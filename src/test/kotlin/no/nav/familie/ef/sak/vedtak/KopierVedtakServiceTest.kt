@@ -42,7 +42,7 @@ internal class KopierVedtakServiceTest {
         barnRepository = barnRepository,
         vedtakService = vedtakService,
         vedtakHistorikkService = vedtakHistorikkService,
-        behandlingService = behandlingService
+        behandlingService = behandlingService,
 
     )
 
@@ -56,7 +56,7 @@ internal class KopierVedtakServiceTest {
         søknadBarnId = UUID.randomUUID(),
         personIdent = "01010112345",
         navn = "Ola",
-        fødselTermindato = LocalDate.now()
+        fødselTermindato = LocalDate.now(),
     )
 
     val barn = behandlingBarn(
@@ -65,7 +65,7 @@ internal class KopierVedtakServiceTest {
         søknadBarnId = UUID.randomUUID(),
         personIdent = "01010112345",
         navn = "Ola",
-        fødselTermindato = LocalDate.now()
+        fødselTermindato = LocalDate.now(),
     )
 
     val forventetFomYearMonth = YearMonth.from(BeregningBarnetilsynUtil.satserForBarnetilsyn.maxOf { it.periode.fom })
@@ -87,7 +87,7 @@ internal class KopierVedtakServiceTest {
             periode = Månedsperiode(YearMonth.now()),
             utgifter = 1000,
             barn = listOf(),
-            periodetype = PeriodetypeBarnetilsyn.ORDINÆR
+            periodetype = PeriodetypeBarnetilsyn.ORDINÆR,
         )
         every { vedtakService.hentVedtak(not(forrigeBehandling.id)) } returns
             vedtak(UUID.randomUUID(), ResultatType.INNVILGE)
@@ -104,7 +104,7 @@ internal class KopierVedtakServiceTest {
         val vedtakDto = kopierVedtakService.lagVedtakDtoBasertPåTidligereVedtaksperioder(
             fagsakId = fagsak.id,
             revurderingId = revurdering.id,
-            forrigeBehandlingId = forrigeBehandling.id
+            forrigeBehandlingId = forrigeBehandling.id,
         ) as InnvilgelseBarnetilsyn
 
         assertThat(vedtakDto.perioder).hasSize(1)

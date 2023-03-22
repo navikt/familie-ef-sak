@@ -14,39 +14,39 @@ object PdlPersonSøkHjelper {
                 matrikkeladresse.matrikkelId?.let {
                     lagSøkeKriterier(
                         søkefelt = "person.bostedsadresse.matrikkeladresse.matrikkelId",
-                        søkeord = it.toString()
+                        søkeord = it.toString(),
                     )
                 },
                 matrikkeladresse.bruksenhetsnummer?.let {
                     lagSøkeKriterier(
                         søkefelt = "person.bostedsadresse.matrikkeladresse.bruksenhetsnummer",
-                        søkeord = it
+                        søkeord = it,
                     )
-                }
+                },
             )
         } else if (bostedsadresse.vegadresse != null) {
             val vegadresse = bostedsadresse.vegadresse
             return listOfNotNull(
                 equalsEllerNotExists(
                     søkefelt = "person.bostedsadresse.vegadresse.adressenavn",
-                    søkeord = vegadresse.adressenavn
+                    søkeord = vegadresse.adressenavn,
                 ),
                 equalsEllerNotExists(
                     søkefelt = "person.bostedsadresse.vegadresse.bruksenhetsnummer",
-                    søkeord = vegadresse.bruksenhetsnummer
+                    søkeord = vegadresse.bruksenhetsnummer,
                 ),
                 equalsEllerNotExists(
                     søkefelt = "person.bostedsadresse.vegadresse.husbokstav",
-                    søkeord = vegadresse.husbokstav
+                    søkeord = vegadresse.husbokstav,
                 ),
                 equalsEllerNotExists(
                     søkefelt = "person.bostedsadresse.vegadresse.husnummer",
-                    søkeord = vegadresse.husnummer
+                    søkeord = vegadresse.husnummer,
                 ),
                 equalsEllerNotExists(
                     søkefelt = "person.bostedsadresse.vegadresse.postnummer",
-                    søkeord = vegadresse.postnummer
-                )
+                    søkeord = vegadresse.postnummer,
+                ),
             )
         }
         return emptyList()
@@ -60,14 +60,14 @@ object PdlPersonSøkHjelper {
     private fun lagSøkeKriterier(søkefelt: String, søkeord: String): SøkeKriterier {
         return SøkeKriterier(
             fieldName = søkefelt,
-            searchRule = SearchRuleEquals(equals = søkeord)
+            searchRule = SearchRuleEquals(equals = søkeord),
         )
     }
 
     private fun lagSøkeKriterier(søkefelt: String, exists: Boolean): SøkeKriterier {
         return SøkeKriterier(
             fieldName = søkefelt,
-            searchRule = SearchRuleExists(exists = exists)
+            searchRule = SearchRuleExists(exists = exists),
         )
     }
 }

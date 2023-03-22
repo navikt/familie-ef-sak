@@ -26,20 +26,20 @@ class BeregningBarnetilsynController(
     private val tilgangService: TilgangService,
     private val vedtakService: VedtakService,
     private val tilkjentYtelseService: TilkjentYtelseService,
-    private val featureToggleService: FeatureToggleService
+    private val featureToggleService: FeatureToggleService,
 ) {
 
     @PostMapping
     fun beregnYtelserForBarnetilsyn(
         @RequestBody
-        barnetilsynBeregningRequest: BeregningBarnetilsynRequest
+        barnetilsynBeregningRequest: BeregningBarnetilsynRequest,
     ): Ressurs<List<BeløpsperiodeBarnetilsynDto>> {
         return Ressurs.success(
             beregningBarnetilsynService.beregnYtelseBarnetilsyn(
                 barnetilsynBeregningRequest.utgiftsperioder,
                 barnetilsynBeregningRequest.kontantstøtteperioder,
-                barnetilsynBeregningRequest.tilleggsstønadsperioder
-            )
+                barnetilsynBeregningRequest.tilleggsstønadsperioder,
+            ),
         )
     }
 
@@ -54,8 +54,8 @@ class BeregningBarnetilsynController(
             return Ressurs.success(
                 tilkjentYtelseService.hentForBehandling(behandlingId).tilBeløpsperiodeBarnetilsyn(
                     vedtak,
-                    brukIkkeVedtatteSatser
-                )
+                    brukIkkeVedtatteSatser,
+                ),
             )
         }
         error("Kan ikke hente beregning for vedtakstype ${vedtak._type}")

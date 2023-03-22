@@ -109,15 +109,15 @@ internal class TilkjentYtelseRepositoryTest : OppslagSpringRunnerTest() {
         val fagsak = testoppsettService.lagreFagsak(fagsak())
         val behandling = behandlingRepository.insert(
             behandling(fagsak, opprettetTid = LocalDate.of(2021, 1, 1).atStartOfDay())
-                .innvilgetOgFerdigstilt()
+                .innvilgetOgFerdigstilt(),
         )
         val andelerTilkjentYtelse = listOf(
             lagAndelTilkjentYtelse(
                 beløp = beløp,
                 fraOgMed = LocalDate.now(),
                 tilOgMed = LocalDate.now().plusDays(1),
-                kildeBehandlingId = behandling.id
-            )
+                kildeBehandlingId = behandling.id,
+            ),
         )
         repository.insert(DataGenerator.tilfeldigTilkjentYtelse(behandling).copy(andelerTilkjentYtelse = andelerTilkjentYtelse))
 

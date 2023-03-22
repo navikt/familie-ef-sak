@@ -54,7 +54,7 @@ internal class FrittståendeBrevServiceTest {
             arbeidsfordelingService,
             iverksettClient,
             brevsignaturService,
-            mellomlagringBrevService
+            mellomlagringBrevService,
         )
     private val fagsak = fagsak(fagsakpersoner(identer = setOf("01010172272")))
     private val frittståendeBrevDto = FrittståendeBrevDto(
@@ -62,54 +62,54 @@ internal class FrittståendeBrevServiceTest {
         listOf(
             FrittståendeBrevAvsnitt(
                 "deloverskrift",
-                "innhold"
-            )
+                "innhold",
+            ),
         ),
         fagsak.id,
         FrittståendeBrevKategori.INFORMASJONSBREV,
         BrevmottakereDto(
             personer = listOf(BrevmottakerPerson("mottakerIdent", "navn", MottakerRolle.BRUKER)),
-            organisasjoner = emptyList()
-        )
+            organisasjoner = emptyList(),
+        ),
     )
 
     private val brevtyperTestData = listOf(
         Pair(
             StønadType.OVERGANGSSTØNAD,
-            FrittståendeBrevKategori.INFORMASJONSBREV
+            FrittståendeBrevKategori.INFORMASJONSBREV,
         ) to FrittståendeBrevType.INFORMASJONSBREV,
         Pair(
             StønadType.OVERGANGSSTØNAD,
-            FrittståendeBrevKategori.INNHENTING_AV_OPPLYSNINGER
+            FrittståendeBrevKategori.INNHENTING_AV_OPPLYSNINGER,
         ) to FrittståendeBrevType.INNHENTING_AV_OPPLYSNINGER,
         Pair(
             StønadType.OVERGANGSSTØNAD,
-            FrittståendeBrevKategori.VARSEL_OM_AKTIVITETSPLIKT
+            FrittståendeBrevKategori.VARSEL_OM_AKTIVITETSPLIKT,
         ) to FrittståendeBrevType.VARSEL_OM_AKTIVITETSPLIKT,
         Pair(
             StønadType.SKOLEPENGER,
-            FrittståendeBrevKategori.INFORMASJONSBREV
+            FrittståendeBrevKategori.INFORMASJONSBREV,
         ) to FrittståendeBrevType.INFORMASJONSBREV,
         Pair(
             StønadType.SKOLEPENGER,
-            FrittståendeBrevKategori.INNHENTING_AV_OPPLYSNINGER
+            FrittståendeBrevKategori.INNHENTING_AV_OPPLYSNINGER,
         ) to FrittståendeBrevType.INNHENTING_AV_OPPLYSNINGER,
         Pair(
             StønadType.SKOLEPENGER,
-            FrittståendeBrevKategori.VARSEL_OM_AKTIVITETSPLIKT
+            FrittståendeBrevKategori.VARSEL_OM_AKTIVITETSPLIKT,
         ) to FrittståendeBrevType.VARSEL_OM_AKTIVITETSPLIKT,
         Pair(
             StønadType.BARNETILSYN,
-            FrittståendeBrevKategori.INFORMASJONSBREV
+            FrittståendeBrevKategori.INFORMASJONSBREV,
         ) to FrittståendeBrevType.INFORMASJONSBREV,
         Pair(
             StønadType.BARNETILSYN,
-            FrittståendeBrevKategori.INNHENTING_AV_OPPLYSNINGER
+            FrittståendeBrevKategori.INNHENTING_AV_OPPLYSNINGER,
         ) to FrittståendeBrevType.INNHENTING_AV_OPPLYSNINGER,
         Pair(
             StønadType.BARNETILSYN,
-            FrittståendeBrevKategori.VARSEL_OM_AKTIVITETSPLIKT
-        ) to FrittståendeBrevType.VARSEL_OM_AKTIVITETSPLIKT
+            FrittståendeBrevKategori.VARSEL_OM_AKTIVITETSPLIKT,
+        ) to FrittståendeBrevType.VARSEL_OM_AKTIVITETSPLIKT,
     )
 
     private val frittståendeBrevSlot = slot<KontrakterFrittståendeBrevDto>()
@@ -131,7 +131,7 @@ internal class FrittståendeBrevServiceTest {
         brevtyperTestData.map { (input, forventetBrevtype) ->
             DynamicTest.dynamicTest(
                 "Skal sende brev for stønadtype ${input.first} og brevkategori " +
-                    "${input.second} til iverksett for journalføring med brevtype $forventetBrevtype"
+                    "${input.second} til iverksett for journalføring med brevtype $forventetBrevtype",
             ) {
                 every { fagsakService.fagsakMedOppdatertPersonIdent(any()) } returns fagsak.copy(stønadstype = input.first)
 
@@ -174,9 +174,9 @@ internal class FrittståendeBrevServiceTest {
                     frittståendeBrevDto.copy(
                         mottakere = BrevmottakereDto(
                             emptyList(),
-                            emptyList()
-                        )
-                    )
+                            emptyList(),
+                        ),
+                    ),
                 )
             }
             assertThat(feil.message).contains("Kan ikke sende frittstående brev uten at minst en brevmottaker er lagt til")
@@ -185,7 +185,7 @@ internal class FrittståendeBrevServiceTest {
         @Test
         internal fun `skal sette mottakere hvis personer finnes`() {
             frittståendeBrevService.sendFrittståendeBrev(
-                frittståendeBrevDto.copy(mottakere = BrevmottakereDto(listOf(person), emptyList()))
+                frittståendeBrevDto.copy(mottakere = BrevmottakereDto(listOf(person), emptyList())),
             )
             val mottakere = frittståendeBrevSlot.captured.mottakere!!
             assertThat(mottakere).hasSize(1)
@@ -197,7 +197,7 @@ internal class FrittståendeBrevServiceTest {
         @Test
         internal fun `skal sette mottakere hvis organisasjoner finnes`() {
             frittståendeBrevService.sendFrittståendeBrev(
-                frittståendeBrevDto.copy(mottakere = BrevmottakereDto(emptyList(), listOf(organisasjon)))
+                frittståendeBrevDto.copy(mottakere = BrevmottakereDto(emptyList(), listOf(organisasjon))),
             )
             val mottakere = frittståendeBrevSlot.captured.mottakere!!
             assertThat(mottakere).hasSize(1)
@@ -209,7 +209,7 @@ internal class FrittståendeBrevServiceTest {
         @Test
         internal fun `skal sette mottakere hvis organisasjoner og personer finnes`() {
             frittståendeBrevService.sendFrittståendeBrev(
-                frittståendeBrevDto.copy(mottakere = BrevmottakereDto(listOf(person), listOf(organisasjon)))
+                frittståendeBrevDto.copy(mottakere = BrevmottakereDto(listOf(person), listOf(organisasjon))),
             )
 
             val mottakere = frittståendeBrevSlot.captured.mottakere!!
@@ -236,7 +236,7 @@ internal class FrittståendeBrevServiceTest {
         every { brevsignaturService.lagSignaturMedEnhet(any<Fagsak>()) } returns SignaturDto(
             "Navn Navnesen",
             "En enhet",
-            false
+            false,
         )
         justRun { iverksettClient.sendFrittståendeBrev(capture(frittståendeBrevSlot)) }
         justRun { mellomlagringBrevService.slettMellomlagretFrittståendeBrev(any(), any()) }

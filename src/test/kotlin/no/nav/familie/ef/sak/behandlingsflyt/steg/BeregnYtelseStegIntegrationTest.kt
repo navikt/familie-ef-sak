@@ -85,8 +85,8 @@ internal class BeregnYtelseStegIntegrationTest : OppslagSpringRunnerTest() {
             listOf(vedtaksperiode),
             listOf(
                 Inntekt(årMånedFra, BigDecimal.ZERO, BigDecimal.ZERO),
-                Inntekt(årMånedTil, BigDecimal.ZERO, BigDecimal(10_000))
-            )
+                Inntekt(årMånedTil, BigDecimal.ZERO, BigDecimal(10_000)),
+            ),
         )
         settBehandlingTilIverksatt(behandling2)
 
@@ -102,8 +102,8 @@ internal class BeregnYtelseStegIntegrationTest : OppslagSpringRunnerTest() {
             behandling.copy(
                 status = BehandlingStatus.FERDIGSTILT,
                 resultat = BehandlingResultat.INNVILGET,
-                vedtakstidspunkt = SporbarUtils.now()
-            )
+                vedtakstidspunkt = SporbarUtils.now(),
+            ),
         )
     }
 
@@ -116,13 +116,13 @@ internal class BeregnYtelseStegIntegrationTest : OppslagSpringRunnerTest() {
     private fun innvilg(
         saksbehandling: Saksbehandling,
         vedtaksperioder: List<VedtaksperiodeDto>,
-        inntekter: List<Inntekt> = listOf(Inntekt(vedtaksperioder.first().periode.fom, null, null))
+        inntekter: List<Inntekt> = listOf(Inntekt(vedtaksperioder.first().periode.fom, null, null)),
     ) {
         val vedtak = InnvilgelseOvergangsstønad(
             perioder = vedtaksperioder,
             inntekter = inntekter,
             periodeBegrunnelse = null,
-            inntektBegrunnelse = null
+            inntektBegrunnelse = null,
         )
         beregnYtelseSteg.utførSteg(saksbehandling, vedtak)
     }

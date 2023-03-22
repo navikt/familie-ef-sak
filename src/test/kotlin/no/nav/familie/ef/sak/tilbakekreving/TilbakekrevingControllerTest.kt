@@ -40,13 +40,13 @@ internal class TilbakekrevingControllerTest : OppslagSpringRunnerTest() {
         val behandling = behandlingService.opprettBehandling(
             BehandlingType.FØRSTEGANGSBEHANDLING,
             fagsak.id,
-            behandlingsårsak = BehandlingÅrsak.SØKNAD
+            behandlingsårsak = BehandlingÅrsak.SØKNAD,
         )
         lagInitiellTilbakekreving(behandling)
         val oppdatertTilbakekrevingsDto = TilbakekrevingDto(
             valg = OPPRETT_MED_VARSEL,
             varseltekst = "Dette er tekst",
-            begrunnelse = "Nei"
+            begrunnelse = "Nei",
         )
 
         lagreTilbakekreving(behandling, oppdatertTilbakekrevingsDto)
@@ -59,7 +59,7 @@ internal class TilbakekrevingControllerTest : OppslagSpringRunnerTest() {
         val initiellTilbakekrevingDto = TilbakekrevingDto(
             valg = OPPRETT_UTEN_VARSEL,
             varseltekst = "",
-            begrunnelse = "Ja"
+            begrunnelse = "Ja",
         )
         lagreTilbakekreving(behandling, initiellTilbakekrevingDto)
         val førsteLagredeTilbakekrevingDto = hentTilbakekreving(behandling)
@@ -70,17 +70,17 @@ internal class TilbakekrevingControllerTest : OppslagSpringRunnerTest() {
         restTemplate.exchange<Ressurs<TilbakekrevingDto?>>(
             localhost("/api/tilbakekreving/${behandling.id}"),
             HttpMethod.GET,
-            HttpEntity<TilbakekrevingDto>(headers)
+            HttpEntity<TilbakekrevingDto>(headers),
         )
 
     private fun lagreTilbakekreving(
         behandling: Behandling,
-        forventetTilbakekrevingsDto: TilbakekrevingDto
+        forventetTilbakekrevingsDto: TilbakekrevingDto,
     ) {
         restTemplate.exchange<Ressurs<UUID>>(
             localhost("/api/tilbakekreving/${behandling.id}"),
             HttpMethod.POST,
-            HttpEntity(forventetTilbakekrevingsDto, headers)
+            HttpEntity(forventetTilbakekrevingsDto, headers),
         )
     }
 }

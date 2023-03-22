@@ -17,7 +17,7 @@ data class AndelTilkjentYtelse(
     val inntekt: Int,
     val inntektsreduksjon: Int,
     val samordningsfradrag: Int,
-    val kildeBehandlingId: UUID
+    val kildeBehandlingId: UUID,
 ) {
 
     constructor(
@@ -27,7 +27,7 @@ data class AndelTilkjentYtelse(
         inntekt: Int,
         inntektsreduksjon: Int,
         samordningsfradrag: Int,
-        kildeBehandlingId: UUID
+        kildeBehandlingId: UUID,
     ) : this(
         beløp,
         periode.fom.atDay(1),
@@ -36,7 +36,7 @@ data class AndelTilkjentYtelse(
         inntekt,
         inntektsreduksjon,
         samordningsfradrag,
-        kildeBehandlingId
+        kildeBehandlingId,
     )
 
     fun erStønadOverlappende(fom: LocalDate): Boolean = this.periode.inneholder(YearMonth.from(fom))

@@ -67,7 +67,7 @@ class BeregningBarnetilsynServiceTest {
                 service.beregnYtelseBarnetilsyn(
                     utgiftsperioder = utgiftsperiode,
                     kontantstøttePerioder = perioderMedTidligDato,
-                    tilleggsstønadsperioder = listOf()
+                    tilleggsstønadsperioder = listOf(),
                 )
             }
             assertThat(kontantstøtteperiodeStarterForTidlig.message).isEqualTo("Fradrag for innvilget kontantstøtte trår i kraft: 2020-03")
@@ -85,7 +85,7 @@ class BeregningBarnetilsynServiceTest {
                 service.beregnYtelseBarnetilsyn(
                     utgiftsperioder = utgiftsperiodeMedNegativtBeløp,
                     kontantstøttePerioder = listOf(),
-                    tilleggsstønadsperioder = listOf()
+                    tilleggsstønadsperioder = listOf(),
                 )
             }
             assertThat(negativUtgiftsfeil.message).isEqualTo("Utgifter kan ikke være mindre enn 0")
@@ -94,7 +94,7 @@ class BeregningBarnetilsynServiceTest {
                 service.beregnYtelseBarnetilsyn(
                     utgiftsperioder = utgiftsperiodeMedHøytBeløp,
                     kontantstøttePerioder = listOf(),
-                    tilleggsstønadsperioder = listOf()
+                    tilleggsstønadsperioder = listOf(),
                 )
             }
             assertThat(forHøyUtgiftsfeil.message).isEqualTo("Utgifter på mer enn 40000 støttes ikke")
@@ -103,7 +103,7 @@ class BeregningBarnetilsynServiceTest {
                 service.beregnYtelseBarnetilsyn(
                     utgiftsperioder = utgiftsperiode,
                     kontantstøttePerioder = listOf(),
-                    tilleggsstønadsperioder = periodeMedHøytBeløp
+                    tilleggsstønadsperioder = periodeMedHøytBeløp,
                 )
             }
 
@@ -111,7 +111,7 @@ class BeregningBarnetilsynServiceTest {
                 service.beregnYtelseBarnetilsyn(
                     utgiftsperioder = utgiftsperiode,
                     kontantstøttePerioder = periodeMedHøytBeløp,
-                    tilleggsstønadsperioder = listOf()
+                    tilleggsstønadsperioder = listOf(),
                 )
             }
 
@@ -119,7 +119,7 @@ class BeregningBarnetilsynServiceTest {
                 service.beregnYtelseBarnetilsyn(
                     utgiftsperioder = utgiftsperiode,
                     kontantstøttePerioder = listOf(),
-                    tilleggsstønadsperioder = periodeMedNegativtBeløp
+                    tilleggsstønadsperioder = periodeMedNegativtBeløp,
                 )
             }
 
@@ -127,7 +127,7 @@ class BeregningBarnetilsynServiceTest {
                 service.beregnYtelseBarnetilsyn(
                     utgiftsperioder = utgiftsperiode,
                     kontantstøttePerioder = periodeMedNegativtBeløp,
-                    tilleggsstønadsperioder = listOf()
+                    tilleggsstønadsperioder = listOf(),
                 )
             }
         }
@@ -140,7 +140,7 @@ class BeregningBarnetilsynServiceTest {
                 service.beregnYtelseBarnetilsyn(
                     utgiftsperioder = januarTilApril,
                     kontantstøttePerioder = urelevant,
-                    tilleggsstønadsperioder = listOf()
+                    tilleggsstønadsperioder = listOf(),
                 )
             }
         }
@@ -153,7 +153,7 @@ class BeregningBarnetilsynServiceTest {
                 service.beregnYtelseBarnetilsyn(
                     utgiftsperioder = januarTilApril,
                     kontantstøttePerioder = listOf(),
-                    tilleggsstønadsperioder = urelevant
+                    tilleggsstønadsperioder = urelevant,
                 )
             }
         }
@@ -168,7 +168,7 @@ class BeregningBarnetilsynServiceTest {
                 service.beregnYtelseBarnetilsyn(
                     utgiftsperioder = perioder,
                     kontantstøttePerioder = listOf(),
-                    tilleggsstønadsperioder = listOf()
+                    tilleggsstønadsperioder = listOf(),
                 )
             }
             assertThat(feil.message).contains("Utgiftsperioder")
@@ -182,7 +182,7 @@ class BeregningBarnetilsynServiceTest {
                 service.beregnYtelseBarnetilsyn(
                     utgiftsperioder = listeMedEnUtgiftsperiode(januar2022, april2022),
                     kontantstøttePerioder = overlappende,
-                    tilleggsstønadsperioder = listOf()
+                    tilleggsstønadsperioder = listOf(),
                 )
             }
             assertThat(feil.message).contains("Kontantstøtteperioder [Månedsperiode(fom=2022-01, tom=2022-04), Månedsperiode(fom=2022-04, tom=2022-04)] overlapper")
@@ -196,7 +196,7 @@ class BeregningBarnetilsynServiceTest {
                 service.beregnYtelseBarnetilsyn(
                     utgiftsperioder = listeMedEnUtgiftsperiode(januar2022, april2022),
                     kontantstøttePerioder = listOf(),
-                    tilleggsstønadsperioder = overlappendePerioder
+                    tilleggsstønadsperioder = overlappendePerioder,
                 )
             }
             assertThat(feil.message).contains("Tilleggsstønadsperioder")
@@ -210,7 +210,7 @@ class BeregningBarnetilsynServiceTest {
                 service.beregnYtelseBarnetilsyn(
                     utgiftsperioder = utgiftsperioder,
                     kontantstøttePerioder = listOf(),
-                    tilleggsstønadsperioder = listOf()
+                    tilleggsstønadsperioder = listOf(),
                 )
             }
             assertThat(ugyldigUtgiftsperiode.message).isEqualTo("Utgiftsperioder $utgiftsperioder mangler en eller flere aktivitetstyper")
@@ -222,13 +222,13 @@ class BeregningBarnetilsynServiceTest {
                 fra = mars2022,
                 til = april2022,
                 periodetype = PeriodetypeBarnetilsyn.ORDINÆR,
-                aktivitetstype = null
+                aktivitetstype = null,
             )
             val perioder = service.beregnYtelseBarnetilsyn(
                 utgiftsperioder = utgiftsperioder,
                 kontantstøttePerioder = listOf(),
                 tilleggsstønadsperioder = listOf(),
-                erMigrering = true
+                erMigrering = true,
             )
             assertThat(perioder).hasSize(1)
         }
@@ -245,7 +245,7 @@ class BeregningBarnetilsynServiceTest {
         val beregnYtelseBarnetilsyn = service.beregnYtelseBarnetilsyn(
             utgiftsperioder = perioder,
             kontantstøttePerioder = listOf(),
-            tilleggsstønadsperioder = listOf()
+            tilleggsstønadsperioder = listOf(),
         )
         assertThat(beregnYtelseBarnetilsyn).hasSize(3)
     }
@@ -262,19 +262,19 @@ class BeregningBarnetilsynServiceTest {
             årMånedFra = januar2022,
             årMånedTil = januar2022,
             periode = Månedsperiode(januar2022, januar2022),
-            beløp = 10
+            beløp = 10,
         )
         val kontantStøtteperiodeApril = PeriodeMedBeløpDto(
             årMånedFra = april2022,
             årMånedTil = april2022,
             periode = Månedsperiode(april2022, april2022),
-            beløp = 10
+            beløp = 10,
         )
         val kontantStøtteperiodeAugust = PeriodeMedBeløpDto(
             årMånedFra = august2022,
             årMånedTil = august2022,
             periode = Månedsperiode(august2022, august2022),
-            beløp = 10
+            beløp = 10,
         )
 
         val beregnYtelseBarnetilsyn = service.beregnYtelseBarnetilsyn(
@@ -282,9 +282,9 @@ class BeregningBarnetilsynServiceTest {
             kontantstøttePerioder = listOf(
                 kontantStøtteperiodeJanuar,
                 kontantStøtteperiodeApril,
-                kontantStøtteperiodeAugust
+                kontantStøtteperiodeAugust,
             ),
-            tilleggsstønadsperioder = listOf()
+            tilleggsstønadsperioder = listOf(),
         )
 
         assertThat(beregnYtelseBarnetilsyn).hasSize(6)
@@ -303,7 +303,7 @@ class BeregningBarnetilsynServiceTest {
         val beregnYtelseBarnetilsyn = service.beregnYtelseBarnetilsyn(
             utgiftsperioder = perioder,
             kontantstøttePerioder = listOf(kontantStøtteperiodeJanuar),
-            tilleggsstønadsperioder = listOf()
+            tilleggsstønadsperioder = listOf(),
         )
 
         assertThat(beregnYtelseBarnetilsyn).hasSize(4)
@@ -320,20 +320,20 @@ class BeregningBarnetilsynServiceTest {
             årMånedFra = mai2022,
             årMånedTil = september2022,
             periode = Månedsperiode(mai2022, september2022),
-            beløp = 10
+            beløp = 10,
         )
         val tilleggsstønadPeriodeDto =
             PeriodeMedBeløpDto(
                 årMånedFra = juli2022,
                 årMånedTil = november2022,
                 periode = Månedsperiode(juli2022, november2022),
-                beløp = 10
+                beløp = 10,
             )
 
         val beregnYtelseBarnetilsyn = service.beregnYtelseBarnetilsyn(
             utgiftsperioder = perioder,
             kontantstøttePerioder = listOf(kontantStøtteperiodeJanuar),
-            tilleggsstønadsperioder = listOf(tilleggsstønadPeriodeDto)
+            tilleggsstønadsperioder = listOf(tilleggsstønadPeriodeDto),
         )
         assertThat(beregnYtelseBarnetilsyn).hasSize(6)
     }
@@ -350,7 +350,7 @@ class BeregningBarnetilsynServiceTest {
             årMånedFra = januar2022,
             årMånedTil = januar2022,
             Månedsperiode(januar2022, januar2022),
-            beløp = 10
+            beløp = 10,
         )
         val kontantStøtteperiodeApril =
             PeriodeMedBeløpDto(årMånedFra = april2022, årMånedTil = april2022, Månedsperiode(april2022, april2022), beløp = 10)
@@ -358,7 +358,7 @@ class BeregningBarnetilsynServiceTest {
             årMånedFra = august2022,
             årMånedTil = august2022,
             Månedsperiode(august2022, august2022),
-            beløp = 10
+            beløp = 10,
         )
 
         val tilleggsstønadsperiodeMars =
@@ -370,7 +370,7 @@ class BeregningBarnetilsynServiceTest {
                 årMånedFra = desember2022,
                 årMånedTil = desember2022,
                 Månedsperiode(desember2022, desember2022),
-                10
+                10,
             )
 
         val beregnYtelseBarnetilsyn = service.beregnYtelseBarnetilsyn(
@@ -378,13 +378,13 @@ class BeregningBarnetilsynServiceTest {
             kontantstøttePerioder = listOf(
                 kontantStøtteperiodeApril,
                 kontantStøtteperiodeJanuar,
-                kontantStøtteperiodeAugust
+                kontantStøtteperiodeAugust,
             ),
             tilleggsstønadsperioder = listOf(
                 tilleggsstønadsperiodeDesember,
                 tilleggsstønadsperiodeJuli,
-                tilleggsstønadsperiodeMars
-            )
+                tilleggsstønadsperiodeMars,
+            ),
         )
 
         assertThat(beregnYtelseBarnetilsyn).hasSize(9)
@@ -399,7 +399,7 @@ class BeregningBarnetilsynServiceTest {
         val beregnYtelseBarnetilsyn = service.beregnYtelseBarnetilsyn(
             utgiftsperioder = listOf(periode),
             kontantstøttePerioder = listOf(),
-            tilleggsstønadsperioder = listOf()
+            tilleggsstønadsperioder = listOf(),
         )
             .sortedBy { it.periode.fom }
         assertThat(beregnYtelseBarnetilsyn).hasSize(2)
@@ -419,7 +419,7 @@ class BeregningBarnetilsynServiceTest {
             service.beregnYtelseBarnetilsyn(
                 utgiftsperioder = perioder,
                 kontantstøttePerioder = listOf(),
-                tilleggsstønadsperioder = listOf()
+                tilleggsstønadsperioder = listOf(),
             )
         assertThat(beregnYtelseBarnetilsyn).hasSize(2)
     }
@@ -435,7 +435,7 @@ class BeregningBarnetilsynServiceTest {
             service.beregnYtelseBarnetilsyn(
                 utgiftsperioder = perioder,
                 kontantstøttePerioder = listOf(),
-                tilleggsstønadsperioder = listOf()
+                tilleggsstønadsperioder = listOf(),
             )
         assertThat(beregnYtelseBarnetilsyn).hasSize(1)
     }
@@ -452,7 +452,7 @@ class BeregningBarnetilsynServiceTest {
             service.beregnYtelseBarnetilsyn(
                 utgiftsperioder = perioder,
                 kontantstøttePerioder = listOf(),
-                tilleggsstønadsperioder = listOf()
+                tilleggsstønadsperioder = listOf(),
             )
         assertThat(beregnYtelseBarnetilsyn).hasSize(2)
     }
@@ -469,7 +469,7 @@ class BeregningBarnetilsynServiceTest {
             service.beregnYtelseBarnetilsyn(
                 utgiftsperioder = perioder,
                 kontantstøttePerioder = listOf(),
-                tilleggsstønadsperioder = listOf()
+                tilleggsstønadsperioder = listOf(),
             )
         assertThat(beregnYtelseBarnetilsyn).hasSize(2)
     }
@@ -487,7 +487,7 @@ class BeregningBarnetilsynServiceTest {
         val forventetTilDato = februar2000.atEndOfMonth()
         val beløpsperioder = listOf(
             lagBeløpsperiode(forventetFraDato, januar2000.atEndOfMonth()),
-            lagBeløpsperiode(februar2000.atDay(1), forventetTilDato)
+            lagBeløpsperiode(februar2000.atDay(1), forventetTilDato),
         )
 
         val resultat = beløpsperioder.mergeSammenhengendePerioder()
@@ -505,13 +505,13 @@ class BeregningBarnetilsynServiceTest {
             lagBeløpsperiode(
                 fraDato = forventetFraDato,
                 tilDato = januar2000.atEndOfMonth(),
-                beløp = BigDecimal(100)
+                beløp = BigDecimal(100),
             ),
             lagBeløpsperiode(
                 fraDato = februar2000.atDay(1),
                 tilDato = forventetTilDato,
-                beløp = BigDecimal(200)
-            )
+                beløp = BigDecimal(200),
+            ),
         )
 
         val resultat = beløpsperioder.mergeSammenhengendePerioder()
@@ -529,13 +529,13 @@ class BeregningBarnetilsynServiceTest {
             lagBeløpsperiode(
                 fraDato = forventetFraDato,
                 tilDato = januar2000.atEndOfMonth(),
-                beløp = BigDecimal(100)
+                beløp = BigDecimal(100),
             ),
             lagBeløpsperiode(
                 fraDato = mars2000.atDay(1),
                 tilDato = forventetTilDato,
-                beløp = BigDecimal(100)
-            )
+                beløp = BigDecimal(100),
+            ),
         )
         assertThat(beløpsperioder.mergeSammenhengendePerioder()).hasSize(2)
     }
@@ -548,13 +548,13 @@ class BeregningBarnetilsynServiceTest {
             lagBeløpsperiode(
                 fraDato = forventetFraDato,
                 tilDato = januar2000.atEndOfMonth(),
-                beløp = BigDecimal(100)
+                beløp = BigDecimal(100),
             ),
             lagBeløpsperiode(
                 fraDato = mars2000.atDay(1),
                 tilDato = forventetTilDato,
-                beløp = BigDecimal(200)
-            )
+                beløp = BigDecimal(200),
+            ),
         )
 
         assertThat(beløpsperioder.mergeSammenhengendePerioder()).hasSize(2)
@@ -571,7 +571,7 @@ class BeregningBarnetilsynServiceTest {
         val beregnYtelseBarnetilsyn = service.beregnYtelseBarnetilsyn(
             utgiftsperioder = utgiftsperioder,
             kontantstøttePerioder = listOf(),
-            tilleggsstønadsperioder = listOf()
+            tilleggsstønadsperioder = listOf(),
         )
 
         assertThat(beregnYtelseBarnetilsyn).hasSize(2)
@@ -580,7 +580,7 @@ class BeregningBarnetilsynServiceTest {
     private fun lagBeløpsperiode(
         fraDato: LocalDate,
         tilDato: LocalDate,
-        beløp: BigDecimal = BigDecimal(100)
+        beløp: BigDecimal = BigDecimal(100),
     ): BeløpsperiodeBarnetilsynDto {
         return BeløpsperiodeBarnetilsynDto(
             periode = Månedsperiode(fraDato, tilDato),
@@ -592,25 +592,25 @@ class BeregningBarnetilsynServiceTest {
                 kontantstøttebeløp = ZERO,
                 tilleggsstønadsbeløp = ZERO,
                 antallBarn = 1,
-                barn = emptyList()
+                barn = emptyList(),
             ),
             periodetype = PeriodetypeBarnetilsyn.ORDINÆR,
-            aktivitetstype = AktivitetstypeBarnetilsyn.I_ARBEID
+            aktivitetstype = AktivitetstypeBarnetilsyn.I_ARBEID,
         )
     }
 
     private fun listeMedEnPeriodeMedBeløp(
         fra: YearMonth = januar2022,
         til: YearMonth = februar2022,
-        beløp: Int = 10
+        beløp: Int = 10,
     ): List<PeriodeMedBeløpDto> {
         return listOf(
             PeriodeMedBeløpDto(
                 årMånedFra = fra,
                 årMånedTil = til,
                 periode = Månedsperiode(fra, til),
-                beløp = beløp
-            )
+                beløp = beløp,
+            ),
         )
     }
 
@@ -620,7 +620,7 @@ class BeregningBarnetilsynServiceTest {
         beløp: Int = 10,
         periodetype: PeriodetypeBarnetilsyn = PeriodetypeBarnetilsyn.ORDINÆR,
         aktivitetstype: AktivitetstypeBarnetilsyn? = AktivitetstypeBarnetilsyn.I_ARBEID,
-        barn: List<UUID>? = null
+        barn: List<UUID>? = null,
     ): List<UtgiftsperiodeDto> {
         return listOf(
             UtgiftsperiodeDto(
@@ -631,8 +631,8 @@ class BeregningBarnetilsynServiceTest {
                 utgifter = beløp,
                 sanksjonsårsak = null,
                 periodetype = periodetype,
-                aktivitetstype = aktivitetstype
-            )
+                aktivitetstype = aktivitetstype,
+            ),
         )
     }
 }

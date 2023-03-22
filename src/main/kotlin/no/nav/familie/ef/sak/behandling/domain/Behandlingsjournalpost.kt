@@ -12,5 +12,5 @@ data class Behandlingsjournalpost(
     val journalpostId: String,
     val journalpostType: Journalposttype,
     @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
-    val sporbar: Sporbar = Sporbar()
+    val sporbar: Sporbar = Sporbar(),
 )

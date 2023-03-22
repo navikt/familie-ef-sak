@@ -34,7 +34,7 @@ class AutomatiskJournalføringService(
     private val arbeidsfordelingService: ArbeidsfordelingService,
     private val journalpostService: JournalpostService,
     private val infotrygdService: InfotrygdService,
-    private val behandlingService: BehandlingService
+    private val behandlingService: BehandlingService,
 ) {
     private val secureLogger = LoggerFactory.getLogger("secureLogger")
 
@@ -43,7 +43,7 @@ class AutomatiskJournalføringService(
         journalpostId: String,
         personIdent: String,
         stønadstype: StønadType,
-        mappeId: Long?
+        mappeId: Long?,
     ): AutomatiskJournalføringResponse {
         val journalpost = journalpostService.hentJournalpost(journalpostId)
         val fagsak = fagsakService.hentEllerOpprettFagsak(personIdent, stønadstype)
@@ -58,7 +58,7 @@ class AutomatiskJournalføringService(
             journalpost,
             journalførendeEnhet,
             mappeId,
-            nesteBehandlingstype
+            nesteBehandlingstype,
         )
     }
 
@@ -91,7 +91,7 @@ class AutomatiskJournalføringService(
     private fun validerKanAutomatiskJournalføre(
         personIdent: String,
         stønadstype: StønadType,
-        journalpost: Journalpost
+        journalpost: Journalpost,
     ) {
         val allePersonIdenter = personService.hentPersonIdenter(personIdent).identer()
 
@@ -117,7 +117,7 @@ class AutomatiskJournalføringService(
     private fun fagsakPersonOgJournalpostBrukerErSammePerson(
         allePersonIdenter: Set<String>,
         gjeldendePersonIdent: String,
-        journalpostBruker: Bruker
+        journalpostBruker: Bruker,
     ): Boolean = when (journalpostBruker.type) {
         BrukerIdType.FNR -> allePersonIdenter.contains(journalpostBruker.id)
         BrukerIdType.AKTOERID -> hentAktørIderForPerson(gjeldendePersonIdent).contains(journalpostBruker.id)
@@ -129,7 +129,7 @@ class AutomatiskJournalføringService(
 
     private fun harIngenInnslagIInfotrygd(
         ident: String,
-        type: StønadType
+        type: StønadType,
     ) = !infotrygdService.eksisterer(ident, setOf(type))
 
     private fun utledNesteBehandlingstype(behandlinger: List<Behandling>): BehandlingType {

@@ -10,5 +10,5 @@ data class MellomlagretBrev(
     val brevverdier: String,
     val brevmal: String,
     val sanityVersjon: String,
-    val opprettetTid: LocalDate
+    val opprettetTid: LocalDate,
 )

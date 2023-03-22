@@ -58,7 +58,7 @@ internal class BeregnYtelseStegBarnetilsynIntegrationTest : OppslagSpringRunnerT
         søknadBarnId = UUID.randomUUID(),
         personIdent = "01010112345",
         navn = "Ola",
-        fødselTermindato = LocalDate.now()
+        fødselTermindato = LocalDate.now(),
     )
     private val barnBehandling1 = listOf(barn)
     private val saksbehandling = saksbehandling(fagsak, behandling)
@@ -128,8 +128,8 @@ internal class BeregnYtelseStegBarnetilsynIntegrationTest : OppslagSpringRunnerT
             behandling.copy(
                 status = BehandlingStatus.FERDIGSTILT,
                 resultat = BehandlingResultat.INNVILGET,
-                vedtakstidspunkt = SporbarUtils.now()
-            )
+                vedtakstidspunkt = SporbarUtils.now(),
+            ),
         )
     }
 
@@ -142,7 +142,7 @@ internal class BeregnYtelseStegBarnetilsynIntegrationTest : OppslagSpringRunnerT
         barnId: List<UUID>,
         beløp: BigDecimal,
         periodetype: PeriodetypeBarnetilsyn = PeriodetypeBarnetilsyn.ORDINÆR,
-        aktivitetstype: AktivitetstypeBarnetilsyn? = AktivitetstypeBarnetilsyn.I_ARBEID
+        aktivitetstype: AktivitetstypeBarnetilsyn? = AktivitetstypeBarnetilsyn.I_ARBEID,
     ) =
         UtgiftsperiodeDto(
             fra,
@@ -152,12 +152,12 @@ internal class BeregnYtelseStegBarnetilsynIntegrationTest : OppslagSpringRunnerT
             beløp.toInt(),
             null,
             periodetype,
-            aktivitetstype
+            aktivitetstype,
         )
 
     private fun innvilge(
         saksbehandling: Saksbehandling,
-        utgiftsperioder: List<UtgiftsperiodeDto>
+        utgiftsperioder: List<UtgiftsperiodeDto>,
     ) {
         val vedtak = InnvilgelseBarnetilsyn(
             perioder = utgiftsperioder,
@@ -166,8 +166,8 @@ internal class BeregnYtelseStegBarnetilsynIntegrationTest : OppslagSpringRunnerT
             tilleggsstønad = TilleggsstønadDto(
                 harTilleggsstønad = false,
                 perioder = listOf(),
-                begrunnelse = null
-            )
+                begrunnelse = null,
+            ),
         )
         beregnYtelseSteg.utførSteg(saksbehandling, vedtak)
     }

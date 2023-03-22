@@ -16,11 +16,11 @@ import java.util.UUID
     maxAntallFeil = 50,
     settTilManuellOppfølgning = true,
     triggerTidVedFeilISekunder = 15 * 60L,
-    beskrivelse = "Ferdigstill behandling."
+    beskrivelse = "Ferdigstill behandling.",
 )
 class FerdigstillBehandlingTask(
     private val stegService: StegService,
-    private val behandlingService: BehandlingService
+    private val behandlingService: BehandlingService,
 ) : AsyncTaskStep {
 
     override fun doTask(task: Task) {
@@ -37,7 +37,7 @@ class FerdigstillBehandlingTask(
                 payload = saksbehandling.id.toString(),
                 properties = Properties().apply {
                     this["behandlingId"] = saksbehandling.id.toString()
-                }
+                },
             )
 
         const val TYPE = "ferdigstillBehandling"

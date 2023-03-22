@@ -13,7 +13,7 @@ import no.nav.familie.ef.sak.vilkår.regler.regelIder
 class ForutgåendeMedlemskapRegel : Vilkårsregel(
     vilkårType = VilkårType.FORUTGÅENDE_MEDLEMSKAP,
     regler = setOf(SØKER_MEDLEM_I_FOLKETRYGDEN, MEDLEMSKAP_UNNTAK),
-    hovedregler = regelIder(SØKER_MEDLEM_I_FOLKETRYGDEN)
+    hovedregler = regelIder(SØKER_MEDLEM_I_FOLKETRYGDEN),
 ) {
 
     companion object {
@@ -27,13 +27,13 @@ class ForutgåendeMedlemskapRegel : Vilkårsregel(
             SvarId.ANDRE_FORELDER_MEDLEM_MINST_7_ÅR_AVBRUDD_MER_ENN_10_ÅR,
             SvarId.TOTALVURDERING_OPPFYLLER_FORSKRIFT,
             SvarId.MEDLEM_MER_ENN_5_ÅR_EØS,
-            SvarId.MEDLEM_MER_ENN_5_ÅR_EØS_ANNEN_FORELDER_TRYGDEDEKKET_I_NORGE
+            SvarId.MEDLEM_MER_ENN_5_ÅR_EØS_ANNEN_FORELDER_TRYGDEDEKKET_I_NORGE,
         ).associateWith { SluttSvarRegel.OPPFYLT_MED_PÅKREVD_BEGRUNNELSE } +
             mapOf(SvarId.NEI to SluttSvarRegel.IKKE_OPPFYLT_MED_PÅKREVD_BEGRUNNELSE)
         private val MEDLEMSKAP_UNNTAK =
             RegelSteg(
                 regelId = RegelId.MEDLEMSKAP_UNNTAK,
-                svarMapping = unntakSvarMapping
+                svarMapping = unntakSvarMapping,
             )
 
         private val SØKER_MEDLEM_I_FOLKETRYGDEN =
@@ -41,8 +41,8 @@ class ForutgåendeMedlemskapRegel : Vilkårsregel(
                 regelId = RegelId.SØKER_MEDLEM_I_FOLKETRYGDEN,
                 svarMapping = jaNeiSvarRegel(
                     hvisJa = SluttSvarRegel.OPPFYLT_MED_PÅKREVD_BEGRUNNELSE,
-                    hvisNei = NesteRegel(MEDLEMSKAP_UNNTAK.regelId)
-                )
+                    hvisNei = NesteRegel(MEDLEMSKAP_UNNTAK.regelId),
+                ),
             )
     }
 }

@@ -148,8 +148,8 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
                 fagsak = fagsak,
                 type = BehandlingType.REVURDERING,
                 status = BehandlingStatus.FERDIGSTILT,
-                resultat = BehandlingResultat.AVSLÅTT
-            )
+                resultat = BehandlingResultat.AVSLÅTT,
+            ),
         )
         opprettVilkår(behandling, lagreSøknad(revurdering1).sivilstand)
 
@@ -214,7 +214,7 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
             beløp = 8000,
             kontantstøtteWrapper = KontantstøtteWrapper(listOf(PeriodeMedBeløp(Månedsperiode(YearMonth.of(2023, 3), YearMonth.of(2023, 4)), 1000))),
             fom = YearMonth.of(2022, 6),
-            tom = YearMonth.of(2023, 12)
+            tom = YearMonth.of(2023, 12),
         )
         ferdigstillVedtak(vedtak, behandling, fagsakBarnetilsyn)
 
@@ -232,7 +232,7 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
     private fun ferdigstillVedtak(
         vedtak: Vedtak,
         behandling: Behandling,
-        fagsakBarnetilsyn: Fagsak
+        fagsakBarnetilsyn: Fagsak,
     ) {
         vedtakService.lagreVedtak(vedtak.tilVedtakDto(), behandling.id, StønadType.BARNETILSYN)
 
@@ -241,8 +241,8 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
             behandling.copy(
                 status = BehandlingStatus.FERDIGSTILT,
                 resultat = BehandlingResultat.INNVILGET,
-                vedtakstidspunkt = SporbarUtils.now()
-            )
+                vedtakstidspunkt = SporbarUtils.now(),
+            ),
         )
     }
 
@@ -274,7 +274,7 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
         assertThat(vilkårForBehandling.mapNotNull { it.barnId }).isNotIn(barnPåBehandling.map { it.id })
         assertThat(vilkårForRevurdering.mapNotNull { it.barnId }.sorted()).isEqualTo(
             barnPåBehandling.map { it.id }
-                .sorted()
+                .sorted(),
         )
         assertThat(vilkårForBehandling.map { it.behandlingId }).isNotIn(vilkårForRevurdering.map { it.behandlingId })
         assertThat(vilkårForBehandling.map { it.sporbar.opprettetTid }).isNotIn(vilkårForRevurdering.map { it.sporbar.opprettetTid })
@@ -325,13 +325,13 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
 
     private fun opprettFerdigstiltBehandling(
         fagsak: Fagsak,
-        resultat: BehandlingResultat = BehandlingResultat.INNVILGET
+        resultat: BehandlingResultat = BehandlingResultat.INNVILGET,
     ) = behandlingRepository.insert(
         behandling(
             fagsak = fagsak,
             status = BehandlingStatus.FERDIGSTILT,
-            resultat = resultat
-        )
+            resultat = resultat,
+        ),
     )
 
     private fun getSøknadsskjemaId(revurdering1: Behandling) =
@@ -341,8 +341,8 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
         val søknad = TestsøknadBuilder.Builder().setBarn(
             listOf(
                 TestsøknadBuilder.Builder()
-                    .defaultBarn("Navn navnesen", "27062188745", fødselTermindato = LocalDate.of(2021, 6, 27))
-            )
+                    .defaultBarn("Navn navnesen", "27062188745", fødselTermindato = LocalDate.of(2021, 6, 27)),
+            ),
         ).build().søknadOvergangsstønad
         søknadService.lagreSøknadForOvergangsstønad(søknad, behandling.id, behandling.fagsakId, "1L")
         val overgangsstønad =
@@ -355,8 +355,8 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
         val søknad = TestsøknadBuilder.Builder().setBarn(
             listOf(
                 TestsøknadBuilder.Builder().defaultBarn("any", PdlClientConfig.barnFnr),
-                TestsøknadBuilder.Builder().defaultBarn("any", PdlClientConfig.barn2Fnr)
-            )
+                TestsøknadBuilder.Builder().defaultBarn("any", PdlClientConfig.barn2Fnr),
+            ),
         ).build().søknadBarnetilsyn
         søknadService.lagreSøknadForBarnetilsyn(søknad, behandling.id, behandling.fagsakId, "1L")
         val barnetilsyn = søknadService.hentBarnetilsyn(behandling.id) ?: error("Fant ikke overgangsstønad for testen")
@@ -366,7 +366,7 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
 
     private fun opprettVilkår(
         behandling: Behandling,
-        sivilstand: Sivilstand?
+        sivilstand: Sivilstand?,
     ) {
         val barn = barnRepository.findByBehandlingId(behandling.id)
         val delvilkårsvurdering =
@@ -379,7 +379,7 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
 
     private fun lagDelvilkårsvurderingAleneomsorg(
         barn: List<BehandlingBarn>,
-        sivilstand: Sivilstand?
+        sivilstand: Sivilstand?,
     ): List<Delvilkårsvurdering> {
         val delvilkårsvurderingAleneomsorg =
             AleneomsorgRegel().initiereDelvilkårsvurdering(
@@ -389,8 +389,8 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
                     barn = barn,
                     søktOmBarnetilsyn = emptyList(),
                     vilkårgrunnlagDto = mockk(),
-                    behandling = mockk()
-                )
+                    behandling = mockk(),
+                ),
             )
         return delvilkårsvurderingAleneomsorg
     }
@@ -404,8 +404,8 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
                     barn = emptyList(),
                     søktOmBarnetilsyn = emptyList(),
                     vilkårgrunnlagDto = mockk(),
-                    behandling = mockk()
-                )
+                    behandling = mockk(),
+                ),
             )
         return delvilkårsvurdering
     }
@@ -414,7 +414,7 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
         behandling: Behandling,
         delvilkårsvurdering: List<Delvilkårsvurdering>,
         barn: List<BehandlingBarn>,
-        delvilkårsvurderingAleneomsorg: List<Delvilkårsvurdering>
+        delvilkårsvurderingAleneomsorg: List<Delvilkårsvurdering>,
     ) {
         vilkårsvurderingRepository.insertAll(
             listOf(
@@ -422,16 +422,16 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
                     resultat = Vilkårsresultat.OPPFYLT,
                     type = VilkårType.SIVILSTAND,
                     behandlingId = behandling.id,
-                    delvilkårsvurdering = delvilkårsvurdering
+                    delvilkårsvurdering = delvilkårsvurdering,
                 ),
                 vilkårsvurdering(
                     resultat = Vilkårsresultat.OPPFYLT,
                     type = VilkårType.ALENEOMSORG,
                     behandlingId = behandling.id,
                     barnId = barn.first().id,
-                    delvilkårsvurdering = delvilkårsvurderingAleneomsorg
-                )
-            )
+                    delvilkårsvurdering = delvilkårsvurderingAleneomsorg,
+                ),
+            ),
         )
     }
 }

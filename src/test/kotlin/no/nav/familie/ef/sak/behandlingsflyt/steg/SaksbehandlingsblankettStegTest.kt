@@ -1,6 +1,5 @@
 package no.nav.familie.ef.sak.behandlingsflyt.steg
 
-import com.github.dockerjava.api.exception.BadRequestException
 import io.mockk.Runs
 import io.mockk.every
 import io.mockk.just
@@ -34,7 +33,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.http.HttpStatus
 import org.springframework.web.client.HttpClientErrorException
-import org.springframework.web.reactive.function.client.WebClientResponseException.BadRequest
 
 internal class SaksbehandlingsblankettStegTest {
 
@@ -53,7 +51,7 @@ internal class SaksbehandlingsblankettStegTest {
         totrinnskontrollService = totrinnskontrollServiceMock,
         journalpostClient = journalpostClientMock,
         behandlingService = behandlingServiceMock,
-        fagsakService = fagsakServiceMock
+        fagsakService = fagsakServiceMock,
     )
 
     val arkiverDokumentRequestSlot = slot<ArkiverDokumentRequest>()
@@ -66,7 +64,7 @@ internal class SaksbehandlingsblankettStegTest {
         every {
             journalpostClientMock.arkiverDokument(
                 capture(arkiverDokumentRequestSlot),
-                any()
+                any(),
             )
         } returns arkiverDokumentResponse
         every { arbeidsfordelingServiceMock.hentNavEnhetIdEllerBrukMaskinellEnhetHvisNull(any()) } returns "4489"
@@ -102,7 +100,7 @@ internal class SaksbehandlingsblankettStegTest {
     internal fun `skal journalføre blankett for barnetilsyn hvis det er revurdering`() {
         every { fagsakServiceMock.hentFagsak(any()) } returns fagsak(
             fagsakpersoner(setOf("12345678912")),
-            stønadstype = StønadType.BARNETILSYN
+            stønadstype = StønadType.BARNETILSYN,
         )
         val behandling = saksbehandling(type = BehandlingType.REVURDERING).copy(stønadstype = StønadType.BARNETILSYN)
         saksbehandlingsblankettSteg.utførSteg(behandling, null)
@@ -117,18 +115,18 @@ internal class SaksbehandlingsblankettStegTest {
     internal fun `skal håndtere 409 Conflict ved journalføring av  blankett`() {
         every { fagsakServiceMock.hentFagsak(any()) } returns fagsak(
             fagsakpersoner(setOf("12345678912")),
-            stønadstype = StønadType.BARNETILSYN
+            stønadstype = StønadType.BARNETILSYN,
         )
 
         every {
             journalpostClientMock.arkiverDokument(
                 capture(arkiverDokumentRequestSlot),
-                any()
+                any(),
             )
         } throws RessursException(
             Ressurs.failure(),
             HttpClientErrorException.create(null, HttpStatus.CONFLICT, null, null, null, null),
-            HttpStatus.CONFLICT
+            HttpStatus.CONFLICT,
         )
 
         val behandling = saksbehandling(type = BehandlingType.REVURDERING).copy(stønadstype = StønadType.BARNETILSYN)
@@ -139,8 +137,8 @@ internal class SaksbehandlingsblankettStegTest {
                 journalpostId = "123456",
                 journalposttype = Journalposttype.N,
                 journalstatus = Journalstatus.JOURNALFOERT,
-                eksternReferanseId = "${behandling.id}-blankett"
-            )
+                eksternReferanseId = "${behandling.id}-blankett",
+            ),
         )
 
         saksbehandlingsblankettSteg.utførSteg(behandling, null)
@@ -151,7 +149,7 @@ internal class SaksbehandlingsblankettStegTest {
             behandlingServiceMock.leggTilBehandlingsjournalpost(
                 journalpostId = "123456",
                 journalposttype = Journalposttype.N,
-                behandlingId = behandling.id
+                behandlingId = behandling.id,
             )
         }
     }
@@ -160,23 +158,23 @@ internal class SaksbehandlingsblankettStegTest {
     internal fun `skal ikke håndtere feil som ikke er av typen 409 conflict ved arkivering av blankett`() {
         every { fagsakServiceMock.hentFagsak(any()) } returns fagsak(
             fagsakpersoner(setOf("12345678912")),
-            stønadstype = StønadType.BARNETILSYN
+            stønadstype = StønadType.BARNETILSYN,
         )
 
         every {
             journalpostClientMock.arkiverDokument(
                 capture(arkiverDokumentRequestSlot),
-                any()
+                any(),
             )
         } throws RessursException(
             Ressurs.failure(),
             HttpClientErrorException.create(null, HttpStatus.BAD_REQUEST, null, null, null, null),
-            HttpStatus.BAD_REQUEST
+            HttpStatus.BAD_REQUEST,
         )
 
         val behandling = saksbehandling(type = BehandlingType.REVURDERING).copy(stønadstype = StønadType.BARNETILSYN)
 
-        val feil = assertThrows<RessursException> {  saksbehandlingsblankettSteg.utførSteg(behandling, null)}
+        val feil = assertThrows<RessursException> { saksbehandlingsblankettSteg.utførSteg(behandling, null) }
         assertThat(feil.httpStatus).isEqualTo(HttpStatus.BAD_REQUEST)
     }
 }

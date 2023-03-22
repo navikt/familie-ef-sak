@@ -7,7 +7,7 @@ import java.time.LocalDateTime
 
 data class JournalposterDto(
     val dokumenterKnyttetTilBehandlingen: List<DokumentinfoDto>,
-    val andreDokumenter: List<DokumentinfoDto>
+    val andreDokumenter: List<DokumentinfoDto>,
 )
 
 data class DokumentinfoDto(
@@ -19,7 +19,7 @@ data class DokumentinfoDto(
     val journalstatus: Journalstatus,
     val journalposttype: Journalposttype,
     val logiskeVedlegg: List<LogiskVedleggDto>,
-    val avsenderMottaker: AvsenderMottaker?
+    val avsenderMottaker: AvsenderMottaker?,
 )
 
 data class LogiskVedleggDto(val tittel: String)

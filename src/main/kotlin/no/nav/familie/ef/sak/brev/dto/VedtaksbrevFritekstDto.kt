@@ -5,5 +5,5 @@ import java.util.UUID
 data class VedtaksbrevFritekstDto(
     val overskrift: String,
     val avsnitt: List<FrittståendeBrevAvsnitt>,
-    val behandlingId: UUID
+    val behandlingId: UUID,
 )

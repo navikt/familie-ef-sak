@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service
 
 @Service
 class ÅrsakRevurderingSteg(
-    private val årsakRevurderingService: ÅrsakRevurderingService
+    private val årsakRevurderingService: ÅrsakRevurderingService,
 ) : BehandlingSteg<RevurderingsinformasjonDto> {
 
     override fun stegType(): StegType {
@@ -39,7 +39,7 @@ class ÅrsakRevurderingSteg(
 
     private fun validerGyldigeVerdier(
         saksbehandling: Saksbehandling,
-        årsakRevurdering: ÅrsakRevurderingDto
+        årsakRevurdering: ÅrsakRevurderingDto,
     ) {
         brukerfeilHvis(saksbehandling.status.behandlingErLåstForVidereRedigering()) {
             "Behandlingen er låst og kan ikke oppdatere årsak til revurdering"

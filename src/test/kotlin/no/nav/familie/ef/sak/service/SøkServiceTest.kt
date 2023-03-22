@@ -44,7 +44,7 @@ internal class SøkServiceTest {
         personService,
         pdlSaksbehandlerClient,
         adresseMapper,
-        fagsakService
+        fagsakService,
     )
 
     @BeforeEach
@@ -65,7 +65,7 @@ internal class SøkServiceTest {
             "",
             "0000",
             null,
-            1L
+            1L,
         )
 
         val bostedsadresseFraPdl = listOf(
@@ -78,8 +78,8 @@ internal class SøkServiceTest {
                 vegadresse,
                 null,
                 null,
-                Metadata(historisk = false)
-            )
+                Metadata(historisk = false),
+            ),
         )
 
         val navnFraPdl = listOf(Navn("Fornavn", "Mellomnavn", "Etternavn", Metadata(false)))
@@ -90,13 +90,13 @@ internal class SøkServiceTest {
                     person = PdlPersonFraSøk(
                         listOf(FolkeregisteridentifikatorFraSøk("123456789")),
                         bostedsadresseFraPdl,
-                        navnFraPdl
-                    )
-                )
+                        navnFraPdl,
+                    ),
+                ),
             ),
             totalHits = 1,
             pageNumber = 1,
-            totalPages = 1
+            totalPages = 1,
         )
 
         every {
@@ -109,7 +109,7 @@ internal class SøkServiceTest {
         val forventetResultat = PersonFraSøk(
             personIdent = "123456789",
             visningsadresse = "Adressenavn 23 A, 0000 Oslo",
-            "Fornavn Mellomnavn Etternavn"
+            "Fornavn Mellomnavn Etternavn",
         )
 
         val person = SøkeresultatPerson(listOf(forventetResultat), 1, 1, 1)

@@ -22,7 +22,7 @@ object BrukerContextUtil {
         preferredUsername: String = "A",
         groups: List<String> = emptyList(),
         servletRequest: HttpServletRequest = MockHttpServletRequest(),
-        azp_name: String? = null
+        azp_name: String? = null,
     ) {
         val tokenValidationContext = mockk<TokenValidationContext>()
         val jwtTokenClaims = JwtTokenClaims(
@@ -32,7 +32,7 @@ object BrukerContextUtil {
                 .claim("name", preferredUsername)
                 .claim("groups", groups)
                 .claim("azp_name", azp_name)
-                .build()
+                .build(),
         )
         val requestAttributes = ServletRequestAttributes(servletRequest)
 
@@ -40,7 +40,7 @@ object BrukerContextUtil {
         requestAttributes.setAttribute(
             SpringTokenValidationContextHolder::class.java.name,
             tokenValidationContext,
-            RequestAttributes.SCOPE_REQUEST
+            RequestAttributes.SCOPE_REQUEST,
         )
         every { tokenValidationContext.getClaims("azuread") } returns jwtTokenClaims
     }

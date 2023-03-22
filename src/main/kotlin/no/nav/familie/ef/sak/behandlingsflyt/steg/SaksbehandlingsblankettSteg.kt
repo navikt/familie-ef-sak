@@ -29,7 +29,7 @@ class SaksbehandlingsblankettSteg(
     private val totrinnskontrollService: TotrinnskontrollService,
     private val journalpostClient: JournalpostClient,
     private val behandlingService: BehandlingService,
-    private val fagsakService: FagsakService
+    private val fagsakService: FagsakService,
 ) : BehandlingSteg<Void?> {
 
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -38,7 +38,7 @@ class SaksbehandlingsblankettSteg(
         if (saksbehandling.erMigrering || saksbehandling.erMaskinellOmregning) {
             logger.info(
                 "Oppretter ikke saksbehandlingsblankett for behandling=${saksbehandling.id}, " +
-                    "behandling er migrering eller maskinell g-omregning"
+                    "behandling er migrering eller maskinell g-omregning",
             )
         } else {
             val blankettPdf = blankettService.lagBlankett(saksbehandling.id)
@@ -55,18 +55,17 @@ class SaksbehandlingsblankettSteg(
         val journalpostId = try {
             journalpostClient.arkiverDokument(arkiverDokumentRequest, beslutter).journalpostId
         } catch (e: RessursException) {
-             if (e.cause is HttpClientErrorException.Conflict) {
-                 finnJournalpostIdForBlankett(saksbehandling)
-             } else {
+            if (e.cause is HttpClientErrorException.Conflict) {
+                finnJournalpostIdForBlankett(saksbehandling)
+            } else {
                 throw e
-             }
+            }
         }
-
 
         behandlingService.leggTilBehandlingsjournalpost(
             journalpostId,
             Journalposttype.N,
-            saksbehandling.id
+            saksbehandling.id,
         )
     }
 
@@ -75,12 +74,12 @@ class SaksbehandlingsblankettSteg(
             JournalposterForBrukerRequest(
                 brukerId = Bruker(
                     id = saksbehandling.ident,
-                    type = BrukerIdType.FNR
+                    type = BrukerIdType.FNR,
                 ),
                 antall = 100,
                 tema = listOf(Tema.ENF),
                 journalposttype = listOf(Journalposttype.N),
-            )
+            ),
         )
 
         val forventetEksternReferanseId = "${saksbehandling.id}-blankett"
@@ -90,7 +89,7 @@ class SaksbehandlingsblankettSteg(
 
     private fun opprettArkiverDokumentRequest(
         saksbehandling: Saksbehandling,
-        blankettPdf: ByteArray
+        blankettPdf: ByteArray,
     ): ArkiverDokumentRequest {
         val fagsak = fagsakService.hentFagsak(saksbehandling.fagsakId)
         val personIdent = fagsak.hentAktivIdent()
@@ -101,7 +100,7 @@ class SaksbehandlingsblankettSteg(
             enhet,
             fagsak.eksternId.id,
             saksbehandling.id,
-            fagsak.stønadstype
+            fagsak.stønadstype,
         )
     }
 

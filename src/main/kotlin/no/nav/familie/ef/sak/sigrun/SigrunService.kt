@@ -59,5 +59,5 @@ private fun SummertSkattegrunnlag.mapSvalbardGrunnlagTilPensjonsgivendeInntektVi
 data class PensjonsgivendeInntektVisning(
     val inntektsår: Int,
     var næring: Int,
-    var person: Int
+    var person: Int,
 )

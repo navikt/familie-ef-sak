@@ -16,7 +16,7 @@ import org.springframework.stereotype.Service
 class EksternVedtakService(
     private val fagsakService: FagsakService,
     private val behandlingService: BehandlingService,
-    private val tilbakekrevingClient: TilbakekrevingClient
+    private val tilbakekrevingClient: TilbakekrevingClient,
 ) {
 
     fun hentVedtak(eksternFagsakId: Long): List<FagsystemVedtak> {
@@ -41,7 +41,7 @@ class EksternVedtakService(
             vedtakstidspunkt = behandling.vedtakstidspunkt
                 ?: error("Mangler vedtakstidspunkt for behandling=${behandling.id}"),
             fagsystemType = fagsystemType,
-            regelverk = Regelverk.NASJONAL
+            regelverk = Regelverk.NASJONAL,
         )
     }
 

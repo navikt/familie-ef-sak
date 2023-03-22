@@ -22,7 +22,7 @@ import java.util.UUID
 @Validated
 class MigreringController(
     private val migreringService: MigreringService,
-    private val tilgangService: TilgangService
+    private val tilgangService: TilgangService,
 ) {
 
     @GetMapping("{fagsakPersonId}")
@@ -34,21 +34,21 @@ class MigreringController(
     @PostMapping("{fagsakPersonId}")
     fun migrerOvergangsstønad(
         @PathVariable fagsakPersonId: UUID,
-        @RequestBody request: MigrerRequestDto?
+        @RequestBody request: MigrerRequestDto?,
     ): Ressurs<UUID> {
         tilgangService.validerTilgangTilFagsakPerson(fagsakPersonId, AuditLoggerEvent.CREATE)
         return Ressurs.success(
             migreringService.migrerOvergangsstønad(
                 fagsakPersonId,
-                request ?: MigrerRequestDto()
-            )
+                request ?: MigrerRequestDto(),
+            ),
         )
     }
 
     @PostMapping("{fagsakPersonId}/barnetilsyn")
     fun migrerBarnetilsyn(
         @PathVariable fagsakPersonId: UUID,
-        @RequestBody request: MigrerRequestDto?
+        @RequestBody request: MigrerRequestDto?,
     ): Ressurs<UUID> {
         tilgangService.validerTilgangTilFagsakPerson(fagsakPersonId, AuditLoggerEvent.CREATE)
         return Ressurs.success(migreringService.migrerBarnetilsyn(fagsakPersonId, request ?: MigrerRequestDto()))

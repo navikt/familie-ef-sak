@@ -25,7 +25,7 @@ class SøknadService(
     private val søknadRepository: SøknadRepository,
     private val søknadOvergangsstønadRepository: SøknadOvergangsstønadRepository,
     private val søknadSkolepengerRepository: SøknadSkolepengerRepository,
-    private val søknadBarnetilsynRepository: SøknadBarnetilsynRepository
+    private val søknadBarnetilsynRepository: SøknadBarnetilsynRepository,
 ) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -72,8 +72,8 @@ class SøknadService(
             søknad.copy(
                 id = UUID.randomUUID(),
                 behandlingId = nyBehandlingId,
-                sporbar = Sporbar()
-            )
+                sporbar = Sporbar(),
+            ),
         )
     }
 
@@ -82,7 +82,7 @@ class SøknadService(
         søknad: SøknadOvergangsstønad,
         behandlingId: UUID,
         fagsakId: UUID,
-        journalpostId: String
+        journalpostId: String,
     ) {
         val søknadsskjema = SøknadsskjemaMapper.tilDomene(søknad)
         søknadOvergangsstønadRepository.insert(søknadsskjema)

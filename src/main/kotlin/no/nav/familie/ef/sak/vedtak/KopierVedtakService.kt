@@ -26,13 +26,13 @@ class KopierVedtakService(
     val barnRepository: BarnRepository,
     val vedtakService: VedtakService,
     val vedtakHistorikkService: VedtakHistorikkService,
-    val behandlingService: BehandlingService
+    val behandlingService: BehandlingService,
 ) {
 
     fun lagVedtakDtoBasertPåTidligereVedtaksperioder(
         fagsakId: UUID,
         forrigeBehandlingId: UUID,
-        revurderingId: UUID
+        revurderingId: UUID,
     ): VedtakDto {
         validerRevurderingErSatsendring(revurderingId)
         val behandlingBarn = barnRepository.findByBehandlingId(revurderingId)
@@ -53,7 +53,7 @@ class KopierVedtakService(
             resultatType = ResultatType.INNVILGE,
             perioderKontantstøtte = mapPerioderKontantstøtte(historikk),
             tilleggsstønad = mapTilleggsstønadDto(historikk, forrigeBehandlingId),
-            begrunnelse = "Satsendring barnetilsyn"
+            begrunnelse = "Satsendring barnetilsyn",
         )
     }
     private fun mapTilleggsstønadDto(historikk: List<AndelHistorikkDto>, forrigeBehandlingId: UUID): TilleggsstønadDto {
@@ -62,7 +62,7 @@ class KopierVedtakService(
             historikk.filter { it.andel.tilleggsstønad > 0 }.map {
                 PeriodeMedBeløpDto(periode = it.andel.periode, beløp = it.andel.tilleggsstønad)
             },
-            vedtakService.hentVedtak(forrigeBehandlingId).tilleggsstønad?.begrunnelse
+            vedtakService.hentVedtak(forrigeBehandlingId).tilleggsstønad?.begrunnelse,
         )
     }
 
@@ -71,7 +71,7 @@ class KopierVedtakService(
             .map {
                 PeriodeMedBeløpDto(
                     periode = it.andel.periode,
-                    beløp = it.andel.kontantstøtte
+                    beløp = it.andel.kontantstøtte,
                 )
             }
     }
@@ -89,7 +89,7 @@ class KopierVedtakService(
                 utgifter = it.andel.utgifter.toInt(),
                 sanksjonsårsak = null,
                 periodetype = it.periodetypeBarnetilsyn ?: error("Mangler periodetype $it"),
-                aktivitetstype = it.aktivitetBarnetilsyn
+                aktivitetstype = it.aktivitetBarnetilsyn,
             )
         }
         return map.fyllUtPerioderUtenStønad()
@@ -119,8 +119,8 @@ private fun List<UtgiftsperiodeDto>.fyllUtPerioderUtenStønad(): List<Utgiftsper
                     utgifter = 0,
                     sanksjonsårsak = null,
                     periodetype = PeriodetypeBarnetilsyn.OPPHØR,
-                    aktivitetstype = null
-                )
+                    aktivitetstype = null,
+                ),
             )
         }
     }

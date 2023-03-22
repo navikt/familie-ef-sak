@@ -22,16 +22,16 @@ import org.springframework.stereotype.Component
 class MedlemskapMapper(
     private val statsborgerskapMapper: StatsborgerskapMapper,
     private val innflyttingUtflyttingMapper: InnflyttingUtflyttingMapper,
-    private val adresseMapper: AdresseMapper
+    private val adresseMapper: AdresseMapper,
 ) {
 
     fun tilDto(
         grunnlagsdata: GrunnlagsdataDomene,
-        medlemskapsdetaljer: Medlemskap?
+        medlemskapsdetaljer: Medlemskap?,
     ): MedlemskapDto {
         return MedlemskapDto(
             søknadsgrunnlag = medlemskapsdetaljer?.let { mapSøknadsgrunnlag(it) },
-            registergrunnlag = mapRegistergrunnlag(grunnlagsdata.søker, grunnlagsdata.medlUnntak)
+            registergrunnlag = mapRegistergrunnlag(grunnlagsdata.søker, grunnlagsdata.medlUnntak),
         )
     }
 
@@ -44,15 +44,15 @@ class MedlemskapMapper(
                     it.fradato,
                     it.tildato,
                     Datoperiode(it.fradato, it.tildato),
-                    it.årsakUtenlandsopphold
+                    it.årsakUtenlandsopphold,
                 )
-            }
+            },
         )
     }
 
     fun mapRegistergrunnlag(
         søker: Søker,
-        medlUnntak: Medlemskapsinfo
+        medlUnntak: Medlemskapsinfo,
     ): MedlemskapRegistergrunnlagDto {
         val statsborgerskap = statsborgerskapMapper.map(søker.statsborgerskap)
         return MedlemskapRegistergrunnlagDto(
@@ -66,7 +66,7 @@ class MedlemskapMapper(
             utflytting = innflyttingUtflyttingMapper.mapUtflytting(søker.utflyttingFraNorge),
             folkeregisterpersonstatus = søker.folkeregisterpersonstatus.gjeldende()
                 ?.let(Folkeregisterpersonstatus::fraPdl),
-            medlUnntak = medlUnntak.tilDto()
+            medlUnntak = medlUnntak.tilDto(),
         )
     }
 }

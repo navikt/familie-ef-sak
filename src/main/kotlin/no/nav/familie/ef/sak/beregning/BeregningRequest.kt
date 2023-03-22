@@ -17,10 +17,10 @@ data class Inntektsperiode(
     val periode: Månedsperiode =
         Månedsperiode(
             startDato ?: error("periode eller startDato må ha verdi"),
-            sluttDato ?: error("periode eller sluttDato må ha verdi")
+            sluttDato ?: error("periode eller sluttDato må ha verdi"),
         ),
     val inntekt: BigDecimal,
-    val samordningsfradrag: BigDecimal
+    val samordningsfradrag: BigDecimal,
 )
 
 fun List<Inntekt>.tilInntektsperioder() = this.mapIndexed { index, inntektsperiode ->
@@ -33,8 +33,8 @@ fun List<Inntekt>.tilInntektsperioder() = this.mapIndexed { index, inntektsperio
                 this[index + 1].årMånedFra.minusMonths(1)
             } else {
                 YearMonth.from(LocalDate.MAX)
-            }
-        )
+            },
+        ),
     )
 }
 
@@ -42,6 +42,6 @@ fun List<Inntektsperiode>.tilInntekt() = this.map { inntektsperiode ->
     Inntekt(
         forventetInntekt = inntektsperiode.inntekt,
         samordningsfradrag = inntektsperiode.samordningsfradrag,
-        årMånedFra = inntektsperiode.periode.fom
+        årMånedFra = inntektsperiode.periode.fom,
     )
 }

@@ -24,13 +24,13 @@ import java.util.UUID
 @ProtectedWithClaims(issuer = "azuread")
 class BrevMellomlagerController(
     private val tilgangService: TilgangService,
-    private val mellomlagringBrevService: MellomlagringBrevService
+    private val mellomlagringBrevService: MellomlagringBrevService,
 ) {
 
     @PostMapping("/{behandlingId}")
     fun mellomlagreBrevverdier(
         @PathVariable behandlingId: UUID,
-        @RequestBody mellomlagretBrev: MellomlagreBrevRequestDto
+        @RequestBody mellomlagretBrev: MellomlagreBrevRequestDto,
     ): Ressurs<UUID> {
         tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.UPDATE)
         tilgangService.validerHarSaksbehandlerrolle()
@@ -40,8 +40,8 @@ class BrevMellomlagerController(
                 behandlingId,
                 mellomlagretBrev.brevverdier,
                 mellomlagretBrev.brevmal,
-                mellomlagretBrev.versjon
-            )
+                mellomlagretBrev.versjon,
+            ),
         )
     }
 
@@ -79,15 +79,15 @@ class BrevMellomlagerController(
     @GetMapping("/{behandlingId}")
     fun hentMellomlagretBrevverdier(
         @PathVariable behandlingId: UUID,
-        @RequestParam sanityVersjon: String
+        @RequestParam sanityVersjon: String,
     ): Ressurs<MellomlagretBrevResponse?> {
         tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.ACCESS)
 
         return Ressurs.success(
             mellomlagringBrevService.hentOgValiderMellomlagretBrev(
                 behandlingId,
-                sanityVersjon
-            )
+                sanityVersjon,
+            ),
         )
     }
 }

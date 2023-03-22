@@ -13,11 +13,11 @@ import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @RequestMapping(
-    path = ["/api/ekstern/vedtak"]
+    path = ["/api/ekstern/vedtak"],
 )
 class EksternVedtakController(
     private val tilgangService: TilgangService,
-    private val eksternVedtakService: EksternVedtakService
+    private val eksternVedtakService: EksternVedtakService,
 ) {
 
     @GetMapping("/{eksternFagsakId}")

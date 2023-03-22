@@ -45,7 +45,7 @@ internal class SimuleringServiceTest {
         iverksettClient = iverksettClient,
         simuleringsresultatRepository = simuleringsresultatRepository,
         tilkjentYtelseService = tilkjentYtelseService,
-        tilgangService = tilgangService
+        tilgangService = tilgangService,
     )
 
     private val personIdent = "12345678901"
@@ -65,14 +65,14 @@ internal class SimuleringServiceTest {
         val behandling = behandling(
             fagsak = fagsak,
             type = BehandlingType.FØRSTEGANGSBEHANDLING,
-            forrigeBehandlingId = forrigeBehandlingId
+            forrigeBehandlingId = forrigeBehandlingId,
         )
 
         val tilkjentYtelse = tilkjentYtelse(behandlingId = behandling.id, personIdent = personIdent)
         val simuleringsresultat = Simuleringsresultat(
             behandlingId = behandling.id,
             data = DetaljertSimuleringResultat(emptyList()),
-            beriketData = BeriketSimuleringsresultat(mockk(), mockk())
+            beriketData = BeriketSimuleringsresultat(mockk(), mockk()),
         )
         every { behandlingService.hentBehandling(any()) } returns behandling
         every { tilkjentYtelseService.hentForBehandling(any()) } returns tilkjentYtelse
@@ -115,7 +115,7 @@ internal class SimuleringServiceTest {
         } returns Simuleringsresultat(
             behandlingId = behandling.id,
             data = DetaljertSimuleringResultat(emptyList()),
-            beriketData = BeriketSimuleringsresultat(mockk(), mockk())
+            beriketData = BeriketSimuleringsresultat(mockk(), mockk()),
         )
         val simuleringsresultatDto = simuleringService.simuler(saksbehandling(fagsak, behandling))
         assertThat(simuleringsresultatDto).isNotNull
@@ -127,7 +127,7 @@ internal class SimuleringServiceTest {
         val behandling = behandling(
             fagsak = fagsak,
             type = BehandlingType.FØRSTEGANGSBEHANDLING,
-            forrigeBehandlingId = forrigeBehandlingId
+            forrigeBehandlingId = forrigeBehandlingId,
         )
 
         val tilkjentYtelse = tilkjentYtelse(behandlingId = behandling.id, personIdent = personIdent)

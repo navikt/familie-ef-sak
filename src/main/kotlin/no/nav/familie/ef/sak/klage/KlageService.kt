@@ -26,7 +26,7 @@ class KlageService(
     private val fagsakPersonService: FagsakPersonService,
     private val klageClient: KlageClient,
     private val infotrygdService: InfotrygdService,
-    private val arbeidsfordelingService: ArbeidsfordelingService
+    private val arbeidsfordelingService: ArbeidsfordelingService,
 ) {
 
     fun hentBehandlinger(fagsakPersonId: UUID): KlagebehandlingerDto {
@@ -35,7 +35,7 @@ class KlageService(
             listOfNotNull(
                 it.overgangsstønad?.eksternId?.id,
                 it.barnetilsyn?.eksternId?.id,
-                it.skolepenger?.eksternId?.id
+                it.skolepenger?.eksternId?.id,
             )
         }
         if (eksternFagsakIder.isEmpty()) {
@@ -49,7 +49,7 @@ class KlageService(
         return KlagebehandlingerDto(
             overgangsstønad = klagebehandlingerPåEksternId[fagsaker.overgangsstønad?.eksternId?.id] ?: emptyList(),
             barnetilsyn = klagebehandlingerPåEksternId[fagsaker.barnetilsyn?.eksternId?.id] ?: emptyList(),
-            skolepenger = klagebehandlingerPåEksternId[fagsaker.skolepenger?.eksternId?.id] ?: emptyList()
+            skolepenger = klagebehandlingerPåEksternId[fagsaker.skolepenger?.eksternId?.id] ?: emptyList(),
         )
     }
 
@@ -74,8 +74,8 @@ class KlageService(
                 eksternFagsakId = fagsak.eksternId.id.toString(),
                 fagsystem = Fagsystem.EF,
                 klageMottatt = klageMottatt,
-                behandlendeEnhet = enhetId
-            )
+                behandlendeEnhet = enhetId,
+            ),
         )
     }
 

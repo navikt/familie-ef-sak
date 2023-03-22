@@ -23,13 +23,13 @@ internal class BarnMatcherTest {
             behandlingBarn(fnr = fnrBarn1),
             behandlingBarn(fnr = fnrBarn2),
             behandlingBarn(fnr = fnrBarn3),
-            behandlingBarn(LocalDate.of(2018, 5, 4))
+            behandlingBarn(LocalDate.of(2018, 5, 4)),
         )
         val barnGrunnlag = listOf(
             pdlBarn(fnrBarn1),
             pdlBarn(fnrBarn2),
             pdlBarn(fnrBarn3),
-            pdlBarn(fnrBarn4)
+            pdlBarn(fnrBarn4),
         )
 
         val barn = BarnMatcher.kobleBehandlingBarnOgRegisterBarn(behandlingBarn, barnGrunnlag)
@@ -52,13 +52,13 @@ internal class BarnMatcherTest {
             behandlingBarn(fnr = fnrBarn1),
             behandlingBarn(fnr = fnrBarn2),
             behandlingBarn(fnr = fnrBarn3),
-            behandlingBarn(LocalDate.of(2018, 9, 4))
+            behandlingBarn(LocalDate.of(2018, 9, 4)),
         )
         val barnGrunnlag = listOf(
             pdlBarn(fnrBarn1),
             pdlBarn(fnrBarn2),
             pdlBarn(fnrBarn3),
-            pdlBarn(fnrBarn4)
+            pdlBarn(fnrBarn4),
         )
 
         val barn = BarnMatcher.kobleBehandlingBarnOgRegisterBarn(behandlingBarn, barnGrunnlag)
@@ -81,13 +81,13 @@ internal class BarnMatcherTest {
             behandlingBarn(fnr = fnrBarn1),
             behandlingBarn(fnr = fnrBarn2),
             behandlingBarn(fnr = fnrBarn3),
-            behandlingBarn(LocalDate.of(2018, 5, 4))
+            behandlingBarn(LocalDate.of(2018, 5, 4)),
         )
         val barnGrunnlag = listOf(
             pdlBarn(fnrBarn1),
             pdlBarn(fnrBarn2),
             pdlBarn(fnrBarn3),
-            pdlBarn(fnrBarn4)
+            pdlBarn(fnrBarn4),
         )
 
         val barn = BarnMatcher.kobleBehandlingBarnOgRegisterBarn(behandlingBarn, barnGrunnlag)
@@ -110,13 +110,13 @@ internal class BarnMatcherTest {
             behandlingBarn(fnr = fnrBarn1),
             behandlingBarn(fnr = fnrBarn2),
             behandlingBarn(LocalDate.of(2018, 5, 4)),
-            behandlingBarn(LocalDate.of(2018, 5, 4))
+            behandlingBarn(LocalDate.of(2018, 5, 4)),
         )
         val barnGrunnlag = listOf(
             pdlBarn(fnrBarn1),
             pdlBarn(fnrBarn2),
             pdlBarn(fnrBarn3),
-            pdlBarn(fnrBarn4)
+            pdlBarn(fnrBarn4),
         )
 
         val barn = BarnMatcher.kobleBehandlingBarnOgRegisterBarn(behandlingBarn, barnGrunnlag)
@@ -139,13 +139,13 @@ internal class BarnMatcherTest {
         val behandlingBarn = listOf(
             behandlingBarn(fnr = fnrBarn1),
             behandlingBarn(fnr = fnrBarn2),
-            behandlingBarn(LocalDate.of(2018, 5, 4))
+            behandlingBarn(LocalDate.of(2018, 5, 4)),
         )
         val barnGrunnlag = listOf(
             pdlBarn(fnrBarn1),
             pdlBarn(fnrBarn2),
             pdlBarn(fnrBarn3),
-            pdlBarn(fnrBarn4)
+            pdlBarn(fnrBarn4),
         )
 
         val barn = BarnMatcher.kobleBehandlingBarnOgRegisterBarn(behandlingBarn, barnGrunnlag)
@@ -164,7 +164,7 @@ internal class BarnMatcherTest {
             fødselTermindato = terminDato,
             behandlingId = UUID.randomUUID(),
             navn = "navn",
-            søknadBarnId = null
+            søknadBarnId = null,
         )
 
     private fun pdlBarn(fnr: String) =
@@ -176,6 +176,6 @@ internal class BarnMatcherTest {
             emptyList(),
             emptyList(),
             Navn("", "", "", Metadata(false)),
-            fnr
+            fnr,
         )
 }

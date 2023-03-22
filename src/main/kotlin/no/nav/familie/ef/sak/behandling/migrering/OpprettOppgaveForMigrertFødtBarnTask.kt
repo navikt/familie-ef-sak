@@ -29,13 +29,13 @@ import java.util.UUID
     maxAntallFeil = 3,
     settTilManuellOppfølgning = true,
     triggerTidVedFeilISekunder = 15 * 60L,
-    beskrivelse = "Oppretter oppgave for fødte barn"
+    beskrivelse = "Oppretter oppgave for fødte barn",
 )
 class OpprettOppgaveForMigrertFødtBarnTask(
     private val behandlingService: BehandlingService,
     private val tilkjentYtelseService: TilkjentYtelseService,
     private val grunnlagsdataService: GrunnlagsdataService,
-    private val taskService: TaskService
+    private val taskService: TaskService,
 ) : AsyncTaskStep {
 
     private val logger: Logger = LoggerFactory.getLogger(javaClass)
@@ -55,7 +55,7 @@ class OpprettOppgaveForMigrertFødtBarnTask(
     private fun lagOgSendOppgaver(
         behandlingId: UUID,
         sisteUtbetalingsdato: LocalDate,
-        data: OpprettOppgaveForMigrertFødtBarnTaskData
+        data: OpprettOppgaveForMigrertFødtBarnTaskData,
     ) {
         val oppgaverForBarn = lagOppgaver(behandlingId, data, sisteUtbetalingsdato)
 
@@ -66,8 +66,8 @@ class OpprettOppgaveForMigrertFødtBarnTask(
                     barnPersonIdent = it.personIdent,
                     søkerPersonIdent = data.personIdent,
                     alder = it.alder,
-                    aktivFra = it.aktivFra
-                )
+                    aktivFra = it.aktivFra,
+                ),
             )
         }
 
@@ -89,7 +89,7 @@ class OpprettOppgaveForMigrertFødtBarnTask(
     private fun lagOppgaver(
         behandlingId: UUID,
         data: OpprettOppgaveForMigrertFødtBarnTaskData,
-        sisteUtbetalingsdato: LocalDate
+        sisteUtbetalingsdato: LocalDate,
     ): List<OppgaveForBarn> {
         val kjenteFødselsdatoer = grunnlagsdataService.hentGrunnlagsdata(behandlingId).grunnlagsdata.barn
             .flatMap { it.fødsel.mapNotNull(Fødsel::fødselsdato) }
@@ -110,7 +110,7 @@ class OpprettOppgaveForMigrertFødtBarnTask(
                         personIdent = it.personIdent,
                         stønadType = data.stønadType,
                         aktivFra = datoOgBeskrivelse.first,
-                        alder = datoOgBeskrivelse.second
+                        alder = datoOgBeskrivelse.second,
                     )
                 }
         }.flatten()
@@ -128,7 +128,7 @@ class OpprettOppgaveForMigrertFødtBarnTask(
         }
         return listOf(
             nesteVirkedagForDatoMinus1Uke(fødselsdato.plusMonths(6)) to Alder.SEKS_MND,
-            datoOm1År to Alder.ETT_ÅR
+            datoOm1År to Alder.ETT_ÅR,
         ).filter { it.first > LocalDate.now() }
     }
 
@@ -153,9 +153,9 @@ class OpprettOppgaveForMigrertFødtBarnTask(
                         eksternFagsakId = fagsak.eksternId.id,
                         stønadType = fagsak.stønadstype,
                         personIdent = fagsak.hentAktivIdent(),
-                        barn = nyeBarn
-                    )
-                )
+                        barn = nyeBarn,
+                    ),
+                ),
             )
         }
     }
@@ -166,7 +166,7 @@ data class OpprettOppgaveForMigrertFødtBarnTaskData(
     val eksternFagsakId: Long,
     val stønadType: StønadType,
     val personIdent: String,
-    val barn: List<BarnMinimumDto>
+    val barn: List<BarnMinimumDto>,
 )
 
 data class OppgaveForBarn(
@@ -174,5 +174,5 @@ data class OppgaveForBarn(
     val personIdent: String,
     val stønadType: StønadType,
     val aktivFra: LocalDate? = null,
-    val alder: Alder
+    val alder: Alder,
 )

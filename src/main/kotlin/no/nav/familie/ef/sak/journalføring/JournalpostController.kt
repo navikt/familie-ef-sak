@@ -38,7 +38,7 @@ class JournalpostController(
     private val journalpostService: JournalpostService,
     private val personService: PersonService,
     private val tilgangService: TilgangService,
-    private val featureToggleService: FeatureToggleService
+    private val featureToggleService: FeatureToggleService,
 ) {
 
     @GetMapping("/{journalpostId}")
@@ -50,8 +50,8 @@ class JournalpostController(
                 journalpost,
                 personIdent,
                 hentBrukersNavn(journalpost, personIdent),
-                journalpost.harStrukturertSøknad()
-            )
+                journalpost.harStrukturertSøknad(),
+            ),
         )
     }
 
@@ -74,7 +74,7 @@ class JournalpostController(
     @PostMapping("/{journalpostId}/fullfor")
     fun fullførJournalpost(
         @PathVariable journalpostId: String,
-        @RequestBody journalføringRequest: JournalføringRequest
+        @RequestBody journalføringRequest: JournalføringRequest,
     ): Ressurs<Long> {
         val (_, personIdent) = finnJournalpostOgPersonIdent(journalpostId)
         tilgangService.validerTilgangTilPersonMedBarn(personIdent, AuditLoggerEvent.UPDATE)
@@ -85,7 +85,7 @@ class JournalpostController(
     @PostMapping("/{journalpostId}/klage/fullfor")
     fun fullførJournalpostKlage(
         @PathVariable journalpostId: String,
-        @RequestBody journalføringRequest: JournalføringKlageRequest
+        @RequestBody journalføringRequest: JournalføringKlageRequest,
     ): Ressurs<String> {
         val (_, personIdent) = finnJournalpostOgPersonIdent(journalpostId)
         tilgangService.validerTilgangTilPersonMedBarn(personIdent, AuditLoggerEvent.UPDATE)
@@ -97,7 +97,7 @@ class JournalpostController(
     @PostMapping("/{journalpostId}/opprett-behandling-med-soknadsdata-fra-en-ferdigstilt-journalpost")
     fun opprettBehandlingMedSøknadsdataFraEnFerdigstiltJournalpost(
         @PathVariable journalpostId: String,
-        @RequestBody request: JournalføringTilNyBehandlingRequest
+        @RequestBody request: JournalføringTilNyBehandlingRequest,
     ): Ressurs<Long> {
         feilHvisIkke(featureToggleService.isEnabled(Toggle.OPPRETT_BEHANDLING_FERDIGSTILT_JOURNALPOST)) {
             "Funksjonen opprettBehandlingPåFerdigstiltJournalføring er skrudd av for denne brukeren"
@@ -109,15 +109,15 @@ class JournalpostController(
         return Ressurs.success(
             journalføringService.opprettBehandlingMedSøknadsdataFraEnFerdigstiltJournalpost(
                 request,
-                journalpostId
-            )
+                journalpostId,
+            ),
         )
     }
 
     private fun validerDokumentKanHentes(
         journalpost: Journalpost,
         dokumentInfoId: String,
-        journalpostId: String
+        journalpostId: String,
     ) {
         val dokument = journalpost.dokumenter?.find { it.dokumentInfoId == dokumentInfoId }
         feilHvis(dokument == null) {
@@ -146,7 +146,7 @@ class JournalpostController(
      */
     private fun hentBrukersNavn(
         journalpost: Journalpost,
-        personIdent: String
+        personIdent: String,
     ): String {
         return journalpost.avsenderMottaker
             ?.takeIf { it.erLikBruker }?.navn

@@ -15,7 +15,7 @@ import org.springframework.stereotype.Service
 @Service
 class TestoppsettService(
     private val fagsakPersonRepository: FagsakPersonRepository,
-    private val fagsakRepository: FagsakRepository
+    private val fagsakRepository: FagsakRepository,
 ) {
 
     fun opprettPerson(ident: String) = fagsakPersonRepository.insert(FagsakPerson(identer = setOf(PersonIdent(ident))))
@@ -31,8 +31,8 @@ class TestoppsettService(
                 stønadstype = fagsak.stønadstype,
                 eksternId = fagsak.eksternId,
                 migrert = fagsak.migrert,
-                sporbar = fagsak.sporbar
-            )
+                sporbar = fagsak.sporbar,
+            ),
         ).tilFagsakMedPerson(person.identer)
     }
 
@@ -50,7 +50,7 @@ class TestoppsettService(
     private fun opprettPerson(fagsak: Fagsak) = fagsakPersonRepository.insert(
         FagsakPerson(
             fagsak.fagsakPersonId,
-            identer = fagsak.personIdenter
-        )
+            identer = fagsak.personIdenter,
+        ),
     )
 }

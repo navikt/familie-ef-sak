@@ -12,7 +12,7 @@ object OppholdstillatelseMapper {
             OppholdstillatelseDto(
                 fraDato = it.oppholdFra,
                 tilDato = it.oppholdTil,
-                oppholdstillatelse = mapOppholdstillatelse(it.type)
+                oppholdstillatelse = mapOppholdstillatelse(it.type),
             )
         }.sortedByDescending { it.fraDato }
 

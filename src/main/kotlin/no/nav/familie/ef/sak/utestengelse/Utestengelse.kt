@@ -18,7 +18,7 @@ data class Utestengelse(
     val tom: LocalDate,
     val slettet: Boolean = false,
     @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
-    val sporbar: Sporbar = Sporbar()
+    val sporbar: Sporbar = Sporbar(),
 )
 
 fun Utestengelse.tilDto() = UtestengelseDto(
@@ -28,5 +28,5 @@ fun Utestengelse.tilDto() = UtestengelseDto(
     opprettetAv = sporbar.opprettetAv,
     opprettetTid = sporbar.opprettetTid,
     endretAv = sporbar.endret.endretAv,
-    endretTid = sporbar.endret.endretTid
+    endretTid = sporbar.endret.endretTid,
 )

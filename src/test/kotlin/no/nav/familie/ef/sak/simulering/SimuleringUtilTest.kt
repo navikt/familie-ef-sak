@@ -28,7 +28,7 @@ class SimuleringUtilTest {
             lagSimuleringsperiode(YearMonth.of(2021, 6), nyttBeløp = -5000, tidligereUtbetalt = 0),
             lagSimuleringsperiode(YearMonth.of(2021, 7), nyttBeløp = -5000, tidligereUtbetalt = 0),
             lagSimuleringsperiode(YearMonth.of(2021, 8), nyttBeløp = -5000, tidligereUtbetalt = 0),
-            lagSimuleringsperiode(YearMonth.of(2021, 10), nyttBeløp = -5000, tidligereUtbetalt = 0)
+            lagSimuleringsperiode(YearMonth.of(2021, 10), nyttBeløp = -5000, tidligereUtbetalt = 0),
         ),
         fomDatoNestePeriode = null,
         etterbetaling = BigDecimal.valueOf(5000),
@@ -37,7 +37,7 @@ class SimuleringUtilTest {
         tomDatoNestePeriode = null,
         forfallsdatoNestePeriode = null,
         tidSimuleringHentet = LocalDate.of(2021, 11, 1),
-        tomSisteUtbetaling = LocalDate.of(2021, 10, 31)
+        tomSisteUtbetaling = LocalDate.of(2021, 10, 31),
     )
 
     @Test
@@ -66,7 +66,7 @@ class SimuleringUtilTest {
             nyttBeløp = nyttBeløp.toBigDecimal(),
             tidligereUtbetalt = tidligereUtbetalt.toBigDecimal(),
             resultat = resultat.toBigDecimal(),
-            feilutbetaling = Integer.max(0 - resultat, 0).toBigDecimal()
+            feilutbetaling = Integer.max(0 - resultat, 0).toBigDecimal(),
         )
     }
 

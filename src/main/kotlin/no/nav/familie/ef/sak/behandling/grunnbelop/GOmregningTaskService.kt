@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service
 @Profile("!integrasjonstest")
 @Service
 class GOmregningTaskServiceScheduler(
-    private val gOmregningTaskService: GOmregningTaskService
+    private val gOmregningTaskService: GOmregningTaskService,
 ) {
 
     val logger: Logger = LoggerFactory.getLogger(javaClass)
@@ -27,7 +27,7 @@ class GOmregningTaskServiceScheduler(
 @Service
 class GOmregningTaskService(
     private val fagsakRepository: FagsakRepository,
-    private val gOmregningTask: GOmregningTask
+    private val gOmregningTask: GOmregningTask,
 ) {
 
     val logger: Logger = LoggerFactory.getLogger(javaClass)

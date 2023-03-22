@@ -103,7 +103,7 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
     private enum class Saksbehandler(val beslutter: Boolean = false) {
         SAKSBEHANDLER,
         BESLUTTER(true),
-        BESLUTTER_2(true)
+        BESLUTTER_2(true),
     }
 
     @BeforeEach
@@ -260,7 +260,7 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
             steg = StegType.SEND_TIL_BESLUTTER,
             vedtakResultatType = ResultatType.AVSLÅ,
             status = BehandlingStatus.UTREDES,
-            avlsåÅrsak = AvslagÅrsak.MINDRE_INNTEKTSENDRINGER
+            avlsåÅrsak = AvslagÅrsak.MINDRE_INNTEKTSENDRINGER,
         )
         sendTilBeslutter(SAKSBEHANDLER)
 
@@ -343,27 +343,27 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
         status: BehandlingStatus = BehandlingStatus.UTREDES,
         steg: StegType = StegType.SEND_TIL_BESLUTTER,
         vedtakResultatType: ResultatType = ResultatType.AVSLÅ,
-        avlsåÅrsak: AvslagÅrsak = AvslagÅrsak.VILKÅR_IKKE_OPPFYLT
+        avlsåÅrsak: AvslagÅrsak = AvslagÅrsak.VILKÅR_IKKE_OPPFYLT,
     ): UUID {
         val lagretBehandling = behandlingRepository.insert(
             behandling.copy(
                 status = status,
-                steg = steg
-            )
+                steg = steg,
+            ),
         )
 
         vedtakRepository.insert(
             vedtak(lagretBehandling.id, vedtakResultatType).copy(
                 avslåÅrsak = avlsåÅrsak,
-                saksbehandlerIdent = SikkerhetContext.hentSaksbehandlerEllerSystembruker()
-            )
+                saksbehandlerIdent = SikkerhetContext.hentSaksbehandlerEllerSystembruker(),
+            ),
         )
         tilkjentYtelseRepository.insert(tilkjentYtelse(behandlingId = lagretBehandling.id, fagsak.hentAktivIdent()))
         søknadService.lagreSøknadForOvergangsstønad(
             Testsøknad.søknadOvergangsstønad,
             lagretBehandling.id,
             fagsak.id,
-            "1"
+            "1",
         )
         grunnlagsdataService.opprettGrunnlagsdata(lagretBehandling.id)
         return lagretBehandling.id
@@ -371,7 +371,7 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
 
     private fun opprettOppgave(
         oppgaveType: Oppgavetype = Oppgavetype.GodkjenneVedtak,
-        sakshandler: Saksbehandler = SAKSBEHANDLER
+        sakshandler: Saksbehandler = SAKSBEHANDLER,
     ) {
         oppgaveService.opprettOppgave(oppgavetype = oppgaveType, behandlingId = behandling.id, tilordnetNavIdent = sakshandler.name)
     }
@@ -391,41 +391,41 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
 
     private fun sendTilBeslutter(
         saksbehandler: Saksbehandler,
-        validator: (ResponseEntity<Ressurs<UUID>>) -> Unit = responseOK()
+        validator: (ResponseEntity<Ressurs<UUID>>) -> Unit = responseOK(),
     ) {
         headers.setBearerAuth(token(saksbehandler))
         lagSaksbehandlerBrev(saksbehandler.name)
         val response = restTemplate.exchange<Ressurs<UUID>>(
             localhost("/api/vedtak/${behandling.id}/send-til-beslutter"),
             HttpMethod.POST,
-            HttpEntity<Any>(headers)
+            HttpEntity<Any>(headers),
         )
         validator.invoke(response)
     }
 
     private fun angreSendTilBeslutter(
         saksbehandler: Saksbehandler,
-        validator: (ResponseEntity<Ressurs<UUID>>) -> Unit = responseOK()
+        validator: (ResponseEntity<Ressurs<UUID>>) -> Unit = responseOK(),
     ) {
         headers.setBearerAuth(token(saksbehandler))
         val response = restTemplate.exchange<Ressurs<UUID>>(
             localhost("/api/vedtak/${behandling.id}/angre-send-til-beslutter"),
             HttpMethod.POST,
-            HttpEntity<Any>(headers)
+            HttpEntity<Any>(headers),
         )
         validator.invoke(response)
     }
 
     private fun godkjennTotrinnskontroll(
         saksbehandler: Saksbehandler,
-        validator: (ResponseEntity<Ressurs<UUID>>) -> Unit = responseOK()
+        validator: (ResponseEntity<Ressurs<UUID>>) -> Unit = responseOK(),
     ) {
         beslutteVedtak(saksbehandler, BeslutteVedtakDto(true), validator)
     }
 
     private fun underkjennTotrinnskontroll(
         saksbehandler: Saksbehandler,
-        validator: (ResponseEntity<Ressurs<UUID>>) -> Unit = responseOK()
+        validator: (ResponseEntity<Ressurs<UUID>>) -> Unit = responseOK(),
     ) {
         beslutteVedtak(saksbehandler, BeslutteVedtakDto(false, "begrunnelse", listOf(ÅrsakUnderkjent.TIDLIGERE_VEDTAKSPERIODER)), validator)
     }
@@ -433,13 +433,13 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
     private fun beslutteVedtak(
         saksbehandler: Saksbehandler,
         beslutteVedtak: BeslutteVedtakDto,
-        validator: (ResponseEntity<Ressurs<UUID>>) -> Unit
+        validator: (ResponseEntity<Ressurs<UUID>>) -> Unit,
     ) {
         headers.setBearerAuth(token(saksbehandler))
         val response = restTemplate.exchange<Ressurs<UUID>>(
             localhost("/api/vedtak/${behandling.id}/beslutte-vedtak"),
             HttpMethod.POST,
-            HttpEntity(beslutteVedtak, headers)
+            HttpEntity(beslutteVedtak, headers),
         )
         validator.invoke(response)
     }
@@ -450,7 +450,7 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
             .exchange<Ressurs<TotrinnskontrollStatusDto>>(
                 localhost("/api/vedtak/${behandling.id}/totrinnskontroll"),
                 HttpMethod.GET,
-                HttpEntity<Any>(headers)
+                HttpEntity<Any>(headers),
             )
         responseOK<TotrinnskontrollStatusDto>().invoke(response)
         return response.body?.data!!
@@ -509,14 +509,14 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
     private fun lagVilkårsvurderinger(
         behandlingId: UUID,
         resultat: Vilkårsresultat = Vilkårsresultat.OPPFYLT,
-        ikkeLag: Int = 0
+        ikkeLag: Int = 0,
     ) {
         val vilkårsvurderinger = VilkårType.hentVilkårForStønad(OVERGANGSSTØNAD).map {
             vilkårsvurdering(
                 behandlingId = behandlingId,
                 resultat = resultat,
                 type = it,
-                delvilkårsvurdering = listOf()
+                delvilkårsvurdering = listOf(),
             )
         }.dropLast(ikkeLag)
         vilkårsvurderingRepository.insertAll(vilkårsvurderinger)

@@ -18,11 +18,11 @@ import java.util.UUID
 @Service
 @TaskStepBeskrivelse(
     taskStepType = OpprettOppfølgingsoppgaveForBarnFyltÅrTask.TYPE,
-    beskrivelse = "Oppretter oppfølgingsoppgave for barn som har fylt 1/2 eller 1 år"
+    beskrivelse = "Oppretter oppfølgingsoppgave for barn som har fylt 1/2 eller 1 år",
 )
 class OpprettOppfølgingsoppgaveForBarnFyltÅrTask(
     private val oppgaveRepository: OppgaveRepository,
-    private val oppgaveService: OppgaveService
+    private val oppgaveService: OppgaveService,
 ) : AsyncTaskStep {
 
     override fun doTask(task: Task) {
@@ -32,14 +32,14 @@ class OpprettOppfølgingsoppgaveForBarnFyltÅrTask(
             Oppgavetype.InnhentDokumentasjon,
             opprettOppgavePayload.aktivFra,
             opprettOppgavePayload.alder.oppgavebeskrivelse,
-            tilordnetNavIdent = null
+            tilordnetNavIdent = null,
         )
         val oppgave = Oppgave(
             gsakOppgaveId = opprettetOppgaveId,
             behandlingId = opprettOppgavePayload.behandlingId,
             barnPersonIdent = opprettOppgavePayload.barnPersonIdent,
             type = Oppgavetype.InnhentDokumentasjon,
-            alder = opprettOppgavePayload.alder
+            alder = opprettOppgavePayload.alder,
         )
         oppgaveRepository.insert(oppgave)
     }
@@ -61,5 +61,5 @@ data class OpprettOppgavePayload(
     val barnPersonIdent: String,
     val søkerPersonIdent: String,
     val alder: Alder,
-    val aktivFra: LocalDate? = null
+    val aktivFra: LocalDate? = null,
 )

@@ -20,7 +20,7 @@ internal class RegelValideringTest {
         assertThat(
             Assertions.catchThrowable {
                 valider(regel, *emptyArray<VurderingDto>())
-            }
+            },
         )
             .hasMessage("Savner svar for en av delvilkåren for vilkår=ALENEOMSORG")
             .isInstanceOf(Feil::class.java)
@@ -34,9 +34,9 @@ internal class RegelValideringTest {
             Assertions.catchThrowable {
                 valider(
                     regel,
-                    VurderingDto(RegelId.KRAV_SIVILSTAND_PÅKREVD_BEGRUNNELSE)
+                    VurderingDto(RegelId.KRAV_SIVILSTAND_PÅKREVD_BEGRUNNELSE),
                 )
-            }
+            },
         )
             .hasMessageStartingWith("Delvilkårsvurderinger savner svar på hovedregler")
             .isInstanceOf(Feil::class.java)
@@ -51,13 +51,13 @@ internal class RegelValideringTest {
                 valider(
                     regel,
                     VurderingDto(RegelId.BOR_OG_OPPHOLDER_SEG_I_NORGE),
-                    VurderingDto(RegelId.KRAV_SIVILSTAND_PÅKREVD_BEGRUNNELSE)
+                    VurderingDto(RegelId.KRAV_SIVILSTAND_PÅKREVD_BEGRUNNELSE),
                 )
-            }
+            },
         )
             .hasMessage(
                 "Mangler svar på ett spørsmål som ikke er siste besvarte spørsmålet vilkårType=ALENEOMSORG " +
-                    "regelId=BOR_OG_OPPHOLDER_SEG_I_NORGE"
+                    "regelId=BOR_OG_OPPHOLDER_SEG_I_NORGE",
             )
             .isInstanceOf(Feil::class.java)
     }
@@ -72,9 +72,9 @@ internal class RegelValideringTest {
                     regel,
                     VurderingDto(RegelId.BOR_OG_OPPHOLDER_SEG_I_NORGE, SvarId.NEI),
                     VurderingDto(RegelId.KRAV_SIVILSTAND_PÅKREVD_BEGRUNNELSE, SvarId.NEI),
-                    VurderingDto(RegelId.KRAV_SIVILSTAND_PÅKREVD_BEGRUNNELSE)
+                    VurderingDto(RegelId.KRAV_SIVILSTAND_PÅKREVD_BEGRUNNELSE),
                 )
-            }
+            },
         )
             .hasMessageStartingWith("Finnes ikke noen flere regler, men finnes flere svar")
             .isInstanceOf(Feil::class.java)
@@ -89,9 +89,9 @@ internal class RegelValideringTest {
                 valider(
                     regel,
                     VurderingDto(RegelId.BOR_OG_OPPHOLDER_SEG_I_NORGE, SvarId.NEI),
-                    VurderingDto(RegelId.NÆRE_BOFORHOLD, SvarId.NEI)
+                    VurderingDto(RegelId.NÆRE_BOFORHOLD, SvarId.NEI),
                 )
-            }
+            },
         )
             .hasMessage("Finner ikke regelId=NÆRE_BOFORHOLD for vilkårType=ALENEOMSORG")
             .isInstanceOf(Feil::class.java)
@@ -105,13 +105,13 @@ internal class RegelValideringTest {
             Assertions.catchThrowable {
                 valider(
                     regel,
-                    VurderingDto(RegelId.BOR_OG_OPPHOLDER_SEG_I_NORGE, SvarId.JA, "b")
+                    VurderingDto(RegelId.BOR_OG_OPPHOLDER_SEG_I_NORGE, SvarId.JA, "b"),
                 )
-            }
+            },
         )
             .hasMessage(
                 "Begrunnelse for vilkårType=ALENEOMSORG regelId=BOR_OG_OPPHOLDER_SEG_I_NORGE " +
-                    "svarId=JA skal ikke ha begrunnelse"
+                    "svarId=JA skal ikke ha begrunnelse",
             )
             .isInstanceOf(Feil::class.java)
     }
@@ -124,32 +124,32 @@ internal class RegelValideringTest {
             Assertions.catchThrowable {
                 valider(
                     regel,
-                    VurderingDto(RegelId.BOR_OG_OPPHOLDER_SEG_I_NORGE, SvarId.JA, "      ")
+                    VurderingDto(RegelId.BOR_OG_OPPHOLDER_SEG_I_NORGE, SvarId.JA, "      "),
                 )
-            }
+            },
         )
             .hasMessage(
                 "Begrunnelse for vilkårType=ALENEOMSORG regelId=BOR_OG_OPPHOLDER_SEG_I_NORGE " +
-                    "svarId=JA skal ikke ha begrunnelse"
+                    "svarId=JA skal ikke ha begrunnelse",
             )
             .isInstanceOf(Feil::class.java)
     }
 
     private fun valider(
         regel: Vilkårsregel,
-        vararg vurderinger: VurderingDto
+        vararg vurderinger: VurderingDto,
     ) {
         valider(regel, delvilkårsvurderingDto(*vurderinger))
     }
 
     private fun valider(
         regel: Vilkårsregel,
-        vararg delvilkårsvurderingDto: DelvilkårsvurderingDto
+        vararg delvilkårsvurderingDto: DelvilkårsvurderingDto,
     ) {
         RegelValidering.validerVurdering(
             vilkårsregel = regel,
             oppdatering = delvilkårsvurderingDto.toList(),
-            tidligereDelvilkårsvurderinger = regel.initiereDelvilkårsvurdering(mockk())
+            tidligereDelvilkårsvurderinger = regel.initiereDelvilkårsvurdering(mockk()),
         )
     }
 }

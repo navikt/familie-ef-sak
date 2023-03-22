@@ -5,5 +5,5 @@ import java.time.LocalDate
 data class StatsborgerskapDto(
     val land: String,
     val gyldigFraOgMedDato: LocalDate?,
-    val gyldigTilOgMedDato: LocalDate?
+    val gyldigTilOgMedDato: LocalDate?,
 )

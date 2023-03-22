@@ -12,7 +12,7 @@ import java.net.URI
 class HistoriskPensjonClient(
     @Value("\${HISTORISK_PENSJON_URL}")
     private val historiskPensjonUri: URI,
-    @Qualifier("azure") restOperations: RestOperations
+    @Qualifier("azure") restOperations: RestOperations,
 ) : AbstractRestClient(restOperations, "pensjon") {
 
     private fun lagHarPensjonUri() =
@@ -22,7 +22,7 @@ class HistoriskPensjonClient(
     fun harPensjon(aktivIdent: String, alleRelaterteFoedselsnummer: Set<String>): HistoriskPensjonResponse {
         return postForEntity(
             lagHarPensjonUri(),
-            EnsligForsoergerRequest(aktivIdent, alleRelaterteFoedselsnummer)
+            EnsligForsoergerRequest(aktivIdent, alleRelaterteFoedselsnummer),
         )
     }
 }

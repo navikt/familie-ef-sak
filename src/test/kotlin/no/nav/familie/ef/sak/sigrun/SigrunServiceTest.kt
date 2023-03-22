@@ -27,15 +27,15 @@ internal class SigrunServiceTest {
         every { sigrunClient.hentBeregnetSkatt(any(), any()) } returns listOf(
             BeregnetSkatt("skatteoppgjoersdato", "2022-05-01"),
             BeregnetSkatt("personinntektNaering", "40000"),
-            BeregnetSkatt("personinntektLoenn", "50000")
+            BeregnetSkatt("personinntektLoenn", "50000"),
         )
         every { sigrunClient.hentSummertSkattegrunnlag(any(), any()) } returns SummertSkattegrunnlag(
             listOf(),
             svalbardGrunnlag = listOf(
                 Grunnlag("personinntektBarePensjonsdel", 50000),
-                Grunnlag("svalbardPersoninntektNaering", 50000)
+                Grunnlag("svalbardPersoninntektNaering", 50000),
             ),
-            "skatteoppgjoersdato"
+            "skatteoppgjoersdato",
         )
     }
 

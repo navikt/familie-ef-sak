@@ -26,8 +26,8 @@ class FagsakController(private val fagsakService: FagsakService, private val til
         return Ressurs.success(
             fagsakService.hentEllerOpprettFagsakMedBehandlinger(
                 fagsakRequest.personIdent,
-                fagsakRequest.stønadstype
-            )
+                fagsakRequest.stønadstype,
+            ),
         )
     }
 

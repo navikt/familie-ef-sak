@@ -54,7 +54,7 @@ internal class BehandlingServiceTest {
             behandlingRepository,
             behandlingshistorikkService,
             taskService,
-            mockFeatureToggleService()
+            mockFeatureToggleService(),
         )
     private val behandlingSlot = slot<Behandling>()
 
@@ -89,7 +89,7 @@ internal class BehandlingServiceTest {
                 kravMottatt = LocalDate.now().plusDays(1),
                 erMigrering = false,
                 behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
-                fagsakId = UUID.randomUUID()
+                fagsakId = UUID.randomUUID(),
             )
         }
     }
@@ -128,7 +128,7 @@ internal class BehandlingServiceTest {
                 behandling(
                     fagsak(),
                     type = BehandlingType.FØRSTEGANGSBEHANDLING,
-                    status = BehandlingStatus.FATTER_VEDTAK
+                    status = BehandlingStatus.FATTER_VEDTAK,
                 )
             henleggOgForventApiFeilmelding(behandling, FEILREGISTRERT)
         }
@@ -138,7 +138,7 @@ internal class BehandlingServiceTest {
             val behandling = behandling(
                 fagsak(),
                 type = BehandlingType.FØRSTEGANGSBEHANDLING,
-                status = BehandlingStatus.IVERKSETTER_VEDTAK
+                status = BehandlingStatus.IVERKSETTER_VEDTAK,
             )
             henleggOgForventApiFeilmelding(behandling, TRUKKET_TILBAKE)
         }
@@ -217,12 +217,12 @@ internal class BehandlingServiceTest {
         private fun opprettBehandling(
             vedtakstidspunkt: LocalDateTime?,
             opprettetTid: LocalDateTime,
-            endretTid: LocalDateTime
+            endretTid: LocalDateTime,
         ) = behandling(vedtakstidspunkt = vedtakstidspunkt).copy(
             sporbar = Sporbar(
                 opprettetTid = opprettetTid,
-                endret = Endret(endretTid = endretTid)
-            )
+                endret = Endret(endretTid = endretTid),
+            ),
         )
     }
 }

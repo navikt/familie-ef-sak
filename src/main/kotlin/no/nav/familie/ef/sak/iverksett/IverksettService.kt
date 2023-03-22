@@ -14,8 +14,8 @@ class IverksettService(private val taskService: TaskService) {
             StartBehandlingTask.opprettTask(
                 behandlingId = behandling.id,
                 fagsakId = fagsak.id,
-                personIdent = fagsak.hentAktivIdent()
-            )
+                personIdent = fagsak.hentAktivIdent(),
+            ),
         )
     }
 }

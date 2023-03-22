@@ -24,7 +24,7 @@ import kotlin.math.floor
 @Unprotected
 class PatchArbeidsoppfølgingController(
     val behandlingRepository: BehandlingRepository,
-    val taskService: TaskService
+    val taskService: TaskService,
 ) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -49,7 +49,7 @@ class PatchArbeidsoppfølgingController(
     maxAntallFeil = 3,
     settTilManuellOppfølgning = true,
     triggerTidVedFeilISekunder = 15 * 60L,
-    beskrivelse = "Patch for å sende alle med aktiv overgangsstønad til arbeidsoppfølging"
+    beskrivelse = "Patch for å sende alle med aktiv overgangsstønad til arbeidsoppfølging",
 )
 class PatchSendTilArbeidsoppfølgingTask(val iverksettClient: IverksettClient) : AsyncTaskStep {
 
@@ -69,7 +69,7 @@ class PatchSendTilArbeidsoppfølgingTask(val iverksettClient: IverksettClient) :
                 payload = behandlingId.toString(),
                 properties = Properties().apply {
                     this["behandlingId"] = behandlingId.toString()
-                }
+                },
             ).medTriggerTid(LocalDateTime.now().plusMinutes(triggerTid.toLong()))
         }
     }

@@ -18,7 +18,7 @@ data class BehandlingBarn(
     @Column("fodsel_termindato")
     val fødselTermindato: LocalDate? = null,
     @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
-    val sporbar: Sporbar = Sporbar()
+    val sporbar: Sporbar = Sporbar(),
 ) {
 
     fun erMatchendeBarn(annetBarn: BehandlingBarn): Boolean =

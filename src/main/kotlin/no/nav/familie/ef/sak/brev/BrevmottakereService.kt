@@ -19,7 +19,7 @@ class BrevmottakereService(val brevmottakereRepository: BrevmottakereRepository)
         val brevmottakere = Brevmottakere(
             behandlingId,
             PersonerWrapper(brevmottakereDto.personer),
-            OrganisasjonerWrapper(brevmottakereDto.organisasjoner)
+            OrganisasjonerWrapper(brevmottakereDto.organisasjoner),
         )
 
         return when (brevmottakereRepository.existsById(behandlingId)) {

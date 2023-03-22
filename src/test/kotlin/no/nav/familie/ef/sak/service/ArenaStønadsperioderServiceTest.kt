@@ -42,7 +42,7 @@ internal class ArenaStønadsperioderServiceTest {
         fagsakService,
         behandlingService,
         tilkjentYtelseService,
-        InfotrygdService(infotrygdReplikaClient, personService)
+        InfotrygdService(infotrygdReplikaClient, personService),
     )
 
     private val service = ArenaStønadsperioderService(periodeService = periodeService)
@@ -57,7 +57,7 @@ internal class ArenaStønadsperioderServiceTest {
         every { infotrygdReplikaClient.hentSammenslåttePerioder(any()) } returns InfotrygdPeriodeResponse(
             emptyList(),
             emptyList(),
-            emptyList()
+            emptyList(),
         )
         every { behandlingService.finnSisteIverksatteBehandling(any()) } returns null
         every { fagsakService.finnFagsak(any(), any()) } returns null
@@ -138,6 +138,6 @@ internal class ArenaStønadsperioderServiceTest {
             personIdent = ident,
             fomDato = fom.atDay(1),
             tomDato = tom.atEndOfMonth(),
-            datakilde = Datakilde.EF
+            datakilde = Datakilde.EF,
         )
 }

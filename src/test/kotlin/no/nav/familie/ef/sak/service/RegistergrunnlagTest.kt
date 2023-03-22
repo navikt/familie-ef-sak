@@ -36,7 +36,7 @@ internal class RegistergrunnlagTest {
         val type: String,
         val fields: Map<String, ObjectInfo>? = null,
         val values: List<String>? = null,
-        val nullable: Boolean
+        val nullable: Boolean,
     )
 
     private val endClasses = setOf(
@@ -48,7 +48,7 @@ internal class RegistergrunnlagTest {
         LocalDate::class,
         LocalDateTime::class,
         YearMonth::class,
-        Boolean::class
+        Boolean::class,
     )
 
     private fun getClassInfo(kClass: KClass<*>): Map<String, ObjectInfo> {

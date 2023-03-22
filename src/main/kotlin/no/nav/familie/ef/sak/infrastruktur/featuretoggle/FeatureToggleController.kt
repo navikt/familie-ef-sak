@@ -22,7 +22,7 @@ class FeatureToggleController(private val featureToggleService: FeatureToggleSer
         Toggle.FRONTEND_AUTOMATISK_UTFYLLE_VILKÅR,
         Toggle.FRONTEND_SATSENDRING,
         Toggle.FRONTEND_VIS_INNTEKT_PERSONOVERSIKT,
-        Toggle.PERSONOPPLYSNINGER_ENDRINGER
+        Toggle.PERSONOPPLYSNINGER_ENDRINGER,
     )
 
     @GetMapping
@@ -33,7 +33,7 @@ class FeatureToggleController(private val featureToggleService: FeatureToggleSer
     @GetMapping("/{toggleId}")
     fun sjekkFunksjonsbryter(
         @PathVariable toggleId: String,
-        @RequestParam("defaultverdi") defaultVerdi: Boolean? = false
+        @RequestParam("defaultverdi") defaultVerdi: Boolean? = false,
     ): Boolean {
         val toggle = Toggle.byToggleId(toggleId)
         return featureToggleService.isEnabled(toggle, defaultVerdi ?: false)

@@ -8,7 +8,7 @@ data class VedtaksbrevDto(
     val saksbehandlersignatur: String,
     val besluttersignatur: String? = null,
     val enhet: String? = null,
-    val skjulBeslutterSignatur: Boolean
+    val skjulBeslutterSignatur: Boolean,
 )
 
 fun VedtaksbrevDto.erFritekstType(): Boolean = this.brevmal == FRITEKST

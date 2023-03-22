@@ -22,19 +22,19 @@ class AleneomsorgRegel : Vilkårsregel(
     regler = setOf(
         SKRIFTLIG_AVTALE_OM_DELT_BOSTED,
         NÆRE_BOFORHOLD,
-        MER_AV_DAGLIG_OMSORG
+        MER_AV_DAGLIG_OMSORG,
     ),
     hovedregler = regelIder(
         SKRIFTLIG_AVTALE_OM_DELT_BOSTED,
         NÆRE_BOFORHOLD,
-        MER_AV_DAGLIG_OMSORG
-    )
+        MER_AV_DAGLIG_OMSORG,
+    ),
 ) {
 
     override fun initiereDelvilkårsvurdering(
         metadata: HovedregelMetadata,
         resultat: Vilkårsresultat,
-        barnId: UUID?
+        barnId: UUID?,
     ): List<Delvilkårsvurdering> {
         return hovedregler.map { hovedregel ->
             if (hovedregel == RegelId.NÆRE_BOFORHOLD && borLangtFraHverandre(metadata, barnId)) {
@@ -51,9 +51,9 @@ class AleneomsorgRegel : Vilkårsregel(
             Vurdering(
                 regelId = RegelId.NÆRE_BOFORHOLD,
                 svar = SvarId.NEI,
-                begrunnelse = "Automatisk vurdert (${LocalDate.now().norskFormat()}): Det er beregnet at annen forelder bor mer enn 1 km unna bruker."
-            )
-        )
+                begrunnelse = "Automatisk vurdert (${LocalDate.now().norskFormat()}): Det er beregnet at annen forelder bor mer enn 1 km unna bruker.",
+            ),
+        ),
     )
 
     private fun borLangtFraHverandre(metadata: HovedregelMetadata, barnId: UUID?) =
@@ -68,8 +68,8 @@ class AleneomsorgRegel : Vilkårsregel(
                 regelId = RegelId.MER_AV_DAGLIG_OMSORG,
                 svarMapping = jaNeiSvarRegel(
                     hvisJa = SluttSvarRegel.OPPFYLT_MED_PÅKREVD_BEGRUNNELSE,
-                    hvisNei = SluttSvarRegel.IKKE_OPPFYLT_MED_PÅKREVD_BEGRUNNELSE
-                )
+                    hvisNei = SluttSvarRegel.IKKE_OPPFYLT_MED_PÅKREVD_BEGRUNNELSE,
+                ),
             )
 
         private val næreBoForholdMapping =
@@ -79,7 +79,7 @@ class AleneomsorgRegel : Vilkårsregel(
                 SvarId.SELVSTENDIGE_BOLIGER_SAMME_GÅRDSTUN,
                 SvarId.SELVSTENDIGE_BOLIGER_SAMME_TOMT,
                 SvarId.NÆRMESTE_BOLIG_ELLER_REKKEHUS_I_SAMMEGATE,
-                SvarId.TILSTØTENDE_BOLIGER_ELLER_REKKEHUS_I_SAMMEGATE
+                SvarId.TILSTØTENDE_BOLIGER_ELLER_REKKEHUS_I_SAMMEGATE,
             )
                 .associateWith {
                     SluttSvarRegel.IKKE_OPPFYLT_MED_PÅKREVD_BEGRUNNELSE
@@ -87,7 +87,7 @@ class AleneomsorgRegel : Vilkårsregel(
         private val NÆRE_BOFORHOLD =
             RegelSteg(
                 regelId = RegelId.NÆRE_BOFORHOLD,
-                svarMapping = næreBoForholdMapping
+                svarMapping = næreBoForholdMapping,
             )
 
         private val SKRIFTLIG_AVTALE_OM_DELT_BOSTED =
@@ -95,8 +95,8 @@ class AleneomsorgRegel : Vilkårsregel(
                 regelId = RegelId.SKRIFTLIG_AVTALE_OM_DELT_BOSTED,
                 jaNeiSvarRegel(
                     hvisJa = SluttSvarRegel.OPPFYLT_MED_VALGFRI_BEGRUNNELSE,
-                    hvisNei = SluttSvarRegel.OPPFYLT_MED_VALGFRI_BEGRUNNELSE
-                )
+                    hvisNei = SluttSvarRegel.OPPFYLT_MED_VALGFRI_BEGRUNNELSE,
+                ),
             )
     }
 }

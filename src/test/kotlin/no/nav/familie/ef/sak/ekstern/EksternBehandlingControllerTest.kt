@@ -53,7 +53,7 @@ internal class EksternBehandlingControllerTest {
     internal fun `tomme lister med andeler, forvent at stønad for det siste året ikke finnes`() {
         mockOpprettTilkjenteYtelser(
             lagTilkjentYtelse(andelerTilkjentYtelse = emptyList()),
-            lagTilkjentYtelse(andelerTilkjentYtelse = emptyList())
+            lagTilkjentYtelse(andelerTilkjentYtelse = emptyList()),
         )
         assertThat(eksternBehandlingController.harAktivStønad(setOf("12345678910")).data).isEqualTo(false)
     }
@@ -64,14 +64,14 @@ internal class EksternBehandlingControllerTest {
                 lagAndelTilkjentYtelse(
                     beløp = 1,
                     fraOgMed = LocalDate.of(2019, 1, 1),
-                    tilOgMed = LocalDate.of(2019, 2, 1)
+                    tilOgMed = LocalDate.of(2019, 2, 1),
                 ),
                 lagAndelTilkjentYtelse(
                     beløp = 1,
                     fraOgMed = LocalDate.of(2020, 1, 1),
-                    tilOgMed = LocalDate.now().plusMonths(11)
-                )
-            )
+                    tilOgMed = LocalDate.now().plusMonths(11),
+                ),
+            ),
         )
     }
 
@@ -81,14 +81,14 @@ internal class EksternBehandlingControllerTest {
                 lagAndelTilkjentYtelse(
                     beløp = 1,
                     fraOgMed = LocalDate.of(2019, 1, 1),
-                    tilOgMed = LocalDate.of(2019, 2, 1)
+                    tilOgMed = LocalDate.of(2019, 2, 1),
                 ),
                 lagAndelTilkjentYtelse(
                     beløp = 1,
                     fraOgMed = LocalDate.now().minusMonths(14),
-                    tilOgMed = LocalDate.now().minusYears(1).minusMonths(1)
-                )
-            )
+                    tilOgMed = LocalDate.now().minusYears(1).minusMonths(1),
+                ),
+            ),
         )
     }
 

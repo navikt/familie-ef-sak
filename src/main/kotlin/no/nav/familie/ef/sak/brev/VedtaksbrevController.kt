@@ -23,7 +23,7 @@ import java.util.UUID
 class VedtaksbrevController(
     private val brevService: VedtaksbrevService,
     private val behandlingService: BehandlingService,
-    private val tilgangService: TilgangService
+    private val tilgangService: TilgangService,
 ) {
 
     @GetMapping("/{behandlingId}")
@@ -36,7 +36,7 @@ class VedtaksbrevController(
     fun lagSaksbehandlerbrev(
         @PathVariable behandlingId: UUID,
         @PathVariable brevMal: String,
-        @RequestBody brevRequest: JsonNode
+        @RequestBody brevRequest: JsonNode,
     ): Ressurs<ByteArray> {
         val saksbehandling = behandlingService.hentSaksbehandling(behandlingId)
         tilgangService.validerTilgangTilBehandling(saksbehandling, AuditLoggerEvent.UPDATE)

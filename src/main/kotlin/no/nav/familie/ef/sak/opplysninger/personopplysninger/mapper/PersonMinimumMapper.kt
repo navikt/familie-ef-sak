@@ -9,7 +9,7 @@ object PersonMinimumMapper {
         return PersonMinimumDto(
             navn = personMinimum.navn,
             fødselsdato = personMinimum.fødselsdato,
-            personIdent = personMinimum.fødselsnummer
+            personIdent = personMinimum.fødselsnummer,
         )
     }
 }

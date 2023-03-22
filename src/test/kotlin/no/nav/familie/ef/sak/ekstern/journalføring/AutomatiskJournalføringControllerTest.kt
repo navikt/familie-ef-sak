@@ -26,7 +26,7 @@ internal class AutomatiskJournalføringControllerTest {
         "12345678901",
         "1234",
         OVERGANGSSTØNAD,
-        1234L
+        1234L,
     )
 
     @BeforeEach

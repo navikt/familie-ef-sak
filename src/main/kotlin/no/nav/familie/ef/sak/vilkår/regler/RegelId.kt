@@ -15,7 +15,7 @@ enum class RegelId(val beskrivelse: String) {
     LEVER_IKKE_MED_ANNEN_FORELDER("Er vilkåret om å ikke leve sammen med den andre av barnets/barnas foreldre oppfylt?"),
     LEVER_IKKE_I_EKTESKAPLIGNENDE_FORHOLD(
         "Er vilkåret om å ikke leve i et ekteskapslignende forhold i felles " +
-            "husholdning uten felles barn oppfylt?"
+            "husholdning uten felles barn oppfylt?",
     ),
 
     // Aleneomsorg
@@ -42,7 +42,7 @@ enum class RegelId(val beskrivelse: String) {
     // Sagt opp arbeidsforhold
     SAGT_OPP_ELLER_REDUSERT(
         "Har søker sagt opp jobben, tatt frivillig permisjon eller redusert arbeidstiden " +
-            "de siste 6 månedene før søknadstidspunktet?"
+            "de siste 6 månedene før søknadstidspunktet?",
     ),
     RIMELIG_GRUNN_SAGT_OPP("Hadde søker rimelig grunn til å si opp jobben eller redusere arbeidstiden?"),
 
@@ -50,7 +50,7 @@ enum class RegelId(val beskrivelse: String) {
     HAR_TIDLIGERE_MOTTATT_OVERGANSSTØNAD("Har søker tidligere mottatt overgangsstønad?"),
     HAR_TIDLIGERE_ANDRE_STØNADER_SOM_HAR_BETYDNING(
         "Har søker tidligere mottatt andre stønader som har betydning " +
-            "for stønadstiden i §15-8 første og andre ledd?"
+            "for stønadstiden i §15-8 første og andre ledd?",
     ),
 
     // Inntekt
@@ -72,7 +72,5 @@ enum class RegelId(val beskrivelse: String) {
     DOKUMENTASJON_AV_UTDANNING("Er det dokumentert at bruker er under utdanning?"),
     DOKUMENTASJON_AV_UTGIFTER_UTDANNING("Er det dokumentert at brukeren har utgifter til utdanningen?"),
     NAVKONTOR_VURDERING("Har NAV-kontoret vurdert utdanningen?"),
-    SAKSBEHANDLER_VURDERING("Er utdanningen nødvendig og hensiktsmessig?")
-
-    ;
+    SAKSBEHANDLER_VURDERING("Er utdanningen nødvendig og hensiktsmessig?"),
 }

@@ -43,13 +43,13 @@ class NyttBarnSammePartnerRegelTest {
         every { barnMedSamværSøknadsgrunnlagDto.forelder } returns annenForelderDto
         every { hovedregelMetadataMock.vilkårgrunnlagDto } returns VilkårTestUtil.mockVilkårGrunnlagDto(
             barnMedSamvær = listOf(BarnMedSamværDto(UUID.randomUUID(), barnMedSamværSøknadsgrunnlagDto, barnMedSamværRegistergrunnlagDto)),
-            tidligereVedtaksperioder = TidligereVedtaksperioderDto(TidligereInnvilgetVedtakDto(true, false, false), TidligereInnvilgetVedtakDto(false, false, false), false)
+            tidligereVedtaksperioder = TidligereVedtaksperioderDto(TidligereInnvilgetVedtakDto(true, false, false), TidligereInnvilgetVedtakDto(false, false, false), false),
         )
 
         val listDelvilkårsvurdering = NyttBarnSammePartnerRegel().initiereDelvilkårsvurdering(
             hovedregelMetadataMock,
             Vilkårsresultat.IKKE_TATT_STILLING_TIL,
-            null
+            null,
         )
 
         assertThat(listDelvilkårsvurdering.size).isEqualTo(1)
@@ -66,7 +66,7 @@ class NyttBarnSammePartnerRegelTest {
         val listDelvilkårsvurdering = NyttBarnSammePartnerRegel().initiereDelvilkårsvurdering(
             hovedregelMetadataMock,
             Vilkårsresultat.IKKE_TATT_STILLING_TIL,
-            null
+            null,
         )
 
         assertThat(listDelvilkårsvurdering.size).isEqualTo(1)
@@ -89,8 +89,8 @@ class NyttBarnSammePartnerRegelTest {
             tidligereVedtaksperioder = TidligereVedtaksperioderDto(
                 TidligereInnvilgetVedtakDto(true, false, false),
                 TidligereInnvilgetVedtakDto(false, false, false),
-                false
-            )
+                false,
+            ),
         )
         every { annenForelderDto.tidligereVedtaksperioder } returns TidligereVedtaksperioderDto(null, null, false)
         every { barnMedSamværSøknadsgrunnlagDto.forelder } returns annenForelderDto
@@ -98,7 +98,7 @@ class NyttBarnSammePartnerRegelTest {
         val listDelvilkårsvurdering = NyttBarnSammePartnerRegel().initiereDelvilkårsvurdering(
             hovedregelMetadataMock,
             Vilkårsresultat.IKKE_TATT_STILLING_TIL,
-            null
+            null,
         )
 
         assertThat(listDelvilkårsvurdering.size).isEqualTo(1)
@@ -116,7 +116,7 @@ class NyttBarnSammePartnerRegelTest {
 
         every { barnMedSamværRegistergrunnlagDto.fødselsnummer } returns "01010199999"
         every { hovedregelMetadataMock.vilkårgrunnlagDto } returns VilkårTestUtil.mockVilkårGrunnlagDto(
-            barnMedSamvær = listOf(BarnMedSamværDto(UUID.randomUUID(), barnMedSamværSøknadsgrunnlagDto, barnMedSamværRegistergrunnlagDto))
+            barnMedSamvær = listOf(BarnMedSamværDto(UUID.randomUUID(), barnMedSamværSøknadsgrunnlagDto, barnMedSamværRegistergrunnlagDto)),
         )
         every { annenForelderDto.tidligereVedtaksperioder } returns TidligereVedtaksperioderDto(null, null, false)
         every { barnMedSamværSøknadsgrunnlagDto.forelder } returns annenForelderDto
@@ -124,7 +124,7 @@ class NyttBarnSammePartnerRegelTest {
         val listDelvilkårsvurdering = NyttBarnSammePartnerRegel().initiereDelvilkårsvurdering(
             hovedregelMetadataMock,
             Vilkårsresultat.IKKE_TATT_STILLING_TIL,
-            null
+            null,
         )
 
         assertThat(listDelvilkårsvurdering.size).isEqualTo(1)
@@ -153,7 +153,7 @@ class NyttBarnSammePartnerRegelTest {
 
         every { hovedregelMetadataMock.vilkårgrunnlagDto } returns VilkårTestUtil.mockVilkårGrunnlagDto(
             barnMedSamvær = listOf(BarnMedSamværDto(UUID.randomUUID(), barnMedSamværSøknadsgrunnlagDto, barnMedSamværRegistergrunnlagDto)),
-            tidligereVedtaksperioder = tidligereVedtaksperioderDtoIkkeTidligereInnvilget()
+            tidligereVedtaksperioder = tidligereVedtaksperioderDtoIkkeTidligereInnvilget(),
         )
         val annenForelderUtenFødselsnummer = mockk<AnnenForelderDto>()
         every { barnMedSamværSøknadsgrunnlagDto.forelder } returns annenForelderUtenFødselsnummer
@@ -161,7 +161,7 @@ class NyttBarnSammePartnerRegelTest {
         val listDelvilkårsvurdering = NyttBarnSammePartnerRegel().initiereDelvilkårsvurdering(
             hovedregelMetadataMock,
             Vilkårsresultat.IKKE_TATT_STILLING_TIL,
-            null
+            null,
         )
 
         assertThat(listDelvilkårsvurdering.size).isEqualTo(1)
@@ -176,7 +176,7 @@ class NyttBarnSammePartnerRegelTest {
         return TidligereVedtaksperioderDto(
             TidligereInnvilgetVedtakDto(false, false, false),
             TidligereInnvilgetVedtakDto(false, false, false),
-            false
+            false,
         )
     }
 }

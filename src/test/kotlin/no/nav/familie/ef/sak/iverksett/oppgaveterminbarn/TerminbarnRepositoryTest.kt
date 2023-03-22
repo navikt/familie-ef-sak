@@ -41,13 +41,13 @@ class TerminbarnRepositoryTest : OppslagSpringRunnerTest() {
                 barn(behandlingId = behandling.id, termindato = LocalDate.now()),
                 barn(
                     behandlingId = behandling.id,
-                    termindato = LocalDate.now().minusWeeks(5)
+                    termindato = LocalDate.now().minusWeeks(5),
                 ),
                 barn(
                     behandlingId = behandling.id,
-                    termindato = LocalDate.now().minusWeeks(10)
-                )
-            )
+                    termindato = LocalDate.now().minusWeeks(10),
+                ),
+            ),
         )
 
         val barnForUtplukk =
@@ -64,9 +64,9 @@ class TerminbarnRepositoryTest : OppslagSpringRunnerTest() {
                 barn(behandlingId = behandling.id, termindato = LocalDate.now()),
                 barn(
                     behandlingId = behandling.id,
-                    termindato = LocalDate.now().minusWeeks(3)
-                )
-            )
+                    termindato = LocalDate.now().minusWeeks(3),
+                ),
+            ),
         )
 
         val barnForUtplukk =
@@ -82,8 +82,8 @@ class TerminbarnRepositoryTest : OppslagSpringRunnerTest() {
         barnRepository.insertAll(
             listOf(
                 barn(behandlingId = behandling.id, termindato = LocalDate.now()),
-                barn(behandlingId = behandling.id, termindato = utgåttTermindato)
-            )
+                barn(behandlingId = behandling.id, termindato = utgåttTermindato),
+            ),
         )
         terminbarnRepository.insert(opprettTerminbarnOppgave(fagsak = fagsak.id, termindato = utgåttTermindato))
 
@@ -94,12 +94,12 @@ class TerminbarnRepositoryTest : OppslagSpringRunnerTest() {
 
     private fun opprettTerminbarnOppgave(
         fagsak: UUID = UUID.randomUUID(),
-        termindato: LocalDate = LocalDate.now()
+        termindato: LocalDate = LocalDate.now(),
     ): TerminbarnOppgave {
         return TerminbarnOppgave(
             fagsakId = fagsak,
             termindato = termindato,
-            opprettetTid = LocalDate.now()
+            opprettetTid = LocalDate.now(),
         )
     }
 
@@ -107,7 +107,7 @@ class TerminbarnRepositoryTest : OppslagSpringRunnerTest() {
         fagsak: Fagsak,
         tidligereBehandling: Behandling? = null,
         opprettetTid: LocalDateTime = tidligereBehandling?.sporbar?.opprettetTid?.plusHours(1)
-            ?: LocalDateTime.now()
+            ?: LocalDateTime.now(),
     ) =
         behandlingRepository.insert(
             behandling(
@@ -115,8 +115,8 @@ class TerminbarnRepositoryTest : OppslagSpringRunnerTest() {
                 status = BehandlingStatus.FERDIGSTILT,
                 resultat = BehandlingResultat.INNVILGET,
                 forrigeBehandlingId = tidligereBehandling?.id,
-                opprettetTid = opprettetTid
-            )
+                opprettetTid = opprettetTid,
+            ),
         )
 
     private fun barn(behandlingId: UUID, personIdent: String? = null, termindato: LocalDate? = LocalDate.now()): BehandlingBarn {
@@ -125,7 +125,7 @@ class TerminbarnRepositoryTest : OppslagSpringRunnerTest() {
             personIdent = personIdent,
             fødselTermindato = termindato,
             navn = null,
-            søknadBarnId = UUID.randomUUID()
+            søknadBarnId = UUID.randomUUID(),
         )
     }
 }
