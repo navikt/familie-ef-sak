@@ -16,7 +16,6 @@ import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus.SATT_PÅ_VENT
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus.UTREDES
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.fagsak.FagsakPersonRepository
-import no.nav.familie.ef.sak.fagsak.FagsakRepository
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
 import no.nav.familie.ef.sak.felles.domain.Endret
@@ -49,14 +48,10 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
     @Autowired
     private lateinit var fagsakPersonRepository: FagsakPersonRepository
 
-    @Autowired
-    private lateinit var fagsakRepository: FagsakRepository
-
     private val ident = "123"
 
     @Test
     fun `skal finne alle personer med aktiv stønad som ikke er manuelt revurdert siste to måneder`() {
-
         val person1 = fagsakPerson(identer = setOf(PersonIdent("1")))
         fagsakPersonRepository.insert(person1)
         behandlingRepository.insert(behandling(testoppsettService.lagreFagsak(fagsak(person = person1)), resultat = INNVILGET, vedtakstidspunkt = LocalDateTime.now().minusMonths(3), årsak = BehandlingÅrsak.G_OMREGNING, status = FERDIGSTILT))
@@ -75,6 +70,7 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
 
         val resultat = behandlingRepository.finnPersonerMedAktivStonadIkkeRevurdertSisteToMåneder()
         assertThat(resultat.size).isEqualTo(3)
+        assertThat(resultat).containsAll(listOf("1", "2", "3"))
     }
 
     @Test
