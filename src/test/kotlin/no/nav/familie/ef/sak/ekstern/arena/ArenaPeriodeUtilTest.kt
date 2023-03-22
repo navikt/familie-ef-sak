@@ -1,10 +1,11 @@
 package no.nav.familie.ef.sak.ekstern.arena
 
-import no.nav.familie.ef.sak.ekstern.arena.ArenaPeriodeUtil.slåSammenPerioderFraEfOgInfotrygd
+import no.nav.familie.ef.sak.ekstern.stønadsperiode.util.ArenaPeriodeUtil.slåSammenPerioderFraEfOgInfotrygd
 import no.nav.familie.ef.sak.infotrygd.InternPeriode
 import no.nav.familie.ef.sak.infotrygd.InternePerioder
-import no.nav.familie.kontrakter.felles.ef.PeriodeOvergangsstønad
-import no.nav.familie.kontrakter.felles.ef.PerioderOvergangsstønadRequest
+import no.nav.familie.kontrakter.felles.ef.Datakilde
+import no.nav.familie.kontrakter.felles.ef.EksternPeriode
+import no.nav.familie.kontrakter.felles.ef.EksternePerioderRequest
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -138,7 +139,7 @@ internal class ArenaPeriodeUtilTest {
 private val ident = "01234567890"
 
 private fun request(fom: YearMonth, tom: YearMonth) =
-    PerioderOvergangsstønadRequest(ident, fom.atDay(1), tom.atEndOfMonth())
+    EksternePerioderRequest(ident, fom.atDay(1), tom.atEndOfMonth())
 
 private fun periode(fom: YearMonth, tom: YearMonth) =
     InternPeriode(
@@ -151,7 +152,7 @@ private fun periode(fom: YearMonth, tom: YearMonth) =
         stønadFom = fom.atDay(1),
         stønadTom = tom.atEndOfMonth(),
         opphørsdato = null,
-        datakilde = PeriodeOvergangsstønad.Datakilde.EF
+        datakilde = Datakilde.EF
     )
 
 private fun internePerioder(
@@ -161,9 +162,9 @@ private fun internePerioder(
 ) = InternePerioder(overgangsstønad, barnetilsyn, skolepenger)
 
 private fun lagResultatPeriode(fom: YearMonth, tom: YearMonth) =
-    PeriodeOvergangsstønad(
+    EksternPeriode(
         personIdent = ident,
         fomDato = fom.atDay(1),
         tomDato = tom.atEndOfMonth(),
-        datakilde = PeriodeOvergangsstønad.Datakilde.EF
+        datakilde = Datakilde.EF
     )

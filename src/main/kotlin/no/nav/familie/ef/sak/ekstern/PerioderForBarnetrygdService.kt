@@ -4,10 +4,9 @@ import no.nav.familie.ef.sak.infotrygd.InternPeriode
 import no.nav.familie.ef.sak.infotrygd.PeriodeService
 import no.nav.familie.kontrakter.felles.Datoperiode
 import no.nav.familie.kontrakter.felles.PersonIdent
-import no.nav.familie.kontrakter.felles.ef.PeriodeOvergangsstønad
-import no.nav.familie.kontrakter.felles.ef.PeriodeOvergangsstønad.Datakilde.EF
-import no.nav.familie.kontrakter.felles.ef.PeriodeOvergangsstønad.Datakilde.INFOTRYGD
-import no.nav.familie.kontrakter.felles.ef.PerioderOvergangsstønadResponse
+import no.nav.familie.kontrakter.felles.ef.Datakilde
+import no.nav.familie.kontrakter.felles.ef.EksternPeriode
+import no.nav.familie.kontrakter.felles.ef.EksternePerioderResponse
 import org.springframework.stereotype.Service
 
 /**
@@ -20,32 +19,32 @@ class PerioderForBarnetrygdService(
     private val periodeService: PeriodeService
 ) {
 
-    fun hentPerioderMedFullOvergangsstønad(request: PersonIdent): PerioderOvergangsstønadResponse {
+    fun hentPerioderMedFullOvergangsstønad(request: PersonIdent): EksternePerioderResponse {
         val perioderPåDatakilde = periodeService.hentPerioderForOvergangsstønadFraEfOgInfotrygd(request.ident)
             .filter(InternPeriode::erFullOvergangsstønad)
-            .map(InternPeriode::tilEksternPeriodeOvergangsstønad)
+            .map(InternPeriode::tilEksternEksternPeriode)
             .groupBy { it.datakilde }
 
-        val perioderInfotrygd = infotrygdperioderUtenOverlapp(perioderPåDatakilde.getOrDefault(INFOTRYGD, emptyList()))
-        val perioderEF = perioderPåDatakilde.getOrDefault(EF, emptyList())
+        val perioderInfotrygd = infotrygdperioderUtenOverlapp(perioderPåDatakilde.getOrDefault(Datakilde.INFOTRYGD, emptyList()))
+        val perioderEF = perioderPåDatakilde.getOrDefault(Datakilde.EF, emptyList())
 
-        return PerioderOvergangsstønadResponse(perioderEF + perioderInfotrygd)
+        return EksternePerioderResponse(perioderEF + perioderInfotrygd)
     }
 
-    private fun infotrygdperioderUtenOverlapp(perioder: List<PeriodeOvergangsstønad>) =
+    private fun infotrygdperioderUtenOverlapp(perioder: List<EksternPeriode>) =
         perioder
-            .sortedWith(compareByDescending<PeriodeOvergangsstønad> { it.tomDato }.thenByDescending { it.fomDato })
-            .fold(mutableListOf<PeriodeOvergangsstønad>()) { acc, gjeldende ->
+            .sortedWith(compareByDescending<EksternPeriode> { it.tomDato }.thenByDescending { it.fomDato })
+            .fold(mutableListOf<EksternPeriode>()) { acc, gjeldende ->
                 acc.fjernDuplikatOgSplittOverlappendePeriode(gjeldende)
             }
             .sortedByDescending { it.fomDato }
 }
 
-private fun PeriodeOvergangsstønad.tilPeriode(): Datoperiode = Datoperiode(this.fomDato, this.tomDato)
-private fun PeriodeOvergangsstønad.omsluttesAv(annen: PeriodeOvergangsstønad): Boolean =
+private fun EksternPeriode.tilPeriode(): Datoperiode = Datoperiode(this.fomDato, this.tomDato)
+private fun EksternPeriode.omsluttesAv(annen: EksternPeriode): Boolean =
     this.tilPeriode().omsluttesAv(annen.tilPeriode())
 
-private fun MutableList<PeriodeOvergangsstønad>.fjernDuplikatOgSplittOverlappendePeriode(gjeldende: PeriodeOvergangsstønad): MutableList<PeriodeOvergangsstønad> {
+private fun MutableList<EksternPeriode>.fjernDuplikatOgSplittOverlappendePeriode(gjeldende: EksternPeriode): MutableList<EksternPeriode> {
     val forrige = this.removeLastOrNull()
     when {
         forrige == null -> this.add(gjeldende)
@@ -61,6 +60,7 @@ private fun MutableList<PeriodeOvergangsstønad>.fjernDuplikatOgSplittOverlappen
                 )
             )
         }
+
         else -> {
             this.add(forrige)
             this.add(gjeldende)
@@ -69,8 +69,8 @@ private fun MutableList<PeriodeOvergangsstønad>.fjernDuplikatOgSplittOverlappen
     return this
 }
 
-private fun InternPeriode.tilEksternPeriodeOvergangsstønad(): PeriodeOvergangsstønad =
-    PeriodeOvergangsstønad(
+private fun InternPeriode.tilEksternEksternPeriode(): EksternPeriode =
+    EksternPeriode(
         personIdent = this.personIdent,
         fomDato = this.stønadFom,
         tomDato = this.stønadTom,

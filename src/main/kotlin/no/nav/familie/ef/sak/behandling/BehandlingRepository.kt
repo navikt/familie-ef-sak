@@ -158,10 +158,19 @@ interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUp
         SELECT DISTINCT pi.ident 
         FROM gjeldende_iverksatte_behandlinger gib 
             JOIN person_ident pi ON gib.fagsak_person_id=pi.fagsak_person_id
-        WHERE gib.stonadstype=:stønadstype
-    """
+        WHERE gib.stonadstype=:stønadstype AND (vedtakstidspunkt < ('now'::timestamp - '2 month'::interval) OR arsak IN ('MIGRERING', 'G_OMREGNING'))
+        """
     )
-    fun finnPersonerMedAktivStonad(stønadstype: StønadType = StønadType.OVERGANGSSTØNAD): List<String>
+    fun finnPersonerMedAktivStonadIkkeRevurdertSisteToMåneder(stønadstype: StønadType = StønadType.OVERGANGSSTØNAD): List<String>
+
+    @Query(
+        """
+        SELECT DISTINCT gib.id
+        FROM gjeldende_iverksatte_behandlinger gib
+        WHERE gib.stonadstype=:stønadstype
+        """
+    )
+    fun finnBehandlingerForPersonerMedAktivStønad(stønadstype: StønadType = StønadType.OVERGANGSSTØNAD): List<UUID>
 
     // language=PostgreSQL
     @Query(

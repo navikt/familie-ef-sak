@@ -29,6 +29,6 @@ data class Paging(val pageNumber: Int, val resultsPerPage: Int)
 
 sealed interface SearchRule
 
-data class SearchRuleEquals(val equals: String): SearchRule
+data class SearchRuleEquals(val equals: String) : SearchRule
 
-data class SearchRuleExists(val exists: Boolean): SearchRule
+data class SearchRuleExists(val exists: Boolean) : SearchRule

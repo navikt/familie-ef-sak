@@ -18,7 +18,7 @@ import no.nav.familie.ef.sak.økonomi.lagAndelTilkjentYtelse
 import no.nav.familie.ef.sak.økonomi.lagTilkjentYtelse
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPeriode
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPeriodeResponse
-import no.nav.familie.kontrakter.felles.ef.PeriodeOvergangsstønad
+import no.nav.familie.kontrakter.felles.ef.Datakilde
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
@@ -83,11 +83,11 @@ internal class PeriodeServiceTest {
         val perioder = service.hentPerioderForOvergangsstønadFraEfOgInfotrygd(personIdent)
 
         assertThat(perioder).hasSize(2)
-        assertThat(perioder[0].datakilde).isEqualTo(PeriodeOvergangsstønad.Datakilde.EF)
+        assertThat(perioder[0].datakilde).isEqualTo(Datakilde.EF)
         assertThat(perioder[0].stønadFom).isEqualTo(efFom)
         assertThat(perioder[0].stønadTom).isEqualTo(efTom)
 
-        assertThat(perioder[1].datakilde).isEqualTo(PeriodeOvergangsstønad.Datakilde.INFOTRYGD)
+        assertThat(perioder[1].datakilde).isEqualTo(Datakilde.INFOTRYGD)
         assertThat(perioder[1].stønadFom).isEqualTo(infotrygdFom)
         assertThat(perioder[1].stønadTom).isEqualTo(infotrygdTom)
     }
@@ -104,11 +104,11 @@ internal class PeriodeServiceTest {
         val perioder = service.hentPerioderForOvergangsstønadFraEfOgInfotrygd(personIdent)
 
         assertThat(perioder).hasSize(2)
-        assertThat(perioder[0].datakilde).isEqualTo(PeriodeOvergangsstønad.Datakilde.EF)
+        assertThat(perioder[0].datakilde).isEqualTo(Datakilde.EF)
         assertThat(perioder[0].stønadFom).isEqualTo(efFom)
         assertThat(perioder[0].stønadTom).isEqualTo(efTom)
 
-        assertThat(perioder[1].datakilde).isEqualTo(PeriodeOvergangsstønad.Datakilde.INFOTRYGD)
+        assertThat(perioder[1].datakilde).isEqualTo(Datakilde.INFOTRYGD)
         assertThat(perioder[1].stønadFom).isEqualTo(infotrygdFom)
         assertThat(perioder[1].stønadTom).isEqualTo(efFom.minusDays(1))
     }
@@ -124,7 +124,7 @@ internal class PeriodeServiceTest {
         val perioder = service.hentPerioderForOvergangsstønadFraEfOgInfotrygd(personIdent)
 
         assertThat(perioder).hasSize(1)
-        assertThat(perioder[0].datakilde).isEqualTo(PeriodeOvergangsstønad.Datakilde.INFOTRYGD)
+        assertThat(perioder[0].datakilde).isEqualTo(Datakilde.INFOTRYGD)
         assertThat(perioder[0].stønadFom).isEqualTo(infotrygdFom)
         assertThat(perioder[0].stønadTom).isEqualTo(efFom.minusDays(1))
     }
@@ -139,7 +139,7 @@ internal class PeriodeServiceTest {
         val perioder = service.hentPerioderForOvergangsstønadFraEfOgInfotrygd(personIdent)
 
         assertThat(perioder).hasSize(1)
-        assertThat(perioder[0].datakilde).isEqualTo(PeriodeOvergangsstønad.Datakilde.EF)
+        assertThat(perioder[0].datakilde).isEqualTo(Datakilde.EF)
         assertThat(perioder[0].stønadFom).isEqualTo(fom)
         assertThat(perioder[0].stønadTom).isEqualTo(tom)
         assertThat(perioder[0].månedsbeløp).isEqualTo(1)
