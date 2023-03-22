@@ -18,7 +18,7 @@ interface MigreringsstatusRepository : RepositoryInterface<Migreringsstatus, Str
 enum class MigreringResultat {
     OK,
     FEILET,
-    IKKE_KONTROLLERT
+    IKKE_KONTROLLERT,
 }
 
 @Table("migrering")
@@ -27,5 +27,5 @@ data class Migreringsstatus(
     val ident: String,
     val status: MigreringResultat,
     @Column("arsak")
-    val årsak: MigreringExceptionType? = null
+    val årsak: MigreringExceptionType? = null,
 )

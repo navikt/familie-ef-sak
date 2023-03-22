@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RestController
 @RequestMapping("api/automatisk-migrering")
 class AutomatiskMigreringController(
     private val automatiskMigreringService: AutomatiskMigreringService,
-    private val featureToggleService: FeatureToggleService
+    private val featureToggleService: FeatureToggleService,
 ) {
 
     @GetMapping

@@ -9,12 +9,12 @@ import java.time.LocalDate
 data class InfotrygdPerioderDto(
     val overgangsstønad: InfotrygdStønadPerioderDto,
     val barnetilsyn: InfotrygdStønadPerioderDto,
-    val skolepenger: InfotrygdStønadPerioderDto
+    val skolepenger: InfotrygdStønadPerioderDto,
 )
 
 data class InfotrygdStønadPerioderDto(
     val perioder: List<InfotrygdPeriode>,
-    val summert: List<SummertInfotrygdPeriodeDto>
+    val summert: List<SummertInfotrygdPeriodeDto>,
 )
 
 data class SummertInfotrygdPeriodeDto(
@@ -27,7 +27,7 @@ data class SummertInfotrygdPeriodeDto(
     val månedsbeløp: Int,
     val engangsbeløp: Int,
     val aktivitet: InfotrygdAktivitetstype?,
-    val barnIdenter: List<String>
+    val barnIdenter: List<String>,
 ) {
 
     @Deprecated("Bruk stønadsperiode", ReplaceWith("stønadsperiode.fom"))
@@ -50,5 +50,5 @@ fun InfotrygdPeriode.tilSummertInfotrygdperiodeDto(): SummertInfotrygdPeriodeDto
         månedsbeløp = this.månedsbeløp,
         engangsbeløp = this.engangsbeløp,
         aktivitet = this.aktivitetstype,
-        barnIdenter = this.barnIdenter
+        barnIdenter = this.barnIdenter,
     )

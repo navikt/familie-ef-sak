@@ -36,7 +36,7 @@ object AktivitetMapper {
             gjelderDeg = situasjon?.gjelderDetteDeg?.verdier ?: emptyList(),
             særligeTilsynsbehov = tilSærligeTilsynsbehovDto(søknadBarn),
             datoOppstartJobb = situasjon?.oppstartNyJobb,
-            erIArbeid = aktivitet?.erIArbeid
+            erIArbeid = aktivitet?.erIArbeid,
         )
     }
 
@@ -47,7 +47,7 @@ object AktivitetMapper {
                 arbeidsmengde = it.arbeidsmengde,
                 fastEllerMidlertidig = it.fastEllerMidlertidig,
                 sluttdato = it.sluttdato,
-                harSluttdato = it.harSluttdato
+                harSluttdato = it.harSluttdato,
             )
         } ?: emptyList()
     }
@@ -59,7 +59,7 @@ object AktivitetMapper {
                 arbeidsmengde = it.arbeidsmengde,
                 organisasjonsnummer = it.organisasjonsnummer,
                 etableringsdato = it.etableringsdato,
-                hvordanSerArbeidsukenUt = it.hvordanSerArbeidsukenUt
+                hvordanSerArbeidsukenUt = it.hvordanSerArbeidsukenUt,
             )
         } ?: emptyList()
     }
@@ -68,7 +68,7 @@ object AktivitetMapper {
         return aksjeselskap?.map {
             AksjeselskapDto(
                 navn = it.navn,
-                arbeidsmengde = it.arbeidsmengde
+                arbeidsmengde = it.arbeidsmengde,
             )
         } ?: emptyList()
     }
@@ -81,7 +81,7 @@ object AktivitetMapper {
                 kanDuBegynneInnenEnUke = it.kanDuBegynneInnenEnUke,
                 kanDuSkaffeBarnepassInnenEnUke = it.kanDuSkaffeBarnepassInnenEnUke,
                 hvorØnskerDuArbeid = it.hvorØnskerDuArbeid,
-                ønskerDuMinst50ProsentStilling = it.ønskerDuMinst50ProsentStilling
+                ønskerDuMinst50ProsentStilling = it.ønskerDuMinst50ProsentStilling,
             )
         }
     }
@@ -100,7 +100,7 @@ object AktivitetMapper {
                 utdanningEtterGrunnskolen = utdanning.utdanningEtterGrunnskolen,
                 semesteravgift = utdanning.semesteravgift,
                 studieavgift = utdanning.studieavgift,
-                eksamensgebyr = utdanning.eksamensgebyr
+                eksamensgebyr = utdanning.eksamensgebyr,
             )
         }
     }
@@ -110,7 +110,7 @@ object AktivitetMapper {
             TidligereUtdanningDto(
                 linjeKursGrad = it.linjeKursGrad,
                 fra = it.fra,
-                til = it.til
+                til = it.til,
             )
         } ?: emptyList()
     }
@@ -122,7 +122,7 @@ object AktivitetMapper {
                 navn = it.navn,
                 erBarnetFødt = it.erBarnetFødt,
                 fødselTermindato = it.fødselTermindato,
-                særligeTilsynsbehov = it.særligeTilsynsbehov
+                særligeTilsynsbehov = it.særligeTilsynsbehov,
             )
         }
     }

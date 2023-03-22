@@ -35,7 +35,7 @@ internal class PersonopplysningerMapperTest {
         adresseMapper = adresseMapper,
         statsborgerskapMapper = statsborgerskapMapper,
         innflyttingUtflyttingMapper = innflyttingUtflyttingMapper,
-        arbeidsfordelingService = arbeidsfordelingService
+        arbeidsfordelingService = arbeidsfordelingService,
     )
 
     @BeforeEach
@@ -48,23 +48,23 @@ internal class PersonopplysningerMapperTest {
         val giftFørsteGang = sivilstand(
             type = GIFT,
             gyldigFraOgMed = LocalDate.now().minusDays(100),
-            metadata = PdlTestdataHelper.metadataHistorisk
+            metadata = PdlTestdataHelper.metadataHistorisk,
         )
         val separert = sivilstand(
             type = SEPARERT,
             gyldigFraOgMed = LocalDate.now(),
-            metadata = PdlTestdataHelper.metadataHistorisk
+            metadata = PdlTestdataHelper.metadataHistorisk,
         )
         val gifteMålOpphørt = sivilstand(
             type = GIFT,
             gyldigFraOgMed = LocalDate.now().minusDays(100),
-            metadata = PdlTestdataHelper.metadataGjeldende
+            metadata = PdlTestdataHelper.metadataGjeldende,
         )
 
         val sivilstandMedSeparasjonSomErOpphørt = listOf(
             giftFørsteGang,
             separert,
-            gifteMålOpphørt
+            gifteMålOpphørt,
         )
 
         val søker = opprettGrunnlagsdata().søker
@@ -72,16 +72,16 @@ internal class PersonopplysningerMapperTest {
             søker = søker.copy(
                 sivilstand = sivilstandMedSeparasjonSomErOpphørt,
                 fødsel = listOf(
-                    PdlTestdataHelper.fødsel(LocalDate.now())
-                )
-            )
+                    PdlTestdataHelper.fødsel(LocalDate.now()),
+                ),
+            ),
         )
         val personOpplysninger = personopplysningerMapper.tilPersonopplysninger(
             grunnlagsdataMedMetadata = GrunnlagsdataMedMetadata(grunnlagsdata, LocalDateTime.now()),
             egenAnsatt = false,
             søkerIdenter = PdlIdenter(
-                listOf(PdlIdent("11223344551", false))
-            )
+                listOf(PdlIdent("11223344551", false)),
+            ),
         )
 
         Assertions.assertThat(personOpplysninger.sivilstand[0].erGjeldende).isEqualTo(true)
@@ -102,30 +102,30 @@ internal class PersonopplysningerMapperTest {
         val giftFørsteGang = sivilstand(
             type = GIFT,
             gyldigFraOgMed = LocalDate.now().minusDays(100),
-            metadata = PdlTestdataHelper.metadataHistorisk
+            metadata = PdlTestdataHelper.metadataHistorisk,
         )
         val separert = sivilstand(
             type = SEPARERT,
             gyldigFraOgMed = LocalDate.now().minusDays(85),
-            metadata = PdlTestdataHelper.metadataHistorisk
+            metadata = PdlTestdataHelper.metadataHistorisk,
         )
         val skilsmisse = sivilstand(
             type = SKILT,
             gyldigFraOgMed = LocalDate.now().minusDays(40),
-            metadata = PdlTestdataHelper.metadataHistorisk
+            metadata = PdlTestdataHelper.metadataHistorisk,
         )
 
         val giftPåNy = sivilstand(
             type = GIFT,
             gyldigFraOgMed = LocalDate.now().minusDays(20),
-            metadata = PdlTestdataHelper.metadataGjeldende
+            metadata = PdlTestdataHelper.metadataGjeldende,
         )
 
         val sivilstandMedSeparasjonSomErOpphørt = listOf(
             separert,
             giftPåNy,
             skilsmisse,
-            giftFørsteGang
+            giftFørsteGang,
         )
 
         val søker = opprettGrunnlagsdata().søker
@@ -133,16 +133,16 @@ internal class PersonopplysningerMapperTest {
             søker = søker.copy(
                 sivilstand = sivilstandMedSeparasjonSomErOpphørt,
                 fødsel = listOf(
-                    PdlTestdataHelper.fødsel(LocalDate.now())
-                )
-            )
+                    PdlTestdataHelper.fødsel(LocalDate.now()),
+                ),
+            ),
         )
         val personOpplysninger = personopplysningerMapper.tilPersonopplysninger(
             grunnlagsdataMedMetadata = GrunnlagsdataMedMetadata(grunnlagsdata, LocalDateTime.now()),
             egenAnsatt = false,
             søkerIdenter = PdlIdenter(
-                listOf(PdlIdent("11223344551", false))
-            )
+                listOf(PdlIdent("11223344551", false)),
+            ),
         )
 
         Assertions.assertThat(personOpplysninger.sivilstand[0].erGjeldende).isEqualTo(true)
@@ -172,8 +172,8 @@ internal class PersonopplysningerMapperTest {
             grunnlagsdataMedMetadata = GrunnlagsdataMedMetadata(grunnlagsdata, deltBostedStart.atStartOfDay()),
             egenAnsatt = false,
             søkerIdenter = PdlIdenter(
-                listOf(PdlIdent("11223344551", false))
-            )
+                listOf(PdlIdent("11223344551", false)),
+            ),
         )
 
         Assertions.assertThat(personOpplysningerI2022.barn.first().harDeltBostedNå).isTrue()
@@ -189,8 +189,8 @@ internal class PersonopplysningerMapperTest {
             grunnlagsdataMedMetadata = GrunnlagsdataMedMetadata(grunnlagsdata, LocalDateTime.MAX),
             egenAnsatt = false,
             søkerIdenter = PdlIdenter(
-                listOf(PdlIdent("11223344551", false))
-            )
+                listOf(PdlIdent("11223344551", false)),
+            ),
         )
 
         Assertions.assertThat(personOpplysningerIFremtiden.barn.first().harDeltBostedNå).isFalse()
@@ -198,14 +198,14 @@ internal class PersonopplysningerMapperTest {
 
     private fun grunnlagsdataMedBarnMedDeltBosted(
         deltBostedStart: LocalDate,
-        deltBostedSlutt: LocalDate
+        deltBostedSlutt: LocalDate,
     ): GrunnlagsdataDomene {
         val søker = opprettGrunnlagsdata().søker
         val grunnlagsdata = opprettGrunnlagsdata().copy(
             søker = søker.copy(
                 fødsel = listOf(
-                    PdlTestdataHelper.fødsel(LocalDate.now())
-                )
+                    PdlTestdataHelper.fødsel(LocalDate.now()),
+                ),
             ),
             barn = listOf(
                 opprettBarnMedIdent(
@@ -216,12 +216,12 @@ internal class PersonopplysningerMapperTest {
                             deltBostedSlutt,
                             null,
                             null,
-                            Metadata(false)
-                        )
+                            Metadata(false),
+                        ),
                     ),
-                    fødsel = PdlTestdataHelper.fødsel(LocalDate.now())
-                )
-            )
+                    fødsel = PdlTestdataHelper.fødsel(LocalDate.now()),
+                ),
+            ),
         )
         return grunnlagsdata
     }

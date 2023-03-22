@@ -20,20 +20,20 @@ import java.util.UUID
 @Validated
 class InntektController(
     private val tilgangService: TilgangService,
-    private val inntektService: InntektService
+    private val inntektService: InntektService,
 ) {
 
     @GetMapping("fagsak/{fagsakId}")
     fun hentInntekt(
         @PathVariable("fagsakId") fagsakId: UUID,
         @RequestParam fom: YearMonth?,
-        @RequestParam tom: YearMonth?
+        @RequestParam tom: YearMonth?,
     ): Ressurs<AMeldingInntektDto> {
         tilgangService.validerTilgangTilFagsak(fagsakId, AuditLoggerEvent.ACCESS)
         val inntekt = inntektService.hentInntekt(
             fagsakId = fagsakId,
             fom = fom ?: YearMonth.now().minusMonths(2),
-            tom = tom ?: YearMonth.now()
+            tom = tom ?: YearMonth.now(),
         )
         return success(inntekt)
     }

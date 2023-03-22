@@ -11,7 +11,7 @@ import no.nav.familie.ef.sak.vilkår.regler.regelIder
 class DokumentasjonTilsynsutgifterRegel : Vilkårsregel(
     vilkårType = VilkårType.DOKUMENTASJON_TILSYNSUTGIFTER,
     regler = setOf(HAR_DOKUMENTERTE_TILSYNSUTGIFTER),
-    hovedregler = regelIder(HAR_DOKUMENTERTE_TILSYNSUTGIFTER)
+    hovedregler = regelIder(HAR_DOKUMENTERTE_TILSYNSUTGIFTER),
 ) {
 
     companion object {
@@ -21,8 +21,8 @@ class DokumentasjonTilsynsutgifterRegel : Vilkårsregel(
                 regelId = RegelId.HAR_DOKUMENTERTE_TILSYNSUTGIFTER,
                 svarMapping = jaNeiSvarRegel(
                     hvisJa = SluttSvarRegel.OPPFYLT_MED_PÅKREVD_BEGRUNNELSE,
-                    hvisNei = SluttSvarRegel.IKKE_OPPFYLT_MED_PÅKREVD_BEGRUNNELSE
-                )
+                    hvisNei = SluttSvarRegel.IKKE_OPPFYLT_MED_PÅKREVD_BEGRUNNELSE,
+                ),
             )
     }
 }

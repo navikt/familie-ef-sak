@@ -19,7 +19,7 @@ interface FagsakRepository : RepositoryInterface<FagsakDomain, UUID>, InsertUpda
                     JOIN fagsak_ekstern fe ON fe.fagsak_id = f.id
                     LEFT JOIN person_ident pi ON pi.fagsak_person_id = f.fagsak_person_id 
                     WHERE pi.ident IN (:personIdenter)
-                    AND f.stonadstype = :stønadstype"""
+                    AND f.stonadstype = :stønadstype""",
     )
     fun findBySøkerIdent(personIdenter: Set<String>, stønadstype: StønadType): FagsakDomain?
 
@@ -32,7 +32,7 @@ interface FagsakRepository : RepositoryInterface<FagsakDomain, UUID>, InsertUpda
                     JOIN fagsak_ekstern fe ON fe.fagsak_id = f.id
                     JOIN behandling b 
                         ON b.fagsak_id = f.id 
-                    WHERE b.id = :behandlingId"""
+                    WHERE b.id = :behandlingId""",
     )
     fun finnFagsakTilBehandling(behandlingId: UUID): FagsakDomain?
 
@@ -41,7 +41,7 @@ interface FagsakRepository : RepositoryInterface<FagsakDomain, UUID>, InsertUpda
         """SELECT DISTINCT f.*, fe.id AS eksternid_id FROM fagsak f 
                 JOIN fagsak_ekstern fe ON fe.fagsak_id = f.id
                 JOIN person_ident pi ON pi.fagsak_person_id = f.fagsak_person_id 
-              WHERE ident IN (:personIdenter)"""
+              WHERE ident IN (:personIdenter)""",
     )
     fun findBySøkerIdent(personIdenter: Set<String>): List<FagsakDomain>
 
@@ -52,7 +52,7 @@ interface FagsakRepository : RepositoryInterface<FagsakDomain, UUID>, InsertUpda
         """SELECT f.*, fe.id AS eksternid_id         
                     FROM fagsak f         
                     JOIN fagsak_ekstern fe ON fe.fagsak_id = f.id       
-                    WHERE fe.id = :eksternId"""
+                    WHERE fe.id = :eksternId""",
     )
     fun finnMedEksternId(eksternId: Long): FagsakDomain?
 
@@ -62,7 +62,7 @@ interface FagsakRepository : RepositoryInterface<FagsakDomain, UUID>, InsertUpda
                 JOIN person_ident pi ON pi.fagsak_person_id = f.fagsak_person_id
               WHERE f.id=:fagsakId
               ORDER BY pi.endret_tid DESC
-              LIMIT 1"""
+              LIMIT 1""",
     )
     fun finnAktivIdent(fagsakId: UUID): String
 
@@ -73,7 +73,7 @@ interface FagsakRepository : RepositoryInterface<FagsakDomain, UUID>, InsertUpda
             FIRST_VALUE(ident) OVER (PARTITION BY pi.fagsak_person_id ORDER BY pi.endret_tid DESC) AS second
         FROM fagsak f
           JOIN person_ident pi ON pi.fagsak_person_id = f.fagsak_person_id
-        WHERE f.id IN (:fagsakIder)"""
+        WHERE f.id IN (:fagsakIder)""",
     )
     fun finnAktivIdenter(fagsakIder: Set<UUID>): List<Pair<UUID, String>>
 
@@ -86,7 +86,7 @@ interface FagsakRepository : RepositoryInterface<FagsakDomain, UUID>, InsertUpda
               ON ty.id = aty.tilkjent_ytelse 
               AND aty.stonad_tom >= CURRENT_DATE 
               WHERE b.fagsak_id = :fagsakId
-              LIMIT 1"""
+              LIMIT 1""",
     )
     fun harLøpendeUtbetaling(fagsakId: UUID): Boolean
 
@@ -101,7 +101,7 @@ interface FagsakRepository : RepositoryInterface<FagsakDomain, UUID>, InsertUpda
               WHERE b.stonadstype = 'OVERGANGSSTØNAD'
               AND b.fagsak_id NOT IN (SELECT b2.fagsak_id FROM behandling b2 
                                       WHERE b2.fagsak_id = b.fagsak_id
-                                      AND b2.status <> 'FERDIGSTILT')"""
+                                      AND b2.status <> 'FERDIGSTILT')""",
     )
     fun finnFerdigstilteFagsakerMedUtdatertGBelop(gjeldendeGrunnbeløpFraOgMedDato: LocalDate): List<UUID>
 }

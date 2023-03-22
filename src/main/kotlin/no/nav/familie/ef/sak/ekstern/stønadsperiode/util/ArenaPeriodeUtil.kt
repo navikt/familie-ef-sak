@@ -20,7 +20,7 @@ object ArenaPeriodeUtil {
 
     fun slåSammenPerioderFraEfOgInfotrygd(
         request: EksternePerioderRequest,
-        perioder: InternePerioder
+        perioder: InternePerioder,
     ): List<EksternPeriode> {
         val måneder = finnUnikeÅrMånedForPerioder(perioder)
         val sammenslåtteÅrMåneder = slåSammenÅrMåneder(måneder)
@@ -29,7 +29,7 @@ object ArenaPeriodeUtil {
                 personIdent = request.personIdent,
                 fomDato = it.first.atDay(1),
                 tomDato = it.second.atEndOfMonth(),
-                datakilde = Datakilde.EF
+                datakilde = Datakilde.EF,
             )
         }.filter { overlapper(request, it) }
     }

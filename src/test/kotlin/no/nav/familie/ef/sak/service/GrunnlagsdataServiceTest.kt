@@ -47,7 +47,7 @@ internal class GrunnlagsdataServiceTest {
     private val grunnlagsdataRegisterService = GrunnlagsdataRegisterService(
         personService,
         personopplysningerIntegrasjonerClient,
-        tidligereVedaksperioderService
+        tidligereVedaksperioderService,
     )
 
     private val søknad = SøknadsskjemaMapper.tilDomene(
@@ -56,9 +56,9 @@ internal class GrunnlagsdataServiceTest {
                 TestsøknadBuilder.Builder()
                     .defaultBarn("Navn1 navnesen", fødselTermindato = LocalDate.now().plusMonths(4)),
                 TestsøknadBuilder.Builder()
-                    .defaultBarn("Navn2 navnesen", fødselTermindato = LocalDate.now().plusMonths(6))
-            )
-        ).build().søknadOvergangsstønad
+                    .defaultBarn("Navn2 navnesen", fødselTermindato = LocalDate.now().plusMonths(6)),
+            ),
+        ).build().søknadOvergangsstønad,
     )
 
     private val service = GrunnlagsdataService(
@@ -66,7 +66,7 @@ internal class GrunnlagsdataServiceTest {
         søknadService = søknadService,
         grunnlagsdataRegisterService = grunnlagsdataRegisterService,
         behandlingService = behandlingService,
-        mockk()
+        mockk(),
     )
 
     @BeforeEach
@@ -80,7 +80,7 @@ internal class GrunnlagsdataServiceTest {
     internal fun `skal kaste feil hvis behandlingen savner grunnlagsdata`() {
         val behandling = behandling(
             fagsak(),
-            type = BehandlingType.FØRSTEGANGSBEHANDLING
+            type = BehandlingType.FØRSTEGANGSBEHANDLING,
         )
         val behandlingId = behandling.id
 
@@ -97,7 +97,7 @@ internal class GrunnlagsdataServiceTest {
         val sivilstand = Sivilstand(Sivilstandstype.GIFT, null, "11111122222", null, Metadata(false))
         val pdlSøker = PdlClientConfig.opprettPdlSøker().copy(
             sivilstand = listOf(sivilstand),
-            vergemaalEllerFremtidsfullmakt = emptyList()
+            vergemaalEllerFremtidsfullmakt = emptyList(),
         )
         val fullmakt = pdlSøker.fullmakt.map { it.motpartsPersonident }
         every { personService.hentSøker(any()) } returns pdlSøker
@@ -114,7 +114,7 @@ internal class GrunnlagsdataServiceTest {
             .copy(
                 sivilstand = listOf(sivilstand),
                 fullmakt = emptyList(),
-                vergemaalEllerFremtidsfullmakt = emptyList()
+                vergemaalEllerFremtidsfullmakt = emptyList(),
             )
 
         service.hentFraRegisterForPersonOgAndreForeldre("1", emptyList())

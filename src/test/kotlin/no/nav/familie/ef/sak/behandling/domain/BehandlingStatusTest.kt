@@ -9,7 +9,7 @@ internal class BehandlingStatusTest {
     @EnumSource(
         value = BehandlingStatus::class,
         names = ["UTREDES", "OPPRETTET"],
-        mode = EnumSource.Mode.EXCLUDE
+        mode = EnumSource.Mode.EXCLUDE,
     )
     @ParameterizedTest
     internal fun `behandling skal være låst`(status: BehandlingStatus) {
@@ -19,7 +19,7 @@ internal class BehandlingStatusTest {
     @EnumSource(
         value = BehandlingStatus::class,
         names = ["FATTER_VEDTAK", "IVERKSETTER_VEDTAK", "FERDIGSTILT", "SATT_PÅ_VENT"],
-        mode = EnumSource.Mode.EXCLUDE
+        mode = EnumSource.Mode.EXCLUDE,
     )
     @ParameterizedTest
     internal fun `behandling skal være låst hvis en behandling utredes eller opprettes`(status: BehandlingStatus) {

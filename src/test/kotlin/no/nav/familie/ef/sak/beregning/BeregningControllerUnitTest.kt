@@ -33,7 +33,7 @@ internal class BeregningControllerUnitTest {
         beregningService = BeregningService(mockFeatureToggleService()),
         tilgangService = mockk(relaxed = true),
         tilkjentYtelseService = tilkjentytelseService,
-        vedtakService = vedtakService
+        vedtakService = vedtakService,
     )
 
     @Test
@@ -46,9 +46,9 @@ internal class BeregningControllerUnitTest {
                 listOf(
                     vedtaksperiodeDto(årMåned, årMåned, VedtaksperiodeType.HOVEDPERIODE),
                     vedtaksperiodeDto(årMåned.plusMonths(1), årMåned.plusMonths(1), VedtaksperiodeType.SANKSJON),
-                    vedtaksperiodeDto(årMåned.plusMonths(2), årMåned.plusMonths(2), VedtaksperiodeType.MIDLERTIDIG_OPPHØR)
-                )
-            )
+                    vedtaksperiodeDto(årMåned.plusMonths(2), årMåned.plusMonths(2), VedtaksperiodeType.MIDLERTIDIG_OPPHØR),
+                ),
+            ),
         ).data!!
 
         assertThat(perioder).hasSize(1)
@@ -68,10 +68,10 @@ internal class BeregningControllerUnitTest {
                             LocalDate.of(2022, 1, 1),
                             datoTil = LocalDate.of(2022, 4, 30),
                             aktivitet = AktivitetType.BARN_UNDER_ETT_ÅR,
-                            periodeType = VedtaksperiodeType.MIDLERTIDIG_OPPHØR
-                        )
-                    )
-                )
+                            periodeType = VedtaksperiodeType.MIDLERTIDIG_OPPHØR,
+                        ),
+                    ),
+                ),
             )
         every { tilkjentytelseService.hentForBehandling(any()) } returns
             lagTilkjentYtelse(
@@ -79,9 +79,9 @@ internal class BeregningControllerUnitTest {
                     lagAndelTilkjentYtelse(
                         fraOgMed = LocalDate.of(2022, 1, 1),
                         beløp = 10_000,
-                        tilOgMed = LocalDate.of(2022, 4, 30)
-                    )
-                )
+                        tilOgMed = LocalDate.of(2022, 4, 30),
+                    ),
+                ),
             )
         assertThrows<Feil> { beregningController.hentBeregnetBeløp(UUID.randomUUID()) }
     }

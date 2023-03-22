@@ -42,7 +42,7 @@ internal class BehandlingPåVentServiceTest {
             behandlingshistorikkService,
             taskService,
             nullstillVedtakService,
-            mockFeatureToggleService()
+            mockFeatureToggleService(),
         )
     val fagsak = fagsak()
     val tidligereIverksattBehandling = behandling(fagsak)
@@ -77,7 +77,7 @@ internal class BehandlingPåVentServiceTest {
                     coWithArg {
                         assertThat(it.type).isEqualTo(BehandlingsstatistikkTask.TYPE)
                         assertThat(it.payload).contains(Hendelse.VENTER.name)
-                    }
+                    },
                 )
             }
         }
@@ -179,7 +179,7 @@ internal class BehandlingPåVentServiceTest {
                     coWithArg {
                         assertThat(it.type).isEqualTo(BehandlingsstatistikkTask.TYPE)
                         assertThat(it.payload).contains(Hendelse.PÅBEGYNT.name)
-                    }
+                    },
                 )
             }
             verify(exactly = 0) { nullstillVedtakService.nullstillVedtak(any()) }

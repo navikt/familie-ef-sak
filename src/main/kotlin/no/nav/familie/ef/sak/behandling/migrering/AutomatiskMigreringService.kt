@@ -18,7 +18,7 @@ class AutomatiskMigreringService(
     private val migreringsstatusRepository: MigreringsstatusRepository,
     private val migreringService: MigreringService,
     private val infotrygdReplikaClient: InfotrygdReplikaClient,
-    private val taskService: TaskService
+    private val taskService: TaskService,
 ) {
 
     private val logger: Logger = LoggerFactory.getLogger(javaClass)

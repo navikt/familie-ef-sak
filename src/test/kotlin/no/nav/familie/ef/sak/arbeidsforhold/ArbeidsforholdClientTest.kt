@@ -31,7 +31,7 @@ class ArbeidsforholdClientTest {
             server.start()
             arbeidsforholdClient = ArbeidsforholdClient(
                 URI.create(server.baseUrl()),
-                restOperations
+                restOperations,
             )
         }
 
@@ -54,8 +54,8 @@ class ArbeidsforholdClientTest {
                 WireMock.aResponse()
                     .withStatus(HttpStatus.OK.value())
                     .withHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.mimeType)
-                    .withBody(aaregIntegrasjonerResponse)
-            )
+                    .withBody(aaregIntegrasjonerResponse),
+            ),
         )
 
         val response = arbeidsforholdClient.hentArbeidsforhold("15046713637", LocalDate.of(2020, 11, 19))

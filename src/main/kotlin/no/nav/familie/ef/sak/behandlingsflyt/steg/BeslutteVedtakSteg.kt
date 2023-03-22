@@ -36,7 +36,7 @@ class BeslutteVedtakSteg(
     private val totrinnskontrollService: TotrinnskontrollService,
     private val behandlingService: BehandlingService,
     private val vedtakService: VedtakService,
-    private val vedtaksbrevService: VedtaksbrevService
+    private val vedtaksbrevService: VedtaksbrevService,
 ) : BehandlingSteg<BeslutteVedtakDto> {
 
     override fun validerSteg(saksbehandling: Saksbehandling) {
@@ -97,8 +97,8 @@ class BeslutteVedtakSteg(
         taskService.save(
             BehandlingsstatistikkTask.opprettBesluttetTask(
                 behandlingId = behandlingId,
-                oppgaveId = oppgaveId
-            )
+                oppgaveId = oppgaveId,
+            ),
         )
 
     private fun oppdaterResultatPåBehandling(behandlingId: UUID) {
@@ -106,7 +106,7 @@ class BeslutteVedtakSteg(
         when (resultat) {
             ResultatType.INNVILGE, ResultatType.INNVILGE_UTEN_UTBETALING -> behandlingService.oppdaterResultatPåBehandling(
                 behandlingId,
-                BehandlingResultat.INNVILGET
+                BehandlingResultat.INNVILGET,
             )
             ResultatType.OPPHØRT -> behandlingService.oppdaterResultatPåBehandling(behandlingId, BehandlingResultat.OPPHØRT)
             ResultatType.AVSLÅ -> behandlingService.oppdaterResultatPåBehandling(behandlingId, BehandlingResultat.AVSLÅTT)
@@ -124,8 +124,8 @@ class BeslutteVedtakSteg(
                     behandlingId = saksbehandling.id,
                     oppgavetype = oppgavetype,
                     oppgaveId = it.gsakOppgaveId,
-                    personIdent = aktivIdent
-                )
+                    personIdent = aktivIdent,
+                ),
             )
             it.gsakOppgaveId
         }
@@ -137,9 +137,9 @@ class BeslutteVedtakSteg(
                 OpprettOppgaveTaskData(
                     behandlingId = saksbehandling.id,
                     oppgavetype = Oppgavetype.BehandleUnderkjentVedtak,
-                    tilordnetNavIdent = navIdent
-                )
-            )
+                    tilordnetNavIdent = navIdent,
+                ),
+            ),
         )
     }
 

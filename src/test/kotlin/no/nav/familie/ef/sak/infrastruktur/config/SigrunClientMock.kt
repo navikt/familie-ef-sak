@@ -21,14 +21,14 @@ class SigrunClientMock {
         val beregnetSkattMockResponse = listOf(
             BeregnetSkatt(
                 "tekniskNavn",
-                "verdi"
-            )
+                "verdi",
+            ),
         )
 
         val summertSkattegrunnlagMockResponse = SummertSkattegrunnlag(
             listOf(Grunnlag("personinntektNaering", 400000)),
             listOf(Grunnlag("svalbardPersoninntektNaering", 350000)),
-            LocalDate.of(2022, 12, 31).toString()
+            LocalDate.of(2022, 12, 31).toString(),
         )
 
         every { mockk.hentBeregnetSkatt(any(), any()) } returns beregnetSkattMockResponse

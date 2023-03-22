@@ -57,7 +57,7 @@ internal class SøknadServiceTest : OppslagSpringRunnerTest() {
 
     private fun kopierSøknadskjema(
         behandling: Behandling,
-        revurdering: Behandling
+        revurdering: Behandling,
     ): SøknadsskjemaOvergangsstønad {
         søknadService.kopierSøknad(behandling.id, revurdering.id)
         return søknadService.hentOvergangsstønad(revurdering.id)!!
@@ -65,7 +65,7 @@ internal class SøknadServiceTest : OppslagSpringRunnerTest() {
 
     private fun lagreSøknad(
         behandling: Behandling,
-        fagsak: Fagsak
+        fagsak: Fagsak,
     ): SøknadsskjemaOvergangsstønad {
         søknadService.lagreSøknadForOvergangsstønad(Testsøknad.søknadOvergangsstønad, behandling.id, fagsak.id, "1L")
         return søknadService.hentOvergangsstønad(behandling.id)!!

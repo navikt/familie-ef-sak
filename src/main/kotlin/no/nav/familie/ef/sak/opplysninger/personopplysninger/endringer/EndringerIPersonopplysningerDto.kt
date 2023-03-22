@@ -4,7 +4,7 @@ import java.time.LocalDateTime
 
 data class EndringerIPersonopplysningerDto(
     val sjekketTidspunkt: LocalDateTime,
-    val endringer: Endringer
+    val endringer: Endringer,
 )
 
 data class Endringer(
@@ -20,7 +20,7 @@ data class Endringer(
     val innflyttingTilNorge: EndringUtenDetaljer = Endring(),
     val utflyttingFraNorge: EndringUtenDetaljer = Endring(),
     val oppholdstillatelse: EndringUtenDetaljer = Endring(),
-    val vergemål: EndringUtenDetaljer = Endring()
+    val vergemål: EndringUtenDetaljer = Endring(),
 ) {
 
     val harEndringer = listOf(
@@ -36,7 +36,7 @@ data class Endringer(
         innflyttingTilNorge,
         utflyttingFraNorge,
         oppholdstillatelse,
-        vergemål
+        vergemål,
     ).any { it.harEndringer }
 
     fun felterMedEndringerString(): String {
@@ -52,14 +52,14 @@ data class Endringer(
             "innflyttingTilNorge=${innflyttingTilNorge.harEndringer}",
             "utflyttingFraNorge=${utflyttingFraNorge.harEndringer}",
             "oppholdstillatelse=${oppholdstillatelse.harEndringer}",
-            "vergemål=${vergemål.harEndringer}"
+            "vergemål=${vergemål.harEndringer}",
         ).joinToString(", ")
     }
 }
 
 data class Endring<DETALJER>(
     val harEndringer: Boolean = false,
-    val detaljer: DETALJER? = null
+    val detaljer: DETALJER? = null,
 )
 
 typealias EndringUtenDetaljer = Endring<Nothing>
@@ -68,16 +68,16 @@ data class Personendring(
     val ident: String,
     val endringer: List<EndringFelt> = emptyList(),
     val ny: Boolean = false,
-    val fjernet: Boolean = false
+    val fjernet: Boolean = false,
 )
 
 data class EndringFelt(
     val felt: String,
     val tidligere: String,
-    val ny: String
+    val ny: String,
 )
 
 data class EndringVerdi(
     val tidligere: String,
-    val ny: String
+    val ny: String,
 )

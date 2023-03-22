@@ -21,7 +21,7 @@ class GrunnlagsdataService(
     private val søknadService: SøknadService,
     private val grunnlagsdataRegisterService: GrunnlagsdataRegisterService,
     private val behandlingService: BehandlingService,
-    private val fagsakService: FagsakService
+    private val fagsakService: FagsakService,
 ) {
 
     fun opprettGrunnlagsdata(behandlingId: UUID): GrunnlagsdataMedMetadata {
@@ -30,7 +30,7 @@ class GrunnlagsdataService(
         grunnlagsdataRepository.insert(grunnlagsdata)
         return GrunnlagsdataMedMetadata(
             grunnlagsdata.data,
-            grunnlagsdata.sporbar.opprettetTid
+            grunnlagsdata.sporbar.opprettetTid,
         )
     }
 
@@ -38,7 +38,7 @@ class GrunnlagsdataService(
         val grunnlagsdata = hentFraRegisterMedSøknadsdata(behandlingId)
         return GrunnlagsdataMedMetadata(
             grunnlagsdata = grunnlagsdata,
-            opprettetTidspunkt = LocalDateTime.now()
+            opprettetTidspunkt = LocalDateTime.now(),
         )
     }
 
@@ -46,7 +46,7 @@ class GrunnlagsdataService(
         val grunnlagsdata = hentLagretGrunnlagsdata(behandlingId)
         return GrunnlagsdataMedMetadata(
             grunnlagsdata.data,
-            grunnlagsdata.sporbar.opprettetTid
+            grunnlagsdata.sporbar.opprettetTid,
         )
     }
 
@@ -88,12 +88,12 @@ class GrunnlagsdataService(
 
     fun hentFraRegisterForPersonOgAndreForeldre(
         personIdent: String,
-        barneforeldreFraSøknad: List<String>
+        barneforeldreFraSøknad: List<String>,
     ): GrunnlagsdataDomene {
         return loggTid {
             grunnlagsdataRegisterService.hentGrunnlagsdataFraRegister(
                 personIdent,
-                barneforeldreFraSøknad
+                barneforeldreFraSøknad,
             )
         }
     }

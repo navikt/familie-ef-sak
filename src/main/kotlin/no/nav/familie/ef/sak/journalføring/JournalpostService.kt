@@ -25,25 +25,25 @@ class JournalpostService(private val journalpostClient: JournalpostClient) {
     fun finnJournalposter(
         personIdent: String,
         antall: Int = 20,
-        typer: List<Journalposttype> = Journalposttype.values().toList()
+        typer: List<Journalposttype> = Journalposttype.values().toList(),
     ): List<Journalpost> {
         return journalpostClient.finnJournalposter(
             JournalposterForBrukerRequest(
                 brukerId = Bruker(
                     id = personIdent,
-                    type = BrukerIdType.FNR
+                    type = BrukerIdType.FNR,
                 ),
                 antall = antall,
                 tema = listOf(Tema.ENF),
-                journalposttype = typer
-            )
+                journalposttype = typer,
+            ),
         )
     }
 
     fun hentDokument(
         journalpostId: String,
         dokumentInfoId: String,
-        dokumentVariantformat: DokumentVariantformat = DokumentVariantformat.ARKIV
+        dokumentVariantformat: DokumentVariantformat = DokumentVariantformat.ARKIV,
     ): ByteArray {
         return journalpostClient.hentDokument(journalpostId, dokumentInfoId, dokumentVariantformat)
     }
@@ -66,13 +66,13 @@ class JournalpostService(private val journalpostClient: JournalpostClient) {
     fun oppdaterOgFerdigstillJournalpostMaskinelt(
         journalpost: Journalpost,
         journalførendeEnhet: String,
-        fagsak: Fagsak
+        fagsak: Fagsak,
     ) = oppdaterOgFerdigstillJournalpost(
         journalpost = journalpost,
         dokumenttitler = null,
         journalførendeEnhet = journalførendeEnhet,
         fagsak = fagsak,
-        saksbehandler = null
+        saksbehandler = null,
     )
 
     fun oppdaterOgFerdigstillJournalpost(
@@ -80,19 +80,19 @@ class JournalpostService(private val journalpostClient: JournalpostClient) {
         dokumenttitler: Map<String, String>?,
         journalførendeEnhet: String,
         fagsak: Fagsak,
-        saksbehandler: String?
+        saksbehandler: String?,
     ) {
         if (journalpost.journalstatus != Journalstatus.JOURNALFOERT) {
             oppdaterJournalpostMedFagsakOgDokumenttitler(
                 journalpost = journalpost,
                 dokumenttitler = dokumenttitler,
                 eksternFagsakId = fagsak.eksternId.id,
-                saksbehandler = saksbehandler
+                saksbehandler = saksbehandler,
             )
             ferdigstillJournalføring(
                 journalpostId = journalpost.journalpostId,
                 journalførendeEnhet = journalførendeEnhet,
-                saksbehandler = saksbehandler
+                saksbehandler = saksbehandler,
             )
         }
     }
@@ -105,7 +105,7 @@ class JournalpostService(private val journalpostClient: JournalpostClient) {
         journalpost: Journalpost,
         dokumenttitler: Map<String, String>? = null,
         eksternFagsakId: Long,
-        saksbehandler: String? = null
+        saksbehandler: String? = null,
     ) {
         val oppdatertJournalpost = JournalføringHelper.lagOppdaterJournalpostRequest(journalpost, eksternFagsakId, dokumenttitler)
         journalpostClient.oppdaterJournalpost(oppdatertJournalpost, journalpost.journalpostId, saksbehandler)

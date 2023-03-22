@@ -35,16 +35,16 @@ internal class MellomlagerFrittståendeRepositoryTest : OppslagSpringRunnerTest(
                 avsnitt = listOf(
                     FrittståendeBrevAvsnitt(
                         deloverskrift = "En deloverskift",
-                        innhold = "Noe innhold"
-                    )
-                )
+                        innhold = "Noe innhold",
+                    ),
+                ),
             ),
             brevType = FrittståendeBrevKategori.VARSEL_OM_AKTIVITETSPLIKT,
             saksbehandlerIdent = "12345678910",
             mottakere = FrittståendeBrevmottakere(
                 personer = listOf(brevmottakerPerson()),
-                organisasjoner = listOf(brevmottakerOrganisasjon())
-            )
+                organisasjoner = listOf(brevmottakerOrganisasjon()),
+            ),
         )
 
         mellomlagerFrittståendeBrevRepository.insert(mellomlagretBrev)
@@ -67,13 +67,13 @@ internal class MellomlagerFrittståendeRepositoryTest : OppslagSpringRunnerTest(
                 avsnitt = listOf(
                     FrittståendeBrevAvsnitt(
                         deloverskrift = "En deloverskift",
-                        innhold = "Noe innhold"
-                    )
-                )
+                        innhold = "Noe innhold",
+                    ),
+                ),
             ),
             brevType = FrittståendeBrevKategori.VARSEL_OM_AKTIVITETSPLIKT,
             saksbehandlerIdent = saksbehandlerIdent,
-            mottakere = null
+            mottakere = null,
         )
 
         mellomlagerFrittståendeBrevRepository.insert(mellomlagretBrev)

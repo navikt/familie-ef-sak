@@ -61,13 +61,13 @@ internal class SøknadControllerTest : OppslagSpringRunnerTest() {
         val søknad = SøknadMedVedlegg(Testsøknad.søknadOvergangsstønad, emptyList())
         val fagsak = fagsakService.hentEllerOpprettFagsakMedBehandlinger(
             søknad.søknad.personalia.verdi.fødselsnummer.verdi.verdi,
-            StønadType.OVERGANGSSTØNAD
+            StønadType.OVERGANGSSTØNAD,
         )
         val behandlingÅrsak = BehandlingÅrsak.SØKNAD
         val behandling = behandlingService.opprettBehandling(
             BehandlingType.FØRSTEGANGSBEHANDLING,
             fagsak.id,
-            behandlingsårsak = behandlingÅrsak
+            behandlingsårsak = behandlingÅrsak,
         )
         søknadService.lagreSøknadForOvergangsstønad(søknad.søknad, behandling.id, fagsak.id, "1234")
         val søknadSkjema = søknadService.hentOvergangsstønad(behandling.id)!!
@@ -83,7 +83,7 @@ internal class SøknadControllerTest : OppslagSpringRunnerTest() {
         return restTemplate.exchange(
             localhost("/api/soknad/$behandlingId/datoer"),
             HttpMethod.GET,
-            HttpEntity<Ressurs<SøknadDatoerDto>>(headers)
+            HttpEntity<Ressurs<SøknadDatoerDto>>(headers),
         )
     }
 }

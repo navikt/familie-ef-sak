@@ -15,7 +15,7 @@ import java.util.UUID
 @ProtectedWithClaims(issuer = "azuread")
 class SigrunController(
     private val tilgangService: TilgangService,
-    private val sigrunService: SigrunService
+    private val sigrunService: SigrunService,
 ) {
 
     @GetMapping("fagsak-person/{fagsakPersonId}")

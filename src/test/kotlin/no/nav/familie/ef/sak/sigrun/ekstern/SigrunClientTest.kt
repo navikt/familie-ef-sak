@@ -53,8 +53,8 @@ class SigrunClientTest {
                     WireMock.aResponse()
                         .withStatus(HttpStatus.OK.value())
                         .withHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.mimeType)
-                        .withBody(beregnetSkattRessursResponseJson)
-                )
+                        .withBody(beregnetSkattRessursResponseJson),
+                ),
         )
         val beregnetSkatt = sigrunClient.hentBeregnetSkatt("123", 2022)
         assertThat(beregnetSkatt.size).isEqualTo(7)
@@ -70,8 +70,8 @@ class SigrunClientTest {
                     WireMock.aResponse()
                         .withStatus(HttpStatus.OK.value())
                         .withHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.mimeType)
-                        .withBody(beregnetSkattMedOppgjørsdatoJson)
-                )
+                        .withBody(beregnetSkattMedOppgjørsdatoJson),
+                ),
         )
         val beregnetSkatt = sigrunClient.hentBeregnetSkatt("123", 2022)
         assertThat(beregnetSkatt.size).isEqualTo(2)
@@ -87,8 +87,8 @@ class SigrunClientTest {
                     WireMock.aResponse()
                         .withStatus(HttpStatus.OK.value())
                         .withHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.mimeType)
-                        .withBody(summertSkattegrunnlagJson)
-                )
+                        .withBody(summertSkattegrunnlagJson),
+                ),
         )
         val summertSkattegrunnlag = sigrunClient.hentSummertSkattegrunnlag("123", 2018)
         assertThat(summertSkattegrunnlag.grunnlag.size).isEqualTo(4)

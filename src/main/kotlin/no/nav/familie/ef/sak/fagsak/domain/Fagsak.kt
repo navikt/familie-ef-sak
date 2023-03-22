@@ -12,7 +12,7 @@ import java.util.UUID
 data class Fagsaker(
     val overgangsstønad: Fagsak?,
     val barnetilsyn: Fagsak?,
-    val skolepenger: Fagsak?
+    val skolepenger: Fagsak?,
 )
 
 data class Fagsak(
@@ -22,7 +22,7 @@ data class Fagsak(
     val eksternId: EksternFagsakId,
     val stønadstype: StønadType,
     val migrert: Boolean,
-    val sporbar: Sporbar
+    val sporbar: Sporbar,
 ) {
 
     fun erAktivIdent(personIdent: String): Boolean = hentAktivIdent() == personIdent
@@ -43,7 +43,7 @@ data class FagsakDomain(
     val stønadstype: StønadType,
     val migrert: Boolean = false,
     @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
-    val sporbar: Sporbar = Sporbar()
+    val sporbar: Sporbar = Sporbar(),
 )
 
 fun FagsakDomain.tilFagsakMedPerson(personIdenter: Set<PersonIdent>): Fagsak =
@@ -54,5 +54,5 @@ fun FagsakDomain.tilFagsakMedPerson(personIdenter: Set<PersonIdent>): Fagsak =
         eksternId = eksternId,
         stønadstype = stønadstype,
         migrert = migrert,
-        sporbar = sporbar
+        sporbar = sporbar,
     )

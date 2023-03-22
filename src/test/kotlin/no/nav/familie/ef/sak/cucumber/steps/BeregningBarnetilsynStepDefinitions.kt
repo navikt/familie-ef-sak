@@ -64,8 +64,8 @@ class BeregningBarnetilsynStepDefinitions {
                     utgifter = beløp,
                     sanksjonsårsak = null,
                     periodetype = periodetype,
-                    aktivitetstype = aktivitetstype
-                )
+                    aktivitetstype = aktivitetstype,
+                ),
             )
         }
     }
@@ -107,8 +107,8 @@ class BeregningBarnetilsynStepDefinitions {
             beregningBarnetilsynService.beregnYtelseBarnetilsyn(
                 utgiftsperioder = utgiftsperioder,
                 kontantstøttePerioder = kontantStøtteperioder,
-                tilleggsstønadsperioder = tilleggsstønadPerioder
-            )
+                tilleggsstønadsperioder = tilleggsstønadPerioder,
+            ),
         )
     }
 
@@ -171,7 +171,7 @@ class BeregningBarnetilsynStepDefinitions {
     private fun assertAllefelterErSomForventet(
         it: BeløpsperiodeBarnetilsynDto,
         sortetForventet: List<ForventetPeriodeMedGrunnlag>,
-        idx: Int
+        idx: Int,
     ) {
         assertThat(it.deprecatedPeriode.fradato).isEqualTo(sortetForventet.get(idx).fraÅrMåned.atDay(1))
         assertThat(it.deprecatedPeriode.tildato).isEqualTo(sortetForventet.get(idx).tilÅrMåned.atEndOfMonth())
@@ -197,6 +197,6 @@ class BeregningBarnetilsynStepDefinitions {
         val tilÅrMåned: YearMonth,
         val harKontantstøtte: Boolean,
         val harTilleggsstønad: Boolean,
-        val antallBarn: Int
+        val antallBarn: Int,
     )
 }

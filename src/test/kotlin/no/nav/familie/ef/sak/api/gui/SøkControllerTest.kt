@@ -138,7 +138,7 @@ internal class SøkControllerTest : OppslagSpringRunnerTest() {
             return restTemplate.exchange(
                 localhost("/api/sok/person/fagsak-ekstern/$eksternFagsakId"),
                 HttpMethod.GET,
-                HttpEntity<Any>(headers)
+                HttpEntity<Any>(headers),
             )
         }
     }
@@ -147,7 +147,7 @@ internal class SøkControllerTest : OppslagSpringRunnerTest() {
         return restTemplate.exchange(
             localhost("/api/sok/"),
             HttpMethod.POST,
-            HttpEntity(PersonIdentDto(personIdent = personIdent), headers)
+            HttpEntity(PersonIdentDto(personIdent = personIdent), headers),
         )
     }
 }

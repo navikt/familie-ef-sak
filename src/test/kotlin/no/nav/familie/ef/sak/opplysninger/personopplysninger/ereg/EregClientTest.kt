@@ -49,8 +49,8 @@ class EregClientTest {
                 WireMock.aResponse()
                     .withStatus(HttpStatus.OK.value())
                     .withHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.mimeType)
-                    .withBody(eregHentOrganisasjonResponse)
-            )
+                    .withBody(eregHentOrganisasjonResponse),
+            ),
         )
 
         val response = eregClient.hentOrganisasjoner(orgnumre)

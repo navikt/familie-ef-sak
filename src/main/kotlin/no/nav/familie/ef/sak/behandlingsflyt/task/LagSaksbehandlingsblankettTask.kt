@@ -15,11 +15,11 @@ import java.util.UUID
     maxAntallFeil = 50,
     settTilManuellOppfølgning = true,
     triggerTidVedFeilISekunder = 15 * 60L,
-    beskrivelse = "Lag blankett for å dokumentere saksbehandling (fallback)."
+    beskrivelse = "Lag blankett for å dokumentere saksbehandling (fallback).",
 )
 class LagSaksbehandlingsblankettTask(
     private val stegService: StegService,
-    private val behandlingService: BehandlingService
+    private val behandlingService: BehandlingService,
 ) : AsyncTaskStep {
 
     override fun doTask(task: Task) {
@@ -35,7 +35,7 @@ class LagSaksbehandlingsblankettTask(
                 payload = behandlingId.toString(),
                 properties = Properties().apply {
                     this["behandlingId"] = behandlingId.toString()
-                }
+                },
             )
 
         const val TYPE = "lagSaksbehandlingsblankettTask"

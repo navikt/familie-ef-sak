@@ -97,16 +97,16 @@ internal class BeregningBarnetilsynControllerTest : OppslagSpringRunnerTest() {
         val fagsak = testoppsettService.lagreFagsak(
             fagsak(
                 stønadstype = StønadType.BARNETILSYN,
-                identer = setOf(PersonIdent("12345678910"))
-            )
+                identer = setOf(PersonIdent("12345678910")),
+            ),
         )
         val førstegangsbehandling = behandlingRepository.insert(
             behandling(
                 fagsak,
                 steg = stegType,
                 type = BehandlingType.FØRSTEGANGSBEHANDLING,
-                status = BehandlingStatus.FERDIGSTILT
-            )
+                status = BehandlingStatus.FERDIGSTILT,
+            ),
         )
         val barn = barnRepository.insert(
             behandlingBarn(
@@ -115,8 +115,8 @@ internal class BeregningBarnetilsynControllerTest : OppslagSpringRunnerTest() {
                 UUID.randomUUID(),
                 "01012212345",
                 "Junior",
-                LocalDate.now()
-            )
+                LocalDate.now(),
+            ),
         )
 
         val søknad = SøknadMedVedlegg(Testsøknad.søknadBarnetilsyn, emptyList())
@@ -127,9 +127,9 @@ internal class BeregningBarnetilsynControllerTest : OppslagSpringRunnerTest() {
                     fraOgMed = LocalDate.of(2022, 1, 1),
                     kildeBehandlingId = førstegangsbehandling.id,
                     beløp = 2000,
-                    tilOgMed = LocalDate.of(2022, 4, 30)
-                )
-            )
+                    tilOgMed = LocalDate.of(2022, 4, 30),
+                ),
+            ),
         )
         val utgiftsperiode = UtgiftsperiodeDto(
             årMånedFra = YearMonth.of(2022, 1),
@@ -139,7 +139,7 @@ internal class BeregningBarnetilsynControllerTest : OppslagSpringRunnerTest() {
             utgifter = 2500,
             periodetype = PeriodetypeBarnetilsyn.ORDINÆR,
             aktivitetstype = AktivitetstypeBarnetilsyn.I_ARBEID,
-            sanksjonsårsak = null
+            sanksjonsårsak = null,
         )
 
         val vedtakDto = InnvilgelseBarnetilsyn(
@@ -149,8 +149,8 @@ internal class BeregningBarnetilsynControllerTest : OppslagSpringRunnerTest() {
             tilleggsstønad = TilleggsstønadDto(
                 harTilleggsstønad = false,
                 perioder = listOf(),
-                begrunnelse = null
-            )
+                begrunnelse = null,
+            ),
         )
 
         søknadService.lagreSøknadForBarnetilsyn(søknad.søknad, førstegangsbehandling.id, fagsak.id, "1234")
@@ -164,15 +164,15 @@ internal class BeregningBarnetilsynControllerTest : OppslagSpringRunnerTest() {
     private fun lagRevurdering(
         stegType: StegType = StegType.BESLUTTE_VEDTAK,
         fagsak: Fagsak,
-        forrigeBehandlingId: UUID
+        forrigeBehandlingId: UUID,
     ): Behandling {
         val revurdering = behandlingRepository.insert(
             behandling(
                 fagsak,
                 steg = stegType,
                 type = BehandlingType.REVURDERING,
-                status = BehandlingStatus.UTREDES
-            )
+                status = BehandlingStatus.UTREDES,
+            ),
         )
         val tilkjentYtelse =
             lagTilkjentYtelse(
@@ -183,15 +183,15 @@ internal class BeregningBarnetilsynControllerTest : OppslagSpringRunnerTest() {
                         fraOgMed = LocalDate.of(2022, 1, 1),
                         beløp = 2000,
                         kildeBehandlingId = revurdering.id,
-                        tilOgMed = LocalDate.of(2022, 2, 28)
+                        tilOgMed = LocalDate.of(2022, 2, 28),
                     ),
                     lagAndelTilkjentYtelse(
                         fraOgMed = LocalDate.of(2022, 3, 1),
                         beløp = 3000,
                         kildeBehandlingId = revurdering.id,
-                        tilOgMed = LocalDate.of(2022, 6, 30)
-                    )
-                )
+                        tilOgMed = LocalDate.of(2022, 6, 30),
+                    ),
+                ),
             )
 
         val barn = barnRepository.findByBehandlingId(forrigeBehandlingId)
@@ -205,7 +205,7 @@ internal class BeregningBarnetilsynControllerTest : OppslagSpringRunnerTest() {
             utgifter = 3000,
             periodetype = PeriodetypeBarnetilsyn.ORDINÆR,
             aktivitetstype = AktivitetstypeBarnetilsyn.I_ARBEID,
-            sanksjonsårsak = null
+            sanksjonsårsak = null,
         )
 
         val vedtakDto = InnvilgelseBarnetilsyn(
@@ -215,8 +215,8 @@ internal class BeregningBarnetilsynControllerTest : OppslagSpringRunnerTest() {
             tilleggsstønad = TilleggsstønadDto(
                 harTilleggsstønad = false,
                 perioder = listOf(),
-                begrunnelse = null
-            )
+                begrunnelse = null,
+            ),
         )
         tilkjentYtelseRepository.insert(tilkjentYtelse)
         vedtakService.lagreVedtak(vedtakDto, revurdering.id, fagsak.stønadstype)
@@ -227,7 +227,7 @@ internal class BeregningBarnetilsynControllerTest : OppslagSpringRunnerTest() {
         return restTemplate.exchange(
             localhost("/api/vedtak/$id/lagre-vedtak"),
             HttpMethod.POST,
-            HttpEntity(vedtakDto, headers)
+            HttpEntity(vedtakDto, headers),
         )
     }
 
@@ -235,7 +235,7 @@ internal class BeregningBarnetilsynControllerTest : OppslagSpringRunnerTest() {
         return restTemplate.exchange(
             localhost("/api/beregning/barnetilsyn/$id"),
             HttpMethod.GET,
-            HttpEntity<Ressurs<List<BeløpsperiodeBarnetilsynDto>>>(headers)
+            HttpEntity<Ressurs<List<BeløpsperiodeBarnetilsynDto>>>(headers),
         )
     }
 }

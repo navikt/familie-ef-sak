@@ -42,8 +42,8 @@ internal class BehandlingshistorikkServiceTest : OppslagSpringRunnerTest() {
                     behandlingId = behandling.id,
                     steg = behandling.steg,
                     opprettetAvNavn = "Saksbehandlernavn",
-                    opprettetAv = SikkerhetContext.hentSaksbehandlerEllerSystembruker()
-                )
+                    opprettetAv = SikkerhetContext.hentSaksbehandlerEllerSystembruker(),
+                ),
             )
         val hendelseshistorikkDto = behandlingHistorikk.tilHendelseshistorikkDto(saksbehandling(fagsak, behandling))
 
@@ -86,7 +86,7 @@ internal class BehandlingshistorikkServiceTest : OppslagSpringRunnerTest() {
             Hendelse.SENDT_TIL_BESLUTTER,
             Hendelse.VEDTAK_UNDERKJENT,
             Hendelse.SENDT_TIL_BESLUTTER,
-            Hendelse.OPPRETTET
+            Hendelse.OPPRETTET,
         )
     }
 
@@ -106,7 +106,7 @@ internal class BehandlingshistorikkServiceTest : OppslagSpringRunnerTest() {
             Hendelse.SATT_PÅ_VENT,
             Hendelse.TATT_AV_VENT,
             Hendelse.SATT_PÅ_VENT,
-            Hendelse.OPPRETTET
+            Hendelse.OPPRETTET,
         )
     }
 
@@ -135,7 +135,7 @@ internal class BehandlingshistorikkServiceTest : OppslagSpringRunnerTest() {
         var siste =
             behandlingshistorikkService.finnSisteBehandlingshistorikk(
                 behandlingId = behandling.id,
-                StegType.BESLUTTE_VEDTAK
+                StegType.BESLUTTE_VEDTAK,
             )
         assertThat(siste).isNull()
 
@@ -146,7 +146,7 @@ internal class BehandlingshistorikkServiceTest : OppslagSpringRunnerTest() {
     private fun insert(
         behandling: Behandling,
         endretTid: LocalDateTime,
-        utfall: StegUtfall? = null
+        utfall: StegUtfall? = null,
     ) {
         insert(behandling, "opprettetAv", endretTid, utfall)
     }
@@ -155,7 +155,7 @@ internal class BehandlingshistorikkServiceTest : OppslagSpringRunnerTest() {
         behandling: Behandling,
         opprettetAv: String,
         endretTid: LocalDateTime,
-        utfall: StegUtfall? = null
+        utfall: StegUtfall? = null,
     ) {
         behandlingshistorikkRepository.insert(
             Behandlingshistorikk(
@@ -163,8 +163,8 @@ internal class BehandlingshistorikkServiceTest : OppslagSpringRunnerTest() {
                 steg = behandling.steg,
                 utfall = utfall,
                 opprettetAvNavn = opprettetAv,
-                endretTid = endretTid
-            )
+                endretTid = endretTid,
+            ),
         )
     }
 }

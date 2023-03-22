@@ -33,19 +33,19 @@ internal class BrevmottakereRepositoryTest : OppslagSpringRunnerTest() {
                     BrevmottakerPerson(
                         personIdent = "12345678910",
                         navn = "Verge",
-                        mottakerRolle = MottakerRolle.VERGE
-                    )
-                )
+                        mottakerRolle = MottakerRolle.VERGE,
+                    ),
+                ),
             ),
             organisasjoner = OrganisasjonerWrapper(
                 listOf(
                     BrevmottakerOrganisasjon(
                         organisasjonsnummer = "12345678",
                         navnHosOrganisasjon = "Advokat",
-                        MottakerRolle.FULLMAKT
-                    )
-                )
-            )
+                        MottakerRolle.FULLMAKT,
+                    ),
+                ),
+            ),
         )
 
         brevmottakereRepository.insert(brevmottakere)

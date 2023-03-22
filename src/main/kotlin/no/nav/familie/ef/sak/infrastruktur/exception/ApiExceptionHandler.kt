@@ -41,7 +41,7 @@ class ApiExceptionHandler(val featureToggleService: FeatureToggleService) {
 
     private fun lagTimeoutfeilRessurs(): Ressurs<Nothing> = Ressurs.failure(
         errorMessage = "Timeout feil",
-        frontendFeilmelding = "Kommunikasjonsproblemer med andre systemer - prøv igjen"
+        frontendFeilmelding = "Kommunikasjonsproblemer med andre systemer - prøv igjen",
     )
 
     @ExceptionHandler(JwtTokenMissingException::class)
@@ -51,8 +51,8 @@ class ApiExceptionHandler(val featureToggleService: FeatureToggleService) {
             .body(
                 Ressurs.failure(
                     errorMessage = "401 Unauthorized JwtTokenMissingException",
-                    frontendFeilmelding = "En uventet feil oppstod: Kall ikke autorisert"
-                )
+                    frontendFeilmelding = "En uventet feil oppstod: Kall ikke autorisert",
+                ),
             )
     }
 
@@ -62,16 +62,16 @@ class ApiExceptionHandler(val featureToggleService: FeatureToggleService) {
         secureLogger.info("En håndtert feil har oppstått(${feil.httpStatus}): ${feil.feil}", feil)
         logger.info(
             "En håndtert feil har oppstått(${feil.httpStatus}) metode=$metodeSomFeiler exception=${
-            rootCause(
-                feil
-            )
-            }: ${feil.message} "
+                rootCause(
+                    feil,
+                )
+            }: ${feil.message} ",
         )
         return ResponseEntity.status(feil.httpStatus).body(
             Ressurs.funksjonellFeil(
                 frontendFeilmelding = feil.feil,
-                melding = feil.feil
-            )
+                melding = feil.feil,
+            ),
         )
     }
 
@@ -81,10 +81,10 @@ class ApiExceptionHandler(val featureToggleService: FeatureToggleService) {
         secureLogger.error("En håndtert feil har oppstått(${feil.httpStatus}): ${feil.frontendFeilmelding}", feil)
         logger.error(
             "En håndtert feil har oppstått(${feil.httpStatus}) metode=$metodeSomFeiler exception=${
-            rootCause(
-                feil
-            )
-            }: ${feil.message} "
+                rootCause(
+                    feil,
+                )
+            }: ${feil.message} ",
         )
         return ResponseEntity.status(feil.httpStatus)
             .body(Ressurs.failure(frontendFeilmelding = feil.frontendFeilmelding))
@@ -97,8 +97,8 @@ class ApiExceptionHandler(val featureToggleService: FeatureToggleService) {
             .body(
                 Ressurs.funksjonellFeil(
                     frontendFeilmelding = "Finner ingen personer for valgt personident",
-                    melding = "Finner ingen personer for valgt personident"
-                )
+                    melding = "Finner ingen personer for valgt personident",
+                ),
             )
     }
 
@@ -113,8 +113,8 @@ class ApiExceptionHandler(val featureToggleService: FeatureToggleService) {
                     status = Ressurs.Status.IKKE_TILGANG,
                     frontendFeilmelding = manglerTilgang.frontendFeilmelding,
                     melding = manglerTilgang.melding,
-                    stacktrace = null
-                )
+                    stacktrace = null,
+                ),
             )
     }
 

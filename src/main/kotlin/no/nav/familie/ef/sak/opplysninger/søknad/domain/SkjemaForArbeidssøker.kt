@@ -9,5 +9,5 @@ data class SkjemaForArbeidssøker(
     val fødselsnummer: String,
     @Embedded(onEmpty = Embedded.OnEmpty.USE_NULL)
     val arbeidssøker: Arbeidssøker,
-    val datoMottatt: LocalDateTime
+    val datoMottatt: LocalDateTime,
 )

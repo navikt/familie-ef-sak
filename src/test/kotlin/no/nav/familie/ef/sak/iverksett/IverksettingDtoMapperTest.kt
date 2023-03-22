@@ -122,7 +122,7 @@ internal class IverksettingDtoMapperTest {
             vedtakService = vedtakService,
             vilkårsvurderingRepository = vilkårsvurderingRepository,
             brevmottakereRepository = brevmottakereRepository,
-            årsakRevurderingsRepository = årsakRevurderingsRepository
+            årsakRevurderingsRepository = årsakRevurderingsRepository,
         )
 
     private val fagsak = fagsak(fagsakpersoner(setOf("1")))
@@ -136,7 +136,7 @@ internal class IverksettingDtoMapperTest {
             Behandlingshistorikk(
                 behandlingId = behandling.id,
                 opprettetAv = "opprettetAv",
-                steg = StegType.SEND_TIL_BESLUTTER
+                steg = StegType.SEND_TIL_BESLUTTER,
             )
         every { behandlingshistorikkService.finnSisteBehandlingshistorikk(any(), any()) } returns behandlingshistorikk
         every { brevmottakereRepository.findByIdOrNull(any()) } returns null
@@ -144,7 +144,7 @@ internal class IverksettingDtoMapperTest {
             behandlingId = saksbehandling.id,
             opplysningskilde = Opplysningskilde.MELDING_MODIA,
             årsak = Revurderingsårsak.ENDRING_INNTEKT,
-            beskrivelse = "beskrivelse"
+            beskrivelse = "beskrivelse",
         )
     }
 
@@ -160,7 +160,7 @@ internal class IverksettingDtoMapperTest {
             tomDatoNestePeriode = null,
             forfallsdatoNestePeriode = null,
             tidSimuleringHentet = null,
-            tomSisteUtbetaling = null
+            tomSisteUtbetaling = null,
         )
 
         every {
@@ -169,7 +169,7 @@ internal class IverksettingDtoMapperTest {
             behandlingId = behandling.id,
             valg = Tilbakekrevingsvalg.OPPRETT_MED_VARSEL,
             varseltekst = forventetVarseltekst,
-            begrunnelse = "ingen"
+            begrunnelse = "ingen",
         )
         every {
             simuleringService.hentLagretSimuleringsoppsummering(behandlingId = behandling.id)
@@ -231,7 +231,7 @@ internal class IverksettingDtoMapperTest {
         val avslåttVedtak = Vedtak(
             behandlingId = behandling.id,
             resultatType = ResultatType.AVSLÅ,
-            avslåÅrsak = AvslagÅrsak.MINDRE_INNTEKTSENDRINGER
+            avslåÅrsak = AvslagÅrsak.MINDRE_INNTEKTSENDRINGER,
         )
 
         every { vedtakService.hentVedtak(any()) } returns avslåttVedtak
@@ -247,7 +247,7 @@ internal class IverksettingDtoMapperTest {
         val saksbehandling = saksbehandling(resultat = BehandlingResultat.INNVILGET)
         val perioder = listOf(
             vedtaksperiode(startDato = dato, sluttDato = dato, vedtaksperiodeType = HOVEDPERIODE),
-            vedtaksperiode(startDato = dato, sluttDato = dato, vedtaksperiodeType = SANKSJON)
+            vedtaksperiode(startDato = dato, sluttDato = dato, vedtaksperiodeType = SANKSJON),
         )
         val innvilgetVedtak = vedtak(behandling.id, perioder = PeriodeWrapper(perioder))
 
@@ -269,7 +269,7 @@ internal class IverksettingDtoMapperTest {
         val perioder = listOf(
             vedtaksperiode(startDato = dato, sluttDato = dato, vedtaksperiodeType = HOVEDPERIODE),
             vedtaksperiode(startDato = dato, sluttDato = dato, vedtaksperiodeType = MIDLERTIDIG_OPPHØR),
-            vedtaksperiode(startDato = dato, sluttDato = dato, vedtaksperiodeType = HOVEDPERIODE)
+            vedtaksperiode(startDato = dato, sluttDato = dato, vedtaksperiodeType = HOVEDPERIODE),
         )
         val innvilgetVedtak = vedtak(behandling.id, perioder = PeriodeWrapper(perioder))
 
@@ -330,7 +330,7 @@ internal class IverksettingDtoMapperTest {
 
     private fun assertBehandling(
         behandling: BehandlingsdetaljerDto,
-        behandlingId: UUID?
+        behandlingId: UUID?,
     ) {
         assertThat(behandling.behandlingId).isEqualTo(behandlingId)
         assertThat(behandling.behandlingType.name).isEqualTo(BehandlingType.FØRSTEGANGSBEHANDLING.name)
@@ -461,7 +461,7 @@ internal class IverksettingDtoMapperTest {
         val grunnlagsdata =
             opprettGrunnlagsdata().copy(
                 søker = søker(),
-                barn = listOf(barnMedIdent(fnr = "123", navn = "fornavn etternavn"))
+                barn = listOf(barnMedIdent(fnr = "123", navn = "fornavn etternavn")),
             )
         every { grunnlagsdataService.hentGrunnlagsdata(any()) } returns
             GrunnlagsdataMedMetadata(grunnlagsdata, LocalDateTime.parse("2022-03-25T05:51:31.439"))
@@ -474,19 +474,19 @@ internal class IverksettingDtoMapperTest {
             MatchetBehandlingBarn(
                 fødselsnummer = "1234",
                 barn = barnMedIdent(fnr = "1234", "fornavn etternavn"),
-                behandlingBarn = behandlingBarn
-            )
+                behandlingBarn = behandlingBarn,
+            ),
         )
         every { vilkårsvurderingRepository.findByBehandlingId(any()) } returns listOf(
             objectMapper.readValue(
-                vilkårsvurderingJson
-            )
+                vilkårsvurderingJson,
+            ),
         )
         every { vedtakService.hentVedtak(any()) } returns objectMapper.readValue(vedtakJson)
         every { brevmottakereRepository.findByIdOrNull(any()) } returns objectMapper.readValue(brevmottakereJson)
         every { tilbakekrevingService.hentTilbakekreving(any()) } returns objectMapper.readValue(tilbakekrevingJson)
         every { simuleringService.hentLagretSimuleringsoppsummering(any()) } returns objectMapper.readValue(
-            simuleringsoppsummeringJson
+            simuleringsoppsummeringJson,
         )
         every { tilkjentYtelseService.hentForBehandling(any()) } returns objectMapper.readValue(tilkjentYtelseJson)
         return behandlingId
@@ -511,7 +511,7 @@ internal class IverksettingDtoMapperTest {
         opprettetAv = "z094239",
         opprettetTid = LocalDateTime.parse("2022-03-02T05:36:39.553"),
         endretTid = LocalDateTime.parse("2022-03-03T05:36:39.556"),
-        vedtakstidspunkt = LocalDateTime.parse("2022-03-03T05:36:39.556")
+        vedtakstidspunkt = LocalDateTime.parse("2022-03-03T05:36:39.556"),
     )
 
     private val behandlingBarnJson = """

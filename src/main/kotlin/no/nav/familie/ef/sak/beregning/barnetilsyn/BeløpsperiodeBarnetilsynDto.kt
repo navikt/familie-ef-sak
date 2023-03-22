@@ -15,7 +15,7 @@ data class BeløpsperiodeBarnetilsynDto(
     val sats: Int,
     val beregningsgrunnlag: BeregningsgrunnlagBarnetilsynDto,
     val periodetype: PeriodetypeBarnetilsyn,
-    val aktivitetstype: AktivitetstypeBarnetilsyn?
+    val aktivitetstype: AktivitetstypeBarnetilsyn?,
 ) {
     @Deprecated("Bruk periode", ReplaceWith("periode"))
     @get:JsonProperty("periode")
@@ -29,5 +29,5 @@ data class BeregningsgrunnlagBarnetilsynDto(
     val kontantstøttebeløp: BigDecimal,
     val tilleggsstønadsbeløp: BigDecimal,
     val antallBarn: Int,
-    val barn: List<UUID>
+    val barn: List<UUID>,
 )

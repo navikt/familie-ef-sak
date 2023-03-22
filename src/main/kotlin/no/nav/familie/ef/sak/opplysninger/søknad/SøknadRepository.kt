@@ -18,7 +18,7 @@ interface SøknadRepository : RepositoryInterface<Søknad, UUID>, InsertUpdateRe
         """SELECT ss.dato_mottatt
                     FROM soknad_grunnlag soknad
                     JOIN soknadsskjema ss ON soknad.soknadsskjema_id = ss.id
-                    WHERE soknad.behandling_id = :behandlingId"""
+                    WHERE soknad.behandling_id = :behandlingId""",
     )
     fun finnDatoMottattForSøknad(behandlingId: UUID): LocalDateTime?
 }

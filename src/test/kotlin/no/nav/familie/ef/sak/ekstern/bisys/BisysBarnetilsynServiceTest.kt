@@ -52,7 +52,7 @@ internal class BisysBarnetilsynServiceTest {
         barnService,
         tilkjentYtelseService,
         andelsHistorikkService,
-        infotrygdService
+        infotrygdService,
     )
 
     val fagsak: Fagsak = fagsak()
@@ -63,8 +63,8 @@ internal class BisysBarnetilsynServiceTest {
             id = UUID.randomUUID(),
             behandlingId = UUID.randomUUID(),
             søknadBarnId = null,
-            personIdent = personIdentBarnAndelHistorikk
-        )
+            personIdent = personIdentBarnAndelHistorikk,
+        ),
     )
     val JAN_2023 = YearMonth.of(2023, 1)
 
@@ -87,8 +87,8 @@ internal class BisysBarnetilsynServiceTest {
         assertThat(
             barnetilsynBisysService.hentBarnetilsynperioderFraEfOgInfotrygd(
                 personident,
-                LocalDate.now()
-            ).barnetilsynBisysPerioder
+                LocalDate.now(),
+            ).barnetilsynBisysPerioder,
         ).isEmpty()
     }
 
@@ -99,15 +99,15 @@ internal class BisysBarnetilsynServiceTest {
             lagAndelHistorikkDto(
                 tilOgMed = LocalDate.now(),
                 behandlingBarn = behandlingBarn,
-                endring = HistorikkEndring(EndringType.FJERNET, UUID.randomUUID(), LocalDateTime.now())
+                endring = HistorikkEndring(EndringType.FJERNET, UUID.randomUUID(), LocalDateTime.now()),
             )
         mockHentHistorikk(andelhistorikkDto)
 
         assertThat(
             barnetilsynBisysService.hentBarnetilsynperioderFraEfOgInfotrygd(
                 personident,
-                LocalDate.now()
-            ).barnetilsynBisysPerioder
+                LocalDate.now(),
+            ).barnetilsynBisysPerioder,
         ).isEmpty()
     }
 
@@ -119,8 +119,8 @@ internal class BisysBarnetilsynServiceTest {
         assertThat(
             barnetilsynBisysService.hentBarnetilsynperioderFraEfOgInfotrygd(
                 personident,
-                LocalDate.now()
-            ).barnetilsynBisysPerioder
+                LocalDate.now(),
+            ).barnetilsynBisysPerioder,
         ).isEmpty()
     }
 
@@ -132,8 +132,8 @@ internal class BisysBarnetilsynServiceTest {
         assertThat(
             barnetilsynBisysService.hentBarnetilsynperioderFraEfOgInfotrygd(
                 personident,
-                LocalDate.now()
-            ).barnetilsynBisysPerioder
+                LocalDate.now(),
+            ).barnetilsynBisysPerioder,
         ).isEmpty()
     }
 
@@ -147,7 +147,7 @@ internal class BisysBarnetilsynServiceTest {
 
         val bisysPeriode = barnetilsynBisysService.hentBarnetilsynperioderFraEfOgInfotrygd(
             personident,
-            LocalDate.now()
+            LocalDate.now(),
         ).barnetilsynBisysPerioder.first()
         assertThat(bisysPeriode.periode.fom).isEqualTo(andelhistorikkDto.andel.periode.fomDato)
         assertThat(bisysPeriode.periode.tom).isEqualTo(andelhistorikkDto.andel.periode.tomDato)
@@ -162,21 +162,21 @@ internal class BisysBarnetilsynServiceTest {
             lagAndelHistorikkDto(
                 fraOgMed = LocalDate.now(),
                 tilOgMed = LocalDate.now().plusMonths(1),
-                behandlingBarn = behandlingBarn
+                behandlingBarn = behandlingBarn,
             )
 
         val andelhistorikkDto2 =
             lagAndelHistorikkDto(
                 fraOgMed = LocalDate.now().plusMonths(3),
                 tilOgMed = LocalDate.now().plusMonths(4),
-                behandlingBarn = behandlingBarn
+                behandlingBarn = behandlingBarn,
             )
 
         val andelhistorikkDto3 =
             lagAndelHistorikkDto(
                 fraOgMed = LocalDate.now().plusMonths(6),
                 tilOgMed = LocalDate.now().plusMonths(7),
-                behandlingBarn = behandlingBarn
+                behandlingBarn = behandlingBarn,
             )
 
         every {
@@ -186,8 +186,8 @@ internal class BisysBarnetilsynServiceTest {
         assertThat(
             barnetilsynBisysService.hentBarnetilsynperioderFraEfOgInfotrygd(
                 personident,
-                LocalDate.now()
-            ).barnetilsynBisysPerioder
+                LocalDate.now(),
+            ).barnetilsynBisysPerioder,
         ).hasSize(3)
     }
 
@@ -202,21 +202,21 @@ internal class BisysBarnetilsynServiceTest {
             lagAndelHistorikkDto(
                 fraOgMed = førsteDato,
                 tilOgMed = LocalDate.now().plusMonths(1),
-                behandlingBarn = behandlingBarn
+                behandlingBarn = behandlingBarn,
             )
 
         val andelhistorikkDto2 =
             lagAndelHistorikkDto(
                 fraOgMed = LocalDate.now().plusMonths(2),
                 tilOgMed = LocalDate.now().plusMonths(3),
-                behandlingBarn = behandlingBarn
+                behandlingBarn = behandlingBarn,
             )
 
         val andelhistorikkDto3 =
             lagAndelHistorikkDto(
                 fraOgMed = LocalDate.now().plusMonths(4),
                 tilOgMed = senesteDato,
-                behandlingBarn = behandlingBarn
+                behandlingBarn = behandlingBarn,
             )
 
         every {
@@ -225,7 +225,7 @@ internal class BisysBarnetilsynServiceTest {
 
         val perioder = barnetilsynBisysService.hentBarnetilsynperioderFraEfOgInfotrygd(
             personident,
-            LocalDate.now()
+            LocalDate.now(),
         ).barnetilsynBisysPerioder
 
         assertThat(perioder).hasSize(1)
@@ -246,21 +246,21 @@ internal class BisysBarnetilsynServiceTest {
             lagAndelHistorikkDto(
                 fraOgMed = førsteDato,
                 tilOgMed = LocalDate.now().plusMonths(1),
-                behandlingBarn = behandlingBarnListe
+                behandlingBarn = behandlingBarnListe,
             )
 
         val andelhistorikkDto2 =
             lagAndelHistorikkDto(
                 fraOgMed = LocalDate.now().plusMonths(2),
                 tilOgMed = LocalDate.now().plusMonths(3),
-                behandlingBarn = behandlingBarn
+                behandlingBarn = behandlingBarn,
             )
 
         val andelhistorikkDto3 =
             lagAndelHistorikkDto(
                 fraOgMed = LocalDate.now().plusMonths(4),
                 tilOgMed = senesteDato,
-                behandlingBarn = behandlingBarn
+                behandlingBarn = behandlingBarn,
             )
 
         every { barnService.hentBehandlingBarnForBarnIder(any()) } returns behandlingBarnListe andThen behandlingBarn
@@ -271,7 +271,7 @@ internal class BisysBarnetilsynServiceTest {
 
         val perioder = barnetilsynBisysService.hentBarnetilsynperioderFraEfOgInfotrygd(
             personident,
-            LocalDate.now()
+            LocalDate.now(),
         ).barnetilsynBisysPerioder
 
         assertThat(perioder).hasSize(2)
@@ -291,8 +291,8 @@ internal class BisysBarnetilsynServiceTest {
         assertThat(
             barnetilsynBisysService.hentBarnetilsynperioderFraEfOgInfotrygd(
                 personident,
-                LocalDate.now()
-            ).barnetilsynBisysPerioder
+                LocalDate.now(),
+            ).barnetilsynBisysPerioder,
         ).hasSize(1)
     }
 
@@ -310,7 +310,7 @@ internal class BisysBarnetilsynServiceTest {
 
         val perioder = barnetilsynBisysService.hentBarnetilsynperioderFraEfOgInfotrygd(
             personident,
-            LocalDate.MIN
+            LocalDate.MIN,
         ).barnetilsynBisysPerioder
 
         assertThat(perioder.first().periode.fom).isEqualTo(infotrygdPeriodeFom)
@@ -331,7 +331,7 @@ internal class BisysBarnetilsynServiceTest {
         val perioder =
             barnetilsynBisysService.hentBarnetilsynperioderFraEfOgInfotrygd(
                 personident,
-                LocalDate.now()
+                LocalDate.now(),
             ).barnetilsynBisysPerioder
 
         assertThat(perioder).hasSize(1)
@@ -351,7 +351,7 @@ internal class BisysBarnetilsynServiceTest {
         val perioder =
             barnetilsynBisysService.hentBarnetilsynperioderFraEfOgInfotrygd(
                 personident,
-                LocalDate.now()
+                LocalDate.now(),
             ).barnetilsynBisysPerioder
 
         assertThat(perioder).hasSize(1)
@@ -367,7 +367,7 @@ internal class BisysBarnetilsynServiceTest {
         val perioder =
             barnetilsynBisysService.hentBarnetilsynperioderFraEfOgInfotrygd(
                 personident,
-                LocalDate.MIN
+                LocalDate.MIN,
             ).barnetilsynBisysPerioder
 
         assertThat(perioder).hasSize(1)
@@ -377,26 +377,26 @@ internal class BisysBarnetilsynServiceTest {
         every {
             andelsHistorikkService.hentHistorikk(any(), any())
         } returns listOf(
-            andelHistorikkDto
+            andelHistorikkDto,
         )
     }
 
     private fun mockTilkjentYtelse(startdato: LocalDate = LocalDate.now()) {
         every { tilkjentYtelseService.hentForBehandling(any()) } returns lagTilkjentYtelse(
             startdato = startdato,
-            andelerTilkjentYtelse = emptyList()
+            andelerTilkjentYtelse = emptyList(),
         )
     }
 
     private fun mockHentEnInfotrygdperiode(
         infotrygdPeriodeFom: LocalDate = YearMonth.now().atDay(1),
         infotrygdPeriodeTom: LocalDate,
-        beløp: Int = 1
+        beløp: Int = 1,
     ) {
         val infotrygdPeriode = lagInfotrygdPeriode(
             stønadFom = infotrygdPeriodeFom,
             stønadTom = infotrygdPeriodeTom,
-            beløp = beløp
+            beløp = beløp,
         )
         mockHentInfotrygdPeriode(infotrygdPeriode)
     }
@@ -405,7 +405,7 @@ internal class BisysBarnetilsynServiceTest {
         every {
             infotrygdService.hentSammenslåtteBarnetilsynPerioderFraReplika(any())
         } returns listOf(
-            infotrygdPeriode
+            infotrygdPeriode,
         )
     }
 
@@ -413,13 +413,13 @@ internal class BisysBarnetilsynServiceTest {
         efPeriodeFom: LocalDate = LocalDate.MIN,
         efPeriodeTom: LocalDate = LocalDate.MAX,
         barn: List<BehandlingBarn> = behandlingBarn,
-        beløp: Int = 1
+        beløp: Int = 1,
     ) {
         val andelHistorikkDto = lagAndelHistorikkDto(
             fraOgMed = efPeriodeFom,
             tilOgMed = efPeriodeTom,
             behandlingBarn = barn,
-            beløp = beløp
+            beløp = beløp,
         )
         mockHentHistorikk(andelHistorikkDto)
     }
@@ -430,7 +430,7 @@ fun lagAndelHistorikkDto(
     tilOgMed: LocalDate,
     behandlingBarn: List<BehandlingBarn> = emptyList(),
     beløp: Int = 1,
-    endring: HistorikkEndring? = null
+    endring: HistorikkEndring? = null,
 ): AndelHistorikkDto {
     return AndelHistorikkDto(
         behandlingId = UUID.randomUUID(),
@@ -441,9 +441,9 @@ fun lagAndelHistorikkDto(
             lagAndelTilkjentYtelse(
                 beløp = beløp,
                 fraOgMed = fraOgMed,
-                tilOgMed = tilOgMed
+                tilOgMed = tilOgMed,
             ),
-            null
+            null,
         ).copy(barn = behandlingBarn.map { it.id }),
 
         aktivitet = null,
@@ -455,6 +455,6 @@ fun lagAndelHistorikkDto(
         behandlingÅrsak = BehandlingÅrsak.SØKNAD,
         erOpphør = false,
         periodetypeBarnetilsyn = PeriodetypeBarnetilsyn.ORDINÆR,
-        aktivitetBarnetilsyn = AktivitetstypeBarnetilsyn.I_ARBEID
+        aktivitetBarnetilsyn = AktivitetstypeBarnetilsyn.I_ARBEID,
     )
 }

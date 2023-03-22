@@ -46,7 +46,7 @@ class VedtakController(
     private val vedtakHistorikkService: VedtakHistorikkService,
     private val behandlingRepository: BehandlingRepository,
     private val nullstillVedtakService: NullstillVedtakService,
-    private val angreSendTilBeslutterService: AngreSendTilBeslutterService
+    private val angreSendTilBeslutterService: AngreSendTilBeslutterService,
 ) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -74,7 +74,7 @@ class VedtakController(
     @PostMapping("/{behandlingId}/beslutte-vedtak")
     fun beslutteVedtak(
         @PathVariable behandlingId: UUID,
-        @RequestBody request: BeslutteVedtakDto
+        @RequestBody request: BeslutteVedtakDto,
     ): Ressurs<UUID> {
         val behandling = behandlingService.hentSaksbehandling(behandlingId)
         tilgangService.validerTilgangTilBehandling(behandling, AuditLoggerEvent.UPDATE)
@@ -100,7 +100,7 @@ class VedtakController(
     @GetMapping("fagsak/{fagsakId}/historikk/{fra}")
     fun hentVedtak(
         @PathVariable fagsakId: UUID,
-        @PathVariable fra: YearMonth
+        @PathVariable fra: YearMonth,
     ): Ressurs<InnvilgelseOvergangsstønad> {
         tilgangService.validerTilgangTilFagsak(fagsakId, AuditLoggerEvent.ACCESS)
         return Ressurs.success(vedtakHistorikkService.hentVedtakForOvergangsstønadFraDato(fagsakId, fra))
@@ -109,7 +109,7 @@ class VedtakController(
     @GetMapping("{behandlingId}/historikk/{fra}")
     fun hentVedtakForBehandling(
         @PathVariable behandlingId: UUID,
-        @PathVariable fra: YearMonth
+        @PathVariable fra: YearMonth,
     ): Ressurs<VedtakDto> {
         tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.ACCESS)
         return Ressurs.success(vedtakHistorikkService.hentVedtakFraDato(behandlingId, fra))
@@ -166,7 +166,7 @@ class VedtakController(
     @ProtectedWithClaims(issuer = "azuread", claimMap = ["roles=access_as_application"]) // Familie-ef-personhendelse bruker denne
     fun hentPersonerMedAktivStonadOgForventetInntekt(
         @RequestBody
-        personIdenter: List<String>
+        personIdenter: List<String>,
     ): Ressurs<List<ForventetInntektForPersonIdent>> {
         logger.info("hentPersonerMedAktivStonadOgForventetInntekt start")
         val personIdentToBehandlingIds =
@@ -193,9 +193,9 @@ class VedtakController(
                 ForventetInntektForPersonIdent(
                     it.personIdent,
                     it.forventetInntektForMåned.forventetInntektForrigeMåned,
-                    it.forventetInntektForMåned.forventetInntektToMånederTilbake
+                    it.forventetInntektForMåned.forventetInntektToMånederTilbake,
                 )
-            }
+            },
         )
     }
 }

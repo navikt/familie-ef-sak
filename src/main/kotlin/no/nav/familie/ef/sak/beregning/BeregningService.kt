@@ -11,7 +11,7 @@ import java.math.BigDecimal
 
 @Service
 class BeregningService(
-    private val featureToggleService: FeatureToggleService
+    private val featureToggleService: FeatureToggleService,
 ) {
 
     fun beregnYtelse(vedtaksperioder: List<Månedsperiode>, inntektsperioder: List<Inntektsperiode>): List<Beløpsperiode> {
@@ -30,7 +30,7 @@ class BeregningService(
 
     private fun validerVedtaksperioder(vedtaksperioder: List<Månedsperiode>) {
         brukerfeilHvis(
-            vedtaksperioder.harOverlappende()
+            vedtaksperioder.harOverlappende(),
         ) { "Vedtaksperioder $vedtaksperioder overlapper" }
     }
 
@@ -40,11 +40,11 @@ class BeregningService(
         }
 
         brukerfeilHvis(
-            inntektsperioder.zipWithNext { a, b -> a.periode < b.periode }.any { !it }
+            inntektsperioder.zipWithNext { a, b -> a.periode < b.periode }.any { !it },
         ) { "Inntektsperioder må være sortert" }
 
         brukerfeilHvis(
-            vedtaksperioder.zipWithNext { a, b -> a < b }.any { !it }
+            vedtaksperioder.zipWithNext { a, b -> a < b }.any { !it },
         ) { "Vedtaksperioder må være sortert" }
 
         brukerfeilHvis(inntektsperioder.first().periode.fom > vedtaksperioder.first().fom) {
@@ -59,22 +59,22 @@ class BeregningService(
         brukerfeilHvis(
             inntektsperioder.any {
                 (it.dagsats ?: BigDecimal.ZERO) < BigDecimal.ZERO
-            }
+            },
         ) { "Dagsats kan ikke være negativt" }
         brukerfeilHvis(
             inntektsperioder.any {
                 (it.månedsinntekt ?: BigDecimal.ZERO) < BigDecimal.ZERO
-            }
+            },
         ) { "Månedsinntekt kan ikke være negativt" }
         brukerfeilHvis(
             inntektsperioder.any {
                 it.samordningsfradrag < BigDecimal.ZERO
-            }
+            },
         ) { "Samordningsfradraget kan ikke være negativt" }
 
         brukerfeilHvis(
             inntektsperioder.map { it.periode }.harOverlappende() ||
-                !inntektsperioder.map { it.periode }.erSammenhengende()
+                !inntektsperioder.map { it.periode }.erSammenhengende(),
         ) { "Inntektsperioder $inntektsperioder overlapper eller er ikke sammenhengde" }
     }
 }

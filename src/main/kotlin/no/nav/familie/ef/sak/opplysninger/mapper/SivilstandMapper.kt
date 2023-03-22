@@ -15,7 +15,7 @@ object SivilstandMapper {
     fun tilDto(grunnlagsdata: GrunnlagsdataDomene, sivilstand: Sivilstand?): SivilstandInngangsvilkårDto {
         return SivilstandInngangsvilkårDto(
             søknadsgrunnlag = sivilstand?.let { mapSøknadsgrunnlag(it) },
-            registergrunnlag = mapRegistergrunnlag(grunnlagsdata.søker)
+            registergrunnlag = mapRegistergrunnlag(grunnlagsdata.søker),
         )
     }
 
@@ -24,7 +24,7 @@ object SivilstandMapper {
         return SivilstandRegistergrunnlagDto(
             type = Sivilstandstype.valueOf(sivilstand.type.name),
             navn = sivilstand.navn,
-            gyldigFraOgMed = sivilstand.gyldigFraOgMed
+            gyldigFraOgMed = sivilstand.gyldigFraOgMed,
         )
     }
 
@@ -40,7 +40,7 @@ object SivilstandMapper {
             årsakEnslig = sivilstandsdetaljer.årsakEnslig,
             tidligereSamboer = sivilstandsdetaljer.tidligereSamboer?.let {
                 PersonMinimumMapper.tilDto(it)
-            }
+            },
         )
     }
 }

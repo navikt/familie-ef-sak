@@ -22,7 +22,7 @@ class JournalføringKlageService(
     private val fagsakService: FagsakService,
     private val oppgaveService: OppgaveService,
     private val journalpostService: JournalpostService,
-    private val klageService: KlageService
+    private val klageService: KlageService,
 ) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -41,7 +41,7 @@ class JournalføringKlageService(
 
     private fun journalførKlageTilEksisterendeBehandling(
         journalføringRequest: JournalføringKlageRequest,
-        journalpost: Journalpost
+        journalpost: Journalpost,
     ) {
         val behandlingId = journalføringRequest.behandling.behandlingId ?: error("Mangler behandlingId")
         val saksbehandler = SikkerhetContext.hentSaksbehandler()
@@ -51,7 +51,7 @@ class JournalføringKlageService(
         logger.info(
             "Journalfører journalpost=${journalpost.journalpostId} på eksisterende " +
                 "klageBehandling=$behandlingId på " +
-                "fagsak=${fagsak.id} stønadstype=${fagsak.stønadstype} "
+                "fagsak=${fagsak.id} stønadstype=${fagsak.stønadstype} ",
         )
 
         journalpostService.oppdaterOgFerdigstillJournalpost(
@@ -59,21 +59,21 @@ class JournalføringKlageService(
             dokumenttitler = journalføringRequest.dokumentTitler,
             journalførendeEnhet = journalføringRequest.journalførendeEnhet,
             fagsak = fagsak,
-            saksbehandler = saksbehandler
+            saksbehandler = saksbehandler,
         )
         ferdigstillJournalføringsoppgave(journalføringRequest)
     }
 
     private fun journalførKlageTilNyBehandling(
         journalføringRequest: JournalføringKlageRequest,
-        journalpost: Journalpost
+        journalpost: Journalpost,
     ) {
         val saksbehandler = SikkerhetContext.hentSaksbehandler()
         val fagsak = fagsakService.fagsakMedOppdatertPersonIdent(journalføringRequest.fagsakId)
         val mottattDato = journalføringRequest.behandling.mottattDato
         logger.info(
             "Journalfører journalpost=${journalpost.journalpostId} på ny klagebehandling på " +
-                "fagsak=${fagsak.id} stønadstype=${fagsak.stønadstype} mottattDato=$mottattDato"
+                "fagsak=${fagsak.id} stønadstype=${fagsak.stønadstype} mottattDato=$mottattDato",
         )
 
         val klageMottatt = mottattDato ?: journalpost.datoMottatt?.toLocalDate()
@@ -88,7 +88,7 @@ class JournalføringKlageService(
             dokumenttitler = journalføringRequest.dokumentTitler,
             journalførendeEnhet = journalføringRequest.journalførendeEnhet,
             fagsak = fagsak,
-            saksbehandler = saksbehandler
+            saksbehandler = saksbehandler,
         )
 
         ferdigstillJournalføringsoppgave(journalføringRequest)

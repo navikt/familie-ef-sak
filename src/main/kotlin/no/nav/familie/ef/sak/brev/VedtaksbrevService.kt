@@ -32,7 +32,7 @@ class VedtaksbrevService(
     private val brevRepository: VedtaksbrevRepository,
     private val personopplysningerService: PersonopplysningerService,
     private val brevsignaturService: BrevsignaturService,
-    private val familieDokumentClient: FamilieDokumentClient
+    private val familieDokumentClient: FamilieDokumentClient,
 ) {
 
     fun hentBeslutterbrevEllerRekonstruerSaksbehandlerBrev(behandlingId: UUID): ByteArray {
@@ -58,7 +58,7 @@ class VedtaksbrevService(
             saksbehandlerBrevrequest = brevrequest,
             saksbehandlersignatur = saksbehandlersignatur.navn,
             enhet = saksbehandlersignatur.enhet,
-            skjulBeslutterSignatur = saksbehandlersignatur.skjulBeslutter
+            skjulBeslutterSignatur = saksbehandlersignatur.skjulBeslutter,
         )
 
         lagreEllerOppdaterSaksbehandlerVedtaksbrev(
@@ -66,7 +66,7 @@ class VedtaksbrevService(
             brevmal = brevmal,
             saksbehandlersignatur = saksbehandlersignatur.navn,
             enhet = saksbehandlersignatur.enhet,
-            saksbehandlerHtml = html
+            saksbehandlerHtml = html,
         )
 
         return familieDokumentClient.genererPdfFraHtml(html)
@@ -77,7 +77,7 @@ class VedtaksbrevService(
         brevmal: String,
         saksbehandlersignatur: String,
         enhet: String,
-        saksbehandlerHtml: String
+        saksbehandlerHtml: String,
     ): Vedtaksbrev {
         val vedtaksbrev = Vedtaksbrev(
             behandlingId = behandlingId,
@@ -86,7 +86,7 @@ class VedtaksbrevService(
             saksbehandlersignatur = saksbehandlersignatur,
             enhet = enhet,
             saksbehandlerident = SikkerhetContext.hentSaksbehandler(),
-            opprettetTid = SporbarUtils.now()
+            opprettetTid = SporbarUtils.now(),
         )
 
         return when (brevRepository.existsById(behandlingId)) {
@@ -105,7 +105,7 @@ class VedtaksbrevService(
 
         return lagBeslutterPdfMedSignatur(
             vedtaksbrev.saksbehandlerHtml,
-            signaturMedEnhet
+            signaturMedEnhet,
         ).bytes
     }
 
@@ -121,7 +121,7 @@ class VedtaksbrevService(
             enhet = signaturMedEnhet.enhet,
             beslutterident = beslutterIdent,
             beslutterPdf = beslutterPdf,
-            besluttetTid = LocalDateTime.now()
+            besluttetTid = LocalDateTime.now(),
         )
         brevRepository.update(besluttervedtaksbrev)
         return Fil(bytes = beslutterPdf.bytes)
@@ -129,7 +129,7 @@ class VedtaksbrevService(
 
     private fun hentSaksbehandlerHtml(
         vedtaksbrev: Vedtaksbrev,
-        saksbehandling: Saksbehandling
+        saksbehandling: Saksbehandling,
     ): String {
         feilHvis(vedtaksbrev.saksbehandlerHtml == null) {
             "Mangler saksbehandlerbrev for behandling: ${saksbehandling.id}"
@@ -144,12 +144,12 @@ class VedtaksbrevService(
         behandling: Saksbehandling,
         vedtaksbrev: Vedtaksbrev,
         beslutterIdent: String,
-        vedtakErUtenBeslutter: VedtakErUtenBeslutter
+        vedtakErUtenBeslutter: VedtakErUtenBeslutter,
     ) {
         if (behandling.steg != StegType.BESLUTTE_VEDTAK || behandling.status != BehandlingStatus.FATTER_VEDTAK) {
             throw Feil(
                 "Behandling er i feil steg=${behandling.steg} status=${behandling.status}",
-                httpStatus = HttpStatus.BAD_REQUEST
+                httpStatus = HttpStatus.BAD_REQUEST,
             )
         }
 
@@ -163,11 +163,11 @@ class VedtaksbrevService(
 
     private fun lagBeslutterPdfMedSignatur(
         saksbehandlerHtml: String,
-        signaturMedEnhet: SignaturDto
+        signaturMedEnhet: SignaturDto,
     ): Fil {
         val htmlMedBeslutterSignatur = settInnBeslutterSignaturIHtml(
             html = saksbehandlerHtml,
-            signaturMedEnhet = signaturMedEnhet
+            signaturMedEnhet = signaturMedEnhet,
         )
         return Fil(familieDokumentClient.genererPdfFraHtml(htmlMedBeslutterSignatur))
     }
@@ -190,7 +190,7 @@ class VedtaksbrevService(
             overskrift = fritekstbrevDto.overskrift,
             avsnitt = fritekstbrevDto.avsnitt,
             personIdent = saksbehandling.ident,
-            navn = navn
+            navn = navn,
         )
 
         val signaturMedEnhet = brevsignaturService.lagSignaturMedEnhet(saksbehandling)
@@ -198,7 +198,7 @@ class VedtaksbrevService(
         val html = brevClient.genererHtmlFritekstbrev(
             fritekstBrev = request,
             saksbehandlerNavn = signaturMedEnhet.navn,
-            enhet = signaturMedEnhet.enhet
+            enhet = signaturMedEnhet.enhet,
         )
 
         lagreEllerOppdaterSaksbehandlerVedtaksbrev(
@@ -206,7 +206,7 @@ class VedtaksbrevService(
             brevmal = FRITEKST,
             saksbehandlersignatur = signaturMedEnhet.navn,
             enhet = signaturMedEnhet.enhet,
-            saksbehandlerHtml = html
+            saksbehandlerHtml = html,
         )
 
         return familieDokumentClient.genererPdfFraHtml(html)
@@ -216,7 +216,7 @@ class VedtaksbrevService(
         if (saksbehandling.status.behandlingErLåstForVidereRedigering()) {
             throw Feil(
                 "Behandling er i feil steg=${saksbehandling.steg} status=${saksbehandling.status}",
-                httpStatus = HttpStatus.BAD_REQUEST
+                httpStatus = HttpStatus.BAD_REQUEST,
             )
         }
     }
@@ -225,7 +225,7 @@ class VedtaksbrevService(
         if (saksbehandlerIdent == beslutterIdent) {
             throw ApiFeil(
                 "Beslutter kan ikke behandle en behandling som den selv har sendt til beslutter",
-                HttpStatus.BAD_REQUEST
+                HttpStatus.BAD_REQUEST,
             )
         }
     }

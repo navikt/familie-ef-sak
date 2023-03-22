@@ -19,7 +19,7 @@ import java.util.UUID
 enum class EndringType {
     FJERNET,
     ERSTATTET,
-    SPLITTET
+    SPLITTET,
 }
 
 data class AndelHistorikkDto(
@@ -37,7 +37,7 @@ data class AndelHistorikkDto(
     val erSanksjon: Boolean, // TODO denne kan fjernes / flyttes som en get og være beroende av periodetype / periodetypeBarnetilsyn
     val sanksjonsårsak: Sanksjonsårsak?,
     val erOpphør: Boolean,
-    val endring: HistorikkEndring?
+    val endring: HistorikkEndring?,
 )
 
 /**
@@ -59,12 +59,12 @@ data class AndelMedGrunnlagDto(
     val utgifter: BigDecimal = BigDecimal.ZERO,
     val barn: List<UUID>,
     val sats: Int,
-    val beløpFørFratrekkOgSatsJustering: Int
+    val beløpFørFratrekkOgSatsJustering: Int,
 ) {
 
     constructor(
         andel: AndelTilkjentYtelse,
-        vedtaksinformasjon: VedtakshistorikkperiodeBarnetilsyn?
+        vedtaksinformasjon: VedtakshistorikkperiodeBarnetilsyn?,
     ) : this(
         beløp = andel.beløp,
         periode = andel.periode,
@@ -77,7 +77,7 @@ data class AndelMedGrunnlagDto(
         antallBarn = vedtaksinformasjon?.antallBarn ?: 0,
         barn = vedtaksinformasjon?.barn ?: emptyList(),
         sats = vedtaksinformasjon?.sats ?: 0,
-        beløpFørFratrekkOgSatsJustering = vedtaksinformasjon?.beløpFørFratrekkOgSatsjustering ?: 0
+        beløpFørFratrekkOgSatsJustering = vedtaksinformasjon?.beløpFørFratrekkOgSatsjustering ?: 0,
     )
 
     @Deprecated("Bruk periode!", ReplaceWith("periode.fomDato"))
@@ -92,5 +92,5 @@ data class AndelMedGrunnlagDto(
 data class HistorikkEndring(
     val type: EndringType,
     val behandlingId: UUID,
-    val vedtakstidspunkt: LocalDateTime
+    val vedtakstidspunkt: LocalDateTime,
 )

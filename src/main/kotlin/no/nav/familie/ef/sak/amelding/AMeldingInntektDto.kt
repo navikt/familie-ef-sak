@@ -5,18 +5,18 @@ import java.time.YearMonth
 
 data class AMeldingInntektDto(
     val inntektPerVirksomhet: List<InntektForVirksomhetDto>,
-    val avvik: List<String>
+    val avvik: List<String>,
 )
 
 data class InntektForVirksomhetDto(
     val identifikator: String,
     val navn: String,
-    val inntektPerMåned: Map<YearMonth, InntektPerMånedDto>
+    val inntektPerMåned: Map<YearMonth, InntektPerMånedDto>,
 )
 
 data class InntektPerMånedDto(
     val totalbeløp: Int,
-    val inntekt: List<InntektDto>
+    val inntekt: List<InntektDto>,
 )
 
 /**
@@ -37,20 +37,21 @@ data class InntektDto(
     val kategori: String?,
     val opptjeningsland: String? = null,
     val opptjeningsperiodeFom: LocalDate? = null,
-    val opptjeningsperiodeTom: LocalDate? = null
+    val opptjeningsperiodeTom: LocalDate? = null,
 )
 
 enum class InntektType {
     LØNNSINNTEKT,
     NÆRINGSINNTEKT,
     PENSJON_ELLER_TRYGD,
-    YTELSE_FRA_OFFENTLIGE
+    YTELSE_FRA_OFFENTLIGE,
 }
 
 enum class Fordel(val verdi: String) {
     KONTANTYTELSE("kontantytelse"),
     NATURALYTELSE("naturalytelse"),
-    UTGIFTSGODTGJØRELSE("utgiftsgodtgjoerelse");
+    UTGIFTSGODTGJØRELSE("utgiftsgodtgjoerelse"),
+    ;
 
     companion object {
 

@@ -13,7 +13,7 @@ data class Inntekt(
     val forventetInntekt: BigDecimal?,
     val samordningsfradrag: BigDecimal?,
     val dagsats: BigDecimal? = null,
-    val månedsinntekt: BigDecimal? = null
+    val månedsinntekt: BigDecimal? = null,
 )
 
 // TODO Dette er en domeneklasse og burde flyttes til Vedtak.kt.
@@ -23,12 +23,12 @@ data class Inntektsperiode(
     val periode: Månedsperiode =
         Månedsperiode(
             startDato ?: error("periode eller startDato må ha verdi"),
-            sluttDato ?: error("periode eller sluttDato må ha verdi")
+            sluttDato ?: error("periode eller sluttDato må ha verdi"),
         ),
     val dagsats: BigDecimal? = null,
     val månedsinntekt: BigDecimal? = null,
     val inntekt: BigDecimal,
-    val samordningsfradrag: BigDecimal
+    val samordningsfradrag: BigDecimal,
 ) {
 
     fun totalinntekt(): BigDecimal {
@@ -50,8 +50,8 @@ fun List<Inntekt>.tilInntektsperioder() = this.mapIndexed { index, inntektsperio
                 this[index + 1].årMånedFra.minusMonths(1)
             } else {
                 YearMonth.from(LocalDate.MAX)
-            }
-        )
+            },
+        ),
     )
 }
 
@@ -61,6 +61,6 @@ fun List<Inntektsperiode>.tilInntekt() = this.map { inntektsperiode ->
         månedsinntekt = inntektsperiode.månedsinntekt,
         forventetInntekt = inntektsperiode.inntekt,
         samordningsfradrag = inntektsperiode.samordningsfradrag,
-        årMånedFra = inntektsperiode.periode.fom
+        årMånedFra = inntektsperiode.periode.fom,
     )
 }

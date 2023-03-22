@@ -49,9 +49,9 @@ class InfotrygdReplikaMock {
                             personIdent = firstArg<InfotrygdSøkRequest>().personIdenter.first(),
                             stønadType = StønadType.BARNETILSYN,
                             resultat = InfotrygdSakResultat.ÅPEN_SAK,
-                            type = InfotrygdSakType.KLAGE
-                        )
-                    )
+                            type = InfotrygdSakType.KLAGE,
+                        ),
+                    ),
                 )
             }
             every { client.hentInslagHosInfotrygd(any()) } answers {
@@ -60,10 +60,10 @@ class InfotrygdReplikaMock {
                         Vedtakstreff(
                             firstArg<InfotrygdSøkRequest>().personIdenter.first(),
                             StønadType.OVERGANGSSTØNAD,
-                            false
-                        )
+                            false,
+                        ),
                     ),
-                    emptyList()
+                    emptyList(),
                 )
             }
             every { client.hentPersonerForMigrering(any()) } returns emptySet()
@@ -80,10 +80,10 @@ class InfotrygdReplikaMock {
                         inntektsgrunnlag = 321,
                         samordningsfradrag = 0,
                         utgifterBarnetilsyn = 1000,
-                        barnIdenter = listOf("123", "234")
-                    )
+                        barnIdenter = listOf("123", "234"),
+                    ),
                 ),
-                skolepenger = emptyList()
+                skolepenger = emptyList(),
             )
         }
     }

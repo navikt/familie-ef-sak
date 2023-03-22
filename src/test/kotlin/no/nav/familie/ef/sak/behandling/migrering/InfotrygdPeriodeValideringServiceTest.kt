@@ -58,9 +58,9 @@ internal class InfotrygdPeriodeValideringServiceTest {
                         lagInfotrygdPeriode(
                             personIdent = "1",
                             stønadFom = dato.atDay(1),
-                            stønadTom = dato.atEndOfMonth()
-                        )
-                    )
+                            stønadTom = dato.atEndOfMonth(),
+                        ),
+                    ),
                 )
             service.validerKanOppretteBehandlingUtenÅMigrereOvergangsstønad(personIdent, OVERGANGSSTØNAD)
         }
@@ -75,9 +75,9 @@ internal class InfotrygdPeriodeValideringServiceTest {
                             personIdent = "1",
                             stønadFom = dato.atDay(1),
                             stønadTom = dato.atEndOfMonth(),
-                            beløp = 0
-                        )
-                    )
+                            beløp = 0,
+                        ),
+                    ),
                 )
             service.validerKanOppretteBehandlingUtenÅMigrereOvergangsstønad(personIdent, OVERGANGSSTØNAD)
         }
@@ -90,7 +90,7 @@ internal class InfotrygdPeriodeValideringServiceTest {
             assertThatThrownBy {
                 service.validerKanOppretteBehandlingUtenÅMigrereOvergangsstønad(
                     personIdent,
-                    StønadType.OVERGANGSSTØNAD
+                    StønadType.OVERGANGSSTØNAD,
                 )
             }
                 .isInstanceOf(ApiFeil::class.java)
@@ -102,14 +102,14 @@ internal class InfotrygdPeriodeValideringServiceTest {
                 infotrygdPerioderDto(
                     listOf(
                         lagInfotrygdPeriode(personIdent = "1", vedtakId = 1),
-                        lagInfotrygdPeriode(personIdent = "2", vedtakId = 2)
-                    )
+                        lagInfotrygdPeriode(personIdent = "2", vedtakId = 2),
+                    ),
                 )
 
             assertThatThrownBy {
                 service.validerKanOppretteBehandlingUtenÅMigrereOvergangsstønad(
                     personIdent,
-                    StønadType.OVERGANGSSTØNAD
+                    StønadType.OVERGANGSSTØNAD,
                 )
             }
                 .isInstanceOf(ApiFeil::class.java)
@@ -128,9 +128,9 @@ internal class InfotrygdPeriodeValideringServiceTest {
                         personIdent = fagsak.hentAktivIdent(),
                         stønadType = fagsak.stønadstype,
                         resultat = InfotrygdSakResultat.ÅPEN_SAK,
-                        type = InfotrygdSakType.KLAGE
-                    )
-                )
+                        type = InfotrygdSakType.KLAGE,
+                    ),
+                ),
             )
 
             service.validerHarIkkeÅpenSakIInfotrygd(fagsak)
@@ -145,9 +145,9 @@ internal class InfotrygdPeriodeValideringServiceTest {
                         personIdent = fagsak.hentAktivIdent(),
                         stønadType = fagsak.stønadstype,
                         resultat = InfotrygdSakResultat.ÅPEN_SAK,
-                        type = InfotrygdSakType.KLAGE_TILBAKEBETALING
-                    )
-                )
+                        type = InfotrygdSakType.KLAGE_TILBAKEBETALING,
+                    ),
+                ),
             )
 
             service.validerHarIkkeÅpenSakIInfotrygd(fagsak)
@@ -165,9 +165,9 @@ internal class InfotrygdPeriodeValideringServiceTest {
                     InfotrygdSak(
                         personIdent = fagsak.hentAktivIdent(),
                         stønadType = fagsak.stønadstype,
-                        resultat = InfotrygdSakResultat.ÅPEN_SAK
-                    )
-                )
+                        resultat = InfotrygdSakResultat.ÅPEN_SAK,
+                    ),
+                ),
             )
 
             assertThatThrownBy { service.validerHarIkkeÅpenSakIInfotrygd(fagsak) }
@@ -184,9 +184,9 @@ internal class InfotrygdPeriodeValideringServiceTest {
                     InfotrygdSak(
                         personIdent = fagsak.hentAktivIdent(),
                         stønadType = fagsak.stønadstype,
-                        resultat = InfotrygdSakResultat.INNVILGET
-                    )
-                )
+                        resultat = InfotrygdSakResultat.INNVILGET,
+                    ),
+                ),
             )
 
             service.validerHarIkkeÅpenSakIInfotrygd(fagsak)

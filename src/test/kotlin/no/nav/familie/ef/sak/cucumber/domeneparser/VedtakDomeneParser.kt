@@ -46,7 +46,7 @@ object VedtakDomeneParser {
                 val perioder = mapPerioderForOvergangsstønad(vedtak.resultatType, rader)
                 vedtak.copy(
                     perioder = PeriodeWrapper(perioder),
-                    inntekter = InntektWrapper(lagDefaultInntektsperiode(perioder))
+                    inntekter = InntektWrapper(lagDefaultInntektsperiode(perioder)),
                 )
             } else {
                 vedtak
@@ -77,7 +77,7 @@ object VedtakDomeneParser {
             vedtak.copy(
                 barnetilsyn = BarnetilsynWrapper(perioder, null),
                 kontantstøtte = KontantstøtteWrapper(emptyList()), // overskreves i egen "Gitt"
-                tilleggsstønad = TilleggsstønadWrapper(false, emptyList(), null)
+                tilleggsstønad = TilleggsstønadWrapper(false, emptyList(), null),
             ) // overskreves i egen "Gitt"
         }
     }
@@ -85,7 +85,7 @@ object VedtakDomeneParser {
     fun opphørSkolepengerUtenPerioder(behandlingId: UUID) = Vedtak(
         resultatType = ResultatType.OPPHØRT,
         skolepenger = SkolepengerWrapper(emptyList(), null),
-        behandlingId = behandlingId
+        behandlingId = behandlingId,
     )
 
     fun mapVedtakForSkolepenger(dataTable: DataTable): List<Vedtak> {
@@ -99,12 +99,13 @@ object VedtakDomeneParser {
             VedtakDomenebegrep.STUDIEBELASTNING,
             VedtakDomenebegrep.DATO_FAKTURA,
             VedtakDomenebegrep.UTGIFTER,
-            VedtakDomenebegrep.BELØP
+            VedtakDomenebegrep.BELØP,
         )
         return mapVedtak(dataTable, gyldigeKolonner) { vedtak, rader ->
             val perioder = when (vedtak.resultatType) {
                 ResultatType.OPPHØRT,
-                ResultatType.INNVILGE -> mapPerioderForSkolepenger(rader)
+                ResultatType.INNVILGE,
+                -> mapPerioderForSkolepenger(rader)
 
                 ResultatType.SANKSJONERE -> {
                     val perioderForBarnetilsyn = mapPerioderForSkolepenger(rader)
@@ -121,7 +122,7 @@ object VedtakDomeneParser {
     private fun mapVedtak(
         dataTable: DataTable,
         gyldigeKolonner: List<Domenenøkkel> = emptyList(),
-        vedtakDecorator: (vedtak: Vedtak, rader: List<Map<String, String>>) -> Vedtak = { vedtak, _ -> vedtak }
+        vedtakDecorator: (vedtak: Vedtak, rader: List<Map<String, String>>) -> Vedtak = { vedtak, _ -> vedtak },
     ): List<Vedtak> {
         validerKolonner(dataTable, gyldigeKolonner)
         return dataTable.forHverBehandling { _, rader ->
@@ -133,7 +134,7 @@ object VedtakDomeneParser {
 
     private fun validerKolonner(
         dataTable: DataTable,
-        gyldigeKolonner: List<Domenenøkkel>
+        gyldigeKolonner: List<Domenenøkkel>,
     ) {
         if (gyldigeKolonner.isNotEmpty()) {
             val kolonneVerdier = gyldigeKolonner.map { it.nøkkel() }.toSet()
@@ -146,13 +147,13 @@ object VedtakDomeneParser {
 
     private fun mapVedtakDomene(
         rad: Map<String, String>,
-        resultatType: ResultatType
+        resultatType: ResultatType,
     ) =
         Vedtak(
             behandlingId = behandlingIdTilUUID[parseInt(Domenebegrep.BEHANDLING_ID, rad)]!!,
             resultatType = resultatType,
             opphørFom = parseValgfriÅrMåned(VedtakDomenebegrep.OPPHØRSDATO, rad),
-            internBegrunnelse = if (resultatType == ResultatType.SANKSJONERE) "Ok" else null
+            internBegrunnelse = if (resultatType == ResultatType.SANKSJONERE) "Ok" else null,
         )
 
     private fun validerSanksjon(perioder: List<Barnetilsynperiode>) {
@@ -177,7 +178,7 @@ object VedtakDomeneParser {
 
     private fun mapPerioderForOvergangsstønad(
         resultatType: ResultatType,
-        rader: List<Map<String, String>>
+        rader: List<Map<String, String>>,
     ): List<Vedtaksperiode> {
         return rader.map { rad ->
             val sanksjonsårsak = sanksjonsårsak(rad, resultatType)
@@ -187,7 +188,7 @@ object VedtakDomeneParser {
                 datoTil = parseTilOgMed(rad),
                 aktivitet = parseAktivitetType(rad) ?: defaultAktivitet(vedtaksperiodeType),
                 periodeType = vedtaksperiodeType ?: VedtaksperiodeType.HOVEDPERIODE,
-                sanksjonsårsak = sanksjonsårsak
+                sanksjonsårsak = sanksjonsårsak,
             )
         }
     }
@@ -205,7 +206,7 @@ object VedtakDomeneParser {
      */
     private fun sanksjonsårsak(
         rad: Map<String, String>,
-        resultatType: ResultatType
+        resultatType: ResultatType,
     ): Sanksjonsårsak? {
         return parseSanksjonsårsak(rad)
             ?: if (resultatType == ResultatType.SANKSJONERE) Sanksjonsårsak.SAGT_OPP_STILLING else null
@@ -213,7 +214,7 @@ object VedtakDomeneParser {
 
     private fun mapPerioderForBarnetilsyn(
         resultatType: ResultatType,
-        rader: List<Map<String, String>>
+        rader: List<Map<String, String>>,
     ): List<Barnetilsynperiode> {
         return rader.map { rad ->
             val behandlingId = behandlingIdTilUUID[parseInt(Domenebegrep.BEHANDLING_ID, rad)]!!
@@ -238,7 +239,7 @@ object VedtakDomeneParser {
                 barn = barn,
                 sanksjonsårsak = sanksjonsårsak,
                 periodetype = periodetype,
-                aktivitetstype = aktivitetstype
+                aktivitetstype = aktivitetstype,
             )
         }
     }
@@ -263,7 +264,7 @@ object VedtakDomeneParser {
                 .getOrDefault(skoleår, SkoleårsperiodeSkolepenger(emptyList(), emptyList()))
             skoleårsperioder[skoleår] = skoleårsperiode.copy(
                 perioder = (skoleårsperiode.perioder.toSet() + delårsperiode).toList(),
-                utgiftsperioder = skoleårsperiode.utgiftsperioder + utgift
+                utgiftsperioder = skoleårsperiode.utgiftsperioder + utgift,
             )
         }
         return skoleårsperioder.values.toList()
@@ -271,12 +272,12 @@ object VedtakDomeneParser {
 
     private fun mapDelårsperiodeSkolepenger(
         rad: Map<String, String>,
-        datoFra: LocalDate
+        datoFra: LocalDate,
     ): DelårsperiodeSkoleårSkolepenger {
         return DelårsperiodeSkoleårSkolepenger(
             studietype = parseEnum(VedtakDomenebegrep.STUDIETYPE, rad),
             periode = Månedsperiode(datoFra, parseTilOgMed(rad)),
-            studiebelastning = parseValgfriInt(VedtakDomenebegrep.STUDIEBELASTNING, rad) ?: 100
+            studiebelastning = parseValgfriInt(VedtakDomenebegrep.STUDIEBELASTNING, rad) ?: 100,
         )
     }
 
@@ -285,23 +286,23 @@ object VedtakDomeneParser {
             id = hentUtgiftUUID(parseValgfriInt(VedtakDomenebegrep.ID_UTGIFT, rad) ?: 1),
             utgiftsdato = parseValgfriÅrMånedEllerDato(
                 VedtakDomenebegrep.DATO_FAKTURA,
-                rad
+                rad,
             ).førsteDagenIMånedenEllerDefault(),
             utgifter = parseValgfriInt(VedtakDomenebegrep.UTGIFTER, rad) ?: 0,
-            stønad = parseValgfriInt(VedtakDomenebegrep.BELØP, rad) ?: 0
+            stønad = parseValgfriInt(VedtakDomenebegrep.BELØP, rad) ?: 0,
         )
     }
 
     fun mapOgSettPeriodeMedBeløp(
         vedtak: List<Vedtak>,
         dataTable: DataTable,
-        oppdaterVedtak: (Vedtak, List<PeriodeMedBeløp>) -> Vedtak
+        oppdaterVedtak: (Vedtak, List<PeriodeMedBeløp>) -> Vedtak,
     ): List<Vedtak> {
         val beløpsperioder = dataTable.forHverBehandling { behandlingId, rader ->
             behandlingId to rader.map { rad ->
                 PeriodeMedBeløp(
                     Månedsperiode(parseFraOgMed(rad), parseTilOgMed(rad)),
-                    beløp = parseValgfriInt(VedtakDomenebegrep.BELØP, rad) ?: 0
+                    beløp = parseValgfriInt(VedtakDomenebegrep.BELØP, rad) ?: 0,
                 )
             }
         }.toMap()
@@ -317,8 +318,8 @@ object VedtakDomeneParser {
                 Inntektsperiode(
                     periode = Månedsperiode(it.datoFra, LocalDate.MAX),
                     inntekt = BigDecimal.ZERO,
-                    samordningsfradrag = BigDecimal.ZERO
-                )
+                    samordningsfradrag = BigDecimal.ZERO,
+                ),
             )
         } ?: emptyList()
 
@@ -337,9 +338,9 @@ object VedtakDomeneParser {
                         månedsinntekt = BigDecimal(parseValgfriInt(VedtakDomenebegrep.MÅNEDSINNTEKT, rad) ?: 0),
                         inntekt = BigDecimal(parseValgfriInt(VedtakDomenebegrep.INNTEKT, rad) ?: 0),
                         samordningsfradrag = BigDecimal(
-                            parseValgfriInt(VedtakDomenebegrep.SAMORDNINGSFRADRAG, rad) ?: 0
-                        )
-                    )
+                            parseValgfriInt(VedtakDomenebegrep.SAMORDNINGSFRADRAG, rad) ?: 0,
+                        ),
+                    ),
                 )
                 acc
             }
@@ -372,7 +373,7 @@ object VedtakDomeneParser {
         val erSanksjon: Boolean?,
         val sanksjonsårsak: Sanksjonsårsak?,
         val vedtaksdato: LocalDate?,
-        val erOpphør: Boolean
+        val erOpphør: Boolean,
     )
 
     class BehandlingForHistorikkEndringMapper {
@@ -389,7 +390,7 @@ object VedtakDomeneParser {
                     HistorikkEndring(
                         type = endringType,
                         behandlingId = behandlingIdTilUUID[parseInt(VedtakDomenebegrep.ENDRET_I_BEHANDLING_ID, rad)]!!,
-                        vedtakstidspunkt = vedtakstidspunkt
+                        vedtakstidspunkt = vedtakstidspunkt,
                     )
                 },
                 stønadFra = parseFraOgMed(rad),
@@ -408,7 +409,7 @@ object VedtakDomeneParser {
                 erSanksjon = parseValgfriBoolean(VedtakDomenebegrep.ER_SANKSJON, rad),
                 sanksjonsårsak = parseSanksjonsårsak(rad) ?: if (erSanksjon) Sanksjonsårsak.SAGT_OPP_STILLING else null,
                 vedtaksdato = parseValgfriDato(VedtakDomenebegrep.VEDTAKSDATO, rad),
-                erOpphør = erOpphør
+                erOpphør = erOpphør,
             )
         }
 
@@ -435,7 +436,7 @@ object VedtakDomeneParser {
         private fun periodeTypeBarnetilsyn(
             stønadstype: StønadType,
             rad: Map<String, String>,
-            erSanksjon: Boolean
+            erSanksjon: Boolean,
         ): PeriodetypeBarnetilsyn? = when {
             stønadstype != StønadType.BARNETILSYN -> null
             erSanksjon -> PeriodetypeBarnetilsyn.SANKSJON_1_MND
@@ -446,7 +447,7 @@ object VedtakDomeneParser {
             stønadstype: StønadType,
             rad: Map<String, String>,
             erSanksjon: Boolean,
-            erOpphør: Boolean
+            erOpphør: Boolean,
         ): AktivitetType? {
             if (stønadstype != StønadType.OVERGANGSSTØNAD) return null
             val aktivitet = parseAktivitetType(rad)
@@ -461,7 +462,7 @@ object VedtakDomeneParser {
             stønadstype: StønadType,
             rad: Map<String, String>,
             erSanksjon: Boolean,
-            erOpphør: Boolean
+            erOpphør: Boolean,
         ): AktivitetstypeBarnetilsyn? {
             if (stønadstype != StønadType.BARNETILSYN) return null
             val aktivitet = parseAktivitetstypeBarnetilsyn(rad)
@@ -505,7 +506,7 @@ enum class VedtakDomenebegrep(val nøkkel: String) : Domenenøkkel {
     STUDIEBELASTNING("Studiebelastning"),
     VEDTAKSDATO("Vedtaksdato"),
     ENDRET_I_VEDTAKSDATO("Endret i vedtaksdato"),
-    ER_OPPHØR("Er opphør")
+    ER_OPPHØR("Er opphør"),
     ;
 
     override fun nøkkel(): String {

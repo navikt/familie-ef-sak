@@ -24,7 +24,7 @@ import no.nav.familie.ef.sak.infrastruktur.exception.Feil
  */
 data class RegelSteg(
     val regelId: RegelId,
-    val svarMapping: Map<SvarId, SvarRegel>
+    val svarMapping: Map<SvarId, SvarRegel>,
 ) {
 
     fun svarMapping(svarId: SvarId): SvarRegel {
@@ -37,6 +37,6 @@ data class RegelSteg(
  */
 fun jaNeiSvarRegel(
     hvisJa: SvarRegel = SluttSvarRegel.OPPFYLT,
-    hvisNei: SvarRegel = SluttSvarRegel.IKKE_OPPFYLT
+    hvisNei: SvarRegel = SluttSvarRegel.IKKE_OPPFYLT,
 ): Map<SvarId, SvarRegel> =
     mapOf(SvarId.JA to hvisJa, SvarId.NEI to hvisNei)

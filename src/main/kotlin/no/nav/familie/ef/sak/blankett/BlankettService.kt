@@ -23,7 +23,7 @@ class BlankettService(
     private val søknadService: SøknadService,
     private val personopplysningerService: PersonopplysningerService,
     private val vedtakService: VedtakService,
-    private val årsakRevurderingService: ÅrsakRevurderingService
+    private val årsakRevurderingService: ÅrsakRevurderingService,
 ) {
 
     fun lagBlankett(behandlingId: UUID): ByteArray {
@@ -32,12 +32,12 @@ class BlankettService(
             BlankettPdfBehandling(
                 årsak = behandling.årsak,
                 stønadstype = behandling.stønadstype,
-                årsakRevurdering = årsakRevurderingService.hentÅrsakRevurdering(behandlingId)?.tilDto()
+                årsakRevurdering = årsakRevurderingService.hentÅrsakRevurdering(behandlingId)?.tilDto(),
             ),
             lagPersonopplysningerDto(behandling),
             vurderingService.hentEllerOpprettVurderinger(behandlingId),
             hentVedtak(behandlingId),
-            lagSøknadsdatoer(behandlingId)
+            lagSøknadsdatoer(behandlingId),
         )
         val blankettPdfAsByteArray = blankettClient.genererBlankett(blankettPdfRequest)
         oppdaterEllerOpprettBlankett(behandlingId, blankettPdfAsByteArray)
@@ -56,7 +56,7 @@ class BlankettService(
         val søknadsgrunnlag = søknadService.hentSøknadsgrunnlag(behandlingId) ?: return null
         return SøknadDatoerDto(
             søknadsdato = søknadsgrunnlag.datoMottatt,
-            søkerStønadFra = søknadsgrunnlag.søkerFra
+            søkerStønadFra = søknadsgrunnlag.søkerFra,
         )
     }
 

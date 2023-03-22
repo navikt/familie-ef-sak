@@ -22,7 +22,7 @@ internal class BeregningServiceTest {
                 inntekt = BigDecimal.ZERO,
                 avkortningPerMåned = BigDecimal.ZERO,
                 fullOvergangsStønadPerMåned = BigDecimal(18_166),
-                grunnbeløp = 96883.toBigDecimal()
+                grunnbeløp = 96883.toBigDecimal(),
             )
         val beregningsgrunnlagG2019 =
             Beregningsgrunnlag(
@@ -30,14 +30,14 @@ internal class BeregningServiceTest {
                 inntekt = BigDecimal.ZERO,
                 avkortningPerMåned = BigDecimal.ZERO,
                 fullOvergangsStønadPerMåned = BigDecimal(18_723),
-                grunnbeløp = 99858.toBigDecimal()
+                grunnbeløp = 99858.toBigDecimal(),
             )
         val beregningsgrunnlagG2020 = Beregningsgrunnlag(
             samordningsfradrag = BigDecimal.ZERO,
             inntekt = BigDecimal.ZERO,
             avkortningPerMåned = BigDecimal.ZERO,
             fullOvergangsStønadPerMåned = BigDecimal(19_003),
-            grunnbeløp = 101351.toBigDecimal()
+            grunnbeløp = 101351.toBigDecimal(),
         )
 
         val beregningsgrunnlagG2021 = Beregningsgrunnlag(
@@ -45,25 +45,25 @@ internal class BeregningServiceTest {
             inntekt = BigDecimal.ZERO,
             avkortningPerMåned = BigDecimal.ZERO,
             fullOvergangsStønadPerMåned = BigDecimal(19_950),
-            grunnbeløp = 106399.toBigDecimal()
+            grunnbeløp = 106399.toBigDecimal(),
         )
         val fullYtelse = beregningService.beregnYtelse(
             inntektsperioder = listOf(
                 Inntektsperiode(
                     periode = Månedsperiode(
                         LocalDate.parse("2019-04-30"),
-                        LocalDate.parse("2022-04-30")
+                        LocalDate.parse("2022-04-30"),
                     ),
                     inntekt = BigDecimal(0),
-                    samordningsfradrag = BigDecimal(0)
-                )
+                    samordningsfradrag = BigDecimal(0),
+                ),
             ),
             vedtaksperioder = listOf(
                 Månedsperiode(
                     LocalDate.parse("2019-04-30"),
-                    LocalDate.parse("2022-04-30")
-                )
-            )
+                    LocalDate.parse("2022-04-30"),
+                ),
+            ),
         )
 
         assertThat(fullYtelse.size).isEqualTo(4)
@@ -71,45 +71,45 @@ internal class BeregningServiceTest {
             Beløpsperiode(
                 Månedsperiode(
                     LocalDate.parse("2019-04-30"),
-                    LocalDate.parse("2019-04-30")
+                    LocalDate.parse("2019-04-30"),
                 ),
                 beregningsgrunnlag = beregningsgrunnlagG2018,
                 beløp = 18166.toBigDecimal(),
-                beløpFørSamordning = 18166.toBigDecimal()
-            )
+                beløpFørSamordning = 18166.toBigDecimal(),
+            ),
         )
         assertThat(fullYtelse[1]).isEqualTo(
             Beløpsperiode(
                 Månedsperiode(
                     LocalDate.parse("2019-05-01"),
-                    LocalDate.parse("2020-04-30")
+                    LocalDate.parse("2020-04-30"),
                 ),
                 beregningsgrunnlag = beregningsgrunnlagG2019,
                 beløp = 18723.toBigDecimal(),
-                beløpFørSamordning = 18723.toBigDecimal()
-            )
+                beløpFørSamordning = 18723.toBigDecimal(),
+            ),
         )
         assertThat(fullYtelse[2]).isEqualTo(
             Beløpsperiode(
                 Månedsperiode(
                     LocalDate.parse("2020-05-01"),
-                    LocalDate.parse("2021-04-30")
+                    LocalDate.parse("2021-04-30"),
                 ),
                 beregningsgrunnlag = beregningsgrunnlagG2020,
                 beløp = 19003.toBigDecimal(),
-                beløpFørSamordning = 19003.toBigDecimal()
-            )
+                beløpFørSamordning = 19003.toBigDecimal(),
+            ),
         )
         assertThat(fullYtelse[3]).isEqualTo(
             Beløpsperiode(
                 Månedsperiode(
                     LocalDate.parse("2021-05-01"),
-                    LocalDate.parse("2022-04-30")
+                    LocalDate.parse("2022-04-30"),
                 ),
                 beregningsgrunnlag = beregningsgrunnlagG2021,
                 beløp = 19950.toBigDecimal(),
-                beløpFørSamordning = 19950.toBigDecimal()
-            )
+                beløpFørSamordning = 19950.toBigDecimal(),
+            ),
         )
     }
 
@@ -133,8 +133,8 @@ internal class BeregningServiceTest {
                 grunnbeløp = grunnbeløp,
                 fullOvergangsStønadPerMåned = fullOvergangsstønad.setScale(
                     0,
-                    RoundingMode.HALF_DOWN
-                )
+                    RoundingMode.HALF_DOWN,
+                ),
             )
         val fullYtelse = beregningService.beregnYtelse(
             inntektsperioder =
@@ -142,18 +142,18 @@ internal class BeregningServiceTest {
                 Inntektsperiode(
                     periode = Månedsperiode(
                         LocalDate.parse("2019-06-01"),
-                        LocalDate.parse("2020-04-30")
+                        LocalDate.parse("2020-04-30"),
                     ),
                     inntekt = inntekt,
-                    samordningsfradrag = BigDecimal(0)
-                )
+                    samordningsfradrag = BigDecimal(0),
+                ),
             ),
             vedtaksperioder = listOf(
                 Månedsperiode(
                     LocalDate.parse("2019-06-01"),
-                    LocalDate.parse("2020-04-30")
-                )
-            )
+                    LocalDate.parse("2020-04-30"),
+                ),
+            ),
         )
 
         assertThat(fullYtelse.size).isEqualTo(1)
@@ -161,12 +161,12 @@ internal class BeregningServiceTest {
             Beløpsperiode(
                 Månedsperiode(
                     LocalDate.parse("2019-06-01"),
-                    LocalDate.parse("2020-04-30")
+                    LocalDate.parse("2020-04-30"),
                 ),
                 beregningsgrunnlag = beregningsgrunnlagG2019,
                 beløp = beløpTilUtbetalning,
-                beløpFørSamordning = beløpTilUtbetalning
-            )
+                beløpFørSamordning = beløpTilUtbetalning,
+            ),
         )
     }
 
@@ -195,7 +195,7 @@ internal class BeregningServiceTest {
             inntekt = inntekt,
             avkortningPerMåned = avkortningPerMåned,
             fullOvergangsStønadPerMåned = fullOvergangsstønad2018PerMåned,
-            grunnbeløp = grunnbeløp2018
+            grunnbeløp = grunnbeløp2018,
         )
 
         val beregningsgrunnlagIAndrePerioden = Beregningsgrunnlag(
@@ -203,7 +203,7 @@ internal class BeregningServiceTest {
             inntekt = BigDecimal.ZERO,
             avkortningPerMåned = BigDecimal.ZERO,
             fullOvergangsStønadPerMåned = fullOvergangsstønad2019,
-            grunnbeløp = grunnbeløp2019
+            grunnbeløp = grunnbeløp2019,
         )
 
         val fullYtelse = beregningService.beregnYtelse(
@@ -211,54 +211,54 @@ internal class BeregningServiceTest {
                 Inntektsperiode(
                     periode = Månedsperiode(
                         LocalDate.parse("2019-01-01"),
-                        LocalDate.parse("2019-02-28")
+                        LocalDate.parse("2019-02-28"),
                     ),
                     inntekt = inntekt,
-                    samordningsfradrag = BigDecimal(0)
+                    samordningsfradrag = BigDecimal(0),
                 ),
                 Inntektsperiode(
                     periode = Månedsperiode(
                         LocalDate.parse("2019-03-01"),
-                        LocalDate.parse("2026-06-30")
+                        LocalDate.parse("2026-06-30"),
                     ),
                     inntekt = BigDecimal(0),
-                    samordningsfradrag = BigDecimal(0)
-                )
+                    samordningsfradrag = BigDecimal(0),
+                ),
             ),
             vedtaksperioder = listOf(
                 Månedsperiode(
                     LocalDate.parse("2019-01-01"),
-                    LocalDate.parse("2019-02-28")
+                    LocalDate.parse("2019-02-28"),
                 ),
                 Månedsperiode(
                     LocalDate.parse("2019-06-01"),
-                    LocalDate.parse("2020-04-30")
-                )
-            )
+                    LocalDate.parse("2020-04-30"),
+                ),
+            ),
         )
         assertThat(fullYtelse.size).isEqualTo(2)
         assertThat(fullYtelse[0]).isEqualTo(
             Beløpsperiode(
                 Månedsperiode(
                     LocalDate.parse("2019-01-01"),
-                    LocalDate.parse("2019-02-28")
+                    LocalDate.parse("2019-02-28"),
                 ),
                 beregningsgrunnlag = beregningsgrunnlagIFørstePerioden,
                 beløp = beløpTilUtbetalningIFørstePerioden,
-                beløpFørSamordning = beløpTilUtbetalningIFørstePerioden
-            )
+                beløpFørSamordning = beløpTilUtbetalningIFørstePerioden,
+            ),
         )
 
         assertThat(fullYtelse[1]).isEqualTo(
             Beløpsperiode(
                 Månedsperiode(
                     LocalDate.parse("2019-06-01"),
-                    LocalDate.parse("2020-04-30")
+                    LocalDate.parse("2020-04-30"),
                 ),
                 beregningsgrunnlag = beregningsgrunnlagIAndrePerioden,
                 beløp = fullOvergangsstønad2019,
-                beløpFørSamordning = fullOvergangsstønad2019
-            )
+                beløpFørSamordning = fullOvergangsstønad2019,
+            ),
         )
     }
 
@@ -270,19 +270,19 @@ internal class BeregningServiceTest {
         val vedtakperioder = listOf(
             Månedsperiode(
                 LocalDate.parse("2020-05-01"),
-                LocalDate.parse("2023-04-30")
-            )
+                LocalDate.parse("2023-04-30"),
+            ),
         )
 
         val inntektsperioder = listOf(
             Inntektsperiode(
                 periode = Månedsperiode(
                     LocalDate.parse("2019-01-01"),
-                    LocalDate.parse("2024-04-30")
+                    LocalDate.parse("2024-04-30"),
                 ),
                 inntekt = inntekt,
-                samordningsfradrag = BigDecimal.ZERO
-            )
+                samordningsfradrag = BigDecimal.ZERO,
+            ),
         )
 
         val ytelseTilUtbetalning =
@@ -296,21 +296,21 @@ internal class BeregningServiceTest {
 
         val vedtakperiode = Månedsperiode(
             LocalDate.parse("2019-01-01"),
-            LocalDate.parse("2019-04-28")
+            LocalDate.parse("2019-04-28"),
         )
         val inntektsperiode = Inntektsperiode(
             periode = Månedsperiode(
                 LocalDate.parse("2019-01-01"),
-                LocalDate.parse("2019-02-28")
+                LocalDate.parse("2019-02-28"),
             ),
             inntekt = inntekt,
-            samordningsfradrag = 0.toBigDecimal()
+            samordningsfradrag = 0.toBigDecimal(),
         )
 
         assertThrows<ApiFeil> {
             beregningService.beregnYtelse(
                 inntektsperioder = listOf(inntektsperiode),
-                vedtaksperioder = listOf(vedtakperiode)
+                vedtaksperioder = listOf(vedtakperiode),
             )
         }
     }
@@ -321,32 +321,32 @@ internal class BeregningServiceTest {
 
         val vedtakperiode = Månedsperiode(
             LocalDate.parse("2019-01-01"),
-            LocalDate.parse("2019-04-28")
+            LocalDate.parse("2019-04-28"),
         )
         val inntektsperioder = listOf(
             Inntektsperiode(
                 periode = Månedsperiode(
                     LocalDate.parse("2019-01-01"),
-                    LocalDate.parse("2019-02-28")
+                    LocalDate.parse("2019-02-28"),
                 ),
                 inntekt = inntekt,
-                samordningsfradrag = 0.toBigDecimal()
+                samordningsfradrag = 0.toBigDecimal(),
             ),
             Inntektsperiode(
                 periode = Månedsperiode(
                     LocalDate.parse("2019-01-01"),
-                    LocalDate.parse("2019-04-28")
+                    LocalDate.parse("2019-04-28"),
                 ),
                 inntekt = inntekt,
-                samordningsfradrag = 0.toBigDecimal()
-            )
+                samordningsfradrag = 0.toBigDecimal(),
+            ),
         )
 
         assertThrows<ApiFeil> {
             (
                 beregningService.beregnYtelse(
                     inntektsperioder = inntektsperioder,
-                    vedtaksperioder = listOf(vedtakperiode)
+                    vedtaksperioder = listOf(vedtakperiode),
                 )
                 )
         }
@@ -359,28 +359,28 @@ internal class BeregningServiceTest {
         val vedtakperioder = listOf(
             Månedsperiode(
                 LocalDate.parse("2019-01-01"),
-                LocalDate.parse("2019-04-28")
+                LocalDate.parse("2019-04-28"),
             ),
             Månedsperiode(
                 LocalDate.parse("2019-03-01"),
-                LocalDate.parse("2019-06-28")
-            )
+                LocalDate.parse("2019-06-28"),
+            ),
         )
         val inntektsperioder = listOf(
             Inntektsperiode(
                 periode = Månedsperiode(
                     LocalDate.parse("2019-01-01"),
-                    LocalDate.parse("2019-06-28")
+                    LocalDate.parse("2019-06-28"),
                 ),
                 inntekt = inntekt,
-                samordningsfradrag = 0.toBigDecimal()
-            )
+                samordningsfradrag = 0.toBigDecimal(),
+            ),
         )
 
         assertThrows<ApiFeil> {
             beregningService.beregnYtelse(
                 inntektsperioder = inntektsperioder,
-                vedtaksperioder = vedtakperioder
+                vedtaksperioder = vedtakperioder,
             )
         }
     }

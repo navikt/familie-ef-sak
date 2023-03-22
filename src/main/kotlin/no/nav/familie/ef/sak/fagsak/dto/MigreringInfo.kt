@@ -12,7 +12,7 @@ data class MigreringInfo(
     val stønadsperiode: Månedsperiode? = null,
     val inntektsgrunnlag: Int? = null,
     val samordningsfradrag: Int? = null,
-    val beløpsperioder: List<Beløpsperiode>? = null
+    val beløpsperioder: List<Beløpsperiode>? = null,
 ) {
     @Deprecated("Bruk stønadsperiode.", ReplaceWith("stønadsperiode.fomMåned"))
     @get:JsonProperty
@@ -24,5 +24,5 @@ data class MigreringInfo(
 }
 
 data class MigrerRequestDto(
-    val ignorerFeilISimulering: Boolean = false
+    val ignorerFeilISimulering: Boolean = false,
 )

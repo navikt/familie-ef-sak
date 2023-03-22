@@ -33,5 +33,5 @@ data class SøknadsskjemaSkolepenger(
     @MappedCollection(idColumn = "soknadsskjema_id")
     val tidligereUtdanninger: Set<TidligereUtdanning> = emptySet(),
     @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY, prefix = "adresseopplysninger_")
-    val adresseopplysninger: Adresseopplysninger?
+    val adresseopplysninger: Adresseopplysninger?,
 ) : ISøknadsskjema

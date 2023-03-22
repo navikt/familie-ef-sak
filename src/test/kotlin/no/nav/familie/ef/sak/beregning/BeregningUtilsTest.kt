@@ -19,17 +19,17 @@ internal class BeregningUtilsTest {
             val beløpsperiode = Beløpsperiode(
                 periode = Månedsperiode(
                     fom = LocalDate.parse("2020-05-01"),
-                    tom = LocalDate.parse("2020-12-01")
+                    tom = LocalDate.parse("2020-12-01"),
                 ),
                 beløp = 10_000.toBigDecimal(),
-                beløpFørSamordning = 12_000.toBigDecimal()
+                beløpFørSamordning = 12_000.toBigDecimal(),
             )
             val vedtaksperiode = Månedsperiode(fom = LocalDate.parse("2020-07-01"), tom = LocalDate.parse("2020-10-31"))
             assertThat(
                 finnStartDatoOgSluttDatoForBeløpsperiode(
                     beløpForInnteksperioder = listOf(beløpsperiode),
-                    vedtaksperiode = vedtaksperiode
-                ).first()
+                    vedtaksperiode = vedtaksperiode,
+                ).first(),
             )
                 .isEqualTo(beløpsperiode.copy(periode = vedtaksperiode))
         }
@@ -40,17 +40,17 @@ internal class BeregningUtilsTest {
                 Beløpsperiode(
                     periode = Månedsperiode(
                         fom = LocalDate.parse("2020-07-01"),
-                        tom = LocalDate.parse("2020-09-30")
+                        tom = LocalDate.parse("2020-09-30"),
                     ),
                     beløp = 10_000.toBigDecimal(),
-                    beløpFørSamordning = 12_000.toBigDecimal()
+                    beløpFørSamordning = 12_000.toBigDecimal(),
                 )
             val vedtaksperiode = Månedsperiode(fom = LocalDate.parse("2020-05-01"), tom = LocalDate.parse("2020-12-31"))
             assertThat(
                 finnStartDatoOgSluttDatoForBeløpsperiode(
                     beløpForInnteksperioder = listOf(beløpsperiode),
-                    vedtaksperiode = vedtaksperiode
-                ).first()
+                    vedtaksperiode = vedtaksperiode,
+                ).first(),
             )
                 .isEqualTo(beløpsperiode)
         }
@@ -61,28 +61,28 @@ internal class BeregningUtilsTest {
                 Beløpsperiode(
                     periode = Månedsperiode(
                         fom = LocalDate.parse("2020-03-01"),
-                        tom = LocalDate.parse("2020-06-30")
+                        tom = LocalDate.parse("2020-06-30"),
                     ),
                     beløp = 10_000.toBigDecimal(),
-                    beløpFørSamordning = 12_000.toBigDecimal()
+                    beløpFørSamordning = 12_000.toBigDecimal(),
                 )
             val vedtaksperiode = Månedsperiode(
                 fom = LocalDate.parse("2020-05-01"),
-                tom = LocalDate.parse("2020-12-31")
+                tom = LocalDate.parse("2020-12-31"),
             )
             assertThat(
                 finnStartDatoOgSluttDatoForBeløpsperiode(
                     beløpForInnteksperioder = listOf(beløpsperiode),
-                    vedtaksperiode = vedtaksperiode
-                ).first()
+                    vedtaksperiode = vedtaksperiode,
+                ).first(),
             )
                 .isEqualTo(
                     beløpsperiode.copy(
                         periode = vedtaksperiode.copy(
                             fom = YearMonth.parse("2020-05"),
-                            tom = YearMonth.parse("2020-06")
-                        )
-                    )
+                            tom = YearMonth.parse("2020-06"),
+                        ),
+                    ),
                 )
         }
 
@@ -92,28 +92,28 @@ internal class BeregningUtilsTest {
                 Beløpsperiode(
                     periode = Månedsperiode(
                         fom = LocalDate.parse("2020-09-01"),
-                        tom = LocalDate.parse("2021-02-28")
+                        tom = LocalDate.parse("2021-02-28"),
                     ),
                     beløp = 10_000.toBigDecimal(),
-                    beløpFørSamordning = 12_000.toBigDecimal()
+                    beløpFørSamordning = 12_000.toBigDecimal(),
                 )
             val vedtaksperiode = Månedsperiode(
                 fom = LocalDate.parse("2020-05-01"),
-                tom = LocalDate.parse("2020-12-31")
+                tom = LocalDate.parse("2020-12-31"),
             )
             assertThat(
                 finnStartDatoOgSluttDatoForBeløpsperiode(
                     beløpForInnteksperioder = listOf(beløpsperiode),
-                    vedtaksperiode = vedtaksperiode
-                ).first()
+                    vedtaksperiode = vedtaksperiode,
+                ).first(),
             )
                 .isEqualTo(
                     beløpsperiode.copy(
                         periode = vedtaksperiode.copy(
                             fom = YearMonth.parse("2020-09"),
-                            tom = YearMonth.parse("2020-12")
-                        )
-                    )
+                            tom = YearMonth.parse("2020-12"),
+                        ),
+                    ),
                 )
         }
 
@@ -123,20 +123,20 @@ internal class BeregningUtilsTest {
                 Beløpsperiode(
                     periode = Månedsperiode(
                         fom = LocalDate.parse("2020-01-01"),
-                        tom = LocalDate.parse("2020-04-30")
+                        tom = LocalDate.parse("2020-04-30"),
                     ),
                     beløp = 10_000.toBigDecimal(),
-                    beløpFørSamordning = 12_000.toBigDecimal()
+                    beløpFørSamordning = 12_000.toBigDecimal(),
                 )
             val vedtaksperiode = Månedsperiode(
                 fom = LocalDate.parse("2020-05-01"),
-                tom = LocalDate.parse("2020-12-31")
+                tom = LocalDate.parse("2020-12-31"),
             )
             assertThat(
                 finnStartDatoOgSluttDatoForBeløpsperiode(
                     beløpForInnteksperioder = listOf(beløpsperiode),
-                    vedtaksperiode = vedtaksperiode
-                )
+                    vedtaksperiode = vedtaksperiode,
+                ),
             )
                 .isEqualTo(emptyList<Beløpsperiode>())
         }
@@ -152,24 +152,24 @@ internal class BeregningUtilsTest {
                     Inntektsperiode(
                         periode = Månedsperiode(
                             LocalDate.of(2021, 1, 1),
-                            LocalDate.of(2021, 4, 30)
+                            LocalDate.of(2021, 4, 30),
                         ),
                         inntekt = 200_000.toBigDecimal(),
-                        samordningsfradrag = BigDecimal(10)
+                        samordningsfradrag = BigDecimal(10),
                     ),
                     Inntektsperiode(
                         periode = Månedsperiode(
                             LocalDate.of(2021, 5, 1),
-                            LocalDate.of(2021, 12, 31)
+                            LocalDate.of(2021, 12, 31),
                         ),
                         inntekt = 200_000.toBigDecimal(),
-                        samordningsfradrag = BigDecimal(10)
-                    )
+                        samordningsfradrag = BigDecimal(10),
+                    ),
                 )
 
             val indeksjusterInntekt = BeregningUtils.indeksjusterInntekt(
                 YearMonth.of(2022, 5),
-                inntektsperioder
+                inntektsperioder,
             )
 
             assertThat(indeksjusterInntekt).hasSameElementsAs(inntektsperioder)
@@ -182,24 +182,24 @@ internal class BeregningUtilsTest {
                     Inntektsperiode(
                         periode = Månedsperiode(
                             LocalDate.of(2021, 1, 1),
-                            LocalDate.of(2021, 4, 30)
+                            LocalDate.of(2021, 4, 30),
                         ),
                         inntekt = 200_000.toBigDecimal(),
-                        samordningsfradrag = BigDecimal(10)
+                        samordningsfradrag = BigDecimal(10),
                     ),
                     Inntektsperiode(
                         periode = Månedsperiode(
                             LocalDate.of(2021, 5, 1),
-                            LocalDate.of(2021, 12, 31)
+                            LocalDate.of(2021, 12, 31),
                         ),
                         inntekt = 200_000.toBigDecimal(),
-                        samordningsfradrag = BigDecimal(10)
-                    )
+                        samordningsfradrag = BigDecimal(10),
+                    ),
                 )
 
             val indeksjusterInntekt = BeregningUtils.indeksjusterInntekt(
                 nyesteGrunnbeløp.periode.fom,
-                inntektsperioder
+                inntektsperioder,
             )
 
             assertThat(indeksjusterInntekt).isSameAs(inntektsperioder)
@@ -212,24 +212,24 @@ internal class BeregningUtilsTest {
                     Inntektsperiode(
                         periode = Månedsperiode(
                             LocalDate.of(2021, 1, 1),
-                            LocalDate.of(2021, 4, 30)
+                            LocalDate.of(2021, 4, 30),
                         ),
                         inntekt = 200_000.toBigDecimal(),
-                        samordningsfradrag = BigDecimal(10)
+                        samordningsfradrag = BigDecimal(10),
                     ),
                     Inntektsperiode(
                         periode = Månedsperiode(
                             LocalDate.of(2021, 5, 1),
-                            LocalDate.of(2021, 12, 31)
+                            LocalDate.of(2021, 12, 31),
                         ),
                         inntekt = 200_000.toBigDecimal(),
-                        samordningsfradrag = BigDecimal(10)
-                    )
+                        samordningsfradrag = BigDecimal(10),
+                    ),
                 )
 
             val indeksjusterInntekt = BeregningUtils.indeksjusterInntekt(
                 YearMonth.of(2020, 5),
-                inntektsperioder
+                inntektsperioder,
             )
 
             assertThat(indeksjusterInntekt.first()).isEqualTo(inntektsperioder.first())
@@ -245,24 +245,24 @@ internal class BeregningUtilsTest {
                     Inntektsperiode(
                         periode = Månedsperiode(
                             LocalDate.of(2020, 1, 1),
-                            LocalDate.of(2020, 4, 30)
+                            LocalDate.of(2020, 4, 30),
                         ),
                         inntekt = 200_000.toBigDecimal(),
-                        samordningsfradrag = BigDecimal(10)
+                        samordningsfradrag = BigDecimal(10),
                     ),
                     Inntektsperiode(
                         periode = Månedsperiode(
                             LocalDate.of(2020, 5, 1),
-                            LocalDate.of(2021, 12, 31)
+                            LocalDate.of(2021, 12, 31),
                         ),
                         inntekt = 200_000.toBigDecimal(),
-                        samordningsfradrag = BigDecimal(10)
-                    )
+                        samordningsfradrag = BigDecimal(10),
+                    ),
                 )
 
             val indeksjusterInntekt = BeregningUtils.indeksjusterInntekt(
                 YearMonth.of(2020, 5),
-                inntektsperioder
+                inntektsperioder,
             )
 
             assertThat(indeksjusterInntekt.first()).isEqualTo(inntektsperioder.first())
@@ -283,24 +283,24 @@ internal class BeregningUtilsTest {
                     Inntektsperiode(
                         periode = Månedsperiode(
                             LocalDate.of(2021, 1, 1),
-                            LocalDate.of(2021, 4, 30)
+                            LocalDate.of(2021, 4, 30),
                         ),
                         inntekt = 200_000.toBigDecimal(),
-                        samordningsfradrag = BigDecimal(10)
+                        samordningsfradrag = BigDecimal(10),
                     ),
                     Inntektsperiode(
                         periode = Månedsperiode(
                             LocalDate.of(2021, 5, 1),
-                            LocalDate.of(2021, 12, 31)
+                            LocalDate.of(2021, 12, 31),
                         ),
                         inntekt = 200_000.toBigDecimal(),
-                        samordningsfradrag = BigDecimal(10)
-                    )
+                        samordningsfradrag = BigDecimal(10),
+                    ),
                 )
 
             val indeksjusterInntekt = BeregningUtils.indeksjusterInntekt(
                 YearMonth.of(2019, 5),
-                inntektsperioder
+                inntektsperioder,
             )
 
             assertThat(indeksjusterInntekt.first().periode).isEqualTo(inntektsperioder.first().periode)
@@ -318,10 +318,10 @@ internal class BeregningUtilsTest {
             Inntektsperiode(
                 periode = Månedsperiode(
                     LocalDate.of(2021, 1, 1),
-                    LocalDate.of(2021, 4, 30)
+                    LocalDate.of(2021, 4, 30),
                 ),
                 inntekt = BigDecimal.ZERO,
-                samordningsfradrag = BigDecimal.ZERO
+                samordningsfradrag = BigDecimal.ZERO,
             )
 
         @Test

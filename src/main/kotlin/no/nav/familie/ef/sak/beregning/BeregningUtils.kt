@@ -45,8 +45,8 @@ object BeregningUtils {
                     avkortningPerMåned = avkortningPerMåned,
                     fullOvergangsStønadPerMåned = fullOvergangsStønadPerMåned,
                     inntekt = totalInntekt,
-                    grunnbeløp = it.beløp
-                )
+                    grunnbeløp = it.beløp,
+                ),
             )
         }
     }
@@ -67,7 +67,7 @@ object BeregningUtils {
 
     fun indeksjusterInntekt(
         sisteBrukteGrunnbeløpsdato: YearMonth,
-        inntekter: List<Inntektsperiode> = emptyList()
+        inntekter: List<Inntektsperiode> = emptyList(),
     ): List<Inntektsperiode> {
         val sistBrukteGrunnbeløp = finnGrunnbeløp(sisteBrukteGrunnbeløpsdato)
         if (nyesteGrunnbeløp == sistBrukteGrunnbeløp) {
@@ -79,7 +79,7 @@ object BeregningUtils {
 
     private fun justerInntektsperiode(
         inntektsperiode: Inntektsperiode,
-        sistBrukteGrunnbeløp: Grunnbeløp
+        sistBrukteGrunnbeløp: Grunnbeløp,
     ): List<Inntektsperiode> {
         val inntekt = inntektsperiode.inntekt
         val samordningsfradrag = inntektsperiode.samordningsfradrag
@@ -103,7 +103,7 @@ object BeregningUtils {
                     dagsats = inntektsperiode.dagsats, // indeksjusrert? avrundet?
                     månedsinntekt = inntektsperiode.månedsinntekt, // indeksjusrert? avrundet?
                     inntekt = BigDecimal(justerInntektAvrundetNedTilNærmeste100),
-                    samordningsfradrag = samordningsfradrag
+                    samordningsfradrag = samordningsfradrag,
                 )
             } else {
                 Inntektsperiode(
@@ -111,7 +111,7 @@ object BeregningUtils {
                     dagsats = inntektsperiode.dagsats,
                     månedsinntekt = inntektsperiode.månedsinntekt,
                     inntekt = inntekt,
-                    samordningsfradrag = samordningsfradrag
+                    samordningsfradrag = samordningsfradrag,
                 )
             }
         }
@@ -119,7 +119,7 @@ object BeregningUtils {
 
     fun finnStartDatoOgSluttDatoForBeløpsperiode(
         beløpForInnteksperioder: List<Beløpsperiode>,
-        vedtaksperiode: Månedsperiode
+        vedtaksperiode: Månedsperiode,
     ): List<Beløpsperiode> {
         return beløpForInnteksperioder.mapNotNull {
             when {

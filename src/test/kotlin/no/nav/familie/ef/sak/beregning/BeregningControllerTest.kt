@@ -76,8 +76,8 @@ class BeregningControllerTest : OppslagSpringRunnerTest() {
                 fagsak,
                 steg = StegType.BEREGNE_YTELSE,
                 type = BehandlingType.FØRSTEGANGSBEHANDLING,
-                status = BehandlingStatus.UTREDES
-            )
+                status = BehandlingStatus.UTREDES,
+            ),
         )
         val vedtakDto = Avslå(avslåBegrunnelse = "avslår vedtaket", avslåÅrsak = AvslagÅrsak.VILKÅR_IKKE_OPPFYLT)
         val vedtak = Vedtak(
@@ -86,7 +86,7 @@ class BeregningControllerTest : OppslagSpringRunnerTest() {
             avslåÅrsak = AvslagÅrsak.VILKÅR_IKKE_OPPFYLT,
             resultatType = ResultatType.AVSLÅ,
             saksbehandlerIdent = "julenissen",
-            opprettetAv = "julenissen"
+            opprettetAv = "julenissen",
         )
         val respons: ResponseEntity<Ressurs<UUID>> = fullførVedtak(behandling.id, vedtakDto)
 
@@ -101,7 +101,7 @@ class BeregningControllerTest : OppslagSpringRunnerTest() {
 
         val vedtakDto = InnvilgelseOvergangsstønad(
             periodeBegrunnelse = "periode begrunnelse",
-            inntektBegrunnelse = "inntekt begrunnelse"
+            inntektBegrunnelse = "inntekt begrunnelse",
         )
 
         vilkårsvurderingService.hentEllerOpprettVurderinger(behandlingId = behandling.id) // ingen ok.
@@ -144,8 +144,8 @@ class BeregningControllerTest : OppslagSpringRunnerTest() {
                 fagsak,
                 steg = stegType,
                 type = BehandlingType.FØRSTEGANGSBEHANDLING,
-                status = BehandlingStatus.FERDIGSTILT
-            )
+                status = BehandlingStatus.FERDIGSTILT,
+            ),
         )
 
         val søknad = SøknadMedVedlegg(Testsøknad.søknadOvergangsstønad, emptyList())
@@ -156,9 +156,9 @@ class BeregningControllerTest : OppslagSpringRunnerTest() {
                     fraOgMed = LocalDate.of(2022, 1, 1),
                     kildeBehandlingId = førstegangsbehandling.id,
                     beløp = 10_000,
-                    tilOgMed = LocalDate.of(2022, 4, 30)
-                )
-            )
+                    tilOgMed = LocalDate.of(2022, 4, 30),
+                ),
+            ),
         )
         val vedtakDto = InnvilgelseOvergangsstønad(
             periodeBegrunnelse = "periode begrunnelse",
@@ -169,10 +169,10 @@ class BeregningControllerTest : OppslagSpringRunnerTest() {
                     årMånedTil = YearMonth.of(2022, 4),
                     periode = Månedsperiode(YearMonth.of(2022, 1), YearMonth.of(2022, 4)),
                     aktivitet = AktivitetType.BARN_UNDER_ETT_ÅR,
-                    periodeType = VedtaksperiodeType.HOVEDPERIODE
-                )
+                    periodeType = VedtaksperiodeType.HOVEDPERIODE,
+                ),
             ),
-            inntekter = emptyList()
+            inntekter = emptyList(),
         )
 
         søknadService.lagreSøknadForOvergangsstønad(søknad.søknad, førstegangsbehandling.id, fagsak.id, "1234")
@@ -189,8 +189,8 @@ class BeregningControllerTest : OppslagSpringRunnerTest() {
                 fagsak,
                 steg = stegType,
                 type = BehandlingType.REVURDERING,
-                status = BehandlingStatus.UTREDES
-            )
+                status = BehandlingStatus.UTREDES,
+            ),
         )
         val tilkjentYtelse =
             lagTilkjentYtelse(
@@ -201,15 +201,15 @@ class BeregningControllerTest : OppslagSpringRunnerTest() {
                         fraOgMed = LocalDate.of(2022, 1, 1),
                         beløp = 10_000,
                         kildeBehandlingId = revurdering.id,
-                        tilOgMed = LocalDate.of(2022, 2, 28)
+                        tilOgMed = LocalDate.of(2022, 2, 28),
                     ),
                     lagAndelTilkjentYtelse(
                         fraOgMed = LocalDate.of(2022, 3, 1),
                         beløp = 12_000,
                         kildeBehandlingId = revurdering.id,
-                        tilOgMed = LocalDate.of(2022, 6, 30)
-                    )
-                )
+                        tilOgMed = LocalDate.of(2022, 6, 30),
+                    ),
+                ),
             )
 
         val vedtakDto = InnvilgelseOvergangsstønad(
@@ -221,10 +221,10 @@ class BeregningControllerTest : OppslagSpringRunnerTest() {
                     årMånedTil = YearMonth.of(2022, 6),
                     periode = Månedsperiode(YearMonth.of(2022, 3), YearMonth.of(2022, 6)),
                     aktivitet = AktivitetType.BARN_UNDER_ETT_ÅR,
-                    periodeType = VedtaksperiodeType.HOVEDPERIODE
-                )
+                    periodeType = VedtaksperiodeType.HOVEDPERIODE,
+                ),
             ),
-            inntekter = emptyList()
+            inntekter = emptyList(),
         )
         tilkjentYtelseRepository.insert(tilkjentYtelse)
         vedtakService.lagreVedtak(vedtakDto, revurdering.id, fagsak.stønadstype)
@@ -235,7 +235,7 @@ class BeregningControllerTest : OppslagSpringRunnerTest() {
         return restTemplate.exchange(
             localhost("/api/vedtak/$id/lagre-vedtak"),
             HttpMethod.POST,
-            HttpEntity(vedtakDto, headers)
+            HttpEntity(vedtakDto, headers),
         )
     }
 
@@ -243,7 +243,7 @@ class BeregningControllerTest : OppslagSpringRunnerTest() {
         return restTemplate.exchange(
             localhost("/api/beregning/$id"),
             HttpMethod.GET,
-            HttpEntity<Ressurs<List<Beløpsperiode>>>(headers)
+            HttpEntity<Ressurs<List<Beløpsperiode>>>(headers),
         )
     }
 }

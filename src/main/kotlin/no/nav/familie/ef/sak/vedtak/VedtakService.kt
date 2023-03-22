@@ -18,7 +18,7 @@ import java.util.UUID
 @Service
 class VedtakService(
     private val vedtakRepository: VedtakRepository,
-    private val tilkjentYtelseRepository: TilkjentYtelseRepository
+    private val tilkjentYtelseRepository: TilkjentYtelseRepository,
 ) {
 
     fun lagreVedtak(vedtakDto: VedtakDto, behandlingId: UUID, stønadstype: StønadType): UUID {
@@ -90,7 +90,7 @@ class VedtakService(
         return ForventetInntektForBehandling(
             vedtak.behandlingId,
             createForventetInntektForMåned(vedtak, YearMonth.now().minusMonths(1)),
-            createForventetInntektForMåned(vedtak, YearMonth.now().minusMonths(2))
+            createForventetInntektForMåned(vedtak, YearMonth.now().minusMonths(2)),
         )
     }
 
@@ -108,19 +108,19 @@ class VedtakService(
 
 data class PersonIdentMedForventetInntekt(
     val personIdent: String,
-    val forventetInntektForMåned: ForventetInntektForBehandling
+    val forventetInntektForMåned: ForventetInntektForBehandling,
 )
 
 data class ForventetInntektForBehandling(
     val behandlingId: UUID,
     val forventetInntektForrigeMåned: Int?,
-    val forventetInntektToMånederTilbake: Int?
+    val forventetInntektToMånederTilbake: Int?,
 )
 
 data class ForventetInntektForPersonIdent(
     val personIdent: String,
     val forventetInntektForrigeMåned: Int?,
-    val forventetInntektToMånederTilbake: Int?
+    val forventetInntektToMånederTilbake: Int?,
 )
 
 fun Vedtak.erVedtakAktivtForDato(dato: LocalDate) = this.perioder?.perioder?.any {

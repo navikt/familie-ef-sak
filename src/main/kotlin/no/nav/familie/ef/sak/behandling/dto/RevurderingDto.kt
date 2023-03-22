@@ -8,5 +8,5 @@ data class RevurderingDto(
     val fagsakId: UUID,
     val behandlingsårsak: BehandlingÅrsak,
     val kravMottatt: LocalDate,
-    val barn: List<RevurderingBarnDto> = emptyList()
+    val barn: List<RevurderingBarnDto> = emptyList(),
 )
