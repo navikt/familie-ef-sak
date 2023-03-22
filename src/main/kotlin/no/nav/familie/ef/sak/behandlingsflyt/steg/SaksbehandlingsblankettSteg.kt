@@ -55,13 +55,12 @@ class SaksbehandlingsblankettSteg(
         val journalpostId = try {
             journalpostClient.arkiverDokument(arkiverDokumentRequest, beslutter).journalpostId
         } catch (e: RessursException) {
-             if (e.cause is HttpClientErrorException.Conflict) {
-                 finnJournalpostIdForBlankett(saksbehandling)
-             } else {
+            if (e.cause is HttpClientErrorException.Conflict) {
+                finnJournalpostIdForBlankett(saksbehandling)
+            } else {
                 throw e
-             }
+            }
         }
-
 
         behandlingService.leggTilBehandlingsjournalpost(
             journalpostId,
@@ -79,7 +78,7 @@ class SaksbehandlingsblankettSteg(
                 ),
                 antall = 100,
                 tema = listOf(Tema.ENF),
-                journalposttype = listOf(Journalposttype.N),
+                journalposttype = listOf(Journalposttype.N)
             )
         )
 

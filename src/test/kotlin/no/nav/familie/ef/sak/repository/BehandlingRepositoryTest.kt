@@ -15,6 +15,8 @@ import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus.OPPRETTET
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus.SATT_PÅ_VENT
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus.UTREDES
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
+import no.nav.familie.ef.sak.fagsak.FagsakPersonRepository
+import no.nav.familie.ef.sak.fagsak.FagsakRepository
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
 import no.nav.familie.ef.sak.felles.domain.Endret
@@ -22,6 +24,7 @@ import no.nav.familie.ef.sak.felles.domain.Sporbar
 import no.nav.familie.ef.sak.felles.domain.SporbarUtils
 import no.nav.familie.ef.sak.felles.util.BehandlingOppsettUtil
 import no.nav.familie.ef.sak.testutil.hasCauseMessageContaining
+import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.kontrakter.felles.ef.StønadType.BARNETILSYN
 import no.nav.familie.kontrakter.felles.ef.StønadType.OVERGANGSSTØNAD
@@ -43,7 +46,36 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
     @Autowired
     private lateinit var behandlingRepository: BehandlingRepository
 
+    @Autowired
+    private lateinit var fagsakPersonRepository: FagsakPersonRepository
+
+    @Autowired
+    private lateinit var fagsakRepository: FagsakRepository
+
     private val ident = "123"
+
+    @Test
+    fun `skal finne alle personer med aktiv stønad som ikke er manuelt revurdert siste to måneder`() {
+
+        val person1 = fagsakPerson(identer = setOf(PersonIdent("1")))
+        fagsakPersonRepository.insert(person1)
+        behandlingRepository.insert(behandling(testoppsettService.lagreFagsak(fagsak(person = person1)), resultat = INNVILGET, vedtakstidspunkt = LocalDateTime.now().minusMonths(3), årsak = BehandlingÅrsak.G_OMREGNING, status = FERDIGSTILT))
+
+        val person2 = fagsakPerson(identer = setOf(PersonIdent("2")))
+        fagsakPersonRepository.insert(person2)
+        behandlingRepository.insert(behandling(testoppsettService.lagreFagsak(fagsak(person = person2)), resultat = INNVILGET, vedtakstidspunkt = LocalDateTime.now(), årsak = BehandlingÅrsak.G_OMREGNING, status = FERDIGSTILT))
+
+        val person3 = fagsakPerson(identer = setOf(PersonIdent("3")))
+        fagsakPersonRepository.insert(person3)
+        behandlingRepository.insert(behandling(testoppsettService.lagreFagsak(fagsak(person = person3)), resultat = INNVILGET, vedtakstidspunkt = LocalDateTime.now().minusMonths(3), årsak = BehandlingÅrsak.NYE_OPPLYSNINGER, status = FERDIGSTILT))
+
+        val person4 = fagsakPerson(identer = setOf(PersonIdent("4")))
+        fagsakPersonRepository.insert(person4)
+        behandlingRepository.insert(behandling(testoppsettService.lagreFagsak(fagsak(person = person4)), resultat = INNVILGET, vedtakstidspunkt = LocalDateTime.now(), årsak = BehandlingÅrsak.NYE_OPPLYSNINGER, status = FERDIGSTILT))
+
+        val resultat = behandlingRepository.finnPersonerMedAktivStonadIkkeRevurdertSisteToMåneder()
+        assertThat(resultat.size).isEqualTo(3)
+    }
 
     @Test
     fun `skal ikke være mulig å legge inn en behandling med referanse til en behandling som ikke eksisterer`() {
