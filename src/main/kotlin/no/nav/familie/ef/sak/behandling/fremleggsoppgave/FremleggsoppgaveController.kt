@@ -17,12 +17,10 @@ class FremleggsoppgaveController(private val fremleggspppgaveService: Fremleggso
     @GetMapping("/{behandlingid}")
     fun hentFremleggsoppgaveForInntekt(@PathVariable behandlingid: UUID): Ressurs<FremleggsoppgaveDto?> {
         val fremleggsOppgave = fremleggspppgaveService.hentFremleggsoppgave(behandlingid)
-        val opprettFremleggsoppgave = fremleggsOppgave?.let { it.inntekt } ?: null
-        val kanOppretteFremleggsoppgave = fremleggspppgaveService.kanOpprettes(behandlingid)
         return Ressurs.success(
             FremleggsoppgaveDto(
-                skalOpprettFremleggsoppgave = opprettFremleggsoppgave,
-                kanOppretteFremleggsoppgave = kanOppretteFremleggsoppgave
+                inntekt = fremleggsOppgave?.let { it.inntekt } ?: null,
+                kanOppretteFremleggsoppgave = fremleggspppgaveService.kanOpprettes(behandlingid)
             )
         )
     }

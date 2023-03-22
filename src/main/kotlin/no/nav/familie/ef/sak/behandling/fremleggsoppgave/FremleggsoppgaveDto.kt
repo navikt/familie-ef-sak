@@ -1,6 +1,6 @@
 package no.nav.familie.ef.sak.behandling.fremleggsoppgave
 
 data class FremleggsoppgaveDto(
-    val skalOpprettFremleggsoppgave: Boolean?,
+    val inntekt: Boolean?,
     val kanOppretteFremleggsoppgave: Boolean
 )
