@@ -48,13 +48,13 @@ internal class AMeldingInntektControllerTest : OppslagSpringRunnerTest() {
         restTemplate.exchange(
             localhost("/api/inntekt/fagsak/${fagsak.id}/generer-url"),
             HttpMethod.GET,
-            HttpEntity<Ressurs<String>>(headers)
+            HttpEntity<Ressurs<String>>(headers),
         )
 
     private fun hentInntekt(fagsakId: UUID): ResponseEntity<Ressurs<AMeldingInntektDto>> =
         restTemplate.exchange(
             localhost("/api/inntekt/fagsak/$fagsakId?fom=2021-01&tom=2021-02"),
             HttpMethod.GET,
-            HttpEntity<Ressurs<AMeldingInntektDto>>(headers)
+            HttpEntity<Ressurs<AMeldingInntektDto>>(headers),
         )
 }

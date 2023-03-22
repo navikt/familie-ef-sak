@@ -4,5 +4,5 @@ data class FrittståendeBrevRequestDto(
     val overskrift: String,
     val avsnitt: List<FrittståendeBrevAvsnitt>,
     val personIdent: String,
-    val navn: String
+    val navn: String,
 )

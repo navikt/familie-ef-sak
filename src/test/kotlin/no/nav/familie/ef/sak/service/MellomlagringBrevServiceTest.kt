@@ -36,7 +36,7 @@ internal class MellomlagringBrevServiceTest {
     private val mellomlagringBrevService = no.nav.familie.ef.sak.brev.MellomlagringBrevService(
         mellomlagerBrevRepository,
         mellomlagerFritekstbrevRepository,
-        mellomlagerFrittståendeBrevRepository
+        mellomlagerFrittståendeBrevRepository,
     )
 
     @BeforeAll
@@ -57,14 +57,14 @@ internal class MellomlagringBrevServiceTest {
         assertThat(
             mellomlagringBrevService.hentOgValiderMellomlagretBrev(
                 behandlingId,
-                sanityVersjon
-            )
+                sanityVersjon,
+            ),
         )
             .isEqualTo(
                 MellomlagretBrevSanity(
                     brevmal = mellomlagretBrev.brevmal,
-                    brevverdier = mellomlagretBrev.brevverdier
-                )
+                    brevverdier = mellomlagretBrev.brevverdier,
+                ),
             )
     }
 
@@ -75,7 +75,7 @@ internal class MellomlagringBrevServiceTest {
             brevverdier,
             brevmal,
             "1",
-            LocalDate.now()
+            LocalDate.now(),
         )
         assertThat(mellomlagringBrevService.hentOgValiderMellomlagretBrev(behandlingId, "2")).isNull()
     }
@@ -92,13 +92,13 @@ internal class MellomlagringBrevServiceTest {
             saksbehandlerIdent = "Bob",
             mottakere = FrittståendeBrevmottakere(
                 listOf(brevmottakerPerson()),
-                listOf(brevmottakerOrganisasjon())
-            )
+                listOf(brevmottakerOrganisasjon()),
+            ),
         )
         every {
             mellomlagerFrittståendeBrevRepository.findByFagsakIdAndSaksbehandlerIdent(
                 fagsakId,
-                any()
+                any(),
             )
         } returns brev
         val dto = mellomlagringBrevService.hentMellomlagretFrittståendeBrev(fagsakId)

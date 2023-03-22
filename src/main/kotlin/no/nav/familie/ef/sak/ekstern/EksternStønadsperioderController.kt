@@ -21,14 +21,14 @@ import org.springframework.web.bind.annotation.RestController
 @RequestMapping(
     path = ["/api/ekstern/perioder"],
     consumes = [APPLICATION_JSON_VALUE],
-    produces = [APPLICATION_JSON_VALUE]
+    produces = [APPLICATION_JSON_VALUE],
 )
 @Validated
 @ProtectedWithClaims(issuer = "azuread")
 class EksternStønadsperioderController(
     private val eksternStønadsperioderService: EksternStønadsperioderService,
     private val perioderForBarnetrygdService: PerioderForBarnetrygdService,
-    private val tilgangService: TilgangService
+    private val tilgangService: TilgangService,
 ) {
 
     /**

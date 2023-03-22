@@ -17,7 +17,7 @@ class BehandlingshistorikkService(private val behandlingshistorikkRepository: Be
 
     fun finnHendelseshistorikk(saksbehandling: Saksbehandling): List<HendelseshistorikkDto> {
         val (hendelserOpprettet, andreHendelser) = behandlingshistorikkRepository.findByBehandlingIdOrderByEndretTidDesc(
-            saksbehandling.id
+            saksbehandling.id,
         ).map {
             it.tilHendelseshistorikkDto(saksbehandling)
         }.filter {
@@ -49,7 +49,7 @@ class BehandlingshistorikkService(private val behandlingshistorikkRepository: Be
         behandlingId: UUID,
         stegtype: StegType,
         utfall: StegUtfall?,
-        metadata: Any?
+        metadata: Any?,
     ) {
         opprettHistorikkInnslag(
             Behandlingshistorikk(
@@ -58,8 +58,8 @@ class BehandlingshistorikkService(private val behandlingshistorikkRepository: Be
                 utfall = utfall,
                 metadata = metadata?.let {
                     JsonWrapper(objectMapper.writeValueAsString(it))
-                }
-            )
+                },
+            ),
         )
     }
 }

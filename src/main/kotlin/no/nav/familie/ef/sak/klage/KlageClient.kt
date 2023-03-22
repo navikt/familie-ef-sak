@@ -16,7 +16,7 @@ import java.net.URI
 @Component
 class KlageClient(
     @Qualifier("azure") restOperations: RestOperations,
-    @Value("\${FAMILIE_KLAGE_URL}") private val familieKlageUri: URI
+    @Value("\${FAMILIE_KLAGE_URL}") private val familieKlageUri: URI,
 ) :
     AbstractRestClient(restOperations, "familie.klage") {
 
@@ -25,7 +25,7 @@ class KlageClient(
 
     private val hentKlagebehandlinger =
         UriComponentsBuilder.fromUri(familieKlageUri).pathSegment(
-            "api/ekstern/behandling/${Fagsystem.EF}"
+            "api/ekstern/behandling/${Fagsystem.EF}",
         ).build().toUri()
 
     fun opprettKlage(opprettKlagebehandlingRequest: OpprettKlagebehandlingRequest) {

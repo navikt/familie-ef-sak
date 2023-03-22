@@ -7,5 +7,5 @@ data class OppholdstillatelseDto(val oppholdstillatelse: OppholdType, val fraDat
 enum class OppholdType {
     PERMANENT,
     MIDLERTIDIG,
-    UKJENT
+    UKJENT,
 }

@@ -21,7 +21,7 @@ data class FinnOppgaveRequestDto(
     val enhetsmappe: Long? = null,
     val mappeId: Long? = null,
     val erUtenMappe: Boolean? = null,
-    val ident: String?
+    val ident: String?,
 ) {
 
     fun tilFinnOppgaveRequest(aktørid: String? = null): FinnOppgaveRequest =
@@ -52,6 +52,6 @@ data class FinnOppgaveRequestDto(
             aktivTomDato = null,
             mappeId = this.mappeId,
             limit = 150,
-            offset = 0
+            offset = 0,
         )
 }

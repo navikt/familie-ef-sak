@@ -21,7 +21,7 @@ import java.util.UUID
 @Validated
 class ArbeidsforholdController(
     private val tilgangService: TilgangService,
-    private val arbeidsforholdService: ArbeidsforholdService
+    private val arbeidsforholdService: ArbeidsforholdService,
 ) {
 
     @GetMapping("fagsak/{fagsakId}")
@@ -29,7 +29,7 @@ class ArbeidsforholdController(
         @PathVariable("fagsakId") fagsakId: UUID,
         @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
         @RequestParam
-        ansettelsesperiodeFom: LocalDate
+        ansettelsesperiodeFom: LocalDate,
     ): Ressurs<List<ArbeidsforholdDto>> {
         tilgangService.validerTilgangTilFagsak(fagsakId, AuditLoggerEvent.ACCESS)
         val arbeidsforhold = arbeidsforholdService.hentArbeidsforhold(fagsakId, ansettelsesperiodeFom)

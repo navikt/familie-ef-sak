@@ -19,5 +19,5 @@ data class Oppgave(
     @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
     val sporbar: Sporbar = Sporbar(),
     @Column("ferdigstilt")
-    var erFerdigstilt: Boolean = false
+    var erFerdigstilt: Boolean = false,
 )

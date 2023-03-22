@@ -7,5 +7,5 @@ data class Adresseopplysninger(
     @Column("soker_bor_pa_adresse")
     val søkerBorPåRegistrertAdresse: Boolean? = null,
     val harMeldtAdresseendring: Boolean? = null,
-    val dokumentasjonAdresseendring: Dokumentasjon? = null
+    val dokumentasjonAdresseendring: Dokumentasjon? = null,
 )

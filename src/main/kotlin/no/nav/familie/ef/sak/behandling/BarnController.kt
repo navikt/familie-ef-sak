@@ -23,7 +23,7 @@ import java.util.UUID
 @Validated
 class BarnController(
     private val nyeBarnService: NyeBarnService,
-    private val tilgangService: TilgangService
+    private val tilgangService: TilgangService,
 ) {
 
     // denne skal kalles på fra ef-personhendelse(client_credential) for å opprette oppgaver for nye eller for tidligt fødte barn
@@ -38,7 +38,7 @@ class BarnController(
     @GetMapping("fagsak/{fagsakId}")
     fun nyeBarnSidenForrigeBehandling(
         @PathVariable("fagsakId")
-        fagsakId: UUID
+        fagsakId: UUID,
     ): Ressurs<BehandlingBarnDto> {
         tilgangService.validerTilgangTilFagsak(fagsakId, AuditLoggerEvent.ACCESS)
         return Ressurs.success(nyeBarnService.finnNyeBarnSidenGjeldendeBehandlingForFagsak(fagsakId))

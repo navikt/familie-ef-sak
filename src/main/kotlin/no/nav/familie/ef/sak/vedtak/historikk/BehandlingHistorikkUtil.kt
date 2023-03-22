@@ -14,7 +14,7 @@ data class BehandlingHistorikkData(
     val vedtakstidspunkt: LocalDateTime,
     val vedtakDto: VedtakDto,
     val aktivitetArbeid: SvarId?,
-    val tilkjentYtelse: TilkjentYtelse
+    val tilkjentYtelse: TilkjentYtelse,
 )
 
 object BehandlingHistorikkUtil {
@@ -23,7 +23,7 @@ object BehandlingHistorikkUtil {
         behandlinger: List<Behandling>,
         vedtaksliste: List<Vedtak>,
         tilkjentYtelser: List<TilkjentYtelse>,
-        behandlingIdsTilAktivitetArbeid: Map<UUID, SvarId?>
+        behandlingIdsTilAktivitetArbeid: Map<UUID, SvarId?>,
     ): List<BehandlingHistorikkData> {
         val tilkjentYtelsePerBehandlingId = tilkjentYtelser.associateBy { it.behandlingId }
         val behandlingerPerBehandlingId = behandlinger.associateBy { it.id }
@@ -38,7 +38,7 @@ object BehandlingHistorikkUtil {
                 vedtakstidspunkt = vedtakstidspunkt,
                 vedtakDto = it.tilVedtakDto(),
                 aktivitetArbeid = behandlingIdsTilAktivitetArbeid[behandlingId],
-                tilkjentYtelse = tilkjentYtelse
+                tilkjentYtelse = tilkjentYtelse,
             )
         }
     }

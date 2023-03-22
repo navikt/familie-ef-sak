@@ -51,7 +51,7 @@ internal class TilgangServiceTest {
             fagsakPersonService = fagsakPersonService,
             rolleConfig = rolleConfig,
             cacheManager = cacheManager,
-            auditLogger = mockk(relaxed = true)
+            auditLogger = mockk(relaxed = true),
         )
     private val mocketPersonIdent = "12345"
 
@@ -97,7 +97,7 @@ internal class TilgangServiceTest {
         val feil = assertFailsWith<ManglerTilgang> {
             tilgangService.validerTilgangTilBehandling(
                 behandling.id,
-                AuditLoggerEvent.ACCESS
+                AuditLoggerEvent.ACCESS,
             )
         }
 

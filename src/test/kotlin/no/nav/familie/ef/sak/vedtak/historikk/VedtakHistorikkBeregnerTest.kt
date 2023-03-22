@@ -41,8 +41,8 @@ internal class VedtakHistorikkBeregnerTest {
             andreVedtak.behandlingId,
             listOf(
                 førstePeriode.copy(datoTil = LocalDate.of(2021, 1, 31)).tilHistorikk(),
-                Opphørsperiode(Månedsperiode(opphørFom))
-            )
+                Opphørsperiode(Månedsperiode(opphørFom)),
+            ),
         )
     }
 
@@ -106,8 +106,8 @@ internal class VedtakHistorikkBeregnerTest {
             andreVedtak.behandlingId,
             listOf(
                 førstePeriode.copy(datoTil = LocalDate.of(2021, 1, 31))
-                    .tilHistorikk()
-            ) + andreVedtak.vedtaksperioder()
+                    .tilHistorikk(),
+            ) + andreVedtak.vedtaksperioder(),
         )
     }
 
@@ -118,7 +118,7 @@ internal class VedtakHistorikkBeregnerTest {
     private fun validerPeriode(
         vedtaksperioderPerBehandling: Map<UUID, List<Vedtakshistorikkperiode>>,
         behandlingId: UUID,
-        vedtaksperioder: List<Vedtakshistorikkperiode>
+        vedtaksperioder: List<Vedtakshistorikkperiode>,
     ) {
         assertThat(vedtaksperioderPerBehandling.getValue(behandlingId)).isEqualTo(vedtaksperioder)
     }
@@ -138,7 +138,7 @@ internal class VedtakHistorikkBeregnerTest {
                 vedtakstidspunkt = LocalDateTime.now(),
                 vedtakDto = it.tilVedtakDto(),
                 aktivitetArbeid = null,
-                tilkjentYtelse = tilkjenteytelser.getValue(it.behandlingId)
+                tilkjentYtelse = tilkjenteytelser.getValue(it.behandlingId),
             )
         }
         val konfigurasjon = HistorikkKonfigurasjon(true)
@@ -152,19 +152,19 @@ internal class VedtakHistorikkBeregnerTest {
             datoFra = fra,
             datoTil = til,
             aktivitet = AktivitetType.BARNET_ER_SYKT,
-            periodeType = VedtaksperiodeType.PERIODE_FØR_FØDSEL
+            periodeType = VedtaksperiodeType.PERIODE_FØR_FØDSEL,
         )
 
     private fun Vedtaksperiode.tilHistorikk() = VedtakshistorikkperiodeOvergangsstønad(
         Månedsperiode(this.datoFra, this.datoTil),
         this.aktivitet,
-        this.periodeType
+        this.periodeType,
     )
 
     private fun lagVedtak(
         behandlingId: UUID = UUID.randomUUID(),
         perioder: List<Vedtaksperiode>?,
-        opphørFom: YearMonth? = null
+        opphørFom: YearMonth? = null,
     ): Vedtak {
         require((perioder == null) xor (opphørFom == null)) { "Må definiere perioder eller opphørFom" }
         return Vedtak(
@@ -182,15 +182,15 @@ internal class VedtakHistorikkBeregnerTest {
                                 Inntektsperiode(
                                     periode = it.periode,
                                     inntekt = BigDecimal.ZERO,
-                                    samordningsfradrag = BigDecimal.ZERO
+                                    samordningsfradrag = BigDecimal.ZERO,
                                 )
-                            }
-                    )
+                            },
+                    ),
                 )
             },
             saksbehandlerIdent = null,
             opphørFom = opphørFom,
-            beslutterIdent = null
+            beslutterIdent = null,
         )
     }
 }

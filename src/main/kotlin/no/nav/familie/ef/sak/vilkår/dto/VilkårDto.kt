@@ -7,7 +7,7 @@ import java.time.LocalDateTime
 
 data class VilkårDto(
     val vurderinger: List<VilkårsvurderingDto>,
-    val grunnlag: VilkårGrunnlagDto
+    val grunnlag: VilkårGrunnlagDto,
 )
 
 data class VilkårGrunnlagDto(
@@ -22,17 +22,17 @@ data class VilkårGrunnlagDto(
     val sagtOppEllerRedusertStilling: SagtOppEllerRedusertStillingDto?, // Gjelder OS
     val registeropplysningerOpprettetTid: LocalDateTime,
     val adresseopplysninger: AdresseopplysningerDto?,
-    val dokumentasjon: DokumentasjonFraSøknadDto?
+    val dokumentasjon: DokumentasjonFraSøknadDto?,
 )
 
 data class PersonaliaDto(
     val navn: NavnDto,
     val personIdent: String,
-    val bostedsadresse: AdresseDto?
+    val bostedsadresse: AdresseDto?,
 )
 
 data class AdresseopplysningerDto(
     val søkerBorPåRegistrertAdresse: Boolean,
     val adresse: String?,
-    val harMeldtAdresseendring: Boolean?
+    val harMeldtAdresseendring: Boolean?,
 )

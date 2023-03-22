@@ -12,7 +12,7 @@ import java.net.URI
 @Component
 class SigrunClient(
     @Value("\${FAMILIE_EF_PROXY_URL}") private val uri: URI,
-    @Qualifier("azure") restOperations: RestOperations
+    @Qualifier("azure") restOperations: RestOperations,
 ) : AbstractRestClient(restOperations, "sigrun") {
 
     fun hentSummertSkattegrunnlag(fødselsnummer: String, inntektsår: Int): SummertSkattegrunnlag {

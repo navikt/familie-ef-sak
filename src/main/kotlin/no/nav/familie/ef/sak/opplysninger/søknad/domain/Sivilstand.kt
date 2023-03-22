@@ -22,5 +22,5 @@ data class Sivilstand(
     @Column("endring_samversordning_dato")
     val endringSamværsordningDato: LocalDate? = null,
     @Embedded(onEmpty = Embedded.OnEmpty.USE_NULL, prefix = "tidligere_samboer_")
-    val tidligereSamboer: PersonMinimum? = null
+    val tidligereSamboer: PersonMinimum? = null,
 )

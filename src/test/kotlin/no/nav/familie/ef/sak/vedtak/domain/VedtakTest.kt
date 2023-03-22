@@ -25,7 +25,7 @@ internal class VedtakTest {
                 periode,
                 AktivitetType.IKKE_AKTIVITETSPLIKT,
                 VedtaksperiodeType.SANKSJON,
-                Sanksjonsårsak.SAGT_OPP_STILLING
+                Sanksjonsårsak.SAGT_OPP_STILLING,
             )
             assertThat(periode).isNotNull
         }
@@ -37,7 +37,7 @@ internal class VedtakTest {
                     periode,
                     AktivitetType.IKKE_AKTIVITETSPLIKT,
                     VedtaksperiodeType.SANKSJON,
-                    null
+                    null,
                 )
             }.hasMessageContaining("Ugyldig kombinasjon av sanksjon")
         }
@@ -49,7 +49,7 @@ internal class VedtakTest {
                     periode,
                     AktivitetType.FORSØRGER_I_ARBEID,
                     VedtaksperiodeType.SANKSJON,
-                    Sanksjonsårsak.SAGT_OPP_STILLING
+                    Sanksjonsårsak.SAGT_OPP_STILLING,
                 )
             }.hasMessageContaining("Ugyldig kombinasjon av sanksjon")
         }
@@ -61,7 +61,7 @@ internal class VedtakTest {
                     periode,
                     AktivitetType.FORSØRGER_I_ARBEID,
                     VedtaksperiodeType.PERIODE_FØR_FØDSEL,
-                    Sanksjonsårsak.SAGT_OPP_STILLING
+                    Sanksjonsårsak.SAGT_OPP_STILLING,
                 )
             }.hasMessageContaining("Ugyldig kombinasjon av sanksjon")
         }
@@ -73,7 +73,7 @@ internal class VedtakTest {
                     Månedsperiode(januar, febaruar),
                     AktivitetType.IKKE_AKTIVITETSPLIKT,
                     VedtaksperiodeType.SANKSJON,
-                    Sanksjonsårsak.SAGT_OPP_STILLING
+                    Sanksjonsårsak.SAGT_OPP_STILLING,
                 )
             }.hasMessageContaining("Sanksjon må være en måned")
 
@@ -82,7 +82,7 @@ internal class VedtakTest {
                     Månedsperiode(januar, januarNesteÅr),
                     AktivitetType.IKKE_AKTIVITETSPLIKT,
                     VedtaksperiodeType.SANKSJON,
-                    Sanksjonsårsak.SAGT_OPP_STILLING
+                    Sanksjonsårsak.SAGT_OPP_STILLING,
                 )
             }.hasMessageContaining("Sanksjon må være en måned")
         }
@@ -99,7 +99,7 @@ internal class VedtakTest {
                     1,
                     emptyList(),
                     Sanksjonsårsak.SAGT_OPP_STILLING,
-                    PeriodetypeBarnetilsyn.OPPHØR
+                    PeriodetypeBarnetilsyn.OPPHØR,
                 )
             }.hasMessageContaining("Ugyldig kombinasjon av sanksjon periodeType=OPPHØR sanksjonsårsak=SAGT_OPP_STILLING")
         }
@@ -112,7 +112,7 @@ internal class VedtakTest {
                     1,
                     emptyList(),
                     Sanksjonsårsak.SAGT_OPP_STILLING,
-                    PeriodetypeBarnetilsyn.OPPHØR
+                    PeriodetypeBarnetilsyn.OPPHØR,
                 )
             }.hasMessageContaining("Ugyldig kombinasjon av sanksjon periodeType=OPPHØR sanksjonsårsak=SAGT_OPP_STILLING")
         }
@@ -124,7 +124,7 @@ internal class VedtakTest {
                 1,
                 emptyList(),
                 Sanksjonsårsak.SAGT_OPP_STILLING,
-                PeriodetypeBarnetilsyn.SANKSJON_1_MND
+                PeriodetypeBarnetilsyn.SANKSJON_1_MND,
             )
             assertThat(periode).isNotNull
         }
@@ -137,7 +137,7 @@ internal class VedtakTest {
                     1,
                     emptyList(),
                     Sanksjonsårsak.SAGT_OPP_STILLING,
-                    PeriodetypeBarnetilsyn.SANKSJON_1_MND
+                    PeriodetypeBarnetilsyn.SANKSJON_1_MND,
                 )
             }.hasMessageContaining("Sanksjon må være en måned, fra=2022-01-01 til=2023-01-31")
         }
@@ -150,7 +150,7 @@ internal class VedtakTest {
                     1,
                     emptyList(),
                     null,
-                    PeriodetypeBarnetilsyn.SANKSJON_1_MND
+                    PeriodetypeBarnetilsyn.SANKSJON_1_MND,
                 )
             }.hasMessageContaining("Ugyldig kombinasjon av sanksjon periodeType=SANKSJON_1_MND sanksjonsårsak=null")
         }

@@ -22,28 +22,28 @@ class VedtakServiceTest {
 
     private val vedtakService = VedtakService(
         vedtakRepository,
-        tilkjentYtelseRepository
+        tilkjentYtelseRepository,
     )
     private val behandlingId = UUID.randomUUID()
     private val inntektsperiodeUtenInntekt = inntektsperiode(
         startDato = LocalDate.of(2021, 1, 1),
         sluttDato = LocalDate.of(2021, 12, 31),
-        inntekt = BigDecimal.ZERO
+        inntekt = BigDecimal.ZERO,
     )
     private val inntektsperiodeMedInntekt = inntektsperiode(
         startDato = LocalDate.of(2022, 1, 1),
         sluttDato = LocalDate.of(2024, 12, 31),
-        inntekt = BigDecimal.valueOf(400000)
+        inntekt = BigDecimal.valueOf(400000),
     )
     private val inntektWrapper = InntektWrapper(listOf(inntektsperiodeUtenInntekt, inntektsperiodeMedInntekt))
 
     private val periodeUtenInntekt = vedtaksperiode(
         startDato = LocalDate.of(2021, 1, 1),
-        sluttDato = LocalDate.of(2021, 12, 31)
+        sluttDato = LocalDate.of(2021, 12, 31),
     )
     private val periodeMedInntekt = vedtaksperiode(
         startDato = LocalDate.of(2022, 1, 1),
-        sluttDato = LocalDate.of(2024, 12, 31)
+        sluttDato = LocalDate.of(2024, 12, 31),
     )
     private val periodeWrapper = PeriodeWrapper(listOf(periodeUtenInntekt, periodeMedInntekt))
 
@@ -52,7 +52,7 @@ class VedtakServiceTest {
         every { vedtakService.hentVedtak(behandlingId) } returns vedtak(
             behandlingId = behandlingId,
             inntekter = inntektWrapper,
-            perioder = periodeWrapper
+            perioder = periodeWrapper,
         )
     }
 

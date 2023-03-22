@@ -22,9 +22,9 @@ internal class SøknadsskjemaMapperTest {
                 null,
                 Søknadsfelt(
                     "Søker du stønad fra et bestemt tidspunkt",
-                    false
-                )
-            )
+                    false,
+                ),
+            ),
         )
         val kontraktsøknad = Testsøknad.søknadOvergangsstønad.copy(stønadsstart = stønadsstart)
         val søknadTilLagring = SøknadsskjemaMapper.tilDomene(kontraktsøknad)
@@ -48,7 +48,7 @@ internal class SøknadsskjemaMapperTest {
         val barn = TestsøknadBuilder.Builder()
             .defaultBarn()
             .copy(
-                skalBarnetBoHosSøker = Søknadsfelt("", "", null, svarSkalBarnetBoHosSøker)
+                skalBarnetBoHosSøker = Søknadsfelt("", "", null, svarSkalBarnetBoHosSøker),
             )
         val søknad = TestsøknadBuilder.Builder()
             .build().søknadOvergangsstønad.copy(barn = Søknadsfelt("", listOf(barn)))
@@ -65,7 +65,7 @@ internal class SøknadsskjemaMapperTest {
                 adresse = "adresse",
                 postnummer = "1234",
                 poststedsnavn = "Sted",
-                land = null
+                land = null,
             )
             val søknad = TestsøknadBuilder.Builder().setPersonalia(adresse = adresse).build().søknadOvergangsstønad
             assertThat(SøknadsskjemaMapper.tilDomene(søknad).adresseopplysninger?.adresse).isEqualTo("adresse, 1234 Sted")
@@ -77,7 +77,7 @@ internal class SøknadsskjemaMapperTest {
                 adresse = "adresse",
                 postnummer = "1234",
                 poststedsnavn = null,
-                land = "Land"
+                land = "Land",
             )
             val søknad = TestsøknadBuilder.Builder().setPersonalia(adresse = adresse).build().søknadOvergangsstønad
             assertThat(SøknadsskjemaMapper.tilDomene(søknad).adresseopplysninger?.adresse).isEqualTo("adresse, 1234, Land")
@@ -89,7 +89,7 @@ internal class SøknadsskjemaMapperTest {
                 adresse = "adresse",
                 postnummer = "",
                 poststedsnavn = null,
-                land = ""
+                land = "",
             )
             val søknad = TestsøknadBuilder.Builder().setPersonalia(adresse = adresse).build().søknadOvergangsstønad
             assertThat(SøknadsskjemaMapper.tilDomene(søknad).adresseopplysninger?.adresse).isEqualTo("adresse")

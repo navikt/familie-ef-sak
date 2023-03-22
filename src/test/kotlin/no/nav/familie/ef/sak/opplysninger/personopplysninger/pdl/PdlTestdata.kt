@@ -19,9 +19,9 @@ object PdlTestdata {
             1.0f,
             1.0f,
             1.0f,
-            1
+            1,
         ),
-        1L
+        1L,
     )
 
     private val matrikkeladresse = Matrikkeladresse(1L, "", "", "")
@@ -36,9 +36,9 @@ object PdlTestdata {
             PersonDataBolk(
                 "11111122222",
                 "ok",
-                PdlSøkerKort(listOf(Kjønn(KjønnType.KVINNE)), navn)
-            )
-        )
+                PdlSøkerKort(listOf(Kjønn(KjønnType.KVINNE)), navn),
+            ),
+        ),
     )
 
     private val adressebeskyttelse =
@@ -54,8 +54,8 @@ object PdlTestdata {
             vegadresse,
             UkjentBosted(""),
             matrikkeladresse,
-            metadataGjeldende
-        )
+            metadataGjeldende,
+        ),
     )
 
     private val dødsfall = listOf(Dødsfall(LocalDate.now()))
@@ -75,8 +75,8 @@ object PdlTestdata {
             utenlandskAdresse,
             vegadresse,
             "",
-            metadataGjeldende
-        )
+            metadataGjeldende,
+        ),
     )
 
     private val statsborgerskap = listOf(Statsborgerskap("", LocalDate.now(), LocalDate.now()))
@@ -91,8 +91,8 @@ object PdlTestdata {
         Folkeregisteridentifikator(
             søkerIdentifikator,
             FolkeregisteridentifikatorStatus.I_BRUK,
-            metadataGjeldende
-        )
+            metadataGjeldende,
+        ),
     )
 
     val pdlSøkerData =
@@ -111,8 +111,8 @@ object PdlTestdata {
                         LocalDate.now(),
                         "",
                         MotpartsRolle.FULLMAKTSGIVER,
-                        listOf("")
-                    )
+                        listOf(""),
+                    ),
                 ),
                 listOf(Kjønn(KjønnType.KVINNE)),
                 listOf(
@@ -125,8 +125,8 @@ object PdlTestdata {
                         KontaktadresseType.INNLAND,
                         utenlandskAdresse,
                         UtenlandskAdresseIFrittFormat("", "", "", "", "", ""),
-                        vegadresse
-                    )
+                        vegadresse,
+                    ),
                 ),
                 navn,
                 opphold,
@@ -137,8 +137,8 @@ object PdlTestdata {
                         LocalDate.now(),
                         "",
                         LocalDate.now(),
-                        metadataGjeldende
-                    )
+                        metadataGjeldende,
+                    ),
                 ),
                 statsborgerskap,
                 listOf(TilrettelagtKommunikasjon(Tolk(""), Tolk(""))),
@@ -153,11 +153,11 @@ object PdlTestdata {
                             "",
                             Personnavn("", "", ""),
                             "",
-                            true
-                        )
-                    )
-                )
-            )
+                            true,
+                        ),
+                    ),
+                ),
+            ),
         )
 
     val pdlPersonForelderBarnData =
@@ -175,16 +175,16 @@ object PdlTestdata {
                                 LocalDate.now(),
                                 vegadresse,
                                 UkjentBosted(""),
-                                metadataGjeldende
-                            )
+                                metadataGjeldende,
+                            ),
                         ),
                         dødsfall,
                         familierelasjon,
                         fødsel,
-                        navn
-                    )
-                )
-            )
+                        navn,
+                    ),
+                ),
+            ),
         )
 
     val ennenForelderIdentifikator = "2"
@@ -193,8 +193,8 @@ object PdlTestdata {
         Folkeregisteridentifikator(
             ennenForelderIdentifikator,
             FolkeregisteridentifikatorStatus.I_BRUK,
-            metadataGjeldende
-        )
+            metadataGjeldende,
+        ),
     )
 
     val pdlAnnenForelderData =
@@ -209,10 +209,10 @@ object PdlTestdata {
                         dødsfall,
                         fødsel,
                         folkeregisteridentifikatorAnnenForelder,
-                        navn
-                    )
-                )
-            )
+                        navn,
+                    ),
+                ),
+            ),
         )
 
     val pdlPersonKortBolk = PersonBolk(
@@ -223,10 +223,10 @@ object PdlTestdata {
                 PdlPersonKort(
                     adressebeskyttelse,
                     navn,
-                    dødsfall
-                )
-            )
-        )
+                    dødsfall,
+                ),
+            ),
+        ),
     )
 
     val pdlPersonSøk = PersonSøk(
@@ -236,13 +236,13 @@ object PdlTestdata {
                     PdlPersonFraSøk(
                         listOf(FolkeregisteridentifikatorFraSøk("123456789")),
                         bostedsadresse,
-                        navn
-                    )
-                )
+                        navn,
+                    ),
+                ),
             ),
             totalHits = 1,
             pageNumber = 1,
-            totalPages = 1
-        )
+            totalPages = 1,
+        ),
     )
 }

@@ -21,7 +21,7 @@ import java.util.UUID
 class MellomlagringBrevService(
     private val mellomlagerBrevRepository: MellomlagerBrevRepository,
     private val mellomlagerFritekstbrevRepository: MellomlagerFritekstbrevRepository,
-    private val mellomlagerFrittståendeBrevRepository: MellomlagerFrittståendeBrevRepository
+    private val mellomlagerFrittståendeBrevRepository: MellomlagerFrittståendeBrevRepository,
 ) {
 
     fun mellomLagreBrev(behandlingId: UUID, brevverdier: String, brevmal: String, sanityVersjon: String): UUID {
@@ -31,7 +31,7 @@ class MellomlagringBrevService(
             brevverdier,
             brevmal,
             sanityVersjon,
-            LocalDate.now()
+            LocalDate.now(),
         )
         return mellomlagerBrevRepository.insert(mellomlagretBrev).behandlingId
     }
@@ -42,9 +42,9 @@ class MellomlagringBrevService(
             mellomlagretBrev.behandlingId,
             Fritekstbrev(
                 overskrift = mellomlagretBrev.overskrift,
-                avsnitt = mellomlagretBrev.avsnitt
+                avsnitt = mellomlagretBrev.avsnitt,
             ),
-            brevType = mellomlagretBrev.brevType
+            brevType = mellomlagretBrev.brevType,
         )
 
         return mellomlagerFritekstbrevRepository.insert(mellomlagretFritekstbrev).behandlingId
@@ -59,12 +59,12 @@ class MellomlagringBrevService(
             brev =
             Fritekstbrev(
                 overskrift = mellomlagretBrev.overskrift,
-                avsnitt = mellomlagretBrev.avsnitt
+                avsnitt = mellomlagretBrev.avsnitt,
             ),
             brevType =
             mellomlagretBrev.brevType,
             saksbehandlerIdent = saksbehandlerIdent,
-            mottakere = mellomlagretBrev.mottakere?.let { FrittståendeBrevmottakere(it.personer, it.organisasjoner) }
+            mottakere = mellomlagretBrev.mottakere?.let { FrittståendeBrevmottakere(it.personer, it.organisasjoner) },
         )
         return mellomlagerFrittståendeBrevRepository.insert(mellomlagretFrittståendeBrev).fagsakId
     }
@@ -77,7 +77,7 @@ class MellomlagringBrevService(
                 it.brev.avsnitt,
                 fagsakId,
                 it.brevType,
-                it.mottakere?.let { mottakere -> BrevmottakereDto(mottakere.personer, mottakere.organisasjoner) }
+                it.mottakere?.let { mottakere -> BrevmottakereDto(mottakere.personer, mottakere.organisasjoner) },
             )
         }
     }
@@ -87,7 +87,7 @@ class MellomlagringBrevService(
             if (sanityVersjon == it.sanityVersjon) {
                 return MellomlagretBrevSanity(
                     brevverdier = it.brevverdier,
-                    brevmal = it.brevmal
+                    brevmal = it.brevmal,
                 )
             }
             return null

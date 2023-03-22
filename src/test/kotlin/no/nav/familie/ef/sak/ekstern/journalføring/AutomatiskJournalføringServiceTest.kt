@@ -53,7 +53,7 @@ internal class AutomatiskJournalføringServiceTest {
         personService = personService,
         infotrygdService = infotrygdService,
         arbeidsfordelingService = arbeidsfordelingService,
-        journalpostService = journalpostService
+        journalpostService = journalpostService,
     )
 
     val enhet = "4489"
@@ -70,7 +70,7 @@ internal class AutomatiskJournalføringServiceTest {
         journalposttype = Journalposttype.I,
         journalstatus = Journalstatus.MOTTATT,
         dokumenter = emptyList(),
-        bruker = Bruker(personIdent, FNR)
+        bruker = Bruker(personIdent, FNR),
     )
 
     @BeforeEach
@@ -78,8 +78,8 @@ internal class AutomatiskJournalføringServiceTest {
         every { personService.hentPersonIdenter(any()) } returns PdlIdenter(
             identer = listOf(
                 PdlIdent(personIdent, false),
-                PdlIdent(tidligerePersonIdent, false)
-            )
+                PdlIdent(tidligerePersonIdent, false),
+            ),
         )
         every { fagsakService.hentEllerOpprettFagsak(any(), any()) } returns fagsak
         every { arbeidsfordelingService.hentNavEnhetIdEllerBrukMaskinellEnhetHvisNull(any()) } returns enhet
@@ -91,7 +91,7 @@ internal class AutomatiskJournalføringServiceTest {
                 any(),
                 any(),
                 any(),
-                any()
+                any(),
             )
         } returns mockk()
     }
@@ -147,9 +147,9 @@ internal class AutomatiskJournalføringServiceTest {
         every { behandlingService.hentBehandlinger(fagsak.id) } returns listOf(
             behandling(
                 resultat = INNVILGET,
-                status = BehandlingStatus.FERDIGSTILT
+                status = BehandlingStatus.FERDIGSTILT,
             ),
-            behandling(resultat = AVSLÅTT, status = BehandlingStatus.FERDIGSTILT)
+            behandling(resultat = AVSLÅTT, status = BehandlingStatus.FERDIGSTILT),
         )
         val kanOppretteBehandling =
             automatiskJournalføringService.kanOppretteBehandling(personIdent, StønadType.OVERGANGSSTØNAD)
@@ -160,7 +160,7 @@ internal class AutomatiskJournalføringServiceTest {
     internal fun `skal ikke kunne automatisk journalføre hvis journalpostens bruker og personident ikke samsvarer`() {
         val enAnnenBruker = Bruker(
             id = personIdentAnnen,
-            type = FNR
+            type = FNR,
         )
         every { journalpostService.hentJournalpost(journalpostId) } returns journalpost.copy(bruker = enAnnenBruker)
         every { behandlingService.hentBehandlinger(fagsak.id) } returns emptyList()
@@ -169,7 +169,7 @@ internal class AutomatiskJournalføringServiceTest {
                 journalpostId,
                 personIdent,
                 StønadType.OVERGANGSSTØNAD,
-                mappeId
+                mappeId,
             )
         }
         assertThat(feil.message).contains("Ikke samsvar mellom personident på journalposten")
@@ -179,7 +179,7 @@ internal class AutomatiskJournalføringServiceTest {
     internal fun `skal ikke kunne automatisk journalføre hvis journalpostens aktørId-bruker og personident ikke samsvarer`() {
         val enAnnenBruker = Bruker(
             id = aktørIdAnnen,
-            type = AKTOERID
+            type = AKTOERID,
         )
         every { journalpostService.hentJournalpost(journalpostId) } returns journalpost.copy(bruker = enAnnenBruker)
         every { fagsakService.finnFagsak(any(), any()) } returns fagsak
@@ -191,7 +191,7 @@ internal class AutomatiskJournalføringServiceTest {
                 journalpostId,
                 personIdent,
                 StønadType.OVERGANGSSTØNAD,
-                mappeId
+                mappeId,
             )
         }
         assertThat(feil.message).contains("Ikke samsvar mellom personident på journalposten")
@@ -209,7 +209,7 @@ internal class AutomatiskJournalføringServiceTest {
                 journalpostId,
                 personIdent,
                 StønadType.OVERGANGSSTØNAD,
-                mappeId
+                mappeId,
             )
         }
         assertThat(feil.message).contains("Journalposten mangler bruker")
@@ -219,7 +219,7 @@ internal class AutomatiskJournalføringServiceTest {
     internal fun `skal ikke kunne automatisk journalføre hvis journalpostens bruker er orgnr`() {
         val enAnnenBruker = Bruker(
             id = aktørIdAnnen,
-            type = ORGNR
+            type = ORGNR,
         )
         every { journalpostService.hentJournalpost(journalpostId) } returns journalpost.copy(bruker = enAnnenBruker)
         every { fagsakService.finnFagsak(any(), any()) } returns fagsak
@@ -231,7 +231,7 @@ internal class AutomatiskJournalføringServiceTest {
                 journalpostId,
                 personIdent,
                 StønadType.OVERGANGSSTØNAD,
-                mappeId
+                mappeId,
             )
         }
         assertThat(feil.message).contains("Ikke samsvar mellom personident på journalposten")
@@ -241,7 +241,7 @@ internal class AutomatiskJournalføringServiceTest {
     internal fun `skal kunne automatisk journalføre hvis journalpostens aktørId-bruker og personident samsvarer`() {
         val aktørIdBruker = Bruker(
             id = aktørId,
-            type = AKTOERID
+            type = AKTOERID,
         )
         val journalpostMedAktørId = journalpost.copy(bruker = aktørIdBruker)
         every { journalpostService.hentJournalpost(journalpostId) } returns journalpostMedAktørId
@@ -254,7 +254,7 @@ internal class AutomatiskJournalføringServiceTest {
             journalpostId,
             personIdent,
             StønadType.OVERGANGSSTØNAD,
-            mappeId
+            mappeId,
         )
         verify {
             journalføringService.automatiskJournalfør(
@@ -262,7 +262,7 @@ internal class AutomatiskJournalføringServiceTest {
                 journalpostMedAktørId,
                 enhet,
                 mappeId,
-                FØRSTEGANGSBEHANDLING
+                FØRSTEGANGSBEHANDLING,
             )
         }
     }
@@ -271,7 +271,7 @@ internal class AutomatiskJournalføringServiceTest {
     internal fun `skal kunne automatisk journalføre hvis journalpostens personIdent er en historisk ident`() {
         val enAnnenBruker = Bruker(
             id = tidligerePersonIdent,
-            type = FNR
+            type = FNR,
         )
         every { journalpostService.hentJournalpost(journalpostId) } returns journalpost.copy(bruker = enAnnenBruker)
         every { fagsakService.finnFagsak(any(), any()) } returns fagsak
@@ -284,14 +284,14 @@ internal class AutomatiskJournalføringServiceTest {
                 any(),
                 any(),
                 any(),
-                any()
+                any(),
             )
         } returns mockk()
         automatiskJournalføringService.automatiskJournalførTilBehandling(
             journalpostId,
             personIdent,
             StønadType.OVERGANGSSTØNAD,
-            mappeId
+            mappeId,
         )
     }
 
@@ -305,7 +305,7 @@ internal class AutomatiskJournalføringServiceTest {
                 journalpostId,
                 personIdent,
                 StønadType.OVERGANGSSTØNAD,
-                mappeId
+                mappeId,
             )
         }
         assertThat(feil.message).contains("Kan ikke opprette førstegangsbehandling")
@@ -321,13 +321,13 @@ internal class AutomatiskJournalføringServiceTest {
             every { behandlingService.hentBehandlinger(fagsak.id) } returns listOf(
                 henlagtBehandling,
                 behandling,
-                henlagtBehandling
+                henlagtBehandling,
             )
             automatiskJournalføringService.automatiskJournalførTilBehandling(
                 journalpostId,
                 personIdent,
                 StønadType.OVERGANGSSTØNAD,
-                mappeId
+                mappeId,
             )
         }
     }
@@ -343,7 +343,7 @@ internal class AutomatiskJournalføringServiceTest {
             journalpostId,
             personIdent,
             StønadType.OVERGANGSSTØNAD,
-            mappeId
+            mappeId,
         )
         verify { journalføringService.automatiskJournalfør(fagsak, journalpost, enhet, mappeId, FØRSTEGANGSBEHANDLING) }
     }
@@ -361,7 +361,7 @@ internal class AutomatiskJournalføringServiceTest {
             journalpostId,
             personIdent,
             StønadType.OVERGANGSSTØNAD,
-            mappeId
+            mappeId,
         )
         verify { journalføringService.automatiskJournalfør(fagsak, journalpost, enhet, mappeId, REVURDERING) }
     }
@@ -376,7 +376,7 @@ internal class AutomatiskJournalføringServiceTest {
                     journalpostId,
                     personIdent,
                     StønadType.OVERGANGSSTØNAD,
-                    mappeId
+                    mappeId,
                 )
             }
             assertThat(feil.message).contains("Journalposten har ugyldig journalstatus $journalstatus")

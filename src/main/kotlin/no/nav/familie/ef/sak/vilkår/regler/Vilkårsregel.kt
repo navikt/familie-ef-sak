@@ -27,30 +27,30 @@ data class HovedregelMetadata(
     val søktOmBarnetilsyn: List<UUID>,
     val langAvstandTilSøker: List<BarnForelderLangAvstandTilSøker> = listOf(),
     val vilkårgrunnlagDto: VilkårGrunnlagDto,
-    val behandling: Behandling
+    val behandling: Behandling,
 )
 
 data class BarnForelderLangAvstandTilSøker(
     val barnId: UUID,
-    val langAvstandTilSøker: LangAvstandTilSøker
+    val langAvstandTilSøker: LangAvstandTilSøker,
 )
 
 abstract class Vilkårsregel(
     val vilkårType: VilkårType,
     val regler: Map<RegelId, RegelSteg>,
     @JsonIgnore
-    val hovedregler: Set<RegelId>
+    val hovedregler: Set<RegelId>,
 ) {
 
     open fun initiereDelvilkårsvurdering(
         metadata: HovedregelMetadata,
         resultat: Vilkårsresultat = Vilkårsresultat.IKKE_TATT_STILLING_TIL,
-        barnId: UUID? = null
+        barnId: UUID? = null,
     ): List<Delvilkårsvurdering> {
         return hovedregler.map {
             Delvilkårsvurdering(
                 resultat,
-                vurderinger = listOf(Vurdering(it))
+                vurderinger = listOf(Vurdering(it)),
             )
         }
     }
@@ -69,9 +69,9 @@ abstract class Vilkårsregel(
                 Vurdering(
                     regelId = regelId,
                     svar = svarId,
-                    begrunnelse = "Automatisk vurdert (${LocalDate.now().norskFormat()}): $begrunnelse"
-                )
-            )
+                    begrunnelse = "Automatisk vurdert (${LocalDate.now().norskFormat()}): $begrunnelse",
+                ),
+            ),
         )
     }
 
@@ -79,8 +79,8 @@ abstract class Vilkårsregel(
         resultat = Vilkårsresultat.IKKE_TATT_STILLING_TIL,
         vurderinger = listOf(
             Vurdering(
-                regelId = regelId
-            )
-        )
+                regelId = regelId,
+            ),
+        ),
     )
 }

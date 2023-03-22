@@ -17,7 +17,7 @@ import java.util.UUID
 @TaskStepBeskrivelse(
     taskStepType = OpprettOppgaveTask.TYPE,
     beskrivelse = "Opprett oppgave i GOSYS for behandling",
-    maxAntallFeil = 3
+    maxAntallFeil = 3,
 )
 class OpprettOppgaveTask(private val oppgaveService: OppgaveService) : AsyncTaskStep {
 
@@ -29,7 +29,7 @@ class OpprettOppgaveTask(private val oppgaveService: OppgaveService) : AsyncTask
         val oppgavetype: Oppgavetype,
         val tilordnetNavIdent: String? = null,
         val beskrivelse: String? = null,
-        val unik: LocalDateTime? = LocalDateTime.now()
+        val unik: LocalDateTime? = LocalDateTime.now(),
     )
 
     override fun doTask(task: Task) {
@@ -38,7 +38,7 @@ class OpprettOppgaveTask(private val oppgaveService: OppgaveService) : AsyncTask
             behandlingId = data.behandlingId,
             oppgavetype = data.oppgavetype,
             tilordnetNavIdent = data.tilordnetNavIdent,
-            beskrivelse = data.beskrivelse
+            beskrivelse = data.beskrivelse,
         )
         task.metadata.setProperty("oppgaveId", oppgaveId.toString())
     }
@@ -53,7 +53,7 @@ class OpprettOppgaveTask(private val oppgaveService: OppgaveService) : AsyncTask
                     this["saksbehandler"] = SikkerhetContext.hentSaksbehandlerEllerSystembruker()
                     this["behandlingId"] = data.behandlingId.toString()
                     this["oppgavetype"] = data.oppgavetype.name
-                }
+                },
             )
         }
 

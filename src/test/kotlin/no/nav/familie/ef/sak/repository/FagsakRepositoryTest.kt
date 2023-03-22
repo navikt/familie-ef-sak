@@ -51,23 +51,23 @@ internal class FagsakRepositoryTest : OppslagSpringRunnerTest() {
                     fagsak,
                     status = BehandlingStatus.FERDIGSTILT,
                     resultat = BehandlingResultat.INNVILGET,
-                    opprettetTid = LocalDateTime.now().minusDays(2)
-                )
+                    opprettetTid = LocalDateTime.now().minusDays(2),
+                ),
             )
             behandlingRepository.insert(
                 behandling(
                     fagsak2,
                     status = BehandlingStatus.UTREDES,
-                    resultat = BehandlingResultat.INNVILGET
-                )
+                    resultat = BehandlingResultat.INNVILGET,
+                ),
             )
             tilkjentYtelseRepository.insert(
                 tilkjentYtelse(
                     behandling.id,
                     fagsak.personIdenter.first().ident,
                     2022,
-                    grunnbeløpsmåned = YearMonth.of(2021, 5)
-                )
+                    grunnbeløpsmåned = YearMonth.of(2021, 5),
+                ),
             )
             assertThat(fagsakRepository.finnFerdigstilteFagsakerMedUtdatertGBelop(LocalDate.of(2022, 5, 1)))
                 .containsExactly(fagsak.id)
@@ -82,23 +82,23 @@ internal class FagsakRepositoryTest : OppslagSpringRunnerTest() {
                     fagsak,
                     status = BehandlingStatus.FERDIGSTILT,
                     resultat = BehandlingResultat.INNVILGET,
-                    opprettetTid = LocalDateTime.now().minusDays(5)
-                )
+                    opprettetTid = LocalDateTime.now().minusDays(5),
+                ),
             )
             behandlingRepository.insert(
                 behandling(
                     fagsak,
                     status = BehandlingStatus.FATTER_VEDTAK,
                     resultat = BehandlingResultat.INNVILGET,
-                    opprettetTid = LocalDateTime.now().minusDays(2)
-                )
+                    opprettetTid = LocalDateTime.now().minusDays(2),
+                ),
             )
             behandlingRepository.insert(
                 behandling(
                     fagsak2,
                     status = BehandlingStatus.UTREDES,
-                    resultat = BehandlingResultat.INNVILGET
-                )
+                    resultat = BehandlingResultat.INNVILGET,
+                ),
             )
             tilkjentYtelseRepository.insert(tilkjentYtelse(behandlingFerdig.id, fagsak.personIdenter.first().ident, 2022))
             assertThat(fagsakRepository.finnFerdigstilteFagsakerMedUtdatertGBelop(LocalDate.of(2022, 5, 1))).isEmpty()
@@ -112,8 +112,8 @@ internal class FagsakRepositoryTest : OppslagSpringRunnerTest() {
             behandling(
                 fagsak,
                 resultat = BehandlingResultat.INNVILGET,
-                status = BehandlingStatus.FERDIGSTILT
-            )
+                status = BehandlingStatus.FERDIGSTILT,
+            ),
         )
         tilkjentYtelseRepository.insert(tilkjentYtelse(behandling.id, "321", LocalDate.now().year))
 
@@ -129,8 +129,8 @@ internal class FagsakRepositoryTest : OppslagSpringRunnerTest() {
             behandling(
                 fagsak,
                 resultat = BehandlingResultat.INNVILGET,
-                status = BehandlingStatus.FERDIGSTILT
-            )
+                status = BehandlingStatus.FERDIGSTILT,
+            ),
         )
         tilkjentYtelseRepository.insert(tilkjentYtelse(behandling.id, "321", LocalDate.now().year))
         tilkjentYtelseRepository.insert(tilkjentYtelse(behandling.id, "321", LocalDate.now().year))
@@ -147,8 +147,8 @@ internal class FagsakRepositoryTest : OppslagSpringRunnerTest() {
             behandling(
                 fagsak,
                 resultat = BehandlingResultat.INNVILGET,
-                status = BehandlingStatus.FERDIGSTILT
-            )
+                status = BehandlingStatus.FERDIGSTILT,
+            ),
         )
         tilkjentYtelseRepository.insert(tilkjentYtelse(behandling.id, "321"))
 
@@ -169,8 +169,8 @@ internal class FagsakRepositoryTest : OppslagSpringRunnerTest() {
                 .has(
                     hasCauseMessageContaining(
                         "ERROR: duplicate key value violates " +
-                            "unique constraint \"fagsak_person_unique\""
-                    )
+                            "unique constraint \"fagsak_person_unique\"",
+                    ),
                 )
         }
     }
@@ -214,14 +214,14 @@ internal class FagsakRepositoryTest : OppslagSpringRunnerTest() {
         val fagsak1 = testoppsettService.lagreFagsak(
             fagsak(
                 person = person,
-                stønadstype = StønadType.OVERGANGSSTØNAD
-            )
+                stønadstype = StønadType.OVERGANGSSTØNAD,
+            ),
         )
         val fagsak2 = testoppsettService.lagreFagsak(
             fagsak(
                 person = person,
-                stønadstype = StønadType.SKOLEPENGER
-            )
+                stønadstype = StønadType.SKOLEPENGER,
+            ),
         )
         val fagsaker = fagsakRepository.findBySøkerIdent(setOf(ident))
 
@@ -230,7 +230,7 @@ internal class FagsakRepositoryTest : OppslagSpringRunnerTest() {
                 val fagsakperson = fagsakPersonRepository.findByIdOrThrow(fagsak.fagsakPersonId)
                 assertThat(fagsakperson.identer.size).isEqualTo(1)
                 assertThat(fagsakperson.identer.map { it.ident }).contains(ident)
-            }
+            },
         )
 
         assertThat(fagsaker.map { it.stønadstype }).contains(StønadType.SKOLEPENGER)
@@ -310,18 +310,18 @@ internal class FagsakRepositoryTest : OppslagSpringRunnerTest() {
         assertThat(
             fagsakRepository.findBySøkerIdent(
                 fagsakMedFlereIdenter.personIdenter.map { it.ident }.toSet(),
-                StønadType.OVERGANGSSTØNAD
-            )
+                StønadType.OVERGANGSSTØNAD,
+            ),
         ).isNotNull
         assertThat(
             fagsakRepository.findBySøkerIdent(
                 setOf(
                     fagsakMedFlereIdenter.personIdenter.map { it.ident }
-                        .first()
-                )
-            )
+                        .first(),
+                ),
+            ),
         ).hasSize(
-            1
+            1,
         )
         assertThat(fagsakRepository.findBySøkerIdent(fagsakMedFlereIdenter.personIdenter.map { it.ident }.toSet())).hasSize(1)
     }
@@ -332,8 +332,8 @@ internal class FagsakRepositoryTest : OppslagSpringRunnerTest() {
             setOf(
                 PersonIdent(ident = ident),
                 PersonIdent(ident = ident2, sporbar = endret2DagerSiden),
-                PersonIdent(ident = ident3)
-            )
+                PersonIdent(ident = ident3),
+            ),
         )
     }
 }

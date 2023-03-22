@@ -63,17 +63,17 @@ internal class FagsakServiceTest : OppslagSpringRunnerTest() {
                 fagsakService.fagsakerMedOppdatertePersonIdenter(
                     listOf(
                         fagsakTilknyttetPesonIdent123.id,
-                        fagsakTilknyttetPesonIdent456.id
-                    )
+                        fagsakTilknyttetPesonIdent456.id,
+                    ),
                 )
 
             assertThat(
                 fagsakerMedOppdatertePersonIdenter.first { it.id == fagsakTilknyttetPesonIdent123.id }
-                    .hentAktivIdent()
+                    .hentAktivIdent(),
             ).isEqualTo("ny123")
             assertThat(
                 fagsakerMedOppdatertePersonIdenter.first { it.id == fagsakTilknyttetPesonIdent456.id }
-                    .hentAktivIdent()
+                    .hentAktivIdent(),
             ).isEqualTo("ny456")
         }
 
@@ -83,17 +83,17 @@ internal class FagsakServiceTest : OppslagSpringRunnerTest() {
                 fagsakService.fagsakerMedOppdatertePersonIdenter(
                     listOf(
                         fagsakTilknyttetPesonIdent111.id,
-                        fagsakTilknyttetPesonIdent222.id
-                    )
+                        fagsakTilknyttetPesonIdent222.id,
+                    ),
                 )
 
             assertThat(
                 fagsakerMedOppdatertePersonIdenter.first { it.id == fagsakTilknyttetPesonIdent111.id }
-                    .hentAktivIdent()
+                    .hentAktivIdent(),
             ).isEqualTo("111")
             assertThat(
                 fagsakerMedOppdatertePersonIdenter.first { it.id == fagsakTilknyttetPesonIdent222.id }
-                    .hentAktivIdent()
+                    .hentAktivIdent(),
             ).isEqualTo("222")
         }
     }
@@ -116,7 +116,7 @@ internal class FagsakServiceTest : OppslagSpringRunnerTest() {
 
             val fagsakRequest = fagsak(
                 stønadstype = StønadType.BARNETILSYN,
-                identer = setOf(PersonIdent(ident = personIdent))
+                identer = setOf(PersonIdent(ident = personIdent)),
             )
             val fagsakDB = testoppsettService.lagreFagsak(fagsakRequest)
 
@@ -127,7 +127,7 @@ internal class FagsakServiceTest : OppslagSpringRunnerTest() {
                 steg = StegType.BEHANDLING_FERDIGSTILT,
                 resultat = BehandlingResultat.INNVILGET,
                 årsak = BehandlingÅrsak.SØKNAD,
-                vedtakstidspunkt = SporbarUtils.now()
+                vedtakstidspunkt = SporbarUtils.now(),
             )
             val behandling2 = Behandling(
                 fagsakId = fagsakDB.id,
@@ -136,7 +136,7 @@ internal class FagsakServiceTest : OppslagSpringRunnerTest() {
                 steg = StegType.VILKÅR,
                 resultat = BehandlingResultat.INNVILGET,
                 årsak = BehandlingÅrsak.SØKNAD,
-                vedtakstidspunkt = SporbarUtils.now()
+                vedtakstidspunkt = SporbarUtils.now(),
             )
 
             behandlingRepository.insert(behandling1)
@@ -170,12 +170,12 @@ internal class FagsakServiceTest : OppslagSpringRunnerTest() {
             val iGår = Sporbar(
                 opprettetAv = "XY",
                 opprettetTid = LocalDateTime.now().minusDays(1),
-                endret = Endret(endretAv = "XY", endretTid = LocalDateTime.now().minusDays(1))
+                endret = Endret(endretAv = "XY", endretTid = LocalDateTime.now().minusDays(1)),
             )
             val iDag = Sporbar(
                 opprettetAv = "XY",
                 opprettetTid = LocalDateTime.now().minusHours(1),
-                endret = Endret(endretAv = "XY", endretTid = LocalDateTime.now().minusHours(1))
+                endret = Endret(endretAv = "XY", endretTid = LocalDateTime.now().minusHours(1)),
             )
 
             val gjeldendeIdent = "12345678901"
@@ -188,14 +188,14 @@ internal class FagsakServiceTest : OppslagSpringRunnerTest() {
                         identer = setOf(
                             PersonIdent(
                                 ident = gjeldendeIdent,
-                                sporbar = iGår
+                                sporbar = iGår,
                             ),
                             PersonIdent(
                                 ident = feilRegistrertIdent,
-                                sporbar = iDag
-                            )
-                        )
-                    )
+                                sporbar = iDag,
+                            ),
+                        ),
+                    ),
                 )
 
             assertThat(fagsakMedFeilregistrertIdent.hentAktivIdent()).isEqualTo(feilRegistrertIdent)
@@ -203,7 +203,7 @@ internal class FagsakServiceTest : OppslagSpringRunnerTest() {
             val oppdatertFagsak = fagsakService.hentEllerOpprettFagsak(gjeldendeIdent, StønadType.OVERGANGSSTØNAD)
             assertThat(oppdatertFagsak.personIdenter.map { it.ident }).containsExactlyInAnyOrder(
                 gjeldendeIdent,
-                feilRegistrertIdent
+                feilRegistrertIdent,
             )
             assertThat(oppdatertFagsak.hentAktivIdent()).isEqualTo(gjeldendeIdent)
             val fagsakEtterOppdatering = fagsakService.hentFagsak(fagsakMedFeilregistrertIdent.id).hentAktivIdent()
@@ -215,7 +215,7 @@ internal class FagsakServiceTest : OppslagSpringRunnerTest() {
             val iGår = Sporbar(
                 opprettetAv = "XY",
                 opprettetTid = LocalDateTime.now().minusDays(1),
-                endret = Endret(endretAv = "XY", endretTid = LocalDateTime.now().minusDays(1))
+                endret = Endret(endretAv = "XY", endretTid = LocalDateTime.now().minusDays(1)),
             )
 
             val gjeldendeIdent = "12345678901"
@@ -228,10 +228,10 @@ internal class FagsakServiceTest : OppslagSpringRunnerTest() {
                         identer = setOf(
                             PersonIdent(
                                 ident = historiskIdent,
-                                sporbar = iGår
-                            )
-                        )
-                    )
+                                sporbar = iGår,
+                            ),
+                        ),
+                    ),
                 )
 
             assertThat(fagsakMedHistoriskIdent.hentAktivIdent()).isEqualTo(historiskIdent)

@@ -9,27 +9,27 @@ data class Søkeresultat(
     val visningsnavn: String,
     val kjønn: Kjønn,
     val fagsakPersonId: UUID?,
-    val fagsaker: List<FagsakForSøkeresultat>
+    val fagsaker: List<FagsakForSøkeresultat>,
 )
 
 data class FagsakForSøkeresultat(
     val fagsakId: UUID,
     val stønadstype: StønadType,
     val erLøpende: Boolean,
-    val erMigrert: Boolean
+    val erMigrert: Boolean,
 )
 
 data class PersonFraSøk(
     val personIdent: String,
     val visningsadresse: String?,
-    val visningsnavn: String
+    val visningsnavn: String,
 )
 
 data class SøkeresultatPerson(
     val hits: List<PersonFraSøk>,
     val totalHits: Int,
     val pageNumber: Int,
-    val totalPages: Int
+    val totalPages: Int,
 )
 
 data class SøkeresultatUtenFagsak(val personIdent: String, val navn: String)

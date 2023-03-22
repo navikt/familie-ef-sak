@@ -66,7 +66,7 @@ internal class EndringerIPersonOpplysningerServiceTest {
                     coWithArg {
                         assertThat(it.oppdaterteData).isNull()
                         assertThat(it.oppdaterteDataHentetTid).isAfter(LocalDateTime.now().minusMinutes(1))
-                    }
+                    },
                 )
             }
         }
@@ -84,7 +84,7 @@ internal class EndringerIPersonOpplysningerServiceTest {
                     coWithArg {
                         assertThat(it.oppdaterteData).isNotNull
                         assertThat(it.oppdaterteDataHentetTid).isAfter(LocalDateTime.now().minusMinutes(1))
-                    }
+                    },
                 )
             }
         }
@@ -128,12 +128,12 @@ internal class EndringerIPersonOpplysningerServiceTest {
 
     private fun grunnlagsdata(
         endringerSjekket: LocalDateTime,
-        endringer: GrunnlagsdataDomene? = opprettGrunnlagsdata()
+        endringer: GrunnlagsdataDomene? = opprettGrunnlagsdata(),
     ) = Grunnlagsdata(
         behandlingId,
         opprettGrunnlagsdata(),
         oppdaterteDataHentetTid = endringerSjekket,
-        oppdaterteData = endringer
+        oppdaterteData = endringer,
     )
 
     private fun mockPersonopplysninger(harEndringer: Boolean) {
@@ -142,7 +142,7 @@ internal class EndringerIPersonOpplysningerServiceTest {
             personopplysningerService.finnEndringerIPersonopplysninger(
                 any(),
                 any(),
-                any()
+                any(),
             )
         } returns EndringerIPersonopplysningerDto(LocalDateTime.now(), endringer)
     }

@@ -26,7 +26,7 @@ interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUp
                      FROM behandling b         
                      JOIN behandling_ekstern be 
                      ON be.behandling_id = b.id         
-                     WHERE be.id = :eksternId"""
+                     WHERE be.id = :eksternId""",
     )
     fun finnMedEksternId(eksternId: Long): Behandling?
 
@@ -38,7 +38,7 @@ interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUp
                     WHERE b.id = :behandlingId
                     ORDER BY pi.endret_tid DESC 
                     LIMIT 1
-                    """
+                    """,
     )
     fun finnAktivIdent(behandlingId: UUID): String
 
@@ -72,7 +72,7 @@ interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUp
              WHERE b.id = :behandlingId
              ORDER BY pi.endret_tid DESC
              LIMIT 1
-             """
+             """,
     )
     fun finnSaksbehandling(behandlingId: UUID): Saksbehandling
 
@@ -106,7 +106,7 @@ interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUp
              WHERE be.id = :eksternBehandlingId
              ORDER BY pi.endret_tid DESC
              LIMIT 1
-             """
+             """,
     )
     fun finnSaksbehandling(eksternBehandlingId: Long): Saksbehandling
 
@@ -121,7 +121,7 @@ interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUp
          AND b.status = 'FERDIGSTILT'
         ORDER BY b.vedtakstidspunkt DESC
         LIMIT 1
-    """
+    """,
     )
     fun finnSisteIverksatteBehandling(fagsakId: UUID): Behandling?
 
@@ -134,7 +134,7 @@ interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUp
         WHERE f.fagsak_person_id = :fagsakPersonId
          AND b.resultat IN ('OPPHØRT', 'INNVILGET', 'AVSLÅTT', 'IKKE_SATT')
          AND b.status NOT IN ('OPPRETTET')
-    """
+    """,
     )
     fun finnBehandlingerForGjenbrukAvVilkår(fagsakPersonId: UUID): List<Behandling>
 
@@ -148,7 +148,7 @@ interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUp
             JOIN behandling_ekstern be ON b.id = be.behandling_id
             JOIN fagsak_ekstern fe ON b.fagsak_id = fe.fagsak_id 
         WHERE behandling_id IN (:behandlingId)
-        """
+        """,
     )
     fun finnEksterneIder(behandlingId: Set<UUID>): Set<EksternId>
 
@@ -159,7 +159,7 @@ interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUp
         FROM gjeldende_iverksatte_behandlinger gib 
             JOIN person_ident pi ON gib.fagsak_person_id=pi.fagsak_person_id
         WHERE gib.stonadstype=:stønadstype AND (vedtakstidspunkt < ('now'::timestamp - '2 month'::interval) OR arsak IN ('MIGRERING', 'G_OMREGNING'))
-        """
+        """,
     )
     fun finnPersonerMedAktivStonadIkkeRevurdertSisteToMåneder(stønadstype: StønadType = StønadType.OVERGANGSSTØNAD): List<String>
 
@@ -168,7 +168,7 @@ interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUp
         SELECT DISTINCT gib.id
         FROM gjeldende_iverksatte_behandlinger gib
         WHERE gib.stonadstype=:stønadstype
-        """
+        """,
     )
     fun finnBehandlingerForPersonerMedAktivStønad(stønadstype: StønadType = StønadType.OVERGANGSSTØNAD): List<UUID>
 
@@ -180,11 +180,11 @@ interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUp
             JOIN person_ident pi ON gib.fagsak_person_id=pi.fagsak_person_id
         WHERE pi.ident IN (:personidenter)
             AND gib.stonadstype=:stønadstype
-    """
+    """,
     )
     fun finnSisteIverksatteBehandlingerForPersonIdenter(
         personidenter: Collection<String>,
-        stønadstype: StønadType = StønadType.OVERGANGSSTØNAD
+        stønadstype: StønadType = StønadType.OVERGANGSSTØNAD,
     ): List<Pair<String, UUID>>
 
     // language=PostgreSQL
@@ -196,7 +196,7 @@ interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUp
         WHERE NOT b.status = 'FERDIGSTILT'
         AND b.opprettet_tid < :opprettetTidFør
         AND f.stonadstype=:stønadstype
-        """
+        """,
     )
     fun hentUferdigeBehandlingerFørDato(stønadstype: StønadType, opprettetTidFør: LocalDateTime): List<Behandling>
 }

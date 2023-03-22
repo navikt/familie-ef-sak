@@ -95,7 +95,7 @@ internal class JournalføringServiceTest {
             barnService = barnService,
             featureToggleService = featureToggleService,
             journalpostService = journalpostService,
-            infotrygdPeriodeValideringService = infotrygdPeriodeValideringService
+            infotrygdPeriodeValideringService = infotrygdPeriodeValideringService,
         )
 
     private val fagsakEksternId = 12345L
@@ -123,28 +123,28 @@ internal class JournalføringServiceTest {
                 dokumentvarianter =
                 listOf(
                     Dokumentvariant(Dokumentvariantformat.ORIGINAL),
-                    Dokumentvariant(Dokumentvariantformat.ARKIV)
-                )
+                    Dokumentvariant(Dokumentvariantformat.ARKIV),
+                ),
             ),
             DokumentInfo(
                 "99999",
                 "Vedlegg2",
                 brevkode = DokumentBrevkode.OVERGANGSSTØNAD.verdi,
                 dokumentvarianter =
-                listOf(Dokumentvariant(Dokumentvariantformat.ARKIV))
+                listOf(Dokumentvariant(Dokumentvariantformat.ARKIV)),
             ),
             DokumentInfo(
                 "23456",
                 "Vedlegg3",
-                brevkode = "XYZ"
+                brevkode = "XYZ",
             ),
             DokumentInfo(
                 "88888",
                 "Vedlegg4",
-                brevkode = "XYZ"
-            )
+                brevkode = "XYZ",
+            ),
         ),
-        tittel = "Søknad om overgangsstønad"
+        tittel = "Søknad om overgangsstønad",
     )
 
     private val ustrukturertJournalpost = journalpost.copy(dokumenter = emptyList())
@@ -170,7 +170,7 @@ internal class JournalføringServiceTest {
         } returns fagsak(
             identer = fagsakpersoner(setOf("1")),
             id = fagsakId,
-            eksternId = EksternFagsakId(fagsakEksternId)
+            eksternId = EksternFagsakId(fagsakEksternId),
         )
 
         mockOpprettBehandling(behandlingId)
@@ -205,7 +205,7 @@ internal class JournalføringServiceTest {
         val journalførtOppgaveId =
             journalføringService.fullførJournalpost(
                 journalpostId = journalpostId,
-                journalføringRequest = lagRequest(JournalføringBehandling(behandlingId))
+                journalføringRequest = lagRequest(JournalføringBehandling(behandlingId)),
             )
 
         assertThat(journalførtOppgaveId).isEqualTo(oppgaveId.toLong())
@@ -230,7 +230,7 @@ internal class JournalføringServiceTest {
         every { fagsakService.hentFagsak(fagsakId) } returns fagsak(
             id = fagsakId,
             eksternId = EksternFagsakId(id = fagsakEksternId),
-            stønadstype = StønadType.OVERGANGSSTØNAD
+            stønadstype = StønadType.OVERGANGSSTØNAD,
         )
 
         every {
@@ -241,7 +241,7 @@ internal class JournalføringServiceTest {
         val behandleSakOppgaveId =
             journalføringService.fullførJournalpost(
                 journalpostId = journalpostId,
-                journalføringRequest = lagRequest(JournalføringBehandling(behandlingstype = FØRSTEGANGSBEHANDLING))
+                journalføringRequest = lagRequest(JournalføringBehandling(behandlingstype = FØRSTEGANGSBEHANDLING)),
             )
 
         assertThat(behandleSakOppgaveId).isEqualTo(nyOppgaveId)
@@ -261,7 +261,7 @@ internal class JournalføringServiceTest {
         every { fagsakService.hentFagsak(fagsakId) } returns fagsak(
             id = fagsakId,
             eksternId = EksternFagsakId(id = fagsakEksternId),
-            stønadstype = StønadType.OVERGANGSSTØNAD
+            stønadstype = StønadType.OVERGANGSSTØNAD,
         )
 
         every {
@@ -273,7 +273,7 @@ internal class JournalføringServiceTest {
         assertThatThrownBy {
             journalføringService.fullførJournalpost(
                 journalpostId = journalpostId,
-                journalføringRequest = lagRequest(JournalføringBehandling(behandlingstype = FØRSTEGANGSBEHANDLING))
+                journalføringRequest = lagRequest(JournalføringBehandling(behandlingstype = FØRSTEGANGSBEHANDLING)),
             )
         }.isInstanceOf(ApiFeil::class.java)
     }
@@ -283,7 +283,7 @@ internal class JournalføringServiceTest {
         every { fagsakService.hentFagsak(fagsakId) } returns fagsak(
             id = fagsakId,
             eksternId = EksternFagsakId(id = fagsakEksternId),
-            stønadstype = StønadType.OVERGANGSSTØNAD
+            stønadstype = StønadType.OVERGANGSSTØNAD,
         )
         every { journalpostClient.hentJournalpost(journalpostId) } returns (journalpost.copy(journalstatus = Journalstatus.JOURNALFOERT))
         every {
@@ -296,8 +296,8 @@ internal class JournalføringServiceTest {
                 journalpostId = journalpostId,
                 journalføringRequest = JournalføringTilNyBehandlingRequest(
                     fagsakId = fagsakId,
-                    behandlingstype = FØRSTEGANGSBEHANDLING
-                )
+                    behandlingstype = FØRSTEGANGSBEHANDLING,
+                ),
             )
 
         assertThat(behandleSakOppgaveId).isEqualTo(nyOppgaveId)
@@ -308,7 +308,7 @@ internal class JournalføringServiceTest {
         every { fagsakService.hentFagsak(fagsakId) } returns fagsak(
             id = fagsakId,
             eksternId = EksternFagsakId(id = fagsakEksternId),
-            stønadstype = StønadType.OVERGANGSSTØNAD
+            stønadstype = StønadType.OVERGANGSSTØNAD,
         )
         every { journalpostClient.hentJournalpost(journalpostId) } returns (journalpost.copy(journalstatus = Journalstatus.MOTTATT))
 
@@ -317,8 +317,8 @@ internal class JournalføringServiceTest {
                 journalpostId = journalpostId,
                 journalføringRequest = JournalføringTilNyBehandlingRequest(
                     fagsakId = fagsakId,
-                    behandlingstype = FØRSTEGANGSBEHANDLING
-                )
+                    behandlingstype = FØRSTEGANGSBEHANDLING,
+                ),
             )
         }
     }
@@ -337,8 +337,8 @@ internal class JournalføringServiceTest {
                 journalpostId = journalpostId,
                 journalføringRequest = JournalføringTilNyBehandlingRequest(
                     fagsakId = fagsakId,
-                    behandlingstype = FØRSTEGANGSBEHANDLING
-                )
+                    behandlingstype = FØRSTEGANGSBEHANDLING,
+                ),
             )
         }.isInstanceOf(ApiFeil::class.java)
     }
@@ -352,9 +352,9 @@ internal class JournalføringServiceTest {
                 fullførJournalpost(
                     JournalføringBehandling(
                         ustrukturertDokumentasjonType = UstrukturertDokumentasjonType.ETTERSENDING,
-                        behandlingstype = BehandlingType.REVURDERING
+                        behandlingstype = BehandlingType.REVURDERING,
                     ),
-                    VilkårsbehandleNyeBarn.VILKÅRSBEHANDLE
+                    VilkårsbehandleNyeBarn.VILKÅRSBEHANDLE,
                 )
             }.hasMessage("Kan ikke sende inn dokumentasjonstype når journalposten har strukturert søknad")
         }
@@ -367,9 +367,9 @@ internal class JournalføringServiceTest {
                 fullførJournalpost(
                     JournalføringBehandling(
                         ustrukturertDokumentasjonType = UstrukturertDokumentasjonType.IKKE_VALGT,
-                        behandlingstype = BehandlingType.REVURDERING
+                        behandlingstype = BehandlingType.REVURDERING,
                     ),
-                    VilkårsbehandleNyeBarn.IKKE_VALGT
+                    VilkårsbehandleNyeBarn.IKKE_VALGT,
                 )
             }.hasMessage("Må sende inn dokumentasjonstype når journalposten mangler digital søknad")
         }
@@ -392,9 +392,9 @@ internal class JournalføringServiceTest {
             fullførJournalpost(
                 JournalføringBehandling(
                     ustrukturertDokumentasjonType = UstrukturertDokumentasjonType.PAPIRSØKNAD,
-                    behandlingstype = BehandlingType.REVURDERING
+                    behandlingstype = BehandlingType.REVURDERING,
                 ),
-                VilkårsbehandleNyeBarn.IKKE_VALGT
+                VilkårsbehandleNyeBarn.IKKE_VALGT,
             )
             verify(exactly = 0) { vurderingService.kopierVurderingerTilNyBehandling(any(), any(), any(), any()) }
         }
@@ -417,9 +417,9 @@ internal class JournalføringServiceTest {
                 fullførJournalpost(
                     JournalføringBehandling(
                         ustrukturertDokumentasjonType = UstrukturertDokumentasjonType.ETTERSENDING,
-                        behandlingstype = BehandlingType.REVURDERING
+                        behandlingstype = BehandlingType.REVURDERING,
                     ),
-                    it
+                    it,
                 )
             }
         }
@@ -431,9 +431,9 @@ internal class JournalføringServiceTest {
                 JournalføringBehandling(
                     ustrukturertDokumentasjonType = UstrukturertDokumentasjonType.ETTERSENDING,
                     behandlingstype = BehandlingType.REVURDERING,
-                    behandlingsId = behandlingId
+                    behandlingsId = behandlingId,
                 ),
-                VilkårsbehandleNyeBarn.IKKE_VALGT
+                VilkårsbehandleNyeBarn.IKKE_VALGT,
             )
             verify(exactly = 0) { vurderingService.kopierVurderingerTilNyBehandling(any(), any(), any(), any()) }
         }
@@ -449,22 +449,22 @@ internal class JournalføringServiceTest {
             every { vurderingService.hentGrunnlagOgMetadata(behandlingId) } returns
                 Pair(
                     mockVilkårGrunnlagDto(),
-                    HovedregelMetadata(null, Sivilstandstype.UGIFT, false, emptyList(), emptyList(), emptyList(), mockk(), mockk())
+                    HovedregelMetadata(null, Sivilstandstype.UGIFT, false, emptyList(), emptyList(), emptyList(), mockk(), mockk()),
                 )
 
             fullførJournalpost(
                 JournalføringBehandling(
                     ustrukturertDokumentasjonType = UstrukturertDokumentasjonType.ETTERSENDING,
-                    behandlingstype = BehandlingType.REVURDERING
+                    behandlingstype = BehandlingType.REVURDERING,
                 ),
-                VilkårsbehandleNyeBarn.VILKÅRSBEHANDLE
+                VilkårsbehandleNyeBarn.VILKÅRSBEHANDLE,
             )
             verify(exactly = 1) {
                 vurderingService.kopierVurderingerTilNyBehandling(
                     forrigeAvslåtteBehandling.id,
                     behandlingId,
                     any(),
-                    any()
+                    any(),
                 )
             }
         }
@@ -477,8 +477,8 @@ internal class JournalføringServiceTest {
                 behandling(
                     id = forrigeBehandlingId,
                     resultat = BehandlingResultat.INNVILGET,
-                    status = BehandlingStatus.FERDIGSTILT
-                )
+                    status = BehandlingStatus.FERDIGSTILT,
+                ),
             )
             justRun {
                 vurderingService.kopierVurderingerTilNyBehandling(forrigeBehandlingId, behandlingId, any(), any())
@@ -487,14 +487,14 @@ internal class JournalføringServiceTest {
             every { vurderingService.hentGrunnlagOgMetadata(behandlingId) } returns
                 Pair(
                     mockVilkårGrunnlagDto(),
-                    HovedregelMetadata(null, Sivilstandstype.UGIFT, false, emptyList(), emptyList(), emptyList(), mockk(), mockk())
+                    HovedregelMetadata(null, Sivilstandstype.UGIFT, false, emptyList(), emptyList(), emptyList(), mockk(), mockk()),
                 )
             fullførJournalpost(
                 JournalføringBehandling(
                     ustrukturertDokumentasjonType = UstrukturertDokumentasjonType.ETTERSENDING,
-                    behandlingstype = BehandlingType.REVURDERING
+                    behandlingstype = BehandlingType.REVURDERING,
                 ),
-                VilkårsbehandleNyeBarn.VILKÅRSBEHANDLE
+                VilkårsbehandleNyeBarn.VILKÅRSBEHANDLE,
             )
             verifyOrder {
                 barnService.opprettBarnPåBehandlingMedSøknadsdata(any(), any(), any(), any(), any(), any(), any())
@@ -508,9 +508,9 @@ internal class JournalføringServiceTest {
                 fullførJournalpost(
                     JournalføringBehandling(
                         ustrukturertDokumentasjonType = UstrukturertDokumentasjonType.ETTERSENDING,
-                        behandlingstype = FØRSTEGANGSBEHANDLING
+                        behandlingstype = FØRSTEGANGSBEHANDLING,
                     ),
-                    VilkårsbehandleNyeBarn.IKKE_VALGT
+                    VilkårsbehandleNyeBarn.IKKE_VALGT,
                 )
             }.hasMessage("Må journalføre ettersending på ny behandling som revurdering")
         }
@@ -521,9 +521,9 @@ internal class JournalføringServiceTest {
                 fullførJournalpost(
                     JournalføringBehandling(
                         ustrukturertDokumentasjonType = UstrukturertDokumentasjonType.ETTERSENDING,
-                        behandlingstype = BehandlingType.REVURDERING
+                        behandlingstype = BehandlingType.REVURDERING,
                     ),
-                    VilkårsbehandleNyeBarn.IKKE_VALGT
+                    VilkårsbehandleNyeBarn.IKKE_VALGT,
                 )
             }.hasMessage("Man må velge om man skal vilkårsbehandle nye barn på ny behandling av type ettersending")
         }
@@ -534,10 +534,10 @@ internal class JournalføringServiceTest {
                 fullførJournalpost(
                     JournalføringBehandling(
                         ustrukturertDokumentasjonType = UstrukturertDokumentasjonType.ETTERSENDING,
-                        behandlingstype = BehandlingType.REVURDERING
+                        behandlingstype = BehandlingType.REVURDERING,
                     ),
                     VilkårsbehandleNyeBarn.VILKÅRSBEHANDLE,
-                    listOf(BarnSomSkalFødes(LocalDate.now()))
+                    listOf(BarnSomSkalFødes(LocalDate.now())),
                 )
             }.hasMessage("Årsak må være satt til papirsøknad hvis man sender inn barn som skal fødes")
         }
@@ -549,9 +549,9 @@ internal class JournalføringServiceTest {
                     fullførJournalpost(
                         JournalføringBehandling(
                             ustrukturertDokumentasjonType = UstrukturertDokumentasjonType.ETTERSENDING,
-                            behandlingsId = UUID.randomUUID()
+                            behandlingsId = UUID.randomUUID(),
                         ),
-                        it
+                        it,
                     )
                 }.hasMessage("Kan ikke vilkårsbehandle nye barn på en eksisterende behandling")
             }
@@ -579,7 +579,7 @@ internal class JournalføringServiceTest {
                 journalpost,
                 journalførendeEnhet,
                 mappeId,
-                FØRSTEGANGSBEHANDLING
+                FØRSTEGANGSBEHANDLING,
             )
             verify { journalpostClient.oppdaterJournalpost(any(), journalpostId, null) }
             verify { journalpostClient.ferdigstillJournalpost(journalpostId, journalførendeEnhet, null) }
@@ -589,7 +589,7 @@ internal class JournalføringServiceTest {
                 behandlingService.opprettBehandling(
                     behandlingType = FØRSTEGANGSBEHANDLING,
                     fagsakId = fagsakId,
-                    behandlingsårsak = SØKNAD
+                    behandlingsårsak = SØKNAD,
                 )
             }
             verify(exactly = 0) { oppgaveService.opprettOppgave(any(), any(), any(), any(), any()) }
@@ -601,7 +601,7 @@ internal class JournalføringServiceTest {
                     any(),
                     any(),
                     any(),
-                    any()
+                    any(),
                 )
             }
             assertThat(res.behandlingId).isEqualTo(behandlingId)
@@ -619,7 +619,7 @@ internal class JournalføringServiceTest {
             steg = StegType.VILKÅR,
             resultat = BehandlingResultat.IKKE_SATT,
             årsak = SØKNAD,
-            forrigeBehandlingId = forrigeBehandlingId
+            forrigeBehandlingId = forrigeBehandlingId,
         )
         every { behandlingService.hentBehandling(behandlingId) } returns behandling
         every { behandlingService.opprettBehandling(any(), any(), behandlingsårsak = any()) } returns behandling
@@ -628,18 +628,18 @@ internal class JournalføringServiceTest {
     private fun fullførJournalpost(
         journalføringBehandling: JournalføringBehandling,
         vilkårsbehandleNyeBarn: VilkårsbehandleNyeBarn,
-        barnSomSkalFødes: List<BarnSomSkalFødes> = emptyList()
+        barnSomSkalFødes: List<BarnSomSkalFødes> = emptyList(),
     ) {
         journalføringService.fullførJournalpost(
             lagRequest(journalføringBehandling, vilkårsbehandleNyeBarn, barnSomSkalFødes),
-            journalpostId
+            journalpostId,
         )
     }
 
     private fun lagRequest(
         journalføringBehandling: JournalføringBehandling,
         vilkårsbehandleNyeBarn: VilkårsbehandleNyeBarn = VilkårsbehandleNyeBarn.IKKE_VALGT,
-        barnSomSkalFødes: List<BarnSomSkalFødes> = emptyList()
+        barnSomSkalFødes: List<BarnSomSkalFødes> = emptyList(),
     ): JournalføringRequest {
         return JournalføringRequest(
             dokumentTitler,
@@ -648,7 +648,7 @@ internal class JournalføringServiceTest {
             journalføringBehandling,
             "1234",
             barnSomSkalFødes,
-            vilkårsbehandleNyeBarn
+            vilkårsbehandleNyeBarn,
         )
     }
 

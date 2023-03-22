@@ -32,7 +32,7 @@ internal class AdresseMapperTest {
         matrikkelId = null,
         bruksenhetsnummer = "bruksenhet",
         tilleggsnavn = "tilleggsnavn",
-        postnummer = ""
+        postnummer = "",
     )
     private val bostedsadresse = Bostedsadresse(
         angittFlyttedato = startdato.plusDays(1),
@@ -43,7 +43,7 @@ internal class AdresseMapperTest {
         vegadresse = vegadresse(),
         ukjentBosted = UkjentBosted(bostedskommune = "ukjentBostedKommune"),
         matrikkeladresse = matrikkeladresse,
-        metadata = metadataGjeldende
+        metadata = metadataGjeldende,
     )
 
     @Test
@@ -70,9 +70,9 @@ internal class AdresseMapperTest {
                 bostedsadresse.copy(
                     vegadresse = null,
                     matrikkeladresse = null,
-                    utenlandskAdresse = null
-                )
-            ).visningsadresse
+                    utenlandskAdresse = null,
+                ),
+            ).visningsadresse,
         )
             .withFailMessage("Skal skrive ut ukjentBosted når vegadresse er null")
             .isEqualTo("ukjentBostedKommune")
@@ -116,7 +116,7 @@ internal class AdresseMapperTest {
             utenlandskAdresse = null,
             vegadresse = null,
             oppholdAnnetSted = null,
-            metadata = metadataGjeldende
+            metadata = metadataGjeldende,
         )
 
         val adresseMedVegadresseMedAdressenavn = oppholdsadresse.copy(vegadresse = tomVegadresse().copy(adressenavn = "adresse"))
@@ -147,9 +147,9 @@ internal class AdresseMapperTest {
             mapper.tilAdresse(
                 kontaktadresse.copy(
                     utenlandskAdresseIFrittFormat =
-                    utenlandskAdresseFrittFormat()
-                )
-            ).visningsadresse
+                    utenlandskAdresseFrittFormat(),
+                ),
+            ).visningsadresse,
         )
             .withFailMessage("Skal skrive ut utenlandskAdresseIFrittFormat når utenlandskAdresse er null")
             .isEqualTo("1, 2, 3, 0575 by, Norge")
@@ -170,8 +170,8 @@ internal class AdresseMapperTest {
             postboksadresse = Postboksadresse(
                 postboks = "postboks",
                 postbokseier = "eier",
-                postnummer = "0575"
-            )
+                postnummer = "0575",
+            ),
         )
         assertThat(mapper.tilAdresse(adresseMedPostboksadresse).visningsadresse)
             .withFailMessage("Skal skrive ut postboksadresse når vegadresse er null")
@@ -179,8 +179,8 @@ internal class AdresseMapperTest {
 
         assertThat(
             mapper.tilAdresse(
-                kontaktadresse.copy(postadresseIFrittFormat = postadresseFrittFormat())
-            ).visningsadresse
+                kontaktadresse.copy(postadresseIFrittFormat = postadresseFrittFormat()),
+            ).visningsadresse,
         )
             .withFailMessage("Skal skrive ut postboksadresse når vegadresse er null")
             .isEqualTo("1, 2, 3, 0575 Oslo")
@@ -220,7 +220,7 @@ internal class AdresseMapperTest {
             "3",
             "by",
             "NOR",
-            "0575"
+            "0575",
         )
     }
 
@@ -229,7 +229,7 @@ internal class AdresseMapperTest {
             "1",
             "2",
             "3",
-            "0575"
+            "0575",
         )
     }
 
@@ -243,7 +243,7 @@ internal class AdresseMapperTest {
             type = kontaktadresseType,
             utenlandskAdresse = null,
             utenlandskAdresseIFrittFormat = null,
-            vegadresse = null
+            vegadresse = null,
         )
 
     private fun oppholdsadresse() =
@@ -254,7 +254,7 @@ internal class AdresseMapperTest {
             utenlandskAdresse = null,
             vegadresse = null,
             oppholdAnnetSted = "oppholdAnnetSted",
-            metadata = Metadata(false)
+            metadata = Metadata(false),
         )
 
     private fun vegadresse(): Vegadresse =
@@ -267,7 +267,7 @@ internal class AdresseMapperTest {
             bruksenhetsnummer = "",
             tilleggsnavn = "tilleggsnavn",
             koordinater = null,
-            matrikkelId = null
+            matrikkelId = null,
         )
 
     private fun utenlandskAdresse(): UtenlandskAdresse =
@@ -278,7 +278,7 @@ internal class AdresseMapperTest {
             landkode = "SWE",
             postboksNummerNavn = "000",
             postkode = "19800",
-            regionDistriktOmraade = "region"
+            regionDistriktOmraade = "region",
         )
 
     private fun tomVegadresse(): Vegadresse =
@@ -291,6 +291,6 @@ internal class AdresseMapperTest {
             bruksenhetsnummer = null,
             tilleggsnavn = null,
             koordinater = null,
-            matrikkelId = null
+            matrikkelId = null,
         )
 }

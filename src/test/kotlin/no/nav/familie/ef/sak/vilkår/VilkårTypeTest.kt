@@ -35,7 +35,7 @@ internal class VilkårTypeTest {
         NYTT_BARN_SAMME_PARTNER,
         SAGT_OPP_ELLER_REDUSERT,
         AKTIVITET,
-        TIDLIGERE_VEDTAKSPERIODER
+        TIDLIGERE_VEDTAKSPERIODER,
     )
 
     private val vilkårForBarnetilsyn = listOf(
@@ -49,7 +49,7 @@ internal class VilkårTypeTest {
         AKTIVITET_ARBEID,
         INNTEKT,
         ALDER_PÅ_BARN,
-        DOKUMENTASJON_TILSYNSUTGIFTER
+        DOKUMENTASJON_TILSYNSUTGIFTER,
     )
 
     private val vilkårForSkolepenger = listOf(
@@ -62,7 +62,7 @@ internal class VilkårTypeTest {
         NYTT_BARN_SAMME_PARTNER,
         RETT_TIL_OVERGANGSSTØNAD,
         DOKUMENTASJON_AV_UTDANNING,
-        ER_UTDANNING_HENSIKTSMESSIG
+        ER_UTDANNING_HENSIKTSMESSIG,
     )
 
     @Test

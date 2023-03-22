@@ -18,7 +18,7 @@ import java.util.UUID
 class BehandlingshistorikkController(
     private val behandlingshistorikkService: BehandlingshistorikkService,
     private val tilgangService: TilgangService,
-    private val behandlingService: BehandlingService
+    private val behandlingService: BehandlingService,
 ) {
 
     @GetMapping("{behandlingId}")

@@ -102,8 +102,8 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
         assertThat(
             behandlingRepository.hentUferdigeBehandlingerFørDato(
                 OVERGANGSSTØNAD,
-                enMånedSiden
-            )
+                enMånedSiden,
+            ),
         ).size()
             .isEqualTo(1)
     }
@@ -130,13 +130,13 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
                             sporbar = Sporbar(
                                 endret = Endret(
                                     endretTid = LocalDateTime.now()
-                                        .plusDays(2)
-                                )
-                            )
+                                        .plusDays(2),
+                                ),
+                            ),
                         ),
-                        PersonIdent(ident = "3")
-                    )
-                )
+                        PersonIdent(ident = "3"),
+                    ),
+                ),
             )
         val behandling = behandlingRepository.insert(behandling(fagsak, status = OPPRETTET, resultat = INNVILGET))
 
@@ -182,11 +182,11 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
                     PersonIdent(ident = "1"),
                     PersonIdent(
                         ident = "2",
-                        sporbar = Sporbar(endret = Endret(endretTid = LocalDateTime.now().plusDays(2)))
+                        sporbar = Sporbar(endret = Endret(endretTid = LocalDateTime.now().plusDays(2))),
                     ),
-                    PersonIdent(ident = "3")
-                )
-            )
+                    PersonIdent(ident = "3"),
+                ),
+            ),
         )
         val behandling = behandlingRepository.insert(behandling(fagsak))
         val fnr = behandlingRepository.finnAktivIdent(behandling.id)
@@ -206,8 +206,8 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
             behandling(
                 fagsak,
                 status = UTREDES,
-                opprettetTid = LocalDateTime.now().minusDays(2)
-            )
+                opprettetTid = LocalDateTime.now().minusDays(2),
+            ),
         )
         assertThat(behandlingRepository.finnSisteIverksatteBehandling(fagsak.id)).isNull()
     }
@@ -293,8 +293,8 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
                 behandling(
                     fagsak,
                     status = FERDIGSTILT,
-                    type = BehandlingType.FØRSTEGANGSBEHANDLING
-                )
+                    type = BehandlingType.FØRSTEGANGSBEHANDLING,
+                ),
             )
             assertThat(behandlingRepository.existsByFagsakId(UUID.randomUUID())).isFalse
         }
@@ -306,8 +306,8 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
                 behandling(
                     fagsak,
                     status = FERDIGSTILT,
-                    type = BehandlingType.REVURDERING
-                )
+                    type = BehandlingType.REVURDERING,
+                ),
             )
             assertThat(behandlingRepository.existsByFagsakId(UUID.randomUUID())).isFalse
         }
@@ -422,7 +422,7 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
             annengangsbehandlingOS,
             førstegangsbehandlingBT,
             revurderingUnderArbeidBT,
-            revurderingUnderArbeidSP
+            revurderingUnderArbeidSP,
         )
     }
 
@@ -454,8 +454,8 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
                 behandlingRepository.insert(
                     behandling(
                         fagsak,
-                        resultat = IKKE_SATT
-                    ).copy(vedtakstidspunkt = SporbarUtils.now())
+                        resultat = IKKE_SATT,
+                    ).copy(vedtakstidspunkt = SporbarUtils.now()),
                 )
             }.has(hasCauseMessageContaining("behandling_resultat_vedtakstidspunkt_check"))
         }
@@ -466,8 +466,8 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
                 behandlingRepository.insert(
                     behandling(
                         fagsak,
-                        resultat = IKKE_SATT
-                    ).copy(vedtakstidspunkt = SporbarUtils.now())
+                        resultat = IKKE_SATT,
+                    ).copy(vedtakstidspunkt = SporbarUtils.now()),
                 )
             }.has(hasCauseMessageContaining("behandling_resultat_vedtakstidspunkt_check"))
         }
@@ -477,29 +477,29 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
         behandlingId: UUID,
         status: BehandlingStatus,
         resultat: BehandlingResultat,
-        fagsak: Fagsak
+        fagsak: Fagsak,
     ): Behandling {
         return behandlingRepository.insert(
             behandling(
                 id = behandlingId,
                 status = status,
                 resultat = resultat,
-                fagsak = fagsak
-            )
+                fagsak = fagsak,
+            ),
         )
     }
 
     private fun lagreFagsak(
         fagsakId: UUID,
         stønadType: StønadType,
-        fagsakPersonId: UUID
+        fagsakPersonId: UUID,
     ): Fagsak {
         return testoppsettService.lagreFagsak(
             fagsak(
                 id = fagsakId,
                 stønadstype = stønadType,
-                fagsakPersonId = fagsakPersonId
-            )
+                fagsakPersonId = fagsakPersonId,
+            ),
         )
     }
 }

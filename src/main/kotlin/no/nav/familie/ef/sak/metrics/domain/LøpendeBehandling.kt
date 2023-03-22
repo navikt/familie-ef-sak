@@ -7,5 +7,5 @@ data class LøpendeBehandling(
     val stonadstype: StønadType,
     val dato: LocalDate,
     val antall: Int,
-    val belop: Long
+    val belop: Long,
 )

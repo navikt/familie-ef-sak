@@ -21,10 +21,10 @@ import org.springframework.web.bind.annotation.RestController
 @RequestMapping(
     path = ["/api/ekstern/automatisk-journalforing"],
     consumes = [MediaType.APPLICATION_JSON_VALUE],
-    produces = [MediaType.APPLICATION_JSON_VALUE]
+    produces = [MediaType.APPLICATION_JSON_VALUE],
 )
 class AutomatiskJournalføringController(
-    private val automatiskJournalføringService: AutomatiskJournalføringService
+    private val automatiskJournalføringService: AutomatiskJournalføringService,
 ) {
 
     /**
@@ -35,7 +35,7 @@ class AutomatiskJournalføringController(
     @ProtectedWithClaims(issuer = "azuread", claimMap = ["roles=access_as_application"])
     fun kanOppretteBehandling(
         @RequestBody personIdent: PersonIdent,
-        @RequestParam type: StønadType
+        @RequestParam type: StønadType,
     ): Ressurs<Boolean> {
         if (!SikkerhetContext.kallKommerFraFamilieEfMottak()) {
             throw Feil(message = "Kallet utføres ikke av en autorisert klient", httpStatus = HttpStatus.UNAUTHORIZED)
@@ -50,7 +50,7 @@ class AutomatiskJournalføringController(
     @PostMapping("journalfor")
     @ProtectedWithClaims(issuer = "azuread", claimMap = ["roles=access_as_application"])
     fun automatiskJournalfør(
-        @RequestBody request: AutomatiskJournalføringRequest
+        @RequestBody request: AutomatiskJournalføringRequest,
     ): Ressurs<AutomatiskJournalføringResponse> {
         if (!SikkerhetContext.kallKommerFraFamilieEfMottak()) {
             throw Feil(message = "Kallet utføres ikke av en autorisert klient", httpStatus = HttpStatus.UNAUTHORIZED)
@@ -61,8 +61,8 @@ class AutomatiskJournalføringController(
                 journalpostId = request.journalpostId,
                 personIdent = request.personIdent,
                 stønadstype = request.stønadstype,
-                mappeId = request.mappeId
-            )
+                mappeId = request.mappeId,
+            ),
         )
     }
 }

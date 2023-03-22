@@ -27,7 +27,7 @@ class TilkjentYtelseServiceTest {
     private val tilkjentYtelseService = TilkjentYtelseService(
         behandlingService,
         tilkjentYtelseRepository,
-        fagsakService
+        fagsakService,
     )
 
     private val fagsak = fagsak(setOf(PersonIdent("321")))
@@ -63,14 +63,14 @@ class TilkjentYtelseServiceTest {
                 behandlingService.hentBehandlinger(
                     ytelser.subList(0, PdlClient.MAKS_ANTALL_IDENTER)
                         .map { it.behandlingId }
-                        .toSet()
+                        .toSet(),
                 )
             }
             verify {
                 behandlingService.hentBehandlinger(
                     ytelser.subList(PdlClient.MAKS_ANTALL_IDENTER, 110)
                         .map { it.behandlingId }
-                        .toSet()
+                        .toSet(),
                 )
             }
         }
@@ -126,9 +126,9 @@ class TilkjentYtelseServiceTest {
                 catchThrowable {
                     tilkjentYtelseService.finnTilkjentYtelserTilKonsistensavstemming(
                         StønadType.OVERGANGSSTØNAD,
-                        datoForAvstemming
+                        datoForAvstemming,
                     )
-                }
+                },
             ).hasMessageContaining(behandling.id.toString())
         }
     }

@@ -20,7 +20,7 @@ import java.util.UUID
 class BeregningSkolepengerController(
     private val beregningSkolepengerService: BeregningSkolepengerService,
     private val tilgangService: TilgangService,
-    private val vedtakService: VedtakService
+    private val vedtakService: VedtakService,
 ) {
 
     @PostMapping
@@ -29,8 +29,8 @@ class BeregningSkolepengerController(
             beregningSkolepengerService.beregnYtelse(
                 request.skoleårsperioder,
                 request.behandlingId,
-                request.erOpphør
-            )
+                request.erOpphør,
+            ),
         )
     }
 
@@ -45,8 +45,8 @@ class BeregningSkolepengerController(
                 beregningSkolepengerService.beregnYtelse(
                     vedtak.skoleårsperioder,
                     behandlingId,
-                    vedtak.erOpphør()
-                )
+                    vedtak.erOpphør(),
+                ),
             )
         }
         error("Kan ikke hente beregning for vedtakstype ${vedtak._type}")

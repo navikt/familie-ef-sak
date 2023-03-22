@@ -36,8 +36,8 @@ internal class AktivitetMapperTest {
                 listOf(
                     " Jeg har søkt om barnepass, men ikke fått plass enda; " +
                         "Jeg har barn som har behov for særlig tilsyn på grunn av fysiske, " +
-                        "psykiske eller store sosiale problemer"
-                )
+                        "psykiske eller store sosiale problemer",
+                ),
             ),
             manglendeBarnepass = dokumentliste(),
             oppsigelseDokumentasjon = dokumentliste(),
@@ -47,7 +47,7 @@ internal class AktivitetMapperTest {
             oppstartUtdanning = null,
             sagtOppEllerRedusertStilling = "Ja",
             sykdom = dokumentliste(),
-            utdanningstilbud = dokumentliste()
+            utdanningstilbud = dokumentliste(),
         )
 
     private fun dokumentliste() =
@@ -63,7 +63,7 @@ internal class AktivitetMapperTest {
             aksjeselskap = aksjeselskap(),
             virksomhet = virksomhet(),
             tidligereUtdanninger = tidligereUtdanning(),
-            erIArbeid = "JA"
+            erIArbeid = "JA",
         )
 
     private fun aksjeselskap(): Set<Aksjeselskap> =
@@ -72,7 +72,7 @@ internal class AktivitetMapperTest {
     private fun virksomhet() =
         Virksomhet(
             virksomhetsbeskrivelse = "virksomhet",
-            dokumentasjon = dokumentliste()
+            dokumentasjon = dokumentliste(),
         )
 
     private fun underUtdanning(): UnderUtdanning =
@@ -88,7 +88,7 @@ internal class AktivitetMapperTest {
             linjeKursGrad = "Kurs",
             semesteravgift = 30000,
             studieavgift = 0,
-            eksamensgebyr = 1500
+            eksamensgebyr = 1500,
         )
 
     private fun tidligereUtdanning(): Set<TidligereUtdanning> =
@@ -96,8 +96,8 @@ internal class AktivitetMapperTest {
             TidligereUtdanning(
                 linjeKursGrad = "linje",
                 fra = YearMonth.now().minusYears(5),
-                til = YearMonth.now().minusYears(1)
-            )
+                til = YearMonth.now().minusYears(1),
+            ),
         )
 
     private fun selvstendig(): Set<Selvstendig> =
@@ -107,8 +107,8 @@ internal class AktivitetMapperTest {
                 etableringsdato = LocalDate.now(),
                 firmanavn = "SelvstendigFirmanavn",
                 hvordanSerArbeidsukenUt = "fin",
-                organisasjonsnummer = "987654321"
-            )
+                organisasjonsnummer = "987654321",
+            ),
         )
 
     private fun arbeidsforhold(): Set<Arbeidsgiver> =
@@ -119,8 +119,8 @@ internal class AktivitetMapperTest {
                     fastEllerMidlertidig = "Fast",
                     harSluttdato = true,
                     sluttdato = LocalDate.now(),
-                    arbeidsmengde = 50
-                )
+                    arbeidsmengde = 50,
+                ),
             )
             )
 
@@ -132,7 +132,7 @@ internal class AktivitetMapperTest {
             registrertSomArbeidssøkerNav = true,
             villigTilÅTaImotTilbudOmArbeid = true,
             ønskerDuMinst50ProsentStilling = true,
-            ikkeVilligTilÅTaImotTilbudOmArbeidDokumentasjon = dokumentliste()
+            ikkeVilligTilÅTaImotTilbudOmArbeidDokumentasjon = dokumentliste(),
         )
 
     private fun barn(): Set<SøknadBarn> =
@@ -153,7 +153,7 @@ internal class AktivitetMapperTest {
                 særligeTilsynsbehov = "Ja",
                 årsakBarnepass = null,
                 barnepassordninger = emptySet(),
-                lagtTilManuelt = true
-            )
+                lagtTilManuelt = true,
+            ),
         )
 }

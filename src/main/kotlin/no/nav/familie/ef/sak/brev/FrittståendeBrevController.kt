@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController
 @ProtectedWithClaims(issuer = "azuread")
 class FrittståendeBrevController(
     private val frittståendeBrevService: FrittståendeBrevService,
-    private val tilgangService: TilgangService
+    private val tilgangService: TilgangService,
 ) {
 
     @PostMapping("")

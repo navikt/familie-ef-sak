@@ -39,7 +39,7 @@ internal class OpprettOppgaveForMigrertFødtBarnTaskTest {
         behandlingService,
         tilkjentYtelseService,
         grunnlagsdataService,
-        taskService
+        taskService,
     )
 
     val taskSlot = slot<List<Task>>()
@@ -92,20 +92,20 @@ internal class OpprettOppgaveForMigrertFødtBarnTaskTest {
             tasks.single {
                 objectMapper.readValue<OpprettOppgavePayload>(it.payload).aktivFra in
                     halvtÅr.minusWeeks(1)..halvtÅr.plusWeeks(2)
-            }
+            },
         )
         assertThat(
             tasks.single {
                 objectMapper.readValue<OpprettOppgavePayload>(it.payload).aktivFra in
                     etÅr.minusWeeks(1)..etÅr.plusWeeks(2)
-            }
+            },
         )
     }
 
     private fun tilkjentYtelse(tilOgMed: LocalDate) = lagTilkjentYtelse(
         listOf(
-            lagAndelTilkjentYtelse(1, fraOgMed = LocalDate.now(), tilOgMed = tilOgMed)
-        )
+            lagAndelTilkjentYtelse(1, fraOgMed = LocalDate.now(), tilOgMed = tilOgMed),
+        ),
     )
 
     private fun opprettGrunnlagsdata(barnFødelsdato: LocalDate?): GrunnlagsdataMedMetadata {
@@ -116,7 +116,7 @@ internal class OpprettOppgaveForMigrertFødtBarnTaskTest {
             fødeland = null,
             fødested = null,
             fødselsår = null,
-            metadata = Metadata(false)
+            metadata = Metadata(false),
         )
         val barn = opprettBarnMedIdent("1", fødsel = fødsel)
         return GrunnlagsdataMedMetadata(grunnlagsdata.copy(barn = listOf(barn)), LocalDateTime.now())
@@ -125,6 +125,6 @@ internal class OpprettOppgaveForMigrertFødtBarnTaskTest {
     private fun opprettOppgave(fødelsdato: LocalDate?) =
         OpprettOppgaveForMigrertFødtBarnTask.opprettOppgave(
             fagsak(fagsakpersoner(setOf("1"))),
-            listOf(BarnMinimumDto("1", "", fødelsdato))
+            listOf(BarnMinimumDto("1", "", fødelsdato)),
         )
 }

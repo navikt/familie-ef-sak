@@ -13,11 +13,11 @@ import java.time.format.DateTimeFormatter
 @Service
 @TaskStepBeskrivelse(
     taskStepType = OpprettTasksForBarnFyltÅrTask.TYPE,
-    beskrivelse = "Oppretter en task pr barn som har fylt 1/2 eller 1 år"
+    beskrivelse = "Oppretter en task pr barn som har fylt 1/2 eller 1 år",
 )
 class OpprettTasksForBarnFyltÅrTask(
     val taskService: TaskService,
-    val barnFyllerÅrOppfølgingsoppgaveService: BarnFyllerÅrOppfølgingsoppgaveService
+    val barnFyllerÅrOppfølgingsoppgaveService: BarnFyllerÅrOppfølgingsoppgaveService,
 ) : AsyncTaskStep {
 
     override fun doTask(task: Task) {

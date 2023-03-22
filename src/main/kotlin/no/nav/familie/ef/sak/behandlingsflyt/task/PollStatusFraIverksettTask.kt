@@ -16,11 +16,11 @@ import java.util.UUID
     maxAntallFeil = 50,
     settTilManuellOppfølgning = true,
     triggerTidVedFeilISekunder = 31L,
-    beskrivelse = "Sjekker status på iverksetting av behandling."
+    beskrivelse = "Sjekker status på iverksetting av behandling.",
 )
 class PollStatusFraIverksettTask(
     private val stegService: StegService,
-    private val behandlingService: BehandlingService
+    private val behandlingService: BehandlingService,
 ) : AsyncTaskStep {
 
     override fun doTask(task: Task) {
@@ -37,7 +37,7 @@ class PollStatusFraIverksettTask(
                 payload = behandlingId.toString(),
                 properties = Properties().apply {
                     this["behandlingId"] = behandlingId.toString()
-                }
+                },
             ).copy(triggerTid = LocalDateTime.now().plusSeconds(31))
 
         const val TYPE = "pollerStatusFraIverksett"

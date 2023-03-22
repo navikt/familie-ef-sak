@@ -12,5 +12,5 @@ data class VedtakPerUke(
     val resultat: BehandlingResultat,
     val arsak: BehandlingÅrsak,
     val henlagt_arsak: HenlagtÅrsak? = null,
-    val antall: Int
+    val antall: Int,
 )

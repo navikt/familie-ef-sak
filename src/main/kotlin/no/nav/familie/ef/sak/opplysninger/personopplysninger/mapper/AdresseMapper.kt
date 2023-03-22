@@ -26,7 +26,7 @@ class AdresseMapper(private val kodeverkService: KodeverkService) {
             visningsadresse = visningsadresse,
             type = AdresseType.OPPHOLDSADRESSE,
             gyldigFraOgMed = adresse.gyldigFraOgMed,
-            gyldigTilOgMed = adresse.gyldigTilOgMed
+            gyldigTilOgMed = adresse.gyldigTilOgMed,
         )
     }
 
@@ -39,7 +39,7 @@ class AdresseMapper(private val kodeverkService: KodeverkService) {
             visningsadresse = tilFormatertAdresse(adresse, datoEllerIdag(adresse.gyldigFraOgMed)),
             type = type,
             gyldigFraOgMed = adresse.gyldigFraOgMed,
-            gyldigTilOgMed = adresse.gyldigTilOgMed
+            gyldigTilOgMed = adresse.gyldigTilOgMed,
         )
     }
 
@@ -51,7 +51,7 @@ class AdresseMapper(private val kodeverkService: KodeverkService) {
             gyldigFraOgMed = adresse.gyldigFraOgMed,
             gyldigTilOgMed = adresse.gyldigTilOgMed,
             angittFlyttedato = angittFlyttedato(adresse.angittFlyttedato),
-            erGjeldende = !adresse.metadata.historisk
+            erGjeldende = !adresse.metadata.historisk,
         )
     }
 
@@ -116,14 +116,14 @@ class AdresseMapper(private val kodeverkService: KodeverkService) {
         join(
             postboksadresse.postbokseier,
             postboksadresse.postboks,
-            space(postboksadresse.postnummer, poststed(postboksadresse.postnummer, gjeldendeDato))
+            space(postboksadresse.postnummer, poststed(postboksadresse.postnummer, gjeldendeDato)),
         )
 
     private fun tilFormatertAdresse(matrikkeladresse: Matrikkeladresse, gjeldendeDato: LocalDate): String? =
         join(
             matrikkeladresse.tilleggsnavn,
             matrikkeladresse.bruksenhetsnummer,
-            space(matrikkeladresse.postnummer, poststed(matrikkeladresse.postnummer, gjeldendeDato))
+            space(matrikkeladresse.postnummer, poststed(matrikkeladresse.postnummer, gjeldendeDato)),
         )
 
     private fun tilFormatertAdresse(postadresseIFrittFormat: PostadresseIFrittFormat, gjeldendeDato: LocalDate): String? =
@@ -131,7 +131,7 @@ class AdresseMapper(private val kodeverkService: KodeverkService) {
             postadresseIFrittFormat.adresselinje1,
             postadresseIFrittFormat.adresselinje2,
             postadresseIFrittFormat.adresselinje3,
-            space(postadresseIFrittFormat.postnummer, poststed(postadresseIFrittFormat.postnummer, gjeldendeDato))
+            space(postadresseIFrittFormat.postnummer, poststed(postadresseIFrittFormat.postnummer, gjeldendeDato)),
         )
 
     // har ikke med bygningEtasjeLeilighet, postboksNummerNavn
@@ -140,20 +140,20 @@ class AdresseMapper(private val kodeverkService: KodeverkService) {
             utenlandskAdresse.adressenavnNummer,
             space(utenlandskAdresse.postkode, utenlandskAdresse.bySted),
             utenlandskAdresse.regionDistriktOmraade,
-            land(utenlandskAdresse.landkode, gjeldendeDato)
+            land(utenlandskAdresse.landkode, gjeldendeDato),
         )
     }
 
     private fun tilFormatertAdresse(
         utenlandskAdresseIFrittFormat: UtenlandskAdresseIFrittFormat,
-        gjeldendeDato: LocalDate
+        gjeldendeDato: LocalDate,
     ): String? {
         return join(
             utenlandskAdresseIFrittFormat.adresselinje1,
             utenlandskAdresseIFrittFormat.adresselinje2,
             utenlandskAdresseIFrittFormat.adresselinje3,
             space(utenlandskAdresseIFrittFormat.postkode, utenlandskAdresseIFrittFormat.byEllerStedsnavn),
-            land(utenlandskAdresseIFrittFormat.landkode, gjeldendeDato)
+            land(utenlandskAdresseIFrittFormat.landkode, gjeldendeDato),
         )
     }
 
@@ -162,7 +162,7 @@ class AdresseMapper(private val kodeverkService: KodeverkService) {
             space(vegadresse.adressenavn, vegadresse.husnummer, vegadresse.husbokstav),
             vegadresse.tilleggsnavn,
             vegadresse.bruksenhetsnummer,
-            space(vegadresse.postnummer, poststed(vegadresse.postnummer, gjeldendeDato))
+            space(vegadresse.postnummer, poststed(vegadresse.postnummer, gjeldendeDato)),
         )
     }
 

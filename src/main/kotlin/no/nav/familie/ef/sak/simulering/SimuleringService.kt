@@ -27,7 +27,7 @@ class SimuleringService(
     private val iverksettClient: IverksettClient,
     private val simuleringsresultatRepository: SimuleringsresultatRepository,
     private val tilkjentYtelseService: TilkjentYtelseService,
-    private val tilgangService: TilgangService
+    private val tilgangService: TilgangService,
 ) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -74,8 +74,8 @@ class SimuleringService(
             Simuleringsresultat(
                 behandlingId = saksbehandling.id,
                 data = beriketSimuleringsresultat.detaljer,
-                beriketData = beriketSimuleringsresultat
-            )
+                beriketData = beriketSimuleringsresultat,
+            ),
         )
     }
 
@@ -88,15 +88,15 @@ class SimuleringService(
                 eksternBehandlingId = saksbehandling.eksternId,
                 stønadstype = saksbehandling.stønadstype,
                 eksternFagsakId = saksbehandling.eksternFagsakId,
-                vedtaksdato = LocalDate.now()
+                vedtaksdato = LocalDate.now(),
             )
 
         try {
             return iverksettClient.simuler(
                 SimuleringDto(
                     nyTilkjentYtelseMedMetaData = tilkjentYtelseMedMedtadata,
-                    forrigeBehandlingId = saksbehandling.forrigeBehandlingId
-                )
+                    forrigeBehandlingId = saksbehandling.forrigeBehandlingId,
+                ),
             )
         } catch (e: Exception) {
             val personFinnesIkkeITps = "Personen finnes ikke i TPS"
@@ -107,7 +107,7 @@ class SimuleringService(
                 message = "Kunne ikke utføre simulering",
                 frontendFeilmelding = "Kunne ikke utføre simulering. Vennligst prøv på nytt",
                 httpStatus = HttpStatus.INTERNAL_SERVER_ERROR,
-                throwable = e
+                throwable = e,
             )
         }
     }

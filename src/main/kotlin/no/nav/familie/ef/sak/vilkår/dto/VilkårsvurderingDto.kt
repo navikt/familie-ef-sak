@@ -19,12 +19,12 @@ data class VilkårsvurderingDto(
     val endretAv: String,
     val endretTid: LocalDateTime,
     val delvilkårsvurderinger: List<DelvilkårsvurderingDto> = emptyList(),
-    val opphavsvilkår: OpphavsvilkårDto?
+    val opphavsvilkår: OpphavsvilkårDto?,
 )
 
 data class OpphavsvilkårDto(
     val behandlingId: UUID,
-    val endretTid: LocalDateTime
+    val endretTid: LocalDateTime,
 )
 
 data class OppdaterVilkårsvurderingDto(val id: UUID, val behandlingId: UUID)
@@ -32,14 +32,14 @@ data class OppdaterVilkårsvurderingDto(val id: UUID, val behandlingId: UUID)
 data class SvarPåVurderingerDto(
     val id: UUID,
     val behandlingId: UUID,
-    val delvilkårsvurderinger: List<DelvilkårsvurderingDto>
+    val delvilkårsvurderinger: List<DelvilkårsvurderingDto>,
 )
 
 data class GjenbrukVilkårsvurderingerDto(val behandlingId: UUID, val kopierBehandlingId: UUID)
 
 data class DelvilkårsvurderingDto(
     val resultat: Vilkårsresultat,
-    val vurderinger: List<VurderingDto>
+    val vurderinger: List<VurderingDto>,
 ) {
 
     /**
@@ -51,7 +51,7 @@ data class DelvilkårsvurderingDto(
 data class VurderingDto(
     val regelId: RegelId,
     val svar: SvarId? = null,
-    val begrunnelse: String? = null
+    val begrunnelse: String? = null,
 )
 
 fun Vurdering.tilDto() = VurderingDto(this.regelId, this.svar, this.begrunnelse)
@@ -70,7 +70,7 @@ fun Vilkårsvurdering.tilDto() =
         delvilkårsvurderinger = this.delvilkårsvurdering.delvilkårsvurderinger
             .filter { it.resultat != Vilkårsresultat.IKKE_AKTUELL }
             .map { it.tilDto() },
-        opphavsvilkår = this.opphavsvilkår?.let { OpphavsvilkårDto(it.behandlingId, it.vurderingstidspunkt) }
+        opphavsvilkår = this.opphavsvilkår?.let { OpphavsvilkårDto(it.behandlingId, it.vurderingstidspunkt) },
     )
 
 fun DelvilkårsvurderingDto.svarTilDomene() = this.vurderinger.map { it.tilDomene() }

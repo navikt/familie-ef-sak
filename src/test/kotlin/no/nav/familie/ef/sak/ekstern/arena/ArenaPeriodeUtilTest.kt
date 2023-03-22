@@ -19,7 +19,7 @@ internal class ArenaPeriodeUtilTest {
         val request = request(of(2022, 1), of(2022, 1))
         val perioder = internePerioder(
             listOf(periode(of(2021, 1), of(2022, 1))),
-            listOf(periode(of(2022, 2), of(2023, 1)))
+            listOf(periode(of(2022, 2), of(2023, 1))),
         )
 
         val resultat = slåSammenPerioderFraEfOgInfotrygd(request, perioder)
@@ -31,13 +31,13 @@ internal class ArenaPeriodeUtilTest {
         val request = request(of(2022, 1), of(2022, 4))
         val perioder = internePerioder(
             listOf(periode(of(2021, 1), of(2022, 1))),
-            listOf(periode(of(2022, 3), of(2023, 1)))
+            listOf(periode(of(2022, 3), of(2023, 1))),
         )
 
         val resultat = slåSammenPerioderFraEfOgInfotrygd(request, perioder)
         assertThat(resultat).containsExactly(
             lagResultatPeriode(of(2021, 1), of(2022, 1)),
-            lagResultatPeriode(of(2022, 3), of(2023, 1))
+            lagResultatPeriode(of(2022, 3), of(2023, 1)),
         )
     }
 
@@ -47,14 +47,14 @@ internal class ArenaPeriodeUtilTest {
         val perioder = internePerioder(
             listOf(
                 periode(of(2021, 1), of(2022, 1)),
-                periode(of(2022, 3), of(2023, 1))
-            )
+                periode(of(2022, 3), of(2023, 1)),
+            ),
         )
 
         val resultat = slåSammenPerioderFraEfOgInfotrygd(request, perioder)
         assertThat(resultat).containsExactly(
             lagResultatPeriode(of(2021, 1), of(2022, 1)),
-            lagResultatPeriode(of(2022, 3), of(2023, 1))
+            lagResultatPeriode(of(2022, 3), of(2023, 1)),
         )
     }
 
@@ -64,8 +64,8 @@ internal class ArenaPeriodeUtilTest {
         val perioder = internePerioder(
             listOf(
                 periode(of(2021, 1), of(2022, 1)),
-                periode(of(2022, 3), of(2023, 1))
-            )
+                periode(of(2022, 3), of(2023, 1)),
+            ),
         )
 
         val resultat = slåSammenPerioderFraEfOgInfotrygd(request, perioder)
@@ -77,7 +77,7 @@ internal class ArenaPeriodeUtilTest {
         val request = request(of(2022, 1), of(2022, 1))
         val perioder = internePerioder(
             listOf(periode(of(2021, 11), of(2022, 1))),
-            listOf(periode(of(2021, 1), of(2023, 1)))
+            listOf(periode(of(2021, 1), of(2023, 1))),
         )
 
         val resultat = slåSammenPerioderFraEfOgInfotrygd(request, perioder)
@@ -152,13 +152,13 @@ private fun periode(fom: YearMonth, tom: YearMonth) =
         stønadFom = fom.atDay(1),
         stønadTom = tom.atEndOfMonth(),
         opphørsdato = null,
-        datakilde = Datakilde.EF
+        datakilde = Datakilde.EF,
     )
 
 private fun internePerioder(
     overgangsstønad: List<InternPeriode> = emptyList(),
     barnetilsyn: List<InternPeriode> = emptyList(),
-    skolepenger: List<InternPeriode> = emptyList()
+    skolepenger: List<InternPeriode> = emptyList(),
 ) = InternePerioder(overgangsstønad, barnetilsyn, skolepenger)
 
 private fun lagResultatPeriode(fom: YearMonth, tom: YearMonth) =
@@ -166,5 +166,5 @@ private fun lagResultatPeriode(fom: YearMonth, tom: YearMonth) =
         personIdent = ident,
         fomDato = fom.atDay(1),
         tomDato = tom.atEndOfMonth(),
-        datakilde = Datakilde.EF
+        datakilde = Datakilde.EF,
     )

@@ -35,7 +35,7 @@ data class Saksbehandling(
     val migrert: Boolean = false,
     val opprettetAv: String,
     val opprettetTid: LocalDateTime,
-    val endretTid: LocalDateTime
+    val endretTid: LocalDateTime,
 ) {
     val skalSendeBrev: Boolean = !skalIkkeSendeBrev
     val skalIkkeSendeBrev get() = erKorrigeringUtenBrev || erOmregning || erSatsendring || erMigrering

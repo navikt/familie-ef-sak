@@ -91,14 +91,14 @@ class IverksettingDtoMapper(
     private val tilbakekrevingService: TilbakekrevingService,
     private val grunnlagsdataService: GrunnlagsdataService,
     private val brevmottakereRepository: BrevmottakereRepository,
-    private val årsakRevurderingsRepository: ÅrsakRevurderingsRepository
+    private val årsakRevurderingsRepository: ÅrsakRevurderingsRepository,
 ) {
 
     fun tilDto(saksbehandling: Saksbehandling, beslutter: String): IverksettDto {
         val saksbehandler =
             behandlingshistorikkService.finnSisteBehandlingshistorikk(
                 saksbehandling.id,
-                StegType.SEND_TIL_BESLUTTER
+                StegType.SEND_TIL_BESLUTTER,
             )?.opprettetAv
                 ?: error("Kan ikke finne saksbehandler på behandlingen")
         return tilDto(saksbehandling, saksbehandler, beslutter)
@@ -111,7 +111,7 @@ class IverksettingDtoMapper(
     private fun tilDto(
         saksbehandling: Saksbehandling,
         saksbehandler: String,
-        beslutter: String
+        beslutter: String,
     ): IverksettDto {
         val vedtak = vedtakService.hentVedtak(saksbehandling.id)
         val tilkjentYtelse =
@@ -133,14 +133,14 @@ class IverksettingDtoMapper(
                         beslutter,
                         tilkjentYtelse,
                         tilbakekreving,
-                        brevmottakere
+                        brevmottakere,
                     )
 
                 IverksettOvergangsstønadDto(
                     behandling = behandlingsdetaljer,
                     fagsak = fagsakdetaljerDto,
                     søker = søkerDto,
-                    vedtak = vedtakDto
+                    vedtak = vedtakDto,
                 )
             }
             StønadType.BARNETILSYN -> {
@@ -150,13 +150,13 @@ class IverksettingDtoMapper(
                     beslutter,
                     tilkjentYtelse,
                     tilbakekreving,
-                    brevmottakere
+                    brevmottakere,
                 )
                 IverksettBarnetilsynDto(
                     behandling = behandlingsdetaljer,
                     fagsak = fagsakdetaljerDto,
                     søker = søkerDto,
-                    vedtak = vedtakDto
+                    vedtak = vedtakDto,
                 )
             }
             StønadType.SKOLEPENGER -> {
@@ -166,13 +166,13 @@ class IverksettingDtoMapper(
                     beslutter,
                     tilkjentYtelse,
                     tilbakekreving,
-                    brevmottakere
+                    brevmottakere,
                 )
                 IverksettSkolepengerDto(
                     behandling = behandlingsdetaljer,
                     fagsak = fagsakdetaljerDto,
                     søker = søkerDto,
-                    vedtak = vedtakDto
+                    vedtak = vedtakDto,
                 )
             }
         }
@@ -183,14 +183,14 @@ class IverksettingDtoMapper(
         return tilbakekreving?.let {
             TilbakekrevingDto(
                 tilbakekrevingsvalg = mapTilbakekrevingsvalg(it.valg),
-                tilbakekrevingMedVarsel = mapTilbakekrevingMedVarsel(it, behandlingId)
+                tilbakekrevingMedVarsel = mapTilbakekrevingMedVarsel(it, behandlingId),
             )
         }
     }
 
     private fun mapTilbakekrevingMedVarsel(
         tilbakekreving: Tilbakekreving,
-        behandlingId: UUID
+        behandlingId: UUID,
     ): TilbakekrevingMedVarselDto? {
         if (tilbakekreving.valg == Tilbakekrevingsvalg.OPPRETT_MED_VARSEL) {
             val lagretSimuleringsresultat = simuleringService.hentLagretSimuleringsoppsummering(behandlingId)
@@ -198,7 +198,7 @@ class IverksettingDtoMapper(
             return TilbakekrevingMedVarselDto(
                 varseltekst = tilbakekreving.varseltekst ?: "",
                 sumFeilutbetaling = lagretSimuleringsresultat.feilutbetaling,
-                fellesperioder = perioder
+                fellesperioder = perioder,
             )
         }
         return null
@@ -215,13 +215,13 @@ class IverksettingDtoMapper(
         FagsakdetaljerDto(
             fagsakId = saksbehandling.fagsakId,
             eksternId = saksbehandling.eksternFagsakId,
-            stønadstype = saksbehandling.stønadstype
+            stønadstype = saksbehandling.stønadstype,
         )
 
     @Improvement("Årsak og Type må utledes når vi støtter revurdering")
     private fun mapBehandlingsdetaljer(
         saksbehandling: Saksbehandling,
-        vilkårsvurderinger: List<Vilkårsvurdering>
+        vilkårsvurderinger: List<Vilkårsvurdering>,
     ) =
         BehandlingsdetaljerDto(
             behandlingId = saksbehandling.id,
@@ -231,7 +231,7 @@ class IverksettingDtoMapper(
             vilkårsvurderinger = vilkårsvurderinger.map { it.tilIverksettDto() },
             forrigeBehandlingId = saksbehandling.forrigeBehandlingId,
             kravMottatt = saksbehandling.kravMottatt,
-            årsakRevurdering = mapÅrsakRevurdering(saksbehandling)
+            årsakRevurdering = mapÅrsakRevurdering(saksbehandling),
         )
 
     private fun mapÅrsakRevurdering(saksbehandling: Saksbehandling): ÅrsakRevurderingDto? =
@@ -245,7 +245,7 @@ class IverksettingDtoMapper(
         beslutter: String,
         tilkjentYtelse: TilkjentYtelse?,
         tilbakekreving: TilbakekrevingDto?,
-        brevmottakere: List<Brevmottaker>
+        brevmottakere: List<Brevmottaker>,
     ): VedtaksdetaljerOvergangsstønadDto =
         VedtaksdetaljerOvergangsstønadDto(
             resultat = vedtak.resultatType.tilVedtaksresultat(),
@@ -258,7 +258,7 @@ class IverksettingDtoMapper(
                 ?: emptyList(),
             tilbakekreving = tilbakekreving,
             brevmottakere = brevmottakere,
-            avslagÅrsak = vedtak.avslåÅrsak
+            avslagÅrsak = vedtak.avslåÅrsak,
         )
 
     @Improvement("Opphørårsak må utledes ved revurdering")
@@ -268,7 +268,7 @@ class IverksettingDtoMapper(
         beslutter: String,
         tilkjentYtelse: TilkjentYtelse?,
         tilbakekreving: TilbakekrevingDto?,
-        brevmottakere: List<Brevmottaker>
+        brevmottakere: List<Brevmottaker>,
     ): VedtaksdetaljerBarnetilsynDto =
         VedtaksdetaljerBarnetilsynDto(
             resultat = vedtak.resultatType.tilVedtaksresultat(),
@@ -283,7 +283,7 @@ class IverksettingDtoMapper(
             brevmottakere = brevmottakere,
             kontantstøtte = mapPerioderMedBeløp(vedtak.kontantstøtte?.perioder),
             tilleggsstønad = mapPerioderMedBeløp(vedtak.tilleggsstønad?.perioder),
-            avslagÅrsak = vedtak.avslåÅrsak
+            avslagÅrsak = vedtak.avslåÅrsak,
         )
 
     @Improvement("Opphørårsak må utledes ved revurdering")
@@ -293,7 +293,7 @@ class IverksettingDtoMapper(
         beslutter: String,
         tilkjentYtelse: TilkjentYtelse?,
         tilbakekreving: TilbakekrevingDto?,
-        brevmottakere: List<Brevmottaker>
+        brevmottakere: List<Brevmottaker>,
     ): VedtaksdetaljerSkolepengerDto =
         VedtaksdetaljerSkolepengerDto(
             resultat = vedtak.resultatType.tilVedtaksresultat(),
@@ -307,7 +307,7 @@ class IverksettingDtoMapper(
             tilbakekreving = tilbakekreving,
             brevmottakere = brevmottakere,
             begrunnelse = vedtak.skolepenger?.begrunnelse,
-            avslagÅrsak = vedtak.avslåÅrsak
+            avslagÅrsak = vedtak.avslåÅrsak,
         )
 
     private fun mapSøkerDto(saksbehandling: Saksbehandling): SøkerDto {
@@ -322,11 +322,11 @@ class IverksettingDtoMapper(
             alleBarn.map {
                 BarnDto(
                     personIdent = it.fødselsnummer,
-                    termindato = it.behandlingBarn.fødselTermindato
+                    termindato = it.behandlingBarn.fødselTermindato,
                 )
             },
             navEnhet,
-            grunnlagsdata.søker.adressebeskyttelse?.let { AdressebeskyttelseGradering.valueOf(it.gradering.name) }
+            grunnlagsdata.søker.adressebeskyttelse?.let { AdressebeskyttelseGradering.valueOf(it.gradering.name) },
         )
     }
 
@@ -341,18 +341,18 @@ class IverksettingDtoMapper(
 
 fun TilkjentYtelse.tilIverksettDto(): TilkjentYtelseDto = TilkjentYtelseDto(
     andelerTilkjentYtelse = andelerTilkjentYtelse.map { andel -> andel.tilIverksettDto() },
-    startmåned = YearMonth.from(startdato)
+    startmåned = YearMonth.from(startdato),
 )
 
 fun Vurdering.tilIverksettDto(): VurderingDto = VurderingDto(
     regelId = RegelIdIverksett.valueOf(this.regelId.name),
     svar = this.svar?.let { SvarIdIverksett.valueOf(it.name) },
-    begrunnelse = this.begrunnelse
+    begrunnelse = this.begrunnelse,
 )
 
 fun Delvilkårsvurdering.tilIverksettDto(): DelvilkårsvurderingDto = DelvilkårsvurderingDto(
     resultat = VilkårsresultatIverksett.valueOf(this.resultat.name),
-    vurderinger = this.vurderinger.map { vurdering -> vurdering.tilIverksettDto() }
+    vurderinger = this.vurderinger.map { vurdering -> vurdering.tilIverksettDto() },
 
 )
 
@@ -361,7 +361,7 @@ fun Vilkårsvurdering.tilIverksettDto(): VilkårsvurderingDto = Vilkårsvurderin
     resultat = VilkårsresultatIverksett.valueOf(this.resultat.name),
     delvilkårsvurderinger = this.delvilkårsvurdering.delvilkårsvurderinger.map { delvilkårsvurdering ->
         delvilkårsvurdering.tilIverksettDto()
-    }
+    },
 )
 
 fun PeriodeWrapper.tilVedtaksperioder(): List<VedtaksperiodeOvergangsstønadDto> = this.perioder
@@ -372,7 +372,7 @@ fun PeriodeWrapper.tilVedtaksperioder(): List<VedtaksperiodeOvergangsstønadDto>
             tilOgMed = it.datoTil,
             periode = it.periode,
             aktivitet = AktivitetType.valueOf(it.aktivitet.name),
-            periodeType = VedtaksperiodeType.valueOf(it.periodeType.name)
+            periodeType = VedtaksperiodeType.valueOf(it.periodeType.name),
         )
     }
 
@@ -383,7 +383,7 @@ fun BarnetilsynWrapper.tilVedtaksperioder(): List<VedtaksperiodeBarnetilsynDto> 
             tilOgMed = it.periode.tomDato,
             periode = it.periode,
             utgifter = it.utgifter,
-            antallBarn = it.barn.size
+            antallBarn = it.barn.size,
         )
     }
 
@@ -391,7 +391,7 @@ fun SkolepengerWrapper.tilVedtaksperioder(): List<VedtaksperiodeSkolepengerDto> 
     .map { skoleårsperiode ->
         VedtaksperiodeSkolepengerDto(
             perioder = skoleårsperiode.perioder.map { it.tilIverksettDto() },
-            utgiftsperioder = skoleårsperiode.utgiftsperioder.map { it.tilIverksettDto() }
+            utgiftsperioder = skoleårsperiode.utgiftsperioder.map { it.tilIverksettDto() },
         )
     }
 
@@ -403,15 +403,15 @@ fun DelårsperiodeSkoleårSkolepenger.tilIverksettDto() = DelårsperiodeSkoleår
     studiebelastning = this.studiebelastning,
     maksSatsForSkoleår = SkolepengerMaksbeløp.maksbeløp(
         this.studietype,
-        Skoleår(this.periode)
-    )
+        Skoleår(this.periode),
+    ),
 
 )
 
 fun SkolepengerUtgift.tilIverksettDto() = SkolepengerUtgiftDto(
     utgiftsdato = this.utgiftsdato,
     utgifter = this.utgifter,
-    stønad = this.stønad
+    stønad = this.stønad,
 )
 
 private fun mapPerioderMedBeløp(perioder: List<PeriodeMedBeløp>?) =
@@ -422,7 +422,7 @@ fun PeriodeMedBeløp.tilPeriodeMedBeløpDto(): PeriodeMedBeløpDto =
         fraOgMed = this.periode.fomDato,
         tilOgMed = this.periode.tomDato,
         periode = this.periode,
-        beløp = this.beløp
+        beløp = this.beløp,
     )
 
 fun MottakerRolle.tilIverksettDto(): Brevmottaker.MottakerRolle =

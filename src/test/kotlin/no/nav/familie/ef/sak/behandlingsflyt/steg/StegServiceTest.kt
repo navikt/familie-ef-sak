@@ -70,8 +70,8 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
             behandling(
                 fagsak,
                 status = BehandlingStatus.UTREDES,
-                steg = StegType.SEND_TIL_BESLUTTER
-            )
+                steg = StegType.SEND_TIL_BESLUTTER,
+            ),
         )
 
         val vedtaksperiode = VedtaksperiodeDto(
@@ -79,12 +79,12 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
             årMånedTil = YearMonth.of(2021, 6),
             periode = Månedsperiode(YearMonth.of(2021, 1), YearMonth.of(2021, 6)),
             aktivitet = AktivitetType.BARN_UNDER_ETT_ÅR,
-            periodeType = VedtaksperiodeType.HOVEDPERIODE
+            periodeType = VedtaksperiodeType.HOVEDPERIODE,
         )
         val inntek = Inntekt(
             årMånedFra = YearMonth.of(2021, 1),
             forventetInntekt = BigDecimal(12345),
-            samordningsfradrag = BigDecimal(2)
+            samordningsfradrag = BigDecimal(2),
         )
         stegService.håndterBeregnYtelseForStønad(
             saksbehandling(fagsak, behandling),
@@ -93,8 +93,8 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
                 inntektBegrunnelse = "okok",
                 perioder = listOf(vedtaksperiode),
                 inntekter = listOf(inntek),
-                samordningsfradragType = SamordningsfradragType.UFØRETRYGD
-            )
+                samordningsfradragType = SamordningsfradragType.UFØRETRYGD,
+            ),
         )
 
         assertThat(behandlingshistorikkRepository.findByBehandlingIdOrderByEndretTidDesc(behandling.id).first().steg)
@@ -118,8 +118,8 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
             behandling(
                 status = BehandlingStatus.UTREDES,
                 fagsak = fagsak,
-                steg = StegType.VILKÅR
-            )
+                steg = StegType.VILKÅR,
+            ),
         )
 
         assertThrows<IllegalStateException> {
@@ -134,8 +134,8 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
             behandling(
                 status = BehandlingStatus.UTREDES,
                 fagsak = fagsak,
-                steg = StegType.BEREGNE_YTELSE
-            )
+                steg = StegType.BEREGNE_YTELSE,
+            ),
         )
 
         stegService.resetSteg(behandling.id, steg = StegType.BEREGNE_YTELSE)
@@ -149,8 +149,8 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
             behandling(
                 status = BehandlingStatus.UTREDES,
                 fagsak = fagsak,
-                steg = StegType.BEREGNE_YTELSE
-            )
+                steg = StegType.BEREGNE_YTELSE,
+            ),
         )
 
         stegService.resetSteg(behandling.id, steg = StegType.VILKÅR)

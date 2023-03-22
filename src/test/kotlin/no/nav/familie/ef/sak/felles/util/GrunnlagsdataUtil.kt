@@ -18,7 +18,7 @@ import no.nav.familie.kontrakter.felles.medlemskap.Medlemskapsinfo
 fun opprettGrunnlagsdata(
     bostedsadresse: List<Bostedsadresse> = emptyList(),
     innflyttingTilNorge: List<InnflyttingTilNorge> = emptyList(),
-    utflyttingFraNorge: List<UtflyttingFraNorge> = emptyList()
+    utflyttingFraNorge: List<UtflyttingFraNorge> = emptyList(),
 ) = GrunnlagsdataDomene(
     Søker(
         adressebeskyttelse = null,
@@ -39,7 +39,7 @@ fun opprettGrunnlagsdata(
         innflyttingTilNorge = innflyttingTilNorge,
         utflyttingFraNorge = utflyttingFraNorge,
         vergemaalEllerFremtidsfullmakt = emptyList(),
-        folkeregisteridentifikator = emptyList()
+        folkeregisteridentifikator = emptyList(),
     ),
     emptyList(),
     Medlemskapsinfo("", emptyList(), emptyList(), emptyList()),
@@ -48,16 +48,16 @@ fun opprettGrunnlagsdata(
         TidligereInnvilgetVedtak(
             harTidligereOvergangsstønad = false,
             harTidligereBarnetilsyn = true,
-            harTidligereSkolepenger = false
-        )
-    )
+            harTidligereSkolepenger = false,
+        ),
+    ),
 )
 
 fun opprettBarnMedIdent(
     personIdent: String,
     bostedsadresse: List<Bostedsadresse> = emptyList(),
     fødsel: Fødsel? = null,
-    deltBosted: List<DeltBosted> = emptyList()
+    deltBosted: List<DeltBosted> = emptyList(),
 ) =
     BarnMedIdent(
         adressebeskyttelse = emptyList(),
@@ -67,5 +67,5 @@ fun opprettBarnMedIdent(
         forelderBarnRelasjon = emptyList(),
         fødsel = listOfNotNull(fødsel),
         navn = Navn("", "", "", Metadata(false)),
-        personIdent = personIdent
+        personIdent = personIdent,
     )

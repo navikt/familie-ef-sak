@@ -103,7 +103,7 @@ internal class BeregnYtelseStegTest {
         barnService,
         fagsakService,
         validerOmregningService,
-        featureToggleService
+        featureToggleService,
     )
 
     private val slot = slot<TilkjentYtelse>()
@@ -120,9 +120,9 @@ internal class BeregnYtelseStegTest {
                     data = DetaljertSimuleringResultat(emptyList()),
                     beriketData = BeriketSimuleringsresultat(
                         mockk(),
-                        mockk()
-                    )
-                )
+                        mockk(),
+                    ),
+                ),
             )
         slot.clear()
         every { tilkjentYtelseService.opprettTilkjentYtelse(capture(slot)) } answers { firstArg() }
@@ -171,8 +171,8 @@ internal class BeregnYtelseStegTest {
                 forrigeBehandlingId = null,
                 vedtak = innvilget(
                     listOf(vedtaksperiodeDto(årMånedFra = nyAndelFom, årMånedTil = nyAndelTom)),
-                    listOf(inntekt(YearMonth.from(nyAndelFom)))
-                )
+                    listOf(inntekt(YearMonth.from(nyAndelFom))),
+                ),
             )
 
             val andeler = slot.captured.andelerTilkjentYtelse
@@ -196,8 +196,8 @@ internal class BeregnYtelseStegTest {
             every { beregningService.beregnYtelse(any(), any()) } returns listOf(
                 lagBeløpsperiode(
                     LocalDate.now(),
-                    LocalDate.now()
-                )
+                    LocalDate.now(),
+                ),
             )
             utførSteg(BehandlingType.FØRSTEGANGSBEHANDLING)
 
@@ -219,7 +219,7 @@ internal class BeregnYtelseStegTest {
             utførSteg(
                 BehandlingType.REVURDERING,
                 Opphør(opphørFom = opphørFom, begrunnelse = "null"),
-                forrigeBehandlingId = UUID.randomUUID()
+                forrigeBehandlingId = UUID.randomUUID(),
             )
 
             assertThat(slot.captured.andelerTilkjentYtelse).hasSize(1)
@@ -240,7 +240,7 @@ internal class BeregnYtelseStegTest {
             utførSteg(
                 BehandlingType.REVURDERING,
                 Opphør(opphørFom = opphørFom, begrunnelse = "null"),
-                forrigeBehandlingId = UUID.randomUUID()
+                forrigeBehandlingId = UUID.randomUUID(),
             )
 
             assertThat(slot.captured.andelerTilkjentYtelse).hasSize(0)
@@ -269,9 +269,9 @@ internal class BeregnYtelseStegTest {
                 BehandlingType.FØRSTEGANGSBEHANDLING,
                 innvilget(
                     listOf(innvilgetPeriode1, opphørsperiode, innvilgetPeriode2),
-                    listOf(inntekt(innvilgetFom1))
+                    listOf(inntekt(innvilgetFom1)),
                 ),
-                forrigeBehandlingId = UUID.randomUUID()
+                forrigeBehandlingId = UUID.randomUUID(),
             )
 
             val andelerTilkjentYtelse = slot.captured.andelerTilkjentYtelse
@@ -279,7 +279,7 @@ internal class BeregnYtelseStegTest {
             assertThat(andelerTilkjentYtelse.firstOrNull()?.stønadFom).isEqualTo(innvilgetFom1.atDay(1))
             assertThat(andelerTilkjentYtelse.firstOrNull()?.stønadTom).isEqualTo(
                 opphørFom.minusMonths(1)
-                    .atEndOfMonth()
+                    .atEndOfMonth(),
             )
             assertThat(andelerTilkjentYtelse.lastOrNull()?.stønadFom).isEqualTo(innvilgetFom2.atDay(1))
             assertThat(andelerTilkjentYtelse.lastOrNull()?.stønadTom).isEqualTo(innvilgetTom2.atEndOfMonth())
@@ -306,7 +306,7 @@ internal class BeregnYtelseStegTest {
                 utførSteg(
                     BehandlingType.REVURDERING,
                     innvilget(listOf(opphørsperiode, innvilgetPeriode), listOf(inntekt(innvilgetFom))),
-                    forrigeBehandlingId = UUID.randomUUID()
+                    forrigeBehandlingId = UUID.randomUUID(),
                 )
             }
         }
@@ -337,9 +337,9 @@ internal class BeregnYtelseStegTest {
                 BehandlingType.REVURDERING,
                 innvilget(
                     listOf(opphørsperiode, innvilgetPeriode),
-                    listOf(inntekt(innvilgetFom))
+                    listOf(inntekt(innvilgetFom)),
                 ),
-                forrigeBehandlingId = UUID.randomUUID()
+                forrigeBehandlingId = UUID.randomUUID(),
             )
 
             assertThat(slot.captured.andelerTilkjentYtelse).hasSize(2)
@@ -381,9 +381,9 @@ internal class BeregnYtelseStegTest {
                 BehandlingType.REVURDERING,
                 innvilget(
                     listOf(innvilgetPeriode1, opphørsperiode, innvilgetPeriode2),
-                    listOf(inntekt(innvilgetFom1))
+                    listOf(inntekt(innvilgetFom1)),
                 ),
-                forrigeBehandlingId = UUID.randomUUID()
+                forrigeBehandlingId = UUID.randomUUID(),
             )
 
             assertThat(slot.captured.andelerTilkjentYtelse).hasSize(3)
@@ -408,14 +408,14 @@ internal class BeregnYtelseStegTest {
                 lagTilkjentYtelse(
                     listOf(
                         lagAndelTilkjentYtelse(100, andel1Fom, andel1Tom),
-                        lagAndelTilkjentYtelse(200, andel2Fom, andel2Tom)
-                    )
+                        lagAndelTilkjentYtelse(200, andel2Fom, andel2Tom),
+                    ),
                 )
 
             utførSteg(
                 BehandlingType.REVURDERING,
                 Opphør(opphørFom = opphørFom, begrunnelse = "null"),
-                forrigeBehandlingId = UUID.randomUUID()
+                forrigeBehandlingId = UUID.randomUUID(),
             )
 
             assertThat(slot.captured.andelerTilkjentYtelse).hasSize(1)
@@ -436,14 +436,14 @@ internal class BeregnYtelseStegTest {
                 lagTilkjentYtelse(
                     listOf(
                         lagAndelTilkjentYtelse(100, andel1Fom, andel1Tom),
-                        lagAndelTilkjentYtelse(200, andel2Fom, andel2Tom)
-                    )
+                        lagAndelTilkjentYtelse(200, andel2Fom, andel2Tom),
+                    ),
                 )
 
             utførSteg(
                 BehandlingType.REVURDERING,
                 Opphør(opphørFom = opphørFom, begrunnelse = "null"),
-                forrigeBehandlingId = UUID.randomUUID()
+                forrigeBehandlingId = UUID.randomUUID(),
             )
 
             assertThat(slot.captured.andelerTilkjentYtelse).hasSize(1)
@@ -467,14 +467,14 @@ internal class BeregnYtelseStegTest {
                 lagTilkjentYtelse(
                     listOf(
                         lagAndelTilkjentYtelse(100, andel1Fom, andel1Tom),
-                        lagAndelTilkjentYtelse(200, andel2Fom, andel2Tom)
-                    )
+                        lagAndelTilkjentYtelse(200, andel2Fom, andel2Tom),
+                    ),
                 )
 
             utførSteg(
                 BehandlingType.REVURDERING,
                 Opphør(opphørFom = opphørFom, begrunnelse = "null"),
-                forrigeBehandlingId = UUID.randomUUID()
+                forrigeBehandlingId = UUID.randomUUID(),
             )
 
             assertThat(slot.captured.andelerTilkjentYtelse).hasSize(1)
@@ -500,14 +500,14 @@ internal class BeregnYtelseStegTest {
                 lagTilkjentYtelse(
                     listOf(
                         lagAndelTilkjentYtelse(100, andel1Fom, andel1Tom),
-                        lagAndelTilkjentYtelse(200, andel2Fom, andel2Tom)
-                    )
+                        lagAndelTilkjentYtelse(200, andel2Fom, andel2Tom),
+                    ),
                 )
 
             utførSteg(
                 BehandlingType.REVURDERING,
                 Opphør(opphørFom = opphørFom, begrunnelse = "null"),
-                forrigeBehandlingId = UUID.randomUUID()
+                forrigeBehandlingId = UUID.randomUUID(),
             )
 
             assertThat(slot.captured.andelerTilkjentYtelse).hasSize(2)
@@ -530,7 +530,7 @@ internal class BeregnYtelseStegTest {
             utførSteg(
                 BehandlingType.REVURDERING,
                 Opphør(opphørFom = opphørFom, begrunnelse = "null"),
-                forrigeBehandlingId = UUID.randomUUID()
+                forrigeBehandlingId = UUID.randomUUID(),
             )
 
             assertThat(slot.captured.andelerTilkjentYtelse).hasSize(0)
@@ -542,7 +542,7 @@ internal class BeregnYtelseStegTest {
                 utførSteg(
                     BehandlingType.FØRSTEGANGSBEHANDLING,
                     Opphør(opphørFom = YearMonth.of(2021, 6), begrunnelse = "null"),
-                    forrigeBehandlingId = UUID.randomUUID()
+                    forrigeBehandlingId = UUID.randomUUID(),
                 )
             }
             assertThat(feil.feil).contains("Kan kun opphøre ved revurdering")
@@ -554,7 +554,7 @@ internal class BeregnYtelseStegTest {
             every { tilbakekrevingService.slettTilbakekreving(any()) } just Runs
             utførSteg(
                 type = BehandlingType.FØRSTEGANGSBEHANDLING,
-                vedtak = Avslå(avslåBegrunnelse = "", avslåÅrsak = AvslagÅrsak.VILKÅR_IKKE_OPPFYLT)
+                vedtak = Avslå(avslåBegrunnelse = "", avslåÅrsak = AvslagÅrsak.VILKÅR_IKKE_OPPFYLT),
             )
 
             verify { tilbakekrevingService.slettTilbakekreving(any()) }
@@ -566,7 +566,7 @@ internal class BeregnYtelseStegTest {
             assertThatThrownBy {
                 utførSteg(
                     lagSaksbehandling(stønadType = StønadType.BARNETILSYN),
-                    innvilget(emptyList(), emptyList())
+                    innvilget(emptyList(), emptyList()),
                 )
             }.isInstanceOf(Feil::class.java)
                 .hasMessageContaining("Stønadstype=BARNETILSYN har ikke støtte for InnvilgelseOvergangsstønad")
@@ -574,7 +574,7 @@ internal class BeregnYtelseStegTest {
             assertThatThrownBy {
                 utførSteg(
                     lagSaksbehandling(stønadType = StønadType.OVERGANGSSTØNAD),
-                    innvilgetBarnetilsyn(LocalDate.of(2021, 1, 1), LocalDate.of(2021, 1, 31))
+                    innvilgetBarnetilsyn(LocalDate.of(2021, 1, 1), LocalDate.of(2021, 1, 31)),
                 )
             }.isInstanceOf(Feil::class.java)
                 .hasMessageContaining("Stønadstype=OVERGANGSSTØNAD har ikke støtte for InnvilgelseBarnetilsyn")
@@ -659,7 +659,7 @@ internal class BeregnYtelseStegTest {
 
             val forrigeAndeler = listOf(
                 lagAndelTilkjentYtelse(50, forrigeAndelFom, forrigeAndelTom),
-                lagAndelTilkjentYtelse(70, forrigeAndelFom2, forrigeAndelTom2)
+                lagAndelTilkjentYtelse(70, forrigeAndelFom2, forrigeAndelTom2),
             )
             val beløpsperioder = listOf(lagAndelTilkjentYtelse(100, nyAndelFom, nyAndelTom))
             val nyeAndeler = steg.slåSammenAndelerSomSkalVidereføres(beløpsperioder, lagTilkjentYtelse(forrigeAndeler), listOf())
@@ -744,7 +744,7 @@ internal class BeregnYtelseStegTest {
             val forrigeAndeler = listOf(lagAndelTilkjentYtelse(50, forrigeAndelFom, forrigeAndelTom))
             val beløpsperioder = listOf(
                 lagAndelTilkjentYtelse(100, nyAndelFom1, nyAndelTom1),
-                lagAndelTilkjentYtelse(150, nyAndelFom2, nyAndelTom2)
+                lagAndelTilkjentYtelse(150, nyAndelFom2, nyAndelTom2),
             )
 
             val nyeAndeler =
@@ -804,7 +804,7 @@ internal class BeregnYtelseStegTest {
             val forrigeAndeler = listOf(lagAndelTilkjentYtelse(50, forrigeAndelFom, forrigeAndelTom))
             val beløpsperioder = listOf(
                 lagAndelTilkjentYtelse(200, nyAndelFom1, nyAndelTom1),
-                lagAndelTilkjentYtelse(100, nyAndelFom2, nyAndelTom2)
+                lagAndelTilkjentYtelse(100, nyAndelFom2, nyAndelTom2),
             )
 
             val nyeAndeler =
@@ -835,7 +835,7 @@ internal class BeregnYtelseStegTest {
             val opphørsperioder = listOf(opphør1)
             val forrigeAndeler = listOf(
                 lagAndelTilkjentYtelse(200, forrigeAndelFom1, forrigeAndelTom1),
-                lagAndelTilkjentYtelse(100, forrigeAndelFom2, forrigeAndelTom2)
+                lagAndelTilkjentYtelse(100, forrigeAndelFom2, forrigeAndelTom2),
             )
 
             val nyeAndeler = steg.slåSammenAndelerSomSkalVidereføres(listOf(), lagTilkjentYtelse(forrigeAndeler), opphørsperioder)
@@ -900,9 +900,9 @@ internal class BeregnYtelseStegTest {
                 BehandlingType.REVURDERING,
                 innvilget(
                     listOf(opphørsperiode, innvilgetPeriode1),
-                    listOf(inntekt(andelTom))
+                    listOf(inntekt(andelTom)),
                 ),
-                forrigeBehandlingId = UUID.randomUUID()
+                forrigeBehandlingId = UUID.randomUUID(),
             )
 
             assertThat(slot.captured.andelerTilkjentYtelse).hasSize(1)
@@ -932,9 +932,9 @@ internal class BeregnYtelseStegTest {
                 BehandlingType.REVURDERING,
                 innvilget(
                     listOf(opphørsperiode, innvilgetPeriode1),
-                    listOf(inntekt(andelTom))
+                    listOf(inntekt(andelTom)),
                 ),
-                forrigeBehandlingId = UUID.randomUUID()
+                forrigeBehandlingId = UUID.randomUUID(),
             )
 
             val andelerTilkjentYtelse = slot.captured.andelerTilkjentYtelse.sortedBy { it.stønadFom }
@@ -965,9 +965,9 @@ internal class BeregnYtelseStegTest {
                 BehandlingType.REVURDERING,
                 innvilget(
                     listOf(innvilgetPeriode1, opphørsperiode),
-                    listOf(inntekt(andelTom))
+                    listOf(inntekt(andelTom)),
                 ),
-                forrigeBehandlingId = UUID.randomUUID()
+                forrigeBehandlingId = UUID.randomUUID(),
             )
 
             assertThat(slot.captured.andelerTilkjentYtelse).hasSize(1)
@@ -989,7 +989,7 @@ internal class BeregnYtelseStegTest {
                 utførSteg(
                     BehandlingType.REVURDERING,
                     innvilget(listOf(opphørsperiode(opphørFom, opphørFom)), listOf(inntekt(opphørFom))),
-                    forrigeBehandlingId = UUID.randomUUID()
+                    forrigeBehandlingId = UUID.randomUUID(),
                 )
             }.hasMessageContaining("Må ha innvilgelsesperioder i tillegg til opphørsperioder")
         }
@@ -1009,10 +1009,10 @@ internal class BeregnYtelseStegTest {
                     innvilget(
                         listOf(
                             opphørsperiode(opphørFom, opphørFom),
-                            innvilgetPeriode(innvilgetMåned, innvilgetMåned)
+                            innvilgetPeriode(innvilgetMåned, innvilgetMåned),
                         ),
-                        listOf(inntekt(opphørFom))
-                    )
+                        listOf(inntekt(opphørFom)),
+                    ),
                 )
             }.hasMessageContaining("Har ikke støtte for å innvilge med opphør først, når man mangler tidligere behandling å opphøre")
         }
@@ -1035,11 +1035,11 @@ internal class BeregnYtelseStegTest {
                 innvilget(
                     listOf(
                         opphørsperiode(opphørFom, opphørFom),
-                        innvilgetPeriode(innvilgetMåned, innvilgetMåned)
+                        innvilgetPeriode(innvilgetMåned, innvilgetMåned),
                     ),
-                    listOf(inntekt(opphørFom))
+                    listOf(inntekt(opphørFom)),
                 ),
-                forrigeBehandlingId = UUID.randomUUID()
+                forrigeBehandlingId = UUID.randomUUID(),
             )
 
             assertThat(slot.captured.startdato).isEqualTo(opphørFom.atDay(1))
@@ -1063,7 +1063,7 @@ internal class BeregnYtelseStegTest {
             utførSteg(
                 BehandlingType.REVURDERING,
                 innvilget(listOf(innvilgetPeriode(innvilgetMåned, innvilgetMåned)), listOf(inntekt(innvilgetMåned))),
-                forrigeBehandlingId = UUID.randomUUID()
+                forrigeBehandlingId = UUID.randomUUID(),
             )
 
             assertThat(slot.captured.startdato).isEqualTo(innvilgetMåned.atDay(1))
@@ -1082,7 +1082,7 @@ internal class BeregnYtelseStegTest {
             every { tilkjentYtelseService.hentForBehandling(any()) } returns
                 lagTilkjentYtelse(
                     listOf(lagAndelTilkjentYtelse(0, andelFom, andelTom)),
-                    startdato = opphørFom.atDay(1)
+                    startdato = opphørFom.atDay(1),
                 )
             every { beregningService.beregnYtelse(any(), any()) } answers {
                 firstArg<List<Månedsperiode>>().map { lagBeløpsperiode(it.fomDato, it.tomDato) }
@@ -1092,9 +1092,9 @@ internal class BeregnYtelseStegTest {
                 BehandlingType.REVURDERING,
                 innvilget(
                     listOf(innvilgetPeriode(innvilgetMåned, innvilgetMåned)),
-                    listOf(inntekt(innvilgetMåned))
+                    listOf(inntekt(innvilgetMåned)),
                 ),
-                forrigeBehandlingId = UUID.randomUUID()
+                forrigeBehandlingId = UUID.randomUUID(),
             )
 
             assertThat(slot.captured.startdato).isEqualTo(opphørFom.atDay(1))
@@ -1121,11 +1121,11 @@ internal class BeregnYtelseStegTest {
                 innvilget(
                     listOf(
                         opphørsperiode(opphørFom, opphørFom),
-                        innvilgetPeriode(nyttInnvilgetFom, nyttInnvilgetFom)
+                        innvilgetPeriode(nyttInnvilgetFom, nyttInnvilgetFom),
                     ),
-                    listOf(inntekt(opphørFom))
+                    listOf(inntekt(opphørFom)),
                 ),
-                forrigeBehandlingId = UUID.randomUUID()
+                forrigeBehandlingId = UUID.randomUUID(),
             )
 
             assertThat(slot.captured.startdato).isEqualTo(opphørFom.atDay(1))
@@ -1145,7 +1145,7 @@ internal class BeregnYtelseStegTest {
             every { tilkjentYtelseService.hentForBehandling(any()) } returns
                 lagTilkjentYtelse(
                     listOf(lagAndelTilkjentYtelse(100, andelFom, andelTom)),
-                    startdato = tidligereOpphør
+                    startdato = tidligereOpphør,
                 )
             every { beregningService.beregnYtelse(any(), any()) } answers {
                 firstArg<List<Månedsperiode>>().map { lagBeløpsperiode(it.fomDato, it.tomDato) }
@@ -1156,11 +1156,11 @@ internal class BeregnYtelseStegTest {
                 innvilget(
                     listOf(
                         opphørsperiode(nyttOpphørsdato, nyttOpphørsdato),
-                        innvilgetPeriode(nyttInnvilgetFom, nyttInnvilgetFom)
+                        innvilgetPeriode(nyttInnvilgetFom, nyttInnvilgetFom),
                     ),
-                    listOf(inntekt(nyttOpphørsdato))
+                    listOf(inntekt(nyttOpphørsdato)),
                 ),
-                forrigeBehandlingId = UUID.randomUUID()
+                forrigeBehandlingId = UUID.randomUUID(),
             )
 
             assertThat(slot.captured.startdato).isEqualTo(tidligereOpphør)
@@ -1180,7 +1180,7 @@ internal class BeregnYtelseStegTest {
             every { tilkjentYtelseService.hentForBehandling(any()) } returns
                 lagTilkjentYtelse(
                     listOf(lagAndelTilkjentYtelse(100, andelFom, andelTom)),
-                    startdato = tidligereOpphør
+                    startdato = tidligereOpphør,
                 )
             every { beregningService.beregnYtelse(any(), any()) } answers {
                 firstArg<List<Månedsperiode>>().map { lagBeløpsperiode(it.fomDato, it.tomDato) }
@@ -1191,11 +1191,11 @@ internal class BeregnYtelseStegTest {
                 innvilget(
                     listOf(
                         opphørsperiode(nyttOpphørsdato, nyttOpphørsdato),
-                        innvilgetPeriode(nyttInnvilgetFom, nyttInnvilgetFom)
+                        innvilgetPeriode(nyttInnvilgetFom, nyttInnvilgetFom),
                     ),
-                    listOf(inntekt(nyttOpphørsdato))
+                    listOf(inntekt(nyttOpphørsdato)),
                 ),
-                forrigeBehandlingId = UUID.randomUUID()
+                forrigeBehandlingId = UUID.randomUUID(),
             )
 
             assertThat(slot.captured.startdato).isEqualTo(nyttOpphørsdato.atDay(1))
@@ -1220,7 +1220,7 @@ internal class BeregnYtelseStegTest {
             utførSteg(
                 BehandlingType.REVURDERING,
                 Opphør(opphørFom = opphørFom, begrunnelse = "null"),
-                forrigeBehandlingId = UUID.randomUUID()
+                forrigeBehandlingId = UUID.randomUUID(),
             )
 
             assertThat(slot.captured.andelerTilkjentYtelse).hasSize(0)
@@ -1239,7 +1239,7 @@ internal class BeregnYtelseStegTest {
             utførSteg(
                 BehandlingType.REVURDERING,
                 Opphør(opphørFom = opphørFom, begrunnelse = "null"),
-                forrigeBehandlingId = UUID.randomUUID()
+                forrigeBehandlingId = UUID.randomUUID(),
             )
 
             assertThat(slot.captured.startdato).isEqualTo(andelFom)
@@ -1261,7 +1261,7 @@ internal class BeregnYtelseStegTest {
                 utførSteg(
                     BehandlingType.REVURDERING,
                     Opphør(opphørFom = opphørFom, begrunnelse = "null"),
-                    forrigeBehandlingId = UUID.randomUUID()
+                    forrigeBehandlingId = UUID.randomUUID(),
                 )
             }.hasMessageContaining("Kan ikke opphøre frem i tiden")
         }
@@ -1275,13 +1275,13 @@ internal class BeregnYtelseStegTest {
             every { tilkjentYtelseService.hentForBehandling(any()) } returns
                 lagTilkjentYtelse(
                     listOf(lagAndelTilkjentYtelse(100, tidligereAndelFom, tidligereAndelTom)),
-                    startdato = opphørFom.atDay(1).plusMonths(1)
+                    startdato = opphørFom.atDay(1).plusMonths(1),
                 )
 
             utførSteg(
                 BehandlingType.REVURDERING,
                 Opphør(opphørFom = opphørFom, begrunnelse = "null"),
-                forrigeBehandlingId = UUID.randomUUID()
+                forrigeBehandlingId = UUID.randomUUID(),
             )
             assertThat(slot.captured.startdato).isEqualTo(opphørFom.atDay(1))
             assertThat(slot.captured.andelerTilkjentYtelse).isEmpty()
@@ -1298,7 +1298,7 @@ internal class BeregnYtelseStegTest {
                 utførSteg(
                     BehandlingType.REVURDERING,
                     Opphør(opphørFom = opphørFom, begrunnelse = "null"),
-                    forrigeBehandlingId = UUID.randomUUID()
+                    forrigeBehandlingId = UUID.randomUUID(),
                 )
             }.hasMessageContaining("Forrige vedtak er allerede opphørt")
         }
@@ -1313,13 +1313,13 @@ internal class BeregnYtelseStegTest {
             every { tilkjentYtelseService.hentForBehandling(any()) } returns
                 lagTilkjentYtelse(
                     listOf(lagAndelTilkjentYtelse(100, andelFom, andelTom)),
-                    startdato = tidligereOpphør
+                    startdato = tidligereOpphør,
                 )
 
             utførSteg(
                 BehandlingType.REVURDERING,
                 Opphør(opphørFom = opphørFom, begrunnelse = "null"),
-                forrigeBehandlingId = UUID.randomUUID()
+                forrigeBehandlingId = UUID.randomUUID(),
             )
             assertThat(slot.captured.startdato).isEqualTo(opphørFom.atDay(1))
             assertThat(slot.captured.andelerTilkjentYtelse).isEmpty()
@@ -1335,13 +1335,13 @@ internal class BeregnYtelseStegTest {
             every { tilkjentYtelseService.hentForBehandling(any()) } returns
                 lagTilkjentYtelse(
                     listOf(lagAndelTilkjentYtelse(100, andelFom, andelTom)),
-                    startdato = tidligereOpphør
+                    startdato = tidligereOpphør,
                 )
 
             utførSteg(
                 BehandlingType.REVURDERING,
                 Opphør(opphørFom = opphørFom, begrunnelse = "null"),
-                forrigeBehandlingId = UUID.randomUUID()
+                forrigeBehandlingId = UUID.randomUUID(),
             )
             assertThat(slot.captured.startdato).isEqualTo(tidligereOpphør)
             assertThat(slot.captured.andelerTilkjentYtelse).isEmpty()
@@ -1357,13 +1357,13 @@ internal class BeregnYtelseStegTest {
             every { tilkjentYtelseService.hentForBehandling(any()) } returns
                 lagTilkjentYtelse(
                     listOf(lagAndelTilkjentYtelse(100, andelFom, andelTom)),
-                    startdato = tidligereOpphør
+                    startdato = tidligereOpphør,
                 )
 
             utførSteg(
                 BehandlingType.REVURDERING,
                 Opphør(opphørFom = opphørFom, begrunnelse = "null"),
-                forrigeBehandlingId = UUID.randomUUID()
+                forrigeBehandlingId = UUID.randomUUID(),
             )
             assertThat(slot.captured.startdato).isEqualTo(tidligereOpphør)
             assertThat(slot.captured.andelerTilkjentYtelse).hasSize(1)
@@ -1384,7 +1384,7 @@ internal class BeregnYtelseStegTest {
             every { tilkjentYtelseService.hentForBehandling(any()) } returns
                 lagTilkjentYtelse(
                     listOf(lagAndelTilkjentYtelse(100, andelFom, andelTom)),
-                    startdato = andelFom
+                    startdato = andelFom,
                 )
             every { beregningService.beregnYtelse(any(), any()) } answers {
                 firstArg<List<Månedsperiode>>().map { lagBeløpsperiode(it.fomDato, it.tomDato) }
@@ -1393,7 +1393,7 @@ internal class BeregnYtelseStegTest {
             utførSteg(
                 BehandlingType.REVURDERING,
                 sanksjon(startMåned.plusMonths(1)),
-                forrigeBehandlingId = UUID.randomUUID()
+                forrigeBehandlingId = UUID.randomUUID(),
             )
 
             assertThat(slot.captured.startdato).isEqualTo(andelFom)
@@ -1420,8 +1420,8 @@ internal class BeregnYtelseStegTest {
             }
             every { tilkjentYtelseService.hentForBehandling(any()) } returns lagTilkjentYtelse(
                 listOf(
-                    lagAndelTilkjentYtelse(100, startMåned.plusMonths(1).atDay(1), sluttMåned.atEndOfMonth())
-                )
+                    lagAndelTilkjentYtelse(100, startMåned.plusMonths(1).atDay(1), sluttMåned.atEndOfMonth()),
+                ),
             )
         }
 
@@ -1429,14 +1429,14 @@ internal class BeregnYtelseStegTest {
         internal fun `skal ikke kunne sanksjonere når periode allerede er sanksjonert`() {
             mockHistorikk(
                 andelhistorikkInnvilget(startMåned, startMåned),
-                andelhistorikkSanksjon(sankskjonsMåned)
+                andelhistorikkSanksjon(sankskjonsMåned),
             )
 
             assertThatThrownBy {
                 utførSteg(
                     BehandlingType.REVURDERING,
                     sanksjon(sankskjonsMåned),
-                    forrigeBehandlingId = UUID.randomUUID()
+                    forrigeBehandlingId = UUID.randomUUID(),
                 )
             }.hasMessageContaining("Behandlingen er allerede sanksjonert")
 
@@ -1448,13 +1448,13 @@ internal class BeregnYtelseStegTest {
             mockHistorikk(
                 andelhistorikkInnvilget(startMåned, sankskjonsMåned.minusMonths(1)),
                 andelhistorikkSanksjon(sankskjonsMåned, fjernetHistorikkEndring),
-                andelhistorikkInnvilget(sankskjonsMåned.plusMonths(1), sluttMåned)
+                andelhistorikkInnvilget(sankskjonsMåned.plusMonths(1), sluttMåned),
             )
 
             utførSteg(
                 BehandlingType.REVURDERING,
                 innvilget(listOf(innvilgetPeriode(startMåned, sluttMåned)), listOf(inntekt(startMåned))),
-                forrigeBehandlingId = UUID.randomUUID()
+                forrigeBehandlingId = UUID.randomUUID(),
             )
 
             assertThat(slot.captured.startdato).isEqualTo(startMåned.atDay(1))
@@ -1467,13 +1467,13 @@ internal class BeregnYtelseStegTest {
             val periodeSluttMåned = sankskjonsMåned.minusMonths(1)
             mockHistorikk(
                 andelhistorikkInnvilget(startMåned, periodeSluttMåned),
-                andelhistorikkSanksjon(sankskjonsMåned)
+                andelhistorikkSanksjon(sankskjonsMåned),
             )
 
             utførSteg(
                 BehandlingType.REVURDERING,
                 innvilget(listOf(innvilgetPeriode(startMåned, periodeSluttMåned), vedtaksperiodeSanksjon(sankskjonsMåned)), listOf(inntekt(startMåned))),
-                forrigeBehandlingId = UUID.randomUUID()
+                forrigeBehandlingId = UUID.randomUUID(),
             )
 
             assertThat(slot.captured.startdato).isEqualTo(startMåned.atDay(1))
@@ -1485,13 +1485,13 @@ internal class BeregnYtelseStegTest {
         internal fun `skal kunne slette sanksjon i revurdering`() {
             mockHistorikk(
                 andelhistorikkInnvilget(startMåned, startMåned),
-                andelhistorikkSanksjon(sankskjonsMåned)
+                andelhistorikkSanksjon(sankskjonsMåned),
             )
 
             utførSteg(
                 BehandlingType.REVURDERING,
                 innvilget(listOf(innvilgetPeriode(startMåned, startMåned)), listOf(inntekt(startMåned))),
-                forrigeBehandlingId = UUID.randomUUID()
+                forrigeBehandlingId = UUID.randomUUID(),
             )
 
             assertThat(slot.captured.startdato).isEqualTo(startMåned.atDay(1))
@@ -1503,7 +1503,7 @@ internal class BeregnYtelseStegTest {
         internal fun `kan ikke innvilge nye sanksjonsperioder`() {
             mockHistorikk(
                 andelhistorikkInnvilget(startMåned, startMåned),
-                andelhistorikkSanksjon(sankskjonsMåned)
+                andelhistorikkSanksjon(sankskjonsMåned),
             )
 
             assertThatThrownBy {
@@ -1511,9 +1511,9 @@ internal class BeregnYtelseStegTest {
                     BehandlingType.REVURDERING,
                     innvilget(
                         listOf(innvilgetPeriode(startMåned, startMåned), vedtaksperiodeSanksjon(sankskjonsMåned.plusMonths(1))),
-                        listOf(inntekt(startMåned))
+                        listOf(inntekt(startMåned)),
                     ),
-                    forrigeBehandlingId = UUID.randomUUID()
+                    forrigeBehandlingId = UUID.randomUUID(),
                 )
             }.hasMessageContaining("Nye eller endrede sanksjonsperioder ")
         }
@@ -1522,7 +1522,7 @@ internal class BeregnYtelseStegTest {
         internal fun `må sende inn lik sanksjonsårsak`() {
             mockHistorikk(
                 andelhistorikkInnvilget(startMåned, startMåned),
-                andelhistorikkSanksjon(sankskjonsMåned)
+                andelhistorikkSanksjon(sankskjonsMåned),
             )
 
             val sanksjon =
@@ -1532,9 +1532,9 @@ internal class BeregnYtelseStegTest {
                     BehandlingType.REVURDERING,
                     innvilget(
                         listOf(innvilgetPeriode(startMåned, startMåned), sanksjon),
-                        listOf(inntekt(startMåned))
+                        listOf(inntekt(startMåned)),
                     ),
-                    forrigeBehandlingId = UUID.randomUUID()
+                    forrigeBehandlingId = UUID.randomUUID(),
                 )
             }.hasMessageContaining("Nye eller endrede sanksjonsperioder ")
         }
@@ -1543,7 +1543,7 @@ internal class BeregnYtelseStegTest {
         internal fun `må sende inn lik sanksjonsårsak for barnetilsyn`() {
             mockHistorikk(
                 andelhistorikkInnvilget(startMåned, startMåned),
-                andelhistorikkSanksjon(sankskjonsMåned)
+                andelhistorikkSanksjon(sankskjonsMåned),
             )
 
             assertThatThrownBy {
@@ -1554,8 +1554,8 @@ internal class BeregnYtelseStegTest {
                         startMåned,
                         utgifter = 0,
                         periodeType = PeriodetypeBarnetilsyn.SANKSJON_1_MND,
-                        sanksjonsårsak = Sanksjonsårsak.SAGT_OPP_STILLING
-                    )
+                        sanksjonsårsak = Sanksjonsårsak.SAGT_OPP_STILLING,
+                    ),
                 )
             }.hasMessageContaining("Nye eller endrede sanksjonsperioder ")
         }
@@ -1575,8 +1575,8 @@ internal class BeregnYtelseStegTest {
                         sats = 6284,
                         beregningsgrunnlag = grunnlag(),
                         periodetype = PeriodetypeBarnetilsyn.ORDINÆR,
-                        aktivitetstype = AktivitetstypeBarnetilsyn.I_ARBEID
-                    )
+                        aktivitetstype = AktivitetstypeBarnetilsyn.I_ARBEID,
+                    ),
                 )
         }
 
@@ -1584,7 +1584,7 @@ internal class BeregnYtelseStegTest {
         internal fun `innvilger barnetilsyn skal validere at barn finnes`() {
             utførSteg(
                 lagSaksbehandling(stønadType = StønadType.BARNETILSYN),
-                innvilgetBarnetilsyn(LocalDate.of(2021, 1, 1), LocalDate.of(2021, 1, 31), barn = listOf(UUID.randomUUID()))
+                innvilgetBarnetilsyn(LocalDate.of(2021, 1, 1), LocalDate.of(2021, 1, 31), barn = listOf(UUID.randomUUID())),
             )
 
             verify(exactly = 1) { barnService.validerBarnFinnesPåBehandling(any(), any()) }
@@ -1608,17 +1608,17 @@ internal class BeregnYtelseStegTest {
                         sats = 6284,
                         beregningsgrunnlag = grunnlag(),
                         periodetype = PeriodetypeBarnetilsyn.ORDINÆR,
-                        aktivitetstype = AktivitetstypeBarnetilsyn.I_ARBEID
-                    )
+                        aktivitetstype = AktivitetstypeBarnetilsyn.I_ARBEID,
+                    ),
                 )
 
             utførSteg(
                 saksbehandling(
                     fagsak = fagsak(stønadstype = StønadType.BARNETILSYN),
                     type = BehandlingType.REVURDERING,
-                    forrigeBehandlingId = UUID.randomUUID()
+                    forrigeBehandlingId = UUID.randomUUID(),
                 ),
-                innvilgetBarnetilsyn(nyAndelFom, nyAndelTom, barn = listOf(UUID.randomUUID()))
+                innvilgetBarnetilsyn(nyAndelFom, nyAndelTom, barn = listOf(UUID.randomUUID())),
             )
 
             val andeler = slot.captured.andelerTilkjentYtelse
@@ -1650,17 +1650,17 @@ internal class BeregnYtelseStegTest {
                         sats = 6284,
                         beregningsgrunnlag = grunnlag(),
                         periodetype = PeriodetypeBarnetilsyn.ORDINÆR,
-                        aktivitetstype = AktivitetstypeBarnetilsyn.I_ARBEID
-                    )
+                        aktivitetstype = AktivitetstypeBarnetilsyn.I_ARBEID,
+                    ),
                 )
 
             utførSteg(
                 saksbehandling(
                     fagsak = fagsak(stønadstype = StønadType.BARNETILSYN),
                     type = BehandlingType.REVURDERING,
-                    forrigeBehandlingId = null
+                    forrigeBehandlingId = null,
                 ),
-                innvilgetBarnetilsyn(nyAndelFom, nyAndelTom, barn = listOf(UUID.randomUUID()))
+                innvilgetBarnetilsyn(nyAndelFom, nyAndelTom, barn = listOf(UUID.randomUUID())),
             )
 
             val andeler = slot.captured.andelerTilkjentYtelse
@@ -1691,11 +1691,11 @@ internal class BeregnYtelseStegTest {
                             kontantstøttebeløp = BigDecimal.TEN,
                             tilleggsstønadsbeløp = BigDecimal.ZERO,
                             1,
-                            emptyList()
+                            emptyList(),
                         ),
                         periodetype = PeriodetypeBarnetilsyn.ORDINÆR,
-                        aktivitetstype = AktivitetstypeBarnetilsyn.I_ARBEID
-                    )
+                        aktivitetstype = AktivitetstypeBarnetilsyn.I_ARBEID,
+                    ),
                 )
 
             assertThrows<ApiFeil> {
@@ -1703,9 +1703,9 @@ internal class BeregnYtelseStegTest {
                     saksbehandling(
                         fagsak = fagsak(stønadstype = StønadType.BARNETILSYN),
                         type = BehandlingType.FØRSTEGANGSBEHANDLING,
-                        forrigeBehandlingId = null
+                        forrigeBehandlingId = null,
                     ),
-                    innvilgetBarnetilsyn(nyAndelFom, nyAndelTom).copy(resultatType = ResultatType.INNVILGE)
+                    innvilgetBarnetilsyn(nyAndelFom, nyAndelTom).copy(resultatType = ResultatType.INNVILGE),
                 )
             }
         }
@@ -1724,9 +1724,9 @@ internal class BeregnYtelseStegTest {
                 saksbehandling(
                     fagsak = fagsak(stønadstype = StønadType.BARNETILSYN),
                     type = BehandlingType.FØRSTEGANGSBEHANDLING,
-                    forrigeBehandlingId = null
+                    forrigeBehandlingId = null,
                 ),
-                innvilgetBarnetilsyn(andelFom, andelTom, barn, utgifter = 0, PeriodetypeBarnetilsyn.OPPHØR)
+                innvilgetBarnetilsyn(andelFom, andelTom, barn, utgifter = 0, PeriodetypeBarnetilsyn.OPPHØR),
             )
         }
         assertThat(feil.feil).contains("Kan ikke ta med barn på en periode som er et midlertidig opphør eller sanksjon, på behandling=")
@@ -1744,9 +1744,9 @@ internal class BeregnYtelseStegTest {
                 saksbehandling(
                     fagsak = fagsak(stønadstype = StønadType.BARNETILSYN),
                     type = BehandlingType.FØRSTEGANGSBEHANDLING,
-                    forrigeBehandlingId = null
+                    forrigeBehandlingId = null,
                 ),
-                innvilgetBarnetilsyn(andelFom, andelTom, utgifter = 2500, periodeType = PeriodetypeBarnetilsyn.OPPHØR)
+                innvilgetBarnetilsyn(andelFom, andelTom, utgifter = 2500, periodeType = PeriodetypeBarnetilsyn.OPPHØR),
             )
         }
         assertThat(feil.feil).contains("Kan ikke ha utgifter større enn null på en periode som er et midlertidig opphør eller sanksjon, på behandling=")
@@ -1764,9 +1764,9 @@ internal class BeregnYtelseStegTest {
                 saksbehandling(
                     fagsak = fagsak(stønadstype = StønadType.BARNETILSYN),
                     type = BehandlingType.FØRSTEGANGSBEHANDLING,
-                    forrigeBehandlingId = null
+                    forrigeBehandlingId = null,
                 ),
-                innvilgetBarnetilsyn(andelFom, andelTom, utgifter = 2500, periodeType = PeriodetypeBarnetilsyn.SANKSJON_1_MND)
+                innvilgetBarnetilsyn(andelFom, andelTom, utgifter = 2500, periodeType = PeriodetypeBarnetilsyn.SANKSJON_1_MND),
             )
         }
         assertThat(feil.feil).contains("Kan ikke ha utgifter større enn null på en periode som er et midlertidig opphør eller sanksjon, på behandling=")
@@ -1784,9 +1784,9 @@ internal class BeregnYtelseStegTest {
                 saksbehandling(
                     fagsak = fagsak(stønadstype = StønadType.BARNETILSYN),
                     type = BehandlingType.FØRSTEGANGSBEHANDLING,
-                    forrigeBehandlingId = null
+                    forrigeBehandlingId = null,
                 ),
-                innvilgetBarnetilsyn(andelFom, andelTom, utgifter = 0, periodeType = PeriodetypeBarnetilsyn.OPPHØR)
+                innvilgetBarnetilsyn(andelFom, andelTom, utgifter = 0, periodeType = PeriodetypeBarnetilsyn.OPPHØR),
             )
         }
         assertThat(feil.feil).contains("Første periode kan ikke være en opphørsperiode, på førstegangsbehandling=")
@@ -1802,7 +1802,7 @@ internal class BeregnYtelseStegTest {
             behandlingId = UUID.randomUUID(),
             personIdent = "",
             startdato = LocalDate.of(2021, 12, 1),
-            beløp = 0
+            beløp = 0,
         )
 
         val feil: ApiFeil = assertThrows {
@@ -1810,9 +1810,9 @@ internal class BeregnYtelseStegTest {
                 saksbehandling(
                     fagsak = fagsak(stønadstype = StønadType.BARNETILSYN),
                     type = BehandlingType.REVURDERING,
-                    forrigeBehandlingId = UUID.randomUUID()
+                    forrigeBehandlingId = UUID.randomUUID(),
                 ),
-                innvilgetBarnetilsyn(andelFom, andelTom, utgifter = 0, periodeType = PeriodetypeBarnetilsyn.OPPHØR)
+                innvilgetBarnetilsyn(andelFom, andelTom, utgifter = 0, periodeType = PeriodetypeBarnetilsyn.OPPHØR),
             )
         }
         assertThat(feil.feil).contains("Første periode kan ikke ha et nullbeløp dersom det ikke har blitt innvilget beløp på et tidligere vedtak, på behandling=")
@@ -1830,7 +1830,7 @@ internal class BeregnYtelseStegTest {
         val data = listOf(
             DatoBarnOgUtgifter(utgiftFom1, utgiftTom1, listOf(UUID.randomUUID()), utgifter = 2500),
             DatoBarnOgUtgifter(andelMidlertidigOpphørFom, andelMidlertidigOpphørTom, listOf(), utgifter = 0),
-            DatoBarnOgUtgifter(utgiftFom2, utgiftTom2, listOf(UUID.randomUUID()), utgifter = 2500)
+            DatoBarnOgUtgifter(utgiftFom2, utgiftTom2, listOf(UUID.randomUUID()), utgifter = 2500),
         )
 
         every { barnService.finnBarnPåBehandling(any()) } returns identerTilBehandlingBarn(emptyList())
@@ -1840,9 +1840,9 @@ internal class BeregnYtelseStegTest {
                 saksbehandling(
                     fagsak = fagsak(stønadstype = StønadType.BARNETILSYN),
                     type = BehandlingType.FØRSTEGANGSBEHANDLING,
-                    forrigeBehandlingId = null
+                    forrigeBehandlingId = null,
                 ),
-                innvilgetBarnetilsynMedFlerePerioder(data)
+                innvilgetBarnetilsynMedFlerePerioder(data),
             )
         }
         assertThat(feil.feil).contains("Periodene må være sammenhengende")
@@ -1858,13 +1858,13 @@ internal class BeregnYtelseStegTest {
 
     private fun innvilget(
         perioder: List<VedtaksperiodeDto>,
-        inntekter: List<Inntekt>
+        inntekter: List<Inntekt>,
     ) =
         InnvilgelseOvergangsstønad(
             perioder = perioder,
             inntekter = inntekter,
             inntektBegrunnelse = "null",
-            periodeBegrunnelse = "null"
+            periodeBegrunnelse = "null",
         )
 
     @Deprecated("Bruk metode med YearMonth")
@@ -1873,7 +1873,7 @@ internal class BeregnYtelseStegTest {
         sluttDato: LocalDate,
         barn: List<UUID>? = null,
         utgifter: Int? = null,
-        periodeType: PeriodetypeBarnetilsyn = PeriodetypeBarnetilsyn.ORDINÆR
+        periodeType: PeriodetypeBarnetilsyn = PeriodetypeBarnetilsyn.ORDINÆR,
     ) = innvilgetBarnetilsyn(YearMonth.from(startDato), YearMonth.from(sluttDato), barn, utgifter, periodeType)
 
     private fun innvilgetBarnetilsyn(
@@ -1882,7 +1882,7 @@ internal class BeregnYtelseStegTest {
         barn: List<UUID>? = null,
         utgifter: Int? = 2500,
         periodeType: PeriodetypeBarnetilsyn = PeriodetypeBarnetilsyn.ORDINÆR,
-        sanksjonsårsak: Sanksjonsårsak? = null
+        sanksjonsårsak: Sanksjonsårsak? = null,
     ) =
         InnvilgelseBarnetilsyn(
             perioder = listOf(
@@ -1894,12 +1894,12 @@ internal class BeregnYtelseStegTest {
                     utgifter = utgifter ?: 2500,
                     periodetype = periodeType,
                     aktivitetstype = if (utgifter == 0) null else AktivitetstypeBarnetilsyn.I_ARBEID,
-                    sanksjonsårsak = sanksjonsårsak
-                )
+                    sanksjonsårsak = sanksjonsårsak,
+                ),
             ),
             perioderKontantstøtte = emptyList(),
             tilleggsstønad = TilleggsstønadDto(true, emptyList(), null),
-            begrunnelse = null
+            begrunnelse = null,
         )
 
     data class DatoBarnOgUtgifter(val andelFom: LocalDate, val andelTom: LocalDate, val barn: List<UUID>, val utgifter: Int)
@@ -1914,16 +1914,16 @@ internal class BeregnYtelseStegTest {
                 utgifter = it.utgifter,
                 periodetype = if (it.utgifter == 0) PeriodetypeBarnetilsyn.OPPHØR else PeriodetypeBarnetilsyn.ORDINÆR,
                 aktivitetstype = if (it.utgifter == 0) null else AktivitetstypeBarnetilsyn.I_ARBEID,
-                sanksjonsårsak = null
+                sanksjonsårsak = null,
             )
         },
         perioderKontantstøtte = emptyList(),
         tilleggsstønad = TilleggsstønadDto(
             true,
             emptyList(),
-            null
+            null,
         ),
-        begrunnelse = null
+        begrunnelse = null,
     )
 
     private fun sanksjon(årMåned: YearMonth) =
@@ -1933,9 +1933,9 @@ internal class BeregnYtelseStegTest {
                 årMånedFra = årMåned,
                 årMånedTil = årMåned,
                 fom = årMåned,
-                tom = årMåned
+                tom = årMåned,
             ),
-            internBegrunnelse = ""
+            internBegrunnelse = "",
         )
 
     private fun andelhistorikkInnvilget(fom: YearMonth, tom: YearMonth) =
@@ -1954,7 +1954,7 @@ internal class BeregnYtelseStegTest {
             sanksjonsårsak = null,
             periodetypeBarnetilsyn = PeriodetypeBarnetilsyn.ORDINÆR,
             aktivitetBarnetilsyn = AktivitetstypeBarnetilsyn.I_ARBEID,
-            erOpphør = false
+            erOpphør = false,
         )
 
     private val fjernetHistorikkEndring = HistorikkEndring(EndringType.FJERNET, UUID.randomUUID(), LocalDateTime.now())
@@ -1975,7 +1975,7 @@ internal class BeregnYtelseStegTest {
             sanksjonsårsak = Sanksjonsårsak.SAGT_OPP_STILLING,
             erOpphør = false,
             periodetypeBarnetilsyn = PeriodetypeBarnetilsyn.SANKSJON_1_MND,
-            aktivitetBarnetilsyn = null
+            aktivitetBarnetilsyn = null,
         )
 
     private fun andelDto(beløp: Int, fom: YearMonth, tom: YearMonth) =
@@ -1991,7 +1991,7 @@ internal class BeregnYtelseStegTest {
             utgifter = BigDecimal.ZERO,
             barn = emptyList(),
             sats = 0,
-            beløpFørFratrekkOgSatsJustering = 0
+            beløpFørFratrekkOgSatsJustering = 0,
         )
 
     private fun lagBeløpsperiode(fom: LocalDate, tom: LocalDate) =
@@ -1999,7 +1999,7 @@ internal class BeregnYtelseStegTest {
             periode = Månedsperiode(fom, tom),
             beregningsgrunnlag = null,
             beløp = BigDecimal.ZERO,
-            beløpFørSamordning = BigDecimal.ZERO
+            beløpFørSamordning = BigDecimal.ZERO,
         )
 
     private fun opphørsperiode(opphørFom: YearMonth, opphørTom: YearMonth) =
@@ -2008,7 +2008,7 @@ internal class BeregnYtelseStegTest {
             årMånedTil = opphørTom,
             periode = Månedsperiode(opphørFom, opphørTom),
             aktivitet = AktivitetType.IKKE_AKTIVITETSPLIKT,
-            periodeType = VedtaksperiodeType.MIDLERTIDIG_OPPHØR
+            periodeType = VedtaksperiodeType.MIDLERTIDIG_OPPHØR,
         )
 
     private fun innvilgetPeriode(andelFom: YearMonth, andelTom: YearMonth) =
@@ -2017,7 +2017,7 @@ internal class BeregnYtelseStegTest {
             årMånedTil = andelTom,
             periode = Månedsperiode(andelFom, andelTom),
             aktivitet = AktivitetType.FORLENGELSE_STØNAD_PÅVENTE_ARBEID,
-            periodeType = VedtaksperiodeType.HOVEDPERIODE
+            periodeType = VedtaksperiodeType.HOVEDPERIODE,
         )
 
     private fun vedtaksperiodeSanksjon(sanksjonsmåned: YearMonth) =
@@ -2027,23 +2027,23 @@ internal class BeregnYtelseStegTest {
             periode = Månedsperiode(sanksjonsmåned),
             aktivitet = AktivitetType.IKKE_AKTIVITETSPLIKT,
             periodeType = VedtaksperiodeType.SANKSJON,
-            sanksjonsårsak = Sanksjonsårsak.SAGT_OPP_STILLING
+            sanksjonsårsak = Sanksjonsårsak.SAGT_OPP_STILLING,
         )
 
     private fun inntekt(andelTom: YearMonth) =
         Inntekt(
             andelTom,
             BigDecimal(100000),
-            samordningsfradrag = BigDecimal.ZERO
+            samordningsfradrag = BigDecimal.ZERO,
         )
 
     private fun utførSteg(
         type: BehandlingType,
         vedtak: VedtakDto = InnvilgelseOvergangsstønad(
             periodeBegrunnelse = "",
-            inntektBegrunnelse = ""
+            inntektBegrunnelse = "",
         ),
-        forrigeBehandlingId: UUID? = null
+        forrigeBehandlingId: UUID? = null,
     ) {
         utførSteg(saksbehandling(type = type, forrigeBehandlingId = forrigeBehandlingId), vedtak)
     }
@@ -2052,8 +2052,8 @@ internal class BeregnYtelseStegTest {
         saksbehandling: Saksbehandling = saksbehandling(),
         vedtak: VedtakDto = InnvilgelseOvergangsstønad(
             periodeBegrunnelse = "",
-            inntektBegrunnelse = ""
-        )
+            inntektBegrunnelse = "",
+        ),
     ) {
         steg.utførSteg(saksbehandling = saksbehandling, data = vedtak)
     }
@@ -2061,7 +2061,7 @@ internal class BeregnYtelseStegTest {
     private fun lagSaksbehandling(
         stønadType: StønadType = StønadType.OVERGANGSSTØNAD,
         type: BehandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
-        forrigeBehandlingId: UUID? = null
+        forrigeBehandlingId: UUID? = null,
     ): Saksbehandling {
         val fagsak = fagsak(stønadstype = stønadType)
         return saksbehandling(fagsak, behandling(fagsak, type = type, forrigeBehandlingId = forrigeBehandlingId))
@@ -2072,6 +2072,6 @@ internal class BeregnYtelseStegTest {
         BigDecimal.ZERO,
         BigDecimal.ZERO,
         0,
-        emptyList()
+        emptyList(),
     )
 }

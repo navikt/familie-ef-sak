@@ -18,7 +18,7 @@ import java.util.UUID
 class BarnetilsynSatsendringService(
     val barnetilsynSatsendringRepository: BarnetilsynSatsendringRepository,
     val vedtakHistorikkService: VedtakHistorikkService,
-    val taskService: TaskService
+    val taskService: TaskService,
 ) {
     private val logger = LoggerFactory.getLogger(javaClass)
 
@@ -29,7 +29,7 @@ class BarnetilsynSatsendringService(
         barnetilsynGjeldeneAvstemmingsfeil.forEach {
             logger.warn(
                 "Skulle ikke ha fått differanse i andeler ved reberegning av barnetilsyn-saker med nåværende satser." +
-                    " FagsakId: ${it.fagsakId}"
+                    " FagsakId: ${it.fagsakId}",
             )
         }
 
@@ -62,7 +62,7 @@ class BarnetilsynSatsendringService(
 
     private fun finnesStørreBeløpINyBeregning(
         nyBeregningMånedsperioder: List<BeløpsperiodeBarnetilsynDto>,
-        nåværendeAndelerForNesteÅr: List<AndelHistorikkDto>
+        nåværendeAndelerForNesteÅr: List<AndelHistorikkDto>,
     ) = nyBeregningMånedsperioder.any { nyMånedsberegning ->
         nåværendeAndelerForNesteÅr.any { it.andel.periode.overlapper(nyMånedsberegning.periode) && it.andel.beløp < nyMånedsberegning.beløp }
     }
@@ -78,7 +78,7 @@ class BarnetilsynSatsendringService(
                 andelerNesteÅr.map {
                     PeriodeMedBeløpDto(periode = it.andel.periode, beløp = it.andel.tilleggsstønad)
                 },
-                brukIkkeVedtatteSatser = brukIkkeVedtatteSatser
+                brukIkkeVedtatteSatser = brukIkkeVedtatteSatser,
             ).values.toList()
         return simulertNyBeregning
     }
@@ -94,7 +94,7 @@ class BarnetilsynSatsendringService(
                 utgifter = it.andel.utgifter.toInt(),
                 sanksjonsårsak = null,
                 periodetype = it.periodetypeBarnetilsyn ?: error("Mangler periodetype $it"),
-                aktivitetstype = it.aktivitetBarnetilsyn
+                aktivitetstype = it.aktivitetBarnetilsyn,
             ) // TODO sjekk erMidlertidigOpphør???...
         }
         return utgiftsperiode
@@ -114,7 +114,7 @@ class BarnetilsynSatsendringService(
 data class BarnetilsynSatsendringKanditat(
     val fagsakId: UUID,
     val andelshistorikk: List<AndelHistorikkDto>,
-    val skalRevurderes: Boolean = false
+    val skalRevurderes: Boolean = false,
 ) {
     fun andelerEtter(yearMonth: YearMonth): List<AndelHistorikkDto> {
         return andelshistorikk.filter { it.andel.periode.tom.isAfter(yearMonth) }

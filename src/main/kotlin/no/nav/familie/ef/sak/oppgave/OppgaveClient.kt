@@ -25,7 +25,7 @@ import java.net.URI
 @Component
 class OppgaveClient(
     @Qualifier("azure") restOperations: RestOperations,
-    integrasjonerConfig: IntegrasjonerConfig
+    integrasjonerConfig: IntegrasjonerConfig,
 ) :
     AbstractPingableRestClient(restOperations, "oppgave") {
 
@@ -54,7 +54,7 @@ class OppgaveClient(
             postForEntity<Ressurs<FinnOppgaveResponseDto>>(
                 uri,
                 finnOppgaveRequest,
-                HttpHeaders().medContentTypeJsonUTF8()
+                HttpHeaders().medContentTypeJsonUTF8(),
             )
         return pakkUtRespons(respons, uri, "hentOppgaver")
     }
@@ -77,12 +77,12 @@ class OppgaveClient(
             if (e.ressurs.melding.contains("allerede er ferdigstilt")) {
                 throw ApiFeil(
                     "Oppgaven med id=$oppgaveId er allerede ferdigstilt. Prøv å hente oppgaver på nytt.",
-                    HttpStatus.BAD_REQUEST
+                    HttpStatus.BAD_REQUEST,
                 )
             } else if (e.httpStatus == HttpStatus.CONFLICT) {
                 throw ApiFeil(
                     "Oppgaven har endret seg siden du sist hentet oppgaver. For å kunne gjøre endringer må du hente oppgaver på nytt.",
-                    HttpStatus.CONFLICT
+                    HttpStatus.CONFLICT,
                 )
             }
             throw e
@@ -99,7 +99,7 @@ class OppgaveClient(
         val response = patchForEntity<Ressurs<OppgaveResponse>>(
             URI.create("$oppgaveUri/${oppgave.id!!}/oppdater"),
             oppgave,
-            HttpHeaders().medContentTypeJsonUTF8()
+            HttpHeaders().medContentTypeJsonUTF8(),
         )
         return response.getDataOrThrow().oppgaveId
     }
@@ -118,7 +118,7 @@ class OppgaveClient(
     private fun <T> pakkUtRespons(
         respons: Ressurs<T>,
         uri: URI?,
-        metode: String
+        metode: String,
     ): T {
         val data = respons.data
         if (respons.status == Ressurs.Status.SUKSESS && data != null) {
@@ -130,7 +130,7 @@ class OppgaveClient(
                 "Respons fra $metode feilet med status=${respons.status} melding=${respons.melding}",
                 null,
                 uri,
-                data
+                data,
             )
         }
     }

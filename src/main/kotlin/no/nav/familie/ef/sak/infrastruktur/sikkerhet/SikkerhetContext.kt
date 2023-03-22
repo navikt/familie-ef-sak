@@ -51,7 +51,7 @@ object SikkerhetContext {
                 onSuccess = {
                     it.getClaims("azuread")?.get("NAVident")?.toString() ?: SYSTEM_FORKORTELSE
                 },
-                onFailure = { SYSTEM_FORKORTELSE }
+                onFailure = { SYSTEM_FORKORTELSE },
             )
 
     fun hentSaksbehandlerNavn(strict: Boolean = false): String {
@@ -61,7 +61,7 @@ object SikkerhetContext {
                     it.getClaims("azuread")?.get("name")?.toString()
                         ?: if (strict) error("Finner ikke navn i azuread token") else SYSTEM_NAVN
                 },
-                onFailure = { if (strict) error("Finner ikke navn på innlogget bruker") else SYSTEM_NAVN }
+                onFailure = { if (strict) error("Finner ikke navn på innlogget bruker") else SYSTEM_NAVN },
             )
     }
 
@@ -73,7 +73,7 @@ object SikkerhetContext {
                     val groups = it.getClaims("azuread")?.get("groups") as List<String>?
                     groups?.toSet() ?: emptySet()
                 },
-                onFailure = { emptySet() }
+                onFailure = { emptySet() },
             )
     }
 
@@ -84,16 +84,16 @@ object SikkerhetContext {
                 BehandlerRolle.SYSTEM,
                 BehandlerRolle.BESLUTTER,
                 BehandlerRolle.SAKSBEHANDLER,
-                BehandlerRolle.VEILEDER
+                BehandlerRolle.VEILEDER,
             )
             rollerFraToken.contains(rolleConfig.beslutterRolle) -> listOf(
                 BehandlerRolle.BESLUTTER,
                 BehandlerRolle.SAKSBEHANDLER,
-                BehandlerRolle.VEILEDER
+                BehandlerRolle.VEILEDER,
             )
             rollerFraToken.contains(rolleConfig.saksbehandlerRolle) -> listOf(
                 BehandlerRolle.SAKSBEHANDLER,
-                BehandlerRolle.VEILEDER
+                BehandlerRolle.VEILEDER,
             )
             rollerFraToken.contains(rolleConfig.veilederRolle) -> listOf(BehandlerRolle.VEILEDER)
             else -> listOf(BehandlerRolle.UKJENT)

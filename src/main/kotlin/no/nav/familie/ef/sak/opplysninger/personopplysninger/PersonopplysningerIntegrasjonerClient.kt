@@ -23,7 +23,7 @@ import java.net.URI
 @Component
 class PersonopplysningerIntegrasjonerClient(
     @Qualifier("azure") restOperations: RestOperations,
-    private val integrasjonerConfig: IntegrasjonerConfig
+    private val integrasjonerConfig: IntegrasjonerConfig,
 ) :
     AbstractPingableRestClient(restOperations, "familie.integrasjoner") {
 
@@ -35,7 +35,7 @@ class PersonopplysningerIntegrasjonerClient(
             listOf(personIdent),
             HttpHeaders().also {
                 it.set(HEADER_NAV_TEMA, HEADER_NAV_TEMA_ENF)
-            }
+            },
         ).single()
     }
 
@@ -45,7 +45,7 @@ class PersonopplysningerIntegrasjonerClient(
             PersonIdent(personIdent),
             HttpHeaders().also {
                 it.set(HEADER_NAV_TEMA, HEADER_NAV_TEMA_ENF)
-            }
+            },
         )
     }
 
@@ -64,13 +64,13 @@ class PersonopplysningerIntegrasjonerClient(
             PersonIdent(personIdent),
             HttpHeaders().also {
                 it.set(HEADER_NAV_TEMA, HEADER_NAV_TEMA_ENF)
-            }
+            },
         ).getDataOrThrow()
     }
 
     private fun hentArbeidsfordelingEnhet(
         uri: URI,
-        ident: String
+        ident: String,
     ): List<Arbeidsfordelingsenhet> {
         return try {
             val response = postForEntity<Ressurs<List<Arbeidsfordelingsenhet>>>(uri, PersonIdent(ident))
@@ -83,7 +83,7 @@ class PersonopplysningerIntegrasjonerClient(
     fun egenAnsatt(ident: String): Boolean {
         return postForEntity<Ressurs<EgenAnsattResponse>>(
             integrasjonerConfig.egenAnsattUri,
-            EgenAnsattRequest(ident)
+            EgenAnsattRequest(ident),
         ).data!!.erEgenAnsatt
     }
 

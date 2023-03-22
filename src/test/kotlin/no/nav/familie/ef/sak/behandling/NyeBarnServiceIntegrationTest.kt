@@ -35,8 +35,8 @@ class NyeBarnServiceIntegrationTest : OppslagSpringRunnerTest() {
             behandling(
                 fagsak,
                 status = BehandlingStatus.FERDIGSTILT,
-                resultat = BehandlingResultat.INNVILGET
-            )
+                resultat = BehandlingResultat.INNVILGET,
+            ),
         )
 
         assertThat(nyeBarnService.finnNyeEllerTidligereFødteBarn(PersonIdent(ident)).nyeBarn).hasSize(2)
@@ -51,8 +51,8 @@ class NyeBarnServiceIntegrationTest : OppslagSpringRunnerTest() {
             behandling(
                 fagsak,
                 status = BehandlingStatus.FERDIGSTILT,
-                resultat = BehandlingResultat.INNVILGET
-            )
+                resultat = BehandlingResultat.INNVILGET,
+            ),
         )
 
         assertThat(nyeBarnService.finnNyeEllerTidligereFødteBarn(PersonIdent(ident)).nyeBarn).hasSize(2)
@@ -66,8 +66,8 @@ class NyeBarnServiceIntegrationTest : OppslagSpringRunnerTest() {
             behandling(
                 fagsak,
                 status = BehandlingStatus.FERDIGSTILT,
-                resultat = BehandlingResultat.INNVILGET
-            )
+                resultat = BehandlingResultat.INNVILGET,
+            ),
         )
 
         val barn = nyeBarnService.finnNyeEllerTidligereFødteBarn(PersonIdent(ident)).nyeBarn // PdlClient.hentBarn er mocket til å returnere 2 barn

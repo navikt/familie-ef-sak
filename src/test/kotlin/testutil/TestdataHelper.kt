@@ -31,7 +31,7 @@ fun søknad(
     barn: Søknadsfelt<List<Barn>> = mockk(),
     aktivitet: Søknadsfelt<Aktivitet> = mockk(),
     situasjon: Søknadsfelt<Situasjon> = mockk(),
-    stønadsstart: Søknadsfelt<Stønadsstart> = mockk()
+    stønadsstart: Søknadsfelt<Stønadsstart> = mockk(),
 ) =
     SøknadOvergangsstønad(
         innsendingsdetaljer = innsendingsdetaljer,
@@ -44,7 +44,7 @@ fun søknad(
         barn = barn,
         aktivitet = aktivitet,
         situasjon = situasjon,
-        stønadsstart = stønadsstart
+        stønadsstart = stønadsstart,
     )
 
 fun søknadBarnTilBehandlingBarn(barn: Set<SøknadBarn>, behandlingId: UUID = UUID.randomUUID()): List<BehandlingBarn> = barn.map {
@@ -56,7 +56,7 @@ fun SøknadBarn.tilBehandlingBarn(behandlingId: UUID) = BehandlingBarn(
     søknadBarnId = this.id,
     personIdent = this.fødselsnummer,
     navn = this.navn,
-    fødselTermindato = this.fødselTermindato
+    fødselTermindato = this.fødselTermindato,
 )
 
 fun BarnMedIdent.tilBehandlingBarn(behandlingId: UUID) = BehandlingBarn(
@@ -64,5 +64,5 @@ fun BarnMedIdent.tilBehandlingBarn(behandlingId: UUID) = BehandlingBarn(
     søknadBarnId = null,
     personIdent = this.personIdent,
     navn = this.navn.visningsnavn(),
-    fødselTermindato = null
+    fødselTermindato = null,
 )

@@ -21,7 +21,7 @@ interface TerminbarnRepository :
          JOIN behandling_barn bb ON bb.behandling_id = b.id
         WHERE b.stonadstype=:stønadType AND bb.person_ident IS NULL AND bb.fodsel_termindato < date(NOW() - INTERVAL '4 week') 
         AND NOT EXISTS(SELECT 1 FROM terminbarn_oppgave WHERE fagsak_id = b.fagsak_id AND termindato = bb.fodsel_termindato)
-        """
+        """,
     )
     fun finnBarnAvGjeldendeIverksatteBehandlingerUtgåtteTerminbarn(stønadType: StønadType): List<TerminbarnTilUtplukkForOppgave>
 }

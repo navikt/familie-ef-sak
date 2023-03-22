@@ -17,7 +17,7 @@ class BisysBarnetilsynController(val bisysBarnetilsynService: BisysBarnetilsynSe
     fun hentPerioderBarnetilsyn(@RequestBody barnetilsynBisysRequest: BarnetilsynBisysRequest): BarnetilsynBisysResponse {
         return bisysBarnetilsynService.hentBarnetilsynperioderFraEfOgInfotrygd(
             barnetilsynBisysRequest.ident,
-            barnetilsynBisysRequest.fomDato
+            barnetilsynBisysRequest.fomDato,
         )
     }
 }

@@ -67,8 +67,8 @@ internal class InnflyttingUtflyttingMapperTest {
             fraflyttingsstedIUtlandet = "Sted",
             folkeregistermetadata = Folkeregistermetadata(
                 gyldighetstidspunkt = gyldighetstidspunkt?.atStartOfDay(),
-                opphørstidspunkt = LocalDateTime.now()
-            )
+                opphørstidspunkt = LocalDateTime.now(),
+            ),
         )
 
     private fun lagUtflytting(utflyttingsdato: LocalDate? = null) =
@@ -78,7 +78,7 @@ internal class InnflyttingUtflyttingMapperTest {
             utflyttingsdato = utflyttingsdato,
             folkeregistermetadata = Folkeregistermetadata(
                 gyldighetstidspunkt = null,
-                opphørstidspunkt = null
-            )
+                opphørstidspunkt = null,
+            ),
         )
 }

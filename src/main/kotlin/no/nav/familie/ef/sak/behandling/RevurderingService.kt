@@ -40,7 +40,7 @@ class RevurderingService(
     private val årsakRevurderingService: ÅrsakRevurderingService,
     private val stegService: StegService,
     private val kopierVedtakService: KopierVedtakService,
-    private val vedtakService: VedtakService
+    private val vedtakService: VedtakService,
 ) {
 
     fun hentRevurderingsinformasjon(behandlingId: UUID): RevurderingsinformasjonDto {
@@ -49,7 +49,7 @@ class RevurderingService(
 
     fun lagreRevurderingsinformasjon(
         behandlingId: UUID,
-        revurderingsinformasjonDto: RevurderingsinformasjonDto
+        revurderingsinformasjonDto: RevurderingsinformasjonDto,
     ): RevurderingsinformasjonDto {
         stegService.håndterÅrsakRevurdering(behandlingId, revurderingsinformasjonDto)
         return hentRevurderingsinformasjon(behandlingId)
@@ -74,7 +74,7 @@ class RevurderingService(
             status = BehandlingStatus.UTREDES,
             stegType = StegType.BEREGNE_YTELSE,
             behandlingsårsak = revurderingInnhold.behandlingsårsak,
-            kravMottatt = revurderingInnhold.kravMottatt
+            kravMottatt = revurderingInnhold.kravMottatt,
         )
         val forrigeBehandlingId = behandlingService.finnSisteIverksatteBehandlingMedEventuellAvslått(fagsak.id)?.id
             ?: error("Revurdering må ha eksisterende iverksatt behandling")
@@ -88,23 +88,23 @@ class RevurderingService(
             forrigeBehandlingId = forrigeBehandlingId,
             nyeBarnPåRevurdering = revurderingInnhold.barn.tilBehandlingBarn(revurdering.id),
             grunnlagsdataBarn = grunnlagsdata.grunnlagsdata.barn,
-            stønadstype = fagsak.stønadstype
+            stønadstype = fagsak.stønadstype,
         )
         val (_, metadata) = vurderingService.hentGrunnlagOgMetadata(revurdering.id)
         vurderingService.kopierVurderingerTilNyBehandling(
             forrigeBehandlingId,
             revurdering.id,
             metadata,
-            fagsak.stønadstype
+            fagsak.stønadstype,
         )
         taskService.save(
             OpprettOppgaveForOpprettetBehandlingTask.opprettTask(
                 OpprettOppgaveForOpprettetBehandlingTask.OpprettOppgaveTaskData(
                     behandlingId = revurdering.id,
                     saksbehandler = saksbehandler,
-                    beskrivelse = "Revurdering i ny løsning"
-                )
-            )
+                    beskrivelse = "Revurdering i ny løsning",
+                ),
+            ),
         )
         taskService.save(BehandlingsstatistikkTask.opprettPåbegyntTask(behandlingId = revurdering.id))
 
@@ -112,12 +112,12 @@ class RevurderingService(
             val vedtakDto = kopierVedtakService.lagVedtakDtoBasertPåTidligereVedtaksperioder(
                 fagsakId = fagsak.id,
                 forrigeBehandlingId = forrigeBehandlingId,
-                revurderingId = revurdering.id
+                revurderingId = revurdering.id,
             )
             vedtakService.lagreVedtak(
                 vedtakDto = vedtakDto,
                 behandlingId = revurdering.id,
-                stønadstype = fagsak.stønadstype
+                stønadstype = fagsak.stønadstype,
             )
         }
 
@@ -127,13 +127,13 @@ class RevurderingService(
     private fun validerOpprettRevurdering(fagsak: Fagsak, revurderingInnhold: RevurderingDto) {
         feilHvis(
             fagsak.stønadstype != StønadType.OVERGANGSSTØNAD &&
-                revurderingInnhold.behandlingsårsak == BehandlingÅrsak.G_OMREGNING
+                revurderingInnhold.behandlingsårsak == BehandlingÅrsak.G_OMREGNING,
         ) {
             "Kan ikke opprette revurdering med årsak g-omregning for ${fagsak.stønadstype}"
         }
         feilHvis(
             fagsak.stønadstype != StønadType.BARNETILSYN &&
-                erSatsendring(revurderingInnhold)
+                erSatsendring(revurderingInnhold),
         ) {
             "Kan ikke opprette revurdering med årsak satsendring for ${fagsak.stønadstype}"
         }

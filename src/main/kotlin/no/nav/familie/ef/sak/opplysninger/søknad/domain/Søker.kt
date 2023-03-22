@@ -9,7 +9,7 @@ import org.springframework.data.relational.core.mapping.Table
 data class Søker(
     @Column("fodselsnummer")
     val fødselsnummer: String,
-    val navn: String
+    val navn: String,
 )
 
 object SøkerMapper {
@@ -17,7 +17,7 @@ object SøkerMapper {
     fun toDomain(personalia: Søknadsfelt<Personalia>): Søker {
         return Søker(
             personalia.verdi.fødselsnummer.verdi.verdi,
-            personalia.verdi.navn.verdi
+            personalia.verdi.navn.verdi,
         )
     }
 }
