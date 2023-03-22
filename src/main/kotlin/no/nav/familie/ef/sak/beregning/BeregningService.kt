@@ -56,12 +56,16 @@ class BeregningService(
         }
 
         brukerfeilHvis(inntektsperioder.any { it.inntekt < BigDecimal.ZERO }) { "Inntekten kan ikke være negativt" }
-        brukerfeilHvis(inntektsperioder.any {
-            (it.dagsats ?: BigDecimal.ZERO) < BigDecimal.ZERO
-        }) { "Dagsats kan ikke være negativt" }
-        brukerfeilHvis(inntektsperioder.any {
-            (it.månedsinntekt ?: BigDecimal.ZERO) < BigDecimal.ZERO
-        }) { "Månedsinntekt kan ikke være negativt" }
+        brukerfeilHvis(
+            inntektsperioder.any {
+                (it.dagsats ?: BigDecimal.ZERO) < BigDecimal.ZERO
+            }
+        ) { "Dagsats kan ikke være negativt" }
+        brukerfeilHvis(
+            inntektsperioder.any {
+                (it.månedsinntekt ?: BigDecimal.ZERO) < BigDecimal.ZERO
+            }
+        ) { "Månedsinntekt kan ikke være negativt" }
         brukerfeilHvis(
             inntektsperioder.any {
                 it.samordningsfradrag < BigDecimal.ZERO
