@@ -16,7 +16,7 @@ import org.springframework.stereotype.Service
  */
 @Service
 class PerioderForBarnetrygdService(
-    private val periodeService: PeriodeService,
+    private val periodeService: PeriodeService
 ) {
 
     fun hentPerioderMedFullOvergangsstønad(request: PersonIdent): EksternePerioderResponse {
@@ -56,8 +56,8 @@ private fun MutableList<EksternPeriode>.fjernDuplikatOgSplittOverlappendePeriode
             this.add(
                 gjeldende.copy(
                     fomDato = minOf(forrige.fomDato, gjeldende.fomDato),
-                    tomDato = maxOf(forrige.fomDato, gjeldende.fomDato).minusDays(1),
-                ),
+                    tomDato = maxOf(forrige.fomDato, gjeldende.fomDato).minusDays(1)
+                )
             )
         }
 
@@ -74,5 +74,5 @@ private fun InternPeriode.tilEksternEksternPeriode(): EksternPeriode =
         personIdent = this.personIdent,
         fomDato = this.stønadFom,
         tomDato = this.stønadTom,
-        datakilde = this.datakilde,
+        datakilde = this.datakilde
     )

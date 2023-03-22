@@ -133,13 +133,13 @@ internal class EksternStønadsperioderControllerTest : OppslagSpringRunnerTest()
     private fun <T> utførKallOgVerifiser(
         url: String,
         request: Any = EksternePerioderRequest("1"),
-        lazyMessage: (ResponseEntity<Ressurs<T>>) -> Unit,
+        lazyMessage: (ResponseEntity<Ressurs<T>>) -> Unit
     ) {
         val response: ResponseEntity<Ressurs<T>> =
             restTemplate.exchange(
                 localhost(url),
                 HttpMethod.POST,
-                HttpEntity(request, headers),
+                HttpEntity(request, headers)
             )
         lazyMessage(response)
     }

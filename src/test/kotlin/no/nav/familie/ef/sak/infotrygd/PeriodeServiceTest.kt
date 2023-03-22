@@ -39,7 +39,7 @@ internal class PeriodeServiceTest {
         fagsakService = fagsakService,
         behandlingService = behandlingService,
         tilkjentYtelseService = tilkjentYtelseService,
-        infotrygdService = InfotrygdService(replikaClient, personService),
+        infotrygdService = InfotrygdService(replikaClient, personService)
     )
 
     private val personIdent = "123"
@@ -55,7 +55,7 @@ internal class PeriodeServiceTest {
         every { replikaClient.hentSammenslåttePerioder(any()) } returns InfotrygdPeriodeResponse(
             emptyList(),
             emptyList(),
-            emptyList(),
+            emptyList()
         )
     }
 
@@ -159,8 +159,8 @@ internal class PeriodeServiceTest {
         mockReplika(
             listOf(
                 lagInfotrygdPeriode(stønadFom = periode1fom, stønadTom = periode1tom, beløp = 1),
-                lagInfotrygdPeriode(stønadFom = periode2fom, stønadTom = periode2tom, beløp = 2),
-            ).sortedByDescending { it.stønadFom },
+                lagInfotrygdPeriode(stønadFom = periode2fom, stønadTom = periode2tom, beløp = 2)
+            ).sortedByDescending { it.stønadFom }
         )
         val perioder = service.hentPerioderForOvergangsstønadFraEfOgInfotrygd(personIdent)
 
@@ -180,7 +180,7 @@ internal class PeriodeServiceTest {
         every { replikaClient.hentSammenslåttePerioder(any()) } returns InfotrygdPeriodeResponse(
             overgangsstønad,
             emptyList(),
-            emptyList(),
+            emptyList()
         )
     }
 

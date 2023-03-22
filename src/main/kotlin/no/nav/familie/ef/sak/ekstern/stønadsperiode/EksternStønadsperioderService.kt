@@ -13,7 +13,7 @@ import java.time.LocalDate
 
 @Service
 class EksternStønadsperioderService(
-    private val periodeService: PeriodeService,
+    private val periodeService: PeriodeService
 ) {
 
     /**
@@ -29,13 +29,13 @@ class EksternStønadsperioderService(
         return hentPerioderForOvergangsstønadAvgrensetPeriode(
             personIdent = request.personIdent,
             fomDato = request.fomDato,
-            tomDato = request.tomDato,
+            tomDato = request.tomDato
         ).map {
             EksternPeriode(
                 personIdent = request.personIdent,
                 fomDato = it.stønadFom,
                 tomDato = it.stønadTom,
-                datakilde = it.datakilde,
+                datakilde = it.datakilde
             )
         }
     }
@@ -44,14 +44,14 @@ class EksternStønadsperioderService(
         return hentPerioderForOvergangsstønadAvgrensetPeriode(
             personIdent = request.personIdent,
             fomDato = request.fomDato,
-            tomDato = request.tomDato,
+            tomDato = request.tomDato
         ).map {
             EksternPeriodeMedBeløp(
                 personIdent = request.personIdent,
                 fomDato = it.stønadFom,
                 tomDato = it.stønadTom,
                 datakilde = it.datakilde,
-                beløp = it.månedsbeløp,
+                beløp = it.månedsbeløp
             )
         }
     }
@@ -59,7 +59,7 @@ class EksternStønadsperioderService(
     private fun hentPerioderForOvergangsstønadAvgrensetPeriode(
         personIdent: String,
         fomDato: LocalDate?,
-        tomDato: LocalDate?,
+        tomDato: LocalDate?
     ): List<InternPeriode> {
         val perioder = periodeService.hentPerioderForOvergangsstønadFraEfOgInfotrygd(personIdent)
         val begrensetPeriode = Datoperiode(fom = fomDato ?: LocalDate.MIN, tom = tomDato ?: LocalDate.MAX)

@@ -9,5 +9,5 @@ fun AndelTilkjentYtelse.tilEksternPeriodeOvergangsstønad() =
         personIdent = this.personIdent,
         fomDato = this.stønadFom,
         tomDato = this.stønadTom,
-        datakilde = Datakilde.EF,
+        datakilde = Datakilde.EF
     )
