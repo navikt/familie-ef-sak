@@ -1,6 +1,5 @@
 package no.nav.familie.ef.sak.behandlingsflyt.steg
 
-import com.github.dockerjava.api.exception.BadRequestException
 import io.mockk.Runs
 import io.mockk.every
 import io.mockk.just
@@ -34,7 +33,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.http.HttpStatus
 import org.springframework.web.client.HttpClientErrorException
-import org.springframework.web.reactive.function.client.WebClientResponseException.BadRequest
 
 internal class SaksbehandlingsblankettStegTest {
 
@@ -176,7 +174,7 @@ internal class SaksbehandlingsblankettStegTest {
 
         val behandling = saksbehandling(type = BehandlingType.REVURDERING).copy(stønadstype = StønadType.BARNETILSYN)
 
-        val feil = assertThrows<RessursException> {  saksbehandlingsblankettSteg.utførSteg(behandling, null)}
+        val feil = assertThrows<RessursException> { saksbehandlingsblankettSteg.utførSteg(behandling, null) }
         assertThat(feil.httpStatus).isEqualTo(HttpStatus.BAD_REQUEST)
     }
 }
