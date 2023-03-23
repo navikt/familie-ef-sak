@@ -3,7 +3,6 @@ package no.nav.familie.ef.sak.sigrun
 import no.nav.familie.ef.sak.fagsak.FagsakPersonService
 import no.nav.familie.ef.sak.sigrun.ekstern.BeregnetSkatt
 import no.nav.familie.ef.sak.sigrun.ekstern.SigrunClient
-import no.nav.familie.ef.sak.sigrun.ekstern.SummertSkattegrunnlag
 import org.springframework.stereotype.Service
 import java.time.YearMonth
 import java.util.UUID
@@ -18,27 +17,15 @@ class SigrunService(val sigrunClient: SigrunClient, val fagsakPersonService: Fag
         val aktivIdent = fagsakPersonService.hentAktivIdent(fagsakPersonId)
 
         val beregnetSkattegrunnlagSisteTreÅr = listInntektsår.map { sigrunClient.hentBeregnetSkatt(aktivIdent, it).mapTilPensjonsgivendeInntektVisning(it) }
-        /* Venter med kall mot beregnet skattegrunnlag - trenger blant annet eget filter
-        val inntektFraSvalbard = hentInntektFraSvalbardSisteTreÅr(aktivIdent)
-        beregnetSkattegrunnlagSisteTreÅr.forEach {
-            it.verdi += inntektFraSvalbard.find { svalbard -> svalbard.inntektsaar == it.inntektsaar }?.verdi ?: 0
-        }
-         */
 
         return beregnetSkattegrunnlagSisteTreÅr
-    }
-
-    private fun hentInntektFraSvalbardSisteTreÅr(aktivIdent: String): List<PensjonsgivendeInntektVisning> {
-        val inntektFraSvalbardSisteTreÅr = listInntektsår.map {
-            sigrunClient.hentSummertSkattegrunnlag(aktivIdent, it).mapSvalbardGrunnlagTilPensjonsgivendeInntektVisning(it)
-        }
-
-        return inntektFraSvalbardSisteTreÅr
     }
 }
 
 val næringKodeverdiBeregnetSkatt = "personinntektNaering"
 val skatteoppgjørsdatoKodeverdi = "skatteoppgjoersdato"
+val svalbardPersoninntektNaering = "svalbardPersoninntektNaering"
+val svalbardSumAllePersoninntekter = "svalbardSumAllePersoninntekter"
 
 private fun List<BeregnetSkatt>.mapTilPensjonsgivendeInntektVisning(inntektsaar: Int): PensjonsgivendeInntektVisning {
     // Skatteoppgjørsdato er en del av response, og bruker samme felter som inntekt. Verdi er datoen for skatteoppgjøret og teknisk navn er "skatteoppgjoersdato".
