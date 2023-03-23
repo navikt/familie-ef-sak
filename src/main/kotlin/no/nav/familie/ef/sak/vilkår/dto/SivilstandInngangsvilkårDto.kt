@@ -23,7 +23,7 @@ data class SivilstandSøknadsgrunnlagDto(
 
 data class SivilstandRegistergrunnlagDto(
     val type: Sivilstandstype,
-    val fødselsnummer: String?,
+    val personIdent: String?,
     val navn: String?,
     val gyldigFraOgMed: LocalDate?,
 )
