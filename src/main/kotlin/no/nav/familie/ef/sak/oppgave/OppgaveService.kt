@@ -220,7 +220,7 @@ class OppgaveService(
     }
 
     fun hentIkkeFerdigstiltOppgaveForBehandling(behandlingId: UUID): Oppgave? {
-        return oppgaveRepository.findByBehandlingIdAndTypeAndErFerdigstiltIsFalse(behandlingId, Oppgavetype.BehandleSak)
+        return oppgaveRepository.findByBehandlingIdAndErFerdigstiltIsFalseAndTypeIn(behandlingId, setOf(Oppgavetype.BehandleSak, Oppgavetype.BehandleUnderkjentVedtak))
             ?.let { oppgaveClient.finnOppgaveMedId(it.gsakOppgaveId) }
     }
 
