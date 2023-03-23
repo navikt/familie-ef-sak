@@ -103,7 +103,7 @@ internal class VurderingServiceTest {
         every { fagsakService.hentFagsakForBehandling(behandlingId) } returns fagsak(stønadstype = OVERGANGSSTØNAD)
         val sivilstand = SivilstandInngangsvilkårDto(
             mockk(relaxed = true),
-            SivilstandRegistergrunnlagDto(Sivilstandstype.GIFT,"1", "Navn", null),
+            SivilstandRegistergrunnlagDto(Sivilstandstype.GIFT, "1", "Navn", null),
         )
 
         val barnMedSamvær = barn.map { lagBarnetilsynBarn(it.id) }
