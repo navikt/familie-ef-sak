@@ -163,15 +163,6 @@ interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUp
     )
     fun finnPersonerMedAktivStonadIkkeRevurdertSisteToMåneder(stønadstype: StønadType = StønadType.OVERGANGSSTØNAD): List<String>
 
-    @Query(
-        """
-        SELECT DISTINCT gib.id
-        FROM gjeldende_iverksatte_behandlinger gib
-        WHERE gib.stonadstype=:stønadstype
-        """,
-    )
-    fun finnBehandlingerForPersonerMedAktivStønad(stønadstype: StønadType = StønadType.OVERGANGSSTØNAD): List<UUID>
-
     // language=PostgreSQL
     @Query(
         """
