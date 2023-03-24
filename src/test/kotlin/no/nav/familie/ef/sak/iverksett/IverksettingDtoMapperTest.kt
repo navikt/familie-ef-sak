@@ -13,6 +13,7 @@ import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.behandling.domain.ÅrsakRevurdering
 import no.nav.familie.ef.sak.behandling.dto.HenlagtÅrsak
+import no.nav.familie.ef.sak.behandling.fremleggsoppgave.FremleggsoppgaveService
 import no.nav.familie.ef.sak.behandling.ÅrsakRevurderingsRepository
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.behandlingshistorikk.BehandlingshistorikkService
@@ -109,6 +110,7 @@ internal class IverksettingDtoMapperTest {
     private val arbeidsfordelingService = mockk<ArbeidsfordelingService>(relaxed = true)
     private val barnMatcher = mockk<BarnMatcher>()
     private val årsakRevurderingsRepository = mockk<ÅrsakRevurderingsRepository>()
+    private val fremleggsoppgaveService = mockk<FremleggsoppgaveService>()
 
     private val iverksettingDtoMapper =
         IverksettingDtoMapper(
@@ -123,6 +125,7 @@ internal class IverksettingDtoMapperTest {
             vilkårsvurderingRepository = vilkårsvurderingRepository,
             brevmottakereRepository = brevmottakereRepository,
             årsakRevurderingsRepository = årsakRevurderingsRepository,
+            fremleggsoppgaveService = fremleggsoppgaveService,
         )
 
     private val fagsak = fagsak(fagsakpersoner(setOf("1")))
@@ -146,6 +149,7 @@ internal class IverksettingDtoMapperTest {
             årsak = Revurderingsårsak.ENDRING_INNTEKT,
             beskrivelse = "beskrivelse",
         )
+        every { fremleggsoppgaveService.hentFremleggsoppgave(any()) } returns null
     }
 
     @Test

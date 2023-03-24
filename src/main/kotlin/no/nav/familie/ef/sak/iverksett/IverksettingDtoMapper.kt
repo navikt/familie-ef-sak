@@ -3,6 +3,7 @@ package no.nav.familie.ef.sak.iverksett
 import no.nav.familie.ef.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ef.sak.barn.BarnService
 import no.nav.familie.ef.sak.behandling.Saksbehandling
+import no.nav.familie.ef.sak.behandling.fremleggsoppgave.FremleggsoppgaveService
 import no.nav.familie.ef.sak.behandling.ÅrsakRevurderingsRepository
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.behandlingshistorikk.BehandlingshistorikkService
@@ -49,6 +50,7 @@ import no.nav.familie.kontrakter.ef.iverksett.IverksettBarnetilsynDto
 import no.nav.familie.kontrakter.ef.iverksett.IverksettDto
 import no.nav.familie.kontrakter.ef.iverksett.IverksettOvergangsstønadDto
 import no.nav.familie.kontrakter.ef.iverksett.IverksettSkolepengerDto
+import no.nav.familie.kontrakter.ef.iverksett.OpprettFremlegsoppgave
 import no.nav.familie.kontrakter.ef.iverksett.PeriodeMedBeløpDto
 import no.nav.familie.kontrakter.ef.iverksett.SkolepengerStudietype
 import no.nav.familie.kontrakter.ef.iverksett.SkolepengerUtgiftDto
@@ -92,6 +94,7 @@ class IverksettingDtoMapper(
     private val grunnlagsdataService: GrunnlagsdataService,
     private val brevmottakereRepository: BrevmottakereRepository,
     private val årsakRevurderingsRepository: ÅrsakRevurderingsRepository,
+    private val fremleggsoppgaveService: FremleggsoppgaveService,
 ) {
 
     fun tilDto(saksbehandling: Saksbehandling, beslutter: String): IverksettDto {
@@ -143,6 +146,7 @@ class IverksettingDtoMapper(
                     vedtak = vedtakDto,
                 )
             }
+
             StønadType.BARNETILSYN -> {
                 val vedtakDto = mapVedtaksdetaljerBarnetilsynDto(
                     vedtak,
@@ -159,6 +163,7 @@ class IverksettingDtoMapper(
                     vedtak = vedtakDto,
                 )
             }
+
             StønadType.SKOLEPENGER -> {
                 val vedtakDto = mapVedtaksdetaljerSkolepengerDto(
                     vedtak,
@@ -259,6 +264,9 @@ class IverksettingDtoMapper(
             tilbakekreving = tilbakekreving,
             brevmottakere = brevmottakere,
             avslagÅrsak = vedtak.avslåÅrsak,
+            opprettFremleggsoppgave =
+            fremleggsoppgaveService.hentFremleggsoppgave(vedtak.behandlingId)
+                ?.let { OpprettFremlegsoppgave(it.inntekt) } ?: OpprettFremlegsoppgave(false),
         )
 
     @Improvement("Opphørårsak må utledes ved revurdering")

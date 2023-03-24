@@ -3,6 +3,9 @@ package no.nav.familie.ef.sak.vedtak
 import no.nav.familie.ef.sak.AuditLoggerEvent
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
 import no.nav.familie.ef.sak.behandling.BehandlingService
+import no.nav.familie.ef.sak.behandling.fremleggsoppgave.FremleggsoppgaveDto
+import no.nav.familie.ef.sak.behandling.fremleggsoppgave.FremleggsoppgaveService
+import no.nav.familie.ef.sak.behandling.fremleggsoppgave.tilDomene
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegService
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvisIkke
@@ -47,15 +50,23 @@ class VedtakController(
     private val behandlingRepository: BehandlingRepository,
     private val nullstillVedtakService: NullstillVedtakService,
     private val angreSendTilBeslutterService: AngreSendTilBeslutterService,
+    private val fremleggsoppgaveService: FremleggsoppgaveService,
 ) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
     @PostMapping("/{behandlingId}/send-til-beslutter")
-    fun sendTilBeslutter(@PathVariable behandlingId: UUID): Ressurs<UUID> {
+    fun sendTilBeslutter(@PathVariable behandlingId: UUID, @RequestBody fremleggsoppgaveDto: FremleggsoppgaveDto): Ressurs<UUID> {
         val behandling = behandlingService.hentSaksbehandling(behandlingId)
         tilgangService.validerTilgangTilBehandling(behandling, AuditLoggerEvent.UPDATE)
         val vedtakErUtenBeslutter = vedtakService.hentVedtak(behandlingId).utledVedtakErUtenBeslutter()
+
+        if (fremleggsoppgaveDto.kanOppretteFremleggsoppgave) {
+            fremleggsoppgaveService.opprettEllerErstattFremleggsoppgave(
+                behandlingId,
+                fremleggsoppgaveDto.tilDomene(behandlingId),
+            )
+        }
 
         return if (vedtakErUtenBeslutter.value) {
             Ressurs.success(stegService.håndterFerdigstilleVedtakUtenBeslutter(behandling).id)

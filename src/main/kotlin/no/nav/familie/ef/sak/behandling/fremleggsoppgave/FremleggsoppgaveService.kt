@@ -13,19 +13,14 @@ import java.util.UUID
 class FremleggsoppgaveService(
     private val fremleggsoppgaveReporitory: FremleggsoppgaveReporitory,
     private val behandlingService: BehandlingService,
-    private val tilkjentYtelseService: TilkjentYtelseService
+    private val tilkjentYtelseService: TilkjentYtelseService,
 ) {
 
     @Transactional
-    fun opprettEllerErstattFremleggsoppgave(behandlingId: UUID, opprettFremleggsoppgave: Boolean) {
+    fun opprettEllerErstattFremleggsoppgave(behandlingId: UUID, fremleggsoppgave: Fremleggsoppgave) {
         when (fremleggsoppgaveReporitory.existsById(behandlingId)) {
-            true -> fremleggsoppgaveReporitory.update(
-                Fremleggsoppgave(behandlingId = behandlingId, inntekt = opprettFremleggsoppgave)
-            )
-
-            false -> fremleggsoppgaveReporitory.insert(
-                Fremleggsoppgave(behandlingId = behandlingId, inntekt = opprettFremleggsoppgave)
-            )
+            true -> fremleggsoppgaveReporitory.update(fremleggsoppgave)
+            false -> fremleggsoppgaveReporitory.insert(fremleggsoppgave)
         }
     }
 
@@ -34,7 +29,6 @@ class FremleggsoppgaveService(
     }
 
     fun kanOpprettes(behandlingId: UUID): Boolean {
-
         val behandling = behandlingService.hentBehandling(behandlingId)
         val behandlingstype = behandling.type
 
@@ -43,8 +37,8 @@ class FremleggsoppgaveService(
         val sisteAndelMedBeløp = sisteAndel.beløp > 0
         val sisteAndel1årFremITid = sisteAndel.stønadTom.minusYears(1) > LocalDate.now()
 
-        return behandlingstype == BehandlingType.FØRSTEGANGSBEHANDLING
-            && sisteAndelMedBeløp
-            && sisteAndel1årFremITid
+        return behandlingstype == BehandlingType.FØRSTEGANGSBEHANDLING &&
+            sisteAndelMedBeløp &&
+            sisteAndel1årFremITid
     }
 }

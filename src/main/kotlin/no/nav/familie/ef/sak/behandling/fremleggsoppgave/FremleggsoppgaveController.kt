@@ -4,7 +4,6 @@ import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import java.util.UUID
@@ -19,22 +18,9 @@ class FremleggsoppgaveController(private val fremleggspppgaveService: Fremleggso
         val fremleggsOppgave = fremleggspppgaveService.hentFremleggsoppgave(behandlingid)
         return Ressurs.success(
             FremleggsoppgaveDto(
-                inntekt = fremleggsOppgave?.let { it.inntekt } ?: null,
-                kanOppretteFremleggsoppgave = fremleggspppgaveService.kanOpprettes(behandlingid)
-            )
-        )
-    }
-
-    @PostMapping("/{behandlingid}/inntekt/{skalopprette}")
-    fun opprettFremleggsoppgave(
-        @PathVariable behandlingid: UUID,
-        @PathVariable skalopprette: Boolean
-    ): Ressurs<Unit> {
-        return Ressurs.success(
-            fremleggspppgaveService.opprettEllerErstattFremleggsoppgave(
-                behandlingid,
-                skalopprette
-            )
+                inntekt = fremleggsOppgave?.let { it.inntekt } ?: false,
+                kanOppretteFremleggsoppgave = fremleggspppgaveService.kanOpprettes(behandlingid),
+            ),
         )
     }
 }

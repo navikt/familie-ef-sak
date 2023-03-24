@@ -7,6 +7,7 @@ import no.nav.familie.ef.sak.api.gui.VedtakControllerTest.Saksbehandler.SAKSBEHA
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
+import no.nav.familie.ef.sak.behandling.fremleggsoppgave.FremleggsoppgaveDto
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.behandlingsflyt.task.FerdigstillOppgaveTask
 import no.nav.familie.ef.sak.behandlingsflyt.task.OpprettOppgaveTask
@@ -99,6 +100,7 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
     private val fagsak = fagsak()
     private val behandling = behandling(fagsak)
     private val saksbehandling = saksbehandling(fagsak, behandling)
+    private val fremleggsoppgave = FremleggsoppgaveDto(inntekt = true, kanOppretteFremleggsoppgave = true)
 
     private enum class Saksbehandler(val beslutter: Boolean = false) {
         SAKSBEHANDLER,
@@ -398,7 +400,7 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
         val response = restTemplate.exchange<Ressurs<UUID>>(
             localhost("/api/vedtak/${behandling.id}/send-til-beslutter"),
             HttpMethod.POST,
-            HttpEntity<Any>(headers),
+            HttpEntity<Any>(fremleggsoppgave, headers),
         )
         validator.invoke(response)
     }
