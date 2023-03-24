@@ -106,7 +106,7 @@ internal class BeregningSkolepengerServiceTest {
             val delårsperiode1 = delårsperiode()
             val delårsperiode2 = delårsperiode(
                 fra = defaultFra.plusYears(1),
-                til = defaultTil.plusYears(1)
+                til = defaultTil.plusYears(1),
             )
             val skoleårsperioder =
                 listOf(SkoleårsperiodeSkolepengerDto(listOf(delårsperiode1, delårsperiode2), listOf(utgift())))
@@ -130,7 +130,7 @@ internal class BeregningSkolepengerServiceTest {
         @Test
         internal fun `overlappende skoleår er ikke gyldig`() {
             val skoleårsperioder = listOf(
-                SkoleårsperiodeSkolepengerDto(listOf(delårsperiode(), delårsperiode()), listOf(utgift()))
+                SkoleårsperiodeSkolepengerDto(listOf(delårsperiode(), delårsperiode()), listOf(utgift())),
             )
 
             assertThatThrownBy { service.beregnYtelse(skoleårsperioder, førstegangsbehandling.id) }
@@ -142,7 +142,7 @@ internal class BeregningSkolepengerServiceTest {
         internal fun `utgifter med samme ider er ikke gyldig`() {
             val utgift = utgift()
             val skoleårsperioder = listOf(
-                SkoleårsperiodeSkolepengerDto(listOf(delårsperiode()), listOf(utgift, utgift))
+                SkoleårsperiodeSkolepengerDto(listOf(delårsperiode()), listOf(utgift, utgift)),
             )
 
             assertThatThrownBy { service.beregnYtelse(skoleårsperioder, førstegangsbehandling.id) }
@@ -156,7 +156,7 @@ internal class BeregningSkolepengerServiceTest {
             val delårsperiode2 =
                 delårsperiode(fra = defaultFra.plusMonths(1), studietype = SkolepengerStudietype.VIDEREGÅENDE)
             val skoleårsperioder = listOf(
-                SkoleårsperiodeSkolepengerDto(listOf(delårsperiode1, delårsperiode2), listOf(utgift()))
+                SkoleårsperiodeSkolepengerDto(listOf(delårsperiode1, delårsperiode2), listOf(utgift())),
             )
 
             assertThatThrownBy { service.beregnYtelse(skoleårsperioder, førstegangsbehandling.id) }
@@ -172,15 +172,15 @@ internal class BeregningSkolepengerServiceTest {
                 SkoleårsperiodeSkolepengerDto(listOf(delårsperiode()), listOf(utgift)),
                 SkoleårsperiodeSkolepengerDto(
                     listOf(delårsperiode(fra = defaultFra.plusYears(1), til = defaultTil.plusYears(1))),
-                    listOf(utgift2)
-                )
+                    listOf(utgift2),
+                ),
             )
             val skoleårsperioder = listOf(
                 SkoleårsperiodeSkolepengerDto(
                     listOf(delårsperiode(fra = defaultFra.plusYears(1), til = defaultTil.plusYears(1))),
-                    listOf(utgift2)
+                    listOf(utgift2),
                 ),
-                SkoleårsperiodeSkolepengerDto(listOf(delårsperiode()), listOf(utgift))
+                SkoleårsperiodeSkolepengerDto(listOf(delårsperiode()), listOf(utgift)),
             )
 
             every { vedtakService.hentVedtak(førstegangsbehandling.id) } returns vedtak(tidligerePerioder)
@@ -230,7 +230,7 @@ internal class BeregningSkolepengerServiceTest {
                 val perioder = listOf(delårsperiode(studiebelastning = it))
                 service.beregnYtelse(
                     listOf(SkoleårsperiodeSkolepengerDto(perioder, listOf(utgift()))),
-                    førstegangsbehandling.id
+                    førstegangsbehandling.id,
                 )
             }
         }
@@ -283,7 +283,7 @@ internal class BeregningSkolepengerServiceTest {
                 .isInstanceOf(ApiFeil::class.java)
                 .hasMessageContainingAll(
                     "Mangler utgiftsperioder fra forrige vedtak",
-                    "fakturadato=2021-08 utgifter=100 stønad=50"
+                    "fakturadato=2021-08 utgifter=100 stønad=50",
                 )
         }
 
@@ -300,7 +300,7 @@ internal class BeregningSkolepengerServiceTest {
             assertThatThrownBy { service.beregnYtelse(revurderingsperioder, revurdering.id) }
                 .isInstanceOf(Feil::class.java) // denne skal ikke være brukerfeil (ApiFeil)
                 .hasMessageContaining(
-                    "Utgiftsperiode er endret for skoleår=21/22 id=${utgift.id} er endret"
+                    "Utgiftsperiode er endret for skoleår=21/22 id=${utgift.id} er endret",
                 )
         }
     }
@@ -339,8 +339,8 @@ internal class BeregningSkolepengerServiceTest {
                 SkoleårsperiodeSkolepengerDto(listOf(delårsperiode()), listOf(utgift)),
                 SkoleårsperiodeSkolepengerDto(
                     listOf(delårsperiode(fra = defaultFra.plusYears(1), til = defaultTil.plusYears(1))),
-                    listOf(utgift())
-                )
+                    listOf(utgift()),
+                ),
             )
             val skoleårsperioder = listOf(SkoleårsperiodeSkolepengerDto(listOf(delårsperiode()), listOf(utgift)))
 
@@ -357,11 +357,11 @@ internal class BeregningSkolepengerServiceTest {
             val tidligerePerioder = listOf(
                 SkoleårsperiodeSkolepengerDto(
                     listOf(delårsperiode(til = defaultFra), delårsperiode(fra = defaultTil)),
-                    listOf(utgift)
-                )
+                    listOf(utgift),
+                ),
             )
             val skoleårsperioder = listOf(
-                SkoleårsperiodeSkolepengerDto(listOf(delårsperiode(til = defaultFra)), listOf(utgift.copy()))
+                SkoleårsperiodeSkolepengerDto(listOf(delårsperiode(til = defaultFra)), listOf(utgift.copy())),
             )
 
             every { vedtakService.hentVedtak(førstegangsbehandling.id) } returns vedtak(tidligerePerioder)
@@ -376,10 +376,10 @@ internal class BeregningSkolepengerServiceTest {
             val utgift1 = utgift()
             val utgift2 = utgift()
             val tidligerePerioder = listOf(
-                SkoleårsperiodeSkolepengerDto(listOf(delårsperiode()), listOf(utgift1, utgift2))
+                SkoleårsperiodeSkolepengerDto(listOf(delårsperiode()), listOf(utgift1, utgift2)),
             )
             val skoleårsperioder = listOf(
-                SkoleårsperiodeSkolepengerDto(listOf(delårsperiode()), listOf(utgift1))
+                SkoleårsperiodeSkolepengerDto(listOf(delårsperiode()), listOf(utgift1)),
             )
 
             every { vedtakService.hentVedtak(førstegangsbehandling.id) } returns vedtak(tidligerePerioder)
@@ -400,8 +400,8 @@ internal class BeregningSkolepengerServiceTest {
                 SkoleårsperiodeSkolepengerDto(listOf(delårsperiode()), listOf(utgift())),
                 SkoleårsperiodeSkolepengerDto(
                     listOf(delårsperiode(fra = defaultFra.plusYears(1), til = defaultTil.plusYears(1))),
-                    listOf(utgift())
-                )
+                    listOf(utgift()),
+                ),
             )
 
             every { vedtakService.hentVedtak(førstegangsbehandling.id) } returns vedtak(tidligerePerioder)
@@ -416,14 +416,14 @@ internal class BeregningSkolepengerServiceTest {
             val tidligerePerioder = listOf(
                 SkoleårsperiodeSkolepengerDto(
                     listOf(delårsperiode(til = defaultFra)),
-                    listOf(utgift())
-                )
+                    listOf(utgift()),
+                ),
             )
             val skoleårsperioder = listOf(
                 SkoleårsperiodeSkolepengerDto(
                     listOf(delårsperiode(til = defaultFra), delårsperiode(fra = defaultTil)),
-                    listOf(utgift())
-                )
+                    listOf(utgift()),
+                ),
             )
 
             every { vedtakService.hentVedtak(førstegangsbehandling.id) } returns vedtak(tidligerePerioder)
@@ -439,11 +439,11 @@ internal class BeregningSkolepengerServiceTest {
             val tidligerePerioder = listOf(
                 SkoleårsperiodeSkolepengerDto(
                     listOf(delårsperiode()),
-                    listOf(utgift)
-                )
+                    listOf(utgift),
+                ),
             )
             val skoleårsperioder = listOf(
-                SkoleårsperiodeSkolepengerDto(listOf(delårsperiode(til = defaultFra)), listOf(utgift))
+                SkoleårsperiodeSkolepengerDto(listOf(delårsperiode(til = defaultFra)), listOf(utgift)),
             )
 
             every { vedtakService.hentVedtak(førstegangsbehandling.id) } returns vedtak(tidligerePerioder)
@@ -458,14 +458,14 @@ internal class BeregningSkolepengerServiceTest {
             val tidligerePerioder = listOf(
                 SkoleårsperiodeSkolepengerDto(
                     listOf(delårsperiode()),
-                    listOf(utgift())
-                )
+                    listOf(utgift()),
+                ),
             )
             val skoleårsperioder = listOf(
                 SkoleårsperiodeSkolepengerDto(
                     listOf(delårsperiode()),
-                    listOf(utgift(), utgift())
-                )
+                    listOf(utgift(), utgift()),
+                ),
             )
 
             every { vedtakService.hentVedtak(førstegangsbehandling.id) } returns vedtak(tidligerePerioder)
@@ -480,11 +480,11 @@ internal class BeregningSkolepengerServiceTest {
             val tidligerePerioder = listOf(
                 SkoleårsperiodeSkolepengerDto(
                     listOf(delårsperiode()),
-                    listOf(utgift())
-                )
+                    listOf(utgift()),
+                ),
             )
             val skoleårsperioder = listOf(
-                SkoleårsperiodeSkolepengerDto(listOf(delårsperiode()), listOf(utgift(stønad = 1)))
+                SkoleårsperiodeSkolepengerDto(listOf(delårsperiode()), listOf(utgift(stønad = 1))),
             )
 
             every { vedtakService.hentVedtak(førstegangsbehandling.id) } returns vedtak(tidligerePerioder)
@@ -498,7 +498,7 @@ internal class BeregningSkolepengerServiceTest {
     private fun vedtak(
         skoleårsperioder: List<SkoleårsperiodeSkolepengerDto>,
         behandlingId: UUID = UUID.randomUUID(),
-        resultatType: ResultatType = ResultatType.INNVILGE
+        resultatType: ResultatType = ResultatType.INNVILGE,
     ) =
         Vedtak(
             behandlingId = behandlingId,
@@ -506,31 +506,31 @@ internal class BeregningSkolepengerServiceTest {
             periodeBegrunnelse = "OK",
             inntektBegrunnelse = "OK",
             avslåBegrunnelse = null,
-            skolepenger = SkolepengerWrapper(skoleårsperioder.map { it.tilDomene() }, begrunnelse = null)
+            skolepenger = SkolepengerWrapper(skoleårsperioder.map { it.tilDomene() }, begrunnelse = null),
         )
 
     private fun utgift(
         id: UUID = UUID.randomUUID(),
         fra: YearMonth = defaultFra,
         utgifter: Int = defaultUtgift,
-        stønad: Int = defaultStønad
+        stønad: Int = defaultStønad,
     ) = SkolepengerUtgiftDto(
         id = id,
         årMånedFra = fra,
         utgifter = utgifter,
-        stønad = stønad
+        stønad = stønad,
     )
 
     private fun delårsperiode(
         studietype: SkolepengerStudietype = SkolepengerStudietype.HØGSKOLE_UNIVERSITET,
         fra: YearMonth = defaultFra,
         til: YearMonth = defaultTil,
-        studiebelastning: Int = 100
+        studiebelastning: Int = 100,
     ) = DelårsperiodeSkoleårDto(
         studietype = studietype,
         årMånedFra = fra,
         årMånedTil = til,
         periode = Månedsperiode(fra, til),
-        studiebelastning = studiebelastning
+        studiebelastning = studiebelastning,
     )
 }

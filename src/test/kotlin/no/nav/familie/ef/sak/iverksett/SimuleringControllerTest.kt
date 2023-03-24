@@ -63,10 +63,10 @@ internal class SimuleringControllerTest : OppslagSpringRunnerTest() {
                             inntekt = 0,
                             inntektsreduksjon = 0,
                             samordningsfradrag = 0,
-                            kildeBehandlingId = behandling.id
-                        )
-                    )
-                )
+                            kildeBehandlingId = behandling.id,
+                        ),
+                    ),
+                ),
             )
 
         val respons: ResponseEntity<Ressurs<Simuleringsoppsummering>> = simulerForBehandling(behandling.id)
@@ -86,7 +86,7 @@ internal class SimuleringControllerTest : OppslagSpringRunnerTest() {
         return restTemplate.exchange(
             localhost("/api/simulering/$behandlingId"),
             HttpMethod.GET,
-            HttpEntity<Ressurs<BehandlingDto>>(headers)
+            HttpEntity<Ressurs<BehandlingDto>>(headers),
         )
     }
 }

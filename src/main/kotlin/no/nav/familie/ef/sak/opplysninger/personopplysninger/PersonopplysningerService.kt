@@ -28,7 +28,7 @@ class PersonopplysningerService(
     private val grunnlagsdataService: GrunnlagsdataService,
     private val personopplysningerMapper: PersonopplysningerMapper,
     @Qualifier("shortCache")
-    private val cacheManager: CacheManager
+    private val cacheManager: CacheManager,
 ) {
 
     private val logger = LoggerFactory.getLogger(this::class.java)
@@ -42,14 +42,14 @@ class PersonopplysningerService(
         return personopplysningerMapper.tilPersonopplysninger(
             grunnlagsdata,
             egenAnsatt,
-            søkerIdenter
+            søkerIdenter,
         )
     }
 
     fun finnEndringerIPersonopplysninger(
         behandling: Saksbehandling,
         tidligereGrunnlagsdata: GrunnlagsdataMedMetadata,
-        nyGrunnlagsdata: GrunnlagsdataMedMetadata
+        nyGrunnlagsdata: GrunnlagsdataMedMetadata,
     ): EndringerIPersonopplysningerDto {
         val personIdent = behandling.ident
         val egenAnsatt = egenAnsatt(personIdent)
@@ -57,13 +57,13 @@ class PersonopplysningerService(
         val tidligerePersonopplysninger = personopplysningerMapper.tilPersonopplysninger(
             tidligereGrunnlagsdata,
             egenAnsatt,
-            søkerIdenter
+            søkerIdenter,
         )
 
         val nyePersonopplysninger = personopplysningerMapper.tilPersonopplysninger(
             nyGrunnlagsdata,
             egenAnsatt,
-            søkerIdenter
+            søkerIdenter,
         )
         val endringer = finnEndringer(tidligerePersonopplysninger, nyePersonopplysninger)
         return EndringerIPersonopplysningerDto(LocalDateTime.now(), endringer)
@@ -78,10 +78,10 @@ class PersonopplysningerService(
         return personopplysningerMapper.tilPersonopplysninger(
             GrunnlagsdataMedMetadata(
                 grunnlagsdata,
-                opprettetTidspunkt = LocalDateTime.now()
+                opprettetTidspunkt = LocalDateTime.now(),
             ),
             egenAnsatt,
-            identerFraPdl
+            identerFraPdl,
         )
     }
 

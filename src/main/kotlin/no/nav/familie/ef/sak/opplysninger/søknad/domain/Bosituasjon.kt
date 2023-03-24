@@ -11,5 +11,5 @@ data class Bosituasjon(
     val sammenflyttingsdato: LocalDate? = null,
     val datoFlyttetFraHverandre: LocalDate? = null,
     @Column("tidligere_samboer_fortsatt_registrert_pa_adresse")
-    val tidligereSamboerFortsattRegistrertPåAdresse: Dokumentasjon? = null
+    val tidligereSamboerFortsattRegistrertPåAdresse: Dokumentasjon? = null,
 )

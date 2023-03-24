@@ -24,14 +24,14 @@ data class UttrekkArbeidssøkere(
     val opprettetTid: LocalDateTime = SporbarUtils.now(),
     val kontrollert: Boolean = false,
     val kontrollertTid: LocalDateTime? = null,
-    val kontrollertAv: String? = null
+    val kontrollertAv: String? = null,
 ) {
 
     fun medKontrollert(kontrollert: Boolean): UttrekkArbeidssøkere {
         return this.copy(
             kontrollert = kontrollert,
             kontrollertTid = SporbarUtils.now(),
-            kontrollertAv = SikkerhetContext.hentSaksbehandlerEllerSystembruker()
+            kontrollertAv = SikkerhetContext.hentSaksbehandlerEllerSystembruker(),
         )
     }
 }
@@ -43,5 +43,5 @@ data class VedtaksperioderForUttrekk(
     val fagsakId: UUID,
     val behandlingId: UUID,
     val behandlingIdForVedtak: UUID,
-    val perioder: PeriodeWrapper
+    val perioder: PeriodeWrapper,
 )

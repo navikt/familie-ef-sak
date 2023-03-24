@@ -26,14 +26,14 @@ class ValiderOmregningService(
     private val tilkjentYtelseRepository: TilkjentYtelseRepository,
     private val beregningService: BeregningService,
     private val vedtakHistorikkService: VedtakHistorikkService,
-    private val featureToggleService: FeatureToggleService
+    private val featureToggleService: FeatureToggleService,
 ) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
     fun validerHarSammePerioderSomTidligereVedtak(
         data: InnvilgelseOvergangsstønad,
-        saksbehandling: Saksbehandling
+        saksbehandling: Saksbehandling,
     ) {
         if (!saksbehandling.erOmregning || saksbehandling.erMaskinellOmregning) {
             return
@@ -48,7 +48,7 @@ class ValiderOmregningService(
 
     private fun validerHarSammePerioderSomTidligereVedtak(
         data: InnvilgelseOvergangsstønad,
-        tidligerePerioder: Map<YearMonth, VedtaksperiodeDto>
+        tidligerePerioder: Map<YearMonth, VedtaksperiodeDto>,
     ) {
         brukerfeilHvis(tidligerePerioder.isEmpty()) {
             "Denne skal ikke g-omregnes då den ikke har noen tidligere perioder som er etter $nyesteGrunnbeløpGyldigFraOgMed"
@@ -67,13 +67,13 @@ class ValiderOmregningService(
             }
             brukerfeilHvis(
                 tidligerePeriode.aktivitet != AktivitetType.MIGRERING &&
-                    tidligerePeriode.aktivitet != it.aktivitet
+                    tidligerePeriode.aktivitet != it.aktivitet,
             ) {
                 "Perioden fra $fra har annen aktivitet(${it.aktivitet} enn tidligere periode (${tidligerePeriode.aktivitet})"
             }
             brukerfeilHvis(
                 tidligerePeriode.periodeType != VedtaksperiodeType.MIGRERING &&
-                    tidligerePeriode.periodeType != it.periodeType
+                    tidligerePeriode.periodeType != it.periodeType,
             ) {
                 "Perioden fra $fra har annen type periode (${it.periodeType} enn " +
                     "tidligere periode (${tidligerePeriode.periodeType})"
@@ -84,7 +84,7 @@ class ValiderOmregningService(
     private fun hentVedtakshistorikkFraNyesteGrunnbeløp(saksbehandling: Saksbehandling) =
         vedtakHistorikkService.hentVedtakForOvergangsstønadFraDato(
             saksbehandling.fagsakId,
-            YearMonth.from(nyesteGrunnbeløpGyldigFraOgMed)
+            YearMonth.from(nyesteGrunnbeløpGyldigFraOgMed),
         )
             .perioder
             .filter { it.periodeType != VedtaksperiodeType.SANKSJON }
@@ -106,7 +106,7 @@ class ValiderOmregningService(
                 val inntektsperiodeForAndel = Inntektsperiode(
                     periode = andel.periode,
                     inntekt = andel.inntekt.toBigDecimal(),
-                    samordningsfradrag = andel.samordningsfradrag.toBigDecimal()
+                    samordningsfradrag = andel.samordningsfradrag.toBigDecimal(),
                 )
                 val beregnetAndel = beregningService.beregnYtelse(listOf(andel.periode), listOf(inntektsperiodeForAndel))
                 brukerfeilHvis(beregnetAndel.size != 1 || beregnetAndel.first().beløp.toInt() != andel.beløp) {

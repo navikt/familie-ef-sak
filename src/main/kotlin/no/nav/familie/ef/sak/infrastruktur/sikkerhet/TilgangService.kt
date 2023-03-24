@@ -32,7 +32,7 @@ class TilgangService(
     private val fagsakPersonService: FagsakPersonService,
     private val rolleConfig: RolleConfig,
     private val cacheManager: CacheManager,
-    private val auditLogger: AuditLogger
+    private val auditLogger: AuditLogger,
 ) {
 
     /**
@@ -44,12 +44,12 @@ class TilgangService(
         if (!tilgang.harTilgang) {
             secureLogger.warn(
                 "Saksbehandler ${SikkerhetContext.hentSaksbehandlerEllerSystembruker()} " +
-                    "har ikke tilgang til $personIdent"
+                    "har ikke tilgang til $personIdent",
             )
             throw ManglerTilgang(
                 melding = "Saksbehandler ${SikkerhetContext.hentSaksbehandlerEllerSystembruker()} " +
                     "har ikke tilgang til person",
-                frontendFeilmelding = "Mangler tilgang til opplysningene. ${tilgang.utledÅrsakstekst()}"
+                frontendFeilmelding = "Mangler tilgang til opplysningene. ${tilgang.utledÅrsakstekst()}",
             )
         }
     }
@@ -60,12 +60,12 @@ class TilgangService(
         if (!tilgang.harTilgang) {
             secureLogger.warn(
                 "Saksbehandler ${SikkerhetContext.hentSaksbehandlerEllerSystembruker()} " +
-                    "har ikke tilgang til $personIdent eller dets barn"
+                    "har ikke tilgang til $personIdent eller dets barn",
             )
             throw ManglerTilgang(
                 melding = "Saksbehandler ${SikkerhetContext.hentSaksbehandlerEllerSystembruker()} " +
                     "har ikke tilgang til person eller dets barn",
-                frontendFeilmelding = "Mangler tilgang til opplysningene. ${tilgang.utledÅrsakstekst()}"
+                frontendFeilmelding = "Mangler tilgang til opplysningene. ${tilgang.utledÅrsakstekst()}",
             )
         }
     }
@@ -80,14 +80,14 @@ class TilgangService(
                 event,
                 personIdent,
                 tilgang,
-                custom1 = CustomKeyValue("behandling", behandlingId.toString())
-            )
+                custom1 = CustomKeyValue("behandling", behandlingId.toString()),
+            ),
         )
         if (!tilgang.harTilgang) {
             throw ManglerTilgang(
                 melding = "Saksbehandler ${SikkerhetContext.hentSaksbehandlerEllerSystembruker()} " +
                     "har ikke tilgang til behandling=$behandlingId",
-                frontendFeilmelding = "Mangler tilgang til opplysningene. ${tilgang.utledÅrsakstekst()}"
+                frontendFeilmelding = "Mangler tilgang til opplysningene. ${tilgang.utledÅrsakstekst()}",
             )
         }
     }
@@ -99,14 +99,14 @@ class TilgangService(
                 event,
                 saksbehandling.ident,
                 tilgang,
-                CustomKeyValue("behandling", saksbehandling.id.toString())
-            )
+                CustomKeyValue("behandling", saksbehandling.id.toString()),
+            ),
         )
         if (!tilgang.harTilgang) {
             throw ManglerTilgang(
                 melding = "Saksbehandler ${SikkerhetContext.hentSaksbehandlerEllerSystembruker()} " +
                     "har ikke tilgang til behandling=${saksbehandling.id}",
-                frontendFeilmelding = "Mangler tilgang til opplysningene. ${tilgang.utledÅrsakstekst()}"
+                frontendFeilmelding = "Mangler tilgang til opplysningene. ${tilgang.utledÅrsakstekst()}",
             )
         }
     }
@@ -121,7 +121,7 @@ class TilgangService(
             throw ManglerTilgang(
                 melding = "Saksbehandler ${SikkerhetContext.hentSaksbehandlerEllerSystembruker()} " +
                     "har ikke tilgang til fagsak=$fagsakId",
-                frontendFeilmelding = "Mangler tilgang til opplysningene. ${tilgang.utledÅrsakstekst()}"
+                frontendFeilmelding = "Mangler tilgang til opplysningene. ${tilgang.utledÅrsakstekst()}",
             )
         }
     }
@@ -143,14 +143,14 @@ class TilgangService(
                 event,
                 personIdent,
                 tilgang,
-                custom1 = CustomKeyValue("fagsakPersonId", fagsakPersonId.toString())
-            )
+                custom1 = CustomKeyValue("fagsakPersonId", fagsakPersonId.toString()),
+            ),
         )
         if (!tilgang.harTilgang) {
             throw ManglerTilgang(
                 melding = "Saksbehandler ${SikkerhetContext.hentSaksbehandlerEllerSystembruker()} " +
                     "har ikke tilgang til fagsakPerson=$fagsakPersonId",
-                frontendFeilmelding = "Mangler tilgang til opplysningene. ${tilgang.utledÅrsakstekst()}"
+                frontendFeilmelding = "Mangler tilgang til opplysningene. ${tilgang.utledÅrsakstekst()}",
             )
         }
     }
@@ -174,7 +174,7 @@ class TilgangService(
             throw ManglerTilgang(
                 melding = "Saksbehandler ${SikkerhetContext.hentSaksbehandlerEllerSystembruker()} har ikke tilgang " +
                     "til å utføre denne operasjonen som krever minimumsrolle $minimumsrolle",
-                frontendFeilmelding = "Mangler nødvendig saksbehandlerrolle for å utføre handlingen"
+                frontendFeilmelding = "Mangler nødvendig saksbehandlerrolle for å utføre handlingen",
             )
         }
     }

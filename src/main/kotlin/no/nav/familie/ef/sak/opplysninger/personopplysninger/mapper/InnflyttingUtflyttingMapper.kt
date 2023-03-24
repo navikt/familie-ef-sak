@@ -16,7 +16,7 @@ class InnflyttingUtflyttingMapper(val kodeverkService: KodeverkService) {
             InnflyttingDto(
                 it.fraflyttingsland?.let { land -> kodeverkService.hentLand(land, LocalDate.now()) },
                 it.folkeregistermetadata.gyldighetstidspunkt?.toLocalDate(),
-                it.fraflyttingsstedIUtlandet
+                it.fraflyttingsstedIUtlandet,
             )
         }.sortedByDescending { it.dato ?: LocalDate.MIN }
 
@@ -25,7 +25,7 @@ class InnflyttingUtflyttingMapper(val kodeverkService: KodeverkService) {
             UtflyttingDto(
                 it.tilflyttingsland?.let { land -> kodeverkService.hentLand(land, LocalDate.now()) },
                 it.utflyttingsdato,
-                it.tilflyttingsstedIUtlandet
+                it.tilflyttingsstedIUtlandet,
             )
         }.sortedByDescending { it.dato ?: LocalDate.MIN }
 }

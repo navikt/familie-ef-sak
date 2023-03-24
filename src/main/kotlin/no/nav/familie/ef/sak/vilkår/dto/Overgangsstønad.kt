@@ -7,7 +7,7 @@ import java.util.UUID
 data class OvergangsstønadDto(
     val aktivitet: AktivitetDto,
     val sagtOppEllerRedusertStilling: SagtOppEllerRedusertStillingDto?,
-    val stønadsperiode: StønadsperiodeDto
+    val stønadsperiode: StønadsperiodeDto,
 )
 
 data class AktivitetDto(
@@ -22,13 +22,13 @@ data class AktivitetDto(
     val gjelderDeg: List<String>,
     val særligeTilsynsbehov: List<SærligeTilsynsbehovDto>,
     val datoOppstartJobb: LocalDate?,
-    val erIArbeid: String?
+    val erIArbeid: String?,
 )
 
 data class SagtOppEllerRedusertStillingDto(
     val sagtOppEllerRedusertStilling: String?,
     val årsak: String?,
-    val dato: LocalDate?
+    val dato: LocalDate?,
 )
 
 data class ArbeidsforholdSøknadDto(
@@ -36,7 +36,7 @@ data class ArbeidsforholdSøknadDto(
     val arbeidsmengde: Int?,
     val fastEllerMidlertidig: String?,
     val harSluttdato: Boolean?,
-    val sluttdato: LocalDate?
+    val sluttdato: LocalDate?,
 )
 
 data class SelvstendigDto(
@@ -44,12 +44,12 @@ data class SelvstendigDto(
     val organisasjonsnummer: String,
     val etableringsdato: LocalDate,
     val arbeidsmengde: Int?,
-    val hvordanSerArbeidsukenUt: String
+    val hvordanSerArbeidsukenUt: String,
 )
 
 data class AksjeselskapDto(
     val navn: String,
-    val arbeidsmengde: Int?
+    val arbeidsmengde: Int?,
 )
 
 data class VirksomhetDto(val virksomhetsbeskrivelse: String)
@@ -60,7 +60,7 @@ data class ArbeidssøkerDto(
     val kanDuBegynneInnenEnUke: Boolean,
     val kanDuSkaffeBarnepassInnenEnUke: Boolean?,
     val hvorØnskerDuArbeid: String,
-    val ønskerDuMinst50ProsentStilling: Boolean
+    val ønskerDuMinst50ProsentStilling: Boolean,
 )
 
 data class UnderUtdanningDto(
@@ -75,30 +75,30 @@ data class UnderUtdanningDto(
     val utdanningEtterGrunnskolen: Boolean,
     val semesteravgift: Int?,
     val studieavgift: Int?,
-    val eksamensgebyr: Int?
+    val eksamensgebyr: Int?,
 )
 
 data class UtdanningDto(
     val linjeKursGrad: String,
-    val nårVarSkalDuVæreElevStudent: PeriodeDto
+    val nårVarSkalDuVæreElevStudent: PeriodeDto,
 )
 
 data class SituasjonDto(
     val sykdom: DokumentasjonDto?,
     val barnsSykdom: DokumentasjonDto?,
     val manglendeBarnepass: DokumentasjonDto?,
-    val barnMedSærligeBehov: DokumentasjonDto?
+    val barnMedSærligeBehov: DokumentasjonDto?,
 )
 
 data class StønadsperiodeDto(
     val resterendeAvHovedperiode: String,
-    val søkerStønadFra: YearMonth?
+    val søkerStønadFra: YearMonth?,
 )
 
 data class TidligereUtdanningDto(
     val linjeKursGrad: String,
     val fra: YearMonth,
-    val til: YearMonth
+    val til: YearMonth,
 )
 
 data class SærligeTilsynsbehovDto(
@@ -106,5 +106,5 @@ data class SærligeTilsynsbehovDto(
     val navn: String?,
     val erBarnetFødt: Boolean,
     val fødselTermindato: LocalDate?,
-    val særligeTilsynsbehov: String?
+    val særligeTilsynsbehov: String?,
 )

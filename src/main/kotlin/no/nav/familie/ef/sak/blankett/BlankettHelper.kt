@@ -15,7 +15,7 @@ object BlankettHelper {
         enhet: String,
         fagsakId: Long,
         behandlingId: UUID,
-        stønadstype: StønadType
+        stønadstype: StønadType,
     ): ArkiverDokumentRequest {
         val dokumenttype = utledSakbehandlingsblankettDokumenttype(stønadstype)
         val dokument = Dokument(pdf, Filtype.PDFA, null, "Blankett for ${stønadstype.name.lowercase()}", dokumenttype)
@@ -26,7 +26,7 @@ object BlankettHelper {
             vedleggsdokumenter = listOf(),
             fagsakId = fagsakId.toString(),
             journalførendeEnhet = enhet,
-            eksternReferanseId = "$behandlingId-blankett"
+            eksternReferanseId = "$behandlingId-blankett",
         )
     }
 

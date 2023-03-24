@@ -15,7 +15,7 @@ import java.util.UUID
 class VedleggService(
     private val behandlingService: BehandlingService,
     private val fagsakPersonService: FagsakPersonService,
-    private val journalpostService: JournalpostService
+    private val journalpostService: JournalpostService,
 ) {
 
     fun finnJournalposter(behandlingId: UUID): JournalposterDto {
@@ -32,13 +32,13 @@ class VedleggService(
 
         return JournalposterDto(
             dokumenterKnyttetTilBehandlingen = dokumentinfoDtoList.first,
-            andreDokumenter = dokumentinfoDtoList.second
+            andreDokumenter = dokumentinfoDtoList.second,
         )
     }
 
     private fun finnJournalposter(
         behandlingId: UUID,
-        behandlingsjournalposter: List<Behandlingsjournalpost>
+        behandlingsjournalposter: List<Behandlingsjournalpost>,
     ): List<Journalpost> {
         val personIdent = behandlingService.hentAktivIdent(behandlingId)
         val sistejournalposter = journalpostService.finnJournalposter(personIdent)
@@ -60,7 +60,7 @@ class VedleggService(
 
     private fun hentJournalposterTilBehandlingSomIkkeErFunnet(
         sistejournalposter: List<Journalpost>,
-        behandlingsjournalposter: List<Behandlingsjournalpost>
+        behandlingsjournalposter: List<Behandlingsjournalpost>,
     ): List<Journalpost> {
         val journalpostIderFraFunnetJournalposter = sistejournalposter.map { it.journalpostId }
         val behandlingsjournalposterIkkeFunnet =
@@ -70,7 +70,7 @@ class VedleggService(
 
     private fun tilDokumentInfoDto(
         dokumentInfo: DokumentInfo,
-        journalpost: Journalpost
+        journalpost: Journalpost,
     ): DokumentinfoDto {
         return DokumentinfoDto(
             dokumentinfoId = dokumentInfo.dokumentInfoId,
@@ -81,7 +81,7 @@ class VedleggService(
             journalstatus = journalpost.journalstatus,
             journalposttype = journalpost.journalposttype,
             logiskeVedlegg = dokumentInfo.logiskeVedlegg?.map { LogiskVedleggDto(tittel = it.tittel) } ?: emptyList(),
-            avsenderMottaker = journalpost.avsenderMottaker
+            avsenderMottaker = journalpost.avsenderMottaker,
         )
     }
 }

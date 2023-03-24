@@ -6,7 +6,7 @@ import java.time.LocalDate
 
 data class SivilstandInngangsvilkårDto(
     val søknadsgrunnlag: SivilstandSøknadsgrunnlagDto?,
-    val registergrunnlag: SivilstandRegistergrunnlagDto
+    val registergrunnlag: SivilstandRegistergrunnlagDto,
 )
 
 data class SivilstandSøknadsgrunnlagDto(
@@ -18,11 +18,12 @@ data class SivilstandSøknadsgrunnlagDto(
     val datoSøktSeparasjon: LocalDate?,
     val søktOmSkilsmisseSeparasjon: Boolean?,
     val årsakEnslig: String?,
-    val tidligereSamboer: PersonMinimumDto?
+    val tidligereSamboer: PersonMinimumDto?,
 )
 
 data class SivilstandRegistergrunnlagDto(
     val type: Sivilstandstype,
+    val personIdent: String?,
     val navn: String?,
-    val gyldigFraOgMed: LocalDate?
+    val gyldigFraOgMed: LocalDate?,
 )

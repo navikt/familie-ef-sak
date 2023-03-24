@@ -35,7 +35,7 @@ internal class BehandlingTest {
     private fun lagBehandlingMed(
         behandlingResultat: BehandlingResultat,
         henlagtÅrsak: HenlagtÅrsak?,
-        type: BehandlingType
+        type: BehandlingType,
     ): Behandling {
         return behandling.copy(resultat = behandlingResultat, henlagtÅrsak = henlagtÅrsak, type = type)
     }

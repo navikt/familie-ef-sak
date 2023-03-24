@@ -32,7 +32,7 @@ internal class EksternVedtakServiceTest {
     private val service = EksternVedtakService(
         fagsakService = fagsakService,
         behandlingService = behandlingService,
-        tilbakekrevingClient = tilbakekrevingClient
+        tilbakekrevingClient = tilbakekrevingClient,
     )
 
     private val eksternFagsakId: Long = 10
@@ -93,7 +93,7 @@ internal class EksternVedtakServiceTest {
             fagsak = fagsak,
             type = BehandlingType.REVURDERING,
             status = BehandlingStatus.FERDIGSTILT,
-            resultat = BehandlingResultat.HENLAGT
+            resultat = BehandlingResultat.HENLAGT,
         )
         every { behandlingService.hentBehandlinger(any<UUID>()) } returns listOf(henlagtBehandling)
 
@@ -106,7 +106,7 @@ internal class EksternVedtakServiceTest {
             fagsak = fagsak,
             type = BehandlingType.REVURDERING,
             status = BehandlingStatus.UTREDES,
-            resultat = BehandlingResultat.IKKE_SATT
+            resultat = BehandlingResultat.IKKE_SATT,
         )
         every { behandlingService.hentBehandlinger(any<UUID>()) } returns listOf(henlagtBehandling)
 
@@ -118,7 +118,7 @@ internal class EksternVedtakServiceTest {
         vedtakstidspunkt = vedtakstidspunkt,
         resultat = BehandlingResultat.AVSLÅTT,
         type = BehandlingType.FØRSTEGANGSBEHANDLING,
-        status = BehandlingStatus.FERDIGSTILT
+        status = BehandlingStatus.FERDIGSTILT,
     )
 
     private fun fagsystemVedtakTilbakekreving() = FagsystemVedtak(
@@ -127,6 +127,6 @@ internal class EksternVedtakServiceTest {
         resultat = "Delvis tilbakebetaling",
         vedtakstidspunkt = LocalDateTime.now(),
         fagsystemType = FagsystemType.TILBAKEKREVING,
-        regelverk = Regelverk.NASJONAL
+        regelverk = Regelverk.NASJONAL,
     )
 }

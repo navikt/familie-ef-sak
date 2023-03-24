@@ -10,7 +10,7 @@ object AdresseopplysningerMapper {
             AdresseopplysningerDto(
                 søkerBorPåRegistrertAdresse = adresseopplysninger.søkerBorPåRegistrertAdresse,
                 adresse = adresseopplysninger.adresse,
-                harMeldtAdresseendring = adresseopplysninger.harMeldtAdresseendring
+                harMeldtAdresseendring = adresseopplysninger.harMeldtAdresseendring,
             )
         }
 }

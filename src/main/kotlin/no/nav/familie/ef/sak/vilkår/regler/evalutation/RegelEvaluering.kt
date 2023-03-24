@@ -16,7 +16,7 @@ import no.nav.familie.ef.sak.vilkår.regler.Vilkårsregel
 data class RegelResultat(
     val vilkårType: VilkårType,
     val vilkår: Vilkårsresultat,
-    val delvilkår: Map<RegelId, Vilkårsresultat>
+    val delvilkår: Map<RegelId, Vilkårsresultat>,
 ) {
 
     fun resultatHovedregel(hovedregel: RegelId) =
@@ -35,7 +35,7 @@ object RegelEvaluering {
         return RegelResultat(
             vilkårType = vilkårsregel.vilkårType,
             vilkår = utledVilkårResultat(delvilkårResultat),
-            delvilkår = delvilkårResultat
+            delvilkår = delvilkårResultat,
         )
     }
 
@@ -56,7 +56,7 @@ object RegelEvaluering {
      */
     private fun utledResultatForDelvilkår(
         vilkårsregel: Vilkårsregel,
-        vurdering: DelvilkårsvurderingDto
+        vurdering: DelvilkårsvurderingDto,
     ): Vilkårsresultat {
         vurdering.vurderinger.forEach { svar ->
             val regel = vilkårsregel.regel(svar.regelId)

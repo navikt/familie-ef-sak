@@ -56,7 +56,7 @@ internal class TilbakekrevingServiceTest {
             fagsakService,
             tilbakekrevingClient,
             simuleringService,
-            arbeidsfordelingService
+            arbeidsfordelingService,
         )
 
     @BeforeAll
@@ -80,12 +80,12 @@ internal class TilbakekrevingServiceTest {
                 TilbakekrevingDto(
                     valg = Tilbakekrevingsvalg.AVVENT,
                     varseltekst = "",
-                    begrunnelse = "Dette er tekst "
+                    begrunnelse = "Dette er tekst ",
                 )
             val feil = assertThrows<ApiFeil> {
                 tilbakekrevingService.lagreTilbakekreving(
                     tilbakekrevingDto,
-                    behandlingId = UUID.randomUUID()
+                    behandlingId = UUID.randomUUID(),
                 )
             }
             assertThat(feil.message).isEqualTo("Behandlingen er låst for redigering")
@@ -98,13 +98,13 @@ internal class TilbakekrevingServiceTest {
                 TilbakekrevingDto(
                     valg = Tilbakekrevingsvalg.OPPRETT_MED_VARSEL,
                     varseltekst = null,
-                    begrunnelse = "tekst her"
+                    begrunnelse = "tekst her",
                 )
 
             val feil = assertThrows<ApiFeil> {
                 tilbakekrevingService.lagreTilbakekreving(
                     tilbakekrevingDto,
-                    behandlingId = UUID.randomUUID()
+                    behandlingId = UUID.randomUUID(),
                 )
             }
             assertThat(feil.message).isEqualTo("Må fylle ut varseltekst for å lage tilbakekreving med varsel")
@@ -117,13 +117,13 @@ internal class TilbakekrevingServiceTest {
                 TilbakekrevingDto(
                     valg = Tilbakekrevingsvalg.OPPRETT_MED_VARSEL,
                     varseltekst = "   ",
-                    begrunnelse = "tekst her"
+                    begrunnelse = "tekst her",
                 )
 
             val feil = assertThrows<ApiFeil> {
                 tilbakekrevingService.lagreTilbakekreving(
                     tilbakekrevingDto,
-                    behandlingId = UUID.randomUUID()
+                    behandlingId = UUID.randomUUID(),
                 )
             }
             assertThat(feil.message).isEqualTo("Må fylle ut varseltekst for å lage tilbakekreving med varsel")
@@ -139,7 +139,7 @@ internal class TilbakekrevingServiceTest {
                 TilbakekrevingDto(
                     valg = Tilbakekrevingsvalg.OPPRETT_MED_VARSEL,
                     varseltekst = varseltekst,
-                    begrunnelse = forventetBegrunnelse
+                    begrunnelse = forventetBegrunnelse,
                 )
 
             val behandlingId = UUID.randomUUID()
@@ -163,7 +163,7 @@ internal class TilbakekrevingServiceTest {
             tomDatoNestePeriode = null,
             forfallsdatoNestePeriode = null,
             tidSimuleringHentet = LocalDate.of(2021, 11, 1),
-            tomSisteUtbetaling = LocalDate.of(2021, 10, 31)
+            tomSisteUtbetaling = LocalDate.of(2021, 10, 31),
         )
 
         @Test
@@ -223,7 +223,7 @@ internal class TilbakekrevingServiceTest {
                 tilbakekrevingClient.opprettManuelTilbakekreving(
                     fagsak.eksternId.id,
                     "654321",
-                    fagsak.stønadstype
+                    fagsak.stønadstype,
                 )
             } just runs
 
@@ -233,7 +233,7 @@ internal class TilbakekrevingServiceTest {
                 tilbakekrevingClient.opprettManuelTilbakekreving(
                     fagsak.eksternId.id,
                     "654321",
-                    fagsak.stønadstype
+                    fagsak.stønadstype,
                 )
             }
         }

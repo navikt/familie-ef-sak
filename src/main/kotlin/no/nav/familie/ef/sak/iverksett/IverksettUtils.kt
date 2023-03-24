@@ -16,7 +16,7 @@ fun AndelTilkjentYtelse.tilIverksettDto() =
         fraOgMed = this.stønadFom,
         tilOgMed = this.stønadTom,
         periode = this.periode,
-        kildeBehandlingId = this.kildeBehandlingId
+        kildeBehandlingId = this.kildeBehandlingId,
     )
 
 fun BrevmottakerPerson.tilIverksettDto() =
@@ -24,7 +24,7 @@ fun BrevmottakerPerson.tilIverksettDto() =
         ident = this.personIdent,
         navn = this.navn,
         mottakerRolle = this.mottakerRolle.tilIverksettDto(),
-        identType = IdentType.PERSONIDENT
+        identType = IdentType.PERSONIDENT,
     )
 
 fun BrevmottakerOrganisasjon.tilIverksettDto() =
@@ -32,5 +32,5 @@ fun BrevmottakerOrganisasjon.tilIverksettDto() =
         ident = this.organisasjonsnummer,
         navn = this.navnHosOrganisasjon,
         mottakerRolle = this.mottakerRolle.tilIverksettDto(),
-        identType = IdentType.ORGANISASJONSNUMMER
+        identType = IdentType.ORGANISASJONSNUMMER,
     )

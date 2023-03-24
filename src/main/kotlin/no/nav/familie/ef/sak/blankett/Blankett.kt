@@ -7,5 +7,5 @@ import java.util.UUID
 data class Blankett(
     @Id
     val behandlingId: UUID,
-    val pdf: Fil
+    val pdf: Fil,
 )

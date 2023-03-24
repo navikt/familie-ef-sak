@@ -11,7 +11,7 @@ import no.nav.familie.ef.sak.vilkår.regler.regelIder
 class AktivitetRegel : Vilkårsregel(
     vilkårType = VilkårType.AKTIVITET,
     regler = setOf(FYLLER_BRUKER_AKTIVITETSPLIKT),
-    hovedregler = regelIder(FYLLER_BRUKER_AKTIVITETSPLIKT)
+    hovedregler = regelIder(FYLLER_BRUKER_AKTIVITETSPLIKT),
 ) {
 
     companion object {
@@ -21,8 +21,8 @@ class AktivitetRegel : Vilkårsregel(
                 regelId = RegelId.FYLLER_BRUKER_AKTIVITETSPLIKT,
                 jaNeiSvarRegel(
                     hvisJa = SluttSvarRegel.OPPFYLT_MED_PÅKREVD_BEGRUNNELSE,
-                    hvisNei = SluttSvarRegel.IKKE_OPPFYLT_MED_PÅKREVD_BEGRUNNELSE
-                )
+                    hvisNei = SluttSvarRegel.IKKE_OPPFYLT_MED_PÅKREVD_BEGRUNNELSE,
+                ),
             )
     }
 }

@@ -13,8 +13,8 @@ class SamlivRegel : Vilkårsregel(
     regler = setOf(LEVER_IKKE_MED_ANNEN_FORELDER, LEVER_IKKE_I_EKTESKAPLIGNENDE_FORHOLD),
     hovedregler = regelIder(
         LEVER_IKKE_MED_ANNEN_FORELDER,
-        LEVER_IKKE_I_EKTESKAPLIGNENDE_FORHOLD
-    )
+        LEVER_IKKE_I_EKTESKAPLIGNENDE_FORHOLD,
+    ),
 ) {
 
     companion object {
@@ -24,8 +24,8 @@ class SamlivRegel : Vilkårsregel(
                 regelId = RegelId.LEVER_IKKE_MED_ANNEN_FORELDER,
                 svarMapping = jaNeiSvarRegel(
                     hvisJa = SluttSvarRegel.OPPFYLT_MED_PÅKREVD_BEGRUNNELSE,
-                    hvisNei = SluttSvarRegel.IKKE_OPPFYLT_MED_PÅKREVD_BEGRUNNELSE
-                )
+                    hvisNei = SluttSvarRegel.IKKE_OPPFYLT_MED_PÅKREVD_BEGRUNNELSE,
+                ),
             )
 
         private val LEVER_IKKE_I_EKTESKAPLIGNENDE_FORHOLD =
@@ -33,8 +33,8 @@ class SamlivRegel : Vilkårsregel(
                 regelId = RegelId.LEVER_IKKE_I_EKTESKAPLIGNENDE_FORHOLD,
                 svarMapping = jaNeiSvarRegel(
                     hvisJa = SluttSvarRegel.OPPFYLT_MED_PÅKREVD_BEGRUNNELSE,
-                    hvisNei = SluttSvarRegel.IKKE_OPPFYLT_MED_PÅKREVD_BEGRUNNELSE
-                )
+                    hvisNei = SluttSvarRegel.IKKE_OPPFYLT_MED_PÅKREVD_BEGRUNNELSE,
+                ),
             )
     }
 }

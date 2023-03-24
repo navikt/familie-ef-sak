@@ -11,7 +11,7 @@ import java.util.UUID
 data class BeregningBarnetilsynRequest(
     val utgiftsperioder: List<UtgiftsperiodeDto>,
     val kontantstøtteperioder: List<PeriodeMedBeløpDto>,
-    val tilleggsstønadsperioder: List<PeriodeMedBeløpDto>
+    val tilleggsstønadsperioder: List<PeriodeMedBeløpDto>,
 )
 
 data class UtgiftsMåned(
@@ -19,13 +19,13 @@ data class UtgiftsMåned(
     val barn: List<UUID>,
     val utgifter: BigDecimal,
     val aktivitetstype: AktivitetstypeBarnetilsyn?,
-    val periodetype: PeriodetypeBarnetilsyn
+    val periodetype: PeriodetypeBarnetilsyn,
 )
 
 fun UtgiftsMåned.tilBeløpsperiodeBarnetilsynDto(
     kontantstøttePerioder: List<PeriodeMedBeløpDto>,
     tilleggsstønadsperioder: List<PeriodeMedBeløpDto>,
-    brukIkkeVedtatteSatser: Boolean
+    brukIkkeVedtatteSatser: Boolean,
 ): BeløpsperiodeBarnetilsynDto {
     val kontantStøtteBeløp = kontantstøttePerioder.finnPeriodeBeløp(this)
     val tilleggsstønadsperiodeBeløp = tilleggsstønadsperioder.finnPeriodeBeløp(this)
@@ -35,7 +35,7 @@ fun UtgiftsMåned.tilBeløpsperiodeBarnetilsynDto(
         kontantstøtteBeløp = BigDecimal(kontantStøtteBeløp),
         tilleggsstønadBeløp = BigDecimal(tilleggsstønadsperiodeBeløp),
         barn = this.barn,
-        brukIkkeVedtatteSatser = brukIkkeVedtatteSatser
+        brukIkkeVedtatteSatser = brukIkkeVedtatteSatser,
     )
 }
 

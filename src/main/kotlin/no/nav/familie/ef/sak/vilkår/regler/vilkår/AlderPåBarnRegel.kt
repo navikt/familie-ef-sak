@@ -24,7 +24,7 @@ class AlderPåBarnRegel :
     Vilkårsregel(
         vilkårType = VilkårType.ALDER_PÅ_BARN,
         regler = setOf(HAR_ALDER_LAVERE_ENN_GRENSEVERDI, UNNTAK_ALDER),
-        hovedregler = regelIder(HAR_ALDER_LAVERE_ENN_GRENSEVERDI)
+        hovedregler = regelIder(HAR_ALDER_LAVERE_ENN_GRENSEVERDI),
     ) {
 
     @JsonIgnore
@@ -33,7 +33,7 @@ class AlderPåBarnRegel :
     override fun initiereDelvilkårsvurdering(
         metadata: HovedregelMetadata,
         resultat: Vilkårsresultat,
-        barnId: UUID?
+        barnId: UUID?,
     ): List<Delvilkårsvurdering> {
         val finnPersonIdentForGjeldendeBarn = metadata.barn.firstOrNull { it.id == barnId }?.personIdent
         val harFullførtFjerdetrinn = if (finnPersonIdentForGjeldendeBarn == null ||
@@ -53,15 +53,15 @@ class AlderPåBarnRegel :
                         svar = harFullførtFjerdetrinn,
                         begrunnelse = if (harFullførtFjerdetrinn == SvarId.NEI) {
                             "Automatisk vurdert: Ut ifra barnets alder er det ${
-                            LocalDate.now()
-                                .norskFormat()
+                                LocalDate.now()
+                                    .norskFormat()
                             } automatisk vurdert at barnet ikke har fullført 4. skoleår."
                         } else {
                             null
-                        }
-                    )
-                )
-            )
+                        },
+                    ),
+                ),
+            ),
         )
     }
 
@@ -70,7 +70,7 @@ class AlderPåBarnRegel :
         private val unntakAlderMapping =
             setOf(
                 SvarId.TRENGER_MER_TILSYN_ENN_JEVNALDRENDE,
-                SvarId.FORSØRGER_HAR_LANGVARIG_ELLER_UREGELMESSIG_ARBEIDSTID
+                SvarId.FORSØRGER_HAR_LANGVARIG_ELLER_UREGELMESSIG_ARBEIDSTID,
             )
                 .associateWith {
                     SluttSvarRegel.OPPFYLT_MED_PÅKREVD_BEGRUNNELSE
@@ -79,7 +79,7 @@ class AlderPåBarnRegel :
         private val UNNTAK_ALDER =
             RegelSteg(
                 regelId = RegelId.UNNTAK_ALDER,
-                svarMapping = unntakAlderMapping
+                svarMapping = unntakAlderMapping,
             )
 
         private val HAR_ALDER_LAVERE_ENN_GRENSEVERDI =
@@ -87,8 +87,8 @@ class AlderPåBarnRegel :
                 regelId = RegelId.HAR_ALDER_LAVERE_ENN_GRENSEVERDI,
                 svarMapping = jaNeiSvarRegel(
                     hvisJa = NesteRegel(UNNTAK_ALDER.regelId),
-                    hvisNei = SluttSvarRegel.OPPFYLT_MED_VALGFRI_BEGRUNNELSE
-                )
+                    hvisNei = SluttSvarRegel.OPPFYLT_MED_VALGFRI_BEGRUNNELSE,
+                ),
             )
     }
 

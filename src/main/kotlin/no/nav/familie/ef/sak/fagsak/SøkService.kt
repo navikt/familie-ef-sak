@@ -35,7 +35,7 @@ class SøkService(
     private val personService: PersonService,
     private val pdlSaksbehandlerClient: PdlSaksbehandlerClient,
     private val adresseMapper: AdresseMapper,
-    private val fagsakService: FagsakService
+    private val fagsakService: FagsakService,
 ) {
 
     private val secureLogger = LoggerFactory.getLogger("secureLogger")
@@ -65,7 +65,7 @@ class SøkService(
     private fun tilSøkeresultat(
         gjeldendePersonIdent: String,
         fagsakPerson: FagsakPerson?,
-        fagsaker: List<Fagsak>
+        fagsaker: List<Fagsak>,
     ): Søkeresultat {
         val person = personService.hentSøker(gjeldendePersonIdent)
 
@@ -79,9 +79,9 @@ class SøkService(
                     fagsakId = it.id,
                     stønadstype = it.stønadstype,
                     erLøpende = fagsakService.erLøpende(it),
-                    erMigrert = it.migrert
+                    erMigrert = it.migrert,
                 )
-            }
+            },
         )
     }
 
@@ -121,7 +121,7 @@ class SøkService(
             secureLogger.error("Får ikke laget søkekriterer for $aktivIdent med bostedsadresse=$bostedsadresse")
             throw Feil(
                 message = "Får ikke laget søkekriterer for bostedsadresse",
-                frontendFeilmelding = "Klarer ikke av å lage søkekriterer for bostedsadressen til person"
+                frontendFeilmelding = "Klarer ikke av å lage søkekriterer for bostedsadressen til person",
             )
         }
 
@@ -131,7 +131,7 @@ class SøkService(
             hits = personSøkResultat.hits.map { tilPersonFraSøk(it.person) },
             totalHits = personSøkResultat.totalHits,
             pageNumber = personSøkResultat.pageNumber,
-            totalPages = personSøkResultat.totalPages
+            totalPages = personSøkResultat.totalPages,
         )
     }
 
@@ -139,7 +139,7 @@ class SøkService(
         return personService.hentPersonKortBolk(listOf(personIdent))[personIdent]?.let {
             SøkeresultatUtenFagsak(
                 personIdent = personIdent,
-                navn = it.navn.gjeldende().visningsnavn()
+                navn = it.navn.gjeldende().visningsnavn(),
             )
         }
             ?: throw ApiFeil("Finner ingen personer for søket", HttpStatus.BAD_REQUEST)
@@ -150,7 +150,7 @@ class SøkService(
             personIdent = person.folkeregisteridentifikator.gjeldende().identifikasjonsnummer,
             visningsadresse = person.bostedsadresse.gjeldende()
                 ?.let { adresseMapper.tilAdresse(it).visningsadresse },
-            visningsnavn = NavnDto.fraNavn(person.navn.gjeldende()).visningsnavn
+            visningsnavn = NavnDto.fraNavn(person.navn.gjeldende()).visningsnavn,
         )
     }
 }

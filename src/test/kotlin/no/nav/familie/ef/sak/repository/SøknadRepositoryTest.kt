@@ -47,11 +47,11 @@ internal class SøknadRepositoryTest : OppslagSpringRunnerTest() {
                             nextInt(11) + 1,
                             nextInt(27) + 1,
                             nextInt(23),
-                            nextInt(59)
-                        )
+                            nextInt(59),
+                        ),
                     ),
-                    relaterteFnr = setOf("654654654")
-                )
+                    relaterteFnr = setOf("654654654"),
+                ),
             )
     }
 }

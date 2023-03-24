@@ -24,7 +24,7 @@ import java.util.UUID
 class PeriodeController(
     private val tilgangService: TilgangService,
     private val tilkjentYtelseService: TilkjentYtelseService,
-    private val andelsHistorikkService: AndelsHistorikkService
+    private val andelsHistorikkService: AndelsHistorikkService,
 ) {
 
     @GetMapping("/{behandlingId}")
@@ -36,7 +36,7 @@ class PeriodeController(
     @GetMapping("/fagsak/{fagsakId}/historikk")
     fun hentHistorikk(
         @PathVariable fagsakId: UUID,
-        @RequestParam tilOgMedBehandlingId: UUID? = null
+        @RequestParam tilOgMedBehandlingId: UUID? = null,
     ): Ressurs<List<AndelHistorikkDto>> {
         tilgangService.validerTilgangTilFagsak(fagsakId, AuditLoggerEvent.ACCESS)
         return Ressurs.success(andelsHistorikkService.hentHistorikk(fagsakId, tilOgMedBehandlingId).reversed())

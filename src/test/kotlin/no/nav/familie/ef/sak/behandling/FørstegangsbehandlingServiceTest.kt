@@ -18,7 +18,7 @@ internal class FørstegangsbehandlingServiceTest {
         mockk(),
         mockk(),
         mockk(),
-        mockk()
+        mockk(),
     )
 
     @Test
@@ -32,8 +32,8 @@ internal class FørstegangsbehandlingServiceTest {
                     FørstegangsbehandlingDto(
                         behandlingsårsak = it,
                         kravMottatt = LocalDate.now().minusDays(10),
-                        barn = emptyList()
-                    )
+                        barn = emptyList(),
+                    ),
                 )
             }
         }

@@ -4,7 +4,6 @@ import no.nav.familie.ef.sak.AuditLoggerEvent
 import no.nav.familie.ef.sak.fagsak.dto.FagsakPersonDto
 import no.nav.familie.ef.sak.fagsak.dto.FagsakPersonUtvidetDto
 import no.nav.familie.ef.sak.felles.dto.PersonIdentDto
-import no.nav.familie.ef.sak.felles.util.FnrUtil
 import no.nav.familie.ef.sak.felles.util.FnrUtil.validerIdent
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService

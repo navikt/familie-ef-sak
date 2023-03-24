@@ -6,7 +6,7 @@ import no.nav.familie.ef.sak.vilkår.Vilkårsresultat
 enum class BegrunnelseType {
     UTEN,
     PÅKREVD,
-    VALGFRI;
+    VALGFRI,
 }
 
 /**
@@ -16,7 +16,7 @@ enum class BegrunnelseType {
 enum class Resultat(val vilkårsresultat: Vilkårsresultat) {
 
     OPPFYLT(Vilkårsresultat.OPPFYLT),
-    IKKE_OPPFYLT(Vilkårsresultat.IKKE_OPPFYLT)
+    IKKE_OPPFYLT(Vilkårsresultat.IKKE_OPPFYLT),
 }
 
 /**
@@ -35,7 +35,7 @@ interface SvarRegel {
 class SluttSvarRegel private constructor(
     @JsonIgnore
     val resultat: Resultat,
-    override val begrunnelseType: BegrunnelseType = BegrunnelseType.UTEN
+    override val begrunnelseType: BegrunnelseType = BegrunnelseType.UTEN,
 ) : SvarRegel {
 
     override val regelId: RegelId = RegelId.SLUTT_NODE
@@ -45,21 +45,21 @@ class SluttSvarRegel private constructor(
         val OPPFYLT = SluttSvarRegel(resultat = Resultat.OPPFYLT)
         val OPPFYLT_MED_PÅKREVD_BEGRUNNELSE = SluttSvarRegel(
             resultat = Resultat.OPPFYLT,
-            begrunnelseType = BegrunnelseType.PÅKREVD
+            begrunnelseType = BegrunnelseType.PÅKREVD,
         )
         val OPPFYLT_MED_VALGFRI_BEGRUNNELSE = SluttSvarRegel(
             resultat = Resultat.OPPFYLT,
-            begrunnelseType = BegrunnelseType.VALGFRI
+            begrunnelseType = BegrunnelseType.VALGFRI,
         )
 
         val IKKE_OPPFYLT = SluttSvarRegel(resultat = Resultat.IKKE_OPPFYLT)
         val IKKE_OPPFYLT_MED_PÅKREVD_BEGRUNNELSE = SluttSvarRegel(
             resultat = Resultat.IKKE_OPPFYLT,
-            begrunnelseType = BegrunnelseType.PÅKREVD
+            begrunnelseType = BegrunnelseType.PÅKREVD,
         )
         val IKKE_OPPFYLT_MED_VALGFRI_BEGRUNNELSE = SluttSvarRegel(
             resultat = Resultat.IKKE_OPPFYLT,
-            begrunnelseType = BegrunnelseType.VALGFRI
+            begrunnelseType = BegrunnelseType.VALGFRI,
         )
     }
 }
@@ -69,5 +69,5 @@ class SluttSvarRegel private constructor(
  */
 data class NesteRegel(
     override val regelId: RegelId,
-    override val begrunnelseType: BegrunnelseType = BegrunnelseType.UTEN
+    override val begrunnelseType: BegrunnelseType = BegrunnelseType.UTEN,
 ) : SvarRegel

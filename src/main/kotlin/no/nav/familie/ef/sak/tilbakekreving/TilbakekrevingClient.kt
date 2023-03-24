@@ -24,7 +24,7 @@ import java.net.URI
 @Component
 class TilbakekrevingClient(
     @Qualifier("azure") restOperations: RestOperations,
-    @Value("\${FAMILIE_TILBAKE_URL}") private val familieTilbakeUri: URI
+    @Value("\${FAMILIE_TILBAKE_URL}") private val familieTilbakeUri: URI,
 ) :
     AbstractRestClient(restOperations, "familie.tilbakekreving") {
 
@@ -38,7 +38,7 @@ class TilbakekrevingClient(
 
     private fun kanBehandlingOpprettesManueltUri(
         stønadstype: StønadType,
-        eksternFagsakId: Long
+        eksternFagsakId: Long,
     ) =
         UriComponentsBuilder.fromUri(familieTilbakeUri)
             .pathSegment(
@@ -48,7 +48,7 @@ class TilbakekrevingClient(
                 "fagsak",
                 eksternFagsakId.toString(),
                 "kanBehandlingOpprettesManuelt",
-                "v1"
+                "v1",
             )
             .build()
             .toUri()
@@ -72,7 +72,7 @@ class TilbakekrevingClient(
         return postForEntity(
             hentForhåndsvisningVarselbrevUri,
             forhåndsvisVarselbrevRequest,
-            HttpHeaders().apply { accept = listOf(MediaType.APPLICATION_PDF) }
+            HttpHeaders().apply { accept = listOf(MediaType.APPLICATION_PDF) },
         )
     }
 
@@ -101,15 +101,15 @@ class TilbakekrevingClient(
     fun opprettManuelTilbakekreving(
         eksternFagsakId: Long,
         kravgrunnlagsreferanse: String,
-        stønadstype: StønadType
+        stønadstype: StønadType,
     ) {
         return postForEntity(
             opprettManueltTilbakekrevingUri,
             OpprettManueltTilbakekrevingRequest(
                 eksternFagsakId.toString(),
                 Ytelsestype.valueOf(stønadstype.name),
-                kravgrunnlagsreferanse
-            )
+                kravgrunnlagsreferanse,
+            ),
         )
     }
 }

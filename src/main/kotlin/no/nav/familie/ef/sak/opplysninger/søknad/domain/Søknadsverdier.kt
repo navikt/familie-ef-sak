@@ -17,7 +17,7 @@ data class Søknadsverdier(
     val datoMottatt: LocalDateTime,
     val søkerFra: YearMonth? = null,
     val adresseopplysninger: Adresseopplysninger?,
-    val dokumentasjon: DokumentasjonFraSøknadDto
+    val dokumentasjon: DokumentasjonFraSøknadDto,
 )
 
 data class DokumentasjonFraSøknadDto(
@@ -49,7 +49,7 @@ data class DokumentasjonFraSøknadDto(
     val reduksjonAvArbeidsforhold: DokumentasjonDto? = null,
     val oppsigelse: DokumentasjonDto? = null,
     val utdanningsutgifter: DokumentasjonDto? = null,
-    val meldtAdresseendring: DokumentasjonDto? = null
+    val meldtAdresseendring: DokumentasjonDto? = null,
 )
 
 fun SøknadsskjemaSkolepenger.tilSøknadsverdier() = Søknadsverdier(
@@ -63,7 +63,7 @@ fun SøknadsskjemaSkolepenger.tilSøknadsverdier() = Søknadsverdier(
     situasjon = null,
     datoMottatt = this.datoMottatt,
     adresseopplysninger = this.adresseopplysninger,
-    dokumentasjon = DokumentasjonMapper.tilDokumentasjonDto(this)
+    dokumentasjon = DokumentasjonMapper.tilDokumentasjonDto(this),
 )
 
 fun SøknadsskjemaBarnetilsyn.tilSøknadsverdier() = Søknadsverdier(
@@ -78,7 +78,7 @@ fun SøknadsskjemaBarnetilsyn.tilSøknadsverdier() = Søknadsverdier(
     datoMottatt = this.datoMottatt,
     søkerFra = this.søkerFra,
     adresseopplysninger = this.adresseopplysninger,
-    dokumentasjon = DokumentasjonMapper.tilDokumentasjonDto(this)
+    dokumentasjon = DokumentasjonMapper.tilDokumentasjonDto(this),
 
 )
 
@@ -94,5 +94,5 @@ fun SøknadsskjemaOvergangsstønad.tilSøknadsverdier() = Søknadsverdier(
     datoMottatt = this.datoMottatt,
     søkerFra = this.søkerFra,
     adresseopplysninger = this.adresseopplysninger,
-    dokumentasjon = DokumentasjonMapper.tilDokumentasjonDto(this)
+    dokumentasjon = DokumentasjonMapper.tilDokumentasjonDto(this),
 )

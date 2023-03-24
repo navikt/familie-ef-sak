@@ -5,7 +5,7 @@ import java.time.LocalDate
 @Deprecated("Bruk periode fra kontrakter felles.", ReplaceWith("no.nav.familie.kontrakter.felles.Periode"))
 data class Periode(
     val fradato: LocalDate,
-    val tildato: LocalDate
+    val tildato: LocalDate,
 ) {
 
     init {

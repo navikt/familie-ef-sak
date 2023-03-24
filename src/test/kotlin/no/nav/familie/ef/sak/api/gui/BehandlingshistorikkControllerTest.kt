@@ -79,7 +79,7 @@ internal class BehandlingshistorikkControllerTest : OppslagSpringRunnerTest() {
             "4",
             LocalDateTime.now().plusDays(3),
             StegType.BESLUTTE_VEDTAK,
-            stegUtfall = StegUtfall.BESLUTTE_VEDTAK_GODKJENT
+            stegUtfall = StegUtfall.BESLUTTE_VEDTAK_GODKJENT,
         )
         leggInnHistorikk(behandling, "5", LocalDateTime.now().plusDays(4), StegType.VENTE_PÅ_STATUS_FRA_IVERKSETT)
         leggInnHistorikk(behandling, "6", LocalDateTime.now().plusDays(5), StegType.LAG_SAKSBEHANDLINGSBLANKETT)
@@ -104,15 +104,15 @@ internal class BehandlingshistorikkControllerTest : OppslagSpringRunnerTest() {
             "4",
             LocalDateTime.now().plusDays(3),
             StegType.BESLUTTE_VEDTAK,
-            stegUtfall = StegUtfall.BESLUTTE_VEDTAK_UNDERKJENT
+            stegUtfall = StegUtfall.BESLUTTE_VEDTAK_UNDERKJENT,
         )
         leggInnHistorikk(behandling, "5", LocalDateTime.now().plusDays(6), StegType.FERDIGSTILLE_BEHANDLING)
         leggInnHistorikk(behandling, "6", LocalDateTime.now().plusDays(8), StegType.BEHANDLING_FERDIGSTILT)
         behandlingRepository.update(
             behandling.copy(
                 resultat = BehandlingResultat.HENLAGT,
-                vedtakstidspunkt = SporbarUtils.now()
-            )
+                vedtakstidspunkt = SporbarUtils.now(),
+            ),
         )
         val respons = hentHistorikk(behandling.id)
         assertThat(respons.body?.data!!.map { it.endretAvNavn }).containsExactly("6", "4", "3", "1")
@@ -131,7 +131,7 @@ internal class BehandlingshistorikkControllerTest : OppslagSpringRunnerTest() {
             "4",
             LocalDateTime.now().plusDays(3),
             StegType.BESLUTTE_VEDTAK,
-            stegUtfall = StegUtfall.BESLUTTE_VEDTAK_UNDERKJENT
+            stegUtfall = StegUtfall.BESLUTTE_VEDTAK_UNDERKJENT,
         )
         leggInnHistorikk(behandling, "5", LocalDateTime.now().plusDays(4), StegType.SEND_TIL_BESLUTTER)
         leggInnHistorikk(
@@ -139,7 +139,7 @@ internal class BehandlingshistorikkControllerTest : OppslagSpringRunnerTest() {
             "6",
             LocalDateTime.now().plusDays(5),
             StegType.BESLUTTE_VEDTAK,
-            stegUtfall = StegUtfall.BESLUTTE_VEDTAK_GODKJENT
+            stegUtfall = StegUtfall.BESLUTTE_VEDTAK_GODKJENT,
         )
 
         val respons = hentHistorikk(behandling.id)
@@ -157,8 +157,8 @@ internal class BehandlingshistorikkControllerTest : OppslagSpringRunnerTest() {
             Behandlingshistorikk(
                 behandlingId = behandling.id,
                 steg = behandling.steg,
-                metadata = metadata
-            )
+                metadata = metadata,
+            ),
         )
 
         val respons = hentHistorikk(behandling.id)
@@ -170,7 +170,7 @@ internal class BehandlingshistorikkControllerTest : OppslagSpringRunnerTest() {
         opprettetAv: String,
         endretTid: LocalDateTime,
         steg: StegType? = null,
-        stegUtfall: StegUtfall? = null
+        stegUtfall: StegUtfall? = null,
     ) {
         behandlingshistorikkRepository.insert(
             Behandlingshistorikk(
@@ -179,8 +179,8 @@ internal class BehandlingshistorikkControllerTest : OppslagSpringRunnerTest() {
                 utfall = stegUtfall,
                 opprettetAv = opprettetAv,
                 opprettetAvNavn = opprettetAv,
-                endretTid = endretTid
-            )
+                endretTid = endretTid,
+            ),
         )
     }
 
@@ -188,7 +188,7 @@ internal class BehandlingshistorikkControllerTest : OppslagSpringRunnerTest() {
         return restTemplate.exchange(
             localhost("/api/behandlingshistorikk/$id"),
             HttpMethod.GET,
-            HttpEntity<Ressurs<List<BehandlingshistorikkDto>>>(headers)
+            HttpEntity<Ressurs<List<BehandlingshistorikkDto>>>(headers),
         )
     }
 }

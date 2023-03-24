@@ -37,7 +37,7 @@ internal class BrevmottakereServiceTest {
         assertThrows<ApiFeil> {
             brevmottakereService.lagreBrevmottakere(
                 behandlingId = behandling.id,
-                brevmottakereDto = brevmottakereDtoMed3Mottakere
+                brevmottakereDto = brevmottakereDtoMed3Mottakere,
             )
         }
     }
@@ -51,21 +51,21 @@ internal class BrevmottakereServiceTest {
                 BrevmottakerPerson(
                     personIdent = "123",
                     mottakerRolle = BRUKER,
-                    navn = "navn"
+                    navn = "navn",
                 ),
                 BrevmottakerPerson(
                     personIdent = "123",
                     mottakerRolle = VERGE,
-                    navn = "navn"
-                )
+                    navn = "navn",
+                ),
             ),
-            organisasjoner = emptyList()
+            organisasjoner = emptyList(),
         )
 
         assertThrows<ApiFeil> {
             brevmottakereService.lagreBrevmottakere(
                 behandlingId = behandling.id,
-                brevmottakereDto = brevmottakereDto
+                brevmottakereDto = brevmottakereDto,
             )
         }
     }
@@ -80,20 +80,20 @@ internal class BrevmottakereServiceTest {
                 BrevmottakerOrganisasjon(
                     organisasjonsnummer = "123",
                     navnHosOrganisasjon = "n",
-                    mottakerRolle = FULLMAKT
+                    mottakerRolle = FULLMAKT,
                 ),
                 BrevmottakerOrganisasjon(
                     organisasjonsnummer = "123",
                     navnHosOrganisasjon = "n",
-                    mottakerRolle = FULLMAKT
-                )
-            )
+                    mottakerRolle = FULLMAKT,
+                ),
+            ),
         )
 
         assertThrows<ApiFeil> {
             brevmottakereService.lagreBrevmottakere(
                 behandlingId = behandling.id,
-                brevmottakereDto = brevmottakereDto
+                brevmottakereDto = brevmottakereDto,
             )
         }
     }
@@ -103,20 +103,20 @@ internal class BrevmottakereServiceTest {
             BrevmottakerPerson(
                 "A",
                 "A",
-                VERGE
+                VERGE,
             ),
             BrevmottakerPerson(
                 "B",
                 "B",
-                BRUKER
-            )
+                BRUKER,
+            ),
         ),
         organisasjoner = listOf(
             BrevmottakerOrganisasjon(
                 "C",
                 "C",
-                FULLMAKT
-            )
-        )
+                FULLMAKT,
+            ),
+        ),
     )
 }

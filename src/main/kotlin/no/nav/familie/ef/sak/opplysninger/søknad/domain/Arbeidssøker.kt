@@ -14,5 +14,5 @@ data class Arbeidssøker(
     @Column("onsker_du_minst_50_prosent_stilling")
     val ønskerDuMinst50ProsentStilling: Boolean,
     @Column("ikke_villig_til_a_ta_tilbud_om_arbeid")
-    val ikkeVilligTilÅTaImotTilbudOmArbeidDokumentasjon: Dokumentasjon? = null
+    val ikkeVilligTilÅTaImotTilbudOmArbeidDokumentasjon: Dokumentasjon? = null,
 )

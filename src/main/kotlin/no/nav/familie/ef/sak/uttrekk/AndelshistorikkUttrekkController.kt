@@ -16,11 +16,11 @@ import java.util.UUID
 @Unprotected
 @RequestMapping(
     path = ["/api/uttrekk/andelshistorikk"],
-    produces = [MediaType.APPLICATION_JSON_VALUE]
+    produces = [MediaType.APPLICATION_JSON_VALUE],
 )
 class AndelshistorikkUttrekkController(
     val andelshistorikkUttrekkRepository: AndelshistorikkUttrekkRepository,
-    val vedtakHistorikkService: VedtakHistorikkService
+    val vedtakHistorikkService: VedtakHistorikkService,
 ) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -44,7 +44,7 @@ class AndelshistorikkUttrekkController(
                     it.fagsakId,
                     it.antallMånederMedManglendeTilsynSomErAvsluttet(),
                     it.beløpForManglendeTilsynSomErAvsluttet(),
-                    it.tidligsteFom()
+                    it.tidligsteFom(),
                 )
                 secureLogger.info("Snittutregning-manglertilsyn: $resultatPerFagsak ")
                 resultatPerFagsak
@@ -65,5 +65,5 @@ data class ResultatPerFagsak(
     val fagsakId: UUID,
     val antallMåneder: Long,
     val totalBeløp: Long,
-    val tidligsteFom: YearMonth
+    val tidligsteFom: YearMonth,
 )

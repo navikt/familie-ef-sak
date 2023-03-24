@@ -9,5 +9,5 @@ data class Utenlandsopphold(
     val fradato: LocalDate,
     val tildato: LocalDate,
     @Column("arsak_utenlandsopphold")
-    val årsakUtenlandsopphold: String
+    val årsakUtenlandsopphold: String,
 )

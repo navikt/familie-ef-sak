@@ -25,7 +25,7 @@ internal class AutomatiskMigreringServiceTest {
         migreringsstatusRepository,
         migreringService,
         infotrygdReplikaClient,
-        taskService
+        taskService,
     )
 
     private val updateSlots = mutableListOf<Migreringsstatus>()

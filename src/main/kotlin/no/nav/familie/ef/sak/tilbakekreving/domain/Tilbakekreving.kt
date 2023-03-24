@@ -15,17 +15,17 @@ data class Tilbakekreving(
     val varseltekst: String? = null,
     val begrunnelse: String,
     @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
-    val sporbar: Sporbar = Sporbar()
+    val sporbar: Sporbar = Sporbar(),
 )
 
 enum class Tilbakekrevingsvalg {
     OPPRETT_MED_VARSEL,
     OPPRETT_UTEN_VARSEL,
-    AVVENT
+    AVVENT,
 }
 
 fun Tilbakekreving.tilDto() = TilbakekrevingDto(
     valg = this.valg,
     varseltekst = this.varseltekst,
-    begrunnelse = this.begrunnelse
+    begrunnelse = this.begrunnelse,
 )

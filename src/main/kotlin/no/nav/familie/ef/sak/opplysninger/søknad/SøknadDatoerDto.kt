@@ -5,5 +5,5 @@ import java.time.YearMonth
 
 data class SøknadDatoerDto(
     val søknadsdato: LocalDateTime,
-    val søkerStønadFra: YearMonth? = null
+    val søkerStønadFra: YearMonth? = null,
 )

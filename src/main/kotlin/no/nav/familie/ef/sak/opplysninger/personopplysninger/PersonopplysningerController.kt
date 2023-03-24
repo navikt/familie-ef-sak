@@ -32,7 +32,7 @@ class PersonopplysningerController(
     private val tilgangService: TilgangService,
     private val behandlingService: BehandlingService,
     private val fagsakService: FagsakService,
-    private val fagsakPersonService: FagsakPersonService
+    private val fagsakPersonService: FagsakPersonService,
 ) {
 
     @PostMapping

@@ -54,8 +54,8 @@ internal class AuditLoggerTest {
             Sporingsdata(
                 AuditLoggerEvent.ACCESS,
                 "12345678901",
-                Tilgang(false, begrunnelse = "har  ikke tilgang")
-            )
+                Tilgang(false, begrunnelse = "har  ikke tilgang"),
+            ),
         )
         assertThat(listAppender.list).hasSize(1)
         assertThat(getMessage()).isEqualTo("${expectedBaseLog("Deny")}flexString2Label=deny_policy flexString2=har_ikke_tilgang ")
@@ -70,8 +70,8 @@ internal class AuditLoggerTest {
                 tilgang = Tilgang(true),
                 custom1 = CustomKeyValue("k", "v"),
                 custom2 = CustomKeyValue("k2", "v2"),
-                custom3 = CustomKeyValue("k3", "v3")
-            )
+                custom3 = CustomKeyValue("k3", "v3"),
+            ),
         )
         assertThat(listAppender.list).hasSize(1)
         assertThat(getMessage())

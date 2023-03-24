@@ -82,7 +82,7 @@ class TestSaksbehandlingController(
     private val journalpostClient: JournalpostClient,
     private val migreringService: MigreringService,
     private val vurderingService: VurderingService,
-    private val vurderingStegService: VurderingStegService
+    private val vurderingStegService: VurderingStegService,
 ) {
 
     @PostMapping("{behandlingId}/utfyll-vilkar")
@@ -100,7 +100,7 @@ class TestSaksbehandlingController(
 
     private fun lagDelvilkår(
         regler: Map<VilkårType, Vilkårsregel>,
-        vurdering: VilkårsvurderingDto
+        vurdering: VilkårsvurderingDto,
     ): List<DelvilkårsvurderingDto> {
         val vilkårsregel = regler.getValue(vurdering.vilkårType)
         if (vurdering.vilkårType == VilkårType.ER_UTDANNING_HENSIKTSMESSIG) {
@@ -119,29 +119,30 @@ class TestSaksbehandlingController(
     private fun lagOppfyltVilkår(
         delvilkår: DelvilkårsvurderingDto,
         svarRegel: SvarRegel,
-        svarId: SvarId
+        svarId: SvarId,
     ) = when (svarRegel) {
         SluttSvarRegel.OPPFYLT_MED_PÅKREVD_BEGRUNNELSE,
         SluttSvarRegel.OPPFYLT_MED_VALGFRI_BEGRUNNELSE,
-        SluttSvarRegel.OPPFYLT -> delvilkår(
+        SluttSvarRegel.OPPFYLT,
+        -> delvilkår(
             delvilkår.hovedregel(),
             svarId,
-            if (svarRegel == SluttSvarRegel.OPPFYLT_MED_PÅKREVD_BEGRUNNELSE) "begrunnelse" else null
+            if (svarRegel == SluttSvarRegel.OPPFYLT_MED_PÅKREVD_BEGRUNNELSE) "begrunnelse" else null,
         )
         else -> null
     }
 
     private fun delvilkår(regelId: RegelId, svar: SvarId, begrunnelse: String? = null) = DelvilkårsvurderingDto(
         Vilkårsresultat.OPPFYLT,
-        listOf(VurderingDto(regelId, svar, begrunnelse))
+        listOf(VurderingDto(regelId, svar, begrunnelse)),
     )
 
     private fun delvilkårErUtdanningHensiktsmessig() = DelvilkårsvurderingDto(
         Vilkårsresultat.OPPFYLT,
         listOf(
             VurderingDto(RegelId.NAVKONTOR_VURDERING, SvarId.JA),
-            VurderingDto(RegelId.SAKSBEHANDLER_VURDERING, SvarId.JA, "begrunnelse")
-        )
+            VurderingDto(RegelId.SAKSBEHANDLER_VURDERING, SvarId.JA, "begrunnelse"),
+        ),
     )
 
     @Transactional
@@ -167,27 +168,27 @@ class TestSaksbehandlingController(
                 behandling.id,
                 fagsak.id,
                 grunnlagsdata.grunnlagsdata.barn,
-                fagsak.stønadstype
+                fagsak.stønadstype,
             )
             behandlingshistorikkService.opprettHistorikkInnslag(
                 Behandlingshistorikk(
                     behandlingId = behandling.id,
-                    steg = StegType.VILKÅR
-                )
+                    steg = StegType.VILKÅR,
+                ),
             )
             val oppgaveId = oppgaveService.opprettOppgave(
                 behandling.id,
                 Oppgavetype.BehandleSak,
                 SikkerhetContext.hentSaksbehandler(),
-                "Dummy-oppgave opprettet i ny løsning"
+                "Dummy-oppgave opprettet i ny løsning",
             )
             taskService.save(
                 taskService.save(
                     BehandlingsstatistikkTask.opprettMottattTask(
                         behandlingId = behandling.id,
-                        oppgaveId = oppgaveId
-                    )
-                )
+                        oppgaveId = oppgaveId,
+                    ),
+                ),
             )
         }
 
@@ -198,14 +199,14 @@ class TestSaksbehandlingController(
         val behandling = behandlingService.opprettBehandling(
             BehandlingType.FØRSTEGANGSBEHANDLING,
             fagsak.id,
-            behandlingsårsak = BehandlingÅrsak.SØKNAD
+            behandlingsårsak = BehandlingÅrsak.SØKNAD,
         )
         val journalposter = behandlingService.hentBehandlingsjournalposter(behandling.id)
         søknadService.lagreSøknadForBarnetilsyn(
             søknadBarnetilsyn,
             behandling.id,
             fagsak.id,
-            journalposter.firstOrNull()?.journalpostId ?: "TESTJPID"
+            journalposter.firstOrNull()?.journalpostId ?: "TESTJPID",
         )
         return behandling
     }
@@ -214,14 +215,14 @@ class TestSaksbehandlingController(
         val behandling = behandlingService.opprettBehandling(
             BehandlingType.FØRSTEGANGSBEHANDLING,
             fagsak.id,
-            behandlingsårsak = BehandlingÅrsak.SØKNAD
+            behandlingsårsak = BehandlingÅrsak.SØKNAD,
         )
         val journalposter = behandlingService.hentBehandlingsjournalposter(behandling.id)
         søknadService.lagreSøknadForSkolepenger(
             søknadSkolepenger,
             behandling.id,
             fagsak.id,
-            journalposter.firstOrNull()?.journalpostId ?: "TESTJPID"
+            journalposter.firstOrNull()?.journalpostId ?: "TESTJPID",
         )
         return behandling
     }
@@ -236,8 +237,8 @@ class TestSaksbehandlingController(
                 delerDuBolig =
                 EnumTekstverdiMedSvarId(
                     verdi = "Nei, jeg bor alene med barn eller jeg er gravid og bor alene",
-                    svarId = "borAleneMedBarnEllerGravid"
-                )
+                    svarId = "borAleneMedBarnEllerGravid",
+                ),
             )
             .setSivilstandsplaner(
                 harPlaner = true,
@@ -245,8 +246,8 @@ class TestSaksbehandlingController(
                 vordendeSamboerEktefelle = TestsøknadBuilder.Builder()
                     .defaultPersonMinimum(
                         navn = "Fyren som skal bli min samboer",
-                        fødselsdato = LocalDate.of(1979, 9, 17)
-                    )
+                        fødselsdato = LocalDate.of(1979, 9, 17),
+                    ),
             )
             .build()
     }
@@ -265,7 +266,7 @@ class TestSaksbehandlingController(
                     bosattINorge = false,
                     land = "Sverige",
                     personMinimum = TestsøknadBuilder.Builder()
-                        .defaultPersonMinimum("Bob Burger", LocalDate.of(1979, 9, 17))
+                        .defaultPersonMinimum("Bob Burger", LocalDate.of(1979, 9, 17)),
                 ),
                 samvær = TestsøknadBuilder.Builder().defaultSamvær(
                     beskrivSamværUtenBarn = "Har sjelden sett noe til han",
@@ -277,9 +278,9 @@ class TestSaksbehandlingController(
                     hvordanPraktiseresSamværet = "Bytter litt på innimellom",
                     nårFlyttetDereFraHverandre = LocalDate.of(2020, 12, 31),
                     skalAnnenForelderHaSamvær = "jaMerEnnVanlig",
-                    spørsmålAvtaleOmDeltBosted = true
+                    spørsmålAvtaleOmDeltBosted = true,
                 ),
-                skalBoHosSøker = "jaMenSamarbeiderIkke"
+                skalBoHosSøker = "jaMenSamarbeiderIkke",
             )
         }
         return barneListe
@@ -289,14 +290,14 @@ class TestSaksbehandlingController(
         val behandling = behandlingService.opprettBehandling(
             BehandlingType.FØRSTEGANGSBEHANDLING,
             fagsak.id,
-            behandlingsårsak = BehandlingÅrsak.SØKNAD
+            behandlingsårsak = BehandlingÅrsak.SØKNAD,
         )
         val journalposter = behandlingService.hentBehandlingsjournalposter(behandling.id)
         søknadService.lagreSøknadForOvergangsstønad(
             søknad,
             behandling.id,
             fagsak.id,
-            journalposter.firstOrNull()?.journalpostId ?: "TESTJPID"
+            journalposter.firstOrNull()?.journalpostId ?: "TESTJPID",
         )
         return behandling
     }
@@ -306,7 +307,7 @@ class TestSaksbehandlingController(
             fagsak = fagsak,
             periode = Månedsperiode(YearMonth.now(), YearMonth.now().plusMonths(1)),
             inntektsgrunnlag = 0,
-            samordningsfradrag = 0
+            samordningsfradrag = 0,
         )
     }
 }
@@ -320,12 +321,12 @@ private fun TestBehandlingsType.tilStønadstype(): StønadType =
 
 data class TestFagsakRequest(
     val personIdent: String,
-    val behandlingsType: TestBehandlingsType = FØRSTEGANGSBEHANDLING
+    val behandlingsType: TestBehandlingsType = FØRSTEGANGSBEHANDLING,
 )
 
 enum class TestBehandlingsType {
     FØRSTEGANGSBEHANDLING,
     MIGRERING,
     BARNETILSYN,
-    SKOLEPENGER
+    SKOLEPENGER,
 }

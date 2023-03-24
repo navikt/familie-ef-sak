@@ -18,12 +18,12 @@ data class UnderUtdanning(
     val utdanningEtterGrunnskolen: Boolean,
     val semesteravgift: Int? = null,
     val studieavgift: Int? = null,
-    val eksamensgebyr: Int? = null
+    val eksamensgebyr: Int? = null,
 )
 
 @Table("soknad_tidligere_utdanning")
 data class TidligereUtdanning(
     val linjeKursGrad: String,
     val fra: YearMonth,
-    val til: YearMonth
+    val til: YearMonth,
 )

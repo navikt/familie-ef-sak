@@ -42,7 +42,7 @@ data class SøknadBarn(
     val årsakBarnepass: String? = null,
     @MappedCollection(idColumn = "barn_id")
     val barnepassordninger: Set<Barnepassordning> = emptySet(),
-    val lagtTilManuelt: Boolean
+    val lagtTilManuelt: Boolean,
 ) : IBarn
 
 interface IAnnenForelder {
@@ -55,7 +55,7 @@ data class AnnenForelder(
     val bosattNorge: Boolean? = null,
     val land: String? = null,
     @Embedded(onEmpty = Embedded.OnEmpty.USE_NULL)
-    override val person: PersonMinimum? = null
+    override val person: PersonMinimum? = null,
 ) : IAnnenForelder
 
 @Table("soknad_barnepassordning")
@@ -65,7 +65,7 @@ data class Barnepassordning(
     @Embedded(onEmpty = Embedded.OnEmpty.USE_NULL)
     val datoperiode: Datoperiode,
     @Column("belop")
-    val beløp: Int
+    val beløp: Int,
 )
 
 data class Samvær(
@@ -91,5 +91,5 @@ data class Samvær(
     val erklæringOmSamlivsbrudd: Dokumentasjon? = null,
     val hvorMyeErDuSammenMedAnnenForelder: String? = null,
     @Column("beskriv_samver_uten_barn")
-    val beskrivSamværUtenBarn: String? = null
+    val beskrivSamværUtenBarn: String? = null,
 )

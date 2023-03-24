@@ -45,7 +45,7 @@ internal class BarnFyllerÅrOppfølgingsoppgaveServiceTest {
         gjeldendeBarnRepository,
         oppgaveRepository,
         taskService,
-        personService
+        personService,
     )
 
     private val oppgaveSlot = slot<Oppgave>()
@@ -66,7 +66,7 @@ internal class BarnFyllerÅrOppfølgingsoppgaveServiceTest {
         every { oppgaveRepository.findByBehandlingIdAndBarnPersonIdentAndAlder(any(), any(), any()) } returns null
         every { oppgaveService.lagFristForOppgave(any()) } returns LocalDate.now().plusDays(1)
         every { personopplysningerIntegrasjonerClient.hentNavEnhetForPersonMedRelasjoner(any()) } returns listOf(
-            Arbeidsfordelingsenhet("enhetId", "enhetNavn")
+            Arbeidsfordelingsenhet("enhetId", "enhetNavn"),
         )
         every { oppgaveService.finnHendelseMappeId(any()) } returns 1
         every { oppgaveClient.opprettOppgave(any()) } returns 1
@@ -144,8 +144,8 @@ internal class BarnFyllerÅrOppfølgingsoppgaveServiceTest {
             opprettBarn(
                 fødselsnummer = null,
                 termindato = termindato,
-                fødselsnummerSøker = fødselsnummerSøker
-            )
+                fødselsnummerSøker = fødselsnummerSøker,
+            ),
         )
 
         every { personService.hentPersonForelderBarnRelasjon(listOf(fødselsnummerSøker)) } returns mapOf(
@@ -157,11 +157,11 @@ internal class BarnFyllerÅrOppfølgingsoppgaveServiceTest {
                         ForelderBarnRelasjon(
                             fødselsnummerBarn,
                             Familierelasjonsrolle.BARN,
-                            Familierelasjonsrolle.MOR
-                        )
-                    )
-                )
-            )
+                            Familierelasjonsrolle.MOR,
+                        ),
+                    ),
+                ),
+            ),
         )
 
         opprettOppgaveForBarnService.opprettTasksForAlleBarnSomHarFyltÅr()
@@ -184,14 +184,14 @@ internal class BarnFyllerÅrOppfølgingsoppgaveServiceTest {
                 behandlingId = behandlingId,
                 fødselsnummer = null,
                 termindato = termindato,
-                fødselsnummerSøker = fødselsnummerSøker
+                fødselsnummerSøker = fødselsnummerSøker,
             ),
             opprettBarn(
                 behandlingId = behandlingId,
                 fødselsnummer = null,
                 termindato = termindato,
-                fødselsnummerSøker = fødselsnummerSøker
-            )
+                fødselsnummerSøker = fødselsnummerSøker,
+            ),
         )
 
         every { personService.hentPersonForelderBarnRelasjon(any()) } returns mapOf(
@@ -203,16 +203,16 @@ internal class BarnFyllerÅrOppfølgingsoppgaveServiceTest {
                         ForelderBarnRelasjon(
                             fødselsnummerBarn,
                             Familierelasjonsrolle.BARN,
-                            Familierelasjonsrolle.MOR
+                            Familierelasjonsrolle.MOR,
                         ),
                         ForelderBarnRelasjon(
                             fødselsnummerBarn2,
                             Familierelasjonsrolle.BARN,
-                            Familierelasjonsrolle.MOR
-                        )
-                    )
-                )
-            )
+                            Familierelasjonsrolle.MOR,
+                        ),
+                    ),
+                ),
+            ),
         )
 
         opprettOppgaveForBarnService.opprettTasksForAlleBarnSomHarFyltÅr()
@@ -228,7 +228,7 @@ internal class BarnFyllerÅrOppfølgingsoppgaveServiceTest {
 
         val opprettBarnForFødselsdato = listOf(
             opprettBarn(behandlingId = UUID.randomUUID(), fødselsnummer = FnrGenerator.generer(fødselsdato)),
-            opprettBarn(behandlingId = UUID.randomUUID(), fødselsnummer = FnrGenerator.generer(fødselsdato))
+            opprettBarn(behandlingId = UUID.randomUUID(), fødselsnummer = FnrGenerator.generer(fødselsdato)),
         )
         every {
             gjeldendeBarnRepository.finnBarnAvGjeldendeIverksatteBehandlinger(StønadType.OVERGANGSSTØNAD, any())
@@ -256,8 +256,8 @@ internal class BarnFyllerÅrOppfølgingsoppgaveServiceTest {
             opprettBarn(
                 behandlingId = behandlingId,
                 fødselsnummer = fødselsnummerBarn,
-                fødselsnummerSøker = fødselsnummerSøker
-            )
+                fødselsnummerSøker = fødselsnummerSøker,
+            ),
         )
 
         every {
@@ -266,8 +266,8 @@ internal class BarnFyllerÅrOppfølgingsoppgaveServiceTest {
             opprettBarn(
                 behandlingId = migrertBehandlingId,
                 fødselsnummer = fødselsnummerBarnMigrert,
-                fraMigrering = true
-            )
+                fraMigrering = true,
+            ),
         )
 
         opprettOppgaveForBarnService.opprettTasksForAlleBarnSomHarFyltÅr()
@@ -279,7 +279,7 @@ internal class BarnFyllerÅrOppfølgingsoppgaveServiceTest {
         fødselsnummerSøker: String = "12345678910",
         fødselsnummer: String? = null,
         termindato: LocalDate? = null,
-        fraMigrering: Boolean = false
+        fraMigrering: Boolean = false,
     ): BarnTilUtplukkForOppgave {
         return BarnTilUtplukkForOppgave(behandlingId, fødselsnummerSøker, fødselsnummer, termindato, fraMigrering)
     }

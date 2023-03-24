@@ -16,5 +16,5 @@ class RolleConfig(
     @Value("\${rolle.kode7}")
     val kode7: String,
     @Value("\${rolle.egenAnsatt}")
-    val egenAnsatt: String
+    val egenAnsatt: String,
 )

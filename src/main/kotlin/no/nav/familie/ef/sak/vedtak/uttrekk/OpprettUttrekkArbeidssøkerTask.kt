@@ -19,12 +19,12 @@ import java.time.YearMonth
 @Service
 @TaskStepBeskrivelse(
     taskStepType = OpprettUttrekkArbeidssøkerTask.TYPE,
-    beskrivelse = "Oppretter uttrekk av arbeidssøkere"
+    beskrivelse = "Oppretter uttrekk av arbeidssøkere",
 )
 class OpprettUttrekkArbeidssøkerTask(
     private val uttrekkArbeidssøkerService: UttrekkArbeidssøkerService,
     private val fagsakService: FagsakService,
-    private val taskService: TaskService
+    private val taskService: TaskService,
 ) : AsyncTaskStep {
 
     private val secureLogger = LoggerFactory.getLogger("secureLogger")
@@ -47,7 +47,7 @@ class OpprettUttrekkArbeidssøkerTask(
                     fagsakId = it.fagsakId,
                     behandlingIdForVedtak = it.behandlingIdForVedtak,
                     personIdent = aktiveIdenter[it.fagsakId]
-                        ?: error("Kunne ikke finne fagsakID")
+                        ?: error("Kunne ikke finne fagsakID"),
                 )
                 ++antallOk
             } catch (ex: Exception) {

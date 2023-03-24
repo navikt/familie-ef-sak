@@ -23,7 +23,7 @@ class AndelsHistorikkService(
     private val vedtakService: VedtakService,
     private val vurderingService: VurderingService,
     private val barnService: BarnService,
-    private val featureToggleService: FeatureToggleService
+    private val featureToggleService: FeatureToggleService,
 ) {
 
     fun hentHistorikk(fagsakId: UUID, tilOgMedBehandlingId: UUID?): List<AndelHistorikkDto> {
@@ -45,8 +45,8 @@ class AndelsHistorikkService(
             tilOgMedBehandlingId,
             aktivitetArbeid,
             HistorikkKonfigurasjon(
-                brukIkkeVedtatteSatser = featureToggleService.isEnabled(Toggle.SATSENDRING_BRUK_IKKE_VEDTATT_MAXSATS)
-            )
+                brukIkkeVedtatteSatser = featureToggleService.isEnabled(Toggle.SATSENDRING_BRUK_IKKE_VEDTATT_MAXSATS),
+            ),
         )
     }
 

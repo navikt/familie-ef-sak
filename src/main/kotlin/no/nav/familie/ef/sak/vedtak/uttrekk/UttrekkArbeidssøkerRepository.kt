@@ -28,10 +28,10 @@ interface UttrekkArbeidssøkerRepository :
           JOIN vedtak v ON v.behandling_id = aty.kilde_behandling_id
         WHERE aty.stonad_tom >= :startdato AND aty.stonad_fom <= :sluttdato
           AND gib.stonadstype = 'OVERGANGSSTØNAD'
-    """
+    """,
     )
     fun hentVedtaksperioderForSisteFerdigstilteBehandlinger(
         startdato: LocalDate,
-        sluttdato: LocalDate
+        sluttdato: LocalDate,
     ): List<VedtaksperioderForUttrekk>
 }

@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component
 class ArbeidsfordelingService(
     private val personopplysningerIntegrasjonerClient: PersonopplysningerIntegrasjonerClient,
     @Qualifier("shortCache")
-    private val cacheManager: CacheManager
+    private val cacheManager: CacheManager,
 ) {
 
     companion object {

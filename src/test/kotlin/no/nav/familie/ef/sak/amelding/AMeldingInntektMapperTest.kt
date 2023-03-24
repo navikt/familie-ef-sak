@@ -27,7 +27,7 @@ internal class AMeldingInntektMapperTest {
         every { kodeverkService.hentInntekt() } returns
             mapOf(
                 InntektKodeverkType.LOENNSINNTEKT to mapOf("fastloenn" to "Fastlønn"),
-                InntektKodeverkType.TILLEGSINFORMASJON_KATEGORI to mapOf("NorskKontinentalsokkel" to "Norsk kontinentalsokkel")
+                InntektKodeverkType.TILLEGSINFORMASJON_KATEGORI to mapOf("NorskKontinentalsokkel" to "Norsk kontinentalsokkel"),
             )
     }
 
