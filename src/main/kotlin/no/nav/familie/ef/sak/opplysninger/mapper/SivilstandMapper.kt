@@ -23,6 +23,7 @@ object SivilstandMapper {
         val sivilstand = søker.sivilstand.gjeldende()
         return SivilstandRegistergrunnlagDto(
             type = Sivilstandstype.valueOf(sivilstand.type.name),
+            personIdent = sivilstand.relatertVedSivilstand,
             navn = sivilstand.navn,
             gyldigFraOgMed = sivilstand.gyldigFraOgMed,
         )
