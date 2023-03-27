@@ -116,6 +116,7 @@ class VedtakHistorikkService(
             .fraDato(fra)
             .map {
                 Inntekt(
+                    // TODO her må vi få inn dagsats og månedsinntekt
                     it.andel.periode.fom,
                     BigDecimal(it.andel.inntekt),
                     BigDecimal(it.andel.samordningsfradrag),
