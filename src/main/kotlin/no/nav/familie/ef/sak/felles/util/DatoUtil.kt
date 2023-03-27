@@ -13,6 +13,8 @@ object DatoFormat {
     val DATE_FORMAT_NORSK = DateTimeFormatter.ofPattern("dd.MM.yyyy")
 }
 
+val YEAR_MONTH_MAX = YearMonth.from(LocalDate.MAX)
+
 fun LocalDate.norskFormat() = this.format(DATE_FORMAT_NORSK)
 
 fun datoEllerIdag(localDate: LocalDate?): LocalDate = localDate ?: LocalDate.now()
