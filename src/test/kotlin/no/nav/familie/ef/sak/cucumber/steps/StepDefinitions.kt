@@ -325,6 +325,12 @@ class StepDefinitions {
             val fraOgMed = parseÅrMåned(Domenebegrep.FRA_OG_MED_DATO, rad)
             assertThat(periode.årMånedFra).isEqualTo(fraOgMed)
 
+            parseValgfriInt(VedtakDomenebegrep.DAGSATS, rad)?.let {
+                assertThat(periode.dagsats?.toInt() ?: 0).isEqualTo(it)
+            }
+            parseValgfriInt(VedtakDomenebegrep.MÅNEDSINNTEKT, rad)?.let {
+                assertThat(periode.månedsinntekt?.toInt() ?: 0).isEqualTo(it)
+            }
             assertThat(periode.forventetInntekt?.toInt()).isEqualTo(parseInt(VedtakDomenebegrep.INNTEKT, rad))
             assertThat(periode.samordningsfradrag?.toInt())
                 .isEqualTo(parseInt(VedtakDomenebegrep.SAMORDNINGSFRADRAG, rad))
