@@ -4,7 +4,9 @@ import no.nav.familie.ef.sak.AuditLoggerEvent
 import no.nav.familie.ef.sak.behandling.dto.RevurderingDto
 import no.nav.familie.ef.sak.behandling.dto.RevurderingsinformasjonDto
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
+import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
+import no.nav.familie.ef.sak.journalføring.dto.VilkårsbehandleNyeBarn
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -35,11 +37,11 @@ class RevurderingsController(
                 "eller med revurderingsårsak \"Nye opplysninger\". " +
                 "Hvis du trenger å \"flytte\" en søknad som er journalført mot infotrygd, kontakt superbrukere for flytting av journalpost"
         }
-        brukerfeilHvis(
+        feilHvis(
             revurderingInnhold.behandlingsårsak == BehandlingÅrsak.G_OMREGNING &&
-                revurderingInnhold.barn.isNotEmpty(),
+                revurderingInnhold.vilkårsbehandleNyeBarn != VilkårsbehandleNyeBarn.IKKE_VILKÅRSBEHANDLE,
         ) {
-            "Kan ikke sende inn nye barn på revurdering med årsak G-omregning"
+            "Kan ikke behandle nye barn på revurdering med årsak G-omregning"
         }
         val revurdering = revurderingService.opprettRevurderingManuelt(revurderingInnhold)
         return Ressurs.success(revurdering.id)
