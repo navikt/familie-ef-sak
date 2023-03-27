@@ -5,6 +5,7 @@ import no.nav.familie.ef.sak.behandling.RevurderingService
 import no.nav.familie.ef.sak.behandling.dto.RevurderingDto
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
+import no.nav.familie.ef.sak.journalføring.dto.VilkårsbehandleNyeBarn
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.ef.sak.tilkjentytelse.domain.AndelTilkjentYtelse
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
@@ -76,6 +77,7 @@ class EksternBehandlingService(
             fagsakId = fagsak.id,
             behandlingsårsak = BehandlingÅrsak.KLAGE,
             kravMottatt = LocalDate.now(),
+            vilkårsbehandleNyeBarn = VilkårsbehandleNyeBarn.VILKÅRSBEHANDLE,
         )
         val behandling = revurderingService.opprettRevurderingManuelt(revurdering)
         OpprettRevurderingResponse(Opprettet(behandling.eksternId.id.toString()))
