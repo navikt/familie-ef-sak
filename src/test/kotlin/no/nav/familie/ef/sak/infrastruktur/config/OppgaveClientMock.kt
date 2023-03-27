@@ -48,7 +48,7 @@ class OppgaveClientMock {
 
         every { oppgaveClient.finnOppgaveMedId(any()) } answers {
             val oppgaveId = firstArg<Long>()
-            oppgaver[oppgaveId] ?: error("Finner ikke oppgave med oppgaveId=$oppgaveId")
+            oppgaver[oppgaveId] ?: oppgave1.copy(id = oppgaveId)
         }
 
         every { oppgaveClient.finnMapper(any(), any()) } answers {
@@ -180,7 +180,7 @@ class OppgaveClientMock {
         oppgaveId: Long,
         oppgavetype: Oppgavetype,
         tildeltRessurs: String? = null,
-        beskivelse: String? = "Beskrivelse av oppgaven. " +
+        beskivelse: String? = "Beskrivelse av oppgaven. \n\n\n" +
             "Denne teksten kan jo være lang, kort eller ikke inneholde noenting. ",
         journalpostId: String? = "1234",
         behandlingstype: String? = null,
@@ -192,7 +192,7 @@ class OppgaveClientMock {
             aktoerId = "1234",
             identer = listOf(OppgaveIdentV2("11111111111", IdentGruppe.FOLKEREGISTERIDENT)),
             journalpostId = journalpostId,
-            tildeltEnhetsnr = "4408",
+            tildeltEnhetsnr = "4489",
             tilordnetRessurs = tildeltRessurs,
             behandlingstype = behandlingstype,
             mappeId = 123,

@@ -1,24 +1,31 @@
 package no.nav.familie.ef.sak.behandling
 
 import io.mockk.every
+import io.mockk.justRun
 import io.mockk.mockk
 import io.mockk.mockkObject
+import io.mockk.slot
 import io.mockk.unmockkObject
 import io.mockk.verify
 import io.mockk.verifyOrder
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
+import no.nav.familie.ef.sak.behandling.dto.SettPåVentRequest
 import no.nav.familie.ef.sak.behandling.dto.TaAvVentStatus
 import no.nav.familie.ef.sak.behandlingsflyt.task.BehandlingsstatistikkTask
 import no.nav.familie.ef.sak.behandlingshistorikk.BehandlingshistorikkService
 import no.nav.familie.ef.sak.behandlingshistorikk.domain.StegUtfall
+import no.nav.familie.ef.sak.felles.util.DatoFormat
 import no.nav.familie.ef.sak.felles.util.mockFeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
+import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.vedtak.NullstillVedtakService
 import no.nav.familie.kontrakter.ef.iverksett.Hendelse
+import no.nav.familie.kontrakter.felles.oppgave.Oppgave
+import no.nav.familie.kontrakter.felles.oppgave.OppgavePrioritet
 import no.nav.familie.prosessering.internal.TaskService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
@@ -27,6 +34,9 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.http.HttpStatus
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.Month
 import java.util.UUID
 
 internal class BehandlingPåVentServiceTest {
@@ -35,6 +45,7 @@ internal class BehandlingPåVentServiceTest {
     private val taskService = mockk<TaskService>(relaxed = true)
     private val nullstillVedtakService = mockk<NullstillVedtakService>(relaxed = true)
     private val behandlingshistorikkService = mockk<BehandlingshistorikkService>(relaxed = true)
+    private val oppgaveService = mockk<OppgaveService>()
 
     private val behandlingPåVentService =
         BehandlingPåVentService(
@@ -42,7 +53,8 @@ internal class BehandlingPåVentServiceTest {
             behandlingshistorikkService,
             taskService,
             nullstillVedtakService,
-            mockFeatureToggleService()
+            mockFeatureToggleService(),
+            oppgaveService,
         )
     val fagsak = fagsak()
     val tidligereIverksattBehandling = behandling(fagsak)
@@ -71,7 +83,14 @@ internal class BehandlingPåVentServiceTest {
             behandlingPåVentService.settPåVent(behandlingId)
 
             verify { behandlingService.oppdaterStatusPåBehandling(behandlingId, BehandlingStatus.SATT_PÅ_VENT) }
-            verify { behandlingshistorikkService.opprettHistorikkInnslag(behandlingId, any(), StegUtfall.SATT_PÅ_VENT, null) }
+            verify {
+                behandlingshistorikkService.opprettHistorikkInnslag(
+                    behandlingId,
+                    any(),
+                    StegUtfall.SATT_PÅ_VENT,
+                    null
+                )
+            }
             verify {
                 taskService.save(
                     coWithArg {
@@ -173,7 +192,14 @@ internal class BehandlingPåVentServiceTest {
             behandlingPåVentService.taAvVent(behandlingId)
 
             verify { behandlingService.oppdaterStatusPåBehandling(behandlingId, BehandlingStatus.UTREDES) }
-            verify { behandlingshistorikkService.opprettHistorikkInnslag(behandlingId, any(), StegUtfall.TATT_AV_VENT, null) }
+            verify {
+                behandlingshistorikkService.opprettHistorikkInnslag(
+                    behandlingId,
+                    any(),
+                    StegUtfall.TATT_AV_VENT,
+                    null
+                )
+            }
             verify {
                 taskService.save(
                     coWithArg {
@@ -215,6 +241,98 @@ internal class BehandlingPåVentServiceTest {
                 behandlingService.oppdaterForrigeBehandlingId(behandlingId, tidligereIverksattBehandling.id)
                 nullstillVedtakService.nullstillVedtak(behandlingId)
             }
+        }
+    }
+
+    @Nested
+    inner class Oppgavebeskrivelse {
+        @Test
+        fun `skal oppdatere oppgavebeskrivelse ved sett på vent - med saksbehandler, prioritet, frist og mappe`() {
+            mockHentBehandling(BehandlingStatus.UTREDES)
+
+            val oppgaveSlot = slot<Oppgave>()
+            val oppgaveId: Long = 123
+
+            every { oppgaveService.hentOppgave(oppgaveId) } returns Oppgave(
+                id = oppgaveId,
+                tildeltEnhetsnr = null,
+                tilordnetRessurs = "gammel saksbehandler",
+                beskrivelse = "Gammel beskrivelse",
+                mappeId = 333,
+                fristFerdigstillelse = LocalDate.of(2002, Month.MARCH, 23).toString(),
+                prioritet = OppgavePrioritet.NORM,
+            )
+
+            justRun { oppgaveService.oppdaterOppgave(capture(oppgaveSlot)) }
+
+            behandlingPåVentService.settPåVent(
+                behandlingId, SettPåVentRequest(
+                    oppgaveId = oppgaveId,
+                    saksbehandler = "ny saksbehandler",
+                    prioritet = OppgavePrioritet.HOY,
+                    frist = LocalDate.of(2002, Month.MARCH, 24).toString(),
+                    mappe = 444,
+                    beskrivelse = "Her er litt tekst fra saksbehandler"
+                )
+            )
+
+            val forventetBeskrivelse = """
+  --- ${LocalDateTime.now().format(DatoFormat.GOSYS_DATE_TIME)} System (VL) ---
+  Oppgave flyttet fra saksbehandler gammel saksbehandler til ny saksbehandler
+  Oppgave endret fra prioritet NORM til HOY
+  Oppgave endret frist fra 2002-03-23 til 2002-03-24
+  Oppgave flyttet fra mappe 333 til 444
+  
+  Her er litt tekst fra saksbehandler
+  
+  Gammel beskrivelse
+            """.trimIndent()
+
+            assertThat(oppgaveSlot.captured.beskrivelse).isEqualTo(forventetBeskrivelse)
+        }
+
+        @Test
+        fun `skal oppdatere oppgavebeskrivelse ved sett på vent - ingen saksbehandler i forveien, mappe eller frist i forveien`() {
+            mockHentBehandling(BehandlingStatus.UTREDES)
+
+            val oppgaveSlot = slot<Oppgave>()
+            val oppgaveId: Long = 123
+
+            every { oppgaveService.hentOppgave(oppgaveId) } returns Oppgave(
+                id = oppgaveId,
+                tildeltEnhetsnr = null,
+                tilordnetRessurs = null,
+                beskrivelse = "Gammel beskrivelse",
+                mappeId = null,
+                fristFerdigstillelse = null,
+                prioritet = OppgavePrioritet.NORM,
+            )
+
+            justRun { oppgaveService.oppdaterOppgave(capture(oppgaveSlot)) }
+
+            behandlingPåVentService.settPåVent(
+                behandlingId, SettPåVentRequest(
+                    oppgaveId = oppgaveId,
+                    saksbehandler = "ny saksbehandler",
+                    prioritet = OppgavePrioritet.NORM,
+                    frist = LocalDate.of(2002, Month.MARCH, 24).toString(),
+                    mappe = 444,
+                    beskrivelse = "Her er litt tekst fra saksbehandler"
+                )
+            )
+
+            val forventetBeskrivelse = """
+  --- ${LocalDateTime.now().format(DatoFormat.GOSYS_DATE_TIME)} System (VL) ---
+Oppgave flyttet fra saksbehandler <ingen> til ny saksbehandler
+Oppgave endret frist fra <ingen> til 2002-03-24
+Oppgave flyttet fra mappe <ingen> til 444
+
+Her er litt tekst fra saksbehandler
+
+Gammel beskrivelse
+            """.trimIndent()
+
+            assertThat(oppgaveSlot.captured.beskrivelse).isEqualTo(forventetBeskrivelse)
         }
     }
 

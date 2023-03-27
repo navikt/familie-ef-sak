@@ -73,6 +73,10 @@ class OppgaveService(
         }
     }
 
+    fun oppdaterOppgave(oppgave: Oppgave) {
+        oppgaveClient.oppdaterOppgave(oppgave)
+    }
+
     /**
      * I de tilfeller en service ønsker å ansvare selv for lagring til [OppgaveRepository]
      */

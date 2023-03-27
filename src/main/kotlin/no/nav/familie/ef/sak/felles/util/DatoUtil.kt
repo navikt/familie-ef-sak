@@ -11,6 +11,7 @@ object DatoFormat {
     val DATE_FORMAT_ISO_YEAR_MONTH = DateTimeFormatter.ofPattern("yyyy-MM")
     val YEAR_MONTH_FORMAT_NORSK = DateTimeFormatter.ofPattern("MM.yyyy")
     val DATE_FORMAT_NORSK = DateTimeFormatter.ofPattern("dd.MM.yyyy")
+    val GOSYS_DATE_TIME = DateTimeFormatter.ofPattern("yyyy.MM.dd' 'HH:mm")
 }
 
 fun LocalDate.norskFormat() = this.format(DATE_FORMAT_NORSK)
