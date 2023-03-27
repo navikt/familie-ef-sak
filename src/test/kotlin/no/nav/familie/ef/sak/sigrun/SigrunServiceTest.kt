@@ -5,9 +5,7 @@ import io.mockk.mockk
 import no.nav.familie.ef.sak.fagsak.FagsakPersonService
 import no.nav.familie.ef.sak.sigrun.SigrunService
 import no.nav.familie.ef.sak.sigrun.ekstern.BeregnetSkatt
-import no.nav.familie.ef.sak.sigrun.ekstern.Grunnlag
 import no.nav.familie.ef.sak.sigrun.ekstern.SigrunClient
-import no.nav.familie.ef.sak.sigrun.ekstern.SummertSkattegrunnlag
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -28,14 +26,8 @@ internal class SigrunServiceTest {
             BeregnetSkatt("skatteoppgjoersdato", "2022-05-01"),
             BeregnetSkatt("personinntektNaering", "40000"),
             BeregnetSkatt("personinntektLoenn", "50000"),
-        )
-        every { sigrunClient.hentSummertSkattegrunnlag(any(), any()) } returns SummertSkattegrunnlag(
-            listOf(),
-            svalbardGrunnlag = listOf(
-                Grunnlag("personinntektBarePensjonsdel", 50000),
-                Grunnlag("svalbardPersoninntektNaering", 50000),
-            ),
-            "skatteoppgjoersdato",
+            BeregnetSkatt("svalbardPersoninntektNaering", "5000"),
+            BeregnetSkatt("svalbardSumAllePersoninntekter", "2000"),
         )
     }
 
@@ -48,5 +40,7 @@ internal class SigrunServiceTest {
         assertThat(pensjonsgivendeInntektVisning.first().næring).isEqualTo(40_000)
         assertThat(pensjonsgivendeInntektVisning.first().person).isEqualTo(50_000)
         assertThat(pensjonsgivendeInntektVisning.last().inntektsår).isEqualTo(YearMonth.now().year - 3)
+        assertThat(pensjonsgivendeInntektVisning.first().svalbard?.næring).isEqualTo(5000)
+        assertThat(pensjonsgivendeInntektVisning.first().svalbard?.person).isEqualTo(2000)
     }
 }

@@ -120,7 +120,7 @@ internal class VurderingStegServiceTest {
         every { vilkårsvurderingRepository.insertAll(any()) } answers { firstArg() }
         val sivilstand = SivilstandInngangsvilkårDto(
             mockk(relaxed = true),
-            SivilstandRegistergrunnlagDto(Sivilstandstype.GIFT, "Navn", null),
+            SivilstandRegistergrunnlagDto(Sivilstandstype.GIFT, "1", "Navn", null),
         )
         every { vilkårGrunnlagService.hentGrunnlag(any(), any(), any(), any()) } returns
             mockVilkårGrunnlagDto(sivilstand = sivilstand)
