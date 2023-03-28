@@ -8,6 +8,7 @@ import no.nav.familie.ef.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ef.sak.barn.BarnService
 import no.nav.familie.ef.sak.barn.BehandlingBarn
 import no.nav.familie.ef.sak.behandling.Saksbehandling
+import no.nav.familie.ef.sak.behandling.domain.BehandlingKategori
 import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
@@ -499,6 +500,7 @@ internal class IverksettingDtoMapperTest {
         type = BehandlingType.FØRSTEGANGSBEHANDLING,
         status = BehandlingStatus.OPPRETTET,
         steg = StegType.VILKÅR,
+        kategori = BehandlingKategori.NASJONAL,
         årsak = BehandlingÅrsak.SØKNAD,
         kravMottatt = LocalDate.of(2022, 3, 1),
         resultat = BehandlingResultat.IKKE_SATT,

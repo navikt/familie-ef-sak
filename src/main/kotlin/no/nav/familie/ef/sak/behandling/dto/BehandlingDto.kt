@@ -2,6 +2,7 @@ package no.nav.familie.ef.sak.behandling.dto
 
 import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.behandling.domain.Behandling
+import no.nav.familie.ef.sak.behandling.domain.BehandlingKategori
 import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
@@ -16,6 +17,7 @@ data class BehandlingDto(
     val forrigeBehandlingId: UUID?,
     val fagsakId: UUID,
     val steg: StegType,
+    val kategori: BehandlingKategori,
     val type: BehandlingType,
     val status: BehandlingStatus,
     val sistEndret: LocalDateTime,
@@ -34,6 +36,7 @@ fun Behandling.tilDto(stønadstype: StønadType): BehandlingDto =
         forrigeBehandlingId = this.forrigeBehandlingId,
         fagsakId = this.fagsakId,
         steg = this.steg,
+        kategori = this.kategori,
         type = this.type,
         status = this.status,
         sistEndret = this.sporbar.endret.endretTid,
@@ -52,6 +55,7 @@ fun Saksbehandling.tilDto(): BehandlingDto =
         forrigeBehandlingId = this.forrigeBehandlingId,
         fagsakId = this.fagsakId,
         steg = this.steg,
+        kategori = this.kategori,
         type = this.type,
         status = this.status,
         sistEndret = this.endretTid,

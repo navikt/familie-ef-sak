@@ -3,6 +3,7 @@ package no.nav.familie.ef.sak.service
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
 import no.nav.familie.ef.sak.behandling.domain.Behandling
+import no.nav.familie.ef.sak.behandling.domain.BehandlingKategori
 import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
@@ -128,6 +129,7 @@ internal class FagsakServiceTest : OppslagSpringRunnerTest() {
                 resultat = BehandlingResultat.INNVILGET,
                 årsak = BehandlingÅrsak.SØKNAD,
                 vedtakstidspunkt = SporbarUtils.now(),
+                kategori = BehandlingKategori.NASJONAL,
             )
             val behandling2 = Behandling(
                 fagsakId = fagsakDB.id,
@@ -137,6 +139,7 @@ internal class FagsakServiceTest : OppslagSpringRunnerTest() {
                 resultat = BehandlingResultat.INNVILGET,
                 årsak = BehandlingÅrsak.SØKNAD,
                 vedtakstidspunkt = SporbarUtils.now(),
+                kategori = BehandlingKategori.NASJONAL,
             )
 
             behandlingRepository.insert(behandling1)

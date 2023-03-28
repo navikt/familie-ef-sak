@@ -4,6 +4,7 @@ import no.nav.familie.ef.sak.behandling.BehandlingUtil.sortertEtterVedtakstidspu
 import no.nav.familie.ef.sak.behandling.BehandlingUtil.sortertEtterVedtakstidspunktEllerEndretTid
 import no.nav.familie.ef.sak.behandling.OpprettBehandlingUtil.validerKanOppretteNyBehandling
 import no.nav.familie.ef.sak.behandling.domain.Behandling
+import no.nav.familie.ef.sak.behandling.domain.BehandlingKategori
 import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat.HENLAGT
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
@@ -136,6 +137,7 @@ class BehandlingService(
                 resultat = BehandlingResultat.IKKE_SATT,
                 årsak = behandlingsårsak,
                 kravMottatt = kravMottatt,
+                kategori = BehandlingKategori.NASJONAL
             ),
         )
 
@@ -170,6 +172,15 @@ class BehandlingService(
                 "fra ${behandling.status} til $status",
         )
         return behandlingRepository.update(behandling.copy(status = status))
+    }
+
+    fun oppdaterKategoriPåBehandling(behandlingId: UUID, kategori: BehandlingKategori): Behandling {
+        val behandling = hentBehandling(behandlingId)
+        secureLogger.info(
+            "${SikkerhetContext.hentSaksbehandlerEllerSystembruker()} endrer kategori på behandling $behandlingId " +
+                "fra ${behandling.kategori} til $kategori",
+        )
+        return behandlingRepository.update(behandling.copy(kategori = kategori))
     }
 
     fun oppdaterForrigeBehandlingId(behandlingId: UUID, forrigeBehandlingId: UUID): Behandling {

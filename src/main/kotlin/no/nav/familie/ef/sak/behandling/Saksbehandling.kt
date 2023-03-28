@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.behandling
 
+import no.nav.familie.ef.sak.behandling.domain.BehandlingKategori
 import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
@@ -20,6 +21,7 @@ data class Saksbehandling(
     val type: BehandlingType,
     val status: BehandlingStatus,
     val steg: StegType,
+    val kategori: BehandlingKategori,
     @Column("arsak")
     val årsak: BehandlingÅrsak,
     val kravMottatt: LocalDate? = null,

@@ -13,6 +13,7 @@ import io.mockk.verifyOrder
 import no.nav.familie.ef.sak.barn.BarnService
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.Behandling
+import no.nav.familie.ef.sak.behandling.domain.BehandlingKategori
 import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
@@ -620,6 +621,7 @@ internal class JournalføringServiceTest {
             resultat = BehandlingResultat.IKKE_SATT,
             årsak = SØKNAD,
             forrigeBehandlingId = forrigeBehandlingId,
+            kategori = BehandlingKategori.NASJONAL,
         )
         every { behandlingService.hentBehandling(behandlingId) } returns behandling
         every { behandlingService.opprettBehandling(any(), any(), behandlingsårsak = any()) } returns behandling

@@ -8,6 +8,7 @@ import io.mockk.mockk
 import io.mockk.verify
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.Behandling
+import no.nav.familie.ef.sak.behandling.domain.BehandlingKategori
 import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat.INNVILGET
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
@@ -119,6 +120,7 @@ internal class SendTilBeslutterStegTest {
             steg = beslutteVedtakSteg.stegType(),
             resultat = BehandlingResultat.IKKE_SATT,
             årsak = BehandlingÅrsak.SØKNAD,
+            kategori = BehandlingKategori.NASJONAL,
         ),
     )
 

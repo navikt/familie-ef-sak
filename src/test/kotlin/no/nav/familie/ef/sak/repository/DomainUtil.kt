@@ -3,6 +3,7 @@ package no.nav.familie.ef.sak.repository
 import no.nav.familie.ef.sak.barn.BehandlingBarn
 import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.behandling.domain.Behandling
+import no.nav.familie.ef.sak.behandling.domain.BehandlingKategori
 import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
@@ -104,6 +105,7 @@ fun behandling(
         type = type,
         status = status,
         steg = steg,
+        kategori = BehandlingKategori.NASJONAL,
         resultat = resultat,
         sporbar = Sporbar(opprettetTid = opprettetTid),
         årsak = årsak,
@@ -141,6 +143,7 @@ fun saksbehandling(
             årsak = årsak,
             henlagtÅrsak = henlagtÅrsak,
             kravMottatt = kravMottatt,
+            kategori = BehandlingKategori.NASJONAL,
         ),
     )
 
@@ -155,6 +158,7 @@ fun saksbehandling(
         type = behandling.type,
         status = behandling.status,
         steg = behandling.steg,
+        kategori = behandling.kategori,
         årsak = behandling.årsak,
         resultat = behandling.resultat,
         vedtakstidspunkt = behandling.vedtakstidspunkt,

@@ -9,6 +9,7 @@ import io.mockk.verify
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.behandling.domain.Behandling
+import no.nav.familie.ef.sak.behandling.domain.BehandlingKategori
 import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
@@ -227,6 +228,7 @@ internal class BeslutteVedtakStegTest {
                 steg = beslutteVedtakSteg.stegType(),
                 resultat = BehandlingResultat.IKKE_SATT,
                 årsak = årsak,
+                kategori = BehandlingKategori.NASJONAL,
             ),
         )
 }

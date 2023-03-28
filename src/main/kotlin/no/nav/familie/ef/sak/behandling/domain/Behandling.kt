@@ -28,6 +28,7 @@ data class Behandling(
     val type: BehandlingType,
     val status: BehandlingStatus,
     val steg: StegType,
+    val kategori: BehandlingKategori,
     @Column("arsak")
     val årsak: BehandlingÅrsak,
     val kravMottatt: LocalDate? = null,
@@ -88,4 +89,9 @@ enum class BehandlingStatus {
 
     fun behandlingErLåstForVidereRedigering(): Boolean =
         setOf(FATTER_VEDTAK, IVERKSETTER_VEDTAK, FERDIGSTILT, SATT_PÅ_VENT).contains(this)
+}
+
+enum class BehandlingKategori {
+    EØS,
+    NASJONAL
 }

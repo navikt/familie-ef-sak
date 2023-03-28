@@ -2,6 +2,7 @@ package no.nav.familie.ef.sak.vilkår
 
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.Saksbehandling
+import no.nav.familie.ef.sak.behandling.domain.BehandlingKategori
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegService
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
@@ -10,10 +11,17 @@ import no.nav.familie.ef.sak.blankett.BlankettRepository
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
+import no.nav.familie.ef.sak.vilkår.VilkårType.FORUTGÅENDE_MEDLEMSKAP
+import no.nav.familie.ef.sak.vilkår.VilkårType.LOVLIG_OPPHOLD
 import no.nav.familie.ef.sak.vilkår.dto.OppdaterVilkårsvurderingDto
 import no.nav.familie.ef.sak.vilkår.dto.SvarPåVurderingerDto
 import no.nav.familie.ef.sak.vilkår.dto.VilkårsvurderingDto
 import no.nav.familie.ef.sak.vilkår.dto.tilDto
+import no.nav.familie.ef.sak.vilkår.regler.RegelId.BOR_OG_OPPHOLDER_SEG_I_NORGE
+import no.nav.familie.ef.sak.vilkår.regler.RegelId.MEDLEMSKAP_UNNTAK
+import no.nav.familie.ef.sak.vilkår.regler.RegelId.OPPHOLD_UNNTAK
+import no.nav.familie.ef.sak.vilkår.regler.RegelId.SØKER_MEDLEM_I_FOLKETRYGDEN
+import no.nav.familie.ef.sak.vilkår.regler.SvarId.*
 import no.nav.familie.ef.sak.vilkår.regler.evalutation.OppdaterVilkår
 import no.nav.familie.ef.sak.vilkår.regler.evalutation.OppdaterVilkår.utledResultatForVilkårSomGjelderFlereBarn
 import no.nav.familie.ef.sak.vilkår.regler.hentVilkårsregel
@@ -47,7 +55,7 @@ class VurderingStegService(
         )
         blankettRepository.deleteById(behandlingId)
         val oppdatertVilkårsvurderingDto = vilkårsvurderingRepository.update(nyVilkårsvurdering).tilDto()
-        oppdaterStegPåBehandling(vilkårsvurdering.behandlingId)
+        oppdaterStegOgKategoriPåBehandling(vilkårsvurdering.behandlingId)
         return oppdatertVilkårsvurderingDto
     }
 
@@ -62,7 +70,7 @@ class VurderingStegService(
         blankettRepository.deleteById(behandlingId)
 
         val nullstillVilkårMedNyeHovedregler = nullstillVilkårMedNyeHovedregler(behandlingId, vilkårsvurdering)
-        oppdaterStegPåBehandling(behandlingId)
+        oppdaterStegOgKategoriPåBehandling(behandlingId)
         return nullstillVilkårMedNyeHovedregler
     }
 
@@ -77,14 +85,20 @@ class VurderingStegService(
         blankettRepository.deleteById(behandlingId)
 
         val oppdatertVilkår = oppdaterVilkårsvurderingTilSkalIkkeVurderes(behandlingId, vilkårsvurdering)
-        oppdaterStegPåBehandling(behandlingId)
+        oppdaterStegOgKategoriPåBehandling(behandlingId)
         return oppdatertVilkår
     }
 
-    private fun oppdaterStegPåBehandling(behandlingId: UUID) {
-        val behandling = behandlingService.hentSaksbehandling(behandlingId)
+    private fun oppdaterStegOgKategoriPåBehandling(behandlingId: UUID) {
+        val saksbehandling = behandlingService.hentSaksbehandling(behandlingId)
         val lagredeVilkårsvurderinger = vilkårsvurderingRepository.findByBehandlingId(behandlingId)
-        val vilkårsresultat = lagredeVilkårsvurderinger.groupBy { it.type }.map {
+
+        oppdaterStegPåBehandling(saksbehandling, lagredeVilkårsvurderinger)
+        oppdaterKategoriPåBehandling(saksbehandling, lagredeVilkårsvurderinger)
+    }
+
+    private fun oppdaterStegPåBehandling(saksbehandling: Saksbehandling, vilkårsvurderinger: List<Vilkårsvurdering>) {
+        val vilkårsresultat = vilkårsvurderinger.groupBy { it.type }.map {
             if (it.key.gjelderFlereBarn()) {
                 utledResultatForVilkårSomGjelderFlereBarn(it.value)
             } else {
@@ -92,13 +106,25 @@ class VurderingStegService(
             }
         }
 
-        if (behandling.steg == StegType.VILKÅR && OppdaterVilkår.erAlleVilkårTattStillingTil(vilkårsresultat)) {
-            stegService.håndterVilkår(behandling).id
-        } else if (behandling.steg != StegType.VILKÅR && vilkårsresultat.any { it == Vilkårsresultat.IKKE_TATT_STILLING_TIL }) {
-            stegService.resetSteg(behandling.id, StegType.VILKÅR)
-        } else if (behandling.harStatusOpprettet) {
-            behandlingService.oppdaterStatusPåBehandling(behandling.id, BehandlingStatus.UTREDES)
-            opprettBehandlingsstatistikkTask(behandling)
+        if (saksbehandling.steg == StegType.VILKÅR && OppdaterVilkår.erAlleVilkårTattStillingTil(vilkårsresultat)) {
+            stegService.håndterVilkår(saksbehandling).id
+        } else if (saksbehandling.steg != StegType.VILKÅR && vilkårsresultat.any { it == Vilkårsresultat.IKKE_TATT_STILLING_TIL }) {
+            stegService.resetSteg(saksbehandling.id, StegType.VILKÅR)
+        } else if (saksbehandling.harStatusOpprettet) {
+            behandlingService.oppdaterStatusPåBehandling(saksbehandling.id, BehandlingStatus.UTREDES)
+            opprettBehandlingsstatistikkTask(saksbehandling)
+        }
+    }
+
+    private fun oppdaterKategoriPåBehandling(
+        saksbehandling: Saksbehandling,
+        vilkårsvurderinger: List<Vilkårsvurdering>
+    ) {
+        val lagretKategori = saksbehandling.kategori
+        val utledetKategori = utledBehandlingKategori(vilkårsvurderinger)
+
+        if (lagretKategori != utledetKategori) {
+            behandlingService.oppdaterKategoriPåBehandling(saksbehandling.id, utledetKategori)
         }
     }
 
@@ -141,7 +167,8 @@ class VurderingStegService(
         ).tilDto()
     }
 
-    private fun hentHovedregelMetadata(behandlingId: UUID) = vurderingService.hentGrunnlagOgMetadata(behandlingId).second
+    private fun hentHovedregelMetadata(behandlingId: UUID) =
+        vurderingService.hentGrunnlagOgMetadata(behandlingId).second
 
     private fun validerLåstForVidereRedigering(behandlingId: UUID) {
         if (behandlingErLåstForVidereRedigering(behandlingId)) {
@@ -165,4 +192,32 @@ class VurderingStegService(
 
     private fun behandlingErLåstForVidereRedigering(behandlingId: UUID) =
         behandlingService.hentBehandling(behandlingId).status.behandlingErLåstForVidereRedigering()
+
+    private fun utledBehandlingKategori(vilkårsvurderinger: List<Vilkårsvurdering>): BehandlingKategori {
+        val medlemFolketrygd =
+            vilkårsvurderinger.utledVurderinger(FORUTGÅENDE_MEDLEMSKAP, SØKER_MEDLEM_I_FOLKETRYGDEN).harSvar(JA)
+
+        val unntakEøsAnnenForelder =
+            vilkårsvurderinger.utledVurderinger(FORUTGÅENDE_MEDLEMSKAP, MEDLEMSKAP_UNNTAK).harSvar(
+                MEDLEM_MER_ENN_5_ÅR_EØS_ANNEN_FORELDER_TRYGDEDEKKET_I_NORGE
+            )
+
+        val unntakEøsMedlemskap =
+            vilkårsvurderinger.utledVurderinger(FORUTGÅENDE_MEDLEMSKAP, MEDLEMSKAP_UNNTAK).harSvar(
+                MEDLEM_MER_ENN_5_ÅR_EØS
+            )
+
+        val borOgOppholderSegINorge =
+            vilkårsvurderinger.utledVurderinger(LOVLIG_OPPHOLD, BOR_OG_OPPHOLDER_SEG_I_NORGE).harSvar(JA)
+
+        val unntakEøsOpphold = vilkårsvurderinger.utledVurderinger(LOVLIG_OPPHOLD, OPPHOLD_UNNTAK).harSvar(
+            OPPHOLDER_SEG_I_ANNET_EØS_LAND
+        )
+
+        val forutgåendeMedelmskapUtløserEøs =
+            !medlemFolketrygd && (unntakEøsAnnenForelder || unntakEøsMedlemskap)
+        val lovligOppholdUtløserEøs = !borOgOppholderSegINorge && unntakEøsOpphold
+
+        return if (forutgåendeMedelmskapUtløserEøs || lovligOppholdUtløserEøs) BehandlingKategori.EØS else BehandlingKategori.NASJONAL
+    }
 }
