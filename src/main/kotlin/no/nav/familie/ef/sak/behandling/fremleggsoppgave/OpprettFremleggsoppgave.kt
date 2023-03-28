@@ -7,5 +7,5 @@ import java.util.UUID
 data class OpprettFremleggsoppgave(
     @Id
     val behandlingId: UUID,
-    val oppgaveType: List<FremleggsoppgaveType>,
+    val oppgavetyper: List<FremleggsoppgaveType>,
 )

@@ -266,8 +266,8 @@ class IverksettingDtoMapper(
             avslagÅrsak = vedtak.avslåÅrsak,
             opprettFremleggsoppgave =
             fremleggsoppgaveService.hentFremleggsoppgave(vedtak.behandlingId)?.let {
-                OpprettFremleggsoppgaveDto(oppgaveTyper = it.oppgaveType)
-            } ?: OpprettFremleggsoppgaveDto(oppgaveTyper = emptyList()),
+                OpprettFremleggsoppgaveDto(oppgavetyper = it.oppgavetyper)
+            } ?: OpprettFremleggsoppgaveDto(oppgavetyper = emptyList()),
         )
 
     @Improvement("Opphørårsak må utledes ved revurdering")

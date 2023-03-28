@@ -101,7 +101,7 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
     private val fagsak = fagsak()
     private val behandling = behandling(fagsak)
     private val saksbehandling = saksbehandling(fagsak, behandling)
-    private val fremleggsoppgave = FremleggsoppgaveDto(fremleggsoppgaveTyper = listOf(FremleggsoppgaveType.INNTEKT), kanOppretteFremleggsoppgave = true)
+    private val fremleggsoppgave = FremleggsoppgaveDto(fremleggsoppgaveTyper = listOf(FremleggsoppgaveType.INNTEKTSKONTROLL_1_ÅR_FREM_I_TID), kanOppretteFremleggsoppgave = true)
 
     private enum class Saksbehandler(val beslutter: Boolean = false) {
         SAKSBEHANDLER,

@@ -9,5 +9,5 @@ data class FremleggsoppgaveDto(
 )
 
 fun FremleggsoppgaveDto.tilDomene(behandlingId: UUID): OpprettFremleggsoppgave {
-    return OpprettFremleggsoppgave(behandlingId = behandlingId, oppgaveType = this.fremleggsoppgaveTyper ?: emptyList())
+    return OpprettFremleggsoppgave(behandlingId = behandlingId, oppgavetyper = this.fremleggsoppgaveTyper ?: emptyList())
 }

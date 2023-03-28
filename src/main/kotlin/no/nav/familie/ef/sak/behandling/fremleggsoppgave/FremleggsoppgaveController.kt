@@ -18,7 +18,7 @@ class FremleggsoppgaveController(private val fremleggspppgaveService: Fremleggso
         val fremleggsOppgave = fremleggspppgaveService.hentFremleggsoppgave(behandlingid)
         return Ressurs.success(
             FremleggsoppgaveDto(
-                fremleggsoppgaveTyper = fremleggsOppgave?.let { it.oppgaveType } ?: null,
+                fremleggsoppgaveTyper = fremleggsOppgave?.let { it.oppgavetyper } ?: null,
                 kanOppretteFremleggsoppgave = fremleggspppgaveService.kanOpprettes(behandlingid),
             ),
         )
