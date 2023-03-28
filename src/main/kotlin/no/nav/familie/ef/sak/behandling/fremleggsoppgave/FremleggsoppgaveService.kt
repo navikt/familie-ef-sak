@@ -17,8 +17,8 @@ class FremleggsoppgaveService(
 ) {
 
     @Transactional
-    fun opprettEllerErstattFremleggsoppgave(behandlingId: UUID, fremleggsoppgave: OpprettFremleggsoppgave) {
-        when (fremleggsoppgaveReporitory.existsById(behandlingId)) {
+    fun opprettEllerErstattFremleggsoppgave(fremleggsoppgave: OpprettFremleggsoppgave) {
+        when (fremleggsoppgaveReporitory.existsById(fremleggsoppgave.behandlingId)) {
             true -> fremleggsoppgaveReporitory.update(fremleggsoppgave)
             false -> fremleggsoppgaveReporitory.insert(fremleggsoppgave)
         }

@@ -62,10 +62,7 @@ class VedtakController(
         val vedtakErUtenBeslutter = vedtakService.hentVedtak(behandlingId).utledVedtakErUtenBeslutter()
 
         if (fremleggsoppgaveDto.kanOppretteFremleggsoppgave) {
-            fremleggsoppgaveService.opprettEllerErstattFremleggsoppgave(
-                behandlingId,
-                fremleggsoppgaveDto.tilDomene(behandlingId),
-            )
+            fremleggsoppgaveService.opprettEllerErstattFremleggsoppgave(fremleggsoppgaveDto.tilDomene(behandlingId))
         }
 
         return if (vedtakErUtenBeslutter.value) {
