@@ -40,6 +40,7 @@ import no.nav.familie.ef.sak.vilkår.VilkårType
 import no.nav.familie.ef.sak.vilkår.Vilkårsresultat
 import no.nav.familie.ef.sak.vilkår.VilkårsvurderingRepository
 import no.nav.familie.kontrakter.ef.felles.AvslagÅrsak
+import no.nav.familie.kontrakter.ef.iverksett.FremleggsoppgaveType
 import no.nav.familie.kontrakter.ef.søknad.Testsøknad
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.ef.StønadType.OVERGANGSSTØNAD
@@ -100,7 +101,7 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
     private val fagsak = fagsak()
     private val behandling = behandling(fagsak)
     private val saksbehandling = saksbehandling(fagsak, behandling)
-    private val fremleggsoppgave = FremleggsoppgaveDto(inntekt = true, kanOppretteFremleggsoppgave = true)
+    private val fremleggsoppgave = FremleggsoppgaveDto(fremleggsoppgaveTyper = listOf(FremleggsoppgaveType.INNTEKT), kanOppretteFremleggsoppgave = true)
 
     private enum class Saksbehandler(val beslutter: Boolean = false) {
         SAKSBEHANDLER,

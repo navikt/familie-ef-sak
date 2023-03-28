@@ -7,5 +7,5 @@ import java.util.UUID
 
 @Repository
 interface FremleggsoppgaveReporitory :
-    RepositoryInterface<Fremleggsoppgave, UUID>,
-    InsertUpdateRepository<Fremleggsoppgave>
+    RepositoryInterface<OpprettFremleggsoppgave, UUID>,
+    InsertUpdateRepository<OpprettFremleggsoppgave>

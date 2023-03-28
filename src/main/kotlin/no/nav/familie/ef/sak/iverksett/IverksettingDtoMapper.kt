@@ -50,7 +50,7 @@ import no.nav.familie.kontrakter.ef.iverksett.IverksettBarnetilsynDto
 import no.nav.familie.kontrakter.ef.iverksett.IverksettDto
 import no.nav.familie.kontrakter.ef.iverksett.IverksettOvergangsstønadDto
 import no.nav.familie.kontrakter.ef.iverksett.IverksettSkolepengerDto
-import no.nav.familie.kontrakter.ef.iverksett.OpprettFremlegsoppgave
+import no.nav.familie.kontrakter.ef.iverksett.OpprettFremleggsoppgaveDto
 import no.nav.familie.kontrakter.ef.iverksett.PeriodeMedBeløpDto
 import no.nav.familie.kontrakter.ef.iverksett.SkolepengerStudietype
 import no.nav.familie.kontrakter.ef.iverksett.SkolepengerUtgiftDto
@@ -265,8 +265,9 @@ class IverksettingDtoMapper(
             brevmottakere = brevmottakere,
             avslagÅrsak = vedtak.avslåÅrsak,
             opprettFremleggsoppgave =
-            fremleggsoppgaveService.hentFremleggsoppgave(vedtak.behandlingId)
-                ?.let { OpprettFremlegsoppgave(it.inntekt) } ?: OpprettFremlegsoppgave(false),
+            fremleggsoppgaveService.hentFremleggsoppgave(vedtak.behandlingId)?.let {
+                OpprettFremleggsoppgaveDto(oppgaveTyper = it.oppgaveType)
+            } ?: OpprettFremleggsoppgaveDto(oppgaveTyper = emptyList()),
         )
 
     @Improvement("Opphørårsak må utledes ved revurdering")

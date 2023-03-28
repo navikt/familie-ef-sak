@@ -1,12 +1,13 @@
 package no.nav.familie.ef.sak.behandling.fremleggsoppgave
 
+import no.nav.familie.kontrakter.ef.iverksett.FremleggsoppgaveType
 import java.util.UUID
 
 data class FremleggsoppgaveDto(
-    val inntekt: Boolean,
+    val fremleggsoppgaveTyper: List<FremleggsoppgaveType>?,
     val kanOppretteFremleggsoppgave: Boolean,
 )
 
-fun FremleggsoppgaveDto.tilDomene(behandlingId: UUID): Fremleggsoppgave {
-    return Fremleggsoppgave(behandlingId = behandlingId, inntekt = this.inntekt)
+fun FremleggsoppgaveDto.tilDomene(behandlingId: UUID): OpprettFremleggsoppgave {
+    return OpprettFremleggsoppgave(behandlingId = behandlingId, oppgaveType = this.fremleggsoppgaveTyper ?: emptyList())
 }

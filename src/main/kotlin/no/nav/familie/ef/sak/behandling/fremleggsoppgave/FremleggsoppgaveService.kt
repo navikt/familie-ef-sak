@@ -17,14 +17,14 @@ class FremleggsoppgaveService(
 ) {
 
     @Transactional
-    fun opprettEllerErstattFremleggsoppgave(behandlingId: UUID, fremleggsoppgave: Fremleggsoppgave) {
+    fun opprettEllerErstattFremleggsoppgave(behandlingId: UUID, fremleggsoppgave: OpprettFremleggsoppgave) {
         when (fremleggsoppgaveReporitory.existsById(behandlingId)) {
             true -> fremleggsoppgaveReporitory.update(fremleggsoppgave)
             false -> fremleggsoppgaveReporitory.insert(fremleggsoppgave)
         }
     }
 
-    fun hentFremleggsoppgave(behandlingId: UUID): Fremleggsoppgave? {
+    fun hentFremleggsoppgave(behandlingId: UUID): OpprettFremleggsoppgave? {
         return fremleggsoppgaveReporitory.findByIdOrNull(behandlingId)
     }
 
