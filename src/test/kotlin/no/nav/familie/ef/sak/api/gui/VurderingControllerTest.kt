@@ -4,6 +4,7 @@ import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.barn.BarnService
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.Behandling
+import no.nav.familie.ef.sak.behandling.domain.BehandlingKategori
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.journalføring.dto.UstrukturertDokumentasjonType
@@ -18,10 +19,12 @@ import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.ef.sak.vilkår.VilkårType
 import no.nav.familie.ef.sak.vilkår.Vilkårsresultat
 import no.nav.familie.ef.sak.vilkår.VurderingService
+import no.nav.familie.ef.sak.vilkår.dto.DelvilkårsvurderingDto
 import no.nav.familie.ef.sak.vilkår.dto.OppdaterVilkårsvurderingDto
 import no.nav.familie.ef.sak.vilkår.dto.SvarPåVurderingerDto
 import no.nav.familie.ef.sak.vilkår.dto.VilkårDto
 import no.nav.familie.ef.sak.vilkår.dto.VilkårsvurderingDto
+import no.nav.familie.ef.sak.vilkår.dto.VurderingDto
 import no.nav.familie.ef.sak.vilkår.regler.RegelId
 import no.nav.familie.ef.sak.vilkår.regler.SvarId
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
@@ -74,8 +77,9 @@ internal class VurderingControllerTest : OppslagSpringRunnerTest() {
         assertThat(respons.body?.status).isEqualTo(Ressurs.Status.SUKSESS)
         assertThat(respons.body?.data).isNotNull
 
-        val næreBoforholdVurderingDto = respons.body?.data?.vurderinger?.first { it.vilkårType == VilkårType.ALENEOMSORG }
-            ?.delvilkårsvurderinger?.first { it.vurderinger.first().regelId == RegelId.NÆRE_BOFORHOLD }?.vurderinger?.first()
+        val næreBoforholdVurderingDto =
+            respons.body?.data?.vurderinger?.first { it.vilkårType == VilkårType.ALENEOMSORG }
+                ?.delvilkårsvurderinger?.first { it.vurderinger.first().regelId == RegelId.NÆRE_BOFORHOLD }?.vurderinger?.first()
 
         assertThat(næreBoforholdVurderingDto?.svar).isEqualTo(SvarId.NEI)
         assertThat(næreBoforholdVurderingDto?.begrunnelse).contains("annen forelder bor mer enn 1 km unna bruker")
@@ -137,8 +141,9 @@ internal class VurderingControllerTest : OppslagSpringRunnerTest() {
             behandlingsårsak = behandlingÅrsak,
         )
 
-        val oppdaterVilkårsvurdering = lagOppdaterVilkårsvurdering(opprettetVurdering, VilkårType.FORUTGÅENDE_MEDLEMSKAP)
-            .copy(behandlingId = behandling.id)
+        val oppdaterVilkårsvurdering =
+            lagOppdaterVilkårsvurdering(opprettetVurdering, VilkårType.FORUTGÅENDE_MEDLEMSKAP)
+                .copy(behandlingId = behandling.id)
         validerSjekkPåBehandlingId(oppdaterVilkårsvurdering, "vilkar")
     }
 
@@ -173,7 +178,8 @@ internal class VurderingControllerTest : OppslagSpringRunnerTest() {
     @Test
     internal fun `skal oppdatere vurderingen for FORUTGÅENDE_MEDLEMSKAP som har ett spørsmål som vi setter til JA`() {
         val opprettetVurdering = opprettVilkår().body?.data!!
-        val oppdatertVilkårsvarMedJa = lagOppdaterVilkårsvurdering(opprettetVurdering, VilkårType.FORUTGÅENDE_MEDLEMSKAP)
+        val oppdatertVilkårsvarMedJa =
+            lagOppdaterVilkårsvurdering(opprettetVurdering, VilkårType.FORUTGÅENDE_MEDLEMSKAP)
         val respons: ResponseEntity<Ressurs<VilkårsvurderingDto>> =
             restTemplate.exchange(
                 localhost("/api/vurdering/vilkar"),
@@ -184,6 +190,28 @@ internal class VurderingControllerTest : OppslagSpringRunnerTest() {
         assertThat(respons.statusCode).isEqualTo(HttpStatus.OK)
         assertThat(respons.body?.status).isEqualTo(Ressurs.Status.SUKSESS)
         assertThat(respons.body?.data?.id).isEqualTo(oppdatertVilkårsvarMedJa.id)
+    }
+
+    @Test
+    internal fun `skal oppdatere vurderingen for FORUTGÅENDE_MEDLEMSKAP til EØS slik at behandlingen får EØS-kategori`() {
+        val opprettetVurdering = opprettVilkår().body?.data!!
+        val behandlingId = opprettetVurdering.vurderinger.first().behandlingId
+        val oppdatertVilkår =
+            opprettetVurdering.vurderinger.first { it.vilkårType == VilkårType.FORUTGÅENDE_MEDLEMSKAP }.let {
+                svarPåVurderingerDtoForEøsMedlemskap(it)
+            }
+        assertThat(behandlingService.hentBehandling(behandlingId).kategori).isEqualTo(BehandlingKategori.NASJONAL)
+        val respons: ResponseEntity<Ressurs<VilkårsvurderingDto>> =
+            restTemplate.exchange(
+                localhost("/api/vurdering/vilkar"),
+                HttpMethod.POST,
+                HttpEntity(oppdatertVilkår, headers),
+            )
+
+        assertThat(respons.statusCode).isEqualTo(HttpStatus.OK)
+        assertThat(respons.body?.status).isEqualTo(Ressurs.Status.SUKSESS)
+        assertThat(respons.body?.data?.id).isEqualTo(oppdatertVilkår.id)
+        assertThat(behandlingService.hentBehandling(behandlingId).kategori).isEqualTo(BehandlingKategori.EØS)
     }
 
     @Test
@@ -211,7 +239,10 @@ internal class VurderingControllerTest : OppslagSpringRunnerTest() {
         assertThat(respons.body?.data?.id).isEqualTo(oppdatertVilkårsvarMedJa.id)
     }
 
-    private fun lagOppdaterVilkårsvurdering(opprettetVurdering: VilkårDto, vilkårType: VilkårType): SvarPåVurderingerDto {
+    private fun lagOppdaterVilkårsvurdering(
+        opprettetVurdering: VilkårDto,
+        vilkårType: VilkårType,
+    ): SvarPåVurderingerDto {
         return opprettetVurdering.vurderinger.first { it.vilkårType == vilkårType }.let {
             lagOppdaterVilkårsvurderingMedSvarJa(it)
         }
@@ -277,4 +308,25 @@ internal class VurderingControllerTest : OppslagSpringRunnerTest() {
         )
         return behandling
     }
+
+    private fun svarPåVurderingerDtoForEøsMedlemskap(it: VilkårsvurderingDto) = SvarPåVurderingerDto(
+        id = it.id,
+        behandlingId = it.behandlingId,
+        delvilkårsvurderinger = listOf(
+            DelvilkårsvurderingDto(
+                Vilkårsresultat.IKKE_OPPFYLT,
+                listOf(
+                    VurderingDto(
+                        RegelId.SØKER_MEDLEM_I_FOLKETRYGDEN,
+                        SvarId.NEI,
+                    ),
+                    VurderingDto(
+                        RegelId.MEDLEMSKAP_UNNTAK,
+                        SvarId.MEDLEM_MER_ENN_5_ÅR_EØS,
+                        "a",
+                    ),
+                ),
+            ),
+        ),
+    )
 }

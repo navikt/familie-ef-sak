@@ -93,5 +93,5 @@ enum class BehandlingStatus {
 
 enum class BehandlingKategori {
     EØS,
-    NASJONAL
+    NASJONAL,
 }

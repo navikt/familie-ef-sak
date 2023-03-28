@@ -137,7 +137,7 @@ class BehandlingService(
                 resultat = BehandlingResultat.IKKE_SATT,
                 årsak = behandlingsårsak,
                 kravMottatt = kravMottatt,
-                kategori = BehandlingKategori.NASJONAL
+                kategori = BehandlingKategori.NASJONAL,
             ),
         )
 
