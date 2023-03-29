@@ -51,7 +51,7 @@ internal class OppgaveRepositoryTest : OppslagSpringRunnerTest() {
         val oppgave =
             oppgaveRepository.findByBehandlingIdAndErFerdigstiltIsFalseAndTypeIn(
                 behandling.id,
-                setOf(Oppgavetype.BehandleSak, Oppgavetype.BehandleUnderkjentVedtak),
+                setOf(Oppgavetype.BehandleSak, Oppgavetype.BehandleUnderkjentVedtak)
             )
         assertThat(oppgave).isNotNull
         assertThat(oppgave?.type).isEqualTo(Oppgavetype.BehandleUnderkjentVedtak)
@@ -96,8 +96,8 @@ internal class OppgaveRepositoryTest : OppslagSpringRunnerTest() {
                 type = Oppgavetype.InnhentDokumentasjon,
                 alder = Alder.SEKS_MND,
                 gsakOppgaveId = 1,
-                barnPersonIdent = "1",
-            ),
+                barnPersonIdent = "1"
+            )
         )
         oppgaveRepository.insert(
             Oppgave(
@@ -105,15 +105,15 @@ internal class OppgaveRepositoryTest : OppslagSpringRunnerTest() {
                 type = Oppgavetype.InnhentDokumentasjon,
                 alder = Alder.SEKS_MND,
                 gsakOppgaveId = 1,
-                barnPersonIdent = "2",
-            ),
+                barnPersonIdent = "2"
+            )
         )
 
         assertThat(
             oppgaveRepository.findByTypeAndAlderIsNotNullAndBarnPersonIdenter(
                 Oppgavetype.InnhentDokumentasjon,
-                listOf("1"),
-            ).size,
+                listOf("1")
+            ).size
         ).isEqualTo(1)
     }
 

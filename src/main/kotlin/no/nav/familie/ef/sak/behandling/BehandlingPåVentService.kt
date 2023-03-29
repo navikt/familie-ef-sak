@@ -9,7 +9,7 @@ import no.nav.familie.ef.sak.behandling.dto.TaAvVentStatusDto
 import no.nav.familie.ef.sak.behandlingsflyt.task.BehandlingsstatistikkTask
 import no.nav.familie.ef.sak.behandlingshistorikk.BehandlingshistorikkService
 import no.nav.familie.ef.sak.behandlingshistorikk.domain.StegUtfall
-import no.nav.familie.ef.sak.felles.util.DatoFormat
+import no.nav.familie.ef.sak.felles.util.dagensDatoMedTidNorskFormat
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
@@ -24,7 +24,6 @@ import no.nav.familie.prosessering.internal.TaskService
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.time.LocalDateTime
 import java.util.UUID
 
 @Service
@@ -46,25 +45,25 @@ class BehandlingPåVentService(
         opprettHistorikkInnslag(behandling, StegUtfall.SATT_PÅ_VENT)
         taskService.save(BehandlingsstatistikkTask.opprettVenterTask(behandlingId))
 
-
         if (settPåVentRequest != null) {
-
-            val oppgave = oppgaveService.hentOppgave(settPåVentRequest.oppgaveId)
-
-            val beskrivelse =
-                utledOppgavebeskrivelse(oppgave, settPåVentRequest)
-
-
-            oppgaveService.oppdaterOppgave(
-                Oppgave(
-                    id = settPåVentRequest.oppgaveId,
-                    prioritet = settPåVentRequest.prioritet,
-                    fristFerdigstillelse = settPåVentRequest.frist,
-                    mappeId = settPåVentRequest.mappe,
-                    beskrivelse = beskrivelse
-                )
-            )
+            oppdaterVerdierPåOppgaven(settPåVentRequest)
         }
+    }
+
+    private fun oppdaterVerdierPåOppgaven(settPåVentRequest: SettPåVentRequest) {
+        val oppgave = oppgaveService.hentOppgave(settPåVentRequest.oppgaveId)
+        val beskrivelse = utledOppgavebeskrivelse(oppgave, settPåVentRequest)
+
+        oppgaveService.oppdaterOppgave(
+            Oppgave(
+                id = settPåVentRequest.oppgaveId,
+                prioritet = settPåVentRequest.prioritet,
+                fristFerdigstillelse = settPåVentRequest.frist,
+                mappeId = settPåVentRequest.mappe,
+                beskrivelse = beskrivelse,
+                tilordnetRessurs = settPåVentRequest.saksbehandler
+            )
+        )
     }
 
     private fun utledOppgavebeskrivelse(
@@ -72,25 +71,31 @@ class BehandlingPåVentService(
         settPåVentRequest: SettPåVentRequest
     ): String? {
         val tilordnetSaksbehandler = utledTilordnetSaksbehandlerBeskrivelse(oppgave, settPåVentRequest)
-
         val prioritet = utledPrioritetBeskrivelse(oppgave, settPåVentRequest)
-
         val frist = utledOppgavefristBeskrivelse(oppgave, settPåVentRequest)
-
         val mappe = utledMappeBeskrivelse(oppgave, settPåVentRequest)
-
         val harEndringer =
             tilordnetSaksbehandler.isNotBlank() || prioritet.isNotBlank() || frist.isNotBlank() || mappe.isNotBlank()
-
-        val beskrivelse = if (harEndringer) "\n${settPåVentRequest.beskrivelse}" else settPåVentRequest.beskrivelse
+        val beskrivelse = utledNyBeskrivelse(harEndringer, settPåVentRequest)
 
         val skalOppdatereBeskrivelse = harEndringer || beskrivelse.isNotBlank()
         val tidligereBeskrivelse =
-            if (skalOppdatereBeskrivelse && oppgave.beskrivelse?.isNotBlank() == true) "\n\n${oppgave.beskrivelse}" else oppgave.beskrivelse
+            if (skalOppdatereBeskrivelse && oppgave.beskrivelse?.isNotBlank() == true) "\n\n${oppgave.beskrivelse.orEmpty()}" else oppgave.beskrivelse.orEmpty()
 
         val prefix = utledBeskrivelsePrefix()
 
         return if (skalOppdatereBeskrivelse) prefix + tilordnetSaksbehandler + prioritet + frist + mappe + beskrivelse + tidligereBeskrivelse else tidligereBeskrivelse
+    }
+
+    private fun utledNyBeskrivelse(
+        harEndringer: Boolean,
+        settPåVentRequest: SettPåVentRequest
+    ): String {
+        return when {
+            settPåVentRequest.beskrivelse.isBlank() -> ""
+            harEndringer -> "\n${settPåVentRequest.beskrivelse}\n"
+            else -> "${settPåVentRequest.beskrivelse}\n"
+        }
     }
 
     private fun utledPrioritetBeskrivelse(
@@ -106,9 +111,7 @@ class BehandlingPåVentService(
         val innloggetSaksbehandlerIdent = SikkerhetContext.hentSaksbehandlerEllerSystembruker()
         val saksbehandlerNavn = SikkerhetContext.hentSaksbehandlerNavn(strict = false)
 
-        val formatertDato = LocalDateTime.now().format(DatoFormat.GOSYS_DATE_TIME)
-
-        val prefix = "--- $formatertDato $saksbehandlerNavn ($innloggetSaksbehandlerIdent) ---\n"
+        val prefix = "--- ${dagensDatoMedTidNorskFormat()} $saksbehandlerNavn ($innloggetSaksbehandlerIdent) ---\n"
         return prefix
     }
 
@@ -116,7 +119,6 @@ class BehandlingPåVentService(
         oppgave: Oppgave,
         settPåVentRequest: SettPåVentRequest
     ): String {
-
         val mapper = oppgaveService.finnMapper(
             oppgave.tildeltEnhetsnr ?: throw Feil("Kan ikke finne mapper når oppgave mangler enhet")
         )
@@ -148,12 +150,12 @@ class BehandlingPåVentService(
         settPåVentRequest: SettPåVentRequest
     ): String {
         val eksisterendeSaksbehandler = oppgave.tilordnetRessurs ?: "<ingen>"
-        val nySaksbehandler =
-            if (settPåVentRequest.saksbehandler == "") "<ingen>" else settPåVentRequest.saksbehandler
+        val nySaksbehandler = if (settPåVentRequest.saksbehandler == "") "<ingen>" else settPåVentRequest.saksbehandler
 
-        val saksbehandlerBeskrivelse =
-            if (eksisterendeSaksbehandler == nySaksbehandler) "" else "Oppgave flyttet fra saksbehandler $eksisterendeSaksbehandler til ${nySaksbehandler}\n"
-        return saksbehandlerBeskrivelse
+        return when (eksisterendeSaksbehandler) {
+            nySaksbehandler -> ""
+            else -> "Oppgave flyttet fra saksbehandler $eksisterendeSaksbehandler til ${nySaksbehandler}\n"
+        }
     }
 
     private fun validerKanSettePåVent(
@@ -185,6 +187,7 @@ class BehandlingPåVentService(
                     "Annen behandling må ferdigstilles før denne kan aktiveres på nytt",
                     HttpStatus.BAD_REQUEST
                 )
+
             TaAvVentStatus.MÅ_NULSTILLE_VEDTAK -> {
                 val nyForrigeBehandlingId = kanTaAvVent.nyForrigeBehandlingId ?: error("Mangler nyForrigeBehandlingId")
                 behandlingService.oppdaterForrigeBehandlingId(behandlingId, nyForrigeBehandlingId)

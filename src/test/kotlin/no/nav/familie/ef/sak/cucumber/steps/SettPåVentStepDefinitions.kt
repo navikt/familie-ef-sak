@@ -20,6 +20,8 @@ import no.nav.familie.ef.sak.cucumber.domeneparser.parseDato
 import no.nav.familie.ef.sak.cucumber.domeneparser.parseEnum
 import no.nav.familie.ef.sak.cucumber.domeneparser.parseInt
 import no.nav.familie.ef.sak.cucumber.domeneparser.parseString
+import no.nav.familie.ef.sak.cucumber.domeneparser.parseValgfriString
+import no.nav.familie.ef.sak.felles.util.DatoUtil
 import no.nav.familie.ef.sak.felles.util.mockFeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.oppgave.OppgaveService
@@ -30,13 +32,13 @@ import no.nav.familie.kontrakter.felles.oppgave.Oppgave
 import no.nav.familie.kontrakter.felles.oppgave.OppgavePrioritet
 import no.nav.familie.prosessering.internal.TaskService
 import org.assertj.core.api.Assertions.assertThat
+import java.time.LocalDateTime
 
 class SettPåVentStepDefinitions {
 
     lateinit var eksisterendeOppgave: Oppgave
     lateinit var settOppgavePåVentRequest: SettPåVentRequest
-    val mapper = emptyList<MappeDto>()
-
+    var mapper = emptyList<MappeDto>()
 
     val featureToggleService = mockFeatureToggleService()
     val behandlingService = mockk<BehandlingService>()
@@ -51,30 +53,29 @@ class SettPåVentStepDefinitions {
         taskService,
         nullstillVedtakService,
         featureToggleService,
-        oppgaveService,
+        oppgaveService
     )
 
     val behandling = behandling()
     val oppgaveSlot = slot<Oppgave>()
-
 
     @Gitt("eksisterende oppgave")
     fun eksisterendeOppgave(dataTable: DataTable) {
         val verdier = dataTable.asMap()
         eksisterendeOppgave =
             Oppgave(
-                tilordnetRessurs = parseString(SettPåVentDomeneBegrep.SAKSBEHANDLER, verdier), //verdier["saksbehandler"],
+                tilordnetRessurs = parseString(SettPåVentDomeneBegrep.SAKSBEHANDLER, verdier),
                 fristFerdigstillelse = parseDato(SettPåVentDomeneBegrep.FRIST, verdier).toString(),
-                mappeId = parseString(SettPåVentDomeneBegrep.MAPPE, verdier).toLong(),
+                mappeId = parseValgfriString(SettPåVentDomeneBegrep.MAPPE, verdier)?.toLong(),
                 prioritet = parseEnum<OppgavePrioritet>(SettPåVentDomeneBegrep.PRIORITET, verdier),
-                beskrivelse = parseString(SettPåVentDomeneBegrep.BESKRIVELSE, verdier),
+                beskrivelse = parseValgfriString(SettPåVentDomeneBegrep.BESKRIVELSE, verdier),
                 tildeltEnhetsnr = "4489"
             )
     }
 
     @Gitt("mapper")
     fun gjeldendeMapper(dataTable: DataTable) {
-        val verdier = dataTable.asMaps().map {
+        mapper = dataTable.asMaps().map {
             MappeDto(
                 id = parseInt(SettPåVentDomeneBegrep.MAPPE_ID, it),
                 navn = parseString(SettPåVentDomeneBegrep.MAPPE_NAVN, it),
@@ -84,23 +85,24 @@ class SettPåVentStepDefinitions {
     }
 
     @Gitt("sett på vent request")
-    fun settPåVentRequest(dataTable: DataTable){
+    fun settPåVentRequest(dataTable: DataTable) {
         val verdier = dataTable.asMap()
         settOppgavePåVentRequest =
             SettPåVentRequest(
                 oppgaveId = 123,
-                saksbehandler = parseString(SettPåVentDomeneBegrep.SAKSBEHANDLER, verdier), //verdier["saksbehandler"],
+                saksbehandler = parseValgfriString(SettPåVentDomeneBegrep.SAKSBEHANDLER, verdier) ?: "",
                 frist = parseDato(SettPåVentDomeneBegrep.FRIST, verdier).toString(),
-                mappe = parseString(SettPåVentDomeneBegrep.MAPPE, verdier).toLong(),
+                mappe = parseValgfriString(SettPåVentDomeneBegrep.MAPPE, verdier)?.toLong(),
                 prioritet = parseEnum(SettPåVentDomeneBegrep.PRIORITET, verdier),
-                beskrivelse = parseString(SettPåVentDomeneBegrep.BESKRIVELSE, verdier)
+                beskrivelse = parseValgfriString(SettPåVentDomeneBegrep.BESKRIVELSE, verdier) ?: ""
             )
     }
 
     @Når("vi setter behandling på vent")
-    fun settBehandlingPåVent(){
-
+    fun settBehandlingPåVent() {
         mockkObject(SikkerhetContext)
+        mockkObject(DatoUtil)
+        every { DatoUtil.dagensDatoMedTid() } returns LocalDateTime.of(2020, 10, 25, 13, 34)
 
         every { SikkerhetContext.hentSaksbehandler() } returns "bob"
         every { behandlingService.hentBehandling(behandling.id) } returns behandling
@@ -113,13 +115,32 @@ class SettPåVentStepDefinitions {
 
         påVentService.settPåVent(behandling.id, settOppgavePåVentRequest)
         unmockkObject(SikkerhetContext)
+        unmockkObject(DatoUtil)
     }
 
     @Så("forventer vi følgende beskrivelse på oppgaven")
-    fun forventOppgavebeskrivelse(beskrivelse: String){
-        assertThat(beskrivelse).isEqualTo(oppgaveSlot.captured.beskrivelse)
+    fun forventOppgavebeskrivelse(beskrivelse: String) {
+        assertThat(oppgaveSlot.captured.beskrivelse).isEqualTo(beskrivelse)
     }
 
+    @Så("forventer vi at oppgaven er oppdatert med")
+    fun forventOppgaveOppdatert(dataTable: DataTable) {
+        val verdier = dataTable.asMap()
+        assertThat(oppgaveSlot.captured.tilordnetRessurs).isEqualTo(parseValgfriString(SettPåVentDomeneBegrep.SAKSBEHANDLER, verdier).orEmpty())
+        assertThat(oppgaveSlot.captured.fristFerdigstillelse).isEqualTo(
+            parseDato(
+                SettPåVentDomeneBegrep.FRIST,
+                verdier
+            ).toString()
+        )
+        assertThat(oppgaveSlot.captured.mappeId).isEqualTo(parseValgfriString(SettPåVentDomeneBegrep.MAPPE, verdier)?.toLong())
+        assertThat(oppgaveSlot.captured.prioritet).isEqualTo(
+            parseEnum<OppgavePrioritet>(
+                SettPåVentDomeneBegrep.PRIORITET,
+                verdier
+            )
+        )
+    }
 
     enum class SettPåVentDomeneBegrep(val nøkkel: String) : Domenenøkkel {
         MAPPE_ID("Mappeid"),
@@ -128,7 +149,8 @@ class SettPåVentStepDefinitions {
         FRIST("frist"),
         MAPPE("mappe"),
         PRIORITET("prioritet"),
-        BESKRIVELSE("beskrivelse");
+        BESKRIVELSE("beskrivelse")
+        ;
 
         override fun nøkkel(): String {
             return nøkkel
