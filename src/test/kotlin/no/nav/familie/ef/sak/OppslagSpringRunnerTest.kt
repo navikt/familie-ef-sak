@@ -9,6 +9,7 @@ import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.Behandlingsjournalpost
 import no.nav.familie.ef.sak.behandling.domain.ÅrsakRevurdering
 import no.nav.familie.ef.sak.behandling.migrering.Migreringsstatus
+import no.nav.familie.ef.sak.behandling.oppgaveforopprettelse.OppgaverForOpprettelse
 import no.nav.familie.ef.sak.behandlingshistorikk.domain.Behandlingshistorikk
 import no.nav.familie.ef.sak.blankett.Blankett
 import no.nav.familie.ef.sak.brev.domain.Brevmottakere
@@ -160,6 +161,7 @@ abstract class OppslagSpringRunnerTest {
             TaskLogg::class,
             Task::class,
             Migreringsstatus::class,
+            OppgaverForOpprettelse::class,
         ).forEach { jdbcAggregateOperations.deleteAll(it.java) }
     }
 
