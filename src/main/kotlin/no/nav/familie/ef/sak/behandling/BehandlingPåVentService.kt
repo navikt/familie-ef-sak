@@ -87,7 +87,7 @@ class BehandlingPåVentService(
 
         val skalOppdatereBeskrivelse = harEndringer || beskrivelse.isNotBlank()
         val tidligereBeskrivelse =
-            if (skalOppdatereBeskrivelse && oppgave.beskrivelse?.isNotBlank() == true) "\n\n${oppgave.beskrivelse}" else oppgave.beskrivelse
+            if (skalOppdatereBeskrivelse && oppgave.beskrivelse?.isNotBlank() == true) "\n\n${oppgave.beskrivelse}" else oppgave.beskrivelse ?: ""
 
         val prefix = utledBeskrivelsePrefix()
 
