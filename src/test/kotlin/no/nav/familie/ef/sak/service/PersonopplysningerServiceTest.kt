@@ -67,7 +67,6 @@ internal class PersonopplysningerServiceTest {
                 adresseMapper,
                 StatsborgerskapMapper(kodeverkService),
                 InnflyttingUtflyttingMapper(kodeverkService),
-                arbeidsfordelingService,
             )
         personopplysningerService = PersonopplysningerService(
             personService,
