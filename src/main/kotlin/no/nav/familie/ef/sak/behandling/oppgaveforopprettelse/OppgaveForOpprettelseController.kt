@@ -14,11 +14,11 @@ import java.util.UUID
 class OppgaveForOpprettelseController(private val fremleggspppgaveService: OppgaverForOpprettelseService) {
 
     @GetMapping("/{behandlingid}")
-    fun hentFremleggsoppgave(@PathVariable behandlingid: UUID): Ressurs<OppgaverForOpprettelseDto?> {
-        val fremleggsOppgave = fremleggspppgaveService.hentFremleggsoppgave(behandlingid)
+    fun hentOppgaverForOpprettelse(@PathVariable behandlingid: UUID): Ressurs<OppgaverForOpprettelseDto?> {
+        val oppgaverForOpprettelse = fremleggspppgaveService.hentOppgaverForOpprettelse(behandlingid)
         return Ressurs.success(
             OppgaverForOpprettelseDto(
-                oppgavetyper = fremleggsOppgave?.let { it.oppgavetyper } ?: null,
+                oppgavetyper = oppgaverForOpprettelse?.let { it.oppgavetyper } ?: null,
                 kanOppretteOppgaveForInntektAutomatisk = fremleggspppgaveService.kanOpprettes(behandlingid),
             ),
         )

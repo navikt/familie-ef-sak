@@ -149,7 +149,7 @@ internal class IverksettingDtoMapperTest {
             årsak = Revurderingsårsak.ENDRING_INNTEKT,
             beskrivelse = "beskrivelse",
         )
-        every { oppgaverForOpprettelseService.hentFremleggsoppgave(any()) } returns null
+        every { oppgaverForOpprettelseService.hentOppgaverForOpprettelse(any()) } returns null
     }
 
     @Test

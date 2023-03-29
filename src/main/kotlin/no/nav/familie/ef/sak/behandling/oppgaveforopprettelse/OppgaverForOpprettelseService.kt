@@ -24,7 +24,7 @@ class OppgaverForOpprettelseService(
         }
     }
 
-    fun hentFremleggsoppgave(behandlingId: UUID): OppgaverForOpprettelse? {
+    fun hentOppgaverForOpprettelse(behandlingId: UUID): OppgaverForOpprettelse? {
         return oppgaverForOpprettelseRepository.findByIdOrNull(behandlingId)
     }
 
