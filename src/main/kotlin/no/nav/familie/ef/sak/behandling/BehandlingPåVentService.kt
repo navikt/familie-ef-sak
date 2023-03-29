@@ -58,6 +58,7 @@ class BehandlingPåVentService(
             oppgaveService.oppdaterOppgave(
                 Oppgave(
                     id = settPåVentRequest.oppgaveId,
+                    tilordnetRessurs = settPåVentRequest.saksbehandler,
                     prioritet = settPåVentRequest.prioritet,
                     fristFerdigstillelse = settPåVentRequest.frist,
                     mappeId = settPåVentRequest.mappe,
