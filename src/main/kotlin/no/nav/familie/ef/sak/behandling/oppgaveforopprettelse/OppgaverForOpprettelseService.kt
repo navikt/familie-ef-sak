@@ -3,6 +3,7 @@ package no.nav.familie.ef.sak.behandling.oppgaveforopprettelse
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
+import no.nav.familie.kontrakter.ef.iverksett.OppgaveForOpprettelseType
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -28,7 +29,14 @@ class OppgaverForOpprettelseService(
         return oppgaverForOpprettelseRepository.findByIdOrNull(behandlingId)
     }
 
-    fun kanOppretteOppgaveForInntektskontroll(behandlingId: UUID): Boolean {
+    fun oppgaverSomKanOpprettes(behandlingId: UUID): List<OppgaveForOpprettelseType> {
+        if (kanOppretteOppgaveForInntektskontroll(behandlingId)) {
+            return listOf(OppgaveForOpprettelseType.INNTEKTSKONTROLL_1_ÅR_FREM_I_TID)
+        }
+        return emptyList()
+    }
+
+    private fun kanOppretteOppgaveForInntektskontroll(behandlingId: UUID): Boolean {
         val behandling = behandlingService.hentBehandling(behandlingId)
         val behandlingstype = behandling.type
 

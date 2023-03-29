@@ -5,7 +5,7 @@ import java.util.UUID
 
 data class OppgaverForOpprettelseDto(
     val oppgavetyper: List<OppgaveForOpprettelseType>?,
-    val kanOppretteOppgaveForInntektAutomatisk: Boolean,
+    val oppgaverSomKanOpprettes: List<OppgaveForOpprettelseType>,
 )
 
 fun OppgaverForOpprettelseDto.tilDomene(behandlingId: UUID): OppgaverForOpprettelse {

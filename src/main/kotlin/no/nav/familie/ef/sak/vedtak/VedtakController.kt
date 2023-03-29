@@ -17,6 +17,7 @@ import no.nav.familie.ef.sak.vedtak.dto.TotrinnskontrollStatusDto
 import no.nav.familie.ef.sak.vedtak.dto.VedtakDto
 import no.nav.familie.ef.sak.vedtak.historikk.VedtakHistorikkService
 import no.nav.familie.ef.sak.vilkår.VurderingService
+import no.nav.familie.kontrakter.ef.iverksett.OppgaveForOpprettelseType
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.slf4j.LoggerFactory
@@ -61,7 +62,7 @@ class VedtakController(
         tilgangService.validerTilgangTilBehandling(behandling, AuditLoggerEvent.UPDATE)
         val vedtakErUtenBeslutter = vedtakService.hentVedtak(behandlingId).utledVedtakErUtenBeslutter()
 
-        if (oppgaverForOpprettelseDto.kanOppretteOppgaveForInntektAutomatisk) {
+        if (oppgaverForOpprettelseDto.oppgaverSomKanOpprettes.contains(OppgaveForOpprettelseType.INNTEKTSKONTROLL_1_ÅR_FREM_I_TID)) {
             oppgaverForOpprettelseService.opprettEllerErstattFremleggsoppgave(oppgaverForOpprettelseDto.tilDomene(behandlingId))
         }
 

@@ -19,7 +19,7 @@ class OppgaveForOpprettelseController(private val oppgaverForOpprettelseService:
         return Ressurs.success(
             OppgaverForOpprettelseDto(
                 oppgavetyper = oppgaverForOpprettelse?.let { it.oppgavetyper } ?: null,
-                kanOppretteOppgaveForInntektAutomatisk = oppgaverForOpprettelseService.kanOppretteOppgaveForInntektskontroll(behandlingid),
+                oppgaverSomKanOpprettes = oppgaverForOpprettelseService.oppgaverSomKanOpprettes(behandlingid),
             ),
         )
     }
