@@ -15,7 +15,7 @@ class OppgaveForOpprettelseController(private val fremleggspppgaveService: Oppga
 
     @GetMapping("/{behandlingid}")
     fun hentOppgaverForOpprettelse(@PathVariable behandlingid: UUID): Ressurs<OppgaverForOpprettelseDto?> {
-        val oppgaverForOpprettelse = fremleggspppgaveService.hentOppgaverForOpprettelse(behandlingid)
+        val oppgaverForOpprettelse = fremleggspppgaveService.hentOppgaverForOpprettelseEllerNull(behandlingid)
         return Ressurs.success(
             OppgaverForOpprettelseDto(
                 oppgavetyper = oppgaverForOpprettelse?.let { it.oppgavetyper } ?: null,
