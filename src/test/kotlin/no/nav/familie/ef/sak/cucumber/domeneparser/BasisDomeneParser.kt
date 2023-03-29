@@ -12,7 +12,6 @@ import no.nav.familie.ef.sak.vedtak.dto.ResultatType
 import no.nav.familie.ef.sak.vedtak.dto.Sanksjonsårsak
 import no.nav.familie.ef.sak.vedtak.historikk.EndringType
 import no.nav.familie.ef.sak.vilkår.regler.SvarId
-import no.nav.familie.kontrakter.felles.oppgave.Oppgave
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.YearMonth

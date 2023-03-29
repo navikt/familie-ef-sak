@@ -20,6 +20,9 @@ import no.nav.familie.ef.sak.cucumber.domeneparser.parseDato
 import no.nav.familie.ef.sak.cucumber.domeneparser.parseEnum
 import no.nav.familie.ef.sak.cucumber.domeneparser.parseInt
 import no.nav.familie.ef.sak.cucumber.domeneparser.parseString
+import no.nav.familie.ef.sak.cucumber.domeneparser.parseValgfriDato
+import no.nav.familie.ef.sak.cucumber.domeneparser.parseValgfriEnum
+import no.nav.familie.ef.sak.cucumber.domeneparser.parseValgfriString
 import no.nav.familie.ef.sak.felles.util.mockFeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.oppgave.OppgaveService
@@ -35,8 +38,7 @@ class SettPåVentStepDefinitions {
 
     lateinit var eksisterendeOppgave: Oppgave
     lateinit var settOppgavePåVentRequest: SettPåVentRequest
-    val mapper = emptyList<MappeDto>()
-
+    lateinit var mapper: List<MappeDto>
 
     val featureToggleService = mockFeatureToggleService()
     val behandlingService = mockk<BehandlingService>()
@@ -57,24 +59,23 @@ class SettPåVentStepDefinitions {
     val behandling = behandling()
     val oppgaveSlot = slot<Oppgave>()
 
-
     @Gitt("eksisterende oppgave")
     fun eksisterendeOppgave(dataTable: DataTable) {
         val verdier = dataTable.asMap()
         eksisterendeOppgave =
             Oppgave(
-                tilordnetRessurs = parseString(SettPåVentDomeneBegrep.SAKSBEHANDLER, verdier), //verdier["saksbehandler"],
-                fristFerdigstillelse = parseDato(SettPåVentDomeneBegrep.FRIST, verdier).toString(),
-                mappeId = parseString(SettPåVentDomeneBegrep.MAPPE, verdier).toLong(),
-                prioritet = parseEnum<OppgavePrioritet>(SettPåVentDomeneBegrep.PRIORITET, verdier),
-                beskrivelse = parseString(SettPåVentDomeneBegrep.BESKRIVELSE, verdier),
+                tilordnetRessurs = parseString(SettPåVentDomeneBegrep.SAKSBEHANDLER, verdier),
+                fristFerdigstillelse = parseValgfriDato(SettPåVentDomeneBegrep.FRIST, verdier)?.toString(),
+                mappeId = parseValgfriString(SettPåVentDomeneBegrep.MAPPE, verdier)?.toLong(),
+                prioritet = parseValgfriEnum<OppgavePrioritet>(SettPåVentDomeneBegrep.PRIORITET, verdier),
+                beskrivelse = parseValgfriString(SettPåVentDomeneBegrep.BESKRIVELSE, verdier),
                 tildeltEnhetsnr = "4489"
             )
     }
 
     @Gitt("mapper")
     fun gjeldendeMapper(dataTable: DataTable) {
-        val verdier = dataTable.asMaps().map {
+        mapper = dataTable.asMaps().map {
             MappeDto(
                 id = parseInt(SettPåVentDomeneBegrep.MAPPE_ID, it),
                 navn = parseString(SettPåVentDomeneBegrep.MAPPE_NAVN, it),
@@ -84,21 +85,21 @@ class SettPåVentStepDefinitions {
     }
 
     @Gitt("sett på vent request")
-    fun settPåVentRequest(dataTable: DataTable){
+    fun settPåVentRequest(dataTable: DataTable) {
         val verdier = dataTable.asMap()
         settOppgavePåVentRequest =
             SettPåVentRequest(
                 oppgaveId = 123,
-                saksbehandler = parseString(SettPåVentDomeneBegrep.SAKSBEHANDLER, verdier), //verdier["saksbehandler"],
+                saksbehandler = parseString(SettPåVentDomeneBegrep.SAKSBEHANDLER, verdier),
                 frist = parseDato(SettPåVentDomeneBegrep.FRIST, verdier).toString(),
-                mappe = parseString(SettPåVentDomeneBegrep.MAPPE, verdier).toLong(),
+                mappe = parseValgfriString(SettPåVentDomeneBegrep.MAPPE, verdier)?.toLong(),
                 prioritet = parseEnum(SettPåVentDomeneBegrep.PRIORITET, verdier),
                 beskrivelse = parseString(SettPåVentDomeneBegrep.BESKRIVELSE, verdier)
             )
     }
 
     @Når("vi setter behandling på vent")
-    fun settBehandlingPåVent(){
+    fun settBehandlingPåVent() {
 
         mockkObject(SikkerhetContext)
 
@@ -116,19 +117,38 @@ class SettPåVentStepDefinitions {
     }
 
     @Så("forventer vi følgende beskrivelse på oppgaven")
-    fun forventOppgavebeskrivelse(beskrivelse: String){
-        assertThat(beskrivelse).isEqualTo(oppgaveSlot.captured.beskrivelse)
+    fun forventOppgavebeskrivelse(beskrivelse: String) {
+
+        assertThat(oppgaveSlot.captured.beskrivelse!!.lines().first()).matches("--- [0-9]{4}\\.[0-9]{2}.[0-9]{2} [0-9]{2}:[0-9]{2} System \\(VL\\) ---")
+        assertThat(oppgaveSlot.captured.beskrivelse).contains(beskrivelse)
+
     }
 
+    @Så("forventer vi at oppgaven er oppdatert med")
+    fun forventOppdatertOppgave(dataTable: DataTable) {
+        val verdier = dataTable.asMap()
+
+        assertThat(oppgaveSlot.captured.tilordnetRessurs).isEqualTo(parseValgfriString(SettPåVentDomeneBegrep.TILORDNET_RESSURS, verdier))
+        assertThat(oppgaveSlot.captured.fristFerdigstillelse).isEqualTo(parseValgfriDato(SettPåVentDomeneBegrep.FRIST_FERDIGSTILLELSE, verdier)?.toString())
+        assertThat(oppgaveSlot.captured.mappeId).isEqualTo(parseValgfriString(SettPåVentDomeneBegrep.ENHETSMAPPE, verdier)?.toLong())
+        assertThat(oppgaveSlot.captured.prioritet).isEqualTo(parseValgfriEnum<OppgavePrioritet>(SettPåVentDomeneBegrep.PRIORITET, verdier))
+    }
 
     enum class SettPåVentDomeneBegrep(val nøkkel: String) : Domenenøkkel {
         MAPPE_ID("Mappeid"),
         MAPPE_NAVN("Mappenavn"),
+
+        // SettPåVentRequest
         SAKSBEHANDLER("saksbehandler"),
         FRIST("frist"),
         MAPPE("mappe"),
         PRIORITET("prioritet"),
-        BESKRIVELSE("beskrivelse");
+        BESKRIVELSE("beskrivelse"),
+
+        // Oppgave
+        TILORDNET_RESSURS("tilordnetRessurs"),
+        FRIST_FERDIGSTILLELSE("fristFerdigstillelse"),
+        ENHETSMAPPE("enhetsmappe");
 
         override fun nøkkel(): String {
             return nøkkel
