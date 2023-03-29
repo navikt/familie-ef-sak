@@ -11,16 +11,18 @@ import java.util.UUID
 @RestController
 @RequestMapping("/api/fremleggsoppgave")
 @ProtectedWithClaims(issuer = "azuread")
-class OppgaveForOpprettelseController(private val fremleggspppgaveService: OppgaverForOpprettelseService) {
+class OppgaveForOpprettelseController(private val oppgaverForOpprettelseService: OppgaverForOpprettelseService) {
 
     @GetMapping("/{behandlingid}")
     fun hentOppgaverForOpprettelse(@PathVariable behandlingid: UUID): Ressurs<OppgaverForOpprettelseDto?> {
-        val oppgaverForOpprettelse = fremleggspppgaveService.hentOppgaverForOpprettelseEllerNull(behandlingid)
+        val oppgaverForOpprettelse = oppgaverForOpprettelseService.hentOppgaverForOpprettelseEllerNull(behandlingid)
         return Ressurs.success(
             OppgaverForOpprettelseDto(
                 oppgavetyper = oppgaverForOpprettelse?.let { it.oppgavetyper } ?: null,
-                kanOppretteOppgaveForInntektAutomatisk = fremleggspppgaveService.kanOpprettes(behandlingid),
+                kanOppretteOppgaveForInntektAutomatisk = oppgaverForOpprettelseService.kanOpprettes(behandlingid),
             ),
         )
     }
 }
+
+
