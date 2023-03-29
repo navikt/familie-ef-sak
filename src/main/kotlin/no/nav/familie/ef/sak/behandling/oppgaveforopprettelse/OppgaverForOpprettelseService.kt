@@ -28,7 +28,7 @@ class OppgaverForOpprettelseService(
         return oppgaverForOpprettelseRepository.findByIdOrNull(behandlingId)
     }
 
-    fun kanOpprettes(behandlingId: UUID): Boolean {
+    fun kanOppretteOppgaveForInntektskontroll(behandlingId: UUID): Boolean {
         val behandling = behandlingService.hentBehandling(behandlingId)
         val behandlingstype = behandling.type
 
