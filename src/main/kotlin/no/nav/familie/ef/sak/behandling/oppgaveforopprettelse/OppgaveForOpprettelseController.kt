@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RestController
 import java.util.UUID
 
 @RestController
-@RequestMapping("/api/fremleggsoppgave")
+@RequestMapping("/api/oppgaveforopprettelse")
 @ProtectedWithClaims(issuer = "azuread")
 class OppgaveForOpprettelseController(private val oppgaverForOpprettelseService: OppgaverForOpprettelseService) {
 
