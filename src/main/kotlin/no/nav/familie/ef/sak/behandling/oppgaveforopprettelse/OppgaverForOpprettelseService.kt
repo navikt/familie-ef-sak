@@ -1,4 +1,4 @@
-package no.nav.familie.ef.sak.behandling.fremleggsoppgave
+package no.nav.familie.ef.sak.behandling.oppgaveforopprettelse
 
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
@@ -10,22 +10,22 @@ import java.time.LocalDate
 import java.util.UUID
 
 @Service
-class FremleggsoppgaveService(
-    private val fremleggsoppgaveReporitory: FremleggsoppgaveReporitory,
+class OppgaverForOpprettelseService(
+    private val oppgaverForOpprettelseRepository: OppgaverForOpprettelseRepository,
     private val behandlingService: BehandlingService,
     private val tilkjentYtelseService: TilkjentYtelseService,
 ) {
 
     @Transactional
-    fun opprettEllerErstattFremleggsoppgave(fremleggsoppgave: OpprettFremleggsoppgave) {
-        when (fremleggsoppgaveReporitory.existsById(fremleggsoppgave.behandlingId)) {
-            true -> fremleggsoppgaveReporitory.update(fremleggsoppgave)
-            false -> fremleggsoppgaveReporitory.insert(fremleggsoppgave)
+    fun opprettEllerErstattFremleggsoppgave(oppgaverForOpprettelse: OppgaverForOpprettelse) {
+        when (this.oppgaverForOpprettelseRepository.existsById(oppgaverForOpprettelse.behandlingId)) {
+            true -> this.oppgaverForOpprettelseRepository.update(oppgaverForOpprettelse)
+            false -> this.oppgaverForOpprettelseRepository.insert(oppgaverForOpprettelse)
         }
     }
 
-    fun hentFremleggsoppgave(behandlingId: UUID): OpprettFremleggsoppgave? {
-        return fremleggsoppgaveReporitory.findByIdOrNull(behandlingId)
+    fun hentFremleggsoppgave(behandlingId: UUID): OppgaverForOpprettelse? {
+        return oppgaverForOpprettelseRepository.findByIdOrNull(behandlingId)
     }
 
     fun kanOpprettes(behandlingId: UUID): Boolean {

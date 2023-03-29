@@ -3,7 +3,7 @@ package no.nav.familie.ef.sak.iverksett
 import no.nav.familie.ef.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ef.sak.barn.BarnService
 import no.nav.familie.ef.sak.behandling.Saksbehandling
-import no.nav.familie.ef.sak.behandling.fremleggsoppgave.FremleggsoppgaveService
+import no.nav.familie.ef.sak.behandling.oppgaveforopprettelse.OppgaverForOpprettelseService
 import no.nav.familie.ef.sak.behandling.ÅrsakRevurderingsRepository
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.behandlingshistorikk.BehandlingshistorikkService
@@ -50,7 +50,7 @@ import no.nav.familie.kontrakter.ef.iverksett.IverksettBarnetilsynDto
 import no.nav.familie.kontrakter.ef.iverksett.IverksettDto
 import no.nav.familie.kontrakter.ef.iverksett.IverksettOvergangsstønadDto
 import no.nav.familie.kontrakter.ef.iverksett.IverksettSkolepengerDto
-import no.nav.familie.kontrakter.ef.iverksett.OpprettFremleggsoppgaveDto
+import no.nav.familie.kontrakter.ef.iverksett.OppgaverForOpprettelseDto
 import no.nav.familie.kontrakter.ef.iverksett.PeriodeMedBeløpDto
 import no.nav.familie.kontrakter.ef.iverksett.SkolepengerStudietype
 import no.nav.familie.kontrakter.ef.iverksett.SkolepengerUtgiftDto
@@ -94,7 +94,7 @@ class IverksettingDtoMapper(
     private val grunnlagsdataService: GrunnlagsdataService,
     private val brevmottakereRepository: BrevmottakereRepository,
     private val årsakRevurderingsRepository: ÅrsakRevurderingsRepository,
-    private val fremleggsoppgaveService: FremleggsoppgaveService,
+    private val oppgaverForOpprettelseService: OppgaverForOpprettelseService,
 ) {
 
     fun tilDto(saksbehandling: Saksbehandling, beslutter: String): IverksettDto {
@@ -265,9 +265,9 @@ class IverksettingDtoMapper(
             brevmottakere = brevmottakere,
             avslagÅrsak = vedtak.avslåÅrsak,
             opprettFremleggsoppgave =
-            fremleggsoppgaveService.hentFremleggsoppgave(vedtak.behandlingId)?.let {
-                OpprettFremleggsoppgaveDto(oppgavetyper = it.oppgavetyper)
-            } ?: OpprettFremleggsoppgaveDto(oppgavetyper = emptyList()),
+            oppgaverForOpprettelseService.hentFremleggsoppgave(vedtak.behandlingId)?.let {
+                OppgaverForOpprettelseDto(oppgavetyper = it.oppgavetyper)
+            } ?: OppgaverForOpprettelseDto(oppgavetyper = emptyList()),
         )
 
     @Improvement("Opphørårsak må utledes ved revurdering")

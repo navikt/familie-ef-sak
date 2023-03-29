@@ -7,7 +7,7 @@ import no.nav.familie.ef.sak.api.gui.VedtakControllerTest.Saksbehandler.SAKSBEHA
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
-import no.nav.familie.ef.sak.behandling.fremleggsoppgave.FremleggsoppgaveDto
+import no.nav.familie.ef.sak.behandling.oppgaveforopprettelse.OppgaverForOpprettelseDto
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.behandlingsflyt.task.FerdigstillOppgaveTask
 import no.nav.familie.ef.sak.behandlingsflyt.task.OpprettOppgaveTask
@@ -40,7 +40,7 @@ import no.nav.familie.ef.sak.vilkår.VilkårType
 import no.nav.familie.ef.sak.vilkår.Vilkårsresultat
 import no.nav.familie.ef.sak.vilkår.VilkårsvurderingRepository
 import no.nav.familie.kontrakter.ef.felles.AvslagÅrsak
-import no.nav.familie.kontrakter.ef.iverksett.FremleggsoppgaveType
+import no.nav.familie.kontrakter.ef.iverksett.OppgaveForOpprettelseType
 import no.nav.familie.kontrakter.ef.søknad.Testsøknad
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.ef.StønadType.OVERGANGSSTØNAD
@@ -101,7 +101,7 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
     private val fagsak = fagsak()
     private val behandling = behandling(fagsak)
     private val saksbehandling = saksbehandling(fagsak, behandling)
-    private val fremleggsoppgave = FremleggsoppgaveDto(fremleggsoppgaveTyper = listOf(FremleggsoppgaveType.INNTEKTSKONTROLL_1_ÅR_FREM_I_TID), kanOppretteFremleggsoppgave = true)
+    private val fremleggsoppgave = OppgaverForOpprettelseDto(oppgavetyper = listOf(OppgaveForOpprettelseType.INNTEKTSKONTROLL_1_ÅR_FREM_I_TID), kanOppretteOppgaveForInntektAutomatisk = true)
 
     private enum class Saksbehandler(val beslutter: Boolean = false) {
         SAKSBEHANDLER,

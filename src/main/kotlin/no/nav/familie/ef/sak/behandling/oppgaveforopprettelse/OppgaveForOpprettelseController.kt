@@ -1,4 +1,4 @@
-package no.nav.familie.ef.sak.behandling.fremleggsoppgave
+package no.nav.familie.ef.sak.behandling.oppgaveforopprettelse
 
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -11,15 +11,15 @@ import java.util.UUID
 @RestController
 @RequestMapping("/api/fremleggsoppgave")
 @ProtectedWithClaims(issuer = "azuread")
-class FremleggsoppgaveController(private val fremleggspppgaveService: FremleggsoppgaveService) {
+class OppgaveForOpprettelseController(private val fremleggspppgaveService: OppgaverForOpprettelseService) {
 
     @GetMapping("/{behandlingid}")
-    fun hentFremleggsoppgave(@PathVariable behandlingid: UUID): Ressurs<FremleggsoppgaveDto?> {
+    fun hentFremleggsoppgave(@PathVariable behandlingid: UUID): Ressurs<OppgaverForOpprettelseDto?> {
         val fremleggsOppgave = fremleggspppgaveService.hentFremleggsoppgave(behandlingid)
         return Ressurs.success(
-            FremleggsoppgaveDto(
-                fremleggsoppgaveTyper = fremleggsOppgave?.let { it.oppgavetyper } ?: null,
-                kanOppretteFremleggsoppgave = fremleggspppgaveService.kanOpprettes(behandlingid),
+            OppgaverForOpprettelseDto(
+                oppgavetyper = fremleggsOppgave?.let { it.oppgavetyper } ?: null,
+                kanOppretteOppgaveForInntektAutomatisk = fremleggspppgaveService.kanOpprettes(behandlingid),
             ),
         )
     }
