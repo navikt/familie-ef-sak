@@ -264,7 +264,7 @@ class IverksettingDtoMapper(
             tilbakekreving = tilbakekreving,
             brevmottakere = brevmottakere,
             avslagÅrsak = vedtak.avslåÅrsak,
-            opprettFremleggsoppgave =
+            oppgaverForOpprettelse =
             oppgaverForOpprettelseService.hentOppgaverForOpprettelseEllerNull(vedtak.behandlingId)?.let {
                 OppgaverForOpprettelseDto(oppgavetyper = it.oppgavetyper)
             } ?: OppgaverForOpprettelseDto(oppgavetyper = emptyList()),
