@@ -6,7 +6,6 @@ import no.nav.familie.ef.sak.behandling.migrering.OpprettOppgaveForMigrertFødtB
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
-import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.opplysninger.mapper.BarnMatcher
 import no.nav.familie.ef.sak.opplysninger.mapper.MatchetBehandlingBarn
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
@@ -37,7 +36,6 @@ class NyeBarnService(
     private val personService: PersonService,
     private val barnService: BarnService,
     private val taskService: TaskService,
-    private val featureToggleService: FeatureToggleService,
 ) {
 
     private val logger: Logger = LoggerFactory.getLogger(javaClass)
@@ -100,8 +98,8 @@ class NyeBarnService(
         return finnKobledeBarn(behandling.id, aktivIdent)
     }
 
-    private fun finnKobledeBarn(forrigeBehandlingId: UUID, personIdent: String): NyeBarnData {
-        val alleBarnPåBehandlingen = barnService.finnBarnPåBehandling(forrigeBehandlingId)
+    private fun finnKobledeBarn(behandlingId: UUID, personIdent: String): NyeBarnData {
+        val alleBarnPåBehandlingen = barnService.finnBarnPåBehandling(behandlingId)
         val pdlBarn = GrunnlagsdataMapper.mapBarn(personService.hentPersonMedBarn(personIdent).barn)
         val kobledeBarn = BarnMatcher.kobleBehandlingBarnOgRegisterBarn(alleBarnPåBehandlingen, pdlBarn)
 

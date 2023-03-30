@@ -35,7 +35,6 @@ internal class PersonopplysningerMapperTest {
         adresseMapper = adresseMapper,
         statsborgerskapMapper = statsborgerskapMapper,
         innflyttingUtflyttingMapper = innflyttingUtflyttingMapper,
-        arbeidsfordelingService = arbeidsfordelingService,
     )
 
     @BeforeEach
