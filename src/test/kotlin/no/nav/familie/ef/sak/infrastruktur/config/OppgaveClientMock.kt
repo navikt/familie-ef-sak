@@ -144,6 +144,10 @@ class OppgaveClientMock {
             oppgaver.remove(firstArg())
         }
 
+        every { oppgaveClient.oppdaterOppgave(any()) } answers {
+            firstArg<Oppgave>().id ?: 0
+        }
+
         return oppgaveClient
     }
 
