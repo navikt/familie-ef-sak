@@ -6,6 +6,6 @@ import org.springframework.stereotype.Repository
 import java.util.UUID
 
 @Repository
-interface FremleggsoppgaveReporitory :
-    RepositoryInterface<OpprettFremleggsoppgave, UUID>,
-    InsertUpdateRepository<OpprettFremleggsoppgave>
+interface FremleggsoppgaveRepository :
+    RepositoryInterface<Fremleggsoppgave, UUID>,
+    InsertUpdateRepository<Fremleggsoppgave>

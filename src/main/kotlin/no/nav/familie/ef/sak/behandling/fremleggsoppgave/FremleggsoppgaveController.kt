@@ -11,15 +11,16 @@ import java.util.UUID
 @RestController
 @RequestMapping("/api/fremleggsoppgave")
 @ProtectedWithClaims(issuer = "azuread")
-class FremleggsoppgaveController(private val fremleggspppgaveService: FremleggsoppgaveService) {
+class FremleggsoppgaveController(private val fremleggsoppgaveService: FremleggsoppgaveService) {
 
-    @GetMapping("/{behandlingid}")
-    fun hentFremleggsoppgave(@PathVariable behandlingid: UUID): Ressurs<FremleggsoppgaveDto?> {
-        val fremleggsOppgave = fremleggspppgaveService.hentFremleggsoppgave(behandlingid)
+    @GetMapping("/{behandlingId}")
+    fun hentFremleggsoppgave(@PathVariable behandlingId: UUID): Ressurs<FremleggWrapper> {
+        val lagretFremleggsoppgave = fremleggsoppgaveService.hentFremleggsoppgave(behandlingId)
         return Ressurs.success(
-            FremleggsoppgaveDto(
-                fremleggsoppgaveTyper = fremleggsOppgave?.let { it.oppgavetyper } ?: null,
-                kanOppretteFremleggsoppgave = fremleggspppgaveService.kanOpprettes(behandlingid),
+            FremleggWrapper(
+                oppgavetyperSomKanOpprettes = fremleggsoppgaveService.hentOppgavetyperSomKanOpprettes(behandlingId),
+                oppgavetyperSomSkalOpprettes = lagretFremleggsoppgave?.oppgavetyper ?: emptyList(),
+                opprettelseTattStillingTil = lagretFremleggsoppgave?.opprettelseTattStillingTil ?: false
             ),
         )
     }

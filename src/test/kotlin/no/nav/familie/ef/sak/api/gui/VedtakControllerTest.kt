@@ -7,7 +7,7 @@ import no.nav.familie.ef.sak.api.gui.VedtakControllerTest.Saksbehandler.SAKSBEHA
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
-import no.nav.familie.ef.sak.behandling.fremleggsoppgave.FremleggsoppgaveDto
+import no.nav.familie.ef.sak.behandling.fremleggsoppgave.FremleggWrapper
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.behandlingsflyt.task.FerdigstillOppgaveTask
 import no.nav.familie.ef.sak.behandlingsflyt.task.OpprettOppgaveTask
@@ -40,7 +40,7 @@ import no.nav.familie.ef.sak.vilkår.VilkårType
 import no.nav.familie.ef.sak.vilkår.Vilkårsresultat
 import no.nav.familie.ef.sak.vilkår.VilkårsvurderingRepository
 import no.nav.familie.kontrakter.ef.felles.AvslagÅrsak
-import no.nav.familie.kontrakter.ef.iverksett.FremleggsoppgaveType
+import no.nav.familie.kontrakter.ef.iverksett.FremleggsoppgaveType.INNTEKTSKONTROLL_1_ÅR_FREM_I_TID
 import no.nav.familie.kontrakter.ef.søknad.Testsøknad
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.ef.StønadType.OVERGANGSSTØNAD
@@ -101,7 +101,11 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
     private val fagsak = fagsak()
     private val behandling = behandling(fagsak)
     private val saksbehandling = saksbehandling(fagsak, behandling)
-    private val fremleggsoppgave = FremleggsoppgaveDto(fremleggsoppgaveTyper = listOf(FremleggsoppgaveType.INNTEKTSKONTROLL_1_ÅR_FREM_I_TID), kanOppretteFremleggsoppgave = true)
+    private val fremleggWrapper = FremleggWrapper(
+        oppgavetyperSomKanOpprettes = listOf(INNTEKTSKONTROLL_1_ÅR_FREM_I_TID),
+        oppgavetyperSomSkalOpprettes = listOf(INNTEKTSKONTROLL_1_ÅR_FREM_I_TID),
+        opprettelseTattStillingTil = true
+    )
 
     private enum class Saksbehandler(val beslutter: Boolean = false) {
         SAKSBEHANDLER,
@@ -296,7 +300,13 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
         @Test
         internal fun `skal feile hvis vedtak ikke er i steg BESLUTTE_VEDTAK`() {
             opprettBehandling(steg = StegType.SEND_TIL_BESLUTTER, status = BehandlingStatus.FATTER_VEDTAK)
-            behandlingshistorikkService.opprettHistorikkInnslag(Behandlingshistorikk(behandlingId = behandling.id, steg = StegType.SEND_TIL_BESLUTTER, opprettetAv = SAKSBEHANDLER.name))
+            behandlingshistorikkService.opprettHistorikkInnslag(
+                Behandlingshistorikk(
+                    behandlingId = behandling.id,
+                    steg = StegType.SEND_TIL_BESLUTTER,
+                    opprettetAv = SAKSBEHANDLER.name,
+                ),
+            )
             opprettOppgave(oppgaveType = Oppgavetype.GodkjenneVedtak, sakshandler = BESLUTTER)
             angreSendTilBeslutter(SAKSBEHANDLER, responseBadRequest())
         }
@@ -328,7 +338,8 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
             val historikk = behandlingshistorikkService.finnSisteBehandlingshistorikk(behandlingId)
             assertThat(historikk.utfall == StegUtfall.ANGRE_SEND_TIL_BESLUTTER)
 
-            val gjeldendeTasks = taskService.findAll().filter { task -> task.metadata["behandlingId"] == behandlingId.toString() }
+            val gjeldendeTasks =
+                taskService.findAll().filter { task -> task.metadata["behandlingId"] == behandlingId.toString() }
             assertThat(gjeldendeTasks.single { task -> task.type == FerdigstillOppgaveTask.TYPE && task.metadata["oppgavetype"] == "GodkjenneVedtak" }).isNotNull
             assertThat(gjeldendeTasks.single { task -> task.type == OpprettOppgaveTask.TYPE && task.metadata["oppgavetype"] == "BehandleSak" }).isNotNull
         }
@@ -376,7 +387,11 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
         oppgaveType: Oppgavetype = Oppgavetype.GodkjenneVedtak,
         sakshandler: Saksbehandler = SAKSBEHANDLER,
     ) {
-        oppgaveService.opprettOppgave(oppgavetype = oppgaveType, behandlingId = behandling.id, tilordnetNavIdent = sakshandler.name)
+        oppgaveService.opprettOppgave(
+            oppgavetype = oppgaveType,
+            behandlingId = behandling.id,
+            tilordnetNavIdent = sakshandler.name,
+        )
     }
 
     private fun <T> responseOK(): (ResponseEntity<Ressurs<T>>) -> Unit = {
@@ -401,7 +416,7 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
         val response = restTemplate.exchange<Ressurs<UUID>>(
             localhost("/api/vedtak/${behandling.id}/send-til-beslutter"),
             HttpMethod.POST,
-            HttpEntity<Any>(fremleggsoppgave, headers),
+            HttpEntity<Any>(fremleggWrapper, headers),
         )
         validator.invoke(response)
     }
@@ -430,7 +445,11 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
         saksbehandler: Saksbehandler,
         validator: (ResponseEntity<Ressurs<UUID>>) -> Unit = responseOK(),
     ) {
-        beslutteVedtak(saksbehandler, BeslutteVedtakDto(false, "begrunnelse", listOf(ÅrsakUnderkjent.TIDLIGERE_VEDTAKSPERIODER)), validator)
+        beslutteVedtak(
+            saksbehandler,
+            BeslutteVedtakDto(false, "begrunnelse", listOf(ÅrsakUnderkjent.TIDLIGERE_VEDTAKSPERIODER)),
+            validator,
+        )
     }
 
     private fun beslutteVedtak(
@@ -464,7 +483,8 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
     private fun validerBehandlingIverksetter() =
         validerBehandling(BehandlingStatus.IVERKSETTER_VEDTAK, StegType.VENTE_PÅ_STATUS_FRA_IVERKSETT)
 
-    private fun validerBehandlingFatterVedtak() = validerBehandling(BehandlingStatus.FATTER_VEDTAK, StegType.BESLUTTE_VEDTAK)
+    private fun validerBehandlingFatterVedtak() =
+        validerBehandling(BehandlingStatus.FATTER_VEDTAK, StegType.BESLUTTE_VEDTAK)
 
     private fun validerBehandling(status: BehandlingStatus, steg: StegType) {
         val behandling = behandlingRepository.findByIdOrThrow(behandling.id)

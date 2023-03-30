@@ -1,8 +1,11 @@
 package no.nav.familie.ef.sak.behandling.fremleggsoppgave
 
 import no.nav.familie.ef.sak.behandling.BehandlingService
+import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
+import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
+import no.nav.familie.kontrakter.ef.iverksett.FremleggsoppgaveType
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -11,33 +14,37 @@ import java.util.UUID
 
 @Service
 class FremleggsoppgaveService(
-    private val fremleggsoppgaveReporitory: FremleggsoppgaveReporitory,
+    private val fremleggsoppgaveRepository: FremleggsoppgaveRepository,
     private val behandlingService: BehandlingService,
     private val tilkjentYtelseService: TilkjentYtelseService,
 ) {
 
     @Transactional
-    fun opprettEllerErstattFremleggsoppgave(fremleggsoppgave: OpprettFremleggsoppgave) {
-        when (fremleggsoppgaveReporitory.existsById(fremleggsoppgave.behandlingId)) {
-            true -> fremleggsoppgaveReporitory.update(fremleggsoppgave)
-            false -> fremleggsoppgaveReporitory.insert(fremleggsoppgave)
+    fun opprettEllerErstattFremleggsoppgave(fremleggsoppgave: Fremleggsoppgave) {
+        when (fremleggsoppgaveRepository.existsById(fremleggsoppgave.behandlingId)) {
+            true -> fremleggsoppgaveRepository.update(fremleggsoppgave)
+            false -> fremleggsoppgaveRepository.insert(fremleggsoppgave)
         }
     }
 
-    fun hentFremleggsoppgave(behandlingId: UUID): OpprettFremleggsoppgave? {
-        return fremleggsoppgaveReporitory.findByIdOrNull(behandlingId)
+    fun hentFremleggsoppgave(behandlingId: UUID): Fremleggsoppgave? {
+        return fremleggsoppgaveRepository.findByIdOrNull(behandlingId)
     }
 
-    fun kanOpprettes(behandlingId: UUID): Boolean {
+    fun hentOppgavetyperSomKanOpprettes(behandlingId: UUID): List<FremleggsoppgaveType> {
         val behandling = behandlingService.hentBehandling(behandlingId)
-        val behandlingstype = behandling.type
-
         val tilkjentYtelse = tilkjentYtelseService.hentForBehandling(behandlingId)
+        val kanOppretteInntektskontroll = kanOppretteOppgaveForInntektskontrollFremITid(behandling, tilkjentYtelse)
+
+        return if (kanOppretteInntektskontroll) listOf(FremleggsoppgaveType.INNTEKTSKONTROLL_1_ÅR_FREM_I_TID) else emptyList()
+    }
+
+    private fun kanOppretteOppgaveForInntektskontrollFremITid(behandling: Behandling, tilkjentYtelse: TilkjentYtelse): Boolean {
         val sisteAndel = tilkjentYtelse.andelerTilkjentYtelse.sortedBy { it.stønadTom }.last()
         val sisteAndelMedBeløp = sisteAndel.beløp > 0
         val sisteAndel1årFremITid = sisteAndel.stønadTom.minusYears(1) > LocalDate.now()
 
-        return behandlingstype == BehandlingType.FØRSTEGANGSBEHANDLING &&
+        return behandling.type == BehandlingType.FØRSTEGANGSBEHANDLING &&
             sisteAndelMedBeløp &&
             sisteAndel1årFremITid
     }
