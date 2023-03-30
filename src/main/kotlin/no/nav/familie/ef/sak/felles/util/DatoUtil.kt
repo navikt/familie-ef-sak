@@ -18,7 +18,6 @@ object DatoFormat {
 object DatoUtil {
 
     fun dagensDatoMedTid(): LocalDateTime = LocalDateTime.now()
-
 }
 
 fun LocalDate.norskFormat() = this.format(DATE_FORMAT_NORSK)

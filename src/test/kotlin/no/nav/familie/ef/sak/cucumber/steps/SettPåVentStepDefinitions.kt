@@ -71,7 +71,7 @@ class SettPåVentStepDefinitions {
                 mappeId = parseValgfriString(SettPåVentDomeneBegrep.MAPPE, verdier)?.toLong(),
                 prioritet = parseValgfriEnum<OppgavePrioritet>(SettPåVentDomeneBegrep.PRIORITET, verdier),
                 beskrivelse = parseValgfriString(SettPåVentDomeneBegrep.BESKRIVELSE, verdier),
-                tildeltEnhetsnr = "4489"
+                tildeltEnhetsnr = "4489",
             )
     }
 
@@ -81,7 +81,7 @@ class SettPåVentStepDefinitions {
             MappeDto(
                 id = parseInt(SettPåVentDomeneBegrep.MAPPE_ID, it),
                 navn = parseString(SettPåVentDomeneBegrep.MAPPE_NAVN, it),
-                "4489"
+                "4489",
             )
         }
     }
@@ -96,13 +96,12 @@ class SettPåVentStepDefinitions {
                 frist = parseDato(SettPåVentDomeneBegrep.FRIST, verdier).toString(),
                 mappe = parseValgfriString(SettPåVentDomeneBegrep.MAPPE, verdier)?.toLong(),
                 prioritet = parseEnum(SettPåVentDomeneBegrep.PRIORITET, verdier),
-                beskrivelse = parseValgfriString(SettPåVentDomeneBegrep.BESKRIVELSE, verdier).orEmpty()
+                beskrivelse = parseValgfriString(SettPåVentDomeneBegrep.BESKRIVELSE, verdier).orEmpty(),
             )
     }
 
     @Når("vi setter behandling på vent")
     fun settBehandlingPåVent() {
-
         mockkObject(SikkerhetContext)
         mockkObject(DatoUtil)
         every { DatoUtil.dagensDatoMedTid() } returns LocalDateTime.of(2020, 10, 25, 13, 34)
@@ -124,7 +123,6 @@ class SettPåVentStepDefinitions {
     @Så("forventer vi følgende beskrivelse på oppgaven")
     fun forventOppgavebeskrivelse(beskrivelse: String) {
         assertThat(oppgaveSlot.captured.beskrivelse).isEqualTo(beskrivelse)
-
     }
 
     @Så("forventer vi at oppgaven er oppdatert med")
@@ -146,7 +144,8 @@ class SettPåVentStepDefinitions {
         FRIST("frist"),
         MAPPE("mappe"),
         PRIORITET("prioritet"),
-        BESKRIVELSE("beskrivelse");
+        BESKRIVELSE("beskrivelse"),
+        ;
 
         override fun nøkkel(): String {
             return nøkkel

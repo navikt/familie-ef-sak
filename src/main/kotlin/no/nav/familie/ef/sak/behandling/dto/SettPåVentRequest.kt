@@ -8,5 +8,5 @@ data class SettPåVentRequest(
     val prioritet: OppgavePrioritet,
     val frist: String,
     val mappe: Long?,
-    val beskrivelse: String
+    val beskrivelse: String,
 )

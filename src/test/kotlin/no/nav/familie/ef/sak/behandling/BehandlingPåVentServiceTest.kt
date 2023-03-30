@@ -106,7 +106,7 @@ internal class BehandlingPåVentServiceTest {
                     behandlingId,
                     any(),
                     StegUtfall.SATT_PÅ_VENT,
-                    null
+                    null,
                 )
             }
             verify {
@@ -215,7 +215,7 @@ internal class BehandlingPåVentServiceTest {
                     behandlingId,
                     any(),
                     StegUtfall.TATT_AV_VENT,
-                    null
+                    null,
                 )
             }
             verify {
@@ -290,12 +290,12 @@ internal class BehandlingPåVentServiceTest {
                 prioritet = OppgavePrioritet.HOY,
                 frist = LocalDate.of(2002, Month.MARCH, 24).toString(),
                 mappe = 102,
-                beskrivelse = "Her er litt tekst fra saksbehandler"
+                beskrivelse = "Her er litt tekst fra saksbehandler",
             )
             behandlingPåVentService.settPåVent(
-                behandlingId, settPåVentRequest
+                behandlingId,
+                settPåVentRequest,
             )
-
 
             assertThat(oppgaveSlot.captured.beskrivelse).isNotEqualTo(eksisterendeOppgave.beskrivelse)
             assertThat(oppgaveSlot.captured.mappeId).isEqualTo(settPåVentRequest.mappe)

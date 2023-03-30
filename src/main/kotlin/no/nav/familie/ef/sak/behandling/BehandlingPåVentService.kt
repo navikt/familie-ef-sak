@@ -33,7 +33,7 @@ class BehandlingPåVentService(
     private val taskService: TaskService,
     private val nullstillVedtakService: NullstillVedtakService,
     private val featureToggleService: FeatureToggleService,
-    private val oppgaveService: OppgaveService
+    private val oppgaveService: OppgaveService,
 ) {
     @Transactional
     fun settPåVent(behandlingId: UUID, settPåVentRequest: SettPåVentRequest? = null) {
@@ -44,7 +44,6 @@ class BehandlingPåVentService(
         behandlingService.oppdaterStatusPåBehandling(behandlingId, SATT_PÅ_VENT)
         opprettHistorikkInnslag(behandling, StegUtfall.SATT_PÅ_VENT)
         taskService.save(BehandlingsstatistikkTask.opprettVenterTask(behandlingId))
-
 
         if (settPåVentRequest != null) {
             oppdaterVerdierPåOppgave(settPåVentRequest)
@@ -63,14 +62,14 @@ class BehandlingPåVentService(
                 prioritet = settPåVentRequest.prioritet,
                 fristFerdigstillelse = settPåVentRequest.frist,
                 mappeId = settPåVentRequest.mappe,
-                beskrivelse = beskrivelse
-            )
+                beskrivelse = beskrivelse,
+            ),
         )
     }
 
     private fun utledOppgavebeskrivelse(
         oppgave: Oppgave,
-        settPåVentRequest: SettPåVentRequest
+        settPåVentRequest: SettPåVentRequest,
     ): String? {
         val tilordnetSaksbehandler = utledTilordnetSaksbehandlerBeskrivelse(oppgave, settPåVentRequest)
 
@@ -99,7 +98,7 @@ class BehandlingPåVentService(
 
     private fun utledPrioritetBeskrivelse(
         oppgave: Oppgave,
-        settPåVentRequest: SettPåVentRequest
+        settPåVentRequest: SettPåVentRequest,
     ): String {
         val prioritetBeskrivelse =
             if (oppgave.prioritet == settPåVentRequest.prioritet) "" else "Oppgave endret fra prioritet ${oppgave.prioritet?.name} til ${settPåVentRequest.prioritet}\n"
@@ -108,7 +107,7 @@ class BehandlingPåVentService(
 
     private fun utledNyBeskrivelse(
         harEndringer: Boolean,
-        settPåVentRequest: SettPåVentRequest
+        settPåVentRequest: SettPåVentRequest,
     ): String {
         return when {
             settPåVentRequest.beskrivelse.isBlank() -> ""
@@ -127,11 +126,10 @@ class BehandlingPåVentService(
 
     private fun utledMappeBeskrivelse(
         oppgave: Oppgave,
-        settPåVentRequest: SettPåVentRequest
+        settPåVentRequest: SettPåVentRequest,
     ): String {
-
         val mapper = oppgaveService.finnMapper(
-            oppgave.tildeltEnhetsnr ?: throw Feil("Kan ikke finne mapper når oppgave mangler enhet")
+            oppgave.tildeltEnhetsnr ?: throw Feil("Kan ikke finne mapper når oppgave mangler enhet"),
         )
 
         val eksisterendeMappenavn = mapper.find { it.id.toLong() == oppgave.mappeId }?.navn
@@ -147,7 +145,7 @@ class BehandlingPåVentService(
 
     private fun utledOppgavefristBeskrivelse(
         oppgave: Oppgave,
-        settPåVentRequest: SettPåVentRequest
+        settPåVentRequest: SettPåVentRequest,
     ): String {
         val eksisterendeFrist = oppgave.fristFerdigstillelse ?: "<ingen>"
         val nyFrist = settPåVentRequest.frist
@@ -158,7 +156,7 @@ class BehandlingPåVentService(
 
     private fun utledTilordnetSaksbehandlerBeskrivelse(
         oppgave: Oppgave,
-        settPåVentRequest: SettPåVentRequest
+        settPåVentRequest: SettPåVentRequest,
     ): String {
         val eksisterendeSaksbehandler = oppgave.tilordnetRessurs ?: "<ingen>"
         val nySaksbehandler =
@@ -171,7 +169,7 @@ class BehandlingPåVentService(
 
     private fun validerKanSettePåVent(
         behandling: Behandling,
-        settPåVentRequest: SettPåVentRequest?
+        settPåVentRequest: SettPåVentRequest?,
     ) {
         brukerfeilHvis(behandling.status.behandlingErLåstForVidereRedigering()) {
             "Kan ikke sette behandling med status ${behandling.status} på vent"

@@ -54,7 +54,7 @@ class BehandlingController(
     @PostMapping("{behandlingId}/vent")
     fun settPåVent(
         @PathVariable behandlingId: UUID,
-        @RequestBody settPåVentRequest: SettPåVentRequest?
+        @RequestBody settPåVentRequest: SettPåVentRequest?,
     ): Ressurs<UUID> {
         tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.UPDATE)
         tilgangService.validerHarSaksbehandlerrolle()
