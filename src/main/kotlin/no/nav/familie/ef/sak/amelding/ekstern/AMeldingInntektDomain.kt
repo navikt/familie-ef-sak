@@ -7,7 +7,7 @@ import java.time.YearMonth
 data class HentInntektListeResponse(
     @JsonProperty("arbeidsInntektMaaned")
     val arbeidsinntektMåned: List<ArbeidsinntektMåned>?,
-    val ident: Aktør
+    val ident: Aktør,
 )
 
 data class ArbeidsinntektMåned(
@@ -15,13 +15,13 @@ data class ArbeidsinntektMåned(
     val årMåned: YearMonth,
     // rapportert for den måneden
     val avvikListe: List<Avvik>?,
-    val arbeidsInntektInformasjon: ArbeidsInntektInformasjon?
+    val arbeidsInntektInformasjon: ArbeidsInntektInformasjon?,
 )
 
 data class Aktør(
     val identifikator: String,
     @JsonProperty("aktoerType")
-    val aktørType: AktørType
+    val aktørType: AktørType,
 )
 
 data class Avvik(
@@ -29,11 +29,11 @@ data class Avvik(
     val opplysningspliktig: Aktør? = null,
     val virksomhet: Aktør,
     val avvikPeriode: YearMonth? = null,
-    val tekst: String? = null
+    val tekst: String? = null,
 )
 
 data class ArbeidsInntektInformasjon(
-    val inntektListe: List<AMeldingInntekt>?
+    val inntektListe: List<AMeldingInntekt>?,
 )
 
 data class AMeldingInntekt(
@@ -47,22 +47,22 @@ data class AMeldingInntekt(
     val skattemessigBosattLand: String? = null,
     val virksomhet: Aktør, // ? = null,
     val tilleggsinformasjon: Tilleggsinformasjon? = null,
-    val beskrivelse: String? = null // hentes fra kodeverk
+    val beskrivelse: String? = null, // hentes fra kodeverk
 )
 
 data class Tilleggsinformasjon(
-    val kategori: String? = null // Kodeverk -> EDAGTilleggsinfoKategorier
+    val kategori: String? = null, // Kodeverk -> EDAGTilleggsinfoKategorier
 )
 
 enum class AktørType {
     AKTOER_ID,
     NATURLIG_IDENT,
-    ORGANISASJON
+    ORGANISASJON,
 }
 
 enum class InntektType {
     LOENNSINNTEKT,
     NAERINGSINNTEKT,
     PENSJON_ELLER_TRYGD,
-    YTELSE_FRA_OFFENTLIGE
+    YTELSE_FRA_OFFENTLIGE,
 }

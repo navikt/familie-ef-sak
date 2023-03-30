@@ -15,7 +15,7 @@ object UtledEndringerUtil {
         return Endringer(
             folkeregisterpersonstatus = utledEndringer(
                 tidligere.folkeregisterpersonstatus,
-                nye.folkeregisterpersonstatus
+                nye.folkeregisterpersonstatus,
             ),
             fødselsdato = utledEndringer(tidligere.fødselsdato, nye.fødselsdato),
             dødsdato = utledEndringer(tidligere.dødsdato, nye.dødsdato),
@@ -28,18 +28,18 @@ object UtledEndringerUtil {
             innflyttingTilNorge = utledEndringerUtenDetaljer(tidligere.innflyttingTilNorge, nye.innflyttingTilNorge),
             utflyttingFraNorge = utledEndringerUtenDetaljer(tidligere.utflyttingFraNorge, nye.utflyttingFraNorge),
             oppholdstillatelse = utledEndringerUtenDetaljer(tidligere.oppholdstillatelse, nye.oppholdstillatelse),
-            vergemål = utledEndringerUtenDetaljer(tidligere.vergemål, nye.vergemål)
+            vergemål = utledEndringerUtenDetaljer(tidligere.vergemål, nye.vergemål),
         )
     }
 
     private fun <T> utledEndringerUtenDetaljer(
         tidligere: T,
-        nye: T
+        nye: T,
     ) = EndringUtenDetaljer(tidligere != nye)
 
     private fun <T> utledEndringer(
         tidligere: T,
-        ny: T
+        ny: T,
     ): Endring<EndringVerdi> {
         return if (tidligere != ny) {
             Endring(true, EndringVerdi(format(tidligere), format(ny)))
@@ -54,23 +54,23 @@ object UtledEndringerUtil {
         formatterEndring(BarnDto::fødselsdato, "Fødselsdato"),
         formatterEndring({ it.annenForelder?.personIdent }, "Annen forelder"),
         formatterEndring(BarnDto::harDeltBostedNå, "Delt bosted"),
-        formatterEndring(BarnDto::deltBosted, "Delt bosted perioder")
+        formatterEndring(BarnDto::deltBosted, "Delt bosted perioder"),
         // TODO adresse ?? Er den interessant å vise som endret hvis man ikke har endring i borHosSøker ? si eks at barnet på > 18 flytter
     )
 
     private val annenForelderEndringer: List<PersonendringDetaljerFn<AnnenForelderMinimumDto>> = listOf(
         formatterEndring(AnnenForelderMinimumDto::dødsdato, "Dødsdato"),
-        formatterEndring(AnnenForelderMinimumDto::bostedsadresse, "Bostedsadresse")
+        formatterEndring(AnnenForelderMinimumDto::bostedsadresse, "Bostedsadresse"),
     )
 
     private fun utledEndringerBarn(
         tidligere: List<BarnDto>,
-        nye: List<BarnDto>
+        nye: List<BarnDto>,
     ) = utledPersonendringer(tidligere, nye, { it.personIdent }, barnEndringer)
 
     private fun utledEndringerAndreForelder(
         tidligere: List<BarnDto>,
-        nye: List<BarnDto>
+        nye: List<BarnDto>,
     ): Endring<List<Personendring>> {
         val tidligereForeldrer = tidligere.mapNotNull { it.annenForelder }.distinct()
         val nyeForeldrer = nye.mapNotNull { it.annenForelder }.distinct()
@@ -81,7 +81,7 @@ object UtledEndringerUtil {
         tidligere: List<T>,
         nye: List<T>,
         ident: (T) -> String,
-        endringer: List<PersonendringDetaljerFn<T>>
+        endringer: List<PersonendringDetaljerFn<T>>,
     ): Endring<List<Personendring>> {
         val tidligerePåIdent = tidligere.associateBy { ident(it) }
         val nyePåIdent = nye.associateBy { ident(it) }
@@ -111,7 +111,7 @@ object UtledEndringerUtil {
     private fun <T, VERDI : Any> formatterEndring(
         verdi: (T) -> VERDI?,
         felt: String,
-        harEndring: (VERDI?, VERDI?) -> Boolean = { tidligere, ny -> tidligere != ny }
+        harEndring: (VERDI?, VERDI?) -> Boolean = { tidligere, ny -> tidligere != ny },
     ): PersonendringDetaljerFn<T> =
         { tidligere: T, ny: T ->
             val tidligereVerdi = verdi(tidligere)

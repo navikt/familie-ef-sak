@@ -10,7 +10,7 @@ import java.util.UUID
 @Service
 class ArbeidsforholdService(
     private val fagsakService: FagsakService,
-    private val arbeidsforholdClient: ArbeidsforholdClient
+    private val arbeidsforholdClient: ArbeidsforholdClient,
 ) {
 
     fun hentArbeidsforhold(fagsakId: UUID, ansettelsesperiodeFom: LocalDate): List<ArbeidsforholdDto> {

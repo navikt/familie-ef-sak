@@ -42,7 +42,7 @@ class KonsistensavstemmingScheduler(private val konsistensavstemmingService: Kon
 @Service
 class KonsistensavstemmingService(
     private val repository: KonsistensavstemmingJobbRepository,
-    private val taskService: TaskService
+    private val taskService: TaskService,
 ) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -58,13 +58,13 @@ class KonsistensavstemmingService(
                 listOf(
                     KonsistensavstemmingTask.opprettTask(
                         KonsistensavstemmingPayload(StønadType.OVERGANGSSTØNAD, triggerdato),
-                        triggerdato.atTime(22, 0)
+                        triggerdato.atTime(22, 0),
                     ),
                     KonsistensavstemmingTask.opprettTask(
                         KonsistensavstemmingPayload(StønadType.BARNETILSYN, triggerdato),
-                        triggerdato.atTime(22, 20)
-                    )
-                )
+                        triggerdato.atTime(22, 20),
+                    ),
+                ),
             )
         }
         repository.updateAll(jobber.map { it.copy(opprettet = true) })
@@ -85,5 +85,5 @@ data class KonsistensavstemmingJobb(
     @Version
     val versjon: Int = 0,
     val triggerdato: LocalDate,
-    val opprettet: Boolean = false
+    val opprettet: Boolean = false,
 )

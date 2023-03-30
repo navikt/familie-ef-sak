@@ -14,7 +14,7 @@ import org.springframework.stereotype.Service
 @Service
 class FerdigstillBehandlingSteg(
     private val behandlingService: BehandlingService,
-    private val taskService: TaskService
+    private val taskService: TaskService,
 ) : BehandlingSteg<Void?> {
 
     private val logger: Logger = LoggerFactory.getLogger(this::class.java)

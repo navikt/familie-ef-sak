@@ -35,16 +35,16 @@ internal class DokumentasjonMapperTest {
         erUformeltGiftDokumentasjon = dokumentasjonSendtInnTidligere,
         erUformeltSeparertEllerSkiltDokumentasjon = dokumentasjonMedVedlegg,
         separasjonsbekreftelse = dokumentasjonSendtInnTidligere,
-        samlivsbruddsdokumentasjon = dokumentasjonSendtInnTidligere
+        samlivsbruddsdokumentasjon = dokumentasjonSendtInnTidligere,
     )
 
     private val medlemskap = Medlemskap(
         oppholderDuDegINorge = false,
-        bosattNorgeSisteÅrene = false
+        bosattNorgeSisteÅrene = false,
     )
 
     private val bosituasjon = Bosituasjon(
-        tidligereSamboerFortsattRegistrertPåAdresse = dokumentasjonMedVedlegg
+        tidligereSamboerFortsattRegistrertPåAdresse = dokumentasjonMedVedlegg,
     )
 
     private val søknadBarn = SøknadBarn(
@@ -55,10 +55,10 @@ internal class DokumentasjonMapperTest {
             avtaleOmDeltBosted = dokumentasjonSendtInnTidligere,
             samværsavtale = dokumentasjonMedVedlegg,
             skalBarnetBoHosSøkerMenAnnenForelderSamarbeiderIkke = dokumentasjonSendtInnTidligere,
-            erklæringOmSamlivsbrudd = dokumentasjonMedVedlegg
+            erklæringOmSamlivsbrudd = dokumentasjonMedVedlegg,
         ),
         ikkeRegistrertPåSøkersAdresseBeskrivelse = null,
-        lagtTilManuelt = false
+        lagtTilManuelt = false,
     )
 
     private val aktivitet = Aktivitet(
@@ -70,9 +70,9 @@ internal class DokumentasjonMapperTest {
             kanDuSkaffeBarnepassInnenEnUke = null,
             hvorØnskerDuArbeid = "",
             ønskerDuMinst50ProsentStilling = false,
-            ikkeVilligTilÅTaImotTilbudOmArbeidDokumentasjon = dokumentasjonSendtInnTidligere
+            ikkeVilligTilÅTaImotTilbudOmArbeidDokumentasjon = dokumentasjonSendtInnTidligere,
         ),
-        erIArbeidDokumentasjon = dokumentasjonSendtInnTidligere
+        erIArbeidDokumentasjon = dokumentasjonSendtInnTidligere,
     )
     private val situasjon = Situasjon(
         sykdom = dokumentasjonMedVedlegg,
@@ -83,7 +83,7 @@ internal class DokumentasjonMapperTest {
         lærlingkontrakt = dokumentasjonSendtInnTidligere,
         utdanningstilbud = dokumentasjonMedVedlegg,
         reduksjonAvArbeidsforholdDokumentasjon = dokumentasjonSendtInnTidligere,
-        oppsigelseDokumentasjon = dokumentasjonMedVedlegg
+        oppsigelseDokumentasjon = dokumentasjonMedVedlegg,
     )
 
     private val utdanning = UnderUtdanning(
@@ -98,13 +98,13 @@ internal class DokumentasjonMapperTest {
         utdanningEtterGrunnskolen = false,
         semesteravgift = null,
         studieavgift = null,
-        eksamensgebyr = null
+        eksamensgebyr = null,
     )
 
     private val adresseopplysninger = Adresseopplysninger(
         søkerBorPåRegistrertAdresse = false,
         harMeldtAdresseendring = true,
-        dokumentasjonAdresseendring = dokumentasjonMedVedlegg
+        dokumentasjonAdresseendring = dokumentasjonMedVedlegg,
     )
 
     @Test
@@ -120,7 +120,7 @@ internal class DokumentasjonMapperTest {
             aktivitet = aktivitet,
             situasjon = situasjon,
             søkerFra = null, søkerFraBestemtMåned = false,
-            adresseopplysninger = adresseopplysninger
+            adresseopplysninger = adresseopplysninger,
         )
 
         val dokumentasjon = DokumentasjonMapper.tilDokumentasjonDto(søknadOvergangsstønad)
@@ -173,12 +173,12 @@ internal class DokumentasjonMapperTest {
                 avtaleBarnepasser = dokumentasjonSendtInnTidligere,
                 arbeidstid = dokumentasjonSendtInnTidligere,
                 roterendeArbeidstid = dokumentasjonMedVedlegg,
-                spesielleBehov = dokumentasjonMedVedlegg
+                spesielleBehov = dokumentasjonMedVedlegg,
 
             ),
             søkerFra = null,
             søkerFraBestemtMåned = false,
-            adresseopplysninger = adresseopplysninger
+            adresseopplysninger = adresseopplysninger,
         )
 
         val dokumentasjon = DokumentasjonMapper.tilDokumentasjonDto(søknadBarnetilsyn)
@@ -225,12 +225,12 @@ internal class DokumentasjonMapperTest {
             bosituasjon = bosituasjon,
             sivilstandsplaner = Sivilstandsplaner(),
             barn = setOf(
-                søknadBarn
+                søknadBarn,
             ),
             utdanning = utdanning,
             utdanningsutgifter = dokumentasjonSendtInnTidligere,
             tidligereUtdanninger = setOf(),
-            adresseopplysninger = adresseopplysninger
+            adresseopplysninger = adresseopplysninger,
         )
         val dokumentasjon = DokumentasjonMapper.tilDokumentasjonDto(søknadSkolepenger)
 

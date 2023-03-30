@@ -67,7 +67,7 @@ internal class JournalpostClientTest {
         wiremockServerItem.stubFor(
             get(urlPathMatching("${integrasjonerConfig.journalPostUri.path}/hentdokument/([0-9]*)/([0-9]*)"))
                 .withQueryParam("variantFormat", equalTo("ARKIV"))
-                .willReturn(okJson(objectMapper.writeValueAsString(Ressurs.success(vedlegg))))
+                .willReturn(okJson(objectMapper.writeValueAsString(Ressurs.success(vedlegg)))),
         )
         val response = journalpostClient.hentDokument("123", "123", DokumentVariantformat.ARKIV)
 
@@ -82,7 +82,7 @@ internal class JournalpostClientTest {
         wiremockServerItem.stubFor(
             get(urlPathMatching("${integrasjonerConfig.journalPostUri.path}/hentdokument/([0-9]*)/([0-9]*)"))
                 .withQueryParam("variantFormat", equalTo("ORIGINAL"))
-                .willReturn(okJson(vedlegg))
+                .willReturn(okJson(vedlegg)),
         )
         val response = journalpostClient.hentOvergangsstønadSøknad("123", "123")
 
@@ -98,7 +98,7 @@ internal class JournalpostClientTest {
         wiremockServerItem.stubFor(
             get(urlPathMatching("${integrasjonerConfig.journalPostUri.path}/hentdokument/([0-9]*)/([0-9]*)"))
                 .withQueryParam("variantFormat", equalTo("ORIGINAL"))
-                .willReturn(okJson(vedlegg))
+                .willReturn(okJson(vedlegg)),
         )
         val response = journalpostClient.hentBarnetilsynSøknad("123", "123")
 
@@ -113,7 +113,7 @@ internal class JournalpostClientTest {
         wiremockServerItem.stubFor(
             get(urlPathMatching("${integrasjonerConfig.journalPostUri.path}/hentdokument/([0-9]*)/([0-9]*)"))
                 .withQueryParam("variantFormat", equalTo("ORIGINAL"))
-                .willReturn(okJson(vedlegg))
+                .willReturn(okJson(vedlegg)),
         )
         val response = journalpostClient.hentSkolepengerSøknad("123", "123")
 
@@ -128,7 +128,7 @@ internal class JournalpostClientTest {
         wiremockServerItem.stubFor(
             get(urlPathMatching("${integrasjonerConfig.journalPostUri.path}/hentdokument/([0-9]*)/([0-9]*)"))
                 .withQueryParam("variantFormat", equalTo("ARKIV"))
-                .willReturn(okJson(objectMapper.writeValueAsString(Ressurs.success(vedlegg))))
+                .willReturn(okJson(objectMapper.writeValueAsString(Ressurs.success(vedlegg)))),
         )
         assertThrows<HttpClientErrorException> {
             journalpostClient.hentDokument("123", "abc", DokumentVariantformat.ARKIV)
@@ -141,7 +141,7 @@ internal class JournalpostClientTest {
         val response = Ressurs.success(ArkiverDokumentResponse("1", true))
         wiremockServerItem.stubFor(
             post(anyUrl())
-                .willReturn(okJson(objectMapper.writeValueAsString(response)))
+                .willReturn(okJson(objectMapper.writeValueAsString(response))),
         )
         journalpostClient.arkiverDokument(ArkiverDokumentRequest("123", true, emptyList(), emptyList()), saksbehandler)
 

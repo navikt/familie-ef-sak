@@ -29,7 +29,7 @@ internal class VedtaksbrevRepositoryTest : OppslagSpringRunnerTest() {
             beslutterPdf = null,
             enhet = "",
             saksbehandlerident = "",
-            beslutterident = ""
+            beslutterident = "",
         )
 
         vedtaksbrevRepository.insert(vedtaksbrev)

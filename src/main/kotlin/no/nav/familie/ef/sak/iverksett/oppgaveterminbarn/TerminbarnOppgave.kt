@@ -8,5 +8,5 @@ data class TerminbarnOppgave(
     @Id
     val fagsakId: UUID,
     val termindato: LocalDate,
-    val opprettetTid: LocalDate = LocalDate.now()
+    val opprettetTid: LocalDate = LocalDate.now(),
 )

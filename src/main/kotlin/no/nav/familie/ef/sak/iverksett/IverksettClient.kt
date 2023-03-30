@@ -27,7 +27,7 @@ class IverksettClient(
     @Value("\${FAMILIE_EF_IVERKSETT_URL}")
     private val familieEfIverksettUri: String,
     @Qualifier("azure")
-    private val restOperations: RestOperations
+    private val restOperations: RestOperations,
 ) :
     AbstractPingableRestClient(restOperations, "familie.ef.iverksett") {
 
@@ -43,7 +43,7 @@ class IverksettClient(
         return postForEntity<Ressurs<BeriketSimuleringsresultat>>(
             url,
             simuleringRequest,
-            HttpHeaders().medContentTypeJsonUTF8()
+            HttpHeaders().medContentTypeJsonUTF8(),
         ).data!!
     }
 
@@ -88,15 +88,11 @@ class IverksettClient(
     fun sendKonsistensavstemming(request: KonsistensavstemmingDto, transaksjonId: UUID) =
         konsistensavstemming(request, sendStartmelding = false, sendAvsluttmelding = false, transaksjonId)
 
-    fun sendTilArbeidsoppfølging(behandlingId: String) {
-        postForEntity<Any>(URI.create("$familieEfIverksettUri/api/arbeidsoppfolging/patch/$behandlingId"), "")
-    }
-
     private fun konsistensavstemming(
         request: KonsistensavstemmingDto,
         sendStartmelding: Boolean = true,
         sendAvsluttmelding: Boolean = true,
-        transaksjonId: UUID = UUID.randomUUID()
+        transaksjonId: UUID = UUID.randomUUID(),
     ) {
         val url = UriComponentsBuilder.fromUriString("$familieEfIverksettUri/api/konsistensavstemming")
             .queryParam("sendStartmelding", sendStartmelding)

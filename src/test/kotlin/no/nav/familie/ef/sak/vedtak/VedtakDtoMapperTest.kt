@@ -43,7 +43,7 @@ class VedtakDtoMapperTest {
         val vedtak = innvilgelseBarnetilsynDto(UUID.fromString("4ab497b2-a19c-4415-bf00-556ff8e9ce86"))
             .copy(
                 resultatType = ResultatType.INNVILGE_UTEN_UTBETALING,
-                _type = "InnvilgelseBarnetilsynUtenUtbetaling"
+                _type = "InnvilgelseBarnetilsynUtenUtbetaling",
             )
         assertErLik(vedtak, vedtakJson)
     }

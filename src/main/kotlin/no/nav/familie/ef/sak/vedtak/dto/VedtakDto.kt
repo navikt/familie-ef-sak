@@ -42,7 +42,7 @@ enum class ResultatType {
     AVSLÅ,
     HENLEGGE,
     OPPHØRT,
-    SANKSJONERE
+    SANKSJONERE,
 }
 
 enum class Sanksjonsårsak {
@@ -50,7 +50,7 @@ enum class Sanksjonsårsak {
     NEKTET_TILBUDT_ARBEID,
     SAGT_OPP_STILLING,
     UNNLATT_GJENOPPTAGELSE_ARBEIDSFORHOLD,
-    UNNLATT_MØTE_INNKALLING
+    UNNLATT_MØTE_INNKALLING,
 }
 
 fun ResultatType.tilVedtaksresultat(): Vedtaksresultat = when (this) {
@@ -73,26 +73,26 @@ data class InnvilgelseOvergangsstønad(
     val inntektBegrunnelse: String?,
     val perioder: List<VedtaksperiodeDto> = emptyList(),
     val inntekter: List<Inntekt> = emptyList(),
-    val samordningsfradragType: SamordningsfradragType? = null
+    val samordningsfradragType: SamordningsfradragType? = null,
 ) : VedtakDto(
     ResultatType.INNVILGE,
-    "InnvilgelseOvergangsstønad"
+    "InnvilgelseOvergangsstønad",
 )
 
 data class Avslå(
     val avslåÅrsak: AvslagÅrsak?,
-    val avslåBegrunnelse: String?
+    val avslåBegrunnelse: String?,
 ) : VedtakDto(ResultatType.AVSLÅ, "Avslag")
 
 data class Opphør(
     val opphørFom: YearMonth,
-    val begrunnelse: String?
+    val begrunnelse: String?,
 ) : VedtakDto(ResultatType.OPPHØRT, "Opphør")
 
 data class Sanksjonert(
     val sanksjonsårsak: Sanksjonsårsak,
     val periode: SanksjonertPeriodeDto,
-    val internBegrunnelse: String
+    val internBegrunnelse: String,
 ) : VedtakDto(ResultatType.SANKSJONERE, "Sanksjonering")
 
 data class SanksjonertPeriodeDto(
@@ -101,7 +101,7 @@ data class SanksjonertPeriodeDto(
     @JsonIgnore
     val fom: YearMonth = årMånedFra,
     @JsonIgnore
-    val tom: YearMonth = årMånedTil
+    val tom: YearMonth = årMånedTil,
 ) {
 
     fun tilPeriode() = Månedsperiode(fom, tom)
@@ -113,7 +113,7 @@ fun VedtakDto.tilVedtak(behandlingId: UUID, stønadstype: StønadType): Vedtak =
         avslåÅrsak = this.avslåÅrsak,
         avslåBegrunnelse = this.avslåBegrunnelse,
         resultatType = this.resultatType,
-        saksbehandlerIdent = SikkerhetContext.hentSaksbehandlerEllerSystembruker()
+        saksbehandlerIdent = SikkerhetContext.hentSaksbehandlerEllerSystembruker(),
     )
     is InnvilgelseOvergangsstønad ->
         Vedtak(
@@ -124,7 +124,7 @@ fun VedtakDto.tilVedtak(behandlingId: UUID, stønadstype: StønadType): Vedtak =
             perioder = PeriodeWrapper(perioder = this.perioder.tilDomene()),
             inntekter = InntektWrapper(inntekter = this.inntekter.tilInntektsperioder()),
             samordningsfradragType = this.samordningsfradragType,
-            saksbehandlerIdent = SikkerhetContext.hentSaksbehandlerEllerSystembruker()
+            saksbehandlerIdent = SikkerhetContext.hentSaksbehandlerEllerSystembruker(),
         )
     is InnvilgelseBarnetilsyn ->
         Vedtak(
@@ -132,15 +132,15 @@ fun VedtakDto.tilVedtak(behandlingId: UUID, stønadstype: StønadType): Vedtak =
             behandlingId = behandlingId,
             barnetilsyn = BarnetilsynWrapper(
                 perioder = this.perioder.map { it.tilDomene() },
-                begrunnelse = this.begrunnelse
+                begrunnelse = this.begrunnelse,
             ),
             kontantstøtte = KontantstøtteWrapper(perioder = this.perioderKontantstøtte.map { it.tilDomene() }),
             tilleggsstønad = TilleggsstønadWrapper(
                 harTilleggsstønad = this.tilleggsstønad.harTilleggsstønad,
                 perioder = this.tilleggsstønad.perioder.map { it.tilDomene() },
-                begrunnelse = this.tilleggsstønad.begrunnelse
+                begrunnelse = this.tilleggsstønad.begrunnelse,
             ),
-            saksbehandlerIdent = SikkerhetContext.hentSaksbehandlerEllerSystembruker()
+            saksbehandlerIdent = SikkerhetContext.hentSaksbehandlerEllerSystembruker(),
         )
     is InnvilgelseSkolepenger ->
         Vedtak(
@@ -149,18 +149,18 @@ fun VedtakDto.tilVedtak(behandlingId: UUID, stønadstype: StønadType): Vedtak =
             skolepenger = SkolepengerWrapper(
                 skoleårsperioder = this.skoleårsperioder.map { it.tilDomene() }
                     .sortedBy { it.perioder.first().periode },
-                begrunnelse = this.begrunnelse
+                begrunnelse = this.begrunnelse,
             ),
-            saksbehandlerIdent = SikkerhetContext.hentSaksbehandlerEllerSystembruker()
+            saksbehandlerIdent = SikkerhetContext.hentSaksbehandlerEllerSystembruker(),
         )
     is OpphørSkolepenger -> Vedtak(
         resultatType = this.resultatType,
         behandlingId = behandlingId,
         skolepenger = SkolepengerWrapper(
             skoleårsperioder = this.skoleårsperioder.map { it.tilDomene() },
-            begrunnelse = this.begrunnelse
+            begrunnelse = this.begrunnelse,
         ),
-        saksbehandlerIdent = SikkerhetContext.hentSaksbehandlerEllerSystembruker()
+        saksbehandlerIdent = SikkerhetContext.hentSaksbehandlerEllerSystembruker(),
     )
     is Opphør ->
         Vedtak(
@@ -168,14 +168,14 @@ fun VedtakDto.tilVedtak(behandlingId: UUID, stønadstype: StønadType): Vedtak =
             avslåBegrunnelse = begrunnelse,
             resultatType = ResultatType.OPPHØRT,
             opphørFom = opphørFom,
-            saksbehandlerIdent = SikkerhetContext.hentSaksbehandlerEllerSystembruker()
+            saksbehandlerIdent = SikkerhetContext.hentSaksbehandlerEllerSystembruker(),
         )
     is Sanksjonert -> sanksjonertTilVedtak(behandlingId, stønadstype)
 }
 
 private fun Sanksjonert.sanksjonertTilVedtak(
     behandlingId: UUID,
-    stønadstype: StønadType
+    stønadstype: StønadType,
 ) =
     when (stønadstype) {
         StønadType.OVERGANGSSTØNAD -> {
@@ -183,14 +183,14 @@ private fun Sanksjonert.sanksjonertTilVedtak(
                 periode.tilPeriode(),
                 AktivitetType.IKKE_AKTIVITETSPLIKT,
                 VedtaksperiodeType.SANKSJON,
-                this.sanksjonsårsak
+                this.sanksjonsårsak,
             )
             Vedtak(
                 behandlingId = behandlingId,
                 perioder = PeriodeWrapper(listOf(vedtaksperiode)),
                 internBegrunnelse = this.internBegrunnelse,
                 resultatType = ResultatType.SANKSJONERE,
-                saksbehandlerIdent = SikkerhetContext.hentSaksbehandlerEllerSystembruker()
+                saksbehandlerIdent = SikkerhetContext.hentSaksbehandlerEllerSystembruker(),
             )
         }
         StønadType.BARNETILSYN -> {
@@ -199,14 +199,14 @@ private fun Sanksjonert.sanksjonertTilVedtak(
                 utgifter = 0,
                 barn = emptyList(),
                 sanksjonsårsak = this.sanksjonsårsak,
-                periodetype = PeriodetypeBarnetilsyn.SANKSJON_1_MND
+                periodetype = PeriodetypeBarnetilsyn.SANKSJON_1_MND,
             )
             Vedtak(
                 behandlingId = behandlingId,
                 barnetilsyn = BarnetilsynWrapper(listOf(vedtaksperiode), begrunnelse = null),
                 internBegrunnelse = this.internBegrunnelse,
                 resultatType = ResultatType.SANKSJONERE,
-                saksbehandlerIdent = SikkerhetContext.hentSaksbehandlerEllerSystembruker()
+                saksbehandlerIdent = SikkerhetContext.hentSaksbehandlerEllerSystembruker(),
             )
         }
         StønadType.SKOLEPENGER -> error("Håndterer ikke sanksjon for skolepenger")
@@ -224,7 +224,7 @@ fun Vedtak.tilVedtakDto(): VedtakDto =
         }
         ResultatType.AVSLÅ -> Avslå(
             avslåBegrunnelse = this.avslåBegrunnelse,
-            avslåÅrsak = this.avslåÅrsak
+            avslåÅrsak = this.avslåÅrsak,
         )
         ResultatType.OPPHØRT -> {
             if (this.skolepenger != null) {
@@ -232,7 +232,7 @@ fun Vedtak.tilVedtakDto(): VedtakDto =
             } else {
                 Opphør(
                     begrunnelse = this.avslåBegrunnelse,
-                    opphørFom = YearMonth.from(this.opphørFom)
+                    opphørFom = YearMonth.from(this.opphørFom),
                 )
             }
         }
@@ -244,7 +244,7 @@ fun Vedtak.tilVedtakDto(): VedtakDto =
             Sanksjonert(
                 sanksjonsårsak = periode.sanksjonsårsak ?: error("Mangler perioder for sanksjon"),
                 periode = periode.fraDomeneForSanksjon(),
-                internBegrunnelse = this.internBegrunnelse ?: error("Sanksjon mangler intern begrunnelse.")
+                internBegrunnelse = this.internBegrunnelse ?: error("Sanksjon mangler intern begrunnelse."),
             )
         }
         else -> throw Feil("Kan ikke sette vedtaksresultat som $this - ikke implementert")
@@ -255,7 +255,7 @@ private fun VedtaksperiodeMedSanksjonsårsak.fraDomeneForSanksjon(): Sanksjonert
         årMånedFra = YearMonth.from(this.datoFra),
         årMånedTil = YearMonth.from(this.datoTil),
         fom = YearMonth.from(this.datoFra),
-        tom = YearMonth.from(this.datoTil)
+        tom = YearMonth.from(this.datoTil),
     )
 
 fun Vedtak.mapInnvilgelseOvergangsstønad(): InnvilgelseOvergangsstønad {
@@ -267,7 +267,7 @@ fun Vedtak.mapInnvilgelseOvergangsstønad(): InnvilgelseOvergangsstønad {
         inntektBegrunnelse = this.inntektBegrunnelse,
         perioder = this.perioder.perioder.fraDomene(),
         inntekter = this.inntekter.inntekter.tilInntekt(),
-        samordningsfradragType = this.samordningsfradragType
+        samordningsfradragType = this.samordningsfradragType,
     )
 }
 

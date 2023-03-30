@@ -9,12 +9,12 @@ data class BarnMedSamværDto(
     val barnId: UUID,
     val søknadsgrunnlag: BarnMedSamværSøknadsgrunnlagDto,
     val registergrunnlag: BarnMedSamværRegistergrunnlagDto,
-    val barnepass: BarnepassDto? = null
+    val barnepass: BarnepassDto? = null,
 ) {
     fun mapTilBarnForelderLangAvstandTilSøker(): BarnForelderLangAvstandTilSøker {
         return BarnForelderLangAvstandTilSøker(
             barnId = barnId,
-            langAvstandTilSøker = registergrunnlag.forelder?.avstandTilSøker?.langAvstandTilSøker ?: LangAvstandTilSøker.UKJENT
+            langAvstandTilSøker = registergrunnlag.forelder?.avstandTilSøker?.langAvstandTilSøker ?: LangAvstandTilSøker.UKJENT,
         )
     }
 }
@@ -36,7 +36,7 @@ data class BarnMedSamværSøknadsgrunnlagDto(
     val harDereTidligereBoddSammen: Boolean?,
     val nårFlyttetDereFraHverandre: LocalDate?,
     val hvorMyeErDuSammenMedAnnenForelder: String?,
-    val beskrivSamværUtenBarn: String?
+    val beskrivSamværUtenBarn: String?,
 )
 
 data class BarnMedSamværRegistergrunnlagDto(
@@ -48,7 +48,7 @@ data class BarnMedSamværRegistergrunnlagDto(
     val harDeltBostedVedGrunnlagsdataopprettelse: Boolean,
     val forelder: AnnenForelderDto?,
     val dødsdato: LocalDate? = null,
-    val fødselsdato: LocalDate?
+    val fødselsdato: LocalDate?,
 )
 
 data class AnnenForelderDto(
@@ -60,14 +60,14 @@ data class AnnenForelderDto(
     val visningsadresse: String?,
     val dødsfall: LocalDate? = null,
     val tidligereVedtaksperioder: TidligereVedtaksperioderDto? = null,
-    val avstandTilSøker: AvstandTilSøkerDto
+    val avstandTilSøker: AvstandTilSøkerDto,
 )
 
 data class BarnepassDto(
     val id: UUID,
     val skalHaBarnepass: Boolean? = null,
     val barnepassordninger: List<BarnepassordningDto> = emptyList(),
-    val årsakBarnepass: String? = null
+    val årsakBarnepass: String? = null,
 )
 
 data class BarnepassordningDto(
@@ -75,16 +75,16 @@ data class BarnepassordningDto(
     val navn: String,
     val fra: LocalDate,
     val til: LocalDate,
-    val beløp: Int
+    val beløp: Int,
 )
 
 data class AvstandTilSøkerDto(
     val avstandIKm: Long?,
-    val langAvstandTilSøker: LangAvstandTilSøker
+    val langAvstandTilSøker: LangAvstandTilSøker,
 )
 
 enum class LangAvstandTilSøker {
     JA,
     JA_UPRESIS,
-    UKJENT
+    UKJENT,
 }

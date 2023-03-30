@@ -10,7 +10,7 @@ import java.util.UUID
 
 @Service
 class UtestengelseService(
-    private val utestengelseRepository: UtestengelseRepository
+    private val utestengelseRepository: UtestengelseRepository,
 ) {
 
     fun opprettUtestengelse(dto: OpprettUtestengelseDto): UtestengelseDto {
@@ -20,8 +20,8 @@ class UtestengelseService(
             Utestengelse(
                 fagsakPersonId = dto.fagsakPersonId,
                 fom = dto.periode.fomDato,
-                tom = dto.periode.tomDato
-            )
+                tom = dto.periode.tomDato,
+            ),
         ).tilDto()
     }
 
@@ -47,7 +47,7 @@ class UtestengelseService(
         tidligerePerioder.firstOrNull { it.overlapper(dto.periode) }?.let {
             throw ApiFeil(
                 "Ny utestengelse overlapper med en eksisterende utestengelse ${it.fom}-${it.tom}",
-                HttpStatus.BAD_REQUEST
+                HttpStatus.BAD_REQUEST,
             )
         }
     }

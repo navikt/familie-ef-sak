@@ -6,5 +6,5 @@ import org.springframework.data.relational.core.mapping.Table
 @Table("behandling_ekstern")
 data class EksternBehandlingId(
     @Id
-    val id: Long = 0
+    val id: Long = 0,
 )

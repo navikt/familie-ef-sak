@@ -80,7 +80,7 @@ object SøknadsskjemaMapper {
             situasjon = tilDomene(kontraktsøknad.situasjon.verdi),
             søkerFra = tilDomene(kontraktsøknad.stønadsstart.verdi),
             søkerFraBestemtMåned = kontraktsøknad.stønadsstart.verdi.søkerFraBestemtMåned.verdi,
-            adresseopplysninger = tilDomene(kontraktsøknad.personalia, kontraktsøknad.adresseopplysninger)
+            adresseopplysninger = tilDomene(kontraktsøknad.personalia, kontraktsøknad.adresseopplysninger),
         )
     }
 
@@ -99,7 +99,7 @@ object SøknadsskjemaMapper {
             søkerFra = tilDomene(kontraktsøknad.stønadsstart.verdi),
             søkerFraBestemtMåned = kontraktsøknad.stønadsstart.verdi.søkerFraBestemtMåned.verdi,
             dokumentasjon = tilDomene(kontraktsøknad.dokumentasjon),
-            adresseopplysninger = tilDomene(kontraktsøknad.personalia, kontraktsøknad.adresseopplysninger)
+            adresseopplysninger = tilDomene(kontraktsøknad.personalia, kontraktsøknad.adresseopplysninger),
         )
     }
 
@@ -117,7 +117,7 @@ object SøknadsskjemaMapper {
             utdanning = tilDomene(kontraktsøknad.utdanning.verdi)!!,
             utdanningsutgifter = tilDomene(kontraktsøknad.dokumentasjon.utdanningsutgifter?.verdi),
             tidligereUtdanninger = tilTidligereUtdanninger(kontraktsøknad.utdanning.verdi.tidligereUtdanninger?.verdi),
-            adresseopplysninger = tilDomene(kontraktsøknad.personalia, kontraktsøknad.adresseopplysninger)
+            adresseopplysninger = tilDomene(kontraktsøknad.personalia, kontraktsøknad.adresseopplysninger),
         )
     }
 
@@ -136,7 +136,7 @@ object SøknadsskjemaMapper {
             samlivsbruddsdato = sivilstandsdetaljer.samlivsbruddsdato?.verdi,
             fraflytningsdato = sivilstandsdetaljer.fraflytningsdato?.verdi,
             endringSamværsordningDato = sivilstandsdetaljer.endringSamværsordningDato?.verdi,
-            tidligereSamboer = tilDomene(sivilstandsdetaljer.tidligereSamboerdetaljer?.verdi)
+            tidligereSamboer = tilDomene(sivilstandsdetaljer.tidligereSamboerdetaljer?.verdi),
         )
     }
 
@@ -146,7 +146,7 @@ object SøknadsskjemaMapper {
             avtaleBarnepasser = tilDomene(dokumentasjon.avtaleBarnepasser?.verdi),
             arbeidstid = tilDomene(dokumentasjon.arbeidstid?.verdi),
             roterendeArbeidstid = tilDomene(dokumentasjon.roterendeArbeidstid?.verdi),
-            spesielleBehov = tilDomene(dokumentasjon.spesielleBehov?.verdi)
+            spesielleBehov = tilDomene(dokumentasjon.spesielleBehov?.verdi),
         )
 
     private fun tilDomene(personMinimum: KontraktPersonMinimum?): PersonMinimum? =
@@ -154,7 +154,7 @@ object SøknadsskjemaMapper {
             PersonMinimum(
                 navn = it.navn.verdi,
                 fødselsnummer = it.fødselsnummer?.verdi?.verdi,
-                fødselsdato = it.fødselsdato?.verdi
+                fødselsdato = it.fødselsdato?.verdi,
             )
         }
 
@@ -162,7 +162,7 @@ object SøknadsskjemaMapper {
         Medlemskap(
             oppholderDuDegINorge = medlemskapsdetaljer.oppholderDuDegINorge.verdi,
             bosattNorgeSisteÅrene = medlemskapsdetaljer.bosattNorgeSisteÅrene.verdi,
-            utenlandsopphold = tilUtenlandsopphold(medlemskapsdetaljer.utenlandsopphold?.verdi)
+            utenlandsopphold = tilUtenlandsopphold(medlemskapsdetaljer.utenlandsopphold?.verdi),
         )
 
     private fun tilUtenlandsopphold(list: List<KontraktUtenlandsopphold>?): Set<Utenlandsopphold> =
@@ -170,7 +170,7 @@ object SøknadsskjemaMapper {
             Utenlandsopphold(
                 fradato = it.fradato.verdi,
                 tildato = it.tildato.verdi,
-                årsakUtenlandsopphold = it.årsakUtenlandsopphold.verdi
+                årsakUtenlandsopphold = it.årsakUtenlandsopphold.verdi,
             )
         }?.toSet() ?: emptySet()
 
@@ -181,14 +181,14 @@ object SøknadsskjemaMapper {
             sammenflyttingsdato = bosituasjon.sammenflyttingsdato?.verdi,
             datoFlyttetFraHverandre = bosituasjon.datoFlyttetFraHverandre?.verdi,
             tidligereSamboerFortsattRegistrertPåAdresse =
-            tilDomene(bosituasjon.tidligereSamboerFortsattRegistrertPåAdresse?.verdi)
+            tilDomene(bosituasjon.tidligereSamboerFortsattRegistrertPåAdresse?.verdi),
         )
 
     private fun tilDomene(sivilstandsplaner: KontraktSivilstandsplaner?): Sivilstandsplaner =
         Sivilstandsplaner(
             harPlaner = sivilstandsplaner?.harPlaner?.verdi,
             fraDato = sivilstandsplaner?.fraDato?.verdi,
-            vordendeSamboerEktefelle = tilDomene(sivilstandsplaner?.vordendeSamboerEktefelle?.verdi)
+            vordendeSamboerEktefelle = tilDomene(sivilstandsplaner?.vordendeSamboerEktefelle?.verdi),
         )
 
     private fun tilDomene(list: List<KontraktBarn>): Set<SøknadBarn> =
@@ -208,7 +208,7 @@ object SøknadsskjemaMapper {
                 årsakBarnepass = it.barnepass?.verdi?.årsakBarnepass?.svarId,
                 barnepassordninger = tilBarnepass(it.barnepass?.verdi?.barnepassordninger?.verdi),
                 skalBoHosSøker = it.skalBarnetBoHosSøker?.svarId,
-                lagtTilManuelt = it.lagtTilManuelt ?: false
+                lagtTilManuelt = it.lagtTilManuelt ?: false,
             )
         }.toSet()
 
@@ -219,7 +219,7 @@ object SøknadsskjemaMapper {
             navn = it.navn.verdi,
             datoperiode = it.datoperiode?.let { datoperiode -> tilDomene(datoperiode.verdi) }
                 ?: error("Mangler verdi for datoperiode i barnepassordningen"),
-            beløp = it.belop.verdi.roundToInt()
+            beløp = it.belop.verdi.roundToInt(),
         )
     }?.toSet() ?: emptySet()
 
@@ -246,7 +246,7 @@ object SøknadsskjemaMapper {
                 nårFlyttetDereFraHverandre = it.nårFlyttetDereFraHverandre?.verdi,
                 erklæringOmSamlivsbrudd = tilDomene(it.erklæringOmSamlivsbrudd?.verdi),
                 hvorMyeErDuSammenMedAnnenForelder = it.hvorMyeErDuSammenMedAnnenForelder?.svarId,
-                beskrivSamværUtenBarn = it.beskrivSamværUtenBarn?.verdi
+                beskrivSamværUtenBarn = it.beskrivSamværUtenBarn?.verdi,
             )
         }
 
@@ -256,7 +256,7 @@ object SøknadsskjemaMapper {
                 ikkeOppgittAnnenForelderBegrunnelse = annenForelder.ikkeOppgittAnnenForelderBegrunnelse?.verdi,
                 bosattNorge = annenForelder.bosattNorge?.verdi,
                 land = annenForelder.land?.verdi,
-                person = tilDomene(annenForelder.person?.verdi)
+                person = tilDomene(annenForelder.person?.verdi),
             )
         }
 
@@ -272,7 +272,7 @@ object SøknadsskjemaMapper {
             erIArbeid = aktivitet.erIArbeid?.svarId,
             erIArbeidDokumentasjon = tilDomene(aktivitet.erIArbeidDokumentasjon?.verdi),
             tidligereUtdanninger =
-            tilTidligereUtdanninger(aktivitet.underUtdanning?.verdi?.tidligereUtdanninger?.verdi)
+            tilTidligereUtdanninger(aktivitet.underUtdanning?.verdi?.tidligereUtdanninger?.verdi),
         )
 
     private fun tilFirmaer(list: List<KontraktSelvstendig>?): Set<Selvstendig> =
@@ -282,14 +282,14 @@ object SøknadsskjemaMapper {
                 organisasjonsnummer = it.organisasjonsnummer.verdi,
                 etableringsdato = it.etableringsdato.verdi,
                 arbeidsmengde = it.arbeidsmengde?.verdi,
-                hvordanSerArbeidsukenUt = it.hvordanSerArbeidsukenUt.verdi
+                hvordanSerArbeidsukenUt = it.hvordanSerArbeidsukenUt.verdi,
             )
         }?.toSet() ?: emptySet()
 
     private fun tilAksjeselskap(list: List<KontraktAksjeselskap>?): Set<Aksjeselskap> = list?.map {
         Aksjeselskap(
             navn = it.navn.verdi,
-            arbeidsmengde = it.arbeidsmengde?.verdi
+            arbeidsmengde = it.arbeidsmengde?.verdi,
         )
     }?.toSet() ?: emptySet()
 
@@ -307,7 +307,7 @@ object SøknadsskjemaMapper {
                 utdanningEtterGrunnskolen = it.utdanningEtterGrunnskolen.verdi,
                 semesteravgift = it.semesteravgift?.verdi?.roundToInt(),
                 studieavgift = it.studieavgift?.verdi?.roundToInt(),
-                eksamensgebyr = it.eksamensgebyr?.verdi?.roundToInt()
+                eksamensgebyr = it.eksamensgebyr?.verdi?.roundToInt(),
             )
         }
 
@@ -317,12 +317,12 @@ object SøknadsskjemaMapper {
                 linjeKursGrad = it.linjeKursGrad.verdi,
                 fra = YearMonth.of(
                     it.nårVarSkalDuVæreElevStudent.verdi.fraÅr,
-                    it.nårVarSkalDuVæreElevStudent.verdi.fraMåned
+                    it.nårVarSkalDuVæreElevStudent.verdi.fraMåned,
                 ),
                 til = YearMonth.of(
                     it.nårVarSkalDuVæreElevStudent.verdi.tilÅr,
-                    it.nårVarSkalDuVæreElevStudent.verdi.tilMåned
-                )
+                    it.nårVarSkalDuVæreElevStudent.verdi.tilMåned,
+                ),
             )
         }?.toSet() ?: emptySet()
 
@@ -336,7 +336,7 @@ object SøknadsskjemaMapper {
                 hvorØnskerDuArbeid = it.hvorØnskerDuArbeid.verdi,
                 ønskerDuMinst50ProsentStilling = it.ønskerDuMinst50ProsentStilling.verdi,
                 ikkeVilligTilÅTaImotTilbudOmArbeidDokumentasjon =
-                tilDomene(it.ikkeVilligTilÅTaImotTilbudOmArbeidDokumentasjon?.verdi)
+                tilDomene(it.ikkeVilligTilÅTaImotTilbudOmArbeidDokumentasjon?.verdi),
             )
         }
 
@@ -344,7 +344,7 @@ object SøknadsskjemaMapper {
         virksomhet?.let {
             Virksomhet(
                 virksomhetsbeskrivelse = it.virksomhetsbeskrivelse.verdi,
-                dokumentasjon = tilDomene(it.dokumentasjon?.verdi)
+                dokumentasjon = tilDomene(it.dokumentasjon?.verdi),
             )
         }
 
@@ -355,7 +355,7 @@ object SøknadsskjemaMapper {
                 arbeidsmengde = it.arbeidsmengde?.verdi,
                 fastEllerMidlertidig = it.fastEllerMidlertidig.svarId,
                 harSluttdato = it.harSluttdato?.verdi,
-                sluttdato = it.sluttdato?.verdi
+                sluttdato = it.sluttdato?.verdi,
             )
         }?.toSet() ?: emptySet()
 
@@ -375,24 +375,24 @@ object SøknadsskjemaMapper {
             oppsigelseReduksjonÅrsak = situasjon.oppsigelseReduksjonÅrsak?.verdi,
             oppsigelseReduksjonTidspunkt = situasjon.oppsigelseReduksjonTidspunkt?.verdi,
             reduksjonAvArbeidsforholdDokumentasjon = tilDomene(situasjon.reduksjonAvArbeidsforholdDokumentasjon?.verdi),
-            oppsigelseDokumentasjon = tilDomene(situasjon.oppsigelseDokumentasjon?.verdi)
+            oppsigelseDokumentasjon = tilDomene(situasjon.oppsigelseDokumentasjon?.verdi),
         )
 
     private fun tilDomene(
         personalia: Søknadsfelt<Personalia>,
-        adresseopplysninger: Søknadsfelt<KontraktAdresseopplysninger>?
+        adresseopplysninger: Søknadsfelt<KontraktAdresseopplysninger>?,
     ) = Adresseopplysninger(
         adresse = mapAdresse(personalia.verdi.adresse.verdi),
         søkerBorPåRegistrertAdresse = adresseopplysninger?.verdi?.søkerBorPåRegistrertAdresse?.verdi,
         harMeldtAdresseendring = adresseopplysninger?.verdi?.harMeldtAdresseendring?.verdi,
-        dokumentasjonAdresseendring = tilDomene(adresseopplysninger?.verdi?.dokumentasjonAdresseendring?.verdi)
+        dokumentasjonAdresseendring = tilDomene(adresseopplysninger?.verdi?.dokumentasjonAdresseendring?.verdi),
     )
 
     private fun mapAdresse(adresse: Adresse): String = adresse.let { adresse ->
         listOfNotNull(
             adresse.adresse,
             "${adresse.postnummer}${adresse.poststedsnavn?.takeIf { it.isNotBlank() }?.let { " $it" } ?: ""}",
-            adresse.land
+            adresse.land,
         )
             .filter { it.isNotBlank() }
             .joinToString(", ")
@@ -405,7 +405,7 @@ object SøknadsskjemaMapper {
         dokumentasjon?.let { dok ->
             Dokumentasjon(
                 dok.harSendtInnTidligere.verdi,
-                dok.dokumenter.map { Dokument(it.id, it.navn) }
+                dok.dokumenter.map { Dokument(it.id, it.navn) },
             )
         }
 }

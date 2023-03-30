@@ -23,7 +23,7 @@ import java.util.UUID
 class UtestengelseController(
     private val tilgangService: TilgangService,
     private val utestengelseService: UtestengelseService,
-    private val fagsakService: FagsakService
+    private val fagsakService: FagsakService,
 ) {
 
     @GetMapping("/{fagsakPersonId}")
@@ -42,7 +42,7 @@ class UtestengelseController(
     @PostMapping("/{fagsakPersonId}")
     fun opprettUtestengelser(
         @PathVariable fagsakPersonId: UUID,
-        @RequestBody opprettUtestengelseDto: OpprettUtestengelseDto
+        @RequestBody opprettUtestengelseDto: OpprettUtestengelseDto,
     ): Ressurs<UtestengelseDto> {
         tilgangService.validerTilgangTilFagsakPerson(fagsakPersonId, AuditLoggerEvent.CREATE)
         feilHvisIkke(fagsakPersonId == opprettUtestengelseDto.fagsakPersonId) {
@@ -54,7 +54,7 @@ class UtestengelseController(
     @DeleteMapping("/{fagsakPersonId}/{id}")
     fun slettUtestengelse(
         @PathVariable fagsakPersonId: UUID,
-        @PathVariable id: UUID
+        @PathVariable id: UUID,
     ): Ressurs<String> {
         tilgangService.validerTilgangTilFagsakPerson(fagsakPersonId, AuditLoggerEvent.DELETE)
         utestengelseService.slettUtestengelse(fagsakPersonId, id)

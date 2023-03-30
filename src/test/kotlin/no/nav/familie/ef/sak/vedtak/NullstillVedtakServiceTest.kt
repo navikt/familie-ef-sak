@@ -44,7 +44,7 @@ class NullstillVedtakServiceTest {
         tilkjentYtelseService,
         tilbakekrevingService,
         mellomlagringBrevService,
-        vedtaksbrevService
+        vedtaksbrevService,
     )
     private val behandlingId = UUID.randomUUID()
 
@@ -53,7 +53,7 @@ class NullstillVedtakServiceTest {
         val saksbehandling = slot<Saksbehandling>()
         every { behandlingService.hentSaksbehandling(behandlingId) } returns saksbehandling(
             id = behandlingId,
-            steg = StegType.BEHANDLING_FERDIGSTILT
+            steg = StegType.BEHANDLING_FERDIGSTILT,
         )
 
         nullstillVedtakService.nullstillVedtak(behandlingId)
@@ -75,7 +75,7 @@ class NullstillVedtakServiceTest {
     internal fun `skal ikke resette steg hvis steget ikke er etter vedtak`() {
         every { behandlingService.hentSaksbehandling(behandlingId) } returns saksbehandling(
             id = behandlingId,
-            steg = StegType.VILKÅR
+            steg = StegType.VILKÅR,
         )
         nullstillVedtakService.nullstillVedtak(behandlingId)
         verify(exactly = 0) {
@@ -90,7 +90,7 @@ class NullstillVedtakServiceTest {
     fun `nullstill vedtak skal feile når behandling er ferdigstilt`() {
         every { behandlingService.hentSaksbehandling(behandlingId) } returns saksbehandling(
             id = behandlingId,
-            status = BehandlingStatus.FERDIGSTILT
+            status = BehandlingStatus.FERDIGSTILT,
         )
 
         assertThrows<Feil> { nullstillVedtakService.nullstillVedtak(behandlingId) }
@@ -100,7 +100,7 @@ class NullstillVedtakServiceTest {
     fun `nullstill vedtak skal feile når behandling er sendt til beslutter`() {
         every { behandlingService.hentSaksbehandling(behandlingId) } returns saksbehandling(
             id = behandlingId,
-            status = BehandlingStatus.FATTER_VEDTAK
+            status = BehandlingStatus.FATTER_VEDTAK,
         )
 
         assertThrows<Feil> { nullstillVedtakService.nullstillVedtak(behandlingId) }
@@ -110,7 +110,7 @@ class NullstillVedtakServiceTest {
     fun `nullstill vedtak skal feile når behanlding iverksettes`() {
         every { behandlingService.hentSaksbehandling(behandlingId) } returns saksbehandling(
             id = behandlingId,
-            status = BehandlingStatus.IVERKSETTER_VEDTAK
+            status = BehandlingStatus.IVERKSETTER_VEDTAK,
         )
 
         assertThrows<Feil> { nullstillVedtakService.nullstillVedtak(behandlingId) }

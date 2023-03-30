@@ -13,7 +13,7 @@ interface FagsakPersonRepository : RepositoryInterface<FagsakPerson, UUID>, Inse
 
     @Query(
         """SELECT p.* FROM fagsak_person p WHERE 
-                EXISTS(SELECT 1 FROM person_ident WHERE fagsak_person_id = p.id AND ident IN (:identer))"""
+                EXISTS(SELECT 1 FROM person_ident WHERE fagsak_person_id = p.id AND ident IN (:identer))""",
     )
     fun findByIdent(identer: Collection<String>): FagsakPerson?
 

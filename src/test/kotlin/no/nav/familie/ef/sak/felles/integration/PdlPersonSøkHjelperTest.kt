@@ -34,9 +34,9 @@ internal class PdlPersonSøkHjelperTest {
                         matrikkelId,
                         bruksenhetsnummer,
                         null,
-                        null
-                    )
-                )
+                        null,
+                    ),
+                ),
             )
         assertThat(resultat.size).isEqualTo(2)
         assertThat(resultat[0].fieldName).isEqualTo("person.bostedsadresse.matrikkeladresse.matrikkelId")
@@ -56,7 +56,7 @@ internal class PdlPersonSøkHjelperTest {
             null,
             "0101",
             null,
-            null
+            null,
         )
 
         val resultat = PdlPersonSøkHjelper.lagPdlPersonSøkKriterier(lagAdresse(vegadresse, null))
@@ -84,7 +84,7 @@ internal class PdlPersonSøkHjelperTest {
             null,
             "0101",
             null,
-            null
+            null,
         )
 
         val resultat = PdlPersonSøkHjelper.lagPdlPersonSøkKriterier(lagAdresse(vegadresse, null))
@@ -111,7 +111,7 @@ internal class PdlPersonSøkHjelperTest {
             coAdressenavn = null,
             utenlandskAdresse = null,
             ukjentBosted = null,
-            metadata = Metadata(false)
+            metadata = Metadata(false),
         )
     }
 }

@@ -11,7 +11,7 @@ import java.util.UUID
 @Service
 class HenleggService(
     private val behandlingService: BehandlingService,
-    private val oppgaveService: OppgaveService
+    private val oppgaveService: OppgaveService,
 ) {
 
     @Transactional
@@ -25,12 +25,12 @@ class HenleggService(
         oppgaveService.ferdigstillOppgaveHvisOppgaveFinnes(
             behandlingId = behandling.id,
             Oppgavetype.BehandleSak,
-            ignorerFeilregistrert = true
+            ignorerFeilregistrert = true,
         )
         oppgaveService.ferdigstillOppgaveHvisOppgaveFinnes(
             behandlingId = behandling.id,
             Oppgavetype.BehandleUnderkjentVedtak,
-            ignorerFeilregistrert = true
+            ignorerFeilregistrert = true,
         )
     }
 }

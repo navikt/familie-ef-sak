@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController
 @Validated
 class PdlSjekkController(
     private val personService: PersonService,
-    private val fagsakService: FagsakService
+    private val fagsakService: FagsakService,
 ) {
 
     private val secureLogger = LoggerFactory.getLogger("secureLogger")

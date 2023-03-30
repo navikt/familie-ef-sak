@@ -75,7 +75,7 @@ internal class BeslutteVedtakStegTest {
         totrinnskontrollService = totrinnskontrollService,
         behandlingService = behandlingService,
         vedtakService = vedtakService,
-        vedtaksbrevService = vedtaksbrevService
+        vedtaksbrevService = vedtaksbrevService,
     )
 
     private val vedtakKreverBeslutter = VedtakErUtenBeslutter(false)
@@ -84,7 +84,7 @@ internal class BeslutteVedtakStegTest {
 
     private val fagsak = fagsak(
         stønadstype = StønadType.OVERGANGSSTØNAD,
-        identer = setOf(PersonIdent(ident = "12345678901"))
+        identer = setOf(PersonIdent(ident = "12345678901")),
     )
     private val behandlingId = UUID.randomUUID()
 
@@ -93,7 +93,7 @@ internal class BeslutteVedtakStegTest {
         behandlingId = behandlingId,
         gsakOppgaveId = 123L,
         type = Oppgavetype.BehandleSak,
-        erFerdigstilt = false
+        erFerdigstilt = false,
     )
     private lateinit var taskSlot: MutableList<Task>
 
@@ -208,11 +208,11 @@ internal class BeslutteVedtakStegTest {
         godkjent: Boolean,
         saksbehandling: Saksbehandling = opprettSaksbehandling(),
         begrunnelse: String? = null,
-        årsakerUnderkjent: List<ÅrsakUnderkjent> = emptyList()
+        årsakerUnderkjent: List<ÅrsakUnderkjent> = emptyList(),
     ): StegType {
         return beslutteVedtakSteg.utførOgReturnerNesteSteg(
             saksbehandling,
-            BeslutteVedtakDto(godkjent = godkjent, begrunnelse = begrunnelse, årsakerUnderkjent = årsakerUnderkjent)
+            BeslutteVedtakDto(godkjent = godkjent, begrunnelse = begrunnelse, årsakerUnderkjent = årsakerUnderkjent),
         )
     }
 
@@ -226,7 +226,7 @@ internal class BeslutteVedtakStegTest {
                 status = BehandlingStatus.FATTER_VEDTAK,
                 steg = beslutteVedtakSteg.stegType(),
                 resultat = BehandlingResultat.IKKE_SATT,
-                årsak = årsak
-            )
+                årsak = årsak,
+            ),
         )
 }

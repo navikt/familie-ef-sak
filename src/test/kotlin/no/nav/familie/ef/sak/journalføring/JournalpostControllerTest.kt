@@ -49,7 +49,7 @@ internal class JournalpostControllerTest {
             journalpostService,
             personService,
             tilgangService,
-            featureToggleService
+            featureToggleService,
         )
 
     @BeforeEach
@@ -157,8 +157,8 @@ internal class JournalpostControllerTest {
                     UUID.randomUUID(),
                     "dummy-oppgave",
                     JournalføringBehandling(UUID.randomUUID()),
-                    "9991"
-                )
+                    "9991",
+                ),
             )
         }
     }
@@ -173,7 +173,7 @@ internal class JournalpostControllerTest {
             } returns journalpostMedFødselsnummer.copy(
                 dokumenter = journalpostMedFødselsnummer.dokumenter!!.map {
                     it.copy(dokumentvarianter = listOf(Dokumentvariant(Dokumentvariantformat.PRODUKSJON_DLF)))
-                }
+                },
             )
 
             assertThrows<ApiFeil> { journalpostController.hentDokument(journalpostId, dokumentInfoId) }
@@ -188,10 +188,10 @@ internal class JournalpostControllerTest {
                     it.copy(
                         dokumentvarianter = listOf(
                             Dokumentvariant(Dokumentvariantformat.PRODUKSJON_DLF),
-                            Dokumentvariant(Dokumentvariantformat.ARKIV)
-                        )
+                            Dokumentvariant(Dokumentvariantformat.ARKIV),
+                        ),
                     )
-                }
+                },
             )
 
             every { journalpostService.hentDokument(any(), any()) } returns byteArrayOf()
@@ -207,7 +207,7 @@ internal class JournalpostControllerTest {
         type = AvsenderMottakerIdType.FNR,
         navn = "navn",
         land = "land",
-        erLikBruker = erLikBruker
+        erLikBruker = erLikBruker,
     )
 
     private val aktørId = "11111111111"
@@ -232,9 +232,9 @@ internal class JournalpostControllerTest {
                     dokumentInfoId = dokumentInfoId,
                     tittel = "Tittel",
                     brevkode = DokumentBrevkode.OVERGANGSSTØNAD.verdi,
-                    dokumentvarianter = listOf(Dokumentvariant(Dokumentvariantformat.ARKIV))
-                )
-            )
+                    dokumentvarianter = listOf(Dokumentvariant(Dokumentvariantformat.ARKIV)),
+                ),
+            ),
         )
 
     private val journalpostMedFødselsnummer =

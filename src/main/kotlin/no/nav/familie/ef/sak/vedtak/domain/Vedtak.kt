@@ -42,7 +42,7 @@ data class Vedtak(
     val beslutterIdent: String? = null,
     val internBegrunnelse: String? = null,
     val opprettetTid: LocalDateTime = SporbarUtils.now(),
-    val opprettetAv: String = SikkerhetContext.hentSaksbehandlerEllerSystembruker()
+    val opprettetAv: String = SikkerhetContext.hentSaksbehandlerEllerSystembruker(),
 ) {
     fun erVedtakUtenBeslutter(): Boolean =
         resultatType == ResultatType.AVSLÅ && avslåÅrsak == AvslagÅrsak.MINDRE_INNTEKTSENDRINGER
@@ -65,14 +65,14 @@ data class Vedtaksperiode(
     override val datoTil: LocalDate,
     val aktivitet: AktivitetType,
     val periodeType: VedtaksperiodeType,
-    override val sanksjonsårsak: Sanksjonsårsak? = null
+    override val sanksjonsårsak: Sanksjonsårsak? = null,
 ) : VedtaksperiodeMedSanksjonsårsak {
 
     init {
         feilHvis(
             (periodeType != VedtaksperiodeType.SANKSJON && sanksjonsårsak != null) ||
                 (periodeType == VedtaksperiodeType.SANKSJON && sanksjonsårsak == null) ||
-                (periodeType == VedtaksperiodeType.SANKSJON && aktivitet != AktivitetType.IKKE_AKTIVITETSPLIKT)
+                (periodeType == VedtaksperiodeType.SANKSJON && aktivitet != AktivitetType.IKKE_AKTIVITETSPLIKT),
         ) {
             "Ugyldig kombinasjon av sanksjon periodeType=$periodeType aktivitet=$aktivitet sanksjonsårsak=$sanksjonsårsak"
         }
@@ -83,13 +83,13 @@ data class Vedtaksperiode(
         periode: Månedsperiode,
         aktivitet: AktivitetType,
         periodeType: VedtaksperiodeType,
-        sanksjonsårsak: Sanksjonsårsak? = null
+        sanksjonsårsak: Sanksjonsårsak? = null,
     ) : this(
         periode.fomDato,
         periode.tomDato,
         aktivitet,
         periodeType,
-        sanksjonsårsak
+        sanksjonsårsak,
     )
 }
 
@@ -102,14 +102,15 @@ private fun VedtaksperiodeMedSanksjonsårsak.validerSanksjon1Måned() {
 enum class PeriodetypeBarnetilsyn {
     ORDINÆR,
     OPPHØR,
-    SANKSJON_1_MND;
+    SANKSJON_1_MND,
+    ;
 
     fun midlertidigOpphørEllerSanksjon() = this == OPPHØR || this == SANKSJON_1_MND
 }
 
 enum class AktivitetstypeBarnetilsyn {
     I_ARBEID,
-    FORBIGÅENDE_SYKDOM
+    FORBIGÅENDE_SYKDOM,
 }
 
 @Improvement("Kan barnetilsynperiode og vedtaksperiode sees på som én ting?")
@@ -120,14 +121,14 @@ data class Barnetilsynperiode(
     val barn: List<UUID>,
     override val sanksjonsårsak: Sanksjonsårsak? = null,
     val periodetype: PeriodetypeBarnetilsyn,
-    val aktivitetstype: AktivitetstypeBarnetilsyn? = null
+    val aktivitetstype: AktivitetstypeBarnetilsyn? = null,
 ) : VedtaksperiodeMedSanksjonsårsak {
 
     init {
         validerSanksjon1Måned()
         feilHvis(
             (periodetype != PeriodetypeBarnetilsyn.SANKSJON_1_MND && sanksjonsårsak != null) ||
-                (periodetype == PeriodetypeBarnetilsyn.SANKSJON_1_MND && sanksjonsårsak == null)
+                (periodetype == PeriodetypeBarnetilsyn.SANKSJON_1_MND && sanksjonsårsak == null),
         ) {
             "Ugyldig kombinasjon av sanksjon periodeType=$periodetype sanksjonsårsak=$sanksjonsårsak"
         }
@@ -139,7 +140,7 @@ data class Barnetilsynperiode(
         barn: List<UUID>,
         sanksjonsårsak: Sanksjonsårsak? = null,
         periodetype: PeriodetypeBarnetilsyn,
-        aktivitet: AktivitetstypeBarnetilsyn? = null
+        aktivitet: AktivitetstypeBarnetilsyn? = null,
     ) : this(
         datoFra = periode.fomDato,
         datoTil = periode.tomDato,
@@ -147,31 +148,31 @@ data class Barnetilsynperiode(
         barn = barn,
         periodetype = periodetype,
         sanksjonsårsak = sanksjonsårsak,
-        aktivitetstype = aktivitet
+        aktivitetstype = aktivitet,
     )
 }
 
 data class SkoleårsperiodeSkolepenger(
     val perioder: List<DelårsperiodeSkoleårSkolepenger>,
-    val utgiftsperioder: List<SkolepengerUtgift>
+    val utgiftsperioder: List<SkolepengerUtgift>,
 )
 
 data class DelårsperiodeSkoleårSkolepenger(
     val studietype: SkolepengerStudietype,
     val datoFra: LocalDate,
     val datoTil: LocalDate,
-    val studiebelastning: Int
+    val studiebelastning: Int,
 ) {
 
     constructor(
         studietype: SkolepengerStudietype,
         periode: Månedsperiode,
-        studiebelastning: Int
+        studiebelastning: Int,
     ) : this(
         studietype,
         periode.fomDato,
         periode.tomDato,
-        studiebelastning
+        studiebelastning,
     )
 
     val periode get() = Månedsperiode(datoFra, datoTil)
@@ -181,18 +182,18 @@ data class SkolepengerUtgift(
     val id: UUID,
     val utgiftsdato: LocalDate,
     val utgifter: Int,
-    val stønad: Int
+    val stønad: Int,
 )
 
 enum class SkolepengerStudietype {
     HØGSKOLE_UNIVERSITET,
-    VIDEREGÅENDE
+    VIDEREGÅENDE,
 }
 
 data class PeriodeMedBeløp(
     val datoFra: LocalDate,
     val datoTil: LocalDate,
-    val beløp: Int
+    val beløp: Int,
 ) {
 
     constructor(periode: Månedsperiode, beløp: Int) : this(periode.fomDato, periode.tomDato, beløp)
@@ -201,7 +202,7 @@ data class PeriodeMedBeløp(
         årMånedFra = periode.fom,
         årMånedTil = periode.tom,
         periode = periode,
-        beløp = beløp
+        beløp = beløp,
     )
 
     val periode get() = Månedsperiode(datoFra, datoTil)
@@ -212,19 +213,19 @@ data class InntektWrapper(val inntekter: List<Inntektsperiode>)
 data class TilleggsstønadWrapper(
     val harTilleggsstønad: Boolean,
     val perioder: List<PeriodeMedBeløp>,
-    val begrunnelse: String?
+    val begrunnelse: String?,
 )
 
 data class KontantstøtteWrapper(val perioder: List<PeriodeMedBeløp>)
 
 data class BarnetilsynWrapper(
     val perioder: List<Barnetilsynperiode>,
-    val begrunnelse: String?
+    val begrunnelse: String?,
 )
 
 data class SkolepengerWrapper(
     val skoleårsperioder: List<SkoleårsperiodeSkolepenger>,
-    val begrunnelse: String?
+    val begrunnelse: String?,
 )
 
 enum class VedtaksperiodeType {
@@ -235,7 +236,8 @@ enum class VedtaksperiodeType {
     PERIODE_FØR_FØDSEL,
     SANKSJON,
     UTVIDELSE,
-    NY_PERIODE_FOR_NYTT_BARN;
+    NY_PERIODE_FOR_NYTT_BARN,
+    ;
 
     fun midlertidigOpphørEllerSanksjon() = this == MIDLERTIDIG_OPPHØR || this == SANKSJON
 }
@@ -260,12 +262,13 @@ enum class AktivitetType {
     FORLENGELSE_STØNAD_PÅVENTE_OPPSTART_KVALIFISERINGSPROGRAM,
     FORLENGELSE_STØNAD_PÅVENTE_TILSYNSORDNING,
     FORLENGELSE_STØNAD_PÅVENTE_UTDANNING,
-    FORLENGELSE_STØNAD_UT_SKOLEÅRET;
+    FORLENGELSE_STØNAD_UT_SKOLEÅRET,
+    ;
 
     fun manglerTilsyn(): Boolean = this == FORSØRGER_MANGLER_TILSYNSORDNING
 }
 
 enum class SamordningsfradragType {
     GJENLEVENDEPENSJON,
-    UFØRETRYGD
+    UFØRETRYGD,
 }

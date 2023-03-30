@@ -20,14 +20,14 @@ internal class VilkårsvurderingTest {
             behandlingId = behandlingIdFørstegangsbehandling,
             delvilkårsvurdering = DelvilkårsvurderingWrapper(emptyList()),
             type = VilkårType.MOR_ELLER_FAR,
-            opphavsvilkår = null
+            opphavsvilkår = null,
         )
         val opphavsvilkår = vilkårsvurdering.opprettOpphavsvilkår()
         assertThat(opphavsvilkår).isEqualTo(
             Opphavsvilkår(
                 behandlingIdFørstegangsbehandling,
-                vilkårsvurdering.sporbar.endret.endretTid
-            )
+                vilkårsvurdering.sporbar.endret.endretTid,
+            ),
         )
     }
 
@@ -38,7 +38,7 @@ internal class VilkårsvurderingTest {
             behandlingId = behandlingIdRevurdering,
             delvilkårsvurdering = DelvilkårsvurderingWrapper(emptyList()),
             type = VilkårType.MOR_ELLER_FAR,
-            opphavsvilkår = opphavsvilkår
+            opphavsvilkår = opphavsvilkår,
         )
         val nyttOpphavsvilkår = vilkårsvurdering.opprettOpphavsvilkår()
         assertThat(nyttOpphavsvilkår).isEqualTo(opphavsvilkår)

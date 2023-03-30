@@ -12,13 +12,13 @@ import java.time.LocalDate
 
 data class MedlemskapDto(
     val søknadsgrunnlag: MedlemskapSøknadsgrunnlagDto?,
-    val registergrunnlag: MedlemskapRegistergrunnlagDto
+    val registergrunnlag: MedlemskapRegistergrunnlagDto,
 )
 
 data class MedlemskapSøknadsgrunnlagDto(
     val bosattNorgeSisteÅrene: Boolean,
     val oppholderDuDegINorge: Boolean,
-    val utenlandsopphold: List<UtenlandsoppholdDto>
+    val utenlandsopphold: List<UtenlandsoppholdDto>,
 )
 
 data class MedlemskapRegistergrunnlagDto(
@@ -29,7 +29,7 @@ data class MedlemskapRegistergrunnlagDto(
     val innflytting: List<InnflyttingDto>,
     val utflytting: List<UtflyttingDto>,
     val folkeregisterpersonstatus: Folkeregisterpersonstatus?,
-    val medlUnntak: MedlUnntakDto
+    val medlUnntak: MedlUnntakDto,
 )
 
 data class MedlUnntakDto(val gyldigeVedtaksPerioder: List<MedlUnntaksperiodeDto>)
@@ -47,7 +47,7 @@ data class UtenlandsoppholdDto(
     @Deprecated("Bruk periode!", ReplaceWith("periode.tomDato")) val tilDato: LocalDate? = null,
     val periode: Datoperiode = Datoperiode(
         fraDato ?: error("Periode eller fraDato må ha verdi"),
-        tilDato ?: error("Periode eller tilDato må ha verdi")
+        tilDato ?: error("Periode eller tilDato må ha verdi"),
     ),
-    val årsak: String
+    val årsak: String,
 )

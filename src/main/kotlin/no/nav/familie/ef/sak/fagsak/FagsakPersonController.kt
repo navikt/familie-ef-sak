@@ -27,7 +27,7 @@ class FagsakPersonController(
     private val tilgangService: TilgangService,
     private val fagsakPersonService: FagsakPersonService,
     private val fagsakService: FagsakService,
-    private val personService: PersonService
+    private val personService: PersonService,
 ) {
 
     @GetMapping("{fagsakPersonId}")
@@ -40,8 +40,8 @@ class FagsakPersonController(
                 person.id,
                 overgangsstønad = fagsaker.overgangsstønad?.id,
                 barnetilsyn = fagsaker.barnetilsyn?.id,
-                skolepenger = fagsaker.skolepenger?.id
-            )
+                skolepenger = fagsaker.skolepenger?.id,
+            ),
         )
     }
 
@@ -55,8 +55,8 @@ class FagsakPersonController(
                 person.id,
                 overgangsstønad = fagsaker.overgangsstønad?.let { fagsakService.fagsakTilDto(it) },
                 barnetilsyn = fagsaker.barnetilsyn?.let { fagsakService.fagsakTilDto(it) },
-                skolepenger = fagsaker.skolepenger?.let { fagsakService.fagsakTilDto(it) }
-            )
+                skolepenger = fagsaker.skolepenger?.let { fagsakService.fagsakTilDto(it) },
+            ),
         )
     }
 
@@ -67,10 +67,10 @@ class FagsakPersonController(
         tilgangService.validerTilgangTilPersonMedBarn(personIdentRequest.personIdent, AuditLoggerEvent.ACCESS)
         val fagsakPersonId = fagsakPersonService.hentEllerOpprettPerson(
             personIdenter.identer(),
-            personIdenter.gjeldende().ident
+            personIdenter.gjeldende().ident,
         ).id
         return Ressurs.success(
-            fagsakPersonId
+            fagsakPersonId,
         )
     }
 }

@@ -20,7 +20,7 @@ import org.springframework.web.client.RestOperations
 @Service
 class PdlSaksbehandlerClient(
     val pdlConfig: PdlConfig,
-    @Qualifier("azureOnBehalfOf") restTemplate: RestOperations
+    @Qualifier("azureOnBehalfOf") restTemplate: RestOperations,
 ) :
     AbstractRestClient(restTemplate, "pdl.personinfo.saksbehandler") {
 
@@ -28,14 +28,14 @@ class PdlSaksbehandlerClient(
         val pdlPersonSøkRequest = PdlPersonSøkRequest(
             variables = PdlPersonSøkRequestVariables(
                 paging = Paging(1, 30),
-                criteria = søkeKriterier
+                criteria = søkeKriterier,
             ),
-            query = PdlConfig.søkPersonQuery
+            query = PdlConfig.søkPersonQuery,
         )
         val pdlResponse: PdlResponse<PersonSøk> = postForEntity(
             pdlConfig.pdlUri,
             pdlPersonSøkRequest,
-            httpHeaders()
+            httpHeaders(),
         )
         return feilsjekkOgReturnerData(null, pdlResponse) { it.sokPerson }
     }

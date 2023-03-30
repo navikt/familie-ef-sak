@@ -17,7 +17,7 @@ import org.springframework.stereotype.Service
 class PersonService(
     private val pdlClient: PdlClient,
     @Qualifier("shortCache")
-    private val cacheManager: CacheManager
+    private val cacheManager: CacheManager,
 ) {
 
     fun hentSøker(ident: String): PdlSøker {

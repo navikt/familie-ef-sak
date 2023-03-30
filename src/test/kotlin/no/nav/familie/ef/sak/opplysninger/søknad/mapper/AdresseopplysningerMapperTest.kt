@@ -24,7 +24,7 @@ internal class AdresseopplysningerMapperTest {
             adresse = "adresse",
             søkerBorPåRegistrertAdresse = false,
             harMeldtAdresseendring = true,
-            dokumentasjonAdresseendring = null
+            dokumentasjonAdresseendring = null,
         )
         val dto = AdresseopplysningerMapper.tilDto(adresseopplysninger)!!
         assertThat(dto.adresse).isEqualTo("adresse")

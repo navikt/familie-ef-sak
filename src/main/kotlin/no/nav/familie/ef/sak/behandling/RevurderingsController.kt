@@ -4,7 +4,9 @@ import no.nav.familie.ef.sak.AuditLoggerEvent
 import no.nav.familie.ef.sak.behandling.dto.RevurderingDto
 import no.nav.familie.ef.sak.behandling.dto.RevurderingsinformasjonDto
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
+import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
+import no.nav.familie.ef.sak.journalføring.dto.VilkårsbehandleNyeBarn
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -22,7 +24,7 @@ import java.util.UUID
 @ProtectedWithClaims(issuer = "azuread")
 class RevurderingsController(
     private val revurderingService: RevurderingService,
-    private val tilgangService: TilgangService
+    private val tilgangService: TilgangService,
 ) {
 
     @PostMapping("{fagsakId}")
@@ -35,11 +37,11 @@ class RevurderingsController(
                 "eller med revurderingsårsak \"Nye opplysninger\". " +
                 "Hvis du trenger å \"flytte\" en søknad som er journalført mot infotrygd, kontakt superbrukere for flytting av journalpost"
         }
-        brukerfeilHvis(
+        feilHvis(
             revurderingInnhold.behandlingsårsak == BehandlingÅrsak.G_OMREGNING &&
-                revurderingInnhold.barn.isNotEmpty()
+                revurderingInnhold.vilkårsbehandleNyeBarn != VilkårsbehandleNyeBarn.IKKE_VILKÅRSBEHANDLE,
         ) {
-            "Kan ikke sende inn nye barn på revurdering med årsak G-omregning"
+            "Kan ikke behandle nye barn på revurdering med årsak G-omregning"
         }
         val revurdering = revurderingService.opprettRevurderingManuelt(revurderingInnhold)
         return Ressurs.success(revurdering.id)
@@ -48,7 +50,7 @@ class RevurderingsController(
     @PostMapping("informasjon/{behandlingId}")
     fun lagreRevurderingsinformasjon(
         @PathVariable behandlingId: UUID,
-        @RequestBody revurderingsinformasjonDto: RevurderingsinformasjonDto
+        @RequestBody revurderingsinformasjonDto: RevurderingsinformasjonDto,
     ): Ressurs<RevurderingsinformasjonDto> {
         tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.CREATE)
         tilgangService.validerHarSaksbehandlerrolle()
@@ -70,7 +72,7 @@ class RevurderingsController(
 
     @GetMapping("informasjon/{behandlingId}")
     fun hentRevurderingsinformasjon(
-        @PathVariable behandlingId: UUID
+        @PathVariable behandlingId: UUID,
     ): Ressurs<RevurderingsinformasjonDto> {
         tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.ACCESS)
         return Ressurs.success(revurderingService.hentRevurderingsinformasjon(behandlingId))

@@ -31,7 +31,7 @@ import java.time.LocalDateTime
 
 data class GrunnlagsdataMedMetadata(
     val grunnlagsdata: GrunnlagsdataDomene,
-    val opprettetTidspunkt: LocalDateTime
+    val opprettetTidspunkt: LocalDateTime,
 ) {
 
     fun endringerMellom(tidligereGrunnlagsdata: GrunnlagsdataMedMetadata): List<GrunnlagsdataEndring> {
@@ -71,7 +71,7 @@ data class GrunnlagsdataDomene(
     val annenForelder: List<AnnenForelderMedIdent>,
     val medlUnntak: Medlemskapsinfo,
     val barn: List<BarnMedIdent>,
-    val tidligereVedtaksperioder: TidligereVedtaksperioder?
+    val tidligereVedtaksperioder: TidligereVedtaksperioder?,
 )
 
 data class Søker(
@@ -93,7 +93,7 @@ data class Søker(
     val innflyttingTilNorge: List<InnflyttingTilNorge>,
     val utflyttingFraNorge: List<UtflyttingFraNorge>,
     val vergemaalEllerFremtidsfullmakt: List<VergemaalEllerFremtidsfullmakt>,
-    val folkeregisteridentifikator: List<Folkeregisteridentifikator>?
+    val folkeregisteridentifikator: List<Folkeregisteridentifikator>?,
 )
 
 data class AnnenForelderMedIdent(
@@ -104,7 +104,7 @@ data class AnnenForelderMedIdent(
     val navn: Navn,
     val personIdent: String,
     val folkeregisteridentifikator: List<Folkeregisteridentifikator>?,
-    val tidligereVedtaksperioder: TidligereVedtaksperioder?
+    val tidligereVedtaksperioder: TidligereVedtaksperioder?,
 )
 
 data class BarnMedIdent(
@@ -115,19 +115,19 @@ data class BarnMedIdent(
     val forelderBarnRelasjon: List<ForelderBarnRelasjon>,
     val fødsel: List<Fødsel>,
     val navn: Navn,
-    val personIdent: String
+    val personIdent: String,
 )
 
 data class ForelderBarnRelasjon(
     val relatertPersonsIdent: String,
     val relatertPersonsRolle: Familierelasjonsrolle,
-    val minRolleForPerson: Familierelasjonsrolle?
+    val minRolleForPerson: Familierelasjonsrolle?,
 )
 
 data class Folkeregisteridentifikator(
     val personIdent: String,
     val status: FolkeregisteridentifikatorStatus,
-    val historisk: Boolean
+    val historisk: Boolean,
 )
 
 data class SivilstandMedNavn(
@@ -137,7 +137,7 @@ data class SivilstandMedNavn(
     val bekreftelsesdato: LocalDate?,
     val dødsfall: Dødsfall?, // Er en liste i PDLSøker
     val navn: String?,
-    val metadata: Metadata
+    val metadata: Metadata,
 )
 
 data class FullmaktMedNavn(
@@ -145,7 +145,7 @@ data class FullmaktMedNavn(
     val gyldigTilOgMed: LocalDate,
     val motpartsPersonident: String,
     val navn: String?,
-    val områder: List<String>?
+    val områder: List<String>?,
 )
 
 /**
@@ -154,18 +154,18 @@ data class FullmaktMedNavn(
 data class TidligereVedtaksperioder(
     val infotrygd: TidligereInnvilgetVedtak,
     val sak: TidligereInnvilgetVedtak? = null,
-    val historiskPensjon: Boolean? = null
+    val historiskPensjon: Boolean? = null,
 )
 
 data class TidligereInnvilgetVedtak(
     val harTidligereOvergangsstønad: Boolean = false,
     val harTidligereBarnetilsyn: Boolean = false,
-    val harTidligereSkolepenger: Boolean = false
+    val harTidligereSkolepenger: Boolean = false,
 )
 
 enum class GrunnlagsdataEndring {
     BARN,
     ADRESSE_ANNEN_FORELDER,
     ADRESSE_SØKER,
-    SIVILSTAND
+    SIVILSTAND,
 }

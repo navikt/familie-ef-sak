@@ -32,7 +32,7 @@ class FagsakService(
     private val behandlingService: BehandlingService,
     private val personService: PersonService,
     private val featureToggleService: FeatureToggleService,
-    private val infotrygdService: InfotrygdService
+    private val infotrygdService: InfotrygdService,
 ) {
 
     fun hentEllerOpprettFagsakMedBehandlinger(personIdent: String, stønadstype: StønadType): FagsakDto {
@@ -42,7 +42,7 @@ class FagsakService(
     @Transactional
     fun hentEllerOpprettFagsak(
         personIdent: String,
-        stønadstype: StønadType
+        stønadstype: StønadType,
     ): Fagsak {
         val personIdenter = personService.hentPersonIdenter(personIdent)
         val gjeldendePersonIdent = personIdenter.gjeldende()
@@ -57,7 +57,7 @@ class FagsakService(
     @Transactional
     fun finnFagsakEllerOpprettHvisPersonFinnesIInfotrygd(
         personIdenter: Set<String>,
-        gjeldendePersonIdent: String
+        gjeldendePersonIdent: String,
     ): List<Fagsak> {
         val fagsaker = fagsakRepository.findBySøkerIdent(personIdenter)
 
@@ -96,7 +96,7 @@ class FagsakService(
             behandlinger = behandlinger.map {
                 it.tilDto(fagsak.stønadstype)
             },
-            erLøpende = erLøpende
+            erLøpende = erLøpende,
         )
     }
 
@@ -107,7 +107,7 @@ class FagsakService(
         return Fagsaker(
             overgangsstønad = fagsaker[StønadType.OVERGANGSSTØNAD],
             barnetilsyn = fagsaker[StønadType.BARNETILSYN],
-            skolepenger = fagsaker[StønadType.SKOLEPENGER]
+            skolepenger = fagsaker[StønadType.SKOLEPENGER],
         )
     }
 
@@ -141,7 +141,7 @@ class FagsakService(
 
     private fun oppdatertPerson(
         person: FagsakPerson,
-        gjeldendePersonIdent: PdlIdent
+        gjeldendePersonIdent: PdlIdent,
     ) = fagsakPersonService.oppdaterIdent(person, gjeldendePersonIdent.ident)
 
     fun hentFagsakForBehandling(behandlingId: UUID): Fagsak {
@@ -183,8 +183,8 @@ class FagsakService(
         return fagsakRepository.insert(
             FagsakDomain(
                 stønadstype = stønadstype,
-                fagsakPersonId = fagsakPerson.id
-            )
+                fagsakPersonId = fagsakPerson.id,
+            ),
         )
     }
 

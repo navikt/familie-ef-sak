@@ -20,7 +20,7 @@ import java.util.UUID
  */
 sealed class VedtakSkolepengerDto(
     resultatType: ResultatType,
-    _type: String
+    _type: String,
 ) : VedtakDto(resultatType, _type) {
     abstract val begrunnelse: String?
     abstract val skoleårsperioder: List<SkoleårsperiodeSkolepengerDto>
@@ -30,22 +30,22 @@ sealed class VedtakSkolepengerDto(
 
 data class InnvilgelseSkolepenger(
     override val begrunnelse: String?,
-    override val skoleårsperioder: List<SkoleårsperiodeSkolepengerDto>
+    override val skoleårsperioder: List<SkoleårsperiodeSkolepengerDto>,
 ) : VedtakSkolepengerDto(
     resultatType = ResultatType.INNVILGE,
-    _type = "InnvilgelseSkolepenger"
+    _type = "InnvilgelseSkolepenger",
 )
 
 const val VEDTAK_SKOLEPENGER_OPPHØR_TYPE = "OpphørSkolepenger"
 
 data class OpphørSkolepenger(
     override val begrunnelse: String?,
-    override val skoleårsperioder: List<SkoleårsperiodeSkolepengerDto>
+    override val skoleårsperioder: List<SkoleårsperiodeSkolepengerDto>,
 ) : VedtakSkolepengerDto(resultatType = ResultatType.OPPHØRT, _type = VEDTAK_SKOLEPENGER_OPPHØR_TYPE)
 
 data class SkoleårsperiodeSkolepengerDto(
     val perioder: List<DelårsperiodeSkoleårDto>,
-    val utgiftsperioder: List<SkolepengerUtgiftDto>
+    val utgiftsperioder: List<SkolepengerUtgiftDto>,
 )
 
 data class DelårsperiodeSkoleårDto(
@@ -55,9 +55,9 @@ data class DelårsperiodeSkoleårDto(
     @JsonIgnore
     val periode: Månedsperiode = Månedsperiode(
         årMånedFra ?: error("periode eller årMånedFra må ha verdi"),
-        årMånedTil ?: error("periode eller årMånedTil må ha verdi")
+        årMånedTil ?: error("periode eller årMånedTil må ha verdi"),
     ),
-    val studiebelastning: Int
+    val studiebelastning: Int,
 ) {
 
     // Brukes for å ikke være en del av json som blir serialisert
@@ -71,7 +71,7 @@ data class SkolepengerUtgiftDto(
     val id: UUID,
     val årMånedFra: YearMonth,
     val utgifter: Int,
-    val stønad: Int
+    val stønad: Int,
 )
 
 fun SkoleårsperiodeSkolepengerDto.tilDomene() = SkoleårsperiodeSkolepenger(
@@ -81,15 +81,15 @@ fun SkoleårsperiodeSkolepengerDto.tilDomene() = SkoleårsperiodeSkolepenger(
             id = it.id,
             utgiftsdato = it.årMånedFra.atDay(1),
             utgifter = it.utgifter,
-            stønad = it.stønad
+            stønad = it.stønad,
         )
-    }.sortedBy { it.utgiftsdato }
+    }.sortedBy { it.utgiftsdato },
 )
 
 fun DelårsperiodeSkoleårDto.tilDomene() = DelårsperiodeSkoleårSkolepenger(
     studietype = this.studietype,
     periode = this.periode,
-    studiebelastning = this.studiebelastning
+    studiebelastning = this.studiebelastning,
 )
 
 fun Vedtak.mapInnvilgelseSkolepenger(): InnvilgelseSkolepenger {
@@ -98,7 +98,7 @@ fun Vedtak.mapInnvilgelseSkolepenger(): InnvilgelseSkolepenger {
     }
     return InnvilgelseSkolepenger(
         begrunnelse = this.skolepenger.begrunnelse,
-        skoleårsperioder = this.skolepenger.skoleårsperioder.map { it.tilDto() }
+        skoleårsperioder = this.skolepenger.skoleårsperioder.map { it.tilDto() },
     )
 }
 
@@ -108,14 +108,14 @@ fun Vedtak.mapOpphørSkolepenger(): OpphørSkolepenger {
     }
     return OpphørSkolepenger(
         begrunnelse = this.skolepenger.begrunnelse,
-        skoleårsperioder = this.skolepenger.skoleårsperioder.map { it.tilDto() }
+        skoleårsperioder = this.skolepenger.skoleårsperioder.map { it.tilDto() },
     )
 }
 
 fun SkoleårsperiodeSkolepenger.tilDto() =
     SkoleårsperiodeSkolepengerDto(
         perioder = this.perioder.map { it.tilDto() },
-        utgiftsperioder = this.utgiftsperioder.map { it.tilDto() }
+        utgiftsperioder = this.utgiftsperioder.map { it.tilDto() },
     )
 
 fun DelårsperiodeSkoleårSkolepenger.tilDto() = DelårsperiodeSkoleårDto(
@@ -123,12 +123,12 @@ fun DelårsperiodeSkoleårSkolepenger.tilDto() = DelårsperiodeSkoleårDto(
     årMånedFra = YearMonth.from(this.datoFra),
     årMånedTil = YearMonth.from(this.datoTil),
     periode = Månedsperiode(this.datoFra, this.datoTil),
-    studiebelastning = this.studiebelastning
+    studiebelastning = this.studiebelastning,
 )
 
 fun SkolepengerUtgift.tilDto() = SkolepengerUtgiftDto(
     id = this.id,
     årMånedFra = YearMonth.from(this.utgiftsdato),
     utgifter = this.utgifter,
-    stønad = this.stønad
+    stønad = this.stønad,
 )

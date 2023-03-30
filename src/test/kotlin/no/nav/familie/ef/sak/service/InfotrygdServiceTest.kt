@@ -72,7 +72,7 @@ internal class InfotrygdServiceTest {
                 resultat = InfotrygdSakResultat.INNVILGET,
                 stønadType = StønadType.OVERGANGSSTØNAD,
                 vedtaksdato = vedtaksdato,
-                mottattDato = mottattDato
+                mottattDato = mottattDato,
             )
 
         val a = sak(LocalDate.of(2021, 1, 1), null)

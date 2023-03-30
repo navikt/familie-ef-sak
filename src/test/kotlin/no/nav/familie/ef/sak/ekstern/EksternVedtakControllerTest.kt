@@ -45,7 +45,7 @@ internal class EksternVedtakControllerTest : OppslagSpringRunnerTest() {
             type = BehandlingType.FØRSTEGANGSBEHANDLING,
             status = BehandlingStatus.FERDIGSTILT,
             eksternId = EksternBehandlingId(1),
-            resultat = BehandlingResultat.INNVILGET
+            resultat = BehandlingResultat.INNVILGET,
         )
 
         behandlingRepository.insertAll(listOf(førstegangsbehandling))
@@ -61,7 +61,7 @@ internal class EksternVedtakControllerTest : OppslagSpringRunnerTest() {
         return restTemplate.exchange(
             localhost("/api/ekstern/vedtak/$eksternFagsakId"),
             HttpMethod.GET,
-            HttpEntity(null, headers.medContentTypeJsonUTF8())
+            HttpEntity(null, headers.medContentTypeJsonUTF8()),
         )
     }
 }

@@ -36,7 +36,7 @@ class OppgaveService(
     private val oppgaveRepository: OppgaveRepository,
     private val arbeidsfordelingService: ArbeidsfordelingService,
     private val cacheManager: CacheManager,
-    @Value("\${FRONTEND_OPPGAVE_URL}") private val frontendOppgaveUrl: URI
+    @Value("\${FRONTEND_OPPGAVE_URL}") private val frontendOppgaveUrl: URI,
 ) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -46,7 +46,7 @@ class OppgaveService(
         oppgavetype: Oppgavetype,
         tilordnetNavIdent: String? = null,
         beskrivelse: String? = null,
-        mappeId: Long? = null // Dersom denne er satt vil vi ikke prøve å finne mappe basert på oppgavens innhold
+        mappeId: Long? = null, // Dersom denne er satt vil vi ikke prøve å finne mappe basert på oppgavens innhold
     ): Long {
         val oppgaveFinnesFraFør =
             oppgaveRepository.findByBehandlingIdAndTypeAndErFerdigstiltIsFalse(behandlingId, oppgavetype)
@@ -61,12 +61,12 @@ class OppgaveService(
                     fristFerdigstillelse = null,
                     beskrivelse = lagOppgaveTekst(beskrivelse),
                     tilordnetNavIdent = tilordnetNavIdent,
-                    mappeId = mappeId
+                    mappeId = mappeId,
                 )
             val oppgave = EfOppgave(
                 gsakOppgaveId = opprettetOppgaveId,
                 behandlingId = behandlingId,
-                type = oppgavetype
+                type = oppgavetype,
             )
             oppgaveRepository.insert(oppgave)
             opprettetOppgaveId
@@ -86,12 +86,13 @@ class OppgaveService(
         fristFerdigstillelse: LocalDate?,
         beskrivelse: String,
         tilordnetNavIdent: String?,
-        mappeId: Long? = null // Dersom denne er satt vil vi ikke prøve å finne mappe basert på oppgavens innhold
+        mappeId: Long? = null, // Dersom denne er satt vil vi ikke prøve å finne mappe basert på oppgavens innhold
     ): Long {
         val settBehandlesAvApplikasjon = when (oppgavetype) {
             Oppgavetype.BehandleSak,
             Oppgavetype.BehandleUnderkjentVedtak,
-            Oppgavetype.GodkjenneVedtak -> true
+            Oppgavetype.GodkjenneVedtak,
+            -> true
             Oppgavetype.InnhentDokumentasjon -> false
             else -> error("Håndterer ikke behandlesAvApplikasjon for $oppgavetype")
         }
@@ -109,7 +110,7 @@ class OppgaveService(
             behandlingstema = finnBehandlingstema(fagsak.stønadstype).value,
             tilordnetRessurs = tilordnetNavIdent,
             behandlesAvApplikasjon = if (settBehandlesAvApplikasjon) "familie-ef-sak" else null,
-            mappeId = mappeId ?: finnAktuellMappe(enhetsnummer, oppgavetype)
+            mappeId = mappeId ?: finnAktuellMappe(enhetsnummer, oppgavetype),
         )
 
         return try {
@@ -159,7 +160,7 @@ class OppgaveService(
         return oppgaveClient.fordelOppgave(
             gsakOppgaveId,
             saksbehandler,
-            versjon
+            versjon,
         )
     }
 
@@ -193,7 +194,7 @@ class OppgaveService(
     fun ferdigstillOppgaveHvisOppgaveFinnes(
         behandlingId: UUID,
         oppgavetype: Oppgavetype,
-        ignorerFeilregistrert: Boolean = false
+        ignorerFeilregistrert: Boolean = false,
     ) {
         val oppgave = oppgaveRepository.findByBehandlingIdAndTypeAndErFerdigstiltIsFalse(behandlingId, oppgavetype)
         oppgave?.let {
@@ -281,12 +282,12 @@ class OppgaveService(
             logger.info("Henter mapper på nytt")
             val mappeRespons = oppgaveClient.finnMapper(
                 enhetsnummer = enhet,
-                limit = 1000
+                limit = 1000,
             )
             if (mappeRespons.antallTreffTotalt > mappeRespons.mapper.size) {
                 logger.error(
                     "Det finnes flere mapper (${mappeRespons.antallTreffTotalt}) " +
-                        "enn vi har hentet ut (${mappeRespons.mapper.size}). Sjekk limit. "
+                        "enn vi har hentet ut (${mappeRespons.mapper.size}). Sjekk limit. ",
                 )
             }
             mappeRespons.mapper

@@ -45,7 +45,7 @@ class SendTilBeslutterSteg(
     private val tilbakekrevingService: TilbakekrevingService,
     private val vurderingService: VurderingService,
     private val validerOmregningService: ValiderOmregningService,
-    private val årsakRevurderingService: ÅrsakRevurderingService
+    private val årsakRevurderingService: ÅrsakRevurderingService,
 ) : BehandlingSteg<Void?> {
 
     override fun validerSteg(saksbehandling: Saksbehandling) {
@@ -121,8 +121,8 @@ class SendTilBeslutterSteg(
                     behandlingId = saksbehandling.id,
                     oppgavetype,
                     it.gsakOppgaveId,
-                    aktivIdent
-                )
+                    aktivIdent,
+                ),
             )
         }
     }
@@ -133,9 +133,9 @@ class SendTilBeslutterSteg(
                 OpprettOppgaveTaskData(
                     behandlingId = saksbehandling.id,
                     oppgavetype = Oppgavetype.GodkjenneVedtak,
-                    beskrivelse = "Sendt til godkjenning av ${SikkerhetContext.hentSaksbehandlerNavn(true)}."
-                )
-            )
+                    beskrivelse = "Sendt til godkjenning av ${SikkerhetContext.hentSaksbehandlerNavn(true)}.",
+                ),
+            ),
         )
     }
 

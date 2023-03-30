@@ -9,17 +9,17 @@ fun List<Arbeidsforhold>.tilDto() = this.map {
         arbeidstaker = ArbeidstakerDto(
             it.arbeidstaker?.type,
             it.arbeidstaker?.offentligIdent,
-            it.arbeidstaker?.aktoerId
+            it.arbeidstaker?.aktoerId,
         ),
         arbeidsgiver = ArbeidsgiverDto(
             it.arbeidsgiver?.type,
             it.arbeidsgiver?.organisasjonsnummer,
-            it.arbeidsgiver?.offentligIdent
+            it.arbeidsgiver?.offentligIdent,
         ),
         type = it.type,
         ansettelsesperiode = AnsettelsesperiodeDto(
             it.ansettelsesperiode?.periode,
-            it.ansettelsesperiode?.bruksperiode
+            it.ansettelsesperiode?.bruksperiode,
         ),
         arbeidsavtaler = it.arbeidsavtaler?.map { arbeidsavtale ->
             ArbeidsavtaleDto(
@@ -29,8 +29,8 @@ fun List<Arbeidsforhold>.tilDto() = this.map {
                 antallTimerPrUke = arbeidsavtale.antallTimerPrUke,
                 beregnetAntallTimerPrUke = arbeidsavtale.beregnetAntallTimerPrUke,
                 bruksperiode = arbeidsavtale.bruksperiode,
-                gyldighetsperiode = arbeidsavtale.gyldighetsperiode
+                gyldighetsperiode = arbeidsavtale.gyldighetsperiode,
             )
-        }
+        },
     )
 }

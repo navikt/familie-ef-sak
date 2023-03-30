@@ -57,13 +57,13 @@ internal class BehandlingsstatistikkTaskTest {
         fagsak,
         resultat = BehandlingResultat.INNVILGET,
         type = FØRSTEGANGSBEHANDLING,
-        kravMottatt = LocalDate.of(2022, 3, 1)
+        kravMottatt = LocalDate.of(2022, 3, 1),
     )
     val avslåttBehandling = behandling(
         fagsak,
         resultat = BehandlingResultat.AVSLÅTT,
         type = FØRSTEGANGSBEHANDLING,
-        kravMottatt = LocalDate.of(2022, 3, 1)
+        kravMottatt = LocalDate.of(2022, 3, 1),
     )
     val avslåttSaksbehandling = saksbehandling(fagsak, avslåttBehandling)
     val saksbehandling = saksbehandling(fagsak, behandling)
@@ -84,7 +84,7 @@ internal class BehandlingsstatistikkTaskTest {
         hendelseTidspunkt.toLocalDateTime(),
         saksbehandlerId,
         oppgaveId,
-        behandlingMetode
+        behandlingMetode,
     )
 
     val oppgaveMock = mockk<Oppgave>()
@@ -105,7 +105,7 @@ internal class BehandlingsstatistikkTaskTest {
         vedtakRepository = vedtakRepository,
         oppgaveService = oppgaveService,
         grunnlagsdataService = grunnlagsdataService,
-        årsakRevurderingService = årsakRevurderingService
+        årsakRevurderingService = årsakRevurderingService,
     )
 
     @BeforeEach
@@ -121,7 +121,7 @@ internal class BehandlingsstatistikkTaskTest {
             periodeBegrunnelse = periodeBegrunnelse,
             inntektBegrunnelse = inntektBegrunnelse,
             saksbehandlerIdent = saksbehandlerId,
-            beslutterIdent = beslutterId
+            beslutterIdent = beslutterId,
         )
         every { oppgaveMock.tildeltEnhetsnr } returns tildeltEnhet
         every { oppgaveMock.opprettetAvEnhetsnr } returns opprettetEnhet
@@ -137,7 +137,7 @@ internal class BehandlingsstatistikkTaskTest {
 
         val task = Task(
             type = "behandlingsstatistikkTask",
-            payload = objectMapper.writeValueAsString(payload)
+            payload = objectMapper.writeValueAsString(payload),
         )
 
         behandlingsstatistikkTask.doTask(task)
@@ -169,7 +169,7 @@ internal class BehandlingsstatistikkTaskTest {
 
         val task = Task(
             type = "behandlingsstatistikkTask",
-            payload = objectMapper.writeValueAsString(payload)
+            payload = objectMapper.writeValueAsString(payload),
         )
 
         behandlingsstatistikkTask.doTask(task)
@@ -191,11 +191,11 @@ internal class BehandlingsstatistikkTaskTest {
             inntektBegrunnelse = inntektBegrunnelse,
             saksbehandlerIdent = saksbehandlerId,
             beslutterIdent = beslutterId,
-            avslåÅrsak = AvslagÅrsak.MINDRE_INNTEKTSENDRINGER
+            avslåÅrsak = AvslagÅrsak.MINDRE_INNTEKTSENDRINGER,
         )
         val task = Task(
             type = "behandlingsstatistikkTask",
-            payload = objectMapper.writeValueAsString(payload)
+            payload = objectMapper.writeValueAsString(payload),
         )
 
         behandlingsstatistikkTask.doTask(task)
@@ -219,15 +219,15 @@ internal class BehandlingsstatistikkTaskTest {
             inntektBegrunnelse = inntektBegrunnelse,
             barnetilsyn = BarnetilsynWrapper(
                 emptyList(),
-                begrunnelse
+                begrunnelse,
             ),
             saksbehandlerIdent = saksbehandlerId,
-            beslutterIdent = beslutterId
+            beslutterIdent = beslutterId,
         )
 
         val task = Task(
             type = "behandlingsstatistikkTask",
-            payload = objectMapper.writeValueAsString(payload)
+            payload = objectMapper.writeValueAsString(payload),
         )
 
         behandlingsstatistikkTask.doTask(task)

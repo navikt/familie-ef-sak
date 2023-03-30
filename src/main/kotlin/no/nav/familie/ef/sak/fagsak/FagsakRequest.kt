@@ -4,5 +4,5 @@ import no.nav.familie.kontrakter.felles.ef.StønadType
 
 data class FagsakRequest(
     val personIdent: String,
-    val stønadstype: StønadType
+    val stønadstype: StønadType,
 )

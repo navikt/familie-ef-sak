@@ -38,7 +38,7 @@ class TilbakekrevingService(
     private val fagsakService: FagsakService,
     private val tilbakekrevingClient: TilbakekrevingClient,
     private val simuleringService: SimuleringService,
-    private val arbeidsfordelingService: ArbeidsfordelingService
+    private val arbeidsfordelingService: ArbeidsfordelingService,
 ) {
 
     fun lagreTilbakekreving(tilbakekrevingDto: TilbakekrevingDto, behandlingId: UUID) {
@@ -59,7 +59,7 @@ class TilbakekrevingService(
     private fun validerTilbakekreving(behandling: Behandling, tilbakekrevingDto: TilbakekrevingDto) {
         brukerfeilHvis(
             tilbakekrevingDto.valg == Tilbakekrevingsvalg.OPPRETT_MED_VARSEL &&
-                tilbakekrevingDto.varseltekst.isNullOrBlank()
+                tilbakekrevingDto.varseltekst.isNullOrBlank(),
         ) {
             "Må fylle ut varseltekst for å lage tilbakekreving med varsel"
         }
@@ -100,7 +100,7 @@ class TilbakekrevingService(
             eksternFagsakId = saksbehandling.eksternFagsakId.toString(),
             fagsystemsbehandlingId = saksbehandling.eksternId.toString(),
             ident = saksbehandling.ident,
-            verge = null
+            verge = null,
         )
         return tilbakekrevingClient.hentForhåndsvisningVarselbrev(forhåndsvisVarselbrevRequest = request)
     }
@@ -117,7 +117,7 @@ class TilbakekrevingService(
 
         return FeilutbetaltePerioderDto(
             sumFeilutbetaling = simulering.feilutbetaling.toLong(),
-            perioder = perioderMedFeilutbetaling
+            perioder = perioderMedFeilutbetaling,
         )
     }
 
@@ -125,7 +125,7 @@ class TilbakekrevingService(
         val varseltekst = tilbakekrevingRepository.findByIdOrThrow(saksbehandling.id).varseltekst
             ?: throw Feil(
                 "Kan ikke finne varseltekst for behandlingId=$saksbehandling",
-                frontendFeilmelding = "Kan ikke finne varseltekst på tilbakekrevingsvalg"
+                frontendFeilmelding = "Kan ikke finne varseltekst på tilbakekrevingsvalg",
             )
         return genererBrev(saksbehandling, varseltekst)
     }

@@ -6,5 +6,5 @@ data class ForekomsterPerUke(
     val år: Int,
     val uke: Int,
     val stonadstype: StønadType,
-    val antall: Int
+    val antall: Int,
 )

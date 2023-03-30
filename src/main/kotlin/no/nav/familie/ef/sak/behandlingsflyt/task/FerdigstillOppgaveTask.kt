@@ -17,7 +17,7 @@ import java.util.UUID
 @TaskStepBeskrivelse(
     taskStepType = FerdigstillOppgaveTask.TYPE,
     beskrivelse = "Avslutt oppgave i GOSYS",
-    maxAntallFeil = 3
+    maxAntallFeil = 3,
 )
 class FerdigstillOppgaveTask(private val oppgaveService: OppgaveService) : AsyncTaskStep {
 
@@ -27,14 +27,14 @@ class FerdigstillOppgaveTask(private val oppgaveService: OppgaveService) : Async
     data class FerdigstillOppgaveTaskData(
         val behandlingId: UUID,
         val oppgavetype: Oppgavetype,
-        val unik: LocalDateTime? = LocalDateTime.now()
+        val unik: LocalDateTime? = LocalDateTime.now(),
     )
 
     override fun doTask(task: Task) {
         val data = objectMapper.readValue<FerdigstillOppgaveTaskData>(task.payload)
         oppgaveService.ferdigstillBehandleOppgave(
             behandlingId = data.behandlingId,
-            oppgavetype = data.oppgavetype
+            oppgavetype = data.oppgavetype,
         )
     }
 
@@ -50,7 +50,7 @@ class FerdigstillOppgaveTask(private val oppgaveService: OppgaveService) : Async
                     this["oppgavetype"] = oppgavetype.name
                     this["oppgaveId"] = oppgaveId.toString()
                     this["personIdent"] = personIdent ?: "ukjent"
-                }
+                },
             )
         }
 

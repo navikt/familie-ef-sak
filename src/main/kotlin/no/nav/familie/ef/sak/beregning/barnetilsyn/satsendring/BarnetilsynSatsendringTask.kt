@@ -12,7 +12,7 @@ import java.util.Properties
     maxAntallFeil = 3,
     settTilManuellOppfølgning = true,
     triggerTidVedFeilISekunder = 15 * 60L,
-    beskrivelse = "Barnetilsyn satsendring"
+    beskrivelse = "Barnetilsyn satsendring",
 )
 class BarnetilsynSatsendringTask(val barnetilsynSatsendringService: BarnetilsynSatsendringService) : AsyncTaskStep {
 
@@ -28,7 +28,7 @@ class BarnetilsynSatsendringTask(val barnetilsynSatsendringService: BarnetilsynS
             return Task(
                 TYPE,
                 "barnetilsynSatsendring",
-                Properties()
+                Properties(),
             )
         }
     }

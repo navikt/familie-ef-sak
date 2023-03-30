@@ -20,7 +20,7 @@ internal class BehandlingStegTest {
                 StegType.LAG_SAKSBEHANDLINGSBLANKETT,
                 StegType.FERDIGSTILLE_BEHANDLING,
                 StegType.PUBLISER_VEDTAKSHENDELSE,
-                StegType.BEHANDLING_FERDIGSTILT
+                StegType.BEHANDLING_FERDIGSTILT,
             )
 
         validerSteg(riktigRekkefølge)

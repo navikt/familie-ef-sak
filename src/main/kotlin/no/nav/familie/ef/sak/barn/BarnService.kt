@@ -4,7 +4,6 @@ import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvisIkke
-import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.journalføring.dto.BarnSomSkalFødes
 import no.nav.familie.ef.sak.journalføring.dto.UstrukturertDokumentasjonType
 import no.nav.familie.ef.sak.journalføring.dto.VilkårsbehandleNyeBarn
@@ -23,7 +22,6 @@ class BarnService(
     private val barnRepository: BarnRepository,
     private val søknadService: SøknadService,
     private val behandlingService: BehandlingService,
-    private val featureToggleService: FeatureToggleService
 ) {
 
     /**
@@ -42,7 +40,7 @@ class BarnService(
         stønadstype: StønadType,
         ustrukturertDokumentasjonType: UstrukturertDokumentasjonType = UstrukturertDokumentasjonType.IKKE_VALGT,
         barnSomSkalFødes: List<BarnSomSkalFødes> = emptyList(),
-        vilkårsbehandleNyeBarn: VilkårsbehandleNyeBarn = VilkårsbehandleNyeBarn.IKKE_VALGT
+        vilkårsbehandleNyeBarn: VilkårsbehandleNyeBarn = VilkårsbehandleNyeBarn.IKKE_VALGT,
     ) {
         val barnPåBehandlingen: List<BehandlingBarn> = when (stønadstype) {
             StønadType.BARNETILSYN -> barnForBarnetilsyn(barnSomSkalFødes, behandlingId, grunnlagsdataBarn)
@@ -53,7 +51,7 @@ class BarnService(
                     ustrukturertDokumentasjonType,
                     grunnlagsdataBarn,
                     barnSomSkalFødes,
-                    vilkårsbehandleNyeBarn
+                    vilkårsbehandleNyeBarn,
                 )
         }
         barnRepository.insertAll(barnPåBehandlingen)
@@ -65,7 +63,7 @@ class BarnService(
     private fun barnForBarnetilsyn(
         barnSomSkalFødes: List<BarnSomSkalFødes>,
         behandlingId: UUID,
-        grunnlagsdataBarn: List<BarnMedIdent>
+        grunnlagsdataBarn: List<BarnMedIdent>,
     ): List<BehandlingBarn> {
         feilHvis(barnSomSkalFødes.isNotEmpty()) {
             "Kan ikke håndtere barnSomSkalFødes i barnetilsyn"
@@ -76,7 +74,7 @@ class BarnService(
                 behandlingId = behandlingId,
                 søknadBarnId = barnFraSøknad[barn.personIdent],
                 personIdent = barn.personIdent,
-                navn = barn.navn.visningsnavn()
+                navn = barn.navn.visningsnavn(),
             )
         }
     }
@@ -87,11 +85,11 @@ class BarnService(
         ustrukturertDokumentasjonType: UstrukturertDokumentasjonType,
         grunnlagsdataBarn: List<BarnMedIdent>,
         barnSomSkalFødes: List<BarnSomSkalFødes>,
-        vilkårsbehandleNyeBarn: VilkårsbehandleNyeBarn
+        vilkårsbehandleNyeBarn: VilkårsbehandleNyeBarn,
     ): List<BehandlingBarn> {
         feilHvis(
             ustrukturertDokumentasjonType != UstrukturertDokumentasjonType.PAPIRSØKNAD &&
-                barnSomSkalFødes.isNotEmpty()
+                barnSomSkalFødes.isNotEmpty(),
         ) {
             "Kan ikke legge til terminbarn med ustrukturertDokumentasjonType=$ustrukturertDokumentasjonType"
         }
@@ -99,19 +97,19 @@ class BarnService(
             UstrukturertDokumentasjonType.PAPIRSØKNAD -> kobleBarnSomSkalFødesPlusAlleRegisterbarn(
                 behandlingId,
                 barnSomSkalFødes,
-                grunnlagsdataBarn
+                grunnlagsdataBarn,
             )
             UstrukturertDokumentasjonType.ETTERSENDING -> barnForEttersending(
                 fagsakId,
                 behandlingId,
                 vilkårsbehandleNyeBarn,
-                grunnlagsdataBarn
+                grunnlagsdataBarn,
             )
             UstrukturertDokumentasjonType.IKKE_VALGT -> {
                 val kobledeBarn = kobleBehandlingBarnOgRegisterBarnTilBehandlingBarn(
                     finnSøknadsbarnOgMapTilBehandlingBarn(behandlingId = behandlingId),
                     grunnlagsdataBarn,
-                    behandlingId
+                    behandlingId,
                 )
                 kobledeBarnPlusRegisterbarn(behandlingId, grunnlagsdataBarn, kobledeBarn)
             }
@@ -122,7 +120,7 @@ class BarnService(
         fagsakId: UUID,
         behandlingId: UUID,
         vilkårsbehandleNyeBarn: VilkårsbehandleNyeBarn,
-        grunnlagsdataBarn: List<BarnMedIdent>
+        grunnlagsdataBarn: List<BarnMedIdent>,
     ): List<BehandlingBarn> {
         val forrigeBehandling = behandlingService.finnSisteIverksatteBehandlingMedEventuellAvslått(fagsakId)
         feilHvis(forrigeBehandling == null) {
@@ -147,7 +145,7 @@ class BarnService(
     private fun vilkårsbehandleBarnForEttersending(
         behandlingId: UUID,
         barnFraForrigeBehandlingen: List<BehandlingBarn>,
-        grunnlagsdataBarn: List<BarnMedIdent>
+        grunnlagsdataBarn: List<BarnMedIdent>,
     ): List<BehandlingBarn> {
         val barnSomSkalFødesFraForrigeBehandling = barnFraForrigeBehandlingen
             .filter { it.personIdent == null }
@@ -156,7 +154,7 @@ class BarnService(
         return kobleBarnSomSkalFødesPlusAlleRegisterbarn(
             behandlingId,
             barnSomSkalFødesFraForrigeBehandling,
-            grunnlagsdataBarn
+            grunnlagsdataBarn,
         )
     }
 
@@ -167,13 +165,13 @@ class BarnService(
     private fun kobleBarnSomSkalFødesPlusAlleRegisterbarn(
         behandlingId: UUID,
         barnSomSkalFødes: List<BarnSomSkalFødes>,
-        grunnlagsdataBarn: List<BarnMedIdent>
+        grunnlagsdataBarn: List<BarnMedIdent>,
     ): List<BehandlingBarn> {
         val barnSomSkalFødesSomBehandlingBarn = barnSomSkalFødes.map { it.tilBehandlingBarn(behandlingId) }
         val kobledeBarn = kobleBehandlingBarnOgRegisterBarnTilBehandlingBarn(
             barnSomSkalFødesSomBehandlingBarn,
             grunnlagsdataBarn,
-            behandlingId
+            behandlingId,
         )
         return kobledeBarnPlusRegisterbarn(behandlingId, grunnlagsdataBarn, kobledeBarn)
     }
@@ -181,7 +179,7 @@ class BarnService(
     private fun kobleBehandlingBarnOgRegisterBarnTilBehandlingBarn(
         barnFraSøknad: List<BehandlingBarn>,
         grunnlagsdataBarn: List<BarnMedIdent>,
-        behandlingId: UUID
+        behandlingId: UUID,
     ): List<BehandlingBarn> {
         return BarnMatcher.kobleBehandlingBarnOgRegisterBarn(barnFraSøknad, grunnlagsdataBarn)
             .map {
@@ -191,7 +189,7 @@ class BarnService(
                     personIdent = it.barn?.personIdent,
                     søknadBarnId = it.behandlingBarn.søknadBarnId,
                     navn = it.barn?.navn?.visningsnavn(),
-                    fødselTermindato = it.behandlingBarn.fødselTermindato
+                    fødselTermindato = it.behandlingBarn.fødselTermindato,
                 )
             }
     }
@@ -203,7 +201,7 @@ class BarnService(
     private fun kobledeBarnPlusRegisterbarn(
         behandlingId: UUID,
         grunnlagsdataBarn: List<BarnMedIdent>,
-        kobledeBarn: List<BehandlingBarn>
+        kobledeBarn: List<BehandlingBarn>,
     ): List<BehandlingBarn> {
         val kobledeBarnIdenter = kobledeBarn.mapNotNull { it.personIdent }.toSet()
         val ukobledeBarn = grunnlagsdataBarn.filterNot { kobledeBarnIdenter.contains(it.personIdent) }
@@ -212,12 +210,12 @@ class BarnService(
 
     private fun mapBarnTilBehandlingBarn(
         behandlingId: UUID,
-        grunnlagsdataBarn: List<BarnMedIdent>
+        grunnlagsdataBarn: List<BarnMedIdent>,
     ) = grunnlagsdataBarn.map {
         BehandlingBarn(
             behandlingId = behandlingId,
             personIdent = it.personIdent,
-            navn = it.navn.visningsnavn()
+            navn = it.navn.visningsnavn(),
         )
     }
 
@@ -226,13 +224,13 @@ class BarnService(
         forrigeBehandlingId: UUID,
         nyeBarnPåRevurdering: List<BehandlingBarn>,
         grunnlagsdataBarn: List<BarnMedIdent>,
-        stønadstype: StønadType
+        stønadstype: StønadType,
     ) {
         val kobledeBarn: List<MatchetBehandlingBarn> = kobleAktuelleBarn(
             forrigeBehandlingId = forrigeBehandlingId,
             nyeBarnPåRevurdering = nyeBarnPåRevurdering,
             grunnlagsdataBarn = grunnlagsdataBarn,
-            stønadstype = stønadstype
+            stønadstype = stønadstype,
         )
 
         val alleBarnPåRevurdering = kobledeBarn.map {
@@ -240,7 +238,7 @@ class BarnService(
                 id = UUID.randomUUID(),
                 behandlingId = behandlingId,
                 personIdent = it.barn?.personIdent ?: it.behandlingBarn.personIdent,
-                navn = it.barn?.navn?.visningsnavn() ?: it.behandlingBarn.navn
+                navn = it.barn?.navn?.visningsnavn() ?: it.behandlingBarn.navn,
             )
         }
 
@@ -249,7 +247,7 @@ class BarnService(
 
     private fun validerAtAlleBarnErMedPåRevurderingen(
         kobledeBarn: List<BehandlingBarn>,
-        grunnlagsdataBarn: List<BarnMedIdent>
+        grunnlagsdataBarn: List<BarnMedIdent>,
     ) {
         val grunnlagsdataBarnIdenter = grunnlagsdataBarn.map { it.personIdent }
         val kobledeBarnIdenter = kobledeBarn.mapNotNull { it.personIdent }
@@ -263,7 +261,7 @@ class BarnService(
         forrigeBehandlingId: UUID,
         nyeBarnPåRevurdering: List<BehandlingBarn>,
         grunnlagsdataBarn: List<BarnMedIdent>,
-        stønadstype: StønadType
+        stønadstype: StønadType,
     ): List<MatchetBehandlingBarn> {
         val barnPåForrigeBehandling = barnRepository.findByBehandlingId(forrigeBehandlingId)
         val alleAktuelleBarn = barnPåForrigeBehandling + nyeBarnPåRevurdering
@@ -283,7 +281,7 @@ class BarnService(
                 søknadBarnId = it.id,
                 personIdent = it.fødselsnummer,
                 navn = it.navn,
-                fødselTermindato = it.fødselTermindato
+                fødselTermindato = it.fødselTermindato,
             )
         }
     }
@@ -310,7 +308,7 @@ class BarnService(
      */
     fun kobleBarnForBarnetilsyn(
         behandlingId: UUID,
-        tidligereBarnIder: Set<UUID>
+        tidligereBarnIder: Set<UUID>,
     ): Map<UUID, UUID> {
         val behandlingBarn = barnRepository.findByBehandlingId(behandlingId).associate {
             val personIdent = it.personIdent ?: error("Mangler ident for barn=${it.id}")

@@ -32,7 +32,7 @@ class BehandlingController(
     private val fagsakService: FagsakService,
     private val henleggService: HenleggService,
     private val tilgangService: TilgangService,
-    private val gjenbrukVilkårService: GjenbrukVilkårService
+    private val gjenbrukVilkårService: GjenbrukVilkårService,
 ) {
 
     @GetMapping("{behandlingId}")

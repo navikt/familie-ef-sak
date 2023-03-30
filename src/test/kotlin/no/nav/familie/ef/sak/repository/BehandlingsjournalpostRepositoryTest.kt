@@ -43,8 +43,8 @@ internal class BehandlingsjournalpostRepositoryTest : OppslagSpringRunnerTest() 
                 Behandlingsjournalpost(
                     behandling1.id,
                     "1",
-                    Journalposttype.U
-                )
+                    Journalposttype.U,
+                ),
             )
         }
         assertThat(getRootCause(throwable)).hasMessageContaining("duplicate key value violates unique constraint")

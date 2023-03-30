@@ -53,7 +53,7 @@ internal class JournalføringKlageServiceTest {
         resultat = null,
         årsak = null,
         vedtaksdato = null,
-        klageinstansResultat = emptyList()
+        klageinstansResultat = emptyList(),
     )
 
     @BeforeEach
@@ -101,7 +101,7 @@ internal class JournalføringKlageServiceTest {
         internal fun `happy case`() {
             service.fullførJournalpost(
                 lagRequest(JournalføringKlageBehandling(behandlingId = klagebehandling.id)),
-                journalpostId
+                journalpostId,
             )
 
             verifyKall(opprettKlageKall = 0)
@@ -112,7 +112,7 @@ internal class JournalføringKlageServiceTest {
             assertThatThrownBy {
                 service.fullførJournalpost(
                     lagRequest(JournalføringKlageBehandling(behandlingId = UUID.randomUUID())),
-                    journalpostId
+                    journalpostId,
                 )
             }.hasMessageContaining("mangler behandlingId")
         }
@@ -137,6 +137,6 @@ internal class JournalføringKlageServiceTest {
             behandlingstema = "behandlingstema",
             dokumenter = emptyList(),
             tittel = "Tittel",
-            relevanteDatoer = mottattDato?.let { listOf(RelevantDato(it.atStartOfDay(), "DATO_REGISTRERT")) }
+            relevanteDatoer = mottattDato?.let { listOf(RelevantDato(it.atStartOfDay(), "DATO_REGISTRERT")) },
         )
 }

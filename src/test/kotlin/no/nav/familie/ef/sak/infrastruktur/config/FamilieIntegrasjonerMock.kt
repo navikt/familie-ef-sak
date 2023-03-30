@@ -97,10 +97,10 @@ class FamilieIntegrasjonerMock(integrasjonerConfig: IntegrasjonerConfig) {
                     okJson(
                         objectMapper.writeValueAsString(
                             Ressurs.success(
-                                objectMapper.writeValueAsBytes(Testsøknad.søknadOvergangsstønad)
-                            )
-                        )
-                    )
+                                objectMapper.writeValueAsBytes(Testsøknad.søknadOvergangsstønad),
+                            ),
+                        ),
+                    ),
                 ),
             get(urlPathMatching("${integrasjonerConfig.journalPostUri.path}/hentdokument/([0-9]*)/([0-9]*)"))
                 .withQueryParam("variantFormat", equalTo("ARKIV"))
@@ -119,11 +119,11 @@ class FamilieIntegrasjonerMock(integrasjonerConfig: IntegrasjonerConfig) {
                         objectMapper.writeValueAsString(
                             Ressurs.success(
                                 ADRESSEBESKYTTELSEGRADERING
-                                    .UGRADERT
-                            )
-                        )
-                    )
-                )
+                                    .UGRADERT,
+                            ),
+                        ),
+                    ),
+                ),
 
         )
 
@@ -131,7 +131,7 @@ class FamilieIntegrasjonerMock(integrasjonerConfig: IntegrasjonerConfig) {
         false,
         "Mock sier: Du har " +
             "ikke tilgang " +
-            "til person ikkeTilgang"
+            "til person ikkeTilgang",
     )
 
     @Bean("mock-integrasjoner")
@@ -158,12 +158,12 @@ class FamilieIntegrasjonerMock(integrasjonerConfig: IntegrasjonerConfig) {
                             mapOf(
                                 "nb" to BeskrivelseDto(
                                     "OSLO",
-                                    "OSLO"
-                                )
-                            )
-                        )
-                    )
-                )
+                                    "OSLO",
+                                ),
+                            ),
+                        ),
+                    ),
+                ),
             )
         private val land = KodeverkDto(
             mapOf(
@@ -174,12 +174,12 @@ class FamilieIntegrasjonerMock(integrasjonerConfig: IntegrasjonerConfig) {
                         mapOf(
                             "nb" to BeskrivelseDto(
                                 "NORGE",
-                                "NORGE"
-                            )
-                        )
-                    )
-                )
-            )
+                                "NORGE",
+                            ),
+                        ),
+                    ),
+                ),
+            ),
         )
         private val kodeverkPoststed = Ressurs.success(poststed)
         private val kodeverkLand = Ressurs.success(land)
@@ -195,8 +195,8 @@ class FamilieIntegrasjonerMock(integrasjonerConfig: IntegrasjonerConfig) {
                     personIdent = fnr,
                     gyldigePerioder = emptyList(),
                     uavklartePerioder = emptyList(),
-                    avvistePerioder = emptyList()
-                )
+                    avvistePerioder = emptyList(),
+                ),
             )
 
         private val oppdatertJournalpostResponse =
@@ -224,22 +224,22 @@ class FamilieIntegrasjonerMock(integrasjonerConfig: IntegrasjonerConfig) {
                         dokumentvarianter =
                         listOf(
                             Dokumentvariant(variantformat = Dokumentvariantformat.ARKIV),
-                            Dokumentvariant(variantformat = Dokumentvariantformat.ORIGINAL)
-                        )
+                            Dokumentvariant(variantformat = Dokumentvariantformat.ORIGINAL),
+                        ),
                     ),
                     DokumentInfo(
                         dokumentInfoId = "123452",
                         tittel = "Søknad om barnetilsyn - dokument 1",
                         brevkode = DokumentBrevkode.OVERGANGSSTØNAD.verdi,
                         dokumentvarianter =
-                        listOf(Dokumentvariant(variantformat = Dokumentvariantformat.ARKIV))
+                        listOf(Dokumentvariant(variantformat = Dokumentvariantformat.ARKIV)),
                     ),
                     DokumentInfo(
                         dokumentInfoId = "123453",
                         tittel = "Samboeravtale",
                         brevkode = DokumentBrevkode.OVERGANGSSTØNAD.verdi,
                         dokumentvarianter =
-                        listOf(Dokumentvariant(variantformat = Dokumentvariantformat.ARKIV))
+                        listOf(Dokumentvariant(variantformat = Dokumentvariantformat.ARKIV)),
                     ),
                     DokumentInfo(
                         dokumentInfoId = "123454",
@@ -250,36 +250,36 @@ class FamilieIntegrasjonerMock(integrasjonerConfig: IntegrasjonerConfig) {
                         logiskeVedlegg = listOf(
                             LogiskVedlegg(
                                 logiskVedleggId = "1",
-                                tittel = "Manuelt skannet samværsavtale"
+                                tittel = "Manuelt skannet samværsavtale",
                             ),
                             LogiskVedlegg(
                                 logiskVedleggId = "2",
-                                tittel = "Annen fritekst fra gosys"
-                            )
-                        )
+                                tittel = "Annen fritekst fra gosys",
+                            ),
+                        ),
                     ),
                     DokumentInfo(
                         dokumentInfoId = "123455",
                         tittel = "EtFrykteligLangtDokumentNavnSomTroligIkkeBrekkerOgØdeleggerGUI",
                         brevkode = DokumentBrevkode.OVERGANGSSTØNAD.verdi,
                         dokumentvarianter =
-                        listOf(Dokumentvariant(variantformat = Dokumentvariantformat.ARKIV))
+                        listOf(Dokumentvariant(variantformat = Dokumentvariantformat.ARKIV)),
                     ),
                     DokumentInfo(
                         dokumentInfoId = "123456",
                         tittel = "Søknad om overgangsstønad - dokument 2",
                         brevkode = DokumentBrevkode.OVERGANGSSTØNAD.verdi,
                         dokumentvarianter =
-                        listOf(Dokumentvariant(variantformat = Dokumentvariantformat.ARKIV))
+                        listOf(Dokumentvariant(variantformat = Dokumentvariantformat.ARKIV)),
                     ),
                     DokumentInfo(
                         dokumentInfoId = "123457",
                         tittel = "Søknad om overgangsstønad - dokument 3",
                         brevkode = DokumentBrevkode.OVERGANGSSTØNAD.verdi,
                         dokumentvarianter =
-                        listOf(Dokumentvariant(variantformat = Dokumentvariantformat.ARKIV))
-                    )
-                )
+                        listOf(Dokumentvariant(variantformat = Dokumentvariantformat.ARKIV)),
+                    ),
+                ),
             )
         private fun journalpostPapirsøknad(id: String) =
             Ressurs.success(
@@ -305,11 +305,11 @@ class FamilieIntegrasjonerMock(integrasjonerConfig: IntegrasjonerConfig) {
                             listOf(Dokumentvariant(variantformat = Dokumentvariantformat.ARKIV)),
                             logiskeVedlegg = listOf(
                                 LogiskVedlegg("1", "Tittel logisk vedlegg"),
-                                LogiskVedlegg("2", "Annet logiskt vedlegg")
-                            )
-                        )
-                    )
-                )
+                                LogiskVedlegg("2", "Annet logiskt vedlegg"),
+                            ),
+                        ),
+                    ),
+                ),
             )
 
         private val journalpost = Ressurs.success(journalpostFraIntegrasjoner)
@@ -319,8 +319,8 @@ class FamilieIntegrasjonerMock(integrasjonerConfig: IntegrasjonerConfig) {
                 enhetId = 100000194,
                 navn = "NAV Kristiansand",
                 enhetNr = "1001",
-                status = "Aktiv"
-            )
+                status = "Aktiv",
+            ),
         )
     }
 }

@@ -94,13 +94,13 @@ class BarnFyllerÅrIntegrationTest : OppslagSpringRunnerTest() {
             beløp = beløp,
             kildeBehandlingId = behandling.id,
             fraOgMed = LocalDate.now().minusMonths(1),
-            tilOgMed = LocalDate.now().plusMonths(1)
+            tilOgMed = LocalDate.now().plusMonths(1),
         )
         return tilkjentYtelseRepository.insert(
             lagTilkjentYtelse(
                 behandlingId = behandling.id,
-                andelerTilkjentYtelse = listOf(andel)
-            )
+                andelerTilkjentYtelse = listOf(andel),
+            ),
         )
     }
 }

@@ -52,7 +52,7 @@ internal class AndelHistorikkDtoKtTest {
         erOpphør = false,
         periodetypeBarnetilsyn = PeriodetypeBarnetilsyn.ORDINÆR,
         aktivitetBarnetilsyn = AktivitetstypeBarnetilsyn.I_ARBEID,
-        endring = null
+        endring = null,
     )
 
     private fun andelMedGrunnlagDto() = AndelMedGrunnlagDto(
@@ -66,6 +66,6 @@ internal class AndelHistorikkDtoKtTest {
         antallBarn = 0,
         barn = emptyList(),
         sats = 0,
-        beløpFørFratrekkOgSatsJustering = 0
+        beløpFørFratrekkOgSatsJustering = 0,
     )
 }

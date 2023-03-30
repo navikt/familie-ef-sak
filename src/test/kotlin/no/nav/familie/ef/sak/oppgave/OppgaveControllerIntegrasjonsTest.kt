@@ -30,7 +30,7 @@ internal class OppgaveControllerIntegrasjonsTest : OppslagSpringRunnerTest() {
         return restTemplate.exchange(
             localhost("/api/oppgave/soek/"),
             HttpMethod.POST,
-            HttpEntity(FinnOppgaveRequestDto(ident = personIdent), headers)
+            HttpEntity(FinnOppgaveRequestDto(ident = personIdent), headers),
         )
     }
 }

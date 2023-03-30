@@ -42,6 +42,6 @@ internal class ArbeidsforholdControllerTest : OppslagSpringRunnerTest() {
         restTemplate.exchange(
             localhost("/api/arbeidsforhold/fagsak/$fagsakId?ansettelsesperiodeFom=2021-01-01"),
             HttpMethod.GET,
-            HttpEntity<Ressurs<List<ArbeidsforholdDto>>>(headers)
+            HttpEntity<Ressurs<List<ArbeidsforholdDto>>>(headers),
         )
 }

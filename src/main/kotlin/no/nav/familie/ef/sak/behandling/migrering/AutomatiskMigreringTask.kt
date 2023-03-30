@@ -21,7 +21,7 @@ data class AutomatiskMigreringTaskData(val personIdent: String, val uniktId: UUI
     maxAntallFeil = 3,
     settTilManuellOppfølgning = true,
     triggerTidVedFeilISekunder = 15 * 60L,
-    beskrivelse = "Automatisk migrering"
+    beskrivelse = "Automatisk migrering",
 )
 class AutomatiskMigreringTask(private val automatiskMigreringService: AutomatiskMigreringService) : AsyncTaskStep {
 
@@ -40,7 +40,7 @@ class AutomatiskMigreringTask(private val automatiskMigreringService: Automatisk
                 objectMapper.writeValueAsString(AutomatiskMigreringTaskData(ident)),
                 Properties().apply {
                     this["personIdent"] = ident
-                }
+                },
             )
         }
     }

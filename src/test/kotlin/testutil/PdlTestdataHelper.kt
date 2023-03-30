@@ -39,13 +39,13 @@ object PdlTestdataHelper {
         fornavn: String = "Fornavn",
         mellomnavn: String? = "mellomnavn",
         etternavn: String = "Etternavn",
-        historisk: Boolean = false
+        historisk: Boolean = false,
     ): Navn {
         return Navn(
             fornavn,
             mellomnavn,
             etternavn,
-            Metadata(historisk = historisk)
+            Metadata(historisk = historisk),
         )
     }
 
@@ -68,7 +68,7 @@ object PdlTestdataHelper {
         innflyttingTilNorge: List<InnflyttingTilNorge> = emptyList(),
         utflyttingFraNorge: List<UtflyttingFraNorge> = emptyList(),
         vergemaalEllerFremtidsfullmakt: List<VergemaalEllerFremtidsfullmakt> = emptyList(),
-        folkeregisteridentifikator: List<Folkeregisteridentifikator> = emptyList()
+        folkeregisteridentifikator: List<Folkeregisteridentifikator> = emptyList(),
     ) =
         PdlSøker(
             adressebeskyttelse,
@@ -89,7 +89,7 @@ object PdlTestdataHelper {
             tilrettelagtKommunikasjon,
             innflyttingTilNorge,
             utflyttingFraNorge,
-            vergemaalEllerFremtidsfullmakt
+            vergemaalEllerFremtidsfullmakt,
         )
 
     fun pdlBarn(
@@ -99,7 +99,7 @@ object PdlTestdataHelper {
         dødsfall: List<Dødsfall> = emptyList(),
         forelderBarnRelasjon: List<ForelderBarnRelasjon> = emptyList(),
         fødsel: Fødsel? = null,
-        navn: Navn = lagNavn()
+        navn: Navn = lagNavn(),
     ) =
         PdlPersonForelderBarn(
             adressebeskyttelse,
@@ -108,7 +108,7 @@ object PdlTestdataHelper {
             dødsfall,
             forelderBarnRelasjon,
             listOfNotNull(fødsel),
-            listOfNotNull(navn)
+            listOfNotNull(navn),
         )
 
     fun fødsel(år: Int = 2018, måned: Int = 1, dag: Int = 1): Fødsel =
@@ -121,12 +121,12 @@ object PdlTestdataHelper {
             metadata = metadataGjeldende,
             fødested = null,
             fødekommune = null,
-            fødeland = null
+            fødeland = null,
         )
 
     fun ukjentBostedsadresse(
         bostedskommune: String = "1234",
-        historisk: Boolean = false
+        historisk: Boolean = false,
     ) =
         Bostedsadresse(
             angittFlyttedato = null,
@@ -137,16 +137,16 @@ object PdlTestdataHelper {
             vegadresse = null,
             ukjentBosted = UkjentBosted(bostedskommune),
             matrikkeladresse = null,
-            metadata = Metadata(historisk)
+            metadata = Metadata(historisk),
         )
 
     fun folkeregisteridentifikator(
         ident: String,
         status: FolkeregisteridentifikatorStatus = FolkeregisteridentifikatorStatus.I_BRUK,
-        gjeldende: Boolean = true
+        gjeldende: Boolean = true,
     ) = Folkeregisteridentifikator(
         ident,
         status,
-        if (gjeldende) metadataGjeldende else metadataHistorisk
+        if (gjeldende) metadataGjeldende else metadataHistorisk,
     )
 }

@@ -9,7 +9,7 @@ import java.util.UUID
 data class TilkjentYtelseDto(
     val behandlingId: UUID,
     val andeler: List<AndelTilkjentYtelseDto>,
-    val samordningsfradragType: SamordningsfradragType?
+    val samordningsfradragType: SamordningsfradragType?,
 )
 
 data class AndelTilkjentYtelseDto(
@@ -17,7 +17,7 @@ data class AndelTilkjentYtelseDto(
     val periode: Månedsperiode,
     val inntekt: Int,
     val inntektsreduksjon: Int,
-    val samordningsfradrag: Int
+    val samordningsfradrag: Int,
 ) {
     @Deprecated("Bruk periode.", ReplaceWith("periode.fomDato"))
     @get:JsonProperty

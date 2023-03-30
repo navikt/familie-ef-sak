@@ -69,7 +69,7 @@ internal class BehandlingControllerTest : OppslagSpringRunnerTest() {
         return restTemplate.exchange(
             localhost("/api/behandling/$id"),
             HttpMethod.GET,
-            HttpEntity<Ressurs<BehandlingDto>>(headers)
+            HttpEntity<Ressurs<BehandlingDto>>(headers),
         )
     }
 
@@ -77,7 +77,7 @@ internal class BehandlingControllerTest : OppslagSpringRunnerTest() {
         return restTemplate.exchange(
             localhost("/api/behandling/$id/henlegg"),
             HttpMethod.POST,
-            HttpEntity<Ressurs<BehandlingDto>>(headers)
+            HttpEntity<Ressurs<BehandlingDto>>(headers),
         )
     }
 
@@ -85,7 +85,7 @@ internal class BehandlingControllerTest : OppslagSpringRunnerTest() {
         return restTemplate.exchange<Ressurs<BehandlingDto>>(
             localhost("/api/behandling/$id/henlegg"),
             HttpMethod.POST,
-            HttpEntity(henlagt, headers)
+            HttpEntity(henlagt, headers),
         )
     }
 }
