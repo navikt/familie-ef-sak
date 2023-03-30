@@ -1,9 +1,11 @@
 package no.nav.familie.ef.sak.behandling.oppgaveforopprettelse
 
+import no.nav.familie.kontrakter.ef.iverksett.OppgaveForOpprettelseType
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import java.util.UUID
@@ -15,14 +17,13 @@ class OppgaveForOpprettelseController(private val oppgaverForOpprettelseService:
 
     @GetMapping("/{behandlingid}")
     fun hentOppgaverForOpprettelse(@PathVariable behandlingid: UUID): Ressurs<OppgaverForOpprettelseDto?> {
-        val oppgaverForOpprettelse = oppgaverForOpprettelseService.hentOppgaverForOpprettelseEllerNull(behandlingid)
+        val lagretFremleggsoppgave = oppgaverForOpprettelseService.hentOppgaverForOpprettelseEllerNull(behandlingid)
         return Ressurs.success(
             OppgaverForOpprettelseDto(
-                oppgavetyper = oppgaverForOpprettelse?.let { it.oppgavetyper } ?: null,
-                oppgaverSomKanOpprettes = oppgaverForOpprettelseService.oppgaverSomKanOpprettes(behandlingid),
+                oppgavetyperSomKanOpprettes = oppgaverForOpprettelseService.hentOppgavetyperSomKanOpprettes(behandlingid),
+                oppgavetyperSomSkalOpprettes = lagretFremleggsoppgave?.oppgavetyper ?: emptyList(),
+                opprettelseTattStillingTil = lagretFremleggsoppgave?.opprettelseTattStillingTil ?: false
             ),
         )
     }
 }
-
-

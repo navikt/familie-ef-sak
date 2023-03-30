@@ -4,10 +4,15 @@ import no.nav.familie.kontrakter.ef.iverksett.OppgaveForOpprettelseType
 import java.util.UUID
 
 data class OppgaverForOpprettelseDto(
-    val oppgavetyper: List<OppgaveForOpprettelseType>?,
-    val oppgaverSomKanOpprettes: List<OppgaveForOpprettelseType>,
+    val oppgavetyperSomKanOpprettes: List<OppgaveForOpprettelseType>,
+    val oppgavetyperSomSkalOpprettes: List<OppgaveForOpprettelseType>,
+    val opprettelseTattStillingTil: Boolean
 )
 
 fun OppgaverForOpprettelseDto.tilDomene(behandlingId: UUID): OppgaverForOpprettelse {
-    return OppgaverForOpprettelse(behandlingId = behandlingId, oppgavetyper = this.oppgavetyper ?: emptyList())
+    return OppgaverForOpprettelse(
+        behandlingId = behandlingId,
+        oppgavetyper = this.oppgavetyperSomSkalOpprettes,
+        opprettelseTattStillingTil = this.opprettelseTattStillingTil
+    )
 }

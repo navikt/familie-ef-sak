@@ -1,8 +1,10 @@
 package no.nav.familie.ef.sak.behandling.oppgaveforopprettelse
 
 import no.nav.familie.ef.sak.behandling.BehandlingService
+import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
+import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
 import no.nav.familie.kontrakter.ef.iverksett.OppgaveForOpprettelseType
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
@@ -29,23 +31,20 @@ class OppgaverForOpprettelseService(
         return oppgaverForOpprettelseRepository.findByIdOrNull(behandlingId)
     }
 
-    fun oppgaverSomKanOpprettes(behandlingId: UUID): List<OppgaveForOpprettelseType> {
-        if (kanOppretteOppgaveForInntektskontroll(behandlingId)) {
-            return listOf(OppgaveForOpprettelseType.INNTEKTSKONTROLL_1_ÅR_FREM_I_TID)
-        }
-        return emptyList()
+    fun hentOppgavetyperSomKanOpprettes(behandlingId: UUID): List<OppgaveForOpprettelseType> {
+        val behandling = behandlingService.hentBehandling(behandlingId)
+        val tilkjentYtelse = tilkjentYtelseService.hentForBehandling(behandlingId)
+        val kanOppretteInntektskontroll = kanOppretteOppgaveForInntektskontrollFremITid(behandling, tilkjentYtelse)
+
+        return if (kanOppretteInntektskontroll) listOf(OppgaveForOpprettelseType.INNTEKTSKONTROLL_1_ÅR_FREM_I_TID) else emptyList()
     }
 
-    private fun kanOppretteOppgaveForInntektskontroll(behandlingId: UUID): Boolean {
-        val behandling = behandlingService.hentBehandling(behandlingId)
-        val behandlingstype = behandling.type
-
-        val tilkjentYtelse = tilkjentYtelseService.hentForBehandling(behandlingId)
+    private fun kanOppretteOppgaveForInntektskontrollFremITid(behandling: Behandling, tilkjentYtelse: TilkjentYtelse): Boolean {
         val sisteAndel = tilkjentYtelse.andelerTilkjentYtelse.sortedBy { it.stønadTom }.last()
         val sisteAndelMedBeløp = sisteAndel.beløp > 0
         val sisteAndel1årFremITid = sisteAndel.stønadTom.minusYears(1) > LocalDate.now()
 
-        return behandlingstype == BehandlingType.FØRSTEGANGSBEHANDLING &&
+        return behandling.type == BehandlingType.FØRSTEGANGSBEHANDLING &&
             sisteAndelMedBeløp &&
             sisteAndel1årFremITid
     }
