@@ -1,11 +1,9 @@
 package no.nav.familie.ef.sak.behandling.oppgaveforopprettelse
 
-import no.nav.familie.kontrakter.ef.iverksett.OppgaveForOpprettelseType
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import java.util.UUID
@@ -22,7 +20,7 @@ class OppgaveForOpprettelseController(private val oppgaverForOpprettelseService:
             OppgaverForOpprettelseDto(
                 oppgavetyperSomKanOpprettes = oppgaverForOpprettelseService.hentOppgavetyperSomKanOpprettes(behandlingid),
                 oppgavetyperSomSkalOpprettes = lagretFremleggsoppgave?.oppgavetyper ?: emptyList(),
-                opprettelseTattStillingTil = lagretFremleggsoppgave?.opprettelseTattStillingTil ?: false
+                opprettelseTattStillingTil = lagretFremleggsoppgave?.opprettelseTattStillingTil ?: false,
             ),
         )
     }

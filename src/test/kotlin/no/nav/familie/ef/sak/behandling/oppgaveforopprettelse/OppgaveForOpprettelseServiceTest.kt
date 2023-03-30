@@ -20,10 +20,11 @@ class OppgaveForOpprettelseServiceTest : OppslagSpringRunnerTest() {
         val uuid = UUID.randomUUID()
         val oppgave = OppgaverForOpprettelse(
             uuid,
-            listOf(OppgaveForOpprettelseType.INNTEKTSKONTROLL_1_ÅR_FREM_I_TID)
+            listOf(OppgaveForOpprettelseType.INNTEKTSKONTROLL_1_ÅR_FREM_I_TID),
+            true,
         )
         oppgaverForOpprettelseService.opprettEllerErstattFremleggsoppgave(
-            oppgave
+            oppgave,
         )
         assertThat(oppgaverForOpprettelseRepository.existsById(uuid))
     }
@@ -33,17 +34,19 @@ class OppgaveForOpprettelseServiceTest : OppslagSpringRunnerTest() {
         val uuid = UUID.randomUUID()
         val oppgave = OppgaverForOpprettelse(
             uuid,
-            listOf(OppgaveForOpprettelseType.INNTEKTSKONTROLL_1_ÅR_FREM_I_TID)
+            listOf(OppgaveForOpprettelseType.INNTEKTSKONTROLL_1_ÅR_FREM_I_TID),
+            true,
         )
         val oppdatertOppgave = OppgaverForOpprettelse(
             uuid,
-            listOf()
+            listOf(),
+            true,
         )
         oppgaverForOpprettelseService.opprettEllerErstattFremleggsoppgave(
-            oppgave
+            oppgave,
         )
         oppgaverForOpprettelseService.opprettEllerErstattFremleggsoppgave(
-            oppdatertOppgave
+            oppdatertOppgave,
         )
         assertThat(oppgaverForOpprettelseService.hentOppgaverForOpprettelseEllerNull(uuid)).isEqualTo(oppdatertOppgave)
     }

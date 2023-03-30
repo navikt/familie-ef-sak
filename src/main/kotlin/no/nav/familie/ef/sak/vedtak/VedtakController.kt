@@ -62,7 +62,7 @@ class VedtakController(
         tilgangService.validerTilgangTilBehandling(behandling, AuditLoggerEvent.UPDATE)
         val vedtakErUtenBeslutter = vedtakService.hentVedtak(behandlingId).utledVedtakErUtenBeslutter()
 
-        if (oppgaverForOpprettelseDto.oppgaverSomKanOpprettes.contains(OppgaveForOpprettelseType.INNTEKTSKONTROLL_1_ÅR_FREM_I_TID)) {
+        if (oppgaverForOpprettelseDto.oppgavetyperSomKanOpprettes.contains(OppgaveForOpprettelseType.INNTEKTSKONTROLL_1_ÅR_FREM_I_TID)) {
             oppgaverForOpprettelseService.opprettEllerErstattFremleggsoppgave(oppgaverForOpprettelseDto.tilDomene(behandlingId))
         }
 
