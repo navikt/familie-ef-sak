@@ -23,6 +23,7 @@ import no.nav.familie.ef.sak.cucumber.domeneparser.parseString
 import no.nav.familie.ef.sak.cucumber.domeneparser.parseValgfriDato
 import no.nav.familie.ef.sak.cucumber.domeneparser.parseValgfriEnum
 import no.nav.familie.ef.sak.cucumber.domeneparser.parseValgfriString
+import no.nav.familie.ef.sak.felles.util.DatoUtil
 import no.nav.familie.ef.sak.felles.util.mockFeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.oppgave.OppgaveService
@@ -33,6 +34,7 @@ import no.nav.familie.kontrakter.felles.oppgave.Oppgave
 import no.nav.familie.kontrakter.felles.oppgave.OppgavePrioritet
 import no.nav.familie.prosessering.internal.TaskService
 import org.assertj.core.api.Assertions.assertThat
+import java.time.LocalDateTime
 
 class SettPåVentStepDefinitions {
 
@@ -90,11 +92,11 @@ class SettPåVentStepDefinitions {
         settOppgavePåVentRequest =
             SettPåVentRequest(
                 oppgaveId = 123,
-                saksbehandler = parseString(SettPåVentDomeneBegrep.SAKSBEHANDLER, verdier),
+                saksbehandler = parseValgfriString(SettPåVentDomeneBegrep.SAKSBEHANDLER, verdier).orEmpty(),
                 frist = parseDato(SettPåVentDomeneBegrep.FRIST, verdier).toString(),
                 mappe = parseValgfriString(SettPåVentDomeneBegrep.MAPPE, verdier)?.toLong(),
                 prioritet = parseEnum(SettPåVentDomeneBegrep.PRIORITET, verdier),
-                beskrivelse = parseString(SettPåVentDomeneBegrep.BESKRIVELSE, verdier)
+                beskrivelse = parseValgfriString(SettPåVentDomeneBegrep.BESKRIVELSE, verdier).orEmpty()
             )
     }
 
@@ -102,6 +104,8 @@ class SettPåVentStepDefinitions {
     fun settBehandlingPåVent() {
 
         mockkObject(SikkerhetContext)
+        mockkObject(DatoUtil)
+        every { DatoUtil.dagensDatoMedTid() } returns LocalDateTime.of(2020, 10, 25, 13, 34)
 
         every { SikkerhetContext.hentSaksbehandler() } returns "bob"
         every { behandlingService.hentBehandling(behandling.id) } returns behandling
@@ -114,13 +118,12 @@ class SettPåVentStepDefinitions {
 
         påVentService.settPåVent(behandling.id, settOppgavePåVentRequest)
         unmockkObject(SikkerhetContext)
+        unmockkObject(DatoUtil)
     }
 
     @Så("forventer vi følgende beskrivelse på oppgaven")
     fun forventOppgavebeskrivelse(beskrivelse: String) {
-
-        assertThat(oppgaveSlot.captured.beskrivelse!!.lines().first()).matches("--- [0-9]{4}\\.[0-9]{2}.[0-9]{2} [0-9]{2}:[0-9]{2} System \\(VL\\) ---")
-        assertThat(oppgaveSlot.captured.beskrivelse).contains(beskrivelse)
+        assertThat(oppgaveSlot.captured.beskrivelse).isEqualTo(beskrivelse)
 
     }
 
@@ -128,9 +131,9 @@ class SettPåVentStepDefinitions {
     fun forventOppdatertOppgave(dataTable: DataTable) {
         val verdier = dataTable.asMap()
 
-        assertThat(oppgaveSlot.captured.tilordnetRessurs).isEqualTo(parseValgfriString(SettPåVentDomeneBegrep.TILORDNET_RESSURS, verdier))
-        assertThat(oppgaveSlot.captured.fristFerdigstillelse).isEqualTo(parseValgfriDato(SettPåVentDomeneBegrep.FRIST_FERDIGSTILLELSE, verdier)?.toString())
-        assertThat(oppgaveSlot.captured.mappeId).isEqualTo(parseValgfriString(SettPåVentDomeneBegrep.ENHETSMAPPE, verdier)?.toLong())
+        assertThat(oppgaveSlot.captured.tilordnetRessurs).isEqualTo(parseValgfriString(SettPåVentDomeneBegrep.SAKSBEHANDLER, verdier).orEmpty())
+        assertThat(oppgaveSlot.captured.fristFerdigstillelse).isEqualTo(parseValgfriDato(SettPåVentDomeneBegrep.FRIST, verdier)?.toString())
+        assertThat(oppgaveSlot.captured.mappeId).isEqualTo(parseValgfriString(SettPåVentDomeneBegrep.MAPPE, verdier)?.toLong())
         assertThat(oppgaveSlot.captured.prioritet).isEqualTo(parseValgfriEnum<OppgavePrioritet>(SettPåVentDomeneBegrep.PRIORITET, verdier))
     }
 
@@ -143,12 +146,7 @@ class SettPåVentStepDefinitions {
         FRIST("frist"),
         MAPPE("mappe"),
         PRIORITET("prioritet"),
-        BESKRIVELSE("beskrivelse"),
-
-        // Oppgave
-        TILORDNET_RESSURS("tilordnetRessurs"),
-        FRIST_FERDIGSTILLELSE("fristFerdigstillelse"),
-        ENHETSMAPPE("enhetsmappe");
+        BESKRIVELSE("beskrivelse");
 
         override fun nøkkel(): String {
             return nøkkel

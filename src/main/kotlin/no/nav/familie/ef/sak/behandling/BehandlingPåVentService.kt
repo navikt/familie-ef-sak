@@ -10,6 +10,7 @@ import no.nav.familie.ef.sak.behandlingsflyt.task.BehandlingsstatistikkTask
 import no.nav.familie.ef.sak.behandlingshistorikk.BehandlingshistorikkService
 import no.nav.familie.ef.sak.behandlingshistorikk.domain.StegUtfall
 import no.nav.familie.ef.sak.felles.util.DatoFormat
+import no.nav.familie.ef.sak.felles.util.dagensDatoMedTidNorskFormat
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
@@ -48,24 +49,25 @@ class BehandlingPåVentService(
 
 
         if (settPåVentRequest != null) {
-
-            val oppgave = oppgaveService.hentOppgave(settPåVentRequest.oppgaveId)
-
-            val beskrivelse =
-                utledOppgavebeskrivelse(oppgave, settPåVentRequest)
-
-
-            oppgaveService.oppdaterOppgave(
-                Oppgave(
-                    id = settPåVentRequest.oppgaveId,
-                    tilordnetRessurs = settPåVentRequest.saksbehandler,
-                    prioritet = settPåVentRequest.prioritet,
-                    fristFerdigstillelse = settPåVentRequest.frist,
-                    mappeId = settPåVentRequest.mappe,
-                    beskrivelse = beskrivelse
-                )
-            )
+            oppdaterVerdierPåOppgave(settPåVentRequest)
         }
+    }
+
+    private fun oppdaterVerdierPåOppgave(settPåVentRequest: SettPåVentRequest) {
+        val oppgave = oppgaveService.hentOppgave(settPåVentRequest.oppgaveId)
+
+        val beskrivelse = utledOppgavebeskrivelse(oppgave, settPåVentRequest)
+
+        oppgaveService.oppdaterOppgave(
+            Oppgave(
+                id = settPåVentRequest.oppgaveId,
+                tilordnetRessurs = settPåVentRequest.saksbehandler,
+                prioritet = settPåVentRequest.prioritet,
+                fristFerdigstillelse = settPåVentRequest.frist,
+                mappeId = settPåVentRequest.mappe,
+                beskrivelse = beskrivelse
+            )
+        )
     }
 
     private fun utledOppgavebeskrivelse(
@@ -83,15 +85,18 @@ class BehandlingPåVentService(
         val harEndringer =
             tilordnetSaksbehandler.isNotBlank() || prioritet.isNotBlank() || frist.isNotBlank() || mappe.isNotBlank()
 
-        val beskrivelse = if (harEndringer) "\n${settPåVentRequest.beskrivelse}" else settPåVentRequest.beskrivelse
+        val beskrivelse = utledNyBeskrivelse(harEndringer, settPåVentRequest)
 
         val skalOppdatereBeskrivelse = harEndringer || beskrivelse.isNotBlank()
         val tidligereBeskrivelse =
-            if (skalOppdatereBeskrivelse && oppgave.beskrivelse?.isNotBlank() == true) "\n\n${oppgave.beskrivelse}" else oppgave.beskrivelse ?: ""
+            if (skalOppdatereBeskrivelse && oppgave.beskrivelse?.isNotBlank() == true) "\n\n${oppgave.beskrivelse.orEmpty()}" else oppgave.beskrivelse.orEmpty()
 
         val prefix = utledBeskrivelsePrefix()
 
-        return if (skalOppdatereBeskrivelse) prefix + tilordnetSaksbehandler + prioritet + frist + mappe + beskrivelse + tidligereBeskrivelse else tidligereBeskrivelse
+        val nyBeskrivelse: String? =
+            if (skalOppdatereBeskrivelse) prefix + tilordnetSaksbehandler + prioritet + frist + mappe + beskrivelse + tidligereBeskrivelse else tidligereBeskrivelse
+
+        return nyBeskrivelse?.trimEnd()
     }
 
     private fun utledPrioritetBeskrivelse(
@@ -103,13 +108,22 @@ class BehandlingPåVentService(
         return prioritetBeskrivelse
     }
 
+    private fun utledNyBeskrivelse(
+        harEndringer: Boolean,
+        settPåVentRequest: SettPåVentRequest
+    ): String {
+        return when {
+            settPåVentRequest.beskrivelse.isBlank() -> ""
+            harEndringer -> "\n${settPåVentRequest.beskrivelse}\n"
+            else -> "${settPåVentRequest.beskrivelse}\n"
+        }
+    }
+
     private fun utledBeskrivelsePrefix(): String {
         val innloggetSaksbehandlerIdent = SikkerhetContext.hentSaksbehandlerEllerSystembruker()
         val saksbehandlerNavn = SikkerhetContext.hentSaksbehandlerNavn(strict = false)
 
-        val formatertDato = LocalDateTime.now().format(DatoFormat.GOSYS_DATE_TIME)
-
-        val prefix = "--- $formatertDato $saksbehandlerNavn ($innloggetSaksbehandlerIdent) ---\n"
+        val prefix = "--- ${dagensDatoMedTidNorskFormat()} $saksbehandlerNavn ($innloggetSaksbehandlerIdent) ---\n"
         return prefix
     }
 

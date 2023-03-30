@@ -15,15 +15,15 @@ import no.nav.familie.ef.sak.behandling.dto.TaAvVentStatus
 import no.nav.familie.ef.sak.behandlingsflyt.task.BehandlingsstatistikkTask
 import no.nav.familie.ef.sak.behandlingshistorikk.BehandlingshistorikkService
 import no.nav.familie.ef.sak.behandlingshistorikk.domain.StegUtfall
-import no.nav.familie.ef.sak.felles.util.DatoFormat
-import no.nav.familie.ef.sak.felles.util.mockFeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.vedtak.NullstillVedtakService
 import no.nav.familie.kontrakter.ef.iverksett.Hendelse
+import no.nav.familie.kontrakter.felles.oppgave.MappeDto
 import no.nav.familie.kontrakter.felles.oppgave.Oppgave
 import no.nav.familie.kontrakter.felles.oppgave.OppgavePrioritet
 import no.nav.familie.prosessering.internal.TaskService
@@ -35,7 +35,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.http.HttpStatus
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.time.Month
 import java.util.UUID
 
@@ -47,13 +46,15 @@ internal class BehandlingPåVentServiceTest {
     private val behandlingshistorikkService = mockk<BehandlingshistorikkService>(relaxed = true)
     private val oppgaveService = mockk<OppgaveService>()
 
+    private val featureToggleService = mockk<FeatureToggleService>()
+
     private val behandlingPåVentService =
         BehandlingPåVentService(
             behandlingService,
             behandlingshistorikkService,
             taskService,
             nullstillVedtakService,
-            mockFeatureToggleService(),
+            featureToggleService,
             oppgaveService,
         )
     val fagsak = fagsak()
@@ -64,8 +65,24 @@ internal class BehandlingPåVentServiceTest {
     @BeforeEach
     internal fun setUp() {
         mockkObject(SikkerhetContext)
+        every { featureToggleService.isEnabled(any()) } returns true
         every { SikkerhetContext.hentSaksbehandler() } returns "bob"
         mockFinnSisteIverksatteBehandling(null)
+        every { oppgaveService.finnMapper(any<String>()) } answers {
+            val enhetsnr = firstArg<String>()
+            listOf(
+                MappeDto(
+                    id = 101,
+                    navn = "Mappe 1",
+                    enhetsnr = enhetsnr,
+                ),
+                MappeDto(
+                    id = 102,
+                    navn = "Mappe 2",
+                    enhetsnr = enhetsnr,
+                ),
+            )
+        }
     }
 
     @AfterEach
@@ -79,6 +96,7 @@ internal class BehandlingPåVentServiceTest {
         @Test
         fun `skal sette behandling på vent hvis den kan redigeres og sende melding til DVH`() {
             mockHentBehandling(BehandlingStatus.UTREDES)
+            every { featureToggleService.isEnabled(any()) } returns false
 
             behandlingPåVentService.settPåVent(behandlingId)
 
@@ -253,86 +271,38 @@ internal class BehandlingPåVentServiceTest {
             val oppgaveSlot = slot<Oppgave>()
             val oppgaveId: Long = 123
 
-            every { oppgaveService.hentOppgave(oppgaveId) } returns Oppgave(
+            val eksisterendeOppgave = Oppgave(
                 id = oppgaveId,
-                tildeltEnhetsnr = null,
+                tildeltEnhetsnr = "4489",
                 tilordnetRessurs = "gammel saksbehandler",
                 beskrivelse = "Gammel beskrivelse",
-                mappeId = 333,
+                mappeId = 101,
                 fristFerdigstillelse = LocalDate.of(2002, Month.MARCH, 23).toString(),
                 prioritet = OppgavePrioritet.NORM,
             )
+            every { oppgaveService.hentOppgave(oppgaveId) } returns eksisterendeOppgave
 
             justRun { oppgaveService.oppdaterOppgave(capture(oppgaveSlot)) }
 
+            val settPåVentRequest = SettPåVentRequest(
+                oppgaveId = oppgaveId,
+                saksbehandler = "ny saksbehandler",
+                prioritet = OppgavePrioritet.HOY,
+                frist = LocalDate.of(2002, Month.MARCH, 24).toString(),
+                mappe = 102,
+                beskrivelse = "Her er litt tekst fra saksbehandler"
+            )
             behandlingPåVentService.settPåVent(
-                behandlingId, SettPåVentRequest(
-                    oppgaveId = oppgaveId,
-                    saksbehandler = "ny saksbehandler",
-                    prioritet = OppgavePrioritet.HOY,
-                    frist = LocalDate.of(2002, Month.MARCH, 24).toString(),
-                    mappe = 444,
-                    beskrivelse = "Her er litt tekst fra saksbehandler"
-                )
+                behandlingId, settPåVentRequest
             )
 
-            val forventetBeskrivelse = """
-  --- ${LocalDateTime.now().format(DatoFormat.GOSYS_DATE_TIME)} System (VL) ---
-  Oppgave flyttet fra saksbehandler gammel saksbehandler til ny saksbehandler
-  Oppgave endret fra prioritet NORM til HOY
-  Oppgave endret frist fra 2002-03-23 til 2002-03-24
-  Oppgave flyttet fra mappe 333 til 444
-  
-  Her er litt tekst fra saksbehandler
-  
-  Gammel beskrivelse
-            """.trimIndent()
 
-            assertThat(oppgaveSlot.captured.beskrivelse).isEqualTo(forventetBeskrivelse)
-        }
-
-        @Test
-        fun `skal oppdatere oppgavebeskrivelse ved sett på vent - ingen saksbehandler i forveien, mappe eller frist i forveien`() {
-            mockHentBehandling(BehandlingStatus.UTREDES)
-
-            val oppgaveSlot = slot<Oppgave>()
-            val oppgaveId: Long = 123
-
-            every { oppgaveService.hentOppgave(oppgaveId) } returns Oppgave(
-                id = oppgaveId,
-                tildeltEnhetsnr = null,
-                tilordnetRessurs = null,
-                beskrivelse = "Gammel beskrivelse",
-                mappeId = null,
-                fristFerdigstillelse = null,
-                prioritet = OppgavePrioritet.NORM,
-            )
-
-            justRun { oppgaveService.oppdaterOppgave(capture(oppgaveSlot)) }
-
-            behandlingPåVentService.settPåVent(
-                behandlingId, SettPåVentRequest(
-                    oppgaveId = oppgaveId,
-                    saksbehandler = "ny saksbehandler",
-                    prioritet = OppgavePrioritet.NORM,
-                    frist = LocalDate.of(2002, Month.MARCH, 24).toString(),
-                    mappe = 444,
-                    beskrivelse = "Her er litt tekst fra saksbehandler"
-                )
-            )
-
-            val forventetBeskrivelse = """
-  --- ${LocalDateTime.now().format(DatoFormat.GOSYS_DATE_TIME)} System (VL) ---
-Oppgave flyttet fra saksbehandler <ingen> til ny saksbehandler
-Oppgave endret frist fra <ingen> til 2002-03-24
-Oppgave flyttet fra mappe <ingen> til 444
-
-Her er litt tekst fra saksbehandler
-
-Gammel beskrivelse
-            """.trimIndent()
-
-            assertThat(oppgaveSlot.captured.beskrivelse).isEqualTo(forventetBeskrivelse)
+            assertThat(oppgaveSlot.captured.beskrivelse).isNotEqualTo(eksisterendeOppgave.beskrivelse)
+            assertThat(oppgaveSlot.captured.mappeId).isEqualTo(settPåVentRequest.mappe)
+            assertThat(oppgaveSlot.captured.tilordnetRessurs).isEqualTo(settPåVentRequest.saksbehandler)
+            assertThat(oppgaveSlot.captured.prioritet).isEqualTo(settPåVentRequest.prioritet)
+            assertThat(oppgaveSlot.captured.fristFerdigstillelse).isEqualTo(settPåVentRequest.frist)
+            assertThat(oppgaveSlot.captured.id).isEqualTo(settPåVentRequest.oppgaveId)
         }
     }
 
