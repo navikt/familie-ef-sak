@@ -174,9 +174,6 @@ class BehandlingPåVentService(
         brukerfeilHvis(behandling.status.behandlingErLåstForVidereRedigering()) {
             "Kan ikke sette behandling med status ${behandling.status} på vent"
         }
-        feilHvis(settPåVentRequest == null && featureToggleService.isEnabled(Toggle.SETT_PÅ_VENT_MED_OPPGAVESTYRING)) {
-            "Mangler settPåVentRequest"
-        }
 
         feilHvis(settPåVentRequest != null && !featureToggleService.isEnabled(Toggle.SETT_PÅ_VENT_MED_OPPGAVESTYRING)) {
             "Featuretoggle for sett på vent med oppgavestyring er ikke påskrudd"
