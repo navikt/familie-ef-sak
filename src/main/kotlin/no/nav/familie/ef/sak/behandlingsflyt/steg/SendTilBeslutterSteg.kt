@@ -4,6 +4,7 @@ import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
+import no.nav.familie.ef.sak.behandling.oppgaveforopprettelse.OppgaverForOpprettelseService
 import no.nav.familie.ef.sak.behandling.ÅrsakRevurderingService
 import no.nav.familie.ef.sak.behandlingsflyt.task.BehandlingsstatistikkTask
 import no.nav.familie.ef.sak.behandlingsflyt.task.FerdigstillOppgaveTask
@@ -25,6 +26,7 @@ import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType.INNVILGE
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType.INNVILGE_UTEN_UTBETALING
+import no.nav.familie.ef.sak.vedtak.dto.SendTilBeslutterDto
 import no.nav.familie.ef.sak.vilkår.VurderingService
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.internal.TaskService
@@ -46,7 +48,8 @@ class SendTilBeslutterSteg(
     private val vurderingService: VurderingService,
     private val validerOmregningService: ValiderOmregningService,
     private val årsakRevurderingService: ÅrsakRevurderingService,
-) : BehandlingSteg<Void?> {
+    private val oppgaverForOpprettelseService: OppgaverForOpprettelseService,
+) : BehandlingSteg<SendTilBeslutterDto?> {
 
     override fun validerSteg(saksbehandling: Saksbehandling) {
         if (saksbehandling.steg != stegType()) {
@@ -99,7 +102,7 @@ class SendTilBeslutterSteg(
             resultatType == ResultatType.HENLEGGE
     }
 
-    override fun utførSteg(saksbehandling: Saksbehandling, data: Void?) {
+    override fun utførSteg(saksbehandling: Saksbehandling, data: SendTilBeslutterDto?) {
         behandlingService.oppdaterStatusPåBehandling(saksbehandling.id, BehandlingStatus.FATTER_VEDTAK)
         vedtakService.oppdaterSaksbehandler(saksbehandling.id, SikkerhetContext.hentSaksbehandler())
         if (!vedtakService.hentVedtak(saksbehandling.id).erVedtakUtenBeslutter()) {
@@ -108,6 +111,9 @@ class SendTilBeslutterSteg(
         ferdigstillOppgave(saksbehandling, Oppgavetype.BehandleSak)
         ferdigstillOppgave(saksbehandling, Oppgavetype.BehandleUnderkjentVedtak)
         opprettTaskForBehandlingsstatistikk(saksbehandling.id)
+        if (data != null) {
+            oppgaverForOpprettelseService.opprettEllerErstattFremleggsoppgave(saksbehandling.id, data.oppgavetyperSomSkalOpprettes)
+        }
     }
 
     private fun opprettTaskForBehandlingsstatistikk(behandlingId: UUID) =

@@ -3,6 +3,7 @@ package no.nav.familie.ef.sak.behandling.oppgaveforopprettelse
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
+import no.nav.familie.ef.sak.infrastruktur.exception.feilHvisIkke
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
 import no.nav.familie.kontrakter.ef.iverksett.OppgaveForOpprettelseType
@@ -20,10 +21,14 @@ class OppgaverForOpprettelseService(
 ) {
 
     @Transactional
-    fun opprettEllerErstattFremleggsoppgave(oppgaverForOpprettelse: OppgaverForOpprettelse) {
-        when (this.oppgaverForOpprettelseRepository.existsById(oppgaverForOpprettelse.behandlingId)) {
-            true -> this.oppgaverForOpprettelseRepository.update(oppgaverForOpprettelse)
-            false -> this.oppgaverForOpprettelseRepository.insert(oppgaverForOpprettelse)
+    fun opprettEllerErstattFremleggsoppgave(behandlingId: UUID, nyeOppgaver: List<OppgaveForOpprettelseType>) {
+        val oppgavetyperSomKanOpprettes = hentOppgavetyperSomKanOpprettes(behandlingId)
+        feilHvisIkke(oppgavetyperSomKanOpprettes.containsAll(nyeOppgaver)) {
+            "behandlingId=$behandlingId prøver å opprette $nyeOppgaver $oppgavetyperSomKanOpprettes"
+        }
+        when (this.oppgaverForOpprettelseRepository.existsById(behandlingId)) {
+            true -> this.oppgaverForOpprettelseRepository.update(OppgaverForOpprettelse(behandlingId, nyeOppgaver))
+            false -> this.oppgaverForOpprettelseRepository.insert(OppgaverForOpprettelse(behandlingId, nyeOppgaver))
         }
     }
 
@@ -39,10 +44,13 @@ class OppgaverForOpprettelseService(
         return if (kanOppretteInntektskontroll) listOf(OppgaveForOpprettelseType.INNTEKTSKONTROLL_1_ÅR_FREM_I_TID) else emptyList()
     }
 
-    private fun kanOppretteOppgaveForInntektskontrollFremITid(behandling: Behandling, tilkjentYtelse: TilkjentYtelse): Boolean {
-        val sisteAndel = tilkjentYtelse.andelerTilkjentYtelse.sortedBy { it.stønadTom }.last()
+    private fun kanOppretteOppgaveForInntektskontrollFremITid(
+        behandling: Behandling,
+        tilkjentYtelse: TilkjentYtelse,
+    ): Boolean {
+        val sisteAndel = tilkjentYtelse.andelerTilkjentYtelse.maxBy { it.stønadTom }
         val sisteAndelMedBeløp = sisteAndel.beløp > 0
-        val sisteAndel1årFremITid = sisteAndel.stønadTom.minusYears(1) > LocalDate.now()
+        val sisteAndel1årFremITid = sisteAndel.stønadTom > LocalDate.now().plusYears(1)
 
         return behandling.type == BehandlingType.FØRSTEGANGSBEHANDLING &&
             sisteAndelMedBeløp &&

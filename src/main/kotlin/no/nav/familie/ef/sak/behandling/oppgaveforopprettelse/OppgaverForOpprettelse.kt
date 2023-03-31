@@ -8,5 +8,4 @@ data class OppgaverForOpprettelse(
     @Id
     val behandlingId: UUID,
     val oppgavetyper: List<OppgaveForOpprettelseType>,
-    val opprettelseTattStillingTil: Boolean,
 )

@@ -14,13 +14,13 @@ import java.util.UUID
 class OppgaveForOpprettelseController(private val oppgaverForOpprettelseService: OppgaverForOpprettelseService) {
 
     @GetMapping("/{behandlingid}")
-    fun hentOppgaverForOpprettelse(@PathVariable behandlingid: UUID): Ressurs<OppgaverForOpprettelseDto?> {
+    fun hentOppgaverForOpprettelse(@PathVariable behandlingid: UUID): Ressurs<OppgaverForOpprettelseDto> {
         val lagretFremleggsoppgave = oppgaverForOpprettelseService.hentOppgaverForOpprettelseEllerNull(behandlingid)
+        val oppgavetyperSomKanOpprettes = oppgaverForOpprettelseService.hentOppgavetyperSomKanOpprettes(behandlingid)
         return Ressurs.success(
             OppgaverForOpprettelseDto(
-                oppgavetyperSomKanOpprettes = oppgaverForOpprettelseService.hentOppgavetyperSomKanOpprettes(behandlingid),
-                oppgavetyperSomSkalOpprettes = lagretFremleggsoppgave?.oppgavetyper ?: emptyList(),
-                opprettelseTattStillingTil = lagretFremleggsoppgave?.opprettelseTattStillingTil ?: false,
+                oppgavetyperSomKanOpprettes = oppgavetyperSomKanOpprettes,
+                oppgavetyperSomSkalOpprettes = lagretFremleggsoppgave?.oppgavetyper ?: oppgavetyperSomKanOpprettes,
             ),
         )
     }

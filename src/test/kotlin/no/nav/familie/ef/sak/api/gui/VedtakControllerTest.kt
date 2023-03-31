@@ -7,7 +7,7 @@ import no.nav.familie.ef.sak.api.gui.VedtakControllerTest.Saksbehandler.SAKSBEHA
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
-import no.nav.familie.ef.sak.behandling.oppgaveforopprettelse.OppgaverForOpprettelseDto
+import no.nav.familie.ef.sak.behandling.oppgaveforopprettelse.OppgaverForOpprettelseService
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.behandlingsflyt.task.FerdigstillOppgaveTask
 import no.nav.familie.ef.sak.behandlingsflyt.task.OpprettOppgaveTask
@@ -30,15 +30,19 @@ import no.nav.familie.ef.sak.repository.tilkjentYtelse
 import no.nav.familie.ef.sak.repository.vedtak
 import no.nav.familie.ef.sak.repository.vilkårsvurdering
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseRepository
+import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.vedtak.VedtakRepository
 import no.nav.familie.ef.sak.vedtak.dto.BeslutteVedtakDto
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType
+import no.nav.familie.ef.sak.vedtak.dto.SendTilBeslutterDto
 import no.nav.familie.ef.sak.vedtak.dto.TotrinnkontrollStatus
 import no.nav.familie.ef.sak.vedtak.dto.TotrinnskontrollStatusDto
 import no.nav.familie.ef.sak.vedtak.dto.ÅrsakUnderkjent
 import no.nav.familie.ef.sak.vilkår.VilkårType
 import no.nav.familie.ef.sak.vilkår.Vilkårsresultat
 import no.nav.familie.ef.sak.vilkår.VilkårsvurderingRepository
+import no.nav.familie.ef.sak.økonomi.lagAndelTilkjentYtelse
+import no.nav.familie.ef.sak.økonomi.lagTilkjentYtelse
 import no.nav.familie.kontrakter.ef.felles.AvslagÅrsak
 import no.nav.familie.kontrakter.ef.iverksett.OppgaveForOpprettelseType
 import no.nav.familie.kontrakter.ef.søknad.Testsøknad
@@ -58,6 +62,7 @@ import org.springframework.http.HttpEntity
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import java.time.LocalDate
 import java.util.UUID
 
 internal class VedtakControllerTest : OppslagSpringRunnerTest() {
@@ -98,14 +103,12 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
     @Autowired
     private lateinit var taskService: TaskService
 
+    @Autowired
+    private lateinit var oppgaverForOpprettelseService: OppgaverForOpprettelseService
+
     private val fagsak = fagsak()
     private val behandling = behandling(fagsak)
     private val saksbehandling = saksbehandling(fagsak, behandling)
-    private val oppgaverForOpprettelseDto = OppgaverForOpprettelseDto(
-        oppgavetyperSomKanOpprettes = listOf(OppgaveForOpprettelseType.INNTEKTSKONTROLL_1_ÅR_FREM_I_TID),
-        oppgavetyperSomSkalOpprettes = listOf(OppgaveForOpprettelseType.INNTEKTSKONTROLL_1_ÅR_FREM_I_TID),
-        opprettelseTattStillingTil = true,
-    )
 
     private enum class Saksbehandler(val beslutter: Boolean = false) {
         SAKSBEHANDLER,
@@ -278,6 +281,33 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
         validerBehandlingIverksetter()
     }
 
+    @Test
+    internal fun `skal lagre oppgaver som skal opprettes`() {
+        val lagAndelMedInntekt1ÅrFremITiden: (behandlingId: UUID) -> TilkjentYtelse = { behandlingId ->
+            val andel = lagAndelTilkjentYtelse(
+                beløp = 100,
+                fraOgMed = LocalDate.now(),
+                tilOgMed = LocalDate.now().plusYears(2),
+                kildeBehandlingId = behandlingId,
+            )
+            lagTilkjentYtelse(behandlingId = behandlingId, andelerTilkjentYtelse = listOf(andel))
+        }
+        val behandlingId = opprettBehandling(
+            steg = StegType.SEND_TIL_BESLUTTER,
+            vedtakResultatType = ResultatType.AVSLÅ,
+            status = BehandlingStatus.UTREDES,
+            avlsåÅrsak = AvslagÅrsak.MINDRE_INNTEKTSENDRINGER,
+            tilkjentYtelse = lagAndelMedInntekt1ÅrFremITiden
+        )
+
+        sendTilBeslutter(SAKSBEHANDLER, SendTilBeslutterDto(
+            oppgavetyperSomSkalOpprettes = listOf(OppgaveForOpprettelseType.INNTEKTSKONTROLL_1_ÅR_FREM_I_TID),
+        ))
+
+        assertThat(oppgaverForOpprettelseService.hentOppgaverForOpprettelseEllerNull(behandlingId)?.oppgavetyper)
+            .containsExactly(OppgaveForOpprettelseType.INNTEKTSKONTROLL_1_ÅR_FREM_I_TID)
+    }
+
     @Nested
     inner class AngreSendTilBeslutter {
         @BeforeEach
@@ -358,6 +388,7 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
         steg: StegType = StegType.SEND_TIL_BESLUTTER,
         vedtakResultatType: ResultatType = ResultatType.AVSLÅ,
         avlsåÅrsak: AvslagÅrsak = AvslagÅrsak.VILKÅR_IKKE_OPPFYLT,
+        tilkjentYtelse: (behandlingId: UUID) -> TilkjentYtelse = {tilkjentYtelse(behandlingId = it, fagsak.hentAktivIdent())}
     ): UUID {
         val lagretBehandling = behandlingRepository.insert(
             behandling.copy(
@@ -372,7 +403,7 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
                 saksbehandlerIdent = SikkerhetContext.hentSaksbehandlerEllerSystembruker(),
             ),
         )
-        tilkjentYtelseRepository.insert(tilkjentYtelse(behandlingId = lagretBehandling.id, fagsak.hentAktivIdent()))
+        tilkjentYtelseRepository.insert(tilkjentYtelse(lagretBehandling.id))
         søknadService.lagreSøknadForOvergangsstønad(
             Testsøknad.søknadOvergangsstønad,
             lagretBehandling.id,
@@ -409,6 +440,7 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
 
     private fun sendTilBeslutter(
         saksbehandler: Saksbehandler,
+        request: SendTilBeslutterDto? = null,
         validator: (ResponseEntity<Ressurs<UUID>>) -> Unit = responseOK(),
     ) {
         headers.setBearerAuth(token(saksbehandler))
@@ -416,7 +448,7 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
         val response = restTemplate.exchange<Ressurs<UUID>>(
             localhost("/api/vedtak/${behandling.id}/send-til-beslutter"),
             HttpMethod.POST,
-            HttpEntity<Any>(oppgaverForOpprettelseDto, headers),
+            HttpEntity<Any>(request, headers),
         )
         validator.invoke(response)
     }

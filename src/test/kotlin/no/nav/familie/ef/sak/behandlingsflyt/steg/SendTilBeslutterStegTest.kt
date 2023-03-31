@@ -12,6 +12,7 @@ import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat.INNVILGET
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
+import no.nav.familie.ef.sak.behandling.oppgaveforopprettelse.OppgaverForOpprettelseService
 import no.nav.familie.ef.sak.behandling.ÅrsakRevurderingService
 import no.nav.familie.ef.sak.behandlingsflyt.task.BehandlingsstatistikkTask
 import no.nav.familie.ef.sak.behandlingsflyt.task.BehandlingsstatistikkTaskPayload
@@ -69,6 +70,7 @@ internal class SendTilBeslutterStegTest {
     private val vurderingService = mockk<VurderingService>()
     private val validerOmregningService = mockk<ValiderOmregningService>(relaxed = true)
     private val årsakRevurderingService = mockk<ÅrsakRevurderingService>(relaxed = true)
+    private val oppgaverForOpprettelseService = mockk<OppgaverForOpprettelseService>(relaxed = true)
     private val simuleringsoppsummering = Simuleringsoppsummering(
         perioder = listOf(),
         fomDatoNestePeriode = null,
@@ -94,6 +96,7 @@ internal class SendTilBeslutterStegTest {
             vurderingService,
             validerOmregningService,
             årsakRevurderingService,
+            oppgaverForOpprettelseService,
         )
     private val fagsak = fagsak(
         stønadstype = StønadType.OVERGANGSSTØNAD,

@@ -3,9 +3,6 @@ package no.nav.familie.ef.sak.vedtak
 import no.nav.familie.ef.sak.AuditLoggerEvent
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
 import no.nav.familie.ef.sak.behandling.BehandlingService
-import no.nav.familie.ef.sak.behandling.oppgaveforopprettelse.OppgaverForOpprettelseDto
-import no.nav.familie.ef.sak.behandling.oppgaveforopprettelse.OppgaverForOpprettelseService
-import no.nav.familie.ef.sak.behandling.oppgaveforopprettelse.tilDomene
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegService
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvisIkke
@@ -13,11 +10,11 @@ import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.secureLogger
 import no.nav.familie.ef.sak.vedtak.dto.BeslutteVedtakDto
 import no.nav.familie.ef.sak.vedtak.dto.InnvilgelseOvergangsstønad
+import no.nav.familie.ef.sak.vedtak.dto.SendTilBeslutterDto
 import no.nav.familie.ef.sak.vedtak.dto.TotrinnskontrollStatusDto
 import no.nav.familie.ef.sak.vedtak.dto.VedtakDto
 import no.nav.familie.ef.sak.vedtak.historikk.VedtakHistorikkService
 import no.nav.familie.ef.sak.vilkår.VurderingService
-import no.nav.familie.kontrakter.ef.iverksett.OppgaveForOpprettelseType
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.slf4j.LoggerFactory
@@ -51,25 +48,20 @@ class VedtakController(
     private val behandlingRepository: BehandlingRepository,
     private val nullstillVedtakService: NullstillVedtakService,
     private val angreSendTilBeslutterService: AngreSendTilBeslutterService,
-    private val oppgaverForOpprettelseService: OppgaverForOpprettelseService,
 ) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
     @PostMapping("/{behandlingId}/send-til-beslutter")
-    fun sendTilBeslutter(@PathVariable behandlingId: UUID, @RequestBody oppgaverForOpprettelseDto: OppgaverForOpprettelseDto): Ressurs<UUID> {
+    fun sendTilBeslutter(@PathVariable behandlingId: UUID, @RequestBody sendTilBeslutter: SendTilBeslutterDto?): Ressurs<UUID> {
         val behandling = behandlingService.hentSaksbehandling(behandlingId)
         tilgangService.validerTilgangTilBehandling(behandling, AuditLoggerEvent.UPDATE)
         val vedtakErUtenBeslutter = vedtakService.hentVedtak(behandlingId).utledVedtakErUtenBeslutter()
 
-        if (oppgaverForOpprettelseDto.oppgavetyperSomKanOpprettes.contains(OppgaveForOpprettelseType.INNTEKTSKONTROLL_1_ÅR_FREM_I_TID)) {
-            oppgaverForOpprettelseService.opprettEllerErstattFremleggsoppgave(oppgaverForOpprettelseDto.tilDomene(behandlingId))
-        }
-
         return if (vedtakErUtenBeslutter.value) {
-            Ressurs.success(stegService.håndterFerdigstilleVedtakUtenBeslutter(behandling).id)
+            Ressurs.success(stegService.håndterFerdigstilleVedtakUtenBeslutter(behandling, sendTilBeslutter).id)
         } else {
-            Ressurs.success(stegService.håndterSendTilBeslutter(behandling).id)
+            Ressurs.success(stegService.håndterSendTilBeslutter(behandling, sendTilBeslutter).id)
         }
     }
 
