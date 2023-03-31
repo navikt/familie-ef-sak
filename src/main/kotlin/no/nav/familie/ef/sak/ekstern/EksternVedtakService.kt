@@ -7,6 +7,7 @@ import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.tilbakekreving.TilbakekrevingClient
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
+import no.nav.familie.kontrakter.ef.iverksett.BehandlingKategori
 import no.nav.familie.kontrakter.felles.Regelverk
 import no.nav.familie.kontrakter.felles.klage.FagsystemType
 import no.nav.familie.kontrakter.felles.klage.FagsystemVedtak
@@ -41,12 +42,17 @@ class EksternVedtakService(
             vedtakstidspunkt = behandling.vedtakstidspunkt
                 ?: error("Mangler vedtakstidspunkt for behandling=${behandling.id}"),
             fagsystemType = fagsystemType,
-            regelverk = Regelverk.NASJONAL,
+            regelverk = mapTilRegelverk(behandling.kategori),
         )
     }
 
     private fun utledReultatOgFagsystemType(behandling: Behandling): Pair<String, FagsystemType> = when (behandling.årsak) {
         BehandlingÅrsak.SANKSJON_1_MND -> Pair("Sanksjon 1 måned", FagsystemType.SANKSJON_1_MND)
         else -> Pair(behandling.resultat.displayName, FagsystemType.ORDNIÆR)
+    }
+
+    private fun mapTilRegelverk(kategori: BehandlingKategori) = when (kategori) {
+        BehandlingKategori.EØS -> Regelverk.EØS
+        BehandlingKategori.NASJONAL -> Regelverk.NASJONAL
     }
 }

@@ -3,7 +3,6 @@ package no.nav.familie.ef.sak.repository
 import no.nav.familie.ef.sak.barn.BehandlingBarn
 import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.behandling.domain.Behandling
-import no.nav.familie.ef.sak.behandling.domain.BehandlingKategori
 import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
@@ -61,6 +60,7 @@ import no.nav.familie.ef.sak.vilkår.Vilkårsvurdering
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.ef.felles.Opplysningskilde
 import no.nav.familie.kontrakter.ef.felles.Revurderingsårsak
+import no.nav.familie.kontrakter.ef.iverksett.BehandlingKategori
 import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
@@ -87,6 +87,7 @@ fun behandling(
     fagsak: Fagsak = fagsak(),
     status: BehandlingStatus = BehandlingStatus.OPPRETTET,
     steg: StegType = StegType.VILKÅR,
+    kategori: BehandlingKategori = BehandlingKategori.NASJONAL,
     id: UUID = UUID.randomUUID(),
     type: BehandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
     resultat: BehandlingResultat = BehandlingResultat.IKKE_SATT,
@@ -105,7 +106,7 @@ fun behandling(
         type = type,
         status = status,
         steg = steg,
-        kategori = BehandlingKategori.NASJONAL,
+        kategori = kategori,
         resultat = resultat,
         sporbar = Sporbar(opprettetTid = opprettetTid),
         årsak = årsak,
