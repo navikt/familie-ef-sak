@@ -20,6 +20,10 @@ class TilkjentYtelseService(
     private val fagsakService: FagsakService,
 ) {
 
+    fun hentForBehandlingEllerNull(behandlingId: UUID): TilkjentYtelse? {
+        return tilkjentYtelseRepository.findByBehandlingId(behandlingId)
+    }
+
     fun hentForBehandling(behandlingId: UUID): TilkjentYtelse {
         return tilkjentYtelseRepository.findByBehandlingId(behandlingId)
             ?: error("Fant ikke tilkjent ytelse med behandlingsid $behandlingId")

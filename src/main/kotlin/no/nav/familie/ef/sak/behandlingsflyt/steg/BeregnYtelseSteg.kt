@@ -4,6 +4,7 @@ import no.nav.familie.ef.sak.barn.BarnService
 import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType.FØRSTEGANGSBEHANDLING
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType.REVURDERING
+import no.nav.familie.ef.sak.behandling.oppgaveforopprettelse.OppgaverForOpprettelseService
 import no.nav.familie.ef.sak.beregning.BeregningService
 import no.nav.familie.ef.sak.beregning.ValiderOmregningService
 import no.nav.familie.ef.sak.beregning.barnetilsyn.BeløpsperiodeBarnetilsynDto
@@ -63,6 +64,7 @@ class BeregnYtelseSteg(
     private val barnService: BarnService,
     private val fagsakService: FagsakService,
     private val validerOmregningService: ValiderOmregningService,
+    private val oppgaverForOpprettelseService: OppgaverForOpprettelseService,
     private val featureToggleService: FeatureToggleService,
 ) : BehandlingSteg<VedtakDto> {
 
@@ -102,15 +104,18 @@ class BeregnYtelseSteg(
                 simuleringService.hentOgLagreSimuleringsresultat(saksbehandlingMedOppdatertIdent)
             }
             is Opphør -> {
+                oppgaverForOpprettelseService.slettOppgaverForOpprettelse(saksbehandling.id)
                 validerStartTidEtterSanksjon(data.opphørFom, saksbehandlingMedOppdatertIdent)
                 opprettTilkjentYtelseForOpphørtBehandling(saksbehandlingMedOppdatertIdent, data)
                 simuleringService.hentOgLagreSimuleringsresultat(saksbehandlingMedOppdatertIdent)
             }
             is Avslå -> {
+                oppgaverForOpprettelseService.slettOppgaverForOpprettelse(saksbehandling.id)
                 simuleringService.slettSimuleringForBehandling(saksbehandlingMedOppdatertIdent)
                 tilbakekrevingService.slettTilbakekreving(saksbehandlingMedOppdatertIdent.id)
             }
             is Sanksjonert -> {
+                oppgaverForOpprettelseService.slettOppgaverForOpprettelse(saksbehandling.id)
                 opprettTilkjentYtelseForSanksjonertBehandling(data, saksbehandlingMedOppdatertIdent)
             }
         }

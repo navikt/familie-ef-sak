@@ -38,7 +38,7 @@ class OppgaverForOpprettelseService(
 
     fun hentOppgavetyperSomKanOpprettes(behandlingId: UUID): List<OppgaveForOpprettelseType> {
         val behandling = behandlingService.hentBehandling(behandlingId)
-        val tilkjentYtelse = tilkjentYtelseService.hentForBehandling(behandlingId)
+        val tilkjentYtelse = tilkjentYtelseService.hentForBehandlingEllerNull(behandlingId)
         val kanOppretteInntektskontroll = kanOppretteOppgaveForInntektskontrollFremITid(behandling, tilkjentYtelse)
 
         return if (kanOppretteInntektskontroll) listOf(OppgaveForOpprettelseType.INNTEKTSKONTROLL_1_ÅR_FREM_I_TID) else emptyList()
@@ -46,8 +46,10 @@ class OppgaverForOpprettelseService(
 
     private fun kanOppretteOppgaveForInntektskontrollFremITid(
         behandling: Behandling,
-        tilkjentYtelse: TilkjentYtelse,
+        tilkjentYtelse: TilkjentYtelse?,
     ): Boolean {
+        if (tilkjentYtelse == null) return false
+
         val sisteAndel = tilkjentYtelse.andelerTilkjentYtelse.maxBy { it.stønadTom }
         val sisteAndelMedBeløp = sisteAndel.beløp > 0
         val sisteAndel1årFremITid = sisteAndel.stønadTom > LocalDate.now().plusYears(1)
@@ -55,5 +57,9 @@ class OppgaverForOpprettelseService(
         return behandling.type == BehandlingType.FØRSTEGANGSBEHANDLING &&
             sisteAndelMedBeløp &&
             sisteAndel1årFremITid
+    }
+
+    fun slettOppgaverForOpprettelse(behandlingId: UUID) {
+        oppgaverForOpprettelseRepository.deleteById(behandlingId)
     }
 }
