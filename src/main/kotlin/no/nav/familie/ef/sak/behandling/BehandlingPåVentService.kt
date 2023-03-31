@@ -63,6 +63,7 @@ class BehandlingPåVentService(
                 fristFerdigstillelse = settPåVentRequest.frist,
                 mappeId = settPåVentRequest.mappe,
                 beskrivelse = beskrivelse,
+                versjon = settPåVentRequest.oppgaveVersjon
             ),
         )
     }

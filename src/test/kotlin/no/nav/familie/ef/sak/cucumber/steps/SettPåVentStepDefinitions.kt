@@ -97,6 +97,7 @@ class SettPåVentStepDefinitions {
                 mappe = parseValgfriString(SettPåVentDomeneBegrep.MAPPE, verdier)?.toLong(),
                 prioritet = parseEnum(SettPåVentDomeneBegrep.PRIORITET, verdier),
                 beskrivelse = parseValgfriString(SettPåVentDomeneBegrep.BESKRIVELSE, verdier).orEmpty(),
+                oppgaveVersjon = 1
             )
     }
 
