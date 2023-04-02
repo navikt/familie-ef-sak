@@ -31,7 +31,7 @@
         <java.version>17</java.version>
         <kotlin.version>1.8.10</kotlin.version>
         <kotlin-coroutines.version>1.6.4</kotlin-coroutines.version>
-        <springdoc.version>1.6.14</springdoc.version>
+        <springdoc.version>1.7.0</springdoc.version>
         <mockk.version>1.13.4</mockk.version>
         <felles.version>1.20221202080911_bcf8f33</felles.version>
         <prosessering.version>1.20221110194901_e9e0d90</prosessering.version>
@@ -344,8 +344,7 @@
                         <phase>verify</phase>
                         <configuration>
                             <target name="ktlint">
-                                <java taskname="ktlint" dir="${basedir}" fork="true" failonerror="true"
-                                      classpathref="maven.plugin.classpath" classname="com.pinterest.ktlint.Main">
+                                <java taskname="ktlint" dir="${basedir}" fork="true" failonerror="true" classpathref="maven.plugin.classpath" classname="com.pinterest.ktlint.Main">
                                     <arg value="src/**/*.kt"/>
                                 </java>
                             </target>
@@ -359,8 +358,7 @@
                         <phase>validate</phase>
                         <configuration>
                             <target name="ktlint">
-                                <java taskname="ktlint" dir="${basedir}" fork="true" failonerror="true"
-                                      classpathref="maven.plugin.classpath" classname="com.pinterest.ktlint.Main">
+                                <java taskname="ktlint" dir="${basedir}" fork="true" failonerror="true" classpathref="maven.plugin.classpath" classname="com.pinterest.ktlint.Main">
                                     <jvmarg value="--add-opens"/>
                                     <jvmarg value="java.base/java.lang=ALL-UNNAMED"/>
                                     <arg value="-F"/>
