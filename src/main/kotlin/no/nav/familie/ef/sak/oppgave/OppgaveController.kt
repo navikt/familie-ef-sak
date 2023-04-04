@@ -111,7 +111,17 @@ class OppgaveController(
                     "sekunderSidenEndret=${sekunderSidenEndret(oppgave)}",
             )
         }
-        return Ressurs.success(saksbehandlerIdentIOppgaveSystemet)
+        throw ApiFeil("Mangler oppgave", HttpStatus.BAD_REQUEST)
+    }
+
+    @GetMapping("/behandling/{behandlingId}")
+    fun hentOppgaveForBehandlingId(@PathVariable behandlingId: UUID): Ressurs<Oppgave> {
+        val oppgave = oppgaveService.hentIkkeFerdigstiltOppgaveForBehandling(behandlingId)
+
+        return oppgave?.let { Ressurs.success(it) } ?: throw ApiFeil(
+            "Fant ingen åpen oppgave for behandlingen",
+            HttpStatus.BAD_REQUEST,
+        )
     }
 
     @GetMapping(path = ["/mapper"], produces = [MediaType.APPLICATION_JSON_VALUE])

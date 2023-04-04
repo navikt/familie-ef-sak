@@ -73,6 +73,10 @@ class OppgaveService(
         }
     }
 
+    fun oppdaterOppgave(oppgave: Oppgave) {
+        oppgaveClient.oppdaterOppgave(oppgave)
+    }
+
     /**
      * I de tilfeller en service ønsker å ansvare selv for lagring til [OppgaveRepository]
      */
@@ -221,7 +225,7 @@ class OppgaveService(
     }
 
     fun hentIkkeFerdigstiltOppgaveForBehandling(behandlingId: UUID): Oppgave? {
-        return oppgaveRepository.findByBehandlingIdAndTypeAndErFerdigstiltIsFalse(behandlingId, Oppgavetype.BehandleSak)
+        return oppgaveRepository.findByBehandlingIdAndErFerdigstiltIsFalseAndTypeIn(behandlingId, setOf(Oppgavetype.BehandleSak, Oppgavetype.BehandleUnderkjentVedtak))
             ?.let { oppgaveClient.finnOppgaveMedId(it.gsakOppgaveId) }
     }
 
