@@ -111,7 +111,7 @@ class OppgaveController(
                     "sekunderSidenEndret=${sekunderSidenEndret(oppgave)}",
             )
         }
-        throw ApiFeil("Mangler oppgave", HttpStatus.BAD_REQUEST)
+        return Ressurs.success(saksbehandlerIdentIOppgaveSystemet)
     }
 
     @GetMapping("/behandling/{behandlingId}")
