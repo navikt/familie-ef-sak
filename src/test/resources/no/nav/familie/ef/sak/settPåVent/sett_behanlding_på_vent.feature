@@ -259,3 +259,66 @@ Venter på bruker
       | frist         | 19.03.2023 |
       | prioritet     | NORM       |
 
+  Scenario: Sett på vent uten oppdateringer
+
+    Gitt eksisterende oppgave
+      | saksbehandler | Ola        |
+      | frist         | 18.03.2023 |
+      | prioritet     | NORM       |
+
+    Og mapper
+      | Mappeid | Mappenavn               |
+      | 111     | søknad                  |
+      | 222     | venter på dokumentasjon |
+
+    Og sett på vent request
+      | saksbehandler | Ola        |
+      | frist         | 18.03.2023 |
+      | prioritet     | NORM       |
+      | beskrivelse   |            |
+
+    Når vi setter behandling på vent
+
+    Så forventer vi følgende beskrivelse på oppgaven
+    """
+    """
+
+    Så forventer vi at oppgaven er oppdatert med
+      | saksbehandler | Ola        |
+      | frist         | 18.03.2023 |
+      | prioritet     | NORM       |
+
+
+  Scenario: Sett på vent uten oppdateringer - med eksisterende beskrivelse
+
+    Gitt eksisterende oppgave
+      | saksbehandler | Ola                     |
+      | frist         | 18.03.2023              |
+      | prioritet     | NORM                    |
+      | beskrivelse   | eksistrende beskrivelse |
+
+    Og mapper
+      | Mappeid | Mappenavn               |
+      | 111     | søknad                  |
+      | 222     | venter på dokumentasjon |
+
+    Og sett på vent request
+      | saksbehandler | Ola        |
+      | frist         | 18.03.2023 |
+      | prioritet     | NORM       |
+      | beskrivelse   |            |
+
+    Når vi setter behandling på vent
+
+    Så forventer vi følgende beskrivelse på oppgaven
+    """
+    eksistrende beskrivelse
+    """
+
+    Så forventer vi at oppgaven er oppdatert med
+      | saksbehandler | Ola                     |
+      | frist         | 18.03.2023              |
+      | prioritet     | NORM                    |
+      | beskrivelse   | eksistrende beskrivelse |
+
+
