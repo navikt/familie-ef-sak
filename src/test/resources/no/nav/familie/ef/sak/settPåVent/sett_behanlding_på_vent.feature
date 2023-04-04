@@ -36,7 +36,6 @@ Egenskap: Sett behandling på vent og oppdater oppgave
 
   Tekst fra saksbehandler
 
-
   Gammel beskrivelse
     """
 
@@ -72,7 +71,6 @@ Egenskap: Sett behandling på vent og oppdater oppgave
     """
     --- 25.10.2020 13:34 System (VL) ---
   Oppgave flyttet fra saksbehandler Ola til Kari
-
 
   Gammel beskrivelse
     """
