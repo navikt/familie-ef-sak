@@ -81,7 +81,7 @@ class JournalføringKlageService(
             "Mangler dato mottatt"
         }
 
-        klageService.opprettKlage(fagsak, klageMottatt)
+        klageService.opprettKlage(fagsak, klageMottatt, journalføringRequest.klageGjelderTilbakekreving)
 
         journalpostService.oppdaterOgFerdigstillJournalpost(
             journalpost = journalpost,
