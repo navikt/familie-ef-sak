@@ -71,7 +71,7 @@ class BehandlingPåVentService(
     private fun utledOppgavebeskrivelse(
         oppgave: Oppgave,
         settPåVentRequest: SettPåVentRequest,
-    ): String? {
+    ): String {
         val tilordnetSaksbehandler = utledTilordnetSaksbehandlerBeskrivelse(oppgave, settPåVentRequest)
 
         val prioritet = utledPrioritetBeskrivelse(oppgave, settPåVentRequest)
@@ -87,24 +87,30 @@ class BehandlingPåVentService(
 
         val skalOppdatereBeskrivelse = harEndringer || beskrivelse.isNotBlank()
         val tidligereBeskrivelse =
-            if (skalOppdatereBeskrivelse && oppgave.beskrivelse?.isNotBlank() == true) "\n\n${oppgave.beskrivelse.orEmpty()}" else oppgave.beskrivelse.orEmpty()
+            if (skalOppdatereBeskrivelse && oppgave.beskrivelse?.isNotBlank() == true) {
+                "\n\n${oppgave.beskrivelse.orEmpty()}"
+            } else {
+                oppgave.beskrivelse.orEmpty()
+            }
 
         val prefix = utledBeskrivelsePrefix()
 
-        val nyBeskrivelse: String? =
-            if (skalOppdatereBeskrivelse) prefix + tilordnetSaksbehandler + prioritet + frist + mappe + beskrivelse + tidligereBeskrivelse else tidligereBeskrivelse
+        val nyBeskrivelse =
+            if (skalOppdatereBeskrivelse) {
+                prefix + tilordnetSaksbehandler + prioritet + frist + mappe + beskrivelse + tidligereBeskrivelse
+            } else {
+                tidligereBeskrivelse
+            }
 
-        return nyBeskrivelse?.trimEnd()
+        return nyBeskrivelse.trimEnd()
     }
 
     private fun utledPrioritetBeskrivelse(
         oppgave: Oppgave,
         settPåVentRequest: SettPåVentRequest,
-    ): String {
-        val prioritetBeskrivelse =
-            if (oppgave.prioritet == settPåVentRequest.prioritet) "" else "Oppgave endret fra prioritet ${oppgave.prioritet?.name} til ${settPåVentRequest.prioritet}\n"
-        return prioritetBeskrivelse
-    }
+    ): String = if (oppgave.prioritet != settPåVentRequest.prioritet) {
+        "Oppgave endret fra prioritet ${oppgave.prioritet?.name} til ${settPåVentRequest.prioritet}\n"
+    } else ""
 
     private fun utledNyBeskrivelse(
         harEndringer: Boolean,
@@ -139,9 +145,7 @@ class BehandlingPåVentService(
         val eksisterendeMappe = eksisterendeMappenavn ?: "<ingen>"
         val nyMappe = nyMappeNavn ?: "<ingen>"
 
-        val mappeBeskrivelse =
-            if (eksisterendeMappe == nyMappe) "" else "Oppgave flyttet fra mappe $eksisterendeMappe til ${nyMappe}\n"
-        return mappeBeskrivelse
+        return if (eksisterendeMappe == nyMappe) "" else "Oppgave flyttet fra mappe $eksisterendeMappe til ${nyMappe}\n"
     }
 
     private fun utledOppgavefristBeskrivelse(
@@ -150,9 +154,7 @@ class BehandlingPåVentService(
     ): String {
         val eksisterendeFrist = oppgave.fristFerdigstillelse ?: "<ingen>"
         val nyFrist = settPåVentRequest.frist
-        val fristBeskrivelse =
-            if (eksisterendeFrist == nyFrist) "" else "Oppgave endret frist fra $eksisterendeFrist til ${nyFrist}\n"
-        return fristBeskrivelse
+        return if (eksisterendeFrist == nyFrist) "" else "Oppgave endret frist fra $eksisterendeFrist til ${nyFrist}\n"
     }
 
     private fun utledTilordnetSaksbehandlerBeskrivelse(
@@ -163,9 +165,11 @@ class BehandlingPåVentService(
         val nySaksbehandler =
             if (settPåVentRequest.saksbehandler == "") "<ingen>" else settPåVentRequest.saksbehandler
 
-        val saksbehandlerBeskrivelse =
-            if (eksisterendeSaksbehandler == nySaksbehandler) "" else "Oppgave flyttet fra saksbehandler $eksisterendeSaksbehandler til ${nySaksbehandler}\n"
-        return saksbehandlerBeskrivelse
+        return if (eksisterendeSaksbehandler == nySaksbehandler) {
+            ""
+        } else {
+            "Oppgave flyttet fra saksbehandler $eksisterendeSaksbehandler til ${nySaksbehandler}\n"
+        }
     }
 
     private fun validerKanSettePåVent(
