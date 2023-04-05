@@ -180,10 +180,6 @@ class OppgaveService(
         return oppgaveRepository.findByGsakOppgaveId(gsakOppgaveId)
     }
 
-    fun oppdaterOppgave(oppdatertOppgave: Oppgave): Long {
-        return oppgaveClient.oppdaterOppgave(oppdatertOppgave)
-    }
-
     fun ferdigstillBehandleOppgave(behandlingId: UUID, oppgavetype: Oppgavetype) {
         val oppgave = oppgaveRepository.findByBehandlingIdAndTypeAndErFerdigstiltIsFalse(behandlingId, oppgavetype)
             ?: error("Finner ikke oppgave for behandling $behandlingId")
