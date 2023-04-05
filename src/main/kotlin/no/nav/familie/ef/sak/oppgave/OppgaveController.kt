@@ -114,6 +114,16 @@ class OppgaveController(
         return Ressurs.success(saksbehandlerIdentIOppgaveSystemet)
     }
 
+    @GetMapping("/behandling/{behandlingId}")
+    fun hentOppgaveForBehandlingId(@PathVariable behandlingId: UUID): Ressurs<Oppgave> {
+        val oppgave = oppgaveService.hentIkkeFerdigstiltOppgaveForBehandling(behandlingId)
+
+        return oppgave?.let { Ressurs.success(it) } ?: throw ApiFeil(
+            "Fant ingen åpen oppgave for behandlingen",
+            HttpStatus.BAD_REQUEST,
+        )
+    }
+
     @GetMapping(path = ["/mapper"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun hentMapper(): Ressurs<List<MappeDto>> {
         val enheter = mutableListOf(ENHET_NR_NAY)
