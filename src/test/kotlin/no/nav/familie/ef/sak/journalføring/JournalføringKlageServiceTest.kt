@@ -113,7 +113,7 @@ internal class JournalføringKlageServiceTest {
         internal fun `skal oppdatere oppgave om klage gjelder tilbakekreving`() {
             val oppgave = Oppgave(id = 1L)
             every { oppgaveService.hentIkkeFerdigstiltOppgaveForBehandling(any()) } returns Oppgave(id = 1L)
-            every { oppgaveService.oppdaterOppgave(oppgave.copy(behandlingstema = Behandlingstema.Tilbakebetaling.value))} returns oppgave.id!!
+            every { oppgaveService.oppdaterOppgave(oppgave.copy(behandlingstema = Behandlingstema.Tilbakebetaling.value))} returns Unit
 
             service.fullførJournalpost(
                 lagRequest(JournalføringKlageBehandling(behandlingId = klagebehandling.id), klageGjelderTilbakekreving = true),
