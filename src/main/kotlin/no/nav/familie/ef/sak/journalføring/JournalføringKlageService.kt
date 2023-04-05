@@ -9,6 +9,7 @@ import no.nav.familie.ef.sak.journalføring.dto.JournalføringKlageRequest
 import no.nav.familie.ef.sak.journalføring.dto.skalJournalførePåEksisterendeBehandling
 import no.nav.familie.ef.sak.klage.KlageService
 import no.nav.familie.ef.sak.oppgave.OppgaveService
+import no.nav.familie.kontrakter.felles.Behandlingstema
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.kontrakter.felles.journalpost.Journalpost
 import no.nav.familie.kontrakter.felles.klage.KlagebehandlingDto
@@ -53,6 +54,15 @@ class JournalføringKlageService(
                 "klageBehandling=$behandlingId på " +
                 "fagsak=${fagsak.id} stønadstype=${fagsak.stønadstype} ",
         )
+
+        if(journalføringRequest.klageGjelderTilbakekreving){
+            val gammelOppgave = oppgaveService.hentIkkeFerdigstiltOppgaveForBehandling(behandlingId)
+            feilHvis(gammelOppgave == null) {
+                "Finner ikke ikke ferdigstilt oppgave for behandling med behandlingId=$behandlingId"
+            }
+            val oppdatertOppgave = gammelOppgave.copy(behandlingstema = Behandlingstema.Tilbakebetaling.value)
+            oppgaveService.oppdaterOppgave(oppdatertOppgave)
+        }
 
         journalpostService.oppdaterOgFerdigstillJournalpost(
             journalpost = journalpost,

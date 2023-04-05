@@ -14,6 +14,7 @@ import no.nav.familie.ef.sak.klage.KlageService
 import no.nav.familie.ef.sak.klage.dto.KlagebehandlingerDto
 import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.ef.sak.repository.fagsak
+import no.nav.familie.kontrakter.felles.Behandlingstema
 import no.nav.familie.kontrakter.felles.journalpost.AvsenderMottaker
 import no.nav.familie.kontrakter.felles.journalpost.Journalpost
 import no.nav.familie.kontrakter.felles.journalpost.Journalposttype
@@ -21,6 +22,7 @@ import no.nav.familie.kontrakter.felles.journalpost.Journalstatus
 import no.nav.familie.kontrakter.felles.journalpost.RelevantDato
 import no.nav.familie.kontrakter.felles.klage.BehandlingStatus
 import no.nav.familie.kontrakter.felles.klage.KlagebehandlingDto
+import no.nav.familie.kontrakter.felles.oppgave.Oppgave
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -108,6 +110,20 @@ internal class JournalføringKlageServiceTest {
         }
 
         @Test
+        internal fun `skal oppdatere oppgave om klage gjelder tilbakekreving`() {
+            val oppgave = Oppgave(id = 1L)
+            every { oppgaveService.hentIkkeFerdigstiltOppgaveForBehandling(any()) } returns Oppgave(id = 1L)
+            every { oppgaveService.oppdaterOppgave(oppgave.copy(behandlingstema = Behandlingstema.Tilbakebetaling.value))} returns oppgave.id!!
+
+            service.fullførJournalpost(
+                lagRequest(JournalføringKlageBehandling(behandlingId = klagebehandling.id), klageGjelderTilbakekreving = true),
+                journalpostId,
+            )
+
+            verifyKall(opprettKlageKall = 0, oppdaterOppgaveKall = 1)
+        }
+
+        @Test
         internal fun `feiler hvis klagebehandlinger ikke inneholder behandlingId som blir sendt inn`() {
             assertThatThrownBy {
                 service.fullførJournalpost(
@@ -118,14 +134,15 @@ internal class JournalføringKlageServiceTest {
         }
     }
 
-    private fun verifyKall(opprettKlageKall: Int = 1) {
+    private fun verifyKall(opprettKlageKall: Int = 1, oppdaterOppgaveKall: Int = 0) {
         verify(exactly = opprettKlageKall) { klageService.opprettKlage(any<Fagsak>(), any(), any()) }
         verify { journalpostService.oppdaterOgFerdigstillJournalpost(any(), any(), any(), any(), any()) }
         verify { oppgaveService.ferdigstillOppgave(any()) }
+        verify(exactly = oppdaterOppgaveKall) {oppgaveService.oppdaterOppgave(any())}
     }
 
-    private fun lagRequest(behandling: JournalføringKlageBehandling) =
-        JournalføringKlageRequest(emptyMap(), fagsakId, oppgaveId, behandling, "enhet")
+    private fun lagRequest(behandling: JournalføringKlageBehandling, klageGjelderTilbakekreving: Boolean = false) =
+        JournalføringKlageRequest(emptyMap(), fagsakId, oppgaveId, behandling, "enhet", klageGjelderTilbakekreving)
 
     fun lagjournalpost(mottattDato: LocalDate? = null) =
         Journalpost(
