@@ -9,10 +9,10 @@ import no.nav.familie.ef.sak.journalføring.dto.JournalføringKlageRequest
 import no.nav.familie.ef.sak.journalføring.dto.skalJournalførePåEksisterendeBehandling
 import no.nav.familie.ef.sak.klage.KlageService
 import no.nav.familie.ef.sak.oppgave.OppgaveService
-import no.nav.familie.kontrakter.felles.Behandlingstema
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.kontrakter.felles.journalpost.Journalpost
 import no.nav.familie.kontrakter.felles.klage.KlagebehandlingDto
+import no.nav.familie.prosessering.internal.TaskService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -24,6 +24,7 @@ class JournalføringKlageService(
     private val oppgaveService: OppgaveService,
     private val journalpostService: JournalpostService,
     private val klageService: KlageService,
+    private val taskService: TaskService,
 ) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -56,12 +57,7 @@ class JournalføringKlageService(
         )
 
         if(journalføringRequest.klageGjelderTilbakekreving){
-            val gammelOppgave = oppgaveService.hentIkkeFerdigstiltOppgaveForBehandling(behandlingId)
-            feilHvis(gammelOppgave == null) {
-                "Finner ikke ikke ferdigstilt oppgave for behandling med behandlingId=$behandlingId"
-            }
-            val oppdatertOppgave = gammelOppgave.copy(behandlingstema = Behandlingstema.Tilbakebetaling.value)
-            oppgaveService.oppdaterOppgave(oppdatertOppgave)
+            oppdaterOppgaveTilÅGjeldeTilbakekreving(behandlingId)
         }
 
         journalpostService.oppdaterOgFerdigstillJournalpost(
@@ -121,5 +117,13 @@ class JournalføringKlageService(
 
     private fun ferdigstillJournalføringsoppgave(journalføringRequest: JournalføringKlageRequest) {
         oppgaveService.ferdigstillOppgave(journalføringRequest.oppgaveId.toLong())
+    }
+
+    private fun oppdaterOppgaveTilÅGjeldeTilbakekreving(behandlingId: UUID){
+        taskService.save(
+            OppdaterOppgaveTilÅGjeldeTilbakekrevingTask.opprettTask(
+                behandlingId = behandlingId
+            ),
+        )
     }
 }
