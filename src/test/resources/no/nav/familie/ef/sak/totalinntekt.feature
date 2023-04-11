@@ -43,9 +43,9 @@ Egenskap: Andelhistorikk: Ulike typer inntekt
       | 05.2022         | 12.2022         | 1               | 90000   | 19617 |
 
     Så forvent følgende inntektsperioder fra dato: 01.2022
-      | Fra og med dato | Dagsats | Månedsinntekt | Inntekt |
-      | 01.2022         | 100     | 1400          | 120000  |
-      | 02.2022         | 0       | 0             | 90000   |
+      | Fra og med dato | Dagsats | Månedsinntekt | Inntekt | Samordningsfradrag |
+      | 01.2022         | 100     | 1400          | 120000  | 0                  |
+      | 02.2022         | 0       | 0             | 90000   | 0                  |
 
   Scenario: flere vedtaksperioder med flere inntektsperioder
 
@@ -71,8 +71,8 @@ Egenskap: Andelhistorikk: Ulike typer inntekt
       | 05.2022         | 12.2022         | 1               | 35000   | 20902 |
 
     Så forvent følgende inntektsperioder fra dato: 01.2022
-      | Fra og med dato | Dagsats | Månedsinntekt | Inntekt |
-      | 01.2022         | 100     | 1400          | 120000  |
-      | 02.2022         | 0       | 0             | 90000   |
-      | 04.2022         | 50      | 1000          | 90000   |
+      | Fra og med dato | Dagsats | Månedsinntekt | Inntekt | Samordningsfradrag |
+      | 01.2022         | 100     | 1400          | 120000  | 0                  |
+      | 02.2022         | 0       | 0             | 90000   | 0                  |
+      | 04.2022         | 50      | 1000          | 10000   | 0                  |
 
