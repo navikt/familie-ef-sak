@@ -74,7 +74,7 @@ data class VedtakshistorikkperiodeOvergangsstønad(
             periode = periode,
             aktivitet = vedtaksperiode.aktivitet,
             periodeType = vedtaksperiode.periodeType,
-            inntekt = inntekt
+            inntekt = inntekt,
         )
 
     override fun medFra(fra: YearMonth): Vedtakshistorikkperiode {
@@ -202,7 +202,7 @@ object VedtakHistorikkBeregner {
             val inntektsperiode = inntekt.first
             val periode = Månedsperiode(
                 maxOf(inntektsperiode.fom, vedtaksperiode.periode.fom),
-                minOf(inntektsperiode.tom, vedtaksperiode.periode.tom)
+                minOf(inntektsperiode.tom, vedtaksperiode.periode.tom),
             )
             VedtakshistorikkperiodeOvergangsstønad(periode, vedtaksperiode, inntekt.second)
         }

@@ -51,7 +51,7 @@ internal class AndelHistorikkDtoKtTest {
             periode = Månedsperiode(YearMonth.now()),
             aktivitet = AktivitetType.IKKE_AKTIVITETSPLIKT,
             periodeType = VedtaksperiodeType.HOVEDPERIODE,
-            inntekt = Inntekt(YearMonth.now(), BigDecimal.ZERO, BigDecimal.ZERO)
+            inntekt = Inntekt(YearMonth.now(), BigDecimal.ZERO, BigDecimal.ZERO),
         ),
         andel = andelMedGrunnlagDto(),
         aktivitet = null,

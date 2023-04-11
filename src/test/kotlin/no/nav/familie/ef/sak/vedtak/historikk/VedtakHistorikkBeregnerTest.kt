@@ -129,7 +129,7 @@ internal class VedtakHistorikkBeregnerTest {
         internal fun `en periode med 2 inntektsperioder`() {
             val vedtak = lagVedtak(
                 perioder = listOf(lagVedtaksperiode(januar.atDay(1), mars.atEndOfMonth())),
-                inntektsperioder = listOf(lagInntekt(januar, februar, 10), lagInntekt(mars, april, 5))
+                inntektsperioder = listOf(lagInntekt(januar, februar, 10), lagInntekt(mars, april, 5)),
             )
 
             val vedtaksperioderPerBehandling = lagVedtaksperioderPerBehandling(listOf(vedtak))
@@ -153,9 +153,9 @@ internal class VedtakHistorikkBeregnerTest {
             val vedtak = lagVedtak(
                 perioder = listOf(
                     lagVedtaksperiode(januar.atDay(1), mars.atEndOfMonth()),
-                    lagVedtaksperiode(april.atDay(1), april.atEndOfMonth())
+                    lagVedtaksperiode(april.atDay(1), april.atEndOfMonth()),
                 ),
-                inntektsperioder = listOf(lagInntekt(januar, april, 10))
+                inntektsperioder = listOf(lagInntekt(januar, april, 10)),
             )
 
             val vedtaksperioderPerBehandling = lagVedtaksperioderPerBehandling(listOf(vedtak))
@@ -222,7 +222,7 @@ internal class VedtakHistorikkBeregnerTest {
         Månedsperiode(this.datoFra, this.datoTil),
         this.aktivitet,
         this.periodeType,
-        Inntekt(YearMonth.from(this.datoFra), BigDecimal.ZERO, BigDecimal.ZERO)
+        Inntekt(YearMonth.from(this.datoFra), BigDecimal.ZERO, BigDecimal.ZERO),
     )
 
     private fun lagVedtak(
@@ -250,9 +250,11 @@ internal class VedtakHistorikkBeregnerTest {
         fom: YearMonth,
         tom: YearMonth,
         inntekt: Int,
-    ) = Inntektsperiode(periode = Månedsperiode(fom, tom),
+    ) = Inntektsperiode(
+        periode = Månedsperiode(fom, tom),
         inntekt = inntekt.toBigDecimal(),
-        samordningsfradrag = BigDecimal.ZERO)
+        samordningsfradrag = BigDecimal.ZERO,
+    )
 
     private fun defaultInntektsperioder(perioder: List<Vedtaksperiode>?): InntektWrapper? = perioder?.let {
         val inntekt = it.firstOrNull()?.let { lagInntekt(it.periode.fom, it.periode.tom, 0) }
