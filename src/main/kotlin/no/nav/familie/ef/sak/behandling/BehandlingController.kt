@@ -3,6 +3,7 @@ package no.nav.familie.ef.sak.behandling
 import no.nav.familie.ef.sak.AuditLoggerEvent
 import no.nav.familie.ef.sak.behandling.dto.BehandlingDto
 import no.nav.familie.ef.sak.behandling.dto.HenlagtDto
+import no.nav.familie.ef.sak.behandling.dto.SettPåVentRequest
 import no.nav.familie.ef.sak.behandling.dto.TaAvVentStatusDto
 import no.nav.familie.ef.sak.behandling.dto.tilDto
 import no.nav.familie.ef.sak.fagsak.FagsakService
@@ -51,10 +52,14 @@ class BehandlingController(
     }
 
     @PostMapping("{behandlingId}/vent")
-    fun settPåVent(@PathVariable behandlingId: UUID): Ressurs<UUID> {
+    fun settPåVent(
+        @PathVariable behandlingId: UUID,
+        @RequestBody settPåVentRequest: SettPåVentRequest?,
+    ): Ressurs<UUID> {
         tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.UPDATE)
         tilgangService.validerHarSaksbehandlerrolle()
-        behandlingPåVentService.settPåVent(behandlingId)
+        behandlingPåVentService.settPåVent(behandlingId, settPåVentRequest)
+
         return Ressurs.success(behandlingId)
     }
 

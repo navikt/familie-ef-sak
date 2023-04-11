@@ -1,6 +1,5 @@
 package no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper
 
-import no.nav.familie.ef.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.AnnenForelderMedIdent
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.BarnMedIdent
@@ -32,7 +31,6 @@ class PersonopplysningerMapper(
     private val adresseMapper: AdresseMapper,
     private val statsborgerskapMapper: StatsborgerskapMapper,
     private val innflyttingUtflyttingMapper: InnflyttingUtflyttingMapper,
-    private val arbeidsfordelingService: ArbeidsfordelingService,
 ) {
 
     fun tilPersonopplysninger(
@@ -77,8 +75,6 @@ class PersonopplysningerMapper(
                 )
             }.sortedByDescending { it.gyldigFraOgMed },
             egenAnsatt = egenAnsatt,
-            navEnhet = arbeidsfordelingService.hentNavEnhet(gjeldendePersonIdent)
-                ?.let { it.enhetId + " - " + it.enhetNavn } ?: "Ikke funnet",
             barn = grunnlagsdata.barn.map {
                 mapBarn(
                     it,

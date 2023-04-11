@@ -12,6 +12,7 @@ import java.util.UUID
 interface OppgaveRepository : RepositoryInterface<Oppgave, Long>, InsertUpdateRepository<Oppgave> {
 
     fun findByBehandlingIdAndTypeAndErFerdigstiltIsFalse(behandlingId: UUID, oppgavetype: Oppgavetype): Oppgave?
+    fun findByBehandlingIdAndErFerdigstiltIsFalseAndTypeIn(behandlingId: UUID, oppgavetype: Set<Oppgavetype>): Oppgave?
     fun findByBehandlingIdAndBarnPersonIdentAndAlder(behandlingId: UUID, barnPersonIdent: String, alder: Alder?): Oppgave?
 
     // language=PostgreSQL
