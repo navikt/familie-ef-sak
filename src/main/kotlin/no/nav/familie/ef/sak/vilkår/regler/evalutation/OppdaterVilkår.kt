@@ -135,33 +135,23 @@ object OppdaterVilkår {
     fun utledBehandlingKategori(vilkårsvurderinger: List<Vilkårsvurdering>): BehandlingKategori {
         val medlemFolketrygd =
             vilkårsvurderinger.utledVurderinger(VilkårType.FORUTGÅENDE_MEDLEMSKAP, RegelId.SØKER_MEDLEM_I_FOLKETRYGDEN)
-                .harSvar(
-                    SvarId.JA,
-                )
+                .harSvar(SvarId.JA)
 
         val unntakEøsAnnenForelder =
             vilkårsvurderinger.utledVurderinger(VilkårType.FORUTGÅENDE_MEDLEMSKAP, RegelId.MEDLEMSKAP_UNNTAK)
-                .harSvar(
-                    SvarId.MEDLEM_MER_ENN_5_ÅR_EØS_ANNEN_FORELDER_TRYGDEDEKKET_I_NORGE,
-                )
+                .harSvar(SvarId.MEDLEM_MER_ENN_5_ÅR_EØS_ANNEN_FORELDER_TRYGDEDEKKET_I_NORGE)
 
         val unntakEøsMedlemskap =
             vilkårsvurderinger.utledVurderinger(VilkårType.FORUTGÅENDE_MEDLEMSKAP, RegelId.MEDLEMSKAP_UNNTAK)
-                .harSvar(
-                    SvarId.MEDLEM_MER_ENN_5_ÅR_EØS,
-                )
+                .harSvar(SvarId.MEDLEM_MER_ENN_5_ÅR_EØS)
 
         val borOgOppholderSegINorge =
             vilkårsvurderinger.utledVurderinger(VilkårType.LOVLIG_OPPHOLD, RegelId.BOR_OG_OPPHOLDER_SEG_I_NORGE)
-                .harSvar(
-                    SvarId.JA,
-                )
+                .harSvar(SvarId.JA)
 
         val unntakEøsOpphold =
-            vilkårsvurderinger.utledVurderinger(
-                VilkårType.LOVLIG_OPPHOLD,
-                RegelId.OPPHOLD_UNNTAK,
-            ).harSvar(SvarId.OPPHOLDER_SEG_I_ANNET_EØS_LAND)
+            vilkårsvurderinger.utledVurderinger(VilkårType.LOVLIG_OPPHOLD, RegelId.OPPHOLD_UNNTAK)
+                .harSvar(SvarId.OPPHOLDER_SEG_I_ANNET_EØS_LAND)
 
         val forutgåendeMedelmskapUtløserEøs =
             !medlemFolketrygd && (unntakEøsAnnenForelder || unntakEøsMedlemskap)
