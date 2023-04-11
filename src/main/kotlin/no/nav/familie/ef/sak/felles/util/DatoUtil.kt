@@ -20,6 +20,8 @@ object DatoUtil {
     fun dagensDatoMedTid(): LocalDateTime = LocalDateTime.now()
 }
 
+val YEAR_MONTH_MAX = YearMonth.from(LocalDate.MAX)
+
 fun LocalDate.norskFormat() = this.format(DATE_FORMAT_NORSK)
 
 fun datoEllerIdag(localDate: LocalDate?): LocalDate = localDate ?: LocalDate.now()

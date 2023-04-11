@@ -1,6 +1,9 @@
 package no.nav.familie.ef.sak.vedtak.historikk
 
+import no.nav.familie.ef.sak.beregning.Inntekt
 import no.nav.familie.ef.sak.beregning.barnetilsyn.BeløpsperiodeBarnetilsynDto
+import no.nav.familie.ef.sak.felles.util.YEAR_MONTH_MAX
+import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.tilkjentytelse.tilBeløpsperiodeBarnetilsyn
 import no.nav.familie.ef.sak.vedtak.domain.AktivitetType
 import no.nav.familie.ef.sak.vedtak.domain.AktivitetstypeBarnetilsyn
@@ -63,13 +66,15 @@ data class VedtakshistorikkperiodeOvergangsstønad(
     override val periode: Månedsperiode,
     val aktivitet: AktivitetType,
     val periodeType: VedtaksperiodeType,
+    val inntekt: Inntekt,
 ) : Vedtakshistorikkperiode() {
 
-    constructor(periode: VedtaksperiodeDto) :
+    constructor(periode: Månedsperiode, vedtaksperiode: VedtaksperiodeDto, inntekt: Inntekt) :
         this(
-            periode = periode.periode,
-            aktivitet = periode.aktivitet,
-            periodeType = periode.periodeType,
+            periode = periode,
+            aktivitet = vedtaksperiode.aktivitet,
+            periodeType = vedtaksperiode.periodeType,
+            inntekt = inntekt
         )
 
     override fun medFra(fra: YearMonth): Vedtakshistorikkperiode {
@@ -149,13 +154,7 @@ object VedtakHistorikkBeregner {
         val vedtak = data.vedtakDto
         return when (vedtak) {
             is InnvilgelseOvergangsstønad -> {
-                val nyePerioder = vedtak.perioder.map {
-                    if (it.periodeType == VedtaksperiodeType.SANKSJON) {
-                        Sanksjonsperiode(it.periode, it.sanksjonsårsak ?: error("Mangler sanksjonsårsak"))
-                    } else {
-                        VedtakshistorikkperiodeOvergangsstønad(it)
-                    }
-                }
+                val nyePerioder = perioderForOvergangsstønad(vedtak)
                 val førsteFomDato = nyePerioder.first().periode.fom
                 avkortTidligerePerioder(acc.lastOrNull(), førsteFomDato) + nyePerioder
             }
@@ -177,6 +176,43 @@ object VedtakHistorikkBeregner {
                 logger.error("Håndterer ikke ${vedtak::class.java.simpleName} behandling=${data.behandlingId}")
                 emptyList()
             }
+        }
+    }
+
+    private fun perioderForOvergangsstønad(vedtak: InnvilgelseOvergangsstønad): List<Vedtakshistorikkperiode> {
+        val inntekter = inntektsperioder(vedtak)
+        return vedtak.perioder.flatMap {
+            if (it.periodeType == VedtaksperiodeType.SANKSJON) {
+                listOf(Sanksjonsperiode(it.periode, it.sanksjonsårsak ?: error("Mangler sanksjonsårsak")))
+            } else {
+                splittOppVedtaksperioderOgInntekter(inntekter, it)
+            }
+        }
+    }
+
+    private fun splittOppVedtaksperioderOgInntekter(
+        inntekter: List<Pair<Månedsperiode, Inntekt>>,
+        vedtaksperiode: VedtaksperiodeDto,
+    ): List<VedtakshistorikkperiodeOvergangsstønad> {
+        val overlappendeInntekter = inntekter.filter { inntekt -> inntekt.first.overlapper(vedtaksperiode.periode) }
+        feilHvis(overlappendeInntekter.isEmpty()) {
+            "Forventer å inneholde minimum en inntektsperiode som overlapper"
+        }
+        return overlappendeInntekter.map { inntekt ->
+            val inntektsperiode = inntekt.first
+            val periode = Månedsperiode(
+                maxOf(inntektsperiode.fom, vedtaksperiode.periode.fom),
+                minOf(inntektsperiode.tom, vedtaksperiode.periode.tom)
+            )
+            VedtakshistorikkperiodeOvergangsstønad(periode, vedtaksperiode, inntekt.second)
+        }
+    }
+
+    private fun inntektsperioder(vedtak: InnvilgelseOvergangsstønad): List<Pair<Månedsperiode, Inntekt>> {
+        return vedtak.inntekter.windowed(2, 1, true).map { inntektWindow ->
+            val tom = inntektWindow.getOrNull(1)?.årMånedFra?.minusMonths(1) ?: YEAR_MONTH_MAX
+            val periode = Månedsperiode(inntektWindow[0].årMånedFra, tom)
+            periode to inntektWindow[0]
         }
     }
 

@@ -125,6 +125,7 @@ object AndelHistorikkBeregner {
                 behandlingÅrsak = behandling.årsak,
                 vedtakstidspunkt = it.vedtakstidspunkt,
                 saksbehandler = it.saksbehandler,
+                vedtaksperiode = vedtaksperiode,
                 andel = AndelMedGrunnlagDto(andel = it.andel, barnetilsyn),
                 aktivitet = aktivitetOvergangsstønad(stønadstype, vedtaksperiode),
                 aktivitetBarnetilsyn = barnetilsyn?.aktivitetstype,
