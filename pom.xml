@@ -36,7 +36,7 @@
         <felles.version>1.20221202080911_bcf8f33</felles.version>
         <prosessering.version>1.20221110194901_e9e0d90</prosessering.version>
         <start-class>no.nav.familie.ef.sak.ApplicationKt</start-class>
-        <kontrakter.version>2.0_20230316124747_98e4ced</kontrakter.version>
+        <kontrakter.version>3.0_20230404163639_edb8619-JAKARTA</kontrakter.version>
         <eksterne.kontrakter.bisys.version>2.0_20221118130052_e2abd9f</eksterne.kontrakter.bisys.version>
         <cucumber.version>7.11.0</cucumber.version>
 

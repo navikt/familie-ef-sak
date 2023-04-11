@@ -7,6 +7,7 @@ import no.nav.familie.ef.sak.behandling.dto.HenlagtÅrsak
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext.SYSTEM_FORKORTELSE
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
+import no.nav.familie.kontrakter.ef.iverksett.BehandlingKategori
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.springframework.data.relational.core.mapping.Column
 import java.time.LocalDate
@@ -20,6 +21,7 @@ data class Saksbehandling(
     val type: BehandlingType,
     val status: BehandlingStatus,
     val steg: StegType,
+    val kategori: BehandlingKategori,
     @Column("arsak")
     val årsak: BehandlingÅrsak,
     val kravMottatt: LocalDate? = null,

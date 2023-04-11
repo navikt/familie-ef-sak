@@ -7,6 +7,7 @@ import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
+import no.nav.familie.kontrakter.ef.iverksett.BehandlingKategori
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import java.time.LocalDateTime
 import java.util.UUID
@@ -16,6 +17,7 @@ data class BehandlingDto(
     val forrigeBehandlingId: UUID?,
     val fagsakId: UUID,
     val steg: StegType,
+    val kategori: BehandlingKategori,
     val type: BehandlingType,
     val status: BehandlingStatus,
     val sistEndret: LocalDateTime,
@@ -34,6 +36,7 @@ fun Behandling.tilDto(stønadstype: StønadType): BehandlingDto =
         forrigeBehandlingId = this.forrigeBehandlingId,
         fagsakId = this.fagsakId,
         steg = this.steg,
+        kategori = this.kategori,
         type = this.type,
         status = this.status,
         sistEndret = this.sporbar.endret.endretTid,
@@ -52,6 +55,7 @@ fun Saksbehandling.tilDto(): BehandlingDto =
         forrigeBehandlingId = this.forrigeBehandlingId,
         fagsakId = this.fagsakId,
         steg = this.steg,
+        kategori = this.kategori,
         type = this.type,
         status = this.status,
         sistEndret = this.endretTid,

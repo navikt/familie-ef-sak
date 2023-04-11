@@ -40,6 +40,7 @@ import no.nav.familie.ef.sak.vedtak.dto.ResultatType
 import no.nav.familie.ef.sak.vedtak.dto.ÅrsakUnderkjent
 import no.nav.familie.kontrakter.ef.felles.AvslagÅrsak
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
+import no.nav.familie.kontrakter.ef.iverksett.BehandlingKategori
 import no.nav.familie.kontrakter.ef.iverksett.Hendelse
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.kontrakter.felles.objectMapper
@@ -227,6 +228,7 @@ internal class BeslutteVedtakStegTest {
                 steg = beslutteVedtakSteg.stegType(),
                 resultat = BehandlingResultat.IKKE_SATT,
                 årsak = årsak,
+                kategori = BehandlingKategori.NASJONAL,
             ),
         )
 }

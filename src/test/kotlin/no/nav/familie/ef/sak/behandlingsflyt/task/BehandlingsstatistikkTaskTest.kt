@@ -28,6 +28,7 @@ import no.nav.familie.kontrakter.ef.felles.AvslagÅrsak
 import no.nav.familie.kontrakter.ef.felles.BehandlingType
 import no.nav.familie.kontrakter.ef.felles.Opplysningskilde
 import no.nav.familie.kontrakter.ef.felles.Revurderingsårsak
+import no.nav.familie.kontrakter.ef.iverksett.BehandlingKategori
 import no.nav.familie.kontrakter.ef.iverksett.BehandlingMetode
 import no.nav.familie.kontrakter.ef.iverksett.BehandlingsstatistikkDto
 import no.nav.familie.kontrakter.ef.iverksett.Hendelse
@@ -57,12 +58,14 @@ internal class BehandlingsstatistikkTaskTest {
         fagsak,
         resultat = BehandlingResultat.INNVILGET,
         type = FØRSTEGANGSBEHANDLING,
+        kategori = BehandlingKategori.NASJONAL,
         kravMottatt = LocalDate.of(2022, 3, 1),
     )
     val avslåttBehandling = behandling(
         fagsak,
         resultat = BehandlingResultat.AVSLÅTT,
         type = FØRSTEGANGSBEHANDLING,
+        kategori = BehandlingKategori.NASJONAL,
         kravMottatt = LocalDate.of(2022, 3, 1),
     )
     val avslåttSaksbehandling = saksbehandling(fagsak, avslåttBehandling)
@@ -155,10 +158,10 @@ internal class BehandlingsstatistikkTaskTest {
         assertThat(behandlingsstatistikk.behandlingstype).isEqualTo(BehandlingType.FØRSTEGANGSBEHANDLING)
         assertThat(behandlingsstatistikk.resultatBegrunnelse).isEqualTo(periodeBegrunnelse)
         assertThat(behandlingsstatistikk.henvendelseTidspunkt).isEqualTo(søknadstidspunkt)
-
         assertThat(behandlingsstatistikk.kravMottatt).isEqualTo(behandling.kravMottatt)
         assertThat(behandlingsstatistikk.årsakRevurdering)
             .isEqualTo(ÅrsakRevurderingDto(Opplysningskilde.MELDING_MODIA, Revurderingsårsak.ANNET))
+        assertThat(behandlingsstatistikk.kategori).isEqualTo(BehandlingKategori.NASJONAL)
     }
 
     @Test
@@ -245,5 +248,6 @@ internal class BehandlingsstatistikkTaskTest {
         assertThat(behandlingsstatistikk.behandlingstype).isEqualTo(BehandlingType.FØRSTEGANGSBEHANDLING)
         assertThat(behandlingsstatistikk.resultatBegrunnelse).isEqualTo(begrunnelse)
         assertThat(behandlingsstatistikk.henvendelseTidspunkt).isEqualTo(søknadstidspunkt)
+        assertThat(behandlingsstatistikk.kategori).isEqualTo(BehandlingKategori.NASJONAL)
     }
 }
