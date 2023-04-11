@@ -41,6 +41,23 @@ internal class OppgaveRepositoryTest : OppslagSpringRunnerTest() {
     }
 
     @Test
+    internal fun findByBehandlingIdAndTypeInAndErFerdigstiltIsFalse() {
+        val fagsak = testoppsettService.lagreFagsak(fagsak())
+        val behandling = behandlingRepository.insert(behandling(fagsak))
+        oppgaveRepository.insert(oppgave(behandling, erFerdigstilt = false, type = Oppgavetype.Journalføring))
+        oppgaveRepository.insert(oppgave(behandling, erFerdigstilt = true, type = Oppgavetype.BehandleSak))
+        oppgaveRepository.insert(oppgave(behandling, erFerdigstilt = false, type = Oppgavetype.BehandleUnderkjentVedtak))
+
+        val oppgave =
+            oppgaveRepository.findByBehandlingIdAndErFerdigstiltIsFalseAndTypeIn(
+                behandling.id,
+                setOf(Oppgavetype.BehandleSak, Oppgavetype.BehandleUnderkjentVedtak),
+            )
+        assertThat(oppgave).isNotNull
+        assertThat(oppgave?.type).isEqualTo(Oppgavetype.BehandleUnderkjentVedtak)
+    }
+
+    @Test
     internal fun `skal finne nyeste oppgave for behandling`() {
         val fagsak = testoppsettService.lagreFagsak(fagsak())
         val behandling = behandlingRepository.insert(behandling(fagsak))
@@ -73,10 +90,31 @@ internal class OppgaveRepositoryTest : OppslagSpringRunnerTest() {
     internal fun `skal finne oppgaver for oppgavetype og personident`() {
         val fagsak = testoppsettService.lagreFagsak(fagsak())
         val behandling = behandlingRepository.insert(behandling(fagsak, status = BehandlingStatus.FERDIGSTILT))
-        oppgaveRepository.insert(Oppgave(behandlingId = behandling.id, type = Oppgavetype.InnhentDokumentasjon, alder = Alder.SEKS_MND, gsakOppgaveId = 1, barnPersonIdent = "1"))
-        oppgaveRepository.insert(Oppgave(behandlingId = behandling.id, type = Oppgavetype.InnhentDokumentasjon, alder = Alder.SEKS_MND, gsakOppgaveId = 1, barnPersonIdent = "2"))
+        oppgaveRepository.insert(
+            Oppgave(
+                behandlingId = behandling.id,
+                type = Oppgavetype.InnhentDokumentasjon,
+                alder = Alder.SEKS_MND,
+                gsakOppgaveId = 1,
+                barnPersonIdent = "1",
+            ),
+        )
+        oppgaveRepository.insert(
+            Oppgave(
+                behandlingId = behandling.id,
+                type = Oppgavetype.InnhentDokumentasjon,
+                alder = Alder.SEKS_MND,
+                gsakOppgaveId = 1,
+                barnPersonIdent = "2",
+            ),
+        )
 
-        assertThat(oppgaveRepository.findByTypeAndAlderIsNotNullAndBarnPersonIdenter(Oppgavetype.InnhentDokumentasjon, listOf("1")).size).isEqualTo(1)
+        assertThat(
+            oppgaveRepository.findByTypeAndAlderIsNotNullAndBarnPersonIdenter(
+                Oppgavetype.InnhentDokumentasjon,
+                listOf("1"),
+            ).size,
+        ).isEqualTo(1)
     }
 
     @Test

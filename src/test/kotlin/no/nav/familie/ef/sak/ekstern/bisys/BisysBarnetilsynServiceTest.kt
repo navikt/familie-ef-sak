@@ -6,6 +6,7 @@ import no.nav.familie.ef.sak.barn.BarnService
 import no.nav.familie.ef.sak.barn.BehandlingBarn
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
+import no.nav.familie.ef.sak.beregning.Inntekt
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.felles.util.BehandlingOppsettUtil.lagBehandlingerForSisteIverksatte
@@ -17,20 +18,25 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlIdenter
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.tilkjentytelse.AndelsHistorikkService
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
+import no.nav.familie.ef.sak.vedtak.domain.AktivitetType
 import no.nav.familie.ef.sak.vedtak.domain.AktivitetstypeBarnetilsyn
 import no.nav.familie.ef.sak.vedtak.domain.PeriodetypeBarnetilsyn
+import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
 import no.nav.familie.ef.sak.vedtak.historikk.AndelHistorikkDto
 import no.nav.familie.ef.sak.vedtak.historikk.AndelMedGrunnlagDto
 import no.nav.familie.ef.sak.vedtak.historikk.EndringType
 import no.nav.familie.ef.sak.vedtak.historikk.HistorikkEndring
+import no.nav.familie.ef.sak.vedtak.historikk.VedtakshistorikkperiodeOvergangsstønad
 import no.nav.familie.ef.sak.økonomi.lagAndelTilkjentYtelse
 import no.nav.familie.ef.sak.økonomi.lagTilkjentYtelse
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPeriode
+import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
@@ -437,6 +443,12 @@ fun lagAndelHistorikkDto(
         behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
         vedtakstidspunkt = LocalDateTime.now(),
         saksbehandler = "",
+        vedtaksperiode = VedtakshistorikkperiodeOvergangsstønad(
+            periode = Månedsperiode(fraOgMed, tilOgMed),
+            aktivitet = AktivitetType.IKKE_AKTIVITETSPLIKT,
+            periodeType = VedtaksperiodeType.HOVEDPERIODE,
+            inntekt = Inntekt(YearMonth.from(fraOgMed), BigDecimal.ZERO, BigDecimal.ZERO)
+        ),
         andel = AndelMedGrunnlagDto(
             lagAndelTilkjentYtelse(
                 beløp = beløp,
@@ -445,7 +457,6 @@ fun lagAndelHistorikkDto(
             ),
             null,
         ).copy(barn = behandlingBarn.map { it.id }),
-
         aktivitet = null,
         aktivitetArbeid = null,
         periodeType = null,

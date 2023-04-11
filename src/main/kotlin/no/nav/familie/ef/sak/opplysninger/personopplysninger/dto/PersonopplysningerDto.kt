@@ -24,7 +24,6 @@ data class PersonopplysningerDto(
     val adresse: List<AdresseDto>,
     val fullmakt: List<FullmaktDto>,
     val egenAnsatt: Boolean,
-    val navEnhet: String,
     val barn: List<BarnDto>,
     val innflyttingTilNorge: List<InnflyttingDto>,
     val utflyttingFraNorge: List<UtflyttingDto>,

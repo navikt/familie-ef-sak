@@ -550,7 +550,6 @@ internal class UtledEndringerUtilTest {
         adresse = adresse,
         fullmakt = fullmakt,
         egenAnsatt = false,
-        navEnhet = "",
         barn = barn,
         innflyttingTilNorge = innflyttingTilNorge,
         utflyttingFraNorge = utflyttingFraNorge,
