@@ -52,6 +52,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
@@ -115,7 +116,8 @@ internal class OmregningServiceTest : OppslagSpringRunnerTest() {
             ),
         )
         tilkjentYtelseRepository.insert(tilkjentYtelse(behandling.id, "321", år))
-        vedtakRepository.insert(vedtak(behandling.id, år = år))
+        val inntekter = listOf(inntektsperiode(år, inntekt = BigDecimal(277_100), samordningsfradrag = BigDecimal.ZERO))
+        vedtakRepository.insert(vedtak(behandling.id, år = år, inntekter = InntektWrapper(inntekter)))
         val barn = barnRepository.insert(
             behandlingBarn(
                 behandlingId = behandling.id,
