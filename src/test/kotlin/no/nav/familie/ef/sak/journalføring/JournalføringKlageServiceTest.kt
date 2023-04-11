@@ -23,6 +23,7 @@ import no.nav.familie.kontrakter.felles.journalpost.RelevantDato
 import no.nav.familie.kontrakter.felles.klage.BehandlingStatus
 import no.nav.familie.kontrakter.felles.klage.KlagebehandlingDto
 import no.nav.familie.kontrakter.felles.oppgave.Oppgave
+import no.nav.familie.prosessering.internal.TaskService
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -38,8 +39,9 @@ internal class JournalføringKlageServiceTest {
     private val oppgaveService = mockk<OppgaveService>()
     private val fagsakService = mockk<FagsakService>()
     private val journalpostService = mockk<JournalpostService>()
+    private val taskService = mockk<TaskService>()
 
-    private val service = JournalføringKlageService(fagsakService, oppgaveService, journalpostService, klageService)
+    private val service = JournalføringKlageService(fagsakService, oppgaveService, journalpostService, klageService, taskService)
 
     private val fagsak = fagsak()
     private val fagsakId = fagsak.id
