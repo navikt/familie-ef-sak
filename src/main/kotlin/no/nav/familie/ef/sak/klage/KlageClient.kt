@@ -29,6 +29,9 @@ class KlageClient(
             "api/ekstern/behandling/${Fagsystem.EF}",
         ).build().toUri()
 
+    private val oppdaterOppgaveTilÅGjeldeTilbakekreving = UriComponentsBuilder.fromUri(familieKlageUri).pathSegment(
+        "api/ekstern/behandling",
+    ).build().toUri()
     fun opprettKlage(opprettKlagebehandlingRequest: OpprettKlagebehandlingRequest) {
         return postForEntity(opprettKlage, opprettKlagebehandlingRequest)
     }
@@ -41,7 +44,9 @@ class KlageClient(
     }
 
     fun oppdaterOppgaveTilÅGjeldeTilbakekreving(behandlingId: UUID) {
-        val uri = URI.create("$familieKlageUri/api/ekstern/behandling/${behandlingId}/gjelder-tilbakekreving")
+        val uri = UriComponentsBuilder.fromUri(oppdaterOppgaveTilÅGjeldeTilbakekreving)
+            .pathSegment("/$behandlingId/gjelder-tilbakekreving")
+            .build().toUri()
         return patchForEntity(uri, "")
     }
 }
