@@ -42,6 +42,6 @@ class KlageClient(
 
     fun oppdaterOppgaveTilÅGjeldeTilbakekreving(behandlingId: UUID) {
         val uri = URI.create("$familieKlageUri/api/ekstern/behandling/$behandlingId/gjelder-tilbakekreving")
-        return patchForEntity(uri, "")
+        return postForEntity(uri, "")
     }
 }
