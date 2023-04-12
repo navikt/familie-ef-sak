@@ -28,7 +28,7 @@ internal class OppgaveControllerIntegrasjonsTest : OppslagSpringRunnerTest() {
 
     private fun søkOppgave(personIdent: String): ResponseEntity<Ressurs<OppgaveResponseDto>> {
         return restTemplate.exchange(
-            localhost("/api/oppgave/soek/"),
+            localhost("/api/oppgave/soek"),
             HttpMethod.POST,
             HttpEntity(FinnOppgaveRequestDto(ident = personIdent), headers),
         )
