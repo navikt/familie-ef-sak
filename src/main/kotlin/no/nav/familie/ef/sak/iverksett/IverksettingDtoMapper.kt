@@ -232,6 +232,7 @@ class IverksettingDtoMapper(
             forrigeBehandlingId = saksbehandling.forrigeBehandlingId,
             kravMottatt = saksbehandling.kravMottatt,
             årsakRevurdering = mapÅrsakRevurdering(saksbehandling),
+            kategori = saksbehandling.kategori,
         )
 
     private fun mapÅrsakRevurdering(saksbehandling: Saksbehandling): ÅrsakRevurderingDto? =

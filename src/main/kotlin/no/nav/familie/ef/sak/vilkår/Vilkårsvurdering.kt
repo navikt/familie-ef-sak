@@ -48,6 +48,10 @@ data class Vilkårsvurdering(
         opphavsvilkår ?: Opphavsvilkår(behandlingId, sporbar.endret.endretTid)
 }
 
+fun List<Vilkårsvurdering>.utledVurderinger(vilkårType: VilkårType, regelId: RegelId) =
+    this.filter { it.type == vilkårType }.flatMap { it.delvilkårsvurdering.delvilkårsvurderinger }.flatMap { it.vurderinger }
+        .filter { it.regelId == regelId }
+
 /**
  * Inneholder informasjon fra hvilken behandling dette vilkår ble gjenrukt fra
  * Hvis man gjenbruker et vilkår som allerede er gjenbrukt fra en annen behandling,
@@ -78,6 +82,8 @@ data class Vurdering(
     val svar: SvarId? = null,
     val begrunnelse: String? = null,
 )
+
+fun List<Vurdering>.harSvar(svarId: SvarId) = this.any { it.svar == svarId }
 
 val inngangsvilkår = listOf(
     VilkårType.FORUTGÅENDE_MEDLEMSKAP,

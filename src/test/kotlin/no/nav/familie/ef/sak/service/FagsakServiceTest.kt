@@ -17,6 +17,7 @@ import no.nav.familie.ef.sak.felles.util.BrukerContextUtil
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
+import no.nav.familie.kontrakter.ef.iverksett.BehandlingKategori
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
@@ -128,6 +129,7 @@ internal class FagsakServiceTest : OppslagSpringRunnerTest() {
                 resultat = BehandlingResultat.INNVILGET,
                 årsak = BehandlingÅrsak.SØKNAD,
                 vedtakstidspunkt = SporbarUtils.now(),
+                kategori = BehandlingKategori.NASJONAL,
             )
             val behandling2 = Behandling(
                 fagsakId = fagsakDB.id,
@@ -137,6 +139,7 @@ internal class FagsakServiceTest : OppslagSpringRunnerTest() {
                 resultat = BehandlingResultat.INNVILGET,
                 årsak = BehandlingÅrsak.SØKNAD,
                 vedtakstidspunkt = SporbarUtils.now(),
+                kategori = BehandlingKategori.NASJONAL,
             )
 
             behandlingRepository.insert(behandling1)
