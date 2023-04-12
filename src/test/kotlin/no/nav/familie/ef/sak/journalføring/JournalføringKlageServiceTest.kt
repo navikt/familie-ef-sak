@@ -1,9 +1,6 @@
 package no.nav.familie.ef.sak.journalføring
 
-import io.mockk.every
-import io.mockk.justRun
-import io.mockk.mockk
-import io.mockk.verify
+import io.mockk.*
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.clearBrukerContext
@@ -14,7 +11,6 @@ import no.nav.familie.ef.sak.klage.KlageService
 import no.nav.familie.ef.sak.klage.dto.KlagebehandlingerDto
 import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.ef.sak.repository.fagsak
-import no.nav.familie.kontrakter.felles.Behandlingstema
 import no.nav.familie.kontrakter.felles.journalpost.AvsenderMottaker
 import no.nav.familie.kontrakter.felles.journalpost.Journalpost
 import no.nav.familie.kontrakter.felles.journalpost.Journalposttype
@@ -22,8 +18,9 @@ import no.nav.familie.kontrakter.felles.journalpost.Journalstatus
 import no.nav.familie.kontrakter.felles.journalpost.RelevantDato
 import no.nav.familie.kontrakter.felles.klage.BehandlingStatus
 import no.nav.familie.kontrakter.felles.klage.KlagebehandlingDto
-import no.nav.familie.kontrakter.felles.oppgave.Oppgave
+import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.internal.TaskService
+import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -112,10 +109,15 @@ internal class JournalføringKlageServiceTest {
         }
 
         @Test
-        internal fun `skal oppdatere oppgave om klage gjelder tilbakekreving`() {
-            val oppgave = Oppgave(id = 1L)
-            every { oppgaveService.hentIkkeFerdigstiltOppgaveForBehandling(any()) } returns Oppgave(id = 1L)
-            every { oppgaveService.oppdaterOppgave(oppgave.copy(behandlingstema = Behandlingstema.Tilbakebetaling.value))} returns Unit
+        internal fun `skal opprette task for å oppdatere behandlingstema om klage gjelder tilbakekreving`() {
+
+            val oppdaterTask = Task(
+                type = OppdaterOppgaveTilÅGjeldeTilbakekrevingTask.TYPE,
+                payload = UUID.randomUUID().toString(),
+            )
+
+            val taskSlot = slot<Task>()
+            every { taskService.save(capture(taskSlot)) } returns oppdaterTask
 
             service.fullførJournalpost(
                 lagRequest(JournalføringKlageBehandling(behandlingId = klagebehandling.id), klageGjelderTilbakekreving = true),
@@ -123,6 +125,8 @@ internal class JournalføringKlageServiceTest {
             )
 
             verifyKall(opprettKlageKall = 0, oppdaterOppgaveKall = 1)
+            assertThat(taskSlot.captured.type).isEqualTo(OppdaterOppgaveTilÅGjeldeTilbakekrevingTask.TYPE)
+            assertThat(taskSlot.captured.payload).isEqualTo(klagebehandling.id.toString())
         }
 
         @Test
@@ -140,7 +144,7 @@ internal class JournalføringKlageServiceTest {
         verify(exactly = opprettKlageKall) { klageService.opprettKlage(any<Fagsak>(), any(), any()) }
         verify { journalpostService.oppdaterOgFerdigstillJournalpost(any(), any(), any(), any(), any()) }
         verify { oppgaveService.ferdigstillOppgave(any()) }
-        verify(exactly = oppdaterOppgaveKall) {oppgaveService.oppdaterOppgave(any())}
+        verify(exactly = oppdaterOppgaveKall) {taskService.save(any())}
     }
 
     private fun lagRequest(behandling: JournalføringKlageBehandling, klageGjelderTilbakekreving: Boolean = false) =
