@@ -13,11 +13,11 @@ data class VedtaksperiodeDto(
     @JsonIgnore
     val periode: Månedsperiode = Månedsperiode(
         årMånedFra ?: error("periode eller årMånedFra må ha verdi"),
-        årMånedTil ?: error("periode eller årMånedTil må ha verdi")
+        årMånedTil ?: error("periode eller årMånedTil må ha verdi"),
     ),
     val aktivitet: AktivitetType,
     val periodeType: VedtaksperiodeType,
-    val sanksjonsårsak: Sanksjonsårsak? = null
+    val sanksjonsårsak: Sanksjonsårsak? = null,
 ) {
 
     fun erMidlertidigOpphørEllerSanksjon(): Boolean = periodeType.midlertidigOpphørEllerSanksjon()
@@ -34,7 +34,7 @@ fun List<VedtaksperiodeDto>.tilDomene(): List<Vedtaksperiode> =
             periode = it.periode,
             aktivitet = it.aktivitet,
             periodeType = it.periodeType,
-            sanksjonsårsak = it.sanksjonsårsak
+            sanksjonsårsak = it.sanksjonsårsak,
         )
     }
 
@@ -46,6 +46,6 @@ fun List<Vedtaksperiode>.fraDomene(): List<VedtaksperiodeDto> =
             periode = it.periode,
             aktivitet = it.aktivitet,
             periodeType = it.periodeType,
-            sanksjonsårsak = it.sanksjonsårsak
+            sanksjonsårsak = it.sanksjonsårsak,
         )
     }

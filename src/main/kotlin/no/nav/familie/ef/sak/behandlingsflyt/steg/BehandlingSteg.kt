@@ -32,58 +32,59 @@ interface BehandlingSteg<T> {
 enum class StegType(
     val rekkefølge: Int,
     val tillattFor: BehandlerRolle,
-    private val gyldigIKombinasjonMedStatus: List<BehandlingStatus>
+    private val gyldigIKombinasjonMedStatus: List<BehandlingStatus>,
 ) {
     REVURDERING_ÅRSAK(
         rekkefølge = 0,
         tillattFor = BehandlerRolle.SAKSBEHANDLER,
-        gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.OPPRETTET, BehandlingStatus.UTREDES)
+        gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.OPPRETTET, BehandlingStatus.UTREDES),
     ),
     VILKÅR(
         rekkefølge = 1,
         tillattFor = BehandlerRolle.SAKSBEHANDLER,
-        gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.OPPRETTET, BehandlingStatus.UTREDES)
+        gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.OPPRETTET, BehandlingStatus.UTREDES),
     ),
     BEREGNE_YTELSE(
         rekkefølge = 2,
         tillattFor = BehandlerRolle.SAKSBEHANDLER,
-        gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.UTREDES)
+        gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.UTREDES),
     ),
     SEND_TIL_BESLUTTER(
         rekkefølge = 3,
         tillattFor = BehandlerRolle.SAKSBEHANDLER,
-        gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.UTREDES)
+        gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.UTREDES),
     ),
     BESLUTTE_VEDTAK(
         rekkefølge = 4,
         tillattFor = BehandlerRolle.BESLUTTER,
-        gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.FATTER_VEDTAK)
+        gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.FATTER_VEDTAK),
     ),
     VENTE_PÅ_STATUS_FRA_IVERKSETT(
         rekkefølge = 5,
         tillattFor = BehandlerRolle.SYSTEM,
-        gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.IVERKSETTER_VEDTAK)
+        gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.IVERKSETTER_VEDTAK),
     ),
     LAG_SAKSBEHANDLINGSBLANKETT(
         rekkefølge = 6,
         tillattFor = BehandlerRolle.SYSTEM,
-        gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.IVERKSETTER_VEDTAK)
+        gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.IVERKSETTER_VEDTAK),
     ),
     FERDIGSTILLE_BEHANDLING(
         rekkefølge = 7,
         tillattFor = BehandlerRolle.SYSTEM,
-        gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.IVERKSETTER_VEDTAK)
+        gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.IVERKSETTER_VEDTAK),
     ),
     PUBLISER_VEDTAKSHENDELSE(
         rekkefølge = 8,
         tillattFor = BehandlerRolle.SYSTEM,
-        gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.FERDIGSTILT)
+        gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.FERDIGSTILT),
     ),
     BEHANDLING_FERDIGSTILT(
         rekkefølge = 9,
         tillattFor = BehandlerRolle.SYSTEM,
-        gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.FERDIGSTILT)
-    );
+        gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.FERDIGSTILT),
+    ),
+    ;
 
     fun displayName(): String {
         return this.name.replace('_', ' ').lowercase().replaceFirstChar { it.uppercase() }
@@ -118,5 +119,5 @@ enum class BehandlerRolle(val nivå: Int) {
     BESLUTTER(3),
     SAKSBEHANDLER(2),
     VEILEDER(1),
-    UKJENT(0)
+    UKJENT(0),
 }

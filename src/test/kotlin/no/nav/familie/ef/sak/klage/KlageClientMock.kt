@@ -36,8 +36,8 @@ class KlageClientMock {
                         mottattDato = LocalDate.now(),
                         resultat = BehandlingResultat.IKKE_MEDHOLD,
                         årsak = Årsak.FEIL_I_LOVANDVENDELSE,
-                        vedtaksdato = LocalDateTime.now()
-                    )
+                        vedtaksdato = LocalDateTime.now(),
+                    ),
                 )
             }
         }

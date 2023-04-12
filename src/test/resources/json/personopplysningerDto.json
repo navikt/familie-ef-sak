@@ -51,7 +51,6 @@
     "områder" : [ ]
   } ],
   "egenAnsatt" : true,
-  "navEnhet" : "1 - Enhet",
   "barn" : [ {
     "personIdent" : "01012067050",
     "navn" : "Barn Barnesen",
@@ -72,7 +71,12 @@
     "borHosSøker" : true,
     "deltBosted" : [ {
       "startdatoForKontrakt" : "2023-01-01",
-      "sluttdatoForKontrakt" : "2053-01-01"
+      "sluttdatoForKontrakt" : "2053-01-01",
+      "historisk" : false
+    }, {
+      "startdatoForKontrakt" : "2020-01-01",
+      "sluttdatoForKontrakt" : "2023-03-31",
+      "historisk" : true
     } ],
     "harDeltBostedNå" : true,
     "fødselsdato" : "2018-01-01",

@@ -12,6 +12,7 @@ import java.util.UUID
 interface OppgaveRepository : RepositoryInterface<Oppgave, Long>, InsertUpdateRepository<Oppgave> {
 
     fun findByBehandlingIdAndTypeAndErFerdigstiltIsFalse(behandlingId: UUID, oppgavetype: Oppgavetype): Oppgave?
+    fun findByBehandlingIdAndErFerdigstiltIsFalseAndTypeIn(behandlingId: UUID, oppgavetype: Set<Oppgavetype>): Oppgave?
     fun findByBehandlingIdAndBarnPersonIdentAndAlder(behandlingId: UUID, barnPersonIdent: String, alder: Alder?): Oppgave?
 
     // language=PostgreSQL
@@ -20,7 +21,7 @@ interface OppgaveRepository : RepositoryInterface<Oppgave, Long>, InsertUpdateRe
             FROM oppgave o         
             WHERE o.alder is not null
                 AND o.barn_person_ident IN (:barnPersonIdenter)
-                AND o.type=:oppgavetype"""
+                AND o.type=:oppgavetype""",
     )
     fun findByTypeAndAlderIsNotNullAndBarnPersonIdenter(oppgavetype: Oppgavetype, barnPersonIdenter: List<String>?): List<Oppgave>
     fun findByGsakOppgaveId(gsakOppgaveId: Long): Oppgave?

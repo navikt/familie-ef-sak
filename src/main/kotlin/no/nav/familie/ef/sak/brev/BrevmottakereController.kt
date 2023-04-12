@@ -17,7 +17,7 @@ import java.util.UUID
 @ProtectedWithClaims(issuer = "azuread")
 class BrevmottakereController(
     private val tilgangService: TilgangService,
-    private val brevmottakereService: BrevmottakereService
+    private val brevmottakereService: BrevmottakereService,
 ) {
 
     @GetMapping("/{behandlingId}")
@@ -30,7 +30,7 @@ class BrevmottakereController(
     @PostMapping("/{behandlingId}")
     fun velgBrevmottakere(
         @PathVariable behandlingId: UUID,
-        @RequestBody brevmottakere: BrevmottakereDto
+        @RequestBody brevmottakere: BrevmottakereDto,
     ): Ressurs<UUID> {
         tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.UPDATE)
         tilgangService.validerHarSaksbehandlerrolle()

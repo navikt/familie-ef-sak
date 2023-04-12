@@ -39,6 +39,7 @@ import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType
 import no.nav.familie.ef.sak.vilkår.VurderingService
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
+import no.nav.familie.kontrakter.ef.iverksett.BehandlingKategori
 import no.nav.familie.kontrakter.ef.iverksett.Hendelse
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.kontrakter.felles.objectMapper
@@ -78,7 +79,7 @@ internal class SendTilBeslutterStegTest {
         tomDatoNestePeriode = null,
         forfallsdatoNestePeriode = null,
         tidSimuleringHentet = null,
-        tomSisteUtbetaling = null
+        tomSisteUtbetaling = null,
     )
 
     private val beslutteVedtakSteg =
@@ -93,11 +94,11 @@ internal class SendTilBeslutterStegTest {
             tilbakekrevingService,
             vurderingService,
             validerOmregningService,
-            årsakRevurderingService
+            årsakRevurderingService,
         )
     private val fagsak = fagsak(
         stønadstype = StønadType.OVERGANGSSTØNAD,
-        identer = setOf(PersonIdent(ident = "12345678901"))
+        identer = setOf(PersonIdent(ident = "12345678901")),
     )
     private val saksbehandlerNavn = "saksbehandlernavn"
     private val vedtaksbrev = Vedtaksbrev(
@@ -107,7 +108,7 @@ internal class SendTilBeslutterStegTest {
         beslutterPdf = null,
         enhet = "enhet",
         saksbehandlerident = saksbehandlerNavn,
-        saksbehandlerHtml = ""
+        saksbehandlerHtml = "",
     )
 
     private val behandling = saksbehandling(
@@ -118,8 +119,9 @@ internal class SendTilBeslutterStegTest {
             status = BehandlingStatus.UTREDES,
             steg = beslutteVedtakSteg.stegType(),
             resultat = BehandlingResultat.IKKE_SATT,
-            årsak = BehandlingÅrsak.SØKNAD
-        )
+            årsak = BehandlingÅrsak.SØKNAD,
+            kategori = BehandlingKategori.NASJONAL,
+        ),
     )
 
     private val revurdering = behandling.copy(type = BehandlingType.REVURDERING, resultat = INNVILGET)
@@ -260,8 +262,8 @@ internal class SendTilBeslutterStegTest {
                     behandlingId = behandling.id,
                     gsakOppgaveId = 123L,
                     type = Oppgavetype.BehandleSak,
-                    erFerdigstilt = false
-                )
+                    erFerdigstilt = false,
+                ),
             )
 
         every { vedtakService.oppdaterSaksbehandler(any(), any()) } just Runs
@@ -294,8 +296,8 @@ internal class SendTilBeslutterStegTest {
         every { vedtakService.hentVedtaksresultat(any()) } returns ResultatType.INNVILGE
         every { simuleringService.hentLagretSimuleringsoppsummering(any()) } returns simuleringsoppsummering.copy(
             feilutbetaling = BigDecimal(
-                1000
-            )
+                1000,
+            ),
         )
 
         every { tilbakekrevingService.harSaksbehandlerTattStillingTilTilbakekreving(any()) } returns false

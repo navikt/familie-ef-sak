@@ -18,6 +18,7 @@ import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
 import no.nav.familie.ef.sak.infrastruktur.config.ObjectMapperProvider
 import no.nav.familie.ef.sak.iverksett.IverksettClient
+import no.nav.familie.ef.sak.no.nav.familie.ef.sak.vilkår.VilkårTestUtil
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.Sivilstandstype
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlIdent
@@ -110,8 +111,8 @@ internal class OmregningServiceTest : OppslagSpringRunnerTest() {
                 id = behandlingId,
                 fagsak = fagsak,
                 resultat = BehandlingResultat.INNVILGET,
-                status = BehandlingStatus.FERDIGSTILT
-            )
+                status = BehandlingStatus.FERDIGSTILT,
+            ),
         )
         tilkjentYtelseRepository.insert(tilkjentYtelse(behandling.id, "321", år))
         vedtakRepository.insert(vedtak(behandling.id, år = år))
@@ -119,8 +120,8 @@ internal class OmregningServiceTest : OppslagSpringRunnerTest() {
             behandlingBarn(
                 behandlingId = behandling.id,
                 personIdent = "01012067050",
-                navn = "Kid Kiddesen"
-            )
+                navn = "Kid Kiddesen",
+            ),
         )
         søknadService.lagreSøknadForOvergangsstønad(Testsøknad.søknadOvergangsstønad, behandling.id, fagsak.id, "1L")
 
@@ -142,7 +143,7 @@ internal class OmregningServiceTest : OppslagSpringRunnerTest() {
         assertThat(søknadService.hentSøknadsgrunnlag(nyBehandling.id)).isNotNull
         assertThat(barnRepository.findByBehandlingId(nyBehandling.id).single().personIdent).isEqualTo(barn.personIdent)
         assertThat(
-            vilkårsvurderingRepository.findByBehandlingId(nyBehandling.id).single { it.type == VilkårType.ALENEOMSORG }.barnId
+            vilkårsvurderingRepository.findByBehandlingId(nyBehandling.id).single { it.type == VilkårType.ALENEOMSORG }.barnId,
         ).isNotNull
     }
 
@@ -153,8 +154,8 @@ internal class OmregningServiceTest : OppslagSpringRunnerTest() {
             behandling(
                 fagsak = fagsak,
                 resultat = BehandlingResultat.INNVILGET,
-                status = BehandlingStatus.FERDIGSTILT
-            )
+                status = BehandlingStatus.FERDIGSTILT,
+            ),
         )
         tilkjentYtelseRepository.insert(tilkjentYtelse(behandling.id, "321", år, samordningsfradrag = 10))
         val inntektsperiode = inntektsperiode(år = år, samordningsfradrag = 100.toBigDecimal())
@@ -175,23 +176,23 @@ internal class OmregningServiceTest : OppslagSpringRunnerTest() {
             behandling(
                 fagsak = fagsak,
                 resultat = BehandlingResultat.INNVILGET,
-                status = BehandlingStatus.FERDIGSTILT
-            )
+                status = BehandlingStatus.FERDIGSTILT,
+            ),
         )
         tilkjentYtelseRepository.insert(tilkjentYtelse(behandling.id, "321", år, samordningsfradrag = 10))
         val inntektsperiode = inntektsperiode(år = år, samordningsfradrag = 100.toBigDecimal())
         val vedtaksperiode = vedtaksperiode(
             startDato = LocalDate.of(år, 1, 1),
             sluttDato = LocalDate.of(år, 1, 31),
-            vedtaksperiodeType = VedtaksperiodeType.SANKSJON
+            vedtaksperiodeType = VedtaksperiodeType.SANKSJON,
         )
         vedtakRepository.insert(
             vedtak(
                 behandlingId = behandling.id,
                 år = år,
                 inntekter = InntektWrapper(listOf(inntektsperiode)),
-                perioder = PeriodeWrapper(listOf(vedtaksperiode))
-            )
+                perioder = PeriodeWrapper(listOf(vedtaksperiode)),
+            ),
         )
 
         omregningService.utførGOmregning(fagsak.id)
@@ -204,7 +205,7 @@ internal class OmregningServiceTest : OppslagSpringRunnerTest() {
 
     private fun lagVilkårsvurderinger(
         barn: BehandlingBarn,
-        behandlingId: UUID
+        behandlingId: UUID,
     ): List<Vilkårsvurdering> {
         val vilkårsvurderinger = vilkårsreglerForStønad(StønadType.OVERGANGSSTØNAD).map { vilkårsregel ->
             val delvilkårsvurdering = vilkårsregel.initiereDelvilkårsvurdering(
@@ -213,8 +214,11 @@ internal class OmregningServiceTest : OppslagSpringRunnerTest() {
                     sivilstandstype = Sivilstandstype.UGIFT,
                     erMigrering = false,
                     barn = listOf(barn),
-                    søktOmBarnetilsyn = emptyList()
-                )
+                    søktOmBarnetilsyn = emptyList(),
+                    langAvstandTilSøker = listOf(),
+                    vilkårgrunnlagDto = VilkårTestUtil.mockVilkårGrunnlagDto(),
+                    behandling = behandling(),
+                ),
             )
             Vilkårsvurdering(
                 behandlingId = behandlingId,
@@ -227,10 +231,11 @@ internal class OmregningServiceTest : OppslagSpringRunnerTest() {
                             resultat = Vilkårsresultat.OPPFYLT,
                             vurderinger = it.vurderinger.map { vurdering ->
                                 vurdering.copy(begrunnelse = "Godkjent")
-                            }
+                            },
                         )
-                    }
-                )
+                    },
+                ),
+                opphavsvilkår = null,
             )
         }
         return vilkårsvurderinger
@@ -239,7 +244,7 @@ internal class OmregningServiceTest : OppslagSpringRunnerTest() {
     fun iverksettMedOppdaterteIder(
         fagsak: Fagsak,
         behandling: Behandling,
-        vedtakstidspunkt: LocalDateTime
+        vedtakstidspunkt: LocalDateTime,
     ): IverksettOvergangsstønadDto {
         val personidenter = fagsak.personIdenter.map { it.ident }.toSet()
         val forrigeBehandling = fagsakService.finnFagsak(personidenter, StønadType.OVERGANGSSTØNAD)?.let {
@@ -260,12 +265,12 @@ internal class OmregningServiceTest : OppslagSpringRunnerTest() {
         val vedtak = expectedIverksettDto.vedtak.copy(tilkjentYtelse = tilkjentYtelseDto, vedtakstidspunkt = vedtakstidspunkt)
         val behandlingsdetaljerDto = expectedIverksettDto.behandling.copy(
             behandlingId = forrigeBehandling.id,
-            eksternId = forrigeBehandling.eksternId.id
+            eksternId = forrigeBehandling.eksternId.id,
         )
         return expectedIverksettDto.copy(
             vedtak = vedtak,
             behandling = behandlingsdetaljerDto,
-            fagsak = expectedIverksettDto.fagsak.copy(eksternId = fagsak.eksternId.id)
+            fagsak = expectedIverksettDto.fagsak.copy(eksternId = fagsak.eksternId.id),
         )
     }
 

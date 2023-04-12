@@ -29,7 +29,7 @@ class FørstegangsbehandlingService(
     private val barnService: BarnService,
     private val taskService: TaskService,
     private val iverksettService: IverksettService,
-    private val infotrygdPeriodeValideringService: InfotrygdPeriodeValideringService
+    private val infotrygdPeriodeValideringService: InfotrygdPeriodeValideringService,
 ) {
 
     @Transactional
@@ -47,9 +47,9 @@ class FørstegangsbehandlingService(
                 OpprettOppgaveForOpprettetBehandlingTask.OpprettOppgaveTaskData(
                     behandlingId = behandling.id,
                     saksbehandler = SikkerhetContext.hentSaksbehandler(),
-                    beskrivelse = "Førstegangsbehandling - manuelt opprettet"
-                )
-            )
+                    beskrivelse = "Førstegangsbehandling - manuelt opprettet",
+                ),
+            ),
         )
         iverksettService.startBehandling(behandling, fagsak)
         return behandling
@@ -57,13 +57,13 @@ class FørstegangsbehandlingService(
 
     private fun opprettBehandling(
         fagsakId: UUID,
-        førstegangsBehandlingRequest: FørstegangsbehandlingDto
+        førstegangsBehandlingRequest: FørstegangsbehandlingDto,
     ): Behandling {
         val behandling = behandlingService.opprettBehandling(
             behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
             fagsakId = fagsakId,
             behandlingsårsak = førstegangsBehandlingRequest.behandlingsårsak,
-            kravMottatt = førstegangsBehandlingRequest.kravMottatt
+            kravMottatt = førstegangsBehandlingRequest.kravMottatt,
         )
         return behandling
     }
@@ -72,7 +72,7 @@ class FørstegangsbehandlingService(
         behandling: Behandling,
         fagsak: Fagsak,
         førstegangsBehandlingRequest: FørstegangsbehandlingDto,
-        grunnlagsdata: GrunnlagsdataMedMetadata
+        grunnlagsdata: GrunnlagsdataMedMetadata,
     ) {
         barnService.opprettBarnPåBehandlingMedSøknadsdata(
             behandlingId = behandling.id,
@@ -81,7 +81,7 @@ class FørstegangsbehandlingService(
             ustrukturertDokumentasjonType = UstrukturertDokumentasjonType.PAPIRSØKNAD,
             barnSomSkalFødes = førstegangsBehandlingRequest.barn,
             grunnlagsdataBarn = grunnlagsdata.grunnlagsdata.barn,
-            vilkårsbehandleNyeBarn = VilkårsbehandleNyeBarn.VILKÅRSBEHANDLE
+            vilkårsbehandleNyeBarn = VilkårsbehandleNyeBarn.VILKÅRSBEHANDLE,
         )
     }
 

@@ -25,13 +25,13 @@ import java.util.UUID
 @Service
 class BeregningSkolepengerService(
     private val behandlingService: BehandlingService,
-    private val vedtakService: VedtakService
+    private val vedtakService: VedtakService,
 ) {
 
     fun beregnYtelse(
         utgiftsperioder: List<SkoleårsperiodeSkolepengerDto>,
         behandlingId: UUID,
-        erOpphør: Boolean = false
+        erOpphør: Boolean = false,
     ): BeregningSkolepengerResponse {
         val forrigePerioder = hentPerioderFraForrigeVedtak(behandlingId)
         return beregnYtelse(utgiftsperioder, forrigePerioder, erOpphør)
@@ -54,7 +54,7 @@ class BeregningSkolepengerService(
     private fun beregnYtelse(
         perioder: List<SkoleårsperiodeSkolepengerDto>,
         forrigePerioder: List<SkoleårsperiodeSkolepengerDto>,
-        erOpphør: Boolean
+        erOpphør: Boolean,
     ): BeregningSkolepengerResponse {
         validerGyldigePerioder(perioder, erOpphør)
         validerFornuftigeBeløp(perioder)
@@ -66,7 +66,7 @@ class BeregningSkolepengerService(
     }
 
     private fun beregnSkoleårsperioder(
-        perioder: List<SkoleårsperiodeSkolepengerDto>
+        perioder: List<SkoleårsperiodeSkolepengerDto>,
     ): List<BeløpsperiodeSkolepenger> {
         return perioder
             .flatMap { skoleårsperiode -> skoleårsperiode.utgiftsperioder }
@@ -76,7 +76,7 @@ class BeregningSkolepengerService(
                 BeløpsperiodeSkolepenger(
                     årMånedFra = key,
                     utgifter = value.sumOf { it.utgifter },
-                    beløp = value.sumOf { it.stønad }
+                    beløp = value.sumOf { it.stønad },
                 )
             }
     }
@@ -155,7 +155,7 @@ class BeregningSkolepengerService(
     private fun validerForrigePerioder(
         perioder: List<SkoleårsperiodeSkolepengerDto>,
         forrigePerioder: List<SkoleårsperiodeSkolepengerDto>,
-        erOpphør: Boolean
+        erOpphør: Boolean,
     ) {
         if (forrigePerioder.isEmpty()) return
         val tidligereUtgiftIder = forrigePerioder.flatMap { periode ->
@@ -172,7 +172,7 @@ class BeregningSkolepengerService(
 
     private fun validerIngenNyePerioderFinnes(
         perioder: List<SkoleårsperiodeSkolepengerDto>,
-        forrigePerioder: List<SkoleårsperiodeSkolepengerDto>
+        forrigePerioder: List<SkoleårsperiodeSkolepengerDto>,
     ) {
         val forrigePerioderPerSkoleår = forrigePerioder.associateBy { it.perioder.first().skoleår }
         val nyePerioderPerSkoleår = perioder.associateBy { it.perioder.first().skoleår }
@@ -189,7 +189,7 @@ class BeregningSkolepengerService(
             }
             feilHvis(
                 forrigePeriodeForSkoleår.utgiftsperioder.size == skoleårsperiode.utgiftsperioder.size &&
-                    forrigePeriodeForSkoleår.utgiftsperioder != skoleårsperiode.utgiftsperioder
+                    forrigePeriodeForSkoleår.utgiftsperioder != skoleårsperiode.utgiftsperioder,
             ) {
                 "Utgiftsperioder for $skoleår er endrede"
             }
@@ -198,7 +198,7 @@ class BeregningSkolepengerService(
 
     private fun validerNoeErFjernet(
         perioder: List<SkoleårsperiodeSkolepengerDto>,
-        forrigePerioder: List<SkoleårsperiodeSkolepengerDto>
+        forrigePerioder: List<SkoleårsperiodeSkolepengerDto>,
     ) {
         if (forrigePerioder.size != perioder.size) {
             return
@@ -219,7 +219,7 @@ class BeregningSkolepengerService(
 
     private fun validerForrigePerioderErUendrede(
         skoleårsperioder: List<SkoleårsperiodeSkolepengerDto>,
-        tidligereUtgiftIder: Map<UUID, SkolepengerUtgiftDto>
+        tidligereUtgiftIder: Map<UUID, SkolepengerUtgiftDto>,
     ) {
         skoleårsperioder.forEach { skoleårsperiode ->
             val skoleår = skoleårsperiode.perioder.first().skoleår
@@ -236,7 +236,7 @@ class BeregningSkolepengerService(
 
     private fun validerForrigePerioderFortsattFinnes(
         skoleårsperioder: List<SkoleårsperiodeSkolepengerDto>,
-        tidligereUtgiftIder: Map<UUID, SkolepengerUtgiftDto>
+        tidligereUtgiftIder: Map<UUID, SkolepengerUtgiftDto>,
     ) {
         val nyeIder = skoleårsperioder.flatMap { periode -> periode.utgiftsperioder.map { it.id } }.toSet()
         val manglende = tidligereUtgiftIder.entries.filterNot { nyeIder.contains(it.key) }

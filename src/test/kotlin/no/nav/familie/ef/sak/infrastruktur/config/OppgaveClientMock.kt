@@ -37,7 +37,7 @@ class OppgaveClientMock {
                 tilbakekreving1,
                 oppgavePapirsøknad,
                 oppgaveEttersending,
-                oppgaveEttersendingUtenBehandlesAvApplikasjon
+                oppgaveEttersendingUtenBehandlesAvApplikasjon,
             ).associateBy { it.id!! }.toMutableMap()
         var maxId: Long = oppgaver.values.maxOf { it.id!! }
         every {
@@ -48,7 +48,7 @@ class OppgaveClientMock {
 
         every { oppgaveClient.finnOppgaveMedId(any()) } answers {
             val oppgaveId = firstArg<Long>()
-            oppgaver[oppgaveId] ?: error("Finner ikke oppgave med oppgaveId=$oppgaveId")
+            oppgaver[oppgaveId] ?: oppgave1.copy(id = oppgaveId)
         }
 
         every { oppgaveClient.finnMapper(any(), any()) } answers {
@@ -60,29 +60,29 @@ class OppgaveClientMock {
                         MappeDto(
                             id = 101,
                             navn = "EF Sak - 01 Uplassert lokal",
-                            enhetsnr = "4489"
+                            enhetsnr = "4489",
                         ),
                         MappeDto(
                             id = 104,
                             navn = "EF Sak - 62 Hendelser",
-                            enhetsnr = "4489"
+                            enhetsnr = "4489",
                         ),
                         MappeDto(
                             id = 105,
                             navn = "62 Hendelser",
-                            enhetsnr = "4489"
+                            enhetsnr = "4489",
                         ),
                         MappeDto(
                             id = 102,
                             navn = "70 Godkjennevedtak",
-                            enhetsnr = "4489"
+                            enhetsnr = "4489",
                         ),
                         MappeDto(
                             id = 103,
                             navn = "EF Sak - 99 testmappe lokal 99",
-                            enhetsnr = "4489"
-                        )
-                    )
+                            enhetsnr = "4489",
+                        ),
+                    ),
                 )
             } else if (enhetsnr == "4483") {
                 FinnMappeResponseDto(
@@ -91,14 +91,14 @@ class OppgaveClientMock {
                         MappeDto(
                             id = 202,
                             navn = "70 Godkjennevedtak",
-                            enhetsnr = "4483"
+                            enhetsnr = "4483",
                         ),
                         MappeDto(
                             id = 203,
                             navn = "EF Sak - 99 testmappe lokal 99",
-                            enhetsnr = "4483"
-                        )
-                    )
+                            enhetsnr = "4483",
+                        ),
+                    ),
                 )
             } else {
                 FinnMappeResponseDto(0, emptyList())
@@ -122,7 +122,7 @@ class OppgaveClientMock {
                 tilordnetRessurs = arg.tilordnetRessurs,
                 status = StatusEnum.OPPRETTET,
                 opprettetTidspunkt = LocalDate.now().toString(),
-                prioritet = OppgavePrioritet.NORM
+                prioritet = OppgavePrioritet.NORM,
             )
             oppgaver[nyOppgaveId] = oppgave
             nyOppgaveId
@@ -135,13 +135,17 @@ class OppgaveClientMock {
             oppgaver[oppgaveId] = oppgave.copy(
                 tilordnetRessurs = saksbehandler,
                 status = saksbehandler?.let { StatusEnum.UNDER_BEHANDLING }
-                    ?: StatusEnum.OPPRETTET
+                    ?: StatusEnum.OPPRETTET,
             )
             oppgaveId
         }
 
         every { oppgaveClient.ferdigstillOppgave(any()) } answers {
             oppgaver.remove(firstArg())
+        }
+
+        every { oppgaveClient.oppdaterOppgave(any()) } answers {
+            firstArg<Oppgave>().id ?: 0
         }
 
         return oppgaveClient
@@ -158,7 +162,7 @@ class OppgaveClientMock {
             Oppgavetype.Journalføring,
             beskivelse = "Ettersending",
             behandlesAvApplikasjon = "familie-ef-sak",
-            journalpostId = "23457"
+            journalpostId = "23457",
         )
     private val oppgaveEttersendingUtenBehandlesAvApplikasjon =
         lagOppgave(
@@ -166,33 +170,33 @@ class OppgaveClientMock {
             Oppgavetype.Journalføring,
             beskivelse = "Ettersending uten behandlesAvApplikasjon",
             behandlesAvApplikasjon = "",
-            journalpostId = "23458"
+            journalpostId = "23458",
         )
     private val tilbakekreving1 = lagOppgave(
         4L,
         Oppgavetype.BehandleSak,
         beskivelse = "",
         behandlingstype = "ae0161",
-        behandlesAvApplikasjon = "familie-tilbake"
+        behandlesAvApplikasjon = "familie-tilbake",
     )
 
     private fun lagOppgave(
         oppgaveId: Long,
         oppgavetype: Oppgavetype,
         tildeltRessurs: String? = null,
-        beskivelse: String? = "Beskrivelse av oppgaven. " +
+        beskivelse: String? = "Beskrivelse av oppgaven. \n\n\n" +
             "Denne teksten kan jo være lang, kort eller ikke inneholde noenting. ",
         journalpostId: String? = "1234",
         behandlingstype: String? = null,
         behandlesAvApplikasjon: String,
-        behandlingstema: Behandlingstema = Behandlingstema.Overgangsstønad
+        behandlingstema: Behandlingstema = Behandlingstema.Overgangsstønad,
     ): Oppgave {
         return Oppgave(
             id = oppgaveId,
             aktoerId = "1234",
             identer = listOf(OppgaveIdentV2("11111111111", IdentGruppe.FOLKEREGISTERIDENT)),
             journalpostId = journalpostId,
-            tildeltEnhetsnr = "4408",
+            tildeltEnhetsnr = "4489",
             tilordnetRessurs = tildeltRessurs,
             behandlingstype = behandlingstype,
             mappeId = 123,
@@ -204,7 +208,7 @@ class OppgaveClientMock {
             opprettetTidspunkt = LocalDate.of(2020, 1, 1).toString(),
             fristFerdigstillelse = LocalDate.of(2020, 2, 1).toString(),
             prioritet = OppgavePrioritet.NORM,
-            status = StatusEnum.OPPRETTET
+            status = StatusEnum.OPPRETTET,
         )
     }
 }

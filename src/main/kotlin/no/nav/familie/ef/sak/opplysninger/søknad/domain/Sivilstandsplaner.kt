@@ -7,5 +7,5 @@ data class Sivilstandsplaner(
     val harPlaner: Boolean? = null,
     val fraDato: LocalDate? = null,
     @Embedded(onEmpty = Embedded.OnEmpty.USE_NULL, prefix = "vordende_samboer_")
-    val vordendeSamboerEktefelle: PersonMinimum? = null
+    val vordendeSamboerEktefelle: PersonMinimum? = null,
 )

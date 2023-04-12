@@ -42,5 +42,5 @@ data class OppgaveEfDto(
     val ferdigstiltTidspunkt: String? = null,
     val endretTidspunkt: String? = null,
     val prioritet: OppgavePrioritet? = null,
-    val status: StatusEnum? = null
+    val status: StatusEnum? = null,
 )

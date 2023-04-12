@@ -2,9 +2,11 @@ package no.nav.familie.ef.sak.vedtak.historikk
 
 import com.github.doyaaaaaken.kotlincsv.dsl.csvReader
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
+import no.nav.familie.ef.sak.beregning.Inntekt
 import no.nav.familie.ef.sak.beregning.Inntektsperiode
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.repository.behandling
+import no.nav.familie.ef.sak.repository.vedtaksperiode
 import no.nav.familie.ef.sak.tilkjentytelse.domain.AndelTilkjentYtelse
 import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.vedtak.domain.AktivitetType
@@ -134,7 +136,7 @@ object AndelHistorikkRunner {
             behandlinger,
             behandlingId,
             mapOf(),
-            HistorikkKonfigurasjon(brukIkkeVedtatteSatser = true)
+            HistorikkKonfigurasjon(brukIkkeVedtatteSatser = true),
         )
 
         assertThat(toString(output)).isEqualTo(toString(grupper.expectedOutput))
@@ -181,7 +183,7 @@ object AndelHistorikkRunner {
 enum class TestType {
     VEDTAK,
     ANDEL,
-    OUTPUT
+    OUTPUT,
 }
 
 private data class AndelHistorikkData(
@@ -196,13 +198,13 @@ private data class AndelHistorikkData(
     val type: EndringType?,
     val aktivitet: AktivitetType?,
     val periodeType: VedtaksperiodeType?,
-    val endretI: UUID?
+    val endretI: UUID?,
 )
 
 data class ParsetAndelHistorikkData(
     val vedtaksliste: List<Vedtak>,
     val input: List<TilkjentYtelse>,
-    val expectedOutput: List<AndelHistorikkDto>
+    val expectedOutput: List<AndelHistorikkDto>,
 )
 
 private val oppdragIdn = mutableMapOf<Int, UUID>()
@@ -215,7 +217,7 @@ private fun hentBehandlingId(behandlingId: UUID) = oppdragIdn.entries.first { it
 private enum class AndelHistorikkHeader(
     val key: String,
     val value: (AndelHistorikkDto) -> Any?,
-    val minHeaderValue: Int = key.length
+    val minHeaderValue: Int = key.length,
 ) {
 
     TEST_TYPE("type", { "" }),
@@ -229,7 +231,7 @@ private enum class AndelHistorikkHeader(
     AKTIVITET("aktivitet", { it.aktivitet }),
     PERIODE_TYPE("periode", { it.periodeType }),
     TYPE_ENDRING("type_endring", { it.endring?.type }),
-    ENDRET_I("endret_i", { it.endring?.behandlingId?.let(::hentBehandlingId) })
+    ENDRET_I("endret_i", { it.endring?.behandlingId?.let(::hentBehandlingId) }),
 }
 
 object AndelHistorikkParser {
@@ -260,7 +262,7 @@ object AndelHistorikkParser {
     private fun mapRow(
         type: TestType,
         behandlingId: UUID,
-        row: Map<String, String>
+        row: Map<String, String>,
     ) =
         AndelHistorikkData(
             testType = type,
@@ -274,7 +276,7 @@ object AndelHistorikkParser {
             aktivitet = row.getOptionalValue(AKTIVITET)?.let { AktivitetType.valueOf(it) },
             periodeType = row.getOptionalValue(PERIODE_TYPE)?.let { VedtaksperiodeType.valueOf(it) },
             type = row.getOptionalValue(TYPE_ENDRING)?.let { EndringType.valueOf(it) },
-            endretI = row.getOptionalInt(ENDRET_I)?.let { generateBehandlingId(it) }
+            endretI = row.getOptionalInt(ENDRET_I)?.let { generateBehandlingId(it) },
         )
 
     private fun mapAndel(andel: AndelHistorikkData): AndelTilkjentYtelse =
@@ -286,7 +288,7 @@ object AndelHistorikkParser {
             inntekt = andel.inntekt!!,
             inntektsreduksjon = andel.inntektsreduksjon!!,
             samordningsfradrag = andel.samordningsfradrag!!,
-            kildeBehandlingId = andel.endretI ?: andel.behandlingId
+            kildeBehandlingId = andel.endretI ?: andel.behandlingId,
         )
 
     private fun Map<String, String>.getValue(header: AndelHistorikkHeader) = getValue(header.key)
@@ -302,7 +304,7 @@ object AndelHistorikkParser {
         return ParsetAndelHistorikkData(
             vedtaksliste = mapVedtaksPerioder(groupBy[TestType.VEDTAK]!!),
             input = mapInput(groupBy[TestType.ANDEL]!!),
-            expectedOutput = groupBy[TestType.OUTPUT]?.map { lagAndel(it) } ?: emptyList()
+            expectedOutput = groupBy[TestType.OUTPUT]?.map { lagAndel(it) } ?: emptyList(),
         )
     }
 
@@ -335,8 +337,8 @@ object AndelHistorikkParser {
                             Inntektsperiode(
                                 periode = Månedsperiode(it.datoFra, it.datoTil),
                                 inntekt = BigDecimal.ZERO,
-                                samordningsfradrag = BigDecimal.ZERO
-                            )
+                                samordningsfradrag = BigDecimal.ZERO,
+                            ),
                         )
                     } ?: emptyList()
                 Vedtak(
@@ -350,7 +352,7 @@ object AndelHistorikkParser {
                     saksbehandlerIdent = null,
                     opphørFom = opphørFom,
                     beslutterIdent = null,
-                    internBegrunnelse = ""
+                    internBegrunnelse = "",
                 )
             }
     }
@@ -363,9 +365,9 @@ object AndelHistorikkParser {
                     datoTil = it.stønadTom!!,
                     aktivitet = it.aktivitet!!,
                     periodeType = it.periodeType!!,
-                    sanksjonsårsak = sanksjonsårsak
+                    sanksjonsårsak = sanksjonsårsak,
                 )
-            }
+            },
         )
 
     private fun lagAndel(it: AndelHistorikkData) =
@@ -375,6 +377,12 @@ object AndelHistorikkParser {
             behandlingÅrsak = BehandlingÅrsak.NYE_OPPLYSNINGER,
             vedtakstidspunkt = LocalDateTime.now(), // burde denne testes? EKs att man oppretter vedtaksdato per behandlingId
             saksbehandler = "",
+            vedtaksperiode = VedtakshistorikkperiodeOvergangsstønad(
+                periode = Månedsperiode(it.stønadFom!!, it.stønadFom!!),
+                aktivitet = AktivitetType.IKKE_AKTIVITETSPLIKT,
+                periodeType = VedtaksperiodeType.HOVEDPERIODE,
+                inntekt = Inntekt(YearMonth.from(it.stønadFom), BigDecimal.ZERO, BigDecimal.ZERO)
+            ),
             andel = AndelMedGrunnlagDto(mapAndel(it), null),
             aktivitet = it.aktivitet!!,
             periodeType = it.periodeType!!,
@@ -383,7 +391,7 @@ object AndelHistorikkParser {
                     type,
                     it.endretI
                         ?: error("Trenger id til behandling hvis det finnes en endring"),
-                    LocalDateTime.now()
+                    LocalDateTime.now(),
                 )
             },
             aktivitetArbeid = null,
@@ -391,7 +399,7 @@ object AndelHistorikkParser {
             sanksjonsårsak = null,
             erOpphør = false,
             periodetypeBarnetilsyn = PeriodetypeBarnetilsyn.ORDINÆR,
-            aktivitetBarnetilsyn = AktivitetstypeBarnetilsyn.I_ARBEID
+            aktivitetBarnetilsyn = AktivitetstypeBarnetilsyn.I_ARBEID,
         )
 
     data class AndelTilkjentHolder(val behandlingId: UUID, val andeler: MutableList<AndelTilkjentYtelse?>)
@@ -427,7 +435,7 @@ object AndelHistorikkParser {
                     behandlingId = holder.behandlingId,
                     andelerTilkjentYtelse = andelerTilkjentYtelse,
                     personident = PERSON_IDENT,
-                    startdato = andelerTilkjentYtelse.minOfOrNull { it.stønadFom } ?: LocalDate.now()
+                    startdato = andelerTilkjentYtelse.minOfOrNull { it.stønadFom } ?: LocalDate.now(),
                 )
             }
     }

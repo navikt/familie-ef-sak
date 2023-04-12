@@ -19,7 +19,7 @@ import java.util.UUID
 @Validated
 class SøknadController(
     private val søknadService: SøknadService,
-    private val tilgangService: TilgangService
+    private val tilgangService: TilgangService,
 ) {
 
     @GetMapping("/{behandlingId}/datoer")
@@ -30,8 +30,8 @@ class SøknadController(
         return Ressurs.success(
             SøknadDatoerDto(
                 søknadsdato = søknadsgrunnlag.datoMottatt,
-                søkerStønadFra = søknadsgrunnlag.søkerFra
-            )
+                søkerStønadFra = søknadsgrunnlag.søkerFra,
+            ),
         )
     }
 }

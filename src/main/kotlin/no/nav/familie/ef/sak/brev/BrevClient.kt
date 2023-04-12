@@ -20,7 +20,7 @@ class BrevClient(
     @Value("\${FAMILIE_BREV_API_URL}")
     private val familieBrevUri: String,
     @Qualifier("utenAuth")
-    private val restOperations: RestOperations
+    private val restOperations: RestOperations,
 ) : AbstractPingableRestClient(restOperations, "familie.brev") {
 
     override val pingUri: URI = URI.create("$familieBrevUri/api/status")
@@ -32,7 +32,7 @@ class BrevClient(
     fun genererBrev(
         fritekstBrev: FrittståendeBrevRequestDto,
         saksbehandlerNavn: String,
-        enhet: String = "NAV Arbeid og ytelser"
+        enhet: String = "NAV Arbeid og ytelser",
     ): ByteArray {
         val url = URI.create("$familieBrevUri/api/fritekst-brev")
         return postForEntity(
@@ -42,9 +42,9 @@ class BrevClient(
                 saksbehandlersignatur = saksbehandlerNavn,
                 besluttersignatur = null,
                 enhet = enhet,
-                datoPlaceholder = null
+                datoPlaceholder = null,
             ),
-            HttpHeaders().medContentTypeJsonUTF8()
+            HttpHeaders().medContentTypeJsonUTF8(),
         )
     }
 
@@ -53,7 +53,7 @@ class BrevClient(
         saksbehandlerBrevrequest: JsonNode,
         saksbehandlersignatur: String,
         enhet: String?,
-        skjulBeslutterSignatur: Boolean
+        skjulBeslutterSignatur: Boolean,
     ): String {
         feilHvis(brevmal === FRITEKST) {
             "HTML-generering av fritekstbrev er ikke implementert"
@@ -69,16 +69,16 @@ class BrevClient(
                 besluttersignatur = BESLUTTER_SIGNATUR_PLACEHOLDER,
                 enhet = enhet,
                 skjulBeslutterSignatur = skjulBeslutterSignatur,
-                datoPlaceholder = BESLUTTER_VEDTAKSDATO_PLACEHOLDER
+                datoPlaceholder = BESLUTTER_VEDTAKSDATO_PLACEHOLDER,
             ),
-            HttpHeaders().medContentTypeJsonUTF8()
+            HttpHeaders().medContentTypeJsonUTF8(),
         )
     }
 
     fun genererHtmlFritekstbrev(
         fritekstBrev: FrittståendeBrevRequestDto,
         saksbehandlerNavn: String,
-        enhet: String
+        enhet: String,
     ): String {
         val url = URI.create("$familieBrevUri/api/fritekst-brev/html")
         return postForEntity(
@@ -88,9 +88,9 @@ class BrevClient(
                 saksbehandlersignatur = saksbehandlerNavn,
                 besluttersignatur = BESLUTTER_SIGNATUR_PLACEHOLDER,
                 enhet = enhet,
-                datoPlaceholder = BESLUTTER_VEDTAKSDATO_PLACEHOLDER
+                datoPlaceholder = BESLUTTER_VEDTAKSDATO_PLACEHOLDER,
             ),
-            HttpHeaders().medContentTypeJsonUTF8()
+            HttpHeaders().medContentTypeJsonUTF8(),
         )
     }
 
@@ -107,7 +107,7 @@ data class BrevRequestMedSignaturer(
     val besluttersignatur: String?,
     val enhet: String?,
     val skjulBeslutterSignatur: Boolean,
-    val datoPlaceholder: String
+    val datoPlaceholder: String,
 )
 
 data class FritekstBrevRequestMedSignatur(
@@ -115,5 +115,5 @@ data class FritekstBrevRequestMedSignatur(
     val saksbehandlersignatur: String,
     val besluttersignatur: String?,
     val enhet: String,
-    val datoPlaceholder: String?
+    val datoPlaceholder: String?,
 )

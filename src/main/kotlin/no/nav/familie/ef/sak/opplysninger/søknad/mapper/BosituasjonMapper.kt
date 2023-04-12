@@ -14,7 +14,7 @@ object BosituasjonMapper {
             samboerDto,
             bosituasjon.sammenflyttingsdato,
             bosituasjon.datoFlyttetFraHverandre,
-            bosituasjon.tidligereSamboerFortsattRegistrertPåAdresse?.tilDto()
+            bosituasjon.tidligereSamboerFortsattRegistrertPåAdresse?.tilDto(),
         )
     }
 }

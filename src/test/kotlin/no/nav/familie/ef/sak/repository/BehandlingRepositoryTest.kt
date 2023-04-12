@@ -15,6 +15,7 @@ import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus.OPPRETTET
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus.SATT_PÅ_VENT
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus.UTREDES
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
+import no.nav.familie.ef.sak.fagsak.FagsakPersonRepository
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
 import no.nav.familie.ef.sak.felles.domain.Endret
@@ -22,6 +23,7 @@ import no.nav.familie.ef.sak.felles.domain.Sporbar
 import no.nav.familie.ef.sak.felles.domain.SporbarUtils
 import no.nav.familie.ef.sak.felles.util.BehandlingOppsettUtil
 import no.nav.familie.ef.sak.testutil.hasCauseMessageContaining
+import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.kontrakter.felles.ef.StønadType.BARNETILSYN
 import no.nav.familie.kontrakter.felles.ef.StønadType.OVERGANGSSTØNAD
@@ -43,7 +45,33 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
     @Autowired
     private lateinit var behandlingRepository: BehandlingRepository
 
+    @Autowired
+    private lateinit var fagsakPersonRepository: FagsakPersonRepository
+
     private val ident = "123"
+
+    @Test
+    fun `skal finne alle personer med aktiv stønad som ikke er manuelt revurdert siste to måneder`() {
+        val person1 = fagsakPerson(identer = setOf(PersonIdent("1")))
+        fagsakPersonRepository.insert(person1)
+        behandlingRepository.insert(behandling(testoppsettService.lagreFagsak(fagsak(person = person1)), resultat = INNVILGET, vedtakstidspunkt = LocalDateTime.now().minusMonths(3), årsak = BehandlingÅrsak.G_OMREGNING, status = FERDIGSTILT))
+
+        val person2 = fagsakPerson(identer = setOf(PersonIdent("2")))
+        fagsakPersonRepository.insert(person2)
+        behandlingRepository.insert(behandling(testoppsettService.lagreFagsak(fagsak(person = person2)), resultat = INNVILGET, vedtakstidspunkt = LocalDateTime.now(), årsak = BehandlingÅrsak.G_OMREGNING, status = FERDIGSTILT))
+
+        val person3 = fagsakPerson(identer = setOf(PersonIdent("3")))
+        fagsakPersonRepository.insert(person3)
+        behandlingRepository.insert(behandling(testoppsettService.lagreFagsak(fagsak(person = person3)), resultat = INNVILGET, vedtakstidspunkt = LocalDateTime.now().minusMonths(3), årsak = BehandlingÅrsak.NYE_OPPLYSNINGER, status = FERDIGSTILT))
+
+        val person4 = fagsakPerson(identer = setOf(PersonIdent("4")))
+        fagsakPersonRepository.insert(person4)
+        behandlingRepository.insert(behandling(testoppsettService.lagreFagsak(fagsak(person = person4)), resultat = INNVILGET, vedtakstidspunkt = LocalDateTime.now(), årsak = BehandlingÅrsak.NYE_OPPLYSNINGER, status = FERDIGSTILT))
+
+        val resultat = behandlingRepository.finnPersonerMedAktivStonadIkkeRevurdertSisteToMåneder()
+        assertThat(resultat.size).isEqualTo(3)
+        assertThat(resultat).containsAll(listOf("1", "2", "3"))
+    }
 
     @Test
     fun `skal ikke være mulig å legge inn en behandling med referanse til en behandling som ikke eksisterer`() {
@@ -74,8 +102,8 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
         assertThat(
             behandlingRepository.hentUferdigeBehandlingerFørDato(
                 OVERGANGSSTØNAD,
-                enMånedSiden
-            )
+                enMånedSiden,
+            ),
         ).size()
             .isEqualTo(1)
     }
@@ -102,13 +130,13 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
                             sporbar = Sporbar(
                                 endret = Endret(
                                     endretTid = LocalDateTime.now()
-                                        .plusDays(2)
-                                )
-                            )
+                                        .plusDays(2),
+                                ),
+                            ),
                         ),
-                        PersonIdent(ident = "3")
-                    )
-                )
+                        PersonIdent(ident = "3"),
+                    ),
+                ),
             )
         val behandling = behandlingRepository.insert(behandling(fagsak, status = OPPRETTET, resultat = INNVILGET))
 
@@ -154,11 +182,11 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
                     PersonIdent(ident = "1"),
                     PersonIdent(
                         ident = "2",
-                        sporbar = Sporbar(endret = Endret(endretTid = LocalDateTime.now().plusDays(2)))
+                        sporbar = Sporbar(endret = Endret(endretTid = LocalDateTime.now().plusDays(2))),
                     ),
-                    PersonIdent(ident = "3")
-                )
-            )
+                    PersonIdent(ident = "3"),
+                ),
+            ),
         )
         val behandling = behandlingRepository.insert(behandling(fagsak))
         val fnr = behandlingRepository.finnAktivIdent(behandling.id)
@@ -178,8 +206,8 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
             behandling(
                 fagsak,
                 status = UTREDES,
-                opprettetTid = LocalDateTime.now().minusDays(2)
-            )
+                opprettetTid = LocalDateTime.now().minusDays(2),
+            ),
         )
         assertThat(behandlingRepository.finnSisteIverksatteBehandling(fagsak.id)).isNull()
     }
@@ -265,8 +293,8 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
                 behandling(
                     fagsak,
                     status = FERDIGSTILT,
-                    type = BehandlingType.FØRSTEGANGSBEHANDLING
-                )
+                    type = BehandlingType.FØRSTEGANGSBEHANDLING,
+                ),
             )
             assertThat(behandlingRepository.existsByFagsakId(UUID.randomUUID())).isFalse
         }
@@ -278,8 +306,8 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
                 behandling(
                     fagsak,
                     status = FERDIGSTILT,
-                    type = BehandlingType.REVURDERING
-                )
+                    type = BehandlingType.REVURDERING,
+                ),
             )
             assertThat(behandlingRepository.existsByFagsakId(UUID.randomUUID())).isFalse
         }
@@ -394,7 +422,7 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
             annengangsbehandlingOS,
             førstegangsbehandlingBT,
             revurderingUnderArbeidBT,
-            revurderingUnderArbeidSP
+            revurderingUnderArbeidSP,
         )
     }
 
@@ -426,8 +454,8 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
                 behandlingRepository.insert(
                     behandling(
                         fagsak,
-                        resultat = IKKE_SATT
-                    ).copy(vedtakstidspunkt = SporbarUtils.now())
+                        resultat = IKKE_SATT,
+                    ).copy(vedtakstidspunkt = SporbarUtils.now()),
                 )
             }.has(hasCauseMessageContaining("behandling_resultat_vedtakstidspunkt_check"))
         }
@@ -438,8 +466,8 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
                 behandlingRepository.insert(
                     behandling(
                         fagsak,
-                        resultat = IKKE_SATT
-                    ).copy(vedtakstidspunkt = SporbarUtils.now())
+                        resultat = IKKE_SATT,
+                    ).copy(vedtakstidspunkt = SporbarUtils.now()),
                 )
             }.has(hasCauseMessageContaining("behandling_resultat_vedtakstidspunkt_check"))
         }
@@ -449,29 +477,29 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
         behandlingId: UUID,
         status: BehandlingStatus,
         resultat: BehandlingResultat,
-        fagsak: Fagsak
+        fagsak: Fagsak,
     ): Behandling {
         return behandlingRepository.insert(
             behandling(
                 id = behandlingId,
                 status = status,
                 resultat = resultat,
-                fagsak = fagsak
-            )
+                fagsak = fagsak,
+            ),
         )
     }
 
     private fun lagreFagsak(
         fagsakId: UUID,
         stønadType: StønadType,
-        fagsakPersonId: UUID
+        fagsakPersonId: UUID,
     ): Fagsak {
         return testoppsettService.lagreFagsak(
             fagsak(
                 id = fagsakId,
                 stønadstype = stønadType,
-                fagsakPersonId = fagsakPersonId
-            )
+                fagsakPersonId = fagsakPersonId,
+            ),
         )
     }
 }

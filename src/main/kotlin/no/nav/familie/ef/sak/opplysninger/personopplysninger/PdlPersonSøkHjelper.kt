@@ -1,7 +1,8 @@
 package no.nav.familie.ef.sak.opplysninger.personopplysninger
 
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Bostedsadresse
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.SearchRule
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.SearchRuleEquals
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.SearchRuleExists
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.SøkeKriterier
 
 object PdlPersonSøkHjelper {
@@ -13,58 +14,60 @@ object PdlPersonSøkHjelper {
                 matrikkeladresse.matrikkelId?.let {
                     lagSøkeKriterier(
                         søkefelt = "person.bostedsadresse.matrikkeladresse.matrikkelId",
-                        søkeord = bostedsadresse.matrikkeladresse.matrikkelId.toString()
+                        søkeord = it.toString(),
                     )
                 },
                 matrikkeladresse.bruksenhetsnummer?.let {
                     lagSøkeKriterier(
                         søkefelt = "person.bostedsadresse.matrikkeladresse.bruksenhetsnummer",
-                        søkeord = bostedsadresse.matrikkeladresse.bruksenhetsnummer.toString()
+                        søkeord = it,
                     )
-                }
+                },
             )
         } else if (bostedsadresse.vegadresse != null) {
             val vegadresse = bostedsadresse.vegadresse
             return listOfNotNull(
-                vegadresse.adressenavn?.let {
-                    lagSøkeKriterier(
-                        søkefelt = "person.bostedsadresse.vegadresse.adressenavn",
-                        søkeord = it
-                    )
-                },
-                vegadresse.bruksenhetsnummer?.let {
-                    lagSøkeKriterier(
-                        søkefelt = "person.bostedsadresse.vegadresse.bruksenhetsnummer",
-                        søkeord = it
-                    )
-                },
-                vegadresse.husbokstav?.let {
-                    lagSøkeKriterier(
-                        søkefelt = "person.bostedsadresse.vegadresse.husbokstav",
-                        søkeord = it
-                    )
-                },
-                vegadresse.husnummer?.let {
-                    lagSøkeKriterier(
-                        søkefelt = "person.bostedsadresse.vegadresse.husnummer",
-                        søkeord = it
-                    )
-                },
-                vegadresse.postnummer?.let {
-                    lagSøkeKriterier(
-                        søkefelt = "person.bostedsadresse.vegadresse.postnummer",
-                        søkeord = it
-                    )
-                }
+                equalsEllerNotExists(
+                    søkefelt = "person.bostedsadresse.vegadresse.adressenavn",
+                    søkeord = vegadresse.adressenavn,
+                ),
+                equalsEllerNotExists(
+                    søkefelt = "person.bostedsadresse.vegadresse.bruksenhetsnummer",
+                    søkeord = vegadresse.bruksenhetsnummer,
+                ),
+                equalsEllerNotExists(
+                    søkefelt = "person.bostedsadresse.vegadresse.husbokstav",
+                    søkeord = vegadresse.husbokstav,
+                ),
+                equalsEllerNotExists(
+                    søkefelt = "person.bostedsadresse.vegadresse.husnummer",
+                    søkeord = vegadresse.husnummer,
+                ),
+                equalsEllerNotExists(
+                    søkefelt = "person.bostedsadresse.vegadresse.postnummer",
+                    søkeord = vegadresse.postnummer,
+                ),
             )
         }
         return emptyList()
     }
 
+    private fun equalsEllerNotExists(søkefelt: String, søkeord: String?): SøkeKriterier {
+        return søkeord?.let { lagSøkeKriterier(søkefelt, it) }
+            ?: lagSøkeKriterier(søkefelt, exists = false)
+    }
+
     private fun lagSøkeKriterier(søkefelt: String, søkeord: String): SøkeKriterier {
         return SøkeKriterier(
             fieldName = søkefelt,
-            searchRule = SearchRule(equals = søkeord)
+            searchRule = SearchRuleEquals(equals = søkeord),
+        )
+    }
+
+    private fun lagSøkeKriterier(søkefelt: String, exists: Boolean): SøkeKriterier {
+        return SøkeKriterier(
+            fieldName = søkefelt,
+            searchRule = SearchRuleExists(exists = exists),
         )
     }
 }

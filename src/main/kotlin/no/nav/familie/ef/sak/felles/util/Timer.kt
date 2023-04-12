@@ -12,7 +12,7 @@ object Timer {
         val caller = Thread.currentThread().stackTrace[2]
         logger.info(
             "class=${caller.className} method=${caller.methodName} " +
-                "tid=${System.currentTimeMillis() - start}ms $metadata"
+                "tid=${System.currentTimeMillis() - start}ms $metadata",
         )
         return result
     }

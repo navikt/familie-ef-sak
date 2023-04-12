@@ -31,8 +31,8 @@ class AaregClientMock {
                 arbeidsgiver = Arbeidsgiver(ArbeidsgiverType.Organisasjon, "orgnummer", "offentligIdent"),
                 type = "type",
                 ansettelsesperiode = Ansettelsesperiode(),
-                arbeidsavtaler = listOf(Arbeidsavtaler())
-            )
+                arbeidsavtaler = listOf(Arbeidsavtaler()),
+            ),
         )
         every { mockk.hentArbeidsforhold(any(), any()) } returns Ressurs.success(mockResponse)
         return mockk

@@ -31,11 +31,11 @@ internal class MellomlagerFritekstbrevRepositoryTest : OppslagSpringRunnerTest()
                 avsnitt = listOf(
                     FrittståendeBrevAvsnitt(
                         deloverskrift = "En deloverskift",
-                        innhold = "Noe innhold"
-                    )
-                )
+                        innhold = "Noe innhold",
+                    ),
+                ),
             ),
-            brevType = FritekstBrevKategori.VEDTAK_AVSLAG
+            brevType = FritekstBrevKategori.VEDTAK_AVSLAG,
         )
 
         mellomlagerFritekstbrevRepository.insert(mellomlagretBrev)

@@ -37,7 +37,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.http.HttpStatus.BAD_REQUEST
-import java.time.LocalDateTime
 
 internal class VedtaksbrevServiceTest {
 
@@ -56,7 +55,7 @@ internal class VedtaksbrevServiceTest {
             vedtaksbrevRepository,
             personopplysningerService,
             brevsignaturService,
-            familieDokumentClient
+            familieDokumentClient,
         )
 
     private val vedtakKreverBeslutter = VedtakErUtenBeslutter(false)
@@ -95,9 +94,9 @@ internal class VedtaksbrevServiceTest {
         vedtaksbrevService.lagEndeligBeslutterbrev(
             saksbehandling(
                 fagsak = fagsak,
-                behandling = behandlingForBeslutter
+                behandling = behandlingForBeslutter,
             ),
-            vedtakErUtenBeslutter
+            vedtakErUtenBeslutter,
         )
 
         assertThat(vedtaksbrevSlot.captured.saksbehandlersignatur).isNotNull
@@ -121,8 +120,10 @@ internal class VedtaksbrevServiceTest {
         every { brevClient.genererHtmlFritekstbrev(any(), any(), any()) } returns "html"
         every { familieDokumentClient.genererPdfFraHtml(any()) } returns "123".toByteArray()
 
-        vedtaksbrevService.lagSaksbehandlerFritekstbrev(fritekstBrevDto,
-            saksbehandling(fagsak, behandlingForSaksbehandler))
+        vedtaksbrevService.lagSaksbehandlerFritekstbrev(
+            fritekstBrevDto,
+            saksbehandling(fagsak, behandlingForSaksbehandler),
+        )
         assertThat(vedtaksbrevSlot.captured.saksbehandlersignatur).isEqualTo(beslutterNavn)
     }
 
@@ -131,7 +132,7 @@ internal class VedtaksbrevServiceTest {
         val feil = assertThrows<Feil> {
             vedtaksbrevService.lagSaksbehandlerFritekstbrev(
                 fritekstBrevDto,
-                saksbehandling(fagsak, behandlingForBeslutter)
+                saksbehandling(fagsak, behandlingForBeslutter),
             )
         }
         assertThat(feil.message).contains("Behandling er i feil steg")
@@ -145,9 +146,9 @@ internal class VedtaksbrevServiceTest {
             vedtaksbrevService.lagEndeligBeslutterbrev(
                 saksbehandling(
                     fagsak,
-                    behandlingForBeslutter.copy(steg = StegType.VILKÅR)
+                    behandlingForBeslutter.copy(steg = StegType.VILKÅR),
                 ),
-                vedtakKreverBeslutter
+                vedtakKreverBeslutter,
             )
         }
         assertThat(feil.message).contains("Behandling er i feil steg")
@@ -164,10 +165,10 @@ internal class VedtaksbrevServiceTest {
                     fagsak,
                     behandlingForBeslutter.copy(
                         status =
-                        BehandlingStatus.FERDIGSTILT
-                    )
+                        BehandlingStatus.FERDIGSTILT,
+                    ),
                 ),
-                vedtakKreverBeslutter
+                vedtakKreverBeslutter,
             )
         }
         assertThat(feilFerdigstilt.httpStatus).isEqualTo(BAD_REQUEST)
@@ -177,9 +178,9 @@ internal class VedtaksbrevServiceTest {
             vedtaksbrevService.lagEndeligBeslutterbrev(
                 saksbehandling(
                     fagsak,
-                    behandling.copy(status = BehandlingStatus.UTREDES)
+                    behandling.copy(status = BehandlingStatus.UTREDES),
                 ),
-                vedtakKreverBeslutter
+                vedtakKreverBeslutter,
             )
         }
         assertThat(feilUtredes.httpStatus).isEqualTo(BAD_REQUEST)
@@ -194,9 +195,9 @@ internal class VedtaksbrevServiceTest {
             vedtaksbrevService.lagEndeligBeslutterbrev(
                 saksbehandling(
                     fagsak,
-                    behandlingForBeslutter
+                    behandlingForBeslutter,
                 ),
-                vedtakKreverBeslutter
+                vedtakKreverBeslutter,
             )
         }
         assertThat(feil.message).isEqualTo("Det finnes allerede et beslutterbrev")
@@ -210,8 +211,10 @@ internal class VedtaksbrevServiceTest {
         every { vedtaksbrevRepository.update(capture(brevSlot)) } returns mockk()
         every { familieDokumentClient.genererPdfFraHtml(any()) } returns "brev".toByteArray()
         // Når
-        vedtaksbrevService.lagEndeligBeslutterbrev(saksbehandling(fagsak, behandlingForBeslutter),
-            vedtakKreverBeslutter)
+        vedtaksbrevService.lagEndeligBeslutterbrev(
+            saksbehandling(fagsak, behandlingForBeslutter),
+            vedtakKreverBeslutter,
+        )
 
         assertThat(beslutterIdent).isNotNull()
         assertThat(brevSlot.captured.beslutterident).isEqualTo(beslutterIdent)
@@ -226,11 +229,11 @@ internal class VedtaksbrevServiceTest {
                         fagsak,
                         behandlingForBeslutter.copy(
                             status =
-                            BehandlingStatus.FERDIGSTILT
-                        )
+                            BehandlingStatus.FERDIGSTILT,
+                        ),
                     ),
                     TextNode(""),
-                    ""
+                    "",
                 )
         }
     }
@@ -238,13 +241,13 @@ internal class VedtaksbrevServiceTest {
     private val behandlingForBeslutter = behandling(
         fagsak,
         status = BehandlingStatus.FATTER_VEDTAK,
-        steg = StegType.BESLUTTE_VEDTAK
+        steg = StegType.BESLUTTE_VEDTAK,
     )
 
     private val behandlingForSaksbehandler = behandling(
         fagsak,
         status = BehandlingStatus.UTREDES,
-        steg = StegType.SEND_TIL_BESLUTTER
+        steg = StegType.SEND_TIL_BESLUTTER,
     )
 
     private fun lagVedtaksbrev(brevmal: String, saksbehandlerIdent: String = "123") = Vedtaksbrev(
@@ -255,13 +258,13 @@ internal class VedtaksbrevServiceTest {
         besluttersignatur = null,
         beslutterPdf = null, enhet = "",
         saksbehandlerident = saksbehandlerIdent,
-        beslutterident = ""
+        beslutterident = "",
     )
 
     private fun lagVedtaksbrevFritekstDto() = VedtaksbrevFritekstDto(
         "Innvilget",
         listOf(FrittståendeBrevAvsnitt("Deloverskrift", "Innhold")),
-        behandling.id
+        behandling.id,
     )
 
     @Test
@@ -317,7 +320,7 @@ internal class VedtaksbrevServiceTest {
         vedtaksbrevService.lagSaksbehandlerSanitybrev(
             saksbehandling(fagsak, behandling),
             objectMapper.createObjectNode(),
-            "brevmal"
+            "brevmal",
         )
 
         assertThat(vedtaksbrevSlot.captured.saksbehandlerHtml).isEqualTo(html)
@@ -335,7 +338,7 @@ internal class VedtaksbrevServiceTest {
         vedtaksbrevService.lagSaksbehandlerSanitybrev(
             saksbehandling(fagsak, behandling),
             objectMapper.createObjectNode(),
-            "brevmal"
+            "brevmal",
         )
         assertThat(vedtaksbrevSlot.captured.opprettetTid).isAfterOrEqualTo(now)
     }

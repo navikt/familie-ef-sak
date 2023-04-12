@@ -10,24 +10,24 @@ class ArbeidsforholdDto(
     val arbeidsgiver: ArbeidsgiverDto? = null,
     val type: String? = null,
     val ansettelsesperiode: AnsettelsesperiodeDto? = null,
-    val arbeidsavtaler: List<ArbeidsavtaleDto>? = null
+    val arbeidsavtaler: List<ArbeidsavtaleDto>? = null,
 )
 
 class ArbeidstakerDto(
     val type: String? = null,
     val offentligIdent: String? = null,
-    val aktoerId: String? = null
+    val aktoerId: String? = null,
 )
 
 class ArbeidsgiverDto(
     val type: ArbeidsgiverType? = null,
     val organisasjonsnummer: String? = null,
-    val offentligIdent: String? = null
+    val offentligIdent: String? = null,
 )
 
 class AnsettelsesperiodeDto(
     val periode: Periode? = null,
-    val bruksperiode: Periode? = null
+    val bruksperiode: Periode? = null,
 )
 
 class ArbeidsavtaleDto(
@@ -37,5 +37,5 @@ class ArbeidsavtaleDto(
     val antallTimerPrUke: Double? = null,
     val beregnetAntallTimerPrUke: Double? = null,
     val bruksperiode: Periode? = null,
-    val gyldighetsperiode: Periode? = null
+    val gyldighetsperiode: Periode? = null,
 )

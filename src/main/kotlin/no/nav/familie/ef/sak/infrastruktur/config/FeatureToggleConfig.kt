@@ -17,13 +17,13 @@ import java.net.URI
 @ConfigurationProperties("funksjonsbrytere")
 class FeatureToggleConfig(
     private val enabled: Boolean,
-    private val unleash: Unleash
+    private val unleash: Unleash,
 ) {
 
     data class Unleash(
         val uri: URI,
         val environment: String,
-        val applicationName: String
+        val applicationName: String,
     )
 
     private val log: Logger = LoggerFactory.getLogger(this::class.java)
@@ -35,7 +35,7 @@ class FeatureToggleConfig(
         } else {
             log.warn(
                 "Funksjonsbryter-funksjonalitet er skrudd AV. " +
-                    "Gir standardoppførsel for alle funksjonsbrytere, dvs 'false'"
+                    "Gir standardoppførsel for alle funksjonsbrytere, dvs 'false'",
             )
             lagDummyFeatureToggleService()
         }
@@ -48,7 +48,7 @@ class FeatureToggleConfig(
                 .unleashContextProvider(lagUnleashContextProvider())
                 .build(),
             ByEnvironmentStrategy(),
-            ByUserIdStrategy()
+            ByUserIdStrategy(),
         )
 
         return object : FeatureToggleService {
@@ -78,6 +78,9 @@ class FeatureToggleConfig(
             override fun isEnabled(toggle: Toggle, defaultValue: Boolean): Boolean {
                 if (unleash.environment == "local") {
                     return true
+                }
+                if (toggle == Toggle.SETT_PÅ_VENT_MED_OPPGAVESTYRING) {
+                    return false
                 }
                 return defaultValue
             }

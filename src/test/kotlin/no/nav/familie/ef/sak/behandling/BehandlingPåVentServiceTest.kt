@@ -1,24 +1,31 @@
 package no.nav.familie.ef.sak.behandling
 
 import io.mockk.every
+import io.mockk.justRun
 import io.mockk.mockk
 import io.mockk.mockkObject
+import io.mockk.slot
 import io.mockk.unmockkObject
 import io.mockk.verify
 import io.mockk.verifyOrder
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
+import no.nav.familie.ef.sak.behandling.dto.SettPåVentRequest
 import no.nav.familie.ef.sak.behandling.dto.TaAvVentStatus
 import no.nav.familie.ef.sak.behandlingsflyt.task.BehandlingsstatistikkTask
 import no.nav.familie.ef.sak.behandlingshistorikk.BehandlingshistorikkService
 import no.nav.familie.ef.sak.behandlingshistorikk.domain.StegUtfall
-import no.nav.familie.ef.sak.felles.util.mockFeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
+import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.vedtak.NullstillVedtakService
 import no.nav.familie.kontrakter.ef.iverksett.Hendelse
+import no.nav.familie.kontrakter.felles.oppgave.MappeDto
+import no.nav.familie.kontrakter.felles.oppgave.Oppgave
+import no.nav.familie.kontrakter.felles.oppgave.OppgavePrioritet
 import no.nav.familie.prosessering.internal.TaskService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
@@ -27,6 +34,8 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.http.HttpStatus
+import java.time.LocalDate
+import java.time.Month
 import java.util.UUID
 
 internal class BehandlingPåVentServiceTest {
@@ -35,6 +44,9 @@ internal class BehandlingPåVentServiceTest {
     private val taskService = mockk<TaskService>(relaxed = true)
     private val nullstillVedtakService = mockk<NullstillVedtakService>(relaxed = true)
     private val behandlingshistorikkService = mockk<BehandlingshistorikkService>(relaxed = true)
+    private val oppgaveService = mockk<OppgaveService>()
+
+    private val featureToggleService = mockk<FeatureToggleService>()
 
     private val behandlingPåVentService =
         BehandlingPåVentService(
@@ -42,7 +54,8 @@ internal class BehandlingPåVentServiceTest {
             behandlingshistorikkService,
             taskService,
             nullstillVedtakService,
-            mockFeatureToggleService()
+            featureToggleService,
+            oppgaveService,
         )
     val fagsak = fagsak()
     val tidligereIverksattBehandling = behandling(fagsak)
@@ -52,8 +65,24 @@ internal class BehandlingPåVentServiceTest {
     @BeforeEach
     internal fun setUp() {
         mockkObject(SikkerhetContext)
+        every { featureToggleService.isEnabled(any()) } returns true
         every { SikkerhetContext.hentSaksbehandler() } returns "bob"
         mockFinnSisteIverksatteBehandling(null)
+        every { oppgaveService.finnMapper(any<String>()) } answers {
+            val enhetsnr = firstArg<String>()
+            listOf(
+                MappeDto(
+                    id = 101,
+                    navn = "Mappe 1",
+                    enhetsnr = enhetsnr,
+                ),
+                MappeDto(
+                    id = 102,
+                    navn = "Mappe 2",
+                    enhetsnr = enhetsnr,
+                ),
+            )
+        }
     }
 
     @AfterEach
@@ -67,17 +96,25 @@ internal class BehandlingPåVentServiceTest {
         @Test
         fun `skal sette behandling på vent hvis den kan redigeres og sende melding til DVH`() {
             mockHentBehandling(BehandlingStatus.UTREDES)
+            every { featureToggleService.isEnabled(any()) } returns false
 
             behandlingPåVentService.settPåVent(behandlingId)
 
             verify { behandlingService.oppdaterStatusPåBehandling(behandlingId, BehandlingStatus.SATT_PÅ_VENT) }
-            verify { behandlingshistorikkService.opprettHistorikkInnslag(behandlingId, any(), StegUtfall.SATT_PÅ_VENT, null) }
+            verify {
+                behandlingshistorikkService.opprettHistorikkInnslag(
+                    behandlingId,
+                    any(),
+                    StegUtfall.SATT_PÅ_VENT,
+                    null,
+                )
+            }
             verify {
                 taskService.save(
                     coWithArg {
                         assertThat(it.type).isEqualTo(BehandlingsstatistikkTask.TYPE)
                         assertThat(it.payload).contains(Hendelse.VENTER.name)
-                    }
+                    },
                 )
             }
         }
@@ -173,13 +210,20 @@ internal class BehandlingPåVentServiceTest {
             behandlingPåVentService.taAvVent(behandlingId)
 
             verify { behandlingService.oppdaterStatusPåBehandling(behandlingId, BehandlingStatus.UTREDES) }
-            verify { behandlingshistorikkService.opprettHistorikkInnslag(behandlingId, any(), StegUtfall.TATT_AV_VENT, null) }
+            verify {
+                behandlingshistorikkService.opprettHistorikkInnslag(
+                    behandlingId,
+                    any(),
+                    StegUtfall.TATT_AV_VENT,
+                    null,
+                )
+            }
             verify {
                 taskService.save(
                     coWithArg {
                         assertThat(it.type).isEqualTo(BehandlingsstatistikkTask.TYPE)
                         assertThat(it.payload).contains(Hendelse.PÅBEGYNT.name)
-                    }
+                    },
                 )
             }
             verify(exactly = 0) { nullstillVedtakService.nullstillVedtak(any()) }
@@ -215,6 +259,51 @@ internal class BehandlingPåVentServiceTest {
                 behandlingService.oppdaterForrigeBehandlingId(behandlingId, tidligereIverksattBehandling.id)
                 nullstillVedtakService.nullstillVedtak(behandlingId)
             }
+        }
+    }
+
+    @Nested
+    inner class Oppgavebeskrivelse {
+        @Test
+        fun `skal oppdatere oppgavebeskrivelse ved sett på vent - med saksbehandler, prioritet, frist og mappe`() {
+            mockHentBehandling(BehandlingStatus.UTREDES)
+
+            val oppgaveSlot = slot<Oppgave>()
+            val oppgaveId: Long = 123
+
+            val eksisterendeOppgave = Oppgave(
+                id = oppgaveId,
+                tildeltEnhetsnr = "4489",
+                tilordnetRessurs = "gammel saksbehandler",
+                beskrivelse = "Gammel beskrivelse",
+                mappeId = 101,
+                fristFerdigstillelse = LocalDate.of(2002, Month.MARCH, 23).toString(),
+                prioritet = OppgavePrioritet.NORM,
+            )
+            every { oppgaveService.hentOppgave(oppgaveId) } returns eksisterendeOppgave
+
+            justRun { oppgaveService.oppdaterOppgave(capture(oppgaveSlot)) }
+
+            val settPåVentRequest = SettPåVentRequest(
+                oppgaveId = oppgaveId,
+                saksbehandler = "ny saksbehandler",
+                prioritet = OppgavePrioritet.HOY,
+                frist = LocalDate.of(2002, Month.MARCH, 24).toString(),
+                mappe = 102,
+                beskrivelse = "Her er litt tekst fra saksbehandler",
+                oppgaveVersjon = 1
+            )
+            behandlingPåVentService.settPåVent(
+                behandlingId,
+                settPåVentRequest,
+            )
+
+            assertThat(oppgaveSlot.captured.beskrivelse).isNotEqualTo(eksisterendeOppgave.beskrivelse)
+            assertThat(oppgaveSlot.captured.mappeId).isEqualTo(settPåVentRequest.mappe)
+            assertThat(oppgaveSlot.captured.tilordnetRessurs).isEqualTo(settPåVentRequest.saksbehandler)
+            assertThat(oppgaveSlot.captured.prioritet).isEqualTo(settPåVentRequest.prioritet)
+            assertThat(oppgaveSlot.captured.fristFerdigstillelse).isEqualTo(settPåVentRequest.frist)
+            assertThat(oppgaveSlot.captured.id).isEqualTo(settPåVentRequest.oppgaveId)
         }
     }
 

@@ -10,7 +10,7 @@ object BarnMatcher {
 
     fun kobleBehandlingBarnOgRegisterBarn(
         behandlingBarn: List<BehandlingBarn>,
-        grunnlagsbarn: List<BarnMedIdent>
+        grunnlagsbarn: List<BarnMedIdent>,
     ): List<MatchetBehandlingBarn> {
         val grunnlagsbarnPåIdent = grunnlagsbarn.associateBy { it.personIdent }
         val behandlingBarnFnrMatchetTilPdlBarn = behandlingBarn.map {
@@ -36,7 +36,7 @@ object BarnMatcher {
 
     private fun forsøkMatchPåFødselsdato(
         barn: MatchetBehandlingBarn,
-        pdlBarnIkkeISøknad: Map<String, BarnMedIdent>
+        pdlBarnIkkeISøknad: Map<String, BarnMedIdent>,
     ): MatchetBehandlingBarn {
         val fødselTermindato = barn.behandlingBarn.fødselTermindato ?: return barn
         val nærmesteMatchBarnMedIdent = nærmesteMatch(pdlBarnIkkeISøknad, fødselTermindato) ?: return barn
@@ -46,7 +46,7 @@ object BarnMatcher {
 
     private fun nærmesteMatch(
         pdlBarnIkkeISøknad: Map<String, BarnMedIdent>,
-        fødselTermindato: LocalDate
+        fødselTermindato: LocalDate,
     ): BarnMedIdent? {
         val besteMatch = finnBesteMatchPåFødselsnummerForTermindato(pdlBarnIkkeISøknad.map { it.key }, fødselTermindato)
         return pdlBarnIkkeISøknad[besteMatch]
@@ -56,7 +56,7 @@ object BarnMatcher {
 data class MatchetBehandlingBarn(
     val fødselsnummer: String?,
     val barn: BarnMedIdent?,
-    val behandlingBarn: BehandlingBarn
+    val behandlingBarn: BehandlingBarn,
 )
 
 fun finnBesteMatchPåFødselsnummerForTermindato(fødselsnumre: List<String>, termindato: LocalDate): String? {

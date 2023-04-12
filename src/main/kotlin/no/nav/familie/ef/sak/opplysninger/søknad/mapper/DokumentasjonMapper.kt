@@ -24,7 +24,7 @@ object DokumentasjonMapper {
             situasjon = null,
             barnetilsynDokumentasjon = søknadsskjema.dokumentasjon,
             utdanningsutgifter = null,
-            adresseopplysninger = søknadsskjema.adresseopplysninger
+            adresseopplysninger = søknadsskjema.adresseopplysninger,
         )
 
     fun tilDokumentasjonDto(søknadsskjema: SøknadsskjemaOvergangsstønad): DokumentasjonFraSøknadDto =
@@ -36,7 +36,7 @@ object DokumentasjonMapper {
             situasjon = søknadsskjema.situasjon,
             barnetilsynDokumentasjon = null,
             utdanningsutgifter = null,
-            adresseopplysninger = søknadsskjema.adresseopplysninger
+            adresseopplysninger = søknadsskjema.adresseopplysninger,
         )
 
     fun tilDokumentasjonDto(søknadsskjema: SøknadsskjemaSkolepenger): DokumentasjonFraSøknadDto =
@@ -48,7 +48,7 @@ object DokumentasjonMapper {
             situasjon = null,
             barnetilsynDokumentasjon = null,
             utdanningsutgifter = søknadsskjema.utdanningsutgifter,
-            adresseopplysninger = søknadsskjema.adresseopplysninger
+            adresseopplysninger = søknadsskjema.adresseopplysninger,
         )
 
     fun tilDokumentasjonDto(
@@ -59,7 +59,7 @@ object DokumentasjonMapper {
         situasjon: Situasjon?,
         barnetilsynDokumentasjon: BarnetilsynDokumentasjon?,
         utdanningsutgifter: Dokumentasjon?,
-        adresseopplysninger: Adresseopplysninger?
+        adresseopplysninger: Adresseopplysninger?,
 
     ): DokumentasjonFraSøknadDto =
         DokumentasjonFraSøknadDto(
@@ -101,6 +101,6 @@ object DokumentasjonMapper {
             oppsigelse = situasjon?.oppsigelseDokumentasjon?.tilDto(),
 
             utdanningsutgifter = utdanningsutgifter?.tilDto(),
-            meldtAdresseendring = adresseopplysninger?.dokumentasjonAdresseendring?.tilDto()
+            meldtAdresseendring = adresseopplysninger?.dokumentasjonAdresseendring?.tilDto(),
         )
 }

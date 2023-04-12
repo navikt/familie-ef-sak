@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.service
 
+import io.mockk.mockk
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.barn.BarnRepository
 import no.nav.familie.ef.sak.barn.BehandlingBarn
@@ -9,7 +10,6 @@ import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
-import no.nav.familie.ef.sak.behandling.dto.RevurderingBarnDto
 import no.nav.familie.ef.sak.behandling.dto.RevurderingDto
 import no.nav.familie.ef.sak.behandlingsflyt.steg.BeregnYtelseSteg
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
@@ -18,6 +18,7 @@ import no.nav.familie.ef.sak.felles.util.BrukerContextUtil
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.mockBrukerContext
 import no.nav.familie.ef.sak.infrastruktur.config.PdlClientConfig
 import no.nav.familie.ef.sak.infrastruktur.config.RolleConfig
+import no.nav.familie.ef.sak.journalføring.dto.VilkårsbehandleNyeBarn
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.Sivilstandstype
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadRepository
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
@@ -38,6 +39,7 @@ import no.nav.familie.ef.sak.vedtak.domain.PeriodeMedBeløp
 import no.nav.familie.ef.sak.vedtak.domain.Vedtak
 import no.nav.familie.ef.sak.vedtak.dto.tilVedtakDto
 import no.nav.familie.ef.sak.vilkår.Delvilkårsvurdering
+import no.nav.familie.ef.sak.vilkår.Opphavsvilkår
 import no.nav.familie.ef.sak.vilkår.VilkårType
 import no.nav.familie.ef.sak.vilkår.Vilkårsresultat
 import no.nav.familie.ef.sak.vilkår.VilkårsvurderingRepository
@@ -45,6 +47,7 @@ import no.nav.familie.ef.sak.vilkår.regler.HovedregelMetadata
 import no.nav.familie.ef.sak.vilkår.regler.vilkår.AleneomsorgRegel
 import no.nav.familie.ef.sak.vilkår.regler.vilkår.SivilstandRegel
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
+import no.nav.familie.kontrakter.ef.søknad.Barn
 import no.nav.familie.kontrakter.ef.søknad.TestsøknadBuilder
 import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.kontrakter.felles.ef.StønadType
@@ -98,7 +101,7 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
     fun setUp() {
         mockBrukerContext(preferredUsername = "Heider", groups = listOf(rolleConfig.saksbehandlerRolle))
         fagsak = testoppsettService.lagreFagsak(fagsak(identer = identer))
-        revurderingDto = RevurderingDto(fagsak.id, behandlingsårsak, kravMottatt, emptyList())
+        revurderingDto = RevurderingDto(fagsak.id, behandlingsårsak, kravMottatt, VilkårsbehandleNyeBarn.VILKÅRSBEHANDLE)
     }
 
     @AfterEach
@@ -146,8 +149,8 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
                 fagsak = fagsak,
                 type = BehandlingType.REVURDERING,
                 status = BehandlingStatus.FERDIGSTILT,
-                resultat = BehandlingResultat.AVSLÅTT
-            )
+                resultat = BehandlingResultat.AVSLÅTT,
+            ),
         )
         opprettVilkår(behandling, lagreSøknad(revurdering1).sivilstand)
 
@@ -164,15 +167,15 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
         opprettVilkår(behandling, lagreSøknad(behandling).sivilstand)
 
         val revurdering = revurderingService.opprettRevurderingManuelt(revurderingDto)
-        val sivilstandVilkårForBehandling =
-            vilkårsvurderingRepository.findByBehandlingId(behandling.id).first { it.type == VilkårType.SIVILSTAND }
-        val sivilstandVilkårForRevurdering =
-            vilkårsvurderingRepository.findByBehandlingId(revurdering.id).first { it.type == VilkårType.SIVILSTAND }
-        val aleneomsorgVilkårForBehandling =
-            vilkårsvurderingRepository.findByBehandlingId(behandling.id).first { it.type == VilkårType.ALENEOMSORG }
-        val aleneomsorgVilkårForRevurdering =
-            vilkårsvurderingRepository.findByBehandlingId(revurdering.id).first { it.type == VilkårType.ALENEOMSORG }
+        val vilkårBehandling = vilkårsvurderingRepository.findByBehandlingId(behandling.id)
+        val vilkårRevurdering = vilkårsvurderingRepository.findByBehandlingId(revurdering.id)
+        val sivilstandVilkårForBehandling = vilkårBehandling.first { it.type == VilkårType.SIVILSTAND }
+        val sivilstandVilkårForRevurdering = vilkårRevurdering.first { it.type == VilkårType.SIVILSTAND }
+        val aleneomsorgVilkårForBehandling = vilkårBehandling.first { it.type == VilkårType.ALENEOMSORG }
+        val aleneomsorgVilkårForRevurdering = vilkårRevurdering.first { it.type == VilkårType.ALENEOMSORG }
         val barnPåBehandling = barnRepository.findByBehandlingId(revurdering.id).first()
+
+        assertThat(vilkårRevurdering).hasSize(vilkårBehandling.size)
 
         assertThat(sivilstandVilkårForBehandling.id).isNotEqualTo(sivilstandVilkårForRevurdering.id)
         assertThat(sivilstandVilkårForBehandling.behandlingId).isNotEqualTo(sivilstandVilkårForRevurdering.behandlingId)
@@ -180,6 +183,9 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
         assertThat(sivilstandVilkårForBehandling.sporbar.endret.endretTid).isEqualTo(sivilstandVilkårForRevurdering.sporbar.endret.endretTid)
         assertThat(sivilstandVilkårForRevurdering.barnId).isNull()
         assertThat(sivilstandVilkårForBehandling.barnId).isNull()
+        assertThat(sivilstandVilkårForBehandling.opphavsvilkår).isNull()
+        assertThat(sivilstandVilkårForRevurdering.opphavsvilkår)
+            .isEqualTo(Opphavsvilkår(behandling.id, sivilstandVilkårForBehandling.sporbar.endret.endretTid))
 
         assertThat(aleneomsorgVilkårForBehandling.id).isNotEqualTo(aleneomsorgVilkårForRevurdering.id)
         assertThat(aleneomsorgVilkårForBehandling.barnId).isNotEqualTo(aleneomsorgVilkårForRevurdering.barnId)
@@ -188,12 +194,15 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
         assertThat(aleneomsorgVilkårForBehandling.sporbar.endret.endretTid).isEqualTo(aleneomsorgVilkårForRevurdering.sporbar.endret.endretTid)
         assertThat(aleneomsorgVilkårForBehandling.barnId).isNotNull
         assertThat(aleneomsorgVilkårForRevurdering.barnId).isEqualTo(barnPåBehandling.id)
+        assertThat(aleneomsorgVilkårForBehandling.opphavsvilkår).isNull()
+        assertThat(aleneomsorgVilkårForRevurdering.opphavsvilkår)
+            .isEqualTo(Opphavsvilkår(behandling.id, aleneomsorgVilkårForBehandling.sporbar.endret.endretTid))
 
         assertThat(sivilstandVilkårForBehandling).usingRecursiveComparison()
-            .ignoringFields("id", "sporbar", "behandlingId", "barnId")
+            .ignoringFields("id", "sporbar", "behandlingId", "barnId", "opphavsvilkår")
             .isEqualTo(sivilstandVilkårForRevurdering)
         assertThat(aleneomsorgVilkårForBehandling).usingRecursiveComparison()
-            .ignoringFields("id", "sporbar", "behandlingId", "barnId")
+            .ignoringFields("id", "sporbar", "behandlingId", "barnId", "opphavsvilkår")
             .isEqualTo(aleneomsorgVilkårForRevurdering)
     }
 
@@ -206,7 +215,7 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
             beløp = 8000,
             kontantstøtteWrapper = KontantstøtteWrapper(listOf(PeriodeMedBeløp(Månedsperiode(YearMonth.of(2023, 3), YearMonth.of(2023, 4)), 1000))),
             fom = YearMonth.of(2022, 6),
-            tom = YearMonth.of(2023, 12)
+            tom = YearMonth.of(2023, 12),
         )
         ferdigstillVedtak(vedtak, behandling, fagsakBarnetilsyn)
 
@@ -224,7 +233,7 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
     private fun ferdigstillVedtak(
         vedtak: Vedtak,
         behandling: Behandling,
-        fagsakBarnetilsyn: Fagsak
+        fagsakBarnetilsyn: Fagsak,
     ) {
         vedtakService.lagreVedtak(vedtak.tilVedtakDto(), behandling.id, StønadType.BARNETILSYN)
 
@@ -233,14 +242,19 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
             behandling.copy(
                 status = BehandlingStatus.FERDIGSTILT,
                 resultat = BehandlingResultat.INNVILGET,
-                vedtakstidspunkt = SporbarUtils.now()
-            )
+                vedtakstidspunkt = SporbarUtils.now(),
+            ),
         )
     }
 
     private fun opprettBarnetilsynBehandling(): Pair<Fagsak, Behandling> {
         val fagsakBarnetilsyn = testoppsettService.lagreFagsak(fagsak(identer = identer, stønadstype = StønadType.BARNETILSYN))
-        revurderingDto = RevurderingDto(fagsakBarnetilsyn.id, BehandlingÅrsak.SATSENDRING, kravMottatt, emptyList())
+        revurderingDto = RevurderingDto(
+            fagsakBarnetilsyn.id,
+            BehandlingÅrsak.SATSENDRING,
+            kravMottatt,
+            VilkårsbehandleNyeBarn.VILKÅRSBEHANDLE,
+        )
 
         val behandling = behandling(fagsakBarnetilsyn)
         behandlingRepository.insert(behandling)
@@ -251,28 +265,26 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
     @Test
     internal fun `revurdering med nye barn - skal kopiere vilkår`() {
         val behandling = opprettFerdigstiltBehandling(fagsak)
-        opprettVilkår(behandling, lagreSøknad(behandling).sivilstand)
-        val nyttBarn = RevurderingBarnDto(personIdent = "44445555666")
+        val barn = listOf(TestsøknadBuilder.Builder().defaultBarn("any", PdlClientConfig.barnFnr))
+        opprettVilkår(behandling, lagreSøknad(behandling, barn).sivilstand)
 
-        val revurdering = revurderingService.opprettRevurderingManuelt(revurderingDto.copy(barn = listOf(nyttBarn)))
+        val revurdering = revurderingService.opprettRevurderingManuelt(revurderingDto)
         val vilkårForBehandling = vilkårsvurderingRepository.findByBehandlingId(behandling.id)
         val vilkårForRevurdering = vilkårsvurderingRepository.findByBehandlingId(revurdering.id)
-        val barnPåBehandling = barnRepository.findByBehandlingId(revurdering.id)
+        val barnPåRevurdering = barnRepository.findByBehandlingId(revurdering.id)
 
         assertThat(vilkårForBehandling).hasSize(2)
         assertThat(vilkårForRevurdering).hasSize(3)
         assertThat(vilkårForBehandling.filter { it.barnId != null }).hasSize(1)
         assertThat(vilkårForRevurdering.filter { it.barnId != null }).hasSize(2)
-        assertThat(vilkårForBehandling.mapNotNull { it.barnId }).isNotIn(barnPåBehandling.map { it.id })
-        assertThat(vilkårForRevurdering.mapNotNull { it.barnId }.sorted()).isEqualTo(
-            barnPåBehandling.map { it.id }
-                .sorted()
-        )
+        assertThat(vilkårForBehandling.mapNotNull { it.barnId }).isNotIn(barnPåRevurdering.map { it.id })
+        assertThat(vilkårForRevurdering.mapNotNull { it.barnId })
+            .containsExactlyInAnyOrderElementsOf(barnPåRevurdering.map { it.id })
         assertThat(vilkårForBehandling.map { it.behandlingId }).isNotIn(vilkårForRevurdering.map { it.behandlingId })
         assertThat(vilkårForBehandling.map { it.sporbar.opprettetTid }).isNotIn(vilkårForRevurdering.map { it.sporbar.opprettetTid })
 
         assertThat(vilkårForBehandling.first { it.type == VilkårType.SIVILSTAND }).usingRecursiveComparison()
-            .ignoringFields("id", "sporbar", "behandlingId", "barnId")
+            .ignoringFields("id", "sporbar", "behandlingId", "barnId", "opphavsvilkår")
             .isEqualTo(vilkårForRevurdering.first { it.type == VilkårType.SIVILSTAND })
     }
 
@@ -296,7 +308,7 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
             val fagsak = testoppsettService.lagreFagsak(fagsak(identer = identer, stønadstype = it))
             val behandling = opprettFerdigstiltBehandling(fagsak)
             opprettVilkår(behandling, lagreSøknad(behandling).sivilstand)
-            val revurderingInnhold = RevurderingDto(fagsak.id, BehandlingÅrsak.G_OMREGNING, kravMottatt, emptyList())
+            val revurderingInnhold = RevurderingDto(fagsak.id, BehandlingÅrsak.G_OMREGNING, kravMottatt, VilkårsbehandleNyeBarn.IKKE_VILKÅRSBEHANDLE)
 
             assertThatThrownBy {
                 revurderingService.opprettRevurderingManuelt(revurderingInnhold)
@@ -308,7 +320,7 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
     internal fun `kan opprette g-omregning for overgangsstønad`() {
         val behandling = opprettFerdigstiltBehandling(fagsak)
         opprettVilkår(behandling, lagreSøknad(behandling).sivilstand)
-        val revurderingInnhold = RevurderingDto(fagsak.id, BehandlingÅrsak.G_OMREGNING, kravMottatt, emptyList())
+        val revurderingInnhold = RevurderingDto(fagsak.id, BehandlingÅrsak.G_OMREGNING, kravMottatt, VilkårsbehandleNyeBarn.IKKE_VILKÅRSBEHANDLE)
 
         val revurdering = revurderingService.opprettRevurderingManuelt(revurderingInnhold)
 
@@ -317,28 +329,29 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
 
     private fun opprettFerdigstiltBehandling(
         fagsak: Fagsak,
-        resultat: BehandlingResultat = BehandlingResultat.INNVILGET
+        resultat: BehandlingResultat = BehandlingResultat.INNVILGET,
     ) = behandlingRepository.insert(
         behandling(
             fagsak = fagsak,
             status = BehandlingStatus.FERDIGSTILT,
-            resultat = resultat
-        )
+            resultat = resultat,
+        ),
     )
 
     private fun getSøknadsskjemaId(revurdering1: Behandling) =
         søknadRepository.findByBehandlingId(revurdering1.id)!!.soknadsskjemaId
 
-    private fun lagreSøknad(behandling: Behandling): SøknadsskjemaOvergangsstønad {
-        val søknad = TestsøknadBuilder.Builder().setBarn(
-            listOf(
-                TestsøknadBuilder.Builder()
-                    .defaultBarn("Navn navnesen", "27062188745", fødselTermindato = LocalDate.of(2021, 6, 27))
-            )
-        ).build().søknadOvergangsstønad
+    private fun lagreSøknad(
+        behandling: Behandling,
+        barn: List<Barn> = listOf(
+            TestsøknadBuilder.Builder().defaultBarn("any", PdlClientConfig.barnFnr),
+            TestsøknadBuilder.Builder().defaultBarn("any", PdlClientConfig.barn2Fnr),
+        ),
+    ): SøknadsskjemaOvergangsstønad {
+        val søknad = TestsøknadBuilder.Builder().setBarn(barn).build().søknadOvergangsstønad
         søknadService.lagreSøknadForOvergangsstønad(søknad, behandling.id, behandling.fagsakId, "1L")
-        val overgangsstønad =
-            søknadService.hentOvergangsstønad(behandling.id) ?: error("Fant ikke overgangsstønad for testen")
+        val overgangsstønad = søknadService.hentOvergangsstønad(behandling.id)
+            ?: error("Fant ikke overgangsstønad for testen")
         barnRepository.insertAll(søknadBarnTilBehandlingBarn(overgangsstønad.barn, behandling.id))
         return overgangsstønad
     }
@@ -347,8 +360,8 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
         val søknad = TestsøknadBuilder.Builder().setBarn(
             listOf(
                 TestsøknadBuilder.Builder().defaultBarn("any", PdlClientConfig.barnFnr),
-                TestsøknadBuilder.Builder().defaultBarn("any", PdlClientConfig.barn2Fnr)
-            )
+                TestsøknadBuilder.Builder().defaultBarn("any", PdlClientConfig.barn2Fnr),
+            ),
         ).build().søknadBarnetilsyn
         søknadService.lagreSøknadForBarnetilsyn(søknad, behandling.id, behandling.fagsakId, "1L")
         val barnetilsyn = søknadService.hentBarnetilsyn(behandling.id) ?: error("Fant ikke overgangsstønad for testen")
@@ -358,7 +371,7 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
 
     private fun opprettVilkår(
         behandling: Behandling,
-        sivilstand: Sivilstand?
+        sivilstand: Sivilstand?,
     ) {
         val barn = barnRepository.findByBehandlingId(behandling.id)
         val delvilkårsvurdering =
@@ -371,7 +384,7 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
 
     private fun lagDelvilkårsvurderingAleneomsorg(
         barn: List<BehandlingBarn>,
-        sivilstand: Sivilstand?
+        sivilstand: Sivilstand?,
     ): List<Delvilkårsvurdering> {
         val delvilkårsvurderingAleneomsorg =
             AleneomsorgRegel().initiereDelvilkårsvurdering(
@@ -379,8 +392,10 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
                     sivilstand,
                     Sivilstandstype.ENKE_ELLER_ENKEMANN,
                     barn = barn,
-                    søktOmBarnetilsyn = emptyList()
-                )
+                    søktOmBarnetilsyn = emptyList(),
+                    vilkårgrunnlagDto = mockk(),
+                    behandling = mockk(),
+                ),
             )
         return delvilkårsvurderingAleneomsorg
     }
@@ -392,8 +407,10 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
                     sivilstand,
                     Sivilstandstype.ENKE_ELLER_ENKEMANN,
                     barn = emptyList(),
-                    søktOmBarnetilsyn = emptyList()
-                )
+                    søktOmBarnetilsyn = emptyList(),
+                    vilkårgrunnlagDto = mockk(),
+                    behandling = mockk(),
+                ),
             )
         return delvilkårsvurdering
     }
@@ -402,24 +419,25 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
         behandling: Behandling,
         delvilkårsvurdering: List<Delvilkårsvurdering>,
         barn: List<BehandlingBarn>,
-        delvilkårsvurderingAleneomsorg: List<Delvilkårsvurdering>
+        delvilkårsvurderingAleneomsorg: List<Delvilkårsvurdering>,
     ) {
+        val vilkårForBarn = barn.map {
+            vilkårsvurdering(
+                resultat = Vilkårsresultat.OPPFYLT,
+                type = VilkårType.ALENEOMSORG,
+                behandlingId = behandling.id,
+                barnId = it.id,
+                delvilkårsvurdering = delvilkårsvurderingAleneomsorg,
+            )
+        }
         vilkårsvurderingRepository.insertAll(
-            listOf(
+            vilkårForBarn +
                 vilkårsvurdering(
                     resultat = Vilkårsresultat.OPPFYLT,
                     type = VilkårType.SIVILSTAND,
                     behandlingId = behandling.id,
-                    delvilkårsvurdering = delvilkårsvurdering
+                    delvilkårsvurdering = delvilkårsvurdering,
                 ),
-                vilkårsvurdering(
-                    resultat = Vilkårsresultat.OPPFYLT,
-                    type = VilkårType.ALENEOMSORG,
-                    behandlingId = behandling.id,
-                    barnId = barn.first().id,
-                    delvilkårsvurdering = delvilkårsvurderingAleneomsorg
-                )
-            )
         )
     }
 }

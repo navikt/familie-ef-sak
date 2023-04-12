@@ -18,7 +18,7 @@ import java.time.LocalDate
 @Service
 class InfotrygdService(
     private val infotrygdReplikaClient: InfotrygdReplikaClient,
-    private val personService: PersonService
+    private val personService: PersonService,
 ) {
 
     /**
@@ -40,7 +40,7 @@ class InfotrygdService(
         return InfotrygdPerioderDto(
             overgangsstønad = mapPerioder(perioder.overgangsstønad, sammenSlåttePerioder.overgangsstønad),
             barnetilsyn = mapPerioder(perioder.barnetilsyn, sammenSlåttePerioder.barnetilsyn),
-            skolepenger = mapPerioder(perioder.skolepenger, sammenSlåttePerioder.skolepenger)
+            skolepenger = mapPerioder(perioder.skolepenger, sammenSlåttePerioder.skolepenger),
         )
     }
 
@@ -50,8 +50,8 @@ class InfotrygdService(
             saker = response.saker
                 .sortedWith(
                     compareByDescending<InfotrygdSak, LocalDate?>(nullsLast()) { it.vedtaksdato }
-                        .thenByDescending(nullsLast()) { it.mottattDato }
-                )
+                        .thenByDescending(nullsLast()) { it.mottattDato },
+                ),
         )
     }
 
@@ -75,7 +75,7 @@ class InfotrygdService(
     }
 
     fun hentSammenslåtteBarnetilsynPerioderFraReplika(
-        personIdent: String
+        personIdent: String,
     ): List<InfotrygdPeriode> {
         val personIdenter = hentPersonIdenter(personIdent)
         val perioder = hentSammenslåttePerioderFraReplika(personIdenter, setOf(StønadType.BARNETILSYN))
@@ -90,14 +90,14 @@ class InfotrygdService(
         return InternePerioder(
             overgangsstønad = perioder.overgangsstønad.map { it.tilInternPeriode() },
             barnetilsyn = perioder.barnetilsyn.map { it.tilInternPeriode() },
-            skolepenger = perioder.skolepenger.map { it.tilInternPeriode() }
+            skolepenger = perioder.skolepenger.map { it.tilInternPeriode() },
         )
     }
 
     private fun mapPerioder(perioder: List<InfotrygdPeriode>, sammenSlåttePerioder: List<InfotrygdPeriode>) =
         InfotrygdStønadPerioderDto(
             perioder.filter { it.kode != InfotrygdEndringKode.ANNULERT },
-            sammenSlåttePerioder.map { it.tilSummertInfotrygdperiodeDto() }
+            sammenSlåttePerioder.map { it.tilSummertInfotrygdperiodeDto() },
         )
 
     /**
@@ -105,7 +105,7 @@ class InfotrygdService(
      */
     fun hentPerioderFraReplika(
         identer: Set<String>,
-        stønadstyper: Set<StønadType> = StønadType.values().toSet()
+        stønadstyper: Set<StønadType> = StønadType.values().toSet(),
     ): InfotrygdPeriodeResponse {
         require(stønadstyper.isNotEmpty()) { "Må sende med stønadstype" }
         val request = InfotrygdPeriodeRequest(identer, stønadstyper)
@@ -114,7 +114,7 @@ class InfotrygdService(
 
     private fun hentSammenslåttePerioderFraReplika(
         identer: Set<String>,
-        stønadstyper: Set<StønadType> = StønadType.values().toSet()
+        stønadstyper: Set<StønadType> = StønadType.values().toSet(),
     ): InfotrygdPeriodeResponse {
         require(stønadstyper.isNotEmpty()) { "Må sende med stønadstype" }
         val request = InfotrygdPeriodeRequest(identer, stønadstyper)

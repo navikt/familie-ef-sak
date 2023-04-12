@@ -21,13 +21,17 @@ enum class Toggle(val toggleId: String, val beskrivelse: String? = null) {
     SATSENDRING_BRUK_IKKE_VEDTATT_MAXSATS("familie.ef.sak.bruk-nye-maxsatser"),
 
     OPPRETT_BEHANDLING_FERDIGSTILT_JOURNALPOST("familie.ef.sak.opprett-behandling-for-ferdigstilt-journalpost", "Permission"),
-
     BEHANDLING_KORRIGERING("familie.ef.sak.behandling-korrigering", "Permission"),
+
+    VILKÅR_GJENBRUK("familie.ef.sak.vilkaar-gjenruk"),
 
     FRONTEND_VIS_IKKE_PUBLISERTE_BREVMALER("familie.ef.sak.frontend-vis-ikke-publiserte-brevmaler"),
     FRONTEND_AUTOMATISK_UTFYLLE_VILKÅR("familie.ef.sak.frontend-automatisk-utfylle-vilkar"),
     FRONTEND_SATSENDRING("familie.ef.sak.frontend-vis-satsendring"),
-    PERSONOPPLYSNINGER_ENDRINGER("familie.ef.sak.frontend.personopplysninger-endringer");
+    FRONTEND_VIS_INNTEKT_PERSONOVERSIKT("familie.ef.sak.frontend.vis-inntekt-personoversikt"),
+    SETT_PÅ_VENT_MED_OPPGAVESTYRING("familie.ef.sak.sett-paa-vent-med-oppgavestyring"),
+    PERSONOPPLYSNINGER_ENDRINGER("familie.ef.sak.frontend.personopplysninger-endringer"),
+    ;
 
     companion object {
         private val toggles: Map<String, Toggle> = values().associateBy { it.name }

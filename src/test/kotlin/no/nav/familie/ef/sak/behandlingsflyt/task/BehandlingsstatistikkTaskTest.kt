@@ -28,6 +28,7 @@ import no.nav.familie.kontrakter.ef.felles.AvslagÅrsak
 import no.nav.familie.kontrakter.ef.felles.BehandlingType
 import no.nav.familie.kontrakter.ef.felles.Opplysningskilde
 import no.nav.familie.kontrakter.ef.felles.Revurderingsårsak
+import no.nav.familie.kontrakter.ef.iverksett.BehandlingKategori
 import no.nav.familie.kontrakter.ef.iverksett.BehandlingMetode
 import no.nav.familie.kontrakter.ef.iverksett.BehandlingsstatistikkDto
 import no.nav.familie.kontrakter.ef.iverksett.Hendelse
@@ -57,13 +58,15 @@ internal class BehandlingsstatistikkTaskTest {
         fagsak,
         resultat = BehandlingResultat.INNVILGET,
         type = FØRSTEGANGSBEHANDLING,
-        kravMottatt = LocalDate.of(2022, 3, 1)
+        kategori = BehandlingKategori.NASJONAL,
+        kravMottatt = LocalDate.of(2022, 3, 1),
     )
     val avslåttBehandling = behandling(
         fagsak,
         resultat = BehandlingResultat.AVSLÅTT,
         type = FØRSTEGANGSBEHANDLING,
-        kravMottatt = LocalDate.of(2022, 3, 1)
+        kategori = BehandlingKategori.NASJONAL,
+        kravMottatt = LocalDate.of(2022, 3, 1),
     )
     val avslåttSaksbehandling = saksbehandling(fagsak, avslåttBehandling)
     val saksbehandling = saksbehandling(fagsak, behandling)
@@ -84,7 +87,7 @@ internal class BehandlingsstatistikkTaskTest {
         hendelseTidspunkt.toLocalDateTime(),
         saksbehandlerId,
         oppgaveId,
-        behandlingMetode
+        behandlingMetode,
     )
 
     val oppgaveMock = mockk<Oppgave>()
@@ -105,7 +108,7 @@ internal class BehandlingsstatistikkTaskTest {
         vedtakRepository = vedtakRepository,
         oppgaveService = oppgaveService,
         grunnlagsdataService = grunnlagsdataService,
-        årsakRevurderingService = årsakRevurderingService
+        årsakRevurderingService = årsakRevurderingService,
     )
 
     @BeforeEach
@@ -121,7 +124,7 @@ internal class BehandlingsstatistikkTaskTest {
             periodeBegrunnelse = periodeBegrunnelse,
             inntektBegrunnelse = inntektBegrunnelse,
             saksbehandlerIdent = saksbehandlerId,
-            beslutterIdent = beslutterId
+            beslutterIdent = beslutterId,
         )
         every { oppgaveMock.tildeltEnhetsnr } returns tildeltEnhet
         every { oppgaveMock.opprettetAvEnhetsnr } returns opprettetEnhet
@@ -137,7 +140,7 @@ internal class BehandlingsstatistikkTaskTest {
 
         val task = Task(
             type = "behandlingsstatistikkTask",
-            payload = objectMapper.writeValueAsString(payload)
+            payload = objectMapper.writeValueAsString(payload),
         )
 
         behandlingsstatistikkTask.doTask(task)
@@ -155,10 +158,10 @@ internal class BehandlingsstatistikkTaskTest {
         assertThat(behandlingsstatistikk.behandlingstype).isEqualTo(BehandlingType.FØRSTEGANGSBEHANDLING)
         assertThat(behandlingsstatistikk.resultatBegrunnelse).isEqualTo(periodeBegrunnelse)
         assertThat(behandlingsstatistikk.henvendelseTidspunkt).isEqualTo(søknadstidspunkt)
-
         assertThat(behandlingsstatistikk.kravMottatt).isEqualTo(behandling.kravMottatt)
         assertThat(behandlingsstatistikk.årsakRevurdering)
             .isEqualTo(ÅrsakRevurderingDto(Opplysningskilde.MELDING_MODIA, Revurderingsårsak.ANNET))
+        assertThat(behandlingsstatistikk.kategori).isEqualTo(BehandlingKategori.NASJONAL)
     }
 
     @Test
@@ -169,7 +172,7 @@ internal class BehandlingsstatistikkTaskTest {
 
         val task = Task(
             type = "behandlingsstatistikkTask",
-            payload = objectMapper.writeValueAsString(payload)
+            payload = objectMapper.writeValueAsString(payload),
         )
 
         behandlingsstatistikkTask.doTask(task)
@@ -191,11 +194,11 @@ internal class BehandlingsstatistikkTaskTest {
             inntektBegrunnelse = inntektBegrunnelse,
             saksbehandlerIdent = saksbehandlerId,
             beslutterIdent = beslutterId,
-            avslåÅrsak = AvslagÅrsak.MINDRE_INNTEKTSENDRINGER
+            avslåÅrsak = AvslagÅrsak.MINDRE_INNTEKTSENDRINGER,
         )
         val task = Task(
             type = "behandlingsstatistikkTask",
-            payload = objectMapper.writeValueAsString(payload)
+            payload = objectMapper.writeValueAsString(payload),
         )
 
         behandlingsstatistikkTask.doTask(task)
@@ -219,15 +222,15 @@ internal class BehandlingsstatistikkTaskTest {
             inntektBegrunnelse = inntektBegrunnelse,
             barnetilsyn = BarnetilsynWrapper(
                 emptyList(),
-                begrunnelse
+                begrunnelse,
             ),
             saksbehandlerIdent = saksbehandlerId,
-            beslutterIdent = beslutterId
+            beslutterIdent = beslutterId,
         )
 
         val task = Task(
             type = "behandlingsstatistikkTask",
-            payload = objectMapper.writeValueAsString(payload)
+            payload = objectMapper.writeValueAsString(payload),
         )
 
         behandlingsstatistikkTask.doTask(task)
@@ -245,5 +248,6 @@ internal class BehandlingsstatistikkTaskTest {
         assertThat(behandlingsstatistikk.behandlingstype).isEqualTo(BehandlingType.FØRSTEGANGSBEHANDLING)
         assertThat(behandlingsstatistikk.resultatBegrunnelse).isEqualTo(begrunnelse)
         assertThat(behandlingsstatistikk.henvendelseTidspunkt).isEqualTo(søknadstidspunkt)
+        assertThat(behandlingsstatistikk.kategori).isEqualTo(BehandlingKategori.NASJONAL)
     }
 }

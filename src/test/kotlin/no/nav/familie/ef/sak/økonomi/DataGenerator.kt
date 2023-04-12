@@ -21,7 +21,7 @@ object DataGenerator {
         stønadFom: LocalDate = LocalDate.now(),
         stønadTom: LocalDate = LocalDate.now(),
         behandlingId: UUID,
-        personIdent: String = tilfeldigFødselsnummer()
+        personIdent: String = tilfeldigFødselsnummer(),
     ) =
         AndelTilkjentYtelse(
             beløp = beløp,
@@ -31,19 +31,19 @@ object DataGenerator {
             inntekt = 0,
             inntektsreduksjon = 0,
             samordningsfradrag = 0,
-            personIdent = personIdent
+            personIdent = personIdent,
         )
 
     fun tilfeldigTilkjentYtelse(
         behandling: Behandling = behandling(fagsak()),
-        antallAndelerTilkjentYtelse: Int = 1
+        antallAndelerTilkjentYtelse: Int = 1,
     ): TilkjentYtelse {
         val andelerTilkjentYtelse = flereTilfeldigeAndelerTilkjentYtelse(antallAndelerTilkjentYtelse, behandling.id)
         return TilkjentYtelse(
             personident = tilfeldigFødselsnummer(),
             behandlingId = behandling.id,
             startdato = andelerTilkjentYtelse.minOf { it.stønadFom },
-            andelerTilkjentYtelse = andelerTilkjentYtelse
+            andelerTilkjentYtelse = andelerTilkjentYtelse,
         )
     }
 }

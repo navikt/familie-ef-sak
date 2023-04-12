@@ -7,6 +7,7 @@ import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
+import no.nav.familie.kontrakter.ef.iverksett.BehandlingKategori
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import java.time.LocalDateTime
 import java.util.UUID
@@ -16,6 +17,7 @@ data class BehandlingDto(
     val forrigeBehandlingId: UUID?,
     val fagsakId: UUID,
     val steg: StegType,
+    val kategori: BehandlingKategori,
     val type: BehandlingType,
     val status: BehandlingStatus,
     val sistEndret: LocalDateTime,
@@ -25,7 +27,7 @@ data class BehandlingDto(
     val behandlingsårsak: BehandlingÅrsak,
     val stønadstype: StønadType,
     val vedtaksdato: LocalDateTime? = null,
-    val henlagtÅrsak: HenlagtÅrsak? = null
+    val henlagtÅrsak: HenlagtÅrsak? = null,
 )
 
 fun Behandling.tilDto(stønadstype: StønadType): BehandlingDto =
@@ -34,6 +36,7 @@ fun Behandling.tilDto(stønadstype: StønadType): BehandlingDto =
         forrigeBehandlingId = this.forrigeBehandlingId,
         fagsakId = this.fagsakId,
         steg = this.steg,
+        kategori = this.kategori,
         type = this.type,
         status = this.status,
         sistEndret = this.sporbar.endret.endretTid,
@@ -43,7 +46,7 @@ fun Behandling.tilDto(stønadstype: StønadType): BehandlingDto =
         behandlingsårsak = this.årsak,
         henlagtÅrsak = this.henlagtÅrsak,
         stønadstype = stønadstype,
-        vedtaksdato = this.vedtakstidspunkt
+        vedtaksdato = this.vedtakstidspunkt,
     )
 
 fun Saksbehandling.tilDto(): BehandlingDto =
@@ -52,6 +55,7 @@ fun Saksbehandling.tilDto(): BehandlingDto =
         forrigeBehandlingId = this.forrigeBehandlingId,
         fagsakId = this.fagsakId,
         steg = this.steg,
+        kategori = this.kategori,
         type = this.type,
         status = this.status,
         sistEndret = this.endretTid,
@@ -61,5 +65,5 @@ fun Saksbehandling.tilDto(): BehandlingDto =
         behandlingsårsak = this.årsak,
         henlagtÅrsak = this.henlagtÅrsak,
         stønadstype = stønadstype,
-        vedtaksdato = this.vedtakstidspunkt
+        vedtaksdato = this.vedtakstidspunkt,
     )

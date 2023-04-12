@@ -43,7 +43,7 @@ class PersonoppslysningerDtoTest {
         if (aDelta.isNotEmpty() || bDelta.isNotEmpty()) {
             throw IllegalStateException(
                 "${A::class.java.name} inneholder feltene [${aDelta.joinToString(",")}]," +
-                    " ${B::class.java.name} inneholder feltene [${bDelta.joinToString(",")}]"
+                    " ${B::class.java.name} inneholder feltene [${bDelta.joinToString(",")}]",
             )
         }
     }

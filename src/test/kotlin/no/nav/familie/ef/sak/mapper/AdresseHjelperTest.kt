@@ -1,6 +1,6 @@
 package no.nav.familie.ef.sak.mapper
 
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.BarnMedIdent
+import no.nav.familie.ef.sak.felles.util.opprettBarnMedIdent
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.AdresseDto
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.AdresseType
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper.AdresseHjelper
@@ -8,8 +8,8 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Bostedsadresse
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.DeltBosted
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Matrikkeladresse
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Metadata
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Navn
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Vegadresse
+import no.nav.familie.ef.sak.testutil.PdlTestdataHelper
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -36,83 +36,35 @@ internal class AdresseHjelperTest {
             val barnAdresser = listOf(
                 lagAdresse(adresseBergen(), now().minusDays(100), null, null, metadataHistorisk),
                 lagAdresse(adresseTromsø(), now().minusDays(1), null, null, metadataGjeldende),
-                lagAdresse(adresseTrondheim(), null, null, null, metadataHistorisk)
+                lagAdresse(adresseTrondheim(), null, null, null, metadataHistorisk),
             )
             val forelderAdresser = listOf(
                 lagAdresse(adresseOslo(), now().minusDays(1000), now().minusDays(100), null, metadataHistorisk),
                 lagAdresse(adresseBergen(), now().minusDays(100), now().minusDays(1), null, metadataHistorisk),
-                lagAdresse(adresseTromsø(), now().minusDays(1), null, null, metadataGjeldende)
+                lagAdresse(adresseTromsø(), now().minusDays(1), null, null, metadataGjeldende),
             )
-
-            val barn = BarnMedIdent(
-                emptyList(),
-                barnAdresser,
-                emptyList(),
-                emptyList(),
-                emptyList(),
-                emptyList(),
-                Navn("", "", "", Metadata(false)),
-                ""
-            )
-            assertThat(AdresseHjelper.borPåSammeAdresse(barn, forelderAdresser)).isTrue
+            val barn = opprettBarnMedIdent(personIdent = "", bostedsadresse = barnAdresser)
+            assertThat(AdresseHjelper.harRegistrertSammeBostedsadresseSomForelder(barn, forelderAdresser)).isTrue
         }
 
         @Test
         internal fun `forelder og barn med samme vegadresse med matrikkelId`() {
             val barnAdresser = listOf(
-                lagAdresse(adresseTromsøMatrikkel(), now().minusDays(1))
+                lagAdresse(adresseTromsøMatrikkel(), now().minusDays(1)),
             )
             val forelderAdresser = listOf(
-                lagAdresse(adresseTromsøMatrikkel(), now().minusDays(1))
+                lagAdresse(adresseTromsøMatrikkel(), now().minusDays(1)),
             )
-
-            val barn = BarnMedIdent(
-                emptyList(),
-                barnAdresser,
-                emptyList(),
-                emptyList(),
-                emptyList(),
-                emptyList(),
-                Navn("", "", "", Metadata(false)),
-                ""
-            )
-            assertThat(AdresseHjelper.borPåSammeAdresse(barn, forelderAdresser)).isTrue
+            val barn = opprettBarnMedIdent(personIdent = "", bostedsadresse = barnAdresser)
+            assertThat(AdresseHjelper.harRegistrertSammeBostedsadresseSomForelder(barn, forelderAdresser)).isTrue
         }
 
         @Test
         internal fun `forelder og barn med samme matrikkeladresse`() {
             val barnAdresser = listOf(lagAdresse(adresseBergen(), now().minusDays(1), null, matrikkeladresse()))
             val forelderAdresser = listOf(lagAdresse(null, now().minusDays(1), null, matrikkeladresse()))
-
-            val barn = BarnMedIdent(
-                emptyList(),
-                barnAdresser,
-                emptyList(),
-                emptyList(),
-                emptyList(),
-                emptyList(),
-                Navn("", "", "", Metadata(false)),
-                ""
-            )
-            assertThat(AdresseHjelper.borPåSammeAdresse(barn, forelderAdresser)).isTrue
-        }
-
-        @Test
-        internal fun `hvis delt bosted, men annen adresse, forvent borPåSammeAdresse lik true`() {
-            val barnAdresser = listOf(lagAdresse(adresseBergen(), now().minusDays(1), null, matrikkeladresse(2)))
-            val forelderAdresser = listOf(lagAdresse(null, now().minusDays(1), null, matrikkeladresse(3)))
-
-            val barn = BarnMedIdent(
-                emptyList(),
-                barnAdresser,
-                listOf(DeltBosted(LocalDate.MIN, null, null, null, metadataGjeldende)),
-                emptyList(),
-                emptyList(),
-                emptyList(),
-                Navn("", "", "", Metadata(false)),
-                ""
-            )
-            assertThat(AdresseHjelper.borPåSammeAdresse(barn, forelderAdresser)).isTrue
+            val barn = opprettBarnMedIdent(personIdent = "", bostedsadresse = barnAdresser)
+            assertThat(AdresseHjelper.harRegistrertSammeBostedsadresseSomForelder(barn, forelderAdresser)).isTrue
         }
 
         @Test
@@ -122,198 +74,138 @@ internal class AdresseHjelperTest {
                     adresseBergen(),
                     now().minusDays(1),
                     null,
-                    matrikkeladresse().copy(bruksenhetsnummer = "H1701")
-                )
+                    matrikkeladresse().copy(bruksenhetsnummer = "H1701"),
+                ),
             )
             val forelderAdresser = listOf(lagAdresse(null, now().minusDays(1), null, matrikkeladresse()))
-
-            val barn = BarnMedIdent(
-                emptyList(),
-                barnAdresser,
-                emptyList(),
-                emptyList(),
-                emptyList(),
-                emptyList(),
-                Navn("", "", "", Metadata(false)),
-                ""
-            )
-            assertThat(AdresseHjelper.borPåSammeAdresse(barn, forelderAdresser)).isFalse()
+            val barn = opprettBarnMedIdent(personIdent = "", bostedsadresse = barnAdresser)
+            assertThat(AdresseHjelper.harRegistrertSammeBostedsadresseSomForelder(barn, forelderAdresser)).isFalse()
         }
 
         @Test
         internal fun `returnere false for vegadresser med samme matrikkelId men forskjellig bruksenhetsnummer`() {
             val barnAdresser = listOf(lagAdresse(adresseBergen().copy(matrikkelId = 123, bruksenhetsnummer = "H0103")))
-            val forelderAdresser = listOf(lagAdresse(adresseBergen().copy(matrikkelId = 123, bruksenhetsnummer = "H1701")))
-
-            val barn = BarnMedIdent(
-                emptyList(),
-                barnAdresser,
-                emptyList(),
-                emptyList(),
-                emptyList(),
-                emptyList(),
-                Navn("", "", "", Metadata(false)),
-                ""
-            )
-            assertThat(AdresseHjelper.borPåSammeAdresse(barn, forelderAdresser)).isFalse()
+            val forelderAdresser =
+                listOf(lagAdresse(adresseBergen().copy(matrikkelId = 123, bruksenhetsnummer = "H1701")))
+            val barn = opprettBarnMedIdent(personIdent = "", bostedsadresse = barnAdresser)
+            assertThat(AdresseHjelper.harRegistrertSammeBostedsadresseSomForelder(barn, forelderAdresser)).isFalse()
         }
 
         @Test
         internal fun `forelder og barn med ulik matrikkeladresse`() {
             val barnAdresser = listOf(lagAdresse(adresseBergen(), now().minusDays(1), null, matrikkeladresse()))
             val forelderAdresser = listOf(lagAdresse(null, now().minusDays(1), null, matrikkeladresse(999L)))
-
-            val barn = BarnMedIdent(
-                emptyList(),
-                barnAdresser,
-                emptyList(),
-                emptyList(),
-                emptyList(),
-                emptyList(),
-                Navn("", "", "", Metadata(false)),
-                ""
-            )
-            assertThat(AdresseHjelper.borPåSammeAdresse(barn, forelderAdresser)).isFalse
+            val barn = opprettBarnMedIdent(personIdent = "", bostedsadresse = barnAdresser)
+            assertThat(AdresseHjelper.harRegistrertSammeBostedsadresseSomForelder(barn, forelderAdresser)).isFalse
         }
 
         @Test
         internal fun `forelder og barn bor ikke på samme adresse`() {
             val barn1Adresser = listOf(
                 lagAdresse(adresseBergen(), now().minusDays(1)),
-                lagAdresse(adresseTromsø(), now().minusDays(100))
+                lagAdresse(adresseTromsø(), now().minusDays(100)),
             )
             val barn2Adresser = listOf(
                 lagAdresse(adresseBergen(), now().minusDays(1)),
-                lagAdresse(adresseTromsø(), null)
+                lagAdresse(adresseTromsø(), null),
             )
 
             val ugyldigeAdresser = listOf(
-                lagAdresse(null, null)
+                lagAdresse(null, null),
             )
 
             val forelderAdresser = listOf(
                 lagAdresse(adresseOslo(), now().minusDays(1000), now().minusDays(100)),
                 lagAdresse(adresseBergen(), now().minusDays(100), now().minusDays(1)),
-                lagAdresse(adresseTromsø(), now().minusDays(1))
+                lagAdresse(adresseTromsø(), now().minusDays(1)),
             )
 
-            val barn1 = BarnMedIdent(
-                emptyList(),
-                barn1Adresser,
-                emptyList(),
-                emptyList(),
-                emptyList(),
-                emptyList(),
-                Navn("", "", "", Metadata(false)),
-                ""
-            )
-            val barn2 = BarnMedIdent(
-                emptyList(),
-                barn2Adresser,
-                emptyList(),
-                emptyList(),
-                emptyList(),
-                emptyList(),
-                Navn("", "", "", Metadata(false)),
-                ""
-            )
-            val barn3 =
-                BarnMedIdent(
-                    emptyList(),
-                    ugyldigeAdresser,
-                    emptyList(),
-                    emptyList(),
-                    emptyList(),
-                    emptyList(),
-                    Navn("", "", "", Metadata(false)),
-                    ""
-                )
-            val barn4 = BarnMedIdent(
-                emptyList(),
-                emptyList(),
-                emptyList(),
-                emptyList(),
-                emptyList(),
-                emptyList(),
-                Navn("", "", "", Metadata(false)),
-                ""
-            )
+            val barn1 = opprettBarnMedIdent(personIdent = "", bostedsadresse = barn1Adresser)
+            val barn2 = opprettBarnMedIdent(personIdent = "", bostedsadresse = barn2Adresser)
+            val barn3 = opprettBarnMedIdent(personIdent = "", bostedsadresse = ugyldigeAdresser)
+            val barn4 = opprettBarnMedIdent(personIdent = "")
 
-            assertThat(AdresseHjelper.borPåSammeAdresse(barn1, forelderAdresser)).isFalse
-            assertThat(AdresseHjelper.borPåSammeAdresse(barn2, forelderAdresser)).isFalse
-            assertThat(AdresseHjelper.borPåSammeAdresse(barn3, forelderAdresser)).isFalse
-            assertThat(AdresseHjelper.borPåSammeAdresse(barn4, forelderAdresser)).isFalse
-            assertThat(AdresseHjelper.borPåSammeAdresse(barn4, emptyList())).isFalse
+            assertThat(AdresseHjelper.harRegistrertSammeBostedsadresseSomForelder(barn1, forelderAdresser)).isFalse
+            assertThat(AdresseHjelper.harRegistrertSammeBostedsadresseSomForelder(barn2, forelderAdresser)).isFalse
+            assertThat(AdresseHjelper.harRegistrertSammeBostedsadresseSomForelder(barn3, forelderAdresser)).isFalse
+            assertThat(AdresseHjelper.harRegistrertSammeBostedsadresseSomForelder(barn4, forelderAdresser)).isFalse
+            assertThat(AdresseHjelper.harRegistrertSammeBostedsadresseSomForelder(barn4, emptyList())).isFalse
         }
 
         @Test
         internal fun `forelder og barn bor på samme adresse selv om det ikke finnes gyldighetsdato`() {
             val barnAdresser = listOf(
                 lagAdresse(vegadresse = adresseTromsø(), metadata = metadataGjeldende),
-                lagAdresse(vegadresse = adresseOslo(), metadata = metadataHistorisk)
+                lagAdresse(vegadresse = adresseOslo(), metadata = metadataHistorisk),
             )
             val forelderAdresser = listOf(
                 lagAdresse(adresseOslo(), now().minusDays(1000), now().minusDays(100), null, metadataHistorisk),
                 lagAdresse(adresseBergen(), now().minusDays(100), now().minusDays(1), null, metadataHistorisk),
-                lagAdresse(adresseTromsø(), now().minusDays(1), null, null, metadataGjeldende)
+                lagAdresse(adresseTromsø(), now().minusDays(1), null, null, metadataGjeldende),
             )
-            val barn = BarnMedIdent(
-                emptyList(),
-                barnAdresser,
-                emptyList(),
-                emptyList(),
-                emptyList(),
-                emptyList(),
-                Navn("", "", "", Metadata(false)),
-                ""
-            )
+            val barn = opprettBarnMedIdent(personIdent = "", bostedsadresse = barnAdresser)
 
-            assertThat(AdresseHjelper.borPåSammeAdresse(barn, forelderAdresser)).isTrue
+            assertThat(AdresseHjelper.harRegistrertSammeBostedsadresseSomForelder(barn, forelderAdresser)).isTrue
         }
 
         @Test
-        internal fun `delt bosted er innenfor nåtid, forvent harDeltBosted lik true`() {
-            val barnMedDeltBosted = BarnMedIdent(
-                listOf(),
-                emptyList(),
-                listOf(DeltBosted(now(), null, null, null, metadataGjeldende)),
-                emptyList(),
-                emptyList(),
-                emptyList(),
-                Navn("", "", "", Metadata(false)),
-                ""
-            )
-            assertThat(AdresseHjelper.harDeltBostedNå(barnMedDeltBosted)).isTrue
+        internal fun `delt bosted er innenfor nåtid med angitt dato now, forvent harDeltBosted lik true`() {
+            val barnMedDeltBosted =
+                opprettBarnMedIdent(
+                    personIdent = "",
+                    fødsel = PdlTestdataHelper.fødsel(now().minusYears(2)),
+                    deltBosted = listOf(DeltBosted(now(), null, null, null, metadataGjeldende)),
+                )
+            assertThat(AdresseHjelper.harDeltBosted(barnMedDeltBosted, now())).isTrue
         }
 
         @Test
-        internal fun `delt bosted er utenfor nåtid, forvent harDeltBosted lik false`() {
-            val barnMedDeltBosted = BarnMedIdent(
-                listOf(),
-                emptyList(),
-                listOf(DeltBosted(now().plusDays(1), null, null, null, metadataGjeldende)),
-                emptyList(),
-                emptyList(),
-                emptyList(),
-                Navn("", "", "", Metadata(false)),
-                ""
-            )
-            assertThat(AdresseHjelper.harDeltBostedNå(barnMedDeltBosted)).isFalse
+        internal fun `delt bosted er utenfor nåtid med angitt dato now, forvent harDeltBosted lik false`() {
+            val barnMedDeltBosted =
+                opprettBarnMedIdent(
+                    personIdent = "",
+                    fødsel = PdlTestdataHelper.fødsel(now().minusYears(2)),
+                    deltBosted = listOf(DeltBosted(now().plusDays(1), null, null, null, metadataGjeldende)),
+                )
+            assertThat(AdresseHjelper.harDeltBosted(barnMedDeltBosted, now())).isFalse
+        }
+
+        @Test
+        internal fun `Barn over 18, skal ikke ha delt bosted`() {
+            val barnMedDeltBosted =
+                opprettBarnMedIdent(
+                    personIdent = "",
+                    fødsel = PdlTestdataHelper.fødsel(now().minusYears(18)),
+                    deltBosted = listOf(DeltBosted(now().minusDays(1), null, null, null, metadataGjeldende)),
+                )
+            assertThat(AdresseHjelper.harDeltBosted(barnMedDeltBosted, now())).isFalse
         }
 
         @Test
         internal fun `delt bosted finnes ikke, forvent harDeltBosted lik false`() {
-            val barnMedDeltBosted = BarnMedIdent(
-                listOf(),
-                emptyList(),
-                emptyList(),
-                emptyList(),
-                emptyList(),
-                emptyList(),
-                Navn("", "", "", Metadata(false)),
-                ""
+            val barnMedDeltBosted = opprettBarnMedIdent(personIdent = "", deltBosted = emptyList(), fødsel = PdlTestdataHelper.fødsel(now().minusYears(2)))
+            assertThat(AdresseHjelper.harDeltBosted(barnMedDeltBosted, now())).isFalse
+        }
+
+        @Test
+        internal fun `delt bosted er før dato for delt bosted, forvent harDeltBosted lik false`() {
+            val barnMedDeltBosted =
+                opprettBarnMedIdent(
+                    personIdent = "",
+                    fødsel = PdlTestdataHelper.fødsel(now().minusYears(2)),
+                    deltBosted = listOf(DeltBosted(now(), null, null, null, metadataGjeldende)),
+                )
+            assertThat(AdresseHjelper.harDeltBosted(barnMedDeltBosted, now().minusDays(1))).isFalse
+        }
+
+        @Test
+        internal fun `delt bosted er innenfor dato for delt bosted, forvent harDeltBosted lik true`() {
+            val barnMedDeltBosted = opprettBarnMedIdent(
+                personIdent = "",
+                fødsel = PdlTestdataHelper.fødsel(now().minusYears(2)),
+                deltBosted = listOf(DeltBosted(now(), null, null, null, metadataGjeldende)),
             )
-            assertThat(AdresseHjelper.harDeltBostedNå(barnMedDeltBosted)).isFalse
+            assertThat(AdresseHjelper.harDeltBosted(barnMedDeltBosted, now().plusDays(1))).isTrue
         }
     }
 
@@ -327,17 +219,17 @@ internal class AdresseHjelperTest {
             val historiskBostedsadresse = lagAdresseDto(
                 AdresseType.BOSTEDADRESSE,
                 now().minusYears(1),
-                now().minusDays(5)
+                now().minusDays(5),
             )
             val historiskBostedsadresseEtterAktivAdresse = lagAdresseDto(
                 AdresseType.BOSTEDADRESSE,
-                now()
+                now(),
             )
             val aktivOppholdsadresse = lagAdresseDto(AdresseType.OPPHOLDSADRESSE, now())
             val historiskKontaktadresse = lagAdresseDto(
                 AdresseType.KONTAKTADRESSE,
                 now().minusDays(15),
-                now().minusDays(14)
+                now().minusDays(14),
             )
             val historiskKontaktadresseUtland = lagAdresseDto(AdresseType.KONTAKTADRESSE_UTLAND, now(), now())
 
@@ -347,7 +239,7 @@ internal class AdresseHjelperTest {
                 historiskKontaktadresseUtland,
                 aktivOppholdsadresse,
                 historiskKontaktadresse,
-                gjeldendeBostedsadresse
+                gjeldendeBostedsadresse,
             )
             val sorterteAdresser = AdresseHjelper.sorterAdresser(adresser)
             assertThat(sorterteAdresser)
@@ -357,7 +249,7 @@ internal class AdresseHjelperTest {
                     historiskBostedsadresse,
                     aktivOppholdsadresse,
                     historiskKontaktadresse,
-                    historiskKontaktadresseUtland
+                    historiskKontaktadresseUtland,
                 )
         }
     }
@@ -367,7 +259,7 @@ internal class AdresseHjelperTest {
         gyldighetstidspunkt: LocalDate? = null,
         opphørstidspunkt: LocalDate? = null,
         matrikkeladresse: Matrikkeladresse? = null,
-        metadata: Metadata? = null
+        metadata: Metadata? = null,
     ): Bostedsadresse {
         return Bostedsadresse(
             vegadresse = vegadresse,
@@ -378,7 +270,7 @@ internal class AdresseHjelperTest {
             utenlandskAdresse = null,
             ukjentBosted = null,
             matrikkeladresse = matrikkeladresse,
-            metadata = metadata ?: metadataGjeldende
+            metadata = metadata ?: metadataGjeldende,
         )
     }
 
@@ -386,14 +278,14 @@ internal class AdresseHjelperTest {
         type: AdresseType,
         gyldigFraOgMed: LocalDate?,
         gyldigTilOgMed: LocalDate? = null,
-        erGjeldende: Boolean = false
+        erGjeldende: Boolean = false,
     ): AdresseDto {
         return AdresseDto(
             visningsadresse = "Oslogata 1",
             type = type,
             gyldigFraOgMed = gyldigFraOgMed,
             gyldigTilOgMed = gyldigTilOgMed,
-            erGjeldende = erGjeldende
+            erGjeldende = erGjeldende,
         )
     }
 }

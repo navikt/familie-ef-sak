@@ -30,7 +30,7 @@ class BeregningBarnetilsynEnPeriodeStepDefinitions {
                 kontantstøtteBeløp = parseBigDecimal(KONTANTSTØTTEBELØP, it),
                 tillegstønadbeløp = parseBigDecimal(TILLEGSSTØNADBELØP, it),
                 antallBarn = parseInt(ANTALL_BARN, it),
-                årMåned = parseÅrMåned(PERIODEDATO, it)
+                årMåned = parseÅrMåned(PERIODEDATO, it),
             )
         }.first()
     }
@@ -47,7 +47,7 @@ class BeregningBarnetilsynEnPeriodeStepDefinitions {
             tilleggsstønadBeløp = periodeDataDto.tillegstønadbeløp,
             antallBarn = periodeDataDto.antallBarn,
             årMåned = periodeDataDto.årMåned,
-            false
+            false,
         )
 
     @Så("forventer vi barnetilsyn periodebeløp")
@@ -62,5 +62,5 @@ data class PeriodeDataDto(
     val kontantstøtteBeløp: BigDecimal,
     val tillegstønadbeløp: BigDecimal,
     val antallBarn: Int,
-    val årMåned: YearMonth
+    val årMåned: YearMonth,
 )

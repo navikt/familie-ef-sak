@@ -7,5 +7,5 @@ import java.time.LocalDate
 data class FørstegangsbehandlingDto(
     val behandlingsårsak: BehandlingÅrsak,
     val kravMottatt: LocalDate,
-    val barn: List<BarnSomSkalFødes> = emptyList()
+    val barn: List<BarnSomSkalFødes> = emptyList(),
 )

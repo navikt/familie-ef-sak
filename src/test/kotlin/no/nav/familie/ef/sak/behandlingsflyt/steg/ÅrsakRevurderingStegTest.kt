@@ -47,7 +47,7 @@ internal class ÅrsakRevurderingStegTest {
             årsakRevurderingService.oppdaterRevurderingsinformasjon(
                 saksbehandling,
                 data.kravMottatt!!,
-                data.årsakRevurdering!!
+                data.årsakRevurdering!!,
             )
         }
     }
@@ -81,7 +81,7 @@ internal class ÅrsakRevurderingStegTest {
         internal fun `feiler hvis man man sender inn en årsak som ikke er gyldig for gitt stønadstype`() {
             val dto = RevurderingsinformasjonDto(
                 LocalDate.now(),
-                ÅrsakRevurderingDto(Opplysningskilde.BESKJED_ANNEN_ENHET, ugyldigÅrsak, null)
+                ÅrsakRevurderingDto(Opplysningskilde.BESKJED_ANNEN_ENHET, ugyldigÅrsak, null),
             )
             assertThatThrownBy { utførOgReturnerNesteSteg(dto) }
                 .hasMessage("Årsak er ikke gyldig for stønadstype")
@@ -92,7 +92,7 @@ internal class ÅrsakRevurderingStegTest {
             val årsak = Revurderingsårsak.ANNET
             val dto = RevurderingsinformasjonDto(
                 LocalDate.now(),
-                ÅrsakRevurderingDto(Opplysningskilde.BESKJED_ANNEN_ENHET, årsak, "   ")
+                ÅrsakRevurderingDto(Opplysningskilde.BESKJED_ANNEN_ENHET, årsak, "   "),
             )
             assertThatThrownBy { utførOgReturnerNesteSteg(dto) }
                 .hasMessage("Må ha med beskrivelse når årsak er annet")
@@ -102,7 +102,7 @@ internal class ÅrsakRevurderingStegTest {
         internal fun `skal ikke sende med beskrivelse når årsak er annet enn ANNET`() {
             val dto = RevurderingsinformasjonDto(
                 LocalDate.now(),
-                ÅrsakRevurderingDto(Opplysningskilde.BESKJED_ANNEN_ENHET, gyldigÅrsak, "asd")
+                ÅrsakRevurderingDto(Opplysningskilde.BESKJED_ANNEN_ENHET, gyldigÅrsak, "asd"),
             )
             assertThatThrownBy { utførOgReturnerNesteSteg(dto) }
                 .hasMessage("Kan ikke ha med beskrivelse når årsak er noe annet en annet")

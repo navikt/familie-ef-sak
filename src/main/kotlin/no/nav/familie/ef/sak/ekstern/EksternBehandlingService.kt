@@ -5,6 +5,7 @@ import no.nav.familie.ef.sak.behandling.RevurderingService
 import no.nav.familie.ef.sak.behandling.dto.RevurderingDto
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
+import no.nav.familie.ef.sak.journalføring.dto.VilkårsbehandleNyeBarn
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.ef.sak.tilkjentytelse.domain.AndelTilkjentYtelse
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
@@ -26,7 +27,7 @@ class EksternBehandlingService(
     private val tilkjentYtelseService: TilkjentYtelseService,
     private val behandlingService: BehandlingService,
     private val fagsakService: FagsakService,
-    private val revurderingService: RevurderingService
+    private val revurderingService: RevurderingService,
 ) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -75,7 +76,8 @@ class EksternBehandlingService(
         val revurdering = RevurderingDto(
             fagsakId = fagsak.id,
             behandlingsårsak = BehandlingÅrsak.KLAGE,
-            kravMottatt = LocalDate.now()
+            kravMottatt = LocalDate.now(),
+            vilkårsbehandleNyeBarn = VilkårsbehandleNyeBarn.VILKÅRSBEHANDLE,
         )
         val behandling = revurderingService.opprettRevurderingManuelt(revurdering)
         OpprettRevurderingResponse(Opprettet(behandling.eksternId.id.toString()))
@@ -104,8 +106,8 @@ private data class KanIkkeOppretteRevurdering(val årsak: Årsak) : KanOppretteR
 
 private enum class Årsak(
     val ikkeOpprettetÅrsak: IkkeOpprettetÅrsak,
-    val kanIkkeOppretteRevurderingÅrsak: KanIkkeOppretteRevurderingÅrsak
+    val kanIkkeOppretteRevurderingÅrsak: KanIkkeOppretteRevurderingÅrsak,
 ) {
     ÅPEN_BEHANDLING(IkkeOpprettetÅrsak.ÅPEN_BEHANDLING, KanIkkeOppretteRevurderingÅrsak.ÅPEN_BEHANDLING),
-    INGEN_BEHANDLING(IkkeOpprettetÅrsak.INGEN_BEHANDLING, KanIkkeOppretteRevurderingÅrsak.INGEN_BEHANDLING)
+    INGEN_BEHANDLING(IkkeOpprettetÅrsak.INGEN_BEHANDLING, KanIkkeOppretteRevurderingÅrsak.INGEN_BEHANDLING),
 }

@@ -29,6 +29,7 @@ import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.repository.findAllByIdOrThrow
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
+import no.nav.familie.kontrakter.ef.iverksett.BehandlingKategori
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.kontrakter.felles.journalpost.Journalposttype
 import no.nav.familie.prosessering.internal.TaskService
@@ -46,7 +47,7 @@ class BehandlingService(
     private val behandlingRepository: BehandlingRepository,
     private val behandlingshistorikkService: BehandlingshistorikkService,
     private val taskService: TaskService,
-    private val featureToggleService: FeatureToggleService
+    private val featureToggleService: FeatureToggleService,
 ) {
 
     private val secureLogger = LoggerFactory.getLogger("secureLogger")
@@ -90,7 +91,7 @@ class BehandlingService(
             behandlingType = BehandlingType.REVURDERING,
             fagsakId = fagsakId,
             behandlingsårsak = BehandlingÅrsak.MIGRERING,
-            erMigrering = true
+            erMigrering = true,
         )
     }
 
@@ -102,7 +103,7 @@ class BehandlingService(
         stegType: StegType = VILKÅR,
         behandlingsårsak: BehandlingÅrsak,
         kravMottatt: LocalDate? = null,
-        erMigrering: Boolean = false
+        erMigrering: Boolean = false,
     ): Behandling {
         brukerfeilHvis(kravMottatt != null && kravMottatt.isAfter(LocalDate.now())) {
             "Kan ikke sette krav mottattdato frem i tid"
@@ -112,13 +113,13 @@ class BehandlingService(
         }
         feilHvis(
             behandlingsårsak == BehandlingÅrsak.G_OMREGNING &&
-                !featureToggleService.isEnabled(Toggle.G_BEREGNING)
+                !featureToggleService.isEnabled(Toggle.G_BEREGNING),
         ) {
             "Feature toggle for g-omregning er disabled"
         }
         feilHvis(
             behandlingsårsak == BehandlingÅrsak.KORRIGERING_UTEN_BREV &&
-                !featureToggleService.isEnabled(Toggle.BEHANDLING_KORRIGERING)
+                !featureToggleService.isEnabled(Toggle.BEHANDLING_KORRIGERING),
         ) {
             "Feature toggle for korrigering er ikke skrudd på for bruker"
         }
@@ -135,15 +136,16 @@ class BehandlingService(
                 status = status,
                 resultat = BehandlingResultat.IKKE_SATT,
                 årsak = behandlingsårsak,
-                kravMottatt = kravMottatt
-            )
+                kravMottatt = kravMottatt,
+                kategori = BehandlingKategori.NASJONAL,
+            ),
         )
 
         behandlingshistorikkService.opprettHistorikkInnslag(
             behandlingshistorikk = Behandlingshistorikk(
                 behandlingId = behandling.id,
-                steg = VILKÅR
-            )
+                steg = VILKÅR,
+            ),
         )
 
         return behandling
@@ -157,7 +159,7 @@ class BehandlingService(
         behandlingRepository.finnSaksbehandling(eksternBehandlingId)
 
     fun hentBehandlingPåEksternId(eksternBehandlingId: Long): Behandling = behandlingRepository.finnMedEksternId(
-        eksternBehandlingId
+        eksternBehandlingId,
     ) ?: error("Kan ikke finne behandling med eksternId=$eksternBehandlingId")
 
     fun hentBehandlinger(behandlingIder: Set<UUID>): List<Behandling> =
@@ -167,9 +169,18 @@ class BehandlingService(
         val behandling = hentBehandling(behandlingId)
         secureLogger.info(
             "${SikkerhetContext.hentSaksbehandlerEllerSystembruker()} endrer status på behandling $behandlingId " +
-                "fra ${behandling.status} til $status"
+                "fra ${behandling.status} til $status",
         )
         return behandlingRepository.update(behandling.copy(status = status))
+    }
+
+    fun oppdaterKategoriPåBehandling(behandlingId: UUID, kategori: BehandlingKategori): Behandling {
+        val behandling = hentBehandling(behandlingId)
+        secureLogger.info(
+            "${SikkerhetContext.hentSaksbehandlerEllerSystembruker()} endrer kategori på behandling $behandlingId " +
+                "fra ${behandling.kategori} til $kategori",
+        )
+        return behandlingRepository.update(behandling.copy(kategori = kategori))
     }
 
     fun oppdaterForrigeBehandlingId(behandlingId: UUID, forrigeBehandlingId: UUID): Behandling {
@@ -179,7 +190,7 @@ class BehandlingService(
         }
         secureLogger.info(
             "${SikkerhetContext.hentSaksbehandlerEllerSystembruker()} endrer forrigeBehandlingId på behandling $behandlingId " +
-                "fra ${behandling.forrigeBehandlingId} til $forrigeBehandlingId"
+                "fra ${behandling.forrigeBehandlingId} til $forrigeBehandlingId",
         )
         return behandlingRepository.update(behandling.copy(forrigeBehandlingId = forrigeBehandlingId))
     }
@@ -188,7 +199,7 @@ class BehandlingService(
         val behandling = hentBehandling(behandlingId)
         secureLogger.info(
             "${SikkerhetContext.hentSaksbehandlerEllerSystembruker()} endrer steg på behandling $behandlingId " +
-                "fra ${behandling.steg} til $steg"
+                "fra ${behandling.steg} til $steg",
         )
         return behandlingRepository.update(behandling.copy(steg = steg))
     }
@@ -210,8 +221,8 @@ class BehandlingService(
                 behandlingId = behandlingId,
                 journalpostId = journalpostId,
                 sporbar = Sporbar(),
-                journalpostType = journalposttype
-            )
+                journalpostType = journalposttype,
+            ),
         )
     }
 
@@ -224,13 +235,13 @@ class BehandlingService(
             resultat = HENLAGT,
             steg = BEHANDLING_FERDIGSTILT,
             status = FERDIGSTILT,
-            vedtakstidspunkt = SporbarUtils.now()
+            vedtakstidspunkt = SporbarUtils.now(),
         )
         behandlingshistorikkService.opprettHistorikkInnslag(
             behandlingId = henlagtBehandling.id,
             stegtype = henlagtBehandling.steg,
             utfall = StegUtfall.HENLAGT,
-            metadata = henlagt
+            metadata = henlagt,
         )
         opprettStatistikkTask(henlagtBehandling)
         return behandlingRepository.update(henlagtBehandling)
@@ -241,8 +252,8 @@ class BehandlingService(
             BehandlingsstatistikkTask.opprettHenlagtTask(
                 behandlingId = behandling.id,
                 hendelseTidspunkt = LocalDateTime.now(),
-                gjeldendeSaksbehandler = SikkerhetContext.hentSaksbehandler()
-            )
+                gjeldendeSaksbehandler = SikkerhetContext.hentSaksbehandler(),
+            ),
         )
     }
 
@@ -250,7 +261,7 @@ class BehandlingService(
         if (!behandling.kanHenlegges()) {
             throw ApiFeil(
                 "Kan ikke henlegge en behandling med status ${behandling.status} for ${behandling.type}",
-                HttpStatus.BAD_REQUEST
+                HttpStatus.BAD_REQUEST,
             )
         }
     }
@@ -269,8 +280,8 @@ class BehandlingService(
         return behandlingRepository.update(
             behandling.copy(
                 resultat = behandlingResultat,
-                vedtakstidspunkt = SporbarUtils.now()
-            )
+                vedtakstidspunkt = SporbarUtils.now(),
+            ),
         )
     }
 }

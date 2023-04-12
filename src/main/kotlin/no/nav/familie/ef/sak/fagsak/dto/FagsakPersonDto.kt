@@ -6,7 +6,7 @@ class FagsakPersonDto(
     val id: UUID,
     val overgangsstønad: UUID?,
     val barnetilsyn: UUID?,
-    val skolepenger: UUID?
+    val skolepenger: UUID?,
 )
 
 /**
@@ -16,5 +16,5 @@ class FagsakPersonUtvidetDto(
     val id: UUID,
     val overgangsstønad: FagsakDto?,
     val barnetilsyn: FagsakDto?,
-    val skolepenger: FagsakDto?
+    val skolepenger: FagsakDto?,
 )

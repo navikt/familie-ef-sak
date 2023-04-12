@@ -1,13 +1,14 @@
 package no.nav.familie.ef.sak.ekstern
 
 import no.nav.familie.ef.sak.AuditLoggerEvent
-import no.nav.familie.ef.sak.ekstern.arena.ArenaStønadsperioderService
+import no.nav.familie.ef.sak.ekstern.stønadsperiode.EksternStønadsperioderService
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.PersonIdent
 import no.nav.familie.kontrakter.felles.Ressurs
-import no.nav.familie.kontrakter.felles.ef.PerioderOvergangsstønadRequest
-import no.nav.familie.kontrakter.felles.ef.PerioderOvergangsstønadResponse
+import no.nav.familie.kontrakter.felles.ef.EksternePerioderMedBeløpResponse
+import no.nav.familie.kontrakter.felles.ef.EksternePerioderRequest
+import no.nav.familie.kontrakter.felles.ef.EksternePerioderResponse
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
 import org.springframework.validation.annotation.Validated
@@ -20,24 +21,50 @@ import org.springframework.web.bind.annotation.RestController
 @RequestMapping(
     path = ["/api/ekstern/perioder"],
     consumes = [APPLICATION_JSON_VALUE],
-    produces = [APPLICATION_JSON_VALUE]
+    produces = [APPLICATION_JSON_VALUE],
 )
 @Validated
 @ProtectedWithClaims(issuer = "azuread")
 class EksternStønadsperioderController(
-    private val arenaStønadsperioderService: ArenaStønadsperioderService,
+    private val eksternStønadsperioderService: EksternStønadsperioderService,
     private val perioderForBarnetrygdService: PerioderForBarnetrygdService,
-    private val tilgangService: TilgangService
+    private val tilgangService: TilgangService,
 ) {
 
     /**
      * Brukes av Arena
      */
-    @PostMapping
+    @PostMapping("alle-stonader", "")
     @ProtectedWithClaims(issuer = "azuread", claimMap = ["roles=access_as_application"])
-    fun hentPerioder(@RequestBody request: PerioderOvergangsstønadRequest): Ressurs<PerioderOvergangsstønadResponse> {
+    fun hentPerioderForAlleStønader(@RequestBody request: EksternePerioderRequest): Ressurs<EksternePerioderResponse> {
         return try {
-            Ressurs.success(arenaStønadsperioderService.hentPerioder(request))
+            Ressurs.success(eksternStønadsperioderService.hentPerioderForAlleStønader(request))
+        } catch (e: Exception) {
+            Ressurs.failure("Henting av perioder for overgangsstønad feilet", error = e)
+        }
+    }
+
+    /**
+     * Brukes av Tiltakspenger-overgangsstønad
+     */
+    @PostMapping("overgangsstonad")
+    @ProtectedWithClaims(issuer = "azuread", claimMap = ["roles=access_as_application"])
+    fun hentPerioderForOvergangsstønad(@RequestBody request: EksternePerioderRequest): Ressurs<EksternePerioderResponse> {
+        return try {
+            Ressurs.success(EksternePerioderResponse(perioder = eksternStønadsperioderService.hentPerioderForOvergangsstønad(request)))
+        } catch (e: Exception) {
+            Ressurs.failure("Henting av perioder for overgangsstønad feilet", error = e)
+        }
+    }
+
+    /**
+     * Brukes av Bidrag
+     */
+    @PostMapping("overgangsstonad/med-belop")
+    @ProtectedWithClaims(issuer = "azuread", claimMap = ["roles=access_as_application"])
+    fun hentPerioderForOvergangsstønadMedBeløp(@RequestBody request: EksternePerioderRequest): Ressurs<EksternePerioderMedBeløpResponse> {
+        return try {
+            Ressurs.success(EksternePerioderMedBeløpResponse(perioder = eksternStønadsperioderService.hentPerioderForOvergangsstønadMedBeløp(request)))
         } catch (e: Exception) {
             Ressurs.failure("Henting av perioder for overgangsstønad feilet", error = e)
         }
@@ -47,7 +74,7 @@ class EksternStønadsperioderController(
      * Brukes av Barnetrygd, for å vurdere utvidet barnetrygd, henter kun perioder med full overgangsstønad
      */
     @PostMapping("full-overgangsstonad")
-    fun hentPerioderForOvergangsstonad(@RequestBody request: PersonIdent): Ressurs<PerioderOvergangsstønadResponse> {
+    fun hentPerioderMedFullOvergangsstonad(@RequestBody request: PersonIdent): Ressurs<EksternePerioderResponse> {
         if (!SikkerhetContext.erMaskinTilMaskinToken()) {
             tilgangService.validerTilgangTilPerson(request.ident, AuditLoggerEvent.ACCESS)
         }

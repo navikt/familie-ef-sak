@@ -3,8 +3,6 @@ package no.nav.familie.ef.sak.service
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.familie.ef.sak.arbeidsfordeling.ArbeidsfordelingService
-import no.nav.familie.ef.sak.arbeidsfordeling.Arbeidsfordelingsenhet
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.infrastruktur.config.KodeverkServiceMock
 import no.nav.familie.ef.sak.infrastruktur.config.PdlClientConfig
@@ -33,7 +31,6 @@ internal class PersonopplysningerServiceTest {
     private lateinit var personopplysningerService: PersonopplysningerService
     private lateinit var personopplysningerIntegrasjonerClient: PersonopplysningerIntegrasjonerClient
     private lateinit var adresseMapper: AdresseMapper
-    private lateinit var arbeidsfordelingService: ArbeidsfordelingService
     private lateinit var grunnlagsdataService: GrunnlagsdataService
     private lateinit var søknadService: SøknadService
     private lateinit var behandlingService: BehandlingService
@@ -45,14 +42,13 @@ internal class PersonopplysningerServiceTest {
         personopplysningerIntegrasjonerClient = mockk(relaxed = true)
         behandlingService = mockk(relaxed = true)
         adresseMapper = AdresseMapper(kodeverkService)
-        arbeidsfordelingService = mockk(relaxed = true)
         søknadService = mockk()
         val personService = PersonService(PdlClientConfig().pdlClient(), ConcurrentMapCacheManager())
 
         val grunnlagsdataRegisterService = GrunnlagsdataRegisterService(
             personService,
             personopplysningerIntegrasjonerClient,
-            tidligereVedaksperioderService
+            tidligereVedaksperioderService,
         )
 
         grunnlagsdataService = GrunnlagsdataService(
@@ -60,14 +56,13 @@ internal class PersonopplysningerServiceTest {
             søknadService,
             grunnlagsdataRegisterService,
             behandlingService,
-            mockk()
+            mockk(),
         )
         val personopplysningerMapper =
             PersonopplysningerMapper(
                 adresseMapper,
                 StatsborgerskapMapper(kodeverkService),
                 InnflyttingUtflyttingMapper(kodeverkService),
-                arbeidsfordelingService
             )
         personopplysningerService = PersonopplysningerService(
             personService,
@@ -75,7 +70,7 @@ internal class PersonopplysningerServiceTest {
             personopplysningerIntegrasjonerClient,
             grunnlagsdataService,
             personopplysningerMapper,
-            ConcurrentMapCacheManager()
+            ConcurrentMapCacheManager(),
         )
     }
 
@@ -86,9 +81,8 @@ internal class PersonopplysningerServiceTest {
             "01010172272",
             emptyList(),
             emptyList(),
-            emptyList()
+            emptyList(),
         )
-        every { arbeidsfordelingService.hentNavEnhet(any()) } returns Arbeidsfordelingsenhet("1", "Enhet")
         val søker = personopplysningerService.hentPersonopplysninger("01010172272")
         assertThat(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(søker))
             .isEqualToIgnoringWhitespace(readFile("/json/personopplysningerDto.json"))

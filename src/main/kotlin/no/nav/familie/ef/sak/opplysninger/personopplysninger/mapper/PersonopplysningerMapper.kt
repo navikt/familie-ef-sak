@@ -1,6 +1,5 @@
 package no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper
 
-import no.nav.familie.ef.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.AnnenForelderMedIdent
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.BarnMedIdent
@@ -24,23 +23,20 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlIdenter
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.gjeldende
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.identer
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.visningsnavn
-import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
+import java.time.LocalDate
 
 @Component
 class PersonopplysningerMapper(
     private val adresseMapper: AdresseMapper,
     private val statsborgerskapMapper: StatsborgerskapMapper,
     private val innflyttingUtflyttingMapper: InnflyttingUtflyttingMapper,
-    private val arbeidsfordelingService: ArbeidsfordelingService
 ) {
-
-    private val logger = LoggerFactory.getLogger(javaClass)
 
     fun tilPersonopplysninger(
         grunnlagsdataMedMetadata: GrunnlagsdataMedMetadata,
         egenAnsatt: Boolean,
-        søkerIdenter: PdlIdenter
+        søkerIdenter: PdlIdenter,
     ): PersonopplysningerDto {
         val grunnlagsdata = grunnlagsdataMedMetadata.grunnlagsdata
         val søker = grunnlagsdata.søker
@@ -65,7 +61,7 @@ class PersonopplysningerMapper(
                     relatertVedSivilstand = it.relatertVedSivilstand,
                     navn = it.navn,
                     dødsdato = it.dødsfall?.dødsdato,
-                    erGjeldende = !it.metadata.historisk
+                    erGjeldende = !it.metadata.historisk,
                 )
             }.sortedWith(compareByDescending<SivilstandDto> { it.erGjeldende }.thenByDescending { it.gyldigFraOgMed }),
             adresse = tilAdresser(søker),
@@ -75,24 +71,23 @@ class PersonopplysningerMapper(
                     gyldigTilOgMed = it.gyldigTilOgMed,
                     motpartsPersonident = it.motpartsPersonident,
                     navn = it.navn,
-                    områder = it.områder?.let { it.map { område -> mapOmråde(område) } } ?: emptyList()
+                    områder = it.områder?.let { it.map { område -> mapOmråde(område) } } ?: emptyList(),
                 )
             }.sortedByDescending { it.gyldigFraOgMed },
             egenAnsatt = egenAnsatt,
-            navEnhet = arbeidsfordelingService.hentNavEnhet(gjeldendePersonIdent)
-                ?.let { it.enhetId + " - " + it.enhetNavn } ?: "Ikke funnet",
             barn = grunnlagsdata.barn.map {
                 mapBarn(
                     it,
                     søkerIdenter.identer(),
                     søker.bostedsadresse,
-                    annenForelderMap
+                    annenForelderMap,
+                    grunnlagsdataMedMetadata.opprettetTidspunkt.toLocalDate(),
                 )
             }.sortedBy { it.fødselsdato },
             innflyttingTilNorge = innflyttingUtflyttingMapper.mapInnflytting(søker.innflyttingTilNorge),
             utflyttingFraNorge = innflyttingUtflyttingMapper.mapUtflytting(søker.utflyttingFraNorge),
             oppholdstillatelse = OppholdstillatelseMapper.map(søker.opphold),
-            vergemål = mapVergemål(søker)
+            vergemål = mapVergemål(søker),
         )
     }
 
@@ -110,7 +105,7 @@ class PersonopplysningerMapper(
                 type = it.type,
                 motpartsPersonident = it.vergeEllerFullmektig.motpartsPersonident,
                 navn = it.vergeEllerFullmektig.navn?.visningsnavn(),
-                omfang = it.vergeEllerFullmektig.omfang
+                omfang = it.vergeEllerFullmektig.omfang,
             )
         }
 
@@ -123,20 +118,20 @@ class PersonopplysningerMapper(
         return AdresseHjelper.sorterAdresser(adresser)
     }
 
-    fun mapBarn(
+    private fun mapBarn(
         barn: BarnMedIdent,
         søkerIdenter: Set<String>,
         bostedsadresserForelder: List<Bostedsadresse>,
-        annenForelderMap: Map<String, AnnenForelderMedIdent>
+        annenForelderMap: Map<String, AnnenForelderMedIdent>,
+        grunnlagsdataOpprettet: LocalDate,
     ): BarnDto {
         val annenForelderIdent = barn.forelderBarnRelasjon.find {
             !søkerIdenter.contains(it.relatertPersonsIdent) && it.relatertPersonsRolle != Familierelasjonsrolle.BARN
         }?.relatertPersonsIdent
 
         feilHvis(barn.deltBosted.filter { !it.metadata.historisk }.size > 1) { "Fant mer enn en ikke-historisk delt bosted." }
-        val bostedDto =
-            barn.deltBosted.gjeldende()?.let { listOf(DeltBostedDto(it.startdatoForKontrakt, it.sluttdatoForKontrakt)) }
-                ?: emptyList()
+        val deltBostedDto =
+            barn.deltBosted.map { DeltBostedDto(it.startdatoForKontrakt, it.sluttdatoForKontrakt, it.metadata.historisk) }
 
         return BarnDto(
             personIdent = barn.personIdent,
@@ -148,15 +143,15 @@ class PersonopplysningerMapper(
                     navn = annenForelder?.navn?.visningsnavn() ?: "Finner ikke navn",
                     dødsdato = annenForelder?.dødsfall?.gjeldende()?.dødsdato,
                     bostedsadresse = annenForelder?.bostedsadresse?.gjeldende()
-                        ?.let { adresseMapper.tilAdresse(it).visningsadresse }
+                        ?.let { adresseMapper.tilAdresse(it).visningsadresse },
                 )
             },
             adresse = barn.bostedsadresse.map(adresseMapper::tilAdresse),
-            borHosSøker = AdresseHjelper.borPåSammeAdresse(barn, bostedsadresserForelder),
-            deltBosted = bostedDto,
-            harDeltBostedNå = AdresseHjelper.harDeltBostedNå(barn),
+            borHosSøker = AdresseHjelper.harRegistrertSammeBostedsadresseSomForelder(barn, bostedsadresserForelder),
+            deltBosted = deltBostedDto,
+            harDeltBostedNå = AdresseHjelper.harDeltBosted(barn, grunnlagsdataOpprettet),
             fødselsdato = barn.fødsel.gjeldende().fødselsdato,
-            dødsdato = barn.dødsfall.gjeldende()?.dødsdato
+            dødsdato = barn.dødsfall.gjeldende()?.dødsdato,
         )
     }
 }

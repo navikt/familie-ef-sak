@@ -21,7 +21,7 @@ import java.util.UUID
 @ProtectedWithClaims(issuer = "azuread")
 class KlageController(
     private val tilgangService: TilgangService,
-    private val klageService: KlageService
+    private val klageService: KlageService,
 ) {
 
     @PostMapping("/fagsak/{fagsakId}")

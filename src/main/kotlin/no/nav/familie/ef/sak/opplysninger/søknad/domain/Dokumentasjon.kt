@@ -10,8 +10,8 @@ data class Dokumentasjon(val harSendtInnTidligere: Boolean, val dokumenter: List
             this.dokumenter.map { dokument ->
                 VedleggDto(
                     dokument.id,
-                    dokument.navn
+                    dokument.navn,
                 )
-            }
+            },
         )
 }

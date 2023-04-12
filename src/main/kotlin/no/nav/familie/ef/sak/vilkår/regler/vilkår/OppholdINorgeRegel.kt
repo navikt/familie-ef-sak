@@ -13,7 +13,7 @@ import no.nav.familie.ef.sak.vilkår.regler.regelIder
 class OppholdINorgeRegel : Vilkårsregel(
     vilkårType = VilkårType.LOVLIG_OPPHOLD,
     regler = setOf(BOR_OG_OPPHOLDER_SEG_I_NORGE, OPPHOLD_UNNTAK),
-    hovedregler = regelIder(BOR_OG_OPPHOLDER_SEG_I_NORGE)
+    hovedregler = regelIder(BOR_OG_OPPHOLDER_SEG_I_NORGE),
 ) {
 
     companion object {
@@ -25,8 +25,8 @@ class OppholdINorgeRegel : Vilkårsregel(
                     SvarId.ARBEID_NORSK_ARBEIDSGIVER to SluttSvarRegel.OPPFYLT_MED_PÅKREVD_BEGRUNNELSE,
                     SvarId.UTENLANDSOPPHOLD_MINDRE_ENN_6_UKER to SluttSvarRegel.OPPFYLT_MED_PÅKREVD_BEGRUNNELSE,
                     SvarId.OPPHOLDER_SEG_I_ANNET_EØS_LAND to SluttSvarRegel.OPPFYLT_MED_PÅKREVD_BEGRUNNELSE,
-                    SvarId.NEI to SluttSvarRegel.IKKE_OPPFYLT_MED_PÅKREVD_BEGRUNNELSE
-                )
+                    SvarId.NEI to SluttSvarRegel.IKKE_OPPFYLT_MED_PÅKREVD_BEGRUNNELSE,
+                ),
             )
 
         private val BOR_OG_OPPHOLDER_SEG_I_NORGE =
@@ -34,8 +34,8 @@ class OppholdINorgeRegel : Vilkårsregel(
                 regelId = RegelId.BOR_OG_OPPHOLDER_SEG_I_NORGE,
                 svarMapping = jaNeiSvarRegel(
                     hvisJa = SluttSvarRegel.OPPFYLT_MED_PÅKREVD_BEGRUNNELSE,
-                    hvisNei = NesteRegel(OPPHOLD_UNNTAK.regelId)
-                )
+                    hvisNei = NesteRegel(OPPHOLD_UNNTAK.regelId),
+                ),
             )
     }
 }

@@ -33,9 +33,9 @@ internal class PersonopplysningerControllerTest : OppslagSpringRunnerTest() {
         val personopplysningerRequest = PersonIdentDto("ikkeTilgang")
 
         return restTemplate.exchange(
-            localhost("/api/personopplysninger"),
+            localhost("/api/personopplysninger/nav-kontor"),
             HttpMethod.POST,
-            HttpEntity(personopplysningerRequest, headers)
+            HttpEntity(personopplysningerRequest, headers),
         )
     }
 }

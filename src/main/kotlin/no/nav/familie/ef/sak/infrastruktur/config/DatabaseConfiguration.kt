@@ -75,7 +75,7 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
     @Bean
     fun verifyIgnoreIfProd(
         @Value("\${spring.flyway.placeholders.ignoreIfProd}") ignoreIfProd: String,
-        environment: Environment
+        environment: Environment,
     ): FlywayConfigurationCustomizer {
         val isProd = environment.activeProfiles.contains("prod")
         val ignore = ignoreIfProd == "--"
@@ -136,8 +136,8 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
                 PGobjectTilSkolepengerConverter(),
                 SkolepengerTilPGobjectConverter(),
                 PGobjectTilFrittståendeBrevmottakere(),
-                FrittståendeBrevmottakereTilPGobjectConverter()
-            )
+                FrittståendeBrevmottakereTilPGobjectConverter(),
+            ),
         )
     }
 
@@ -392,7 +392,7 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
             return tilleggstønadVerdi ?: TilleggsstønadWrapper(
                 harTilleggsstønad = false,
                 perioder = emptyList(),
-                begrunnelse = null
+                begrunnelse = null,
             )
         }
     }

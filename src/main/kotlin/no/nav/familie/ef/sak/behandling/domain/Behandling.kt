@@ -5,6 +5,7 @@ import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.felles.domain.Sporbar
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
+import no.nav.familie.kontrakter.ef.iverksett.BehandlingKategori
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Embedded
@@ -28,6 +29,7 @@ data class Behandling(
     val type: BehandlingType,
     val status: BehandlingStatus,
     val steg: StegType,
+    val kategori: BehandlingKategori,
     @Column("arsak")
     val årsak: BehandlingÅrsak,
     val kravMottatt: LocalDate? = null,
@@ -37,7 +39,7 @@ data class Behandling(
     val resultat: BehandlingResultat,
     @Column("henlagt_arsak")
     val henlagtÅrsak: HenlagtÅrsak? = null,
-    val vedtakstidspunkt: LocalDateTime? = null
+    val vedtakstidspunkt: LocalDateTime? = null,
 ) {
 
     fun kanHenlegges(): Boolean = !status.behandlingErLåstForVidereRedigering()
@@ -58,7 +60,7 @@ data class Behandling(
 
 enum class BehandlingType(val visningsnavn: String) {
     FØRSTEGANGSBEHANDLING("Førstegangsbehandling"),
-    REVURDERING("Revurdering")
+    REVURDERING("Revurdering"),
 }
 
 /**
@@ -69,7 +71,7 @@ enum class BehandlingResultat(val displayName: String) {
     OPPHØRT(displayName = "Opphørt"),
     AVSLÅTT(displayName = "Avslått"),
     IKKE_SATT(displayName = "Ikke satt"),
-    HENLAGT(displayName = "Henlagt")
+    HENLAGT(displayName = "Henlagt"),
 }
 
 enum class BehandlingStatus {
@@ -78,7 +80,8 @@ enum class BehandlingStatus {
     FATTER_VEDTAK,
     IVERKSETTER_VEDTAK,
     FERDIGSTILT,
-    SATT_PÅ_VENT
+    SATT_PÅ_VENT,
+
     ;
 
     fun visningsnavn(): String {

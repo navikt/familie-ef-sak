@@ -9,12 +9,13 @@ data class OpprettOppgaveForBarn(
     val fødselsnummer: String,
     val fødselsnummerSøker: String,
     val alder: Alder,
-    val behandlingId: UUID
+    val behandlingId: UUID,
 )
 
 enum class Alder(val oppgavebeskrivelse: String) {
     SEKS_MND("Barn 1/2 år. Send varsel om aktivitetsplikt."),
-    ETT_ÅR("Barn 1 år. Vurder aktivitetsplikten.");
+    ETT_ÅR("Barn 1 år. Vurder aktivitetsplikten."),
+    ;
 
     companion object {
         fun fromFødselsdato(fødselsdato: LocalDate?, numberOfDaysCutoff: Long = 7): Alder? {

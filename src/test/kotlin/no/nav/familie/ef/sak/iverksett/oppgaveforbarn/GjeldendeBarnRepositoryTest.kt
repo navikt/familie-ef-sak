@@ -62,8 +62,8 @@ class GjeldendeBarnRepositoryTest : OppslagSpringRunnerTest() {
         barnRepository.insertAll(
             listOf(
                 barn(behandlingId = behandlingMedFremtidigAndel.id),
-                barn(behandlingId = behandlingMedTidligereAndel.id)
-            )
+                barn(behandlingId = behandlingMedTidligereAndel.id),
+            ),
         )
 
         val barnForUtplukk = finnBarnAvGjeldendeIverksatteBehandlinger()
@@ -96,15 +96,15 @@ class GjeldendeBarnRepositoryTest : OppslagSpringRunnerTest() {
                     setOf(
                         PersonIdent(
                             nyesteFnrSøker,
-                            Sporbar(opprettetTid = LocalDateTime.now())
+                            Sporbar(opprettetTid = LocalDateTime.now()),
                         ),
                         PersonIdent(
                             eldsteFnrSøker,
-                            Sporbar(opprettetTid = LocalDateTime.now().minusDays(1))
-                        )
-                    )
-                )
-            )
+                            Sporbar(opprettetTid = LocalDateTime.now().minusDays(1)),
+                        ),
+                    ),
+                ),
+            ),
         )
 
         val behandlingMedFremtidigAndel = lagreInnvilgetBehandling(fagsak)
@@ -128,22 +128,22 @@ class GjeldendeBarnRepositoryTest : OppslagSpringRunnerTest() {
                 fagsakForTidligereAndel,
                 status = BehandlingStatus.FERDIGSTILT,
                 resultat = BehandlingResultat.INNVILGET,
-                opprettetTid = LocalDateTime.now().minusDays(2)
-            )
+                opprettetTid = LocalDateTime.now().minusDays(2),
+            ),
         )
 
         val tidligereAndel = lagAndelTilkjentYtelse(
             beløp = 1,
             kildeBehandlingId = behandlingMedTidligereAndel.id,
             fraOgMed = LocalDate.now().minusMonths(2),
-            tilOgMed = LocalDate.now().minusMonths(1)
+            tilOgMed = LocalDate.now().minusMonths(1),
         )
 
         tilkjentYtelseRepository.insert(
             lagTilkjentYtelse(
                 behandlingId = behandlingMedTidligereAndel.id,
-                andelerTilkjentYtelse = listOf(tidligereAndel)
-            )
+                andelerTilkjentYtelse = listOf(tidligereAndel),
+            ),
         )
 
         val behandlingMedFremtidigAndel = behandlingRepository.insert(
@@ -151,8 +151,8 @@ class GjeldendeBarnRepositoryTest : OppslagSpringRunnerTest() {
                 fagsakForFremtidigAndel,
                 status = BehandlingStatus.FERDIGSTILT,
                 resultat = BehandlingResultat.INNVILGET,
-                opprettetTid = LocalDateTime.now().minusDays(2)
-            )
+                opprettetTid = LocalDateTime.now().minusDays(2),
+            ),
         )
 
         lagreFremtidligAndel(behandlingMedFremtidigAndel, beløp = 1)
@@ -160,7 +160,7 @@ class GjeldendeBarnRepositoryTest : OppslagSpringRunnerTest() {
         val barnListe = listOf(
             barn(behandlingId = behandlingMedFremtidigAndel.id, personIdent = "1"),
             barn(behandlingId = behandlingMedFremtidigAndel.id, personIdent = "2"),
-            barn(behandlingId = behandlingMedTidligereAndel.id, personIdent = "3")
+            barn(behandlingId = behandlingMedTidligereAndel.id, personIdent = "3"),
         )
 
         barnRepository.insertAll(barnListe)
@@ -234,7 +234,7 @@ class GjeldendeBarnRepositoryTest : OppslagSpringRunnerTest() {
         fagsak: Fagsak,
         tidligereBehandling: Behandling? = null,
         opprettetTid: LocalDateTime = tidligereBehandling?.sporbar?.opprettetTid?.plusHours(1)
-            ?: LocalDateTime.now()
+            ?: LocalDateTime.now(),
     ) =
         behandlingRepository.insert(
             behandling(
@@ -242,8 +242,8 @@ class GjeldendeBarnRepositoryTest : OppslagSpringRunnerTest() {
                 status = BehandlingStatus.FERDIGSTILT,
                 resultat = BehandlingResultat.INNVILGET,
                 forrigeBehandlingId = tidligereBehandling?.id,
-                opprettetTid = opprettetTid
-            )
+                opprettetTid = opprettetTid,
+            ),
         )
 
     private fun lagreHistoriskAndel(behandling: Behandling, beløp: Int): TilkjentYtelse {
@@ -251,13 +251,13 @@ class GjeldendeBarnRepositoryTest : OppslagSpringRunnerTest() {
             beløp = beløp,
             kildeBehandlingId = behandling.id,
             fraOgMed = LocalDate.now().minusMonths(2),
-            tilOgMed = LocalDate.now().minusMonths(1)
+            tilOgMed = LocalDate.now().minusMonths(1),
         )
         return tilkjentYtelseRepository.insert(
             lagTilkjentYtelse(
                 behandlingId = behandling.id,
-                andelerTilkjentYtelse = listOf(andel)
-            )
+                andelerTilkjentYtelse = listOf(andel),
+            ),
         )
     }
 
@@ -266,13 +266,13 @@ class GjeldendeBarnRepositoryTest : OppslagSpringRunnerTest() {
             beløp = beløp,
             kildeBehandlingId = behandling.id,
             fraOgMed = LocalDate.now().minusMonths(1),
-            tilOgMed = LocalDate.now().plusMonths(1)
+            tilOgMed = LocalDate.now().plusMonths(1),
         )
         return tilkjentYtelseRepository.insert(
             lagTilkjentYtelse(
                 behandlingId = behandling.id,
-                andelerTilkjentYtelse = listOf(andel)
-            )
+                andelerTilkjentYtelse = listOf(andel),
+            ),
         )
     }
 
@@ -282,7 +282,7 @@ class GjeldendeBarnRepositoryTest : OppslagSpringRunnerTest() {
             personIdent = personIdent,
             fødselTermindato = termindato,
             navn = null,
-            søknadBarnId = UUID.randomUUID()
+            søknadBarnId = UUID.randomUUID(),
         )
     }
 }

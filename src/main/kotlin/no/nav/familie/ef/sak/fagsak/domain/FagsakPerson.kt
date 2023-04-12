@@ -16,7 +16,7 @@ data class FagsakPerson(
     @MappedCollection(idColumn = "fagsak_person_id")
     val identer: Set<PersonIdent>,
     val opprettetAv: String = SikkerhetContext.hentSaksbehandlerEllerSystembruker(),
-    val opprettetTid: LocalDateTime = SporbarUtils.now()
+    val opprettetTid: LocalDateTime = SporbarUtils.now(),
 ) {
 
     fun hentAktivIdent(): String {
@@ -40,5 +40,5 @@ data class PersonIdent(
     @Id
     val ident: String,
     @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
-    val sporbar: Sporbar = Sporbar()
+    val sporbar: Sporbar = Sporbar(),
 )

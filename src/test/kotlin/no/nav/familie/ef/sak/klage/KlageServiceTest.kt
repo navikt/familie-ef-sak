@@ -62,7 +62,7 @@ internal class KlageServiceTest {
             fagsakPersonService,
             klageClient,
             infotrygdService,
-            arbeidsfordelingService
+            arbeidsfordelingService,
         )
 
     private val eksternFagsakId = 11L
@@ -72,7 +72,7 @@ internal class KlageServiceTest {
     val fagsak = fagsak(eksternId = EksternFagsakId(eksternFagsakId), person = fagsakPerson)
     private val saksbehandling = saksbehandling(
         fagsak,
-        behandling(eksternId = EksternBehandlingId(eksternBehandlingId))
+        behandling(eksternId = EksternBehandlingId(eksternBehandlingId)),
     )
 
     private val opprettKlageSlot = slot<OpprettKlagebehandlingRequest>()
@@ -122,8 +122,8 @@ internal class KlageServiceTest {
         internal fun `har åpen sak for stønadstype`(stønadType: StønadType) {
             every { infotrygdService.hentÅpneKlagesaker(fagsakPerson.hentAktivIdent()) } returns listOf(
                 åpenSak(
-                    stønadstype = stønadType
-                )
+                    stønadstype = stønadType,
+                ),
             )
 
             val åpneKlager = klageService.hentÅpneKlagerInfotrygd(fagsakPerson.id)
@@ -135,7 +135,7 @@ internal class KlageServiceTest {
             "1",
             stønadType = stønadstype,
             resultat = InfotrygdSakResultat.ÅPEN_SAK,
-            type = InfotrygdSakType.KLAGE
+            type = InfotrygdSakType.KLAGE,
         )
     }
 
@@ -158,7 +158,7 @@ internal class KlageServiceTest {
             assertThat(eksternFagsakIdSlot.captured).containsExactlyInAnyOrder(
                 eksternIdBT,
                 eksternIdOS,
-                eksternIdSP
+                eksternIdSP,
             )
         }
 
@@ -203,17 +203,17 @@ internal class KlageServiceTest {
                         type = BehandlingEventType.KLAGEBEHANDLING_AVSLUTTET,
                         utfall = null,
                         mottattEllerAvsluttetTidspunkt = tidsPunktAvsluttetIKabal,
-                        journalpostReferanser = listOf()
-                    )
+                        journalpostReferanser = listOf(),
+                    ),
                 ),
-                vedtaksdato = tidspunktAvsluttetIFamilieKlage
+                vedtaksdato = tidspunktAvsluttetIFamilieKlage,
             )
 
             every { fagsakService.finnFagsakerForFagsakPersonId(any()) } returns fagsaker
             every { klageClient.hentKlagebehandlinger(any()) } returns mapOf(
                 eksternIdOS to listOf(klagebehandlingAvsluttetKabal),
                 eksternIdBT to emptyList(),
-                eksternIdSP to emptyList()
+                eksternIdSP to emptyList(),
             )
 
             val klager = klageService.hentBehandlinger(UUID.randomUUID())
@@ -229,14 +229,14 @@ internal class KlageServiceTest {
             val klagebehandlingIkkeAvsluttetKabal = klageBehandlingDto(
                 resultat = BehandlingResultat.IKKE_MEDHOLD,
                 klageinstansResultat = emptyList(),
-                vedtaksdato = tidspunktAvsluttetFamilieKlage
+                vedtaksdato = tidspunktAvsluttetFamilieKlage,
             )
 
             every { fagsakService.finnFagsakerForFagsakPersonId(any()) } returns fagsaker
             every { klageClient.hentKlagebehandlinger(any()) } returns mapOf(
                 eksternIdOS to listOf(klagebehandlingIkkeAvsluttetKabal),
                 eksternIdBT to emptyList(),
-                eksternIdSP to emptyList()
+                eksternIdSP to emptyList(),
             )
 
             val klager = klageService.hentBehandlinger(UUID.randomUUID())
@@ -255,17 +255,17 @@ internal class KlageServiceTest {
                     klageBehandlingDto(
                         resultat = BehandlingResultat.MEDHOLD,
                         klageinstansResultat = emptyList(),
-                        vedtaksdato = tidspunktAvsluttetFamilieKlage
-                    )
+                        vedtaksdato = tidspunktAvsluttetFamilieKlage,
+                    ),
                 ),
                 eksternIdBT to listOf(
                     klageBehandlingDto(
                         resultat = BehandlingResultat.IKKE_MEDHOLD_FORMKRAV_AVVIST,
                         klageinstansResultat = emptyList(),
-                        vedtaksdato = tidspunktAvsluttetFamilieKlage
-                    )
+                        vedtaksdato = tidspunktAvsluttetFamilieKlage,
+                    ),
                 ),
-                eksternIdSP to emptyList()
+                eksternIdSP to emptyList(),
             )
 
             val klager = klageService.hentBehandlinger(UUID.randomUUID())
@@ -277,13 +277,13 @@ internal class KlageServiceTest {
         private fun fagsaker() = Fagsaker(
             fagsak(stønadstype = StønadType.OVERGANGSSTØNAD, eksternId = EksternFagsakId(eksternIdOS)),
             fagsak(stønadstype = StønadType.BARNETILSYN, eksternId = EksternFagsakId(eksternIdBT)),
-            fagsak(stønadstype = StønadType.SKOLEPENGER, eksternId = EksternFagsakId(eksternIdSP))
+            fagsak(stønadstype = StønadType.SKOLEPENGER, eksternId = EksternFagsakId(eksternIdSP)),
         )
 
         private fun klageBehandlingDto(
             resultat: BehandlingResultat? = null,
             vedtaksdato: LocalDateTime? = null,
-            klageinstansResultat: List<KlageinstansResultatDto> = emptyList()
+            klageinstansResultat: List<KlageinstansResultatDto> = emptyList(),
         ) = KlagebehandlingDto(
             id = UUID.randomUUID(),
             fagsakId = UUID.randomUUID(),
@@ -293,13 +293,13 @@ internal class KlageServiceTest {
             resultat = resultat,
             årsak = null,
             vedtaksdato = vedtaksdato,
-            klageinstansResultat = klageinstansResultat
+            klageinstansResultat = klageinstansResultat,
         )
 
         private fun klageBehandlingerDto() = mapOf(
             eksternIdOS to listOf(klageBehandlingDto()),
             eksternIdBT to listOf(klageBehandlingDto()),
-            eksternIdSP to listOf(klageBehandlingDto())
+            eksternIdSP to listOf(klageBehandlingDto()),
         )
     }
 

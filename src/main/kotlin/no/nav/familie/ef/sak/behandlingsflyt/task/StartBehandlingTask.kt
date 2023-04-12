@@ -18,13 +18,13 @@ import java.util.UUID
 @Service
 @TaskStepBeskrivelse(
     taskStepType = StartBehandlingTask.TYPE,
-    beskrivelse = "Sender start behandling til Infotrygd"
+    beskrivelse = "Sender start behandling til Infotrygd",
 )
 class StartBehandlingTask(
     private val iverksettClient: IverksettClient,
     private val personService: PersonService,
     private val fagsakService: FagsakService,
-    private val behandlingRepository: BehandlingRepository
+    private val behandlingRepository: BehandlingRepository,
 ) : AsyncTaskStep {
 
     override fun doTask(task: Task) {
@@ -52,7 +52,7 @@ class StartBehandlingTask(
                     this["behandlingId"] = behandlingId.toString()
                     this["fagsakId"] = fagsakId.toString()
                     this["personIdent"] = personIdent
-                }
+                },
             )
 
         const val TYPE = "startBehandlingTask"

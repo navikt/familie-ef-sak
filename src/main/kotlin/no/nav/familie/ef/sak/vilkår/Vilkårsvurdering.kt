@@ -11,6 +11,7 @@ import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Embedded
 import org.springframework.data.relational.core.mapping.Table
+import java.time.LocalDateTime
 import java.util.UUID
 
 /**
@@ -19,6 +20,7 @@ import java.util.UUID
  *
  * Hver vilkårsvurdering har delvilkår. Hvert delvilkår har vurderinger med svar, og kanskje begrunnelse.
  *
+ * Husk at [opphavsvilkår] må tas stilling til når man kopierer denne
  */
 @Table("vilkarsvurdering")
 data class Vilkårsvurdering(
@@ -31,19 +33,44 @@ data class Vilkårsvurdering(
     @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
     val sporbar: Sporbar = Sporbar(),
     @Column("delvilkar")
-    val delvilkårsvurdering: DelvilkårsvurderingWrapper
+    val delvilkårsvurdering: DelvilkårsvurderingWrapper,
+    @Embedded(onEmpty = Embedded.OnEmpty.USE_NULL, prefix = "opphavsvilkaar_")
+    val opphavsvilkår: Opphavsvilkår?,
 ) {
     init {
         require(resultat.erIkkeDelvilkårsresultat()) // Verdien AUTOMATISK_OPPFYLT er kun forbeholdt delvilkår
     }
+
+    /**
+     * Brukes når man skal gjenbruke denne vilkårsvurderingen i en annan vilkårsvurdering
+     */
+    fun opprettOpphavsvilkår(): Opphavsvilkår =
+        opphavsvilkår ?: Opphavsvilkår(behandlingId, sporbar.endret.endretTid)
 }
+
+fun List<Vilkårsvurdering>.utledVurderinger(vilkårType: VilkårType, regelId: RegelId) =
+    this.filter { it.type == vilkårType }.flatMap { it.delvilkårsvurdering.delvilkårsvurderinger }.flatMap { it.vurderinger }
+        .filter { it.regelId == regelId }
+
+/**
+ * Inneholder informasjon fra hvilken behandling dette vilkår ble gjenrukt fra
+ * Hvis man gjenbruker et vilkår som allerede er gjenbrukt fra en annen behandling,
+ * så skal man peke til den opprinnelige behandlingen. Dvs
+ * Behandling A
+ * Behandling B gjenbruker fra behandling A
+ * Behandling C gjenbruker fra B, men peker mot A sitt vilkår
+ */
+data class Opphavsvilkår(
+    val behandlingId: UUID,
+    val vurderingstidspunkt: LocalDateTime,
+)
 
 // Ingen støtte for å ha en liste direkt i entiteten, wrapper+converter virker
 data class DelvilkårsvurderingWrapper(val delvilkårsvurderinger: List<Delvilkårsvurdering>)
 
 data class Delvilkårsvurdering(
     val resultat: Vilkårsresultat = Vilkårsresultat.IKKE_TATT_STILLING_TIL,
-    val vurderinger: List<Vurdering>
+    val vurderinger: List<Vurdering>,
 ) {
 
     // regelId for første svaret er det samme som hovedregel
@@ -53,8 +80,10 @@ data class Delvilkårsvurdering(
 data class Vurdering(
     val regelId: RegelId,
     val svar: SvarId? = null,
-    val begrunnelse: String? = null
+    val begrunnelse: String? = null,
 )
+
+fun List<Vurdering>.harSvar(svarId: SvarId) = this.any { it.svar == svarId }
 
 val inngangsvilkår = listOf(
     VilkårType.FORUTGÅENDE_MEDLEMSKAP,
@@ -63,7 +92,7 @@ val inngangsvilkår = listOf(
     VilkårType.SIVILSTAND,
     VilkårType.SAMLIV,
     VilkårType.ALENEOMSORG,
-    VilkårType.NYTT_BARN_SAMME_PARTNER
+    VilkårType.NYTT_BARN_SAMME_PARTNER,
 )
 
 enum class Vilkårsresultat(val beskrivelse: String) {
@@ -72,7 +101,8 @@ enum class Vilkårsresultat(val beskrivelse: String) {
     IKKE_OPPFYLT("Vilkåret er ikke oppfylt hvis alle delvilkår er oppfylt eller ikke oppfylt, men minimum 1 ikke oppfylt"),
     IKKE_AKTUELL("Hvis søknaden/pdl data inneholder noe som gjør att delvilkåret ikke må besvares"),
     IKKE_TATT_STILLING_TIL("Init state, eller att brukeren ikke svaret på hele delvilkåret"),
-    SKAL_IKKE_VURDERES("Saksbehandleren kan sette att ett delvilkår ikke skal vurderes");
+    SKAL_IKKE_VURDERES("Saksbehandleren kan sette att ett delvilkår ikke skal vurderes"),
+    ;
 
     fun oppfyltEllerIkkeOppfylt() = this == OPPFYLT || this == IKKE_OPPFYLT
     fun erIkkeDelvilkårsresultat() = this != AUTOMATISK_OPPFYLT
@@ -98,7 +128,8 @@ enum class VilkårType(val beskrivelse: String, val gjelderStønader: List<Støn
     DOKUMENTASJON_TILSYNSUTGIFTER("Dokumentasjon av tilsynsutgifter", listOf(BARNETILSYN)),
     RETT_TIL_OVERGANGSSTØNAD("Er vilkårene for rett til overgangsstønad oppfylt?", listOf(SKOLEPENGER)),
     DOKUMENTASJON_AV_UTDANNING("Dokumentasjon av utdanning", listOf(SKOLEPENGER)),
-    ER_UTDANNING_HENSIKTSMESSIG("Er utdanning hensiktsmessig?", listOf(SKOLEPENGER))
+    ER_UTDANNING_HENSIKTSMESSIG("Er utdanning hensiktsmessig?", listOf(SKOLEPENGER)),
+
     ;
 
     fun gjelderFlereBarn(): Boolean = this == ALENEOMSORG || this == ALDER_PÅ_BARN

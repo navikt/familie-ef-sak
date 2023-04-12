@@ -24,7 +24,7 @@ class FrittståendeBrevService(
     private val arbeidsfordelingService: ArbeidsfordelingService,
     private val iverksettClient: IverksettClient,
     private val brevsignaturService: BrevsignaturService,
-    private val mellomlagringBrevService: MellomlagringBrevService
+    private val mellomlagringBrevService: MellomlagringBrevService,
 ) {
 
     fun forhåndsvisFrittståendeBrev(frittståendeBrevDto: FrittståendeBrevDto): ByteArray {
@@ -47,8 +47,8 @@ class FrittståendeBrevService(
                 fil = brev,
                 journalførendeEnhet = journalførendeEnhet,
                 saksbehandlerIdent = saksbehandlerIdent,
-                mottakere = mottakere
-            )
+                mottakere = mottakere,
+            ),
         )
         mellomlagringBrevService.slettMellomlagretFrittståendeBrev(fagsak.id, saksbehandlerIdent)
     }
@@ -61,14 +61,14 @@ class FrittståendeBrevService(
 
     private fun lagFrittståendeBrevRequest(
         frittståendeBrevDto: FrittståendeBrevDto,
-        ident: String
+        ident: String,
     ): FrittståendeBrevRequestDto {
         val navn = personopplysningerService.hentGjeldeneNavn(listOf(ident))
         return FrittståendeBrevRequestDto(
             overskrift = frittståendeBrevDto.overskrift,
             avsnitt = frittståendeBrevDto.avsnitt,
             personIdent = ident,
-            navn = navn.getValue(ident)
+            navn = navn.getValue(ident),
         )
     }
 

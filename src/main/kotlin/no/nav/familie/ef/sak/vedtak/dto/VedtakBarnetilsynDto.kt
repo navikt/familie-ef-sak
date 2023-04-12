@@ -18,13 +18,13 @@ data class InnvilgelseBarnetilsyn(
     val perioderKontantstøtte: List<PeriodeMedBeløpDto>,
     val tilleggsstønad: TilleggsstønadDto,
     override val resultatType: ResultatType = ResultatType.INNVILGE,
-    override val _type: String = "InnvilgelseBarnetilsyn"
+    override val _type: String = "InnvilgelseBarnetilsyn",
 ) : VedtakDto(resultatType, _type)
 
 data class TilleggsstønadDto(
     val harTilleggsstønad: Boolean,
     val perioder: List<PeriodeMedBeløpDto> = emptyList(),
-    val begrunnelse: String?
+    val begrunnelse: String?,
 )
 
 data class PeriodeMedBeløpDto(
@@ -33,9 +33,9 @@ data class PeriodeMedBeløpDto(
     @JsonIgnore
     val periode: Månedsperiode = Månedsperiode(
         årMånedFra ?: error("periode eller årMånedFra må ha verdi"),
-        årMånedTil ?: error("periode eller årMånedTil må ha verdi")
+        årMånedTil ?: error("periode eller årMånedTil må ha verdi"),
     ),
-    val beløp: Int
+    val beløp: Int,
 )
 
 data class UtgiftsperiodeDto(
@@ -44,13 +44,13 @@ data class UtgiftsperiodeDto(
     @JsonIgnore
     val periode: Månedsperiode = Månedsperiode(
         årMånedFra ?: error("periode eller årMånedFra må ha verdi"),
-        årMånedTil ?: error("periode eller årMånedTil må ha verdi")
+        årMånedTil ?: error("periode eller årMånedTil må ha verdi"),
     ),
     val barn: List<UUID>,
     val utgifter: Int,
     val sanksjonsårsak: Sanksjonsårsak?,
     val periodetype: PeriodetypeBarnetilsyn,
-    val aktivitetstype: AktivitetstypeBarnetilsyn?
+    val aktivitetstype: AktivitetstypeBarnetilsyn?,
 ) {
 
     val erMidlertidigOpphørEllerSanksjon get() = periodetype.midlertidigOpphørEllerSanksjon()
@@ -67,13 +67,13 @@ fun UtgiftsperiodeDto.tilDomene(): Barnetilsynperiode =
         barn = this.barn,
         sanksjonsårsak = this.sanksjonsårsak,
         periodetype = this.periodetype,
-        aktivitet = this.aktivitetstype
+        aktivitet = this.aktivitetstype,
     )
 
 fun PeriodeMedBeløpDto.tilDomene(): PeriodeMedBeløp =
     PeriodeMedBeløp(
         periode = this.periode,
-        beløp = this.beløp
+        beløp = this.beløp,
     )
 
 fun Vedtak.mapInnvilgelseBarnetilsyn(resultatType: ResultatType = ResultatType.INNVILGE): InnvilgelseBarnetilsyn {
@@ -91,20 +91,20 @@ fun Vedtak.mapInnvilgelseBarnetilsyn(resultatType: ResultatType = ResultatType.I
                 barn = it.barn,
                 sanksjonsårsak = it.sanksjonsårsak,
                 periodetype = it.periodetype,
-                aktivitetstype = it.aktivitetstype
+                aktivitetstype = it.aktivitetstype,
             )
         },
         perioderKontantstøtte = this.kontantstøtte.perioder.map { it.tilDto() },
         tilleggsstønad = TilleggsstønadDto(
             harTilleggsstønad = this.tilleggsstønad.harTilleggsstønad,
             perioder = this.tilleggsstønad.perioder.map { it.tilDto() },
-            begrunnelse = this.tilleggsstønad.begrunnelse
+            begrunnelse = this.tilleggsstønad.begrunnelse,
         ),
         resultatType = resultatType,
         _type = when (resultatType) {
             ResultatType.INNVILGE -> "InnvilgelseBarnetilsyn"
             ResultatType.INNVILGE_UTEN_UTBETALING -> "InnvilgelseBarnetilsynUtenUtbetaling"
             else -> error("Ugyldig resultattype $this")
-        }
+        },
     )
 }

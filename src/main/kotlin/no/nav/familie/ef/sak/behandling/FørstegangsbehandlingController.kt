@@ -17,13 +17,13 @@ import java.util.UUID
 @ProtectedWithClaims(issuer = "azuread")
 class FørstegangsbehandlingController(
     private val førstegangsbehandlingService: FørstegangsbehandlingService,
-    private val tilgangService: TilgangService
+    private val tilgangService: TilgangService,
 ) {
 
     @PostMapping("{fagsakId}/opprett")
     fun opprettFørstegangsbehandlingManuelt(
         @PathVariable fagsakId: UUID,
-        @RequestBody førstegangsBehandlingRequest: FørstegangsbehandlingDto
+        @RequestBody førstegangsBehandlingRequest: FørstegangsbehandlingDto,
     ): Ressurs<UUID> {
         tilgangService.validerTilgangTilFagsak(fagsakId, AuditLoggerEvent.CREATE)
         tilgangService.validerHarSaksbehandlerrolle()

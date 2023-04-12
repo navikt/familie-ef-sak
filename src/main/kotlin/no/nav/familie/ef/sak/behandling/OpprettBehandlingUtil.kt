@@ -20,7 +20,7 @@ object OpprettBehandlingUtil {
     fun validerKanOppretteNyBehandling(
         behandlingType: BehandlingType,
         tidligereBehandlinger: List<Behandling>,
-        erMigrering: Boolean = false
+        erMigrering: Boolean = false,
     ) {
         val sisteBehandling = tidligereBehandlinger
             .filter { it.resultat != BehandlingResultat.HENLAGT }
@@ -67,7 +67,7 @@ object OpprettBehandlingUtil {
         if (erMigrering && sisteBehandling != null) {
             throw ApiFeil(
                 "Det er ikke mulig å opprette en migrering når det finnes en behandling fra før",
-                HttpStatus.BAD_REQUEST
+                HttpStatus.BAD_REQUEST,
             )
         }
     }

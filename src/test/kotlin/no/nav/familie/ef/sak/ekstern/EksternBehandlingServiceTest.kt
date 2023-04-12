@@ -39,8 +39,8 @@ internal class EksternBehandlingServiceTest : OppslagSpringRunnerTest() {
                 behandling(
                     fagsakMedFerdigstiltBehandling,
                     resultat = BehandlingResultat.INNVILGET,
-                    status = BehandlingStatus.FERDIGSTILT
-                )
+                    status = BehandlingStatus.FERDIGSTILT,
+                ),
             )
             vilkårsvurderingRepository.insert(vilkårsvurdering(førstegangsbehandling.id))
 
@@ -72,8 +72,8 @@ internal class EksternBehandlingServiceTest : OppslagSpringRunnerTest() {
                 behandling(
                     fagsakMedHenlagtBehandling,
                     resultat = BehandlingResultat.HENLAGT,
-                    status = BehandlingStatus.FERDIGSTILT
-                )
+                    status = BehandlingStatus.FERDIGSTILT,
+                ),
             )
 
             val result = eksternBehandlingService.opprettRevurderingKlage(fagsakMedHenlagtBehandling.eksternId.id)
@@ -104,8 +104,8 @@ internal class EksternBehandlingServiceTest : OppslagSpringRunnerTest() {
                 behandling(
                     fagsakMedFerdigstiltBehandling,
                     resultat = BehandlingResultat.INNVILGET,
-                    status = BehandlingStatus.FERDIGSTILT
-                )
+                    status = BehandlingStatus.FERDIGSTILT,
+                ),
             )
             val result = eksternBehandlingService.kanOppretteRevurdering(fagsakMedFerdigstiltBehandling.eksternId.id)
 

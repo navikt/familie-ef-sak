@@ -18,7 +18,7 @@ class InfotrygdReplikaClient(
     @Value("\${INFOTRYGD_REPLIKA_API_URL}")
     private val infotrygdReplikaUri: URI,
     @Qualifier("azure")
-    restOperations: RestOperations
+    restOperations: RestOperations,
 ) :
     AbstractPingableRestClient(restOperations, "infotrygd.replika") {
 

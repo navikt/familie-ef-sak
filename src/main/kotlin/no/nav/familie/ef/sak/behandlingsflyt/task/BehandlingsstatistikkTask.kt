@@ -41,7 +41,7 @@ import java.util.UUID
 @Service
 @TaskStepBeskrivelse(
     taskStepType = BehandlingsstatistikkTask.TYPE,
-    beskrivelse = "Sender behandlingsstatistikk til iverksett"
+    beskrivelse = "Sender behandlingsstatistikk til iverksett",
 )
 class BehandlingsstatistikkTask(
     private val iverksettClient: IverksettClient,
@@ -50,7 +50,7 @@ class BehandlingsstatistikkTask(
     private val vedtakRepository: VedtakRepository,
     private val oppgaveService: OppgaveService,
     private val grunnlagsdataService: GrunnlagsdataService,
-    private val årsakRevurderingService: ÅrsakRevurderingService
+    private val årsakRevurderingService: ÅrsakRevurderingService,
 ) : AsyncTaskStep {
 
     private val zoneIdOslo = ZoneId.of("Europe/Oslo")
@@ -106,7 +106,8 @@ class BehandlingsstatistikkTask(
             årsakRevurdering = årsakRevurdering?.let {
                 ÅrsakRevurderingDto(it.opplysningskilde, it.årsak)
             },
-            avslagÅrsak = vedtak?.avslåÅrsak
+            avslagÅrsak = vedtak?.avslåÅrsak,
+            kategori = saksbehandling.kategori,
         )
 
         iverksettClient.sendBehandlingsstatistikk(behandlingsstatistikkDto)
@@ -130,7 +131,7 @@ class BehandlingsstatistikkTask(
                 return when (vedtak?.resultatType) {
                     ResultatType.INNVILGE, ResultatType.INNVILGE_UTEN_UTBETALING -> utledBegrunnelseForInnvilgetVedtak(
                         saksbehandling.stønadstype,
-                        vedtak
+                        vedtak,
                     )
                     ResultatType.AVSLÅ, ResultatType.OPPHØRT -> vedtak.avslåBegrunnelse
                     ResultatType.HENLEGGE -> error("ResultatType henlegge er ikke i bruk for vedtak")
@@ -170,14 +171,14 @@ class BehandlingsstatistikkTask(
             behandlingId: UUID,
             hendelseTidspunkt: LocalDateTime = LocalDateTime.now(),
             saksbehandler: String = SikkerhetContext.hentSaksbehandlerEllerSystembruker(),
-            oppgaveId: Long?
+            oppgaveId: Long?,
         ): Task =
             opprettTask(
                 behandlingId = behandlingId,
                 hendelse = Hendelse.MOTTATT,
                 hendelseTidspunkt = hendelseTidspunkt,
                 gjeldendeSaksbehandler = saksbehandler,
-                oppgaveId = oppgaveId
+                oppgaveId = oppgaveId,
             )
 
         fun opprettPåbegyntTask(behandlingId: UUID): Task =
@@ -185,7 +186,7 @@ class BehandlingsstatistikkTask(
                 behandlingId = behandlingId,
                 hendelse = Hendelse.PÅBEGYNT,
                 hendelseTidspunkt = LocalDateTime.now(),
-                gjeldendeSaksbehandler = SikkerhetContext.hentSaksbehandler()
+                gjeldendeSaksbehandler = SikkerhetContext.hentSaksbehandler(),
             )
 
         fun opprettVenterTask(behandlingId: UUID): Task =
@@ -193,32 +194,32 @@ class BehandlingsstatistikkTask(
                 behandlingId = behandlingId,
                 hendelse = Hendelse.VENTER,
                 hendelseTidspunkt = LocalDateTime.now(),
-                gjeldendeSaksbehandler = SikkerhetContext.hentSaksbehandler()
+                gjeldendeSaksbehandler = SikkerhetContext.hentSaksbehandler(),
             )
 
         fun opprettVedtattTask(behandlingId: UUID): Task =
             opprettTask(
                 behandlingId = behandlingId,
                 hendelse = Hendelse.VEDTATT,
-                hendelseTidspunkt = LocalDateTime.now()
+                hendelseTidspunkt = LocalDateTime.now(),
             )
 
         fun opprettBesluttetTask(
             behandlingId: UUID,
-            oppgaveId: Long?
+            oppgaveId: Long?,
         ): Task =
             opprettTask(
                 behandlingId = behandlingId,
                 hendelse = Hendelse.BESLUTTET,
                 hendelseTidspunkt = LocalDateTime.now(),
-                oppgaveId = oppgaveId
+                oppgaveId = oppgaveId,
             )
 
         fun opprettFerdigTask(behandlingId: UUID): Task =
             opprettTask(
                 behandlingId = behandlingId,
                 hendelse = Hendelse.FERDIG,
-                hendelseTidspunkt = LocalDateTime.now()
+                hendelseTidspunkt = LocalDateTime.now(),
             )
 
         fun opprettHenlagtTask(behandlingId: UUID, hendelseTidspunkt: LocalDateTime, gjeldendeSaksbehandler: String): Task =
@@ -226,7 +227,7 @@ class BehandlingsstatistikkTask(
                 behandlingId = behandlingId,
                 hendelse = Hendelse.FERDIG,
                 hendelseTidspunkt = hendelseTidspunkt,
-                gjeldendeSaksbehandler = gjeldendeSaksbehandler
+                gjeldendeSaksbehandler = gjeldendeSaksbehandler,
             )
 
         private fun opprettTask(
@@ -235,7 +236,7 @@ class BehandlingsstatistikkTask(
             hendelseTidspunkt: LocalDateTime = LocalDateTime.now(),
             gjeldendeSaksbehandler: String? = null,
             oppgaveId: Long? = null,
-            behandlingMetode: BehandlingMetode? = null
+            behandlingMetode: BehandlingMetode? = null,
         ): Task =
             Task(
                 type = TYPE,
@@ -246,8 +247,8 @@ class BehandlingsstatistikkTask(
                         hendelseTidspunkt,
                         gjeldendeSaksbehandler,
                         oppgaveId,
-                        behandlingMetode
-                    )
+                        behandlingMetode,
+                    ),
                 ),
                 properties = Properties().apply {
                     this["saksbehandler"] = gjeldendeSaksbehandler ?: ""
@@ -255,7 +256,7 @@ class BehandlingsstatistikkTask(
                     this["hendelse"] = hendelse.name
                     this["hendelseTidspunkt"] = hendelseTidspunkt.toString()
                     this["oppgaveId"] = oppgaveId?.toString() ?: ""
-                }
+                },
             )
 
         const val TYPE = "behandlingsstatistikkTask"
@@ -268,5 +269,5 @@ data class BehandlingsstatistikkTaskPayload(
     val hendelseTidspunkt: LocalDateTime,
     val gjeldendeSaksbehandler: String?,
     val oppgaveId: Long?,
-    val behandlingMetode: BehandlingMetode?
+    val behandlingMetode: BehandlingMetode?,
 )

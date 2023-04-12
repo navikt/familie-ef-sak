@@ -46,7 +46,7 @@ internal class AutomatiskMigreringServiceIntegrationTest : OppslagSpringRunnerTe
         migreringsstatusRepository.insert(Migreringsstatus(personIdent, MigreringResultat.IKKE_KONTROLLERT))
         val perioderOvergangsstønad = listOf(
             lagInfotrygdPeriode(vedtakId = 1, stønadFom = periode1dato, stønadTom = periode1dato.plusDays(1)),
-            lagInfotrygdPeriode(vedtakId = 2, stønadFom = periode2dato, stønadTom = periode2dato.plusDays(1))
+            lagInfotrygdPeriode(vedtakId = 2, stønadFom = periode2dato, stønadTom = periode2dato.plusDays(1)),
         )
         every { infotrygdReplikaClient.hentSammenslåttePerioder(any()) } returns
             InfotrygdPeriodeResponse(perioderOvergangsstønad, emptyList(), emptyList())

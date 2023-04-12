@@ -46,7 +46,7 @@ internal class TidligereVedaksperioderServiceTest {
         behandlingService,
         tilkjentYtelseService,
         infotrygdService,
-        historiskPensjonService
+        historiskPensjonService,
     )
 
     private val infotrygdPeriodeRequestSlot = slot<InfotrygdPeriodeRequest>()

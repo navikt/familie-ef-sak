@@ -61,22 +61,22 @@ internal class BrevMellomlagerControllerTest : OppslagSpringRunnerTest() {
             FrittståendeBrevAvsnitt(
                 deloverskrift = "Hei",
                 innhold = "Hopp",
-                skalSkjulesIBrevbygger = false
-            )
+                skalSkjulesIBrevbygger = false,
+            ),
         ),
         fagsakId = fagsak.id,
         brevType = FrittståendeBrevKategori.VARSEL_OM_AKTIVITETSPLIKT,
         mottakere = BrevmottakereDto(
             personer = listOf(BrevmottakerPerson("12345678901", "Hei", MottakerRolle.VERGE)),
-            organisasjoner = emptyList()
-        )
+            organisasjoner = emptyList(),
+        ),
     )
 
     private fun mellomlagre(frittståendeBrev: FrittståendeBrevDto): ResponseEntity<Ressurs<UUID>> {
         return restTemplate.exchange(
             localhost("/api/brev/mellomlager/frittstaende"),
             HttpMethod.POST,
-            HttpEntity(frittståendeBrev, headers)
+            HttpEntity(frittståendeBrev, headers),
         )
     }
 
@@ -84,7 +84,7 @@ internal class BrevMellomlagerControllerTest : OppslagSpringRunnerTest() {
         return restTemplate.exchange(
             localhost("/api/brev/mellomlager/frittstaende/$id"),
             HttpMethod.GET,
-            HttpEntity<Ressurs<FrittståendeBrevDto?>>(headers)
+            HttpEntity<Ressurs<FrittståendeBrevDto?>>(headers),
         )
     }
 
@@ -92,7 +92,7 @@ internal class BrevMellomlagerControllerTest : OppslagSpringRunnerTest() {
         return restTemplate.exchange(
             localhost("/api/brev/mellomlager/frittstaende/$id"),
             HttpMethod.DELETE,
-            HttpEntity<Ressurs<UUID>>(headers)
+            HttpEntity<Ressurs<UUID>>(headers),
         )
     }
 }

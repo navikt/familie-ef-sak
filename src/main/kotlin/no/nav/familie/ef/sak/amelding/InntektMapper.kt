@@ -14,13 +14,13 @@ import no.nav.familie.ef.sak.amelding.ekstern.InntektType as EksternInntektType
 @Component
 class InntektMapper(
     private val kodeverkService: CachedKodeverkService,
-    private val eregService: EregService
+    private val eregService: EregService,
 ) {
 
     fun mapInntekt(response: HentInntektListeResponse): AMeldingInntektDto {
         return AMeldingInntektDto(
             inntektPerVirksomhet = mapOrganisasjoner(response),
-            avvik = mapAvvik(response)
+            avvik = mapAvvik(response),
         )
     }
 
@@ -35,9 +35,9 @@ class InntektMapper(
                 inntektPerMåned = entry.value.entries.associate { inntektEntry ->
                     inntektEntry.key to InntektPerMånedDto(
                         totalbeløp = inntektEntry.value.sumOf { it.beløp },
-                        inntekt = mapInntekt(inntektEntry.value)
+                        inntekt = mapInntekt(inntektEntry.value),
                     )
-                }
+                },
             )
         }
     }
@@ -73,7 +73,7 @@ class InntektMapper(
             },
             opptjeningsland = inntekt.opptjeningsland,
             opptjeningsperiodeFom = inntekt.opptjeningsperiodeFom,
-            opptjeningsperiodeTom = inntekt.opptjeningsperiodeTom
+            opptjeningsperiodeTom = inntekt.opptjeningsperiodeTom,
         )
     }
 

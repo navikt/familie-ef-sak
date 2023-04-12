@@ -25,7 +25,7 @@ class UttrekkArbeidssøkerService(
     private val uttrekkArbeidssøkerRepository: UttrekkArbeidssøkerRepository,
     private val fagsakService: FagsakService,
     private val personService: PersonService,
-    private val arbeidssøkerClient: ArbeidssøkerClient
+    private val arbeidssøkerClient: ArbeidssøkerClient,
 ) {
 
     fun forrigeMåned(): () -> YearMonth = { YearMonth.now().minusMonths(1) }
@@ -35,7 +35,7 @@ class UttrekkArbeidssøkerService(
         årMåned: YearMonth,
         fagsakId: UUID,
         behandlingIdForVedtak: UUID,
-        personIdent: String
+        personIdent: String,
     ) {
         val registrertSomArbeidssøker = erRegistrertSomArbeidssøker(personIdent, årMåned)
         uttrekkArbeidssøkerRepository.insert(
@@ -43,14 +43,14 @@ class UttrekkArbeidssøkerService(
                 fagsakId = fagsakId,
                 vedtakId = behandlingIdForVedtak,
                 årMåned = årMåned,
-                registrertArbeidssøker = registrertSomArbeidssøker
-            )
+                registrertArbeidssøker = registrertSomArbeidssøker,
+            ),
         )
     }
 
     fun hentUttrekkArbeidssøkere(
         årMåned: YearMonth = forrigeMåned().invoke(),
-        visKontrollerte: Boolean = false
+        visKontrollerte: Boolean = false,
     ): UttrekkArbeidssøkereDto {
         tilgangService.validerHarSaksbehandlerrolle()
         val arbeidssøkere = uttrekkArbeidssøkerRepository.findAllByÅrMånedAndRegistrertArbeidssøkerIsFalse(årMåned)
@@ -68,7 +68,7 @@ class UttrekkArbeidssøkerService(
             antallTotalt = filtrerteArbeidsssøkere.size,
             antallKontrollert = antallKontrollert,
             antallManglerKontrollUtenTilgang = antallManglerKontrollUtenTilgang,
-            arbeidssøkere = filtrerteKontrollert
+            arbeidssøkere = filtrerteKontrollert,
         )
     }
 
@@ -102,7 +102,7 @@ class UttrekkArbeidssøkerService(
         val perioder = arbeidssøkerClient.hentPerioder(
             personIdent,
             sisteIMåneden,
-            sisteIMåneden
+            sisteIMåneden,
         ).perioder
         return perioder.any { it.fraOgMedDato <= sisteIMåneden && (it.tilOgMedDato == null || it.tilOgMedDato >= sisteIMåneden) }
     }
@@ -123,7 +123,7 @@ class UttrekkArbeidssøkerService(
 
     private fun tilDtoMedAdressebeskyttelse(
         it: UttrekkArbeidssøkere,
-        persondataPåFagsak: Map<UUID, Persondata>
+        persondataPåFagsak: Map<UUID, Persondata>,
     ): Pair<UttrekkArbeidssøkerDto, Adressebeskyttelse?> {
         val persondata = persondataPåFagsak[it.fagsakId] ?: error("Finner ikke data til fagsak=${it.fagsakId}")
         val pdlPersonKort = persondata.pdlPersonKort
@@ -131,7 +131,7 @@ class UttrekkArbeidssøkerService(
         val dto = it.tilDto(
             personIdent = persondata.personIdent,
             navn = pdlPersonKort.navn.gjeldende().visningsnavn(),
-            adressebeskyttelse = adressebeskyttelse
+            adressebeskyttelse = adressebeskyttelse,
         )
         return dto to adressebeskyttelse
     }
@@ -148,7 +148,7 @@ class UttrekkArbeidssøkerService(
     private fun harPeriodeSomArbeidssøker(
         it: VedtaksperioderForUttrekk,
         startdato: LocalDate,
-        sluttdato: LocalDate
+        sluttdato: LocalDate,
     ) =
         it.perioder.perioder.any {
             it.datoFra <= startdato &&

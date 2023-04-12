@@ -37,7 +37,7 @@ data class SøknadsskjemaBarnetilsyn(
     @Embedded(onEmpty = Embedded.OnEmpty.USE_NULL, prefix = "dokumentasjon_")
     val dokumentasjon: BarnetilsynDokumentasjon,
     @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY, prefix = "adresseopplysninger_")
-    val adresseopplysninger: Adresseopplysninger?
+    val adresseopplysninger: Adresseopplysninger?,
 ) : ISøknadsskjema
 
 data class BarnetilsynDokumentasjon(
@@ -45,5 +45,5 @@ data class BarnetilsynDokumentasjon(
     val avtaleBarnepasser: Dokumentasjon? = null,
     val arbeidstid: Dokumentasjon? = null,
     val roterendeArbeidstid: Dokumentasjon? = null,
-    val spesielleBehov: Dokumentasjon? = null
+    val spesielleBehov: Dokumentasjon? = null,
 )

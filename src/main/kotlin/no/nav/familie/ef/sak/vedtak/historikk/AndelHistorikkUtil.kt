@@ -22,13 +22,13 @@ object AndelHistorikkUtil {
 
     fun sammenhengende(
         first: AndelHistorikkDto,
-        second: AndelHistorikkDto
+        second: AndelHistorikkDto,
     ) =
-        first.andel.periode.påfølgesAv(second.andel.periode)
+        first.vedtaksperiode.periode.påfølgesAv(second.vedtaksperiode.periode)
 
     fun periodeTypeOvergangsstønad(
         stønadstype: StønadType,
-        vedtaksperiode: Vedtakshistorikkperiode
+        vedtaksperiode: Vedtakshistorikkperiode,
     ): VedtaksperiodeType? = when {
         stønadstype != StønadType.OVERGANGSSTØNAD -> null
         vedtaksperiode is VedtakshistorikkperiodeOvergangsstønad -> vedtaksperiode.periodeType
@@ -39,7 +39,7 @@ object AndelHistorikkUtil {
 
     fun periodeTypeBarnetilsyn(
         stønadstype: StønadType,
-        vedtaksperiode: Vedtakshistorikkperiode
+        vedtaksperiode: Vedtakshistorikkperiode,
     ): PeriodetypeBarnetilsyn? = when {
         stønadstype != StønadType.BARNETILSYN -> null
         vedtaksperiode is VedtakshistorikkperiodeBarnetilsyn -> vedtaksperiode.periodetype
@@ -50,7 +50,7 @@ object AndelHistorikkUtil {
 
     fun aktivitetOvergangsstønad(
         stønadstype: StønadType,
-        vedtaksperiode: Vedtakshistorikkperiode
+        vedtaksperiode: Vedtakshistorikkperiode,
     ): AktivitetType? = when {
         stønadstype != StønadType.OVERGANGSSTØNAD -> null
         vedtaksperiode is VedtakshistorikkperiodeOvergangsstønad -> vedtaksperiode.aktivitet
@@ -61,5 +61,5 @@ object AndelHistorikkUtil {
 }
 
 data class HistorikkKonfigurasjon(
-    val brukIkkeVedtatteSatser: Boolean
+    val brukIkkeVedtatteSatser: Boolean,
 )

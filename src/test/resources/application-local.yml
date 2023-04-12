@@ -18,13 +18,14 @@ no.nav.security.jwt:
     cookie_name: azure_token
 
 AZUREAD_TOKEN_ENDPOINT_URL: https://login.microsoftonline.com/navq.onmicrosoft.com/oauth2/v2.0/token
-FAMILIE_INTEGRASJONER_URL: http://localhost:8385
+FAMILIE_INTEGRASJONER_URL: http://localhost:8386
 FAMILIE_BREV_API_URL: http://localhost:8001
 FAMILIE_BLANKETT_API_URL: http://localhost:8033
 #FAMILIE_EF_IVERKSETT_URL: http://localhost:8094 # Fordi iverksett og klage er på samme url/port lokalt så må vi kommentere ut den av de vi ikke vil kjøre opp mot lokalt
 FAMILIE_EF_PROXY_URL: http://localhost:8002
 FAMILIE_DOKUMENT_URL: http://localhost:8082
 FAMILIE_KLAGE_URL: http://localhost:8094
+FAMILIE_KS_SAK_URL: http://localhost:8083
 
 AZURE_APP_TENANT_ID: navq.onmicrosoft.com
 
@@ -34,7 +35,7 @@ rolle:
   beslutter: "01166863-22f1-4e16-9785-d7a05a22df74"
   kode6: "5ef775f2-61f8-4283-bf3d-8d03f428aa14" # 0000-GA-Strengt_Fortrolig_Adresse
   kode7: "ea930b6b-9397-44d9-b9e6-f4cf527a632a" # 0000-GA-Fortrolig_Adresse
-  egenAnsatt: "de44052d-b062-4497-89a2-0c85b935b808" # 0000-GA-GOSYS_UTVIDET egen ansatt
+  egenAnsatt: "dbe4ad45-320b-4e9a-aaa1-73cca4ee124d" # 0000-GA-Egne_ansatte
 
 funksjonsbrytere:
   enabled: false

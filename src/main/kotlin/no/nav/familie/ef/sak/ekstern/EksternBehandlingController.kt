@@ -20,12 +20,12 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 @RequestMapping(
     path = ["/api/ekstern/behandling"],
-    produces = [MediaType.APPLICATION_JSON_VALUE]
+    produces = [MediaType.APPLICATION_JSON_VALUE],
 )
 @ProtectedWithClaims(issuer = "azuread")
 class EksternBehandlingController(
     private val tilgangService: TilgangService,
-    private val eksternBehandlingService: EksternBehandlingService
+    private val eksternBehandlingService: EksternBehandlingService,
 ) {
 
     /**

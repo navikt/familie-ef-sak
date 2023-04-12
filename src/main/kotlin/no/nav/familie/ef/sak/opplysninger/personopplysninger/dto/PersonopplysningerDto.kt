@@ -24,15 +24,14 @@ data class PersonopplysningerDto(
     val adresse: List<AdresseDto>,
     val fullmakt: List<FullmaktDto>,
     val egenAnsatt: Boolean,
-    val navEnhet: String,
     val barn: List<BarnDto>,
     val innflyttingTilNorge: List<InnflyttingDto>,
     val utflyttingFraNorge: List<UtflyttingDto>,
     val oppholdstillatelse: List<OppholdstillatelseDto>,
-    val vergemål: List<VergemålDto>
+    val vergemål: List<VergemålDto>,
 )
 
-data class DeltBostedDto(val startdatoForKontrakt: LocalDate, val sluttdatoForKontrakt: LocalDate?)
+data class DeltBostedDto(val startdatoForKontrakt: LocalDate, val sluttdatoForKontrakt: LocalDate?, val historisk: Boolean)
 
 data class BarnDto(
     val personIdent: String,
@@ -43,20 +42,20 @@ data class BarnDto(
     val deltBosted: List<DeltBostedDto>,
     val harDeltBostedNå: Boolean,
     val fødselsdato: LocalDate?,
-    val dødsdato: LocalDate?
+    val dødsdato: LocalDate?,
 )
 
 data class BarnMinimumDto(
     val personIdent: String,
     val navn: String,
-    val fødselsdato: LocalDate?
+    val fødselsdato: LocalDate?,
 )
 
 data class AnnenForelderMinimumDto(
     val personIdent: String,
     val navn: String,
     val dødsdato: LocalDate?,
-    val bostedsadresse: String?
+    val bostedsadresse: String?,
 )
 
 data class SivilstandDto(
@@ -65,7 +64,7 @@ data class SivilstandDto(
     val relatertVedSivilstand: String?,
     val navn: String?,
     val dødsdato: LocalDate?,
-    val erGjeldende: Boolean
+    val erGjeldende: Boolean,
 )
 
 @Suppress("unused") // Kopi fra PDL
@@ -80,7 +79,8 @@ enum class Sivilstandstype {
     REGISTRERT_PARTNER,
     SEPARERT_PARTNER,
     SKILT_PARTNER,
-    GJENLEVENDE_PARTNER;
+    GJENLEVENDE_PARTNER,
+    ;
 
     fun erGift(): Boolean = this == REGISTRERT_PARTNER || this == GIFT
     fun erUgiftEllerUoppgitt(): Boolean = this == UGIFT || this == UOPPGITT
@@ -95,14 +95,14 @@ data class AdresseDto(
     val gyldigFraOgMed: LocalDate?,
     val gyldigTilOgMed: LocalDate?,
     val angittFlyttedato: LocalDate? = null,
-    val erGjeldende: Boolean = false
+    val erGjeldende: Boolean = false,
 )
 
 enum class AdresseType(val rekkefølge: Int) {
     BOSTEDADRESSE(1),
     OPPHOLDSADRESSE(2),
     KONTAKTADRESSE(3),
-    KONTAKTADRESSE_UTLAND(4)
+    KONTAKTADRESSE_UTLAND(4),
 }
 
 data class FullmaktDto(
@@ -110,7 +110,7 @@ data class FullmaktDto(
     val gyldigTilOgMed: LocalDate,
     val motpartsPersonident: String,
     val navn: String?,
-    val områder: List<String>
+    val områder: List<String>,
 )
 
 @Suppress("unused") // Kopi fra PDL
@@ -119,7 +119,7 @@ enum class Adressebeskyttelse {
     STRENGT_FORTROLIG,
     STRENGT_FORTROLIG_UTLAND,
     FORTROLIG,
-    UGRADERT
+    UGRADERT,
 }
 
 @Suppress("unused")
@@ -133,7 +133,8 @@ enum class Folkeregisterpersonstatus(private val pdlStatus: String, val visnings
     FØDSELSREGISTRERT("foedselsregistrert", "Fødselsregistrert"),
     MIDLERTIDIG("midlertidig", "Midlertidig"),
     INAKTIV("inaktiv", "Inaktiv"),
-    UKJENT("ukjent", "Ukjent");
+    UKJENT("ukjent", "Ukjent"),
+    ;
 
     companion object {
 
@@ -147,14 +148,14 @@ enum class Kjønn {
 
     KVINNE,
     MANN,
-    UKJENT
+    UKJENT,
 }
 
 data class NavnDto(
     val fornavn: String,
     val mellomnavn: String?,
     val etternavn: String,
-    val visningsnavn: String
+    val visningsnavn: String,
 ) {
 
     companion object {
@@ -168,5 +169,5 @@ data class VergemålDto(
     val type: String?,
     val motpartsPersonident: String?,
     val navn: String?,
-    val omfang: String?
+    val omfang: String?,
 )
