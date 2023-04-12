@@ -145,7 +145,7 @@ internal class SøkControllerTest : OppslagSpringRunnerTest() {
 
     private fun søkPerson(personIdent: String): ResponseEntity<Ressurs<Søkeresultat>> {
         return restTemplate.exchange(
-            localhost("/api/sok/"),
+            localhost("/api/sok"),
             HttpMethod.POST,
             HttpEntity(PersonIdentDto(personIdent = personIdent), headers),
         )

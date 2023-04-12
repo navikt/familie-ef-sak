@@ -3,7 +3,7 @@ package no.nav.familie.ef.sak.kontantstøtte
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
-import org.apache.http.entity.ContentType
+import org.apache.hc.core5.http.ContentType
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
