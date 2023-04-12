@@ -110,6 +110,15 @@ no.nav.security.jwt:
           client-id: ${AZURE_APP_CLIENT_ID}
           client-secret: ${AZURE_APP_CLIENT_SECRET}
           client-auth-method: client_secret_basic
+      familie-klage:
+        resource-url: ${FAMILIE_KLAGE_URL}
+        token-endpoint-url: ${AZUREAD_TOKEN_ENDPOINT_URL}
+        grant-type: client_credentials
+        scope: ${FAMILIE_KLAGE_SCOPE}
+        authentication:
+          client-id: ${AZURE_APP_CLIENT_ID}
+          client-secret: ${AZURE_APP_CLIENT_SECRET}
+          client-auth-method: client_secret_basic
       ef-proxy:
         resource-url: ${FAMILIE_EF_PROXY_URL}
         token-endpoint-url: ${AZUREAD_TOKEN_ENDPOINT_URL}
