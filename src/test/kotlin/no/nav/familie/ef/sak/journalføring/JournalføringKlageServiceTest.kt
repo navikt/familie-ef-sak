@@ -1,6 +1,10 @@
 package no.nav.familie.ef.sak.journalføring
 
-import io.mockk.*
+import io.mockk.every
+import io.mockk.justRun
+import io.mockk.mockk
+import io.mockk.slot
+import io.mockk.verify
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.clearBrukerContext
@@ -110,7 +114,6 @@ internal class JournalføringKlageServiceTest {
 
         @Test
         internal fun `skal opprette task for å oppdatere behandlingstema om klage gjelder tilbakekreving`() {
-
             val oppdaterTask = Task(
                 type = OppdaterOppgaveTilÅGjeldeTilbakekrevingTask.TYPE,
                 payload = UUID.randomUUID().toString(),
@@ -144,7 +147,7 @@ internal class JournalføringKlageServiceTest {
         verify(exactly = opprettKlageKall) { klageService.opprettKlage(any<Fagsak>(), any(), any()) }
         verify { journalpostService.oppdaterOgFerdigstillJournalpost(any(), any(), any(), any(), any()) }
         verify { oppgaveService.ferdigstillOppgave(any()) }
-        verify(exactly = oppdaterOppgaveKall) {taskService.save(any())}
+        verify(exactly = oppdaterOppgaveKall) { taskService.save(any()) }
     }
 
     private fun lagRequest(behandling: JournalføringKlageBehandling, klageGjelderTilbakekreving: Boolean = false) =
