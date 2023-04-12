@@ -58,6 +58,7 @@ import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.ef.felles.Opplysningskilde
 import no.nav.familie.kontrakter.ef.felles.Revurderingsårsak
 import no.nav.familie.kontrakter.ef.felles.Vedtaksresultat
+import no.nav.familie.kontrakter.ef.iverksett.BehandlingKategori
 import no.nav.familie.kontrakter.ef.iverksett.BehandlingsdetaljerDto
 import no.nav.familie.kontrakter.ef.iverksett.Brevmottaker
 import no.nav.familie.kontrakter.ef.iverksett.FagsakdetaljerDto
@@ -499,6 +500,7 @@ internal class IverksettingDtoMapperTest {
         type = BehandlingType.FØRSTEGANGSBEHANDLING,
         status = BehandlingStatus.OPPRETTET,
         steg = StegType.VILKÅR,
+        kategori = BehandlingKategori.NASJONAL,
         årsak = BehandlingÅrsak.SØKNAD,
         kravMottatt = LocalDate.of(2022, 3, 1),
         resultat = BehandlingResultat.IKKE_SATT,

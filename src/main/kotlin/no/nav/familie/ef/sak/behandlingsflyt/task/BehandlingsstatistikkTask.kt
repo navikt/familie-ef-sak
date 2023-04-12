@@ -107,6 +107,7 @@ class BehandlingsstatistikkTask(
                 ÅrsakRevurderingDto(it.opplysningskilde, it.årsak)
             },
             avslagÅrsak = vedtak?.avslåÅrsak,
+            kategori = saksbehandling.kategori,
         )
 
         iverksettClient.sendBehandlingsstatistikk(behandlingsstatistikkDto)
