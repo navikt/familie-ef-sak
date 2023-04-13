@@ -29,10 +29,12 @@ internal class OpprettOppgaveTaskTest {
     fun `skal ikke opprette behandle sak oppgave om status er ugyldig`() {
         every { behandlingService.hentBehandling(behandlingId) } returns behandling(id = behandlingId, status = BehandlingStatus.FATTER_VEDTAK)
 
-        val task = OpprettOppgaveTask.opprettTask(OpprettOppgaveTask.OpprettOppgaveTaskData(
-            behandlingId = behandlingId,
-            oppgavetype = Oppgavetype.BehandleSak
-        ))
+        val task = OpprettOppgaveTask.opprettTask(
+            OpprettOppgaveTask.OpprettOppgaveTaskData(
+                behandlingId = behandlingId,
+                oppgavetype = Oppgavetype.BehandleSak,
+            ),
+        )
 
         opprettOppgaveTask.doTask(task)
         verifyKall(0)
@@ -42,16 +44,18 @@ internal class OpprettOppgaveTaskTest {
     fun `skal opprette behandle sak oppgave om status er gyldig`() {
         every { behandlingService.hentBehandling(behandlingId) } returns behandling(id = behandlingId, status = BehandlingStatus.UTREDES)
 
-        val task = OpprettOppgaveTask.opprettTask(OpprettOppgaveTask.OpprettOppgaveTaskData(
-            behandlingId = behandlingId,
-            oppgavetype = Oppgavetype.BehandleSak
-        ))
+        val task = OpprettOppgaveTask.opprettTask(
+            OpprettOppgaveTask.OpprettOppgaveTaskData(
+                behandlingId = behandlingId,
+                oppgavetype = Oppgavetype.BehandleSak,
+            ),
+        )
 
         opprettOppgaveTask.doTask(task)
         verifyKall(1)
     }
 
     private fun verifyKall(opprettOppgaveKall: Int) {
-        verify(exactly = opprettOppgaveKall) {oppgaveService.opprettOppgave(any(), any())}
+        verify(exactly = opprettOppgaveKall) { oppgaveService.opprettOppgave(any(), any()) }
     }
 }

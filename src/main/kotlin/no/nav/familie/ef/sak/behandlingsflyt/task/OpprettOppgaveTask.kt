@@ -41,10 +41,10 @@ class OpprettOppgaveTask(private val oppgaveService: OppgaveService, private val
         val data = objectMapper.readValue<OpprettOppgaveTaskData>(task.payload)
         val oppgavetype = data.oppgavetype
 
-        if(oppgavetype == Oppgavetype.BehandleSak ) {
+        if (oppgavetype == Oppgavetype.BehandleSak) {
             val behandling = behandlingService.hentBehandling(data.behandlingId)
 
-            if(listOf(BehandlingStatus.FATTER_VEDTAK, BehandlingStatus.IVERKSETTER_VEDTAK, BehandlingStatus.FERDIGSTILT).contains(behandling.status)){
+            if (listOf(BehandlingStatus.FATTER_VEDTAK, BehandlingStatus.IVERKSETTER_VEDTAK, BehandlingStatus.FERDIGSTILT).contains(behandling.status)) {
                 logger.info("Opprettet ikke oppgave med oppgavetype = $oppgavetype fordi status = ${behandling.status}")
                 return
             }
