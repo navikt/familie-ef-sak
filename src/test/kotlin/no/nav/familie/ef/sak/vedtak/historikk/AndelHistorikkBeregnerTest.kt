@@ -381,7 +381,7 @@ object AndelHistorikkParser {
                 periode = Månedsperiode(it.stønadFom!!, it.stønadFom!!),
                 aktivitet = AktivitetType.IKKE_AKTIVITETSPLIKT,
                 periodeType = VedtaksperiodeType.HOVEDPERIODE,
-                inntekt = Inntekt(YearMonth.from(it.stønadFom), BigDecimal.ZERO, BigDecimal.ZERO)
+                inntekt = Inntekt(YearMonth.from(it.stønadFom), BigDecimal.ZERO, BigDecimal.ZERO),
             ),
             andel = AndelMedGrunnlagDto(mapAndel(it), null),
             aktivitet = it.aktivitet!!,

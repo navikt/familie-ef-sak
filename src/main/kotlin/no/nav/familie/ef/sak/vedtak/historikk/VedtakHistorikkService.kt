@@ -89,10 +89,12 @@ class VedtakHistorikkService(
         return historikk
             .slåSammen { a, b ->
                 sammenhengende(a, b) &&
-                    (a.vedtaksperiode is VedtakshistorikkperiodeOvergangsstønad &&
-                        b.vedtaksperiode is VedtakshistorikkperiodeOvergangsstønad &&
-                        a.vedtaksperiode.aktivitet == b.vedtaksperiode.aktivitet &&
-                        a.vedtaksperiode.periodeType == b.vedtaksperiode.periodeType)
+                    (
+                        a.vedtaksperiode is VedtakshistorikkperiodeOvergangsstønad &&
+                            b.vedtaksperiode is VedtakshistorikkperiodeOvergangsstønad &&
+                            a.vedtaksperiode.aktivitet == b.vedtaksperiode.aktivitet &&
+                            a.vedtaksperiode.periodeType == b.vedtaksperiode.periodeType
+                        )
             }
             .fraDato(fra)
             .map {
@@ -111,10 +113,12 @@ class VedtakHistorikkService(
         return historikk
             .filter { it.periodeType != VedtaksperiodeType.SANKSJON }
             .slåSammen { a, b ->
-                (a.vedtaksperiode is VedtakshistorikkperiodeOvergangsstønad &&
-                    b.vedtaksperiode is VedtakshistorikkperiodeOvergangsstønad &&
-                    a.vedtaksperiode.inntekt.forventetInntekt == b.vedtaksperiode.inntekt.forventetInntekt &&
-                    a.vedtaksperiode.inntekt.samordningsfradrag == b.vedtaksperiode.inntekt.samordningsfradrag)
+                (
+                    a.vedtaksperiode is VedtakshistorikkperiodeOvergangsstønad &&
+                        b.vedtaksperiode is VedtakshistorikkperiodeOvergangsstønad &&
+                        a.vedtaksperiode.inntekt.forventetInntekt == b.vedtaksperiode.inntekt.forventetInntekt &&
+                        a.vedtaksperiode.inntekt.samordningsfradrag == b.vedtaksperiode.inntekt.samordningsfradrag
+                    )
             }
             .fraDato(fra)
             .map {

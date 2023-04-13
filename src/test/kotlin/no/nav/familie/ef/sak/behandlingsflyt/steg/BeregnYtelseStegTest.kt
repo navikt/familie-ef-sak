@@ -1951,7 +1951,7 @@ internal class BeregnYtelseStegTest {
                 periode = Månedsperiode(fom, tom),
                 aktivitet = AktivitetType.IKKE_AKTIVITETSPLIKT,
                 periodeType = VedtaksperiodeType.HOVEDPERIODE,
-                inntekt = Inntekt(fom, BigDecimal.ZERO, BigDecimal.ZERO)
+                inntekt = Inntekt(fom, BigDecimal.ZERO, BigDecimal.ZERO),
             ),
             andel = andelDto(1, fom, tom),
             aktivitet = AktivitetType.IKKE_AKTIVITETSPLIKT,

@@ -16,9 +16,9 @@ class KontantstøtteService(
     }
 }
 
-fun List<HentUtbetalingsinfoKontantstøtte>.tilDto(): HentUtbetalingsinfoKontantstøtteDto {
+fun HentUtbetalingsinfoKontantstøtte.tilDto(): HentUtbetalingsinfoKontantstøtteDto {
     return HentUtbetalingsinfoKontantstøtteDto(
-        this.any { it.ksSakPerioder.isNotEmpty() || it.infotrygdPerioder.isNotEmpty() },
+        this.ksSakPerioder.isNotEmpty() || this.infotrygdPerioder.isNotEmpty(),
     )
 }
 data class HentUtbetalingsinfoKontantstøtteDto(

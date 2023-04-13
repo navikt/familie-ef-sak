@@ -63,7 +63,7 @@ class BehandlingPåVentService(
                 fristFerdigstillelse = settPåVentRequest.frist,
                 mappeId = settPåVentRequest.mappe,
                 beskrivelse = beskrivelse,
-                versjon = settPåVentRequest.oppgaveVersjon
+                versjon = settPåVentRequest.oppgaveVersjon,
             ),
         )
     }
@@ -110,7 +110,9 @@ class BehandlingPåVentService(
         settPåVentRequest: SettPåVentRequest,
     ): String = if (oppgave.prioritet != settPåVentRequest.prioritet) {
         "Oppgave endret fra prioritet ${oppgave.prioritet?.name} til ${settPåVentRequest.prioritet}\n"
-    } else ""
+    } else {
+        ""
+    }
 
     private fun utledNyBeskrivelse(
         harEndringer: Boolean,
