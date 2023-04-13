@@ -46,6 +46,7 @@ class OpprettOppgaveTask(private val oppgaveService: OppgaveService, private val
 
             if(listOf(BehandlingStatus.FATTER_VEDTAK, BehandlingStatus.IVERKSETTER_VEDTAK, BehandlingStatus.FERDIGSTILT).contains(behandling.status)){
                 logger.info("Opprettet ikke oppgave med oppgavetype = $oppgavetype fordi status = ${behandling.status}")
+                return
             }
         }
 
