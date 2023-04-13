@@ -291,7 +291,7 @@ internal class BehandlingPåVentServiceTest {
                 frist = LocalDate.of(2002, Month.MARCH, 24).toString(),
                 mappe = 102,
                 beskrivelse = "Her er litt tekst fra saksbehandler",
-                oppgaveVersjon = 1
+                oppgaveVersjon = 1,
             )
             behandlingPåVentService.settPåVent(
                 behandlingId,

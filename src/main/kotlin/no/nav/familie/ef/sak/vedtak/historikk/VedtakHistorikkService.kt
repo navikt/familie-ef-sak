@@ -89,10 +89,12 @@ class VedtakHistorikkService(
         return historikk
             .slåSammen { a, b ->
                 sammenhengende(a, b) &&
-                    (a.vedtaksperiode is VedtakshistorikkperiodeOvergangsstønad &&
-                        b.vedtaksperiode is VedtakshistorikkperiodeOvergangsstønad &&
-                        a.vedtaksperiode.aktivitet == b.vedtaksperiode.aktivitet &&
-                        a.vedtaksperiode.periodeType == b.vedtaksperiode.periodeType)
+                    (
+                        a.vedtaksperiode is VedtakshistorikkperiodeOvergangsstønad &&
+                            b.vedtaksperiode is VedtakshistorikkperiodeOvergangsstønad &&
+                            a.vedtaksperiode.aktivitet == b.vedtaksperiode.aktivitet &&
+                            a.vedtaksperiode.periodeType == b.vedtaksperiode.periodeType
+                        )
             }
             .fraDato(fra)
             .map {

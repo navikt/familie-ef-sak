@@ -447,7 +447,7 @@ fun lagAndelHistorikkDto(
             periode = Månedsperiode(fraOgMed, tilOgMed),
             aktivitet = AktivitetType.IKKE_AKTIVITETSPLIKT,
             periodeType = VedtaksperiodeType.HOVEDPERIODE,
-            inntekt = Inntekt(YearMonth.from(fraOgMed), BigDecimal.ZERO, BigDecimal.ZERO)
+            inntekt = Inntekt(YearMonth.from(fraOgMed), BigDecimal.ZERO, BigDecimal.ZERO),
         ),
         andel = AndelMedGrunnlagDto(
             lagAndelTilkjentYtelse(
