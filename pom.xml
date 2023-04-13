@@ -11,7 +11,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.7.5</version>
+        <version>3.0.5</version>
     </parent>
     <repositories>
         <repository>
@@ -31,23 +31,23 @@
         <java.version>17</java.version>
         <kotlin.version>1.8.10</kotlin.version>
         <kotlin-coroutines.version>1.6.4</kotlin-coroutines.version>
-        <springdoc.version>1.6.14</springdoc.version>
-        <mockk.version>1.13.4</mockk.version>
-        <felles.version>1.20221202080911_bcf8f33</felles.version>
-        <prosessering.version>1.20221110194901_e9e0d90</prosessering.version>
+        <springdoc.version>1.7.0</springdoc.version>
+        <mockk.version>1.13.5</mockk.version>
+        <felles.version>2.20230210162649_a258d57-SPRING_BOOT_3</felles.version>
+        <prosessering.version>2.20230322091650_fb0187e-SPRING_BOOT_3</prosessering.version>
         <start-class>no.nav.familie.ef.sak.ApplicationKt</start-class>
-        <kontrakter.version>2.0_20230316124747_98e4ced</kontrakter.version>
-        <eksterne.kontrakter.bisys.version>2.0_20221118130052_e2abd9f</eksterne.kontrakter.bisys.version>
-        <cucumber.version>7.11.0</cucumber.version>
+        <kontrakter.version>3.0_20230404163639_edb8619-JAKARTA</kontrakter.version>
+        <eksterne.kontrakter.bisys.version>2.0_20230214104704_706e9c0</eksterne.kontrakter.bisys.version>
+        <cucumber.version>7.11.2</cucumber.version>
 
 
         <!--suppress UnresolvedMavenProperty  Ligger som secret i github-->
         <sonar.projectKey>${SONAR_PROJECTKEY}</sonar.projectKey>
         <sonar.organization>navit</sonar.organization>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
-        <nav.security.version>2.1.8</nav.security.version> <!-- Denne burde være samme versjon som i felles -->
+        <nav.security.version>3.0.10</nav.security.version> <!-- Denne burde være samme versjon som i felles -->
         <okhttp3.version>4.9.1</okhttp3.version> <!-- overskrever spring sin versjon, blir brukt av mock-oauth2-server -->
-        <unleash.version>7.1.0</unleash.version>
+        <unleash.version>8.0.0</unleash.version>
         <!--suppress UnresolvedMavenProperty -->
         <sonar.login>${SONAR_LOGIN}</sonar.login>
     </properties>
@@ -66,6 +66,11 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-jetty</artifactId>
+        </dependency>
+        <!-- https://github.com/spring-projects/spring-boot/issues/33044#issuecomment-1379812611 -->
+        <dependency>
+            <groupId>org.eclipse.jetty</groupId>
+            <artifactId>jetty-server</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -172,7 +177,7 @@
         <!-- test -->
         <dependency>
             <groupId>com.github.tomakehurst</groupId>
-            <artifactId>wiremock-jre8</artifactId>
+            <artifactId>wiremock-jre8-standalone</artifactId>
             <version>2.35.0</version>
             <scope>test</scope>
         </dependency>
@@ -207,19 +212,19 @@
         <dependency>
             <groupId>dev.akkinoc.spring.boot</groupId>
             <artifactId>logback-access-spring-boot-starter</artifactId>
-            <version>3.4.3</version>
+            <version>3.4.5</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.testcontainers</groupId>
             <artifactId>postgresql</artifactId>
-            <version>1.17.6</version>
+            <version>1.18.0</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.github.doyaaaaaken</groupId>
             <artifactId>kotlin-csv-jvm</artifactId>
-            <version>1.8.0</version>
+            <version>1.9.0</version>
             <scope>test</scope>
         </dependency>
 
@@ -312,6 +317,7 @@
                 </dependencies>
                 <groupId>org.jetbrains.kotlin</groupId>
                 <artifactId>kotlin-maven-plugin</artifactId>
+                <version>${kotlin.version}</version>
                 <configuration>
                     <compilerPlugins>
                         <plugin>spring</plugin>
@@ -325,7 +331,6 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
-                    <fork>true</fork>
                     <mainClass>${start-class}</mainClass>
                 </configuration>
             </plugin>

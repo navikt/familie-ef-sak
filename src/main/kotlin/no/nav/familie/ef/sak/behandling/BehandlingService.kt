@@ -29,6 +29,7 @@ import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.repository.findAllByIdOrThrow
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
+import no.nav.familie.kontrakter.ef.iverksett.BehandlingKategori
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.kontrakter.felles.journalpost.Journalposttype
 import no.nav.familie.prosessering.internal.TaskService
@@ -136,6 +137,7 @@ class BehandlingService(
                 resultat = BehandlingResultat.IKKE_SATT,
                 årsak = behandlingsårsak,
                 kravMottatt = kravMottatt,
+                kategori = BehandlingKategori.NASJONAL,
             ),
         )
 
@@ -170,6 +172,15 @@ class BehandlingService(
                 "fra ${behandling.status} til $status",
         )
         return behandlingRepository.update(behandling.copy(status = status))
+    }
+
+    fun oppdaterKategoriPåBehandling(behandlingId: UUID, kategori: BehandlingKategori): Behandling {
+        val behandling = hentBehandling(behandlingId)
+        secureLogger.info(
+            "${SikkerhetContext.hentSaksbehandlerEllerSystembruker()} endrer kategori på behandling $behandlingId " +
+                "fra ${behandling.kategori} til $kategori",
+        )
+        return behandlingRepository.update(behandling.copy(kategori = kategori))
     }
 
     fun oppdaterForrigeBehandlingId(behandlingId: UUID, forrigeBehandlingId: UUID): Behandling {

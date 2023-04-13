@@ -5,7 +5,7 @@ import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import no.nav.familie.ef.sak.sigrun.ekstern.SigrunClient
-import org.apache.http.entity.ContentType
+import org.apache.hc.core5.http.ContentType
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
