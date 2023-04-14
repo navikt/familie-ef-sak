@@ -30,7 +30,7 @@ data class AndelHistorikkDto(
     val saksbehandler: String,
     val vedtaksperiode: Vedtakshistorikkperiode,
     val andel: AndelMedGrunnlagDto,
-    val aktivitet: AktivitetType?,  // finnes i vedtaksperiode
+    val aktivitet: AktivitetType?, // finnes i vedtaksperiode
     val aktivitetBarnetilsyn: AktivitetstypeBarnetilsyn?, // finnes i vedtaksperiode
     val aktivitetArbeid: SvarId?,
     val periodeType: VedtaksperiodeType?, // finnes i vedtaksperiode

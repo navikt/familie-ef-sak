@@ -9,5 +9,5 @@ data class SettPåVentRequest(
     val frist: String,
     val mappe: Long?,
     val beskrivelse: String,
-    val oppgaveVersjon: Int
+    val oppgaveVersjon: Int,
 )
