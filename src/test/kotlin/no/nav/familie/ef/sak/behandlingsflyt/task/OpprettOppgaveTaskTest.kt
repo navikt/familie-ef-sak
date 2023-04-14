@@ -26,7 +26,7 @@ internal class OpprettOppgaveTaskTest {
     }
 
     @Test
-    fun `skal ikke opprette behandle sak oppgave om status er ugyldig`() {
+    fun `skal ikke opprette behandle sak oppgave om status er låst for videre redigering`() {
         every { behandlingService.hentBehandling(behandlingId) } returns behandling(id = behandlingId, status = BehandlingStatus.FATTER_VEDTAK)
 
         val task = OpprettOppgaveTask.opprettTask(
@@ -41,7 +41,7 @@ internal class OpprettOppgaveTaskTest {
     }
 
     @Test
-    fun `skal opprette behandle sak oppgave om status er gyldig`() {
+    fun `skal opprette behandle sak oppgave om behandling ikke er låst for videre redigering`() {
         every { behandlingService.hentBehandling(behandlingId) } returns behandling(id = behandlingId, status = BehandlingStatus.UTREDES)
 
         val task = OpprettOppgaveTask.opprettTask(
