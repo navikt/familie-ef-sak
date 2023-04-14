@@ -43,6 +43,10 @@ class OpprettOppgaveTask(private val oppgaveService: OppgaveService, private val
         if (oppgavetype == Oppgavetype.BehandleSak) {
             val behandling = behandlingService.hentBehandling(data.behandlingId)
 
+            /**
+             * Nødvendig sjekk for å unngå å lage en behandle sak oppgave som aldri ferdigstilles dersom
+             * SB sender til beslutter rett etter angring og oppgave ikke er opprettet enda.
+             */
             if (behandling.status.behandlingErLåstForVidereRedigering()) {
                 logger.info("Opprettet ikke oppgave med oppgavetype = $oppgavetype fordi status = ${behandling.status}")
                 return
