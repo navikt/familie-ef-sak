@@ -1,12 +1,16 @@
 package no.nav.familie.ef.sak.vedtak.historikk
 
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
+import no.nav.familie.ef.sak.beregning.Inntekt
+import no.nav.familie.ef.sak.vedtak.domain.AktivitetType
 import no.nav.familie.ef.sak.vedtak.domain.AktivitetstypeBarnetilsyn
 import no.nav.familie.ef.sak.vedtak.domain.PeriodetypeBarnetilsyn
+import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.felles.Månedsperiode
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import java.math.BigDecimal
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.UUID
@@ -43,6 +47,12 @@ internal class AndelHistorikkDtoKtTest {
         behandlingÅrsak = BehandlingÅrsak.NYE_OPPLYSNINGER,
         vedtakstidspunkt = LocalDateTime.now(),
         saksbehandler = "",
+        vedtaksperiode = VedtakshistorikkperiodeOvergangsstønad(
+            periode = Månedsperiode(YearMonth.now()),
+            aktivitet = AktivitetType.IKKE_AKTIVITETSPLIKT,
+            periodeType = VedtaksperiodeType.HOVEDPERIODE,
+            inntekt = Inntekt(YearMonth.now(), BigDecimal.ZERO, BigDecimal.ZERO),
+        ),
         andel = andelMedGrunnlagDto(),
         aktivitet = null,
         aktivitetArbeid = null,

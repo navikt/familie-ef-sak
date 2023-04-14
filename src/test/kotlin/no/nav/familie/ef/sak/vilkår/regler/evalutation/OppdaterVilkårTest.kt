@@ -25,6 +25,7 @@ import no.nav.familie.ef.sak.vilkår.regler.evalutation.OppdaterVilkår.erAlleVi
 import no.nav.familie.ef.sak.vilkår.regler.evalutation.OppdaterVilkår.opprettNyeVilkårsvurderinger
 import no.nav.familie.ef.sak.vilkår.regler.evalutation.OppdaterVilkår.utledResultatForVilkårSomGjelderFlereBarn
 import no.nav.familie.ef.sak.vilkår.regler.vilkår.SivilstandRegel
+import no.nav.familie.kontrakter.ef.iverksett.BehandlingKategori
 import no.nav.familie.kontrakter.ef.søknad.TestsøknadBuilder
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.util.FnrGenerator
@@ -67,7 +68,8 @@ internal class OppdaterVilkårTest {
         )
 
         assertThat(nyeVilkårsvurderinger.filter { it.type === VilkårType.ALDER_PÅ_BARN }).hasSize(2)
-        val barnIdMedAlderPåBarnVilkår = nyeVilkårsvurderinger.filter { it.type === VilkårType.ALDER_PÅ_BARN }.map { it.barnId }
+        val barnIdMedAlderPåBarnVilkår =
+            nyeVilkårsvurderinger.filter { it.type === VilkårType.ALDER_PÅ_BARN }.map { it.barnId }
         assertThat(barnIdMedAlderPåBarnVilkår).containsAll(listOf(barn.id, barnUtenSøknad.id))
     }
 
@@ -140,7 +142,8 @@ internal class OppdaterVilkårTest {
         )
 
         assertThat(nyeVilkårsvurderinger.filter { it.type === VilkårType.ALENEOMSORG }).hasSize(2)
-        val barnIdMedVilkårAleneomsorg = nyeVilkårsvurderinger.filter { it.type === VilkårType.ALENEOMSORG }.map { it.barnId }
+        val barnIdMedVilkårAleneomsorg =
+            nyeVilkårsvurderinger.filter { it.type === VilkårType.ALENEOMSORG }.map { it.barnId }
         assertThat(barnIdMedVilkårAleneomsorg).containsAll(listOf(barn.id, barnUtenSøknad.id))
     }
 
@@ -366,7 +369,8 @@ internal class OppdaterVilkårTest {
                 listOf(VurderingDto(aktuelleDelvilkår.first().hovedregel, SvarId.JA)),
             ),
         )
-        val lagNyOppdatertVilkårsvurdering = OppdaterVilkår.lagNyOppdatertVilkårsvurdering(vilkårsvurdering, oppdatering)
+        val lagNyOppdatertVilkårsvurdering =
+            OppdaterVilkår.lagNyOppdatertVilkårsvurdering(vilkårsvurdering, oppdatering)
         assertThat(lagNyOppdatertVilkårsvurdering.delvilkårsvurdering.delvilkårsvurderinger).hasSize(regel.hovedregler.size)
     }
 
@@ -605,6 +609,90 @@ internal class OppdaterVilkårTest {
         )
             .withFailMessage("Alle vilkår skal kunne være satt til enten SKAL_IKKE_VURDERES eller OPPFYLT")
             .isTrue
+    }
+
+    @Test
+    fun `Skal returnere behandlingKategori EØS for vilkårsvurderinger med EØS-unntak`() {
+        val eøsMedlemskapUnntak = listOf(
+            SvarId.MEDLEM_MER_ENN_5_ÅR_EØS,
+            SvarId.MEDLEM_MER_ENN_5_ÅR_EØS_ANNEN_FORELDER_TRYGDEDEKKET_I_NORGE,
+        )
+        eøsMedlemskapUnntak.forEach {
+            val nasjonalMedlemskapOgOpphold = opprettVurderingForEøsEllerNasjonal(it, null)
+            assertThat(OppdaterVilkår.utledBehandlingKategori(nasjonalMedlemskapOgOpphold)).isEqualTo(BehandlingKategori.EØS)
+        }
+
+        val eøsOppholdUnntak = opprettVurderingForEøsEllerNasjonal(null, SvarId.OPPHOLDER_SEG_I_ANNET_EØS_LAND)
+        assertThat(OppdaterVilkår.utledBehandlingKategori(eøsOppholdUnntak)).isEqualTo(BehandlingKategori.EØS)
+    }
+
+    @Test
+    fun `Skal returnere behandlingKategori Nasjonal for vilkårsvurderinger uten EØS-unntak`() {
+        val nasjonalMedlemskapOgOpphold = opprettVurderingForEøsEllerNasjonal(null, null)
+        val nasjonaleMedlemskapUnntak = listOf(
+            SvarId.MEDLEM_MER_ENN_5_ÅR_AVBRUDD_MINDRE_ENN_10_ÅR,
+            SvarId.MEDLEM_MER_ENN_7_ÅR_AVBRUDD_MER_ENN_10ÅR,
+            SvarId.I_LANDET_FOR_GJENFORENING_ELLER_GIFTE_SEG,
+            SvarId.ANDRE_FORELDER_MEDLEM_SISTE_5_ÅR,
+            SvarId.ANDRE_FORELDER_MEDLEM_MINST_5_ÅR_AVBRUDD_MINDRE_ENN_10_ÅR,
+            SvarId.ANDRE_FORELDER_MEDLEM_MINST_7_ÅR_AVBRUDD_MER_ENN_10_ÅR,
+            SvarId.TOTALVURDERING_OPPFYLLER_FORSKRIFT,
+        )
+        val nasjonaleOppholdUnntak = listOf(
+            SvarId.ARBEID_NORSK_ARBEIDSGIVER,
+            SvarId.UTENLANDSOPPHOLD_MINDRE_ENN_6_UKER,
+        )
+
+        assertThat(OppdaterVilkår.utledBehandlingKategori(nasjonalMedlemskapOgOpphold)).isEqualTo(BehandlingKategori.NASJONAL)
+        nasjonaleMedlemskapUnntak.forEach {
+            val nasjonalMedlemskapOgOpphold = opprettVurderingForEøsEllerNasjonal(it, null)
+            assertThat(OppdaterVilkår.utledBehandlingKategori(nasjonalMedlemskapOgOpphold)).isEqualTo(BehandlingKategori.NASJONAL)
+        }
+        nasjonaleOppholdUnntak.forEach {
+            val nasjonalMedlemskapOgOpphold = opprettVurderingForEøsEllerNasjonal(null, it)
+            assertThat(OppdaterVilkår.utledBehandlingKategori(nasjonalMedlemskapOgOpphold)).isEqualTo(BehandlingKategori.NASJONAL)
+        }
+    }
+
+    private fun opprettVurderingForEøsEllerNasjonal(
+        medlemskapUnntak: SvarId?,
+        oppholdUnntak: SvarId?,
+    ): List<Vilkårsvurdering> {
+        val delvilkårForutgåendeMedlemskap = listOf(
+            Delvilkårsvurdering(
+                Vilkårsresultat.IKKE_TATT_STILLING_TIL,
+                listOf(
+                    Vurdering(RegelId.SØKER_MEDLEM_I_FOLKETRYGDEN, medlemskapUnntak?.let { SvarId.NEI } ?: SvarId.JA),
+                    medlemskapUnntak?.let { Vurdering(RegelId.MEDLEMSKAP_UNNTAK, it, begrunnelse = "Polen") },
+                ).filterNotNull(),
+            ),
+        )
+
+        val delvilkårOpphold = listOf(
+            Delvilkårsvurdering(
+                Vilkårsresultat.IKKE_TATT_STILLING_TIL,
+                listOf(
+                    Vurdering(RegelId.BOR_OG_OPPHOLDER_SEG_I_NORGE, oppholdUnntak?.let { SvarId.NEI } ?: SvarId.JA),
+                    oppholdUnntak?.let { Vurdering(RegelId.OPPHOLD_UNNTAK, it, begrunnelse = "Polen") },
+                ).filterNotNull(),
+            ),
+        )
+
+        val forutgåendeMedlemskap = Vilkårsvurdering(
+            behandlingId = UUID.randomUUID(),
+            type = VilkårType.FORUTGÅENDE_MEDLEMSKAP,
+            delvilkårsvurdering = DelvilkårsvurderingWrapper(delvilkårForutgåendeMedlemskap),
+            opphavsvilkår = null,
+        )
+
+        val opphold = Vilkårsvurdering(
+            behandlingId = UUID.randomUUID(),
+            type = VilkårType.LOVLIG_OPPHOLD,
+            delvilkårsvurdering = DelvilkårsvurderingWrapper(delvilkårOpphold),
+            opphavsvilkår = null,
+        )
+
+        return listOf(forutgåendeMedlemskap, opphold)
     }
 
     private fun aleneomsorg(vilkårsresultat: Vilkårsresultat) =

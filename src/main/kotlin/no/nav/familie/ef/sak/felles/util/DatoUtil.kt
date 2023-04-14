@@ -1,6 +1,7 @@
 package no.nav.familie.ef.sak.felles.util
 
 import no.nav.familie.ef.sak.felles.util.DatoFormat.DATE_FORMAT_NORSK
+import no.nav.familie.ef.sak.felles.util.DatoUtil.dagensDatoMedTid
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
@@ -11,7 +12,15 @@ object DatoFormat {
     val DATE_FORMAT_ISO_YEAR_MONTH = DateTimeFormatter.ofPattern("yyyy-MM")
     val YEAR_MONTH_FORMAT_NORSK = DateTimeFormatter.ofPattern("MM.yyyy")
     val DATE_FORMAT_NORSK = DateTimeFormatter.ofPattern("dd.MM.yyyy")
+    val GOSYS_DATE_TIME = DateTimeFormatter.ofPattern("dd.MM.yyyy' 'HH:mm")
 }
+
+object DatoUtil {
+
+    fun dagensDatoMedTid(): LocalDateTime = LocalDateTime.now()
+}
+
+val YEAR_MONTH_MAX = YearMonth.from(LocalDate.MAX)
 
 fun LocalDate.norskFormat() = this.format(DATE_FORMAT_NORSK)
 
@@ -61,3 +70,5 @@ fun LocalDate.erEttÅrEllerMerOgInnenforCutoff(numberOfDaysCutoff: Long): Boolea
 
 fun LocalDateTime.harGåttAntallTimer(timer: Int) =
     this.plusHours(timer.toLong()) < LocalDateTime.now()
+
+fun dagensDatoMedTidNorskFormat(): String = dagensDatoMedTid().format(DatoFormat.GOSYS_DATE_TIME)

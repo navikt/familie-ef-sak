@@ -57,6 +57,8 @@ import no.nav.familie.ef.sak.vedtak.historikk.AndelHistorikkDto
 import no.nav.familie.ef.sak.vedtak.historikk.AndelMedGrunnlagDto
 import no.nav.familie.ef.sak.vedtak.historikk.EndringType
 import no.nav.familie.ef.sak.vedtak.historikk.HistorikkEndring
+import no.nav.familie.ef.sak.vedtak.historikk.Sanksjonsperiode
+import no.nav.familie.ef.sak.vedtak.historikk.VedtakshistorikkperiodeOvergangsstønad
 import no.nav.familie.ef.sak.økonomi.lagAndelTilkjentYtelse
 import no.nav.familie.ef.sak.økonomi.lagTilkjentYtelse
 import no.nav.familie.kontrakter.ef.felles.AvslagÅrsak
@@ -1964,6 +1966,12 @@ internal class BeregnYtelseStegTest {
             behandlingÅrsak = BehandlingÅrsak.NYE_OPPLYSNINGER,
             vedtakstidspunkt = LocalDateTime.now(),
             saksbehandler = "",
+            vedtaksperiode = VedtakshistorikkperiodeOvergangsstønad(
+                periode = Månedsperiode(fom, tom),
+                aktivitet = AktivitetType.IKKE_AKTIVITETSPLIKT,
+                periodeType = VedtaksperiodeType.HOVEDPERIODE,
+                inntekt = Inntekt(fom, BigDecimal.ZERO, BigDecimal.ZERO),
+            ),
             andel = andelDto(1, fom, tom),
             aktivitet = AktivitetType.IKKE_AKTIVITETSPLIKT,
             periodeType = VedtaksperiodeType.HOVEDPERIODE,
@@ -1985,6 +1993,7 @@ internal class BeregnYtelseStegTest {
             behandlingÅrsak = BehandlingÅrsak.SANKSJON_1_MND,
             vedtakstidspunkt = LocalDateTime.now(),
             saksbehandler = "",
+            vedtaksperiode = Sanksjonsperiode(Månedsperiode(sanksjonMåned), Sanksjonsårsak.SAGT_OPP_STILLING),
             andel = andelDto(0, sanksjonMåned, sanksjonMåned),
             aktivitet = AktivitetType.IKKE_AKTIVITETSPLIKT,
             periodeType = VedtaksperiodeType.SANKSJON,

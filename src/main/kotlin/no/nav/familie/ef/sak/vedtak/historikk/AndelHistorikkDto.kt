@@ -28,14 +28,15 @@ data class AndelHistorikkDto(
     val behandlingÅrsak: BehandlingÅrsak,
     val vedtakstidspunkt: LocalDateTime,
     val saksbehandler: String,
+    val vedtaksperiode: Vedtakshistorikkperiode,
     val andel: AndelMedGrunnlagDto,
-    val aktivitet: AktivitetType?,
-    val aktivitetBarnetilsyn: AktivitetstypeBarnetilsyn?, // TODO: Skal bli non-nullable
+    val aktivitet: AktivitetType?, // finnes i vedtaksperiode
+    val aktivitetBarnetilsyn: AktivitetstypeBarnetilsyn?, // finnes i vedtaksperiode
     val aktivitetArbeid: SvarId?,
-    val periodeType: VedtaksperiodeType?,
-    val periodetypeBarnetilsyn: PeriodetypeBarnetilsyn?,
+    val periodeType: VedtaksperiodeType?, // finnes i vedtaksperiode
+    val periodetypeBarnetilsyn: PeriodetypeBarnetilsyn?, // finnes i vedtaksperiode
     val erSanksjon: Boolean, // TODO denne kan fjernes / flyttes som en get og være beroende av periodetype / periodetypeBarnetilsyn
-    val sanksjonsårsak: Sanksjonsårsak?,
+    val sanksjonsårsak: Sanksjonsårsak?, // finnes i vedtaksperiode
     val erOpphør: Boolean,
     val endring: HistorikkEndring?,
 )

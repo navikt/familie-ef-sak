@@ -20,7 +20,7 @@ class KontantstøtteClient(
         UriComponentsBuilder.fromUri(kontantstøtteUrl).pathSegment("api/bisys/hent-utbetalingsinfo")
             .build().toUri()
 
-    fun hentUtbetalingsinfo(barnIdents: List<String>): List<HentUtbetalingsinfoKontantstøtte> {
+    fun hentUtbetalingsinfo(barnIdents: List<String>): HentUtbetalingsinfoKontantstøtte {
         return postForEntity(
             lagHentUtbetalingsinfoUri(),
             HentUtbetalingsinfoKontantstøtteRequest(LocalDate.MIN.toString(), barnIdents),

@@ -253,7 +253,8 @@
       }
     ],
     "aktivitetspliktInntrefferDato": null,
-    "kravMottatt": null
+    "kravMottatt": null,
+    "kategori": "NASJONAL"
   },
   "søker": {
     "personIdent": "321",

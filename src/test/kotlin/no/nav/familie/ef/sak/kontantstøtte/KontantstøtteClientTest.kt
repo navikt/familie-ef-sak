@@ -3,7 +3,7 @@ package no.nav.familie.ef.sak.kontantstøtte
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
-import org.apache.http.entity.ContentType
+import org.apache.hc.core5.http.ContentType
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
@@ -57,7 +57,8 @@ class KontantstøtteClientTest {
                 ),
         )
         val utbetalingsinfo = kontantstøtteClient.hentUtbetalingsinfo(listOf("01010199999", "02020299999"))
-        Assertions.assertThat(utbetalingsinfo.size).isEqualTo(2)
+        Assertions.assertThat(utbetalingsinfo.infotrygdPerioder.size).isEqualTo(1)
+        Assertions.assertThat(utbetalingsinfo.ksSakPerioder.size).isEqualTo(2)
     }
 
     private val fomDatoRequest = LocalDate.MIN.toString()
@@ -71,52 +72,36 @@ class KontantstøtteClientTest {
         }
     """.trimIndent()
 
-    private val hentUtbetalingsinfoResponseJson = """
-        [
+    private val hentUtbetalingsinfoResponseJson = """  
+      {
+        "infotrygdPerioder": [
           {
-            "infotrygdPerioder": [
-              {
-                "fomMåned": "2022-09",
-                "tomMåned": "2022-10",
-                "beløp": 1000,
-                "barna": [
-                  "01010199999"
-                ]
-              }
-            ],
-            "ksSakPerioder": [
-              {
-                "fomMåned": "2022-11",
-                "tomMåned": "2022-12",
-                "barn": {
-                  "beløp": 2000,
-                  "ident": "01010199999"
-                }
-              }
-            ]
-          },
-          {
-            "infotrygdPerioder": [
-              {
-                "fomMåned": "2023-01",
-                "tomMåned": "2023-02",
-                "beløp": 3000,
-                "barna": [
-                  "02020299999"
-                ]
-              }
-            ],
-            "ksSakPerioder": [
-              {
-                "fomMåned": "2023-03",
-                "tomMåned": "2023-04",
-                "barn": {
-                  "beløp": 4000,
-                  "ident": "02020299999"
-                }
-              }
+            "fomMåned": "2022-09",
+            "tomMåned": "2022-10",
+            "beløp": 1000,
+            "barna": [
+              "01010199999"
             ]
           }
+        ],
+        "ksSakPerioder": [
+          {
+            "fomMåned": "2022-11",
+            "tomMåned": "2022-12",
+            "barn": {
+              "beløp": 2000,
+              "ident": "01010199999"
+            }
+          },
+          {
+            "fomMåned": "2023-01",
+            "tomMåned": "2023-06",
+            "barn": {
+              "beløp": 3000,
+              "ident": "01010199998"
+            }
+          }
         ]
+      }
     """.trimIndent()
 }

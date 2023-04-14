@@ -2,9 +2,11 @@ package no.nav.familie.ef.sak.vedtak.historikk
 
 import com.github.doyaaaaaken.kotlincsv.dsl.csvReader
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
+import no.nav.familie.ef.sak.beregning.Inntekt
 import no.nav.familie.ef.sak.beregning.Inntektsperiode
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.repository.behandling
+import no.nav.familie.ef.sak.repository.vedtaksperiode
 import no.nav.familie.ef.sak.tilkjentytelse.domain.AndelTilkjentYtelse
 import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.vedtak.domain.AktivitetType
@@ -375,6 +377,12 @@ object AndelHistorikkParser {
             behandlingÅrsak = BehandlingÅrsak.NYE_OPPLYSNINGER,
             vedtakstidspunkt = LocalDateTime.now(), // burde denne testes? EKs att man oppretter vedtaksdato per behandlingId
             saksbehandler = "",
+            vedtaksperiode = VedtakshistorikkperiodeOvergangsstønad(
+                periode = Månedsperiode(it.stønadFom!!, it.stønadFom!!),
+                aktivitet = AktivitetType.IKKE_AKTIVITETSPLIKT,
+                periodeType = VedtaksperiodeType.HOVEDPERIODE,
+                inntekt = Inntekt(YearMonth.from(it.stønadFom), BigDecimal.ZERO, BigDecimal.ZERO),
+            ),
             andel = AndelMedGrunnlagDto(mapAndel(it), null),
             aktivitet = it.aktivitet!!,
             periodeType = it.periodeType!!,

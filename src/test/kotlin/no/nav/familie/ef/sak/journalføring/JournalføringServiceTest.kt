@@ -42,6 +42,7 @@ import no.nav.familie.ef.sak.repository.fagsakpersoner
 import no.nav.familie.ef.sak.vilkår.VurderingService
 import no.nav.familie.ef.sak.vilkår.regler.HovedregelMetadata
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak.SØKNAD
+import no.nav.familie.kontrakter.ef.iverksett.BehandlingKategori
 import no.nav.familie.kontrakter.ef.sak.DokumentBrevkode
 import no.nav.familie.kontrakter.ef.søknad.Testsøknad
 import no.nav.familie.kontrakter.felles.Fagsystem
@@ -620,6 +621,7 @@ internal class JournalføringServiceTest {
             resultat = BehandlingResultat.IKKE_SATT,
             årsak = SØKNAD,
             forrigeBehandlingId = forrigeBehandlingId,
+            kategori = BehandlingKategori.NASJONAL,
         )
         every { behandlingService.hentBehandling(behandlingId) } returns behandling
         every { behandlingService.opprettBehandling(any(), any(), behandlingsårsak = any()) } returns behandling

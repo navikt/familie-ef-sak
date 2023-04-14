@@ -89,9 +89,12 @@ class VedtakHistorikkService(
         return historikk
             .slåSammen { a, b ->
                 sammenhengende(a, b) &&
-                    a.aktivitet == b.aktivitet &&
-                    a.periodeType == b.periodeType &&
-                    a.periodeType != VedtaksperiodeType.SANKSJON
+                    (
+                        a.vedtaksperiode is VedtakshistorikkperiodeOvergangsstønad &&
+                            b.vedtaksperiode is VedtakshistorikkperiodeOvergangsstønad &&
+                            a.vedtaksperiode.aktivitet == b.vedtaksperiode.aktivitet &&
+                            a.vedtaksperiode.periodeType == b.vedtaksperiode.periodeType
+                        )
             }
             .fraDato(fra)
             .map {
@@ -110,8 +113,12 @@ class VedtakHistorikkService(
         return historikk
             .filter { it.periodeType != VedtaksperiodeType.SANKSJON }
             .slåSammen { a, b ->
-                a.andel.inntekt == b.andel.inntekt &&
-                    a.andel.samordningsfradrag == b.andel.samordningsfradrag
+                (
+                    a.vedtaksperiode is VedtakshistorikkperiodeOvergangsstønad &&
+                        b.vedtaksperiode is VedtakshistorikkperiodeOvergangsstønad &&
+                        a.vedtaksperiode.inntekt.forventetInntekt == b.vedtaksperiode.inntekt.forventetInntekt &&
+                        a.vedtaksperiode.inntekt.samordningsfradrag == b.vedtaksperiode.inntekt.samordningsfradrag
+                    )
             }
             .fraDato(fra)
             .map {
