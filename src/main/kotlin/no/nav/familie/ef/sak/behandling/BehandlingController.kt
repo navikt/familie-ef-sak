@@ -65,15 +65,12 @@ class BehandlingController(
 
         val eksternFagsakIds = gamleBehandlinger.map { fagsakService.hentFagsakForBehandling(it.id).eksternId.id.toString() }
 
-        val fagsakerMedÅpenBehandlingSomManglerOppgaveAvType : List<String> = oppgaveService.finnFagsakerSomManglerOppgave(eksternFagsakIds)
+        val fagsakerMedÅpenBehandlingSomManglerOppgaveAvType: List<String> = oppgaveService.finnFagsakerSomManglerOppgave(eksternFagsakIds)
 
-        fagsakerMedÅpenBehandlingSomManglerOppgaveAvType.forEach{
+        fagsakerMedÅpenBehandlingSomManglerOppgaveAvType.forEach {
             logger.info("Fagsak med åpen behandling uten oppgave: $it")
         }
     }
-
-
-
 
     @PostMapping("{behandlingId}/vent")
     fun settPåVent(

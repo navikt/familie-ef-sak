@@ -16,7 +16,6 @@ import no.nav.familie.kontrakter.felles.oppgave.MappeDto
 import no.nav.familie.kontrakter.felles.oppgave.Oppgave
 import no.nav.familie.kontrakter.felles.oppgave.OppgaveIdentV2
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
-import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype.*
 import no.nav.familie.kontrakter.felles.oppgave.OpprettOppgaveRequest
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
@@ -90,12 +89,12 @@ class OppgaveService(
         mappeId: Long? = null, // Dersom denne er satt vil vi ikke prøve å finne mappe basert på oppgavens innhold
     ): Long {
         val settBehandlesAvApplikasjon = when (oppgavetype) {
-            BehandleSak,
-            BehandleUnderkjentVedtak,
-            GodkjenneVedtak,
+            Oppgavetype.BehandleSak,
+            Oppgavetype.BehandleUnderkjentVedtak,
+            Oppgavetype.GodkjenneVedtak,
             -> true
 
-            InnhentDokumentasjon -> false
+            Oppgavetype.InnhentDokumentasjon -> false
             else -> error("Håndterer ikke behandlesAvApplikasjon for $oppgavetype")
         }
         val fagsak = fagsakService.hentFagsakForBehandling(behandlingId)
@@ -130,11 +129,11 @@ class OppgaveService(
         e.message?.contains("Fant ingen gyldig arbeidsfordeling for oppgaven") ?: false
 
     private fun finnAktuellMappe(enhetsnummer: String?, oppgavetype: Oppgavetype): Long? {
-        if (enhetsnummer == "4489" && oppgavetype == GodkjenneVedtak) {
+        if (enhetsnummer == "4489" && oppgavetype == Oppgavetype.GodkjenneVedtak) {
             val mapper = finnMapper(enhetsnummer)
             val mappeIdForGodkjenneVedtak = mapper.find {
                 (it.navn.contains("70 Godkjennevedtak") || it.navn.contains("70 Godkjenne vedtak")) &&
-                        !it.navn.contains("EF Sak")
+                    !it.navn.contains("EF Sak")
             }?.id?.toLong()
             mappeIdForGodkjenneVedtak?.let {
                 logger.info("Legger oppgave i Godkjenne vedtak-mappe")
@@ -143,7 +142,7 @@ class OppgaveService(
             }
             return mappeIdForGodkjenneVedtak
         }
-        if (enhetsnummer == "4489" && oppgavetype == InnhentDokumentasjon) { // Skjermede personer skal ikke puttes i mappe
+        if (enhetsnummer == "4489" && oppgavetype == Oppgavetype.InnhentDokumentasjon) { // Skjermede personer skal ikke puttes i mappe
             return finnHendelseMappeId(enhetsnummer)
         }
         return null
@@ -229,7 +228,7 @@ class OppgaveService(
     fun hentIkkeFerdigstiltOppgaveForBehandling(behandlingId: UUID): Oppgave? {
         return oppgaveRepository.findByBehandlingIdAndErFerdigstiltIsFalseAndTypeIn(
             behandlingId,
-            setOf(BehandleSak, BehandleUnderkjentVedtak)
+            setOf(Oppgavetype.BehandleSak, Oppgavetype.BehandleUnderkjentVedtak),
         )
             ?.let { oppgaveClient.finnOppgaveMedId(it.gsakOppgaveId) }
     }
@@ -308,10 +307,10 @@ class OppgaveService(
     }
 
     fun finnFagsakerSomManglerOppgave(fagsakEksternId: List<String>): List<String> {
-        val oppgaveTyper = listOf(BehandleSak, BehandleUderkjentVedtak, GodkjenneVedtak).map { it.toString() }
+        val oppgaveTyper = listOf(Oppgavetype.BehandleSak, Oppgavetype.BehandleUderkjentVedtak, Oppgavetype.GodkjenneVedtak).map { it.toString() }
 
         val alleOppgaver =
-            oppgaveClient.hentOppgaver(finnOppgaveRequest = FinnOppgaveRequest(tema = Tema.ENF, oppgavetype=BehandleSak)).oppgaver.filter {
+            oppgaveClient.hentOppgaver(finnOppgaveRequest = FinnOppgaveRequest(tema = Tema.ENF, oppgavetype = Oppgavetype.BehandleSak)).oppgaver.filter {
                 oppgaveTyper.contains(it.behandlingstype)
             }
         return fagsakEksternId.filterNot { externId -> alleOppgaver.any { externId == it.saksreferanse } }

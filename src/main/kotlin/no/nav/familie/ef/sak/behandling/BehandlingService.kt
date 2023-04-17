@@ -62,7 +62,7 @@ class BehandlingService(
 
     fun hentGamleUferdigeBehandlinger(
         stønadtype: StønadType,
-        enMånedSiden: LocalDateTime = LocalDateTime.now().minusMonths(1)
+        enMånedSiden: LocalDateTime = LocalDateTime.now().minusMonths(1),
     ): List<Behandling> {
         return behandlingRepository.hentUferdigeBehandlingerFørDato(stønadtype, enMånedSiden)
     }
@@ -114,13 +114,13 @@ class BehandlingService(
         }
         feilHvis(
             behandlingsårsak == BehandlingÅrsak.G_OMREGNING &&
-                    !featureToggleService.isEnabled(Toggle.G_BEREGNING),
+                !featureToggleService.isEnabled(Toggle.G_BEREGNING),
         ) {
             "Feature toggle for g-omregning er disabled"
         }
         feilHvis(
             behandlingsårsak == BehandlingÅrsak.KORRIGERING_UTEN_BREV &&
-                    !featureToggleService.isEnabled(Toggle.BEHANDLING_KORRIGERING),
+                !featureToggleService.isEnabled(Toggle.BEHANDLING_KORRIGERING),
         ) {
             "Feature toggle for korrigering er ikke skrudd på for bruker"
         }
@@ -170,7 +170,7 @@ class BehandlingService(
         val behandling = hentBehandling(behandlingId)
         secureLogger.info(
             "${SikkerhetContext.hentSaksbehandlerEllerSystembruker()} endrer status på behandling $behandlingId " +
-                    "fra ${behandling.status} til $status",
+                "fra ${behandling.status} til $status",
         )
         return behandlingRepository.update(behandling.copy(status = status))
     }
@@ -179,7 +179,7 @@ class BehandlingService(
         val behandling = hentBehandling(behandlingId)
         secureLogger.info(
             "${SikkerhetContext.hentSaksbehandlerEllerSystembruker()} endrer kategori på behandling $behandlingId " +
-                    "fra ${behandling.kategori} til $kategori",
+                "fra ${behandling.kategori} til $kategori",
         )
         return behandlingRepository.update(behandling.copy(kategori = kategori))
     }
@@ -191,7 +191,7 @@ class BehandlingService(
         }
         secureLogger.info(
             "${SikkerhetContext.hentSaksbehandlerEllerSystembruker()} endrer forrigeBehandlingId på behandling $behandlingId " +
-                    "fra ${behandling.forrigeBehandlingId} til $forrigeBehandlingId",
+                "fra ${behandling.forrigeBehandlingId} til $forrigeBehandlingId",
         )
         return behandlingRepository.update(behandling.copy(forrigeBehandlingId = forrigeBehandlingId))
     }
@@ -200,7 +200,7 @@ class BehandlingService(
         val behandling = hentBehandling(behandlingId)
         secureLogger.info(
             "${SikkerhetContext.hentSaksbehandlerEllerSystembruker()} endrer steg på behandling $behandlingId " +
-                    "fra ${behandling.steg} til $steg",
+                "fra ${behandling.steg} til $steg",
         )
         return behandlingRepository.update(behandling.copy(steg = steg))
     }
