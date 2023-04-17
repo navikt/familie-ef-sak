@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component
 import org.springframework.web.client.RestOperations
 import org.springframework.web.util.UriComponentsBuilder
 import java.net.URI
+import java.util.UUID
 
 @Component
 class KlageClient(
@@ -37,5 +38,10 @@ class KlageClient(
             .queryParam("eksternFagsakId", eksternIder.joinToString(","))
             .build().toUri()
         return getForEntity<Ressurs<Map<Long, List<KlagebehandlingDto>>>>(uri).getDataOrThrow()
+    }
+
+    fun oppdaterOppgaveTilÅGjeldeTilbakekreving(behandlingId: UUID) {
+        val uri = URI.create("$familieKlageUri/api/ekstern/behandling/$behandlingId/gjelder-tilbakekreving")
+        return patchForEntity(uri, "")
     }
 }
