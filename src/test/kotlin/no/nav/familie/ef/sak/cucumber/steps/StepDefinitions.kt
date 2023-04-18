@@ -239,7 +239,12 @@ class StepDefinitions {
         }
 
         gittVedtak.map {
-            beregnYtelseSteg.utførSteg(saksbehandlinger[it.behandlingId]!!.second, it.tilVedtakDto())
+            try {
+                beregnYtelseSteg.utførSteg(saksbehandlinger[it.behandlingId]!!.second, it.tilVedtakDto())
+            } catch (e: Exception) {
+                logger.error("Feilet for behandling ${behandlingIdFraUUID(it.behandlingId)}")
+                throw e
+            }
             // kan ikke beregne historikk ennå
             if (stønadstype != StønadType.SKOLEPENGER) {
                 beregnetAndelHistorikkList = AndelHistorikkBeregner.lagHistorikk(
@@ -496,24 +501,33 @@ class StepDefinitions {
             } catch (e: Throwable) {
                 logger.info("Expected: {}", it)
                 logger.info("Actual: {}", andelHistorikkDto)
-                beregnetAndelHistorikkList.forEach { andel ->
-                    logger.info(
-                        listOf(
-                            behandlingIdTilUUID.entries.find { it.value == andel.behandlingId }!!.key,
-                            andel.andel.periode.fom.format(YEAR_MONTH_FORMAT_NORSK),
-                            andel.andel.periode.tom.format(YEAR_MONTH_FORMAT_NORSK),
-                            andel.endring?.type ?: "",
-                            andel.endring?.behandlingId?.let { bid -> behandlingIdTilUUID.entries.find { it.value == bid }!!.key }
-                                ?: "",
-                            "opphør=${andel.erOpphør}",
-                        ).joinToString("|", prefix = "|", postfix = "|"),
-                    )
-                }
+                loggForventet()
 
                 throw Throwable("Feilet rad $index", e)
             }
         }
-        assertThat(dataTable.asMaps()).hasSize(forventetHistorikkEndringer.size)
+        try {
+            assertThat(dataTable.asMaps()).hasSize(beregnetAndelHistorikkList.size)
+        } catch (e: Throwable) {
+            loggForventet()
+            throw e
+        }
+    }
+
+    private fun loggForventet() {
+        beregnetAndelHistorikkList.forEach { andel ->
+            logger.info(
+                listOf(
+                    behandlingIdTilUUID.entries.find { it.value == andel.behandlingId }!!.key,
+                    andel.andel.periode.fom.format(YEAR_MONTH_FORMAT_NORSK),
+                    andel.andel.periode.tom.format(YEAR_MONTH_FORMAT_NORSK),
+                    andel.endring?.type ?: "",
+                    andel.endring?.behandlingId?.let { bid -> behandlingIdTilUUID.entries.find { it.value == bid }!!.key }
+                        ?: "",
+                    "opphør=${andel.erOpphør}",
+                ).joinToString("|", prefix = "|", postfix = "|"),
+            )
+        }
     }
 
     private fun assertBeregnetAndel(

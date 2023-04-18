@@ -24,7 +24,7 @@ object AndelHistorikkUtil {
         first: AndelHistorikkDto,
         second: AndelHistorikkDto,
     ) =
-        first.vedtaksperiode.periode.påfølgesAv(second.vedtaksperiode.periode)
+        first.andel.periode.påfølgesAv(second.andel.periode)
 
     fun periodeTypeOvergangsstønad(
         stønadstype: StønadType,

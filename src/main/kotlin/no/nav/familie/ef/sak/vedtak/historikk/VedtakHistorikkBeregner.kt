@@ -185,10 +185,14 @@ object VedtakHistorikkBeregner {
     private fun perioderForOvergangsstønad(vedtak: InnvilgelseOvergangsstønad): List<Vedtakshistorikkperiode> {
         val inntekter = inntektsperioder(vedtak)
         return vedtak.perioder.flatMap {
-            if (it.periodeType == VedtaksperiodeType.SANKSJON) {
-                listOf(Sanksjonsperiode(it.periode, it.sanksjonsårsak ?: error("Mangler sanksjonsårsak")))
-            } else {
-                splittOppVedtaksperioderOgInntekter(inntekter, it)
+            when (it.periodeType) {
+                VedtaksperiodeType.SANKSJON ->
+                    listOf(Sanksjonsperiode(it.periode, it.sanksjonsårsak ?: error("Mangler sanksjonsårsak")))
+                VedtaksperiodeType.MIDLERTIDIG_OPPHØR -> {
+                    val inntekt = Inntekt(it.periode.fom, BigDecimal.ZERO, BigDecimal.ZERO)
+                    listOf(VedtakshistorikkperiodeOvergangsstønad(it.periode, it.aktivitet, it.periodeType, inntekt))
+                }
+                else -> splittOppVedtaksperioderOgInntekter(inntekter, it)
             }
         }
     }

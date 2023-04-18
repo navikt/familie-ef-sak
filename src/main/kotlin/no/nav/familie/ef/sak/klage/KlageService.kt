@@ -58,10 +58,10 @@ class KlageService(
         brukerfeilHvis(klageMottatt.isAfter(LocalDate.now())) {
             "Kan ikke opprette klage med krav mottatt frem i tid for fagsak=$fagsakId"
         }
-        opprettKlage(fagsakService.hentFagsak(fagsakId), opprettKlageDto.mottattDato)
+        opprettKlage(fagsakService.hentFagsak(fagsakId), opprettKlageDto.mottattDato, opprettKlageDto.klageGjelderTilbakekreving)
     }
 
-    fun opprettKlage(fagsak: Fagsak, klageMottatt: LocalDate) {
+    fun opprettKlage(fagsak: Fagsak, klageMottatt: LocalDate, klageGjelderTilbakekreving: Boolean) {
         val aktivIdent = fagsak.hentAktivIdent()
         val enhetId = arbeidsfordelingService.hentNavEnhet(aktivIdent)?.enhetId
         brukerfeilHvis(enhetId == null) {
@@ -75,6 +75,7 @@ class KlageService(
                 fagsystem = Fagsystem.EF,
                 klageMottatt = klageMottatt,
                 behandlendeEnhet = enhetId,
+                klageGjelderTilbakekreving = klageGjelderTilbakekreving
             ),
         )
     }
