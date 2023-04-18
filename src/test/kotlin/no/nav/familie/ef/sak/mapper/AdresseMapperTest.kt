@@ -75,7 +75,20 @@ internal class AdresseMapperTest {
             ).visningsadresse,
         )
             .withFailMessage("Skal skrive ut ukjentBosted når vegadresse er null")
-            .isEqualTo("ukjentBostedKommune")
+            .isEqualTo("Ukjent bosted - ukjentBostedKommune")
+
+        assertThat(
+            mapper.tilAdresse(
+                bostedsadresse.copy(
+                    vegadresse = null,
+                    matrikkeladresse = null,
+                    utenlandskAdresse = null,
+                    ukjentBosted = null,
+                ),
+            ).visningsadresse,
+        )
+            .withFailMessage("Skal skrive ut Ingen opplysninger tilgjenglig når alle adressene mangler")
+            .isEqualTo("Ingen opplysninger tilgjenglig")
     }
 
     @Test
