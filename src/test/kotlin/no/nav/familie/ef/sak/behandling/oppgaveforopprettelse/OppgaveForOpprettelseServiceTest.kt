@@ -78,9 +78,13 @@ class OppgaveForOpprettelseServiceTest : OppslagSpringRunnerTest() {
             beløp = beløp,
             fraOgMed = LocalDate.now(),
             tilOgMed = LocalDate.now().plusYears(2),
-            kildeBehandlingId = behandlingId
+            kildeBehandlingId = behandlingId,
         )
-        tilkjentYtelseRepository.insert(lagTilkjentYtelse(behandlingId = behandlingId,
-            andelerTilkjentYtelse = listOf(andel)))
+        tilkjentYtelseRepository.insert(
+            lagTilkjentYtelse(
+                behandlingId = behandlingId,
+                andelerTilkjentYtelse = listOf(andel),
+            ),
+        )
     }
 }

@@ -297,12 +297,15 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
             vedtakResultatType = ResultatType.AVSLÅ,
             status = BehandlingStatus.UTREDES,
             avlsåÅrsak = AvslagÅrsak.MINDRE_INNTEKTSENDRINGER,
-            tilkjentYtelse = lagAndelMedInntekt1ÅrFremITiden
+            tilkjentYtelse = lagAndelMedInntekt1ÅrFremITiden,
         )
 
-        sendTilBeslutter(SAKSBEHANDLER, SendTilBeslutterDto(
-            oppgavetyperSomSkalOpprettes = listOf(OppgaveForOpprettelseType.INNTEKTSKONTROLL_1_ÅR_FREM_I_TID),
-        ))
+        sendTilBeslutter(
+            SAKSBEHANDLER,
+            SendTilBeslutterDto(
+                oppgavetyperSomSkalOpprettes = listOf(OppgaveForOpprettelseType.INNTEKTSKONTROLL_1_ÅR_FREM_I_TID),
+            ),
+        )
 
         assertThat(oppgaverForOpprettelseService.hentOppgaverForOpprettelseEllerNull(behandlingId)?.oppgavetyper)
             .containsExactly(OppgaveForOpprettelseType.INNTEKTSKONTROLL_1_ÅR_FREM_I_TID)
@@ -388,7 +391,7 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
         steg: StegType = StegType.SEND_TIL_BESLUTTER,
         vedtakResultatType: ResultatType = ResultatType.AVSLÅ,
         avlsåÅrsak: AvslagÅrsak = AvslagÅrsak.VILKÅR_IKKE_OPPFYLT,
-        tilkjentYtelse: (behandlingId: UUID) -> TilkjentYtelse = {tilkjentYtelse(behandlingId = it, fagsak.hentAktivIdent())}
+        tilkjentYtelse: (behandlingId: UUID) -> TilkjentYtelse = { tilkjentYtelse(behandlingId = it, fagsak.hentAktivIdent()) },
     ): UUID {
         val lagretBehandling = behandlingRepository.insert(
             behandling.copy(
