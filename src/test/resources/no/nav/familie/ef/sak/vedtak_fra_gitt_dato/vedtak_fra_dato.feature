@@ -145,3 +145,46 @@ Egenskap: hentVedtakForOvergangsstønadFraDato
     Så forvent følgende inntektsperioder fra dato: 03.2021
       | Fra og med dato | Inntekt | Samordningsfradrag |
       | 05.2021         | 20      | 10                 |
+
+  Scenario: Periode som strekker seg over flere g-beløp
+
+    Gitt følgende vedtak
+      | BehandlingId | Fra og med dato | Til og med dato | Vedtaksresultat | Aktivitet         | Vedtaksperiode |
+      | 1            | 01.2021         | 07.2021         | INNVILGE        | BARN_UNDER_ETT_ÅR | HOVEDPERIODE   |
+
+    Og følgende inntekter
+      | BehandlingId | Fra og med dato | Inntekt | Samordningsfradrag |
+      | 1            | 01.2021         | 10      | 20                 |
+
+    Når beregner ytelse
+
+    Så forvent følgende vedtaksperioder fra dato: 01.2021
+      | Fra og med dato | Til og med dato | Aktivitet         | Vedtaksperiode |
+      | 01.2021         | 07.2021         | BARN_UNDER_ETT_ÅR | HOVEDPERIODE   |
+
+    Så forvent følgende inntektsperioder fra dato: 01.2021
+      | Fra og med dato | Inntekt | Samordningsfradrag |
+      | 01.2021         | 10      | 20                 |
+
+  Scenario: Periode som med flere inntekter
+
+    Gitt følgende vedtak
+      | BehandlingId | Fra og med dato | Til og med dato | Vedtaksresultat | Aktivitet         | Vedtaksperiode |
+      | 1            | 01.2021         | 07.2021         | INNVILGE        | BARN_UNDER_ETT_ÅR | HOVEDPERIODE   |
+
+    Og følgende inntekter
+      | BehandlingId | Fra og med dato | Inntekt | Samordningsfradrag |
+      | 1            | 01.2021         | 10      | 20                 |
+      | 1            | 02.2021         | 10      | 20                 |
+      | 1            | 03.2021         | 20      | 20                 |
+
+    Når beregner ytelse
+
+    Så forvent følgende vedtaksperioder fra dato: 01.2021
+      | Fra og med dato | Til og med dato | Aktivitet         | Vedtaksperiode |
+      | 01.2021         | 07.2021         | BARN_UNDER_ETT_ÅR | HOVEDPERIODE   |
+
+    Så forvent følgende inntektsperioder fra dato: 01.2021
+      | Fra og med dato | Inntekt | Samordningsfradrag |
+      | 01.2021         | 10      | 20                 |
+      | 03.2021         | 20      | 20                 |

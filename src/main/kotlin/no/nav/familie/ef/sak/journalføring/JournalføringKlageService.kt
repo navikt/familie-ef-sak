@@ -12,6 +12,7 @@ import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.kontrakter.felles.journalpost.Journalpost
 import no.nav.familie.kontrakter.felles.klage.KlagebehandlingDto
+import no.nav.familie.prosessering.internal.TaskService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -23,6 +24,7 @@ class JournalføringKlageService(
     private val oppgaveService: OppgaveService,
     private val journalpostService: JournalpostService,
     private val klageService: KlageService,
+    private val taskService: TaskService,
 ) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -54,6 +56,10 @@ class JournalføringKlageService(
                 "fagsak=${fagsak.id} stønadstype=${fagsak.stønadstype} ",
         )
 
+        if(journalføringRequest.klageGjelderTilbakekreving){
+            oppdaterOppgaveTilÅGjeldeTilbakekreving(behandlingId)
+        }
+
         journalpostService.oppdaterOgFerdigstillJournalpost(
             journalpost = journalpost,
             dokumenttitler = journalføringRequest.dokumentTitler,
@@ -81,7 +87,7 @@ class JournalføringKlageService(
             "Mangler dato mottatt"
         }
 
-        klageService.opprettKlage(fagsak, klageMottatt)
+        klageService.opprettKlage(fagsak, klageMottatt, journalføringRequest.klageGjelderTilbakekreving)
 
         journalpostService.oppdaterOgFerdigstillJournalpost(
             journalpost = journalpost,
@@ -111,5 +117,13 @@ class JournalføringKlageService(
 
     private fun ferdigstillJournalføringsoppgave(journalføringRequest: JournalføringKlageRequest) {
         oppgaveService.ferdigstillOppgave(journalføringRequest.oppgaveId.toLong())
+    }
+
+    private fun oppdaterOppgaveTilÅGjeldeTilbakekreving(behandlingId: UUID){
+        taskService.save(
+            OppdaterOppgaveTilÅGjeldeTilbakekrevingTask.opprettTask(
+                behandlingId = behandlingId
+            ),
+        )
     }
 }
