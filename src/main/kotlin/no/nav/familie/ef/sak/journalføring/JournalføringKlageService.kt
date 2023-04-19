@@ -56,7 +56,7 @@ class JournalføringKlageService(
                 "fagsak=${fagsak.id} stønadstype=${fagsak.stønadstype} ",
         )
 
-        if(journalføringRequest.klageGjelderTilbakekreving){
+        if (journalføringRequest.klageGjelderTilbakekreving) {
             oppdaterOppgaveTilÅGjeldeTilbakekreving(behandlingId)
         }
 
@@ -119,10 +119,10 @@ class JournalføringKlageService(
         oppgaveService.ferdigstillOppgave(journalføringRequest.oppgaveId.toLong())
     }
 
-    private fun oppdaterOppgaveTilÅGjeldeTilbakekreving(behandlingId: UUID){
+    private fun oppdaterOppgaveTilÅGjeldeTilbakekreving(behandlingId: UUID) {
         taskService.save(
             OppdaterOppgaveTilÅGjeldeTilbakekrevingTask.opprettTask(
-                behandlingId = behandlingId
+                behandlingId = behandlingId,
             ),
         )
     }
