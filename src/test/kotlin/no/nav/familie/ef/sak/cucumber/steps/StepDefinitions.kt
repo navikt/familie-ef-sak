@@ -92,8 +92,8 @@ class StepDefinitions {
     private val tilkjentYtelseService = mockk<TilkjentYtelseService>(relaxed = true)
     private val andelsHistorikkService = mockk<AndelsHistorikkService>(relaxed = true)
     private val vedtakService = mockk<VedtakService>(relaxed = true)
-    private val beregningService = BeregningService()
     private val featureToggleService = mockFeatureToggleService()
+    private val beregningService = BeregningService(featureToggleService)
     private val beregningBarnetilsynService = BeregningBarnetilsynService(featureToggleService)
     private val beregningSkolepengerService = BeregningSkolepengerService(
         behandlingService = behandlingService,
@@ -330,6 +330,12 @@ class StepDefinitions {
             val fraOgMed = parseÅrMåned(Domenebegrep.FRA_OG_MED_DATO, rad)
             assertThat(periode.årMånedFra).isEqualTo(fraOgMed)
 
+            parseValgfriInt(VedtakDomenebegrep.DAGSATS, rad)?.let {
+                assertThat(periode.dagsats?.toInt() ?: 0).isEqualTo(it)
+            }
+            parseValgfriInt(VedtakDomenebegrep.MÅNEDSINNTEKT, rad)?.let {
+                assertThat(periode.månedsinntekt?.toInt() ?: 0).isEqualTo(it)
+            }
             assertThat(periode.forventetInntekt?.toInt()).isEqualTo(parseInt(VedtakDomenebegrep.INNTEKT, rad))
             assertThat(periode.samordningsfradrag?.toInt())
                 .isEqualTo(parseInt(VedtakDomenebegrep.SAMORDNINGSFRADRAG, rad))
@@ -385,6 +391,7 @@ class StepDefinitions {
                 parseValgfriÅrMånedEllerDato(Domenebegrep.TIL_OG_MED_DATO, rad).sisteDagenIMånedenEllerDefault(fraOgMed)
             val beløpMellom = parseValgfriIntRange(VedtakDomenebegrep.BELØP_MELLOM, rad)
             val beløp = parseValgfriInt(VedtakDomenebegrep.BELØP, rad)
+            val inntekt = parseValgfriInt(VedtakDomenebegrep.INNTEKT, rad)
 
             val gjeldendeAndel = gjeldendeAndelerTilkjentYtelse[index]
 
@@ -398,6 +405,7 @@ class StepDefinitions {
                 }
                 beløp?.let { assertThat(gjeldendeAndel.beløp).isEqualTo(it) }
                 assertThat(kildeBehandlingId).isEqualTo(gjeldendeAndel.kildeBehandlingId)
+                inntekt?.let { assertThat(gjeldendeAndel.inntekt).isEqualTo(it) }
             } catch (e: Throwable) {
                 logger.info("Expected: {}", rad)
                 logger.info("Actual: {}", gjeldendeAndel)

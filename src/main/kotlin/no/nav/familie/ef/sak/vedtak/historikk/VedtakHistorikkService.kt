@@ -113,22 +113,36 @@ class VedtakHistorikkService(
         return historikk
             .filter { it.periodeType != VedtaksperiodeType.SANKSJON }
             .slåSammen { a, b ->
-                (
-                    a.vedtaksperiode is VedtakshistorikkperiodeOvergangsstønad &&
-                        b.vedtaksperiode is VedtakshistorikkperiodeOvergangsstønad &&
-                        a.vedtaksperiode.inntekt.forventetInntekt == b.vedtaksperiode.inntekt.forventetInntekt &&
-                        a.vedtaksperiode.inntekt.samordningsfradrag == b.vedtaksperiode.inntekt.samordningsfradrag
-                    )
+                (a.vedtaksperiode is VedtakshistorikkperiodeOvergangsstønad &&
+                    b.vedtaksperiode is VedtakshistorikkperiodeOvergangsstønad &&
+                    a.vedtaksperiode.inntekt.dagsats nullOrEquals b.vedtaksperiode.inntekt.dagsats &&
+                    a.vedtaksperiode.inntekt.månedsinntekt nullOrEquals b.vedtaksperiode.inntekt.månedsinntekt &&
+                    a.vedtaksperiode.inntekt.forventetInntekt nullOrEquals b.vedtaksperiode.inntekt.forventetInntekt &&
+                    a.vedtaksperiode.inntekt.samordningsfradrag nullOrEquals b.vedtaksperiode.inntekt.samordningsfradrag)
             }
             .fraDato(fra)
-            .map {
+            .mapNotNull {
+                // fraDato korter av andelen men ikke vedtaksperiode/inntekt, så riktig dato må brukes
+                if (it.vedtaksperiode is VedtakshistorikkperiodeOvergangsstønad) {
+                    it.andel.periode.fom to it.vedtaksperiode.inntekt
+                } else {
+                    null
+                }
+            }
+            .map { (årMånedFra, inntekt) ->
                 Inntekt(
-                    it.andel.periode.fom,
-                    BigDecimal(it.andel.inntekt),
-                    BigDecimal(it.andel.samordningsfradrag),
+                    årMånedFra = årMånedFra,
+                    dagsats = inntekt.dagsats,
+                    månedsinntekt = inntekt.månedsinntekt,
+                    forventetInntekt = inntekt.forventetInntekt,
+                    samordningsfradrag = inntekt.samordningsfradrag,
                 )
             }
     }
+
+    private infix fun BigDecimal?.nullOrEquals(other: BigDecimal?) =
+        this == null && other == null ||
+            (this !== null && other != null && this.compareTo(other) == 0)
 
     private fun mapUtgifterBarnetilsyn(
         historikk: List<AndelHistorikkDto>,
@@ -197,6 +211,9 @@ class VedtakHistorikkService(
     }
 }
 
+/**
+ * Noter! Denne setter kun fra-dato på andelen, og ikke vedtaksperiode/inntekt
+ */
 fun List<AndelHistorikkDto>.fraDato(fra: YearMonth): List<AndelHistorikkDto> {
     return this.mapNotNull {
         if (it.andel.periode.fom >= fra) {

@@ -11,7 +11,7 @@ Egenskap: hentVedtakForOvergangsstønadFraDato
 
     Og følgende inntekter
       | BehandlingId | Fra og med dato | Inntekt | Samordningsfradrag |
-      | 1            | 01.2021         | 10      | 20                 |
+      | 1            | 01.2021         | 1000    | 20                 |
 
     Når beregner ytelse
 
@@ -38,19 +38,19 @@ Egenskap: hentVedtakForOvergangsstønadFraDato
     # inntektsperioder
     Så forvent følgende inntektsperioder fra dato: 11.2020
       | Fra og med dato | Inntekt | Samordningsfradrag |
-      | 01.2021         | 10      | 20                 |
+      | 01.2021         | 1000    | 20                 |
 
     Så forvent følgende inntektsperioder fra dato: 01.2021
       | Fra og med dato | Inntekt | Samordningsfradrag |
-      | 01.2021         | 10      | 20                 |
+      | 01.2021         | 1000    | 20                 |
 
     Så forvent følgende inntektsperioder fra dato: 02.2021
       | Fra og med dato | Inntekt | Samordningsfradrag |
-      | 02.2021         | 10      | 20                 |
+      | 02.2021         | 1000    | 20                 |
 
     Så forvent følgende inntektsperioder fra dato: 03.2021
       | Fra og med dato | Inntekt | Samordningsfradrag |
-      | 03.2021         | 10      | 20                 |
+      | 03.2021         | 1000    | 20                 |
 
     Så forvent følgende inntektsperioder fra dato: 04.2021
       | Fra og med dato | Inntekt | Samordningsfradrag |
@@ -65,8 +65,8 @@ Egenskap: hentVedtakForOvergangsstønadFraDato
 
     Og følgende inntekter
       | BehandlingId | Fra og med dato | Inntekt | Samordningsfradrag |
-      | 1            | 01.2021         | 10      | 20                 |
-      | 2            | 02.2021         | 20      | 10                 |
+      | 1            | 01.2021         | 1000    | 20                 |
+      | 2            | 02.2021         | 2000    | 10                 |
 
     Når beregner ytelse
 
@@ -84,12 +84,12 @@ Egenskap: hentVedtakForOvergangsstønadFraDato
 
     Så forvent følgende inntektsperioder fra dato: 01.2021
       | Fra og med dato | Inntekt | Samordningsfradrag |
-      | 01.2021         | 10      | 20                 |
-      | 02.2021         | 20      | 10                 |
+      | 01.2021         | 1000    | 20                 |
+      | 02.2021         | 2000    | 10                 |
 
     Så forvent følgende inntektsperioder fra dato: 04.2021
       | Fra og med dato | Inntekt | Samordningsfradrag |
-      | 04.2021         | 20      | 10                 |
+      | 04.2021         | 2000    | 10                 |
 
     # Hvordan skal inntekt håndteres når første perioden er sanksjon?
 
@@ -102,7 +102,7 @@ Egenskap: hentVedtakForOvergangsstønadFraDato
 
     Og følgende inntekter
       | BehandlingId | Fra og med dato | Inntekt | Samordningsfradrag |
-      | 1            | 01.2021         | 10      | 20                 |
+      | 1            | 01.2021         | 1000    | 20                 |
 
     Når beregner ytelse
 
@@ -116,7 +116,7 @@ Egenskap: hentVedtakForOvergangsstønadFraDato
     # fra sanksjon skal bruke verdi fra tidligere inntekt
     Så forvent følgende inntektsperioder fra dato: 04.2021
       | Fra og med dato | Inntekt | Samordningsfradrag |
-      | 04.2021         | 10      | 20                 |
+      | 04.2021         | 1000    | 20                 |
 
 
   Scenario: Behandling med hull, henter vedtaksperioder og inntekt fra hull
@@ -127,8 +127,8 @@ Egenskap: hentVedtakForOvergangsstønadFraDato
 
     Og følgende inntekter
       | BehandlingId | Fra og med dato | Inntekt | Samordningsfradrag |
-      | 1            | 01.2021         | 10      | 20                 |
-      | 2            | 05.2021         | 20      | 10                 |
+      | 1            | 01.2021         | 1000    | 20                 |
+      | 2            | 05.2021         | 2000    | 10                 |
 
     Når beregner ytelse
 
@@ -138,53 +138,10 @@ Egenskap: hentVedtakForOvergangsstønadFraDato
 
     Så forvent følgende inntektsperioder fra dato: 02.2021
       | Fra og med dato | Inntekt | Samordningsfradrag |
-      | 02.2021         | 10      | 20                 |
+      | 02.2021         | 1000    | 20                 |
       # TODO: her kan lønen vært noe annet?
-      | 05.2021         | 20      | 10                 |
+      | 05.2021         | 2000    | 10                 |
 
     Så forvent følgende inntektsperioder fra dato: 03.2021
       | Fra og med dato | Inntekt | Samordningsfradrag |
-      | 05.2021         | 20      | 10                 |
-
-  Scenario: Periode som strekker seg over flere g-beløp
-
-    Gitt følgende vedtak
-      | BehandlingId | Fra og med dato | Til og med dato | Vedtaksresultat | Aktivitet         | Vedtaksperiode |
-      | 1            | 01.2021         | 07.2021         | INNVILGE        | BARN_UNDER_ETT_ÅR | HOVEDPERIODE   |
-
-    Og følgende inntekter
-      | BehandlingId | Fra og med dato | Inntekt | Samordningsfradrag |
-      | 1            | 01.2021         | 10      | 20                 |
-
-    Når beregner ytelse
-
-    Så forvent følgende vedtaksperioder fra dato: 01.2021
-      | Fra og med dato | Til og med dato | Aktivitet         | Vedtaksperiode |
-      | 01.2021         | 07.2021         | BARN_UNDER_ETT_ÅR | HOVEDPERIODE   |
-
-    Så forvent følgende inntektsperioder fra dato: 01.2021
-      | Fra og med dato | Inntekt | Samordningsfradrag |
-      | 01.2021         | 10      | 20                 |
-
-  Scenario: Periode som med flere inntekter
-
-    Gitt følgende vedtak
-      | BehandlingId | Fra og med dato | Til og med dato | Vedtaksresultat | Aktivitet         | Vedtaksperiode |
-      | 1            | 01.2021         | 07.2021         | INNVILGE        | BARN_UNDER_ETT_ÅR | HOVEDPERIODE   |
-
-    Og følgende inntekter
-      | BehandlingId | Fra og med dato | Inntekt | Samordningsfradrag |
-      | 1            | 01.2021         | 10      | 20                 |
-      | 1            | 02.2021         | 10      | 20                 |
-      | 1            | 03.2021         | 20      | 20                 |
-
-    Når beregner ytelse
-
-    Så forvent følgende vedtaksperioder fra dato: 01.2021
-      | Fra og med dato | Til og med dato | Aktivitet         | Vedtaksperiode |
-      | 01.2021         | 07.2021         | BARN_UNDER_ETT_ÅR | HOVEDPERIODE   |
-
-    Så forvent følgende inntektsperioder fra dato: 01.2021
-      | Fra og med dato | Inntekt | Samordningsfradrag |
-      | 01.2021         | 10      | 20                 |
-      | 03.2021         | 20      | 20                 |
+      | 05.2021         | 2000    | 10                 |

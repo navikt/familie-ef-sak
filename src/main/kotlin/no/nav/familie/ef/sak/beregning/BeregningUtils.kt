@@ -1,5 +1,8 @@
 package no.nav.familie.ef.sak.beregning
 
+import no.nav.familie.ef.sak.felles.util.Utregning.rundNedTilNærmeste100
+import no.nav.familie.ef.sak.felles.util.Utregning.rundNedTilNærmeste1000
+import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.kontrakter.felles.Månedsperiode
 import java.math.BigDecimal
 import java.math.MathContext
@@ -9,15 +12,19 @@ import java.time.YearMonth
 object BeregningUtils {
 
     private val REDUKSJONSFAKTOR = BigDecimal(0.45)
+    val DAGSATS_ANTALL_DAGER = BigDecimal(260)
+    val ANTALL_MÅNEDER_ÅR = BigDecimal(12)
 
-    fun beregnStønadForInntekt(inntektsperiode: Inntektsperiode): List<Beløpsperiode> {
-        val (_, _, periode, inntekt, samordningsfradrag) = inntektsperiode
+    fun beregnStønadForInntekt(inntektsperiode: Inntektsperiode, skalRundeNedTotalInntekt: Boolean): List<Beløpsperiode> {
+        val periode = inntektsperiode.periode
+        val samordningsfradrag = inntektsperiode.samordningsfradrag
+        val totalInntekt = beregnTotalinntekt(inntektsperiode, skalRundeNedTotalInntekt)
         return finnGrunnbeløpsPerioder(periode).map {
-            val avkortningPerMåned = beregnAvkortning(it.beløp, inntekt).divide(BigDecimal(12))
+            val avkortningPerMåned = beregnAvkortning(it.beløp, totalInntekt).divide(ANTALL_MÅNEDER_ÅR)
                 .setScale(0, RoundingMode.HALF_DOWN)
 
             val fullOvergangsStønadPerMåned =
-                it.beløp.multiply(BigDecimal(2.25)).divide(BigDecimal(12)).setScale(0, RoundingMode.HALF_EVEN)
+                it.beløp.multiply(BigDecimal(2.25)).divide(ANTALL_MÅNEDER_ÅR).setScale(0, RoundingMode.HALF_EVEN)
 
             val beløpFørSamordningUtenAvrunding =
                 fullOvergangsStønadPerMåned.subtract(avkortningPerMåned).setScale(0, RoundingMode.HALF_UP)
@@ -37,11 +44,16 @@ object BeregningUtils {
                     samordningsfradrag = samordningsfradrag,
                     avkortningPerMåned = avkortningPerMåned,
                     fullOvergangsStønadPerMåned = fullOvergangsStønadPerMåned,
-                    inntekt = inntekt,
+                    inntekt = totalInntekt,
                     grunnbeløp = it.beløp,
                 ),
             )
         }
+    }
+
+    private fun beregnTotalinntekt(inntektsperiode: Inntektsperiode, skalRundeNedTotalInntekt: Boolean): BigDecimal {
+        val totalInntekt = inntektsperiode.totalinntekt()
+        return if (skalRundeNedTotalInntekt) BigDecimal(rundNedTilNærmeste1000(totalInntekt)) else totalInntekt
     }
 
     private fun beregnAvkortning(grunnbeløp: BigDecimal, inntekt: BigDecimal): BigDecimal {
@@ -69,21 +81,38 @@ object BeregningUtils {
         inntektsperiode: Inntektsperiode,
         sistBrukteGrunnbeløp: Grunnbeløp,
     ): List<Inntektsperiode> {
-        val (_, _, _, inntekt, samordningsfradrag) = inntektsperiode
+        val inntekt = inntektsperiode.inntekt
+        val samordningsfradrag = inntektsperiode.samordningsfradrag
+        // For å unngå at vi kjører g-omregning og ikke har fikset ev. oppjustering av dagsats/månedsinntekt
+        // så kaster vi feil hvis det kommer inn en vedtak med de
+        feilHvis(inntektsperiode.dagsats != null && inntektsperiode.dagsats > BigDecimal.ZERO) {
+            "Mangler indeksjustering av dagsats?"
+        }
+        feilHvis(inntektsperiode.månedsinntekt != null && inntektsperiode.månedsinntekt > BigDecimal.ZERO) {
+            "Mangler indeksjustering av månedsinntekt?"
+        }
         return finnGrunnbeløpsPerioder(inntektsperiode.periode).map { grunnbeløp ->
             if (grunnbeløp.periode.fom > sistBrukteGrunnbeløp.periode.fom &&
                 grunnbeløp.beløp != sistBrukteGrunnbeløp.grunnbeløp
             ) {
                 val faktor = grunnbeløp.beløp.divide(sistBrukteGrunnbeløp.grunnbeløp, MathContext.DECIMAL128)
-                val justerInntekt = inntekt.multiply(faktor).setScale(0, RoundingMode.FLOOR).toLong()
-                val justerInntektAvrundetNedTilNærmeste100 = (justerInntekt / 100L) * 100L
+                val justertInntekt = inntekt.multiply(faktor)
+                val justerInntektAvrundetNedTilNærmeste100 = rundNedTilNærmeste100(justertInntekt)
                 Inntektsperiode(
                     periode = grunnbeløp.periode,
+                    dagsats = inntektsperiode.dagsats, // indeksjusrert? avrundet?
+                    månedsinntekt = inntektsperiode.månedsinntekt, // indeksjusrert? avrundet?
                     inntekt = BigDecimal(justerInntektAvrundetNedTilNærmeste100),
                     samordningsfradrag = samordningsfradrag,
                 )
             } else {
-                Inntektsperiode(periode = grunnbeløp.periode, inntekt = inntekt, samordningsfradrag = samordningsfradrag)
+                Inntektsperiode(
+                    periode = grunnbeløp.periode,
+                    dagsats = inntektsperiode.dagsats,
+                    månedsinntekt = inntektsperiode.månedsinntekt,
+                    inntekt = inntekt,
+                    samordningsfradrag = samordningsfradrag,
+                )
             }
         }
     }

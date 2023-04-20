@@ -78,7 +78,10 @@ data class VedtakshistorikkperiodeOvergangsstønad(
         )
 
     override fun medFra(fra: YearMonth): Vedtakshistorikkperiode {
-        return this.copy(periode = this.periode.copy(fom = fra))
+        return this.copy(
+            periode = this.periode.copy(fom = fra),
+            inntekt = this.inntekt.copy(årMånedFra = fra)
+        )
     }
 
     override fun medTil(til: YearMonth): Vedtakshistorikkperiode {
