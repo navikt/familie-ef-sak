@@ -50,13 +50,11 @@ class OppgaverForOpprettelseService(
     ): Boolean {
         if (tilkjentYtelse == null) return false
 
-        val sisteAndel = tilkjentYtelse.andelerTilkjentYtelse.maxBy { it.stønadTom }
-        val sisteAndelMedBeløp = sisteAndel.beløp > 0
-        val sisteAndel1årFremITid = sisteAndel.stønadTom > LocalDate.now().plusYears(1)
+        val harUtbetalingEtterDetNesteÅret = tilkjentYtelse.andelerTilkjentYtelse
+            .filter { it.stønadTom > LocalDate.now().plusYears(1) }
+            .any { it.beløp > 0 }
 
-        return behandling.type == BehandlingType.FØRSTEGANGSBEHANDLING &&
-            sisteAndelMedBeløp &&
-            sisteAndel1årFremITid
+        return behandling.type == BehandlingType.FØRSTEGANGSBEHANDLING && harUtbetalingEtterDetNesteÅret
     }
 
     fun slettOppgaverForOpprettelse(behandlingId: UUID) {
