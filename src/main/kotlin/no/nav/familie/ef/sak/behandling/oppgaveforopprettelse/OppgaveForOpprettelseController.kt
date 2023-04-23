@@ -17,6 +17,7 @@ class OppgaveForOpprettelseController(private val oppgaverForOpprettelseService:
     fun hentOppgaverForOpprettelse(@PathVariable behandlingid: UUID): Ressurs<OppgaverForOpprettelseDto> {
         val lagretFremleggsoppgave = oppgaverForOpprettelseService.hentOppgaverForOpprettelseEllerNull(behandlingid)
         val oppgavetyperSomKanOpprettes = oppgaverForOpprettelseService.hentOppgavetyperSomKanOpprettes(behandlingid)
+
         return Ressurs.success(
             OppgaverForOpprettelseDto(
                 oppgavetyperSomKanOpprettes = oppgavetyperSomKanOpprettes,
