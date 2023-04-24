@@ -63,11 +63,11 @@ class OppgaveForOpprettelseServiceTest : OppslagSpringRunnerTest() {
     }
 
     private fun opprettTomListe() {
-        oppgaverForOpprettelseService.opprettEllerErstattFremleggsoppgave(behandlingId, listOf())
+        oppgaverForOpprettelseService.opprettEllerErstatt(behandlingId, listOf())
     }
 
     private fun opprettInntektskontroll() {
-        oppgaverForOpprettelseService.opprettEllerErstattFremleggsoppgave(
+        oppgaverForOpprettelseService.opprettEllerErstatt(
             behandlingId,
             listOf(OppgaveForOpprettelseType.INNTEKTSKONTROLL_1_ÅR_FREM_I_TID),
         )

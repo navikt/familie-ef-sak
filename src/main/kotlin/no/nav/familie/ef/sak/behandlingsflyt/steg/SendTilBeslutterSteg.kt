@@ -28,7 +28,6 @@ import no.nav.familie.ef.sak.vedtak.dto.ResultatType.INNVILGE
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType.INNVILGE_UTEN_UTBETALING
 import no.nav.familie.ef.sak.vedtak.dto.SendTilBeslutterDto
 import no.nav.familie.ef.sak.vilkår.VurderingService
-import no.nav.familie.kontrakter.ef.iverksett.OppgaveForOpprettelseType
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.internal.TaskService
 import org.springframework.http.HttpStatus
@@ -112,10 +111,8 @@ class SendTilBeslutterSteg(
         ferdigstillOppgave(saksbehandling, Oppgavetype.BehandleSak)
         ferdigstillOppgave(saksbehandling, Oppgavetype.BehandleUnderkjentVedtak)
         opprettTaskForBehandlingsstatistikk(saksbehandling.id)
-        if (data != null && oppgaverForOpprettelseService.hentOppgavetyperSomKanOpprettes(saksbehandling.id)
-                .contains(OppgaveForOpprettelseType.INNTEKTSKONTROLL_1_ÅR_FREM_I_TID)
-        ) {
-            oppgaverForOpprettelseService.opprettEllerErstattFremleggsoppgave(
+        if (data != null) {
+            oppgaverForOpprettelseService.opprettEllerErstatt(
                 saksbehandling.id,
                 data.oppgavetyperSomSkalOpprettes
             )

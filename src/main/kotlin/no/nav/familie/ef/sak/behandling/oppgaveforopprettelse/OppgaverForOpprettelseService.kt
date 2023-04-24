@@ -21,14 +21,16 @@ class OppgaverForOpprettelseService(
 ) {
 
     @Transactional
-    fun opprettEllerErstattFremleggsoppgave(behandlingId: UUID, nyeOppgaver: List<OppgaveForOpprettelseType>) {
+    fun opprettEllerErstatt(behandlingId: UUID, nyeOppgaver: List<OppgaveForOpprettelseType>) {
         val oppgavetyperSomKanOpprettes = hentOppgavetyperSomKanOpprettes(behandlingId)
         feilHvisIkke(oppgavetyperSomKanOpprettes.containsAll(nyeOppgaver)) {
             "behandlingId=$behandlingId prøver å opprette $nyeOppgaver $oppgavetyperSomKanOpprettes"
         }
-        when (this.oppgaverForOpprettelseRepository.existsById(behandlingId)) {
-            true -> this.oppgaverForOpprettelseRepository.update(OppgaverForOpprettelse(behandlingId, nyeOppgaver))
-            false -> this.oppgaverForOpprettelseRepository.insert(OppgaverForOpprettelse(behandlingId, nyeOppgaver))
+        if (oppgavetyperSomKanOpprettes.isNotEmpty()) {
+            when (this.oppgaverForOpprettelseRepository.existsById(behandlingId)) {
+                true -> this.oppgaverForOpprettelseRepository.update(OppgaverForOpprettelse(behandlingId, nyeOppgaver))
+                false -> this.oppgaverForOpprettelseRepository.insert(OppgaverForOpprettelse(behandlingId, nyeOppgaver))
+            }
         }
     }
 
