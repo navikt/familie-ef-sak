@@ -63,7 +63,7 @@ internal class ÅrsakRevurderingStegTest {
     }
 
     @Nested
-    inner class validering {
+    inner class Validering {
 
         @Test
         internal fun `feiler hvis kravMottatt mangler`() {

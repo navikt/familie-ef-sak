@@ -1,6 +1,8 @@
 package no.nav.familie.ef.sak.beregning
 
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.kontrakter.felles.erSammenhengende
 import no.nav.familie.kontrakter.felles.harOverlappende
@@ -8,13 +10,18 @@ import org.springframework.stereotype.Service
 import java.math.BigDecimal
 
 @Service
-class BeregningService {
+class BeregningService(
+    private val featureToggleService: FeatureToggleService,
+) {
 
     fun beregnYtelse(vedtaksperioder: List<Månedsperiode>, inntektsperioder: List<Inntektsperiode>): List<Beløpsperiode> {
         validerInnteksperioder(inntektsperioder, vedtaksperioder)
         validerVedtaksperioder(vedtaksperioder)
 
-        val beløpForInnteksperioder = inntektsperioder.flatMap { BeregningUtils.beregnStønadForInntekt(it) }
+        val skalRundeNedTotalInntekt = featureToggleService.isEnabled(Toggle.ULIKE_INNTEKTER)
+        val beløpForInnteksperioder = inntektsperioder.flatMap {
+            BeregningUtils.beregnStønadForInntekt(it, skalRundeNedTotalInntekt)
+        }
 
         return vedtaksperioder.flatMap {
             BeregningUtils.finnStartDatoOgSluttDatoForBeløpsperiode(beløpForInnteksperioder, it)
@@ -49,6 +56,16 @@ class BeregningService {
         }
 
         brukerfeilHvis(inntektsperioder.any { it.inntekt < BigDecimal.ZERO }) { "Inntekten kan ikke være negativt" }
+        brukerfeilHvis(
+            inntektsperioder.any {
+                (it.dagsats ?: BigDecimal.ZERO) < BigDecimal.ZERO
+            },
+        ) { "Dagsats kan ikke være negativt" }
+        brukerfeilHvis(
+            inntektsperioder.any {
+                (it.månedsinntekt ?: BigDecimal.ZERO) < BigDecimal.ZERO
+            },
+        ) { "Månedsinntekt kan ikke være negativt" }
         brukerfeilHvis(
             inntektsperioder.any {
                 it.samordningsfradrag < BigDecimal.ZERO

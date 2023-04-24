@@ -49,7 +49,7 @@ internal class ÅrsakRevurderingServiceTest {
     }
 
     @Nested
-    inner class validerHarGyldigRevurderingsinformasjon {
+    inner class ValiderHarGyldigRevurderingsinformasjon {
 
         @Test
         internal fun `skal ikke validere hvis det er førstegångsbehandling`() {

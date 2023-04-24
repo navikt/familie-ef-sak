@@ -652,7 +652,7 @@ internal class BarnServiceTest {
     }
 
     @Nested
-    inner class mapTidligereBarnIdTilNårværende {
+    inner class MapTidligereBarnIdTilNårværende {
 
         private val barnA = BehandlingBarn(behandlingId = UUID.randomUUID(), personIdent = fnrBarnA)
         private val tidligereBarnA = BehandlingBarn(behandlingId = UUID.randomUUID(), personIdent = fnrBarnA)

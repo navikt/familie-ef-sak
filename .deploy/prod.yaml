@@ -56,7 +56,6 @@ spec:
         - application: familie-klage
         - application: familie-ef-personhendelse
         - application: familie-ef-mottak
-        - application: familie-ks-sak
         - application: familie-ef-proxy
           namespace: teamfamilie
           cluster: prod-fss
@@ -75,6 +74,7 @@ spec:
         - application: familie-ef-blankett
         - application: familie-ef-iverksett
         - application: familie-dokument
+        - application: familie-ks-sak
         - application: historisk-pensjon
           namespace: historisk
         - application: familie-ef-proxy

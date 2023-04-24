@@ -13,12 +13,12 @@ Egenskap: Andelhistorikk: Endring i inntekt
     Og følgende inntekter
       | BehandlingId | Inntekt |
       | 1            | 0       |
-      | 2            | 1       |
+      | 2            | 1000    |
 
     Når beregner ytelse
 
     Så forvent følgende historikk
       | BehandlingId | Endringstype | Endret i behandlingId | Inntekt |
       | 1            | ERSTATTET    | 2                     | 0       |
-      | 2            |              |                       | 1       |
+      | 2            |              |                       | 1000    |
 

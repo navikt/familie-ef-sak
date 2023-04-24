@@ -8,7 +8,13 @@ import java.time.YearMonth
 
 data class BeregningRequest(val inntekt: List<Inntekt>, val vedtaksperioder: List<VedtaksperiodeDto>)
 
-data class Inntekt(val årMånedFra: YearMonth, val forventetInntekt: BigDecimal?, val samordningsfradrag: BigDecimal?)
+data class Inntekt(
+    val årMånedFra: YearMonth,
+    val forventetInntekt: BigDecimal?,
+    val samordningsfradrag: BigDecimal?,
+    val dagsats: BigDecimal? = null,
+    val månedsinntekt: BigDecimal? = null,
+)
 
 // TODO Dette er en domeneklasse og burde flyttes til Vedtak.kt.
 data class Inntektsperiode(
@@ -19,12 +25,23 @@ data class Inntektsperiode(
             startDato ?: error("periode eller startDato må ha verdi"),
             sluttDato ?: error("periode eller sluttDato må ha verdi"),
         ),
+    val dagsats: BigDecimal? = null,
+    val månedsinntekt: BigDecimal? = null,
     val inntekt: BigDecimal,
     val samordningsfradrag: BigDecimal,
-)
+) {
+
+    fun totalinntekt(): BigDecimal {
+        return this.inntekt +
+            (this.dagsats ?: BigDecimal.ZERO).multiply(BeregningUtils.DAGSATS_ANTALL_DAGER) +
+            (this.månedsinntekt ?: BigDecimal.ZERO).multiply(BeregningUtils.ANTALL_MÅNEDER_ÅR)
+    }
+}
 
 fun List<Inntekt>.tilInntektsperioder() = this.mapIndexed { index, inntektsperiode ->
     Inntektsperiode(
+        dagsats = inntektsperiode.dagsats ?: BigDecimal.ZERO,
+        månedsinntekt = inntektsperiode.månedsinntekt ?: BigDecimal.ZERO,
         inntekt = inntektsperiode.forventetInntekt ?: BigDecimal.ZERO,
         samordningsfradrag = inntektsperiode.samordningsfradrag ?: BigDecimal.ZERO,
         periode = Månedsperiode(
@@ -40,6 +57,8 @@ fun List<Inntekt>.tilInntektsperioder() = this.mapIndexed { index, inntektsperio
 
 fun List<Inntektsperiode>.tilInntekt() = this.map { inntektsperiode ->
     Inntekt(
+        dagsats = inntektsperiode.dagsats,
+        månedsinntekt = inntektsperiode.månedsinntekt,
         forventetInntekt = inntektsperiode.inntekt,
         samordningsfradrag = inntektsperiode.samordningsfradrag,
         årMånedFra = inntektsperiode.periode.fom,
