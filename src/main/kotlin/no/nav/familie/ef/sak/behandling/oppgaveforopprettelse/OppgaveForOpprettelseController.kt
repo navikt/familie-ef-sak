@@ -22,7 +22,7 @@ class OppgaveForOpprettelseController(private val oppgaverForOpprettelseService:
             OppgaverForOpprettelseDto(
                 oppgavetyperSomKanOpprettes = oppgavetyperSomKanOpprettes,
                 oppgavetyperSomSkalOpprettes = lagretFremleggsoppgave?.oppgavetyper
-                    ?: oppgaverForOpprettelseService.initialVerdierForOppgaverSomSkalOpprettes(),
+                    ?: oppgaverForOpprettelseService.initialVerdierForOppgaverSomSkalOpprettes(behandlingid),
             ),
         )
     }

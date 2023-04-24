@@ -22,7 +22,10 @@ class OppgaverForOpprettelseService(
 
     @Transactional
     fun opprettEllerErstatt(behandlingId: UUID, nyeOppgaver: List<OppgaveForOpprettelseType>) {
-        val oppgavetyperSomKanOpprettes = hentOppgavetyperSomKanOpprettes(behandlingId).intersect(nyeOppgaver)
+        val oppgavetyperSomKanOpprettes = hentOppgavetyperSomKanOpprettes(behandlingId)
+        feilHvisIkke(oppgavetyperSomKanOpprettes.containsAll(nyeOppgaver)) {
+            "behandlingId=$behandlingId prøver å opprette $nyeOppgaver $oppgavetyperSomKanOpprettes"
+        }
         if (oppgavetyperSomKanOpprettes.isNotEmpty()) {
             when (this.oppgaverForOpprettelseRepository.existsById(behandlingId)) {
                 true -> this.oppgaverForOpprettelseRepository.update(OppgaverForOpprettelse(behandlingId, nyeOppgaver))
@@ -43,7 +46,7 @@ class OppgaverForOpprettelseService(
         return if (kanOppretteInntektskontroll) listOf(OppgaveForOpprettelseType.INNTEKTSKONTROLL_1_ÅR_FREM_I_TID) else emptyList()
     }
 
-    fun initialVerdierForOppgaverSomSkalOpprettes() = OppgaveForOpprettelseType.values().toList()
+    fun initialVerdierForOppgaverSomSkalOpprettes(behandlingId: UUID) = hentOppgavetyperSomKanOpprettes(behandlingId)
 
     private fun kanOppretteOppgaveForInntektskontrollFremITid(
         behandling: Behandling,
