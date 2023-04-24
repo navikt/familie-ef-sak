@@ -334,6 +334,8 @@ object VedtakDomeneParser {
                 acc.add(
                     Inntektsperiode(
                         periode = Månedsperiode(datoFra, LocalDate.MAX),
+                        dagsats = BigDecimal(parseValgfriInt(VedtakDomenebegrep.DAGSATS, rad) ?: 0),
+                        månedsinntekt = BigDecimal(parseValgfriInt(VedtakDomenebegrep.MÅNEDSINNTEKT, rad) ?: 0),
                         inntekt = BigDecimal(parseValgfriInt(VedtakDomenebegrep.INNTEKT, rad) ?: 0),
                         samordningsfradrag = BigDecimal(
                             parseValgfriInt(VedtakDomenebegrep.SAMORDNINGSFRADRAG, rad) ?: 0,
@@ -477,6 +479,8 @@ enum class VedtakDomenebegrep(val nøkkel: String) : Domenenøkkel {
     RESULTAT_TYPE("Vedtaksresultat"),
     TILKJENT_YTELSE_ID("Tilkjent ytelse Id"),
     PERSONIDENT("Personnummer"),
+    DAGSATS("Dagsats"),
+    MÅNEDSINNTEKT("Månedsinntekt"),
     INNTEKT("Inntekt"),
     INNTEKTSREDUKSJON("Inntektsreduksjon"),
     SAMORDNINGSFRADRAG("Samordningsfradrag"),

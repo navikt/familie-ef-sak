@@ -65,13 +65,16 @@ class AdresseMapper(private val kodeverkService: KodeverkService) {
 
     private fun tilFormatertAdresse(bostedsadresse: Bostedsadresse, gjeldendeDato: LocalDate): String? {
         val (_, _, _, coAdressenavn, utenlandskAdresse, vegadresse, ukjentBosted, matrikkeladresse, _) = bostedsadresse
+        val coAdresse = coAdresse(coAdressenavn)
         val formattertAdresse: String? = when {
             vegadresse != null -> tilFormatertAdresse(vegadresse, gjeldendeDato)
             matrikkeladresse != null -> tilFormatertAdresse(matrikkeladresse, gjeldendeDato)
             utenlandskAdresse != null -> tilFormatertAdresse(utenlandskAdresse, gjeldendeDato)
-            else -> ukjentBosted?.bostedskommune
+            ukjentBosted != null -> "Ukjent bosted - ${ukjentBosted.bostedskommune}"
+            coAdresse != null -> ""
+            else -> "Ingen opplysninger tilgjenglig"
         }
-        return join(coAdresse(coAdressenavn), formattertAdresse)
+        return join(coAdresse, formattertAdresse)
     }
 
     private fun tilFormatertAdresse(oppholdsadresse: Oppholdsadresse, gjeldendeDato: LocalDate): String? {

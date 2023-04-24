@@ -261,7 +261,7 @@ class NyeBarnServiceTest {
     }
 
     @Nested
-    inner class finnNyeBarnSidenGjeldendeBehandlingForFagsak {
+    inner class FinnNyeBarnSidenGjeldendeBehandlingForFagsak {
 
         @Test
         internal fun `har ikke barn fra før, og har ikke noen nye barn`() {

@@ -3,6 +3,7 @@ package no.nav.familie.ef.sak.journalføring
 import io.mockk.every
 import io.mockk.justRun
 import io.mockk.mockk
+import io.mockk.slot
 import io.mockk.verify
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
@@ -21,6 +22,9 @@ import no.nav.familie.kontrakter.felles.journalpost.Journalstatus
 import no.nav.familie.kontrakter.felles.journalpost.RelevantDato
 import no.nav.familie.kontrakter.felles.klage.BehandlingStatus
 import no.nav.familie.kontrakter.felles.klage.KlagebehandlingDto
+import no.nav.familie.prosessering.domene.Task
+import no.nav.familie.prosessering.internal.TaskService
+import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -36,8 +40,9 @@ internal class JournalføringKlageServiceTest {
     private val oppgaveService = mockk<OppgaveService>()
     private val fagsakService = mockk<FagsakService>()
     private val journalpostService = mockk<JournalpostService>()
+    private val taskService = mockk<TaskService>()
 
-    private val service = JournalføringKlageService(fagsakService, oppgaveService, journalpostService, klageService)
+    private val service = JournalføringKlageService(fagsakService, oppgaveService, journalpostService, klageService, taskService)
 
     private val fagsak = fagsak()
     private val fagsakId = fagsak.id
@@ -63,7 +68,7 @@ internal class JournalføringKlageServiceTest {
         every { klageService.hentBehandlinger(fagsak.fagsakPersonId) } returns
             KlagebehandlingerDto(listOf(klagebehandling), emptyList(), emptyList())
 
-        justRun { klageService.opprettKlage(any<Fagsak>(), any()) }
+        justRun { klageService.opprettKlage(any<Fagsak>(), any(), any()) }
         justRun { journalpostService.oppdaterOgFerdigstillJournalpost(any(), any(), any(), any(), any()) }
         justRun { oppgaveService.ferdigstillOppgave(any()) }
         mockBrukerContext()
@@ -108,6 +113,26 @@ internal class JournalføringKlageServiceTest {
         }
 
         @Test
+        internal fun `skal opprette task for å oppdatere behandlingstema om klage gjelder tilbakekreving`() {
+            val oppdaterTask = Task(
+                type = OppdaterOppgaveTilÅGjeldeTilbakekrevingTask.TYPE,
+                payload = UUID.randomUUID().toString(),
+            )
+
+            val taskSlot = slot<Task>()
+            every { taskService.save(capture(taskSlot)) } returns oppdaterTask
+
+            service.fullførJournalpost(
+                lagRequest(JournalføringKlageBehandling(behandlingId = klagebehandling.id), klageGjelderTilbakekreving = true),
+                journalpostId,
+            )
+
+            verifyKall(opprettKlageKall = 0, oppdaterOppgaveKall = 1)
+            assertThat(taskSlot.captured.type).isEqualTo(OppdaterOppgaveTilÅGjeldeTilbakekrevingTask.TYPE)
+            assertThat(taskSlot.captured.payload).isEqualTo(klagebehandling.id.toString())
+        }
+
+        @Test
         internal fun `feiler hvis klagebehandlinger ikke inneholder behandlingId som blir sendt inn`() {
             assertThatThrownBy {
                 service.fullførJournalpost(
@@ -118,14 +143,15 @@ internal class JournalføringKlageServiceTest {
         }
     }
 
-    private fun verifyKall(opprettKlageKall: Int = 1) {
-        verify(exactly = opprettKlageKall) { klageService.opprettKlage(any<Fagsak>(), any()) }
+    private fun verifyKall(opprettKlageKall: Int = 1, oppdaterOppgaveKall: Int = 0) {
+        verify(exactly = opprettKlageKall) { klageService.opprettKlage(any<Fagsak>(), any(), any()) }
         verify { journalpostService.oppdaterOgFerdigstillJournalpost(any(), any(), any(), any(), any()) }
         verify { oppgaveService.ferdigstillOppgave(any()) }
+        verify(exactly = oppdaterOppgaveKall) { taskService.save(any()) }
     }
 
-    private fun lagRequest(behandling: JournalføringKlageBehandling) =
-        JournalføringKlageRequest(emptyMap(), fagsakId, oppgaveId, behandling, "enhet")
+    private fun lagRequest(behandling: JournalføringKlageBehandling, klageGjelderTilbakekreving: Boolean = false) =
+        JournalføringKlageRequest(emptyMap(), fagsakId, oppgaveId, behandling, "enhet", klageGjelderTilbakekreving)
 
     fun lagjournalpost(mottattDato: LocalDate? = null) =
         Journalpost(

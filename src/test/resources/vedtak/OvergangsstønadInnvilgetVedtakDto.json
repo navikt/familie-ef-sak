@@ -13,6 +13,8 @@
   "inntekter": [
     {
       "årMånedFra": "2021-01",
+      "dagsats": 0,
+      "månedsinntekt": 0,
       "forventetInntekt": 100000,
       "samordningsfradrag": 500
     }

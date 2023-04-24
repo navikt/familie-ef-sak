@@ -37,9 +37,9 @@ class ValiderOmregningServiceTest {
 
     val vedtakService = mockk<VedtakService>()
     val tilkjentYtelseRepository = mockk<TilkjentYtelseRepository>()
-    val beregningService = BeregningService()
-    val vedtakHistorikkService = mockk<VedtakHistorikkService>()
     val featureToggleService = mockFeatureToggleService()
+    val beregningService = BeregningService(featureToggleService)
+    val vedtakHistorikkService = mockk<VedtakHistorikkService>()
     val validerOmregningService = ValiderOmregningService(
         vedtakService,
         tilkjentYtelseRepository,
@@ -89,7 +89,7 @@ class ValiderOmregningServiceTest {
     }
 
     @Nested
-    inner class validerHarSammePerioderSomTidligereVedtak {
+    inner class ValiderHarSammePerioderSomTidligereVedtak {
 
         private val år = nyesteGrunnbeløpGyldigFraOgMed.year
 

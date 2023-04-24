@@ -270,11 +270,11 @@ class InfotrygdPeriodeValideringService(
                     it.type != InfotrygdSakType.ANKE
             }
             .find { it.resultat == InfotrygdSakResultat.ÅPEN_SAK }?.let {
-            throw MigreringException(
-                "Har åpen sak. ${lagSakFeilinfo(it)}",
-                MigreringExceptionType.ÅPEN_SAK,
-            )
-        }
+                throw MigreringException(
+                    "Har åpen sak. ${lagSakFeilinfo(it)}",
+                    MigreringExceptionType.ÅPEN_SAK,
+                )
+            }
     }
 
     private fun lagSakFeilinfo(sak: InfotrygdSak): String {

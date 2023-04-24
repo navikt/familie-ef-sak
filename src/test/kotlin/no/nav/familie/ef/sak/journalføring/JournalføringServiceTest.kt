@@ -345,7 +345,7 @@ internal class JournalføringServiceTest {
     }
 
     @Nested
-    inner class validerJournalføringNyBehandling {
+    inner class ValiderJournalføringNyBehandling {
 
         @Test
         internal fun `strukturert søknad - kan ikke sende inn dokumentasjonstype`() {
