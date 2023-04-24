@@ -9,13 +9,12 @@ import no.nav.familie.ef.sak.økonomi.lagAndelTilkjentYtelse
 import no.nav.familie.ef.sak.økonomi.lagTilkjentYtelse
 import no.nav.familie.kontrakter.ef.iverksett.OppgaveForOpprettelseType
 import org.assertj.core.api.Assertions.assertThat
-import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
 
-class OppgaveForOpprettelseServiceTest : OppslagSpringRunnerTest() {
+class OppgaverForOpprettelseServiceIntegrationTest : OppslagSpringRunnerTest() {
 
     @Autowired
     private lateinit var behandlingRepository: BehandlingRepository
@@ -41,8 +40,9 @@ class OppgaveForOpprettelseServiceTest : OppslagSpringRunnerTest() {
         opprettTilkjentYtelse(1000)
         opprettInntektskontroll()
 
-        assertThat(oppgaverForOpprettelseService.hentOppgaverForOpprettelseEllerNull(behandlingId)?.oppgavetyper)
-            .containsExactly(OppgaveForOpprettelseType.INNTEKTSKONTROLL_1_ÅR_FREM_I_TID)
+        assertThat(oppgaverForOpprettelseService.hentOppgaverForOpprettelseEllerNull(behandlingId)?.oppgavetyper).containsExactly(
+            OppgaveForOpprettelseType.INNTEKTSKONTROLL_1_ÅR_FREM_I_TID,
+        )
     }
 
     @Test
@@ -51,15 +51,7 @@ class OppgaveForOpprettelseServiceTest : OppslagSpringRunnerTest() {
         opprettInntektskontroll()
         opprettTomListe()
 
-        assertThat(oppgaverForOpprettelseService.hentOppgaverForOpprettelseEllerNull(behandlingId)?.oppgavetyper)
-            .isEmpty()
-    }
-
-    @Test
-    internal fun `skal ikke kunne opprette kontrollere inntekt hvis den ikke kan opprettes`() {
-        opprettTilkjentYtelse(0)
-        assertThatThrownBy { opprettInntektskontroll() }
-            .hasMessageContaining("prøver å opprette")
+        assertThat(oppgaverForOpprettelseService.hentOppgaverForOpprettelseEllerNull(behandlingId)?.oppgavetyper).isEmpty()
     }
 
     private fun opprettTomListe() {

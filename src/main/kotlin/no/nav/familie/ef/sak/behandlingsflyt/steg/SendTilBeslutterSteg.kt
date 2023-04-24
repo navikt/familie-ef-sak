@@ -114,7 +114,7 @@ class SendTilBeslutterSteg(
         if (data != null) {
             oppgaverForOpprettelseService.opprettEllerErstatt(
                 saksbehandling.id,
-                data.oppgavetyperSomSkalOpprettes
+                data.oppgavetyperSomSkalOpprettes,
             )
         }
     }
