@@ -29,14 +29,10 @@ class OppgaverForOpprettelseService(
             }
         }
         with(oppgaverForOpprettelseRepository) {
-            if (existsById(behandlingId)) {
-                if (oppgavetyperSomKanOpprettes.isEmpty()) {
-                    deleteById(behandlingId)
-                } else {
-                    update(OppgaverForOpprettelse(behandlingId, nyeOppgaver))
-                }
-            } else {
-                insert(OppgaverForOpprettelse(behandlingId, nyeOppgaver))
+            when {
+                existsById(behandlingId) && oppgavetyperSomKanOpprettes.isEmpty() -> deleteById(behandlingId)
+                existsById(behandlingId) -> update(OppgaverForOpprettelse(behandlingId, nyeOppgaver))
+                else -> insert(OppgaverForOpprettelse(behandlingId, nyeOppgaver))
             }
         }
     }
