@@ -46,6 +46,8 @@ class OppgaverForOpprettelseService(
         return if (kanOppretteInntektskontroll) listOf(OppgaveForOpprettelseType.INNTEKTSKONTROLL_1_ÅR_FREM_I_TID) else emptyList()
     }
 
+    fun initialVerdierForOppgaverSomSkalOpprettes() = OppgaveForOpprettelseType.values().toList()
+
     private fun kanOppretteOppgaveForInntektskontrollFremITid(
         behandling: Behandling,
         tilkjentYtelse: TilkjentYtelse?,

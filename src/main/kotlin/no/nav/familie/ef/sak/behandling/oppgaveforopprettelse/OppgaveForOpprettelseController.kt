@@ -21,7 +21,8 @@ class OppgaveForOpprettelseController(private val oppgaverForOpprettelseService:
         return Ressurs.success(
             OppgaverForOpprettelseDto(
                 oppgavetyperSomKanOpprettes = oppgavetyperSomKanOpprettes,
-                oppgavetyperSomSkalOpprettes = lagretFremleggsoppgave?.oppgavetyper ?: oppgavetyperSomKanOpprettes,
+                oppgavetyperSomSkalOpprettes = lagretFremleggsoppgave?.oppgavetyper
+                    ?: oppgaverForOpprettelseService.initialVerdierForOppgaverSomSkalOpprettes(),
             ),
         )
     }
