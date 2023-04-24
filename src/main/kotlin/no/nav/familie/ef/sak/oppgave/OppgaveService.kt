@@ -133,7 +133,7 @@ class OppgaveService(
             val mapper = finnMapper(enhetsnummer)
             val mappeIdForGodkjenneVedtak = mapper.find {
                 (it.navn.contains("70 Godkjennevedtak") || it.navn.contains("70 Godkjenne vedtak")) &&
-                    !it.navn.contains("EF Sak")
+                        !it.navn.contains("EF Sak")
             }?.id?.toLong()
             mappeIdForGodkjenneVedtak?.let {
                 logger.info("Legger oppgave i Godkjenne vedtak-mappe")
@@ -239,8 +239,10 @@ class OppgaveService(
         } else {
             ""
         } +
-            "----- Opprettet av familie-ef-sak ${LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME)} --- \n" +
-            "$frontendOppgaveUrl" + "\n----- Oppgave må behandles i ny løsning"
+                "----- Opprettet av familie-ef-sak ${
+                    LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME)
+                } --- \n" +
+                "$frontendOppgaveUrl" + "\n----- Oppgave må behandles i ny løsning"
     }
 
     fun hentOppgaver(finnOppgaveRequest: FinnOppgaveRequest): FinnOppgaveResponseDto {
@@ -291,7 +293,7 @@ class OppgaveService(
             if (mappeRespons.antallTreffTotalt > mappeRespons.mapper.size) {
                 logger.error(
                     "Det finnes flere mapper (${mappeRespons.antallTreffTotalt}) " +
-                        "enn vi har hentet ut (${mappeRespons.mapper.size}). Sjekk limit. ",
+                            "enn vi har hentet ut (${mappeRespons.mapper.size}). Sjekk limit. ",
                 )
             }
             mappeRespons.mapper
@@ -307,12 +309,31 @@ class OppgaveService(
     }
 
     fun finnFagsakerSomManglerOppgave(fagsakEksternId: List<String>): List<String> {
-        val oppgaveTyper = listOf(Oppgavetype.BehandleSak, Oppgavetype.BehandleUderkjentVedtak, Oppgavetype.GodkjenneVedtak).map { it.toString() }
+        val oppgaveTyper =
+            listOf(Oppgavetype.BehandleSak, Oppgavetype.BehandleUderkjentVedtak, Oppgavetype.GodkjenneVedtak)
 
-        val alleOppgaver =
-            oppgaveClient.hentOppgaver(finnOppgaveRequest = FinnOppgaveRequest(tema = Tema.ENF, oppgavetype = Oppgavetype.BehandleSak)).oppgaver.filter {
-                oppgaveTyper.contains(it.behandlingstype)
-            }
-        return fagsakEksternId.filterNot { externId -> alleOppgaver.any { externId == it.saksreferanse } }
+        val limit: Long = 1000
+        val alleOppgaver = mutableListOf<FinnOppgaveResponseDto>()
+
+        oppgaveTyper.forEach {
+            alleOppgaver.addAll(
+                listOf(
+                    oppgaveClient.hentOppgaver(
+                        finnOppgaveRequest = FinnOppgaveRequest(
+                            tema = Tema.ENF,
+                            oppgavetype = it,
+                            limit = limit
+                        )
+                    )
+                )
+            )
+        }
+
+        if (alleOppgaver.any { it.antallTreffTotalt >= limit }) {
+            error("For mange oppgaver, kan ikke sjekke mot behandlinger som mangler oppgave. ")
+        }
+
+        val oppgaveSaksreferanser :List<String>  = alleOppgaver.flatMap { it.oppgaver.mapNotNull { oppgave -> oppgave.saksreferanse } }
+        return fagsakEksternId.filterNot{ oppgaveSaksreferanser.contains(it)  }
     }
 }
