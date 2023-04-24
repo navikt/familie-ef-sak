@@ -26,12 +26,12 @@ class OppgaverForOpprettelseService(
         feilHvisIkke(oppgavetyperSomKanOpprettes.containsAll(nyeOppgaver)) {
             "behandlingId=$behandlingId prøver å opprette $nyeOppgaver $oppgavetyperSomKanOpprettes"
         }
-        if (oppgavetyperSomKanOpprettes.isNotEmpty()) {
-            when (this.oppgaverForOpprettelseRepository.existsById(behandlingId)) {
-                true -> this.oppgaverForOpprettelseRepository.update(OppgaverForOpprettelse(behandlingId, nyeOppgaver))
-                false -> this.oppgaverForOpprettelseRepository.insert(OppgaverForOpprettelse(behandlingId, nyeOppgaver))
-            }
+        when (this.oppgaverForOpprettelseRepository.existsById(behandlingId)) {
+            nyeOppgaver.isEmpty() -> oppgaverForOpprettelseRepository.deleteById(behandlingId)
+            true -> this.oppgaverForOpprettelseRepository.update(OppgaverForOpprettelse(behandlingId, nyeOppgaver))
+            false -> this.oppgaverForOpprettelseRepository.insert(OppgaverForOpprettelse(behandlingId, nyeOppgaver))
         }
+
     }
 
     fun hentOppgaverForOpprettelseEllerNull(behandlingId: UUID): OppgaverForOpprettelse? {
