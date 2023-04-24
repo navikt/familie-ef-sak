@@ -23,18 +23,20 @@ class OppgaverForOpprettelseService(
     @Transactional
     fun opprettEllerErstatt(behandlingId: UUID, nyeOppgaver: List<OppgaveForOpprettelseType>) {
         val oppgavetyperSomKanOpprettes = hentOppgavetyperSomKanOpprettes(behandlingId)
+        if (oppgavetyperSomKanOpprettes.isNotEmpty()) {
+            feilHvisIkke(oppgavetyperSomKanOpprettes.containsAll(nyeOppgaver)) {
+                "behandlingId=$behandlingId prøver å opprette $nyeOppgaver $oppgavetyperSomKanOpprettes"
+            }
+        }
         with(oppgaverForOpprettelseRepository) {
-            if (existsById(behandlingId) && oppgavetyperSomKanOpprettes.isEmpty()) {
-                deleteById(behandlingId)
-            } else {
-                feilHvisIkke(oppgavetyperSomKanOpprettes.containsAll(nyeOppgaver)) {
-                    "behandlingId=$behandlingId prøver å opprette $nyeOppgaver $oppgavetyperSomKanOpprettes"
-                }
-                if (existsById(behandlingId)) {
-                    update(OppgaverForOpprettelse(behandlingId, nyeOppgaver))
+            if (existsById(behandlingId)) {
+                if (oppgavetyperSomKanOpprettes.isEmpty()) {
+                    deleteById(behandlingId)
                 } else {
-                    insert(OppgaverForOpprettelse(behandlingId, nyeOppgaver))
+                    update(OppgaverForOpprettelse(behandlingId, nyeOppgaver))
                 }
+            } else {
+                insert(OppgaverForOpprettelse(behandlingId, nyeOppgaver))
             }
         }
     }
