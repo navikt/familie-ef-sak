@@ -30,7 +30,7 @@ internal class EksternBehandlingServiceTest : OppslagSpringRunnerTest() {
     lateinit var vilkårsvurderingRepository: VilkårsvurderingRepository
 
     @Nested
-    inner class opprettRevurderingKlage {
+    inner class OpprettRevurderingKlage {
 
         @Test
         internal fun `kan opprette revurdering hvis det finnes en ferdigstilt behandling`() {
@@ -95,7 +95,7 @@ internal class EksternBehandlingServiceTest : OppslagSpringRunnerTest() {
     }
 
     @Nested
-    inner class kanOppretteRevurdering {
+    inner class KanOppretteRevurdering {
 
         @Test
         internal fun `kan opprette revurdering hvis det finnes en ferdigstilt behandling`() {

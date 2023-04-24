@@ -89,7 +89,7 @@ class ValiderOmregningServiceTest {
     }
 
     @Nested
-    inner class validerHarSammePerioderSomTidligereVedtak {
+    inner class ValiderHarSammePerioderSomTidligereVedtak {
 
         private val år = nyesteGrunnbeløpGyldigFraOgMed.year
 
