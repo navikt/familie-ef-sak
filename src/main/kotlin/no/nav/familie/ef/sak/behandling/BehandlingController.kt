@@ -67,6 +67,7 @@ class BehandlingController(
 
         val fagsakerMedÅpenBehandlingSomManglerOppgaveAvType: List<String> = oppgaveService.finnFagsakerSomManglerOppgave(eksternFagsakIds)
 
+        logger.info("Fagsak med åpen behandling uten oppgave antall ${fagsakerMedÅpenBehandlingSomManglerOppgaveAvType.size}")
         fagsakerMedÅpenBehandlingSomManglerOppgaveAvType.forEach {
             logger.info("Fagsak med åpen behandling uten oppgave: $it")
         }
