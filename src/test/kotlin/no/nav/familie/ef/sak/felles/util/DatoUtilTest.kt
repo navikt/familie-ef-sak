@@ -13,7 +13,7 @@ import java.time.YearMonth
 internal class DatoUtilTest {
 
     @Nested
-    inner class datoEllerIdag {
+    inner class DatoEllerIdag {
 
         @Test
         internal fun `Hvis localDate er null skal den returnere dagens dato`() {
@@ -50,7 +50,7 @@ internal class DatoUtilTest {
     }
 
     @Nested
-    inner class erPåfølgende {
+    inner class ErPåfølgende {
 
         @Test
         internal fun `er påfølgende måned`() {
@@ -169,7 +169,7 @@ internal class DatoUtilTest {
     }
 
     @Nested
-    inner class harGåttAntallTimer {
+    inner class HarGåttAntallTimer {
 
         @Test
         internal fun `sjekker har gått mer enn X timer`() {

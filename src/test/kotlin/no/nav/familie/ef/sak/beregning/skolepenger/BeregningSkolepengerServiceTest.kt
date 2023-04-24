@@ -306,7 +306,7 @@ internal class BeregningSkolepengerServiceTest {
     }
 
     @Nested
-    inner class Opphør_ValiderFinnesEndringer {
+    inner class OpphørValiderFinnesEndringer {
 
         @Test
         internal fun `ingen endringer kaster feil`() {
@@ -391,7 +391,7 @@ internal class BeregningSkolepengerServiceTest {
     }
 
     @Nested
-    inner class Opphør_validerIngenNyePerioderFinnes {
+    inner class OpphørValiderIngenNyePerioderFinnes {
 
         @Test
         internal fun `skal oppdage en ny skoleårsperioder`() {

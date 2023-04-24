@@ -113,12 +113,14 @@ class VedtakHistorikkService(
         return historikk
             .filter { it.periodeType != VedtaksperiodeType.SANKSJON }
             .slåSammen { a, b ->
-                (a.vedtaksperiode is VedtakshistorikkperiodeOvergangsstønad &&
-                    b.vedtaksperiode is VedtakshistorikkperiodeOvergangsstønad &&
-                    a.vedtaksperiode.inntekt.dagsats nullOrEquals b.vedtaksperiode.inntekt.dagsats &&
-                    a.vedtaksperiode.inntekt.månedsinntekt nullOrEquals b.vedtaksperiode.inntekt.månedsinntekt &&
-                    a.vedtaksperiode.inntekt.forventetInntekt nullOrEquals b.vedtaksperiode.inntekt.forventetInntekt &&
-                    a.vedtaksperiode.inntekt.samordningsfradrag nullOrEquals b.vedtaksperiode.inntekt.samordningsfradrag)
+                (
+                    a.vedtaksperiode is VedtakshistorikkperiodeOvergangsstønad &&
+                        b.vedtaksperiode is VedtakshistorikkperiodeOvergangsstønad &&
+                        a.vedtaksperiode.inntekt.dagsats nullOrEquals b.vedtaksperiode.inntekt.dagsats &&
+                        a.vedtaksperiode.inntekt.månedsinntekt nullOrEquals b.vedtaksperiode.inntekt.månedsinntekt &&
+                        a.vedtaksperiode.inntekt.forventetInntekt nullOrEquals b.vedtaksperiode.inntekt.forventetInntekt &&
+                        a.vedtaksperiode.inntekt.samordningsfradrag nullOrEquals b.vedtaksperiode.inntekt.samordningsfradrag
+                    )
             }
             .fraDato(fra)
             .mapNotNull {

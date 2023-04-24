@@ -25,7 +25,7 @@ class OppdaterOppgaveTilÅGjeldeTilbakekrevingTask(private val klageClient: Klag
         fun opprettTask(behandlingId: UUID): Task {
             return Task(
                 type = TYPE,
-                payload = behandlingId.toString()
+                payload = behandlingId.toString(),
             )
         }
 

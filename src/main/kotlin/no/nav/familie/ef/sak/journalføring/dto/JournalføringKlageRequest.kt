@@ -9,7 +9,7 @@ data class JournalføringKlageRequest(
     val oppgaveId: String,
     val behandling: JournalføringKlageBehandling,
     val journalførendeEnhet: String,
-    val klageGjelderTilbakekreving: Boolean = false
+    val klageGjelderTilbakekreving: Boolean = false,
 )
 
 data class JournalføringKlageBehandling(
