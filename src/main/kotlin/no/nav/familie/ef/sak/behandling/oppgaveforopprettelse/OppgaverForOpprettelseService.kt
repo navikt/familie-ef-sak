@@ -31,6 +31,7 @@ class OppgaverForOpprettelseService(
         with(oppgaverForOpprettelseRepository) {
             when {
                 existsById(behandlingId) && oppgavetyperSomKanOpprettes.isEmpty() -> deleteById(behandlingId)
+                oppgavetyperSomKanOpprettes.isEmpty() -> return
                 existsById(behandlingId) -> update(OppgaverForOpprettelse(behandlingId, nyeOppgaver))
                 else -> insert(OppgaverForOpprettelse(behandlingId, nyeOppgaver))
             }
