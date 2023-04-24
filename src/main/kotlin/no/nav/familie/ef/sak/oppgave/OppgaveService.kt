@@ -2,8 +2,10 @@ package no.nav.familie.ef.sak.oppgave
 
 import no.nav.familie.ef.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ef.sak.behandling.Saksbehandling
+import no.nav.familie.ef.sak.behandling.dto.VurderHenvendelseOppgavetype
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.infrastruktur.config.getValue
+import no.nav.familie.ef.sak.iverksett.oppgaveforbarn.OppgaveBeskrivelse
 import no.nav.familie.ef.sak.oppgave.OppgaveUtil.ENHET_NR_NAY
 import no.nav.familie.http.client.RessursException
 import no.nav.familie.kontrakter.felles.Behandlingstema
@@ -88,17 +90,10 @@ class OppgaveService(
         tilordnetNavIdent: String?,
         mappeId: Long? = null, // Dersom denne er satt vil vi ikke prøve å finne mappe basert på oppgavens innhold
     ): Long {
-        val settBehandlesAvApplikasjon = when (oppgavetype) {
-            Oppgavetype.BehandleSak,
-            Oppgavetype.BehandleUnderkjentVedtak,
-            Oppgavetype.GodkjenneVedtak,
-            -> true
-            Oppgavetype.InnhentDokumentasjon -> false
-            else -> error("Håndterer ikke behandlesAvApplikasjon for $oppgavetype")
-        }
+        val settBehandlesAvApplikasjon = utledSettBehandlesAvApplikasjon(oppgavetype)
         val fagsak = fagsakService.hentFagsakForBehandling(behandlingId)
         val personIdent = fagsak.hentAktivIdent()
-        val enhetsnummer = arbeidsfordelingService.hentNavEnhet(personIdent)?.enhetId
+        val enhetsnummer = arbeidsfordelingService.hentNavEnhetId(personIdent, oppgavetype)
         val opprettOppgave = OpprettOppgaveRequest(
             ident = OppgaveIdentV2(ident = personIdent, gruppe = IdentGruppe.FOLKEREGISTERIDENT),
             saksId = fagsak.eksternId.id.toString(),
@@ -294,11 +289,28 @@ class OppgaveService(
         }
     }
 
+    fun lagOppgavebeskrivelse(oppgavetype: VurderHenvendelseOppgavetype) =
+        when (oppgavetype) {
+            VurderHenvendelseOppgavetype.INFORMERE_OM_SØKT_OVERGANGSSTØNAD -> OppgaveBeskrivelse.informereLokalkontorOmOvergangsstønad
+            VurderHenvendelseOppgavetype.INNSTILLING_VEDRØRENDE_UTDANNING -> OppgaveBeskrivelse.innstillingOmBrukersUtdanning
+
+        }
+
     private fun fristBasertPåKlokkeslett(gjeldendeTid: LocalDateTime): LocalDate {
         return if (gjeldendeTid.hour >= 12) {
             return gjeldendeTid.plusDays(2).toLocalDate()
         } else {
             gjeldendeTid.plusDays(1).toLocalDate()
         }
+    }
+
+    private fun utledSettBehandlesAvApplikasjon(oppgavetype: Oppgavetype) = when (oppgavetype) {
+        Oppgavetype.BehandleSak,
+        Oppgavetype.BehandleUnderkjentVedtak,
+        Oppgavetype.GodkjenneVedtak,
+        -> true
+        Oppgavetype.InnhentDokumentasjon -> false
+        Oppgavetype.VurderHenvendelse -> false
+        else -> error("Håndterer ikke behandlesAvApplikasjon for $oppgavetype")
     }
 }

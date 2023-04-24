@@ -9,10 +9,12 @@ import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.http.client.AbstractPingableRestClient
 import no.nav.familie.kontrakter.felles.PersonIdent
 import no.nav.familie.kontrakter.felles.Ressurs
+import no.nav.familie.kontrakter.felles.arbeidsfordeling.Enhet
 import no.nav.familie.kontrakter.felles.getDataOrThrow
 import no.nav.familie.kontrakter.felles.medlemskap.Medlemskapsinfo
 import no.nav.familie.kontrakter.felles.navkontor.NavKontorEnhet
 import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING
+import no.nav.familie.kontrakter.felles.personopplysning.Ident
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.http.HttpHeaders
 import org.springframework.stereotype.Component
@@ -66,6 +68,12 @@ class PersonopplysningerIntegrasjonerClient(
                 it.set(HEADER_NAV_TEMA, HEADER_NAV_TEMA_ENF)
             },
         ).getDataOrThrow()
+    }
+
+    fun hentBehandlendeEnhetForOppfølging(personident: String): Enhet? {
+        val response =
+            postForEntity<Ressurs<List<Enhet>>>(integrasjonerConfig.arbeidsfordelingOppfølgingUri, Ident(personident))
+        return response.getDataOrThrow().firstOrNull()
     }
 
     private fun hentArbeidsfordelingEnhet(

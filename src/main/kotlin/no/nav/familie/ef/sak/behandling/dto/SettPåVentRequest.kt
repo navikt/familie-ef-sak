@@ -10,4 +10,10 @@ data class SettPåVentRequest(
     val mappe: Long?,
     val beskrivelse: String,
     val oppgaveVersjon: Int,
+    val oppfølgingsoppgaverMotLokalKontor: List<VurderHenvendelseOppgavetype>,
 )
+
+enum class VurderHenvendelseOppgavetype {
+    INFORMERE_OM_SØKT_OVERGANGSSTØNAD,
+    INNSTILLING_VEDRØRENDE_UTDANNING
+}

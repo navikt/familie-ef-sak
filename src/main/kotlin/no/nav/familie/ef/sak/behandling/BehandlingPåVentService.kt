@@ -3,10 +3,12 @@ package no.nav.familie.ef.sak.behandling
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus.SATT_PÅ_VENT
+import no.nav.familie.ef.sak.behandling.dto.VurderHenvendelseOppgavetype
 import no.nav.familie.ef.sak.behandling.dto.SettPåVentRequest
 import no.nav.familie.ef.sak.behandling.dto.TaAvVentStatus
 import no.nav.familie.ef.sak.behandling.dto.TaAvVentStatusDto
 import no.nav.familie.ef.sak.behandlingsflyt.task.BehandlingsstatistikkTask
+import no.nav.familie.ef.sak.behandlingsflyt.task.OpprettOppgaveTask
 import no.nav.familie.ef.sak.behandlingshistorikk.BehandlingshistorikkService
 import no.nav.familie.ef.sak.behandlingshistorikk.domain.StegUtfall
 import no.nav.familie.ef.sak.felles.util.dagensDatoMedTidNorskFormat
@@ -19,7 +21,9 @@ import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.ef.sak.vedtak.NullstillVedtakService
+import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.kontrakter.felles.oppgave.Oppgave
+import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.internal.TaskService
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
@@ -47,6 +51,10 @@ class BehandlingPåVentService(
 
         if (settPåVentRequest != null) {
             oppdaterVerdierPåOppgave(settPåVentRequest)
+
+            if (settPåVentRequest.oppfølgingsoppgaverMotLokalKontor.isNotEmpty()) {
+                opprettVurderHenvendelseOppgaveTasks(behandlingId, settPåVentRequest.oppfølgingsoppgaverMotLokalKontor)
+            }
         }
     }
 
@@ -66,6 +74,28 @@ class BehandlingPåVentService(
                 versjon = settPåVentRequest.oppgaveVersjon,
             ),
         )
+    }
+
+    private fun opprettVurderHenvendelseOppgaveTasks(
+        behandlingId: UUID,
+        vurderHenvendelseOppgaver: List<VurderHenvendelseOppgavetype>
+    ) {
+        val saksbehandling = behandlingService.hentSaksbehandling(behandlingId)
+
+        validerKanOppretteVurderHenvendelseOppgave(saksbehandling, vurderHenvendelseOppgaver)
+
+        vurderHenvendelseOppgaver.forEach {
+            val oppgaveBeskrivelse = oppgaveService.lagOppgavebeskrivelse(it)
+            taskService.save(
+                OpprettOppgaveTask.opprettTask(
+                    OpprettOppgaveTask.OpprettOppgaveTaskData(
+                        saksbehandling.id,
+                        Oppgavetype.VurderHenvendelse,
+                        beskrivelse = oppgaveBeskrivelse,
+                    )
+                )
+            )
+        }
     }
 
     private fun utledOppgavebeskrivelse(
@@ -187,6 +217,27 @@ class BehandlingPåVentService(
         }
     }
 
+    private fun validerKanOppretteVurderHenvendelseOppgave(
+        saksbehandling: Saksbehandling,
+        vurderHenvendelseOppgaver: List<VurderHenvendelseOppgavetype>,
+    ) {
+        if (vurderHenvendelseOppgaver.contains(VurderHenvendelseOppgavetype.INFORMERE_OM_SØKT_OVERGANGSSTØNAD)) {
+            brukerfeilHvis(saksbehandling.stønadstype != StønadType.OVERGANGSSTØNAD) {
+                "Kan ikke opprette vurder henvendelse oppgave på behandling med id ${saksbehandling.id} fordi behandlingen ikke er tilknyttet overgangsstønad"
+            }
+        }
+
+        if (vurderHenvendelseOppgaver.contains(VurderHenvendelseOppgavetype.INNSTILLING_VEDRØRENDE_UTDANNING)) {
+            brukerfeilHvis(saksbehandling.stønadstype != StønadType.OVERGANGSSTØNAD && saksbehandling.stønadstype != StønadType.SKOLEPENGER) {
+                "Kan ikke opprette vurder henvendelse oppgave på behandling med id ${saksbehandling.id} fordi behandlingen ikke er tilknyttet overgangsstønad eller skolepenger"
+            }
+        }
+
+        feilHvis(featureToggleService.isEnabled(Toggle.AUTOMATISKE_OPPGAVER_LOKALKONTOR)) {
+            "Featuretoggle for opprettelse av automatiske oppgaver til lokalkontor er ikke påskrudd"
+        }
+    }
+
     @Transactional
     fun taAvVent(behandlingId: UUID) {
         val behandling = behandlingService.hentBehandling(behandlingId)
@@ -200,6 +251,7 @@ class BehandlingPåVentService(
                     "Annen behandling må ferdigstilles før denne kan aktiveres på nytt",
                     HttpStatus.BAD_REQUEST,
                 )
+
             TaAvVentStatus.MÅ_NULSTILLE_VEDTAK -> {
                 val nyForrigeBehandlingId = kanTaAvVent.nyForrigeBehandlingId ?: error("Mangler nyForrigeBehandlingId")
                 behandlingService.oppdaterForrigeBehandlingId(behandlingId, nyForrigeBehandlingId)
