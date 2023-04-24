@@ -56,7 +56,7 @@ class BehandlingController(
     }
 
     @GetMapping("gamle-behandlinger-oppgavemangler")
-    fun hentGamleUferdigeBehandlingerUtenOppgave() {
+    fun hentGamleUferdigeBehandlingerUtenOppgave() :  Ressurs<List<String>> {
         val stønadstyper = listOf(StønadType.OVERGANGSSTØNAD, StønadType.SKOLEPENGER, StønadType.BARNETILSYN)
         val toUkerSiden = LocalDateTime.now().minusWeeks(2)
         val gamleBehandlinger = stønadstyper.flatMap { stønadstype ->
@@ -65,12 +65,13 @@ class BehandlingController(
 
         val eksternFagsakIds = gamleBehandlinger.map { fagsakService.hentFagsakForBehandling(it.id).eksternId.id.toString() }
 
-        val fagsakerMedÅpenBehandlingSomManglerOppgaveAvType: List<String> = oppgaveService.finnFagsakerSomManglerOppgave(eksternFagsakIds)
+        val fagsakerMedÅpenBehandlingSomManglerOppgave: List<String> = oppgaveService.finnFagsakerSomManglerOppgave(eksternFagsakIds)
 
-        logger.info("Fagsak med åpen behandling uten oppgave antall ${fagsakerMedÅpenBehandlingSomManglerOppgaveAvType.size}")
-        fagsakerMedÅpenBehandlingSomManglerOppgaveAvType.forEach {
+        logger.info("Fagsak med åpen behandling uten oppgave antall ${fagsakerMedÅpenBehandlingSomManglerOppgave.size}")
+        fagsakerMedÅpenBehandlingSomManglerOppgave.forEach {
             logger.info("Fagsak med åpen behandling uten oppgave: $it")
         }
+        return Ressurs.success(fagsakerMedÅpenBehandlingSomManglerOppgave)
     }
 
     @PostMapping("{behandlingId}/vent")
