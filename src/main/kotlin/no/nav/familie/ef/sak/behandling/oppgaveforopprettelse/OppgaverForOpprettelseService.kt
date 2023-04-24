@@ -22,10 +22,7 @@ class OppgaverForOpprettelseService(
 
     @Transactional
     fun opprettEllerErstatt(behandlingId: UUID, nyeOppgaver: List<OppgaveForOpprettelseType>) {
-        val oppgavetyperSomKanOpprettes = hentOppgavetyperSomKanOpprettes(behandlingId)
-        feilHvisIkke(oppgavetyperSomKanOpprettes.containsAll(nyeOppgaver)) {
-            "behandlingId=$behandlingId prøver å opprette $nyeOppgaver $oppgavetyperSomKanOpprettes"
-        }
+        val oppgavetyperSomKanOpprettes = hentOppgavetyperSomKanOpprettes(behandlingId).intersect(nyeOppgaver)
         if (oppgavetyperSomKanOpprettes.isNotEmpty()) {
             when (this.oppgaverForOpprettelseRepository.existsById(behandlingId)) {
                 true -> this.oppgaverForOpprettelseRepository.update(OppgaverForOpprettelse(behandlingId, nyeOppgaver))
