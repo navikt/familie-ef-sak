@@ -84,7 +84,7 @@ class GjenbrukVilkårService(
         tidligereVurderinger: List<Vilkårsvurdering>,
         forrigeBarnIdTilNåværendeBarnMap: Map<UUID, BehandlingBarn>,
     ) = tidligereVurderinger.mapNotNull { tidligereVurdering ->
-        /* Dersom tidligere vurdering og matchende nåværende vurdering ikke gjelder barn vil tidligere vurdering kopieres */
+        // Dersom tidligere vurdering og matchende nåværende vurdering ikke gjelder barn vil tidligere vurdering kopieres
         val barnForVurdering = forrigeBarnIdTilNåværendeBarnMap[tidligereVurdering.barnId]
         nåværendeVurderinger.firstOrNull { it.type == tidligereVurdering.type && it.barnId == barnForVurdering?.id }
             ?.let {

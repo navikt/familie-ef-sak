@@ -117,7 +117,7 @@ internal class InfotrygdPeriodeValideringServiceTest {
     }
 
     @Nested
-    inner class validerHarIkkeÅpenSakIInfotrygd {
+    inner class ValiderHarIkkeÅpenSakIInfotrygd {
 
         @Test
         internal fun `skal kunne migrere selv om personen har en klagesak`() {

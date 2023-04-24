@@ -164,7 +164,7 @@ internal class BehandlingServiceTest {
     }
 
     @Nested
-    inner class oppdaterResultatPåBehandling {
+    inner class OppdaterResultatPåBehandling {
 
         private val behandling = behandling()
 
@@ -195,7 +195,7 @@ internal class BehandlingServiceTest {
     }
 
     @Nested
-    inner class hentBehandlinger {
+    inner class HentBehandlinger {
 
         @Test
         internal fun `skal sortere behandlinger etter vedtakstidspunkt og til sist uten vedtakstidspunkt`() {

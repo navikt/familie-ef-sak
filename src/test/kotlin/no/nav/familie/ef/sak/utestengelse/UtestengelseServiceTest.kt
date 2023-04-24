@@ -36,7 +36,7 @@ internal class UtestengelseServiceTest : OppslagSpringRunnerTest() {
     }
 
     @Nested
-    inner class opprettUtestengelse {
+    inner class OpprettUtestengelse {
 
         @Test
         internal fun `skal kunne opprette utestengelse når det finnes en fra før`() {
@@ -75,7 +75,7 @@ internal class UtestengelseServiceTest : OppslagSpringRunnerTest() {
     }
 
     @Nested
-    inner class slettUtestengelse {
+    inner class SlettUtestengelse {
 
         @Test
         internal fun `markerer utestengelse som slettet`() {

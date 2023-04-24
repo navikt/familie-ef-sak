@@ -75,7 +75,7 @@ class KlageService(
                 fagsystem = Fagsystem.EF,
                 klageMottatt = klageMottatt,
                 behandlendeEnhet = enhetId,
-                klageGjelderTilbakekreving = klageGjelderTilbakekreving
+                klageGjelderTilbakekreving = klageGjelderTilbakekreving,
             ),
         )
     }
