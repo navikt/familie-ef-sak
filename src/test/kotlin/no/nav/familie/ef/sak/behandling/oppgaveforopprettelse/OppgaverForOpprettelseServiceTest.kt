@@ -51,7 +51,7 @@ internal class OppgaverForOpprettelseServiceTest {
 
         oppgaverForOpprettelseService.opprettEllerErstatt(behandlingId, listOf())
 
-        verify(exactly = 0) { oppgaverForOpprettelseRepository.deleteById(any()) }
+        verify { oppgaverForOpprettelseRepository.deleteById(any()) }
         verify(exactly = 0) { oppgaverForOpprettelseRepository.insert(any()) }
         verify(exactly = 0) { oppgaverForOpprettelseRepository.update(any()) }
     }
