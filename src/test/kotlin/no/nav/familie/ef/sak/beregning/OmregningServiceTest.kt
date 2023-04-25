@@ -33,6 +33,7 @@ import no.nav.familie.ef.sak.repository.vedtak
 import no.nav.familie.ef.sak.repository.vedtaksperiode
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseRepository
 import no.nav.familie.ef.sak.vedtak.VedtakRepository
+import no.nav.familie.ef.sak.vedtak.domain.AktivitetType
 import no.nav.familie.ef.sak.vedtak.domain.InntektWrapper
 import no.nav.familie.ef.sak.vedtak.domain.PeriodeWrapper
 import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
@@ -43,6 +44,8 @@ import no.nav.familie.ef.sak.vilkår.Vilkårsvurdering
 import no.nav.familie.ef.sak.vilkår.VilkårsvurderingRepository
 import no.nav.familie.ef.sak.vilkår.regler.HovedregelMetadata
 import no.nav.familie.ef.sak.vilkår.regler.vilkårsreglerForStønad
+import no.nav.familie.ef.sak.økonomi.lagAndelTilkjentYtelse
+import no.nav.familie.ef.sak.økonomi.lagTilkjentYtelse
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.ef.iverksett.IverksettOvergangsstønadDto
 import no.nav.familie.kontrakter.ef.søknad.Testsøknad
@@ -55,6 +58,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.YearMonth
 import java.util.UUID
 
 internal class OmregningServiceTest : OppslagSpringRunnerTest() {
@@ -203,6 +207,107 @@ internal class OmregningServiceTest : OppslagSpringRunnerTest() {
         assertThat(behandlingRepository.findByFagsakId(fagsak.id).size).isEqualTo(1)
         verify(exactly = 0) { iverksettClient.simuler(any()) }
         verify(exactly = 0) { iverksettClient.iverksettUtenBrev(any()) }
+    }
+
+    @Test
+    fun `utførGOmregning med 0 beløp skal oppdatere grunnbeløpsmåned i tilkjent ytelse`() {
+        /*
+        2021-08-01 -> 2021-11-30 med beløp 0, inntekt 700 000 og inntektsreduksjon 5543
+        2021-12-01 -> 2024-07-31 med beløp 0, inntekt 700 000 og inntektsreduksjon 5543
+        tilkjent ytelse grunnbeløpsmåned: 2021-05 skal bli 2022-05
+         */
+        val fagsak = insertVedtakMed0BeløpSomSkalGOmregnes()
+
+        omregningService.utførGOmregning(fagsak.id)
+
+        val iverksettDtoSlot = slot<IverksettOvergangsstønadDto>()
+        verify { iverksettClient.iverksettUtenBrev(capture(iverksettDtoSlot)) }
+        val iverksettDto = iverksettDtoSlot.captured
+        assertThat(iverksettDto.vedtak.tilkjentYtelse?.andelerTilkjentYtelse?.all { it.beløp == 0 }).isTrue
+        val oppdatertTilkjentYtelse = tilkjentYtelseRepository.findByBehandlingId(iverksettDto.behandling.behandlingId)
+        assertThat(oppdatertTilkjentYtelse?.grunnbeløpsmåned).isEqualTo(YearMonth.of(2022, 5))
+    }
+
+    private fun insertVedtakMed0BeløpSomSkalGOmregnes(): Fagsak {
+        val fagsak = testoppsettService.lagreFagsak(fagsak(id = UUID.randomUUID(), identer = setOf(PersonIdent("123"))))
+        val behandling = behandlingRepository.insert(
+            behandling(
+                id = UUID.randomUUID(),
+                fagsak = fagsak,
+                resultat = BehandlingResultat.INNVILGET,
+                status = BehandlingStatus.FERDIGSTILT,
+            ),
+        )
+
+        val andelTilkjentYtelse = lagAndelTilkjentYtelse(
+            beløp = 0,
+            fraOgMed = LocalDate.of(2021, 8, 1),
+            tilOgMed = LocalDate.of(2021, 11, 30),
+            personIdent = "123",
+            inntekt = 700000,
+            inntektsreduksjon = 5543,
+            kildeBehandlingId = behandling.id,
+        )
+
+        val andelTilkjentYtelse2 = lagAndelTilkjentYtelse(
+            beløp = 0,
+            fraOgMed = LocalDate.of(2021, 12, 1),
+            tilOgMed = LocalDate.of(2024, 7, 31),
+            personIdent = "123",
+            inntekt = 700000,
+            inntektsreduksjon = 5543,
+            kildeBehandlingId = behandling.id,
+        )
+
+        val tilkjentYtelse = lagTilkjentYtelse(
+            andelerTilkjentYtelse = listOf(andelTilkjentYtelse, andelTilkjentYtelse2),
+            startdato = LocalDate.of(2021, 8, 1),
+            grunnbeløpsmåned = YearMonth.of(2021, 5),
+            behandlingId = behandling.id,
+        )
+        tilkjentYtelseRepository.insert(tilkjentYtelse)
+
+        val perioder = listOf(
+            vedtaksperiode(
+                startDato = LocalDate.of(2021, 8, 1),
+                sluttDato = LocalDate.of(2021, 11, 30),
+                vedtaksperiodeType = VedtaksperiodeType.HOVEDPERIODE,
+                aktivitetstype = AktivitetType.BARN_UNDER_ETT_ÅR,
+            ),
+            vedtaksperiode(
+                startDato = LocalDate.of(2021, 12, 1),
+                sluttDato = LocalDate.of(2024, 7, 31),
+                vedtaksperiodeType = VedtaksperiodeType.HOVEDPERIODE,
+                aktivitetstype = AktivitetType.FORSØRGER_ER_SYK,
+            ),
+        )
+        val inntekt = inntektsperiode(
+            startDato = LocalDate.of(2021, 8, 1),
+            sluttDato = LocalDate.MAX,
+            inntekt = BigDecimal.valueOf(700000),
+            samordningsfradrag = BigDecimal.ZERO,
+        )
+
+        vedtakRepository.insert(
+            vedtak(
+                behandling.id,
+                år = år,
+                inntekter = InntektWrapper(listOf(inntekt)),
+                perioder = PeriodeWrapper(perioder),
+            ),
+        )
+        val barn = barnRepository.insert(
+            behandlingBarn(
+                behandlingId = behandling.id,
+                personIdent = "01012067050",
+                navn = "Kid Kiddesen",
+            ),
+        )
+        søknadService.lagreSøknadForOvergangsstønad(Testsøknad.søknadOvergangsstønad, behandling.id, fagsak.id, "1L")
+
+        val vilkårsvurderinger = lagVilkårsvurderinger(barn, behandling.id)
+        vilkårsvurderingRepository.insertAll(vilkårsvurderinger)
+        return fagsak
     }
 
     private fun lagVilkårsvurderinger(

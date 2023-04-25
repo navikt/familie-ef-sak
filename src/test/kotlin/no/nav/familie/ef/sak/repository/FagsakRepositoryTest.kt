@@ -74,6 +74,37 @@ internal class FagsakRepositoryTest : OppslagSpringRunnerTest() {
         }
 
         @Test
+        fun `finnFerdigstilteFagsakerMedUtdatertGBelop - skal ikke finne fagsaker med samordningsfradrag`() {
+            val fagsak = testoppsettService.lagreFagsak(fagsak())
+            val fagsak2 = testoppsettService.lagreFagsak(fagsak(identer = setOf(PersonIdent("1"))))
+            val behandling = behandlingRepository.insert(
+                behandling(
+                    fagsak,
+                    status = BehandlingStatus.FERDIGSTILT,
+                    resultat = BehandlingResultat.INNVILGET,
+                    opprettetTid = LocalDateTime.now().minusDays(2),
+                ),
+            )
+            behandlingRepository.insert(
+                behandling(
+                    fagsak2,
+                    status = BehandlingStatus.UTREDES,
+                    resultat = BehandlingResultat.INNVILGET,
+                ),
+            )
+            tilkjentYtelseRepository.insert(
+                tilkjentYtelse(
+                    behandling.id,
+                    fagsak.personIdenter.first().ident,
+                    2022,
+                    grunnbeløpsmåned = YearMonth.of(2021, 5),
+                    samordningsfradrag = 1500
+                ),
+            )
+            assertThat(fagsakRepository.finnFerdigstilteFagsakerMedUtdatertGBelop(LocalDate.of(2022, 5, 1))).isEmpty()
+        }
+
+        @Test
         fun `tar ikke med ferdigstilte fagsaker som har en åpen behandling`() {
             val fagsak = testoppsettService.lagreFagsak(fagsak())
             val fagsak2 = testoppsettService.lagreFagsak(fagsak(identer = setOf(PersonIdent("1"))))
