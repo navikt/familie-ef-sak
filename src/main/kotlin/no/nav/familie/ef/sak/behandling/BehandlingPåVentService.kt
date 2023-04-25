@@ -89,8 +89,8 @@ class BehandlingPåVentService(
             taskService.save(
                 OpprettOppgaveTask.opprettTask(
                     OpprettOppgaveTask.OpprettOppgaveTaskData(
-                        saksbehandling.id,
-                        Oppgavetype.VurderHenvendelse,
+                        behandlingId = saksbehandling.id,
+                        oppgavetype = Oppgavetype.VurderHenvendelse,
                         beskrivelse = oppgaveBeskrivelse,
                     ),
                 ),
