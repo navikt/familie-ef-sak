@@ -233,7 +233,7 @@ class BehandlingPåVentService(
             }
         }
 
-        feilHvis(featureToggleService.isEnabled(Toggle.AUTOMATISKE_OPPGAVER_LOKALKONTOR)) {
+        feilHvis(!featureToggleService.isEnabled(Toggle.AUTOMATISKE_OPPGAVER_LOKALKONTOR)) {
             "Featuretoggle for opprettelse av automatiske oppgaver til lokalkontor er ikke påskrudd"
         }
     }
