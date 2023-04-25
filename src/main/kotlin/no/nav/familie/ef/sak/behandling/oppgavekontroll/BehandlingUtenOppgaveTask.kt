@@ -9,25 +9,24 @@ import java.util.*
 @Service
 @TaskStepBeskrivelse(
     taskStepType = BehandlingUtenOppgaveTask.TYPE,
-    maxAntallFeil = 2,
+    maxAntallFeil = 1,
     settTilManuellOppfølgning = true,
-    triggerTidVedFeilISekunder = 60L * 60L * 2,
     beskrivelse = "Finn åpne behandlinger uten behandle sak oppgave",
 )
 class BehandlingUtenOppgaveTask(val behandlingsoppgaveService: BehandlingsoppgaveService) : AsyncTaskStep {
 
     override fun doTask(task: Task) {
-        behandlingsoppgaveService.loggÅpneBehandligerUtenOppgave()
+        behandlingsoppgaveService.loggÅpneBehandlingerUtenOppgave()
     }
 
     companion object {
 
         const val TYPE = "finnBehandlingUtenOppgave"
 
-        fun opprettTask(): Task {
+        fun opprettTask(ukenummer: Int): Task {
             return Task(
                 TYPE,
-                "finnBehandlingUtenOppgave",
+                ukenummer.toString(),
                 Properties(),
             )
         }

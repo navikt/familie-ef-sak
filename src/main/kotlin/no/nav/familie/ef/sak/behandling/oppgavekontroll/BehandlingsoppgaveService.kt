@@ -11,7 +11,9 @@ import no.nav.familie.prosessering.internal.TaskService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.temporal.IsoFields
 import kotlin.random.Random
 
 @Service
@@ -20,24 +22,25 @@ class BehandlingsoppgaveService(
     val behandlingService: BehandlingService,
     val fagsakService: FagsakService,
     val oppgaveService: OppgaveService,
-    val featureToggleService: FeatureToggleService
+    val featureToggleService: FeatureToggleService,
 ) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
     @Transactional
     fun opprettTask() {
+        val ukenummer = LocalDate.now().get(IsoFields.WEEK_OF_WEEK_BASED_YEAR)
         Thread.sleep(Random.nextLong(5_000)) // YOLO unngå feil med att 2 samtidige podder oppretter task
         val finnesTask =
-            taskService.finnTaskMedPayloadOgType("finnBehandlingUtenOppgave", BehandlingUtenOppgaveTask.TYPE)
+            taskService.finnTaskMedPayloadOgType(ukenummer.toString(), BehandlingUtenOppgaveTask.TYPE)
         if (finnesTask == null) {
             logger.info("Oppretter satsendring-task, da den ikke finnes fra før")
-            val task = BehandlingUtenOppgaveTask.opprettTask()
+            val task = BehandlingUtenOppgaveTask.opprettTask(ukenummer)
             taskService.save(task)
         }
     }
 
-    fun loggÅpneBehandligerUtenOppgave() {
+    fun loggÅpneBehandlingerUtenOppgave() {
         val stønadstyper = listOf(StønadType.OVERGANGSSTØNAD, StønadType.SKOLEPENGER, StønadType.BARNETILSYN)
         val toUkerSiden = LocalDateTime.now().minusWeeks(2)
         val gamleBehandlinger = stønadstyper.flatMap { stønadstype ->
@@ -58,7 +61,6 @@ class BehandlingsoppgaveService(
 
         val enabled = featureToggleService.isEnabled(Toggle.KAST_FEIL_HVIS_OPPGAVE_MANGLER_PÅ_ÅPEN_BEHANDLING)
         val harFunnetFagsakUtenOppgave = fagsakerMedÅpenBehandlingSomManglerOppgave.size > 0
-        feilHvis(enabled && harFunnetFagsakUtenOppgave){"Åpne behandlinger uten behandleSak oppgave funnet på fagsak "}
-
+        feilHvis(enabled && harFunnetFagsakUtenOppgave) { "Åpne behandlinger uten behandleSak oppgave funnet på fagsak " }
     }
 }

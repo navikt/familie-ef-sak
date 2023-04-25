@@ -134,7 +134,7 @@ class OppgaveService(
             val mapper = finnMapper(enhetsnummer)
             val mappeIdForGodkjenneVedtak = mapper.find {
                 (it.navn.contains("70 Godkjennevedtak") || it.navn.contains("70 Godkjenne vedtak")) &&
-                        !it.navn.contains("EF Sak")
+                    !it.navn.contains("EF Sak")
             }?.id?.toLong()
             mappeIdForGodkjenneVedtak?.let {
                 logger.info("Legger oppgave i Godkjenne vedtak-mappe")
@@ -329,7 +329,7 @@ class OppgaveService(
                 ),
             )
         }
-        feilHvis(alleOppgaver.any { it.antallTreffTotalt >= limit }) {"For mange oppgaver - limit truffet: + $limit "}
+        feilHvis(alleOppgaver.any { it.antallTreffTotalt >= limit }) { "For mange oppgaver - limit truffet: + $limit " }
         return alleOppgaver.toList()
     }
 }

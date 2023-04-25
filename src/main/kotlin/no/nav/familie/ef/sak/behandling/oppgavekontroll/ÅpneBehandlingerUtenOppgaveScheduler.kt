@@ -9,8 +9,7 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 class ÅpneBehandlingerUtenOppgaveScheduler(val behandlingsoppgaveService: BehandlingsoppgaveService) {
 
-    // TODO @Scheduled(cron = "\${G_OMREGNING_CRON_EXPRESSION}")
-    @Scheduled(initialDelay = 60 * 1000L, fixedDelay = 365 * 24 * 60 * 60 * 1000L)
+    @Scheduled(cron = "\${FINN_BEHANDLINGER_UTEN_OPPGAVE_CRON_EXPRESSION}")
     @Transactional
     fun sjekkOmViHarÅpneBehandlingerUtenOppgave() {
         behandlingsoppgaveService.opprettTask()
