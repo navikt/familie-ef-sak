@@ -17,7 +17,7 @@ import java.util.*
 class BehandlingUtenOppgaveTask(val behandlingsoppgaveService: BehandlingsoppgaveService) : AsyncTaskStep {
 
     override fun doTask(task: Task) {
-        behandlingsoppgaveService.validerHarIkkeÅpneBehandligerUtenOppgave()
+        behandlingsoppgaveService.loggÅpneBehandligerUtenOppgave()
     }
 
     companion object {

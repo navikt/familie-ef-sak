@@ -37,7 +37,7 @@ class BehandlingsoppgaveService(
         }
     }
 
-    fun validerHarIkkeÅpneBehandligerUtenOppgave() {
+    fun loggÅpneBehandligerUtenOppgave() {
         val stønadstyper = listOf(StønadType.OVERGANGSSTØNAD, StønadType.SKOLEPENGER, StønadType.BARNETILSYN)
         val toUkerSiden = LocalDateTime.now().minusWeeks(2)
         val gamleBehandlinger = stønadstyper.flatMap { stønadstype ->
