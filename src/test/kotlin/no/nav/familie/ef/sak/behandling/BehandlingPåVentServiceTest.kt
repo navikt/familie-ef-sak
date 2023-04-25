@@ -292,7 +292,7 @@ internal class BehandlingPåVentServiceTest {
                 mappe = 102,
                 beskrivelse = "Her er litt tekst fra saksbehandler",
                 oppgaveVersjon = 1,
-                oppfølgingsoppgaverMotLokalKontor = emptyList()
+                oppfølgingsoppgaverMotLokalKontor = emptyList(),
             )
             behandlingPåVentService.settPåVent(
                 behandlingId,

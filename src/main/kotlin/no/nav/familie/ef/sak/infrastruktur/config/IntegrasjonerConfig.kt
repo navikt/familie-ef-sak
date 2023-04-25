@@ -46,7 +46,8 @@ class IntegrasjonerConfig(@Value("\${FAMILIE_INTEGRASJONER_URL}") private val in
     val navKontorUri: URI = UriComponentsBuilder.fromUri(integrasjonUri).pathSegment(PATH_NAV_KONTOR).build().toUri()
 
     val arbeidsfordelingOppfølgingUri: URI = UriComponentsBuilder.fromUri(integrasjonUri).pathSegment(
-        PATH_ARBEIDSFORDELING_OPPFØLGING).build().toUri()
+        PATH_ARBEIDSFORDELING_OPPFØLGING,
+    ).build().toUri()
 
     companion object {
 

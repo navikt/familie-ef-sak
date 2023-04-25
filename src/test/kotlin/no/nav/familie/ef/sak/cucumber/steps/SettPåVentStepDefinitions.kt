@@ -98,7 +98,7 @@ class SettPåVentStepDefinitions {
                 prioritet = parseEnum(SettPåVentDomeneBegrep.PRIORITET, verdier),
                 beskrivelse = parseValgfriString(SettPåVentDomeneBegrep.BESKRIVELSE, verdier).orEmpty(),
                 oppgaveVersjon = 1,
-                oppfølgingsoppgaverMotLokalKontor = emptyList()
+                oppfølgingsoppgaverMotLokalKontor = emptyList(),
             )
     }
 

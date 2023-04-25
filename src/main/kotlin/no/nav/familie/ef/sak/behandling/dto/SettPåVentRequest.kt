@@ -15,5 +15,5 @@ data class SettPåVentRequest(
 
 enum class VurderHenvendelseOppgavetype {
     INFORMERE_OM_SØKT_OVERGANGSSTØNAD,
-    INNSTILLING_VEDRØRENDE_UTDANNING
+    INNSTILLING_VEDRØRENDE_UTDANNING,
 }

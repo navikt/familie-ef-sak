@@ -3,10 +3,10 @@ package no.nav.familie.ef.sak.behandling
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus.SATT_PÅ_VENT
-import no.nav.familie.ef.sak.behandling.dto.VurderHenvendelseOppgavetype
 import no.nav.familie.ef.sak.behandling.dto.SettPåVentRequest
 import no.nav.familie.ef.sak.behandling.dto.TaAvVentStatus
 import no.nav.familie.ef.sak.behandling.dto.TaAvVentStatusDto
+import no.nav.familie.ef.sak.behandling.dto.VurderHenvendelseOppgavetype
 import no.nav.familie.ef.sak.behandlingsflyt.task.BehandlingsstatistikkTask
 import no.nav.familie.ef.sak.behandlingsflyt.task.OpprettOppgaveTask
 import no.nav.familie.ef.sak.behandlingshistorikk.BehandlingshistorikkService
@@ -78,7 +78,7 @@ class BehandlingPåVentService(
 
     private fun opprettVurderHenvendelseOppgaveTasks(
         behandlingId: UUID,
-        vurderHenvendelseOppgaver: List<VurderHenvendelseOppgavetype>
+        vurderHenvendelseOppgaver: List<VurderHenvendelseOppgavetype>,
     ) {
         val saksbehandling = behandlingService.hentSaksbehandling(behandlingId)
 
@@ -92,8 +92,8 @@ class BehandlingPåVentService(
                         saksbehandling.id,
                         Oppgavetype.VurderHenvendelse,
                         beskrivelse = oppgaveBeskrivelse,
-                    )
-                )
+                    ),
+                ),
             )
         }
     }

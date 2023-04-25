@@ -293,7 +293,6 @@ class OppgaveService(
         when (oppgavetype) {
             VurderHenvendelseOppgavetype.INFORMERE_OM_SØKT_OVERGANGSSTØNAD -> OppgaveBeskrivelse.informereLokalkontorOmOvergangsstønad
             VurderHenvendelseOppgavetype.INNSTILLING_VEDRØRENDE_UTDANNING -> OppgaveBeskrivelse.innstillingOmBrukersUtdanning
-
         }
 
     private fun fristBasertPåKlokkeslett(gjeldendeTid: LocalDateTime): LocalDate {
