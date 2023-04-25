@@ -56,7 +56,7 @@ class BehandlingController(
     }
 
     @GetMapping("gamle-behandlinger-oppgavemangler")
-    fun finnÅpneBehandlingerUtenOppgave() :  Ressurs<List<String>> {
+    fun finnÅpneBehandlingerUtenOppgave(): Ressurs<List<String>> {
         val stønadstyper = listOf(StønadType.OVERGANGSSTØNAD, StønadType.SKOLEPENGER, StønadType.BARNETILSYN)
         val toUkerSiden = LocalDateTime.now().minusWeeks(2)
         val gamleBehandlinger = stønadstyper.flatMap { stønadstype ->

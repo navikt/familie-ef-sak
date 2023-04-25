@@ -16,7 +16,7 @@ class ÅpneBehandlingerUtenOppgaveScheduler(val behandlingService: BehandlingSer
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    //@Scheduled(cron = "\${G_OMREGNING_CRON_EXPRESSION}")
+    // @Scheduled(cron = "\${G_OMREGNING_CRON_EXPRESSION}")
     @Scheduled(initialDelay = 60 * 1000L, fixedDelay = 365 * 24 * 60 * 60 * 1000L)
     fun opprettGOmregningTaskForBehandlingerMedUtdatertG() {
         val stønadstyper = listOf(StønadType.OVERGANGSSTØNAD, StønadType.SKOLEPENGER, StønadType.BARNETILSYN)

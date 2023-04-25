@@ -239,10 +239,10 @@ class OppgaveService(
         } else {
             ""
         } +
-                "----- Opprettet av familie-ef-sak ${
-                    LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME)
-                } --- \n" +
-                "$frontendOppgaveUrl" + "\n----- Oppgave må behandles i ny løsning"
+            "----- Opprettet av familie-ef-sak ${
+                LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME)
+            } --- \n" +
+            "$frontendOppgaveUrl" + "\n----- Oppgave må behandles i ny løsning"
     }
 
     fun hentOppgaver(finnOppgaveRequest: FinnOppgaveRequest): FinnOppgaveResponseDto {
@@ -293,7 +293,7 @@ class OppgaveService(
             if (mappeRespons.antallTreffTotalt > mappeRespons.mapper.size) {
                 logger.error(
                     "Det finnes flere mapper (${mappeRespons.antallTreffTotalt}) " +
-                            "enn vi har hentet ut (${mappeRespons.mapper.size}). Sjekk limit. ",
+                        "enn vi har hentet ut (${mappeRespons.mapper.size}). Sjekk limit. ",
                 )
             }
             mappeRespons.mapper
@@ -322,10 +322,10 @@ class OppgaveService(
                         finnOppgaveRequest = FinnOppgaveRequest(
                             tema = Tema.ENF,
                             oppgavetype = it,
-                            limit = limit
-                        )
-                    )
-                )
+                            limit = limit,
+                        ),
+                    ),
+                ),
             )
         }
 
@@ -333,7 +333,7 @@ class OppgaveService(
             error("For mange oppgaver, kan ikke sjekke mot behandlinger som mangler oppgave. ")
         }
 
-        val oppgaveSaksreferanser :List<String>  = alleOppgaver.flatMap { it.oppgaver.mapNotNull { oppgave -> oppgave.saksreferanse } }
-        return fagsakEksternId.filterNot{ oppgaveSaksreferanser.contains(it)  }
+        val oppgaveSaksreferanser: List<String> = alleOppgaver.flatMap { it.oppgaver.mapNotNull { oppgave -> oppgave.saksreferanse } }
+        return fagsakEksternId.filterNot { oppgaveSaksreferanser.contains(it) }
     }
 }
