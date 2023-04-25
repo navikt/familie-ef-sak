@@ -11,7 +11,7 @@ class ÅpneBehandlingerUtenOppgaveScheduler(val behandlingsoppgaveService: Behan
 
     @Scheduled(cron = "\${FINN_BEHANDLINGER_UTEN_OPPGAVE_CRON_EXPRESSION}")
     @Transactional
-    fun sjekkOmViHarÅpneBehandlingerUtenOppgave() {
+    fun opprettTaskFinnÅpneBehandlingerUtenOppgave() {
         behandlingsoppgaveService.opprettTask()
     }
 }

@@ -44,7 +44,7 @@ class BehandlingController(
     fun hentGamleUferdigeBehandlinger(): Ressurs<List<BehandlingDto>> {
         val stønadstyper = listOf(StønadType.OVERGANGSSTØNAD, StønadType.SKOLEPENGER, StønadType.BARNETILSYN)
         val gamleBehandlinger = stønadstyper.flatMap { stønadstype ->
-            behandlingService.hentGamleUferdigeBehandlinger(stønadstype).map { it.tilDto(stønadstype) }
+            behandlingService.hentUferdigeBehandlingerOpprettetFørDato(stønadstype).map { it.tilDto(stønadstype) }
         }
         return Ressurs.success(gamleBehandlinger)
     }

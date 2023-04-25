@@ -34,7 +34,7 @@ class BehandlingsoppgaveService(
         val finnesTask =
             taskService.finnTaskMedPayloadOgType(ukenummer.toString(), BehandlingUtenOppgaveTask.TYPE)
         if (finnesTask == null) {
-            logger.info("Oppretter satsendring-task, da den ikke finnes fra før")
+            logger.info("Oppretter finnBehandlingUtenOppgave-task, da den ikke finnes fra før")
             val task = BehandlingUtenOppgaveTask.opprettTask(ukenummer)
             taskService.save(task)
         }
@@ -44,7 +44,7 @@ class BehandlingsoppgaveService(
         val stønadstyper = listOf(StønadType.OVERGANGSSTØNAD, StønadType.SKOLEPENGER, StønadType.BARNETILSYN)
         val toUkerSiden = LocalDateTime.now().minusWeeks(2)
         val gamleBehandlinger = stønadstyper.flatMap { stønadstype ->
-            behandlingService.hentGamleUferdigeBehandlinger(stønadstype, toUkerSiden)
+            behandlingService.hentUferdigeBehandlingerOpprettetFørDato(stønadstype, toUkerSiden)
         }
 
         val eksternFagsakIds =
@@ -59,8 +59,8 @@ class BehandlingsoppgaveService(
             logger.warn("Fagsaker med åpen behandling uten oppgave: $it")
         }
 
-        val enabled = featureToggleService.isEnabled(Toggle.KAST_FEIL_HVIS_OPPGAVE_MANGLER_PÅ_ÅPEN_BEHANDLING)
+        val skalKasteFeilHvisOppgaveMangler = featureToggleService.isEnabled(Toggle.KAST_FEIL_HVIS_OPPGAVE_MANGLER_PÅ_ÅPEN_BEHANDLING)
         val harFunnetFagsakUtenOppgave = fagsakerMedÅpenBehandlingSomManglerOppgave.size > 0
-        feilHvis(enabled && harFunnetFagsakUtenOppgave) { "Åpne behandlinger uten behandleSak oppgave funnet på fagsak " }
+        feilHvis(skalKasteFeilHvisOppgaveMangler && harFunnetFagsakUtenOppgave) { "Åpne behandlinger uten behandleSak oppgave funnet på fagsak " }
     }
 }
