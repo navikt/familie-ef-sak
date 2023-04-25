@@ -4,6 +4,7 @@ import no.nav.familie.ef.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.infrastruktur.config.getValue
+import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.oppgave.OppgaveUtil.ENHET_NR_NAY
 import no.nav.familie.http.client.RessursException
 import no.nav.familie.kontrakter.felles.Behandlingstema
@@ -308,7 +309,7 @@ class OppgaveService(
         }
     }
 
-    fun finnFagsakerSomManglerOppgave(fagsakEksternId: List<String>): List<String> {
+    fun finnBehandleSakOppgaver(): List<FinnOppgaveResponseDto> {
         val oppgaveTyper =
             listOf(Oppgavetype.BehandleSak, Oppgavetype.BehandleUderkjentVedtak, Oppgavetype.GodkjenneVedtak)
 
@@ -328,12 +329,7 @@ class OppgaveService(
                 ),
             )
         }
-
-        if (alleOppgaver.any { it.antallTreffTotalt >= limit }) {
-            error("For mange oppgaver, kan ikke sjekke mot behandlinger som mangler oppgave. ")
-        }
-
-        val oppgaveSaksreferanser: List<String> = alleOppgaver.flatMap { it.oppgaver.mapNotNull { oppgave -> oppgave.saksreferanse } }
-        return fagsakEksternId.filterNot { oppgaveSaksreferanser.contains(it) }
+        feilHvis(alleOppgaver.any { it.antallTreffTotalt >= limit }) {"For mange oppgaver - limit truffet: + $limit "}
+        return alleOppgaver.toList()
     }
 }

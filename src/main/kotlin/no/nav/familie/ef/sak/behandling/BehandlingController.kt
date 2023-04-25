@@ -9,19 +9,16 @@ import no.nav.familie.ef.sak.behandling.dto.tilDto
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
-import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.ef.sak.vilkår.gjenbruk.GjenbrukVilkårService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.security.token.support.core.api.ProtectedWithClaims
-import org.slf4j.LoggerFactory
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
-import java.time.LocalDateTime
 import java.util.UUID
 
 @RestController
@@ -34,10 +31,7 @@ class BehandlingController(
     private val henleggService: HenleggService,
     private val tilgangService: TilgangService,
     private val gjenbrukVilkårService: GjenbrukVilkårService,
-    private val oppgaveService: OppgaveService,
 ) {
-
-    private val logger = LoggerFactory.getLogger(javaClass)
 
     @GetMapping("{behandlingId}")
     fun hentBehandling(@PathVariable behandlingId: UUID): Ressurs<BehandlingDto> {
@@ -53,25 +47,6 @@ class BehandlingController(
             behandlingService.hentGamleUferdigeBehandlinger(stønadstype).map { it.tilDto(stønadstype) }
         }
         return Ressurs.success(gamleBehandlinger)
-    }
-
-    @GetMapping("gamle-behandlinger-oppgavemangler")
-    fun finnÅpneBehandlingerUtenOppgave(): Ressurs<List<String>> {
-        val stønadstyper = listOf(StønadType.OVERGANGSSTØNAD, StønadType.SKOLEPENGER, StønadType.BARNETILSYN)
-        val toUkerSiden = LocalDateTime.now().minusWeeks(2)
-        val gamleBehandlinger = stønadstyper.flatMap { stønadstype ->
-            behandlingService.hentGamleUferdigeBehandlinger(stønadstype, toUkerSiden)
-        }
-
-        val eksternFagsakIds = gamleBehandlinger.map { fagsakService.hentFagsakForBehandling(it.id).eksternId.id.toString() }
-
-        val fagsakerMedÅpenBehandlingSomManglerOppgave: List<String> = oppgaveService.finnFagsakerSomManglerOppgave(eksternFagsakIds)
-
-        logger.info("Fagsak med åpen behandling uten oppgave antall ${fagsakerMedÅpenBehandlingSomManglerOppgave.size}")
-        fagsakerMedÅpenBehandlingSomManglerOppgave.forEach {
-            logger.info("Fagsak med åpen behandling uten oppgave: $it")
-        }
-        return Ressurs.success(fagsakerMedÅpenBehandlingSomManglerOppgave)
     }
 
     @PostMapping("{behandlingId}/vent")

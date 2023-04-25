@@ -98,7 +98,7 @@ internal class FagsakRepositoryTest : OppslagSpringRunnerTest() {
                     fagsak.personIdenter.first().ident,
                     2022,
                     grunnbeløpsmåned = YearMonth.of(2021, 5),
-                    samordningsfradrag = 1500
+                    samordningsfradrag = 1500,
                 ),
             )
             assertThat(fagsakRepository.finnFerdigstilteFagsakerMedUtdatertGBelop(LocalDate.of(2022, 5, 1))).isEmpty()
