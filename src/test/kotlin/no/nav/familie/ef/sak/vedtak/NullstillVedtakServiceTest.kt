@@ -69,6 +69,7 @@ class NullstillVedtakServiceTest {
             vedtaksbrevService.slettVedtaksbrev(any())
             vedtakService.slettVedtakHvisFinnes(behandlingId)
             stegService.resetSteg(behandlingId, StegType.BEREGNE_YTELSE)
+            oppgaverForOpprettelseService.slettOppgaverForOpprettelse(any())
         }
 
         Assertions.assertThat(saksbehandling.captured.id).isEqualTo(behandlingId)
