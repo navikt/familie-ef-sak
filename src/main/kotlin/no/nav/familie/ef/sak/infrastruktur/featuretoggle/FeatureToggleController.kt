@@ -25,6 +25,7 @@ class FeatureToggleController(private val featureToggleService: FeatureToggleSer
         Toggle.SETT_PÅ_VENT_MED_OPPGAVESTYRING,
         Toggle.PERSONOPPLYSNINGER_ENDRINGER,
         Toggle.ULIKE_INNTEKTER,
+        Toggle.AUTOMATISKE_OPPGAVER_LOKALKONTOR
     )
 
     @GetMapping
