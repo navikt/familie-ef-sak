@@ -2,6 +2,7 @@ package no.nav.familie.ef.sak.behandling
 
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.dto.HenlagtDto
+import no.nav.familie.ef.sak.behandling.oppgaveforopprettelse.OppgaverForOpprettelseService
 import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import org.springframework.stereotype.Service
@@ -12,12 +13,14 @@ import java.util.UUID
 class HenleggService(
     private val behandlingService: BehandlingService,
     private val oppgaveService: OppgaveService,
+    private val oppgaverForOpprettelseService: OppgaverForOpprettelseService
 ) {
 
     @Transactional
     fun henleggBehandling(behandlingId: UUID, henlagt: HenlagtDto): Behandling {
         val behandling = behandlingService.henleggBehandling(behandlingId, henlagt)
         ferdigstillOppgaveTask(behandling)
+        oppgaverForOpprettelseService.slettOppgaverForOpprettelse(behandlingId)
         return behandling
     }
 
