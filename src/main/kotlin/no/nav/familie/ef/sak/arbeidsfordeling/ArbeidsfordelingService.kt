@@ -30,12 +30,11 @@ class ArbeidsfordelingService(
         }
     }
 
-    fun hentNavEnhetForOppfølging(ident: String, oppgavetype: Oppgavetype): Enhet? {
-        return cacheManager.getNullable("navEnhet", ident) {
+    fun hentNavEnhetForOppfølging(ident: String, oppgavetype: Oppgavetype): Enhet? =
+        cacheManager.getNullable("navEnhetForOppfølging", ident) {
             personopplysningerIntegrasjonerClient.hentBehandlendeEnhetForOppfølging(ident)
                 ?: error("Fant ikke NAV-enhet for oppgave av type $oppgavetype")
         }
-    }
 
     fun hentNavEnhetIdEllerBrukMaskinellEnhetHvisNull(personIdent: String): String {
         return hentNavEnhet(personIdent)?.enhetId ?: MASKINELL_JOURNALFOERENDE_ENHET
