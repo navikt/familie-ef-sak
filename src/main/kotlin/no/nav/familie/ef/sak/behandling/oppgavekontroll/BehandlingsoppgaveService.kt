@@ -56,6 +56,5 @@ class BehandlingsoppgaveService(
         }
 
         return fagsakerMedÅpenBehandlingSomManglerOppgave.size
-
     }
 }
