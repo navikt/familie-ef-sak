@@ -38,7 +38,7 @@ class BehandlingsoppgaveService(
     }
 
     fun antallÅpneBehandlingerUtenOppgave(): Int {
-        val gamleBehandlinger = finnAlleBehandlingerOpprettetForMerEnnToUkerSiden()
+        val gamleBehandlinger = finnAlleBehandlingerOpprettetForMerEnnTreUkerSiden()
 
         val eksternFagsakIds =
             gamleBehandlinger.map { fagsakService.hentFagsakForBehandling(it.id).eksternId.id.toString() }
@@ -60,11 +60,11 @@ class BehandlingsoppgaveService(
         }
     }
 
-    private fun finnAlleBehandlingerOpprettetForMerEnnToUkerSiden(): List<Behandling> {
+    private fun finnAlleBehandlingerOpprettetForMerEnnTreUkerSiden(): List<Behandling> {
         val stønadstyper = listOf(StønadType.OVERGANGSSTØNAD, StønadType.SKOLEPENGER, StønadType.BARNETILSYN)
-        val toUkerSiden = LocalDateTime.now().minusWeeks(2)
+        val treUkerSiden = LocalDateTime.now().minusWeeks(3)
         val gamleBehandlinger = stønadstyper.flatMap { stønadstype ->
-            behandlingService.hentUferdigeBehandlingerOpprettetFørDato(stønadstype, toUkerSiden)
+            behandlingService.hentUferdigeBehandlingerOpprettetFørDato(stønadstype, treUkerSiden)
         }
         return gamleBehandlinger
     }
