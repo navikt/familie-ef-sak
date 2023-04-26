@@ -310,26 +310,39 @@ class OppgaveService(
     }
 
     fun finnBehandleSakOppgaver(): List<FinnOppgaveResponseDto> {
-        val oppgaveTyper =
-            listOf(Oppgavetype.BehandleSak, Oppgavetype.BehandleUderkjentVedtak, Oppgavetype.GodkjenneVedtak)
+        val limit: Long = 2000
 
-        val limit: Long = 1000
-        val alleOppgaver = mutableListOf<FinnOppgaveResponseDto>()
+        val behandleSakOppgaver = oppgaveClient.hentOppgaver(
+            finnOppgaveRequest = FinnOppgaveRequest(
+                tema = Tema.ENF,
+                oppgavetype = Oppgavetype.BehandleSak,
+                limit = limit,
+                opprettetTomTidspunkt = LocalDateTime.now().minusWeeks(2).minusDays(5),
+            ),
+        )
 
-        oppgaveTyper.forEach {
-            alleOppgaver.addAll(
-                listOf(
-                    oppgaveClient.hentOppgaver(
-                        finnOppgaveRequest = FinnOppgaveRequest(
-                            tema = Tema.ENF,
-                            oppgavetype = it,
-                            limit = limit,
-                        ),
-                    ),
-                ),
-            )
-        }
-        feilHvis(alleOppgaver.any { it.antallTreffTotalt >= limit }) { "For mange oppgaver - limit truffet: + $limit " }
-        return alleOppgaver.toList()
+        val behandleUnderkjent = oppgaveClient.hentOppgaver(
+            finnOppgaveRequest = FinnOppgaveRequest(
+                tema = Tema.ENF,
+                oppgavetype = Oppgavetype.BehandleUnderkjentVedtak,
+                limit = limit,
+            ),
+        )
+
+        val godkjenne = oppgaveClient.hentOppgaver(
+            finnOppgaveRequest = FinnOppgaveRequest(
+                tema = Tema.ENF,
+                oppgavetype = Oppgavetype.GodkjenneVedtak,
+                limit = limit,
+            ),
+        )
+
+        logger.info("Hentet oppgaver:  ${behandleSakOppgaver.antallTreffTotalt}, ${behandleUnderkjent.antallTreffTotalt}, ${godkjenne.antallTreffTotalt}")
+
+        feilHvis(behandleSakOppgaver.antallTreffTotalt >= limit) { "For mange behandleSakOppgaver - limit truffet: + $limit " }
+        feilHvis(behandleUnderkjent.antallTreffTotalt >= limit) { "For mange behandleUnderkjent - limit truffet: + $limit " }
+        feilHvis(godkjenne.antallTreffTotalt >= limit) { "For mange godkjenne - limit truffet: + $limit " }
+
+        return listOf(behandleSakOppgaver, behandleUnderkjent, godkjenne)
     }
 }
