@@ -4,6 +4,7 @@ import no.nav.familie.ef.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.infrastruktur.config.getValue
+import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.oppgave.OppgaveUtil.ENHET_NR_NAY
 import no.nav.familie.http.client.RessursException
 import no.nav.familie.kontrakter.felles.Behandlingstema
@@ -93,6 +94,7 @@ class OppgaveService(
             Oppgavetype.BehandleUnderkjentVedtak,
             Oppgavetype.GodkjenneVedtak,
             -> true
+
             Oppgavetype.InnhentDokumentasjon -> false
             else -> error("Håndterer ikke behandlesAvApplikasjon for $oppgavetype")
         }
@@ -225,7 +227,10 @@ class OppgaveService(
     }
 
     fun hentIkkeFerdigstiltOppgaveForBehandling(behandlingId: UUID): Oppgave? {
-        return oppgaveRepository.findByBehandlingIdAndErFerdigstiltIsFalseAndTypeIn(behandlingId, setOf(Oppgavetype.BehandleSak, Oppgavetype.BehandleUnderkjentVedtak))
+        return oppgaveRepository.findByBehandlingIdAndErFerdigstiltIsFalseAndTypeIn(
+            behandlingId,
+            setOf(Oppgavetype.BehandleSak, Oppgavetype.BehandleUnderkjentVedtak),
+        )
             ?.let { oppgaveClient.finnOppgaveMedId(it.gsakOppgaveId) }
     }
 
@@ -235,7 +240,9 @@ class OppgaveService(
         } else {
             ""
         } +
-            "----- Opprettet av familie-ef-sak ${LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME)} --- \n" +
+            "----- Opprettet av familie-ef-sak ${
+                LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME)
+            } --- \n" +
             "$frontendOppgaveUrl" + "\n----- Oppgave må behandles i ny løsning"
     }
 
@@ -300,5 +307,29 @@ class OppgaveService(
         } else {
             gjeldendeTid.plusDays(1).toLocalDate()
         }
+    }
+
+    fun finnBehandleSakOppgaver(): List<FinnOppgaveResponseDto> {
+        val oppgaveTyper =
+            listOf(Oppgavetype.BehandleSak, Oppgavetype.BehandleUderkjentVedtak, Oppgavetype.GodkjenneVedtak)
+
+        val limit: Long = 1000
+        val alleOppgaver = mutableListOf<FinnOppgaveResponseDto>()
+
+        oppgaveTyper.forEach {
+            alleOppgaver.addAll(
+                listOf(
+                    oppgaveClient.hentOppgaver(
+                        finnOppgaveRequest = FinnOppgaveRequest(
+                            tema = Tema.ENF,
+                            oppgavetype = it,
+                            limit = limit,
+                        ),
+                    ),
+                ),
+            )
+        }
+        feilHvis(alleOppgaver.any { it.antallTreffTotalt >= limit }) { "For mange oppgaver - limit truffet: + $limit " }
+        return alleOppgaver.toList()
     }
 }

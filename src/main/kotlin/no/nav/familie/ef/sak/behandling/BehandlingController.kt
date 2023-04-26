@@ -13,7 +13,6 @@ import no.nav.familie.ef.sak.vilkår.gjenbruk.GjenbrukVilkårService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.security.token.support.core.api.ProtectedWithClaims
-import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
@@ -25,7 +24,6 @@ import java.util.UUID
 @RestController
 @RequestMapping(path = ["/api/behandling"])
 @ProtectedWithClaims(issuer = "azuread")
-@Validated
 class BehandlingController(
     private val behandlingService: BehandlingService,
     private val behandlingPåVentService: BehandlingPåVentService,
@@ -46,7 +44,7 @@ class BehandlingController(
     fun hentGamleUferdigeBehandlinger(): Ressurs<List<BehandlingDto>> {
         val stønadstyper = listOf(StønadType.OVERGANGSSTØNAD, StønadType.SKOLEPENGER, StønadType.BARNETILSYN)
         val gamleBehandlinger = stønadstyper.flatMap { stønadstype ->
-            behandlingService.hentGamleUferdigeBehandlinger(stønadstype).map { it.tilDto(stønadstype) }
+            behandlingService.hentUferdigeBehandlingerOpprettetFørDato(stønadstype).map { it.tilDto(stønadstype) }
         }
         return Ressurs.success(gamleBehandlinger)
     }

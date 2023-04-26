@@ -34,7 +34,7 @@ internal class TilbakekrevingClientTest {
             "/api/ytelsestype/$encodedStønadstype/fagsak/$eksternFagsakId/kanBehandlingOpprettesManuelt/v1"
         wiremockServerItem.stubFor(
             WireMock.get(WireMock.urlEqualTo(url))
-                .willReturn(WireMock.okJson(jsonResponse))
+                .willReturn(WireMock.okJson(jsonResponse)),
         )
         val kanBehandlingOpprettesManuelt =
             client.kanBehandlingOpprettesManuelt(StønadType.OVERGANGSSTØNAD, eksternFagsakId)
