@@ -1,6 +1,7 @@
 package no.nav.familie.ef.sak.behandling.oppgavekontroll
 
 import no.nav.familie.ef.sak.behandling.BehandlingService
+import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.kontrakter.felles.ef.StønadType
@@ -37,24 +38,34 @@ class BehandlingsoppgaveService(
     }
 
     fun antallÅpneBehandlingerUtenOppgave(): Int {
-        val stønadstyper = listOf(StønadType.OVERGANGSSTØNAD, StønadType.SKOLEPENGER, StønadType.BARNETILSYN)
-        val toUkerSiden = LocalDateTime.now().minusWeeks(2)
-        val gamleBehandlinger = stønadstyper.flatMap { stønadstype ->
-            behandlingService.hentUferdigeBehandlingerOpprettetFørDato(stønadstype, toUkerSiden)
-        }
+        val gamleBehandlinger = finnAlleBehandlingerOpprettetForMerEnnToUkerSiden()
 
         val eksternFagsakIds =
             gamleBehandlinger.map { fagsakService.hentFagsakForBehandling(it.id).eksternId.id.toString() }
 
         val alleOppgaver = oppgaveService.finnBehandleSakOppgaver()
         val oppgaveSaksreferanser: List<String> = alleOppgaver.flatMap { it.oppgaver.mapNotNull { oppgave -> oppgave.saksreferanse } }
+
         val fagsakerMedÅpenBehandlingSomManglerOppgave = eksternFagsakIds.filterNot { oppgaveSaksreferanser.contains(it) }
 
+        loggManglerOppgave(fagsakerMedÅpenBehandlingSomManglerOppgave)
+
+        return fagsakerMedÅpenBehandlingSomManglerOppgave.size
+    }
+
+    private fun loggManglerOppgave(fagsakerMedÅpenBehandlingSomManglerOppgave: List<String>) {
         logger.info("Fagsak med åpen behandling uten oppgave antall ${fagsakerMedÅpenBehandlingSomManglerOppgave.size}")
         fagsakerMedÅpenBehandlingSomManglerOppgave.forEach {
             logger.warn("Fagsaker med åpen behandling uten oppgave: $it")
         }
+    }
 
-        return fagsakerMedÅpenBehandlingSomManglerOppgave.size
+    private fun finnAlleBehandlingerOpprettetForMerEnnToUkerSiden(): List<Behandling> {
+        val stønadstyper = listOf(StønadType.OVERGANGSSTØNAD, StønadType.SKOLEPENGER, StønadType.BARNETILSYN)
+        val toUkerSiden = LocalDateTime.now().minusWeeks(2)
+        val gamleBehandlinger = stønadstyper.flatMap { stønadstype ->
+            behandlingService.hentUferdigeBehandlingerOpprettetFørDato(stønadstype, toUkerSiden)
+        }
+        return gamleBehandlinger
     }
 }
