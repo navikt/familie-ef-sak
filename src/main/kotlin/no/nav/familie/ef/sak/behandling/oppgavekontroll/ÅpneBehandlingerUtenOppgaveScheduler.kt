@@ -9,7 +9,8 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 class ÅpneBehandlingerUtenOppgaveScheduler(val behandlingsoppgaveService: BehandlingsoppgaveService) {
 
-    @Scheduled(cron = "\${FINN_BEHANDLINGER_UTEN_OPPGAVE_CRON_EXPRESSION}")
+    //@Scheduled(cron = "\${FINN_BEHANDLINGER_UTEN_OPPGAVE_CRON_EXPRESSION}")
+    @Scheduled(initialDelay = 60 * 1000L, fixedDelay = 365 * 24 * 60 * 60 * 1000L) // kun første kjøring
     @Transactional
     fun opprettTaskFinnÅpneBehandlingerUtenOppgave() {
         behandlingsoppgaveService.opprettTask()
