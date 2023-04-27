@@ -135,7 +135,7 @@ class OppgaveService(
             val mapper = finnMapper(enhetsnummer)
             val mappeIdForGodkjenneVedtak = mapper.find {
                 (it.navn.contains("70 Godkjennevedtak") || it.navn.contains("70 Godkjenne vedtak")) &&
-                    !it.navn.contains("EF Sak")
+                        !it.navn.contains("EF Sak")
             }?.id?.toLong()
             mappeIdForGodkjenneVedtak?.let {
                 logger.info("Legger oppgave i Godkjenne vedtak-mappe")
@@ -241,10 +241,10 @@ class OppgaveService(
         } else {
             ""
         } +
-            "----- Opprettet av familie-ef-sak ${
-                LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME)
-            } --- \n" +
-            "$frontendOppgaveUrl" + "\n----- Oppgave må behandles i ny løsning"
+                "----- Opprettet av familie-ef-sak ${
+                    LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME)
+                } --- \n" +
+                "$frontendOppgaveUrl" + "\n----- Oppgave må behandles i ny løsning"
     }
 
     fun hentOppgaver(finnOppgaveRequest: FinnOppgaveRequest): FinnOppgaveResponseDto {
@@ -295,7 +295,7 @@ class OppgaveService(
             if (mappeRespons.antallTreffTotalt > mappeRespons.mapper.size) {
                 logger.error(
                     "Det finnes flere mapper (${mappeRespons.antallTreffTotalt}) " +
-                        "enn vi har hentet ut (${mappeRespons.mapper.size}). Sjekk limit. ",
+                            "enn vi har hentet ut (${mappeRespons.mapper.size}). Sjekk limit. ",
                 )
             }
             mappeRespons.mapper
@@ -330,7 +330,9 @@ class OppgaveService(
         }
     }
 
-    fun finnBehandleSakOppgaver(): List<FinnOppgaveResponseDto> {
+    fun finnBehandleSakOppgaver(
+        opprettetTomTidspunktPåBehandleSakOppgave: LocalDateTime
+    ): List<FinnOppgaveResponseDto> {
         val limit: Long = 2000
 
         val behandleSakOppgaver = oppgaveClient.hentOppgaver(
@@ -338,7 +340,7 @@ class OppgaveService(
                 tema = Tema.ENF,
                 oppgavetype = Oppgavetype.BehandleSak,
                 limit = limit,
-                opprettetTomTidspunkt = LocalDateTime.now().minusWeeks(2).minusDays(5),
+                opprettetTomTidspunkt = opprettetTomTidspunktPåBehandleSakOppgave,
             ),
         )
 
