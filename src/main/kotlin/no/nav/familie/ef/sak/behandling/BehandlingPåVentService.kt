@@ -40,21 +40,19 @@ class BehandlingPåVentService(
     private val oppgaveService: OppgaveService,
 ) {
     @Transactional
-    fun settPåVent(behandlingId: UUID, settPåVentRequest: SettPåVentRequest? = null) {
+    fun settPåVent(behandlingId: UUID, settPåVentRequest: SettPåVentRequest) {
         val behandling = behandlingService.hentBehandling(behandlingId)
 
-        validerKanSettePåVent(behandling, settPåVentRequest)
+        validerKanSettePåVent(behandling)
 
         behandlingService.oppdaterStatusPåBehandling(behandlingId, SATT_PÅ_VENT)
         opprettHistorikkInnslag(behandling, StegUtfall.SATT_PÅ_VENT)
         taskService.save(BehandlingsstatistikkTask.opprettVenterTask(behandlingId))
 
-        if (settPåVentRequest != null) {
-            oppdaterVerdierPåOppgave(settPåVentRequest)
+        oppdaterVerdierPåOppgave(settPåVentRequest)
 
-            if (settPåVentRequest.oppfølgingsoppgaverMotLokalKontor.isNotEmpty()) {
-                opprettVurderHenvendelseOppgaveTasks(behandlingId, settPåVentRequest.oppfølgingsoppgaverMotLokalKontor)
-            }
+        if (settPåVentRequest.oppfølgingsoppgaverMotLokalKontor.isNotEmpty()) {
+            opprettVurderHenvendelseOppgaveTasks(behandlingId, settPåVentRequest.oppfølgingsoppgaverMotLokalKontor)
         }
     }
 
@@ -85,13 +83,12 @@ class BehandlingPåVentService(
         validerKanOppretteVurderHenvendelseOppgave(saksbehandling, vurderHenvendelseOppgaver)
 
         vurderHenvendelseOppgaver.forEach {
-            val oppgaveBeskrivelse = oppgaveService.lagOppgavebeskrivelse(it)
             taskService.save(
                 OpprettOppgaveTask.opprettTask(
                     OpprettOppgaveTask.OpprettOppgaveTaskData(
                         behandlingId = saksbehandling.id,
                         oppgavetype = Oppgavetype.VurderHenvendelse,
-                        beskrivelse = oppgaveBeskrivelse,
+                        beskrivelse = oppgaveService.lagOppgavebeskrivelse(it),
                     ),
                 ),
             )
@@ -206,13 +203,12 @@ class BehandlingPåVentService(
 
     private fun validerKanSettePåVent(
         behandling: Behandling,
-        settPåVentRequest: SettPåVentRequest?,
     ) {
         brukerfeilHvis(behandling.status.behandlingErLåstForVidereRedigering()) {
             "Kan ikke sette behandling med status ${behandling.status} på vent"
         }
 
-        feilHvis(settPåVentRequest != null && !featureToggleService.isEnabled(Toggle.SETT_PÅ_VENT_MED_OPPGAVESTYRING)) {
+        feilHvis( !featureToggleService.isEnabled(Toggle.SETT_PÅ_VENT_MED_OPPGAVESTYRING)) {
             "Featuretoggle for sett på vent med oppgavestyring er ikke påskrudd"
         }
     }

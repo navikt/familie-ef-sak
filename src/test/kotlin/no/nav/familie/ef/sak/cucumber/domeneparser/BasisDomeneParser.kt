@@ -2,8 +2,10 @@ package no.nav.familie.ef.sak.cucumber.domeneparser
 
 import io.cucumber.datatable.DataTable
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
+import no.nav.familie.ef.sak.behandling.dto.VurderHenvendelseOppgavetype
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.cucumber.domeneparser.SaksbehandlingDomeneBegrep
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.cucumber.domeneparser.ÅrMånedEllerDato
+import no.nav.familie.ef.sak.no.nav.familie.ef.sak.cucumber.steps.SettPåVentStepDefinitions.SettPåVentDomeneBegrep
 import no.nav.familie.ef.sak.vedtak.domain.AktivitetType
 import no.nav.familie.ef.sak.vedtak.domain.AktivitetstypeBarnetilsyn
 import no.nav.familie.ef.sak.vedtak.domain.PeriodetypeBarnetilsyn
@@ -233,9 +235,18 @@ fun parseBehandlingstype(rad: Map<String, String>): BehandlingType? {
     return parseValgfriEnum<BehandlingType>(SaksbehandlingDomeneBegrep.BEHANDLINGSTYPE, rad)
 }
 
+fun parseOppfølgingsoppgave(rad: Map<String, String>): VurderHenvendelseOppgavetype {
+    return parseEnum(SettPåVentDomeneBegrep.OPPFØLGINGSOPPGAVE, rad)
+}
+
 inline fun <reified T : Enum<T>> parseValgfriEnum(domenebegrep: Domenenøkkel, rad: Map<String, String>): T? {
     val verdi = valgfriVerdi(domenebegrep.nøkkel(), rad) ?: return null
     return enumValueOf<T>(verdi.uppercase())
+}
+
+inline fun <reified T : Enum<T>> parseEnumUtenUppercase(domenebegrep: Domenenøkkel, rad: Map<String, String>): T? {
+    val verdi = valgfriVerdi(domenebegrep.nøkkel(), rad) ?: return null
+    return enumValueOf<T>(verdi)
 }
 
 inline fun <reified T : Enum<T>> parseEnum(domenebegrep: Domenenøkkel, rad: Map<String, String>): T {
