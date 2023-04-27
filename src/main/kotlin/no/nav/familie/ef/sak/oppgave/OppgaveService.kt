@@ -310,7 +310,6 @@ class OppgaveService(
     }
 
     fun finnBehandleSakOppgaver(): List<FinnOppgaveResponseDto> {
-
         val limit: Long = 2000
 
         val behandleSakOppgaver = oppgaveClient.hentOppgaver(
@@ -318,7 +317,7 @@ class OppgaveService(
                 tema = Tema.ENF,
                 oppgavetype = Oppgavetype.BehandleSak,
                 limit = limit,
-                opprettetTomTidspunkt = LocalDateTime.now().minusWeeks(2).minusDays(5)
+                opprettetTomTidspunkt = LocalDateTime.now().minusWeeks(2).minusDays(5),
             ),
         )
 
@@ -338,13 +337,12 @@ class OppgaveService(
             ),
         )
 
-        logger.info("Hentet oppgaver:  ${behandleSakOppgaver.antallTreffTotalt}, ${behandleUnderkjent.antallTreffTotalt}, ${godkjenne.antallTreffTotalt}" )
+        logger.info("Hentet oppgaver:  ${behandleSakOppgaver.antallTreffTotalt}, ${behandleUnderkjent.antallTreffTotalt}, ${godkjenne.antallTreffTotalt}")
 
+        feilHvis(behandleSakOppgaver.antallTreffTotalt >= limit) { "For mange behandleSakOppgaver - limit truffet: + $limit " }
+        feilHvis(behandleUnderkjent.antallTreffTotalt >= limit) { "For mange behandleUnderkjent - limit truffet: + $limit " }
+        feilHvis(godkjenne.antallTreffTotalt >= limit) { "For mange godkjenne - limit truffet: + $limit " }
 
-        feilHvis(behandleSakOppgaver.antallTreffTotalt >= limit ) { "For mange behandleSakOppgaver - limit truffet: + $limit " }
-        feilHvis(behandleUnderkjent.antallTreffTotalt >= limit ) { "For mange behandleUnderkjent - limit truffet: + $limit " }
-        feilHvis(godkjenne.antallTreffTotalt >= limit ) { "For mange godkjenne - limit truffet: + $limit " }
-
-        return listOf(behandleSakOppgaver,behandleUnderkjent,godkjenne)
+        return listOf(behandleSakOppgaver, behandleUnderkjent, godkjenne)
     }
 }
