@@ -6,6 +6,7 @@ import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.infrastruktur.config.getValue
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.oppgave.OppgaveUtil.ENHET_NR_NAY
+import no.nav.familie.ef.sak.oppgave.dto.UtdanningOppgaveDto
 import no.nav.familie.http.client.RessursException
 import no.nav.familie.kontrakter.felles.Behandlingstema
 import no.nav.familie.kontrakter.felles.Tema
@@ -306,6 +307,26 @@ class OppgaveService(
             return gjeldendeTid.plusDays(2).toLocalDate()
         } else {
             gjeldendeTid.plusDays(1).toLocalDate()
+        }
+    }
+
+    fun finnOppgaverIUtdanningsmappe(fristDato: LocalDate): List<UtdanningOppgaveDto> {
+        val oppgaver = oppgaveClient.hentOppgaver(
+            FinnOppgaveRequest(
+                tema = Tema.ENF,
+                mappeId = 100026882, // Mappenavn: 64 - Utdanning
+                fristFomDato = fristDato,
+                fristTomDato = fristDato,
+            ),
+        ).oppgaver
+
+        return oppgaver.map { oppgave ->
+            UtdanningOppgaveDto(
+                oppgave.aktoerId,
+                oppgave.behandlingstema?.let { Behandlingstema.fromValue(it) },
+                oppgave.oppgavetype,
+                oppgave.beskrivelse,
+            )
         }
     }
 
