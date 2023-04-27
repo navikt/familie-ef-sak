@@ -6,12 +6,16 @@ import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.behandling.ÅrsakRevurderingsRepository
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.behandlingshistorikk.BehandlingshistorikkService
+import no.nav.familie.ef.sak.beregning.forrigeGrunnbeløp
+import no.nav.familie.ef.sak.beregning.nyesteGrunnbeløpGyldigFraOgMed
 import no.nav.familie.ef.sak.beregning.skolepenger.SkolepengerMaksbeløp
 import no.nav.familie.ef.sak.brev.BrevmottakereRepository
 import no.nav.familie.ef.sak.brev.domain.BrevmottakerOrganisasjon
 import no.nav.familie.ef.sak.brev.domain.BrevmottakerPerson
 import no.nav.familie.ef.sak.brev.domain.MottakerRolle
+import no.nav.familie.ef.sak.felles.util.DatoUtil
 import no.nav.familie.ef.sak.felles.util.Skoleår
+import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvisIkke
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.opplysninger.mapper.BarnMatcher
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
@@ -70,7 +74,9 @@ import no.nav.familie.kontrakter.felles.annotasjoner.Improvement
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Component
+import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.Month
 import java.time.YearMonth
 import java.util.UUID
 import no.nav.familie.kontrakter.ef.felles.RegelId as RegelIdIverksett
@@ -116,6 +122,8 @@ class IverksettingDtoMapper(
         val vedtak = vedtakService.hentVedtak(saksbehandling.id)
         val tilkjentYtelse =
             if (vedtak.resultatType != ResultatType.AVSLÅ) tilkjentYtelseService.hentForBehandling(saksbehandling.id) else null
+
+        if (tilkjentYtelse != null) validerGrunnbeløpsmåned(tilkjentYtelse)
         val vilkårsvurderinger = vilkårsvurderingRepository.findByBehandlingId(saksbehandling.id)
 
         val behandlingsdetaljer = mapBehandlingsdetaljer(saksbehandling, vilkårsvurderinger)
@@ -175,6 +183,22 @@ class IverksettingDtoMapper(
                     vedtak = vedtakDto,
                 )
             }
+        }
+    }
+
+    private fun validerGrunnbeløpsmåned(tilkjentYtelse: TilkjentYtelse) {
+        val gMånedTilkjentYtelse = tilkjentYtelse.grunnbeløpsmåned
+        val harFåttÅretsGrunnbeløp = nyesteGrunnbeløpGyldigFraOgMed.year == DatoUtil.inneværendeÅr()
+        val feilmelding =
+            "Kan ikke iverksette med utdatert grunnbeløp gyldig fra $gMånedTilkjentYtelse. Denne behandlingen må beregnes og simmuleres på nytt"
+        val fristGOmregning = LocalDate.of(DatoUtil.inneværendeÅr(), Month.JUNE, 15)
+
+        if (harFåttÅretsGrunnbeløp && DatoUtil.dagensDato() < fristGOmregning) {
+            brukerfeilHvisIkke(gMånedTilkjentYtelse == nyesteGrunnbeløpGyldigFraOgMed || gMånedTilkjentYtelse == forrigeGrunnbeløp.periode.fom) {
+                feilmelding
+            }
+        } else {
+            brukerfeilHvisIkke(gMånedTilkjentYtelse == nyesteGrunnbeløpGyldigFraOgMed) { feilmelding }
         }
     }
 
