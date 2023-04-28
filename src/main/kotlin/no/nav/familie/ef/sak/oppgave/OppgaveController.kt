@@ -136,7 +136,7 @@ class OppgaveController(
     }
 
     @GetMapping(path = ["/utdanningsuttrekk"])
-    fun utdanningsuttrekk(@PathVariable frist: LocalDate): Ressurs<List<UtdanningOppgaveDto>> {
+    fun utdanningsuttrekk(@RequestParam frist: LocalDate): Ressurs<List<UtdanningOppgaveDto>> {
         return Ressurs.success(oppgaveService.finnOppgaverIUtdanningsmappe(frist))
     }
 }
