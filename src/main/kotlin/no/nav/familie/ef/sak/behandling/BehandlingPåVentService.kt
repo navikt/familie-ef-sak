@@ -116,7 +116,7 @@ class BehandlingPåVentService(
         val skalOppdatereBeskrivelse = harEndringer || beskrivelse.isNotBlank()
         val tidligereBeskrivelse =
             if (skalOppdatereBeskrivelse && oppgave.beskrivelse?.isNotBlank() == true) {
-                "\n${oppgave.beskrivelse.orEmpty()}"
+                "\n\n${oppgave.beskrivelse.orEmpty()}"
             } else {
                 oppgave.beskrivelse.orEmpty()
             }
@@ -125,7 +125,7 @@ class BehandlingPåVentService(
 
         val nyBeskrivelse =
             if (skalOppdatereBeskrivelse) {
-                prefix + tilordnetSaksbehandler + prioritet + frist + mappe + beskrivelse + tidligereBeskrivelse
+                prefix + beskrivelse + tilordnetSaksbehandler + prioritet + frist + mappe + tidligereBeskrivelse
             } else {
                 tidligereBeskrivelse
             }
@@ -148,8 +148,8 @@ class BehandlingPåVentService(
     ): String {
         return when {
             settPåVentRequest.beskrivelse.isBlank() -> ""
-            harEndringer -> "\n${settPåVentRequest.beskrivelse}\n"
-            else -> "${settPåVentRequest.beskrivelse}\n"
+            harEndringer -> "${settPåVentRequest.beskrivelse}\n\n"
+            else -> "${settPåVentRequest.beskrivelse}\n\n"
         }
     }
 
