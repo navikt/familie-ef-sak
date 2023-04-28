@@ -23,6 +23,7 @@ internal class OpprettOppgaveTaskTest {
     @BeforeEach
     fun setUp() {
         every { oppgaveService.opprettOppgave(any(), any()) } returns 1L
+        every { oppgaveService.opprettOppgaveUtenÅLagreIRepository(any(), any(), any(), any(), any()) } returns 2L
     }
 
     @Test
@@ -37,7 +38,8 @@ internal class OpprettOppgaveTaskTest {
         )
 
         opprettOppgaveTask.doTask(task)
-        verifyKall(0)
+        verifyOpprettOppgaveMedLagringKall(0)
+        verifyOpprettOppgaveUtenLagringKall(0)
     }
 
     @Test
@@ -52,10 +54,33 @@ internal class OpprettOppgaveTaskTest {
         )
 
         opprettOppgaveTask.doTask(task)
-        verifyKall(1)
+        verifyOpprettOppgaveMedLagringKall(1)
+        verifyOpprettOppgaveUtenLagringKall(0)
     }
 
-    private fun verifyKall(opprettOppgaveKall: Int) {
+    @Test
+    fun `skal ikke lagre ned oppgave om oppgavetypen er vurder henvendelse`() {
+        every { behandlingService.hentBehandling(behandlingId) } returns behandling(id = behandlingId, status = BehandlingStatus.UTREDES)
+        every {oppgaveService.lagOppgaveTekst(any())} returns ""
+
+        val task = OpprettOppgaveTask.opprettTask(
+            OpprettOppgaveTask.OpprettOppgaveTaskData(
+                behandlingId = behandlingId,
+                oppgavetype = Oppgavetype.VurderHenvendelse,
+                beskrivelse = ""
+            ),
+        )
+
+        opprettOppgaveTask.doTask(task)
+        verifyOpprettOppgaveMedLagringKall(0)
+        verifyOpprettOppgaveUtenLagringKall(1)
+    }
+
+    private fun verifyOpprettOppgaveMedLagringKall(opprettOppgaveKall: Int) {
         verify(exactly = opprettOppgaveKall) { oppgaveService.opprettOppgave(any(), any()) }
+    }
+
+    private fun verifyOpprettOppgaveUtenLagringKall(opprettOppgaveKall: Int) {
+        verify(exactly = opprettOppgaveKall) { oppgaveService.opprettOppgaveUtenÅLagreIRepository(any(), any(), any(), any(), any()) }
     }
 }
