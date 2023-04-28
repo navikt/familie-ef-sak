@@ -162,6 +162,7 @@ object SøknadsskjemaMapper {
         Medlemskap(
             oppholderDuDegINorge = medlemskapsdetaljer.oppholderDuDegINorge.verdi,
             bosattNorgeSisteÅrene = medlemskapsdetaljer.bosattNorgeSisteÅrene.verdi,
+            oppholdsland = medlemskapsdetaljer.oppholdsland?.svarId,
             utenlandsopphold = tilUtenlandsopphold(medlemskapsdetaljer.utenlandsopphold?.verdi),
         )
 
@@ -170,6 +171,7 @@ object SøknadsskjemaMapper {
             Utenlandsopphold(
                 fradato = it.fradato.verdi,
                 tildato = it.tildato.verdi,
+                land = it.land?.svarId,
                 årsakUtenlandsopphold = it.årsakUtenlandsopphold.verdi,
             )
         }?.toSet() ?: emptySet()
