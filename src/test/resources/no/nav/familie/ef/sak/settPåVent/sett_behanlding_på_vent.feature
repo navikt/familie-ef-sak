@@ -321,4 +321,70 @@ Venter på bruker
       | prioritet     | NORM                    |
       | beskrivelse   | eksistrende beskrivelse |
 
+  Scenario: Sett på vent med en oppfølgingsoppgave som automatisk skal opprettes - informer om søkt overgangsstønad
 
+    Gitt eksisterende oppgave
+      | saksbehandler | Ola                     |
+      | frist         | 18.03.2023              |
+      | prioritet     | NORM                    |
+      | beskrivelse   | eksistrende beskrivelse |
+
+    Og mapper
+      | Mappeid | Mappenavn               |
+      | 111     | søknad                  |
+      | 222     | venter på dokumentasjon |
+
+    Og sett på vent request
+      | saksbehandler | Ola        |
+      | frist         | 18.03.2023 |
+      | prioritet     | NORM       |
+      | beskrivelse   |            |
+
+    Og behandling
+      | BehandlingId | a7947fc8-e39d-4cbc-960c-73ef39a9b59d |
+
+    Og valgte oppfølgingsoppgaver
+      | oppfølgingsopppgave               |
+      | INFORMERE_OM_SØKT_OVERGANGSSTØNAD |
+
+    Når vi setter behandling på vent
+
+    Så forventer vi at følgende task lagres
+      | Tasktype           | opprettOppgave                                       |
+      | BehandlingId       | a7947fc8-e39d-4cbc-960c-73ef39a9b59d                 |
+      | Oppgavetype        | VurderHenvendelse                                    |
+      | Oppgavebeskrivelse | Bruker har søkt om overgangsstønad. Til informasjon. |
+
+  Scenario: Sett på vent med en oppfølgingsoppgave som automatisk skal opprettes - be om innstilling om utdanning
+
+    Gitt eksisterende oppgave
+      | saksbehandler | Ola                     |
+      | frist         | 18.03.2023              |
+      | prioritet     | NORM                    |
+      | beskrivelse   | eksistrende beskrivelse |
+
+    Og mapper
+      | Mappeid | Mappenavn               |
+      | 111     | søknad                  |
+      | 222     | venter på dokumentasjon |
+
+    Og sett på vent request
+      | saksbehandler | Ola        |
+      | frist         | 18.03.2023 |
+      | prioritet     | NORM       |
+      | beskrivelse   |            |
+
+    Og behandling
+      | BehandlingId | a7947fc8-e39d-4cbc-960c-73ef39a9b59d |
+
+    Og valgte oppfølgingsoppgaver
+      | oppfølgingsopppgave              |
+      | INNSTILLING_VEDRØRENDE_UTDANNING |
+
+    Når vi setter behandling på vent
+
+    Så forventer vi at følgende task lagres
+      | Tasktype           | opprettOppgave                                                       |
+      | BehandlingId       | a7947fc8-e39d-4cbc-960c-73ef39a9b59d                                 |
+      | Oppgavetype        | VurderHenvendelse                                                    |
+      | Oppgavebeskrivelse | Vi trenger en vurdering fra dere fordi bruker tar/skal ta utdanning. |

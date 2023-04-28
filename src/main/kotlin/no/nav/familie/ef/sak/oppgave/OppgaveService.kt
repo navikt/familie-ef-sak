@@ -6,6 +6,7 @@ import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.infrastruktur.config.getValue
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.oppgave.OppgaveUtil.ENHET_NR_NAY
+import no.nav.familie.ef.sak.oppgave.dto.UtdanningOppgaveDto
 import no.nav.familie.http.client.RessursException
 import no.nav.familie.kontrakter.felles.Behandlingstema
 import no.nav.familie.kontrakter.felles.Tema
@@ -89,18 +90,10 @@ class OppgaveService(
         tilordnetNavIdent: String?,
         mappeId: Long? = null, // Dersom denne er satt vil vi ikke prøve å finne mappe basert på oppgavens innhold
     ): Long {
-        val settBehandlesAvApplikasjon = when (oppgavetype) {
-            Oppgavetype.BehandleSak,
-            Oppgavetype.BehandleUnderkjentVedtak,
-            Oppgavetype.GodkjenneVedtak,
-            -> true
-
-            Oppgavetype.InnhentDokumentasjon -> false
-            else -> error("Håndterer ikke behandlesAvApplikasjon for $oppgavetype")
-        }
+        val settBehandlesAvApplikasjon = utledSettBehandlesAvApplikasjon(oppgavetype)
         val fagsak = fagsakService.hentFagsakForBehandling(behandlingId)
         val personIdent = fagsak.hentAktivIdent()
-        val enhetsnummer = arbeidsfordelingService.hentNavEnhet(personIdent)?.enhetId
+        val enhetsnummer = arbeidsfordelingService.hentNavEnhetId(personIdent, oppgavetype)
         val opprettOppgave = OpprettOppgaveRequest(
             ident = OppgaveIdentV2(ident = personIdent, gruppe = IdentGruppe.FOLKEREGISTERIDENT),
             saksId = fagsak.eksternId.id.toString(),
@@ -309,6 +302,26 @@ class OppgaveService(
         }
     }
 
+    fun finnOppgaverIUtdanningsmappe(fristDato: LocalDate): List<UtdanningOppgaveDto> {
+        val oppgaver = oppgaveClient.hentOppgaver(
+            FinnOppgaveRequest(
+                tema = Tema.ENF,
+                mappeId = 100026882, // Mappenavn: 64 - Utdanning
+                fristFomDato = fristDato,
+                fristTomDato = fristDato,
+            ),
+        ).oppgaver
+
+        return oppgaver.map { oppgave ->
+            UtdanningOppgaveDto(
+                oppgave.aktoerId,
+                oppgave.behandlingstema?.let { Behandlingstema.fromValue(it) },
+                oppgave.oppgavetype,
+                oppgave.beskrivelse,
+            )
+        }
+    }
+
     fun finnBehandleSakOppgaver(): List<FinnOppgaveResponseDto> {
         val limit: Long = 2000
 
@@ -344,5 +357,16 @@ class OppgaveService(
         feilHvis(godkjenne.antallTreffTotalt >= limit) { "For mange godkjenne - limit truffet: + $limit " }
 
         return listOf(behandleSakOppgaver, behandleUnderkjent, godkjenne)
+    }
+
+    private fun utledSettBehandlesAvApplikasjon(oppgavetype: Oppgavetype) = when (oppgavetype) {
+        Oppgavetype.BehandleSak,
+        Oppgavetype.BehandleUnderkjentVedtak,
+        Oppgavetype.GodkjenneVedtak,
+        -> true
+
+        Oppgavetype.InnhentDokumentasjon -> false
+        Oppgavetype.VurderHenvendelse -> false
+        else -> error("Håndterer ikke behandlesAvApplikasjon for $oppgavetype")
     }
 }
