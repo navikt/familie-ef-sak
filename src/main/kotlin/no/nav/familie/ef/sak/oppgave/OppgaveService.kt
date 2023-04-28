@@ -4,7 +4,9 @@ import no.nav.familie.ef.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.infrastruktur.config.getValue
+import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.oppgave.OppgaveUtil.ENHET_NR_NAY
+import no.nav.familie.ef.sak.oppgave.dto.UtdanningOppgaveDto
 import no.nav.familie.http.client.RessursException
 import no.nav.familie.kontrakter.felles.Behandlingstema
 import no.nav.familie.kontrakter.felles.Tema
@@ -218,7 +220,10 @@ class OppgaveService(
     }
 
     fun hentIkkeFerdigstiltOppgaveForBehandling(behandlingId: UUID): Oppgave? {
-        return oppgaveRepository.findByBehandlingIdAndErFerdigstiltIsFalseAndTypeIn(behandlingId, setOf(Oppgavetype.BehandleSak, Oppgavetype.BehandleUnderkjentVedtak))
+        return oppgaveRepository.findByBehandlingIdAndErFerdigstiltIsFalseAndTypeIn(
+            behandlingId,
+            setOf(Oppgavetype.BehandleSak, Oppgavetype.BehandleUnderkjentVedtak),
+        )
             ?.let { oppgaveClient.finnOppgaveMedId(it.gsakOppgaveId) }
     }
 
@@ -228,7 +233,9 @@ class OppgaveService(
         } else {
             ""
         } +
-            "----- Opprettet av familie-ef-sak ${LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME)} --- \n" +
+            "----- Opprettet av familie-ef-sak ${
+                LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME)
+            } --- \n" +
             "$frontendOppgaveUrl" + "\n----- Oppgave må behandles i ny løsning"
     }
 
@@ -295,11 +302,69 @@ class OppgaveService(
         }
     }
 
+    fun finnOppgaverIUtdanningsmappe(fristDato: LocalDate): List<UtdanningOppgaveDto> {
+        val oppgaver = oppgaveClient.hentOppgaver(
+            FinnOppgaveRequest(
+                tema = Tema.ENF,
+                mappeId = 100026882, // Mappenavn: 64 - Utdanning
+                fristFomDato = fristDato,
+                fristTomDato = fristDato,
+            ),
+        ).oppgaver
+
+        return oppgaver.map { oppgave ->
+            UtdanningOppgaveDto(
+                oppgave.aktoerId,
+                oppgave.behandlingstema?.let { Behandlingstema.fromValue(it) },
+                oppgave.oppgavetype,
+                oppgave.beskrivelse,
+            )
+        }
+    }
+
+    fun finnBehandleSakOppgaver(): List<FinnOppgaveResponseDto> {
+        val limit: Long = 2000
+
+        val behandleSakOppgaver = oppgaveClient.hentOppgaver(
+            finnOppgaveRequest = FinnOppgaveRequest(
+                tema = Tema.ENF,
+                oppgavetype = Oppgavetype.BehandleSak,
+                limit = limit,
+                opprettetTomTidspunkt = LocalDateTime.now().minusWeeks(2).minusDays(5),
+            ),
+        )
+
+        val behandleUnderkjent = oppgaveClient.hentOppgaver(
+            finnOppgaveRequest = FinnOppgaveRequest(
+                tema = Tema.ENF,
+                oppgavetype = Oppgavetype.BehandleUnderkjentVedtak,
+                limit = limit,
+            ),
+        )
+
+        val godkjenne = oppgaveClient.hentOppgaver(
+            finnOppgaveRequest = FinnOppgaveRequest(
+                tema = Tema.ENF,
+                oppgavetype = Oppgavetype.GodkjenneVedtak,
+                limit = limit,
+            ),
+        )
+
+        logger.info("Hentet oppgaver:  ${behandleSakOppgaver.antallTreffTotalt}, ${behandleUnderkjent.antallTreffTotalt}, ${godkjenne.antallTreffTotalt}")
+
+        feilHvis(behandleSakOppgaver.antallTreffTotalt >= limit) { "For mange behandleSakOppgaver - limit truffet: + $limit " }
+        feilHvis(behandleUnderkjent.antallTreffTotalt >= limit) { "For mange behandleUnderkjent - limit truffet: + $limit " }
+        feilHvis(godkjenne.antallTreffTotalt >= limit) { "For mange godkjenne - limit truffet: + $limit " }
+
+        return listOf(behandleSakOppgaver, behandleUnderkjent, godkjenne)
+    }
+
     private fun utledSettBehandlesAvApplikasjon(oppgavetype: Oppgavetype) = when (oppgavetype) {
         Oppgavetype.BehandleSak,
         Oppgavetype.BehandleUnderkjentVedtak,
         Oppgavetype.GodkjenneVedtak,
         -> true
+
         Oppgavetype.InnhentDokumentasjon -> false
         Oppgavetype.VurderHenvendelse -> false
         else -> error("Håndterer ikke behandlesAvApplikasjon for $oppgavetype")

@@ -60,10 +60,11 @@ class BehandlingService(
     fun finnSisteIverksatteBehandling(fagsakId: UUID) =
         behandlingRepository.finnSisteIverksatteBehandling(fagsakId)
 
-    fun hentGamleUferdigeBehandlinger(stønadtype: StønadType): List<Behandling> {
-        val enMånedSiden = LocalDateTime.now().minusMonths(1)
-
-        return behandlingRepository.hentUferdigeBehandlingerFørDato(stønadtype, enMånedSiden)
+    fun hentUferdigeBehandlingerOpprettetFørDato(
+        stønadtype: StønadType,
+        opprettetFørDato: LocalDateTime = LocalDateTime.now().minusMonths(1),
+    ): List<Behandling> {
+        return behandlingRepository.hentUferdigeBehandlingerOpprettetFørDato(stønadtype, opprettetFørDato)
     }
 
     fun finnesÅpenBehandling(fagsakId: UUID) =

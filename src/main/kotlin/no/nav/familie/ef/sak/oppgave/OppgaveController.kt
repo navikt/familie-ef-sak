@@ -11,6 +11,7 @@ import no.nav.familie.ef.sak.oppgave.dto.FinnOppgaveRequestDto
 import no.nav.familie.ef.sak.oppgave.dto.OppgaveDto
 import no.nav.familie.ef.sak.oppgave.dto.OppgaveEfDto
 import no.nav.familie.ef.sak.oppgave.dto.OppgaveResponseDto
+import no.nav.familie.ef.sak.oppgave.dto.UtdanningOppgaveDto
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveResponseDto
@@ -28,6 +29,7 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
+import java.time.LocalDate
 import java.util.UUID
 
 @RestController
@@ -131,6 +133,11 @@ class OppgaveController(
             enheter += ENHET_NR_EGEN_ANSATT
         }
         return Ressurs.success(oppgaveService.finnMapper(enheter = enheter))
+    }
+
+    @GetMapping(path = ["/utdanningsuttrekk"])
+    fun utdanningsuttrekk(@PathVariable frist: LocalDate): Ressurs<List<UtdanningOppgaveDto>> {
+        return Ressurs.success(oppgaveService.finnOppgaverIUtdanningsmappe(frist))
     }
 }
 
