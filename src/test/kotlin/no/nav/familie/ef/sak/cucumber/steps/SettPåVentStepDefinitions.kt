@@ -13,25 +13,21 @@ import io.mockk.slot
 import io.mockk.unmockkObject
 import no.nav.familie.ef.sak.behandling.BehandlingPåVentService
 import no.nav.familie.ef.sak.behandling.BehandlingService
-import no.nav.familie.ef.sak.behandling.Saksbehandling
-import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.dto.SettPåVentRequest
 import no.nav.familie.ef.sak.behandling.dto.VurderHenvendelseOppgavetype
 import no.nav.familie.ef.sak.behandlingshistorikk.BehandlingshistorikkService
 import no.nav.familie.ef.sak.cucumber.domeneparser.Domenenøkkel
 import no.nav.familie.ef.sak.cucumber.domeneparser.parseDato
 import no.nav.familie.ef.sak.cucumber.domeneparser.parseEnum
-import no.nav.familie.ef.sak.cucumber.domeneparser.parseInt
-import no.nav.familie.ef.sak.cucumber.domeneparser.parseOppfølgingsoppgave
-import no.nav.familie.ef.sak.cucumber.domeneparser.parseString
 import no.nav.familie.ef.sak.cucumber.domeneparser.parseEnumUtenUppercase
+import no.nav.familie.ef.sak.cucumber.domeneparser.parseInt
+import no.nav.familie.ef.sak.cucumber.domeneparser.parseString
 import no.nav.familie.ef.sak.cucumber.domeneparser.parseValgfriDato
 import no.nav.familie.ef.sak.cucumber.domeneparser.parseValgfriEnum
 import no.nav.familie.ef.sak.cucumber.domeneparser.parseValgfriString
 import no.nav.familie.ef.sak.felles.util.DatoUtil
 import no.nav.familie.ef.sak.felles.util.mockFeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
-import no.nav.familie.ef.sak.iverksett.oppgaveforbarn.OppgaveBeskrivelse
 import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.saksbehandling
@@ -123,11 +119,11 @@ class SettPåVentStepDefinitions {
         saksbehandling = saksbehandling(behandling = behandling)
     }
 
-    @Gitt("oppfølgingsoppgaver")
+    @Gitt("valgte oppfølgingsoppgaver")
     fun oppFølgingsoppgaver(dataTable: DataTable) {
         val oppfølgingsoppgaver = mutableListOf<VurderHenvendelseOppgavetype>()
         dataTable.asMaps().map {
-            oppfølgingsoppgaver.add(parseOppfølgingsoppgave(it))
+            oppfølgingsoppgaver.add(parseEnum(SettPåVentDomeneBegrep.OPPFØLGINGSOPPGAVE, it))
         }
         settOppgavePåVentRequest = settOppgavePåVentRequest.copy(oppfølgingsoppgaverMotLokalKontor = oppfølgingsoppgaver.toList())
     }
@@ -143,8 +139,6 @@ class SettPåVentStepDefinitions {
         every { behandlingService.hentSaksbehandling(behandling.id) } returns saksbehandling
         every { behandlingService.oppdaterStatusPåBehandling(any(), any()) } returns behandling
         every { oppgaveService.hentOppgave(any()) } returns eksisterendeOppgave
-        every { oppgaveService.lagOppgavebeskrivelse(VurderHenvendelseOppgavetype.INNSTILLING_VEDRØRENDE_UTDANNING) } returns OppgaveBeskrivelse.innstillingOmBrukersUtdanning
-        every { oppgaveService.lagOppgavebeskrivelse(VurderHenvendelseOppgavetype.INFORMERE_OM_SØKT_OVERGANGSSTØNAD) } returns OppgaveBeskrivelse.informereLokalkontorOmOvergangsstønad
         every { behandlingshistorikkService.opprettHistorikkInnslag(any(), any(), any(), any()) } just Runs
         every { oppgaveService.oppdaterOppgave(capture(oppgaveSlot)) } just Runs
         every { taskService.save(capture(taskSlot)) } answers { firstArg() }
@@ -196,7 +190,7 @@ class SettPåVentStepDefinitions {
         MAPPE("mappe"),
         PRIORITET("prioritet"),
         BESKRIVELSE("beskrivelse"),
-        OPPFØLGINGSOPPGAVE("oppfølgingsopppgave")
+        OPPFØLGINGSOPPGAVE("oppfølgingsopppgave"),
         ;
 
         override fun nøkkel(): String {

@@ -18,9 +18,9 @@ import no.nav.familie.ef.sak.behandlingsflyt.task.OpprettOppgaveTask
 import no.nav.familie.ef.sak.behandlingshistorikk.BehandlingshistorikkService
 import no.nav.familie.ef.sak.behandlingshistorikk.domain.StegUtfall
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
+import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
-import no.nav.familie.ef.sak.iverksett.oppgaveforbarn.OppgaveBeskrivelse
 import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
@@ -152,7 +152,7 @@ internal class BehandlingPåVentServiceTest {
             val oppfølgingsoppgaver = listOf(innstillingUtdanning)
             val settPåVentRequest = settPåVentRequest(
                 oppgaveId,
-                oppfølgingsoppgaver
+                oppfølgingsoppgaver,
             )
 
             behandlingPåVentService.settPåVent(
@@ -160,7 +160,7 @@ internal class BehandlingPåVentServiceTest {
                 settPåVentRequest,
             )
 
-            verify (exactly = 1) {
+            verify(exactly = 1) {
                 taskService.save(
                     coWithArg {
                         assertThat(it.type).isEqualTo(OpprettOppgaveTask.TYPE)
@@ -179,7 +179,7 @@ internal class BehandlingPåVentServiceTest {
             val oppfølgingsoppgaver = listOf(informereOmSøktStønad)
             val settPåVentRequest = settPåVentRequest(
                 oppgaveId,
-                oppfølgingsoppgaver
+                oppfølgingsoppgaver,
             )
 
             behandlingPåVentService.settPåVent(
@@ -187,7 +187,7 @@ internal class BehandlingPåVentServiceTest {
                 settPåVentRequest,
             )
 
-            verify (exactly = 1) {
+            verify(exactly = 1) {
                 taskService.save(
                     coWithArg {
                         assertThat(it.type).isEqualTo(OpprettOppgaveTask.TYPE)
@@ -206,7 +206,7 @@ internal class BehandlingPåVentServiceTest {
             val oppfølgingsoppgaver = listOf(informereOmSøktStønad, innstillingUtdanning)
             val settPåVentRequest = settPåVentRequest(
                 oppgaveId,
-                oppfølgingsoppgaver
+                oppfølgingsoppgaver,
             )
 
             behandlingPåVentService.settPåVent(
@@ -214,7 +214,7 @@ internal class BehandlingPåVentServiceTest {
                 settPåVentRequest,
             )
 
-            verify (exactly = 1) {
+            verify(exactly = 1) {
                 taskService.save(
                     coWithArg {
                         assertThat(it.type).isEqualTo(OpprettOppgaveTask.TYPE)
@@ -225,7 +225,7 @@ internal class BehandlingPåVentServiceTest {
                 )
             }
 
-            verify (exactly = 1) {
+            verify(exactly = 1) {
                 taskService.save(
                     coWithArg {
                         assertThat(it.type).isEqualTo(OpprettOppgaveTask.TYPE)
@@ -244,13 +244,13 @@ internal class BehandlingPåVentServiceTest {
             val oppfølgingsoppgaver = listOf(informereOmSøktStønad)
             val settPåVentRequest = settPåVentRequest(
                 oppgaveId,
-                oppfølgingsoppgaver
+                oppfølgingsoppgaver,
             )
 
-            val feil: ApiFeil =
+            val feil: Feil =
                 assertThrows { behandlingPåVentService.settPåVent(behandlingId, settPåVentRequest) }
 
-            assertThat(feil.httpStatus).isEqualTo(HttpStatus.BAD_REQUEST)
+            assertThat(feil.httpStatus).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR)
         }
 
         @Test
@@ -260,13 +260,13 @@ internal class BehandlingPåVentServiceTest {
             val oppfølgingsoppgaver = listOf(innstillingUtdanning)
             val settPåVentRequest = settPåVentRequest(
                 oppgaveId,
-                oppfølgingsoppgaver
+                oppfølgingsoppgaver,
             )
 
-            val feil: ApiFeil =
+            val feil: Feil =
                 assertThrows { behandlingPåVentService.settPåVent(behandlingId, settPåVentRequest) }
 
-            assertThat(feil.httpStatus).isEqualTo(HttpStatus.BAD_REQUEST)
+            assertThat(feil.httpStatus).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR)
         }
 
         @Test
@@ -438,17 +438,12 @@ internal class BehandlingPåVentServiceTest {
     private fun mockHentBehandling(
         status: BehandlingStatus,
         forrigeBehandlingId: UUID? = null,
-        stønadType: StønadType = StønadType.OVERGANGSSTØNAD
+        stønadType: StønadType = StønadType.OVERGANGSSTØNAD,
     ) {
         every {
             behandlingService.hentBehandling(behandlingId)
         } returns behandling.copy(status = status, forrigeBehandlingId = forrigeBehandlingId)
         every { behandlingService.hentSaksbehandling(behandlingId) } returns saksbehandling.copy(stønadstype = stønadType)
-    }
-
-    private fun mockLagOppgavebeskrivelse() {
-        every { oppgaveService.lagOppgavebeskrivelse(innstillingUtdanning) } returns OppgaveBeskrivelse.innstillingOmBrukersUtdanning
-        every { oppgaveService.lagOppgavebeskrivelse(informereOmSøktStønad) } returns OppgaveBeskrivelse.informereLokalkontorOmOvergangsstønad
     }
 
     private fun mockHentBehandlinger(vararg behandlinger: Behandling) {
@@ -461,7 +456,6 @@ internal class BehandlingPåVentServiceTest {
 
     private fun mockOppsettForAutomatiskeOppgaver(stønadType: StønadType = StønadType.OVERGANGSSTØNAD): Long {
         mockHentBehandling(BehandlingStatus.UTREDES, null, stønadType)
-        mockLagOppgavebeskrivelse()
 
         val oppgaveId: Long = 123
         val eksisterendeOppgave = oppgave(oppgaveId)

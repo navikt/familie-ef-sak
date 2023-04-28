@@ -343,7 +343,7 @@ Venter på bruker
     Og behandling
       | BehandlingId | a7947fc8-e39d-4cbc-960c-73ef39a9b59d |
 
-    Og oppfølgingsoppgaver
+    Og valgte oppfølgingsoppgaver
       | oppfølgingsopppgave               |
       | INFORMERE_OM_SØKT_OVERGANGSSTØNAD |
 
@@ -377,7 +377,7 @@ Venter på bruker
     Og behandling
       | BehandlingId | a7947fc8-e39d-4cbc-960c-73ef39a9b59d |
 
-    Og oppfølgingsoppgaver
+    Og valgte oppfølgingsoppgaver
       | oppfølgingsopppgave              |
       | INNSTILLING_VEDRØRENDE_UTDANNING |
 

@@ -7,6 +7,7 @@ import no.nav.familie.ef.sak.behandling.dto.SettPåVentRequest
 import no.nav.familie.ef.sak.behandling.dto.TaAvVentStatus
 import no.nav.familie.ef.sak.behandling.dto.TaAvVentStatusDto
 import no.nav.familie.ef.sak.behandling.dto.VurderHenvendelseOppgavetype
+import no.nav.familie.ef.sak.behandling.dto.beskrivelse
 import no.nav.familie.ef.sak.behandlingsflyt.task.BehandlingsstatistikkTask
 import no.nav.familie.ef.sak.behandlingsflyt.task.OpprettOppgaveTask
 import no.nav.familie.ef.sak.behandlingshistorikk.BehandlingshistorikkService
@@ -51,7 +52,7 @@ class BehandlingPåVentService(
 
         oppdaterVerdierPåOppgave(settPåVentRequest)
 
-        if (settPåVentRequest.oppfølgingsoppgaverMotLokalKontor.isNotEmpty()) {
+        if (!settPåVentRequest.oppfølgingsoppgaverMotLokalKontor.isNullOrEmpty()) {
             opprettVurderHenvendelseOppgaveTasks(behandlingId, settPåVentRequest.oppfølgingsoppgaverMotLokalKontor)
         }
     }
@@ -88,7 +89,7 @@ class BehandlingPåVentService(
                     OpprettOppgaveTask.OpprettOppgaveTaskData(
                         behandlingId = saksbehandling.id,
                         oppgavetype = Oppgavetype.VurderHenvendelse,
-                        beskrivelse = oppgaveService.lagOppgavebeskrivelse(it),
+                        beskrivelse = it.beskrivelse(),
                     ),
                 ),
             )
@@ -208,7 +209,7 @@ class BehandlingPåVentService(
             "Kan ikke sette behandling med status ${behandling.status} på vent"
         }
 
-        feilHvis( !featureToggleService.isEnabled(Toggle.SETT_PÅ_VENT_MED_OPPGAVESTYRING)) {
+        feilHvis(!featureToggleService.isEnabled(Toggle.SETT_PÅ_VENT_MED_OPPGAVESTYRING)) {
             "Featuretoggle for sett på vent med oppgavestyring er ikke påskrudd"
         }
     }
@@ -218,18 +219,18 @@ class BehandlingPåVentService(
         vurderHenvendelseOppgaver: List<VurderHenvendelseOppgavetype>,
     ) {
         if (vurderHenvendelseOppgaver.contains(VurderHenvendelseOppgavetype.INFORMERE_OM_SØKT_OVERGANGSSTØNAD)) {
-            brukerfeilHvis(saksbehandling.stønadstype != StønadType.OVERGANGSSTØNAD) {
-                "Kan ikke opprette vurder henvendelse oppgave på behandling med id ${saksbehandling.id} fordi behandlingen ikke er tilknyttet overgangsstønad"
+            feilHvis(saksbehandling.stønadstype != StønadType.OVERGANGSSTØNAD) {
+                "Kan ikke lagre task for opprettelse av oppgave om informering om søkt overgangsstønad  på behandling med id ${saksbehandling.id} fordi behandlingen ikke er tilknyttet overgangsstønad"
             }
         }
 
         if (vurderHenvendelseOppgaver.contains(VurderHenvendelseOppgavetype.INNSTILLING_VEDRØRENDE_UTDANNING)) {
-            brukerfeilHvis(saksbehandling.stønadstype != StønadType.OVERGANGSSTØNAD && saksbehandling.stønadstype != StønadType.SKOLEPENGER) {
-                "Kan ikke opprette vurder henvendelse oppgave på behandling med id ${saksbehandling.id} fordi behandlingen ikke er tilknyttet overgangsstønad eller skolepenger"
+            feilHvis(saksbehandling.stønadstype != StønadType.OVERGANGSSTØNAD && saksbehandling.stønadstype != StønadType.SKOLEPENGER) {
+                "Kan ikke lagre task for opprettelse av oppgave om innstilling om utdanning på behandling med id ${saksbehandling.id} fordi behandlingen hverken er tilknyttet overgangsstønad eller skolepenger"
             }
         }
 
-        feilHvis(!featureToggleService.isEnabled(Toggle.AUTOMATISKE_OPPGAVER_LOKALKONTOR)) {
+        feilHvis(!featureToggleService.isEnabled(Toggle.VURDER_KONSEKVENS_OPPGAVER_LOKALKONTOR)) {
             "Featuretoggle for opprettelse av automatiske oppgaver til lokalkontor er ikke påskrudd"
         }
     }
