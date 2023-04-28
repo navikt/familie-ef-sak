@@ -15,7 +15,7 @@ import no.nav.familie.ef.sak.brev.domain.BrevmottakerPerson
 import no.nav.familie.ef.sak.brev.domain.MottakerRolle
 import no.nav.familie.ef.sak.felles.util.DatoUtil
 import no.nav.familie.ef.sak.felles.util.Skoleår
-import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvisIkke
+import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.opplysninger.mapper.BarnMatcher
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
@@ -188,17 +188,29 @@ class IverksettingDtoMapper(
 
     private fun validerGrunnbeløpsmåned(tilkjentYtelse: TilkjentYtelse) {
         val gMånedTilkjentYtelse = tilkjentYtelse.grunnbeløpsmåned
-        val harFåttÅretsGrunnbeløp = nyesteGrunnbeløpGyldigFraOgMed.year == DatoUtil.inneværendeÅr()
         val feilmelding =
             "Kan ikke iverksette med utdatert grunnbeløp gyldig fra $gMånedTilkjentYtelse. Denne behandlingen må beregnes og simmuleres på nytt"
+
+        val nyttGrunnbeløpForInneværendeÅrRegistrertIEF = nyesteGrunnbeløpGyldigFraOgMed.year == DatoUtil.inneværendeÅr()
         val fristGOmregning = LocalDate.of(DatoUtil.inneværendeÅr(), Month.JUNE, 15)
 
-        if (harFåttÅretsGrunnbeløp && DatoUtil.dagensDato() < fristGOmregning) {
-            brukerfeilHvisIkke(gMånedTilkjentYtelse == nyesteGrunnbeløpGyldigFraOgMed || gMånedTilkjentYtelse == forrigeGrunnbeløp.periode.fom) {
-                feilmelding
-            }
+        if (nyttGrunnbeløpForInneværendeÅrRegistrertIEF && DatoUtil.dagensDato() < fristGOmregning) {
+            validerBehandlingBrukerÅretsEllerFjoråretsG(gMånedTilkjentYtelse, feilmelding)
         } else {
-            brukerfeilHvisIkke(gMånedTilkjentYtelse == nyesteGrunnbeløpGyldigFraOgMed) { feilmelding }
+            validerBehandlingBrukerNyesteG(gMånedTilkjentYtelse, feilmelding)
+        }
+    }
+
+    private fun validerBehandlingBrukerNyesteG(gMånedTilkjentYtelse: YearMonth, feilmelding: String) {
+        brukerfeilHvis(gMånedTilkjentYtelse != nyesteGrunnbeløpGyldigFraOgMed) { feilmelding }
+    }
+
+    private fun validerBehandlingBrukerÅretsEllerFjoråretsG(
+        gMånedTilkjentYtelse: YearMonth,
+        feilmelding: String
+    ) {
+        brukerfeilHvis(gMånedTilkjentYtelse != nyesteGrunnbeløpGyldigFraOgMed && gMånedTilkjentYtelse != forrigeGrunnbeløp.periode.fom) {
+            feilmelding
         }
     }
 
