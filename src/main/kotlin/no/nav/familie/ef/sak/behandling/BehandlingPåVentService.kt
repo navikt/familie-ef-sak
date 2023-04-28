@@ -6,7 +6,10 @@ import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus.SATT_PÅ_VENT
 import no.nav.familie.ef.sak.behandling.dto.SettPåVentRequest
 import no.nav.familie.ef.sak.behandling.dto.TaAvVentStatus
 import no.nav.familie.ef.sak.behandling.dto.TaAvVentStatusDto
+import no.nav.familie.ef.sak.behandling.dto.VurderHenvendelseOppgavetype
+import no.nav.familie.ef.sak.behandling.dto.beskrivelse
 import no.nav.familie.ef.sak.behandlingsflyt.task.BehandlingsstatistikkTask
+import no.nav.familie.ef.sak.behandlingsflyt.task.OpprettOppgaveTask
 import no.nav.familie.ef.sak.behandlingshistorikk.BehandlingshistorikkService
 import no.nav.familie.ef.sak.behandlingshistorikk.domain.StegUtfall
 import no.nav.familie.ef.sak.felles.util.dagensDatoMedTidNorskFormat
@@ -19,7 +22,9 @@ import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.ef.sak.vedtak.NullstillVedtakService
+import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.kontrakter.felles.oppgave.Oppgave
+import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.internal.TaskService
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
@@ -36,17 +41,19 @@ class BehandlingPåVentService(
     private val oppgaveService: OppgaveService,
 ) {
     @Transactional
-    fun settPåVent(behandlingId: UUID, settPåVentRequest: SettPåVentRequest? = null) {
+    fun settPåVent(behandlingId: UUID, settPåVentRequest: SettPåVentRequest) {
         val behandling = behandlingService.hentBehandling(behandlingId)
 
-        validerKanSettePåVent(behandling, settPåVentRequest)
+        validerKanSettePåVent(behandling)
 
         behandlingService.oppdaterStatusPåBehandling(behandlingId, SATT_PÅ_VENT)
         opprettHistorikkInnslag(behandling, StegUtfall.SATT_PÅ_VENT)
         taskService.save(BehandlingsstatistikkTask.opprettVenterTask(behandlingId))
 
-        if (settPåVentRequest != null) {
-            oppdaterVerdierPåOppgave(settPåVentRequest)
+        oppdaterVerdierPåOppgave(settPåVentRequest)
+
+        if (!settPåVentRequest.oppfølgingsoppgaverMotLokalKontor.isNullOrEmpty()) {
+            opprettVurderHenvendelseOppgaveTasks(behandlingId, settPåVentRequest.oppfølgingsoppgaverMotLokalKontor)
         }
     }
 
@@ -66,6 +73,27 @@ class BehandlingPåVentService(
                 versjon = settPåVentRequest.oppgaveVersjon,
             ),
         )
+    }
+
+    private fun opprettVurderHenvendelseOppgaveTasks(
+        behandlingId: UUID,
+        vurderHenvendelseOppgaver: List<VurderHenvendelseOppgavetype>,
+    ) {
+        val saksbehandling = behandlingService.hentSaksbehandling(behandlingId)
+
+        validerKanOppretteVurderHenvendelseOppgave(saksbehandling, vurderHenvendelseOppgaver)
+
+        vurderHenvendelseOppgaver.forEach {
+            taskService.save(
+                OpprettOppgaveTask.opprettTask(
+                    OpprettOppgaveTask.OpprettOppgaveTaskData(
+                        behandlingId = saksbehandling.id,
+                        oppgavetype = Oppgavetype.VurderHenvendelse,
+                        beskrivelse = it.beskrivelse(),
+                    ),
+                ),
+            )
+        }
     }
 
     private fun utledOppgavebeskrivelse(
@@ -176,14 +204,34 @@ class BehandlingPåVentService(
 
     private fun validerKanSettePåVent(
         behandling: Behandling,
-        settPåVentRequest: SettPåVentRequest?,
     ) {
         brukerfeilHvis(behandling.status.behandlingErLåstForVidereRedigering()) {
             "Kan ikke sette behandling med status ${behandling.status} på vent"
         }
 
-        feilHvis(settPåVentRequest != null && !featureToggleService.isEnabled(Toggle.SETT_PÅ_VENT_MED_OPPGAVESTYRING)) {
+        feilHvis(!featureToggleService.isEnabled(Toggle.SETT_PÅ_VENT_MED_OPPGAVESTYRING)) {
             "Featuretoggle for sett på vent med oppgavestyring er ikke påskrudd"
+        }
+    }
+
+    private fun validerKanOppretteVurderHenvendelseOppgave(
+        saksbehandling: Saksbehandling,
+        vurderHenvendelseOppgaver: List<VurderHenvendelseOppgavetype>,
+    ) {
+        if (vurderHenvendelseOppgaver.contains(VurderHenvendelseOppgavetype.INFORMERE_OM_SØKT_OVERGANGSSTØNAD)) {
+            feilHvis(saksbehandling.stønadstype != StønadType.OVERGANGSSTØNAD) {
+                "Kan ikke lagre task for opprettelse av oppgave om informering om søkt overgangsstønad  på behandling med id ${saksbehandling.id} fordi behandlingen ikke er tilknyttet overgangsstønad"
+            }
+        }
+
+        if (vurderHenvendelseOppgaver.contains(VurderHenvendelseOppgavetype.INNSTILLING_VEDRØRENDE_UTDANNING)) {
+            feilHvis(saksbehandling.stønadstype != StønadType.OVERGANGSSTØNAD && saksbehandling.stønadstype != StønadType.SKOLEPENGER) {
+                "Kan ikke lagre task for opprettelse av oppgave om innstilling om utdanning på behandling med id ${saksbehandling.id} fordi behandlingen hverken er tilknyttet overgangsstønad eller skolepenger"
+            }
+        }
+
+        feilHvis(!featureToggleService.isEnabled(Toggle.VURDER_KONSEKVENS_OPPGAVER_LOKALKONTOR)) {
+            "Featuretoggle for opprettelse av automatiske oppgaver til lokalkontor er ikke påskrudd"
         }
     }
 
@@ -200,6 +248,7 @@ class BehandlingPåVentService(
                     "Annen behandling må ferdigstilles før denne kan aktiveres på nytt",
                     HttpStatus.BAD_REQUEST,
                 )
+
             TaAvVentStatus.MÅ_NULSTILLE_VEDTAK -> {
                 val nyForrigeBehandlingId = kanTaAvVent.nyForrigeBehandlingId ?: error("Mangler nyForrigeBehandlingId")
                 behandlingService.oppdaterForrigeBehandlingId(behandlingId, nyForrigeBehandlingId)

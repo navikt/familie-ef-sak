@@ -90,18 +90,10 @@ class OppgaveService(
         tilordnetNavIdent: String?,
         mappeId: Long? = null, // Dersom denne er satt vil vi ikke prøve å finne mappe basert på oppgavens innhold
     ): Long {
-        val settBehandlesAvApplikasjon = when (oppgavetype) {
-            Oppgavetype.BehandleSak,
-            Oppgavetype.BehandleUnderkjentVedtak,
-            Oppgavetype.GodkjenneVedtak,
-            -> true
-
-            Oppgavetype.InnhentDokumentasjon -> false
-            else -> error("Håndterer ikke behandlesAvApplikasjon for $oppgavetype")
-        }
+        val settBehandlesAvApplikasjon = utledSettBehandlesAvApplikasjon(oppgavetype)
         val fagsak = fagsakService.hentFagsakForBehandling(behandlingId)
         val personIdent = fagsak.hentAktivIdent()
-        val enhetsnummer = arbeidsfordelingService.hentNavEnhet(personIdent)?.enhetId
+        val enhetsnummer = arbeidsfordelingService.hentNavEnhetId(personIdent, oppgavetype)
         val opprettOppgave = OpprettOppgaveRequest(
             ident = OppgaveIdentV2(ident = personIdent, gruppe = IdentGruppe.FOLKEREGISTERIDENT),
             saksId = fagsak.eksternId.id.toString(),
@@ -365,5 +357,16 @@ class OppgaveService(
         feilHvis(godkjenne.antallTreffTotalt >= limit) { "For mange godkjenne - limit truffet: + $limit " }
 
         return listOf(behandleSakOppgaver, behandleUnderkjent, godkjenne)
+    }
+
+    private fun utledSettBehandlesAvApplikasjon(oppgavetype: Oppgavetype) = when (oppgavetype) {
+        Oppgavetype.BehandleSak,
+        Oppgavetype.BehandleUnderkjentVedtak,
+        Oppgavetype.GodkjenneVedtak,
+        -> true
+
+        Oppgavetype.InnhentDokumentasjon -> false
+        Oppgavetype.VurderHenvendelse -> false
+        else -> error("Håndterer ikke behandlesAvApplikasjon for $oppgavetype")
     }
 }
