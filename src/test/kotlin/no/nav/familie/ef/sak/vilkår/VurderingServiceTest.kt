@@ -73,14 +73,16 @@ internal class VurderingServiceTest {
     private val søknad = SøknadsskjemaMapper.tilDomene(
         TestsøknadBuilder.Builder().setBarn(
             listOf(
-                TestsøknadBuilder.Builder().defaultBarn("Navn navnesen", "14041385481"),
-                TestsøknadBuilder.Builder().defaultBarn("Navn navnesen", "01012067050"),
+                TestsøknadBuilder.Builder().defaultBarn("Navn navnesen", no.nav.familie.util.FnrGenerator.generer(LocalDate.now().minusYears(5))),
+                TestsøknadBuilder.Builder().defaultBarn("Navn navnesen", no.nav.familie.util.FnrGenerator.generer(LocalDate.now().minusYears(3))),
             ),
         ).build().søknadOvergangsstønad,
     ).tilSøknadsverdier()
     private val barn = søknadBarnTilBehandlingBarn(søknad.barn)
     private val behandling = behandling(fagsak(), BehandlingStatus.OPPRETTET, årsak = BehandlingÅrsak.PAPIRSØKNAD)
     private val behandlingId = UUID.randomUUID()
+
+    private val fnr = no.nav.familie.util.FnrGenerator.generer(LocalDate.now().minusYears(5))
 
     @BeforeEach
     fun setUp() {
