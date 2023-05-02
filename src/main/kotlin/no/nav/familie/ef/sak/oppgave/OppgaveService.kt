@@ -314,7 +314,7 @@ class OppgaveService(
 
         return oppgaver.map { oppgave ->
             UtdanningOppgaveDto(
-                oppgave.aktoerId,
+                oppgave.identer?.first { it.gruppe == IdentGruppe.FOLKEREGISTERIDENT }?.ident,
                 oppgave.behandlingstema?.let { Behandlingstema.fromValue(it) },
                 oppgave.oppgavetype,
                 oppgave.beskrivelse,
