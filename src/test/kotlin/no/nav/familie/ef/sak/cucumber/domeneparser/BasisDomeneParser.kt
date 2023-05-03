@@ -238,6 +238,11 @@ inline fun <reified T : Enum<T>> parseValgfriEnum(domenebegrep: Domenenøkkel, r
     return enumValueOf<T>(verdi.uppercase())
 }
 
+inline fun <reified T : Enum<T>> parseEnumUtenUppercase(domenebegrep: Domenenøkkel, rad: Map<String, String>): T? {
+    val verdi = valgfriVerdi(domenebegrep.nøkkel(), rad) ?: return null
+    return enumValueOf<T>(verdi)
+}
+
 inline fun <reified T : Enum<T>> parseEnum(domenebegrep: Domenenøkkel, rad: Map<String, String>): T {
     return parseValgfriEnum<T>(domenebegrep, rad)!!
 }

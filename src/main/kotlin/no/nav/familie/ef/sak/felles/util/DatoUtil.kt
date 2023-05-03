@@ -18,6 +18,8 @@ object DatoFormat {
 object DatoUtil {
 
     fun dagensDatoMedTid(): LocalDateTime = LocalDateTime.now()
+    fun dagensDato(): LocalDate = LocalDate.now()
+    fun inneværendeÅr() = LocalDate.now().year
 }
 
 val YEAR_MONTH_MAX = YearMonth.from(LocalDate.MAX)

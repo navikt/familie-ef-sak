@@ -8,7 +8,6 @@ import io.mockk.runs
 import io.mockk.slot
 import io.mockk.verify
 import no.nav.familie.ef.sak.arbeidsfordeling.ArbeidsfordelingService
-import no.nav.familie.ef.sak.arbeidsfordeling.Arbeidsfordelingsenhet
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.EksternFagsakId
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
@@ -90,7 +89,7 @@ internal class OppgaveServiceTest {
     fun `Opprett oppgave som feiler med fordeling skal prøve på nytt med 4489`() {
         val slot = slot<OpprettOppgaveRequest>()
         mockOpprettOppgave(slot)
-        every { arbeidsfordelingService.hentNavEnhet(any()) } returns null
+        every { arbeidsfordelingService.hentNavEnhetId(any(), any()) } returns null
         oppgaveService.opprettOppgave(BEHANDLING_ID, Oppgavetype.BehandleSak)
 
         verify(exactly = 2) { oppgaveClient.opprettOppgave(any()) }
@@ -131,10 +130,7 @@ internal class OppgaveServiceTest {
         every {
             oppgaveRepository.findByBehandlingIdAndTypeAndErFerdigstiltIsFalse(any(), any())
         } returns null
-        every { arbeidsfordelingService.hentNavEnhet(any()) } returns Arbeidsfordelingsenhet(
-            enhetId = "1234",
-            enhetNavn = ENHETSNAVN,
-        )
+        every { arbeidsfordelingService.hentNavEnhetId(any(), any()) } returns "1234"
         val slot = slot<OpprettOppgaveRequest>()
         every { oppgaveClient.opprettOppgave(capture(slot)) } returns GSAK_OPPGAVE_ID
 
@@ -289,7 +285,7 @@ internal class OppgaveServiceTest {
         val behandlingId = UUID.randomUUID()
         every { oppgaveRepository.findByBehandlingIdAndTypeAndErFerdigstiltIsFalse(any(), any()) } returns null
         every { fagsakService.hentFagsakForBehandling(any()) } returns fagsak()
-        every { arbeidsfordelingService.hentNavEnhet(any()) } returns Arbeidsfordelingsenhet("4489", "")
+        every { arbeidsfordelingService.hentNavEnhetId(any(), any()) } returns "4489"
         every { oppgaveRepository.insert(any()) } answers { firstArg() }
         val opprettOppgaveRequestSlot = slot<OpprettOppgaveRequest>()
         every { oppgaveClient.opprettOppgave(capture(opprettOppgaveRequestSlot)) } returns 1
@@ -362,10 +358,7 @@ internal class OppgaveServiceTest {
         every {
             oppgaveRepository.findByBehandlingIdAndTypeAndErFerdigstiltIsFalse(any(), any())
         } returns null
-        every { arbeidsfordelingService.hentNavEnhet(any()) } returns Arbeidsfordelingsenhet(
-            enhetId = ENHETSNUMMER,
-            enhetNavn = ENHETSNAVN,
-        )
+        every { arbeidsfordelingService.hentNavEnhetId(any(), any()) } returns ENHETSNUMMER
         every { oppgaveClient.opprettOppgave(capture(slot)) } answers {
             val oppgaveRequest: OpprettOppgaveRequest = firstArg()
             if (oppgaveRequest.enhetsnummer == null) {

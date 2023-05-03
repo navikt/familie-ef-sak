@@ -4,7 +4,9 @@ import no.nav.familie.ef.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.infrastruktur.config.getValue
+import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.oppgave.OppgaveUtil.ENHET_NR_NAY
+import no.nav.familie.ef.sak.oppgave.dto.UtdanningOppgaveDto
 import no.nav.familie.http.client.RessursException
 import no.nav.familie.kontrakter.felles.Behandlingstema
 import no.nav.familie.kontrakter.felles.Tema
@@ -88,17 +90,10 @@ class OppgaveService(
         tilordnetNavIdent: String?,
         mappeId: Long? = null, // Dersom denne er satt vil vi ikke prøve å finne mappe basert på oppgavens innhold
     ): Long {
-        val settBehandlesAvApplikasjon = when (oppgavetype) {
-            Oppgavetype.BehandleSak,
-            Oppgavetype.BehandleUnderkjentVedtak,
-            Oppgavetype.GodkjenneVedtak,
-            -> true
-            Oppgavetype.InnhentDokumentasjon -> false
-            else -> error("Håndterer ikke behandlesAvApplikasjon for $oppgavetype")
-        }
+        val settBehandlesAvApplikasjon = utledSettBehandlesAvApplikasjon(oppgavetype)
         val fagsak = fagsakService.hentFagsakForBehandling(behandlingId)
         val personIdent = fagsak.hentAktivIdent()
-        val enhetsnummer = arbeidsfordelingService.hentNavEnhet(personIdent)?.enhetId
+        val enhetsnummer = arbeidsfordelingService.hentNavEnhetId(personIdent, oppgavetype)
         val opprettOppgave = OpprettOppgaveRequest(
             ident = OppgaveIdentV2(ident = personIdent, gruppe = IdentGruppe.FOLKEREGISTERIDENT),
             saksId = fagsak.eksternId.id.toString(),
@@ -132,7 +127,7 @@ class OppgaveService(
             val mapper = finnMapper(enhetsnummer)
             val mappeIdForGodkjenneVedtak = mapper.find {
                 (it.navn.contains("70 Godkjennevedtak") || it.navn.contains("70 Godkjenne vedtak")) &&
-                    !it.navn.contains("EF Sak")
+                        !it.navn.contains("EF Sak")
             }?.id?.toLong()
             mappeIdForGodkjenneVedtak?.let {
                 logger.info("Legger oppgave i Godkjenne vedtak-mappe")
@@ -225,7 +220,10 @@ class OppgaveService(
     }
 
     fun hentIkkeFerdigstiltOppgaveForBehandling(behandlingId: UUID): Oppgave? {
-        return oppgaveRepository.findByBehandlingIdAndErFerdigstiltIsFalseAndTypeIn(behandlingId, setOf(Oppgavetype.BehandleSak, Oppgavetype.BehandleUnderkjentVedtak))
+        return oppgaveRepository.findByBehandlingIdAndErFerdigstiltIsFalseAndTypeIn(
+            behandlingId,
+            setOf(Oppgavetype.BehandleSak, Oppgavetype.BehandleUnderkjentVedtak),
+        )
             ?.let { oppgaveClient.finnOppgaveMedId(it.gsakOppgaveId) }
     }
 
@@ -235,8 +233,10 @@ class OppgaveService(
         } else {
             ""
         } +
-            "----- Opprettet av familie-ef-sak ${LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME)} --- \n" +
-            "$frontendOppgaveUrl" + "\n----- Oppgave må behandles i ny løsning"
+                "----- Opprettet av familie-ef-sak ${
+                    LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME)
+                } --- \n" +
+                "$frontendOppgaveUrl" + "\n----- Oppgave må behandles i ny løsning"
     }
 
     fun hentOppgaver(finnOppgaveRequest: FinnOppgaveRequest): FinnOppgaveResponseDto {
@@ -287,7 +287,7 @@ class OppgaveService(
             if (mappeRespons.antallTreffTotalt > mappeRespons.mapper.size) {
                 logger.error(
                     "Det finnes flere mapper (${mappeRespons.antallTreffTotalt}) " +
-                        "enn vi har hentet ut (${mappeRespons.mapper.size}). Sjekk limit. ",
+                            "enn vi har hentet ut (${mappeRespons.mapper.size}). Sjekk limit. ",
                 )
             }
             mappeRespons.mapper
@@ -300,5 +300,75 @@ class OppgaveService(
         } else {
             gjeldendeTid.plusDays(1).toLocalDate()
         }
+    }
+
+    fun finnOppgaverIUtdanningsmappe(fristDato: LocalDate): List<UtdanningOppgaveDto> {
+        val oppgaver = oppgaveClient.hentOppgaver(
+            FinnOppgaveRequest(
+                tema = Tema.ENF,
+                mappeId = 100026882, // Mappenavn: 64 - Utdanning
+                fristFomDato = fristDato,
+                fristTomDato = fristDato,
+            ),
+        ).oppgaver
+
+        return oppgaver.map { oppgave ->
+            UtdanningOppgaveDto(
+                oppgave.identer?.first { it.gruppe == IdentGruppe.FOLKEREGISTERIDENT }?.ident,
+                oppgave.behandlingstema?.let { Behandlingstema.fromValue(it) },
+                oppgave.oppgavetype,
+                oppgave.beskrivelse,
+            )
+        }
+    }
+
+    fun finnBehandleSakOppgaver(
+        opprettetTomTidspunktPåBehandleSakOppgave: LocalDateTime
+    ): List<FinnOppgaveResponseDto> {
+        val limit: Long = 2000
+
+        val behandleSakOppgaver = oppgaveClient.hentOppgaver(
+            finnOppgaveRequest = FinnOppgaveRequest(
+                tema = Tema.ENF,
+                oppgavetype = Oppgavetype.BehandleSak,
+                limit = limit,
+                opprettetTomTidspunkt = opprettetTomTidspunktPåBehandleSakOppgave,
+            ),
+        )
+
+        val behandleUnderkjent = oppgaveClient.hentOppgaver(
+            finnOppgaveRequest = FinnOppgaveRequest(
+                tema = Tema.ENF,
+                oppgavetype = Oppgavetype.BehandleUnderkjentVedtak,
+                limit = limit,
+            ),
+        )
+
+        val godkjenne = oppgaveClient.hentOppgaver(
+            finnOppgaveRequest = FinnOppgaveRequest(
+                tema = Tema.ENF,
+                oppgavetype = Oppgavetype.GodkjenneVedtak,
+                limit = limit,
+            ),
+        )
+
+        logger.info("Hentet oppgaver:  ${behandleSakOppgaver.antallTreffTotalt}, ${behandleUnderkjent.antallTreffTotalt}, ${godkjenne.antallTreffTotalt}")
+
+        feilHvis(behandleSakOppgaver.antallTreffTotalt >= limit) { "For mange behandleSakOppgaver - limit truffet: + $limit " }
+        feilHvis(behandleUnderkjent.antallTreffTotalt >= limit) { "For mange behandleUnderkjent - limit truffet: + $limit " }
+        feilHvis(godkjenne.antallTreffTotalt >= limit) { "For mange godkjenne - limit truffet: + $limit " }
+
+        return listOf(behandleSakOppgaver, behandleUnderkjent, godkjenne)
+    }
+
+    private fun utledSettBehandlesAvApplikasjon(oppgavetype: Oppgavetype) = when (oppgavetype) {
+        Oppgavetype.BehandleSak,
+        Oppgavetype.BehandleUnderkjentVedtak,
+        Oppgavetype.GodkjenneVedtak,
+        -> true
+
+        Oppgavetype.InnhentDokumentasjon -> false
+        Oppgavetype.VurderHenvendelse -> false
+        else -> error("Håndterer ikke behandlesAvApplikasjon for $oppgavetype")
     }
 }

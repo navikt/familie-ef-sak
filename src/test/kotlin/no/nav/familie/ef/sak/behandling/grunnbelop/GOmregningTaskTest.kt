@@ -3,6 +3,8 @@ package no.nav.familie.ef.sak.behandling.grunnbelop
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
+import no.nav.familie.ef.sak.beregning.nyesteGrunnbeløpGyldigFraOgMed
+import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.log.mdc.MDCConstants
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.internal.TaskService
@@ -39,6 +41,18 @@ internal class GOmregningTaskTest {
         gOmregningTask.opprettTask(UUID.randomUUID())
 
         assertThat(taskSlot.captured.callId).isNotEqualTo(callId)
+    }
+
+
+    @Test
+    internal fun `skal opprette task med grunnbeløpsmåned i payload`() {
+        val fagsakId = UUID.randomUUID()
+        val payload = objectMapper.writeValueAsString(GOmregningPayload(fagsakId, nyesteGrunnbeløpGyldigFraOgMed))
+        every { taskService.finnTaskMedPayloadOgType(any(), any()) } returns null
+
+        gOmregningTask.opprettTask(fagsakId)
+
+        assertThat(taskSlot.captured.payload).isEqualTo(payload)
     }
 
     @Test

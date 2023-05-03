@@ -12,20 +12,26 @@ import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.dto.SettPåVentRequest
 import no.nav.familie.ef.sak.behandling.dto.TaAvVentStatus
+import no.nav.familie.ef.sak.behandling.dto.VurderHenvendelseOppgavetype
 import no.nav.familie.ef.sak.behandlingsflyt.task.BehandlingsstatistikkTask
+import no.nav.familie.ef.sak.behandlingsflyt.task.OpprettOppgaveTask
 import no.nav.familie.ef.sak.behandlingshistorikk.BehandlingshistorikkService
 import no.nav.familie.ef.sak.behandlingshistorikk.domain.StegUtfall
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
+import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
+import no.nav.familie.ef.sak.repository.saksbehandling
 import no.nav.familie.ef.sak.vedtak.NullstillVedtakService
 import no.nav.familie.kontrakter.ef.iverksett.Hendelse
+import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.kontrakter.felles.oppgave.MappeDto
 import no.nav.familie.kontrakter.felles.oppgave.Oppgave
 import no.nav.familie.kontrakter.felles.oppgave.OppgavePrioritet
+import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.internal.TaskService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
@@ -60,6 +66,7 @@ internal class BehandlingPåVentServiceTest {
     val fagsak = fagsak()
     val tidligereIverksattBehandling = behandling(fagsak)
     val behandling = behandling(fagsak)
+    val saksbehandling = saksbehandling(fagsak, behandling)
     val behandlingId = behandling.id
 
     @BeforeEach
@@ -94,11 +101,23 @@ internal class BehandlingPåVentServiceTest {
     inner class SettPåVent {
 
         @Test
-        fun `skal sette behandling på vent hvis den kan redigeres og sende melding til DVH`() {
+        fun `skal oppdatere oppgavebeskrivelse ved sett på vent - med saksbehandler, prioritet, frist og mappe`() {
             mockHentBehandling(BehandlingStatus.UTREDES)
-            every { featureToggleService.isEnabled(any()) } returns false
 
-            behandlingPåVentService.settPåVent(behandlingId)
+            val oppgaveSlot = slot<Oppgave>()
+            val oppgaveId: Long = 123
+            val eksisterendeOppgave = oppgave(oppgaveId)
+
+            every { oppgaveService.hentOppgave(oppgaveId) } returns eksisterendeOppgave
+
+            justRun { oppgaveService.oppdaterOppgave(capture(oppgaveSlot)) }
+
+            val settPåVentRequest = settPåVentRequest(oppgaveId, emptyList())
+
+            behandlingPåVentService.settPåVent(
+                behandlingId,
+                settPåVentRequest,
+            )
 
             verify { behandlingService.oppdaterStatusPåBehandling(behandlingId, BehandlingStatus.SATT_PÅ_VENT) }
             verify {
@@ -117,13 +136,145 @@ internal class BehandlingPåVentServiceTest {
                     },
                 )
             }
+
+            assertThat(oppgaveSlot.captured.beskrivelse).isNotEqualTo(eksisterendeOppgave.beskrivelse)
+            assertThat(oppgaveSlot.captured.mappeId).isEqualTo(settPåVentRequest.mappe)
+            assertThat(oppgaveSlot.captured.tilordnetRessurs).isEqualTo(settPåVentRequest.saksbehandler)
+            assertThat(oppgaveSlot.captured.prioritet).isEqualTo(settPåVentRequest.prioritet)
+            assertThat(oppgaveSlot.captured.fristFerdigstillelse).isEqualTo(settPåVentRequest.frist)
+            assertThat(oppgaveSlot.captured.id).isEqualTo(settPåVentRequest.oppgaveId)
+        }
+
+        @Test
+        fun `skal opprette vurder konsekvens oppgave - innstilling om utdanning`() {
+            val oppgaveId = mockOppsettForAutomatiskeOppgaver()
+
+            val oppfølgingsoppgaver = listOf(innstillingUtdanning)
+            val settPåVentRequest = settPåVentRequest(
+                oppgaveId,
+                oppfølgingsoppgaver,
+            )
+
+            behandlingPåVentService.settPåVent(
+                behandlingId,
+                settPåVentRequest,
+            )
+
+            verify(exactly = 1) {
+                taskService.save(
+                    coWithArg {
+                        assertThat(it.type).isEqualTo(OpprettOppgaveTask.TYPE)
+                        assertThat(it.payload).contains(behandlingId.toString())
+                        assertThat(it.payload).contains(Oppgavetype.VurderHenvendelse.name)
+                        assertThat(it.payload).contains(OppgaveBeskrivelse.innstillingOmBrukersUtdanning.subSequence(0, 50))
+                    },
+                )
+            }
+        }
+
+        @Test
+        fun `skal opprette vurder konsekvens oppgave - informere om søkt overgangsstønad`() {
+            val oppgaveId = mockOppsettForAutomatiskeOppgaver()
+
+            val oppfølgingsoppgaver = listOf(informereOmSøktStønad)
+            val settPåVentRequest = settPåVentRequest(
+                oppgaveId,
+                oppfølgingsoppgaver,
+            )
+
+            behandlingPåVentService.settPåVent(
+                behandlingId,
+                settPåVentRequest,
+            )
+
+            verify(exactly = 1) {
+                taskService.save(
+                    coWithArg {
+                        assertThat(it.type).isEqualTo(OpprettOppgaveTask.TYPE)
+                        assertThat(it.payload).contains(behandlingId.toString())
+                        assertThat(it.payload).contains(Oppgavetype.VurderHenvendelse.name)
+                        assertThat(it.payload).contains(OppgaveBeskrivelse.informereLokalkontorOmOvergangsstønad)
+                    },
+                )
+            }
+        }
+
+        @Test
+        fun `skal opprette flere vurder konsekvens oppgaver mot lokalkontor i en request`() {
+            val oppgaveId = mockOppsettForAutomatiskeOppgaver()
+
+            val oppfølgingsoppgaver = listOf(informereOmSøktStønad, innstillingUtdanning)
+            val settPåVentRequest = settPåVentRequest(
+                oppgaveId,
+                oppfølgingsoppgaver,
+            )
+
+            behandlingPåVentService.settPåVent(
+                behandlingId,
+                settPåVentRequest,
+            )
+
+            verify(exactly = 1) {
+                taskService.save(
+                    coWithArg {
+                        assertThat(it.type).isEqualTo(OpprettOppgaveTask.TYPE)
+                        assertThat(it.payload).contains(behandlingId.toString())
+                        assertThat(it.payload).contains(Oppgavetype.VurderHenvendelse.name)
+                        assertThat(it.payload).contains(OppgaveBeskrivelse.informereLokalkontorOmOvergangsstønad)
+                    },
+                )
+            }
+
+            verify(exactly = 1) {
+                taskService.save(
+                    coWithArg {
+                        assertThat(it.type).isEqualTo(OpprettOppgaveTask.TYPE)
+                        assertThat(it.payload).contains(behandlingId.toString())
+                        assertThat(it.payload).contains(Oppgavetype.VurderHenvendelse.name)
+                        assertThat(it.payload).contains(OppgaveBeskrivelse.innstillingOmBrukersUtdanning.subSequence(0, 50))
+                    },
+                )
+            }
+        }
+
+        @Test
+        fun `skal ikke kunne opprette informer om søkt overgangsstønad oppgave dersom behandlingen ikke er overgangsstønad`() {
+            val oppgaveId = mockOppsettForAutomatiskeOppgaver(stønadType = StønadType.SKOLEPENGER)
+
+            val oppfølgingsoppgaver = listOf(informereOmSøktStønad)
+            val settPåVentRequest = settPåVentRequest(
+                oppgaveId,
+                oppfølgingsoppgaver,
+            )
+
+            val feil: Feil =
+                assertThrows { behandlingPåVentService.settPåVent(behandlingId, settPåVentRequest) }
+
+            assertThat(feil.httpStatus).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR)
+        }
+
+        @Test
+        fun `skal ikke kunne opprette innstilling om utdanning oppgave dersom behandlingen hverken er overgangsstønad eller skolepenger`() {
+            val oppgaveId = mockOppsettForAutomatiskeOppgaver(stønadType = StønadType.BARNETILSYN)
+
+            val oppfølgingsoppgaver = listOf(innstillingUtdanning)
+            val settPåVentRequest = settPåVentRequest(
+                oppgaveId,
+                oppfølgingsoppgaver,
+            )
+
+            val feil: Feil =
+                assertThrows { behandlingPåVentService.settPåVent(behandlingId, settPåVentRequest) }
+
+            assertThat(feil.httpStatus).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR)
         }
 
         @Test
         fun `skal ikke sette behandling på vent hvis den er sperret for redigering`() {
             mockHentBehandling(BehandlingStatus.FATTER_VEDTAK)
 
-            val feil: ApiFeil = assertThrows { behandlingPåVentService.settPåVent(behandlingId) }
+            val feil: ApiFeil =
+                assertThrows { behandlingPåVentService.settPåVent(behandlingId, settPåVentRequest(1, emptyList())) }
 
             assertThat(feil.httpStatus).isEqualTo(HttpStatus.BAD_REQUEST)
         }
@@ -262,55 +413,37 @@ internal class BehandlingPåVentServiceTest {
         }
     }
 
-    @Nested
-    inner class Oppgavebeskrivelse {
-        @Test
-        fun `skal oppdatere oppgavebeskrivelse ved sett på vent - med saksbehandler, prioritet, frist og mappe`() {
-            mockHentBehandling(BehandlingStatus.UTREDES)
+    private fun oppgave(oppgaveId: Long) = Oppgave(
+        id = oppgaveId,
+        tildeltEnhetsnr = "4489",
+        tilordnetRessurs = "gammel saksbehandler",
+        beskrivelse = "Gammel beskrivelse",
+        mappeId = 101,
+        fristFerdigstillelse = LocalDate.of(2002, Month.MARCH, 23).toString(),
+        prioritet = OppgavePrioritet.NORM,
+    )
 
-            val oppgaveSlot = slot<Oppgave>()
-            val oppgaveId: Long = 123
+    private fun settPåVentRequest(oppgaveId: Long, oppfølgingsoppgaver: List<VurderHenvendelseOppgavetype>) =
+        SettPåVentRequest(
+            oppgaveId = oppgaveId,
+            saksbehandler = "ny saksbehandler",
+            prioritet = OppgavePrioritet.HOY,
+            frist = LocalDate.of(2002, Month.MARCH, 24).toString(),
+            mappe = 102,
+            beskrivelse = "Her er litt tekst fra saksbehandler",
+            oppgaveVersjon = 1,
+            oppfølgingsoppgaverMotLokalKontor = oppfølgingsoppgaver,
+        )
 
-            val eksisterendeOppgave = Oppgave(
-                id = oppgaveId,
-                tildeltEnhetsnr = "4489",
-                tilordnetRessurs = "gammel saksbehandler",
-                beskrivelse = "Gammel beskrivelse",
-                mappeId = 101,
-                fristFerdigstillelse = LocalDate.of(2002, Month.MARCH, 23).toString(),
-                prioritet = OppgavePrioritet.NORM,
-            )
-            every { oppgaveService.hentOppgave(oppgaveId) } returns eksisterendeOppgave
-
-            justRun { oppgaveService.oppdaterOppgave(capture(oppgaveSlot)) }
-
-            val settPåVentRequest = SettPåVentRequest(
-                oppgaveId = oppgaveId,
-                saksbehandler = "ny saksbehandler",
-                prioritet = OppgavePrioritet.HOY,
-                frist = LocalDate.of(2002, Month.MARCH, 24).toString(),
-                mappe = 102,
-                beskrivelse = "Her er litt tekst fra saksbehandler",
-                oppgaveVersjon = 1,
-            )
-            behandlingPåVentService.settPåVent(
-                behandlingId,
-                settPåVentRequest,
-            )
-
-            assertThat(oppgaveSlot.captured.beskrivelse).isNotEqualTo(eksisterendeOppgave.beskrivelse)
-            assertThat(oppgaveSlot.captured.mappeId).isEqualTo(settPåVentRequest.mappe)
-            assertThat(oppgaveSlot.captured.tilordnetRessurs).isEqualTo(settPåVentRequest.saksbehandler)
-            assertThat(oppgaveSlot.captured.prioritet).isEqualTo(settPåVentRequest.prioritet)
-            assertThat(oppgaveSlot.captured.fristFerdigstillelse).isEqualTo(settPåVentRequest.frist)
-            assertThat(oppgaveSlot.captured.id).isEqualTo(settPåVentRequest.oppgaveId)
-        }
-    }
-
-    private fun mockHentBehandling(status: BehandlingStatus, forrigeBehandlingId: UUID? = null) {
+    private fun mockHentBehandling(
+        status: BehandlingStatus,
+        forrigeBehandlingId: UUID? = null,
+        stønadType: StønadType = StønadType.OVERGANGSSTØNAD,
+    ) {
         every {
             behandlingService.hentBehandling(behandlingId)
         } returns behandling.copy(status = status, forrigeBehandlingId = forrigeBehandlingId)
+        every { behandlingService.hentSaksbehandling(behandlingId) } returns saksbehandling.copy(stønadstype = stønadType)
     }
 
     private fun mockHentBehandlinger(vararg behandlinger: Behandling) {
@@ -320,4 +453,19 @@ internal class BehandlingPåVentServiceTest {
     private fun mockFinnSisteIverksatteBehandling(behandling: Behandling?) {
         every { behandlingService.finnSisteIverksatteBehandling(fagsak.id) } returns behandling
     }
+
+    private fun mockOppsettForAutomatiskeOppgaver(stønadType: StønadType = StønadType.OVERGANGSSTØNAD): Long {
+        mockHentBehandling(BehandlingStatus.UTREDES, null, stønadType)
+
+        val oppgaveId: Long = 123
+        val eksisterendeOppgave = oppgave(oppgaveId)
+
+        every { oppgaveService.hentOppgave(oppgaveId) } returns eksisterendeOppgave
+        justRun { oppgaveService.oppdaterOppgave(any()) }
+
+        return oppgaveId
+    }
+
+    private val innstillingUtdanning = VurderHenvendelseOppgavetype.INNSTILLING_VEDRØRENDE_UTDANNING
+    private val informereOmSøktStønad = VurderHenvendelseOppgavetype.INFORMERE_OM_SØKT_OVERGANGSSTØNAD
 }
