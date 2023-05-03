@@ -36,7 +36,7 @@ class BehandlingsoppgaveServiceTest {
         every { fagsakService.hentFagsakForBehandling(returnGamleÅpneBehandlinger[1].id) } returns fagsak(eksternId = EksternFagsakId(1))
         every { fagsakService.hentFagsakForBehandling(returnGamleÅpneBehandlinger[2].id) } returns fagsak(eksternId = EksternFagsakId(2))
 
-        every { oppgaveService.finnBehandleSakOppgaver() } returns listOf(
+        every { oppgaveService.finnBehandleSakOppgaver(any()) } returns listOf(
             FinnOppgaveResponseDto(1, listOf(Oppgave(saksreferanse = fagsakMedOppgave.eksternId.id.toString()))),
         )
 

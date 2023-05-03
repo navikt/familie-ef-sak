@@ -169,11 +169,17 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
         val revurdering = revurderingService.opprettRevurderingManuelt(revurderingDto)
         val vilkårBehandling = vilkårsvurderingRepository.findByBehandlingId(behandling.id)
         val vilkårRevurdering = vilkårsvurderingRepository.findByBehandlingId(revurdering.id)
+        val barnPåBehandlingRevurdering = barnRepository.findByBehandlingId(revurdering.id).first {
+            it.navn.equals("Barn Barnesen")
+        }
+        val barnPåBehandling = barnRepository.findByBehandlingId(behandling.id).first {
+            it.navn.equals("Barn Barnesen")
+        }
+
         val sivilstandVilkårForBehandling = vilkårBehandling.first { it.type == VilkårType.SIVILSTAND }
         val sivilstandVilkårForRevurdering = vilkårRevurdering.first { it.type == VilkårType.SIVILSTAND }
-        val aleneomsorgVilkårForBehandling = vilkårBehandling.first { it.type == VilkårType.ALENEOMSORG }
-        val aleneomsorgVilkårForRevurdering = vilkårRevurdering.first { it.type == VilkårType.ALENEOMSORG }
-        val barnPåBehandling = barnRepository.findByBehandlingId(revurdering.id).first()
+        val aleneomsorgVilkårForBehandling = vilkårBehandling.first { it.type == VilkårType.ALENEOMSORG && barnPåBehandling.id == it.barnId }
+        val aleneomsorgVilkårForRevurdering = vilkårRevurdering.first { it.type == VilkårType.ALENEOMSORG && barnPåBehandlingRevurdering.id == it.barnId }
 
         assertThat(vilkårRevurdering).hasSize(vilkårBehandling.size)
 
@@ -193,7 +199,7 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
         assertThat(aleneomsorgVilkårForBehandling.sporbar.opprettetTid).isNotEqualTo(aleneomsorgVilkårForRevurdering.sporbar.opprettetTid)
         assertThat(aleneomsorgVilkårForBehandling.sporbar.endret.endretTid).isEqualTo(aleneomsorgVilkårForRevurdering.sporbar.endret.endretTid)
         assertThat(aleneomsorgVilkårForBehandling.barnId).isNotNull
-        assertThat(aleneomsorgVilkårForRevurdering.barnId).isEqualTo(barnPåBehandling.id)
+        assertThat(aleneomsorgVilkårForRevurdering.barnId).isEqualTo(barnPåBehandlingRevurdering.id)
         assertThat(aleneomsorgVilkårForBehandling.opphavsvilkår).isNull()
         assertThat(aleneomsorgVilkårForRevurdering.opphavsvilkår)
             .isEqualTo(Opphavsvilkår(behandling.id, aleneomsorgVilkårForBehandling.sporbar.endret.endretTid))
@@ -265,7 +271,7 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
     @Test
     internal fun `revurdering med nye barn - skal kopiere vilkår`() {
         val behandling = opprettFerdigstiltBehandling(fagsak)
-        val barn = listOf(TestsøknadBuilder.Builder().defaultBarn("any", PdlClientConfig.barnFnr))
+        val barn = listOf(TestsøknadBuilder.Builder().defaultBarn("Barn Barnesen", PdlClientConfig.barnFnr))
         opprettVilkår(behandling, lagreSøknad(behandling, barn).sivilstand)
 
         val revurdering = revurderingService.opprettRevurderingManuelt(revurderingDto)
@@ -344,8 +350,8 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
     private fun lagreSøknad(
         behandling: Behandling,
         barn: List<Barn> = listOf(
-            TestsøknadBuilder.Builder().defaultBarn("any", PdlClientConfig.barnFnr),
-            TestsøknadBuilder.Builder().defaultBarn("any", PdlClientConfig.barn2Fnr),
+            TestsøknadBuilder.Builder().defaultBarn("Barn Barnesen", PdlClientConfig.barnFnr),
+            TestsøknadBuilder.Builder().defaultBarn("Barn2 Barnesen", PdlClientConfig.barn2Fnr),
         ),
     ): SøknadsskjemaOvergangsstønad {
         val søknad = TestsøknadBuilder.Builder().setBarn(barn).build().søknadOvergangsstønad
@@ -359,8 +365,8 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
     private fun lagreSøknadForBarnetilsyn(behandling: Behandling): SøknadsskjemaBarnetilsyn {
         val søknad = TestsøknadBuilder.Builder().setBarn(
             listOf(
-                TestsøknadBuilder.Builder().defaultBarn("any", PdlClientConfig.barnFnr),
-                TestsøknadBuilder.Builder().defaultBarn("any", PdlClientConfig.barn2Fnr),
+                TestsøknadBuilder.Builder().defaultBarn("Barn Barnesen", PdlClientConfig.barnFnr),
+                TestsøknadBuilder.Builder().defaultBarn("Barn2 Barnesen", PdlClientConfig.barn2Fnr),
             ),
         ).build().søknadBarnetilsyn
         søknadService.lagreSøknadForBarnetilsyn(søknad, behandling.id, behandling.fagsakId, "1L")
