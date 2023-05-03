@@ -18,6 +18,8 @@ class KodeverkServiceMock {
         val kodeverkService = mockk<KodeverkService>()
         every { kodeverkService.hentLand("NOR", any()) } returns "Norge"
         every { kodeverkService.hentLand("SWE", any()) } returns "Sverige"
+        every { kodeverkService.hentLand("POL", any()) } returns "Polen"
+        every { kodeverkService.hentLand("ESP", any()) } returns "Spania"
         every { kodeverkService.hentPoststed(any(), any()) } returns "Oslo"
         return kodeverkService
     }

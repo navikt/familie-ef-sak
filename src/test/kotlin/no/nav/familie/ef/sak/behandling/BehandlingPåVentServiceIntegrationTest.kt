@@ -5,7 +5,9 @@ import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.dto.RevurderingDto
+import no.nav.familie.ef.sak.behandling.dto.SettPåVentRequest
 import no.nav.familie.ef.sak.behandling.dto.TaAvVentStatus
+import no.nav.familie.ef.sak.behandling.dto.VurderHenvendelseOppgavetype
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.clearBrukerContext
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.mockBrukerContext
 import no.nav.familie.ef.sak.journalføring.dto.VilkårsbehandleNyeBarn
@@ -13,9 +15,11 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataServic
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
+import no.nav.familie.ef.sak.repository.saksbehandling
 import no.nav.familie.ef.sak.repository.vilkårsvurdering
 import no.nav.familie.ef.sak.vilkår.VilkårsvurderingRepository
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
+import no.nav.familie.kontrakter.felles.oppgave.OppgavePrioritet
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -23,6 +27,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.Month
 
 internal class BehandlingPåVentServiceIntegrationTest : OppslagSpringRunnerTest() {
 
@@ -43,6 +48,7 @@ internal class BehandlingPåVentServiceIntegrationTest : OppslagSpringRunnerTest
 
     val fagsak = fagsak()
     val behandling = behandling(fagsak).ferdigstill()
+    val saksbehandling = saksbehandling(fagsak, behandling)
 
     @BeforeEach
     internal fun setUp() {
@@ -60,8 +66,9 @@ internal class BehandlingPåVentServiceIntegrationTest : OppslagSpringRunnerTest
 
     @Test
     internal fun `revurdering med behandling på vent skal peke til førstegangsbehandling`() {
+        val settPåVentRequest = settPåVentRequest(1, emptyList())
         val behandling2 = opprettRevurdering()
-        behandlingPåVentService.settPåVent(behandling2.id)
+        behandlingPåVentService.settPåVent(behandling2.id, settPåVentRequest)
         val behandling3 = opprettRevurdering()
 
         assertThat(behandling2.forrigeBehandlingId).isEqualTo(behandling.id)
@@ -70,8 +77,9 @@ internal class BehandlingPåVentServiceIntegrationTest : OppslagSpringRunnerTest
 
     @Test
     internal fun `behandling2 settes på vent og det gjøres et vedtak på behandling3 i mellomtiden`() {
+        val settPåVentRequest = settPåVentRequest(1, emptyList())
         val behandling2 = opprettRevurdering()
-        behandlingPåVentService.settPåVent(behandling2.id)
+        behandlingPåVentService.settPåVent(behandling2.id, settPåVentRequest)
         val behandling3 = opprettRevurdering()
 
         assertKanTaAvVent(behandling2, TaAvVentStatus.ANNEN_BEHANDLING_MÅ_FERDIGSTILLES)
@@ -118,5 +126,17 @@ internal class BehandlingPåVentServiceIntegrationTest : OppslagSpringRunnerTest
                 kravMottatt = LocalDate.now(),
                 vilkårsbehandleNyeBarn = VilkårsbehandleNyeBarn.VILKÅRSBEHANDLE,
             ),
+        )
+
+    private fun settPåVentRequest(oppgaveId: Long, oppfølgingsoppgaver: List<VurderHenvendelseOppgavetype>) =
+        SettPåVentRequest(
+            oppgaveId = oppgaveId,
+            saksbehandler = "ny saksbehandler",
+            prioritet = OppgavePrioritet.HOY,
+            frist = LocalDate.of(2002, Month.MARCH, 24).toString(),
+            mappe = 102,
+            beskrivelse = "Her er litt tekst fra saksbehandler",
+            oppgaveVersjon = 1,
+            oppfølgingsoppgaverMotLokalKontor = oppfølgingsoppgaver,
         )
 }

@@ -43,7 +43,8 @@ class BehandlingsoppgaveService(
         val eksternFagsakIds =
             gamleBehandlinger.map { fagsakService.hentFagsakForBehandling(it.id).eksternId.id.toString() }
 
-        val alleOppgaver = oppgaveService.finnBehandleSakOppgaver()
+        val opprettetTomTidspunktPåBehandleSakOppgave = LocalDateTime.now().minusWeeks(2).minusDays(5)
+        val alleOppgaver = oppgaveService.finnBehandleSakOppgaver(opprettetTomTidspunktPåBehandleSakOppgave)
         val oppgaveSaksreferanser: List<String> = alleOppgaver.flatMap { it.oppgaver.mapNotNull { oppgave -> oppgave.saksreferanse } }
 
         val fagsakerMedÅpenBehandlingSomManglerOppgave = eksternFagsakIds.filterNot { oppgaveSaksreferanser.contains(it) }
