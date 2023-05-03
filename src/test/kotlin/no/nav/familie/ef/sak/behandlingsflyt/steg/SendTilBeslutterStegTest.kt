@@ -19,6 +19,9 @@ import no.nav.familie.ef.sak.behandlingsflyt.task.FerdigstillOppgaveTask
 import no.nav.familie.ef.sak.behandlingsflyt.task.FerdigstillOppgaveTask.FerdigstillOppgaveTaskData
 import no.nav.familie.ef.sak.behandlingsflyt.task.OpprettOppgaveTask
 import no.nav.familie.ef.sak.behandlingsflyt.task.OpprettOppgaveTask.OpprettOppgaveTaskData
+import no.nav.familie.ef.sak.behandlingshistorikk.BehandlingshistorikkService
+import no.nav.familie.ef.sak.behandlingshistorikk.domain.Behandlingshistorikk
+import no.nav.familie.ef.sak.behandlingshistorikk.domain.StegUtfall
 import no.nav.familie.ef.sak.beregning.ValiderOmregningService
 import no.nav.familie.ef.sak.brev.VedtaksbrevRepository
 import no.nav.familie.ef.sak.brev.domain.Vedtaksbrev
@@ -70,6 +73,7 @@ internal class SendTilBeslutterStegTest {
     private val vurderingService = mockk<VurderingService>()
     private val validerOmregningService = mockk<ValiderOmregningService>(relaxed = true)
     private val årsakRevurderingService = mockk<ÅrsakRevurderingService>(relaxed = true)
+    private val behandlingshistorikkService = mockk<BehandlingshistorikkService>()
     private val simuleringsoppsummering = Simuleringsoppsummering(
         perioder = listOf(),
         fomDatoNestePeriode = null,
@@ -95,6 +99,7 @@ internal class SendTilBeslutterStegTest {
             vurderingService,
             validerOmregningService,
             årsakRevurderingService,
+            behandlingshistorikkService,
         )
     private val fagsak = fagsak(
         stønadstype = StønadType.OVERGANGSSTØNAD,
@@ -153,6 +158,8 @@ internal class SendTilBeslutterStegTest {
         every { tilbakekrevingService.harSaksbehandlerTattStillingTilTilbakekreving(any()) } returns true
         every { tilbakekrevingService.finnesÅpenTilbakekrevingsBehandling(any()) } returns true
         every { vedtakService.hentVedtak(any()) } returns vedtak(behandling.id)
+        every { behandlingshistorikkService.finnSisteBehandlingshistorikk(any(), any()) } returns
+            Behandlingshistorikk(behandlingId = UUID.randomUUID(), steg = StegType.SEND_TIL_BESLUTTER)
         mockBrukerContext(saksbehandlerNavn)
     }
 
@@ -223,6 +230,8 @@ internal class SendTilBeslutterStegTest {
 
     @Test
     internal fun `Skal avslutte oppgave BehandleUnderkjentVedtak hvis den finnes`() {
+        every { behandlingshistorikkService.finnSisteBehandlingshistorikk(any(), StegType.BESLUTTE_VEDTAK) } returns
+            Behandlingshistorikk(behandlingId = UUID.randomUUID(), steg = StegType.BESLUTTE_VEDTAK, utfall = StegUtfall.BESLUTTE_VEDTAK_UNDERKJENT)
         utførOgVerifiserKall(Oppgavetype.BehandleUnderkjentVedtak)
         verifiserVedtattBehandlingsstatistikkTask()
     }

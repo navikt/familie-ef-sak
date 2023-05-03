@@ -61,13 +61,13 @@ internal class OpprettOppgaveTaskTest {
     @Test
     fun `skal ikke lagre ned oppgave om oppgavetypen er vurder henvendelse`() {
         every { behandlingService.hentBehandling(behandlingId) } returns behandling(id = behandlingId, status = BehandlingStatus.UTREDES)
-        every {oppgaveService.lagOppgaveTekst(any())} returns ""
+        every { oppgaveService.lagOppgaveTekst(any()) } returns ""
 
         val task = OpprettOppgaveTask.opprettTask(
             OpprettOppgaveTask.OpprettOppgaveTaskData(
                 behandlingId = behandlingId,
                 oppgavetype = Oppgavetype.VurderHenvendelse,
-                beskrivelse = ""
+                beskrivelse = "",
             ),
         )
 
