@@ -29,12 +29,13 @@ Egenskap: Sett behandling på vent og oppdater oppgave
     Så forventer vi følgende beskrivelse på oppgaven
     """
  --- 25.10.2020 13:34 System (VL) ---
+  Tekst fra saksbehandler
+
   Oppgave flyttet fra saksbehandler Ola til Kari
   Oppgave endret fra prioritet NORM til HOY
   Oppgave endret frist fra 2023-03-18 til 2023-03-24
   Oppgave flyttet fra mappe søknad til venter på dokumentasjon
 
-  Tekst fra saksbehandler
 
   Gammel beskrivelse
     """
@@ -71,6 +72,7 @@ Egenskap: Sett behandling på vent og oppdater oppgave
     """
     --- 25.10.2020 13:34 System (VL) ---
   Oppgave flyttet fra saksbehandler Ola til Kari
+
 
   Gammel beskrivelse
     """
@@ -179,11 +181,11 @@ Egenskap: Sett behandling på vent og oppdater oppgave
     Så forventer vi følgende beskrivelse på oppgaven
     """
     --- 25.10.2020 13:34 System (VL) ---
-  Oppgave flyttet fra saksbehandler Ola til <ingen>
-
   Har lagt inn en ny beskrivelse.
 
   Den kan også være formatert
+
+  Oppgave flyttet fra saksbehandler Ola til <ingen>
     """
 
     Så forventer vi at oppgaven er oppdatert med
@@ -216,9 +218,9 @@ Egenskap: Sett behandling på vent og oppdater oppgave
     Så forventer vi følgende beskrivelse på oppgaven
     """
     --- 25.10.2020 13:34 System (VL) ---
-  Oppgave flyttet fra saksbehandler Ola til Rita
-
   Sendt til Rita
+
+  Oppgave flyttet fra saksbehandler Ola til Rita
     """
 
     Så forventer vi at oppgaven er oppdatert med
@@ -249,9 +251,9 @@ Egenskap: Sett behandling på vent og oppdater oppgave
     Så forventer vi følgende beskrivelse på oppgaven
     """
 --- 25.10.2020 13:34 System (VL) ---
-Oppgave endret frist fra 2023-03-18 til 2023-03-19
-
 Venter på bruker
+
+Oppgave endret frist fra 2023-03-18 til 2023-03-19
     """
 
     Så forventer vi at oppgaven er oppdatert med
@@ -321,4 +323,70 @@ Venter på bruker
       | prioritet     | NORM                    |
       | beskrivelse   | eksistrende beskrivelse |
 
+  Scenario: Sett på vent med en oppfølgingsoppgave som automatisk skal opprettes - informer om søkt overgangsstønad
 
+    Gitt eksisterende oppgave
+      | saksbehandler | Ola                     |
+      | frist         | 18.03.2023              |
+      | prioritet     | NORM                    |
+      | beskrivelse   | eksistrende beskrivelse |
+
+    Og mapper
+      | Mappeid | Mappenavn               |
+      | 111     | søknad                  |
+      | 222     | venter på dokumentasjon |
+
+    Og sett på vent request
+      | saksbehandler | Ola        |
+      | frist         | 18.03.2023 |
+      | prioritet     | NORM       |
+      | beskrivelse   |            |
+
+    Og behandling
+      | BehandlingId | a7947fc8-e39d-4cbc-960c-73ef39a9b59d |
+
+    Og valgte oppfølgingsoppgaver
+      | oppfølgingsopppgave               |
+      | INFORMERE_OM_SØKT_OVERGANGSSTØNAD |
+
+    Når vi setter behandling på vent
+
+    Så forventer vi at følgende task lagres
+      | Tasktype           | opprettOppgave                                       |
+      | BehandlingId       | a7947fc8-e39d-4cbc-960c-73ef39a9b59d                 |
+      | Oppgavetype        | VurderHenvendelse                                    |
+      | Oppgavebeskrivelse | Bruker har søkt om overgangsstønad. Til informasjon. |
+
+  Scenario: Sett på vent med en oppfølgingsoppgave som automatisk skal opprettes - be om innstilling om utdanning
+
+    Gitt eksisterende oppgave
+      | saksbehandler | Ola                     |
+      | frist         | 18.03.2023              |
+      | prioritet     | NORM                    |
+      | beskrivelse   | eksistrende beskrivelse |
+
+    Og mapper
+      | Mappeid | Mappenavn               |
+      | 111     | søknad                  |
+      | 222     | venter på dokumentasjon |
+
+    Og sett på vent request
+      | saksbehandler | Ola        |
+      | frist         | 18.03.2023 |
+      | prioritet     | NORM       |
+      | beskrivelse   |            |
+
+    Og behandling
+      | BehandlingId | a7947fc8-e39d-4cbc-960c-73ef39a9b59d |
+
+    Og valgte oppfølgingsoppgaver
+      | oppfølgingsopppgave              |
+      | INNSTILLING_VEDRØRENDE_UTDANNING |
+
+    Når vi setter behandling på vent
+
+    Så forventer vi at følgende task lagres
+      | Tasktype           | opprettOppgave                                                       |
+      | BehandlingId       | a7947fc8-e39d-4cbc-960c-73ef39a9b59d                                 |
+      | Oppgavetype        | VurderHenvendelse                                                    |
+      | Oppgavebeskrivelse | Vi trenger en vurdering fra dere fordi bruker tar/skal ta utdanning. |

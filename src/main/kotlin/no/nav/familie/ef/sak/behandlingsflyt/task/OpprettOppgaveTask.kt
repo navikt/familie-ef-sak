@@ -21,7 +21,8 @@ import java.util.UUID
     beskrivelse = "Opprett oppgave i GOSYS for behandling",
     maxAntallFeil = 3,
 )
-class OpprettOppgaveTask(private val oppgaveService: OppgaveService, private val behandlingService: BehandlingService) : AsyncTaskStep {
+class OpprettOppgaveTask(private val oppgaveService: OppgaveService, private val behandlingService: BehandlingService) :
+    AsyncTaskStep {
 
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -53,13 +54,23 @@ class OpprettOppgaveTask(private val oppgaveService: OppgaveService, private val
             }
         }
 
-        val oppgaveId = oppgaveService.opprettOppgave(
-            behandlingId = data.behandlingId,
-            oppgavetype = oppgavetype,
-            tilordnetNavIdent = data.tilordnetNavIdent,
-            beskrivelse = data.beskrivelse,
-        )
-
+        val oppgaveId = if (oppgavetype == Oppgavetype.VurderHenvendelse) {
+            oppgaveService.opprettOppgaveUtenÅLagreIRepository(
+                behandlingId = data.behandlingId,
+                oppgavetype = oppgavetype,
+                tilordnetNavIdent = data.tilordnetNavIdent,
+                beskrivelse = oppgaveService.lagOppgaveTekst(data.beskrivelse),
+                fristFerdigstillelse = null,
+                mappeId = null,
+            )
+        } else {
+            oppgaveService.opprettOppgave(
+                behandlingId = data.behandlingId,
+                oppgavetype = oppgavetype,
+                tilordnetNavIdent = data.tilordnetNavIdent,
+                beskrivelse = data.beskrivelse,
+            )
+        }
         task.metadata.setProperty("oppgaveId", oppgaveId.toString())
     }
 

@@ -2,6 +2,7 @@ package no.nav.familie.ef.sak.behandling.grunnbelop
 
 import no.nav.familie.ef.sak.beregning.OmregningService
 import no.nav.familie.ef.sak.beregning.nyesteGrunnbeløpGyldigFraOgMed
+import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.log.IdUtils
 import no.nav.familie.log.mdc.MDCConstants
 import no.nav.familie.prosessering.AsyncTaskStep
@@ -14,6 +15,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
+import java.time.YearMonth
 import java.util.Properties
 import java.util.UUID
 
@@ -39,7 +41,8 @@ class GOmregningTask(
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     fun opprettTask(fagsakId: UUID) {
-        val eksisterendeTask = taskService.finnTaskMedPayloadOgType(fagsakId.toString(), TYPE)
+        val payload = objectMapper.writeValueAsString(GOmregningPayload(fagsakId, nyesteGrunnbeløpGyldigFraOgMed))
+        val eksisterendeTask = taskService.finnTaskMedPayloadOgType(payload, TYPE)
 
         if (eksisterendeTask != null) {
             return
@@ -50,7 +53,8 @@ class GOmregningTask(
             setProperty("grunnbeløpsdato", nyesteGrunnbeløpGyldigFraOgMed.toString())
             setProperty(MDCConstants.MDC_CALL_ID, IdUtils.generateId())
         }
-        val task = Task(TYPE, fagsakId.toString()).copy(metadataWrapper = PropertiesWrapper(properties))
+
+        val task = Task(TYPE, payload).copy(metadataWrapper = PropertiesWrapper(properties))
 
         taskService.save(task)
     }
@@ -60,3 +64,8 @@ class GOmregningTask(
         const val TYPE = "G-omregning"
     }
 }
+
+data class GOmregningPayload(
+    val fagsakId: UUID,
+    val nyesteGrunnbeløpGyldigFraOgMed: YearMonth,
+)

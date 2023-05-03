@@ -14,10 +14,12 @@ import io.mockk.unmockkObject
 import no.nav.familie.ef.sak.behandling.BehandlingPåVentService
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.dto.SettPåVentRequest
+import no.nav.familie.ef.sak.behandling.dto.VurderHenvendelseOppgavetype
 import no.nav.familie.ef.sak.behandlingshistorikk.BehandlingshistorikkService
 import no.nav.familie.ef.sak.cucumber.domeneparser.Domenenøkkel
 import no.nav.familie.ef.sak.cucumber.domeneparser.parseDato
 import no.nav.familie.ef.sak.cucumber.domeneparser.parseEnum
+import no.nav.familie.ef.sak.cucumber.domeneparser.parseEnumUtenUppercase
 import no.nav.familie.ef.sak.cucumber.domeneparser.parseInt
 import no.nav.familie.ef.sak.cucumber.domeneparser.parseString
 import no.nav.familie.ef.sak.cucumber.domeneparser.parseValgfriDato
@@ -28,13 +30,17 @@ import no.nav.familie.ef.sak.felles.util.mockFeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.ef.sak.repository.behandling
+import no.nav.familie.ef.sak.repository.saksbehandling
 import no.nav.familie.ef.sak.vedtak.NullstillVedtakService
 import no.nav.familie.kontrakter.felles.oppgave.MappeDto
 import no.nav.familie.kontrakter.felles.oppgave.Oppgave
 import no.nav.familie.kontrakter.felles.oppgave.OppgavePrioritet
+import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
+import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.internal.TaskService
 import org.assertj.core.api.Assertions.assertThat
 import java.time.LocalDateTime
+import java.util.UUID
 
 class SettPåVentStepDefinitions {
 
@@ -58,8 +64,10 @@ class SettPåVentStepDefinitions {
         oppgaveService,
     )
 
-    val behandling = behandling()
+    var behandling = behandling()
+    var saksbehandling = saksbehandling(behandling = behandling)
     val oppgaveSlot = slot<Oppgave>()
+    val taskSlot = slot<Task>()
 
     @Gitt("eksisterende oppgave")
     fun eksisterendeOppgave(dataTable: DataTable) {
@@ -98,7 +106,26 @@ class SettPåVentStepDefinitions {
                 prioritet = parseEnum(SettPåVentDomeneBegrep.PRIORITET, verdier),
                 beskrivelse = parseValgfriString(SettPåVentDomeneBegrep.BESKRIVELSE, verdier).orEmpty(),
                 oppgaveVersjon = 1,
+                oppfølgingsoppgaverMotLokalKontor = emptyList(),
             )
+    }
+
+    @Gitt("behandling")
+    fun behandling(dataTable: DataTable) {
+        val verdier = dataTable.asMap()
+        val behandlingId = UUID.fromString(parseValgfriString(SettPåVentDomeneBegrep.BEHANDLINGID, verdier)) ?: UUID.randomUUID()
+
+        behandling = behandling(id = behandlingId)
+        saksbehandling = saksbehandling(behandling = behandling)
+    }
+
+    @Gitt("valgte oppfølgingsoppgaver")
+    fun oppFølgingsoppgaver(dataTable: DataTable) {
+        val oppfølgingsoppgaver = mutableListOf<VurderHenvendelseOppgavetype>()
+        dataTable.asMaps().map {
+            oppfølgingsoppgaver.add(parseEnum(SettPåVentDomeneBegrep.OPPFØLGINGSOPPGAVE, it))
+        }
+        settOppgavePåVentRequest = settOppgavePåVentRequest.copy(oppfølgingsoppgaverMotLokalKontor = oppfølgingsoppgaver.toList())
     }
 
     @Når("vi setter behandling på vent")
@@ -109,11 +136,12 @@ class SettPåVentStepDefinitions {
 
         every { SikkerhetContext.hentSaksbehandler() } returns "bob"
         every { behandlingService.hentBehandling(behandling.id) } returns behandling
+        every { behandlingService.hentSaksbehandling(behandling.id) } returns saksbehandling
         every { behandlingService.oppdaterStatusPåBehandling(any(), any()) } returns behandling
         every { oppgaveService.hentOppgave(any()) } returns eksisterendeOppgave
         every { behandlingshistorikkService.opprettHistorikkInnslag(any(), any(), any(), any()) } just Runs
         every { oppgaveService.oppdaterOppgave(capture(oppgaveSlot)) } just Runs
-        every { taskService.save(any()) } returns mockk()
+        every { taskService.save(capture(taskSlot)) } answers { firstArg() }
         every { oppgaveService.finnMapper("4489") } returns mapper
 
         påVentService.settPåVent(behandling.id, settOppgavePåVentRequest)
@@ -136,9 +164,25 @@ class SettPåVentStepDefinitions {
         assertThat(oppgaveSlot.captured.prioritet).isEqualTo(parseValgfriEnum<OppgavePrioritet>(SettPåVentDomeneBegrep.PRIORITET, verdier))
     }
 
+    @Så("forventer vi at følgende task lagres")
+    fun forventLagretTask(dataTable: DataTable) {
+        val verdier = dataTable.asMap()
+
+        assertThat(taskSlot.captured.type).isEqualTo(parseValgfriString(SettPåVentDomeneBegrep.TASKTYPE, verdier).orEmpty())
+        assertThat(taskSlot.captured.payload).contains(parseValgfriString(SettPåVentDomeneBegrep.BEHANDLINGID, verdier).orEmpty())
+        assertThat(taskSlot.captured.payload).contains(parseEnumUtenUppercase<Oppgavetype>(SettPåVentDomeneBegrep.OPPGAVETYPE, verdier)?.name)
+        assertThat(taskSlot.captured.payload).contains(parseValgfriString(SettPåVentDomeneBegrep.OPPGAVEBESKRIVELSE, verdier).orEmpty())
+    }
+
     enum class SettPåVentDomeneBegrep(val nøkkel: String) : Domenenøkkel {
         MAPPE_ID("Mappeid"),
         MAPPE_NAVN("Mappenavn"),
+
+        TASKTYPE("Tasktype"),
+        OPPGAVETYPE("Oppgavetype"),
+        OPPGAVEBESKRIVELSE("Oppgavebeskrivelse"),
+
+        BEHANDLINGID("BehandlingId"),
 
         // SettPåVentRequest
         SAKSBEHANDLER("saksbehandler"),
@@ -146,6 +190,7 @@ class SettPåVentStepDefinitions {
         MAPPE("mappe"),
         PRIORITET("prioritet"),
         BESKRIVELSE("beskrivelse"),
+        OPPFØLGINGSOPPGAVE("oppfølgingsopppgave"),
         ;
 
         override fun nøkkel(): String {

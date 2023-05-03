@@ -191,5 +191,5 @@ interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUp
         AND f.stonadstype=:stønadstype
         """,
     )
-    fun hentUferdigeBehandlingerFørDato(stønadstype: StønadType, opprettetTidFør: LocalDateTime): List<Behandling>
+    fun hentUferdigeBehandlingerOpprettetFørDato(stønadstype: StønadType, opprettetTidFør: LocalDateTime): List<Behandling>
 }

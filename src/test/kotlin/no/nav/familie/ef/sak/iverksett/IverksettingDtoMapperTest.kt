@@ -3,6 +3,8 @@ package no.nav.familie.ef.sak.iverksett
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.mockkObject
+import io.mockk.unmockkObject
 import io.mockk.verify
 import no.nav.familie.ef.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ef.sak.barn.BarnService
@@ -20,7 +22,9 @@ import no.nav.familie.ef.sak.behandlingshistorikk.BehandlingshistorikkService
 import no.nav.familie.ef.sak.behandlingshistorikk.domain.Behandlingshistorikk
 import no.nav.familie.ef.sak.brev.BrevmottakereRepository
 import no.nav.familie.ef.sak.brev.domain.MottakerRolle
+import no.nav.familie.ef.sak.felles.util.DatoUtil
 import no.nav.familie.ef.sak.felles.util.opprettGrunnlagsdata
+import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.opplysninger.mapper.BarnMatcher
 import no.nav.familie.ef.sak.opplysninger.mapper.MatchetBehandlingBarn
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
@@ -81,11 +85,14 @@ import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADE
 import no.nav.familie.kontrakter.felles.simulering.Simuleringsoppsummering
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.springframework.data.repository.findByIdOrNull
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.Month
 import java.time.YearMonth
 import java.util.UUID
 import no.nav.familie.kontrakter.ef.felles.BehandlingType as BehandlingTypeIverksett
@@ -190,8 +197,14 @@ internal class IverksettingDtoMapperTest {
         every { barnService.finnBarnPåBehandling(any()) } returns emptyList()
         every { grunnlagsdataService.hentGrunnlagsdata(any()) } returns
             GrunnlagsdataMedMetadata(opprettGrunnlagsdata(), LocalDateTime.now())
-        every { tilkjentYtelseService.hentForBehandling(any()) } returns tilkjentYtelse(UUID.randomUUID(), personIdent = "132")
+        every { tilkjentYtelseService.hentForBehandling(any()) } returns tilkjentYtelse(
+            UUID.randomUUID(),
+            personIdent = "132",
+            stønadsår = LocalDate.now().year
+        )
         every { vilkårsvurderingRepository.findByBehandlingId(any()) } returns mockk(relaxed = true)
+
+
         iverksettingDtoMapper.tilDto(saksbehandling, "bes")
 
         verify(exactly = 1) { grunnlagsdataService.hentGrunnlagsdata(any()) }
@@ -495,6 +508,56 @@ internal class IverksettingDtoMapperTest {
         )
         every { tilkjentYtelseService.hentForBehandling(any()) } returns objectMapper.readValue(tilkjentYtelseJson)
         return behandlingId
+    }
+
+    @Nested
+    inner class ValideringGrunnbeløp {
+
+        @Test
+        fun `skal feile ved iverksetting med utdatert grunnbeløp`() {
+
+            val inneværendeÅr = LocalDate.now().year
+
+            every { tilkjentYtelseService.hentForBehandling(saksbehandling.id) } returns tilkjentYtelse(
+                behandlingId = UUID.randomUUID(),
+                personIdent = "132",
+                grunnbeløpsmåned = YearMonth.of(inneværendeÅr-2, Month.MAY)
+            )
+
+            mockkObject(DatoUtil)
+            every { DatoUtil.dagensDatoMedTid() } returns LocalDateTime.of(inneværendeÅr, 1, 1, 0, 0)
+            assertThrows<ApiFeil> { iverksettingDtoMapper.tilDto(saksbehandling, "bes") }
+            unmockkObject(DatoUtil)
+        }
+
+        @Test
+        fun `skal ikke feile ved iverksetting med nyeste grunnbeløp`() {
+
+            val inneværendeÅr = LocalDate.now().year
+
+            every { barnService.finnBarnPåBehandling(any()) } returns emptyList()
+            every { grunnlagsdataService.hentGrunnlagsdata(any()) } returns
+                GrunnlagsdataMedMetadata(opprettGrunnlagsdata(), LocalDateTime.now())
+            every { vilkårsvurderingRepository.findByBehandlingId(any()) } returns mockk(relaxed = true)
+
+            every { tilkjentYtelseService.hentForBehandling(saksbehandling.id) } returns tilkjentYtelse(
+                behandlingId = UUID.randomUUID(),
+                personIdent = "132",
+                grunnbeløpsmåned = YearMonth.of(inneværendeÅr-1, Month.MAY)
+            )
+
+            mockkObject(DatoUtil)
+            every { DatoUtil.dagensDatoMedTid() } returns LocalDateTime.of(inneværendeÅr, 1, 1, 0, 0)
+
+            iverksettingDtoMapper.tilDto(saksbehandling, "bes")
+
+            unmockkObject(DatoUtil)
+        }
+
+
+
+
+
     }
 
     private fun saksbehandling(stønadType: StønadType = StønadType.OVERGANGSSTØNAD) = Saksbehandling(

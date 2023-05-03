@@ -100,7 +100,7 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
         behandlingRepository.insert(behandling(annenFagsak, opprettetTid = LocalDateTime.now().minusWeeks(1)))
 
         assertThat(
-            behandlingRepository.hentUferdigeBehandlingerFørDato(
+            behandlingRepository.hentUferdigeBehandlingerOpprettetFørDato(
                 OVERGANGSSTØNAD,
                 enMånedSiden,
             ),
