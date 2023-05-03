@@ -5,6 +5,7 @@ import io.mockk.mockk
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
+import no.nav.familie.ef.sak.felles.kodeverk.KodeverkService
 import no.nav.familie.ef.sak.infrastruktur.config.PdlClientConfig
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.opplysninger.mapper.adresseMapper
@@ -22,6 +23,7 @@ import no.nav.familie.ef.sak.opplysninger.søknad.mapper.SøknadsskjemaMapper
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.testutil.søknadBarnTilBehandlingBarn
+import no.nav.familie.kontrakter.ef.søknad.Søknadsfelt
 import no.nav.familie.kontrakter.ef.søknad.TestsøknadBuilder
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.kontrakter.felles.medlemskap.Medlemskapsinfo
@@ -39,7 +41,8 @@ internal class VilkårGrunnlagServiceTest {
     private val personopplysningerIntegrasjonerClient = mockk<PersonopplysningerIntegrasjonerClient>()
     private val søknadService = mockk<SøknadService>()
     private val featureToggleService = mockk<FeatureToggleService>()
-    private val medlemskapMapper = MedlemskapMapper(mockk(relaxed = true), mockk(relaxed = true), mockk(relaxed = true))
+    private val kodeverkService = mockk<KodeverkService>(relaxed = true)
+    private val medlemskapMapper = MedlemskapMapper(mockk(relaxed = true), mockk(relaxed = true), mockk(relaxed = true), kodeverkService)
     private val behandlingService = mockk<BehandlingService>()
     private val tidligereVedaksperioderService = mockk<TidligereVedaksperioderService>(relaxed = true)
 
@@ -96,8 +99,9 @@ internal class VilkårGrunnlagServiceTest {
             skalHaBarnepass = true,
         ),
     )
+    val oppholdsland = Søknadsfelt(label = "I hvilket land oppholder du deg?", verdi = "Polen", svarId = "POL")
     private val søknadOvergangsstønad =
-        SøknadsskjemaMapper.tilDomene(søknadsBuilder.setBarn(søknadsbarn).build().søknadOvergangsstønad)
+        SøknadsskjemaMapper.tilDomene(søknadsBuilder.setBarn(søknadsbarn).setMedlemskapsdetaljer(oppholderDuDegINorge = false, oppholdsland = oppholdsland).build().søknadOvergangsstønad)
             .tilSøknadsverdier()
 
     private val søknadBarnetilsyn =
@@ -114,6 +118,8 @@ internal class VilkårGrunnlagServiceTest {
         every { fagsakService.hentFagsakForBehandling(behandlingId) } returns fagsak
         every { personopplysningerIntegrasjonerClient.hentMedlemskapsinfo(any()) } returns medlemskapsinfo
         every { featureToggleService.isEnabled(any(), any()) } returns false
+        every { kodeverkService.hentLand("POL", any()) } returns "Polen"
+        every { kodeverkService.hentLand("SWE", any()) } returns "Sverige"
     }
 
     @Test
@@ -182,5 +188,17 @@ internal class VilkårGrunnlagServiceTest {
         assertThat(grunnlag.personalia.navn.visningsnavn).isEqualTo("Fornavn mellomnavn Etternavn")
         assertThat(grunnlag.personalia.bostedsadresse!!.visningsadresse)
             .isEqualTo("c/o CONAVN, Charlies vei 13 b, 0575 Oslo")
+    }
+
+    @Test
+    internal fun `skal mappe oppholdsland og land i medlemskap`() {
+        val data = grunnlagsdataService.hentFraRegisterForPersonOgAndreForeldre("1", emptyList())
+        every { grunnlagsdataRepository.findByIdOrNull(behandlingId) } returns Grunnlagsdata(behandlingId, data)
+
+        val grunnlag = service.hentGrunnlag(behandlingId, søknadOvergangsstønad, søknadOvergangsstønad.fødselsnummer, barn)
+        val test = grunnlag.medlemskap.søknadsgrunnlag
+        assertThat(test?.oppholdsland).isEqualTo("Polen")
+        assertThat(test!!.utenlandsopphold[0].land).isEqualTo("Sverige")
+
     }
 }
