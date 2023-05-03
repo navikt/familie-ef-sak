@@ -207,7 +207,7 @@ class IverksettingDtoMapper(
 
     private fun validerBehandlingBrukerÅretsEllerFjoråretsG(
         gMånedTilkjentYtelse: YearMonth,
-        feilmelding: String
+        feilmelding: String,
     ) {
         brukerfeilHvis(gMånedTilkjentYtelse != nyesteGrunnbeløpGyldigFraOgMed && gMånedTilkjentYtelse != forrigeGrunnbeløp.periode.fom) {
             feilmelding

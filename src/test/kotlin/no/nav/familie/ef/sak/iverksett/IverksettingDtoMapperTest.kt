@@ -196,10 +196,9 @@ internal class IverksettingDtoMapperTest {
         every { tilkjentYtelseService.hentForBehandling(any()) } returns tilkjentYtelse(
             UUID.randomUUID(),
             personIdent = "132",
-            stønadsår = LocalDate.now().year
+            stønadsår = LocalDate.now().year,
         )
         every { vilkårsvurderingRepository.findByBehandlingId(any()) } returns mockk(relaxed = true)
-
 
         iverksettingDtoMapper.tilDto(saksbehandling, "bes")
 
@@ -511,13 +510,12 @@ internal class IverksettingDtoMapperTest {
 
         @Test
         fun `skal feile ved iverksetting med utdatert grunnbeløp`() {
-
             val inneværendeÅr = LocalDate.now().year
 
             every { tilkjentYtelseService.hentForBehandling(saksbehandling.id) } returns tilkjentYtelse(
                 behandlingId = UUID.randomUUID(),
                 personIdent = "132",
-                grunnbeløpsmåned = YearMonth.of(inneværendeÅr-2, Month.MAY)
+                grunnbeløpsmåned = YearMonth.of(inneværendeÅr - 2, Month.MAY),
             )
 
             mockkObject(DatoUtil)
@@ -528,7 +526,6 @@ internal class IverksettingDtoMapperTest {
 
         @Test
         fun `skal ikke feile ved iverksetting med nyeste grunnbeløp`() {
-
             val inneværendeÅr = LocalDate.now().year
 
             every { barnService.finnBarnPåBehandling(any()) } returns emptyList()
@@ -539,7 +536,7 @@ internal class IverksettingDtoMapperTest {
             every { tilkjentYtelseService.hentForBehandling(saksbehandling.id) } returns tilkjentYtelse(
                 behandlingId = UUID.randomUUID(),
                 personIdent = "132",
-                grunnbeløpsmåned = YearMonth.of(inneværendeÅr-1, Month.MAY)
+                grunnbeløpsmåned = YearMonth.of(inneværendeÅr - 1, Month.MAY),
             )
 
             mockkObject(DatoUtil)
@@ -549,11 +546,6 @@ internal class IverksettingDtoMapperTest {
 
             unmockkObject(DatoUtil)
         }
-
-
-
-
-
     }
 
     private fun saksbehandling(stønadType: StønadType = StønadType.OVERGANGSSTØNAD) = Saksbehandling(
