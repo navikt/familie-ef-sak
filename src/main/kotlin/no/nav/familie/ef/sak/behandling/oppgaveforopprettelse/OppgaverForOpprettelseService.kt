@@ -67,7 +67,7 @@ class OppgaverForOpprettelseService(
 
     private fun behandlingErFørstegangs(behandling: Behandling) =
         behandling.type == BehandlingType.FØRSTEGANGSBEHANDLING
-    
+
     private fun forrigeErFørstegangsOgAvslåttEllerHenlagt(behandling: Behandling): Boolean {
         val forrigeBehandling = behandling.forrigeBehandlingId?.let { behandlingService.hentBehandling(it) }
         return forrigeBehandling?.type == BehandlingType.FØRSTEGANGSBEHANDLING

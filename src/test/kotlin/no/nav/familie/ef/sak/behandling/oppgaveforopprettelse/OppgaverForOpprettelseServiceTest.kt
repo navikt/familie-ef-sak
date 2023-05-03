@@ -7,10 +7,18 @@ import io.mockk.runs
 import io.mockk.spyk
 import io.mockk.verify
 import no.nav.familie.ef.sak.behandling.BehandlingService
+import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
+import no.nav.familie.ef.sak.felles.util.BehandlingOppsettUtil.henlagtFørstegangsbehandling
+import no.nav.familie.ef.sak.felles.util.BehandlingOppsettUtil.iverksattFørstegangsbehandling
+import no.nav.familie.ef.sak.felles.util.BehandlingOppsettUtil.revurdering
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
+import no.nav.familie.ef.sak.økonomi.lagAndelTilkjentYtelse
+import no.nav.familie.ef.sak.økonomi.lagTilkjentYtelse
 import no.nav.familie.kontrakter.ef.iverksett.OppgaveForOpprettelseType
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
 import java.util.UUID
 
 internal class OppgaverForOpprettelseServiceTest {
@@ -83,4 +91,85 @@ internal class OppgaverForOpprettelseServiceTest {
         verify { oppgaverForOpprettelseRepository.insert(any()) }
         verify(exactly = 0) { oppgaverForOpprettelseRepository.update(any()) }
     }
+
+    @Test
+    fun `skal kunne opprette oppgave hvis forrige behandlingen er en HENLAGT førstegangsbehandling`() {
+        val behandling = revurdering.copy(forrigeBehandlingId = henlagtFørstegangsbehandling.id)
+        every { behandlingService.hentBehandling(behandling.id) } returns behandling
+        every { behandlingService.hentBehandling(henlagtFørstegangsbehandling.id) } returns henlagtFørstegangsbehandling
+        every { tilkjentYtelseService.hentForBehandlingEllerNull(any()) } returns tilkjentYtelse2årFremITid
+
+        val oppgaver = oppgaverForOpprettelseService.hentOppgavetyperSomKanOpprettes(behandling.id)
+
+        assertThat(oppgaver.contains(OppgaveForOpprettelseType.INNTEKTSKONTROLL_1_ÅR_FREM_I_TID)).isTrue
+    }
+
+    @Test
+    fun `skal kunne opprette oppgave hvis forrige behandling er en AVSLÅTT førstegangsbehandling`() {
+        val behandling = revurdering.copy(forrigeBehandlingId = henlagtFørstegangsbehandling.id)
+        every { behandlingService.hentBehandling(behandling.id) } returns behandling
+        every { behandlingService.hentBehandling(henlagtFørstegangsbehandling.id) } returns henlagtFørstegangsbehandling.copy(
+            resultat = BehandlingResultat.AVSLÅTT
+        )
+
+        every { tilkjentYtelseService.hentForBehandlingEllerNull(any()) } returns tilkjentYtelse2årFremITid
+
+        val oppgaver = oppgaverForOpprettelseService.hentOppgavetyperSomKanOpprettes(behandling.id)
+
+        assertThat(oppgaver.contains(OppgaveForOpprettelseType.INNTEKTSKONTROLL_1_ÅR_FREM_I_TID)).isTrue
+    }
+
+    @Test
+    fun `skal ikke kunne opprette oppgave hvis forrige behandling er en INNVILGET førstegangsbehandling`() {
+        val behandling = revurdering.copy(forrigeBehandlingId = henlagtFørstegangsbehandling.id)
+        every { behandlingService.hentBehandling(behandling.id) } returns behandling
+        every { behandlingService.hentBehandling(henlagtFørstegangsbehandling.id) } returns iverksattFørstegangsbehandling
+        every { tilkjentYtelseService.hentForBehandlingEllerNull(any()) } returns tilkjentYtelse2årFremITid
+
+        val oppgaver = oppgaverForOpprettelseService.hentOppgavetyperSomKanOpprettes(behandling.id)
+
+        assertThat(oppgaver.contains(OppgaveForOpprettelseType.INNTEKTSKONTROLL_1_ÅR_FREM_I_TID)).isFalse
+    }
+
+    @Test
+    fun `skal kunne opprette oppgave hvis behandling er førstegangsbehandling`() {
+        every { behandlingService.hentBehandling(iverksattFørstegangsbehandling.id) } returns iverksattFørstegangsbehandling
+        every { tilkjentYtelseService.hentForBehandlingEllerNull(any()) } returns tilkjentYtelse2årFremITid
+
+        val oppgaver = oppgaverForOpprettelseService.hentOppgavetyperSomKanOpprettes(iverksattFørstegangsbehandling.id)
+
+        assertThat(oppgaver.contains(OppgaveForOpprettelseType.INNTEKTSKONTROLL_1_ÅR_FREM_I_TID)).isTrue
+    }
+
+    @Test
+    fun `skal ikke kunne opprette oppgave hvis behandling er førstegangsbehandling, men andeler under 1 år frem i tid`() {
+        every { behandlingService.hentBehandling(iverksattFørstegangsbehandling.id) } returns iverksattFørstegangsbehandling
+        every { tilkjentYtelseService.hentForBehandlingEllerNull(any()) } returns tilkjentYtelseUnder1årFremITid
+
+        val oppgaver = oppgaverForOpprettelseService.hentOppgavetyperSomKanOpprettes(iverksattFørstegangsbehandling.id)
+
+        assertThat(oppgaver.contains(OppgaveForOpprettelseType.INNTEKTSKONTROLL_1_ÅR_FREM_I_TID)).isFalse
+    }
+
+    private val tilkjentYtelse2årFremITid = lagTilkjentYtelse(
+        andelerTilkjentYtelse = listOf(
+            lagAndelTilkjentYtelse(
+                fraOgMed = LocalDate.now(),
+                kildeBehandlingId = UUID.randomUUID(),
+                beløp = 10_000,
+                tilOgMed = LocalDate.now().plusYears(2),
+            ),
+        ),
+    )
+
+    private val tilkjentYtelseUnder1årFremITid = lagTilkjentYtelse(
+        andelerTilkjentYtelse = listOf(
+            lagAndelTilkjentYtelse(
+                fraOgMed = LocalDate.now(),
+                kildeBehandlingId = UUID.randomUUID(),
+                beløp = 10_000,
+                tilOgMed = LocalDate.now().plusMonths(11)
+            ),
+        ),
+    )
 }
