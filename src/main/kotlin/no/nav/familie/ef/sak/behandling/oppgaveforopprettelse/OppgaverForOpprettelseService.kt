@@ -2,6 +2,7 @@ package no.nav.familie.ef.sak.behandling.oppgaveforopprettelse
 
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.Behandling
+import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvisIkke
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
@@ -32,7 +33,7 @@ class OppgaverForOpprettelseService(
         }
         when (oppgaverForOpprettelseRepository.existsById(behandlingId)) {
             true -> oppgaverForOpprettelseRepository.update(OppgaverForOpprettelse(behandlingId, nyeOppgaver))
-            false ->oppgaverForOpprettelseRepository.insert(OppgaverForOpprettelse(behandlingId, nyeOppgaver))
+            false -> oppgaverForOpprettelseRepository.insert(OppgaverForOpprettelse(behandlingId, nyeOppgaver))
         }
     }
 
@@ -60,7 +61,17 @@ class OppgaverForOpprettelseService(
             .filter { it.stønadTom > LocalDate.now().plusYears(1) }
             .any { it.beløp > 0 }
 
-        return behandling.type == BehandlingType.FØRSTEGANGSBEHANDLING && harUtbetalingEtterDetNesteÅret
+        return harUtbetalingEtterDetNesteÅret
+            && (behandlingErFørstegangs(behandling) || forrigeErFørstegangsOgAvslåttEllerHenlagt(behandling))
+    }
+
+    private fun behandlingErFørstegangs(behandling: Behandling) =
+        behandling.type == BehandlingType.FØRSTEGANGSBEHANDLING
+    
+    private fun forrigeErFørstegangsOgAvslåttEllerHenlagt(behandling: Behandling): Boolean {
+        val forrigeBehandling = behandling.forrigeBehandlingId?.let { behandlingService.hentBehandling(it) }
+        return forrigeBehandling?.type == BehandlingType.FØRSTEGANGSBEHANDLING
+            && (forrigeBehandling.resultat == BehandlingResultat.AVSLÅTT || forrigeBehandling.resultat == BehandlingResultat.HENLAGT)
     }
 
     fun slettOppgaverForOpprettelse(behandlingId: UUID) {
