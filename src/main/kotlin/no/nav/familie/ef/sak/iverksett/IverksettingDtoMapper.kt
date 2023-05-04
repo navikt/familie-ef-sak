@@ -123,7 +123,7 @@ class IverksettingDtoMapper(
         val tilkjentYtelse =
             if (vedtak.resultatType != ResultatType.AVSLÅ) tilkjentYtelseService.hentForBehandling(saksbehandling.id) else null
 
-        if (tilkjentYtelse != null) validerGrunnbeløpsmåned(tilkjentYtelse)
+        if (tilkjentYtelse != null && vedtak.resultatType != ResultatType.OPPHØRT) validerGrunnbeløpsmåned(tilkjentYtelse)
         val vilkårsvurderinger = vilkårsvurderingRepository.findByBehandlingId(saksbehandling.id)
 
         val behandlingsdetaljer = mapBehandlingsdetaljer(saksbehandling, vilkårsvurderinger)
@@ -189,7 +189,7 @@ class IverksettingDtoMapper(
     private fun validerGrunnbeløpsmåned(tilkjentYtelse: TilkjentYtelse) {
         val gMånedTilkjentYtelse = tilkjentYtelse.grunnbeløpsmåned
         val feilmelding =
-            "Kan ikke iverksette med utdatert grunnbeløp gyldig fra $gMånedTilkjentYtelse. Denne behandlingen må beregnes og simmuleres på nytt"
+            "Kan ikke iverksette med utdatert grunnbeløp gyldig fra $gMånedTilkjentYtelse. Denne behandlingen må beregnes og simuleres på nytt"
 
         val nyttGrunnbeløpForInneværendeÅrRegistrertIEF = nyesteGrunnbeløpGyldigFraOgMed.year == DatoUtil.inneværendeÅr()
         val fristGOmregning = LocalDate.of(DatoUtil.inneværendeÅr(), Month.JUNE, 15)
