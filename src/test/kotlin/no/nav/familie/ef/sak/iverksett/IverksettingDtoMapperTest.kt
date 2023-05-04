@@ -200,10 +200,9 @@ internal class IverksettingDtoMapperTest {
         every { tilkjentYtelseService.hentForBehandling(any()) } returns tilkjentYtelse(
             UUID.randomUUID(),
             personIdent = "132",
-            stønadsår = LocalDate.now().year
+            stønadsår = LocalDate.now().year,
         )
         every { vilkårsvurderingRepository.findByBehandlingId(any()) } returns mockk(relaxed = true)
-
 
         iverksettingDtoMapper.tilDto(saksbehandling, "bes")
 
@@ -515,13 +514,12 @@ internal class IverksettingDtoMapperTest {
 
         @Test
         fun `skal feile ved iverksetting med utdatert grunnbeløp`() {
-
             val inneværendeÅr = LocalDate.now().year
 
             every { tilkjentYtelseService.hentForBehandling(saksbehandling.id) } returns tilkjentYtelse(
                 behandlingId = UUID.randomUUID(),
                 personIdent = "132",
-                grunnbeløpsmåned = YearMonth.of(inneværendeÅr-2, Month.MAY)
+                grunnbeløpsmåned = YearMonth.of(inneværendeÅr - 2, Month.MAY),
             )
 
             mockkObject(DatoUtil)
@@ -532,7 +530,6 @@ internal class IverksettingDtoMapperTest {
 
         @Test
         fun `skal ikke feile ved iverksetting med nyeste grunnbeløp`() {
-
             val inneværendeÅr = LocalDate.now().year
 
             every { barnService.finnBarnPåBehandling(any()) } returns emptyList()
@@ -543,7 +540,7 @@ internal class IverksettingDtoMapperTest {
             every { tilkjentYtelseService.hentForBehandling(saksbehandling.id) } returns tilkjentYtelse(
                 behandlingId = UUID.randomUUID(),
                 personIdent = "132",
-                grunnbeløpsmåned = YearMonth.of(inneværendeÅr-1, Month.MAY)
+                grunnbeløpsmåned = YearMonth.of(inneværendeÅr - 1, Month.MAY),
             )
 
             mockkObject(DatoUtil)
@@ -554,10 +551,36 @@ internal class IverksettingDtoMapperTest {
             unmockkObject(DatoUtil)
         }
 
+        @Test
+        fun `skal ikke feile ved iverksetting av utdatert G dersom vedtaksresultat er OPPHØRT`() {
+            /*
+             * Ved et opphør settes grunnbeløpsmåned til samme grunnbeløpsmåned som tilkjent ytelse fra forrige vedtak.
+             * Derfor vil opphør ikke nødvendigvis ha nyeste grunnbeløpsmåned. Dette går fint fordi det ikke gjøres noen beregning der grunnbeløp brukes.
+             * */
 
+            val inneværendeÅr = LocalDate.now().year
 
+            val opphørtSaksbehandling = saksbehandling.copy(resultat = BehandlingResultat.OPPHØRT)
 
+            every { vedtakService.hentVedtak(behandling.id) } returns Vedtak(behandling.id, ResultatType.OPPHØRT)
+            every { barnService.finnBarnPåBehandling(any()) } returns emptyList()
+            every { grunnlagsdataService.hentGrunnlagsdata(any()) } returns
+                GrunnlagsdataMedMetadata(opprettGrunnlagsdata(), LocalDateTime.now())
+            every { vilkårsvurderingRepository.findByBehandlingId(any()) } returns mockk(relaxed = true)
 
+            every { tilkjentYtelseService.hentForBehandling(saksbehandling.id) } returns tilkjentYtelse(
+                behandlingId = UUID.randomUUID(),
+                personIdent = "132",
+                grunnbeløpsmåned = YearMonth.of(inneværendeÅr - 3, Month.MAY),
+            )
+
+            mockkObject(DatoUtil)
+            every { DatoUtil.dagensDatoMedTid() } returns LocalDateTime.of(inneværendeÅr, 1, 1, 0, 0)
+
+            iverksettingDtoMapper.tilDto(opphørtSaksbehandling, "bes")
+
+            unmockkObject(DatoUtil)
+        }
     }
 
     private fun saksbehandling(stønadType: StønadType = StønadType.OVERGANGSSTØNAD) = Saksbehandling(

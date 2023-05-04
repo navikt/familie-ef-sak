@@ -43,7 +43,6 @@ internal class GOmregningTaskTest {
         assertThat(taskSlot.captured.callId).isNotEqualTo(callId)
     }
 
-
     @Test
     internal fun `skal opprette task med grunnbeløpsmåned i payload`() {
         val fagsakId = UUID.randomUUID()

@@ -32,7 +32,7 @@ class OppgaverForOpprettelseService(
         }
         when (oppgaverForOpprettelseRepository.existsById(behandlingId)) {
             true -> oppgaverForOpprettelseRepository.update(OppgaverForOpprettelse(behandlingId, nyeOppgaver))
-            false ->oppgaverForOpprettelseRepository.insert(OppgaverForOpprettelse(behandlingId, nyeOppgaver))
+            false -> oppgaverForOpprettelseRepository.insert(OppgaverForOpprettelse(behandlingId, nyeOppgaver))
         }
     }
 

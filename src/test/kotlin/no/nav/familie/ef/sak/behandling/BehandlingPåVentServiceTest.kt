@@ -166,14 +166,14 @@ internal class BehandlingPåVentServiceTest {
                         assertThat(it.type).isEqualTo(OpprettOppgaveTask.TYPE)
                         assertThat(it.payload).contains(behandlingId.toString())
                         assertThat(it.payload).contains(Oppgavetype.VurderHenvendelse.name)
-                        assertThat(it.payload).contains(OppgaveBeskrivelse.innstillingOmBrukersUtdanning.subSequence(0, 50))
+                        assertThat(it.payload).contains("Vi trenger en vurdering fra dere fordi bruker tar/skal ta utdanning.")
                     },
                 )
             }
         }
 
         @Test
-        fun `skal opprette vurder konsekvens oppgave - informere om søkt overgangsstønad`() {
+        fun `skal opprette vurder henvendelse oppgave - informere om søkt overgangsstønad`() {
             val oppgaveId = mockOppsettForAutomatiskeOppgaver()
 
             val oppfølgingsoppgaver = listOf(informereOmSøktStønad)
@@ -193,14 +193,14 @@ internal class BehandlingPåVentServiceTest {
                         assertThat(it.type).isEqualTo(OpprettOppgaveTask.TYPE)
                         assertThat(it.payload).contains(behandlingId.toString())
                         assertThat(it.payload).contains(Oppgavetype.VurderHenvendelse.name)
-                        assertThat(it.payload).contains(OppgaveBeskrivelse.informereLokalkontorOmOvergangsstønad)
+                        assertThat(it.payload).contains("Bruker har søkt om overgangsstønad. Til informasjon.")
                     },
                 )
             }
         }
 
         @Test
-        fun `skal opprette flere vurder konsekvens oppgaver mot lokalkontor i en request`() {
+        fun `skal opprette flere vurder henvendelse oppgaver mot lokalkontor i en request`() {
             val oppgaveId = mockOppsettForAutomatiskeOppgaver()
 
             val oppfølgingsoppgaver = listOf(informereOmSøktStønad, innstillingUtdanning)
@@ -220,7 +220,7 @@ internal class BehandlingPåVentServiceTest {
                         assertThat(it.type).isEqualTo(OpprettOppgaveTask.TYPE)
                         assertThat(it.payload).contains(behandlingId.toString())
                         assertThat(it.payload).contains(Oppgavetype.VurderHenvendelse.name)
-                        assertThat(it.payload).contains(OppgaveBeskrivelse.informereLokalkontorOmOvergangsstønad)
+                        assertThat(it.payload).contains("Bruker har søkt om overgangsstønad. Til informasjon.")
                     },
                 )
             }

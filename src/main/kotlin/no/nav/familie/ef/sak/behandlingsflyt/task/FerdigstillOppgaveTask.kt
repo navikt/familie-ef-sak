@@ -40,7 +40,7 @@ class FerdigstillOppgaveTask(private val oppgaveService: OppgaveService) : Async
 
     companion object {
 
-        fun opprettTask(behandlingId: UUID, oppgavetype: Oppgavetype, oppgaveId: Long, personIdent: String?): Task {
+        fun opprettTask(behandlingId: UUID, oppgavetype: Oppgavetype, oppgaveId: Long?, personIdent: String?): Task {
             return Task(
                 type = TYPE,
                 payload = objectMapper.writeValueAsString(FerdigstillOppgaveTaskData(behandlingId, oppgavetype)),
