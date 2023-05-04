@@ -8,6 +8,7 @@ import java.time.LocalDate
 data class Utenlandsopphold(
     val fradato: LocalDate,
     val tildato: LocalDate,
+    val land: String? = null,
     @Column("arsak_utenlandsopphold")
     val årsakUtenlandsopphold: String,
 )

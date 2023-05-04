@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.vilkår
 
+import no.nav.familie.ef.sak.felles.kodeverk.KodeverkService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.GrunnlagsdataDomene
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.Søker
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.Folkeregisterpersonstatus
@@ -17,12 +18,14 @@ import no.nav.familie.ef.sak.vilkår.dto.tilDto
 import no.nav.familie.kontrakter.felles.Datoperiode
 import no.nav.familie.kontrakter.felles.medlemskap.Medlemskapsinfo
 import org.springframework.stereotype.Component
+import java.time.LocalDate
 
 @Component
 class MedlemskapMapper(
     private val statsborgerskapMapper: StatsborgerskapMapper,
     private val innflyttingUtflyttingMapper: InnflyttingUtflyttingMapper,
     private val adresseMapper: AdresseMapper,
+    private val kodeverkService: KodeverkService,
 ) {
 
     fun tilDto(
@@ -39,12 +42,14 @@ class MedlemskapMapper(
         return MedlemskapSøknadsgrunnlagDto(
             bosattNorgeSisteÅrene = medlemskapsdetaljer.bosattNorgeSisteÅrene,
             oppholderDuDegINorge = medlemskapsdetaljer.oppholderDuDegINorge,
+            oppholdsland = medlemskapsdetaljer.oppholdsland?.let { kodeverkService.hentLand(it, LocalDate.now()) },
             utenlandsopphold = medlemskapsdetaljer.utenlandsopphold.map {
                 UtenlandsoppholdDto(
-                    it.fradato,
-                    it.tildato,
-                    Datoperiode(it.fradato, it.tildato),
-                    it.årsakUtenlandsopphold,
+                    fraDato = it.fradato,
+                    tilDato = it.tildato,
+                    periode = Datoperiode(it.fradato, it.tildato),
+                    land = it.land?.let { land -> kodeverkService.hentLand(land, LocalDate.now()) },
+                    årsak = it.årsakUtenlandsopphold,
                 )
             },
         )
