@@ -38,7 +38,7 @@ enum class Toggle(val toggleId: String, val beskrivelse: String? = null) {
     PERSONOPPLYSNINGER_ENDRINGER("familie.ef.sak.frontend.personopplysninger-endringer"),
     VURDER_KONSEKVENS_OPPGAVER_LOKALKONTOR("familie.ef.sak.automatiske-oppgaver-lokalkontor"),
     KAST_FEIL_HVIS_OPPGAVE_MANGLER_PÅ_ÅPEN_BEHANDLING("familie.ef.sak.kast-feil-hvis-oppgave-mangler-pa-apen-behandling"),
-    TILLAT_MIGRERING_5_ÅR_TILBAKE("familie.ef.sak.tillat-migrering-5-ar-tilbake"),
+    TILLAT_MIGRERING_5_ÅR_TILBAKE("familie.ef.sak.tillat-migrering-5-ar-tilbake", "Permission"),
     ;
 
     companion object {
