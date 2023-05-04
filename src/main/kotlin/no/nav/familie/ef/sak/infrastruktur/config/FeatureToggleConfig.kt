@@ -79,9 +79,6 @@ class FeatureToggleConfig(
                 if (unleash.environment == "local") {
                     return true
                 }
-                if (toggle == Toggle.SETT_PÅ_VENT_MED_OPPGAVESTYRING) {
-                    return false
-                }
                 return defaultValue
             }
 
