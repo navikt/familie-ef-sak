@@ -10,6 +10,7 @@ import no.nav.familie.ef.sak.barn.BarnService
 import no.nav.familie.ef.sak.barn.BehandlingBarn
 import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
+import no.nav.familie.ef.sak.behandling.oppgaveforopprettelse.OppgaverForOpprettelseService
 import no.nav.familie.ef.sak.beregning.Beløpsperiode
 import no.nav.familie.ef.sak.beregning.BeregningService
 import no.nav.familie.ef.sak.beregning.Inntekt
@@ -91,6 +92,7 @@ internal class BeregnYtelseStegTest {
     private val barnService = mockk<BarnService>(relaxed = true)
     private val fagsakService = mockk<FagsakService>(relaxed = true)
     private val validerOmregningService = mockk<ValiderOmregningService>(relaxed = true)
+    private val oppgaverForOpprettelseService = mockk<OppgaverForOpprettelseService>(relaxed = true)
     private val featureToggleService = mockFeatureToggleService()
 
     private val steg = BeregnYtelseSteg(
@@ -105,6 +107,7 @@ internal class BeregnYtelseStegTest {
         barnService,
         fagsakService,
         validerOmregningService,
+        oppgaverForOpprettelseService,
         featureToggleService,
     )
 
@@ -551,7 +554,7 @@ internal class BeregnYtelseStegTest {
         }
 
         @Test
-        internal fun `skal slette tilbakekreving og simulering ved avslag`() {
+        internal fun `skal slette oppgaver til opprettelse, tilbakekreving og simulering ved avslag`() {
             every { simuleringService.slettSimuleringForBehandling(any()) } just Runs
             every { tilbakekrevingService.slettTilbakekreving(any()) } just Runs
             utførSteg(
@@ -561,6 +564,7 @@ internal class BeregnYtelseStegTest {
 
             verify { tilbakekrevingService.slettTilbakekreving(any()) }
             verify { simuleringService.slettSimuleringForBehandling(any()) }
+            verify { oppgaverForOpprettelseService.slettOppgaverForOpprettelse(any()) }
         }
 
         @Test
@@ -1371,6 +1375,21 @@ internal class BeregnYtelseStegTest {
             assertThat(slot.captured.andelerTilkjentYtelse).hasSize(1)
             assertThat(slot.captured.andelerTilkjentYtelse[0].stønadFom).isEqualTo(andelFom)
             assertThat(slot.captured.andelerTilkjentYtelse[0].stønadTom).isEqualTo(opphørFom.atDay(1).minusDays(1))
+        }
+
+        @Test
+        internal fun `skal slette oppgaver til opprettelse hvis de finnes`() {
+            val fom = LocalDate.of(2022, 1, 1)
+            val tom = fom.plusYears(1)
+            every { tilkjentYtelseService.hentForBehandling(any()) } returns
+                lagTilkjentYtelse(listOf(lagAndelTilkjentYtelse(100, fom, tom)))
+
+            utførSteg(
+                BehandlingType.REVURDERING,
+                Opphør(opphørFom = YearMonth.from(fom), begrunnelse = "null"),
+                forrigeBehandlingId = UUID.randomUUID(),
+            )
+            verify { oppgaverForOpprettelseService.slettOppgaverForOpprettelse(any()) }
         }
     }
 

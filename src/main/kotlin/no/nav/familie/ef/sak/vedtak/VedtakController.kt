@@ -10,6 +10,7 @@ import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.secureLogger
 import no.nav.familie.ef.sak.vedtak.dto.BeslutteVedtakDto
 import no.nav.familie.ef.sak.vedtak.dto.InnvilgelseOvergangsstønad
+import no.nav.familie.ef.sak.vedtak.dto.SendTilBeslutterDto
 import no.nav.familie.ef.sak.vedtak.dto.TotrinnskontrollStatusDto
 import no.nav.familie.ef.sak.vedtak.dto.VedtakDto
 import no.nav.familie.ef.sak.vedtak.historikk.VedtakHistorikkService
@@ -52,15 +53,15 @@ class VedtakController(
     private val logger = LoggerFactory.getLogger(javaClass)
 
     @PostMapping("/{behandlingId}/send-til-beslutter")
-    fun sendTilBeslutter(@PathVariable behandlingId: UUID): Ressurs<UUID> {
+    fun sendTilBeslutter(@PathVariable behandlingId: UUID, @RequestBody sendTilBeslutter: SendTilBeslutterDto?): Ressurs<UUID> {
         val behandling = behandlingService.hentSaksbehandling(behandlingId)
         tilgangService.validerTilgangTilBehandling(behandling, AuditLoggerEvent.UPDATE)
         val vedtakErUtenBeslutter = vedtakService.hentVedtak(behandlingId).utledVedtakErUtenBeslutter()
 
         return if (vedtakErUtenBeslutter.value) {
-            Ressurs.success(stegService.håndterFerdigstilleVedtakUtenBeslutter(behandling).id)
+            Ressurs.success(stegService.håndterFerdigstilleVedtakUtenBeslutter(behandling, sendTilBeslutter).id)
         } else {
-            Ressurs.success(stegService.håndterSendTilBeslutter(behandling).id)
+            Ressurs.success(stegService.håndterSendTilBeslutter(behandling, sendTilBeslutter).id)
         }
     }
 
