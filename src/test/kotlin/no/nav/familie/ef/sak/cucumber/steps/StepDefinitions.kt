@@ -15,6 +15,7 @@ import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
+import no.nav.familie.ef.sak.behandling.oppgaveforopprettelse.OppgaverForOpprettelseService
 import no.nav.familie.ef.sak.behandlingsflyt.steg.BeregnYtelseSteg
 import no.nav.familie.ef.sak.beregning.BeregningService
 import no.nav.familie.ef.sak.beregning.ValiderOmregningService
@@ -105,6 +106,7 @@ class StepDefinitions {
     private val barnService = spyk(BarnService(barnRepository, mockk(), behandlingService))
     private val fagsakService = mockFagsakService()
     private val validerOmregningService = mockk<ValiderOmregningService>(relaxed = true)
+    private val oppgaverForOpprettelseService = mockk<OppgaverForOpprettelseService>(relaxed = true)
 
     private val beregnYtelseSteg = BeregnYtelseSteg(
         tilkjentYtelseService,
@@ -118,6 +120,7 @@ class StepDefinitions {
         barnService,
         fagsakService,
         validerOmregningService,
+        oppgaverForOpprettelseService,
         featureToggleService,
     )
 

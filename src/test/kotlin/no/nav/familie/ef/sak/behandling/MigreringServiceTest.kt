@@ -836,7 +836,7 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
                 saksbehandling.id,
             )
             vedtaksbrevService.lagSaksbehandlerSanitybrev(saksbehandling, brevrequest, "brevMal")
-            stegService.håndterSendTilBeslutter(behandlingService.hentSaksbehandling(saksbehandling.id))
+            stegService.håndterSendTilBeslutter(behandlingService.hentSaksbehandling(saksbehandling.id), null)
         }
     }
 

@@ -15,6 +15,7 @@ import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.behandling.domain.ÅrsakRevurdering
 import no.nav.familie.ef.sak.behandling.dto.HenlagtÅrsak
+import no.nav.familie.ef.sak.behandling.oppgaveforopprettelse.OppgaverForOpprettelseService
 import no.nav.familie.ef.sak.behandling.ÅrsakRevurderingsRepository
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.behandlingshistorikk.BehandlingshistorikkService
@@ -117,6 +118,7 @@ internal class IverksettingDtoMapperTest {
     private val arbeidsfordelingService = mockk<ArbeidsfordelingService>(relaxed = true)
     private val barnMatcher = mockk<BarnMatcher>()
     private val årsakRevurderingsRepository = mockk<ÅrsakRevurderingsRepository>()
+    private val oppgaverForOpprettelseService = mockk<OppgaverForOpprettelseService>()
 
     private val iverksettingDtoMapper =
         IverksettingDtoMapper(
@@ -131,6 +133,7 @@ internal class IverksettingDtoMapperTest {
             vilkårsvurderingRepository = vilkårsvurderingRepository,
             brevmottakereRepository = brevmottakereRepository,
             årsakRevurderingsRepository = årsakRevurderingsRepository,
+            oppgaverForOpprettelseService = oppgaverForOpprettelseService,
         )
 
     private val fagsak = fagsak(fagsakpersoner(setOf("1")))
@@ -154,6 +157,7 @@ internal class IverksettingDtoMapperTest {
             årsak = Revurderingsårsak.ENDRING_INNTEKT,
             beskrivelse = "beskrivelse",
         )
+        every { oppgaverForOpprettelseService.hentOppgaverForOpprettelseEllerNull(any()) } returns null
     }
 
     @Test
@@ -543,6 +547,37 @@ internal class IverksettingDtoMapperTest {
             every { DatoUtil.dagensDatoMedTid() } returns LocalDateTime.of(inneværendeÅr, 1, 1, 0, 0)
 
             iverksettingDtoMapper.tilDto(saksbehandling, "bes")
+
+            unmockkObject(DatoUtil)
+        }
+
+        @Test
+        fun `skal ikke feile ved iverksetting av utdatert G dersom vedtaksresultat er OPPHØRT`() {
+            /*
+             * Ved et opphør settes grunnbeløpsmåned til samme grunnbeløpsmåned som tilkjent ytelse fra forrige vedtak.
+             * Derfor vil opphør ikke nødvendigvis ha nyeste grunnbeløpsmåned. Dette går fint fordi det ikke gjøres noen beregning der grunnbeløp brukes.
+             * */
+
+            val inneværendeÅr = LocalDate.now().year
+
+            val opphørtSaksbehandling = saksbehandling.copy(resultat = BehandlingResultat.OPPHØRT)
+
+            every { vedtakService.hentVedtak(behandling.id) } returns Vedtak(behandling.id, ResultatType.OPPHØRT)
+            every { barnService.finnBarnPåBehandling(any()) } returns emptyList()
+            every { grunnlagsdataService.hentGrunnlagsdata(any()) } returns
+                GrunnlagsdataMedMetadata(opprettGrunnlagsdata(), LocalDateTime.now())
+            every { vilkårsvurderingRepository.findByBehandlingId(any()) } returns mockk(relaxed = true)
+
+            every { tilkjentYtelseService.hentForBehandling(saksbehandling.id) } returns tilkjentYtelse(
+                behandlingId = UUID.randomUUID(),
+                personIdent = "132",
+                grunnbeløpsmåned = YearMonth.of(inneværendeÅr - 3, Month.MAY),
+            )
+
+            mockkObject(DatoUtil)
+            every { DatoUtil.dagensDatoMedTid() } returns LocalDateTime.of(inneværendeÅr, 1, 1, 0, 0)
+
+            iverksettingDtoMapper.tilDto(opphørtSaksbehandling, "bes")
 
             unmockkObject(DatoUtil)
         }

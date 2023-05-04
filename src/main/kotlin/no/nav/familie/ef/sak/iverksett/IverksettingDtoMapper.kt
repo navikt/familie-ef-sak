@@ -3,6 +3,7 @@ package no.nav.familie.ef.sak.iverksett
 import no.nav.familie.ef.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ef.sak.barn.BarnService
 import no.nav.familie.ef.sak.behandling.Saksbehandling
+import no.nav.familie.ef.sak.behandling.oppgaveforopprettelse.OppgaverForOpprettelseService
 import no.nav.familie.ef.sak.behandling.ÅrsakRevurderingsRepository
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.behandlingshistorikk.BehandlingshistorikkService
@@ -53,6 +54,7 @@ import no.nav.familie.kontrakter.ef.iverksett.IverksettBarnetilsynDto
 import no.nav.familie.kontrakter.ef.iverksett.IverksettDto
 import no.nav.familie.kontrakter.ef.iverksett.IverksettOvergangsstønadDto
 import no.nav.familie.kontrakter.ef.iverksett.IverksettSkolepengerDto
+import no.nav.familie.kontrakter.ef.iverksett.OppgaverForOpprettelseDto
 import no.nav.familie.kontrakter.ef.iverksett.PeriodeMedBeløpDto
 import no.nav.familie.kontrakter.ef.iverksett.SkolepengerStudietype
 import no.nav.familie.kontrakter.ef.iverksett.SkolepengerUtgiftDto
@@ -98,6 +100,7 @@ class IverksettingDtoMapper(
     private val grunnlagsdataService: GrunnlagsdataService,
     private val brevmottakereRepository: BrevmottakereRepository,
     private val årsakRevurderingsRepository: ÅrsakRevurderingsRepository,
+    private val oppgaverForOpprettelseService: OppgaverForOpprettelseService,
 ) {
 
     fun tilDto(saksbehandling: Saksbehandling, beslutter: String): IverksettDto {
@@ -123,7 +126,7 @@ class IverksettingDtoMapper(
         val tilkjentYtelse =
             if (vedtak.resultatType != ResultatType.AVSLÅ) tilkjentYtelseService.hentForBehandling(saksbehandling.id) else null
 
-        if (tilkjentYtelse != null) validerGrunnbeløpsmåned(tilkjentYtelse)
+        if (tilkjentYtelse != null && vedtak.resultatType != ResultatType.OPPHØRT) validerGrunnbeløpsmåned(tilkjentYtelse)
         val vilkårsvurderinger = vilkårsvurderingRepository.findByBehandlingId(saksbehandling.id)
 
         val behandlingsdetaljer = mapBehandlingsdetaljer(saksbehandling, vilkårsvurderinger)
@@ -151,6 +154,7 @@ class IverksettingDtoMapper(
                     vedtak = vedtakDto,
                 )
             }
+
             StønadType.BARNETILSYN -> {
                 val vedtakDto = mapVedtaksdetaljerBarnetilsynDto(
                     vedtak,
@@ -167,6 +171,7 @@ class IverksettingDtoMapper(
                     vedtak = vedtakDto,
                 )
             }
+
             StønadType.SKOLEPENGER -> {
                 val vedtakDto = mapVedtaksdetaljerSkolepengerDto(
                     vedtak,
@@ -189,7 +194,7 @@ class IverksettingDtoMapper(
     private fun validerGrunnbeløpsmåned(tilkjentYtelse: TilkjentYtelse) {
         val gMånedTilkjentYtelse = tilkjentYtelse.grunnbeløpsmåned
         val feilmelding =
-            "Kan ikke iverksette med utdatert grunnbeløp gyldig fra $gMånedTilkjentYtelse. Denne behandlingen må beregnes og simmuleres på nytt"
+            "Kan ikke iverksette med utdatert grunnbeløp gyldig fra $gMånedTilkjentYtelse. Denne behandlingen må beregnes og simuleres på nytt"
 
         val nyttGrunnbeløpForInneværendeÅrRegistrertIEF = nyesteGrunnbeløpGyldigFraOgMed.year == DatoUtil.inneværendeÅr()
         val fristGOmregning = LocalDate.of(DatoUtil.inneværendeÅr(), Month.JUNE, 15)
@@ -296,6 +301,10 @@ class IverksettingDtoMapper(
             tilbakekreving = tilbakekreving,
             brevmottakere = brevmottakere,
             avslagÅrsak = vedtak.avslåÅrsak,
+            oppgaverForOpprettelse =
+            oppgaverForOpprettelseService.hentOppgaverForOpprettelseEllerNull(vedtak.behandlingId)?.let {
+                OppgaverForOpprettelseDto(oppgavetyper = it.oppgavetyper)
+            } ?: OppgaverForOpprettelseDto(oppgavetyper = emptyList()),
         )
 
     @Improvement("Opphørårsak må utledes ved revurdering")

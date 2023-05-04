@@ -23,6 +23,7 @@ import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.ef.sak.vedtak.dto.BeslutteVedtakDto
+import no.nav.familie.ef.sak.vedtak.dto.SendTilBeslutterDto
 import no.nav.familie.ef.sak.vedtak.dto.VedtakDto
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -60,18 +61,18 @@ class StegService(
     }
 
     @Transactional
-    fun håndterFerdigstilleVedtakUtenBeslutter(saksbehandling: Saksbehandling): Behandling {
-        håndterSendTilBeslutter(saksbehandling)
+    fun håndterFerdigstilleVedtakUtenBeslutter(saksbehandling: Saksbehandling, sendTilBeslutter: SendTilBeslutterDto?): Behandling {
+        håndterSendTilBeslutter(saksbehandling, sendTilBeslutter)
         val oppdatertBehandling = behandlingService.hentSaksbehandling(saksbehandling.id)
         val godkjentBesluttetVedtak = BeslutteVedtakDto(godkjent = true)
         return håndterBeslutteVedtak(oppdatertBehandling, godkjentBesluttetVedtak)
     }
 
     @Transactional
-    fun håndterSendTilBeslutter(saksbehandling: Saksbehandling): Behandling {
+    fun håndterSendTilBeslutter(saksbehandling: Saksbehandling, sendTilBeslutter: SendTilBeslutterDto?): Behandling {
         val behandlingSteg: SendTilBeslutterSteg = hentBehandlingSteg(SEND_TIL_BESLUTTER)
 
-        return håndterSteg(saksbehandling, behandlingSteg, null)
+        return håndterSteg(saksbehandling, behandlingSteg, sendTilBeslutter)
     }
 
     @Transactional
