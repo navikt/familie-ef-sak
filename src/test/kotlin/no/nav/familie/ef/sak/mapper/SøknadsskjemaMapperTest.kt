@@ -101,7 +101,6 @@ internal class SøknadsskjemaMapperTest {
     inner class LandIMedlemskap {
         @Test
         internal fun `skal ikke inneholde oppholdsland om ikke sendt med`() {
-
             val søknad = TestsøknadBuilder.Builder().build().søknadOvergangsstønad
 
             val søknadTilLagring = SøknadsskjemaMapper.tilDomene(søknad)
@@ -113,7 +112,7 @@ internal class SøknadsskjemaMapperTest {
             val oppholdsland = Søknadsfelt(
                 label = "I hvilket land oppholder du deg?",
                 verdi = "Polen",
-                svarId = "POL"
+                svarId = "POL",
             )
             val søknad = TestsøknadBuilder.Builder().setMedlemskapsdetaljer(oppholdsland = oppholdsland).build().søknadOvergangsstønad
 
@@ -123,12 +122,14 @@ internal class SøknadsskjemaMapperTest {
 
         @Test
         internal fun `utenlandsperiode skal inneholde land om innsendt`() {
-            val utenlandsperioder = listOf(Utenlandsopphold(
-                fradato = Søknadsfelt("Fra", LocalDate.of(2021, 1, 1)),
-                tildato = Søknadsfelt("Til", LocalDate.of(2022, 1, 1)),
-                land = Søknadsfelt("I hvilket land oppholdt du deg i?", svarId = "ESP", verdi = "Spania"),
-                årsakUtenlandsopphold = Søknadsfelt("Årsak til utenlandsopphold", "Ferie")
-            ))
+            val utenlandsperioder = listOf(
+                Utenlandsopphold(
+                    fradato = Søknadsfelt("Fra", LocalDate.of(2021, 1, 1)),
+                    tildato = Søknadsfelt("Til", LocalDate.of(2022, 1, 1)),
+                    land = Søknadsfelt("I hvilket land oppholdt du deg i?", svarId = "ESP", verdi = "Spania"),
+                    årsakUtenlandsopphold = Søknadsfelt("Årsak til utenlandsopphold", "Ferie"),
+                ),
+            )
 
             val søknad = TestsøknadBuilder.Builder().setMedlemskapsdetaljer(utenlandsopphold = utenlandsperioder).build().søknadOvergangsstønad
             val søknadTilLagring = SøknadsskjemaMapper.tilDomene(søknad)
@@ -138,6 +139,5 @@ internal class SøknadsskjemaMapperTest {
             assertThat(søknadTilLagring.medlemskap.utenlandsopphold.first().land).isEqualTo("ESP")
             assertThat(søknadTilLagring.medlemskap.utenlandsopphold.first().årsakUtenlandsopphold).isEqualTo("Ferie")
         }
-
     }
 }

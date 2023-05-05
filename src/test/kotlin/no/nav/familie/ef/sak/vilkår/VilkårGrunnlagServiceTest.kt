@@ -199,6 +199,5 @@ internal class VilkårGrunnlagServiceTest {
         val test = grunnlag.medlemskap.søknadsgrunnlag
         assertThat(test?.oppholdsland).isEqualTo("Polen")
         assertThat(test!!.utenlandsopphold[0].land).isEqualTo("Sverige")
-
     }
 }

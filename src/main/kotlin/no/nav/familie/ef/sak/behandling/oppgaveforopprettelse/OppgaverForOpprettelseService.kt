@@ -61,8 +61,8 @@ class OppgaverForOpprettelseService(
             .filter { it.stønadTom > LocalDate.now().plusYears(1) }
             .any { it.beløp > 0 }
 
-        return harUtbetalingEtterDetNesteÅret
-            && (behandlingErFørstegangs(behandling) || forrigeErFørstegangsOgAvslåttEllerHenlagt(behandling))
+        return harUtbetalingEtterDetNesteÅret &&
+            (behandlingErFørstegangs(behandling) || forrigeErFørstegangsOgAvslåttEllerHenlagt(behandling))
     }
 
     private fun behandlingErFørstegangs(behandling: Behandling) =
@@ -70,8 +70,8 @@ class OppgaverForOpprettelseService(
 
     private fun forrigeErFørstegangsOgAvslåttEllerHenlagt(behandling: Behandling): Boolean {
         val forrigeBehandling = behandling.forrigeBehandlingId?.let { behandlingService.hentBehandling(it) }
-        return forrigeBehandling?.type == BehandlingType.FØRSTEGANGSBEHANDLING
-            && (forrigeBehandling.resultat == BehandlingResultat.AVSLÅTT || forrigeBehandling.resultat == BehandlingResultat.HENLAGT)
+        return forrigeBehandling?.type == BehandlingType.FØRSTEGANGSBEHANDLING &&
+            (forrigeBehandling.resultat == BehandlingResultat.AVSLÅTT || forrigeBehandling.resultat == BehandlingResultat.HENLAGT)
     }
 
     fun slettOppgaverForOpprettelse(behandlingId: UUID) {
