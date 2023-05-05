@@ -109,7 +109,7 @@ internal class OppgaverForOpprettelseServiceTest {
         val behandling = revurdering.copy(forrigeBehandlingId = henlagtFørstegangsbehandling.id)
         every { behandlingService.hentBehandling(behandling.id) } returns behandling
         every { behandlingService.hentBehandling(henlagtFørstegangsbehandling.id) } returns henlagtFørstegangsbehandling.copy(
-            resultat = BehandlingResultat.AVSLÅTT
+            resultat = BehandlingResultat.AVSLÅTT,
         )
 
         every { tilkjentYtelseService.hentForBehandlingEllerNull(any()) } returns tilkjentYtelse2årFremITid
@@ -168,7 +168,7 @@ internal class OppgaverForOpprettelseServiceTest {
                 fraOgMed = LocalDate.now(),
                 kildeBehandlingId = UUID.randomUUID(),
                 beløp = 10_000,
-                tilOgMed = LocalDate.now().plusMonths(11)
+                tilOgMed = LocalDate.now().plusMonths(11),
             ),
         ),
     )
