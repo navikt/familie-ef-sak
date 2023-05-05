@@ -1,9 +1,5 @@
 package no.nav.familie.ef.sak.behandling.oppgaveforopprettelse
 
-import no.nav.familie.ef.sak.behandling.BehandlingService
-import no.nav.familie.ef.sak.behandling.domain.Behandling
-import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
-import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvisIkke
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
@@ -17,7 +13,6 @@ import java.util.UUID
 @Service
 class OppgaverForOpprettelseService(
     private val oppgaverForOpprettelseRepository: OppgaverForOpprettelseRepository,
-    private val behandlingService: BehandlingService,
     private val tilkjentYtelseService: TilkjentYtelseService,
 ) {
 
@@ -42,9 +37,8 @@ class OppgaverForOpprettelseService(
     }
 
     fun hentOppgavetyperSomKanOpprettes(behandlingId: UUID): List<OppgaveForOpprettelseType> {
-        val behandling = behandlingService.hentBehandling(behandlingId)
         val tilkjentYtelse = tilkjentYtelseService.hentForBehandlingEllerNull(behandlingId)
-        val kanOppretteInntektskontroll = kanOppretteOppgaveForInntektskontrollFremITid(behandling, tilkjentYtelse)
+        val kanOppretteInntektskontroll = kanOppretteOppgaveForInntektskontrollFremITid(tilkjentYtelse)
 
         return if (kanOppretteInntektskontroll) listOf(OppgaveForOpprettelseType.INNTEKTSKONTROLL_1_ÅR_FREM_I_TID) else emptyList()
     }
@@ -52,7 +46,6 @@ class OppgaverForOpprettelseService(
     fun initialVerdierForOppgaverSomSkalOpprettes(behandlingId: UUID) = hentOppgavetyperSomKanOpprettes(behandlingId)
 
     private fun kanOppretteOppgaveForInntektskontrollFremITid(
-        behandling: Behandling,
         tilkjentYtelse: TilkjentYtelse?,
     ): Boolean {
         if (tilkjentYtelse == null) return false
@@ -61,17 +54,7 @@ class OppgaverForOpprettelseService(
             .filter { it.stønadTom > LocalDate.now().plusYears(1) }
             .any { it.beløp > 0 }
 
-        return harUtbetalingEtterDetNesteÅret &&
-            (behandlingErFørstegangs(behandling) || forrigeErFørstegangsOgAvslåttEllerHenlagt(behandling))
-    }
-
-    private fun behandlingErFørstegangs(behandling: Behandling) =
-        behandling.type == BehandlingType.FØRSTEGANGSBEHANDLING
-
-    private fun forrigeErFørstegangsOgAvslåttEllerHenlagt(behandling: Behandling): Boolean {
-        val forrigeBehandling = behandling.forrigeBehandlingId?.let { behandlingService.hentBehandling(it) }
-        return forrigeBehandling?.type == BehandlingType.FØRSTEGANGSBEHANDLING &&
-            (forrigeBehandling.resultat == BehandlingResultat.AVSLÅTT || forrigeBehandling.resultat == BehandlingResultat.HENLAGT)
+        return harUtbetalingEtterDetNesteÅret
     }
 
     fun slettOppgaverForOpprettelse(behandlingId: UUID) {
