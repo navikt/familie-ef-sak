@@ -10,6 +10,8 @@ import no.nav.familie.ef.sak.behandlingsflyt.task.BehandlingsstatistikkTask
 import no.nav.familie.ef.sak.behandlingsflyt.task.FerdigstillOppgaveTask
 import no.nav.familie.ef.sak.behandlingsflyt.task.OpprettOppgaveTask
 import no.nav.familie.ef.sak.behandlingsflyt.task.OpprettOppgaveTask.OpprettOppgaveTaskData
+import no.nav.familie.ef.sak.behandlingshistorikk.BehandlingshistorikkService
+import no.nav.familie.ef.sak.behandlingshistorikk.domain.StegUtfall
 import no.nav.familie.ef.sak.beregning.ValiderOmregningService
 import no.nav.familie.ef.sak.brev.VedtaksbrevRepository
 import no.nav.familie.ef.sak.fagsak.FagsakService
@@ -49,6 +51,7 @@ class SendTilBeslutterSteg(
     private val validerOmregningService: ValiderOmregningService,
     private val årsakRevurderingService: ÅrsakRevurderingService,
     private val oppgaverForOpprettelseService: OppgaverForOpprettelseService,
+    private val behandlingshistorikkService: BehandlingshistorikkService,
 ) : BehandlingSteg<SendTilBeslutterDto?> {
 
     override fun validerSteg(saksbehandling: Saksbehandling) {
@@ -108,8 +111,7 @@ class SendTilBeslutterSteg(
         if (!vedtakService.hentVedtak(saksbehandling.id).erVedtakUtenBeslutter()) {
             opprettGodkjennVedtakOppgave(saksbehandling)
         }
-        ferdigstillOppgave(saksbehandling, Oppgavetype.BehandleSak)
-        ferdigstillOppgave(saksbehandling, Oppgavetype.BehandleUnderkjentVedtak)
+        ferdigstillOppgave(saksbehandling)
         opprettTaskForBehandlingsstatistikk(saksbehandling.id)
         if (data != null) {
             oppgaverForOpprettelseService.opprettEllerErstatt(
@@ -122,18 +124,25 @@ class SendTilBeslutterSteg(
     private fun opprettTaskForBehandlingsstatistikk(behandlingId: UUID) =
         taskService.save(BehandlingsstatistikkTask.opprettVedtattTask(behandlingId = behandlingId))
 
-    private fun ferdigstillOppgave(saksbehandling: Saksbehandling, oppgavetype: Oppgavetype) {
+    private fun ferdigstillOppgave(saksbehandling: Saksbehandling) {
         val aktivIdent = fagsakService.hentAktivIdent(saksbehandling.fagsakId)
-        oppgaveService.hentOppgaveSomIkkeErFerdigstilt(oppgavetype, saksbehandling)?.let {
-            taskService.save(
-                FerdigstillOppgaveTask.opprettTask(
-                    behandlingId = saksbehandling.id,
-                    oppgavetype,
-                    it.gsakOppgaveId,
-                    aktivIdent,
-                ),
-            )
+
+        val besluttetVedtakHendelse =
+            behandlingshistorikkService.finnSisteBehandlingshistorikk(saksbehandling.id, StegType.BESLUTTE_VEDTAK)
+        val oppgavetype = if (besluttetVedtakHendelse?.utfall == StegUtfall.BESLUTTE_VEDTAK_UNDERKJENT) {
+            Oppgavetype.BehandleUnderkjentVedtak
+        } else {
+            Oppgavetype.BehandleSak
         }
+
+        taskService.save(
+            FerdigstillOppgaveTask.opprettTask(
+                behandlingId = saksbehandling.id,
+                oppgavetype,
+                null,
+                aktivIdent,
+            ),
+        )
     }
 
     private fun opprettGodkjennVedtakOppgave(saksbehandling: Saksbehandling) {

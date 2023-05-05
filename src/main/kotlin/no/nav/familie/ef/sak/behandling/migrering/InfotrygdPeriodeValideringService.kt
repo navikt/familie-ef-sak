@@ -7,6 +7,8 @@ import no.nav.familie.ef.sak.infotrygd.InfotrygdStønadPerioderDto
 import no.nav.familie.ef.sak.infotrygd.SummertInfotrygdPeriodeDto
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdAktivitetstype.TILMELDT_SOM_REELL_ARBEIDSSØKER
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdSak
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdSakResultat
@@ -21,6 +23,7 @@ import java.time.YearMonth
 class InfotrygdPeriodeValideringService(
     private val infotrygdService: InfotrygdService,
     private val behandlingService: BehandlingService,
+    private val featureToggleService: FeatureToggleService,
 ) {
 
     fun validerKanOppretteBehandlingGittInfotrygdData(fagsak: Fagsak) {
@@ -219,9 +222,16 @@ class InfotrygdPeriodeValideringService(
                 MigreringExceptionType.FEIL_TOM_DATO,
             )
         }
-        if (dato.isBefore(LocalDate.now().minusYears(3))) {
+
+        val årBakoverTillattVedMigrering: Long =
+            when (featureToggleService.isEnabled(Toggle.TILLAT_MIGRERING_5_ÅR_TILBAKE)) {
+                true -> 5
+                false -> 3
+            }
+
+        if (dato.isBefore(LocalDate.now().minusYears(årBakoverTillattVedMigrering))) {
             throw MigreringException(
-                "Kan ikke migrere når forrige utbetaling i infotrygd er mer enn 3 år tilbake i tid, dato=$dato",
+                "Kan ikke migrere når forrige utbetaling i infotrygd er mer enn $årBakoverTillattVedMigrering år tilbake i tid, dato=$dato",
                 MigreringExceptionType.ELDRE_PERIODER,
             )
         }

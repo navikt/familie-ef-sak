@@ -47,7 +47,7 @@ class NullstillVedtakServiceTest {
         tilbakekrevingService,
         mellomlagringBrevService,
         vedtaksbrevService,
-        oppgaverForOpprettelseService
+        oppgaverForOpprettelseService,
     )
     private val behandlingId = UUID.randomUUID()
 

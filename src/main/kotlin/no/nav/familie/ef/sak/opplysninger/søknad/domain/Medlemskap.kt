@@ -7,6 +7,7 @@ data class Medlemskap(
     val oppholderDuDegINorge: Boolean,
     @Column("bosatt_norge_siste_arene")
     val bosattNorgeSisteÅrene: Boolean,
+    val oppholdsland: String? = null,
     @MappedCollection(idColumn = "soknadsskjema_id")
     val utenlandsopphold: Set<Utenlandsopphold> = emptySet(),
 )

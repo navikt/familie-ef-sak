@@ -178,7 +178,7 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
 
         val sivilstandVilkårForBehandling = vilkårBehandling.first { it.type == VilkårType.SIVILSTAND }
         val sivilstandVilkårForRevurdering = vilkårRevurdering.first { it.type == VilkårType.SIVILSTAND }
-        val aleneomsorgVilkårForBehandling = vilkårBehandling.first { it.type == VilkårType.ALENEOMSORG && barnPåBehandling.id == it.barnId}
+        val aleneomsorgVilkårForBehandling = vilkårBehandling.first { it.type == VilkårType.ALENEOMSORG && barnPåBehandling.id == it.barnId }
         val aleneomsorgVilkårForRevurdering = vilkårRevurdering.first { it.type == VilkårType.ALENEOMSORG && barnPåBehandlingRevurdering.id == it.barnId }
 
         assertThat(vilkårRevurdering).hasSize(vilkårBehandling.size)

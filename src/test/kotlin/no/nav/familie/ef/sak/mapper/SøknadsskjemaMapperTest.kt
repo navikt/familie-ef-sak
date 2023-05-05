@@ -6,6 +6,7 @@ import no.nav.familie.kontrakter.ef.søknad.Stønadsstart
 import no.nav.familie.kontrakter.ef.søknad.Søknadsfelt
 import no.nav.familie.kontrakter.ef.søknad.Testsøknad
 import no.nav.familie.kontrakter.ef.søknad.TestsøknadBuilder
+import no.nav.familie.kontrakter.ef.søknad.Utenlandsopphold
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -93,6 +94,50 @@ internal class SøknadsskjemaMapperTest {
             )
             val søknad = TestsøknadBuilder.Builder().setPersonalia(adresse = adresse).build().søknadOvergangsstønad
             assertThat(SøknadsskjemaMapper.tilDomene(søknad).adresseopplysninger?.adresse).isEqualTo("adresse")
+        }
+    }
+
+    @Nested
+    inner class LandIMedlemskap {
+        @Test
+        internal fun `skal ikke inneholde oppholdsland om ikke sendt med`() {
+            val søknad = TestsøknadBuilder.Builder().build().søknadOvergangsstønad
+
+            val søknadTilLagring = SøknadsskjemaMapper.tilDomene(søknad)
+            assertThat(søknadTilLagring.medlemskap.oppholdsland).isNull()
+        }
+
+        @Test
+        internal fun `skal inneholde oppholdsland om innsendt`() {
+            val oppholdsland = Søknadsfelt(
+                label = "I hvilket land oppholder du deg?",
+                verdi = "Polen",
+                svarId = "POL",
+            )
+            val søknad = TestsøknadBuilder.Builder().setMedlemskapsdetaljer(oppholdsland = oppholdsland).build().søknadOvergangsstønad
+
+            val søknadTilLagring = SøknadsskjemaMapper.tilDomene(søknad)
+            assertThat(søknadTilLagring.medlemskap.oppholdsland).isEqualTo("POL")
+        }
+
+        @Test
+        internal fun `utenlandsperiode skal inneholde land om innsendt`() {
+            val utenlandsperioder = listOf(
+                Utenlandsopphold(
+                    fradato = Søknadsfelt("Fra", LocalDate.of(2021, 1, 1)),
+                    tildato = Søknadsfelt("Til", LocalDate.of(2022, 1, 1)),
+                    land = Søknadsfelt("I hvilket land oppholdt du deg i?", svarId = "ESP", verdi = "Spania"),
+                    årsakUtenlandsopphold = Søknadsfelt("Årsak til utenlandsopphold", "Ferie"),
+                ),
+            )
+
+            val søknad = TestsøknadBuilder.Builder().setMedlemskapsdetaljer(utenlandsopphold = utenlandsperioder).build().søknadOvergangsstønad
+            val søknadTilLagring = SøknadsskjemaMapper.tilDomene(søknad)
+
+            assertThat(søknadTilLagring.medlemskap.utenlandsopphold.first().fradato).isEqualTo(LocalDate.of(2021, 1, 1))
+            assertThat(søknadTilLagring.medlemskap.utenlandsopphold.first().tildato).isEqualTo(LocalDate.of(2022, 1, 1))
+            assertThat(søknadTilLagring.medlemskap.utenlandsopphold.first().land).isEqualTo("ESP")
+            assertThat(søknadTilLagring.medlemskap.utenlandsopphold.first().årsakUtenlandsopphold).isEqualTo("Ferie")
         }
     }
 }

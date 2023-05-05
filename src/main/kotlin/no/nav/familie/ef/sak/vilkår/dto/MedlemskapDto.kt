@@ -18,6 +18,7 @@ data class MedlemskapDto(
 data class MedlemskapSøknadsgrunnlagDto(
     val bosattNorgeSisteÅrene: Boolean,
     val oppholderDuDegINorge: Boolean,
+    val oppholdsland: String? = null,
     val utenlandsopphold: List<UtenlandsoppholdDto>,
 )
 
@@ -49,5 +50,6 @@ data class UtenlandsoppholdDto(
         fraDato ?: error("Periode eller fraDato må ha verdi"),
         tilDato ?: error("Periode eller tilDato må ha verdi"),
     ),
+    val land: String? = null,
     val årsak: String,
 )
