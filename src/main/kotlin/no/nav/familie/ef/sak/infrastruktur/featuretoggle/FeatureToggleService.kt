@@ -20,7 +20,10 @@ enum class Toggle(val toggleId: String, val beskrivelse: String? = null) {
 
     SATSENDRING_BRUK_IKKE_VEDTATT_MAXSATS("familie.ef.sak.bruk-nye-maxsatser"),
 
-    OPPRETT_BEHANDLING_FERDIGSTILT_JOURNALPOST("familie.ef.sak.opprett-behandling-for-ferdigstilt-journalpost", "Permission"),
+    OPPRETT_BEHANDLING_FERDIGSTILT_JOURNALPOST(
+        "familie.ef.sak.opprett-behandling-for-ferdigstilt-journalpost",
+        "Permission",
+    ),
     BEHANDLING_KORRIGERING("familie.ef.sak.behandling-korrigering", "Permission"),
 
     VILKÅR_GJENBRUK("familie.ef.sak.vilkaar-gjenruk"),
@@ -35,6 +38,7 @@ enum class Toggle(val toggleId: String, val beskrivelse: String? = null) {
     PERSONOPPLYSNINGER_ENDRINGER("familie.ef.sak.frontend.personopplysninger-endringer"),
     VURDER_KONSEKVENS_OPPGAVER_LOKALKONTOR("familie.ef.sak.automatiske-oppgaver-lokalkontor"),
     KAST_FEIL_HVIS_OPPGAVE_MANGLER_PÅ_ÅPEN_BEHANDLING("familie.ef.sak.kast-feil-hvis-oppgave-mangler-pa-apen-behandling"),
+    TILLAT_MIGRERING_5_ÅR_TILBAKE("familie.ef.sak.tillat-migrering-5-ar-tilbake", "Permission"),
     ;
 
     companion object {

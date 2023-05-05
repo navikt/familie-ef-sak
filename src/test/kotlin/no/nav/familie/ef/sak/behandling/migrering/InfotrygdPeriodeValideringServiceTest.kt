@@ -8,6 +8,8 @@ import no.nav.familie.ef.sak.infotrygd.InfotrygdService
 import no.nav.familie.ef.sak.infotrygd.InfotrygdStønadPerioderDto
 import no.nav.familie.ef.sak.infotrygd.tilSummertInfotrygdperiodeDto
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.infotrygd.InfotrygdPeriodeTestUtil.lagInfotrygdPeriode
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPeriode
@@ -15,21 +17,23 @@ import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdSak
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdSakResponse
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdSakResultat
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdSakType
-import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.kontrakter.felles.ef.StønadType.BARNETILSYN
 import no.nav.familie.kontrakter.felles.ef.StønadType.OVERGANGSSTØNAD
+import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import java.time.YearMonth
 
 internal class InfotrygdPeriodeValideringServiceTest {
 
     private val infotrygdService = mockk<InfotrygdService>()
     private val behandlingService = mockk<BehandlingService>()
+    private val featureToggleService = mockk<FeatureToggleService>()
 
-    private val service = InfotrygdPeriodeValideringService(infotrygdService, behandlingService)
+    private val service = InfotrygdPeriodeValideringService(infotrygdService, behandlingService, featureToggleService)
 
     private val personIdent = "1"
 
@@ -37,6 +41,7 @@ internal class InfotrygdPeriodeValideringServiceTest {
     internal fun setUp() {
         every { infotrygdService.eksisterer(any(), any()) } returns true
         every { infotrygdService.hentSaker(any()) } returns InfotrygdSakResponse(emptyList())
+        every { featureToggleService.isEnabled(Toggle.TILLAT_MIGRERING_5_ÅR_TILBAKE) } returns false
     }
 
     @Nested
@@ -46,7 +51,7 @@ internal class InfotrygdPeriodeValideringServiceTest {
         internal fun `skal kunne journalføre når personen ikke har noen saker i infotrygd`() {
             every { infotrygdService.hentDtoPerioder(personIdent) } returns infotrygdPerioderDto(emptyList())
 
-            service.validerKanOppretteBehandlingUtenÅMigrereOvergangsstønad(personIdent, StønadType.OVERGANGSSTØNAD)
+            service.validerKanOppretteBehandlingUtenÅMigrereOvergangsstønad(personIdent, OVERGANGSSTØNAD)
         }
 
         @Test
@@ -90,7 +95,7 @@ internal class InfotrygdPeriodeValideringServiceTest {
             assertThatThrownBy {
                 service.validerKanOppretteBehandlingUtenÅMigrereOvergangsstønad(
                     personIdent,
-                    StønadType.OVERGANGSSTØNAD,
+                    OVERGANGSSTØNAD,
                 )
             }
                 .isInstanceOf(ApiFeil::class.java)
@@ -109,10 +114,59 @@ internal class InfotrygdPeriodeValideringServiceTest {
             assertThatThrownBy {
                 service.validerKanOppretteBehandlingUtenÅMigrereOvergangsstønad(
                     personIdent,
-                    StønadType.OVERGANGSSTØNAD,
+                    OVERGANGSSTØNAD,
                 )
             }
                 .isInstanceOf(ApiFeil::class.java)
+        }
+    }
+
+    @Nested
+    inner class ValiderHentPeriodeForMigrering {
+        @Test
+        internal fun `Skal kaste feil hvis perioder er mer enn tre år tilbake i tid`() {
+            val dato = YearMonth.now().minusYears(4)
+            every { infotrygdService.hentDtoPerioder(personIdent) } returns
+                infotrygdPerioderDto(
+                    listOf(
+                        lagInfotrygdPeriode(
+                            personIdent = "1",
+                            stønadFom = dato.atDay(1),
+                            stønadTom = dato.atEndOfMonth(),
+                        ),
+                    ),
+                )
+            val message =
+                assertThrows<MigreringException> {
+                    service.hentPeriodeForMigrering(
+                        personIdent,
+                        OVERGANGSSTØNAD,
+                    )
+                }.message
+            assertThat(message).contains("Kan ikke migrere når forrige utbetaling i infotrygd er mer enn 3 år tilbake i tid")
+        }
+
+        @Test
+        internal fun `Skal ikke kaste feil hvis perioder er 4 år tilbake i tid og toggle tillater 5`() {
+            val dato = YearMonth.now().minusYears(4)
+            every { featureToggleService.isEnabled(Toggle.TILLAT_MIGRERING_5_ÅR_TILBAKE) } returns true
+            every { infotrygdService.hentDtoPerioder(personIdent) } returns
+                infotrygdPerioderDto(
+                    listOf(
+                        lagInfotrygdPeriode(
+                            personIdent = "1",
+                            stønadFom = dato.atDay(1),
+                            stønadTom = dato.atEndOfMonth(),
+                        ),
+                    ),
+                )
+
+            assertThat(
+                service.hentPeriodeForMigrering(
+                    personIdent,
+                    OVERGANGSSTØNAD,
+                ),
+            ).isNotNull
         }
     }
 
