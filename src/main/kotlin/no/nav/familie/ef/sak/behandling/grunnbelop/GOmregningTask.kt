@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.behandling.grunnbelop
 
+import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.familie.ef.sak.beregning.OmregningService
 import no.nav.familie.ef.sak.beregning.nyesteGrunnbeløpGyldigFraOgMed
 import no.nav.familie.kontrakter.felles.objectMapper
@@ -35,7 +36,7 @@ class GOmregningTask(
     val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
     override fun doTask(task: Task) {
-        val fagsakId = UUID.fromString(task.payload)
+        val fagsakId = objectMapper.readValue<GOmregningPayload>(task.payload).fagsakId
         omregningService.utførGOmregning(fagsakId)
     }
 
