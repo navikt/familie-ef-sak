@@ -39,6 +39,7 @@ internal class OppgaverForOpprettelseServiceTest {
         every { oppgaverForOpprettelseRepository.deleteById(any()) } just runs
         every { oppgaverForOpprettelseRepository.insert(any()) } returns oppgaverForOpprettelse
         every { oppgaverForOpprettelseRepository.update(any()) } returns oppgaverForOpprettelse
+        every { featureToggleService.isEnabled(any()) } returns true
     }
 
     @Test
