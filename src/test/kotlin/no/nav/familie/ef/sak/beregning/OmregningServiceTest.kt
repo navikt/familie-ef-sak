@@ -27,11 +27,13 @@ import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.behandlingBarn
 import no.nav.familie.ef.sak.repository.fagsak
+import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.ef.sak.repository.inntektsperiode
 import no.nav.familie.ef.sak.repository.tilkjentYtelse
 import no.nav.familie.ef.sak.repository.vedtak
 import no.nav.familie.ef.sak.repository.vedtaksperiode
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseRepository
+import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.vedtak.VedtakRepository
 import no.nav.familie.ef.sak.vedtak.domain.AktivitetType
 import no.nav.familie.ef.sak.vedtak.domain.InntektWrapper
@@ -102,6 +104,43 @@ internal class OmregningServiceTest : OppslagSpringRunnerTest() {
         clearMocks(iverksettClient, answers = false)
     }
 
+    val fagsakId = UUID.fromString("3549f9e2-ddd1-467d-82be-bfdb6c7f07e1")
+    val behandlingId = UUID.fromString("39c7dc82-adc1-43db-a6f9-64b8e4352ff6")
+
+    /**
+     * Denne brekker hver gang det kommer nytt G-beløp.
+     */
+    @Test
+    fun `Verifiser riktig beløp og intekstjustering`() {
+        val (inntekt, totalinntekt) = lagInntekt(201, 2002, 200003, år)
+        lagSøknadOgVilkårOgVedtak(behandlingId, fagsakId, inntekt, stønadsår = år)
+        val tilkjentYtelse = lagreTilkjentYtelse(behandlingId, stønadsår = år)
+        val iverksettDtoSlot = slot<IverksettOvergangsstønadDto>()
+        // Gitt assert: - skal splittes til to med ny g
+        assertThat(tilkjentYtelse.andelerTilkjentYtelse).hasSize(1)
+        assertThat(totalinntekt.toInt()).isEqualTo(276287)
+
+        // When
+        omregningService.utførGOmregning(fagsakId)
+        verify { iverksettClient.iverksettUtenBrev(capture(iverksettDtoSlot)) }
+        val iverksettDto = iverksettDtoSlot.captured
+
+        // Then
+        assertThat(iverksettDto.vedtak.tilkjentYtelse?.andelerTilkjentYtelse?.size).isEqualTo(2) // skal være splittet
+
+        // Sjekk andel etter ny g omregningsdato
+        val andelTilkjentYtelseOmregnet = finnAndelEtterNyGDato(iverksettDto)!!
+        assertThat(andelTilkjentYtelseOmregnet.inntekt).isEqualTo(289000)
+        assertThat(andelTilkjentYtelseOmregnet.beløp).isEqualTo(12155)
+
+        // Sjekk inntektsperiode etter ny G omregning
+        val inntektsperiodeEtterGomregning = finnInntektsperiodeEtterNyGDato(iverksettDto.behandling.behandlingId)
+        assertThat(inntektsperiodeEtterGomregning.dagsats?.toInt()).isEqualTo(210)
+        assertThat(inntektsperiodeEtterGomregning.månedsinntekt?.toInt()).isEqualTo(2097)
+        assertThat(inntektsperiodeEtterGomregning.inntekt.toInt()).isEqualTo(209548)
+        assertThat(inntektsperiodeEtterGomregning.totalinntekt().toInt()).isEqualTo(289312)
+    }
+
     /**
      * Denne brekker hver gang det kommer nytt G-beløp.
      * Beløp må oppdateres i omregnes i expectedIverksettDto.json.
@@ -135,7 +174,8 @@ internal class OmregningServiceTest : OppslagSpringRunnerTest() {
         vilkårsvurderingRepository.insertAll(vilkårsvurderinger)
 
         omregningService.utførGOmregning(fagsakId)
-        val nyBehandling = behandlingRepository.findByFagsakId(fagsakId).single { it.årsak == BehandlingÅrsak.G_OMREGNING }
+        val nyBehandling =
+            behandlingRepository.findByFagsakId(fagsakId).single { it.årsak == BehandlingÅrsak.G_OMREGNING }
 
         assertThat(taskService.findAll().find { it.type == "pollerStatusFraIverksett" }).isNotNull
         val iverksettDtoSlot = slot<IverksettOvergangsstønadDto>()
@@ -149,8 +189,25 @@ internal class OmregningServiceTest : OppslagSpringRunnerTest() {
         assertThat(søknadService.hentSøknadsgrunnlag(nyBehandling.id)).isNotNull
         assertThat(barnRepository.findByBehandlingId(nyBehandling.id).single().personIdent).isEqualTo(barn.personIdent)
         assertThat(
-            vilkårsvurderingRepository.findByBehandlingId(nyBehandling.id).single { it.type == VilkårType.ALENEOMSORG }.barnId,
+            vilkårsvurderingRepository.findByBehandlingId(nyBehandling.id)
+                .single { it.type == VilkårType.ALENEOMSORG }.barnId,
         ).isNotNull
+    }
+
+    private fun lagreFagsakOgBehandling(
+        fagsakId: UUID,
+        behandlingId: UUID,
+    ): Pair<Fagsak, Behandling> {
+        val fagsak = testoppsettService.lagreFagsak(fagsak(id = fagsakId, identer = setOf(PersonIdent("321"))))
+        val behandling = behandlingRepository.insert(
+            behandling(
+                id = behandlingId,
+                fagsak = fagsak,
+                resultat = BehandlingResultat.INNVILGET,
+                status = BehandlingStatus.FERDIGSTILT,
+            ),
+        )
+        return Pair(fagsak, behandling)
     }
 
     @Test
@@ -310,6 +367,14 @@ internal class OmregningServiceTest : OppslagSpringRunnerTest() {
         return fagsak
     }
 
+    private fun lagBarn(behandling: Behandling) = barnRepository.insert(
+        behandlingBarn(
+            behandlingId = behandling.id,
+            personIdent = "01012067050",
+            navn = "Kid Kiddesen",
+        ),
+    )
+
     private fun lagVilkårsvurderinger(
         barn: BehandlingBarn,
         behandlingId: UUID,
@@ -368,8 +433,10 @@ internal class OmregningServiceTest : OppslagSpringRunnerTest() {
                 it.copy(kildeBehandlingId = behandling.id)
             }
         } ?: emptyList()
-        val tilkjentYtelseDto = expectedIverksettDto.vedtak.tilkjentYtelse?.copy(andelerTilkjentYtelse = andelerTilkjentYtelse)
-        val vedtak = expectedIverksettDto.vedtak.copy(tilkjentYtelse = tilkjentYtelseDto, vedtakstidspunkt = vedtakstidspunkt)
+        val tilkjentYtelseDto =
+            expectedIverksettDto.vedtak.tilkjentYtelse?.copy(andelerTilkjentYtelse = andelerTilkjentYtelse)
+        val vedtak =
+            expectedIverksettDto.vedtak.copy(tilkjentYtelse = tilkjentYtelseDto, vedtakstidspunkt = vedtakstidspunkt)
         val behandlingsdetaljerDto = expectedIverksettDto.behandling.copy(
             behandlingId = forrigeBehandling.id,
             eksternId = forrigeBehandling.eksternId.id,
@@ -383,5 +450,66 @@ internal class OmregningServiceTest : OppslagSpringRunnerTest() {
 
     private fun readFile(filnavn: String): String {
         return this::class.java.getResource("/omregning/$filnavn")!!.readText()
+    }
+
+    private fun lagreTilkjentYtelse(
+        behandlingId: UUID,
+        stønadsår: Int,
+    ): TilkjentYtelse {
+        val tilkjentYtelse = tilkjentYtelse(
+            behandlingId = behandlingId,
+            personIdent = "321",
+            stønadsår = stønadsår,
+            inntekt = 1,
+            beløp = 1,
+        ) // tidligere beløp betyr ikke noe
+        tilkjentYtelseRepository.insert(tilkjentYtelse)
+        return tilkjentYtelse
+    }
+
+    private fun finnInntektsperiodeEtterNyGDato(behandlingId: UUID): Inntektsperiode {
+        val behandlingNy = behandlingRepository.findByIdOrThrow(behandlingId)
+        val vedtakNy = vedtakRepository.findByIdOrThrow(behandlingNy.id)
+        return vedtakNy.inntekter?.inntekter!!.first { it.periode.inneholder(YearMonth.of(2022, 6)) }
+    }
+
+    private fun finnAndelEtterNyGDato(iverksettDto: IverksettOvergangsstønadDto) =
+        iverksettDto.vedtak.tilkjentYtelse?.andelerTilkjentYtelse?.firstOrNull {
+            it.periode.inneholder(
+                YearMonth.of(2022, 6),
+            )
+        }
+
+    private fun lagSøknadOgVilkårOgVedtak(
+        behandlingId: UUID,
+        fagsakId: UUID,
+        inntekt: Inntektsperiode,
+        stønadsår: Int,
+    ) {
+        val (fagsak, behandling) = lagreFagsakOgBehandling(fagsakId, behandlingId)
+
+        søknadService.lagreSøknadForOvergangsstønad(Testsøknad.søknadOvergangsstønad, behandling.id, fagsak.id, "1L")
+
+        val vilkårsvurderinger = lagVilkårsvurderinger(lagBarn(behandling), behandlingId)
+        vilkårsvurderingRepository.insertAll(vilkårsvurderinger)
+
+        val vedtak = vedtak(behandling.id, år = stønadsår, inntekter = InntektWrapper(listOf(inntekt)))
+        vedtakRepository.insert(vedtak)
+    }
+
+    private fun lagInntekt(dagsats: Int, månedsinntekt: Int, inntekt: Int, år: Int): Pair<Inntektsperiode, BigDecimal> {
+        val inntektPeriode = inntektsperiode(
+            år = år,
+            dagsats = dagsats.toBig(),
+            månedsinntekt = månedsinntekt.toBig(),
+            inntekt = inntekt.toBigDecimal(),
+            samordningsfradrag = BigDecimal.ZERO,
+        )
+        val totalinntekt = inntektPeriode.totalinntekt()
+        return Pair(inntektPeriode, totalinntekt)
+    }
+
+    private fun Int.toBig(): BigDecimal {
+        return BigDecimal(this)
     }
 }

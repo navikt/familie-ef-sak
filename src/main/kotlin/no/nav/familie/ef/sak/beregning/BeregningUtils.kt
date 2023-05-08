@@ -1,8 +1,7 @@
 package no.nav.familie.ef.sak.beregning
 
-import no.nav.familie.ef.sak.felles.util.Utregning.rundNedTilNærmeste100
 import no.nav.familie.ef.sak.felles.util.Utregning.rundNedTilNærmeste1000
-import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
+import no.nav.familie.ef.sak.felles.util.Utregning.rundNedTilNærmesteKrone
 import no.nav.familie.kontrakter.felles.Månedsperiode
 import java.math.BigDecimal
 import java.math.MathContext
@@ -15,7 +14,10 @@ object BeregningUtils {
     val DAGSATS_ANTALL_DAGER = BigDecimal(260)
     val ANTALL_MÅNEDER_ÅR = BigDecimal(12)
 
-    fun beregnStønadForInntekt(inntektsperiode: Inntektsperiode, skalRundeNedTotalInntekt: Boolean): List<Beløpsperiode> {
+    fun beregnStønadForInntekt(
+        inntektsperiode: Inntektsperiode,
+        skalRundeNedTotalInntekt: Boolean,
+    ): List<Beløpsperiode> {
         val periode = inntektsperiode.periode
         val samordningsfradrag = inntektsperiode.samordningsfradrag
         val totalInntekt = beregnTotalinntekt(inntektsperiode, skalRundeNedTotalInntekt)
@@ -29,7 +31,8 @@ object BeregningUtils {
             val beløpFørSamordningUtenAvrunding =
                 fullOvergangsStønadPerMåned.subtract(avkortningPerMåned).setScale(0, RoundingMode.HALF_UP)
 
-            val utbetaling = beløpFørSamordningUtenAvrunding.subtract(samordningsfradrag).setScale(0, RoundingMode.HALF_UP)
+            val utbetaling =
+                beløpFørSamordningUtenAvrunding.subtract(samordningsfradrag).setScale(0, RoundingMode.HALF_UP)
 
             val beløpFørSamordning =
                 if (beløpFørSamordningUtenAvrunding <= BigDecimal.ZERO) BigDecimal.ZERO else beløpFørSamordningUtenAvrunding
@@ -82,27 +85,26 @@ object BeregningUtils {
         sistBrukteGrunnbeløp: Grunnbeløp,
     ): List<Inntektsperiode> {
         val inntekt = inntektsperiode.inntekt
+        val dagsats = inntektsperiode.dagsats
+        val månedsinntekt = inntektsperiode.månedsinntekt
+
         val samordningsfradrag = inntektsperiode.samordningsfradrag
-        // For å unngå at vi kjører g-omregning og ikke har fikset ev. oppjustering av dagsats/månedsinntekt
-        // så kaster vi feil hvis det kommer inn en vedtak med de
-        feilHvis(inntektsperiode.dagsats != null && inntektsperiode.dagsats > BigDecimal.ZERO) {
-            "Mangler indeksjustering av dagsats?"
-        }
-        feilHvis(inntektsperiode.månedsinntekt != null && inntektsperiode.månedsinntekt > BigDecimal.ZERO) {
-            "Mangler indeksjustering av månedsinntekt?"
-        }
+
         return finnGrunnbeløpsPerioder(inntektsperiode.periode).map { grunnbeløp ->
             if (grunnbeløp.periode.fom > sistBrukteGrunnbeløp.periode.fom &&
                 grunnbeløp.beløp != sistBrukteGrunnbeløp.grunnbeløp
             ) {
                 val faktor = grunnbeløp.beløp.divide(sistBrukteGrunnbeløp.grunnbeløp, MathContext.DECIMAL128)
-                val justertInntekt = inntekt.multiply(faktor)
-                val justerInntektAvrundetNedTilNærmeste100 = rundNedTilNærmeste100(justertInntekt)
+
+                val justertInntekt = inntekt.multiply(faktor).rundNedTilNærmesteKrone()
+                val justertDagsatsInntekt = dagsats?.multiply(faktor)?.rundNedTilNærmesteKrone()
+                val justertMånedinntekt = månedsinntekt?.multiply(faktor)?.rundNedTilNærmesteKrone()
+                // avrunding gjøres i beregning
                 Inntektsperiode(
                     periode = grunnbeløp.periode,
-                    dagsats = inntektsperiode.dagsats, // indeksjusrert? avrundet?
-                    månedsinntekt = inntektsperiode.månedsinntekt, // indeksjusrert? avrundet?
-                    inntekt = BigDecimal(justerInntektAvrundetNedTilNærmeste100),
+                    dagsats = justertDagsatsInntekt,
+                    månedsinntekt = justertMånedinntekt,
+                    inntekt = justertInntekt,
                     samordningsfradrag = samordningsfradrag,
                 )
             } else {
@@ -126,15 +128,19 @@ object BeregningUtils {
                 it.periode.omsluttesAv(vedtaksperiode) -> {
                     it
                 }
+
                 it.periode.overlapperKunIStartenAv(vedtaksperiode) -> {
                     it.copy(periode = (it.periode snitt vedtaksperiode)!!)
                 }
+
                 vedtaksperiode.overlapperKunIStartenAv(it.periode) -> {
                     it.copy(periode = (it.periode snitt vedtaksperiode)!!)
                 }
+
                 vedtaksperiode.omsluttesAv(it.periode) -> {
                     it.copy(periode = (it.periode snitt vedtaksperiode)!!)
                 }
+
                 else -> {
                     null
                 }
