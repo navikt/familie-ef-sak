@@ -7,14 +7,18 @@ import io.mockk.runs
 import io.mockk.spyk
 import io.mockk.verify
 import no.nav.familie.ef.sak.behandling.BehandlingService
-import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
-import no.nav.familie.ef.sak.felles.util.BehandlingOppsettUtil.henlagtFørstegangsbehandling
+import no.nav.familie.ef.sak.behandling.Saksbehandling
+import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.felles.util.BehandlingOppsettUtil.iverksattFørstegangsbehandling
-import no.nav.familie.ef.sak.felles.util.BehandlingOppsettUtil.revurdering
+import no.nav.familie.ef.sak.felles.util.BehandlingOppsettUtil.iverksattRevurdering
+import no.nav.familie.ef.sak.repository.behandling
+import no.nav.familie.ef.sak.repository.fagsak
+import no.nav.familie.ef.sak.repository.saksbehandling
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.ef.sak.økonomi.lagAndelTilkjentYtelse
 import no.nav.familie.ef.sak.økonomi.lagTilkjentYtelse
 import no.nav.familie.kontrakter.ef.iverksett.OppgaveForOpprettelseType
+import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -24,14 +28,15 @@ import java.util.UUID
 internal class OppgaverForOpprettelseServiceTest {
 
     private val oppgaverForOpprettelseRepository = mockk<OppgaverForOpprettelseRepository>()
-    private val behandlingService = mockk<BehandlingService>()
     private val tilkjentYtelseService = mockk<TilkjentYtelseService>()
-
+    private val behandlingService = mockk<BehandlingService>()
     private var oppgaverForOpprettelseService =
         spyk(OppgaverForOpprettelseService(oppgaverForOpprettelseRepository, behandlingService, tilkjentYtelseService))
 
-    private val behandlingId = UUID.randomUUID()
+    private val behandling = behandling(fagsak = fagsak())
+    private val behandlingId = behandling.id
     private val oppgaverForOpprettelse = OppgaverForOpprettelse(behandlingId, emptyList())
+    private val saksbehandling = lagSaksbehandling(stønadType = StønadType.OVERGANGSSTØNAD, behandling = behandling)
 
     @BeforeEach
     fun init() {
@@ -44,6 +49,7 @@ internal class OppgaverForOpprettelseServiceTest {
     fun `slett innslag når det ikke kan opprettes noen oppgaver og det finnes innslag fra før`() {
         every { oppgaverForOpprettelseService.hentOppgavetyperSomKanOpprettes(any()) } returns emptyList()
         every { oppgaverForOpprettelseRepository.existsById(any()) } returns true
+        every { behandlingService.hentSaksbehandling(behandlingId) } returns saksbehandling
 
         oppgaverForOpprettelseService.opprettEllerErstatt(behandlingId, listOf())
 
@@ -93,48 +99,9 @@ internal class OppgaverForOpprettelseServiceTest {
     }
 
     @Test
-    fun `skal kunne opprette oppgave hvis forrige behandlingen er en HENLAGT førstegangsbehandling`() {
-        val behandling = revurdering.copy(forrigeBehandlingId = henlagtFørstegangsbehandling.id)
-        every { behandlingService.hentBehandling(behandling.id) } returns behandling
-        every { behandlingService.hentBehandling(henlagtFørstegangsbehandling.id) } returns henlagtFørstegangsbehandling
-        every { tilkjentYtelseService.hentForBehandlingEllerNull(any()) } returns tilkjentYtelse2årFremITid
-
-        val oppgaver = oppgaverForOpprettelseService.hentOppgavetyperSomKanOpprettes(behandling.id)
-
-        assertThat(oppgaver.contains(OppgaveForOpprettelseType.INNTEKTSKONTROLL_1_ÅR_FREM_I_TID)).isTrue
-    }
-
-    @Test
-    fun `skal kunne opprette oppgave hvis forrige behandling er en AVSLÅTT førstegangsbehandling`() {
-        val behandling = revurdering.copy(forrigeBehandlingId = henlagtFørstegangsbehandling.id)
-        every { behandlingService.hentBehandling(behandling.id) } returns behandling
-        every { behandlingService.hentBehandling(henlagtFørstegangsbehandling.id) } returns henlagtFørstegangsbehandling.copy(
-            resultat = BehandlingResultat.AVSLÅTT,
-        )
-
-        every { tilkjentYtelseService.hentForBehandlingEllerNull(any()) } returns tilkjentYtelse2årFremITid
-
-        val oppgaver = oppgaverForOpprettelseService.hentOppgavetyperSomKanOpprettes(behandling.id)
-
-        assertThat(oppgaver.contains(OppgaveForOpprettelseType.INNTEKTSKONTROLL_1_ÅR_FREM_I_TID)).isTrue
-    }
-
-    @Test
-    fun `skal ikke kunne opprette oppgave hvis forrige behandling er en INNVILGET førstegangsbehandling`() {
-        val behandling = revurdering.copy(forrigeBehandlingId = henlagtFørstegangsbehandling.id)
-        every { behandlingService.hentBehandling(behandling.id) } returns behandling
-        every { behandlingService.hentBehandling(henlagtFørstegangsbehandling.id) } returns iverksattFørstegangsbehandling
-        every { tilkjentYtelseService.hentForBehandlingEllerNull(any()) } returns tilkjentYtelse2årFremITid
-
-        val oppgaver = oppgaverForOpprettelseService.hentOppgavetyperSomKanOpprettes(behandling.id)
-
-        assertThat(oppgaver.contains(OppgaveForOpprettelseType.INNTEKTSKONTROLL_1_ÅR_FREM_I_TID)).isFalse
-    }
-
-    @Test
     fun `skal kunne opprette oppgave hvis behandling er førstegangsbehandling`() {
-        every { behandlingService.hentBehandling(iverksattFørstegangsbehandling.id) } returns iverksattFørstegangsbehandling
         every { tilkjentYtelseService.hentForBehandlingEllerNull(any()) } returns tilkjentYtelse2årFremITid
+        every { behandlingService.hentSaksbehandling(iverksattFørstegangsbehandling.id) } returns saksbehandling
 
         val oppgaver = oppgaverForOpprettelseService.hentOppgavetyperSomKanOpprettes(iverksattFørstegangsbehandling.id)
 
@@ -142,10 +109,28 @@ internal class OppgaverForOpprettelseServiceTest {
     }
 
     @Test
-    fun `skal ikke kunne opprette oppgave hvis behandling er førstegangsbehandling, men andeler under 1 år frem i tid`() {
-        every { behandlingService.hentBehandling(iverksattFørstegangsbehandling.id) } returns iverksattFørstegangsbehandling
-        every { tilkjentYtelseService.hentForBehandlingEllerNull(any()) } returns tilkjentYtelseUnder1årFremITid
+    fun `skal kunne opprette oppgave hvis behandling er en revurdering`() {
+        every { tilkjentYtelseService.hentForBehandlingEllerNull(any()) } returns tilkjentYtelse2årFremITid
+        every { behandlingService.hentSaksbehandling(iverksattRevurdering.id) } returns saksbehandling
+        val oppgaver = oppgaverForOpprettelseService.hentOppgavetyperSomKanOpprettes(iverksattRevurdering.id)
 
+        assertThat(oppgaver.contains(OppgaveForOpprettelseType.INNTEKTSKONTROLL_1_ÅR_FREM_I_TID)).isTrue
+    }
+
+    @Test
+    fun `skal ikke kunne opprette oppgave hvis behandling er førstegangsbehandling, men andeler under 1 år frem i tid`() {
+        every { tilkjentYtelseService.hentForBehandlingEllerNull(any()) } returns tilkjentYtelseUnder1årFremITid
+        every { behandlingService.hentSaksbehandling(iverksattFørstegangsbehandling.id) } returns saksbehandling
+        val oppgaver = oppgaverForOpprettelseService.hentOppgavetyperSomKanOpprettes(iverksattFørstegangsbehandling.id)
+
+        assertThat(oppgaver.contains(OppgaveForOpprettelseType.INNTEKTSKONTROLL_1_ÅR_FREM_I_TID)).isFalse
+    }
+
+    @Test
+    fun `skal ikke kunne opprette fremleggsoppgave hvis stønadstype ikke er overgangsstønad`() {
+        val saksbehandling = lagSaksbehandling(stønadType = StønadType.BARNETILSYN, behandling = behandling)
+        every { tilkjentYtelseService.hentForBehandlingEllerNull(any()) } returns tilkjentYtelseUnder1årFremITid
+        every { behandlingService.hentSaksbehandling(iverksattFørstegangsbehandling.id) } returns saksbehandling
         val oppgaver = oppgaverForOpprettelseService.hentOppgavetyperSomKanOpprettes(iverksattFørstegangsbehandling.id)
 
         assertThat(oppgaver.contains(OppgaveForOpprettelseType.INNTEKTSKONTROLL_1_ÅR_FREM_I_TID)).isFalse
@@ -172,4 +157,12 @@ internal class OppgaverForOpprettelseServiceTest {
             ),
         ),
     )
+
+    private fun lagSaksbehandling(
+        stønadType: StønadType = StønadType.OVERGANGSSTØNAD,
+        behandling: Behandling,
+    ): Saksbehandling {
+        val fagsak = fagsak(stønadstype = stønadType)
+        return saksbehandling(fagsak, behandling)
+    }
 }
