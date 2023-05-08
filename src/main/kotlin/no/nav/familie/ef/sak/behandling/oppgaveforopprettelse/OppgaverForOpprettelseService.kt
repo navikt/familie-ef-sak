@@ -1,9 +1,11 @@
 package no.nav.familie.ef.sak.behandling.oppgaveforopprettelse
 
+import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvisIkke
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
 import no.nav.familie.kontrakter.ef.iverksett.OppgaveForOpprettelseType
+import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -13,6 +15,7 @@ import java.util.UUID
 @Service
 class OppgaverForOpprettelseService(
     private val oppgaverForOpprettelseRepository: OppgaverForOpprettelseRepository,
+    private val behandlingService: BehandlingService,
     private val tilkjentYtelseService: TilkjentYtelseService,
 ) {
 
@@ -37,6 +40,10 @@ class OppgaverForOpprettelseService(
     }
 
     fun hentOppgavetyperSomKanOpprettes(behandlingId: UUID): List<OppgaveForOpprettelseType> {
+        val saksbehandling = behandlingService.hentSaksbehandling(behandlingId)
+        if (saksbehandling.stønadstype != StønadType.OVERGANGSSTØNAD) {
+            return emptyList()
+        }
         val tilkjentYtelse = tilkjentYtelseService.hentForBehandlingEllerNull(behandlingId)
         val kanOppretteInntektskontroll = kanOppretteOppgaveForInntektskontrollFremITid(tilkjentYtelse)
 
