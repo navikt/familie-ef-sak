@@ -5,6 +5,8 @@ import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvisIkke
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
 import no.nav.familie.kontrakter.ef.iverksett.OppgaveForOpprettelseType
@@ -19,6 +21,7 @@ class OppgaverForOpprettelseService(
     private val oppgaverForOpprettelseRepository: OppgaverForOpprettelseRepository,
     private val behandlingService: BehandlingService,
     private val tilkjentYtelseService: TilkjentYtelseService,
+    private val featureToggleService: FeatureToggleService
 ) {
 
     @Transactional
@@ -42,6 +45,9 @@ class OppgaverForOpprettelseService(
     }
 
     fun hentOppgavetyperSomKanOpprettes(behandlingId: UUID): List<OppgaveForOpprettelseType> {
+        if (!featureToggleService.isEnabled(Toggle.AUTOMATISKE_OPPGAVER_FREMLEGGSOPPGAVE)) {
+            return emptyList()
+        }
         val behandling = behandlingService.hentBehandling(behandlingId)
         val tilkjentYtelse = tilkjentYtelseService.hentForBehandlingEllerNull(behandlingId)
         val kanOppretteInntektskontroll = kanOppretteOppgaveForInntektskontrollFremITid(behandling, tilkjentYtelse)
