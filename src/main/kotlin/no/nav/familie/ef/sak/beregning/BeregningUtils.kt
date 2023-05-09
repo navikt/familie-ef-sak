@@ -99,7 +99,6 @@ object BeregningUtils {
                 val justertInntekt = inntekt.multiply(faktor).rundNedTilNærmesteKrone()
                 val justertDagsatsInntekt = dagsats?.multiply(faktor)?.rundNedTilNærmesteKrone()
                 val justertMånedinntekt = månedsinntekt?.multiply(faktor)?.rundNedTilNærmesteKrone()
-                // avrunding gjøres i beregning
                 Inntektsperiode(
                     periode = grunnbeløp.periode,
                     dagsats = justertDagsatsInntekt,
