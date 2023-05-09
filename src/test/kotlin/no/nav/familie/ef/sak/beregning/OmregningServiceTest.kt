@@ -112,27 +112,23 @@ internal class OmregningServiceTest : OppslagSpringRunnerTest() {
      */
     @Test
     fun `Verifiser riktig beløp og intekstjustering`() {
-        val (inntekt, totalinntekt) = lagInntekt(201, 2002, 200003, år)
-        lagSøknadOgVilkårOgVedtak(behandlingId, fagsakId, inntekt, stønadsår = år)
+        val inntektPeriode = lagInntekt(201, 2002, 200003, år)
+        lagSøknadOgVilkårOgVedtak(behandlingId, fagsakId, inntektPeriode, stønadsår = år)
         val tilkjentYtelse = lagreTilkjentYtelse(behandlingId, stønadsår = år)
         val iverksettDtoSlot = slot<IverksettOvergangsstønadDto>()
         // Gitt assert: - skal splittes til to med ny g
         assertThat(tilkjentYtelse.andelerTilkjentYtelse).hasSize(1)
-        assertThat(totalinntekt.toInt()).isEqualTo(276287)
+        assertThat(inntektPeriode.totalinntekt().toInt()).isEqualTo(276287)
 
-        // When
         omregningService.utførGOmregning(fagsakId)
         verify { iverksettClient.iverksettUtenBrev(capture(iverksettDtoSlot)) }
         val iverksettDto = iverksettDtoSlot.captured
 
-        // Then
         assertThat(iverksettDto.vedtak.tilkjentYtelse?.andelerTilkjentYtelse?.size).isEqualTo(2) // skal være splittet
-
         // Sjekk andel etter ny g omregningsdato
         val andelTilkjentYtelseOmregnet = finnAndelEtterNyGDato(iverksettDto)!!
         assertThat(andelTilkjentYtelseOmregnet.inntekt).isEqualTo(289000)
         assertThat(andelTilkjentYtelseOmregnet.beløp).isEqualTo(12155)
-
         // Sjekk inntektsperiode etter ny G omregning
         val inntektsperiodeEtterGomregning = finnInntektsperiodeEtterNyGDato(iverksettDto.behandling.behandlingId)
         assertThat(inntektsperiodeEtterGomregning.dagsats?.toInt()).isEqualTo(210)
@@ -194,7 +190,7 @@ internal class OmregningServiceTest : OppslagSpringRunnerTest() {
         ).isNotNull
     }
 
-    private fun lagreFagsakOgBehandling(
+    private fun opprettFagsakOgAvsluttetBehandling(
         fagsakId: UUID,
         behandlingId: UUID,
     ): Pair<Fagsak, Behandling> {
@@ -462,7 +458,7 @@ internal class OmregningServiceTest : OppslagSpringRunnerTest() {
             stønadsår = stønadsår,
             inntekt = 1,
             beløp = 1,
-        ) // tidligere beløp betyr ikke noe
+        )
         tilkjentYtelseRepository.insert(tilkjentYtelse)
         return tilkjentYtelse
     }
@@ -486,7 +482,7 @@ internal class OmregningServiceTest : OppslagSpringRunnerTest() {
         inntekt: Inntektsperiode,
         stønadsår: Int,
     ) {
-        val (fagsak, behandling) = lagreFagsakOgBehandling(fagsakId, behandlingId)
+        val (fagsak, behandling) = opprettFagsakOgAvsluttetBehandling(fagsakId, behandlingId)
 
         søknadService.lagreSøknadForOvergangsstønad(Testsøknad.søknadOvergangsstønad, behandling.id, fagsak.id, "1L")
 
@@ -497,19 +493,15 @@ internal class OmregningServiceTest : OppslagSpringRunnerTest() {
         vedtakRepository.insert(vedtak)
     }
 
-    private fun lagInntekt(dagsats: Int, månedsinntekt: Int, inntekt: Int, år: Int): Pair<Inntektsperiode, BigDecimal> {
+    private fun lagInntekt(dagsats: Int, månedsinntekt: Int, inntekt: Int, år: Int): Inntektsperiode {
         val inntektPeriode = inntektsperiode(
             år = år,
-            dagsats = dagsats.toBig(),
-            månedsinntekt = månedsinntekt.toBig(),
+            dagsats = dagsats.toBigDecimal(),
+            månedsinntekt = månedsinntekt.toBigDecimal(),
             inntekt = inntekt.toBigDecimal(),
             samordningsfradrag = BigDecimal.ZERO,
         )
-        val totalinntekt = inntektPeriode.totalinntekt()
-        return Pair(inntektPeriode, totalinntekt)
+        return inntektPeriode
     }
 
-    private fun Int.toBig(): BigDecimal {
-        return BigDecimal(this)
-    }
 }
