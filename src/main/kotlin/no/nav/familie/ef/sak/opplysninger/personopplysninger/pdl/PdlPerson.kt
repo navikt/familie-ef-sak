@@ -13,7 +13,7 @@ import kotlin.math.sqrt
 data class PdlResponse<T>(
     val data: T,
     val errors: List<PdlError>?,
-    open val extensions: PdlExtensions?,
+    val extensions: PdlExtensions?,
 ) {
 
     fun harFeil(): Boolean {
