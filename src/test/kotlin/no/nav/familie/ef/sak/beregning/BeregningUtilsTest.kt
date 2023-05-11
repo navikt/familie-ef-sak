@@ -234,7 +234,7 @@ internal class BeregningUtilsTest {
 
             assertThat(indeksjusterInntekt.first()).isEqualTo(inntektsperioder.first())
             assertThat(indeksjusterInntekt[1].periode).isEqualTo(inntektsperioder[1].periode)
-            assertThat(indeksjusterInntekt[1].inntekt).isEqualTo(209_900.toBigDecimal())
+            assertThat(indeksjusterInntekt[1].inntekt).isEqualTo(209_961.toBigDecimal()) // runder ikke av inntektsgrunnlag
             assertThat(indeksjusterInntekt[1].samordningsfradrag).isEqualTo(inntektsperioder[1].samordningsfradrag)
         }
 
@@ -272,7 +272,7 @@ internal class BeregningUtilsTest {
             assertThat(indeksjusterInntekt[1].samordningsfradrag).isEqualTo(inntektsperioder[1].samordningsfradrag)
             assertThat(indeksjusterInntekt[2].periode.fomDato).isEqualTo(LocalDate.of(2021, 5, 1))
             assertThat(indeksjusterInntekt[2].periode.tom).isEqualTo(inntektsperioder[1].periode.tom)
-            assertThat(indeksjusterInntekt[2].inntekt).isEqualTo(209_900.toBigDecimal())
+            assertThat(indeksjusterInntekt[2].inntekt).isEqualTo(209_961.toBigDecimal())
             assertThat(indeksjusterInntekt[2].samordningsfradrag).isEqualTo(inntektsperioder[1].samordningsfradrag)
         }
 
@@ -304,7 +304,7 @@ internal class BeregningUtilsTest {
             )
 
             assertThat(indeksjusterInntekt.first().periode).isEqualTo(inntektsperioder.first().periode)
-            assertThat(indeksjusterInntekt.first().inntekt).isEqualTo(202_900.toBigDecimal())
+            assertThat(indeksjusterInntekt.first().inntekt).isEqualTo(202_990.toBigDecimal())
             assertThat(indeksjusterInntekt.first().samordningsfradrag).isEqualTo(inntektsperioder.first().samordningsfradrag)
             assertThat(indeksjusterInntekt[1].periode).isEqualTo(inntektsperioder[1].periode)
             assertThat(indeksjusterInntekt[1].inntekt).isEqualTo(213_100.toBigDecimal())

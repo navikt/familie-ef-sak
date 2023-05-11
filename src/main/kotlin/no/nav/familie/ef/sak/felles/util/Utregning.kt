@@ -14,4 +14,8 @@ object Utregning {
         val beløpSomHeltal = beløp.setScale(0, RoundingMode.FLOOR).toLong()
         return (beløpSomHeltal / 1000L) * 1000L
     }
+
+    fun BigDecimal.rundNedTilNærmesteKrone(): BigDecimal {
+        return this.setScale(0, RoundingMode.FLOOR)
+    }
 }

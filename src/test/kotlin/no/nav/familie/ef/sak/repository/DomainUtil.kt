@@ -295,6 +295,7 @@ fun tilkjentYtelse(
     grunnbeløpsmåned: YearMonth = YearMonth.of(stønadsår - 1, 5),
     samordningsfradrag: Int = 0,
     beløp: Int = 11554,
+    inntekt: Int = 277100,
 ): TilkjentYtelse {
     val andeler = listOf(
         AndelTilkjentYtelse(
@@ -303,7 +304,7 @@ fun tilkjentYtelse(
             stønadTom = LocalDate.of(stønadsår, 12, 31),
             personIdent = personIdent,
             inntektsreduksjon = 8396,
-            inntekt = 277100,
+            inntekt = inntekt,
             samordningsfradrag = samordningsfradrag,
             kildeBehandlingId = behandlingId,
         ),
@@ -380,8 +381,10 @@ fun inntektsperiode(
     sluttDato: LocalDate = LocalDate.of(år, 12, 1),
     inntekt: BigDecimal = BigDecimal.valueOf(100000),
     samordningsfradrag: BigDecimal = BigDecimal.valueOf(500),
+    dagsats: BigDecimal? = null,
+    månedsinntekt: BigDecimal? = null,
 ) =
-    Inntektsperiode(periode = Månedsperiode(startDato, sluttDato), inntekt = inntekt, samordningsfradrag = samordningsfradrag)
+    Inntektsperiode(periode = Månedsperiode(startDato, sluttDato), dagsats = dagsats, månedsinntekt = månedsinntekt, inntekt = inntekt, samordningsfradrag = samordningsfradrag)
 
 fun vedtaksperiode(
     år: Int = 2021,
