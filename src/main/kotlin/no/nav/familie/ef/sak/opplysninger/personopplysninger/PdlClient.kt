@@ -22,6 +22,7 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlResponse
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlSøker
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlSøkerData
 import no.nav.familie.http.client.AbstractPingableRestClient
+import no.nav.familie.kontrakter.felles.Tema
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.http.HttpHeaders
 import org.springframework.stereotype.Service
@@ -161,6 +162,7 @@ class PdlClient(
     private fun httpHeaders(): HttpHeaders {
         return HttpHeaders().apply {
             add("Tema", "ENF")
+            add("behandlingsnummer", Tema.ENF.behandlingsnummer)
         }
     }
 
