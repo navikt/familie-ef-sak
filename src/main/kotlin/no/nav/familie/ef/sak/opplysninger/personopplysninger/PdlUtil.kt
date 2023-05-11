@@ -10,7 +10,7 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 val secureLogger: Logger = LoggerFactory.getLogger("secureLogger")
-private val logger: Logger = LoggerFactory.getLogger(PdlClient::class.java)
+val logger: Logger = LoggerFactory.getLogger(PdlClient::class.java)
 
 inline fun <reified DATA : Any, reified T : Any> feilsjekkOgReturnerData(
     ident: String?,
@@ -24,7 +24,10 @@ inline fun <reified DATA : Any, reified T : Any> feilsjekkOgReturnerData(
         secureLogger.error("Feil ved henting av ${T::class} fra PDL: ${pdlResponse.errorMessages()}")
         throw PdlRequestException("Feil ved henting av ${T::class} fra PDL. Se secure logg for detaljer.")
     }
-
+    if (pdlResponse.harAdvarsel()) {
+        logger.warn("Advarsel ved henting av ${T::class} fra PDL. Se securelogs for detaljer.")
+        secureLogger.warn("Advarsel ved henting av ${T::class} fra PDL: ${pdlResponse.extensions?.warnings}")
+    }
     val data = dataMapper.invoke(pdlResponse.data)
     if (data == null) {
         val errorMelding = if (ident != null) "Feil ved oppslag på ident $ident. " else "Feil ved oppslag på person."
@@ -47,6 +50,10 @@ inline fun <reified T : Any> feilsjekkOgReturnerData(pdlResponse: PdlBolkRespons
     if (feil.isNotEmpty()) {
         secureLogger.error("Feil ved henting av ${T::class} fra PDL: $feil")
         throw PdlRequestException("Feil ved henting av ${T::class} fra PDL. Se secure logg for detaljer.")
+    }
+    if (pdlResponse.harAdvarsel()) {
+        logger.warn("Advarsel ved henting av ${T::class} fra PDL. Se securelogs for detaljer.")
+        secureLogger.warn("Advarsel ved henting av ${T::class} fra PDL: ${pdlResponse.extensions?.warnings}")
     }
     return pdlResponse.data.personBolk.associateBy({ it.ident }, { it.person!! })
 }
