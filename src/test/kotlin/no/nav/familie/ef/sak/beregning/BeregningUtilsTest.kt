@@ -198,7 +198,7 @@ internal class BeregningUtilsTest {
                 )
 
             val indeksjusterInntekt = BeregningUtils.indeksjusterInntekt(
-                nyesteGrunnbeløp.periode.fom,
+                Grunnbeløpsperioder.nyesteGrunnbeløp.periode.fom,
                 inntektsperioder,
             )
 

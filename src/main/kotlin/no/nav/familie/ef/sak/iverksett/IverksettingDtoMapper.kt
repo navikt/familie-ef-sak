@@ -7,8 +7,7 @@ import no.nav.familie.ef.sak.behandling.oppgaveforopprettelse.OppgaverForOpprett
 import no.nav.familie.ef.sak.behandling.ÅrsakRevurderingsRepository
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.behandlingshistorikk.BehandlingshistorikkService
-import no.nav.familie.ef.sak.beregning.forrigeGrunnbeløp
-import no.nav.familie.ef.sak.beregning.nyesteGrunnbeløpGyldigFraOgMed
+import no.nav.familie.ef.sak.beregning.Grunnbeløpsperioder
 import no.nav.familie.ef.sak.beregning.skolepenger.SkolepengerMaksbeløp
 import no.nav.familie.ef.sak.brev.BrevmottakereRepository
 import no.nav.familie.ef.sak.brev.domain.BrevmottakerOrganisasjon
@@ -196,7 +195,7 @@ class IverksettingDtoMapper(
         val feilmelding =
             "Kan ikke iverksette med utdatert grunnbeløp gyldig fra $gMånedTilkjentYtelse. Denne behandlingen må beregnes og simuleres på nytt"
 
-        val nyttGrunnbeløpForInneværendeÅrRegistrertIEF = nyesteGrunnbeløpGyldigFraOgMed.year == DatoUtil.inneværendeÅr()
+        val nyttGrunnbeløpForInneværendeÅrRegistrertIEF = Grunnbeløpsperioder.nyesteGrunnbeløpGyldigFraOgMed.year == DatoUtil.inneværendeÅr()
         val fristGOmregning = LocalDate.of(DatoUtil.inneværendeÅr(), Month.JUNE, 15)
 
         if (nyttGrunnbeløpForInneværendeÅrRegistrertIEF && DatoUtil.dagensDato() < fristGOmregning) {
@@ -207,14 +206,14 @@ class IverksettingDtoMapper(
     }
 
     private fun validerBehandlingBrukerNyesteG(gMånedTilkjentYtelse: YearMonth, feilmelding: String) {
-        brukerfeilHvis(gMånedTilkjentYtelse != nyesteGrunnbeløpGyldigFraOgMed) { feilmelding }
+        brukerfeilHvis(gMånedTilkjentYtelse != Grunnbeløpsperioder.nyesteGrunnbeløpGyldigFraOgMed) { feilmelding }
     }
 
     private fun validerBehandlingBrukerÅretsEllerFjoråretsG(
         gMånedTilkjentYtelse: YearMonth,
         feilmelding: String,
     ) {
-        brukerfeilHvis(gMånedTilkjentYtelse != nyesteGrunnbeløpGyldigFraOgMed && gMånedTilkjentYtelse != forrigeGrunnbeløp.periode.fom) {
+        brukerfeilHvis(gMånedTilkjentYtelse != Grunnbeløpsperioder.nyesteGrunnbeløpGyldigFraOgMed && gMånedTilkjentYtelse != Grunnbeløpsperioder.forrigeGrunnbeløp.periode.fom) {
             feilmelding
         }
     }

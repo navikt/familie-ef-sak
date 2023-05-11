@@ -1,6 +1,6 @@
 package no.nav.familie.ef.sak.økonomi
 
-import no.nav.familie.ef.sak.beregning.nyesteGrunnbeløp
+import no.nav.familie.ef.sak.beregning.Grunnbeløpsperioder
 import no.nav.familie.ef.sak.tilkjentytelse.domain.AndelTilkjentYtelse
 import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelseType
@@ -16,7 +16,7 @@ fun lagTilkjentYtelse(
     personident: String = "123",
     type: TilkjentYtelseType = TilkjentYtelseType.FØRSTEGANGSBEHANDLING,
     startdato: LocalDate = andelerTilkjentYtelse.minOfOrNull { it.stønadFom } ?: LocalDate.now(),
-    grunnbeløpsmåned: YearMonth = nyesteGrunnbeløp.periode.fom,
+    grunnbeløpsmåned: YearMonth = Grunnbeløpsperioder.nyesteGrunnbeløp.periode.fom,
 ) =
     TilkjentYtelse(
         id = id,

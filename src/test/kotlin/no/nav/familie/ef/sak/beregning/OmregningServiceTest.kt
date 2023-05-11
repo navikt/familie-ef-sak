@@ -96,7 +96,7 @@ internal class OmregningServiceTest : OppslagSpringRunnerTest() {
     lateinit var søknadService: SøknadService
 
     val personService = mockk<PersonService>()
-    val år = nyesteGrunnbeløpGyldigFraOgMed.year
+    val år = Grunnbeløpsperioder.nyesteGrunnbeløpGyldigFraOgMed.year
 
     @BeforeEach
     fun setup() {
@@ -423,7 +423,7 @@ internal class OmregningServiceTest : OppslagSpringRunnerTest() {
             ObjectMapperProvider.objectMapper.readValue(readFile("expectedIverksettDto.json"))
 
         val andelerTilkjentYtelse = expectedIverksettDto.vedtak.tilkjentYtelse?.andelerTilkjentYtelse?.map {
-            if (it.periode.fomDato >= nyesteGrunnbeløpGyldigFraOgMed.atDay(1)) {
+            if (it.periode.fomDato >= Grunnbeløpsperioder.nyesteGrunnbeløpGyldigFraOgMed.atDay(1)) {
                 it.copy(kildeBehandlingId = forrigeBehandling.id)
             } else {
                 it.copy(kildeBehandlingId = behandling.id)

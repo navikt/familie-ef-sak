@@ -1,6 +1,6 @@
 package no.nav.familie.ef.sak.tilkjentytelse.domain
 
-import no.nav.familie.ef.sak.beregning.nyesteGrunnbeløp
+import no.nav.familie.ef.sak.beregning.Grunnbeløpsperioder
 import no.nav.familie.ef.sak.felles.domain.Sporbar
 import no.nav.familie.ef.sak.vedtak.domain.SamordningsfradragType
 import org.springframework.data.annotation.Id
@@ -36,7 +36,7 @@ data class TilkjentYtelse(
     val samordningsfradragType: SamordningsfradragType? = null,
     val startdato: LocalDate,
     @Column("grunnbelopsdato")
-    val grunnbeløpsmåned: YearMonth = nyesteGrunnbeløp.periode.fom,
+    val grunnbeløpsmåned: YearMonth = Grunnbeløpsperioder.nyesteGrunnbeløp.periode.fom,
     @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
     val sporbar: Sporbar = Sporbar(),
 ) {

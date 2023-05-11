@@ -51,7 +51,7 @@ class ValiderOmregningService(
         tidligerePerioder: Map<YearMonth, VedtaksperiodeDto>,
     ) {
         brukerfeilHvis(tidligerePerioder.isEmpty()) {
-            "Denne skal ikke g-omregnes då den ikke har noen tidligere perioder som er etter $nyesteGrunnbeløpGyldigFraOgMed"
+            "Denne skal ikke g-omregnes då den ikke har noen tidligere perioder som er etter ${Grunnbeløpsperioder.nyesteGrunnbeløpGyldigFraOgMed}"
         }
         brukerfeilHvis(data.perioder.size != tidligerePerioder.size) {
             val tidligereDatoer = tidligerePerioder.values.joinToString(", ") { "${it.periode}" }
@@ -84,7 +84,7 @@ class ValiderOmregningService(
     private fun hentVedtakshistorikkFraNyesteGrunnbeløp(saksbehandling: Saksbehandling) =
         vedtakHistorikkService.hentVedtakForOvergangsstønadFraDato(
             saksbehandling.fagsakId,
-            YearMonth.from(nyesteGrunnbeløpGyldigFraOgMed),
+            YearMonth.from(Grunnbeløpsperioder.nyesteGrunnbeløpGyldigFraOgMed),
         )
             .perioder
             .filter { it.periodeType != VedtaksperiodeType.SANKSJON }
@@ -95,13 +95,13 @@ class ValiderOmregningService(
         if (vedtakService.hentVedtak(saksbehandling.id).resultatType != ResultatType.INNVILGE) return
         if (saksbehandling.forrigeBehandlingId == null) return
         val forrigeTilkjentYtelse = tilkjentYtelseRepository.findByBehandlingId(saksbehandling.forrigeBehandlingId) ?: return
-        if (forrigeTilkjentYtelse.grunnbeløpsmåned >= nyesteGrunnbeløpGyldigFraOgMed) return
+        if (forrigeTilkjentYtelse.grunnbeløpsmåned >= Grunnbeløpsperioder.nyesteGrunnbeløpGyldigFraOgMed) return
 
         val tilkjentYtelse = tilkjentYtelseRepository.findByBehandlingId(saksbehandling.id) ?: return
-        if (tilkjentYtelse.grunnbeløpsmåned < nyesteGrunnbeløpGyldigFraOgMed) return
+        if (tilkjentYtelse.grunnbeløpsmåned < Grunnbeløpsperioder.nyesteGrunnbeløpGyldigFraOgMed) return
 
         tilkjentYtelse.andelerTilkjentYtelse
-            .filter { it.stønadTom > nyesteGrunnbeløpGyldigFraOgMed.atDay(1) }
+            .filter { it.stønadTom > Grunnbeløpsperioder.nyesteGrunnbeløpGyldigFraOgMed.atDay(1) }
             .forEach { andel ->
                 val inntektsperiodeForAndel = Inntektsperiode(
                     periode = andel.periode,
@@ -117,5 +117,5 @@ class ValiderOmregningService(
 
     private fun feilmeldingForFeilGBeløp(andel: AndelTilkjentYtelse) =
         "Kan ikke fullføre behandling: Det må revurderes fra " +
-            "${maxOf(andel.periode.fom, nyesteGrunnbeløpGyldigFraOgMed)} for at beregning av ny G blir riktig"
+            "${maxOf(andel.periode.fom, Grunnbeløpsperioder.nyesteGrunnbeløpGyldigFraOgMed)} for at beregning av ny G blir riktig"
 }

@@ -1,6 +1,6 @@
 package no.nav.familie.ef.sak.behandling.grunnbelop
 
-import no.nav.familie.ef.sak.beregning.nyesteGrunnbeløpGyldigFraOgMed
+import no.nav.familie.ef.sak.beregning.Grunnbeløpsperioder
 import no.nav.familie.ef.sak.fagsak.FagsakRepository
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -34,7 +34,7 @@ class GOmregningTaskService(
 
     fun opprettGOmregningTaskForBehandlingerMedUtdatertG(): Int {
         logger.info("Starter opprettelse av tasker for G-omregning.")
-        val fagsakIder = fagsakRepository.finnFerdigstilteFagsakerMedUtdatertGBelop(nyesteGrunnbeløpGyldigFraOgMed.atDay(1))
+        val fagsakIder = fagsakRepository.finnFerdigstilteFagsakerMedUtdatertGBelop(Grunnbeløpsperioder.nyesteGrunnbeløpGyldigFraOgMed.atDay(1))
         try {
             fagsakIder.forEach {
                 gOmregningTask.opprettTask(it)
