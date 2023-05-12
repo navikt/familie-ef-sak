@@ -503,5 +503,4 @@ internal class OmregningServiceTest : OppslagSpringRunnerTest() {
         )
         return inntektPeriode
     }
-
 }
