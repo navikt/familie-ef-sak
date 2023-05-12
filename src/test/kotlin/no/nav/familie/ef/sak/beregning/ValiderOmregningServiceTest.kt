@@ -4,8 +4,8 @@ import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.beregning.BeregningService
+import no.nav.familie.ef.sak.beregning.Grunnbeløpsperioder
 import no.nav.familie.ef.sak.beregning.ValiderOmregningService
-import no.nav.familie.ef.sak.beregning.nyesteGrunnbeløpGyldigFraOgMed
 import no.nav.familie.ef.sak.felles.util.mockFeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
@@ -91,7 +91,7 @@ class ValiderOmregningServiceTest {
     @Nested
     inner class ValiderHarSammePerioderSomTidligereVedtak {
 
-        private val år = nyesteGrunnbeløpGyldigFraOgMed.year
+        private val år = Grunnbeløpsperioder.nyesteGrunnbeløpGyldigFraOgMed.year
 
         @BeforeEach
         internal fun setUp() {

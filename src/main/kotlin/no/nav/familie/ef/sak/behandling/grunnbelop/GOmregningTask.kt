@@ -1,8 +1,8 @@
 package no.nav.familie.ef.sak.behandling.grunnbelop
 
 import com.fasterxml.jackson.module.kotlin.readValue
+import no.nav.familie.ef.sak.beregning.Grunnbeløpsperioder
 import no.nav.familie.ef.sak.beregning.OmregningService
-import no.nav.familie.ef.sak.beregning.nyesteGrunnbeløpGyldigFraOgMed
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.log.IdUtils
 import no.nav.familie.log.mdc.MDCConstants
@@ -42,7 +42,7 @@ class GOmregningTask(
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     fun opprettTask(fagsakId: UUID) {
-        val payload = objectMapper.writeValueAsString(GOmregningPayload(fagsakId, nyesteGrunnbeløpGyldigFraOgMed))
+        val payload = objectMapper.writeValueAsString(GOmregningPayload(fagsakId, Grunnbeløpsperioder.nyesteGrunnbeløpGyldigFraOgMed))
         val eksisterendeTask = taskService.finnTaskMedPayloadOgType(payload, TYPE)
 
         if (eksisterendeTask != null) {
@@ -51,7 +51,7 @@ class GOmregningTask(
 
         val properties = Properties().apply {
             setProperty("fagsakId", fagsakId.toString())
-            setProperty("grunnbeløpsdato", nyesteGrunnbeløpGyldigFraOgMed.toString())
+            setProperty("grunnbeløpsdato", Grunnbeløpsperioder.nyesteGrunnbeløpGyldigFraOgMed.toString())
             setProperty(MDCConstants.MDC_CALL_ID, IdUtils.generateId())
         }
 

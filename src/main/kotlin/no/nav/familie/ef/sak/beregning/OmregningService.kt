@@ -61,7 +61,7 @@ class OmregningService(
         val innvilgelseOvergangsstønad =
             vedtakHistorikkService.hentVedtakForOvergangsstønadFraDato(
                 fagsakId,
-                YearMonth.from(nyesteGrunnbeløpGyldigFraOgMed),
+                YearMonth.from(Grunnbeløpsperioder.nyesteGrunnbeløpGyldigFraOgMed),
             )
         if (innvilgelseOvergangsstønad.perioder.any { it.periodeType == VedtaksperiodeType.SANKSJON }) {
             logger.warn(
@@ -91,7 +91,7 @@ class OmregningService(
 
         val forrigeTilkjentYtelse = ytelseService.hentForBehandling(sisteBehandling.id)
 
-        feilHvis(forrigeTilkjentYtelse.grunnbeløpsmåned == nyesteGrunnbeløpGyldigFraOgMed) {
+        feilHvis(forrigeTilkjentYtelse.grunnbeløpsmåned == Grunnbeløpsperioder.nyesteGrunnbeløpGyldigFraOgMed) {
             "Skal ikke utføre g-omregning når forrige tilkjent ytelse allerede har nyeste grunnbeløpsdato"
         }
         return forrigeTilkjentYtelse

@@ -43,7 +43,7 @@ internal class BeregningTest {
                         "med forventet svar: $fasit",
                 ) {
                     assertThat(
-                        finnGrunnbeløpsPerioder(
+                        Grunnbeløpsperioder.finnGrunnbeløpsPerioder(
                             Månedsperiode(
                                 LocalDate.parse(periode.first),
                                 LocalDate.parse(periode.second),
