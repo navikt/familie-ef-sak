@@ -9,6 +9,7 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PersonSøk
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PersonSøkResultat
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.SøkeKriterier
 import no.nav.familie.http.client.AbstractRestClient
+import no.nav.familie.kontrakter.felles.Tema
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.http.HttpHeaders
 import org.springframework.stereotype.Service
@@ -43,6 +44,7 @@ class PdlSaksbehandlerClient(
     private fun httpHeaders(): HttpHeaders {
         return HttpHeaders().apply {
             add("Tema", "ENF")
+            add("behandlingsnummer", Tema.ENF.behandlingsnummer)
         }
     }
 }
