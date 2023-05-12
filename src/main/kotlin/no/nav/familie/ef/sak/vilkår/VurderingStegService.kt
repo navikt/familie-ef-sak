@@ -6,6 +6,8 @@ import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegService
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.behandlingsflyt.task.BehandlingsstatistikkTask
+import no.nav.familie.ef.sak.behandlingshistorikk.BehandlingshistorikkService
+import no.nav.familie.ef.sak.behandlingshistorikk.domain.StegUtfall
 import no.nav.familie.ef.sak.blankett.BlankettRepository
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
@@ -32,6 +34,7 @@ class VurderingStegService(
     private val stegService: StegService,
     private val taskService: TaskService,
     private val blankettRepository: BlankettRepository,
+    private val behandlingshistorikkService: BehandlingshistorikkService,
 ) {
 
     @Transactional
@@ -105,6 +108,7 @@ class VurderingStegService(
             stegService.resetSteg(saksbehandling.id, StegType.VILKÅR)
         } else if (saksbehandling.harStatusOpprettet) {
             behandlingService.oppdaterStatusPåBehandling(saksbehandling.id, BehandlingStatus.UTREDES)
+            behandlingshistorikkService.opprettHistorikkInnslag(behandlingId = saksbehandling.id, stegtype = StegType.VILKÅR, utfall = StegUtfall.UTREDNING_PÅBEGYNT, metadata = null)
             opprettBehandlingsstatistikkTask(saksbehandling)
         }
     }

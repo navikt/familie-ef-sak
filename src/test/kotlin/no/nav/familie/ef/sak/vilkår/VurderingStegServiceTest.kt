@@ -3,6 +3,7 @@ package no.nav.familie.ef.sak.vilkår
 import io.mockk.CapturingSlot
 import io.mockk.every
 import io.mockk.just
+import io.mockk.justRun
 import io.mockk.mockk
 import io.mockk.runs
 import io.mockk.slot
@@ -11,6 +12,9 @@ import no.nav.familie.ef.sak.barn.BarnService
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegService
+import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
+import no.nav.familie.ef.sak.behandlingshistorikk.BehandlingshistorikkService
+import no.nav.familie.ef.sak.behandlingshistorikk.domain.StegUtfall
 import no.nav.familie.ef.sak.blankett.BlankettRepository
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil
@@ -66,6 +70,7 @@ internal class VurderingStegServiceTest {
     private val grunnlagsdataService = mockk<GrunnlagsdataService>()
     private val fagsakService = mockk<FagsakService>()
     private val featureToggleService = mockk<FeatureToggleService>()
+    private val behandlingshistorikkService = mockk<BehandlingshistorikkService>()
     private val vurderingService = VurderingService(
         behandlingService,
         søknadService,
@@ -83,6 +88,7 @@ internal class VurderingStegServiceTest {
         blankettRepository = blankettRepository,
         stegService = stegService,
         taskService = taskService,
+        behandlingshistorikkService = behandlingshistorikkService
     )
     private val søknad = SøknadsskjemaMapper.tilDomene(
         TestsøknadBuilder.Builder().setBarn(
@@ -125,6 +131,8 @@ internal class VurderingStegServiceTest {
         )
         every { vilkårGrunnlagService.hentGrunnlag(any(), any(), any(), any()) } returns
             mockVilkårGrunnlagDto(sivilstand = sivilstand)
+
+        justRun { behandlingshistorikkService.opprettHistorikkInnslag(any(), any(), any(), any()) }
 
         BrukerContextUtil.mockBrukerContext("saksbehandlernavn")
     }
@@ -250,7 +258,7 @@ internal class VurderingStegServiceTest {
     }
 
     @Test
-    internal fun `skal oppdatere status fra OPPRETTET til UTREDES for første vilkår`() {
+    internal fun `skal oppdatere status fra OPPRETTET til UTREDES og lage historikkinnslag for første vilkår`() {
         every { behandlingService.hentSaksbehandling(behandlingId) } returns saksbehandling(
             fagsak(),
             status = BehandlingStatus.OPPRETTET,
@@ -278,10 +286,11 @@ internal class VurderingStegServiceTest {
         )
 
         verify(exactly = 1) { behandlingService.oppdaterStatusPåBehandling(any(), BehandlingStatus.UTREDES) }
+        verify(exactly = 1) { behandlingshistorikkService.opprettHistorikkInnslag(any(), StegType.VILKÅR, StegUtfall.UTREDNING_PÅBEGYNT, metadata = null) }
     }
 
     @Test
-    internal fun `skal ikke oppdatere status til UTREDES hvis den allerede er dette `() {
+    internal fun `skal ikke oppdatere status til UTREDES eller opprette historikkinnslag hvis den allerede er dette `() {
         val fagsak = fagsak()
         every { behandlingService.hentSaksbehandling(behandlingId) } returns saksbehandling(
             fagsak,
@@ -310,6 +319,7 @@ internal class VurderingStegServiceTest {
         )
 
         verify(exactly = 0) { behandlingService.oppdaterStatusPåBehandling(any(), BehandlingStatus.UTREDES) }
+        verify(exactly = 0) { behandlingshistorikkService.opprettHistorikkInnslag(any(), StegType.VILKÅR, StegUtfall.UTREDNING_PÅBEGYNT, metadata = null) }
     }
 
     @Test
