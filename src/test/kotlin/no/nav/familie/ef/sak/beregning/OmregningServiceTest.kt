@@ -4,9 +4,7 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.mockkObject
 import io.mockk.slot
-import io.mockk.unmockkObject
 import io.mockk.verify
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.barn.BarnRepository
@@ -34,6 +32,7 @@ import no.nav.familie.ef.sak.repository.inntektsperiode
 import no.nav.familie.ef.sak.repository.tilkjentYtelse
 import no.nav.familie.ef.sak.repository.vedtak
 import no.nav.familie.ef.sak.repository.vedtaksperiode
+import no.nav.familie.ef.sak.testutil.mockTestMedGrunnbeløpFra2022
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseRepository
 import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.vedtak.VedtakRepository
@@ -53,7 +52,6 @@ import no.nav.familie.ef.sak.økonomi.lagTilkjentYtelse
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.ef.iverksett.IverksettOvergangsstønadDto
 import no.nav.familie.kontrakter.ef.søknad.Testsøknad
-import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.prosessering.internal.TaskService
 import org.assertj.core.api.Assertions.assertThat
@@ -289,29 +287,6 @@ internal class OmregningServiceTest : OppslagSpringRunnerTest() {
         assertThat(iverksettDto.vedtak.tilkjentYtelse?.andelerTilkjentYtelse?.all { it.beløp == 0 }).isTrue
         val oppdatertTilkjentYtelse = tilkjentYtelseRepository.findByBehandlingId(iverksettDto.behandling.behandlingId)
         assertThat(oppdatertTilkjentYtelse?.grunnbeløpsmåned).isEqualTo(YearMonth.of(2022, 5))
-    }
-
-    private fun mockTestMedGrunnbeløpFra2022(test: () -> Unit) {
-        val grunnbeløp2022 = Grunnbeløp(
-            periode = Månedsperiode(YearMonth.parse("2022-05"), YearMonth.from(LocalDate.MAX)),
-            grunnbeløp = 111_477.toBigDecimal(),
-            perMnd = 9_290.toBigDecimal(),
-            gjennomsnittPerÅr = 109_784.toBigDecimal(),
-        )
-
-        val indeks2022 =
-            Grunnbeløpsperioder.grunnbeløpsperioder.indexOfFirst { it.periode.fom == YearMonth.of(2022, 5) }
-        val grunnbeløpFør2022 =
-            Grunnbeløpsperioder.grunnbeløpsperioder.slice(indeks2022 until Grunnbeløpsperioder.grunnbeløpsperioder.size)
-
-        mockkObject(Grunnbeløpsperioder)
-        every { Grunnbeløpsperioder.grunnbeløpsperioder } returns listOf(grunnbeløp2022) + grunnbeløpFør2022
-        every { Grunnbeløpsperioder.nyesteGrunnbeløp } returns grunnbeløp2022
-        every { Grunnbeløpsperioder.nyesteGrunnbeløpGyldigFraOgMed } returns YearMonth.of(2022, 5)
-
-        test()
-
-        unmockkObject(Grunnbeløpsperioder)
     }
 
     private fun insertVedtakMed0BeløpSomSkalGOmregnes(): Fagsak {
