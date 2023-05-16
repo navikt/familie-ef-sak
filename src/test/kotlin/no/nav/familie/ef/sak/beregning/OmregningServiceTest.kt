@@ -110,40 +110,36 @@ internal class OmregningServiceTest : OppslagSpringRunnerTest() {
     val fagsakId = UUID.fromString("3549f9e2-ddd1-467d-82be-bfdb6c7f07e1")
     val behandlingId = UUID.fromString("39c7dc82-adc1-43db-a6f9-64b8e4352ff6")
 
-    /**
-     * Denne brekker hver gang det kommer nytt G-beløp.
-     */
     @Test
     fun `Verifiser riktig beløp og intekstjustering`() {
-        val inntektPeriode = lagInntekt(201, 2002, 200003, år)
-        lagSøknadOgVilkårOgVedtak(behandlingId, fagsakId, inntektPeriode, stønadsår = år)
-        val tilkjentYtelse = lagreTilkjentYtelse(behandlingId, stønadsår = år)
+        val inntektPeriode = lagInntekt(201, 2002, 200003, 2022)
+        lagSøknadOgVilkårOgVedtak(behandlingId, fagsakId, inntektPeriode, stønadsår = 2022)
+        val tilkjentYtelse = lagreTilkjentYtelse(behandlingId, stønadsår = 2022)
         val iverksettDtoSlot = slot<IverksettOvergangsstønadDto>()
         // Gitt assert: - skal splittes til to med ny g
         assertThat(tilkjentYtelse.andelerTilkjentYtelse).hasSize(1)
         assertThat(inntektPeriode.totalinntekt().toInt()).isEqualTo(276287)
 
-        omregningService.utførGOmregning(fagsakId)
-        verify { iverksettClient.iverksettUtenBrev(capture(iverksettDtoSlot)) }
-        val iverksettDto = iverksettDtoSlot.captured
+        mockTestMedGrunnbeløpFra2022 {
+            omregningService.utførGOmregning(fagsakId)
 
-        assertThat(iverksettDto.vedtak.tilkjentYtelse?.andelerTilkjentYtelse?.size).isEqualTo(2) // skal være splittet
-        // Sjekk andel etter ny g omregningsdato
-        val andelTilkjentYtelseOmregnet = finnAndelEtterNyGDato(iverksettDto)!!
-        assertThat(andelTilkjentYtelseOmregnet.inntekt).isEqualTo(289000)
-        assertThat(andelTilkjentYtelseOmregnet.beløp).isEqualTo(12155)
-        // Sjekk inntektsperiode etter ny G omregning
-        val inntektsperiodeEtterGomregning = finnInntektsperiodeEtterNyGDato(iverksettDto.behandling.behandlingId)
-        assertThat(inntektsperiodeEtterGomregning.dagsats?.toInt()).isEqualTo(210)
-        assertThat(inntektsperiodeEtterGomregning.månedsinntekt?.toInt()).isEqualTo(2097)
-        assertThat(inntektsperiodeEtterGomregning.inntekt.toInt()).isEqualTo(209548)
-        assertThat(inntektsperiodeEtterGomregning.totalinntekt().toInt()).isEqualTo(289312)
+            verify { iverksettClient.iverksettUtenBrev(capture(iverksettDtoSlot)) }
+            val iverksettDto = iverksettDtoSlot.captured
+
+            assertThat(iverksettDto.vedtak.tilkjentYtelse?.andelerTilkjentYtelse?.size).isEqualTo(2) // skal være splittet
+            // Sjekk andel etter ny g omregningsdato
+            val andelTilkjentYtelseOmregnet = finnAndelEtterNyGDato(iverksettDto)!!
+            assertThat(andelTilkjentYtelseOmregnet.inntekt).isEqualTo(289000)
+            assertThat(andelTilkjentYtelseOmregnet.beløp).isEqualTo(12155)
+            // Sjekk inntektsperiode etter ny G omregning
+            val inntektsperiodeEtterGomregning = finnInntektsperiodeEtterNyGDato(iverksettDto.behandling.behandlingId)
+            assertThat(inntektsperiodeEtterGomregning.dagsats?.toInt()).isEqualTo(210)
+            assertThat(inntektsperiodeEtterGomregning.månedsinntekt?.toInt()).isEqualTo(2097)
+            assertThat(inntektsperiodeEtterGomregning.inntekt.toInt()).isEqualTo(209548)
+            assertThat(inntektsperiodeEtterGomregning.totalinntekt().toInt()).isEqualTo(289312)
+        }
     }
 
-    /**
-     * Denne brekker hver gang det kommer nytt G-beløp.
-     * Beløp må oppdateres i omregnes i expectedIverksettDto.json.
-     */
     @Test
     fun `utførGOmregning kaller iverksettUtenBrev med korrekt iverksettDto `() {
         val fagsakId = UUID.fromString("3549f9e2-ddd1-467d-82be-bfdb6c7f07e1")
@@ -157,9 +153,10 @@ internal class OmregningServiceTest : OppslagSpringRunnerTest() {
                 status = BehandlingStatus.FERDIGSTILT,
             ),
         )
-        tilkjentYtelseRepository.insert(tilkjentYtelse(behandling.id, "321", år))
-        val inntekter = listOf(inntektsperiode(år, inntekt = BigDecimal(277_100), samordningsfradrag = BigDecimal.ZERO))
-        vedtakRepository.insert(vedtak(behandling.id, år = år, inntekter = InntektWrapper(inntekter)))
+        tilkjentYtelseRepository.insert(tilkjentYtelse(behandling.id, "321", 2022))
+        val inntekter =
+            listOf(inntektsperiode(2022, inntekt = BigDecimal(277_100), samordningsfradrag = BigDecimal.ZERO))
+        vedtakRepository.insert(vedtak(behandling.id, år = 2022, inntekter = InntektWrapper(inntekter)))
         val barn = barnRepository.insert(
             behandlingBarn(
                 behandlingId = behandling.id,
@@ -167,30 +164,40 @@ internal class OmregningServiceTest : OppslagSpringRunnerTest() {
                 navn = "Kid Kiddesen",
             ),
         )
-        søknadService.lagreSøknadForOvergangsstønad(Testsøknad.søknadOvergangsstønad, behandling.id, fagsak.id, "1L")
+        søknadService.lagreSøknadForOvergangsstønad(
+            Testsøknad.søknadOvergangsstønad,
+            behandling.id,
+            fagsak.id,
+            "1L",
+        )
 
         val vilkårsvurderinger = lagVilkårsvurderinger(barn, behandlingId)
         vilkårsvurderingRepository.insertAll(vilkårsvurderinger)
 
-        omregningService.utførGOmregning(fagsakId)
-        val nyBehandling =
-            behandlingRepository.findByFagsakId(fagsakId).single { it.årsak == BehandlingÅrsak.G_OMREGNING }
+        mockTestMedGrunnbeløpFra2022 {
+            omregningService.utførGOmregning(fagsakId)
+            val nyBehandling =
+                behandlingRepository.findByFagsakId(fagsakId).single { it.årsak == BehandlingÅrsak.G_OMREGNING }
 
-        assertThat(taskService.findAll().find { it.type == "pollerStatusFraIverksett" }).isNotNull
-        val iverksettDtoSlot = slot<IverksettOvergangsstønadDto>()
-        verify { iverksettClient.iverksettUtenBrev(capture(iverksettDtoSlot)) }
+            assertThat(taskService.findAll().find { it.type == "pollerStatusFraIverksett" }).isNotNull
+            val iverksettDtoSlot = slot<IverksettOvergangsstønadDto>()
+            verify { iverksettClient.iverksettUtenBrev(capture(iverksettDtoSlot)) }
 
-        val iverksettDto = iverksettDtoSlot.captured
-        val expectedIverksettDto = iverksettMedOppdaterteIder(fagsak, behandling, iverksettDto.vedtak.vedtakstidspunkt)
-        assertThat(iverksettDto).usingRecursiveComparison()
-            .ignoringCollectionOrder()
-            .isEqualTo(expectedIverksettDto)
-        assertThat(søknadService.hentSøknadsgrunnlag(nyBehandling.id)).isNotNull
-        assertThat(barnRepository.findByBehandlingId(nyBehandling.id).single().personIdent).isEqualTo(barn.personIdent)
-        assertThat(
-            vilkårsvurderingRepository.findByBehandlingId(nyBehandling.id)
-                .single { it.type == VilkårType.ALENEOMSORG }.barnId,
-        ).isNotNull
+            val iverksettDto = iverksettDtoSlot.captured
+            val expectedIverksettDto =
+                iverksettMedOppdaterteIder(fagsak, behandling, iverksettDto.vedtak.vedtakstidspunkt)
+            assertThat(iverksettDto).usingRecursiveComparison()
+                .ignoringCollectionOrder()
+                .isEqualTo(expectedIverksettDto)
+            assertThat(søknadService.hentSøknadsgrunnlag(nyBehandling.id)).isNotNull
+            assertThat(
+                barnRepository.findByBehandlingId(nyBehandling.id).single().personIdent,
+            ).isEqualTo(barn.personIdent)
+            assertThat(
+                vilkårsvurderingRepository.findByBehandlingId(nyBehandling.id)
+                    .single { it.type == VilkårType.ALENEOMSORG }.barnId,
+            ).isNotNull
+        }
     }
 
     private fun opprettFagsakOgAvsluttetBehandling(
@@ -292,7 +299,8 @@ internal class OmregningServiceTest : OppslagSpringRunnerTest() {
             gjennomsnittPerÅr = 109_784.toBigDecimal(),
         )
 
-        val indeks2022 = Grunnbeløpsperioder.grunnbeløpsperioder.indexOfFirst { it.periode.fom == YearMonth.of(2022, 5) }
+        val indeks2022 =
+            Grunnbeløpsperioder.grunnbeløpsperioder.indexOfFirst { it.periode.fom == YearMonth.of(2022, 5) }
         val grunnbeløpFør2022 =
             Grunnbeløpsperioder.grunnbeløpsperioder.slice(indeks2022 until Grunnbeløpsperioder.grunnbeløpsperioder.size)
 
@@ -497,7 +505,7 @@ internal class OmregningServiceTest : OppslagSpringRunnerTest() {
     private fun finnAndelEtterNyGDato(iverksettDto: IverksettOvergangsstønadDto) =
         iverksettDto.vedtak.tilkjentYtelse?.andelerTilkjentYtelse?.firstOrNull {
             it.periode.inneholder(
-                YearMonth.of(2022, 6),
+                Grunnbeløpsperioder.nyesteGrunnbeløpGyldigFraOgMed.plusMonths(1),
             )
         }
 
