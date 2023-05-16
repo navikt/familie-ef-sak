@@ -88,7 +88,7 @@ internal class VurderingStegServiceTest {
         blankettRepository = blankettRepository,
         stegService = stegService,
         taskService = taskService,
-        behandlingshistorikkService = behandlingshistorikkService
+        behandlingshistorikkService = behandlingshistorikkService,
     )
     private val søknad = SøknadsskjemaMapper.tilDomene(
         TestsøknadBuilder.Builder().setBarn(

@@ -26,7 +26,7 @@ class FeatureToggleController(private val featureToggleService: FeatureToggleSer
         Toggle.PERSONOPPLYSNINGER_ENDRINGER,
         Toggle.ULIKE_INNTEKTER,
         Toggle.VURDER_KONSEKVENS_OPPGAVER_LOKALKONTOR,
-        Toggle.AUTOMATISKE_OPPGAVER_FREMLEGGSOPPGAVE
+        Toggle.AUTOMATISKE_OPPGAVER_FREMLEGGSOPPGAVE,
     )
 
     @GetMapping

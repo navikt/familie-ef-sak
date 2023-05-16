@@ -289,8 +289,6 @@ internal class OmregningServiceTest : OppslagSpringRunnerTest() {
         assertThat(oppdatertTilkjentYtelse?.grunnbeløpsmåned).isEqualTo(YearMonth.of(2022, 5))
     }
 
-
-
     private fun insertVedtakMed0BeløpSomSkalGOmregnes(): Fagsak {
         val fagsak = testoppsettService.lagreFagsak(fagsak(id = UUID.randomUUID(), identer = setOf(PersonIdent("123"))))
         val behandling = behandlingRepository.insert(
