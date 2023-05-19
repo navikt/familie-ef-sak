@@ -39,7 +39,6 @@ data class Grunnbeløp(
 )
 
 fun finnGrunnbeløpsPerioder(periode: Månedsperiode): List<Beløpsperiode> {
-    println("grunnbeløpsperioder: ${Grunnbeløpsperioder.grunnbeløpsperioder}" )
     return Grunnbeløpsperioder.grunnbeløpsperioder
         .filter { it.periode.overlapper(periode) }
         .map {
@@ -57,8 +56,6 @@ fun finnGrunnbeløpsPerioder(periode: Månedsperiode): List<Beløpsperiode> {
 
 object Grunnbeløpsperioder {
 
-
-
     fun finnGrunnbeløp(måned: YearMonth) = grunnbeløpsperioder.find {
         it.periode.inneholder(måned)
     } ?: error("Grunnbeløp finnes ikke for dato $måned")
@@ -67,12 +64,6 @@ object Grunnbeløpsperioder {
 // TODO: tilDato må være siste dag i måneden
     val grunnbeløpsperioder: List<Grunnbeløp> =
         listOf(
-//            Grunnbeløp(
-//                periode = Månedsperiode(YearMonth.parse("2023-05"), YearMonth.from(LocalDate.MAX)),
-//                grunnbeløp = 120_000.toBigDecimal(),
-//                perMnd = 10000.toBigDecimal(),
-//                gjennomsnittPerÅr = 117_160.toBigDecimal(),
-//            ),
             Grunnbeløp(
                 periode = Månedsperiode(YearMonth.parse("2022-05"), YearMonth.from(LocalDate.MAX)),
                 grunnbeløp = 111_477.toBigDecimal(),
