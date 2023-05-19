@@ -3,6 +3,29 @@
 
 Egenskap: Andelhistorikk: Ulike typer inntekt
 
+  Scenario: Skal feile pga g
+
+    Gitt følgende vedtak
+      | BehandlingId | Fra og med dato | Til og med dato | Vedtaksresultat |
+      | 1            | 01.2023         | 02.2024         | INNVILGE        |
+
+    Og følgende inntekter
+      | BehandlingId | Fra og med dato | Inntekt | Dagsats | Månedsinntekt |
+      | 1            | 01.2023         | 120000  | 100     | 1400          |
+
+    Og G i 2023 er 120_000
+
+    Når beregner ytelse med G
+
+    Så forvent følgende andeler lagret for behandling med id: 1
+      | Fra og med dato | Til og med dato | Kildebehandling | Inntekt | Beløp |
+      | 01.2023         | 02.2024         | 1               | 162000  | 16917 |
+
+    Så forvent følgende historikk
+      | BehandlingId | Fra og med dato | Til og med dato | Endringstype | Endret i behandlingId | Inntekt |
+      | 1            | 01.2023         | 02.2024         |              |                       | 162000  |
+
+
   Scenario: Skal bruke totalinntekten for andelen
 
     Gitt følgende vedtak
