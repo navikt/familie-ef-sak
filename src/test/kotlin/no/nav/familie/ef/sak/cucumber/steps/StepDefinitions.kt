@@ -52,7 +52,6 @@ import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.saksbehandling
 import no.nav.familie.ef.sak.simulering.SimuleringService
 import no.nav.familie.ef.sak.testutil.mockTestMedGrunnbeløpFra
-import no.nav.familie.ef.sak.testutil.mockTestMedGrunnbeløpFra2022
 import no.nav.familie.ef.sak.tilbakekreving.TilbakekrevingService
 import no.nav.familie.ef.sak.tilkjentytelse.AndelsHistorikkService
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
@@ -211,7 +210,7 @@ class StepDefinitions {
     }
 
     @Gitt("G i 2023 er 120_000")
-    fun Gi2023er120_000(dataTable: DataTable) {
+    fun Gi2023er120_000() {
         grunnbeløp = Grunnbeløp(
             periode = Månedsperiode(YearMonth.parse("2023-05"), YearMonth.from(LocalDate.MAX)),
             grunnbeløp = 120_000.toBigDecimal(),
@@ -248,8 +247,7 @@ class StepDefinitions {
 
     @Når("beregner ytelse med G")
     fun `beregner ytelse med G`() {
-
-        mockTestMedGrunnbeløpFra (grunnbeløp!!){
+        mockTestMedGrunnbeløpFra(grunnbeløp!!) {
             initialiserTilkjentYtelseOgVedtakMock()
             saksbehandlinger = mapBehandlinger()
 
@@ -281,7 +279,6 @@ class StepDefinitions {
                 }
             }
         }
-
     }
 
     @Når("beregner ytelse")

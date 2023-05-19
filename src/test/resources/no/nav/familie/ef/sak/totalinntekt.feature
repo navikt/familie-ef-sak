@@ -19,11 +19,13 @@ Egenskap: Andelhistorikk: Ulike typer inntekt
 
     Så forvent følgende andeler lagret for behandling med id: 1
       | Fra og med dato | Til og med dato | Kildebehandling | Inntekt | Beløp |
-      | 01.2023         | 02.2024         | 1               | 162000  | 16917 |
+      | 01.2023         | 04.2023         | 1               | 162000  | 16917 |
+      | 05.2023         | 02.2024         | 1               | 162000  | 18675 |
 
     Så forvent følgende historikk
       | BehandlingId | Fra og med dato | Til og med dato | Endringstype | Endret i behandlingId | Inntekt |
-      | 1            | 01.2023         | 02.2024         |              |                       | 162000  |
+      | 1            | 01.2023         | 04.2023         |              |                       | 162000  |
+      | 1            | 05.2023         | 02.2024         |              |                       | 162000  |
 
 
   Scenario: Skal bruke totalinntekten for andelen

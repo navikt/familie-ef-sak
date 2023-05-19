@@ -9,18 +9,17 @@ import no.nav.familie.kontrakter.felles.Månedsperiode
 import java.time.LocalDate
 import java.time.YearMonth
 
-
-fun mockTestMedGrunnbeløpFra( grunnbeløp2023: Grunnbeløp,test: () -> Unit) {
-
-    val indeks2023 =
-        Grunnbeløpsperioder.grunnbeløpsperioder.indexOfFirst { it.periode.fom == YearMonth.of(2023, 5) }
-    val grunnbeløpFør2023 =
-        Grunnbeløpsperioder.grunnbeløpsperioder.slice(indeks2023 until Grunnbeløpsperioder.grunnbeløpsperioder.size)
-
+fun mockTestMedGrunnbeløpFra(sisteGrunnbeløp: Grunnbeløp, test: () -> Unit) {
+    val indeksForrigeÅr =
+        Grunnbeløpsperioder.grunnbeløpsperioder.indexOfFirst { it.periode.fom == YearMonth.of(sisteGrunnbeløp.periode.fom.year - 1, 5) }
+    val grunnbeløpFørNestSiste =
+        Grunnbeløpsperioder.grunnbeløpsperioder.slice(indeksForrigeÅr + 1 until Grunnbeløpsperioder.grunnbeløpsperioder.size)
+    val nestSistePeriodeKuttet = Grunnbeløpsperioder.grunnbeløpsperioder[indeksForrigeÅr].periode.copy(tom = sisteGrunnbeløp.periode.fom.minusMonths(1))
+    val nestSisteGrunnbeløp = Grunnbeløpsperioder.grunnbeløpsperioder[indeksForrigeÅr].copy(periode = nestSistePeriodeKuttet)
     mockkObject(Grunnbeløpsperioder)
-    every { Grunnbeløpsperioder.grunnbeløpsperioder } returns listOf(grunnbeløp2023) + grunnbeløpFør2023
-    every { Grunnbeløpsperioder.nyesteGrunnbeløp } returns grunnbeløp2023
-    every { Grunnbeløpsperioder.nyesteGrunnbeløpGyldigFraOgMed } returns YearMonth.of(2023, 5)
+    every { Grunnbeløpsperioder.grunnbeløpsperioder } returns listOf(sisteGrunnbeløp) + nestSisteGrunnbeløp + grunnbeløpFørNestSiste
+    every { Grunnbeløpsperioder.nyesteGrunnbeløp } returns sisteGrunnbeløp
+    every { Grunnbeløpsperioder.nyesteGrunnbeløpGyldigFraOgMed } returns sisteGrunnbeløp.periode.fom
 
     test()
 

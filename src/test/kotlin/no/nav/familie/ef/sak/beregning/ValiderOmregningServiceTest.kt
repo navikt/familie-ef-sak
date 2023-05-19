@@ -55,6 +55,7 @@ class ValiderOmregningServiceTest {
         mockVedtakOgForrigeTilkjentYtelse(saksbehandling)
         mockNyTilkjentYtelse(saksbehandling, medRiktigBeløp = false)
         mockTestMedGrunnbeløpFra2022 {
+            println(Grunnbeløpsperioder.grunnbeløpsperioder)
             assertThatThrownBy { validerOmregningService.validerHarGammelGOgKanLagres(saksbehandling) }
                 .isInstanceOf(ApiFeil::class.java)
         }
