@@ -38,23 +38,26 @@ data class Grunnbeløp(
     val gjennomsnittPerÅr: BigDecimal? = null,
 )
 
+fun finnGrunnbeløpsPerioder(periode: Månedsperiode): List<Beløpsperiode> {
+    println("grunnbeløpsperioder: ${Grunnbeløpsperioder.grunnbeløpsperioder}" )
+    return Grunnbeløpsperioder.grunnbeløpsperioder
+        .filter { it.periode.overlapper(periode) }
+        .map {
+            Beløpsperiode(
+                periode = Månedsperiode(
+                    fom = maxOf(it.periode.fom, periode.fom),
+                    tom = minOf(it.periode.tom, periode.tom),
+                ),
+                beløp = it.grunnbeløp,
+                beløpFørSamordning = it.grunnbeløp,
+            )
+        }
+        .sortedBy { it.periode }
+}
+
 object Grunnbeløpsperioder {
 
-    fun finnGrunnbeløpsPerioder(periode: Månedsperiode): List<Beløpsperiode> {
-        return grunnbeløpsperioder
-            .filter { it.periode.overlapper(periode) }
-            .map {
-                Beløpsperiode(
-                    periode = Månedsperiode(
-                        fom = maxOf(it.periode.fom, periode.fom),
-                        tom = minOf(it.periode.tom, periode.tom),
-                    ),
-                    beløp = it.grunnbeløp,
-                    beløpFørSamordning = it.grunnbeløp,
-                )
-            }
-            .sortedBy { it.periode }
-    }
+
 
     fun finnGrunnbeløp(måned: YearMonth) = grunnbeløpsperioder.find {
         it.periode.inneholder(måned)
@@ -64,14 +67,14 @@ object Grunnbeløpsperioder {
 // TODO: tilDato må være siste dag i måneden
     val grunnbeløpsperioder: List<Grunnbeløp> =
         listOf(
+//            Grunnbeløp(
+//                periode = Månedsperiode(YearMonth.parse("2023-05"), YearMonth.from(LocalDate.MAX)),
+//                grunnbeløp = 120_000.toBigDecimal(),
+//                perMnd = 10000.toBigDecimal(),
+//                gjennomsnittPerÅr = 117_160.toBigDecimal(),
+//            ),
             Grunnbeløp(
-                periode = Månedsperiode(YearMonth.parse("2023-05"), YearMonth.from(LocalDate.MAX)),
-                grunnbeløp = 120_000.toBigDecimal(),
-                perMnd = 10000.toBigDecimal(),
-                gjennomsnittPerÅr = 117_160.toBigDecimal(),
-            ),
-            Grunnbeløp(
-                periode = Månedsperiode(YearMonth.parse("2022-05"), YearMonth.parse("2023-04")),
+                periode = Månedsperiode(YearMonth.parse("2022-05"), YearMonth.from(LocalDate.MAX)),
                 grunnbeløp = 111_477.toBigDecimal(),
                 perMnd = 9_290.toBigDecimal(),
                 gjennomsnittPerÅr = 109_784.toBigDecimal(),
