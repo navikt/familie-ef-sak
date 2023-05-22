@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.oppgave
 
+import no.nav.familie.kontrakter.felles.oppgave.IdentGruppe
 import no.nav.familie.kontrakter.felles.oppgave.Oppgave
 import org.slf4j.LoggerFactory
 import java.time.OffsetDateTime
@@ -25,4 +26,7 @@ object OppgaveUtil {
             null
         }
     }
+
+    fun finnPersondentForOppgave(oppgave: Oppgave): String? =
+        oppgave.identer?.first { it.gruppe == IdentGruppe.FOLKEREGISTERIDENT }?.ident
 }
