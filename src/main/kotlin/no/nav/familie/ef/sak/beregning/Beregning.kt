@@ -38,23 +38,23 @@ data class Grunnbeløp(
     val gjennomsnittPerÅr: BigDecimal? = null,
 )
 
-object Grunnbeløpsperioder {
+fun finnGrunnbeløpsPerioder(periode: Månedsperiode): List<Beløpsperiode> {
+    return Grunnbeløpsperioder.grunnbeløpsperioder
+        .filter { it.periode.overlapper(periode) }
+        .map {
+            Beløpsperiode(
+                periode = Månedsperiode(
+                    fom = maxOf(it.periode.fom, periode.fom),
+                    tom = minOf(it.periode.tom, periode.tom),
+                ),
+                beløp = it.grunnbeløp,
+                beløpFørSamordning = it.grunnbeløp,
+            )
+        }
+        .sortedBy { it.periode }
+}
 
-    fun finnGrunnbeløpsPerioder(periode: Månedsperiode): List<Beløpsperiode> {
-        return grunnbeløpsperioder
-            .filter { it.periode.overlapper(periode) }
-            .map {
-                Beløpsperiode(
-                    periode = Månedsperiode(
-                        fom = maxOf(it.periode.fom, periode.fom),
-                        tom = minOf(it.periode.tom, periode.tom),
-                    ),
-                    beløp = it.grunnbeløp,
-                    beløpFørSamordning = it.grunnbeløp,
-                )
-            }
-            .sortedBy { it.periode }
-    }
+object Grunnbeløpsperioder {
 
     fun finnGrunnbeløp(måned: YearMonth) = grunnbeløpsperioder.find {
         it.periode.inneholder(måned)
