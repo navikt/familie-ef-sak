@@ -31,7 +31,7 @@ class AutomatiskBrevInnhentingKarakterutskriftService(
     @Transactional
     fun opprettTasks(brevtype: KarakterutskriftBrevtype, liveRun: Boolean) {
         val mappeId = oppgaveService.finnMapper(OppgaveUtil.ENHET_NR_NAY)
-            .single { it.navn.contains("64 - Utdanning skal ha brev") && it.tema == Behandlingstema.Skolepenger.name }.id
+            .single { it.navn == "64 Utdanning" }.id
 
         val opppgaver = oppgaveService.hentOppgaver(
             FinnOppgaveRequest(
