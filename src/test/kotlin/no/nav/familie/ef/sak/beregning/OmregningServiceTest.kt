@@ -109,7 +109,7 @@ internal class OmregningServiceTest : OppslagSpringRunnerTest() {
     val behandlingId = UUID.fromString("39c7dc82-adc1-43db-a6f9-64b8e4352ff6")
 
     @Test
-    fun `Verifiser riktig beløp og intekstjustering`() {
+    fun `Verifiser riktig beløp og inntektsjustering`() {
         val inntektPeriode = lagInntekt(201, 2002, 200003, 2022)
         lagSøknadOgVilkårOgVedtak(behandlingId, fagsakId, inntektPeriode, stønadsår = 2022)
         val tilkjentYtelse = lagreTilkjentYtelse(behandlingId, stønadsår = 2022)
