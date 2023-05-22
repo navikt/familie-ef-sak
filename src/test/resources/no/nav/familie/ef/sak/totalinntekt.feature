@@ -3,7 +3,7 @@
 
 Egenskap: Andelhistorikk: Ulike typer inntekt
 
-  Scenario: Skal feile pga g
+  Scenario: Ny periode som følge av ny G
 
     Gitt følgende vedtak
       | BehandlingId | Fra og med dato | Til og med dato | Vedtaksresultat |

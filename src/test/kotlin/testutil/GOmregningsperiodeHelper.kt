@@ -34,17 +34,5 @@ fun mockTestMedGrunnbeløpFra2022(test: () -> Unit) {
         gjennomsnittPerÅr = 109_784.toBigDecimal(),
     )
 
-    val indeks2022 =
-        Grunnbeløpsperioder.grunnbeløpsperioder.indexOfFirst { it.periode.fom == YearMonth.of(2022, 5) }
-    val grunnbeløpFør2022 =
-        Grunnbeløpsperioder.grunnbeløpsperioder.slice(indeks2022 until Grunnbeløpsperioder.grunnbeløpsperioder.size)
-
-    mockkObject(Grunnbeløpsperioder)
-    every { Grunnbeløpsperioder.grunnbeløpsperioder } returns listOf(grunnbeløp2022) + grunnbeløpFør2022
-    every { Grunnbeløpsperioder.nyesteGrunnbeløp } returns grunnbeløp2022
-    every { Grunnbeløpsperioder.nyesteGrunnbeløpGyldigFraOgMed } returns YearMonth.of(2022, 5)
-
-    test()
-
-    unmockkObject(Grunnbeløpsperioder)
+    mockTestMedGrunnbeløpFra(grunnbeløp2022, test)
 }

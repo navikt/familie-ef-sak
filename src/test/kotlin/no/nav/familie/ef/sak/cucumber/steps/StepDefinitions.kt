@@ -260,7 +260,7 @@ class StepDefinitions {
     }
 
     @Gitt("G i 2023 er 120_000")
-    fun Gi2023er120_000() {
+    fun grunnbeløpI2023er120_000() {
         grunnbeløp = Grunnbeløp(
             periode = Månedsperiode(YearMonth.parse("2023-05"), YearMonth.from(LocalDate.MAX)),
             grunnbeløp = 120_000.toBigDecimal(),
@@ -298,36 +298,7 @@ class StepDefinitions {
     @Når("beregner ytelse med G")
     fun `beregner ytelse med G`() {
         mockTestMedGrunnbeløpFra(grunnbeløp!!) {
-            initialiserTilkjentYtelseOgVedtakMock()
-            saksbehandlinger = mapBehandlinger()
-
-            if (stønadstype == StønadType.OVERGANGSSTØNAD) {
-                // Skriver over inntekt hvis inntekter er definiert
-                gittVedtak = gittVedtak.map {
-                    it.copy(inntekter = inntekter[it.behandlingId] ?: it.inntekter)
-                }
-            }
-
-            gittVedtak.map {
-                try {
-                    beregnYtelseSteg.utførSteg(saksbehandlinger[it.behandlingId]!!.second, it.tilVedtakDto())
-                } catch (e: Exception) {
-                    logger.error("Feilet for behandling ${behandlingIdFraUUID(it.behandlingId)}")
-                    throw e
-                }
-                // kan ikke beregne historikk ennå
-                if (stønadstype != StønadType.SKOLEPENGER) {
-                    beregnetAndelHistorikkList = AndelHistorikkBeregner.lagHistorikk(
-                        stønadstype,
-                        tilkjentYtelser.values.toList(),
-                        lagredeVedtak,
-                        saksbehandlinger.values.map { it.first }.toList(),
-                        null,
-                        behandlingIdsToAktivitetArbeid,
-                        HistorikkKonfigurasjon(brukIkkeVedtatteSatser = true),
-                    )
-                }
-            }
+            `beregner ytelse`()
         }
     }
 
