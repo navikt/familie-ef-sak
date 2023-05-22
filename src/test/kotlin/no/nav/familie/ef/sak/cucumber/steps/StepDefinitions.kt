@@ -210,17 +210,6 @@ class StepDefinitions {
         saksbehandlinger = SaksbehandlingDomeneParser.mapSaksbehandlinger(dataTable, stønadstype)
     }
 
-    @Gitt("siste grunnbeløp endres til år {} med beløp {}")
-    fun siste_grunnbeløp_år(år: Int, g: Int) {
-        val mai = YearMonth.of(år, 5)
-        grunnbeløp = Grunnbeløp(
-            periode = Månedsperiode(mai, YearMonth.from(LocalDate.MAX)),
-            grunnbeløp = g.toBigDecimal(),
-            perMnd = g.toBigDecimal().divide(BeregningUtils.ANTALL_MÅNEDER_ÅR, RoundingMode.HALF_UP),
-            gjennomsnittPerÅr = 0.toBigDecimal(),
-        )
-    }
-
     @Gitt("følgende vedtak")
     fun følgende_vedtak(dataTable: DataTable) {
         følgende_vedtak(StønadType.OVERGANGSSTØNAD.name, dataTable)
@@ -295,15 +284,17 @@ class StepDefinitions {
             .hasMessageContaining(feilmelding)
     }
 
-    @Når("beregner ytelse med G")
-    fun `beregner ytelse med G`() {
+    @Når("beregner ytelse med G for år {} med beløp {}")
+    fun `beregn ytelse med gitt grunnbeløp`(år: Int, beløp: Int) {
+        settGrunnbeløp(år, beløp)
         mockTestMedGrunnbeløpFra(grunnbeløp!!) {
             `beregner ytelse`()
         }
     }
 
-    @Når("Utfør g-omregning")
-    fun `Utfør g-omregning`() {
+    @Når("utfør g-omregning for år {} med beløp {}")
+    fun `utfør g-omregning`(år: Int, beløp: Int) {
+        settGrunnbeløp(år, beløp)
         val saksbehandling = saksbehandlinger.firstNotNullOf { saksb -> saksb.value.second }
         val fagsakId = saksbehandling.fagsakId
         val forrigeBehandling = saksbehandlinger.firstNotNullOf { saksb -> saksb.value.first }
@@ -313,6 +304,16 @@ class StepDefinitions {
             every { tilkjentYtelseService.opprettTilkjentYtelse(capture(tilkjentYtelseSlot)) } answers { firstArg() }
             omregningService.utførGOmregning(fagsakId = fagsakId)
         }
+    }
+
+    private fun settGrunnbeløp(år: Int, beløp: Int) {
+        val mai = YearMonth.of(år, 5)
+        grunnbeløp = Grunnbeløp(
+            periode = Månedsperiode(mai, YearMonth.from(LocalDate.MAX)),
+            grunnbeløp = beløp.toBigDecimal(),
+            perMnd = beløp.toBigDecimal().divide(BeregningUtils.ANTALL_MÅNEDER_ÅR, RoundingMode.HALF_UP),
+            gjennomsnittPerÅr = 0.toBigDecimal(),
+        )
     }
 
     private fun mockGOmregning(
@@ -526,11 +527,11 @@ class StepDefinitions {
 
     @Så("forvent følgende andeler for g-omregnet tilkjent ytelse")
     fun `forvent følgende andeler for g-omregning`(dataTable: DataTable) {
+        assertThat(tilkjentYtelseSlot.captured.andelerTilkjentYtelse.size).isEqualTo(dataTable.asMaps().size)
         dataTable.asMaps().mapIndexed { index, rad ->
             val fraOgMed = parseFraOgMed(rad)
             val tilOgMed =
                 parseValgfriÅrMånedEllerDato(Domenebegrep.TIL_OG_MED_DATO, rad).sisteDagenIMånedenEllerDefault(fraOgMed)
-            val beløpMellom = parseValgfriIntRange(VedtakDomenebegrep.BELØP_MELLOM, rad)
             val beløp = parseValgfriInt(VedtakDomenebegrep.BELØP, rad)
             val inntekt = parseValgfriInt(VedtakDomenebegrep.INNTEKT, rad)
             assertThat(tilkjentYtelseSlot.captured.andelerTilkjentYtelse[index].stønadFom).isEqualTo(fraOgMed)
