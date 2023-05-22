@@ -22,8 +22,6 @@ object BeregningUtils {
         val samordningsfradrag = inntektsperiode.samordningsfradrag
         val totalInntekt = beregnTotalinntekt(inntektsperiode, skalRundeNedTotalInntekt)
 
-        println("finnGrunnbeløpsPerioder: ${finnGrunnbeløpsPerioder(periode)}")
-
         return finnGrunnbeløpsPerioder(periode).map {
             val avkortningPerMåned = beregnAvkortning(it.beløp, totalInntekt).divide(ANTALL_MÅNEDER_ÅR)
                 .setScale(0, RoundingMode.HALF_DOWN)

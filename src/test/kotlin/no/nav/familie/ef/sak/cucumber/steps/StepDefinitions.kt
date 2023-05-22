@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.cucumber.steps
 
+import com.fasterxml.jackson.module.kotlin.readValue
 import io.cucumber.datatable.DataTable
 import io.cucumber.java.no.Gitt
 import io.cucumber.java.no.Når
@@ -14,11 +15,16 @@ import no.nav.familie.ef.sak.barn.BehandlingBarn
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.behandling.domain.Behandling
+import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.behandling.oppgaveforopprettelse.OppgaverForOpprettelseService
 import no.nav.familie.ef.sak.behandlingsflyt.steg.BeregnYtelseSteg
+import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.beregning.BeregningService
+import no.nav.familie.ef.sak.beregning.BeregningUtils
 import no.nav.familie.ef.sak.beregning.Grunnbeløp
+import no.nav.familie.ef.sak.beregning.Grunnbeløpsperioder
+import no.nav.familie.ef.sak.beregning.OmregningService
 import no.nav.familie.ef.sak.beregning.ValiderOmregningService
 import no.nav.familie.ef.sak.beregning.barnetilsyn.BeregningBarnetilsynService
 import no.nav.familie.ef.sak.beregning.skolepenger.BeregningSkolepengerService
@@ -43,10 +49,15 @@ import no.nav.familie.ef.sak.cucumber.domeneparser.parseÅrMåned
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.felles.util.DatoFormat.YEAR_MONTH_FORMAT_NORSK
 import no.nav.familie.ef.sak.felles.util.mockFeatureToggleService
+import no.nav.familie.ef.sak.infrastruktur.config.ObjectMapperProvider
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvisIkke
+import no.nav.familie.ef.sak.iverksett.IverksettClient
+import no.nav.familie.ef.sak.iverksett.IverksettingDtoMapper
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.cucumber.domeneparser.SaksbehandlingDomeneParser
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.cucumber.domeneparser.sisteDagenIMånedenEllerDefault
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
+import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.saksbehandling
@@ -72,13 +83,18 @@ import no.nav.familie.ef.sak.vedtak.historikk.AndelHistorikkBeregner
 import no.nav.familie.ef.sak.vedtak.historikk.AndelHistorikkDto
 import no.nav.familie.ef.sak.vedtak.historikk.HistorikkKonfigurasjon
 import no.nav.familie.ef.sak.vedtak.historikk.VedtakHistorikkService
+import no.nav.familie.ef.sak.vilkår.VurderingService
 import no.nav.familie.ef.sak.vilkår.regler.SvarId
+import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
+import no.nav.familie.kontrakter.ef.iverksett.IverksettOvergangsstønadDto
 import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.kontrakter.felles.ef.StønadType
+import no.nav.familie.prosessering.internal.TaskService
 import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.assertThat
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import java.math.RoundingMode
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
@@ -139,6 +155,27 @@ class StepDefinitions {
     private lateinit var tilkjentYtelser: MutableMap<UUID, TilkjentYtelse>
     private lateinit var lagredeVedtak: MutableList<Vedtak>
 
+    val søknadService = mockk<SøknadService>(relaxed = true)
+    val grunnlagsdataService = mockk<GrunnlagsdataService>(relaxed = true)
+    val vurderingService = mockk<VurderingService>(relaxed = true)
+    val barnServiceMock = mockk<BarnService>(relaxed = true)
+    val iverksettingDtoMapper = mockk<IverksettingDtoMapper>()
+    val iverksettClient = mockk<IverksettClient>(relaxed = true)
+    val taskService = mockk<TaskService>(relaxed = true)
+    private val omregningService = OmregningService(
+        behandlingService,
+        vedtakHistorikkService,
+        taskService = taskService,
+        iverksettClient = iverksettClient,
+        ytelseService = tilkjentYtelseService,
+        grunnlagsdataService = grunnlagsdataService,
+        vurderingService = vurderingService,
+        beregnYtelseSteg,
+        iverksettingDtoMapper = iverksettingDtoMapper,
+        søknadService = søknadService,
+        barnService = barnServiceMock,
+    )
+
     init {
         every { behandlingService.hentSaksbehandling(any<UUID>()) } answers {
             val behandlingId = firstArg<UUID>()
@@ -172,6 +209,17 @@ class StepDefinitions {
         saksbehandlinger = SaksbehandlingDomeneParser.mapSaksbehandlinger(dataTable, stønadstype)
     }
 
+    @Gitt("siste grunnbeløp endres til år {} med beløp {}")
+    fun siste_grunnbeløp_år(år: Int, g: Int) {
+        val mai = YearMonth.of(år, 5)
+        grunnbeløp = Grunnbeløp(
+            periode = Månedsperiode(mai, YearMonth.from(LocalDate.MAX)),
+            grunnbeløp = g.toBigDecimal(),
+            perMnd = g.toBigDecimal().divide(BeregningUtils.ANTALL_MÅNEDER_ÅR, RoundingMode.HALF_UP),
+            gjennomsnittPerÅr = 0.toBigDecimal(),
+        )
+    }
+
     @Gitt("følgende vedtak")
     fun følgende_vedtak(dataTable: DataTable) {
         følgende_vedtak(StønadType.OVERGANGSSTØNAD.name, dataTable)
@@ -187,6 +235,7 @@ class StepDefinitions {
                 behandlingIdsToAktivitetArbeid.putAll(VedtakDomeneParser.mapAktivitetForBarnetilsyn(dataTable))
                 VedtakDomeneParser.mapVedtakForBarnetilsyn(dataTable)
             }
+
             StønadType.SKOLEPENGER -> VedtakDomeneParser.mapVedtakForSkolepenger(dataTable)
         }
     }
@@ -281,6 +330,77 @@ class StepDefinitions {
         }
     }
 
+    @Når("Utfør g-omregning")
+    fun `Utfør g-omregning`() {
+        val saksbehandling = saksbehandlinger.firstNotNullOf { saksb -> saksb.value.second }
+        val fagsakId = saksbehandling.fagsakId
+        val forrigeBehandling = saksbehandlinger.firstNotNullOf { saksb -> saksb.value.first }
+
+        mockGomregning(forrigeBehandling, fagsakId, saksbehandling)
+
+        mockTestMedGrunnbeløpFra(grunnbeløp!!) {
+            // gomregn
+            println(Grunnbeløpsperioder.nyesteGrunnbeløp)
+            omregningService.utførGOmregning(fagsakId = fagsakId)
+        }
+    }
+
+    private fun mockGomregning(
+        forrigeBehandling: Behandling,
+        fagsakId: UUID,
+        saksbehandling: Saksbehandling,
+    ) {
+        every { behandlingService.finnSisteIverksatteBehandling(any()) } returns forrigeBehandling
+        every { behandlingService.finnesÅpenBehandling(any()) } returns false
+        every { tilkjentYtelseService.hentForBehandling(any()) } returns tilkjentYtelser.values.first()
+        val behandling = behandling(
+            id = UUID.randomUUID(),
+            opprettetTid = LocalDateTime.now(),
+            type = BehandlingType.REVURDERING,
+            forrigeBehandlingId = forrigeBehandling.id,
+            vedtakstidspunkt = LocalDateTime.MIN,
+        )
+        every {
+            behandlingService.opprettBehandling(
+                BehandlingType.REVURDERING,
+                fagsakId,
+                BehandlingStatus.OPPRETTET,
+                StegType.VILKÅR,
+                BehandlingÅrsak.G_OMREGNING,
+                null,
+                false,
+            )
+        } returns behandling
+
+        every { behandlingService.hentSaksbehandling(behandling.id) } returns saksbehandling(
+            fagsak(id = saksbehandling.fagsakId),
+            behandling,
+        )
+
+        every { behandlingService.oppdaterResultatPåBehandling(any(), any()) } returns behandling
+        every {
+            behandlingService.oppdaterStegPåBehandling(
+                any(),
+                any(),
+            )
+        } returns behandling.copy(steg = StegType.VENTE_PÅ_STATUS_FRA_IVERKSETT)
+        every {
+            behandlingService.oppdaterStatusPåBehandling(
+                any(),
+                any(),
+            )
+        } returns behandling.copy(status = BehandlingStatus.IVERKSETTER_VEDTAK)
+
+        val expectedIverksettDto: IverksettOvergangsstønadDto =
+            ObjectMapperProvider.objectMapper.readValue(readFile("expectedIverksettDto.json"))
+
+        every { iverksettingDtoMapper.tilDtoMaskineltBehandlet(any()) } returns expectedIverksettDto
+    }
+
+    private fun readFile(filnavn: String): String {
+        return this::class.java.getResource("/omregning/$filnavn")!!.readText()
+    }
+
     @Når("beregner ytelse")
     fun `beregner ytelse`() {
         initialiserTilkjentYtelseOgVedtakMock()
@@ -353,6 +473,7 @@ class StepDefinitions {
                 }
                 assertThat(dataTable.asMaps()).hasSize(perioder.size)
             }
+
             is InnvilgelseBarnetilsyn -> {
                 val perioder = vedtak.perioder
                 dataTable.asMaps().mapIndexed { index, rad ->
@@ -368,6 +489,7 @@ class StepDefinitions {
                 }
                 assertThat(dataTable.asMaps()).hasSize(perioder.size)
             }
+
             else -> error("Støtter ikke ${vedtak.javaClass.simpleName}")
         }
     }
