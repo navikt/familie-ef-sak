@@ -8,6 +8,7 @@ import io.cucumber.java.no.Så
 import io.mockk.every
 import io.mockk.justRun
 import io.mockk.mockk
+import io.mockk.slot
 import io.mockk.spyk
 import no.nav.familie.ef.sak.barn.BarnRepository
 import no.nav.familie.ef.sak.barn.BarnService
@@ -23,7 +24,6 @@ import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.beregning.BeregningService
 import no.nav.familie.ef.sak.beregning.BeregningUtils
 import no.nav.familie.ef.sak.beregning.Grunnbeløp
-import no.nav.familie.ef.sak.beregning.Grunnbeløpsperioder
 import no.nav.familie.ef.sak.beregning.OmregningService
 import no.nav.familie.ef.sak.beregning.ValiderOmregningService
 import no.nav.familie.ef.sak.beregning.barnetilsyn.BeregningBarnetilsynService
@@ -153,6 +153,7 @@ class StepDefinitions {
     private lateinit var stønadstype: StønadType
     private val behandlingIdsToAktivitetArbeid = mutableMapOf<UUID, SvarId?>()
     private lateinit var tilkjentYtelser: MutableMap<UUID, TilkjentYtelse>
+    private val tilkjentYtelseSlot = slot<TilkjentYtelse>()
     private lateinit var lagredeVedtak: MutableList<Vedtak>
 
     val søknadService = mockk<SøknadService>(relaxed = true)
@@ -335,17 +336,15 @@ class StepDefinitions {
         val saksbehandling = saksbehandlinger.firstNotNullOf { saksb -> saksb.value.second }
         val fagsakId = saksbehandling.fagsakId
         val forrigeBehandling = saksbehandlinger.firstNotNullOf { saksb -> saksb.value.first }
-
-        mockGomregning(forrigeBehandling, fagsakId, saksbehandling)
+        mockGOmregning(forrigeBehandling, fagsakId, saksbehandling)
 
         mockTestMedGrunnbeløpFra(grunnbeløp!!) {
-            // gomregn
-            println(Grunnbeløpsperioder.nyesteGrunnbeløp)
+            every { tilkjentYtelseService.opprettTilkjentYtelse(capture(tilkjentYtelseSlot)) } answers { firstArg() }
             omregningService.utførGOmregning(fagsakId = fagsakId)
         }
     }
 
-    private fun mockGomregning(
+    private fun mockGOmregning(
         forrigeBehandling: Behandling,
         fagsakId: UUID,
         saksbehandling: Saksbehandling,
@@ -552,6 +551,22 @@ class StepDefinitions {
             assertThat(periode.beløp).isEqualTo(parseInt(VedtakDomenebegrep.BELØP, rad))
         }
         assertThat(dataTable.asMaps()).hasSize(perioder.size)
+    }
+
+    @Så("forvent følgende andeler for g-omregnet tilkjent ytelse")
+    fun `forvent følgende andeler for g-omregning`(dataTable: DataTable) {
+        dataTable.asMaps().mapIndexed { index, rad ->
+            val fraOgMed = parseFraOgMed(rad)
+            val tilOgMed =
+                parseValgfriÅrMånedEllerDato(Domenebegrep.TIL_OG_MED_DATO, rad).sisteDagenIMånedenEllerDefault(fraOgMed)
+            val beløpMellom = parseValgfriIntRange(VedtakDomenebegrep.BELØP_MELLOM, rad)
+            val beløp = parseValgfriInt(VedtakDomenebegrep.BELØP, rad)
+            val inntekt = parseValgfriInt(VedtakDomenebegrep.INNTEKT, rad)
+            assertThat(tilkjentYtelseSlot.captured.andelerTilkjentYtelse[index].stønadFom).isEqualTo(fraOgMed)
+            assertThat(tilkjentYtelseSlot.captured.andelerTilkjentYtelse[index].stønadTom).isEqualTo(tilOgMed)
+            assertThat(tilkjentYtelseSlot.captured.andelerTilkjentYtelse[index].beløp).isEqualTo(beløp)
+            assertThat(tilkjentYtelseSlot.captured.andelerTilkjentYtelse[index].inntekt).isEqualTo(inntekt)
+        }
     }
 
     @Så("forvent følgende andeler lagret for behandling med id: {int}")
