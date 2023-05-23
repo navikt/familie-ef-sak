@@ -35,7 +35,7 @@ class KarakterutskriftBrevTask(
     override fun doTask(task: Task) {
         val payload = objectMapper.readValue<AutomatiskBrevKarakterutskriftPayload>(task.payload)
         val oppgave = oppgaveService.hentOppgave(payload.oppgaveId)
-        val ident = OppgaveUtil.finnPersondentForOppgave(oppgave) ?: throw Feil("Fant ikke ident for oppgave=${oppgave.id}")
+        val ident = OppgaveUtil.finnPersonidentForOppgave(oppgave) ?: throw Feil("Fant ikke ident for oppgave=${oppgave.id}")
         val fagsakId = fagsakService.finnFagsak(setOf(ident), StønadType.SKOLEPENGER)?.id
             ?: throw Feil("Fant ikke fagsak for oppgave med id=${oppgave.id}")
 

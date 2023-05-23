@@ -27,6 +27,6 @@ object OppgaveUtil {
         }
     }
 
-    fun finnPersondentForOppgave(oppgave: Oppgave): String? =
+    fun finnPersonidentForOppgave(oppgave: Oppgave): String? =
         oppgave.identer?.first { it.gruppe == IdentGruppe.FOLKEREGISTERIDENT }?.ident
 }
