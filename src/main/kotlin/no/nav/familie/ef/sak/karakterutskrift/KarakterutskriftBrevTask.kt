@@ -39,15 +39,15 @@ class KarakterutskriftBrevTask(
         val fagsakId = fagsakService.finnFagsak(setOf(ident), StønadType.SKOLEPENGER)?.id
             ?: throw Feil("Fant ikke fagsak for oppgave med id=${oppgave.id}")
 
-        // valider har fagsak med løpende behandling?
+        // TODO: valider har fagsak med løpende behandling?
 
-        // opprett brev
+        // TODO: opprett brev
 
-        // journfalfør brev
+        // TODO: journalfør brev
 
-        // distribuer brev
+        // TODO: distribuer brev
 
-        // oppdater oppgave
+        // TODO: oppdater oppgave
 
         throw Feil("Task for innhenting av karakterutskrift er ikke implementert")
     }

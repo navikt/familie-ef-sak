@@ -30,15 +30,16 @@ class AutomatiskBrevInnhentingKarakterutskriftService(
         val mappeId = oppgaveService.finnMapper(OppgaveUtil.ENHET_NR_NAY)
             .single { it.navn == "64 Utdanning" }.id
 
+        val oppgaveFrist = when (brevtype) {
+            KarakterutskriftBrevtype.HOVEDPERIODE -> fristHovedperiode
+            KarakterutskriftBrevtype.UTVIDET -> fristutvidet
+        }
         val opppgaver = oppgaveService.hentOppgaver(
             FinnOppgaveRequest(
                 tema = Tema.ENF,
                 behandlingstema = Behandlingstema.Skolepenger,
-                fristFomDato = when (brevtype) {
-                    KarakterutskriftBrevtype.HOVEDPERIODE -> fristHovedperiode
-                    KarakterutskriftBrevtype.UTVIDET -> fristutvidet
-                },
-                fristTomDato = fristHovedperiode,
+                fristFomDato = oppgaveFrist,
+                fristTomDato = oppgaveFrist,
                 mappeId = mappeId.toLong(),
                 limit = 5000,
             ),
