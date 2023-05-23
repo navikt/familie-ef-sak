@@ -6,6 +6,7 @@ import io.mockk.unmockkObject
 import no.nav.familie.ef.sak.beregning.Grunnbeløp
 import no.nav.familie.ef.sak.beregning.Grunnbeløpsperioder
 import no.nav.familie.kontrakter.felles.Månedsperiode
+import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.YearMonth
 
@@ -35,4 +36,16 @@ fun mockTestMedGrunnbeløpFra2022(test: () -> Unit) {
     )
 
     mockTestMedGrunnbeløpFra(grunnbeløp2022, test)
+}
+
+
+fun mockTestMedGrunnbeløpFra2023(test: () -> Unit) {
+    val grunnbeløp2023 = Grunnbeløp(
+        periode = Månedsperiode(YearMonth.parse("2023-05"), YearMonth.from(LocalDate.MAX)),
+        grunnbeløp = 118_032.toBigDecimal(),
+        perMnd = BigDecimal.ZERO,
+        gjennomsnittPerÅr =  BigDecimal.ZERO,
+    )
+
+    mockTestMedGrunnbeløpFra(grunnbeløp2023, test)
 }
