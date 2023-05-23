@@ -11,7 +11,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.0.6</version>
+        <version>3.1.0</version>
     </parent>
     <repositories>
         <repository>
@@ -29,23 +29,23 @@
         <sha1/>
         <changelist>-SNAPSHOT</changelist>
         <java.version>17</java.version>
-        <kotlin.version>1.8.20</kotlin.version>
-        <kotlin-coroutines.version>1.6.4</kotlin-coroutines.version>
+        <kotlin.version>1.8.21</kotlin.version>
+        <kotlin-coroutines.version>1.7.1</kotlin-coroutines.version>
         <springdoc.version>2.1.0</springdoc.version>
         <mockk.version>1.13.5</mockk.version>
-        <felles.version>2.20230210162649_a258d57-SPRING_BOOT_3</felles.version>
-        <prosessering.version>2.20230322091650_fb0187e-SPRING_BOOT_3</prosessering.version>
+        <felles.version>2.20230508082643_6b28bd8</felles.version>
+        <prosessering.version>2.20230505153212_2bc6a06</prosessering.version>
         <start-class>no.nav.familie.ef.sak.ApplicationKt</start-class>
         <kontrakter.version>3.0_20230509152247_36d24db</kontrakter.version>
         <eksterne.kontrakter.bisys.version>2.0_20230214104704_706e9c0</eksterne.kontrakter.bisys.version>
-        <cucumber.version>7.11.2</cucumber.version>
+        <cucumber.version>7.12.0</cucumber.version>
 
 
         <!--suppress UnresolvedMavenProperty  Ligger som secret i github-->
         <sonar.projectKey>${SONAR_PROJECTKEY}</sonar.projectKey>
         <sonar.organization>navit</sonar.organization>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
-        <nav.security.version>3.0.10</nav.security.version> <!-- Denne burde være samme versjon som i felles -->
+        <nav.security.version>3.1.0</nav.security.version> <!-- Denne burde være samme versjon som i felles -->
         <okhttp3.version>4.9.1</okhttp3.version> <!-- overskrever spring sin versjon, blir brukt av mock-oauth2-server -->
         <unleash.version>8.0.0</unleash.version>
         <!--suppress UnresolvedMavenProperty -->
@@ -212,13 +212,13 @@
         <dependency>
             <groupId>dev.akkinoc.spring.boot</groupId>
             <artifactId>logback-access-spring-boot-starter</artifactId>
-            <version>3.4.6</version>
+            <version>4.0.0</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.testcontainers</groupId>
             <artifactId>postgresql</artifactId>
-            <version>1.18.0</version>
+            <version>1.18.1</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -301,7 +301,7 @@
                 <plugin>
                     <groupId>org.jacoco</groupId>
                     <artifactId>jacoco-maven-plugin</artifactId>
-                    <version>0.8.9</version>
+                    <version>0.8.10</version>
                 </plugin>
             </plugins>
         </pluginManagement>
@@ -337,7 +337,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>3.0.0-M8</version>
+                <version>3.1.0</version>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
