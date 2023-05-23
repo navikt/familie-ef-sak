@@ -2,11 +2,13 @@ package no.nav.familie.ef.sak.karakterutskrift
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.familie.ef.sak.behandling.BehandlingService
+import no.nav.familie.ef.sak.brev.VedtaksbrevService
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvisIkke
 import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.ef.sak.oppgave.OppgaveUtil
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerService
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.log.IdUtils
@@ -32,6 +34,8 @@ class KarakterutskriftBrevTask(
     private val behandlingService: BehandlingService,
     private val fagsakService: FagsakService,
     private val oppgaveService: OppgaveService,
+    private val personopplysningerService: PersonopplysningerService,
+    private val vedtaksbrevService: VedtaksbrevService,
 ) : AsyncTaskStep {
     val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
@@ -46,7 +50,8 @@ class KarakterutskriftBrevTask(
             "Fagsak med id=$fagsakId er ikke tilknyttet noen behandlinger"
         }
 
-        // TODO: opprett brev
+        val visningsnavn = personopplysningerService.hentGjeldeneNavn(listOf(ident)).getValue(ident)
+        val brev = vedtaksbrevService.lagBrevForInnhentingAvKarakterutskrift(visningsnavn, ident, payload.brevtype)
 
         // TODO: journalfør brev
 
@@ -86,7 +91,7 @@ data class AutomatiskBrevKarakterutskriftPayload(
     val år: Year,
 )
 
-enum class KarakterutskriftBrevtype {
-    HOVEDPERIODE,
-    UTVIDET,
+enum class KarakterutskriftBrevtype(val brevMal: String) {
+    HOVEDPERIODE("innhentingKarakterutskriftHovedperiode"),
+    UTVIDET("innhentingKarakterutskriftUtvidetPeriode"),
 }

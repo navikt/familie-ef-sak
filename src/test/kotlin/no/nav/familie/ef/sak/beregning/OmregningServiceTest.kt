@@ -169,7 +169,6 @@ internal class OmregningServiceTest : OppslagSpringRunnerTest() {
         }
     }
 
-
     @Test
     fun `utførGOmregning kaller iverksettUtenBrev med korrekt iverksettDto `() {
         val fagsakId = UUID.fromString("3549f9e2-ddd1-467d-82be-bfdb6c7f07e1")
