@@ -1,8 +1,10 @@
 package no.nav.familie.ef.sak.karakterutskrift
 
 import com.fasterxml.jackson.module.kotlin.readValue
+import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
+import no.nav.familie.ef.sak.infrastruktur.exception.feilHvisIkke
 import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.ef.sak.oppgave.OppgaveUtil
 import no.nav.familie.kontrakter.felles.ef.StønadType
@@ -27,6 +29,7 @@ import java.util.Properties
     beskrivelse = "Automatisk utsendt brev for innhenting av karakterutskrift",
 )
 class KarakterutskriftBrevTask(
+    private val behandlingService: BehandlingService,
     private val fagsakService: FagsakService,
     private val oppgaveService: OppgaveService,
 ) : AsyncTaskStep {
@@ -39,7 +42,9 @@ class KarakterutskriftBrevTask(
         val fagsakId = fagsakService.finnFagsak(setOf(ident), StønadType.SKOLEPENGER)?.id
             ?: throw Feil("Fant ikke fagsak for oppgave med id=${oppgave.id}")
 
-        // TODO: valider har fagsak med løpende behandling?
+        feilHvisIkke(behandlingService.finnesBehandlingForFagsak(fagsakId)) {
+            "Fagsak med id=$fagsakId er ikke tilknyttet noen behandlinger"
+        }
 
         // TODO: opprett brev
 
