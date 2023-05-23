@@ -141,7 +141,7 @@ internal class OmregningServiceTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    fun `Verifiser riktig beløp og intekstjustering hvis finnes behandling på vent`() {
+    fun `Verifiser riktig beløp og inntektsjustering hvis finnes behandling på vent`() {
         val inntektPeriode = lagInntekt(201, 2002, 200003, 2022)
         lagSøknadOgVilkårOgVedtak(behandlingId, fagsakId, inntektPeriode, stønadsår = 2022)
 
