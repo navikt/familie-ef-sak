@@ -28,12 +28,11 @@ import java.util.Properties
 )
 class KarakterutskriftBrevTask(
     private val fagsakService: FagsakService,
-    private val oppgaveService: OppgaveService
+    private val oppgaveService: OppgaveService,
 ) : AsyncTaskStep {
     val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
     override fun doTask(task: Task) {
-
         val payload = objectMapper.readValue<AutomatiskBrevKarakterutskriftPayload>(task.payload)
         val oppgave = oppgaveService.hentOppgave(payload.oppgaveId)
         val ident = OppgaveUtil.finnPersondentForOppgave(oppgave) ?: throw Feil("Fant ikke ident for oppgave=${oppgave.id}")
@@ -49,6 +48,8 @@ class KarakterutskriftBrevTask(
         // distribuer brev
 
         // oppdater oppgave
+
+        throw Feil("Task for innhenting av karakterutskrift er ikke implementert")
     }
 
     companion object {
