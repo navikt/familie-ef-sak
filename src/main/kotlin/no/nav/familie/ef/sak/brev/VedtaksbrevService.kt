@@ -8,7 +8,7 @@ import no.nav.familie.ef.sak.brev.domain.FRITEKST
 import no.nav.familie.ef.sak.brev.domain.Vedtaksbrev
 import no.nav.familie.ef.sak.brev.dto.Flettefelter
 import no.nav.familie.ef.sak.brev.dto.FrittståendeBrevRequestDto
-import no.nav.familie.ef.sak.brev.dto.SanityBrevRequest
+import no.nav.familie.ef.sak.brev.dto.SanityBrevRequestInnhentingKarakterutskrift
 import no.nav.familie.ef.sak.brev.dto.SignaturDto
 import no.nav.familie.ef.sak.brev.dto.VedtaksbrevFritekstDto
 import no.nav.familie.ef.sak.felles.domain.Fil
@@ -77,7 +77,7 @@ class VedtaksbrevService(
     }
 
     fun lagBrevForInnhentingAvKarakterutskrift(visningsnavn: String, personIdent: String, brevtype: KarakterutskriftBrevtype): ByteArray {
-        val brevRequest = SanityBrevRequest(flettefelter = Flettefelter(navn = listOf(visningsnavn), fodselsnummer = listOf(personIdent)))
+        val brevRequest = SanityBrevRequestInnhentingKarakterutskrift(flettefelter = Flettefelter(navn = listOf(visningsnavn), fodselsnummer = listOf(personIdent)))
 
         val html = brevClient.genererHtml(
             brevmal = brevtype.brevMal,
