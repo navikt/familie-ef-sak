@@ -131,7 +131,7 @@ internal class OmregningServiceTest : OppslagSpringRunnerTest() {
             assertThat(andelTilkjentYtelseOmregnet.inntekt).isEqualTo(289000)
             assertThat(andelTilkjentYtelseOmregnet.beløp).isEqualTo(12155)
             // Sjekk inntektsperiode etter ny G omregning
-            val inntektsperiodeEtterGomregning = finnInntektsperiodeEtterNyGDato(iverksettDto.behandling.behandlingId)
+            val inntektsperiodeEtterGomregning = finnInntektsperiodeEtterNyGDato(iverksettDto.behandling.behandlingId, 2022)
             assertThat(inntektsperiodeEtterGomregning.dagsats?.toInt()).isEqualTo(210)
             assertThat(inntektsperiodeEtterGomregning.månedsinntekt?.toInt()).isEqualTo(2097)
             assertThat(inntektsperiodeEtterGomregning.inntekt.toInt()).isEqualTo(209548)
@@ -161,7 +161,7 @@ internal class OmregningServiceTest : OppslagSpringRunnerTest() {
             assertThat(andelTilkjentYtelseOmregnet.inntekt).isEqualTo(222000)
             assertThat(andelTilkjentYtelseOmregnet.beløp).isEqualTo(16019)
             // Sjekk inntektsperiode etter ny G omregning
-            val inntektsperiodeEtterGomregning = finnInntektsperiodeEtterNyGDato(iverksettDto.behandling.behandlingId)
+            val inntektsperiodeEtterGomregning = finnInntektsperiodeEtterNyGDato(iverksettDto.behandling.behandlingId, 2023)
             assertThat(inntektsperiodeEtterGomregning.dagsats?.toInt()).isEqualTo(0)
             assertThat(inntektsperiodeEtterGomregning.månedsinntekt?.toInt()).isEqualTo(0)
             assertThat(inntektsperiodeEtterGomregning.inntekt.toInt()).isEqualTo(222348)
@@ -503,10 +503,10 @@ internal class OmregningServiceTest : OppslagSpringRunnerTest() {
         return tilkjentYtelse
     }
 
-    private fun finnInntektsperiodeEtterNyGDato(behandlingId: UUID): Inntektsperiode {
+    private fun finnInntektsperiodeEtterNyGDato(behandlingId: UUID, grunnbeløpsår: Int): Inntektsperiode {
         val behandlingNy = behandlingRepository.findByIdOrThrow(behandlingId)
         val vedtakNy = vedtakRepository.findByIdOrThrow(behandlingNy.id)
-        return vedtakNy.inntekter?.inntekter!!.first { it.periode.inneholder(YearMonth.of(2023, 6)) }
+        return vedtakNy.inntekter?.inntekter!!.first { it.periode.inneholder(YearMonth.of(grunnbeløpsår, 6)) }
     }
 
     private fun finnAndelEtterNyGDato(iverksettDto: IverksettOvergangsstønadDto) =
