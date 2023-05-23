@@ -8,6 +8,7 @@ import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat.HENLAGT
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus.FERDIGSTILT
+import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus.SATT_PÅ_VENT
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.behandling.domain.Behandlingsjournalpost
 import no.nav.familie.ef.sak.behandling.dto.HenlagtDto
@@ -69,6 +70,9 @@ class BehandlingService(
 
     fun finnesÅpenBehandling(fagsakId: UUID) =
         behandlingRepository.existsByFagsakIdAndStatusIsNot(fagsakId, FERDIGSTILT)
+
+    fun finnesBehandlingSomIkkeErFerdigstiltEllerSattPåVent(fagsakId: UUID) =
+        behandlingRepository.existsByFagsakIdAndStatusIsNotIn(fagsakId, listOf(FERDIGSTILT, SATT_PÅ_VENT))
 
     fun finnSisteIverksatteBehandlingMedEventuellAvslått(fagsakId: UUID): Behandling? =
         behandlingRepository.finnSisteIverksatteBehandling(fagsakId)

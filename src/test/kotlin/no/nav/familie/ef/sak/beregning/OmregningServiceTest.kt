@@ -13,6 +13,7 @@ import no.nav.familie.ef.sak.behandling.BehandlingRepository
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
+import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
@@ -140,6 +141,47 @@ internal class OmregningServiceTest : OppslagSpringRunnerTest() {
     }
 
     @Test
+    fun `Verifiser riktig beløp og intekstjustering hvis finnes behandling på vent`() {
+        val inntektPeriode = lagInntekt(201, 2002, 200003, 2022)
+        lagSøknadOgVilkårOgVedtak(behandlingId, fagsakId, inntektPeriode, stønadsår = 2022)
+
+        behandlingRepository.insert(
+            behandling(
+                id = UUID.randomUUID(),
+                fagsak = fagsakService.hentFagsak(fagsakId),
+                resultat = BehandlingResultat.INNVILGET,
+                status = BehandlingStatus.SATT_PÅ_VENT,
+                type = BehandlingType.REVURDERING,
+            ),
+        )
+
+        val tilkjentYtelse = lagreTilkjentYtelse(behandlingId, stønadsår = 2022)
+        val iverksettDtoSlot = slot<IverksettOvergangsstønadDto>()
+        // Gitt assert: - skal splittes til to med ny g
+        assertThat(tilkjentYtelse.andelerTilkjentYtelse).hasSize(1)
+        assertThat(inntektPeriode.totalinntekt().toInt()).isEqualTo(276287)
+
+        mockTestMedGrunnbeløpFra2022 {
+            omregningService.utførGOmregning(fagsakId)
+
+            verify { iverksettClient.iverksettUtenBrev(capture(iverksettDtoSlot)) }
+            val iverksettDto = iverksettDtoSlot.captured
+
+            assertThat(iverksettDto.vedtak.tilkjentYtelse?.andelerTilkjentYtelse?.size).isEqualTo(2) // skal være splittet
+            // Sjekk andel etter ny g omregningsdato
+            val andelTilkjentYtelseOmregnet = finnAndelEtterNyGDato(iverksettDto)!!
+            assertThat(andelTilkjentYtelseOmregnet.inntekt).isEqualTo(289000)
+            assertThat(andelTilkjentYtelseOmregnet.beløp).isEqualTo(12155)
+            // Sjekk inntektsperiode etter ny G omregning
+            val inntektsperiodeEtterGomregning = finnInntektsperiodeEtterNyGDato(iverksettDto.behandling.behandlingId, 2022)
+            assertThat(inntektsperiodeEtterGomregning.dagsats?.toInt()).isEqualTo(210)
+            assertThat(inntektsperiodeEtterGomregning.månedsinntekt?.toInt()).isEqualTo(2097)
+            assertThat(inntektsperiodeEtterGomregning.inntekt.toInt()).isEqualTo(209548)
+            assertThat(inntektsperiodeEtterGomregning.totalinntekt().toInt()).isEqualTo(289312)
+        }
+    }
+
+    @Test
     fun `Verifiser riktig beløp og inntektsjustering for 2023`() {
         val inntektPeriode = lagInntekt(0, 0, 210_000, 2023)
         lagSøknadOgVilkårOgVedtak(behandlingId, fagsakId, inntektPeriode, stønadsår = 2023)
@@ -168,7 +210,6 @@ internal class OmregningServiceTest : OppslagSpringRunnerTest() {
             assertThat(inntektsperiodeEtterGomregning.totalinntekt().toInt()).isEqualTo(222348)
         }
     }
-
 
     @Test
     fun `utførGOmregning kaller iverksettUtenBrev med korrekt iverksettDto `() {

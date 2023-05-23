@@ -40,6 +40,7 @@ enum class Toggle(val toggleId: String, val beskrivelse: String? = null) {
     KAST_FEIL_HVIS_OPPGAVE_MANGLER_PÅ_ÅPEN_BEHANDLING("familie.ef.sak.kast-feil-hvis-oppgave-mangler-pa-apen-behandling"),
     TILLAT_MIGRERING_5_ÅR_TILBAKE("familie.ef.sak.tillat-migrering-5-ar-tilbake", "Permission"),
     AUTOMATISKE_OPPGAVER_FREMLEGGSOPPGAVE("familie.ef.sak.automatiske-oppgaver.fremleggsoppgave"),
+    INKLUDER_SATT_PÅ_VENT_GOMREGNING("familie.ef.sak.inkluder-satt-pa-vent-gomregning"),
     ;
 
     companion object {
