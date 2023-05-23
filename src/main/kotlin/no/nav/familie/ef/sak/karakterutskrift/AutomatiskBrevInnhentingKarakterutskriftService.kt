@@ -20,7 +20,6 @@ import java.time.Year
 class AutomatiskBrevInnhentingKarakterutskriftService(
     private val taskService: TaskService,
     private val oppgaveService: OppgaveService,
-    private val fagsakService: FagsakService,
 ) {
 
     val logger: Logger = LoggerFactory.getLogger(javaClass)
@@ -50,14 +49,12 @@ class AutomatiskBrevInnhentingKarakterutskriftService(
         logger.info("Fant ${opppgaver.oppgaver.size} oppgaver for utsending av automatisk brev ifb innhenting av karakterutskrift")
 
         opppgaver.oppgaver.forEach {
-            val ident = OppgaveUtil.finnPersondentForOppgave(it) ?: throw Feil("Fant ikke ident for oppgave=${it.id}")
-            val fagsakId = fagsakService.finnFagsak(setOf(ident), StønadType.SKOLEPENGER)?.id
-                ?: throw Feil("Fant ikke fagsak for oppgave med id=${it.id}")
+            val oppgaveId = it.id ?: throw Feil("Mangler oppgaveid")
             if (liveRun) {
-                logger.info("Oppretter task for fagsak=$fagsakId og brevtype=$brevtype")
-                taskService.save(KarakterutskriftBrevTask.opprettTask(fagsakId, brevtype, Year.now()))
+                logger.info("Oppretter task for oppgaveId=${it.id} og brevtype=$brevtype")
+                taskService.save(KarakterutskriftBrevTask.opprettTask(oppgaveId, brevtype, Year.now()))
             } else {
-                logger.info("Dry run. Fant fagsak=$fagsakId og brevtype=$brevtype for oppgaveId=${it.id}")
+                logger.info("Dry run. Fant oppgave=$oppgaveId og brevtype=$brevtype")
             }
         }
     }
