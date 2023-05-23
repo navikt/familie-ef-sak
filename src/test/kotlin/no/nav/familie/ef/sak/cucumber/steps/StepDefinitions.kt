@@ -18,6 +18,7 @@ import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.behandling.oppgaveforopprettelse.OppgaverForOpprettelseService
 import no.nav.familie.ef.sak.behandlingsflyt.steg.BeregnYtelseSteg
 import no.nav.familie.ef.sak.beregning.BeregningService
+import no.nav.familie.ef.sak.beregning.Grunnbeløp
 import no.nav.familie.ef.sak.beregning.ValiderOmregningService
 import no.nav.familie.ef.sak.beregning.barnetilsyn.BeregningBarnetilsynService
 import no.nav.familie.ef.sak.beregning.skolepenger.BeregningSkolepengerService
@@ -50,6 +51,7 @@ import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.saksbehandling
 import no.nav.familie.ef.sak.simulering.SimuleringService
+import no.nav.familie.ef.sak.testutil.mockTestMedGrunnbeløpFra
 import no.nav.familie.ef.sak.tilbakekreving.TilbakekrevingService
 import no.nav.familie.ef.sak.tilkjentytelse.AndelsHistorikkService
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
@@ -71,12 +73,15 @@ import no.nav.familie.ef.sak.vedtak.historikk.AndelHistorikkDto
 import no.nav.familie.ef.sak.vedtak.historikk.HistorikkKonfigurasjon
 import no.nav.familie.ef.sak.vedtak.historikk.VedtakHistorikkService
 import no.nav.familie.ef.sak.vilkår.regler.SvarId
+import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.assertThat
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.YearMonth
 import java.util.UUID
 
 class StepDefinitions {
@@ -88,6 +93,8 @@ class StepDefinitions {
     private var inntekter = mapOf<UUID, InntektWrapper>()
     private var beregnetAndelHistorikkList = listOf<AndelHistorikkDto>()
     private var beregnYtelseException: Exception? = null
+
+    private var grunnbeløp: Grunnbeløp? = null
 
     private val behandlingService = mockk<BehandlingService>()
     private val tilkjentYtelseService = mockk<TilkjentYtelseService>(relaxed = true)
@@ -202,6 +209,16 @@ class StepDefinitions {
         inntekter = VedtakDomeneParser.mapInntekter(dataTable)
     }
 
+    @Gitt("G i 2023 er 120_000")
+    fun grunnbeløpI2023er120_000() {
+        grunnbeløp = Grunnbeløp(
+            periode = Månedsperiode(YearMonth.parse("2023-05"), YearMonth.from(LocalDate.MAX)),
+            grunnbeløp = 120_000.toBigDecimal(),
+            perMnd = 10000.toBigDecimal(),
+            gjennomsnittPerÅr = 117_160.toBigDecimal(),
+        )
+    }
+
     @Gitt("følgende kontantstøtte")
     fun følgende_kontantstøtte(dataTable: DataTable) {
         feilHvis(stønadstype != StønadType.BARNETILSYN) {
@@ -226,6 +243,13 @@ class StepDefinitions {
     fun `beregner ytelse kaster feil pga validering`(feilmelding: String) {
         Assertions.assertThatThrownBy { `beregner ytelse`() }
             .hasMessageContaining(feilmelding)
+    }
+
+    @Når("beregner ytelse med G")
+    fun `beregner ytelse med G`() {
+        mockTestMedGrunnbeløpFra(grunnbeløp!!) {
+            `beregner ytelse`()
+        }
     }
 
     @Når("beregner ytelse")
