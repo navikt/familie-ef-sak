@@ -13,9 +13,7 @@ Egenskap: Andelhistorikk: Ulike typer inntekt
       | BehandlingId | Fra og med dato | Inntekt | Dagsats | Månedsinntekt |
       | 1            | 01.2023         | 120000  | 100     | 1400          |
 
-    Og G i 2023 er 120_000
-
-    Når beregner ytelse med G
+    Når beregner ytelse med G for år 2023 med beløp 120000
 
     Så forvent følgende andeler lagret for behandling med id: 1
       | Fra og med dato | Til og med dato | Kildebehandling | Inntekt | Beløp |

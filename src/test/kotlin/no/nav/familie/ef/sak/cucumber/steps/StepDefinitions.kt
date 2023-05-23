@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.cucumber.steps
 
+import com.fasterxml.jackson.module.kotlin.readValue
 import io.cucumber.datatable.DataTable
 import io.cucumber.java.no.Gitt
 import io.cucumber.java.no.Når
@@ -7,6 +8,7 @@ import io.cucumber.java.no.Så
 import io.mockk.every
 import io.mockk.justRun
 import io.mockk.mockk
+import io.mockk.slot
 import io.mockk.spyk
 import no.nav.familie.ef.sak.barn.BarnRepository
 import no.nav.familie.ef.sak.barn.BarnService
@@ -14,11 +16,15 @@ import no.nav.familie.ef.sak.barn.BehandlingBarn
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.behandling.domain.Behandling
+import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.behandling.oppgaveforopprettelse.OppgaverForOpprettelseService
 import no.nav.familie.ef.sak.behandlingsflyt.steg.BeregnYtelseSteg
+import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.beregning.BeregningService
+import no.nav.familie.ef.sak.beregning.BeregningUtils
 import no.nav.familie.ef.sak.beregning.Grunnbeløp
+import no.nav.familie.ef.sak.beregning.OmregningService
 import no.nav.familie.ef.sak.beregning.ValiderOmregningService
 import no.nav.familie.ef.sak.beregning.barnetilsyn.BeregningBarnetilsynService
 import no.nav.familie.ef.sak.beregning.skolepenger.BeregningSkolepengerService
@@ -43,10 +49,15 @@ import no.nav.familie.ef.sak.cucumber.domeneparser.parseÅrMåned
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.felles.util.DatoFormat.YEAR_MONTH_FORMAT_NORSK
 import no.nav.familie.ef.sak.felles.util.mockFeatureToggleService
+import no.nav.familie.ef.sak.infrastruktur.config.ObjectMapperProvider
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvisIkke
+import no.nav.familie.ef.sak.iverksett.IverksettClient
+import no.nav.familie.ef.sak.iverksett.IverksettingDtoMapper
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.cucumber.domeneparser.SaksbehandlingDomeneParser
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.cucumber.domeneparser.sisteDagenIMånedenEllerDefault
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
+import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.saksbehandling
@@ -72,13 +83,18 @@ import no.nav.familie.ef.sak.vedtak.historikk.AndelHistorikkBeregner
 import no.nav.familie.ef.sak.vedtak.historikk.AndelHistorikkDto
 import no.nav.familie.ef.sak.vedtak.historikk.HistorikkKonfigurasjon
 import no.nav.familie.ef.sak.vedtak.historikk.VedtakHistorikkService
+import no.nav.familie.ef.sak.vilkår.VurderingService
 import no.nav.familie.ef.sak.vilkår.regler.SvarId
+import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
+import no.nav.familie.kontrakter.ef.iverksett.IverksettOvergangsstønadDto
 import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.kontrakter.felles.ef.StønadType
+import no.nav.familie.prosessering.internal.TaskService
 import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.assertThat
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import java.math.RoundingMode
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
@@ -137,7 +153,29 @@ class StepDefinitions {
     private lateinit var stønadstype: StønadType
     private val behandlingIdsToAktivitetArbeid = mutableMapOf<UUID, SvarId?>()
     private lateinit var tilkjentYtelser: MutableMap<UUID, TilkjentYtelse>
+    private val tilkjentYtelseSlot = slot<TilkjentYtelse>()
     private lateinit var lagredeVedtak: MutableList<Vedtak>
+
+    val søknadService = mockk<SøknadService>(relaxed = true)
+    val grunnlagsdataService = mockk<GrunnlagsdataService>(relaxed = true)
+    val vurderingService = mockk<VurderingService>(relaxed = true)
+    val barnServiceMock = mockk<BarnService>(relaxed = true)
+    val iverksettingDtoMapper = mockk<IverksettingDtoMapper>()
+    val iverksettClient = mockk<IverksettClient>(relaxed = true)
+    val taskService = mockk<TaskService>(relaxed = true)
+    private val omregningService = OmregningService(
+        behandlingService,
+        vedtakHistorikkService,
+        taskService = taskService,
+        iverksettClient = iverksettClient,
+        ytelseService = tilkjentYtelseService,
+        grunnlagsdataService = grunnlagsdataService,
+        vurderingService = vurderingService,
+        beregnYtelseSteg,
+        iverksettingDtoMapper = iverksettingDtoMapper,
+        søknadService = søknadService,
+        barnService = barnServiceMock,
+    )
 
     init {
         every { behandlingService.hentSaksbehandling(any<UUID>()) } answers {
@@ -187,6 +225,7 @@ class StepDefinitions {
                 behandlingIdsToAktivitetArbeid.putAll(VedtakDomeneParser.mapAktivitetForBarnetilsyn(dataTable))
                 VedtakDomeneParser.mapVedtakForBarnetilsyn(dataTable)
             }
+
             StønadType.SKOLEPENGER -> VedtakDomeneParser.mapVedtakForSkolepenger(dataTable)
         }
     }
@@ -245,11 +284,92 @@ class StepDefinitions {
             .hasMessageContaining(feilmelding)
     }
 
-    @Når("beregner ytelse med G")
-    fun `beregner ytelse med G`() {
+    @Når("beregner ytelse med G for år {} med beløp {}")
+    fun `beregn ytelse med gitt grunnbeløp`(år: Int, beløp: Int) {
+        settGrunnbeløp(år, beløp)
         mockTestMedGrunnbeløpFra(grunnbeløp!!) {
             `beregner ytelse`()
         }
+    }
+
+    @Når("utfør g-omregning for år {} med beløp {}")
+    fun `utfør g-omregning`(år: Int, beløp: Int) {
+        settGrunnbeløp(år, beløp)
+        val saksbehandling = saksbehandlinger.firstNotNullOf { saksb -> saksb.value.second }
+        val fagsakId = saksbehandling.fagsakId
+        val forrigeBehandling = saksbehandlinger.firstNotNullOf { saksb -> saksb.value.first }
+        mockGOmregning(forrigeBehandling, fagsakId, saksbehandling)
+
+        mockTestMedGrunnbeløpFra(grunnbeløp!!) {
+            every { tilkjentYtelseService.opprettTilkjentYtelse(capture(tilkjentYtelseSlot)) } answers { firstArg() }
+            omregningService.utførGOmregning(fagsakId = fagsakId)
+        }
+    }
+
+    private fun settGrunnbeløp(år: Int, beløp: Int) {
+        val mai = YearMonth.of(år, 5)
+        grunnbeløp = Grunnbeløp(
+            periode = Månedsperiode(mai, YearMonth.from(LocalDate.MAX)),
+            grunnbeløp = beløp.toBigDecimal(),
+            perMnd = beløp.toBigDecimal().divide(BeregningUtils.ANTALL_MÅNEDER_ÅR, RoundingMode.HALF_UP),
+            gjennomsnittPerÅr = 0.toBigDecimal(),
+        )
+    }
+
+    private fun mockGOmregning(
+        forrigeBehandling: Behandling,
+        fagsakId: UUID,
+        saksbehandling: Saksbehandling,
+    ) {
+        every { behandlingService.finnSisteIverksatteBehandling(any()) } returns forrigeBehandling
+        every { behandlingService.finnesÅpenBehandling(any()) } returns false
+        every { tilkjentYtelseService.hentForBehandling(any()) } returns tilkjentYtelser.values.first()
+        val behandling = behandling(
+            id = UUID.randomUUID(),
+            opprettetTid = LocalDateTime.now(),
+            type = BehandlingType.REVURDERING,
+            forrigeBehandlingId = forrigeBehandling.id,
+            vedtakstidspunkt = LocalDateTime.MIN,
+        )
+        every {
+            behandlingService.opprettBehandling(
+                BehandlingType.REVURDERING,
+                fagsakId,
+                BehandlingStatus.OPPRETTET,
+                StegType.VILKÅR,
+                BehandlingÅrsak.G_OMREGNING,
+                null,
+                false,
+            )
+        } returns behandling
+
+        every { behandlingService.hentSaksbehandling(behandling.id) } returns saksbehandling(
+            fagsak(id = saksbehandling.fagsakId),
+            behandling,
+        )
+
+        every { behandlingService.oppdaterResultatPåBehandling(any(), any()) } returns behandling
+        every {
+            behandlingService.oppdaterStegPåBehandling(
+                any(),
+                any(),
+            )
+        } returns behandling.copy(steg = StegType.VENTE_PÅ_STATUS_FRA_IVERKSETT)
+        every {
+            behandlingService.oppdaterStatusPåBehandling(
+                any(),
+                any(),
+            )
+        } returns behandling.copy(status = BehandlingStatus.IVERKSETTER_VEDTAK)
+
+        val expectedIverksettDto: IverksettOvergangsstønadDto =
+            ObjectMapperProvider.objectMapper.readValue(readFile("expectedIverksettDto.json"))
+
+        every { iverksettingDtoMapper.tilDtoMaskineltBehandlet(any()) } returns expectedIverksettDto
+    }
+
+    private fun readFile(filnavn: String): String {
+        return this::class.java.getResource("/omregning/$filnavn")!!.readText()
     }
 
     @Når("beregner ytelse")
@@ -324,6 +444,7 @@ class StepDefinitions {
                 }
                 assertThat(dataTable.asMaps()).hasSize(perioder.size)
             }
+
             is InnvilgelseBarnetilsyn -> {
                 val perioder = vedtak.perioder
                 dataTable.asMaps().mapIndexed { index, rad ->
@@ -339,6 +460,7 @@ class StepDefinitions {
                 }
                 assertThat(dataTable.asMaps()).hasSize(perioder.size)
             }
+
             else -> error("Støtter ikke ${vedtak.javaClass.simpleName}")
         }
     }
@@ -401,6 +523,22 @@ class StepDefinitions {
             assertThat(periode.beløp).isEqualTo(parseInt(VedtakDomenebegrep.BELØP, rad))
         }
         assertThat(dataTable.asMaps()).hasSize(perioder.size)
+    }
+
+    @Så("forvent følgende andeler for g-omregnet tilkjent ytelse")
+    fun `forvent følgende andeler for g-omregning`(dataTable: DataTable) {
+        assertThat(tilkjentYtelseSlot.captured.andelerTilkjentYtelse.size).isEqualTo(dataTable.asMaps().size)
+        dataTable.asMaps().mapIndexed { index, rad ->
+            val fraOgMed = parseFraOgMed(rad)
+            val tilOgMed =
+                parseValgfriÅrMånedEllerDato(Domenebegrep.TIL_OG_MED_DATO, rad).sisteDagenIMånedenEllerDefault(fraOgMed)
+            val beløp = parseValgfriInt(VedtakDomenebegrep.BELØP, rad)
+            val inntekt = parseValgfriInt(VedtakDomenebegrep.INNTEKT, rad)
+            assertThat(tilkjentYtelseSlot.captured.andelerTilkjentYtelse[index].stønadFom).isEqualTo(fraOgMed)
+            assertThat(tilkjentYtelseSlot.captured.andelerTilkjentYtelse[index].stønadTom).isEqualTo(tilOgMed)
+            assertThat(tilkjentYtelseSlot.captured.andelerTilkjentYtelse[index].beløp).isEqualTo(beløp)
+            assertThat(tilkjentYtelseSlot.captured.andelerTilkjentYtelse[index].inntekt).isEqualTo(inntekt)
+        }
     }
 
     @Så("forvent følgende andeler lagret for behandling med id: {int}")

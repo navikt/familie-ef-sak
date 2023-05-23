@@ -33,6 +33,7 @@ import no.nav.familie.ef.sak.repository.tilkjentYtelse
 import no.nav.familie.ef.sak.repository.vedtak
 import no.nav.familie.ef.sak.repository.vedtaksperiode
 import no.nav.familie.ef.sak.testutil.mockTestMedGrunnbeløpFra2022
+import no.nav.familie.ef.sak.testutil.mockTestMedGrunnbeløpFra2023
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseRepository
 import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.vedtak.VedtakRepository
@@ -109,7 +110,7 @@ internal class OmregningServiceTest : OppslagSpringRunnerTest() {
     val behandlingId = UUID.fromString("39c7dc82-adc1-43db-a6f9-64b8e4352ff6")
 
     @Test
-    fun `Verifiser riktig beløp og intekstjustering`() {
+    fun `Verifiser riktig beløp og inntektsjustering`() {
         val inntektPeriode = lagInntekt(201, 2002, 200003, 2022)
         lagSøknadOgVilkårOgVedtak(behandlingId, fagsakId, inntektPeriode, stønadsår = 2022)
         val tilkjentYtelse = lagreTilkjentYtelse(behandlingId, stønadsår = 2022)
@@ -130,13 +131,44 @@ internal class OmregningServiceTest : OppslagSpringRunnerTest() {
             assertThat(andelTilkjentYtelseOmregnet.inntekt).isEqualTo(289000)
             assertThat(andelTilkjentYtelseOmregnet.beløp).isEqualTo(12155)
             // Sjekk inntektsperiode etter ny G omregning
-            val inntektsperiodeEtterGomregning = finnInntektsperiodeEtterNyGDato(iverksettDto.behandling.behandlingId)
+            val inntektsperiodeEtterGomregning = finnInntektsperiodeEtterNyGDato(iverksettDto.behandling.behandlingId, 2022)
             assertThat(inntektsperiodeEtterGomregning.dagsats?.toInt()).isEqualTo(210)
             assertThat(inntektsperiodeEtterGomregning.månedsinntekt?.toInt()).isEqualTo(2097)
             assertThat(inntektsperiodeEtterGomregning.inntekt.toInt()).isEqualTo(209548)
             assertThat(inntektsperiodeEtterGomregning.totalinntekt().toInt()).isEqualTo(289312)
         }
     }
+
+    @Test
+    fun `Verifiser riktig beløp og inntektsjustering for 2023`() {
+        val inntektPeriode = lagInntekt(0, 0, 210_000, 2023)
+        lagSøknadOgVilkårOgVedtak(behandlingId, fagsakId, inntektPeriode, stønadsår = 2023)
+        val tilkjentYtelse = lagreTilkjentYtelse(behandlingId, stønadsår = 2023)
+        val iverksettDtoSlot = slot<IverksettOvergangsstønadDto>()
+        // Gitt assert: - skal splittes til to med ny g
+        assertThat(tilkjentYtelse.andelerTilkjentYtelse).hasSize(1)
+        assertThat(inntektPeriode.totalinntekt().toInt()).isEqualTo(210_000)
+
+        mockTestMedGrunnbeløpFra2023 {
+            omregningService.utførGOmregning(fagsakId)
+
+            verify { iverksettClient.iverksettUtenBrev(capture(iverksettDtoSlot)) }
+            val iverksettDto = iverksettDtoSlot.captured
+
+            assertThat(iverksettDto.vedtak.tilkjentYtelse?.andelerTilkjentYtelse?.size).isEqualTo(2) // skal være splittet
+            // Sjekk andel etter ny g omregningsdato
+            val andelTilkjentYtelseOmregnet = finnAndelEtterNyGDato(iverksettDto)!!
+            assertThat(andelTilkjentYtelseOmregnet.inntekt).isEqualTo(222000)
+            assertThat(andelTilkjentYtelseOmregnet.beløp).isEqualTo(16019)
+            // Sjekk inntektsperiode etter ny G omregning
+            val inntektsperiodeEtterGomregning = finnInntektsperiodeEtterNyGDato(iverksettDto.behandling.behandlingId, 2023)
+            assertThat(inntektsperiodeEtterGomregning.dagsats?.toInt()).isEqualTo(0)
+            assertThat(inntektsperiodeEtterGomregning.månedsinntekt?.toInt()).isEqualTo(0)
+            assertThat(inntektsperiodeEtterGomregning.inntekt.toInt()).isEqualTo(222348)
+            assertThat(inntektsperiodeEtterGomregning.totalinntekt().toInt()).isEqualTo(222348)
+        }
+    }
+
 
     @Test
     fun `utførGOmregning kaller iverksettUtenBrev med korrekt iverksettDto `() {
@@ -471,10 +503,10 @@ internal class OmregningServiceTest : OppslagSpringRunnerTest() {
         return tilkjentYtelse
     }
 
-    private fun finnInntektsperiodeEtterNyGDato(behandlingId: UUID): Inntektsperiode {
+    private fun finnInntektsperiodeEtterNyGDato(behandlingId: UUID, grunnbeløpsår: Int): Inntektsperiode {
         val behandlingNy = behandlingRepository.findByIdOrThrow(behandlingId)
         val vedtakNy = vedtakRepository.findByIdOrThrow(behandlingNy.id)
-        return vedtakNy.inntekter?.inntekter!!.first { it.periode.inneholder(YearMonth.of(2022, 6)) }
+        return vedtakNy.inntekter?.inntekter!!.first { it.periode.inneholder(YearMonth.of(grunnbeløpsår, 6)) }
     }
 
     private fun finnAndelEtterNyGDato(iverksettDto: IverksettOvergangsstønadDto) =
