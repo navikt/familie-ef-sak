@@ -200,14 +200,14 @@ internal class OmregningServiceTest : OppslagSpringRunnerTest() {
             assertThat(iverksettDto.vedtak.tilkjentYtelse?.andelerTilkjentYtelse?.size).isEqualTo(2) // skal være splittet
             // Sjekk andel etter ny g omregningsdato
             val andelTilkjentYtelseOmregnet = finnAndelEtterNyGDato(iverksettDto)!!
-            assertThat(andelTilkjentYtelseOmregnet.inntekt).isEqualTo(222000)
-            assertThat(andelTilkjentYtelseOmregnet.beløp).isEqualTo(16019)
+            assertThat(andelTilkjentYtelseOmregnet.inntekt).isEqualTo(223000)
+            assertThat(andelTilkjentYtelseOmregnet.beløp).isEqualTo(16103)
             // Sjekk inntektsperiode etter ny G omregning
             val inntektsperiodeEtterGomregning = finnInntektsperiodeEtterNyGDato(iverksettDto.behandling.behandlingId, 2023)
             assertThat(inntektsperiodeEtterGomregning.dagsats?.toInt()).isEqualTo(0)
             assertThat(inntektsperiodeEtterGomregning.månedsinntekt?.toInt()).isEqualTo(0)
-            assertThat(inntektsperiodeEtterGomregning.inntekt.toInt()).isEqualTo(222348)
-            assertThat(inntektsperiodeEtterGomregning.totalinntekt().toInt()).isEqualTo(222348)
+            assertThat(inntektsperiodeEtterGomregning.inntekt.toInt()).isEqualTo(223455)
+            assertThat(inntektsperiodeEtterGomregning.totalinntekt().toInt()).isEqualTo(223455)
         }
     }
 
