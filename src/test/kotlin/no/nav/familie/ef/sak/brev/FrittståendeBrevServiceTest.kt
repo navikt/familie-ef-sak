@@ -45,6 +45,7 @@ internal class FrittståendeBrevServiceTest {
     private val iverksettClient = mockk<IverksettClient>()
     private val brevsignaturService = mockk<BrevsignaturService>()
     private val mellomlagringBrevService = mockk<MellomlagringBrevService>()
+    private val familieDokumentClient = mockk<FamilieDokumentClient>()
 
     private val frittståendeBrevService =
         FrittståendeBrevService(
@@ -55,6 +56,7 @@ internal class FrittståendeBrevServiceTest {
             iverksettClient,
             brevsignaturService,
             mellomlagringBrevService,
+            familieDokumentClient,
         )
     private val fagsak = fagsak(fagsakpersoner(identer = setOf("01010172272")))
     private val frittståendeBrevDto = FrittståendeBrevDto(

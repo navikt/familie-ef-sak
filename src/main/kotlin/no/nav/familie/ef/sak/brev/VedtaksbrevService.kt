@@ -6,9 +6,7 @@ import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.brev.domain.FRITEKST
 import no.nav.familie.ef.sak.brev.domain.Vedtaksbrev
-import no.nav.familie.ef.sak.brev.dto.Flettefelter
 import no.nav.familie.ef.sak.brev.dto.FrittståendeBrevRequestDto
-import no.nav.familie.ef.sak.brev.dto.SanityBrevRequestInnhentingKarakterutskrift
 import no.nav.familie.ef.sak.brev.dto.SignaturDto
 import no.nav.familie.ef.sak.brev.dto.VedtaksbrevFritekstDto
 import no.nav.familie.ef.sak.felles.domain.Fil
@@ -19,11 +17,9 @@ import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvisIkke
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
-import no.nav.familie.ef.sak.karakterutskrift.KarakterutskriftBrevtype
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerService
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.ef.sak.vedtak.domain.VedtakErUtenBeslutter
-import no.nav.familie.kontrakter.felles.objectMapper
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import java.time.LocalDate
@@ -72,20 +68,6 @@ class VedtaksbrevService(
             enhet = saksbehandlersignatur.enhet,
             saksbehandlerHtml = html,
         )
-
-        return familieDokumentClient.genererPdfFraHtml(html)
-    }
-
-    fun lagBrevForInnhentingAvKarakterutskrift(visningsnavn: String, personIdent: String, brevtype: KarakterutskriftBrevtype): ByteArray {
-        val brevRequest = SanityBrevRequestInnhentingKarakterutskrift(flettefelter = Flettefelter(navn = listOf(visningsnavn), fodselsnummer = listOf(personIdent)))
-
-        val html = brevClient.genererHtml(
-            brevmal = brevtype.brevMal,
-            saksbehandlerBrevrequest = objectMapper.valueToTree(brevRequest),
-            saksbehandlersignatur = "",
-            enhet = "NAV Arbeid og ytelser",
-            skjulBeslutterSignatur = true,
-        ).replace(BESLUTTER_VEDTAKSDATO_PLACEHOLDER, LocalDate.now().norskFormat())
 
         return familieDokumentClient.genererPdfFraHtml(html)
     }

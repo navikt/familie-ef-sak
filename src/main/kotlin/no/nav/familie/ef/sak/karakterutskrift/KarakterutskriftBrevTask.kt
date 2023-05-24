@@ -2,7 +2,7 @@ package no.nav.familie.ef.sak.karakterutskrift
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.familie.ef.sak.behandling.BehandlingService
-import no.nav.familie.ef.sak.brev.VedtaksbrevService
+import no.nav.familie.ef.sak.brev.FrittståendeBrevService
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvisIkke
@@ -35,7 +35,7 @@ class KarakterutskriftBrevTask(
     private val fagsakService: FagsakService,
     private val oppgaveService: OppgaveService,
     private val personopplysningerService: PersonopplysningerService,
-    private val vedtaksbrevService: VedtaksbrevService,
+    private val frittståendeBrevService: FrittståendeBrevService,
 ) : AsyncTaskStep {
     val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
@@ -51,7 +51,7 @@ class KarakterutskriftBrevTask(
         }
 
         val visningsnavn = personopplysningerService.hentGjeldeneNavn(listOf(ident)).getValue(ident)
-        val brev = vedtaksbrevService.lagBrevForInnhentingAvKarakterutskrift(visningsnavn, ident, payload.brevtype)
+        val brev = frittståendeBrevService.lagBrevForInnhentingAvKarakterutskrift(visningsnavn, ident, payload.brevtype)
 
         // TODO: journalfør brev
 
