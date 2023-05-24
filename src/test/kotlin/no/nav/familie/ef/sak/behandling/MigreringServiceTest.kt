@@ -36,6 +36,7 @@ import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.revurderingsinformasjon
 import no.nav.familie.ef.sak.repository.saksbehandling
 import no.nav.familie.ef.sak.simulering.SimuleringsresultatRepository
+import no.nav.familie.ef.sak.testutil.mockTestMedGrunnbeløpFra2022
 import no.nav.familie.ef.sak.tilbakekreving.TilbakekrevingService
 import no.nav.familie.ef.sak.tilbakekreving.domain.Tilbakekrevingsvalg
 import no.nav.familie.ef.sak.tilbakekreving.dto.TilbakekrevingDto
@@ -136,10 +137,10 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
     @Autowired
     private lateinit var barnRepository: BarnRepository
 
-    private val periodeFraMåned = YearMonth.now().minusMonths(10)
-    private val opphørsmåned = YearMonth.now()
-    private val migrerFraDato = YearMonth.now()
-    private val til = YearMonth.now()
+    private val periodeFraMåned = YearMonth.of(2022, 7)
+    private val opphørsmåned = YearMonth.of(2023, 5)
+    private val migrerFraDato = YearMonth.of(2023, 5)
+    private val til = YearMonth.of(2023, 5)
     private val forventetInntekt = BigDecimal.ZERO
     private val samordningsfradrag = BigDecimal.ZERO
     private lateinit var fagsak: Fagsak
@@ -164,26 +165,27 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     internal fun `skal opprette migrering og sende til iverksett`() {
-        val migrering = opprettOgIverksettMigrering()
-
-        with(tilkjentYtelseService.hentForBehandling(migrering.id).andelerTilkjentYtelse) {
-            assertThat(this).hasSize(1)
-            assertThat(this[0].stønadFom).isEqualTo(migrerFraDato.atDay(1))
-            assertThat(this[0].stønadTom).isEqualTo(til.atEndOfMonth())
+        mockTestMedGrunnbeløpFra2022 {
+            val migrering = opprettOgIverksettMigrering()
+            with(tilkjentYtelseService.hentForBehandling(migrering.id).andelerTilkjentYtelse) {
+                assertThat(this).hasSize(1)
+                assertThat(this[0].stønadFom).isEqualTo(migrerFraDato.atDay(1))
+                assertThat(this[0].stønadTom).isEqualTo(til.atEndOfMonth())
+            }
+            with(behandlingService.hentBehandling(migrering.id)) {
+                assertThat(this.status).isEqualTo(BehandlingStatus.FERDIGSTILT)
+                assertThat(this.resultat).isEqualTo(BehandlingResultat.INNVILGET)
+                assertThat(this.steg).isEqualTo(StegType.BEHANDLING_FERDIGSTILT)
+            }
+            with(vedtakService.hentVedtak(migrering.id)) {
+                val perioder = this.perioder!!.perioder
+                assertThat(perioder).hasSize(1)
+                assertThat(perioder[0].aktivitet).isEqualTo(AktivitetType.MIGRERING)
+                assertThat(perioder[0].periodeType).isEqualTo(VedtaksperiodeType.MIGRERING)
+            }
+            assertThat(simuleringsresultatRepository.findByIdOrNull(migrering.id)).isNotNull
+            verifiserVurderinger(migrering)
         }
-        with(behandlingService.hentBehandling(migrering.id)) {
-            assertThat(this.status).isEqualTo(BehandlingStatus.FERDIGSTILT)
-            assertThat(this.resultat).isEqualTo(BehandlingResultat.INNVILGET)
-            assertThat(this.steg).isEqualTo(StegType.BEHANDLING_FERDIGSTILT)
-        }
-        with(vedtakService.hentVedtak(migrering.id)) {
-            val perioder = this.perioder!!.perioder
-            assertThat(perioder).hasSize(1)
-            assertThat(perioder[0].aktivitet).isEqualTo(AktivitetType.MIGRERING)
-            assertThat(perioder[0].periodeType).isEqualTo(VedtaksperiodeType.MIGRERING)
-        }
-        assertThat(simuleringsresultatRepository.findByIdOrNull(migrering.id)).isNotNull
-        verifiserVurderinger(migrering)
     }
 
     @Test
@@ -242,14 +244,16 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     internal fun `migrering med 0-beløp skal håndteres`() {
-        val migrering = opprettOgIverksettMigrering(inntektsgrunnlag = BigDecimal(1_000_000))
+        mockTestMedGrunnbeløpFra2022 {
+            val migrering = opprettOgIverksettMigrering(inntektsgrunnlag = BigDecimal(1_000_000))
 
-        verifiserBehandlingErFerdigstilt(migrering)
-        with(tilkjentYtelseService.hentForBehandling(migrering.id).andelerTilkjentYtelse) {
-            assertThat(this).hasSize(1)
-            assertThat(this[0].stønadFom).isEqualTo(migrerFraDato.atDay(1))
-            assertThat(this[0].stønadTom).isEqualTo(til.atEndOfMonth())
-            assertThat(this[0].beløp).isEqualTo(0)
+            verifiserBehandlingErFerdigstilt(migrering)
+            with(tilkjentYtelseService.hentForBehandling(migrering.id).andelerTilkjentYtelse) {
+                assertThat(this).hasSize(1)
+                assertThat(this[0].stønadFom).isEqualTo(migrerFraDato.atDay(1))
+                assertThat(this[0].stønadTom).isEqualTo(til.atEndOfMonth())
+                assertThat(this[0].beløp).isEqualTo(0)
+            }
         }
     }
 
