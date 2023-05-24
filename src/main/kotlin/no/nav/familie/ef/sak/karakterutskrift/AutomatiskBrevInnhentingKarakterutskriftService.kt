@@ -3,7 +3,6 @@ package no.nav.familie.ef.sak.karakterutskrift
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.ef.sak.oppgave.OppgaveUtil
-import no.nav.familie.kontrakter.felles.Behandlingstema
 import no.nav.familie.kontrakter.felles.Tema
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveRequest
 import no.nav.familie.prosessering.internal.TaskService
@@ -37,7 +36,6 @@ class AutomatiskBrevInnhentingKarakterutskriftService(
         val opppgaver = oppgaveService.hentOppgaver(
             FinnOppgaveRequest(
                 tema = Tema.ENF,
-                behandlingstema = Behandlingstema.Skolepenger,
                 fristFomDato = oppgaveFrist,
                 fristTomDato = oppgaveFrist,
                 mappeId = mappeId.toLong(),
