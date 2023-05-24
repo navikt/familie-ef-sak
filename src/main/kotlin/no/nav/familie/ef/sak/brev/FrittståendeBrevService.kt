@@ -3,17 +3,23 @@ package no.nav.familie.ef.sak.brev
 import no.nav.familie.ef.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ef.sak.brev.domain.BrevmottakerOrganisasjon
 import no.nav.familie.ef.sak.brev.domain.BrevmottakerPerson
+import no.nav.familie.ef.sak.brev.dto.Flettefelter
 import no.nav.familie.ef.sak.brev.dto.FrittståendeBrevDto
 import no.nav.familie.ef.sak.brev.dto.FrittståendeBrevRequestDto
+import no.nav.familie.ef.sak.brev.dto.SanityBrevRequestInnhentingKarakterutskrift
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
+import no.nav.familie.ef.sak.felles.util.norskFormat
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.iverksett.tilIverksettDto
+import no.nav.familie.ef.sak.karakterutskrift.KarakterutskriftBrevtype
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerService
 import no.nav.familie.kontrakter.ef.iverksett.Brevmottaker
+import no.nav.familie.kontrakter.felles.objectMapper
 import org.springframework.stereotype.Service
+import java.time.LocalDate
 import no.nav.familie.kontrakter.ef.felles.FrittståendeBrevDto as FrittståendeBrevDtoIverksetting
 
 @Service
@@ -25,6 +31,7 @@ class FrittståendeBrevService(
     private val iverksettClient: IverksettClient,
     private val brevsignaturService: BrevsignaturService,
     private val mellomlagringBrevService: MellomlagringBrevService,
+    private val familieDokumentClient: FamilieDokumentClient,
 ) {
 
     fun forhåndsvisFrittståendeBrev(frittståendeBrevDto: FrittståendeBrevDto): ByteArray {
@@ -51,6 +58,20 @@ class FrittståendeBrevService(
             ),
         )
         mellomlagringBrevService.slettMellomlagretFrittståendeBrev(fagsak.id, saksbehandlerIdent)
+    }
+
+    fun lagBrevForInnhentingAvKarakterutskrift(visningsnavn: String, personIdent: String, brevtype: KarakterutskriftBrevtype): ByteArray {
+        val brevRequest = SanityBrevRequestInnhentingKarakterutskrift(flettefelter = Flettefelter(navn = listOf(visningsnavn), fodselsnummer = listOf(personIdent)))
+
+        val html = brevClient.genererHtml(
+            brevmal = brevtype.brevMal,
+            saksbehandlerBrevrequest = objectMapper.valueToTree(brevRequest),
+            saksbehandlersignatur = "",
+            enhet = "NAV Arbeid og ytelser",
+            skjulBeslutterSignatur = true,
+        ).replace(VedtaksbrevService.BESLUTTER_VEDTAKSDATO_PLACEHOLDER, LocalDate.now().norskFormat())
+
+        return familieDokumentClient.genererPdfFraHtml(html)
     }
 
     private fun mapMottakere(mottakere: BrevmottakereDto): List<Brevmottaker> {
