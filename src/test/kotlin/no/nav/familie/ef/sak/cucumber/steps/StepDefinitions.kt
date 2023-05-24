@@ -175,6 +175,7 @@ class StepDefinitions {
         iverksettingDtoMapper = iverksettingDtoMapper,
         søknadService = søknadService,
         barnService = barnServiceMock,
+        featureToggleService,
     )
 
     init {
@@ -323,6 +324,8 @@ class StepDefinitions {
     ) {
         every { behandlingService.finnSisteIverksatteBehandling(any()) } returns forrigeBehandling
         every { behandlingService.finnesÅpenBehandling(any()) } returns false
+        every { behandlingService.finnesBehandlingSomIkkeErFerdigstiltEllerSattPåVent(any()) } returns false
+
         every { tilkjentYtelseService.hentForBehandling(any()) } returns tilkjentYtelser.values.first()
         val behandling = behandling(
             id = UUID.randomUUID(),

@@ -1,7 +1,9 @@
 package no.nav.familie.ef.sak.behandling.grunnbelop
 
-import no.nav.familie.ef.sak.beregning.Grunnbeløpsperioder
+import no.nav.familie.ef.sak.beregning.Grunnbeløpsperioder.nyesteGrunnbeløpGyldigFraOgMed
 import no.nav.familie.ef.sak.fagsak.FagsakRepository
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Profile
@@ -9,6 +11,7 @@ import org.springframework.dao.DuplicateKeyException
 import org.springframework.data.relational.core.conversion.DbActionExecutionException
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
+import java.util.UUID
 
 @Profile("!integrasjonstest")
 @Service
@@ -28,13 +31,14 @@ class GOmregningTaskServiceScheduler(
 class GOmregningTaskService(
     private val fagsakRepository: FagsakRepository,
     private val gOmregningTask: GOmregningTask,
+    private val featureToggleService: FeatureToggleService,
 ) {
 
     val logger: Logger = LoggerFactory.getLogger(javaClass)
 
     fun opprettGOmregningTaskForBehandlingerMedUtdatertG(): Int {
         logger.info("Starter opprettelse av tasker for G-omregning.")
-        val fagsakIder = fagsakRepository.finnFerdigstilteFagsakerMedUtdatertGBelop(Grunnbeløpsperioder.nyesteGrunnbeløpGyldigFraOgMed.atDay(1))
+        val fagsakIder = finnFagsakIder()
         try {
             fagsakIder.forEach {
                 gOmregningTask.opprettTask(it)
@@ -49,5 +53,17 @@ class GOmregningTaskService(
             }
         }
         return fagsakIder.size
+    }
+
+    private fun finnFagsakIder(): List<UUID> {
+        val fagsakIder = when (featureToggleService.isEnabled(Toggle.INKLUDER_SATT_PÅ_VENT_GOMREGNING)) {
+            false -> fagsakRepository.finnFerdigstilteFagsakerMedUtdatertGBelop(
+                nyesteGrunnbeløpGyldigFraOgMed.atDay(1),
+            )
+            true -> fagsakRepository.finnFerdigstilteEllerSattPåVentFagsakerMedUtdatertGBelop(
+                nyesteGrunnbeløpGyldigFraOgMed.atDay(1),
+            )
+        }
+        return fagsakIder
     }
 }
