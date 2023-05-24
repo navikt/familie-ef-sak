@@ -4,13 +4,14 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.brev.FrittståendeBrevService
 import no.nav.familie.ef.sak.fagsak.FagsakService
+import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
-import no.nav.familie.ef.sak.infrastruktur.exception.feilHvisIkke
+import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.ef.sak.oppgave.OppgaveUtil
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerService
-import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.oppgave.Oppgave
 import no.nav.familie.log.IdUtils
 import no.nav.familie.log.mdc.MDCConstants
 import no.nav.familie.prosessering.AsyncTaskStep
@@ -43,12 +44,9 @@ class KarakterutskriftBrevTask(
         val payload = objectMapper.readValue<AutomatiskBrevKarakterutskriftPayload>(task.payload)
         val oppgave = oppgaveService.hentOppgave(payload.oppgaveId)
         val ident = OppgaveUtil.finnPersonidentForOppgave(oppgave) ?: throw Feil("Fant ikke ident for oppgave=${oppgave.id}")
-        val fagsakId = fagsakService.finnFagsak(setOf(ident), StønadType.SKOLEPENGER)?.id
-            ?: throw Feil("Fant ikke fagsak for oppgave med id=${oppgave.id}")
+        val fagsaker = fagsakService.finnFagsaker(setOf(ident))
 
-        feilHvisIkke(behandlingService.finnesBehandlingForFagsak(fagsakId)) {
-            "Fagsak med id=$fagsakId er ikke tilknyttet noen behandlinger"
-        }
+        validerHarFagsakOgBehandling(fagsaker, oppgave)
 
         val visningsnavn = personopplysningerService.hentGjeldeneNavn(listOf(ident)).getValue(ident)
         val brev = frittståendeBrevService.lagBrevForInnhentingAvKarakterutskrift(visningsnavn, ident, payload.brevtype)
@@ -60,6 +58,19 @@ class KarakterutskriftBrevTask(
         // TODO: oppdater oppgave
 
         throw Feil("Task for innhenting av karakterutskrift er ikke implementert")
+    }
+
+    private fun validerHarFagsakOgBehandling(
+        fagsaker: List<Fagsak>,
+        oppgave: Oppgave,
+    ) {
+        feilHvis(fagsaker.isEmpty()) {
+            "Fant ingen fagsak for oppgave=${oppgave.id}"
+        }
+
+        feilHvis(fagsaker.none { behandlingService.finnesBehandlingForFagsak(it.id) }) {
+            "Fant ingen behandling for oppgave=${oppgave.id}"
+        }
     }
 
     companion object {
