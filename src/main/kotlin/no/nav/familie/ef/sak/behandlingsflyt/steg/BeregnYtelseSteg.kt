@@ -556,7 +556,7 @@ class BeregnYtelseSteg(
         vedtak: InnvilgelseOvergangsstønad,
         saksbehandling: Saksbehandling,
     ) =
-        beregningService.beregnYtelse(finnInnvilgedePerioder(vedtak), vedtak.inntekter.tilInntektsperioder())
+        beregningService.beregnYtelse(finnInnvilgedePerioder(vedtak), vedtak.inntekter.tilInntektsperioder(), saksbehandling.erOmregning)
             .map {
                 AndelTilkjentYtelse(
                     beløp = it.beløp.toInt(),

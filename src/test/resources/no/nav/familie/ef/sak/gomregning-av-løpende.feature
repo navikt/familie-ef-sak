@@ -24,7 +24,7 @@ Egenskap: G-omregning
     Så forvent følgende andeler for g-omregnet tilkjent ytelse
       | Fra og med dato | Til og med dato | Inntekt | Beløp |
       | 01.2021         | 04.2021         | 120000  | 16403 |
-      | 05.2021         | 12.2021         | 125000  | 17257 |
+      | 05.2021         | 12.2021         | 125900  | 17224 |
 
 
   Scenariomal: Enkel behandling med 1 periode g-omregnes med 2023 G-beløp
@@ -52,10 +52,10 @@ Egenskap: G-omregning
 
     Eksempler:
       | Inntekt | Beløp | Indeksjustert inntekt | G omregnet beløp |
-      | 10000   | 20902 | 10000                 | 22241            |
-      | 120000  | 18492 | 127000                | 19703            |
-      | 180000  | 16242 | 191000                | 17303            |
-      | 210000  | 15117 | 223000                | 16103            |
-      | 240000  | 13992 | 255000                | 14903            |
-      | 600000  | 492   | 638000                | 540              |
-      | 700000  | 0     | 744000                | 0                |
+      | 10000   | 20902 | 10600                 | 22241            |
+      | 120000  | 18492 | 127600                | 19680            |
+      | 180000  | 16242 | 191500                | 17284            |
+      | 210000  | 15117 | 223400                | 16088            |
+      | 240000  | 13992 | 255300                | 14891            |
+      | 600000  | 492   | 638400                | 525              |
+      | 700000  | 0     | 744800                | 0                |

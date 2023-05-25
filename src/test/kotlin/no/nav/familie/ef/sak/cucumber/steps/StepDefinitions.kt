@@ -296,10 +296,10 @@ class StepDefinitions {
     @Når("utfør g-omregning for år {} med beløp {}")
     fun `utfør g-omregning`(år: Int, beløp: Int) {
         settGrunnbeløp(år, beløp)
-        val saksbehandling = saksbehandlinger.firstNotNullOf { saksb -> saksb.value.second }
-        val fagsakId = saksbehandling.fagsakId
+        val fagsakId = saksbehandlinger.firstNotNullOf { saksb -> saksb.value.second }.fagsakId
+
         val forrigeBehandling = saksbehandlinger.firstNotNullOf { saksb -> saksb.value.first }
-        mockGOmregning(forrigeBehandling, fagsakId, saksbehandling)
+        mockGOmregning(forrigeBehandling, fagsakId)
 
         mockTestMedGrunnbeløpFra(grunnbeløp!!) {
             every { tilkjentYtelseService.opprettTilkjentYtelse(capture(tilkjentYtelseSlot)) } answers { firstArg() }
@@ -319,8 +319,8 @@ class StepDefinitions {
 
     private fun mockGOmregning(
         forrigeBehandling: Behandling,
-        fagsakId: UUID,
-        saksbehandling: Saksbehandling,
+        fagsakId: UUID
+
     ) {
         every { behandlingService.finnSisteIverksatteBehandling(any()) } returns forrigeBehandling
         every { behandlingService.finnesÅpenBehandling(any()) } returns false
@@ -333,6 +333,7 @@ class StepDefinitions {
             type = BehandlingType.REVURDERING,
             forrigeBehandlingId = forrigeBehandling.id,
             vedtakstidspunkt = LocalDateTime.MIN,
+            årsak = BehandlingÅrsak.G_OMREGNING
         )
         every {
             behandlingService.opprettBehandling(
@@ -347,7 +348,7 @@ class StepDefinitions {
         } returns behandling
 
         every { behandlingService.hentSaksbehandling(behandling.id) } returns saksbehandling(
-            fagsak(id = saksbehandling.fagsakId),
+            fagsak(id = fagsakId),
             behandling,
         )
 

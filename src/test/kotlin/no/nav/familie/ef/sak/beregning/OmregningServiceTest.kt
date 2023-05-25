@@ -129,8 +129,8 @@ internal class OmregningServiceTest : OppslagSpringRunnerTest() {
             assertThat(iverksettDto.vedtak.tilkjentYtelse?.andelerTilkjentYtelse?.size).isEqualTo(2) // skal være splittet
             // Sjekk andel etter ny g omregningsdato
             val andelTilkjentYtelseOmregnet = finnAndelEtterNyGDato(iverksettDto)!!
-            assertThat(andelTilkjentYtelseOmregnet.inntekt).isEqualTo(289000)
-            assertThat(andelTilkjentYtelseOmregnet.beløp).isEqualTo(12155)
+            assertThat(andelTilkjentYtelseOmregnet.inntekt).isEqualTo(289300)
+            assertThat(andelTilkjentYtelseOmregnet.beløp).isEqualTo(12143)
             // Sjekk inntektsperiode etter ny G omregning
             val inntektsperiodeEtterGomregning = finnInntektsperiodeEtterNyGDato(iverksettDto.behandling.behandlingId, 2022)
             assertThat(inntektsperiodeEtterGomregning.dagsats?.toInt()).isEqualTo(210)
@@ -170,8 +170,8 @@ internal class OmregningServiceTest : OppslagSpringRunnerTest() {
             assertThat(iverksettDto.vedtak.tilkjentYtelse?.andelerTilkjentYtelse?.size).isEqualTo(2) // skal være splittet
             // Sjekk andel etter ny g omregningsdato
             val andelTilkjentYtelseOmregnet = finnAndelEtterNyGDato(iverksettDto)!!
-            assertThat(andelTilkjentYtelseOmregnet.inntekt).isEqualTo(289000)
-            assertThat(andelTilkjentYtelseOmregnet.beløp).isEqualTo(12155)
+            assertThat(andelTilkjentYtelseOmregnet.inntekt).isEqualTo(289300)
+            assertThat(andelTilkjentYtelseOmregnet.beløp).isEqualTo(12143)
             // Sjekk inntektsperiode etter ny G omregning
             val inntektsperiodeEtterGomregning = finnInntektsperiodeEtterNyGDato(iverksettDto.behandling.behandlingId, 2022)
             assertThat(inntektsperiodeEtterGomregning.dagsats?.toInt()).isEqualTo(210)
@@ -200,8 +200,8 @@ internal class OmregningServiceTest : OppslagSpringRunnerTest() {
             assertThat(iverksettDto.vedtak.tilkjentYtelse?.andelerTilkjentYtelse?.size).isEqualTo(2) // skal være splittet
             // Sjekk andel etter ny g omregningsdato
             val andelTilkjentYtelseOmregnet = finnAndelEtterNyGDato(iverksettDto)!!
-            assertThat(andelTilkjentYtelseOmregnet.inntekt).isEqualTo(223000)
-            assertThat(andelTilkjentYtelseOmregnet.beløp).isEqualTo(16103)
+            assertThat(andelTilkjentYtelseOmregnet.inntekt).isEqualTo(223400)
+            assertThat(andelTilkjentYtelseOmregnet.beløp).isEqualTo(16088)
             // Sjekk inntektsperiode etter ny G omregning
             val inntektsperiodeEtterGomregning = finnInntektsperiodeEtterNyGDato(iverksettDto.behandling.behandlingId, 2023)
             assertThat(inntektsperiodeEtterGomregning.dagsats?.toInt()).isEqualTo(0)

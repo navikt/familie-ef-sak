@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.beregning
 
+import no.nav.familie.ef.sak.felles.util.Utregning.rundNedTilNærmeste100
 import no.nav.familie.ef.sak.felles.util.Utregning.rundNedTilNærmeste1000
 import no.nav.familie.ef.sak.felles.util.Utregning.rundNedTilNærmesteKrone
 import no.nav.familie.kontrakter.felles.Månedsperiode
@@ -17,10 +18,11 @@ object BeregningUtils {
     fun beregnStønadForInntekt(
         inntektsperiode: Inntektsperiode,
         skalRundeNedTotalInntekt: Boolean,
+        erGomregning: Boolean = false
     ): List<Beløpsperiode> {
         val periode = inntektsperiode.periode
         val samordningsfradrag = inntektsperiode.samordningsfradrag
-        val totalInntekt = beregnTotalinntekt(inntektsperiode, skalRundeNedTotalInntekt)
+        val totalInntekt = beregnTotalinntekt(inntektsperiode, skalRundeNedTotalInntekt, erGomregning)
 
         return finnGrunnbeløpsPerioder(periode).map {
             val avkortningPerMåned = beregnAvkortning(it.beløp, totalInntekt).divide(ANTALL_MÅNEDER_ÅR)
@@ -55,8 +57,13 @@ object BeregningUtils {
         }
     }
 
-    private fun beregnTotalinntekt(inntektsperiode: Inntektsperiode, skalRundeNedTotalInntekt: Boolean): BigDecimal {
+    private fun beregnTotalinntekt(inntektsperiode: Inntektsperiode, skalRundeNedTotalInntekt: Boolean, erGomregning: Boolean = false): BigDecimal {
         val totalInntekt = inntektsperiode.totalinntekt()
+
+        if (erGomregning){
+            return BigDecimal(rundNedTilNærmeste100(totalInntekt))
+        }
+
         return if (skalRundeNedTotalInntekt) BigDecimal(rundNedTilNærmeste1000(totalInntekt)) else totalInntekt
     }
 
