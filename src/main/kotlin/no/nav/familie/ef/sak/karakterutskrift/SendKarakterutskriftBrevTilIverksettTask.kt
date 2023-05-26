@@ -5,8 +5,9 @@ import no.nav.familie.ef.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.brev.FrittståendeBrevService
 import no.nav.familie.ef.sak.fagsak.FagsakService
+import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
-import no.nav.familie.ef.sak.infrastruktur.exception.feilHvisIkke
+import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.ef.sak.oppgave.OppgaveUtil
@@ -15,6 +16,7 @@ import no.nav.familie.kontrakter.ef.felles.FrittståendeBrevType
 import no.nav.familie.kontrakter.ef.felles.KarakterutskriftBrevDto
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.oppgave.Oppgave
 import no.nav.familie.log.IdUtils
 import no.nav.familie.log.mdc.MDCConstants
 import no.nav.familie.prosessering.AsyncTaskStep
@@ -28,17 +30,17 @@ import java.util.Properties
 
 @Service
 @TaskStepBeskrivelse(
-    taskStepType = KarakterutskriftBrevTask.TYPE,
+    taskStepType = SendKarakterutskriftBrevTilIverksettTask.TYPE,
     maxAntallFeil = 1,
     settTilManuellOppfølgning = true,
     triggerTidVedFeilISekunder = 15 * 60L,
     beskrivelse = "Automatisk utsend brev for innhenting av karakterutskrift",
 )
-class KarakterutskriftBrevTask(
+class SendKarakterutskriftBrevTilIverksettTask(
     private val behandlingService: BehandlingService,
     private val fagsakService: FagsakService,
-    private val frittståendeBrevService: FrittståendeBrevService,
     private val oppgaveService: OppgaveService,
+    private val frittståendeBrevService: FrittståendeBrevService,
     private val personopplysningerService: PersonopplysningerService,
     private val iverksettClient: IverksettClient,
     private val arbeidsfordelingService: ArbeidsfordelingService,
@@ -49,16 +51,14 @@ class KarakterutskriftBrevTask(
         val payload = objectMapper.readValue<AutomatiskBrevKarakterutskriftPayload>(task.payload)
         val oppgave = oppgaveService.hentOppgave(payload.oppgaveId)
         val ident = OppgaveUtil.finnPersonidentForOppgave(oppgave) ?: throw Feil("Fant ikke ident for oppgave=${oppgave.id}")
-        val fagsak = fagsakService.finnFagsak(setOf(ident), StønadType.SKOLEPENGER)
-            ?: throw Feil("Fant ikke fagsak for oppgave med id=${oppgave.id}")
+        val fagsaker = fagsakService.finnFagsaker(setOf(ident))
 
-        feilHvisIkke(behandlingService.finnesBehandlingForFagsak(fagsak.id)) {
-            "Fagsak med id=$fagsak er ikke tilknyttet noen behandlinger"
-        }
+        validerHarFagsakOgBehandling(fagsaker, oppgave)
 
         val visningsnavn = personopplysningerService.hentGjeldeneNavn(listOf(ident)).getValue(ident)
         val brev = frittståendeBrevService.lagBrevForInnhentingAvKarakterutskrift(visningsnavn, ident, payload.brevtype)
         val journalFørendeEnhet = arbeidsfordelingService.hentNavEnhetIdEllerBrukMaskinellEnhetHvisNull(ident)
+        val fagsak = utledFagsak(fagsaker)
 
         iverksettClient.håndterUtsendingAvKarakterutskriftBrev(
             KarakterutskriftBrevDto(
@@ -74,14 +74,29 @@ class KarakterutskriftBrevTask(
         )
     }
 
+    private fun utledFagsak(fagsaker: List<Fagsak>): Fagsak = fagsaker.firstOrNull { it.stønadstype == StønadType.OVERGANGSSTØNAD } ?: fagsaker.first()
+
+    private fun validerHarFagsakOgBehandling(
+        fagsaker: List<Fagsak>,
+        oppgave: Oppgave,
+    ) {
+        feilHvis(fagsaker.isEmpty()) {
+            "Fant ingen fagsak for oppgave=${oppgave.id}"
+        }
+
+        feilHvis(fagsaker.none { behandlingService.finnesBehandlingForFagsak(it.id) }) {
+            "Fant ingen behandling for oppgave=${oppgave.id}"
+        }
+    }
+
     companion object {
 
-        fun opprettTask(oppgaveId: Long, brevType: FrittståendeBrevType, år: Year): Task {
+        fun opprettTask(oppgaveId: Long, brevType: FrittståendeBrevType, gjeldendeÅr: Year): Task {
             val payload = objectMapper.writeValueAsString(
                 AutomatiskBrevKarakterutskriftPayload(
                     oppgaveId,
                     brevType,
-                    år,
+                    gjeldendeÅr,
                 ),
             )
 
@@ -93,7 +108,7 @@ class KarakterutskriftBrevTask(
             return Task(TYPE, payload, properties)
         }
 
-        const val TYPE = "KarakterutskriftBrev"
+        const val TYPE = "SendKarakterutskriftBrevTilIverksettTask"
     }
 }
 

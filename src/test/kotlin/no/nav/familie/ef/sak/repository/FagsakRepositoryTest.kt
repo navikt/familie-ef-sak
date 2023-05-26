@@ -43,6 +43,37 @@ internal class FagsakRepositoryTest : OppslagSpringRunnerTest() {
     inner class FinnFagsakerMedUtdatertGBelop {
 
         @Test
+        fun `finnFerdigstilteEllerSattPåVentFagsakerMedUtdatertGBelop skal finne fagsak med behandling satt på vent`() {
+            val fagsak = testoppsettService.lagreFagsak(fagsak())
+            val fagsak2 = testoppsettService.lagreFagsak(fagsak(identer = setOf(PersonIdent("1"))))
+            val behandlingFerdig = behandlingRepository.insert(
+                behandling(
+                    fagsak,
+                    status = BehandlingStatus.FERDIGSTILT,
+                    resultat = BehandlingResultat.INNVILGET,
+                    opprettetTid = LocalDateTime.now().minusDays(5),
+                ),
+            )
+            behandlingRepository.insert(
+                behandling(
+                    fagsak,
+                    status = BehandlingStatus.SATT_PÅ_VENT,
+                    resultat = BehandlingResultat.IKKE_SATT,
+                    opprettetTid = LocalDateTime.now().minusDays(2),
+                ),
+            )
+            behandlingRepository.insert(
+                behandling(
+                    fagsak2,
+                    status = BehandlingStatus.UTREDES,
+                    resultat = BehandlingResultat.INNVILGET,
+                ),
+            )
+            tilkjentYtelseRepository.insert(tilkjentYtelse(behandlingFerdig.id, fagsak.personIdenter.first().ident, 2022))
+            assertThat(fagsakRepository.finnFerdigstilteEllerSattPåVentFagsakerMedUtdatertGBelop(LocalDate.of(2022, 5, 1)).size).isEqualTo(1)
+        }
+
+        @Test
         fun `finner alle ferdigstilte fagsaker med innvilget tilkjent ytelse etter ny G-dato med gammel grunnbeløpsdato`() {
             val fagsak = testoppsettService.lagreFagsak(fagsak())
             val fagsak2 = testoppsettService.lagreFagsak(fagsak(identer = setOf(PersonIdent("1"))))

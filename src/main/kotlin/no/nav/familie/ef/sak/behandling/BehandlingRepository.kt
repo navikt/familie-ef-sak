@@ -142,6 +142,8 @@ interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUp
 
     fun existsByFagsakIdAndStatusIsNot(fagsakId: UUID, behandlingStatus: BehandlingStatus): Boolean
 
+    fun existsByFagsakIdAndStatusIsNotIn(fagsakId: UUID, behandlingStatus: List<BehandlingStatus>): Boolean
+
     // language=PostgreSQL
     @Query(
         """

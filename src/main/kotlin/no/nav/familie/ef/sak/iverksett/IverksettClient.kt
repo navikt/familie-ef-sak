@@ -108,6 +108,6 @@ class IverksettClient(
     }
 
     fun håndterUtsendingAvKarakterutskriftBrev(karakterutskriftBrevDto: KarakterutskriftBrevDto) {
-        postForEntity<Any>(URI.create("$familieEfIverksettUri/api/brev/frittstaende/innhenting-karakterutskrift"), karakterutskriftBrevDto)
+        postForEntity<Unit>(URI.create("$familieEfIverksettUri/api/brev/frittstaende/innhenting-karakterutskrift"), karakterutskriftBrevDto)
     }
 }

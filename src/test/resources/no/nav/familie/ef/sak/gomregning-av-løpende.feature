@@ -43,7 +43,7 @@ Egenskap: G-omregning
       | Fra og med dato | Til og med dato | Kildebehandling | Inntekt   | Beløp   |
       | 01.2023         | 12.2023         | 1               | <Inntekt> | <Beløp> |
 
-    Når utfør g-omregning for år 2023 med beløp 118032
+    Når utfør g-omregning for år 2023 med beløp 118620
 
     Så forvent følgende andeler for g-omregnet tilkjent ytelse
       | Fra og med dato | Til og med dato | Inntekt                 | Beløp              |
@@ -52,10 +52,10 @@ Egenskap: G-omregning
 
     Eksempler:
       | Inntekt | Beløp | Indeksjustert inntekt | G omregnet beløp |
-      | 10000   | 20902 | 10000                 | 22131            |
-      | 120000  | 18492 | 127000                | 19582            |
-      | 180000  | 16242 | 190000                | 17219            |
-      | 210000  | 15117 | 222000                | 16019            |
-      | 240000  | 13992 | 254000                | 14819            |
-      | 600000  | 492   | 635000                | 532              |
-      | 700000  | 0     | 741000                | 0                |
+      | 10000   | 20902 | 10000                 | 22241            |
+      | 120000  | 18492 | 127000                | 19703            |
+      | 180000  | 16242 | 191000                | 17303            |
+      | 210000  | 15117 | 223000                | 16103            |
+      | 240000  | 13992 | 255000                | 14903            |
+      | 600000  | 492   | 638000                | 540              |
+      | 700000  | 0     | 744000                | 0                |
