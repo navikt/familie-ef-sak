@@ -5,6 +5,7 @@ import no.nav.familie.ef.sak.felles.util.Utregning.rundNedTilNærmeste1000
 import no.nav.familie.ef.sak.felles.util.Utregning.rundNedTilNærmesteKrone
 import no.nav.familie.kontrakter.felles.Månedsperiode
 import java.math.BigDecimal
+import java.math.BigDecimal.ZERO
 import java.math.MathContext
 import java.math.RoundingMode
 import java.time.YearMonth
@@ -38,9 +39,9 @@ object BeregningUtils {
                 beløpFørSamordningUtenAvrunding.subtract(samordningsfradrag).setScale(0, RoundingMode.HALF_UP)
 
             val beløpFørSamordning =
-                if (beløpFørSamordningUtenAvrunding <= BigDecimal.ZERO) BigDecimal.ZERO else beløpFørSamordningUtenAvrunding
+                if (beløpFørSamordningUtenAvrunding <= ZERO) ZERO else beløpFørSamordningUtenAvrunding
 
-            val beløpTilUtbetalning = if (utbetaling <= BigDecimal.ZERO) BigDecimal.ZERO else utbetaling
+            val beløpTilUtbetalning = if (utbetaling <= ZERO) ZERO else utbetaling
 
             Beløpsperiode(
                 periode = it.periode,
@@ -61,7 +62,7 @@ object BeregningUtils {
         val totalInntekt = inntektsperiode.totalinntekt()
 
         if (erGomregning){
-            return BigDecimal(rundNedTilNærmeste100(totalInntekt))
+            return BigDecimal(rundNedTilNærmeste100(totalInntekt)) // TODO unødvendig hvis vi regner ut avrunder inntekt i inntektsjustering
         }
 
         return if (skalRundeNedTotalInntekt) BigDecimal(rundNedTilNærmeste1000(totalInntekt)) else totalInntekt
@@ -69,10 +70,10 @@ object BeregningUtils {
 
     private fun beregnAvkortning(grunnbeløp: BigDecimal, inntekt: BigDecimal): BigDecimal {
         val inntektOverHalveGrunnbeløp = inntekt.subtract(grunnbeløp.multiply(BigDecimal(0.5)))
-        return if (inntektOverHalveGrunnbeløp > BigDecimal.ZERO) {
+        return if (inntektOverHalveGrunnbeløp > ZERO) {
             inntektOverHalveGrunnbeløp.multiply(REDUKSJONSFAKTOR).setScale(5, RoundingMode.HALF_DOWN)
         } else {
-            BigDecimal.ZERO
+            ZERO
         }
     }
 
@@ -82,7 +83,7 @@ object BeregningUtils {
     ): List<Inntektsperiode> {
         val sistBrukteGrunnbeløp = Grunnbeløpsperioder.finnGrunnbeløp(sisteBrukteGrunnbeløpsdato)
         if (Grunnbeløpsperioder.nyesteGrunnbeløp == sistBrukteGrunnbeløp) {
-            return inntekter
+            return inntekter // TODO her skal vi vel ikke gomregne? Hvis retur - returner F, ikke R
         }
 
         return inntekter.flatMap { justerInntektsperiode(it, sistBrukteGrunnbeløp) }
@@ -105,16 +106,33 @@ object BeregningUtils {
             ) {
                 val faktor = grunnbeløp.beløp.divide(sistBrukteGrunnbeløp.grunnbeløp, MathContext.DECIMAL128)
 
-                val justertInntekt = inntekt.multiply(faktor).rundNedTilNærmesteKrone()
+                                val justertInntekt = inntekt.multiply(faktor).rundNedTilNærmesteKrone()
                 val justertDagsatsInntekt = dagsats?.multiply(faktor)?.rundNedTilNærmesteKrone()
                 val justertMånedinntekt = månedsinntekt?.multiply(faktor)?.rundNedTilNærmesteKrone()
-                Inntektsperiode(
+                val indeksjustert_R = Inntektsperiode(
                     periode = grunnbeløp.periode,
                     dagsats = justertDagsatsInntekt,
                     månedsinntekt = justertMånedinntekt,
                     inntekt = justertInntekt,
                     samordningsfradrag = samordningsfradrag,
-                )
+                ).totalinntekt()
+
+                println(indeksjustert_R)
+
+
+                val totalinntekt = inntektsperiode.totalinntekt()
+                val f = rundNedTilNærmeste1000(totalinntekt)
+
+//                val indeksjustertInntektF = rundNedTilNærmeste100(faktor.multiply(f.toBigDecimal()))
+                val indeksjustertInntektF = faktor.multiply(f.toBigDecimal())
+
+
+
+                //  inntektsperiode.copy(f = indeksjustertInntektF , typeF = "G")
+                // Versjon som kan virke, men som sletter bra real-inntekt-data
+                inntektsperiode.copy(dagsats = ZERO, månedsinntekt = ZERO, inntekt = indeksjustertInntektF)
+
+
             } else {
                 Inntektsperiode(
                     periode = grunnbeløp.periode,

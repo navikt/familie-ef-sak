@@ -170,8 +170,16 @@ internal class OmregningServiceTest : OppslagSpringRunnerTest() {
             assertThat(iverksettDto.vedtak.tilkjentYtelse?.andelerTilkjentYtelse?.size).isEqualTo(2) // skal være splittet
             // Sjekk andel etter ny g omregningsdato
             val andelTilkjentYtelseOmregnet = finnAndelEtterNyGDato(iverksettDto)!!
-            assertThat(andelTilkjentYtelseOmregnet.inntekt).isEqualTo(289300)
-            assertThat(andelTilkjentYtelseOmregnet.beløp).isEqualTo(12143)
+//            assertThat(andelTilkjentYtelseOmregnet.inntekt).isEqualTo(289300) // justert med R
+          assertThat(andelTilkjentYtelseOmregnet.inntekt).isEqualTo(289100) // justert med F
+           // assertThat(andelTilkjentYtelseOmregnet.beløp).isEqualTo(12143) // Justert med R
+            assertThat(andelTilkjentYtelseOmregnet.beløp).isEqualTo(12151) // Justert med F
+            //   assertThat(andelTilkjentYtelseOmregnet.beløp).isEqualTo(12155)  beløp med 1000 kr nedrunding i beregning
+            // samme beløp - 12155 -> R justert inntekt og 1000 ned i beregning
+
+
+
+
             // Sjekk inntektsperiode etter ny G omregning
             val inntektsperiodeEtterGomregning = finnInntektsperiodeEtterNyGDato(iverksettDto.behandling.behandlingId, 2022)
             assertThat(inntektsperiodeEtterGomregning.dagsats?.toInt()).isEqualTo(210)
