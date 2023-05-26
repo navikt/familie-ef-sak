@@ -2,13 +2,16 @@ package no.nav.familie.ef.sak.karakterutskrift
 
 import io.mockk.every
 import io.mockk.mockk
+import no.nav.familie.ef.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.brev.FrittståendeBrevService
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
+import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerService
 import no.nav.familie.ef.sak.repository.fagsak
+import no.nav.familie.kontrakter.ef.felles.FrittståendeBrevType
 import no.nav.familie.kontrakter.felles.oppgave.IdentGruppe
 import no.nav.familie.kontrakter.felles.oppgave.Oppgave
 import no.nav.familie.kontrakter.felles.oppgave.OppgaveIdentV2
@@ -24,13 +27,17 @@ internal class KarakterutskriftBrevTaskTest {
     private val oppgaveService = mockk<OppgaveService>()
     private val personopplysningerService = mockk<PersonopplysningerService>()
     private val frittståendeBrevService = mockk<FrittståendeBrevService>()
+    private val iverksettClient = mockk<IverksettClient>()
+    private val arbeidsfordelingService = mockk<ArbeidsfordelingService>()
 
-    private val karakterutskriftBrevTask = KarakterutskriftBrevTask(
+    private val karakterutskriftBrevTask = SendKarakterutskriftBrevTilIverksettTask(
         behandlingService,
         fagsakService,
         oppgaveService,
-        personopplysningerService,
         frittståendeBrevService,
+        personopplysningerService,
+        iverksettClient,
+        arbeidsfordelingService,
     )
 
     @Test
@@ -43,7 +50,7 @@ internal class KarakterutskriftBrevTaskTest {
         )
         every { fagsakService.finnFagsaker(any()) } returns emptyList()
 
-        val task = KarakterutskriftBrevTask.opprettTask(oppgaveId, KarakterutskriftBrevtype.HOVEDPERIODE, Year.of(2023))
+        val task = SendKarakterutskriftBrevTilIverksettTask.opprettTask(oppgaveId, FrittståendeBrevType.INNHENTING_AV_KARAKTERUTSKRIFT_HOVEDPERIODE, Year.of(2023))
 
         val feil = assertThrows<Feil> { karakterutskriftBrevTask.doTask(task) }
         assertThat(feil.frontendFeilmelding?.contains("Fant ikke fagsak"))
@@ -60,7 +67,7 @@ internal class KarakterutskriftBrevTaskTest {
         every { behandlingService.finnesBehandlingForFagsak(any()) } returns false
         every { fagsakService.finnFagsaker(any()) } returns listOf(fagsak())
 
-        val task = KarakterutskriftBrevTask.opprettTask(oppgaveId, KarakterutskriftBrevtype.HOVEDPERIODE, Year.of(2023))
+        val task = SendKarakterutskriftBrevTilIverksettTask.opprettTask(oppgaveId, FrittståendeBrevType.INNHENTING_AV_KARAKTERUTSKRIFT_HOVEDPERIODE, Year.of(2023))
 
         val feil = assertThrows<Feil> { karakterutskriftBrevTask.doTask(task) }
         assertThat(feil.frontendFeilmelding?.contains("Fant ikke behandling"))
