@@ -3,6 +3,7 @@ package no.nav.familie.ef.sak.karakterutskrift
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.ef.sak.oppgave.OppgaveUtil
+import no.nav.familie.kontrakter.ef.felles.FrittståendeBrevType
 import no.nav.familie.kontrakter.felles.Behandlingstema
 import no.nav.familie.kontrakter.felles.Tema
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveRequest
@@ -26,14 +27,11 @@ class AutomatiskBrevInnhentingKarakterutskriftService(
     val fristutvidet = LocalDate.parse("2023-05-18")
 
     @Transactional
-    fun opprettTasks(brevtype: KarakterutskriftBrevtype, liveRun: Boolean) {
+    fun opprettTasks(brevtype: FrittståendeBrevType, liveRun: Boolean) {
         val mappeId = oppgaveService.finnMapper(OppgaveUtil.ENHET_NR_NAY)
             .single { it.navn == "64 Utdanning" }.id
 
-        val oppgaveFrist = when (brevtype) {
-            KarakterutskriftBrevtype.HOVEDPERIODE -> fristHovedperiode
-            KarakterutskriftBrevtype.UTVIDET -> fristutvidet
-        }
+        val oppgaveFrist = utledOppgavefrist(brevtype)
         val opppgaver = oppgaveService.hentOppgaver(
             FinnOppgaveRequest(
                 tema = Tema.ENF,
@@ -57,4 +55,11 @@ class AutomatiskBrevInnhentingKarakterutskriftService(
             }
         }
     }
+
+    private fun utledOppgavefrist(brevtype: FrittståendeBrevType) =
+        when (brevtype) {
+            FrittståendeBrevType.INNHENTING_AV_KARAKTERUTSKRIFT_HOVEDPERIODE -> fristHovedperiode
+            FrittståendeBrevType.INNHENTING_AV_KARAKTERUTSKRIFT_UTVIDET_PERIODE -> fristutvidet
+            else -> throw Feil("Skal ikke opprette automatiske innhentingsbrev for frittstående brev av type $brevtype")
+        }
 }

@@ -5,6 +5,7 @@ import no.nav.familie.ef.sak.felles.util.medContentTypeJsonUTF8
 import no.nav.familie.http.client.AbstractPingableRestClient
 import no.nav.familie.http.client.MultipartBuilder
 import no.nav.familie.kontrakter.ef.felles.FrittståendeBrevDto
+import no.nav.familie.kontrakter.ef.felles.KarakterutskriftBrevDto
 import no.nav.familie.kontrakter.ef.infotrygd.OpprettStartBehandlingHendelseDto
 import no.nav.familie.kontrakter.ef.iverksett.BehandlingsstatistikkDto
 import no.nav.familie.kontrakter.ef.iverksett.IverksettDto
@@ -104,5 +105,9 @@ class IverksettClient(
 
     fun sendFrittståendeBrev(frittståendeBrevDto: FrittståendeBrevDto) {
         postForEntity<Any>(URI.create("$familieEfIverksettUri/api/brev/frittstaende"), frittståendeBrevDto)
+    }
+
+    fun håndterUtsendingAvKarakterutskriftBrev(karakterutskriftBrevDto: KarakterutskriftBrevDto) {
+        postForEntity<Any>(URI.create("$familieEfIverksettUri/api/brev/frittstaende/innhenting-karakterutskrift"), karakterutskriftBrevDto)
     }
 }
