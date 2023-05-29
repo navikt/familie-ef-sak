@@ -14,8 +14,10 @@ class BeregningService(
     private val featureToggleService: FeatureToggleService,
 ) {
 
-    fun beregnYtelse(vedtaksperioder: List<Månedsperiode>, inntektsperioder: List<Inntektsperiode>,
-                     erGomregning: Boolean = false
+    fun beregnYtelse(
+        vedtaksperioder: List<Månedsperiode>,
+        inntektsperioder: List<Inntektsperiode>,
+        erGomregning: Boolean = false,
     ): List<Beløpsperiode> {
         validerInnteksperioder(inntektsperioder, vedtaksperioder)
         validerVedtaksperioder(vedtaksperioder)

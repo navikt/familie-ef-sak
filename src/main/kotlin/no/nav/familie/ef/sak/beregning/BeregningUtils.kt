@@ -19,7 +19,7 @@ object BeregningUtils {
     fun beregnStønadForInntekt(
         inntektsperiode: Inntektsperiode,
         skalRundeNedTotalInntekt: Boolean,
-        erGomregning: Boolean = false
+        erGomregning: Boolean = false,
     ): List<Beløpsperiode> {
         val periode = inntektsperiode.periode
         val samordningsfradrag = inntektsperiode.samordningsfradrag
@@ -61,7 +61,7 @@ object BeregningUtils {
     private fun beregnTotalinntekt(inntektsperiode: Inntektsperiode, skalRundeNedTotalInntekt: Boolean, erGomregning: Boolean = false): BigDecimal {
         val totalInntekt = inntektsperiode.totalinntekt()
 
-        if (erGomregning){
+        if (erGomregning) {
             return BigDecimal(rundNedTilNærmeste100(totalInntekt)) // TODO unødvendig hvis vi regner ut avrunder inntekt i inntektsjustering
         }
 
@@ -106,7 +106,7 @@ object BeregningUtils {
             ) {
                 val faktor = grunnbeløp.beløp.divide(sistBrukteGrunnbeløp.grunnbeløp, MathContext.DECIMAL128)
 
-                                val justertInntekt = inntekt.multiply(faktor).rundNedTilNærmesteKrone()
+                val justertInntekt = inntekt.multiply(faktor).rundNedTilNærmesteKrone()
                 val justertDagsatsInntekt = dagsats?.multiply(faktor)?.rundNedTilNærmesteKrone()
                 val justertMånedinntekt = månedsinntekt?.multiply(faktor)?.rundNedTilNærmesteKrone()
                 val indeksjustert_R = Inntektsperiode(
@@ -119,20 +119,15 @@ object BeregningUtils {
 
                 println(indeksjustert_R)
 
-
                 val totalinntekt = inntektsperiode.totalinntekt()
                 val f = rundNedTilNærmeste1000(totalinntekt)
 
 //                val indeksjustertInntektF = rundNedTilNærmeste100(faktor.multiply(f.toBigDecimal()))
-                val indeksjustertInntektF = faktor.multiply(f.toBigDecimal())
-
-
+                val indeksjustertInntektF = faktor.multiply(f.toBigDecimal()).rundNedTilNærmesteKrone()
 
                 //  inntektsperiode.copy(f = indeksjustertInntektF , typeF = "G")
                 // Versjon som kan virke, men som sletter bra real-inntekt-data
-                inntektsperiode.copy(dagsats = ZERO, månedsinntekt = ZERO, inntekt = indeksjustertInntektF)
-
-
+                inntektsperiode.copy(dagsats = ZERO, månedsinntekt = ZERO, inntekt = indeksjustertInntektF, periode = grunnbeløp.periode)
             } else {
                 Inntektsperiode(
                     periode = grunnbeløp.periode,

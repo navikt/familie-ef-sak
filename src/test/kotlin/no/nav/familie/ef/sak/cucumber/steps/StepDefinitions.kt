@@ -319,8 +319,7 @@ class StepDefinitions {
 
     private fun mockGOmregning(
         forrigeBehandling: Behandling,
-        fagsakId: UUID
-
+        fagsakId: UUID,
     ) {
         every { behandlingService.finnSisteIverksatteBehandling(any()) } returns forrigeBehandling
         every { behandlingService.finnesÅpenBehandling(any()) } returns false
@@ -333,7 +332,7 @@ class StepDefinitions {
             type = BehandlingType.REVURDERING,
             forrigeBehandlingId = forrigeBehandling.id,
             vedtakstidspunkt = LocalDateTime.MIN,
-            årsak = BehandlingÅrsak.G_OMREGNING
+            årsak = BehandlingÅrsak.G_OMREGNING,
         )
         every {
             behandlingService.opprettBehandling(
@@ -538,6 +537,7 @@ class StepDefinitions {
                 parseValgfriÅrMånedEllerDato(Domenebegrep.TIL_OG_MED_DATO, rad).sisteDagenIMånedenEllerDefault(fraOgMed)
             val beløp = parseValgfriInt(VedtakDomenebegrep.BELØP, rad)
             val inntekt = parseValgfriInt(VedtakDomenebegrep.INNTEKT, rad)
+            // val indeksjustertInntekt = parseValgfriInt(VedtakDomenebegrep.INDEKSJUSTERT_INNTEKT, rad)
             assertThat(tilkjentYtelseSlot.captured.andelerTilkjentYtelse[index].stønadFom).isEqualTo(fraOgMed)
             assertThat(tilkjentYtelseSlot.captured.andelerTilkjentYtelse[index].stønadTom).isEqualTo(tilOgMed)
             assertThat(tilkjentYtelseSlot.captured.andelerTilkjentYtelse[index].beløp).isEqualTo(beløp)
