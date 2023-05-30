@@ -10,12 +10,13 @@ import no.nav.familie.ef.sak.brev.dto.SanityBrevRequestInnhentingKarakterutskrif
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.felles.util.norskFormat
+import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.iverksett.tilIverksettDto
-import no.nav.familie.ef.sak.karakterutskrift.KarakterutskriftBrevtype
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerService
+import no.nav.familie.kontrakter.ef.felles.FrittståendeBrevType
 import no.nav.familie.kontrakter.ef.iverksett.Brevmottaker
 import no.nav.familie.kontrakter.felles.objectMapper
 import org.springframework.stereotype.Service
@@ -60,11 +61,11 @@ class FrittståendeBrevService(
         mellomlagringBrevService.slettMellomlagretFrittståendeBrev(fagsak.id, saksbehandlerIdent)
     }
 
-    fun lagBrevForInnhentingAvKarakterutskrift(visningsnavn: String, personIdent: String, brevtype: KarakterutskriftBrevtype): ByteArray {
+    fun lagBrevForInnhentingAvKarakterutskrift(visningsnavn: String, personIdent: String, brevtype: FrittståendeBrevType): ByteArray {
         val brevRequest = SanityBrevRequestInnhentingKarakterutskrift(flettefelter = Flettefelter(navn = listOf(visningsnavn), fodselsnummer = listOf(personIdent)))
 
         val html = brevClient.genererHtml(
-            brevmal = brevtype.brevMal,
+            brevmal = utledBrevMal(brevtype),
             saksbehandlerBrevrequest = objectMapper.valueToTree(brevRequest),
             saksbehandlersignatur = "",
             enhet = "NAV Arbeid og ytelser",
@@ -109,5 +110,11 @@ class FrittståendeBrevService(
             "Kan ikke sende frittstående brev uten at minst en brevmottaker er lagt til"
         }
         return mapMottakere(mottakere)
+    }
+
+    private fun utledBrevMal(brevType: FrittståendeBrevType) = when (brevType) {
+        FrittståendeBrevType.INNHENTING_AV_KARAKTERUTSKRIFT_HOVEDPERIODE -> "innhentingKarakterutskriftHovedperiode"
+        FrittståendeBrevType.INNHENTING_AV_KARAKTERUTSKRIFT_UTVIDET_PERIODE -> "innhentingKarakterutskriftUtvidetPeriode"
+        else -> throw Feil("Skal ikke opprette automatiske innhentingsbrev for frittstående brev av type $brevType")
     }
 }
