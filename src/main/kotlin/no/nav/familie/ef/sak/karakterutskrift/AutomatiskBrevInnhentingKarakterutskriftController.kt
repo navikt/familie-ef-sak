@@ -38,7 +38,7 @@ class AutomatiskBrevInnhentingKarakterutskriftController(
     }
 
     private fun validerBrevtype(brevtype: FrittståendeBrevType) {
-        feilHvisIkke(
+        feilHvis(
             brevtype != FrittståendeBrevType.INNHENTING_AV_KARAKTERUTSKRIFT_HOVEDPERIODE &&
                 brevtype != FrittståendeBrevType.INNHENTING_AV_KARAKTERUTSKRIFT_UTVIDET_PERIODE,
         ) {
