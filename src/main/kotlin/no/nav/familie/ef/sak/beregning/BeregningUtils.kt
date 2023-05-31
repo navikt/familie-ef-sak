@@ -2,7 +2,6 @@ package no.nav.familie.ef.sak.beregning
 
 import no.nav.familie.ef.sak.felles.util.Utregning.rundNedTilNærmeste100
 import no.nav.familie.ef.sak.felles.util.Utregning.rundNedTilNærmeste1000
-import no.nav.familie.ef.sak.felles.util.Utregning.rundNedTilNærmesteKrone
 import no.nav.familie.kontrakter.felles.Månedsperiode
 import java.math.BigDecimal
 import java.math.BigDecimal.ZERO
@@ -58,11 +57,15 @@ object BeregningUtils {
         }
     }
 
-    private fun beregnTotalinntekt(inntektsperiode: Inntektsperiode, skalRundeNedTotalInntekt: Boolean, erGomregning: Boolean = false): BigDecimal {
+    private fun beregnTotalinntekt(
+        inntektsperiode: Inntektsperiode,
+        skalRundeNedTotalInntekt: Boolean,
+        erGomregning: Boolean = false,
+    ): BigDecimal {
         val totalInntekt = inntektsperiode.totalinntekt()
 
         if (erGomregning) {
-            return BigDecimal(rundNedTilNærmeste100(totalInntekt)) // TODO unødvendig hvis vi regner ut avrunder inntekt i inntektsjustering
+            return rundNedTilNærmeste100(totalInntekt) // TODO unødvendig hvis vi regner ut avrunder inntekt i inntektsjustering
         }
 
         return if (skalRundeNedTotalInntekt) BigDecimal(rundNedTilNærmeste1000(totalInntekt)) else totalInntekt
@@ -93,9 +96,6 @@ object BeregningUtils {
         inntektsperiode: Inntektsperiode,
         sistBrukteGrunnbeløp: Grunnbeløp,
     ): List<Inntektsperiode> {
-        val inntekt = inntektsperiode.inntekt
-        val dagsats = inntektsperiode.dagsats
-        val månedsinntekt = inntektsperiode.månedsinntekt
 
         val samordningsfradrag = inntektsperiode.samordningsfradrag
 
@@ -106,34 +106,29 @@ object BeregningUtils {
             ) {
                 val faktor = grunnbeløp.beløp.divide(sistBrukteGrunnbeløp.grunnbeløp, MathContext.DECIMAL128)
 
-                val justertInntekt = inntekt.multiply(faktor).rundNedTilNærmesteKrone()
-                val justertDagsatsInntekt = dagsats?.multiply(faktor)?.rundNedTilNærmesteKrone()
-                val justertMånedinntekt = månedsinntekt?.multiply(faktor)?.rundNedTilNærmesteKrone()
-                val indeksjustert_R = Inntektsperiode(
-                    periode = grunnbeløp.periode,
-                    dagsats = justertDagsatsInntekt,
-                    månedsinntekt = justertMånedinntekt,
-                    inntekt = justertInntekt,
-                    samordningsfradrag = samordningsfradrag,
-                ).totalinntekt()
-
-                println(indeksjustert_R)
+                // Her velger vi å tolke alle inntekter (totalinntekt) som "uavrundet inntekter" (reell).
+                // Vi runder derfor ned til nærmeste 1000 før vi justerer inntekt.
+                // Alternativ er "ikke rund ned g-beløp til nærmeste 1000" - gir potensielt fel ved
+                // eksisterende beløp som tilfeldigvis er 100 (pre - warning)
 
                 val totalinntekt = inntektsperiode.totalinntekt()
                 val f = rundNedTilNærmeste1000(totalinntekt)
 
-//                val indeksjustertInntektF = rundNedTilNærmeste100(faktor.multiply(f.toBigDecimal()))
-                val indeksjustertInntektF = faktor.multiply(f.toBigDecimal()).rundNedTilNærmesteKrone()
+                val indeksjustertInntektF = rundNedTilNærmeste100(faktor.multiply(f.toBigDecimal()))
 
-                //  inntektsperiode.copy(f = indeksjustertInntektF , typeF = "G")
-                // Versjon som kan virke, men som sletter bra real-inntekt-data
-                inntektsperiode.copy(dagsats = ZERO, månedsinntekt = ZERO, inntekt = indeksjustertInntektF, periode = grunnbeløp.periode)
+                // Versjon som kan virke, men som sletter inntekt-data saksbehandler har lagt inn (dag/mnd)
+                inntektsperiode.copy(
+                    dagsats = ZERO,
+                    månedsinntekt = ZERO,
+                    inntekt = indeksjustertInntektF,
+                    periode = grunnbeløp.periode,
+                )
             } else {
                 Inntektsperiode(
                     periode = grunnbeløp.periode,
                     dagsats = inntektsperiode.dagsats,
                     månedsinntekt = inntektsperiode.månedsinntekt,
-                    inntekt = inntekt,
+                    inntekt = inntektsperiode.inntekt,
                     samordningsfradrag = samordningsfradrag,
                 )
             }
