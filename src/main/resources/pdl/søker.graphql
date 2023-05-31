@@ -220,14 +220,6 @@ query($ident: ID!){
             gyldigFraOgMed
             gyldigTilOgMed
         }
-        tilrettelagtKommunikasjon {
-            talespraaktolk {
-                spraak
-            }
-            tegnspraaktolk {
-                spraak
-            }
-        }
         innflyttingTilNorge {
             fraflyttingsland
             fraflyttingsstedIUtlandet
