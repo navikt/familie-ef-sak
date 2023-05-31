@@ -35,7 +35,6 @@ fun opprettGrunnlagsdata(
         oppholdsadresse = emptyList(),
         sivilstand = emptyList(),
         statsborgerskap = emptyList(),
-        tilrettelagtKommunikasjon = emptyList(),
         innflyttingTilNorge = innflyttingTilNorge,
         utflyttingFraNorge = utflyttingFraNorge,
         vergemaalEllerFremtidsfullmakt = emptyList(),

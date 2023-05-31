@@ -141,7 +141,6 @@ object PdlTestdata {
                     ),
                 ),
                 statsborgerskap,
-                listOf(TilrettelagtKommunikasjon(Tolk(""), Tolk(""))),
                 innflyttingTilNorge,
                 utflyttingFraNorge,
                 listOf(

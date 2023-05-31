@@ -117,7 +117,6 @@ data class PdlSøker(
     val oppholdsadresse: List<Oppholdsadresse>,
     val sivilstand: List<Sivilstand>,
     val statsborgerskap: List<Statsborgerskap>,
-    val tilrettelagtKommunikasjon: List<TilrettelagtKommunikasjon>,
     val innflyttingTilNorge: List<InnflyttingTilNorge>,
     val utflyttingFraNorge: List<UtflyttingFraNorge>,
     val vergemaalEllerFremtidsfullmakt: List<VergemaalEllerFremtidsfullmakt>,
@@ -377,11 +376,6 @@ data class Personnavn(
     val etternavn: String,
     val fornavn: String,
     val mellomnavn: String?,
-)
-
-data class TilrettelagtKommunikasjon(
-    @JsonProperty("talespraaktolk") val talespråktolk: Tolk?,
-    @JsonProperty("tegnspraaktolk") val tegnspråktolk: Tolk?,
 )
 
 data class Tolk(@JsonProperty("spraak") val språk: String?)
