@@ -1,6 +1,5 @@
 package no.nav.familie.ef.sak.beregning
 
-import no.nav.familie.ef.sak.felles.util.Utregning
 import no.nav.familie.ef.sak.felles.util.Utregning.rundNedTilNærmeste100
 import no.nav.familie.ef.sak.felles.util.Utregning.rundNedTilNærmeste1000
 import no.nav.familie.kontrakter.felles.Månedsperiode
