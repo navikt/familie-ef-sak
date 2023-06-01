@@ -339,11 +339,40 @@ internal class BeregningUtilsTest {
 
         @Test
         internal fun `skal runde beregnet inntekt ned til nærmeste 1000`() {
-            val årsinntekt = 500_500.toBigDecimal()
+            val årsinntekt = 500_501.toBigDecimal()
             val inntektsperiodeMedÅrsinntekt = inntektsperiode.copy(inntekt = årsinntekt)
 
             val resultat = BeregningUtils.beregnStønadForInntekt(inntektsperiodeMedÅrsinntekt, true).single()
             assertThat(resultat.beregningsgrunnlag?.inntekt).isEqualTo((500_000.toBigDecimal()))
+        }
+
+        @Test
+        internal fun `skal runde beregnet inntekt ned til nærmeste 1000 ved både års og månedsinntekt`() {
+            val årsinntekt = 500_500.toBigDecimal()
+            val månedsinntekt = 1000.toBigDecimal()
+            val inntektsperiodeMedÅrsinntekt = inntektsperiode.copy(inntekt = årsinntekt, månedsinntekt = månedsinntekt)
+
+            val resultat = BeregningUtils.beregnStønadForInntekt(inntektsperiodeMedÅrsinntekt, true).single()
+            assertThat(resultat.beregningsgrunnlag?.inntekt).isEqualTo((512_000.toBigDecimal()))
+        }
+
+        @Test
+        internal fun `skal runde beregnet inntekt ned til nærmeste 1000 ved både årsinntekt og dagsats`() {
+            val årsinntekt = 500_500.toBigDecimal()
+            val dagsats = 100.toBigDecimal()
+            val inntektsperiodeMedÅrsinntekt = inntektsperiode.copy(inntekt = årsinntekt, dagsats = dagsats)
+
+            val resultat = BeregningUtils.beregnStønadForInntekt(inntektsperiodeMedÅrsinntekt, true).single()
+            assertThat(resultat.beregningsgrunnlag?.inntekt).isEqualTo((526_000.toBigDecimal()))
+        }
+
+        @Test
+        internal fun `skal ikke runde beregnet inntekt ned til nærmeste 1000 hvis kun årsinntekt finnes og denne allerede er rundet til nærmeste 100`() {
+            val årsinntekt = 500_500.toBigDecimal()
+            val inntektsperiodeMedÅrsinntekt = inntektsperiode.copy(inntekt = årsinntekt)
+
+            val resultat = BeregningUtils.beregnStønadForInntekt(inntektsperiodeMedÅrsinntekt, true).single()
+            assertThat(resultat.beregningsgrunnlag?.inntekt).isEqualTo((500_500.toBigDecimal()))
         }
     }
 }

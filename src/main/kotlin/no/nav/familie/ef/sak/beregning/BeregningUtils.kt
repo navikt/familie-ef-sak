@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.beregning
 
+import no.nav.familie.ef.sak.felles.util.Utregning
 import no.nav.familie.ef.sak.felles.util.Utregning.rundNedTilNærmeste100
 import no.nav.familie.ef.sak.felles.util.Utregning.rundNedTilNærmeste1000
 import no.nav.familie.kontrakter.felles.Månedsperiode
@@ -58,7 +59,9 @@ object BeregningUtils {
 
     private fun beregnTotalinntekt(inntektsperiode: Inntektsperiode, skalRundeNedTotalInntekt: Boolean): BigDecimal {
         val totalInntekt = inntektsperiode.totalinntekt()
-        return if (skalRundeNedTotalInntekt) BigDecimal(rundNedTilNærmeste1000(totalInntekt)) else totalInntekt
+        val skalRundeNedBasertPåInntektsperiodensVerdier = inntektsperiode.skalRundeAvTilNærmeste1000()
+
+        return if (skalRundeNedTotalInntekt && skalRundeNedBasertPåInntektsperiodensVerdier) BigDecimal(rundNedTilNærmeste1000(totalInntekt)) else totalInntekt
     }
 
     private fun beregnAvkortning(grunnbeløp: BigDecimal, inntekt: BigDecimal): BigDecimal {
