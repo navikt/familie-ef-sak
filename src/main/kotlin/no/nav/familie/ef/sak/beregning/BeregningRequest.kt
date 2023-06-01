@@ -36,6 +36,22 @@ data class Inntektsperiode(
             (this.dagsats ?: BigDecimal.ZERO).multiply(BeregningUtils.DAGSATS_ANTALL_DAGER) +
             (this.månedsinntekt ?: BigDecimal.ZERO).multiply(BeregningUtils.ANTALL_MÅNEDER_ÅR)
     }
+
+    /**
+     * Dersom den eksisterende årsinntekten er g-omregnet til nærmeste 100,
+     * så skal vi ikke nedjustere denne til nærmeste 1000
+     */
+    fun skalRundeAvTilNærmeste1000(): Boolean {
+        if (this.dagsats != null && this.dagsats > BigDecimal.ZERO) {
+            return true
+        } else if (this.månedsinntekt != null && this.månedsinntekt > BigDecimal.ZERO) {
+            return true
+        } else if (this.inntekt.remainder(BigDecimal(100)) > BigDecimal.ZERO) {
+            return true
+        } else {
+            return false
+        }
+    }
 }
 
 fun List<Inntekt>.tilInntektsperioder() = this.mapIndexed { index, inntektsperiode ->
