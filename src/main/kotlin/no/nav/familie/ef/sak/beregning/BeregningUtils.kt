@@ -96,7 +96,6 @@ object BeregningUtils {
         inntektsperiode: Inntektsperiode,
         sistBrukteGrunnbeløp: Grunnbeløp,
     ): List<Inntektsperiode> {
-
         val samordningsfradrag = inntektsperiode.samordningsfradrag
 
         return finnGrunnbeløpsPerioder(inntektsperiode.periode).map { grunnbeløp ->

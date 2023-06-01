@@ -129,23 +129,15 @@ internal class OmregningServiceTest : OppslagSpringRunnerTest() {
             assertThat(iverksettDto.vedtak.tilkjentYtelse?.andelerTilkjentYtelse?.size).isEqualTo(2) // skal være splittet
             // Sjekk andel etter ny g omregningsdato
             val andelTilkjentYtelseOmregnet = finnAndelEtterNyGDato(iverksettDto)!!
-            // assertThat(andelTilkjentYtelseOmregnet.inntekt).isEqualTo(289300) justert med R
             assertThat(andelTilkjentYtelseOmregnet.inntekt).isEqualTo(289100) // justert med F
-            // assertThat(andelTilkjentYtelseOmregnet.beløp).isEqualTo(12143) justert med R
             assertThat(andelTilkjentYtelseOmregnet.beløp).isEqualTo(12151)
             // Sjekk inntektsperiode etter ny G omregning
             val inntektsperiodeEtterGomregning = finnInntektsperiodeEtterNyGDato(iverksettDto.behandling.behandlingId, 2022)
-            /* justert med R
-            assertThat(inntektsperiodeEtterGomregning.dagsats?.toInt()).isEqualTo(210)
-            assertThat(inntektsperiodeEtterGomregning.månedsinntekt?.toInt()).isEqualTo(2097)
-            assertThat(inntektsperiodeEtterGomregning.inntekt.toInt()).isEqualTo(209548)
-            assertThat(inntektsperiodeEtterGomregning.totalinntekt().toInt()).isEqualTo(289312)
-             */
 
             assertThat(inntektsperiodeEtterGomregning.dagsats?.toInt()).isEqualTo(0)
             assertThat(inntektsperiodeEtterGomregning.månedsinntekt?.toInt()).isEqualTo(0)
-            assertThat(inntektsperiodeEtterGomregning.inntekt.toInt()).isEqualTo(289172)
-            assertThat(inntektsperiodeEtterGomregning.totalinntekt().toInt()).isEqualTo(289172)
+            assertThat(inntektsperiodeEtterGomregning.inntekt.toInt()).isEqualTo(289100)
+            assertThat(inntektsperiodeEtterGomregning.totalinntekt().toInt()).isEqualTo(289100)
         }
     }
 
@@ -197,8 +189,8 @@ internal class OmregningServiceTest : OppslagSpringRunnerTest() {
 
             assertThat(inntektsperiodeEtterGomregning.dagsats?.toInt()).isEqualTo(0)
             assertThat(inntektsperiodeEtterGomregning.månedsinntekt?.toInt()).isEqualTo(0)
-            assertThat(inntektsperiodeEtterGomregning.inntekt.toInt()).isEqualTo(289172)
-            assertThat(inntektsperiodeEtterGomregning.totalinntekt().toInt()).isEqualTo(289172)
+            assertThat(inntektsperiodeEtterGomregning.inntekt.toInt()).isEqualTo(289100)
+            assertThat(inntektsperiodeEtterGomregning.totalinntekt().toInt()).isEqualTo(289100)
         }
     }
 
@@ -227,8 +219,8 @@ internal class OmregningServiceTest : OppslagSpringRunnerTest() {
             val inntektsperiodeEtterGomregning = finnInntektsperiodeEtterNyGDato(iverksettDto.behandling.behandlingId, 2023)
             assertThat(inntektsperiodeEtterGomregning.dagsats?.toInt()).isEqualTo(0)
             assertThat(inntektsperiodeEtterGomregning.månedsinntekt?.toInt()).isEqualTo(0)
-            assertThat(inntektsperiodeEtterGomregning.inntekt.toInt()).isEqualTo(223455)
-            assertThat(inntektsperiodeEtterGomregning.totalinntekt().toInt()).isEqualTo(223455)
+            assertThat(inntektsperiodeEtterGomregning.inntekt.toInt()).isEqualTo(223400)
+            assertThat(inntektsperiodeEtterGomregning.totalinntekt().toInt()).isEqualTo(223400)
         }
     }
 

@@ -10,13 +10,13 @@ internal class UtregningTest {
 
     @Test
     internal fun `skal avrunde ned til næmeste 100`() {
-        assertThat(rundNedTilNærmeste100(BigDecimal(0))).isEqualTo(0)
-        assertThat(rundNedTilNærmeste100(BigDecimal(50))).isEqualTo(0)
-        assertThat(rundNedTilNærmeste100(BigDecimal(99.999))).isEqualTo(0)
-        assertThat(rundNedTilNærmeste100(BigDecimal(100))).isEqualTo(100)
-        assertThat(rundNedTilNærmeste100(BigDecimal(101))).isEqualTo(100)
-        assertThat(rundNedTilNærmeste100(BigDecimal(199))).isEqualTo(100)
-        assertThat(rundNedTilNærmeste100(BigDecimal(2199))).isEqualTo(2100)
+        assertThat(rundNedTilNærmeste100(BigDecimal(0))).isEqualTo(0.toBigDecimal())
+        assertThat(rundNedTilNærmeste100(BigDecimal(50))).isEqualTo(0.toBigDecimal())
+        assertThat(rundNedTilNærmeste100(BigDecimal(99.999))).isEqualTo(0.toBigDecimal())
+        assertThat(rundNedTilNærmeste100(BigDecimal(100))).isEqualTo(100.toBigDecimal())
+        assertThat(rundNedTilNærmeste100(BigDecimal(101))).isEqualTo(100.toBigDecimal())
+        assertThat(rundNedTilNærmeste100(BigDecimal(199))).isEqualTo(100.toBigDecimal())
+        assertThat(rundNedTilNærmeste100(BigDecimal(2199))).isEqualTo(2100.toBigDecimal())
     }
 
     @Test
