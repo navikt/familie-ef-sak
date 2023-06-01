@@ -20,6 +20,7 @@ import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.fagsak.domain.FagsakPerson
 import no.nav.familie.ef.sak.fagsak.dto.MigrerRequestDto
 import no.nav.familie.ef.sak.fagsak.dto.MigreringInfo
+import no.nav.familie.ef.sak.felles.util.DatoUtil
 import no.nav.familie.ef.sak.infotrygd.InfotrygdService
 import no.nav.familie.ef.sak.infotrygd.InfotrygdStønadPerioderDto
 import no.nav.familie.ef.sak.infotrygd.SummertInfotrygdPeriodeDto
@@ -306,7 +307,7 @@ class MigreringService(
         iverksettClient.iverksettUtenBrev(iverksettDto)
         taskService.save(PollStatusFraIverksettTask.opprettTask(behandling.id))
 
-        if (periode.tom >= YearMonth.now()) {
+        if (periode.tom >= DatoUtil.årMånedNå()) {
             taskService.save(
                 SjekkMigrertStatusIInfotrygdTask.opprettTask(
                     behandling.id,
