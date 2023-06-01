@@ -17,14 +17,13 @@ class BeregningService(
     fun beregnYtelse(
         vedtaksperioder: List<Månedsperiode>,
         inntektsperioder: List<Inntektsperiode>,
-        erGomregning: Boolean = false,
     ): List<Beløpsperiode> {
         validerInnteksperioder(inntektsperioder, vedtaksperioder)
         validerVedtaksperioder(vedtaksperioder)
 
         val skalRundeNedTotalInntekt = featureToggleService.isEnabled(Toggle.ULIKE_INNTEKTER)
         val beløpForInnteksperioder = inntektsperioder.flatMap {
-            BeregningUtils.beregnStønadForInntekt(it, skalRundeNedTotalInntekt, erGomregning)
+            BeregningUtils.beregnStønadForInntekt(it, skalRundeNedTotalInntekt)
         }
 
         return vedtaksperioder.flatMap {

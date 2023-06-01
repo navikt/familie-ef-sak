@@ -18,11 +18,10 @@ object BeregningUtils {
     fun beregnStønadForInntekt(
         inntektsperiode: Inntektsperiode,
         skalRundeNedTotalInntekt: Boolean,
-        erGomregning: Boolean = false,
     ): List<Beløpsperiode> {
         val periode = inntektsperiode.periode
         val samordningsfradrag = inntektsperiode.samordningsfradrag
-        val totalInntekt = beregnTotalinntekt(inntektsperiode, skalRundeNedTotalInntekt, erGomregning)
+        val totalInntekt = beregnTotalinntekt(inntektsperiode, skalRundeNedTotalInntekt)
 
         return finnGrunnbeløpsPerioder(periode).map {
             val avkortningPerMåned = beregnAvkortning(it.beløp, totalInntekt).divide(ANTALL_MÅNEDER_ÅR)
@@ -57,17 +56,8 @@ object BeregningUtils {
         }
     }
 
-    private fun beregnTotalinntekt(
-        inntektsperiode: Inntektsperiode,
-        skalRundeNedTotalInntekt: Boolean,
-        erGomregning: Boolean = false,
-    ): BigDecimal {
+    private fun beregnTotalinntekt(inntektsperiode: Inntektsperiode, skalRundeNedTotalInntekt: Boolean): BigDecimal {
         val totalInntekt = inntektsperiode.totalinntekt()
-
-        if (erGomregning) {
-            return rundNedTilNærmeste100(totalInntekt) // TODO unødvendig hvis vi regner ut avrunder inntekt i inntektsjustering
-        }
-
         return if (skalRundeNedTotalInntekt) BigDecimal(rundNedTilNærmeste1000(totalInntekt)) else totalInntekt
     }
 
@@ -86,7 +76,7 @@ object BeregningUtils {
     ): List<Inntektsperiode> {
         val sistBrukteGrunnbeløp = Grunnbeløpsperioder.finnGrunnbeløp(sisteBrukteGrunnbeløpsdato)
         if (Grunnbeløpsperioder.nyesteGrunnbeløp == sistBrukteGrunnbeløp) {
-            return inntekter // TODO her skal vi vel ikke gomregne? Hvis retur - returner F, ikke R
+            return inntekter
         }
 
         return inntekter.flatMap { justerInntektsperiode(it, sistBrukteGrunnbeløp) }
