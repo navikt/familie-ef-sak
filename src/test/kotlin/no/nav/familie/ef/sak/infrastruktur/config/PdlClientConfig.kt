@@ -196,7 +196,6 @@ class PdlClientConfig {
                 oppholdsadresse = listOf(),
                 sivilstand = sivilstand(),
                 statsborgerskap = statsborgerskap(),
-                tilrettelagtKommunikasjon = listOf(),
                 innflyttingTilNorge = listOf(InnflyttingTilNorge("SWE", "Stockholm", folkeregistermetadata)),
                 utflyttingFraNorge = listOf(
                     UtflyttingFraNorge(

@@ -891,37 +891,6 @@
         },
         "nullable" : false
       },
-      "tilrettelagtKommunikasjon" : {
-        "name" : "tilrettelagtKommunikasjon",
-        "type" : "Collection",
-        "fields" : {
-          "talespråktolk" : {
-            "name" : "talespråktolk",
-            "type" : "Object",
-            "fields" : {
-              "språk" : {
-                "name" : "språk",
-                "type" : "String",
-                "nullable" : true
-              }
-            },
-            "nullable" : true
-          },
-          "tegnspråktolk" : {
-            "name" : "tegnspråktolk",
-            "type" : "Object",
-            "fields" : {
-              "språk" : {
-                "name" : "språk",
-                "type" : "String",
-                "nullable" : true
-              }
-            },
-            "nullable" : true
-          }
-        },
-        "nullable" : false
-      },
       "innflyttingTilNorge" : {
         "name" : "innflyttingTilNorge",
         "type" : "Collection",
