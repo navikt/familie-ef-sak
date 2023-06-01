@@ -97,7 +97,7 @@ object BeregningUtils {
 
                 // Her velger vi å tolke alle inntekter (totalinntekt) som "uavrundet inntekter" (reell).
                 // Vi runder derfor ned til nærmeste 1000 før vi justerer inntekt.
-                // Alternativ er "ikke rund ned g-beløp til nærmeste 1000" - gir potensielt fel ved
+                // Alternativ er "ikke rund ned g-beløp til nærmeste 1000" - gir potensielt feil ved
                 // eksisterende beløp som tilfeldigvis er 100 (pre - warning)
 
                 val totalinntekt = inntektsperiode.totalinntekt()
