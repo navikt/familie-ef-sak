@@ -16,6 +16,7 @@ enum class Toggle(val toggleId: String, val beskrivelse: String? = null) {
     MIGRERING("familie.ef.sak.migrering"),
     MIGRERING_BARNETILSYN("familie.ef.sak.migrering.barnetilsyn"),
     G_BEREGNING("familie.ef.sak.g-beregning"),
+    G_BEREGNING_SCHEDULER("familie.ef.sak.g-beregning-scheduler"),
     G_OMREGNING_REVURDER_HOPP_OVER_VALIDER_TIDLIGERE_VEDTAK("familie.ef.sak.revurder-g-omregning-hopp-over-valider-tidligere-vedtak"),
 
     SATSENDRING_BRUK_IKKE_VEDTATT_MAXSATS("familie.ef.sak.bruk-nye-maxsatser"),

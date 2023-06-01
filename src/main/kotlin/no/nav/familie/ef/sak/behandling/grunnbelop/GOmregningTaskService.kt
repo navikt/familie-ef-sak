@@ -17,13 +17,16 @@ import java.util.UUID
 @Service
 class GOmregningTaskServiceScheduler(
     private val gOmregningTaskService: GOmregningTaskService,
+    private val featureToggleService: FeatureToggleService,
 ) {
 
     val logger: Logger = LoggerFactory.getLogger(javaClass)
 
     @Scheduled(cron = "\${G_OMREGNING_CRON_EXPRESSION}")
     fun opprettGOmregningTaskForBehandlingerMedUtdatertG() {
-        gOmregningTaskService.opprettGOmregningTaskForBehandlingerMedUtdatertG()
+        if (featureToggleService.isEnabled(Toggle.G_BEREGNING)) {
+            gOmregningTaskService.opprettGOmregningTaskForBehandlingerMedUtdatertG()
+        }
     }
 }
 
