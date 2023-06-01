@@ -60,12 +60,17 @@ object Grunnbeløpsperioder {
         it.periode.inneholder(måned)
     } ?: error("Grunnbeløp finnes ikke for dato $måned")
 
-    // TODO: Kopiert inn fra https://github.com/navikt/g - kan kanskje kalle tjenesten på sikt hvis den er tenkt å være oppdatert?
-// TODO: tilDato må være siste dag i måneden
+    // Sjekk G mot https://github.com/navikt/g
     val grunnbeløpsperioder: List<Grunnbeløp> =
         listOf(
             Grunnbeløp(
-                periode = Månedsperiode(YearMonth.parse("2022-05"), YearMonth.from(LocalDate.MAX)),
+                periode = Månedsperiode(YearMonth.parse("2023-05"), YearMonth.from(LocalDate.MAX)),
+                grunnbeløp = 118_620.toBigDecimal(),
+                perMnd = 9_885.toBigDecimal(),
+                gjennomsnittPerÅr = 116_239.toBigDecimal(),
+            ),
+            Grunnbeløp(
+                periode = Månedsperiode("2022-05" to "2023-04"),
                 grunnbeløp = 111_477.toBigDecimal(),
                 perMnd = 9_290.toBigDecimal(),
                 gjennomsnittPerÅr = 109_784.toBigDecimal(),
