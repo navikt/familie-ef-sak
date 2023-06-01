@@ -1,6 +1,8 @@
 package no.nav.familie.ef.sak.behandling
 
 import io.mockk.every
+import io.mockk.mockkObject
+import io.mockk.unmockkObject
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.barn.BarnRepository
 import no.nav.familie.ef.sak.behandling.domain.Behandling
@@ -21,6 +23,7 @@ import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.fagsak.dto.MigrerRequestDto
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.testWithBrukerContext
+import no.nav.familie.ef.sak.felles.util.DatoUtil
 import no.nav.familie.ef.sak.infotrygd.InfotrygdReplikaClient
 import no.nav.familie.ef.sak.infrastruktur.config.InfotrygdReplikaMock
 import no.nav.familie.ef.sak.infrastruktur.config.IverksettClientMock
@@ -147,6 +150,9 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
 
     @BeforeEach
     internal fun setUp() {
+        mockkObject(DatoUtil)
+        every { DatoUtil.årMånedNå() } returns YearMonth.of(2023, 5)
+        every { DatoUtil.dagensDato() } returns LocalDate.of(2023, 5, 7)
         // Vid migrering forventer vi OK_MOT_OPPDRAG, vid revurdering forventer vi OK
         val responseFraInfotrygd: Queue<IverksettStatus> =
             LinkedList(listOf(IverksettStatus.OK_MOT_OPPDRAG, IverksettStatus.OK))
@@ -159,6 +165,7 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
 
     @AfterEach
     internal fun tearDown() {
+        unmockkObject(DatoUtil)
         IverksettClientMock.clearMock(iverksettClient)
         InfotrygdReplikaMock.resetMock(infotrygdReplikaClient)
     }
@@ -592,13 +599,13 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
             assertThat(
                 gjeldendeBarnRepository.finnBarnTilMigrerteBehandlinger(
                     OVERGANGSSTØNAD,
-                    LocalDate.now(),
+                    DatoUtil.dagensDato(),
                 ),
             ).hasSize(2)
             assertThat(
                 gjeldendeBarnRepository.finnBarnAvGjeldendeIverksatteBehandlinger(
                     OVERGANGSSTØNAD,
-                    LocalDate.now(),
+                    DatoUtil.dagensDato(),
                 ),
             )
                 .isEmpty()
@@ -611,11 +618,11 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
             assertThat(
                 gjeldendeBarnRepository.finnBarnAvGjeldendeIverksatteBehandlinger(
                     OVERGANGSSTØNAD,
-                    LocalDate.now(),
+                    DatoUtil.dagensDato(),
                 ),
             )
                 .isEmpty()
-            val migrerteBarn = gjeldendeBarnRepository.finnBarnTilMigrerteBehandlinger(OVERGANGSSTØNAD, LocalDate.now())
+            val migrerteBarn = gjeldendeBarnRepository.finnBarnTilMigrerteBehandlinger(OVERGANGSSTØNAD, DatoUtil.dagensDato())
             assertThat(migrerteBarn).hasSize(2)
             assertThat(migrerteBarn.map { it.behandlingId }.toSet()).containsExactly(revurdering.id)
         }
