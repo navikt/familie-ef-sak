@@ -4,6 +4,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
+import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.kontrakter.ef.felles.FrittståendeBrevType
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveRequest
@@ -15,6 +16,7 @@ import no.nav.familie.prosessering.internal.TaskService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
 
 internal class AutomatiskBrevInnhentingKarakterutskriftServiceTest {
@@ -107,6 +109,24 @@ internal class AutomatiskBrevInnhentingKarakterutskriftServiceTest {
 
         assertThat(finnOppgaveRequestSlot.captured.fristFomDato).isEqualTo(LocalDate.parse("2023-05-18"))
         assertThat(finnOppgaveRequestSlot.captured.fristTomDato).isEqualTo(LocalDate.parse("2023-05-18"))
+    }
+
+    @Test
+    fun `Skal feile opprettelse av tasks dersom brevtype er ugyldig`() {
+        val finnOppgaveRequestSlot = slot<FinnOppgaveRequest>()
+
+        every { oppgaveService.hentOppgaver(capture(finnOppgaveRequestSlot)) } returns FinnOppgaveResponseDto(
+            0,
+            oppgaver = emptyList(),
+        )
+
+        val feil = assertThrows<Feil> {
+            automatiskBrevInnhentingKarakterutskriftService.opprettTasks(
+                FrittståendeBrevType.BREV_OM_FORLENGET_SVARTID,
+                true,
+            )
+        }
+        assertThat(feil.message).contains("Skal ikke opprette automatiske innhentingsbrev for frittstående brev av type")
     }
 
     companion object {
