@@ -35,7 +35,6 @@ class AutomatiskBrevInnhentingKarakterutskriftService(
         val opppgaver = oppgaveService.hentOppgaver(
             FinnOppgaveRequest(
                 tema = Tema.ENF,
-                behandlingstema = Behandlingstema.Skolepenger,
                 fristFomDato = oppgaveFrist,
                 fristTomDato = oppgaveFrist,
                 mappeId = mappeId.toLong(),
