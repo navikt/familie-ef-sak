@@ -21,6 +21,7 @@ import no.nav.familie.log.IdUtils
 import no.nav.familie.log.mdc.MDCConstants
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
+import no.nav.familie.prosessering.domene.PropertiesWrapper
 import no.nav.familie.prosessering.domene.Task
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -105,7 +106,7 @@ class SendKarakterutskriftBrevTilIverksettTask(
                 setProperty(MDCConstants.MDC_CALL_ID, IdUtils.generateId())
             }
 
-            return Task(TYPE, payload, properties)
+            return Task(TYPE, payload).copy(metadataWrapper = PropertiesWrapper(properties))
         }
 
         const val TYPE = "SendKarakterutskriftBrevTilIverksettTask"
