@@ -24,7 +24,7 @@ class GOmregningTaskServiceScheduler(
 
     @Scheduled(cron = "\${G_OMREGNING_CRON_EXPRESSION}")
     fun opprettGOmregningTaskForBehandlingerMedUtdatertG() {
-        if (featureToggleService.isEnabled(Toggle.G_BEREGNING)) {
+        if (featureToggleService.isEnabled(Toggle.G_BEREGNING_SCHEDULER)) {
             gOmregningTaskService.opprettGOmregningTaskForBehandlingerMedUtdatertG()
         }
     }
