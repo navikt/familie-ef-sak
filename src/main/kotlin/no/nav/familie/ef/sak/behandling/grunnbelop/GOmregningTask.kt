@@ -41,12 +41,12 @@ class GOmregningTask(
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    fun opprettTask(fagsakId: UUID) {
+    fun opprettTask(fagsakId: UUID): Boolean {
         val payload = objectMapper.writeValueAsString(GOmregningPayload(fagsakId, Grunnbeløpsperioder.nyesteGrunnbeløpGyldigFraOgMed))
         val eksisterendeTask = taskService.finnTaskMedPayloadOgType(payload, TYPE)
 
         if (eksisterendeTask != null) {
-            return
+            return false
         }
 
         val properties = Properties().apply {
@@ -58,6 +58,7 @@ class GOmregningTask(
         val task = Task(TYPE, payload).copy(metadataWrapper = PropertiesWrapper(properties))
 
         taskService.save(task)
+        return true
     }
 
     companion object {
