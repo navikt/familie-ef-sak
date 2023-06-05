@@ -1,10 +1,10 @@
 package no.nav.familie.ef.sak.beregning
 
-import no.nav.familie.ef.sak.felles.util.Utregning
+import no.nav.familie.ef.sak.felles.util.Utregning.rundNedTilNærmeste100
 import no.nav.familie.ef.sak.felles.util.Utregning.rundNedTilNærmeste1000
-import no.nav.familie.ef.sak.felles.util.Utregning.rundNedTilNærmesteKrone
 import no.nav.familie.kontrakter.felles.Månedsperiode
 import java.math.BigDecimal
+import java.math.BigDecimal.ZERO
 import java.math.MathContext
 import java.math.RoundingMode
 import java.time.YearMonth
@@ -37,9 +37,9 @@ object BeregningUtils {
                 beløpFørSamordningUtenAvrunding.subtract(samordningsfradrag).setScale(0, RoundingMode.HALF_UP)
 
             val beløpFørSamordning =
-                if (beløpFørSamordningUtenAvrunding <= BigDecimal.ZERO) BigDecimal.ZERO else beløpFørSamordningUtenAvrunding
+                if (beløpFørSamordningUtenAvrunding <= ZERO) ZERO else beløpFørSamordningUtenAvrunding
 
-            val beløpTilUtbetalning = if (utbetaling <= BigDecimal.ZERO) BigDecimal.ZERO else utbetaling
+            val beløpTilUtbetalning = if (utbetaling <= ZERO) ZERO else utbetaling
 
             Beløpsperiode(
                 periode = it.periode,
@@ -65,10 +65,10 @@ object BeregningUtils {
 
     private fun beregnAvkortning(grunnbeløp: BigDecimal, inntekt: BigDecimal): BigDecimal {
         val inntektOverHalveGrunnbeløp = inntekt.subtract(grunnbeløp.multiply(BigDecimal(0.5)))
-        return if (inntektOverHalveGrunnbeløp > BigDecimal.ZERO) {
+        return if (inntektOverHalveGrunnbeløp > ZERO) {
             inntektOverHalveGrunnbeløp.multiply(REDUKSJONSFAKTOR).setScale(5, RoundingMode.HALF_DOWN)
         } else {
-            BigDecimal.ZERO
+            ZERO
         }
     }
 
@@ -88,10 +88,6 @@ object BeregningUtils {
         inntektsperiode: Inntektsperiode,
         sistBrukteGrunnbeløp: Grunnbeløp,
     ): List<Inntektsperiode> {
-        val inntekt = inntektsperiode.inntekt
-        val dagsats = inntektsperiode.dagsats
-        val månedsinntekt = inntektsperiode.månedsinntekt
-
         val samordningsfradrag = inntektsperiode.samordningsfradrag
 
         return finnGrunnbeløpsPerioder(inntektsperiode.periode).map { grunnbeløp ->
@@ -101,22 +97,29 @@ object BeregningUtils {
             ) {
                 val faktor = grunnbeløp.beløp.divide(sistBrukteGrunnbeløp.grunnbeløp, MathContext.DECIMAL128)
 
-                val justertInntekt = inntekt.multiply(faktor).rundNedTilNærmesteKrone()
-                val justertDagsatsInntekt = dagsats?.multiply(faktor)?.rundNedTilNærmesteKrone()
-                val justertMånedinntekt = månedsinntekt?.multiply(faktor)?.rundNedTilNærmesteKrone()
-                Inntektsperiode(
+                // Her velger vi å tolke alle inntekter (totalinntekt) som "uavrundet inntekter" (reell).
+                // Vi runder derfor ned til nærmeste 1000 før vi justerer inntekt.
+                // Alternativ er "ikke rund ned g-beløp til nærmeste 1000" - gir potensielt feil ved
+                // eksisterende beløp som tilfeldigvis er 100 (pre - warning)
+
+                val totalinntekt = inntektsperiode.totalinntekt()
+                val f = rundNedTilNærmeste1000(totalinntekt)
+
+                val indeksjustertInntektF = rundNedTilNærmeste100(faktor.multiply(f.toBigDecimal()))
+
+                // Sletter inntekt-data som saksbehandler har lagt inn (dag/mnd) og legger inn justert inntekt.
+                inntektsperiode.copy(
+                    dagsats = ZERO,
+                    månedsinntekt = ZERO,
+                    inntekt = indeksjustertInntektF,
                     periode = grunnbeløp.periode,
-                    dagsats = justertDagsatsInntekt,
-                    månedsinntekt = justertMånedinntekt,
-                    inntekt = justertInntekt,
-                    samordningsfradrag = samordningsfradrag,
                 )
             } else {
                 Inntektsperiode(
                     periode = grunnbeløp.periode,
                     dagsats = inntektsperiode.dagsats,
                     månedsinntekt = inntektsperiode.månedsinntekt,
-                    inntekt = inntekt,
+                    inntekt = inntektsperiode.inntekt,
                     samordningsfradrag = samordningsfradrag,
                 )
             }

@@ -24,7 +24,7 @@ class GOmregningTaskServiceScheduler(
 
     @Scheduled(cron = "\${G_OMREGNING_CRON_EXPRESSION}")
     fun opprettGOmregningTaskForBehandlingerMedUtdatertG() {
-        if (featureToggleService.isEnabled(Toggle.G_BEREGNING)) {
+        if (featureToggleService.isEnabled(Toggle.G_BEREGNING_SCHEDULER)) {
             gOmregningTaskService.opprettGOmregningTaskForBehandlingerMedUtdatertG()
         }
     }
@@ -42,11 +42,15 @@ class GOmregningTaskService(
     fun opprettGOmregningTaskForBehandlingerMedUtdatertG(): Int {
         logger.info("Starter opprettelse av tasker for G-omregning.")
         val fagsakIder = finnFagsakIder()
+        logger.info("Funnet ${fagsakIder.size} fagsaker aktuelle for G-omregning.")
         try {
+            var counter = 0
             fagsakIder.forEach {
-                gOmregningTask.opprettTask(it)
+                if (gOmregningTask.opprettTask(it)) {
+                    counter++
+                }
             }
-            logger.info("Opprettet ${fagsakIder.size} tasker for G-omregning.")
+            logger.info("Opprettet $counter tasker for G-omregning.")
         } catch (e: DbActionExecutionException) {
             if (e.cause is DuplicateKeyException) {
                 logger.info("To podder har forsøkt å starte G-omregning samtidig. Stopper den ene.")
@@ -59,7 +63,7 @@ class GOmregningTaskService(
     }
 
     private fun finnFagsakIder(): List<UUID> {
-        val fagsakIder = when (featureToggleService.isEnabled(Toggle.INKLUDER_SATT_PÅ_VENT_GOMREGNING)) {
+        val fagsakIder = when (featureToggleService.isEnabled(Toggle.G_BEREGNING_INKLUDER_SATT_PÅ_VENT)) {
             false -> fagsakRepository.finnFerdigstilteFagsakerMedUtdatertGBelop(
                 nyesteGrunnbeløpGyldigFraOgMed.atDay(1),
             )
