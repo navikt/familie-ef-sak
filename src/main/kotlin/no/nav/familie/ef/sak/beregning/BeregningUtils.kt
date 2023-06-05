@@ -107,7 +107,7 @@ object BeregningUtils {
 
                 val indeksjustertInntektF = rundNedTilNærmeste100(faktor.multiply(f.toBigDecimal()))
 
-                // Versjon som kan virke, men som sletter inntekt-data saksbehandler har lagt inn (dag/mnd)
+                // Sletter inntekt-data som saksbehandler har lagt inn (dag/mnd) og legger inn justert inntekt.
                 inntektsperiode.copy(
                     dagsats = ZERO,
                     månedsinntekt = ZERO,
