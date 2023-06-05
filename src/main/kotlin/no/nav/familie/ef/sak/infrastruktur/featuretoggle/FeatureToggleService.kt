@@ -19,7 +19,7 @@ enum class Toggle(val toggleId: String, val beskrivelse: String? = null) {
     G_BEREGNING_SCHEDULER("familie.ef.sak.g-beregning-scheduler"),
     G_OMREGNING_REVURDER_HOPP_OVER_VALIDER_TIDLIGERE_VEDTAK("familie.ef.sak.revurder-g-omregning-hopp-over-valider-tidligere-vedtak"),
     G_BEREGNING_INKLUDER_SATT_PÅ_VENT("familie.ef.sak.inkluder-satt-pa-vent-gomregning"),
-    G_BEREGNING_TILLAT_MANUELL_OPPRETTELSE_AV_G_TASK("familie.ef.sak.tillat_opprettelse_av_g_task", "Permission"),
+    G_BEREGNING_TILLAT_MANUELL_OPPRETTELSE_AV_G_TASK("familie.ef.sak.tillat-opprettelse-av-g-task", "Permission"),
     SATSENDRING_BRUK_IKKE_VEDTATT_MAXSATS("familie.ef.sak.bruk-nye-maxsatser"),
 
     OPPRETT_BEHANDLING_FERDIGSTILT_JOURNALPOST(
