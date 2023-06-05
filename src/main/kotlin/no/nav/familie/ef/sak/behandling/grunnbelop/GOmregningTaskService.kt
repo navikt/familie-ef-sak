@@ -42,11 +42,15 @@ class GOmregningTaskService(
     fun opprettGOmregningTaskForBehandlingerMedUtdatertG(): Int {
         logger.info("Starter opprettelse av tasker for G-omregning.")
         val fagsakIder = finnFagsakIder()
+        logger.info("Funnet ${fagsakIder.size} fagsaker aktuelle for G-omregning.")
         try {
+            var counter = 0
             fagsakIder.forEach {
-                gOmregningTask.opprettTask(it)
+                if (gOmregningTask.opprettTask(it)) {
+                    counter++
+                }
             }
-            logger.info("Opprettet ${fagsakIder.size} tasker for G-omregning.")
+            logger.info("Opprettet $counter tasker for G-omregning.")
         } catch (e: DbActionExecutionException) {
             if (e.cause is DuplicateKeyException) {
                 logger.info("To podder har forsøkt å starte G-omregning samtidig. Stopper den ene.")
