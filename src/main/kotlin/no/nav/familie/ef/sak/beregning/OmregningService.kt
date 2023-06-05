@@ -99,7 +99,7 @@ class OmregningService(
     }
 
     private fun validerBehandlingstatusForFagsak(fagsakId: UUID) {
-        when (featureToggleService.isEnabled(Toggle.INKLUDER_SATT_PÅ_VENT_GOMREGNING)) {
+        when (featureToggleService.isEnabled(Toggle.G_BEREGNING_INKLUDER_SATT_PÅ_VENT)) {
             false -> feilHvis(behandlingService.finnesÅpenBehandling(fagsakId)) {
                 "Kan ikke omregne, det finnes åpen behandling på fagsak: $fagsakId"
             }

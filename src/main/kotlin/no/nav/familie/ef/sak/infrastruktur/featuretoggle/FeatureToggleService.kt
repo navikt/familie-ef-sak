@@ -18,7 +18,8 @@ enum class Toggle(val toggleId: String, val beskrivelse: String? = null) {
     G_BEREGNING("familie.ef.sak.g-beregning"),
     G_BEREGNING_SCHEDULER("familie.ef.sak.g-beregning-scheduler"),
     G_OMREGNING_REVURDER_HOPP_OVER_VALIDER_TIDLIGERE_VEDTAK("familie.ef.sak.revurder-g-omregning-hopp-over-valider-tidligere-vedtak"),
-
+    G_BEREGNING_INKLUDER_SATT_PÅ_VENT("familie.ef.sak.inkluder-satt-pa-vent-gomregning"),
+    G_BEREGNING_TILLAT_MANUELL_OPPRETTELSE_AV_G_TASK("familie.ef.sak.tillat_opprettelse_av_g_task", "Permission"),
     SATSENDRING_BRUK_IKKE_VEDTATT_MAXSATS("familie.ef.sak.bruk-nye-maxsatser"),
 
     OPPRETT_BEHANDLING_FERDIGSTILT_JOURNALPOST(
@@ -42,7 +43,6 @@ enum class Toggle(val toggleId: String, val beskrivelse: String? = null) {
     TILLAT_MIGRERING_5_ÅR_TILBAKE("familie.ef.sak.tillat-migrering-5-ar-tilbake", "Permission"),
     AUTOMATISKE_OPPGAVER_FREMLEGGSOPPGAVE("familie.ef.sak.automatiske-oppgaver.fremleggsoppgave"),
     AUTOMATISKE_BREV_INNHENTING_KARAKTERUTSKRIFT("familie.ef.sak.automatiske-brev-innhenting-karakterutskrift"),
-    INKLUDER_SATT_PÅ_VENT_GOMREGNING("familie.ef.sak.inkluder-satt-pa-vent-gomregning"),
     ;
 
     companion object {

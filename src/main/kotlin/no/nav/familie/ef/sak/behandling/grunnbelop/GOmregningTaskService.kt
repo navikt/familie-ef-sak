@@ -63,7 +63,7 @@ class GOmregningTaskService(
     }
 
     private fun finnFagsakIder(): List<UUID> {
-        val fagsakIder = when (featureToggleService.isEnabled(Toggle.INKLUDER_SATT_PÅ_VENT_GOMREGNING)) {
+        val fagsakIder = when (featureToggleService.isEnabled(Toggle.G_BEREGNING_INKLUDER_SATT_PÅ_VENT)) {
             false -> fagsakRepository.finnFerdigstilteFagsakerMedUtdatertGBelop(
                 nyesteGrunnbeløpGyldigFraOgMed.atDay(1),
             )
