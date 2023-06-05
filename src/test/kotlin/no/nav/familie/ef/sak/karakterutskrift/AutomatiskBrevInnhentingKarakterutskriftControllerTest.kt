@@ -39,6 +39,16 @@ internal class AutomatiskBrevInnhentingKarakterutskriftControllerTest : OppslagS
         assertThat(taskService.findAll().any { it.type == SendKarakterutskriftBrevTilIverksettTask.TYPE }).isTrue
     }
 
+    @Test
+    internal fun `Tasker skal ha unik callId`() {
+        val respons = opprettTasks(liveRun = true)
+
+        assertThat(respons.statusCode).isEqualTo(HttpStatus.OK)
+        assertThat(taskService.findAll().any { it.type == SendKarakterutskriftBrevTilIverksettTask.TYPE }).isTrue
+        assertThat(taskService.findAll().map { it.callId }).doesNotHaveDuplicates()
+        assertThat(taskService.findAll().size > 1).isTrue
+    }
+
     private fun opprettTasks(
         liveRun: Boolean = true,
         brevtype: FrittståendeBrevType = FrittståendeBrevType.INNHENTING_AV_KARAKTERUTSKRIFT_HOVEDPERIODE,
