@@ -7,6 +7,7 @@ import io.mockk.verify
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.kontrakter.ef.felles.FrittståendeBrevType
+import no.nav.familie.kontrakter.felles.Tema
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveRequest
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveResponseDto
 import no.nav.familie.kontrakter.felles.oppgave.MappeDto
@@ -47,8 +48,10 @@ internal class AutomatiskBrevInnhentingKarakterutskriftServiceTest {
         automatiskBrevInnhentingKarakterutskriftService.opprettTasks(
             brevtype = FrittståendeBrevType.INNHENTING_AV_KARAKTERUTSKRIFT_HOVEDPERIODE,
             liveRun = true,
+            taskLimit = 5,
         )
 
+        verifyOppgaveRequest(5, "2023-05-17")
         verify(exactly = oppgaver.size) { taskService.save(any()) }
         assertThat(taskSlots.size).isEqualTo(oppgaver.size)
         assertThat(taskSlots.all { it.type === SendKarakterutskriftBrevTilIverksettTask.TYPE }).isTrue
@@ -69,8 +72,10 @@ internal class AutomatiskBrevInnhentingKarakterutskriftServiceTest {
         automatiskBrevInnhentingKarakterutskriftService.opprettTasks(
             brevtype = FrittståendeBrevType.INNHENTING_AV_KARAKTERUTSKRIFT_HOVEDPERIODE,
             liveRun = false,
+            taskLimit = 5,
         )
 
+        verifyOppgaveRequest(5, "2023-05-17")
         verify(exactly = 0) { taskService.save(any()) }
         assertThat(taskSlots.isEmpty()).isTrue
     }
@@ -87,8 +92,10 @@ internal class AutomatiskBrevInnhentingKarakterutskriftServiceTest {
         automatiskBrevInnhentingKarakterutskriftService.opprettTasks(
             FrittståendeBrevType.INNHENTING_AV_KARAKTERUTSKRIFT_HOVEDPERIODE,
             true,
+            10,
         )
 
+        verifyOppgaveRequest(10, "2023-05-17")
         assertThat(finnOppgaveRequestSlot.captured.fristFomDato).isEqualTo(LocalDate.parse("2023-05-17"))
         assertThat(finnOppgaveRequestSlot.captured.fristTomDato).isEqualTo(LocalDate.parse("2023-05-17"))
     }
@@ -105,8 +112,10 @@ internal class AutomatiskBrevInnhentingKarakterutskriftServiceTest {
         automatiskBrevInnhentingKarakterutskriftService.opprettTasks(
             FrittståendeBrevType.INNHENTING_AV_KARAKTERUTSKRIFT_UTVIDET_PERIODE,
             true,
+            10,
         )
 
+        verifyOppgaveRequest(10, "2023-05-18")
         assertThat(finnOppgaveRequestSlot.captured.fristFomDato).isEqualTo(LocalDate.parse("2023-05-18"))
         assertThat(finnOppgaveRequestSlot.captured.fristTomDato).isEqualTo(LocalDate.parse("2023-05-18"))
     }
@@ -124,9 +133,25 @@ internal class AutomatiskBrevInnhentingKarakterutskriftServiceTest {
             automatiskBrevInnhentingKarakterutskriftService.opprettTasks(
                 FrittståendeBrevType.BREV_OM_FORLENGET_SVARTID,
                 true,
+                10,
             )
         }
         assertThat(feil.message).contains("Skal ikke opprette automatiske innhentingsbrev for frittstående brev av type")
+        verify(exactly = 0) { oppgaveService.hentOppgaver(any()) }
+    }
+
+    private fun verifyOppgaveRequest(taskLimit: Int, frist: String) {
+        verify(exactly = 1) {
+            oppgaveService.hentOppgaver(
+                FinnOppgaveRequest(
+                    tema = Tema.ENF,
+                    fristFomDato = LocalDate.parse(frist),
+                    fristTomDato = LocalDate.parse(frist),
+                    mappeId = 1,
+                    limit = taskLimit.toLong(),
+                ),
+            )
+        }
     }
 
     companion object {

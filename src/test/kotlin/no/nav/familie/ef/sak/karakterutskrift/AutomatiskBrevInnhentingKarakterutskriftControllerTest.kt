@@ -25,7 +25,7 @@ internal class AutomatiskBrevInnhentingKarakterutskriftControllerTest : OppslagS
 
     @Test
     internal fun `Skal ikke opprette tasks når liveRun er false`() {
-        val respons = opprettTasks(liveRun = false)
+        val respons = opprettTasks(liveRun = false, taskLimit = 10)
 
         assertThat(respons.statusCode).isEqualTo(HttpStatus.OK)
         assertThat(taskService.findAll().none { it.type == SendKarakterutskriftBrevTilIverksettTask.TYPE }).isTrue
@@ -33,7 +33,7 @@ internal class AutomatiskBrevInnhentingKarakterutskriftControllerTest : OppslagS
 
     @Test
     internal fun `Skal opprette tasks når liveRun er true`() {
-        val respons = opprettTasks(liveRun = true)
+        val respons = opprettTasks(liveRun = true, taskLimit = 10)
 
         assertThat(respons.statusCode).isEqualTo(HttpStatus.OK)
         assertThat(taskService.findAll().any { it.type == SendKarakterutskriftBrevTilIverksettTask.TYPE }).isTrue
@@ -41,7 +41,7 @@ internal class AutomatiskBrevInnhentingKarakterutskriftControllerTest : OppslagS
 
     @Test
     internal fun `Tasker skal ha unik callId`() {
-        val respons = opprettTasks(liveRun = true)
+        val respons = opprettTasks(liveRun = true, taskLimit = 10)
 
         assertThat(respons.statusCode).isEqualTo(HttpStatus.OK)
         assertThat(taskService.findAll().any { it.type == SendKarakterutskriftBrevTilIverksettTask.TYPE }).isTrue
@@ -52,11 +52,12 @@ internal class AutomatiskBrevInnhentingKarakterutskriftControllerTest : OppslagS
     private fun opprettTasks(
         liveRun: Boolean = true,
         brevtype: FrittståendeBrevType = FrittståendeBrevType.INNHENTING_AV_KARAKTERUTSKRIFT_HOVEDPERIODE,
+        taskLimit: Int,
     ): ResponseEntity<Ressurs<Unit>> {
         return restTemplate.exchange(
             localhost("/api/automatisk-brev-innhenting-karakterutskrift/opprett-tasks"),
             HttpMethod.POST,
-            HttpEntity(KarakterutskriftRequest(liveRun = liveRun, frittståendeBrevType = brevtype), headers),
+            HttpEntity(KarakterutskriftRequest(liveRun = liveRun, frittståendeBrevType = brevtype, taskLimit = taskLimit), headers),
         )
     }
 }
