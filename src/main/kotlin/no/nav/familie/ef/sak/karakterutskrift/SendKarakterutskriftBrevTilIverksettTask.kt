@@ -54,6 +54,7 @@ class SendKarakterutskriftBrevTilIverksettTask(
         val ident = OppgaveUtil.finnPersonidentForOppgave(oppgave) ?: throw Feil("Fant ikke ident for oppgave=${oppgave.id}")
         val fagsaker = fagsakService.finnFagsaker(setOf(ident))
 
+        validerHarIkkeVergemål(ident, oppgave)
         validerHarFagsakOgBehandling(fagsaker, oppgave)
 
         val visningsnavn = personopplysningerService.hentGjeldeneNavn(listOf(ident)).getValue(ident)
@@ -73,6 +74,14 @@ class SendKarakterutskriftBrevTilIverksettTask(
                 stønadType = fagsak.stønadstype,
             ),
         )
+    }
+
+    private fun validerHarIkkeVergemål(ident: String, opggave: Oppgave) {
+        val personopplysninger = personopplysningerService.hentPersonopplysninger(ident)
+        val harVerge = personopplysninger.vergemål.isNotEmpty()
+        feilHvis(harVerge) {
+            "Kan ikke automatisk sende brev for oppgaveId=${opggave.id}. Brev om innhenting av karakterutskrift skal ikke sendes automatisk fordi bruker har vergemål. Saken må følges opp manuelt og tasken kan avvikshåndteres."
+        }
     }
 
     private fun utledFagsak(fagsaker: List<Fagsak>): Fagsak = fagsaker.firstOrNull { it.stønadstype == StønadType.OVERGANGSSTØNAD } ?: fagsaker.first()
