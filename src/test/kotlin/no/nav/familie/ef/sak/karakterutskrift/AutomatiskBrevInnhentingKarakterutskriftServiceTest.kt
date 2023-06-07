@@ -39,6 +39,7 @@ internal class AutomatiskBrevInnhentingKarakterutskriftServiceTest {
 
         val oppgaver = listOf(oppgave(), oppgave(), oppgave(), oppgave(), oppgave())
 
+        every { taskService.finnTaskMedPayloadOgType(any(), SendKarakterutskriftBrevTilIverksettTask.TYPE) } returns null
         every { taskService.save(capture(taskSlots)) } returns mockk()
         every { oppgaveService.hentOppgaver(any()) } returns FinnOppgaveResponseDto(
             antallTreffTotalt = oppgaver.size.toLong(),

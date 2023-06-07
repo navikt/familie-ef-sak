@@ -49,6 +49,20 @@ internal class AutomatiskBrevInnhentingKarakterutskriftControllerTest : OppslagS
         assertThat(taskService.findAll().size > 1).isTrue
     }
 
+    @Test
+    internal fun `Skal ikke opprette tasker for oppgaver det allerede er opprettet for`() {
+        val førsteRespons = opprettTasks(liveRun = true, taskLimit = 10)
+        val antallTaskerEtterFørsteKjøring = taskService.findAll().any { it.type == SendKarakterutskriftBrevTilIverksettTask.TYPE }
+
+        val andreRespons = opprettTasks(liveRun = true, taskLimit = 10)
+
+        val antallTaskerEtterAndreKjøring = taskService.findAll().any { it.type == SendKarakterutskriftBrevTilIverksettTask.TYPE }
+
+        assertThat(førsteRespons.statusCode).isEqualTo(HttpStatus.OK)
+        assertThat(andreRespons.statusCode).isEqualTo(HttpStatus.OK)
+        assertThat(antallTaskerEtterFørsteKjøring).isEqualTo(antallTaskerEtterAndreKjøring)
+    }
+
     private fun opprettTasks(
         liveRun: Boolean = true,
         brevtype: FrittståendeBrevType = FrittståendeBrevType.INNHENTING_AV_KARAKTERUTSKRIFT_HOVEDPERIODE,

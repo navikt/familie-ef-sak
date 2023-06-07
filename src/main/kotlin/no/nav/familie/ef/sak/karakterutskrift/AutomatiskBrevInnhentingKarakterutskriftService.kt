@@ -46,13 +46,22 @@ class AutomatiskBrevInnhentingKarakterutskriftService(
         opppgaver.oppgaver.forEach {
             val oppgaveId = it.id ?: throw Feil("Mangler oppgaveid")
             if (liveRun) {
-                logger.info("Oppretter task for oppgaveId=${it.id} og brevtype=$brevtype")
-                taskService.save(SendKarakterutskriftBrevTilIverksettTask.opprettTask(oppgaveId, brevtype, Year.now()))
+                if (harOpprettetTaskTidligere(oppgaveId, brevtype)) {
+                    logger.warn("Oppretter ikke task for oppgave=$oppgaveId da denne er opprettet tidligere.")
+                } else {
+                    logger.info("Oppretter task for oppgaveId=${it.id} og brevtype=$brevtype")
+                    taskService.save(SendKarakterutskriftBrevTilIverksettTask.opprettTask(oppgaveId, brevtype, Year.now()))
+                }
             } else {
                 logger.info("Dry run. Fant oppgave=$oppgaveId og brevtype=$brevtype")
             }
         }
     }
+
+    private fun harOpprettetTaskTidligere(oppgaveId: Long, brevtype: FrittståendeBrevType) = taskService.finnTaskMedPayloadOgType(
+        SendKarakterutskriftBrevTilIverksettTask.opprettTaskPayload(oppgaveId, brevtype, Year.now()),
+        SendKarakterutskriftBrevTilIverksettTask.TYPE,
+    ) != null
 
     fun opprettTaskForOppgave(oppgaveId: Long) {
         val oppgave = oppgaveService.hentOppgave(oppgaveId)

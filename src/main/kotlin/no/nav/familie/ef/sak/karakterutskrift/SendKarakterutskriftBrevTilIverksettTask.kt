@@ -102,13 +102,7 @@ class SendKarakterutskriftBrevTilIverksettTask(
     companion object {
 
         fun opprettTask(oppgaveId: Long, brevType: FrittståendeBrevType, gjeldendeÅr: Year): Task {
-            val payload = objectMapper.writeValueAsString(
-                AutomatiskBrevKarakterutskriftPayload(
-                    oppgaveId,
-                    brevType,
-                    gjeldendeÅr,
-                ),
-            )
+            val payload = opprettTaskPayload(oppgaveId, brevType, gjeldendeÅr)
 
             val properties = Properties().apply {
                 setProperty("oppgaveId", oppgaveId.toString())
@@ -117,6 +111,11 @@ class SendKarakterutskriftBrevTilIverksettTask(
 
             return Task(TYPE, payload).copy(metadataWrapper = PropertiesWrapper(properties))
         }
+
+        fun opprettTaskPayload(oppgaveId: Long, brevType: FrittståendeBrevType, gjeldendeÅr: Year): String =
+            objectMapper.writeValueAsString(
+                AutomatiskBrevKarakterutskriftPayload(oppgaveId, brevType, gjeldendeÅr),
+            )
 
         const val TYPE = "SendKarakterutskriftBrevTilIverksettTask"
     }
