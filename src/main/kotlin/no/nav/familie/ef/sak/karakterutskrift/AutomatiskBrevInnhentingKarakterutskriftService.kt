@@ -27,7 +27,7 @@ class AutomatiskBrevInnhentingKarakterutskriftService(
     val fristutvidet = LocalDate.parse("2023-05-18")
 
     @Transactional
-    fun opprettTasks(brevtype: FrittståendeBrevType, liveRun: Boolean) {
+    fun opprettTasks(brevtype: FrittståendeBrevType, liveRun: Boolean, taskLimit: Int) {
         val mappeId = hentUtdanningsmappeId()
 
         val oppgaveFrist = utledOppgavefrist(brevtype)
@@ -37,7 +37,7 @@ class AutomatiskBrevInnhentingKarakterutskriftService(
                 fristFomDato = oppgaveFrist,
                 fristTomDato = oppgaveFrist,
                 mappeId = mappeId.toLong(),
-                limit = 5000,
+                limit = taskLimit.toLong(),
             ),
         )
 

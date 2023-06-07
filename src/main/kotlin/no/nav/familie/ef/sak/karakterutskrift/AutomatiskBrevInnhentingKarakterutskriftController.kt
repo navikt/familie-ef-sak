@@ -34,6 +34,7 @@ class AutomatiskBrevInnhentingKarakterutskriftController(
         automatiskBrevInnhentingKarakterutskriftService.opprettTasks(
             brevtype = karakterUtskriftRequest.frittståendeBrevType,
             liveRun = karakterUtskriftRequest.liveRun,
+            taskLimit = karakterUtskriftRequest.taskLimit,
         )
     }
 
@@ -55,4 +56,4 @@ class AutomatiskBrevInnhentingKarakterutskriftController(
     }
 }
 
-data class KarakterutskriftRequest(val liveRun: Boolean, val frittståendeBrevType: FrittståendeBrevType)
+data class KarakterutskriftRequest(val liveRun: Boolean, val frittståendeBrevType: FrittståendeBrevType, val taskLimit: Int)
