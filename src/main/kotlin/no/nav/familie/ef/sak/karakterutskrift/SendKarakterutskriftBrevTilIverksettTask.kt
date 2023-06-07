@@ -62,6 +62,8 @@ class SendKarakterutskriftBrevTilIverksettTask(
         val journalFørendeEnhet = arbeidsfordelingService.hentNavEnhetIdEllerBrukMaskinellEnhetHvisNull(ident)
         val fagsak = utledFagsak(fagsaker)
 
+        logger.info("Starter utsending karakterutskriftsbrev for oppgaveId=${oppgave.id} og eksternFagsakId=${fagsak.eksternId}")
+
         iverksettClient.håndterUtsendingAvKarakterutskriftBrev(
             KarakterutskriftBrevDto(
                 fil = brev,
