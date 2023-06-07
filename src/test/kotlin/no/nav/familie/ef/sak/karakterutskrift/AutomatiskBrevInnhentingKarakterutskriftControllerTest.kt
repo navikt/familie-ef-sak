@@ -51,10 +51,10 @@ internal class AutomatiskBrevInnhentingKarakterutskriftControllerTest : OppslagS
 
     @Test
     internal fun `Skal ikke opprette tasker for oppgaver det allerede er opprettet for`() {
-        val førsteRespons = opprettTasks(liveRun = true)
+        val førsteRespons = opprettTasks(liveRun = true, taskLimit = 10)
         val antallTaskerEtterFørsteKjøring = taskService.findAll().any { it.type == SendKarakterutskriftBrevTilIverksettTask.TYPE }
 
-        val andreRespons = opprettTasks(liveRun = true)
+        val andreRespons = opprettTasks(liveRun = true, taskLimit = 10)
 
         val antallTaskerEtterAndreKjøring = taskService.findAll().any { it.type == SendKarakterutskriftBrevTilIverksettTask.TYPE }
 
