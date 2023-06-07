@@ -42,6 +42,7 @@ internal class InfotrygdPeriodeValideringServiceTest {
         every { infotrygdService.eksisterer(any(), any()) } returns true
         every { infotrygdService.hentSaker(any()) } returns InfotrygdSakResponse(emptyList())
         every { featureToggleService.isEnabled(Toggle.TILLAT_MIGRERING_5_ÅR_TILBAKE) } returns false
+        every { featureToggleService.isEnabled(Toggle.TILLAT_MIGRERING_7_ÅR_TILBAKE) } returns false
     }
 
     @Nested
@@ -147,9 +148,57 @@ internal class InfotrygdPeriodeValideringServiceTest {
         }
 
         @Test
+        internal fun `Skal kaste feil hvis perioder er mer enn sju år tilbake i tid`() {
+            val dato = YearMonth.now().minusYears(8)
+            every { featureToggleService.isEnabled(Toggle.TILLAT_MIGRERING_5_ÅR_TILBAKE) } returns true
+            every { featureToggleService.isEnabled(Toggle.TILLAT_MIGRERING_7_ÅR_TILBAKE) } returns true
+            every { infotrygdService.hentDtoPerioder(personIdent) } returns
+                infotrygdPerioderDto(
+                    listOf(
+                        lagInfotrygdPeriode(
+                            personIdent = "1",
+                            stønadFom = dato.atDay(1),
+                            stønadTom = dato.atEndOfMonth(),
+                        ),
+                    ),
+                )
+            val message =
+                assertThrows<MigreringException> {
+                    service.hentPeriodeForMigrering(
+                        personIdent,
+                        OVERGANGSSTØNAD,
+                    )
+                }.message
+            assertThat(message).contains("Kan ikke migrere når forrige utbetaling i infotrygd er mer enn 7 år tilbake i tid")
+        }
+
+        @Test
         internal fun `Skal ikke kaste feil hvis perioder er 4 år tilbake i tid og toggle tillater 5`() {
             val dato = YearMonth.now().minusYears(4)
             every { featureToggleService.isEnabled(Toggle.TILLAT_MIGRERING_5_ÅR_TILBAKE) } returns true
+            every { infotrygdService.hentDtoPerioder(personIdent) } returns
+                infotrygdPerioderDto(
+                    listOf(
+                        lagInfotrygdPeriode(
+                            personIdent = "1",
+                            stønadFom = dato.atDay(1),
+                            stønadTom = dato.atEndOfMonth(),
+                        ),
+                    ),
+                )
+
+            assertThat(
+                service.hentPeriodeForMigrering(
+                    personIdent,
+                    OVERGANGSSTØNAD,
+                ),
+            ).isNotNull
+        }
+
+        @Test
+        internal fun `Skal ikke kaste feil hvis perioder er 6 år tilbake i tid og toggle tillater 7`() {
+            val dato = YearMonth.now().minusYears(6)
+            every { featureToggleService.isEnabled(Toggle.TILLAT_MIGRERING_7_ÅR_TILBAKE) } returns true
             every { infotrygdService.hentDtoPerioder(personIdent) } returns
                 infotrygdPerioderDto(
                     listOf(

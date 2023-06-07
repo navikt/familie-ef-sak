@@ -223,11 +223,7 @@ class InfotrygdPeriodeValideringService(
             )
         }
 
-        val årBakoverTillattVedMigrering: Long =
-            when (featureToggleService.isEnabled(Toggle.TILLAT_MIGRERING_5_ÅR_TILBAKE)) {
-                true -> 5
-                false -> 3
-            }
+        val årBakoverTillattVedMigrering = utledÅrBakoverTillattVedMigrering()
 
         if (dato.isBefore(LocalDate.now().minusYears(årBakoverTillattVedMigrering))) {
             throw MigreringException(
@@ -285,6 +281,16 @@ class InfotrygdPeriodeValideringService(
                     MigreringExceptionType.ÅPEN_SAK,
                 )
             }
+    }
+
+    private fun utledÅrBakoverTillattVedMigrering(): Long {
+        if (featureToggleService.isEnabled(Toggle.TILLAT_MIGRERING_7_ÅR_TILBAKE)) {
+            return 7
+        }
+        else if (featureToggleService.isEnabled(Toggle.TILLAT_MIGRERING_5_ÅR_TILBAKE)){
+            return 5
+        }
+        return 3
     }
 
     private fun lagSakFeilinfo(sak: InfotrygdSak): String {
