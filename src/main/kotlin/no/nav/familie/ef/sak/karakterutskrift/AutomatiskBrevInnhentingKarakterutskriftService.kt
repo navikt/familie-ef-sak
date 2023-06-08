@@ -41,9 +41,11 @@ class AutomatiskBrevInnhentingKarakterutskriftService(
             ),
         )
 
-        logger.info("Fant ${opppgaver.oppgaver.size} oppgaver for utsending av automatisk brev ifb innhenting av karakterutskrift")
+        val oppgaverUtenTilordnetRessurs = opppgaver.oppgaver.filter { it.tilordnetRessurs.isNullOrBlank() }
 
-        opppgaver.oppgaver.filter { it.tilordnetRessurs.isNullOrBlank() }.forEach {
+        logger.info("Fant ${oppgaverUtenTilordnetRessurs.size} oppgaver for utsending av automatisk brev ifb innhenting av karakterutskrift")
+
+        oppgaverUtenTilordnetRessurs.forEach {
             val oppgaveId = it.id ?: throw Feil("Mangler oppgaveid")
             if (liveRun) {
                 if (harOpprettetTaskTidligere(oppgaveId, brevtype)) {
