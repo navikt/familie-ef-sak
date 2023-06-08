@@ -82,6 +82,30 @@ internal class AutomatiskBrevInnhentingKarakterutskriftServiceTest {
     }
 
     @Test
+    fun `Skal ikke opprette tasks for oppgaver dersom oppgaver har tilordnetRessurs`() {
+        val taskSlots = mutableListOf<Task>()
+
+        val oppgaver = listOf(oppgave(tilordnetRessurs = "SaksbehandlerA"), oppgave(tilordnetRessurs = "SaksbehandlerB"), oppgave(), oppgave(), oppgave())
+
+        every { taskService.finnTaskMedPayloadOgType(any(), SendKarakterutskriftBrevTilIverksettTask.TYPE) } returns null
+        every { taskService.save(capture(taskSlots)) } returns mockk()
+        every { oppgaveService.hentOppgaver(any()) } returns FinnOppgaveResponseDto(
+            antallTreffTotalt = oppgaver.size.toLong(),
+            oppgaver = oppgaver,
+        )
+
+        automatiskBrevInnhentingKarakterutskriftService.opprettTasks(
+            brevtype = FrittståendeBrevType.INNHENTING_AV_KARAKTERUTSKRIFT_HOVEDPERIODE,
+            liveRun = true,
+            taskLimit = 5,
+        )
+
+        verifyOppgaveRequest(5, "2023-05-17")
+        verify(exactly = 3) { taskService.save(any()) }
+        assertThat(taskSlots.size).isEqualTo(3)
+    }
+
+    @Test
     fun `Skal hente oppgaver med frist 17-05-2023 dersom brevtype er INNHENTING_AV_KARAKTERUTSKRIFT_HOVEDPERIODE`() {
         val finnOppgaveRequestSlot = slot<FinnOppgaveRequest>()
 
@@ -157,6 +181,6 @@ internal class AutomatiskBrevInnhentingKarakterutskriftServiceTest {
 
     companion object {
         private var oppgaveTeller = 1
-        private fun oppgave() = Oppgave(id = oppgaveTeller++.toLong())
+        private fun oppgave(tilordnetRessurs: String? = null) = Oppgave(id = oppgaveTeller++.toLong(), tilordnetRessurs = tilordnetRessurs)
     }
 }
