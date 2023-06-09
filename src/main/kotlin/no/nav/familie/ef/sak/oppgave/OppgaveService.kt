@@ -167,6 +167,13 @@ class OppgaveService(
         return oppgaveRepository.findByBehandlingIdAndTypeAndErFerdigstiltIsFalse(saksbehandling.id, oppgavetype)
     }
 
+    fun hentBehandleSakOppgaveSomIkkeErFerdigstilt(behandlingId: UUID): EfOppgave? {
+        return oppgaveRepository.findByBehandlingIdAndErFerdigstiltIsFalseAndTypeIn(
+            behandlingId,
+            setOf(Oppgavetype.BehandleSak, Oppgavetype.BehandleUnderkjentVedtak),
+        )
+    }
+
     fun hentOppgave(gsakOppgaveId: Long): Oppgave {
         return oppgaveClient.finnOppgaveMedId(gsakOppgaveId)
     }
@@ -220,10 +227,7 @@ class OppgaveService(
     }
 
     fun hentIkkeFerdigstiltOppgaveForBehandling(behandlingId: UUID): Oppgave? {
-        return oppgaveRepository.findByBehandlingIdAndErFerdigstiltIsFalseAndTypeIn(
-            behandlingId,
-            setOf(Oppgavetype.BehandleSak, Oppgavetype.BehandleUnderkjentVedtak),
-        )
+        return hentBehandleSakOppgaveSomIkkeErFerdigstilt(behandlingId)
             ?.let { oppgaveClient.finnOppgaveMedId(it.gsakOppgaveId) }
     }
 

@@ -19,6 +19,7 @@ import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvisIkke
+import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
@@ -72,6 +73,13 @@ class SendTilBeslutterSteg(
         validerOmregningService.validerHarGammelGOgKanLagres(saksbehandling)
 
         årsakRevurderingService.validerHarGyldigRevurderingsinformasjon(saksbehandling)
+        validerAtDetFinnesOppgave(saksbehandling)
+    }
+
+    private fun validerAtDetFinnesOppgave(saksbehandling: Saksbehandling) {
+        feilHvis(oppgaveService.hentBehandleSakOppgaveSomIkkeErFerdigstilt(saksbehandling.id) == null) {
+            "Oppgaven for behandlingen er ikke tilgjengelig. Vennligst vent og prøv igjen om litt."
+        }
     }
 
     private fun validerRiktigTilstandVedInvilgelse(saksbehandling: Saksbehandling) {
