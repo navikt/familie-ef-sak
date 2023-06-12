@@ -44,6 +44,7 @@ enum class Toggle(val toggleId: String, val beskrivelse: String? = null) {
     TILLAT_MIGRERING_7_ÅR_TILBAKE("familie.ef.sak.tillat-migrering-7-ar-tilbake", "Permission"),
     AUTOMATISKE_OPPGAVER_FREMLEGGSOPPGAVE("familie.ef.sak.automatiske-oppgaver.fremleggsoppgave"),
     AUTOMATISKE_BREV_INNHENTING_KARAKTERUTSKRIFT("familie.ef.sak.automatiske-brev-innhenting-karakterutskrift"),
+    SANITYBREV_FRITTSTÅENDE_BREVBYGGER("familie.ef.sak.frontend-frittstaaende-sanitybrev"),
     ;
 
     companion object {
