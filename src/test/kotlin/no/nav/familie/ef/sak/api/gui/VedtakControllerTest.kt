@@ -6,6 +6,7 @@ import no.nav.familie.ef.sak.api.gui.VedtakControllerTest.Saksbehandler.BESLUTTE
 import no.nav.familie.ef.sak.api.gui.VedtakControllerTest.Saksbehandler.SAKSBEHANDLER
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
 import no.nav.familie.ef.sak.behandling.BehandlingService
+import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.oppgaveforopprettelse.OppgaverForOpprettelseService
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
@@ -19,6 +20,8 @@ import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.clearBrukerContext
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.mockBrukerContext
 import no.nav.familie.ef.sak.infrastruktur.config.RolleConfig
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
+import no.nav.familie.ef.sak.oppgave.Oppgave
+import no.nav.familie.ef.sak.oppgave.OppgaveRepository
 import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
@@ -90,6 +93,9 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
 
     @Autowired
     private lateinit var grunnlagsdataService: GrunnlagsdataService
+
+    @Autowired
+    private lateinit var oppgaveRepository: OppgaveRepository
 
     @Autowired
     private lateinit var vilkårsvurderingRepository: VilkårsvurderingRepository
@@ -414,7 +420,17 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
             "1",
         )
         grunnlagsdataService.opprettGrunnlagsdata(lagretBehandling.id)
+        opprettOppgave(lagretBehandling.id)
         return lagretBehandling.id
+    }
+
+    private fun opprettOppgave(behandlingId: UUID) {
+        val oppgave = Oppgave(
+            gsakOppgaveId = 12345L,
+            behandlingId = behandlingId,
+            type = Oppgavetype.BehandleSak,
+        )
+        oppgaveRepository.insert(oppgave)
     }
 
     private fun opprettOppgave(

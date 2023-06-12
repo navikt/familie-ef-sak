@@ -35,6 +35,8 @@ import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.iverksett.oppgaveforbarn.GjeldendeBarnRepository
 import no.nav.familie.ef.sak.journalføring.dto.VilkårsbehandleNyeBarn
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.infotrygd.InfotrygdPeriodeTestUtil
+import no.nav.familie.ef.sak.oppgave.Oppgave
+import no.nav.familie.ef.sak.oppgave.OppgaveRepository
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.revurderingsinformasjon
 import no.nav.familie.ef.sak.repository.saksbehandling
@@ -62,6 +64,7 @@ import no.nav.familie.kontrakter.ef.iverksett.IverksettStatus
 import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.kontrakter.felles.ef.StønadType.OVERGANGSSTØNAD
 import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.domene.Status
 import no.nav.familie.prosessering.error.TaskExceptionUtenStackTrace
 import no.nav.familie.prosessering.internal.TaskService
@@ -79,6 +82,7 @@ import java.time.LocalDate
 import java.time.YearMonth
 import java.util.LinkedList
 import java.util.Queue
+import java.util.UUID
 
 internal class MigreringServiceTest : OppslagSpringRunnerTest() {
 
@@ -121,6 +125,9 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
 
     @Autowired
     private lateinit var stegService: StegService
+
+    @Autowired
+    private lateinit var oppgaveRepository: OppgaveRepository
 
     @Autowired
     private lateinit var tilbakekrevingService: TilbakekrevingService
@@ -839,6 +846,7 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
             inntekter = listOf(inntekt),
         )
         val brevrequest = objectMapper.readTree("123")
+        opprettOppgave(saksbehandling.id)
         testWithBrukerContext(groups = listOf(rolleConfig.saksbehandlerRolle)) {
             stegService.håndterÅrsakRevurdering(saksbehandling.id, revurderingsinformasjon())
             stegService.håndterBeregnYtelseForStønad(saksbehandling, innvilget)
@@ -849,6 +857,15 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
             vedtaksbrevService.lagSaksbehandlerSanitybrev(saksbehandling, brevrequest, "brevMal")
             stegService.håndterSendTilBeslutter(behandlingService.hentSaksbehandling(saksbehandling.id), null)
         }
+    }
+
+    private fun opprettOppgave(behandlingId: UUID) {
+        val oppgave = Oppgave(
+            gsakOppgaveId = 12345L,
+            behandlingId = behandlingId,
+            type = Oppgavetype.BehandleSak,
+        )
+        oppgaveRepository.insert(oppgave)
     }
 
     private fun godkjennTotrinnskontroll(saksbehandling: Saksbehandling) {
