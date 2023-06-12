@@ -31,6 +31,7 @@ import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.clearBrukerContext
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.mockBrukerContext
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
+import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.oppgave.Oppgave
 import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.ef.sak.repository.fagsak
@@ -149,6 +150,11 @@ internal class SendTilBeslutterStegTest {
             taskService.save(capture(taskSlot))
         } returns Task("", "", Properties())
         every { oppgaveService.hentOppgaveSomIkkeErFerdigstilt(any(), any()) } returns null
+        every { oppgaveService.hentBehandleSakOppgaveSomIkkeErFerdigstilt(any()) } returns Oppgave(
+            behandlingId = behandling.id,
+            gsakOppgaveId = 1234L,
+            type = Oppgavetype.BehandleSak,
+        )
 
         every { vedtaksbrevRepository.findByIdOrThrow(any()) } returns vedtaksbrev
         every { vedtaksbrevRepository.update(any()) } returns vedtaksbrev
@@ -234,9 +240,27 @@ internal class SendTilBeslutterStegTest {
     @Test
     internal fun `Skal avslutte oppgave BehandleUnderkjentVedtak hvis den finnes`() {
         every { behandlingshistorikkService.finnSisteBehandlingshistorikk(any(), StegType.BESLUTTE_VEDTAK) } returns
-            Behandlingshistorikk(behandlingId = UUID.randomUUID(), steg = StegType.BESLUTTE_VEDTAK, utfall = StegUtfall.BESLUTTE_VEDTAK_UNDERKJENT)
+            Behandlingshistorikk(
+                behandlingId = UUID.randomUUID(),
+                steg = StegType.BESLUTTE_VEDTAK,
+                utfall = StegUtfall.BESLUTTE_VEDTAK_UNDERKJENT,
+            )
         utførOgVerifiserKall(Oppgavetype.BehandleUnderkjentVedtak)
         verifiserVedtattBehandlingsstatistikkTask()
+    }
+
+    @Test
+    internal fun `Skal kaste feil hvis oppgave med type BehandleUnderkjentVedtak eller BehandleSak ikke finnes`() {
+        every { behandlingshistorikkService.finnSisteBehandlingshistorikk(any(), StegType.BESLUTTE_VEDTAK) } returns
+            Behandlingshistorikk(
+                behandlingId = UUID.randomUUID(),
+                steg = StegType.BESLUTTE_VEDTAK,
+                utfall = StegUtfall.BESLUTTE_VEDTAK_UNDERKJENT,
+            )
+        every { oppgaveService.hentBehandleSakOppgaveSomIkkeErFerdigstilt(any()) } returns null
+        every { vedtakService.hentVedtaksresultat(any()) } returns ResultatType.INNVILGE
+        val feil = assertThrows<Feil> { beslutteVedtakSteg.validerSteg(behandling) }
+        assertThat(feil.frontendFeilmelding).contains("Oppgaven for behandlingen er ikke tilgjengelig. Vennligst vent og prøv igjen om litt.")
     }
 
     @Test
