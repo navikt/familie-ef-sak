@@ -45,6 +45,7 @@ enum class Toggle(val toggleId: String, val beskrivelse: String? = null) {
     AUTOMATISKE_OPPGAVER_FREMLEGGSOPPGAVE("familie.ef.sak.automatiske-oppgaver.fremleggsoppgave"),
     AUTOMATISKE_BREV_INNHENTING_KARAKTERUTSKRIFT("familie.ef.sak.automatiske-brev-innhenting-karakterutskrift"),
     SANITYBREV_FRITTSTÅENDE_BREVBYGGER("familie.ef.sak.frontend-frittstaaende-sanitybrev"),
+    UTBEDRET_GUI_SKOLEPENGER("familie.ef.sak.frontend-skolepenger-utbedret-gui"),
     ;
 
     companion object {
