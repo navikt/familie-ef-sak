@@ -62,7 +62,7 @@ internal class AutomatiskJournalføringControllerTest {
         every { SikkerhetContext.kallKommerFraFamilieEfMottak() } returns true
         automatiskJournalføringController.automatiskJournalfør(request)
 
-        verify { automatiskJournalføringService.automatiskJournalførTilBehandling(any(), any(), any(), any()) }
+        verify { automatiskJournalføringService.automatiskJournalførTilBehandling(any(), any(), any(), any(), any()) }
     }
 
     @Test

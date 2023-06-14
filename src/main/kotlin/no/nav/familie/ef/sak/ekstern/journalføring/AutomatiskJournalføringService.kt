@@ -22,6 +22,7 @@ import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.kontrakter.felles.journalpost.Bruker
 import no.nav.familie.kontrakter.felles.journalpost.Journalpost
 import no.nav.familie.kontrakter.felles.journalpost.Journalstatus
+import no.nav.familie.kontrakter.felles.oppgave.OppgavePrioritet
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -44,6 +45,7 @@ class AutomatiskJournalføringService(
         personIdent: String,
         stønadstype: StønadType,
         mappeId: Long?,
+        prioritet: OppgavePrioritet,
     ): AutomatiskJournalføringResponse {
         val journalpost = journalpostService.hentJournalpost(journalpostId)
         val fagsak = fagsakService.hentEllerOpprettFagsak(personIdent, stønadstype)
@@ -59,6 +61,7 @@ class AutomatiskJournalføringService(
             journalførendeEnhet,
             mappeId,
             nesteBehandlingstype,
+            prioritet,
         )
     }
 

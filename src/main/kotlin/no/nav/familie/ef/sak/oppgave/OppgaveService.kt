@@ -17,6 +17,7 @@ import no.nav.familie.kontrakter.felles.oppgave.IdentGruppe
 import no.nav.familie.kontrakter.felles.oppgave.MappeDto
 import no.nav.familie.kontrakter.felles.oppgave.Oppgave
 import no.nav.familie.kontrakter.felles.oppgave.OppgaveIdentV2
+import no.nav.familie.kontrakter.felles.oppgave.OppgavePrioritet
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.kontrakter.felles.oppgave.OpprettOppgaveRequest
 import org.slf4j.LoggerFactory
@@ -49,6 +50,7 @@ class OppgaveService(
         tilordnetNavIdent: String? = null,
         beskrivelse: String? = null,
         mappeId: Long? = null, // Dersom denne er satt vil vi ikke prøve å finne mappe basert på oppgavens innhold
+        prioritet: OppgavePrioritet = OppgavePrioritet.NORM,
     ): Long {
         val oppgaveFinnesFraFør =
             oppgaveRepository.findByBehandlingIdAndTypeAndErFerdigstiltIsFalse(behandlingId, oppgavetype)
@@ -64,6 +66,7 @@ class OppgaveService(
                     beskrivelse = lagOppgaveTekst(beskrivelse),
                     tilordnetNavIdent = tilordnetNavIdent,
                     mappeId = mappeId,
+                    prioritet = prioritet,
                 )
             val oppgave = EfOppgave(
                 gsakOppgaveId = opprettetOppgaveId,
@@ -89,6 +92,7 @@ class OppgaveService(
         beskrivelse: String,
         tilordnetNavIdent: String?,
         mappeId: Long? = null, // Dersom denne er satt vil vi ikke prøve å finne mappe basert på oppgavens innhold
+        prioritet: OppgavePrioritet = OppgavePrioritet.NORM,
     ): Long {
         val settBehandlesAvApplikasjon = utledSettBehandlesAvApplikasjon(oppgavetype)
         val fagsak = fagsakService.hentFagsakForBehandling(behandlingId)
@@ -106,6 +110,7 @@ class OppgaveService(
             tilordnetRessurs = tilordnetNavIdent,
             behandlesAvApplikasjon = if (settBehandlesAvApplikasjon) "familie-ef-sak" else null,
             mappeId = mappeId ?: finnAktuellMappe(enhetsnummer, oppgavetype),
+            prioritet = prioritet,
         )
 
         return try {

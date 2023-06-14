@@ -33,6 +33,7 @@ import no.nav.familie.kontrakter.ef.journalføring.AutomatiskJournalføringRespo
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.kontrakter.felles.journalpost.Journalpost
 import no.nav.familie.kontrakter.felles.journalpost.Journalstatus
+import no.nav.familie.kontrakter.felles.oppgave.OppgavePrioritet
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.internal.TaskService
 import org.slf4j.LoggerFactory
@@ -146,6 +147,7 @@ class JournalføringService(
         journalførendeEnhet: String,
         mappeId: Long?,
         behandlingstype: BehandlingType,
+        prioritet: OppgavePrioritet,
     ): AutomatiskJournalføringResponse {
         val behandling = opprettBehandlingOgPopulerGrunnlagsdata(
             behandlingstype = behandlingstype,
@@ -166,6 +168,7 @@ class JournalføringService(
                 saksbehandler = SikkerhetContext.hentSaksbehandlerEllerSystembruker(),
                 beskrivelse = AUTOMATISK_JOURNALFØRING_BESKRIVELSE,
                 mappeId = mappeId,
+                prioritet = prioritet,
             ),
         )
         return AutomatiskJournalføringResponse(

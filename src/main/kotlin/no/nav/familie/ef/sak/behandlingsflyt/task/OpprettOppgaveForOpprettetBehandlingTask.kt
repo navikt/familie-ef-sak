@@ -6,6 +6,7 @@ import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.oppgave.OppgavePrioritet
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
@@ -37,6 +38,7 @@ class OpprettOppgaveForOpprettetBehandlingTask(
         val beskrivelse: String? = null,
         val hendelseTidspunkt: LocalDateTime = LocalDateTime.now(),
         val mappeId: Long? = null,
+        val prioritet: OppgavePrioritet = OppgavePrioritet.NORM,
     )
 
     override fun doTask(task: Task) {
@@ -68,6 +70,7 @@ class OpprettOppgaveForOpprettetBehandlingTask(
                 tilordnetNavIdent = tilordnetNavIdent,
                 beskrivelse = data.beskrivelse,
                 mappeId = data.mappeId,
+                prioritet = data.prioritet,
             )
             task.metadata.setProperty("oppgaveId", oppgaveId.toString())
             return oppgaveId
