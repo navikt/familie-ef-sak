@@ -43,13 +43,13 @@ class BarnetilsynSatsendringService(
         }
     }
 
-    private fun finnFagsakerSomSkalSatsendresMedNySats(brukIkkeVedtatteSatser: Boolean = true): List<BarnetilsynSatsendringKanditat> {
+    private fun finnFagsakerSomSkalSatsendresMedNySats(brukIkkeVedtatteSatser: Boolean = true): List<BarnetilsynSatsendringKandidat> {
         val fagsakIds = barnetilsynSatsendringRepository.finnSatsendringskandidaterForBarnetilsyn()
-        val barnetilsynSatsendringKanditat: List<BarnetilsynSatsendringKanditat> =
-            fagsakIds.map { BarnetilsynSatsendringKanditat(it, vedtakHistorikkService.hentAktivHistorikk(it)) }
-        logger.info("Antall kandidater til satsendring: ${barnetilsynSatsendringKanditat.size}")
+        val barnetilsynSatsendringKandidat: List<BarnetilsynSatsendringKandidat> =
+            fagsakIds.map { BarnetilsynSatsendringKandidat(it, vedtakHistorikkService.hentAktivHistorikk(it)) }
+        logger.info("Antall kandidater til satsendring: ${barnetilsynSatsendringKandidat.size}")
 
-        val kandidaterMedSkalRevurderesSatt = barnetilsynSatsendringKanditat.map {
+        val kandidaterMedSkalRevurderesSatt = barnetilsynSatsendringKandidat.map {
             val nåværendeAndelerForNesteÅr = it.andelerEtter(YearMonth.of(YearMonth.now().year, 12))
             val nyBeregningMånedsperioder = gjørNyBeregning(nåværendeAndelerForNesteÅr, brukIkkeVedtatteSatser)
             val skalRevurderes: Boolean =
@@ -111,7 +111,7 @@ class BarnetilsynSatsendringService(
     }
 }
 
-data class BarnetilsynSatsendringKanditat(
+data class BarnetilsynSatsendringKandidat(
     val fagsakId: UUID,
     val andelshistorikk: List<AndelHistorikkDto>,
     val skalRevurderes: Boolean = false,
