@@ -50,7 +50,7 @@ class BarnetilsynSatsendringService(
         logger.info("Antall kandidater til satsendring: ${barnetilsynSatsendringKandidat.size}")
 
         val kandidaterMedSkalRevurderesSatt = barnetilsynSatsendringKandidat.map {
-            val nåværendeAndelerForNesteÅr = it.andelerEtter(YearMonth.of(YearMonth.now().year, 12))
+            val nåværendeAndelerForNesteÅr = it.andelerEtter(YearMonth.of(YearMonth.now().year, 7))
             val nyBeregningMånedsperioder = gjørNyBeregning(nåværendeAndelerForNesteÅr, brukIkkeVedtatteSatser)
             val skalRevurderes: Boolean =
                 finnesStørreBeløpINyBeregning(nyBeregningMånedsperioder, nåværendeAndelerForNesteÅr)
