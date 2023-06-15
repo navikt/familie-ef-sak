@@ -6,7 +6,7 @@ import org.springframework.stereotype.Repository
 import java.util.UUID
 
 @Repository
-interface BarnetilsynSatsendringRepository : RepositoryInterface<BarnetilsynSatsendringKanditat, UUID> {
+interface BarnetilsynSatsendringRepository : RepositoryInterface<BarnetilsynSatsendringKandidat, UUID> {
 
     // language=PostgreSQL
     @Query(
@@ -15,7 +15,7 @@ interface BarnetilsynSatsendringRepository : RepositoryInterface<BarnetilsynSats
         FROM gjeldende_iverksatte_behandlinger gib
          JOIN tilkjent_ytelse ty ON ty.behandling_id = gib.id
          JOIN andel_tilkjent_ytelse aty ON ty.id = aty.tilkjent_ytelse
-        WHERE aty.stonad_tom >= '2023-01-01' AND gib.stonadstype = 'BARNETILSYN'
+        WHERE aty.stonad_tom >= '2023-07-01' AND gib.stonadstype = 'BARNETILSYN'
         """,
     )
     fun finnSatsendringskandidaterForBarnetilsyn(): List<UUID>
