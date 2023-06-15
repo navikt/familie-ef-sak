@@ -62,6 +62,7 @@ class AutomatiskJournalføringController(
                 personIdent = request.personIdent,
                 stønadstype = request.stønadstype,
                 mappeId = request.mappeId,
+                prioritet = request.prioritet,
             ),
         )
     }

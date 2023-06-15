@@ -32,6 +32,7 @@ import no.nav.familie.kontrakter.felles.journalpost.Bruker
 import no.nav.familie.kontrakter.felles.journalpost.Journalpost
 import no.nav.familie.kontrakter.felles.journalpost.Journalposttype
 import no.nav.familie.kontrakter.felles.journalpost.Journalstatus
+import no.nav.familie.kontrakter.felles.oppgave.OppgavePrioritet
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -87,6 +88,7 @@ internal class AutomatiskJournalføringServiceTest {
         every { infotrygdService.eksisterer(any(), any()) } returns false
         every {
             journalføringService.automatiskJournalfør(
+                any(),
                 any(),
                 any(),
                 any(),
@@ -170,6 +172,7 @@ internal class AutomatiskJournalføringServiceTest {
                 personIdent,
                 StønadType.OVERGANGSSTØNAD,
                 mappeId,
+                OppgavePrioritet.NORM,
             )
         }
         assertThat(feil.message).contains("Ikke samsvar mellom personident på journalposten")
@@ -192,6 +195,7 @@ internal class AutomatiskJournalføringServiceTest {
                 personIdent,
                 StønadType.OVERGANGSSTØNAD,
                 mappeId,
+                OppgavePrioritet.NORM,
             )
         }
         assertThat(feil.message).contains("Ikke samsvar mellom personident på journalposten")
@@ -210,6 +214,7 @@ internal class AutomatiskJournalføringServiceTest {
                 personIdent,
                 StønadType.OVERGANGSSTØNAD,
                 mappeId,
+                OppgavePrioritet.NORM,
             )
         }
         assertThat(feil.message).contains("Journalposten mangler bruker")
@@ -232,6 +237,7 @@ internal class AutomatiskJournalføringServiceTest {
                 personIdent,
                 StønadType.OVERGANGSSTØNAD,
                 mappeId,
+                OppgavePrioritet.NORM,
             )
         }
         assertThat(feil.message).contains("Ikke samsvar mellom personident på journalposten")
@@ -255,6 +261,7 @@ internal class AutomatiskJournalføringServiceTest {
             personIdent,
             StønadType.OVERGANGSSTØNAD,
             mappeId,
+            OppgavePrioritet.NORM,
         )
         verify {
             journalføringService.automatiskJournalfør(
@@ -263,6 +270,7 @@ internal class AutomatiskJournalføringServiceTest {
                 enhet,
                 mappeId,
                 FØRSTEGANGSBEHANDLING,
+                OppgavePrioritet.NORM,
             )
         }
     }
@@ -285,6 +293,7 @@ internal class AutomatiskJournalføringServiceTest {
                 any(),
                 any(),
                 any(),
+                any(),
             )
         } returns mockk()
         automatiskJournalføringService.automatiskJournalførTilBehandling(
@@ -292,6 +301,7 @@ internal class AutomatiskJournalføringServiceTest {
             personIdent,
             StønadType.OVERGANGSSTØNAD,
             mappeId,
+            OppgavePrioritet.NORM,
         )
     }
 
@@ -306,6 +316,7 @@ internal class AutomatiskJournalføringServiceTest {
                 personIdent,
                 StønadType.OVERGANGSSTØNAD,
                 mappeId,
+                OppgavePrioritet.NORM,
             )
         }
         assertThat(feil.message).contains("Kan ikke opprette førstegangsbehandling")
@@ -328,6 +339,7 @@ internal class AutomatiskJournalføringServiceTest {
                 personIdent,
                 StønadType.OVERGANGSSTØNAD,
                 mappeId,
+                OppgavePrioritet.NORM,
             )
         }
     }
@@ -344,8 +356,18 @@ internal class AutomatiskJournalføringServiceTest {
             personIdent,
             StønadType.OVERGANGSSTØNAD,
             mappeId,
+            OppgavePrioritet.NORM,
         )
-        verify { journalføringService.automatiskJournalfør(fagsak, journalpost, enhet, mappeId, FØRSTEGANGSBEHANDLING) }
+        verify {
+            journalføringService.automatiskJournalfør(
+                fagsak,
+                journalpost,
+                enhet,
+                mappeId,
+                FØRSTEGANGSBEHANDLING,
+                OppgavePrioritet.NORM,
+            )
+        }
     }
 
     @Test
@@ -362,8 +384,18 @@ internal class AutomatiskJournalføringServiceTest {
             personIdent,
             StønadType.OVERGANGSSTØNAD,
             mappeId,
+            OppgavePrioritet.NORM,
         )
-        verify { journalføringService.automatiskJournalfør(fagsak, journalpost, enhet, mappeId, REVURDERING) }
+        verify {
+            journalføringService.automatiskJournalfør(
+                fagsak,
+                journalpost,
+                enhet,
+                mappeId,
+                REVURDERING,
+                OppgavePrioritet.NORM,
+            )
+        }
     }
 
     @Test
@@ -377,6 +409,7 @@ internal class AutomatiskJournalføringServiceTest {
                     personIdent,
                     StønadType.OVERGANGSSTØNAD,
                     mappeId,
+                    OppgavePrioritet.NORM,
                 )
             }
             assertThat(feil.message).contains("Journalposten har ugyldig journalstatus $journalstatus")
