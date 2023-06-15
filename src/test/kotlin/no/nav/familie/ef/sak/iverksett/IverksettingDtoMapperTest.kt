@@ -20,6 +20,7 @@ import no.nav.familie.ef.sak.behandling.ÅrsakRevurderingsRepository
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.behandlingshistorikk.BehandlingshistorikkService
 import no.nav.familie.ef.sak.behandlingshistorikk.domain.Behandlingshistorikk
+import no.nav.familie.ef.sak.beregning.Grunnbeløpsperioder
 import no.nav.familie.ef.sak.brev.BrevmottakereRepository
 import no.nav.familie.ef.sak.brev.domain.MottakerRolle
 import no.nav.familie.ef.sak.felles.util.DatoUtil
@@ -201,6 +202,7 @@ internal class IverksettingDtoMapperTest {
             UUID.randomUUID(),
             personIdent = "132",
             stønadsår = LocalDate.now().year,
+            grunnbeløpsmåned = Grunnbeløpsperioder.nyesteGrunnbeløpGyldigFraOgMed,
         )
         every { vilkårsvurderingRepository.findByBehandlingId(any()) } returns mockk(relaxed = true)
 
@@ -540,7 +542,7 @@ internal class IverksettingDtoMapperTest {
             every { tilkjentYtelseService.hentForBehandling(saksbehandling.id) } returns tilkjentYtelse(
                 behandlingId = UUID.randomUUID(),
                 personIdent = "132",
-                grunnbeløpsmåned = YearMonth.of(inneværendeÅr - 1, Month.MAY),
+                grunnbeløpsmåned = Grunnbeløpsperioder.nyesteGrunnbeløpGyldigFraOgMed,
             )
 
             mockkObject(DatoUtil)
