@@ -129,7 +129,7 @@ internal class FrittståendeBrevServiceTest {
     }
 
     @TestFactory
-    fun `skal sende frittstående brev med riktig brevtype`() =
+    fun `skal sende frittstående brev med riktig brevtype og sette riktig tittel`() =
         brevtyperTestData.map { (input, forventetBrevtype) ->
             DynamicTest.dynamicTest(
                 "Skal sende brev for stønadtype ${input.first} og brevkategori " +
@@ -140,6 +140,7 @@ internal class FrittståendeBrevServiceTest {
                 frittståendeBrevService.sendFrittståendeBrev(frittståendeBrevDto.copy(brevType = input.second))
 
                 assertThat(frittståendeBrevSlot.captured.brevtype).isEqualTo(forventetBrevtype)
+                assertThat(frittståendeBrevSlot.captured.tittel).isEqualTo(forventetBrevtype.tittel)
                 assertThat(frittståendeBrevSlot.captured.mottakere).hasSize(1)
                 assertThat(frittståendeBrevSlot.captured.mottakere!![0].ident).isEqualTo("mottakerIdent")
             }

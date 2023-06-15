@@ -52,6 +52,7 @@ class FrittståendeBrevService(
                 eksternFagsakId = fagsak.eksternId.id,
                 stønadType = fagsak.stønadstype,
                 brevtype = frittståendeBrevDto.brevType.frittståendeBrevType,
+                tittel = frittståendeBrevDto.brevType.frittståendeBrevType.tittel,
                 fil = brev,
                 journalførendeEnhet = journalførendeEnhet,
                 saksbehandlerIdent = saksbehandlerIdent,
