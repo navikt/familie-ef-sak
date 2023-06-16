@@ -9,17 +9,27 @@ import java.time.YearMonth
 internal class BeregningBarnetilsynUtilKtTest {
 
     @Test
-    fun `hente riktig sats for barn barn for år 2023`() {
-        val år2023 = YearMonth.of(2023, 1)
-        assertThat(satserForBarnetilsyn.hentSatsFor(antallBarn = 4, årMåned = år2023)).isEqualTo(6460)
-        assertThat(satserForBarnetilsyn.hentSatsFor(antallBarn = 3, årMåned = år2023)).isEqualTo(6460)
-        assertThat(satserForBarnetilsyn.hentSatsFor(antallBarn = 2, årMåned = år2023)).isEqualTo(5700)
-        assertThat(satserForBarnetilsyn.hentSatsFor(antallBarn = 1, årMåned = år2023)).isEqualTo(4369)
-        assertThat(satserForBarnetilsyn.hentSatsFor(antallBarn = 0, årMåned = år2023)).isEqualTo(0)
+    fun `hente riktig sats for barn for år 2023`() {
+        val juli2023 = YearMonth.of(2023, 7)
+        assertThat(satserForBarnetilsyn.hentSatsFor(antallBarn = 4, årMåned = juli2023)).isEqualTo(6623)
+        assertThat(satserForBarnetilsyn.hentSatsFor(antallBarn = 3, årMåned = juli2023)).isEqualTo(6623)
+        assertThat(satserForBarnetilsyn.hentSatsFor(antallBarn = 2, årMåned = juli2023)).isEqualTo(5844)
+        assertThat(satserForBarnetilsyn.hentSatsFor(antallBarn = 1, årMåned = juli2023)).isEqualTo(4480)
+        assertThat(satserForBarnetilsyn.hentSatsFor(antallBarn = 0, årMåned = juli2023)).isEqualTo(0)
     }
 
     @Test
-    fun `hente riktig sats for barn barn for år 2022`() {
+    fun `hente riktig sats for barn for år 2023 første halvdel`() {
+        val januar2023 = YearMonth.of(2023, 1)
+        assertThat(satserForBarnetilsyn.hentSatsFor(antallBarn = 4, årMåned = januar2023)).isEqualTo(6460)
+        assertThat(satserForBarnetilsyn.hentSatsFor(antallBarn = 3, årMåned = januar2023)).isEqualTo(6460)
+        assertThat(satserForBarnetilsyn.hentSatsFor(antallBarn = 2, årMåned = januar2023)).isEqualTo(5700)
+        assertThat(satserForBarnetilsyn.hentSatsFor(antallBarn = 1, årMåned = januar2023)).isEqualTo(4369)
+        assertThat(satserForBarnetilsyn.hentSatsFor(antallBarn = 0, årMåned = januar2023)).isEqualTo(0)
+    }
+
+    @Test
+    fun `hente riktig sats for barn for år 2022`() {
         val år2022 = YearMonth.of(2022, 1)
         assertThat(satserForBarnetilsyn.hentSatsFor(antallBarn = 4, årMåned = år2022)).isEqualTo(6284)
         assertThat(satserForBarnetilsyn.hentSatsFor(antallBarn = 3, årMåned = år2022)).isEqualTo(6284)
@@ -29,7 +39,7 @@ internal class BeregningBarnetilsynUtilKtTest {
     }
 
     @Test
-    fun `hente riktig sats for barn barn for år 2021`() {
+    fun `hente riktig sats for barn for år 2021`() {
         val år2021 = YearMonth.of(2021, 1)
         assertThat(satserForBarnetilsyn.hentSatsFor(antallBarn = 4, årMåned = år2021)).isEqualTo(6203)
         assertThat(satserForBarnetilsyn.hentSatsFor(antallBarn = 3, årMåned = år2021)).isEqualTo(6203)
@@ -39,7 +49,7 @@ internal class BeregningBarnetilsynUtilKtTest {
     }
 
     @Test
-    fun `hente riktig sats for barn barn for år 2020`() {
+    fun `hente riktig sats for barn for år 2020`() {
         val år2020 = YearMonth.of(2020, 1)
         assertThat(satserForBarnetilsyn.hentSatsFor(antallBarn = 4, årMåned = år2020)).isEqualTo(5993)
         assertThat(satserForBarnetilsyn.hentSatsFor(antallBarn = 3, årMåned = år2020)).isEqualTo(5993)
@@ -49,7 +59,7 @@ internal class BeregningBarnetilsynUtilKtTest {
     }
 
     @Test
-    fun `hente riktig sats for barn barn for år 2019`() {
+    fun `hente riktig sats for barn for år 2019`() {
         val år2019 = YearMonth.of(2019, 1)
         assertThat(satserForBarnetilsyn.hentSatsFor(antallBarn = 4, årMåned = år2019)).isEqualTo(5881)
         assertThat(satserForBarnetilsyn.hentSatsFor(antallBarn = 3, årMåned = år2019)).isEqualTo(5881)
@@ -59,7 +69,7 @@ internal class BeregningBarnetilsynUtilKtTest {
     }
 
     @Test
-    fun `hente riktig sats for barn barn for år 2016, 2017, 2018`() {
+    fun `hente riktig sats for barn for år 2016, 2017, 2018`() {
         listOf(2018, 2017, 2016).forEach {
             val år = YearMonth.of(it, 1)
             assertThat(satserForBarnetilsyn.hentSatsFor(antallBarn = 4, årMåned = år)).isEqualTo(5749)
