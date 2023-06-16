@@ -90,4 +90,30 @@ class BrevMellomlagerController(
             ),
         )
     }
+
+    @PostMapping("/fagsak/{fagsakId}")
+    fun mellomlagreFrittståendeSanitybrev(
+        @PathVariable fagsakId: UUID,
+        @RequestBody mellomlagreBrev: MellomlagreBrevRequestDto,
+    ): Ressurs<UUID> {
+        tilgangService.validerTilgangTilFagsak(fagsakId, AuditLoggerEvent.UPDATE)
+        tilgangService.validerHarSaksbehandlerrolle()
+
+        return Ressurs.success(
+            mellomlagringBrevService.mellomLagreFrittståendeSanitybrev(
+                fagsakId,
+                mellomlagreBrev.brevverdier,
+                mellomlagreBrev.brevmal,
+            ),
+        )
+    }
+
+    @GetMapping("/fagsak/{fagsakId}")
+    fun hentMellomlagretFrittståendesanitybrev(
+        @PathVariable fagsakId: UUID,
+    ): Ressurs<MellomlagretBrevResponse?> {
+        tilgangService.validerTilgangTilFagsak(fagsakId, AuditLoggerEvent.ACCESS)
+
+        return Ressurs.success(mellomlagringBrevService.hentMellomlagretFrittståendeSanitybrev(fagsakId))
+    }
 }

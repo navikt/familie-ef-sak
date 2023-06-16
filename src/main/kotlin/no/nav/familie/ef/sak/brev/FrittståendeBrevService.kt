@@ -1,11 +1,13 @@
 package no.nav.familie.ef.sak.brev
 
+import com.fasterxml.jackson.databind.JsonNode
 import no.nav.familie.ef.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ef.sak.brev.domain.BrevmottakerOrganisasjon
 import no.nav.familie.ef.sak.brev.domain.BrevmottakerPerson
 import no.nav.familie.ef.sak.brev.dto.Flettefelter
 import no.nav.familie.ef.sak.brev.dto.FrittståendeBrevDto
 import no.nav.familie.ef.sak.brev.dto.FrittståendeBrevRequestDto
+import no.nav.familie.ef.sak.brev.dto.FrittståendeSanitybrevDto
 import no.nav.familie.ef.sak.brev.dto.SanityBrevRequestInnhentingKarakterutskrift
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
@@ -21,6 +23,7 @@ import no.nav.familie.kontrakter.ef.iverksett.Brevmottaker
 import no.nav.familie.kontrakter.felles.objectMapper
 import org.springframework.stereotype.Service
 import java.time.LocalDate
+import java.util.UUID
 import no.nav.familie.kontrakter.ef.felles.FrittståendeBrevDto as FrittståendeBrevDtoIverksetting
 
 @Service
@@ -37,6 +40,46 @@ class FrittståendeBrevService(
 
     fun forhåndsvisFrittståendeBrev(frittståendeBrevDto: FrittståendeBrevDto): ByteArray {
         return lagFrittståendeBrevMedSignatur(frittståendeBrevDto)
+    }
+
+    fun lagFrittståendeSanitybrev(
+        fagsakId: UUID,
+        brevmal: String,
+        brevrequest: JsonNode,
+    ): ByteArray {
+        val fagsak = fagsakService.hentFagsak(fagsakId)
+        val signatur = brevsignaturService.lagSignaturMedEnhet(fagsak)
+
+        val html = brevClient.genererHtml(
+            brevmal = brevmal,
+            saksbehandlerBrevrequest = brevrequest,
+            saksbehandlersignatur = signatur.navn,
+            enhet = signatur.enhet,
+            skjulBeslutterSignatur = true,
+        ).replace(VedtaksbrevService.BESLUTTER_VEDTAKSDATO_PLACEHOLDER, LocalDate.now().norskFormat())
+
+        return familieDokumentClient.genererPdfFraHtml(html)
+    }
+
+    fun sendFrittståendeSanitybrev(fagsakId: UUID, sendBrevRequest: FrittståendeSanitybrevDto) {
+        val saksbehandlerIdent = SikkerhetContext.hentSaksbehandler()
+        val brevmottakere = validerOgMapBrevmottakere(sendBrevRequest.mottakere)
+        val fagsak = fagsakService.fagsakMedOppdatertPersonIdent(fagsakId)
+        val ident = fagsak.hentAktivIdent()
+        val journalførendeEnhet = arbeidsfordelingService.hentNavEnhetIdEllerBrukMaskinellEnhetHvisNull(ident)
+        iverksettClient.sendFrittståendeBrev(
+            FrittståendeBrevDtoIverksetting(
+                personIdent = ident,
+                eksternFagsakId = fagsak.eksternId.id,
+                stønadType = fagsak.stønadstype,
+                tittel = sendBrevRequest.tittel,
+                fil = sendBrevRequest.pdf,
+                journalførendeEnhet = journalførendeEnhet,
+                saksbehandlerIdent = saksbehandlerIdent,
+                mottakere = brevmottakere,
+            ),
+        )
+        mellomlagringBrevService.slettMellomlagretFrittståendeBrev(fagsakId, saksbehandlerIdent)
     }
 
     fun sendFrittståendeBrev(frittståendeBrevDto: FrittståendeBrevDto) {
