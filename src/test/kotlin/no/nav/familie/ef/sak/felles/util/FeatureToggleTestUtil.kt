@@ -7,7 +7,7 @@ import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 
 fun mockFeatureToggleService(enabled: Boolean = true): FeatureToggleService {
     val mockk = mockk<FeatureToggleService>()
-    every { mockk.isEnabled(Toggle.SATSENDRING_BRUK_IKKE_VEDTATT_MAXSATS) } returns false
     every { mockk.isEnabled(any()) } returns enabled
+    every { mockk.isEnabled(Toggle.SATSENDRING_BRUK_IKKE_VEDTATT_MAXSATS) } returns false
     return mockk
 }
