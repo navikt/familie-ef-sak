@@ -55,7 +55,11 @@ object BeregningBarnetilsynUtil {
                 Datoperiode(LocalDate.of(2023, 7, 1), LocalDate.MAX),
                 maxbeløp = mapOf(1 to 4480, 2 to 5844, 3 to 6623),
             ),
-        ) + eldreBarnetilsynsatser.filter { !it.periode.inneholder(LocalDate.of(2022, 1, 1)) }
+            MaxbeløpBarnetilsynSats(
+                Datoperiode(LocalDate.of(2023, 1, 1), LocalDate.of(2023, 6, 30)),
+                maxbeløp = mapOf(1 to 4369, 2 to 5700, 3 to 6460),
+            ),
+        ) + eldreBarnetilsynsatser
 
     fun lagBeløpsPeriodeBarnetilsyn(
         utgiftsperiode: UtgiftsMåned,
