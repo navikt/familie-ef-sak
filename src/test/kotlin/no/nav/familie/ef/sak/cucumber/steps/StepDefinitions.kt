@@ -404,7 +404,7 @@ class StepDefinitions {
                     saksbehandlinger.values.map { it.first }.toList(),
                     null,
                     behandlingIdsToAktivitetArbeid,
-                    HistorikkKonfigurasjon(brukIkkeVedtatteSatser = true),
+                    HistorikkKonfigurasjon(brukIkkeVedtatteSatser = false),
                 )
             }
         }
