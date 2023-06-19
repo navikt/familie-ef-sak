@@ -2,6 +2,7 @@ package no.nav.familie.ef.sak.brev.dto
 
 import no.nav.familie.kontrakter.ef.felles.FrittståendeBrevType
 
+@Deprecated("Skal slettes")
 enum class FrittståendeBrevKategori(val frittståendeBrevType: FrittståendeBrevType) {
     INFORMASJONSBREV(frittståendeBrevType = FrittståendeBrevType.INFORMASJONSBREV),
     INNHENTING_AV_OPPLYSNINGER(frittståendeBrevType = (FrittståendeBrevType.INNHENTING_AV_OPPLYSNINGER)),

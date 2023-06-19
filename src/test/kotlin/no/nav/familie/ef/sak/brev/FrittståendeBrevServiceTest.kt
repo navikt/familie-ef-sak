@@ -12,6 +12,7 @@ import no.nav.familie.ef.sak.brev.domain.MottakerRolle
 import no.nav.familie.ef.sak.brev.dto.FrittståendeBrevAvsnitt
 import no.nav.familie.ef.sak.brev.dto.FrittståendeBrevDto
 import no.nav.familie.ef.sak.brev.dto.FrittståendeBrevKategori
+import no.nav.familie.ef.sak.brev.dto.FrittståendeSanitybrevDto
 import no.nav.familie.ef.sak.brev.dto.SignaturDto
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
@@ -73,6 +74,15 @@ internal class FrittståendeBrevServiceTest {
             personer = listOf(BrevmottakerPerson("mottakerIdent", "navn", MottakerRolle.BRUKER)),
             organisasjoner = emptyList(),
         ),
+    )
+
+    private val frittståendeSanitybrevDto = FrittståendeSanitybrevDto(
+        "123".toByteArray(),
+        mottakere = BrevmottakereDto(
+            personer = listOf(BrevmottakerPerson("mottakerIdent", "navn", MottakerRolle.BRUKER)),
+            organisasjoner = emptyList(),
+        ),
+        tittel = "tittel",
     )
 
     private val brevtyperTestData = listOf(
@@ -186,9 +196,35 @@ internal class FrittståendeBrevServiceTest {
         }
 
         @Test
+        internal fun `Sanitybrev - skal kaste feil dersom både personer og organisasjoner i mottakere i dto er tomme lister`() {
+            val feil = assertThrows<ApiFeil> {
+                frittståendeBrevService.sendFrittståendeSanitybrev(
+                    fagsak.id,
+                    frittståendeSanitybrevDto.copy(
+                        mottakere = BrevmottakereDto(emptyList(), emptyList()),
+                    ),
+                )
+            }
+            assertThat(feil.message).contains("Kan ikke sende frittstående brev uten at minst en brevmottaker er lagt til")
+        }
+
+        @Test
         internal fun `skal sette mottakere hvis personer finnes`() {
             frittståendeBrevService.sendFrittståendeBrev(
                 frittståendeBrevDto.copy(mottakere = BrevmottakereDto(listOf(person), emptyList())),
+            )
+            val mottakere = frittståendeBrevSlot.captured.mottakere!!
+            assertThat(mottakere).hasSize(1)
+            assertThat(mottakere[0].ident).isEqualTo(person.personIdent)
+            assertThat(mottakere[0].navn).isEqualTo(person.navn)
+            assertThat(mottakere[0].mottakerRolle).isEqualTo(person.mottakerRolle.tilIverksettDto())
+        }
+
+        @Test
+        internal fun `Sanitybrev - skal sette mottakere hvis personer finnes`() {
+            frittståendeBrevService.sendFrittståendeSanitybrev(
+                fagsak.id,
+                frittståendeSanitybrevDto.copy(mottakere = BrevmottakereDto(listOf(person), emptyList())),
             )
             val mottakere = frittståendeBrevSlot.captured.mottakere!!
             assertThat(mottakere).hasSize(1)
@@ -210,9 +246,40 @@ internal class FrittståendeBrevServiceTest {
         }
 
         @Test
+        internal fun `Sanitybrev - skal sette mottakere hvis organisasjoner finnes`() {
+            frittståendeBrevService.sendFrittståendeSanitybrev(
+                fagsak.id,
+                frittståendeSanitybrevDto.copy(mottakere = BrevmottakereDto(emptyList(), listOf(organisasjon))),
+            )
+            val mottakere = frittståendeBrevSlot.captured.mottakere!!
+            assertThat(mottakere).hasSize(1)
+            assertThat(mottakere[0].ident).isEqualTo(organisasjon.organisasjonsnummer)
+            assertThat(mottakere[0].navn).isEqualTo(organisasjon.navnHosOrganisasjon)
+            assertThat(mottakere[0].mottakerRolle).isEqualTo(organisasjon.mottakerRolle.tilIverksettDto())
+        }
+
+        @Test
         internal fun `skal sette mottakere hvis organisasjoner og personer finnes`() {
             frittståendeBrevService.sendFrittståendeBrev(
                 frittståendeBrevDto.copy(mottakere = BrevmottakereDto(listOf(person), listOf(organisasjon))),
+            )
+
+            val mottakere = frittståendeBrevSlot.captured.mottakere!!
+            assertThat(mottakere).hasSize(2)
+            assertThat(mottakere[0].ident).isEqualTo(person.personIdent)
+            assertThat(mottakere[0].navn).isEqualTo(person.navn)
+            assertThat(mottakere[0].mottakerRolle).isEqualTo(person.mottakerRolle.tilIverksettDto())
+
+            assertThat(mottakere[1].ident).isEqualTo(organisasjon.organisasjonsnummer)
+            assertThat(mottakere[1].navn).isEqualTo(organisasjon.navnHosOrganisasjon)
+            assertThat(mottakere[1].mottakerRolle).isEqualTo(organisasjon.mottakerRolle.tilIverksettDto())
+        }
+
+        @Test
+        internal fun `Sanitybrev - skal sette mottakere hvis organisasjoner og personer finnes`() {
+            frittståendeBrevService.sendFrittståendeSanitybrev(
+                fagsak.id,
+                frittståendeSanitybrevDto.copy(mottakere = BrevmottakereDto(listOf(person), listOf(organisasjon))),
             )
 
             val mottakere = frittståendeBrevSlot.captured.mottakere!!

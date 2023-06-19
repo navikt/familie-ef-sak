@@ -45,6 +45,7 @@ class BrevMellomlagerController(
         )
     }
 
+    @Deprecated("Skal slettes")
     @PostMapping("/fritekst")
     fun mellomlagreFritekstbrev(@RequestBody mellomlagretBrev: FritekstBrevDto): Ressurs<UUID> {
         tilgangService.validerTilgangTilBehandling(mellomlagretBrev.behandlingId, AuditLoggerEvent.UPDATE)
@@ -53,6 +54,7 @@ class BrevMellomlagerController(
         return Ressurs.success(mellomlagringBrevService.mellomlagreFritekstbrev(mellomlagretBrev))
     }
 
+    @Deprecated("Skal slettes")
     @PostMapping("/frittstaende")
     fun mellomlagreFrittstaendeBrev(@RequestBody mellomlagretBrev: FrittståendeBrevDto): Ressurs<UUID> {
         tilgangService.validerTilgangTilFagsak(mellomlagretBrev.fagsakId, AuditLoggerEvent.UPDATE)
@@ -61,6 +63,7 @@ class BrevMellomlagerController(
         return Ressurs.success(mellomlagringBrevService.mellomlagreFrittståendeBrev(mellomlagretBrev))
     }
 
+    @Deprecated("Skal slettes")
     @DeleteMapping("/frittstaende/{fagsakId}")
     fun mellomlagreFrittstaendeBrev(@PathVariable fagsakId: UUID): Ressurs<UUID> {
         tilgangService.validerTilgangTilFagsak(fagsakId, AuditLoggerEvent.DELETE)
@@ -69,6 +72,7 @@ class BrevMellomlagerController(
         return Ressurs.success(fagsakId)
     }
 
+    @Deprecated("Skal slettes")
     @GetMapping("/frittstaende/{fagsakId}")
     fun hentMellomlagretFrittstaendeBrev(@PathVariable fagsakId: UUID): Ressurs<FrittståendeBrevDto?> {
         tilgangService.validerTilgangTilFagsak(fagsakId, AuditLoggerEvent.ACCESS)
@@ -89,5 +93,31 @@ class BrevMellomlagerController(
                 sanityVersjon,
             ),
         )
+    }
+
+    @PostMapping("/fagsak/{fagsakId}")
+    fun mellomlagreFrittståendeSanitybrev(
+        @PathVariable fagsakId: UUID,
+        @RequestBody mellomlagreBrev: MellomlagreBrevRequestDto,
+    ): Ressurs<UUID> {
+        tilgangService.validerTilgangTilFagsak(fagsakId, AuditLoggerEvent.UPDATE)
+        tilgangService.validerHarSaksbehandlerrolle()
+
+        return Ressurs.success(
+            mellomlagringBrevService.mellomLagreFrittståendeSanitybrev(
+                fagsakId,
+                mellomlagreBrev.brevverdier,
+                mellomlagreBrev.brevmal,
+            ),
+        )
+    }
+
+    @GetMapping("/fagsak/{fagsakId}")
+    fun hentMellomlagretFrittståendesanitybrev(
+        @PathVariable fagsakId: UUID,
+    ): Ressurs<MellomlagretBrevResponse?> {
+        tilgangService.validerTilgangTilFagsak(fagsakId, AuditLoggerEvent.ACCESS)
+
+        return Ressurs.success(mellomlagringBrevService.hentMellomlagretFrittståendeSanitybrev(fagsakId))
     }
 }

@@ -29,6 +29,7 @@ class BrevClient(
         operations.optionsForAllow(pingUri)
     }
 
+    @Deprecated("Skal slettes")
     fun genererBrev(
         fritekstBrev: FrittståendeBrevRequestDto,
         saksbehandlerNavn: String,
@@ -75,6 +76,7 @@ class BrevClient(
         )
     }
 
+    @Deprecated("Skal slettes")
     fun genererHtmlFritekstbrev(
         fritekstBrev: FrittståendeBrevRequestDto,
         saksbehandlerNavn: String,
@@ -110,6 +112,7 @@ data class BrevRequestMedSignaturer(
     val datoPlaceholder: String,
 )
 
+@Deprecated("Skal slettes")
 data class FritekstBrevRequestMedSignatur(
     val brevFraSaksbehandler: FrittståendeBrevRequestDto,
     val saksbehandlersignatur: String,

@@ -6,6 +6,7 @@ import no.nav.familie.ef.sak.repository.RepositoryInterface
 import org.springframework.stereotype.Repository
 import java.util.UUID
 
+@Deprecated("Skal slettes")
 @Repository
 interface MellomlagerFrittståendeBrevRepository :
     RepositoryInterface<MellomlagretFrittståendeBrev, UUID>,
