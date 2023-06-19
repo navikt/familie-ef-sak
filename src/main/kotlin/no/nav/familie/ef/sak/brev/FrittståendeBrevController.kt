@@ -22,12 +22,14 @@ class FrittståendeBrevController(
     private val tilgangService: TilgangService,
 ) {
 
+    @Deprecated("Skal slettes")
     @PostMapping("")
     fun forhåndsvisFrittståendeBrev(@RequestBody brevInnhold: FrittståendeBrevDto): Ressurs<ByteArray> {
         tilgangService.validerTilgangTilFagsak(brevInnhold.fagsakId, AuditLoggerEvent.UPDATE)
         return Ressurs.success(frittståendeBrevService.forhåndsvisFrittståendeBrev(brevInnhold))
     }
 
+    @Deprecated("Skal slettes")
     @PostMapping("/send")
     fun sendFrittståendeBrev(@RequestBody brevInnhold: FrittståendeBrevDto): Ressurs<Unit> {
         tilgangService.validerTilgangTilFagsak(brevInnhold.fagsakId, AuditLoggerEvent.CREATE)

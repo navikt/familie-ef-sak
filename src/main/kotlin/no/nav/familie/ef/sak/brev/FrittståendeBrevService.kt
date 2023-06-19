@@ -38,6 +38,7 @@ class FrittståendeBrevService(
     private val familieDokumentClient: FamilieDokumentClient,
 ) {
 
+    @Deprecated("Skal slettes")
     fun forhåndsvisFrittståendeBrev(frittståendeBrevDto: FrittståendeBrevDto): ByteArray {
         return lagFrittståendeBrevMedSignatur(frittståendeBrevDto)
     }
@@ -82,6 +83,7 @@ class FrittståendeBrevService(
         mellomlagringBrevService.slettMellomlagretFrittståendeBrev(fagsakId, saksbehandlerIdent)
     }
 
+    @Deprecated("Skal slettes")
     fun sendFrittståendeBrev(frittståendeBrevDto: FrittståendeBrevDto) {
         val saksbehandlerIdent = SikkerhetContext.hentSaksbehandler()
         val mottakere = validerOgMapBrevmottakere(frittståendeBrevDto.mottakere)
@@ -125,6 +127,7 @@ class FrittståendeBrevService(
         return personer + organisasjoner
     }
 
+    @Deprecated("Skal slettes")
     private fun lagFrittståendeBrevRequest(
         frittståendeBrevDto: FrittståendeBrevDto,
         ident: String,
@@ -138,11 +141,13 @@ class FrittståendeBrevService(
         )
     }
 
+    @Deprecated("Skal slettes")
     private fun lagFrittståendeBrevMedSignatur(frittståendeBrevDto: FrittståendeBrevDto): ByteArray {
         val fagsak = fagsakService.hentFagsak(frittståendeBrevDto.fagsakId)
         return lagFrittståendeBrevMedSignatur(frittståendeBrevDto, fagsak)
     }
 
+    @Deprecated("Skal slettes")
     private fun lagFrittståendeBrevMedSignatur(frittståendeBrevDto: FrittståendeBrevDto, fagsak: Fagsak): ByteArray {
         val request = lagFrittståendeBrevRequest(frittståendeBrevDto, fagsak.hentAktivIdent())
         val signatur = brevsignaturService.lagSignaturMedEnhet(fagsak)

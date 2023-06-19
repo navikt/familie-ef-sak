@@ -52,6 +52,7 @@ class MellomlagringBrevService(
         return mellomlagerFrittståendeSanitybrevRepository.insert(mellomlagretBrev).fagsakId
     }
 
+    @Deprecated("Skal slettes")
     fun mellomlagreFritekstbrev(mellomlagretBrev: FritekstBrevDto): UUID {
         slettMellomlagringHvisFinnes(mellomlagretBrev.behandlingId)
         val mellomlagretFritekstbrev = MellomlagretFritekstbrev(
@@ -66,6 +67,7 @@ class MellomlagringBrevService(
         return mellomlagerFritekstbrevRepository.insert(mellomlagretFritekstbrev).behandlingId
     }
 
+    @Deprecated("Skal slettes")
     fun mellomlagreFrittståendeBrev(mellomlagretBrev: FrittståendeBrevDto): UUID {
         mellomlagretBrev.mottakere?.let { validerUnikeBrevmottakere(it) }
         val saksbehandlerIdent = SikkerhetContext.hentSaksbehandler()
@@ -85,6 +87,7 @@ class MellomlagringBrevService(
         return mellomlagerFrittståendeBrevRepository.insert(mellomlagretFrittståendeBrev).fagsakId
     }
 
+    @Deprecated("Skal slettes")
     fun hentMellomlagretFrittståendeBrev(fagsakId: UUID): FrittståendeBrevDto? {
         val saksbehandlerIdent = SikkerhetContext.hentSaksbehandler()
         return mellomlagerFrittståendeBrevRepository.findByFagsakIdAndSaksbehandlerIdent(fagsakId, saksbehandlerIdent)?.let {

@@ -6,6 +6,7 @@ import org.springframework.data.relational.core.mapping.Table
 import java.time.LocalDateTime
 import java.util.UUID
 
+@Deprecated("Skal slettes")
 @Table("mellomlagret_frittstaende_brev")
 data class MellomlagretFrittståendeBrev(
     @Id
@@ -18,6 +19,7 @@ data class MellomlagretFrittståendeBrev(
     val mottakere: FrittståendeBrevmottakere?,
 )
 
+@Deprecated("Skal slettes")
 data class FrittståendeBrevmottakere(
     val personer: List<BrevmottakerPerson>,
     val organisasjoner: List<BrevmottakerOrganisasjon>,

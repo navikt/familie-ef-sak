@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.brev.dto
 
+@Deprecated("Skal slettes")
 enum class FritekstBrevKategori {
     SANKSJON,
     VEDTAK_INVILGELSE,

@@ -7,6 +7,7 @@ sealed class MellomlagretBrevResponse
 data class MellomlagretBrevSanity(val brevtype: Brevtype = Brevtype.SANITYBREV, val brevmal: String, val brevverdier: String?) :
     MellomlagretBrevResponse()
 
+@Deprecated("Skal slettes")
 data class MellomlagretBrevFritekst(
     val brevtype: Brevtype = Brevtype.FRITEKSTBREV,
     val brev: Fritekstbrev,
