@@ -219,7 +219,7 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
             behandlingId = behandling.id,
             barn = barnRepository.findByBehandlingId(behandling.id).map { it.id },
             beløp = 8000,
-            kontantstøtteWrapper = KontantstøtteWrapper(listOf(PeriodeMedBeløp(Månedsperiode(YearMonth.of(2023, 3), YearMonth.of(2023, 4)), 1000))),
+            kontantstøtteWrapper = KontantstøtteWrapper(listOf(PeriodeMedBeløp(Månedsperiode(YearMonth.of(2023, 9), YearMonth.of(2023, 10)), 1000))),
             fom = YearMonth.of(2022, 6),
             tom = YearMonth.of(2023, 12),
         )
@@ -233,7 +233,7 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
         assertThat(barnetilsynPerioder?.size).isEqualTo(3) // 3 perioder: Før, under og etter kontantstøtte-periode
         assertThat(barnetilsynPerioder?.first()?.utgifter).isEqualTo(8000)
         assertThat(barnetilsynPerioder?.first()?.barn?.size).isEqualTo(2)
-        assertThat(barnetilsynPerioder?.first()?.periode?.fom).isEqualTo(YearMonth.of(2023, 1))
+        assertThat(barnetilsynPerioder?.first()?.periode?.fom).isEqualTo(YearMonth.of(2023, 7))
     }
 
     private fun ferdigstillVedtak(
