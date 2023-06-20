@@ -34,7 +34,6 @@ class JournalpostService(private val journalpostClient: JournalpostClient) {
                     type = BrukerIdType.FNR,
                 ),
                 antall = antall,
-                tema = listOf(Tema.ENF),
                 journalposttype = typer,
             ),
         )
