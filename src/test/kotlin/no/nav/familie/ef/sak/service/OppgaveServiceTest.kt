@@ -8,6 +8,7 @@ import io.mockk.runs
 import io.mockk.slot
 import io.mockk.verify
 import no.nav.familie.ef.sak.arbeidsfordeling.ArbeidsfordelingService
+import no.nav.familie.ef.sak.behandling.dto.VurderHenvendelseOppgavetype.INNSTILLING_VEDRØRENDE_UTDANNING
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.EksternFagsakId
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
@@ -18,7 +19,9 @@ import no.nav.familie.ef.sak.iverksett.oppgaveforbarn.Alder
 import no.nav.familie.ef.sak.oppgave.Oppgave
 import no.nav.familie.ef.sak.oppgave.OppgaveRepository
 import no.nav.familie.ef.sak.oppgave.OppgaveService
+import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
+import no.nav.familie.ef.sak.repository.oppgave
 import no.nav.familie.http.client.RessursException
 import no.nav.familie.kontrakter.felles.Behandlingstema
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -43,6 +46,7 @@ import java.net.URI
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.familie.ef.sak.oppgave.Oppgave as EfOppgave
 
 internal class OppgaveServiceTest {
 
@@ -66,6 +70,52 @@ internal class OppgaveServiceTest {
     internal fun setUp() {
         every { oppgaveClient.finnOppgaveMedId(any()) } returns lagEksternTestOppgave()
         every { oppgaveRepository.update(any()) } answers { firstArg() }
+    }
+
+    @Test
+    fun `Skal ikke lage ny VurderHenvendelseOppgave med type utdanning dersom det finnes en på behandling fra før`() {
+        val eksisterendeGsakOppgaveId: Long = 987345
+        val oppgave = oppgave(
+            behandling = behandling(),
+            type = Oppgavetype.VurderHenvendelse,
+            gsakOppgaveId = eksisterendeGsakOppgaveId,
+        )
+        mockFinnVurderHenvendelseOppgave(returnValue = oppgave)
+
+        val opprettOppgave = oppgaveService.opprettOppgave(
+            BEHANDLING_ID,
+            Oppgavetype.VurderHenvendelse,
+            INNSTILLING_VEDRØRENDE_UTDANNING,
+        )
+
+        verify(exactly = 0) { oppgaveRepository.insert(any()) }
+        assertThat(opprettOppgave).isEqualTo(eksisterendeGsakOppgaveId)
+    }
+
+    @Test
+    fun `Skal lage ny VurderHenvendelseOppgave med type utdanning dersom det ikke finnes en på behandling fra før`() {
+        mockOpprettOppgave(slot())
+        mockFinnVurderHenvendelseOppgave(null)
+        val oppgaveRepositoryInsertSlot = slot<EfOppgave>()
+        every { oppgaveRepository.insert(capture(oppgaveRepositoryInsertSlot)) } answers { firstArg() }
+
+        oppgaveService.opprettOppgave(
+            BEHANDLING_ID,
+            Oppgavetype.VurderHenvendelse,
+            INNSTILLING_VEDRØRENDE_UTDANNING,
+        )
+
+        assertThat(oppgaveRepositoryInsertSlot.captured.vurderHenvendelseOppgavetype).isEqualTo(INNSTILLING_VEDRØRENDE_UTDANNING)
+    }
+
+    private fun mockFinnVurderHenvendelseOppgave(returnValue: Oppgave?) {
+        every {
+            oppgaveRepository.findByBehandlingIdAndTypeAndVurderHenvendelseOppgavetype(
+                any(),
+                any(),
+                any(),
+            )
+        } returns returnValue
     }
 
     @Test
@@ -354,7 +404,9 @@ internal class OppgaveServiceTest {
 
     private fun mockOpprettOppgave(slot: CapturingSlot<OpprettOppgaveRequest>) {
         every { fagsakService.hentFagsakForBehandling(BEHANDLING_ID) } returns lagTestFagsak()
+
         every { oppgaveRepository.insert(any()) } returns lagTestOppgave()
+
         every {
             oppgaveRepository.findByBehandlingIdAndTypeAndErFerdigstiltIsFalse(any(), any())
         } returns null

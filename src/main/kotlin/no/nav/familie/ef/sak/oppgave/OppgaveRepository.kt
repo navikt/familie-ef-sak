@@ -19,6 +19,11 @@ interface OppgaveRepository : RepositoryInterface<Oppgave, Long>, InsertUpdateRe
         vurderHenvendelseOppgavetype: VurderHenvendelseOppgavetype,
     ): Oppgave?
 
+    fun findByBehandlingIdAndType(
+        behandlingId: UUID,
+        oppgavetype: Oppgavetype,
+    ): List<Oppgave>?
+
     fun findByBehandlingIdAndErFerdigstiltIsFalseAndTypeIn(behandlingId: UUID, oppgavetype: Set<Oppgavetype>): Oppgave?
     fun findByBehandlingIdAndBarnPersonIdentAndAlder(
         behandlingId: UUID,

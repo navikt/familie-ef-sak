@@ -391,4 +391,14 @@ class OppgaveService(
         Oppgavetype.VurderHenvendelse -> false
         else -> error("Håndterer ikke behandlesAvApplikasjon for $oppgavetype")
     }
+
+    fun finnVurderHenvendelsesOppgaver(behandlingId: UUID): List<VurderHenvendelsOppgaveDto> {
+        val vurderHenvendelsOppgave =
+            oppgaveRepository.findByBehandlingIdAndType(behandlingId, Oppgavetype.VurderHenvendelse)
+        val oppgaveList = vurderHenvendelsOppgave?.filter { it.vurderHenvendelseOppgavetype != null } ?: emptyList()
+
+        return oppgaveList.map {
+            VurderHenvendelsOppgaveDto(it.vurderHenvendelseOppgavetype ?: error("Skal ikke skje"), it.sporbar.opprettetTid.toLocalDate())
+        }
+    }
 }
