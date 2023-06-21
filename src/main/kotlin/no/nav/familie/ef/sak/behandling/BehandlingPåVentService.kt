@@ -226,7 +226,7 @@ class BehandlingPåVentService(
         }
 
         if (vurderHenvendelseOppgaver.contains(VurderHenvendelseOppgavetype.INNSTILLING_VEDRØRENDE_UTDANNING)) {
-            feilHvis(saksbehandling.stønadstype != StønadType.OVERGANGSSTØNAD && saksbehandling.stønadstype != StønadType.SKOLEPENGER) {
+            feilHvis(saksbehandling.stønadstype == StønadType.BARNETILSYN) {
                 "Kan ikke lagre task for opprettelse av oppgave om innstilling om utdanning på behandling med id ${saksbehandling.id} fordi behandlingen hverken er tilknyttet overgangsstønad eller skolepenger"
             }
         }
