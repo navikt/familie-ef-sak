@@ -44,6 +44,11 @@ class JournalpostClient(
             ?: error("Kunne ikke hente vedlegg for ${journalposterForBrukerRequest.brukerId.id}")
     }
 
+    fun finnJournalposterForBrukerOgTema(journalposterForBrukerOgTemaRequest: JournalposterForBrukerOgTemaRequest): List<Journalpost> {
+        return postForEntity<Ressurs<List<Journalpost>>>(journalpostURI, journalposterForBrukerOgTemaRequest).data
+            ?: error("Kunne ikke hente vedlegg for ${journalposterForBrukerOgTemaRequest.brukerId.id}")
+    }
+
     fun hentJournalpost(journalpostId: String): Journalpost {
         val ressurs = try {
             getForEntity<Ressurs<Journalpost>>(URI.create("$journalpostURI?journalpostId=$journalpostId"))

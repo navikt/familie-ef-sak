@@ -6,6 +6,7 @@ import no.nav.familie.kontrakter.ef.sak.DokumentBrevkode
 import no.nav.familie.kontrakter.ef.søknad.SøknadBarnetilsyn
 import no.nav.familie.kontrakter.ef.søknad.SøknadOvergangsstønad
 import no.nav.familie.kontrakter.ef.søknad.SøknadSkolepenger
+import no.nav.familie.kontrakter.felles.Arkivtema
 import no.nav.familie.kontrakter.felles.BrukerIdType
 import no.nav.familie.kontrakter.felles.Tema
 import no.nav.familie.kontrakter.felles.journalpost.Bruker
@@ -34,7 +35,24 @@ class JournalpostService(private val journalpostClient: JournalpostClient) {
                     type = BrukerIdType.FNR,
                 ),
                 antall = antall,
+                tema = listOf(Tema.ENF),
                 journalposttype = typer,
+            ),
+        )
+    }
+
+    fun finnJournalposterForTema(
+        personIdent: String,
+        tema: List<Arkivtema>?,
+        antall: Int = 200,
+    ): List<Journalpost> {
+        return journalpostClient.finnJournalposterForBrukerOgTema(
+            JournalposterForBrukerOgTemaRequest(
+                brukerId = Bruker(
+                    id = personIdent,
+                    type = BrukerIdType.FNR,
+                ),
+                tema = tema,
             ),
         )
     }
@@ -110,3 +128,8 @@ class JournalpostService(private val journalpostClient: JournalpostClient) {
         journalpostClient.oppdaterJournalpost(oppdatertJournalpost, journalpost.journalpostId, saksbehandler)
     }
 }
+
+data class JournalposterForBrukerOgTemaRequest(
+    val brukerId: Bruker,
+    val tema: List<Arkivtema>?,
+)
