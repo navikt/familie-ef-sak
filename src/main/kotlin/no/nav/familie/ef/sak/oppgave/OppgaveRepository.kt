@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.oppgave
 
+import no.nav.familie.ef.sak.behandling.dto.VurderHenvendelseOppgavetype
 import no.nav.familie.ef.sak.iverksett.oppgaveforbarn.Alder
 import no.nav.familie.ef.sak.repository.InsertUpdateRepository
 import no.nav.familie.ef.sak.repository.RepositoryInterface
@@ -12,8 +13,18 @@ import java.util.UUID
 interface OppgaveRepository : RepositoryInterface<Oppgave, Long>, InsertUpdateRepository<Oppgave> {
 
     fun findByBehandlingIdAndTypeAndErFerdigstiltIsFalse(behandlingId: UUID, oppgavetype: Oppgavetype): Oppgave?
+    fun findByBehandlingIdAndTypeAndVurderHenvendelseOppgavetype(
+        behandlingId: UUID,
+        oppgavetype: Oppgavetype,
+        vurderHenvendelseOppgavetype: VurderHenvendelseOppgavetype,
+    ): Oppgave?
+
     fun findByBehandlingIdAndErFerdigstiltIsFalseAndTypeIn(behandlingId: UUID, oppgavetype: Set<Oppgavetype>): Oppgave?
-    fun findByBehandlingIdAndBarnPersonIdentAndAlder(behandlingId: UUID, barnPersonIdent: String, alder: Alder?): Oppgave?
+    fun findByBehandlingIdAndBarnPersonIdentAndAlder(
+        behandlingId: UUID,
+        barnPersonIdent: String,
+        alder: Alder?,
+    ): Oppgave?
 
     // language=PostgreSQL
     @Query(
@@ -23,7 +34,11 @@ interface OppgaveRepository : RepositoryInterface<Oppgave, Long>, InsertUpdateRe
                 AND o.barn_person_ident IN (:barnPersonIdenter)
                 AND o.type=:oppgavetype""",
     )
-    fun findByTypeAndAlderIsNotNullAndBarnPersonIdenter(oppgavetype: Oppgavetype, barnPersonIdenter: List<String>?): List<Oppgave>
+    fun findByTypeAndAlderIsNotNullAndBarnPersonIdenter(
+        oppgavetype: Oppgavetype,
+        barnPersonIdenter: List<String>?,
+    ): List<Oppgave>
+
     fun findByGsakOppgaveId(gsakOppgaveId: Long): Oppgave?
     fun findTopByBehandlingIdOrderBySporbarOpprettetTidDesc(behandlingId: UUID): Oppgave?
 }

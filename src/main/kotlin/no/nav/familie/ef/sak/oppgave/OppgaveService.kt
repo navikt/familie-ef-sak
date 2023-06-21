@@ -2,6 +2,7 @@ package no.nav.familie.ef.sak.oppgave
 
 import no.nav.familie.ef.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ef.sak.behandling.Saksbehandling
+import no.nav.familie.ef.sak.behandling.dto.VurderHenvendelseOppgavetype
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.infrastruktur.config.getValue
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
@@ -47,13 +48,22 @@ class OppgaveService(
     fun opprettOppgave(
         behandlingId: UUID,
         oppgavetype: Oppgavetype,
+        vurderHenvendelseOppgavetype: VurderHenvendelseOppgavetype? = null,
         tilordnetNavIdent: String? = null,
         beskrivelse: String? = null,
         mappeId: Long? = null, // Dersom denne er satt vil vi ikke prøve å finne mappe basert på oppgavens innhold
         prioritet: OppgavePrioritet = OppgavePrioritet.NORM,
     ): Long {
         val oppgaveFinnesFraFør =
-            oppgaveRepository.findByBehandlingIdAndTypeAndErFerdigstiltIsFalse(behandlingId, oppgavetype)
+            if (oppgavetype == Oppgavetype.VurderHenvendelse && vurderHenvendelseOppgavetype != null) {
+                oppgaveRepository.findByBehandlingIdAndTypeAndVurderHenvendelseOppgavetype(
+                    behandlingId,
+                    oppgavetype,
+                    vurderHenvendelseOppgavetype,
+                )
+            } else {
+                oppgaveRepository.findByBehandlingIdAndTypeAndErFerdigstiltIsFalse(behandlingId, oppgavetype)
+            }
 
         return if (oppgaveFinnesFraFør !== null) {
             oppgaveFinnesFraFør.gsakOppgaveId
@@ -72,6 +82,7 @@ class OppgaveService(
                 gsakOppgaveId = opprettetOppgaveId,
                 behandlingId = behandlingId,
                 type = oppgavetype,
+                vurderHenvendelseOppgavetype = vurderHenvendelseOppgavetype,
             )
             oppgaveRepository.insert(oppgave)
             opprettetOppgaveId

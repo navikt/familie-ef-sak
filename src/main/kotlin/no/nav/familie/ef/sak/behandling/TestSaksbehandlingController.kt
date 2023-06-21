@@ -177,10 +177,10 @@ class TestSaksbehandlingController(
                 ),
             )
             val oppgaveId = oppgaveService.opprettOppgave(
-                behandling.id,
-                Oppgavetype.BehandleSak,
-                SikkerhetContext.hentSaksbehandler(),
-                "Dummy-oppgave opprettet i ny løsning",
+                behandlingId = behandling.id,
+                oppgavetype = Oppgavetype.BehandleSak,
+                tilordnetNavIdent = SikkerhetContext.hentSaksbehandler(),
+                beskrivelse = "Dummy-oppgave opprettet i ny løsning",
             )
             taskService.save(
                 taskService.save(

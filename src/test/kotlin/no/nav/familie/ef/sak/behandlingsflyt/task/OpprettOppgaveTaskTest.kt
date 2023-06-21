@@ -22,7 +22,7 @@ internal class OpprettOppgaveTaskTest {
 
     @BeforeEach
     fun setUp() {
-        every { oppgaveService.opprettOppgave(any(), any()) } returns 1L
+        every { oppgaveService.opprettOppgave(any(), any(), any()) } returns 1L
         every { oppgaveService.opprettOppgaveUtenÅLagreIRepository(any(), any(), any(), any(), any()) } returns 2L
     }
 
@@ -59,7 +59,7 @@ internal class OpprettOppgaveTaskTest {
     }
 
     @Test
-    fun `skal ikke lagre ned oppgave om oppgavetypen er vurder henvendelse`() {
+    fun `skal lagre ned oppgave om oppgavetypen er vurder henvendelse`() {
         every { behandlingService.hentBehandling(behandlingId) } returns behandling(id = behandlingId, status = BehandlingStatus.UTREDES)
         every { oppgaveService.lagOppgaveTekst(any()) } returns ""
 
@@ -67,17 +67,15 @@ internal class OpprettOppgaveTaskTest {
             OpprettOppgaveTask.OpprettOppgaveTaskData(
                 behandlingId = behandlingId,
                 oppgavetype = Oppgavetype.VurderHenvendelse,
-                beskrivelse = "",
             ),
         )
 
         opprettOppgaveTask.doTask(task)
-        verifyOpprettOppgaveMedLagringKall(0)
-        verifyOpprettOppgaveUtenLagringKall(1)
+        verifyOpprettOppgaveMedLagringKall(1)
     }
 
     private fun verifyOpprettOppgaveMedLagringKall(opprettOppgaveKall: Int) {
-        verify(exactly = opprettOppgaveKall) { oppgaveService.opprettOppgave(any(), any()) }
+        verify(exactly = opprettOppgaveKall) { oppgaveService.opprettOppgave(any(), any(), any(), any(), any()) }
     }
 
     private fun verifyOpprettOppgaveUtenLagringKall(opprettOppgaveKall: Int) {

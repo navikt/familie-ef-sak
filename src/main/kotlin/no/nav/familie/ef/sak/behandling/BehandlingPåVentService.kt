@@ -89,6 +89,7 @@ class BehandlingPåVentService(
                     OpprettOppgaveTask.OpprettOppgaveTaskData(
                         behandlingId = saksbehandling.id,
                         oppgavetype = Oppgavetype.VurderHenvendelse,
+                        vurderHenvendelseOppgavetype = it,
                         beskrivelse = it.beskrivelse(),
                     ),
                 ),
