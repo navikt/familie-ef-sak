@@ -45,7 +45,7 @@ class JournalpostClient(
     }
 
     fun finnJournalposterForBrukerOgTema(journalposterForBrukerOgTemaRequest: JournalposterForBrukerOgTemaRequest): List<Journalpost> {
-        return postForEntity<Ressurs<List<Journalpost>>>(journalpostURI, journalposterForBrukerOgTemaRequest).data
+        return postForEntity<Ressurs<List<Journalpost>>>(URI.create("$journalpostURI/temaer"), journalposterForBrukerOgTemaRequest).data
             ?: error("Kunne ikke hente vedlegg for ${journalposterForBrukerOgTemaRequest.brukerId.id}")
     }
 
