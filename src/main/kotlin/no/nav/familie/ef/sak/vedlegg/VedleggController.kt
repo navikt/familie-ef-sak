@@ -52,4 +52,6 @@ class VedleggController(
 data class VedleggRequest(
     val fagsakPersonId: UUID,
     val arkivtemaer: List<Arkivtema>?,
+    val dokumenttype: String,
+    val journalpostStatus: String
 )
