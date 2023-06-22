@@ -227,6 +227,12 @@ class OppgaveService(
         oppgaveClient.ferdigstillOppgave(gsakOppgaveId)
     }
 
+    fun finnSisteBehandleSakOppgaveForBehandling(behandlingId: UUID): EfOppgave? =
+        oppgaveRepository.findTopByBehandlingIdAndTypeOrderBySporbarOpprettetTidDesc(
+            behandlingId,
+            Oppgavetype.BehandleSak,
+        )
+
     fun finnSisteOppgaveForBehandling(behandlingId: UUID): EfOppgave? {
         return oppgaveRepository.findTopByBehandlingIdOrderBySporbarOpprettetTidDesc(behandlingId)
     }

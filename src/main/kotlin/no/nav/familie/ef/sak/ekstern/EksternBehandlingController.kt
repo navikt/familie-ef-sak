@@ -1,9 +1,12 @@
 package no.nav.familie.ef.sak.ekstern
 
 import no.nav.familie.ef.sak.AuditLoggerEvent
+import no.nav.familie.ef.sak.felles.util.FnrUtil
+import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvisIkke
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
+import no.nav.familie.kontrakter.ef.søknad.KanSendePåminnelseRequest
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.klage.KanOppretteRevurderingResponse
 import no.nav.familie.kontrakter.felles.klage.OpprettRevurderingResponse
@@ -62,5 +65,23 @@ class EksternBehandlingController(
             "Kallet utføres ikke av en autorisert klient"
         }
         return Ressurs.success(eksternBehandlingService.opprettRevurderingKlage(eksternFagsakId))
+    }
+
+    @PostMapping("kan-sende-påminnelse-til-bruker")
+    @ProtectedWithClaims(issuer = "azuread", claimMap = ["roles=access_as_application"])
+    fun kanSendeSmsPåminnelseTilSøker(
+        @RequestBody kanSendePåminnelseRequest: KanSendePåminnelseRequest,
+    ): Ressurs<Boolean> {
+        if (!SikkerhetContext.kallKommerFraFamilieEfMottak()) {
+            throw Feil(message = "Kallet utføres ikke av en autorisert klient", httpStatus = HttpStatus.UNAUTHORIZED)
+        }
+        FnrUtil.validerIdent(kanSendePåminnelseRequest.personIdent)
+        return Ressurs.success(
+            eksternBehandlingService.tilhørendeBehandleSakOppgaveErPåbegynt(
+                kanSendePåminnelseRequest.personIdent,
+                kanSendePåminnelseRequest.stønadType,
+                kanSendePåminnelseRequest.innsendtSøknadTidspunkt,
+            ),
+        )
     }
 }
