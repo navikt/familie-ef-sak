@@ -132,4 +132,5 @@ class JournalpostService(private val journalpostClient: JournalpostClient) {
 data class JournalposterForBrukerOgTemaRequest(
     val brukerId: Bruker,
     val tema: List<Arkivtema>?,
+    val antall: Int = 200,
 )
