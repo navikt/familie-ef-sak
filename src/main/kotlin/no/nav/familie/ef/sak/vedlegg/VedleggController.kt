@@ -2,6 +2,7 @@ package no.nav.familie.ef.sak.vedlegg
 
 import no.nav.familie.ef.sak.AuditLoggerEvent
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.logger
 import no.nav.familie.kontrakter.felles.Arkivtema
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -46,6 +47,9 @@ class VedleggController(
     @PostMapping("/fagsak-person")
     fun finnVedleggForVedleggRequest(@RequestBody vedleggRequest: VedleggRequest): Ressurs<List<DokumentinfoDto>> {
         tilgangService.validerTilgangTilFagsakPerson(vedleggRequest.fagsakPersonId, AuditLoggerEvent.ACCESS)
+        logger.info("ef-sak vedleggrequest: $vedleggRequest")
+        logger.info("fagsak-person antall temaer: ${vedleggRequest.arkivtemaer?.size}")
+        logger.info("fagsak-person temaer: ${vedleggRequest.arkivtemaer}")
         return Ressurs.success(vedleggService.finnVedleggForVedleggRequest(vedleggRequest))
     }
 }
