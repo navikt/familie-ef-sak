@@ -398,7 +398,11 @@ class OppgaveService(
         val oppgaveList = vurderHenvendelsOppgave?.filter { it.vurderHenvendelseOppgavetype != null } ?: emptyList()
 
         return oppgaveList.map {
-            VurderHenvendelsOppgaveDto(it.vurderHenvendelseOppgavetype ?: error("Skal ikke skje"), it.sporbar.opprettetTid.toLocalDate())
+            VurderHenvendelsOppgaveDto(
+                it.vurderHenvendelseOppgavetype
+                    ?: error("Fant en nullverdi av VurderhenvendelseOppgavetype. Dette skal ikke skje."),
+                it.sporbar.opprettetTid.toLocalDate()
+            )
         }
     }
 }
