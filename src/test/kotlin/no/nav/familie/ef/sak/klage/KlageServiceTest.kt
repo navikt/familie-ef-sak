@@ -205,6 +205,7 @@ internal class KlageServiceTest {
                         utfall = null,
                         mottattEllerAvsluttetTidspunkt = tidsPunktAvsluttetIKabal,
                         journalpostReferanser = listOf(),
+                        årsakFeilregistrert = null,
                     ),
                 ),
                 vedtaksdato = tidspunktAvsluttetIFamilieKlage,
