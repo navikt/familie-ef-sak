@@ -48,15 +48,15 @@ class VedleggController(
     fun finnVedleggForVedleggRequest(@RequestBody vedleggRequest: VedleggRequest): Ressurs<List<DokumentinfoDto>> {
         tilgangService.validerTilgangTilFagsakPerson(vedleggRequest.fagsakPersonId, AuditLoggerEvent.ACCESS)
         logger.info("ef-sak vedleggrequest: $vedleggRequest")
-        logger.info("fagsak-person antall temaer: ${vedleggRequest.arkivtemaer?.size}")
-        logger.info("fagsak-person temaer: ${vedleggRequest.arkivtemaer}")
+        logger.info("fagsak-person antall temaer: ${vedleggRequest.tema?.size}")
+        logger.info("fagsak-person temaer: ${vedleggRequest.tema}")
         return Ressurs.success(vedleggService.finnVedleggForVedleggRequest(vedleggRequest))
     }
 }
 
 data class VedleggRequest(
     val fagsakPersonId: UUID,
-    val arkivtemaer: List<Arkivtema>?,
+    val tema: List<Arkivtema>?,
     val dokumenttype: String?,
     val journalpostStatus: String?,
 )

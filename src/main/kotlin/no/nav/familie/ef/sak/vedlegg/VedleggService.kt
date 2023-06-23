@@ -55,7 +55,7 @@ class VedleggService(
         val aktivIdent = fagsakPersonService.hentAktivIdent(vedleggRequest.fagsakPersonId)
         val journalposter = journalpostService.finnJournalposterForTema(
             personIdent = aktivIdent,
-            tema = vedleggRequest.arkivtemaer,
+            tema = vedleggRequest.tema,
             antall = 1000,
         )
         return journalposter.flatMap { journalpost -> journalpost.dokumenter?.map { tilDokumentInfoDto(it, journalpost) } ?: emptyList() }
