@@ -47,9 +47,6 @@ class VedleggController(
     @PostMapping("/fagsak-person")
     fun finnVedleggForVedleggRequest(@RequestBody vedleggRequest: VedleggRequest): Ressurs<List<DokumentinfoDto>> {
         tilgangService.validerTilgangTilFagsakPerson(vedleggRequest.fagsakPersonId, AuditLoggerEvent.ACCESS)
-        logger.info("ef-sak vedleggrequest: $vedleggRequest")
-        logger.info("fagsak-person antall temaer: ${vedleggRequest.tema?.size}")
-        logger.info("fagsak-person temaer: ${vedleggRequest.tema}")
         return Ressurs.success(vedleggService.finnVedleggForVedleggRequest(vedleggRequest))
     }
 }
