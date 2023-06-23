@@ -276,6 +276,41 @@ internal class KlageServiceTest {
             assertThat(klager.barnetilsyn.first().vedtaksdato).isEqualTo(tidspunktAvsluttetFamilieKlage)
         }
 
+        @Test
+        internal fun `Hent klage - skal bruke vedtaksdato fra kabal dersom behandlingen er feilregistrert i kabal`() {
+            val fagsaker = fagsaker()
+
+            val tidsPunktAvsluttetIKabal = LocalDateTime.of(2022, Month.OCTOBER, 1, 0, 0)
+            val tidspunktAvsluttetIFamilieKlage = LocalDateTime.of(2022, Month.AUGUST, 1, 0, 0)
+
+            val årsakFeilregistrert = "Klage registrert på feil vedtak"
+            val klagebehandlingAvsluttetKabal = klageBehandlingDto(
+                resultat = BehandlingResultat.IKKE_MEDHOLD,
+                klageinstansResultat = listOf(
+                    KlageinstansResultatDto(
+                        type = BehandlingEventType.BEHANDLING_FEILREGISTRERT,
+                        utfall = null,
+                        mottattEllerAvsluttetTidspunkt = tidsPunktAvsluttetIKabal,
+                        journalpostReferanser = listOf(),
+                        årsakFeilregistrert = årsakFeilregistrert,
+                    ),
+                ),
+                vedtaksdato = tidspunktAvsluttetIFamilieKlage,
+            )
+
+            every { fagsakService.finnFagsakerForFagsakPersonId(any()) } returns fagsaker
+            every { klageClient.hentKlagebehandlinger(any()) } returns mapOf(
+                eksternIdOS to listOf(klagebehandlingAvsluttetKabal),
+                eksternIdBT to emptyList(),
+                eksternIdSP to emptyList(),
+            )
+
+            val klager = klageService.hentBehandlinger(UUID.randomUUID())
+
+            assertThat(klager.overgangsstønad.first().vedtaksdato).isEqualTo(tidsPunktAvsluttetIKabal)
+            assertThat(klager.overgangsstønad.first().klageinstansResultat.first().årsakFeilregistrert).isEqualTo(årsakFeilregistrert)
+        }
+
         private fun fagsaker() = Fagsaker(
             fagsak(stønadstype = StønadType.OVERGANGSSTØNAD, eksternId = EksternFagsakId(eksternIdOS)),
             fagsak(stønadstype = StønadType.BARNETILSYN, eksternId = EksternFagsakId(eksternIdBT)),
