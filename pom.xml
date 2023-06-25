@@ -34,7 +34,7 @@
         <springdoc.version>2.1.0</springdoc.version>
         <mockk.version>1.13.5</mockk.version>
         <felles.version>2.20230508082643_6b28bd8</felles.version>
-        <prosessering.version>2.20230505153212_2bc6a06</prosessering.version>
+        <prosessering.version>2.20230621155918_9c5de0f</prosessering.version>
         <start-class>no.nav.familie.ef.sak.ApplicationKt</start-class>
         <kontrakter.version>3.0_20230621135853_92036e1</kontrakter.version>
         <eksterne.kontrakter.bisys.version>2.0_20230214104704_706e9c0</eksterne.kontrakter.bisys.version>
