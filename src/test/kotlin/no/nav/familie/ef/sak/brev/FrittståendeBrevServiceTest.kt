@@ -4,6 +4,7 @@ import io.mockk.every
 import io.mockk.justRun
 import io.mockk.mockk
 import io.mockk.slot
+import io.mockk.verify
 import io.mockk.verifyOrder
 import no.nav.familie.ef.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ef.sak.brev.domain.BrevmottakerOrganisasjon
@@ -47,6 +48,7 @@ internal class FrittståendeBrevServiceTest {
     private val brevsignaturService = mockk<BrevsignaturService>()
     private val mellomlagringBrevService = mockk<MellomlagringBrevService>()
     private val familieDokumentClient = mockk<FamilieDokumentClient>()
+    private val brevmottakereService = mockk<BrevmottakereService>()
 
     private val frittståendeBrevService =
         FrittståendeBrevService(
@@ -58,6 +60,7 @@ internal class FrittståendeBrevServiceTest {
             brevsignaturService,
             mellomlagringBrevService,
             familieDokumentClient,
+            brevmottakereService,
         )
     private val fagsak = fagsak(fagsakpersoner(identer = setOf("01010172272")))
     private val frittståendeBrevDto = FrittståendeBrevDto(
@@ -231,6 +234,7 @@ internal class FrittståendeBrevServiceTest {
             assertThat(mottakere[0].ident).isEqualTo(person.personIdent)
             assertThat(mottakere[0].navn).isEqualTo(person.navn)
             assertThat(mottakere[0].mottakerRolle).isEqualTo(person.mottakerRolle.tilIverksettDto())
+            verify { brevmottakereService.slettBrevmottakereForFagsakOgSaksbehandlerHvisFinnes(fagsak.id, any()) }
         }
 
         @Test
@@ -256,6 +260,7 @@ internal class FrittståendeBrevServiceTest {
             assertThat(mottakere[0].ident).isEqualTo(organisasjon.organisasjonsnummer)
             assertThat(mottakere[0].navn).isEqualTo(organisasjon.navnHosOrganisasjon)
             assertThat(mottakere[0].mottakerRolle).isEqualTo(organisasjon.mottakerRolle.tilIverksettDto())
+            verify { brevmottakereService.slettBrevmottakereForFagsakOgSaksbehandlerHvisFinnes(fagsak.id, any()) }
         }
 
         @Test
@@ -291,6 +296,7 @@ internal class FrittståendeBrevServiceTest {
             assertThat(mottakere[1].ident).isEqualTo(organisasjon.organisasjonsnummer)
             assertThat(mottakere[1].navn).isEqualTo(organisasjon.navnHosOrganisasjon)
             assertThat(mottakere[1].mottakerRolle).isEqualTo(organisasjon.mottakerRolle.tilIverksettDto())
+            verify { brevmottakereService.slettBrevmottakereForFagsakOgSaksbehandlerHvisFinnes(fagsak.id, any()) }
         }
     }
 
@@ -310,6 +316,7 @@ internal class FrittståendeBrevServiceTest {
         )
         justRun { iverksettClient.sendFrittståendeBrev(capture(frittståendeBrevSlot)) }
         justRun { mellomlagringBrevService.slettMellomlagretFrittståendeBrev(any(), any()) }
+        justRun { brevmottakereService.slettBrevmottakereForFagsakOgSaksbehandlerHvisFinnes(any(), any()) }
     }
 
     companion object {

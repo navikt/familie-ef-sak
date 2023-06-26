@@ -30,6 +30,7 @@ class BrevmottakereService(
         return when (brevmottakereRepository.existsById(behandlingId)) {
             true ->
                 brevmottakereRepository.update(brevmottakere)
+
             false ->
                 brevmottakereRepository.insert(brevmottakere)
         }.behandlingId
@@ -64,6 +65,11 @@ class BrevmottakereService(
             opprettBrevmottakere(fagsakId, brevmottakereDto)
         }.fagsakId
     }
+
+    fun slettBrevmottakereForFagsakOgSaksbehandlerHvisFinnes(fagsakId: UUID, saksbehandlerIdent: String) =
+        frittståendeBrevmottakereRepository.findByFagsakIdAndSaksbehandlerIdent(fagsakId, saksbehandlerIdent)?.let {
+            frittståendeBrevmottakereRepository.deleteById(it.id)
+        }
 
     private fun opprettBrevmottakere(
         fagsakId: UUID,
