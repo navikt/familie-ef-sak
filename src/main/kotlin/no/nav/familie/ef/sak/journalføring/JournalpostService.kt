@@ -2,6 +2,7 @@ package no.nav.familie.ef.sak.journalføring
 
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.journalføring.dto.DokumentVariantformat
+import no.nav.familie.ef.sak.vedlegg.VedleggRequest
 import no.nav.familie.kontrakter.ef.sak.DokumentBrevkode
 import no.nav.familie.kontrakter.ef.søknad.SøknadBarnetilsyn
 import no.nav.familie.kontrakter.ef.søknad.SøknadOvergangsstønad
@@ -41,18 +42,20 @@ class JournalpostService(private val journalpostClient: JournalpostClient) {
         )
     }
 
-    fun finnJournalposterForTema(
+    fun finnJournalposterForVedleggRequest(
         personIdent: String,
-        tema: List<Arkivtema>?,
-        antall: Int = 200,
+        vedleggRequest: VedleggRequest,
     ): List<Journalpost> {
         return journalpostClient.finnJournalposterForBrukerOgTema(
-            JournalposterForBrukerOgTemaRequest(
+            JournalposterForVedleggRequest(
                 brukerId = Bruker(
                     id = personIdent,
                     type = BrukerIdType.FNR,
                 ),
-                tema = tema,
+                tema = vedleggRequest.tema,
+                dokumenttype = vedleggRequest.dokumenttype,
+                journalpostStatus = vedleggRequest.journalpostStatus,
+                antall = 200,
             ),
         )
     }
@@ -129,8 +132,10 @@ class JournalpostService(private val journalpostClient: JournalpostClient) {
     }
 }
 
-data class JournalposterForBrukerOgTemaRequest(
+data class JournalposterForVedleggRequest(
     val brukerId: Bruker,
     val tema: List<Arkivtema>?,
+    val dokumenttype: String?,
+    val journalpostStatus: String?,
     val antall: Int = 200,
 )
