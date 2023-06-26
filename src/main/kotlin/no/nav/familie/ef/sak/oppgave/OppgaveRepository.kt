@@ -26,4 +26,5 @@ interface OppgaveRepository : RepositoryInterface<Oppgave, Long>, InsertUpdateRe
     fun findByTypeAndAlderIsNotNullAndBarnPersonIdenter(oppgavetype: Oppgavetype, barnPersonIdenter: List<String>?): List<Oppgave>
     fun findByGsakOppgaveId(gsakOppgaveId: Long): Oppgave?
     fun findTopByBehandlingIdOrderBySporbarOpprettetTidDesc(behandlingId: UUID): Oppgave?
+    fun findTopByBehandlingIdAndTypeOrderBySporbarOpprettetTidDesc(behandlingId: UUID, type: Oppgavetype): Oppgave?
 }
