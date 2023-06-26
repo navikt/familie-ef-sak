@@ -50,16 +50,16 @@ internal class SkolepengerMaksbeløpTest {
     @Nested
     inner class MaksBeløpEtÅrFremITiden {
 
-        private val ÅR_OM_2_ÅR = Year.of(2024)
+        private val ÅR_OM_2_ÅR = Year.now().plusYears(2)
 
         @Test
         internal fun `maksbeløp for universitet et år frem i tiden skal returnere forrige år sitt verdi`() {
-            assertThat(maksbeløpForÅr(HØGSKOLE_UNIVERSITET, Year.of(2023))).isEqualTo(69_500)
+            assertThat(maksbeløpForÅr(HØGSKOLE_UNIVERSITET, Year.of(2023))).isEqualTo(74_366)
         }
 
         @Test
         internal fun `maksbeløp for videregående et år frem i tiden skal returnere forrige år sitt verdi`() {
-            assertThat(maksbeløpForÅr(VIDEREGÅENDE, Year.of(2023))).isEqualTo(29_002)
+            assertThat(maksbeløpForÅr(VIDEREGÅENDE, Year.of(2023))).isEqualTo(31_033)
         }
 
         @Test
