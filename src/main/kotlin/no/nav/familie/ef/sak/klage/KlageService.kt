@@ -88,7 +88,7 @@ class KlageService(
     private fun brukVedtaksdatoFraKlageinstansHvisOversendt(klagebehandling: KlagebehandlingDto): KlagebehandlingDto {
         val erOversendtTilKlageinstans = klagebehandling.resultat == BehandlingResultat.IKKE_MEDHOLD
         val vedtaksdato = if (erOversendtTilKlageinstans) {
-            klagebehandling.klageinstansResultat.singleOrNull { klageinnstansResultat -> klageinnstansResultat.type == BehandlingEventType.KLAGEBEHANDLING_AVSLUTTET }?.mottattEllerAvsluttetTidspunkt
+            klagebehandling.klageinstansResultat.singleOrNull { klageinnstansResultat -> klageinnstansResultat.type == BehandlingEventType.KLAGEBEHANDLING_AVSLUTTET || klageinnstansResultat.type == BehandlingEventType.BEHANDLING_FEILREGISTRERT }?.mottattEllerAvsluttetTidspunkt
         } else {
             klagebehandling.vedtaksdato
         }
