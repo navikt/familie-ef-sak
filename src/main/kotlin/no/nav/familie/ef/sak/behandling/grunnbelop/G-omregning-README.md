@@ -1,5 +1,5 @@
 # G-omregning 
-## WIP: Dokumentasjon, valg, rutiner og manuelle steg 
+## WIP: Dokumentasjon, valg, rutiner og manuelle steg. Førsteutkast 
 
 Noen av kommentarene i dette dokumentet går litt ut over implementering av kode.  
 Viktig med forklaring på hvordan og hvorfor koden har blitt som den har blitt, hvilke 
@@ -32,13 +32,15 @@ Saker som var åpne ved første g-omregning vil bli forsøkt kjørt i neste ukes
 Det finnes også en controller hvor man også kan kjøre omregning på _en_ fagsak
 `no.nav.familie.ef.sak.behandling.ManuellGOmregningController`
 
-##### 2. Gjennomføring (kode)
+##### 2. Utfør gomregning (kode)
 1. Vi kopier data fra forrige behandling -> ny G - behandling
 2. Vi justerer inntekt [HER ER DET GJORT NOEN VALG!!!]
 3. Vi beregner ytelse [HER ER DET GJORT NOEN VALG!!!]
-4. Vi iverksetter uten brev 
-5. Iverksett iverksetter mot økonomi og sender melding til ditt nav (hvis dette ikke endres må ny G også oppdateres på iverksett)
+4. Vi iverksetter uten brev
 5. Vi oppretter ny task som poller status fra iverksett (vanlig flyt)
+
+* familie-ef-iverksett: iverksetter mot økonomi og sender melding til ditt nav 
+(hvis dette ikke endres må ny G også oppdateres på iverksett)
 
 ### Noen valg og andre greier det er fint å vite om
 #### Indeksjustering av inntekt.
@@ -73,9 +75,8 @@ Når vi har lagt inn ny G er det fint om vi ikke iverksetter med "gammel" g på 
 
 `no.nav.familie.ef.sak.iverksett.IverksettingDtoMapper.validerGrunnbeløpsmåned`
 
-Fint om vi kan unngå å iverksette vedtak med gammel g. 
-Dette gjelder spesiellt revurderinger fra juni hvor det også er løpende i mai. 
-Da er det vanskeligere å finne igjen mai for regulering senere. 
+Dette gjelder spesiellt revurderinger fra juni hvor det også er løpende i mai - da er det vanskeligere å finne 
+igjen mai for regulering senere. 
 
 #### Etterarbeid/sjekkliste/:
 
