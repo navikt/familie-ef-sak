@@ -381,17 +381,6 @@ class OppgaveService(
         return listOf(behandleSakOppgaver, behandleUnderkjent, godkjenne)
     }
 
-    private fun utledSettBehandlesAvApplikasjon(oppgavetype: Oppgavetype) = when (oppgavetype) {
-        Oppgavetype.BehandleSak,
-        Oppgavetype.BehandleUnderkjentVedtak,
-        Oppgavetype.GodkjenneVedtak,
-        -> true
-
-        Oppgavetype.InnhentDokumentasjon -> false
-        Oppgavetype.VurderHenvendelse -> false
-        else -> error("Håndterer ikke behandlesAvApplikasjon for $oppgavetype")
-    }
-
     fun finnVurderHenvendelsesOppgaver(behandlingId: UUID): List<VurderHenvendelsOppgaveDto> {
         val vurderHenvendelsOppgave =
             oppgaveRepository.findByBehandlingIdAndType(behandlingId, Oppgavetype.VurderHenvendelse)
@@ -405,4 +394,16 @@ class OppgaveService(
             )
         }
     }
+
+    private fun utledSettBehandlesAvApplikasjon(oppgavetype: Oppgavetype) = when (oppgavetype) {
+        Oppgavetype.BehandleSak,
+        Oppgavetype.BehandleUnderkjentVedtak,
+        Oppgavetype.GodkjenneVedtak,
+        -> true
+
+        Oppgavetype.InnhentDokumentasjon -> false
+        Oppgavetype.VurderHenvendelse -> false
+        else -> error("Håndterer ikke behandlesAvApplikasjon for $oppgavetype")
+    }
+
 }
