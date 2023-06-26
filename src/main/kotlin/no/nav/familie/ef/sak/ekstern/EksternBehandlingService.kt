@@ -64,19 +64,23 @@ class EksternBehandlingService(
         }
     }
 
-    @Transactional
     fun tilhørendeBehandleSakOppgaveErPåbegynt(
         personIdent: String,
         stønadType: StønadType,
         innsendtSøknadTidspunkt: LocalDateTime,
     ): Boolean {
-        val fagsak = fagsakService.hentEllerOpprettFagsak(personIdent, stønadType)
-        val behandlingerOpprettetEtterSøknadstidspunkt =
-            behandlingService.hentBehandlinger(fagsak.id).filter { it.sporbar.opprettetTid > innsendtSøknadTidspunkt }
-        val efOppgaver = hentEFOppgaver(behandlingerOpprettetEtterSøknadstidspunkt.map { it.id })
-        val oppgaver = hentOppgaver(efOppgaver.map { it.gsakOppgaveId })
+        val fagsak = fagsakService.finnFagsak(setOf(personIdent), stønadType)
 
-        return oppgaver.any { it.tilordnetRessurs != null }
+        return if (fagsak == null) {
+            false
+        } else {
+            val behandlingerOpprettetEtterSøknadstidspunkt =
+                behandlingService.hentBehandlinger(fagsak.id).filter { it.sporbar.opprettetTid > innsendtSøknadTidspunkt }
+            val efOppgaver = hentEFOppgaver(behandlingerOpprettetEtterSøknadstidspunkt.map { it.id })
+            val oppgaver = hentOppgaver(efOppgaver.map { it.gsakOppgaveId })
+
+            oppgaver.any { it.tilordnetRessurs != null }
+        }
     }
 
     @Transactional
