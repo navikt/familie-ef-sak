@@ -390,7 +390,7 @@ class OppgaveService(
             VurderHenvendelsOppgaveDto(
                 it.vurderHenvendelseOppgavetype
                     ?: error("Fant en nullverdi av VurderhenvendelseOppgavetype. Dette skal ikke skje."),
-                it.sporbar.opprettetTid.toLocalDate()
+                it.sporbar.opprettetTid.toLocalDate(),
             )
         }
     }
@@ -405,5 +405,4 @@ class OppgaveService(
         Oppgavetype.VurderHenvendelse -> false
         else -> error("Håndterer ikke behandlesAvApplikasjon for $oppgavetype")
     }
-
 }
