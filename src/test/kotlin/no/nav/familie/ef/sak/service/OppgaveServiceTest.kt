@@ -110,7 +110,7 @@ internal class OppgaveServiceTest {
 
     private fun mockFinnVurderHenvendelseOppgave(returnValue: Oppgave?) {
         every {
-            oppgaveRepository.findByBehandlingIdAndTypeAndVurderHenvendelseOppgaveSubtype(
+            oppgaveRepository.findByBehandlingIdAndTypeAndOppgaveSubtype(
                 any(),
                 any(),
                 any(),

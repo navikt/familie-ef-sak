@@ -1,1 +1,1 @@
-ALTER TABLE oppgave ADD COLUMN vurder_henvendelse_oppgave_subtype VARCHAR DEFAULT NULL;
+ALTER TABLE oppgave ADD COLUMN oppgave_subtype VARCHAR DEFAULT NULL;
