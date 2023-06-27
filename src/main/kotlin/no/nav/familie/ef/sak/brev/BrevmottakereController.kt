@@ -37,4 +37,22 @@ class BrevmottakereController(
 
         return Ressurs.success(brevmottakereService.lagreBrevmottakere(behandlingId, brevmottakere))
     }
+
+    @GetMapping("fagsak/{fagsakId}")
+    fun hentBrevmottakereForFagsak(@PathVariable fagsakId: UUID): Ressurs<BrevmottakereDto?> {
+        tilgangService.validerTilgangTilFagsak(fagsakId, AuditLoggerEvent.ACCESS)
+
+        return Ressurs.success(brevmottakereService.hentBrevnottakereForFagsak(fagsakId))
+    }
+
+    @PostMapping("fagsak/{fagsakId}")
+    fun velgBrevmottakereForFagsak(
+        @PathVariable fagsakId: UUID,
+        @RequestBody brevmottakere: BrevmottakereDto,
+    ): Ressurs<UUID> {
+        tilgangService.validerTilgangTilFagsak(fagsakId, AuditLoggerEvent.UPDATE)
+        tilgangService.validerHarSaksbehandlerrolle()
+
+        return Ressurs.success(brevmottakereService.lagreBrevmottakereForFagsak(fagsakId, brevmottakere))
+    }
 }
