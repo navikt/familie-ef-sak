@@ -2,7 +2,6 @@ package no.nav.familie.ef.sak.vedlegg
 
 import no.nav.familie.ef.sak.AuditLoggerEvent
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.logger
 import no.nav.familie.kontrakter.felles.Arkivtema
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims

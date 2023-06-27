@@ -91,6 +91,7 @@ class VedleggService(
             journalposttype = journalpost.journalposttype,
             logiskeVedlegg = dokumentInfo.logiskeVedlegg?.map { LogiskVedleggDto(tittel = it.tittel) } ?: emptyList(),
             avsenderMottaker = journalpost.avsenderMottaker,
+            utsendingsinfo = journalpost.utsendingsinfo,
         )
     }
 }

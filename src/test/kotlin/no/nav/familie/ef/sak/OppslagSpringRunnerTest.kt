@@ -13,6 +13,7 @@ import no.nav.familie.ef.sak.behandling.oppgaveforopprettelse.OppgaverForOpprett
 import no.nav.familie.ef.sak.behandlingshistorikk.domain.Behandlingshistorikk
 import no.nav.familie.ef.sak.blankett.Blankett
 import no.nav.familie.ef.sak.brev.domain.Brevmottakere
+import no.nav.familie.ef.sak.brev.domain.BrevmottakereFrittståendeBrev
 import no.nav.familie.ef.sak.brev.domain.MellomlagretBrev
 import no.nav.familie.ef.sak.brev.domain.MellomlagretFritekstbrev
 import no.nav.familie.ef.sak.brev.domain.MellomlagretFrittståendeBrev
@@ -153,6 +154,7 @@ abstract class OppslagSpringRunnerTest {
             MellomlagretFritekstbrev::class,
             MellomlagretFrittståendeBrev::class,
             MellomlagretFrittståendeSanitybrev::class,
+            BrevmottakereFrittståendeBrev::class,
             Behandlingsjournalpost::class,
             Grunnlagsdata::class,
             Tilbakekreving::class,

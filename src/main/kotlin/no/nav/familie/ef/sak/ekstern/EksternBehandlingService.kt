@@ -6,6 +6,7 @@ import no.nav.familie.ef.sak.behandling.dto.RevurderingDto
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.journalføring.dto.VilkårsbehandleNyeBarn
+import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.ef.sak.tilkjentytelse.domain.AndelTilkjentYtelse
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
@@ -20,6 +21,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.UUID
 
 @Service
@@ -28,6 +30,8 @@ class EksternBehandlingService(
     private val behandlingService: BehandlingService,
     private val fagsakService: FagsakService,
     private val revurderingService: RevurderingService,
+    private val oppgaveService: OppgaveService,
+
 ) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -57,6 +61,25 @@ class EksternBehandlingService(
             is KanOppretteRevurdering -> KanOppretteRevurderingResponse(true, null)
             is KanIkkeOppretteRevurdering ->
                 KanOppretteRevurderingResponse(false, resultat.årsak.kanIkkeOppretteRevurderingÅrsak)
+        }
+    }
+
+    fun tilhørendeBehandleSakOppgaveErPåbegynt(
+        personIdent: String,
+        stønadType: StønadType,
+        innsendtSøknadTidspunkt: LocalDateTime,
+    ): Boolean {
+        val fagsak = fagsakService.finnFagsak(setOf(personIdent), stønadType)
+
+        return if (fagsak == null) {
+            false
+        } else {
+            val behandlingerOpprettetEtterSøknadstidspunkt =
+                behandlingService.hentBehandlinger(fagsak.id).filter { it.sporbar.opprettetTid > innsendtSøknadTidspunkt }
+            val efOppgaver = hentEFOppgaver(behandlingerOpprettetEtterSøknadstidspunkt.map { it.id })
+            val oppgaver = hentOppgaver(efOppgaver.map { it.gsakOppgaveId })
+
+            oppgaver.any { it.tilordnetRessurs != null }
         }
     }
 
@@ -98,6 +121,11 @@ class EksternBehandlingService(
         }
         return KanOppretteRevurdering()
     }
+
+    private fun hentEFOppgaver(behandlingIder: List<UUID>) =
+        behandlingIder.mapNotNull { oppgaveService.finnSisteBehandleSakOppgaveForBehandling(it) }
+
+    private fun hentOppgaver(oppgaveIder: List<Long>) = oppgaveIder.map { oppgaveService.hentOppgave(it) }
 }
 
 private sealed interface KanOppretteRevurderingResultat

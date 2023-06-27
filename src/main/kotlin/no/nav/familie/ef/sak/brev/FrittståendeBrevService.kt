@@ -36,6 +36,7 @@ class FrittståendeBrevService(
     private val brevsignaturService: BrevsignaturService,
     private val mellomlagringBrevService: MellomlagringBrevService,
     private val familieDokumentClient: FamilieDokumentClient,
+    private val brevmottakereService: BrevmottakereService,
 ) {
 
     @Deprecated("Skal slettes")
@@ -81,6 +82,7 @@ class FrittståendeBrevService(
             ),
         )
         mellomlagringBrevService.slettMellomlagretFrittståendeBrev(fagsakId, saksbehandlerIdent)
+        brevmottakereService.slettBrevmottakereForFagsakOgSaksbehandlerHvisFinnes(fagsakId, saksbehandlerIdent)
     }
 
     @Deprecated("Skal slettes")
