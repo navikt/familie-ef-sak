@@ -17,6 +17,7 @@ data class DokumentinfoDto(
     val tittel: String,
     val journalpostId: String,
     val dato: LocalDateTime?,
+    val tema: String?,
     val journalstatus: Journalstatus,
     val journalposttype: Journalposttype,
     val logiskeVedlegg: List<LogiskVedleggDto>,
