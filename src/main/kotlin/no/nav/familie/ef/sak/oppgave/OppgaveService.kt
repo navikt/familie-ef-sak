@@ -54,17 +54,7 @@ class OppgaveService(
         mappeId: Long? = null, // Dersom denne er satt vil vi ikke prøve å finne mappe basert på oppgavens innhold
         prioritet: OppgavePrioritet = OppgavePrioritet.NORM,
     ): Long {
-        val oppgaveFinnesFraFør =
-            if (oppgavetype == Oppgavetype.VurderHenvendelse && vurderHenvendelseOppgaveSubtype != null) {
-                oppgaveRepository.findByBehandlingIdAndTypeAndVurderHenvendelseOppgaveSubtype(
-                    behandlingId,
-                    oppgavetype,
-                    vurderHenvendelseOppgaveSubtype,
-                )
-            } else {
-                oppgaveRepository.findByBehandlingIdAndTypeAndErFerdigstiltIsFalse(behandlingId, oppgavetype)
-            }
-
+        val oppgaveFinnesFraFør = getOppgaveFinnesFraFør(oppgavetype, vurderHenvendelseOppgaveSubtype, behandlingId)
         return if (oppgaveFinnesFraFør !== null) {
             oppgaveFinnesFraFør.gsakOppgaveId
         } else {
@@ -87,6 +77,20 @@ class OppgaveService(
             oppgaveRepository.insert(oppgave)
             opprettetOppgaveId
         }
+    }
+
+    private fun getOppgaveFinnesFraFør(
+        oppgavetype: Oppgavetype,
+        vurderHenvendelseOppgaveSubtype: VurderHenvendelseOppgaveSubtype?,
+        behandlingId: UUID
+    ) = if (oppgavetype == Oppgavetype.VurderHenvendelse && vurderHenvendelseOppgaveSubtype != null) {
+        oppgaveRepository.findByBehandlingIdAndTypeAndVurderHenvendelseOppgaveSubtype(
+            behandlingId,
+            oppgavetype,
+            vurderHenvendelseOppgaveSubtype,
+        )
+    } else {
+        oppgaveRepository.findByBehandlingIdAndTypeAndErFerdigstiltIsFalse(behandlingId, oppgavetype)
     }
 
     fun oppdaterOppgave(oppgave: Oppgave) {
