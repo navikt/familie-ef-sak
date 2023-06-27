@@ -2,10 +2,12 @@ package no.nav.familie.ef.sak.journalføring
 
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.journalføring.dto.DokumentVariantformat
+import no.nav.familie.ef.sak.vedlegg.VedleggRequest
 import no.nav.familie.kontrakter.ef.sak.DokumentBrevkode
 import no.nav.familie.kontrakter.ef.søknad.SøknadBarnetilsyn
 import no.nav.familie.kontrakter.ef.søknad.SøknadOvergangsstønad
 import no.nav.familie.kontrakter.ef.søknad.SøknadSkolepenger
+import no.nav.familie.kontrakter.felles.Arkivtema
 import no.nav.familie.kontrakter.felles.BrukerIdType
 import no.nav.familie.kontrakter.felles.Tema
 import no.nav.familie.kontrakter.felles.journalpost.Bruker
@@ -36,6 +38,24 @@ class JournalpostService(private val journalpostClient: JournalpostClient) {
                 antall = antall,
                 tema = listOf(Tema.ENF),
                 journalposttype = typer,
+            ),
+        )
+    }
+
+    fun finnJournalposterForVedleggRequest(
+        personIdent: String,
+        vedleggRequest: VedleggRequest,
+    ): List<Journalpost> {
+        return journalpostClient.finnJournalposterForBrukerOgTema(
+            JournalposterForVedleggRequest(
+                brukerId = Bruker(
+                    id = personIdent,
+                    type = BrukerIdType.FNR,
+                ),
+                tema = vedleggRequest.tema,
+                dokumenttype = vedleggRequest.dokumenttype,
+                journalpostStatus = vedleggRequest.journalpostStatus,
+                antall = 200,
             ),
         )
     }
@@ -111,3 +131,11 @@ class JournalpostService(private val journalpostClient: JournalpostClient) {
         journalpostClient.oppdaterJournalpost(oppdatertJournalpost, journalpost.journalpostId, saksbehandler)
     }
 }
+
+data class JournalposterForVedleggRequest(
+    val brukerId: Bruker,
+    val tema: List<Arkivtema>?,
+    val dokumenttype: String?,
+    val journalpostStatus: String?,
+    val antall: Int = 200,
+)
