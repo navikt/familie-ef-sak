@@ -399,7 +399,7 @@ class OppgaveService(
         return oppgaveListe.map {
             VurderHenvendelseOppgaveDto(
                 it.vurderHenvendelseOppgaveSubtype
-                    ?: error("Fant en nullverdi av VurderhenvendelseOppgavetype. Dette skal ikke skje."),
+                    ?: error("VurderHenvendelseOppgavetype på Oppgave skal ikke kunne være null"),
                 it.sporbar.opprettetTid.toLocalDate(),
             )
         }
