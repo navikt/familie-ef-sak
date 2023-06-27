@@ -105,5 +105,3 @@ internal class SkolepengerMaksbeløpTest {
         return maksbeløp(studietype, Skoleår(skoleår))
     }
 }
-
-
