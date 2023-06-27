@@ -46,4 +46,5 @@ interface OppgaveRepository : RepositoryInterface<Oppgave, Long>, InsertUpdateRe
 
     fun findByGsakOppgaveId(gsakOppgaveId: Long): Oppgave?
     fun findTopByBehandlingIdOrderBySporbarOpprettetTidDesc(behandlingId: UUID): Oppgave?
+    fun findTopByBehandlingIdAndTypeOrderBySporbarOpprettetTidDesc(behandlingId: UUID, type: Oppgavetype): Oppgave?
 }
