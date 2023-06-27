@@ -387,13 +387,13 @@ class OppgaveService(
         return listOf(behandleSakOppgaver, behandleUnderkjent, godkjenne)
     }
 
-    fun finnVurderHenvendelsesOppgaver(behandlingId: UUID): List<VurderHenvendelsOppgaveDto> {
+    fun finnVurderHenvendelsesOppgaver(behandlingId: UUID): List<VurderHenvendelseOppgaveDto> {
         val vurderHenvendelsOppgave =
             oppgaveRepository.findByBehandlingIdAndType(behandlingId, Oppgavetype.VurderHenvendelse)
-        val oppgaveList = vurderHenvendelsOppgave?.filter { it.vurderHenvendelseOppgaveSubtype != null } ?: emptyList()
+        val oppgaveListe = vurderHenvendelsOppgave?.filter { it.vurderHenvendelseOppgaveSubtype != null } ?: emptyList()
 
-        return oppgaveList.map {
-            VurderHenvendelsOppgaveDto(
+        return oppgaveListe.map {
+            VurderHenvendelseOppgaveDto(
                 it.vurderHenvendelseOppgaveSubtype
                     ?: error("Fant en nullverdi av VurderhenvendelseOppgavetype. Dette skal ikke skje."),
                 it.sporbar.opprettetTid.toLocalDate(),

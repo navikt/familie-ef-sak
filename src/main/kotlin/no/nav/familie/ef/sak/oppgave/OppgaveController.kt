@@ -127,8 +127,8 @@ class OppgaveController(
     }
 
     @GetMapping("/behandling/{behandlingId}/settpavent-oppgavestatus")
-    fun hentVurderHenvendelseStatus(@PathVariable behandlingId: UUID): Ressurs<List<VurderHenvendelsOppgaveDto>> {
-        val status: List<VurderHenvendelsOppgaveDto> = oppgaveService.finnVurderHenvendelsesOppgaver(behandlingId)
+    fun hentVurderHenvendelseStatus(@PathVariable behandlingId: UUID): Ressurs<List<VurderHenvendelseOppgaveDto>> {
+        val status: List<VurderHenvendelseOppgaveDto> = oppgaveService.finnVurderHenvendelsesOppgaver(behandlingId)
         return Ressurs.success(status)
     }
 
