@@ -387,7 +387,7 @@ class OppgaveService(
         return listOf(behandleSakOppgaver, behandleUnderkjent, godkjenne)
     }
 
-    fun finnVurderHenvendelsesOppgaver(behandlingId: UUID): List<VurderHenvendelseOppgaveDto> {
+    fun finnVurderHenvendelseOppgaver(behandlingId: UUID): List<VurderHenvendelseOppgaveDto> {
         val vurderHenvendelsOppgave =
             oppgaveRepository.findByBehandlingIdAndType(behandlingId, Oppgavetype.VurderHenvendelse)
         val oppgaveListe = vurderHenvendelsOppgave?.filter { it.vurderHenvendelseOppgaveSubtype != null } ?: emptyList()
