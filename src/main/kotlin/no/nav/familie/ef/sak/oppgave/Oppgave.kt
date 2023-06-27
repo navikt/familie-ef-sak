@@ -1,6 +1,6 @@
 package no.nav.familie.ef.sak.oppgave
 
-import no.nav.familie.ef.sak.behandling.dto.VurderHenvendelseOppgavetype
+import no.nav.familie.ef.sak.behandling.dto.VurderHenvendelseOppgaveSubtype
 import no.nav.familie.ef.sak.felles.domain.Sporbar
 import no.nav.familie.ef.sak.iverksett.oppgaveforbarn.Alder
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
@@ -15,7 +15,7 @@ data class Oppgave(
     val behandlingId: UUID,
     val gsakOppgaveId: Long,
     val type: Oppgavetype,
-    val vurderHenvendelseOppgavetype: VurderHenvendelseOppgavetype? = null,
+    val vurderHenvendelseOppgaveSubtype: VurderHenvendelseOppgaveSubtype? = null,
     val barnPersonIdent: String? = null,
     val alder: Alder? = null,
     @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)

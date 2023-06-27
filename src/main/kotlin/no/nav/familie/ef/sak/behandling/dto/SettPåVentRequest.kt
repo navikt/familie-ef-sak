@@ -12,14 +12,14 @@ data class SettPåVentRequest(
     val mappe: Long?,
     val beskrivelse: String,
     val oppgaveVersjon: Int,
-    val oppfølgingsoppgaverMotLokalKontor: List<VurderHenvendelseOppgavetype>?,
+    val oppfølgingsoppgaverMotLokalKontor: List<VurderHenvendelseOppgaveSubtype>?,
 )
 
-enum class VurderHenvendelseOppgavetype {
+enum class VurderHenvendelseOppgaveSubtype {
     INFORMERE_OM_SØKT_OVERGANGSSTØNAD,
     INNSTILLING_VEDRØRENDE_UTDANNING,
 }
-fun VurderHenvendelseOppgavetype.beskrivelse() = when (this) {
-    VurderHenvendelseOppgavetype.INFORMERE_OM_SØKT_OVERGANGSSTØNAD -> OppgaveBeskrivelse.informereLokalkontorOmOvergangsstønad
-    VurderHenvendelseOppgavetype.INNSTILLING_VEDRØRENDE_UTDANNING -> OppgaveBeskrivelse.innstillingOmBrukersUtdanning
+fun VurderHenvendelseOppgaveSubtype.beskrivelse() = when (this) {
+    VurderHenvendelseOppgaveSubtype.INFORMERE_OM_SØKT_OVERGANGSSTØNAD -> OppgaveBeskrivelse.informereLokalkontorOmOvergangsstønad
+    VurderHenvendelseOppgaveSubtype.INNSTILLING_VEDRØRENDE_UTDANNING -> OppgaveBeskrivelse.innstillingOmBrukersUtdanning
 }

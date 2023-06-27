@@ -2,7 +2,7 @@ package no.nav.familie.ef.sak.oppgave
 
 import no.nav.familie.ef.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ef.sak.behandling.Saksbehandling
-import no.nav.familie.ef.sak.behandling.dto.VurderHenvendelseOppgavetype
+import no.nav.familie.ef.sak.behandling.dto.VurderHenvendelseOppgaveSubtype
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.infrastruktur.config.getValue
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
@@ -48,18 +48,18 @@ class OppgaveService(
     fun opprettOppgave(
         behandlingId: UUID,
         oppgavetype: Oppgavetype,
-        vurderHenvendelseOppgavetype: VurderHenvendelseOppgavetype? = null,
+        vurderHenvendelseOppgaveSubtype: VurderHenvendelseOppgaveSubtype? = null,
         tilordnetNavIdent: String? = null,
         beskrivelse: String? = null,
         mappeId: Long? = null, // Dersom denne er satt vil vi ikke prøve å finne mappe basert på oppgavens innhold
         prioritet: OppgavePrioritet = OppgavePrioritet.NORM,
     ): Long {
         val oppgaveFinnesFraFør =
-            if (oppgavetype == Oppgavetype.VurderHenvendelse && vurderHenvendelseOppgavetype != null) {
-                oppgaveRepository.findByBehandlingIdAndTypeAndVurderHenvendelseOppgavetype(
+            if (oppgavetype == Oppgavetype.VurderHenvendelse && vurderHenvendelseOppgaveSubtype != null) {
+                oppgaveRepository.findByBehandlingIdAndTypeAndVurderHenvendelseOppgaveSubtype(
                     behandlingId,
                     oppgavetype,
-                    vurderHenvendelseOppgavetype,
+                    vurderHenvendelseOppgaveSubtype,
                 )
             } else {
                 oppgaveRepository.findByBehandlingIdAndTypeAndErFerdigstiltIsFalse(behandlingId, oppgavetype)
@@ -82,7 +82,7 @@ class OppgaveService(
                 gsakOppgaveId = opprettetOppgaveId,
                 behandlingId = behandlingId,
                 type = oppgavetype,
-                vurderHenvendelseOppgavetype = vurderHenvendelseOppgavetype,
+                vurderHenvendelseOppgaveSubtype = vurderHenvendelseOppgaveSubtype,
             )
             oppgaveRepository.insert(oppgave)
             opprettetOppgaveId
@@ -390,11 +390,11 @@ class OppgaveService(
     fun finnVurderHenvendelsesOppgaver(behandlingId: UUID): List<VurderHenvendelsOppgaveDto> {
         val vurderHenvendelsOppgave =
             oppgaveRepository.findByBehandlingIdAndType(behandlingId, Oppgavetype.VurderHenvendelse)
-        val oppgaveList = vurderHenvendelsOppgave?.filter { it.vurderHenvendelseOppgavetype != null } ?: emptyList()
+        val oppgaveList = vurderHenvendelsOppgave?.filter { it.vurderHenvendelseOppgaveSubtype != null } ?: emptyList()
 
         return oppgaveList.map {
             VurderHenvendelsOppgaveDto(
-                it.vurderHenvendelseOppgavetype
+                it.vurderHenvendelseOppgaveSubtype
                     ?: error("Fant en nullverdi av VurderhenvendelseOppgavetype. Dette skal ikke skje."),
                 it.sporbar.opprettetTid.toLocalDate(),
             )
@@ -406,7 +406,6 @@ class OppgaveService(
         Oppgavetype.BehandleUnderkjentVedtak,
         Oppgavetype.GodkjenneVedtak,
         -> true
-
         Oppgavetype.InnhentDokumentasjon -> false
         Oppgavetype.VurderHenvendelse -> false
         else -> error("Håndterer ikke behandlesAvApplikasjon for $oppgavetype")

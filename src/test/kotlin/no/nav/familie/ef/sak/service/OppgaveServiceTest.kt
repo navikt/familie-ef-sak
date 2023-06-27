@@ -8,7 +8,7 @@ import io.mockk.runs
 import io.mockk.slot
 import io.mockk.verify
 import no.nav.familie.ef.sak.arbeidsfordeling.ArbeidsfordelingService
-import no.nav.familie.ef.sak.behandling.dto.VurderHenvendelseOppgavetype.INNSTILLING_VEDRØRENDE_UTDANNING
+import no.nav.familie.ef.sak.behandling.dto.VurderHenvendelseOppgaveSubtype.INNSTILLING_VEDRØRENDE_UTDANNING
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.EksternFagsakId
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
@@ -105,12 +105,12 @@ internal class OppgaveServiceTest {
             INNSTILLING_VEDRØRENDE_UTDANNING,
         )
 
-        assertThat(oppgaveRepositoryInsertSlot.captured.vurderHenvendelseOppgavetype).isEqualTo(INNSTILLING_VEDRØRENDE_UTDANNING)
+        assertThat(oppgaveRepositoryInsertSlot.captured.vurderHenvendelseOppgaveSubtype).isEqualTo(INNSTILLING_VEDRØRENDE_UTDANNING)
     }
 
     private fun mockFinnVurderHenvendelseOppgave(returnValue: Oppgave?) {
         every {
-            oppgaveRepository.findByBehandlingIdAndTypeAndVurderHenvendelseOppgavetype(
+            oppgaveRepository.findByBehandlingIdAndTypeAndVurderHenvendelseOppgaveSubtype(
                 any(),
                 any(),
                 any(),

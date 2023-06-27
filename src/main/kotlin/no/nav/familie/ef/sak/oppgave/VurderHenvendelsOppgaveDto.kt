@@ -1,9 +1,9 @@
 package no.nav.familie.ef.sak.oppgave
 
-import no.nav.familie.ef.sak.behandling.dto.VurderHenvendelseOppgavetype
+import no.nav.familie.ef.sak.behandling.dto.VurderHenvendelseOppgaveSubtype
 import java.time.LocalDate
 
 data class VurderHenvendelsOppgaveDto(
-    val vurderHenvendelsOppgave: VurderHenvendelseOppgavetype,
+    val vurderHenvendelsOppgave: VurderHenvendelseOppgaveSubtype,
     val datoOpprettet: LocalDate,
 )

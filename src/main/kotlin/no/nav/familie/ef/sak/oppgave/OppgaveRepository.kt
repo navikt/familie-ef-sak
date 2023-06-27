@@ -1,6 +1,6 @@
 package no.nav.familie.ef.sak.oppgave
 
-import no.nav.familie.ef.sak.behandling.dto.VurderHenvendelseOppgavetype
+import no.nav.familie.ef.sak.behandling.dto.VurderHenvendelseOppgaveSubtype
 import no.nav.familie.ef.sak.iverksett.oppgaveforbarn.Alder
 import no.nav.familie.ef.sak.repository.InsertUpdateRepository
 import no.nav.familie.ef.sak.repository.RepositoryInterface
@@ -13,10 +13,10 @@ import java.util.UUID
 interface OppgaveRepository : RepositoryInterface<Oppgave, Long>, InsertUpdateRepository<Oppgave> {
 
     fun findByBehandlingIdAndTypeAndErFerdigstiltIsFalse(behandlingId: UUID, oppgavetype: Oppgavetype): Oppgave?
-    fun findByBehandlingIdAndTypeAndVurderHenvendelseOppgavetype(
+    fun findByBehandlingIdAndTypeAndVurderHenvendelseOppgaveSubtype(
         behandlingId: UUID,
         oppgavetype: Oppgavetype,
-        vurderHenvendelseOppgavetype: VurderHenvendelseOppgavetype,
+        vurderHenvendelseOppgavetype: VurderHenvendelseOppgaveSubtype,
     ): Oppgave?
 
     fun findByBehandlingIdAndType(

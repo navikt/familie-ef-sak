@@ -6,7 +6,7 @@ import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus.SATT_PÅ_VENT
 import no.nav.familie.ef.sak.behandling.dto.SettPåVentRequest
 import no.nav.familie.ef.sak.behandling.dto.TaAvVentStatus
 import no.nav.familie.ef.sak.behandling.dto.TaAvVentStatusDto
-import no.nav.familie.ef.sak.behandling.dto.VurderHenvendelseOppgavetype
+import no.nav.familie.ef.sak.behandling.dto.VurderHenvendelseOppgaveSubtype
 import no.nav.familie.ef.sak.behandling.dto.beskrivelse
 import no.nav.familie.ef.sak.behandlingsflyt.task.BehandlingsstatistikkTask
 import no.nav.familie.ef.sak.behandlingsflyt.task.OpprettOppgaveTask
@@ -77,7 +77,7 @@ class BehandlingPåVentService(
 
     private fun opprettVurderHenvendelseOppgaveTasks(
         behandlingId: UUID,
-        vurderHenvendelseOppgaver: List<VurderHenvendelseOppgavetype>,
+        vurderHenvendelseOppgaver: List<VurderHenvendelseOppgaveSubtype>,
     ) {
         val saksbehandling = behandlingService.hentSaksbehandling(behandlingId)
 
@@ -89,7 +89,7 @@ class BehandlingPåVentService(
                     OpprettOppgaveTask.OpprettOppgaveTaskData(
                         behandlingId = saksbehandling.id,
                         oppgavetype = Oppgavetype.VurderHenvendelse,
-                        vurderHenvendelseOppgavetype = it,
+                        vurderHenvendelseOppgaveSubtype = it,
                         beskrivelse = it.beskrivelse(),
                     ),
                 ),
@@ -217,15 +217,15 @@ class BehandlingPåVentService(
 
     private fun validerKanOppretteVurderHenvendelseOppgave(
         saksbehandling: Saksbehandling,
-        vurderHenvendelseOppgaver: List<VurderHenvendelseOppgavetype>,
+        vurderHenvendelseOppgaver: List<VurderHenvendelseOppgaveSubtype>,
     ) {
-        if (vurderHenvendelseOppgaver.contains(VurderHenvendelseOppgavetype.INFORMERE_OM_SØKT_OVERGANGSSTØNAD)) {
+        if (vurderHenvendelseOppgaver.contains(VurderHenvendelseOppgaveSubtype.INFORMERE_OM_SØKT_OVERGANGSSTØNAD)) {
             feilHvis(saksbehandling.stønadstype != StønadType.OVERGANGSSTØNAD) {
                 "Kan ikke lagre task for opprettelse av oppgave om informering om søkt overgangsstønad  på behandling med id ${saksbehandling.id} fordi behandlingen ikke er tilknyttet overgangsstønad"
             }
         }
 
-        if (vurderHenvendelseOppgaver.contains(VurderHenvendelseOppgavetype.INNSTILLING_VEDRØRENDE_UTDANNING)) {
+        if (vurderHenvendelseOppgaver.contains(VurderHenvendelseOppgaveSubtype.INNSTILLING_VEDRØRENDE_UTDANNING)) {
             feilHvis(saksbehandling.stønadstype == StønadType.BARNETILSYN) {
                 "Kan ikke lagre task for opprettelse av oppgave om innstilling om utdanning på behandling med id ${saksbehandling.id} fordi behandlingen hverken er tilknyttet overgangsstønad eller skolepenger"
             }

@@ -2,7 +2,7 @@ package no.nav.familie.ef.sak.behandlingsflyt.task
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.familie.ef.sak.behandling.BehandlingService
-import no.nav.familie.ef.sak.behandling.dto.VurderHenvendelseOppgavetype
+import no.nav.familie.ef.sak.behandling.dto.VurderHenvendelseOppgaveSubtype
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.kontrakter.felles.objectMapper
@@ -33,7 +33,7 @@ class OpprettOppgaveTask(private val oppgaveService: OppgaveService, private val
     data class OpprettOppgaveTaskData(
         val behandlingId: UUID,
         val oppgavetype: Oppgavetype,
-        val vurderHenvendelseOppgavetype: VurderHenvendelseOppgavetype? = null,
+        val vurderHenvendelseOppgaveSubtype: VurderHenvendelseOppgaveSubtype? = null,
         val tilordnetNavIdent: String? = null,
         val beskrivelse: String? = null,
         val unik: LocalDateTime? = LocalDateTime.now(),
@@ -59,7 +59,7 @@ class OpprettOppgaveTask(private val oppgaveService: OppgaveService, private val
         val oppgaveId = oppgaveService.opprettOppgave(
             behandlingId = data.behandlingId,
             oppgavetype = oppgavetype,
-            vurderHenvendelseOppgavetype = data.vurderHenvendelseOppgavetype,
+            vurderHenvendelseOppgaveSubtype = data.vurderHenvendelseOppgaveSubtype,
             tilordnetNavIdent = data.tilordnetNavIdent,
             beskrivelse = data.beskrivelse,
         )
