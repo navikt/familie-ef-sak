@@ -42,6 +42,16 @@ internal class SkolepengerMaksbeløpTest {
             .withFailMessage("Finner ikke maksbeløp for studietype=VIDEREGÅENDE skoleår=18/19")
     }
 
+    @Test
+    internal fun `maksbeløp for universitet 2023 skal returnere riktig beløp`() {
+        assertThat(maksbeløpForÅr(HØGSKOLE_UNIVERSITET, Year.of(2023))).isEqualTo(74_366)
+    }
+
+    @Test
+    internal fun `maksbeløp for videregående 2023 skal returnere riktig beløp`() {
+        assertThat(maksbeløpForÅr(VIDEREGÅENDE, Year.of(2023))).isEqualTo(31_033)
+    }
+
     /**
      * Disse testene må oppdateres med år når man legger inn nytt maksbeløp for neste år
      * * [ÅR_OM_2_ÅR] må oppdateres
@@ -50,17 +60,7 @@ internal class SkolepengerMaksbeløpTest {
     @Nested
     inner class MaksBeløpEtÅrFremITiden {
 
-        private val ÅR_OM_2_ÅR = Year.of(2024)
-
-        @Test
-        internal fun `maksbeløp for universitet et år frem i tiden skal returnere forrige år sitt verdi`() {
-            assertThat(maksbeløpForÅr(HØGSKOLE_UNIVERSITET, Year.of(2023))).isEqualTo(69_500)
-        }
-
-        @Test
-        internal fun `maksbeløp for videregående et år frem i tiden skal returnere forrige år sitt verdi`() {
-            assertThat(maksbeløpForÅr(VIDEREGÅENDE, Year.of(2023))).isEqualTo(29_002)
-        }
+        private val ÅR_OM_2_ÅR = Year.now().plusYears(2)
 
         @Test
         internal fun `maksbeløp for skoleår 2 år frem i tiden kaster exception`() {
