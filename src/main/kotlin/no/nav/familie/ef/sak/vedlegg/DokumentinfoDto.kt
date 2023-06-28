@@ -20,6 +20,7 @@ data class DokumentinfoDto(
     val tema: String?,
     val journalstatus: Journalstatus,
     val journalposttype: Journalposttype,
+    val harSaksbehandlerTilgang: Boolean,
     val logiskeVedlegg: List<LogiskVedleggDto>,
     val avsenderMottaker: AvsenderMottaker?,
     val utsendingsinfo: Utsendingsinfo?,

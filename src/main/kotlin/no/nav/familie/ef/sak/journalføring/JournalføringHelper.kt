@@ -15,7 +15,6 @@ import no.nav.familie.kontrakter.felles.dokarkiv.DokarkivBruker
 import no.nav.familie.kontrakter.felles.dokarkiv.DokumentInfo
 import no.nav.familie.kontrakter.felles.dokarkiv.OppdaterJournalpostRequest
 import no.nav.familie.kontrakter.felles.dokarkiv.Sak
-import no.nav.familie.kontrakter.felles.journalpost.Dokumentvariant
 import no.nav.familie.kontrakter.felles.journalpost.Dokumentvariantformat
 import no.nav.familie.kontrakter.felles.journalpost.Journalpost
 import no.nav.familie.kontrakter.felles.journalpost.Journalposttype
@@ -64,7 +63,7 @@ object JournalføringHelper {
     }
 
     private fun harOriginalDokument(dokument: no.nav.familie.kontrakter.felles.journalpost.DokumentInfo): Boolean =
-        dokument.dokumentvarianter?.contains(Dokumentvariant(variantformat = Dokumentvariantformat.ORIGINAL))
+        dokument.dokumentvarianter?.any { it.variantformat == Dokumentvariantformat.ORIGINAL }
             ?: false
 
     fun lagOppdaterJournalpostRequest(
