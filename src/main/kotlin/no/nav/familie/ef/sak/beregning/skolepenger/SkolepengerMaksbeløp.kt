@@ -47,4 +47,12 @@ object SkolepengerMaksbeløp {
         }
         return maksbeløp
     }
+
+    fun hentSisteÅrRegistrertMaksbeløpHøyskole(): Year {
+        return this.høgskoleUniversitet.keys.max()
+    }
+
+    fun hentSisteÅrRegistrertMaksbeløpVideregående(): Year {
+        return this.videregående.keys.max()
+    }
 }
