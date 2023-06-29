@@ -93,7 +93,7 @@ class VedleggService(
             avsenderMottaker = journalpost.avsenderMottaker,
             utsendingsinfo = journalpost.utsendingsinfo,
             tema = journalpost.tema,
-            harSaksbehandlerTilgang = dokumentInfo.dokumentvarianter?.find { it.variantformat == Dokumentvariantformat.ARKIV }?.saksbehandlerHarTilgang ?: false
+            harSaksbehandlerTilgang = dokumentInfo.dokumentvarianter?.find { it.variantformat == Dokumentvariantformat.ARKIV }?.saksbehandlerHarTilgang ?: false,
         )
     }
 }
