@@ -8,7 +8,6 @@ import io.mockk.runs
 import io.mockk.slot
 import io.mockk.verify
 import no.nav.familie.ef.sak.arbeidsfordeling.ArbeidsfordelingService
-import no.nav.familie.ef.sak.behandling.dto.VurderHenvendelseOppgaveSubtype.INNSTILLING_VEDRØRENDE_UTDANNING
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.EksternFagsakId
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
@@ -19,6 +18,7 @@ import no.nav.familie.ef.sak.iverksett.oppgaveforbarn.Alder
 import no.nav.familie.ef.sak.oppgave.Oppgave
 import no.nav.familie.ef.sak.oppgave.OppgaveRepository
 import no.nav.familie.ef.sak.oppgave.OppgaveService
+import no.nav.familie.ef.sak.oppgave.OppgaveSubtype
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.oppgave
@@ -85,7 +85,7 @@ internal class OppgaveServiceTest {
         val opprettOppgave = oppgaveService.opprettOppgave(
             BEHANDLING_ID,
             Oppgavetype.VurderHenvendelse,
-            INNSTILLING_VEDRØRENDE_UTDANNING,
+            OppgaveSubtype.INNSTILLING_VEDRØRENDE_UTDANNING,
         )
 
         verify(exactly = 0) { oppgaveRepository.insert(any()) }
@@ -102,10 +102,10 @@ internal class OppgaveServiceTest {
         oppgaveService.opprettOppgave(
             BEHANDLING_ID,
             Oppgavetype.VurderHenvendelse,
-            INNSTILLING_VEDRØRENDE_UTDANNING,
+            OppgaveSubtype.INNSTILLING_VEDRØRENDE_UTDANNING,
         )
 
-        assertThat(oppgaveRepositoryInsertSlot.captured.vurderHenvendelseOppgaveSubtype).isEqualTo(INNSTILLING_VEDRØRENDE_UTDANNING)
+        assertThat(oppgaveRepositoryInsertSlot.captured.oppgaveSubtype).isEqualTo(OppgaveSubtype.INNSTILLING_VEDRØRENDE_UTDANNING)
     }
 
     private fun mockFinnVurderHenvendelseOppgave(returnValue: Oppgave?) {
