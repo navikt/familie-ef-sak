@@ -131,8 +131,9 @@ internal class VedleggServiceTest {
             Dokumentvariant(
                 filnavn = "FilnavnDok1",
                 variantformat = Dokumentvariantformat.ARKIV,
+                saksbehandlerHarTilgang = true,
             ),
-            Dokumentvariant(variantformat = Dokumentvariantformat.ORIGINAL),
+            Dokumentvariant(variantformat = Dokumentvariantformat.ORIGINAL, saksbehandlerHarTilgang = true),
         ),
     )
 
@@ -143,6 +144,7 @@ internal class VedleggServiceTest {
             Dokumentvariant(
                 filnavn = "FilnavnDok2",
                 variantformat = Dokumentvariantformat.ARKIV,
+                saksbehandlerHarTilgang = true,
             ),
         ),
     )
@@ -161,6 +163,7 @@ internal class VedleggServiceTest {
             Dokumentvariant(
                 filnavn = "FilnavnDok3",
                 variantformat = Dokumentvariantformat.ARKIV,
+                saksbehandlerHarTilgang = true,
             ),
         ),
     )
@@ -172,6 +175,7 @@ internal class VedleggServiceTest {
             Dokumentvariant(
                 filnavn = "FilnavnDok4",
                 variantformat = Dokumentvariantformat.ARKIV,
+                saksbehandlerHarTilgang = true,
             ),
         ),
     )

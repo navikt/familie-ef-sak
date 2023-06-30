@@ -192,8 +192,8 @@ internal class JournalpostUtilKtTest {
         brevkode = brevkode.verdi,
         dokumentvarianter =
         listOf(
-            Dokumentvariant(Dokumentvariantformat.ORIGINAL),
-            Dokumentvariant(Dokumentvariantformat.ARKIV),
+            Dokumentvariant(Dokumentvariantformat.ORIGINAL, saksbehandlerHarTilgang = true),
+            Dokumentvariant(Dokumentvariantformat.ARKIV, saksbehandlerHarTilgang = true),
         ),
     )
 
@@ -202,7 +202,7 @@ internal class JournalpostUtilKtTest {
         "Vedlegg2",
         brevkode = brevkode.verdi,
         dokumentvarianter =
-        listOf(Dokumentvariant(Dokumentvariantformat.ARKIV)),
+        listOf(Dokumentvariant(Dokumentvariantformat.ARKIV, saksbehandlerHarTilgang = true)),
     )
 
     val dokumentUkjent = DokumentInfo(
