@@ -96,12 +96,22 @@ class OppgaveClient(
     }
 
     fun oppdaterOppgave(oppgave: Oppgave): Long {
-        val response = patchForEntity<Ressurs<OppgaveResponse>>(
-            URI.create("$oppgaveUri/${oppgave.id!!}/oppdater"),
-            oppgave,
-            HttpHeaders().medContentTypeJsonUTF8(),
-        )
-        return response.getDataOrThrow().oppgaveId
+        try {
+            val response = patchForEntity<Ressurs<OppgaveResponse>>(
+                URI.create("$oppgaveUri/${oppgave.id!!}/oppdater"),
+                oppgave,
+                HttpHeaders().medContentTypeJsonUTF8(),
+            )
+            return response.getDataOrThrow().oppgaveId
+        } catch (e: RessursException) {
+            if (e.httpStatus == HttpStatus.CONFLICT) {
+                throw ApiFeil(
+                    "Oppgaven har endret seg siden du sist hentet oppgaver. For å kunne gjøre endringer må du laste inn siden på nytt",
+                    HttpStatus.CONFLICT,
+                )
+            }
+            throw e
+        }
     }
 
     fun finnMapper(enhetsnummer: String, limit: Int): FinnMappeResponseDto {
