@@ -36,6 +36,7 @@ enum class Toggle(val toggleId: String, val beskrivelse: String? = null) {
     FRONTEND_AUTOMATISK_UTFYLLE_VILKÅR("familie.ef.sak.frontend-automatisk-utfylle-vilkar"),
     FRONTEND_SATSENDRING("familie.ef.sak.frontend-vis-satsendring"),
     FRONTEND_VIS_INNTEKT_PERSONOVERSIKT("familie.ef.sak.frontend.vis-inntekt-personoversikt"),
+    FRONTEND_DOKUMENTOVERSIKT_LINK_TIL_DOKUMENT("familie.ef.sak.frontend.dokumentoversikt-link-til-dokument"),
     SETT_PÅ_VENT_MED_OPPGAVESTYRING("familie.ef.sak.sett-paa-vent-med-oppgavestyring"),
     PERSONOPPLYSNINGER_ENDRINGER("familie.ef.sak.frontend.personopplysninger-endringer"),
     VURDER_KONSEKVENS_OPPGAVER_LOKALKONTOR("familie.ef.sak.automatiske-oppgaver-lokalkontor"),
