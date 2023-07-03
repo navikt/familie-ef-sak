@@ -14,7 +14,6 @@ import io.mockk.unmockkObject
 import no.nav.familie.ef.sak.behandling.BehandlingPåVentService
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.dto.SettPåVentRequest
-import no.nav.familie.ef.sak.behandling.dto.VurderHenvendelseOppgavetype
 import no.nav.familie.ef.sak.behandlingshistorikk.BehandlingshistorikkService
 import no.nav.familie.ef.sak.cucumber.domeneparser.Domenenøkkel
 import no.nav.familie.ef.sak.cucumber.domeneparser.parseDato
@@ -29,6 +28,7 @@ import no.nav.familie.ef.sak.felles.util.DatoUtil
 import no.nav.familie.ef.sak.felles.util.mockFeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.oppgave.OppgaveService
+import no.nav.familie.ef.sak.oppgave.OppgaveSubtype
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.saksbehandling
 import no.nav.familie.ef.sak.vedtak.NullstillVedtakService
@@ -121,7 +121,7 @@ class SettPåVentStepDefinitions {
 
     @Gitt("valgte oppfølgingsoppgaver")
     fun oppFølgingsoppgaver(dataTable: DataTable) {
-        val oppfølgingsoppgaver = mutableListOf<VurderHenvendelseOppgavetype>()
+        val oppfølgingsoppgaver = mutableListOf<OppgaveSubtype>()
         dataTable.asMaps().map {
             oppfølgingsoppgaver.add(parseEnum(SettPåVentDomeneBegrep.OPPFØLGINGSOPPGAVE, it))
         }

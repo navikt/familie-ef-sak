@@ -12,7 +12,6 @@ import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.dto.SettPåVentRequest
 import no.nav.familie.ef.sak.behandling.dto.TaAvVentStatus
-import no.nav.familie.ef.sak.behandling.dto.VurderHenvendelseOppgavetype
 import no.nav.familie.ef.sak.behandlingsflyt.task.BehandlingsstatistikkTask
 import no.nav.familie.ef.sak.behandlingsflyt.task.OpprettOppgaveTask
 import no.nav.familie.ef.sak.behandlingshistorikk.BehandlingshistorikkService
@@ -22,6 +21,7 @@ import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.oppgave.OppgaveService
+import no.nav.familie.ef.sak.oppgave.OppgaveSubtype
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.saksbehandling
@@ -423,7 +423,7 @@ internal class BehandlingPåVentServiceTest {
         prioritet = OppgavePrioritet.NORM,
     )
 
-    private fun settPåVentRequest(oppgaveId: Long, oppfølgingsoppgaver: List<VurderHenvendelseOppgavetype>) =
+    private fun settPåVentRequest(oppgaveId: Long, oppfølgingsoppgaver: List<OppgaveSubtype>) =
         SettPåVentRequest(
             oppgaveId = oppgaveId,
             saksbehandler = "ny saksbehandler",
@@ -466,6 +466,6 @@ internal class BehandlingPåVentServiceTest {
         return oppgaveId
     }
 
-    private val innstillingUtdanning = VurderHenvendelseOppgavetype.INNSTILLING_VEDRØRENDE_UTDANNING
-    private val informereOmSøktStønad = VurderHenvendelseOppgavetype.INFORMERE_OM_SØKT_OVERGANGSSTØNAD
+    private val innstillingUtdanning = OppgaveSubtype.INNSTILLING_VEDRØRENDE_UTDANNING
+    private val informereOmSøktStønad = OppgaveSubtype.INFORMERE_OM_SØKT_OVERGANGSSTØNAD
 }

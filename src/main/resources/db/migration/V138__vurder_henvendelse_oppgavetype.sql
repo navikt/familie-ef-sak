@@ -1,0 +1,1 @@
+ALTER TABLE oppgave ADD COLUMN oppgave_subtype VARCHAR DEFAULT NULL;

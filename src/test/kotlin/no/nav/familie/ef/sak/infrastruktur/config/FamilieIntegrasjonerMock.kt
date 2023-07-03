@@ -76,6 +76,8 @@ class FamilieIntegrasjonerMock(integrasjonerConfig: IntegrasjonerConfig) {
                 .willReturn(okJson(objectMapper.writeValueAsString(kodeverkInntekt))),
             post(urlEqualTo(integrasjonerConfig.arbeidsfordelingUri.path))
                 .willReturn(okJson(objectMapper.writeValueAsString(arbeidsfordeling))),
+            post(urlEqualTo(integrasjonerConfig.arbeidsfordelingOppfølgingUri.path))
+                .willReturn(okJson(objectMapper.writeValueAsString(arbeidsfordeling))),
             post(urlEqualTo(integrasjonerConfig.arbeidsfordelingMedRelasjonerUri.path))
                 .willReturn(okJson(objectMapper.writeValueAsString(arbeidsfordeling))),
 

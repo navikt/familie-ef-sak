@@ -14,6 +14,7 @@ data class Oppgave(
     val behandlingId: UUID,
     val gsakOppgaveId: Long,
     val type: Oppgavetype,
+    val oppgaveSubtype: OppgaveSubtype? = null,
     val barnPersonIdent: String? = null,
     val alder: Alder? = null,
     @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)

@@ -126,6 +126,12 @@ class OppgaveController(
         )
     }
 
+    @GetMapping("/behandling/{behandlingId}/settpavent-oppgavestatus")
+    fun hentVurderHenvendelseStatus(@PathVariable behandlingId: UUID): Ressurs<List<VurderHenvendelseOppgaveDto>> {
+        val status: List<VurderHenvendelseOppgaveDto> = oppgaveService.finnVurderHenvendelseOppgaver(behandlingId)
+        return Ressurs.success(status)
+    }
+
     @GetMapping(path = ["/mapper"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun hentMapper(): Ressurs<List<MappeDto>> {
         val enheter = mutableListOf(ENHET_NR_NAY)

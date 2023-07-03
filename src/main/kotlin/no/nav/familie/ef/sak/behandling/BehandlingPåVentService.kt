@@ -6,7 +6,6 @@ import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus.SATT_PÅ_VENT
 import no.nav.familie.ef.sak.behandling.dto.SettPåVentRequest
 import no.nav.familie.ef.sak.behandling.dto.TaAvVentStatus
 import no.nav.familie.ef.sak.behandling.dto.TaAvVentStatusDto
-import no.nav.familie.ef.sak.behandling.dto.VurderHenvendelseOppgavetype
 import no.nav.familie.ef.sak.behandling.dto.beskrivelse
 import no.nav.familie.ef.sak.behandlingsflyt.task.BehandlingsstatistikkTask
 import no.nav.familie.ef.sak.behandlingsflyt.task.OpprettOppgaveTask
@@ -21,6 +20,7 @@ import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.oppgave.OppgaveService
+import no.nav.familie.ef.sak.oppgave.OppgaveSubtype
 import no.nav.familie.ef.sak.vedtak.NullstillVedtakService
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.kontrakter.felles.oppgave.Oppgave
@@ -77,7 +77,7 @@ class BehandlingPåVentService(
 
     private fun opprettVurderHenvendelseOppgaveTasks(
         behandlingId: UUID,
-        vurderHenvendelseOppgaver: List<VurderHenvendelseOppgavetype>,
+        vurderHenvendelseOppgaver: List<OppgaveSubtype>,
     ) {
         val saksbehandling = behandlingService.hentSaksbehandling(behandlingId)
 
@@ -89,6 +89,7 @@ class BehandlingPåVentService(
                     OpprettOppgaveTask.OpprettOppgaveTaskData(
                         behandlingId = saksbehandling.id,
                         oppgavetype = Oppgavetype.VurderHenvendelse,
+                        vurderHenvendelseOppgaveSubtype = it,
                         beskrivelse = it.beskrivelse(),
                     ),
                 ),
@@ -216,16 +217,16 @@ class BehandlingPåVentService(
 
     private fun validerKanOppretteVurderHenvendelseOppgave(
         saksbehandling: Saksbehandling,
-        vurderHenvendelseOppgaver: List<VurderHenvendelseOppgavetype>,
+        vurderHenvendelseOppgaver: List<OppgaveSubtype>,
     ) {
-        if (vurderHenvendelseOppgaver.contains(VurderHenvendelseOppgavetype.INFORMERE_OM_SØKT_OVERGANGSSTØNAD)) {
+        if (vurderHenvendelseOppgaver.contains(OppgaveSubtype.INFORMERE_OM_SØKT_OVERGANGSSTØNAD)) {
             feilHvis(saksbehandling.stønadstype != StønadType.OVERGANGSSTØNAD) {
                 "Kan ikke lagre task for opprettelse av oppgave om informering om søkt overgangsstønad  på behandling med id ${saksbehandling.id} fordi behandlingen ikke er tilknyttet overgangsstønad"
             }
         }
 
-        if (vurderHenvendelseOppgaver.contains(VurderHenvendelseOppgavetype.INNSTILLING_VEDRØRENDE_UTDANNING)) {
-            feilHvis(saksbehandling.stønadstype != StønadType.OVERGANGSSTØNAD && saksbehandling.stønadstype != StønadType.SKOLEPENGER) {
+        if (vurderHenvendelseOppgaver.contains(OppgaveSubtype.INNSTILLING_VEDRØRENDE_UTDANNING)) {
+            feilHvis(saksbehandling.stønadstype == StønadType.BARNETILSYN) {
                 "Kan ikke lagre task for opprettelse av oppgave om innstilling om utdanning på behandling med id ${saksbehandling.id} fordi behandlingen hverken er tilknyttet overgangsstønad eller skolepenger"
             }
         }
