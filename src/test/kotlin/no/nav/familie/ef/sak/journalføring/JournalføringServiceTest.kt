@@ -124,8 +124,8 @@ internal class JournalføringServiceTest {
                 brevkode = DokumentBrevkode.OVERGANGSSTØNAD.verdi,
                 dokumentvarianter =
                 listOf(
-                    Dokumentvariant(Dokumentvariantformat.ORIGINAL),
-                    Dokumentvariant(Dokumentvariantformat.ARKIV),
+                    Dokumentvariant(Dokumentvariantformat.ORIGINAL, saksbehandlerHarTilgang = true),
+                    Dokumentvariant(Dokumentvariantformat.ARKIV, saksbehandlerHarTilgang = true),
                 ),
             ),
             DokumentInfo(
@@ -133,7 +133,7 @@ internal class JournalføringServiceTest {
                 "Vedlegg2",
                 brevkode = DokumentBrevkode.OVERGANGSSTØNAD.verdi,
                 dokumentvarianter =
-                listOf(Dokumentvariant(Dokumentvariantformat.ARKIV)),
+                listOf(Dokumentvariant(Dokumentvariantformat.ARKIV, saksbehandlerHarTilgang = true)),
             ),
             DokumentInfo(
                 "23456",

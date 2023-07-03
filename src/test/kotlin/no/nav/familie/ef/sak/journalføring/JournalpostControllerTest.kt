@@ -172,7 +172,7 @@ internal class JournalpostControllerTest {
                 journalpostService.hentJournalpost(any())
             } returns journalpostMedFødselsnummer.copy(
                 dokumenter = journalpostMedFødselsnummer.dokumenter!!.map {
-                    it.copy(dokumentvarianter = listOf(Dokumentvariant(Dokumentvariantformat.PRODUKSJON_DLF)))
+                    it.copy(dokumentvarianter = listOf(Dokumentvariant(Dokumentvariantformat.PRODUKSJON_DLF, saksbehandlerHarTilgang = true)))
                 },
             )
 
@@ -187,8 +187,8 @@ internal class JournalpostControllerTest {
                 dokumenter = journalpostMedFødselsnummer.dokumenter!!.map {
                     it.copy(
                         dokumentvarianter = listOf(
-                            Dokumentvariant(Dokumentvariantformat.PRODUKSJON_DLF),
-                            Dokumentvariant(Dokumentvariantformat.ARKIV),
+                            Dokumentvariant(Dokumentvariantformat.PRODUKSJON_DLF, saksbehandlerHarTilgang = true),
+                            Dokumentvariant(Dokumentvariantformat.ARKIV, saksbehandlerHarTilgang = true),
                         ),
                     )
                 },
@@ -232,7 +232,7 @@ internal class JournalpostControllerTest {
                     dokumentInfoId = dokumentInfoId,
                     tittel = "Tittel",
                     brevkode = DokumentBrevkode.OVERGANGSSTØNAD.verdi,
-                    dokumentvarianter = listOf(Dokumentvariant(Dokumentvariantformat.ARKIV)),
+                    dokumentvarianter = listOf(Dokumentvariant(Dokumentvariantformat.ARKIV, saksbehandlerHarTilgang = true)),
                 ),
             ),
         )
