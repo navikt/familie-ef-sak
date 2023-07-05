@@ -97,8 +97,9 @@ class OppgaveClient(
 
     fun oppdaterOppgave(oppgave: Oppgave): Long {
         try {
+            val oppgaveId = oppgave.id ?: error("Oppgave mangler id")
             val response = patchForEntity<Ressurs<OppgaveResponse>>(
-                URI.create("$oppgaveUri/${oppgave.id!!}/oppdater"),
+                URI.create("$oppgaveUri/$oppgaveId/oppdater"),
                 oppgave,
                 HttpHeaders().medContentTypeJsonUTF8(),
             )
