@@ -210,7 +210,7 @@ class BehandlingPåVentService(
             "Kan ikke sette behandling med status ${behandling.status} på vent"
         }
     }
-ad
+
     private fun validerKanOppretteVurderHenvendelseOppgave(
         saksbehandling: Saksbehandling,
         vurderHenvendelseOppgaver: List<OppgaveSubtype>,
