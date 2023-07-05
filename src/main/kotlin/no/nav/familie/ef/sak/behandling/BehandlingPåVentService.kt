@@ -209,12 +209,8 @@ class BehandlingPåVentService(
         brukerfeilHvis(behandling.status.behandlingErLåstForVidereRedigering()) {
             "Kan ikke sette behandling med status ${behandling.status} på vent"
         }
-
-        feilHvis(!featureToggleService.isEnabled(Toggle.SETT_PÅ_VENT_MED_OPPGAVESTYRING)) {
-            "Featuretoggle for sett på vent med oppgavestyring er ikke påskrudd"
-        }
     }
-
+ad
     private fun validerKanOppretteVurderHenvendelseOppgave(
         saksbehandling: Saksbehandling,
         vurderHenvendelseOppgaver: List<OppgaveSubtype>,
