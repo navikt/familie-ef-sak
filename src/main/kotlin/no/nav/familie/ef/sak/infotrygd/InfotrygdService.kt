@@ -119,7 +119,6 @@ class InfotrygdService(
         stønadstyper: Set<StønadType> = StønadType.values().toSet(),
     ): InfotrygdPeriodeResponse {
         require(stønadstyper.isNotEmpty()) { "Må sende med stønadstype" }
-        require(identer.isNotEmpty()) { "Finner ingen identer for oppslag" }
         val request = InfotrygdPeriodeRequest(identer, stønadstyper)
         return infotrygdReplikaClient.hentSammenslåttePerioder(request)
     }
