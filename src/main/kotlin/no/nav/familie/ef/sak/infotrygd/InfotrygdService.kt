@@ -1,6 +1,7 @@
 package no.nav.familie.ef.sak.infotrygd
 
 import no.nav.familie.ef.sak.infotrygd.InfotrygdUtils.KLAGETYPER
+import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.identer
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdEndringKode
@@ -71,6 +72,7 @@ class InfotrygdService(
 
     private fun hentSammenslåttePerioderFraReplika(personIdent: String): InfotrygdPeriodeResponse {
         val personIdenter = hentPersonIdenter(personIdent)
+        feilHvis(personIdenter.isEmpty()) { "Finner ikke identer for oppslag oppslag" }
         return hentSammenslåttePerioderFraReplika(personIdenter)
     }
 
@@ -117,6 +119,7 @@ class InfotrygdService(
         stønadstyper: Set<StønadType> = StønadType.values().toSet(),
     ): InfotrygdPeriodeResponse {
         require(stønadstyper.isNotEmpty()) { "Må sende med stønadstype" }
+        require(identer.isNotEmpty()) { "Finner ingen identer for oppslag" }
         val request = InfotrygdPeriodeRequest(identer, stønadstyper)
         return infotrygdReplikaClient.hentSammenslåttePerioder(request)
     }
