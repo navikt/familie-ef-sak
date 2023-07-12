@@ -24,23 +24,46 @@ class GrunnlagsdataRegisterService(
         personIdent: String,
         barneforeldreFraSøknad: List<String>,
     ): GrunnlagsdataDomene {
-        val pdlSøker = personService.hentSøker(personIdent)
-        val pdlBarn = hentPdlBarn(pdlSøker)
-        val barneForeldre = hentPdlBarneForeldre(pdlBarn, personIdent, barneforeldreFraSøknad)
-        val tidligereVedtasksperioderAnnenForelder = hentTidligereVedtaksperioderAnnenForelder(barneForeldre)
-        val dataTilAndreIdenter = hentDataTilAndreIdenter(pdlSøker)
-
-        val medlUnntak = personopplysningerIntegrasjonerClient.hentMedlemskapsinfo(ident = personIdent)
-
+        val grunnlagsdataFraPdl = hentGrunnlagsdataFraPdl(personIdent, emptyList())
+        val medlUnntak = personopplysningerIntegrasjonerClient.hentMedlemskapsinfo(personIdent)
         val tidligereVedtaksperioder =
-            tidligereVedaksperioderService.hentTidligereVedtaksperioder(pdlSøker.folkeregisteridentifikator)
+            tidligereVedaksperioderService.hentTidligereVedtaksperioder(grunnlagsdataFraPdl.søker.folkeregisteridentifikator)
+        val tidligereVedtasksperioderAnnenForelder = hentTidligereVedtaksperioderAnnenForelder(grunnlagsdataFraPdl.barneForeldre)
 
         return GrunnlagsdataDomene(
-            søker = mapSøker(pdlSøker, dataTilAndreIdenter),
-            annenForelder = mapAnnenForelder(barneForeldre, tidligereVedtasksperioderAnnenForelder),
+            søker = mapSøker(grunnlagsdataFraPdl.søker, grunnlagsdataFraPdl.andrePersoner),
+            annenForelder = mapAnnenForelder(grunnlagsdataFraPdl.barneForeldre, tidligereVedtasksperioderAnnenForelder),
             medlUnntak = medlUnntak,
-            barn = mapBarn(pdlBarn),
+            barn = mapBarn(grunnlagsdataFraPdl.barn),
             tidligereVedtaksperioder = tidligereVedtaksperioder,
+        )
+    }
+
+    fun hentGrunnlagsdataUtenVedtakshitorikkFraRegister(
+        personIdent: String,
+    ): GrunnlagsdataDomene {
+        val grunnlagsdataFraPdl = hentGrunnlagsdataFraPdl(personIdent, emptyList())
+        val medlUnntak = personopplysningerIntegrasjonerClient.hentMedlemskapsinfo(personIdent)
+        return GrunnlagsdataDomene(
+            søker = mapSøker(grunnlagsdataFraPdl.søker, grunnlagsdataFraPdl.andrePersoner),
+            annenForelder = mapAnnenForelder(grunnlagsdataFraPdl.barneForeldre, emptyMap()),
+            medlUnntak = medlUnntak,
+            barn = mapBarn(grunnlagsdataFraPdl.barn),
+            tidligereVedtaksperioder = null,
+        )
+    }
+
+    private fun hentGrunnlagsdataFraPdl(personIdent: String, barneforeldreFraSøknad: List<String>): GrunnlagsdataFraPdl {
+        val søker = personService.hentSøker(personIdent)
+        val barn = hentPdlBarn(søker)
+        val andreForeldre = hentPdlBarneForeldre(barn, personIdent, barneforeldreFraSøknad)
+        val dataTilAndreIdenter = hentDataTilAndreIdenter(søker)
+
+        return GrunnlagsdataFraPdl(
+            søker = søker,
+            barn = barn,
+            barneForeldre = andreForeldre,
+            andrePersoner = dataTilAndreIdenter,
         )
     }
 
@@ -83,3 +106,10 @@ class GrunnlagsdataRegisterService(
         return personService.hentPersonKortBolk(andreIdenter)
     }
 }
+
+data class GrunnlagsdataFraPdl(
+    val søker: PdlSøker,
+    val barn: Map<String, PdlPersonForelderBarn>,
+    val barneForeldre: Map<String, PdlAnnenForelder>,
+    val andrePersoner: Map<String, PdlPersonKort>,
+)

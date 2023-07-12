@@ -98,6 +98,12 @@ class GrunnlagsdataService(
         }
     }
 
+    fun hentGrunnlagsdataUtenTidligereVedtakshistorikk(personIdent: String): GrunnlagsdataDomene {
+        return loggTid {
+            grunnlagsdataRegisterService.hentGrunnlagsdataUtenVedtakshitorikkFraRegister(personIdent)
+        }
+    }
+
     fun oppdaterEndringer(grunnlagsdata: Grunnlagsdata): Grunnlagsdata {
         return grunnlagsdataRepository.update(grunnlagsdata)
     }
