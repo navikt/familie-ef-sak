@@ -28,11 +28,11 @@ class GrunnlagsdataRegisterService(
         val medlUnntak = personopplysningerIntegrasjonerClient.hentMedlemskapsinfo(personIdent)
         val tidligereVedtaksperioder =
             tidligereVedtaksperioderService.hentTidligereVedtaksperioder(grunnlagsdataFraPdl.søker.folkeregisteridentifikator)
-        val tidligereVedtasksperioderAnnenForelder = hentTidligereVedtaksperioderAnnenForelder(grunnlagsdataFraPdl.barneForeldre)
+        val tidligereVedtaksperioderAnnenForelder = hentTidligereVedtaksperioderAnnenForelder(grunnlagsdataFraPdl.barneForeldre)
 
         return GrunnlagsdataDomene(
             søker = mapSøker(grunnlagsdataFraPdl.søker, grunnlagsdataFraPdl.andrePersoner),
-            annenForelder = mapAnnenForelder(grunnlagsdataFraPdl.barneForeldre, tidligereVedtasksperioderAnnenForelder),
+            annenForelder = mapAnnenForelder(grunnlagsdataFraPdl.barneForeldre, tidligereVedtaksperioderAnnenForelder),
             medlUnntak = medlUnntak,
             barn = mapBarn(grunnlagsdataFraPdl.barn),
             tidligereVedtaksperioder = tidligereVedtaksperioder,
