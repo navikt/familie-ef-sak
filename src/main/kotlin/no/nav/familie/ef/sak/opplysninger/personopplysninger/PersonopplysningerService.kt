@@ -33,7 +33,7 @@ class PersonopplysningerService(
 
     private val logger = LoggerFactory.getLogger(this::class.java)
 
-    fun hentPersonopplysningerUtenVedtakshistorikk(behandlingId: UUID): PersonopplysningerDto {
+    fun hentPersonopplysninger(behandlingId: UUID): PersonopplysningerDto {
         val personIdent = behandlingService.hentAktivIdent(behandlingId)
         val søkerIdenter = personService.hentPersonIdenter(personIdent)
         val grunnlagsdata = grunnlagsdataService.hentGrunnlagsdata(behandlingId)

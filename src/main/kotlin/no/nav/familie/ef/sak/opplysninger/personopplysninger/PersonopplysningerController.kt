@@ -34,7 +34,7 @@ class PersonopplysningerController(
     @GetMapping("/behandling/{behandlingId}")
     fun personopplysninger(@PathVariable behandlingId: UUID): Ressurs<PersonopplysningerDto> {
         tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.ACCESS)
-        return Ressurs.success(personopplysningerService.hentPersonopplysningerUtenVedtakshistorikk(behandlingId))
+        return Ressurs.success(personopplysningerService.hentPersonopplysninger(behandlingId))
     }
 
     @GetMapping("/behandling/{behandlingId}/endringer")
