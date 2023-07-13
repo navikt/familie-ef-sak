@@ -1,8 +1,10 @@
 package no.nav.familie.ef.sak.infotrygd
 
 import no.nav.familie.ef.sak.infotrygd.InfotrygdUtils.KLAGETYPER
+import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.identer
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.secureLogger
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdEndringKode
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPeriode
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPeriodeRequest
@@ -71,6 +73,10 @@ class InfotrygdService(
 
     private fun hentSammenslåttePerioderFraReplika(personIdent: String): InfotrygdPeriodeResponse {
         val personIdenter = hentPersonIdenter(personIdent)
+        feilHvis(personIdenter.isEmpty()) {
+            secureLogger.warn("Finner ikke $personIdent i pdl, kan følgelig ikke hente perioder fra replika")
+            "Det finnes ingen identer i pdl for oppslaget"
+        }
         return hentSammenslåttePerioderFraReplika(personIdenter)
     }
 
