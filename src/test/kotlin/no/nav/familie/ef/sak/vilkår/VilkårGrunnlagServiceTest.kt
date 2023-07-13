@@ -15,7 +15,7 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataReposi
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerIntegrasjonerClient
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.TidligereVedaksperioderService
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.TidligereVedtaksperioderService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.Grunnlagsdata
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.tilSøknadsverdier
@@ -44,12 +44,12 @@ internal class VilkårGrunnlagServiceTest {
     private val kodeverkService = mockk<KodeverkService>(relaxed = true)
     private val medlemskapMapper = MedlemskapMapper(mockk(relaxed = true), mockk(relaxed = true), mockk(relaxed = true), kodeverkService)
     private val behandlingService = mockk<BehandlingService>()
-    private val tidligereVedaksperioderService = mockk<TidligereVedaksperioderService>(relaxed = true)
+    private val tidligereVedtaksperioderService = mockk<TidligereVedtaksperioderService>(relaxed = true)
 
     private val grunnlagsdataRegisterService = GrunnlagsdataRegisterService(
         personService,
         personopplysningerIntegrasjonerClient,
-        tidligereVedaksperioderService,
+        tidligereVedtaksperioderService,
     )
 
     private val fagsakService = mockk<FagsakService>()

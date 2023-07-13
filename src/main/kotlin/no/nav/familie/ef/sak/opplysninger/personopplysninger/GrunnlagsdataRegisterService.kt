@@ -17,7 +17,7 @@ import org.springframework.stereotype.Service
 class GrunnlagsdataRegisterService(
     private val personService: PersonService,
     private val personopplysningerIntegrasjonerClient: PersonopplysningerIntegrasjonerClient,
-    private val tidligereVedaksperioderService: TidligereVedaksperioderService,
+    private val tidligereVedtaksperioderService: TidligereVedtaksperioderService,
 ) {
 
     fun hentGrunnlagsdataFraRegister(
@@ -27,7 +27,7 @@ class GrunnlagsdataRegisterService(
         val grunnlagsdataFraPdl = hentGrunnlagsdataFraPdl(personIdent, emptyList())
         val medlUnntak = personopplysningerIntegrasjonerClient.hentMedlemskapsinfo(personIdent)
         val tidligereVedtaksperioder =
-            tidligereVedaksperioderService.hentTidligereVedtaksperioder(grunnlagsdataFraPdl.søker.folkeregisteridentifikator)
+            tidligereVedtaksperioderService.hentTidligereVedtaksperioder(grunnlagsdataFraPdl.søker.folkeregisteridentifikator)
         val tidligereVedtasksperioderAnnenForelder = hentTidligereVedtaksperioderAnnenForelder(grunnlagsdataFraPdl.barneForeldre)
 
         return GrunnlagsdataDomene(
@@ -73,7 +73,7 @@ class GrunnlagsdataRegisterService(
         return loggTid("antall=${barneForeldre.size}") {
             barneForeldre.entries.associate { (ident, annenForelder) ->
                 val folkeregisteridentifikatorer = annenForelder.folkeregisteridentifikator
-                ident to tidligereVedaksperioderService.hentTidligereVedtaksperioder(folkeregisteridentifikatorer)
+                ident to tidligereVedtaksperioderService.hentTidligereVedtaksperioder(folkeregisteridentifikatorer)
             }
         }
     }

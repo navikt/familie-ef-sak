@@ -11,7 +11,7 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataServic
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerIntegrasjonerClient
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerService
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.TidligereVedaksperioderService
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.TidligereVedtaksperioderService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper.AdresseMapper
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper.InnflyttingUtflyttingMapper
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper.PersonopplysningerMapper
@@ -35,7 +35,7 @@ internal class PersonopplysningerServiceTest {
     private lateinit var søknadService: SøknadService
     private lateinit var behandlingService: BehandlingService
 
-    private val tidligereVedaksperioderService = mockk<TidligereVedaksperioderService>(relaxed = true)
+    private val tidligereVedtaksperioderService = mockk<TidligereVedtaksperioderService>(relaxed = true)
 
     @BeforeEach
     internal fun setUp() {
@@ -48,7 +48,7 @@ internal class PersonopplysningerServiceTest {
         val grunnlagsdataRegisterService = GrunnlagsdataRegisterService(
             personService,
             personopplysningerIntegrasjonerClient,
-            tidligereVedaksperioderService,
+            tidligereVedtaksperioderService,
         )
 
         grunnlagsdataService = GrunnlagsdataService(

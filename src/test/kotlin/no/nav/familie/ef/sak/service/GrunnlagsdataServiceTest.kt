@@ -13,7 +13,7 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataReposi
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerIntegrasjonerClient
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.TidligereVedaksperioderService
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.TidligereVedtaksperioderService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.TidligereInnvilgetVedtak
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.TidligereVedtaksperioder
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Metadata
@@ -43,11 +43,11 @@ internal class GrunnlagsdataServiceTest {
     private val personService = PersonService(pdlClient, ConcurrentMapCacheManager())
     private val søknadService = mockk<SøknadService>()
     private val personopplysningerIntegrasjonerClient = mockk<PersonopplysningerIntegrasjonerClient>()
-    private val tidligereVedaksperioderService = mockk<TidligereVedaksperioderService>(relaxed = true)
+    private val tidligereVedtaksperioderService = mockk<TidligereVedtaksperioderService>(relaxed = true)
     private val grunnlagsdataRegisterService = GrunnlagsdataRegisterService(
         personService,
         personopplysningerIntegrasjonerClient,
-        tidligereVedaksperioderService,
+        tidligereVedtaksperioderService,
     )
 
     private val søknad = SøknadsskjemaMapper.tilDomene(
@@ -128,11 +128,11 @@ internal class GrunnlagsdataServiceTest {
         val folkeregisteridentifikatorAnnenForelder = folkeregisteridentifikator(annenForelderFnr)
         val defaultTidligereInnvilgetVedtak = TidligereInnvilgetVedtak(true, true, false)
 
-        every { tidligereVedaksperioderService.hentTidligereVedtaksperioder(eq(listOf(identifikatorSøker))) } returns
+        every { tidligereVedtaksperioderService.hentTidligereVedtaksperioder(eq(listOf(identifikatorSøker))) } returns
             TidligereVedtaksperioder(defaultTidligereInnvilgetVedtak)
 
         every {
-            tidligereVedaksperioderService.hentTidligereVedtaksperioder(listOf(folkeregisteridentifikatorAnnenForelder))
+            tidligereVedtaksperioderService.hentTidligereVedtaksperioder(listOf(folkeregisteridentifikatorAnnenForelder))
         } returns
             TidligereVedtaksperioder(defaultTidligereInnvilgetVedtak, defaultTidligereInnvilgetVedtak)
 
@@ -143,9 +143,9 @@ internal class GrunnlagsdataServiceTest {
         assertThat(tidligereVedtaksperioder.infotrygd.harTidligereBarnetilsyn).isTrue
         assertThat(tidligereVedtaksperioder.infotrygd.harTidligereSkolepenger).isFalse
 
-        verify(exactly = 1) { tidligereVedaksperioderService.hentTidligereVedtaksperioder(listOf(identifikatorSøker)) }
+        verify(exactly = 1) { tidligereVedtaksperioderService.hentTidligereVedtaksperioder(listOf(identifikatorSøker)) }
         verify(exactly = 1) {
-            tidligereVedaksperioderService.hentTidligereVedtaksperioder(listOf(folkeregisteridentifikatorAnnenForelder))
+            tidligereVedtaksperioderService.hentTidligereVedtaksperioder(listOf(folkeregisteridentifikatorAnnenForelder))
         }
     }
 }
