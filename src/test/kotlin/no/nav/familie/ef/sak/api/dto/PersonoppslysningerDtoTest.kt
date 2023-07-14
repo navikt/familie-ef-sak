@@ -37,8 +37,14 @@ class PersonoppslysningerDtoTest {
         val aValues = enumValues<A>().map { it.name }.toSet()
         val bValues = enumValues<B>().map { it.name }.toSet()
 
-        val aDelta = aValues.toMutableSet().let { it.removeAll(bValues); it }
-        val bDelta = bValues.toMutableSet().let { it.removeAll(aValues); it }
+        val aDelta = aValues.toMutableSet().let {
+            it.removeAll(bValues)
+            it
+        }
+        val bDelta = bValues.toMutableSet().let {
+            it.removeAll(aValues)
+            it
+        }
 
         if (aDelta.isNotEmpty() || bDelta.isNotEmpty()) {
             throw IllegalStateException(
