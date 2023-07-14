@@ -11,7 +11,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.1.0</version>
+        <version>3.1.1</version>
     </parent>
     <repositories>
         <repository>
@@ -29,16 +29,16 @@
         <sha1/>
         <changelist>-SNAPSHOT</changelist>
         <java.version>17</java.version>
-        <kotlin.version>1.8.21</kotlin.version>
-        <kotlin-coroutines.version>1.7.1</kotlin-coroutines.version>
+        <kotlin.version>1.9.0</kotlin.version>
+        <kotlin-coroutines.version>1.7.2</kotlin-coroutines.version>
         <springdoc.version>2.1.0</springdoc.version>
         <mockk.version>1.13.5</mockk.version>
         <felles.version>2.20230508082643_6b28bd8</felles.version>
-        <prosessering.version>2.20230505153212_2bc6a06</prosessering.version>
+        <prosessering.version>2.20230621155918_9c5de0f</prosessering.version>
         <start-class>no.nav.familie.ef.sak.ApplicationKt</start-class>
         <kontrakter.version>3.0_20230627152200_afdca38</kontrakter.version>
         <eksterne.kontrakter.bisys.version>2.0_20230214104704_706e9c0</eksterne.kontrakter.bisys.version>
-        <cucumber.version>7.12.0</cucumber.version>
+        <cucumber.version>7.12.1</cucumber.version>
 
 
         <!--suppress UnresolvedMavenProperty  Ligger som secret i github-->
@@ -47,7 +47,7 @@
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
         <nav.security.version>3.1.0</nav.security.version> <!-- Denne burde være samme versjon som i felles -->
         <okhttp3.version>4.9.1</okhttp3.version> <!-- overskrever spring sin versjon, blir brukt av mock-oauth2-server -->
-        <unleash.version>8.0.0</unleash.version>
+        <unleash.version>8.2.0</unleash.version>
         <!--suppress UnresolvedMavenProperty -->
         <sonar.login>${SONAR_LOGIN}</sonar.login>
     </properties>
@@ -218,13 +218,13 @@
         <dependency>
             <groupId>org.testcontainers</groupId>
             <artifactId>postgresql</artifactId>
-            <version>1.18.1</version>
+            <version>1.18.3</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.github.doyaaaaaken</groupId>
             <artifactId>kotlin-csv-jvm</artifactId>
-            <version>1.9.0</version>
+            <version>1.9.1</version>
             <scope>test</scope>
         </dependency>
 
@@ -337,7 +337,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>3.1.0</version>
+                <version>3.1.2</version>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
