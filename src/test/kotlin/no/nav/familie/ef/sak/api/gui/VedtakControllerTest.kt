@@ -359,7 +359,6 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
         }
 
         @Test
-        @Disabled("Feiler uventet i github actions.")
         internal fun `skal kunne angre send til beslutter`() {
             val behandlingId = opprettBehandling(steg = StegType.SEND_TIL_BESLUTTER, status = BehandlingStatus.UTREDES)
             opprettOppgave(oppgaveType = Oppgavetype.GodkjenneVedtak)
@@ -385,7 +384,6 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
         }
 
         @Test
-        @Disabled("Feiler uventet i github actions.")
         internal fun `skal kunne angre send til beslutter når godkjenne vedtak-oppgaven er plukket av saksbehandler`() {
             opprettBehandling(steg = StegType.SEND_TIL_BESLUTTER, status = BehandlingStatus.UTREDES)
             sendTilBeslutter(SAKSBEHANDLER)
