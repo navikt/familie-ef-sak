@@ -163,11 +163,6 @@ internal class EksternBehandlingServiceTest : OppslagSpringRunnerTest() {
 
         @Test
         internal fun `har ingen fagsak - skal returnere false`() {
-            every { oppgaveClient.finnOppgaveMedId(any()) } returns Oppgave(
-                id = 1L,
-                tilordnetRessurs = "saksbehandler",
-            )
-
             val result = testWithBrukerContext {
                 eksternBehandlingService.tilhørendeBehandleSakOppgaveErPåbegynt(
                     personIdent = personIdent,
@@ -181,10 +176,6 @@ internal class EksternBehandlingServiceTest : OppslagSpringRunnerTest() {
         @Test
         internal fun `har fagsak men ingen behandlinger - skal returnere false`() {
             testoppsettService.lagreFagsak(fagsak(fagsakpersoner(personIdent)))
-            every { oppgaveClient.finnOppgaveMedId(any()) } returns Oppgave(
-                id = 1L,
-                tilordnetRessurs = "saksbehandler",
-            )
 
             val result = testWithBrukerContext {
                 eksternBehandlingService.tilhørendeBehandleSakOppgaveErPåbegynt(
@@ -207,8 +198,8 @@ internal class EksternBehandlingServiceTest : OppslagSpringRunnerTest() {
                     ),
                 )
 
-            insertOppgave(behandling, 1L, Oppgavetype.BehandleSak)
-            mockOppgaveClient(1L, "saksbehandler")
+            insertOppgave(behandling, 91L, Oppgavetype.BehandleSak)
+            mockOppgaveClient(91L, "saksbehandler")
 
             val result = testWithBrukerContext {
                 eksternBehandlingService.tilhørendeBehandleSakOppgaveErPåbegynt(
@@ -239,12 +230,12 @@ internal class EksternBehandlingServiceTest : OppslagSpringRunnerTest() {
                     opprettetTid = søknadInnsendtTidspunkt.plusDays(1),
                 ),
             )
-            insertOppgave(førstegangsbehandling, 1L, Oppgavetype.Journalføring)
-            insertOppgave(førstegangsbehandling, 2L, Oppgavetype.BehandleSak)
-            insertOppgave(andregangsbehandling, 3L, Oppgavetype.BehandleSak)
-            mockOppgaveClient(1L, "saksbehandler")
-            mockOppgaveClient(2L, "saksbehandler")
-            mockOppgaveClient(3L)
+            insertOppgave(førstegangsbehandling, 91L, Oppgavetype.Journalføring)
+            insertOppgave(førstegangsbehandling, 92L, Oppgavetype.BehandleSak)
+            insertOppgave(andregangsbehandling, 93L, Oppgavetype.BehandleSak)
+            mockOppgaveClient(91L, "saksbehandler")
+            mockOppgaveClient(92L, "saksbehandler")
+            mockOppgaveClient(93L)
 
             val result = testWithBrukerContext {
                 eksternBehandlingService.tilhørendeBehandleSakOppgaveErPåbegynt(
@@ -275,12 +266,12 @@ internal class EksternBehandlingServiceTest : OppslagSpringRunnerTest() {
                     opprettetTid = søknadInnsendtTidspunkt.plusDays(1),
                 ),
             )
-            insertOppgave(førstegangsbehandling, 1L, Oppgavetype.Journalføring)
-            insertOppgave(førstegangsbehandling, 2L, Oppgavetype.BehandleSak)
-            insertOppgave(andregangsbehandling, 3L, Oppgavetype.BehandleSak)
-            mockOppgaveClient(1L, "saksbehandler")
-            mockOppgaveClient(2L, "saksbehandler")
-            mockOppgaveClient(3L, "saksbehandler")
+            insertOppgave(førstegangsbehandling, 91L, Oppgavetype.Journalføring)
+            insertOppgave(førstegangsbehandling, 92L, Oppgavetype.BehandleSak)
+            insertOppgave(andregangsbehandling, 93L, Oppgavetype.BehandleSak)
+            mockOppgaveClient(91L, "saksbehandler")
+            mockOppgaveClient(92L, "saksbehandler")
+            mockOppgaveClient(93L, "saksbehandler")
 
             val result = testWithBrukerContext {
                 eksternBehandlingService.tilhørendeBehandleSakOppgaveErPåbegynt(

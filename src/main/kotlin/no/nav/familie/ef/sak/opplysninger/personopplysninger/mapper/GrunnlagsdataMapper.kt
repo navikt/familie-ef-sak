@@ -51,7 +51,7 @@ object GrunnlagsdataMapper {
                 dødsfall = it.value.dødsfall,
                 navn = it.value.navn.gjeldende(),
                 folkeregisteridentifikator = mapFolkeregisteridentifikator(it.value.folkeregisteridentifikator),
-                tidligereVedtaksperioder = tidligereVedtaksperioderAnnenForelder.getValue(it.key),
+                tidligereVedtaksperioder = tidligereVedtaksperioderAnnenForelder[it.key],
             )
         }
 
