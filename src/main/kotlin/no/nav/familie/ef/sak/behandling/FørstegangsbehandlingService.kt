@@ -86,7 +86,7 @@ class FørstegangsbehandlingService(
     }
 
     private fun validerGyldigÅrsak(behandlingsårsak: BehandlingÅrsak) {
-        feilHvisIkke(behandlingsårsak == BehandlingÅrsak.PAPIRSØKNAD || behandlingsårsak == BehandlingÅrsak.NYE_OPPLYSNINGER) {
+        feilHvisIkke(behandlingsårsak == BehandlingÅrsak.PAPIRSØKNAD || behandlingsårsak == BehandlingÅrsak.NYE_OPPLYSNINGER || behandlingsårsak == BehandlingÅrsak.MANUELT_OPPRETTET) {
             "Kan ikke opprette førstegangsbehandlinge med behandlingsårsak $behandlingsårsak"
         }
     }
