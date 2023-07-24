@@ -1,7 +1,6 @@
 package no.nav.familie.ef.sak.brev
 
 import no.nav.familie.ef.sak.AuditLoggerEvent
-import no.nav.familie.ef.sak.brev.dto.FritekstBrevDto
 import no.nav.familie.ef.sak.brev.dto.FrittståendeBrevDto
 import no.nav.familie.ef.sak.brev.dto.MellomlagreBrevRequestDto
 import no.nav.familie.ef.sak.brev.dto.MellomlagretBrevResponse
@@ -43,15 +42,6 @@ class BrevMellomlagerController(
                 mellomlagretBrev.versjon,
             ),
         )
-    }
-
-    @Deprecated("Skal slettes")
-    @PostMapping("/fritekst")
-    fun mellomlagreFritekstbrev(@RequestBody mellomlagretBrev: FritekstBrevDto): Ressurs<UUID> {
-        tilgangService.validerTilgangTilBehandling(mellomlagretBrev.behandlingId, AuditLoggerEvent.UPDATE)
-        tilgangService.validerHarSaksbehandlerrolle()
-
-        return Ressurs.success(mellomlagringBrevService.mellomlagreFritekstbrev(mellomlagretBrev))
     }
 
     @Deprecated("Skal slettes")
