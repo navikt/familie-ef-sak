@@ -455,7 +455,6 @@ fun DelårsperiodeSkoleårSkolepenger.tilIverksettDto() = DelårsperiodeSkoleår
 
 fun SkolepengerUtgift.tilIverksettDto() = SkolepengerUtgiftDto(
     utgiftsdato = this.utgiftsdato,
-    utgifter = this.utgifter,
     stønad = this.stønad,
 )
 

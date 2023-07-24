@@ -472,7 +472,6 @@ internal class IverksettingDtoMapperTest {
 
         assertThat(vedtaksperiode.utgiftsperioder).hasSize(1)
         assertThat(vedtaksperiode.utgiftsperioder[0].utgiftsdato).isEqualTo(LocalDate.of(2021, 2, 1))
-        assertThat(vedtaksperiode.utgiftsperioder[0].utgifter).isEqualTo(200)
         assertThat(vedtaksperiode.utgiftsperioder[0].stønad).isEqualTo(150)
     }
 
