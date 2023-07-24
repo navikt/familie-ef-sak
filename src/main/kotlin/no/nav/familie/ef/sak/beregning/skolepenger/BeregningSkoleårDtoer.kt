@@ -16,6 +16,7 @@ data class BeregningSkolepengerResponse(
 
 data class BeløpsperiodeSkolepenger(
     val årMånedFra: YearMonth,
-    val utgifter: Int,
+    @Deprecated("Skal ikke brukes når nytt UI tas i bruk")
+    val utgifter: Int? = null,
     val beløp: Int,
 )
