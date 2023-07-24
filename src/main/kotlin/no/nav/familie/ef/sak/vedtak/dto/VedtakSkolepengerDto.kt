@@ -70,7 +70,8 @@ data class DelårsperiodeSkoleårDto(
 data class SkolepengerUtgiftDto(
     val id: UUID,
     val årMånedFra: YearMonth,
-    val utgifter: Int,
+    @Deprecated("Skal ikke brukes når nytt UI tas i bruk")
+    val utgifter: Int? = null,
     val stønad: Int,
 )
 
