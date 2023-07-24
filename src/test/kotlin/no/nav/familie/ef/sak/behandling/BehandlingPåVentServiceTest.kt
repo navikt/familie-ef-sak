@@ -358,6 +358,9 @@ internal class BehandlingPåVentServiceTest {
 
         @Test
         fun `skal ta behandling av vent og sende melding til DVH`() {
+            val oppgaveId = 1234561L
+            mockSettSaksbehandlerPåOppgave(oppgaveId)
+
             behandlingPåVentService.taAvVent(behandlingId)
 
             verify { behandlingService.oppdaterStatusPåBehandling(behandlingId, BehandlingStatus.UTREDES) }
@@ -379,6 +382,7 @@ internal class BehandlingPåVentServiceTest {
             }
             verify(exactly = 0) { nullstillVedtakService.nullstillVedtak(any()) }
             verify(exactly = 0) { behandlingService.oppdaterForrigeBehandlingId(any(), any()) }
+            verify { oppgaveService.fordelOppgave(oppgaveId, "bob", any()) }
         }
 
         @Test
@@ -400,7 +404,9 @@ internal class BehandlingPåVentServiceTest {
         }
 
         @Test
-        internal fun `skal oppdatere nullstille vedtak og oppdatere forrigeBehandlingId hvis man må nullstille vedtaket`() {
+        internal fun `skal nullstille vedtak og oppdatere forrigeBehandlingId hvis man må nullstille vedtaket`() {
+            val oppgaveId = 123456L
+            mockSettSaksbehandlerPåOppgave(oppgaveId)
             mockFinnSisteIverksatteBehandling(tidligereIverksattBehandling)
 
             behandlingPåVentService.taAvVent(behandlingId)
@@ -409,7 +415,14 @@ internal class BehandlingPåVentServiceTest {
                 behandlingService.oppdaterStatusPåBehandling(behandlingId, BehandlingStatus.UTREDES)
                 behandlingService.oppdaterForrigeBehandlingId(behandlingId, tidligereIverksattBehandling.id)
                 nullstillVedtakService.nullstillVedtak(behandlingId)
+                oppgaveService.fordelOppgave(oppgaveId, "bob", any())
             }
+        }
+
+        private fun mockSettSaksbehandlerPåOppgave(oppgaveId: Long) {
+            val oppgave = oppgave(oppgaveId)
+            every { oppgaveService.hentIkkeFerdigstiltOppgaveForBehandling(behandlingId) } returns oppgave
+            every { oppgaveService.fordelOppgave(any(), any(), any()) } returns oppgaveId
         }
     }
 

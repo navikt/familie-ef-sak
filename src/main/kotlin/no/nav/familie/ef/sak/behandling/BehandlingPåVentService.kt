@@ -26,6 +26,8 @@ import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.kontrakter.felles.oppgave.Oppgave
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.internal.TaskService
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -40,6 +42,9 @@ class BehandlingPåVentService(
     private val featureToggleService: FeatureToggleService,
     private val oppgaveService: OppgaveService,
 ) {
+
+    val logger: Logger = LoggerFactory.getLogger(javaClass)
+
     @Transactional
     fun settPåVent(behandlingId: UUID, settPåVentRequest: SettPåVentRequest) {
         val behandling = behandlingService.hentBehandling(behandlingId)
@@ -252,7 +257,18 @@ class BehandlingPåVentService(
                 nullstillVedtakService.nullstillVedtak(behandlingId)
             }
         }
+        fordelOppgaveTilSaksbehandler(behandlingId)
         taskService.save(BehandlingsstatistikkTask.opprettPåbegyntTask(behandlingId))
+    }
+
+    private fun fordelOppgaveTilSaksbehandler(behandlingId: UUID) {
+        val oppgave = oppgaveService.hentIkkeFerdigstiltOppgaveForBehandling(behandlingId)
+        val oppgaveId = oppgave?.id
+        if (oppgaveId != null) {
+            oppgaveService.fordelOppgave(oppgaveId, SikkerhetContext.hentSaksbehandler(), oppgave.versjon)
+        } else {
+            logger.warn("Finner ingen oppgave å oppdatere")
+        }
     }
 
     private fun opprettHistorikkInnslag(behandling: Behandling, stegUtfall: StegUtfall) {
