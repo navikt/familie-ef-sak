@@ -4,12 +4,9 @@ import no.nav.familie.ef.sak.brev.BrevmottakerUtil.validerUnikeBrevmottakere
 import no.nav.familie.ef.sak.brev.domain.Fritekstbrev
 import no.nav.familie.ef.sak.brev.domain.FrittståendeBrevmottakere
 import no.nav.familie.ef.sak.brev.domain.MellomlagretBrev
-import no.nav.familie.ef.sak.brev.domain.MellomlagretFritekstbrev
 import no.nav.familie.ef.sak.brev.domain.MellomlagretFrittståendeBrev
 import no.nav.familie.ef.sak.brev.domain.MellomlagretFrittståendeSanitybrev
-import no.nav.familie.ef.sak.brev.dto.FritekstBrevDto
 import no.nav.familie.ef.sak.brev.dto.FrittståendeBrevDto
-import no.nav.familie.ef.sak.brev.dto.MellomlagretBrevFritekst
 import no.nav.familie.ef.sak.brev.dto.MellomlagretBrevResponse
 import no.nav.familie.ef.sak.brev.dto.MellomlagretBrevSanity
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
@@ -21,7 +18,6 @@ import java.util.UUID
 @Service
 class MellomlagringBrevService(
     private val mellomlagerBrevRepository: MellomlagerBrevRepository,
-    private val mellomlagerFritekstbrevRepository: MellomlagerFritekstbrevRepository,
     private val mellomlagerFrittståendeBrevRepository: MellomlagerFrittståendeBrevRepository,
     private val mellomlagerFrittståendeSanitybrevRepository: MellomlagerFrittståendeSanitybrevRepository,
 ) {
@@ -50,21 +46,6 @@ class MellomlagringBrevService(
             brevmal = brevmal,
         )
         return mellomlagerFrittståendeSanitybrevRepository.insert(mellomlagretBrev).fagsakId
-    }
-
-    @Deprecated("Skal slettes")
-    fun mellomlagreFritekstbrev(mellomlagretBrev: FritekstBrevDto): UUID {
-        slettMellomlagringHvisFinnes(mellomlagretBrev.behandlingId)
-        val mellomlagretFritekstbrev = MellomlagretFritekstbrev(
-            mellomlagretBrev.behandlingId,
-            Fritekstbrev(
-                overskrift = mellomlagretBrev.overskrift,
-                avsnitt = mellomlagretBrev.avsnitt,
-            ),
-            brevType = mellomlagretBrev.brevType,
-        )
-
-        return mellomlagerFritekstbrevRepository.insert(mellomlagretFritekstbrev).behandlingId
     }
 
     @Deprecated("Skal slettes")
@@ -107,24 +88,18 @@ class MellomlagringBrevService(
             SikkerhetContext.hentSaksbehandler(),
         )?.let { MellomlagretBrevSanity(brevverdier = it.brevverdier, brevmal = it.brevmal) }
 
-    fun hentOgValiderMellomlagretBrev(behhandlingId: UUID, sanityVersjon: String): MellomlagretBrevResponse? {
-        mellomlagerBrevRepository.findByIdOrNull(behhandlingId)?.let {
-            if (sanityVersjon == it.sanityVersjon) {
-                return MellomlagretBrevSanity(
-                    brevverdier = it.brevverdier,
-                    brevmal = it.brevmal,
-                )
-            }
-            return null
+    fun hentOgValiderMellomlagretBrev(behhandlingId: UUID, sanityVersjon: String): MellomlagretBrevResponse? = mellomlagerBrevRepository.findByIdOrNull(behhandlingId)?.let {
+        if (sanityVersjon == it.sanityVersjon) {
+            return MellomlagretBrevSanity(
+                brevverdier = it.brevverdier,
+                brevmal = it.brevmal,
+            )
         }
-        return mellomlagerFritekstbrevRepository.findByIdOrNull(behhandlingId)?.let {
-            MellomlagretBrevFritekst(brev = it.brev, brevType = it.brevType)
-        }
+        return null
     }
 
     fun slettMellomlagringHvisFinnes(behandlingId: UUID) {
         mellomlagerBrevRepository.deleteById(behandlingId)
-        mellomlagerFritekstbrevRepository.deleteById(behandlingId)
     }
 
     fun slettMellomlagretFrittståendeBrev(fagsakId: UUID, saksbehandlerIdent: String) {

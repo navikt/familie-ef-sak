@@ -5,7 +5,6 @@ import io.mockk.mockk
 import io.mockk.mockkObject
 import io.mockk.unmockkObject
 import no.nav.familie.ef.sak.brev.MellomlagerBrevRepository
-import no.nav.familie.ef.sak.brev.MellomlagerFritekstbrevRepository
 import no.nav.familie.ef.sak.brev.MellomlagerFrittståendeBrevRepository
 import no.nav.familie.ef.sak.brev.MellomlagerFrittståendeSanitybrevRepository
 import no.nav.familie.ef.sak.brev.domain.BrevmottakerOrganisasjon
@@ -33,12 +32,10 @@ import java.util.UUID
 internal class MellomlagringBrevServiceTest {
 
     private val mellomlagerBrevRepository = mockk<MellomlagerBrevRepository>()
-    private val mellomlagerFritekstbrevRepository = mockk<MellomlagerFritekstbrevRepository>()
     private val mellomlagerFrittståendeBrevRepository = mockk<MellomlagerFrittståendeBrevRepository>()
     private val mellomlagerFrittståendeSanitybrevRepository = mockk<MellomlagerFrittståendeSanitybrevRepository>()
     private val mellomlagringBrevService = no.nav.familie.ef.sak.brev.MellomlagringBrevService(
         mellomlagerBrevRepository,
-        mellomlagerFritekstbrevRepository,
         mellomlagerFrittståendeBrevRepository,
         mellomlagerFrittståendeSanitybrevRepository,
     )
