@@ -68,6 +68,7 @@ import no.nav.familie.kontrakter.ef.iverksett.BehandlingKategori
 import no.nav.familie.kontrakter.ef.iverksett.BehandlingsdetaljerDto
 import no.nav.familie.kontrakter.ef.iverksett.Brevmottaker
 import no.nav.familie.kontrakter.ef.iverksett.FagsakdetaljerDto
+import no.nav.familie.kontrakter.ef.iverksett.Grunnbeløp
 import no.nav.familie.kontrakter.ef.iverksett.IverksettBarnetilsynDto
 import no.nav.familie.kontrakter.ef.iverksett.IverksettDto
 import no.nav.familie.kontrakter.ef.iverksett.IverksettOvergangsstønadDto
@@ -320,6 +321,16 @@ internal class IverksettingDtoMapperTest {
     private fun assertAlleFelter(iverksettDto: IverksettOvergangsstønadDto, behandlingId: UUID?) {
         assertAlleFelterIverksettDto(iverksettDto, behandlingId, StønadType.OVERGANGSSTØNAD)
         assertVedtaksperiode(iverksettDto.vedtak)
+        assertGrunnbeløp(iverksettDto)
+    }
+
+    private fun assertGrunnbeløp(iverksettDto: IverksettOvergangsstønadDto) {
+        assertThat(iverksettDto.vedtak.grunnbeløp).isEqualTo(
+            Grunnbeløp(
+                Grunnbeløpsperioder.nyesteGrunnbeløp.periode,
+                Grunnbeløpsperioder.nyesteGrunnbeløp.grunnbeløp,
+            ),
+        )
     }
 
     private fun assertAlleFelter(iverksettDto: IverksettBarnetilsynDto, behandlingId: UUID?) {
