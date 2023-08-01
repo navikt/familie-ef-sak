@@ -54,15 +54,10 @@ object OppdaterVilkår {
         )
     }
 
-    /**
-     * Då vi ikke helt har støtte for [Vilkårsresultat.SKAL_IKKE_VURDERES] ennå så skal svaret være
-     * [Vilkårsresultat.IKKE_OPPFYLT] eller [Vilkårsresultat.OPPFYLT]
-     * Når man legger til funksjonalitet for SKAL_IKKE_VURDERES, hva skal resultatet være?
-     */
     private fun validerAttResultatErOppfyltEllerIkkeOppfylt(vilkårsresultat: RegelResultat) {
         if (!vilkårsresultat.vilkår.oppfyltEllerIkkeOppfylt()) {
-            val message = "Støtter ikke mellomlagring ennå, må håndtere ${vilkårsresultat.vilkår}. " +
-                "Ett resultat på vurderingen må bli oppfylt eller ikke oppfylt"
+            val message = "Mangler fullstendig vilkårsvurdering for ${vilkårsresultat.vilkårType}. " +
+                "Svar på alle spørsmål samt fyll inn evt. påkrevd begrunnelsesfelt"
             throw Feil(message = message, frontendFeilmelding = message)
         }
     }
@@ -119,6 +114,7 @@ object OppdaterVilkår {
         }
         return when {
             value.any { it.resultat == Vilkårsresultat.OPPFYLT } -> Vilkårsresultat.OPPFYLT
+            value.all { it.barnId == null && it.resultat == Vilkårsresultat.IKKE_TATT_STILLING_TIL } -> Vilkårsresultat.SKAL_IKKE_VURDERES // Dersom man ikke har barn på behandlingen så er ikke disse vilkårene aktuelle å vurdere
             value.any { it.resultat == Vilkårsresultat.IKKE_TATT_STILLING_TIL } -> Vilkårsresultat.IKKE_TATT_STILLING_TIL
             value.all { it.resultat == Vilkårsresultat.SKAL_IKKE_VURDERES } -> Vilkårsresultat.SKAL_IKKE_VURDERES
             value.any { it.resultat == Vilkårsresultat.IKKE_OPPFYLT } &&
