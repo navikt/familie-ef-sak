@@ -5,6 +5,13 @@ Dette gjør at alt vi har iverksett i preprod er ute av synk med de eksterne mil
 
 For å komme i en gyldig (og bra) tilstand må vi nullstille vår database etter datalast.
 
+Hva slettes: 
+- Alt som ikke er iverksatt mot oppdrag etter datalast-datoen
+- Nye, uferdige behandlinger slettes
+- Gamle iverksatte behandlinger slettes
+- Alle henlagte behandlinger slettes
+
+
 Her følger et script som kan kjøres mot preprod (IKKE PROD!!!):
 
 ```sql
