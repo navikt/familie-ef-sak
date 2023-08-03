@@ -22,6 +22,7 @@ BEGIN;
 
 create temp table ta_vare_paa_behandlinger (id UUID);
 insert into ta_vare_paa_behandlinger (select id from behandling where vedtakstidspunkt > '2023-07-12' AND resultat != 'HENLAGT');
+insert into ta_vare_paa_behandlinger(select id from behandling where forrige_behandling_id in (select id from ta_vare_paa_behandlinger));
 
 delete from simuleringsresultat where behandling_id not in (select id from ta_vare_paa_behandlinger);
 delete from behandling_barn where behandling_id not in (select id from ta_vare_paa_behandlinger);
