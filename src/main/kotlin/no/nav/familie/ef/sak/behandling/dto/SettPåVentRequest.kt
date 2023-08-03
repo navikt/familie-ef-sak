@@ -15,7 +15,7 @@ data class SettPåVentRequest(
     val oppgaveVersjon: Int,
     val oppfølgingsoppgaverMotLokalKontor: List<OppgaveSubtype>?,
     val innstillingsoppgaveBeskrivelse: String,
-    )
+)
 
 fun OppgaveSubtype.beskrivelse(innstillingOppgaveBeskrivelse: String?) = when (this) {
     OppgaveSubtype.INFORMERE_OM_SØKT_OVERGANGSSTØNAD -> OppgaveBeskrivelse.informereLokalkontorOmOvergangsstønad

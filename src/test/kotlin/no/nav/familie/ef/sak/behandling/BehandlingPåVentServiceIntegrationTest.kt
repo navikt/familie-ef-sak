@@ -138,6 +138,6 @@ internal class BehandlingPåVentServiceIntegrationTest : OppslagSpringRunnerTest
             beskrivelse = "Her er litt tekst fra saksbehandler",
             oppgaveVersjon = 1,
             oppfølgingsoppgaverMotLokalKontor = oppfølgingsoppgaver,
-            innstillingsoppgaveBeskrivelse = ""
+            innstillingsoppgaveBeskrivelse = "",
         )
 }

@@ -4,5 +4,5 @@ import java.time.LocalDate
 
 data class VurderHenvendelseOppgaveDto(
     val vurderHenvendelseOppgave: OppgaveSubtype,
-    val datoOpprettet: LocalDate
+    val datoOpprettet: LocalDate,
 )
