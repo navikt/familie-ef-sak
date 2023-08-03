@@ -107,6 +107,7 @@ class SettPåVentStepDefinitions {
                 beskrivelse = parseValgfriString(SettPåVentDomeneBegrep.BESKRIVELSE, verdier).orEmpty(),
                 oppgaveVersjon = 1,
                 oppfølgingsoppgaverMotLokalKontor = emptyList(),
+                innstillingsoppgaveBeskrivelse = null
             )
     }
 

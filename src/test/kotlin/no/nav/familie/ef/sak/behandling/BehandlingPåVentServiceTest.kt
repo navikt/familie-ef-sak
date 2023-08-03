@@ -446,6 +446,7 @@ internal class BehandlingPåVentServiceTest {
             beskrivelse = "Her er litt tekst fra saksbehandler",
             oppgaveVersjon = 1,
             oppfølgingsoppgaverMotLokalKontor = oppfølgingsoppgaver,
+            innstillingsoppgaveBeskrivelse = null
         )
 
     private fun mockHentBehandling(
