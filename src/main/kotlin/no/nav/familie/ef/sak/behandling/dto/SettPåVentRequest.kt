@@ -14,11 +14,12 @@ data class SettPåVentRequest(
     val beskrivelse: String,
     val oppgaveVersjon: Int,
     val oppfølgingsoppgaverMotLokalKontor: List<OppgaveSubtype>?,
-    val innstillingsoppgaveBeskrivelse: String,
+    val innstillingsoppgaveBeskjed: String?,
 )
 
-fun OppgaveSubtype.beskrivelse(beskjed: String?) = when (this) {
+fun OppgaveSubtype.beskrivelse(innstillingsoppgaveBeskjed: String?) = when (this) {
     OppgaveSubtype.INFORMERE_OM_SØKT_OVERGANGSSTØNAD -> OppgaveBeskrivelse.informereLokalkontorOmOvergangsstønad
     OppgaveSubtype.INNSTILLING_VEDRØRENDE_UTDANNING ->
-        "${OppgaveBeskrivelse.innstillingOmBrukersUtdanning}${"\n $beskjed \n"}"
+        "${OppgaveBeskrivelse.innstillingOmBrukersUtdanning}" +
+            "${if (!innstillingsoppgaveBeskjed.isNullOrEmpty()) "\n $innstillingsoppgaveBeskjed \n" else ""}"
 }

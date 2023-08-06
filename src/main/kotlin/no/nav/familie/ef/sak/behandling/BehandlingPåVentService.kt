@@ -61,7 +61,7 @@ class BehandlingPåVentService(
             opprettVurderHenvendelseOppgaveTasks(
                 behandlingId,
                 settPåVentRequest.oppfølgingsoppgaverMotLokalKontor,
-                settPåVentRequest.innstillingsoppgaveBeskrivelse,
+                settPåVentRequest.innstillingsoppgaveBeskjed,
             )
         }
     }
@@ -87,7 +87,7 @@ class BehandlingPåVentService(
     private fun opprettVurderHenvendelseOppgaveTasks(
         behandlingId: UUID,
         vurderHenvendelseOppgaver: List<OppgaveSubtype>,
-        innstillingsoppgaveBeskrivelse: String,
+        innstillingsoppgaveBeskjed: String?,
     ) {
         val saksbehandling = behandlingService.hentSaksbehandling(behandlingId)
 
@@ -100,7 +100,7 @@ class BehandlingPåVentService(
                         behandlingId = saksbehandling.id,
                         oppgavetype = Oppgavetype.VurderHenvendelse,
                         vurderHenvendelseOppgaveSubtype = it,
-                        beskrivelse = it.beskrivelse(innstillingsoppgaveBeskrivelse),
+                        beskrivelse = it.beskrivelse(innstillingsoppgaveBeskjed),
                     ),
                 ),
             )
