@@ -12,6 +12,7 @@ import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.dto.SettPåVentRequest
 import no.nav.familie.ef.sak.behandling.dto.TaAvVentStatus
+import no.nav.familie.ef.sak.behandling.dto.beskrivelse
 import no.nav.familie.ef.sak.behandlingsflyt.task.BehandlingsstatistikkTask
 import no.nav.familie.ef.sak.behandlingsflyt.task.OpprettOppgaveTask
 import no.nav.familie.ef.sak.behandlingshistorikk.BehandlingshistorikkService
@@ -424,6 +425,41 @@ internal class BehandlingPåVentServiceTest {
             every { oppgaveService.hentIkkeFerdigstiltOppgaveForBehandling(behandlingId) } returns oppgave
             every { oppgaveService.fordelOppgave(any(), any(), any()) } returns oppgaveId
         }
+    }
+
+    @Nested
+    inner class OppgaveSubtypeTest {
+
+            @Test
+            fun `skal returnere beskrivelse uten beskjed for info om søkt overgangsstønad`() {
+                val subtype = OppgaveSubtype.INFORMERE_OM_SØKT_OVERGANGSSTØNAD
+                val beskrivelse = OppgaveBeskrivelse.informereLokalkontorOmOvergangsstønad
+
+                val beskrivelseOppgaveSubtype = subtype.beskrivelse("beskjed")
+
+                assertThat(beskrivelseOppgaveSubtype).isEqualTo(beskrivelse)
+            }
+
+            @Test
+            fun `skal returnere beskrivelse med ekstra beskjed for innstilling vedr utdanning`() {
+                val subtype = OppgaveSubtype.INNSTILLING_VEDRØRENDE_UTDANNING
+                val beskjed = "beskjed"
+                val beskrivelse = "${OppgaveBeskrivelse.innstillingOmBrukersUtdanning}\n $beskjed \n"
+
+                val beskrivelseOppgaveSubtype = subtype.beskrivelse(beskjed)
+
+                assertThat(beskrivelseOppgaveSubtype).isEqualTo(beskrivelse)
+            }
+
+            @Test
+            fun `skal returnere beskrivelse uten ekstra beskjed for innstilling vedr utdanning`() {
+                val subtype = OppgaveSubtype.INNSTILLING_VEDRØRENDE_UTDANNING
+                val beskjed = null
+                val beskrivelse = OppgaveBeskrivelse.innstillingOmBrukersUtdanning
+                val beskrivelseOppgaveSubtype = subtype.beskrivelse(beskjed)
+
+                assertThat(beskrivelseOppgaveSubtype).isEqualTo(beskrivelse)
+            }
     }
 
     private fun oppgave(oppgaveId: Long) = Oppgave(
