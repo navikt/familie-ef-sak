@@ -7,7 +7,8 @@ object OppgaveBeskrivelse {
     """.trimMargin()
 
     val innstillingOmBrukersUtdanning =
-        """Vi trenger en vurdering fra dere fordi bruker tar/skal ta utdanning. 
+        """
+            Vi trenger en vurdering fra dere fordi bruker tar/skal ta utdanning. 
             Dere må gjøre vurderingen etter retningslinjene til folketrygdloven § 15-6 første ledd bokstav c og § 5 i Forskrift om stønad til enslig mor eller far.
             
             Dere må skrive vurderingen i et notat i Gosys med tittelen «Innstilling utdanning». 
