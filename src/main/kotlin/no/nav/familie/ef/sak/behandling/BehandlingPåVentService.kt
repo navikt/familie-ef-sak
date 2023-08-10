@@ -58,7 +58,11 @@ class BehandlingPåVentService(
         oppdaterVerdierPåOppgave(settPåVentRequest)
 
         if (!settPåVentRequest.oppfølgingsoppgaverMotLokalKontor.isNullOrEmpty()) {
-            opprettVurderHenvendelseOppgaveTasks(behandlingId, settPåVentRequest.oppfølgingsoppgaverMotLokalKontor)
+            opprettVurderHenvendelseOppgaveTasks(
+                behandlingId,
+                settPåVentRequest.oppfølgingsoppgaverMotLokalKontor,
+                settPåVentRequest.innstillingsoppgaveBeskjed,
+            )
         }
     }
 
@@ -83,6 +87,7 @@ class BehandlingPåVentService(
     private fun opprettVurderHenvendelseOppgaveTasks(
         behandlingId: UUID,
         vurderHenvendelseOppgaver: List<OppgaveSubtype>,
+        innstillingsoppgaveBeskjed: String?,
     ) {
         val saksbehandling = behandlingService.hentSaksbehandling(behandlingId)
 
@@ -95,7 +100,7 @@ class BehandlingPåVentService(
                         behandlingId = saksbehandling.id,
                         oppgavetype = Oppgavetype.VurderHenvendelse,
                         vurderHenvendelseOppgaveSubtype = it,
-                        beskrivelse = it.beskrivelse(),
+                        beskrivelse = it.beskrivelse(innstillingsoppgaveBeskjed),
                     ),
                 ),
             )
