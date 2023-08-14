@@ -111,7 +111,7 @@ internal class ÅrsakRevurderingStegTest {
                 ÅrsakRevurderingDto(Opplysningskilde.BESKJED_ANNEN_ENHET, gyldigÅrsak, "asd"),
             )
             assertThatThrownBy { utførOgReturnerNesteSteg(dto) }
-                .hasMessage("Kan ikke ha med beskrivelse når årsak er noe annet en annet")
+                .hasMessage("Kan ikke ha med beskrivelse når årsak er noe annet enn annet")
         }
     }
 
