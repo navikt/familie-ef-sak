@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.JsonNode
 import no.nav.familie.ef.sak.brev.VedtaksbrevService.Companion.BESLUTTER_SIGNATUR_PLACEHOLDER
 import no.nav.familie.ef.sak.brev.VedtaksbrevService.Companion.BESLUTTER_VEDTAKSDATO_PLACEHOLDER
 import no.nav.familie.ef.sak.brev.domain.FRITEKST
-import no.nav.familie.ef.sak.brev.dto.FrittståendeBrevRequestDto
 import no.nav.familie.ef.sak.felles.util.medContentTypeJsonUTF8
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.http.client.AbstractPingableRestClient
@@ -27,26 +26,6 @@ class BrevClient(
 
     override fun ping() {
         operations.optionsForAllow(pingUri)
-    }
-
-    @Deprecated("Skal slettes")
-    fun genererBrev(
-        fritekstBrev: FrittståendeBrevRequestDto,
-        saksbehandlerNavn: String,
-        enhet: String = "NAV Arbeid og ytelser",
-    ): ByteArray {
-        val url = URI.create("$familieBrevUri/api/fritekst-brev")
-        return postForEntity(
-            url,
-            FritekstBrevRequestMedSignatur(
-                brevFraSaksbehandler = fritekstBrev,
-                saksbehandlersignatur = saksbehandlerNavn,
-                besluttersignatur = null,
-                enhet = enhet,
-                datoPlaceholder = null,
-            ),
-            HttpHeaders().medContentTypeJsonUTF8(),
-        )
     }
 
     fun genererHtml(
@@ -76,26 +55,6 @@ class BrevClient(
         )
     }
 
-    @Deprecated("Skal slettes")
-    fun genererHtmlFritekstbrev(
-        fritekstBrev: FrittståendeBrevRequestDto,
-        saksbehandlerNavn: String,
-        enhet: String,
-    ): String {
-        val url = URI.create("$familieBrevUri/api/fritekst-brev/html")
-        return postForEntity(
-            url,
-            FritekstBrevRequestMedSignatur(
-                brevFraSaksbehandler = fritekstBrev,
-                saksbehandlersignatur = saksbehandlerNavn,
-                besluttersignatur = BESLUTTER_SIGNATUR_PLACEHOLDER,
-                enhet = enhet,
-                datoPlaceholder = BESLUTTER_VEDTAKSDATO_PLACEHOLDER,
-            ),
-            HttpHeaders().medContentTypeJsonUTF8(),
-        )
-    }
-
     companion object {
 
         const val ef = "ef-brev"
@@ -110,13 +69,4 @@ data class BrevRequestMedSignaturer(
     val enhet: String?,
     val skjulBeslutterSignatur: Boolean,
     val datoPlaceholder: String,
-)
-
-@Deprecated("Skal slettes")
-data class FritekstBrevRequestMedSignatur(
-    val brevFraSaksbehandler: FrittståendeBrevRequestDto,
-    val saksbehandlersignatur: String,
-    val besluttersignatur: String?,
-    val enhet: String,
-    val datoPlaceholder: String?,
 )

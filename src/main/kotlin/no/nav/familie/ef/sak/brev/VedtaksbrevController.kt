@@ -3,7 +3,6 @@ package no.nav.familie.ef.sak.brev
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.familie.ef.sak.AuditLoggerEvent
 import no.nav.familie.ef.sak.behandling.BehandlingService
-import no.nav.familie.ef.sak.brev.dto.VedtaksbrevFritekstDto
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -42,14 +41,6 @@ class VedtaksbrevController(
         tilgangService.validerTilgangTilBehandling(saksbehandling, AuditLoggerEvent.UPDATE)
         tilgangService.validerHarSaksbehandlerrolle()
         return Ressurs.success(brevService.lagSaksbehandlerSanitybrev(saksbehandling, brevRequest, brevMal))
-    }
-
-    @PostMapping("/fritekst")
-    fun lagSaksbehandlerbrev(@RequestBody brevInnhold: VedtaksbrevFritekstDto): Ressurs<ByteArray> {
-        val saksbehandling = behandlingService.hentSaksbehandling(brevInnhold.behandlingId)
-        tilgangService.validerTilgangTilBehandling(saksbehandling, AuditLoggerEvent.UPDATE)
-        tilgangService.validerHarSaksbehandlerrolle()
-        return Ressurs.success(brevService.lagSaksbehandlerFritekstbrev(brevInnhold, saksbehandling))
     }
 
     @Deprecated("Slettes - bruk forhåndsvisBeslutterbrev")

@@ -4,11 +4,8 @@ import com.fasterxml.jackson.databind.JsonNode
 import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
-import no.nav.familie.ef.sak.brev.domain.FRITEKST
 import no.nav.familie.ef.sak.brev.domain.Vedtaksbrev
-import no.nav.familie.ef.sak.brev.dto.FrittståendeBrevRequestDto
 import no.nav.familie.ef.sak.brev.dto.SignaturDto
-import no.nav.familie.ef.sak.brev.dto.VedtaksbrevFritekstDto
 import no.nav.familie.ef.sak.felles.domain.Fil
 import no.nav.familie.ef.sak.felles.domain.SporbarUtils
 import no.nav.familie.ef.sak.felles.util.norskFormat
@@ -181,35 +178,6 @@ class VedtaksbrevService(
         return html
             .replace(BESLUTTER_SIGNATUR_PLACEHOLDER, beslutterSignatur)
             .replace(BESLUTTER_VEDTAKSDATO_PLACEHOLDER, LocalDate.now().norskFormat())
-    }
-
-    fun lagSaksbehandlerFritekstbrev(fritekstbrevDto: VedtaksbrevFritekstDto, saksbehandling: Saksbehandling): ByteArray {
-        validerRedigerbarBehandling(saksbehandling)
-        val navn = personopplysningerService.hentGjeldeneNavn(listOf(saksbehandling.ident)).getValue(saksbehandling.ident)
-        val request = FrittståendeBrevRequestDto(
-            overskrift = fritekstbrevDto.overskrift,
-            avsnitt = fritekstbrevDto.avsnitt,
-            personIdent = saksbehandling.ident,
-            navn = navn,
-        )
-
-        val signaturMedEnhet = brevsignaturService.lagSignaturMedEnhet(saksbehandling)
-
-        val html = brevClient.genererHtmlFritekstbrev(
-            fritekstBrev = request,
-            saksbehandlerNavn = signaturMedEnhet.navn,
-            enhet = signaturMedEnhet.enhet,
-        )
-
-        lagreEllerOppdaterSaksbehandlerVedtaksbrev(
-            behandlingId = fritekstbrevDto.behandlingId,
-            brevmal = FRITEKST,
-            saksbehandlersignatur = signaturMedEnhet.navn,
-            enhet = signaturMedEnhet.enhet,
-            saksbehandlerHtml = html,
-        )
-
-        return familieDokumentClient.genererPdfFraHtml(html)
     }
 
     private fun validerRedigerbarBehandling(saksbehandling: Saksbehandling) {
