@@ -27,6 +27,7 @@ class FeatureToggleController(private val featureToggleService: FeatureToggleSer
         Toggle.AUTOMATISKE_OPPGAVER_FREMLEGGSOPPGAVE,
         Toggle.SANITYBREV_FRITTSTÅENDE_BREVBYGGER,
         Toggle.UTBEDRET_GUI_SKOLEPENGER,
+        Toggle.ÅRSAK_REVURDERING_BESKRIVELSE,
     )
 
     @GetMapping

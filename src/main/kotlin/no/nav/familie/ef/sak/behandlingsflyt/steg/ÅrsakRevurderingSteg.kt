@@ -7,12 +7,15 @@ import no.nav.familie.ef.sak.behandling.ÅrsakRevurderingService
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvisIkke
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.kontrakter.ef.felles.Revurderingsårsak
 import org.springframework.stereotype.Service
 
 @Service
 class ÅrsakRevurderingSteg(
     private val årsakRevurderingService: ÅrsakRevurderingService,
+    private val featureToggleService: FeatureToggleService,
 ) : BehandlingSteg<RevurderingsinformasjonDto> {
 
     override fun stegType(): StegType {
@@ -51,7 +54,7 @@ class ÅrsakRevurderingSteg(
             "Må ha med beskrivelse når årsak er annet"
         }
 
-        brukerfeilHvis(årsakRevurdering.årsak != Revurderingsårsak.ANNET && årsakRevurdering.beskrivelse != null) {
+        brukerfeilHvis(!featureToggleService.isEnabled(Toggle.ÅRSAK_REVURDERING_BESKRIVELSE) && årsakRevurdering.årsak != Revurderingsårsak.ANNET && årsakRevurdering.beskrivelse != null) {
             "Kan ikke ha med beskrivelse når årsak er noe annet en annet"
         }
     }
