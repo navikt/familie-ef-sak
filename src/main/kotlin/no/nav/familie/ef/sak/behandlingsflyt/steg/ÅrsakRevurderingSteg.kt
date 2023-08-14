@@ -55,7 +55,7 @@ class ÅrsakRevurderingSteg(
         }
 
         brukerfeilHvis(!featureToggleService.isEnabled(Toggle.ÅRSAK_REVURDERING_BESKRIVELSE) && årsakRevurdering.årsak != Revurderingsårsak.ANNET && årsakRevurdering.beskrivelse != null) {
-            "Kan ikke ha med beskrivelse når årsak er noe annet en annet"
+            "Kan ikke ha med beskrivelse når årsak er noe annet enn annet"
         }
     }
 
