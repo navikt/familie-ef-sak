@@ -46,6 +46,12 @@ class EksternBehandlingService(
         return sisteStønadsdato >= LocalDate.now()
     }
 
+    fun harLøpendeBarnetilsyn(personIdentId: UUID): Boolean {
+        val fagsaker = fagsakService.finnFagsakerForFagsakPersonId(personIdentId)
+        val fagsak = fagsaker.barnetilsyn
+        return fagsak?.let { fagsakService.erLøpende(fagsak) } ?: false
+    }
+
     private fun hentAlleBehandlingIDer(personidenter: Set<String>): Set<UUID> {
         return StønadType.values().mapNotNull { fagsakService.finnFagsak(personidenter, it) }
             .mapNotNull { behandlingService.finnSisteIverksatteBehandling(it.id) }

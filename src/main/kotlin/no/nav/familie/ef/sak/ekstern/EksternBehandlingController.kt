@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
+import java.util.UUID
 
 @RestController
 @RequestMapping(
@@ -45,6 +46,13 @@ class EksternBehandlingController(
             return Ressurs.failure("Støtter kun identer av typen fnr/dnr")
         }
         return Ressurs.success(eksternBehandlingService.harLøpendeStønad(personidenter))
+    }
+
+    @PostMapping("har-loepende-barnetilsyn")
+    @ProtectedWithClaims(issuer = "azuread", claimMap = ["roles=access_as_application"])
+    fun harLøpendeBarnetilsyn(@PathVariable fagsakPersonId: UUID): Ressurs<Boolean> {
+        tilgangService.validerTilgangTilFagsak(fagsakPersonId, AuditLoggerEvent.ACCESS)
+        return Ressurs.success(eksternBehandlingService.harLøpendeBarnetilsyn(fagsakPersonId))
     }
 
     @GetMapping("kan-opprette-revurdering-klage/{eksternFagsakId}")
