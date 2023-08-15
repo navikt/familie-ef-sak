@@ -2127,5 +2127,10 @@
       }
     },
     "nullable" : true
+  },
+  "harAvsluttetArbeidsforhold" : {
+    "name" : "harAvsluttetArbeidsforhold",
+    "type" : "Boolean",
+    "nullable" : true
   }
 }
