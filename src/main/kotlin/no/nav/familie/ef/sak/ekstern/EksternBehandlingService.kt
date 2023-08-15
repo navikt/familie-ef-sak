@@ -3,6 +3,7 @@ package no.nav.familie.ef.sak.ekstern
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.RevurderingService
 import no.nav.familie.ef.sak.behandling.dto.RevurderingDto
+import no.nav.familie.ef.sak.fagsak.FagsakPersonService
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.journalføring.dto.VilkårsbehandleNyeBarn
@@ -29,6 +30,7 @@ class EksternBehandlingService(
     private val tilkjentYtelseService: TilkjentYtelseService,
     private val behandlingService: BehandlingService,
     private val fagsakService: FagsakService,
+    private val fagsakPersonService: FagsakPersonService,
     private val revurderingService: RevurderingService,
     private val oppgaveService: OppgaveService,
 
@@ -46,8 +48,9 @@ class EksternBehandlingService(
         return sisteStønadsdato >= LocalDate.now()
     }
 
-    fun harLøpendeBarnetilsyn(personIdentId: UUID): Boolean {
-        val fagsaker = fagsakService.finnFagsakerForFagsakPersonId(personIdentId)
+    fun harLøpendeBarnetilsyn(personIdent: String): Boolean {
+        val fagsakPerson = fagsakPersonService.finnPerson(setOf(personIdent)) ?: return false
+        val fagsaker = fagsakService.finnFagsakerForFagsakPersonId(fagsakPerson.id)
         val fagsak = fagsaker.barnetilsyn
         return fagsak?.let { fagsakService.erLøpende(fagsak) } ?: false
     }
