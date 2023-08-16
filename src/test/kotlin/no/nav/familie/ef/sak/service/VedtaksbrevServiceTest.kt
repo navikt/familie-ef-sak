@@ -13,8 +13,6 @@ import no.nav.familie.ef.sak.brev.VedtaksbrevRepository
 import no.nav.familie.ef.sak.brev.VedtaksbrevService
 import no.nav.familie.ef.sak.brev.VedtaksbrevService.Companion.BESLUTTER_SIGNATUR_PLACEHOLDER
 import no.nav.familie.ef.sak.brev.domain.Vedtaksbrev
-import no.nav.familie.ef.sak.brev.dto.FrittståendeBrevAvsnitt
-import no.nav.familie.ef.sak.brev.dto.VedtaksbrevFritekstDto
 import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
 import no.nav.familie.ef.sak.felles.domain.Fil
 import no.nav.familie.ef.sak.felles.domain.SporbarUtils
@@ -63,7 +61,6 @@ internal class VedtaksbrevServiceTest {
 
     private val vedtaksbrev: Vedtaksbrev = lagVedtaksbrev("malnavn")
     private val beslutterNavn = "456"
-    private val fritekstBrevDto = lagVedtaksbrevFritekstDto()
 
     @BeforeEach
     fun setUp() {
@@ -88,7 +85,6 @@ internal class VedtaksbrevServiceTest {
         every { vedtaksbrevRepository.existsById(any()) } returns true
         every { vedtaksbrevRepository.update(capture(vedtaksbrevSlot)) } returns vedtaksbrev
         every { vedtaksbrevRepository.findByIdOrThrow(any()) } returns vedtaksbrev
-        every { brevClient.genererHtmlFritekstbrev(any(), any(), any()) } returns "html"
         every { familieDokumentClient.genererPdfFraHtml(any()) } returns "123".toByteArray()
 
         vedtaksbrevService.lagEndeligBeslutterbrev(
@@ -104,38 +100,6 @@ internal class VedtaksbrevServiceTest {
         assertThat(vedtaksbrevSlot.captured.besluttersignatur).isEqualTo("")
         assertThat(vedtaksbrevSlot.captured.enhet).isEqualTo("")
         assertThat(vedtaksbrevSlot.captured.beslutterPdf).isNotNull
-    }
-
-    @Test
-    internal fun `skal legge på signatur og lage pdf ved lagSaksbehandlerFritekstbrev`() {
-        val vedtaksbrevSlot = slot<Vedtaksbrev>()
-
-        val ident = "12345678910"
-        val gjeldendeNavn = "Navn Navnesen"
-        val navnMap = mapOf(ident to gjeldendeNavn)
-
-        every { personopplysningerService.hentGjeldeneNavn(any()) } returns navnMap
-        every { vedtaksbrevRepository.existsById(any()) } returns true
-        every { vedtaksbrevRepository.update(capture(vedtaksbrevSlot)) } returns vedtaksbrev
-        every { brevClient.genererHtmlFritekstbrev(any(), any(), any()) } returns "html"
-        every { familieDokumentClient.genererPdfFraHtml(any()) } returns "123".toByteArray()
-
-        vedtaksbrevService.lagSaksbehandlerFritekstbrev(
-            fritekstBrevDto,
-            saksbehandling(fagsak, behandlingForSaksbehandler),
-        )
-        assertThat(vedtaksbrevSlot.captured.saksbehandlersignatur).isEqualTo(beslutterNavn)
-    }
-
-    @Test
-    internal fun `lagFritekstSaksbehandlerBrev skal kaste feil når behandling er låst for videre behandling`() {
-        val feil = assertThrows<Feil> {
-            vedtaksbrevService.lagSaksbehandlerFritekstbrev(
-                fritekstBrevDto,
-                saksbehandling(fagsak, behandlingForBeslutter),
-            )
-        }
-        assertThat(feil.message).contains("Behandling er i feil steg")
     }
 
     @Test
@@ -259,12 +223,6 @@ internal class VedtaksbrevServiceTest {
         beslutterPdf = null, enhet = "",
         saksbehandlerident = saksbehandlerIdent,
         beslutterident = "",
-    )
-
-    private fun lagVedtaksbrevFritekstDto() = VedtaksbrevFritekstDto(
-        "Innvilget",
-        listOf(FrittståendeBrevAvsnitt("Deloverskrift", "Innhold")),
-        behandling.id,
     )
 
     @Test

@@ -307,6 +307,13 @@
       }
     ],
     "tilbakekreving": null,
-    "brevmottakere": []
+    "brevmottakere": [],
+    "grunnbeløp": {
+      "periode": {
+        "fom": "2022-05",
+        "tom": "2023-04"
+      },
+      "grunnbeløp": 111477
+    }
   }
 }
