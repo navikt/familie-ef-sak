@@ -32,6 +32,8 @@ enum class Toggle(val toggleId: String, val beskrivelse: String? = null) {
 
     ULIKE_INNTEKTER("familie.ef.sak-ulike-inntekter"),
 
+    ÅRSAK_REVURDERING_BESKRIVELSE("familie.ef.sak.arsak-revurdering-beskrivelse"),
+
     FRONTEND_VIS_IKKE_PUBLISERTE_BREVMALER("familie.ef.sak.frontend-vis-ikke-publiserte-brevmaler"),
     FRONTEND_AUTOMATISK_UTFYLLE_VILKÅR("familie.ef.sak.frontend-automatisk-utfylle-vilkar"),
     FRONTEND_SATSENDRING("familie.ef.sak.frontend-vis-satsendring"),
@@ -42,7 +44,6 @@ enum class Toggle(val toggleId: String, val beskrivelse: String? = null) {
     TILLAT_MIGRERING_7_ÅR_TILBAKE("familie.ef.sak.tillat-migrering-7-ar-tilbake", "Permission"),
     AUTOMATISKE_OPPGAVER_FREMLEGGSOPPGAVE("familie.ef.sak.automatiske-oppgaver.fremleggsoppgave"),
     AUTOMATISKE_BREV_INNHENTING_KARAKTERUTSKRIFT("familie.ef.sak.automatiske-brev-innhenting-karakterutskrift"),
-    SANITYBREV_FRITTSTÅENDE_BREVBYGGER("familie.ef.sak.frontend-frittstaaende-sanitybrev"),
     UTBEDRET_GUI_SKOLEPENGER("familie.ef.sak.frontend-skolepenger-utbedret-gui"),
     ;
 

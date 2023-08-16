@@ -5,18 +5,9 @@ import io.mockk.mockk
 import io.mockk.mockkObject
 import io.mockk.unmockkObject
 import no.nav.familie.ef.sak.brev.MellomlagerBrevRepository
-import no.nav.familie.ef.sak.brev.MellomlagerFrittståendeBrevRepository
 import no.nav.familie.ef.sak.brev.MellomlagerFrittståendeSanitybrevRepository
-import no.nav.familie.ef.sak.brev.domain.BrevmottakerOrganisasjon
-import no.nav.familie.ef.sak.brev.domain.BrevmottakerPerson
-import no.nav.familie.ef.sak.brev.domain.Fritekstbrev
-import no.nav.familie.ef.sak.brev.domain.FrittståendeBrevmottakere
 import no.nav.familie.ef.sak.brev.domain.MellomlagretBrev
-import no.nav.familie.ef.sak.brev.domain.MellomlagretFrittståendeBrev
 import no.nav.familie.ef.sak.brev.domain.MellomlagretFrittståendeSanitybrev
-import no.nav.familie.ef.sak.brev.domain.MottakerRolle
-import no.nav.familie.ef.sak.brev.dto.FrittståendeBrevAvsnitt
-import no.nav.familie.ef.sak.brev.dto.FrittståendeBrevKategori
 import no.nav.familie.ef.sak.brev.dto.MellomlagretBrevSanity
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import org.assertj.core.api.Assertions.assertThat
@@ -32,11 +23,9 @@ import java.util.UUID
 internal class MellomlagringBrevServiceTest {
 
     private val mellomlagerBrevRepository = mockk<MellomlagerBrevRepository>()
-    private val mellomlagerFrittståendeBrevRepository = mockk<MellomlagerFrittståendeBrevRepository>()
     private val mellomlagerFrittståendeSanitybrevRepository = mockk<MellomlagerFrittståendeSanitybrevRepository>()
     private val mellomlagringBrevService = no.nav.familie.ef.sak.brev.MellomlagringBrevService(
         mellomlagerBrevRepository,
-        mellomlagerFrittståendeBrevRepository,
         mellomlagerFrittståendeSanitybrevRepository,
     )
 
@@ -82,36 +71,6 @@ internal class MellomlagringBrevServiceTest {
     }
 
     @Test
-    fun `hentMellomlagretFrittståendeBrev skal returnere mellomlagret frittstående brev`() {
-        val fagsakId = UUID.randomUUID()
-        val avsnitt = listOf(FrittståendeBrevAvsnitt("del", "innehold", true))
-        val brev = MellomlagretFrittståendeBrev(
-            id = UUID.randomUUID(),
-            fagsakId = fagsakId,
-            brev = Fritekstbrev(overskrift = "Hei", avsnitt = avsnitt),
-            brevType = FrittståendeBrevKategori.INFORMASJONSBREV,
-            saksbehandlerIdent = "Bob",
-            mottakere = FrittståendeBrevmottakere(
-                listOf(brevmottakerPerson()),
-                listOf(brevmottakerOrganisasjon()),
-            ),
-        )
-        every {
-            mellomlagerFrittståendeBrevRepository.findByFagsakIdAndSaksbehandlerIdent(
-                fagsakId,
-                any(),
-            )
-        } returns brev
-        val dto = mellomlagringBrevService.hentMellomlagretFrittståendeBrev(fagsakId)
-        assertThat(dto).isNotNull
-        assertThat(dto!!.fagsakId).isEqualTo(brev.fagsakId)
-        assertThat(dto.avsnitt).isEqualTo(brev.brev.avsnitt)
-        assertThat(dto.brevType).isEqualTo(brev.brevType)
-        assertThat(dto.mottakere!!.organisasjoner).isEqualTo(brev.mottakere!!.organisasjoner)
-        assertThat(dto.mottakere!!.personer).isEqualTo(brev.mottakere!!.personer)
-    }
-
-    @Test
     fun `hentMellomlagretFrittståendeSanityBrev skal returnere mellomlagret frittstående brev`() {
         val fagsakId = UUID.randomUUID()
 
@@ -130,9 +89,6 @@ internal class MellomlagringBrevServiceTest {
             ),
         )
     }
-
-    private fun brevmottakerOrganisasjon() = BrevmottakerOrganisasjon("456", "Power", MottakerRolle.FULLMAKT)
-    private fun brevmottakerPerson() = BrevmottakerPerson("123", "Arne", MottakerRolle.VERGE)
 
     private val behandlingId = UUID.randomUUID()
     private val brevmal = "testMal"

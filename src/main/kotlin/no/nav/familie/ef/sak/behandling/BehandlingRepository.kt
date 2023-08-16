@@ -136,6 +136,7 @@ interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUp
         WHERE f.fagsak_person_id = :fagsakPersonId
          AND b.resultat IN ('OPPHØRT', 'INNVILGET', 'AVSLÅTT', 'IKKE_SATT')
          AND b.status NOT IN ('OPPRETTET')
+         AND b.arsak != 'MIGRERING'
     """,
     )
     fun finnBehandlingerForGjenbrukAvVilkår(fagsakPersonId: UUID): List<Behandling>
