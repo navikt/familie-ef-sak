@@ -81,12 +81,4 @@ class BrevMellomlagerController(
 
         return Ressurs.success(mellomlagringBrevService.hentMellomlagretFrittståendeSanitybrev(fagsakId))
     }
-
-    @Deprecated("Skal ikke brukes men noen saksbehandlere sitter fremdeles med utdatert frontend.")
-    @GetMapping("/frittstaende/{fagsakId}")
-    fun deprecatedHentMellomlagretFrittståendeBrev(@PathVariable fagsakId: UUID): Ressurs<Unit?> {
-        tilgangService.validerTilgangTilFagsak(fagsakId, AuditLoggerEvent.ACCESS)
-        tilgangService.validerHarSaksbehandlerrolle()
-        return Ressurs.success(null)
-    }
 }
