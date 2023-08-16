@@ -2,7 +2,6 @@ package no.nav.familie.ef.sak.brev
 
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.familie.ef.sak.AuditLoggerEvent
-import no.nav.familie.ef.sak.brev.dto.FrittståendeBrevDto
 import no.nav.familie.ef.sak.brev.dto.FrittståendeSanitybrevDto
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -21,21 +20,6 @@ class FrittståendeBrevController(
     private val frittståendeBrevService: FrittståendeBrevService,
     private val tilgangService: TilgangService,
 ) {
-
-    @Deprecated("Skal slettes")
-    @PostMapping("")
-    fun forhåndsvisFrittståendeBrev(@RequestBody brevInnhold: FrittståendeBrevDto): Ressurs<ByteArray> {
-        tilgangService.validerTilgangTilFagsak(brevInnhold.fagsakId, AuditLoggerEvent.UPDATE)
-        return Ressurs.success(frittståendeBrevService.forhåndsvisFrittståendeBrev(brevInnhold))
-    }
-
-    @Deprecated("Skal slettes")
-    @PostMapping("/send")
-    fun sendFrittståendeBrev(@RequestBody brevInnhold: FrittståendeBrevDto): Ressurs<Unit> {
-        tilgangService.validerTilgangTilFagsak(brevInnhold.fagsakId, AuditLoggerEvent.CREATE)
-        tilgangService.validerHarSaksbehandlerrolle()
-        return Ressurs.success(frittståendeBrevService.sendFrittståendeBrev(brevInnhold))
-    }
 
     @PostMapping("/{fagsakId}/{brevMal}")
     fun forhåndsvisFrittsåendeSanitybrev(

@@ -194,15 +194,6 @@ internal class BeregningSkolepengerServiceTest {
 
     @Nested
     inner class ValideringAvBeløp {
-        @Test
-        internal fun `utgifter er mindre enn 1`() {
-            val periode = SkoleårsperiodeSkolepengerDto(listOf(delårsperiode()), listOf(utgift(utgifter = 0)))
-            val skoleårsperioder = listOf(periode)
-
-            assertThatThrownBy { service.beregnYtelse(skoleårsperioder, førstegangsbehandling.id) }
-                .isInstanceOf(ApiFeil::class.java)
-                .hasMessageContaining("Utgifter må være høyere enn 0kr")
-        }
 
         @Test
         internal fun `stønad kan ikke være under 0kr`() {
@@ -212,16 +203,6 @@ internal class BeregningSkolepengerServiceTest {
             assertThatThrownBy { service.beregnYtelse(skoleårsperioder, førstegangsbehandling.id) }
                 .isInstanceOf(ApiFeil::class.java)
                 .hasMessageContaining("Stønad kan ikke være lavere enn 0kr")
-        }
-
-        @Test
-        internal fun `stønad kan ikke være høyere enn utgifter`() {
-            val periode = SkoleårsperiodeSkolepengerDto(listOf(delårsperiode()), listOf(utgift(stønad = 200)))
-            val skoleårsperioder = listOf(periode)
-
-            assertThatThrownBy { service.beregnYtelse(skoleårsperioder, førstegangsbehandling.id) }
-                .isInstanceOf(ApiFeil::class.java)
-                .hasMessageContaining("Stønad kan ikke være overstige utgifter")
         }
 
         @Test

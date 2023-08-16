@@ -24,7 +24,7 @@ internal class FørstegangsbehandlingServiceTest {
     @Test
     internal fun `skal feile hvis behandlingsårsak er ugyldig for førstegangsbehandlinger`() {
         val ugyldigeÅrsaker =
-            BehandlingÅrsak.values().filter { it != BehandlingÅrsak.PAPIRSØKNAD && it != BehandlingÅrsak.NYE_OPPLYSNINGER }
+            BehandlingÅrsak.values().filter { it != BehandlingÅrsak.PAPIRSØKNAD && it != BehandlingÅrsak.NYE_OPPLYSNINGER && it != BehandlingÅrsak.MANUELT_OPPRETTET }
         ugyldigeÅrsaker.forEach {
             assertThrows<Feil> {
                 førstegangsbehandlingService.opprettFørstegangsbehandling(

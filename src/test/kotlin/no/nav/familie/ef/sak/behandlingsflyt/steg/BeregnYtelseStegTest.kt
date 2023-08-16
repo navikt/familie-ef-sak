@@ -317,6 +317,31 @@ internal class BeregnYtelseStegTest {
         }
 
         @Test
+        internal fun `skal feile hvis mer enn 4 måneder av periodetypen periode før fødsel`() {
+            val innvilgetFom = YearMonth.of(2021, 10)
+            val innvilgetTom = YearMonth.of(2022, 3)
+
+            every { beregningService.beregnYtelse(any(), any()) } answers {
+                firstArg<List<Månedsperiode>>().map { lagBeløpsperiode(it.fomDato, it.tomDato) }
+            }
+            val innvilgetPeriode = VedtaksperiodeDto(
+                periode = Månedsperiode(fom = innvilgetFom, tom = innvilgetTom),
+                aktivitet = AktivitetType.IKKE_AKTIVITETSPLIKT,
+                periodeType = VedtaksperiodeType.PERIODE_FØR_FØDSEL,
+            )
+
+            val feil = assertThrows<ApiFeil> {
+                utførSteg(
+                    BehandlingType.REVURDERING,
+                    innvilget(listOf(innvilgetPeriode), listOf(inntekt(innvilgetFom))),
+                    forrigeBehandlingId = UUID.randomUUID(),
+                )
+            }
+
+            assertThat(feil.feil).contains("Vedtaket kan ikke inneholde mer enn 4 måneder med periodetypen periode før fødesel")
+        }
+
+        @Test
         internal fun `skal innvilge med opphør som første periode`() {
             val opphørFom = YearMonth.of(2021, 6)
             val opphørTom = YearMonth.of(2021, 8)

@@ -32,19 +32,18 @@ enum class Toggle(val toggleId: String, val beskrivelse: String? = null) {
 
     ULIKE_INNTEKTER("familie.ef.sak-ulike-inntekter"),
 
+    ÅRSAK_REVURDERING_BESKRIVELSE("familie.ef.sak.arsak-revurdering-beskrivelse"),
+
     FRONTEND_VIS_IKKE_PUBLISERTE_BREVMALER("familie.ef.sak.frontend-vis-ikke-publiserte-brevmaler"),
     FRONTEND_AUTOMATISK_UTFYLLE_VILKÅR("familie.ef.sak.frontend-automatisk-utfylle-vilkar"),
     FRONTEND_SATSENDRING("familie.ef.sak.frontend-vis-satsendring"),
     FRONTEND_VIS_INNTEKT_PERSONOVERSIKT("familie.ef.sak.frontend.vis-inntekt-personoversikt"),
-    FRONTEND_DOKUMENTOVERSIKT_LINK_TIL_DOKUMENT("familie.ef.sak.frontend.dokumentoversikt-link-til-dokument"),
-    PERSONOPPLYSNINGER_ENDRINGER("familie.ef.sak.frontend.personopplysninger-endringer"),
     VURDER_KONSEKVENS_OPPGAVER_LOKALKONTOR("familie.ef.sak.automatiske-oppgaver-lokalkontor"),
     KAST_FEIL_HVIS_OPPGAVE_MANGLER_PÅ_ÅPEN_BEHANDLING("familie.ef.sak.kast-feil-hvis-oppgave-mangler-pa-apen-behandling"),
     TILLAT_MIGRERING_5_ÅR_TILBAKE("familie.ef.sak.tillat-migrering-5-ar-tilbake", "Permission"),
     TILLAT_MIGRERING_7_ÅR_TILBAKE("familie.ef.sak.tillat-migrering-7-ar-tilbake", "Permission"),
     AUTOMATISKE_OPPGAVER_FREMLEGGSOPPGAVE("familie.ef.sak.automatiske-oppgaver.fremleggsoppgave"),
     AUTOMATISKE_BREV_INNHENTING_KARAKTERUTSKRIFT("familie.ef.sak.automatiske-brev-innhenting-karakterutskrift"),
-    SANITYBREV_FRITTSTÅENDE_BREVBYGGER("familie.ef.sak.frontend-frittstaaende-sanitybrev"),
     UTBEDRET_GUI_SKOLEPENGER("familie.ef.sak.frontend-skolepenger-utbedret-gui"),
     ;
 
