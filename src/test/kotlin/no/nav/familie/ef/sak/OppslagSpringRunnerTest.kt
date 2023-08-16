@@ -15,7 +15,6 @@ import no.nav.familie.ef.sak.blankett.Blankett
 import no.nav.familie.ef.sak.brev.domain.Brevmottakere
 import no.nav.familie.ef.sak.brev.domain.BrevmottakereFrittståendeBrev
 import no.nav.familie.ef.sak.brev.domain.MellomlagretBrev
-import no.nav.familie.ef.sak.brev.domain.MellomlagretFrittståendeBrev
 import no.nav.familie.ef.sak.brev.domain.MellomlagretFrittståendeSanitybrev
 import no.nav.familie.ef.sak.brev.domain.Vedtaksbrev
 import no.nav.familie.ef.sak.database.DbContainerInitializer
@@ -150,7 +149,6 @@ abstract class OppslagSpringRunnerTest {
             Blankett::class,
             Vedtak::class,
             MellomlagretBrev::class,
-            MellomlagretFrittståendeBrev::class,
             MellomlagretFrittståendeSanitybrev::class,
             BrevmottakereFrittståendeBrev::class,
             Behandlingsjournalpost::class,
