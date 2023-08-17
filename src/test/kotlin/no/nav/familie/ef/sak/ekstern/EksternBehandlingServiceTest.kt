@@ -1,12 +1,19 @@
 package no.nav.familie.ef.sak.ekstern
 
 import io.mockk.every
+import io.mockk.mockk
+import io.mockk.verify
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
+import no.nav.familie.ef.sak.fagsak.FagsakPersonService
+import no.nav.familie.ef.sak.fagsak.FagsakService
+import no.nav.familie.ef.sak.fagsak.domain.Fagsak
+import no.nav.familie.ef.sak.fagsak.domain.FagsakPerson
+import no.nav.familie.ef.sak.fagsak.domain.Fagsaker
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.testWithBrukerContext
 import no.nav.familie.ef.sak.oppgave.OppgaveClient
 import no.nav.familie.ef.sak.oppgave.OppgaveRepository
@@ -28,6 +35,7 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDateTime
+import java.util.UUID
 
 internal class EksternBehandlingServiceTest : OppslagSpringRunnerTest() {
 
@@ -282,6 +290,75 @@ internal class EksternBehandlingServiceTest : OppslagSpringRunnerTest() {
             }
 
             assertThat(result).isTrue
+        }
+    }
+
+    @Nested
+    inner class LøpendeBarnetilsyn {
+
+        private val fagsakPersonService = mockk<FagsakPersonService>()
+        private val fagsakPerson = mockk<FagsakPerson>()
+        private val fagsak = mockk<Fagsak>()
+        private val fagsakService = mockk<FagsakService>()
+
+        private val eksternBehandlingService =
+            EksternBehandlingService(mockk(), mockk(), fagsakService, fagsakPersonService, mockk(), mockk())
+
+        @Test
+        internal fun `person som ikke finnes i ef skal ikke ha løpende barnetilsyn`() {
+            every { fagsakPersonService.finnPerson(any()) } returns null
+
+            val løpendeBarnetilsyn = eksternBehandlingService.harLøpendeBarnetilsyn("123")
+            assertThat(løpendeBarnetilsyn).isFalse()
+        }
+
+        @Test
+        internal fun `person som finnes i ef har ikke bt hvis fagsak for bt ikke finnes`() {
+            every { fagsakPersonService.finnPerson(any()) } returns fagsakPerson
+            every { fagsakPerson.id } returns UUID.randomUUID()
+            every { fagsakService.finnFagsakerForFagsakPersonId(any()) } returns Fagsaker(
+                overgangsstønad = null,
+                barnetilsyn = null,
+                skolepenger = null
+            )
+
+            val løpendeBarnetilsyn = eksternBehandlingService.harLøpendeBarnetilsyn("123")
+
+            assertThat(løpendeBarnetilsyn).isFalse()
+            verify(exactly = 0) { fagsakService.erLøpende(any()) }
+        }
+
+        @Test
+        internal fun `løpende bt for person som finnes i ef og som har løpende fagsak for bt`() {
+            every { fagsakPersonService.finnPerson(any()) } returns fagsakPerson
+            every { fagsakPerson.id } returns UUID.randomUUID()
+            every { fagsakService.finnFagsakerForFagsakPersonId(any()) } returns Fagsaker(
+                overgangsstønad = null,
+                barnetilsyn = fagsak,
+                skolepenger = null
+            )
+            every { fagsakService.erLøpende(fagsak) } returns true
+
+            val løpendeBarnetilsyn = eksternBehandlingService.harLøpendeBarnetilsyn("123")
+
+            assertThat(løpendeBarnetilsyn).isTrue()
+            verify(exactly = 1) { fagsakService.erLøpende(fagsak) }
+        }
+
+        @Test
+        internal fun `skal ikke sjekke om fagsak er løpende for andre stønader enn bt`() {
+            every { fagsakPersonService.finnPerson(any()) } returns fagsakPerson
+            every { fagsakPerson.id } returns UUID.randomUUID()
+            every { fagsakService.finnFagsakerForFagsakPersonId(any()) } returns Fagsaker(
+                overgangsstønad = fagsak,
+                barnetilsyn = null,
+                skolepenger = fagsak
+            )
+
+            val løpendeBarnetilsyn = eksternBehandlingService.harLøpendeBarnetilsyn("123")
+
+            assertThat(løpendeBarnetilsyn).isFalse()
+            verify(exactly = 0) { fagsakService.erLøpende(fagsak) }
         }
     }
 
