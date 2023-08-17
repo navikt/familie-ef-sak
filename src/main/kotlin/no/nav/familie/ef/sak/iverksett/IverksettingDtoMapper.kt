@@ -197,7 +197,7 @@ class IverksettingDtoMapper(
             "Kan ikke iverksette med utdatert grunnbeløp gyldig fra $gMånedTilkjentYtelse. Denne behandlingen må beregnes og simuleres på nytt"
 
         val nyttGrunnbeløpForInneværendeÅrRegistrertIEF = Grunnbeløpsperioder.nyesteGrunnbeløpGyldigFraOgMed.year == DatoUtil.inneværendeÅr()
-        val fristGOmregning = LocalDate.of(DatoUtil.inneværendeÅr(), Month.JUNE, 15)
+        val fristGOmregning = LocalDate.of(DatoUtil.inneværendeÅr(), Month.JUNE, 1)
 
         if (nyttGrunnbeløpForInneværendeÅrRegistrertIEF && DatoUtil.dagensDato() < fristGOmregning) {
             validerBehandlingBrukerÅretsEllerFjoråretsG(gMånedTilkjentYtelse, feilmelding)
