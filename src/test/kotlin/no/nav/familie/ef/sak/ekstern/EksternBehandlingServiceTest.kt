@@ -319,7 +319,7 @@ internal class EksternBehandlingServiceTest : OppslagSpringRunnerTest() {
             every { fagsakService.finnFagsakerForFagsakPersonId(any()) } returns Fagsaker(
                 overgangsstønad = null,
                 barnetilsyn = null,
-                skolepenger = null
+                skolepenger = null,
             )
 
             val løpendeBarnetilsyn = eksternBehandlingService.harLøpendeBarnetilsyn("123")
@@ -335,7 +335,7 @@ internal class EksternBehandlingServiceTest : OppslagSpringRunnerTest() {
             every { fagsakService.finnFagsakerForFagsakPersonId(any()) } returns Fagsaker(
                 overgangsstønad = null,
                 barnetilsyn = fagsak,
-                skolepenger = null
+                skolepenger = null,
             )
             every { fagsakService.erLøpende(fagsak) } returns true
 
@@ -352,7 +352,7 @@ internal class EksternBehandlingServiceTest : OppslagSpringRunnerTest() {
             every { fagsakService.finnFagsakerForFagsakPersonId(any()) } returns Fagsaker(
                 overgangsstønad = fagsak,
                 barnetilsyn = null,
-                skolepenger = fagsak
+                skolepenger = fagsak,
             )
 
             val løpendeBarnetilsyn = eksternBehandlingService.harLøpendeBarnetilsyn("123")
