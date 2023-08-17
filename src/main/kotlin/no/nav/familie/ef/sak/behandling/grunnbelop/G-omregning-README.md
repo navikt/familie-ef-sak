@@ -71,12 +71,12 @@ Vi jobber med å modernisere regelverk og rutiner her. Husk å følge opp disse 
 
 #### Gomregning - validering av ordinere behandlinger/iverksettinger under og etter g-omregning
 
-Når vi har lagt inn ny G er det fint om vi ikke iverksetter med "gammel" g på nye perioder. 
+Når vi har lagt inn ny G er det fint om vi ikke iverksetter med "gammel" g på nye perioder. Dette gjelder spesiellt revurderinger fra juni hvor det også er løpende i mai - da er det vanskeligere å finne 
+igjen mai for regulering senere. For at åpne behandlinger, f.eks. en behandling som er sendt til beslutter, ikke må utføres på nytt tillater vi likevel å iverksette med gammel G i en overgangsperiode. Denne valideringen ligger i
 
 `no.nav.familie.ef.sak.iverksett.IverksettingDtoMapper.validerGrunnbeløpsmåned`
 
-Dette gjelder spesiellt revurderinger fra juni hvor det også er løpende i mai - da er det vanskeligere å finne 
-igjen mai for regulering senere. 
+Valideringen utføres når et vedtak besluttes. Lengden på overgangsperioden bestemmes utifra `fristGOmregning` som vi har hardkodet til 1. juni. Det betyr at hvis koden oppdateres med ny G 20. mai, vil man i perioden 20.mai - 1. juni få lov til å iverksette både med nyeste og nest nyeste G. `fristGOmregning` kan justeres utifra hvor strenge vi ønsker å være.
 
 #### Etterarbeid/sjekkliste/:
 
