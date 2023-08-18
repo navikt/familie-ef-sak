@@ -234,6 +234,7 @@ ARBEIDSSOKER_URL: http://veilarbregistrering.paw.svc.cluster.local
 HISTORISK_PENSJON_URL: http://historisk-pensjon.historisk
 FAMILIE_KS_SAK_URL: http://familie-ks-sak
 FRONTEND_OPPGAVE_URL: https://ensligmorellerfar.intern.nav.no/oppgavebenk
+SKJERMING_URL: https://skjermede-personer-pip.intern.nav.no
 
 GYLDIGE_SERVICE_BRUKERE: srvArena
 
