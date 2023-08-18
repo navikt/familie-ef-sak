@@ -47,6 +47,12 @@ class EksternBehandlingController(
         return Ressurs.success(eksternBehandlingService.harLøpendeStønad(personidenter))
     }
 
+    @PostMapping("har-loepende-barnetilsyn")
+    @ProtectedWithClaims(issuer = "azuread", claimMap = ["roles=access_as_application"])
+    fun harLøpendeBarnetilsyn(@RequestBody personIdent: String): Ressurs<Boolean> {
+        return Ressurs.success(eksternBehandlingService.harLøpendeBarnetilsyn(personIdent))
+    }
+
     @GetMapping("kan-opprette-revurdering-klage/{eksternFagsakId}")
     fun kanOppretteRevurdering(@PathVariable eksternFagsakId: Long): Ressurs<KanOppretteRevurderingResponse> {
         tilgangService.validerTilgangTilEksternFagsak(eksternFagsakId, AuditLoggerEvent.CREATE)
