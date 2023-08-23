@@ -22,12 +22,15 @@ import no.nav.familie.ef.sak.felles.domain.Endret
 import no.nav.familie.ef.sak.felles.domain.Sporbar
 import no.nav.familie.ef.sak.felles.domain.SporbarUtils
 import no.nav.familie.ef.sak.felles.util.BehandlingOppsettUtil
+import no.nav.familie.ef.sak.oppgave.Oppgave
+import no.nav.familie.ef.sak.oppgave.OppgaveRepository
 import no.nav.familie.ef.sak.testutil.hasCauseMessageContaining
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.kontrakter.felles.ef.StønadType.BARNETILSYN
 import no.nav.familie.kontrakter.felles.ef.StønadType.OVERGANGSSTØNAD
 import no.nav.familie.kontrakter.felles.ef.StønadType.SKOLEPENGER
+import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.BeforeEach
@@ -47,6 +50,9 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
 
     @Autowired
     private lateinit var fagsakPersonRepository: FagsakPersonRepository
+
+    @Autowired
+    private lateinit var oppgaveRepository: OppgaveRepository
 
     private val ident = "123"
 
@@ -94,11 +100,14 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
         val enMånedSiden = LocalDateTime.now().minusMonths(1)
 
         val fagsak = testoppsettService.lagreFagsak(fagsak(stønadstype = OVERGANGSSTØNAD))
-        behandlingRepository.insert(behandling(fagsak, opprettetTid = LocalDateTime.now().minusMonths(2)))
+        val behandling = behandling(fagsak, opprettetTid = LocalDateTime.now().minusMonths(2))
+        behandlingRepository.insert(behandling)
         val annenFagsak =
             testoppsettService.lagreFagsak(fagsak(setOf(PersonIdent("1")), stønadstype = OVERGANGSSTØNAD))
         behandlingRepository.insert(behandling(annenFagsak, opprettetTid = LocalDateTime.now().minusWeeks(1)))
-
+        val sporbar = Sporbar("saksbh", enMånedSiden.minusDays(1))
+        val oppgave = Oppgave(sporbar = sporbar, behandlingId = behandling.id, gsakOppgaveId = 1, type = Oppgavetype.BehandleSak, erFerdigstilt = false)
+        oppgaveRepository.insert(oppgave)
         assertThat(
             behandlingRepository.hentUferdigeBehandlingerOpprettetFørDato(
                 OVERGANGSSTØNAD,
@@ -106,6 +115,28 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
             ),
         ).size()
             .isEqualTo(1)
+    }
+
+    @Test
+    fun `hentUferdigeBehandlingerFørDato skal ikke hente behandling dersom oppgave er endret etter frist`() {
+        val enMånedSiden = LocalDateTime.now().minusMonths(1)
+
+        val fagsak = testoppsettService.lagreFagsak(fagsak(stønadstype = OVERGANGSSTØNAD))
+        val behandling = behandling(fagsak, opprettetTid = LocalDateTime.now().minusMonths(2))
+        behandlingRepository.insert(behandling)
+        val annenFagsak =
+            testoppsettService.lagreFagsak(fagsak(setOf(PersonIdent("1")), stønadstype = OVERGANGSSTØNAD))
+        behandlingRepository.insert(behandling(annenFagsak, opprettetTid = LocalDateTime.now().minusWeeks(1)))
+        val sporbar = Sporbar("saksbh", enMånedSiden.plusDays(1))
+        val oppgave = Oppgave(sporbar = sporbar, behandlingId = behandling.id, gsakOppgaveId = 1, type = Oppgavetype.BehandleSak, erFerdigstilt = false)
+        oppgaveRepository.insert(oppgave)
+        assertThat(
+            behandlingRepository.hentUferdigeBehandlingerOpprettetFørDato(
+                OVERGANGSSTØNAD,
+                enMånedSiden,
+            ),
+        ).size()
+            .isEqualTo(0)
     }
 
     @Test
