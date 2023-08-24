@@ -189,8 +189,11 @@ interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUp
         SELECT b.*, f.stonadstype
         FROM behandling b
         JOIN fagsak f ON f.id = b.fagsak_id
+        JOIN oppgave o on b.id = o.behandling_id
         WHERE NOT b.status = 'FERDIGSTILT'
-        AND b.opprettet_tid < :opprettetTidFør
+        AND o.ferdigstilt = false
+        AND o.type in ('BehandleSak', 'GodkjenneVedtak', 'BehandleUnderkjentVedtak')
+        AND o.opprettet_tid < :opprettetTidFør
         AND f.stonadstype=:stønadstype
         """,
     )
