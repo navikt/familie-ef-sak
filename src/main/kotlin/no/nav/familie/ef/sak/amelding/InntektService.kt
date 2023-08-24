@@ -1,7 +1,6 @@
 package no.nav.familie.ef.sak.amelding
 
 import no.nav.familie.ef.sak.amelding.ekstern.AMeldingInntektClient
-import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.fagsak.FagsakPersonService
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import org.springframework.stereotype.Service
@@ -13,7 +12,6 @@ class InntektService(
     private val aMeldingInntektClient: AMeldingInntektClient,
     private val fagsakService: FagsakService,
     private val fagsakPersonService: FagsakPersonService,
-    private val behandlingService: BehandlingService,
     private val inntektMapper: InntektMapper,
 ) {
 
@@ -28,8 +26,8 @@ class InntektService(
         return aMeldingInntektClient.genererAInntektUrl(personIdent)
     }
 
-    fun genererAInntektArbeidsforholdUrl(behandlingId: UUID): String {
-        val personIdent = behandlingService.hentAktivIdent(behandlingId)
+    fun genererAInntektArbeidsforholdUrl(fagsakId: UUID): String {
+        val personIdent = fagsakService.hentAktivIdent(fagsakId)
         return aMeldingInntektClient.genererAInntektArbeidsforholdUrl(personIdent)
     }
 

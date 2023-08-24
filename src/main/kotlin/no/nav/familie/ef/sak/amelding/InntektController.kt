@@ -50,9 +50,9 @@ class InntektController(
         return success(inntektService.genererAInntektUrl(fagsakPersonId))
     }
 
-    @GetMapping("behandling/{behandlingId}/generer-url-arbeidsforhold/")
-    fun genererAInntektArbeidsforholdUrl(@PathVariable("behandlingId") behandlingId: UUID): Ressurs<String> {
-        tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.ACCESS)
-        return success(inntektService.genererAInntektArbeidsforholdUrl(behandlingId))
+    @GetMapping("fagsak/{fagsakId}/generer-url-arbeidsforhold/")
+    fun genererAInntektArbeidsforholdUrl(@PathVariable("fagsakId") fagsakId: UUID): Ressurs<String> {
+        tilgangService.validerTilgangTilFagsak(fagsakId, AuditLoggerEvent.ACCESS)
+        return success(inntektService.genererAInntektArbeidsforholdUrl(fagsakId))
     }
 }
