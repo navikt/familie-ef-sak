@@ -191,7 +191,7 @@ class BeregnYtelseSteg(
             }
             val perioderFørFødsel = data.perioder.filter { it.periodeType === VedtaksperiodeType.PERIODE_FØR_FØDSEL }
             brukerfeilHvis(perioderFørFødsel.sumOf { it.periode.lengdeIHeleMåneder() } > 4) {
-                "Vedtaket kan ikke inneholde mer enn 4 måneder med periodetypen periode før fødesel"
+                "Vedtaket kan ikke inneholde mer enn 4 måneder med denne periodetypen før fødsel"
             }
         }
         if (data is InnvilgelseBarnetilsyn) {
