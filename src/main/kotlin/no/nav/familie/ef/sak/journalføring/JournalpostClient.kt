@@ -79,7 +79,7 @@ class JournalpostClient(
     }
 
     fun hentDokument(journalpostId: String, dokumentInfoId: String, dokumentVariantformat: DokumentVariantformat): ByteArray {
-        // TODO: feil her hvis utviklere med veilederrolle
+        validerIkkeUtviklerMedVeilederrolle()
         return getForEntity<Ressurs<ByteArray>>(
             UriComponentsBuilder
                 .fromUriString(
