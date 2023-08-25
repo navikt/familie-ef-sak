@@ -10,7 +10,11 @@ import com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor
 import com.github.tomakehurst.wiremock.client.WireMock.urlPathMatching
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import com.github.tomakehurst.wiremock.matching.EqualToPattern
+import io.mockk.every
+import io.mockk.mockk
 import no.nav.familie.ef.sak.infrastruktur.config.IntegrasjonerConfig
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.ef.sak.journalføring.JournalpostClient
 import no.nav.familie.ef.sak.journalføring.dto.DokumentVariantformat
 import no.nav.familie.kontrakter.ef.søknad.Testsøknad
@@ -33,6 +37,7 @@ internal class JournalpostClientTest {
 
     companion object {
 
+        private val featureToggleService = mockk<FeatureToggleService>(relaxed = true)
         private val restOperations: RestOperations = RestTemplateBuilder().build()
         lateinit var journalpostClient: JournalpostClient
         lateinit var wiremockServerItem: WireMockServer
@@ -41,11 +46,19 @@ internal class JournalpostClientTest {
         @BeforeAll
         @JvmStatic
         fun initClass() {
+            every {
+                featureToggleService.isEnabled(any())
+            } answers {
+                if (firstArg<Toggle>() == Toggle.UTVIKLER_MED_VEILEDERRROLLE) {
+                    false
+                }
+                true
+            }
             wiremockServerItem = WireMockServer(WireMockConfiguration.wireMockConfig().dynamicPort())
             wiremockServerItem.start()
             integrasjonerConfig = IntegrasjonerConfig(URI.create(wiremockServerItem.baseUrl()))
             journalpostClient =
-                JournalpostClient(restOperations, integrasjonerConfig)
+                JournalpostClient(restOperations, integrasjonerConfig, featureToggleService)
         }
 
         @AfterAll
