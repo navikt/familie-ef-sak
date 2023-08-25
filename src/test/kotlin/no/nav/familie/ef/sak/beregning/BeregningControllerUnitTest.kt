@@ -30,7 +30,7 @@ internal class BeregningControllerUnitTest {
     val vedtakService = mockk<VedtakService>()
 
     val beregningController = BeregningController(
-        beregningService = BeregningService(mockFeatureToggleService()),
+        beregningService = BeregningService(),
         tilgangService = mockk(relaxed = true),
         tilkjentYtelseService = tilkjentytelseService,
         vedtakService = vedtakService,

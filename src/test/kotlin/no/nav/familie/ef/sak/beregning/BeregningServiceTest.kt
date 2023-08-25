@@ -12,7 +12,7 @@ import java.time.LocalDate
 
 internal class BeregningServiceTest {
 
-    private val beregningService = BeregningService(mockFeatureToggleService())
+    private val beregningService = BeregningService()
 
     @Test
     internal fun `skal beregne full ytelse når det ikke foreligger inntekt`() {
