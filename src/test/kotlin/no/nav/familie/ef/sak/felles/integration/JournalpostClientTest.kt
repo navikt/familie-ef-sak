@@ -13,14 +13,20 @@ import com.github.tomakehurst.wiremock.matching.EqualToPattern
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ef.sak.infrastruktur.config.IntegrasjonerConfig
+import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.ef.sak.journalføring.JournalpostClient
 import no.nav.familie.ef.sak.journalføring.dto.DokumentVariantformat
 import no.nav.familie.kontrakter.ef.søknad.Testsøknad
+import no.nav.familie.kontrakter.felles.BrukerIdType
 import no.nav.familie.kontrakter.felles.Ressurs
+import no.nav.familie.kontrakter.felles.Tema
 import no.nav.familie.kontrakter.felles.dokarkiv.ArkiverDokumentResponse
 import no.nav.familie.kontrakter.felles.dokarkiv.v2.ArkiverDokumentRequest
+import no.nav.familie.kontrakter.felles.journalpost.Bruker
+import no.nav.familie.kontrakter.felles.journalpost.JournalposterForBrukerRequest
+import no.nav.familie.kontrakter.felles.journalpost.Journalposttype
 import no.nav.familie.kontrakter.felles.objectMapper
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterAll
@@ -29,6 +35,7 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.boot.web.client.RestTemplateBuilder
+import org.springframework.http.HttpStatus
 import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.RestOperations
 import java.net.URI
@@ -159,5 +166,25 @@ internal class JournalpostClientTest {
         journalpostClient.arkiverDokument(ArkiverDokumentRequest("123", true, emptyList(), emptyList()), saksbehandler)
 
         wiremockServerItem.verify(1, postRequestedFor(anyUrl()).withHeader("Nav-User-Id", EqualToPattern(saksbehandler)))
+    }
+
+    @Test
+    internal fun `skal kaste feil hvis innlogget bruker er utvikler med veillederrolle`() {
+        val journalposterForBrukerRequest = JournalposterForBrukerRequest(
+            brukerId = Bruker(
+                id = "1234",
+                type = BrukerIdType.FNR,
+            ),
+            antall = 100,
+            tema = listOf(Tema.ENF),
+            journalposttype = listOf(Journalposttype.N),
+        )
+
+        every { featureToggleService.isEnabled(any()) } returns true
+
+        val feilJournalposter = assertThrows<ApiFeil> { journalpostClient.finnJournalposter(journalposterForBrukerRequest) }
+        assertThat(feilJournalposter.httpStatus).isEqualTo(HttpStatus.FORBIDDEN)
+        val feilJournalpost = assertThrows<ApiFeil> { journalpostClient.hentJournalpost("1234") }
+        assertThat(feilJournalpost.httpStatus).isEqualTo(HttpStatus.FORBIDDEN)
     }
 }
