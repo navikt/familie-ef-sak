@@ -32,6 +32,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.boot.web.client.RestTemplateBuilder
@@ -53,14 +54,6 @@ internal class JournalpostClientTest {
         @BeforeAll
         @JvmStatic
         fun initClass() {
-            every {
-                featureToggleService.isEnabled(any())
-            } answers {
-                if (firstArg<Toggle>() == Toggle.UTVIKLER_MED_VEILEDERRROLLE) {
-                    false
-                }
-                true
-            }
             wiremockServerItem = WireMockServer(WireMockConfiguration.wireMockConfig().dynamicPort())
             wiremockServerItem.start()
             integrasjonerConfig = IntegrasjonerConfig(URI.create(wiremockServerItem.baseUrl()))
@@ -78,6 +71,15 @@ internal class JournalpostClientTest {
     @AfterEach
     fun tearDownEachTest() {
         wiremockServerItem.resetAll()
+    }
+
+    @BeforeEach
+    fun setup() {
+        every {
+            featureToggleService.isEnabled(any())
+        } answers {
+            firstArg<Toggle>() != Toggle.UTVIKLER_MED_VEILEDERRROLLE
+        }
     }
 
     @Test

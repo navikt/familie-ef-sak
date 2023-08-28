@@ -28,7 +28,7 @@ import java.net.URI
 class OppgaveClient(
     @Qualifier("azure") restOperations: RestOperations,
     integrasjonerConfig: IntegrasjonerConfig,
-    private val featureToggleService: FeatureToggleService
+    private val featureToggleService: FeatureToggleService,
 ) :
     AbstractPingableRestClient(restOperations, "oppgave") {
 
@@ -139,7 +139,6 @@ class OppgaveClient(
             )
         }
     }
-
 
     private fun <T> pakkUtRespons(
         respons: Ressurs<T>,
