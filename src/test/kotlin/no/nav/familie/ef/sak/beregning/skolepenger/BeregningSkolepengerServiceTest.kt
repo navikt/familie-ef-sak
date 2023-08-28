@@ -263,7 +263,7 @@ internal class BeregningSkolepengerServiceTest {
                 .isInstanceOf(ApiFeil::class.java)
                 .hasMessageContainingAll(
                     "Mangler utgiftsperioder fra forrige vedtak",
-                    "fakturadato=2021-08 utgifter=100 stønad=50",
+                    "fakturadato=2021-08 stønad=50",
                 )
         }
 
