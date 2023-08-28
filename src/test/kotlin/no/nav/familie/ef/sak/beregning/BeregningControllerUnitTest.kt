@@ -2,7 +2,6 @@ package no.nav.familie.ef.sak.beregning
 
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.familie.ef.sak.felles.util.mockFeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.repository.vedtaksperiodeDto
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
