@@ -134,7 +134,7 @@ class OppgaveClient(
     private fun kastApiFeilDersomUtviklerMedVeilederrolle() {
         if (featureToggleService.isEnabled(Toggle.UTVIKLER_MED_VEILEDERRROLLE)) {
             throw ApiFeil(
-                "Kan ikke hente ut journalposter som utvikler med veilederrolle. Kontakt teamet dersom du har saksbehandlerrolle.",
+                "Kan ikke hente ut oppgaver som utvikler med veilederrolle. Kontakt teamet dersom du har saksbehandlerrolle.",
                 HttpStatus.FORBIDDEN,
             )
         }
