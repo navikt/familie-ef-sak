@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.opplysninger.personopplysninger.domene
 
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataPeriodeHistorikk
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.Sivilstandstype
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Adressebeskyttelse
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Bostedsadresse
@@ -159,6 +160,7 @@ data class TidligereInnvilgetVedtak(
     val harTidligereOvergangsstønad: Boolean = false,
     val harTidligereBarnetilsyn: Boolean = false,
     val harTidligereSkolepenger: Boolean = false,
+    val øyeblikksbildeAvPerioderOgPeriodetype: List<GrunnlagsdataPeriodeHistorikk> = emptyList()
 )
 
 enum class GrunnlagsdataEndring {

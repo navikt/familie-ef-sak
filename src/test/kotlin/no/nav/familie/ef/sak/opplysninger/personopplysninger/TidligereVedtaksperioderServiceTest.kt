@@ -20,6 +20,7 @@ import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.fagsakPerson
 import no.nav.familie.ef.sak.repository.fagsakpersoner
 import no.nav.familie.ef.sak.testutil.PdlTestdataHelper.folkeregisteridentifikator
+import no.nav.familie.ef.sak.tilkjentytelse.AndelsHistorikkService
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.ef.sak.økonomi.lagAndelTilkjentYtelse
 import no.nav.familie.ef.sak.økonomi.lagTilkjentYtelse
@@ -31,6 +32,7 @@ import java.time.LocalDate
 
 internal class TidligereVedtaksperioderServiceTest {
 
+    private val andelsHistorikkService = mockk<AndelsHistorikkService>()
     private val fagsakPersonService = mockk<FagsakPersonService>()
     private val fagsakService = mockk<FagsakService>()
     private val behandlingService = mockk<BehandlingService>()
@@ -47,6 +49,7 @@ internal class TidligereVedtaksperioderServiceTest {
         tilkjentYtelseService,
         infotrygdService,
         historiskPensjonService,
+        andelsHistorikkService,
     )
 
     private val infotrygdPeriodeRequestSlot = slot<InfotrygdPeriodeRequest>()

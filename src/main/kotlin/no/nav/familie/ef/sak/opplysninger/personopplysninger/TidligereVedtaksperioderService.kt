@@ -4,12 +4,14 @@ import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.fagsak.FagsakPersonService
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
+import no.nav.familie.ef.sak.fagsak.domain.Fagsaker
 import no.nav.familie.ef.sak.infotrygd.InfotrygdService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.TidligereInnvilgetVedtak
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.TidligereVedtaksperioder
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Folkeregisteridentifikator
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.gjeldende
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pensjon.HistoriskPensjonService
+import no.nav.familie.ef.sak.tilkjentytelse.AndelsHistorikkService
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPeriodeResponse
 import org.springframework.stereotype.Service
@@ -22,6 +24,7 @@ class TidligereVedtaksperioderService(
     private val tilkjentYtelseService: TilkjentYtelseService,
     private val infotrygdService: InfotrygdService,
     private val historiskPensjonService: HistoriskPensjonService,
+    private val andelsHistorikkService: AndelsHistorikkService,
 ) {
 
     /**
@@ -54,6 +57,7 @@ class TidligereVedtaksperioderService(
                     harTidligereOvergangsstønad = hentTidligereVedtaksperioder(it.overgangsstønad),
                     harTidligereBarnetilsyn = hentTidligereVedtaksperioder(it.barnetilsyn),
                     harTidligereSkolepenger = hentTidligereVedtaksperioder(it.skolepenger),
+                    øyeblikksbildeAvPerioderOgPeriodetype = hentOvergangstønadsperioder(it),
                 )
             } ?: TidligereInnvilgetVedtak(false, false, false)
     }
@@ -64,4 +68,18 @@ class TidligereVedtaksperioderService(
             val tilkjentYtelse = tilkjentYtelseService.hentForBehandling(it.id)
             tilkjentYtelse.andelerTilkjentYtelse.isNotEmpty()
         } ?: false
+
+
+    private fun hentOvergangstønadsperioder(fagsaker: Fagsaker?): List<GrunnlagsdataPeriodeHistorikk> {
+        val andelHistorikkDtos = fagsaker?.overgangsstønad?.id?.let { andelsHistorikkService.hentHistorikk(it, null) }
+        return andelHistorikkDtos?.mapNotNull {
+             it.periodeType?.let { vedtaksperiodeType ->
+                GrunnlagsdataPeriodeHistorikk(
+                    vedtaksperiodeType,
+                    it.andel.periode
+                )
+            }
+        } ?: emptyList() /* TODO sjekk om det kan løses uten let?*/
+    }
+
 }
