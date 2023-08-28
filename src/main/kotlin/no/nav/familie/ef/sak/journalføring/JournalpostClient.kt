@@ -44,19 +44,19 @@ class JournalpostClient(
     private val dokarkivUri: URI = integrasjonerConfig.dokarkivUri
 
     fun finnJournalposter(journalposterForBrukerRequest: JournalposterForBrukerRequest): List<Journalpost> {
-        validerIkkeUtviklerMedVeilederrolle()
+        kastApiFeilDersomUtviklerMedVeilederrolle()
         return postForEntity<Ressurs<List<Journalpost>>>(journalpostURI, journalposterForBrukerRequest).data
             ?: error("Kunne ikke hente vedlegg for ${journalposterForBrukerRequest.brukerId.id}")
     }
 
     fun finnJournalposterForBrukerOgTema(journalposterForBrukerOgTemaRequest: JournalposterForVedleggRequest): List<Journalpost> {
-        validerIkkeUtviklerMedVeilederrolle()
+        kastApiFeilDersomUtviklerMedVeilederrolle()
         return postForEntity<Ressurs<List<Journalpost>>>(URI.create("$journalpostURI/temaer"), journalposterForBrukerOgTemaRequest).data
             ?: error("Kunne ikke hente vedlegg for ${journalposterForBrukerOgTemaRequest.brukerId.id}")
     }
 
     fun hentJournalpost(journalpostId: String): Journalpost {
-        validerIkkeUtviklerMedVeilederrolle()
+        kastApiFeilDersomUtviklerMedVeilederrolle()
         val ressurs = try {
             getForEntity<Ressurs<Journalpost>>(URI.create("$journalpostURI?journalpostId=$journalpostId"))
         } catch (e: RessursException) {
@@ -69,7 +69,7 @@ class JournalpostClient(
         return ressurs.getDataOrThrow()
     }
 
-    private fun validerIkkeUtviklerMedVeilederrolle() {
+    private fun kastApiFeilDersomUtviklerMedVeilederrolle() {
         if (featureToggleService.isEnabled(Toggle.UTVIKLER_MED_VEILEDERRROLLE)) {
             throw ApiFeil(
                 "Kan ikke hente ut journalposter som utvikler med veilederrolle. Kontakt teamet dersom du har saksbehandlerrolle.",
@@ -79,7 +79,7 @@ class JournalpostClient(
     }
 
     fun hentDokument(journalpostId: String, dokumentInfoId: String, dokumentVariantformat: DokumentVariantformat): ByteArray {
-        validerIkkeUtviklerMedVeilederrolle()
+        kastApiFeilDersomUtviklerMedVeilederrolle()
         return getForEntity<Ressurs<ByteArray>>(
             UriComponentsBuilder
                 .fromUriString(

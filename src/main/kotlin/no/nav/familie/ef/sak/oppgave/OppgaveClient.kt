@@ -44,7 +44,7 @@ class OppgaveClient(
     }
 
     fun finnOppgaveMedId(oppgaveId: Long): Oppgave {
-        validerIkkeUtviklerMedVeilederrolle()
+        kastApiFeilDersomUtviklerMedVeilederrolle()
         val uri = URI.create("$oppgaveUri/$oppgaveId")
 
         val respons = getForEntity<Ressurs<Oppgave>>(uri)
@@ -52,7 +52,7 @@ class OppgaveClient(
     }
 
     fun hentOppgaver(finnOppgaveRequest: FinnOppgaveRequest): FinnOppgaveResponseDto {
-        validerIkkeUtviklerMedVeilederrolle()
+        kastApiFeilDersomUtviklerMedVeilederrolle()
         val uri = URI.create("$oppgaveUri/v4")
 
         val respons =
@@ -131,7 +131,7 @@ class OppgaveClient(
         return pakkUtRespons(respons, uri, "finnMappe")
     }
 
-    private fun validerIkkeUtviklerMedVeilederrolle() {
+    private fun kastApiFeilDersomUtviklerMedVeilederrolle() {
         if (featureToggleService.isEnabled(Toggle.UTVIKLER_MED_VEILEDERRROLLE)) {
             throw ApiFeil(
                 "Kan ikke hente ut journalposter som utvikler med veilederrolle. Kontakt teamet dersom du har saksbehandlerrolle.",
