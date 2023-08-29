@@ -16,8 +16,6 @@ import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.vilkårsvurdering
 import no.nav.familie.ef.sak.testutil.søknadBarnTilBehandlingBarn
 import no.nav.familie.ef.sak.vilkår.regler.HovedregelMetadata
-import no.nav.familie.ef.sak.vilkår.regler.RegelId
-import no.nav.familie.ef.sak.vilkår.regler.SvarId
 import no.nav.familie.ef.sak.vilkår.regler.vilkår.SivilstandRegel
 import no.nav.familie.kontrakter.ef.søknad.Testsøknad
 import no.nav.familie.kontrakter.felles.ef.StønadType
@@ -118,28 +116,6 @@ internal class VurderingServiceIntegrasjonsTest : OppslagSpringRunnerTest() {
             },
         )
             .hasMessage("Tidligere behandling=$tidligereBehandlingId har ikke noen vilkår")
-    }
-
-    @Test
-    internal fun `aktivitet arbeid for behandlingIds`() {
-        val fagsak = testoppsettService.lagreFagsak(fagsak(stønadstype = StønadType.BARNETILSYN))
-        val behandling = behandling(fagsak)
-        behandlingRepository.insert(behandling)
-        val vilkårsvurdering = vilkårsvurdering(
-            behandling.id,
-            Vilkårsresultat.OPPFYLT,
-            VilkårType.AKTIVITET_ARBEID,
-            listOf(
-                Delvilkårsvurdering(
-                    Vilkårsresultat.OPPFYLT,
-                    listOf(Vurdering(RegelId.ER_I_ARBEID_ELLER_FORBIGÅENDE_SYKDOM, SvarId.ER_I_ARBEID)),
-                ),
-            ),
-        )
-        vilkårsvurderingRepository.insert(vilkårsvurdering)
-
-        val behandlingIdToSvarId = vurderingService.aktivitetArbeidForBehandlingIds(listOf(behandling.id))
-        assertThat(behandlingIdToSvarId[behandling.id]).isEqualTo(SvarId.ER_I_ARBEID)
     }
 
     private fun opprettVilkårsvurderinger(

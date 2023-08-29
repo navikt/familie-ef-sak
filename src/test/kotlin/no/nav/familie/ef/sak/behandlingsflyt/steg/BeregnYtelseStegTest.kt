@@ -338,7 +338,7 @@ internal class BeregnYtelseStegTest {
                 )
             }
 
-            assertThat(feil.feil).contains("Vedtaket kan ikke inneholde mer enn 4 måneder med periodetypen periode før fødesel")
+            assertThat(feil.feil).contains("Vedtaket kan ikke inneholde mer enn 4 måneder med periodetypen: \"periode før fødsel\"")
         }
 
         @Test
