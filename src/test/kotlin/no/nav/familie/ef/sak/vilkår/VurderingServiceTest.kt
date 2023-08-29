@@ -34,8 +34,6 @@ import no.nav.familie.ef.sak.vilkår.dto.LangAvstandTilSøker
 import no.nav.familie.ef.sak.vilkår.dto.SivilstandInngangsvilkårDto
 import no.nav.familie.ef.sak.vilkår.dto.SivilstandRegistergrunnlagDto
 import no.nav.familie.ef.sak.vilkår.regler.HovedregelMetadata
-import no.nav.familie.ef.sak.vilkår.regler.RegelId
-import no.nav.familie.ef.sak.vilkår.regler.SvarId
 import no.nav.familie.ef.sak.vilkår.regler.vilkår.SivilstandRegel
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.ef.søknad.TestsøknadBuilder
@@ -81,8 +79,6 @@ internal class VurderingServiceTest {
     private val barn = søknadBarnTilBehandlingBarn(søknad.barn)
     private val behandling = behandling(fagsak(), BehandlingStatus.OPPRETTET, årsak = BehandlingÅrsak.PAPIRSØKNAD)
     private val behandlingId = UUID.randomUUID()
-
-    private val fnr = no.nav.familie.util.FnrGenerator.generer(LocalDate.now().minusYears(5))
 
     @BeforeEach
     fun setUp() {
@@ -316,34 +312,6 @@ internal class VurderingServiceTest {
 
         val erAlleVilkårOppfylt = vurderingService.erAlleVilkårOppfylt(behandlingId)
         assertThat(erAlleVilkårOppfylt).isFalse
-    }
-
-    @Test
-    internal fun `Skal returnere aktivitet i historikk`() {
-        val vilkårsvurderingList = VilkårType.hentVilkårForStønad(BARNETILSYN).map {
-            vilkårsvurdering(
-                behandlingId = behandlingId,
-                resultat = OPPFYLT,
-                type = VilkårType.AKTIVITET_ARBEID,
-                delvilkårsvurdering = listOf(
-                    Delvilkårsvurdering(
-                        OPPFYLT,
-                        listOf(Vurdering(RegelId.ER_I_ARBEID_ELLER_FORBIGÅENDE_SYKDOM, SvarId.ER_I_ARBEID)),
-                    ),
-                ),
-            )
-        }
-
-        every {
-            vilkårsvurderingRepository.findByTypeAndBehandlingIdIn(
-                VilkårType.AKTIVITET_ARBEID,
-                listOf(behandlingId),
-            )
-        } returns vilkårsvurderingList
-
-        val behandlingIdToSvarID = vurderingService.aktivitetArbeidForBehandlingIds(listOf(behandlingId))
-
-        assertThat(behandlingIdToSvarID[behandlingId]).isEqualTo(SvarId.ER_I_ARBEID)
     }
 
     private fun lagVilkårsvurderingerMedResultat(
