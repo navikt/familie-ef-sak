@@ -4,6 +4,8 @@ import no.nav.familie.ef.sak.felles.util.medContentTypeJsonUTF8
 import no.nav.familie.ef.sak.infrastruktur.config.IntegrasjonerConfig
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.infrastruktur.exception.IntegrasjonException
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.http.client.AbstractPingableRestClient
 import no.nav.familie.http.client.RessursException
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -26,6 +28,7 @@ import java.net.URI
 class OppgaveClient(
     @Qualifier("azure") restOperations: RestOperations,
     integrasjonerConfig: IntegrasjonerConfig,
+    private val featureToggleService: FeatureToggleService,
 ) :
     AbstractPingableRestClient(restOperations, "oppgave") {
 
@@ -41,6 +44,7 @@ class OppgaveClient(
     }
 
     fun finnOppgaveMedId(oppgaveId: Long): Oppgave {
+        kastApiFeilDersomUtviklerMedVeilederrolle()
         val uri = URI.create("$oppgaveUri/$oppgaveId")
 
         val respons = getForEntity<Ressurs<Oppgave>>(uri)
@@ -48,6 +52,7 @@ class OppgaveClient(
     }
 
     fun hentOppgaver(finnOppgaveRequest: FinnOppgaveRequest): FinnOppgaveResponseDto {
+        kastApiFeilDersomUtviklerMedVeilederrolle()
         val uri = URI.create("$oppgaveUri/v4")
 
         val respons =
@@ -124,6 +129,15 @@ class OppgaveClient(
             .toUri()
         val respons = getForEntity<Ressurs<FinnMappeResponseDto>>(uri)
         return pakkUtRespons(respons, uri, "finnMappe")
+    }
+
+    private fun kastApiFeilDersomUtviklerMedVeilederrolle() {
+        if (featureToggleService.isEnabled(Toggle.UTVIKLER_MED_VEILEDERRROLLE)) {
+            throw ApiFeil(
+                "Kan ikke hente ut oppgaver som utvikler med veilederrolle. Kontakt teamet dersom du har saksbehandlerrolle.",
+                HttpStatus.FORBIDDEN,
+            )
+        }
     }
 
     private fun <T> pakkUtRespons(
