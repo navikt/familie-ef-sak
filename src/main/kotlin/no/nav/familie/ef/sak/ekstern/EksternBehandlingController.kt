@@ -7,6 +7,7 @@ import no.nav.familie.ef.sak.infrastruktur.exception.feilHvisIkke
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.ef.søknad.KanSendePåminnelseRequest
+import no.nav.familie.kontrakter.felles.PersonIdent
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.klage.KanOppretteRevurderingResponse
 import no.nav.familie.kontrakter.felles.klage.OpprettRevurderingResponse
@@ -49,8 +50,8 @@ class EksternBehandlingController(
 
     @PostMapping("har-loepende-barnetilsyn")
     @ProtectedWithClaims(issuer = "azuread", claimMap = ["roles=access_as_application"])
-    fun harLøpendeBarnetilsyn(@RequestBody personIdent: String): Ressurs<Boolean> {
-        return Ressurs.success(eksternBehandlingService.harLøpendeBarnetilsyn(personIdent))
+    fun harLøpendeBarnetilsyn(@RequestBody personIdent: PersonIdent): Ressurs<Boolean> {
+        return Ressurs.success(eksternBehandlingService.harLøpendeBarnetilsyn(personIdent.ident))
     }
 
     @GetMapping("kan-opprette-revurdering-klage/{eksternFagsakId}")
