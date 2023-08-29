@@ -4,6 +4,9 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.familie.ef.sak.infrastruktur.config.IntegrasjonerConfig
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
+import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.journalføring.dto.DokumentVariantformat
 import no.nav.familie.http.client.AbstractPingableRestClient
 import no.nav.familie.http.client.RessursException
@@ -22,7 +25,8 @@ import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.log.NavHttpHeaders
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.http.HttpHeaders
-import org.springframework.http.HttpStatus
+import org.springframework.http.HttpStatus.BAD_REQUEST
+import org.springframework.http.HttpStatus.FORBIDDEN
 import org.springframework.stereotype.Component
 import org.springframework.web.client.RestOperations
 import org.springframework.web.util.UriComponentsBuilder
@@ -32,6 +36,7 @@ import java.net.URI
 class JournalpostClient(
     @Qualifier("azure") restOperations: RestOperations,
     integrasjonerConfig: IntegrasjonerConfig,
+    private val featureToggleService: FeatureToggleService,
 ) :
     AbstractPingableRestClient(restOperations, "journalpost") {
 
@@ -40,21 +45,24 @@ class JournalpostClient(
     private val dokarkivUri: URI = integrasjonerConfig.dokarkivUri
 
     fun finnJournalposter(journalposterForBrukerRequest: JournalposterForBrukerRequest): List<Journalpost> {
+        kastApiFeilDersomUtviklerMedVeilederrolle()
         return postForEntity<Ressurs<List<Journalpost>>>(journalpostURI, journalposterForBrukerRequest).data
             ?: error("Kunne ikke hente vedlegg for ${journalposterForBrukerRequest.brukerId.id}")
     }
 
     fun finnJournalposterForBrukerOgTema(journalposterForBrukerOgTemaRequest: JournalposterForVedleggRequest): List<Journalpost> {
+        kastApiFeilDersomUtviklerMedVeilederrolle()
         return postForEntity<Ressurs<List<Journalpost>>>(URI.create("$journalpostURI/temaer"), journalposterForBrukerOgTemaRequest).data
             ?: error("Kunne ikke hente vedlegg for ${journalposterForBrukerOgTemaRequest.brukerId.id}")
     }
 
     fun hentJournalpost(journalpostId: String): Journalpost {
+        kastApiFeilDersomUtviklerMedVeilederrolle()
         val ressurs = try {
             getForEntity<Ressurs<Journalpost>>(URI.create("$journalpostURI?journalpostId=$journalpostId"))
         } catch (e: RessursException) {
             if (e.message?.contains("Fant ikke journalpost i fagarkivet") == true) {
-                throw ApiFeil("Finner ikke journalpost i fagarkivet", HttpStatus.BAD_REQUEST)
+                throw ApiFeil("Finner ikke journalpost i fagarkivet", BAD_REQUEST)
             } else {
                 throw e
             }
@@ -62,7 +70,17 @@ class JournalpostClient(
         return ressurs.getDataOrThrow()
     }
 
+    private fun kastApiFeilDersomUtviklerMedVeilederrolle() {
+        if (SikkerhetContext.erSaksbehandler() && featureToggleService.isEnabled(Toggle.UTVIKLER_MED_VEILEDERRROLLE)) {
+            throw ApiFeil(
+                "Kan ikke hente ut journalposter som utvikler med veilederrolle. Kontakt teamet dersom du har saksbehandlerrolle.",
+                FORBIDDEN,
+            )
+        }
+    }
+
     fun hentDokument(journalpostId: String, dokumentInfoId: String, dokumentVariantformat: DokumentVariantformat): ByteArray {
+        kastApiFeilDersomUtviklerMedVeilederrolle()
         return getForEntity<Ressurs<ByteArray>>(
             UriComponentsBuilder
                 .fromUriString(

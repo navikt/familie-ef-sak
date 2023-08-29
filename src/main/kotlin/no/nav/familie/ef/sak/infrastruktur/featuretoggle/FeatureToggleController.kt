@@ -22,7 +22,6 @@ class FeatureToggleController(private val featureToggleService: FeatureToggleSer
         Toggle.FRONTEND_AUTOMATISK_UTFYLLE_VILKÅR,
         Toggle.FRONTEND_SATSENDRING,
         Toggle.FRONTEND_VIS_INNTEKT_PERSONOVERSIKT,
-        Toggle.VURDER_KONSEKVENS_OPPGAVER_LOKALKONTOR,
         Toggle.AUTOMATISKE_OPPGAVER_FREMLEGGSOPPGAVE,
         Toggle.ÅRSAK_REVURDERING_BESKRIVELSE,
     )

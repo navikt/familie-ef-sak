@@ -17,7 +17,6 @@ import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
-import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.ef.sak.oppgave.OppgaveSubtype
@@ -235,10 +234,6 @@ class BehandlingPåVentService(
             feilHvis(saksbehandling.stønadstype == StønadType.BARNETILSYN) {
                 "Kan ikke lagre task for opprettelse av oppgave om innstilling om utdanning på behandling med id ${saksbehandling.id} fordi behandlingen hverken er tilknyttet overgangsstønad eller skolepenger"
             }
-        }
-
-        feilHvis(!featureToggleService.isEnabled(Toggle.VURDER_KONSEKVENS_OPPGAVER_LOKALKONTOR)) {
-            "Featuretoggle for opprettelse av automatiske oppgaver til lokalkontor er ikke påskrudd"
         }
     }
 
