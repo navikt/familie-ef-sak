@@ -45,6 +45,8 @@ object SikkerhetContext {
         return result
     }
 
+    fun erSaksbehandler(): Boolean = hentSaksbehandlerEllerSystembruker() != SYSTEM_FORKORTELSE
+
     fun hentSaksbehandlerEllerSystembruker() =
         Result.runCatching { SpringTokenValidationContextHolder().tokenValidationContext }
             .fold(
