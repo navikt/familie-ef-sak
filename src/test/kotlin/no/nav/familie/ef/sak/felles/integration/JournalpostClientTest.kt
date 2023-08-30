@@ -12,10 +12,13 @@ import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import com.github.tomakehurst.wiremock.matching.EqualToPattern
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.mockkObject
+import io.mockk.unmockkObject
 import no.nav.familie.ef.sak.infrastruktur.config.IntegrasjonerConfig
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
+import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.journalføring.JournalpostClient
 import no.nav.familie.ef.sak.journalføring.dto.DokumentVariantformat
 import no.nav.familie.kontrakter.ef.søknad.Testsøknad
@@ -71,6 +74,7 @@ internal class JournalpostClientTest {
     @AfterEach
     fun tearDownEachTest() {
         wiremockServerItem.resetAll()
+        unmockkObject(SikkerhetContext)
     }
 
     @BeforeEach
@@ -80,6 +84,8 @@ internal class JournalpostClientTest {
         } answers {
             firstArg<Toggle>() != Toggle.UTVIKLER_MED_VEILEDERRROLLE
         }
+        mockkObject(SikkerhetContext)
+        every { SikkerhetContext.erSaksbehandler() } returns true
     }
 
     @Test
