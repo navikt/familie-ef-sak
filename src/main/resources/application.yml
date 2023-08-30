@@ -248,13 +248,6 @@ rolle:
   kode7: "9ec6487d-f37a-4aad-a027-cd221c1ac32b" # 0000-GA-Fortrolig_Adresse
   egenAnsatt: "e750ceb5-b70b-4d94-b4fa-9d22467b786b" # 0000-GA-Egne_ansatte
 
-funksjonsbrytere:
-  enabled: true
-  unleash:
-    uri: ${UNLEASH_SERVER_API_URL}/api/
-    environment: ${NAIS_CLUSTER_NAME}
-    applicationName: ${NAIS_APP_NAME}
-
 prosessering:
   continuousRunning.enabled: true
   fixedDelayString:

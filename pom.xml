@@ -230,11 +230,6 @@
         </dependency>
 
         <dependency>
-            <groupId>io.getunleash</groupId>
-            <artifactId>unleash-client-java</artifactId>
-            <version>${unleash.version}</version>
-        </dependency>
-        <dependency>
             <groupId>no.nav.familie.felles</groupId>
             <artifactId>unleash</artifactId>
             <version>${felles.unleash.version}</version>
