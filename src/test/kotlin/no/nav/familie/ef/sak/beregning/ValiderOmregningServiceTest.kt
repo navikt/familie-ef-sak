@@ -39,7 +39,7 @@ class ValiderOmregningServiceTest {
     val vedtakService = mockk<VedtakService>()
     val tilkjentYtelseRepository = mockk<TilkjentYtelseRepository>()
     val featureToggleService = mockFeatureToggleService()
-    val beregningService = BeregningService(featureToggleService)
+    val beregningService = BeregningService()
     val vedtakHistorikkService = mockk<VedtakHistorikkService>()
     val validerOmregningService = ValiderOmregningService(
         vedtakService,
