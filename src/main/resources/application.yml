@@ -251,7 +251,7 @@ rolle:
 funksjonsbrytere:
   enabled: true
   unleash:
-    uri: https://unleash.nais.io/api/
+    uri: ${UNLEASH_SERVER_API_URL}/api/
     environment: ${NAIS_CLUSTER_NAME}
     applicationName: ${NAIS_APP_NAME}
 
