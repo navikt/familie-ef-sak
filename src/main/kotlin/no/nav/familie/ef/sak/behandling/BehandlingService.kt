@@ -113,9 +113,6 @@ class BehandlingService(
         brukerfeilHvis(kravMottatt != null && kravMottatt.isAfter(LocalDate.now())) {
             "Kan ikke sette krav mottattdato frem i tid"
         }
-        feilHvis(erMigrering && !featureToggleService.isEnabled(Toggle.MIGRERING)) {
-            "Feature toggle for migrering er disabled"
-        }
         feilHvis(
             behandlingsårsak == BehandlingÅrsak.G_OMREGNING &&
                 !featureToggleService.isEnabled(Toggle.G_BEREGNING),

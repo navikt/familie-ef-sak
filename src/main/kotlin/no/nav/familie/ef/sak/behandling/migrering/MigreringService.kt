@@ -26,7 +26,6 @@ import no.nav.familie.ef.sak.infotrygd.InfotrygdStønadPerioderDto
 import no.nav.familie.ef.sak.infotrygd.SummertInfotrygdPeriodeDto
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvisIkke
-import no.nav.familie.ef.sak.infrastruktur.exception.feilHvisIkke
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.ef.sak.iverksett.IverksettClient
@@ -280,9 +279,6 @@ class MigreringService(
         ignorerFeilISimulering: Boolean = false,
         vedtak: (saksbehandling: Saksbehandling, grunnlagsdata: GrunnlagsdataMedMetadata) -> VedtakDto,
     ): Behandling {
-        feilHvisIkke(featureToggleService.isEnabled(Toggle.MIGRERING)) {
-            "Feature toggle for migrering er disabled"
-        }
         fagsakService.settFagsakTilMigrert(fagsak.id)
         val behandling = behandlingService.opprettMigrering(fagsak.id)
         logger.info(
