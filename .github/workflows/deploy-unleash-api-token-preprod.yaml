@@ -1,4 +1,4 @@
-name: Deploy unleashh api-token
+name: Deploy unleash api-token
 
 on:
   workflow_dispatch:
