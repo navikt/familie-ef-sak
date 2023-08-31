@@ -1,7 +1,7 @@
 apiVersion: unleash.nais.io/v1
 kind: ApiToken
 metadata:
-  name: my-application
+  name: familie-ef-sak
   namespace: teamfamilie
   labels:
     team: teamfamilie
