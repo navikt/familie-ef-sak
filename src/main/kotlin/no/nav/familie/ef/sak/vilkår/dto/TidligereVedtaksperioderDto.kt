@@ -3,6 +3,7 @@ package no.nav.familie.ef.sak.vilkår.dto
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataPeriodeHistorikk
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.TidligereInnvilgetVedtak
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.TidligereVedtaksperioder
+import no.nav.familie.kontrakter.felles.Månedsperiode
 
 data class TidligereVedtaksperioderDto(
     val infotrygd: TidligereInnvilgetVedtakDto?,
@@ -17,10 +18,17 @@ data class TidligereInnvilgetVedtakDto(
     val harTidligereOvergangsstønad: Boolean,
     val harTidligereBarnetilsyn: Boolean,
     val harTidligereSkolepenger: Boolean,
-    val øyeblikksbildeAvPerioderOgPeriodetype: List<GrunnlagsdataPeriodeHistorikk> = emptyList()
+    val periodeHistorikkOvergangsstønad: List<GrunnlagsdataPeriodeHistorikkDto> = emptyList(),
 ) {
     fun harTidligereInnvilgetVedtak() = harTidligereOvergangsstønad || harTidligereBarnetilsyn || harTidligereSkolepenger
 }
+
+data class GrunnlagsdataPeriodeHistorikkDto(
+    val periodeType: String,
+    val periode: Månedsperiode,
+    val antMnd: Long = periode.lengdeIHeleMåneder(),
+    val harUtbetaling: Boolean
+) //
 
 fun TidligereVedtaksperioder?.tilDto(): TidligereVedtaksperioderDto = this?.let {
     TidligereVedtaksperioderDto(
@@ -35,5 +43,18 @@ fun TidligereInnvilgetVedtak.tilDto() =
         harTidligereOvergangsstønad = this.harTidligereOvergangsstønad,
         harTidligereBarnetilsyn = this.harTidligereBarnetilsyn,
         harTidligereSkolepenger = this.harTidligereSkolepenger,
-        øyeblikksbildeAvPerioderOgPeriodetype = this.øyeblikksbildeAvPerioderOgPeriodetype
-)
+        periodeHistorikkOvergangsstønad = this.periodeHistorikkOvergangsstønad.tilDto(),
+    )
+
+fun List<GrunnlagsdataPeriodeHistorikk>.tilDto() = this.map { it.tilDto() }
+private fun GrunnlagsdataPeriodeHistorikk.tilDto() = GrunnlagsdataPeriodeHistorikkDto(periodeType = finnType(this), periode = this.periode, harUtbetaling = this.harUtbetaling)
+
+fun finnType(grunnlagsdataPeriodeHistorikk: GrunnlagsdataPeriodeHistorikk): String {
+    if(grunnlagsdataPeriodeHistorikk.periodeType != null){
+        return grunnlagsdataPeriodeHistorikk.periodeType.toString()
+    }
+    if(grunnlagsdataPeriodeHistorikk.erOpphør){
+        return "OPPHØR"
+    }
+    return "UKJENT"
+}

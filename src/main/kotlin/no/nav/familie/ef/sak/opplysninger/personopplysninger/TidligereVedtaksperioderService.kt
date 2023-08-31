@@ -13,6 +13,8 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.gjeldende
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pensjon.HistoriskPensjonService
 import no.nav.familie.ef.sak.tilkjentytelse.AndelsHistorikkService
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
+import no.nav.familie.ef.sak.vedtak.historikk.AndelHistorikkDto
+import no.nav.familie.ef.sak.vedtak.historikk.EndringType
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPeriodeResponse
 import org.springframework.stereotype.Service
 
@@ -57,7 +59,7 @@ class TidligereVedtaksperioderService(
                     harTidligereOvergangsstønad = hentTidligereVedtaksperioder(it.overgangsstønad),
                     harTidligereBarnetilsyn = hentTidligereVedtaksperioder(it.barnetilsyn),
                     harTidligereSkolepenger = hentTidligereVedtaksperioder(it.skolepenger),
-                    øyeblikksbildeAvPerioderOgPeriodetype = hentOvergangstønadsperioder(it),
+                    periodeHistorikkOvergangsstønad = hentOvergangstønadsperioder(it),
                 )
             } ?: TidligereInnvilgetVedtak(false, false, false)
     }
@@ -69,17 +71,26 @@ class TidligereVedtaksperioderService(
             tilkjentYtelse.andelerTilkjentYtelse.isNotEmpty()
         } ?: false
 
-
     private fun hentOvergangstønadsperioder(fagsaker: Fagsaker?): List<GrunnlagsdataPeriodeHistorikk> {
-        val andelHistorikkDtos = fagsaker?.overgangsstønad?.id?.let { andelsHistorikkService.hentHistorikk(it, null) }
-        return andelHistorikkDtos?.mapNotNull {
-             it.periodeType?.let { vedtaksperiodeType ->
+        return hentAndelshistorikkForOvergangsstønsd(fagsaker)
+            .filterNot(erstattetEllerFjernet())
+            .map {
                 GrunnlagsdataPeriodeHistorikk(
-                    vedtaksperiodeType,
-                    it.andel.periode
+                    periodeType = it.periodeType  ,
+                    erOpphør = it.erOpphør,
+                    periode = it.andel.periode,
+                    harUtbetaling = it.andel.beløp > 0,
                 )
             }
-        } ?: emptyList() /* TODO sjekk om det kan løses uten let?*/
     }
 
+    private fun hentAndelshistorikkForOvergangsstønsd(fagsaker: Fagsaker?) =
+        fagsaker?.overgangsstønad?.id?.let { andelsHistorikkService.hentHistorikk(it, null) } ?: emptyList()
+
+    private fun erstattetEllerFjernet(): (AndelHistorikkDto) -> Boolean = {
+        listOf(
+            EndringType.FJERNET,
+            EndringType.ERSTATTET,
+        ).contains(it.endring?.type)
+    }
 }

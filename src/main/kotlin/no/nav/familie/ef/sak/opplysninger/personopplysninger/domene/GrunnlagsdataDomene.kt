@@ -160,7 +160,7 @@ data class TidligereInnvilgetVedtak(
     val harTidligereOvergangsstønad: Boolean = false,
     val harTidligereBarnetilsyn: Boolean = false,
     val harTidligereSkolepenger: Boolean = false,
-    val øyeblikksbildeAvPerioderOgPeriodetype: List<GrunnlagsdataPeriodeHistorikk> = emptyList()
+    val periodeHistorikkOvergangsstønad: List<GrunnlagsdataPeriodeHistorikk> = emptyList(),
 )
 
 enum class GrunnlagsdataEndring {
