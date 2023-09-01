@@ -38,6 +38,8 @@ enum class Toggle(val toggleId: String, val beskrivelse: String? = null) {
     TILLAT_MIGRERING_7_ÅR_TILBAKE("familie.ef.sak.tillat-migrering-7-ar-tilbake", "Permission"),
     AUTOMATISKE_BREV_INNHENTING_KARAKTERUTSKRIFT("familie.ef.sak.automatiske-brev-innhenting-karakterutskrift"),
     UTVIKLER_MED_VEILEDERRROLLE("familie.ef.sak.utviklere-med-veilederrolle"),
+    TEST_ENVIRONMENT("test.environment"),
+    TEST_USER_ID("test.user.id"),
     ;
 
     companion object {
