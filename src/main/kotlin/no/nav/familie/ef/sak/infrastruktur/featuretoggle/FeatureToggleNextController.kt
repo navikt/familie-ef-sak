@@ -1,6 +1,7 @@
 package no.nav.familie.ef.sak.infrastruktur.featuretoggle
 
 import no.nav.familie.unleash.DefaultUnleashService
+import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.GetMapping
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @RequestMapping(path = ["/api/featuretogglenext"], produces = [MediaType.APPLICATION_JSON_VALUE])
+@ProtectedWithClaims(issuer = "azuread")
 class FeatureToggleNextController(
     @Value("\${UNLEASH_SERVER_API_URL}") private val apiUrl: String,
     @Value("\${UNLEASH_SERVER_API_TOKEN}") private val apiToken: String,
