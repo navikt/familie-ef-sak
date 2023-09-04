@@ -3,6 +3,7 @@ package no.nav.familie.ef.sak.vilkår.dto
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataPeriodeHistorikk
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.TidligereInnvilgetVedtak
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.TidligereVedtaksperioder
+import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.kontrakter.felles.Periode
 import java.time.LocalDate
 
@@ -26,7 +27,9 @@ data class TidligereInnvilgetVedtakDto(
 
 data class GrunnlagsdataPeriodeHistorikkDto(
     val periodeType: String,
-    val periode: Periode<LocalDate>,
+    val periode: Månedsperiode,
+    val fomDato: LocalDate = periode.fomDato,
+    val tomDato: LocalDate = periode.tomDato,
     val antMnd: Long = periode.lengdeIHeleMåneder(),
     val harUtbetaling: Boolean,
 ) //

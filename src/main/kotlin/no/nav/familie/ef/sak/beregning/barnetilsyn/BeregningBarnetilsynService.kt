@@ -168,7 +168,7 @@ fun List<BeløpsperiodeBarnetilsynDto>.mergeSammenhengendePerioder(): List<Belø
     return sortertPåDatoListe.fold(mutableListOf()) { acc, entry ->
         val last = acc.lastOrNull()
         if (
-            last != null && last.hengerSammenMed(entry) &&
+            last != null && last.periode påfølgesAv entry.periode &&
             last.sammeBeløpOgBeregningsgrunnlag(entry) &&
             last.sammeAktivitet(entry)
         ) {

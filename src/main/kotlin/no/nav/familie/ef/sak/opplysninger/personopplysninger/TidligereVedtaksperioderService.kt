@@ -78,11 +78,13 @@ class TidligereVedtaksperioderService(
             .map {
                 GrunnlagsdataPeriodeHistorikk(
                     periodeType = it.periodeType,
-                    periode = it.andel.periode.toDatoperiode(),
+                    periode = it.andel.periode,
                     harUtbetaling = it.andel.beløp > 0,
                 )
             }
+            .slåSammenPåfølgendePerioderMedLikPeriodetype()
     }
+
 
     private fun hentAndelshistorikkForOvergangsstønsd(fagsaker: Fagsaker?) =
         fagsaker?.overgangsstønad?.id?.let { andelsHistorikkService.hentHistorikk(it, null) } ?: emptyList()
@@ -92,5 +94,26 @@ class TidligereVedtaksperioderService(
             EndringType.FJERNET,
             EndringType.ERSTATTET,
         ).contains(it.endring?.type)
+    }
+}
+
+private fun List<GrunnlagsdataPeriodeHistorikk>.slåSammenPåfølgendePerioderMedLikPeriodetype(): List<GrunnlagsdataPeriodeHistorikk> {
+    val sortertPåDatoListe = this.sortedBy { it.periode }
+    return sortertPåDatoListe.fold(mutableListOf()) { acc, entry ->
+        val last = acc.lastOrNull()
+        if (
+            last != null && last.periode påfølgesAv entry.periode &&
+            last.periodeType === entry.periodeType
+        ) {
+            acc.removeLast()
+            acc.add(
+                last.copy(
+                    periode = last.periode union entry.periode,
+                ),
+            )
+        } else {
+            acc.add(entry)
+        }
+        acc
     }
 }
