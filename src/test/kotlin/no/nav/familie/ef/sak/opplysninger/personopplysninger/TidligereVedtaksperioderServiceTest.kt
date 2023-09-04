@@ -22,13 +22,16 @@ import no.nav.familie.ef.sak.repository.fagsakpersoner
 import no.nav.familie.ef.sak.testutil.PdlTestdataHelper.folkeregisteridentifikator
 import no.nav.familie.ef.sak.tilkjentytelse.AndelsHistorikkService
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
+import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
 import no.nav.familie.ef.sak.økonomi.lagAndelTilkjentYtelse
 import no.nav.familie.ef.sak.økonomi.lagTilkjentYtelse
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPeriodeRequest
+import no.nav.familie.kontrakter.felles.Månedsperiode
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
+import java.time.YearMonth
 
 internal class TidligereVedtaksperioderServiceTest {
 
@@ -68,9 +71,9 @@ internal class TidligereVedtaksperioderServiceTest {
             infotrygdReplikaClient.hentPerioder(capture(infotrygdPeriodeRequestSlot))
         } answers { InfotrygdReplikaMock.hentPerioderDefaultResponse(firstArg()) }
         every { personService.hentPersonIdenter(personIdent.ident) } returns
-            PdlIdenter(listOf(PdlIdent(personIdent.ident, false)))
+                PdlIdenter(listOf(PdlIdent(personIdent.ident, false)))
         every { historiskPensjonService.hentHistoriskPensjon(any(), any()) } returns
-            HistoriskPensjonResponse(false, "")
+                HistoriskPensjonResponse(false, "")
     }
 
     @Test
@@ -111,7 +114,39 @@ internal class TidligereVedtaksperioderServiceTest {
         assertThat(sak.harTidligereSkolepenger).isFalse
     }
 
-    private fun mockTidligereVedtakEfSak(harAndeler: Boolean = true) {
+    @Test
+    internal fun `Skal slå sammen perioder med lik periodetype`() {
+        val periode1 = Månedsperiode(YearMonth.of(2022, 1), YearMonth.of(2022, 12))
+        val periode2 = Månedsperiode(YearMonth.of(2023, 1), YearMonth.of(2023, 12))
+        val periode3 = Månedsperiode(YearMonth.of(2024, 1), YearMonth.of(2024, 12))
+        val historikk1 = grunnlagsdataPeriodeHistorikk(periode1)
+        val historikk2 = grunnlagsdataPeriodeHistorikk(periode2)
+        val historikk3 = grunnlagsdataPeriodeHistorikk(periode3)
+        val perioderMedLikPeriodetype =
+            listOf(historikk2, historikk3, historikk1).slåSammenPåfølgendePerioderMedLikPeriodetype()
+        assertThat(perioderMedLikPeriodetype).hasSize(1)
+
+    }
+
+    @Test
+    internal fun `Skal slå sammen perioder og sette harNullbeløp hvis en periode som merges har nullbeløp`() {
+        val periode1 = Månedsperiode(YearMonth.of(2022, 1), YearMonth.of(2022, 12))
+        val periode2 = Månedsperiode(YearMonth.of(2023, 1), YearMonth.of(2023, 12))
+        val periode3 = Månedsperiode(YearMonth.of(2024, 1), YearMonth.of(2024, 12))
+        val historikk1 = grunnlagsdataPeriodeHistorikk(periode1, false)
+        val historikk2 = grunnlagsdataPeriodeHistorikk(periode2, true)
+        val historikk3 = grunnlagsdataPeriodeHistorikk(periode3, false)
+        val perioderMedLikPeriodetype =
+            listOf(historikk2, historikk3, historikk1).slåSammenPåfølgendePerioderMedLikPeriodetype()
+        assertThat(perioderMedLikPeriodetype).hasSize(1)
+        assertThat(perioderMedLikPeriodetype.first().harPeriodeUtenUtbetaling).isTrue
+
+    }
+
+    private fun grunnlagsdataPeriodeHistorikk(periode: Månedsperiode, harNullbeløp:Boolean = false) =
+        GrunnlagsdataPeriodeHistorikk(periodeType = VedtaksperiodeType.HOVEDPERIODE, fom = periode.fomDato, tom = periode.tomDato, harNullbeløp)
+
+    private fun mockTidligereVedtakEfSak(harAndeler: Boolean = false) {
         every { fagsakPersonService.finnPerson(any()) } returns fagsakPerson
         every { fagsakService.finnFagsakerForFagsakPersonId(any()) } returns fagsaker
         every { behandlingService.finnSisteIverksatteBehandling(fagsak.id) } returns behandling

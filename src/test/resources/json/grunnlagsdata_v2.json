@@ -1442,14 +1442,18 @@
                     "values" : [ "FORLENGELSE", "HOVEDPERIODE", "MIDLERTIDIG_OPPHØR", "MIGRERING", "PERIODE_FØR_FØDSEL", "SANKSJON", "UTVIDELSE", "NY_PERIODE_FOR_NYTT_BARN" ],
                     "nullable" : true
                   },
-                  "periode" : {
-                    "name" : "periode",
-                    "type" : "Object",
-                    "fields" : { },
+                  "fom" : {
+                    "name" : "fom",
+                    "type" : "LocalDate",
                     "nullable" : false
                   },
-                  "harUtbetaling" : {
-                    "name" : "harUtbetaling",
+                  "tom" : {
+                    "name" : "tom",
+                    "type" : "LocalDate",
+                    "nullable" : false
+                  },
+                  "harPeriodeUtenUtbetaling" : {
+                    "name" : "harPeriodeUtenUtbetaling",
                     "type" : "Boolean",
                     "nullable" : false
                   }
@@ -1488,14 +1492,18 @@
                     "values" : [ "FORLENGELSE", "HOVEDPERIODE", "MIDLERTIDIG_OPPHØR", "MIGRERING", "PERIODE_FØR_FØDSEL", "SANKSJON", "UTVIDELSE", "NY_PERIODE_FOR_NYTT_BARN" ],
                     "nullable" : true
                   },
-                  "periode" : {
-                    "name" : "periode",
-                    "type" : "Object",
-                    "fields" : { },
+                  "fom" : {
+                    "name" : "fom",
+                    "type" : "LocalDate",
                     "nullable" : false
                   },
-                  "harUtbetaling" : {
-                    "name" : "harUtbetaling",
+                  "tom" : {
+                    "name" : "tom",
+                    "type" : "LocalDate",
+                    "nullable" : false
+                  },
+                  "harPeriodeUtenUtbetaling" : {
+                    "name" : "harPeriodeUtenUtbetaling",
                     "type" : "Boolean",
                     "nullable" : false
                   }
@@ -2153,14 +2161,18 @@
                 "values" : [ "FORLENGELSE", "HOVEDPERIODE", "MIDLERTIDIG_OPPHØR", "MIGRERING", "PERIODE_FØR_FØDSEL", "SANKSJON", "UTVIDELSE", "NY_PERIODE_FOR_NYTT_BARN" ],
                 "nullable" : true
               },
-              "periode" : {
-                "name" : "periode",
-                "type" : "Object",
-                "fields" : { },
+              "fom" : {
+                "name" : "fom",
+                "type" : "LocalDate",
                 "nullable" : false
               },
-              "harUtbetaling" : {
-                "name" : "harUtbetaling",
+              "tom" : {
+                "name" : "tom",
+                "type" : "LocalDate",
+                "nullable" : false
+              },
+              "harPeriodeUtenUtbetaling" : {
+                "name" : "harPeriodeUtenUtbetaling",
                 "type" : "Boolean",
                 "nullable" : false
               }
@@ -2199,14 +2211,18 @@
                 "values" : [ "FORLENGELSE", "HOVEDPERIODE", "MIDLERTIDIG_OPPHØR", "MIGRERING", "PERIODE_FØR_FØDSEL", "SANKSJON", "UTVIDELSE", "NY_PERIODE_FOR_NYTT_BARN" ],
                 "nullable" : true
               },
-              "periode" : {
-                "name" : "periode",
-                "type" : "Object",
-                "fields" : { },
+              "fom" : {
+                "name" : "fom",
+                "type" : "LocalDate",
                 "nullable" : false
               },
-              "harUtbetaling" : {
-                "name" : "harUtbetaling",
+              "tom" : {
+                "name" : "tom",
+                "type" : "LocalDate",
+                "nullable" : false
+              },
+              "harPeriodeUtenUtbetaling" : {
+                "name" : "harPeriodeUtenUtbetaling",
                 "type" : "Boolean",
                 "nullable" : false
               }

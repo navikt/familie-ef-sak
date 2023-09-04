@@ -4,7 +4,6 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataPeriod
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.TidligereInnvilgetVedtak
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.TidligereVedtaksperioder
 import no.nav.familie.kontrakter.felles.Månedsperiode
-import no.nav.familie.kontrakter.felles.Periode
 import java.time.LocalDate
 
 data class TidligereVedtaksperioderDto(
@@ -22,16 +21,16 @@ data class TidligereInnvilgetVedtakDto(
     val harTidligereSkolepenger: Boolean,
     val periodeHistorikkOvergangsstønad: List<GrunnlagsdataPeriodeHistorikkDto> = emptyList(),
 ) {
-    fun harTidligereInnvilgetVedtak() = harTidligereOvergangsstønad || harTidligereBarnetilsyn || harTidligereSkolepenger
+    fun harTidligereInnvilgetVedtak() =
+        harTidligereOvergangsstønad || harTidligereBarnetilsyn || harTidligereSkolepenger
 }
 
 data class GrunnlagsdataPeriodeHistorikkDto(
     val periodeType: String,
-    val periode: Månedsperiode,
-    val fomDato: LocalDate = periode.fomDato,
-    val tomDato: LocalDate = periode.tomDato,
-    val antMnd: Long = periode.lengdeIHeleMåneder(),
-    val harUtbetaling: Boolean,
+    val fomDato: LocalDate,
+    val tomDato: LocalDate,
+    val antMnd: Long = Månedsperiode(fomDato, tomDato).lengdeIHeleMåneder(),
+    val harPeriodeUtenUtbetaling: Boolean,
 ) //
 
 fun TidligereVedtaksperioder?.tilDto(): TidligereVedtaksperioderDto = this?.let {
@@ -51,11 +50,16 @@ fun TidligereInnvilgetVedtak.tilDto() =
     )
 
 fun List<GrunnlagsdataPeriodeHistorikk>.tilDto() = this.map { it.tilDto() }
-private fun GrunnlagsdataPeriodeHistorikk.tilDto() = GrunnlagsdataPeriodeHistorikkDto(periodeType = finnType(this), periode = this.periode, harUtbetaling = this.harUtbetaling)
+private fun GrunnlagsdataPeriodeHistorikk.tilDto() = GrunnlagsdataPeriodeHistorikkDto(
+    periodeType = finnType(this),
+    fomDato = this.fom,
+    tomDato = this.tom,
+    harPeriodeUtenUtbetaling = this.harPeriodeUtenUtbetaling
+)
 
 fun finnType(grunnlagsdataPeriodeHistorikk: GrunnlagsdataPeriodeHistorikk): String {
     if (grunnlagsdataPeriodeHistorikk.periodeType != null) {
         return grunnlagsdataPeriodeHistorikk.periodeType.toString()
     }
-    return "UKJENT"
+    return "UKJENT"// TODO throw exception?
 }

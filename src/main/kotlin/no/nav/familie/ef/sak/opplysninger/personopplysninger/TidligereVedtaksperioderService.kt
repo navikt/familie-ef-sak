@@ -16,6 +16,7 @@ import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.ef.sak.vedtak.historikk.AndelHistorikkDto
 import no.nav.familie.ef.sak.vedtak.historikk.EndringType
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPeriodeResponse
+import no.nav.familie.kontrakter.felles.Månedsperiode
 import org.springframework.stereotype.Service
 
 @Service
@@ -71,20 +72,20 @@ class TidligereVedtaksperioderService(
             tilkjentYtelse.andelerTilkjentYtelse.isNotEmpty()
         } ?: false
 
-    private fun hentOvergangstønadsperioder(fagsaker: Fagsaker?): List<GrunnlagsdataPeriodeHistorikk> {
+    fun hentOvergangstønadsperioder(fagsaker: Fagsaker?): List<GrunnlagsdataPeriodeHistorikk> {
         return hentAndelshistorikkForOvergangsstønsd(fagsaker)
             .filterNot(erstattetEllerFjernet())
             .filterNot({ it.erOpphør })
             .map {
                 GrunnlagsdataPeriodeHistorikk(
                     periodeType = it.periodeType,
-                    periode = it.andel.periode,
-                    harUtbetaling = it.andel.beløp > 0,
+                    fom = it.andel.periode.fomDato,
+                    tom = it.andel.periode.tomDato,
+                    harPeriodeUtenUtbetaling = it.andel.beløp <= 0,
                 )
             }
             .slåSammenPåfølgendePerioderMedLikPeriodetype()
     }
-
 
     private fun hentAndelshistorikkForOvergangsstønsd(fagsaker: Fagsaker?) =
         fagsaker?.overgangsstønad?.id?.let { andelsHistorikkService.hentHistorikk(it, null) } ?: emptyList()
@@ -97,18 +98,21 @@ class TidligereVedtaksperioderService(
     }
 }
 
-private fun List<GrunnlagsdataPeriodeHistorikk>.slåSammenPåfølgendePerioderMedLikPeriodetype(): List<GrunnlagsdataPeriodeHistorikk> {
-    val sortertPåDatoListe = this.sortedBy { it.periode }
+fun List<GrunnlagsdataPeriodeHistorikk>.slåSammenPåfølgendePerioderMedLikPeriodetype(): List<GrunnlagsdataPeriodeHistorikk> {
+    val sortertPåDatoListe = this.sortedBy { it.fom }
     return sortertPåDatoListe.fold(mutableListOf()) { acc, entry ->
         val last = acc.lastOrNull()
         if (
-            last != null && last.periode påfølgesAv entry.periode &&
+            last != null && last.periode() påfølgesAv entry.periode() &&
             last.periodeType === entry.periodeType
         ) {
             acc.removeLast()
+            val månedsperiode = last.periode() union entry.periode()
             acc.add(
                 last.copy(
-                    periode = last.periode union entry.periode,
+                    fom = månedsperiode.fomDato,
+                    tom = månedsperiode.tomDato,
+                    harPeriodeUtenUtbetaling  = last.harPeriodeUtenUtbetaling || entry.harPeriodeUtenUtbetaling
                 ),
             )
         } else {
@@ -117,3 +121,5 @@ private fun List<GrunnlagsdataPeriodeHistorikk>.slåSammenPåfølgendePerioderMe
         acc
     }
 }
+
+private fun GrunnlagsdataPeriodeHistorikk.periode(): Månedsperiode = Månedsperiode(fom = this.fom, tom = this.tom)
