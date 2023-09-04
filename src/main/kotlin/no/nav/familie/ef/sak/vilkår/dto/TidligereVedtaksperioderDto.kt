@@ -3,7 +3,8 @@ package no.nav.familie.ef.sak.vilkår.dto
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataPeriodeHistorikk
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.TidligereInnvilgetVedtak
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.TidligereVedtaksperioder
-import no.nav.familie.kontrakter.felles.Månedsperiode
+import no.nav.familie.kontrakter.felles.Periode
+import java.time.LocalDate
 
 data class TidligereVedtaksperioderDto(
     val infotrygd: TidligereInnvilgetVedtakDto?,
@@ -25,9 +26,9 @@ data class TidligereInnvilgetVedtakDto(
 
 data class GrunnlagsdataPeriodeHistorikkDto(
     val periodeType: String,
-    val periode: Månedsperiode,
+    val periode: Periode<LocalDate>,
     val antMnd: Long = periode.lengdeIHeleMåneder(),
-    val harUtbetaling: Boolean
+    val harUtbetaling: Boolean,
 ) //
 
 fun TidligereVedtaksperioder?.tilDto(): TidligereVedtaksperioderDto = this?.let {
@@ -50,7 +51,7 @@ fun List<GrunnlagsdataPeriodeHistorikk>.tilDto() = this.map { it.tilDto() }
 private fun GrunnlagsdataPeriodeHistorikk.tilDto() = GrunnlagsdataPeriodeHistorikkDto(periodeType = finnType(this), periode = this.periode, harUtbetaling = this.harUtbetaling)
 
 fun finnType(grunnlagsdataPeriodeHistorikk: GrunnlagsdataPeriodeHistorikk): String {
-    if(grunnlagsdataPeriodeHistorikk.periodeType != null){
+    if (grunnlagsdataPeriodeHistorikk.periodeType != null) {
         return grunnlagsdataPeriodeHistorikk.periodeType.toString()
     }
     return "UKJENT"

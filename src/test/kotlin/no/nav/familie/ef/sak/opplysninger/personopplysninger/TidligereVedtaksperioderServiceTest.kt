@@ -32,7 +32,7 @@ import java.time.LocalDate
 
 internal class TidligereVedtaksperioderServiceTest {
 
-    private val andelsHistorikkService = mockk<AndelsHistorikkService>()
+    private val andelsHistorikkService = mockk<AndelsHistorikkService>(relaxed = true)
     private val fagsakPersonService = mockk<FagsakPersonService>()
     private val fagsakService = mockk<FagsakService>()
     private val behandlingService = mockk<BehandlingService>()
