@@ -43,7 +43,7 @@ enum class Toggle(val toggleId: String, val beskrivelse: String? = null) {
     ;
 
     companion object {
-        private val toggles: Map<String, Toggle> = values().associateBy { it.name }
+        private val toggles: Map<String, Toggle> = values().associateBy { it.toggleId }
 
         fun byToggleId(toggleId: String): Toggle {
             return toggles[toggleId] ?: error("Finner ikke toggle for $toggleId")
