@@ -7,7 +7,6 @@ data class GrunnlagsdataPeriodeHistorikk(
     val periodeType: VedtaksperiodeType?,
     val periode: Månedsperiode,
     val harUtbetaling: Boolean,
-    val erOpphør: Boolean
 )
 
 

@@ -78,7 +78,6 @@ class TidligereVedtaksperioderService(
             .map {
                 GrunnlagsdataPeriodeHistorikk(
                     periodeType = it.periodeType  ,
-                    erOpphør = it.erOpphør,
                     periode = it.andel.periode,
                     harUtbetaling = it.andel.beløp > 0,
                 )
