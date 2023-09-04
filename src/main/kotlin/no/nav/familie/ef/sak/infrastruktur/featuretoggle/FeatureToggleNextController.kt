@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.infrastruktur.featuretoggle
 
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.secureLogger
 import no.nav.familie.unleash.DefaultUnleashService
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.beans.factory.annotation.Value
@@ -36,7 +37,8 @@ class FeatureToggleNextController(
         @PathVariable toggleId: String,
         @RequestParam("defaultverdi") defaultVerdi: Boolean? = false,
     ): Boolean {
-        val toggle = Toggle.byToggleId(toggleId)
-        return defaultUnleashService.isEnabled(toggle.toggleId, defaultVerdi ?: false)
+        val enabled = defaultUnleashService.isEnabled("test.environment", defaultVerdi ?: false)
+        secureLogger.info("test.environment featuretoggle value is: ${enabled}")
+        return enabled
     }
 }
