@@ -53,8 +53,5 @@ fun finnType(grunnlagsdataPeriodeHistorikk: GrunnlagsdataPeriodeHistorikk): Stri
     if(grunnlagsdataPeriodeHistorikk.periodeType != null){
         return grunnlagsdataPeriodeHistorikk.periodeType.toString()
     }
-    if(grunnlagsdataPeriodeHistorikk.erOpphør){
-        return "OPPHØR"
-    }
     return "UKJENT"
 }

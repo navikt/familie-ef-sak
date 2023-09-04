@@ -74,6 +74,7 @@ class TidligereVedtaksperioderService(
     private fun hentOvergangstønadsperioder(fagsaker: Fagsaker?): List<GrunnlagsdataPeriodeHistorikk> {
         return hentAndelshistorikkForOvergangsstønsd(fagsaker)
             .filterNot(erstattetEllerFjernet())
+            .filterNot({it.erOpphør})
             .map {
                 GrunnlagsdataPeriodeHistorikk(
                     periodeType = it.periodeType  ,
