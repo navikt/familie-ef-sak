@@ -5,6 +5,8 @@ import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
 import no.nav.familie.ef.sak.behandling.BehandlingService
+import no.nav.familie.ef.sak.behandling.domain.BehandlingType
+import no.nav.familie.ef.sak.beregning.Inntekt
 import no.nav.familie.ef.sak.fagsak.FagsakPersonService
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Fagsaker
@@ -22,16 +24,27 @@ import no.nav.familie.ef.sak.repository.fagsakpersoner
 import no.nav.familie.ef.sak.testutil.PdlTestdataHelper.folkeregisteridentifikator
 import no.nav.familie.ef.sak.tilkjentytelse.AndelsHistorikkService
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
+import no.nav.familie.ef.sak.vedtak.domain.AktivitetType
+import no.nav.familie.ef.sak.vedtak.domain.AktivitetstypeBarnetilsyn
+import no.nav.familie.ef.sak.vedtak.domain.PeriodetypeBarnetilsyn
 import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
+import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType.HOVEDPERIODE
+import no.nav.familie.ef.sak.vedtak.historikk.AndelHistorikkDto
+import no.nav.familie.ef.sak.vedtak.historikk.AndelMedGrunnlagDto
+import no.nav.familie.ef.sak.vedtak.historikk.VedtakshistorikkperiodeOvergangsstønad
 import no.nav.familie.ef.sak.økonomi.lagAndelTilkjentYtelse
 import no.nav.familie.ef.sak.økonomi.lagTilkjentYtelse
+import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPeriodeRequest
 import no.nav.familie.kontrakter.felles.Månedsperiode
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.math.BigDecimal
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.YearMonth
+import java.util.*
 
 internal class TidligereVedtaksperioderServiceTest {
 
@@ -71,9 +84,9 @@ internal class TidligereVedtaksperioderServiceTest {
             infotrygdReplikaClient.hentPerioder(capture(infotrygdPeriodeRequestSlot))
         } answers { InfotrygdReplikaMock.hentPerioderDefaultResponse(firstArg()) }
         every { personService.hentPersonIdenter(personIdent.ident) } returns
-            PdlIdenter(listOf(PdlIdent(personIdent.ident, false)))
+                PdlIdenter(listOf(PdlIdent(personIdent.ident, false)))
         every { historiskPensjonService.hentHistoriskPensjon(any(), any()) } returns
-            HistoriskPensjonResponse(false, "")
+                HistoriskPensjonResponse(false, "")
     }
 
     @Test
@@ -114,14 +127,51 @@ internal class TidligereVedtaksperioderServiceTest {
         assertThat(sak.harTidligereSkolepenger).isFalse
     }
 
+
+    @Test
+    internal fun `Skal filtere bort opphør`() {
+        val andel2 = andel.copy(erOpphør = true)
+        every { andelsHistorikkService.hentHistorikk(fagsaker.overgangsstønad!!.id, null) } returns
+                listOf(andel, andel2, andel)
+
+        val overgangstønadsperioder = service.hentOvergangstønadsperioder(fagsaker)
+
+        assertThat(overgangstønadsperioder).hasSize(2)
+    }
+
+    @Test
+    internal fun `Skal ikke feile hvis det ikke finnes noen perioder`() {
+        val overgangstønadsperioder = service.hentOvergangstønadsperioder(fagsaker)
+
+        assertThat(overgangstønadsperioder).hasSize(0)
+    }
+
+    @Test
+    internal fun `Skal ikke slå sammen perioder med ulik periodetype`() {
+        val periode1 = Månedsperiode(YearMonth.of(2022, 1), YearMonth.of(2022, 12))
+        val periode2 = Månedsperiode(YearMonth.of(2023, 1), YearMonth.of(2023, 12))
+        val periode3 = Månedsperiode(YearMonth.of(2024, 1), YearMonth.of(2024, 12))
+        val historikk1 = grunnlagsdataPeriodeHistorikk(false, periode1.fomDato, periode1.tomDato)
+        val historikk2 = grunnlagsdataPeriodeHistorikk(
+            false,
+            periode2.fomDato,
+            periode2.tomDato,
+            periodeType = VedtaksperiodeType.FORLENGELSE
+        )
+        val historikk3 = grunnlagsdataPeriodeHistorikk(false, periode3.fomDato, periode3.tomDato)
+        val perioderMedLikPeriodetype =
+            listOf(historikk2, historikk3, historikk1).slåSammenPåfølgendePerioderMedLikPeriodetype()
+        assertThat(perioderMedLikPeriodetype).hasSize(3)
+    }
+
     @Test
     internal fun `Skal slå sammen perioder med lik periodetype`() {
         val periode1 = Månedsperiode(YearMonth.of(2022, 1), YearMonth.of(2022, 12))
         val periode2 = Månedsperiode(YearMonth.of(2023, 1), YearMonth.of(2023, 12))
         val periode3 = Månedsperiode(YearMonth.of(2024, 1), YearMonth.of(2024, 12))
-        val historikk1 = grunnlagsdataPeriodeHistorikk(periode1)
-        val historikk2 = grunnlagsdataPeriodeHistorikk(periode2)
-        val historikk3 = grunnlagsdataPeriodeHistorikk(periode3)
+        val historikk1 = grunnlagsdataPeriodeHistorikk(false, periode1.fomDato, periode1.tomDato)
+        val historikk2 = grunnlagsdataPeriodeHistorikk(false, periode2.fomDato, periode2.tomDato)
+        val historikk3 = grunnlagsdataPeriodeHistorikk(false, periode3.fomDato, periode3.tomDato)
         val perioderMedLikPeriodetype =
             listOf(historikk2, historikk3, historikk1).slåSammenPåfølgendePerioderMedLikPeriodetype()
         assertThat(perioderMedLikPeriodetype).hasSize(1)
@@ -132,17 +182,22 @@ internal class TidligereVedtaksperioderServiceTest {
         val periode1 = Månedsperiode(YearMonth.of(2022, 1), YearMonth.of(2022, 12))
         val periode2 = Månedsperiode(YearMonth.of(2023, 1), YearMonth.of(2023, 12))
         val periode3 = Månedsperiode(YearMonth.of(2024, 1), YearMonth.of(2024, 12))
-        val historikk1 = grunnlagsdataPeriodeHistorikk(periode1, false)
-        val historikk2 = grunnlagsdataPeriodeHistorikk(periode2, true)
-        val historikk3 = grunnlagsdataPeriodeHistorikk(periode3, false)
+        val historikk1 = grunnlagsdataPeriodeHistorikk(false, periode1.fomDato, periode1.tomDato)
+        val historikk2 = grunnlagsdataPeriodeHistorikk(true, periode2.fomDato, periode2.tomDato)
+        val historikk3 = grunnlagsdataPeriodeHistorikk(false, periode3.fomDato, periode3.tomDato)
         val perioderMedLikPeriodetype =
             listOf(historikk2, historikk3, historikk1).slåSammenPåfølgendePerioderMedLikPeriodetype()
         assertThat(perioderMedLikPeriodetype).hasSize(1)
         assertThat(perioderMedLikPeriodetype.first().harPeriodeUtenUtbetaling).isTrue
     }
 
-    private fun grunnlagsdataPeriodeHistorikk(periode: Månedsperiode, harNullbeløp: Boolean = false) =
-        GrunnlagsdataPeriodeHistorikk(periodeType = VedtaksperiodeType.HOVEDPERIODE, fom = periode.fomDato, tom = periode.tomDato, harNullbeløp)
+    private fun grunnlagsdataPeriodeHistorikk(
+        harNullbeløp: Boolean = false,
+        fom: LocalDate,
+        tom: LocalDate,
+        periodeType: VedtaksperiodeType = HOVEDPERIODE
+    ) =
+        GrunnlagsdataPeriodeHistorikk(periodeType = periodeType, fom = fom, tom = tom, harNullbeløp)
 
     private fun mockTidligereVedtakEfSak(harAndeler: Boolean = false) {
         every { fagsakPersonService.finnPerson(any()) } returns fagsakPerson
@@ -152,4 +207,42 @@ internal class TidligereVedtaksperioderServiceTest {
             if (harAndeler) listOf(lagAndelTilkjentYtelse(100, LocalDate.now(), LocalDate.now())) else emptyList()
         every { tilkjentYtelseService.hentForBehandling(behandling.id) } returns lagTilkjentYtelse(andelerTilkjentYtelse)
     }
+
+    val andel = AndelHistorikkDto(
+        behandlingId = UUID.randomUUID(),
+        behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+        behandlingÅrsak = BehandlingÅrsak.NYE_OPPLYSNINGER,
+        vedtakstidspunkt = LocalDateTime.now(),
+        saksbehandler = "",
+        vedtaksperiode = VedtakshistorikkperiodeOvergangsstønad(
+            periode = Månedsperiode(YearMonth.now()),
+            aktivitet = AktivitetType.IKKE_AKTIVITETSPLIKT,
+            periodeType = HOVEDPERIODE,
+            inntekt = Inntekt(YearMonth.now(), BigDecimal.ZERO, BigDecimal.ZERO),
+        ),
+        andel = andelMedGrunnlagDto(),
+        aktivitet = null,
+        aktivitetArbeid = null,
+        periodeType = null,
+        erSanksjon = false,
+        sanksjonsårsak = null,
+        erOpphør = false,
+        periodetypeBarnetilsyn = PeriodetypeBarnetilsyn.ORDINÆR,
+        aktivitetBarnetilsyn = AktivitetstypeBarnetilsyn.I_ARBEID,
+        endring = null,
+    )
+
+    private fun andelMedGrunnlagDto() = AndelMedGrunnlagDto(
+        beløp = 0,
+        periode = Månedsperiode(YearMonth.now()),
+        inntekt = 0,
+        inntektsreduksjon = 0,
+        samordningsfradrag = 0,
+        kontantstøtte = 0,
+        tilleggsstønad = 0,
+        antallBarn = 0,
+        barn = emptyList(),
+        sats = 0,
+        beløpFørFratrekkOgSatsJustering = 0,
+    )
 }
