@@ -27,11 +27,11 @@ data class TidligereInnvilgetVedtakDto(
 
 data class GrunnlagsdataPeriodeHistorikkDto(
     val periodeType: String,
-    val fomDato: LocalDate,
-    val tomDato: LocalDate,
-    val antMnd: Long = Månedsperiode(fomDato, tomDato).lengdeIHeleMåneder(),
+    val fom: LocalDate,
+    val tom: LocalDate,
+    val antMnd: Long = Månedsperiode(fom, tom).lengdeIHeleMåneder(),
     val harPeriodeUtenUtbetaling: Boolean,
-) //
+)
 
 fun TidligereVedtaksperioder?.tilDto(): TidligereVedtaksperioderDto = this?.let {
     TidligereVedtaksperioderDto(
@@ -52,8 +52,8 @@ fun TidligereInnvilgetVedtak.tilDto() =
 fun List<GrunnlagsdataPeriodeHistorikk>.tilDto() = this.map { it.tilDto() }
 private fun GrunnlagsdataPeriodeHistorikk.tilDto() = GrunnlagsdataPeriodeHistorikkDto(
     periodeType = finnType(this),
-    fomDato = this.fom,
-    tomDato = this.tom,
+    fom = this.fom,
+    tom = this.tom,
     harPeriodeUtenUtbetaling = this.harPeriodeUtenUtbetaling
 )
 
