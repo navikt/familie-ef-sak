@@ -112,7 +112,7 @@ fun List<GrunnlagsdataPeriodeHistorikk>.slåSammenPåfølgendePerioderMedLikPeri
                 last.copy(
                     fom = månedsperiode.fomDato,
                     tom = månedsperiode.tomDato,
-                    harPeriodeUtenUtbetaling  = last.harPeriodeUtenUtbetaling || entry.harPeriodeUtenUtbetaling
+                    harPeriodeUtenUtbetaling = last.harPeriodeUtenUtbetaling || entry.harPeriodeUtenUtbetaling,
                 ),
             )
         } else {

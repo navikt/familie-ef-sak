@@ -71,9 +71,9 @@ internal class TidligereVedtaksperioderServiceTest {
             infotrygdReplikaClient.hentPerioder(capture(infotrygdPeriodeRequestSlot))
         } answers { InfotrygdReplikaMock.hentPerioderDefaultResponse(firstArg()) }
         every { personService.hentPersonIdenter(personIdent.ident) } returns
-                PdlIdenter(listOf(PdlIdent(personIdent.ident, false)))
+            PdlIdenter(listOf(PdlIdent(personIdent.ident, false)))
         every { historiskPensjonService.hentHistoriskPensjon(any(), any()) } returns
-                HistoriskPensjonResponse(false, "")
+            HistoriskPensjonResponse(false, "")
     }
 
     @Test
@@ -125,7 +125,6 @@ internal class TidligereVedtaksperioderServiceTest {
         val perioderMedLikPeriodetype =
             listOf(historikk2, historikk3, historikk1).slåSammenPåfølgendePerioderMedLikPeriodetype()
         assertThat(perioderMedLikPeriodetype).hasSize(1)
-
     }
 
     @Test
@@ -140,10 +139,9 @@ internal class TidligereVedtaksperioderServiceTest {
             listOf(historikk2, historikk3, historikk1).slåSammenPåfølgendePerioderMedLikPeriodetype()
         assertThat(perioderMedLikPeriodetype).hasSize(1)
         assertThat(perioderMedLikPeriodetype.first().harPeriodeUtenUtbetaling).isTrue
-
     }
 
-    private fun grunnlagsdataPeriodeHistorikk(periode: Månedsperiode, harNullbeløp:Boolean = false) =
+    private fun grunnlagsdataPeriodeHistorikk(periode: Månedsperiode, harNullbeløp: Boolean = false) =
         GrunnlagsdataPeriodeHistorikk(periodeType = VedtaksperiodeType.HOVEDPERIODE, fom = periode.fomDato, tom = periode.tomDato, harNullbeløp)
 
     private fun mockTidligereVedtakEfSak(harAndeler: Boolean = false) {
