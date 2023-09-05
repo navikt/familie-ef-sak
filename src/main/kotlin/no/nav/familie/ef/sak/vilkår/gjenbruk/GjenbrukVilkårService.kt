@@ -11,7 +11,6 @@ import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
-import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.gjeldende
@@ -93,7 +92,7 @@ class GjenbrukVilkårService(
                     behandlingId = behandlingId,
                     sporbar = it.sporbar,
                     barnId = it.barnId,
-                    opphavsvilkår = if (featureToggleService.isEnabled(Toggle.VILKÅR_GJENBRUK)) tidligereVurdering.opprettOpphavsvilkår() else null,
+                    opphavsvilkår = tidligereVurdering.opprettOpphavsvilkår(),
                 )
             }
     }
