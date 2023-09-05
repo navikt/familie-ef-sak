@@ -29,9 +29,7 @@ import no.nav.familie.ef.sak.vedtak.domain.AktivitetstypeBarnetilsyn
 import no.nav.familie.ef.sak.vedtak.domain.PeriodetypeBarnetilsyn
 import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
 import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType.HOVEDPERIODE
-import no.nav.familie.ef.sak.vedtak.historikk.AndelHistorikkDto
-import no.nav.familie.ef.sak.vedtak.historikk.AndelMedGrunnlagDto
-import no.nav.familie.ef.sak.vedtak.historikk.VedtakshistorikkperiodeOvergangsstønad
+import no.nav.familie.ef.sak.vedtak.historikk.*
 import no.nav.familie.ef.sak.økonomi.lagAndelTilkjentYtelse
 import no.nav.familie.ef.sak.økonomi.lagTilkjentYtelse
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
@@ -139,6 +137,70 @@ internal class TidligereVedtaksperioderServiceTest {
         assertThat(overgangstønadsperioder).hasSize(2)
     }
 
+    @Test
+    internal fun `Skal fjerne uvesentlige perioder`() {
+        val historikkEndring = HistorikkEndring(type =  EndringType.ERSTATTET, behandlingId = UUID.randomUUID(), vedtakstidspunkt = LocalDateTime.now())
+        val historikkEndring2 = HistorikkEndring(type =  EndringType.FJERNET, behandlingId = UUID.randomUUID(), vedtakstidspunkt = LocalDateTime.now())
+        val andel2 = andel.copy(endring = historikkEndring)
+        val andel3 = andel.copy(endring = historikkEndring2)
+
+        every { andelsHistorikkService.hentHistorikk(fagsaker.overgangsstønad!!.id, null) } returns
+                listOf(andel, andel2, andel3)
+
+        val overgangstønadsperioder = service.hentOvergangstønadsperioder(fagsaker)
+
+        assertThat(overgangstønadsperioder).hasSize(1)
+    }
+
+    @Test
+    internal fun `Skal ha en periode med null utbetaling`() {
+
+        val andel2 = andel.copy(andel = andelMedGrunnlagDto().copy(beløp = 0))
+        every { andelsHistorikkService.hentHistorikk(fagsaker.overgangsstønad!!.id, null) } returns
+                listOf(andel2)
+
+        val overgangstønadsperioder = service.hentOvergangstønadsperioder(fagsaker)
+
+        assertThat(overgangstønadsperioder.first().harPeriodeUtenUtbetaling).isTrue()
+    }
+/*3 andeler som skla merges sammen, den i midten har 0 beløp -> skal gi true */
+
+    @Test
+    internal fun `Skal slå sammen tre andeler hvor bare en har null beløp og returnerer harPeriodeUtenUtbetaling lik true`() {
+        val periode1 = Månedsperiode(YearMonth.of(2022, 1), YearMonth.of(2022, 12))
+        val periode2 = Månedsperiode(YearMonth.of(2023, 1), YearMonth.of(2023, 12))
+        val periode3 = Månedsperiode(YearMonth.of(2024, 1), YearMonth.of(2024, 12))
+
+        val andel1 = andel.copy(andel = andelMedGrunnlagDto().copy(beløp = 500, periode = periode1))
+        val andel2 = andel.copy(andel = andelMedGrunnlagDto().copy(beløp = 0, periode = periode2))
+        val andel3 = andel.copy(andel = andelMedGrunnlagDto().copy(beløp = 100, periode = periode3))
+
+        every { andelsHistorikkService.hentHistorikk(fagsaker.overgangsstønad!!.id, null) } returns
+                listOf(andel1, andel2, andel3)
+
+        val overgangstønadsperioder = service.hentOvergangstønadsperioder(fagsaker)
+
+        assertThat(overgangstønadsperioder).hasSize(1)
+        assertThat(overgangstønadsperioder.first().harPeriodeUtenUtbetaling).isTrue()
+    }
+    @Test
+    internal fun `Skal slå sammen tre andeler hvor ingen har null beløp og returnerer harPeriodeUtenUtbetaling lik false`() {
+        val periode1 = Månedsperiode(YearMonth.of(2022, 1), YearMonth.of(2022, 12))
+        val periode2 = Månedsperiode(YearMonth.of(2023, 1), YearMonth.of(2023, 12))
+        val periode3 = Månedsperiode(YearMonth.of(2024, 1), YearMonth.of(2024, 12))
+
+        val andel1 = andel.copy(andel = andelMedGrunnlagDto().copy(beløp = 500, periode = periode1))
+        val andel2 = andel.copy(andel = andelMedGrunnlagDto().copy(beløp = 200, periode = periode2))
+        val andel3 = andel.copy(andel = andelMedGrunnlagDto().copy(beløp = 100, periode = periode3))
+
+        every { andelsHistorikkService.hentHistorikk(fagsaker.overgangsstønad!!.id, null) } returns
+                listOf(andel1, andel2, andel3)
+
+        val overgangstønadsperioder = service.hentOvergangstønadsperioder(fagsaker)
+
+        assertThat(overgangstønadsperioder).hasSize(1)
+        assertThat(overgangstønadsperioder.first().harPeriodeUtenUtbetaling).isFalse()
+    }
     @Test
     internal fun `Skal ikke feile hvis det ikke finnes noen perioder`() {
         val overgangstønadsperioder = service.hentOvergangstønadsperioder(fagsaker)

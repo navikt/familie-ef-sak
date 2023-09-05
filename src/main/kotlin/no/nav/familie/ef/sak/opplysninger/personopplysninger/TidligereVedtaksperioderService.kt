@@ -73,7 +73,7 @@ class TidligereVedtaksperioderService(
         } ?: false
 
     fun hentOvergangstønadsperioder(fagsaker: Fagsaker?): List<GrunnlagsdataPeriodeHistorikk> {
-        return hentAndelshistorikkForOvergangsstønsd(fagsaker)
+        return hentAndelshistorikkForOvergangsstønad(fagsaker)
             .filterNot(erstattetEllerFjernet())
             .filterNot({ it.erOpphør })
             .map {
@@ -87,7 +87,7 @@ class TidligereVedtaksperioderService(
             .slåSammenPåfølgendePerioderMedLikPeriodetype()
     }
 
-    private fun hentAndelshistorikkForOvergangsstønsd(fagsaker: Fagsaker?) =
+    private fun hentAndelshistorikkForOvergangsstønad(fagsaker: Fagsaker?) =
         fagsaker?.overgangsstønad?.id?.let { andelsHistorikkService.hentHistorikk(it, null) } ?: emptyList()
 
     private fun erstattetEllerFjernet(): (AndelHistorikkDto) -> Boolean = {
