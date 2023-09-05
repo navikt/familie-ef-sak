@@ -11,6 +11,22 @@ interface FeatureToggleService : DisposableBean {
     fun isEnabled(toggle: Toggle, defaultValue: Boolean): Boolean
 }
 
+enum class ToggleNext(val toggleId: String, val beskrivelse: String? = null) {
+
+    MIGRERING_BARNETILSYN_NEXT("familie.ef.sak.migrering.barnetilsyn.next"),
+    TEST_ENVIRONMENT("test.environment"),
+    TEST_USER_ID("test.user.id"),
+    ;
+
+    internal companion object {
+        private val toggles: Map<String, ToggleNext> = values().associateBy { it.toggleId }
+
+        fun byToggleId(toggleId: String): ToggleNext? {
+            return toggles[toggleId]
+        }
+    }
+}
+
 enum class Toggle(val toggleId: String, val beskrivelse: String? = null) {
     AUTOMATISK_MIGRERING("familie.ef.sak.automatisk-migrering"),
     MIGRERING_BARNETILSYN("familie.ef.sak.migrering.barnetilsyn"),
@@ -38,15 +54,30 @@ enum class Toggle(val toggleId: String, val beskrivelse: String? = null) {
     TILLAT_MIGRERING_7_ÅR_TILBAKE("familie.ef.sak.tillat-migrering-7-ar-tilbake", "Permission"),
     AUTOMATISKE_BREV_INNHENTING_KARAKTERUTSKRIFT("familie.ef.sak.automatiske-brev-innhenting-karakterutskrift"),
     UTVIKLER_MED_VEILEDERRROLLE("familie.ef.sak.utviklere-med-veilederrolle"),
-    TEST_ENVIRONMENT("test.environment"),
-    TEST_USER_ID("test.user.id"),
     ;
 
-    companion object {
+    internal companion object {
         private val toggles: Map<String, Toggle> = values().associateBy { it.toggleId }
 
-        fun byToggleId(toggleId: String): Toggle {
-            return toggles[toggleId] ?: error("Finner ikke toggle for $toggleId")
+        fun byToggleId(toggleId: String): Toggle? {
+            return toggles[toggleId]
         }
     }
+}
+
+sealed class ToggleWrapper(val toggleId: String) {
+    data class Funksjonsbrytere(val toggle: Toggle) : ToggleWrapper(toggle.toggleId)
+    data class UnleashNext(val toggleNext: ToggleNext) : ToggleWrapper(toggleNext.toggleId)
+}
+
+fun byToggleId(toggleId: String): ToggleWrapper {
+    val toggle = Toggle.byToggleId(toggleId)
+    if (toggle != null) {
+        return ToggleWrapper.Funksjonsbrytere(toggle)
+    }
+    val toggleNext = ToggleNext.byToggleId(toggleId)
+    if (toggleNext != null) {
+        return ToggleWrapper.UnleashNext(toggleNext)
+    }
+    error("Finner ikke toggle for $toggleId")
 }

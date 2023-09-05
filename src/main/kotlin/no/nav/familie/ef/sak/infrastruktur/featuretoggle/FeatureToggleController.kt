@@ -1,6 +1,9 @@
 package no.nav.familie.ef.sak.infrastruktur.featuretoggle
 
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.logger
+import no.nav.familie.unleash.DefaultUnleashService
 import no.nav.security.token.support.core.api.Unprotected
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -11,7 +14,14 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 @RequestMapping(path = ["/api/featuretoggle"], produces = [MediaType.APPLICATION_JSON_VALUE])
 @Unprotected
-class FeatureToggleController(private val featureToggleService: FeatureToggleService) {
+class FeatureToggleController(
+    @Value("\${UNLEASH_SERVER_API_URL}") private val apiUrl: String,
+    @Value("\${UNLEASH_SERVER_API_TOKEN}") private val apiToken: String,
+    @Value("\${NAIS_APP_NAME}") private val appName: String,
+    private val featureToggleService: FeatureToggleService,
+) {
+
+    private val unleashNextService: DefaultUnleashService = DefaultUnleashService(apiUrl, apiToken, appName)
 
     private val funksjonsbrytere = setOf(
         Toggle.BEHANDLING_KORRIGERING,
@@ -23,9 +33,23 @@ class FeatureToggleController(private val featureToggleService: FeatureToggleSer
         Toggle.FRONTEND_VIS_INNTEKT_PERSONOVERSIKT,
     )
 
+    private val unleashNextToggles = setOf(
+        ToggleNext.TEST_USER_ID,
+        ToggleNext.TEST_ENVIRONMENT,
+        ToggleNext.MIGRERING_BARNETILSYN_NEXT,
+    )
+
     @GetMapping
     fun sjekkAlle(): Map<String, Boolean> {
-        return funksjonsbrytere.associate { it.toggleId to featureToggleService.isEnabled(it) }
+        val funksjonsbrytere = funksjonsbrytere.associate { it.toggleId to featureToggleService.isEnabled(it) }
+        val funksjonsbrytereNext =
+            unleashNextToggles.associate { it.toggleId to unleashNextService.isEnabled(it.toggleId) }
+
+        val likeToggles = funksjonsbrytere.keys.intersect(funksjonsbrytereNext.keys)
+        if (likeToggles.isNotEmpty()) {
+            logger.error("Like funksjonsbrytere funnet fra Unleash og Unleash Next: $likeToggles")
+        }
+        return funksjonsbrytere + funksjonsbrytereNext
     }
 
     @GetMapping("/{toggleId}")
@@ -33,7 +57,14 @@ class FeatureToggleController(private val featureToggleService: FeatureToggleSer
         @PathVariable toggleId: String,
         @RequestParam("defaultverdi") defaultVerdi: Boolean? = false,
     ): Boolean {
-        val toggle = Toggle.byToggleId(toggleId)
-        return featureToggleService.isEnabled(toggle, defaultVerdi ?: false)
+        val toggle = byToggleId(toggleId)
+        return when (toggle) {
+            is ToggleWrapper.Funksjonsbrytere -> {
+                featureToggleService.isEnabled(toggle.toggle, defaultVerdi ?: false)
+            }
+            is ToggleWrapper.UnleashNext -> {
+                unleashNextService.isEnabled(toggle.toggleId, defaultVerdi ?: false)
+            }
+        }
     }
 }
