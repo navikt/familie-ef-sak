@@ -6,9 +6,7 @@ import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.beregning.BeregningService
 import no.nav.familie.ef.sak.beregning.Grunnbeløpsperioder
 import no.nav.familie.ef.sak.beregning.ValiderOmregningService
-import no.nav.familie.ef.sak.felles.util.mockFeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
-import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext.SYSTEM_FORKORTELSE
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
@@ -38,7 +36,6 @@ class ValiderOmregningServiceTest {
 
     val vedtakService = mockk<VedtakService>()
     val tilkjentYtelseRepository = mockk<TilkjentYtelseRepository>()
-    val featureToggleService = mockFeatureToggleService()
     val beregningService = BeregningService()
     val vedtakHistorikkService = mockk<VedtakHistorikkService>()
     val validerOmregningService = ValiderOmregningService(
@@ -46,7 +43,6 @@ class ValiderOmregningServiceTest {
         tilkjentYtelseRepository,
         beregningService,
         vedtakHistorikkService,
-        featureToggleService,
     )
 
     @Test
@@ -94,12 +90,6 @@ class ValiderOmregningServiceTest {
     inner class ValiderHarSammePerioderSomTidligereVedtak {
 
         private val år = Grunnbeløpsperioder.nyesteGrunnbeløpGyldigFraOgMed.year
-
-        @BeforeEach
-        internal fun setUp() {
-            val toggle = Toggle.G_OMREGNING_REVURDER_HOPP_OVER_VALIDER_TIDLIGERE_VEDTAK
-            every { featureToggleService.isEnabled(toggle) } returns false
-        }
 
         @Test
         internal fun `skal ikke validere hvis det er maskinell g-omregning`() {

@@ -233,7 +233,7 @@ class VurderingService(
                     behandlingId = nyBehandlingsId,
                     sporbar = Sporbar(),
                     barnId = finnBarnId(vurdering.barnId, barnIdMap),
-                    opphavsvilkår = if (featureToggleService.isEnabled(Toggle.VILKÅR_GJENBRUK)) vurdering.opprettOpphavsvilkår() else null,
+                    opphavsvilkår = vurdering.opprettOpphavsvilkår(),
                 )
             }
 
