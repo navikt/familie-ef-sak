@@ -26,8 +26,7 @@ import no.nav.familie.ef.sak.infotrygd.InfotrygdStønadPerioderDto
 import no.nav.familie.ef.sak.infotrygd.SummertInfotrygdPeriodeDto
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvisIkke
-import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
-import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.ToggleNext
 import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.iverksett.IverksettService
 import no.nav.familie.ef.sak.iverksett.IverksettingDtoMapper
@@ -55,6 +54,7 @@ import no.nav.familie.kontrakter.felles.simulering.BeriketSimuleringsresultat
 import no.nav.familie.kontrakter.felles.simulering.BetalingType
 import no.nav.familie.kontrakter.felles.simulering.PosteringType
 import no.nav.familie.prosessering.internal.TaskService
+import no.nav.familie.unleash.DefaultUnleashService
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
@@ -76,7 +76,7 @@ class MigreringService(
     private val vurderingService: VurderingService,
     private val beregnYtelseSteg: BeregnYtelseSteg,
     private val iverksettingDtoMapper: IverksettingDtoMapper,
-    private val featureToggleService: FeatureToggleService,
+    private val defaultUnleashService: DefaultUnleashService,
     private val infotrygdService: InfotrygdService,
     private val beregningService: BeregningService,
     private val simuleringService: SimuleringService,
@@ -144,7 +144,7 @@ class MigreringService(
      */
     @Transactional
     fun migrerBarnetilsyn(fagsakPersonId: UUID, request: MigrerRequestDto): UUID {
-        brukerfeilHvisIkke(featureToggleService.isEnabled(Toggle.MIGRERING_BARNETILSYN)) {
+        brukerfeilHvisIkke(defaultUnleashService.isEnabled(ToggleNext.MIGRERING_BARNETILSYN_NEXT.toggleId)) {
             "Feature toggle for migrering av barnetilsyn er ikke aktivert"
         }
         try {

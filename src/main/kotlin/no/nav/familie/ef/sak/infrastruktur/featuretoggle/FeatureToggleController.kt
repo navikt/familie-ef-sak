@@ -1,10 +1,8 @@
 package no.nav.familie.ef.sak.infrastruktur.featuretoggle
 
-import io.getunleash.strategy.Strategy
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.logger
 import no.nav.familie.unleash.DefaultUnleashService
 import no.nav.security.token.support.core.api.Unprotected
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -16,19 +14,13 @@ import org.springframework.web.bind.annotation.RestController
 @RequestMapping(path = ["/api/featuretoggle"], produces = [MediaType.APPLICATION_JSON_VALUE])
 @Unprotected
 class FeatureToggleController(
-    @Value("\${UNLEASH_SERVER_API_URL}") private val apiUrl: String,
-    @Value("\${UNLEASH_SERVER_API_TOKEN}") private val apiToken: String,
-    @Value("\${NAIS_APP_NAME}") private val appName: String,
-    private val strategies: List<Strategy>,
     private val featureToggleService: FeatureToggleService,
+    val defaultUnleashService: DefaultUnleashService,
 ) {
-
-    private val unleashNextService: DefaultUnleashService = DefaultUnleashService(apiUrl, apiToken, appName, strategies)
 
     private val funksjonsbrytere = setOf(
         Toggle.BEHANDLING_KORRIGERING,
         Toggle.FRONTEND_VIS_IKKE_PUBLISERTE_BREVMALER,
-        Toggle.MIGRERING_BARNETILSYN,
         Toggle.OPPRETT_BEHANDLING_FERDIGSTILT_JOURNALPOST,
         Toggle.FRONTEND_AUTOMATISK_UTFYLLE_VILKÅR,
         Toggle.FRONTEND_SATSENDRING,
@@ -45,7 +37,7 @@ class FeatureToggleController(
     fun sjekkAlle(): Map<String, Boolean> {
         val funksjonsbrytere = funksjonsbrytere.associate { it.toggleId to featureToggleService.isEnabled(it) }
         val funksjonsbrytereNext =
-            unleashNextToggles.associate { it.toggleId to unleashNextService.isEnabled(it.toggleId) }
+            unleashNextToggles.associate { it.toggleId to defaultUnleashService.isEnabled(it.toggleId) }
 
         val likeToggles = funksjonsbrytere.keys.intersect(funksjonsbrytereNext.keys)
         if (likeToggles.isNotEmpty()) {
@@ -64,8 +56,9 @@ class FeatureToggleController(
             is ToggleWrapper.Funksjonsbrytere -> {
                 featureToggleService.isEnabled(toggle.toggle, defaultVerdi ?: false)
             }
+
             is ToggleWrapper.UnleashNext -> {
-                unleashNextService.isEnabled(toggle.toggleId, defaultVerdi ?: false)
+                defaultUnleashService.isEnabled(toggle.toggleId, defaultVerdi ?: false)
             }
         }
     }
