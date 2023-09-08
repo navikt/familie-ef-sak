@@ -75,7 +75,6 @@ class BeregningSkolepengerService(
             .map { (key, value) ->
                 BeløpsperiodeSkolepenger(
                     årMånedFra = key,
-                    utgifter = value.sumOf { it.utgifter ?: 0 },
                     beløp = value.sumOf { it.stønad },
                 )
             }
@@ -237,7 +236,6 @@ class BeregningSkolepengerService(
         brukerfeilHvis(manglende.isNotEmpty()) {
             val manglendePerioder = manglende.joinToString(", \n") { (_, utgiftsperiode) ->
                 "fakturadato=${utgiftsperiode.årMånedFra} " +
-                    "utgifter=${utgiftsperiode.utgifter} " +
                     "stønad=${utgiftsperiode.stønad}"
             }
             "Mangler utgiftsperioder fra forrige vedtak \n$manglendePerioder"
