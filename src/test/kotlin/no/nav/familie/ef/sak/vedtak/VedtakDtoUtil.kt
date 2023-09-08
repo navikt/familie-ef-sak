@@ -144,7 +144,6 @@ object VedtakDtoUtil {
                 SkolepengerUtgiftDto(
                     id = UUID.fromString("c076a0b9-0eb9-4a1b-bdcb-d75ebc40570d"),
                     årMånedFra = YearMonth.of(2021, 1),
-                    utgifter = 500,
                     stønad = 500,
                 ),
             ),
