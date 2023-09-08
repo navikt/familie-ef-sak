@@ -34,7 +34,7 @@ data class BarnSomSkalFødes(val fødselTerminDato: LocalDate) {
 enum class UstrukturertDokumentasjonType(val behandlingÅrsak: () -> BehandlingÅrsak) {
     PAPIRSØKNAD({ BehandlingÅrsak.PAPIRSØKNAD }),
     ETTERSENDING({ BehandlingÅrsak.NYE_OPPLYSNINGER }),
-    IKKE_VALGT({ error("Kan ikke bruke behandlingsårsak fra $IKKE_VALGT") }),;
+    IKKE_VALGT({ error("Kan ikke bruke behandlingsårsak fra $IKKE_VALGT") }), ;
 
     fun erEttersending(): Boolean = this == ETTERSENDING
 }
