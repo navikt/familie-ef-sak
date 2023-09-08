@@ -11,7 +11,6 @@ import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvisIkke
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
-import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.GrunnlagsdataEndring
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
@@ -20,8 +19,6 @@ import no.nav.familie.ef.sak.vilkår.dto.VilkårGrunnlagDto
 import no.nav.familie.ef.sak.vilkår.dto.VilkårsvurderingDto
 import no.nav.familie.ef.sak.vilkår.dto.tilDto
 import no.nav.familie.ef.sak.vilkår.regler.HovedregelMetadata
-import no.nav.familie.ef.sak.vilkår.regler.RegelId
-import no.nav.familie.ef.sak.vilkår.regler.SvarId
 import no.nav.familie.ef.sak.vilkår.regler.evalutation.OppdaterVilkår
 import no.nav.familie.ef.sak.vilkår.regler.evalutation.OppdaterVilkår.opprettNyeVilkårsvurderinger
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
@@ -211,19 +208,6 @@ class VurderingService(
         tilbakestillEndretTidForKopierteVurderinger(kopiAvVurderinger, tidligereVurderinger)
     }
 
-    fun aktivitetArbeidForBehandlingIds(behandlingIds: Collection<UUID>): Map<UUID, SvarId?> {
-        val vilkårsvurderinger =
-            vilkårsvurderingRepository.findByTypeAndBehandlingIdIn(VilkårType.AKTIVITET_ARBEID, behandlingIds)
-
-        return vilkårsvurderinger.associate { vilkårsvurdering ->
-            val delvilkårsvurderinger = vilkårsvurdering.delvilkårsvurdering.delvilkårsvurderinger
-
-            vilkårsvurdering.behandlingId to delvilkårsvurderinger.map { delvilkårsvurdering ->
-                delvilkårsvurdering.vurderinger.single { it.regelId == RegelId.ER_I_ARBEID_ELLER_FORBIGÅENDE_SYKDOM }.svar
-            }.single()
-        }
-    }
-
     private fun validerAtVurderingerKanKopieres(
         tidligereVurderinger: Map<UUID, Vilkårsvurdering>,
         eksisterendeBehandlingId: UUID,
@@ -248,7 +232,7 @@ class VurderingService(
                     behandlingId = nyBehandlingsId,
                     sporbar = Sporbar(),
                     barnId = finnBarnId(vurdering.barnId, barnIdMap),
-                    opphavsvilkår = if (featureToggleService.isEnabled(Toggle.VILKÅR_GJENBRUK)) vurdering.opprettOpphavsvilkår() else null,
+                    opphavsvilkår = vurdering.opprettOpphavsvilkår(),
                 )
             }
 

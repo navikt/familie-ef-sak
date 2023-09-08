@@ -308,6 +308,7 @@ class TestSaksbehandlingController(
             periode = Månedsperiode(YearMonth.now(), YearMonth.now().plusMonths(1)),
             inntektsgrunnlag = 0,
             samordningsfradrag = 0,
+            ignorerFeilISimulering = true,
         )
     }
 }

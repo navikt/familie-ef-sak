@@ -54,9 +54,6 @@ fun JournalføringRequest.valider() {
         feilHvis(barnSomSkalFødes.isNotEmpty()) {
             "Kan ikke sende inn barn når man journalfører på en eksisterende behandling"
         }
-        feilHvis(ustrukturertDokumentasjonType == UstrukturertDokumentasjonType.PAPIRSØKNAD) {
-            "Kan ikke journalføre papirsøknad på eksisterende behandling"
-        }
         feilHvis(vilkårsbehandleNyeBarn != VilkårsbehandleNyeBarn.IKKE_VALGT) {
             "Kan ikke vilkårsbehandle nye barn på en eksisterende behandling"
         }
