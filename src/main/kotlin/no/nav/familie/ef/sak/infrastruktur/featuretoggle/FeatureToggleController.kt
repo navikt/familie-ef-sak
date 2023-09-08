@@ -16,17 +16,11 @@ class FeatureToggleController(private val featureToggleService: FeatureToggleSer
     private val funksjonsbrytere = setOf(
         Toggle.BEHANDLING_KORRIGERING,
         Toggle.FRONTEND_VIS_IKKE_PUBLISERTE_BREVMALER,
-        Toggle.MIGRERING,
         Toggle.MIGRERING_BARNETILSYN,
         Toggle.OPPRETT_BEHANDLING_FERDIGSTILT_JOURNALPOST,
         Toggle.FRONTEND_AUTOMATISK_UTFYLLE_VILKÅR,
         Toggle.FRONTEND_SATSENDRING,
         Toggle.FRONTEND_VIS_INNTEKT_PERSONOVERSIKT,
-        Toggle.ULIKE_INNTEKTER,
-        Toggle.VURDER_KONSEKVENS_OPPGAVER_LOKALKONTOR,
-        Toggle.AUTOMATISKE_OPPGAVER_FREMLEGGSOPPGAVE,
-        Toggle.UTBEDRET_GUI_SKOLEPENGER,
-        Toggle.ÅRSAK_REVURDERING_BESKRIVELSE,
     )
 
     @GetMapping

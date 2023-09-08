@@ -10,7 +10,10 @@ import no.nav.familie.ef.sak.vedtak.historikk.AndelHistorikkBeregner
 import no.nav.familie.ef.sak.vedtak.historikk.AndelHistorikkDto
 import no.nav.familie.ef.sak.vedtak.historikk.EndringType
 import no.nav.familie.ef.sak.vedtak.historikk.HistorikkKonfigurasjon
-import no.nav.familie.ef.sak.vilkår.VurderingService
+import no.nav.familie.ef.sak.vilkår.VilkårType
+import no.nav.familie.ef.sak.vilkår.VilkårsvurderingRepository
+import no.nav.familie.ef.sak.vilkår.regler.RegelId
+import no.nav.familie.ef.sak.vilkår.regler.SvarId
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.util.UUID
@@ -21,7 +24,7 @@ class AndelsHistorikkService(
     private val behandlingService: BehandlingService,
     private val tilkjentYtelseRepository: TilkjentYtelseRepository,
     private val vedtakService: VedtakService,
-    private val vurderingService: VurderingService,
+    private val vilkårsvurderingRepository: VilkårsvurderingRepository,
     private val barnService: BarnService,
     private val featureToggleService: FeatureToggleService,
 ) {
@@ -36,7 +39,7 @@ class AndelsHistorikkService(
         val vedtakForBehandlinger = vedtakService.hentVedtakForBehandlinger(behandlingIder)
         val behandlinger = behandlingService.hentBehandlinger(behandlingIder)
         // hent vilkår for viss type hvor behandlingIder sendes inn
-        val aktivitetArbeid = vurderingService.aktivitetArbeidForBehandlingIds(behandlingIder)
+        val aktivitetArbeid = aktivitetArbeidForBehandlingIds(behandlingIder)
         return AndelHistorikkBeregner.lagHistorikk(
             stønadstype,
             tilkjenteYtelser,
@@ -48,6 +51,19 @@ class AndelsHistorikkService(
                 brukIkkeVedtatteSatser = featureToggleService.isEnabled(Toggle.SATSENDRING_BRUK_IKKE_VEDTATT_MAXSATS),
             ),
         )
+    }
+
+    fun aktivitetArbeidForBehandlingIds(behandlingIds: Collection<UUID>): Map<UUID, SvarId?> {
+        val vilkårsvurderinger =
+            vilkårsvurderingRepository.findByTypeAndBehandlingIdIn(VilkårType.AKTIVITET_ARBEID, behandlingIds)
+
+        return vilkårsvurderinger.associate { vilkårsvurdering ->
+            val delvilkårsvurderinger = vilkårsvurdering.delvilkårsvurdering.delvilkårsvurderinger
+
+            vilkårsvurdering.behandlingId to delvilkårsvurderinger.map { delvilkårsvurdering ->
+                delvilkårsvurdering.vurderinger.single { it.regelId == RegelId.ER_I_ARBEID_ELLER_FORBIGÅENDE_SYKDOM }.svar
+            }.single()
+        }
     }
 
     fun utledLøpendeUtbetalingForBarnIBarnetilsyn(behandlingId: UUID): BarnMedLøpendeStønad {

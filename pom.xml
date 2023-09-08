@@ -36,7 +36,7 @@
         <felles.version>2.20230825095715_3bcaf53</felles.version>
         <prosessering.version>2.20230807154047_d770f01</prosessering.version>
         <start-class>no.nav.familie.ef.sak.ApplicationKt</start-class>
-        <kontrakter.version>3.0_20230808083340_ced4750</kontrakter.version>
+        <kontrakter.version>3.0_20230817140529_df3e9ab</kontrakter.version>
         <eksterne.kontrakter.bisys.version>2.0_20230214104704_706e9c0</eksterne.kontrakter.bisys.version>
         <cucumber.version>7.13.0</cucumber.version>
 
@@ -45,7 +45,7 @@
         <sonar.projectKey>${SONAR_PROJECTKEY}</sonar.projectKey>
         <sonar.organization>navit</sonar.organization>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
-        <nav.security.version>3.1.3</nav.security.version> <!-- Denne burde være samme versjon som i felles -->
+        <nav.security.version>3.1.5</nav.security.version> <!-- Denne burde være samme versjon som i felles -->
         <okhttp3.version>4.9.1</okhttp3.version> <!-- overskrever spring sin versjon, blir brukt av mock-oauth2-server -->
         <unleash.version>8.3.0</unleash.version>
         <!--suppress UnresolvedMavenProperty -->
@@ -176,9 +176,9 @@
 
         <!-- test -->
         <dependency>
-            <groupId>com.github.tomakehurst</groupId>
-            <artifactId>wiremock-jre8-standalone</artifactId>
-            <version>2.35.0</version>
+            <groupId>org.wiremock</groupId>
+            <artifactId>wiremock-standalone</artifactId>
+            <version>3.0.1</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -218,7 +218,7 @@
         <dependency>
             <groupId>org.testcontainers</groupId>
             <artifactId>postgresql</artifactId>
-            <version>1.18.3</version>
+            <version>1.19.0</version>
             <scope>test</scope>
         </dependency>
         <dependency>

@@ -1,6 +1,5 @@
 package no.nav.familie.ef.sak.beregning
 
-import no.nav.familie.ef.sak.felles.util.mockFeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.kontrakter.felles.Månedsperiode
 import org.assertj.core.api.Assertions.assertThat
@@ -12,7 +11,7 @@ import java.time.LocalDate
 
 internal class BeregningServiceTest {
 
-    private val beregningService = BeregningService(mockFeatureToggleService())
+    private val beregningService = BeregningService()
 
     @Test
     internal fun `skal beregne full ytelse når det ikke foreligger inntekt`() {
