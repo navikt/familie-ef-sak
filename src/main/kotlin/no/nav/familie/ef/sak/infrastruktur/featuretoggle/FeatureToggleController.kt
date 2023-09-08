@@ -42,6 +42,9 @@ class FeatureToggleController(
         val likeToggles = funksjonsbrytere.keys.intersect(funksjonsbrytereNext.keys)
         if (likeToggles.isNotEmpty()) {
             logger.error("Like funksjonsbrytere funnet fra Unleash og Unleash Next: $likeToggles")
+            val filteredFunksjonsbrytereNext = funksjonsbrytereNext.toMutableMap()
+            filteredFunksjonsbrytereNext.keys.removeAll(likeToggles)
+            return funksjonsbrytere + filteredFunksjonsbrytereNext
         }
         return funksjonsbrytere + funksjonsbrytereNext
     }
