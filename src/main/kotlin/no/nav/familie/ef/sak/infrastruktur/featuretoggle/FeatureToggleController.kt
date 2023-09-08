@@ -1,6 +1,5 @@
 package no.nav.familie.ef.sak.infrastruktur.featuretoggle
 
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.logger
 import no.nav.familie.unleash.DefaultUnleashService
 import no.nav.security.token.support.core.api.Unprotected
 import org.springframework.http.MediaType
@@ -41,9 +40,7 @@ class FeatureToggleController(
 
         val likeToggles = funksjonsbrytere.keys.intersect(funksjonsbrytereNext.keys)
         if (likeToggles.isNotEmpty()) {
-            logger.error("Like funksjonsbrytere funnet fra Unleash og Unleash Next: $likeToggles")
-            val filtrerteFunksjonsbrytereNext = funksjonsbrytereNext.filterKeys { it !in likeToggles }
-            return funksjonsbrytere + filtrerteFunksjonsbrytereNext
+            error("Like funksjonsbrytere funnet fra Unleash og Unleash Next: $likeToggles")
         }
         return funksjonsbrytere + funksjonsbrytereNext
     }
