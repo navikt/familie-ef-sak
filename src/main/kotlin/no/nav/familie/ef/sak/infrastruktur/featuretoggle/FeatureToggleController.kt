@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.infrastruktur.featuretoggle
 
+import io.getunleash.strategy.Strategy
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.logger
 import no.nav.familie.unleash.DefaultUnleashService
 import no.nav.security.token.support.core.api.Unprotected
@@ -18,10 +19,11 @@ class FeatureToggleController(
     @Value("\${UNLEASH_SERVER_API_URL}") private val apiUrl: String,
     @Value("\${UNLEASH_SERVER_API_TOKEN}") private val apiToken: String,
     @Value("\${NAIS_APP_NAME}") private val appName: String,
+    private val strategies: List<Strategy>,
     private val featureToggleService: FeatureToggleService,
 ) {
 
-    private val unleashNextService: DefaultUnleashService = DefaultUnleashService(apiUrl, apiToken, appName)
+    private val unleashNextService: DefaultUnleashService = DefaultUnleashService(apiUrl, apiToken, appName, strategies)
 
     private val funksjonsbrytere = setOf(
         Toggle.BEHANDLING_KORRIGERING,
