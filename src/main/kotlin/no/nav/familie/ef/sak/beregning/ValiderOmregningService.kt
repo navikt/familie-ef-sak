@@ -3,8 +3,6 @@ package no.nav.familie.ef.sak.beregning
 import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
-import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
-import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseRepository
 import no.nav.familie.ef.sak.tilkjentytelse.domain.AndelTilkjentYtelse
 import no.nav.familie.ef.sak.vedtak.VedtakService
@@ -15,7 +13,6 @@ import no.nav.familie.ef.sak.vedtak.dto.ResultatType
 import no.nav.familie.ef.sak.vedtak.dto.VedtaksperiodeDto
 import no.nav.familie.ef.sak.vedtak.historikk.VedtakHistorikkService
 import no.nav.familie.kontrakter.felles.ef.StønadType
-import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import java.time.YearMonth
@@ -26,20 +23,13 @@ class ValiderOmregningService(
     private val tilkjentYtelseRepository: TilkjentYtelseRepository,
     private val beregningService: BeregningService,
     private val vedtakHistorikkService: VedtakHistorikkService,
-    private val featureToggleService: FeatureToggleService,
 ) {
-
-    private val logger = LoggerFactory.getLogger(javaClass)
 
     fun validerHarSammePerioderSomTidligereVedtak(
         data: InnvilgelseOvergangsstønad,
         saksbehandling: Saksbehandling,
     ) {
         if (!saksbehandling.erOmregning || saksbehandling.erMaskinellOmregning) {
-            return
-        }
-        if (featureToggleService.isEnabled(Toggle.G_OMREGNING_REVURDER_HOPP_OVER_VALIDER_TIDLIGERE_VEDTAK)) {
-            logger.warn("Skipper validering av tidligere perioder vid g-omregning for behandling=${saksbehandling.id}")
             return
         }
         val tidligerePerioder = hentVedtakshistorikkFraNyesteGrunnbeløp(saksbehandling)
