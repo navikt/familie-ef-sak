@@ -13,7 +13,7 @@ class ByUserIdStrategy : Strategy {
     }
 
     override fun isEnabled(map: MutableMap<String, String>): Boolean {
-        return map["user"]
+        return map["userIds"]
             ?.split(',')
             ?.any {
                 logger.info("ByUserId: $it")
