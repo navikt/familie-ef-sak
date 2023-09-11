@@ -9,6 +9,7 @@ class FeatureToggleService(val defaultUnleashService: DefaultUnleashService) {
     fun isEnabled(toggle: Toggle): Boolean {
         return defaultUnleashService.isEnabled(toggle.toggleId)
     }
+
     fun isEnabled(toggle: Toggle, defaultValue: Boolean): Boolean {
         return defaultUnleashService.isEnabled(toggle.toggleId, defaultValue)
     }
@@ -27,8 +28,14 @@ enum class Toggle(val toggleId: String, val beskrivelse: String? = null) {
     G_BEREGNING("familie.ef.sak.g-beregning", "Operational"),
     G_BEREGNING_SCHEDULER("familie.ef.sak.g-beregning-scheduler", "Operational"),
     SATSENDRING_BRUK_IKKE_VEDTATT_MAXSATS("familie.ef.sak.bruk-nye-maxsatser", "Operational"),
-    FRONTEND_VIS_IKKE_PUBLISERTE_BREVMALER("familie.ef.sak.frontend-vis-ikke-publiserte-brevmaler", "Operational- kun preprod"),
-    FRONTEND_AUTOMATISK_UTFYLLE_VILKÅR("familie.ef.sak.frontend-automatisk-utfylle-vilkar", "Operational - kun preprod"),
+    FRONTEND_VIS_IKKE_PUBLISERTE_BREVMALER(
+        "familie.ef.sak.frontend-vis-ikke-publiserte-brevmaler",
+        "Operational- kun preprod"
+    ),
+    FRONTEND_AUTOMATISK_UTFYLLE_VILKÅR(
+        "familie.ef.sak.frontend-automatisk-utfylle-vilkar",
+        "Operational - kun preprod"
+    ),
     AUTOMATISKE_BREV_INNHENTING_KARAKTERUTSKRIFT(
         "familie.ef.sak.automatiske-brev-innhenting-karakterutskrift",
         "Operational - sesongavhengig",
@@ -47,7 +54,7 @@ enum class Toggle(val toggleId: String, val beskrivelse: String? = null) {
     TILLAT_MIGRERING_7_ÅR_TILBAKE("familie.ef.sak.tillat-migrering-7-ar-tilbake", "Permission"),
     UTVIKLER_MED_VEILEDERRROLLE("familie.ef.sak.utviklere-med-veilederrolle", "Permission"),
     TEST_ENVIRONMENT("test.environment"),
-     TEST_USER_ID("test.user.id"),
+    TEST_USER_ID("test.user.id"),
     ;
 
     companion object {
