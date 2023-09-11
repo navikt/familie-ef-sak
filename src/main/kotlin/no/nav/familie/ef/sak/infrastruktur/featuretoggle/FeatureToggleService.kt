@@ -30,11 +30,11 @@ enum class Toggle(val toggleId: String, val beskrivelse: String? = null) {
     SATSENDRING_BRUK_IKKE_VEDTATT_MAXSATS("familie.ef.sak.bruk-nye-maxsatser", "Operational"),
     FRONTEND_VIS_IKKE_PUBLISERTE_BREVMALER(
         "familie.ef.sak.frontend-vis-ikke-publiserte-brevmaler",
-        "Operational- kun preprod"
+        "Operational- kun preprod",
     ),
     FRONTEND_AUTOMATISK_UTFYLLE_VILKÅR(
         "familie.ef.sak.frontend-automatisk-utfylle-vilkar",
-        "Operational - kun preprod"
+        "Operational - kun preprod",
     ),
     AUTOMATISKE_BREV_INNHENTING_KARAKTERUTSKRIFT(
         "familie.ef.sak.automatiske-brev-innhenting-karakterutskrift",
