@@ -42,7 +42,7 @@ Det finnes også en controller hvor man også kan kjøre omregning på _en_ fags
 * familie-ef-iverksett: iverksetter mot økonomi og sender melding til ditt nav 
 (hvis dette ikke endres må ny G også oppdateres på iverksett)
 
-### Noen valg og andre greier det er fint å vite om
+### Noen valg det er fint å vite om
 #### Indeksjustering av inntekt.
 `no.nav.familie.ef.sak.beregning.BeregningKt.finnGrunnbeløpsPerioder`
 Vi indeksjusterer inntekt når vi g-omregner. For hver inntektsperiode vi skal endre:
