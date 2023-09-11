@@ -49,6 +49,7 @@ import no.nav.familie.kontrakter.ef.iverksett.Brevmottaker
 import no.nav.familie.kontrakter.ef.iverksett.DelvilkårsvurderingDto
 import no.nav.familie.kontrakter.ef.iverksett.DelårsperiodeSkoleårSkolepengerDto
 import no.nav.familie.kontrakter.ef.iverksett.FagsakdetaljerDto
+import no.nav.familie.kontrakter.ef.iverksett.Grunnbeløp
 import no.nav.familie.kontrakter.ef.iverksett.IverksettBarnetilsynDto
 import no.nav.familie.kontrakter.ef.iverksett.IverksettDto
 import no.nav.familie.kontrakter.ef.iverksett.IverksettOvergangsstønadDto
@@ -196,7 +197,7 @@ class IverksettingDtoMapper(
             "Kan ikke iverksette med utdatert grunnbeløp gyldig fra $gMånedTilkjentYtelse. Denne behandlingen må beregnes og simuleres på nytt"
 
         val nyttGrunnbeløpForInneværendeÅrRegistrertIEF = Grunnbeløpsperioder.nyesteGrunnbeløpGyldigFraOgMed.year == DatoUtil.inneværendeÅr()
-        val fristGOmregning = LocalDate.of(DatoUtil.inneværendeÅr(), Month.JUNE, 15)
+        val fristGOmregning = LocalDate.of(DatoUtil.inneværendeÅr(), Month.JUNE, 1)
 
         if (nyttGrunnbeløpForInneværendeÅrRegistrertIEF && DatoUtil.dagensDato() < fristGOmregning) {
             validerBehandlingBrukerÅretsEllerFjoråretsG(gMånedTilkjentYtelse, feilmelding)
@@ -304,6 +305,7 @@ class IverksettingDtoMapper(
             oppgaverForOpprettelseService.hentOppgaverForOpprettelseEllerNull(vedtak.behandlingId)?.let {
                 OppgaverForOpprettelseDto(oppgavetyper = it.oppgavetyper)
             } ?: OppgaverForOpprettelseDto(oppgavetyper = emptyList()),
+            grunnbeløp = grunnbeløpFraTilkjentYtelse(tilkjentYtelse),
         )
 
     @Improvement("Opphørårsak må utledes ved revurdering")
@@ -455,7 +457,6 @@ fun DelårsperiodeSkoleårSkolepenger.tilIverksettDto() = DelårsperiodeSkoleår
 
 fun SkolepengerUtgift.tilIverksettDto() = SkolepengerUtgiftDto(
     utgiftsdato = this.utgiftsdato,
-    utgifter = this.utgifter,
     stønad = this.stønad,
 )
 
@@ -475,4 +476,10 @@ fun MottakerRolle.tilIverksettDto(): Brevmottaker.MottakerRolle =
         MottakerRolle.FULLMAKT -> Brevmottaker.MottakerRolle.FULLMEKTIG
         MottakerRolle.VERGE -> Brevmottaker.MottakerRolle.VERGE
         MottakerRolle.BRUKER -> Brevmottaker.MottakerRolle.BRUKER
+    }
+
+private fun grunnbeløpFraTilkjentYtelse(tilkjentYtelse: TilkjentYtelse?) =
+    tilkjentYtelse?.let {
+        val grunnbeløp = Grunnbeløpsperioder.finnGrunnbeløp(it.grunnbeløpsmåned)
+        Grunnbeløp(periode = grunnbeløp.periode, grunnbeløp = grunnbeløp.grunnbeløp)
     }

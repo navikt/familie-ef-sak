@@ -15,7 +15,7 @@ import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPeriodeResponse
 import org.springframework.stereotype.Service
 
 @Service
-class TidligereVedaksperioderService(
+class TidligereVedtaksperioderService(
     private val fagsakPersonService: FagsakPersonService,
     private val fagsakService: FagsakService,
     private val behandlingService: BehandlingService,

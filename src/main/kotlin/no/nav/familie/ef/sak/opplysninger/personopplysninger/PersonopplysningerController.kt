@@ -47,7 +47,7 @@ class PersonopplysningerController(
     fun personopplysningerFraFagsakPersonId(@PathVariable fagsakPersonId: UUID): Ressurs<PersonopplysningerDto> {
         tilgangService.validerTilgangTilFagsakPerson(fagsakPersonId, AuditLoggerEvent.ACCESS)
         val aktivIdent = fagsakPersonService.hentAktivIdent(fagsakPersonId)
-        return Ressurs.success(personopplysningerService.hentPersonopplysninger(aktivIdent))
+        return Ressurs.success(personopplysningerService.hentPersonopplysningerUtenVedtakshistorikk(aktivIdent))
     }
 
     @PostMapping("/nav-kontor")

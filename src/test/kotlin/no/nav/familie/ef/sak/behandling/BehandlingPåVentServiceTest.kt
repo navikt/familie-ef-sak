@@ -12,7 +12,7 @@ import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.dto.SettPåVentRequest
 import no.nav.familie.ef.sak.behandling.dto.TaAvVentStatus
-import no.nav.familie.ef.sak.behandling.dto.VurderHenvendelseOppgavetype
+import no.nav.familie.ef.sak.behandling.dto.beskrivelse
 import no.nav.familie.ef.sak.behandlingsflyt.task.BehandlingsstatistikkTask
 import no.nav.familie.ef.sak.behandlingsflyt.task.OpprettOppgaveTask
 import no.nav.familie.ef.sak.behandlingshistorikk.BehandlingshistorikkService
@@ -22,6 +22,7 @@ import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.oppgave.OppgaveService
+import no.nav.familie.ef.sak.oppgave.OppgaveSubtype
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.saksbehandling
@@ -358,6 +359,9 @@ internal class BehandlingPåVentServiceTest {
 
         @Test
         fun `skal ta behandling av vent og sende melding til DVH`() {
+            val oppgaveId = 1234561L
+            mockSettSaksbehandlerPåOppgave(oppgaveId)
+
             behandlingPåVentService.taAvVent(behandlingId)
 
             verify { behandlingService.oppdaterStatusPåBehandling(behandlingId, BehandlingStatus.UTREDES) }
@@ -379,6 +383,7 @@ internal class BehandlingPåVentServiceTest {
             }
             verify(exactly = 0) { nullstillVedtakService.nullstillVedtak(any()) }
             verify(exactly = 0) { behandlingService.oppdaterForrigeBehandlingId(any(), any()) }
+            verify { oppgaveService.fordelOppgave(oppgaveId, "bob", any()) }
         }
 
         @Test
@@ -400,7 +405,9 @@ internal class BehandlingPåVentServiceTest {
         }
 
         @Test
-        internal fun `skal oppdatere nullstille vedtak og oppdatere forrigeBehandlingId hvis man må nullstille vedtaket`() {
+        internal fun `skal nullstille vedtak og oppdatere forrigeBehandlingId hvis man må nullstille vedtaket`() {
+            val oppgaveId = 123456L
+            mockSettSaksbehandlerPåOppgave(oppgaveId)
             mockFinnSisteIverksatteBehandling(tidligereIverksattBehandling)
 
             behandlingPåVentService.taAvVent(behandlingId)
@@ -409,7 +416,49 @@ internal class BehandlingPåVentServiceTest {
                 behandlingService.oppdaterStatusPåBehandling(behandlingId, BehandlingStatus.UTREDES)
                 behandlingService.oppdaterForrigeBehandlingId(behandlingId, tidligereIverksattBehandling.id)
                 nullstillVedtakService.nullstillVedtak(behandlingId)
+                oppgaveService.fordelOppgave(oppgaveId, "bob", any())
             }
+        }
+
+        private fun mockSettSaksbehandlerPåOppgave(oppgaveId: Long) {
+            val oppgave = oppgave(oppgaveId)
+            every { oppgaveService.hentIkkeFerdigstiltOppgaveForBehandling(behandlingId) } returns oppgave
+            every { oppgaveService.fordelOppgave(any(), any(), any()) } returns oppgaveId
+        }
+    }
+
+    @Nested
+    inner class OppgaveSubtypeTest {
+
+        @Test
+        fun `skal returnere beskrivelse uten beskjed for info om søkt overgangsstønad`() {
+            val subtype = OppgaveSubtype.INFORMERE_OM_SØKT_OVERGANGSSTØNAD
+            val beskrivelse = OppgaveBeskrivelse.informereLokalkontorOmOvergangsstønad
+
+            val beskrivelseOppgaveSubtype = subtype.beskrivelse("beskjed")
+
+            assertThat(beskrivelseOppgaveSubtype).isEqualTo(beskrivelse)
+        }
+
+        @Test
+        fun `skal returnere beskrivelse med ekstra beskjed for innstilling vedr utdanning`() {
+            val subtype = OppgaveSubtype.INNSTILLING_VEDRØRENDE_UTDANNING
+            val beskjed = "beskjed"
+            val beskrivelse = "${OppgaveBeskrivelse.innstillingOmBrukersUtdanning}\n $beskjed \n"
+
+            val beskrivelseOppgaveSubtype = subtype.beskrivelse(beskjed)
+
+            assertThat(beskrivelseOppgaveSubtype).isEqualTo(beskrivelse)
+        }
+
+        @Test
+        fun `skal returnere beskrivelse uten ekstra beskjed for innstilling vedr utdanning`() {
+            val subtype = OppgaveSubtype.INNSTILLING_VEDRØRENDE_UTDANNING
+            val beskjed = null
+            val beskrivelse = OppgaveBeskrivelse.innstillingOmBrukersUtdanning
+            val beskrivelseOppgaveSubtype = subtype.beskrivelse(beskjed)
+
+            assertThat(beskrivelseOppgaveSubtype).isEqualTo(beskrivelse)
         }
     }
 
@@ -423,7 +472,7 @@ internal class BehandlingPåVentServiceTest {
         prioritet = OppgavePrioritet.NORM,
     )
 
-    private fun settPåVentRequest(oppgaveId: Long, oppfølgingsoppgaver: List<VurderHenvendelseOppgavetype>) =
+    private fun settPåVentRequest(oppgaveId: Long, oppfølgingsoppgaver: List<OppgaveSubtype>) =
         SettPåVentRequest(
             oppgaveId = oppgaveId,
             saksbehandler = "ny saksbehandler",
@@ -433,6 +482,7 @@ internal class BehandlingPåVentServiceTest {
             beskrivelse = "Her er litt tekst fra saksbehandler",
             oppgaveVersjon = 1,
             oppfølgingsoppgaverMotLokalKontor = oppfølgingsoppgaver,
+            innstillingsoppgaveBeskjed = "",
         )
 
     private fun mockHentBehandling(
@@ -466,6 +516,6 @@ internal class BehandlingPåVentServiceTest {
         return oppgaveId
     }
 
-    private val innstillingUtdanning = VurderHenvendelseOppgavetype.INNSTILLING_VEDRØRENDE_UTDANNING
-    private val informereOmSøktStønad = VurderHenvendelseOppgavetype.INFORMERE_OM_SØKT_OVERGANGSSTØNAD
+    private val innstillingUtdanning = OppgaveSubtype.INNSTILLING_VEDRØRENDE_UTDANNING
+    private val informereOmSøktStønad = OppgaveSubtype.INFORMERE_OM_SØKT_OVERGANGSSTØNAD
 }

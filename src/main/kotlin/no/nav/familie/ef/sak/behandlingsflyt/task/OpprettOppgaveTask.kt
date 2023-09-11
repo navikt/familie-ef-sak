@@ -4,6 +4,7 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.oppgave.OppgaveService
+import no.nav.familie.ef.sak.oppgave.OppgaveSubtype
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.AsyncTaskStep
@@ -32,6 +33,7 @@ class OpprettOppgaveTask(private val oppgaveService: OppgaveService, private val
     data class OpprettOppgaveTaskData(
         val behandlingId: UUID,
         val oppgavetype: Oppgavetype,
+        val vurderHenvendelseOppgaveSubtype: OppgaveSubtype? = null,
         val tilordnetNavIdent: String? = null,
         val beskrivelse: String? = null,
         val unik: LocalDateTime? = LocalDateTime.now(),
@@ -54,23 +56,14 @@ class OpprettOppgaveTask(private val oppgaveService: OppgaveService, private val
             }
         }
 
-        val oppgaveId = if (oppgavetype == Oppgavetype.VurderHenvendelse) {
-            oppgaveService.opprettOppgaveUtenÅLagreIRepository(
-                behandlingId = data.behandlingId,
-                oppgavetype = oppgavetype,
-                tilordnetNavIdent = data.tilordnetNavIdent,
-                beskrivelse = oppgaveService.lagOppgaveTekst(data.beskrivelse),
-                fristFerdigstillelse = null,
-                mappeId = null,
-            )
-        } else {
-            oppgaveService.opprettOppgave(
-                behandlingId = data.behandlingId,
-                oppgavetype = oppgavetype,
-                tilordnetNavIdent = data.tilordnetNavIdent,
-                beskrivelse = data.beskrivelse,
-            )
-        }
+        val oppgaveId = oppgaveService.opprettOppgave(
+            behandlingId = data.behandlingId,
+            oppgavetype = oppgavetype,
+            vurderHenvendelseOppgaveSubtype = data.vurderHenvendelseOppgaveSubtype,
+            tilordnetNavIdent = data.tilordnetNavIdent,
+            beskrivelse = data.beskrivelse,
+        )
+
         task.metadata.setProperty("oppgaveId", oppgaveId.toString())
     }
 
@@ -87,7 +80,6 @@ class OpprettOppgaveTask(private val oppgaveService: OppgaveService, private val
                 },
             )
         }
-
         const val TYPE = "opprettOppgave"
     }
 }

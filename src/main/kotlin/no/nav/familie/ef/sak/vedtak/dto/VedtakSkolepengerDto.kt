@@ -70,7 +70,6 @@ data class DelårsperiodeSkoleårDto(
 data class SkolepengerUtgiftDto(
     val id: UUID,
     val årMånedFra: YearMonth,
-    val utgifter: Int,
     val stønad: Int,
 )
 
@@ -80,7 +79,6 @@ fun SkoleårsperiodeSkolepengerDto.tilDomene() = SkoleårsperiodeSkolepenger(
         SkolepengerUtgift(
             id = it.id,
             utgiftsdato = it.årMånedFra.atDay(1),
-            utgifter = it.utgifter,
             stønad = it.stønad,
         )
     }.sortedBy { it.utgiftsdato },
@@ -129,6 +127,5 @@ fun DelårsperiodeSkoleårSkolepenger.tilDto() = DelårsperiodeSkoleårDto(
 fun SkolepengerUtgift.tilDto() = SkolepengerUtgiftDto(
     id = this.id,
     årMånedFra = YearMonth.from(this.utgiftsdato),
-    utgifter = this.utgifter,
     stønad = this.stønad,
 )

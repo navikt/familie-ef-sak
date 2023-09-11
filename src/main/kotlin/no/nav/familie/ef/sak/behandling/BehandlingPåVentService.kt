@@ -6,7 +6,6 @@ import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus.SATT_PÅ_VENT
 import no.nav.familie.ef.sak.behandling.dto.SettPåVentRequest
 import no.nav.familie.ef.sak.behandling.dto.TaAvVentStatus
 import no.nav.familie.ef.sak.behandling.dto.TaAvVentStatusDto
-import no.nav.familie.ef.sak.behandling.dto.VurderHenvendelseOppgavetype
 import no.nav.familie.ef.sak.behandling.dto.beskrivelse
 import no.nav.familie.ef.sak.behandlingsflyt.task.BehandlingsstatistikkTask
 import no.nav.familie.ef.sak.behandlingsflyt.task.OpprettOppgaveTask
@@ -18,14 +17,16 @@ import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
-import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.oppgave.OppgaveService
+import no.nav.familie.ef.sak.oppgave.OppgaveSubtype
 import no.nav.familie.ef.sak.vedtak.NullstillVedtakService
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.kontrakter.felles.oppgave.Oppgave
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.internal.TaskService
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -40,6 +41,9 @@ class BehandlingPåVentService(
     private val featureToggleService: FeatureToggleService,
     private val oppgaveService: OppgaveService,
 ) {
+
+    val logger: Logger = LoggerFactory.getLogger(javaClass)
+
     @Transactional
     fun settPåVent(behandlingId: UUID, settPåVentRequest: SettPåVentRequest) {
         val behandling = behandlingService.hentBehandling(behandlingId)
@@ -53,7 +57,11 @@ class BehandlingPåVentService(
         oppdaterVerdierPåOppgave(settPåVentRequest)
 
         if (!settPåVentRequest.oppfølgingsoppgaverMotLokalKontor.isNullOrEmpty()) {
-            opprettVurderHenvendelseOppgaveTasks(behandlingId, settPåVentRequest.oppfølgingsoppgaverMotLokalKontor)
+            opprettVurderHenvendelseOppgaveTasks(
+                behandlingId,
+                settPåVentRequest.oppfølgingsoppgaverMotLokalKontor,
+                settPåVentRequest.innstillingsoppgaveBeskjed,
+            )
         }
     }
 
@@ -77,7 +85,8 @@ class BehandlingPåVentService(
 
     private fun opprettVurderHenvendelseOppgaveTasks(
         behandlingId: UUID,
-        vurderHenvendelseOppgaver: List<VurderHenvendelseOppgavetype>,
+        vurderHenvendelseOppgaver: List<OppgaveSubtype>,
+        innstillingsoppgaveBeskjed: String?,
     ) {
         val saksbehandling = behandlingService.hentSaksbehandling(behandlingId)
 
@@ -89,7 +98,8 @@ class BehandlingPåVentService(
                     OpprettOppgaveTask.OpprettOppgaveTaskData(
                         behandlingId = saksbehandling.id,
                         oppgavetype = Oppgavetype.VurderHenvendelse,
-                        beskrivelse = it.beskrivelse(),
+                        vurderHenvendelseOppgaveSubtype = it,
+                        beskrivelse = it.beskrivelse(innstillingsoppgaveBeskjed),
                     ),
                 ),
             )
@@ -208,30 +218,22 @@ class BehandlingPåVentService(
         brukerfeilHvis(behandling.status.behandlingErLåstForVidereRedigering()) {
             "Kan ikke sette behandling med status ${behandling.status} på vent"
         }
-
-        feilHvis(!featureToggleService.isEnabled(Toggle.SETT_PÅ_VENT_MED_OPPGAVESTYRING)) {
-            "Featuretoggle for sett på vent med oppgavestyring er ikke påskrudd"
-        }
     }
 
     private fun validerKanOppretteVurderHenvendelseOppgave(
         saksbehandling: Saksbehandling,
-        vurderHenvendelseOppgaver: List<VurderHenvendelseOppgavetype>,
+        vurderHenvendelseOppgaver: List<OppgaveSubtype>,
     ) {
-        if (vurderHenvendelseOppgaver.contains(VurderHenvendelseOppgavetype.INFORMERE_OM_SØKT_OVERGANGSSTØNAD)) {
+        if (vurderHenvendelseOppgaver.contains(OppgaveSubtype.INFORMERE_OM_SØKT_OVERGANGSSTØNAD)) {
             feilHvis(saksbehandling.stønadstype != StønadType.OVERGANGSSTØNAD) {
                 "Kan ikke lagre task for opprettelse av oppgave om informering om søkt overgangsstønad  på behandling med id ${saksbehandling.id} fordi behandlingen ikke er tilknyttet overgangsstønad"
             }
         }
 
-        if (vurderHenvendelseOppgaver.contains(VurderHenvendelseOppgavetype.INNSTILLING_VEDRØRENDE_UTDANNING)) {
-            feilHvis(saksbehandling.stønadstype != StønadType.OVERGANGSSTØNAD && saksbehandling.stønadstype != StønadType.SKOLEPENGER) {
+        if (vurderHenvendelseOppgaver.contains(OppgaveSubtype.INNSTILLING_VEDRØRENDE_UTDANNING)) {
+            feilHvis(saksbehandling.stønadstype == StønadType.BARNETILSYN) {
                 "Kan ikke lagre task for opprettelse av oppgave om innstilling om utdanning på behandling med id ${saksbehandling.id} fordi behandlingen hverken er tilknyttet overgangsstønad eller skolepenger"
             }
-        }
-
-        feilHvis(!featureToggleService.isEnabled(Toggle.VURDER_KONSEKVENS_OPPGAVER_LOKALKONTOR)) {
-            "Featuretoggle for opprettelse av automatiske oppgaver til lokalkontor er ikke påskrudd"
         }
     }
 
@@ -255,7 +257,18 @@ class BehandlingPåVentService(
                 nullstillVedtakService.nullstillVedtak(behandlingId)
             }
         }
+        fordelOppgaveTilSaksbehandler(behandlingId)
         taskService.save(BehandlingsstatistikkTask.opprettPåbegyntTask(behandlingId))
+    }
+
+    private fun fordelOppgaveTilSaksbehandler(behandlingId: UUID) {
+        val oppgave = oppgaveService.hentIkkeFerdigstiltOppgaveForBehandling(behandlingId)
+        val oppgaveId = oppgave?.id
+        if (oppgaveId != null) {
+            oppgaveService.fordelOppgave(oppgaveId, SikkerhetContext.hentSaksbehandler(), oppgave.versjon)
+        } else {
+            logger.warn("Finner ingen oppgave å oppdatere")
+        }
     }
 
     private fun opprettHistorikkInnslag(behandling: Behandling, stegUtfall: StegUtfall) {

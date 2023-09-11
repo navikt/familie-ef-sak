@@ -42,6 +42,30 @@ internal class SkolepengerMaksbeløpTest {
             .withFailMessage("Finner ikke maksbeløp for studietype=VIDEREGÅENDE skoleår=18/19")
     }
 
+    @Test
+    internal fun `maksbeløp for universitet 2023 skal returnere riktig beløp`() {
+        assertThat(maksbeløpForÅr(HØGSKOLE_UNIVERSITET, Year.of(2023))).isEqualTo(74_366)
+    }
+
+    @Test
+    internal fun `maksbeløp for videregående 2023 skal returnere riktig beløp`() {
+        assertThat(maksbeløpForÅr(VIDEREGÅENDE, Year.of(2023))).isEqualTo(31_033)
+    }
+
+    @Test
+    internal fun `Siste registrerte maksbeløp-år skal være samme for høyskole og videregående`() {
+        val årHøyskole = SkolepengerMaksbeløp.hentSisteÅrRegistrertMaksbeløpHøyskole()
+        val årVideregående = SkolepengerMaksbeløp.hentSisteÅrRegistrertMaksbeløpVideregående()
+        assertThat(årHøyskole).isEqualTo(årVideregående)
+    }
+
+    @Test
+    internal fun `Må holde maksbeløp skolepenger oppdatert, men tåler ett år forsinkelse`() {
+        val sisteRegistrerteÅr = SkolepengerMaksbeløp.hentSisteÅrRegistrertMaksbeløpHøyskole()
+        val ifjor = Year.now().minusYears(1)
+        assertThat(sisteRegistrerteÅr).isGreaterThanOrEqualTo(ifjor)
+    }
+
     /**
      * Disse testene må oppdateres med år når man legger inn nytt maksbeløp for neste år
      * * [ÅR_OM_2_ÅR] må oppdateres
@@ -50,16 +74,20 @@ internal class SkolepengerMaksbeløpTest {
     @Nested
     inner class MaksBeløpEtÅrFremITiden {
 
-        private val ÅR_OM_2_ÅR = Year.of(2024)
+        private val ÅR_OM_2_ÅR = Year.now().plusYears(2)
 
         @Test
-        internal fun `maksbeløp for universitet et år frem i tiden skal returnere forrige år sitt verdi`() {
-            assertThat(maksbeløpForÅr(HØGSKOLE_UNIVERSITET, Year.of(2023))).isEqualTo(69_500)
+        internal fun `Skolepenger skal returnere maksbeløp for siste høyskole år når man ber om året etter`() {
+            val år = SkolepengerMaksbeløp.hentSisteÅrRegistrertMaksbeløpHøyskole()
+            val åretEtterSiste = år.plusYears(1)
+            assertThat(maksbeløpForÅr(HØGSKOLE_UNIVERSITET, år)).isEqualTo(maksbeløpForÅr(HØGSKOLE_UNIVERSITET, åretEtterSiste))
         }
 
         @Test
-        internal fun `maksbeløp for videregående et år frem i tiden skal returnere forrige år sitt verdi`() {
-            assertThat(maksbeløpForÅr(VIDEREGÅENDE, Year.of(2023))).isEqualTo(29_002)
+        internal fun `Skolepenger skal returnere maksbeløp for siste videregående år når man ber om året etter`() {
+            val år = SkolepengerMaksbeløp.hentSisteÅrRegistrertMaksbeløpVideregående()
+            val åretEtterSiste = år.plusYears(1)
+            assertThat(maksbeløpForÅr(VIDEREGÅENDE, år)).isEqualTo(maksbeløpForÅr(VIDEREGÅENDE, åretEtterSiste))
         }
 
         @Test

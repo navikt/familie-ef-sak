@@ -189,6 +189,10 @@ class BeregnYtelseSteg(
             ) {
                 "Kan ikke inneholde aktivitet eller periode av type migrering"
             }
+            val perioderFørFødsel = data.perioder.filter { it.periodeType === VedtaksperiodeType.PERIODE_FØR_FØDSEL }
+            brukerfeilHvis(perioderFørFødsel.sumOf { it.periode.lengdeIHeleMåneder() } > 4) {
+                "Vedtaket kan ikke inneholde mer enn 4 måneder med periodetypen: \"periode før fødsel\""
+            }
         }
         if (data is InnvilgelseBarnetilsyn) {
             barnService.validerBarnFinnesPåBehandling(saksbehandling.id, data.perioder.flatMap { it.barn }.toSet())

@@ -1,8 +1,6 @@
 package no.nav.familie.ef.sak.beregning
 
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
-import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
-import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.kontrakter.felles.erSammenhengende
 import no.nav.familie.kontrakter.felles.harOverlappende
@@ -10,9 +8,7 @@ import org.springframework.stereotype.Service
 import java.math.BigDecimal
 
 @Service
-class BeregningService(
-    private val featureToggleService: FeatureToggleService,
-) {
+class BeregningService {
 
     fun beregnYtelse(
         vedtaksperioder: List<Månedsperiode>,
@@ -21,9 +17,8 @@ class BeregningService(
         validerInnteksperioder(inntektsperioder, vedtaksperioder)
         validerVedtaksperioder(vedtaksperioder)
 
-        val skalRundeNedTotalInntekt = featureToggleService.isEnabled(Toggle.ULIKE_INNTEKTER)
         val beløpForInnteksperioder = inntektsperioder.flatMap {
-            BeregningUtils.beregnStønadForInntekt(it, skalRundeNedTotalInntekt)
+            BeregningUtils.beregnStønadForInntekt(it)
         }
 
         return vedtaksperioder.flatMap {

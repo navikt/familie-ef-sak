@@ -16,7 +16,8 @@ import org.springframework.data.repository.findByIdOrNull
 internal class BrevmottakereServiceTest {
 
     val brevmottakereRepository = mockk<BrevmottakereRepository>()
-    val brevmottakereService = BrevmottakereService(brevmottakereRepository)
+    val frittståendeBrevmottakereRepository = mockk<FrittståendeBrevmottakereRepository>()
+    val brevmottakereService = BrevmottakereService(brevmottakereRepository, frittståendeBrevmottakereRepository)
     val behandling = behandling()
 
     @Test

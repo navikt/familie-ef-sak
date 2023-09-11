@@ -38,7 +38,6 @@ internal class BeregningSkolepengerServiceTest {
 
     private val defaultFra = YearMonth.of(2021, 8)
     private val defaultTil = YearMonth.of(2022, 6)
-    private val defaultUtgift = 100
     private val defaultStønad = 50
 
     @BeforeEach
@@ -55,7 +54,7 @@ internal class BeregningSkolepengerServiceTest {
         val delårsperiode = delårsperiode()
         val skoleårsperiode = SkoleårsperiodeSkolepengerDto(listOf(delårsperiode), listOf(utgift))
         val beregnedePerioder = service.beregnYtelse(listOf(skoleårsperiode), førstegangsbehandling.id)
-        assertThat(beregnedePerioder.perioder).containsOnly(BeløpsperiodeSkolepenger(defaultFra, 100, 50))
+        assertThat(beregnedePerioder.perioder).containsOnly(BeløpsperiodeSkolepenger(defaultFra, 50))
     }
 
     @Nested
@@ -194,15 +193,6 @@ internal class BeregningSkolepengerServiceTest {
 
     @Nested
     inner class ValideringAvBeløp {
-        @Test
-        internal fun `utgifter er mindre enn 1`() {
-            val periode = SkoleårsperiodeSkolepengerDto(listOf(delårsperiode()), listOf(utgift(utgifter = 0)))
-            val skoleårsperioder = listOf(periode)
-
-            assertThatThrownBy { service.beregnYtelse(skoleårsperioder, førstegangsbehandling.id) }
-                .isInstanceOf(ApiFeil::class.java)
-                .hasMessageContaining("Utgifter må være høyere enn 0kr")
-        }
 
         @Test
         internal fun `stønad kan ikke være under 0kr`() {
@@ -212,16 +202,6 @@ internal class BeregningSkolepengerServiceTest {
             assertThatThrownBy { service.beregnYtelse(skoleårsperioder, førstegangsbehandling.id) }
                 .isInstanceOf(ApiFeil::class.java)
                 .hasMessageContaining("Stønad kan ikke være lavere enn 0kr")
-        }
-
-        @Test
-        internal fun `stønad kan ikke være høyere enn utgifter`() {
-            val periode = SkoleårsperiodeSkolepengerDto(listOf(delårsperiode()), listOf(utgift(stønad = 200)))
-            val skoleårsperioder = listOf(periode)
-
-            assertThatThrownBy { service.beregnYtelse(skoleårsperioder, førstegangsbehandling.id) }
-                .isInstanceOf(ApiFeil::class.java)
-                .hasMessageContaining("Stønad kan ikke være overstige utgifter")
         }
 
         @Test
@@ -268,7 +248,7 @@ internal class BeregningSkolepengerServiceTest {
             every { vedtakService.hentVedtak(førstegangsbehandling.id) } returns vedtak(skoleårsperioder)
 
             val beregnedePerioder = service.beregnYtelse(skoleårsperioder, revurdering.id)
-            assertThat(beregnedePerioder.perioder).containsOnly(BeløpsperiodeSkolepenger(defaultFra, 100, 50))
+            assertThat(beregnedePerioder.perioder).containsOnly(BeløpsperiodeSkolepenger(defaultFra, 50))
         }
 
         @Test
@@ -283,7 +263,7 @@ internal class BeregningSkolepengerServiceTest {
                 .isInstanceOf(ApiFeil::class.java)
                 .hasMessageContainingAll(
                     "Mangler utgiftsperioder fra forrige vedtak",
-                    "fakturadato=2021-08 utgifter=100 stønad=50",
+                    "fakturadato=2021-08 stønad=50",
                 )
         }
 
@@ -348,7 +328,7 @@ internal class BeregningSkolepengerServiceTest {
 
             val perioder = service.beregnYtelse(skoleårsperioder, revurdering.id, erOpphør = true)
             assertThat(perioder.perioder)
-                .containsOnly(BeløpsperiodeSkolepenger(defaultFra, defaultUtgift, defaultStønad))
+                .containsOnly(BeløpsperiodeSkolepenger(defaultFra, defaultStønad))
         }
 
         @Test
@@ -368,7 +348,7 @@ internal class BeregningSkolepengerServiceTest {
 
             val perioder = service.beregnYtelse(skoleårsperioder, revurdering.id, erOpphør = true)
             assertThat(perioder.perioder)
-                .containsOnly(BeløpsperiodeSkolepenger(defaultFra, defaultUtgift, defaultStønad))
+                .containsOnly(BeløpsperiodeSkolepenger(defaultFra, defaultStønad))
         }
 
         @Test
@@ -386,7 +366,7 @@ internal class BeregningSkolepengerServiceTest {
 
             val perioder = service.beregnYtelse(skoleårsperioder, revurdering.id, erOpphør = true)
             assertThat(perioder.perioder)
-                .containsOnly(BeløpsperiodeSkolepenger(defaultFra, defaultUtgift, defaultStønad))
+                .containsOnly(BeløpsperiodeSkolepenger(defaultFra, defaultStønad))
         }
     }
 
@@ -450,7 +430,7 @@ internal class BeregningSkolepengerServiceTest {
 
             val perioder = service.beregnYtelse(skoleårsperioder, revurdering.id, erOpphør = true)
             assertThat(perioder.perioder)
-                .containsOnly(BeløpsperiodeSkolepenger(defaultFra, defaultUtgift, defaultStønad))
+                .containsOnly(BeløpsperiodeSkolepenger(defaultFra, defaultStønad))
         }
 
         @Test
@@ -512,12 +492,10 @@ internal class BeregningSkolepengerServiceTest {
     private fun utgift(
         id: UUID = UUID.randomUUID(),
         fra: YearMonth = defaultFra,
-        utgifter: Int = defaultUtgift,
         stønad: Int = defaultStønad,
     ) = SkolepengerUtgiftDto(
         id = id,
         årMånedFra = fra,
-        utgifter = utgifter,
         stønad = stønad,
     )
 

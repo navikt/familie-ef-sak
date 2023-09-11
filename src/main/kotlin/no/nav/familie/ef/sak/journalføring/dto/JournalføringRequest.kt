@@ -34,7 +34,9 @@ data class BarnSomSkalFødes(val fødselTerminDato: LocalDate) {
 enum class UstrukturertDokumentasjonType(val behandlingÅrsak: () -> BehandlingÅrsak) {
     PAPIRSØKNAD({ BehandlingÅrsak.PAPIRSØKNAD }),
     ETTERSENDING({ BehandlingÅrsak.NYE_OPPLYSNINGER }),
-    IKKE_VALGT({ error("Kan ikke bruke behandlingsårsak fra $IKKE_VALGT") }),
+    IKKE_VALGT({ error("Kan ikke bruke behandlingsårsak fra $IKKE_VALGT") }), ;
+
+    fun erEttersending(): Boolean = this == ETTERSENDING
 }
 
 enum class VilkårsbehandleNyeBarn {
@@ -53,9 +55,6 @@ fun JournalføringRequest.valider() {
     if (skalJournalførePåEksisterendeBehandling()) {
         feilHvis(barnSomSkalFødes.isNotEmpty()) {
             "Kan ikke sende inn barn når man journalfører på en eksisterende behandling"
-        }
-        feilHvis(ustrukturertDokumentasjonType == UstrukturertDokumentasjonType.PAPIRSØKNAD) {
-            "Kan ikke journalføre papirsøknad på eksisterende behandling"
         }
         feilHvis(vilkårsbehandleNyeBarn != VilkårsbehandleNyeBarn.IKKE_VALGT) {
             "Kan ikke vilkårsbehandle nye barn på en eksisterende behandling"

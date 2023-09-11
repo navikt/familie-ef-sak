@@ -4,8 +4,10 @@ import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.RevurderingService
+import no.nav.familie.ef.sak.fagsak.FagsakPersonService
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
+import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
@@ -23,10 +25,20 @@ internal class EksternBehandlingControllerTest {
     private val tilgangService = mockk<TilgangService>(relaxed = true)
     private val behandlingService = mockk<BehandlingService>()
     private val fagsakService = mockk<FagsakService>()
+    private val fagsakPersonService = mockk<FagsakPersonService>()
     private val tilkjentYtelseService = mockk<TilkjentYtelseService>()
     private val revurderingService = mockk<RevurderingService>()
+    private val oppgaveService = mockk<OppgaveService>()
+
     private val eksternBehandlingService =
-        EksternBehandlingService(tilkjentYtelseService, behandlingService, fagsakService, revurderingService)
+        EksternBehandlingService(
+            tilkjentYtelseService,
+            behandlingService,
+            fagsakService,
+            fagsakPersonService,
+            revurderingService,
+            oppgaveService,
+        )
 
     private val eksternBehandlingController = EksternBehandlingController(tilgangService, eksternBehandlingService)
 

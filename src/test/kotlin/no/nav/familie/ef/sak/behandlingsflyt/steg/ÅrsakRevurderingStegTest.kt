@@ -6,6 +6,7 @@ import io.mockk.verify
 import no.nav.familie.ef.sak.behandling.dto.RevurderingsinformasjonDto
 import no.nav.familie.ef.sak.behandling.dto.ÅrsakRevurderingDto
 import no.nav.familie.ef.sak.behandling.ÅrsakRevurderingService
+import no.nav.familie.ef.sak.felles.util.mockFeatureToggleService
 import no.nav.familie.ef.sak.repository.revurderingsinformasjon
 import no.nav.familie.ef.sak.repository.saksbehandling
 import no.nav.familie.kontrakter.ef.felles.Opplysningskilde
@@ -21,7 +22,9 @@ internal class ÅrsakRevurderingStegTest {
 
     private val årsakRevurderingService = mockk<ÅrsakRevurderingService>()
 
-    private val steg = ÅrsakRevurderingSteg(årsakRevurderingService)
+    private val featureToggleService = mockFeatureToggleService()
+
+    private val steg = ÅrsakRevurderingSteg(årsakRevurderingService, featureToggleService)
 
     private val saksbehandling = saksbehandling()
     private val stønadstype = saksbehandling.stønadstype
@@ -96,16 +99,6 @@ internal class ÅrsakRevurderingStegTest {
             )
             assertThatThrownBy { utførOgReturnerNesteSteg(dto) }
                 .hasMessage("Må ha med beskrivelse når årsak er annet")
-        }
-
-        @Test
-        internal fun `skal ikke sende med beskrivelse når årsak er annet enn ANNET`() {
-            val dto = RevurderingsinformasjonDto(
-                LocalDate.now(),
-                ÅrsakRevurderingDto(Opplysningskilde.BESKJED_ANNEN_ENHET, gyldigÅrsak, "asd"),
-            )
-            assertThatThrownBy { utførOgReturnerNesteSteg(dto) }
-                .hasMessage("Kan ikke ha med beskrivelse når årsak er noe annet en annet")
         }
     }
 

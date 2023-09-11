@@ -7,10 +7,10 @@ import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.dto.RevurderingDto
 import no.nav.familie.ef.sak.behandling.dto.SettPåVentRequest
 import no.nav.familie.ef.sak.behandling.dto.TaAvVentStatus
-import no.nav.familie.ef.sak.behandling.dto.VurderHenvendelseOppgavetype
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.clearBrukerContext
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.mockBrukerContext
 import no.nav.familie.ef.sak.journalføring.dto.VilkårsbehandleNyeBarn
+import no.nav.familie.ef.sak.oppgave.OppgaveSubtype
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
@@ -128,7 +128,7 @@ internal class BehandlingPåVentServiceIntegrationTest : OppslagSpringRunnerTest
             ),
         )
 
-    private fun settPåVentRequest(oppgaveId: Long, oppfølgingsoppgaver: List<VurderHenvendelseOppgavetype>) =
+    private fun settPåVentRequest(oppgaveId: Long, oppfølgingsoppgaver: List<OppgaveSubtype>) =
         SettPåVentRequest(
             oppgaveId = oppgaveId,
             saksbehandler = "ny saksbehandler",
@@ -138,5 +138,6 @@ internal class BehandlingPåVentServiceIntegrationTest : OppslagSpringRunnerTest
             beskrivelse = "Her er litt tekst fra saksbehandler",
             oppgaveVersjon = 1,
             oppfølgingsoppgaverMotLokalKontor = oppfølgingsoppgaver,
+            innstillingsoppgaveBeskjed = "",
         )
 }

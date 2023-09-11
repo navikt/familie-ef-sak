@@ -75,21 +75,14 @@ class BeregningSkolepengerService(
             .map { (key, value) ->
                 BeløpsperiodeSkolepenger(
                     årMånedFra = key,
-                    utgifter = value.sumOf { it.utgifter },
                     beløp = value.sumOf { it.stønad },
                 )
             }
     }
 
     private fun validerFornuftigeBeløp(skoleårsperioder: List<SkoleårsperiodeSkolepengerDto>) {
-        brukerfeilHvis(skoleårsperioder.any { periode -> periode.utgiftsperioder.any { it.utgifter < 1 } }) {
-            "Utgifter må være høyere enn 0kr"
-        }
         brukerfeilHvis(skoleårsperioder.any { periode -> periode.utgiftsperioder.any { it.stønad < 0 } }) {
             "Stønad kan ikke være lavere enn 0kr"
-        }
-        brukerfeilHvis(skoleårsperioder.any { periode -> periode.utgiftsperioder.any { it.stønad > it.utgifter } }) {
-            "Stønad kan ikke være overstige utgifter"
         }
 
         skoleårsperioder.forEach { skoleårsperiode ->
@@ -243,7 +236,6 @@ class BeregningSkolepengerService(
         brukerfeilHvis(manglende.isNotEmpty()) {
             val manglendePerioder = manglende.joinToString(", \n") { (_, utgiftsperiode) ->
                 "fakturadato=${utgiftsperiode.årMånedFra} " +
-                    "utgifter=${utgiftsperiode.utgifter} " +
                     "stønad=${utgiftsperiode.stønad}"
             }
             "Mangler utgiftsperioder fra forrige vedtak \n$manglendePerioder"

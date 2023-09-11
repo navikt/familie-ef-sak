@@ -47,14 +47,13 @@ class OppgaveService(
     fun opprettOppgave(
         behandlingId: UUID,
         oppgavetype: Oppgavetype,
+        vurderHenvendelseOppgaveSubtype: OppgaveSubtype? = null,
         tilordnetNavIdent: String? = null,
         beskrivelse: String? = null,
         mappeId: Long? = null, // Dersom denne er satt vil vi ikke prøve å finne mappe basert på oppgavens innhold
         prioritet: OppgavePrioritet = OppgavePrioritet.NORM,
     ): Long {
-        val oppgaveFinnesFraFør =
-            oppgaveRepository.findByBehandlingIdAndTypeAndErFerdigstiltIsFalse(behandlingId, oppgavetype)
-
+        val oppgaveFinnesFraFør = getOppgaveFinnesFraFør(oppgavetype, vurderHenvendelseOppgaveSubtype, behandlingId)
         return if (oppgaveFinnesFraFør !== null) {
             oppgaveFinnesFraFør.gsakOppgaveId
         } else {
@@ -72,10 +71,25 @@ class OppgaveService(
                 gsakOppgaveId = opprettetOppgaveId,
                 behandlingId = behandlingId,
                 type = oppgavetype,
+                oppgaveSubtype = vurderHenvendelseOppgaveSubtype,
             )
             oppgaveRepository.insert(oppgave)
             opprettetOppgaveId
         }
+    }
+
+    private fun getOppgaveFinnesFraFør(
+        oppgavetype: Oppgavetype,
+        vurderHenvendelseOppgaveSubtype: OppgaveSubtype?,
+        behandlingId: UUID,
+    ) = if (oppgavetype == Oppgavetype.VurderHenvendelse && vurderHenvendelseOppgaveSubtype != null) {
+        oppgaveRepository.findByBehandlingIdAndTypeAndOppgaveSubtype(
+            behandlingId,
+            oppgavetype,
+            vurderHenvendelseOppgaveSubtype,
+        )
+    } else {
+        oppgaveRepository.findByBehandlingIdAndTypeAndErFerdigstiltIsFalse(behandlingId, oppgavetype)
     }
 
     fun oppdaterOppgave(oppgave: Oppgave) {
@@ -227,6 +241,12 @@ class OppgaveService(
         oppgaveClient.ferdigstillOppgave(gsakOppgaveId)
     }
 
+    fun finnSisteBehandleSakOppgaveForBehandling(behandlingId: UUID): EfOppgave? =
+        oppgaveRepository.findTopByBehandlingIdAndTypeOrderBySporbarOpprettetTidDesc(
+            behandlingId,
+            Oppgavetype.BehandleSak,
+        )
+
     fun finnSisteOppgaveForBehandling(behandlingId: UUID): EfOppgave? {
         return oppgaveRepository.findTopByBehandlingIdOrderBySporbarOpprettetTidDesc(behandlingId)
     }
@@ -370,12 +390,25 @@ class OppgaveService(
         return listOf(behandleSakOppgaver, behandleUnderkjent, godkjenne)
     }
 
+    fun finnVurderHenvendelseOppgaver(behandlingId: UUID): List<VurderHenvendelseOppgaveDto> {
+        val vurderHenvendelsOppgave =
+            oppgaveRepository.findByBehandlingIdAndType(behandlingId, Oppgavetype.VurderHenvendelse)
+        val oppgaveListe = vurderHenvendelsOppgave?.filter { it.oppgaveSubtype != null } ?: emptyList()
+
+        return oppgaveListe.map {
+            VurderHenvendelseOppgaveDto(
+                it.oppgaveSubtype
+                    ?: error("VurderHenvendelseOppgavetype på Oppgave skal ikke kunne være null"),
+                it.sporbar.opprettetTid.toLocalDate(),
+            )
+        }
+    }
+
     private fun utledSettBehandlesAvApplikasjon(oppgavetype: Oppgavetype) = when (oppgavetype) {
         Oppgavetype.BehandleSak,
         Oppgavetype.BehandleUnderkjentVedtak,
         Oppgavetype.GodkjenneVedtak,
         -> true
-
         Oppgavetype.InnhentDokumentasjon -> false
         Oppgavetype.VurderHenvendelse -> false
         else -> error("Håndterer ikke behandlesAvApplikasjon for $oppgavetype")

@@ -29,7 +29,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
-internal class TidligereVedaksperioderServiceTest {
+internal class TidligereVedtaksperioderServiceTest {
 
     private val fagsakPersonService = mockk<FagsakPersonService>()
     private val fagsakService = mockk<FagsakService>()
@@ -40,7 +40,7 @@ internal class TidligereVedaksperioderServiceTest {
     private val infotrygdReplikaClient = mockk<InfotrygdReplikaClient>()
     private val infotrygdService = InfotrygdService(infotrygdReplikaClient, personService)
 
-    private val service = TidligereVedaksperioderService(
+    private val service = TidligereVedtaksperioderService(
         fagsakPersonService,
         fagsakService,
         behandlingService,

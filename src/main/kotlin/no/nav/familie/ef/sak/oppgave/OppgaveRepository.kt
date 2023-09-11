@@ -12,8 +12,23 @@ import java.util.UUID
 interface OppgaveRepository : RepositoryInterface<Oppgave, Long>, InsertUpdateRepository<Oppgave> {
 
     fun findByBehandlingIdAndTypeAndErFerdigstiltIsFalse(behandlingId: UUID, oppgavetype: Oppgavetype): Oppgave?
+    fun findByBehandlingIdAndTypeAndOppgaveSubtype(
+        behandlingId: UUID,
+        oppgavetype: Oppgavetype,
+        oppgaveSubtype: OppgaveSubtype,
+    ): Oppgave?
+
+    fun findByBehandlingIdAndType(
+        behandlingId: UUID,
+        oppgavetype: Oppgavetype,
+    ): List<Oppgave>?
+
     fun findByBehandlingIdAndErFerdigstiltIsFalseAndTypeIn(behandlingId: UUID, oppgavetype: Set<Oppgavetype>): Oppgave?
-    fun findByBehandlingIdAndBarnPersonIdentAndAlder(behandlingId: UUID, barnPersonIdent: String, alder: Alder?): Oppgave?
+    fun findByBehandlingIdAndBarnPersonIdentAndAlder(
+        behandlingId: UUID,
+        barnPersonIdent: String,
+        alder: Alder?,
+    ): Oppgave?
 
     // language=PostgreSQL
     @Query(
@@ -23,7 +38,12 @@ interface OppgaveRepository : RepositoryInterface<Oppgave, Long>, InsertUpdateRe
                 AND o.barn_person_ident IN (:barnPersonIdenter)
                 AND o.type=:oppgavetype""",
     )
-    fun findByTypeAndAlderIsNotNullAndBarnPersonIdenter(oppgavetype: Oppgavetype, barnPersonIdenter: List<String>?): List<Oppgave>
+    fun findByTypeAndAlderIsNotNullAndBarnPersonIdenter(
+        oppgavetype: Oppgavetype,
+        barnPersonIdenter: List<String>?,
+    ): List<Oppgave>
+
     fun findByGsakOppgaveId(gsakOppgaveId: Long): Oppgave?
     fun findTopByBehandlingIdOrderBySporbarOpprettetTidDesc(behandlingId: UUID): Oppgave?
+    fun findTopByBehandlingIdAndTypeOrderBySporbarOpprettetTidDesc(behandlingId: UUID, type: Oppgavetype): Oppgave?
 }

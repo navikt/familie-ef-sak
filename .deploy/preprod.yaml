@@ -25,11 +25,9 @@ spec:
   replicas:
     min: 2
     max: 4
-    cpuThresholdPercentage: 50
   resources:
     limits:
       memory: 1024Mi
-      cpu: 1500m
     requests:
       memory: 512Mi
       cpu: 500m
@@ -96,6 +94,7 @@ spec:
         - host: familie-integrasjoner.dev-fss-pub.nais.io
         - host: familie-ef-infotrygd.dev-fss-pub.nais.io
         - host: familie-ef-proxy.dev-fss-pub.nais.io
+        - host: teamfamilie-unleash-api.nav.cloud.nais.io
   azure:
     application:
       enabled: true
@@ -118,3 +117,4 @@ spec:
       value: dev
   envFrom:
     - secret: familie-ef-sak
+    - secret: familie-ef-sak-unleash-api-token

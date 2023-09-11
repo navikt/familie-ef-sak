@@ -214,6 +214,7 @@ class OppgaveClientMock {
             fristFerdigstillelse = LocalDate.of(2020, 2, 1).toString(),
             prioritet = OppgavePrioritet.NORM,
             status = StatusEnum.OPPRETTET,
+            versjon = 2,
         )
     }
 }

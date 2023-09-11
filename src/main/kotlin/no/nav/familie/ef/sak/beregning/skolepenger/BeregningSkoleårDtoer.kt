@@ -16,6 +16,5 @@ data class BeregningSkolepengerResponse(
 
 data class BeløpsperiodeSkolepenger(
     val årMånedFra: YearMonth,
-    val utgifter: Int,
     val beløp: Int,
 )

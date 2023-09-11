@@ -3,9 +3,11 @@ package no.nav.familie.ef.sak.ekstern
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.RevurderingService
 import no.nav.familie.ef.sak.behandling.dto.RevurderingDto
+import no.nav.familie.ef.sak.fagsak.FagsakPersonService
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.journalføring.dto.VilkårsbehandleNyeBarn
+import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.ef.sak.tilkjentytelse.domain.AndelTilkjentYtelse
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
@@ -20,6 +22,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.UUID
 
 @Service
@@ -27,7 +30,10 @@ class EksternBehandlingService(
     private val tilkjentYtelseService: TilkjentYtelseService,
     private val behandlingService: BehandlingService,
     private val fagsakService: FagsakService,
+    private val fagsakPersonService: FagsakPersonService,
     private val revurderingService: RevurderingService,
+    private val oppgaveService: OppgaveService,
+
 ) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -40,6 +46,13 @@ class EksternBehandlingService(
             .mapNotNull { it.andelerTilkjentYtelse.maxOfOrNull(AndelTilkjentYtelse::stønadTom) }
             .maxOfOrNull { it } ?: LocalDate.MIN
         return sisteStønadsdato >= LocalDate.now()
+    }
+
+    fun harLøpendeBarnetilsyn(personIdent: String): Boolean {
+        val fagsakPerson = fagsakPersonService.finnPerson(setOf(personIdent)) ?: return false
+        val fagsaker = fagsakService.finnFagsakerForFagsakPersonId(fagsakPerson.id)
+        val fagsak = fagsaker.barnetilsyn
+        return fagsak?.let { fagsakService.erLøpende(fagsak) } ?: false
     }
 
     private fun hentAlleBehandlingIDer(personidenter: Set<String>): Set<UUID> {
@@ -57,6 +70,25 @@ class EksternBehandlingService(
             is KanOppretteRevurdering -> KanOppretteRevurderingResponse(true, null)
             is KanIkkeOppretteRevurdering ->
                 KanOppretteRevurderingResponse(false, resultat.årsak.kanIkkeOppretteRevurderingÅrsak)
+        }
+    }
+
+    fun tilhørendeBehandleSakOppgaveErPåbegynt(
+        personIdent: String,
+        stønadType: StønadType,
+        innsendtSøknadTidspunkt: LocalDateTime,
+    ): Boolean {
+        val fagsak = fagsakService.finnFagsak(setOf(personIdent), stønadType)
+
+        return if (fagsak == null) {
+            false
+        } else {
+            val behandlingerOpprettetEtterSøknadstidspunkt =
+                behandlingService.hentBehandlinger(fagsak.id).filter { it.sporbar.opprettetTid > innsendtSøknadTidspunkt }
+            val efOppgaver = hentEFOppgaver(behandlingerOpprettetEtterSøknadstidspunkt.map { it.id })
+            val oppgaver = hentOppgaver(efOppgaver.map { it.gsakOppgaveId })
+
+            oppgaver.any { it.tilordnetRessurs != null }
         }
     }
 
@@ -98,6 +130,11 @@ class EksternBehandlingService(
         }
         return KanOppretteRevurdering()
     }
+
+    private fun hentEFOppgaver(behandlingIder: List<UUID>) =
+        behandlingIder.mapNotNull { oppgaveService.finnSisteBehandleSakOppgaveForBehandling(it) }
+
+    private fun hentOppgaver(oppgaveIder: List<Long>) = oppgaveIder.map { oppgaveService.hentOppgave(it) }
 }
 
 private sealed interface KanOppretteRevurderingResultat

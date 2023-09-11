@@ -136,6 +136,7 @@ interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUp
         WHERE f.fagsak_person_id = :fagsakPersonId
          AND b.resultat IN ('OPPHØRT', 'INNVILGET', 'AVSLÅTT', 'IKKE_SATT')
          AND b.status NOT IN ('OPPRETTET')
+         AND b.arsak != 'MIGRERING'
     """,
     )
     fun finnBehandlingerForGjenbrukAvVilkår(fagsakPersonId: UUID): List<Behandling>
@@ -188,8 +189,11 @@ interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUp
         SELECT b.*, f.stonadstype
         FROM behandling b
         JOIN fagsak f ON f.id = b.fagsak_id
+        JOIN oppgave o on b.id = o.behandling_id
         WHERE NOT b.status = 'FERDIGSTILT'
-        AND b.opprettet_tid < :opprettetTidFør
+        AND o.ferdigstilt = false
+        AND o.type in ('BehandleSak', 'GodkjenneVedtak', 'BehandleUnderkjentVedtak')
+        AND o.opprettet_tid < :opprettetTidFør
         AND f.stonadstype=:stønadstype
         """,
     )
