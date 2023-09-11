@@ -56,4 +56,3 @@ private fun GrunnlagsdataPeriodeHistorikk.tilDto() = GrunnlagsdataPeriodeHistori
     tom = this.tom,
     harPeriodeUtenUtbetaling = this.harPeriodeUtenUtbetaling,
 )
-

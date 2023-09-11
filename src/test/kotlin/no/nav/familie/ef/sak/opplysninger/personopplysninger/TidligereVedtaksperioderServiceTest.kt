@@ -27,7 +27,11 @@ import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.ef.sak.vedtak.domain.AktivitetType
 import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
 import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType.HOVEDPERIODE
-import no.nav.familie.ef.sak.vedtak.historikk.*
+import no.nav.familie.ef.sak.vedtak.historikk.AndelHistorikkDto
+import no.nav.familie.ef.sak.vedtak.historikk.AndelMedGrunnlagDto
+import no.nav.familie.ef.sak.vedtak.historikk.EndringType
+import no.nav.familie.ef.sak.vedtak.historikk.HistorikkEndring
+import no.nav.familie.ef.sak.vedtak.historikk.VedtakshistorikkperiodeOvergangsstønad
 import no.nav.familie.ef.sak.økonomi.lagAndelTilkjentYtelse
 import no.nav.familie.ef.sak.økonomi.lagTilkjentYtelse
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
@@ -80,9 +84,9 @@ internal class TidligereVedtaksperioderServiceTest {
             infotrygdReplikaClient.hentPerioder(capture(infotrygdPeriodeRequestSlot))
         } answers { InfotrygdReplikaMock.hentPerioderDefaultResponse(firstArg()) }
         every { personService.hentPersonIdenter(personIdent.ident) } returns
-                PdlIdenter(listOf(PdlIdent(personIdent.ident, false)))
+            PdlIdenter(listOf(PdlIdent(personIdent.ident, false)))
         every { historiskPensjonService.hentHistoriskPensjon(any(), any()) } returns
-                HistoriskPensjonResponse(false, "")
+            HistoriskPensjonResponse(false, "")
     }
 
     @Test
@@ -123,12 +127,11 @@ internal class TidligereVedtaksperioderServiceTest {
         assertThat(sak.harTidligereSkolepenger).isFalse
     }
 
-
     @Test
     internal fun `Skal filtere bort opphør`() {
         val andel2 = andel.copy(erOpphør = true)
         every { andelsHistorikkService.hentHistorikk(fagsaker.overgangsstønad!!.id, null) } returns
-                listOf(andel, andel2, andel)
+            listOf(andel, andel2, andel)
 
         val overgangstønadsperioder = service.hentOvergangstønadsperioder(fagsaker)
 
@@ -137,13 +140,13 @@ internal class TidligereVedtaksperioderServiceTest {
 
     @Test
     internal fun `Skal fjerne uvesentlige perioder`() {
-        val historikkEndring = HistorikkEndring(type =  EndringType.ERSTATTET, behandlingId = UUID.randomUUID(), vedtakstidspunkt = LocalDateTime.now())
-        val historikkEndring2 = HistorikkEndring(type =  EndringType.FJERNET, behandlingId = UUID.randomUUID(), vedtakstidspunkt = LocalDateTime.now())
+        val historikkEndring = HistorikkEndring(type = EndringType.ERSTATTET, behandlingId = UUID.randomUUID(), vedtakstidspunkt = LocalDateTime.now())
+        val historikkEndring2 = HistorikkEndring(type = EndringType.FJERNET, behandlingId = UUID.randomUUID(), vedtakstidspunkt = LocalDateTime.now())
         val andel2 = andel.copy(endring = historikkEndring)
         val andel3 = andel.copy(endring = historikkEndring2)
 
         every { andelsHistorikkService.hentHistorikk(fagsaker.overgangsstønad!!.id, null) } returns
-                listOf(andel, andel2, andel3)
+            listOf(andel, andel2, andel3)
 
         val overgangstønadsperioder = service.hentOvergangstønadsperioder(fagsaker)
 
@@ -152,10 +155,9 @@ internal class TidligereVedtaksperioderServiceTest {
 
     @Test
     internal fun `Skal ha en periode med null utbetaling`() {
-
         val andel2 = andel.copy(andel = andelMedGrunnlagDto().copy(beløp = 0))
         every { andelsHistorikkService.hentHistorikk(fagsaker.overgangsstønad!!.id, null) } returns
-                listOf(andel2)
+            listOf(andel2)
 
         val overgangstønadsperioder = service.hentOvergangstønadsperioder(fagsaker)
 
@@ -174,13 +176,14 @@ internal class TidligereVedtaksperioderServiceTest {
         val andel3 = andel.copy(andel = andelMedGrunnlagDto().copy(beløp = 100, periode = periode3))
 
         every { andelsHistorikkService.hentHistorikk(fagsaker.overgangsstønad!!.id, null) } returns
-                listOf(andel1, andel2, andel3)
+            listOf(andel1, andel2, andel3)
 
         val overgangstønadsperioder = service.hentOvergangstønadsperioder(fagsaker)
 
         assertThat(overgangstønadsperioder).hasSize(1)
         assertThat(overgangstønadsperioder.first().harPeriodeUtenUtbetaling).isTrue()
     }
+
     @Test
     internal fun `Skal slå sammen tre andeler hvor ingen har null beløp og returnerer harPeriodeUtenUtbetaling lik false`() {
         val periode1 = Månedsperiode(YearMonth.of(2022, 1), YearMonth.of(2022, 12))
@@ -192,13 +195,14 @@ internal class TidligereVedtaksperioderServiceTest {
         val andel3 = andel.copy(andel = andelMedGrunnlagDto().copy(beløp = 100, periode = periode3))
 
         every { andelsHistorikkService.hentHistorikk(fagsaker.overgangsstønad!!.id, null) } returns
-                listOf(andel1, andel2, andel3)
+            listOf(andel1, andel2, andel3)
 
         val overgangstønadsperioder = service.hentOvergangstønadsperioder(fagsaker)
 
         assertThat(overgangstønadsperioder).hasSize(1)
         assertThat(overgangstønadsperioder.first().harPeriodeUtenUtbetaling).isFalse()
     }
+
     @Test
     internal fun `Skal ikke feile hvis det ikke finnes noen perioder`() {
         val overgangstønadsperioder = service.hentOvergangstønadsperioder(fagsaker)
@@ -216,7 +220,7 @@ internal class TidligereVedtaksperioderServiceTest {
             false,
             periode2.fomDato,
             periode2.tomDato,
-            periodeType = VedtaksperiodeType.FORLENGELSE
+            periodeType = VedtaksperiodeType.FORLENGELSE,
         )
         val historikk3 = grunnlagsdataPeriodeHistorikk(false, periode3.fomDato, periode3.tomDato)
         val perioderMedLikPeriodetype =
@@ -255,7 +259,7 @@ internal class TidligereVedtaksperioderServiceTest {
         harNullbeløp: Boolean = false,
         fom: LocalDate,
         tom: LocalDate,
-        periodeType: VedtaksperiodeType = HOVEDPERIODE
+        periodeType: VedtaksperiodeType = HOVEDPERIODE,
     ) =
         GrunnlagsdataPeriodeHistorikk(periodeType = periodeType, fom = fom, tom = tom, harNullbeløp)
 
