@@ -128,7 +128,7 @@ internal class TidligereVedtaksperioderServiceTest {
     }
 
     @Test
-    internal fun `Skal filtere bort opphør`() {
+    internal fun `Skal filtrere bort opphør`() {
         val andel2 = andel.copy(erOpphør = true)
         every { andelsHistorikkService.hentHistorikk(fagsaker.overgangsstønad!!.id, null) } returns
             listOf(andel, andel2, andel)
