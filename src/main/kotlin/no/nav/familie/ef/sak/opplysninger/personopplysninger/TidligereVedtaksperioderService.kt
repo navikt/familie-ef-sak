@@ -78,7 +78,7 @@ class TidligereVedtaksperioderService(
             .filterNot({ it.erOpphør })
             .map {
                 GrunnlagsdataPeriodeHistorikk(
-                    periodeType = it.periodeType,
+                    periodeType = it.periodeType ?: error("Overgangsstønad skal ha periodetype"),
                     fom = it.andel.periode.fomDato,
                     tom = it.andel.periode.tomDato,
                     harPeriodeUtenUtbetaling = it.andel.beløp <= 0,

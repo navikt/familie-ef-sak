@@ -25,8 +25,6 @@ import no.nav.familie.ef.sak.testutil.PdlTestdataHelper.folkeregisteridentifikat
 import no.nav.familie.ef.sak.tilkjentytelse.AndelsHistorikkService
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.ef.sak.vedtak.domain.AktivitetType
-import no.nav.familie.ef.sak.vedtak.domain.AktivitetstypeBarnetilsyn
-import no.nav.familie.ef.sak.vedtak.domain.PeriodetypeBarnetilsyn
 import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
 import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType.HOVEDPERIODE
 import no.nav.familie.ef.sak.vedtak.historikk.*
@@ -285,12 +283,12 @@ internal class TidligereVedtaksperioderServiceTest {
         andel = andelMedGrunnlagDto(),
         aktivitet = null,
         aktivitetArbeid = null,
-        periodeType = null,
+        periodeType = HOVEDPERIODE,
         erSanksjon = false,
         sanksjonsårsak = null,
         erOpphør = false,
-        periodetypeBarnetilsyn = PeriodetypeBarnetilsyn.ORDINÆR,
-        aktivitetBarnetilsyn = AktivitetstypeBarnetilsyn.I_ARBEID,
+        periodetypeBarnetilsyn = null,
+        aktivitetBarnetilsyn = null,
         endring = null,
     )
 
