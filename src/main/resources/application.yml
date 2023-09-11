@@ -251,13 +251,6 @@ rolle:
 unleash:
   enabled: true
 
-funksjonsbrytere:
-  enabled: true
-  unleash:
-    uri: https://unleash.nais.io/api/
-    environment: ${NAIS_CLUSTER_NAME}
-    applicationName: ${NAIS_APP_NAME}
-
 prosessering:
   continuousRunning.enabled: true
   fixedDelayString:

@@ -81,7 +81,6 @@ spec:
           namespace: paw
       external:
         - host: api-gw.oera.no
-        - host: unleash.nais.io
         - host: familie-oppdrag.prod-fss-pub.nais.io
         - host: familie-integrasjoner.prod-fss-pub.nais.io
         - host: familie-ef-infotrygd.prod-fss-pub.nais.io

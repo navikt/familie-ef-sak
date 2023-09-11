@@ -1,29 +1,16 @@
 package no.nav.familie.ef.sak.infrastruktur.featuretoggle
 
-import org.springframework.beans.factory.DisposableBean
+import no.nav.familie.unleash.DefaultUnleashService
+import org.springframework.stereotype.Service
 
-interface FeatureToggleService : DisposableBean {
+@Service
+class FeatureToggleService(val defaultUnleashService: DefaultUnleashService) {
 
     fun isEnabled(toggle: Toggle): Boolean {
-        return isEnabled(toggle, false)
+        return defaultUnleashService.isEnabled(toggle.toggleId)
     }
-
-    fun isEnabled(toggle: Toggle, defaultValue: Boolean): Boolean
-}
-
-enum class ToggleNext(val toggleId: String, val beskrivelse: String? = null) {
-
-    MIGRERING_BARNETILSYN_NEXT("familie.ef.sak.migrering.barnetilsyn.next"),
-    TEST_ENVIRONMENT("test.environment"),
-    TEST_USER_ID("test.user.id"),
-    ;
-
-    internal companion object {
-        private val toggles: Map<String, ToggleNext> = values().associateBy { it.toggleId }
-
-        fun byToggleId(toggleId: String): ToggleNext? {
-            return toggles[toggleId]
-        }
+    fun isEnabled(toggle: Toggle, defaultValue: Boolean): Boolean {
+        return defaultUnleashService.isEnabled(toggle.toggleId, defaultValue)
     }
 }
 
@@ -48,7 +35,7 @@ enum class Toggle(val toggleId: String, val beskrivelse: String? = null) {
     ),
 
     // Permission
-    // MIGRERING_BARNETILSYN("familie.ef.sak.migrering.barnetilsyn", "Permission"),
+    MIGRERING_BARNETILSYN("familie.ef.sak.migrering.barnetilsyn", "Permission"),
     G_BEREGNING_TILLAT_MANUELL_OPPRETTELSE_AV_G_TASK("familie.ef.sak.tillat-opprettelse-av-g-task", "Permission"),
     OPPRETT_BEHANDLING_FERDIGSTILT_JOURNALPOST(
         "familie.ef.sak.opprett-behandling-for-ferdigstilt-journalpost",
@@ -59,30 +46,15 @@ enum class Toggle(val toggleId: String, val beskrivelse: String? = null) {
     TILLAT_MIGRERING_5_ÅR_TILBAKE("familie.ef.sak.tillat-migrering-5-ar-tilbake", "Permission"),
     TILLAT_MIGRERING_7_ÅR_TILBAKE("familie.ef.sak.tillat-migrering-7-ar-tilbake", "Permission"),
     UTVIKLER_MED_VEILEDERRROLLE("familie.ef.sak.utviklere-med-veilederrolle", "Permission"),
+    TEST_ENVIRONMENT("test.environment"),
+    TEST_USER_ID("test.user.id"),
     ;
 
-    internal companion object {
-        private val toggles: Map<String, Toggle> = values().associateBy { it.toggleId }
+    companion object {
+        private val toggles: Map<String, Toggle> = values().associateBy { it.name }
 
-        fun byToggleId(toggleId: String): Toggle? {
-            return toggles[toggleId]
+        fun byToggleId(toggleId: String): Toggle {
+            return toggles[toggleId] ?: error("Finner ikke toggle for $toggleId")
         }
     }
-}
-
-sealed class ToggleWrapper(val toggleId: String) {
-    data class Funksjonsbrytere(val toggle: Toggle) : ToggleWrapper(toggle.toggleId)
-    data class UnleashNext(val toggleNext: ToggleNext) : ToggleWrapper(toggleNext.toggleId)
-}
-
-fun byToggleId(toggleId: String): ToggleWrapper {
-    val toggle = Toggle.byToggleId(toggleId)
-    if (toggle != null) {
-        return ToggleWrapper.Funksjonsbrytere(toggle)
-    }
-    val toggleNext = ToggleNext.byToggleId(toggleId)
-    if (toggleNext != null) {
-        return ToggleWrapper.UnleashNext(toggleNext)
-    }
-    error("Finner ikke toggle for $toggleId")
 }
