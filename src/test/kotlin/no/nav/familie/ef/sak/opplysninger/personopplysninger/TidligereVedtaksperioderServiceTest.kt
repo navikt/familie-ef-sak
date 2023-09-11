@@ -139,7 +139,7 @@ internal class TidligereVedtaksperioderServiceTest {
     }
 
     @Test
-    internal fun `Skal fjerne uvesentlige perioder`() {
+    internal fun `Skal fjerne uvesentlige perioder som er overskrevet av nye revurderinger`() {
         val historikkEndring = HistorikkEndring(
             type = EndringType.ERSTATTET,
             behandlingId = UUID.randomUUID(),
