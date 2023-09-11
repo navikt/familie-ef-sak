@@ -140,8 +140,16 @@ internal class TidligereVedtaksperioderServiceTest {
 
     @Test
     internal fun `Skal fjerne uvesentlige perioder`() {
-        val historikkEndring = HistorikkEndring(type = EndringType.ERSTATTET, behandlingId = UUID.randomUUID(), vedtakstidspunkt = LocalDateTime.now())
-        val historikkEndring2 = HistorikkEndring(type = EndringType.FJERNET, behandlingId = UUID.randomUUID(), vedtakstidspunkt = LocalDateTime.now())
+        val historikkEndring = HistorikkEndring(
+            type = EndringType.ERSTATTET,
+            behandlingId = UUID.randomUUID(),
+            vedtakstidspunkt = LocalDateTime.now(),
+        )
+        val historikkEndring2 = HistorikkEndring(
+            type = EndringType.FJERNET,
+            behandlingId = UUID.randomUUID(),
+            vedtakstidspunkt = LocalDateTime.now(),
+        )
         val andel2 = andel.copy(endring = historikkEndring)
         val andel3 = andel.copy(endring = historikkEndring2)
 
@@ -163,7 +171,6 @@ internal class TidligereVedtaksperioderServiceTest {
 
         assertThat(overgangstønadsperioder.first().harPeriodeUtenUtbetaling).isTrue()
     }
-/*3 andeler som skla merges sammen, den i midten har 0 beløp -> skal gi true */
 
     @Test
     internal fun `Skal slå sammen tre andeler hvor bare en har null beløp og returnerer harPeriodeUtenUtbetaling lik true`() {
