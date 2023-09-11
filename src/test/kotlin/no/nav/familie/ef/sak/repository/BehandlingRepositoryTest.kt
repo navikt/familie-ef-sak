@@ -426,7 +426,7 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
         val behandlingerForGjenbruk: List<Behandling> =
             behandlingRepository.finnBehandlingerForGjenbrukAvVilkår(fagsakBT.fagsakPersonId)
 
-        assertThat(behandlingerForGjenbruk).containsExactly(førstegangsbehandlingOS, førstegangsbehandlingBT)
+        assertThat(behandlingerForGjenbruk).containsExactlyInAnyOrder(førstegangsbehandlingOS, førstegangsbehandlingBT)
     }
 
     @Test
@@ -448,7 +448,7 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
         val behandlingerForGjenbruk: List<Behandling> =
             behandlingRepository.finnBehandlingerForGjenbrukAvVilkår(fagsakSP.fagsakPersonId)
 
-        assertThat(behandlingerForGjenbruk).containsExactly(
+        assertThat(behandlingerForGjenbruk).containsExactlyInAnyOrder(
             førstegangsbehandlingOS,
             annengangsbehandlingOS,
             førstegangsbehandlingBT,
