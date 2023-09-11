@@ -51,15 +51,9 @@ fun TidligereInnvilgetVedtak.tilDto() =
 
 fun List<GrunnlagsdataPeriodeHistorikk>.tilDto() = this.map { it.tilDto() }.sortedByDescending { it.fom }
 private fun GrunnlagsdataPeriodeHistorikk.tilDto() = GrunnlagsdataPeriodeHistorikkDto(
-    periodeType = finnType(this),
+    periodeType = this.periodeType.toString(),
     fom = this.fom,
     tom = this.tom,
     harPeriodeUtenUtbetaling = this.harPeriodeUtenUtbetaling,
 )
 
-fun finnType(grunnlagsdataPeriodeHistorikk: GrunnlagsdataPeriodeHistorikk): String {
-    if (grunnlagsdataPeriodeHistorikk.periodeType != null) {
-        return grunnlagsdataPeriodeHistorikk.periodeType.toString()
-    }
-    return "UKJENT" // TODO throw exception?
-}
