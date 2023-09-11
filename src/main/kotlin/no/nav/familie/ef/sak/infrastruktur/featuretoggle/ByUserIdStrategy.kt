@@ -9,7 +9,7 @@ class ByUserIdStrategy : Strategy {
     private val logger = LoggerFactory.getLogger(javaClass)
 
     override fun getName(): String {
-        return "byUserId"
+        return "userWithId"
     }
 
     override fun isEnabled(map: MutableMap<String, String>): Boolean {
