@@ -2,8 +2,11 @@ package no.nav.familie.ef.sak.infrastruktur.featuretoggle
 
 import io.getunleash.strategy.Strategy
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
+import org.slf4j.LoggerFactory
 
 class ByUserIdStrategy : Strategy {
+
+    private val logger = LoggerFactory.getLogger(javaClass)
 
     override fun getName(): String {
         return "userWithId"
@@ -12,7 +15,10 @@ class ByUserIdStrategy : Strategy {
     override fun isEnabled(map: MutableMap<String, String>): Boolean {
         return map["userIds"]
             ?.split(',')
-            ?.any { SikkerhetContext.hentSaksbehandler() == it }
+            ?.any {
+                logger.info("ByUserId: $it")
+                SikkerhetContext.hentSaksbehandler() == it
+            }
             ?: false
     }
 }
