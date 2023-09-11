@@ -12,32 +12,37 @@ interface FeatureToggleService : DisposableBean {
 }
 
 enum class Toggle(val toggleId: String, val beskrivelse: String? = null) {
-    AUTOMATISK_MIGRERING("familie.ef.sak.automatisk-migrering"),
-    MIGRERING_BARNETILSYN("familie.ef.sak.migrering.barnetilsyn"),
-    G_BEREGNING("familie.ef.sak.g-beregning"),
-    G_BEREGNING_SCHEDULER("familie.ef.sak.g-beregning-scheduler"),
-    G_OMREGNING_REVURDER_HOPP_OVER_VALIDER_TIDLIGERE_VEDTAK("familie.ef.sak.revurder-g-omregning-hopp-over-valider-tidligere-vedtak"),
-    G_BEREGNING_INKLUDER_SATT_PÅ_VENT("familie.ef.sak.inkluder-satt-pa-vent-gomregning"),
-    G_BEREGNING_TILLAT_MANUELL_OPPRETTELSE_AV_G_TASK("familie.ef.sak.tillat-opprettelse-av-g-task", "Permission"),
-    SATSENDRING_BRUK_IKKE_VEDTATT_MAXSATS("familie.ef.sak.bruk-nye-maxsatser"),
+    // Release
+    G_BEREGNING_INKLUDER_SATT_PÅ_VENT(
+        "familie.ef.sak.inkluder-satt-pa-vent-gomregning",
+        "Usikker på om vi ønsker denne eller ikke. Ta en vurdering før 2024?",
+    ),
+    FRONTEND_VIS_INNTEKT_PERSONOVERSIKT("familie.ef.sak.frontend.vis-inntekt-personoversikt", "Ikke ferdigstilt ennå"),
 
+    // Operational
+    AUTOMATISK_MIGRERING("familie.ef.sak.automatisk-migrering", "Kan denne slettes?"),
+    G_BEREGNING("familie.ef.sak.g-beregning", "Operational"),
+    G_BEREGNING_SCHEDULER("familie.ef.sak.g-beregning-scheduler", "Operational"),
+    SATSENDRING_BRUK_IKKE_VEDTATT_MAXSATS("familie.ef.sak.bruk-nye-maxsatser", "Operational"),
+    FRONTEND_VIS_IKKE_PUBLISERTE_BREVMALER("familie.ef.sak.frontend-vis-ikke-publiserte-brevmaler", "Operational- kun preprod"),
+    FRONTEND_AUTOMATISK_UTFYLLE_VILKÅR("familie.ef.sak.frontend-automatisk-utfylle-vilkar", "Operational - kun preprod"),
+    AUTOMATISKE_BREV_INNHENTING_KARAKTERUTSKRIFT(
+        "familie.ef.sak.automatiske-brev-innhenting-karakterutskrift",
+        "Operational - sesongavhengig",
+    ),
+
+    // Permission
+    MIGRERING_BARNETILSYN("familie.ef.sak.migrering.barnetilsyn", "Permission"),
+    G_BEREGNING_TILLAT_MANUELL_OPPRETTELSE_AV_G_TASK("familie.ef.sak.tillat-opprettelse-av-g-task", "Permission"),
     OPPRETT_BEHANDLING_FERDIGSTILT_JOURNALPOST(
         "familie.ef.sak.opprett-behandling-for-ferdigstilt-journalpost",
         "Permission",
     ),
     BEHANDLING_KORRIGERING("familie.ef.sak.behandling-korrigering", "Permission"),
-
-    VILKÅR_GJENBRUK("familie.ef.sak.vilkaar-gjenruk"),
-
-    FRONTEND_VIS_IKKE_PUBLISERTE_BREVMALER("familie.ef.sak.frontend-vis-ikke-publiserte-brevmaler"),
-    FRONTEND_AUTOMATISK_UTFYLLE_VILKÅR("familie.ef.sak.frontend-automatisk-utfylle-vilkar"),
-    FRONTEND_SATSENDRING("familie.ef.sak.frontend-vis-satsendring"),
-    FRONTEND_VIS_INNTEKT_PERSONOVERSIKT("familie.ef.sak.frontend.vis-inntekt-personoversikt"),
-    KAST_FEIL_HVIS_OPPGAVE_MANGLER_PÅ_ÅPEN_BEHANDLING("familie.ef.sak.kast-feil-hvis-oppgave-mangler-pa-apen-behandling"),
+    FRONTEND_SATSENDRING("familie.ef.sak.frontend-vis-satsendring", "Permission"),
     TILLAT_MIGRERING_5_ÅR_TILBAKE("familie.ef.sak.tillat-migrering-5-ar-tilbake", "Permission"),
     TILLAT_MIGRERING_7_ÅR_TILBAKE("familie.ef.sak.tillat-migrering-7-ar-tilbake", "Permission"),
-    AUTOMATISKE_BREV_INNHENTING_KARAKTERUTSKRIFT("familie.ef.sak.automatiske-brev-innhenting-karakterutskrift"),
-    UTVIKLER_MED_VEILEDERRROLLE("familie.ef.sak.utviklere-med-veilederrolle"),
+    UTVIKLER_MED_VEILEDERRROLLE("familie.ef.sak.utviklere-med-veilederrolle", "Permission"),
     ;
 
     companion object {
