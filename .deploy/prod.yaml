@@ -85,6 +85,7 @@ spec:
         - host: familie-integrasjoner.prod-fss-pub.nais.io
         - host: familie-ef-infotrygd.prod-fss-pub.nais.io
         - host: familie-ef-proxy.prod-fss-pub.nais.io
+        - host: teamfamilie-unleash-api.nav.cloud.nais.io
   azure:
     application:
       enabled: true
