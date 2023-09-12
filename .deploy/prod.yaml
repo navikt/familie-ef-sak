@@ -108,3 +108,4 @@ spec:
       value: prod
   envFrom:
     - secret: familie-ef-sak
+    - secret: familie-ef-sak-unleash-api-token
