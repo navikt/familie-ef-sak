@@ -11,16 +11,19 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 @RequestMapping(path = ["/api/featuretoggle"], produces = [MediaType.APPLICATION_JSON_VALUE])
 @Unprotected
-class FeatureToggleController(private val featureToggleService: FeatureToggleService) {
+class FeatureToggleController(
+    private val featureToggleService: FeatureToggleService,
+) {
 
     private val funksjonsbrytere = setOf(
         Toggle.BEHANDLING_KORRIGERING,
         Toggle.FRONTEND_VIS_IKKE_PUBLISERTE_BREVMALER,
-        Toggle.MIGRERING_BARNETILSYN,
         Toggle.OPPRETT_BEHANDLING_FERDIGSTILT_JOURNALPOST,
         Toggle.FRONTEND_AUTOMATISK_UTFYLLE_VILKÅR,
         Toggle.FRONTEND_SATSENDRING,
         Toggle.FRONTEND_VIS_INNTEKT_PERSONOVERSIKT,
+        Toggle.TEST_USER_ID,
+        Toggle.TEST_ENVIRONMENT,
     )
 
     @GetMapping
