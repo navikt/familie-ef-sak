@@ -118,7 +118,7 @@ class OppgaveController(
     }
 
     @GetMapping("{behandlingId}/ansvarlig-saksbehandler")
-    fun hentAnsvarligSaksbehandlerForBehandlingId(@PathVariable behandlingId: UUID): Ressurs<Saksbehandler?> {
+    fun hentAnsvarligSaksbehandlerForBehandling(@PathVariable behandlingId: UUID): Ressurs<Saksbehandler?> {
         val oppgave = oppgaveService.hentIkkeFerdigstiltOppgaveForBehandling(behandlingId)
         val saksbehandlerIdentIOppgaveSystemet = oppgave?.tilordnetRessurs
 

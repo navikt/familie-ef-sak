@@ -17,7 +17,9 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlIdenter
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveRequest
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveResponseDto
+import no.nav.familie.kontrakter.felles.oppgave.Oppgave
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
+import no.nav.familie.kontrakter.felles.saksbehandler.Saksbehandler
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Nested
@@ -165,6 +167,30 @@ internal class OppgaveControllerTest {
         }
     }
 
+    @Nested
+    inner class HentAnsvarligSaksbehandler {
+
+        @Test
+        internal fun `skal hente ansvarlig saksbehandler for behandling basert på behandle sak oppgave`() {
+            every { oppgaveService.hentSaksbehandlerInfo(any()) } returns saksbehandler
+            every { oppgaveService.hentIkkeFerdigstiltOppgaveForBehandling(any()) } returns Oppgave(tilordnetRessurs = "")
+
+            val ansvarligSaksbehandler = oppgaveController.hentAnsvarligSaksbehandlerForBehandling(UUID.randomUUID())
+
+            assertThat(ansvarligSaksbehandler.data).isEqualTo(saksbehandler)
+        }
+
+        @Test
+        internal fun `skal returnere null dersom ansvarlig saksbehandler ikke er satt`() {
+            every { oppgaveService.hentSaksbehandlerInfo(any()) } returns saksbehandler
+            every { oppgaveService.hentIkkeFerdigstiltOppgaveForBehandling(any()) } returns Oppgave(tilordnetRessurs = null)
+
+            val ansvarligSaksbehandler = oppgaveController.hentAnsvarligSaksbehandlerForBehandling(UUID.randomUUID())
+
+            assertThat(ansvarligSaksbehandler.data).isNull()
+        }
+    }
+
     private fun tilgangOgRolleJustRuns() {
         every {
             tilgangService.validerTilgangTilPersonMedBarn(any(), any())
@@ -178,4 +204,6 @@ internal class OppgaveControllerTest {
             tilgangService.validerSaksbehandler(any())
         } returns true
     }
+
+    private val saksbehandler = Saksbehandler(UUID.randomUUID(), "Z999999", "Darth", "Vader", "4405")
 }

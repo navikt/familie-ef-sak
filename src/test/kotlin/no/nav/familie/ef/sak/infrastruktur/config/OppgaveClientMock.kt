@@ -156,7 +156,7 @@ class OppgaveClientMock {
             firstArg<Oppgave>().id ?: 0
         }
 
-        every {oppgaveClient.hentSaksbehandlerInfo(any())} answers {
+        every { oppgaveClient.hentSaksbehandlerInfo(any()) } answers {
             val navIdent = SikkerhetContext.hentSaksbehandler()
             val saksbehandlerNavn = SikkerhetContext.hentSaksbehandlerNavn().split(" ")
 
