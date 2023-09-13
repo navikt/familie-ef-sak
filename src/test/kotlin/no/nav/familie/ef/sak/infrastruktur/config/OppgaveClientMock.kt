@@ -2,6 +2,7 @@ package no.nav.familie.ef.sak.infrastruktur.config
 
 import io.mockk.every
 import io.mockk.mockk
+import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.oppgave.OppgaveClient
 import no.nav.familie.kontrakter.felles.Behandlingstema
 import no.nav.familie.kontrakter.felles.Tema
@@ -15,11 +16,13 @@ import no.nav.familie.kontrakter.felles.oppgave.OppgavePrioritet
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.kontrakter.felles.oppgave.OpprettOppgaveRequest
 import no.nav.familie.kontrakter.felles.oppgave.StatusEnum
+import no.nav.familie.kontrakter.felles.saksbehandler.Saksbehandler
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Primary
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
+import java.util.UUID
 
 @Configuration
 class OppgaveClientMock {
@@ -151,6 +154,13 @@ class OppgaveClientMock {
 
         every { oppgaveClient.oppdaterOppgave(any()) } answers {
             firstArg<Oppgave>().id ?: 0
+        }
+
+        every {oppgaveClient.hentSaksbehandlerInfo(any())} answers {
+            val navIdent = SikkerhetContext.hentSaksbehandler()
+            val saksbehandlerNavn = SikkerhetContext.hentSaksbehandlerNavn().split(" ")
+
+            Saksbehandler(azureId = UUID.randomUUID(), navIdent = navIdent, fornavn = saksbehandlerNavn.first(), etternavn = saksbehandlerNavn.elementAt(1), enhet = "4405")
         }
 
         return oppgaveClient

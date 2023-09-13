@@ -6,7 +6,6 @@ import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.ef.sak.oppgave.OppgaveUtil.ENHET_NR_EGEN_ANSATT
 import no.nav.familie.ef.sak.oppgave.OppgaveUtil.ENHET_NR_NAY
-import no.nav.familie.ef.sak.oppgave.OppgaveUtil.sekunderSidenEndret
 import no.nav.familie.ef.sak.oppgave.dto.FinnOppgaveRequestDto
 import no.nav.familie.ef.sak.oppgave.dto.OppgaveDto
 import no.nav.familie.ef.sak.oppgave.dto.OppgaveEfDto
@@ -17,6 +16,7 @@ import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveResponseDto
 import no.nav.familie.kontrakter.felles.oppgave.MappeDto
 import no.nav.familie.kontrakter.felles.oppgave.Oppgave
+import no.nav.familie.kontrakter.felles.saksbehandler.Saksbehandler
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
@@ -100,6 +100,7 @@ class OppgaveController(
         return Ressurs.success(oppgaveService.hentOppgave(gsakOppgaveId).tilDto())
     }
 
+    @Deprecated("Har ikke lenger behov for logging - fjern etter at frontend slutter å kalle på dette endepunktet")
     @GetMapping("{behandlingId}/tilordnet-ressurs")
     fun hentTilordnetRessursForBehandlingId(@PathVariable behandlingId: UUID): Ressurs<String?> {
         val saksbehandlerIdent = SikkerhetContext.hentSaksbehandlerEllerSystembruker()
@@ -110,10 +111,22 @@ class OppgaveController(
                 "(Eier av behandling/oppgave) " +
                     "Saksbehandler $saksbehandlerIdent er inne i behandling=$behandlingId " +
                     "mens oppgaven=${oppgave.id} er tilordnet $saksbehandlerIdentIOppgaveSystemet " +
-                    "sekunderSidenEndret=${sekunderSidenEndret(oppgave)}",
+                    "sekunderSidenEndret=${OppgaveUtil.sekunderSidenEndret(oppgave)}",
             )
         }
         return Ressurs.success(saksbehandlerIdentIOppgaveSystemet)
+    }
+
+    @GetMapping("{behandlingId}/ansvarlig-saksbehandler")
+    fun hentAnsvarligSaksbehandlerForBehandlingId(@PathVariable behandlingId: UUID): Ressurs<Saksbehandler?> {
+        val oppgave = oppgaveService.hentIkkeFerdigstiltOppgaveForBehandling(behandlingId)
+        val saksbehandlerIdentIOppgaveSystemet = oppgave?.tilordnetRessurs
+
+        return if (saksbehandlerIdentIOppgaveSystemet == null) {
+            Ressurs.success(saksbehandlerIdentIOppgaveSystemet)
+        } else {
+            Ressurs.success(oppgaveService.hentSaksbehandlerInfo(saksbehandlerIdentIOppgaveSystemet))
+        }
     }
 
     @GetMapping("/behandling/{behandlingId}")
