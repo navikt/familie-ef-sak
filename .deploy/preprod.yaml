@@ -9,7 +9,6 @@ metadata:
 spec:
   image: {{ image }}
   ingresses:
-    - https://familie-ef-sak.dev.intern.nav.no # Deprecated
     - https://familie-ef-sak.intern.dev.nav.no
   liveness:
     path: /internal/status/isAlive
