@@ -71,7 +71,7 @@ class OppgaveClient(
         val uri = URI.create("$saksbehandlerUri/$navIdent")
 
         val respons = getForEntity<Ressurs<Saksbehandler>>(uri)
-        return pakkUtRespons(respons, uri, "hentAnsvarligSaksbehandlerInfo")
+        return pakkUtRespons(respons, uri, "hentSaksbehandlerInfo")
     }
 
     fun fordelOppgave(oppgaveId: Long, saksbehandler: String?, versjon: Int? = null): Long {

@@ -21,7 +21,7 @@ import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvisIkke
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
-import no.nav.familie.ef.sak.oppgave.OppgaveService
+import no.nav.familie.ef.sak.oppgave.HentIkkeFerdigstiltOppgaveService
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.ef.sak.simulering.SimuleringService
 import no.nav.familie.ef.sak.tilbakekreving.TilbakekrevingService
@@ -41,7 +41,6 @@ import java.util.UUID
 @Service
 class SendTilBeslutterSteg(
     private val taskService: TaskService,
-    private val oppgaveService: OppgaveService,
     private val fagsakService: FagsakService,
     private val behandlingService: BehandlingService,
     private val vedtaksbrevRepository: VedtaksbrevRepository,
@@ -53,6 +52,7 @@ class SendTilBeslutterSteg(
     private val årsakRevurderingService: ÅrsakRevurderingService,
     private val oppgaverForOpprettelseService: OppgaverForOpprettelseService,
     private val behandlingshistorikkService: BehandlingshistorikkService,
+    private val hentIkkeFerdigstiltOppgaveService: HentIkkeFerdigstiltOppgaveService,
 ) : BehandlingSteg<SendTilBeslutterDto?> {
 
     override fun validerSteg(saksbehandling: Saksbehandling) {
@@ -77,7 +77,7 @@ class SendTilBeslutterSteg(
     }
 
     private fun validerAtDetFinnesOppgave(saksbehandling: Saksbehandling) {
-        feilHvis(oppgaveService.hentBehandleSakOppgaveSomIkkeErFerdigstilt(saksbehandling.id) == null) {
+        feilHvis(hentIkkeFerdigstiltOppgaveService.hentBehandleSakOppgaveSomIkkeErFerdigstilt(saksbehandling.id) == null) {
             "Oppgaven for behandlingen er ikke tilgjengelig. Vennligst vent og prøv igjen om litt."
         }
     }

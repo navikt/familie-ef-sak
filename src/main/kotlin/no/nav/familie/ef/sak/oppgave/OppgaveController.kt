@@ -40,6 +40,7 @@ class OppgaveController(
     private val oppgaveService: OppgaveService,
     private val tilgangService: TilgangService,
     private val personService: PersonService,
+    private val hentIkkeFerdigstiltOppgaveService: HentIkkeFerdigstiltOppgaveService,
 ) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -104,7 +105,7 @@ class OppgaveController(
     @GetMapping("{behandlingId}/tilordnet-ressurs")
     fun hentTilordnetRessursForBehandlingId(@PathVariable behandlingId: UUID): Ressurs<String?> {
         val saksbehandlerIdent = SikkerhetContext.hentSaksbehandlerEllerSystembruker()
-        val oppgave = oppgaveService.hentIkkeFerdigstiltOppgaveForBehandling(behandlingId)
+        val oppgave = hentIkkeFerdigstiltOppgaveService.hentIkkeFerdigstiltOppgaveForBehandling(behandlingId)
         val saksbehandlerIdentIOppgaveSystemet = oppgave?.tilordnetRessurs
         if (oppgave != null && saksbehandlerIdentIOppgaveSystemet != saksbehandlerIdent) {
             logger.info(
@@ -119,7 +120,7 @@ class OppgaveController(
 
     @GetMapping("{behandlingId}/ansvarlig-saksbehandler")
     fun hentAnsvarligSaksbehandlerForBehandling(@PathVariable behandlingId: UUID): Ressurs<Saksbehandler?> {
-        val oppgave = oppgaveService.hentIkkeFerdigstiltOppgaveForBehandling(behandlingId)
+        val oppgave = hentIkkeFerdigstiltOppgaveService.hentIkkeFerdigstiltOppgaveForBehandling(behandlingId)
         val saksbehandlerIdentIOppgaveSystemet = oppgave?.tilordnetRessurs
 
         return if (saksbehandlerIdentIOppgaveSystemet == null) {
@@ -131,7 +132,7 @@ class OppgaveController(
 
     @GetMapping("/behandling/{behandlingId}")
     fun hentOppgaveForBehandlingId(@PathVariable behandlingId: UUID): Ressurs<Oppgave> {
-        val oppgave = oppgaveService.hentIkkeFerdigstiltOppgaveForBehandling(behandlingId)
+        val oppgave = hentIkkeFerdigstiltOppgaveService.hentIkkeFerdigstiltOppgaveForBehandling(behandlingId)
 
         return oppgave?.let { Ressurs.success(it) } ?: throw ApiFeil(
             "Fant ingen åpen oppgave for behandlingen",

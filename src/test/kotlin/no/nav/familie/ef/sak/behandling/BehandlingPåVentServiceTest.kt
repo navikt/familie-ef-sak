@@ -21,6 +21,7 @@ import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
+import no.nav.familie.ef.sak.oppgave.HentIkkeFerdigstiltOppgaveService
 import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.ef.sak.oppgave.OppgaveSubtype
 import no.nav.familie.ef.sak.repository.behandling
@@ -52,6 +53,7 @@ internal class BehandlingPåVentServiceTest {
     private val nullstillVedtakService = mockk<NullstillVedtakService>(relaxed = true)
     private val behandlingshistorikkService = mockk<BehandlingshistorikkService>(relaxed = true)
     private val oppgaveService = mockk<OppgaveService>()
+    private val hentIkkeFerdigstiltOppgaveService: HentIkkeFerdigstiltOppgaveService = mockk<HentIkkeFerdigstiltOppgaveService>(relaxed = true)
 
     private val featureToggleService = mockk<FeatureToggleService>()
 
@@ -61,8 +63,8 @@ internal class BehandlingPåVentServiceTest {
             behandlingshistorikkService,
             taskService,
             nullstillVedtakService,
-            featureToggleService,
             oppgaveService,
+            hentIkkeFerdigstiltOppgaveService,
         )
     val fagsak = fagsak()
     val tidligereIverksattBehandling = behandling(fagsak)
@@ -422,7 +424,7 @@ internal class BehandlingPåVentServiceTest {
 
         private fun mockSettSaksbehandlerPåOppgave(oppgaveId: Long) {
             val oppgave = oppgave(oppgaveId)
-            every { oppgaveService.hentIkkeFerdigstiltOppgaveForBehandling(behandlingId) } returns oppgave
+            every { hentIkkeFerdigstiltOppgaveService.hentIkkeFerdigstiltOppgaveForBehandling(behandlingId) } returns oppgave
             every { oppgaveService.fordelOppgave(any(), any(), any()) } returns oppgaveId
         }
     }

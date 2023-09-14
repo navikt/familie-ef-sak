@@ -27,6 +27,7 @@ import no.nav.familie.ef.sak.cucumber.domeneparser.parseValgfriString
 import no.nav.familie.ef.sak.felles.util.DatoUtil
 import no.nav.familie.ef.sak.felles.util.mockFeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
+import no.nav.familie.ef.sak.oppgave.HentIkkeFerdigstiltOppgaveService
 import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.ef.sak.oppgave.OppgaveSubtype
 import no.nav.familie.ef.sak.repository.behandling
@@ -54,14 +55,15 @@ class SettPåVentStepDefinitions {
     val taskService = mockk<TaskService>()
     val nullstillVedtakService = mockk<NullstillVedtakService>()
     val oppgaveService = mockk<OppgaveService>()
+    val hentIkkeFerdigstiltOppgaveService = mockk<HentIkkeFerdigstiltOppgaveService>()
 
     val påVentService = BehandlingPåVentService(
         behandlingService,
         behandlingshistorikkService,
         taskService,
         nullstillVedtakService,
-        featureToggleService,
         oppgaveService,
+        hentIkkeFerdigstiltOppgaveService,
     )
 
     var behandling = behandling()

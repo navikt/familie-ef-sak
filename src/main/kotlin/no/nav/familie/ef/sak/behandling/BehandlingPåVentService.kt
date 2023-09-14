@@ -16,8 +16,8 @@ import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
-import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
+import no.nav.familie.ef.sak.oppgave.HentIkkeFerdigstiltOppgaveService
 import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.ef.sak.oppgave.OppgaveSubtype
 import no.nav.familie.ef.sak.vedtak.NullstillVedtakService
@@ -38,8 +38,8 @@ class BehandlingPåVentService(
     private val behandlingshistorikkService: BehandlingshistorikkService,
     private val taskService: TaskService,
     private val nullstillVedtakService: NullstillVedtakService,
-    private val featureToggleService: FeatureToggleService,
     private val oppgaveService: OppgaveService,
+    private val hentIkkeFerdigstiltOppgaveService: HentIkkeFerdigstiltOppgaveService,
 ) {
 
     val logger: Logger = LoggerFactory.getLogger(javaClass)
@@ -262,7 +262,7 @@ class BehandlingPåVentService(
     }
 
     private fun fordelOppgaveTilSaksbehandler(behandlingId: UUID) {
-        val oppgave = oppgaveService.hentIkkeFerdigstiltOppgaveForBehandling(behandlingId)
+        val oppgave = hentIkkeFerdigstiltOppgaveService.hentIkkeFerdigstiltOppgaveForBehandling(behandlingId)
         val oppgaveId = oppgave?.id
         if (oppgaveId != null) {
             oppgaveService.fordelOppgave(oppgaveId, SikkerhetContext.hentSaksbehandler(), oppgave.versjon)

@@ -32,8 +32,9 @@ internal class OppgaveControllerTest {
     private val tilgangService: TilgangService = mockk()
     private val oppgaveService: OppgaveService = mockk()
     private val personService: PersonService = mockk()
+    private val hentIkkeFerdigstiltOppgaveService: HentIkkeFerdigstiltOppgaveService = mockk()
 
-    private val oppgaveController: OppgaveController = OppgaveController(oppgaveService, tilgangService, personService)
+    private val oppgaveController: OppgaveController = OppgaveController(oppgaveService, tilgangService, personService, hentIkkeFerdigstiltOppgaveService)
 
     @Test
     internal fun `skal kaste feil hvis ident ikke er på gyldig format`() {
@@ -173,7 +174,7 @@ internal class OppgaveControllerTest {
         @Test
         internal fun `skal hente ansvarlig saksbehandler for behandling basert på behandle sak oppgave`() {
             every { oppgaveService.hentSaksbehandlerInfo(any()) } returns saksbehandler
-            every { oppgaveService.hentIkkeFerdigstiltOppgaveForBehandling(any()) } returns Oppgave(tilordnetRessurs = "")
+            every { hentIkkeFerdigstiltOppgaveService.hentIkkeFerdigstiltOppgaveForBehandling(any()) } returns Oppgave(tilordnetRessurs = "")
 
             val ansvarligSaksbehandler = oppgaveController.hentAnsvarligSaksbehandlerForBehandling(UUID.randomUUID())
 
@@ -183,7 +184,7 @@ internal class OppgaveControllerTest {
         @Test
         internal fun `skal returnere null dersom ansvarlig saksbehandler ikke er satt`() {
             every { oppgaveService.hentSaksbehandlerInfo(any()) } returns saksbehandler
-            every { oppgaveService.hentIkkeFerdigstiltOppgaveForBehandling(any()) } returns Oppgave(tilordnetRessurs = null)
+            every { hentIkkeFerdigstiltOppgaveService.hentIkkeFerdigstiltOppgaveForBehandling(any()) } returns Oppgave(tilordnetRessurs = null)
 
             val ansvarligSaksbehandler = oppgaveController.hentAnsvarligSaksbehandlerForBehandling(UUID.randomUUID())
 
