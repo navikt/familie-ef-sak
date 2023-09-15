@@ -19,5 +19,9 @@ FAMILIE_BREV_API_URL: http://localhost:8001
 
 AZURE_APP_TENANT_ID: navq.onmicrosoft.com
 
+UNLEASH_SERVER_API_URL: http://localhost:4242/api
+UNLEASH_SERVER_API_TOKEN: token
+NAIS_APP_NAME: familie-ef-sak
+
 prosessering:
   enabled: false
