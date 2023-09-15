@@ -69,6 +69,7 @@ class BeregnYtelseSteg(
 ) : BehandlingSteg<VedtakDto> {
 
     private val logger = LoggerFactory.getLogger(javaClass)
+    private val MIDLERTIDIG_OPPHØR_FEILMELDING = "Kan ikke starte vedtaket med opphørsperiode for en førstegangsbehandling"
 
     override fun stegType(): StegType {
         return StegType.BEREGNE_YTELSE
@@ -89,35 +90,56 @@ class BeregnYtelseSteg(
 
         when (data) {
             is InnvilgelseOvergangsstønad -> {
+                validerGyldigStartperiodeForOvergangsstønad(data, saksbehandlingMedOppdatertIdent)
                 validerOmregningService.validerHarSammePerioderSomTidligereVedtak(data, saksbehandlingMedOppdatertIdent)
                 validerSanksjoner(data, saksbehandlingMedOppdatertIdent)
                 opprettTilkjentYtelseForInnvilgetOvergangsstønad(data, saksbehandlingMedOppdatertIdent)
                 simuleringService.hentOgLagreSimuleringsresultat(saksbehandlingMedOppdatertIdent)
             }
+
             is InnvilgelseBarnetilsyn -> {
+                validerGyldigStartperiodeForBarnetilsyn(data, saksbehandlingMedOppdatertIdent)
                 validerSanksjoner(data, saksbehandlingMedOppdatertIdent)
                 opprettTilkjentYtelseForInnvilgetBarnetilsyn(data, saksbehandlingMedOppdatertIdent)
                 simuleringService.hentOgLagreSimuleringsresultat(saksbehandlingMedOppdatertIdent)
             }
+
             is VedtakSkolepengerDto -> {
                 opprettTilkjentYtelseForInnvilgetSkolepenger(data, saksbehandlingMedOppdatertIdent)
                 simuleringService.hentOgLagreSimuleringsresultat(saksbehandlingMedOppdatertIdent)
             }
+
             is Opphør -> {
                 oppgaverForOpprettelseService.slettOppgaverForOpprettelse(saksbehandling.id)
                 validerStartTidEtterSanksjon(data.opphørFom, saksbehandlingMedOppdatertIdent)
                 opprettTilkjentYtelseForOpphørtBehandling(saksbehandlingMedOppdatertIdent, data)
                 simuleringService.hentOgLagreSimuleringsresultat(saksbehandlingMedOppdatertIdent)
             }
+
             is Avslå -> {
                 oppgaverForOpprettelseService.slettOppgaverForOpprettelse(saksbehandling.id)
                 simuleringService.slettSimuleringForBehandling(saksbehandlingMedOppdatertIdent)
                 tilbakekrevingService.slettTilbakekreving(saksbehandlingMedOppdatertIdent.id)
             }
+
             is Sanksjonert -> {
                 oppgaverForOpprettelseService.slettOppgaverForOpprettelse(saksbehandling.id)
                 opprettTilkjentYtelseForSanksjonertBehandling(data, saksbehandlingMedOppdatertIdent)
             }
+        }
+    }
+
+    private fun validerGyldigStartperiodeForOvergangsstønad(vedtak: InnvilgelseOvergangsstønad, behandling: Saksbehandling) {
+        if (behandling.type == FØRSTEGANGSBEHANDLING) {
+            val starterMedMidlertidigOpphør = vedtak.perioder.firstOrNull()?.erMidlertidigOpphørEllerSanksjon() == true
+            feilHvis(starterMedMidlertidigOpphør) { MIDLERTIDIG_OPPHØR_FEILMELDING }
+        }
+    }
+
+    private fun validerGyldigStartperiodeForBarnetilsyn(vedtak: InnvilgelseBarnetilsyn, behandling: Saksbehandling) {
+        if (behandling.type == FØRSTEGANGSBEHANDLING) {
+            val starterMedMidlertidigOpphør = vedtak.perioder.firstOrNull()?.erMidlertidigOpphørEllerSanksjon == true
+            feilHvis(starterMedMidlertidigOpphør) { MIDLERTIDIG_OPPHØR_FEILMELDING }
         }
     }
 
@@ -258,6 +280,7 @@ class BeregnYtelseSteg(
                 Opphør::class,
                 Sanksjonert::class,
             )
+
             StønadType.BARNETILSYN -> validerGyldigeVedtakstyper(
                 saksbehandling.stønadstype,
                 data,
@@ -266,6 +289,7 @@ class BeregnYtelseSteg(
                 Opphør::class,
                 Sanksjonert::class,
             )
+
             StønadType.SKOLEPENGER -> validerGyldigeVedtakstyper(
                 saksbehandling.stønadstype,
                 data,
