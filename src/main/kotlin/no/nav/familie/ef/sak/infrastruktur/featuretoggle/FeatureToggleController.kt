@@ -22,8 +22,6 @@ class FeatureToggleController(
         Toggle.FRONTEND_AUTOMATISK_UTFYLLE_VILKÅR,
         Toggle.FRONTEND_SATSENDRING,
         Toggle.FRONTEND_VIS_INNTEKT_PERSONOVERSIKT,
-        Toggle.TEST_USER_ID,
-        Toggle.TEST_ENVIRONMENT,
     )
 
     @GetMapping
