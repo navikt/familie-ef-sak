@@ -73,7 +73,7 @@ internal class TilordnetRessursServiceTest {
     }
 
     @Nested
-    inner class utledEierskapTilOppgave {
+    inner class UtledEierskapTilOppgave {
 
         @Test
         internal fun `skal returnere true dersom tilordnet ressurs er null`() {
@@ -119,7 +119,6 @@ internal class TilordnetRessursServiceTest {
 
             assertThat(erSaksbehandlerEllerNull).isFalse()
         }
-
     }
 
     companion object {

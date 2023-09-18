@@ -6,7 +6,6 @@ import io.mockk.verify
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.infrastruktur.config.KodeverkServiceMock
 import no.nav.familie.ef.sak.infrastruktur.config.PdlClientConfig
-import no.nav.familie.ef.sak.oppgave.TilordnetRessursService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataRegisterService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService

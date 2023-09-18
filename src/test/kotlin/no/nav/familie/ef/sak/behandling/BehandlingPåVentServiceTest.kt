@@ -93,7 +93,7 @@ internal class BehandlingPåVentServiceTest {
                 ),
             )
         }
-        every { tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandlerEllerNull(any())} returns true
+        every { tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandlerEllerNull(any()) } returns true
     }
 
     @AfterEach

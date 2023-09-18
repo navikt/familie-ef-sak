@@ -47,7 +47,7 @@ internal class ÅrsakRevurderingServiceTest {
 
         justRun { årsakRevurderingsRepository.deleteById(any()) }
         every { årsakRevurderingsRepository.insert(capture(årsakRevurderingSlot)) } answers { firstArg() }
-        every { tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandlerEllerNull(any())} returns true
+        every { tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandlerEllerNull(any()) } returns true
     }
 
     @Nested

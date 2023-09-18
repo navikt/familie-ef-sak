@@ -27,5 +27,6 @@ class TilordnetRessursService(
     fun hentBehandleSakOppgaveSomIkkeErFerdigstilt(behandlingId: UUID): EFOppgave? =
         oppgaveRepository.findByBehandlingIdAndErFerdigstiltIsFalseAndTypeIn(
             behandlingId,
-            setOf(Oppgavetype.BehandleSak, Oppgavetype.BehandleUnderkjentVedtak))
+            setOf(Oppgavetype.BehandleSak, Oppgavetype.BehandleUnderkjentVedtak),
+        )
 }

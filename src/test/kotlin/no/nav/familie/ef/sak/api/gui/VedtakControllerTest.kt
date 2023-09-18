@@ -399,7 +399,7 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
         tilkjentYtelse: (behandlingId: UUID) -> TilkjentYtelse = {
             tilkjentYtelse(
                 behandlingId = it,
-                fagsak.hentAktivIdent()
+                fagsak.hentAktivIdent(),
             )
         },
         saksbehandler: Saksbehandler = SAKSBEHANDLER,

@@ -813,7 +813,7 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
             kravMottatt = LocalDate.now(),
             VilkårsbehandleNyeBarn.IKKE_VILKÅRSBEHANDLE,
         )
-        val revurdering = testWithBrukerContext ( preferredUsername = "Z999999") { revurderingService.opprettRevurderingManuelt(revurderingDto) }
+        val revurdering = testWithBrukerContext(preferredUsername = "Z999999") { revurderingService.opprettRevurderingManuelt(revurderingDto) }
         val saksbehandling = saksbehandling(fagsak, revurdering)
         innvilgOgSendTilBeslutter(saksbehandling)
         godkjennTotrinnskontroll(behandlingService.hentSaksbehandling(revurdering.id))
@@ -847,7 +847,7 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
         )
         val brevrequest = objectMapper.readTree("123")
         opprettOppgave(saksbehandling.id)
-        testWithBrukerContext( preferredUsername = "Z999999", groups = listOf(rolleConfig.saksbehandlerRolle)) {
+        testWithBrukerContext(preferredUsername = "Z999999", groups = listOf(rolleConfig.saksbehandlerRolle)) {
             stegService.håndterÅrsakRevurdering(saksbehandling.id, revurderingsinformasjon())
             stegService.håndterBeregnYtelseForStønad(saksbehandling, innvilget)
             tilbakekrevingService.lagreTilbakekreving(
@@ -890,7 +890,7 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
         mockPerioder()
 
         val fagsak = fagsakService.hentEllerOpprettFagsak("1", OVERGANGSSTØNAD)
-        val behandling = testWithBrukerContext(preferredUsername = "Z999999",groups = listOf(rolleConfig.beslutterRolle)) {
+        val behandling = testWithBrukerContext(preferredUsername = "Z999999", groups = listOf(rolleConfig.beslutterRolle)) {
             migreringService.opprettMigrering(
                 fagsak,
                 Månedsperiode(migrerFraDato, migrerTilDato),

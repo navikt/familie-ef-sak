@@ -8,7 +8,6 @@ import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
-import no.nav.familie.ef.sak.felles.util.BrukerContextUtil
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.testWithBrukerContext
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService

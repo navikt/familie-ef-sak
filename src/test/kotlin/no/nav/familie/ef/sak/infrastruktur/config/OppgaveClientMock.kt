@@ -20,7 +20,6 @@ import no.nav.familie.kontrakter.felles.saksbehandler.Saksbehandler
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Primary
-import org.springframework.context.annotation.Profile
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.UUID

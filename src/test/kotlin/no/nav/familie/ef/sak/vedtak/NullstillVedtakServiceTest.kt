@@ -57,7 +57,7 @@ class NullstillVedtakServiceTest {
 
     @BeforeEach
     fun setUp() {
-        every {tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandlerEllerNull(any())} returns true
+        every { tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandlerEllerNull(any()) } returns true
     }
 
     @Test

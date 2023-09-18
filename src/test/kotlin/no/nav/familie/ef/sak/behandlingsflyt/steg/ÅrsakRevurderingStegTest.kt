@@ -35,7 +35,7 @@ internal class ÅrsakRevurderingStegTest {
     @BeforeEach
     internal fun setUp() {
         justRun { årsakRevurderingService.oppdaterRevurderingsinformasjon(any(), any(), any()) }
-        every { tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandlerEllerNull(any())} returns true
+        every { tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandlerEllerNull(any()) } returns true
     }
 
     private val gyldigRevurderingsinformasjon = revurderingsinformasjon()
