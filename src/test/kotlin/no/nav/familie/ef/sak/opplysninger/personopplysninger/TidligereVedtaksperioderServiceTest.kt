@@ -232,13 +232,13 @@ internal class TidligereVedtaksperioderServiceTest {
     internal fun `Skal ikke telle mnd med sanksjon som antall uten beløp`() {
         val periode1 = Månedsperiode(YearMonth.of(2022, 1), YearMonth.of(2022, 12))
         val periode2 = Månedsperiode(YearMonth.of(2023, 1))
-        val sanksjonsperiode = Sanksjonsperiode(periode =periode2, sanksjonsårsak =Sanksjonsårsak.SAGT_OPP_STILLING)
+        val sanksjonsperiode = Sanksjonsperiode(periode = periode2, sanksjonsårsak = Sanksjonsårsak.SAGT_OPP_STILLING)
 
         val hovedAndel = andel.copy(andel = andelMedGrunnlagDto().copy(beløp = 500, periode = periode1))
-        val sanksjonAndel = andel.copy(periodeType = SANKSJON, vedtaksperiode = sanksjonsperiode ,erSanksjon = true, andel = andelMedGrunnlagDto().copy(beløp = 0, periode = periode2))
+        val sanksjonAndel = andel.copy(periodeType = SANKSJON, vedtaksperiode = sanksjonsperiode, erSanksjon = true, andel = andelMedGrunnlagDto().copy(beløp = 0, periode = periode2))
 
         every { andelsHistorikkService.hentHistorikk(fagsaker.overgangsstønad!!.id, null) } returns
-                listOf(hovedAndel, sanksjonAndel)
+            listOf(hovedAndel, sanksjonAndel)
 
         mockTidligereVedtakEfSak(harAndeler = false)
         val tidligereVedtaksperioder = service.hentTidligereVedtaksperioder(listOf(personIdent))
@@ -254,7 +254,6 @@ internal class TidligereVedtaksperioderServiceTest {
         assertThat(sanksjonsperiodeDto.antMnd).isEqualTo(1)
         assertThat(sanksjonsperiodeDto.antallMndUtenBeløp).isEqualTo(0)
     }
-
 
     @Test
     internal fun `Skal ikke feile hvis det ikke finnes noen perioder`() {
