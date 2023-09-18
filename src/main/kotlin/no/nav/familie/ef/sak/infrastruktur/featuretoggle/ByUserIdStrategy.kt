@@ -6,11 +6,11 @@ import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 class ByUserIdStrategy : Strategy {
 
     override fun getName(): String {
-        return "byUserId"
+        return "userWithId"
     }
 
     override fun isEnabled(map: MutableMap<String, String>): Boolean {
-        return map["user"]
+        return map["userIds"]
             ?.split(',')
             ?.any { SikkerhetContext.hentSaksbehandler() == it }
             ?: false
