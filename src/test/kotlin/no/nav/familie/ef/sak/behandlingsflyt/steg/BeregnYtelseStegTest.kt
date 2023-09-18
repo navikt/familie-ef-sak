@@ -1166,6 +1166,32 @@ internal class BeregnYtelseStegTest {
         }
 
         @Test
+        internal fun `skal ikke kunne starte en innvilgelse med opphør for en førstegangsbehandling`() {
+            val opphørFom = YearMonth.of(2021, 1)
+            val nyttInnvilgetFom = opphørFom.plusMonths(1)
+
+            every { beregningService.beregnYtelse(any(), any()) } answers {
+                firstArg<List<Månedsperiode>>().map { lagBeløpsperiode(it.fomDato, it.tomDato) }
+            }
+
+            val feil = assertThrows<Feil> {
+                utførSteg(
+                    BehandlingType.FØRSTEGANGSBEHANDLING,
+                    innvilget(
+                        listOf(
+                            opphørsperiode(opphørFom, opphørFom),
+                            innvilgetPeriode(nyttInnvilgetFom, nyttInnvilgetFom),
+                        ),
+                        listOf(inntekt(opphørFom)),
+                    ),
+                    forrigeBehandlingId = null,
+                )
+            }
+
+            assertThat(feil.message).isEqualTo("Kan ikke starte vedtaket med opphørsperiode for en førstegangsbehandling")
+        }
+
+        @Test
         internal fun `finnes tidligere opphørsdato fra før, og vurderer med opphør etter det datoet - beholder tidligere opphørsdato`() {
             val tidligereOpphør = YearMonth.of(2020, 1).atDay(1)
             val nyttOpphørsdato = YearMonth.of(2021, 1)
@@ -1518,7 +1544,10 @@ internal class BeregnYtelseStegTest {
 
             utførSteg(
                 BehandlingType.REVURDERING,
-                innvilget(listOf(innvilgetPeriode(startMåned, periodeSluttMåned), vedtaksperiodeSanksjon(sankskjonsMåned)), listOf(inntekt(startMåned))),
+                innvilget(
+                    listOf(innvilgetPeriode(startMåned, periodeSluttMåned), vedtaksperiodeSanksjon(sankskjonsMåned)),
+                    listOf(inntekt(startMåned)),
+                ),
                 forrigeBehandlingId = UUID.randomUUID(),
             )
 

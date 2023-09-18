@@ -123,6 +123,31 @@ internal class BeregnYtelseStegBarnetilsynIntegrationTest : OppslagSpringRunnerT
         assertThat(feil.feil).contains("Kan ikke ha null utgifter på en periode som ikke er et midlertidig opphør eller sanksjon, på behandling=")
     }
 
+    @Test
+    internal fun `skal ikke kunne midlertidig opphøre første periode i en førstegangsbehandling`() {
+        val barnId = barnBehandling1.map { it.id }
+        val utgiftsperiodeOpphør =
+            opprettUtgiftsperiode(januar, februar, emptyList(), BigDecimal(0), periodetype = PeriodetypeBarnetilsyn.OPPHØR)
+        val utgiftsperiodeUtbetaling =
+            opprettUtgiftsperiode(mars, april, barnId, BigDecimal(100), periodetype = PeriodetypeBarnetilsyn.ORDINÆR)
+        opprettBehandlingOgBarn(behandling.copy(type = BehandlingType.FØRSTEGANGSBEHANDLING), barnBehandling1)
+        val feil: ApiFeil = assertThrows {
+            innvilge(saksbehandling, listOf(utgiftsperiodeOpphør, utgiftsperiodeUtbetaling))
+        }
+        assertThat(feil.feil).contains("Første periode kan ikke være en opphørsperiode, på førstegangsbehandling=")
+    }
+
+    @Test
+    internal fun `skal kunne ha midlertidig opphøre etter en ordinær periode i en førstegangsbehandling`() {
+        val barnId = barnBehandling1.map { it.id }
+        val utgiftsperiodeUtbetaling =
+            opprettUtgiftsperiode(januar, februar, barnId, BigDecimal(100), periodetype = PeriodetypeBarnetilsyn.ORDINÆR)
+        val utgiftsperiodeOpphør =
+            opprettUtgiftsperiode(mars, april, emptyList(), BigDecimal(0), periodetype = PeriodetypeBarnetilsyn.OPPHØR)
+        opprettBehandlingOgBarn(behandling.copy(type = BehandlingType.FØRSTEGANGSBEHANDLING), barnBehandling1)
+        innvilge(saksbehandling, listOf(utgiftsperiodeUtbetaling, utgiftsperiodeOpphør))
+    }
+
     fun settBehandlingTilIverksatt(behandling: Behandling) {
         behandlingRepository.update(
             behandling.copy(
