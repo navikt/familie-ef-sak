@@ -28,10 +28,13 @@ import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.ef.sak.vedtak.domain.AktivitetType
 import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
 import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType.HOVEDPERIODE
+import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType.SANKSJON
+import no.nav.familie.ef.sak.vedtak.dto.Sanksjonsårsak
 import no.nav.familie.ef.sak.vedtak.historikk.AndelHistorikkDto
 import no.nav.familie.ef.sak.vedtak.historikk.AndelMedGrunnlagDto
 import no.nav.familie.ef.sak.vedtak.historikk.EndringType
 import no.nav.familie.ef.sak.vedtak.historikk.HistorikkEndring
+import no.nav.familie.ef.sak.vedtak.historikk.Sanksjonsperiode
 import no.nav.familie.ef.sak.vedtak.historikk.VedtakshistorikkperiodeOvergangsstønad
 import no.nav.familie.ef.sak.vilkår.dto.tilDto
 import no.nav.familie.ef.sak.økonomi.lagAndelTilkjentYtelse
@@ -224,6 +227,34 @@ internal class TidligereVedtaksperioderServiceTest {
         assertThat(overgangstønadsperioder.first().antallMndUtenBeløp).isEqualTo(0)
         assertThat(overgangstønadsperioder.first().antMnd).isEqualTo(36)
     }
+
+    @Test
+    internal fun `Skal ikke telle mnd med sanksjon som antall uten beløp`() {
+        val periode1 = Månedsperiode(YearMonth.of(2022, 1), YearMonth.of(2022, 12))
+        val periode2 = Månedsperiode(YearMonth.of(2023, 1))
+        val sanksjonsperiode = Sanksjonsperiode(periode =periode2, sanksjonsårsak =Sanksjonsårsak.SAGT_OPP_STILLING)
+
+        val hovedAndel = andel.copy(andel = andelMedGrunnlagDto().copy(beløp = 500, periode = periode1))
+        val sanksjonAndel = andel.copy(periodeType = SANKSJON, vedtaksperiode = sanksjonsperiode ,erSanksjon = true, andel = andelMedGrunnlagDto().copy(beløp = 0, periode = periode2))
+
+        every { andelsHistorikkService.hentHistorikk(fagsaker.overgangsstønad!!.id, null) } returns
+                listOf(hovedAndel, sanksjonAndel)
+
+        mockTidligereVedtakEfSak(harAndeler = false)
+        val tidligereVedtaksperioder = service.hentTidligereVedtaksperioder(listOf(personIdent))
+        val overgangstønadsperioder = tidligereVedtaksperioder.tilDto().sak!!.periodeHistorikkOvergangsstønad
+
+        assertThat(overgangstønadsperioder).hasSize(2)
+
+        val hovedperiodeDto = overgangstønadsperioder.find { it.periodeType == "HOVEDPERIODE" }!!
+        assertThat(hovedperiodeDto.antallMndUtenBeløp).isEqualTo(0)
+        assertThat(hovedperiodeDto.antMnd).isEqualTo(12)
+
+        val sanksjonsperiodeDto = overgangstønadsperioder.find { it.periodeType == "SANKSJON" }!!
+        assertThat(sanksjonsperiodeDto.antMnd).isEqualTo(1)
+        assertThat(sanksjonsperiodeDto.antallMndUtenBeløp).isEqualTo(0)
+    }
+
 
     @Test
     internal fun `Skal ikke feile hvis det ikke finnes noen perioder`() {
