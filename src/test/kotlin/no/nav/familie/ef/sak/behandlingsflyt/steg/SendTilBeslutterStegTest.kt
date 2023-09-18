@@ -32,8 +32,8 @@ import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.clearBrukerContext
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.mockBrukerContext
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
-import no.nav.familie.ef.sak.oppgave.HentIkkeFerdigstiltOppgaveService
 import no.nav.familie.ef.sak.oppgave.Oppgave
+import no.nav.familie.ef.sak.oppgave.TilordnetRessursService
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.ef.sak.repository.saksbehandling
@@ -76,7 +76,7 @@ internal class SendTilBeslutterStegTest {
     private val årsakRevurderingService = mockk<ÅrsakRevurderingService>(relaxed = true)
     private val oppgaverForOpprettelseService = mockk<OppgaverForOpprettelseService>(relaxed = true)
     private val behandlingshistorikkService = mockk<BehandlingshistorikkService>()
-    private val hentIkkeFerdigstiltOppgaveService = mockk<HentIkkeFerdigstiltOppgaveService>()
+    private val tilordnetRessursService = mockk<TilordnetRessursService>()
     private val simuleringsoppsummering = Simuleringsoppsummering(
         perioder = listOf(),
         fomDatoNestePeriode = null,
@@ -103,7 +103,7 @@ internal class SendTilBeslutterStegTest {
             årsakRevurderingService,
             oppgaverForOpprettelseService,
             behandlingshistorikkService,
-            hentIkkeFerdigstiltOppgaveService,
+            tilordnetRessursService,
         )
     private val fagsak = fagsak(
         stønadstype = StønadType.OVERGANGSSTØNAD,
@@ -149,7 +149,7 @@ internal class SendTilBeslutterStegTest {
         every {
             taskService.save(capture(taskSlot))
         } returns Task("", "", Properties())
-        every { hentIkkeFerdigstiltOppgaveService.hentBehandleSakOppgaveSomIkkeErFerdigstilt(any()) } returns Oppgave(
+        every { tilordnetRessursService.hentBehandleSakOppgaveSomIkkeErFerdigstilt(any()) } returns Oppgave(
             behandlingId = behandling.id,
             gsakOppgaveId = 1234L,
             type = Oppgavetype.BehandleSak,
@@ -256,7 +256,7 @@ internal class SendTilBeslutterStegTest {
                 steg = StegType.BESLUTTE_VEDTAK,
                 utfall = StegUtfall.BESLUTTE_VEDTAK_UNDERKJENT,
             )
-        every { hentIkkeFerdigstiltOppgaveService.hentBehandleSakOppgaveSomIkkeErFerdigstilt(any()) } returns null
+        every { tilordnetRessursService.hentBehandleSakOppgaveSomIkkeErFerdigstilt(any()) } returns null
         every { vedtakService.hentVedtaksresultat(any()) } returns ResultatType.INNVILGE
         val feil = assertThrows<Feil> { beslutteVedtakSteg.validerSteg(behandling) }
         assertThat(feil.frontendFeilmelding).contains("Oppgaven for behandlingen er ikke tilgjengelig. Vennligst vent og prøv igjen om litt.")

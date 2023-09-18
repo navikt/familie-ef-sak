@@ -11,6 +11,7 @@ import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
+import no.nav.familie.ef.sak.oppgave.TilordnetRessursService
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.fagsakpersoner
@@ -40,12 +41,14 @@ internal class SimuleringServiceTest {
     private val simuleringsresultatRepository = mockk<SimuleringsresultatRepository>()
     private val tilkjentYtelseService = mockk<TilkjentYtelseService>()
     private val tilgangService = mockk<TilgangService>()
+    private val tilordnetRessursService = mockk<TilordnetRessursService>()
 
     private val simuleringService = SimuleringService(
         iverksettClient = iverksettClient,
         simuleringsresultatRepository = simuleringsresultatRepository,
         tilkjentYtelseService = tilkjentYtelseService,
         tilgangService = tilgangService,
+        tilordnetRessursService = tilordnetRessursService,
     )
 
     private val personIdent = "12345678901"
@@ -78,6 +81,7 @@ internal class SimuleringServiceTest {
         every { tilkjentYtelseService.hentForBehandling(any()) } returns tilkjentYtelse
         every { simuleringsresultatRepository.deleteById(any()) } just Runs
         every { simuleringsresultatRepository.insert(any()) } returns simuleringsresultat
+        every { tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandlerEllerNull(any())} returns true
 
         val simulerSlot = slot<SimuleringDto>()
         every {
@@ -138,6 +142,7 @@ internal class SimuleringServiceTest {
         every { behandlingService.hentBehandling(any()) } returns behandling
         every { tilkjentYtelseService.hentForBehandling(any()) } returns tilkjentYtelse
         every { simuleringsresultatRepository.deleteById(any()) } just Runs
+        every { tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandlerEllerNull(any())} returns true
 
         val simulerSlot = slot<Simuleringsresultat>()
         every { simuleringsresultatRepository.insert(capture(simulerSlot)) } answers { firstArg() }

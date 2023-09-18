@@ -10,8 +10,8 @@ import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
-import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
+import no.nav.familie.ef.sak.oppgave.TilordnetRessursService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.gjeldende
 import no.nav.familie.ef.sak.vilkår.VilkårType
@@ -29,7 +29,7 @@ class GjenbrukVilkårService(
     private val vilkårsvurderingRepository: VilkårsvurderingRepository,
     private val grunnlagsdataService: GrunnlagsdataService,
     private val barnService: BarnService,
-    private val featureToggleService: FeatureToggleService,
+    private val tilordnetRessursService: TilordnetRessursService,
 ) {
 
     private val secureLogger = LoggerFactory.getLogger("secureLogger")
@@ -132,6 +132,9 @@ class GjenbrukVilkårService(
         val saksbehandling = behandlingService.hentSaksbehandling(behandlingId)
         feilHvis(saksbehandling.status.behandlingErLåstForVidereRedigering()) {
             "Behandlingen er låst og vilkår kan ikke oppdateres på behandling med id=$behandlingId"
+        }
+        feilHvis(!tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandlerEllerNull(behandlingId)) {
+            "Behandling med id=$behandlingId eies av noen andre og vilkår kan derfor ikke oppdateres av deg"
         }
 
         val fagsak: Fagsak = fagsakService.hentFagsakForBehandling(behandlingId)

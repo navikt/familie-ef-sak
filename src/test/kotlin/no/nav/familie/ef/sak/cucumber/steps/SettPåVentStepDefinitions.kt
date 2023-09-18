@@ -27,9 +27,9 @@ import no.nav.familie.ef.sak.cucumber.domeneparser.parseValgfriString
 import no.nav.familie.ef.sak.felles.util.DatoUtil
 import no.nav.familie.ef.sak.felles.util.mockFeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
-import no.nav.familie.ef.sak.oppgave.HentIkkeFerdigstiltOppgaveService
 import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.ef.sak.oppgave.OppgaveSubtype
+import no.nav.familie.ef.sak.oppgave.TilordnetRessursService
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.saksbehandling
 import no.nav.familie.ef.sak.vedtak.NullstillVedtakService
@@ -55,7 +55,7 @@ class SettPåVentStepDefinitions {
     val taskService = mockk<TaskService>()
     val nullstillVedtakService = mockk<NullstillVedtakService>()
     val oppgaveService = mockk<OppgaveService>()
-    val hentIkkeFerdigstiltOppgaveService = mockk<HentIkkeFerdigstiltOppgaveService>()
+    val tilordnetRessursService = mockk<TilordnetRessursService>()
 
     val påVentService = BehandlingPåVentService(
         behandlingService,
@@ -63,7 +63,7 @@ class SettPåVentStepDefinitions {
         taskService,
         nullstillVedtakService,
         oppgaveService,
-        hentIkkeFerdigstiltOppgaveService,
+        tilordnetRessursService,
     )
 
     var behandling = behandling()
@@ -146,6 +146,7 @@ class SettPåVentStepDefinitions {
         every { oppgaveService.oppdaterOppgave(capture(oppgaveSlot)) } just Runs
         every { taskService.save(capture(taskSlot)) } answers { firstArg() }
         every { oppgaveService.finnMapper("4489") } returns mapper
+        every { tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandlerEllerNull(any())} returns true
 
         påVentService.settPåVent(behandling.id, settOppgavePåVentRequest)
         unmockkObject(SikkerhetContext)

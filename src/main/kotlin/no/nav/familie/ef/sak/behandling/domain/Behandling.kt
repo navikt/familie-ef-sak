@@ -48,8 +48,6 @@ data class Behandling(
 
     fun erAvsluttet(): Boolean = status == BehandlingStatus.FERDIGSTILT
 
-    fun erIkkeRedigerbar(tilordnetSaksbehandler: String?, innloggetSaksbehandler: String): Boolean = this.status.behandlingErLåstForVidereRedigering() || (tilordnetSaksbehandler != null && tilordnetSaksbehandler != innloggetSaksbehandler)
-
     fun vedtakstidspunktEllerFeil(): LocalDateTime =
         this.vedtakstidspunkt ?: error("Mangler vedtakstidspunkt for behandling=$id")
 

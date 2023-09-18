@@ -14,7 +14,7 @@ import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvisIkke
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerService
+import no.nav.familie.ef.sak.oppgave.TilordnetRessursService
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.ef.sak.vedtak.domain.VedtakErUtenBeslutter
 import org.springframework.http.HttpStatus
@@ -27,9 +27,9 @@ import java.util.UUID
 class VedtaksbrevService(
     private val brevClient: BrevClient,
     private val brevRepository: VedtaksbrevRepository,
-    private val personopplysningerService: PersonopplysningerService,
     private val brevsignaturService: BrevsignaturService,
     private val familieDokumentClient: FamilieDokumentClient,
+    private val tilordnetRessursService: TilordnetRessursService,
 ) {
 
     fun hentBeslutterbrevEllerRekonstruerSaksbehandlerBrev(behandlingId: UUID): ByteArray {
@@ -184,6 +184,12 @@ class VedtaksbrevService(
         if (saksbehandling.status.behandlingErLåstForVidereRedigering()) {
             throw Feil(
                 "Behandling er i feil steg=${saksbehandling.steg} status=${saksbehandling.status}",
+                httpStatus = HttpStatus.BAD_REQUEST,
+            )
+        }
+        if (!tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandlerEllerNull(saksbehandling.id)) {
+            throw Feil(
+                "Behandlingen har en ny eier",
                 httpStatus = HttpStatus.BAD_REQUEST,
             )
         }

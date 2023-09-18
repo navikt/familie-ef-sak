@@ -17,9 +17,9 @@ import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
-import no.nav.familie.ef.sak.oppgave.HentIkkeFerdigstiltOppgaveService
 import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.ef.sak.oppgave.OppgaveSubtype
+import no.nav.familie.ef.sak.oppgave.TilordnetRessursService
 import no.nav.familie.ef.sak.vedtak.NullstillVedtakService
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.kontrakter.felles.oppgave.Oppgave
@@ -39,7 +39,7 @@ class BehandlingPåVentService(
     private val taskService: TaskService,
     private val nullstillVedtakService: NullstillVedtakService,
     private val oppgaveService: OppgaveService,
-    private val hentIkkeFerdigstiltOppgaveService: HentIkkeFerdigstiltOppgaveService,
+    private val tilordnetRessursService: TilordnetRessursService,
 ) {
 
     val logger: Logger = LoggerFactory.getLogger(javaClass)
@@ -218,6 +218,9 @@ class BehandlingPåVentService(
         brukerfeilHvis(behandling.status.behandlingErLåstForVidereRedigering()) {
             "Kan ikke sette behandling med status ${behandling.status} på vent"
         }
+        brukerfeilHvis(!tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandlerEllerNull(behandling.id)) {
+            "Behandlingen har en ny eier og kan derfor ikke settes på vent av deg"
+        }
     }
 
     private fun validerKanOppretteVurderHenvendelseOppgave(
@@ -262,7 +265,7 @@ class BehandlingPåVentService(
     }
 
     private fun fordelOppgaveTilSaksbehandler(behandlingId: UUID) {
-        val oppgave = hentIkkeFerdigstiltOppgaveService.hentIkkeFerdigstiltOppgaveForBehandling(behandlingId)
+        val oppgave = tilordnetRessursService.hentIkkeFerdigstiltOppgaveForBehandling(behandlingId)
         val oppgaveId = oppgave?.id
         if (oppgaveId != null) {
             oppgaveService.fordelOppgave(oppgaveId, SikkerhetContext.hentSaksbehandler(), oppgave.versjon)

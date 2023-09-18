@@ -20,6 +20,7 @@ import no.nav.familie.kontrakter.felles.saksbehandler.Saksbehandler
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Primary
+import org.springframework.context.annotation.Profile
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.UUID
@@ -37,6 +38,8 @@ class OppgaveClientMock {
                 oppgave1,
                 oppgave2,
                 oppgave3,
+                oppgave4,
+                oppgave5,
                 tilbakekreving1,
                 oppgavePapirsøknad,
                 oppgaveEttersending,
@@ -169,6 +172,8 @@ class OppgaveClientMock {
     private val oppgave1 = lagOppgave(1L, Oppgavetype.Journalføring, "Z999999", behandlesAvApplikasjon = "familie-ef-sak")
     private val oppgave2 = lagOppgave(2L, Oppgavetype.BehandleSak, "Z999999", behandlesAvApplikasjon = "familie-ef-sak")
     private val oppgave3 = lagOppgave(3L, Oppgavetype.Journalføring, beskivelse = "", behandlesAvApplikasjon = "familie-ef-sak")
+    private val oppgave4 = lagOppgave(24681L, Oppgavetype.Journalføring, "SAKSBEHANDLER", behandlesAvApplikasjon = "familie-ef-sak")
+    private val oppgave5 = lagOppgave(24682L, Oppgavetype.Journalføring, "BESLUTTER", behandlesAvApplikasjon = "familie-ef-sak")
     private val oppgavePapirsøknad =
         lagOppgave(5L, Oppgavetype.Journalføring, beskivelse = "Papirsøknad", behandlesAvApplikasjon = "", journalpostId = "23456")
     private val oppgaveEttersending =
