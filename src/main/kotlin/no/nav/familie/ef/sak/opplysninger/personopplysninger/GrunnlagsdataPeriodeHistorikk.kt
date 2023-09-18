@@ -7,5 +7,5 @@ data class GrunnlagsdataPeriodeHistorikk(
     val periodeType: VedtaksperiodeType,
     val fom: LocalDate,
     val tom: LocalDate,
-    val harPeriodeUtenUtbetaling: Boolean,
+    val beløp: Int,
 )

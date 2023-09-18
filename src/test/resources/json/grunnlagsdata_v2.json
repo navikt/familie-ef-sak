@@ -1452,9 +1452,9 @@
                     "type" : "LocalDate",
                     "nullable" : false
                   },
-                  "harPeriodeUtenUtbetaling" : {
-                    "name" : "harPeriodeUtenUtbetaling",
-                    "type" : "Boolean",
+                  "beløp" : {
+                    "name" : "beløp",
+                    "type" : "Int",
                     "nullable" : false
                   }
                 },
@@ -1502,9 +1502,9 @@
                     "type" : "LocalDate",
                     "nullable" : false
                   },
-                  "harPeriodeUtenUtbetaling" : {
-                    "name" : "harPeriodeUtenUtbetaling",
-                    "type" : "Boolean",
+                  "beløp" : {
+                    "name" : "beløp",
+                    "type" : "Int",
                     "nullable" : false
                   }
                 },
@@ -2171,9 +2171,9 @@
                 "type" : "LocalDate",
                 "nullable" : false
               },
-              "harPeriodeUtenUtbetaling" : {
-                "name" : "harPeriodeUtenUtbetaling",
-                "type" : "Boolean",
+              "beløp" : {
+                "name" : "beløp",
+                "type" : "Int",
                 "nullable" : false
               }
             },
@@ -2221,9 +2221,9 @@
                 "type" : "LocalDate",
                 "nullable" : false
               },
-              "harPeriodeUtenUtbetaling" : {
-                "name" : "harPeriodeUtenUtbetaling",
-                "type" : "Boolean",
+              "beløp" : {
+                "name" : "beløp",
+                "type" : "Int",
                 "nullable" : false
               }
             },

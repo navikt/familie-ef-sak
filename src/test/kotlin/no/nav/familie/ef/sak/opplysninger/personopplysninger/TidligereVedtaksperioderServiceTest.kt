@@ -13,6 +13,7 @@ import no.nav.familie.ef.sak.fagsak.domain.Fagsaker
 import no.nav.familie.ef.sak.infotrygd.InfotrygdReplikaClient
 import no.nav.familie.ef.sak.infotrygd.InfotrygdService
 import no.nav.familie.ef.sak.infrastruktur.config.InfotrygdReplikaMock
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.TidligereInnvilgetVedtak
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlIdent
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlIdenter
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pensjon.HistoriskPensjonResponse
@@ -32,6 +33,7 @@ import no.nav.familie.ef.sak.vedtak.historikk.AndelMedGrunnlagDto
 import no.nav.familie.ef.sak.vedtak.historikk.EndringType
 import no.nav.familie.ef.sak.vedtak.historikk.HistorikkEndring
 import no.nav.familie.ef.sak.vedtak.historikk.VedtakshistorikkperiodeOvergangsstønad
+import no.nav.familie.ef.sak.vilkår.dto.tilDto
 import no.nav.familie.ef.sak.økonomi.lagAndelTilkjentYtelse
 import no.nav.familie.ef.sak.økonomi.lagTilkjentYtelse
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
@@ -131,11 +133,12 @@ internal class TidligereVedtaksperioderServiceTest {
     internal fun `Skal filtrere bort opphør`() {
         val andel2 = andel.copy(erOpphør = true)
         every { andelsHistorikkService.hentHistorikk(fagsaker.overgangsstønad!!.id, null) } returns
-            listOf(andel, andel2, andel)
+            listOf(andel, andel2, andel) // ikke påfølgende, men like perioder - vil ikke slås sammen
 
-        val overgangstønadsperioder = service.hentOvergangstønadsperioder(fagsaker)
+        mockTidligereVedtakEfSak(harAndeler = false)
+        val tidligereVedtaksperioder = service.hentTidligereVedtaksperioder(listOf(personIdent)).tilDto()
 
-        assertThat(overgangstønadsperioder).hasSize(2)
+        assertThat(tidligereVedtaksperioder.sak!!.periodeHistorikkOvergangsstønad).hasSize(2)
     }
 
     @Test
@@ -156,7 +159,10 @@ internal class TidligereVedtaksperioderServiceTest {
         every { andelsHistorikkService.hentHistorikk(fagsaker.overgangsstønad!!.id, null) } returns
             listOf(andel, andel2, andel3)
 
-        val overgangstønadsperioder = service.hentOvergangstønadsperioder(fagsaker)
+        mockTidligereVedtakEfSak(harAndeler = false)
+        val tidligereVedtaksperioder = service.hentTidligereVedtaksperioder(listOf(personIdent)).tilDto()
+
+        val overgangstønadsperioder = tidligereVedtaksperioder.sak!!.periodeHistorikkOvergangsstønad
 
         assertThat(overgangstønadsperioder).hasSize(1)
     }
@@ -167,13 +173,16 @@ internal class TidligereVedtaksperioderServiceTest {
         every { andelsHistorikkService.hentHistorikk(fagsaker.overgangsstønad!!.id, null) } returns
             listOf(andel2)
 
-        val overgangstønadsperioder = service.hentOvergangstønadsperioder(fagsaker)
+        mockTidligereVedtakEfSak(harAndeler = false)
 
-        assertThat(overgangstønadsperioder.first().harPeriodeUtenUtbetaling).isTrue()
+        val tidligereVedtaksperioder = service.hentTidligereVedtaksperioder(listOf(personIdent)).tilDto()
+        val overgangstønadsperioder = tidligereVedtaksperioder.sak!!.periodeHistorikkOvergangsstønad
+
+        assertThat(overgangstønadsperioder.first().antallMndUtenBeløp).isEqualTo(1)
     }
 
     @Test
-    internal fun `Skal slå sammen tre andeler hvor bare en har null beløp og returnerer harPeriodeUtenUtbetaling lik true`() {
+    internal fun `Skal slå sammen tre andeler hvor en på 12 mnd har null beløp `() {
         val periode1 = Månedsperiode(YearMonth.of(2022, 1), YearMonth.of(2022, 12))
         val periode2 = Månedsperiode(YearMonth.of(2023, 1), YearMonth.of(2023, 12))
         val periode3 = Månedsperiode(YearMonth.of(2024, 1), YearMonth.of(2024, 12))
@@ -185,14 +194,17 @@ internal class TidligereVedtaksperioderServiceTest {
         every { andelsHistorikkService.hentHistorikk(fagsaker.overgangsstønad!!.id, null) } returns
             listOf(andel1, andel2, andel3)
 
-        val overgangstønadsperioder = service.hentOvergangstønadsperioder(fagsaker)
+        mockTidligereVedtakEfSak(harAndeler = false)
+        val tidligereVedtaksperioder = service.hentTidligereVedtaksperioder(listOf(personIdent)).tilDto()
+        val dto = tidligereVedtaksperioder.sak!!.periodeHistorikkOvergangsstønad
 
-        assertThat(overgangstønadsperioder).hasSize(1)
-        assertThat(overgangstønadsperioder.first().harPeriodeUtenUtbetaling).isTrue()
+        assertThat(dto).hasSize(1)
+        assertThat(dto.first().antallMndUtenBeløp).isEqualTo(12)
+        assertThat(dto.first().antMnd).isEqualTo(24)
     }
 
     @Test
-    internal fun `Skal slå sammen tre andeler hvor ingen har null beløp og returnerer harPeriodeUtenUtbetaling lik false`() {
+    internal fun `Skal slå sammen tre andeler hvor ingen har null beløp`() {
         val periode1 = Månedsperiode(YearMonth.of(2022, 1), YearMonth.of(2022, 12))
         val periode2 = Månedsperiode(YearMonth.of(2023, 1), YearMonth.of(2023, 12))
         val periode3 = Månedsperiode(YearMonth.of(2024, 1), YearMonth.of(2024, 12))
@@ -204,15 +216,21 @@ internal class TidligereVedtaksperioderServiceTest {
         every { andelsHistorikkService.hentHistorikk(fagsaker.overgangsstønad!!.id, null) } returns
             listOf(andel1, andel2, andel3)
 
-        val overgangstønadsperioder = service.hentOvergangstønadsperioder(fagsaker)
+        mockTidligereVedtakEfSak(harAndeler = false)
+        val tidligereVedtaksperioder = service.hentTidligereVedtaksperioder(listOf(personIdent))
+        val overgangstønadsperioder = tidligereVedtaksperioder.tilDto().sak!!.periodeHistorikkOvergangsstønad
 
         assertThat(overgangstønadsperioder).hasSize(1)
-        assertThat(overgangstønadsperioder.first().harPeriodeUtenUtbetaling).isFalse()
+        assertThat(overgangstønadsperioder.first().antallMndUtenBeløp).isEqualTo(0)
+        assertThat(overgangstønadsperioder.first().antMnd).isEqualTo(36)
     }
 
     @Test
     internal fun `Skal ikke feile hvis det ikke finnes noen perioder`() {
-        val overgangstønadsperioder = service.hentOvergangstønadsperioder(fagsaker)
+        mockTidligereVedtakEfSak(harAndeler = false)
+        val tidligereVedtaksperioder = service.hentTidligereVedtaksperioder(listOf(personIdent)).tilDto()
+
+        val overgangstønadsperioder = tidligereVedtaksperioder.sak!!.periodeHistorikkOvergangsstønad
 
         assertThat(overgangstønadsperioder).hasSize(0)
     }
@@ -222,17 +240,22 @@ internal class TidligereVedtaksperioderServiceTest {
         val periode1 = Månedsperiode(YearMonth.of(2022, 1), YearMonth.of(2022, 12))
         val periode2 = Månedsperiode(YearMonth.of(2023, 1), YearMonth.of(2023, 12))
         val periode3 = Månedsperiode(YearMonth.of(2024, 1), YearMonth.of(2024, 12))
-        val historikk1 = grunnlagsdataPeriodeHistorikk(false, periode1.fomDato, periode1.tomDato)
+        val historikk1 = grunnlagsdataPeriodeHistorikk(123, periode1.fomDato, periode1.tomDato)
         val historikk2 = grunnlagsdataPeriodeHistorikk(
-            false,
+            123,
             periode2.fomDato,
             periode2.tomDato,
             periodeType = VedtaksperiodeType.FORLENGELSE,
         )
-        val historikk3 = grunnlagsdataPeriodeHistorikk(false, periode3.fomDato, periode3.tomDato)
+        val historikk3 = grunnlagsdataPeriodeHistorikk(123, periode3.fomDato, periode3.tomDato)
+
         val perioderMedLikPeriodetype =
-            listOf(historikk2, historikk3, historikk1).slåSammenPåfølgendePerioderMedLikPeriodetype()
-        assertThat(perioderMedLikPeriodetype).hasSize(3)
+            listOf(historikk2, historikk3, historikk1)
+
+        val tidligereVedtaksperioder = TidligereInnvilgetVedtak(periodeHistorikkOvergangsstønad = perioderMedLikPeriodetype).tilDto()
+        val overgangstønadsperioder = tidligereVedtaksperioder.periodeHistorikkOvergangsstønad
+
+        assertThat(overgangstønadsperioder).hasSize(3)
     }
 
     @Test
@@ -240,12 +263,16 @@ internal class TidligereVedtaksperioderServiceTest {
         val periode1 = Månedsperiode(YearMonth.of(2022, 1), YearMonth.of(2022, 12))
         val periode2 = Månedsperiode(YearMonth.of(2023, 1), YearMonth.of(2023, 12))
         val periode3 = Månedsperiode(YearMonth.of(2024, 1), YearMonth.of(2024, 12))
-        val historikk1 = grunnlagsdataPeriodeHistorikk(false, periode1.fomDato, periode1.tomDato)
-        val historikk2 = grunnlagsdataPeriodeHistorikk(false, periode2.fomDato, periode2.tomDato)
-        val historikk3 = grunnlagsdataPeriodeHistorikk(false, periode3.fomDato, periode3.tomDato)
+        val historikk1 = grunnlagsdataPeriodeHistorikk(123, periode1.fomDato, periode1.tomDato)
+        val historikk2 = grunnlagsdataPeriodeHistorikk(123, periode2.fomDato, periode2.tomDato)
+        val historikk3 = grunnlagsdataPeriodeHistorikk(123, periode3.fomDato, periode3.tomDato)
         val perioderMedLikPeriodetype =
-            listOf(historikk2, historikk3, historikk1).slåSammenPåfølgendePerioderMedLikPeriodetype()
-        assertThat(perioderMedLikPeriodetype).hasSize(1)
+            listOf(historikk2, historikk3, historikk1)
+
+        val tidligereInnvilgetVedtak =
+            TidligereInnvilgetVedtak(periodeHistorikkOvergangsstønad = perioderMedLikPeriodetype)
+
+        assertThat(tidligereInnvilgetVedtak.tilDto().periodeHistorikkOvergangsstønad).hasSize(1)
     }
 
     @Test
@@ -253,22 +280,30 @@ internal class TidligereVedtaksperioderServiceTest {
         val periode1 = Månedsperiode(YearMonth.of(2022, 1), YearMonth.of(2022, 12))
         val periode2 = Månedsperiode(YearMonth.of(2023, 1), YearMonth.of(2023, 12))
         val periode3 = Månedsperiode(YearMonth.of(2024, 1), YearMonth.of(2024, 12))
-        val historikk1 = grunnlagsdataPeriodeHistorikk(false, periode1.fomDato, periode1.tomDato)
-        val historikk2 = grunnlagsdataPeriodeHistorikk(true, periode2.fomDato, periode2.tomDato)
-        val historikk3 = grunnlagsdataPeriodeHistorikk(false, periode3.fomDato, periode3.tomDato)
+        val periode4 = Månedsperiode(YearMonth.of(2025, 1), YearMonth.of(2025, 12))
+        val historikk1 = grunnlagsdataPeriodeHistorikk(100, periode1.fomDato, periode1.tomDato)
+        val historikk2 = grunnlagsdataPeriodeHistorikk(0, periode2.fomDato, periode2.tomDato)
+        val historikk3 = grunnlagsdataPeriodeHistorikk(100, periode3.fomDato, periode3.tomDato)
+        val historikk4 = grunnlagsdataPeriodeHistorikk(0, periode4.fomDato, periode4.tomDato)
+
         val perioderMedLikPeriodetype =
-            listOf(historikk2, historikk3, historikk1).slåSammenPåfølgendePerioderMedLikPeriodetype()
-        assertThat(perioderMedLikPeriodetype).hasSize(1)
-        assertThat(perioderMedLikPeriodetype.first().harPeriodeUtenUtbetaling).isTrue
+            listOf(historikk2, historikk3, historikk1, historikk4)
+
+        val tidligereVedtaksperioder = TidligereInnvilgetVedtak(periodeHistorikkOvergangsstønad = perioderMedLikPeriodetype).tilDto()
+
+        val periodeHistorikkDtos = tidligereVedtaksperioder.periodeHistorikkOvergangsstønad
+        assertThat(periodeHistorikkDtos).hasSize(1)
+        assertThat(periodeHistorikkDtos.first().antallMndUtenBeløp).isEqualTo(24)
+        assertThat(periodeHistorikkDtos.first().antMnd).isEqualTo(24)
     }
 
     private fun grunnlagsdataPeriodeHistorikk(
-        harNullbeløp: Boolean = false,
+        beløp: Int = 0,
         fom: LocalDate,
         tom: LocalDate,
         periodeType: VedtaksperiodeType = HOVEDPERIODE,
     ) =
-        GrunnlagsdataPeriodeHistorikk(periodeType = periodeType, fom = fom, tom = tom, harNullbeløp)
+        GrunnlagsdataPeriodeHistorikk(periodeType = periodeType, fom = fom, tom = tom, beløp)
 
     private fun mockTidligereVedtakEfSak(harAndeler: Boolean = false) {
         every { fagsakPersonService.finnPerson(any()) } returns fagsakPerson

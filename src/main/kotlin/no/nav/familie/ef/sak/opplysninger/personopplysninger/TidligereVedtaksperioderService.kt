@@ -6,6 +6,7 @@ import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.fagsak.domain.Fagsaker
 import no.nav.familie.ef.sak.infotrygd.InfotrygdService
+import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.TidligereInnvilgetVedtak
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.TidligereVedtaksperioder
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Folkeregisteridentifikator
@@ -16,7 +17,6 @@ import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.ef.sak.vedtak.historikk.AndelHistorikkDto
 import no.nav.familie.ef.sak.vedtak.historikk.EndringType
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPeriodeResponse
-import no.nav.familie.kontrakter.felles.Månedsperiode
 import org.springframework.stereotype.Service
 
 @Service
@@ -40,7 +40,7 @@ class TidligereVedtaksperioderService(
             mapTidligereInnvilgetVedtak(infotrygdService.hentPerioderFraReplika(alleIdenter))
         return TidligereVedtaksperioder(
             infotrygd = tidligereInnvilgetVedtak,
-            sak = harTidligereMottattStønadEf(alleIdenter),
+            sak = hentTidligereInnvilgedeVedtakEf(alleIdenter),
             historiskPensjon = historiskPensjonService.hentHistoriskPensjon(aktivIdent, alleIdenter).harPensjonsdata,
         )
     }
@@ -52,7 +52,7 @@ class TidligereVedtaksperioderService(
             harTidligereSkolepenger = periodeResponse.skolepenger.isNotEmpty(),
         )
 
-    private fun harTidligereMottattStønadEf(identer: Set<String>): TidligereInnvilgetVedtak {
+    private fun hentTidligereInnvilgedeVedtakEf(identer: Set<String>): TidligereInnvilgetVedtak {
         return fagsakPersonService.finnPerson(identer)
             ?.let { fagsakService.finnFagsakerForFagsakPersonId(it.id) }
             ?.let {
@@ -72,19 +72,20 @@ class TidligereVedtaksperioderService(
             tilkjentYtelse.andelerTilkjentYtelse.isNotEmpty()
         } ?: false
 
-    fun hentOvergangstønadsperioder(fagsaker: Fagsaker?): List<GrunnlagsdataPeriodeHistorikk> {
+    private fun hentOvergangstønadsperioder(fagsaker: Fagsaker?): List<GrunnlagsdataPeriodeHistorikk> {
         return hentAndelshistorikkForOvergangsstønad(fagsaker)
             .filterNot(erstattetEllerFjernet())
             .filterNot({ it.erOpphør })
             .map {
+                feilHvis(it.periodeType == null) { "Overgangsstønad skal ha periodetype" }
+
                 GrunnlagsdataPeriodeHistorikk(
-                    periodeType = it.periodeType ?: error("Overgangsstønad skal ha periodetype"),
+                    periodeType = it.periodeType,
                     fom = it.andel.periode.fomDato,
                     tom = it.andel.periode.tomDato,
-                    harPeriodeUtenUtbetaling = it.andel.beløp <= 0,
+                    beløp = it.andel.beløp,
                 )
             }
-            .slåSammenPåfølgendePerioderMedLikPeriodetype()
     }
 
     private fun hentAndelshistorikkForOvergangsstønad(fagsaker: Fagsaker?) =
@@ -97,29 +98,3 @@ class TidligereVedtaksperioderService(
         ).contains(it.endring?.type)
     }
 }
-
-fun List<GrunnlagsdataPeriodeHistorikk>.slåSammenPåfølgendePerioderMedLikPeriodetype(): List<GrunnlagsdataPeriodeHistorikk> {
-    val sortertPåDatoListe = this.sortedBy { it.fom }
-    return sortertPåDatoListe.fold(mutableListOf()) { acc, entry ->
-        val last = acc.lastOrNull()
-        if (
-            last != null && last.periode() påfølgesAv entry.periode() &&
-            last.periodeType === entry.periodeType
-        ) {
-            acc.removeLast()
-            val månedsperiode = last.periode() union entry.periode()
-            acc.add(
-                last.copy(
-                    fom = månedsperiode.fomDato,
-                    tom = månedsperiode.tomDato,
-                    harPeriodeUtenUtbetaling = last.harPeriodeUtenUtbetaling || entry.harPeriodeUtenUtbetaling,
-                ),
-            )
-        } else {
-            acc.add(entry)
-        }
-        acc
-    }
-}
-
-private fun GrunnlagsdataPeriodeHistorikk.periode(): Månedsperiode = Månedsperiode(fom = this.fom, tom = this.tom)
