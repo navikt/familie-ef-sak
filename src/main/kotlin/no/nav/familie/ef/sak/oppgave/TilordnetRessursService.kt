@@ -14,13 +14,8 @@ class TilordnetRessursService(
 ) {
 
     fun tilordnetRessursErInnloggetSaksbehandlerEllerNull(behandlingId: UUID): Boolean {
-        println("LOGGER HER FØR KALL")
         val innloggetSaksbehandler = SikkerhetContext.hentSaksbehandler()
         val tilordnetRessurs = hentIkkeFerdigstiltOppgaveForBehandling(behandlingId)?.tilordnetRessurs
-        println("LOGGER HER ETTER KALL")
-        println(innloggetSaksbehandler)
-        println(tilordnetRessurs)
-
 
         return tilordnetRessurs == null || tilordnetRessurs == innloggetSaksbehandler
     }
