@@ -36,7 +36,7 @@
         <felles.version>2.20230905101454_06fa3d7</felles.version>
         <prosessering.version>2.20230807154047_d770f01</prosessering.version>
         <start-class>no.nav.familie.ef.sak.ApplicationKt</start-class>
-        <kontrakter.version>3.0_20230911133621_c5918cb</kontrakter.version>
+        <kontrakter.version>3.0_20230913123325_397b21d</kontrakter.version>
         <eksterne.kontrakter.bisys.version>2.0_20230214104704_706e9c0</eksterne.kontrakter.bisys.version>
         <cucumber.version>7.14.0</cucumber.version>
 
@@ -182,7 +182,7 @@
         <dependency>
             <groupId>org.wiremock</groupId>
             <artifactId>wiremock-standalone</artifactId>
-            <version>3.0.1</version>
+            <version>3.0.4</version>
             <scope>test</scope>
         </dependency>
         <dependency>
