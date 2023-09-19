@@ -44,6 +44,10 @@ funksjonsbrytere:
     environment: local
     applicationName: familie-ef-sak
 
+UNLEASH_SERVER_API_URL: http://localhost:4242/api
+UNLEASH_SERVER_API_TOKEN: token
+NAIS_APP_NAME: familie-ef-sak
+
 prosessering:
   fixedDelayString:
     in:

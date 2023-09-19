@@ -1,4 +1,4 @@
-name: Deploy unleash api-token for dev
+name: Deploy unleash api-token for prod
 
 on:
   workflow_dispatch:
@@ -13,6 +13,6 @@ jobs:
         uses: nais/deploy/actions/deploy@v1
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
-          CLUSTER: dev-gcp
-          RESOURCE: .deploy/unleash-apitoken-preprod.yaml
+          CLUSTER: prod-gcp
+          RESOURCE: .deploy/unleash-apitoken-prod.yaml
           PRINT_PAYLOAD: true

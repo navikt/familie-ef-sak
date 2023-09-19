@@ -26,7 +26,7 @@ Velg `true` om du ønsker å lagre ned tasks for generering og utsending av brev
 18.05, respektivt.
 - **taskLimit** `[Int]`: Et øvre tak for hvor mange oppgaver som hentes ut.
 
-I tillegg er man nødt til å [gå inn i unleash og aktivere feature toggle for automatisk brevinnhenting av karakterutskrift for prod miljøet.](https://unleash.nais.io/#/features/strategies/familie.ef.sak.automatiske-brev-innhenting-karakterutskrift)
+I tillegg er man nødt til å [gå inn i unleash og aktivere feature toggle for automatisk brevinnhenting av karakterutskrift for prod miljøet.](https://teamfamilie-unleash-web.nav.cloud.nais.io/projects/default/features/familie.ef.sak.automatiske-brev-innhenting-karakterutskrift)
 
 ### Teknisk
 Ved `liveRun` satt til `true` ved innsending av `POST-request` vil følgende skje:

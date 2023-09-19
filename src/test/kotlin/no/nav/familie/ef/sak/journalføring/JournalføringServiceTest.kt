@@ -23,7 +23,6 @@ import no.nav.familie.ef.sak.behandlingsflyt.task.OpprettOppgaveForOpprettetBeha
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.EksternFagsakId
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil
-import no.nav.familie.ef.sak.felles.util.mockFeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.iverksett.IverksettService
 import no.nav.familie.ef.sak.journalføring.dto.BarnSomSkalFødes
@@ -80,7 +79,6 @@ internal class JournalføringServiceTest {
     private val taskService = mockk<TaskService>()
     private val barnService = mockk<BarnService>()
     private val iverksettService = mockk<IverksettService>(relaxed = true)
-    private val featureToggleService = mockFeatureToggleService()
     private val journalpostService = JournalpostService(journalpostClient = journalpostClient)
     private val infotrygdPeriodeValideringService = mockk<InfotrygdPeriodeValideringService>()
 
@@ -95,7 +93,6 @@ internal class JournalføringServiceTest {
             oppgaveService = oppgaveService,
             taskService = taskService,
             barnService = barnService,
-            featureToggleService = featureToggleService,
             journalpostService = journalpostService,
             infotrygdPeriodeValideringService = infotrygdPeriodeValideringService,
         )
@@ -188,6 +185,9 @@ internal class JournalføringServiceTest {
 
         every { taskService.save(capture(slotOpprettedeTasks)) } answers { firstArg() }
 
+        every { behandlingService.oppdaterStegPåBehandling(any(), any()) } returns behandling(id = behandlingId)
+        every { behandlingService.oppdaterStatusPåBehandling(any(), any()) } returns behandling(id = behandlingId)
+
         slotJournalpost.clear()
         every {
             journalpostClient.oppdaterJournalpost(capture(slotJournalpost), journalpostId, any())
@@ -239,6 +239,7 @@ internal class JournalføringServiceTest {
             journalpostClient.hentOvergangsstønadSøknad(any(), any())
         } returns Testsøknad.søknadOvergangsstønad
         every { infotrygdPeriodeValideringService.validerKanOppretteBehandlingGittInfotrygdData(any()) } just Runs
+        every { behandlingService.finnSisteIverksatteBehandlingMedEventuellAvslått(any()) } returns null
 
         val behandleSakOppgaveId =
             journalføringService.fullførJournalpost(
@@ -292,6 +293,7 @@ internal class JournalføringServiceTest {
             journalpostClient.hentOvergangsstønadSøknad(any(), any())
         } returns Testsøknad.søknadOvergangsstønad
         every { infotrygdPeriodeValideringService.validerKanOppretteBehandlingGittInfotrygdData(any()) } just Runs
+        every { behandlingService.finnSisteIverksatteBehandlingMedEventuellAvslått(any()) } returns null
 
         val behandleSakOppgaveId =
             journalføringService.opprettBehandlingMedSøknadsdataFraEnFerdigstiltJournalpost(
@@ -451,7 +453,16 @@ internal class JournalføringServiceTest {
             every { vurderingService.hentGrunnlagOgMetadata(behandlingId) } returns
                 Pair(
                     mockVilkårGrunnlagDto(),
-                    HovedregelMetadata(null, Sivilstandstype.UGIFT, false, emptyList(), emptyList(), emptyList(), mockk(), mockk()),
+                    HovedregelMetadata(
+                        null,
+                        Sivilstandstype.UGIFT,
+                        false,
+                        emptyList(),
+                        emptyList(),
+                        emptyList(),
+                        mockk(),
+                        mockk(),
+                    ),
                 )
 
             fullførJournalpost(
@@ -468,6 +479,8 @@ internal class JournalføringServiceTest {
                     any(),
                     any(),
                 )
+                behandlingService.oppdaterStatusPåBehandling(behandlingId, BehandlingStatus.UTREDES)
+                behandlingService.oppdaterStegPåBehandling(behandlingId, StegType.BEREGNE_YTELSE)
             }
         }
 
@@ -489,7 +502,16 @@ internal class JournalføringServiceTest {
             every { vurderingService.hentGrunnlagOgMetadata(behandlingId) } returns
                 Pair(
                     mockVilkårGrunnlagDto(),
-                    HovedregelMetadata(null, Sivilstandstype.UGIFT, false, emptyList(), emptyList(), emptyList(), mockk(), mockk()),
+                    HovedregelMetadata(
+                        null,
+                        Sivilstandstype.UGIFT,
+                        false,
+                        emptyList(),
+                        emptyList(),
+                        emptyList(),
+                        mockk(),
+                        mockk(),
+                    ),
                 )
             fullførJournalpost(
                 JournalføringBehandling(
@@ -501,6 +523,8 @@ internal class JournalføringServiceTest {
             verifyOrder {
                 barnService.opprettBarnPåBehandlingMedSøknadsdata(any(), any(), any(), any(), any(), any(), any())
                 vurderingService.kopierVurderingerTilNyBehandling(forrigeBehandlingId, behandlingId, any(), any())
+                behandlingService.oppdaterStatusPåBehandling(behandlingId, BehandlingStatus.UTREDES)
+                behandlingService.oppdaterStegPåBehandling(behandlingId, StegType.BEREGNE_YTELSE)
             }
         }
 
@@ -574,6 +598,7 @@ internal class JournalføringServiceTest {
                 journalpostClient.hentOvergangsstønadSøknad(any(), any())
             } returns Testsøknad.søknadOvergangsstønad
 
+            every { behandlingService.finnSisteIverksatteBehandlingMedEventuellAvslått(any()) } returns null
             val journalførendeEnhet = "4489"
             val mappeId = 1234L
             val res = journalføringService.automatiskJournalfør(
@@ -627,6 +652,12 @@ internal class JournalføringServiceTest {
         )
         every { behandlingService.hentBehandling(behandlingId) } returns behandling
         every { behandlingService.opprettBehandling(any(), any(), behandlingsårsak = any()) } returns behandling
+        every { behandlingService.finnSisteIverksatteBehandlingMedEventuellAvslått(any()) } returns forrigeBehandlingId?.let {
+            behandling.copy(
+                id = forrigeBehandlingId,
+                forrigeBehandlingId = null,
+            )
+        }
     }
 
     private fun fullførJournalpost(
