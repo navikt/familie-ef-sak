@@ -10,13 +10,13 @@ import no.nav.familie.ef.sak.oppgave.dto.FinnOppgaveRequestDto
 import no.nav.familie.ef.sak.oppgave.dto.OppgaveDto
 import no.nav.familie.ef.sak.oppgave.dto.OppgaveEfDto
 import no.nav.familie.ef.sak.oppgave.dto.OppgaveResponseDto
+import no.nav.familie.ef.sak.oppgave.dto.SaksbehandlerDto
 import no.nav.familie.ef.sak.oppgave.dto.UtdanningOppgaveDto
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveResponseDto
 import no.nav.familie.kontrakter.felles.oppgave.MappeDto
 import no.nav.familie.kontrakter.felles.oppgave.Oppgave
-import no.nav.familie.kontrakter.felles.saksbehandler.Saksbehandler
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
@@ -119,15 +119,12 @@ class OppgaveController(
     }
 
     @GetMapping("{behandlingId}/ansvarlig-saksbehandler")
-    fun hentAnsvarligSaksbehandlerForBehandling(@PathVariable behandlingId: UUID): Ressurs<Saksbehandler?> {
+    fun hentAnsvarligSaksbehandlerForBehandling(@PathVariable behandlingId: UUID): Ressurs<SaksbehandlerDto> {
         val oppgave = tilordnetRessursService.hentIkkeFerdigstiltOppgaveForBehandling(behandlingId)
         val saksbehandlerIdentIOppgaveSystemet = oppgave?.tilordnetRessurs
+        val saksbehandlerInfoEllerNull = saksbehandlerIdentIOppgaveSystemet?.let { oppgaveService.hentSaksbehandlerInfo(it) }
 
-        return if (saksbehandlerIdentIOppgaveSystemet == null) {
-            Ressurs.success(saksbehandlerIdentIOppgaveSystemet)
-        } else {
-            Ressurs.success(oppgaveService.hentSaksbehandlerInfo(saksbehandlerIdentIOppgaveSystemet))
-        }
+        return Ressurs.success(tilordnetRessursService.mapTilSaksbehandlerDto(saksbehandlerInfoEllerNull))
     }
 
     @GetMapping("/behandling/{behandlingId}")

@@ -39,6 +39,7 @@ class OppgaveClientMock {
                 oppgave3,
                 oppgave4,
                 oppgave5,
+                oppgave6,
                 tilbakekreving1,
                 oppgavePapirsøknad,
                 oppgaveEttersending,
@@ -159,22 +160,42 @@ class OppgaveClientMock {
         }
 
         every { oppgaveClient.hentSaksbehandlerInfo(any()) } answers {
-            val navIdent = SikkerhetContext.hentSaksbehandler()
+            val navIdent = utledNavIdent(firstArg<String>())
             val saksbehandlerNavn = SikkerhetContext.hentSaksbehandlerNavn().split(" ")
+            val fornavn = saksbehandlerNavn.first()
+            val etternavn = if (saksbehandlerNavn.size > 1) saksbehandlerNavn.elementAt(1) else "Saksbehandlersen"
 
-            Saksbehandler(azureId = UUID.randomUUID(), navIdent = navIdent, fornavn = saksbehandlerNavn.first(), etternavn = saksbehandlerNavn.elementAt(1), enhet = "4405")
+            Saksbehandler(
+                azureId = UUID.randomUUID(),
+                navIdent = navIdent,
+                fornavn = fornavn,
+                etternavn = etternavn,
+                enhet = "4405",
+            )
         }
 
         return oppgaveClient
     }
 
-    private val oppgave1 = lagOppgave(1L, Oppgavetype.Journalføring, "Z999999", behandlesAvApplikasjon = "familie-ef-sak")
+    private val oppgave1 =
+        lagOppgave(1L, Oppgavetype.Journalføring, "Z999999", behandlesAvApplikasjon = "familie-ef-sak")
     private val oppgave2 = lagOppgave(2L, Oppgavetype.BehandleSak, "Z999999", behandlesAvApplikasjon = "familie-ef-sak")
-    private val oppgave3 = lagOppgave(3L, Oppgavetype.Journalføring, beskivelse = "", behandlesAvApplikasjon = "familie-ef-sak")
-    private val oppgave4 = lagOppgave(24681L, Oppgavetype.Journalføring, "SAKSBEHANDLER", behandlesAvApplikasjon = "familie-ef-sak")
-    private val oppgave5 = lagOppgave(24682L, Oppgavetype.Journalføring, "BESLUTTER", behandlesAvApplikasjon = "familie-ef-sak")
+    private val oppgave3 =
+        lagOppgave(3L, Oppgavetype.Journalføring, beskivelse = "", behandlesAvApplikasjon = "familie-ef-sak")
+    private val oppgave4 =
+        lagOppgave(24681L, Oppgavetype.Journalføring, "SAKSBEHANDLER", behandlesAvApplikasjon = "familie-ef-sak")
+    private val oppgave5 =
+        lagOppgave(24682L, Oppgavetype.Journalføring, "BESLUTTER", behandlesAvApplikasjon = "familie-ef-sak")
+    private val oppgave6 =
+        lagOppgave(24683L, Oppgavetype.BehandleSak, tilordnetRessurs = null, behandlesAvApplikasjon = "familie-ef-sak")
     private val oppgavePapirsøknad =
-        lagOppgave(5L, Oppgavetype.Journalføring, beskivelse = "Papirsøknad", behandlesAvApplikasjon = "", journalpostId = "23456")
+        lagOppgave(
+            5L,
+            Oppgavetype.Journalføring,
+            beskivelse = "Papirsøknad",
+            behandlesAvApplikasjon = "",
+            journalpostId = "23456",
+        )
     private val oppgaveEttersending =
         lagOppgave(
             6L,
@@ -202,7 +223,7 @@ class OppgaveClientMock {
     private fun lagOppgave(
         oppgaveId: Long,
         oppgavetype: Oppgavetype,
-        tildeltRessurs: String? = null,
+        tilordnetRessurs: String? = null,
         beskivelse: String? = "Beskrivelse av oppgaven. \n\n\n" +
             "Denne teksten kan jo være lang, kort eller ikke inneholde noenting. ",
         journalpostId: String? = "1234",
@@ -216,7 +237,7 @@ class OppgaveClientMock {
             identer = listOf(OppgaveIdentV2("11111111111", IdentGruppe.FOLKEREGISTERIDENT)),
             journalpostId = journalpostId,
             tildeltEnhetsnr = "4489",
-            tilordnetRessurs = tildeltRessurs,
+            tilordnetRessurs = tilordnetRessurs,
             behandlingstype = behandlingstype,
             mappeId = 123,
             behandlesAvApplikasjon = behandlesAvApplikasjon,
@@ -230,5 +251,10 @@ class OppgaveClientMock {
             status = StatusEnum.OPPRETTET,
             versjon = 2,
         )
+    }
+
+    private fun utledNavIdent(navIdent: String) = when (navIdent) {
+        "BESLUTTER" -> "ANNEN_SAKSBEHANDLER"
+        else -> SikkerhetContext.hentSaksbehandler()
     }
 }

@@ -6,8 +6,10 @@ import io.mockk.mockkObject
 import io.mockk.unmockkObject
 import io.mockk.verify
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
+import no.nav.familie.ef.sak.oppgave.dto.SaksbehandlerRolle
 import no.nav.familie.kontrakter.felles.oppgave.Oppgave
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
+import no.nav.familie.kontrakter.felles.saksbehandler.Saksbehandler
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -45,13 +47,14 @@ internal class TilordnetRessursServiceTest {
                     any(),
                     oppgaveTyper,
                 )
-            } returns efOppgave
-            every { oppgaveClient.finnOppgaveMedId(any()) } returns oppgave
+            } answers { efOppgave(firstArg<UUID>()) }
+            every { oppgaveClient.finnOppgaveMedId(any()) } answers { oppgave(firstArg<Long>()) }
 
+            val behandlingId = UUID.randomUUID()
             val hentetOppgave =
-                tilordnetRessursService.hentIkkeFerdigstiltOppgaveForBehandling(UUID.randomUUID())
+                tilordnetRessursService.hentIkkeFerdigstiltOppgaveForBehandling(behandlingId)
 
-            assertThat(hentetOppgave).isEqualTo(oppgave)
+            assertThat(hentetOppgave?.id).isEqualTo(1L)
         }
 
         @Test
@@ -62,10 +65,11 @@ internal class TilordnetRessursServiceTest {
                     oppgaveTyper,
                 )
             } returns null
-            every { oppgaveClient.finnOppgaveMedId(any()) } returns oppgave
+            every { oppgaveClient.finnOppgaveMedId(any()) } answers { oppgave(firstArg<Long>()) }
 
+            val behandlingId = UUID.randomUUID()
             val hentetOppgave =
-                tilordnetRessursService.hentIkkeFerdigstiltOppgaveForBehandling(UUID.randomUUID())
+                tilordnetRessursService.hentIkkeFerdigstiltOppgaveForBehandling(behandlingId)
 
             assertThat(hentetOppgave).isNull()
             verify(exactly = 0) { oppgaveClient.finnOppgaveMedId(any()) }
@@ -73,7 +77,7 @@ internal class TilordnetRessursServiceTest {
     }
 
     @Nested
-    inner class UtledEierskapTilOppgave {
+    inner class UtledSaksbehandlerRolle {
 
         @Test
         internal fun `skal returnere true dersom tilordnet ressurs er null`() {
@@ -82,10 +86,11 @@ internal class TilordnetRessursServiceTest {
                     any(),
                     oppgaveTyper,
                 )
-            } returns efOppgave
-            every { oppgaveClient.finnOppgaveMedId(any()) } returns oppgave.copy(tilordnetRessurs = null)
+            } answers { efOppgave(firstArg<UUID>()) }
+            every { oppgaveClient.finnOppgaveMedId(any()) } answers { oppgave(firstArg<Long>()).copy(tilordnetRessurs = null) }
 
-            val erSaksbehandlerEllerNull = tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandlerEllerNull(UUID.randomUUID())
+            val erSaksbehandlerEllerNull =
+                tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandlerEllerNull(UUID.randomUUID())
 
             assertThat(erSaksbehandlerEllerNull).isTrue()
         }
@@ -97,10 +102,11 @@ internal class TilordnetRessursServiceTest {
                     any(),
                     oppgaveTyper,
                 )
-            } returns efOppgave
-            every { oppgaveClient.finnOppgaveMedId(any()) } returns oppgave.copy(tilordnetRessurs = "NAV1234")
+            } answers { efOppgave(firstArg<UUID>()) }
+            every { oppgaveClient.finnOppgaveMedId(any()) } answers { oppgave(firstArg<Long>()).copy(tilordnetRessurs = "NAV1234") }
 
-            val erSaksbehandlerEllerNull = tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandlerEllerNull(UUID.randomUUID())
+            val erSaksbehandlerEllerNull =
+                tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandlerEllerNull(UUID.randomUUID())
 
             assertThat(erSaksbehandlerEllerNull).isTrue()
         }
@@ -112,19 +118,82 @@ internal class TilordnetRessursServiceTest {
                     any(),
                     oppgaveTyper,
                 )
-            } returns efOppgave
-            every { oppgaveClient.finnOppgaveMedId(any()) } returns oppgave.copy(tilordnetRessurs = "NAV2345")
+            } answers { efOppgave(firstArg<UUID>()) }
+            every { oppgaveClient.finnOppgaveMedId(any()) } answers { oppgave(firstArg<Long>()).copy(tilordnetRessurs = "NAV2345") }
 
-            val erSaksbehandlerEllerNull = tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandlerEllerNull(UUID.randomUUID())
+            val erSaksbehandlerEllerNull =
+                tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandlerEllerNull(UUID.randomUUID())
 
             assertThat(erSaksbehandlerEllerNull).isFalse()
         }
     }
 
+    @Nested
+    inner class MapSaksbehandlerDto {
+
+        @Test
+        internal fun `skal mappe INNLOGGET SAKSBEHANDLER til SaksbehandlerDto`() {
+            val azureId = UUID.randomUUID()
+            val saksbehandler = saksbehandler(azureId, "4405", "Vader", "Darth", "NAV1234")
+
+            val saksbehandlerDto = tilordnetRessursService.mapTilSaksbehandlerDto(saksbehandler)
+
+            assertThat(saksbehandlerDto.azureId).isEqualTo(azureId)
+            assertThat(saksbehandlerDto.enhet).isEqualTo(saksbehandler.enhet)
+            assertThat(saksbehandlerDto.fornavn).isEqualTo(saksbehandler.fornavn)
+            assertThat(saksbehandlerDto.etternavn).isEqualTo(saksbehandler.etternavn)
+            assertThat(saksbehandlerDto.navIdent).isEqualTo(saksbehandler.navIdent)
+            assertThat(saksbehandlerDto.rolle).isEqualTo(SaksbehandlerRolle.INNLOGGET_SAKSBEHANDLER)
+        }
+
+        @Test
+        internal fun `skal mappe ANNEN SAKSBEHANDLER til SaksbehandlerDto`() {
+            val azureId = UUID.randomUUID()
+            val saksbehandler = saksbehandler(azureId, "4405", "Vader", "Darth", "NAV2345")
+
+            val saksbehandlerDto = tilordnetRessursService.mapTilSaksbehandlerDto(saksbehandler)
+
+            assertThat(saksbehandlerDto.azureId).isEqualTo(azureId)
+            assertThat(saksbehandlerDto.enhet).isEqualTo(saksbehandler.enhet)
+            assertThat(saksbehandlerDto.fornavn).isEqualTo(saksbehandler.fornavn)
+            assertThat(saksbehandlerDto.etternavn).isEqualTo(saksbehandler.etternavn)
+            assertThat(saksbehandlerDto.navIdent).isEqualTo(saksbehandler.navIdent)
+            assertThat(saksbehandlerDto.rolle).isEqualTo(SaksbehandlerRolle.ANNEN_SAKSBEHANDLER)
+        }
+
+        @Test
+        internal fun `skal mappe IKKE SATT til SaksbehandlerDto`() {
+            val saksbehandlerDto = tilordnetRessursService.mapTilSaksbehandlerDto(null)
+
+            assertThat(saksbehandlerDto.enhet).isEqualTo("")
+            assertThat(saksbehandlerDto.fornavn).isEqualTo("")
+            assertThat(saksbehandlerDto.etternavn).isEqualTo("")
+            assertThat(saksbehandlerDto.navIdent).isEqualTo("")
+            assertThat(saksbehandlerDto.rolle).isEqualTo(SaksbehandlerRolle.IKKE_SATT)
+        }
+    }
+
+    private fun efOppgave(behandlingId: UUID) =
+        EFOppgave(behandlingId = behandlingId, gsakOppgaveId = 1L, type = Oppgavetype.BehandleSak)
+
+    private fun oppgave(oppgaveId: Long) = Oppgave(id = oppgaveId)
+
+    private fun saksbehandler(
+        azureId: UUID,
+        enhet: String,
+        etternavn: String,
+        fornavn: String,
+        navIdent: String,
+    ) = Saksbehandler(
+        azureId = azureId,
+        enhet = enhet,
+        etternavn = etternavn,
+        fornavn = fornavn,
+        navIdent = navIdent,
+    )
+
     companion object {
+
         private val oppgaveTyper = setOf(Oppgavetype.BehandleSak, Oppgavetype.BehandleUnderkjentVedtak)
-        private val efOppgave =
-            EFOppgave(behandlingId = UUID.randomUUID(), gsakOppgaveId = 1L, type = Oppgavetype.BehandleSak)
-        private val oppgave = Oppgave(id = 1L)
     }
 }
