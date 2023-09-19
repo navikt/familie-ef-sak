@@ -55,7 +55,7 @@ private fun List<GrunnlagsdataPeriodeHistorikk>.tilDto() = this.map { it.tilDto(
     .sortedByDescending { it.fom }
 
 private fun GrunnlagsdataPeriodeHistorikk.tilDto() = GrunnlagsdataPeriodeHistorikkDto(
-    periodeType = this.periodeType.toString(),
+    periodeType = this.periodeType.name,
     fom = this.fom,
     tom = this.tom,
     antMnd = mndMedBeløp(periodeType, beløp, fom, tom),
