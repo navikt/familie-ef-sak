@@ -60,6 +60,8 @@ class SendTilBeslutterSteg(
             throw ApiFeil("Behandling er i feil steg=${saksbehandling.steg}", HttpStatus.BAD_REQUEST)
         }
 
+        validerAtSaksbehandlerErAnsvarligForBehandling(saksbehandling)
+
         if (saksbehandling.skalSendeBrev &&
             !vedtaksbrevRepository.existsById(saksbehandling.id)
         ) {
@@ -79,6 +81,12 @@ class SendTilBeslutterSteg(
     private fun validerAtDetFinnesOppgave(saksbehandling: Saksbehandling) {
         feilHvis(tilordnetRessursService.hentBehandleSakOppgaveSomIkkeErFerdigstilt(saksbehandling.id) == null) {
             "Oppgaven for behandlingen er ikke tilgjengelig. Vennligst vent og prøv igjen om litt."
+        }
+    }
+
+    private fun validerAtSaksbehandlerErAnsvarligForBehandling(saksbehandling: Saksbehandling) {
+        feilHvis(!tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandlerEllerNull(saksbehandling.id)) {
+            "Behandlingen har en ny eier og kan derfor ikke sendes til totrinnskontroll av deg"
         }
     }
 

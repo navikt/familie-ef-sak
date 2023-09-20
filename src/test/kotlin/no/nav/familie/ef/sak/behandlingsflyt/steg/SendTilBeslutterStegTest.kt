@@ -169,6 +169,7 @@ internal class SendTilBeslutterStegTest {
         every { behandlingshistorikkService.finnSisteBehandlingshistorikk(any(), any()) } returns
             Behandlingshistorikk(behandlingId = UUID.randomUUID(), steg = StegType.SEND_TIL_BESLUTTER)
         mockBrukerContext(saksbehandlerNavn)
+        every { tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandlerEllerNull(any()) } returns true
     }
 
     @AfterEach
