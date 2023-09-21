@@ -85,7 +85,9 @@ class SigrunClientTest {
         )
 
         val response = sigrunClient.hentPensjonsgivendeInntekt("123", 2022)
-        println(response)
+        assertThat(response.norskPersonidentifikator).isEqualTo("123")
+        assertThat(response.inntektsaar).isEqualTo(2022)
+        assertThat(response.pensjonsgivendeInntekt).isEmpty()
     }
 
     @Test
