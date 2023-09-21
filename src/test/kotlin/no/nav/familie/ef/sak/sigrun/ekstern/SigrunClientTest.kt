@@ -84,7 +84,8 @@ class SigrunClientTest {
                 ),
         )
 
-        sigrunClient.hentPensjonsgivendeInntekt("123", 2022)
+        val response = sigrunClient.hentPensjonsgivendeInntekt("123", 2022)
+        println(response)
     }
 
     @Test

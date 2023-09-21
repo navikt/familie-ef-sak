@@ -3,8 +3,8 @@ package no.nav.familie.ef.sak.sigrun.ekstern
 import java.time.LocalDate
 
 data class PensjonsgivendeInntektResponse(
-    val norskPersonidentifikator: String,
-    val inntektsaar: Int,
+    val norskPersonidentifikator: String?, // Kan bli null dersom person ikke finnes
+    val inntektsaar: Int?,
     val pensjonsgivendeInntekt: List<PensjonsgivendeInntektForSkatteordning>,
 )
 

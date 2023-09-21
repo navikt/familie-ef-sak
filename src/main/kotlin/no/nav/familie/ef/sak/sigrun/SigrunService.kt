@@ -26,7 +26,7 @@ private fun PensjonsgivendeInntektResponse.mapTilPensjonsgivendeInntektVisning(i
     val svalbardInntekt = this.pensjonsgivendeInntekt.firstOrNull { it.skatteordning == Skatteordning.SVALBARD }
 
     return PensjonsgivendeInntektVisning(
-        this.inntektsaar,
+        this.inntektsaar?: inntektsår,
         (fastlandInntekt?.pensjonsgivendeInntektAvNaeringsinntekt ?: 0) + (fastlandInntekt?.pensjonsgivendeInntektAvNaeringsinntektFraFiskeFangstEllerFamiliebarnehage ?: 0),
         this.pensjonsgivendeInntekt.first { it.skatteordning == Skatteordning.FASTLAND }.pensjonsgivendeInntektAvLoennsinntekt ?: 0,
         SvalbardPensjonsgivendeInntekt(
