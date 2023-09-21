@@ -22,13 +22,13 @@ class SigrunService(val sigrunClient: SigrunClient, val fagsakPersonService: Fag
 }
 
 private fun PensjonsgivendeInntektResponse.mapTilPensjonsgivendeInntektVisning(inntektsår: Int): PensjonsgivendeInntektVisning {
-    val fastlandInntekt = this.pensjonsgivendeInntekt.firstOrNull { it.skatteordning == Skatteordning.FASTLAND }
-    val svalbardInntekt = this.pensjonsgivendeInntekt.firstOrNull { it.skatteordning == Skatteordning.SVALBARD }
+    val fastlandInntekt = this.pensjonsgivendeInntekt?.firstOrNull { it.skatteordning == Skatteordning.FASTLAND }
+    val svalbardInntekt = this.pensjonsgivendeInntekt?.firstOrNull { it.skatteordning == Skatteordning.SVALBARD }
 
     return PensjonsgivendeInntektVisning(
-        this.inntektsaar?: inntektsår,
+        this.inntektsaar ?: inntektsår,
         (fastlandInntekt?.pensjonsgivendeInntektAvNaeringsinntekt ?: 0) + (fastlandInntekt?.pensjonsgivendeInntektAvNaeringsinntektFraFiskeFangstEllerFamiliebarnehage ?: 0),
-        this.pensjonsgivendeInntekt.first { it.skatteordning == Skatteordning.FASTLAND }.pensjonsgivendeInntektAvLoennsinntekt ?: 0,
+        this.pensjonsgivendeInntekt?.first { it.skatteordning == Skatteordning.FASTLAND }?.pensjonsgivendeInntektAvLoennsinntekt ?: 0,
         SvalbardPensjonsgivendeInntekt(
             (svalbardInntekt?.pensjonsgivendeInntektAvNaeringsinntekt ?: 0) + (svalbardInntekt?.pensjonsgivendeInntektAvNaeringsinntektFraFiskeFangstEllerFamiliebarnehage ?: 0),
             svalbardInntekt?.pensjonsgivendeInntektAvLoennsinntekt ?: 0,

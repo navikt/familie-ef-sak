@@ -29,7 +29,7 @@ class SigrunClient(
             return PensjonsgivendeInntektResponse(
                 fødselsnummer,
                 inntektsår,
-                listOf()
+                listOf(),
             )
         }
     }

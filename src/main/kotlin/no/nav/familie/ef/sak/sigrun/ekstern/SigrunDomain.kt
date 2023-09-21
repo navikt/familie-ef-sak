@@ -5,7 +5,7 @@ import java.time.LocalDate
 data class PensjonsgivendeInntektResponse(
     val norskPersonidentifikator: String?, // Kan bli null dersom person ikke finnes
     val inntektsaar: Int?,
-    val pensjonsgivendeInntekt: List<PensjonsgivendeInntektForSkatteordning>,
+    val pensjonsgivendeInntekt: List<PensjonsgivendeInntektForSkatteordning>?,
 )
 
 data class PensjonsgivendeInntektForSkatteordning(
