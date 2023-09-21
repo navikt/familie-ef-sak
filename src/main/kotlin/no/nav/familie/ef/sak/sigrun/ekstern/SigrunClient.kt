@@ -5,6 +5,7 @@ import no.nav.familie.kontrakter.felles.PersonIdent
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
+import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.RestOperations
 import org.springframework.web.util.UriComponentsBuilder
 import java.net.URI
@@ -20,9 +21,17 @@ class SigrunClient(
             .queryParam("inntektsaar", inntektsår.toString())
             .build().toUri()
 
-        val response = postForEntity<PensjonsgivendeInntektResponse>(uri, PersonIdent(fødselsnummer))
-        secureLogger.info("Pensjonsgivende inntekt for inntektsår $inntektsår: $response") // Fjernes når det er litt mer kjennskap til dataene
-        return response
+        try {
+            val response = postForEntity<PensjonsgivendeInntektResponse>(uri, PersonIdent(fødselsnummer))
+            secureLogger.info("Pensjonsgivende inntekt for inntektsår $inntektsår: $response") // Fjernes når det er litt mer kjennskap til dataene
+            return response
+        } catch (e: HttpClientErrorException.NotFound) { // Kan få 404 selv om personen finnes, men dersom vedkommende ikke har registrert inntekt for gitt inntektsår
+            return PensjonsgivendeInntektResponse(
+                fødselsnummer,
+                inntektsår,
+                listOf()
+            )
+        }
     }
     fun hentSummertSkattegrunnlag(fødselsnummer: String, inntektsår: Int): SummertSkattegrunnlag {
         val uri = UriComponentsBuilder.fromUri(uri).pathSegment("api/sigrun/summertskattegrunnlag")
