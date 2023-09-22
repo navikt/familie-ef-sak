@@ -1,6 +1,7 @@
 package no.nav.familie.ef.sak.sigrun
 
 import no.nav.familie.ef.sak.fagsak.FagsakPersonService
+import no.nav.familie.ef.sak.sigrun.ekstern.PensjonsgivendeInntektForSkatteordning
 import no.nav.familie.ef.sak.sigrun.ekstern.PensjonsgivendeInntektResponse
 import no.nav.familie.ef.sak.sigrun.ekstern.SigrunClient
 import no.nav.familie.ef.sak.sigrun.ekstern.Skatteordning
@@ -27,14 +28,17 @@ private fun PensjonsgivendeInntektResponse.mapTilPensjonsgivendeInntektVisning(i
 
     return PensjonsgivendeInntektVisning(
         this.inntektsaar ?: inntektsår,
-        (fastlandInntekt?.pensjonsgivendeInntektAvNaeringsinntekt ?: 0) + (fastlandInntekt?.pensjonsgivendeInntektAvNaeringsinntektFraFiskeFangstEllerFamiliebarnehage ?: 0),
-        this.pensjonsgivendeInntekt?.first { it.skatteordning == Skatteordning.FASTLAND }?.pensjonsgivendeInntektAvLoennsinntekt ?: 0,
+        fastlandInntekt?.næringsinntekt() ?: 0,
+        fastlandInntekt?.pensjonsgivendeInntektAvLoennsinntekt ?: 0,
         SvalbardPensjonsgivendeInntekt(
-            (svalbardInntekt?.pensjonsgivendeInntektAvNaeringsinntekt ?: 0) + (svalbardInntekt?.pensjonsgivendeInntektAvNaeringsinntektFraFiskeFangstEllerFamiliebarnehage ?: 0),
+            svalbardInntekt?.næringsinntekt() ?: 0,
             svalbardInntekt?.pensjonsgivendeInntektAvLoennsinntekt ?: 0,
         ),
     )
 }
+
+fun PensjonsgivendeInntektForSkatteordning.næringsinntekt() =
+    (this.pensjonsgivendeInntektAvNaeringsinntekt ?: 0) + (this.pensjonsgivendeInntektAvNaeringsinntektFraFiskeFangstEllerFamiliebarnehage ?: 0)
 
 data class PensjonsgivendeInntektVisning(
     val inntektsår: Int,
