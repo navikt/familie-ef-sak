@@ -124,6 +124,5 @@ class ApplicationConfig {
         override fun harTilgang(): Boolean {
             return kallKommerFraProssesering()
         }
-
     }
 }
