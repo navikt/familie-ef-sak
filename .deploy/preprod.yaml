@@ -9,7 +9,6 @@ metadata:
 spec:
   image: {{ image }}
   ingresses:
-    - https://familie-ef-sak.dev.intern.nav.no # Deprecated
     - https://familie-ef-sak.intern.dev.nav.no
   liveness:
     path: /internal/status/isAlive
@@ -89,7 +88,6 @@ spec:
           namespace: paw
       external:
         - host: api-gw-q1.oera.no
-        - host: unleash.nais.io
         - host: familie-oppdrag.dev-fss-pub.nais.io
         - host: familie-integrasjoner.dev-fss-pub.nais.io
         - host: familie-ef-infotrygd.dev-fss-pub.nais.io
