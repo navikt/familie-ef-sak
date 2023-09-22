@@ -107,12 +107,10 @@ private fun <E> MutableList<E>.byttUtSisteMed(ny: E) {
 private fun skalSlåSammenForrigePeriodeMedDennePerioden(
     liste: List<GrunnlagsdataPeriodeHistorikkDto>,
     denne: GrunnlagsdataPeriodeHistorikkDto,
-) :Boolean {
+): Boolean {
     val forrige = liste.lastOrNull()
     return forrige != null && (forrige.periode() påfølgesAv denne.periode() && forrige.vedtaksperiodeType === denne.vedtaksperiodeType)
 }
-
-
 
 private fun slåSammenPeriodeHistorikkDto(
     forrige: GrunnlagsdataPeriodeHistorikkDto,

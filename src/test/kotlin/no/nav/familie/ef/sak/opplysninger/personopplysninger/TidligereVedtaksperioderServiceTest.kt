@@ -375,6 +375,6 @@ internal class TidligereVedtaksperioderServiceTest {
         HistorikkEndring(
             type = type,
             behandlingId = UUID.randomUUID(),
-            vedtakstidspunkt = LocalDateTime.now()
+            vedtakstidspunkt = LocalDateTime.now(),
         )
 }
