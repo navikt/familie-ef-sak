@@ -42,7 +42,7 @@ class ArbeidsforholdServiceTest {
                 ),
             ),
         )
-        val finnesAvsluttetArbeidsforhold = arbeidsforholdService.finnesAvsluttetArbeidsforholdSisteGittAntallMåneder("1")
+        val finnesAvsluttetArbeidsforhold = arbeidsforholdService.finnesAvsluttetArbeidsforholdSisteAntallMåneder("1")
         assertThat(finnesAvsluttetArbeidsforhold).isTrue
     }
 
@@ -57,7 +57,7 @@ class ArbeidsforholdServiceTest {
                 ),
             ),
         )
-        val finnesAvsluttetArbeidsforhold = arbeidsforholdService.finnesAvsluttetArbeidsforholdSisteGittAntallMåneder("1")
+        val finnesAvsluttetArbeidsforhold = arbeidsforholdService.finnesAvsluttetArbeidsforholdSisteAntallMåneder("1")
         assertThat(finnesAvsluttetArbeidsforhold).isFalse
     }
 }

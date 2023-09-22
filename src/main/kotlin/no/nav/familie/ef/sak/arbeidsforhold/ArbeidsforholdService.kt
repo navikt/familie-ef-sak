@@ -20,13 +20,13 @@ class ArbeidsforholdService(
         return arbeidsforholdResponse.data ?: emptyList()
     }
 
-    fun finnesAvsluttetArbeidsforholdSisteGittAntallMåneder(aktivIdent: String, antallMåneder: Long = 6): Boolean {
+    fun finnesAvsluttetArbeidsforholdSisteAntallMåneder(aktivIdent: String, antallMåneder: Long = 6): Boolean {
         val ansettelsesdato = LocalDate.now().minusMonths(antallMåneder)
         val arbeidsforhold = arbeidsforholdClient.hentArbeidsforhold(aktivIdent, ansettelsesdato).data
 
         return arbeidsforhold?.any {
-            it.ansettelsesperiode?.periode?.fom?.isEqualOrBefore(LocalDate.now().minusMonths(antallMåneder)) == true &&
-                it.ansettelsesperiode?.periode?.tom?.isEqualOrAfter(LocalDate.now().minusMonths(antallMåneder)) == true
+            it.ansettelsesperiode?.periode?.fom?.isEqualOrBefore(ansettelsesdato) == true &&
+                it.ansettelsesperiode?.periode?.tom?.isEqualOrAfter(ansettelsesdato) == true
         } == true
     }
 }
