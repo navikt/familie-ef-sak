@@ -72,7 +72,6 @@ class SigrunClientTest {
         assertThat(pensjonsgivendeInntektResponse.pensjonsgivendeInntekt?.last()?.pensjonsgivendeInntektAvLoennsinntekt).isEqualTo(492160)
     }
 
-
     @Test
     fun `hent beregnetskatt fra sigrun og map til objekt`() {
         wiremockServerItem.stubFor(
