@@ -78,35 +78,43 @@ private fun mndMedBeløp(
     beløp: Int,
     fom: LocalDate,
     tom: LocalDate,
-) = when (beløp != 0 || periodeType er SANKSJON) {
+) = when ((beløp != 0) || (periodeType er SANKSJON)) {
     true -> Månedsperiode(fom, tom).lengdeIHeleMåneder()
     false -> 0
 }
 
 fun List<GrunnlagsdataPeriodeHistorikkDto>.slåSammenPåfølgendePerioderMedLikPeriodetype(): List<GrunnlagsdataPeriodeHistorikkDto> {
     val sortertPåDatoListe = this.sortedBy { it.fom }
-    return sortertPåDatoListe.fold(mutableListOf()) { acc, entry ->
-        val last = acc.lastOrNull()
-        if (
-            last != null && last.periode() påfølgesAv entry.periode() &&
-            last.periodeType === entry.periodeType
-        ) {
-            acc.removeLast()
-            val månedsperiode = last.periode() union entry.periode()
-            acc.add(
-                last.copy(
-                    fom = månedsperiode.fomDato,
-                    tom = månedsperiode.tomDato,
-                    antMnd = last.antMnd + entry.antMnd,
-                    antallMndUtenBeløp = last.antallMndUtenBeløp + entry.antallMndUtenBeløp,
-
-                ),
-            )
+    return sortertPåDatoListe.fold(mutableListOf()) { returliste, denne ->
+        val forrige = returliste.lastOrNull()
+        if(forrige!=null && erSammenhangendePerioderMedSammePeriodetype(forrige, denne)){
+            returliste.byttUtSisteMed(slåSammenPeriodeHistorikkDto(forrige, denne))
         } else {
-            acc.add(entry)
+            returliste.add(denne)
         }
-        acc
+        returliste
     }
 }
+
+private fun <E> MutableList<E>.byttUtSisteMed(ny: E) {
+    this.removeLast()
+    this.add(ny)
+}
+
+private fun erSammenhangendePerioderMedSammePeriodetype(
+    forrige: GrunnlagsdataPeriodeHistorikkDto,
+    denne: GrunnlagsdataPeriodeHistorikkDto,
+) = forrige.periode() påfølgesAv denne.periode() && forrige.periodeType === denne.periodeType
+
+private fun slåSammenPeriodeHistorikkDto(
+    forrige: GrunnlagsdataPeriodeHistorikkDto,
+    denne: GrunnlagsdataPeriodeHistorikkDto,
+) = GrunnlagsdataPeriodeHistorikkDto(
+    periodeType = forrige.periodeType,
+    fom = forrige.fom,
+    tom = denne.tom,
+    antMnd = forrige.antMnd + denne.antMnd,
+    antallMndUtenBeløp = forrige.antallMndUtenBeløp + denne.antallMndUtenBeløp,
+)
 
 private fun GrunnlagsdataPeriodeHistorikkDto.periode(): Månedsperiode = Månedsperiode(this.fom, this.tom)

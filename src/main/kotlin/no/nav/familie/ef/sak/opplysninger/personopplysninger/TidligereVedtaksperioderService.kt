@@ -60,7 +60,7 @@ class TidligereVedtaksperioderService(
                     harTidligereOvergangsstønad = hentTidligereVedtaksperioder(it.overgangsstønad),
                     harTidligereBarnetilsyn = hentTidligereVedtaksperioder(it.barnetilsyn),
                     harTidligereSkolepenger = hentTidligereVedtaksperioder(it.skolepenger),
-                    periodeHistorikkOvergangsstønad = hentOvergangstønadsperioder(it),
+                    periodeHistorikkOvergangsstønad = hentGjeldendeOvergangstønadsperioder(it),
                 )
             } ?: TidligereInnvilgetVedtak(false, false, false)
     }
@@ -72,13 +72,12 @@ class TidligereVedtaksperioderService(
             tilkjentYtelse.andelerTilkjentYtelse.isNotEmpty()
         } ?: false
 
-    private fun hentOvergangstønadsperioder(fagsaker: Fagsaker?): List<GrunnlagsdataPeriodeHistorikkOvergangsstønad> {
+    private fun hentGjeldendeOvergangstønadsperioder(fagsaker: Fagsaker?): List<GrunnlagsdataPeriodeHistorikkOvergangsstønad> {
         return hentAndelshistorikkForOvergangsstønad(fagsaker)
             .filterNot(erstattetEllerFjernet())
             .filterNot { it.erOpphør }
             .map {
                 feilHvis(it.periodeType == null) { "Overgangsstønad skal ha periodetype" }
-
                 GrunnlagsdataPeriodeHistorikkOvergangsstønad(
                     periodeType = it.periodeType,
                     fom = it.andel.periode.fomDato,

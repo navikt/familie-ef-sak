@@ -145,29 +145,18 @@ internal class TidligereVedtaksperioderServiceTest {
     }
 
     @Test
-    internal fun `Skal fjerne uvesentlige perioder som er overskrevet av nye revurderinger`() {
-        val historikkEndring = HistorikkEndring(
-            type = EndringType.ERSTATTET,
-            behandlingId = UUID.randomUUID(),
-            vedtakstidspunkt = LocalDateTime.now(),
-        )
-        val historikkEndring2 = HistorikkEndring(
-            type = EndringType.FJERNET,
-            behandlingId = UUID.randomUUID(),
-            vedtakstidspunkt = LocalDateTime.now(),
-        )
-        val andel2 = andel.copy(endring = historikkEndring)
-        val andel3 = andel.copy(endring = historikkEndring2)
+    internal fun `Skal fjerne alle uvesentlige perioder som er overskrevet av nye revurderinger`() {
+        val andel1 = andel.copy(erOpphør = true)
+        val andel2 = andel.copy(endring = historikkEndring(EndringType.ERSTATTET))
+        val andel3 = andel.copy(endring = historikkEndring(EndringType.FJERNET))
 
         every { andelsHistorikkService.hentHistorikk(fagsaker.overgangsstønad!!.id, null) } returns
-            listOf(andel, andel2, andel3)
+            listOf(andel1, andel2, andel3)
 
         mockTidligereVedtakEfSak(harAndeler = false)
         val tidligereVedtaksperioder = service.hentTidligereVedtaksperioder(listOf(personIdent)).tilDto()
 
-        val overgangstønadsperioder = tidligereVedtaksperioder.sak!!.periodeHistorikkOvergangsstønad
-
-        assertThat(overgangstønadsperioder).hasSize(1)
+        assertThat(tidligereVedtaksperioder.sak!!.periodeHistorikkOvergangsstønad).hasSize(0)
     }
 
     @Test
@@ -381,4 +370,11 @@ internal class TidligereVedtaksperioderServiceTest {
         sats = 0,
         beløpFørFratrekkOgSatsJustering = 0,
     )
+
+    private fun historikkEndring(type: EndringType) =
+        HistorikkEndring(
+            type = type,
+            behandlingId = UUID.randomUUID(),
+            vedtakstidspunkt = LocalDateTime.now()
+        )
 }
