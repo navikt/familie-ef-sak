@@ -287,6 +287,23 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
     }
 
     @Test
+    internal fun `skal automatisk utføre besluttesteg når en behandling avslås pga kortvarig avbrudd jobb`() {
+        opprettBehandling(
+            steg = StegType.SEND_TIL_BESLUTTER,
+            vedtakResultatType = ResultatType.AVSLÅ,
+            status = BehandlingStatus.UTREDES,
+            avlsåÅrsak = AvslagÅrsak.KORTVARIG_AVBRUDD_JOBB,
+        )
+        sendTilBeslutter(SAKSBEHANDLER)
+
+        validerTotrinnskontrollUaktuelt(BESLUTTER)
+        validerTotrinnskontrollUaktuelt(SAKSBEHANDLER)
+        validerTotrinnskontrollUaktuelt(BESLUTTER_2)
+
+        validerBehandlingIverksetter()
+    }
+
+    @Test
     internal fun `skal lagre oppgaver som skal opprettes`() {
         val lagAndelMedInntekt1ÅrFremITiden: (behandlingId: UUID) -> TilkjentYtelse = { behandlingId ->
             val andel = lagAndelTilkjentYtelse(
