@@ -15,6 +15,15 @@ class SigrunClient(
     @Qualifier("azure") restOperations: RestOperations,
 ) : AbstractRestClient(restOperations, "sigrun") {
 
+    fun hentPensjonsgivendeInntekt(fødselsnummer: String, inntektsår: Int): PensjonsgivendeInntektResponse {
+        val uri = UriComponentsBuilder.fromUri(uri).pathSegment("api/sigrun/pensjonsgivendeinntekt")
+            .queryParam("inntektsaar", inntektsår.toString())
+            .build().toUri()
+
+        val response = postForEntity<PensjonsgivendeInntektResponse>(uri, PersonIdent(fødselsnummer))
+        secureLogger.info("Pensjonsgivende inntekt for inntektsår $inntektsår: $response") // Fjernes når det er litt mer kjennskap til dataene
+        return response
+    }
     fun hentSummertSkattegrunnlag(fødselsnummer: String, inntektsår: Int): SummertSkattegrunnlag {
         val uri = UriComponentsBuilder.fromUri(uri).pathSegment("api/sigrun/summertskattegrunnlag")
             .queryParam("inntektsaar", inntektsår.toString())
