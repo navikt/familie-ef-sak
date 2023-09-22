@@ -4,11 +4,14 @@ import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ef.sak.fagsak.FagsakPersonService
 import no.nav.familie.ef.sak.sigrun.SigrunService
-import no.nav.familie.ef.sak.sigrun.ekstern.BeregnetSkatt
+import no.nav.familie.ef.sak.sigrun.ekstern.PensjonsgivendeInntektForSkatteordning
+import no.nav.familie.ef.sak.sigrun.ekstern.PensjonsgivendeInntektResponse
 import no.nav.familie.ef.sak.sigrun.ekstern.SigrunClient
+import no.nav.familie.ef.sak.sigrun.ekstern.Skatteordning
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
 
@@ -22,12 +25,31 @@ internal class SigrunServiceTest {
     @BeforeEach
     fun setup() {
         every { fagsakPersonService.hentAktivIdent(any()) } returns "123"
-        every { sigrunClient.hentBeregnetSkatt(any(), any()) } returns listOf(
-            BeregnetSkatt("skatteoppgjoersdato", "2022-05-01"),
-            BeregnetSkatt("personinntektNaering", "40000"),
-            BeregnetSkatt("personinntektLoenn", "50000"),
-            BeregnetSkatt("svalbardPersoninntektNaering", "5000"),
-            BeregnetSkatt("svalbardSumAllePersoninntekter", "2000"),
+        every { sigrunClient.hentPensjonsgivendeInntekt(any(), YearMonth.now().year - 1) }
+
+        every { sigrunClient.hentPensjonsgivendeInntekt(any(), 2022) } returns PensjonsgivendeInntektResponse(
+            "123",
+            2022,
+            pensjonsgivendeInntekt = listOf(
+                pensjonsgivendeInntektForSkatteordning(Skatteordning.FASTLAND),
+                pensjonsgivendeInntektForSkatteordning(Skatteordning.SVALBARD, 325_000, 20_000),
+            ),
+        )
+        every { sigrunClient.hentPensjonsgivendeInntekt(any(), 2021) } returns PensjonsgivendeInntektResponse(
+            "123",
+            2021,
+            pensjonsgivendeInntekt = listOf(
+                pensjonsgivendeInntektForSkatteordning(Skatteordning.FASTLAND),
+                pensjonsgivendeInntektForSkatteordning(Skatteordning.SVALBARD),
+            ),
+        )
+        every { sigrunClient.hentPensjonsgivendeInntekt(any(), 2020) } returns PensjonsgivendeInntektResponse(
+            "123",
+            2020,
+            pensjonsgivendeInntekt = listOf(
+                pensjonsgivendeInntektForSkatteordning(Skatteordning.FASTLAND),
+                pensjonsgivendeInntektForSkatteordning(Skatteordning.SVALBARD),
+            ),
         )
     }
 
@@ -37,10 +59,19 @@ internal class SigrunServiceTest {
         val pensjonsgivendeInntektVisning = sigrunService.hentInntektSisteTreÅr(fagsakId)
         assertThat(pensjonsgivendeInntektVisning.size).isEqualTo(3)
         assertThat(pensjonsgivendeInntektVisning.first().inntektsår).isEqualTo(YearMonth.now().year - 1)
-        assertThat(pensjonsgivendeInntektVisning.first().næring).isEqualTo(40_000)
-        assertThat(pensjonsgivendeInntektVisning.first().person).isEqualTo(50_000)
+        assertThat(pensjonsgivendeInntektVisning.first().næring).isEqualTo(250_000)
+        assertThat(pensjonsgivendeInntektVisning.first().person).isEqualTo(100_000)
+        assertThat(pensjonsgivendeInntektVisning.first().svalbard?.næring).isEqualTo(70_000)
+        assertThat(pensjonsgivendeInntektVisning.first().svalbard?.person).isEqualTo(325_000)
         assertThat(pensjonsgivendeInntektVisning.last().inntektsår).isEqualTo(YearMonth.now().year - 3)
-        assertThat(pensjonsgivendeInntektVisning.first().svalbard?.næring).isEqualTo(5000)
-        assertThat(pensjonsgivendeInntektVisning.first().svalbard?.person).isEqualTo(2000)
     }
 }
+
+fun pensjonsgivendeInntektForSkatteordning(skatteordning: Skatteordning = Skatteordning.FASTLAND, lønnsinntekt: Int = 100_000, næringsinntekt: Int = 200_000) = PensjonsgivendeInntektForSkatteordning(
+    skatteordning,
+    LocalDate.now(),
+    lønnsinntekt,
+    null,
+    næringsinntekt,
+    50_000,
+)
