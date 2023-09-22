@@ -29,6 +29,10 @@ object SikkerhetContext {
         return kallKommerFra("teamfamilie:familie-klage")
     }
 
+    fun kallKommerFraProssesering(): Boolean {
+        return kallKommerFra("teamfamilie:familie-prosessering") || kallKommerFra("teamfamilie:familie-prosessering-lokal")
+    }
+
     private fun kallKommerFra(forventetApplikasjonsSuffix: String): Boolean {
         val claims = SpringTokenValidationContextHolder().tokenValidationContext.getClaims("azuread")
         val applikasjonsnavn = claims.get("azp_name")?.toString() ?: "" // e.g. dev-gcp:some-team:application-name

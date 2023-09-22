@@ -2,15 +2,18 @@ package no.nav.familie.ef.sak.infrastruktur.config
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.KotlinModule
+import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext.kallKommerFraProssesering
 import no.nav.familie.http.client.RetryOAuth2HttpClient
 import no.nav.familie.http.config.RestTemplateAzure
 import no.nav.familie.http.interceptor.ConsumerIdClientInterceptor
 import no.nav.familie.http.interceptor.MdcValuesPropagatingClientInterceptor
 import no.nav.familie.log.filter.LogFilter
 import no.nav.familie.log.filter.RequestTimeFilter
+import no.nav.familie.prosessering.config.ProsesseringInfoProvider
 import no.nav.security.token.support.client.core.http.OAuth2HttpClient
 import no.nav.security.token.support.client.core.oauth2.OAuth2AccessTokenResponse
 import no.nav.security.token.support.client.spring.oauth2.EnableOAuth2Client
+import no.nav.security.token.support.spring.SpringTokenValidationContextHolder
 import no.nav.security.token.support.spring.api.EnableJwtTokenValidation
 import org.slf4j.LoggerFactory
 import org.springframework.boot.SpringBootConfiguration
@@ -30,7 +33,12 @@ import java.time.temporal.ChronoUnit
 
 @SpringBootConfiguration
 @ConfigurationPropertiesScan
-@ComponentScan("no.nav.familie.prosessering", "no.nav.familie.ef.sak", "no.nav.familie.sikkerhet", "no.nav.familie.unleash")
+@ComponentScan(
+    "no.nav.familie.prosessering",
+    "no.nav.familie.ef.sak",
+    "no.nav.familie.sikkerhet",
+    "no.nav.familie.unleash",
+)
 @EnableJwtTokenValidation(ignore = ["org.springframework", "org.springdoc"])
 @Import(RestTemplateAzure::class)
 @EnableOAuth2Client(cacheEnabled = true)
@@ -101,5 +109,21 @@ class ApplicationConfig {
                 .setConnectTimeout(Duration.of(2, ChronoUnit.SECONDS))
                 .setReadTimeout(Duration.of(2, ChronoUnit.SECONDS)),
         )
+    }
+
+    @Bean
+    fun prosesseringInfoProvider() = object : ProsesseringInfoProvider {
+
+        override fun hentBrukernavn(): String = try {
+            SpringTokenValidationContextHolder().tokenValidationContext.getClaims("azuread")
+                .getStringClaim("preferred_username")
+        } catch (e: Exception) {
+            throw e
+        }
+
+        override fun harTilgang(): Boolean {
+            return kallKommerFraProssesering()
+        }
+
     }
 }
