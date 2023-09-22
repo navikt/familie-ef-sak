@@ -1,9 +1,10 @@
 package no.nav.familie.ef.sak.vilkår.dto
 
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataPeriodeHistorikk
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataPeriodeHistorikkOvergangsstønad
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.TidligereInnvilgetVedtak
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.TidligereVedtaksperioder
 import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
+import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType.SANKSJON
 import no.nav.familie.kontrakter.felles.Månedsperiode
 import java.time.LocalDate
 
@@ -50,11 +51,11 @@ fun TidligereInnvilgetVedtak.tilDto() =
         periodeHistorikkOvergangsstønad = this.periodeHistorikkOvergangsstønad.tilDto(),
     )
 
-private fun List<GrunnlagsdataPeriodeHistorikk>.tilDto() = this.map { it.tilDto() }
+private fun List<GrunnlagsdataPeriodeHistorikkOvergangsstønad>.tilDto() = this.map { it.tilDto() }
     .slåSammenPåfølgendePerioderMedLikPeriodetype()
     .sortedByDescending { it.fom }
 
-private fun GrunnlagsdataPeriodeHistorikk.tilDto() = GrunnlagsdataPeriodeHistorikkDto(
+private fun GrunnlagsdataPeriodeHistorikkOvergangsstønad.tilDto() = GrunnlagsdataPeriodeHistorikkDto(
     periodeType = this.periodeType.name,
     fom = this.fom,
     tom = this.tom,
@@ -67,7 +68,7 @@ private fun mndUtenBeløp(
     beløp: Int,
     fom: LocalDate,
     tom: LocalDate,
-) = when (beløp == 0 && !periodeType.midlertidigOpphørEllerSanksjon()) {
+) = when (beløp == 0 && periodeType erIkke SANKSJON) {
     true -> Månedsperiode(fom, tom).lengdeIHeleMåneder()
     false -> 0
 }
@@ -77,7 +78,7 @@ private fun mndMedBeløp(
     beløp: Int,
     fom: LocalDate,
     tom: LocalDate,
-) = when (beløp != 0 || periodeType.midlertidigOpphørEllerSanksjon()) {
+) = when (beløp != 0 || periodeType er SANKSJON) {
     true -> Månedsperiode(fom, tom).lengdeIHeleMåneder()
     false -> 0
 }

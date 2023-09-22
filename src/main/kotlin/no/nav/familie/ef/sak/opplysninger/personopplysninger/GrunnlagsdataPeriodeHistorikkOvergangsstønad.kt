@@ -3,7 +3,7 @@ package no.nav.familie.ef.sak.opplysninger.personopplysninger
 import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
 import java.time.LocalDate
 
-data class GrunnlagsdataPeriodeHistorikk(
+data class GrunnlagsdataPeriodeHistorikkOvergangsstønad(
     val periodeType: VedtaksperiodeType,
     val fom: LocalDate,
     val tom: LocalDate,

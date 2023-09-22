@@ -240,6 +240,8 @@ enum class VedtaksperiodeType {
     ;
 
     fun midlertidigOpphørEllerSanksjon() = this == MIDLERTIDIG_OPPHØR || this == SANKSJON
+    infix fun er(vedtaksperiodeType: VedtaksperiodeType): Boolean = this == vedtaksperiodeType
+    infix fun erIkke(vedtaksperiodeType: VedtaksperiodeType): Boolean = this != vedtaksperiodeType
 }
 
 enum class AktivitetType {
