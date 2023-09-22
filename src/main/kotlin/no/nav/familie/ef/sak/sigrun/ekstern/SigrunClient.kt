@@ -21,17 +21,9 @@ class SigrunClient(
             .queryParam("inntektsaar", inntektsår.toString())
             .build().toUri()
 
-        try {
-            val response = postForEntity<PensjonsgivendeInntektResponse>(uri, PersonIdent(fødselsnummer))
-            secureLogger.info("Pensjonsgivende inntekt for inntektsår $inntektsår: $response") // Fjernes når det er litt mer kjennskap til dataene
-            return response
-        } catch (e: HttpClientErrorException.NotFound) { // Kan få 404 selv om personen finnes, men dersom vedkommende ikke har registrert inntekt for gitt inntektsår
-            return PensjonsgivendeInntektResponse(
-                fødselsnummer,
-                inntektsår,
-                listOf(),
-            )
-        }
+        val response = postForEntity<PensjonsgivendeInntektResponse>(uri, PersonIdent(fødselsnummer))
+        secureLogger.info("Pensjonsgivende inntekt for inntektsår $inntektsår: $response") // Fjernes når det er litt mer kjennskap til dataene
+        return response
     }
     fun hentSummertSkattegrunnlag(fødselsnummer: String, inntektsår: Int): SummertSkattegrunnlag {
         val uri = UriComponentsBuilder.fromUri(uri).pathSegment("api/sigrun/summertskattegrunnlag")
