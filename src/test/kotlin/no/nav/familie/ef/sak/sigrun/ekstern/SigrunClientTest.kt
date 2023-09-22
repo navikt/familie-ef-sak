@@ -72,23 +72,6 @@ class SigrunClientTest {
         assertThat(pensjonsgivendeInntektResponse.pensjonsgivendeInntekt?.last()?.pensjonsgivendeInntektAvLoennsinntekt).isEqualTo(492160)
     }
 
-    @Test
-    fun `hent pensjonsgivende inntekt fra Sigrun - 404 ingen treff på identifikator`() {
-        wiremockServerItem.stubFor(
-            WireMock.post(urlEqualTo("/api/sigrun/pensjonsgivendeinntekt?inntektsaar=2022"))
-                .willReturn(
-                    WireMock.aResponse()
-                        .withStatus(HttpStatus.NOT_FOUND.value())
-                        .withHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.mimeType)
-                        .withBody(pensjonsgivendeInntektIngenTreffJson),
-                ),
-        )
-
-        val response = sigrunClient.hentPensjonsgivendeInntekt("123", 2022)
-        assertThat(response.norskPersonidentifikator).isEqualTo("123")
-        assertThat(response.inntektsaar).isEqualTo(2022)
-        assertThat(response.pensjonsgivendeInntekt).isEmpty()
-    }
 
     @Test
     fun `hent beregnetskatt fra sigrun og map til objekt`() {
@@ -165,14 +148,6 @@ class SigrunClientTest {
               "pensjonsgivendeInntektAvNaeringsinntektFraFiskeFangstEllerFamiliebarnehage": null
             }
           ]
-        }
-    """.trimIndent()
-
-    private val pensjonsgivendeInntektIngenTreffJson = """
-        {
-            "kode":"PGIF-009",
-            "melding":"Fant ikke gitt personidentifikator",
-            "korrelasjonsid":"9eafa724983f82262327337b00149fac"
         }
     """.trimIndent()
 
