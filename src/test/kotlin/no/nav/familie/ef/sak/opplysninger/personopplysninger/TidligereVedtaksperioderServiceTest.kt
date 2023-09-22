@@ -170,7 +170,7 @@ internal class TidligereVedtaksperioderServiceTest {
         val tidligereVedtaksperioder = service.hentTidligereVedtaksperioder(listOf(personIdent)).tilDto()
         val overgangstønadsperioder = tidligereVedtaksperioder.sak!!.periodeHistorikkOvergangsstønad
 
-        assertThat(overgangstønadsperioder.first().antallMndUtenBeløp).isEqualTo(1)
+        assertThat(overgangstønadsperioder.first().antallMånederUtenBeløp).isEqualTo(1)
     }
 
     @Test
@@ -191,8 +191,8 @@ internal class TidligereVedtaksperioderServiceTest {
         val dto = tidligereVedtaksperioder.sak!!.periodeHistorikkOvergangsstønad
 
         assertThat(dto).hasSize(1)
-        assertThat(dto.first().antallMndUtenBeløp).isEqualTo(12)
-        assertThat(dto.first().antMnd).isEqualTo(24)
+        assertThat(dto.first().antallMånederUtenBeløp).isEqualTo(12)
+        assertThat(dto.first().antallMåneder).isEqualTo(24)
     }
 
     @Test
@@ -213,8 +213,8 @@ internal class TidligereVedtaksperioderServiceTest {
         val overgangstønadsperioder = tidligereVedtaksperioder.tilDto().sak!!.periodeHistorikkOvergangsstønad
 
         assertThat(overgangstønadsperioder).hasSize(1)
-        assertThat(overgangstønadsperioder.first().antallMndUtenBeløp).isEqualTo(0)
-        assertThat(overgangstønadsperioder.first().antMnd).isEqualTo(36)
+        assertThat(overgangstønadsperioder.first().antallMånederUtenBeløp).isEqualTo(0)
+        assertThat(overgangstønadsperioder.first().antallMåneder).isEqualTo(36)
     }
 
     @Test
@@ -235,13 +235,13 @@ internal class TidligereVedtaksperioderServiceTest {
 
         assertThat(overgangstønadsperioder).hasSize(2)
 
-        val hovedperiodeDto = overgangstønadsperioder.find { it.periodeType == "HOVEDPERIODE" }!!
-        assertThat(hovedperiodeDto.antallMndUtenBeløp).isEqualTo(0)
-        assertThat(hovedperiodeDto.antMnd).isEqualTo(12)
+        val hovedperiodeDto = overgangstønadsperioder.find { it.vedtaksperiodeType == "HOVEDPERIODE" }!!
+        assertThat(hovedperiodeDto.antallMånederUtenBeløp).isEqualTo(0)
+        assertThat(hovedperiodeDto.antallMåneder).isEqualTo(12)
 
-        val sanksjonsperiodeDto = overgangstønadsperioder.find { it.periodeType == "SANKSJON" }!!
-        assertThat(sanksjonsperiodeDto.antMnd).isEqualTo(1)
-        assertThat(sanksjonsperiodeDto.antallMndUtenBeløp).isEqualTo(0)
+        val sanksjonsperiodeDto = overgangstønadsperioder.find { it.vedtaksperiodeType == "SANKSJON" }!!
+        assertThat(sanksjonsperiodeDto.antallMåneder).isEqualTo(1)
+        assertThat(sanksjonsperiodeDto.antallMånederUtenBeløp).isEqualTo(0)
     }
 
     @Test
@@ -312,8 +312,8 @@ internal class TidligereVedtaksperioderServiceTest {
 
         val periodeHistorikkDtos = tidligereVedtaksperioder.periodeHistorikkOvergangsstønad
         assertThat(periodeHistorikkDtos).hasSize(1)
-        assertThat(periodeHistorikkDtos.first().antallMndUtenBeløp).isEqualTo(24)
-        assertThat(periodeHistorikkDtos.first().antMnd).isEqualTo(24)
+        assertThat(periodeHistorikkDtos.first().antallMånederUtenBeløp).isEqualTo(24)
+        assertThat(periodeHistorikkDtos.first().antallMåneder).isEqualTo(24)
     }
 
     private fun grunnlagsdataPeriodeHistorikk(

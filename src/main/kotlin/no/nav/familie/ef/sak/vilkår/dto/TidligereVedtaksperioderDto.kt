@@ -28,11 +28,11 @@ data class TidligereInnvilgetVedtakDto(
 }
 
 data class GrunnlagsdataPeriodeHistorikkDto(
-    val periodeType: String,
+    val vedtaksperiodeType: String,
     val fom: LocalDate,
     val tom: LocalDate,
-    val antMnd: Long,
-    val antallMndUtenBeløp: Long = 0,
+    val antallMåneder: Long,
+    val antallMånederUtenBeløp: Long = 0,
 )
 
 fun TidligereVedtaksperioder?.tilDto(): TidligereVedtaksperioderDto = this?.let {
@@ -56,11 +56,11 @@ private fun List<GrunnlagsdataPeriodeHistorikkOvergangsstønad>.tilDto() = this.
     .sortedByDescending { it.fom }
 
 private fun GrunnlagsdataPeriodeHistorikkOvergangsstønad.tilDto() = GrunnlagsdataPeriodeHistorikkDto(
-    periodeType = this.periodeType.name,
+    vedtaksperiodeType = this.periodeType.name,
     fom = this.fom,
     tom = this.tom,
-    antMnd = mndMedBeløp(periodeType, beløp, fom, tom),
-    antallMndUtenBeløp = mndUtenBeløp(periodeType, beløp, fom, tom),
+    antallMåneder = mndMedBeløp(periodeType, beløp, fom, tom),
+    antallMånederUtenBeløp = mndUtenBeløp(periodeType, beløp, fom, tom),
 )
 
 private fun mndUtenBeløp(
@@ -109,7 +109,7 @@ private fun skalSlåSammenForrigePeriodeMedDennePerioden(
     denne: GrunnlagsdataPeriodeHistorikkDto,
 ) :Boolean {
     val forrige = liste.lastOrNull()
-    return forrige != null && (forrige.periode() påfølgesAv denne.periode() && forrige.periodeType === denne.periodeType)
+    return forrige != null && (forrige.periode() påfølgesAv denne.periode() && forrige.vedtaksperiodeType === denne.vedtaksperiodeType)
 }
 
 
@@ -118,11 +118,11 @@ private fun slåSammenPeriodeHistorikkDto(
     forrige: GrunnlagsdataPeriodeHistorikkDto,
     denne: GrunnlagsdataPeriodeHistorikkDto,
 ) = GrunnlagsdataPeriodeHistorikkDto(
-    periodeType = forrige.periodeType,
+    vedtaksperiodeType = forrige.vedtaksperiodeType,
     fom = forrige.fom,
     tom = denne.tom,
-    antMnd = forrige.antMnd + denne.antMnd,
-    antallMndUtenBeløp = forrige.antallMndUtenBeløp + denne.antallMndUtenBeløp,
+    antallMåneder = forrige.antallMåneder + denne.antallMåneder,
+    antallMånederUtenBeløp = forrige.antallMånederUtenBeløp + denne.antallMånederUtenBeløp,
 )
 
 private fun GrunnlagsdataPeriodeHistorikkDto.periode(): Månedsperiode = Månedsperiode(this.fom, this.tom)
