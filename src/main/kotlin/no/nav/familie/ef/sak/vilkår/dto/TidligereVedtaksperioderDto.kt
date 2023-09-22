@@ -68,7 +68,7 @@ private fun mndUtenBeløp(
     beløp: Int,
     fom: LocalDate,
     tom: LocalDate,
-) = when (beløp == 0 && periodeType erIkke SANKSJON) {
+) = when (beløp == 0 && periodeType != SANKSJON) {
     true -> Månedsperiode(fom, tom).lengdeIHeleMåneder()
     false -> 0
 }
@@ -78,22 +78,25 @@ private fun mndMedBeløp(
     beløp: Int,
     fom: LocalDate,
     tom: LocalDate,
-) = when ((beløp != 0) || (periodeType er SANKSJON)) {
+) = when (beløp != 0 || periodeType == SANKSJON) {
     true -> Månedsperiode(fom, tom).lengdeIHeleMåneder()
     false -> 0
 }
 
 fun List<GrunnlagsdataPeriodeHistorikkDto>.slåSammenPåfølgendePerioderMedLikPeriodetype(): List<GrunnlagsdataPeriodeHistorikkDto> {
     val sortertPåDatoListe = this.sortedBy { it.fom }
-    return sortertPåDatoListe.fold(mutableListOf()) { returliste, denne ->
-        val forrige = returliste.lastOrNull()
-        if(forrige!=null && erSammenhangendePerioderMedSammePeriodetype(forrige, denne)){
-            returliste.byttUtSisteMed(slåSammenPeriodeHistorikkDto(forrige, denne))
-        } else {
-            returliste.add(denne)
+    return sortertPåDatoListe.fold(mutableListOf()) { returliste, dennePerioden ->
+        when (skalSlåSammenForrigePeriodeMedDennePerioden(returliste, dennePerioden)) {
+            true -> returliste.utvidSistePeriodeMed(dennePerioden)
+            false -> returliste.add(dennePerioden)
         }
         returliste
     }
+}
+
+private fun MutableList<GrunnlagsdataPeriodeHistorikkDto>.utvidSistePeriodeMed(dennePerioden: GrunnlagsdataPeriodeHistorikkDto) {
+    val sammeslått = slåSammenPeriodeHistorikkDto(this.last(), dennePerioden)
+    this.byttUtSisteMed(sammeslått)
 }
 
 private fun <E> MutableList<E>.byttUtSisteMed(ny: E) {
@@ -101,10 +104,15 @@ private fun <E> MutableList<E>.byttUtSisteMed(ny: E) {
     this.add(ny)
 }
 
-private fun erSammenhangendePerioderMedSammePeriodetype(
-    forrige: GrunnlagsdataPeriodeHistorikkDto,
+private fun skalSlåSammenForrigePeriodeMedDennePerioden(
+    liste: List<GrunnlagsdataPeriodeHistorikkDto>,
     denne: GrunnlagsdataPeriodeHistorikkDto,
-) = forrige.periode() påfølgesAv denne.periode() && forrige.periodeType === denne.periodeType
+) :Boolean {
+    val forrige = liste.lastOrNull()
+    return forrige != null && (forrige.periode() påfølgesAv denne.periode() && forrige.periodeType === denne.periodeType)
+}
+
+
 
 private fun slåSammenPeriodeHistorikkDto(
     forrige: GrunnlagsdataPeriodeHistorikkDto,
