@@ -21,7 +21,7 @@ class SigrunService(val sigrunClient: SigrunClient, val fagsakPersonService: Fag
             val pensjonsgivendeInntektVisning = sigrunClient.hentPensjonsgivendeInntekt(aktivIdent, inntektsår).mapTilPensjonsgivendeInntektVisning(inntektsår)
             pensjonsgivendeInntektVisningList.add(pensjonsgivendeInntektVisning)
             inntektsår--
-        } while (pensjonsgivendeInntektVisning.totalInntektOverNull())
+        } while (pensjonsgivendeInntektVisning.totalInntektOverNull() && inntektsår < (YearMonth.now().year - 3))
 
         return pensjonsgivendeInntektVisningList
     }
