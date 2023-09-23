@@ -25,7 +25,6 @@ internal class SigrunServiceTest {
     @BeforeEach
     fun setup() {
         every { fagsakPersonService.hentAktivIdent(any()) } returns "123"
-        every { sigrunClient.hentPensjonsgivendeInntekt(any(), YearMonth.now().year - 1) }
 
         every { sigrunClient.hentPensjonsgivendeInntekt(any(), 2022) } returns PensjonsgivendeInntektResponse(
             "123",
@@ -51,19 +50,21 @@ internal class SigrunServiceTest {
                 pensjonsgivendeInntektForSkatteordning(Skatteordning.SVALBARD),
             ),
         )
+        every { sigrunClient.hentPensjonsgivendeInntekt(any(), 2019) } returns PensjonsgivendeInntektResponse("123", 2019, listOf())
+
     }
 
     @Test
     fun `hent inntekt siste tre år med svalbard inntekt`() {
         val fagsakId = UUID.randomUUID()
-        val pensjonsgivendeInntektVisning = sigrunService.hentInntektSisteTreÅr(fagsakId)
-        assertThat(pensjonsgivendeInntektVisning.size).isEqualTo(3)
+        val pensjonsgivendeInntektVisning = sigrunService.hentInntektForAlleÅrMedInntekt(fagsakId)
+        assertThat(pensjonsgivendeInntektVisning.size).isEqualTo(4)
         assertThat(pensjonsgivendeInntektVisning.first().inntektsår).isEqualTo(YearMonth.now().year - 1)
         assertThat(pensjonsgivendeInntektVisning.first().næring).isEqualTo(250_000)
         assertThat(pensjonsgivendeInntektVisning.first().person).isEqualTo(100_000)
         assertThat(pensjonsgivendeInntektVisning.first().svalbard?.næring).isEqualTo(70_000)
         assertThat(pensjonsgivendeInntektVisning.first().svalbard?.person).isEqualTo(325_000)
-        assertThat(pensjonsgivendeInntektVisning.last().inntektsår).isEqualTo(YearMonth.now().year - 3)
+        assertThat(pensjonsgivendeInntektVisning.last().inntektsår).isEqualTo(YearMonth.now().year - 4)
     }
 }
 

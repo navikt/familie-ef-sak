@@ -12,7 +12,7 @@ import java.util.UUID
 @Service
 class SigrunService(val sigrunClient: SigrunClient, val fagsakPersonService: FagsakPersonService) {
 
-    fun hentInntektSisteTreÅr(fagsakPersonId: UUID): List<PensjonsgivendeInntektVisning> {
+    fun hentInntektForAlleÅrMedInntekt(fagsakPersonId: UUID): List<PensjonsgivendeInntektVisning> {
         val aktivIdent = fagsakPersonService.hentAktivIdent(fagsakPersonId)
         val pensjonsgivendeInntektVisningList = mutableListOf<PensjonsgivendeInntektVisning>()
         var inntektsår = YearMonth.now().year - 1
@@ -21,7 +21,7 @@ class SigrunService(val sigrunClient: SigrunClient, val fagsakPersonService: Fag
             val pensjonsgivendeInntektVisning = sigrunClient.hentPensjonsgivendeInntekt(aktivIdent, inntektsår).mapTilPensjonsgivendeInntektVisning(inntektsår)
             pensjonsgivendeInntektVisningList.add(pensjonsgivendeInntektVisning)
             inntektsår--
-        } while (pensjonsgivendeInntektVisning.totalInntektOverNull() && inntektsår < (YearMonth.now().year - 3))
+        } while (pensjonsgivendeInntektVisning.totalInntektOverNull() || inntektsår >= (YearMonth.now().year - 4))
 
         return pensjonsgivendeInntektVisningList
     }
