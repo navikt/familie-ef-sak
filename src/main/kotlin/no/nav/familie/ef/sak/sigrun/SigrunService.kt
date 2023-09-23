@@ -12,13 +12,18 @@ import java.util.UUID
 @Service
 class SigrunService(val sigrunClient: SigrunClient, val fagsakPersonService: FagsakPersonService) {
 
-    val forrigeÅr = YearMonth.now().year - 1
-    val listInntektsår = listOf(forrigeÅr, forrigeÅr - 1, forrigeÅr - 2)
-
     fun hentInntektSisteTreÅr(fagsakPersonId: UUID): List<PensjonsgivendeInntektVisning> {
         val aktivIdent = fagsakPersonService.hentAktivIdent(fagsakPersonId)
+        val pensjonsgivendeInntektVisningList = mutableListOf<PensjonsgivendeInntektVisning>()
+        var inntektsår = YearMonth.now().year - 1
 
-        return listInntektsår.map { sigrunClient.hentPensjonsgivendeInntekt(aktivIdent, it).mapTilPensjonsgivendeInntektVisning(it) }
+        do {
+            val pensjonsgivendeInntektVisning = sigrunClient.hentPensjonsgivendeInntekt(aktivIdent, inntektsår).mapTilPensjonsgivendeInntektVisning(inntektsår)
+            pensjonsgivendeInntektVisningList.add(pensjonsgivendeInntektVisning)
+            inntektsår--
+        } while (pensjonsgivendeInntektVisning.totalInntektOverNull())
+
+        return pensjonsgivendeInntektVisningList
     }
 }
 
@@ -39,6 +44,8 @@ private fun PensjonsgivendeInntektResponse.mapTilPensjonsgivendeInntektVisning(i
 
 fun PensjonsgivendeInntektForSkatteordning.næringsinntekt() =
     (this.pensjonsgivendeInntektAvNaeringsinntekt ?: 0) + (this.pensjonsgivendeInntektAvNaeringsinntektFraFiskeFangstEllerFamiliebarnehage ?: 0)
+
+fun PensjonsgivendeInntektVisning.totalInntektOverNull() = (this.næring + this.person + (this.svalbard?.næring ?: 0) + (this.svalbard?.person ?: 0)) > 0
 
 data class PensjonsgivendeInntektVisning(
     val inntektsår: Int,
