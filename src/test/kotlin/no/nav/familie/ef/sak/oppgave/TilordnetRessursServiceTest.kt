@@ -96,6 +96,21 @@ internal class TilordnetRessursServiceTest {
         }
 
         @Test
+        internal fun `skal returnere true dersom returnert oppgave er null`() {
+            every {
+                oppgaveRepository.findByBehandlingIdAndErFerdigstiltIsFalseAndTypeIn(
+                    any(),
+                    oppgaveTyper,
+                )
+            } answers { null }
+
+            val erSaksbehandlerEllerNull =
+                tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandlerEllerNull(UUID.randomUUID())
+
+            assertThat(erSaksbehandlerEllerNull).isTrue()
+        }
+
+        @Test
         internal fun `skal returnere true dersom tilordnet ressurs er innlogget saksbehander`() {
             every {
                 oppgaveRepository.findByBehandlingIdAndErFerdigstiltIsFalseAndTypeIn(
@@ -129,38 +144,65 @@ internal class TilordnetRessursServiceTest {
     }
 
     @Nested
-    inner class MapSaksbehandlerDto {
+    inner class UtledAnsvarligSaksbehandler {
 
         @Test
-        internal fun `skal mappe INNLOGGET SAKSBEHANDLER til SaksbehandlerDto`() {
+        internal fun `skal utlede at saksbehandlers rolle er INNLOGGET SAKSBEHANDLER`() {
             val saksbehandler = saksbehandler(UUID.randomUUID(), "4405", "Vader", "Darth", "NAV1234")
+            val oppgave = Oppgave(tilordnetRessurs = "NAV1234")
 
-            val saksbehandlerDto = tilordnetRessursService.mapTilSaksbehandlerDto(saksbehandler)
+            every { oppgaveClient.hentSaksbehandlerInfo("NAV1234") } returns saksbehandler
 
-            assertThat(saksbehandlerDto.fornavn).isEqualTo(saksbehandler.fornavn)
-            assertThat(saksbehandlerDto.etternavn).isEqualTo(saksbehandler.etternavn)
+            val saksbehandlerDto = tilordnetRessursService.utledAnsvarligSaksbehandlerForOppgave(oppgave)
+
+            assertThat(saksbehandlerDto.fornavn).isEqualTo("Darth")
+            assertThat(saksbehandlerDto.etternavn).isEqualTo("Vader")
             assertThat(saksbehandlerDto.rolle).isEqualTo(SaksbehandlerRolle.INNLOGGET_SAKSBEHANDLER)
         }
 
         @Test
-        internal fun `skal mappe ANNEN SAKSBEHANDLER til SaksbehandlerDto`() {
+        internal fun `skal utlede at saksbehandlers rolle er ANNEN SAKSBEHANDLER`() {
             val saksbehandler = saksbehandler(UUID.randomUUID(), "4405", "Vader", "Darth", "NAV2345")
+            val oppgave = Oppgave(tilordnetRessurs = "NAV2345")
 
-            val saksbehandlerDto = tilordnetRessursService.mapTilSaksbehandlerDto(saksbehandler)
+            every { oppgaveClient.hentSaksbehandlerInfo("NAV2345") } returns saksbehandler
 
-            assertThat(saksbehandlerDto.fornavn).isEqualTo(saksbehandler.fornavn)
-            assertThat(saksbehandlerDto.etternavn).isEqualTo(saksbehandler.etternavn)
+            val saksbehandlerDto = tilordnetRessursService.utledAnsvarligSaksbehandlerForOppgave(oppgave)
+
+            assertThat(saksbehandlerDto.fornavn).isEqualTo("Darth")
+            assertThat(saksbehandlerDto.etternavn).isEqualTo("Vader")
             assertThat(saksbehandlerDto.rolle).isEqualTo(SaksbehandlerRolle.ANNEN_SAKSBEHANDLER)
         }
 
         @Test
-        internal fun `skal mappe IKKE SATT til SaksbehandlerDto`() {
-            val saksbehandlerDto = tilordnetRessursService.mapTilSaksbehandlerDto(null)
+        internal fun `skal utlede at saksbehandlers rolle er IKKE SATT`() {
+            val oppgave = Oppgave(tilordnetRessurs = null)
+
+            val saksbehandlerDto = tilordnetRessursService.utledAnsvarligSaksbehandlerForOppgave(oppgave)
 
             assertThat(saksbehandlerDto.fornavn).isEqualTo("")
             assertThat(saksbehandlerDto.etternavn).isEqualTo("")
             assertThat(saksbehandlerDto.rolle).isEqualTo(SaksbehandlerRolle.IKKE_SATT)
+            verify(exactly = 0) { oppgaveClient.hentSaksbehandlerInfo(any()) }
         }
+
+        @Test
+        internal fun `skal utlede at saksbehandlers rolle er OPPGAVE FINNES IKKE`() {
+            val saksbehandlerDto = tilordnetRessursService.utledAnsvarligSaksbehandlerForOppgave(null)
+
+            assertThat(saksbehandlerDto.fornavn).isEqualTo("")
+            assertThat(saksbehandlerDto.etternavn).isEqualTo("")
+            assertThat(saksbehandlerDto.rolle).isEqualTo(SaksbehandlerRolle.OPPGAVE_FINNES_IKKE)
+            verify(exactly = 0) { oppgaveClient.hentSaksbehandlerInfo(any()) }
+        }
+    }
+
+    @Test
+    fun `Skal kunne hente ansvarlig saksbehandler gitt en nav ident`() {
+        every { oppgaveClient.hentSaksbehandlerInfo(any()) } returns saksbehandler
+        val ansvarligSaksbehandler = tilordnetRessursService.hentSaksbehandlerInfo("Z999999")
+
+        assertThat(ansvarligSaksbehandler).isEqualTo(saksbehandler)
     }
 
     private fun efOppgave(behandlingId: UUID) =
@@ -185,5 +227,7 @@ internal class TilordnetRessursServiceTest {
     companion object {
 
         private val oppgaveTyper = setOf(Oppgavetype.BehandleSak, Oppgavetype.BehandleUnderkjentVedtak)
+
+        private val saksbehandler = Saksbehandler(UUID.randomUUID(), "Z999999", "Darth", "Vader", "4405")
     }
 }

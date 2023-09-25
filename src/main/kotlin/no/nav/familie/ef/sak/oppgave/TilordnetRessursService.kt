@@ -5,7 +5,6 @@ import no.nav.familie.ef.sak.oppgave.dto.SaksbehandlerDto
 import no.nav.familie.ef.sak.oppgave.dto.SaksbehandlerRolle
 import no.nav.familie.kontrakter.felles.oppgave.Oppgave
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
-import no.nav.familie.kontrakter.felles.saksbehandler.Saksbehandler
 import org.springframework.stereotype.Service
 import java.util.UUID
 import no.nav.familie.ef.sak.oppgave.Oppgave as EFOppgave
@@ -17,11 +16,11 @@ class TilordnetRessursService(
 ) {
 
     fun tilordnetRessursErInnloggetSaksbehandlerEllerNull(behandlingId: UUID): Boolean {
-        val tilordnetRessurs = hentIkkeFerdigstiltOppgaveForBehandling(behandlingId)?.tilordnetRessurs
-        val rolle = utledSaksbehandlerRolle(tilordnetRessurs)
+        val oppgave = hentIkkeFerdigstiltOppgaveForBehandling(behandlingId)
+        val rolle = utledSaksbehandlerRolle(oppgave)
 
         return when (rolle) {
-            SaksbehandlerRolle.IKKE_SATT, SaksbehandlerRolle.INNLOGGET_SAKSBEHANDLER -> true
+            SaksbehandlerRolle.IKKE_SATT, SaksbehandlerRolle.INNLOGGET_SAKSBEHANDLER, SaksbehandlerRolle.OPPGAVE_FINNES_IKKE -> true
             SaksbehandlerRolle.ANNEN_SAKSBEHANDLER -> false
         }
     }
@@ -36,8 +35,9 @@ class TilordnetRessursService(
             setOf(Oppgavetype.BehandleSak, Oppgavetype.BehandleUnderkjentVedtak),
         )
 
-    fun mapTilSaksbehandlerDto(tilOrdnetRessurs: Saksbehandler?): SaksbehandlerDto {
-        val rolle = utledSaksbehandlerRolle(tilOrdnetRessurs?.navIdent)
+    fun utledAnsvarligSaksbehandlerForOppgave(behandleSakOppgave: Oppgave?): SaksbehandlerDto {
+        val tilOrdnetRessurs = behandleSakOppgave?.tilordnetRessurs?.let { hentSaksbehandlerInfo(it) }
+        val rolle = utledSaksbehandlerRolle(behandleSakOppgave)
 
         return SaksbehandlerDto(
             etternavn = tilOrdnetRessurs?.etternavn ?: "",
@@ -46,10 +46,16 @@ class TilordnetRessursService(
         )
     }
 
-    private fun utledSaksbehandlerRolle(navIdent: String?): SaksbehandlerRolle {
+    fun hentSaksbehandlerInfo(navIdent: String) = oppgaveClient.hentSaksbehandlerInfo(navIdent)
+
+    private fun utledSaksbehandlerRolle(oppgave: Oppgave?): SaksbehandlerRolle {
         val innloggetSaksbehandler = SikkerhetContext.hentSaksbehandler()
 
-        return when (navIdent) {
+        if (oppgave == null) {
+            return SaksbehandlerRolle.OPPGAVE_FINNES_IKKE
+        }
+
+        return when (oppgave.tilordnetRessurs) {
             innloggetSaksbehandler -> SaksbehandlerRolle.INNLOGGET_SAKSBEHANDLER
             null -> SaksbehandlerRolle.IKKE_SATT
             else -> SaksbehandlerRolle.ANNEN_SAKSBEHANDLER

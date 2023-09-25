@@ -10,4 +10,5 @@ enum class SaksbehandlerRolle {
     IKKE_SATT,
     INNLOGGET_SAKSBEHANDLER,
     ANNEN_SAKSBEHANDLER,
+    OPPGAVE_FINNES_IKKE,
 }

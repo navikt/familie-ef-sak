@@ -207,14 +207,6 @@ internal class OppgaveServiceTest {
     }
 
     @Test
-    fun `Skal kunne hente ansvarlig saksbehandler gitt en nav ident`() {
-        every { oppgaveClient.hentSaksbehandlerInfo(any()) } returns saksbehandler
-        val ansvarligSaksbehandler = oppgaveService.hentSaksbehandlerInfo(SAKSBEHANDLER_ID)
-
-        assertThat(ansvarligSaksbehandler).isEqualTo(saksbehandler)
-    }
-
-    @Test
     fun `Skal hente oppgaver gitt en filtrering`() {
         every { oppgaveClient.hentOppgaver(any()) } returns lagFinnOppgaveResponseDto()
         val respons = oppgaveService.hentOppgaver(FinnOppgaveRequest(tema = Tema.ENF))

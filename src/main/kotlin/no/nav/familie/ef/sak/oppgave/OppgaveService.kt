@@ -392,8 +392,6 @@ class OppgaveService(
         }
     }
 
-    fun hentSaksbehandlerInfo(navIdent: String) = oppgaveClient.hentSaksbehandlerInfo(navIdent)
-
     private fun utledSettBehandlesAvApplikasjon(oppgavetype: Oppgavetype) = when (oppgavetype) {
         Oppgavetype.BehandleSak,
         Oppgavetype.BehandleUnderkjentVedtak,

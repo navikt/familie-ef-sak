@@ -121,10 +121,7 @@ class OppgaveController(
     @GetMapping("{behandlingId}/ansvarlig-saksbehandler")
     fun hentAnsvarligSaksbehandlerForBehandling(@PathVariable behandlingId: UUID): Ressurs<SaksbehandlerDto> {
         val oppgave = tilordnetRessursService.hentIkkeFerdigstiltOppgaveForBehandling(behandlingId)
-        val saksbehandlerIdentIOppgaveSystemet = oppgave?.tilordnetRessurs
-        val saksbehandlerInfoEllerNull = saksbehandlerIdentIOppgaveSystemet?.let { oppgaveService.hentSaksbehandlerInfo(it) }
-
-        return Ressurs.success(tilordnetRessursService.mapTilSaksbehandlerDto(saksbehandlerInfoEllerNull))
+        return Ressurs.success(tilordnetRessursService.utledAnsvarligSaksbehandlerForOppgave(oppgave))
     }
 
     @GetMapping("/behandling/{behandlingId}")
