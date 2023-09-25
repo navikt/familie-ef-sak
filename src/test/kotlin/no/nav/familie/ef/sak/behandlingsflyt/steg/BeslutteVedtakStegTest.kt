@@ -135,7 +135,7 @@ internal class BeslutteVedtakStegTest {
         every {
             vedtaksbrevService.lagEndeligBeslutterbrev(
                 any(),
-                vedtakKreverBeslutter
+                vedtakKreverBeslutter,
             )
         } returns Fil("123".toByteArray())
 
@@ -150,7 +150,7 @@ internal class BeslutteVedtakStegTest {
         verify(exactly = 1) {
             behandlingService.oppdaterResultatPåBehandling(
                 behandlingId,
-                BehandlingResultat.INNVILGET
+                BehandlingResultat.INNVILGET,
             )
         }
         verify(exactly = 1) { iverksett.iverksett(any(), any()) }
@@ -162,7 +162,7 @@ internal class BeslutteVedtakStegTest {
         val nesteSteg = utførTotrinnskontroll(
             godkjent = false,
             begrunnelse = "begrunnelse",
-            årsakerUnderkjent = listOf(ÅrsakUnderkjent.AKTIVITET)
+            årsakerUnderkjent = listOf(ÅrsakUnderkjent.AKTIVITET),
         )
 
         val deserializedPayload = objectMapper.readValue<OpprettOppgaveTask.OpprettOppgaveTaskData>(taskSlot[1].payload)
@@ -200,7 +200,7 @@ internal class BeslutteVedtakStegTest {
     @Test
     internal fun `skal ikke ha beslutter ved avslag og mindre inntektsendringer`() {
         every { vedtakService.hentVedtak(any()) } returns vedtak(behandlingId, resultatType = ResultatType.AVSLÅ).copy(
-            avslåÅrsak = AvslagÅrsak.MINDRE_INNTEKTSENDRINGER
+            avslåÅrsak = AvslagÅrsak.MINDRE_INNTEKTSENDRINGER,
         )
         every {
             vedtaksbrevService.lagEndeligBeslutterbrev(any(), vedtakErUtenBeslutter)
@@ -228,7 +228,7 @@ internal class BeslutteVedtakStegTest {
         assertThrows<ApiFeil> {
             utførTotrinnskontroll(
                 godkjent = false,
-                årsakerUnderkjent = listOf(ÅrsakUnderkjent.AKTIVITET)
+                årsakerUnderkjent = listOf(ÅrsakUnderkjent.AKTIVITET),
             )
         }
     }
@@ -239,7 +239,7 @@ internal class BeslutteVedtakStegTest {
             utførTotrinnskontroll(
                 godkjent = false,
                 begrunnelse = "bergrunnelse",
-                årsakerUnderkjent = emptyList()
+                årsakerUnderkjent = emptyList(),
             )
         }
     }
