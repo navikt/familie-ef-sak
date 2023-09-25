@@ -20,6 +20,7 @@ import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
 import no.nav.familie.ef.sak.infrastruktur.config.ObjectMapperProvider
 import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.vilkår.VilkårTestUtil
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.Sivilstandstype
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlIdent
@@ -98,6 +99,9 @@ internal class OmregningServiceTest : OppslagSpringRunnerTest() {
     @Autowired
     lateinit var søknadService: SøknadService
 
+    @Autowired
+    lateinit var grunnlagsdataService: GrunnlagsdataService
+
     val personService = mockk<PersonService>()
     val år = Grunnbeløpsperioder.nyesteGrunnbeløpGyldigFraOgMed.year
 
@@ -146,15 +150,15 @@ internal class OmregningServiceTest : OppslagSpringRunnerTest() {
         val inntektPeriode = lagInntekt(201, 2002, 200003, 2022)
         lagSøknadOgVilkårOgVedtak(behandlingId, fagsakId, inntektPeriode, stønadsår = 2022)
 
-        behandlingRepository.insert(
-            behandling(
-                id = UUID.randomUUID(),
-                fagsak = fagsakService.hentFagsak(fagsakId),
-                resultat = BehandlingResultat.INNVILGET,
-                status = BehandlingStatus.SATT_PÅ_VENT,
-                type = BehandlingType.REVURDERING,
-            ),
+        val behandlingSattPåVent = behandling(
+            id = UUID.randomUUID(),
+            fagsak = fagsakService.hentFagsak(fagsakId),
+            resultat = BehandlingResultat.INNVILGET,
+            status = BehandlingStatus.SATT_PÅ_VENT,
+            type = BehandlingType.REVURDERING,
         )
+        behandlingRepository.insert(behandlingSattPåVent)
+        grunnlagsdataService.opprettGrunnlagsdata(behandlingSattPåVent.id)
 
         val tilkjentYtelse = lagreTilkjentYtelse(behandlingId, stønadsår = 2022)
         val iverksettDtoSlot = slot<IverksettOvergangsstønadDto>()
@@ -181,6 +185,7 @@ internal class OmregningServiceTest : OppslagSpringRunnerTest() {
             assertThat(inntektsperiodeEtterGomregning.månedsinntekt?.toInt()).isEqualTo(0)
             assertThat(inntektsperiodeEtterGomregning.inntekt.toInt()).isEqualTo(289100)
             assertThat(inntektsperiodeEtterGomregning.totalinntekt().toInt()).isEqualTo(289100)
+            // TODO: Sjekk at vilkår peker til riktig
         }
     }
 
@@ -567,7 +572,7 @@ internal class OmregningServiceTest : OppslagSpringRunnerTest() {
         stønadsår: Int,
     ) {
         val (fagsak, behandling) = opprettFagsakOgAvsluttetBehandling(fagsakId, behandlingId)
-
+        grunnlagsdataService.opprettGrunnlagsdata(behandlingId)
         søknadService.lagreSøknadForOvergangsstønad(Testsøknad.søknadOvergangsstønad, behandling.id, fagsak.id, "1L")
 
         val vilkårsvurderinger = lagVilkårsvurderinger(lagBarn(behandling), behandlingId)

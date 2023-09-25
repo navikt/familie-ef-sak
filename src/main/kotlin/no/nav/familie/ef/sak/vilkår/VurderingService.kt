@@ -11,6 +11,7 @@ import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvisIkke
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.GrunnlagsdataEndring
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
@@ -18,6 +19,7 @@ import no.nav.familie.ef.sak.vilkår.dto.VilkårDto
 import no.nav.familie.ef.sak.vilkår.dto.VilkårGrunnlagDto
 import no.nav.familie.ef.sak.vilkår.dto.VilkårsvurderingDto
 import no.nav.familie.ef.sak.vilkår.dto.tilDto
+import no.nav.familie.ef.sak.vilkår.gjenbruk.GjenbrukVilkårService
 import no.nav.familie.ef.sak.vilkår.regler.HovedregelMetadata
 import no.nav.familie.ef.sak.vilkår.regler.evalutation.OppdaterVilkår
 import no.nav.familie.ef.sak.vilkår.regler.evalutation.OppdaterVilkår.opprettNyeVilkårsvurderinger
@@ -37,6 +39,7 @@ class VurderingService(
     private val vilkårGrunnlagService: VilkårGrunnlagService,
     private val grunnlagsdataService: GrunnlagsdataService,
     private val fagsakService: FagsakService,
+    private val gjenbrukVilkårService: GjenbrukVilkårService,
     private val featureToggleService: FeatureToggleService,
 ) {
 
@@ -104,12 +107,13 @@ class VurderingService(
     fun opprettVilkårForOmregning(behandling: Behandling) {
         feilHvisIkke(behandling.årsak == BehandlingÅrsak.G_OMREGNING) { "Maskinelle vurderinger kun for G-omregning." }
         val (_, metadata) = hentGrunnlagOgMetadata(behandling.id)
-        val stønadstype = fagsakService.hentFagsakForBehandling(behandling.id).stønadstype
+        val fagsak = fagsakService.hentFagsakForBehandling(behandling.id)
         kopierVurderingerTilNyBehandling(
             eksisterendeBehandlingId = behandling.forrigeBehandlingId ?: error("Finner ikke forrige behandlingId"),
             nyBehandlingsId = behandling.id,
             metadata = metadata,
-            stønadType = stønadstype,
+            stønadType = fagsak.stønadstype,
+            fagsakPersonId = fagsak.fagsakPersonId,
 
         )
     }
@@ -178,16 +182,16 @@ class VurderingService(
     }
 
     /**
-     * Når en revurdering opprettes skal den kopiere de tidligere vilkårsvurderingene med lik verdi for endretTid.
-     * Endret tid blir satt av Sporbar() som alltid vil sette endretTid til nåværende tispunkt, noe som blir feil.
-     * For å omgå dette problemet lagres først de kopierte vilkårsvurderingene til databasen. Til slutt
-     * vil oppdaterEndretTid() manuelt overskrive verdiene for endretTid til korrekte verdier.
+     * Når en revurdering opprettes skal den kopiere de tidligere vilkårsvurderingene for samme stønad.
+     * Dersom det finnes en nyere behandling for en annen stønad skal vi kopiere inngangsvilkårene fra denne stønaden,
+     * med unntak av noen særtilfeller: endret sivilstand, barn som er uaktuelle for én stønad kan være aktuelle for andre.
      */
     fun kopierVurderingerTilNyBehandling(
         eksisterendeBehandlingId: UUID,
         nyBehandlingsId: UUID,
         metadata: HovedregelMetadata,
         stønadType: StønadType,
+        fagsakPersonId: UUID,
     ) {
         val tidligereVurderinger =
             vilkårsvurderingRepository.findByBehandlingId(eksisterendeBehandlingId).associateBy { it.id }
@@ -205,7 +209,40 @@ class VurderingService(
         val nyeBarnVurderinger = opprettVurderingerForNyeBarn(kopiAvVurderinger, metadata, stønadType)
 
         vilkårsvurderingRepository.insertAll(kopiAvVurderinger.values.toList() + nyeBarnVurderinger)
-        tilbakestillEndretTidForKopierteVurderinger(kopiAvVurderinger, tidligereVurderinger)
+
+        val behandlingForÅGjenbrukeInngangsvilkår = finnBehandlingForGjenbrukAvInngangsvilkår(
+            fagsakPersonId = fagsakPersonId,
+            gjenbruktBehandlingId = eksisterendeBehandlingId,
+            nyBehandlingsId = nyBehandlingsId,
+        )
+        behandlingForÅGjenbrukeInngangsvilkår?.let {
+            if (featureToggleService.isEnabled(Toggle.BEHANDLING_KORRIGERING)) {
+                logger.info("Gjenbruker inngangsvilkår fra behandling=$it til ny behandling=$nyBehandlingsId")
+                gjenbrukVilkårService.gjenbrukInngangsvilkårVurderinger(
+                    nåværendeBehandlingId = nyBehandlingsId,
+                    tidligereBehandlingId = it,
+                )
+            }
+        }
+    }
+
+    private fun finnBehandlingForGjenbrukAvInngangsvilkår(
+        fagsakPersonId: UUID,
+        gjenbruktBehandlingId: UUID,
+        nyBehandlingsId: UUID,
+    ): UUID? {
+        val eksisterendeBehandlinger = behandlingService.hentBehandlingerForGjenbrukAvVilkår(fagsakPersonId)
+        val behandlingForGjenbruk = eksisterendeBehandlinger
+            .filterNot { it.id == nyBehandlingsId }
+            .firstOrNull()
+
+        return behandlingForGjenbruk?.let { (id) ->
+            if (id == gjenbruktBehandlingId) {
+                null
+            } else {
+                id
+            }
+        }
     }
 
     private fun validerAtVurderingerKanKopieres(
@@ -245,18 +282,6 @@ class VurderingService(
             .filter { barn -> vurderingerKopi.none { it.value.barnId == barn.id } }
             .map { OppdaterVilkår.lagVilkårsvurderingForNyttBarn(metadata, it.behandlingId, it.id, stønadType) }
             .flatten()
-
-    private fun tilbakestillEndretTidForKopierteVurderinger(
-        vurderinger: Map<UUID, Vilkårsvurdering>,
-        tidligereVurderinger: Map<UUID, Vilkårsvurdering>,
-    ) {
-        vurderinger.forEach { (forrigeId, vurdering) ->
-            vilkårsvurderingRepository.oppdaterEndretTid(
-                vurdering.id,
-                tidligereVurderinger.getValue(forrigeId).sporbar.endret.endretTid,
-            )
-        }
-    }
 
     private fun finnBarnId(barnId: UUID?, barnIdMap: Map<UUID, BehandlingBarn>): UUID? {
         return barnId?.let {

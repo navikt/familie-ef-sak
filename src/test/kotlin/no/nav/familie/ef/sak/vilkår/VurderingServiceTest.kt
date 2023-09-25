@@ -33,6 +33,7 @@ import no.nav.familie.ef.sak.vilkår.dto.BarnepassDto
 import no.nav.familie.ef.sak.vilkår.dto.LangAvstandTilSøker
 import no.nav.familie.ef.sak.vilkår.dto.SivilstandInngangsvilkårDto
 import no.nav.familie.ef.sak.vilkår.dto.SivilstandRegistergrunnlagDto
+import no.nav.familie.ef.sak.vilkår.gjenbruk.GjenbrukVilkårService
 import no.nav.familie.ef.sak.vilkår.regler.HovedregelMetadata
 import no.nav.familie.ef.sak.vilkår.regler.vilkår.SivilstandRegel
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
@@ -58,6 +59,7 @@ internal class VurderingServiceTest {
     private val grunnlagsdataService = mockk<GrunnlagsdataService>()
     private val fagsakService = mockk<FagsakService>()
     private val featureToggleService = mockk<FeatureToggleService>()
+    private val gjenbrukVilkårService = mockk<GjenbrukVilkårService>()
     private val vurderingService = VurderingService(
         behandlingService = behandlingService,
         søknadService = søknadService,
@@ -66,6 +68,7 @@ internal class VurderingServiceTest {
         grunnlagsdataService = grunnlagsdataService,
         barnService = barnService,
         fagsakService = fagsakService,
+        gjenbrukVilkårService = gjenbrukVilkårService,
         featureToggleService = featureToggleService,
     )
     private val søknad = SøknadsskjemaMapper.tilDomene(
@@ -307,7 +310,7 @@ internal class VurderingServiceTest {
                 vilkårsvurderinger.map { it.type }
                     .containsAll(VilkårType.hentVilkårForStønad(OVERGANGSSTØNAD))
                 ),
-        ).isTrue()
+        ).isTrue
         every { vilkårsvurderingRepository.findByBehandlingId(behandlingId) } returns vilkårsvurderinger
 
         val erAlleVilkårOppfylt = vurderingService.erAlleVilkårOppfylt(behandlingId)

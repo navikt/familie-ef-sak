@@ -257,10 +257,11 @@ class JournalføringService(
     ) {
         val (_, metadata) = vurderingService.hentGrunnlagOgMetadata(behandling.id)
         vurderingService.kopierVurderingerTilNyBehandling(
-            forrigeBehandlingId,
-            behandling.id,
-            metadata,
-            fagsak.stønadstype,
+            eksisterendeBehandlingId = forrigeBehandlingId,
+            nyBehandlingsId = behandling.id,
+            metadata = metadata,
+            stønadType = fagsak.stønadstype,
+            fagsakPersonId = fagsak.fagsakPersonId
         )
         behandlingService.oppdaterStatusPåBehandling(behandling.id, BehandlingStatus.UTREDES)
         behandlingService.oppdaterStegPåBehandling(behandling.id, StegType.BEREGNE_YTELSE)

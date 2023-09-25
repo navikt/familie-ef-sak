@@ -15,6 +15,7 @@ import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.gjeldende
 import no.nav.familie.ef.sak.vilkår.VilkårType
+import no.nav.familie.ef.sak.vilkår.Vilkårsresultat
 import no.nav.familie.ef.sak.vilkår.Vilkårsvurdering
 import no.nav.familie.ef.sak.vilkår.VilkårsvurderingRepository
 import org.slf4j.LoggerFactory
@@ -57,8 +58,10 @@ class GjenbrukVilkårService(
             finnBarnPåBeggeBehandlinger(nåværendeBehandlingId, tidligereBehandlingId)
         val sivilstandErLik =
             erSivilstandUforandretSidenForrigeBehandling(nåværendeBehandlingId, tidligereBehandlingId)
+        val erSammeStønadstype = erSammeStønadstype(nåværendeBehandlingId, tidligereBehandlingId)
         val tidligereVurderinger = hentVurderingerSomSkalGjenbrukes(
             sivilstandErLik,
+            erSammeStønadstype,
             tidligereBehandlingId,
             forrigeBarnIdTilNåværendeBarnMap,
         )
@@ -75,6 +78,12 @@ class GjenbrukVilkårService(
                 "for å oppdatere vurderinger på inngangsvilkår for behandling $nåværendeBehandlingId",
         )
         vilkårsvurderingRepository.updateAll(vurderingerSomSkalLagres)
+    }
+
+    private fun erSammeStønadstype(nåværendeBehandlingId: UUID, tidligereBehandlingId: UUID): Boolean {
+        val fagsak = fagsakService.hentFagsakForBehandling(nåværendeBehandlingId)
+        val fagsakForTidligereBehandling = fagsakService.hentFagsakForBehandling(tidligereBehandlingId)
+        return fagsak.stønadstype == fagsakForTidligereBehandling.stønadstype
     }
 
     private fun lagInngangsvilkårVurderingerForGjenbruk(
@@ -110,11 +119,12 @@ class GjenbrukVilkårService(
 
     private fun hentVurderingerSomSkalGjenbrukes(
         sivilstandErLik: Boolean,
+        erSammeStønadstype: Boolean,
         tidligereBehandlingId: UUID,
         barnPåBeggeBehandlinger: Map<UUID, BehandlingBarn>,
     ): List<Vilkårsvurdering> = vilkårsvurderingRepository.findByBehandlingId(tidligereBehandlingId)
         .filter { it.type.erInngangsvilkår() }
-        .filter { skalGjenbrukeVurdering(it, sivilstandErLik, barnPåBeggeBehandlinger) }
+        .filter { skalGjenbrukeVurdering(it, sivilstandErLik, erSammeStønadstype, barnPåBeggeBehandlinger) }
 
     private fun erSivilstandUforandretSidenForrigeBehandling(
         behandlingId: UUID,
@@ -149,11 +159,12 @@ class GjenbrukVilkårService(
     private fun skalGjenbrukeVurdering(
         vurdering: Vilkårsvurdering,
         sivilstandErLik: Boolean,
+        erSammeStønadstype: Boolean,
         barnPåBeggeBehandlinger: Map<UUID, BehandlingBarn>,
     ): Boolean {
         return when (vurdering.type) {
             VilkårType.SIVILSTAND -> sivilstandErLik
-            VilkårType.ALENEOMSORG -> barnPåBeggeBehandlinger.containsKey(vurdering.barnId)
+            VilkårType.ALENEOMSORG -> barnPåBeggeBehandlinger.containsKey(vurdering.barnId) && (erSammeStønadstype || vurdering.resultat != Vilkårsresultat.SKAL_IKKE_VURDERES)
             else -> true
         }
     }

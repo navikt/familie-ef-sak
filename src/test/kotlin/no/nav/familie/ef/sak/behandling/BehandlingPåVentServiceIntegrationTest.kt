@@ -73,6 +73,7 @@ internal class BehandlingPåVentServiceIntegrationTest : OppslagSpringRunnerTest
 
         assertThat(behandling2.forrigeBehandlingId).isEqualTo(behandling.id)
         assertThat(behandling3.forrigeBehandlingId).isEqualTo(behandling.id)
+        // TODO: Sjekk at vilkår peker til behandling 1
     }
 
     @Test
