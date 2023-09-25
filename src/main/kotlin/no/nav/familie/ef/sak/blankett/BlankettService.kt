@@ -28,6 +28,7 @@ class BlankettService(
 
     fun lagBlankett(behandlingId: UUID): ByteArray {
         val behandling = behandlingService.hentSaksbehandling(behandlingId)
+        val vilkårVurderinger = vurderingService.hentEllerOpprettVurderinger(behandlingId)
         val blankettPdfRequest = BlankettPdfRequest(
             BlankettPdfBehandling(
                 årsak = behandling.årsak,
@@ -38,6 +39,7 @@ class BlankettService(
             vurderingService.hentEllerOpprettVurderinger(behandlingId),
             hentVedtak(behandlingId),
             lagSøknadsdatoer(behandlingId),
+            vilkårVurderinger.grunnlag.harAvsluttetArbeidsforhold,
         )
         val blankettPdfAsByteArray = blankettClient.genererBlankett(blankettPdfRequest)
         oppdaterEllerOpprettBlankett(behandlingId, blankettPdfAsByteArray)
