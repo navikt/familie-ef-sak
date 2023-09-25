@@ -3,8 +3,6 @@ package no.nav.familie.ef.sak.infrastruktur.config
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext.harRolle
-import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext.kallKommerFraProssesering
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.secureLogger
 import no.nav.familie.http.client.RetryOAuth2HttpClient
 import no.nav.familie.http.config.RestTemplateAzure
 import no.nav.familie.http.interceptor.ConsumerIdClientInterceptor
@@ -125,10 +123,7 @@ class ApplicationConfig {
         }
 
         override fun harTilgang(): Boolean {
-            val kallKommerFraProssesering = kallKommerFraProssesering()
-            val harRolle = harRolle(prosesseringRolle)
-            secureLogger.info("kall fra prosessering tilgangssjekk. Rolle: $harRolle, fra prosessering: $kallKommerFraProssesering")
-            return kallKommerFraProssesering && harRolle
+            return harRolle(prosesseringRolle)
         }
     }
 }
