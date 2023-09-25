@@ -40,11 +40,8 @@ class TilordnetRessursService(
         val rolle = utledSaksbehandlerRolle(tilOrdnetRessurs?.navIdent)
 
         return SaksbehandlerDto(
-            azureId = tilOrdnetRessurs?.azureId ?: UUID.randomUUID(),
-            enhet = tilOrdnetRessurs?.enhet ?: "",
             etternavn = tilOrdnetRessurs?.etternavn ?: "",
             fornavn = tilOrdnetRessurs?.fornavn ?: "",
-            navIdent = tilOrdnetRessurs?.navIdent ?: "",
             rolle = rolle,
         )
     }

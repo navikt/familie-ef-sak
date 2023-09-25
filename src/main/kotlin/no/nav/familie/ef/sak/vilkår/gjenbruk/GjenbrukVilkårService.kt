@@ -9,7 +9,7 @@ import no.nav.familie.ef.sak.behandling.dto.tilDto
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
-import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
+import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.oppgave.TilordnetRessursService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
@@ -130,10 +130,10 @@ class GjenbrukVilkårService(
         tidligereBehandlingId: UUID,
     ) {
         val saksbehandling = behandlingService.hentSaksbehandling(behandlingId)
-        feilHvis(saksbehandling.status.behandlingErLåstForVidereRedigering()) {
+        brukerfeilHvis(saksbehandling.status.behandlingErLåstForVidereRedigering()) {
             "Behandlingen er låst og vilkår kan ikke oppdateres på behandling med id=$behandlingId"
         }
-        feilHvis(!tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandlerEllerNull(behandlingId)) {
+        brukerfeilHvis(!tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandlerEllerNull(behandlingId)) {
             "Behandling med id=$behandlingId eies av noen andre og vilkår kan derfor ikke oppdateres av deg"
         }
 

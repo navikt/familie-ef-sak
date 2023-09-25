@@ -133,31 +133,23 @@ internal class TilordnetRessursServiceTest {
 
         @Test
         internal fun `skal mappe INNLOGGET SAKSBEHANDLER til SaksbehandlerDto`() {
-            val azureId = UUID.randomUUID()
-            val saksbehandler = saksbehandler(azureId, "4405", "Vader", "Darth", "NAV1234")
+            val saksbehandler = saksbehandler(UUID.randomUUID(), "4405", "Vader", "Darth", "NAV1234")
 
             val saksbehandlerDto = tilordnetRessursService.mapTilSaksbehandlerDto(saksbehandler)
 
-            assertThat(saksbehandlerDto.azureId).isEqualTo(azureId)
-            assertThat(saksbehandlerDto.enhet).isEqualTo(saksbehandler.enhet)
             assertThat(saksbehandlerDto.fornavn).isEqualTo(saksbehandler.fornavn)
             assertThat(saksbehandlerDto.etternavn).isEqualTo(saksbehandler.etternavn)
-            assertThat(saksbehandlerDto.navIdent).isEqualTo(saksbehandler.navIdent)
             assertThat(saksbehandlerDto.rolle).isEqualTo(SaksbehandlerRolle.INNLOGGET_SAKSBEHANDLER)
         }
 
         @Test
         internal fun `skal mappe ANNEN SAKSBEHANDLER til SaksbehandlerDto`() {
-            val azureId = UUID.randomUUID()
-            val saksbehandler = saksbehandler(azureId, "4405", "Vader", "Darth", "NAV2345")
+            val saksbehandler = saksbehandler(UUID.randomUUID(), "4405", "Vader", "Darth", "NAV2345")
 
             val saksbehandlerDto = tilordnetRessursService.mapTilSaksbehandlerDto(saksbehandler)
 
-            assertThat(saksbehandlerDto.azureId).isEqualTo(azureId)
-            assertThat(saksbehandlerDto.enhet).isEqualTo(saksbehandler.enhet)
             assertThat(saksbehandlerDto.fornavn).isEqualTo(saksbehandler.fornavn)
             assertThat(saksbehandlerDto.etternavn).isEqualTo(saksbehandler.etternavn)
-            assertThat(saksbehandlerDto.navIdent).isEqualTo(saksbehandler.navIdent)
             assertThat(saksbehandlerDto.rolle).isEqualTo(SaksbehandlerRolle.ANNEN_SAKSBEHANDLER)
         }
 
@@ -165,10 +157,8 @@ internal class TilordnetRessursServiceTest {
         internal fun `skal mappe IKKE SATT til SaksbehandlerDto`() {
             val saksbehandlerDto = tilordnetRessursService.mapTilSaksbehandlerDto(null)
 
-            assertThat(saksbehandlerDto.enhet).isEqualTo("")
             assertThat(saksbehandlerDto.fornavn).isEqualTo("")
             assertThat(saksbehandlerDto.etternavn).isEqualTo("")
-            assertThat(saksbehandlerDto.navIdent).isEqualTo("")
             assertThat(saksbehandlerDto.rolle).isEqualTo(SaksbehandlerRolle.IKKE_SATT)
         }
     }

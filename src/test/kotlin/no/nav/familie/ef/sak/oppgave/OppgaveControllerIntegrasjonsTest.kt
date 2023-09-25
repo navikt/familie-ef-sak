@@ -53,10 +53,8 @@ internal class OppgaveControllerIntegrasjonsTest : OppslagSpringRunnerTest() {
         val response = hentAnsvarligSaksbehandler(behandling.id)
 
         assertThat(response.body?.status).isEqualTo(Ressurs.Status.SUKSESS)
-        assertThat(response.body?.data?.navIdent).isEqualTo("julenissen")
         assertThat(response.body?.data?.fornavn).isEqualTo("julenissen")
         assertThat(response.body?.data?.etternavn).isEqualTo("Saksbehandlersen")
-        assertThat(response.body?.data?.enhet).isEqualTo("4405")
         assertThat(response.body?.data?.rolle).isEqualTo(SaksbehandlerRolle.INNLOGGET_SAKSBEHANDLER)
     }
 
@@ -70,10 +68,8 @@ internal class OppgaveControllerIntegrasjonsTest : OppslagSpringRunnerTest() {
         val response = hentAnsvarligSaksbehandler(behandling.id)
 
         assertThat(response.body?.status).isEqualTo(Ressurs.Status.SUKSESS)
-        assertThat(response.body?.data?.navIdent).isEqualTo("ANNEN_SAKSBEHANDLER")
         assertThat(response.body?.data?.fornavn).isEqualTo("julenissen")
         assertThat(response.body?.data?.etternavn).isEqualTo("Saksbehandlersen")
-        assertThat(response.body?.data?.enhet).isEqualTo("4405")
         assertThat(response.body?.data?.rolle).isEqualTo(SaksbehandlerRolle.ANNEN_SAKSBEHANDLER)
     }
 
@@ -87,10 +83,8 @@ internal class OppgaveControllerIntegrasjonsTest : OppslagSpringRunnerTest() {
         val response = hentAnsvarligSaksbehandler(behandling.id)
 
         assertThat(response.body?.status).isEqualTo(Ressurs.Status.SUKSESS)
-        assertThat(response.body?.data?.navIdent).isEqualTo("")
         assertThat(response.body?.data?.fornavn).isEqualTo("")
         assertThat(response.body?.data?.etternavn).isEqualTo("")
-        assertThat(response.body?.data?.enhet).isEqualTo("")
         assertThat(response.body?.data?.rolle).isEqualTo(SaksbehandlerRolle.IKKE_SATT)
     }
 
