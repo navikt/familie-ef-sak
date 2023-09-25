@@ -2,7 +2,9 @@ package no.nav.familie.ef.sak.infrastruktur.config
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.KotlinModule
+import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext.harRolle
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext.kallKommerFraProssesering
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.secureLogger
 import no.nav.familie.http.client.RetryOAuth2HttpClient
 import no.nav.familie.http.config.RestTemplateAzure
 import no.nav.familie.http.interceptor.ConsumerIdClientInterceptor
@@ -16,6 +18,7 @@ import no.nav.security.token.support.client.spring.oauth2.EnableOAuth2Client
 import no.nav.security.token.support.spring.SpringTokenValidationContextHolder
 import no.nav.security.token.support.spring.api.EnableJwtTokenValidation
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.SpringBootConfiguration
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan
 import org.springframework.boot.web.client.RestTemplateBuilder
@@ -112,7 +115,7 @@ class ApplicationConfig {
     }
 
     @Bean
-    fun prosesseringInfoProvider() = object : ProsesseringInfoProvider {
+    fun prosesseringInfoProvider(@Value("\${prosessering.rolle}") prosesseringRolle: String) = object : ProsesseringInfoProvider {
 
         override fun hentBrukernavn(): String = try {
             SpringTokenValidationContextHolder().tokenValidationContext.getClaims("azuread")
@@ -122,7 +125,10 @@ class ApplicationConfig {
         }
 
         override fun harTilgang(): Boolean {
-            return kallKommerFraProssesering()
+            val kallKommerFraProssesering = kallKommerFraProssesering()
+            val harRolle = harRolle(prosesseringRolle)
+            secureLogger.info("kall fra prosessering tilgangssjekk. Rolle: $harRolle, fra prosessering: $kallKommerFraProssesering")
+            return kallKommerFraProssesering && harRolle
         }
     }
 }

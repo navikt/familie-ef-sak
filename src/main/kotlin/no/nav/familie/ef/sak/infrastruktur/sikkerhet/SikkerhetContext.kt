@@ -107,4 +107,8 @@ object SikkerhetContext {
 
         return rollerForBruker.contains(minimumsrolle)
     }
+
+    fun harRolle(rolle: String): Boolean {
+        return hentGrupperFraToken().contains(rolle)
+    }
 }
