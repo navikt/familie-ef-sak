@@ -40,6 +40,7 @@ class OppgaveClientMock {
                 oppgave4,
                 oppgave5,
                 oppgave6,
+                oppgave7,
                 tilbakekreving1,
                 oppgavePapirsøknad,
                 oppgaveEttersending,
@@ -188,6 +189,8 @@ class OppgaveClientMock {
         lagOppgave(24682L, Oppgavetype.Journalføring, "BESLUTTER", behandlesAvApplikasjon = "familie-ef-sak")
     private val oppgave6 =
         lagOppgave(24683L, Oppgavetype.BehandleSak, tilordnetRessurs = null, behandlesAvApplikasjon = "familie-ef-sak")
+    private val oppgave7 =
+        lagOppgave(24684L, Oppgavetype.BehandleSak, tilordnetRessurs = "julenissen", behandlesAvApplikasjon = "familie-ef-sak")
     private val oppgavePapirsøknad =
         lagOppgave(
             5L,
@@ -255,6 +258,7 @@ class OppgaveClientMock {
 
     private fun utledNavIdent(navIdent: String) = when (navIdent) {
         "BESLUTTER" -> "ANNEN_SAKSBEHANDLER"
+        "julenissen" -> "julenissen"
         else -> SikkerhetContext.hentSaksbehandler()
     }
 }

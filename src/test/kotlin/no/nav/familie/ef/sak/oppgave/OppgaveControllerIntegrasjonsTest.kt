@@ -48,7 +48,7 @@ internal class OppgaveControllerIntegrasjonsTest : OppslagSpringRunnerTest() {
         val fagsak = testoppsettService.lagreFagsak(fagsak(identer = setOf(PersonIdent(""))))
         val behandling = behandlingRepository.insert(behandling(fagsak))
 
-        oppgaveRepository.insert(Oppgave(behandlingId = behandling.id, gsakOppgaveId = 24681L, type = Oppgavetype.BehandleSak))
+        oppgaveRepository.insert(Oppgave(behandlingId = behandling.id, gsakOppgaveId = 24684L, type = Oppgavetype.BehandleSak))
 
         val response = hentAnsvarligSaksbehandler(behandling.id)
 
