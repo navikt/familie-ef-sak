@@ -212,6 +212,18 @@ internal class BeslutteVedtakStegTest {
     }
 
     @Test
+    internal fun `skal ikke ha beslutter ved avslag og årsak kortvarig avbrudd jobb`() {
+        every { vedtakService.hentVedtak(any()) } returns vedtak(behandlingId, resultatType = ResultatType.AVSLÅ).copy(avslåÅrsak = AvslagÅrsak.KORTVARIG_AVBRUDD_JOBB)
+        every {
+            vedtaksbrevService.lagEndeligBeslutterbrev(any(), vedtakErUtenBeslutter)
+        } returns Fil("123".toByteArray())
+        utførTotrinnskontroll(true, opprettSaksbehandling(BehandlingÅrsak.NYE_OPPLYSNINGER))
+
+        verify(exactly = 1) { iverksett.iverksett(any(), any()) }
+        verify(exactly = 0) { iverksett.iverksettUtenBrev(any()) }
+    }
+
+    @Test
     internal fun `skal feile dersom vedtak underkjent og mangler begrunnelse`() {
         assertThrows<ApiFeil> {
             utførTotrinnskontroll(
