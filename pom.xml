@@ -32,7 +32,7 @@
         <kotlin.version>1.9.10</kotlin.version>
         <kotlin-coroutines.version>1.7.3</kotlin-coroutines.version>
         <springdoc.version>2.2.0</springdoc.version>
-        <mockk.version>1.13.7</mockk.version>
+        <mockk.version>1.13.8</mockk.version>
         <felles.version>2.20230905101454_06fa3d7</felles.version>
         <prosessering.version>2.20230919105024_7d939cb</prosessering.version>
         <start-class>no.nav.familie.ef.sak.ApplicationKt</start-class>
