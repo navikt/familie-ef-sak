@@ -44,8 +44,9 @@ data class Vedtak(
     val opprettetTid: LocalDateTime = SporbarUtils.now(),
     val opprettetAv: String = SikkerhetContext.hentSaksbehandlerEllerSystembruker(),
 ) {
+
     fun erVedtakUtenBeslutter(): Boolean =
-        resultatType == ResultatType.AVSLÅ && avslåÅrsak == AvslagÅrsak.MINDRE_INNTEKTSENDRINGER
+        resultatType == ResultatType.AVSLÅ && (avslåÅrsak == AvslagÅrsak.MINDRE_INNTEKTSENDRINGER || avslåÅrsak == AvslagÅrsak.KORTVARIG_AVBRUDD_JOBB)
 
     fun utledVedtakErUtenBeslutter(): VedtakErUtenBeslutter = VedtakErUtenBeslutter(erVedtakUtenBeslutter())
 }
