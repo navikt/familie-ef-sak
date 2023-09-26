@@ -36,6 +36,11 @@ class InfotrygdService(
         return harVedtak || harSak
     }
 
+
+    fun hentÅpneSaker(): String {
+        return infotrygdReplikaClient.hentÅpneSaker()
+    }
+
     fun hentDtoPerioder(personIdent: String): InfotrygdPerioderDto {
         val perioder = hentPerioderFraReplika(personIdent)
         val sammenSlåttePerioder = hentSammenslåttePerioderFraReplika(personIdent)
