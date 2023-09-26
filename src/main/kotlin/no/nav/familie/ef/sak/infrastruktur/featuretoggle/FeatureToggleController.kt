@@ -22,6 +22,7 @@ class FeatureToggleController(
         Toggle.FRONTEND_AUTOMATISK_UTFYLLE_VILKÅR,
         Toggle.FRONTEND_SATSENDRING,
         Toggle.FRONTEND_VIS_INNTEKT_PERSONOVERSIKT,
+        Toggle.VIS_KA_VEDTAK_ALTERNATIV,
     )
 
     @GetMapping
