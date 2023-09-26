@@ -8,6 +8,7 @@ import io.mockk.verify
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.behandling.domain.ÅrsakRevurdering
 import no.nav.familie.ef.sak.behandling.dto.ÅrsakRevurderingDto
+import no.nav.familie.ef.sak.oppgave.TilordnetRessursService
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.saksbehandling
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
@@ -25,10 +26,10 @@ import java.util.UUID
 internal class ÅrsakRevurderingServiceTest {
 
     private val behandlingService = mockk<BehandlingService>()
-
     private val årsakRevurderingsRepository = mockk<ÅrsakRevurderingsRepository>()
+    private val tilordnetRessursService = mockk<TilordnetRessursService>()
 
-    private val service = ÅrsakRevurderingService(behandlingService, årsakRevurderingsRepository)
+    private val service = ÅrsakRevurderingService(behandlingService, årsakRevurderingsRepository, tilordnetRessursService)
 
     private val førstegångsbehandling = saksbehandling(type = BehandlingType.FØRSTEGANGSBEHANDLING)
     private val revurdering = saksbehandling(type = BehandlingType.REVURDERING)
@@ -46,6 +47,7 @@ internal class ÅrsakRevurderingServiceTest {
 
         justRun { årsakRevurderingsRepository.deleteById(any()) }
         every { årsakRevurderingsRepository.insert(capture(årsakRevurderingSlot)) } answers { firstArg() }
+        every { tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandlerEllerNull(any()) } returns true
     }
 
     @Nested

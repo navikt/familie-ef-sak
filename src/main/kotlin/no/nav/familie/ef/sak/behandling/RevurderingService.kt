@@ -17,6 +17,7 @@ import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.journalføring.dto.VilkårsbehandleNyeBarn
+import no.nav.familie.ef.sak.oppgave.TilordnetRessursService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
 import no.nav.familie.ef.sak.vedtak.KopierVedtakService
@@ -43,6 +44,7 @@ class RevurderingService(
     private val kopierVedtakService: KopierVedtakService,
     private val vedtakService: VedtakService,
     private val nyeBarnService: NyeBarnService,
+    private val tilordnetRessursService: TilordnetRessursService,
 ) {
 
     fun hentRevurderingsinformasjon(behandlingId: UUID): RevurderingsinformasjonDto {
@@ -61,6 +63,9 @@ class RevurderingService(
     fun slettRevurderingsinformasjon(behandlingId: UUID) {
         brukerfeilHvis(behandlingService.hentBehandling(behandlingId).status.behandlingErLåstForVidereRedigering()) {
             "Kan ikke slette revurderingsinformasjon når behandlingen er låst"
+        }
+        brukerfeilHvis(!tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandlerEllerNull(behandlingId)) {
+            "Behandlingen har en ny eier og du kan derfor ikke slette revurderingsinformasjon"
         }
         årsakRevurderingService.slettRevurderingsinformasjon(behandlingId)
     }
