@@ -90,6 +90,7 @@ internal class ÅrsakRevurderingServiceTest {
                 BehandlingÅrsak.SØKNAD,
                 BehandlingÅrsak.MIGRERING,
                 BehandlingÅrsak.G_OMREGNING,
+                BehandlingÅrsak.IVERKSETTE_KA_VEDTAK,
                 BehandlingÅrsak.KORRIGERING_UTEN_BREV,
                 BehandlingÅrsak.PAPIRSØKNAD,
                 BehandlingÅrsak.SATSENDRING,
