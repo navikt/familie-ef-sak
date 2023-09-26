@@ -51,7 +51,6 @@ internal class SigrunServiceTest {
             ),
         )
         every { sigrunClient.hentPensjonsgivendeInntekt(any(), 2019) } returns PensjonsgivendeInntektResponse("123", 2019, listOf())
-
     }
 
     @Test
