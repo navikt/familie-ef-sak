@@ -16,14 +16,12 @@ class SigrunService(val sigrunClient: SigrunClient, val fagsakPersonService: Fag
         val aktivIdent = fagsakPersonService.hentAktivIdent(fagsakPersonId)
         val pensjonsgivendeInntektVisningList = mutableListOf<PensjonsgivendeInntektVisning>()
         var inntektsår = YearMonth.now().year - 1
-        var totalinntektLikNull = 0
 
         do {
             val pensjonsgivendeInntektVisning = sigrunClient.hentPensjonsgivendeInntekt(aktivIdent, inntektsår).mapTilPensjonsgivendeInntektVisning(inntektsår)
             pensjonsgivendeInntektVisningList.add(pensjonsgivendeInntektVisning)
             inntektsår--
-            if (pensjonsgivendeInntektVisning.ingenInntekt()) totalinntektLikNull++
-        } while (totalinntektLikNull > 1 || inntektsår >= (YearMonth.now().year - 6))
+        } while (pensjonsgivendeInntektVisning.totalInntektOverNull() || inntektsår >= (YearMonth.now().year - 5))
 
         return pensjonsgivendeInntektVisningList
     }
@@ -47,7 +45,7 @@ private fun PensjonsgivendeInntektResponse.mapTilPensjonsgivendeInntektVisning(i
 fun PensjonsgivendeInntektForSkatteordning.næringsinntekt() =
     (this.pensjonsgivendeInntektAvNaeringsinntekt ?: 0) + (this.pensjonsgivendeInntektAvNaeringsinntektFraFiskeFangstEllerFamiliebarnehage ?: 0)
 
-fun PensjonsgivendeInntektVisning.ingenInntekt() = (this.næring + this.person + (this.svalbard?.næring ?: 0) + (this.svalbard?.person ?: 0)) == 0
+fun PensjonsgivendeInntektVisning.totalInntektOverNull() = (this.næring + this.person + (this.svalbard?.næring ?: 0) + (this.svalbard?.person ?: 0)) > 0
 
 data class PensjonsgivendeInntektVisning(
     val inntektsår: Int,

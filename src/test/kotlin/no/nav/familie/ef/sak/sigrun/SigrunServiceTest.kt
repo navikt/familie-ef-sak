@@ -51,19 +51,20 @@ internal class SigrunServiceTest {
             ),
         )
         every { sigrunClient.hentPensjonsgivendeInntekt(any(), 2019) } returns PensjonsgivendeInntektResponse("123", 2019, listOf())
+        every { sigrunClient.hentPensjonsgivendeInntekt(any(), 2018) } returns PensjonsgivendeInntektResponse("123", 2018, listOf())
     }
 
     @Test
-    fun `hent inntekt siste tre år med svalbard inntekt`() {
+    fun `hent inntekt siste fem år med svalbard inntekt`() {
         val fagsakId = UUID.randomUUID()
         val pensjonsgivendeInntektVisning = sigrunService.hentInntektForAlleÅrMedInntekt(fagsakId)
-        assertThat(pensjonsgivendeInntektVisning.size).isEqualTo(4)
+        assertThat(pensjonsgivendeInntektVisning.size).isEqualTo(5)
         assertThat(pensjonsgivendeInntektVisning.first().inntektsår).isEqualTo(YearMonth.now().year - 1)
         assertThat(pensjonsgivendeInntektVisning.first().næring).isEqualTo(250_000)
         assertThat(pensjonsgivendeInntektVisning.first().person).isEqualTo(100_000)
         assertThat(pensjonsgivendeInntektVisning.first().svalbard?.næring).isEqualTo(70_000)
         assertThat(pensjonsgivendeInntektVisning.first().svalbard?.person).isEqualTo(325_000)
-        assertThat(pensjonsgivendeInntektVisning.last().inntektsår).isEqualTo(YearMonth.now().year - 4)
+        assertThat(pensjonsgivendeInntektVisning.last().inntektsår).isEqualTo(YearMonth.now().year - 5)
     }
 }
 
