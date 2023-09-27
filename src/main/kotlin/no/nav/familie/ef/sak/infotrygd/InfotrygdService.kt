@@ -36,7 +36,6 @@ class InfotrygdService(
         return harVedtak || harSak
     }
 
-
     fun hentÅpneSaker(): String {
         return infotrygdReplikaClient.hentÅpneSaker()
     }
