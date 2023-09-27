@@ -10,8 +10,8 @@ import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
-import no.nav.familie.ef.sak.felles.util.mockFeatureToggleService
 import no.nav.familie.ef.sak.felles.util.opprettGrunnlagsdata
+import no.nav.familie.ef.sak.oppgave.TilordnetRessursService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.GrunnlagsdataMedMetadata
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.Sivilstandstype
@@ -48,13 +48,14 @@ internal class GjenbrukVilkårServiceTest {
     private val vilkårsvurderingRepository = mockk<VilkårsvurderingRepository>()
     private val grunnlagsdataService = mockk<GrunnlagsdataService>()
     private val barnService = mockk<BarnService>()
+    private val tilordnetRessursService = mockk<TilordnetRessursService>()
     private val gjenbrukVilkårService = GjenbrukVilkårService(
         behandlingService = behandlingService,
         fagsakService = fagsakService,
         vilkårsvurderingRepository = vilkårsvurderingRepository,
         grunnlagsdataService = grunnlagsdataService,
         barnService = barnService,
-        mockFeatureToggleService(),
+        tilordnetRessursService = tilordnetRessursService,
     )
 
     private val barn1 = FnrGenerator.generer(LocalDate.now())
@@ -117,6 +118,7 @@ internal class GjenbrukVilkårServiceTest {
         )
 
         every { vilkårsvurderingRepository.updateAll(capture(vilkårsvurderingerSlot)) } answers { firstArg() }
+        every { tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandlerEllerNull(any()) } returns true
     }
 
     @Test

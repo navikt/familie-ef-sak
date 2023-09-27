@@ -8,6 +8,7 @@ import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
+import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.testWithBrukerContext
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
 import no.nav.familie.ef.sak.repository.behandling
@@ -104,7 +105,9 @@ class BeregningControllerTest : OppslagSpringRunnerTest() {
             inntektBegrunnelse = "inntekt begrunnelse",
         )
 
-        vilkårsvurderingService.hentEllerOpprettVurderinger(behandlingId = behandling.id) // ingen ok.
+        testWithBrukerContext {
+            vilkårsvurderingService.hentEllerOpprettVurderinger(behandlingId = behandling.id) // ingen ok.
+        }
 
         val respons: ResponseEntity<Ressurs<UUID>> = fullførVedtak(behandling.id, vedtakDto)
 
@@ -114,7 +117,7 @@ class BeregningControllerTest : OppslagSpringRunnerTest() {
 
     @Test
     internal fun `Skal kun hente beløpsperioder for det relevante vedtaket`() {
-        val (fagsak, behandling) = lagFagsakOgBehandling(StegType.BEHANDLING_FERDIGSTILT)
+        val (fagsak, behandling) = lagFagsakOgBehandling(StegType.BEHANDLING_FERDIGSTILT, BehandlingStatus.FERDIGSTILT)
         val revurdering = lagRevurdering(stegType = StegType.BESLUTTE_VEDTAK, fagsak)
 
         val responsFørstegangsbehandling: ResponseEntity<Ressurs<List<Beløpsperiode>>> =
@@ -137,14 +140,14 @@ class BeregningControllerTest : OppslagSpringRunnerTest() {
         assertThat(beløpsperioderRevurdering?.first()?.beløp).isEqualTo(BigDecimal(12_000))
     }
 
-    private fun lagFagsakOgBehandling(stegType: StegType = StegType.BESLUTTE_VEDTAK): Pair<Fagsak, Behandling> {
+    private fun lagFagsakOgBehandling(stegType: StegType = StegType.BESLUTTE_VEDTAK, status: BehandlingStatus = BehandlingStatus.UTREDES): Pair<Fagsak, Behandling> {
         val fagsak = testoppsettService.lagreFagsak(fagsak(identer = setOf(PersonIdent("12345678910"))))
         val førstegangsbehandling = behandlingRepository.insert(
             behandling(
                 fagsak,
                 steg = stegType,
                 type = BehandlingType.FØRSTEGANGSBEHANDLING,
-                status = BehandlingStatus.FERDIGSTILT,
+                status = status,
             ),
         )
 

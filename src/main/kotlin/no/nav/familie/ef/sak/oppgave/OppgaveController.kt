@@ -6,11 +6,11 @@ import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.ef.sak.oppgave.OppgaveUtil.ENHET_NR_EGEN_ANSATT
 import no.nav.familie.ef.sak.oppgave.OppgaveUtil.ENHET_NR_NAY
-import no.nav.familie.ef.sak.oppgave.OppgaveUtil.sekunderSidenEndret
 import no.nav.familie.ef.sak.oppgave.dto.FinnOppgaveRequestDto
 import no.nav.familie.ef.sak.oppgave.dto.OppgaveDto
 import no.nav.familie.ef.sak.oppgave.dto.OppgaveEfDto
 import no.nav.familie.ef.sak.oppgave.dto.OppgaveResponseDto
+import no.nav.familie.ef.sak.oppgave.dto.SaksbehandlerDto
 import no.nav.familie.ef.sak.oppgave.dto.UtdanningOppgaveDto
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -40,6 +40,7 @@ class OppgaveController(
     private val oppgaveService: OppgaveService,
     private val tilgangService: TilgangService,
     private val personService: PersonService,
+    private val tilordnetRessursService: TilordnetRessursService,
 ) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -100,25 +101,32 @@ class OppgaveController(
         return Ressurs.success(oppgaveService.hentOppgave(gsakOppgaveId).tilDto())
     }
 
+    @Deprecated("Har ikke lenger behov for logging - fjern etter at frontend slutter å kalle på dette endepunktet")
     @GetMapping("{behandlingId}/tilordnet-ressurs")
     fun hentTilordnetRessursForBehandlingId(@PathVariable behandlingId: UUID): Ressurs<String?> {
         val saksbehandlerIdent = SikkerhetContext.hentSaksbehandlerEllerSystembruker()
-        val oppgave = oppgaveService.hentIkkeFerdigstiltOppgaveForBehandling(behandlingId)
+        val oppgave = tilordnetRessursService.hentIkkeFerdigstiltOppgaveForBehandling(behandlingId)
         val saksbehandlerIdentIOppgaveSystemet = oppgave?.tilordnetRessurs
         if (oppgave != null && saksbehandlerIdentIOppgaveSystemet != saksbehandlerIdent) {
             logger.info(
                 "(Eier av behandling/oppgave) " +
                     "Saksbehandler $saksbehandlerIdent er inne i behandling=$behandlingId " +
                     "mens oppgaven=${oppgave.id} er tilordnet $saksbehandlerIdentIOppgaveSystemet " +
-                    "sekunderSidenEndret=${sekunderSidenEndret(oppgave)}",
+                    "sekunderSidenEndret=${OppgaveUtil.sekunderSidenEndret(oppgave)}",
             )
         }
         return Ressurs.success(saksbehandlerIdentIOppgaveSystemet)
     }
 
+    @GetMapping("{behandlingId}/ansvarlig-saksbehandler")
+    fun hentAnsvarligSaksbehandlerForBehandling(@PathVariable behandlingId: UUID): Ressurs<SaksbehandlerDto> {
+        val oppgave = tilordnetRessursService.hentIkkeFerdigstiltOppgaveForBehandling(behandlingId)
+        return Ressurs.success(tilordnetRessursService.utledAnsvarligSaksbehandlerForOppgave(oppgave))
+    }
+
     @GetMapping("/behandling/{behandlingId}")
     fun hentOppgaveForBehandlingId(@PathVariable behandlingId: UUID): Ressurs<Oppgave> {
-        val oppgave = oppgaveService.hentIkkeFerdigstiltOppgaveForBehandling(behandlingId)
+        val oppgave = tilordnetRessursService.hentIkkeFerdigstiltOppgaveForBehandling(behandlingId)
 
         return oppgave?.let { Ressurs.success(it) } ?: throw ApiFeil(
             "Fant ingen åpen oppgave for behandlingen",

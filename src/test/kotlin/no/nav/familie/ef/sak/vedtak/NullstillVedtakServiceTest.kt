@@ -14,6 +14,7 @@ import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.brev.MellomlagringBrevService
 import no.nav.familie.ef.sak.brev.VedtaksbrevService
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
+import no.nav.familie.ef.sak.oppgave.TilordnetRessursService
 import no.nav.familie.ef.sak.repository.saksbehandling
 import no.nav.familie.ef.sak.simulering.SimuleringService
 import no.nav.familie.ef.sak.tilbakekreving.TilbakekrevingService
@@ -21,6 +22,7 @@ import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.ef.sak.vedtak.NullstillVedtakService
 import no.nav.familie.ef.sak.vedtak.VedtakService
 import org.assertj.core.api.Assertions
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.util.UUID
@@ -37,6 +39,7 @@ class NullstillVedtakServiceTest {
     private val mellomlagringBrevService = mockk<MellomlagringBrevService>(relaxed = true)
     private val vedtaksbrevService = mockk<VedtaksbrevService>(relaxed = true)
     private val oppgaverForOpprettelseService = mockk<OppgaverForOpprettelseService>(relaxed = true)
+    private val tilordnetRessursService = mockk<TilordnetRessursService>(relaxed = true)
 
     private val nullstillVedtakService = NullstillVedtakService(
         vedtakService,
@@ -48,8 +51,14 @@ class NullstillVedtakServiceTest {
         mellomlagringBrevService,
         vedtaksbrevService,
         oppgaverForOpprettelseService,
+        tilordnetRessursService,
     )
     private val behandlingId = UUID.randomUUID()
+
+    @BeforeEach
+    fun setUp() {
+        every { tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandlerEllerNull(any()) } returns true
+    }
 
     @Test
     fun `nullstill vedtak`() {
