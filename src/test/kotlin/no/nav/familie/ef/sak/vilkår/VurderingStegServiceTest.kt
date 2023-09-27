@@ -21,6 +21,7 @@ import no.nav.familie.ef.sak.felles.util.BrukerContextUtil
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.vilkår.VilkårTestUtil.mockVilkårGrunnlagDto
+import no.nav.familie.ef.sak.oppgave.TilordnetRessursService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerIntegrasjonerClient
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.Sivilstandstype
@@ -73,6 +74,7 @@ internal class VurderingStegServiceTest {
     private val gjenbrukVilkårService = mockk<GjenbrukVilkårService>()
     private val featureToggleService = mockk<FeatureToggleService>()
     private val behandlingshistorikkService = mockk<BehandlingshistorikkService>()
+    private val tilordnetRessursService = mockk<TilordnetRessursService>()
     private val vurderingService = VurderingService(
         behandlingService,
         søknadService,
@@ -83,6 +85,7 @@ internal class VurderingStegServiceTest {
         fagsakService,
         gjenbrukVilkårService,
         featureToggleService,
+        tilordnetRessursService,
     )
     private val vurderingStegService = VurderingStegService(
         behandlingService = behandlingService,
@@ -92,6 +95,7 @@ internal class VurderingStegServiceTest {
         stegService = stegService,
         taskService = taskService,
         behandlingshistorikkService = behandlingshistorikkService,
+        tilordnetRessursService = tilordnetRessursService,
     )
     private val søknad = SøknadsskjemaMapper.tilDomene(
         TestsøknadBuilder.Builder().setBarn(
@@ -128,6 +132,7 @@ internal class VurderingStegServiceTest {
                 ),
             )
         every { vilkårsvurderingRepository.insertAll(any()) } answers { firstArg() }
+        every { tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandlerEllerNull(any()) } returns true
         val sivilstand = SivilstandInngangsvilkårDto(
             mockk(relaxed = true),
             SivilstandRegistergrunnlagDto(Sivilstandstype.GIFT, "1", "Navn", null),

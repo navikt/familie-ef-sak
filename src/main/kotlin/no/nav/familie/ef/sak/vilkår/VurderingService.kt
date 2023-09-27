@@ -12,6 +12,7 @@ import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvisIkke
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
+import no.nav.familie.ef.sak.oppgave.TilordnetRessursService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.GrunnlagsdataEndring
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
@@ -41,6 +42,7 @@ class VurderingService(
     private val fagsakService: FagsakService,
     private val gjenbrukVilkårService: GjenbrukVilkårService,
     private val featureToggleService: FeatureToggleService,
+    private val tilordnetRessursService: TilordnetRessursService,
 ) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -151,7 +153,7 @@ class VurderingService(
         val lagredeVilkårsvurderinger = vilkårsvurderingRepository.findByBehandlingId(behandlingId)
 
         return when {
-            behandlingErLåstForVidereRedigering(behandlingId) -> lagredeVilkårsvurderinger
+            behandlingErLåstForVidereRedigeringForInnloggetSaksbehandler(behandlingId) -> lagredeVilkårsvurderinger
             lagredeVilkårsvurderinger.isEmpty() -> lagreNyeVilkårsvurderinger(behandlingId, metadata)
             else -> lagredeVilkårsvurderinger
         }
@@ -170,8 +172,9 @@ class VurderingService(
         return vilkårsvurderingRepository.insertAll(nyeVilkårsvurderinger)
     }
 
-    private fun behandlingErLåstForVidereRedigering(behandlingId: UUID) =
-        behandlingService.hentBehandling(behandlingId).status.behandlingErLåstForVidereRedigering()
+    private fun behandlingErLåstForVidereRedigeringForInnloggetSaksbehandler(behandlingId: UUID) =
+        behandlingService.hentBehandling(behandlingId).status.behandlingErLåstForVidereRedigering() ||
+            !tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandlerEllerNull(behandlingId)
 
     private fun finnEndringerIGrunnlagsdata(behandlingId: UUID): List<GrunnlagsdataEndring> {
         val oppdaterteGrunnlagsdata = grunnlagsdataService.hentFraRegister(behandlingId)
