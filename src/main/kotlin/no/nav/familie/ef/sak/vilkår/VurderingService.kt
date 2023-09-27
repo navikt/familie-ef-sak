@@ -113,8 +113,6 @@ class VurderingService(
             nyBehandlingsId = behandling.id,
             metadata = metadata,
             stønadType = fagsak.stønadstype,
-            fagsakPersonId = fagsak.fagsakPersonId,
-
         )
     }
 
@@ -191,7 +189,6 @@ class VurderingService(
         nyBehandlingsId: UUID,
         metadata: HovedregelMetadata,
         stønadType: StønadType,
-        fagsakPersonId: UUID,
     ) {
         val tidligereVurderinger =
             vilkårsvurderingRepository.findByBehandlingId(eksisterendeBehandlingId).associateBy { it.id }
@@ -210,40 +207,41 @@ class VurderingService(
 
         vilkårsvurderingRepository.insertAll(kopiAvVurderinger.values.toList() + nyeBarnVurderinger)
 
-        val behandlingForÅGjenbrukeInngangsvilkår = finnBehandlingForGjenbrukAvInngangsvilkår(
-            fagsakPersonId = fagsakPersonId,
-            gjenbruktBehandlingId = eksisterendeBehandlingId,
-            nyBehandlingsId = nyBehandlingsId,
+        val behandlingSomErGrunnlagForGjenbrukAvInngangsvilkår = finnBehandlingForGjenbrukAvInngangsvilkår(
+            alleredeGjenbruktBehandlingId = eksisterendeBehandlingId,
+            behandlingId = nyBehandlingsId,
         )
-        behandlingForÅGjenbrukeInngangsvilkår?.let {
+        behandlingSomErGrunnlagForGjenbrukAvInngangsvilkår?.let {
             if (featureToggleService.isEnabled(Toggle.BEHANDLING_KORRIGERING)) {
                 logger.info("Gjenbruker inngangsvilkår fra behandling=$it til ny behandling=$nyBehandlingsId")
                 gjenbrukVilkårService.gjenbrukInngangsvilkårVurderinger(
-                    nåværendeBehandlingId = nyBehandlingsId,
-                    tidligereBehandlingId = it,
+                    behandlingSomSkalOppdateres = nyBehandlingsId,
+                    behandlingIdSomSkalGjenbrukeInngangsvilkår = it.id,
                 )
             }
         }
     }
 
     private fun finnBehandlingForGjenbrukAvInngangsvilkår(
-        fagsakPersonId: UUID,
-        gjenbruktBehandlingId: UUID,
-        nyBehandlingsId: UUID,
-    ): UUID? {
-        val eksisterendeBehandlinger = behandlingService.hentBehandlingerForGjenbrukAvVilkår(fagsakPersonId)
+        alleredeGjenbruktBehandlingId: UUID,
+        behandlingId: UUID,
+    ): Behandling? {
+        val fagsak = fagsakService.hentFagsakForBehandling(behandlingId)
+        val eksisterendeBehandlinger = behandlingService.hentBehandlingerForGjenbrukAvVilkår(fagsak.fagsakPersonId)
         val behandlingForGjenbruk = eksisterendeBehandlinger
-            .filterNot { it.id == nyBehandlingsId }
+            .filterNot { it.id == behandlingId }
             .firstOrNull()
 
-        return behandlingForGjenbruk?.let { (id) ->
-            if (id == gjenbruktBehandlingId) {
-                null
-            } else {
-                id
+        return behandlingForGjenbruk?.let { behandling ->
+            when (erUlikBehandlingenSomAlleredeErGjenbrukt(behandling, alleredeGjenbruktBehandlingId)) {
+                true -> behandling
+                false -> null
             }
         }
     }
+
+    private fun erUlikBehandlingenSomAlleredeErGjenbrukt(behandling: Behandling, alleredeGjenbruktBehandlingId: UUID): Boolean =
+        behandling.id != alleredeGjenbruktBehandlingId
 
     private fun validerAtVurderingerKanKopieres(
         tidligereVurderinger: Map<UUID, Vilkårsvurdering>,

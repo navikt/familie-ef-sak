@@ -47,35 +47,35 @@ class GjenbrukVilkårService(
 
     @Transactional
     fun gjenbrukInngangsvilkårVurderinger(
-        nåværendeBehandlingId: UUID,
-        tidligereBehandlingId: UUID,
+        behandlingSomSkalOppdateres: UUID,
+        behandlingIdSomSkalGjenbrukeInngangsvilkår: UUID,
     ) {
         validerBehandlingForGjenbruk(
-            nåværendeBehandlingId,
-            tidligereBehandlingId,
+            behandlingSomSkalOppdateres,
+            behandlingIdSomSkalGjenbrukeInngangsvilkår,
         )
         val forrigeBarnIdTilNåværendeBarnMap =
-            finnBarnPåBeggeBehandlinger(nåværendeBehandlingId, tidligereBehandlingId)
+            finnBarnPåBeggeBehandlinger(behandlingSomSkalOppdateres, behandlingIdSomSkalGjenbrukeInngangsvilkår)
         val sivilstandErLik =
-            erSivilstandUforandretSidenForrigeBehandling(nåværendeBehandlingId, tidligereBehandlingId)
-        val erSammeStønadstype = erSammeStønadstype(nåværendeBehandlingId, tidligereBehandlingId)
+            erSivilstandUforandretSidenForrigeBehandling(behandlingSomSkalOppdateres, behandlingIdSomSkalGjenbrukeInngangsvilkår)
+        val erSammeStønadstype = erSammeStønadstype(behandlingSomSkalOppdateres, behandlingIdSomSkalGjenbrukeInngangsvilkår)
         val tidligereVurderinger = hentVurderingerSomSkalGjenbrukes(
             sivilstandErLik,
             erSammeStønadstype,
-            tidligereBehandlingId,
+            behandlingIdSomSkalGjenbrukeInngangsvilkår,
             forrigeBarnIdTilNåværendeBarnMap,
         )
         val nåværendeVurderinger =
-            vilkårsvurderingRepository.findByBehandlingId(nåværendeBehandlingId)
+            vilkårsvurderingRepository.findByBehandlingId(behandlingSomSkalOppdateres)
         val vurderingerSomSkalLagres = lagInngangsvilkårVurderingerForGjenbruk(
-            nåværendeBehandlingId,
+            behandlingSomSkalOppdateres,
             nåværendeVurderinger,
             tidligereVurderinger,
             forrigeBarnIdTilNåværendeBarnMap,
         )
         secureLogger.info(
-            "${SikkerhetContext.hentSaksbehandlerEllerSystembruker()} gjenbruker vurderinger fra behandling $tidligereBehandlingId " +
-                "for å oppdatere vurderinger på inngangsvilkår for behandling $nåværendeBehandlingId",
+            "${SikkerhetContext.hentSaksbehandlerEllerSystembruker()} gjenbruker vurderinger fra behandling $behandlingIdSomSkalGjenbrukeInngangsvilkår " +
+                "for å oppdatere vurderinger på inngangsvilkår for behandling $behandlingSomSkalOppdateres",
         )
         vilkårsvurderingRepository.updateAll(vurderingerSomSkalLagres)
     }

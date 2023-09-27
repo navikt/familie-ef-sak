@@ -62,7 +62,7 @@ internal class VurderingServiceIntegrasjonsTest : OppslagSpringRunnerTest() {
             mockk(),
             mockk(),
         )
-        vurderingService.kopierVurderingerTilNyBehandling(behandling.id, revurdering.id, metadata, StønadType.OVERGANGSSTØNAD, fagsak.fagsakPersonId)
+        vurderingService.kopierVurderingerTilNyBehandling(behandling.id, revurdering.id, metadata, StønadType.OVERGANGSSTØNAD)
 
         val vilkårForRevurdering = vilkårsvurderingRepository.findByBehandlingId(revurdering.id).first()
 
@@ -112,7 +112,6 @@ internal class VurderingServiceIntegrasjonsTest : OppslagSpringRunnerTest() {
                     revurdering.id,
                     metadata,
                     StønadType.OVERGANGSSTØNAD,
-                    fagsak.fagsakPersonId
                 )
             },
         )

@@ -400,7 +400,7 @@ internal class JournalføringServiceTest {
                 ),
                 VilkårsbehandleNyeBarn.IKKE_VALGT,
             )
-            verify(exactly = 0) { vurderingService.kopierVurderingerTilNyBehandling(any(), any(), any(), any(), any()) }
+            verify(exactly = 0) { vurderingService.kopierVurderingerTilNyBehandling(any(), any(), any(), any()) }
         }
     }
 
@@ -439,7 +439,7 @@ internal class JournalføringServiceTest {
                 ),
                 VilkårsbehandleNyeBarn.IKKE_VALGT,
             )
-            verify(exactly = 0) { vurderingService.kopierVurderingerTilNyBehandling(any(), any(), any(), any(), any()) }
+            verify(exactly = 0) { vurderingService.kopierVurderingerTilNyBehandling(any(), any(), any(), any()) }
         }
 
         @Test
@@ -448,7 +448,7 @@ internal class JournalføringServiceTest {
             val forrigeAvslåtteBehandling = behandling()
             mockSisteIverksatteBehandlinger(forrigeAvslåtteBehandling)
 
-            justRun { vurderingService.kopierVurderingerTilNyBehandling(any(), behandlingId, any(), any(), any()) }
+            justRun { vurderingService.kopierVurderingerTilNyBehandling(any(), behandlingId, any(), any()) }
             every { infotrygdPeriodeValideringService.validerKanOppretteBehandlingGittInfotrygdData(any()) } just Runs
             every { vurderingService.hentGrunnlagOgMetadata(behandlingId) } returns
                 Pair(
@@ -478,7 +478,6 @@ internal class JournalføringServiceTest {
                     behandlingId,
                     any(),
                     any(),
-                    any(),
                 )
                 behandlingService.oppdaterStatusPåBehandling(behandlingId, BehandlingStatus.UTREDES)
                 behandlingService.oppdaterStegPåBehandling(behandlingId, StegType.BEREGNE_YTELSE)
@@ -497,7 +496,7 @@ internal class JournalføringServiceTest {
                 ),
             )
             justRun {
-                vurderingService.kopierVurderingerTilNyBehandling(forrigeBehandlingId, behandlingId, any(), any(), any())
+                vurderingService.kopierVurderingerTilNyBehandling(forrigeBehandlingId, behandlingId, any(), any())
             }
             every { infotrygdPeriodeValideringService.validerKanOppretteBehandlingGittInfotrygdData(any()) } just Runs
             every { vurderingService.hentGrunnlagOgMetadata(behandlingId) } returns
@@ -523,7 +522,7 @@ internal class JournalføringServiceTest {
             )
             verifyOrder {
                 barnService.opprettBarnPåBehandlingMedSøknadsdata(any(), any(), any(), any(), any(), any(), any())
-                vurderingService.kopierVurderingerTilNyBehandling(forrigeBehandlingId, behandlingId, any(), any(), any())
+                vurderingService.kopierVurderingerTilNyBehandling(forrigeBehandlingId, behandlingId, any(), any())
                 behandlingService.oppdaterStatusPåBehandling(behandlingId, BehandlingStatus.UTREDES)
                 behandlingService.oppdaterStegPåBehandling(behandlingId, StegType.BEREGNE_YTELSE)
             }

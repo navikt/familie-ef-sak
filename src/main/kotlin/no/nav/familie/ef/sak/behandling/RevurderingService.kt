@@ -98,7 +98,6 @@ class RevurderingService(
             nyBehandlingsId = revurdering.id,
             metadata = metadata,
             stønadType = fagsak.stønadstype,
-            fagsakPersonId = fagsak.fagsakPersonId,
         )
         taskService.save(
             OpprettOppgaveForOpprettetBehandlingTask.opprettTask(
