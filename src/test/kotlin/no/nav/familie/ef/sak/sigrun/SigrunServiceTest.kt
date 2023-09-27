@@ -70,7 +70,7 @@ internal class SigrunServiceTest {
     fun `hent inntekt siste fem år med svalbard inntekt`() {
         val fagsakId = UUID.randomUUID()
         val pensjonsgivendeInntektVisning = sigrunService.hentInntektForAlleÅrMedInntekt(fagsakId)
-       // assertThat(pensjonsgivendeInntektVisning.size).isEqualTo(inntektsårUtenInntekt.count() - 6)
+        // assertThat(pensjonsgivendeInntektVisning.size).isEqualTo(inntektsårUtenInntekt.count() - 6)
         assertThat(pensjonsgivendeInntektVisning.first().inntektsår).isEqualTo(YearMonth.now().year - 1)
         assertThat(pensjonsgivendeInntektVisning.first().næring).isEqualTo(250_000)
         assertThat(pensjonsgivendeInntektVisning.first().person).isEqualTo(100_000)
