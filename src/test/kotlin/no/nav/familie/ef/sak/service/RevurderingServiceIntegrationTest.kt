@@ -307,7 +307,7 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
         val sivilstandVilkårForBT = vilkårForBT.first { it.type == VilkårType.SIVILSTAND }
         val sivilstandVilkårForRevurdering = vilkårForRevurdering.first { it.type == VilkårType.SIVILSTAND }
 
-        val aleneomsorgVilkårForRevurdering = vilkårForRevurdering.first { it.type == VilkårType.ALENEOMSORG && it.barnId == barnPåRevurdering.id}
+        val aleneomsorgVilkårForRevurdering = vilkårForRevurdering.first { it.type == VilkårType.ALENEOMSORG && it.barnId == barnPåRevurdering.id }
         val aleneomsorgVilkårForOS = vilkårForOS.first { it.type == VilkårType.ALENEOMSORG }
 
         validerVilkårUtenBarn(sivilstandVilkårForBT, sivilstandVilkårForRevurdering, førstegangsbehandlingBT)
@@ -344,7 +344,7 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
         val sivilstandVilkårForBT = vilkårForBTOppdatert.first { it.type == VilkårType.SIVILSTAND }
         val sivilstandVilkårForRevurdering = vilkårForRevurdering.first { it.type == VilkårType.SIVILSTAND }
 
-        val aleneomsorgVilkårForRevurdering = vilkårForRevurdering.first { it.type == VilkårType.ALENEOMSORG  && it.barnId == barnPåRevurdering.id}
+        val aleneomsorgVilkårForRevurdering = vilkårForRevurdering.first { it.type == VilkårType.ALENEOMSORG && it.barnId == barnPåRevurdering.id }
         val aleneomsorgVilkårForBT = vilkårForBTOppdatert.first { it.type == VilkårType.ALENEOMSORG }
 
         validerVilkårUtenBarn(sivilstandVilkårForBT, sivilstandVilkårForRevurdering, førstegangsbehandlingBT)

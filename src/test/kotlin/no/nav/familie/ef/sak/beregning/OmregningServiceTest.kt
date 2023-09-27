@@ -7,7 +7,6 @@ import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
-import no.nav.familie.ef.sak.api.gui.VedtakControllerTest
 import no.nav.familie.ef.sak.barn.BarnRepository
 import no.nav.familie.ef.sak.barn.BehandlingBarn
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
