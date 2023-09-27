@@ -34,7 +34,7 @@
         <springdoc.version>2.2.0</springdoc.version>
         <mockk.version>1.13.8</mockk.version>
         <felles.version>2.20230905101454_06fa3d7</felles.version>
-        <prosessering.version>2.20230807154047_d770f01</prosessering.version>
+        <prosessering.version>2.20230919105024_7d939cb</prosessering.version>
         <start-class>no.nav.familie.ef.sak.ApplicationKt</start-class>
         <kontrakter.version>3.0_20230925140159_1b0dbac</kontrakter.version>
         <eksterne.kontrakter.bisys.version>2.0_20230214104704_706e9c0</eksterne.kontrakter.bisys.version>
@@ -147,6 +147,11 @@
         <dependency>
             <groupId>no.nav.familie.felles</groupId>
             <artifactId>unleash</artifactId>
+            <version>${felles.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>no.nav.familie.felles</groupId>
+            <artifactId>leader</artifactId>
             <version>${felles.version}</version>
         </dependency>
         <dependency>
