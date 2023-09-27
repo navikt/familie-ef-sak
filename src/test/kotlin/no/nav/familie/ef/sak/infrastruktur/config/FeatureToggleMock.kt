@@ -1,18 +1,25 @@
 package no.nav.familie.ef.sak.no.nav.familie.ef.sak.infrastruktur.config
 
+import io.getunleash.strategy.Strategy
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
+import no.nav.familie.unleash.DefaultUnleashService
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Primary
 import org.springframework.context.annotation.Profile
 
+@Profile("mock-featuretoggle")
 @Configuration
 class FeatureToggleMock {
 
-    @Profile("mock-featuretoggle")
+    @Bean
+    fun defaultUnleashService(strategies: List<Strategy>): DefaultUnleashService {
+        return mockk()
+    }
+
     @Bean
     @Primary
     fun featureToggleService(): FeatureToggleService {

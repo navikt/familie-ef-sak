@@ -5,6 +5,7 @@ import no.nav.familie.unleash.DefaultUnleashService
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.context.annotation.Profile
 
 @Configuration
 class FeatureToggleConfig(
@@ -18,6 +19,7 @@ class FeatureToggleConfig(
         return listOf(ByUserIdStrategy(), ByEnvironmentStrategy())
     }
 
+    @Profile("!mock-featuretoggle")
     @Bean
     fun defaultUnleashService(strategies: List<Strategy>): DefaultUnleashService {
         return DefaultUnleashService(apiUrl, apiToken, appName, strategies)
