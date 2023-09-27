@@ -57,7 +57,7 @@ class InfotrygdReplikaClient(
     }
 
     fun hentÅpneSaker(): String {
-        return postForEntity(åpnesakerUri, Unit)
+        return getForEntity(åpnesakerUri)
     }
 
     fun hentPersonerForMigrering(antall: Int): Set<String> {
