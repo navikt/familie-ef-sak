@@ -7,6 +7,7 @@ import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
+import no.nav.familie.ef.sak.api.gui.VedtakControllerTest
 import no.nav.familie.ef.sak.barn.BarnRepository
 import no.nav.familie.ef.sak.barn.BehandlingBarn
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
@@ -17,7 +18,9 @@ import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
+import no.nav.familie.ef.sak.felles.util.BrukerContextUtil
 import no.nav.familie.ef.sak.infrastruktur.config.ObjectMapperProvider
+import no.nav.familie.ef.sak.infrastruktur.config.RolleConfig
 import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.vilkår.VilkårTestUtil
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
@@ -58,6 +61,7 @@ import no.nav.familie.kontrakter.ef.søknad.Testsøknad
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.prosessering.internal.TaskService
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -102,6 +106,9 @@ internal class OmregningServiceTest : OppslagSpringRunnerTest() {
     @Autowired
     lateinit var grunnlagsdataService: GrunnlagsdataService
 
+    @Autowired
+    private lateinit var rolleConfig: RolleConfig
+
     val personService = mockk<PersonService>()
     val år = Grunnbeløpsperioder.nyesteGrunnbeløpGyldigFraOgMed.year
 
@@ -109,6 +116,12 @@ internal class OmregningServiceTest : OppslagSpringRunnerTest() {
     fun setup() {
         every { personService.hentPersonIdenter(any()) } returns PdlIdenter(listOf(PdlIdent("321", false)))
         clearMocks(iverksettClient, answers = false)
+        BrukerContextUtil.mockBrukerContext("Saksbehandler", groups = listOf(rolleConfig.saksbehandlerRolle))
+    }
+
+    @AfterEach
+    fun tearDown() {
+        BrukerContextUtil.clearBrukerContext()
     }
 
     val fagsakId = UUID.fromString("3549f9e2-ddd1-467d-82be-bfdb6c7f07e1")
@@ -185,7 +198,6 @@ internal class OmregningServiceTest : OppslagSpringRunnerTest() {
             assertThat(inntektsperiodeEtterGomregning.månedsinntekt?.toInt()).isEqualTo(0)
             assertThat(inntektsperiodeEtterGomregning.inntekt.toInt()).isEqualTo(289100)
             assertThat(inntektsperiodeEtterGomregning.totalinntekt().toInt()).isEqualTo(289100)
-            // TODO: Sjekk at vilkår peker til riktig
         }
     }
 
