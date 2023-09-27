@@ -14,16 +14,15 @@ class SigrunService(val sigrunClient: SigrunClient, val fagsakPersonService: Fag
 
     fun hentInntektForAlleÅrMedInntekt(fagsakPersonId: UUID): List<PensjonsgivendeInntektVisning> {
         val aktivIdent = fagsakPersonService.hentAktivIdent(fagsakPersonId)
-        val pensjonsgivendeInntektVisningList = mutableListOf<PensjonsgivendeInntektVisning>()
-        var inntektsår = YearMonth.now().year - 1
 
-        do {
-            val pensjonsgivendeInntektVisning = sigrunClient.hentPensjonsgivendeInntekt(aktivIdent, inntektsår).mapTilPensjonsgivendeInntektVisning(inntektsår)
-            pensjonsgivendeInntektVisningList.add(pensjonsgivendeInntektVisning)
-            inntektsår--
-        } while (pensjonsgivendeInntektVisning.totalInntektOverNull() || inntektsår >= (YearMonth.now().year - 5))
+        val inntektsår = (YearMonth.now().year - 1) downTo 1990
 
-        return pensjonsgivendeInntektVisningList
+        val pensjonsgivendeInntektList = inntektsår.map {
+            sigrunClient.hentPensjonsgivendeInntekt(aktivIdent, it).mapTilPensjonsgivendeInntektVisning(it)
+        }
+        val førsteÅretMedInntektIndex = pensjonsgivendeInntektList.indexOfLast { it.totalInntektOverNull() } + 1
+
+        return pensjonsgivendeInntektList.subList(0, førsteÅretMedInntektIndex)
     }
 }
 
