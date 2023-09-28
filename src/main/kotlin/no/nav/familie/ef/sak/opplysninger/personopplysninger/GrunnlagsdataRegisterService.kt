@@ -29,7 +29,6 @@ class GrunnlagsdataRegisterService(
         val tidligereVedtaksperioder =
             tidligereVedtaksperioderService.hentTidligereVedtaksperioder(grunnlagsdataFraPdl.søker.folkeregisteridentifikator)
         val tidligereVedtaksperioderAnnenForelder = hentTidligereVedtaksperioderAnnenForelder(grunnlagsdataFraPdl.barneForeldre)
-
         return GrunnlagsdataDomene(
             søker = mapSøker(grunnlagsdataFraPdl.søker, grunnlagsdataFraPdl.andrePersoner),
             annenForelder = mapAnnenForelder(grunnlagsdataFraPdl.barneForeldre, tidligereVedtaksperioderAnnenForelder),
