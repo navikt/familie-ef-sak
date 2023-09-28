@@ -59,11 +59,11 @@ private fun GrunnlagsdataPeriodeHistorikkOvergangsstønad.tilDto() = Grunnlagsda
     vedtaksperiodeType = this.periodeType.name,
     fom = this.fom,
     tom = this.tom,
-    antallMåneder = mndMedBeløp(periodeType, beløp, fom, tom),
-    antallMånederUtenBeløp = mndUtenBeløp(periodeType, beløp, fom, tom),
+    antallMåneder = månederMedBeløp(periodeType, beløp, fom, tom),
+    antallMånederUtenBeløp = månederUtenBeløp(periodeType, beløp, fom, tom),
 )
 
-private fun mndUtenBeløp(
+private fun månederUtenBeløp(
     periodeType: VedtaksperiodeType,
     beløp: Int,
     fom: LocalDate,
@@ -73,7 +73,7 @@ private fun mndUtenBeløp(
     false -> 0
 }
 
-private fun mndMedBeløp(
+private fun månederMedBeløp(
     periodeType: VedtaksperiodeType,
     beløp: Int,
     fom: LocalDate,
