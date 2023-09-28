@@ -31,6 +31,9 @@ class InfotrygdReplikaClient(
     private val finnSakerUri: URI =
         UriComponentsBuilder.fromUri(infotrygdReplikaUri).pathSegment("api/saker/finn").build().toUri()
 
+    private val åpnesakerUri: URI =
+        UriComponentsBuilder.fromUri(infotrygdReplikaUri).pathSegment("api/saker/hentrapport").build().toUri()
+
     private val eksistererUri: URI =
         UriComponentsBuilder.fromUri(infotrygdReplikaUri).pathSegment("api/stonad/eksisterer").build().toUri()
 
@@ -51,6 +54,12 @@ class InfotrygdReplikaClient(
 
     fun hentSaker(request: InfotrygdSøkRequest): InfotrygdSakResponse {
         return postForEntity(finnSakerUri, request)
+    }
+
+    data class ÅpnesakerRapport(val typeMedAntall: Map<String, Int>)
+
+    fun hentÅpneSaker(): ÅpnesakerRapport {
+        return getForEntity(åpnesakerUri)
     }
 
     fun hentPersonerForMigrering(antall: Int): Set<String> {

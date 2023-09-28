@@ -11,6 +11,7 @@ import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.blankett.BlankettRepository
 import no.nav.familie.ef.sak.fagsak.FagsakService
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.vilkår.VilkårTestUtil.mockVilkårGrunnlagDto
 import no.nav.familie.ef.sak.oppgave.TilordnetRessursService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
@@ -33,6 +34,7 @@ import no.nav.familie.ef.sak.vilkår.dto.BarnepassDto
 import no.nav.familie.ef.sak.vilkår.dto.LangAvstandTilSøker
 import no.nav.familie.ef.sak.vilkår.dto.SivilstandInngangsvilkårDto
 import no.nav.familie.ef.sak.vilkår.dto.SivilstandRegistergrunnlagDto
+import no.nav.familie.ef.sak.vilkår.gjenbruk.GjenbrukVilkårService
 import no.nav.familie.ef.sak.vilkår.regler.HovedregelMetadata
 import no.nav.familie.ef.sak.vilkår.regler.vilkår.SivilstandRegel
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
@@ -57,6 +59,8 @@ internal class VurderingServiceTest {
     private val vilkårGrunnlagService = mockk<VilkårGrunnlagService>()
     private val grunnlagsdataService = mockk<GrunnlagsdataService>()
     private val fagsakService = mockk<FagsakService>()
+    private val featureToggleService = mockk<FeatureToggleService>()
+    private val gjenbrukVilkårService = mockk<GjenbrukVilkårService>()
     private val tilordnetRessursService = mockk<TilordnetRessursService>()
     private val vurderingService = VurderingService(
         behandlingService = behandlingService,
@@ -66,6 +70,8 @@ internal class VurderingServiceTest {
         grunnlagsdataService = grunnlagsdataService,
         barnService = barnService,
         fagsakService = fagsakService,
+        gjenbrukVilkårService = gjenbrukVilkårService,
+        featureToggleService = featureToggleService,
         tilordnetRessursService = tilordnetRessursService,
     )
     private val søknad = SøknadsskjemaMapper.tilDomene(
@@ -307,7 +313,7 @@ internal class VurderingServiceTest {
                 vilkårsvurderinger.map { it.type }
                     .containsAll(VilkårType.hentVilkårForStønad(OVERGANGSSTØNAD))
                 ),
-        ).isTrue()
+        ).isTrue
         every { vilkårsvurderingRepository.findByBehandlingId(behandlingId) } returns vilkårsvurderinger
 
         val erAlleVilkårOppfylt = vurderingService.erAlleVilkårOppfylt(behandlingId)
