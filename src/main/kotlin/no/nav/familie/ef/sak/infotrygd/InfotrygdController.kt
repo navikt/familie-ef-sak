@@ -37,7 +37,7 @@ class InfotrygdController(
     }
 
     @GetMapping("rapport")
-    fun hentRapportÅpneSaker(): Ressurs<String> {
+    fun hentRapportÅpneSaker(): Ressurs<InfotrygdReplikaClient.ÅpnesakerRapport> {
         feilHvis(!featureToggleService.isEnabled(toggle = Toggle.TILLAT_HENT_UT_INFOTRYGD_RAPPORT)) {
             "Rapport ikke tilgjengelig - toggle ikke enablet for bruker"
         }

@@ -56,7 +56,9 @@ class InfotrygdReplikaClient(
         return postForEntity(finnSakerUri, request)
     }
 
-    fun hentÅpneSaker(): String {
+    data class ÅpnesakerRapport(val typeMedAntall: Map<String, Int>)
+
+    fun hentÅpneSaker(): ÅpnesakerRapport {
         return getForEntity(åpnesakerUri)
     }
 
