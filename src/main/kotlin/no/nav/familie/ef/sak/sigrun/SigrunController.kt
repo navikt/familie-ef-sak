@@ -19,7 +19,7 @@ class SigrunController(
 ) {
 
     @GetMapping("fagsak-person/{fagsakPersonId}")
-    fun hentBeregnetSkatt(@PathVariable fagsakPersonId: UUID): Ressurs<List<PensjonsgivendeInntektVisning>> {
+    fun hentPensjonsgivendeInntektForFolketrygden(@PathVariable fagsakPersonId: UUID): Ressurs<List<PensjonsgivendeInntektVisning>> {
         tilgangService.validerTilgangTilFagsakPerson(fagsakPersonId, AuditLoggerEvent.ACCESS)
         val inntektSisteTreÅr = sigrunService.hentInntektSisteTreÅr(fagsakPersonId)
         return Ressurs.success(inntektSisteTreÅr)

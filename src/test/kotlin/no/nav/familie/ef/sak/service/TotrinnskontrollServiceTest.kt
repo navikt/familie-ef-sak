@@ -193,14 +193,41 @@ internal class TotrinnskontrollServiceTest {
                 steg = StegType.BESLUTTE_VEDTAK,
                 utfall = StegUtfall.BESLUTTE_VEDTAK_UNDERKJENT,
                 opprettetAv = "Noe",
-                beslutt = BeslutteVedtakDto(godkjent = false, begrunnelse = "begrunnelse", årsakerUnderkjent = listOf(ÅrsakUnderkjent.VEDTAKSBREV, ÅrsakUnderkjent.AKTIVITET)),
-
+                beslutt = BeslutteVedtakDto(
+                    godkjent = false,
+                    begrunnelse = "begrunnelse",
+                    årsakerUnderkjent = listOf(ÅrsakUnderkjent.VEDTAKSBREV, ÅrsakUnderkjent.AKTIVITET),
+                ),
             )
 
         val totrinnskontroll = totrinnskontrollService.hentTotrinnskontrollStatus(ID)
         assertThat(totrinnskontroll.status).isEqualTo(TotrinnkontrollStatus.TOTRINNSKONTROLL_UNDERKJENT)
         assertThat(totrinnskontroll.totrinnskontroll?.begrunnelse).isEqualTo("begrunnelse")
-        assertThat(totrinnskontroll.totrinnskontroll?.årsakerUnderkjent).containsExactlyInAnyOrder(ÅrsakUnderkjent.VEDTAKSBREV, ÅrsakUnderkjent.AKTIVITET)
+        assertThat(totrinnskontroll.totrinnskontroll?.årsakerUnderkjent).containsExactlyInAnyOrder(
+            ÅrsakUnderkjent.VEDTAKSBREV,
+            ÅrsakUnderkjent.AKTIVITET,
+        )
+    }
+
+    @Test
+    internal fun `skal returnere underkjent og årsak simulering når vedtak er underkjent med årsak simulering`() {
+        every { behandlingService.hentBehandling(any()) } returns behandling(BehandlingStatus.UTREDES)
+        every { behandlingshistorikkService.finnSisteBehandlingshistorikk(any(), any()) } returns
+            behandlingshistorikk(
+                steg = StegType.BESLUTTE_VEDTAK,
+                utfall = StegUtfall.BESLUTTE_VEDTAK_UNDERKJENT,
+                opprettetAv = "Noe",
+                beslutt = BeslutteVedtakDto(
+                    godkjent = false,
+                    begrunnelse = "En god begrunnelse",
+                    årsakerUnderkjent = listOf(ÅrsakUnderkjent.SIMULERING),
+                ),
+            )
+
+        val totrinnskontroll = totrinnskontrollService.hentTotrinnskontrollStatus(ID)
+        assertThat(totrinnskontroll.status).isEqualTo(TotrinnkontrollStatus.TOTRINNSKONTROLL_UNDERKJENT)
+        assertThat(totrinnskontroll.totrinnskontroll?.begrunnelse).isEqualTo("En god begrunnelse")
+        assertThat(totrinnskontroll.totrinnskontroll?.årsakerUnderkjent).containsExactlyInAnyOrder(ÅrsakUnderkjent.SIMULERING)
     }
 
     private fun behandlingshistorikk(

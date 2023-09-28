@@ -192,7 +192,7 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
 
     @Test
     internal fun `en annen beslutter enn den som sendte til beslutter må godkjenne behandlingen`() {
-        opprettBehandling()
+        opprettBehandling(saksbehandler = BESLUTTER)
 
         sendTilBeslutter(BESLUTTER)
         validerTotrinnskontrollIkkeAutorisert(SAKSBEHANDLER)
@@ -233,7 +233,7 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
 
     @Test
     internal fun `en annen beslutter enn den som sendte behandlingen til beslutter må godkjenne behandlingen`() {
-        opprettBehandling()
+        opprettBehandling(saksbehandler = BESLUTTER)
         sendTilBeslutter(BESLUTTER)
         validerTotrinnskontrollIkkeAutorisert(SAKSBEHANDLER)
         validerTotrinnskontrollIkkeAutorisert(BESLUTTER)
@@ -262,7 +262,7 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
 
     @Test
     internal fun `kan ikke sende til besluttning som saksbehandler`() {
-        opprettBehandling()
+        opprettBehandling(saksbehandler = BESLUTTER)
         sendTilBeslutter(BESLUTTER)
         godkjennTotrinnskontroll(SAKSBEHANDLER) {
             assertThat(it.statusCode).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -276,6 +276,23 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
             vedtakResultatType = ResultatType.AVSLÅ,
             status = BehandlingStatus.UTREDES,
             avlsåÅrsak = AvslagÅrsak.MINDRE_INNTEKTSENDRINGER,
+        )
+        sendTilBeslutter(SAKSBEHANDLER)
+
+        validerTotrinnskontrollUaktuelt(BESLUTTER)
+        validerTotrinnskontrollUaktuelt(SAKSBEHANDLER)
+        validerTotrinnskontrollUaktuelt(BESLUTTER_2)
+
+        validerBehandlingIverksetter()
+    }
+
+    @Test
+    internal fun `skal automatisk utføre besluttesteg når en behandling avslås pga kortvarig avbrudd jobb`() {
+        opprettBehandling(
+            steg = StegType.SEND_TIL_BESLUTTER,
+            vedtakResultatType = ResultatType.AVSLÅ,
+            status = BehandlingStatus.UTREDES,
+            avlsåÅrsak = AvslagÅrsak.KORTVARIG_AVBRUDD_JOBB,
         )
         sendTilBeslutter(SAKSBEHANDLER)
 
@@ -396,7 +413,13 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
         steg: StegType = StegType.SEND_TIL_BESLUTTER,
         vedtakResultatType: ResultatType = ResultatType.AVSLÅ,
         avlsåÅrsak: AvslagÅrsak = AvslagÅrsak.VILKÅR_IKKE_OPPFYLT,
-        tilkjentYtelse: (behandlingId: UUID) -> TilkjentYtelse = { tilkjentYtelse(behandlingId = it, fagsak.hentAktivIdent()) },
+        tilkjentYtelse: (behandlingId: UUID) -> TilkjentYtelse = {
+            tilkjentYtelse(
+                behandlingId = it,
+                fagsak.hentAktivIdent(),
+            )
+        },
+        saksbehandler: Saksbehandler = SAKSBEHANDLER,
     ): UUID {
         val lagretBehandling = behandlingRepository.insert(
             behandling.copy(
@@ -419,13 +442,14 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
             "1",
         )
         grunnlagsdataService.opprettGrunnlagsdata(lagretBehandling.id)
-        opprettOppgave(lagretBehandling.id)
+        opprettOppgave(lagretBehandling.id, saksbehandler)
         return lagretBehandling.id
     }
 
-    private fun opprettOppgave(behandlingId: UUID) {
+    private fun opprettOppgave(behandlingId: UUID, saksbehandler: Saksbehandler = SAKSBEHANDLER) {
+        val oppgaveId = if (saksbehandler == SAKSBEHANDLER) 24681L else 24682L
         val oppgave = Oppgave(
-            gsakOppgaveId = 12345L,
+            gsakOppgaveId = oppgaveId,
             behandlingId = behandlingId,
             type = Oppgavetype.BehandleSak,
         )

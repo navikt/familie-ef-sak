@@ -30,8 +30,10 @@ internal class OppgaveControllerTest {
     private val tilgangService: TilgangService = mockk()
     private val oppgaveService: OppgaveService = mockk()
     private val personService: PersonService = mockk()
+    private val tilordnetRessursService: TilordnetRessursService = mockk()
 
-    private val oppgaveController: OppgaveController = OppgaveController(oppgaveService, tilgangService, personService)
+    private val oppgaveController: OppgaveController =
+        OppgaveController(oppgaveService, tilgangService, personService, tilordnetRessursService)
 
     @Test
     internal fun `skal kaste feil hvis ident ikke er på gyldig format`() {
@@ -52,7 +54,10 @@ internal class OppgaveControllerTest {
         val finnOppgaveRequestSlot = slot<FinnOppgaveRequest>()
         tilgangOgRolleJustRuns()
         every { personService.hentAktørIder("12345678901") } returns PdlIdenter(listOf(PdlIdent("1234", false)))
-        every { oppgaveService.hentOppgaver(capture(finnOppgaveRequestSlot)) } returns FinnOppgaveResponseDto(0, listOf())
+        every { oppgaveService.hentOppgaver(capture(finnOppgaveRequestSlot)) } returns FinnOppgaveResponseDto(
+            0,
+            listOf(),
+        )
         oppgaveController.hentOppgaver(FinnOppgaveRequestDto(ident = "12345678901"))
         assertThat(finnOppgaveRequestSlot.captured.aktørId).isEqualTo("1234")
     }
@@ -80,7 +85,10 @@ internal class OppgaveControllerTest {
     internal fun `skal ikke feile hvis ident er tom`() {
         val finnOppgaveRequestSlot = slot<FinnOppgaveRequest>()
         tilgangOgRolleJustRuns()
-        every { oppgaveService.hentOppgaver(capture(finnOppgaveRequestSlot)) } returns FinnOppgaveResponseDto(0, listOf())
+        every { oppgaveService.hentOppgaver(capture(finnOppgaveRequestSlot)) } returns FinnOppgaveResponseDto(
+            0,
+            listOf(),
+        )
         oppgaveController.hentOppgaver(FinnOppgaveRequestDto(ident = " "))
         verify(exactly = 0) { personService.hentAktørIder(any()) }
         assertThat(finnOppgaveRequestSlot.captured.aktørId).isEqualTo(null)
@@ -90,7 +98,10 @@ internal class OppgaveControllerTest {
     internal fun `skal ikke feile hvis ident er null`() {
         val finnOppgaveRequestSlot = slot<FinnOppgaveRequest>()
         tilgangOgRolleJustRuns()
-        every { oppgaveService.hentOppgaver(capture(finnOppgaveRequestSlot)) } returns FinnOppgaveResponseDto(0, listOf())
+        every { oppgaveService.hentOppgaver(capture(finnOppgaveRequestSlot)) } returns FinnOppgaveResponseDto(
+            0,
+            listOf(),
+        )
         oppgaveController.hentOppgaver(FinnOppgaveRequestDto(ident = null))
         verify(exactly = 0) { personService.hentAktørIder(any()) }
         assertThat(finnOppgaveRequestSlot.captured.aktørId).isEqualTo(null)

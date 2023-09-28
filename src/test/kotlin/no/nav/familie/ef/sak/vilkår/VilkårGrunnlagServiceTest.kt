@@ -8,6 +8,7 @@ import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
 import no.nav.familie.ef.sak.felles.kodeverk.KodeverkService
 import no.nav.familie.ef.sak.infrastruktur.config.PdlClientConfig
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
+import no.nav.familie.ef.sak.oppgave.TilordnetRessursService
 import no.nav.familie.ef.sak.opplysninger.mapper.adresseMapper
 import no.nav.familie.ef.sak.opplysninger.mapper.barnMedSamværMapper
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataRegisterService
@@ -45,6 +46,7 @@ internal class VilkårGrunnlagServiceTest {
     private val medlemskapMapper = MedlemskapMapper(mockk(relaxed = true), mockk(relaxed = true), mockk(relaxed = true), kodeverkService)
     private val behandlingService = mockk<BehandlingService>()
     private val tidligereVedtaksperioderService = mockk<TidligereVedtaksperioderService>(relaxed = true)
+    private val tilordnetRessursService = mockk<TilordnetRessursService>(relaxed = true)
 
     private val grunnlagsdataRegisterService = GrunnlagsdataRegisterService(
         personService,
@@ -59,6 +61,7 @@ internal class VilkårGrunnlagServiceTest {
         grunnlagsdataRegisterService,
         behandlingService,
         mockk(),
+        tilordnetRessursService,
     )
 
     private val service = VilkårGrunnlagService(
