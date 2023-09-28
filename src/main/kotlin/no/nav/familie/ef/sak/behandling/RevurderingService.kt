@@ -99,10 +99,10 @@ class RevurderingService(
         )
         val (_, metadata) = vurderingService.hentGrunnlagOgMetadata(revurdering.id)
         vurderingService.kopierVurderingerTilNyBehandling(
-            forrigeBehandlingId,
-            revurdering.id,
-            metadata,
-            fagsak.stønadstype,
+            eksisterendeBehandlingId = forrigeBehandlingId,
+            nyBehandlingsId = revurdering.id,
+            metadata = metadata,
+            stønadType = fagsak.stønadstype,
         )
         taskService.save(
             OpprettOppgaveForOpprettetBehandlingTask.opprettTask(

@@ -69,7 +69,7 @@ internal class VurderingServiceIntegrasjonsTest : OppslagSpringRunnerTest() {
         assertThat(vilkårForBehandling.id).isNotEqualTo(vilkårForRevurdering.id)
         assertThat(vilkårForBehandling.behandlingId).isNotEqualTo(vilkårForRevurdering.behandlingId)
         assertThat(vilkårForBehandling.sporbar.opprettetTid).isNotEqualTo(vilkårForRevurdering.sporbar.opprettetTid)
-        assertThat(vilkårForBehandling.sporbar.endret).isEqualTo(vilkårForRevurdering.sporbar.endret)
+        assertThat(vilkårForBehandling.sporbar.endret).isNotEqualTo(vilkårForRevurdering.sporbar.endret)
         assertThat(vilkårForBehandling.barnId).isNotEqualTo(vilkårForRevurdering.barnId)
         assertThat(vilkårForBehandling.barnId).isEqualTo(barnPåFørsteSøknad.first().id)
         assertThat(vilkårForBehandling.opphavsvilkår).isNull()

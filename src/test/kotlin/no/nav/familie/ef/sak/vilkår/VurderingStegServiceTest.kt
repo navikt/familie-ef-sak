@@ -39,6 +39,7 @@ import no.nav.familie.ef.sak.vilkår.dto.SivilstandInngangsvilkårDto
 import no.nav.familie.ef.sak.vilkår.dto.SivilstandRegistergrunnlagDto
 import no.nav.familie.ef.sak.vilkår.dto.SvarPåVurderingerDto
 import no.nav.familie.ef.sak.vilkår.dto.VurderingDto
+import no.nav.familie.ef.sak.vilkår.gjenbruk.GjenbrukVilkårService
 import no.nav.familie.ef.sak.vilkår.regler.HovedregelMetadata
 import no.nav.familie.ef.sak.vilkår.regler.RegelId
 import no.nav.familie.ef.sak.vilkår.regler.SvarId
@@ -70,6 +71,7 @@ internal class VurderingStegServiceTest {
     private val taskService = mockk<TaskService>()
     private val grunnlagsdataService = mockk<GrunnlagsdataService>()
     private val fagsakService = mockk<FagsakService>()
+    private val gjenbrukVilkårService = mockk<GjenbrukVilkårService>()
     private val featureToggleService = mockk<FeatureToggleService>()
     private val behandlingshistorikkService = mockk<BehandlingshistorikkService>()
     private val tilordnetRessursService = mockk<TilordnetRessursService>()
@@ -81,6 +83,8 @@ internal class VurderingStegServiceTest {
         vilkårGrunnlagService,
         grunnlagsdataService,
         fagsakService,
+        gjenbrukVilkårService,
+        featureToggleService,
         tilordnetRessursService,
     )
     private val vurderingStegService = VurderingStegService(

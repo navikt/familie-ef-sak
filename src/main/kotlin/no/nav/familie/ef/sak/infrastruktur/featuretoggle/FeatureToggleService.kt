@@ -22,6 +22,7 @@ enum class Toggle(val toggleId: String, val beskrivelse: String? = null) {
         "Usikker på om vi ønsker denne eller ikke. Ta en vurdering før 2024?",
     ),
     FRONTEND_VIS_INNTEKT_PERSONOVERSIKT("familie.ef.sak.frontend.vis-inntekt-personoversikt", "Ikke ferdigstilt ennå"),
+    GJENBRUK_VILKÅR_PÅ_TVERS_AV_BEHANDLINGER("familie.ef.sak.gjenbruk-vilkaar-paa-tvers-av-behandlinger", "Må testes i preprod"),
     VIS_KA_VEDTAK_ALTERNATIV("familie.ef.sak.frontend.vis-ka-uten-brev"),
 
     // Operational
