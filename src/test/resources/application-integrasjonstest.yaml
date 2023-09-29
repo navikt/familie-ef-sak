@@ -7,12 +7,8 @@ no.nav.security.jwt:
     accepted_audience: aud-localhost
     cookie_name: localhost-idtoken
 
-funksjonsbrytere:
+unleash:
   enabled: false
-  unleash:
-    uri: http://localhost:4242/api
-    environment: local
-    applicationName: familie-ef-sak
 
 FAMILIE_INTEGRASJONER_URL: http://localhost:8385
 FAMILIE_BREV_API_URL: http://localhost:8001
