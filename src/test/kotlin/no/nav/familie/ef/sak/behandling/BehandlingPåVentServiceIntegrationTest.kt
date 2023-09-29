@@ -17,6 +17,7 @@ import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.ef.sak.repository.saksbehandling
 import no.nav.familie.ef.sak.repository.vilkårsvurdering
+import no.nav.familie.ef.sak.vilkår.Vilkårsvurdering
 import no.nav.familie.ef.sak.vilkår.VilkårsvurderingRepository
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.felles.oppgave.OppgavePrioritet
@@ -49,6 +50,7 @@ internal class BehandlingPåVentServiceIntegrationTest : OppslagSpringRunnerTest
     val fagsak = fagsak()
     val behandling = behandling(fagsak).ferdigstill()
     val saksbehandling = saksbehandling(fagsak, behandling)
+    lateinit var vilkårsvurdering: Vilkårsvurdering
 
     @BeforeEach
     internal fun setUp() {
@@ -56,7 +58,7 @@ internal class BehandlingPåVentServiceIntegrationTest : OppslagSpringRunnerTest
         testoppsettService.lagreFagsak(fagsak)
         behandlingRepository.insert(behandling)
         grunnlagsdataService.opprettGrunnlagsdata(behandling.id)
-        vilkårsvurderingRepository.insert(vilkårsvurdering(behandling.id))
+        vilkårsvurdering = vilkårsvurderingRepository.insert(vilkårsvurdering(behandling.id))
     }
 
     @AfterEach
@@ -73,6 +75,10 @@ internal class BehandlingPåVentServiceIntegrationTest : OppslagSpringRunnerTest
 
         assertThat(behandling2.forrigeBehandlingId).isEqualTo(behandling.id)
         assertThat(behandling3.forrigeBehandlingId).isEqualTo(behandling.id)
+        val vilkårForBehandling3 = vilkårsvurderingRepository.findByBehandlingId(behandling3.id)
+        val gjenbruktVilkår = vilkårForBehandling3.find { it.type == vilkårsvurdering.type }
+        assertThat(gjenbruktVilkår?.opphavsvilkår?.behandlingId).isEqualTo(behandling.id)
+        assertThat(gjenbruktVilkår?.opphavsvilkår?.vurderingstidspunkt).isEqualTo(vilkårsvurdering.sporbar.endret.endretTid)
     }
 
     @Test

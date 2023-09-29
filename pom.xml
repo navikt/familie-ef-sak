@@ -11,7 +11,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.1.3</version>
+        <version>3.1.4</version>
     </parent>
     <repositories>
         <repository>
@@ -32,11 +32,11 @@
         <kotlin.version>1.9.10</kotlin.version>
         <kotlin-coroutines.version>1.7.3</kotlin-coroutines.version>
         <springdoc.version>2.2.0</springdoc.version>
-        <mockk.version>1.13.7</mockk.version>
+        <mockk.version>1.13.8</mockk.version>
         <felles.version>2.20230905101454_06fa3d7</felles.version>
-        <prosessering.version>2.20230807154047_d770f01</prosessering.version>
+        <prosessering.version>2.20230919105024_7d939cb</prosessering.version>
         <start-class>no.nav.familie.ef.sak.ApplicationKt</start-class>
-        <kontrakter.version>3.0_20230918090258_bf0dfa7</kontrakter.version>
+        <kontrakter.version>3.0_20230925140159_1b0dbac</kontrakter.version>
         <eksterne.kontrakter.bisys.version>2.0_20230214104704_706e9c0</eksterne.kontrakter.bisys.version>
         <cucumber.version>7.14.0</cucumber.version>
 
@@ -150,6 +150,11 @@
             <version>${felles.version}</version>
         </dependency>
         <dependency>
+            <groupId>no.nav.familie.felles</groupId>
+            <artifactId>leader</artifactId>
+            <version>${felles.version}</version>
+        </dependency>
+        <dependency>
             <groupId>no.nav.familie</groupId>
             <artifactId>prosessering-core</artifactId>
             <version>${prosessering.version}</version>
@@ -182,7 +187,7 @@
         <dependency>
             <groupId>org.wiremock</groupId>
             <artifactId>wiremock-standalone</artifactId>
-            <version>3.0.4</version>
+            <version>3.1.0</version>
             <scope>test</scope>
         </dependency>
         <dependency>

@@ -4,6 +4,7 @@ import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.felles.util.Timer.loggTid
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
+import no.nav.familie.ef.sak.oppgave.TilordnetRessursService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.Grunnlagsdata
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.GrunnlagsdataDomene
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.GrunnlagsdataMedMetadata
@@ -22,6 +23,7 @@ class GrunnlagsdataService(
     private val grunnlagsdataRegisterService: GrunnlagsdataRegisterService,
     private val behandlingService: BehandlingService,
     private val fagsakService: FagsakService,
+    private val tilordnetRessursService: TilordnetRessursService,
 ) {
 
     fun opprettGrunnlagsdata(behandlingId: UUID): GrunnlagsdataMedMetadata {
@@ -55,6 +57,9 @@ class GrunnlagsdataService(
         val behandling = behandlingService.hentBehandling(behandlingId)
         brukerfeilHvis(behandling.status.behandlingErLåstForVidereRedigering()) {
             "Kan ikke laste inn nye grunnlagsdata for behandling med status ${behandling.status}"
+        }
+        brukerfeilHvis(!tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandlerEllerNull(behandlingId)) {
+            "Behandlingen har en ny eier og du kan derfor ikke laste inn nye grunnlagsdata"
         }
         slettGrunnlagsdataHvisFinnes(behandlingId)
         opprettGrunnlagsdata(behandlingId)

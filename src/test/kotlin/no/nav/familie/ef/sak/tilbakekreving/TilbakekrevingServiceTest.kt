@@ -18,6 +18,7 @@ import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
+import no.nav.familie.ef.sak.oppgave.TilordnetRessursService
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.saksbehandling
@@ -49,6 +50,7 @@ internal class TilbakekrevingServiceTest {
     private val tilbakekrevingClient = mockk<TilbakekrevingClient>()
     private val simuleringService = mockk<SimuleringService>()
     private val arbeidsfordelingService = mockk<ArbeidsfordelingService>()
+    private val tilordnetRessursService = mockk<TilordnetRessursService>()
     private val tilbakekrevingService =
         TilbakekrevingService(
             tilbakekrevingRepository,
@@ -57,12 +59,14 @@ internal class TilbakekrevingServiceTest {
             tilbakekrevingClient,
             simuleringService,
             arbeidsfordelingService,
+            tilordnetRessursService,
         )
 
     @BeforeAll
     fun setUp() {
         mockkObject(SikkerhetContext)
         every { SikkerhetContext.hentSaksbehandler() } returns "bob"
+        every { tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandlerEllerNull(any()) } returns true
     }
 
     @AfterAll

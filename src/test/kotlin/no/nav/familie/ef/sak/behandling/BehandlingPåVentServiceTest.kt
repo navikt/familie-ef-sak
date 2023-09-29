@@ -23,6 +23,7 @@ import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.ef.sak.oppgave.OppgaveSubtype
+import no.nav.familie.ef.sak.oppgave.TilordnetRessursService
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.saksbehandling
@@ -52,6 +53,7 @@ internal class BehandlingPåVentServiceTest {
     private val nullstillVedtakService = mockk<NullstillVedtakService>(relaxed = true)
     private val behandlingshistorikkService = mockk<BehandlingshistorikkService>(relaxed = true)
     private val oppgaveService = mockk<OppgaveService>()
+    private val tilordnetRessursService: TilordnetRessursService = mockk<TilordnetRessursService>(relaxed = true)
 
     private val featureToggleService = mockk<FeatureToggleService>()
 
@@ -61,8 +63,8 @@ internal class BehandlingPåVentServiceTest {
             behandlingshistorikkService,
             taskService,
             nullstillVedtakService,
-            featureToggleService,
             oppgaveService,
+            tilordnetRessursService,
         )
     val fagsak = fagsak()
     val tidligereIverksattBehandling = behandling(fagsak)
@@ -91,6 +93,7 @@ internal class BehandlingPåVentServiceTest {
                 ),
             )
         }
+        every { tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandlerEllerNull(any()) } returns true
     }
 
     @AfterEach
@@ -422,7 +425,7 @@ internal class BehandlingPåVentServiceTest {
 
         private fun mockSettSaksbehandlerPåOppgave(oppgaveId: Long) {
             val oppgave = oppgave(oppgaveId)
-            every { oppgaveService.hentIkkeFerdigstiltOppgaveForBehandling(behandlingId) } returns oppgave
+            every { tilordnetRessursService.hentIkkeFerdigstiltOppgaveForBehandling(behandlingId) } returns oppgave
             every { oppgaveService.fordelOppgave(any(), any(), any()) } returns oppgaveId
         }
     }

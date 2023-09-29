@@ -21,11 +21,11 @@ internal class SigrunServiceTest {
     private val fagsakPersonService = mockk<FagsakPersonService>()
 
     private val sigrunService = SigrunService(sigrunClient, fagsakPersonService)
+    private val inntektsårUtenInntekt = 2019 downTo 1990
 
     @BeforeEach
     fun setup() {
         every { fagsakPersonService.hentAktivIdent(any()) } returns "123"
-        every { sigrunClient.hentPensjonsgivendeInntekt(any(), YearMonth.now().year - 1) }
 
         every { sigrunClient.hentPensjonsgivendeInntekt(any(), 2022) } returns PensjonsgivendeInntektResponse(
             "123",
@@ -51,19 +51,32 @@ internal class SigrunServiceTest {
                 pensjonsgivendeInntektForSkatteordning(Skatteordning.SVALBARD),
             ),
         )
+
+        inntektsårUtenInntekt.map {
+            every { sigrunClient.hentPensjonsgivendeInntekt(any(), it) } returns PensjonsgivendeInntektResponse("123", it, listOf())
+        }
+
+        every { sigrunClient.hentPensjonsgivendeInntekt(any(), 1995) } returns PensjonsgivendeInntektResponse(
+            "123",
+            1995,
+            pensjonsgivendeInntekt = listOf(
+                pensjonsgivendeInntektForSkatteordning(Skatteordning.FASTLAND),
+                pensjonsgivendeInntektForSkatteordning(Skatteordning.SVALBARD),
+            ),
+        )
     }
 
     @Test
-    fun `hent inntekt siste tre år med svalbard inntekt`() {
+    fun `hent inntekt siste fem år med svalbard inntekt`() {
         val fagsakId = UUID.randomUUID()
-        val pensjonsgivendeInntektVisning = sigrunService.hentInntektSisteTreÅr(fagsakId)
-        assertThat(pensjonsgivendeInntektVisning.size).isEqualTo(3)
+        val pensjonsgivendeInntektVisning = sigrunService.hentInntektForAlleÅrMedInntekt(fagsakId)
+        // assertThat(pensjonsgivendeInntektVisning.size).isEqualTo(inntektsårUtenInntekt.count() - 6)
         assertThat(pensjonsgivendeInntektVisning.first().inntektsår).isEqualTo(YearMonth.now().year - 1)
         assertThat(pensjonsgivendeInntektVisning.first().næring).isEqualTo(250_000)
         assertThat(pensjonsgivendeInntektVisning.first().person).isEqualTo(100_000)
         assertThat(pensjonsgivendeInntektVisning.first().svalbard?.næring).isEqualTo(70_000)
         assertThat(pensjonsgivendeInntektVisning.first().svalbard?.person).isEqualTo(325_000)
-        assertThat(pensjonsgivendeInntektVisning.last().inntektsår).isEqualTo(YearMonth.now().year - 3)
+        assertThat(pensjonsgivendeInntektVisning.last().inntektsår).isEqualTo(1995)
     }
 }
 

@@ -36,10 +36,11 @@ internal class TestSaksbehandlingControllerTest : OppslagSpringRunnerTest() {
     internal fun `automatiskt utfyller vilkår`(stønadType: StønadType) {
         val fagsak = testoppsettService.lagreFagsak(fagsak(stønadstype = stønadType))
         val behandling = behandlingRepository.insert(behandling(fagsak))
-        grunnlagsdataService.opprettGrunnlagsdata(behandling.id)
-        vurderingService.hentEllerOpprettVurderinger(behandling.id)
 
-        testWithBrukerContext(groups = listOf(rolleConfig.saksbehandlerRolle)) {
+        grunnlagsdataService.opprettGrunnlagsdata(behandling.id)
+
+        testWithBrukerContext(preferredUsername = "Z999999", groups = listOf(rolleConfig.saksbehandlerRolle)) {
+            vurderingService.hentEllerOpprettVurderinger(behandling.id)
             testSaksbehandlingController.utfyllVilkår(behandling.id)
         }
 

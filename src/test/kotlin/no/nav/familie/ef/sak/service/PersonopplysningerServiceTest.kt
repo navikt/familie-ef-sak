@@ -61,6 +61,7 @@ internal class PersonopplysningerServiceTest {
             grunnlagsdataRegisterService,
             behandlingService,
             mockk(),
+            mockk(),
         )
         val personopplysningerMapper =
             PersonopplysningerMapper(

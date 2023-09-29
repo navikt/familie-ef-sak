@@ -9,6 +9,7 @@ import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.infrastruktur.config.PdlClientConfig
 import no.nav.familie.ef.sak.infrastruktur.config.PdlClientConfig.Companion.annenForelderFnr
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
+import no.nav.familie.ef.sak.oppgave.TilordnetRessursService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataRegisterService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataRepository
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
@@ -40,6 +41,7 @@ internal class GrunnlagsdataServiceTest {
     private val featureToggleService = mockk<FeatureToggleService>()
     private val grunnlagsdataRepository = mockk<GrunnlagsdataRepository>()
     private val behandlingService = mockk<BehandlingService>()
+    private val tilordnetRessursService = mockk<TilordnetRessursService>()
     private val pdlClient = PdlClientConfig().pdlClient()
     private val personService = PersonService(pdlClient, ConcurrentMapCacheManager())
     private val søknadService = mockk<SøknadService>()
@@ -70,6 +72,7 @@ internal class GrunnlagsdataServiceTest {
         grunnlagsdataRegisterService = grunnlagsdataRegisterService,
         behandlingService = behandlingService,
         mockk(),
+        tilordnetRessursService,
     )
 
     @BeforeEach

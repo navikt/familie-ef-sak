@@ -33,6 +33,7 @@ import no.nav.familie.kontrakter.felles.oppgave.IdentGruppe
 import no.nav.familie.kontrakter.felles.oppgave.OppgaveIdentV2
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.kontrakter.felles.oppgave.OpprettOppgaveRequest
+import no.nav.familie.kontrakter.felles.saksbehandler.Saksbehandler
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.BeforeEach
@@ -476,3 +477,5 @@ private val fredagFrist = LocalDate.of(2021, 4, 2)
 private val mandagFrist = LocalDate.of(2021, 4, 5)
 private val tirsdagFrist = LocalDate.of(2021, 4, 6)
 private val onsdagFrist = LocalDate.of(2021, 4, 7)
+
+private val saksbehandler = Saksbehandler(UUID.randomUUID(), "Z999999", "Darth", "Vader", "4405")

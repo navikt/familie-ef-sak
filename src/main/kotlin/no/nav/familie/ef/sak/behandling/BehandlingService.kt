@@ -27,6 +27,7 @@ import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
+import no.nav.familie.ef.sak.oppgave.TilordnetRessursService
 import no.nav.familie.ef.sak.repository.findAllByIdOrThrow
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
@@ -49,6 +50,7 @@ class BehandlingService(
     private val behandlingshistorikkService: BehandlingshistorikkService,
     private val taskService: TaskService,
     private val featureToggleService: FeatureToggleService,
+    private val tilordnetRessursService: TilordnetRessursService,
 ) {
 
     private val secureLogger = LoggerFactory.getLogger("secureLogger")
@@ -263,6 +265,12 @@ class BehandlingService(
         if (!behandling.kanHenlegges()) {
             throw ApiFeil(
                 "Kan ikke henlegge en behandling med status ${behandling.status} for ${behandling.type}",
+                HttpStatus.BAD_REQUEST,
+            )
+        }
+        if (!tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandlerEllerNull(behandling.id)) {
+            throw ApiFeil(
+                "Behandlingen har en annen eier og kan derfor ikke henlegges av deg",
                 HttpStatus.BAD_REQUEST,
             )
         }
