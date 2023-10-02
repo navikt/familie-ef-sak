@@ -5,6 +5,8 @@ import io.mockk.mockk
 import io.mockk.mockkObject
 import io.mockk.unmockkObject
 import io.mockk.verify
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.oppgave.dto.SaksbehandlerRolle
 import no.nav.familie.kontrakter.felles.oppgave.Oppgave
@@ -22,14 +24,17 @@ internal class TilordnetRessursServiceTest {
 
     private val oppgaveClient: OppgaveClient = mockk()
     private val oppgaveRepository: OppgaveRepository = mockk()
+    private val featureToggleService: FeatureToggleService = mockk()
 
     private val tilordnetRessursService: TilordnetRessursService =
-        TilordnetRessursService(oppgaveClient, oppgaveRepository)
+        TilordnetRessursService(oppgaveClient, oppgaveRepository, featureToggleService)
 
     @BeforeEach
     fun setUp() {
         mockkObject(SikkerhetContext)
         every { SikkerhetContext.hentSaksbehandler() } returns "NAV1234"
+        every { SikkerhetContext.erSaksbehandler() } returns true
+        every { featureToggleService.isEnabled(any())} returns false
     }
 
     @AfterEach
@@ -141,6 +146,24 @@ internal class TilordnetRessursServiceTest {
 
             assertThat(erSaksbehandlerEllerNull).isFalse()
         }
+
+        @Test
+        internal fun `skal returnere false dersom innlogget saksbehandler er utvikler med veilederrolle`() {
+            every {
+                oppgaveRepository.findByBehandlingIdAndErFerdigstiltIsFalseAndTypeIn(
+                    any(),
+                    oppgaveTyper,
+                )
+            } answers { efOppgave(firstArg<UUID>()) }
+            every { oppgaveClient.finnOppgaveMedId(any()) } answers { oppgave(firstArg<Long>()).copy(tilordnetRessurs = "NAV2345") }
+            every { SikkerhetContext.erSaksbehandler() } returns true
+            every { featureToggleService.isEnabled(any())} returns true
+
+            val erSaksbehandlerEllerNull =
+                tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandlerEllerNull(UUID.randomUUID())
+
+            assertThat(erSaksbehandlerEllerNull).isFalse()
+        }
     }
 
     @Nested
@@ -194,6 +217,22 @@ internal class TilordnetRessursServiceTest {
             assertThat(saksbehandlerDto.etternavn).isEqualTo("")
             assertThat(saksbehandlerDto.rolle).isEqualTo(SaksbehandlerRolle.OPPGAVE_FINNES_IKKE)
             verify(exactly = 0) { oppgaveClient.hentSaksbehandlerInfo(any()) }
+        }
+
+        @Test
+        internal fun `skal utlede at saksbehandlers rolle er UTVIKLER MED VEILEDERROLLE`() {
+            val saksbehandler = saksbehandler(UUID.randomUUID(), "4405", "Vader", "Darth", "NAV1234")
+            val oppgave = Oppgave(tilordnetRessurs = "NAV1234")
+
+            every { oppgaveClient.hentSaksbehandlerInfo("NAV1234") } returns saksbehandler
+            every { SikkerhetContext.erSaksbehandler() } returns true
+            every { featureToggleService.isEnabled(any())} returns true
+
+            val saksbehandlerDto = tilordnetRessursService.utledAnsvarligSaksbehandlerForOppgave(oppgave)
+
+            assertThat(saksbehandlerDto.fornavn).isEqualTo("Darth")
+            assertThat(saksbehandlerDto.etternavn).isEqualTo("Vader")
+            assertThat(saksbehandlerDto.rolle).isEqualTo(SaksbehandlerRolle.UTVIKLER_MED_VEILDERROLLE)
         }
     }
 

@@ -1,5 +1,7 @@
 package no.nav.familie.ef.sak.oppgave
 
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.oppgave.dto.SaksbehandlerDto
 import no.nav.familie.ef.sak.oppgave.dto.SaksbehandlerRolle
@@ -13,15 +15,16 @@ import no.nav.familie.ef.sak.oppgave.Oppgave as EFOppgave
 class TilordnetRessursService(
     private val oppgaveClient: OppgaveClient,
     private val oppgaveRepository: OppgaveRepository,
+    private val featureToggleService: FeatureToggleService,
 ) {
 
     fun tilordnetRessursErInnloggetSaksbehandlerEllerNull(behandlingId: UUID): Boolean {
-        val oppgave = hentIkkeFerdigstiltOppgaveForBehandling(behandlingId)
+        val oppgave = if(erUtviklerMedVeilderrolle()) null else hentIkkeFerdigstiltOppgaveForBehandling(behandlingId)
         val rolle = utledSaksbehandlerRolle(oppgave)
 
         return when (rolle) {
             SaksbehandlerRolle.IKKE_SATT, SaksbehandlerRolle.INNLOGGET_SAKSBEHANDLER, SaksbehandlerRolle.OPPGAVE_FINNES_IKKE -> true
-            SaksbehandlerRolle.ANNEN_SAKSBEHANDLER -> false
+            SaksbehandlerRolle.ANNEN_SAKSBEHANDLER, SaksbehandlerRolle.UTVIKLER_MED_VEILDERROLLE -> false
         }
     }
 
@@ -49,6 +52,10 @@ class TilordnetRessursService(
     fun hentSaksbehandlerInfo(navIdent: String) = oppgaveClient.hentSaksbehandlerInfo(navIdent)
 
     private fun utledSaksbehandlerRolle(oppgave: Oppgave?): SaksbehandlerRolle {
+        if (erUtviklerMedVeilderrolle()) {
+            return SaksbehandlerRolle.UTVIKLER_MED_VEILDERROLLE
+        }
+
         val innloggetSaksbehandler = SikkerhetContext.hentSaksbehandler()
 
         if (oppgave == null) {
@@ -61,4 +68,7 @@ class TilordnetRessursService(
             else -> SaksbehandlerRolle.ANNEN_SAKSBEHANDLER
         }
     }
+
+    private fun erUtviklerMedVeilderrolle(): Boolean =
+        SikkerhetContext.erSaksbehandler() && featureToggleService.isEnabled(Toggle.UTVIKLER_MED_VEILEDERRROLLE)
 }
