@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.opplysninger.personopplysninger
 
+import no.nav.familie.ef.sak.arbeidsforhold.ekstern.ArbeidsforholdService
 import no.nav.familie.ef.sak.felles.util.Timer.loggTid
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.GrunnlagsdataDomene
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.TidligereVedtaksperioder
@@ -11,6 +12,7 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlAnnenForelde
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlPersonForelderBarn
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlPersonKort
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlSøker
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.gjeldende
 import org.springframework.stereotype.Service
 
 @Service
@@ -18,6 +20,7 @@ class GrunnlagsdataRegisterService(
     private val personService: PersonService,
     private val personopplysningerIntegrasjonerClient: PersonopplysningerIntegrasjonerClient,
     private val tidligereVedtaksperioderService: TidligereVedtaksperioderService,
+    private val arbeidsforholdService: ArbeidsforholdService,
 ) {
 
     fun hentGrunnlagsdataFraRegister(
@@ -29,12 +32,14 @@ class GrunnlagsdataRegisterService(
         val tidligereVedtaksperioder =
             tidligereVedtaksperioderService.hentTidligereVedtaksperioder(grunnlagsdataFraPdl.søker.folkeregisteridentifikator)
         val tidligereVedtaksperioderAnnenForelder = hentTidligereVedtaksperioderAnnenForelder(grunnlagsdataFraPdl.barneForeldre)
+        val harAvsluttetArbeidsforhold = arbeidsforholdService.finnesAvsluttetArbeidsforholdSisteAntallMåneder(grunnlagsdataFraPdl.gjeldendeIdentForSøker())
         return GrunnlagsdataDomene(
             søker = mapSøker(grunnlagsdataFraPdl.søker, grunnlagsdataFraPdl.andrePersoner),
             annenForelder = mapAnnenForelder(grunnlagsdataFraPdl.barneForeldre, tidligereVedtaksperioderAnnenForelder),
             medlUnntak = medlUnntak,
             barn = mapBarn(grunnlagsdataFraPdl.barn),
             tidligereVedtaksperioder = tidligereVedtaksperioder,
+            harAvsluttetArbeidsforhold = harAvsluttetArbeidsforhold,
         )
     }
 
@@ -43,12 +48,14 @@ class GrunnlagsdataRegisterService(
     ): GrunnlagsdataDomene {
         val grunnlagsdataFraPdl = hentGrunnlagsdataFraPdl(personIdent, emptyList())
         val medlUnntak = personopplysningerIntegrasjonerClient.hentMedlemskapsinfo(personIdent)
+        val harAvsluttetArbeidsforhold = arbeidsforholdService.finnesAvsluttetArbeidsforholdSisteAntallMåneder(personIdent)
         return GrunnlagsdataDomene(
             søker = mapSøker(grunnlagsdataFraPdl.søker, grunnlagsdataFraPdl.andrePersoner),
             annenForelder = mapAnnenForelder(grunnlagsdataFraPdl.barneForeldre, emptyMap()),
             medlUnntak = medlUnntak,
             barn = mapBarn(grunnlagsdataFraPdl.barn),
             tidligereVedtaksperioder = null,
+            harAvsluttetArbeidsforhold = harAvsluttetArbeidsforhold,
         )
     }
 
@@ -112,3 +119,5 @@ data class GrunnlagsdataFraPdl(
     val barneForeldre: Map<String, PdlAnnenForelder>,
     val andrePersoner: Map<String, PdlPersonKort>,
 )
+
+fun GrunnlagsdataFraPdl.gjeldendeIdentForSøker() = this.søker.folkeregisteridentifikator.gjeldende().ident

@@ -26,6 +26,11 @@ class InntektService(
         return aMeldingInntektClient.genererAInntektUrl(personIdent)
     }
 
+    fun genererAInntektArbeidsforholdUrl(fagsakId: UUID): String {
+        val personIdent = fagsakService.hentAktivIdent(fagsakId)
+        return aMeldingInntektClient.genererAInntektArbeidsforholdUrl(personIdent)
+    }
+
     fun genererAInntektUrlFagsak(fagsakId: UUID): String {
         val personIdent = fagsakService.hentAktivIdent(fagsakId)
         return aMeldingInntektClient.genererAInntektUrl(personIdent)

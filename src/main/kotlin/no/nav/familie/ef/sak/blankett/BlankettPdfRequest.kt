@@ -13,6 +13,7 @@ data class BlankettPdfRequest(
     val vilkår: VilkårDto,
     val vedtak: VedtakDto,
     val søknadsdatoer: SøknadDatoerDto?,
+    val harAvsluttetArbeidsforhold: Boolean?,
 )
 
 data class BlankettPdfBehandling(

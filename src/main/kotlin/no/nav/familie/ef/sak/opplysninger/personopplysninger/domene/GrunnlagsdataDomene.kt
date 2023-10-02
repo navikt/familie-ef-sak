@@ -72,6 +72,7 @@ data class GrunnlagsdataDomene(
     val medlUnntak: Medlemskapsinfo,
     val barn: List<BarnMedIdent>,
     val tidligereVedtaksperioder: TidligereVedtaksperioder?,
+    val harAvsluttetArbeidsforhold: Boolean?,
 )
 
 data class Søker(
