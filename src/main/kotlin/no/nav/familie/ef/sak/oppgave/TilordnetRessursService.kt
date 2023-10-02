@@ -25,14 +25,17 @@ class TilordnetRessursService(
         }
     }
 
-    fun hentIkkeFerdigstiltOppgaveForBehandling(behandlingId: UUID): Oppgave? =
-        hentBehandleSakOppgaveSomIkkeErFerdigstilt(behandlingId)
-            ?.let { oppgaveClient.finnOppgaveMedId(it.gsakOppgaveId) }
+    fun hentIkkeFerdigstiltOppgaveForBehandling(behandlingId: UUID, oppgavetyper: Set<Oppgavetype>? = null): Oppgave? {
+        val typer = if (oppgavetyper.isNullOrEmpty()) setOf(Oppgavetype.BehandleSak, Oppgavetype.BehandleUnderkjentVedtak) else oppgavetyper
 
-    fun hentBehandleSakOppgaveSomIkkeErFerdigstilt(behandlingId: UUID): EFOppgave? =
+        return hentEFOppgaveSomIkkeErFerdigstilt(behandlingId, typer)
+            ?.let { oppgaveClient.finnOppgaveMedId(it.gsakOppgaveId) }
+    }
+
+    fun hentEFOppgaveSomIkkeErFerdigstilt(behandlingId: UUID, oppgavetyper: Set<Oppgavetype>): EFOppgave? =
         oppgaveRepository.findByBehandlingIdAndErFerdigstiltIsFalseAndTypeIn(
             behandlingId,
-            setOf(Oppgavetype.BehandleSak, Oppgavetype.BehandleUnderkjentVedtak),
+            oppgavetyper,
         )
 
     fun utledAnsvarligSaksbehandlerForOppgave(behandleSakOppgave: Oppgave?): SaksbehandlerDto {
