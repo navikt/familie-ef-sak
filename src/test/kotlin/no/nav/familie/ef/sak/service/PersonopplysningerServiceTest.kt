@@ -3,6 +3,7 @@ package no.nav.familie.ef.sak.service
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import no.nav.familie.ef.sak.arbeidsforhold.ekstern.ArbeidsforholdService
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.infrastruktur.config.KodeverkServiceMock
 import no.nav.familie.ef.sak.infrastruktur.config.PdlClientConfig
@@ -34,6 +35,7 @@ internal class PersonopplysningerServiceTest {
     private lateinit var grunnlagsdataService: GrunnlagsdataService
     private lateinit var søknadService: SøknadService
     private lateinit var behandlingService: BehandlingService
+    private lateinit var arbeidsforholdService: ArbeidsforholdService
 
     private val tidligereVedtaksperioderService = mockk<TidligereVedtaksperioderService>(relaxed = true)
 
@@ -43,12 +45,14 @@ internal class PersonopplysningerServiceTest {
         behandlingService = mockk(relaxed = true)
         adresseMapper = AdresseMapper(kodeverkService)
         søknadService = mockk()
+        arbeidsforholdService = mockk(relaxed = true)
         val personService = PersonService(PdlClientConfig().pdlClient(), ConcurrentMapCacheManager())
 
         val grunnlagsdataRegisterService = GrunnlagsdataRegisterService(
             personService,
             personopplysningerIntegrasjonerClient,
             tidligereVedtaksperioderService,
+            arbeidsforholdService,
         )
 
         grunnlagsdataService = GrunnlagsdataService(

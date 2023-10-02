@@ -2,6 +2,7 @@ package no.nav.familie.ef.sak.vilkår
 
 import io.mockk.every
 import io.mockk.mockk
+import no.nav.familie.ef.sak.arbeidsforhold.ekstern.ArbeidsforholdService
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
@@ -46,12 +47,14 @@ internal class VilkårGrunnlagServiceTest {
     private val medlemskapMapper = MedlemskapMapper(mockk(relaxed = true), mockk(relaxed = true), mockk(relaxed = true), kodeverkService)
     private val behandlingService = mockk<BehandlingService>()
     private val tidligereVedtaksperioderService = mockk<TidligereVedtaksperioderService>(relaxed = true)
+    private val arbeidsforholdService = mockk<ArbeidsforholdService>(relaxed = true)
     private val tilordnetRessursService = mockk<TilordnetRessursService>(relaxed = true)
 
     private val grunnlagsdataRegisterService = GrunnlagsdataRegisterService(
         personService,
         personopplysningerIntegrasjonerClient,
         tidligereVedtaksperioderService,
+        arbeidsforholdService,
     )
 
     private val fagsakService = mockk<FagsakService>()

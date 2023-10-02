@@ -50,6 +50,7 @@ fun opprettGrunnlagsdata(
             harTidligereSkolepenger = false,
         ),
     ),
+    false,
 )
 
 fun opprettBarnMedIdent(

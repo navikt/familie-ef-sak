@@ -23,6 +23,7 @@ data class VilkårGrunnlagDto(
     val registeropplysningerOpprettetTid: LocalDateTime,
     val adresseopplysninger: AdresseopplysningerDto?,
     val dokumentasjon: DokumentasjonFraSøknadDto?,
+    val harAvsluttetArbeidsforhold: Boolean?,
 )
 
 data class PersonaliaDto(
