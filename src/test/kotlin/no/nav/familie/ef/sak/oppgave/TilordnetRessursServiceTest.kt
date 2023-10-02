@@ -6,7 +6,6 @@ import io.mockk.mockkObject
 import io.mockk.unmockkObject
 import io.mockk.verify
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
-import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.oppgave.dto.SaksbehandlerRolle
 import no.nav.familie.kontrakter.felles.oppgave.Oppgave
@@ -34,7 +33,7 @@ internal class TilordnetRessursServiceTest {
         mockkObject(SikkerhetContext)
         every { SikkerhetContext.hentSaksbehandler() } returns "NAV1234"
         every { SikkerhetContext.erSaksbehandler() } returns true
-        every { featureToggleService.isEnabled(any())} returns false
+        every { featureToggleService.isEnabled(any()) } returns false
     }
 
     @AfterEach
@@ -157,7 +156,7 @@ internal class TilordnetRessursServiceTest {
             } answers { efOppgave(firstArg<UUID>()) }
             every { oppgaveClient.finnOppgaveMedId(any()) } answers { oppgave(firstArg<Long>()).copy(tilordnetRessurs = "NAV2345") }
             every { SikkerhetContext.erSaksbehandler() } returns true
-            every { featureToggleService.isEnabled(any())} returns true
+            every { featureToggleService.isEnabled(any()) } returns true
 
             val erSaksbehandlerEllerNull =
                 tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandlerEllerNull(UUID.randomUUID())
@@ -226,7 +225,7 @@ internal class TilordnetRessursServiceTest {
 
             every { oppgaveClient.hentSaksbehandlerInfo("NAV1234") } returns saksbehandler
             every { SikkerhetContext.erSaksbehandler() } returns true
-            every { featureToggleService.isEnabled(any())} returns true
+            every { featureToggleService.isEnabled(any()) } returns true
 
             val saksbehandlerDto = tilordnetRessursService.utledAnsvarligSaksbehandlerForOppgave(oppgave)
 

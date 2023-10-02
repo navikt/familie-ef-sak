@@ -19,7 +19,7 @@ class TilordnetRessursService(
 ) {
 
     fun tilordnetRessursErInnloggetSaksbehandlerEllerNull(behandlingId: UUID): Boolean {
-        val oppgave = if(erUtviklerMedVeilderrolle()) null else hentIkkeFerdigstiltOppgaveForBehandling(behandlingId)
+        val oppgave = if (erUtviklerMedVeilderrolle()) null else hentIkkeFerdigstiltOppgaveForBehandling(behandlingId)
         val rolle = utledSaksbehandlerRolle(oppgave)
 
         return when (rolle) {
