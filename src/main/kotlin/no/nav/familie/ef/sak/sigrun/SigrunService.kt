@@ -15,7 +15,7 @@ class SigrunService(val sigrunClient: SigrunClient, val fagsakPersonService: Fag
     fun hentInntektForAlleÅrMedInntekt(fagsakPersonId: UUID): List<PensjonsgivendeInntektVisning> {
         val aktivIdent = fagsakPersonService.hentAktivIdent(fagsakPersonId)
 
-        val inntektsår = (YearMonth.now().year - 1) downTo 1990
+        val inntektsår = (YearMonth.now().year - 1) downTo 2017
 
         val pensjonsgivendeInntektList = inntektsår.map {
             sigrunClient.hentPensjonsgivendeInntekt(aktivIdent, it).mapTilPensjonsgivendeInntektVisning(it)
