@@ -34,16 +34,13 @@ class BlankettService(
         val vilkårVurderinger = vurderingService.hentEllerOpprettVurderinger(behandlingId)
         val registergrunnlagData = grunnlagsdataService.hentGrunnlagsdata(behandlingId)
         val grunnlagsdata = registergrunnlagData.grunnlagsdata
-        grunnlagsdata.tidligereVedtaksperioder.tilDto()
-        val tidligereVedtaksperioder = grunnlagsdata.tidligereVedtaksperioder.tilDto()
-        println("lagBlankett - tidligereVedtaksperioder: $tidligereVedtaksperioder") // TODO slett
 
         val blankettPdfRequest = BlankettPdfRequest(
             BlankettPdfBehandling(
                 årsak = behandling.årsak,
                 stønadstype = behandling.stønadstype,
                 årsakRevurdering = årsakRevurderingService.hentÅrsakRevurdering(behandlingId)?.tilDto(),
-                tidligereVedtaksperioder = tidligereVedtaksperioder,
+                tidligereVedtaksperioder = grunnlagsdata.tidligereVedtaksperioder.tilDto(),
             ),
             lagPersonopplysningerDto(behandling),
             vurderingService.hentEllerOpprettVurderinger(behandlingId),
