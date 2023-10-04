@@ -74,7 +74,7 @@ class GrunnlagsdataService(
         return grunnlagsdataRepository.findByIdOrThrow(behandlingId)
     }
 
-    private fun hentFraRegisterMedSøknadsdata(behandlingId: UUID): GrunnlagsdataDomene {
+    fun hentFraRegisterMedSøknadsdata(behandlingId: UUID): GrunnlagsdataDomene {
         val stønadstype = fagsakService.hentFagsakForBehandling(behandlingId).stønadstype
         val søknad = when (stønadstype) {
             StønadType.OVERGANGSSTØNAD -> søknadService.hentOvergangsstønad(behandlingId)
