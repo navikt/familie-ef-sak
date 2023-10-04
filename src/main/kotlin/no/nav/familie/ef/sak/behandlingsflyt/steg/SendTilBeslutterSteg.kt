@@ -85,7 +85,7 @@ class SendTilBeslutterSteg(
     }
 
     private fun validerAtSaksbehandlerErAnsvarligForBehandling(saksbehandling: Saksbehandling) {
-        feilHvis(!tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandlerEllerNull(saksbehandling.id)) {
+        feilHvis(!tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandler(saksbehandling.id)) {
             "Behandlingen har en ny eier og kan derfor ikke sendes til totrinnskontroll av deg"
         }
     }

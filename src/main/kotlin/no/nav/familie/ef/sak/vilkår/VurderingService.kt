@@ -174,7 +174,7 @@ class VurderingService(
 
     private fun behandlingErLåstForVidereRedigeringForInnloggetSaksbehandler(behandlingId: UUID) =
         behandlingService.hentBehandling(behandlingId).status.behandlingErLåstForVidereRedigering() ||
-            !tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandlerEllerNull(behandlingId)
+            !tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandler(behandlingId)
 
     private fun finnEndringerIGrunnlagsdata(behandlingId: UUID): List<GrunnlagsdataEndring> {
         val oppdaterteGrunnlagsdata = grunnlagsdataService.hentFraRegister(behandlingId)

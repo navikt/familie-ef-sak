@@ -143,7 +143,7 @@ class GjenbrukVilkårService(
         brukerfeilHvis(saksbehandling.status.behandlingErLåstForVidereRedigering()) {
             "Behandlingen er låst og vilkår kan ikke oppdateres på behandling med id=$behandlingId"
         }
-        brukerfeilHvis(!tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandlerEllerNull(behandlingId)) {
+        brukerfeilHvis(!tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandler(behandlingId)) {
             "Behandling med id=$behandlingId eies av noen andre og vilkår kan derfor ikke oppdateres av deg"
         }
 

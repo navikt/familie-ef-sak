@@ -268,7 +268,7 @@ class BehandlingService(
                 HttpStatus.BAD_REQUEST,
             )
         }
-        if (!tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandlerEllerNull(behandling.id)) {
+        if (!tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandler(behandling.id)) {
             throw ApiFeil(
                 "Behandlingen har en annen eier og kan derfor ikke henlegges av deg",
                 HttpStatus.BAD_REQUEST,

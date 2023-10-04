@@ -148,7 +148,7 @@ class VedtakController(
         feilHvis(saksbehandling.status.behandlingErLåstForVidereRedigering()) {
             "Behandlingen er låst og vedtaket kan derfor ikke lagres"
         }
-        feilHvis(!tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandlerEllerNull((saksbehandling.id))) {
+        feilHvis(!tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandler((saksbehandling.id))) {
             "Behandlingen har en annen eier og du kan derfor lagre vedtaket"
         }
     }

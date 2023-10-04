@@ -38,7 +38,7 @@ class SimuleringService(
     fun simuler(saksbehandling: Saksbehandling): Simuleringsoppsummering {
         if (saksbehandling.status.behandlingErLåstForVidereRedigering() ||
             !tilgangService.harTilgangTilRolle(BehandlerRolle.SAKSBEHANDLER) ||
-            !tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandlerEllerNull(saksbehandling.id)
+            !tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandler(saksbehandling.id)
         ) {
             return hentLagretSimuleringsoppsummering(saksbehandling.id)
         }

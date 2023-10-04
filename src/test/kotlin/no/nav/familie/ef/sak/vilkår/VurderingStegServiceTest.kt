@@ -132,7 +132,7 @@ internal class VurderingStegServiceTest {
                 ),
             )
         every { vilkårsvurderingRepository.insertAll(any()) } answers { firstArg() }
-        every { tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandlerEllerNull(any()) } returns true
+        every { tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandler(any()) } returns true
         val sivilstand = SivilstandInngangsvilkårDto(
             mockk(relaxed = true),
             SivilstandRegistergrunnlagDto(Sivilstandstype.GIFT, "1", "Navn", null),

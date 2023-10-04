@@ -84,7 +84,7 @@ internal class TilordnetRessursServiceTest {
     inner class UtledSaksbehandlerRolle {
 
         @Test
-        internal fun `skal returnere true dersom tilordnet ressurs er null`() {
+        internal fun `skal returnere false dersom tilordnet ressurs er null`() {
             every {
                 oppgaveRepository.findByBehandlingIdAndErFerdigstiltIsFalseAndTypeIn(
                     any(),
@@ -94,9 +94,9 @@ internal class TilordnetRessursServiceTest {
             every { oppgaveClient.finnOppgaveMedId(any()) } answers { oppgave(firstArg<Long>()).copy(tilordnetRessurs = null) }
 
             val erSaksbehandlerEllerNull =
-                tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandlerEllerNull(UUID.randomUUID())
+                tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandler(UUID.randomUUID())
 
-            assertThat(erSaksbehandlerEllerNull).isTrue()
+            assertThat(erSaksbehandlerEllerNull).isFalse()
         }
 
         @Test
@@ -109,7 +109,7 @@ internal class TilordnetRessursServiceTest {
             } answers { null }
 
             val erSaksbehandlerEllerNull =
-                tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandlerEllerNull(UUID.randomUUID())
+                tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandler(UUID.randomUUID())
 
             assertThat(erSaksbehandlerEllerNull).isTrue()
         }
@@ -125,7 +125,7 @@ internal class TilordnetRessursServiceTest {
             every { oppgaveClient.finnOppgaveMedId(any()) } answers { oppgave(firstArg<Long>()).copy(tilordnetRessurs = "NAV1234") }
 
             val erSaksbehandlerEllerNull =
-                tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandlerEllerNull(UUID.randomUUID())
+                tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandler(UUID.randomUUID())
 
             assertThat(erSaksbehandlerEllerNull).isTrue()
         }
@@ -141,7 +141,7 @@ internal class TilordnetRessursServiceTest {
             every { oppgaveClient.finnOppgaveMedId(any()) } answers { oppgave(firstArg<Long>()).copy(tilordnetRessurs = "NAV2345") }
 
             val erSaksbehandlerEllerNull =
-                tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandlerEllerNull(UUID.randomUUID())
+                tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandler(UUID.randomUUID())
 
             assertThat(erSaksbehandlerEllerNull).isFalse()
         }
@@ -159,7 +159,7 @@ internal class TilordnetRessursServiceTest {
             every { featureToggleService.isEnabled(any()) } returns true
 
             val erSaksbehandlerEllerNull =
-                tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandlerEllerNull(UUID.randomUUID())
+                tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandler(UUID.randomUUID())
 
             assertThat(erSaksbehandlerEllerNull).isFalse()
         }
