@@ -149,7 +149,7 @@ internal class SendTilBeslutterStegTest {
         every {
             taskService.save(capture(taskSlot))
         } returns Task("", "", Properties())
-        every { tilordnetRessursService.hentBehandleSakOppgaveSomIkkeErFerdigstilt(any()) } returns Oppgave(
+        every { tilordnetRessursService.hentEFOppgaveSomIkkeErFerdigstilt(any(), any()) } returns Oppgave(
             behandlingId = behandling.id,
             gsakOppgaveId = 1234L,
             type = Oppgavetype.BehandleSak,
@@ -257,7 +257,7 @@ internal class SendTilBeslutterStegTest {
                 steg = StegType.BESLUTTE_VEDTAK,
                 utfall = StegUtfall.BESLUTTE_VEDTAK_UNDERKJENT,
             )
-        every { tilordnetRessursService.hentBehandleSakOppgaveSomIkkeErFerdigstilt(any()) } returns null
+        every { tilordnetRessursService.hentEFOppgaveSomIkkeErFerdigstilt(any(), any()) } returns null
         every { vedtakService.hentVedtaksresultat(any()) } returns ResultatType.INNVILGE
         val feil = assertThrows<Feil> { beslutteVedtakSteg.validerSteg(behandling) }
         assertThat(feil.frontendFeilmelding).contains("Oppgaven for behandlingen er ikke tilgjengelig. Vennligst vent og prøv igjen om litt.")

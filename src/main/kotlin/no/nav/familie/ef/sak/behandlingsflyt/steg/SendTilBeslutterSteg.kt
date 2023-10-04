@@ -79,7 +79,7 @@ class SendTilBeslutterSteg(
     }
 
     private fun validerAtDetFinnesOppgave(saksbehandling: Saksbehandling) {
-        feilHvis(tilordnetRessursService.hentBehandleSakOppgaveSomIkkeErFerdigstilt(saksbehandling.id) == null) {
+        feilHvis(tilordnetRessursService.hentEFOppgaveSomIkkeErFerdigstilt(saksbehandling.id, setOf(Oppgavetype.BehandleSak, Oppgavetype.BehandleUnderkjentVedtak)) == null) {
             "Oppgaven for behandlingen er ikke tilgjengelig. Vennligst vent og prøv igjen om litt."
         }
     }

@@ -17,6 +17,7 @@ import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveResponseDto
 import no.nav.familie.kontrakter.felles.oppgave.MappeDto
 import no.nav.familie.kontrakter.felles.oppgave.Oppgave
+import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
@@ -120,7 +121,10 @@ class OppgaveController(
 
     @GetMapping("{behandlingId}/ansvarlig-saksbehandler")
     fun hentAnsvarligSaksbehandlerForBehandling(@PathVariable behandlingId: UUID): Ressurs<SaksbehandlerDto> {
-        val oppgave = tilordnetRessursService.hentIkkeFerdigstiltOppgaveForBehandling(behandlingId)
+        val oppgave = tilordnetRessursService.hentIkkeFerdigstiltOppgaveForBehandling(
+            behandlingId,
+            setOf(Oppgavetype.BehandleSak, Oppgavetype.BehandleUnderkjentVedtak, Oppgavetype.GodkjenneVedtak),
+        )
         return Ressurs.success(tilordnetRessursService.utledAnsvarligSaksbehandlerForOppgave(oppgave))
     }
 
