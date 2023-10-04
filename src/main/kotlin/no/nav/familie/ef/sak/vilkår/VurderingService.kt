@@ -215,7 +215,7 @@ class VurderingService(
             behandlingId = nyBehandlingsId,
         )
         behandlingSomErGrunnlagForGjenbrukAvInngangsvilkår?.let {
-            if (featureToggleService.isEnabled(Toggle.BEHANDLING_KORRIGERING)) {
+            if (featureToggleService.isEnabled(Toggle.GJENBRUK_VILKÅR_PÅ_TVERS_AV_BEHANDLINGER)) {
                 logger.info("Gjenbruker inngangsvilkår fra behandling=$it til ny behandling=$nyBehandlingsId")
                 gjenbrukVilkårService.gjenbrukInngangsvilkårVurderinger(
                     behandlingSomSkalOppdateres = nyBehandlingsId,
