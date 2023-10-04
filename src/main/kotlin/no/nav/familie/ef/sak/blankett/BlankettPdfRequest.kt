@@ -22,7 +22,7 @@ data class BlankettPdfBehandling(
     val årsak: BehandlingÅrsak,
     val stønadstype: StønadType,
     val årsakRevurdering: ÅrsakRevurderingDto?,
-    val tidligereVedtaksperioder: TidligereVedtaksperioderDto,
+    val tidligereVedtaksperioder: TidligereVedtaksperioderDto?,
 )
 
 data class PersonopplysningerDto(
