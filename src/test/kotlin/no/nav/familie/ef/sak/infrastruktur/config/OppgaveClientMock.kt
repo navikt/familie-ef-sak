@@ -2,6 +2,7 @@ package no.nav.familie.ef.sak.infrastruktur.config
 
 import io.mockk.every
 import io.mockk.mockk
+import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.oppgave.OppgaveClient
 import no.nav.familie.kontrakter.felles.Behandlingstema
 import no.nav.familie.kontrakter.felles.Tema
@@ -15,11 +16,13 @@ import no.nav.familie.kontrakter.felles.oppgave.OppgavePrioritet
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.kontrakter.felles.oppgave.OpprettOppgaveRequest
 import no.nav.familie.kontrakter.felles.oppgave.StatusEnum
+import no.nav.familie.kontrakter.felles.saksbehandler.Saksbehandler
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Primary
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
+import java.util.UUID
 
 @Configuration
 class OppgaveClientMock {
@@ -34,6 +37,10 @@ class OppgaveClientMock {
                 oppgave1,
                 oppgave2,
                 oppgave3,
+                oppgave4,
+                oppgave5,
+                oppgave6,
+                oppgave7,
                 tilbakekreving1,
                 oppgavePapirsøknad,
                 oppgaveEttersending,
@@ -153,14 +160,45 @@ class OppgaveClientMock {
             firstArg<Oppgave>().id ?: 0
         }
 
+        every { oppgaveClient.hentSaksbehandlerInfo(any()) } answers {
+            val navIdent = utledNavIdent(firstArg<String>())
+            val saksbehandlerNavn = SikkerhetContext.hentSaksbehandlerNavn().split(" ")
+            val fornavn = saksbehandlerNavn.first()
+            val etternavn = if (saksbehandlerNavn.size > 1) saksbehandlerNavn.elementAt(1) else "Saksbehandlersen"
+
+            Saksbehandler(
+                azureId = UUID.randomUUID(),
+                navIdent = navIdent,
+                fornavn = fornavn,
+                etternavn = etternavn,
+                enhet = "4405",
+            )
+        }
+
         return oppgaveClient
     }
 
-    private val oppgave1 = lagOppgave(1L, Oppgavetype.Journalføring, "Z999999", behandlesAvApplikasjon = "familie-ef-sak")
+    private val oppgave1 =
+        lagOppgave(1L, Oppgavetype.Journalføring, "Z999999", behandlesAvApplikasjon = "familie-ef-sak")
     private val oppgave2 = lagOppgave(2L, Oppgavetype.BehandleSak, "Z999999", behandlesAvApplikasjon = "familie-ef-sak")
-    private val oppgave3 = lagOppgave(3L, Oppgavetype.Journalføring, beskivelse = "", behandlesAvApplikasjon = "familie-ef-sak")
+    private val oppgave3 =
+        lagOppgave(3L, Oppgavetype.Journalføring, beskivelse = "", behandlesAvApplikasjon = "familie-ef-sak")
+    private val oppgave4 =
+        lagOppgave(24681L, Oppgavetype.Journalføring, "SAKSBEHANDLER", behandlesAvApplikasjon = "familie-ef-sak")
+    private val oppgave5 =
+        lagOppgave(24682L, Oppgavetype.Journalføring, "BESLUTTER", behandlesAvApplikasjon = "familie-ef-sak")
+    private val oppgave6 =
+        lagOppgave(24683L, Oppgavetype.BehandleSak, tilordnetRessurs = null, behandlesAvApplikasjon = "familie-ef-sak")
+    private val oppgave7 =
+        lagOppgave(24684L, Oppgavetype.BehandleSak, tilordnetRessurs = "julenissen", behandlesAvApplikasjon = "familie-ef-sak")
     private val oppgavePapirsøknad =
-        lagOppgave(5L, Oppgavetype.Journalføring, beskivelse = "Papirsøknad", behandlesAvApplikasjon = "", journalpostId = "23456")
+        lagOppgave(
+            5L,
+            Oppgavetype.Journalføring,
+            beskivelse = "Papirsøknad",
+            behandlesAvApplikasjon = "",
+            journalpostId = "23456",
+        )
     private val oppgaveEttersending =
         lagOppgave(
             6L,
@@ -188,7 +226,7 @@ class OppgaveClientMock {
     private fun lagOppgave(
         oppgaveId: Long,
         oppgavetype: Oppgavetype,
-        tildeltRessurs: String? = null,
+        tilordnetRessurs: String? = null,
         beskivelse: String? = "Beskrivelse av oppgaven. \n\n\n" +
             "Denne teksten kan jo være lang, kort eller ikke inneholde noenting. ",
         journalpostId: String? = "1234",
@@ -202,7 +240,7 @@ class OppgaveClientMock {
             identer = listOf(OppgaveIdentV2("11111111111", IdentGruppe.FOLKEREGISTERIDENT)),
             journalpostId = journalpostId,
             tildeltEnhetsnr = "4489",
-            tilordnetRessurs = tildeltRessurs,
+            tilordnetRessurs = tilordnetRessurs,
             behandlingstype = behandlingstype,
             mappeId = 123,
             behandlesAvApplikasjon = behandlesAvApplikasjon,
@@ -216,5 +254,11 @@ class OppgaveClientMock {
             status = StatusEnum.OPPRETTET,
             versjon = 2,
         )
+    }
+
+    private fun utledNavIdent(navIdent: String) = when (navIdent) {
+        "BESLUTTER" -> "ANNEN_SAKSBEHANDLER"
+        "julenissen" -> "julenissen"
+        else -> SikkerhetContext.hentSaksbehandler()
     }
 }

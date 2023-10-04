@@ -37,12 +37,14 @@ rolle:
   kode7: "ea930b6b-9397-44d9-b9e6-f4cf527a632a" # 0000-GA-Fortrolig_Adresse
   egenAnsatt: "dbe4ad45-320b-4e9a-aaa1-73cca4ee124d" # 0000-GA-Egne_ansatte
 
-funksjonsbrytere:
+prosessering.rolle: "928636f4-fd0d-4149-978e-a6fb68bb19de" # 0000-GA-STDAPPS
+
+unleash:
   enabled: false
-  unleash:
-    uri: http://localhost:4242/api
-    environment: local
-    applicationName: familie-ef-sak
+
+UNLEASH_SERVER_API_URL: http://localhost:4242/api
+UNLEASH_SERVER_API_TOKEN: token
+NAIS_APP_NAME: familie-ef-sak
 
 prosessering:
   fixedDelayString:

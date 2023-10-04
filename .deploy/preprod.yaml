@@ -9,7 +9,6 @@ metadata:
 spec:
   image: {{ image }}
   ingresses:
-    - https://familie-ef-sak.dev.intern.nav.no # Deprecated
     - https://familie-ef-sak.intern.dev.nav.no
   liveness:
     path: /internal/status/isAlive
@@ -89,11 +88,11 @@ spec:
           namespace: paw
       external:
         - host: api-gw-q1.oera.no
-        - host: unleash.nais.io
         - host: familie-oppdrag.dev-fss-pub.nais.io
         - host: familie-integrasjoner.dev-fss-pub.nais.io
         - host: familie-ef-infotrygd.dev-fss-pub.nais.io
         - host: familie-ef-proxy.dev-fss-pub.nais.io
+        - host: teamfamilie-unleash-api.nav.cloud.nais.io
   azure:
     application:
       enabled: true
@@ -108,6 +107,7 @@ spec:
           - id: "5ef775f2-61f8-4283-bf3d-8d03f428aa14" # 0000-GA-Strengt_Fortrolig_Adresse
           - id: "ea930b6b-9397-44d9-b9e6-f4cf527a632a" # 0000-GA-Fortrolig_Adresse
           - id: "dbe4ad45-320b-4e9a-aaa1-73cca4ee124d" # 0000-GA-Egne_ansatte
+          - id: "928636f4-fd0d-4149-978e-a6fb68bb19de" # prosessering.rolle - (0000-GA-STDAPPS)
         extra:
           - "NAVident"
           - "azp_name"
@@ -116,3 +116,5 @@ spec:
       value: dev
   envFrom:
     - secret: familie-ef-sak
+    - secret: familie-ef-sak-unleash-api-token
+  leaderElection: true

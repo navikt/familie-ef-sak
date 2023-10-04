@@ -49,4 +49,10 @@ class InntektController(
         tilgangService.validerTilgangTilFagsakPerson(fagsakPersonId, AuditLoggerEvent.ACCESS)
         return success(inntektService.genererAInntektUrl(fagsakPersonId))
     }
+
+    @GetMapping("fagsak/{fagsakId}/generer-url-arbeidsforhold")
+    fun genererAInntektArbeidsforholdUrl(@PathVariable("fagsakId") fagsakId: UUID): Ressurs<String> {
+        tilgangService.validerTilgangTilFagsak(fagsakId, AuditLoggerEvent.ACCESS)
+        return success(inntektService.genererAInntektArbeidsforholdUrl(fagsakId))
+    }
 }

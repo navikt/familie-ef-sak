@@ -45,6 +45,8 @@ object SikkerhetContext {
         return result
     }
 
+    fun erSaksbehandler(): Boolean = hentSaksbehandlerEllerSystembruker() != SYSTEM_FORKORTELSE
+
     fun hentSaksbehandlerEllerSystembruker() =
         Result.runCatching { SpringTokenValidationContextHolder().tokenValidationContext }
             .fold(
@@ -100,5 +102,9 @@ object SikkerhetContext {
         }
 
         return rollerForBruker.contains(minimumsrolle)
+    }
+
+    fun harRolle(rolle: String): Boolean {
+        return hentGrupperFraToken().contains(rolle)
     }
 }

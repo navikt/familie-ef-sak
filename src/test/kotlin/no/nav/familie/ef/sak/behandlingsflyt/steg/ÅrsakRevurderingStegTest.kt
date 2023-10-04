@@ -7,8 +7,7 @@ import io.mockk.verify
 import no.nav.familie.ef.sak.behandling.dto.RevurderingsinformasjonDto
 import no.nav.familie.ef.sak.behandling.dto.ÅrsakRevurderingDto
 import no.nav.familie.ef.sak.behandling.ÅrsakRevurderingService
-import no.nav.familie.ef.sak.felles.util.mockFeatureToggleService
-import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
+import no.nav.familie.ef.sak.oppgave.TilordnetRessursService
 import no.nav.familie.ef.sak.repository.revurderingsinformasjon
 import no.nav.familie.ef.sak.repository.saksbehandling
 import no.nav.familie.kontrakter.ef.felles.Opplysningskilde
@@ -23,10 +22,9 @@ import java.time.LocalDate
 internal class ÅrsakRevurderingStegTest {
 
     private val årsakRevurderingService = mockk<ÅrsakRevurderingService>()
+    private val tilordnetRessursService = mockk<TilordnetRessursService>()
 
-    private val featureToggleService = mockFeatureToggleService()
-
-    private val steg = ÅrsakRevurderingSteg(årsakRevurderingService, featureToggleService)
+    private val steg = ÅrsakRevurderingSteg(årsakRevurderingService, tilordnetRessursService)
 
     private val saksbehandling = saksbehandling()
     private val stønadstype = saksbehandling.stønadstype
@@ -36,8 +34,8 @@ internal class ÅrsakRevurderingStegTest {
 
     @BeforeEach
     internal fun setUp() {
-        every { featureToggleService.isEnabled(Toggle.ÅRSAK_REVURDERING_BESKRIVELSE) } returns false
         justRun { årsakRevurderingService.oppdaterRevurderingsinformasjon(any(), any(), any()) }
+        every { tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandlerEllerNull(any()) } returns true
     }
 
     private val gyldigRevurderingsinformasjon = revurderingsinformasjon()
@@ -102,16 +100,6 @@ internal class ÅrsakRevurderingStegTest {
             )
             assertThatThrownBy { utførOgReturnerNesteSteg(dto) }
                 .hasMessage("Må ha med beskrivelse når årsak er annet")
-        }
-
-        @Test
-        internal fun `skal ikke sende med beskrivelse når årsak er annet enn ANNET`() {
-            val dto = RevurderingsinformasjonDto(
-                LocalDate.now(),
-                ÅrsakRevurderingDto(Opplysningskilde.BESKJED_ANNEN_ENHET, gyldigÅrsak, "asd"),
-            )
-            assertThatThrownBy { utførOgReturnerNesteSteg(dto) }
-                .hasMessage("Kan ikke ha med beskrivelse når årsak er noe annet enn annet")
         }
     }
 

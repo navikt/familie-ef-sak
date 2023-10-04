@@ -1,50 +1,61 @@
 package no.nav.familie.ef.sak.infrastruktur.featuretoggle
 
-import org.springframework.beans.factory.DisposableBean
+import no.nav.familie.unleash.UnleashService
+import org.springframework.stereotype.Service
 
-interface FeatureToggleService : DisposableBean {
+@Service
+class FeatureToggleService(val unleashService: UnleashService) {
 
     fun isEnabled(toggle: Toggle): Boolean {
-        return isEnabled(toggle, false)
+        return unleashService.isEnabled(toggle.toggleId)
     }
 
-    fun isEnabled(toggle: Toggle, defaultValue: Boolean): Boolean
+    fun isEnabled(toggle: Toggle, defaultValue: Boolean): Boolean {
+        return unleashService.isEnabled(toggle.toggleId, defaultValue)
+    }
 }
 
 enum class Toggle(val toggleId: String, val beskrivelse: String? = null) {
-    AUTOMATISK_MIGRERING("familie.ef.sak.automatisk-migrering"),
-    MIGRERING("familie.ef.sak.migrering"),
-    MIGRERING_BARNETILSYN("familie.ef.sak.migrering.barnetilsyn"),
-    G_BEREGNING("familie.ef.sak.g-beregning"),
-    G_BEREGNING_SCHEDULER("familie.ef.sak.g-beregning-scheduler"),
-    G_OMREGNING_REVURDER_HOPP_OVER_VALIDER_TIDLIGERE_VEDTAK("familie.ef.sak.revurder-g-omregning-hopp-over-valider-tidligere-vedtak"),
-    G_BEREGNING_INKLUDER_SATT_PÅ_VENT("familie.ef.sak.inkluder-satt-pa-vent-gomregning"),
-    G_BEREGNING_TILLAT_MANUELL_OPPRETTELSE_AV_G_TASK("familie.ef.sak.tillat-opprettelse-av-g-task", "Permission"),
-    SATSENDRING_BRUK_IKKE_VEDTATT_MAXSATS("familie.ef.sak.bruk-nye-maxsatser"),
+    // Release
+    G_BEREGNING_INKLUDER_SATT_PÅ_VENT(
+        "familie.ef.sak.inkluder-satt-pa-vent-gomregning",
+        "Usikker på om vi ønsker denne eller ikke. Ta en vurdering før 2024?",
+    ),
+    FRONTEND_VIS_INNTEKT_PERSONOVERSIKT("familie.ef.sak.frontend.vis-inntekt-personoversikt", "Ikke ferdigstilt ennå"),
+    GJENBRUK_VILKÅR_PÅ_TVERS_AV_BEHANDLINGER("familie.ef.sak.gjenbruk-vilkaar-paa-tvers-av-behandlinger", "Må testes i preprod"),
+    VIS_KA_VEDTAK_ALTERNATIV("familie.ef.sak.frontend.vis-ka-uten-brev"),
 
+    // Operational
+    AUTOMATISK_MIGRERING("familie.ef.sak.automatisk-migrering", "Kan denne slettes?"),
+    G_BEREGNING("familie.ef.sak.g-beregning", "Operational"),
+    G_BEREGNING_SCHEDULER("familie.ef.sak.g-beregning-scheduler", "Operational"),
+    SATSENDRING_BRUK_IKKE_VEDTATT_MAXSATS("familie.ef.sak.bruk-nye-maxsatser", "Operational"),
+    FRONTEND_VIS_IKKE_PUBLISERTE_BREVMALER(
+        "familie.ef.sak.frontend-vis-ikke-publiserte-brevmaler",
+        "Operational- kun preprod",
+    ),
+    FRONTEND_AUTOMATISK_UTFYLLE_VILKÅR(
+        "familie.ef.sak.frontend-automatisk-utfylle-vilkar",
+        "Operational - kun preprod",
+    ),
+    AUTOMATISKE_BREV_INNHENTING_KARAKTERUTSKRIFT(
+        "familie.ef.sak.automatiske-brev-innhenting-karakterutskrift",
+        "Operational - sesongavhengig",
+    ),
+
+    // Permission
+    MIGRERING_BARNETILSYN("familie.ef.sak.migrering.barnetilsyn", "Permission"),
+    G_BEREGNING_TILLAT_MANUELL_OPPRETTELSE_AV_G_TASK("familie.ef.sak.tillat-opprettelse-av-g-task", "Permission"),
     OPPRETT_BEHANDLING_FERDIGSTILT_JOURNALPOST(
         "familie.ef.sak.opprett-behandling-for-ferdigstilt-journalpost",
         "Permission",
     ),
     BEHANDLING_KORRIGERING("familie.ef.sak.behandling-korrigering", "Permission"),
-
-    VILKÅR_GJENBRUK("familie.ef.sak.vilkaar-gjenruk"),
-
-    ULIKE_INNTEKTER("familie.ef.sak-ulike-inntekter"),
-
-    ÅRSAK_REVURDERING_BESKRIVELSE("familie.ef.sak.arsak-revurdering-beskrivelse"),
-
-    FRONTEND_VIS_IKKE_PUBLISERTE_BREVMALER("familie.ef.sak.frontend-vis-ikke-publiserte-brevmaler"),
-    FRONTEND_AUTOMATISK_UTFYLLE_VILKÅR("familie.ef.sak.frontend-automatisk-utfylle-vilkar"),
-    FRONTEND_SATSENDRING("familie.ef.sak.frontend-vis-satsendring"),
-    FRONTEND_VIS_INNTEKT_PERSONOVERSIKT("familie.ef.sak.frontend.vis-inntekt-personoversikt"),
-    VURDER_KONSEKVENS_OPPGAVER_LOKALKONTOR("familie.ef.sak.automatiske-oppgaver-lokalkontor"),
-    KAST_FEIL_HVIS_OPPGAVE_MANGLER_PÅ_ÅPEN_BEHANDLING("familie.ef.sak.kast-feil-hvis-oppgave-mangler-pa-apen-behandling"),
+    FRONTEND_SATSENDRING("familie.ef.sak.frontend-vis-satsendring", "Permission"),
     TILLAT_MIGRERING_5_ÅR_TILBAKE("familie.ef.sak.tillat-migrering-5-ar-tilbake", "Permission"),
     TILLAT_MIGRERING_7_ÅR_TILBAKE("familie.ef.sak.tillat-migrering-7-ar-tilbake", "Permission"),
-    AUTOMATISKE_OPPGAVER_FREMLEGGSOPPGAVE("familie.ef.sak.automatiske-oppgaver.fremleggsoppgave"),
-    AUTOMATISKE_BREV_INNHENTING_KARAKTERUTSKRIFT("familie.ef.sak.automatiske-brev-innhenting-karakterutskrift"),
-    UTBEDRET_GUI_SKOLEPENGER("familie.ef.sak.frontend-skolepenger-utbedret-gui"),
+    UTVIKLER_MED_VEILEDERRROLLE("familie.ef.sak.utviklere-med-veilederrolle", "Permission"),
+    TILLAT_HENT_UT_INFOTRYGD_RAPPORT("familie.ef.sak.tillat-hent-infotrygd-rapport", "Permission"),
     ;
 
     companion object {

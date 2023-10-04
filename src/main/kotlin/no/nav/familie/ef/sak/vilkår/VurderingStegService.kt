@@ -11,6 +11,7 @@ import no.nav.familie.ef.sak.behandlingshistorikk.domain.StegUtfall
 import no.nav.familie.ef.sak.blankett.BlankettRepository
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
+import no.nav.familie.ef.sak.oppgave.TilordnetRessursService
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.ef.sak.vilkår.dto.OppdaterVilkårsvurderingDto
 import no.nav.familie.ef.sak.vilkår.dto.SvarPåVurderingerDto
@@ -35,6 +36,7 @@ class VurderingStegService(
     private val taskService: TaskService,
     private val blankettRepository: BlankettRepository,
     private val behandlingshistorikkService: BehandlingshistorikkService,
+    private val tilordnetRessursService: TilordnetRessursService,
 ) {
 
     @Transactional
@@ -170,6 +172,9 @@ class VurderingStegService(
     private fun validerLåstForVidereRedigering(behandlingId: UUID) {
         if (behandlingErLåstForVidereRedigering(behandlingId)) {
             throw ApiFeil("Behandlingen er låst for videre redigering", HttpStatus.BAD_REQUEST)
+        }
+        if (!tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandlerEllerNull(behandlingId)) {
+            throw ApiFeil("Behandlingen eies av en annen saksbehandler", HttpStatus.BAD_REQUEST)
         }
     }
 

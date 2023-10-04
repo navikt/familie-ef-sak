@@ -3,8 +3,10 @@ package no.nav.familie.ef.sak.journalføring
 import no.nav.familie.ef.sak.barn.BarnService
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.Behandling
+import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.behandling.migrering.InfotrygdPeriodeValideringService
+import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.behandlingsflyt.task.BehandlingsstatistikkTask
 import no.nav.familie.ef.sak.behandlingsflyt.task.OpprettOppgaveForOpprettetBehandlingTask
 import no.nav.familie.ef.sak.behandlingsflyt.task.OpprettOppgaveForOpprettetBehandlingTask.OpprettOppgaveTaskData
@@ -12,7 +14,6 @@ import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvisIkke
-import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.iverksett.IverksettService
 import no.nav.familie.ef.sak.journalføring.JournalføringHelper.validerJournalføringNyBehandling
@@ -53,7 +54,6 @@ class JournalføringService(
     private val taskService: TaskService,
     private val barnService: BarnService,
     private val oppgaveService: OppgaveService,
-    private val featureToggleService: FeatureToggleService,
     private val journalpostService: JournalpostService,
     private val infotrygdPeriodeValideringService: InfotrygdPeriodeValideringService,
 ) {
@@ -214,15 +214,10 @@ class JournalføringService(
         ustrukturertDokumentasjonType: UstrukturertDokumentasjonType = UstrukturertDokumentasjonType.IKKE_VALGT,
         vilkårsbehandleNyeBarn: VilkårsbehandleNyeBarn = VilkårsbehandleNyeBarn.IKKE_VALGT,
     ): Behandling {
-        val behandlingsårsak = if (journalpost.harStrukturertSøknad()) {
-            BehandlingÅrsak.SØKNAD
-        } else {
-            ustrukturertDokumentasjonType.behandlingÅrsak()
-        }
         val behandling = behandlingService.opprettBehandling(
             behandlingType = behandlingstype,
             fagsakId = fagsak.id,
-            behandlingsårsak = behandlingsårsak,
+            behandlingsårsak = utledBehandlingÅrsak(journalpost, ustrukturertDokumentasjonType),
         )
         iverksettService.startBehandling(behandling, fagsak)
         if (journalpost.harStrukturertSøknad()) {
@@ -239,29 +234,44 @@ class JournalføringService(
             barnSomSkalFødes = barnSomSkalFødes,
             vilkårsbehandleNyeBarn = vilkårsbehandleNyeBarn,
         )
-        kopierVurderingerForEttersendingPåNyBehandling(ustrukturertDokumentasjonType, behandling, fagsak)
+        val forrigeBehandling = finnForrigeIverksatteEllerAvslåtteBehandling(fagsak)
+        if (skalKopiereVurderingerTilNyBehandling(ustrukturertDokumentasjonType)) {
+            forrigeBehandling?.let { kopierVurderingerOgOppdaterBehandling(behandling, it.id, fagsak) }
+        }
         return behandling
     }
 
-    private fun kopierVurderingerForEttersendingPåNyBehandling(
+    private fun utledBehandlingÅrsak(
+        journalpost: Journalpost,
         ustrukturertDokumentasjonType: UstrukturertDokumentasjonType,
+    ) = if (journalpost.harStrukturertSøknad()) {
+        BehandlingÅrsak.SØKNAD
+    } else {
+        ustrukturertDokumentasjonType.behandlingÅrsak()
+    }
+
+    private fun kopierVurderingerOgOppdaterBehandling(
         behandling: Behandling,
+        forrigeBehandlingId: UUID,
         fagsak: Fagsak,
     ) {
-        val erEttersending = ustrukturertDokumentasjonType == UstrukturertDokumentasjonType.ETTERSENDING
-        if (erEttersending) {
-            val forrigeBehandling = behandlingService.finnSisteIverksatteBehandlingMedEventuellAvslått(fagsak.id)
-            forrigeBehandling?.let {
-                val (_, metadata) = vurderingService.hentGrunnlagOgMetadata(behandling.id)
-                vurderingService.kopierVurderingerTilNyBehandling(
-                    it.id,
-                    behandling.id,
-                    metadata,
-                    fagsak.stønadstype,
-                )
-            }
-        }
+        val (_, metadata) = vurderingService.hentGrunnlagOgMetadata(behandling.id)
+        vurderingService.kopierVurderingerTilNyBehandling(
+            eksisterendeBehandlingId = forrigeBehandlingId,
+            nyBehandlingsId = behandling.id,
+            metadata = metadata,
+            stønadType = fagsak.stønadstype,
+        )
+        behandlingService.oppdaterStatusPåBehandling(behandling.id, BehandlingStatus.UTREDES)
+        behandlingService.oppdaterStegPåBehandling(behandling.id, StegType.BEREGNE_YTELSE)
     }
+
+    private fun skalKopiereVurderingerTilNyBehandling(
+        ustrukturertDokumentasjonType: UstrukturertDokumentasjonType,
+    ): Boolean = ustrukturertDokumentasjonType.erEttersending()
+
+    private fun finnForrigeIverksatteEllerAvslåtteBehandling(fagsak: Fagsak) =
+        behandlingService.finnSisteIverksatteBehandlingMedEventuellAvslått(fagsak.id)
 
     private fun opprettBehandlingsstatistikkTask(behandlingId: UUID, oppgaveId: Long? = null) {
         taskService.save(

@@ -32,7 +32,7 @@ class ArbeidsforholdController(
         ansettelsesperiodeFom: LocalDate,
     ): Ressurs<List<ArbeidsforholdDto>> {
         tilgangService.validerTilgangTilFagsak(fagsakId, AuditLoggerEvent.ACCESS)
-        val arbeidsforhold = arbeidsforholdService.hentArbeidsforhold(fagsakId, ansettelsesperiodeFom)
+        val arbeidsforhold = arbeidsforholdService.hentArbeidsforhold(fagsakId, ansettelsesperiodeFom).tilDto()
         return Ressurs.success(arbeidsforhold)
     }
 }

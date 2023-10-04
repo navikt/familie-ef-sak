@@ -25,6 +25,7 @@ class AMeldingInntektClient(
             .build().toUri()
 
     private val genererUrlUri = UriComponentsBuilder.fromUri(uri).pathSegment("api/ainntekt/generer-url").build().toUri()
+    private val genererUrlUriArbeidsforhold = UriComponentsBuilder.fromUri(uri).pathSegment("api/ainntekt/generer-url-arbeidsforhold").build().toUri()
 
     fun hentInntekt(personIdent: String, fom: YearMonth, tom: YearMonth): HentInntektListeResponse {
         return postForEntity(lagInntektUri(fom, tom), PersonIdent(personIdent))
@@ -33,6 +34,16 @@ class AMeldingInntektClient(
     fun genererAInntektUrl(personIdent: String): String {
         return postForEntity(
             genererUrlUri,
+            PersonIdent(personIdent),
+            HttpHeaders().apply {
+                accept = listOf(MediaType.TEXT_PLAIN)
+            },
+        )
+    }
+
+    fun genererAInntektArbeidsforholdUrl(personIdent: String): String {
+        return postForEntity(
+            genererUrlUriArbeidsforhold,
             PersonIdent(personIdent),
             HttpHeaders().apply {
                 accept = listOf(MediaType.TEXT_PLAIN)

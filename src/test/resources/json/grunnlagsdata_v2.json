@@ -1431,6 +1431,34 @@
                 "name" : "harTidligereSkolepenger",
                 "type" : "Boolean",
                 "nullable" : false
+              },
+              "periodeHistorikkOvergangsstønad" : {
+                "name" : "periodeHistorikkOvergangsstønad",
+                "type" : "Collection",
+                "fields" : {
+                  "periodeType" : {
+                    "name" : "periodeType",
+                    "type" : "Enum",
+                    "values" : [ "FORLENGELSE", "HOVEDPERIODE", "MIDLERTIDIG_OPPHØR", "MIGRERING", "PERIODE_FØR_FØDSEL", "SANKSJON", "UTVIDELSE", "NY_PERIODE_FOR_NYTT_BARN" ],
+                    "nullable" : false
+                  },
+                  "fom" : {
+                    "name" : "fom",
+                    "type" : "LocalDate",
+                    "nullable" : false
+                  },
+                  "tom" : {
+                    "name" : "tom",
+                    "type" : "LocalDate",
+                    "nullable" : false
+                  },
+                  "beløp" : {
+                    "name" : "beløp",
+                    "type" : "Int",
+                    "nullable" : false
+                  }
+                },
+                "nullable" : false
               }
             },
             "nullable" : false
@@ -1452,6 +1480,34 @@
               "harTidligereSkolepenger" : {
                 "name" : "harTidligereSkolepenger",
                 "type" : "Boolean",
+                "nullable" : false
+              },
+              "periodeHistorikkOvergangsstønad" : {
+                "name" : "periodeHistorikkOvergangsstønad",
+                "type" : "Collection",
+                "fields" : {
+                  "periodeType" : {
+                    "name" : "periodeType",
+                    "type" : "Enum",
+                    "values" : [ "FORLENGELSE", "HOVEDPERIODE", "MIDLERTIDIG_OPPHØR", "MIGRERING", "PERIODE_FØR_FØDSEL", "SANKSJON", "UTVIDELSE", "NY_PERIODE_FOR_NYTT_BARN" ],
+                    "nullable" : false
+                  },
+                  "fom" : {
+                    "name" : "fom",
+                    "type" : "LocalDate",
+                    "nullable" : false
+                  },
+                  "tom" : {
+                    "name" : "tom",
+                    "type" : "LocalDate",
+                    "nullable" : false
+                  },
+                  "beløp" : {
+                    "name" : "beløp",
+                    "type" : "Int",
+                    "nullable" : false
+                  }
+                },
                 "nullable" : false
               }
             },
@@ -2094,6 +2150,34 @@
             "name" : "harTidligereSkolepenger",
             "type" : "Boolean",
             "nullable" : false
+          },
+          "periodeHistorikkOvergangsstønad" : {
+            "name" : "periodeHistorikkOvergangsstønad",
+            "type" : "Collection",
+            "fields" : {
+              "periodeType" : {
+                "name" : "periodeType",
+                "type" : "Enum",
+                "values" : [ "FORLENGELSE", "HOVEDPERIODE", "MIDLERTIDIG_OPPHØR", "MIGRERING", "PERIODE_FØR_FØDSEL", "SANKSJON", "UTVIDELSE", "NY_PERIODE_FOR_NYTT_BARN" ],
+                "nullable" : false
+              },
+              "fom" : {
+                "name" : "fom",
+                "type" : "LocalDate",
+                "nullable" : false
+              },
+              "tom" : {
+                "name" : "tom",
+                "type" : "LocalDate",
+                "nullable" : false
+              },
+              "beløp" : {
+                "name" : "beløp",
+                "type" : "Int",
+                "nullable" : false
+              }
+            },
+            "nullable" : false
           }
         },
         "nullable" : false
@@ -2116,6 +2200,34 @@
             "name" : "harTidligereSkolepenger",
             "type" : "Boolean",
             "nullable" : false
+          },
+          "periodeHistorikkOvergangsstønad" : {
+            "name" : "periodeHistorikkOvergangsstønad",
+            "type" : "Collection",
+            "fields" : {
+              "periodeType" : {
+                "name" : "periodeType",
+                "type" : "Enum",
+                "values" : [ "FORLENGELSE", "HOVEDPERIODE", "MIDLERTIDIG_OPPHØR", "MIGRERING", "PERIODE_FØR_FØDSEL", "SANKSJON", "UTVIDELSE", "NY_PERIODE_FOR_NYTT_BARN" ],
+                "nullable" : false
+              },
+              "fom" : {
+                "name" : "fom",
+                "type" : "LocalDate",
+                "nullable" : false
+              },
+              "tom" : {
+                "name" : "tom",
+                "type" : "LocalDate",
+                "nullable" : false
+              },
+              "beløp" : {
+                "name" : "beløp",
+                "type" : "Int",
+                "nullable" : false
+              }
+            },
+            "nullable" : false
           }
         },
         "nullable" : true
@@ -2126,6 +2238,11 @@
         "nullable" : true
       }
     },
+    "nullable" : true
+  },
+  "harAvsluttetArbeidsforhold" : {
+    "name" : "harAvsluttetArbeidsforhold",
+    "type" : "Boolean",
     "nullable" : true
   }
 }

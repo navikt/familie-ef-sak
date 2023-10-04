@@ -30,6 +30,7 @@ object VilkårTestUtil {
         registeropplysningerOpprettetTid: LocalDateTime = mockk(relaxed = true),
         adresseopplysninger: AdresseopplysningerDto = mockk(relaxed = true),
         dokumentasjon: DokumentasjonFraSøknadDto? = mockk(relaxed = true),
+        harAvsluttetArbeidsforhold: Boolean = mockk(relaxed = true),
     ) =
         VilkårGrunnlagDto(
             personalia = registergrunnlag,
@@ -44,5 +45,6 @@ object VilkårTestUtil {
             registeropplysningerOpprettetTid = registeropplysningerOpprettetTid,
             adresseopplysninger = adresseopplysninger,
             dokumentasjon = dokumentasjon,
+            harAvsluttetArbeidsforhold = harAvsluttetArbeidsforhold,
         )
 }

@@ -4,13 +4,18 @@ import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.fagsak.FagsakPersonService
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
+import no.nav.familie.ef.sak.fagsak.domain.Fagsaker
 import no.nav.familie.ef.sak.infotrygd.InfotrygdService
+import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.TidligereInnvilgetVedtak
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.TidligereVedtaksperioder
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Folkeregisteridentifikator
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.gjeldende
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pensjon.HistoriskPensjonService
+import no.nav.familie.ef.sak.tilkjentytelse.AndelsHistorikkService
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
+import no.nav.familie.ef.sak.vedtak.historikk.AndelHistorikkDto
+import no.nav.familie.ef.sak.vedtak.historikk.EndringType
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPeriodeResponse
 import org.springframework.stereotype.Service
 
@@ -22,6 +27,7 @@ class TidligereVedtaksperioderService(
     private val tilkjentYtelseService: TilkjentYtelseService,
     private val infotrygdService: InfotrygdService,
     private val historiskPensjonService: HistoriskPensjonService,
+    private val andelsHistorikkService: AndelsHistorikkService,
 ) {
 
     /**
@@ -34,7 +40,7 @@ class TidligereVedtaksperioderService(
             mapTidligereInnvilgetVedtak(infotrygdService.hentPerioderFraReplika(alleIdenter))
         return TidligereVedtaksperioder(
             infotrygd = tidligereInnvilgetVedtak,
-            sak = harTidligereMottattStønadEf(alleIdenter),
+            sak = hentTidligereInnvilgedeVedtakEf(alleIdenter),
             historiskPensjon = historiskPensjonService.hentHistoriskPensjon(aktivIdent, alleIdenter).harPensjonsdata,
         )
     }
@@ -46,7 +52,7 @@ class TidligereVedtaksperioderService(
             harTidligereSkolepenger = periodeResponse.skolepenger.isNotEmpty(),
         )
 
-    private fun harTidligereMottattStønadEf(identer: Set<String>): TidligereInnvilgetVedtak {
+    private fun hentTidligereInnvilgedeVedtakEf(identer: Set<String>): TidligereInnvilgetVedtak {
         return fagsakPersonService.finnPerson(identer)
             ?.let { fagsakService.finnFagsakerForFagsakPersonId(it.id) }
             ?.let {
@@ -54,6 +60,7 @@ class TidligereVedtaksperioderService(
                     harTidligereOvergangsstønad = hentTidligereVedtaksperioder(it.overgangsstønad),
                     harTidligereBarnetilsyn = hentTidligereVedtaksperioder(it.barnetilsyn),
                     harTidligereSkolepenger = hentTidligereVedtaksperioder(it.skolepenger),
+                    periodeHistorikkOvergangsstønad = hentGjeldendeOvergangstønadsperioder(it),
                 )
             } ?: TidligereInnvilgetVedtak(false, false, false)
     }
@@ -64,4 +71,29 @@ class TidligereVedtaksperioderService(
             val tilkjentYtelse = tilkjentYtelseService.hentForBehandling(it.id)
             tilkjentYtelse.andelerTilkjentYtelse.isNotEmpty()
         } ?: false
+
+    private fun hentGjeldendeOvergangstønadsperioder(fagsaker: Fagsaker?): List<GrunnlagsdataPeriodeHistorikkOvergangsstønad> {
+        return hentAndelshistorikkForOvergangsstønad(fagsaker)
+            .filterNot(erstattetEllerFjernet())
+            .filterNot { it.erOpphør }
+            .map {
+                feilHvis(it.periodeType == null) { "Overgangsstønad skal ha periodetype" }
+                GrunnlagsdataPeriodeHistorikkOvergangsstønad(
+                    periodeType = it.periodeType,
+                    fom = it.andel.periode.fomDato,
+                    tom = it.andel.periode.tomDato,
+                    beløp = it.andel.beløp,
+                )
+            }
+    }
+
+    private fun hentAndelshistorikkForOvergangsstønad(fagsaker: Fagsaker?) =
+        fagsaker?.overgangsstønad?.id?.let { andelsHistorikkService.hentHistorikk(it, null) } ?: emptyList()
+
+    private fun erstattetEllerFjernet(): (AndelHistorikkDto) -> Boolean = {
+        listOf(
+            EndringType.FJERNET,
+            EndringType.ERSTATTET,
+        ).contains(it.endring?.type)
+    }
 }

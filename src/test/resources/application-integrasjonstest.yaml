@@ -7,17 +7,17 @@ no.nav.security.jwt:
     accepted_audience: aud-localhost
     cookie_name: localhost-idtoken
 
-funksjonsbrytere:
+unleash:
   enabled: false
-  unleash:
-    uri: http://localhost:4242/api
-    environment: local
-    applicationName: familie-ef-sak
 
 FAMILIE_INTEGRASJONER_URL: http://localhost:8385
 FAMILIE_BREV_API_URL: http://localhost:8001
 
 AZURE_APP_TENANT_ID: navq.onmicrosoft.com
+
+UNLEASH_SERVER_API_URL: http://localhost:4242/api
+UNLEASH_SERVER_API_TOKEN: token
+NAIS_APP_NAME: familie-ef-sak
 
 prosessering:
   enabled: false

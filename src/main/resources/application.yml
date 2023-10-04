@@ -249,12 +249,10 @@ rolle:
   kode7: "9ec6487d-f37a-4aad-a027-cd221c1ac32b" # 0000-GA-Fortrolig_Adresse
   egenAnsatt: "e750ceb5-b70b-4d94-b4fa-9d22467b786b" # 0000-GA-Egne_ansatte
 
-funksjonsbrytere:
+prosessering.rolle: "87190cf3-b278-457d-8ab7-1a5c55a9edd7" # Gruppen teamfamilie
+
+unleash:
   enabled: true
-  unleash:
-    uri: https://unleash.nais.io/api/
-    environment: ${NAIS_CLUSTER_NAME}
-    applicationName: ${NAIS_APP_NAME}
 
 prosessering:
   continuousRunning.enabled: true

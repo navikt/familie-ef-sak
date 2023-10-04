@@ -1,0 +1,74 @@
+package no.nav.familie.ef.sak.oppgave
+
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
+import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
+import no.nav.familie.ef.sak.oppgave.dto.SaksbehandlerDto
+import no.nav.familie.ef.sak.oppgave.dto.SaksbehandlerRolle
+import no.nav.familie.kontrakter.felles.oppgave.Oppgave
+import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
+import org.springframework.stereotype.Service
+import java.util.UUID
+import no.nav.familie.ef.sak.oppgave.Oppgave as EFOppgave
+
+@Service
+class TilordnetRessursService(
+    private val oppgaveClient: OppgaveClient,
+    private val oppgaveRepository: OppgaveRepository,
+    private val featureToggleService: FeatureToggleService,
+) {
+
+    fun tilordnetRessursErInnloggetSaksbehandlerEllerNull(behandlingId: UUID): Boolean {
+        val oppgave = if (erUtviklerMedVeilderrolle()) null else hentIkkeFerdigstiltOppgaveForBehandling(behandlingId)
+        val rolle = utledSaksbehandlerRolle(oppgave)
+
+        return when (rolle) {
+            SaksbehandlerRolle.IKKE_SATT, SaksbehandlerRolle.INNLOGGET_SAKSBEHANDLER, SaksbehandlerRolle.OPPGAVE_FINNES_IKKE -> true
+            SaksbehandlerRolle.ANNEN_SAKSBEHANDLER, SaksbehandlerRolle.UTVIKLER_MED_VEILDERROLLE -> false
+        }
+    }
+
+    fun hentIkkeFerdigstiltOppgaveForBehandling(behandlingId: UUID): Oppgave? =
+        hentBehandleSakOppgaveSomIkkeErFerdigstilt(behandlingId)
+            ?.let { oppgaveClient.finnOppgaveMedId(it.gsakOppgaveId) }
+
+    fun hentBehandleSakOppgaveSomIkkeErFerdigstilt(behandlingId: UUID): EFOppgave? =
+        oppgaveRepository.findByBehandlingIdAndErFerdigstiltIsFalseAndTypeIn(
+            behandlingId,
+            setOf(Oppgavetype.BehandleSak, Oppgavetype.BehandleUnderkjentVedtak),
+        )
+
+    fun utledAnsvarligSaksbehandlerForOppgave(behandleSakOppgave: Oppgave?): SaksbehandlerDto {
+        val tilOrdnetRessurs = behandleSakOppgave?.tilordnetRessurs?.let { hentSaksbehandlerInfo(it) }
+        val rolle = utledSaksbehandlerRolle(behandleSakOppgave)
+
+        return SaksbehandlerDto(
+            etternavn = tilOrdnetRessurs?.etternavn ?: "",
+            fornavn = tilOrdnetRessurs?.fornavn ?: "",
+            rolle = rolle,
+        )
+    }
+
+    fun hentSaksbehandlerInfo(navIdent: String) = oppgaveClient.hentSaksbehandlerInfo(navIdent)
+
+    private fun utledSaksbehandlerRolle(oppgave: Oppgave?): SaksbehandlerRolle {
+        if (erUtviklerMedVeilderrolle()) {
+            return SaksbehandlerRolle.UTVIKLER_MED_VEILDERROLLE
+        }
+
+        val innloggetSaksbehandler = SikkerhetContext.hentSaksbehandler()
+
+        if (oppgave == null) {
+            return SaksbehandlerRolle.OPPGAVE_FINNES_IKKE
+        }
+
+        return when (oppgave.tilordnetRessurs) {
+            innloggetSaksbehandler -> SaksbehandlerRolle.INNLOGGET_SAKSBEHANDLER
+            null -> SaksbehandlerRolle.IKKE_SATT
+            else -> SaksbehandlerRolle.ANNEN_SAKSBEHANDLER
+        }
+    }
+
+    private fun erUtviklerMedVeilderrolle(): Boolean =
+        SikkerhetContext.erSaksbehandler() && featureToggleService.isEnabled(Toggle.UTVIKLER_MED_VEILEDERRROLLE)
+}
