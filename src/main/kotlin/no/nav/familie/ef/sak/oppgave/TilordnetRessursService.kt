@@ -31,7 +31,7 @@ class TilordnetRessursService(
 
         return when (rolle) {
             SaksbehandlerRolle.INNLOGGET_SAKSBEHANDLER, SaksbehandlerRolle.OPPGAVE_FINNES_IKKE -> true
-            SaksbehandlerRolle.ANNEN_SAKSBEHANDLER, SaksbehandlerRolle.UTVIKLER_MED_VEILDERROLLE, SaksbehandlerRolle.IKKE_SATT  -> false
+            SaksbehandlerRolle.ANNEN_SAKSBEHANDLER, SaksbehandlerRolle.UTVIKLER_MED_VEILDERROLLE, SaksbehandlerRolle.IKKE_SATT -> false
         }
     }
 

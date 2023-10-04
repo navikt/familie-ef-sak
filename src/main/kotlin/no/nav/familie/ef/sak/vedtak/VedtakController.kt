@@ -60,6 +60,9 @@ class VedtakController(
     fun sendTilBeslutter(@PathVariable behandlingId: UUID, @RequestBody sendTilBeslutter: SendTilBeslutterDto?): Ressurs<UUID> {
         val behandling = behandlingService.hentSaksbehandling(behandlingId)
         tilgangService.validerTilgangTilBehandling(behandling, AuditLoggerEvent.UPDATE)
+
+        validerTilordnetRessurs(behandlingId)
+
         val vedtakErUtenBeslutter = vedtakService.hentVedtak(behandlingId).utledVedtakErUtenBeslutter()
 
         return if (vedtakErUtenBeslutter.value) {
@@ -148,7 +151,11 @@ class VedtakController(
         feilHvis(saksbehandling.status.behandlingErLåstForVidereRedigering()) {
             "Behandlingen er låst og vedtaket kan derfor ikke lagres"
         }
-        feilHvis(!tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandler((saksbehandling.id))) {
+        validerTilordnetRessurs(saksbehandling.id)
+    }
+
+    private fun validerTilordnetRessurs(behandlingId: UUID) {
+        feilHvis(!tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandler((behandlingId))) {
             "Behandlingen har en annen eier og du kan derfor lagre vedtaket"
         }
     }
