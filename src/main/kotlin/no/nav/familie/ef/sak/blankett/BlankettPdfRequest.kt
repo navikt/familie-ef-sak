@@ -1,7 +1,6 @@
 package no.nav.familie.ef.sak.blankett
 
 import no.nav.familie.ef.sak.behandling.dto.ÅrsakRevurderingDto
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataPeriodeHistorikkOvergangsstønad
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadDatoerDto
 import no.nav.familie.ef.sak.vedtak.dto.VedtakDto
 import no.nav.familie.ef.sak.vilkår.dto.TidligereVedtaksperioderDto
