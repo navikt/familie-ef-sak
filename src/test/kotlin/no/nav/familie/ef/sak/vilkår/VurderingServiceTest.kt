@@ -116,7 +116,7 @@ internal class VurderingServiceTest {
                 sivilstand = sivilstand,
                 barnMedSamvær = barnMedSamvær,
             )
-        every { tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandlerEllerNull(any()) } returns true
+        every { tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandler(any()) } returns true
     }
 
     private fun lagBarnetilsynBarn(barnId: UUID = UUID.randomUUID()) = BarnMedSamværDto(

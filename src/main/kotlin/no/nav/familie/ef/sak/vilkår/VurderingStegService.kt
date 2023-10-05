@@ -173,7 +173,7 @@ class VurderingStegService(
         if (behandlingErLåstForVidereRedigering(behandlingId)) {
             throw ApiFeil("Behandlingen er låst for videre redigering", HttpStatus.BAD_REQUEST)
         }
-        if (!tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandlerEllerNull(behandlingId)) {
+        if (!tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandler(behandlingId)) {
             throw ApiFeil("Behandlingen eies av en annen saksbehandler", HttpStatus.BAD_REQUEST)
         }
     }

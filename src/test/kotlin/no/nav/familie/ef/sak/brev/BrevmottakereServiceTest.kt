@@ -26,7 +26,7 @@ internal class BrevmottakereServiceTest {
 
     @BeforeEach
     fun setUp() {
-        every { tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandlerEllerNull(any()) } returns true
+        every { tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandler(any()) } returns true
     }
 
     @Test
@@ -89,7 +89,7 @@ internal class BrevmottakereServiceTest {
     @Test
     fun `skal feile hvis saksbehandler ikke eier behandling`() {
         every { brevmottakereRepository.findByIdOrNull(behandling.id) } returns mockk()
-        every { tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandlerEllerNull(any()) } returns false
+        every { tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandler(any()) } returns false
 
         val brevmottakereDto = BrevmottakereDto(
             personer = listOf(

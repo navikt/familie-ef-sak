@@ -36,7 +36,7 @@ class NullstillVedtakService(
         feilHvis(saksbehandling.status.behandlingErLåstForVidereRedigering()) {
             "Behandling er låst og vedtak kan ikke slettes"
         }
-        feilHvis(!tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandlerEllerNull(behandlingId)) {
+        feilHvis(!tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandler(behandlingId)) {
             "Behandlingen har en annen eier og vedtak kan derfor ikke slettes av deg"
         }
 

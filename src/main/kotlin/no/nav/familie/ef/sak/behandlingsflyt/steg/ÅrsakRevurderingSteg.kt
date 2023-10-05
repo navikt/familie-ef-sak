@@ -46,7 +46,7 @@ class ÅrsakRevurderingSteg(
         brukerfeilHvis(saksbehandling.status.behandlingErLåstForVidereRedigering()) {
             "Behandlingen er låst og kan ikke oppdatere årsak til revurdering"
         }
-        brukerfeilHvis(!tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandlerEllerNull(saksbehandling.id)) {
+        brukerfeilHvis(!tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandler(saksbehandling.id)) {
             "Behandlingen har en ny eier og du kan derfor ikke oppdatere årsak til revurdering"
         }
         brukerfeilHvisIkke(årsakRevurdering.årsak.erGyldigForStønadstype(saksbehandling.stønadstype)) {

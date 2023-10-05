@@ -80,7 +80,7 @@ internal class BehandlingServiceTest {
     @BeforeEach
     fun reset() {
         clearAllMocks(answers = false)
-        every { tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandlerEllerNull(any()) } returns true
+        every { tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandler(any()) } returns true
     }
 
     @Test
@@ -204,7 +204,7 @@ internal class BehandlingServiceTest {
         val behandling =
             behandling(fagsak(), type = BehandlingType.FØRSTEGANGSBEHANDLING, status = BehandlingStatus.UTREDES)
 
-        every { tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandlerEllerNull(any()) } returns false
+        every { tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandler(any()) } returns false
 
         every {
             behandlingRepository.findByIdOrThrow(any())

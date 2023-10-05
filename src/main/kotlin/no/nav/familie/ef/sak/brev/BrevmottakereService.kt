@@ -111,7 +111,7 @@ class BrevmottakereService(
     }
 
     private fun validerAtSaksbehandlerEierbehandling(behandlingId: UUID) {
-        brukerfeilHvis(!tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandlerEllerNull(behandlingId)) {
+        brukerfeilHvis(!tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandler(behandlingId)) {
             "Behandlingen eies av noen andre og brevmottakere kan derfor ikke endres av deg"
         }
     }

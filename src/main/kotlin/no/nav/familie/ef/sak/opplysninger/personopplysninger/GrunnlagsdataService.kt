@@ -58,7 +58,7 @@ class GrunnlagsdataService(
         brukerfeilHvis(behandling.status.behandlingErLåstForVidereRedigering()) {
             "Kan ikke laste inn nye grunnlagsdata for behandling med status ${behandling.status}"
         }
-        brukerfeilHvis(!tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandlerEllerNull(behandlingId)) {
+        brukerfeilHvis(!tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandler(behandlingId)) {
             "Behandlingen har en ny eier og du kan derfor ikke laste inn nye grunnlagsdata"
         }
         slettGrunnlagsdataHvisFinnes(behandlingId)

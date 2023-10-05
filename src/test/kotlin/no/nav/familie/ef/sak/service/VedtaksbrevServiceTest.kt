@@ -276,7 +276,7 @@ internal class VedtaksbrevServiceTest {
         every { vedtaksbrevRepository.existsById(any()) } returns false
         every { vedtaksbrevRepository.insert(capture(vedtaksbrevSlot)) } returns vedtaksbrev
         every { familieDokumentClient.genererPdfFraHtml(any()) } returns "123".toByteArray()
-        every { tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandlerEllerNull(any()) } returns true
+        every { tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandler(any()) } returns true
 
         vedtaksbrevService.lagSaksbehandlerSanitybrev(
             saksbehandling(fagsak, behandling),
@@ -294,7 +294,7 @@ internal class VedtaksbrevServiceTest {
         every { vedtaksbrevRepository.update(capture(vedtaksbrevSlot)) } answers { firstArg() }
         every { brevClient.genererHtml(any(), any(), any(), any(), any()) } returns "html"
         every { familieDokumentClient.genererPdfFraHtml(any()) } returns "123".toByteArray()
-        every { tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandlerEllerNull(any()) } returns true
+        every { tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandler(any()) } returns true
 
         val now = SporbarUtils.now()
         vedtaksbrevService.lagSaksbehandlerSanitybrev(

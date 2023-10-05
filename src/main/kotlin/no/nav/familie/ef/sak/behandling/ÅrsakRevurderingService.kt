@@ -64,7 +64,7 @@ class ÅrsakRevurderingService(
         feilHvis(saksbehandling.status.behandlingErLåstForVidereRedigering()) {
             "Behandlingen er låst og kan ikke oppdatere revurderingsinformasjon"
         }
-        feilHvis(!tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandlerEllerNull((saksbehandling.id))) {
+        feilHvis(!tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandler((saksbehandling.id))) {
             "Behandlingen har en ny eier og du kan derfor ikke oppdatere revurderingsinformasjon"
         }
         årsakRevurderingsRepository.deleteById(saksbehandling.id)
