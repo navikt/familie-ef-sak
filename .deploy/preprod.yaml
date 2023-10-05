@@ -86,6 +86,8 @@ spec:
           namespace: historisk
         - application: veilarbregistrering
           namespace: paw
+        - application: skjermede-personer-pip
+          namespace: nom
       external:
         - host: api-gw-q1.oera.no
         - host: familie-oppdrag.dev-fss-pub.nais.io

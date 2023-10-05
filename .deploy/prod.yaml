@@ -79,6 +79,8 @@ spec:
           cluster: prod-fss
         - application: veilarbregistrering
           namespace: paw
+        - application: skjermede-personer-pip
+          namespace: nom
       external:
         - host: api-gw.oera.no
         - host: familie-oppdrag.prod-fss-pub.nais.io
