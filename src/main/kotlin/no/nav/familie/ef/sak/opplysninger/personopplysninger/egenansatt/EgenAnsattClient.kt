@@ -12,7 +12,7 @@ import java.net.URI
 
 @Component
 class EgenAnsattClient(
-    @Value("\${SKJERMING_URL}") private val uri: URI,
+    @Value("\${SKJERMEDE_PERSONER_URL}") private val uri: URI,
     @Qualifier("azure") restOperations: RestOperations,
 ) : AbstractRestClient(restOperations, "egenansatt") {
 
