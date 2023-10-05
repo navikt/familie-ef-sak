@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
 import org.springframework.web.client.RestOperations
+import org.springframework.web.util.UriComponentsBuilder
 import java.net.URI
 
 @Component
@@ -16,9 +17,10 @@ class EgenAnsattClient(
     @Qualifier("azure") restOperations: RestOperations,
 ) : AbstractRestClient(restOperations, "egenansatt") {
 
+    private val egenAnsattUri: URI = UriComponentsBuilder.fromUri(uri).pathSegment("skjermet").build().toUri()
     fun egenAnsatt(ident: String): Boolean {
         return postForEntity<Ressurs<EgenAnsattResponse>>(
-            uri,
+            egenAnsattUri,
             EgenAnsattRequest(ident),
         ).data!!.erEgenAnsatt
     }
