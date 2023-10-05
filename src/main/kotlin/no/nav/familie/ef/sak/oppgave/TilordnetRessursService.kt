@@ -18,13 +18,20 @@ class TilordnetRessursService(
     private val featureToggleService: FeatureToggleService,
 ) {
 
-    fun tilordnetRessursErInnloggetSaksbehandlerEllerNull(behandlingId: UUID): Boolean {
+    /**
+     * [SaksbehandlerRolle.OPPGAVE_FINNES_IKKE]: I de tilfellene hvor man manuelt oppretter en revurdering
+     * fra fagsakoversikten vil man øyeblikkelig bli redirectet inn i revurderingen. Da har ikke oppgavesystemet
+     * rukket å opprette en behandle-sak-oppgave enda. I disse tilfellene ønsker vi å sende med oppgave-finnes-ikke
+     * til frontend for å skjule visningen av ansvarlig saksbehandler frem til oppgavesystemet rekker å opprette
+     * behandle-sak-oppgaven. Man må kunne redigere frontend i dette tilfellet.
+     */
+    fun tilordnetRessursErInnloggetSaksbehandler(behandlingId: UUID): Boolean {
         val oppgave = if (erUtviklerMedVeilderrolle()) null else hentIkkeFerdigstiltOppgaveForBehandling(behandlingId)
         val rolle = utledSaksbehandlerRolle(oppgave)
 
         return when (rolle) {
-            SaksbehandlerRolle.IKKE_SATT, SaksbehandlerRolle.INNLOGGET_SAKSBEHANDLER, SaksbehandlerRolle.OPPGAVE_FINNES_IKKE -> true
-            SaksbehandlerRolle.ANNEN_SAKSBEHANDLER, SaksbehandlerRolle.UTVIKLER_MED_VEILDERROLLE -> false
+            SaksbehandlerRolle.INNLOGGET_SAKSBEHANDLER, SaksbehandlerRolle.OPPGAVE_FINNES_IKKE -> true
+            SaksbehandlerRolle.ANNEN_SAKSBEHANDLER, SaksbehandlerRolle.UTVIKLER_MED_VEILDERROLLE, SaksbehandlerRolle.IKKE_SATT -> false
         }
     }
 
