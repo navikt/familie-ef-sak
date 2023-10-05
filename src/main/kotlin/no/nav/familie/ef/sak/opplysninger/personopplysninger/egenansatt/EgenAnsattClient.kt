@@ -1,9 +1,7 @@
 package no.nav.familie.ef.sak.opplysninger.personopplysninger.egenansatt
 
 import no.nav.familie.ef.sak.felles.integration.dto.EgenAnsattRequest
-import no.nav.familie.ef.sak.felles.integration.dto.EgenAnsattResponse
 import no.nav.familie.http.client.AbstractRestClient
-import no.nav.familie.kontrakter.felles.Ressurs
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
@@ -19,9 +17,9 @@ class EgenAnsattClient(
 
     private val egenAnsattUri: URI = UriComponentsBuilder.fromUri(uri).pathSegment("skjermet").build().toUri()
     fun egenAnsatt(ident: String): Boolean {
-        return postForEntity<Ressurs<EgenAnsattResponse>>(
+        return postForEntity<Boolean>(
             egenAnsattUri,
             EgenAnsattRequest(ident),
-        ).data!!.erEgenAnsatt
+        )
     }
 }
