@@ -13,7 +13,6 @@ import com.github.tomakehurst.wiremock.client.WireMock.urlMatching
 import com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo
 import com.github.tomakehurst.wiremock.client.WireMock.urlPathMatching
 import no.nav.familie.ef.sak.arbeidsfordeling.Arbeidsfordelingsenhet
-import no.nav.familie.ef.sak.felles.integration.dto.EgenAnsattResponse
 import no.nav.familie.ef.sak.felles.integration.dto.Tilgang
 import no.nav.familie.ef.sak.journalføring.JournalføringTestUtil.avsenderMottaker
 import no.nav.familie.kontrakter.ef.sak.DokumentBrevkode
@@ -54,8 +53,6 @@ class FamilieIntegrasjonerMock(integrasjonerConfig: IntegrasjonerConfig) {
         listOf(
             get(urlEqualTo(integrasjonerConfig.pingUri.path))
                 .willReturn(aResponse().withStatus(200)),
-            post(urlEqualTo(integrasjonerConfig.egenAnsattUri.path))
-                .willReturn(okJson(objectMapper.writeValueAsString(egenAnsatt))),
             post(urlEqualTo(integrasjonerConfig.tilgangRelasjonerUri.path))
                 .withRequestBody(matching(".*ikkeTilgang.*"))
                 .atPriority(1)
@@ -151,7 +148,6 @@ class FamilieIntegrasjonerMock(integrasjonerConfig: IntegrasjonerConfig) {
 
     companion object {
 
-        private val egenAnsatt = Ressurs.success(EgenAnsattResponse(false))
         private val poststed =
             KodeverkDto(
                 mapOf(
