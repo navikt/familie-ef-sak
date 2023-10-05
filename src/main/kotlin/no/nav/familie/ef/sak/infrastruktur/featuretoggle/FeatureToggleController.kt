@@ -23,6 +23,7 @@ class FeatureToggleController(
         Toggle.FRONTEND_SATSENDRING,
         Toggle.FRONTEND_VIS_INNTEKT_PERSONOVERSIKT,
         Toggle.VIS_KA_VEDTAK_ALTERNATIV,
+        Toggle.VIS_NY_JOURNALFØRING,
     )
 
     @GetMapping
