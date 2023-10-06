@@ -86,6 +86,7 @@ class VedtakController(
     ): Ressurs<UUID> {
         val behandling = behandlingService.hentSaksbehandling(behandlingId)
         tilgangService.validerTilgangTilBehandling(behandling, AuditLoggerEvent.UPDATE)
+        validerTilordnetRessurs(behandlingId)
         if (!request.godkjent && request.begrunnelse.isNullOrBlank()) {
             throw ApiFeil("Mangler begrunnelse", HttpStatus.BAD_REQUEST)
         }
@@ -156,7 +157,7 @@ class VedtakController(
 
     private fun validerTilordnetRessurs(behandlingId: UUID) {
         feilHvis(!tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandler((behandlingId))) {
-            "Behandlingen har en annen eier og du kan derfor lagre vedtaket"
+            "Behandlingen har en annen eier og du kan derfor ikke lagre vedtaket"
         }
     }
 

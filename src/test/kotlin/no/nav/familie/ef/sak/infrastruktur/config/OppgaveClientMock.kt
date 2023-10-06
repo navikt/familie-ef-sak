@@ -41,6 +41,7 @@ class OppgaveClientMock {
                 oppgave5,
                 oppgave6,
                 oppgave7,
+                oppgave8,
                 tilbakekreving1,
                 oppgavePapirsøknad,
                 oppgaveEttersending,
@@ -191,6 +192,8 @@ class OppgaveClientMock {
         lagOppgave(24683L, Oppgavetype.BehandleSak, tilordnetRessurs = null, behandlesAvApplikasjon = "familie-ef-sak")
     private val oppgave7 =
         lagOppgave(24684L, Oppgavetype.BehandleSak, tilordnetRessurs = "julenissen", behandlesAvApplikasjon = "familie-ef-sak")
+    private val oppgave8 =
+        lagOppgave(24685L, Oppgavetype.BehandleSak, tilordnetRessurs = "BESLUTTER_2", behandlesAvApplikasjon = "familie-ef-sak")
     private val oppgavePapirsøknad =
         lagOppgave(
             5L,
