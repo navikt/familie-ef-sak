@@ -36,7 +36,7 @@
         <felles.version>2.20230905101454_06fa3d7</felles.version>
         <prosessering.version>2.20231005144526_f184554</prosessering.version>
         <start-class>no.nav.familie.ef.sak.ApplicationKt</start-class>
-        <kontrakter.version>3.0_20230925140159_1b0dbac</kontrakter.version>
+        <kontrakter.version>3.0_20231006095938_4f85a1d</kontrakter.version>
         <eksterne.kontrakter.bisys.version>2.0_20230214104704_706e9c0</eksterne.kontrakter.bisys.version>
         <cucumber.version>7.14.0</cucumber.version>
 
@@ -227,7 +227,7 @@
         <dependency>
             <groupId>org.testcontainers</groupId>
             <artifactId>postgresql</artifactId>
-            <version>1.19.0</version>
+            <version>1.19.1</version>
             <scope>test</scope>
         </dependency>
         <dependency>
