@@ -132,7 +132,12 @@ internal class BeslutteVedtakStegTest {
     @Test
     internal fun `skal opprette iverksettMotOppdragTask etter beslutte vedtak hvis godkjent`() {
         every { vedtakService.hentVedtaksresultat(behandlingId) } returns ResultatType.INNVILGE
-        every { vedtaksbrevService.lagEndeligBeslutterbrev(any(), vedtakKreverBeslutter) } returns Fil("123".toByteArray())
+        every {
+            vedtaksbrevService.lagEndeligBeslutterbrev(
+                any(),
+                vedtakKreverBeslutter,
+            )
+        } returns Fil("123".toByteArray())
 
         val nesteSteg = utførTotrinnskontroll(godkjent = true)
 
@@ -142,14 +147,23 @@ internal class BeslutteVedtakStegTest {
         assertThat(taskSlot[2].type).isEqualTo(BehandlingsstatistikkTask.TYPE)
         assertThat(objectMapper.readValue<BehandlingsstatistikkTaskPayload>(taskSlot[2].payload).hendelse)
             .isEqualTo(Hendelse.BESLUTTET)
-        verify(exactly = 1) { behandlingService.oppdaterResultatPåBehandling(behandlingId, BehandlingResultat.INNVILGET) }
+        verify(exactly = 1) {
+            behandlingService.oppdaterResultatPåBehandling(
+                behandlingId,
+                BehandlingResultat.INNVILGET,
+            )
+        }
         verify(exactly = 1) { iverksett.iverksett(any(), any()) }
         verify(exactly = 0) { iverksett.iverksettUtenBrev(any()) }
     }
 
     @Test
     internal fun `skal opprette opprettBehandleUnderkjentVedtakOppgave etter beslutte vedtak hvis underkjent`() {
-        val nesteSteg = utførTotrinnskontroll(godkjent = false, begrunnelse = "begrunnelse", årsakerUnderkjent = listOf(ÅrsakUnderkjent.AKTIVITET))
+        val nesteSteg = utførTotrinnskontroll(
+            godkjent = false,
+            begrunnelse = "begrunnelse",
+            årsakerUnderkjent = listOf(ÅrsakUnderkjent.AKTIVITET),
+        )
 
         val deserializedPayload = objectMapper.readValue<OpprettOppgaveTask.OpprettOppgaveTaskData>(taskSlot[1].payload)
 
@@ -168,6 +182,14 @@ internal class BeslutteVedtakStegTest {
     }
 
     @Test
+    internal fun `skal ikke sende brev hvis årsaken er iverksette KA vedtak`() {
+        utførTotrinnskontroll(true, opprettSaksbehandling(BehandlingÅrsak.IVERKSETTE_KA_VEDTAK))
+
+        verify(exactly = 0) { iverksett.iverksett(any(), any()) }
+        verify(exactly = 1) { iverksett.iverksettUtenBrev(any()) }
+    }
+
+    @Test
     internal fun `skal ikke sende brev hvis årsaken er g-omregning`() {
         utførTotrinnskontroll(true, opprettSaksbehandling(BehandlingÅrsak.G_OMREGNING))
 
@@ -177,7 +199,21 @@ internal class BeslutteVedtakStegTest {
 
     @Test
     internal fun `skal ikke ha beslutter ved avslag og mindre inntektsendringer`() {
-        every { vedtakService.hentVedtak(any()) } returns vedtak(behandlingId, resultatType = ResultatType.AVSLÅ).copy(avslåÅrsak = AvslagÅrsak.MINDRE_INNTEKTSENDRINGER)
+        every { vedtakService.hentVedtak(any()) } returns vedtak(behandlingId, resultatType = ResultatType.AVSLÅ).copy(
+            avslåÅrsak = AvslagÅrsak.MINDRE_INNTEKTSENDRINGER,
+        )
+        every {
+            vedtaksbrevService.lagEndeligBeslutterbrev(any(), vedtakErUtenBeslutter)
+        } returns Fil("123".toByteArray())
+        utførTotrinnskontroll(true, opprettSaksbehandling(BehandlingÅrsak.NYE_OPPLYSNINGER))
+
+        verify(exactly = 1) { iverksett.iverksett(any(), any()) }
+        verify(exactly = 0) { iverksett.iverksettUtenBrev(any()) }
+    }
+
+    @Test
+    internal fun `skal ikke ha beslutter ved avslag og årsak kortvarig avbrudd jobb`() {
+        every { vedtakService.hentVedtak(any()) } returns vedtak(behandlingId, resultatType = ResultatType.AVSLÅ).copy(avslåÅrsak = AvslagÅrsak.KORTVARIG_AVBRUDD_JOBB)
         every {
             vedtaksbrevService.lagEndeligBeslutterbrev(any(), vedtakErUtenBeslutter)
         } returns Fil("123".toByteArray())
@@ -189,12 +225,23 @@ internal class BeslutteVedtakStegTest {
 
     @Test
     internal fun `skal feile dersom vedtak underkjent og mangler begrunnelse`() {
-        assertThrows<ApiFeil> { utførTotrinnskontroll(godkjent = false, årsakerUnderkjent = listOf(ÅrsakUnderkjent.AKTIVITET)) }
+        assertThrows<ApiFeil> {
+            utførTotrinnskontroll(
+                godkjent = false,
+                årsakerUnderkjent = listOf(ÅrsakUnderkjent.AKTIVITET),
+            )
+        }
     }
 
     @Test
     internal fun `skal feile dersom vedtak underkjent og mangler årsaker til underkjennelse`() {
-        assertThrows<ApiFeil> { utførTotrinnskontroll(godkjent = false, begrunnelse = "bergrunnelse", årsakerUnderkjent = emptyList()) }
+        assertThrows<ApiFeil> {
+            utførTotrinnskontroll(
+                godkjent = false,
+                begrunnelse = "bergrunnelse",
+                årsakerUnderkjent = emptyList(),
+            )
+        }
     }
 
     @Test

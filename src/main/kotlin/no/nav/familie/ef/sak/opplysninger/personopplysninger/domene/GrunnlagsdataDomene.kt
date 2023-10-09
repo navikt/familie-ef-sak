@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.opplysninger.personopplysninger.domene
 
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataPeriodeHistorikkOvergangsstønad
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.Sivilstandstype
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Adressebeskyttelse
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Bostedsadresse
@@ -71,6 +72,7 @@ data class GrunnlagsdataDomene(
     val medlUnntak: Medlemskapsinfo,
     val barn: List<BarnMedIdent>,
     val tidligereVedtaksperioder: TidligereVedtaksperioder?,
+    val harAvsluttetArbeidsforhold: Boolean?,
 )
 
 data class Søker(
@@ -159,6 +161,7 @@ data class TidligereInnvilgetVedtak(
     val harTidligereOvergangsstønad: Boolean = false,
     val harTidligereBarnetilsyn: Boolean = false,
     val harTidligereSkolepenger: Boolean = false,
+    val periodeHistorikkOvergangsstønad: List<GrunnlagsdataPeriodeHistorikkOvergangsstønad> = emptyList(),
 )
 
 enum class GrunnlagsdataEndring {

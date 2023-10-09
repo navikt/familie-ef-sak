@@ -1,8 +1,10 @@
 package no.nav.familie.ef.sak.sigrun
 
 import no.nav.familie.ef.sak.fagsak.FagsakPersonService
-import no.nav.familie.ef.sak.sigrun.ekstern.BeregnetSkatt
+import no.nav.familie.ef.sak.sigrun.ekstern.PensjonsgivendeInntektForSkatteordning
+import no.nav.familie.ef.sak.sigrun.ekstern.PensjonsgivendeInntektResponse
 import no.nav.familie.ef.sak.sigrun.ekstern.SigrunClient
+import no.nav.familie.ef.sak.sigrun.ekstern.Skatteordning
 import org.springframework.stereotype.Service
 import java.time.YearMonth
 import java.util.UUID
@@ -10,38 +12,39 @@ import java.util.UUID
 @Service
 class SigrunService(val sigrunClient: SigrunClient, val fagsakPersonService: FagsakPersonService) {
 
-    val forrigeÅr = YearMonth.now().year - 1
-    val listInntektsår = listOf(forrigeÅr, forrigeÅr - 1, forrigeÅr - 2)
-
-    fun hentInntektSisteTreÅr(fagsakPersonId: UUID): List<PensjonsgivendeInntektVisning> {
+    fun hentInntektForAlleÅrMedInntekt(fagsakPersonId: UUID): List<PensjonsgivendeInntektVisning> {
         val aktivIdent = fagsakPersonService.hentAktivIdent(fagsakPersonId)
 
-        val beregnetSkattegrunnlagSisteTreÅr = listInntektsår.map { sigrunClient.hentBeregnetSkatt(aktivIdent, it).mapTilPensjonsgivendeInntektVisning(it) }
+        val inntektsår = (YearMonth.now().year - 1) downTo 2017
 
-        return beregnetSkattegrunnlagSisteTreÅr
+        val pensjonsgivendeInntektList = inntektsår.map {
+            sigrunClient.hentPensjonsgivendeInntekt(aktivIdent, it).mapTilPensjonsgivendeInntektVisning(it)
+        }
+        val førsteÅretMedInntektIndex = pensjonsgivendeInntektList.indexOfLast { it.totalInntektOverNull() } + 1
+
+        return pensjonsgivendeInntektList.subList(0, førsteÅretMedInntektIndex)
     }
 }
 
-val næringKodeverdiBeregnetSkatt = "personinntektNaering"
-val skatteoppgjørsdatoKodeverdi = "skatteoppgjoersdato"
-val svalbardPersoninntektNaering = "svalbardPersoninntektNaering"
-val svalbardSumAllePersoninntekter = "svalbardSumAllePersoninntekter"
+private fun PensjonsgivendeInntektResponse.mapTilPensjonsgivendeInntektVisning(inntektsår: Int): PensjonsgivendeInntektVisning {
+    val fastlandInntekt = this.pensjonsgivendeInntekt?.firstOrNull { it.skatteordning == Skatteordning.FASTLAND }
+    val svalbardInntekt = this.pensjonsgivendeInntekt?.firstOrNull { it.skatteordning == Skatteordning.SVALBARD }
 
-private fun List<BeregnetSkatt>.mapTilPensjonsgivendeInntektVisning(inntektsaar: Int): PensjonsgivendeInntektVisning {
-    // Skatteoppgjørsdato er en del av response, og bruker samme felter som inntekt. Verdi er datoen for skatteoppgjøret og teknisk navn er "skatteoppgjoersdato".
-    // Dette filtreres vekk for at summeringen av inntekt skal gå bra, i tillegg til at det ikke er sett behov for å vise skatteoppgjørsdato i frontend.
-    val inntekt = this.filter { it.tekniskNavn != skatteoppgjørsdatoKodeverdi }
-
-    val næring = inntekt.filter { it.tekniskNavn == næringKodeverdiBeregnetSkatt }.sumOf { it.verdi.toInt() }
-    val person = inntekt.filterNot { listOf(næringKodeverdiBeregnetSkatt, svalbardPersoninntektNaering, svalbardSumAllePersoninntekter).contains(it.tekniskNavn) }.sumOf { it.verdi.toInt() }
-
-    val næringSvalbard = inntekt.filter { it.tekniskNavn == svalbardPersoninntektNaering }.sumOf { it.verdi.toInt() }
-    val personSvalbard = inntekt.filter { it.tekniskNavn == svalbardSumAllePersoninntekter }.sumOf { it.verdi.toInt() }
-
-    val svalbard = if (næringSvalbard != 0 || personSvalbard > 0) SvalbardPensjonsgivendeInntekt(næring = næringSvalbard, person = personSvalbard) else null
-
-    return PensjonsgivendeInntektVisning(inntektsaar, næring, person, svalbard = svalbard)
+    return PensjonsgivendeInntektVisning(
+        this.inntektsaar ?: inntektsår,
+        fastlandInntekt?.næringsinntekt() ?: 0,
+        fastlandInntekt?.pensjonsgivendeInntektAvLoennsinntekt ?: 0,
+        SvalbardPensjonsgivendeInntekt(
+            svalbardInntekt?.næringsinntekt() ?: 0,
+            svalbardInntekt?.pensjonsgivendeInntektAvLoennsinntekt ?: 0,
+        ),
+    )
 }
+
+fun PensjonsgivendeInntektForSkatteordning.næringsinntekt() =
+    (this.pensjonsgivendeInntektAvNaeringsinntekt ?: 0) + (this.pensjonsgivendeInntektAvNaeringsinntektFraFiskeFangstEllerFamiliebarnehage ?: 0)
+
+fun PensjonsgivendeInntektVisning.totalInntektOverNull() = (this.næring + this.person + (this.svalbard?.næring ?: 0) + (this.svalbard?.person ?: 0)) > 0
 
 data class PensjonsgivendeInntektVisning(
     val inntektsår: Int,

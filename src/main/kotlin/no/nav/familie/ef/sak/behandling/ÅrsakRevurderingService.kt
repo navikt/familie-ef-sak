@@ -8,6 +8,7 @@ import no.nav.familie.ef.sak.behandling.dto.tilDto
 import no.nav.familie.ef.sak.behandling.dto.ÅrsakRevurderingDto
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
+import no.nav.familie.ef.sak.oppgave.TilordnetRessursService
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
@@ -19,6 +20,7 @@ import java.util.UUID
 class ÅrsakRevurderingService(
     private val behandlingService: BehandlingService,
     private val årsakRevurderingsRepository: ÅrsakRevurderingsRepository,
+    private val tilordnetRessursService: TilordnetRessursService,
 ) {
 
     private val årsakerSomIkkeHarRevurderingsinformasjon = setOf(
@@ -61,6 +63,9 @@ class ÅrsakRevurderingService(
     ) {
         feilHvis(saksbehandling.status.behandlingErLåstForVidereRedigering()) {
             "Behandlingen er låst og kan ikke oppdatere revurderingsinformasjon"
+        }
+        feilHvis(!tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandler((saksbehandling.id))) {
+            "Behandlingen har en ny eier og du kan derfor ikke oppdatere revurderingsinformasjon"
         }
         årsakRevurderingsRepository.deleteById(saksbehandling.id)
         årsakRevurderingsRepository.insert(årsakRevurdering.tilDomene(saksbehandling.id))

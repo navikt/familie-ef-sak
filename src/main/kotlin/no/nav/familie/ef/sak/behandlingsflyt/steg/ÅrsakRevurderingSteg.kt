@@ -7,14 +7,14 @@ import no.nav.familie.ef.sak.behandling.ÅrsakRevurderingService
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvisIkke
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
-import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
+import no.nav.familie.ef.sak.oppgave.TilordnetRessursService
 import no.nav.familie.kontrakter.ef.felles.Revurderingsårsak
 import org.springframework.stereotype.Service
 
 @Service
 class ÅrsakRevurderingSteg(
     private val årsakRevurderingService: ÅrsakRevurderingService,
-    private val featureToggleService: FeatureToggleService,
+    private val tilordnetRessursService: TilordnetRessursService,
 ) : BehandlingSteg<RevurderingsinformasjonDto> {
 
     override fun stegType(): StegType {
@@ -45,6 +45,9 @@ class ÅrsakRevurderingSteg(
     ) {
         brukerfeilHvis(saksbehandling.status.behandlingErLåstForVidereRedigering()) {
             "Behandlingen er låst og kan ikke oppdatere årsak til revurdering"
+        }
+        brukerfeilHvis(!tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandler(saksbehandling.id)) {
+            "Behandlingen har en ny eier og du kan derfor ikke oppdatere årsak til revurdering"
         }
         brukerfeilHvisIkke(årsakRevurdering.årsak.erGyldigForStønadstype(saksbehandling.stønadstype)) {
             "Årsak er ikke gyldig for stønadstype"

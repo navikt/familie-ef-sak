@@ -20,6 +20,7 @@ import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.clearBrukerContext
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.mockBrukerContext
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
+import no.nav.familie.ef.sak.oppgave.TilordnetRessursService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerService
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
@@ -46,14 +47,15 @@ internal class VedtaksbrevServiceTest {
     private val personopplysningerService = mockk<PersonopplysningerService>()
     private val brevsignaturService = BrevsignaturService(personopplysningerService)
     private val familieDokumentClient = mockk<FamilieDokumentClient>()
+    private val tilordnetRessursService = mockk<TilordnetRessursService>()
 
     private val vedtaksbrevService =
         VedtaksbrevService(
             brevClient,
             vedtaksbrevRepository,
-            personopplysningerService,
             brevsignaturService,
             familieDokumentClient,
+            tilordnetRessursService,
         )
 
     private val vedtakKreverBeslutter = VedtakErUtenBeslutter(false)
@@ -274,6 +276,7 @@ internal class VedtaksbrevServiceTest {
         every { vedtaksbrevRepository.existsById(any()) } returns false
         every { vedtaksbrevRepository.insert(capture(vedtaksbrevSlot)) } returns vedtaksbrev
         every { familieDokumentClient.genererPdfFraHtml(any()) } returns "123".toByteArray()
+        every { tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandler(any()) } returns true
 
         vedtaksbrevService.lagSaksbehandlerSanitybrev(
             saksbehandling(fagsak, behandling),
@@ -291,6 +294,7 @@ internal class VedtaksbrevServiceTest {
         every { vedtaksbrevRepository.update(capture(vedtaksbrevSlot)) } answers { firstArg() }
         every { brevClient.genererHtml(any(), any(), any(), any(), any()) } returns "html"
         every { familieDokumentClient.genererPdfFraHtml(any()) } returns "123".toByteArray()
+        every { tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandler(any()) } returns true
 
         val now = SporbarUtils.now()
         vedtaksbrevService.lagSaksbehandlerSanitybrev(

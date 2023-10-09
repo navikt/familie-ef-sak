@@ -1,17 +1,17 @@
 package no.nav.familie.ef.sak.infrastruktur.featuretoggle
 
-import no.nav.familie.unleash.DefaultUnleashService
+import no.nav.familie.unleash.UnleashService
 import org.springframework.stereotype.Service
 
 @Service
-class FeatureToggleService(val defaultUnleashService: DefaultUnleashService) {
+class FeatureToggleService(val unleashService: UnleashService) {
 
     fun isEnabled(toggle: Toggle): Boolean {
-        return defaultUnleashService.isEnabled(toggle.toggleId)
+        return unleashService.isEnabled(toggle.toggleId)
     }
 
     fun isEnabled(toggle: Toggle, defaultValue: Boolean): Boolean {
-        return defaultUnleashService.isEnabled(toggle.toggleId, defaultValue)
+        return unleashService.isEnabled(toggle.toggleId, defaultValue)
     }
 }
 
@@ -22,6 +22,9 @@ enum class Toggle(val toggleId: String, val beskrivelse: String? = null) {
         "Usikker på om vi ønsker denne eller ikke. Ta en vurdering før 2024?",
     ),
     FRONTEND_VIS_INNTEKT_PERSONOVERSIKT("familie.ef.sak.frontend.vis-inntekt-personoversikt", "Ikke ferdigstilt ennå"),
+    GJENBRUK_VILKÅR_PÅ_TVERS_AV_BEHANDLINGER("familie.ef.sak.gjenbruk-vilkaar-paa-tvers-av-behandlinger", "Må testes i preprod"),
+    VIS_KA_VEDTAK_ALTERNATIV("familie.ef.sak.frontend.vis-ka-uten-brev"),
+    VIS_NY_JOURNALFØRING("familie.ef.sak-ny-journalforing"),
 
     // Operational
     AUTOMATISK_MIGRERING("familie.ef.sak.automatisk-migrering", "Kan denne slettes?"),
@@ -53,6 +56,7 @@ enum class Toggle(val toggleId: String, val beskrivelse: String? = null) {
     TILLAT_MIGRERING_5_ÅR_TILBAKE("familie.ef.sak.tillat-migrering-5-ar-tilbake", "Permission"),
     TILLAT_MIGRERING_7_ÅR_TILBAKE("familie.ef.sak.tillat-migrering-7-ar-tilbake", "Permission"),
     UTVIKLER_MED_VEILEDERRROLLE("familie.ef.sak.utviklere-med-veilederrolle", "Permission"),
+    TILLAT_HENT_UT_INFOTRYGD_RAPPORT("familie.ef.sak.tillat-hent-infotrygd-rapport", "Permission"),
     ;
 
     companion object {

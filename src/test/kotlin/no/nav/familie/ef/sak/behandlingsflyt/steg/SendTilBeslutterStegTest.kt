@@ -33,7 +33,7 @@ import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.mockBrukerContext
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.oppgave.Oppgave
-import no.nav.familie.ef.sak.oppgave.OppgaveService
+import no.nav.familie.ef.sak.oppgave.TilordnetRessursService
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.ef.sak.repository.saksbehandling
@@ -66,7 +66,6 @@ internal class SendTilBeslutterStegTest {
 
     private val taskService = mockk<TaskService>()
     private val fagsakService = mockk<FagsakService>()
-    private val oppgaveService = mockk<OppgaveService>()
     private val behandlingService = mockk<BehandlingService>(relaxed = true)
     private val vedtaksbrevRepository = mockk<VedtaksbrevRepository>()
     private val vedtakService = mockk<VedtakService>()
@@ -77,6 +76,7 @@ internal class SendTilBeslutterStegTest {
     private val årsakRevurderingService = mockk<ÅrsakRevurderingService>(relaxed = true)
     private val oppgaverForOpprettelseService = mockk<OppgaverForOpprettelseService>(relaxed = true)
     private val behandlingshistorikkService = mockk<BehandlingshistorikkService>()
+    private val tilordnetRessursService = mockk<TilordnetRessursService>()
     private val simuleringsoppsummering = Simuleringsoppsummering(
         perioder = listOf(),
         fomDatoNestePeriode = null,
@@ -92,7 +92,6 @@ internal class SendTilBeslutterStegTest {
     private val beslutteVedtakSteg =
         SendTilBeslutterSteg(
             taskService,
-            oppgaveService,
             fagsakService,
             behandlingService,
             vedtaksbrevRepository,
@@ -104,6 +103,7 @@ internal class SendTilBeslutterStegTest {
             årsakRevurderingService,
             oppgaverForOpprettelseService,
             behandlingshistorikkService,
+            tilordnetRessursService,
         )
     private val fagsak = fagsak(
         stønadstype = StønadType.OVERGANGSSTØNAD,
@@ -149,8 +149,7 @@ internal class SendTilBeslutterStegTest {
         every {
             taskService.save(capture(taskSlot))
         } returns Task("", "", Properties())
-        every { oppgaveService.hentOppgaveSomIkkeErFerdigstilt(any(), any()) } returns null
-        every { oppgaveService.hentBehandleSakOppgaveSomIkkeErFerdigstilt(any()) } returns Oppgave(
+        every { tilordnetRessursService.hentEFOppgaveSomIkkeErFerdigstilt(any(), any()) } returns Oppgave(
             behandlingId = behandling.id,
             gsakOppgaveId = 1234L,
             type = Oppgavetype.BehandleSak,
@@ -170,6 +169,7 @@ internal class SendTilBeslutterStegTest {
         every { behandlingshistorikkService.finnSisteBehandlingshistorikk(any(), any()) } returns
             Behandlingshistorikk(behandlingId = UUID.randomUUID(), steg = StegType.SEND_TIL_BESLUTTER)
         mockBrukerContext(saksbehandlerNavn)
+        every { tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandler(any()) } returns true
     }
 
     @AfterEach
@@ -257,7 +257,7 @@ internal class SendTilBeslutterStegTest {
                 steg = StegType.BESLUTTE_VEDTAK,
                 utfall = StegUtfall.BESLUTTE_VEDTAK_UNDERKJENT,
             )
-        every { oppgaveService.hentBehandleSakOppgaveSomIkkeErFerdigstilt(any()) } returns null
+        every { tilordnetRessursService.hentEFOppgaveSomIkkeErFerdigstilt(any(), any()) } returns null
         every { vedtakService.hentVedtaksresultat(any()) } returns ResultatType.INNVILGE
         val feil = assertThrows<Feil> { beslutteVedtakSteg.validerSteg(behandling) }
         assertThat(feil.frontendFeilmelding).contains("Oppgaven for behandlingen er ikke tilgjengelig. Vennligst vent og prøv igjen om litt.")
@@ -291,17 +291,6 @@ internal class SendTilBeslutterStegTest {
     }
 
     private fun utførOgVerifiserKall(oppgavetype: Oppgavetype) {
-        every { oppgaveService.hentOppgaveSomIkkeErFerdigstilt(oppgavetype, any()) }
-            .returns(
-                Oppgave(
-                    id = UUID.randomUUID(),
-                    behandlingId = behandling.id,
-                    gsakOppgaveId = 123L,
-                    type = Oppgavetype.BehandleSak,
-                    erFerdigstilt = false,
-                ),
-            )
-
         every { vedtakService.oppdaterSaksbehandler(any(), any()) } just Runs
         mockBrukerContext("saksbehandlernavn")
 

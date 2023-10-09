@@ -3,10 +3,13 @@ package no.nav.familie.ef.sak.vedtak
 import no.nav.familie.ef.sak.AuditLoggerEvent
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
 import no.nav.familie.ef.sak.behandling.BehandlingService
+import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegService
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvisIkke
+import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
+import no.nav.familie.ef.sak.oppgave.TilordnetRessursService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.secureLogger
 import no.nav.familie.ef.sak.vedtak.dto.BeslutteVedtakDto
 import no.nav.familie.ef.sak.vedtak.dto.InnvilgelseOvergangsstønad
@@ -48,6 +51,7 @@ class VedtakController(
     private val behandlingRepository: BehandlingRepository,
     private val nullstillVedtakService: NullstillVedtakService,
     private val angreSendTilBeslutterService: AngreSendTilBeslutterService,
+    private val tilordnetRessursService: TilordnetRessursService,
 ) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -56,6 +60,9 @@ class VedtakController(
     fun sendTilBeslutter(@PathVariable behandlingId: UUID, @RequestBody sendTilBeslutter: SendTilBeslutterDto?): Ressurs<UUID> {
         val behandling = behandlingService.hentSaksbehandling(behandlingId)
         tilgangService.validerTilgangTilBehandling(behandling, AuditLoggerEvent.UPDATE)
+
+        validerTilordnetRessurs(behandlingId)
+
         val vedtakErUtenBeslutter = vedtakService.hentVedtak(behandlingId).utledVedtakErUtenBeslutter()
 
         return if (vedtakErUtenBeslutter.value) {
@@ -79,6 +86,7 @@ class VedtakController(
     ): Ressurs<UUID> {
         val behandling = behandlingService.hentSaksbehandling(behandlingId)
         tilgangService.validerTilgangTilBehandling(behandling, AuditLoggerEvent.UPDATE)
+        validerTilordnetRessurs(behandlingId)
         if (!request.godkjent && request.begrunnelse.isNullOrBlank()) {
             throw ApiFeil("Mangler begrunnelse", HttpStatus.BAD_REQUEST)
         }
@@ -120,6 +128,7 @@ class VedtakController(
     fun lagreVedtak(@PathVariable behandlingId: UUID, @RequestBody vedtak: VedtakDto): Ressurs<UUID> {
         val behandling = behandlingService.hentSaksbehandling(behandlingId)
         tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.UPDATE)
+        validerKanRedigereBehandling(behandling)
         validerAlleVilkårOppfyltDersomInvilgelse(vedtak, behandlingId)
         return Ressurs.success(stegService.håndterBeregnYtelseForStønad(behandling, vedtak).id)
     }
@@ -136,6 +145,19 @@ class VedtakController(
     private fun validerAlleVilkårOppfyltDersomInvilgelse(vedtak: VedtakDto, behandlingId: UUID) {
         if (vedtak is InnvilgelseOvergangsstønad) {
             brukerfeilHvisIkke(vurderingService.erAlleVilkårOppfylt(behandlingId)) { "Kan ikke fullføre en behandling med resultat innvilget hvis ikke alle vilkår er oppfylt" }
+        }
+    }
+
+    private fun validerKanRedigereBehandling(saksbehandling: Saksbehandling) {
+        feilHvis(saksbehandling.status.behandlingErLåstForVidereRedigering()) {
+            "Behandlingen er låst og vedtaket kan derfor ikke lagres"
+        }
+        validerTilordnetRessurs(saksbehandling.id)
+    }
+
+    private fun validerTilordnetRessurs(behandlingId: UUID) {
+        feilHvis(!tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandler((behandlingId))) {
+            "Behandlingen har en annen eier og du kan derfor ikke lagre vedtaket"
         }
     }
 

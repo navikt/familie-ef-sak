@@ -9,10 +9,10 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Primary
 import org.springframework.context.annotation.Profile
 
+@Profile("mock-featuretoggle")
 @Configuration
 class FeatureToggleMock {
 
-    @Profile("mock-featuretoggle")
     @Bean
     @Primary
     fun featureToggleService(): FeatureToggleService {
@@ -21,6 +21,7 @@ class FeatureToggleMock {
         every { mockk.isEnabled(Toggle.TILLAT_MIGRERING_5_ÅR_TILBAKE) } returns false
         every { mockk.isEnabled(Toggle.TILLAT_MIGRERING_7_ÅR_TILBAKE) } returns false
         every { mockk.isEnabled(Toggle.SATSENDRING_BRUK_IKKE_VEDTATT_MAXSATS) } returns false
+        every { mockk.isEnabled(Toggle.UTVIKLER_MED_VEILEDERRROLLE) } returns false
         return mockk
     }
 }

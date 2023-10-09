@@ -7,6 +7,7 @@ import no.nav.familie.ef.sak.brev.domain.OrganisasjonerWrapper
 import no.nav.familie.ef.sak.brev.domain.PersonerWrapper
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
+import no.nav.familie.ef.sak.oppgave.TilordnetRessursService
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import java.util.UUID
@@ -15,11 +16,13 @@ import java.util.UUID
 class BrevmottakereService(
     val brevmottakereRepository: BrevmottakereRepository,
     val frittståendeBrevmottakereRepository: FrittståendeBrevmottakereRepository,
+    val tilordnetRessursService: TilordnetRessursService,
 ) {
 
     fun lagreBrevmottakere(behandlingId: UUID, brevmottakereDto: BrevmottakereDto): UUID {
         validerAntallBrevmottakere(brevmottakereDto)
         validerUnikeBrevmottakere(brevmottakereDto)
+        validerAtSaksbehandlerEierbehandling(behandlingId)
 
         val brevmottakere = Brevmottakere(
             behandlingId,
@@ -104,6 +107,12 @@ class BrevmottakereService(
         }
         brukerfeilHvis(antallMottakere > 2) {
             "Vedtaksbrevet kan ikke ha mer enn 2 mottakere"
+        }
+    }
+
+    private fun validerAtSaksbehandlerEierbehandling(behandlingId: UUID) {
+        brukerfeilHvis(!tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandler(behandlingId)) {
+            "Behandlingen eies av noen andre og brevmottakere kan derfor ikke endres av deg"
         }
     }
 }

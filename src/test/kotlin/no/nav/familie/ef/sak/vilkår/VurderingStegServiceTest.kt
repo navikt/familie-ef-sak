@@ -21,6 +21,7 @@ import no.nav.familie.ef.sak.felles.util.BrukerContextUtil
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.vilkår.VilkårTestUtil.mockVilkårGrunnlagDto
+import no.nav.familie.ef.sak.oppgave.TilordnetRessursService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerIntegrasjonerClient
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.Sivilstandstype
@@ -38,6 +39,7 @@ import no.nav.familie.ef.sak.vilkår.dto.SivilstandInngangsvilkårDto
 import no.nav.familie.ef.sak.vilkår.dto.SivilstandRegistergrunnlagDto
 import no.nav.familie.ef.sak.vilkår.dto.SvarPåVurderingerDto
 import no.nav.familie.ef.sak.vilkår.dto.VurderingDto
+import no.nav.familie.ef.sak.vilkår.gjenbruk.GjenbrukVilkårService
 import no.nav.familie.ef.sak.vilkår.regler.HovedregelMetadata
 import no.nav.familie.ef.sak.vilkår.regler.RegelId
 import no.nav.familie.ef.sak.vilkår.regler.SvarId
@@ -69,8 +71,10 @@ internal class VurderingStegServiceTest {
     private val taskService = mockk<TaskService>()
     private val grunnlagsdataService = mockk<GrunnlagsdataService>()
     private val fagsakService = mockk<FagsakService>()
+    private val gjenbrukVilkårService = mockk<GjenbrukVilkårService>()
     private val featureToggleService = mockk<FeatureToggleService>()
     private val behandlingshistorikkService = mockk<BehandlingshistorikkService>()
+    private val tilordnetRessursService = mockk<TilordnetRessursService>()
     private val vurderingService = VurderingService(
         behandlingService,
         søknadService,
@@ -79,7 +83,9 @@ internal class VurderingStegServiceTest {
         vilkårGrunnlagService,
         grunnlagsdataService,
         fagsakService,
+        gjenbrukVilkårService,
         featureToggleService,
+        tilordnetRessursService,
     )
     private val vurderingStegService = VurderingStegService(
         behandlingService = behandlingService,
@@ -89,6 +95,7 @@ internal class VurderingStegServiceTest {
         stegService = stegService,
         taskService = taskService,
         behandlingshistorikkService = behandlingshistorikkService,
+        tilordnetRessursService = tilordnetRessursService,
     )
     private val søknad = SøknadsskjemaMapper.tilDomene(
         TestsøknadBuilder.Builder().setBarn(
@@ -125,6 +132,7 @@ internal class VurderingStegServiceTest {
                 ),
             )
         every { vilkårsvurderingRepository.insertAll(any()) } answers { firstArg() }
+        every { tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandler(any()) } returns true
         val sivilstand = SivilstandInngangsvilkårDto(
             mockk(relaxed = true),
             SivilstandRegistergrunnlagDto(Sivilstandstype.GIFT, "1", "Navn", null),

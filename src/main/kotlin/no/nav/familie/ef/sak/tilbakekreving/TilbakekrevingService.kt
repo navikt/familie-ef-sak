@@ -11,6 +11,7 @@ import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
+import no.nav.familie.ef.sak.oppgave.TilordnetRessursService
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.ef.sak.simulering.SimuleringService
 import no.nav.familie.ef.sak.simulering.hentSammenhengendePerioderMedFeilutbetaling
@@ -39,6 +40,7 @@ class TilbakekrevingService(
     private val tilbakekrevingClient: TilbakekrevingClient,
     private val simuleringService: SimuleringService,
     private val arbeidsfordelingService: ArbeidsfordelingService,
+    private val tilordnetRessursService: TilordnetRessursService,
 ) {
 
     fun lagreTilbakekreving(tilbakekrevingDto: TilbakekrevingDto, behandlingId: UUID) {
@@ -65,6 +67,9 @@ class TilbakekrevingService(
         }
         brukerfeilHvis(behandling.status.behandlingErLåstForVidereRedigering()) {
             "Behandlingen er låst for redigering"
+        }
+        brukerfeilHvis(!tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandler(behandling.id)) {
+            "Behandlingen har en ny eier og er derfor låst for redigering av deg"
         }
     }
 

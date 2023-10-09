@@ -8,6 +8,7 @@ import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.ef.sak.iverksett.IverksettClient
+import no.nav.familie.ef.sak.oppgave.TilordnetRessursService
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.ef.sak.tilkjentytelse.tilTilkjentYtelseMedMetaData
@@ -28,6 +29,7 @@ class SimuleringService(
     private val simuleringsresultatRepository: SimuleringsresultatRepository,
     private val tilkjentYtelseService: TilkjentYtelseService,
     private val tilgangService: TilgangService,
+    private val tilordnetRessursService: TilordnetRessursService,
 ) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -35,7 +37,8 @@ class SimuleringService(
     @Transactional
     fun simuler(saksbehandling: Saksbehandling): Simuleringsoppsummering {
         if (saksbehandling.status.behandlingErLåstForVidereRedigering() ||
-            !tilgangService.harTilgangTilRolle(BehandlerRolle.SAKSBEHANDLER)
+            !tilgangService.harTilgangTilRolle(BehandlerRolle.SAKSBEHANDLER) ||
+            !tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandler(saksbehandling.id)
         ) {
             return hentLagretSimuleringsoppsummering(saksbehandling.id)
         }

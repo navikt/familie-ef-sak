@@ -23,6 +23,7 @@ import no.nav.familie.ef.sak.felles.domain.Sporbar
 import no.nav.familie.ef.sak.felles.util.mockFeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
+import no.nav.familie.ef.sak.oppgave.TilordnetRessursService
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
@@ -48,6 +49,7 @@ internal class BehandlingServiceTest {
     private val behandlingRepository: BehandlingRepository = mockk()
     private val behandlingshistorikkService: BehandlingshistorikkService = mockk(relaxed = true)
     private val taskService: TaskService = mockk(relaxed = true)
+    private val tilordnetRessursService: TilordnetRessursService = mockk(relaxed = true)
     private val behandlingService =
         BehandlingService(
             mockk(),
@@ -55,6 +57,7 @@ internal class BehandlingServiceTest {
             behandlingshistorikkService,
             taskService,
             mockFeatureToggleService(),
+            tilordnetRessursService,
         )
     private val behandlingSlot = slot<Behandling>()
 
@@ -77,6 +80,7 @@ internal class BehandlingServiceTest {
     @BeforeEach
     fun reset() {
         clearAllMocks(answers = false)
+        every { tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandler(any()) } returns true
     }
 
     @Test
@@ -160,6 +164,7 @@ internal class BehandlingServiceTest {
             }
 
             assertThat(feil.httpStatus).isEqualTo(HttpStatus.BAD_REQUEST)
+            assertThat(feil.feil).contains("Kan ikke henlegge en behandling med status")
         }
     }
 
@@ -192,6 +197,25 @@ internal class BehandlingServiceTest {
                 behandlingService.oppdaterResultatPåBehandling(UUID.randomUUID(), BehandlingResultat.IKKE_SATT)
             }.hasMessageContaining("Må sette et endelig resultat")
         }
+    }
+
+    @Test
+    internal fun `skal ikke kunne henlegge behandling hvor innlogget saksbehandler er eier av behandling`() {
+        val behandling =
+            behandling(fagsak(), type = BehandlingType.FØRSTEGANGSBEHANDLING, status = BehandlingStatus.UTREDES)
+
+        every { tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandler(any()) } returns false
+
+        every {
+            behandlingRepository.findByIdOrThrow(any())
+        } returns behandling
+
+        val feil: ApiFeil = assertThrows {
+            behandlingService.henleggBehandling(behandling.id, HenlagtDto(FEILREGISTRERT))
+        }
+
+        assertThat(feil.httpStatus).isEqualTo(HttpStatus.BAD_REQUEST)
+        assertThat(feil.feil).isEqualTo("Behandlingen har en annen eier og kan derfor ikke henlegges av deg")
     }
 
     @Nested

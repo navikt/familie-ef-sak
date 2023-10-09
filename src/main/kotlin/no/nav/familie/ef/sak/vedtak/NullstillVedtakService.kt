@@ -7,6 +7,7 @@ import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.brev.MellomlagringBrevService
 import no.nav.familie.ef.sak.brev.VedtaksbrevService
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
+import no.nav.familie.ef.sak.oppgave.TilordnetRessursService
 import no.nav.familie.ef.sak.simulering.SimuleringService
 import no.nav.familie.ef.sak.tilbakekreving.TilbakekrevingService
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
@@ -25,6 +26,7 @@ class NullstillVedtakService(
     private val mellomlagringBrevService: MellomlagringBrevService,
     private val vedtaksbrevService: VedtaksbrevService,
     private val oppgaverForOpprettelseService: OppgaverForOpprettelseService,
+    private val tilordnetRessursService: TilordnetRessursService,
 ) {
 
     @Transactional
@@ -33,6 +35,9 @@ class NullstillVedtakService(
 
         feilHvis(saksbehandling.status.behandlingErLåstForVidereRedigering()) {
             "Behandling er låst og vedtak kan ikke slettes"
+        }
+        feilHvis(!tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandler(behandlingId)) {
+            "Behandlingen har en annen eier og vedtak kan derfor ikke slettes av deg"
         }
 
         mellomlagringBrevService.slettMellomlagringHvisFinnes(behandlingId)
