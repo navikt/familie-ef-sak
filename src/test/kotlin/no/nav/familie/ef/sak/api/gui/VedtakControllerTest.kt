@@ -171,20 +171,24 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    internal fun `skal sette behandling til iverksett når man godkjent totrinnskontroll`() {
-        opprettBehandling()
+    internal fun `skal sette behandling til iverksett når man har godkjent totrinnskontroll`() {
+        val behandlingId = opprettBehandling()
 
         sendTilBeslutter(SAKSBEHANDLER)
+        byttEierPåLagretOppgave(behandlingId, 24681L, 24682L)
         godkjennTotrinnskontroll(BESLUTTER)
         validerBehandlingIverksetter()
     }
 
     @Test
     internal fun `hvis man underkjenner den så skal man få ut det som status`() {
-        opprettBehandling()
+        val behandlingId = opprettBehandling()
 
         sendTilBeslutter(SAKSBEHANDLER)
+
+        byttEierPåLagretOppgave(behandlingId, 24681L, 24682L)
         underkjennTotrinnskontroll(BESLUTTER)
+
         validerTotrinnskontrollUnderkjent(SAKSBEHANDLER)
         validerTotrinnskontrollUnderkjent(BESLUTTER)
         validerTotrinnskontrollUnderkjent(BESLUTTER_2)
@@ -192,7 +196,7 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
 
     @Test
     internal fun `en annen beslutter enn den som sendte til beslutter må godkjenne behandlingen`() {
-        opprettBehandling(saksbehandler = BESLUTTER)
+        val behandlingId = opprettBehandling(saksbehandler = BESLUTTER)
 
         sendTilBeslutter(BESLUTTER)
         validerTotrinnskontrollIkkeAutorisert(SAKSBEHANDLER)
@@ -201,14 +205,17 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
 
         godkjennTotrinnskontroll(SAKSBEHANDLER, responseServerError())
         godkjennTotrinnskontroll(BESLUTTER, responseBadRequest())
+
+        byttEierPåLagretOppgave(behandlingId, 24682L, 24685L)
         godkjennTotrinnskontroll(BESLUTTER_2)
     }
 
     @Test
     internal fun `skal gi totrinnskontroll uaktuelt hvis totrinnskontrollen er godkjent`() {
-        opprettBehandling()
+        val behandlingId = opprettBehandling()
 
         sendTilBeslutter(SAKSBEHANDLER)
+        byttEierPåLagretOppgave(behandlingId, 24681L, 24682L)
         godkjennTotrinnskontroll(BESLUTTER)
 
         validerTotrinnskontrollUaktuelt(SAKSBEHANDLER)
@@ -218,22 +225,30 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
 
     @Test
     internal fun `hvis man underkjenner behandlingen må man sende den til beslutter på nytt og sen godkjenne den`() {
-        opprettBehandling()
+        val behandlingId = opprettBehandling()
         sendTilBeslutter(SAKSBEHANDLER)
+
+        byttEierPåLagretOppgave(behandlingId, 24681L, 24682L)
         underkjennTotrinnskontroll(BESLUTTER)
 
+        byttEierPåLagretOppgave(behandlingId, 24682L, 24681L)
         sendTilBeslutter(SAKSBEHANDLER)
+
+        byttEierPåLagretOppgave(behandlingId, 24681L, 24682L)
         underkjennTotrinnskontroll(BESLUTTER)
 
         validerBehandlingUtredes()
 
+        byttEierPåLagretOppgave(behandlingId, 24682L, 24681L)
         sendTilBeslutter(SAKSBEHANDLER)
+
+        byttEierPåLagretOppgave(behandlingId, 24681L, 24682L)
         godkjennTotrinnskontroll(BESLUTTER)
     }
 
     @Test
     internal fun `en annen beslutter enn den som sendte behandlingen til beslutter må godkjenne behandlingen`() {
-        opprettBehandling(saksbehandler = BESLUTTER)
+        val behandlingId = opprettBehandling(saksbehandler = BESLUTTER)
         sendTilBeslutter(BESLUTTER)
         validerTotrinnskontrollIkkeAutorisert(SAKSBEHANDLER)
         validerTotrinnskontrollIkkeAutorisert(BESLUTTER)
@@ -241,6 +256,7 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
 
         godkjennTotrinnskontroll(BESLUTTER, responseBadRequest())
 
+        byttEierPåLagretOppgave(behandlingId, 24682L, 24685L)
         godkjennTotrinnskontroll(BESLUTTER_2)
     }
 
@@ -450,6 +466,22 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
         val oppgaveId = if (saksbehandler == SAKSBEHANDLER) 24681L else 24682L
         val oppgave = Oppgave(
             gsakOppgaveId = oppgaveId,
+            behandlingId = behandlingId,
+            type = Oppgavetype.BehandleSak,
+        )
+        oppgaveRepository.insert(oppgave)
+    }
+
+    private fun byttEierPåLagretOppgave(
+        behandlingId: UUID,
+        gammelOppgaveId: Long,
+        nyOppgaveId: Long,
+    ) {
+        val gammelOppgave = oppgaveRepository.findByGsakOppgaveId(gammelOppgaveId)
+        oppgaveRepository.delete(gammelOppgave)
+
+        val oppgave = Oppgave(
+            gsakOppgaveId = nyOppgaveId,
             behandlingId = behandlingId,
             type = Oppgavetype.BehandleSak,
         )
