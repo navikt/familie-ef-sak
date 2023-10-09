@@ -25,8 +25,11 @@ class TilordnetRessursService(
      * til frontend for å skjule visningen av ansvarlig saksbehandler frem til oppgavesystemet rekker å opprette
      * behandle-sak-oppgaven. Man må kunne redigere frontend i dette tilfellet.
      */
-    fun tilordnetRessursErInnloggetSaksbehandler(behandlingId: UUID): Boolean {
-        val oppgave = if (erUtviklerMedVeilderrolle()) null else hentIkkeFerdigstiltOppgaveForBehandling(behandlingId)
+    fun tilordnetRessursErInnloggetSaksbehandler(
+        behandlingId: UUID,
+        oppgavetyper: Set<Oppgavetype> = setOf(Oppgavetype.BehandleSak, Oppgavetype.BehandleUnderkjentVedtak),
+    ): Boolean {
+        val oppgave = if (erUtviklerMedVeilderrolle()) null else hentIkkeFerdigstiltOppgaveForBehandling(behandlingId, oppgavetyper)
         val rolle = utledSaksbehandlerRolle(oppgave)
 
         return when (rolle) {
@@ -35,12 +38,11 @@ class TilordnetRessursService(
         }
     }
 
-    fun hentIkkeFerdigstiltOppgaveForBehandling(behandlingId: UUID, oppgavetyper: Set<Oppgavetype>? = null): Oppgave? {
-        val typer = if (oppgavetyper.isNullOrEmpty()) setOf(Oppgavetype.BehandleSak, Oppgavetype.BehandleUnderkjentVedtak) else oppgavetyper
-
-        return hentEFOppgaveSomIkkeErFerdigstilt(behandlingId, typer)
-            ?.let { oppgaveClient.finnOppgaveMedId(it.gsakOppgaveId) }
-    }
+    fun hentIkkeFerdigstiltOppgaveForBehandling(
+        behandlingId: UUID,
+        oppgavetyper: Set<Oppgavetype> = setOf(Oppgavetype.BehandleSak, Oppgavetype.BehandleUnderkjentVedtak),
+    ): Oppgave? = hentEFOppgaveSomIkkeErFerdigstilt(behandlingId, oppgavetyper)
+        ?.let { oppgaveClient.finnOppgaveMedId(it.gsakOppgaveId) }
 
     fun hentEFOppgaveSomIkkeErFerdigstilt(behandlingId: UUID, oppgavetyper: Set<Oppgavetype>): EFOppgave? =
         oppgaveRepository.findByBehandlingIdAndErFerdigstiltIsFalseAndTypeIn(
