@@ -146,7 +146,7 @@ class SettPåVentStepDefinitions {
         every { oppgaveService.oppdaterOppgave(capture(oppgaveSlot)) } just Runs
         every { taskService.save(capture(taskSlot)) } answers { firstArg() }
         every { oppgaveService.finnMapper("4489") } returns mapper
-        every { tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandlerEllerNull(any()) } returns true
+        every { tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandler(any()) } returns true
 
         påVentService.settPåVent(behandling.id, settOppgavePåVentRequest)
         unmockkObject(SikkerhetContext)

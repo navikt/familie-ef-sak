@@ -68,7 +68,7 @@ class TilbakekrevingService(
         brukerfeilHvis(behandling.status.behandlingErLåstForVidereRedigering()) {
             "Behandlingen er låst for redigering"
         }
-        brukerfeilHvis(!tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandlerEllerNull(behandling.id)) {
+        brukerfeilHvis(!tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandler(behandling.id)) {
             "Behandlingen har en ny eier og er derfor låst for redigering av deg"
         }
     }

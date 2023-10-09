@@ -188,7 +188,7 @@ class VedtaksbrevService(
                 httpStatus = HttpStatus.BAD_REQUEST,
             )
         }
-        brukerfeilHvis(!tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandlerEllerNull(saksbehandling.id)) {
+        brukerfeilHvis(!tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandler(saksbehandling.id)) {
             "Behandlingen har en ny eier"
         }
     }

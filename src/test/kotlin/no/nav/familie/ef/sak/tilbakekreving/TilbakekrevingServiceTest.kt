@@ -66,7 +66,7 @@ internal class TilbakekrevingServiceTest {
     fun setUp() {
         mockkObject(SikkerhetContext)
         every { SikkerhetContext.hentSaksbehandler() } returns "bob"
-        every { tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandlerEllerNull(any()) } returns true
+        every { tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandler(any()) } returns true
     }
 
     @AfterAll

@@ -64,7 +64,7 @@ class RevurderingService(
         brukerfeilHvis(behandlingService.hentBehandling(behandlingId).status.behandlingErLåstForVidereRedigering()) {
             "Kan ikke slette revurderingsinformasjon når behandlingen er låst"
         }
-        brukerfeilHvis(!tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandlerEllerNull(behandlingId)) {
+        brukerfeilHvis(!tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandler(behandlingId)) {
             "Behandlingen har en ny eier og du kan derfor ikke slette revurderingsinformasjon"
         }
         årsakRevurderingService.slettRevurderingsinformasjon(behandlingId)

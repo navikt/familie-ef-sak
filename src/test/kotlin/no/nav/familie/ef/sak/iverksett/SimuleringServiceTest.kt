@@ -81,7 +81,7 @@ internal class SimuleringServiceTest {
         every { tilkjentYtelseService.hentForBehandling(any()) } returns tilkjentYtelse
         every { simuleringsresultatRepository.deleteById(any()) } just Runs
         every { simuleringsresultatRepository.insert(any()) } returns simuleringsresultat
-        every { tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandlerEllerNull(any()) } returns true
+        every { tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandler(any()) } returns true
 
         val simulerSlot = slot<SimuleringDto>()
         every {
@@ -142,7 +142,7 @@ internal class SimuleringServiceTest {
         every { behandlingService.hentBehandling(any()) } returns behandling
         every { tilkjentYtelseService.hentForBehandling(any()) } returns tilkjentYtelse
         every { simuleringsresultatRepository.deleteById(any()) } just Runs
-        every { tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandlerEllerNull(any()) } returns true
+        every { tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandler(any()) } returns true
 
         val simulerSlot = slot<Simuleringsresultat>()
         every { simuleringsresultatRepository.insert(capture(simulerSlot)) } answers { firstArg() }
