@@ -218,6 +218,7 @@ class VedtakController(
                     it.personIdent,
                     it.forventetInntektForMåned.forventetInntektForrigeMåned,
                     it.forventetInntektForMåned.forventetInntektToMånederTilbake,
+                    it.forventetInntektForMåned.forventetInntektTreMånederTilbake,
                 )
             },
         )
