@@ -68,7 +68,7 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
 
         val person3 = fagsakPerson(identer = setOf(PersonIdent("3")))
         fagsakPersonRepository.insert(person3)
-        behandlingRepository.insert(behandling(testoppsettService.lagreFagsak(fagsak(person = person3)), resultat = INNVILGET, vedtakstidspunkt = LocalDateTime.now().minusMonths(3), årsak = BehandlingÅrsak.NYE_OPPLYSNINGER, status = FERDIGSTILT))
+        behandlingRepository.insert(behandling(testoppsettService.lagreFagsak(fagsak(person = person3)), resultat = INNVILGET, vedtakstidspunkt = LocalDateTime.now().minusMonths(4), årsak = BehandlingÅrsak.NYE_OPPLYSNINGER, status = FERDIGSTILT))
 
         val person4 = fagsakPerson(identer = setOf(PersonIdent("4")))
         fagsakPersonRepository.insert(person4)
