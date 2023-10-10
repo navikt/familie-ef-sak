@@ -180,10 +180,10 @@ class VedtakController(
         return Ressurs.success(forventetInntekt)
     }
 
-    @GetMapping("/personerMedAktivStonadIkkeManueltRevurdertSisteToMaaneder")
+    @GetMapping("/personerMedAktivStonadIkkeManueltRevurdertSisteTreMaaneder")
     @ProtectedWithClaims(issuer = "azuread", claimMap = ["roles=access_as_application"]) // Familie-ef-personhendelse bruker denne
-    fun hentPersonerMedAktivStonadIkkeManueltRevurdertSisteToMåneder(): Ressurs<List<String>> {
-        return Ressurs.success(behandlingRepository.finnPersonerMedAktivStonadIkkeRevurdertSisteToMåneder())
+    fun hentPersonerMedAktivStonadIkkeManueltRevurdertSisteTreMåneder(): Ressurs<List<String>> {
+        return Ressurs.success(behandlingRepository.finnPersonerMedAktivStonadIkkeRevurdertSisteTreMåneder())
     }
 
     @PostMapping("/gjeldendeIverksatteBehandlingerMedInntekt")
@@ -218,6 +218,7 @@ class VedtakController(
                     it.personIdent,
                     it.forventetInntektForMåned.forventetInntektForrigeMåned,
                     it.forventetInntektForMåned.forventetInntektToMånederTilbake,
+                    it.forventetInntektForMåned.forventetInntektTreMånederTilbake,
                 )
             },
         )
