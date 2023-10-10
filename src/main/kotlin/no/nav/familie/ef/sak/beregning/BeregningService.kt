@@ -72,7 +72,32 @@ class BeregningService {
 
         brukerfeilHvis(
             inntektsperioder.map { it.periode }.harOverlappende() ||
-                !inntektsperioder.map { it.periode }.erSammenhengende(),
+                    !inntektsperioder.map { it.periode }.erSammenhengende(),
         ) { "Inntektsperioder $inntektsperioder overlapper eller er ikke sammenhengde" }
+    }
+
+    fun hentNyesteGrunnbeløpOgAntallGrunnløpsperioderTilbakeITid(antall: Int): List<Grunnbeløp> {
+        return Grunnbeløpsperioder.grunnbeløpsperioder.subList(0, antall)
+    }
+
+    fun grunnbeløpsperiodeDTO(gl: Grunnbeløp): GrunnbeløpDTO {
+        val periode = gl.periode
+        val grunnbeløp = gl.grunnbeløp
+        val grunnbeløpMåned = gl.perMnd
+        val gjennomsnittPerÅr = gl.gjennomsnittPerÅr
+        val seksGangerGrunnbeløp = 6.toBigDecimal() * grunnbeløp
+        val seksGangerGrunnbeløpPerMåned = 6.toBigDecimal() * grunnbeløpMåned
+        return GrunnbeløpDTO(
+            periode = periode,
+            grunnbeløp = grunnbeløp,
+            grunnbeløpMåned = grunnbeløpMåned,
+            gjennomsnittPerÅr = gjennomsnittPerÅr,
+            seksGangerGrunnbeløp = seksGangerGrunnbeløp,
+            seksGangerGrunnbeløpPerMåned = seksGangerGrunnbeløpPerMåned,
+        )
+    }
+
+    fun listeMedGrunnbeløpTilDTO(grunnbeløp: List<Grunnbeløp>): List<GrunnbeløpDTO> {
+        return grunnbeløp.map { grunnbeløpsperiodeDTO(it) }
     }
 }

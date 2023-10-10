@@ -38,6 +38,15 @@ data class Grunnbeløp(
     val gjennomsnittPerÅr: BigDecimal? = null,
 )
 
+data class GrunnbeløpDTO(
+    val periode: Månedsperiode,
+    val grunnbeløp: BigDecimal,
+    val grunnbeløpMåned: BigDecimal,
+    val gjennomsnittPerÅr: BigDecimal? = null,
+    val seksGangerGrunnbeløp: BigDecimal,
+    val seksGangerGrunnbeløpPerMåned: BigDecimal,
+)
+
 fun finnGrunnbeløpsPerioder(periode: Månedsperiode): List<Beløpsperiode> {
     return Grunnbeløpsperioder.grunnbeløpsperioder
         .filter { it.periode.overlapper(periode) }
