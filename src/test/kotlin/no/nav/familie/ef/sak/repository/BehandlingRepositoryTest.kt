@@ -74,7 +74,7 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
         fagsakPersonRepository.insert(person4)
         behandlingRepository.insert(behandling(testoppsettService.lagreFagsak(fagsak(person = person4)), resultat = INNVILGET, vedtakstidspunkt = LocalDateTime.now(), årsak = BehandlingÅrsak.NYE_OPPLYSNINGER, status = FERDIGSTILT))
 
-        val resultat = behandlingRepository.finnPersonerMedAktivStonadIkkeRevurdertSisteToMåneder()
+        val resultat = behandlingRepository.finnPersonerMedAktivStonadIkkeRevurdertSisteTreMåneder()
         assertThat(resultat.size).isEqualTo(3)
         assertThat(resultat).containsAll(listOf("1", "2", "3"))
     }
