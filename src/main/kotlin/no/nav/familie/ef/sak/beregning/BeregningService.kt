@@ -72,7 +72,7 @@ class BeregningService {
 
         brukerfeilHvis(
             inntektsperioder.map { it.periode }.harOverlappende() ||
-                    !inntektsperioder.map { it.periode }.erSammenhengende(),
+                !inntektsperioder.map { it.periode }.erSammenhengende(),
         ) { "Inntektsperioder $inntektsperioder overlapper eller er ikke sammenhengde" }
     }
 
