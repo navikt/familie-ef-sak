@@ -56,9 +56,9 @@ class BeregningController(
     }
 
     @GetMapping("/grunnbelopForPerioder")
-    fun hentNyesteGrunnbeløpOgAntallGrunnløpsperioderTilbakeITid(@RequestParam antall: Int): Ressurs<List<GrunnbeløpDTO>> {
-        val liste = beregningService.hentNyesteGrunnbeløpOgAntallGrunnløpsperioderTilbakeITid(antall)
-        val listeDTO = beregningService.listeMedGrunnbeløpTilDTO(liste)
-        return Ressurs.success(listeDTO)
+    fun hentNyesteGrunnbeløpOgAntallGrunnbeløpsperioderTilbakeITid(@RequestParam antall: Int): Ressurs<List<GrunnbeløpDTO>> {
+        val listeMedGrunnbeløpsperioder = beregningService.hentNyesteGrunnbeløpOgAntallGrunnbeløpsperioderTilbakeITid(antall)
+        val listeMedGrunnbeløpsperioderDTO = beregningService.listeMedGrunnbeløpTilDTO(listeMedGrunnbeløpsperioder)
+        return Ressurs.success(listeMedGrunnbeløpsperioderDTO)
     }
 }

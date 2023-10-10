@@ -76,15 +76,15 @@ class BeregningService {
         ) { "Inntektsperioder $inntektsperioder overlapper eller er ikke sammenhengde" }
     }
 
-    fun hentNyesteGrunnbeløpOgAntallGrunnløpsperioderTilbakeITid(antall: Int): List<Grunnbeløp> {
+    fun hentNyesteGrunnbeløpOgAntallGrunnbeløpsperioderTilbakeITid(antall: Int): List<Grunnbeløp> {
         return Grunnbeløpsperioder.grunnbeløpsperioder.subList(0, antall)
     }
 
-    fun grunnbeløpsperiodeDTO(gl: Grunnbeløp): GrunnbeløpDTO {
-        val periode = gl.periode
-        val grunnbeløp = gl.grunnbeløp
-        val grunnbeløpMåned = gl.perMnd
-        val gjennomsnittPerÅr = gl.gjennomsnittPerÅr
+    fun grunnbeløpsperiodeDTO(grunnbeløpParameter: Grunnbeløp): GrunnbeløpDTO {
+        val periode = grunnbeløpParameter.periode
+        val grunnbeløp = grunnbeløpParameter.grunnbeløp
+        val grunnbeløpMåned = grunnbeløpParameter.perMnd
+        val gjennomsnittPerÅr = grunnbeløpParameter.gjennomsnittPerÅr
         val seksGangerGrunnbeløp = 6.toBigDecimal() * grunnbeløp
         val seksGangerGrunnbeløpPerMåned = 6.toBigDecimal() * grunnbeløpMåned
         return GrunnbeløpDTO(
