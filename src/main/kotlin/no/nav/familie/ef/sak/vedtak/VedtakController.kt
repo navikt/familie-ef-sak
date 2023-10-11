@@ -182,7 +182,7 @@ class VedtakController(
 
     @GetMapping("/personerMedAktivStonadIkkeManueltRevurdertSisteTreMaaneder")
     @ProtectedWithClaims(issuer = "azuread", claimMap = ["roles=access_as_application"]) // Familie-ef-personhendelse bruker denne
-    fun hentPersonerMedAktivStonadIkkeManueltRevurdertSisteTreMåneder(): Ressurs<List<String>> {
+    fun hentPersonerMedAktivStonadIkkeManueltRevurdertSisteToMåneder(): Ressurs<List<String>> {
         return Ressurs.success(behandlingRepository.finnPersonerMedAktivStonadIkkeRevurdertSisteTreMåneder())
     }
 
