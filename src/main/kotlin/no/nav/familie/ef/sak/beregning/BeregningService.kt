@@ -84,14 +84,12 @@ class BeregningService {
         val periode = grunnbeløpParameter.periode
         val grunnbeløp = grunnbeløpParameter.grunnbeløp
         val grunnbeløpMåned = grunnbeløpParameter.perMnd
-        val gjennomsnittPerÅr = grunnbeløpParameter.gjennomsnittPerÅr
         val seksGangerGrunnbeløp = 6.toBigDecimal() * grunnbeløp
         val seksGangerGrunnbeløpPerMåned = 6.toBigDecimal() * grunnbeløpMåned
         return GrunnbeløpDTO(
             periode = periode,
             grunnbeløp = grunnbeløp,
             grunnbeløpMåned = grunnbeløpMåned,
-            gjennomsnittPerÅr = gjennomsnittPerÅr,
             seksGangerGrunnbeløp = seksGangerGrunnbeløp,
             seksGangerGrunnbeløpPerMåned = seksGangerGrunnbeløpPerMåned,
         )
