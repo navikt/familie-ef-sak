@@ -1,6 +1,5 @@
 package no.nav.familie.ef.sak.opplysninger.personopplysninger.egenansatt
 
-import no.nav.familie.ef.sak.felles.integration.dto.EgenAnsattRequest
 import no.nav.familie.http.client.AbstractRestClient
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
@@ -23,3 +22,5 @@ class EgenAnsattClient(
         )
     }
 }
+
+data class EgenAnsattRequest(val personident: String)
