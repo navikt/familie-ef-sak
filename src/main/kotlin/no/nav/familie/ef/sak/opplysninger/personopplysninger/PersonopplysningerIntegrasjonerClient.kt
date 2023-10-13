@@ -1,8 +1,6 @@
 package no.nav.familie.ef.sak.opplysninger.personopplysninger
 
 import no.nav.familie.ef.sak.arbeidsfordeling.Arbeidsfordelingsenhet
-import no.nav.familie.ef.sak.felles.integration.dto.EgenAnsattRequest
-import no.nav.familie.ef.sak.felles.integration.dto.EgenAnsattResponse
 import no.nav.familie.ef.sak.felles.integration.dto.Tilgang
 import no.nav.familie.ef.sak.infrastruktur.config.IntegrasjonerConfig
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
@@ -86,13 +84,6 @@ class PersonopplysningerIntegrasjonerClient(
         } catch (e: RestClientException) {
             throw Feil("Kall mot integrasjon feilet ved henting av arbeidsfordelingsenhet uri=$uri", e)
         }
-    }
-
-    fun egenAnsatt(ident: String): Boolean {
-        return postForEntity<Ressurs<EgenAnsattResponse>>(
-            integrasjonerConfig.egenAnsattUri,
-            EgenAnsattRequest(ident),
-        ).data!!.erEgenAnsatt
     }
 
     fun hentNavKontor(ident: String): NavKontorEnhet? {

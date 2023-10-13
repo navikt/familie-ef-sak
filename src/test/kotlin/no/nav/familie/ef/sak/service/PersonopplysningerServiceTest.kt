@@ -13,6 +13,7 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerIntegrasjonerClient
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.TidligereVedtaksperioderService
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.egenansatt.EgenAnsattClient
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper.AdresseMapper
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper.InnflyttingUtflyttingMapper
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper.PersonopplysningerMapper
@@ -31,6 +32,7 @@ internal class PersonopplysningerServiceTest {
 
     private lateinit var personopplysningerService: PersonopplysningerService
     private lateinit var personopplysningerIntegrasjonerClient: PersonopplysningerIntegrasjonerClient
+    private lateinit var egenAnsattClient: EgenAnsattClient
     private lateinit var adresseMapper: AdresseMapper
     private lateinit var grunnlagsdataService: GrunnlagsdataService
     private lateinit var søknadService: SøknadService
@@ -45,8 +47,10 @@ internal class PersonopplysningerServiceTest {
         behandlingService = mockk(relaxed = true)
         adresseMapper = AdresseMapper(kodeverkService)
         søknadService = mockk()
+        egenAnsattClient = mockk()
         arbeidsforholdService = mockk(relaxed = true)
         val personService = PersonService(PdlClientConfig().pdlClient(), ConcurrentMapCacheManager())
+        every { egenAnsattClient.egenAnsatt(any()) } returns true
 
         val grunnlagsdataRegisterService = GrunnlagsdataRegisterService(
             personService,
@@ -75,13 +79,13 @@ internal class PersonopplysningerServiceTest {
             personopplysningerIntegrasjonerClient,
             grunnlagsdataService,
             personopplysningerMapper,
+            egenAnsattClient,
             ConcurrentMapCacheManager(),
         )
     }
 
     @Test
     internal fun `mapper grunnlagsdata til PersonopplysningerDto`() {
-        every { personopplysningerIntegrasjonerClient.egenAnsatt(any()) } returns true
         every { personopplysningerIntegrasjonerClient.hentMedlemskapsinfo(any()) } returns Medlemskapsinfo(
             "01010172272",
             emptyList(),
@@ -97,10 +101,10 @@ internal class PersonopplysningerServiceTest {
     internal fun `skal cache egenAnsatt når man kaller med samme ident`() {
         personopplysningerService.hentPersonopplysningerUtenVedtakshistorikk("1")
         personopplysningerService.hentPersonopplysningerUtenVedtakshistorikk("1")
-        verify(exactly = 1) { personopplysningerIntegrasjonerClient.egenAnsatt(any()) }
+        verify(exactly = 1) { egenAnsattClient.egenAnsatt(any()) }
 
         personopplysningerService.hentPersonopplysningerUtenVedtakshistorikk("2")
-        verify(exactly = 2) { personopplysningerIntegrasjonerClient.egenAnsatt(any()) }
+        verify(exactly = 2) { egenAnsattClient.egenAnsatt(any()) }
     }
 
     private fun readFile(filnavn: String): String {

@@ -5,6 +5,7 @@ import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.infrastruktur.config.getValue
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.GrunnlagsdataMedMetadata
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.PersonopplysningerDto
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.egenansatt.EgenAnsattClient
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.endringer.EndringerIPersonopplysningerDto
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.endringer.UtledEndringerUtil.finnEndringer
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper.PersonopplysningerMapper
@@ -27,6 +28,7 @@ class PersonopplysningerService(
     private val personopplysningerIntegrasjonerClient: PersonopplysningerIntegrasjonerClient,
     private val grunnlagsdataService: GrunnlagsdataService,
     private val personopplysningerMapper: PersonopplysningerMapper,
+    private val egenAnsattClient: EgenAnsattClient,
     @Qualifier("shortCache")
     private val cacheManager: CacheManager,
 ) {
@@ -86,7 +88,7 @@ class PersonopplysningerService(
     }
 
     private fun egenAnsatt(personIdent: String) = cacheManager.getValue("egenAnsatt", personIdent) {
-        personopplysningerIntegrasjonerClient.egenAnsatt(personIdent)
+        egenAnsattClient.egenAnsatt(personIdent)
     }
 
     fun hentGjeldeneNavn(identer: List<String>): Map<String, String> {
