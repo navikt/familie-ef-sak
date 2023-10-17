@@ -47,7 +47,7 @@ class RevurderingsController(
             "Kan ikke behandle nye barn på revurdering med årsak G-omregning"
         }
 
-        feilHvis((revurderingInnhold.barnSomSkalFødes.isNotEmpty() || revurderingInnhold.behandlingsårsak == BehandlingÅrsak.PAPIRSØKNAD) && !featureToggleService.isEnabled(Toggle.PAPIRSOKNAD_OG_TERMINBARN_REVURDERING)){
+        feilHvis((revurderingInnhold.barnSomSkalFødes.isNotEmpty() || revurderingInnhold.behandlingsårsak == BehandlingÅrsak.PAPIRSØKNAD) && !featureToggleService.isEnabled(Toggle.PAPIRSOKNAD_OG_TERMINBARN_REVURDERING)) {
             "Featuretoggle for papirsøknad / terminbarn på revurdering er ikke skrudd på"
         }
 
