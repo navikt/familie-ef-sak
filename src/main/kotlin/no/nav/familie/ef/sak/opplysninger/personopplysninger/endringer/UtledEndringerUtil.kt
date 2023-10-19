@@ -73,7 +73,7 @@ object UtledEndringerUtil {
         tidligere: List<BarnDto>,
         nye: List<BarnDto>,
     ): Endring<List<Personendring>> {
-        secureLogger.info("Utled endringer andreForelder")
+        secureLogger.info("Utled endringer andreForelder. Tidligere barn: $tidligere nye barn: $nye")
         val tidligereForeldrer = tidligere.mapNotNull { it.annenForelder }.distinct()
         val nyeForeldrer = nye.mapNotNull { it.annenForelder }.distinct()
         return utledPersonendringer(tidligereForeldrer, nyeForeldrer, { it.personIdent }, annenForelderEndringer)
