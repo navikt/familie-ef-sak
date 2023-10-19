@@ -57,7 +57,7 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
     private val ident = "123"
 
     @Test
-    fun `skal finne alle personer med aktiv stønad som ikke er manuelt revurdert siste to måneder`() {
+    fun `skal finne alle personer med aktiv stønad som ikke er manuelt revurdert siste tre måneder`() {
         val person1 = fagsakPerson(identer = setOf(PersonIdent("1")))
         fagsakPersonRepository.insert(person1)
         behandlingRepository.insert(behandling(testoppsettService.lagreFagsak(fagsak(person = person1)), resultat = INNVILGET, vedtakstidspunkt = LocalDateTime.now().minusMonths(3), årsak = BehandlingÅrsak.G_OMREGNING, status = FERDIGSTILT))
@@ -73,6 +73,12 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
         val person4 = fagsakPerson(identer = setOf(PersonIdent("4")))
         fagsakPersonRepository.insert(person4)
         behandlingRepository.insert(behandling(testoppsettService.lagreFagsak(fagsak(person = person4)), resultat = INNVILGET, vedtakstidspunkt = LocalDateTime.now(), årsak = BehandlingÅrsak.NYE_OPPLYSNINGER, status = FERDIGSTILT))
+
+        val person5 = fagsakPerson(identer = setOf(PersonIdent("5")))
+        fagsakPersonRepository.insert(person5)
+        val fagsak = testoppsettService.lagreFagsak(fagsak(person = person5)) //Personer med åpen behandling på seg skal ikke med
+        behandlingRepository.insert(behandling(fagsak, resultat = INNVILGET, vedtakstidspunkt = LocalDateTime.now().minusMonths(4), årsak = BehandlingÅrsak.NYE_OPPLYSNINGER, status = FERDIGSTILT))
+        behandlingRepository.insert(behandling(fagsak, resultat = IKKE_SATT, årsak = BehandlingÅrsak.NYE_OPPLYSNINGER, status = UTREDES))
 
         val resultat = behandlingRepository.finnPersonerMedAktivStonadIkkeRevurdertSisteTreMåneder()
         assertThat(resultat.size).isEqualTo(3)

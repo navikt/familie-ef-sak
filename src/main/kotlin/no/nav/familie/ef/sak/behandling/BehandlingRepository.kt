@@ -164,6 +164,12 @@ interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUp
         FROM gjeldende_iverksatte_behandlinger gib 
             JOIN person_ident pi ON gib.fagsak_person_id=pi.fagsak_person_id
         WHERE gib.stonadstype=:stønadstype AND (vedtakstidspunkt < ('now'::timestamp - '3 month'::interval) OR arsak IN ('MIGRERING', 'G_OMREGNING'))
+        EXCEPT
+        (SELECT pi.ident
+         FROM fagsak
+                  JOIN behandling ON fagsak.id = behandling.fagsak_id
+                  JOIN person_ident pi ON fagsak.fagsak_person_id = pi.fagsak_person_id
+         WHERE behandling.status <> 'FERDIGSTILT' AND fagsak.stonadstype=:stønadstype)
         """,
     )
     fun finnPersonerMedAktivStonadIkkeRevurdertSisteTreMåneder(stønadstype: StønadType = StønadType.OVERGANGSSTØNAD): List<String>
