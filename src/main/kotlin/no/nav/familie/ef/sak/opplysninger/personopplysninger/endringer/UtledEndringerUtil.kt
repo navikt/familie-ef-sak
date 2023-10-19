@@ -22,6 +22,7 @@ object UtledEndringerUtil {
             statsborgerskap = utledEndringerUtenDetaljer(tidligere.statsborgerskap, nye.statsborgerskap),
             sivilstand = utledEndringerUtenDetaljer(tidligere.sivilstand, nye.sivilstand),
             adresse = utledEndringerUtenDetaljer(tidligere.adresse, nye.adresse),
+            adresseAnnenForelder = utledEndringerUtenDetaljer(tidligere.barn.map { it.annenForelder?.bostedsadresse }, nye.barn.map { it.annenForelder?.bostedsadresse }),
             fullmakt = utledEndringerUtenDetaljer(tidligere.fullmakt, nye.fullmakt),
             barn = utledEndringerBarn(tidligere.barn, nye.barn),
             annenForelder = utledEndringerAndreForelder(tidligere.barn, nye.barn),
