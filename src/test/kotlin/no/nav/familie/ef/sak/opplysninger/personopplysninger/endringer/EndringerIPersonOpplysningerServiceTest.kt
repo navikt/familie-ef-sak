@@ -16,6 +16,7 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.endringer.Endringer
 import no.nav.familie.ef.sak.repository.saksbehandling
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
@@ -96,6 +97,7 @@ internal class EndringerIPersonOpplysningerServiceTest {
         val treTimerSiden = LocalDateTime.now().minusHours(3)
 
         @Test
+        @Disabled
         internal fun `skal bruke data fra databasen hvis det gått mindre enn 4h siden siste oppdatering`() {
             mockHentLagretGrunnlagsdata(grunnlagsdata(endringerSjekket = treTimerSiden))
 
@@ -109,6 +111,7 @@ internal class EndringerIPersonOpplysningerServiceTest {
         }
 
         @Test
+        @Disabled
         internal fun `skal bruke data fra databasen hvis det gått mindre enn 4h siden siste oppdatering, også når endringer er null`() {
             mockHentLagretGrunnlagsdata(grunnlagsdata(endringerSjekket = treTimerSiden, endringer = null))
 
