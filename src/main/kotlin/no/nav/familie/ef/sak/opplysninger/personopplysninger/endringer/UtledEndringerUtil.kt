@@ -5,6 +5,7 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.AnnenForelderMi
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.BarnDto
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.Folkeregisterpersonstatus
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.PersonopplysningerDto
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.secureLogger
 import java.time.LocalDate
 
 private typealias PersonendringDetaljerFn<T> = (T, T) -> EndringFelt?
@@ -72,6 +73,7 @@ object UtledEndringerUtil {
         tidligere: List<BarnDto>,
         nye: List<BarnDto>,
     ): Endring<List<Personendring>> {
+        secureLogger.info("Utled endringer andreForelder")
         val tidligereForeldrer = tidligere.mapNotNull { it.annenForelder }.distinct()
         val nyeForeldrer = nye.mapNotNull { it.annenForelder }.distinct()
         return utledPersonendringer(tidligereForeldrer, nyeForeldrer, { it.personIdent }, annenForelderEndringer)
@@ -85,7 +87,8 @@ object UtledEndringerUtil {
     ): Endring<List<Personendring>> {
         val tidligerePåIdent = tidligere.associateBy { ident(it) }
         val nyePåIdent = nye.associateBy { ident(it) }
-
+        secureLogger.info("TidligerePåIdent: $tidligerePåIdent")
+        secureLogger.info("nyePåIdent: $nyePåIdent")
         val endringerPåNye = nyePåIdent.mapNotNull { (ident, nyPerson) ->
             val tidligerePerson = tidligerePåIdent[ident]
             if (tidligerePerson != null) {
@@ -97,10 +100,12 @@ object UtledEndringerUtil {
                 Personendring(ident, ny = true)
             }
         }
+        secureLogger.info("EndringerPåNye: $endringerPåNye")
         val fjernede = tidligerePåIdent.keys
             .filterNot { nyePåIdent.containsKey(it) }
             .map { Personendring(it, fjernet = true) }
         val alleEndringer = fjernede + endringerPåNye
+        secureLogger.info("Alle endringer: $alleEndringer")
         return Endring(alleEndringer.isNotEmpty(), alleEndringer)
     }
 
