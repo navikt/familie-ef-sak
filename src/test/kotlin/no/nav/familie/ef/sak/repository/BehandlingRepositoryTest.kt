@@ -76,7 +76,7 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
 
         val person5 = fagsakPerson(identer = setOf(PersonIdent("5")))
         fagsakPersonRepository.insert(person5)
-        val fagsak = testoppsettService.lagreFagsak(fagsak(person = person5)) //Personer med åpen behandling på seg skal ikke med
+        val fagsak = testoppsettService.lagreFagsak(fagsak(person = person5)) // Personer med åpen behandling på seg skal ikke med
         behandlingRepository.insert(behandling(fagsak, resultat = INNVILGET, vedtakstidspunkt = LocalDateTime.now().minusMonths(4), årsak = BehandlingÅrsak.NYE_OPPLYSNINGER, status = FERDIGSTILT))
         behandlingRepository.insert(behandling(fagsak, resultat = IKKE_SATT, årsak = BehandlingÅrsak.NYE_OPPLYSNINGER, status = UTREDES))
 
