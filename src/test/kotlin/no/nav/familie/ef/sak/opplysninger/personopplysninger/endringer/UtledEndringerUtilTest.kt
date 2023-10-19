@@ -30,7 +30,9 @@ import kotlin.reflect.full.memberProperties
 internal class UtledEndringerUtilTest {
 
     val barnIdent = "ident"
+    val barn2Ident = "ident2"
     val forelderIdent = "forelderIdent"
+    val forelderIdent2 = "forelderIdent2"
 
     @Test
     internal fun jsontest() {
@@ -400,12 +402,16 @@ internal class UtledEndringerUtilTest {
 
         @Test
         internal fun `endring bostedsadresse på annen forelder trigger endring på annen forelder`() {
-            val annenForelder = AnnenForelderMinimumDto(forelderIdent, "Navn", null, "Adresse 1")
-            val barn = BarnDto(barnIdent, "", annenForelder, emptyList(), true, emptyList(), false, null, null)
-            val barn2 = barn.copy(annenForelder = annenForelder.copy(bostedsadresse = "Adresse 2"))
+            val annenForelderUtenEndring = AnnenForelderMinimumDto(forelderIdent2, "Annen forelder navn uendret adresse", null, "Adresse uten endring")
+            val barnUtenEndring = BarnDto(barnIdent, "barn uten endring navn", annenForelderUtenEndring, emptyList(), true, emptyList(), false, null, null)
+
+            val annenForelderMedEndring = AnnenForelderMinimumDto(forelderIdent, "Annen forelder navn endret adresse", null, "Oslo")
+            val tidligereBarnMedEndretAnnenForelderBostedsadresse = BarnDto(barn2Ident, "barn med endring navn", annenForelderMedEndring, emptyList(), true, emptyList(), false, null, null)
+            val nyttBarnMedEndretAnnenForelderBostedsadresse = tidligereBarnMedEndretAnnenForelderBostedsadresse.copy(annenForelder = annenForelderMedEndring.copy(bostedsadresse = "Roa"))
+
             val endringer = finnEndringer(
-                dto(barn = listOf(barn)),
-                dto(barn = listOf(barn2)),
+                dto(barn = listOf(tidligereBarnMedEndretAnnenForelderBostedsadresse, barnUtenEndring)),
+                dto(barn = listOf(nyttBarnMedEndretAnnenForelderBostedsadresse, barnUtenEndring)),
             )
             assertThat(endringer.barn.harEndringer).isFalse
             val detaljer = endringer.annenForelder.detaljer!!
@@ -414,8 +420,8 @@ internal class UtledEndringerUtilTest {
             val endringsdetaljer = detaljer[0].endringer
             assertThat(endringsdetaljer).hasSize(1)
             assertThat(endringsdetaljer[0].felt).isEqualTo("Bostedsadresse")
-            assertThat(endringsdetaljer[0].tidligere).isEqualTo("Adresse 1")
-            assertThat(endringsdetaljer[0].ny).isEqualTo("Adresse 2")
+            assertThat(endringsdetaljer[0].tidligere).isEqualTo("Oslo")
+            assertThat(endringsdetaljer[0].ny).isEqualTo("Roa")
 
             assertIngenAndreEndringer(endringer, "annenForelder")
         }
