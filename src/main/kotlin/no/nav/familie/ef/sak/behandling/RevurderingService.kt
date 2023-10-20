@@ -90,10 +90,12 @@ class RevurderingService(
         søknadService.kopierSøknad(forrigeBehandlingId, revurdering.id)
         val grunnlagsdata = grunnlagsdataService.opprettGrunnlagsdata(revurdering.id)
 
+        val terminbarn = revurderingInnhold.barnSomSkalFødes.map { it.tilBehandlingBarn(revurdering.id) }
+        val nyeBarnFraRegister = vilkårsbehandleNyeBarn(revurdering, revurderingInnhold.vilkårsbehandleNyeBarn)
         barnService.opprettBarnForRevurdering(
             behandlingId = revurdering.id,
             forrigeBehandlingId = forrigeBehandlingId,
-            nyeBarnPåRevurdering = vilkårsbehandleNyeBarn(revurdering, revurderingInnhold.vilkårsbehandleNyeBarn),
+            nyeBarnPåRevurdering = nyeBarnFraRegister + terminbarn,
             grunnlagsdataBarn = grunnlagsdata.grunnlagsdata.barn,
             stønadstype = fagsak.stønadstype,
         )
@@ -184,6 +186,10 @@ class RevurderingService(
                 erSatsendring(revurderingInnhold),
         ) {
             "Kan ikke opprette revurdering med årsak satsendring for ${fagsak.stønadstype}"
+        }
+        if (revurderingInnhold.barnSomSkalFødes.isNotEmpty()) {
+            feilHvis(fagsak.stønadstype == StønadType.BARNETILSYN) { "Kan ikke legge inn terminbarn for barnetilsyn" }
+            feilHvis(revurderingInnhold.behandlingsårsak != BehandlingÅrsak.PAPIRSØKNAD) { "Terminbarn på revurdering kan kun legges inn for papirsøknader" }
         }
     }
 

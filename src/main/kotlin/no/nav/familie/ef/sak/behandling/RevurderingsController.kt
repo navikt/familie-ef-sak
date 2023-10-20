@@ -5,6 +5,8 @@ import no.nav.familie.ef.sak.behandling.dto.RevurderingDto
 import no.nav.familie.ef.sak.behandling.dto.RevurderingsinformasjonDto
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.ef.sak.journalføring.dto.VilkårsbehandleNyeBarn
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
@@ -25,6 +27,7 @@ import java.util.UUID
 class RevurderingsController(
     private val revurderingService: RevurderingService,
     private val tilgangService: TilgangService,
+    private val featureToggleService: FeatureToggleService,
 ) {
 
     @PostMapping("{fagsakId}")
@@ -32,7 +35,7 @@ class RevurderingsController(
         tilgangService.validerTilgangTilFagsak(revurderingInnhold.fagsakId, AuditLoggerEvent.CREATE)
         tilgangService.validerHarSaksbehandlerrolle()
         brukerfeilHvis(revurderingInnhold.behandlingsårsak == BehandlingÅrsak.SØKNAD) {
-            "Systemet har ikke støtte for å revurdere med årsak “Søknad” for øyeblikket. " +
+            "Systemet har ikke støtte for å revurdere med årsak “Søknad”. " +
                 "Vurder om behandlingen skal opprettes via en oppgave i oppgavebenken, " +
                 "eller med revurderingsårsak \"Nye opplysninger\". " +
                 "Hvis du trenger å \"flytte\" en søknad som er journalført mot infotrygd, kontakt superbrukere for flytting av journalpost"
@@ -43,6 +46,11 @@ class RevurderingsController(
         ) {
             "Kan ikke behandle nye barn på revurdering med årsak G-omregning"
         }
+
+        feilHvis((revurderingInnhold.barnSomSkalFødes.isNotEmpty() || revurderingInnhold.behandlingsårsak == BehandlingÅrsak.PAPIRSØKNAD) && !featureToggleService.isEnabled(Toggle.PAPIRSOKNAD_OG_TERMINBARN_REVURDERING)) {
+            "Featuretoggle for papirsøknad / terminbarn på revurdering er ikke skrudd på"
+        }
+
         val revurdering = revurderingService.opprettRevurderingManuelt(revurderingInnhold)
         return Ressurs.success(revurdering.id)
     }

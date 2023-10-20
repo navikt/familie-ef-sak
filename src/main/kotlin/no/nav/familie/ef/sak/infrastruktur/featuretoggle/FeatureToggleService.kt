@@ -25,6 +25,7 @@ enum class Toggle(val toggleId: String, val beskrivelse: String? = null) {
     GJENBRUK_VILKÅR_PÅ_TVERS_AV_BEHANDLINGER("familie.ef.sak.gjenbruk-vilkaar-paa-tvers-av-behandlinger", "Må testes i preprod"),
     VIS_KA_VEDTAK_ALTERNATIV("familie.ef.sak.frontend.vis-ka-uten-brev"),
     VIS_NY_JOURNALFØRING("familie.ef.sak-ny-journalforing"),
+    PAPIRSOKNAD_OG_TERMINBARN_REVURDERING("familie.ef.sak.papirsoknad-og-terminbarn-paa-revurdering"),
 
     // Operational
     AUTOMATISK_MIGRERING("familie.ef.sak.automatisk-migrering", "Kan denne slettes?"),
