@@ -1,9 +1,14 @@
 package no.nav.familie.ef.sak.journalføring
 
+import no.nav.familie.ef.sak.behandling.domain.Behandling
+import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
+import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.journalføring.dto.JournalføringRequest
+import no.nav.familie.ef.sak.journalføring.dto.JournalføringRequestV2
+import no.nav.familie.ef.sak.journalføring.dto.Journalføringsårsak
 import no.nav.familie.ef.sak.journalføring.dto.UstrukturertDokumentasjonType
 import no.nav.familie.ef.sak.journalføring.dto.VilkårsbehandleNyeBarn
 import no.nav.familie.kontrakter.ef.sak.DokumentBrevkode
@@ -46,6 +51,25 @@ object JournalføringHelper {
         } else {
             brukerfeilHvis(ustrukturertDokumentasjonType == UstrukturertDokumentasjonType.IKKE_VALGT) {
                 "Må sende inn dokumentasjonstype når journalposten mangler digital søknad"
+            }
+        }
+    }
+
+    fun validerJournalføringNyBehandling(
+        journalpost: Journalpost,
+        journalføringRequest: JournalføringRequestV2,
+    ) {
+        val årsak = journalføringRequest.årsak
+        if (journalpost.harStrukturertSøknad()) {
+            feilHvis(årsak != Journalføringsårsak.DIGITAL_SØKNAD) {
+                "Årsak til journalføring må være digital søknad siden det foreligger en digital søknad på journalposten"
+            }
+            feilHvis(journalføringRequest.vilkårsbehandleNyeBarn != VilkårsbehandleNyeBarn.IKKE_VALGT) {
+                "Kan ikke velge å vilkårsbehandle nye barn når man har strukturert søknad"
+            }
+        } else {
+            brukerfeilHvis(årsak == Journalføringsårsak.DIGITAL_SØKNAD) {
+                "Må velge mellom PAPIRSØKNAD, ETTERSENDING eller KLAGE når journalposten mangler en digital søknad"
             }
         }
     }
@@ -94,4 +118,8 @@ object JournalføringHelper {
             }
         },
     )
+
+    fun utledNesteBehandlingstype(behandlinger: List<Behandling>): BehandlingType {
+        return if (behandlinger.all { it.resultat == BehandlingResultat.HENLAGT }) BehandlingType.FØRSTEGANGSBEHANDLING else BehandlingType.REVURDERING
+    }
 }

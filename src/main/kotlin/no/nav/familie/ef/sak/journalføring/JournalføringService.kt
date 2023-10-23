@@ -20,6 +20,7 @@ import no.nav.familie.ef.sak.journalføring.JournalføringHelper.validerJournalf
 import no.nav.familie.ef.sak.journalføring.JournalføringHelper.validerMottakerFinnes
 import no.nav.familie.ef.sak.journalføring.dto.BarnSomSkalFødes
 import no.nav.familie.ef.sak.journalføring.dto.JournalføringRequest
+import no.nav.familie.ef.sak.journalføring.dto.JournalføringRequestV2
 import no.nav.familie.ef.sak.journalføring.dto.JournalføringTilNyBehandlingRequest
 import no.nav.familie.ef.sak.journalføring.dto.UstrukturertDokumentasjonType
 import no.nav.familie.ef.sak.journalføring.dto.VilkårsbehandleNyeBarn
@@ -60,6 +61,7 @@ class JournalføringService(
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
+    @Deprecated("Bruk v2")
     @Transactional
     fun fullførJournalpost(journalføringRequest: JournalføringRequest, journalpostId: String): Long {
         journalføringRequest.valider()
@@ -73,6 +75,20 @@ class JournalføringService(
         }
     }
 
+    @Transactional
+    fun fullførJournalpostV2(journalføringRequest: JournalføringRequestV2, journalpostId: String): Long {
+        journalføringRequest.valider()
+        val journalpost = journalpostService.hentJournalpost(journalpostId)
+        validerMottakerFinnes(journalpost)
+
+        return if (journalføringRequest.skalJournalføreUtenNyBehandling()) {
+            journalførSøknadTilEksisterendeBehandlingV2(journalføringRequest, journalpost)
+        } else {
+            journalførSøknadTilNyBehandlingV2(journalføringRequest, journalpost)
+        }
+    }
+
+    @Deprecated("Bruk v2")
     private fun journalførSøknadTilEksisterendeBehandling(
         journalføringRequest: JournalføringRequest,
         journalpost: Journalpost,
@@ -92,10 +108,32 @@ class JournalføringService(
             fagsak = fagsak,
             saksbehandler = saksbehandler,
         )
-        ferdigstillJournalføringsoppgave(journalføringRequest)
+        ferdigstillJournalføringsoppgave(journalføringRequest.oppgaveId.toLong())
         return journalføringRequest.oppgaveId.toLong()
     }
 
+    private fun journalførSøknadTilEksisterendeBehandlingV2(
+        journalføringRequest: JournalføringRequestV2,
+        journalpost: Journalpost,
+    ): Long {
+        val saksbehandler = SikkerhetContext.hentSaksbehandler()
+        val fagsak = fagsakService.fagsakMedOppdatertPersonIdent(journalføringRequest.fagsakId)
+        logger.info(
+            "Journalfører journalpost=${journalpost.journalpostId} på eksisterende " +
+                "fagsak=${fagsak.id} stønadstype=${fagsak.stønadstype} ",
+        )
+        journalpostService.oppdaterOgFerdigstillJournalpost(
+            journalpost = journalpost,
+            dokumenttitler = journalføringRequest.dokumentTitler,
+            journalførendeEnhet = journalføringRequest.journalførendeEnhet,
+            fagsak = fagsak,
+            saksbehandler = saksbehandler,
+        )
+        ferdigstillJournalføringsoppgave(journalføringRequest.oppgaveId.toLong())
+        return journalføringRequest.oppgaveId.toLong()
+    }
+
+    @Deprecated("Bruk v2")
     private fun journalførSøknadTilNyBehandling(
         journalføringRequest: JournalføringRequest,
         journalpost: Journalpost,
@@ -134,7 +172,49 @@ class JournalføringService(
             saksbehandler = saksbehandler,
         )
 
-        ferdigstillJournalføringsoppgave(journalføringRequest)
+        ferdigstillJournalføringsoppgave(journalføringRequest.oppgaveId.toLong())
+        opprettBehandlingsstatistikkTask(behandling.id, journalføringRequest.oppgaveId.toLong())
+
+        return opprettBehandleSakOppgave(behandling, saksbehandler)
+    }
+
+    private fun journalførSøknadTilNyBehandlingV2(
+        journalføringRequest: JournalføringRequestV2,
+        journalpost: Journalpost,
+    ): Long {
+        val saksbehandler = SikkerhetContext.hentSaksbehandler()
+        val fagsak = fagsakService.fagsakMedOppdatertPersonIdent(journalføringRequest.fagsakId)
+        logger.info(
+            "Journalfører journalpost=${journalpost.journalpostId} på ny behandling på " +
+                "fagsak=${fagsak.id} stønadstype=${fagsak.stønadstype} " +
+                " vilkårsbehandleNyeBarn=${journalføringRequest.vilkårsbehandleNyeBarn} " +
+                " årsak=${journalføringRequest.årsak} aksjon=${journalføringRequest.aksjon}",
+        )
+        validerJournalføringNyBehandling(
+            journalpost,
+            journalføringRequest,
+        )
+        val behandlingstype = JournalføringHelper.utledNesteBehandlingstype(behandlingService.hentBehandlinger(fagsak.id))
+        infotrygdPeriodeValideringService.validerKanOppretteBehandlingGittInfotrygdData(fagsak)
+
+        val behandling = opprettBehandlingOgPopulerGrunnlagsdata(
+            behandlingstype = behandlingstype,
+            fagsak = fagsak,
+            journalpost = journalpost,
+            barnSomSkalFødes = journalføringRequest.barnSomSkalFødes,
+            ustrukturertDokumentasjonType = journalføringRequest.tilUstrukturertDokumentasjonType(),
+            vilkårsbehandleNyeBarn = journalføringRequest.vilkårsbehandleNyeBarn,
+        )
+
+        journalpostService.oppdaterOgFerdigstillJournalpost(
+            journalpost = journalpost,
+            dokumenttitler = journalføringRequest.dokumentTitler,
+            journalførendeEnhet = journalføringRequest.journalførendeEnhet,
+            fagsak = fagsak,
+            saksbehandler = saksbehandler,
+        )
+
+        ferdigstillJournalføringsoppgave(journalføringRequest.oppgaveId.toLong())
         opprettBehandlingsstatistikkTask(behandling.id, journalføringRequest.oppgaveId.toLong())
 
         return opprettBehandleSakOppgave(behandling, saksbehandler)
@@ -294,8 +374,8 @@ class JournalføringService(
         taskService.save(OpprettOppgaveForOpprettetBehandlingTask.opprettTask(opprettOppgaveTaskData))
     }
 
-    private fun ferdigstillJournalføringsoppgave(journalføringRequest: JournalføringRequest) {
-        oppgaveService.ferdigstillOppgave(journalføringRequest.oppgaveId.toLong())
+    private fun ferdigstillJournalføringsoppgave(oppgaveId: Long) {
+        oppgaveService.ferdigstillOppgave(oppgaveId)
     }
 
     private fun hentBehandling(journalføringRequest: JournalføringRequest): Behandling =

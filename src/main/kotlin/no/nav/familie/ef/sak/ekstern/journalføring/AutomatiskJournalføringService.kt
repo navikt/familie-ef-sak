@@ -3,8 +3,6 @@ package no.nav.familie.ef.sak.ekstern.journalføring
 import no.nav.familie.ef.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.Behandling
-import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
-import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType.FØRSTEGANGSBEHANDLING
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType.REVURDERING
 import no.nav.familie.ef.sak.fagsak.FagsakService
@@ -12,6 +10,7 @@ import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.infotrygd.InfotrygdService
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvisIkke
+import no.nav.familie.ef.sak.journalføring.JournalføringHelper.utledNesteBehandlingstype
 import no.nav.familie.ef.sak.journalføring.JournalføringService
 import no.nav.familie.ef.sak.journalføring.JournalpostService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
@@ -134,10 +133,6 @@ class AutomatiskJournalføringService(
         ident: String,
         type: StønadType,
     ) = !infotrygdService.eksisterer(ident, setOf(type))
-
-    private fun utledNesteBehandlingstype(behandlinger: List<Behandling>): BehandlingType {
-        return if (behandlinger.all { it.resultat == BehandlingResultat.HENLAGT }) FØRSTEGANGSBEHANDLING else REVURDERING
-    }
 
     private fun harÅpenBehandling(behandlinger: List<Behandling>): Boolean {
         return behandlinger.any { !it.erAvsluttet() }

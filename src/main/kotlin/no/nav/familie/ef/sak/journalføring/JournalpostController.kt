@@ -9,6 +9,7 @@ import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.ef.sak.journalføring.dto.JournalføringKlageRequest
 import no.nav.familie.ef.sak.journalføring.dto.JournalføringRequest
+import no.nav.familie.ef.sak.journalføring.dto.JournalføringRequestV2
 import no.nav.familie.ef.sak.journalføring.dto.JournalføringResponse
 import no.nav.familie.ef.sak.journalføring.dto.JournalføringTilNyBehandlingRequest
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
@@ -71,6 +72,7 @@ class JournalpostController(
         return journalpostService.hentDokument(journalpostId, dokumentInfoId)
     }
 
+    @Deprecated("Bruk v2")
     @PostMapping("/{journalpostId}/fullfor")
     fun fullførJournalpost(
         @PathVariable journalpostId: String,
@@ -82,6 +84,24 @@ class JournalpostController(
         return Ressurs.success(journalføringService.fullførJournalpost(journalføringRequest, journalpostId))
     }
 
+    @PostMapping("/{journalpostId}/fullfor/v2")
+    fun fullførJournalpostV2(
+        @PathVariable journalpostId: String,
+        @RequestBody journalføringRequest: JournalføringRequestV2,
+    ): Ressurs<String> {
+        val (_, personIdent) = finnJournalpostOgPersonIdent(journalpostId)
+        tilgangService.validerTilgangTilPersonMedBarn(personIdent, AuditLoggerEvent.UPDATE)
+        tilgangService.validerHarSaksbehandlerrolle()
+
+        if (journalføringRequest.gjelderKlage()) {
+            journalføringKlageService.fullførJournalpostV2(journalføringRequest, journalpostId)
+        } else {
+            journalføringService.fullførJournalpostV2(journalføringRequest, journalpostId)
+        }
+        return Ressurs.success(journalpostId)
+    }
+
+    @Deprecated("Bruk V2 - den skal dekke både klage og vanlig journalføring")
     @PostMapping("/{journalpostId}/klage/fullfor")
     fun fullførJournalpostKlage(
         @PathVariable journalpostId: String,

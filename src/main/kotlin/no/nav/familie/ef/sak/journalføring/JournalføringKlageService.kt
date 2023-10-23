@@ -6,6 +6,8 @@ import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.journalføring.JournalføringHelper.validerMottakerFinnes
 import no.nav.familie.ef.sak.journalføring.dto.JournalføringKlageRequest
+import no.nav.familie.ef.sak.journalføring.dto.JournalføringRequestV2
+import no.nav.familie.ef.sak.journalføring.dto.Journalføringsårsak
 import no.nav.familie.ef.sak.journalføring.dto.skalJournalførePåEksisterendeBehandling
 import no.nav.familie.ef.sak.klage.KlageService
 import no.nav.familie.ef.sak.oppgave.OppgaveService
@@ -29,6 +31,7 @@ class JournalføringKlageService(
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
+    @Deprecated("Bruk V2")
     @Transactional
     fun fullførJournalpost(journalføringRequest: JournalføringKlageRequest, journalpostId: String) {
         val journalpost = journalpostService.hentJournalpost(journalpostId)
@@ -41,6 +44,19 @@ class JournalføringKlageService(
         }
     }
 
+    @Transactional
+    fun fullførJournalpostV2(journalføringRequest: JournalføringRequestV2, journalpostId: String) {
+        val journalpost = journalpostService.hentJournalpost(journalpostId)
+        validerMottakerFinnes(journalpost)
+
+        return if (journalføringRequest.skalJournalføreUtenNyBehandling()) {
+            journalførKlageTilEksisterendeBehandling(journalføringRequest, journalpost)
+        } else {
+            journalførKlageTilNyBehandling(journalføringRequest, journalpost)
+        }
+    }
+
+    @Deprecated("Bruk V2")
     private fun journalførKlageTilEksisterendeBehandling(
         journalføringRequest: JournalføringKlageRequest,
         journalpost: Journalpost,
@@ -67,9 +83,32 @@ class JournalføringKlageService(
             fagsak = fagsak,
             saksbehandler = saksbehandler,
         )
-        ferdigstillJournalføringsoppgave(journalføringRequest)
+        ferdigstillJournalføringsoppgave(journalføringRequest.oppgaveId.toLong())
     }
 
+    private fun journalførKlageTilEksisterendeBehandling(
+        journalføringRequest: JournalføringRequestV2,
+        journalpost: Journalpost,
+    ) {
+        val saksbehandler = SikkerhetContext.hentSaksbehandler()
+        val fagsak = fagsakService.fagsakMedOppdatertPersonIdent(journalføringRequest.fagsakId)
+
+        logger.info(
+            "Journalfører journalpost=${journalpost.journalpostId} på eksisterende " +
+                "fagsak=${fagsak.id} stønadstype=${fagsak.stønadstype} ",
+        )
+
+        journalpostService.oppdaterOgFerdigstillJournalpost(
+            journalpost = journalpost,
+            dokumenttitler = journalføringRequest.dokumentTitler,
+            journalførendeEnhet = journalføringRequest.journalførendeEnhet,
+            fagsak = fagsak,
+            saksbehandler = saksbehandler,
+        )
+        ferdigstillJournalføringsoppgave(journalføringRequest.oppgaveId.toLong())
+    }
+
+    @Deprecated("Bruk V2")
     private fun journalførKlageTilNyBehandling(
         journalføringRequest: JournalføringKlageRequest,
         journalpost: Journalpost,
@@ -97,7 +136,37 @@ class JournalføringKlageService(
             saksbehandler = saksbehandler,
         )
 
-        ferdigstillJournalføringsoppgave(journalføringRequest)
+        ferdigstillJournalføringsoppgave(journalføringRequest.oppgaveId.toLong())
+    }
+
+    private fun journalførKlageTilNyBehandling(
+        journalføringRequest: JournalføringRequestV2,
+        journalpost: Journalpost,
+    ) {
+        val saksbehandler = SikkerhetContext.hentSaksbehandler()
+        val fagsak = fagsakService.fagsakMedOppdatertPersonIdent(journalføringRequest.fagsakId)
+        val mottattDato = journalføringRequest.mottattDato
+        logger.info(
+            "Journalfører journalpost=${journalpost.journalpostId} på ny klagebehandling på " +
+                "fagsak=${fagsak.id} stønadstype=${fagsak.stønadstype} mottattDato=$mottattDato",
+        )
+
+        val klageMottatt = mottattDato ?: journalpost.datoMottatt?.toLocalDate()
+        feilHvis(klageMottatt == null) {
+            "Mangler dato mottatt"
+        }
+
+        klageService.opprettKlage(fagsak, klageMottatt, journalføringRequest.årsak == Journalføringsårsak.KLAGE_TILBAKEKREVING)
+
+        journalpostService.oppdaterOgFerdigstillJournalpost(
+            journalpost = journalpost,
+            dokumenttitler = journalføringRequest.dokumentTitler,
+            journalførendeEnhet = journalføringRequest.journalførendeEnhet,
+            fagsak = fagsak,
+            saksbehandler = saksbehandler,
+        )
+
+        ferdigstillJournalføringsoppgave(journalføringRequest.oppgaveId.toLong())
     }
 
     private fun validerKlagebehandlinger(fagsak: Fagsak, behandlingId: UUID) {
@@ -115,8 +184,8 @@ class JournalføringKlageService(
         }
     }
 
-    private fun ferdigstillJournalføringsoppgave(journalføringRequest: JournalføringKlageRequest) {
-        oppgaveService.ferdigstillOppgave(journalføringRequest.oppgaveId.toLong())
+    private fun ferdigstillJournalføringsoppgave(oppgaveId: Long) {
+        oppgaveService.ferdigstillOppgave(oppgaveId)
     }
 
     private fun oppdaterOppgaveTilÅGjeldeTilbakekreving(behandlingId: UUID) {
