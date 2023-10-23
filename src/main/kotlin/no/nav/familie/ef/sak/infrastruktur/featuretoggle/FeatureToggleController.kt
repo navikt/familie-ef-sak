@@ -24,6 +24,7 @@ class FeatureToggleController(
         Toggle.FRONTEND_VIS_INNTEKT_PERSONOVERSIKT,
         Toggle.VIS_KA_VEDTAK_ALTERNATIV,
         Toggle.VIS_NY_JOURNALFØRING,
+        Toggle.PAPIRSOKNAD_OG_TERMINBARN_REVURDERING,
     )
 
     @GetMapping
