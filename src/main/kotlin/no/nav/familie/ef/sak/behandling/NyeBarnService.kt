@@ -40,7 +40,7 @@ class NyeBarnService(
 
     private val logger: Logger = LoggerFactory.getLogger(javaClass)
 
-    fun finnNyeEllerTidligereFødteBarn(personIdent: PersonIdent): NyeBarnDto {
+    fun finnNyeEllerUtenforTerminFødteBarn(personIdent: PersonIdent): NyeBarnDto {
         val personIdenter = personService.hentPersonIdenter(personIdent.ident).identer()
         val nyttBarnList = mutableListOf<NyttBarn>()
         val fagsaker = fagsakService.finnFagsaker(personIdenter)
@@ -118,13 +118,14 @@ class NyeBarnService(
     }
 
     private fun finnForSentFødteBarn(kobledeBarn: NyeBarnData, stønadstype: StønadType): List<NyttBarn> {
-        return kobledeBarn.kobledeBarn
+        val forSentFødteBarn = kobledeBarn.kobledeBarn
             .filter { it.behandlingBarn.personIdent == null }
             .filter { barnFødtEtterTermin(it) }
             .map {
                 val barn = it.barn ?: error("Skal ha filtrert ut matchet barn uten barn")
                 NyttBarn(barn.personIdent, stønadstype, NyttBarnÅrsak.FØDT_ETTER_TERMIN)
             }
+        return forSentFødteBarn
     }
     private fun barnFødtFørTermin(barn: MatchetBehandlingBarn): Boolean {
         val pdlBarn = barn.barn
@@ -143,7 +144,7 @@ class NyeBarnService(
             return false
         }
         val fødselsdato = pdlBarn.fødsel.gjeldende().fødselsdato ?: return false
-        return YearMonth.from(fødselsdato).plusMonths(1) > YearMonth.from(behandlingBarn.fødselTermindato)
+        return YearMonth.from(fødselsdato).month > YearMonth.from(behandlingBarn.fødselTermindato).month
     }
 
     private data class NyeBarnData(
