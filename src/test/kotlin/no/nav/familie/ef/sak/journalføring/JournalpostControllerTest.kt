@@ -12,6 +12,9 @@ import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.ef.sak.journalføring.dto.JournalføringBehandling
 import no.nav.familie.ef.sak.journalføring.dto.JournalføringRequest
+import no.nav.familie.ef.sak.journalføring.dto.JournalføringRequestV2
+import no.nav.familie.ef.sak.journalføring.dto.Journalføringsaksjon
+import no.nav.familie.ef.sak.journalføring.dto.Journalføringsårsak
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlIdent
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlIdenter
@@ -31,6 +34,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import java.time.LocalDate
 import java.util.UUID
 import kotlin.test.assertFailsWith
 
@@ -163,6 +167,57 @@ internal class JournalpostControllerTest {
         }
     }
 
+    @Test
+    fun `skal journalføre som klage i v2 hvis årsak er klage`() {
+        setupFullførJournalføringV2()
+
+        val journalføringRequest = opprettJournalføringRequestV2(årsak = Journalføringsårsak.KLAGE)
+        journalpostController.fullførJournalpostV2(journalpostId, journalføringRequest)
+        verify(exactly = 1) { journalføringKlageService.fullførJournalpostV2(journalføringRequest, journalpostId) }
+    }
+
+    @Test
+    fun `skal journalføre som klage i v2 hvis årsak er klage_tilbakekreving`() {
+        setupFullførJournalføringV2()
+
+        val journalføringRequest = opprettJournalføringRequestV2(årsak = Journalføringsårsak.KLAGE_TILBAKEKREVING)
+        journalpostController.fullførJournalpostV2(journalpostId, journalføringRequest)
+        verify(exactly = 1) { journalføringKlageService.fullførJournalpostV2(journalføringRequest, journalpostId) }
+    }
+
+    @Test
+    fun `skal journalføre som vanlig i v2 hvis årsaker ikke er klage`() {
+        setupFullførJournalføringV2()
+
+        listOf(
+            Journalføringsårsak.PAPIRSØKNAD,
+            Journalføringsårsak.DIGITAL_SØKNAD,
+            Journalføringsårsak.ETTERSENDING,
+        ).forEach {
+            val journalføringRequest = opprettJournalføringRequestV2(årsak = it)
+            journalpostController.fullførJournalpostV2(journalpostId, journalføringRequest)
+            verify(exactly = 1) { journalføringService.fullførJournalpostV2(journalføringRequest, journalpostId) }
+        }
+    }
+
+    private fun setupFullførJournalføringV2() {
+        every { journalpostService.hentJournalpost(any()) } returns journalpostMedFødselsnummer
+        every { tilgangService.validerHarSaksbehandlerrolle() } just Runs
+        every { journalføringKlageService.fullførJournalpostV2(any(), any()) } just Runs
+        every { journalføringService.fullførJournalpostV2(any(), any()) } returns 1L
+    }
+
+    private fun opprettJournalføringRequestV2(årsak: Journalføringsårsak) = JournalføringRequestV2(
+        dokumentTitler = emptyMap(),
+        logiskeVedlegg = emptyMap(),
+        fagsakId = UUID.randomUUID(),
+        oppgaveId = "21345",
+        journalførendeEnhet = "9999",
+        årsak = årsak,
+        aksjon = Journalføringsaksjon.OPPRETT_BEHANDLING,
+        mottattDato = LocalDate.now(),
+    )
+
     @Nested
     inner class HentDokument {
 
@@ -172,7 +227,14 @@ internal class JournalpostControllerTest {
                 journalpostService.hentJournalpost(any())
             } returns journalpostMedFødselsnummer.copy(
                 dokumenter = journalpostMedFødselsnummer.dokumenter!!.map {
-                    it.copy(dokumentvarianter = listOf(Dokumentvariant(Dokumentvariantformat.PRODUKSJON_DLF, saksbehandlerHarTilgang = true)))
+                    it.copy(
+                        dokumentvarianter = listOf(
+                            Dokumentvariant(
+                                Dokumentvariantformat.PRODUKSJON_DLF,
+                                saksbehandlerHarTilgang = true,
+                            ),
+                        ),
+                    )
                 },
             )
 
