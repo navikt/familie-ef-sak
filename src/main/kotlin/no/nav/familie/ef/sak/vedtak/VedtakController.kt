@@ -19,6 +19,7 @@ import no.nav.familie.ef.sak.vedtak.dto.VedtakDto
 import no.nav.familie.ef.sak.vedtak.historikk.VedtakHistorikkService
 import no.nav.familie.ef.sak.vilkår.VurderingService
 import no.nav.familie.kontrakter.felles.Ressurs
+import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
@@ -86,7 +87,7 @@ class VedtakController(
     ): Ressurs<UUID> {
         val behandling = behandlingService.hentSaksbehandling(behandlingId)
         tilgangService.validerTilgangTilBehandling(behandling, AuditLoggerEvent.UPDATE)
-        validerTilordnetRessurs(behandlingId)
+        validerTilordnetRessurs(behandlingId, setOf(Oppgavetype.BehandleSak, Oppgavetype.BehandleUnderkjentVedtak, Oppgavetype.GodkjenneVedtak))
         if (!request.godkjent && request.begrunnelse.isNullOrBlank()) {
             throw ApiFeil("Mangler begrunnelse", HttpStatus.BAD_REQUEST)
         }
@@ -155,8 +156,8 @@ class VedtakController(
         validerTilordnetRessurs(saksbehandling.id)
     }
 
-    private fun validerTilordnetRessurs(behandlingId: UUID) {
-        feilHvis(!tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandler((behandlingId))) {
+    private fun validerTilordnetRessurs(behandlingId: UUID, oppgavetyper: Set<Oppgavetype> = setOf(Oppgavetype.BehandleSak, Oppgavetype.BehandleUnderkjentVedtak)) {
+        feilHvis(!tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandler(behandlingId, oppgavetyper)) {
             "Behandlingen har en annen eier og du kan derfor ikke lagre vedtaket"
         }
     }
@@ -179,10 +180,10 @@ class VedtakController(
         return Ressurs.success(forventetInntekt)
     }
 
-    @GetMapping("/personerMedAktivStonadIkkeManueltRevurdertSisteToMaaneder")
+    @GetMapping("/personerMedAktivStonadIkkeManueltRevurdertSisteTreMaaneder")
     @ProtectedWithClaims(issuer = "azuread", claimMap = ["roles=access_as_application"]) // Familie-ef-personhendelse bruker denne
     fun hentPersonerMedAktivStonadIkkeManueltRevurdertSisteToMåneder(): Ressurs<List<String>> {
-        return Ressurs.success(behandlingRepository.finnPersonerMedAktivStonadIkkeRevurdertSisteToMåneder())
+        return Ressurs.success(behandlingRepository.finnPersonerMedAktivStonadIkkeRevurdertSisteTreMåneder())
     }
 
     @PostMapping("/gjeldendeIverksatteBehandlingerMedInntekt")
@@ -217,6 +218,7 @@ class VedtakController(
                     it.personIdent,
                     it.forventetInntektForMåned.forventetInntektForrigeMåned,
                     it.forventetInntektForMåned.forventetInntektToMånederTilbake,
+                    it.forventetInntektForMåned.forventetInntektTreMånederTilbake,
                 )
             },
         )
