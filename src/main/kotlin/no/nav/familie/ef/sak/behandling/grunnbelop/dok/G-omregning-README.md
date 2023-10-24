@@ -24,7 +24,7 @@ valg vi har tatt og hva vi jobber med å endre før neste g-omregning.
 G-omregning starter vanligvis med at en scheduler finner kandidater for g-omregning (sql) 
 `no.nav.familie.ef.sak.behandling.grunnbelop.GOmregningTaskServiceScheduler`
 
-Scheduler kjøres typisk en gang i uka og vil prøve å finne ferdigstillte fagsaker med gammel G uten samording.
+Scheduler kjøres typisk en gang i uka og vil prøve å finne ferdigstilte fagsaker med gammel G uten samordning.
 Det finnes to versjoner av denne - en som i tillegg henter saker på vent. Denne må toggle skrus på. 
 
 Saker som var åpne ved første g-omregning vil bli forsøkt kjørt i neste ukes batch hvis de er ferdige. 
@@ -39,7 +39,7 @@ Det finnes også en controller hvor man også kan kjøre omregning på _en_ fags
 4. Vi iverksetter uten brev
 5. Vi oppretter ny task som poller status fra iverksett (vanlig flyt)
 
-* familie-ef-iverksett: iverksetter mot økonomi og sender melding til ditt nav 
+* familie-ef-iverksett: Iverksetter mot økonomi og sender melding til ditt nav 
 (hvis dette ikke endres må ny G også oppdateres på iverksett)
 
 ### Noen valg det er fint å vite om
@@ -78,11 +78,11 @@ igjen mai for regulering senere. For at åpne behandlinger, f.eks. en behandling
 
 Valideringen utføres når et vedtak besluttes. Lengden på overgangsperioden bestemmes utifra `fristGOmregning` som vi har hardkodet til 1. juni. Det betyr at hvis koden oppdateres med ny G 20. mai, vil man i perioden 20.mai - 1. juni få lov til å iverksette både med nyeste og nest nyeste G. `fristGOmregning` kan justeres utifra hvor strenge vi ønsker å være.
 
-#### Etterarbeid/sjekkliste/:
+#### Etterarbeid/sjekkliste:
 
 * Gå igjennom de med samordningsfradrag - disse må g-reguleres manuelt
 
-* Gå igjennom de med sankskjon - disse må revurderes manuelt 
+* Gå igjennom de med sanksjon - disse må revurderes manuelt 
 (NB! ikke mulig å g-omregne mai-løpende, juni-sanksjon, juli-løpende). Denne vil kaste feil. 
 
 * Gå igjennom de som er satt på vent? Vurdere om disse skal kjøres maskinelt? 
@@ -90,9 +90,9 @@ Valideringen utføres når et vedtak besluttes. Lengden på overgangsperioden be
 * Sjekk om det ligger noen som IKKE er g-omregnet. Typisk 0-utbetaling i juni og utover  - de som er tagget med 2022 etter g-omregningsdag
 
 * Sjekk om det det er innvilget vedtak (revurdering) med fom > mai2023 OG har 2022-verdi for mai/juni+++ som ikke ble omregnet automatisk og nytt vedtak fattet - som starter ETTER mai.  
-Spennende sql her / Lag kotlinkode som henter ut alle behandlinger som har 2023-tag, MEN ikke har noen g-omregningsbehandling for 2023. Gjør tørr-beregning (ikke "g-beregning" for disse fra mai 2023 og se om det blir diff i ATY
+Spennende sql her / Lag kotlinkode som henter ut alle behandlinger som har 2023-tag, MEN ikke har noen g-omregningsbehandling for 2023. Gjør tørr-beregning (ikke "g-beregning" for disse fra mai 2023 og se om det blir diff i ATY)
 
-* Fallgruver: 2, men får samordningsfradrag blir ikke plukket opp - her må vi sjekke litt "jevnt og trutt" (!) Egen jobb for dette?
+* Fallgruver: Behandlinger med samordningsfradrag blir ikke plukket opp - her må vi sjekke litt "jevnt og trutt" (!). Det vil bli laget en egen task som sjekker om det finnes behandlinger som ikke har blitt g-omregnet enda, før g-omregning 2024.  
 
 * Oppdater veiviser med barnetilsyn 6G (vilkår for å kunne motta = inntekt under 6G) 
 
