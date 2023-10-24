@@ -231,9 +231,13 @@ class BehandlingService(
     }
 
     @Transactional
-    fun henleggBehandling(behandlingId: UUID, henlagt: HenlagtDto): Behandling {
+    fun henleggBehandling(
+        behandlingId: UUID,
+        henlagt: HenlagtDto,
+        henleggTilhørendeOppgave: Boolean = true
+    ): Behandling {
         val behandling = hentBehandling(behandlingId)
-        validerAtBehandlingenKanHenlegges(behandling)
+        validerAtBehandlingenKanHenlegges(behandling, henleggTilhørendeOppgave)
         val henlagtBehandling = behandling.copy(
             henlagtÅrsak = henlagt.årsak,
             resultat = HENLAGT,
@@ -261,14 +265,14 @@ class BehandlingService(
         )
     }
 
-    private fun validerAtBehandlingenKanHenlegges(behandling: Behandling) {
+    private fun validerAtBehandlingenKanHenlegges(behandling: Behandling, henleggTilhørendeOppgave: Boolean) {
         if (!behandling.kanHenlegges()) {
             throw ApiFeil(
                 "Kan ikke henlegge en behandling med status ${behandling.status} for ${behandling.type}",
                 HttpStatus.BAD_REQUEST,
             )
         }
-        if (!tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandler(behandling.id)) {
+        if (henleggTilhørendeOppgave && !tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandler(behandling.id)) {
             throw ApiFeil(
                 "Behandlingen har en annen eier og kan derfor ikke henlegges av deg",
                 HttpStatus.BAD_REQUEST,

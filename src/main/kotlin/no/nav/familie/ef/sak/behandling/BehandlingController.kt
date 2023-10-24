@@ -85,6 +85,15 @@ class BehandlingController(
         return Ressurs.success(henlagtBehandling.tilDto(fagsak.stønadstype))
     }
 
+    @PostMapping("{behandlingId}/henlegg/behandling-uten-oppgave")
+    fun henleggBehandlingUtenOppgave(@PathVariable behandlingId: UUID, @RequestBody henlagt: HenlagtDto): Ressurs<BehandlingDto> {
+        tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.UPDATE)
+        tilgangService.validerHarSaksbehandlerrolle()
+        val henlagtBehandling = henleggService.henleggBehandlingUtenOppgave(behandlingId, henlagt)
+        val fagsak: Fagsak = fagsakService.hentFagsak(henlagtBehandling.fagsakId)
+        return Ressurs.success(henlagtBehandling.tilDto(fagsak.stønadstype))
+    }
+
     @GetMapping("/ekstern/{eksternBehandlingId}")
     fun hentBehandling(@PathVariable eksternBehandlingId: Long): Ressurs<BehandlingDto> {
         val saksbehandling = behandlingService.hentSaksbehandling(eksternBehandlingId)
