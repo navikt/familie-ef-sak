@@ -32,6 +32,7 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import java.time.LocalDate
 import java.time.YearMonth
@@ -180,10 +181,10 @@ class VedtakController(
         return Ressurs.success(forventetInntekt)
     }
 
-    @GetMapping("/personerMedAktivStonadIkkeManueltRevurdertSisteTreMaaneder")
+    @GetMapping("/personerMedAktivStonadIkkeManueltRevurdertSisteMaaneder")
     @ProtectedWithClaims(issuer = "azuread", claimMap = ["roles=access_as_application"]) // Familie-ef-personhendelse bruker denne
-    fun hentPersonerMedAktivStonadIkkeManueltRevurdertSisteToMåneder(): Ressurs<List<String>> {
-        return Ressurs.success(behandlingRepository.finnPersonerMedAktivStonadIkkeRevurdertSisteTreMåneder())
+    fun hentPersonerMedAktivStonadIkkeManueltRevurdertSisteToMåneder(@RequestParam antallMaaneder: Int = 3): Ressurs<List<String>> {
+        return Ressurs.success(behandlingRepository.finnPersonerMedAktivStonadIkkeRevurdertSisteMåneder(antallMåneder = antallMaaneder))
     }
 
     @PostMapping("/gjeldendeIverksatteBehandlingerMedInntekt")
