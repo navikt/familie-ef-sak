@@ -238,7 +238,7 @@ class NyeBarnServiceTest {
             )
 
             val barn = nyeBarnService.finnNyeEllerUtenforTerminFødteBarn(PersonIdent("fnr til søker")).nyeBarn
-            assertThat(barn).hasSize(0)
+            assertThat(barn).isEmpty()
         }
 
         @Test
