@@ -27,15 +27,16 @@ class HenleggServiceTest {
         val behandlingId = UUID.randomUUID()
         val henlagtDto = HenlagtDto(HenlagtÅrsak.FEILREGISTRERT)
         val behandling = behandling(id = behandlingId)
-        every { behandlingService.henleggBehandling(behandlingId, henlagtDto)
+        every {
+            behandlingService.henleggBehandling(behandlingId, henlagtDto)
         } returns behandling.copy(resultat = BehandlingResultat.HENLAGT)
         every { oppgaveService.ferdigstillOppgaveHvisOppgaveFinnes(any(), any(), any()) } just Runs
 
         val henalgtBehandling = henleggService.henleggBehandling(behandlingId, henlagtDto)
 
         assertThat(henalgtBehandling.resultat).isEqualTo(BehandlingResultat.HENLAGT)
-        verify (exactly = 1) { oppgaveService.ferdigstillOppgaveHvisOppgaveFinnes(any(), Oppgavetype.BehandleSak, any()) }
-        verify (exactly = 1) { oppgaveService.ferdigstillOppgaveHvisOppgaveFinnes(any(), Oppgavetype.BehandleUnderkjentVedtak, any()) }
+        verify(exactly = 1) { oppgaveService.ferdigstillOppgaveHvisOppgaveFinnes(any(), Oppgavetype.BehandleSak, any()) }
+        verify(exactly = 1) { oppgaveService.ferdigstillOppgaveHvisOppgaveFinnes(any(), Oppgavetype.BehandleUnderkjentVedtak, any()) }
     }
 
     @Test
@@ -43,15 +44,15 @@ class HenleggServiceTest {
         val behandlingId = UUID.randomUUID()
         val henlagtDto = HenlagtDto(HenlagtÅrsak.FEILREGISTRERT)
         val behandling = behandling(id = behandlingId)
-        every { behandlingService.henleggBehandling(behandlingId, henlagtDto, false)
+        every {
+            behandlingService.henleggBehandling(behandlingId, henlagtDto, false)
         } returns behandling.copy(resultat = BehandlingResultat.HENLAGT)
         every { oppgaveService.settEfOppgaveTilFerdig(any(), any()) } returns oppgave(behandling)
 
         val henalgtBehandling = henleggService.henleggBehandlingUtenOppgave(behandlingId, henlagtDto)
 
         assertThat(henalgtBehandling.resultat).isEqualTo(BehandlingResultat.HENLAGT)
-        verify (exactly = 1) { oppgaveService.settEfOppgaveTilFerdig(any(), Oppgavetype.BehandleSak) }
-        verify (exactly = 1) { oppgaveService.settEfOppgaveTilFerdig(any(), Oppgavetype.BehandleUnderkjentVedtak) }
-
+        verify(exactly = 1) { oppgaveService.settEfOppgaveTilFerdig(any(), Oppgavetype.BehandleSak) }
+        verify(exactly = 1) { oppgaveService.settEfOppgaveTilFerdig(any(), Oppgavetype.BehandleUnderkjentVedtak) }
     }
 }

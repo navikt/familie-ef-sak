@@ -1,6 +1,5 @@
 package no.nav.familie.ef.sak.service
 
-import io.mockk.Awaits
 import io.mockk.CapturingSlot
 import io.mockk.every
 import io.mockk.just

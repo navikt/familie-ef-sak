@@ -25,6 +25,7 @@ class FeatureToggleController(
         Toggle.VIS_KA_VEDTAK_ALTERNATIV,
         Toggle.VIS_NY_JOURNALFØRING,
         Toggle.PAPIRSOKNAD_OG_TERMINBARN_REVURDERING,
+        Toggle.HENLEGG_BEHANDLING_UTEN_OPPGAVE,
     )
 
     @GetMapping

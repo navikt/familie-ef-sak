@@ -234,7 +234,7 @@ class BehandlingService(
     fun henleggBehandling(
         behandlingId: UUID,
         henlagt: HenlagtDto,
-        henleggTilhørendeOppgave: Boolean = true
+        henleggTilhørendeOppgave: Boolean = true,
     ): Behandling {
         val behandling = hentBehandling(behandlingId)
         validerAtBehandlingenKanHenlegges(behandling, henleggTilhørendeOppgave)
