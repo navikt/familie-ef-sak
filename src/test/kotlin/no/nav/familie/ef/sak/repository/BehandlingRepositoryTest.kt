@@ -60,7 +60,7 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
     fun `skal finne alle personer med aktiv stønad som ikke er manuelt revurdert siste måneder`() {
         val person1 = fagsakPerson(identer = setOf(PersonIdent("1")))
         fagsakPersonRepository.insert(person1)
-        behandlingRepository.insert(behandling(testoppsettService.lagreFagsak(fagsak(person = person1)), resultat = INNVILGET, vedtakstidspunkt = LocalDateTime.now().minusMonths(3), årsak = BehandlingÅrsak.NYE_OPPLYSNINGER, status = FERDIGSTILT))
+        behandlingRepository.insert(behandling(testoppsettService.lagreFagsak(fagsak(person = person1)), resultat = INNVILGET, vedtakstidspunkt = LocalDateTime.now().minusMonths(3).plusHours(1), årsak = BehandlingÅrsak.NYE_OPPLYSNINGER, status = FERDIGSTILT))
 
         val person2 = fagsakPerson(identer = setOf(PersonIdent("2")))
         fagsakPersonRepository.insert(person2)
@@ -68,7 +68,7 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
 
         val person3 = fagsakPerson(identer = setOf(PersonIdent("3")))
         fagsakPersonRepository.insert(person3)
-        behandlingRepository.insert(behandling(testoppsettService.lagreFagsak(fagsak(person = person3)), resultat = INNVILGET, vedtakstidspunkt = LocalDateTime.now().minusMonths(4), årsak = BehandlingÅrsak.NYE_OPPLYSNINGER, status = FERDIGSTILT))
+        behandlingRepository.insert(behandling(testoppsettService.lagreFagsak(fagsak(person = person3)), resultat = INNVILGET, vedtakstidspunkt = LocalDateTime.now().minusMonths(4).plusHours(1), årsak = BehandlingÅrsak.NYE_OPPLYSNINGER, status = FERDIGSTILT))
 
         val person4 = fagsakPerson(identer = setOf(PersonIdent("4")))
         fagsakPersonRepository.insert(person4)
