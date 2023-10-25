@@ -60,7 +60,7 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
     fun `skal finne alle personer med aktiv stønad som ikke er manuelt revurdert siste måneder`() {
         val person1 = fagsakPerson(identer = setOf(PersonIdent("1")))
         fagsakPersonRepository.insert(person1)
-        behandlingRepository.insert(behandling(testoppsettService.lagreFagsak(fagsak(person = person1)), resultat = INNVILGET, vedtakstidspunkt = LocalDateTime.now().minusMonths(3), årsak = BehandlingÅrsak.G_OMREGNING, status = FERDIGSTILT))
+        behandlingRepository.insert(behandling(testoppsettService.lagreFagsak(fagsak(person = person1)), resultat = INNVILGET, vedtakstidspunkt = LocalDateTime.now().minusMonths(3), årsak = BehandlingÅrsak.NYE_OPPLYSNINGER, status = FERDIGSTILT))
 
         val person2 = fagsakPerson(identer = setOf(PersonIdent("2")))
         fagsakPersonRepository.insert(person2)
@@ -72,15 +72,15 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
 
         val person4 = fagsakPerson(identer = setOf(PersonIdent("4")))
         fagsakPersonRepository.insert(person4)
-        behandlingRepository.insert(behandling(testoppsettService.lagreFagsak(fagsak(person = person4)), resultat = INNVILGET, vedtakstidspunkt = LocalDateTime.now(), årsak = BehandlingÅrsak.NYE_OPPLYSNINGER, status = FERDIGSTILT))
+        behandlingRepository.insert(behandling(testoppsettService.lagreFagsak(fagsak(person = person4)), resultat = INNVILGET, vedtakstidspunkt = LocalDateTime.now().minusMonths(5), årsak = BehandlingÅrsak.NYE_OPPLYSNINGER, status = FERDIGSTILT))
 
         val resultat = behandlingRepository.finnPersonerMedAktivStonadIkkeRevurdertSisteMåneder(antallMåneder = 3)
         assertThat(resultat.size).isEqualTo(3)
-        assertThat(resultat).containsAll(listOf("1", "2", "3"))
+        assertThat(resultat).containsAll(listOf("2", "3", "4"))
 
-        val resultatSiste2Mnd = behandlingRepository.finnPersonerMedAktivStonadIkkeRevurdertSisteMåneder(antallMåneder = 4)
-        assertThat(resultatSiste2Mnd.size).isEqualTo(2)
-        assertThat(resultatSiste2Mnd).containsAll(listOf("1", "2"))
+        val resultatSiste4Mnd = behandlingRepository.finnPersonerMedAktivStonadIkkeRevurdertSisteMåneder(antallMåneder = 4)
+        assertThat(resultatSiste4Mnd.size).isEqualTo(2)
+        assertThat(resultatSiste4Mnd).containsAll(listOf("2", "4"))
     }
 
     @Test
