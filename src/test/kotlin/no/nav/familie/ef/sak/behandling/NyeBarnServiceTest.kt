@@ -183,7 +183,7 @@ class NyeBarnServiceTest {
     inner class FinnNyeEllerUtenforTerminFødteBarn {
 
         @Test
-        internal fun `finnNyeEllerUtenforTerminFødteBarn - skal finne barn som blitt født i en tidligere måned`() {
+        internal fun `finnNyeEllerUtenforTerminFødteBarn - skal finne barn som blir født i en tidligere måned`() {
             val terminDato = LocalDate.of(2021, 2, 1)
             val fødselsdato = terminDato.minusMonths(1)
             val fnrForTerminbarn = FnrGenerator.generer(fødselsdato)
@@ -203,9 +203,9 @@ class NyeBarnServiceTest {
         }
 
         @Test
-        internal fun `finnNyeEllerUtenforTerminFødteBarn - skal finne barn som blitt født i en senere måned`() {
-            val terminDato = LocalDate.of(2021, 1, 25)
-            val fødselsdato = terminDato.plusWeeks(3)
+        internal fun `finnNyeEllerUtenforTerminFødteBarn - skal finne barn som blir født i en senere måned`() {
+            val terminDato = LocalDate.of(2021, 1, 1)
+            val fødselsdato = LocalDate.of(2021, 1, 30)
             val fnrForTerminbarn = FnrGenerator.generer(fødselsdato)
             val pdlBarn = mapOf(
                 fnrForEksisterendeBarn to pdlBarn(fødsel = fødsel(fødselsdato = fødselsdatoEksisterendeBarn)),
