@@ -234,11 +234,10 @@ class OppgaveService(
         oppgaveClient.ferdigstillOppgave(gsakOppgaveId)
     }
 
-    fun settEfOppgaveTilFerdig(behandlingId: UUID, oppgavetype: Oppgavetype) {
+    fun settEfOppgaveTilFerdig(behandlingId: UUID, oppgavetype: Oppgavetype): EfOppgave? {
         val oppgave = oppgaveRepository.findByBehandlingIdAndTypeAndErFerdigstiltIsFalse(behandlingId, oppgavetype)
-        oppgave?.let {
-            it.erFerdigstilt = true
-            oppgaveRepository.update(it)
+        return oppgave?.let {
+            oppgaveRepository.update(it.copy(erFerdigstilt = true))
         }
     }
 
