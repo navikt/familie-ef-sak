@@ -59,7 +59,6 @@ class NyeBarnService(
             nyttBarnList.addAll(finnForTidligtFødteBarn(barnSidenGjeldendeBehandling, fagsak.stønadstype))
             nyttBarnList.addAll(finnForSentFødteBarn(barnSidenGjeldendeBehandling, fagsak.stønadstype))
         }
-        nyttBarnList.forEach { logger.info("Nytt barn : ${it.personIdent}") }
         return NyeBarnDto(nyttBarnList)
     }
 
