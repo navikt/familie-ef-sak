@@ -234,6 +234,13 @@ class OppgaveService(
         oppgaveClient.ferdigstillOppgave(gsakOppgaveId)
     }
 
+    fun settEfOppgaveTilFerdig(behandlingId: UUID, oppgavetype: Oppgavetype): EfOppgave? {
+        val oppgave = oppgaveRepository.findByBehandlingIdAndTypeAndErFerdigstiltIsFalse(behandlingId, oppgavetype)
+        return oppgave?.let {
+            oppgaveRepository.update(it.copy(erFerdigstilt = true))
+        }
+    }
+
     fun finnSisteBehandleSakOppgaveForBehandling(behandlingId: UUID): EfOppgave? =
         oppgaveRepository.findTopByBehandlingIdAndTypeOrderBySporbarOpprettetTidDesc(
             behandlingId,
@@ -397,6 +404,7 @@ class OppgaveService(
         Oppgavetype.BehandleUnderkjentVedtak,
         Oppgavetype.GodkjenneVedtak,
         -> true
+
         Oppgavetype.InnhentDokumentasjon -> false
         Oppgavetype.VurderHenvendelse -> false
         else -> error("Håndterer ikke behandlesAvApplikasjon for $oppgavetype")

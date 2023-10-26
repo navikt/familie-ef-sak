@@ -5,6 +5,7 @@ import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.oppgave.dto.SaksbehandlerDto
 import no.nav.familie.ef.sak.oppgave.dto.SaksbehandlerRolle
+import no.nav.familie.kontrakter.felles.Tema
 import no.nav.familie.kontrakter.felles.oppgave.Oppgave
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import org.springframework.stereotype.Service
@@ -34,7 +35,7 @@ class TilordnetRessursService(
 
         return when (rolle) {
             SaksbehandlerRolle.INNLOGGET_SAKSBEHANDLER, SaksbehandlerRolle.OPPGAVE_FINNES_IKKE -> true
-            SaksbehandlerRolle.ANNEN_SAKSBEHANDLER, SaksbehandlerRolle.UTVIKLER_MED_VEILDERROLLE, SaksbehandlerRolle.IKKE_SATT -> false
+            SaksbehandlerRolle.ANNEN_SAKSBEHANDLER, SaksbehandlerRolle.UTVIKLER_MED_VEILDERROLLE, SaksbehandlerRolle.OPPGAVE_HAR_ANNET_TEMA_ENN_ENF, SaksbehandlerRolle.IKKE_SATT -> false
         }
     }
 
@@ -72,6 +73,10 @@ class TilordnetRessursService(
 
         if (oppgave == null) {
             return SaksbehandlerRolle.OPPGAVE_FINNES_IKKE
+        }
+
+        if (oppgave.tema != Tema.ENF) {
+            return SaksbehandlerRolle.OPPGAVE_HAR_ANNET_TEMA_ENN_ENF
         }
 
         return when (oppgave.tilordnetRessurs) {

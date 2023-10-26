@@ -8,6 +8,7 @@ import io.mockk.verify
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.oppgave.dto.SaksbehandlerRolle
+import no.nav.familie.kontrakter.felles.Tema
 import no.nav.familie.kontrakter.felles.oppgave.Oppgave
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.kontrakter.felles.saksbehandler.Saksbehandler
@@ -122,7 +123,7 @@ internal class TilordnetRessursServiceTest {
                     oppgaveTyper,
                 )
             } answers { efOppgave(firstArg<UUID>()) }
-            every { oppgaveClient.finnOppgaveMedId(any()) } answers { oppgave(firstArg<Long>()).copy(tilordnetRessurs = "NAV1234") }
+            every { oppgaveClient.finnOppgaveMedId(any()) } answers { oppgave(firstArg<Long>()).copy(tilordnetRessurs = "NAV1234", tema = Tema.ENF) }
 
             val erSaksbehandlerEllerNull =
                 tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandler(UUID.randomUUID())
@@ -171,7 +172,7 @@ internal class TilordnetRessursServiceTest {
         @Test
         internal fun `skal utlede at saksbehandlers rolle er INNLOGGET SAKSBEHANDLER`() {
             val saksbehandler = saksbehandler(UUID.randomUUID(), "4405", "Vader", "Darth", "NAV1234")
-            val oppgave = Oppgave(tilordnetRessurs = "NAV1234")
+            val oppgave = Oppgave(tilordnetRessurs = "NAV1234", tema = Tema.ENF)
 
             every { oppgaveClient.hentSaksbehandlerInfo("NAV1234") } returns saksbehandler
 
@@ -185,7 +186,7 @@ internal class TilordnetRessursServiceTest {
         @Test
         internal fun `skal utlede at saksbehandlers rolle er ANNEN SAKSBEHANDLER`() {
             val saksbehandler = saksbehandler(UUID.randomUUID(), "4405", "Vader", "Darth", "NAV2345")
-            val oppgave = Oppgave(tilordnetRessurs = "NAV2345")
+            val oppgave = Oppgave(tilordnetRessurs = "NAV2345", tema = Tema.ENF)
 
             every { oppgaveClient.hentSaksbehandlerInfo("NAV2345") } returns saksbehandler
 
@@ -198,7 +199,7 @@ internal class TilordnetRessursServiceTest {
 
         @Test
         internal fun `skal utlede at saksbehandlers rolle er IKKE SATT`() {
-            val oppgave = Oppgave(tilordnetRessurs = null)
+            val oppgave = Oppgave(tilordnetRessurs = null, tema = Tema.ENF)
 
             val saksbehandlerDto = tilordnetRessursService.utledAnsvarligSaksbehandlerForOppgave(oppgave)
 
@@ -232,6 +233,20 @@ internal class TilordnetRessursServiceTest {
             assertThat(saksbehandlerDto.fornavn).isEqualTo("Darth")
             assertThat(saksbehandlerDto.etternavn).isEqualTo("Vader")
             assertThat(saksbehandlerDto.rolle).isEqualTo(SaksbehandlerRolle.UTVIKLER_MED_VEILDERROLLE)
+        }
+
+        @Test
+        internal fun `skal utlede at saksbehandlers rolle er OPPGAVE_HAR_ANNET_TEMA_ENN_ENF`() {
+            val saksbehandler = saksbehandler(UUID.randomUUID(), "4405", "Vader", "Darth", "NAV2345")
+            val oppgave = Oppgave(tilordnetRessurs = "NAV2345", tema = Tema.BAR)
+
+            every { oppgaveClient.hentSaksbehandlerInfo("NAV2345") } returns saksbehandler
+
+            val saksbehandlerDto = tilordnetRessursService.utledAnsvarligSaksbehandlerForOppgave(oppgave)
+
+            assertThat(saksbehandlerDto.fornavn).isEqualTo("Darth")
+            assertThat(saksbehandlerDto.etternavn).isEqualTo("Vader")
+            assertThat(saksbehandlerDto.rolle).isEqualTo(SaksbehandlerRolle.OPPGAVE_HAR_ANNET_TEMA_ENN_ENF)
         }
     }
 
