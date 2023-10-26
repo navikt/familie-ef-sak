@@ -8,6 +8,7 @@ import no.nav.familie.ef.sak.oppgave.dto.SaksbehandlerRolle
 import no.nav.familie.kontrakter.felles.Tema
 import no.nav.familie.kontrakter.felles.oppgave.Oppgave
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
+import no.nav.familie.kontrakter.felles.oppgave.StatusEnum
 import org.springframework.stereotype.Service
 import java.util.UUID
 import no.nav.familie.ef.sak.oppgave.Oppgave as EFOppgave
@@ -35,7 +36,7 @@ class TilordnetRessursService(
 
         return when (rolle) {
             SaksbehandlerRolle.INNLOGGET_SAKSBEHANDLER, SaksbehandlerRolle.OPPGAVE_FINNES_IKKE -> true
-            SaksbehandlerRolle.ANNEN_SAKSBEHANDLER, SaksbehandlerRolle.UTVIKLER_MED_VEILDERROLLE, SaksbehandlerRolle.OPPGAVE_HAR_ANNET_TEMA_ENN_ENF, SaksbehandlerRolle.IKKE_SATT -> false
+            SaksbehandlerRolle.ANNEN_SAKSBEHANDLER, SaksbehandlerRolle.UTVIKLER_MED_VEILDERROLLE, SaksbehandlerRolle.OPPGAVE_TILHØRER_IKKE_ENF, SaksbehandlerRolle.IKKE_SATT -> false
         }
     }
 
@@ -75,8 +76,8 @@ class TilordnetRessursService(
             return SaksbehandlerRolle.OPPGAVE_FINNES_IKKE
         }
 
-        if (oppgave.tema != Tema.ENF) {
-            return SaksbehandlerRolle.OPPGAVE_HAR_ANNET_TEMA_ENN_ENF
+        if (oppgave.tema != Tema.ENF || oppgave.status == StatusEnum.FEILREGISTRERT) {
+            return SaksbehandlerRolle.OPPGAVE_TILHØRER_IKKE_ENF
         }
 
         return when (oppgave.tilordnetRessurs) {
