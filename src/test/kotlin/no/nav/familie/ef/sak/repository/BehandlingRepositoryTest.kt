@@ -25,7 +25,14 @@ import no.nav.familie.ef.sak.felles.util.BehandlingOppsettUtil
 import no.nav.familie.ef.sak.oppgave.Oppgave
 import no.nav.familie.ef.sak.oppgave.OppgaveRepository
 import no.nav.familie.ef.sak.testutil.hasCauseMessageContaining
+import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseRepository
+import no.nav.familie.ef.sak.vedtak.VedtakRepository
+import no.nav.familie.ef.sak.vedtak.domain.PeriodeWrapper
+import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
+import no.nav.familie.ef.sak.økonomi.lagAndelTilkjentYtelse
+import no.nav.familie.ef.sak.økonomi.lagTilkjentYtelse
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
+import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.kontrakter.felles.ef.StønadType.BARNETILSYN
 import no.nav.familie.kontrakter.felles.ef.StønadType.OVERGANGSSTØNAD
@@ -41,6 +48,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.dao.DuplicateKeyException
 import org.springframework.data.relational.core.conversion.DbActionExecutionException
 import java.time.LocalDateTime
+import java.time.YearMonth
 import java.util.UUID
 
 internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
@@ -54,33 +62,71 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
     @Autowired
     private lateinit var oppgaveRepository: OppgaveRepository
 
+    @Autowired
+    private lateinit var vedtakRepository: VedtakRepository
+
+    @Autowired
+    private lateinit var tilkjentYtelseRepository: TilkjentYtelseRepository
+
     private val ident = "123"
 
     @Test
     fun `skal finne alle personer med aktiv stønad som ikke er manuelt revurdert siste måneder`() {
-        val person1 = fagsakPerson(identer = setOf(PersonIdent("1")))
+        lagrePersonMedVedtak("1", 12)
+        lagrePersonMedVedtak("2", 3)
+        lagrePersonMedVedtak("3", 3, behandlingÅrsak = BehandlingÅrsak.G_OMREGNING) // Skal ikke ta hensyn til forrige revurderingsdato ved g-omregning
+        lagrePersonMedVedtak("4", 3, YearMonth.now().minusMonths(1)) // Gammelt vedtak
+
+        val resultat = behandlingRepository.finnPersonerMedAktivStonadIkkeRevurdertSisteMåneder(antallMåneder = 4)
+        assertThat(resultat.size).isEqualTo(2)
+        assertThat(resultat).containsAll(listOf("1", "3"))
+    }
+
+    @Test
+    fun `skal finne alle personer med aktiv stønad som ikke er manuelt revurdert siste måneder - filtrer ut person med åpen behandling`() {
+        val fagsak = lagrePersonMedVedtak("1", 12)
+        val åpenBehandling = behandling(
+            fagsak,
+            UTREDES,
+        )
+        behandlingRepository.insert(åpenBehandling)
+        lagrePersonMedVedtak("2", 12)
+        val resultat = behandlingRepository.finnPersonerMedAktivStonadIkkeRevurdertSisteMåneder(antallMåneder = 4)
+        assertThat(resultat.size).isEqualTo(1)
+        assertThat(resultat).containsAll(listOf("2"))
+    }
+
+    private fun lagrePersonMedVedtak(personIdent: String, antallMånederSidenForrigeRevurdering: Long, stønadTom: YearMonth = YearMonth.now().plusMonths(2), behandlingÅrsak: BehandlingÅrsak = BehandlingÅrsak.NYE_OPPLYSNINGER): Fagsak {
+        val stønadsperiode = Månedsperiode(YearMonth.now().minusMonths(antallMånederSidenForrigeRevurdering), stønadTom)
+        val person1 = fagsakPerson(identer = setOf(PersonIdent(personIdent)))
         fagsakPersonRepository.insert(person1)
-        behandlingRepository.insert(behandling(testoppsettService.lagreFagsak(fagsak(person = person1)), resultat = INNVILGET, vedtakstidspunkt = LocalDateTime.now().minusMonths(3).plusHours(1), årsak = BehandlingÅrsak.NYE_OPPLYSNINGER, status = FERDIGSTILT))
-
-        val person2 = fagsakPerson(identer = setOf(PersonIdent("2")))
-        fagsakPersonRepository.insert(person2)
-        behandlingRepository.insert(behandling(testoppsettService.lagreFagsak(fagsak(person = person2)), resultat = INNVILGET, vedtakstidspunkt = LocalDateTime.now(), årsak = BehandlingÅrsak.G_OMREGNING, status = FERDIGSTILT))
-
-        val person3 = fagsakPerson(identer = setOf(PersonIdent("3")))
-        fagsakPersonRepository.insert(person3)
-        behandlingRepository.insert(behandling(testoppsettService.lagreFagsak(fagsak(person = person3)), resultat = INNVILGET, vedtakstidspunkt = LocalDateTime.now().minusMonths(4).plusHours(1), årsak = BehandlingÅrsak.NYE_OPPLYSNINGER, status = FERDIGSTILT))
-
-        val person4 = fagsakPerson(identer = setOf(PersonIdent("4")))
-        fagsakPersonRepository.insert(person4)
-        behandlingRepository.insert(behandling(testoppsettService.lagreFagsak(fagsak(person = person4)), resultat = INNVILGET, vedtakstidspunkt = LocalDateTime.now().minusMonths(5), årsak = BehandlingÅrsak.NYE_OPPLYSNINGER, status = FERDIGSTILT))
-
-        val resultat = behandlingRepository.finnPersonerMedAktivStonadIkkeRevurdertSisteMåneder(antallMåneder = 3)
-        assertThat(resultat.size).isEqualTo(3)
-        assertThat(resultat).containsAll(listOf("2", "3", "4"))
-
-        val resultatSiste4Mnd = behandlingRepository.finnPersonerMedAktivStonadIkkeRevurdertSisteMåneder(antallMåneder = 4)
-        assertThat(resultatSiste4Mnd.size).isEqualTo(2)
-        assertThat(resultatSiste4Mnd).containsAll(listOf("2", "4"))
+        val fagsak = testoppsettService.lagreFagsak(fagsak(person = person1))
+        val behandling = behandling(
+            fagsak,
+            resultat = INNVILGET,
+            vedtakstidspunkt = stønadsperiode.fomDato.atStartOfDay(),
+            årsak = behandlingÅrsak,
+            status = FERDIGSTILT,
+        )
+        val vedtaksperiodeList = listOf(
+            vedtaksperiode(
+                startDato = stønadsperiode.fomDato,
+                sluttDato = stønadsperiode.tomDato,
+                vedtaksperiodeType = VedtaksperiodeType.HOVEDPERIODE,
+            ),
+        )
+        behandlingRepository.insert(behandling)
+        val vedtak = vedtak(behandlingId = behandling.id, perioder = PeriodeWrapper(vedtaksperiodeList))
+        vedtakRepository.insert(vedtak)
+        val aty = lagAndelTilkjentYtelse(
+            10000,
+            stønadsperiode.fomDato,
+            stønadsperiode.tomDato,
+            kildeBehandlingId = behandling.id,
+        )
+        val ty = lagTilkjentYtelse(listOf(aty), behandlingId = behandling.id)
+        tilkjentYtelseRepository.insert(ty)
+        return fagsak
     }
 
     @Test
