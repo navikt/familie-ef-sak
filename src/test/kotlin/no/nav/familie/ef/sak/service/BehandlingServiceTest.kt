@@ -109,17 +109,25 @@ internal class BehandlingServiceTest {
         }
 
         @Test
+        internal fun `skal kunne henlegge behandling dersom tilhørende oppgave har annet tema enn ENF`() {
+            val behandling =
+                behandling(fagsak(), type = BehandlingType.FØRSTEGANGSBEHANDLING, status = BehandlingStatus.UTREDES)
+            every { tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandler(any()) } returns true
+            henleggOgForventOk(behandling, henlagtÅrsak = FEILREGISTRERT, false)
+        }
+
+        @Test
         internal fun `skal kunne henlegge behandling som er revurdering`() {
             val behandling = behandling(fagsak(), type = BehandlingType.REVURDERING, status = BehandlingStatus.UTREDES)
             henleggOgForventOk(behandling, FEILREGISTRERT)
         }
 
-        private fun henleggOgForventOk(behandling: Behandling, henlagtÅrsak: HenlagtÅrsak) {
+        private fun henleggOgForventOk(behandling: Behandling, henlagtÅrsak: HenlagtÅrsak, henleggTilhørendeOppgave: Boolean = true) {
             every {
                 behandlingRepository.findByIdOrThrow(any())
             } returns behandling
 
-            behandlingService.henleggBehandling(behandling.id, HenlagtDto(henlagtÅrsak))
+            behandlingService.henleggBehandling(behandling.id, HenlagtDto(henlagtÅrsak), henleggTilhørendeOppgave)
             assertThat(behandlingSlot.captured.status).isEqualTo(BehandlingStatus.FERDIGSTILT)
             assertThat(behandlingSlot.captured.resultat).isEqualTo(BehandlingResultat.HENLAGT)
             assertThat(behandlingSlot.captured.steg).isEqualTo(StegType.BEHANDLING_FERDIGSTILT)

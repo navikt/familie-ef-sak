@@ -403,6 +403,35 @@ internal class OppgaveServiceTest {
         }
     }
 
+    @Nested
+    inner class HenleggBehandlingUtenÅFerdigstilleOppgave {
+
+        @Test
+        internal fun `Dersom oppgave ikke finnes skal det ikke kastes feil`() {
+            every {
+                oppgaveRepository.findByBehandlingIdAndTypeAndErFerdigstiltIsFalse(any(), any())
+            } returns null
+            val ferdigstiltOppgave = oppgaveService.settEfOppgaveTilFerdig(BEHANDLING_ID, Oppgavetype.BehandleSak)
+
+            verify(exactly = 1) { oppgaveRepository.findByBehandlingIdAndTypeAndErFerdigstiltIsFalse(any(), any()) }
+            verify(exactly = 0) { oppgaveRepository.update(any()) }
+            assertThat(ferdigstiltOppgave).isNull()
+        }
+
+        @Test
+        fun `Ferdigstill oppgave - hvis oppgave finnes`() {
+            every {
+                oppgaveRepository.findByBehandlingIdAndTypeAndErFerdigstiltIsFalse(any(), any())
+            } returns lagTestOppgave()
+            every { oppgaveRepository.update(any()) } returns lagTestOppgave().copy(erFerdigstilt = true)
+
+            val ferdigstiltOppgave = oppgaveService.settEfOppgaveTilFerdig(BEHANDLING_ID, Oppgavetype.BehandleSak)
+            assertThat(ferdigstiltOppgave).isNotNull
+            assertThat(ferdigstiltOppgave?.behandlingId).isEqualTo(BEHANDLING_ID)
+            assertThat(ferdigstiltOppgave?.erFerdigstilt).isTrue()
+        }
+    }
+
     private fun mockOpprettOppgave(slot: CapturingSlot<OpprettOppgaveRequest>) {
         every { fagsakService.hentFagsakForBehandling(BEHANDLING_ID) } returns lagTestFagsak()
 

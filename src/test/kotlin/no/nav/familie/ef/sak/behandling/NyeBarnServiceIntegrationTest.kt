@@ -39,8 +39,8 @@ class NyeBarnServiceIntegrationTest : OppslagSpringRunnerTest() {
             ),
         )
 
-        assertThat(nyeBarnService.finnNyeEllerTidligereFødteBarn(PersonIdent(ident)).nyeBarn).hasSize(2)
-        assertThat(nyeBarnService.finnNyeEllerTidligereFødteBarn(PersonIdent(ident)).nyeBarn).hasSize(2)
+        assertThat(nyeBarnService.finnNyeEllerUtenforTerminFødteBarn(PersonIdent(ident)).nyeBarn).hasSize(2)
+        assertThat(nyeBarnService.finnNyeEllerUtenforTerminFødteBarn(PersonIdent(ident)).nyeBarn).hasSize(2)
         assertThat(taskService.findAll().filter { it.type == OpprettOppgaveForMigrertFødtBarnTask.TYPE }).hasSize(1)
     }
 
@@ -55,7 +55,7 @@ class NyeBarnServiceIntegrationTest : OppslagSpringRunnerTest() {
             ),
         )
 
-        assertThat(nyeBarnService.finnNyeEllerTidligereFødteBarn(PersonIdent(ident)).nyeBarn).hasSize(2)
+        assertThat(nyeBarnService.finnNyeEllerUtenforTerminFødteBarn(PersonIdent(ident)).nyeBarn).hasSize(2)
         assertThat(taskService.findAll().filter { it.type == OpprettOppgaveForMigrertFødtBarnTask.TYPE }).isEmpty()
     }
 
@@ -70,7 +70,7 @@ class NyeBarnServiceIntegrationTest : OppslagSpringRunnerTest() {
             ),
         )
 
-        val barn = nyeBarnService.finnNyeEllerTidligereFødteBarn(PersonIdent(ident)).nyeBarn // PdlClient.hentBarn er mocket til å returnere 2 barn
+        val barn = nyeBarnService.finnNyeEllerUtenforTerminFødteBarn(PersonIdent(ident)).nyeBarn // PdlClient.hentBarn er mocket til å returnere 2 barn
         assertThat(barn).hasSize(2)
         assertThat(barn.all { it.stønadstype == StønadType.BARNETILSYN }).isTrue
     }
@@ -83,7 +83,7 @@ class NyeBarnServiceIntegrationTest : OppslagSpringRunnerTest() {
     internal fun `finnNyeEllerTidligereFødteBarn skal ikke feile hvis det ikke finnes en behandling på fagsaken`() {
         testoppsettService.lagreFagsak(fagsak(identer = fagsakpersoner(setOf(ident)), migrert = true))
 
-        val barn = nyeBarnService.finnNyeEllerTidligereFødteBarn(PersonIdent(ident)).nyeBarn
+        val barn = nyeBarnService.finnNyeEllerUtenforTerminFødteBarn(PersonIdent(ident)).nyeBarn
 
         assertThat(barn).isEmpty()
     }
