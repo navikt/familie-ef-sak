@@ -40,7 +40,7 @@ class NyeBarnService(
 
     private val logger: Logger = LoggerFactory.getLogger(javaClass)
 
-    fun finnNyeEllerTidligereFødteBarn(personIdent: PersonIdent): NyeBarnDto {
+    fun finnNyeEllerUtenforTerminFødteBarn(personIdent: PersonIdent): NyeBarnDto {
         val personIdenter = personService.hentPersonIdenter(personIdent.ident).identer()
         val nyttBarnList = mutableListOf<NyttBarn>()
         val fagsaker = fagsakService.finnFagsaker(personIdenter)
@@ -57,8 +57,8 @@ class NyeBarnService(
                 },
             )
             nyttBarnList.addAll(finnForTidligtFødteBarn(barnSidenGjeldendeBehandling, fagsak.stønadstype))
+            nyttBarnList.addAll(finnForSentFødteBarn(barnSidenGjeldendeBehandling, fagsak.stønadstype))
         }
-
         return NyeBarnDto(nyttBarnList)
     }
 
@@ -116,6 +116,16 @@ class NyeBarnService(
             }
     }
 
+    private fun finnForSentFødteBarn(kobledeBarn: NyeBarnData, stønadstype: StønadType): List<NyttBarn> {
+        val forSentFødteBarn = kobledeBarn.kobledeBarn
+            .filter { it.behandlingBarn.personIdent == null }
+            .filter { barnFødtEtterTermin(it) }
+            .map {
+                val barn = it.barn ?: error("Skal ha filtrert ut matchet barn uten barn")
+                NyttBarn(barn.personIdent, stønadstype, NyttBarnÅrsak.FØDT_ETTER_TERMIN)
+            }
+        return forSentFødteBarn
+    }
     private fun barnFødtFørTermin(barn: MatchetBehandlingBarn): Boolean {
         val pdlBarn = barn.barn
         val behandlingBarn = barn.behandlingBarn
@@ -124,6 +134,16 @@ class NyeBarnService(
         }
         val fødselsdato = pdlBarn.fødsel.gjeldende().fødselsdato ?: return false
         return YearMonth.from(fødselsdato) < YearMonth.from(behandlingBarn.fødselTermindato)
+    }
+
+    private fun barnFødtEtterTermin(barn: MatchetBehandlingBarn): Boolean {
+        val pdlBarn = barn.barn
+        val behandlingBarn = barn.behandlingBarn
+        if (pdlBarn == null || behandlingBarn.fødselTermindato == null) {
+            return false
+        }
+        val fødselsdato = pdlBarn.fødsel.gjeldende().fødselsdato ?: return false
+        return YearMonth.from(fødselsdato).month > YearMonth.from(behandlingBarn.fødselTermindato).month
     }
 
     private data class NyeBarnData(
