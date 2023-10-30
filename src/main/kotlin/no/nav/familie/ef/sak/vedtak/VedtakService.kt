@@ -81,7 +81,7 @@ class VedtakService(
             if (vedtak.erVedtakAktivtForDato(LocalDate.now())) {
                 createForventetInntektForBehandling(vedtak)
             } else {
-                ForventetInntektForBehandling(vedtak.behandlingId, null, null, null)
+                ForventetInntektForBehandling(vedtak.behandlingId, null, null, null, null)
             }
         }.associateBy { it.behandlingId }
     }
@@ -92,6 +92,7 @@ class VedtakService(
             createForventetInntektForMåned(vedtak, YearMonth.now().minusMonths(1)),
             createForventetInntektForMåned(vedtak, YearMonth.now().minusMonths(2)),
             createForventetInntektForMåned(vedtak, YearMonth.now().minusMonths(3)),
+            createForventetInntektForMåned(vedtak, YearMonth.now().minusMonths(4)),
         )
     }
 
@@ -117,6 +118,7 @@ data class ForventetInntektForBehandling(
     val forventetInntektForrigeMåned: Int?,
     val forventetInntektToMånederTilbake: Int?,
     val forventetInntektTreMånederTilbake: Int?,
+    val forventetInntektFireMånederTilbake: Int?,
 )
 
 data class ForventetInntektForPersonIdent(
@@ -124,6 +126,7 @@ data class ForventetInntektForPersonIdent(
     val forventetInntektForrigeMåned: Int?,
     val forventetInntektToMånederTilbake: Int?,
     val forventetInntektTreMånederTilbake: Int?,
+    val forventetInntektFireMånederTilbake: Int?,
 )
 
 fun Vedtak.erVedtakAktivtForDato(dato: LocalDate) = this.perioder?.perioder?.any {
