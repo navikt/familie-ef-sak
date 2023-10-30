@@ -1,6 +1,7 @@
 package no.nav.familie.ef.sak.brev
 
 import com.fasterxml.jackson.databind.JsonNode
+import no.nav.familie.ef.sak.blankett.BlankettPdfRequest
 import no.nav.familie.ef.sak.brev.VedtaksbrevService.Companion.BESLUTTER_SIGNATUR_PLACEHOLDER
 import no.nav.familie.ef.sak.brev.VedtaksbrevService.Companion.BESLUTTER_VEDTAKSDATO_PLACEHOLDER
 import no.nav.familie.ef.sak.brev.domain.FRITEKST
@@ -53,6 +54,11 @@ class BrevClient(
             ),
             HttpHeaders().medContentTypeJsonUTF8(),
         )
+    }
+
+    fun genererBlankett(blankettPdfRequest: BlankettPdfRequest): ByteArray {
+        val pdfUrl = URI.create("$familieBrevUri/api/pdf")
+        return postForEntity(pdfUrl, blankettPdfRequest, HttpHeaders().medContentTypeJsonUTF8())
     }
 
     companion object {

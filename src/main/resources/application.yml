@@ -237,7 +237,6 @@ ON_PREM_URL_ENV: prod
 AZUREAD_TOKEN_ENDPOINT_URL: https://login.microsoftonline.com/${AZURE_APP_TENANT_ID}/oauth2/v2.0/token
 
 FAMILIE_BREV_API_URL: http://familie-brev
-FAMILIE_BLANKETT_API_URL: http://familie-ef-blankett
 FAMILIE_EF_IVERKSETT_URL: http://familie-ef-iverksett
 FAMILIE_DOKUMENT_URL: http://familie-dokument
 

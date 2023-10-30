@@ -23,7 +23,6 @@ fun main(args: Array<String>) {
             "mock-pdl",
             "mock-infotrygd-replika",
             "mock-kodeverk",
-            "mock-blankett",
             "mock-iverksett",
             "mock-inntekt",
             "mock-ereg",
