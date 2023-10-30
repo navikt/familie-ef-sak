@@ -236,7 +236,7 @@ internal class TilordnetRessursServiceTest {
         }
 
         @Test
-        internal fun `skal utlede at saksbehandlers rolle er OPPGAVE_HAR_ANNET_TEMA_ENN_ENF`() {
+        internal fun `skal utlede at saksbehandlers rolle er OPPGAVE_TILHØRER_IKKE_ENF`() {
             val saksbehandler = saksbehandler(UUID.randomUUID(), "4405", "Vader", "Darth", "NAV2345")
             val oppgave = Oppgave(tilordnetRessurs = "NAV2345", tema = Tema.BAR)
 
@@ -246,7 +246,7 @@ internal class TilordnetRessursServiceTest {
 
             assertThat(saksbehandlerDto.fornavn).isEqualTo("Darth")
             assertThat(saksbehandlerDto.etternavn).isEqualTo("Vader")
-            assertThat(saksbehandlerDto.rolle).isEqualTo(SaksbehandlerRolle.OPPGAVE_HAR_ANNET_TEMA_ENN_ENF)
+            assertThat(saksbehandlerDto.rolle).isEqualTo(SaksbehandlerRolle.OPPGAVE_TILHØRER_IKKE_ENF)
         }
     }
 
