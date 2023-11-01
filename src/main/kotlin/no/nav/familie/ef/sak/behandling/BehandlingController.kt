@@ -8,6 +8,9 @@ import no.nav.familie.ef.sak.behandling.dto.TaAvVentStatusDto
 import no.nav.familie.ef.sak.behandling.dto.tilDto
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
+import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.ef.sak.vilkår.gjenbruk.GjenbrukVilkårService
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -31,6 +34,8 @@ class BehandlingController(
     private val henleggService: HenleggService,
     private val tilgangService: TilgangService,
     private val gjenbrukVilkårService: GjenbrukVilkårService,
+    private val featureToggleService: FeatureToggleService,
+
 ) {
 
     @GetMapping("{behandlingId}")
@@ -81,6 +86,19 @@ class BehandlingController(
         tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.UPDATE)
         tilgangService.validerHarSaksbehandlerrolle()
         val henlagtBehandling = henleggService.henleggBehandling(behandlingId, henlagt)
+        val fagsak: Fagsak = fagsakService.hentFagsak(henlagtBehandling.fagsakId)
+        return Ressurs.success(henlagtBehandling.tilDto(fagsak.stønadstype))
+    }
+
+    @PostMapping("{behandlingId}/henlegg/behandling-uten-oppgave")
+    fun henleggBehandlingUtenOppgave(@PathVariable behandlingId: UUID, @RequestBody henlagt: HenlagtDto): Ressurs<BehandlingDto> {
+        tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.UPDATE)
+        tilgangService.validerHarSaksbehandlerrolle()
+        feilHvis(!featureToggleService.isEnabled(toggle = Toggle.HENLEGG_BEHANDLING_UTEN_OPPGAVE)) {
+            "Henleggelse av behandling uten å henlegge oppgave er ikke mulig - toggle ikke enablet for bruker"
+        }
+
+        val henlagtBehandling = henleggService.henleggBehandlingUtenOppgave(behandlingId, henlagt)
         val fagsak: Fagsak = fagsakService.hentFagsak(henlagtBehandling.fagsakId)
         return Ressurs.success(henlagtBehandling.tilDto(fagsak.stønadstype))
     }

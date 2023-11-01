@@ -21,6 +21,13 @@ class HenleggService(
         return behandling
     }
 
+    @Transactional
+    fun henleggBehandlingUtenOppgave(behandlingId: UUID, henlagt: HenlagtDto): Behandling {
+        val behandling = behandlingService.henleggBehandling(behandlingId, henlagt, false)
+        settEfOppgaveTilFerdig(behandling)
+        return behandling
+    }
+
     private fun ferdigstillOppgaveTask(behandling: Behandling) {
         oppgaveService.ferdigstillOppgaveHvisOppgaveFinnes(
             behandlingId = behandling.id,
@@ -31,6 +38,17 @@ class HenleggService(
             behandlingId = behandling.id,
             Oppgavetype.BehandleUnderkjentVedtak,
             ignorerFeilregistrert = true,
+        )
+    }
+
+    private fun settEfOppgaveTilFerdig(behandling: Behandling) {
+        oppgaveService.settEfOppgaveTilFerdig(
+            behandlingId = behandling.id,
+            Oppgavetype.BehandleSak,
+        )
+        oppgaveService.settEfOppgaveTilFerdig(
+            behandlingId = behandling.id,
+            Oppgavetype.BehandleUnderkjentVedtak,
         )
     }
 }

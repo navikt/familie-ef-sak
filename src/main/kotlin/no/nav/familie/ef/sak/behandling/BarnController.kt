@@ -32,7 +32,7 @@ class BarnController(
         if (!SikkerhetContext.erMaskinTilMaskinToken()) {
             tilgangService.validerTilgangTilPerson(personIdent.ident, AuditLoggerEvent.ACCESS)
         }
-        return Ressurs.success(nyeBarnService.finnNyeEllerTidligereFødteBarn(personIdent))
+        return Ressurs.success(nyeBarnService.finnNyeEllerUtenforTerminFødteBarn(personIdent))
     }
 
     @GetMapping("fagsak/{fagsakId}")
