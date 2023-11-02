@@ -35,9 +35,8 @@ class AlderPåBarnRegel :
             return super.initiereDelvilkårsvurdering(metadata, resultat, barnId)
         }
 
-        val harFullførtFjerdetrinn = harFullførtFjedetrinn(metadata, barnId)
         return hovedregler.map {
-            if (it == RegelId.HAR_ALDER_LAVERE_ENN_GRENSEVERDI && harFullførtFjerdetrinn == SvarId.NEI) {
+            if (it == RegelId.HAR_ALDER_LAVERE_ENN_GRENSEVERDI && !harFullførtFjedetrinn(metadata, barnId)) {
                 automatisktOppgyltHarAlderLavereEnnGrenseverdi()
             } else {
                 Delvilkårsvurdering(resultat, vurderinger = listOf(Vurdering(it)))
@@ -63,15 +62,12 @@ class AlderPåBarnRegel :
     private fun harFullførtFjedetrinn(
         metadata: HovedregelMetadata,
         barnId: UUID?,
-    ): SvarId? {
+    ): Boolean {
         val fødselsdato = metadata.barn.firstOrNull { it.id == barnId }
             ?.personIdent
             ?.let { Fødselsnummer(it).fødselsdato }
-        return if (fødselsdato == null || harFullførtFjerdetrinn(fødselsdato)) {
-            null
-        } else {
-            SvarId.NEI
-        }
+            ?: error("Finner ikke ident til barn=$barnId")
+        return harFullførtFjerdetrinn(fødselsdato)
     }
 
     companion object {
