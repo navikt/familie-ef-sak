@@ -33,23 +33,27 @@ class AlderPåBarnRegel :
         if (resultat != Vilkårsresultat.IKKE_TATT_STILLING_TIL) {
             return super.initiereDelvilkårsvurdering(metadata, resultat, barnId)
         }
+
         val harFullførtFjerdetrinn = harFullførtFjedetrinn(metadata, barnId)
-        return listOf(
-            Delvilkårsvurdering(
-                resultat = if (harFullførtFjerdetrinn == SvarId.NEI) Vilkårsresultat.AUTOMATISK_OPPFYLT else Vilkårsresultat.IKKE_TATT_STILLING_TIL,
-                listOf(
-                    Vurdering(
-                        regelId = RegelId.HAR_ALDER_LAVERE_ENN_GRENSEVERDI,
-                        svar = harFullførtFjerdetrinn,
-                        begrunnelse = if (harFullførtFjerdetrinn == SvarId.NEI) {
-                            "Automatisk vurdert: Ut ifra barnets alder er det ${
-                                LocalDate.now()
-                                    .norskFormat()
-                            } automatisk vurdert at barnet ikke har fullført 4. skoleår."
-                        } else {
-                            null
-                        },
-                    ),
+        return hovedregler.map {
+            if (it == RegelId.HAR_ALDER_LAVERE_ENN_GRENSEVERDI && harFullførtFjerdetrinn == SvarId.NEI) {
+                automatisktOppgyltHarAlderLavereEnnGrenseverdi()
+            } else {
+                Delvilkårsvurdering(resultat, vurderinger = listOf(Vurdering(it)))
+            }
+        }
+    }
+
+    private fun automatisktOppgyltHarAlderLavereEnnGrenseverdi(): Delvilkårsvurdering {
+        val beskrivelse = "Automatisk vurdert: Ut ifra barnets alder er det ${LocalDate.now().norskFormat()}" +
+            " automatisk vurdert at barnet ikke har fullført 4. skoleår."
+        return Delvilkårsvurdering(
+            resultat = Vilkårsresultat.AUTOMATISK_OPPFYLT,
+            listOf(
+                Vurdering(
+                    regelId = RegelId.HAR_ALDER_LAVERE_ENN_GRENSEVERDI,
+                    svar = SvarId.NEI,
+                    begrunnelse = beskrivelse,
                 ),
             ),
         )
