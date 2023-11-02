@@ -30,14 +30,7 @@ class AlderPåBarnRegel :
         resultat: Vilkårsresultat,
         barnId: UUID?,
     ): List<Delvilkårsvurdering> {
-        val finnPersonIdentForGjeldendeBarn = metadata.barn.firstOrNull { it.id == barnId }?.personIdent
-        val harFullførtFjerdetrinn = if (finnPersonIdentForGjeldendeBarn == null ||
-            harFullførtFjerdetrinn(Fødselsnummer(finnPersonIdentForGjeldendeBarn).fødselsdato)
-        ) {
-            null
-        } else {
-            SvarId.NEI
-        }
+        val harFullførtFjerdetrinn = harFullførtFjedetrinn(metadata, barnId)
         return listOf(
             Delvilkårsvurdering(
                 resultat = if (harFullførtFjerdetrinn == SvarId.NEI) Vilkårsresultat.AUTOMATISK_OPPFYLT else Vilkårsresultat.IKKE_TATT_STILLING_TIL,
@@ -57,6 +50,20 @@ class AlderPåBarnRegel :
                 ),
             ),
         )
+    }
+
+    private fun harFullførtFjedetrinn(
+        metadata: HovedregelMetadata,
+        barnId: UUID?,
+    ): SvarId? {
+        val fødselsdato = metadata.barn.firstOrNull { it.id == barnId }
+            ?.personIdent
+            ?.let { Fødselsnummer(it).fødselsdato }
+        return if (fødselsdato == null || harFullførtFjerdetrinn(fødselsdato)) {
+            null
+        } else {
+            SvarId.NEI
+        }
     }
 
     companion object {
