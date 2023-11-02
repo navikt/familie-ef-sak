@@ -14,6 +14,7 @@ import no.nav.familie.ef.sak.vilkår.regler.SvarId
 import no.nav.familie.ef.sak.vilkår.regler.Vilkårsregel
 import no.nav.familie.ef.sak.vilkår.regler.jaNeiSvarRegel
 import no.nav.familie.ef.sak.vilkår.regler.regelIder
+import no.nav.familie.ef.sak.vilkår.regler.vilkår.AlderPåBarnRegelUtil.harFullførtFjerdetrinn
 import no.nav.familie.kontrakter.felles.Fødselsnummer
 import java.time.LocalDate
 import java.util.UUID
@@ -98,14 +99,5 @@ class AlderPåBarnRegel :
                     hvisNei = SluttSvarRegel.OPPFYLT_MED_VALGFRI_BEGRUNNELSE,
                 ),
             )
-    }
-
-    fun harFullførtFjerdetrinn(fødselsdato: LocalDate, datoForBeregning: LocalDate = LocalDate.now()): Boolean {
-        val alder = datoForBeregning.year - fødselsdato.year
-        var skoletrinn = alder - 5 // Begynner på skolen i det året de fyller 6
-        if (datoForBeregning.month.plus(1).value < 6) { // Legger til en sikkerhetsmargin på 1 mnd tilfelle de fyller år mens saken behandles
-            skoletrinn--
-        }
-        return skoletrinn > 4
     }
 }
