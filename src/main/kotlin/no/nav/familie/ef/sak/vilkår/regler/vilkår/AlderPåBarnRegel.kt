@@ -1,6 +1,5 @@
 package no.nav.familie.ef.sak.vilkår.regler.vilkår
 
-import com.fasterxml.jackson.annotation.JsonIgnore
 import no.nav.familie.ef.sak.felles.util.norskFormat
 import no.nav.familie.ef.sak.vilkår.Delvilkårsvurdering
 import no.nav.familie.ef.sak.vilkår.VilkårType
@@ -16,7 +15,6 @@ import no.nav.familie.ef.sak.vilkår.regler.Vilkårsregel
 import no.nav.familie.ef.sak.vilkår.regler.jaNeiSvarRegel
 import no.nav.familie.ef.sak.vilkår.regler.regelIder
 import no.nav.familie.kontrakter.felles.Fødselsnummer
-import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.util.UUID
 
@@ -26,9 +24,6 @@ class AlderPåBarnRegel :
         regler = setOf(HAR_ALDER_LAVERE_ENN_GRENSEVERDI, UNNTAK_ALDER),
         hovedregler = regelIder(HAR_ALDER_LAVERE_ENN_GRENSEVERDI),
     ) {
-
-    @JsonIgnore
-    private val secureLogger = LoggerFactory.getLogger("secureLogger")
 
     override fun initiereDelvilkårsvurdering(
         metadata: HovedregelMetadata,
@@ -43,7 +38,6 @@ class AlderPåBarnRegel :
         } else {
             SvarId.NEI
         }
-        secureLogger.info("BarnId: $barnId harFullførtFjerdetrinn: $harFullførtFjerdetrinn fødselsdato")
         return listOf(
             Delvilkårsvurdering(
                 resultat = if (harFullførtFjerdetrinn == SvarId.NEI) Vilkårsresultat.AUTOMATISK_OPPFYLT else Vilkårsresultat.IKKE_TATT_STILLING_TIL,
@@ -98,7 +92,6 @@ class AlderPåBarnRegel :
         if (datoForBeregning.month.plus(1).value < 6) { // Legger til en sikkerhetsmargin på 1 mnd tilfelle de fyller år mens saken behandles
             skoletrinn--
         }
-        secureLogger.info("Fødselsdato: $fødselsdato gir skoletrinn $skoletrinn")
         return skoletrinn > 4
     }
 }
