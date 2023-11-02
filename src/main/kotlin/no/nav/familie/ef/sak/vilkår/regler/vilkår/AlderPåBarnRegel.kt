@@ -30,6 +30,9 @@ class AlderPåBarnRegel :
         resultat: Vilkårsresultat,
         barnId: UUID?,
     ): List<Delvilkårsvurdering> {
+        if (resultat != Vilkårsresultat.IKKE_TATT_STILLING_TIL) {
+            return super.initiereDelvilkårsvurdering(metadata, resultat, barnId)
+        }
         val harFullførtFjerdetrinn = harFullførtFjedetrinn(metadata, barnId)
         return listOf(
             Delvilkårsvurdering(
