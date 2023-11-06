@@ -49,10 +49,10 @@ class JournalføringKlageService(
         val journalpost = journalpostService.hentJournalpost(journalpostId)
         validerMottakerFinnes(journalpost)
 
-        return if (journalføringRequest.skalJournalføreUtenNyBehandling()) {
-            journalførKlageTilEksisterendeBehandling(journalføringRequest, journalpost)
-        } else {
+        return if (journalføringRequest.skalJournalføreTilNyBehandling()) {
             journalførKlageTilNyBehandling(journalføringRequest, journalpost)
+        } else {
+            journalførKlageTilEksisterendeBehandling(journalføringRequest, journalpost)
         }
     }
 

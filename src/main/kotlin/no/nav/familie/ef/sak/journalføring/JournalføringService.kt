@@ -77,14 +77,16 @@ class JournalføringService(
 
     @Transactional
     fun fullførJournalpostV2(journalføringRequest: JournalføringRequestV2, journalpostId: String): Long {
-        journalføringRequest.valider()
+        val finnesFerdigstiltEllerVentendeBehandling = behandlingService.finnesBehandlingSomIkkeErFerdigstiltEllerSattPåVent(journalføringRequest.fagsakId)
+        journalføringRequest.valider(finnesFerdigstiltEllerVentendeBehandling)
+
         val journalpost = journalpostService.hentJournalpost(journalpostId)
         validerMottakerFinnes(journalpost)
 
-        return if (journalføringRequest.skalJournalføreUtenNyBehandling()) {
-            journalførSøknadTilEksisterendeBehandlingV2(journalføringRequest, journalpost)
-        } else {
+        return if (journalføringRequest.skalJournalføreTilNyBehandling()) {
             journalførSøknadTilNyBehandlingV2(journalføringRequest, journalpost)
+        } else {
+            journalførSøknadTilEksisterendeBehandlingV2(journalføringRequest, journalpost)
         }
     }
 

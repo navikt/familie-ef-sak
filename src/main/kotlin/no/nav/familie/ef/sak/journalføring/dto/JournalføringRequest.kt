@@ -19,6 +19,7 @@ data class JournalføringRequest(
     val vilkårsbehandleNyeBarn: VilkårsbehandleNyeBarn = VilkårsbehandleNyeBarn.IKKE_VALGT,
 )
 
+// TODO: Legg til felt for ny avsender
 data class JournalføringRequestV2(
     val dokumentTitler: Map<String, String>? = null,
     val logiskeVedlegg: Map<String, List<String>>? = null, // TODO: Må tas i bruk!
@@ -43,7 +44,7 @@ data class JournalføringRequestV2(
         }
     }
 
-    fun skalJournalføreUtenNyBehandling(): Boolean = aksjon == Journalføringsaksjon.JOURNALFØR_PÅ_FAGSAK
+    fun skalJournalføreTilNyBehandling(): Boolean = aksjon == Journalføringsaksjon.OPPRETT_BEHANDLING
 }
 
 enum class Journalføringsaksjon {
@@ -131,30 +132,38 @@ fun JournalføringRequest.valider() {
     }
 }
 
-fun JournalføringRequestV2.valider() {
-    if (skalJournalføreUtenNyBehandling()) {
-        feilHvis(barnSomSkalFødes.isNotEmpty()) {
-            "Kan ikke sende inn barn når man journalfører på en eksisterende behandling"
-        }
-        feilHvis(vilkårsbehandleNyeBarn != VilkårsbehandleNyeBarn.IKKE_VALGT) {
-            "Kan ikke vilkårsbehandle nye barn på en eksisterende behandling"
-        }
-    } else {
+fun JournalføringRequestV2.valider(finnesFerdigstiltEllerVentendeBehandlingPåFagsak: Boolean) {
+    if (skalJournalføreTilNyBehandling()) {
         feilHvis(
             årsak == Journalføringsårsak.ETTERSENDING &&
                 vilkårsbehandleNyeBarn == VilkårsbehandleNyeBarn.IKKE_VALGT,
         ) {
             "Man må velge om man skal vilkårsbehandle nye barn på ny behandling av type ettersending"
         }
+        feilHvis(finnesFerdigstiltEllerVentendeBehandlingPåFagsak) {
+            "Kan ikke journalføre på ny behandling når det finnes en behandling som ikke er ferdigstilt"
+        }
+    } else {
+        feilHvis(barnSomSkalFødes.isNotEmpty()) {
+            "Kan ikke legge inn barn når man journalfører til en eksisterende behandling"
+        }
+        feilHvis(vilkårsbehandleNyeBarn != VilkårsbehandleNyeBarn.IKKE_VALGT) {
+            "Kan ikke vilkårsbehandle nye barn på en eksisterende behandling"
+        }
     }
 
     feilHvis(
-        årsak != Journalføringsårsak.ETTERSENDING &&
-            vilkårsbehandleNyeBarn != VilkårsbehandleNyeBarn.IKKE_VALGT,
+        årsak == Journalføringsårsak.ETTERSENDING
     ) {
-        "Kan ikke sende inn vilkårsbehandleNyeBarn=$vilkårsbehandleNyeBarn når årsak=$årsak"
+        "Årsaken til journalføring er ettersending og man kan derfor ikke velge vilkårsbehandling av nye barn"
     }
-
+    dokumentTitler?.let {
+        feilHvis(
+            it.containsValue("")
+        ) {
+            "Mangler tittel på et eller flere dokumenter"
+        }
+    }
     feilHvis(
         årsak != Journalføringsårsak.PAPIRSØKNAD &&
             barnSomSkalFødes.isNotEmpty(),
