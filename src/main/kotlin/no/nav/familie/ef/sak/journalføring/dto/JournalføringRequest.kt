@@ -19,7 +19,6 @@ data class JournalføringRequest(
     val vilkårsbehandleNyeBarn: VilkårsbehandleNyeBarn = VilkårsbehandleNyeBarn.IKKE_VALGT,
 )
 
-// TODO: Legg til felt for ny avsender
 data class JournalføringRequestV2(
     val dokumentTitler: Map<String, String>? = null,
     val logiskeVedlegg: Map<String, List<String>>? = null, // TODO: Må tas i bruk!
@@ -31,6 +30,7 @@ data class JournalføringRequestV2(
     val mottattDato: LocalDate? = null, // Brukes av klage
     val barnSomSkalFødes: List<BarnSomSkalFødes> = emptyList(),
     val vilkårsbehandleNyeBarn: VilkårsbehandleNyeBarn = VilkårsbehandleNyeBarn.IKKE_VALGT,
+    val nyAvsender: NyAvsender? = null,
 ) {
     fun gjelderKlage(): Boolean {
         return årsak == Journalføringsårsak.KLAGE || årsak == Journalføringsårsak.KLAGE_TILBAKEKREVING
@@ -46,6 +46,8 @@ data class JournalføringRequestV2(
 
     fun skalJournalføreTilNyBehandling(): Boolean = aksjon == Journalføringsaksjon.OPPRETT_BEHANDLING
 }
+
+data class NyAvsender(val erBruker: Boolean, val navn: String?, val personIdent: String?)
 
 enum class Journalføringsaksjon {
     OPPRETT_BEHANDLING,
@@ -153,13 +155,13 @@ fun JournalføringRequestV2.valider(finnesFerdigstiltEllerVentendeBehandlingPåF
     }
 
     feilHvis(
-        årsak == Journalføringsårsak.ETTERSENDING
+        årsak == Journalføringsårsak.ETTERSENDING,
     ) {
         "Årsaken til journalføring er ettersending og man kan derfor ikke velge vilkårsbehandling av nye barn"
     }
     dokumentTitler?.let {
         feilHvis(
-            it.containsValue("")
+            it.containsValue(""),
         ) {
             "Mangler tittel på et eller flere dokumenter"
         }

@@ -16,6 +16,8 @@ import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvisIkke
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.iverksett.IverksettService
+import no.nav.familie.ef.sak.journalføring.JournalføringHelper.utledNyAvsender
+import no.nav.familie.ef.sak.journalføring.JournalføringHelper.validerGyldigAvsender
 import no.nav.familie.ef.sak.journalføring.JournalføringHelper.validerJournalføringNyBehandling
 import no.nav.familie.ef.sak.journalføring.JournalføringHelper.validerMottakerFinnes
 import no.nav.familie.ef.sak.journalføring.dto.BarnSomSkalFødes
@@ -76,12 +78,15 @@ class JournalføringService(
     }
 
     @Transactional
-    fun fullførJournalpostV2(journalføringRequest: JournalføringRequestV2, journalpostId: String): Long {
-        val finnesFerdigstiltEllerVentendeBehandling = behandlingService.finnesBehandlingSomIkkeErFerdigstiltEllerSattPåVent(journalføringRequest.fagsakId)
+    fun fullførJournalpostV2(
+        journalføringRequest: JournalføringRequestV2,
+        journalpost: Journalpost,
+    ): Long {
+        val finnesFerdigstiltEllerVentendeBehandling =
+            behandlingService.finnesBehandlingSomIkkeErFerdigstiltEllerSattPåVent(journalføringRequest.fagsakId)
         journalføringRequest.valider(finnesFerdigstiltEllerVentendeBehandling)
 
-        val journalpost = journalpostService.hentJournalpost(journalpostId)
-        validerMottakerFinnes(journalpost)
+        validerGyldigAvsender(journalpost, journalføringRequest)
 
         return if (journalføringRequest.skalJournalføreTilNyBehandling()) {
             journalførSøknadTilNyBehandlingV2(journalføringRequest, journalpost)
@@ -120,6 +125,7 @@ class JournalføringService(
     ): Long {
         val saksbehandler = SikkerhetContext.hentSaksbehandler()
         val fagsak = fagsakService.fagsakMedOppdatertPersonIdent(journalføringRequest.fagsakId)
+        val nyAvsender = utledNyAvsender(journalføringRequest.nyAvsender, journalpost.bruker)
         logger.info(
             "Journalfører journalpost=${journalpost.journalpostId} på eksisterende " +
                 "fagsak=${fagsak.id} stønadstype=${fagsak.stønadstype} ",
@@ -130,6 +136,7 @@ class JournalføringService(
             journalførendeEnhet = journalføringRequest.journalførendeEnhet,
             fagsak = fagsak,
             saksbehandler = saksbehandler,
+            nyAvsender = nyAvsender,
         )
         ferdigstillJournalføringsoppgave(journalføringRequest.oppgaveId.toLong())
         return journalføringRequest.oppgaveId.toLong()
@@ -196,8 +203,10 @@ class JournalføringService(
             journalpost,
             journalføringRequest,
         )
-        val behandlingstype = JournalføringHelper.utledNesteBehandlingstype(behandlingService.hentBehandlinger(fagsak.id))
+        val behandlingstype =
+            JournalføringHelper.utledNesteBehandlingstype(behandlingService.hentBehandlinger(fagsak.id))
         infotrygdPeriodeValideringService.validerKanOppretteBehandlingGittInfotrygdData(fagsak)
+        val nyAvsender = utledNyAvsender(journalføringRequest.nyAvsender, journalpost.bruker)
 
         val behandling = opprettBehandlingOgPopulerGrunnlagsdata(
             behandlingstype = behandlingstype,
@@ -214,6 +223,7 @@ class JournalføringService(
             journalførendeEnhet = journalføringRequest.journalførendeEnhet,
             fagsak = fagsak,
             saksbehandler = saksbehandler,
+            nyAvsender = nyAvsender,
         )
 
         ferdigstillJournalføringsoppgave(journalføringRequest.oppgaveId.toLong())

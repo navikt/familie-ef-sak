@@ -9,6 +9,7 @@ import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.journalføring.dto.JournalføringRequest
 import no.nav.familie.ef.sak.journalføring.dto.JournalføringRequestV2
 import no.nav.familie.ef.sak.journalføring.dto.Journalføringsårsak
+import no.nav.familie.ef.sak.journalføring.dto.NyAvsender
 import no.nav.familie.ef.sak.journalføring.dto.UstrukturertDokumentasjonType
 import no.nav.familie.ef.sak.journalføring.dto.VilkårsbehandleNyeBarn
 import no.nav.familie.kontrakter.ef.sak.DokumentBrevkode
@@ -16,10 +17,12 @@ import no.nav.familie.kontrakter.felles.Behandlingstema
 import no.nav.familie.kontrakter.felles.BrukerIdType
 import no.nav.familie.kontrakter.felles.Fagsystem
 import no.nav.familie.kontrakter.felles.Tema
+import no.nav.familie.kontrakter.felles.dokarkiv.AvsenderMottaker
 import no.nav.familie.kontrakter.felles.dokarkiv.DokarkivBruker
 import no.nav.familie.kontrakter.felles.dokarkiv.DokumentInfo
 import no.nav.familie.kontrakter.felles.dokarkiv.OppdaterJournalpostRequest
 import no.nav.familie.kontrakter.felles.dokarkiv.Sak
+import no.nav.familie.kontrakter.felles.journalpost.Bruker
 import no.nav.familie.kontrakter.felles.journalpost.Dokumentvariantformat
 import no.nav.familie.kontrakter.felles.journalpost.Journalpost
 import no.nav.familie.kontrakter.felles.journalpost.Journalposttype
@@ -35,6 +38,31 @@ object JournalføringHelper {
                 "Når endringene er gjort, trykker du på \"Lagre utkast\" før du går tilbake til EF Sak og journalfører."
         }
     }
+
+    fun validerGyldigAvsender(journalpost: Journalpost, request: JournalføringRequestV2) {
+        if (journalpost.avsenderMottaker == null) {
+            brukerfeilHvis(request.nyAvsender == null) {
+                "Kan ikke journalføre uten avsender"
+            }
+            brukerfeilHvis(!request.nyAvsender.erBruker && request.nyAvsender.navn.isNullOrBlank()) {
+                "Må sende inn navn på ny avsender"
+            }
+            brukerfeilHvis(!request.nyAvsender.erBruker && request.nyAvsender.personIdent.isNullOrBlank()) {
+                "Må sende inn ident på ny avsender"
+            }
+        } else {
+            brukerfeilHvis(request.nyAvsender != null) {
+                "Kan ikke endre avsender på journalpost som har avsender fra før"
+            }
+        }
+    }
+
+    fun utledNyAvsender(nyAvsender: NyAvsender?, bruker: Bruker?): AvsenderMottaker? =
+        when (nyAvsender?.erBruker) {
+            null -> null
+            true -> AvsenderMottaker(id = nyAvsender.personIdent, idType = bruker?.type!!, navn = nyAvsender.navn!!)
+            false -> AvsenderMottaker(id = null, idType = null, navn = nyAvsender.navn!!)
+        }
 
     fun validerJournalføringNyBehandling(
         journalpost: Journalpost,
@@ -94,7 +122,9 @@ object JournalføringHelper {
         journalpost: Journalpost,
         eksternFagsakId: Long,
         dokumenttitler: Map<String, String>?,
+        nyAvsender: AvsenderMottaker?,
     ) = OppdaterJournalpostRequest(
+        avsenderMottaker = nyAvsender,
         bruker = journalpost.bruker?.let {
             DokarkivBruker(idType = BrukerIdType.valueOf(it.type.toString()), id = it.id)
         },

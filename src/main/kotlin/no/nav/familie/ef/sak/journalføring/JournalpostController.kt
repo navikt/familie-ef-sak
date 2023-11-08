@@ -89,14 +89,14 @@ class JournalpostController(
         @PathVariable journalpostId: String,
         @RequestBody journalføringRequest: JournalføringRequestV2,
     ): Ressurs<String> {
-        val (_, personIdent) = finnJournalpostOgPersonIdent(journalpostId)
+        val (journalpost, personIdent) = finnJournalpostOgPersonIdent(journalpostId)
         tilgangService.validerTilgangTilPersonMedBarn(personIdent, AuditLoggerEvent.UPDATE)
         tilgangService.validerHarSaksbehandlerrolle()
 
         if (journalføringRequest.gjelderKlage()) {
-            journalføringKlageService.fullførJournalpostV2(journalføringRequest, journalpostId)
+            journalføringKlageService.fullførJournalpostV2(journalføringRequest, journalpost)
         } else {
-            journalføringService.fullførJournalpostV2(journalføringRequest, journalpostId)
+            journalføringService.fullførJournalpostV2(journalføringRequest, journalpost)
         }
         return Ressurs.success(journalpostId)
     }

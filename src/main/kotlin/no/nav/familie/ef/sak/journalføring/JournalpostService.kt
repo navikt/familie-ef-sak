@@ -10,6 +10,7 @@ import no.nav.familie.kontrakter.ef.søknad.SøknadSkolepenger
 import no.nav.familie.kontrakter.felles.Arkivtema
 import no.nav.familie.kontrakter.felles.BrukerIdType
 import no.nav.familie.kontrakter.felles.Tema
+import no.nav.familie.kontrakter.felles.dokarkiv.AvsenderMottaker
 import no.nav.familie.kontrakter.felles.journalpost.Bruker
 import no.nav.familie.kontrakter.felles.journalpost.Journalpost
 import no.nav.familie.kontrakter.felles.journalpost.JournalposterForBrukerRequest
@@ -101,6 +102,7 @@ class JournalpostService(private val journalpostClient: JournalpostClient) {
         journalførendeEnhet: String,
         fagsak: Fagsak,
         saksbehandler: String?,
+        nyAvsender: AvsenderMottaker? = null,
     ) {
         if (journalpost.journalstatus != Journalstatus.JOURNALFOERT) {
             oppdaterJournalpostMedFagsakOgDokumenttitler(
@@ -108,6 +110,7 @@ class JournalpostService(private val journalpostClient: JournalpostClient) {
                 dokumenttitler = dokumenttitler,
                 eksternFagsakId = fagsak.eksternId.id,
                 saksbehandler = saksbehandler,
+                nyAvsender = nyAvsender,
             )
             ferdigstillJournalføring(
                 journalpostId = journalpost.journalpostId,
@@ -123,11 +126,12 @@ class JournalpostService(private val journalpostClient: JournalpostClient) {
 
     private fun oppdaterJournalpostMedFagsakOgDokumenttitler(
         journalpost: Journalpost,
-        dokumenttitler: Map<String, String>? = null,
+        dokumenttitler: Map<String, String>?,
         eksternFagsakId: Long,
-        saksbehandler: String? = null,
+        saksbehandler: String?,
+        nyAvsender: AvsenderMottaker?,
     ) {
-        val oppdatertJournalpost = JournalføringHelper.lagOppdaterJournalpostRequest(journalpost, eksternFagsakId, dokumenttitler)
+        val oppdatertJournalpost = JournalføringHelper.lagOppdaterJournalpostRequest(journalpost, eksternFagsakId, dokumenttitler, nyAvsender)
         journalpostClient.oppdaterJournalpost(oppdatertJournalpost, journalpost.journalpostId, saksbehandler)
     }
 }

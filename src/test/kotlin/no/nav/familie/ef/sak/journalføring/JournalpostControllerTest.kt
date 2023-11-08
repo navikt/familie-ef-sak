@@ -173,7 +173,7 @@ internal class JournalpostControllerTest {
 
         val journalføringRequest = opprettJournalføringRequestV2(årsak = Journalføringsårsak.KLAGE)
         journalpostController.fullførJournalpostV2(journalpostId, journalføringRequest)
-        verify(exactly = 1) { journalføringKlageService.fullførJournalpostV2(journalføringRequest, journalpostId) }
+        verify(exactly = 1) { journalføringKlageService.fullførJournalpostV2(journalføringRequest, any()) }
     }
 
     @Test
@@ -182,7 +182,7 @@ internal class JournalpostControllerTest {
 
         val journalføringRequest = opprettJournalføringRequestV2(årsak = Journalføringsårsak.KLAGE_TILBAKEKREVING)
         journalpostController.fullførJournalpostV2(journalpostId, journalføringRequest)
-        verify(exactly = 1) { journalføringKlageService.fullførJournalpostV2(journalføringRequest, journalpostId) }
+        verify(exactly = 1) { journalføringKlageService.fullførJournalpostV2(journalføringRequest, any()) }
     }
 
     @Test
@@ -196,7 +196,7 @@ internal class JournalpostControllerTest {
         ).forEach {
             val journalføringRequest = opprettJournalføringRequestV2(årsak = it)
             journalpostController.fullførJournalpostV2(journalpostId, journalføringRequest)
-            verify(exactly = 1) { journalføringService.fullførJournalpostV2(journalføringRequest, journalpostId) }
+            verify(exactly = 1) { journalføringService.fullførJournalpostV2(journalføringRequest, any()) }
         }
     }
 

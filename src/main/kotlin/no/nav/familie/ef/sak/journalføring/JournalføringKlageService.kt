@@ -4,6 +4,7 @@ import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
+import no.nav.familie.ef.sak.journalføring.JournalføringHelper.validerGyldigAvsender
 import no.nav.familie.ef.sak.journalføring.JournalføringHelper.validerMottakerFinnes
 import no.nav.familie.ef.sak.journalføring.dto.JournalføringKlageRequest
 import no.nav.familie.ef.sak.journalføring.dto.JournalføringRequestV2
@@ -45,9 +46,8 @@ class JournalføringKlageService(
     }
 
     @Transactional
-    fun fullførJournalpostV2(journalføringRequest: JournalføringRequestV2, journalpostId: String) {
-        val journalpost = journalpostService.hentJournalpost(journalpostId)
-        validerMottakerFinnes(journalpost)
+    fun fullførJournalpostV2(journalføringRequest: JournalføringRequestV2, journalpost: Journalpost) {
+        validerGyldigAvsender(journalpost, journalføringRequest)
 
         return if (journalføringRequest.skalJournalføreTilNyBehandling()) {
             journalførKlageTilNyBehandling(journalføringRequest, journalpost)
@@ -92,6 +92,8 @@ class JournalføringKlageService(
     ) {
         val saksbehandler = SikkerhetContext.hentSaksbehandler()
         val fagsak = fagsakService.fagsakMedOppdatertPersonIdent(journalføringRequest.fagsakId)
+        val nyAvsender =
+            JournalføringHelper.utledNyAvsender(journalføringRequest.nyAvsender, journalpost.bruker)
 
         logger.info(
             "Journalfører journalpost=${journalpost.journalpostId} på eksisterende " +
@@ -104,6 +106,7 @@ class JournalføringKlageService(
             journalførendeEnhet = journalføringRequest.journalførendeEnhet,
             fagsak = fagsak,
             saksbehandler = saksbehandler,
+            nyAvsender = nyAvsender,
         )
         ferdigstillJournalføringsoppgave(journalføringRequest.oppgaveId.toLong())
     }
@@ -146,6 +149,8 @@ class JournalføringKlageService(
         val saksbehandler = SikkerhetContext.hentSaksbehandler()
         val fagsak = fagsakService.fagsakMedOppdatertPersonIdent(journalføringRequest.fagsakId)
         val mottattDato = journalføringRequest.mottattDato
+        val nyAvsender =
+            JournalføringHelper.utledNyAvsender(journalføringRequest.nyAvsender, journalpost.bruker)
         logger.info(
             "Journalfører journalpost=${journalpost.journalpostId} på ny klagebehandling på " +
                 "fagsak=${fagsak.id} stønadstype=${fagsak.stønadstype} mottattDato=$mottattDato",
@@ -164,6 +169,7 @@ class JournalføringKlageService(
             journalførendeEnhet = journalføringRequest.journalførendeEnhet,
             fagsak = fagsak,
             saksbehandler = saksbehandler,
+            nyAvsender = nyAvsender,
         )
 
         ferdigstillJournalføringsoppgave(journalføringRequest.oppgaveId.toLong())
