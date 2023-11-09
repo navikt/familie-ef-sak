@@ -7,6 +7,7 @@ import com.github.tomakehurst.wiremock.client.WireMock.get
 import com.github.tomakehurst.wiremock.client.WireMock.okJson
 import com.github.tomakehurst.wiremock.client.WireMock.post
 import com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor
+import com.github.tomakehurst.wiremock.client.WireMock.put
 import com.github.tomakehurst.wiremock.client.WireMock.urlPathMatching
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import com.github.tomakehurst.wiremock.matching.EqualToPattern
@@ -26,6 +27,7 @@ import no.nav.familie.kontrakter.felles.BrukerIdType
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.Tema
 import no.nav.familie.kontrakter.felles.dokarkiv.ArkiverDokumentResponse
+import no.nav.familie.kontrakter.felles.dokarkiv.BulkOppdaterLogiskVedleggRequest
 import no.nav.familie.kontrakter.felles.dokarkiv.v2.ArkiverDokumentRequest
 import no.nav.familie.kontrakter.felles.journalpost.Bruker
 import no.nav.familie.kontrakter.felles.journalpost.JournalposterForBrukerRequest
@@ -194,5 +196,21 @@ internal class JournalpostClientTest {
         assertThat(feilJournalposter.httpStatus).isEqualTo(HttpStatus.FORBIDDEN)
         val feilJournalpost = assertThrows<ApiFeil> { journalpostClient.hentJournalpost("1234") }
         assertThat(feilJournalpost.httpStatus).isEqualTo(HttpStatus.FORBIDDEN)
+    }
+
+    @Test
+    internal fun `skal bulk oppdatere logiske vedlegg for et dokument`() {
+        val dokumentInfoId = "123"
+        val request = BulkOppdaterLogiskVedleggRequest(titler = listOf("Logisk vedlegg 1", "Logisk vedlegg 2"))
+
+        wiremockServerItem.stubFor(
+            put("${integrasjonerConfig.dokarkivUri.path}/dokument/([0-9]*)/logiskVedlegg")
+                .willReturn(okJson(objectMapper.writeValueAsString(Ressurs.success(dokumentInfoId)))),
+        )
+
+        val response = journalpostClient.oppdaterLogiskeVedlegg(dokumentInfoId, request)
+
+        assertThat(response).isNotNull()
+        assertThat(response).isEqualTo(dokumentInfoId)
     }
 }

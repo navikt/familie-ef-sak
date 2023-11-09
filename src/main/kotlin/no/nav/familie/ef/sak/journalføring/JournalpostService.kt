@@ -11,6 +11,7 @@ import no.nav.familie.kontrakter.felles.Arkivtema
 import no.nav.familie.kontrakter.felles.BrukerIdType
 import no.nav.familie.kontrakter.felles.Tema
 import no.nav.familie.kontrakter.felles.dokarkiv.AvsenderMottaker
+import no.nav.familie.kontrakter.felles.dokarkiv.BulkOppdaterLogiskVedleggRequest
 import no.nav.familie.kontrakter.felles.journalpost.Bruker
 import no.nav.familie.kontrakter.felles.journalpost.Journalpost
 import no.nav.familie.kontrakter.felles.journalpost.JournalposterForBrukerRequest
@@ -127,8 +128,8 @@ class JournalpostService(private val journalpostClient: JournalpostClient) {
         journalpost.dokumenter?.forEach { dokument ->
             val eksisterendeLogiskeVedlegg = dokument.logiskeVedlegg ?: emptyList()
             val logiskeVedleggForDokument = logiskeVedlegg?.get(dokument.dokumentInfoId) ?: emptyList()
-            if (eksisterendeLogiskeVedlegg.containsAll(logiskeVedleggForDokument) && eksisterendeLogiskeVedlegg.size == logiskeVedleggForDokument.size){ //evt. == , men test ulik sorteringsinnhold
-                journalpostClient.oppdaterLogiskeVedlegg(dokument.dokumentInfoId, logiskeVedleggForDokument)
+            if (eksisterendeLogiskeVedlegg.containsAll(logiskeVedleggForDokument) && eksisterendeLogiskeVedlegg.size == logiskeVedleggForDokument.size) { // evt. == , men test ulik sorteringsinnhold
+                journalpostClient.oppdaterLogiskeVedlegg(dokument.dokumentInfoId, BulkOppdaterLogiskVedleggRequest(titler = logiskeVedleggForDokument.map { it.tittel }))
             }
         }
     }

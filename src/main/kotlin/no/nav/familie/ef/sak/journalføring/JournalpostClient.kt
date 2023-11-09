@@ -15,13 +15,13 @@ import no.nav.familie.kontrakter.ef.søknad.SøknadOvergangsstønad
 import no.nav.familie.kontrakter.ef.søknad.SøknadSkolepenger
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.dokarkiv.ArkiverDokumentResponse
+import no.nav.familie.kontrakter.felles.dokarkiv.BulkOppdaterLogiskVedleggRequest
 import no.nav.familie.kontrakter.felles.dokarkiv.OppdaterJournalpostRequest
 import no.nav.familie.kontrakter.felles.dokarkiv.OppdaterJournalpostResponse
 import no.nav.familie.kontrakter.felles.dokarkiv.v2.ArkiverDokumentRequest
 import no.nav.familie.kontrakter.felles.getDataOrThrow
 import no.nav.familie.kontrakter.felles.journalpost.Journalpost
 import no.nav.familie.kontrakter.felles.journalpost.JournalposterForBrukerRequest
-import no.nav.familie.kontrakter.felles.journalpost.LogiskVedlegg
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.log.NavHttpHeaders
 import org.springframework.beans.factory.annotation.Qualifier
@@ -169,7 +169,10 @@ class JournalpostClient(
         return httpHeaders
     }
 
-    fun oppdaterLogiskeVedlegg(dokumentInfoId: String, logiskeVedleggForDokument: List<LogiskVedlegg>) {
-        TODO("Not yet implemented")
+    fun oppdaterLogiskeVedlegg(dokumentInfoId: String, request: BulkOppdaterLogiskVedleggRequest): String {
+        return putForEntity<Ressurs<String>>(
+            URI.create("$dokarkivUri/dokument/$dokumentInfoId/logiskVedlegg"),
+            request,
+        ).data ?: error("Kunne ikke bulk oppdatere logiske vedlegg på dokument med id=$dokumentInfoId")
     }
 }
