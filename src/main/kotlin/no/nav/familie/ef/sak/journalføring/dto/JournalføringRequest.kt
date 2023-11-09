@@ -135,16 +135,13 @@ fun JournalføringRequest.valider() {
     }
 }
 
-fun JournalføringRequestV2.valider(finnesFerdigstiltEllerVentendeBehandlingPåFagsak: Boolean) {
+fun JournalføringRequestV2.valider() {
     if (skalJournalføreTilNyBehandling()) {
         feilHvis(
             årsak == Journalføringsårsak.ETTERSENDING &&
                 vilkårsbehandleNyeBarn == VilkårsbehandleNyeBarn.IKKE_VALGT,
         ) {
             "Man må velge om man skal vilkårsbehandle nye barn på ny behandling av type ettersending"
-        }
-        feilHvis(finnesFerdigstiltEllerVentendeBehandlingPåFagsak) {
-            "Kan ikke journalføre på ny behandling når det finnes en behandling som ikke er ferdigstilt"
         }
     } else {
         feilHvis(barnSomSkalFødes.isNotEmpty()) {

@@ -28,7 +28,11 @@ import no.nav.familie.ef.sak.iverksett.IverksettService
 import no.nav.familie.ef.sak.journalføring.dto.BarnSomSkalFødes
 import no.nav.familie.ef.sak.journalføring.dto.JournalføringBehandling
 import no.nav.familie.ef.sak.journalføring.dto.JournalføringRequest
+import no.nav.familie.ef.sak.journalføring.dto.JournalføringRequestV2
 import no.nav.familie.ef.sak.journalføring.dto.JournalføringTilNyBehandlingRequest
+import no.nav.familie.ef.sak.journalføring.dto.Journalføringsaksjon
+import no.nav.familie.ef.sak.journalføring.dto.Journalføringsårsak
+import no.nav.familie.ef.sak.journalføring.dto.NyAvsender
 import no.nav.familie.ef.sak.journalføring.dto.UstrukturertDokumentasjonType
 import no.nav.familie.ef.sak.journalføring.dto.VilkårsbehandleNyeBarn
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.vilkår.VilkårTestUtil.mockVilkårGrunnlagDto
@@ -45,6 +49,7 @@ import no.nav.familie.kontrakter.ef.iverksett.BehandlingKategori
 import no.nav.familie.kontrakter.ef.sak.DokumentBrevkode
 import no.nav.familie.kontrakter.ef.søknad.Testsøknad
 import no.nav.familie.kontrakter.felles.Fagsystem
+import no.nav.familie.kontrakter.felles.dokarkiv.BulkOppdaterLogiskVedleggRequest
 import no.nav.familie.kontrakter.felles.dokarkiv.OppdaterJournalpostRequest
 import no.nav.familie.kontrakter.felles.dokarkiv.OppdaterJournalpostResponse
 import no.nav.familie.kontrakter.felles.ef.StønadType
@@ -54,6 +59,7 @@ import no.nav.familie.kontrakter.felles.journalpost.Dokumentvariantformat
 import no.nav.familie.kontrakter.felles.journalpost.Journalpost
 import no.nav.familie.kontrakter.felles.journalpost.Journalposttype
 import no.nav.familie.kontrakter.felles.journalpost.Journalstatus
+import no.nav.familie.kontrakter.felles.journalpost.LogiskVedlegg
 import no.nav.familie.kontrakter.felles.oppgave.OppgavePrioritet
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.internal.TaskService
@@ -145,8 +151,25 @@ internal class JournalføringServiceTest {
         ),
         tittel = "Søknad om overgangsstønad",
     )
+    private val papirInnsendingsdokument = DokumentInfo(
+        dokumentInfoId = "123",
+        "Dokumenttittel",
+        brevkode = DokumentBrevkode.OVERGANGSSTØNAD.verdi,
+        dokumentvarianter =
+        listOf(
+            Dokumentvariant(Dokumentvariantformat.ARKIV, saksbehandlerHarTilgang = true),
+        ),
+    )
+    private val papirInnsendingsdokumentMedLogiskeVedlegg = papirInnsendingsdokument.copy(
+        dokumentInfoId = "1234",
+        logiskeVedlegg = listOf(
+            LogiskVedlegg(logiskVedleggId = "123", tittel = "Annet Innhold 1"),
+            LogiskVedlegg(logiskVedleggId = "1234", tittel = "Annet Innhold 2"),
+        ),
+    )
 
-    private val ustrukturertJournalpost = journalpost.copy(dokumenter = emptyList())
+    private val ustrukturertJournalpost =
+        journalpost.copy(dokumenter = listOf(papirInnsendingsdokument, papirInnsendingsdokumentMedLogiskeVedlegg))
 
     private val slotJournalpost = slot<OppdaterJournalpostRequest>()
     private val slotOpprettedeTasks = mutableListOf<Task>()
@@ -401,6 +424,41 @@ internal class JournalføringServiceTest {
                 VilkårsbehandleNyeBarn.IKKE_VALGT,
             )
             verify(exactly = 0) { vurderingService.kopierVurderingerTilNyBehandling(any(), any(), any(), any()) }
+        }
+
+        @Test
+        internal fun `skal oppdatere logiske vedlegg som har endret seg`() {
+            mockOpprettBehandling(behandlingId, UUID.randomUUID())
+            every { behandlingService.finnesBehandlingSomIkkeErFerdigstiltEllerSattPåVent(any()) } returns false
+            every { journalpostClient.oppdaterLogiskeVedlegg(any(), any()) } returns "OK"
+            val request = lagRequestV2(
+                logiskeVedlegg = mapOf(
+                    papirInnsendingsdokument.dokumentInfoId to emptyList(),
+                    papirInnsendingsdokumentMedLogiskeVedlegg.dokumentInfoId to listOf(
+                        LogiskVedlegg(
+                            "234",
+                            "Samværserklæring",
+                        ),
+                    ),
+                ),
+                aksjon = Journalføringsaksjon.JOURNALFØR_PÅ_FAGSAK,
+                årsak = Journalføringsårsak.PAPIRSØKNAD,
+            )
+
+            journalføringService.fullførJournalpostV2(request, ustrukturertJournalpost)
+
+            verify(exactly = 0) {
+                journalpostClient.oppdaterLogiskeVedlegg(
+                    papirInnsendingsdokument.dokumentInfoId,
+                    any(),
+                )
+            }
+            verify(exactly = 1) {
+                journalpostClient.oppdaterLogiskeVedlegg(
+                    papirInnsendingsdokumentMedLogiskeVedlegg.dokumentInfoId,
+                    BulkOppdaterLogiskVedleggRequest(titler = listOf("Samværserklæring")),
+                )
+            }
         }
     }
 
@@ -687,6 +745,29 @@ internal class JournalføringServiceTest {
         )
     }
 
+    private fun lagRequestV2(
+        dokumentTitler: Map<String, String>? = null,
+        logiskeVedlegg: Map<String, List<LogiskVedlegg>>? = null,
+        årsak: Journalføringsårsak,
+        aksjon: Journalføringsaksjon,
+        mottattDato: LocalDate? = null, // Brukes av klage
+        barnSomSkalFødes: List<BarnSomSkalFødes> = emptyList(),
+        vilkårsbehandleNyeBarn: VilkårsbehandleNyeBarn = VilkårsbehandleNyeBarn.IKKE_VALGT,
+        nyAvsender: NyAvsender? = null,
+    ): JournalføringRequestV2 = JournalføringRequestV2(
+        dokumentTitler = dokumentTitler,
+        logiskeVedlegg = logiskeVedlegg,
+        fagsakId = fagsakId,
+        oppgaveId = oppgaveId,
+        journalførendeEnhet = "1234",
+        årsak = årsak,
+        aksjon = aksjon,
+        mottattDato = mottattDato,
+        barnSomSkalFødes = barnSomSkalFødes,
+        vilkårsbehandleNyeBarn = vilkårsbehandleNyeBarn,
+        nyAvsender = nyAvsender,
+    )
+
     private fun mockFeilerValideringAvInfotrygdperioder() {
         every {
             infotrygdPeriodeValideringService.validerKanOppretteBehandlingGittInfotrygdData(any())
@@ -696,6 +777,4 @@ internal class JournalføringServiceTest {
     private fun mockSisteIverksatteBehandlinger(sisteBehandling: Behandling?) {
         every { behandlingService.finnSisteIverksatteBehandlingMedEventuellAvslått(any()) } returns sisteBehandling
     }
-
-    // Test barnetilsyn!!!
 }

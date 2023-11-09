@@ -82,9 +82,7 @@ class JournalføringService(
         journalføringRequest: JournalføringRequestV2,
         journalpost: Journalpost,
     ): Long {
-        val finnesFerdigstiltEllerVentendeBehandling =
-            behandlingService.finnesBehandlingSomIkkeErFerdigstiltEllerSattPåVent(journalføringRequest.fagsakId)
-        journalføringRequest.valider(finnesFerdigstiltEllerVentendeBehandling)
+        journalføringRequest.valider()
 
         validerGyldigAvsender(journalpost, journalføringRequest)
 

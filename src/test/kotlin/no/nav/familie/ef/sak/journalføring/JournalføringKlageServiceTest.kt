@@ -69,7 +69,7 @@ internal class JournalføringKlageServiceTest {
             KlagebehandlingerDto(listOf(klagebehandling), emptyList(), emptyList())
 
         justRun { klageService.opprettKlage(any<Fagsak>(), any(), any()) }
-        justRun { journalpostService.oppdaterOgFerdigstillJournalpost(any(), any(), any(), any(), any()) }
+        justRun { journalpostService.oppdaterOgFerdigstillJournalpost(any(), any(), any(), any(), any(), any()) }
         justRun { oppgaveService.ferdigstillOppgave(any()) }
         mockBrukerContext()
     }
@@ -145,7 +145,7 @@ internal class JournalføringKlageServiceTest {
 
     private fun verifyKall(opprettKlageKall: Int = 1, oppdaterOppgaveKall: Int = 0) {
         verify(exactly = opprettKlageKall) { klageService.opprettKlage(any<Fagsak>(), any(), any()) }
-        verify { journalpostService.oppdaterOgFerdigstillJournalpost(any(), any(), any(), any(), any()) }
+        verify { journalpostService.oppdaterOgFerdigstillJournalpost(any(), any(), any(), any(), any(), any()) }
         verify { oppgaveService.ferdigstillOppgave(any()) }
         verify(exactly = oppdaterOppgaveKall) { taskService.save(any()) }
     }

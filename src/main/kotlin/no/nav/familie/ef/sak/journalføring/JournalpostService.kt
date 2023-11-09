@@ -2,6 +2,7 @@ package no.nav.familie.ef.sak.journalføring
 
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.journalføring.dto.DokumentVariantformat
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.logger
 import no.nav.familie.ef.sak.vedlegg.VedleggRequest
 import no.nav.familie.kontrakter.ef.sak.DokumentBrevkode
 import no.nav.familie.kontrakter.ef.søknad.SøknadBarnetilsyn
@@ -125,16 +126,31 @@ class JournalpostService(private val journalpostClient: JournalpostClient) {
     }
 
     private fun oppdaterLogiskeVedlegg(journalpost: Journalpost, logiskeVedlegg: Map<String, List<LogiskVedlegg>>?) {
+        // Skal ikke endre på logiske vedlegg dersom man journalfører fra gammel løsning. Gammel løsning sender ikke inn logiske vedlegg og vil derfor resultere i null her. Ny løsning vil sende inn tom liste.
+        if (logiskeVedlegg == null) {
+            return
+        }
+
         journalpost.dokumenter?.forEach { dokument ->
             val eksisterendeLogiskeVedlegg = dokument.logiskeVedlegg ?: emptyList()
-            val logiskeVedleggForDokument = logiskeVedlegg?.get(dokument.dokumentInfoId) ?: emptyList()
-            if (eksisterendeLogiskeVedlegg.containsAll(logiskeVedleggForDokument) && eksisterendeLogiskeVedlegg.size == logiskeVedleggForDokument.size) { // evt. == , men test ulik sorteringsinnhold
-                journalpostClient.oppdaterLogiskeVedlegg(dokument.dokumentInfoId, BulkOppdaterLogiskVedleggRequest(titler = logiskeVedleggForDokument.map { it.tittel }))
+            val logiskeVedleggForDokument = logiskeVedlegg.get(dokument.dokumentInfoId) ?: emptyList()
+            val harIdentiskInnhold =
+                eksisterendeLogiskeVedlegg.containsAll(logiskeVedleggForDokument) && eksisterendeLogiskeVedlegg.size == logiskeVedleggForDokument.size
+            if (!harIdentiskInnhold) {
+                logger.info("oppdaterer logiske vedlegg på journalpost med id=${journalpost.journalpostId}")
+                journalpostClient.oppdaterLogiskeVedlegg(
+                    dokument.dokumentInfoId,
+                    BulkOppdaterLogiskVedleggRequest(titler = logiskeVedleggForDokument.map { it.tittel }),
+                )
             }
         }
     }
 
-    private fun ferdigstillJournalføring(journalpostId: String, journalførendeEnhet: String, saksbehandler: String? = null) {
+    private fun ferdigstillJournalføring(
+        journalpostId: String,
+        journalførendeEnhet: String,
+        saksbehandler: String? = null,
+    ) {
         journalpostClient.ferdigstillJournalpost(journalpostId, journalførendeEnhet, saksbehandler)
     }
 
@@ -145,7 +161,8 @@ class JournalpostService(private val journalpostClient: JournalpostClient) {
         saksbehandler: String?,
         nyAvsender: AvsenderMottaker?,
     ) {
-        val oppdatertJournalpost = JournalføringHelper.lagOppdaterJournalpostRequest(journalpost, eksternFagsakId, dokumenttitler, nyAvsender)
+        val oppdatertJournalpost =
+            JournalføringHelper.lagOppdaterJournalpostRequest(journalpost, eksternFagsakId, dokumenttitler, nyAvsender)
         journalpostClient.oppdaterJournalpost(oppdatertJournalpost, journalpost.journalpostId, saksbehandler)
     }
 }
