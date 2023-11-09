@@ -153,10 +153,12 @@ fun JournalføringRequestV2.valider() {
     }
 
     feilHvis(
-        årsak == Journalføringsårsak.ETTERSENDING,
+        årsak != Journalføringsårsak.ETTERSENDING &&
+            vilkårsbehandleNyeBarn != VilkårsbehandleNyeBarn.IKKE_VALGT,
     ) {
-        "Årsaken til journalføring er ettersending og man kan derfor ikke velge vilkårsbehandling av nye barn"
+        "Kan ikke sende inn vilkårsbehandleNyeBarn=$vilkårsbehandleNyeBarn når årsak=$årsak"
     }
+
     dokumentTitler?.let {
         feilHvis(
             it.containsValue(""),
