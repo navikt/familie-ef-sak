@@ -5,6 +5,7 @@ import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.journalføring.dto.UstrukturertDokumentasjonType.IKKE_VALGT
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
+import no.nav.familie.kontrakter.felles.journalpost.LogiskVedlegg
 import java.time.LocalDate
 import java.util.UUID
 
@@ -21,7 +22,7 @@ data class JournalføringRequest(
 
 data class JournalføringRequestV2(
     val dokumentTitler: Map<String, String>? = null,
-    val logiskeVedlegg: Map<String, List<String>>? = null, // TODO: Må tas i bruk!
+    val logiskeVedlegg: Map<String, List<LogiskVedlegg>>? = null,
     val fagsakId: UUID,
     val oppgaveId: String,
     val journalførendeEnhet: String,

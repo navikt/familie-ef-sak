@@ -16,6 +16,7 @@ import no.nav.familie.kontrakter.felles.journalpost.Journalpost
 import no.nav.familie.kontrakter.felles.journalpost.JournalposterForBrukerRequest
 import no.nav.familie.kontrakter.felles.journalpost.Journalposttype
 import no.nav.familie.kontrakter.felles.journalpost.Journalstatus
+import no.nav.familie.kontrakter.felles.journalpost.LogiskVedlegg
 import org.springframework.stereotype.Service
 
 @Service
@@ -99,12 +100,14 @@ class JournalpostService(private val journalpostClient: JournalpostClient) {
     fun oppdaterOgFerdigstillJournalpost(
         journalpost: Journalpost,
         dokumenttitler: Map<String, String>?,
+        logiskeVedlegg: Map<String, List<LogiskVedlegg>>? = null,
         journalførendeEnhet: String,
         fagsak: Fagsak,
         saksbehandler: String?,
         nyAvsender: AvsenderMottaker? = null,
     ) {
         if (journalpost.journalstatus != Journalstatus.JOURNALFOERT) {
+            oppdaterLogiskeVedlegg(journalpost, logiskeVedlegg)
             oppdaterJournalpostMedFagsakOgDokumenttitler(
                 journalpost = journalpost,
                 dokumenttitler = dokumenttitler,
@@ -117,6 +120,16 @@ class JournalpostService(private val journalpostClient: JournalpostClient) {
                 journalførendeEnhet = journalførendeEnhet,
                 saksbehandler = saksbehandler,
             )
+        }
+    }
+
+    private fun oppdaterLogiskeVedlegg(journalpost: Journalpost, logiskeVedlegg: Map<String, List<LogiskVedlegg>>?) {
+        journalpost.dokumenter?.forEach { dokument ->
+            val eksisterendeLogiskeVedlegg = dokument.logiskeVedlegg ?: emptyList()
+            val logiskeVedleggForDokument = logiskeVedlegg?.get(dokument.dokumentInfoId) ?: emptyList()
+            if (eksisterendeLogiskeVedlegg.containsAll(logiskeVedleggForDokument) && eksisterendeLogiskeVedlegg.size == logiskeVedleggForDokument.size){ //evt. == , men test ulik sorteringsinnhold
+                journalpostClient.oppdaterLogiskeVedlegg(dokument.dokumentInfoId, logiskeVedleggForDokument)
+            }
         }
     }
 

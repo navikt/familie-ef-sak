@@ -133,6 +133,7 @@ class JournalføringService(
         journalpostService.oppdaterOgFerdigstillJournalpost(
             journalpost = journalpost,
             dokumenttitler = journalføringRequest.dokumentTitler,
+            logiskeVedlegg = journalføringRequest.logiskeVedlegg,
             journalførendeEnhet = journalføringRequest.journalførendeEnhet,
             fagsak = fagsak,
             saksbehandler = saksbehandler,

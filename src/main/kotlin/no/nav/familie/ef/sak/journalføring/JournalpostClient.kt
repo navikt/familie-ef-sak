@@ -21,6 +21,7 @@ import no.nav.familie.kontrakter.felles.dokarkiv.v2.ArkiverDokumentRequest
 import no.nav.familie.kontrakter.felles.getDataOrThrow
 import no.nav.familie.kontrakter.felles.journalpost.Journalpost
 import no.nav.familie.kontrakter.felles.journalpost.JournalposterForBrukerRequest
+import no.nav.familie.kontrakter.felles.journalpost.LogiskVedlegg
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.log.NavHttpHeaders
 import org.springframework.beans.factory.annotation.Qualifier
@@ -166,5 +167,9 @@ class JournalpostClient(
             httpHeaders.set(NavHttpHeaders.NAV_USER_ID.asString(), saksbehandler)
         }
         return httpHeaders
+    }
+
+    fun oppdaterLogiskeVedlegg(dokumentInfoId: String, logiskeVedleggForDokument: List<LogiskVedlegg>) {
+        TODO("Not yet implemented")
     }
 }
