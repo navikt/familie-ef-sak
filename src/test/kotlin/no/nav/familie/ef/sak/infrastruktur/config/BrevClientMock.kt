@@ -18,7 +18,7 @@ class BrevClientMock {
     fun brevClient(): BrevClient {
         val brevClient: BrevClient = mockk()
         every { brevClient.genererHtml(any(), any(), any(), any(), any()) } returns "<h1>Hei $BESLUTTER_SIGNATUR_PLACEHOLDER</h1>"
-        val dummyPdf = this::class.java.classLoader.getResource("dummy/pdf_dummy.pdf").readBytes()
+        val dummyPdf = this::class.java.classLoader.getResource("blankett/dummy/pdf_dummy.pdf").readBytes()
         every { brevClient.genererBlankett(any()) } returns dummyPdf
         return brevClient
     }
