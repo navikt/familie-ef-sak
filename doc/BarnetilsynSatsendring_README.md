@@ -43,3 +43,6 @@ WHERE stonadstype='BARNETILSYN' AND status != 'FERDIGSTILT';
 ```
 
 PS: Sjekk antall som treffer max-sats for januar neste år i oktober, slik at man eventuelt har tid til å implementere en automatisk revurdering med satsendring som årsak.
+
+PS: Sjekk gjerne veiviser (vilkår 6G), eksempel: "Dersom du tjener mer enn 711 720 kroner i året, har du ikke rett til stønaden."
+
