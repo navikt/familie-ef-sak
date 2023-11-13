@@ -15,6 +15,7 @@ import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus.OPPRETTET
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus.SATT_PÅ_VENT
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus.UTREDES
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
+import no.nav.familie.ef.sak.beregning.Grunnbeløpsperioder
 import no.nav.familie.ef.sak.fagsak.FagsakPersonRepository
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
@@ -96,6 +97,14 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
         assertThat(resultat).containsAll(listOf("2"))
     }
 
+    @Test
+    fun `skal finne ferdigstilte behandlinger med utdatert G-beløp som må behandles manuelt`() {
+        lagrePersonMedVedtak("2", 3)
+        val resultat = behandlingRepository.finnFerdigstilteBehandlingerMedUtdatertGBelopSomMåBehandlesManuelt(Grunnbeløpsperioder.nyesteGrunnbeløp.periode.fomDato)
+
+        assertThat(resultat.size).isEqualTo(1)
+    }
+
     private fun lagrePersonMedVedtak(personIdent: String, antallMånederSidenForrigeRevurdering: Long, stønadTom: YearMonth = YearMonth.now().plusMonths(2), behandlingÅrsak: BehandlingÅrsak = BehandlingÅrsak.NYE_OPPLYSNINGER): Fagsak {
         val stønadsperiode = Månedsperiode(YearMonth.now().minusMonths(antallMånederSidenForrigeRevurdering), stønadTom)
         val person1 = fagsakPerson(identer = setOf(PersonIdent(personIdent)))
@@ -124,7 +133,7 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
             stønadsperiode.tomDato,
             kildeBehandlingId = behandling.id,
         )
-        val ty = lagTilkjentYtelse(listOf(aty), behandlingId = behandling.id)
+        val ty = lagTilkjentYtelse(listOf(aty), behandlingId = behandling.id, grunnbeløpsmåned = Grunnbeløpsperioder.forrigeGrunnbeløp.periode.fom)
         tilkjentYtelseRepository.insert(ty)
         return fagsak
     }
