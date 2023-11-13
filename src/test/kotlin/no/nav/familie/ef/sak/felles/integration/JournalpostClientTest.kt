@@ -204,7 +204,7 @@ internal class JournalpostClientTest {
         val request = BulkOppdaterLogiskVedleggRequest(titler = listOf("Logisk vedlegg 1", "Logisk vedlegg 2"))
 
         wiremockServerItem.stubFor(
-            put("${integrasjonerConfig.dokarkivUri.path}/dokument/([0-9]*)/logiskVedlegg")
+            put("${integrasjonerConfig.dokarkivUri.path}/dokument/$dokumentInfoId/logiskVedlegg")
                 .willReturn(okJson(objectMapper.writeValueAsString(Ressurs.success(dokumentInfoId)))),
         )
 
