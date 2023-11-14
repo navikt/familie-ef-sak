@@ -10,12 +10,7 @@
           "gradering" : {
             "name" : "gradering",
             "type" : "Enum",
-            "values" : [
-              "STRENGT_FORTROLIG",
-              "STRENGT_FORTROLIG_UTLAND",
-              "FORTROLIG",
-              "UGRADERT"
-            ],
+            "values" : [ "STRENGT_FORTROLIG", "STRENGT_FORTROLIG_UTLAND", "FORTROLIG", "UGRADERT" ],
             "nullable" : false
           },
           "metadata" : {
@@ -251,23 +246,13 @@
           "relatertPersonsRolle" : {
             "name" : "relatertPersonsRolle",
             "type" : "Enum",
-            "values" : [
-              "BARN",
-              "MOR",
-              "FAR",
-              "MEDMOR"
-            ],
+            "values" : [ "BARN", "MOR", "FAR", "MEDMOR" ],
             "nullable" : false
           },
           "minRolleForPerson" : {
             "name" : "minRolleForPerson",
             "type" : "Enum",
-            "values" : [
-              "BARN",
-              "MOR",
-              "FAR",
-              "MEDMOR"
-            ],
+            "values" : [ "BARN", "MOR", "FAR", "MEDMOR" ],
             "nullable" : true
           }
         },
@@ -373,8 +358,7 @@
           "områder" : {
             "name" : "områder",
             "type" : "Collection",
-            "fields" : {
-            },
+            "fields" : { },
             "nullable" : true
           }
         },
@@ -383,11 +367,7 @@
       "kjønn" : {
         "name" : "kjønn",
         "type" : "Enum",
-        "values" : [
-          "KVINNE",
-          "MANN",
-          "UKJENT"
-        ],
+        "values" : [ "KVINNE", "MANN", "UKJENT" ],
         "nullable" : false
       },
       "kontaktadresse" : {
@@ -461,10 +441,7 @@
           "type" : {
             "name" : "type",
             "type" : "Enum",
-            "values" : [
-              "INNLAND",
-              "UTLAND"
-            ],
+            "values" : [ "INNLAND", "UTLAND" ],
             "nullable" : false
           },
           "utenlandskAdresse" : {
@@ -664,11 +641,7 @@
           "type" : {
             "name" : "type",
             "type" : "Enum",
-            "values" : [
-              "MIDLERTIDIG",
-              "PERMANENT",
-              "OPPLYSNING_MANGLER"
-            ],
+            "values" : [ "MIDLERTIDIG", "PERMANENT", "OPPLYSNING_MANGLER" ],
             "nullable" : false
           },
           "oppholdFra" : {
@@ -846,18 +819,7 @@
           "type" : {
             "name" : "type",
             "type" : "Enum",
-            "values" : [
-              "UOPPGITT",
-              "UGIFT",
-              "GIFT",
-              "ENKE_ELLER_ENKEMANN",
-              "SKILT",
-              "SEPARERT",
-              "REGISTRERT_PARTNER",
-              "SEPARERT_PARTNER",
-              "SKILT_PARTNER",
-              "GJENLEVENDE_PARTNER"
-            ],
+            "values" : [ "UOPPGITT", "UGIFT", "GIFT", "ENKE_ELLER_ENKEMANN", "SKILT", "SEPARERT", "REGISTRERT_PARTNER", "SEPARERT_PARTNER", "SKILT_PARTNER", "GJENLEVENDE_PARTNER" ],
             "nullable" : false
           },
           "gyldigFraOgMed" : {
@@ -1092,10 +1054,7 @@
           "status" : {
             "name" : "status",
             "type" : "Enum",
-            "values" : [
-              "I_BRUK",
-              "OPPHOERT"
-            ],
+            "values" : [ "I_BRUK", "OPPHOERT" ],
             "nullable" : false
           },
           "historisk" : {
@@ -1120,12 +1079,7 @@
           "gradering" : {
             "name" : "gradering",
             "type" : "Enum",
-            "values" : [
-              "STRENGT_FORTROLIG",
-              "STRENGT_FORTROLIG_UTLAND",
-              "FORTROLIG",
-              "UGRADERT"
-            ],
+            "values" : [ "STRENGT_FORTROLIG", "STRENGT_FORTROLIG_UTLAND", "FORTROLIG", "UGRADERT" ],
             "nullable" : false
           },
           "metadata" : {
@@ -1444,10 +1398,7 @@
           "status" : {
             "name" : "status",
             "type" : "Enum",
-            "values" : [
-              "I_BRUK",
-              "OPPHOERT"
-            ],
+            "values" : [ "I_BRUK", "OPPHOERT" ],
             "nullable" : false
           },
           "historisk" : {
@@ -1488,16 +1439,7 @@
                   "periodeType" : {
                     "name" : "periodeType",
                     "type" : "Enum",
-                    "values" : [
-                      "FORLENGELSE",
-                      "HOVEDPERIODE",
-                      "MIDLERTIDIG_OPPHØR",
-                      "MIGRERING",
-                      "PERIODE_FØR_FØDSEL",
-                      "SANKSJON",
-                      "UTVIDELSE",
-                      "NY_PERIODE_FOR_NYTT_BARN"
-                    ],
+                    "values" : [ "FORLENGELSE", "HOVEDPERIODE", "MIDLERTIDIG_OPPHØR", "MIGRERING", "PERIODE_FØR_FØDSEL", "SANKSJON", "UTVIDELSE", "NY_PERIODE_FOR_NYTT_BARN" ],
                     "nullable" : false
                   },
                   "fom" : {
@@ -1564,16 +1506,7 @@
                   "periodeType" : {
                     "name" : "periodeType",
                     "type" : "Enum",
-                    "values" : [
-                      "FORLENGELSE",
-                      "HOVEDPERIODE",
-                      "MIDLERTIDIG_OPPHØR",
-                      "MIGRERING",
-                      "PERIODE_FØR_FØDSEL",
-                      "SANKSJON",
-                      "UTVIDELSE",
-                      "NY_PERIODE_FOR_NYTT_BARN"
-                    ],
+                    "values" : [ "FORLENGELSE", "HOVEDPERIODE", "MIDLERTIDIG_OPPHØR", "MIGRERING", "PERIODE_FØR_FØDSEL", "SANKSJON", "UTVIDELSE", "NY_PERIODE_FOR_NYTT_BARN" ],
                     "nullable" : false
                   },
                   "fom" : {
@@ -1641,22 +1574,13 @@
           "periodeStatus" : {
             "name" : "periodeStatus",
             "type" : "Enum",
-            "values" : [
-              "AVST",
-              "GYLD",
-              "UAVK"
-            ],
+            "values" : [ "AVST", "GYLD", "UAVK" ],
             "nullable" : false
           },
           "periodeStatusÅrsak" : {
             "name" : "periodeStatusÅrsak",
             "type" : "Enum",
-            "values" : [
-              "Avvist",
-              "Feilregistrert",
-              "Migrert",
-              "Opphort"
-            ],
+            "values" : [ "Avvist", "Feilregistrert", "Migrert", "Opphort" ],
             "nullable" : true
           },
           "fom" : {
@@ -1694,22 +1618,13 @@
           "periodeStatus" : {
             "name" : "periodeStatus",
             "type" : "Enum",
-            "values" : [
-              "AVST",
-              "GYLD",
-              "UAVK"
-            ],
+            "values" : [ "AVST", "GYLD", "UAVK" ],
             "nullable" : false
           },
           "periodeStatusÅrsak" : {
             "name" : "periodeStatusÅrsak",
             "type" : "Enum",
-            "values" : [
-              "Avvist",
-              "Feilregistrert",
-              "Migrert",
-              "Opphort"
-            ],
+            "values" : [ "Avvist", "Feilregistrert", "Migrert", "Opphort" ],
             "nullable" : true
           },
           "fom" : {
@@ -1747,22 +1662,13 @@
           "periodeStatus" : {
             "name" : "periodeStatus",
             "type" : "Enum",
-            "values" : [
-              "AVST",
-              "GYLD",
-              "UAVK"
-            ],
+            "values" : [ "AVST", "GYLD", "UAVK" ],
             "nullable" : false
           },
           "periodeStatusÅrsak" : {
             "name" : "periodeStatusÅrsak",
             "type" : "Enum",
-            "values" : [
-              "Avvist",
-              "Feilregistrert",
-              "Migrert",
-              "Opphort"
-            ],
+            "values" : [ "Avvist", "Feilregistrert", "Migrert", "Opphort" ],
             "nullable" : true
           },
           "fom" : {
@@ -1807,12 +1713,7 @@
           "gradering" : {
             "name" : "gradering",
             "type" : "Enum",
-            "values" : [
-              "STRENGT_FORTROLIG",
-              "STRENGT_FORTROLIG_UTLAND",
-              "FORTROLIG",
-              "UGRADERT"
-            ],
+            "values" : [ "STRENGT_FORTROLIG", "STRENGT_FORTROLIG_UTLAND", "FORTROLIG", "UGRADERT" ],
             "nullable" : false
           },
           "metadata" : {
@@ -2163,23 +2064,13 @@
           "relatertPersonsRolle" : {
             "name" : "relatertPersonsRolle",
             "type" : "Enum",
-            "values" : [
-              "BARN",
-              "MOR",
-              "FAR",
-              "MEDMOR"
-            ],
+            "values" : [ "BARN", "MOR", "FAR", "MEDMOR" ],
             "nullable" : false
           },
           "minRolleForPerson" : {
             "name" : "minRolleForPerson",
             "type" : "Enum",
-            "values" : [
-              "BARN",
-              "MOR",
-              "FAR",
-              "MEDMOR"
-            ],
+            "values" : [ "BARN", "MOR", "FAR", "MEDMOR" ],
             "nullable" : true
           }
         },
@@ -2256,7 +2147,6 @@
                 "name" : "historisk",
                 "type" : "Boolean",
                 "nullable" : false
-                ∫
               }
             },
             "nullable" : false
@@ -2302,16 +2192,7 @@
               "periodeType" : {
                 "name" : "periodeType",
                 "type" : "Enum",
-                "values" : [
-                  "FORLENGELSE",
-                  "HOVEDPERIODE",
-                  "MIDLERTIDIG_OPPHØR",
-                  "MIGRERING",
-                  "PERIODE_FØR_FØDSEL",
-                  "SANKSJON",
-                  "UTVIDELSE",
-                  "NY_PERIODE_FOR_NYTT_BARN"
-                ],
+                "values" : [ "FORLENGELSE", "HOVEDPERIODE", "MIDLERTIDIG_OPPHØR", "MIGRERING", "PERIODE_FØR_FØDSEL", "SANKSJON", "UTVIDELSE", "NY_PERIODE_FOR_NYTT_BARN" ],
                 "nullable" : false
               },
               "fom" : {
@@ -2378,16 +2259,7 @@
               "periodeType" : {
                 "name" : "periodeType",
                 "type" : "Enum",
-                "values" : [
-                  "FORLENGELSE",
-                  "HOVEDPERIODE",
-                  "MIDLERTIDIG_OPPHØR",
-                  "MIGRERING",
-                  "PERIODE_FØR_FØDSEL",
-                  "SANKSJON",
-                  "UTVIDELSE",
-                  "NY_PERIODE_FOR_NYTT_BARN"
-                ],
+                "values" : [ "FORLENGELSE", "HOVEDPERIODE", "MIDLERTIDIG_OPPHØR", "MIGRERING", "PERIODE_FØR_FØDSEL", "SANKSJON", "UTVIDELSE", "NY_PERIODE_FOR_NYTT_BARN" ],
                 "nullable" : false
               },
               "fom" : {
