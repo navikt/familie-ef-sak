@@ -61,6 +61,7 @@ class TidligereVedtaksperioderService(
                     harTidligereBarnetilsyn = hentTidligereVedtaksperioder(it.barnetilsyn),
                     harTidligereSkolepenger = hentTidligereVedtaksperioder(it.skolepenger),
                     periodeHistorikkOvergangsstønad = hentGjeldendeOvergangstønadsperioder(it),
+                    periodeHistorikkBarnetilsyn = hentGjeldendeBarnetilsynsperioder(it)
                 )
             } ?: TidligereInnvilgetVedtak(false, false, false)
     }
@@ -87,8 +88,23 @@ class TidligereVedtaksperioderService(
             }
     }
 
+    private fun hentGjeldendeBarnetilsynsperioder(fagsaker: Fagsaker?): List<GrunnlagsdataPeriodeHistorikkBarnetilsyn> {
+        return hentAndelshistorikkForBarnetilsyn(fagsaker)
+            .filterNot(erstattetEllerFjernet())
+            .filterNot { it.erOpphør }
+            .map {
+                GrunnlagsdataPeriodeHistorikkBarnetilsyn(
+                    fom = it.andel.periode.fomDato,
+                    tom = it.andel.periode.tomDato,
+                )
+            }
+    }
+
     private fun hentAndelshistorikkForOvergangsstønad(fagsaker: Fagsaker?) =
         fagsaker?.overgangsstønad?.id?.let { andelsHistorikkService.hentHistorikk(it, null) } ?: emptyList()
+
+    private fun hentAndelshistorikkForBarnetilsyn(fagsaker: Fagsaker?) =
+        fagsaker?.barnetilsyn?.id?.let { andelsHistorikkService.hentHistorikk(it, null) } ?: emptyList()
 
     private fun erstattetEllerFjernet(): (AndelHistorikkDto) -> Boolean = {
         listOf(

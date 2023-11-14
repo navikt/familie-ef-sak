@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.vilkår.dto
 
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataPeriodeHistorikkBarnetilsyn
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataPeriodeHistorikkOvergangsstønad
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.TidligereInnvilgetVedtak
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.TidligereVedtaksperioder
@@ -22,6 +23,7 @@ data class TidligereInnvilgetVedtakDto(
     val harTidligereBarnetilsyn: Boolean,
     val harTidligereSkolepenger: Boolean,
     val periodeHistorikkOvergangsstønad: List<GrunnlagsdataPeriodeHistorikkDto> = emptyList(),
+    val periodeHistorikkBarnetilsyn: List<GrunnlagsdataPeriodeHistorikkBarnetilsynDto> = emptyList(),
 ) {
     fun harTidligereInnvilgetVedtak() =
         harTidligereOvergangsstønad || harTidligereBarnetilsyn || harTidligereSkolepenger
@@ -33,6 +35,11 @@ data class GrunnlagsdataPeriodeHistorikkDto(
     val tom: LocalDate,
     val antallMåneder: Long,
     val antallMånederUtenBeløp: Long = 0,
+)
+
+data class GrunnlagsdataPeriodeHistorikkBarnetilsynDto(
+    val fom: LocalDate,
+    val tom: LocalDate,
 )
 
 fun TidligereVedtaksperioder?.tilDto(): TidligereVedtaksperioderDto = this?.let {
@@ -49,10 +56,15 @@ fun TidligereInnvilgetVedtak.tilDto() =
         harTidligereBarnetilsyn = this.harTidligereBarnetilsyn,
         harTidligereSkolepenger = this.harTidligereSkolepenger,
         periodeHistorikkOvergangsstønad = this.periodeHistorikkOvergangsstønad.tilDto(),
+        periodeHistorikkBarnetilsyn = this.periodeHistorikkBarnetilsyn.tilDto(),
     )
 
 private fun List<GrunnlagsdataPeriodeHistorikkOvergangsstønad>.tilDto() = this.map { it.tilDto() }
     .slåSammenPåfølgendePerioderMedLikPeriodetype()
+    .sortedByDescending { it.fom }
+
+@JvmName("tilDtoBarnetilsyn")
+private fun List<GrunnlagsdataPeriodeHistorikkBarnetilsyn>.tilDto() = this.map { it.tilDto() }
     .sortedByDescending { it.fom }
 
 private fun GrunnlagsdataPeriodeHistorikkOvergangsstønad.tilDto() = GrunnlagsdataPeriodeHistorikkDto(
@@ -61,6 +73,11 @@ private fun GrunnlagsdataPeriodeHistorikkOvergangsstønad.tilDto() = Grunnlagsda
     tom = this.tom,
     antallMåneder = månederMedBeløp(periodeType, beløp, fom, tom),
     antallMånederUtenBeløp = månederUtenBeløp(periodeType, beløp, fom, tom),
+)
+
+private fun GrunnlagsdataPeriodeHistorikkBarnetilsyn.tilDto() = GrunnlagsdataPeriodeHistorikkBarnetilsynDto(
+    fom = this.fom,
+    tom = this.tom,
 )
 
 private fun månederUtenBeløp(
