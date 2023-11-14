@@ -61,7 +61,7 @@ class TidligereVedtaksperioderService(
                     harTidligereBarnetilsyn = hentTidligereVedtaksperioder(it.barnetilsyn),
                     harTidligereSkolepenger = hentTidligereVedtaksperioder(it.skolepenger),
                     periodeHistorikkOvergangsstønad = hentGjeldendeOvergangstønadsperioder(it),
-                    periodeHistorikkBarnetilsyn = hentGjeldendeBarnetilsynsperioder(it)
+                    periodeHistorikkBarnetilsyn = hentGjeldendeBarnetilsynsperioder(it),
                 )
             } ?: TidligereInnvilgetVedtak(false, false, false)
     }
