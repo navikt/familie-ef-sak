@@ -10,8 +10,6 @@ import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.infrastruktur.exception.ManglerTilgang
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
-import no.nav.familie.ef.sak.journalføring.dto.JournalføringBehandling
-import no.nav.familie.ef.sak.journalføring.dto.JournalføringRequest
 import no.nav.familie.ef.sak.journalføring.dto.JournalføringRequestV2
 import no.nav.familie.ef.sak.journalføring.dto.Journalføringsaksjon
 import no.nav.familie.ef.sak.journalføring.dto.Journalføringsårsak
@@ -154,60 +152,62 @@ internal class JournalpostControllerTest {
         } throws ManglerTilgang("Bruker mangler tilgang", "Mangler tilgang til bruker")
 
         assertThrows<ManglerTilgang> {
-            journalpostController.fullførJournalpost(
+            journalpostController.fullførJournalpostV2(
                 journalpostMedFødselsnummer.journalpostId,
-                JournalføringRequest(
-                    null,
-                    UUID.randomUUID(),
-                    "dummy-oppgave",
-                    JournalføringBehandling(UUID.randomUUID()),
-                    "9991",
+                JournalføringRequestV2(
+                    dokumentTitler = null,
+                    logiskeVedlegg = null,
+                    fagsakId = UUID.randomUUID(),
+                    oppgaveId = "",
+                    aksjon = Journalføringsaksjon.JOURNALFØR_PÅ_FAGSAK,
+                    journalførendeEnhet = "",
+                    årsak = Journalføringsårsak.ETTERSENDING,
                 ),
             )
         }
     }
 
     @Test
-    fun `skal journalføre som klage i v2 hvis årsak er klage`() {
-        setupFullførJournalføringV2()
+    fun `skal journalføre som klage dersom årsak til journalføring er klage`() {
+        setupFullførJournalføring()
 
-        val journalføringRequest = opprettJournalføringRequestV2(årsak = Journalføringsårsak.KLAGE)
+        val journalføringRequest = opprettJournalføringRequest(årsak = Journalføringsårsak.KLAGE)
         journalpostController.fullførJournalpostV2(journalpostId, journalføringRequest)
         verify(exactly = 1) { journalføringKlageService.fullførJournalpostV2(journalføringRequest, any()) }
     }
 
     @Test
-    fun `skal journalføre som klage i v2 hvis årsak er klage_tilbakekreving`() {
-        setupFullførJournalføringV2()
+    fun `skal journalføre som klage dersom årsak er klage_tilbakekreving`() {
+        setupFullførJournalføring()
 
-        val journalføringRequest = opprettJournalføringRequestV2(årsak = Journalføringsårsak.KLAGE_TILBAKEKREVING)
+        val journalføringRequest = opprettJournalføringRequest(årsak = Journalføringsårsak.KLAGE_TILBAKEKREVING)
         journalpostController.fullførJournalpostV2(journalpostId, journalføringRequest)
         verify(exactly = 1) { journalføringKlageService.fullførJournalpostV2(journalføringRequest, any()) }
     }
 
     @Test
-    fun `skal journalføre som vanlig i v2 hvis årsaker ikke er klage`() {
-        setupFullførJournalføringV2()
+    fun `skal journalføre som vanlig dersom årsaker til journalføring ikke er klage`() {
+        setupFullførJournalføring()
 
         listOf(
             Journalføringsårsak.PAPIRSØKNAD,
             Journalføringsårsak.DIGITAL_SØKNAD,
             Journalføringsårsak.ETTERSENDING,
         ).forEach {
-            val journalføringRequest = opprettJournalføringRequestV2(årsak = it)
+            val journalføringRequest = opprettJournalføringRequest(årsak = it)
             journalpostController.fullførJournalpostV2(journalpostId, journalføringRequest)
             verify(exactly = 1) { journalføringService.fullførJournalpostV2(journalføringRequest, any()) }
         }
     }
 
-    private fun setupFullførJournalføringV2() {
+    private fun setupFullførJournalføring() {
         every { journalpostService.hentJournalpost(any()) } returns journalpostMedFødselsnummer
         every { tilgangService.validerHarSaksbehandlerrolle() } just Runs
         every { journalføringKlageService.fullførJournalpostV2(any(), any()) } just Runs
         every { journalføringService.fullførJournalpostV2(any(), any()) } returns 1L
     }
 
-    private fun opprettJournalføringRequestV2(årsak: Journalføringsårsak) = JournalføringRequestV2(
+    private fun opprettJournalføringRequest(årsak: Journalføringsårsak) = JournalføringRequestV2(
         dokumentTitler = emptyMap(),
         logiskeVedlegg = emptyMap(),
         fagsakId = UUID.randomUUID(),
