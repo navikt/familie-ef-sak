@@ -67,3 +67,7 @@ Testbrukeren som opprettes i IDA må ha minst en av følgende roller:
 
 ## Manuell vedlikehold
 [Satsendring barnetilsyn](doc/BarnetilsynSatsendring_README.md)
+
+## Kode generert av GitHub Copilot
+
+Dette repoet bruker GitHub Copilot til å generere kode.
