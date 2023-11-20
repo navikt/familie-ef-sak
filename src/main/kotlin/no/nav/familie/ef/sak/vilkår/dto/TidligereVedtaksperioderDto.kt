@@ -55,16 +55,15 @@ fun TidligereInnvilgetVedtak.tilDto() =
         harTidligereOvergangsstønad = this.harTidligereOvergangsstønad,
         harTidligereBarnetilsyn = this.harTidligereBarnetilsyn,
         harTidligereSkolepenger = this.harTidligereSkolepenger,
-        periodeHistorikkOvergangsstønad = this.periodeHistorikkOvergangsstønad.tilDto(),
-        periodeHistorikkBarnetilsyn = this.periodeHistorikkBarnetilsyn.tilDto(),
+        periodeHistorikkOvergangsstønad = this.periodeHistorikkOvergangsstønad.tilDtoOvergangsstønad(),
+        periodeHistorikkBarnetilsyn = this.periodeHistorikkBarnetilsyn.tilDtoBarnetilsyn(),
     )
 
-private fun List<GrunnlagsdataPeriodeHistorikkOvergangsstønad>.tilDto() = this.map { it.tilDto() }
+private fun List<GrunnlagsdataPeriodeHistorikkOvergangsstønad>.tilDtoOvergangsstønad() = this.map { it.tilDto() }
     .slåSammenPåfølgendePerioderMedLikPeriodetype()
     .sortedByDescending { it.fom }
 
-@JvmName("tilDtoBarnetilsyn")
-private fun List<GrunnlagsdataPeriodeHistorikkBarnetilsyn>.tilDto() = this.map { it.tilDto() }
+private fun List<GrunnlagsdataPeriodeHistorikkBarnetilsyn>.tilDtoBarnetilsyn() = this.map { it.tilDto() }
     .sortedByDescending { it.fom }
 
 private fun GrunnlagsdataPeriodeHistorikkOvergangsstønad.tilDto() = GrunnlagsdataPeriodeHistorikkDto(
