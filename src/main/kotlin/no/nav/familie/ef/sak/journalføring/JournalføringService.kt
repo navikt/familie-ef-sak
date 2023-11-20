@@ -220,6 +220,7 @@ class JournalføringService(
             journalpost = journalpost,
             dokumenttitler = journalføringRequest.dokumentTitler,
             journalførendeEnhet = journalføringRequest.journalførendeEnhet,
+            logiskeVedlegg = journalføringRequest.logiskeVedlegg,
             fagsak = fagsak,
             saksbehandler = saksbehandler,
             nyAvsender = nyAvsender,

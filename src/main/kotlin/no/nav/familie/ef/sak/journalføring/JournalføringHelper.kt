@@ -40,15 +40,15 @@ object JournalføringHelper {
     }
 
     fun validerGyldigAvsender(journalpost: Journalpost, request: JournalføringRequestV2) {
-        if (journalpost.avsenderMottaker == null) {
+        if (journalpost.manglerAvsenderMottaker()) {
             brukerfeilHvis(request.nyAvsender == null) {
                 "Kan ikke journalføre uten avsender"
             }
             brukerfeilHvis(!request.nyAvsender.erBruker && request.nyAvsender.navn.isNullOrBlank()) {
                 "Må sende inn navn på ny avsender"
             }
-            brukerfeilHvis(!request.nyAvsender.erBruker && request.nyAvsender.personIdent.isNullOrBlank()) {
-                "Må sende inn ident på ny avsender"
+            brukerfeilHvis(request.nyAvsender.erBruker && request.nyAvsender.personIdent.isNullOrBlank()) {
+                "Må sende inn ident på ny avsender hvis det er bruker"
             }
         } else {
             brukerfeilHvis(request.nyAvsender != null) {

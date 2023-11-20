@@ -105,6 +105,7 @@ class JournalføringKlageService(
             dokumenttitler = journalføringRequest.dokumentTitler,
             journalførendeEnhet = journalføringRequest.journalførendeEnhet,
             fagsak = fagsak,
+            logiskeVedlegg = journalføringRequest.logiskeVedlegg,
             saksbehandler = saksbehandler,
             nyAvsender = nyAvsender,
         )
@@ -168,6 +169,7 @@ class JournalføringKlageService(
             dokumenttitler = journalføringRequest.dokumentTitler,
             journalførendeEnhet = journalføringRequest.journalførendeEnhet,
             fagsak = fagsak,
+            logiskeVedlegg = journalføringRequest.logiskeVedlegg,
             saksbehandler = saksbehandler,
             nyAvsender = nyAvsender,
         )

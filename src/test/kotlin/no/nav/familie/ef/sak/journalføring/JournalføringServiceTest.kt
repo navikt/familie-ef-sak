@@ -53,6 +53,7 @@ import no.nav.familie.kontrakter.felles.dokarkiv.BulkOppdaterLogiskVedleggReques
 import no.nav.familie.kontrakter.felles.dokarkiv.OppdaterJournalpostRequest
 import no.nav.familie.kontrakter.felles.dokarkiv.OppdaterJournalpostResponse
 import no.nav.familie.kontrakter.felles.ef.StønadType
+import no.nav.familie.kontrakter.felles.journalpost.AvsenderMottaker
 import no.nav.familie.kontrakter.felles.journalpost.DokumentInfo
 import no.nav.familie.kontrakter.felles.journalpost.Dokumentvariant
 import no.nav.familie.kontrakter.felles.journalpost.Dokumentvariantformat
@@ -459,6 +460,24 @@ internal class JournalføringServiceTest {
                     BulkOppdaterLogiskVedleggRequest(titler = listOf("Samværserklæring")),
                 )
             }
+        }
+
+        @Test
+        internal fun `skal sette avsenderMottaker`() {
+            val ingenAvsenderMottaker = AvsenderMottaker(null, null, null, null, false)
+            val journalpostUtenAvsender = ustrukturertJournalpost.copy(avsenderMottaker = ingenAvsenderMottaker)
+            every { journalpostClient.hentJournalpost(journalpostId) } returns journalpostUtenAvsender
+            mockOpprettBehandling(behandlingId, UUID.randomUUID())
+            every { behandlingService.finnesBehandlingSomIkkeErFerdigstiltEllerSattPåVent(any()) } returns false
+            val request = lagRequestV2(
+                aksjon = Journalføringsaksjon.JOURNALFØR_PÅ_FAGSAK,
+                årsak = Journalføringsårsak.PAPIRSØKNAD,
+                nyAvsender = NyAvsender(false, "Fjasball", null),
+            )
+
+            journalføringService.fullførJournalpostV2(request, journalpostUtenAvsender)
+
+            assertThat(slotJournalpost.captured.avsenderMottaker).isNotNull
         }
     }
 
