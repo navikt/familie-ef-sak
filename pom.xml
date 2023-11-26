@@ -30,7 +30,7 @@
         <sha1/>
         <changelist>-SNAPSHOT</changelist>
         <java.version>17</java.version>
-        <kotlin.version>1.9.20</kotlin.version>
+        <kotlin.version>1.9.21</kotlin.version>
         <kotlin-coroutines.version>1.7.3</kotlin-coroutines.version>
         <springdoc.version>2.2.0</springdoc.version>
         <mockk.version>1.13.8</mockk.version>
