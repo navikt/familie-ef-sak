@@ -12,7 +12,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.1.5</version>
+        <version>3.2.0</version>
     </parent>
     <repositories>
         <repository>
@@ -30,16 +30,16 @@
         <sha1/>
         <changelist>-SNAPSHOT</changelist>
         <java.version>17</java.version>
-        <kotlin.version>1.9.20</kotlin.version>
+        <kotlin.version>1.9.21</kotlin.version>
         <kotlin-coroutines.version>1.7.3</kotlin-coroutines.version>
         <springdoc.version>2.2.0</springdoc.version>
         <mockk.version>1.13.8</mockk.version>
-        <felles.version>2.20231023162434_fa320ce</felles.version>
+        <felles.version>2.20231123085409_33fb768</felles.version>
         <prosessering.version>2.20231026103714_2f17845</prosessering.version>
         <start-class>no.nav.familie.ef.sak.ApplicationKt</start-class>
-        <kontrakter.version>3.0_20231109091547_fd2cae7</kontrakter.version>
+        <kontrakter.version>3.0_20231122081318_2e4ddec</kontrakter.version>
         <eksterne.kontrakter.bisys.version>2.0_20230214104704_706e9c0</eksterne.kontrakter.bisys.version>
-        <cucumber.version>7.14.0</cucumber.version>
+        <cucumber.version>7.14.1</cucumber.version>
 
 
         <!--suppress UnresolvedMavenProperty  Ligger som secret i github-->
@@ -228,7 +228,7 @@
         <dependency>
             <groupId>org.testcontainers</groupId>
             <artifactId>postgresql</artifactId>
-            <version>1.19.1</version>
+            <version>1.19.3</version>
             <scope>test</scope>
         </dependency>
         <dependency>
