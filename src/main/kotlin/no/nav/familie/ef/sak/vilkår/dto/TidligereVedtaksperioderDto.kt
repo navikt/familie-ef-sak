@@ -64,7 +64,7 @@ private fun List<GrunnlagsdataPeriodeHistorikkOvergangsstønad>.tilDtoOvergangss
     .sortedByDescending { it.fom }
 
 private fun List<GrunnlagsdataPeriodeHistorikkBarnetilsynDto>.slåSammenHistoriskePerioder(): List<GrunnlagsdataPeriodeHistorikkBarnetilsynDto> {
-    val sortertePerioder = this.sortedBy { it.fom }
+    val sortertePerioder = this.sortedByDescending { it.fom }
     return sortertePerioder.fold(mutableListOf()) { resultat, periode ->
         if (resultat.isNotEmpty() && resultat.last().periode() påfølgesAv periode.periode()) {
             val siste = resultat.removeLast()
@@ -74,6 +74,7 @@ private fun List<GrunnlagsdataPeriodeHistorikkBarnetilsynDto>.slåSammenHistoris
         }
         resultat
     }
+
 }
 
 private fun List<GrunnlagsdataPeriodeHistorikkBarnetilsyn>.tilDtoBarnetilsyn() = this.map { it.tilDto() }
