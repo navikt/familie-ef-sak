@@ -69,8 +69,7 @@ private fun List<GrunnlagsdataPeriodeHistorikkBarnetilsynDto>.slåSammenHistoris
         if (resultat.isNotEmpty() && resultat.last().periode() påfølgesAv periode.periode()) {
             val siste = resultat.removeLast()
             resultat.add(GrunnlagsdataPeriodeHistorikkBarnetilsynDto(siste.fom, periode.tom))
-        }
-        else {
+        } else {
             resultat.add(periode)
         }
         resultat
