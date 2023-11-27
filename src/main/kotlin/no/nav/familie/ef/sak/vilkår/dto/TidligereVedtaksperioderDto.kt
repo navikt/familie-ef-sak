@@ -63,8 +63,22 @@ private fun List<GrunnlagsdataPeriodeHistorikkOvergangsstønad>.tilDtoOvergangss
     .slåSammenPåfølgendePerioderMedLikPeriodetype()
     .sortedByDescending { it.fom }
 
+private fun List<GrunnlagsdataPeriodeHistorikkBarnetilsynDto>.slåSammenHistoriskePerioder(): List<GrunnlagsdataPeriodeHistorikkBarnetilsynDto> {
+    val sortertePerioder = this.sortedBy { it.fom }
+    return sortertePerioder.fold(mutableListOf()) { resultat, periode ->
+        if (resultat.isNotEmpty() && resultat.last().periode() påfølgesAv periode.periode()) {
+            val siste = resultat.removeLast()
+            resultat.add(GrunnlagsdataPeriodeHistorikkBarnetilsynDto(siste.fom, periode.tom))
+        }
+        else {
+            resultat.add(periode)
+        }
+        resultat
+    }
+}
+
 private fun List<GrunnlagsdataPeriodeHistorikkBarnetilsyn>.tilDtoBarnetilsyn() = this.map { it.tilDto() }
-    .sortedByDescending { it.fom }
+    .slåSammenHistoriskePerioder()
 
 private fun GrunnlagsdataPeriodeHistorikkOvergangsstønad.tilDto() = GrunnlagsdataPeriodeHistorikkDto(
     vedtaksperiodeType = this.periodeType.name,
@@ -140,3 +154,4 @@ private fun slåSammenPeriodeHistorikkDto(
 )
 
 private fun GrunnlagsdataPeriodeHistorikkDto.periode(): Månedsperiode = Månedsperiode(this.fom, this.tom)
+private fun GrunnlagsdataPeriodeHistorikkBarnetilsynDto.periode(): Månedsperiode = Månedsperiode(this.fom, this.tom)
