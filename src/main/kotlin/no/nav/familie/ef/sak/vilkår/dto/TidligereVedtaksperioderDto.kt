@@ -73,7 +73,7 @@ private fun List<GrunnlagsdataPeriodeHistorikkBarnetilsynDto>.slåSammenHistoris
                 GrunnlagsdataPeriodeHistorikkBarnetilsynDto(
                     siste.fom,
                     periode.tom,
-                    siste.overlapp || periode.overlapp
+                    siste.overlapp || periode.overlapp,
                 )
             )
         } else {
