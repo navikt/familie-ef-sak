@@ -94,7 +94,7 @@ private fun List<GrunnlagsdataPeriodeHistorikkOvergangsstønad>.overlapperMedPer
 }
 
 private fun List<GrunnlagsdataPeriodeHistorikkBarnetilsyn>.tilDtoBarnetilsyn(
-    grunnlagsdataPeriodeHistorikkOvergangsstønad: List<GrunnlagsdataPeriodeHistorikkOvergangsstønad>
+    grunnlagsdataPeriodeHistorikkOvergangsstønad: List<GrunnlagsdataPeriodeHistorikkOvergangsstønad>,
 ) = this.map { it.tilDto(grunnlagsdataPeriodeHistorikkOvergangsstønad) }
     .slåSammenHistoriskePerioder()
     .sortedByDescending { it.fom }
@@ -111,7 +111,7 @@ private fun GrunnlagsdataPeriodeHistorikkBarnetilsyn.tilDto(grunnlagsdataPeriode
     GrunnlagsdataPeriodeHistorikkBarnetilsynDto(
         fom = this.fom,
         tom = this.tom,
-        overlapp = grunnlagsdataPeriodeHistorikkOvergangsstønad.overlapperMedPeriode(this.fom, this.tom)
+        overlapp = grunnlagsdataPeriodeHistorikkOvergangsstønad.overlapperMedPeriode(this.fom, this.tom),
     )
 
 private fun månederUtenBeløp(
