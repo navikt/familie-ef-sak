@@ -38,7 +38,7 @@ data class GrunnlagsdataPeriodeHistorikkDto(
 )
 
 enum class OverlappMedOvergangsstønad {
-    NEI, JA, DELVIS;
+    NEI, JA, DELVIS,
 }
 
 data class GrunnlagsdataPeriodeHistorikkBarnetilsynDto(
@@ -69,7 +69,7 @@ private fun List<GrunnlagsdataPeriodeHistorikkOvergangsstønad>.tilDtoOvergangss
     .sortedByDescending { it.fom }
 
 private fun List<GrunnlagsdataPeriodeHistorikkBarnetilsynDto>.slåSammenHistoriskePerioder(
-    grunnlagsdataPeriodeHistorikkOvergangsstønad: List<GrunnlagsdataPeriodeHistorikkOvergangsstønad>
+    grunnlagsdataPeriodeHistorikkOvergangsstønad: List<GrunnlagsdataPeriodeHistorikkOvergangsstønad>,
 ): List<GrunnlagsdataPeriodeHistorikkBarnetilsynDto> {
     val sortertePerioder = this.sortedBy { it.fom }
     return sortertePerioder.fold(mutableListOf()) { resultat, periode ->
@@ -120,7 +120,10 @@ private fun GrunnlagsdataPeriodeHistorikkBarnetilsyn.tilDto(grunnlagsdataPeriode
     GrunnlagsdataPeriodeHistorikkBarnetilsynDto(
         fom = this.fom,
         tom = this.tom,
-        overlapperMedOvergangsstønad = grunnlagsdataPeriodeHistorikkOvergangsstønad.overlapperMedPeriode(this.fom, this.tom),
+        overlapperMedOvergangsstønad = grunnlagsdataPeriodeHistorikkOvergangsstønad.overlapperMedPeriode(
+            this.fom,
+            this.tom,
+        ),
     )
 
 private fun månederUtenBeløp(
