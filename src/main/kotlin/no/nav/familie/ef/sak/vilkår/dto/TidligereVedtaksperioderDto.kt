@@ -37,10 +37,14 @@ data class GrunnlagsdataPeriodeHistorikkDto(
     val antallMånederUtenBeløp: Long = 0,
 )
 
+enum class OverlappMedOvergangsstønad {
+    NEI, JA, DELVIS;
+}
+
 data class GrunnlagsdataPeriodeHistorikkBarnetilsynDto(
     val fom: LocalDate,
     val tom: LocalDate,
-    val overlapp: Boolean,
+    val overlappMedOvergangsstønad: OverlappMedOvergangsstønad,
 )
 
 fun TidligereVedtaksperioder?.tilDto(): TidligereVedtaksperioderDto = this?.let {
@@ -64,16 +68,19 @@ private fun List<GrunnlagsdataPeriodeHistorikkOvergangsstønad>.tilDtoOvergangss
     .slåSammenPåfølgendePerioderMedLikPeriodetype()
     .sortedByDescending { it.fom }
 
-private fun List<GrunnlagsdataPeriodeHistorikkBarnetilsynDto>.slåSammenHistoriskePerioder(): List<GrunnlagsdataPeriodeHistorikkBarnetilsynDto> {
+private fun List<GrunnlagsdataPeriodeHistorikkBarnetilsynDto>.slåSammenHistoriskePerioder(
+    grunnlagsdataPeriodeHistorikkOvergangsstønad: List<GrunnlagsdataPeriodeHistorikkOvergangsstønad>
+): List<GrunnlagsdataPeriodeHistorikkBarnetilsynDto> {
     val sortertePerioder = this.sortedBy { it.fom }
     return sortertePerioder.fold(mutableListOf()) { resultat, periode ->
         if (resultat.isNotEmpty() && resultat.last().periode() påfølgesAv periode.periode()) {
             val siste = resultat.removeLast()
+
             resultat.add(
                 GrunnlagsdataPeriodeHistorikkBarnetilsynDto(
                     siste.fom,
                     periode.tom,
-                    siste.overlapp || periode.overlapp,
+                    grunnlagsdataPeriodeHistorikkOvergangsstønad.overlapperMedPeriode(siste.fom, periode.tom),
                 ),
             )
         } else {
@@ -86,17 +93,19 @@ private fun List<GrunnlagsdataPeriodeHistorikkBarnetilsynDto>.slåSammenHistoris
 private fun List<GrunnlagsdataPeriodeHistorikkOvergangsstønad>.overlapperMedPeriode(
     fom: LocalDate,
     tom: LocalDate,
-): Boolean {
+): OverlappMedOvergangsstønad {
     val periode = Månedsperiode(fom, tom)
-    return this.any {
-        periode overlapper Månedsperiode(it.fom, it.tom)
+    return when {
+        this.any { periode omsluttesAv Månedsperiode(it.fom, it.tom) } -> OverlappMedOvergangsstønad.JA
+        this.any { periode overlapper Månedsperiode(it.fom, it.tom) } -> OverlappMedOvergangsstønad.DELVIS
+        else -> OverlappMedOvergangsstønad.NEI
     }
 }
 
 private fun List<GrunnlagsdataPeriodeHistorikkBarnetilsyn>.tilDtoBarnetilsyn(
     grunnlagsdataPeriodeHistorikkOvergangsstønad: List<GrunnlagsdataPeriodeHistorikkOvergangsstønad>,
 ) = this.map { it.tilDto(grunnlagsdataPeriodeHistorikkOvergangsstønad) }
-    .slåSammenHistoriskePerioder()
+    .slåSammenHistoriskePerioder(grunnlagsdataPeriodeHistorikkOvergangsstønad)
     .sortedByDescending { it.fom }
 
 private fun GrunnlagsdataPeriodeHistorikkOvergangsstønad.tilDto() = GrunnlagsdataPeriodeHistorikkDto(
@@ -111,7 +120,7 @@ private fun GrunnlagsdataPeriodeHistorikkBarnetilsyn.tilDto(grunnlagsdataPeriode
     GrunnlagsdataPeriodeHistorikkBarnetilsynDto(
         fom = this.fom,
         tom = this.tom,
-        overlapp = grunnlagsdataPeriodeHistorikkOvergangsstønad.overlapperMedPeriode(this.fom, this.tom),
+        overlappMedOvergangsstønad = grunnlagsdataPeriodeHistorikkOvergangsstønad.overlapperMedPeriode(this.fom, this.tom),
     )
 
 private fun månederUtenBeløp(
