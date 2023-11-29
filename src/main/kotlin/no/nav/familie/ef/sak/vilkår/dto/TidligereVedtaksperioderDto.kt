@@ -44,7 +44,7 @@ enum class OverlappMedOvergangsstønad {
 data class GrunnlagsdataPeriodeHistorikkBarnetilsynDto(
     val fom: LocalDate,
     val tom: LocalDate,
-    val overlappMedOvergangsstønad: OverlappMedOvergangsstønad,
+    val pverlapperMedOvergangsstønad: OverlappMedOvergangsstønad,
 )
 
 fun TidligereVedtaksperioder?.tilDto(): TidligereVedtaksperioderDto = this?.let {
@@ -120,7 +120,7 @@ private fun GrunnlagsdataPeriodeHistorikkBarnetilsyn.tilDto(grunnlagsdataPeriode
     GrunnlagsdataPeriodeHistorikkBarnetilsynDto(
         fom = this.fom,
         tom = this.tom,
-        overlappMedOvergangsstønad = grunnlagsdataPeriodeHistorikkOvergangsstønad.overlapperMedPeriode(this.fom, this.tom),
+        pverlapperMedOvergangsstønad = grunnlagsdataPeriodeHistorikkOvergangsstønad.overlapperMedPeriode(this.fom, this.tom),
     )
 
 private fun månederUtenBeløp(
