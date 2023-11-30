@@ -108,6 +108,7 @@ internal class AktivitetMapperTest {
                 firmanavn = "SelvstendigFirmanavn",
                 hvordanSerArbeidsukenUt = "fin",
                 organisasjonsnummer = "987654321",
+                overskudd = 30000,
             ),
         )
 

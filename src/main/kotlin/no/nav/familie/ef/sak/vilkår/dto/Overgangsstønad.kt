@@ -45,6 +45,7 @@ data class SelvstendigDto(
     val etableringsdato: LocalDate,
     val arbeidsmengde: Int?,
     val hvordanSerArbeidsukenUt: String,
+    val overskudd: Int?,
 )
 
 data class AksjeselskapDto(

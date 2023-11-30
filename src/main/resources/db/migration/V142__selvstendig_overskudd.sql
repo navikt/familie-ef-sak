@@ -1,0 +1,1 @@
+ALTER TABLE soknad_selvstendig ADD COLUMN overskudd INT;

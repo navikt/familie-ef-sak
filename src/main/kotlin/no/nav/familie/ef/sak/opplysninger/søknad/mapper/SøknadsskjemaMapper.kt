@@ -285,6 +285,7 @@ object SøknadsskjemaMapper {
                 etableringsdato = it.etableringsdato.verdi,
                 arbeidsmengde = it.arbeidsmengde?.verdi,
                 hvordanSerArbeidsukenUt = it.hvordanSerArbeidsukenUt.verdi,
+                overskudd = it.overskudd?.verdi
             )
         }?.toSet() ?: emptySet()
 

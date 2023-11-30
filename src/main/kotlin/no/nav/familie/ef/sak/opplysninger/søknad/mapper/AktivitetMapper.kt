@@ -60,6 +60,7 @@ object AktivitetMapper {
                 organisasjonsnummer = it.organisasjonsnummer,
                 etableringsdato = it.etableringsdato,
                 hvordanSerArbeidsukenUt = it.hvordanSerArbeidsukenUt,
+                overskudd = it.overskudd,
             )
         } ?: emptyList()
     }
