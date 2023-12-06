@@ -46,6 +46,7 @@ data class SelvstendigDto(
     val arbeidsmengde: Int?,
     val hvordanSerArbeidsukenUt: String,
     val overskudd: Int?,
+    val overskuddGjelderÅr: Int?,
 )
 
 data class AksjeselskapDto(

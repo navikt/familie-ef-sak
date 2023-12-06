@@ -23,7 +23,7 @@ internal class AktivitetMapperTest {
 
     @Test
     internal fun `sjekker at mappet aktivitet har fått satt alle verdier`() {
-        val dto = AktivitetMapper.tilDto(aktivitet(), situasjon(), barn())
+        val dto = AktivitetMapper.tilDto(aktivitet(), situasjon(), barn(), LocalDate.now())
         sjekkAtAlleVerdierErSatt(dto)
     }
 

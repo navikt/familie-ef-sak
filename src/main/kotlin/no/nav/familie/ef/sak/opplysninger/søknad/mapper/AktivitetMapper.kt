@@ -18,14 +18,15 @@ import no.nav.familie.ef.sak.vilkår.dto.SærligeTilsynsbehovDto
 import no.nav.familie.ef.sak.vilkår.dto.TidligereUtdanningDto
 import no.nav.familie.ef.sak.vilkår.dto.UnderUtdanningDto
 import no.nav.familie.ef.sak.vilkår.dto.VirksomhetDto
+import java.time.LocalDate
 
 object AktivitetMapper {
 
-    fun tilDto(aktivitet: Aktivitet?, situasjon: Situasjon?, søknadBarn: Set<SøknadBarn>): AktivitetDto {
+    fun tilDto(aktivitet: Aktivitet?, situasjon: Situasjon?, søknadBarn: Set<SøknadBarn>, datoPåbegyntSøknad: LocalDate?): AktivitetDto {
         return AktivitetDto(
             arbeidssituasjon = aktivitet?.hvordanErArbeidssituasjonen?.verdier ?: emptyList(),
             arbeidsforhold = tilArbeidforholdDto(aktivitet?.arbeidsforhold),
-            selvstendig = tilSelvstendigDto(aktivitet?.firmaer),
+            selvstendig = tilSelvstendigDto(aktivitet?.firmaer, datoPåbegyntSøknad),
             aksjeselskap = tilAksjeselskapDto(aktivitet?.aksjeselskap),
             arbeidssøker = tilArbeidssøkerDto(aktivitet?.arbeidssøker),
             underUtdanning = tilUnderUtdanningDto(aktivitet?.underUtdanning),
@@ -52,7 +53,7 @@ object AktivitetMapper {
         } ?: emptyList()
     }
 
-    private fun tilSelvstendigDto(firmaer: Set<Selvstendig>?): List<SelvstendigDto> {
+    private fun tilSelvstendigDto(firmaer: Set<Selvstendig>?, datoPåbegyntSøknad: LocalDate?): List<SelvstendigDto> {
         return firmaer?.map {
             SelvstendigDto(
                 firmanavn = it.firmanavn,
@@ -61,6 +62,7 @@ object AktivitetMapper {
                 etableringsdato = it.etableringsdato,
                 hvordanSerArbeidsukenUt = it.hvordanSerArbeidsukenUt,
                 overskudd = it.overskudd,
+                overskuddGjelderÅr = datoPåbegyntSøknad?.year,
             )
         } ?: emptyList()
     }
