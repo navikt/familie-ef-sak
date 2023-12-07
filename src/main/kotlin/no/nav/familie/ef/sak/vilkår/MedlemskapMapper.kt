@@ -15,7 +15,6 @@ import no.nav.familie.ef.sak.vilkår.dto.MedlemskapRegistergrunnlagDto
 import no.nav.familie.ef.sak.vilkår.dto.MedlemskapSøknadsgrunnlagDto
 import no.nav.familie.ef.sak.vilkår.dto.UtenlandsoppholdDto
 import no.nav.familie.ef.sak.vilkår.dto.tilDto
-import no.nav.familie.kontrakter.felles.Datoperiode
 import no.nav.familie.kontrakter.felles.medlemskap.Medlemskapsinfo
 import org.springframework.stereotype.Component
 import java.time.LocalDate
@@ -47,7 +46,6 @@ class MedlemskapMapper(
                 UtenlandsoppholdDto(
                     fraDato = it.fradato,
                     tilDato = it.tildato,
-                    periode = Datoperiode(it.fradato, it.tildato),
                     land = it.land?.let { land -> kodeverkService.hentLand(land, LocalDate.now()) },
                     årsak = it.årsakUtenlandsopphold,
                 )
