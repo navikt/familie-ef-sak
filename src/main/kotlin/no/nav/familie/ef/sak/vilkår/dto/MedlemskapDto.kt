@@ -5,7 +5,6 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.Folkeregisterpe
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.InnflyttingDto
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.OppholdstillatelseDto
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.UtflyttingDto
-import no.nav.familie.kontrakter.felles.Datoperiode
 import no.nav.familie.kontrakter.felles.medlemskap.Medlemskapsinfo
 import no.nav.familie.kontrakter.felles.medlemskap.PeriodeInfo
 import java.time.LocalDate
@@ -44,12 +43,8 @@ fun PeriodeInfo.tilDto(): MedlUnntaksperiodeDto =
     MedlUnntaksperiodeDto(this.fom, this.tom, this.gjelderMedlemskapIFolketrygden)
 
 data class UtenlandsoppholdDto(
-    @Deprecated("Bruk periode!", ReplaceWith("periode.fomDato")) val fraDato: LocalDate? = null,
-    @Deprecated("Bruk periode!", ReplaceWith("periode.tomDato")) val tilDato: LocalDate? = null,
-    val periode: Datoperiode = Datoperiode(
-        fraDato ?: error("Periode eller fraDato må ha verdi"),
-        tilDato ?: error("Periode eller tilDato må ha verdi"),
-    ),
+    val fraDato: LocalDate? = null,
+    val tilDato: LocalDate? = null,
     val land: String? = null,
     val årsak: String,
 )
