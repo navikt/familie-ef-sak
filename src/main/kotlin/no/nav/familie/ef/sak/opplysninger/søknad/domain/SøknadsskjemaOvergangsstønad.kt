@@ -19,6 +19,8 @@ data class SøknadsskjemaOvergangsstønad(
     override val fødselsnummer: String,
     override val navn: String,
     override val datoMottatt: LocalDateTime,
+    @Column("dato_pabegynt_soknad")
+    override val datoPåbegyntSøknad: LocalDate? = null,
     @Embedded(onEmpty = Embedded.OnEmpty.USE_NULL, prefix = "sivilstand_")
     val sivilstand: Sivilstand,
     @Embedded(onEmpty = Embedded.OnEmpty.USE_NULL, prefix = "medlemskap_")

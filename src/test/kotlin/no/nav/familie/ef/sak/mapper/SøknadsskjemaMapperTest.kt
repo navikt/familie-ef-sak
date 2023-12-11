@@ -31,6 +31,7 @@ internal class SøknadsskjemaMapperTest {
         val søknadTilLagring = SøknadsskjemaMapper.tilDomene(kontraktsøknad)
         assertThat(søknadTilLagring.søkerFraBestemtMåned).isEqualTo(false)
         assertThat(søknadTilLagring.søkerFra).isNull()
+        assertThat(søknadTilLagring.datoPåbegyntSøknad).isNull()
     }
 
     @Test
