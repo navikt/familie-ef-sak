@@ -81,6 +81,7 @@ fun SøknadsskjemaBarnetilsyn.tilSøknadsverdier() = Søknadsverdier(
     datoMottatt = this.datoMottatt,
     søkerFra = this.søkerFra,
     adresseopplysninger = this.adresseopplysninger,
+    datoPåbegyntSøknad = this.datoPåbegyntSøknad,
     dokumentasjon = DokumentasjonMapper.tilDokumentasjonDto(this),
 
 )
@@ -97,5 +98,6 @@ fun SøknadsskjemaOvergangsstønad.tilSøknadsverdier() = Søknadsverdier(
     datoMottatt = this.datoMottatt,
     søkerFra = this.søkerFra,
     adresseopplysninger = this.adresseopplysninger,
+    datoPåbegyntSøknad = this.datoPåbegyntSøknad,
     dokumentasjon = DokumentasjonMapper.tilDokumentasjonDto(this),
 )

@@ -14,6 +14,7 @@ import no.nav.familie.kontrakter.ef.søknad.TestsøknadBuilder
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import java.time.LocalDate
 
 internal class SøknadsskjemaOvergangsstønadRepositoryTest : OppslagSpringRunnerTest() {
 
@@ -105,7 +106,11 @@ internal class SøknadsskjemaOvergangsstønadRepositoryTest : OppslagSpringRunne
 
     @Test
     internal fun `søknad om barnetilsyn lagres korrekt`() {
-        val søknadTilLagring = SøknadsskjemaMapper.tilDomene(Testsøknad.søknadBarnetilsyn)
+        val barnetilsyn = Testsøknad.søknadBarnetilsyn
+        val datoPåbegyntSøknad = LocalDate.of(2021, 11, 25)
+        val innsendingsdetaljer = barnetilsyn.innsendingsdetaljer
+        val innsendingsdetaljerMedDatoPåbegyntSøknad = innsendingsdetaljer.copy(verdi = innsendingsdetaljer.verdi.copy(datoPåbegyntSøknad = datoPåbegyntSøknad))
+        val søknadTilLagring = SøknadsskjemaMapper.tilDomene(barnetilsyn.copy(innsendingsdetaljer = innsendingsdetaljerMedDatoPåbegyntSøknad))
 
         søknadBarnetilsynRepository.insert(søknadTilLagring)
         val søknadFraDatabase = søknadBarnetilsynRepository.findByIdOrThrow(søknadTilLagring.id)
