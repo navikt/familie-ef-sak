@@ -125,7 +125,7 @@ class OppgaveController(
             behandlingId,
             setOf(Oppgavetype.BehandleSak, Oppgavetype.BehandleUnderkjentVedtak, Oppgavetype.GodkjenneVedtak),
         )
-        when(oppgave){
+        when (oppgave) {
             null -> logger.warn("Finner ikke oppgave for behandlingId=$behandlingId")
         }
 

@@ -16,7 +16,7 @@ import java.util.*
     beskrivelse = "Finn og logg metadata for oppgave knyttet til behandling",
 )
 class LoggOppgaveMetadataTask(
-    private val tilordnetRessursService: TilordnetRessursService
+    private val tilordnetRessursService: TilordnetRessursService,
 ) : AsyncTaskStep {
 
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -49,4 +49,3 @@ class LoggOppgaveMetadataTask(
 fun Oppgave.toLogString(): String {
     return "Oppgave(aktivDato=$aktivDato, behandlesAvApplikasjon=$behandlesAvApplikasjon, behandlingstema=$behandlingstema, behandlingstype=$behandlingstype, endretAv=$endretAv, endretAvEnhetsnr=$endretAvEnhetsnr, endretTidspunkt=$endretTidspunkt, ferdigstiltTidspunkt=$ferdigstiltTidspunkt, fristFerdigstillelse=$fristFerdigstillelse, id=$id, journalpostId=$journalpostId, journalpostkilde=$journalpostkilde, mappeId=$mappeId, oppgavetype=$oppgavetype, opprettetAv=$opprettetAv, opprettetAvEnhetsnr=$opprettetAvEnhetsnr, opprettetTidspunkt=$opprettetTidspunkt, orgnr=$orgnr, prioritet=$prioritet, saksreferanse=$saksreferanse, samhandlernr=$samhandlernr, status=$status, tema=$tema, temagruppe=$temagruppe, tildeltEnhetsnr=$tildeltEnhetsnr, tilordnetRessurs=$tilordnetRessurs, versjon=$versjon)"
 }
-
