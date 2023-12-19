@@ -276,7 +276,7 @@ G_OMREGNING_CRON_EXPRESSION: 0 0 15 * * TUE
 FINN_BEHANDLINGER_UTEN_OPPGAVE_CRON_EXPRESSION: 0 0 8 * * MON #kl 08:00 hver mandag
 FINN_BEHANDLINGER_MED_GAMMEL_G_CRON_EXPRESSION: 0 0 8 1 * * #kl 08:00 den 1. hver måned
 
-MIN_SIDE_TOPIC: aapen-microfrontend-v1
+MIN_SIDE_TOPIC: min-side.aapen-microfrontend-v1
 
 rolle:
   veileder: "31778fd8-3b71-4867-8db6-a81235fbe001"
