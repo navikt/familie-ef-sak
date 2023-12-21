@@ -29,7 +29,7 @@
         <revision>1.0</revision>
         <sha1/>
         <changelist>-SNAPSHOT</changelist>
-        <java.version>17</java.version>
+        <java.version>21</java.version>
         <kotlin.version>1.9.21</kotlin.version>
         <kotlin-coroutines.version>1.7.3</kotlin-coroutines.version>
         <springdoc.version>2.3.0</springdoc.version>
@@ -37,7 +37,8 @@
         <felles.version>2.20231201131108_ea25dd3</felles.version>
         <prosessering.version>2.20231026103714_2f17845</prosessering.version>
         <start-class>no.nav.familie.ef.sak.ApplicationKt</start-class>
-        <kontrakter.version>3.0_20231130135617_c1535fc</kontrakter.version>
+        <kontrakter.version>3.0_20231206111937_3c866af</kontrakter.version>
+        <mikrofrontend.builder.version>20230704114948-74aa2e9</mikrofrontend.builder.version>
         <eksterne.kontrakter.bisys.version>2.0_20230214104704_706e9c0</eksterne.kontrakter.bisys.version>
         <cucumber.version>7.14.1</cucumber.version>
 
@@ -93,6 +94,10 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-validation</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.kafka</groupId>
+            <artifactId>spring-kafka</artifactId>
         </dependency>
         <dependency>
             <groupId>org.flywaydb</groupId>
@@ -169,6 +174,11 @@
             <groupId>no.nav.familie.kontrakter</groupId>
             <artifactId>felles</artifactId>
             <version>${kontrakter.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>no.nav.tms.mikrofrontend.selector</groupId>
+            <artifactId>builder</artifactId>
+            <version>${mikrofrontend.builder.version}</version>
         </dependency>
         <dependency>
             <groupId>io.micrometer</groupId>

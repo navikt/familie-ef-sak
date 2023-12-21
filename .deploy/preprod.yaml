@@ -119,3 +119,5 @@ spec:
     - secret: familie-ef-sak
     - secret: familie-ef-sak-unleash-api-token
   leaderElection: true
+  kafka:
+    pool: nav-dev

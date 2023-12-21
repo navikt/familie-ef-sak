@@ -1,6 +1,7 @@
 package no.nav.familie.ef.sak.opplysninger.søknad.domain
 
 import org.springframework.data.relational.core.mapping.Table
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -13,4 +14,5 @@ interface ISøknadsskjema {
     val navn: String
     val barn: Set<IBarn>
     val datoMottatt: LocalDateTime
+    val datoPåbegyntSøknad: LocalDate?
 }

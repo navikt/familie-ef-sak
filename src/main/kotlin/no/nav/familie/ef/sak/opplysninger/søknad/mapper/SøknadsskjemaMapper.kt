@@ -71,6 +71,7 @@ object SøknadsskjemaMapper {
             navn = kontraktsøknad.personalia.verdi.navn.verdi,
             type = SøknadType.OVERGANGSSTØNAD,
             datoMottatt = kontraktsøknad.innsendingsdetaljer.verdi.datoMottatt.verdi,
+            datoPåbegyntSøknad = kontraktsøknad.innsendingsdetaljer.verdi.datoPåbegyntSøknad,
             sivilstand = tilDomene(kontraktsøknad.sivilstandsdetaljer.verdi),
             medlemskap = tilDomene(kontraktsøknad.medlemskapsdetaljer.verdi),
             bosituasjon = tilDomene(kontraktsøknad.bosituasjon.verdi),
@@ -90,6 +91,7 @@ object SøknadsskjemaMapper {
             navn = kontraktsøknad.personalia.verdi.navn.verdi,
             type = SøknadType.BARNETILSYN,
             datoMottatt = kontraktsøknad.innsendingsdetaljer.verdi.datoMottatt.verdi,
+            datoPåbegyntSøknad = kontraktsøknad.innsendingsdetaljer.verdi.datoPåbegyntSøknad,
             sivilstand = tilDomene(kontraktsøknad.sivilstandsdetaljer.verdi),
             medlemskap = tilDomene(kontraktsøknad.medlemskapsdetaljer.verdi),
             bosituasjon = tilDomene(kontraktsøknad.bosituasjon.verdi),
@@ -109,6 +111,7 @@ object SøknadsskjemaMapper {
             navn = kontraktsøknad.personalia.verdi.navn.verdi,
             type = SøknadType.SKOLEPENGER,
             datoMottatt = kontraktsøknad.innsendingsdetaljer.verdi.datoMottatt.verdi,
+            datoPåbegyntSøknad = kontraktsøknad.innsendingsdetaljer.verdi.datoPåbegyntSøknad,
             medlemskap = tilDomene(kontraktsøknad.medlemskapsdetaljer.verdi),
             bosituasjon = tilDomene(kontraktsøknad.bosituasjon.verdi),
             sivilstand = tilDomene(kontraktsøknad.sivilstandsdetaljer.verdi),
@@ -285,6 +288,7 @@ object SøknadsskjemaMapper {
                 etableringsdato = it.etableringsdato.verdi,
                 arbeidsmengde = it.arbeidsmengde?.verdi,
                 hvordanSerArbeidsukenUt = it.hvordanSerArbeidsukenUt.verdi,
+                overskudd = it.overskudd?.verdi,
             )
         }?.toSet() ?: emptySet()
 
