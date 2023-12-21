@@ -7,6 +7,7 @@ import no.nav.familie.ef.sak.vedtak.dto.PeriodeMedBeløpDto
 import no.nav.familie.ef.sak.vedtak.dto.UtgiftsperiodeDto
 import no.nav.familie.ef.sak.vedtak.historikk.AndelHistorikkDto
 import no.nav.familie.ef.sak.vedtak.historikk.VedtakHistorikkService
+import no.nav.familie.leader.LeaderClient
 import no.nav.familie.prosessering.internal.TaskService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -102,9 +103,11 @@ class BarnetilsynSatsendringService(
 
     @Transactional
     fun opprettTask() {
-        logger.info("Oppretter satsendring-task")
-        val task = BarnetilsynSatsendringTask.opprettTask()
-        taskService.save(task)
+        if (LeaderClient.isLeader() == true) {
+            logger.info("Oppretter satsendring-task")
+            val task = BarnetilsynSatsendringTask.opprettTask()
+            taskService.save(task)
+        }
     }
 }
 
