@@ -125,6 +125,7 @@ class OppgaveController(
             behandlingId,
             setOf(Oppgavetype.BehandleSak, Oppgavetype.BehandleUnderkjentVedtak, Oppgavetype.GodkjenneVedtak),
         )
+
         return Ressurs.success(tilordnetRessursService.utledAnsvarligSaksbehandlerForOppgave(oppgave))
     }
 

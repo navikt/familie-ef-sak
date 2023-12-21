@@ -5,6 +5,7 @@ import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Embedded
 import org.springframework.data.relational.core.mapping.MappedCollection
 import org.springframework.data.relational.core.mapping.Table
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.UUID
@@ -18,6 +19,8 @@ data class SøknadsskjemaBarnetilsyn(
     override val fødselsnummer: String,
     override val navn: String,
     override val datoMottatt: LocalDateTime,
+    @Column("dato_pabegynt_soknad")
+    override val datoPåbegyntSøknad: LocalDate? = null,
     @Embedded(onEmpty = Embedded.OnEmpty.USE_NULL, prefix = "sivilstand_")
     val sivilstand: Sivilstand,
     @Embedded(onEmpty = Embedded.OnEmpty.USE_NULL, prefix = "medlemskap_")

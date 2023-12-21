@@ -49,7 +49,7 @@ class VilkårGrunnlagService(
         val grunnlagsdata = registergrunnlagData.grunnlagsdata
 
         val aktivitet =
-            søknad?.let { AktivitetMapper.tilDto(aktivitet = it.aktivitet, situasjon = it.situasjon, søknadBarn = it.barn) }
+            søknad?.let { AktivitetMapper.tilDto(aktivitet = it.aktivitet, situasjon = it.situasjon, søknadBarn = it.barn, it.datoPåbegyntSøknad) }
         val søknadsbarn = søknad?.barn ?: emptyList()
         val stønadstype = fagsakService.hentFagsakForBehandling(behandlingId).stønadstype
         val barnMedSamvær = mapBarnMedSamvær(
