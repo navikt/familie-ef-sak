@@ -53,7 +53,10 @@ class JournalpostClient(
 
     fun finnJournalposterForBrukerOgTema(journalposterForBrukerOgTemaRequest: JournalposterForVedleggRequest): List<Journalpost> {
         kastApiFeilDersomUtviklerMedVeilederrolle()
-        return postForEntity<Ressurs<List<Journalpost>>>(URI.create("$journalpostURI/temaer"), journalposterForBrukerOgTemaRequest).data
+        return postForEntity<Ressurs<List<Journalpost>>>(
+            URI.create("$journalpostURI/temaer"),
+            journalposterForBrukerOgTemaRequest,
+        ).data
             ?: error("Kunne ikke hente vedlegg for ${journalposterForBrukerOgTemaRequest.brukerId.id}")
     }
 
