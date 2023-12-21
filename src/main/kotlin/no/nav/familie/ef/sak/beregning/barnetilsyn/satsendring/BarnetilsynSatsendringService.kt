@@ -102,12 +102,9 @@ class BarnetilsynSatsendringService(
 
     @Transactional
     fun opprettTask() {
-        val finnesTask = taskService.finnTaskMedPayloadOgType("barnetilsynSatsendring", BarnetilsynSatsendringTask.TYPE)
-        if (finnesTask == null) {
-            logger.info("Oppretter satsendring-task, da den ikke finnes fra før")
-            val task = BarnetilsynSatsendringTask.opprettTask()
-            taskService.save(task)
-        }
+        logger.info("Oppretter satsendring-task")
+        val task = BarnetilsynSatsendringTask.opprettTask()
+        taskService.save(task)
     }
 }
 
