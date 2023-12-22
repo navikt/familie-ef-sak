@@ -27,7 +27,7 @@ class BarnetilsynSatsendringTask(val barnetilsynSatsendringService: BarnetilsynS
         fun opprettTask(payload: String): Task {
             return Task(
                 TYPE,
-                "barnetilsynSatsendring",
+                payload,
                 Properties(),
             )
         }
