@@ -7,6 +7,7 @@ import no.nav.familie.ef.sak.vedtak.dto.PeriodeMedBeløpDto
 import no.nav.familie.ef.sak.vedtak.dto.UtgiftsperiodeDto
 import no.nav.familie.ef.sak.vedtak.historikk.AndelHistorikkDto
 import no.nav.familie.ef.sak.vedtak.historikk.VedtakHistorikkService
+import no.nav.familie.leader.LeaderClient
 import no.nav.familie.prosessering.internal.TaskService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -102,12 +103,14 @@ class BarnetilsynSatsendringService(
 
     @Transactional
     fun opprettTask() {
-        val payload = YearMonth.now().toString()
-        val finnesTask = taskService.finnTaskMedPayloadOgType(payload, BarnetilsynSatsendringTask.TYPE)
-        if (finnesTask == null) {
-            logger.info("Oppretter satsendring-task, da den ikke finnes fra før")
-            val task = BarnetilsynSatsendringTask.opprettTask(payload)
-            taskService.save(task)
+        if (LeaderClient.isLeader() == true) {
+            val payload = YearMonth.now().toString()
+            val finnesTask = taskService.finnTaskMedPayloadOgType(payload, BarnetilsynSatsendringTask.TYPE)
+            if (finnesTask == null) {
+                logger.info("Oppretter satsendring-task, da den ikke finnes fra før")
+                val task = BarnetilsynSatsendringTask.opprettTask(payload)
+                taskService.save(task)
+            }
         }
     }
 }
