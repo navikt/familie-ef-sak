@@ -104,9 +104,13 @@ class BarnetilsynSatsendringService(
     @Transactional
     fun opprettTask() {
         if (LeaderClient.isLeader() == true) {
-            logger.info("Oppretter satsendring-task")
-            val task = BarnetilsynSatsendringTask.opprettTask()
-            taskService.save(task)
+            val payload = YearMonth.now().toString()
+            val finnesTask = taskService.finnTaskMedPayloadOgType(payload, BarnetilsynSatsendringTask.TYPE)
+            if (finnesTask == null) {
+                logger.info("Oppretter satsendring-task, da den ikke finnes fra før")
+                val task = BarnetilsynSatsendringTask.opprettTask(payload)
+                taskService.save(task)
+            }
         }
     }
 }
