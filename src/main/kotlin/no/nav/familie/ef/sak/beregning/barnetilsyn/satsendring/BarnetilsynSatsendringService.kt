@@ -37,7 +37,10 @@ class BarnetilsynSatsendringService(
         if (barnetilsynGjeldeneAvstemmingsfeil.isEmpty()) {
             val fagsakerSomMåRevurderesGrunnetSatsendring =
                 finnFagsakerSomSkalSatsendresMedNySats(true)
-
+            logger.info(
+                "Antall fagsaker som må revurderes grunnet satsendring: " +
+                    "${fagsakerSomMåRevurderesGrunnetSatsendring.size}"
+            )
             fagsakerSomMåRevurderesGrunnetSatsendring.forEach {
                 logger.info("${it.fagsakId}: skal revurderes/endres etter satsendring")
             }
@@ -68,7 +71,10 @@ class BarnetilsynSatsendringService(
         nåværendeAndelerForNesteÅr.any { it.andel.periode.overlapper(nyMånedsberegning.periode) && it.andel.beløp < nyMånedsberegning.beløp }
     }
 
-    private fun gjørNyBeregning(andelerNesteÅr: List<AndelHistorikkDto>, brukIkkeVedtatteSatser: Boolean = false): List<BeløpsperiodeBarnetilsynDto> {
+    private fun gjørNyBeregning(
+        andelerNesteÅr: List<AndelHistorikkDto>,
+        brukIkkeVedtatteSatser: Boolean = false
+    ): List<BeløpsperiodeBarnetilsynDto> {
         val utgiftsperiode = mapAndelerForNesteÅrTilUtgiftsperiodeDto(andelerNesteÅr)
 
         val simulertNyBeregning =
