@@ -39,7 +39,7 @@ class BarnetilsynSatsendringService(
                 finnFagsakerSomSkalSatsendresMedNySats(true)
             logger.info(
                 "Antall fagsaker som må revurderes grunnet satsendring: " +
-                    "${fagsakerSomMåRevurderesGrunnetSatsendring.size}"
+                    "${fagsakerSomMåRevurderesGrunnetSatsendring.size}",
             )
             fagsakerSomMåRevurderesGrunnetSatsendring.forEach {
                 logger.info("${it.fagsakId}: skal revurderes/endres etter satsendring")
@@ -73,7 +73,7 @@ class BarnetilsynSatsendringService(
 
     private fun gjørNyBeregning(
         andelerNesteÅr: List<AndelHistorikkDto>,
-        brukIkkeVedtatteSatser: Boolean = false
+        brukIkkeVedtatteSatser: Boolean = false,
     ): List<BeløpsperiodeBarnetilsynDto> {
         val utgiftsperiode = mapAndelerForNesteÅrTilUtgiftsperiodeDto(andelerNesteÅr)
 
