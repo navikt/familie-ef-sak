@@ -12,7 +12,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.1.5</version>
+        <version>3.2.1</version>
     </parent>
     <repositories>
         <repository>
@@ -30,17 +30,17 @@
         <sha1/>
         <changelist>-SNAPSHOT</changelist>
         <java.version>21</java.version>
-        <kotlin.version>1.9.21</kotlin.version>
+        <kotlin.version>1.9.22</kotlin.version>
         <kotlin-coroutines.version>1.7.3</kotlin-coroutines.version>
         <springdoc.version>2.3.0</springdoc.version>
         <mockk.version>1.13.8</mockk.version>
         <felles.version>2.20231201131108_ea25dd3</felles.version>
-        <prosessering.version>2.20231026103714_2f17845</prosessering.version>
+        <prosessering.version>2.20231212093500_bfa0e7c</prosessering.version>
         <start-class>no.nav.familie.ef.sak.ApplicationKt</start-class>
-        <kontrakter.version>3.0_20231206111937_3c866af</kontrakter.version>
+        <kontrakter.version>3.0_20231215081141_948d3f9</kontrakter.version>
         <mikrofrontend.builder.version>20230704114948-74aa2e9</mikrofrontend.builder.version>
         <eksterne.kontrakter.bisys.version>2.0_20230214104704_706e9c0</eksterne.kontrakter.bisys.version>
-        <cucumber.version>7.14.1</cucumber.version>
+        <cucumber.version>7.15.0</cucumber.version>
 
 
         <!--suppress UnresolvedMavenProperty  Ligger som secret i github-->
@@ -232,7 +232,7 @@
         <dependency>
             <groupId>dev.akkinoc.spring.boot</groupId>
             <artifactId>logback-access-spring-boot-starter</artifactId>
-            <version>4.1.0</version>
+            <version>4.1.1</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -350,7 +350,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>3.2.2</version>
+                <version>3.2.3</version>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
