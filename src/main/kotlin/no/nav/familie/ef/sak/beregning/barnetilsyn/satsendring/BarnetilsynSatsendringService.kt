@@ -7,7 +7,6 @@ import no.nav.familie.ef.sak.vedtak.dto.PeriodeMedBeløpDto
 import no.nav.familie.ef.sak.vedtak.dto.UtgiftsperiodeDto
 import no.nav.familie.ef.sak.vedtak.historikk.AndelHistorikkDto
 import no.nav.familie.ef.sak.vedtak.historikk.VedtakHistorikkService
-import no.nav.familie.leader.LeaderClient
 import no.nav.familie.prosessering.internal.TaskService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -37,7 +36,10 @@ class BarnetilsynSatsendringService(
         if (barnetilsynGjeldeneAvstemmingsfeil.isEmpty()) {
             val fagsakerSomMåRevurderesGrunnetSatsendring =
                 finnFagsakerSomSkalSatsendresMedNySats(true)
-
+            logger.info(
+                "Antall fagsaker som må revurderes grunnet satsendring: " +
+                    "${fagsakerSomMåRevurderesGrunnetSatsendring.size}",
+            )
             fagsakerSomMåRevurderesGrunnetSatsendring.forEach {
                 logger.info("${it.fagsakId}: skal revurderes/endres etter satsendring")
             }
@@ -68,7 +70,10 @@ class BarnetilsynSatsendringService(
         nåværendeAndelerForNesteÅr.any { it.andel.periode.overlapper(nyMånedsberegning.periode) && it.andel.beløp < nyMånedsberegning.beløp }
     }
 
-    private fun gjørNyBeregning(andelerNesteÅr: List<AndelHistorikkDto>, brukIkkeVedtatteSatser: Boolean = false): List<BeløpsperiodeBarnetilsynDto> {
+    private fun gjørNyBeregning(
+        andelerNesteÅr: List<AndelHistorikkDto>,
+        brukIkkeVedtatteSatser: Boolean = false,
+    ): List<BeløpsperiodeBarnetilsynDto> {
         val utgiftsperiode = mapAndelerForNesteÅrTilUtgiftsperiodeDto(andelerNesteÅr)
 
         val simulertNyBeregning =
@@ -103,9 +108,11 @@ class BarnetilsynSatsendringService(
 
     @Transactional
     fun opprettTask() {
-        if (LeaderClient.isLeader() == true) {
-            logger.info("Oppretter satsendring-task")
-            val task = BarnetilsynSatsendringTask.opprettTask()
+        val payload = YearMonth.now().toString()
+        val finnesTask = taskService.finnTaskMedPayloadOgType(payload, BarnetilsynSatsendringTask.TYPE)
+        if (finnesTask == null) {
+            logger.info("Oppretter satsendring-task, da den ikke finnes fra før")
+            val task = BarnetilsynSatsendringTask.opprettTask(payload)
             taskService.save(task)
         }
     }
