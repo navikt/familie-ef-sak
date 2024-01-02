@@ -24,7 +24,6 @@ internal class SigrunServiceTest {
 
     @BeforeEach
     fun setup() {
-
         every { fagsakPersonService.hentAktivIdent(any()) } returns "123"
         val tilOgMedÅr = if (YearMonth.now().month.value < 6) YearMonth.now().year - 2 else YearMonth.now().year - 1
 

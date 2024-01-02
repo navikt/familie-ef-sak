@@ -225,7 +225,7 @@ internal class VedtakServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     internal fun `hentForventetInntektForVedtakOgDato - forskjellig inntekt mellom to måneder`() {
-        val vedtakFraOgMedDato = LocalDate.of(YearMonth.now().year-1, 1, 1)
+        val vedtakFraOgMedDato = LocalDate.of(YearMonth.now().year - 1, 1, 1)
         val vedtakTilOgMedDato = LocalDate.of(YearMonth.now().year, 12, 31)
 
         val inntektsperiodeToMånederTilbake =
