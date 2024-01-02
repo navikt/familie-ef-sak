@@ -8,13 +8,14 @@ on:
 env:
   IMAGE: ghcr.io/navikt/familie-ef-sak:${{ github.sha }}
 
+permissions:
+  contents: "read"
+  id-token: "write"
+
 jobs:
   build:
     name: Build, push and deploy to dev-gcp and prod-gcp
     runs-on: ubuntu-latest
-    permissions:
-      contents: "read"
-      id-token: "write"
     steps:
       - uses: actions/checkout@v4
         with:
