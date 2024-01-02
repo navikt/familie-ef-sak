@@ -1459,6 +1459,23 @@
                   }
                 },
                 "nullable" : false
+              },
+              "periodeHistorikkBarnetilsyn" : {
+                "name" : "periodeHistorikkBarnetilsyn",
+                "type" : "Collection",
+                "fields" : {
+                  "fom" : {
+                    "name" : "fom",
+                    "type" : "LocalDate",
+                    "nullable" : false
+                  },
+                  "tom" : {
+                    "name" : "tom",
+                    "type" : "LocalDate",
+                    "nullable" : false
+                  }
+                },
+                "nullable" : false
               }
             },
             "nullable" : false
@@ -1505,6 +1522,23 @@
                   "beløp" : {
                     "name" : "beløp",
                     "type" : "Int",
+                    "nullable" : false
+                  }
+                },
+                "nullable" : false
+              },
+              "periodeHistorikkBarnetilsyn" : {
+                "name" : "periodeHistorikkBarnetilsyn",
+                "type" : "Collection",
+                "fields" : {
+                  "fom" : {
+                    "name" : "fom",
+                    "type" : "LocalDate",
+                    "nullable" : false
+                  },
+                  "tom" : {
+                    "name" : "tom",
+                    "type" : "LocalDate",
                     "nullable" : false
                   }
                 },
@@ -2178,6 +2212,23 @@
               }
             },
             "nullable" : false
+          },
+          "periodeHistorikkBarnetilsyn" : {
+            "name" : "periodeHistorikkBarnetilsyn",
+            "type" : "Collection",
+            "fields" : {
+              "fom" : {
+                "name" : "fom",
+                "type" : "LocalDate",
+                "nullable" : false
+              },
+              "tom" : {
+                "name" : "tom",
+                "type" : "LocalDate",
+                "nullable" : false
+              }
+            },
+            "nullable" : false
           }
         },
         "nullable" : false
@@ -2224,6 +2275,23 @@
               "beløp" : {
                 "name" : "beløp",
                 "type" : "Int",
+                "nullable" : false
+              }
+            },
+            "nullable" : false
+          },
+          "periodeHistorikkBarnetilsyn" : {
+            "name" : "periodeHistorikkBarnetilsyn",
+            "type" : "Collection",
+            "fields" : {
+              "fom" : {
+                "name" : "fom",
+                "type" : "LocalDate",
+                "nullable" : false
+              },
+              "tom" : {
+                "name" : "tom",
+                "type" : "LocalDate",
                 "nullable" : false
               }
             },

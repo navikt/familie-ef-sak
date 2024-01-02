@@ -10,9 +10,8 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
       - name: deploy unleash api-token
-        uses: nais/deploy/actions/deploy@v1
+        uses: nais/deploy/actions/deploy@v2
         env:
-          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: dev-gcp
           RESOURCE: .deploy/unleash-apitoken-preprod.yaml
           PRINT_PAYLOAD: true

@@ -41,6 +41,7 @@ data class Selvstendig(
     val etableringsdato: LocalDate,
     val arbeidsmengde: Int? = null,
     val hvordanSerArbeidsukenUt: String,
+    val overskudd: Int? = null,
 )
 
 data class Virksomhet(

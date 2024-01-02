@@ -66,7 +66,6 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
     "mock-infotrygd-replika",
     "mock-iverksett",
     "mock-brev",
-    "mock-blankett",
     "mock-inntekt",
     "mock-ereg",
     "mock-aareg",

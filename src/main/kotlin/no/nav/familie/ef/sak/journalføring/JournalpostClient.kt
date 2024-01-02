@@ -15,6 +15,7 @@ import no.nav.familie.kontrakter.ef.søknad.SøknadOvergangsstønad
 import no.nav.familie.kontrakter.ef.søknad.SøknadSkolepenger
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.dokarkiv.ArkiverDokumentResponse
+import no.nav.familie.kontrakter.felles.dokarkiv.BulkOppdaterLogiskVedleggRequest
 import no.nav.familie.kontrakter.felles.dokarkiv.OppdaterJournalpostRequest
 import no.nav.familie.kontrakter.felles.dokarkiv.OppdaterJournalpostResponse
 import no.nav.familie.kontrakter.felles.dokarkiv.v2.ArkiverDokumentRequest
@@ -52,7 +53,10 @@ class JournalpostClient(
 
     fun finnJournalposterForBrukerOgTema(journalposterForBrukerOgTemaRequest: JournalposterForVedleggRequest): List<Journalpost> {
         kastApiFeilDersomUtviklerMedVeilederrolle()
-        return postForEntity<Ressurs<List<Journalpost>>>(URI.create("$journalpostURI/temaer"), journalposterForBrukerOgTemaRequest).data
+        return postForEntity<Ressurs<List<Journalpost>>>(
+            URI.create("$journalpostURI/temaer"),
+            journalposterForBrukerOgTemaRequest,
+        ).data
             ?: error("Kunne ikke hente vedlegg for ${journalposterForBrukerOgTemaRequest.brukerId.id}")
     }
 
@@ -166,5 +170,12 @@ class JournalpostClient(
             httpHeaders.set(NavHttpHeaders.NAV_USER_ID.asString(), saksbehandler)
         }
         return httpHeaders
+    }
+
+    fun oppdaterLogiskeVedlegg(dokumentInfoId: String, request: BulkOppdaterLogiskVedleggRequest): String {
+        return putForEntity<Ressurs<String>>(
+            URI.create("$dokarkivUri/dokument/$dokumentInfoId/logiskVedlegg"),
+            request,
+        ).data ?: error("Kunne ikke bulk oppdatere logiske vedlegg på dokument med id=$dokumentInfoId")
     }
 }

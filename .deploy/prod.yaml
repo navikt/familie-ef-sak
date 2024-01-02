@@ -69,7 +69,6 @@ spec:
         - application: familie-tilbake
         - application: familie-klage
         - application: familie-brev
-        - application: familie-ef-blankett
         - application: familie-ef-iverksett
         - application: familie-dokument
         - application: familie-ks-sak
@@ -114,4 +113,6 @@ spec:
     - secret: familie-ef-sak
     - secret: familie-ef-sak-unleash-api-token
   leaderElection: true
+  kafka:
+    pool: nav-prod
 

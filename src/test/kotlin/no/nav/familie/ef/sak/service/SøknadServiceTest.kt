@@ -14,6 +14,7 @@ import no.nav.familie.kontrakter.ef.søknad.Testsøknad
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import java.time.LocalDate
 
 internal class SøknadServiceTest : OppslagSpringRunnerTest() {
 
@@ -67,7 +68,16 @@ internal class SøknadServiceTest : OppslagSpringRunnerTest() {
         behandling: Behandling,
         fagsak: Fagsak,
     ): SøknadsskjemaOvergangsstønad {
-        søknadService.lagreSøknadForOvergangsstønad(Testsøknad.søknadOvergangsstønad, behandling.id, fagsak.id, "1L")
+        val søknadOvergangsstønad = Testsøknad.søknadOvergangsstønad
+        val innsendingsdetaljer = søknadOvergangsstønad.innsendingsdetaljer
+        val innsendingsdetaljerMedDatoPåbegyntSøknad =
+            innsendingsdetaljer.copy(verdi = innsendingsdetaljer.verdi.copy(datoPåbegyntSøknad = LocalDate.now()))
+        søknadService.lagreSøknadForOvergangsstønad(
+            søknadOvergangsstønad.copy(innsendingsdetaljer = innsendingsdetaljerMedDatoPåbegyntSøknad),
+            behandling.id,
+            fagsak.id,
+            "1L",
+        )
         return søknadService.hentOvergangsstønad(behandling.id)!!
     }
 }

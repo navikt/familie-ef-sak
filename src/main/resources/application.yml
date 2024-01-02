@@ -221,6 +221,22 @@ spring:
       connection-test-query: "select 1"
       max-lifetime: 30000
       minimum-idle: 1
+  kafka:
+    bootstrap-servers: ${KAFKA_BROKERS}
+    properties:
+      security:
+        protocol: SSL
+      ssl:
+        keystore:
+          type: PKCS12
+          location: ${KAFKA_KEYSTORE_PATH}
+          password: ${KAFKA_CREDSTORE_PASSWORD}
+        truststore:
+          type: PKCS12
+          location: ${KAFKA_TRUSTSTORE_PATH}
+          password: ${KAFKA_CREDSTORE_PASSWORD}
+    producer:
+      acks: all
 
 management:
   endpoint.health.show-details: always
@@ -237,7 +253,6 @@ ON_PREM_URL_ENV: prod
 AZUREAD_TOKEN_ENDPOINT_URL: https://login.microsoftonline.com/${AZURE_APP_TENANT_ID}/oauth2/v2.0/token
 
 FAMILIE_BREV_API_URL: http://familie-brev
-FAMILIE_BLANKETT_API_URL: http://familie-ef-blankett
 FAMILIE_EF_IVERKSETT_URL: http://familie-ef-iverksett
 FAMILIE_DOKUMENT_URL: http://familie-dokument
 
@@ -260,6 +275,8 @@ GYLDIGE_SERVICE_BRUKERE: srvArena
 G_OMREGNING_CRON_EXPRESSION: 0 0 15 * * TUE
 FINN_BEHANDLINGER_UTEN_OPPGAVE_CRON_EXPRESSION: 0 0 8 * * MON #kl 08:00 hver mandag
 FINN_BEHANDLINGER_MED_GAMMEL_G_CRON_EXPRESSION: 0 0 8 1 * * #kl 08:00 den 1. hver måned
+
+MIN_SIDE_TOPIC: min-side.aapen-microfrontend-v1
 
 rolle:
   veileder: "31778fd8-3b71-4867-8db6-a81235fbe001"

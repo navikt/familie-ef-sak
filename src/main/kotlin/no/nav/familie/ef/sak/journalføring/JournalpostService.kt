@@ -2,6 +2,7 @@ package no.nav.familie.ef.sak.journalføring
 
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.journalføring.dto.DokumentVariantformat
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.logger
 import no.nav.familie.ef.sak.vedlegg.VedleggRequest
 import no.nav.familie.kontrakter.ef.sak.DokumentBrevkode
 import no.nav.familie.kontrakter.ef.søknad.SøknadBarnetilsyn
@@ -10,15 +11,21 @@ import no.nav.familie.kontrakter.ef.søknad.SøknadSkolepenger
 import no.nav.familie.kontrakter.felles.Arkivtema
 import no.nav.familie.kontrakter.felles.BrukerIdType
 import no.nav.familie.kontrakter.felles.Tema
+import no.nav.familie.kontrakter.felles.dokarkiv.AvsenderMottaker
+import no.nav.familie.kontrakter.felles.dokarkiv.BulkOppdaterLogiskVedleggRequest
 import no.nav.familie.kontrakter.felles.journalpost.Bruker
 import no.nav.familie.kontrakter.felles.journalpost.Journalpost
 import no.nav.familie.kontrakter.felles.journalpost.JournalposterForBrukerRequest
 import no.nav.familie.kontrakter.felles.journalpost.Journalposttype
 import no.nav.familie.kontrakter.felles.journalpost.Journalstatus
+import no.nav.familie.kontrakter.felles.journalpost.LogiskVedlegg
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
 @Service
 class JournalpostService(private val journalpostClient: JournalpostClient) {
+
+    private val secureLogger = LoggerFactory.getLogger("secureLogger")
 
     fun hentJournalpost(journalpostId: String): Journalpost {
         return journalpostClient.hentJournalpost(journalpostId)
@@ -98,16 +105,20 @@ class JournalpostService(private val journalpostClient: JournalpostClient) {
     fun oppdaterOgFerdigstillJournalpost(
         journalpost: Journalpost,
         dokumenttitler: Map<String, String>?,
+        logiskeVedlegg: Map<String, List<LogiskVedlegg>>? = null,
         journalførendeEnhet: String,
         fagsak: Fagsak,
         saksbehandler: String?,
+        nyAvsender: AvsenderMottaker? = null,
     ) {
         if (journalpost.journalstatus != Journalstatus.JOURNALFOERT) {
+            oppdaterLogiskeVedlegg(journalpost, logiskeVedlegg)
             oppdaterJournalpostMedFagsakOgDokumenttitler(
                 journalpost = journalpost,
                 dokumenttitler = dokumenttitler,
                 eksternFagsakId = fagsak.eksternId.id,
                 saksbehandler = saksbehandler,
+                nyAvsender = nyAvsender,
             )
             ferdigstillJournalføring(
                 journalpostId = journalpost.journalpostId,
@@ -117,18 +128,50 @@ class JournalpostService(private val journalpostClient: JournalpostClient) {
         }
     }
 
-    private fun ferdigstillJournalføring(journalpostId: String, journalførendeEnhet: String, saksbehandler: String? = null) {
+    private fun oppdaterLogiskeVedlegg(journalpost: Journalpost, logiskeVedlegg: Map<String, List<LogiskVedlegg>>?) {
+        // Skal ikke endre på logiske vedlegg dersom man journalfører fra gammel løsning. Gammel løsning sender ikke inn logiske vedlegg og vil derfor resultere i null her. Ny løsning vil sende inn tom liste.
+        if (logiskeVedlegg == null) {
+            return
+        }
+
+        journalpost.dokumenter?.forEach { dokument ->
+            val eksisterendeLogiskeVedlegg = dokument.logiskeVedlegg ?: emptyList()
+            val logiskeVedleggForDokument = logiskeVedlegg.get(dokument.dokumentInfoId) ?: emptyList()
+            val harIdentiskInnhold =
+                eksisterendeLogiskeVedlegg.containsAll(logiskeVedleggForDokument) && eksisterendeLogiskeVedlegg.size == logiskeVedleggForDokument.size
+            if (!harIdentiskInnhold) {
+                logger.info("oppdaterer logiske vedlegg på journalpost med id=${journalpost.journalpostId}")
+                journalpostClient.oppdaterLogiskeVedlegg(
+                    dokument.dokumentInfoId,
+                    BulkOppdaterLogiskVedleggRequest(titler = logiskeVedleggForDokument.map { it.tittel }),
+                )
+            }
+        }
+    }
+
+    private fun ferdigstillJournalføring(
+        journalpostId: String,
+        journalførendeEnhet: String,
+        saksbehandler: String? = null,
+    ) {
         journalpostClient.ferdigstillJournalpost(journalpostId, journalførendeEnhet, saksbehandler)
     }
 
     private fun oppdaterJournalpostMedFagsakOgDokumenttitler(
         journalpost: Journalpost,
-        dokumenttitler: Map<String, String>? = null,
+        dokumenttitler: Map<String, String>?,
         eksternFagsakId: Long,
-        saksbehandler: String? = null,
+        saksbehandler: String?,
+        nyAvsender: AvsenderMottaker?,
     ) {
-        val oppdatertJournalpost = JournalføringHelper.lagOppdaterJournalpostRequest(journalpost, eksternFagsakId, dokumenttitler)
-        journalpostClient.oppdaterJournalpost(oppdatertJournalpost, journalpost.journalpostId, saksbehandler)
+        val oppdatertJournalpost =
+            JournalføringHelper.lagOppdaterJournalpostRequest(journalpost, eksternFagsakId, dokumenttitler, nyAvsender)
+        try {
+            journalpostClient.oppdaterJournalpost(oppdatertJournalpost, journalpost.journalpostId, saksbehandler)
+        } catch (e: Exception) {
+            secureLogger.error("Kunne ikke oppdatere journalpost med id=${journalpost.journalpostId} og ny avsenderMottaker=${oppdatertJournalpost.avsenderMottaker} og gammel avsendermottaker=${journalpost.avsenderMottaker}")
+            throw e
+        }
     }
 }
 

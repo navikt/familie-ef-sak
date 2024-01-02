@@ -2,6 +2,7 @@ package no.nav.familie.ef.sak.opplysninger.søknad.domain
 
 import no.nav.familie.ef.sak.opplysninger.søknad.mapper.DokumentasjonMapper
 import no.nav.familie.ef.sak.vilkår.dto.DokumentasjonDto
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
 
@@ -15,6 +16,7 @@ data class Søknadsverdier(
     val aktivitet: Aktivitet? = null, // Gjelder: OS og BT
     val situasjon: Situasjon? = null, // Gjelder: OS
     val datoMottatt: LocalDateTime,
+    val datoPåbegyntSøknad: LocalDate? = null,
     val søkerFra: YearMonth? = null,
     val adresseopplysninger: Adresseopplysninger?,
     val dokumentasjon: DokumentasjonFraSøknadDto,
@@ -62,6 +64,7 @@ fun SøknadsskjemaSkolepenger.tilSøknadsverdier() = Søknadsverdier(
     bosituasjon = this.bosituasjon,
     situasjon = null,
     datoMottatt = this.datoMottatt,
+    datoPåbegyntSøknad = this.datoPåbegyntSøknad,
     adresseopplysninger = this.adresseopplysninger,
     dokumentasjon = DokumentasjonMapper.tilDokumentasjonDto(this),
 )
@@ -78,6 +81,7 @@ fun SøknadsskjemaBarnetilsyn.tilSøknadsverdier() = Søknadsverdier(
     datoMottatt = this.datoMottatt,
     søkerFra = this.søkerFra,
     adresseopplysninger = this.adresseopplysninger,
+    datoPåbegyntSøknad = this.datoPåbegyntSøknad,
     dokumentasjon = DokumentasjonMapper.tilDokumentasjonDto(this),
 
 )
@@ -94,5 +98,6 @@ fun SøknadsskjemaOvergangsstønad.tilSøknadsverdier() = Søknadsverdier(
     datoMottatt = this.datoMottatt,
     søkerFra = this.søkerFra,
     adresseopplysninger = this.adresseopplysninger,
+    datoPåbegyntSøknad = this.datoPåbegyntSøknad,
     dokumentasjon = DokumentasjonMapper.tilDokumentasjonDto(this),
 )

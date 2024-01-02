@@ -4,6 +4,7 @@ import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.behandling.dto.tilDto
 import no.nav.familie.ef.sak.behandling.ÅrsakRevurderingService
+import no.nav.familie.ef.sak.brev.BrevClient
 import no.nav.familie.ef.sak.felles.domain.Fil
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerService
@@ -19,7 +20,7 @@ import java.util.UUID
 @Service
 class BlankettService(
     private val vurderingService: VurderingService,
-    private val blankettClient: BlankettClient,
+    private val brevClient: BrevClient,
     private val blankettRepository: BlankettRepository,
     private val behandlingService: BehandlingService,
     private val søknadService: SøknadService,
@@ -48,7 +49,7 @@ class BlankettService(
             lagSøknadsdatoer(behandlingId),
             vilkårVurderinger.grunnlag.harAvsluttetArbeidsforhold,
         )
-        val blankettPdfAsByteArray = blankettClient.genererBlankett(blankettPdfRequest)
+        val blankettPdfAsByteArray = brevClient.genererBlankett(blankettPdfRequest)
         oppdaterEllerOpprettBlankett(behandlingId, blankettPdfAsByteArray)
         return blankettPdfAsByteArray
     }
