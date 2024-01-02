@@ -24,10 +24,10 @@ class BarnetilsynSatsendringTask(val barnetilsynSatsendringService: BarnetilsynS
 
         const val TYPE = "barnetilsynSatsendring"
 
-        fun opprettTask(): Task {
+        fun opprettTask(payload: String): Task {
             return Task(
                 TYPE,
-                "barnetilsynSatsendring",
+                payload,
                 Properties(),
             )
         }

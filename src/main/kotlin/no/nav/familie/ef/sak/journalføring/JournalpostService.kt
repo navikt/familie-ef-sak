@@ -19,10 +19,13 @@ import no.nav.familie.kontrakter.felles.journalpost.JournalposterForBrukerReques
 import no.nav.familie.kontrakter.felles.journalpost.Journalposttype
 import no.nav.familie.kontrakter.felles.journalpost.Journalstatus
 import no.nav.familie.kontrakter.felles.journalpost.LogiskVedlegg
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
 @Service
 class JournalpostService(private val journalpostClient: JournalpostClient) {
+
+    private val secureLogger = LoggerFactory.getLogger("secureLogger")
 
     fun hentJournalpost(journalpostId: String): Journalpost {
         return journalpostClient.hentJournalpost(journalpostId)
@@ -163,7 +166,12 @@ class JournalpostService(private val journalpostClient: JournalpostClient) {
     ) {
         val oppdatertJournalpost =
             JournalføringHelper.lagOppdaterJournalpostRequest(journalpost, eksternFagsakId, dokumenttitler, nyAvsender)
-        journalpostClient.oppdaterJournalpost(oppdatertJournalpost, journalpost.journalpostId, saksbehandler)
+        try {
+            journalpostClient.oppdaterJournalpost(oppdatertJournalpost, journalpost.journalpostId, saksbehandler)
+        } catch (e: Exception) {
+            secureLogger.error("Kunne ikke oppdatere journalpost med id=${journalpost.journalpostId} og ny avsenderMottaker=${oppdatertJournalpost.avsenderMottaker} og gammel avsendermottaker=${journalpost.avsenderMottaker}")
+            throw e
+        }
     }
 }
 

@@ -125,9 +125,6 @@ class OppgaveController(
             behandlingId,
             setOf(Oppgavetype.BehandleSak, Oppgavetype.BehandleUnderkjentVedtak, Oppgavetype.GodkjenneVedtak),
         )
-        when (oppgave) {
-            null -> logger.warn("Finner ikke oppgave for behandlingId=$behandlingId")
-        }
 
         return Ressurs.success(tilordnetRessursService.utledAnsvarligSaksbehandlerForOppgave(oppgave))
     }
