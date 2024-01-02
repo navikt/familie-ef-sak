@@ -24,51 +24,37 @@ internal class SigrunServiceTest {
 
     @BeforeEach
     fun setup() {
+
         every { fagsakPersonService.hentAktivIdent(any()) } returns "123"
+        val tilOgMedÅr = if (YearMonth.now().month.value < 6) YearMonth.now().year - 2 else YearMonth.now().year - 1
 
-        every { sigrunClient.hentPensjonsgivendeInntekt(any(), 2022) } returns PensjonsgivendeInntektResponse(
-            "123",
-            2022,
-            pensjonsgivendeInntekt = listOf(
-                pensjonsgivendeInntektForSkatteordning(Skatteordning.FASTLAND),
-                pensjonsgivendeInntektForSkatteordning(Skatteordning.SVALBARD, 325_000, 20_000),
-            ),
-        )
-        every { sigrunClient.hentPensjonsgivendeInntekt(any(), 2021) } returns PensjonsgivendeInntektResponse(
-            "123",
-            2021,
-            pensjonsgivendeInntekt = listOf(
-                pensjonsgivendeInntektForSkatteordning(Skatteordning.FASTLAND),
-                pensjonsgivendeInntektForSkatteordning(Skatteordning.SVALBARD),
-            ),
-        )
-        every { sigrunClient.hentPensjonsgivendeInntekt(any(), 2020) } returns PensjonsgivendeInntektResponse(
-            "123",
-            2020,
-            pensjonsgivendeInntekt = listOf(
-                pensjonsgivendeInntektForSkatteordning(Skatteordning.FASTLAND),
-                pensjonsgivendeInntektForSkatteordning(Skatteordning.SVALBARD),
-            ),
-        )
+        every { sigrunClient.hentPensjonsgivendeInntekt("123", any()) } answers {
+            PensjonsgivendeInntektResponse(
+                "123",
+                secondArg<Int>(),
+                pensjonsgivendeInntekt = listOf(
+                    pensjonsgivendeInntektForSkatteordning(Skatteordning.FASTLAND),
+                    pensjonsgivendeInntektForSkatteordning(Skatteordning.SVALBARD),
+                ),
+            )
+        }
 
-        every { sigrunClient.hentPensjonsgivendeInntekt(any(), 2019) } returns PensjonsgivendeInntektResponse("123", 2019, listOf())
-        every { sigrunClient.hentPensjonsgivendeInntekt(any(), 2018) } returns PensjonsgivendeInntektResponse("123", 2018, listOf())
-
-        every { sigrunClient.hentPensjonsgivendeInntekt(any(), 2017) } returns PensjonsgivendeInntektResponse(
-            "123",
-            2017,
-            pensjonsgivendeInntekt = listOf(
-                pensjonsgivendeInntektForSkatteordning(Skatteordning.FASTLAND),
-                pensjonsgivendeInntektForSkatteordning(Skatteordning.SVALBARD),
-            ),
-        )
+        every { sigrunClient.hentPensjonsgivendeInntekt("123", tilOgMedÅr) } answers {
+            PensjonsgivendeInntektResponse(
+                "123",
+                2022,
+                pensjonsgivendeInntekt = listOf(
+                    pensjonsgivendeInntektForSkatteordning(Skatteordning.FASTLAND),
+                    pensjonsgivendeInntektForSkatteordning(Skatteordning.SVALBARD, 325_000, 20_000),
+                ),
+            )
+        }
     }
 
     @Test
-    fun `hent inntekt siste fem år med svalbard inntekt`() {
+    fun `hent inntekt tilbake til 2017 med svalbard inntekt`() {
         val fagsakId = UUID.randomUUID()
         val pensjonsgivendeInntektVisning = sigrunService.hentInntektForAlleÅrMedInntekt(fagsakId)
-        assertThat(pensjonsgivendeInntektVisning.first().inntektsår).isEqualTo(YearMonth.now().year - 1)
         assertThat(pensjonsgivendeInntektVisning.first().næring).isEqualTo(250_000)
         assertThat(pensjonsgivendeInntektVisning.first().person).isEqualTo(100_000)
         assertThat(pensjonsgivendeInntektVisning.first().svalbard?.næring).isEqualTo(70_000)
