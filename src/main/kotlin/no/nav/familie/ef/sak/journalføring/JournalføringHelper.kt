@@ -60,7 +60,7 @@ object JournalføringHelper {
     fun utledNyAvsender(nyAvsender: NyAvsender?, bruker: Bruker?): AvsenderMottaker? =
         when (nyAvsender?.erBruker) {
             null -> null
-            true -> AvsenderMottaker(id = nyAvsender.personIdent, idType = bruker?.type!!, navn = nyAvsender.navn!!)
+            true -> AvsenderMottaker(id = nyAvsender.personIdent, idType = BrukerIdType.FNR, navn = nyAvsender.navn!!)
             false -> AvsenderMottaker(id = null, idType = null, navn = nyAvsender.navn!!)
         }
 
