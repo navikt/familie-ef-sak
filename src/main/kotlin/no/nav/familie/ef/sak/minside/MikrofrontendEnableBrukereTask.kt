@@ -14,7 +14,7 @@ import org.springframework.stereotype.Service
     taskStepType = MikrofrontendEnableBrukereTask.TYPE,
     beskrivelse = "Sender over liste av personer til minside kafka-kø",
 )
-class MikrofrontendEnableBrukereTask(val minSideKafkaProducerService: MinSideKafkaProducerService): AsyncTaskStep {
+class MikrofrontendEnableBrukereTask(val minSideKafkaProducerService: MinSideKafkaProducerService) : AsyncTaskStep {
 
     private val logger = LoggerFactory.getLogger(this::class.java)
 

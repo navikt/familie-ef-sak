@@ -22,7 +22,7 @@ class MinsideForvaltningsController(
     private val featureToggleService: FeatureToggleService,
     private val minSideKafkaProducerService: MinSideKafkaProducerService,
     private val fagsakPersonRepository: FagsakPersonRepository,
-    private val taskService: TaskService
+    private val taskService: TaskService,
 ) {
     @PostMapping("aktiver")
     fun aktiverPersonForMinSide(@RequestBody personIdentDto: PersonIdentDto) {
