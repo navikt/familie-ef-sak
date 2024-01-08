@@ -57,7 +57,7 @@ class BrevClient(
     }
 
     fun genererBlankett(blankettPdfRequest: BlankettPdfRequest): ByteArray {
-        val pdfUrl = URI.create("$familieBrevUri/api/blankett/pdf")
+        val pdfUrl = URI.create("$familieBrevUri/blankett/pdf")
         return postForEntity(pdfUrl, blankettPdfRequest, HttpHeaders().medContentTypeJsonUTF8())
     }
 
