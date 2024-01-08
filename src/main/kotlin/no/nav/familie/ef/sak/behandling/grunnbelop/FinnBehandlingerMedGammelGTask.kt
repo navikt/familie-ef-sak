@@ -17,7 +17,7 @@ import org.springframework.stereotype.Service
 )
 class FinnBehandlingerMedGammelGTask(
     val behandlingRepository: BehandlingRepository,
-    val tilkjentYtelseService: TilkjentYtelseService
+    val tilkjentYtelseService: TilkjentYtelseService,
 ) : AsyncTaskStep {
 
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -26,7 +26,7 @@ class FinnBehandlingerMedGammelGTask(
         logger.info("Starter jobb som finner behandlinger som ikke har blitt g-omregnet")
         val gjeldendeGrunnbeløpFraOgMedDato = Grunnbeløpsperioder.nyesteGrunnbeløp.periode.fomDato
         val behandlingsIdMedUtdatertG = behandlingRepository.finnFerdigstilteBehandlingerMedUtdatertGBelopSomMåBehandlesManuelt(
-            gjeldendeGrunnbeløpFraOgMedDato
+            gjeldendeGrunnbeløpFraOgMedDato,
         )
         val behandlingerSomBurdeBlittGOmregnet = behandlingsIdMedUtdatertG.filter { behandlingId ->
             val tilkjentYtelse = tilkjentYtelseService.hentForBehandling(behandlingId)
