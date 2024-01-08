@@ -30,13 +30,13 @@ class FinnBehandlingerMedGammelGTask(
         )
         val behandlingerSomBurdeBlittGOmregnet = behandlingsIdMedUtdatertG.filter { behandlingId ->
             val tilkjentYtelse = tilkjentYtelseService.hentForBehandling(behandlingId)
-            val harSamordningMenIkkeOmregnet = tilkjentYtelse.andelerTilkjentYtelse
+            val harSamordningMenErIkkeRelevantForOmregning = tilkjentYtelse.andelerTilkjentYtelse
                 .filter { it.stønadTom >= gjeldendeGrunnbeløpFraOgMedDato }
                 .all { it.beløp == 0 && it.samordningsfradrag > 0 && it.inntektsreduksjon == 0 }
-            if (harSamordningMenIkkeOmregnet) {
+            if (harSamordningMenErIkkeRelevantForOmregning) {
                 logger.info("Behandling $behandlingId har kun samordningsfradrag og er følgelig ikke g-omregnet manuelt av noen saksbehandlere")
             }
-            !harSamordningMenIkkeOmregnet
+            !harSamordningMenErIkkeRelevantForOmregning
         }
         behandlingerSomBurdeBlittGOmregnet.forEach { behandlingId -> logger.info("Behandling med id $behandlingId har utdatert G") }
         feilHvis(behandlingerSomBurdeBlittGOmregnet.isNotEmpty()) { "Ferdigstilte behandlinger med utdatert G" }
