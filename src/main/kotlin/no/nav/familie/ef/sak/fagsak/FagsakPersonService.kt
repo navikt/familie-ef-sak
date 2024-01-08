@@ -4,13 +4,14 @@ import no.nav.familie.ef.sak.fagsak.domain.FagsakPerson
 import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvisIkke
+import no.nav.familie.ef.sak.minside.MinSideKafkaProducerService
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
 
 @Service
-class FagsakPersonService(private val fagsakPersonRepository: FagsakPersonRepository) {
+class FagsakPersonService(private val fagsakPersonRepository: FagsakPersonRepository, private val kafkaMinSideKafkaProducerService: MinSideKafkaProducerService) {
 
     fun hentPerson(personId: UUID): FagsakPerson = fagsakPersonRepository.findByIdOrThrow(personId)
 
@@ -31,19 +32,24 @@ class FagsakPersonService(private val fagsakPersonRepository: FagsakPersonReposi
         feilHvisIkke(personIdenter.contains(gjeldendePersonIdent)) {
             "Liste med personidenter inneholder ikke gjeldende personident"
         }
-        return ( // TODO : Lag task som sender over til minside kafka-kø (ved insert)
+        return (
             fagsakPersonRepository.findByIdent(personIdenter)
-                ?: fagsakPersonRepository.insert(FagsakPerson(identer = setOf(PersonIdent(gjeldendePersonIdent))))
+                ?: insertOgAktiverPersonIdentMinSideKafka(gjeldendePersonIdent)
             )
     }
 
     @Transactional
     fun oppdaterIdent(fagsakPerson: FagsakPerson, gjeldendePersonIdent: String): FagsakPerson {
-        return if (fagsakPerson.hentAktivIdent() != gjeldendePersonIdent) {
-            fagsakPersonRepository.update(fagsakPerson.medOppdatertGjeldendeIdent(gjeldendePersonIdent))
-            // TODO : Lag task som sender over til minside kafka-kø
+        if (fagsakPerson.hentAktivIdent() != gjeldendePersonIdent) {
+            kafkaMinSideKafkaProducerService.aktiver(gjeldendePersonIdent)
+            return fagsakPersonRepository.update(fagsakPerson.medOppdatertGjeldendeIdent(gjeldendePersonIdent))
         } else {
-            fagsakPerson
+            return fagsakPerson
         }
+    }
+
+    fun insertOgAktiverPersonIdentMinSideKafka(gjeldendePersonIdent: String): FagsakPerson {
+        kafkaMinSideKafkaProducerService.aktiver(gjeldendePersonIdent)
+        return fagsakPersonRepository.insert(FagsakPerson(identer = setOf(PersonIdent(gjeldendePersonIdent))))
     }
 }

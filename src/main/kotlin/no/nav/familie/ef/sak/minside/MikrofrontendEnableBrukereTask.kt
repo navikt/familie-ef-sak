@@ -34,6 +34,12 @@ class MikrofrontendEnableBrukereTask(val minSideKafkaProducerService: MinSideKaf
                 payload = objectMapper.writeValueAsString(fagsakPerson),
             )
         }
+        fun opprettTask(fagsakPerson: FagsakPerson): Task {
+            return Task(
+                type = TYPE,
+                payload = objectMapper.writeValueAsString(listOf(fagsakPerson)),
+            )
+        }
         const val TYPE = "mikrofrontendEnableBrukereTask"
     }
 }
