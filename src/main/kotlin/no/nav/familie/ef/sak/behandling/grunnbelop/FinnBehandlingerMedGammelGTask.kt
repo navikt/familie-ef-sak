@@ -9,6 +9,8 @@ import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import java.time.LocalDate
+import java.util.UUID
 
 @Service
 @TaskStepBeskrivelse(
@@ -22,6 +24,7 @@ class FinnBehandlingerMedGammelGTask(
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
+    private val uaktuelleBehandlinger = listOf("4d4de67b-f87b-4b6b-8524-aa92b3ebb870")
     override fun doTask(task: Task) {
         logger.info("Starter jobb som finner behandlinger som ikke har blitt g-omregnet")
         val gjeldendeGrunnbeløpFraOgMedDato = Grunnbeløpsperioder.nyesteGrunnbeløp.periode.fomDato
@@ -29,17 +32,26 @@ class FinnBehandlingerMedGammelGTask(
             gjeldendeGrunnbeløpFraOgMedDato,
         )
         val behandlingerSomBurdeBlittGOmregnet = behandlingsIdMedUtdatertG.filter { behandlingId ->
-            val tilkjentYtelse = tilkjentYtelseService.hentForBehandling(behandlingId)
-            val harSamordningMenErIkkeRelevantForOmregning = tilkjentYtelse.andelerTilkjentYtelse
-                .filter { it.stønadTom >= gjeldendeGrunnbeløpFraOgMedDato }
-                .all { it.beløp == 0 && it.samordningsfradrag > 0 && it.inntektsreduksjon == 0 }
-            if (harSamordningMenErIkkeRelevantForOmregning) {
-                logger.info("Behandling $behandlingId har kun samordningsfradrag og er følgelig ikke g-omregnet manuelt av noen saksbehandlere")
+            val erIkkeRelevantForOmregning = utledOmBehandlingIkkeErRelevantForOmregning(behandlingId, gjeldendeGrunnbeløpFraOgMedDato)
+            when {
+                erIkkeRelevantForOmregning -> false
+                uaktuelleBehandlinger.contains(behandlingId.toString()) -> false
+                else -> true
             }
-            !harSamordningMenErIkkeRelevantForOmregning
         }
         behandlingerSomBurdeBlittGOmregnet.forEach { behandlingId -> logger.info("Behandling med id $behandlingId har utdatert G") }
         feilHvis(behandlingerSomBurdeBlittGOmregnet.isNotEmpty()) { "Ferdigstilte behandlinger med utdatert G" }
+    }
+
+    private fun utledOmBehandlingIkkeErRelevantForOmregning(behandlingId: UUID, gjeldendeGrunnbeløpFraOgMedDato: LocalDate?): Boolean {
+        val tilkjentYtelse = tilkjentYtelseService.hentForBehandling(behandlingId)
+        val harSamordningMenErIkkeRelevantForOmregning = tilkjentYtelse.andelerTilkjentYtelse
+            .filter { it.stønadTom >= gjeldendeGrunnbeløpFraOgMedDato }
+            .all { it.beløp == 0 && it.samordningsfradrag > 0 }
+        if (harSamordningMenErIkkeRelevantForOmregning) {
+            logger.info("Behandling $behandlingId har kun samordningsfradrag og er følgelig ikke g-omregnet manuelt av noen saksbehandlere")
+        }
+        return harSamordningMenErIkkeRelevantForOmregning
     }
 
     companion object {
