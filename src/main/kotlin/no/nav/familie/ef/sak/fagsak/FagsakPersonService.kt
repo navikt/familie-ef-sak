@@ -31,7 +31,7 @@ class FagsakPersonService(private val fagsakPersonRepository: FagsakPersonReposi
         feilHvisIkke(personIdenter.contains(gjeldendePersonIdent)) {
             "Liste med personidenter inneholder ikke gjeldende personident"
         }
-        return (
+        return ( // TODO : Lag task som sender over til minside kafka-kø (ved insert)
             fagsakPersonRepository.findByIdent(personIdenter)
                 ?: fagsakPersonRepository.insert(FagsakPerson(identer = setOf(PersonIdent(gjeldendePersonIdent))))
             )
@@ -41,6 +41,7 @@ class FagsakPersonService(private val fagsakPersonRepository: FagsakPersonReposi
     fun oppdaterIdent(fagsakPerson: FagsakPerson, gjeldendePersonIdent: String): FagsakPerson {
         return if (fagsakPerson.hentAktivIdent() != gjeldendePersonIdent) {
             fagsakPersonRepository.update(fagsakPerson.medOppdatertGjeldendeIdent(gjeldendePersonIdent))
+            // TODO : Lag task som sender over til minside kafka-kø
         } else {
             fagsakPerson
         }
