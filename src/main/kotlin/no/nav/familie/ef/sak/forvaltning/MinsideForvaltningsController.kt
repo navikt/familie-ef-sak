@@ -41,7 +41,7 @@ class MinsideForvaltningsController(
     @PostMapping("aktiver-alle")
     fun aktiverAllePersonerForMinSide() {
         feilHvisIkke(erUtviklerMedVeilderrolle()) { "Kan kun kjøres av utvikler med veilederrolle" }
-        fagsakPersonRepository.findAll().chunked(500)
+        fagsakPersonRepository.findAll().chunked(250)
             .forEach { fagsakPersoner ->
                 val task = MikrofrontendEnableBrukereTask.opprettTask(fagsakPersoner)
                 taskService.save(task)
