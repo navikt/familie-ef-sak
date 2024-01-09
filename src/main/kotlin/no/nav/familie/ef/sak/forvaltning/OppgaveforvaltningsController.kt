@@ -1,4 +1,4 @@
-package no.nav.familie.ef.sak.oppgave
+package no.nav.familie.ef.sak.forvaltning
 
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvisIkke
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
