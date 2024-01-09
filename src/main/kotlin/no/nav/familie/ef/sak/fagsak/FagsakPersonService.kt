@@ -34,7 +34,7 @@ class FagsakPersonService(private val fagsakPersonRepository: FagsakPersonReposi
         }
         return (
             fagsakPersonRepository.findByIdent(personIdenter)
-                ?: insertOgAktiverPersonIdentMinSideKafka(gjeldendePersonIdent)
+                ?: opprettFagsakPersonOgAktiverForMinSide(gjeldendePersonIdent)
             )
     }
 
@@ -48,7 +48,7 @@ class FagsakPersonService(private val fagsakPersonRepository: FagsakPersonReposi
         }
     }
 
-    fun insertOgAktiverPersonIdentMinSideKafka(gjeldendePersonIdent: String): FagsakPerson {
+    fun opprettFagsakPersonOgAktiverForMinSide(gjeldendePersonIdent: String): FagsakPerson {
         kafkaMinSideKafkaProducerService.aktiver(gjeldendePersonIdent)
         return fagsakPersonRepository.insert(FagsakPerson(identer = setOf(PersonIdent(gjeldendePersonIdent))))
     }
