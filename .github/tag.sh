@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 
-#0: Sjekk at du er på master
+#0: Sjekk at du er på main
 current_branch=$(git branch | grep \* | cut -d ' ' -f2)
-master_branch="master"
+main_branch="main"
 
-if ! [ "$current_branch" == "$master_branch" ]; then
-    printf "Må være på master-branch for å tagge. Avslutter script\n"
+if ! [ "$current_branch" == "$main_branch" ]; then
+    printf "Må være på main-branch for å tagge. Avslutter script\n"
     exit 1
 fi
 
