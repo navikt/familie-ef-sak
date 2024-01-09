@@ -1,9 +1,10 @@
-package no.nav.familie.ef.sak.oppgave
+package no.nav.familie.ef.sak.forvaltning
 
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvisIkke
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
+import no.nav.familie.ef.sak.oppgave.LoggOppgaveMetadataTask
 import no.nav.familie.prosessering.internal.TaskService
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.web.bind.annotation.PathVariable
