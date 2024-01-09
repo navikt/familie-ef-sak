@@ -4,14 +4,15 @@ import no.nav.familie.ef.sak.fagsak.domain.FagsakPerson
 import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvisIkke
-import no.nav.familie.ef.sak.minside.MinSideKafkaProducerService
+import no.nav.familie.ef.sak.minside.MikrofrontendEnableBrukereTask
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
+import no.nav.familie.prosessering.internal.TaskService
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
 
 @Service
-class FagsakPersonService(private val fagsakPersonRepository: FagsakPersonRepository, private val kafkaMinSideKafkaProducerService: MinSideKafkaProducerService) {
+class FagsakPersonService(private val fagsakPersonRepository: FagsakPersonRepository, private val taskService: TaskService) {
 
     fun hentPerson(personId: UUID): FagsakPerson = fagsakPersonRepository.findByIdOrThrow(personId)
 
@@ -41,15 +42,17 @@ class FagsakPersonService(private val fagsakPersonRepository: FagsakPersonReposi
     @Transactional
     fun oppdaterIdent(fagsakPerson: FagsakPerson, gjeldendePersonIdent: String): FagsakPerson {
         if (fagsakPerson.hentAktivIdent() != gjeldendePersonIdent) {
-            kafkaMinSideKafkaProducerService.aktiver(gjeldendePersonIdent)
-            return fagsakPersonRepository.update(fagsakPerson.medOppdatertGjeldendeIdent(gjeldendePersonIdent))
+            val fagsakPerson = fagsakPerson.medOppdatertGjeldendeIdent(gjeldendePersonIdent)
+            taskService.save(MikrofrontendEnableBrukereTask.opprettTask(fagsakPerson))
+            return fagsakPersonRepository.update(fagsakPerson)
         } else {
             return fagsakPerson
         }
     }
 
     fun opprettFagsakPersonOgAktiverForMinSide(gjeldendePersonIdent: String): FagsakPerson {
-        kafkaMinSideKafkaProducerService.aktiver(gjeldendePersonIdent)
-        return fagsakPersonRepository.insert(FagsakPerson(identer = setOf(PersonIdent(gjeldendePersonIdent))))
+        val fagsakPerson = fagsakPersonRepository.insert(FagsakPerson(identer = setOf(PersonIdent(gjeldendePersonIdent))))
+        taskService.save(MikrofrontendEnableBrukereTask.opprettTask(fagsakPerson))
+        return fagsakPerson
     }
 }
