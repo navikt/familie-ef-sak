@@ -4,7 +4,7 @@ import no.nav.familie.ef.sak.fagsak.domain.FagsakPerson
 import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvisIkke
-import no.nav.familie.ef.sak.minside.MikrofrontendEnableBrukereTask
+import no.nav.familie.ef.sak.minside.MikrofrontendEnableBrukerTask
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.prosessering.internal.TaskService
 import org.springframework.stereotype.Service
@@ -43,7 +43,7 @@ class FagsakPersonService(private val fagsakPersonRepository: FagsakPersonReposi
     fun oppdaterIdent(fagsakPerson: FagsakPerson, gjeldendePersonIdent: String): FagsakPerson {
         if (fagsakPerson.hentAktivIdent() != gjeldendePersonIdent) {
             val oppdatertFagsakPerson = fagsakPerson.medOppdatertGjeldendeIdent(gjeldendePersonIdent)
-            taskService.save(MikrofrontendEnableBrukereTask.opprettTask(oppdatertFagsakPerson))
+            taskService.save(MikrofrontendEnableBrukerTask.opprettTask(oppdatertFagsakPerson))
             return fagsakPersonRepository.update(oppdatertFagsakPerson)
         } else {
             return fagsakPerson
@@ -52,7 +52,7 @@ class FagsakPersonService(private val fagsakPersonRepository: FagsakPersonReposi
 
     fun opprettFagsakPersonOgAktiverForMinSide(gjeldendePersonIdent: String): FagsakPerson {
         val fagsakPerson = fagsakPersonRepository.insert(FagsakPerson(identer = setOf(PersonIdent(gjeldendePersonIdent))))
-        taskService.save(MikrofrontendEnableBrukereTask.opprettTask(fagsakPerson))
+        taskService.save(MikrofrontendEnableBrukerTask.opprettTask(fagsakPerson))
         return fagsakPerson
     }
 }
