@@ -20,9 +20,9 @@ class MikrofrontendEnableBrukereTask(val minSideKafkaProducerService: MinSideKaf
 
     override fun doTask(task: Task) {
         logger.info("Starter task for aktivering av brukere for mikrofrontend")
-        val fagsakPersonIdenter = objectMapper.readValue<List<FagsakPerson>>(task.payload)
-        fagsakPersonIdenter.forEach { fagsakPerson ->
-            minSideKafkaProducerService.aktiver(fagsakPerson.hentAktivIdent())
+        val personIdenter = objectMapper.readValue<List<String>>(task.payload)
+        personIdenter.forEach { personIdent ->
+            minSideKafkaProducerService.aktiver(personIdent)
         }
     }
 
@@ -31,13 +31,13 @@ class MikrofrontendEnableBrukereTask(val minSideKafkaProducerService: MinSideKaf
         fun opprettTask(fagsakPerson: List<FagsakPerson>): Task {
             return Task(
                 type = TYPE,
-                payload = objectMapper.writeValueAsString(fagsakPerson),
+                payload = objectMapper.writeValueAsString(fagsakPerson.map { it.hentAktivIdent() }),
             )
         }
         fun opprettTask(fagsakPerson: FagsakPerson): Task {
             return Task(
                 type = TYPE,
-                payload = objectMapper.writeValueAsString(listOf(fagsakPerson)),
+                payload = objectMapper.writeValueAsString(listOf(fagsakPerson.hentAktivIdent())),
             )
         }
         const val TYPE = "mikrofrontendEnableBrukereTask"
