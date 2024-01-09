@@ -42,9 +42,9 @@ class FagsakPersonService(private val fagsakPersonRepository: FagsakPersonReposi
     @Transactional
     fun oppdaterIdent(fagsakPerson: FagsakPerson, gjeldendePersonIdent: String): FagsakPerson {
         if (fagsakPerson.hentAktivIdent() != gjeldendePersonIdent) {
-            val fagsakPerson = fagsakPerson.medOppdatertGjeldendeIdent(gjeldendePersonIdent)
-            taskService.save(MikrofrontendEnableBrukereTask.opprettTask(fagsakPerson))
-            return fagsakPersonRepository.update(fagsakPerson)
+            val oppdatertFagsakPerson = fagsakPerson.medOppdatertGjeldendeIdent(gjeldendePersonIdent)
+            taskService.save(MikrofrontendEnableBrukereTask.opprettTask(oppdatertFagsakPerson))
+            return fagsakPersonRepository.update(oppdatertFagsakPerson)
         } else {
             return fagsakPerson
         }
