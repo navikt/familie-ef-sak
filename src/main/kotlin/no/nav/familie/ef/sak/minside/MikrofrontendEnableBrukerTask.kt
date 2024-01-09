@@ -1,7 +1,6 @@
 package no.nav.familie.ef.sak.minside
 
 import no.nav.familie.ef.sak.fagsak.domain.FagsakPerson
-import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
@@ -28,7 +27,7 @@ class MikrofrontendEnableBrukerTask(val minSideKafkaProducerService: MinSideKafk
         fun opprettTask(fagsakPerson: FagsakPerson): Task {
             return Task(
                 type = TYPE,
-                payload = objectMapper.writeValueAsString(listOf(fagsakPerson.hentAktivIdent())),
+                payload = fagsakPerson.hentAktivIdent(),
             )
         }
         const val TYPE = "mikrofrontendEnableBrukerTask"
