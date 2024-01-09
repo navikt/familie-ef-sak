@@ -55,7 +55,7 @@ For å koble til preprod kan du kjøre kommandoene:
 5. Passord: Lim inn det som ligger i clipboard fra steg 2
 
 ## Produksjonssetting
-Applikasjonen vil deployes til produksjon ved ny commit på master-branchen. Det er dermed tilstrekkelig å merge PR for å trigge produksjonsbygget. 
+Applikasjonen vil deployes til produksjon ved ny commit på main-branchen. Det er dermed tilstrekkelig å merge PR for å trigge produksjonsbygget. 
 
 ## Roller
 Testbrukeren som opprettes i IDA må ha minst en av følgende roller:
