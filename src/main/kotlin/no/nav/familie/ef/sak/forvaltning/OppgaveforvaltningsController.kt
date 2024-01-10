@@ -1,9 +1,7 @@
 package no.nav.familie.ef.sak.forvaltning
 
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvisIkke
-import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
-import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
-import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
+import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.prosessering.internal.TaskService
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.web.bind.annotation.PathVariable
@@ -17,15 +15,12 @@ import java.util.UUID
 @ProtectedWithClaims(issuer = "azuread")
 class OppgaveforvaltningsController(
     private val taskService: TaskService,
-    private val featureToggleService: FeatureToggleService,
+    private val tilgangService: TilgangService,
 ) {
     @PostMapping("behandling/{behandlingId}")
     fun loggOppgavemetadataFor(@PathVariable behandlingId: UUID) {
-        feilHvisIkke(erUtviklerMedVeilderrolle()) { "Kan kun kjøres av utvikler med veilederrolle" }
+        feilHvisIkke(tilgangService.harForvalterrolle()) { "Må være forvalter for å bruke forvaltningsendepunkt" }
         val task = LoggOppgaveMetadataTask.opprettTask(behandlingId)
         taskService.save(task)
     }
-
-    private fun erUtviklerMedVeilderrolle(): Boolean =
-        SikkerhetContext.erSaksbehandler() && featureToggleService.isEnabled(Toggle.UTVIKLER_MED_VEILEDERRROLLE)
 }

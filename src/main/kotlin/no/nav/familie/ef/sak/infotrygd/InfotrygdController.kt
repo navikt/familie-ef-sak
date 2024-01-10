@@ -2,14 +2,10 @@ package no.nav.familie.ef.sak.infotrygd
 
 import no.nav.familie.ef.sak.AuditLoggerEvent
 import no.nav.familie.ef.sak.felles.dto.PersonIdentDto
-import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
-import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
-import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdSakResponse
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
-import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
@@ -21,7 +17,6 @@ import org.springframework.web.bind.annotation.RestController
 class InfotrygdController(
     private val tilgangService: TilgangService,
     private val infotrygdService: InfotrygdService,
-    private val featureToggleService: FeatureToggleService,
 ) {
 
     @PostMapping("perioder")
@@ -34,13 +29,5 @@ class InfotrygdController(
     fun hentSaker(@RequestBody personIdent: PersonIdentDto): Ressurs<InfotrygdSakResponse> {
         tilgangService.validerTilgangTilPersonMedBarn(personIdent.personIdent, AuditLoggerEvent.ACCESS)
         return Ressurs.success(infotrygdService.hentSaker(personIdent.personIdent))
-    }
-
-    @GetMapping("rapport")
-    fun hentRapportÅpneSaker(): Ressurs<InfotrygdReplikaClient.ÅpnesakerRapport> {
-        feilHvis(!featureToggleService.isEnabled(toggle = Toggle.TILLAT_HENT_UT_INFOTRYGD_RAPPORT)) {
-            "Rapport ikke tilgjengelig - toggle ikke enablet for bruker"
-        }
-        return Ressurs.success(infotrygdService.hentÅpneSaker())
     }
 }
