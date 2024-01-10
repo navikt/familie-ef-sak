@@ -6,7 +6,6 @@ import no.nav.familie.ef.sak.infrastruktur.exception.feilHvisIkke
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
-import no.nav.familie.ef.sak.minside.MikrofrontendEnableBrukereTask
 import no.nav.familie.ef.sak.minside.MinSideKafkaProducerService
 import no.nav.familie.prosessering.internal.TaskService
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -36,16 +35,6 @@ class MinsideForvaltningsController(
         feilHvisIkke(erUtviklerMedVeilderrolle()) { "Kan kun kjøres av utvikler med veilederrolle" }
         validerPersonIdent(personIdentDto)
         minSideKafkaProducerService.deaktiver(personIdent = personIdentDto.personIdent)
-    }
-
-    @PostMapping("aktiver-alle")
-    fun aktiverAllePersonerForMinSide() {
-        feilHvisIkke(erUtviklerMedVeilderrolle()) { "Kan kun kjøres av utvikler med veilederrolle" }
-        fagsakPersonRepository.findAll().chunked(250)
-            .forEach { fagsakPersoner ->
-                val task = MikrofrontendEnableBrukereTask.opprettTask(fagsakPersoner)
-                taskService.save(task)
-            }
     }
 
     private fun validerPersonIdent(personIdentDto: PersonIdentDto) {
