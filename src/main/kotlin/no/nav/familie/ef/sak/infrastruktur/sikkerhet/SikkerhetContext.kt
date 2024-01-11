@@ -45,6 +45,7 @@ object SikkerhetContext {
         return result
     }
 
+    @Deprecated("Bytt til _har_veileder_rolle eller tilsvarende")
     fun erSaksbehandler(): Boolean = hentSaksbehandlerEllerSystembruker() != SYSTEM_FORKORTELSE
 
     fun hentSaksbehandlerEllerSystembruker() =
@@ -104,7 +105,7 @@ object SikkerhetContext {
         return rollerForBruker.contains(minimumsrolle)
     }
 
-    fun harRolle(rolle: String): Boolean {
-        return hentGrupperFraToken().contains(rolle)
+    fun harRolle(rolleId: String): Boolean {
+        return hentGrupperFraToken().contains(rolleId)
     }
 }

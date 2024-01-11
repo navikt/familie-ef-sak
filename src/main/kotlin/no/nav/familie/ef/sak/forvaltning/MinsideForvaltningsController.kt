@@ -1,13 +1,9 @@
 package no.nav.familie.ef.sak.forvaltning
 
-import no.nav.familie.ef.sak.fagsak.FagsakPersonRepository
 import no.nav.familie.ef.sak.felles.dto.PersonIdentDto
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvisIkke
-import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
-import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
-import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
+import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.ef.sak.minside.MinSideKafkaProducerService
-import no.nav.familie.prosessering.internal.TaskService
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
@@ -18,21 +14,19 @@ import org.springframework.web.bind.annotation.RestController
 @RequestMapping("/api/minside/forvaltning/")
 @ProtectedWithClaims(issuer = "azuread")
 class MinsideForvaltningsController(
-    private val featureToggleService: FeatureToggleService,
     private val minSideKafkaProducerService: MinSideKafkaProducerService,
-    private val fagsakPersonRepository: FagsakPersonRepository,
-    private val taskService: TaskService,
+    private val tilgangService: TilgangService,
 ) {
     @PostMapping("aktiver")
     fun aktiverPersonForMinSide(@RequestBody personIdentDto: PersonIdentDto) {
-        feilHvisIkke(erUtviklerMedVeilderrolle()) { "Kan kun kjøres av utvikler med veilederrolle" }
+        validerHarTilgangTilForvaltningsendepunkt()
         validerPersonIdent(personIdentDto)
         minSideKafkaProducerService.aktiver(personIdent = personIdentDto.personIdent)
     }
 
     @PostMapping("deaktiver")
     fun deaktiverPersonForMinSide(@RequestBody personIdentDto: PersonIdentDto) {
-        feilHvisIkke(erUtviklerMedVeilderrolle()) { "Kan kun kjøres av utvikler med veilederrolle" }
+        validerHarTilgangTilForvaltningsendepunkt()
         validerPersonIdent(personIdentDto)
         minSideKafkaProducerService.deaktiver(personIdent = personIdentDto.personIdent)
     }
@@ -43,6 +37,7 @@ class MinsideForvaltningsController(
         }
     }
 
-    private fun erUtviklerMedVeilderrolle(): Boolean =
-        SikkerhetContext.erSaksbehandler() && featureToggleService.isEnabled(Toggle.UTVIKLER_MED_VEILEDERRROLLE)
+    fun validerHarTilgangTilForvaltningsendepunkt() {
+        feilHvisIkke(tilgangService.harForvalterrolle()) { "Må være forvalter for å bruke forvaltningsendepunkt" }
+    }
 }
