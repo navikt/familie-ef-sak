@@ -7,20 +7,6 @@ server:
       max-file-size: 200MB
       max-request-size: 200MB
 
-#springdoc:
-#  packagesToScan: no.nav.familie.ef.sak
-#  pathsToMatch: /v3/api-docs,/api/**
-#  swagger-ui:
-#    disable-swagger-default-url: true
-
-springdoc:
-  swagger-ui:
-    oauth:
-      use-pkce-with-authorization-code-grant: true
-      client-id: ${AZURE_APP_CLIENT_ID}
-      scope-separator: ","
-    disable-swagger-default-url: true
-
 no.nav.security.jwt:
   issuer.azuread:
     discoveryurl: ${AZURE_APP_WELL_KNOWN_URL}
@@ -310,3 +296,11 @@ prosessering:
   delete:
     after:
       weeks: 16
+
+springdoc:
+  swagger-ui:
+    oauth:
+      use-pkce-with-authorization-code-grant: true
+      client-id: ${AZURE_APP_CLIENT_ID}
+      scope-separator: ","
+    disable-swagger-default-url: true
