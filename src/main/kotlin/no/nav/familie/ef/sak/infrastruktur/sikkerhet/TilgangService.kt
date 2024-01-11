@@ -183,7 +183,7 @@ class TilgangService(
         return SikkerhetContext.harTilgangTilGittRolle(rolleConfig, minimumsrolle)
     }
 
-    fun harForvalterrolle(): Boolean = SikkerhetContext.harRolle(rolleConfig.forvalter)
+    fun harForvalterrolle() = SikkerhetContext.harRolle(rolleConfig.forvalter)
 
     fun harEgenAnsattRolle(): Boolean =
         hentGrupperFraToken().contains(rolleConfig.egenAnsatt)
