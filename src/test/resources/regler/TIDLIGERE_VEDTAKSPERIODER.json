@@ -22,7 +22,7 @@
           "regelId" : "SLUTT_NODE"
         },
         "NEI" : {
-          "begrunnelseType" : "UTEN",
+          "begrunnelseType" : "VALGFRI",
           "regelId" : "SLUTT_NODE"
         }
       }

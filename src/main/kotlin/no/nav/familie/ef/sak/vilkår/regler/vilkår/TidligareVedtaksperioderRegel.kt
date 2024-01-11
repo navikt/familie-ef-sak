@@ -18,11 +18,11 @@ class TidligareVedtaksperioderRegel : Vilkårsregel(
     vilkårType = VilkårType.TIDLIGERE_VEDTAKSPERIODER,
     regler = setOf(
         HAR_TIDLIGERE_MOTTATT_OVERGANSSTØNAD,
-        LEVER_IKKE_I_EKTESKAPLIGNENDE_FORHOLD,
+        HAR_TIDLIGERE_ANDRE_STØNADER_SOM_HAR_BETYDNING,
     ),
     hovedregler = regelIder(
         HAR_TIDLIGERE_MOTTATT_OVERGANSSTØNAD,
-        LEVER_IKKE_I_EKTESKAPLIGNENDE_FORHOLD,
+        HAR_TIDLIGERE_ANDRE_STØNADER_SOM_HAR_BETYDNING,
     ),
 ) {
 
@@ -60,12 +60,12 @@ class TidligareVedtaksperioderRegel : Vilkårsregel(
                 ),
             )
 
-        private val LEVER_IKKE_I_EKTESKAPLIGNENDE_FORHOLD =
+        private val HAR_TIDLIGERE_ANDRE_STØNADER_SOM_HAR_BETYDNING =
             RegelSteg(
                 regelId = RegelId.HAR_TIDLIGERE_ANDRE_STØNADER_SOM_HAR_BETYDNING,
                 svarMapping = jaNeiSvarRegel(
                     hvisJa = SluttSvarRegel.OPPFYLT_MED_PÅKREVD_BEGRUNNELSE,
-                    hvisNei = SluttSvarRegel.OPPFYLT,
+                    hvisNei = SluttSvarRegel.OPPFYLT_MED_VALGFRI_BEGRUNNELSE,
                 ),
             )
     }
