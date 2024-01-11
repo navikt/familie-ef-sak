@@ -106,9 +106,6 @@ object SikkerhetContext {
     }
 
     fun harRolle(rolleId: String): Boolean {
-
-        secureLogger.info("Sjekker rolleId: $rolleId mot roller: ${hentGrupperFraToken()}")
-
         return hentGrupperFraToken().contains(rolleId)
     }
 }

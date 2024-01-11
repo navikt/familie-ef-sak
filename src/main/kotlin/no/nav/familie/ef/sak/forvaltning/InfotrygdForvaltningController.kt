@@ -26,8 +26,6 @@ class InfotrygdForvaltningController(
     fun hentRapportÅpneSaker(): Ressurs<InfotrygdReplikaClient.ÅpnesakerRapport> {
         logger.info("Henter åpne saker fra infotrygd")
         feilHvisIkke(tilgangService.harForvalterrolle()) { "Må være forvalter for å hente ut rapport" }
-        logger.info("Henter åpne saker fra infotrygd - autentisert")
-
         return Ressurs.success(infotrygdService.hentÅpneSaker())
     }
 }
