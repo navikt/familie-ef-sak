@@ -52,3 +52,5 @@ prosessering:
   fixedDelayString:
     in:
       milliseconds: 3000
+
+API_SCOPE: api://${AZURE_APP_CLIENT_ID}/.default
