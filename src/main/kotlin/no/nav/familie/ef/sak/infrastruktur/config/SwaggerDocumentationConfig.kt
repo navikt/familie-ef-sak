@@ -13,7 +13,7 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 
 @Configuration
-class SwaggerConfig(
+class SwaggerDocumentationConfig(
     @Value("\${AUTHORIZATION_URL}")
     val authorizationUrl: String,
     @Value("\${AZUREAD_TOKEN_ENDPOINT_URL}")
