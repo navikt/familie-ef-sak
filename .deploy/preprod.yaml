@@ -115,7 +115,6 @@ spec:
           - "azp_name"
       replyURLs:
         - "https://familie-ef-sak.intern.dev.nav.no/swagger-ui/oauth2-redirect.html"
-        - "http://localhost:8093/swagger-ui/oauth2-redirect.html"
       singlePageApplication: true
   env:
     - name: SPRING_PROFILES_ACTIVE
