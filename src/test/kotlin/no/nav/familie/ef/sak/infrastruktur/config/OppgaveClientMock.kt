@@ -56,7 +56,7 @@ class OppgaveClientMock {
 
         every { oppgaveClient.finnOppgaveMedId(any()) } answers {
             val oppgaveId = firstArg<Long>()
-            oppgaver[oppgaveId] ?: oppgave1.copy(id = oppgaveId)
+            oppgaver[oppgaveId] ?: oppgave1.copy(id = oppgaveId, tilordnetRessurs = SikkerhetContext.hentSaksbehandler())
         }
 
         every { oppgaveClient.finnMapper(any(), any()) } answers {
