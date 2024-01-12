@@ -21,3 +21,5 @@ NAIS_APP_NAME: familie-ef-sak
 
 prosessering:
   enabled: false
+
+API_SCOPE: test
