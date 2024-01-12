@@ -304,3 +304,4 @@ springdoc:
       client-id: ${AZURE_APP_CLIENT_ID}
       scope-separator: ","
     disable-swagger-default-url: true
+    persist-authorization: true
