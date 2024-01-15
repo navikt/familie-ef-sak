@@ -1,7 +1,6 @@
 package no.nav.familie.ef.sak.forvaltning
 
 import no.nav.familie.ef.sak.felles.dto.PersonIdentDto
-import no.nav.familie.ef.sak.infrastruktur.exception.feilHvisIkke
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.ef.sak.minside.MinSideKafkaProducerService
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -19,14 +18,14 @@ class MinsideForvaltningsController(
 ) {
     @PostMapping("aktiver")
     fun aktiverPersonForMinSide(@RequestBody personIdentDto: PersonIdentDto) {
-        validerHarTilgangTilForvaltningsendepunkt()
+        tilgangService.validerHarForvalterrolle()
         validerPersonIdent(personIdentDto)
         minSideKafkaProducerService.aktiver(personIdent = personIdentDto.personIdent)
     }
 
     @PostMapping("deaktiver")
     fun deaktiverPersonForMinSide(@RequestBody personIdentDto: PersonIdentDto) {
-        validerHarTilgangTilForvaltningsendepunkt()
+        tilgangService.validerHarForvalterrolle()
         validerPersonIdent(personIdentDto)
         minSideKafkaProducerService.deaktiver(personIdent = personIdentDto.personIdent)
     }
@@ -35,9 +34,5 @@ class MinsideForvaltningsController(
         if (personIdentDto.personIdent.length != 11) {
             error("PersonIdent må ha 11 siffer")
         }
-    }
-
-    fun validerHarTilgangTilForvaltningsendepunkt() {
-        feilHvisIkke(tilgangService.harForvalterrolle()) { "Må være forvalter for å bruke forvaltningsendepunkt" }
     }
 }

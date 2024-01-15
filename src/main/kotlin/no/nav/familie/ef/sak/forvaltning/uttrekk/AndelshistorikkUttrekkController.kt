@@ -1,7 +1,8 @@
-package no.nav.familie.ef.sak.uttrekk
+package no.nav.familie.ef.sak.forvaltning.uttrekk
 
+import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.ef.sak.vedtak.historikk.VedtakHistorikkService
-import no.nav.security.token.support.core.api.Unprotected
+import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.slf4j.LoggerFactory
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
@@ -13,7 +14,7 @@ import java.time.YearMonth
 import java.util.UUID
 
 @Controller
-@Unprotected
+@ProtectedWithClaims(issuer = "azuread")
 @RequestMapping(
     path = ["/api/uttrekk/andelshistorikk"],
     produces = [MediaType.APPLICATION_JSON_VALUE],
@@ -21,6 +22,7 @@ import java.util.UUID
 class AndelshistorikkUttrekkController(
     val andelshistorikkUttrekkRepository: AndelshistorikkUttrekkRepository,
     val vedtakHistorikkService: VedtakHistorikkService,
+    private val tilgangService: TilgangService,
 ) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -28,6 +30,7 @@ class AndelshistorikkUttrekkController(
 
     @GetMapping("/manglertilsyn")
     fun hentDataManglerTilsyn2022(): ResponseEntity<String> {
+        tilgangService.validerHarForvalterrolle()
         val fagsakerMedTilsynManglerKandidater = andelshistorikkUttrekkRepository.finnFagsakerMedTilsynManglerKandidater()
 
         val fagsakerMedAndelshistorikk: List<UttrekkFagsakMedAndelshistorikk> =

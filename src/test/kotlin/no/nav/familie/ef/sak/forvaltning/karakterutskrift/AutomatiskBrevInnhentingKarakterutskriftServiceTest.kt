@@ -1,9 +1,11 @@
-package no.nav.familie.ef.sak.karakterutskrift
+package no.nav.familie.ef.sak.no.nav.familie.ef.sak.forvaltning.karakterutskrift
 
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
+import no.nav.familie.ef.sak.forvaltning.karakterutskrift.AutomatiskBrevInnhentingKarakterutskriftService
+import no.nav.familie.ef.sak.forvaltning.karakterutskrift.SendKarakterutskriftBrevTilIverksettTask
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.kontrakter.ef.felles.FrittståendeBrevType

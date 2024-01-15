@@ -2,7 +2,6 @@ package no.nav.familie.ef.sak.forvaltning
 
 import no.nav.familie.ef.sak.behandlingsflyt.task.KonsistensavstemmingPayload
 import no.nav.familie.ef.sak.behandlingsflyt.task.KonsistensavstemmingTask
-import no.nav.familie.ef.sak.infrastruktur.exception.feilHvisIkke
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.prosessering.internal.TaskService
@@ -25,7 +24,7 @@ class KonsistensavstemmingForvaltningController(
 
     @PostMapping
     fun kjørKonsistensavstemming() {
-        feilHvisIkke(tilgangService.harForvalterrolle()) { "Må være forvalter for å hente ut rapport" }
+        tilgangService.validerHarForvalterrolle()
         val triggerdato = LocalDate.now()
         logger.info("Oppretter manuell tasks for konsistensavstemming for dato=$triggerdato")
         taskService.saveAll(

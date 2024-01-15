@@ -8,8 +8,9 @@ import no.nav.familie.ef.sak.infrastruktur.exception.TestExceptionType.TIMEOUT
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.Ressurs.Status.FEILET
 import no.nav.familie.kontrakter.felles.Ressurs.Status.IKKE_TILGANG
-import no.nav.security.token.support.core.api.Unprotected
+import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.boot.test.web.client.exchange
 import org.springframework.http.HttpEntity
@@ -24,6 +25,11 @@ import java.net.SocketTimeoutException
 import java.util.concurrent.TimeoutException
 
 internal class ApiExceptionHandlerTest : OppslagSpringRunnerTest() {
+
+    @BeforeEach
+    fun setUp() {
+        headers.setBearerAuth(lokalTestToken)
+    }
 
     @Test
     internal fun `Skal håndtere timeout exception`() {
@@ -73,7 +79,7 @@ enum class TestExceptionType {
 
 @RestController
 @RequestMapping("/api/testfeil/")
-@Unprotected
+@ProtectedWithClaims(issuer = "azuread")
 class TestController {
     @GetMapping(path = ["{exception}"])
     fun kastTimeoutException(@PathVariable exception: TestExceptionType): Ressurs<String> {
