@@ -1,6 +1,5 @@
 package no.nav.familie.ef.sak.forvaltning
 
-import no.nav.familie.ef.sak.infrastruktur.exception.feilHvisIkke
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.prosessering.internal.TaskService
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -19,7 +18,7 @@ class OppgaveforvaltningsController(
 ) {
     @PostMapping("behandling/{behandlingId}")
     fun loggOppgavemetadataFor(@PathVariable behandlingId: UUID) {
-        feilHvisIkke(tilgangService.harForvalterrolle()) { "Må være forvalter for å bruke forvaltningsendepunkt" }
+        tilgangService.validerHarForvalterrolle()
         val task = LoggOppgaveMetadataTask.opprettTask(behandlingId)
         taskService.save(task)
     }

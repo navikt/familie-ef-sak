@@ -1,6 +1,8 @@
-package no.nav.familie.ef.sak.karakterutskrift
+package no.nav.familie.ef.sak.no.nav.familie.ef.sak.forvaltning.karakterutskrift
 
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
+import no.nav.familie.ef.sak.forvaltning.karakterutskrift.KarakterutskriftRequest
+import no.nav.familie.ef.sak.forvaltning.karakterutskrift.SendKarakterutskriftBrevTilIverksettTask
 import no.nav.familie.kontrakter.ef.felles.FrittståendeBrevType
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.prosessering.internal.TaskService
@@ -20,7 +22,7 @@ internal class AutomatiskBrevInnhentingKarakterutskriftControllerTest : OppslagS
 
     @BeforeEach
     fun setUp() {
-        headers.setBearerAuth(lokalTestToken)
+        headers.setBearerAuth(lokalForvalterToken)
     }
 
     @Test

@@ -1,4 +1,4 @@
-package no.nav.familie.ef.sak.uttrekk
+package no.nav.familie.ef.sak.forvaltning.uttrekk
 
 import no.nav.familie.ef.sak.repository.RepositoryInterface
 import org.springframework.data.jdbc.repository.query.Query

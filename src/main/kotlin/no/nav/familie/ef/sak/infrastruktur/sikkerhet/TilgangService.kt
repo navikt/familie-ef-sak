@@ -13,6 +13,7 @@ import no.nav.familie.ef.sak.felles.integration.dto.Tilgang
 import no.nav.familie.ef.sak.infrastruktur.config.RolleConfig
 import no.nav.familie.ef.sak.infrastruktur.config.getValue
 import no.nav.familie.ef.sak.infrastruktur.exception.ManglerTilgang
+import no.nav.familie.ef.sak.infrastruktur.exception.feilHvisIkke
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext.hentGrupperFraToken
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerIntegrasjonerClient
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Adressebeskyttelse
@@ -156,7 +157,7 @@ class TilgangService(
     }
 
     private fun harTilgangTilPersonMedRelasjoner(personIdent: String): Tilgang {
-        return harSaksbehandlerTilgang("validerTilgangTilPersonMedBarn", personIdent) {
+        return harSaksbehandlerTilgangTilPersonMedBarn(personIdent) {
             personopplysningerIntegrasjonerClient.sjekkTilgangTilPersonMedRelasjoner(personIdent)
         }
     }
@@ -207,18 +208,22 @@ class TilgangService(
 
     /**
      * Sjekker cache om tilgangen finnes siden tidligere, hvis ikke hentes verdiet med [hentVerdi]
-     * Resultatet caches sammen med identen for saksbehandleren på gitt [cacheName]
-     * @param cacheName navnet på cachen
+     * Resultatet caches sammen med identen for saksbehandleren på validerTilgangTilPersonMedBarn
+     *
      * @param verdi verdiet som man ønsket å hente cache for, eks behandlingId, eller personIdent
      */
-    private fun <T> harSaksbehandlerTilgang(cacheName: String, verdi: T, hentVerdi: () -> Tilgang): Tilgang {
-        val cache = cacheManager.getCache(cacheName) ?: error("Finner ikke cache=$cacheName")
+    private fun <T> harSaksbehandlerTilgangTilPersonMedBarn(verdi: T, hentVerdi: () -> Tilgang): Tilgang {
+        val cache = cacheManager.getCache("validerTilgangTilPersonMedBarn") ?: error("Finner ikke cache=validerTilgangTilPersonMedBarn")
         return cache.get(Pair(verdi, SikkerhetContext.hentSaksbehandler())) {
             hentVerdi()
-        } ?: error("Finner ikke verdi fra cache=$cacheName")
+        } ?: error("Finner ikke verdi fra cache=validerTilgangTilPersonMedBarn")
     }
 
     fun validerSaksbehandler(saksbehandler: String): Boolean {
         return SikkerhetContext.hentSaksbehandlerEllerSystembruker() == saksbehandler
+    }
+
+    fun validerHarForvalterrolle() {
+        feilHvisIkke(harForvalterrolle()) { "Innlogget bruker har ikke forvalterrolle" }
     }
 }

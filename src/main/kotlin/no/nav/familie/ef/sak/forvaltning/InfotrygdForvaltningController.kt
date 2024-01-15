@@ -2,7 +2,6 @@ package no.nav.familie.ef.sak.forvaltning
 
 import no.nav.familie.ef.sak.infotrygd.InfotrygdReplikaClient
 import no.nav.familie.ef.sak.infotrygd.InfotrygdService
-import no.nav.familie.ef.sak.infrastruktur.exception.feilHvisIkke
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -25,7 +24,7 @@ class InfotrygdForvaltningController(
     @GetMapping("rapport")
     fun hentRapportÅpneSaker(): Ressurs<InfotrygdReplikaClient.ÅpnesakerRapport> {
         logger.info("Henter åpne saker fra infotrygd")
-        feilHvisIkke(tilgangService.harForvalterrolle()) { "Må være forvalter for å hente ut rapport" }
+        tilgangService.validerHarForvalterrolle()
         return Ressurs.success(infotrygdService.hentÅpneSaker())
     }
 }
