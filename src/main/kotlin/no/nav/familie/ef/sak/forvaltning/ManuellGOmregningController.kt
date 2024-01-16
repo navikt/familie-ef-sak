@@ -31,7 +31,7 @@ class ManuellGOmregningController(
     private val tilkjentYtelseService: TilkjentYtelseService,
     private val tilgangService: TilgangService,
 
-    ) {
+) {
 
     val logger: Logger = LoggerFactory.getLogger(javaClass)
 
