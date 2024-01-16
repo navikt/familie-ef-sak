@@ -30,7 +30,7 @@ Det finnes to versjoner av denne - en som i tillegg henter saker på vent. Denne
 Saker som var åpne ved første g-omregning vil bli forsøkt kjørt i neste ukes batch hvis de er ferdige. 
 
 Det finnes også en controller hvor man også kan kjøre omregning på _en_ fagsak
-`no.nav.familie.ef.sak.behandling.ManuellGOmregningController`
+`no.nav.familie.ef.sak.forvaltning.ManuellGOmregningController`
 
 ##### 2. Utfør gomregning (kode)
 1. Vi kopier data fra forrige behandling -> ny G - behandling

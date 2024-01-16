@@ -1,5 +1,6 @@
-package no.nav.familie.ef.sak.behandling
+package no.nav.familie.ef.sak.forvaltning
 
+import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.grunnbelop.GOmregningTask
 import no.nav.familie.ef.sak.behandling.grunnbelop.GOmregningTaskService
 import no.nav.familie.ef.sak.beregning.Grunnbeløpsperioder
@@ -7,6 +8,7 @@ import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvisIkke
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
+import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -27,19 +29,22 @@ class ManuellGOmregningController(
     private val featureToggleService: FeatureToggleService,
     private val behandlingService: BehandlingService,
     private val tilkjentYtelseService: TilkjentYtelseService,
+    private val tilgangService: TilgangService,
 
-) {
+    ) {
 
     val logger: Logger = LoggerFactory.getLogger(javaClass)
 
     @PostMapping(path = ["startjobb"])
     fun opprettGOmregningTasksForBehandlingerMedGammeltGBelop(): Ressurs<Int> {
+        tilgangService.validerHarForvalterrolle()
         val antallTaskerOpprettet = gOmregningTaskService.opprettGOmregningTaskForBehandlingerMedUtdatertG()
         return Ressurs.success(antallTaskerOpprettet)
     }
 
     @PostMapping(path = ["{fagsakId}"])
     fun opprettGOmregningTaskForFagsak(@PathVariable fagsakId: UUID) {
+        tilgangService.validerHarForvalterrolle()
         feilHvisIkke(featureToggleService.isEnabled(Toggle.G_BEREGNING_TILLAT_MANUELL_OPPRETTELSE_AV_G_TASK)) {
             "Opprettelse av gomregningstask for fagsak ikke enablet"
         }
