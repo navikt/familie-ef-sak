@@ -20,6 +20,7 @@ data class PensjonsgivendeInntektForSkatteordning(
 enum class Skatteordning {
     FASTLAND,
     SVALBARD,
+    KILDESKATT_PAA_LOENN
 }
 
 data class SummertSkattegrunnlag(
