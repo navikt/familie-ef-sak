@@ -11,23 +11,28 @@ import java.util.UUID
 
 @Repository
 interface FagsakRepository : RepositoryInterface<FagsakDomain, UUID>, InsertUpdateRepository<FagsakDomain> {
-
     // language=PostgreSQL
     @Query(
-        """SELECT DISTINCT f.*, fe.id AS eksternid_id
+        """SELECT DISTINCT f.*, fe.id AS eksternid_id, fe.fagsak_id AS eksternId_fagsak_id
                     FROM fagsak f 
                     JOIN fagsak_ekstern fe ON fe.fagsak_id = f.id
                     LEFT JOIN person_ident pi ON pi.fagsak_person_id = f.fagsak_person_id 
                     WHERE pi.ident IN (:personIdenter)
                     AND f.stonadstype = :stønadstype""",
     )
-    fun findBySøkerIdent(personIdenter: Set<String>, stønadstype: StønadType): FagsakDomain?
+    fun findBySøkerIdent(
+        personIdenter: Set<String>,
+        stønadstype: StønadType,
+    ): FagsakDomain?
 
-    fun findByFagsakPersonIdAndStønadstype(fagsakPersonId: UUID, stønadstype: StønadType): FagsakDomain?
+    fun findByFagsakPersonIdAndStønadstype(
+        fagsakPersonId: UUID,
+        stønadstype: StønadType,
+    ): FagsakDomain?
 
     // language=PostgreSQL
     @Query(
-        """SELECT f.*, fe.id AS eksternid_id
+        """SELECT f.*, fe.id AS eksternid_id, fe.fagsak_id AS eksternId_fagsak_id
                     FROM fagsak f
                     JOIN fagsak_ekstern fe ON fe.fagsak_id = f.id
                     JOIN behandling b 
@@ -38,7 +43,8 @@ interface FagsakRepository : RepositoryInterface<FagsakDomain, UUID>, InsertUpda
 
     // language=PostgreSQL
     @Query(
-        """SELECT DISTINCT f.*, fe.id AS eksternid_id FROM fagsak f 
+        """SELECT DISTINCT f.*, fe.id AS eksternid_id, fe.fagsak_id AS eksternId_fagsak_id
+             FROM fagsak f 
                 JOIN fagsak_ekstern fe ON fe.fagsak_id = f.id
                 JOIN person_ident pi ON pi.fagsak_person_id = f.fagsak_person_id 
               WHERE ident IN (:personIdenter)""",
@@ -49,7 +55,7 @@ interface FagsakRepository : RepositoryInterface<FagsakDomain, UUID>, InsertUpda
 
     // language=PostgreSQL
     @Query(
-        """SELECT f.*, fe.id AS eksternid_id         
+        """SELECT f.*, fe.id AS eksternid_id, fe.fagsak_id AS eksternId_fagsak_id         
                     FROM fagsak f         
                     JOIN fagsak_ekstern fe ON fe.fagsak_id = f.id       
                     WHERE fe.id = :eksternId""",

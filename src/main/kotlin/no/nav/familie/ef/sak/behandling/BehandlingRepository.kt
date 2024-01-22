@@ -14,16 +14,18 @@ import java.util.UUID
 
 @Repository
 interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUpdateRepository<Behandling> {
-
     fun findByFagsakId(fagsakId: UUID): List<Behandling>
 
-    fun findByFagsakIdAndStatus(fagsakId: UUID, status: BehandlingStatus): List<Behandling>
+    fun findByFagsakIdAndStatus(
+        fagsakId: UUID,
+        status: BehandlingStatus,
+    ): List<Behandling>
 
     fun existsByFagsakId(fagsakId: UUID): Boolean
 
     // language=PostgreSQL
     @Query(
-        """SELECT b.*, be.id AS eksternid_id         
+        """SELECT b.*, be.id AS eksternid_id, be.behandling_id AS eksternId_behandling_id         
                      FROM behandling b         
                      JOIN behandling_ekstern be 
                      ON be.behandling_id = b.id         
@@ -116,7 +118,7 @@ interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUp
     // language=PostgreSQL
     @Query(
         """
-        SELECT b.*, be.id AS eksternid_id
+        SELECT b.*, be.id AS eksternid_id, be.behandling_id AS eksternId_behandling_id
         FROM behandling b
         JOIN behandling_ekstern be ON b.id = be.behandling_id
         WHERE b.fagsak_id = :fagsakId
@@ -130,7 +132,7 @@ interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUp
 
     @Query(
         """
-        SELECT b.*, be.id AS eksternid_id
+        SELECT b.*, be.id AS eksternid_id, be.behandling_id AS eksternId_behandling_id
         FROM behandling b
         JOIN behandling_ekstern be ON b.id = be.behandling_id
         JOIN fagsak f on b.fagsak_id = f.id 
@@ -142,9 +144,15 @@ interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUp
     )
     fun finnBehandlingerForGjenbrukAvVilkår(fagsakPersonId: UUID): List<Behandling>
 
-    fun existsByFagsakIdAndStatusIsNot(fagsakId: UUID, behandlingStatus: BehandlingStatus): Boolean
+    fun existsByFagsakIdAndStatusIsNot(
+        fagsakId: UUID,
+        behandlingStatus: BehandlingStatus,
+    ): Boolean
 
-    fun existsByFagsakIdAndStatusIsNotIn(fagsakId: UUID, behandlingStatus: List<BehandlingStatus>): Boolean
+    fun existsByFagsakIdAndStatusIsNotIn(
+        fagsakId: UUID,
+        behandlingStatus: List<BehandlingStatus>,
+    ): Boolean
 
     // language=PostgreSQL
     @Query(
@@ -178,7 +186,10 @@ interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUp
          WHERE behandling.status <> 'FERDIGSTILT' AND fagsak.stonadstype=:stønadstype)
         """,
     )
-    fun finnPersonerMedAktivStonadIkkeRevurdertSisteMåneder(stønadstype: StønadType = StønadType.OVERGANGSSTØNAD, antallMåneder: Int = 3): List<String>
+    fun finnPersonerMedAktivStonadIkkeRevurdertSisteMåneder(
+        stønadstype: StønadType = StønadType.OVERGANGSSTØNAD,
+        antallMåneder: Int = 3,
+    ): List<String>
 
     // language=PostgreSQL
     @Query(
@@ -209,7 +220,10 @@ interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUp
         AND f.stonadstype=:stønadstype
         """,
     )
-    fun hentUferdigeBehandlingerOpprettetFørDato(stønadstype: StønadType, opprettetTidFør: LocalDateTime): List<Behandling>
+    fun hentUferdigeBehandlingerOpprettetFørDato(
+        stønadstype: StønadType,
+        opprettetTidFør: LocalDateTime,
+    ): List<Behandling>
 
     @Query(
         """SELECT DISTINCT b.id 
