@@ -13,7 +13,6 @@ import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import org.springframework.http.HttpStatus
 
 object OpprettBehandlingUtil {
-
     /**
      * @param behandlingType for ny behandling
      */
@@ -22,9 +21,10 @@ object OpprettBehandlingUtil {
         tidligereBehandlinger: List<Behandling>,
         erMigrering: Boolean = false,
     ) {
-        val sisteBehandling = tidligereBehandlinger
-            .filter { it.resultat != BehandlingResultat.HENLAGT }
-            .sisteFerdigstilteBehandling()
+        val sisteBehandling =
+            tidligereBehandlinger
+                .filter { it.resultat != BehandlingResultat.HENLAGT }
+                .sisteFerdigstilteBehandling()
 
         validerTidligereBehandlingerErFerdigstilte(tidligereBehandlinger)
         validerMigreringErRevurdering(behandlingType, erMigrering)
@@ -35,7 +35,10 @@ object OpprettBehandlingUtil {
         }
     }
 
-    private fun validerMigreringErRevurdering(behandlingType: BehandlingType, erMigrering: Boolean) {
+    private fun validerMigreringErRevurdering(
+        behandlingType: BehandlingType,
+        erMigrering: Boolean,
+    ) {
         feilHvis(erMigrering && behandlingType != REVURDERING) {
             "Det er ikke mulig å lage en migrering av annet enn revurdering"
         }
@@ -45,7 +48,7 @@ object OpprettBehandlingUtil {
         if (tidligereBehandlinger.any { it.status != BehandlingStatus.FERDIGSTILT && it.status != BehandlingStatus.SATT_PÅ_VENT }) {
             throw ApiFeil("Det finnes en behandling på fagsaken som ikke er ferdigstilt", HttpStatus.BAD_REQUEST)
         }
-        feilHvis(tidligereBehandlinger.any { it.type == FØRSTEGANGSBEHANDLING && it.status == BehandlingStatus.SATT_PÅ_VENT }) {
+        brukerfeilHvis(tidligereBehandlinger.any { it.type == FØRSTEGANGSBEHANDLING && it.status == BehandlingStatus.SATT_PÅ_VENT }) {
             "Kan ikke opprette ny behandling når det finnes en førstegangsbehandling på vent"
         }
     }
@@ -60,7 +63,10 @@ object OpprettBehandlingUtil {
         }
     }
 
-    private fun validerKanOppretteRevurdering(sisteBehandling: Behandling?, erMigrering: Boolean) {
+    private fun validerKanOppretteRevurdering(
+        sisteBehandling: Behandling?,
+        erMigrering: Boolean,
+    ) {
         if (sisteBehandling == null && !erMigrering) {
             throw ApiFeil("Det finnes ikke en tidligere behandling på fagsaken", HttpStatus.BAD_REQUEST)
         }
