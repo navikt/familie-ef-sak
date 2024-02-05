@@ -1,9 +1,11 @@
 package no.nav.familie.ef.sak.beregning.barnetilsyn.satsendring
 
 import org.slf4j.LoggerFactory
+import org.springframework.context.annotation.Profile
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
 
+@Profile("!integrasjonstest")
 @Service
 class BarnetilsynSatsendringScheduler(val barnetilsynSatsendringService: BarnetilsynSatsendringService) {
 
