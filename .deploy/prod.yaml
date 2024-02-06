@@ -54,6 +54,7 @@ spec:
         - application: familie-klage
         - application: familie-ef-personhendelse
         - application: familie-ef-mottak
+        - application: familie-ef-soknad-api
         - application: familie-ef-proxy
           namespace: teamfamilie
           cluster: prod-fss

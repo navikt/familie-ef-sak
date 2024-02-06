@@ -54,6 +54,7 @@ spec:
         - application: familie-prosessering-lokal
         - application: familie-ef-sak-frontend-lokal
         - application: familie-ef-mottak
+        - application: familie-ef-soknad-api
         - application: familie-klage
         - application: familie-ef-proxy
           namespace: teamfamilie
