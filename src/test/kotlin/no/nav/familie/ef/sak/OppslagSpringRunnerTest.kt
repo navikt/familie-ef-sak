@@ -80,7 +80,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
 @EnableMockOAuth2Server
 abstract class OppslagSpringRunnerTest {
 
-    protected val listAppender = initLoggingEventListAppender()
+    protected final val listAppender = initLoggingEventListAppender()
     protected var loggingEvents: MutableList<ILoggingEvent> = listAppender.list
     protected val restTemplate = TestRestTemplate()
     protected val headers = HttpHeaders()
@@ -101,7 +101,6 @@ abstract class OppslagSpringRunnerTest {
     @Autowired
     private lateinit var rolleConfig: RolleConfig
 
-    @Suppress("SpringJavaInjectionPointsAutowiringInspection")
     @Autowired
     private lateinit var mockOAuth2Server: MockOAuth2Server
 
@@ -184,11 +183,23 @@ abstract class OppslagSpringRunnerTest {
             return onBehalfOfToken(role = rolleConfig.beslutterRolle)
         }
 
+    protected val lokalForvalterToken: String
+        get() {
+            return onBehalfOfToken(roles = listOf(rolleConfig.forvalter, rolleConfig.veilederRolle))
+        }
+
     protected fun onBehalfOfToken(
         role: String = rolleConfig.beslutterRolle,
         saksbehandler: String = "julenissen",
     ): String {
-        return TokenUtil.onBehalfOfToken(mockOAuth2Server, role, saksbehandler)
+        return onBehalfOfToken(listOf(role), saksbehandler)
+    }
+
+    protected fun onBehalfOfToken(
+        roles: List<String>,
+        saksbehandler: String = "julenissen",
+    ): String {
+        return TokenUtil.onBehalfOfToken(mockOAuth2Server, roles, saksbehandler)
     }
 
     protected fun clientToken(clientId: String = "1", accessAsApplication: Boolean = true): String {

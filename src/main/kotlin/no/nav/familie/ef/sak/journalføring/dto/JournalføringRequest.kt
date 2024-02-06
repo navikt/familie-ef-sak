@@ -2,6 +2,7 @@ package no.nav.familie.ef.sak.journalføring.dto
 
 import no.nav.familie.ef.sak.barn.BehandlingBarn
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
+import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.journalføring.dto.UstrukturertDokumentasjonType.IKKE_VALGT
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
@@ -64,14 +65,14 @@ enum class Journalføringsårsak(val behandlingsårsak: BehandlingÅrsak) {
 }
 
 data class BarnSomSkalFødes(val fødselTerminDato: LocalDate) {
-
-    fun tilBehandlingBarn(behandlingId: UUID): BehandlingBarn = BehandlingBarn(
-        behandlingId = behandlingId,
-        søknadBarnId = null,
-        personIdent = null,
-        navn = null,
-        fødselTermindato = this.fødselTerminDato,
-    )
+    fun tilBehandlingBarn(behandlingId: UUID): BehandlingBarn =
+        BehandlingBarn(
+            behandlingId = behandlingId,
+            søknadBarnId = null,
+            personIdent = null,
+            navn = null,
+            fødselTermindato = this.fødselTerminDato,
+        )
 }
 
 /**
@@ -160,7 +161,7 @@ fun JournalføringRequestV2.valider() {
     }
 
     dokumentTitler?.let {
-        feilHvis(
+        brukerfeilHvis(
             it.containsValue(""),
         ) {
             "Mangler tittel på et eller flere dokumenter"

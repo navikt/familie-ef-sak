@@ -1,4 +1,4 @@
-package no.nav.familie.ef.sak.karakterutskrift
+package no.nav.familie.ef.sak.no.nav.familie.ef.sak.forvaltning.karakterutskrift
 
 import io.mockk.every
 import io.mockk.mockk
@@ -6,6 +6,7 @@ import no.nav.familie.ef.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.brev.FrittståendeBrevService
 import no.nav.familie.ef.sak.fagsak.FagsakService
+import no.nav.familie.ef.sak.forvaltning.karakterutskrift.SendKarakterutskriftBrevTilIverksettTask
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.oppgave.OppgaveService
@@ -42,7 +43,7 @@ internal class KarakterutskriftBrevTaskTest {
     )
 
     @BeforeEach
-    private fun setUp() {
+    fun setUp() {
         every { personopplysningerService.hentPersonopplysningerUtenVedtakshistorikk(any<String>()) } returns mockk {
             every { vergemål } returns emptyList()
         }

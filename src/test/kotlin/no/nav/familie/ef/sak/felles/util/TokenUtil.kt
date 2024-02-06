@@ -33,7 +33,7 @@ object TokenUtil {
      * oid = unik id på brukeren i Azure AD
      * sub = unik id på brukeren i kombinasjon med applikasjon det ble logget inn i
      */
-    fun onBehalfOfToken(mockOAuth2Server: MockOAuth2Server, role: String, saksbehandler: String): String {
+    fun onBehalfOfToken(mockOAuth2Server: MockOAuth2Server, roles: List<String>, saksbehandler: String): String {
         val clientId = UUID.randomUUID().toString()
         val brukerId = UUID.randomUUID().toString()
 
@@ -42,7 +42,7 @@ object TokenUtil {
             "azp" to clientId,
             "name" to saksbehandler,
             "NAVident" to saksbehandler,
-            "groups" to listOf(role),
+            "groups" to roles,
         )
 
         return mockOAuth2Server.issueToken(

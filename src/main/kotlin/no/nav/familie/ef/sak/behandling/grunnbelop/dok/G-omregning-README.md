@@ -30,7 +30,7 @@ Det finnes to versjoner av denne - en som i tillegg henter saker på vent. Denne
 Saker som var åpne ved første g-omregning vil bli forsøkt kjørt i neste ukes batch hvis de er ferdige. 
 
 Det finnes også en controller hvor man også kan kjøre omregning på _en_ fagsak
-`no.nav.familie.ef.sak.behandling.ManuellGOmregningController`
+`no.nav.familie.ef.sak.forvaltning.ManuellGOmregningController`
 
 ##### 2. Utfør gomregning (kode)
 1. Vi kopier data fra forrige behandling -> ny G - behandling
@@ -53,7 +53,7 @@ Vi indeksjusterer inntekt når vi g-omregner. For hver inntektsperiode vi skal e
 5. Dette resultatet runder vi av til nærmeste 100. *2
 6. Evt. dagsats og månedsats vil nulles på det nye G-vedtaket og det G-avrundede beløpet settes på "årsinntekt". *3 
 
-*1) Vi velger vi å tolke alle inntekter (totalinntekt) som "uavrundet inntekter" (reell).
+*1) Vi velger å tolke alle inntekter (totalinntekt) som "uavrundet inntekter" (reell).
 Vi runder derfor ned til nærmeste 1000 før vi justerer inntekt.
 Dette gjør vi for å behandle g-regulering på samme måte som vanlige beregninger.
 Alternativ er "ikke rund ned g-beløp til nærmeste 1000" - gir potensielt feil ved
@@ -61,11 +61,11 @@ eksisterende beløp som tilfeldigvis er 100 (pre - warning)
 
 *2) I beregning vil vi ikke runde ned beløp modulus 100 med rest. 
 
-*3) Her mister vi detaljer i vedtal (mnd/dag). Dette kan føre til problemer med beregning i etterkant.
+*3) Her mister vi detaljer i vedtak (mnd/dag). Dette kan føre til problemer med beregning i etterkant.
 Dersom vi revurderer og gjør ny beregning etter en g-omregning vil bruker få mer utbetalt. Dette fordi vi i beregning avrunder inntekt ned til nærmeste 1000. 
-Dette har vi løst med et hack hvor inntekter som slutter på hele 100 ikke rundes ned (vi gjetter på og antar at dette er en g-beløps-inntekt) - uff.
+Dette har vi løst med et hack hvor inntekter som slutter på hele 100 ikke rundes ned (vi gjetter på og antar at dette er en g-beløps-inntekt).
 
-En del av punktene ovenfor har vært kilde til mye diskusjon på teamet. Kan i noen tilfeller føre til forskjellsbehandling av stønadsmottakere. 
+En del av punktene ovenfor har vært kilde til mye diskusjon på teamet. Kan dette i noen tilfeller føre til forskjellsbehandling av stønadsmottakere? 
 Regler og rutiner er nok et etterslep fra en tid hvor vi jobbet med stormaskin, andre beløp (naturlig inflasjon) og praktiske løsninger for å få dette til å fly. 
 Vi jobber med å modernisere regelverk og rutiner her. Husk å følge opp disse diskusjonene i god tid før g-omregning. 
 
