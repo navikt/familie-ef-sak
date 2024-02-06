@@ -54,7 +54,7 @@ class OppgaverForOpprettelseService(
         val kanOppretteInntektskontroll = if (vedtak.resultatType == ResultatType.AVSLÅ &&
             vedtak.avslåÅrsak == AvslagÅrsak.MINDRE_INNTEKTSENDRINGER
         ) {
-            kanOppretteInntektsoppgaveForSisteIverksatteBehandling(behandlingId)
+            kanOppretteInntektsoppgaveForSisteIverksatteBehandling(saksbehandling.fagsakId)
         } else if (vedtak.resultatType == ResultatType.INNVILGE) {
             val tilkjentYtelse = tilkjentYtelseService.hentForBehandlingEllerNull(behandlingId)
             kanOppretteOppgaveForInntektskontrollFremITid(tilkjentYtelse)
