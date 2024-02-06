@@ -2,7 +2,6 @@ package no.nav.familie.ef.sak.behandling.oppgaveforopprettelse
 
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvisIkke
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.logger
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.vedtak.VedtakService
@@ -66,10 +65,8 @@ class OppgaverForOpprettelseService(
 
     private fun kanOppretteInntektsoppgaveForSisteIverksatteBehandling(behandlingId: UUID): Boolean {
         val sisteIverksatteBehandling = behandlingService.finnSisteIverksatteBehandling(behandlingId)
-        logger.info("Siste iverksatte behandling: " + sisteIverksatteBehandling?.let { sisteIverksatteBehandling.id })
         return sisteIverksatteBehandling?.let {
             val sisteTilkjentYtelse = tilkjentYtelseService.hentForBehandlingEllerNull(sisteIverksatteBehandling.id)
-            logger.info("Sjekker om oppgave kan opprettes ift siste tilkjente ytelse")
             kanOppretteOppgaveForInntektskontrollFremITid(sisteTilkjentYtelse)
         } ?: false
     }
@@ -85,7 +82,7 @@ class OppgaverForOpprettelseService(
         val harUtbetalingEtterDetNesteÅret = tilkjentYtelse.andelerTilkjentYtelse
             .filter { it.stønadTom > LocalDate.now().plusYears(1) }
             .any { it.beløp > 0 }
-        logger.info("Bruker har andeler > 1 år frem i tid")
+
         return harUtbetalingEtterDetNesteÅret
     }
 
