@@ -9,7 +9,6 @@ import io.mockk.verify
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.behandling.domain.Behandling
-import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.felles.util.BehandlingOppsettUtil.iverksattFørstegangsbehandling
 import no.nav.familie.ef.sak.felles.util.BehandlingOppsettUtil.iverksattRevurdering
 import no.nav.familie.ef.sak.repository.behandling
@@ -18,6 +17,7 @@ import no.nav.familie.ef.sak.repository.saksbehandling
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.ef.sak.vedtak.domain.Vedtak
+import no.nav.familie.ef.sak.vedtak.dto.ResultatType
 import no.nav.familie.ef.sak.økonomi.lagAndelTilkjentYtelse
 import no.nav.familie.ef.sak.økonomi.lagTilkjentYtelse
 import no.nav.familie.kontrakter.ef.felles.AvslagÅrsak
@@ -50,6 +50,7 @@ internal class OppgaverForOpprettelseServiceTest {
         every { oppgaverForOpprettelseRepository.deleteById(any()) } just runs
         every { oppgaverForOpprettelseRepository.insert(any()) } returns oppgaverForOpprettelse
         every { oppgaverForOpprettelseRepository.update(any()) } returns oppgaverForOpprettelse
+        every { vedtak.resultatType } returns ResultatType.INNVILGE
         every { vedtakService.hentVedtak(any()) } returns vedtak
     }
 
@@ -146,10 +147,11 @@ internal class OppgaverForOpprettelseServiceTest {
 
     @Test
     fun `ikke oppgaveopprettelse for avslått overgangsstønad med tilkjente ytelser under 1 år frem i tid`() {
-        val saksbehandling = lagSaksbehandling(behandling = behandling, resultat = BehandlingResultat.AVSLÅTT)
+        val saksbehandling = lagSaksbehandling(behandling = behandling)
         every { tilkjentYtelseService.hentForBehandlingEllerNull(any()) } returns tilkjentYtelseUnder1årFremITid
         every { behandlingService.hentSaksbehandling(iverksattFørstegangsbehandling.id) } returns saksbehandling
         every { vedtak.avslåÅrsak } returns AvslagÅrsak.MINDRE_INNTEKTSENDRINGER
+        every { vedtak.resultatType } returns ResultatType.AVSLÅ
         every { behandlingService.finnSisteIverksatteBehandling(any()) } returns behandling
 
         val oppgaver = oppgaverForOpprettelseService.hentOppgavetyperSomKanOpprettes(iverksattFørstegangsbehandling.id)
@@ -159,10 +161,11 @@ internal class OppgaverForOpprettelseServiceTest {
 
     @Test
     fun `oppgaveopprettelse for avslått overgangsstønad med tilkjente ytelser over 1 år frem i tid`() {
-        val saksbehandling = lagSaksbehandling(behandling = behandling, resultat = BehandlingResultat.AVSLÅTT)
+        val saksbehandling = lagSaksbehandling(behandling = behandling)
         every { tilkjentYtelseService.hentForBehandlingEllerNull(any()) } returns tilkjentYtelse2årFremITid
         every { behandlingService.hentSaksbehandling(iverksattFørstegangsbehandling.id) } returns saksbehandling
         every { vedtak.avslåÅrsak } returns AvslagÅrsak.MINDRE_INNTEKTSENDRINGER
+        every { vedtak.resultatType } returns ResultatType.AVSLÅ
         every { behandlingService.finnSisteIverksatteBehandling(any()) } returns behandling
 
         val oppgaver = oppgaverForOpprettelseService.hentOppgavetyperSomKanOpprettes(iverksattFørstegangsbehandling.id)
@@ -171,10 +174,11 @@ internal class OppgaverForOpprettelseServiceTest {
 
     @Test
     fun `oppgaveopprettelse for avslått overgangsstønad med ytelser frem i tid og avslagsårsak inntektsendringer`() {
-        val saksbehandling = lagSaksbehandling(behandling = behandling, resultat = BehandlingResultat.AVSLÅTT)
+        val saksbehandling = lagSaksbehandling(behandling = behandling)
         every { tilkjentYtelseService.hentForBehandlingEllerNull(any()) } returns tilkjentYtelse2årFremITid
         every { behandlingService.hentSaksbehandling(iverksattFørstegangsbehandling.id) } returns saksbehandling
         every { vedtak.avslåÅrsak } returns AvslagÅrsak.MINDRE_INNTEKTSENDRINGER
+        every { vedtak.resultatType } returns ResultatType.AVSLÅ
         every { behandlingService.finnSisteIverksatteBehandling(any()) } returns behandling
 
         val oppgaver = oppgaverForOpprettelseService.hentOppgavetyperSomKanOpprettes(iverksattFørstegangsbehandling.id)
@@ -183,10 +187,11 @@ internal class OppgaverForOpprettelseServiceTest {
 
     @Test
     fun `ikke oppgaveopprettelse for avslått overgangsstønad med avslagsårsak ulik inntektsendring`() {
-        val saksbehandling = lagSaksbehandling(behandling = behandling, resultat = BehandlingResultat.AVSLÅTT)
+        val saksbehandling = lagSaksbehandling(behandling = behandling)
         every { tilkjentYtelseService.hentForBehandlingEllerNull(any()) } returns tilkjentYtelse2årFremITid
         every { behandlingService.hentSaksbehandling(iverksattFørstegangsbehandling.id) } returns saksbehandling
         every { vedtak.avslåÅrsak } returns AvslagÅrsak.KORTVARIG_AVBRUDD_JOBB
+        every { vedtak.resultatType } returns ResultatType.AVSLÅ
         every { behandlingService.finnSisteIverksatteBehandling(any()) } returns behandling
 
         val oppgaver = oppgaverForOpprettelseService.hentOppgavetyperSomKanOpprettes(iverksattFørstegangsbehandling.id)
@@ -195,10 +200,11 @@ internal class OppgaverForOpprettelseServiceTest {
 
     @Test
     fun `siste iverksatte behandling hentes for avslag`() {
-        val saksbehandling = lagSaksbehandling(behandling = behandling, resultat = BehandlingResultat.AVSLÅTT)
+        val saksbehandling = lagSaksbehandling(behandling = behandling)
         every { tilkjentYtelseService.hentForBehandlingEllerNull(any()) } returns tilkjentYtelse2årFremITid
         every { behandlingService.hentSaksbehandling(iverksattFørstegangsbehandling.id) } returns saksbehandling
         every { vedtak.avslåÅrsak } returns AvslagÅrsak.MINDRE_INNTEKTSENDRINGER
+        every { vedtak.resultatType } returns ResultatType.AVSLÅ
         every { behandlingService.finnSisteIverksatteBehandling(any()) } returns behandling
 
         oppgaverForOpprettelseService.hentOppgavetyperSomKanOpprettes(iverksattFørstegangsbehandling.id)
@@ -230,9 +236,8 @@ internal class OppgaverForOpprettelseServiceTest {
     private fun lagSaksbehandling(
         stønadType: StønadType = StønadType.OVERGANGSSTØNAD,
         behandling: Behandling,
-        resultat: BehandlingResultat = BehandlingResultat.INNVILGET,
     ): Saksbehandling {
         val fagsak = fagsak(stønadstype = stønadType)
-        return saksbehandling(fagsak, behandling, resultat)
+        return saksbehandling(fagsak, behandling)
     }
 }

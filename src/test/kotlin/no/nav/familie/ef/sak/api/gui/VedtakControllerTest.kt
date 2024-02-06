@@ -330,14 +330,17 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
                 )
             lagTilkjentYtelse(behandlingId = behandlingId, andelerTilkjentYtelse = listOf(andel))
         }
+
         val behandlingId =
             opprettBehandling(
                 steg = StegType.SEND_TIL_BESLUTTER,
-                vedtakResultatType = ResultatType.AVSLÅ,
+                vedtakResultatType = ResultatType.INNVILGE,
                 status = BehandlingStatus.UTREDES,
                 avlsåÅrsak = AvslagÅrsak.MINDRE_INNTEKTSENDRINGER,
                 tilkjentYtelse = lagAndelMedInntekt1ÅrFremITiden,
             )
+
+        lagVilkårsvurderinger(behandlingId, Vilkårsresultat.OPPFYLT)
 
         sendTilBeslutter(
             SAKSBEHANDLER,

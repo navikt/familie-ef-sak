@@ -1,11 +1,11 @@
 package no.nav.familie.ef.sak.behandling.oppgaveforopprettelse
 
 import no.nav.familie.ef.sak.behandling.BehandlingService
-import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvisIkke
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.vedtak.VedtakService
+import no.nav.familie.ef.sak.vedtak.dto.ResultatType
 import no.nav.familie.kontrakter.ef.felles.AvslagÅrsak
 import no.nav.familie.kontrakter.ef.iverksett.OppgaveForOpprettelseType
 import no.nav.familie.kontrakter.felles.ef.StønadType
@@ -50,11 +50,11 @@ class OppgaverForOpprettelseService(
         }
 
         val vedtak = vedtakService.hentVedtak(behandlingId)
-        val kanOppretteInntektskontroll = if (saksbehandling.resultat == BehandlingResultat.AVSLÅTT &&
+        val kanOppretteInntektskontroll = if (vedtak.resultatType == ResultatType.AVSLÅ &&
             vedtak.avslåÅrsak == AvslagÅrsak.MINDRE_INNTEKTSENDRINGER
         ) {
             kanOppretteInntektsoppgaveForSisteIverksatteBehandling(behandlingId)
-        } else if (saksbehandling.resultat == BehandlingResultat.INNVILGET) {
+        } else if (vedtak.resultatType == ResultatType.INNVILGE) {
             val tilkjentYtelse = tilkjentYtelseService.hentForBehandlingEllerNull(behandlingId)
             kanOppretteOppgaveForInntektskontrollFremITid(tilkjentYtelse)
         } else {
