@@ -151,6 +151,7 @@ fun saksbehandling(
 fun saksbehandling(
     fagsak: Fagsak = fagsak(),
     behandling: Behandling = behandling(),
+    resultat: BehandlingResultat = behandling.resultat,
 ): Saksbehandling =
     Saksbehandling(
         id = behandling.id,
@@ -161,7 +162,7 @@ fun saksbehandling(
         steg = behandling.steg,
         kategori = behandling.kategori,
         årsak = behandling.årsak,
-        resultat = behandling.resultat,
+        resultat = resultat,
         vedtakstidspunkt = behandling.vedtakstidspunkt,
         henlagtÅrsak = behandling.henlagtÅrsak,
         ident = fagsak.hentAktivIdent(),

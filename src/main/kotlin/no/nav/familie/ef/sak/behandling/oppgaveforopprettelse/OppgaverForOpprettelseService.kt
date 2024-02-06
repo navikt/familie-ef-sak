@@ -1,9 +1,12 @@
 package no.nav.familie.ef.sak.behandling.oppgaveforopprettelse
 
 import no.nav.familie.ef.sak.behandling.BehandlingService
+import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvisIkke
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
+import no.nav.familie.ef.sak.vedtak.VedtakService
+import no.nav.familie.kontrakter.ef.felles.AvslagÅrsak
 import no.nav.familie.kontrakter.ef.iverksett.OppgaveForOpprettelseType
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.springframework.data.repository.findByIdOrNull
@@ -17,6 +20,7 @@ class OppgaverForOpprettelseService(
     private val oppgaverForOpprettelseRepository: OppgaverForOpprettelseRepository,
     private val behandlingService: BehandlingService,
     private val tilkjentYtelseService: TilkjentYtelseService,
+    private val vedtakService: VedtakService,
 ) {
 
     @Transactional
@@ -44,13 +48,31 @@ class OppgaverForOpprettelseService(
         if (saksbehandling.stønadstype != StønadType.OVERGANGSSTØNAD) {
             return emptyList()
         }
-        val tilkjentYtelse = tilkjentYtelseService.hentForBehandlingEllerNull(behandlingId)
-        val kanOppretteInntektskontroll = kanOppretteOppgaveForInntektskontrollFremITid(tilkjentYtelse)
 
+        val vedtak = vedtakService.hentVedtak(behandlingId)
+        val kanOppretteInntektskontroll = if (saksbehandling.resultat == BehandlingResultat.AVSLÅTT &&
+            vedtak.avslåÅrsak == AvslagÅrsak.MINDRE_INNTEKTSENDRINGER
+        ) {
+            kanOppretteInntektsoppgaveForSisteIverksatteBehandling(behandlingId)
+        } else if (saksbehandling.resultat == BehandlingResultat.INNVILGET) {
+            val tilkjentYtelse = tilkjentYtelseService.hentForBehandlingEllerNull(behandlingId)
+            kanOppretteOppgaveForInntektskontrollFremITid(tilkjentYtelse)
+        } else {
+            false
+        }
         return if (kanOppretteInntektskontroll) listOf(OppgaveForOpprettelseType.INNTEKTSKONTROLL_1_ÅR_FREM_I_TID) else emptyList()
     }
 
-    fun initialVerdierForOppgaverSomSkalOpprettes(behandlingId: UUID) = hentOppgavetyperSomKanOpprettes(behandlingId)
+    private fun kanOppretteInntektsoppgaveForSisteIverksatteBehandling(behandlingId: UUID): Boolean {
+        val sisteIverksatteBehandling = behandlingService.finnSisteIverksatteBehandling(behandlingId)
+        return sisteIverksatteBehandling?.let {
+            val sisteTilkjentYtelse = tilkjentYtelseService.hentForBehandlingEllerNull(sisteIverksatteBehandling.id)
+            kanOppretteOppgaveForInntektskontrollFremITid(sisteTilkjentYtelse)
+        } ?: false
+    }
+
+    fun initialVerdierForOppgaverSomSkalOpprettes(behandlingId: UUID) =
+        hentOppgavetyperSomKanOpprettes(behandlingId)
 
     private fun kanOppretteOppgaveForInntektskontrollFremITid(
         tilkjentYtelse: TilkjentYtelse?,
