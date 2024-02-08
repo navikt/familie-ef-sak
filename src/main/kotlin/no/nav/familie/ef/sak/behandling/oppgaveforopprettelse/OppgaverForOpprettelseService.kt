@@ -63,8 +63,8 @@ class OppgaverForOpprettelseService(
         return if (kanOppretteInntektskontroll) listOf(OppgaveForOpprettelseType.INNTEKTSKONTROLL_1_ÅR_FREM_I_TID) else emptyList()
     }
 
-    private fun kanOppretteInntektsoppgaveForSisteIverksatteBehandling(behandlingId: UUID): Boolean {
-        val sisteIverksatteBehandling = behandlingService.finnSisteIverksatteBehandling(behandlingId)
+    private fun kanOppretteInntektsoppgaveForSisteIverksatteBehandling(fagsakId: UUID): Boolean {
+        val sisteIverksatteBehandling = behandlingService.finnSisteIverksatteBehandling(fagsakId)
         return sisteIverksatteBehandling?.let {
             val sisteTilkjentYtelse = tilkjentYtelseService.hentForBehandlingEllerNull(sisteIverksatteBehandling.id)
             kanOppretteOppgaveForInntektskontrollFremITid(sisteTilkjentYtelse)
