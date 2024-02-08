@@ -43,8 +43,6 @@ class EksternMinsideControllerTest : OppslagSpringRunnerTest() {
         headers.setBearerAuth(søkerToken(personident))
         testoppsettService.lagreFagsak(fagsakOvergangsstønad)
         testoppsettService.lagreFagsak(fagsakBarnetilsyn)
-        behandlingOvergangsstønad = behandlingRepository.insert(behandling(fagsakOvergangsstønad).innvilgetOgFerdigstilt())
-        behandlingBarnetilsyn = behandlingRepository.insert(behandling(fagsakBarnetilsyn).innvilgetOgFerdigstilt())
     }
 
     @Test
@@ -60,6 +58,8 @@ class EksternMinsideControllerTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `skal kunne hente ut stønader som sluttbruker`() {
+        behandlingOvergangsstønad = behandlingRepository.insert(behandling(fagsakOvergangsstønad).innvilgetOgFerdigstilt())
+        behandlingBarnetilsyn = behandlingRepository.insert(behandling(fagsakBarnetilsyn).innvilgetOgFerdigstilt())
         opprettTilkjentYtelseMedAndeler(behandlingBarnetilsyn)
         opprettTilkjentYtelseMedAndeler(behandlingOvergangsstønad)
 
