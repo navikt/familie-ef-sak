@@ -24,6 +24,8 @@ spec:
   replicas:
     min: 2
     max: 2
+  tokenx:
+    enabled: true
   resources:
     limits:
       memory: 1024Mi
