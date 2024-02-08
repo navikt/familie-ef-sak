@@ -32,7 +32,6 @@ class VedtaksbrevService(
     private val familieDokumentClient: FamilieDokumentClient,
     private val tilordnetRessursService: TilordnetRessursService,
 ) {
-
     fun hentBeslutterbrevEllerRekonstruerSaksbehandlerBrev(behandlingId: UUID): ByteArray {
         val vedtaksbrev = brevRepository.findByIdOrThrow(behandlingId)
         return when (vedtaksbrev.beslutterPdf) {
@@ -46,18 +45,23 @@ class VedtaksbrevService(
         }
     }
 
-    fun lagSaksbehandlerSanitybrev(saksbehandling: Saksbehandling, brevrequest: JsonNode, brevmal: String): ByteArray {
+    fun lagSaksbehandlerSanitybrev(
+        saksbehandling: Saksbehandling,
+        brevrequest: JsonNode,
+        brevmal: String,
+    ): ByteArray {
         validerRedigerbarBehandling(saksbehandling)
 
         val saksbehandlersignatur = brevsignaturService.lagSignaturMedEnhet(saksbehandling)
 
-        val html = brevClient.genererHtml(
-            brevmal = brevmal,
-            saksbehandlerBrevrequest = brevrequest,
-            saksbehandlersignatur = saksbehandlersignatur.navn,
-            enhet = saksbehandlersignatur.enhet,
-            skjulBeslutterSignatur = saksbehandlersignatur.skjulBeslutter,
-        )
+        val html =
+            brevClient.genererHtml(
+                brevmal = brevmal,
+                saksbehandlerBrevrequest = brevrequest,
+                saksbehandlersignatur = saksbehandlersignatur.navn,
+                enhet = saksbehandlersignatur.enhet,
+                skjulBeslutterSignatur = saksbehandlersignatur.skjulBeslutter,
+            )
 
         lagreEllerOppdaterSaksbehandlerVedtaksbrev(
             behandlingId = saksbehandling.id,
@@ -77,15 +81,16 @@ class VedtaksbrevService(
         enhet: String,
         saksbehandlerHtml: String,
     ): Vedtaksbrev {
-        val vedtaksbrev = Vedtaksbrev(
-            behandlingId = behandlingId,
-            saksbehandlerHtml = saksbehandlerHtml,
-            brevmal = brevmal,
-            saksbehandlersignatur = saksbehandlersignatur,
-            enhet = enhet,
-            saksbehandlerident = SikkerhetContext.hentSaksbehandler(),
-            opprettetTid = SporbarUtils.now(),
-        )
+        val vedtaksbrev =
+            Vedtaksbrev(
+                behandlingId = behandlingId,
+                saksbehandlerHtml = saksbehandlerHtml,
+                brevmal = brevmal,
+                saksbehandlersignatur = saksbehandlersignatur,
+                enhet = enhet,
+                saksbehandlerident = SikkerhetContext.hentSaksbehandler(),
+                opprettetTid = SporbarUtils.now(),
+            )
 
         return when (brevRepository.existsById(behandlingId)) {
             true -> brevRepository.update(vedtaksbrev)
@@ -107,20 +112,24 @@ class VedtaksbrevService(
         ).bytes
     }
 
-    fun lagEndeligBeslutterbrev(saksbehandling: Saksbehandling, vedtakErUtenBeslutter: VedtakErUtenBeslutter): Fil {
+    fun lagEndeligBeslutterbrev(
+        saksbehandling: Saksbehandling,
+        vedtakErUtenBeslutter: VedtakErUtenBeslutter,
+    ): Fil {
         val vedtaksbrev = brevRepository.findByIdOrThrow(saksbehandling.id)
         val saksbehandlerHtml = hentSaksbehandlerHtml(vedtaksbrev, saksbehandling)
         val beslutterIdent = SikkerhetContext.hentSaksbehandler()
         validerKanLageBeslutterbrev(saksbehandling, vedtaksbrev, beslutterIdent, vedtakErUtenBeslutter)
         val signaturMedEnhet = brevsignaturService.lagSignaturMedEnhet(saksbehandling, vedtakErUtenBeslutter)
         val beslutterPdf = lagBeslutterPdfMedSignatur(saksbehandlerHtml, signaturMedEnhet)
-        val besluttervedtaksbrev = vedtaksbrev.copy(
-            besluttersignatur = signaturMedEnhet.navn,
-            enhet = signaturMedEnhet.enhet,
-            beslutterident = beslutterIdent,
-            beslutterPdf = beslutterPdf,
-            besluttetTid = LocalDateTime.now(),
-        )
+        val besluttervedtaksbrev =
+            vedtaksbrev.copy(
+                besluttersignatur = signaturMedEnhet.navn,
+                enhet = signaturMedEnhet.enhet,
+                beslutterident = beslutterIdent,
+                beslutterPdf = beslutterPdf,
+                besluttetTid = LocalDateTime.now(),
+            )
         brevRepository.update(besluttervedtaksbrev)
         return Fil(bytes = beslutterPdf.bytes)
     }
@@ -163,14 +172,18 @@ class VedtaksbrevService(
         saksbehandlerHtml: String,
         signaturMedEnhet: SignaturDto,
     ): Fil {
-        val htmlMedBeslutterSignatur = settInnBeslutterSignaturIHtml(
-            html = saksbehandlerHtml,
-            signaturMedEnhet = signaturMedEnhet,
-        )
+        val htmlMedBeslutterSignatur =
+            settInnBeslutterSignaturIHtml(
+                html = saksbehandlerHtml,
+                signaturMedEnhet = signaturMedEnhet,
+            )
         return Fil(familieDokumentClient.genererPdfFraHtml(htmlMedBeslutterSignatur))
     }
 
-    private fun settInnBeslutterSignaturIHtml(html: String, signaturMedEnhet: SignaturDto): String {
+    private fun settInnBeslutterSignaturIHtml(
+        html: String,
+        signaturMedEnhet: SignaturDto,
+    ): String {
         feilHvis(!signaturMedEnhet.skjulBeslutter && !html.contains(BESLUTTER_SIGNATUR_PLACEHOLDER)) {
             "Brev-HTML mangler placeholder for besluttersignatur"
         }
@@ -183,7 +196,7 @@ class VedtaksbrevService(
 
     private fun validerRedigerbarBehandling(saksbehandling: Saksbehandling) {
         if (saksbehandling.status.behandlingErLåstForVidereRedigering()) {
-            throw Feil(
+            throw ApiFeil(
                 "Behandling er i feil steg=${saksbehandling.steg} status=${saksbehandling.status}",
                 httpStatus = HttpStatus.BAD_REQUEST,
             )
@@ -193,7 +206,10 @@ class VedtaksbrevService(
         }
     }
 
-    private fun validerUlikeIdenter(saksbehandlerIdent: String, beslutterIdent: String) {
+    private fun validerUlikeIdenter(
+        saksbehandlerIdent: String,
+        beslutterIdent: String,
+    ) {
         if (saksbehandlerIdent == beslutterIdent) {
             throw ApiFeil(
                 "Beslutter kan ikke behandle en behandling som den selv har sendt til beslutter",
@@ -207,7 +223,6 @@ class VedtaksbrevService(
     }
 
     companion object {
-
         const val BESLUTTER_SIGNATUR_PLACEHOLDER = "BESLUTTER_SIGNATUR"
         const val BESLUTTER_VEDTAKSDATO_PLACEHOLDER = "BESLUTTER_VEDTAKSDATO"
     }
