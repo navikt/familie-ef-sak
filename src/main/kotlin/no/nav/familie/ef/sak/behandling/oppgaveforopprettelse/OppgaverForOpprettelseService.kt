@@ -50,25 +50,22 @@ class OppgaverForOpprettelseService(
         }
 
         val vedtak = vedtakService.hentVedtak(behandlingId)
-        val kanOppretteInntektskontroll = if (vedtak.resultatType == ResultatType.AVSLÅ &&
-            vedtak.avslåÅrsak == AvslagÅrsak.MINDRE_INNTEKTSENDRINGER
-        ) {
-            kanOppretteInntektsoppgaveForSisteIverksatteBehandling(saksbehandling.fagsakId)
-        } else if (vedtak.resultatType == ResultatType.INNVILGE) {
-            val tilkjentYtelse = tilkjentYtelseService.hentForBehandlingEllerNull(behandlingId)
-            kanOppretteOppgaveForInntektskontrollFremITid(tilkjentYtelse)
-        } else {
-            false
+        val tilkjentYtelse = when {
+            vedtak.resultatType == ResultatType.AVSLÅ && vedtak.avslåÅrsak == AvslagÅrsak.MINDRE_INNTEKTSENDRINGER ->
+                hentSisteTilkjentYtelse(saksbehandling.fagsakId)
+            vedtak.resultatType == ResultatType.INNVILGE ->
+                tilkjentYtelseService.hentForBehandlingEllerNull(behandlingId)
+            else -> null
         }
-        return if (kanOppretteInntektskontroll) listOf(OppgaveForOpprettelseType.INNTEKTSKONTROLL_1_ÅR_FREM_I_TID) else emptyList()
+
+        return if (kanOppretteOppgaveForInntektskontrollFremITid(tilkjentYtelse)) listOf(OppgaveForOpprettelseType.INNTEKTSKONTROLL_1_ÅR_FREM_I_TID) else emptyList()
     }
 
-    private fun kanOppretteInntektsoppgaveForSisteIverksatteBehandling(fagsakId: UUID): Boolean {
+    private fun hentSisteTilkjentYtelse(fagsakId: UUID): TilkjentYtelse? {
         val sisteIverksatteBehandling = behandlingService.finnSisteIverksatteBehandling(fagsakId)
         return sisteIverksatteBehandling?.let {
-            val sisteTilkjentYtelse = tilkjentYtelseService.hentForBehandlingEllerNull(sisteIverksatteBehandling.id)
-            kanOppretteOppgaveForInntektskontrollFremITid(sisteTilkjentYtelse)
-        } ?: false
+            tilkjentYtelseService.hentForBehandlingEllerNull(sisteIverksatteBehandling.id)
+        }
     }
 
     fun initialVerdierForOppgaverSomSkalOpprettes(behandlingId: UUID) =
