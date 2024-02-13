@@ -67,7 +67,7 @@ object TokenUtil {
         mockOAuth2Server: MockOAuth2Server,
         personident: String,
     ): String {
-        val clientId = UUID.randomUUID().toString()
+        val clientId = "lokal:teamfamilie:familie-ef-soknad-api"
         return mockOAuth2Server.issueToken(
             issuerId = "tokenx",
             clientId,
@@ -75,7 +75,7 @@ object TokenUtil {
                 issuerId = "tokenx",
                 subject = personident,
                 audience = listOf("aud-localhost"),
-                claims = mapOf("acr" to "Level4"),
+                claims = mapOf("acr" to "Level4", "client_id" to clientId),
                 expiry = 3600,
             ),
         ).serialize()
