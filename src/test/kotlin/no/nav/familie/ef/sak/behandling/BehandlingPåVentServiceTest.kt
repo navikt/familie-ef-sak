@@ -197,7 +197,7 @@ internal class BehandlingPåVentServiceTest {
                         assertThat(it.type).isEqualTo(OpprettOppgaveTask.TYPE)
                         assertThat(it.payload).contains(behandlingId.toString())
                         assertThat(it.payload).contains(Oppgavetype.VurderHenvendelse.name)
-                        assertThat(it.payload).contains("Bruker har søkt om overgangsstønad. Til informasjon.")
+                        assertThat(it.payload).contains("Bruker har søkt om overgangsstønad. Vurder oppfølging.")
                     },
                 )
             }
@@ -224,7 +224,7 @@ internal class BehandlingPåVentServiceTest {
                         assertThat(it.type).isEqualTo(OpprettOppgaveTask.TYPE)
                         assertThat(it.payload).contains(behandlingId.toString())
                         assertThat(it.payload).contains(Oppgavetype.VurderHenvendelse.name)
-                        assertThat(it.payload).contains("Bruker har søkt om overgangsstønad. Til informasjon.")
+                        assertThat(it.payload).contains("Bruker har søkt om overgangsstønad. Vurder oppfølging.")
                     },
                 )
             }
