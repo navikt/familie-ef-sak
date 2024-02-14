@@ -2,11 +2,11 @@ package no.nav.familie.ef.sak.infrastruktur.sikkerhet
 
 import no.nav.familie.ef.sak.behandlingsflyt.steg.BehandlerRolle
 import no.nav.familie.ef.sak.infrastruktur.config.RolleConfig
+import no.nav.familie.sikkerhet.EksternBrukerUtils
 import no.nav.security.token.support.spring.SpringTokenValidationContextHolder
 import org.slf4j.LoggerFactory
 
 object SikkerhetContext {
-
     private const val SYSTEM_NAVN = "System"
     const val SYSTEM_FORKORTELSE = "VL"
 
@@ -27,6 +27,12 @@ object SikkerhetContext {
 
     fun kallKommerFraKlage(): Boolean {
         return kallKommerFra("teamfamilie:familie-klage")
+    }
+
+    fun kallKommerFraFamilieEfSøknadApi(): Boolean {
+        val claims = SpringTokenValidationContextHolder().tokenValidationContext.getClaims(EksternBrukerUtils.ISSUER_TOKENX)
+        val applikasjonsnavn = claims.get("client_id")?.toString() ?: "" // e.g. dev-gcp:some-team:application-name
+        return applikasjonsnavn.endsWith("teamfamilie:familie-ef-soknad-api")
     }
 
     private fun kallKommerFra(forventetApplikasjonsSuffix: String): Boolean {
@@ -80,27 +86,34 @@ object SikkerhetContext {
             )
     }
 
-    fun harTilgangTilGittRolle(rolleConfig: RolleConfig, minimumsrolle: BehandlerRolle): Boolean {
+    fun harTilgangTilGittRolle(
+        rolleConfig: RolleConfig,
+        minimumsrolle: BehandlerRolle,
+    ): Boolean {
         val rollerFraToken = hentGrupperFraToken()
-        val rollerForBruker = when {
-            hentSaksbehandlerEllerSystembruker() == SYSTEM_FORKORTELSE -> listOf(
-                BehandlerRolle.SYSTEM,
-                BehandlerRolle.BESLUTTER,
-                BehandlerRolle.SAKSBEHANDLER,
-                BehandlerRolle.VEILEDER,
-            )
-            rollerFraToken.contains(rolleConfig.beslutterRolle) -> listOf(
-                BehandlerRolle.BESLUTTER,
-                BehandlerRolle.SAKSBEHANDLER,
-                BehandlerRolle.VEILEDER,
-            )
-            rollerFraToken.contains(rolleConfig.saksbehandlerRolle) -> listOf(
-                BehandlerRolle.SAKSBEHANDLER,
-                BehandlerRolle.VEILEDER,
-            )
-            rollerFraToken.contains(rolleConfig.veilederRolle) -> listOf(BehandlerRolle.VEILEDER)
-            else -> listOf(BehandlerRolle.UKJENT)
-        }
+        val rollerForBruker =
+            when {
+                hentSaksbehandlerEllerSystembruker() == SYSTEM_FORKORTELSE ->
+                    listOf(
+                        BehandlerRolle.SYSTEM,
+                        BehandlerRolle.BESLUTTER,
+                        BehandlerRolle.SAKSBEHANDLER,
+                        BehandlerRolle.VEILEDER,
+                    )
+                rollerFraToken.contains(rolleConfig.beslutterRolle) ->
+                    listOf(
+                        BehandlerRolle.BESLUTTER,
+                        BehandlerRolle.SAKSBEHANDLER,
+                        BehandlerRolle.VEILEDER,
+                    )
+                rollerFraToken.contains(rolleConfig.saksbehandlerRolle) ->
+                    listOf(
+                        BehandlerRolle.SAKSBEHANDLER,
+                        BehandlerRolle.VEILEDER,
+                    )
+                rollerFraToken.contains(rolleConfig.veilederRolle) -> listOf(BehandlerRolle.VEILEDER)
+                else -> listOf(BehandlerRolle.UKJENT)
+            }
 
         return rollerForBruker.contains(minimumsrolle)
     }
