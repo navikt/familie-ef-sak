@@ -1,4 +1,4 @@
-FROM ghcr.io/navikt/baseimages/temurin:21
+FROM gcr.io/distroless/java21-debian12:nonroot
 
 ENV APP_NAME=familie-ef-sak
 ENV JAVA_OPTS="-XX:MaxRAMPercentage=75"
