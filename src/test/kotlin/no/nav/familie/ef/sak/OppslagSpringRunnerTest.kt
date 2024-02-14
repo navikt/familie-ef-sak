@@ -79,7 +79,6 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
 )
 @EnableMockOAuth2Server
 abstract class OppslagSpringRunnerTest {
-
     protected final val listAppender = initLoggingEventListAppender()
     protected var loggingEvents: MutableList<ILoggingEvent> = listAppender.list
     protected val restTemplate = TestRestTemplate()
@@ -174,7 +173,10 @@ abstract class OppslagSpringRunnerTest {
         return LOCALHOST + getPort() + uri
     }
 
-    protected fun url(baseUrl: String, uri: String): String {
+    protected fun url(
+        baseUrl: String,
+        uri: String,
+    ): String {
         return baseUrl + uri
     }
 
@@ -202,13 +204,18 @@ abstract class OppslagSpringRunnerTest {
         return TokenUtil.onBehalfOfToken(mockOAuth2Server, roles, saksbehandler)
     }
 
-    protected fun clientToken(clientId: String = "1", accessAsApplication: Boolean = true): String {
+    protected fun clientToken(
+        clientId: String = "1",
+        accessAsApplication: Boolean = true,
+    ): String {
         return TokenUtil.clientToken(mockOAuth2Server, clientId, accessAsApplication)
     }
 
-    companion object {
+    protected fun søkerToken(personident: String) = TokenUtil.søkerBearerToken(mockOAuth2Server, personident)
 
+    companion object {
         private const val LOCALHOST = "http://localhost:"
+
         protected fun initLoggingEventListAppender(): ListAppender<ILoggingEvent> {
             val listAppender = ListAppender<ILoggingEvent>()
             listAppender.start()
