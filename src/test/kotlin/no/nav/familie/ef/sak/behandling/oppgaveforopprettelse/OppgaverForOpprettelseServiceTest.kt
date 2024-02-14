@@ -15,8 +15,12 @@ import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.saksbehandling
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
+import no.nav.familie.ef.sak.vedtak.VedtakService
+import no.nav.familie.ef.sak.vedtak.domain.Vedtak
+import no.nav.familie.ef.sak.vedtak.dto.ResultatType
 import no.nav.familie.ef.sak.økonomi.lagAndelTilkjentYtelse
 import no.nav.familie.ef.sak.økonomi.lagTilkjentYtelse
+import no.nav.familie.kontrakter.ef.felles.AvslagÅrsak
 import no.nav.familie.kontrakter.ef.iverksett.OppgaveForOpprettelseType
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.assertj.core.api.Assertions.assertThat
@@ -30,19 +34,24 @@ internal class OppgaverForOpprettelseServiceTest {
     private val oppgaverForOpprettelseRepository = mockk<OppgaverForOpprettelseRepository>()
     private val tilkjentYtelseService = mockk<TilkjentYtelseService>()
     private val behandlingService = mockk<BehandlingService>()
+    private val vedtakService = mockk<VedtakService>()
+
     private var oppgaverForOpprettelseService =
-        spyk(OppgaverForOpprettelseService(oppgaverForOpprettelseRepository, behandlingService, tilkjentYtelseService))
+        spyk(OppgaverForOpprettelseService(oppgaverForOpprettelseRepository, behandlingService, tilkjentYtelseService, vedtakService))
 
     private val behandling = behandling(fagsak = fagsak())
     private val behandlingId = behandling.id
     private val oppgaverForOpprettelse = OppgaverForOpprettelse(behandlingId, emptyList())
     private val saksbehandling = lagSaksbehandling(stønadType = StønadType.OVERGANGSSTØNAD, behandling = behandling)
+    private val vedtak = mockk<Vedtak>()
 
     @BeforeEach
     fun init() {
         every { oppgaverForOpprettelseRepository.deleteById(any()) } just runs
         every { oppgaverForOpprettelseRepository.insert(any()) } returns oppgaverForOpprettelse
         every { oppgaverForOpprettelseRepository.update(any()) } returns oppgaverForOpprettelse
+        every { vedtak.resultatType } returns ResultatType.INNVILGE
+        every { vedtakService.hentVedtak(any()) } returns vedtak
     }
 
     @Test
@@ -134,6 +143,72 @@ internal class OppgaverForOpprettelseServiceTest {
         val oppgaver = oppgaverForOpprettelseService.hentOppgavetyperSomKanOpprettes(iverksattFørstegangsbehandling.id)
 
         assertThat(oppgaver.contains(OppgaveForOpprettelseType.INNTEKTSKONTROLL_1_ÅR_FREM_I_TID)).isFalse
+    }
+
+    @Test
+    fun `ikke oppgaveopprettelse for avslått overgangsstønad med tilkjente ytelser under 1 år frem i tid`() {
+        val saksbehandling = lagSaksbehandling(behandling = behandling)
+        every { tilkjentYtelseService.hentForBehandlingEllerNull(any()) } returns tilkjentYtelseUnder1årFremITid
+        every { behandlingService.hentSaksbehandling(iverksattFørstegangsbehandling.id) } returns saksbehandling
+        every { vedtak.avslåÅrsak } returns AvslagÅrsak.MINDRE_INNTEKTSENDRINGER
+        every { vedtak.resultatType } returns ResultatType.AVSLÅ
+        every { behandlingService.finnSisteIverksatteBehandling(any()) } returns behandling
+
+        val oppgaver = oppgaverForOpprettelseService.hentOppgavetyperSomKanOpprettes(iverksattFørstegangsbehandling.id)
+
+        assertThat(oppgaver.contains(OppgaveForOpprettelseType.INNTEKTSKONTROLL_1_ÅR_FREM_I_TID)).isFalse
+    }
+
+    @Test
+    fun `oppgaveopprettelse for avslått overgangsstønad med tilkjente ytelser over 1 år frem i tid`() {
+        val saksbehandling = lagSaksbehandling(behandling = behandling)
+        every { tilkjentYtelseService.hentForBehandlingEllerNull(any()) } returns tilkjentYtelse2årFremITid
+        every { behandlingService.hentSaksbehandling(iverksattFørstegangsbehandling.id) } returns saksbehandling
+        every { vedtak.avslåÅrsak } returns AvslagÅrsak.MINDRE_INNTEKTSENDRINGER
+        every { vedtak.resultatType } returns ResultatType.AVSLÅ
+        every { behandlingService.finnSisteIverksatteBehandling(any()) } returns behandling
+
+        val oppgaver = oppgaverForOpprettelseService.hentOppgavetyperSomKanOpprettes(iverksattFørstegangsbehandling.id)
+        assertThat(oppgaver.contains(OppgaveForOpprettelseType.INNTEKTSKONTROLL_1_ÅR_FREM_I_TID)).isTrue()
+    }
+
+    @Test
+    fun `oppgaveopprettelse for avslått overgangsstønad med ytelser frem i tid og avslagsårsak inntektsendringer`() {
+        val saksbehandling = lagSaksbehandling(behandling = behandling)
+        every { tilkjentYtelseService.hentForBehandlingEllerNull(any()) } returns tilkjentYtelse2årFremITid
+        every { behandlingService.hentSaksbehandling(iverksattFørstegangsbehandling.id) } returns saksbehandling
+        every { vedtak.avslåÅrsak } returns AvslagÅrsak.MINDRE_INNTEKTSENDRINGER
+        every { vedtak.resultatType } returns ResultatType.AVSLÅ
+        every { behandlingService.finnSisteIverksatteBehandling(any()) } returns behandling
+
+        val oppgaver = oppgaverForOpprettelseService.hentOppgavetyperSomKanOpprettes(iverksattFørstegangsbehandling.id)
+        assertThat(oppgaver.contains(OppgaveForOpprettelseType.INNTEKTSKONTROLL_1_ÅR_FREM_I_TID)).isTrue()
+    }
+
+    @Test
+    fun `ikke oppgaveopprettelse for avslått overgangsstønad med avslagsårsak ulik inntektsendring`() {
+        val saksbehandling = lagSaksbehandling(behandling = behandling)
+        every { tilkjentYtelseService.hentForBehandlingEllerNull(any()) } returns tilkjentYtelse2årFremITid
+        every { behandlingService.hentSaksbehandling(iverksattFørstegangsbehandling.id) } returns saksbehandling
+        every { vedtak.avslåÅrsak } returns AvslagÅrsak.KORTVARIG_AVBRUDD_JOBB
+        every { vedtak.resultatType } returns ResultatType.AVSLÅ
+        every { behandlingService.finnSisteIverksatteBehandling(any()) } returns behandling
+
+        val oppgaver = oppgaverForOpprettelseService.hentOppgavetyperSomKanOpprettes(iverksattFørstegangsbehandling.id)
+        assertThat(oppgaver.contains(OppgaveForOpprettelseType.INNTEKTSKONTROLL_1_ÅR_FREM_I_TID)).isFalse()
+    }
+
+    @Test
+    fun `siste iverksatte behandling hentes for avslag`() {
+        val saksbehandling = lagSaksbehandling(behandling = behandling)
+        every { tilkjentYtelseService.hentForBehandlingEllerNull(any()) } returns tilkjentYtelse2årFremITid
+        every { behandlingService.hentSaksbehandling(iverksattFørstegangsbehandling.id) } returns saksbehandling
+        every { vedtak.avslåÅrsak } returns AvslagÅrsak.MINDRE_INNTEKTSENDRINGER
+        every { vedtak.resultatType } returns ResultatType.AVSLÅ
+        every { behandlingService.finnSisteIverksatteBehandling(any()) } returns behandling
+
+        oppgaverForOpprettelseService.hentOppgavetyperSomKanOpprettes(iverksattFørstegangsbehandling.id)
+        verify { behandlingService.finnSisteIverksatteBehandling(any()) }
     }
 
     private val tilkjentYtelse2årFremITid = lagTilkjentYtelse(
