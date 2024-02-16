@@ -2,11 +2,11 @@ package no.nav.familie.ef.sak.infrastruktur.sikkerhet
 
 import no.nav.familie.ef.sak.behandlingsflyt.steg.BehandlerRolle
 import no.nav.familie.ef.sak.infrastruktur.config.RolleConfig
+import no.nav.familie.sikkerhet.EksternBrukerUtils
 import no.nav.security.token.support.spring.SpringTokenValidationContextHolder
 import org.slf4j.LoggerFactory
 
 object SikkerhetContext {
-
     private const val SYSTEM_NAVN = "System"
     const val SYSTEM_FORKORTELSE = "VL"
 
@@ -29,6 +29,12 @@ object SikkerhetContext {
         return kallKommerFra("teamfamilie:familie-klage")
     }
 
+    fun kallKommerFraFamilieEfSøknadApi(): Boolean {
+        val claims = SpringTokenValidationContextHolder().tokenValidationContext.getClaims(EksternBrukerUtils.ISSUER_TOKENX)
+        val applikasjonsnavn = claims.get("client_id")?.toString() ?: "" // e.g. dev-gcp:some-team:application-name
+        return applikasjonsnavn.endsWith("teamfamilie:familie-ef-soknad-api")
+    }
+
     private fun kallKommerFra(forventetApplikasjonsSuffix: String): Boolean {
         val claims = SpringTokenValidationContextHolder().tokenValidationContext.getClaims("azuread")
         val applikasjonsnavn = claims.get("azp_name")?.toString() ?: "" // e.g. dev-gcp:some-team:application-name
@@ -45,6 +51,7 @@ object SikkerhetContext {
         return result
     }
 
+    @Deprecated("Bytt til _har_veileder_rolle eller tilsvarende")
     fun erSaksbehandler(): Boolean = hentSaksbehandlerEllerSystembruker() != SYSTEM_FORKORTELSE
 
     fun hentSaksbehandlerEllerSystembruker() =
@@ -79,32 +86,39 @@ object SikkerhetContext {
             )
     }
 
-    fun harTilgangTilGittRolle(rolleConfig: RolleConfig, minimumsrolle: BehandlerRolle): Boolean {
+    fun harTilgangTilGittRolle(
+        rolleConfig: RolleConfig,
+        minimumsrolle: BehandlerRolle,
+    ): Boolean {
         val rollerFraToken = hentGrupperFraToken()
-        val rollerForBruker = when {
-            hentSaksbehandlerEllerSystembruker() == SYSTEM_FORKORTELSE -> listOf(
-                BehandlerRolle.SYSTEM,
-                BehandlerRolle.BESLUTTER,
-                BehandlerRolle.SAKSBEHANDLER,
-                BehandlerRolle.VEILEDER,
-            )
-            rollerFraToken.contains(rolleConfig.beslutterRolle) -> listOf(
-                BehandlerRolle.BESLUTTER,
-                BehandlerRolle.SAKSBEHANDLER,
-                BehandlerRolle.VEILEDER,
-            )
-            rollerFraToken.contains(rolleConfig.saksbehandlerRolle) -> listOf(
-                BehandlerRolle.SAKSBEHANDLER,
-                BehandlerRolle.VEILEDER,
-            )
-            rollerFraToken.contains(rolleConfig.veilederRolle) -> listOf(BehandlerRolle.VEILEDER)
-            else -> listOf(BehandlerRolle.UKJENT)
-        }
+        val rollerForBruker =
+            when {
+                hentSaksbehandlerEllerSystembruker() == SYSTEM_FORKORTELSE ->
+                    listOf(
+                        BehandlerRolle.SYSTEM,
+                        BehandlerRolle.BESLUTTER,
+                        BehandlerRolle.SAKSBEHANDLER,
+                        BehandlerRolle.VEILEDER,
+                    )
+                rollerFraToken.contains(rolleConfig.beslutterRolle) ->
+                    listOf(
+                        BehandlerRolle.BESLUTTER,
+                        BehandlerRolle.SAKSBEHANDLER,
+                        BehandlerRolle.VEILEDER,
+                    )
+                rollerFraToken.contains(rolleConfig.saksbehandlerRolle) ->
+                    listOf(
+                        BehandlerRolle.SAKSBEHANDLER,
+                        BehandlerRolle.VEILEDER,
+                    )
+                rollerFraToken.contains(rolleConfig.veilederRolle) -> listOf(BehandlerRolle.VEILEDER)
+                else -> listOf(BehandlerRolle.UKJENT)
+            }
 
         return rollerForBruker.contains(minimumsrolle)
     }
 
-    fun harRolle(rolle: String): Boolean {
-        return hentGrupperFraToken().contains(rolle)
+    fun harRolle(rolleId: String): Boolean {
+        return hentGrupperFraToken().contains(rolleId)
     }
 }

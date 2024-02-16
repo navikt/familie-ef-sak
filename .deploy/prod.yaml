@@ -24,6 +24,8 @@ spec:
   replicas:
     min: 2
     max: 4
+  tokenx:
+    enabled: true
   resources:
     limits:
       memory: 2048Mi
@@ -54,6 +56,7 @@ spec:
         - application: familie-klage
         - application: familie-ef-personhendelse
         - application: familie-ef-mottak
+        - application: familie-ef-soknad-api
         - application: familie-ef-proxy
           namespace: teamfamilie
           cluster: prod-fss
@@ -102,10 +105,13 @@ spec:
           - id: "ad7b87a6-9180-467c-affc-20a566b0fec0" # 0000-GA-Strengt_Fortrolig_Adresse
           - id: "9ec6487d-f37a-4aad-a027-cd221c1ac32b" # 0000-GA-Fortrolig_Adresse
           - id: "e750ceb5-b70b-4d94-b4fa-9d22467b786b" # 0000-GA-Egne_ansatte
-
+          - id: "3d718ae5-f25e-47a4-b4b3-084a97604c1d" # teamfamilie-forvaltning
         extra:
           - "NAVident"
           - "azp_name"
+      replyURLs:
+        - "https://familie-ef-sak.intern.nav.no/swagger-ui/oauth2-redirect.html"
+      singlePageApplication: true
   env:
     - name: SPRING_PROFILES_ACTIVE
       value: prod

@@ -6,8 +6,8 @@ import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegService
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
+import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvisIkke
-import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.ef.sak.oppgave.TilordnetRessursService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.secureLogger
@@ -55,11 +55,13 @@ class VedtakController(
     private val angreSendTilBeslutterService: AngreSendTilBeslutterService,
     private val tilordnetRessursService: TilordnetRessursService,
 ) {
-
     private val logger = LoggerFactory.getLogger(javaClass)
 
     @PostMapping("/{behandlingId}/send-til-beslutter")
-    fun sendTilBeslutter(@PathVariable behandlingId: UUID, @RequestBody sendTilBeslutter: SendTilBeslutterDto?): Ressurs<UUID> {
+    fun sendTilBeslutter(
+        @PathVariable behandlingId: UUID,
+        @RequestBody sendTilBeslutter: SendTilBeslutterDto?,
+    ): Ressurs<UUID> {
         val behandling = behandlingService.hentSaksbehandling(behandlingId)
         tilgangService.validerTilgangTilBehandling(behandling, AuditLoggerEvent.UPDATE)
 
@@ -75,7 +77,9 @@ class VedtakController(
     }
 
     @PostMapping("/{behandlingId}/angre-send-til-beslutter")
-    fun angreSendTilBeslutter(@PathVariable behandlingId: UUID): Ressurs<UUID> {
+    fun angreSendTilBeslutter(
+        @PathVariable behandlingId: UUID,
+    ): Ressurs<UUID> {
         tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.UPDATE)
         angreSendTilBeslutterService.angreSendTilBeslutter(behandlingId)
         return Ressurs.success(behandlingId)
@@ -88,7 +92,10 @@ class VedtakController(
     ): Ressurs<UUID> {
         val behandling = behandlingService.hentSaksbehandling(behandlingId)
         tilgangService.validerTilgangTilBehandling(behandling, AuditLoggerEvent.UPDATE)
-        validerTilordnetRessurs(behandlingId, setOf(Oppgavetype.BehandleSak, Oppgavetype.BehandleUnderkjentVedtak, Oppgavetype.GodkjenneVedtak))
+        validerTilordnetRessurs(
+            behandlingId,
+            setOf(Oppgavetype.BehandleSak, Oppgavetype.BehandleUnderkjentVedtak, Oppgavetype.GodkjenneVedtak),
+        )
         if (!request.godkjent && request.begrunnelse.isNullOrBlank()) {
             throw ApiFeil("Mangler begrunnelse", HttpStatus.BAD_REQUEST)
         }
@@ -96,14 +103,18 @@ class VedtakController(
     }
 
     @GetMapping("{behandlingId}/totrinnskontroll")
-    fun hentTotrinnskontroll(@PathVariable behandlingId: UUID): ResponseEntity<Ressurs<TotrinnskontrollStatusDto>> {
+    fun hentTotrinnskontroll(
+        @PathVariable behandlingId: UUID,
+    ): ResponseEntity<Ressurs<TotrinnskontrollStatusDto>> {
         tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.ACCESS)
         val totrinnskontroll = totrinnskontrollService.hentTotrinnskontrollStatus(behandlingId)
         return ResponseEntity.ok(Ressurs.success(totrinnskontroll))
     }
 
     @GetMapping("{behandlingId}")
-    fun hentVedtak(@PathVariable behandlingId: UUID): Ressurs<VedtakDto?> {
+    fun hentVedtak(
+        @PathVariable behandlingId: UUID,
+    ): Ressurs<VedtakDto?> {
         tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.ACCESS)
         return Ressurs.success(vedtakService.hentVedtakHvisEksisterer(behandlingId))
     }
@@ -127,7 +138,10 @@ class VedtakController(
     }
 
     @PostMapping("/{behandlingId}/lagre-vedtak")
-    fun lagreVedtak(@PathVariable behandlingId: UUID, @RequestBody vedtak: VedtakDto): Ressurs<UUID> {
+    fun lagreVedtak(
+        @PathVariable behandlingId: UUID,
+        @RequestBody vedtak: VedtakDto,
+    ): Ressurs<UUID> {
         val behandling = behandlingService.hentSaksbehandling(behandlingId)
         tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.UPDATE)
         validerKanRedigereBehandling(behandling)
@@ -136,7 +150,9 @@ class VedtakController(
     }
 
     @DeleteMapping("/{behandlingId}")
-    fun nullstillVedtak(@PathVariable behandlingId: UUID): Ressurs<UUID> {
+    fun nullstillVedtak(
+        @PathVariable behandlingId: UUID,
+    ): Ressurs<UUID> {
         tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.DELETE)
         tilgangService.validerHarSaksbehandlerrolle()
 
@@ -144,28 +160,43 @@ class VedtakController(
         return Ressurs.success(behandlingId)
     }
 
-    private fun validerAlleVilkårOppfyltDersomInvilgelse(vedtak: VedtakDto, behandlingId: UUID) {
+    private fun validerAlleVilkårOppfyltDersomInvilgelse(
+        vedtak: VedtakDto,
+        behandlingId: UUID,
+    ) {
         if (vedtak is InnvilgelseOvergangsstønad) {
-            brukerfeilHvisIkke(vurderingService.erAlleVilkårOppfylt(behandlingId)) { "Kan ikke fullføre en behandling med resultat innvilget hvis ikke alle vilkår er oppfylt" }
+            brukerfeilHvisIkke(vurderingService.erAlleVilkårOppfylt(behandlingId)) {
+                "Kan ikke fullføre en behandling med resultat innvilget hvis ikke alle vilkår er oppfylt"
+            }
         }
     }
 
     private fun validerKanRedigereBehandling(saksbehandling: Saksbehandling) {
-        feilHvis(saksbehandling.status.behandlingErLåstForVidereRedigering()) {
+        brukerfeilHvis(saksbehandling.status.behandlingErLåstForVidereRedigering()) {
             "Behandlingen er låst og vedtaket kan derfor ikke lagres"
         }
         validerTilordnetRessurs(saksbehandling.id)
     }
 
-    private fun validerTilordnetRessurs(behandlingId: UUID, oppgavetyper: Set<Oppgavetype> = setOf(Oppgavetype.BehandleSak, Oppgavetype.BehandleUnderkjentVedtak)) {
-        feilHvis(!tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandler(behandlingId, oppgavetyper)) {
+    private fun validerTilordnetRessurs(
+        behandlingId: UUID,
+        oppgavetyper: Set<Oppgavetype> =
+            setOf(
+                Oppgavetype.BehandleSak,
+                Oppgavetype.BehandleUnderkjentVedtak,
+            ),
+    ) {
+        brukerfeilHvis(!tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandler(behandlingId, oppgavetyper)) {
             "Behandlingen har en annen eier og du kan derfor ikke lagre vedtaket"
         }
     }
 
     @GetMapping("/eksternid/{eksternId}/inntekt")
     @ProtectedWithClaims(issuer = "azuread", claimMap = ["roles=access_as_application"]) // Familie-ef-personhendelse bruker denne
-    fun hentForventetInntektForEksternId(@PathVariable eksternId: Long, dato: LocalDate?): Ressurs<Int?> {
+    fun hentForventetInntektForEksternId(
+        @PathVariable eksternId: Long,
+        dato: LocalDate?,
+    ): Ressurs<Int?> {
         val behandlingId = behandlingService.hentBehandlingPåEksternId(eksternId).id
 
         val forventetInntekt = vedtakService.hentForventetInntektForBehandlingIds(behandlingId, dato ?: LocalDate.now())
@@ -174,7 +205,10 @@ class VedtakController(
 
     @GetMapping("/eksternid/{eksternId}/harAktivtVedtak")
     @ProtectedWithClaims(issuer = "azuread", claimMap = ["roles=access_as_application"]) // Familie-ef-personhendelse bruker denne
-    fun hentHarAktivStonad(@PathVariable eksternId: Long, dato: LocalDate?): Ressurs<Boolean> {
+    fun hentHarAktivStonad(
+        @PathVariable eksternId: Long,
+        dato: LocalDate?,
+    ): Ressurs<Boolean> {
         val behandlingId = behandlingService.hentBehandlingPåEksternId(eksternId).id
 
         val forventetInntekt = vedtakService.hentHarAktivtVedtak(behandlingId, dato ?: LocalDate.now())
@@ -183,7 +217,9 @@ class VedtakController(
 
     @GetMapping("/personerMedAktivStonadIkkeManueltRevurdertSisteMaaneder")
     @ProtectedWithClaims(issuer = "azuread", claimMap = ["roles=access_as_application"]) // Familie-ef-personhendelse bruker denne
-    fun hentPersonerMedAktivStonadIkkeManueltRevurdertSisteToMåneder(@RequestParam antallMaaneder: Int = 3): Ressurs<List<String>> {
+    fun hentPersonerMedAktivStonadIkkeManueltRevurdertSisteToMåneder(
+        @RequestParam antallMaaneder: Int = 3,
+    ): Ressurs<List<String>> {
         return Ressurs.success(behandlingRepository.finnPersonerMedAktivStonadIkkeRevurdertSisteMåneder(antallMåneder = antallMaaneder))
     }
 

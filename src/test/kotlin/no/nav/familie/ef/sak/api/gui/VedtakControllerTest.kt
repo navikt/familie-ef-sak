@@ -68,7 +68,6 @@ import java.time.LocalDate
 import java.util.UUID
 
 internal class VedtakControllerTest : OppslagSpringRunnerTest() {
-
     @Autowired
     private lateinit var behandlingRepository: BehandlingRepository
 
@@ -203,7 +202,7 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
         validerTotrinnskontrollIkkeAutorisert(BESLUTTER)
         validerTotrinnskontrollKanFatteVedtak(BESLUTTER_2)
 
-        godkjennTotrinnskontroll(SAKSBEHANDLER, responseServerError())
+        godkjennTotrinnskontroll(SAKSBEHANDLER, responseBadRequest())
         godkjennTotrinnskontroll(BESLUTTER, responseBadRequest())
 
         byttEierPåLagretOppgave(behandlingId, 24682L, 24685L)
@@ -264,7 +263,7 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
     internal fun `kan ikke godkjenne totrinnskontroll når behandling utredes`() {
         opprettBehandling()
         godkjennTotrinnskontroll(BESLUTTER) {
-            assertThat(it.statusCode).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR)
+            assertThat(it.statusCode).isEqualTo(HttpStatus.BAD_REQUEST)
         }
     }
 
@@ -272,7 +271,7 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
     internal fun `kan ikke sende til besluttning før behandling er i riktig steg`() {
         opprettBehandling(steg = StegType.VILKÅR)
         godkjennTotrinnskontroll(BESLUTTER) {
-            assertThat(it.statusCode).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR)
+            assertThat(it.statusCode).isEqualTo(HttpStatus.BAD_REQUEST)
         }
     }
 
@@ -281,7 +280,7 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
         opprettBehandling(saksbehandler = BESLUTTER)
         sendTilBeslutter(BESLUTTER)
         godkjennTotrinnskontroll(SAKSBEHANDLER) {
-            assertThat(it.statusCode).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR)
+            assertThat(it.statusCode).isEqualTo(HttpStatus.BAD_REQUEST)
         }
     }
 
@@ -322,21 +321,26 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
     @Test
     internal fun `skal lagre oppgaver som skal opprettes`() {
         val lagAndelMedInntekt1ÅrFremITiden: (behandlingId: UUID) -> TilkjentYtelse = { behandlingId ->
-            val andel = lagAndelTilkjentYtelse(
-                beløp = 100,
-                fraOgMed = LocalDate.now(),
-                tilOgMed = LocalDate.now().plusYears(2),
-                kildeBehandlingId = behandlingId,
-            )
+            val andel =
+                lagAndelTilkjentYtelse(
+                    beløp = 100,
+                    fraOgMed = LocalDate.now(),
+                    tilOgMed = LocalDate.now().plusYears(2),
+                    kildeBehandlingId = behandlingId,
+                )
             lagTilkjentYtelse(behandlingId = behandlingId, andelerTilkjentYtelse = listOf(andel))
         }
-        val behandlingId = opprettBehandling(
-            steg = StegType.SEND_TIL_BESLUTTER,
-            vedtakResultatType = ResultatType.AVSLÅ,
-            status = BehandlingStatus.UTREDES,
-            avlsåÅrsak = AvslagÅrsak.MINDRE_INNTEKTSENDRINGER,
-            tilkjentYtelse = lagAndelMedInntekt1ÅrFremITiden,
-        )
+
+        val behandlingId =
+            opprettBehandling(
+                steg = StegType.SEND_TIL_BESLUTTER,
+                vedtakResultatType = ResultatType.INNVILGE,
+                status = BehandlingStatus.UTREDES,
+                avlsåÅrsak = AvslagÅrsak.MINDRE_INNTEKTSENDRINGER,
+                tilkjentYtelse = lagAndelMedInntekt1ÅrFremITiden,
+            )
+
+        lagVilkårsvurderinger(behandlingId, Vilkårsresultat.OPPFYLT)
 
         sendTilBeslutter(
             SAKSBEHANDLER,
@@ -411,8 +415,18 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
 
             val gjeldendeTasks =
                 taskService.findAll().filter { task -> task.metadata["behandlingId"] == behandlingId.toString() }
-            assertThat(gjeldendeTasks.single { task -> task.type == FerdigstillOppgaveTask.TYPE && task.metadata["oppgavetype"] == "GodkjenneVedtak" }).isNotNull
-            assertThat(gjeldendeTasks.single { task -> task.type == OpprettOppgaveTask.TYPE && task.metadata["oppgavetype"] == "BehandleSak" }).isNotNull
+            assertThat(
+                gjeldendeTasks.single {
+                        task ->
+                    task.type == FerdigstillOppgaveTask.TYPE && task.metadata["oppgavetype"] == "GodkjenneVedtak"
+                },
+            ).isNotNull
+            assertThat(
+                gjeldendeTasks.single {
+                        task ->
+                    task.type == OpprettOppgaveTask.TYPE && task.metadata["oppgavetype"] == "BehandleSak"
+                },
+            ).isNotNull
         }
 
         @Test
@@ -437,12 +451,13 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
         },
         saksbehandler: Saksbehandler = SAKSBEHANDLER,
     ): UUID {
-        val lagretBehandling = behandlingRepository.insert(
-            behandling.copy(
-                status = status,
-                steg = steg,
-            ),
-        )
+        val lagretBehandling =
+            behandlingRepository.insert(
+                behandling.copy(
+                    status = status,
+                    steg = steg,
+                ),
+            )
 
         vedtakRepository.insert(
             vedtak(lagretBehandling.id, vedtakResultatType).copy(
@@ -462,13 +477,17 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
         return lagretBehandling.id
     }
 
-    private fun opprettOppgave(behandlingId: UUID, saksbehandler: Saksbehandler = SAKSBEHANDLER) {
+    private fun opprettOppgave(
+        behandlingId: UUID,
+        saksbehandler: Saksbehandler = SAKSBEHANDLER,
+    ) {
         val oppgaveId = if (saksbehandler == SAKSBEHANDLER) 24681L else 24682L
-        val oppgave = Oppgave(
-            gsakOppgaveId = oppgaveId,
-            behandlingId = behandlingId,
-            type = Oppgavetype.BehandleSak,
-        )
+        val oppgave =
+            Oppgave(
+                gsakOppgaveId = oppgaveId,
+                behandlingId = behandlingId,
+                type = Oppgavetype.BehandleSak,
+            )
         oppgaveRepository.insert(oppgave)
     }
 
@@ -480,11 +499,12 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
         val gammelOppgave = oppgaveRepository.findByGsakOppgaveId(gammelOppgaveId)
         oppgaveRepository.delete(gammelOppgave)
 
-        val oppgave = Oppgave(
-            gsakOppgaveId = nyOppgaveId,
-            behandlingId = behandlingId,
-            type = Oppgavetype.BehandleSak,
-        )
+        val oppgave =
+            Oppgave(
+                gsakOppgaveId = nyOppgaveId,
+                behandlingId = behandlingId,
+                type = Oppgavetype.BehandleSak,
+            )
         oppgaveRepository.insert(oppgave)
     }
 
@@ -499,18 +519,21 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
         )
     }
 
-    private fun <T> responseOK(): (ResponseEntity<Ressurs<T>>) -> Unit = {
-        assertThat(it.statusCode).isEqualTo(HttpStatus.OK)
-        assertThat(it.body?.status).isEqualTo(Ressurs.Status.SUKSESS)
-    }
+    private fun <T> responseOK(): (ResponseEntity<Ressurs<T>>) -> Unit =
+        {
+            assertThat(it.statusCode).isEqualTo(HttpStatus.OK)
+            assertThat(it.body?.status).isEqualTo(Ressurs.Status.SUKSESS)
+        }
 
-    private fun <T> responseServerError(): (ResponseEntity<Ressurs<T>>) -> Unit = {
-        assertThat(it.statusCode).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR)
-    }
+    private fun <T> responseServerError(): (ResponseEntity<Ressurs<T>>) -> Unit =
+        {
+            assertThat(it.statusCode).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR)
+        }
 
-    private fun <T> responseBadRequest(): (ResponseEntity<Ressurs<T>>) -> Unit = {
-        assertThat(it.statusCode).isEqualTo(HttpStatus.BAD_REQUEST)
-    }
+    private fun <T> responseBadRequest(): (ResponseEntity<Ressurs<T>>) -> Unit =
+        {
+            assertThat(it.statusCode).isEqualTo(HttpStatus.BAD_REQUEST)
+        }
 
     private fun sendTilBeslutter(
         saksbehandler: Saksbehandler,
@@ -519,11 +542,12 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
     ) {
         headers.setBearerAuth(token(saksbehandler))
         lagSaksbehandlerBrev(saksbehandler.name)
-        val response = restTemplate.exchange<Ressurs<UUID>>(
-            localhost("/api/vedtak/${behandling.id}/send-til-beslutter"),
-            HttpMethod.POST,
-            HttpEntity<Any>(request, headers),
-        )
+        val response =
+            restTemplate.exchange<Ressurs<UUID>>(
+                localhost("/api/vedtak/${behandling.id}/send-til-beslutter"),
+                HttpMethod.POST,
+                HttpEntity<Any>(request, headers),
+            )
         validator.invoke(response)
     }
 
@@ -532,11 +556,12 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
         validator: (ResponseEntity<Ressurs<UUID>>) -> Unit = responseOK(),
     ) {
         headers.setBearerAuth(token(saksbehandler))
-        val response = restTemplate.exchange<Ressurs<UUID>>(
-            localhost("/api/vedtak/${behandling.id}/angre-send-til-beslutter"),
-            HttpMethod.POST,
-            HttpEntity<Any>(headers),
-        )
+        val response =
+            restTemplate.exchange<Ressurs<UUID>>(
+                localhost("/api/vedtak/${behandling.id}/angre-send-til-beslutter"),
+                HttpMethod.POST,
+                HttpEntity<Any>(headers),
+            )
         validator.invoke(response)
     }
 
@@ -564,22 +589,24 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
         validator: (ResponseEntity<Ressurs<UUID>>) -> Unit,
     ) {
         headers.setBearerAuth(token(saksbehandler))
-        val response = restTemplate.exchange<Ressurs<UUID>>(
-            localhost("/api/vedtak/${behandling.id}/beslutte-vedtak"),
-            HttpMethod.POST,
-            HttpEntity(beslutteVedtak, headers),
-        )
+        val response =
+            restTemplate.exchange<Ressurs<UUID>>(
+                localhost("/api/vedtak/${behandling.id}/beslutte-vedtak"),
+                HttpMethod.POST,
+                HttpEntity(beslutteVedtak, headers),
+            )
         validator.invoke(response)
     }
 
     private fun hentTotrinnskontrollStatus(saksbehandler: Saksbehandler): TotrinnskontrollStatusDto {
         headers.setBearerAuth(token(saksbehandler))
-        val response = restTemplate
-            .exchange<Ressurs<TotrinnskontrollStatusDto>>(
-                localhost("/api/vedtak/${behandling.id}/totrinnskontroll"),
-                HttpMethod.GET,
-                HttpEntity<Any>(headers),
-            )
+        val response =
+            restTemplate
+                .exchange<Ressurs<TotrinnskontrollStatusDto>>(
+                    localhost("/api/vedtak/${behandling.id}/totrinnskontroll"),
+                    HttpMethod.GET,
+                    HttpEntity<Any>(headers),
+                )
         responseOK<TotrinnskontrollStatusDto>().invoke(response)
         return response.body?.data!!
     }
@@ -589,10 +616,12 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
     private fun validerBehandlingIverksetter() =
         validerBehandling(BehandlingStatus.IVERKSETTER_VEDTAK, StegType.VENTE_PÅ_STATUS_FRA_IVERKSETT)
 
-    private fun validerBehandlingFatterVedtak() =
-        validerBehandling(BehandlingStatus.FATTER_VEDTAK, StegType.BESLUTTE_VEDTAK)
+    private fun validerBehandlingFatterVedtak() = validerBehandling(BehandlingStatus.FATTER_VEDTAK, StegType.BESLUTTE_VEDTAK)
 
-    private fun validerBehandling(status: BehandlingStatus, steg: StegType) {
+    private fun validerBehandling(
+        status: BehandlingStatus,
+        steg: StegType,
+    ) {
         val behandling = behandlingRepository.findByIdOrThrow(behandling.id)
         assertThat(behandling.status).isEqualTo(status)
         assertThat(behandling.steg).isEqualTo(steg)
@@ -640,14 +669,15 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
         resultat: Vilkårsresultat = Vilkårsresultat.OPPFYLT,
         ikkeLag: Int = 0,
     ) {
-        val vilkårsvurderinger = VilkårType.hentVilkårForStønad(OVERGANGSSTØNAD).map {
-            vilkårsvurdering(
-                behandlingId = behandlingId,
-                resultat = resultat,
-                type = it,
-                delvilkårsvurdering = listOf(),
-            )
-        }.dropLast(ikkeLag)
+        val vilkårsvurderinger =
+            VilkårType.hentVilkårForStønad(OVERGANGSSTØNAD).map {
+                vilkårsvurdering(
+                    behandlingId = behandlingId,
+                    resultat = resultat,
+                    type = it,
+                    delvilkårsvurdering = listOf(),
+                )
+            }.dropLast(ikkeLag)
         vilkårsvurderingRepository.insertAll(vilkårsvurderinger)
     }
 }

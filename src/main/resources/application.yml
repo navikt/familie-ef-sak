@@ -7,17 +7,15 @@ server:
       max-file-size: 200MB
       max-request-size: 200MB
 
-springdoc:
-  packagesToScan: no.nav.familie.ef.sak
-  pathsToMatch: /v3/api-docs,/api/**
-  swagger-ui:
-    disable-swagger-default-url: true
-
 no.nav.security.jwt:
-  issuer.azuread:
-    discoveryurl: ${AZURE_APP_WELL_KNOWN_URL}
-    accepted_audience: ${AZURE_APP_CLIENT_ID}
-    cookie_name: azure_token
+  issuer:
+    tokenx:
+      discovery-url: ${TOKEN_X_WELL_KNOWN_URL}
+      accepted-audience: ${TOKEN_X_CLIENT_ID}
+    azuread:
+      discoveryurl: ${AZURE_APP_WELL_KNOWN_URL}
+      accepted_audience: ${AZURE_APP_CLIENT_ID}
+      cookie_name: azure_token
   client:
     registration:
       familie-integrasjoner:
@@ -251,6 +249,8 @@ DEPLOY_ENV: prod
 ON_PREM_URL_ENV: prod
 
 AZUREAD_TOKEN_ENDPOINT_URL: https://login.microsoftonline.com/${AZURE_APP_TENANT_ID}/oauth2/v2.0/token
+AUTHORIZATION_URL: https://login.microsoftonline.com/${AZURE_APP_TENANT_ID}/oauth2/v2.0/authorize
+API_SCOPE: api://${AZURE_APP_CLIENT_ID}/.default
 
 FAMILIE_BREV_API_URL: http://familie-brev
 FAMILIE_EF_IVERKSETT_URL: http://familie-ef-iverksett
@@ -285,6 +285,7 @@ rolle:
   kode6: "ad7b87a6-9180-467c-affc-20a566b0fec0" # 0000-GA-Strengt_Fortrolig_Adresse
   kode7: "9ec6487d-f37a-4aad-a027-cd221c1ac32b" # 0000-GA-Fortrolig_Adresse
   egenAnsatt: "e750ceb5-b70b-4d94-b4fa-9d22467b786b" # 0000-GA-Egne_ansatte
+  forvalter: "3d718ae5-f25e-47a4-b4b3-084a97604c1d" # teamfamilie-forvaltning
 
 prosessering.rolle: "87190cf3-b278-457d-8ab7-1a5c55a9edd7" # Gruppen teamfamilie
 
@@ -299,3 +300,12 @@ prosessering:
   delete:
     after:
       weeks: 16
+
+springdoc:
+  swagger-ui:
+    oauth:
+      use-pkce-with-authorization-code-grant: true
+      client-id: ${AZURE_APP_CLIENT_ID}
+      scope-separator: ","
+    disable-swagger-default-url: true
+    persist-authorization: true

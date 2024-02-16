@@ -1,4 +1,4 @@
-package no.nav.familie.ef.sak.karakterutskrift
+package no.nav.familie.ef.sak.forvaltning.karakterutskrift
 
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.oppgave.OppgaveService
@@ -51,7 +51,13 @@ class AutomatiskBrevInnhentingKarakterutskriftService(
                     logger.warn("Oppretter ikke task for oppgave=$oppgaveId da denne er opprettet tidligere.")
                 } else {
                     logger.info("Oppretter task for oppgaveId=${it.id} og brevtype=$brevtype")
-                    taskService.save(SendKarakterutskriftBrevTilIverksettTask.opprettTask(oppgaveId, brevtype, Year.now()))
+                    taskService.save(
+                        SendKarakterutskriftBrevTilIverksettTask.opprettTask(
+                            oppgaveId,
+                            brevtype,
+                            Year.now(),
+                        ),
+                    )
                 }
             } else {
                 logger.info("Dry run. Fant oppgave=$oppgaveId og brevtype=$brevtype")

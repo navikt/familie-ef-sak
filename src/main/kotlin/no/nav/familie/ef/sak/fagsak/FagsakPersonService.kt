@@ -4,13 +4,15 @@ import no.nav.familie.ef.sak.fagsak.domain.FagsakPerson
 import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvisIkke
+import no.nav.familie.ef.sak.minside.MikrofrontendEnableBrukerTask
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
+import no.nav.familie.prosessering.internal.TaskService
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
 
 @Service
-class FagsakPersonService(private val fagsakPersonRepository: FagsakPersonRepository) {
+class FagsakPersonService(private val fagsakPersonRepository: FagsakPersonRepository, private val taskService: TaskService) {
 
     fun hentPerson(personId: UUID): FagsakPerson = fagsakPersonRepository.findByIdOrThrow(personId)
 
@@ -33,16 +35,24 @@ class FagsakPersonService(private val fagsakPersonRepository: FagsakPersonReposi
         }
         return (
             fagsakPersonRepository.findByIdent(personIdenter)
-                ?: fagsakPersonRepository.insert(FagsakPerson(identer = setOf(PersonIdent(gjeldendePersonIdent))))
+                ?: opprettFagsakPersonOgAktiverForMinSide(gjeldendePersonIdent)
             )
     }
 
     @Transactional
     fun oppdaterIdent(fagsakPerson: FagsakPerson, gjeldendePersonIdent: String): FagsakPerson {
-        return if (fagsakPerson.hentAktivIdent() != gjeldendePersonIdent) {
-            fagsakPersonRepository.update(fagsakPerson.medOppdatertGjeldendeIdent(gjeldendePersonIdent))
+        if (fagsakPerson.hentAktivIdent() != gjeldendePersonIdent) {
+            val oppdatertFagsakPerson = fagsakPerson.medOppdatertGjeldendeIdent(gjeldendePersonIdent)
+            taskService.save(MikrofrontendEnableBrukerTask.opprettTask(oppdatertFagsakPerson))
+            return fagsakPersonRepository.update(oppdatertFagsakPerson)
         } else {
-            fagsakPerson
+            return fagsakPerson
         }
+    }
+
+    fun opprettFagsakPersonOgAktiverForMinSide(gjeldendePersonIdent: String): FagsakPerson {
+        val fagsakPerson = fagsakPersonRepository.insert(FagsakPerson(identer = setOf(PersonIdent(gjeldendePersonIdent))))
+        taskService.save(MikrofrontendEnableBrukerTask.opprettTask(fagsakPerson))
+        return fagsakPerson
     }
 }

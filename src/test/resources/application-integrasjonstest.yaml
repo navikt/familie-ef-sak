@@ -2,10 +2,15 @@ server:
   port: 9093
 
 no.nav.security.jwt:
-  issuer.azuread:
-    discoveryurl: http://localhost:${mock-oauth2-server.port}/azuread/.well-known/openid-configuration
-    accepted_audience: aud-localhost
-    cookie_name: localhost-idtoken
+  issuer:
+    tokenx:
+      discovery-url: http://localhost:${mock-oauth2-server.port}/tokenx/.well-known/openid-configuration
+      accepted-audience: aud-localhost
+      cookie_name: localhost-idtoken
+    azuread:
+      discoveryurl: http://localhost:${mock-oauth2-server.port}/azuread/.well-known/openid-configuration
+      accepted_audience: aud-localhost
+      cookie_name: localhost-idtoken
 
 unleash:
   enabled: false
@@ -21,3 +26,5 @@ NAIS_APP_NAME: familie-ef-sak
 
 prosessering:
   enabled: false
+
+API_SCOPE: test

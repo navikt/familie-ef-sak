@@ -1,4 +1,4 @@
-package no.nav.familie.ef.sak.karakterutskrift
+package no.nav.familie.ef.sak.forvaltning.karakterutskrift
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.familie.ef.sak.arbeidsfordeling.ArbeidsfordelingService
