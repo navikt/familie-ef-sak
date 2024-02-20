@@ -15,15 +15,14 @@ class KontantstøtteClient(
     @Value("\${FAMILIE_KS_SAK_URL}") private val kontantstøtteUrl: URI,
     @Qualifier("azure") restOperations: RestOperations,
 ) : AbstractRestClient(restOperations, "kontantstøtte") {
-
     private fun lagHentUtbetalingsinfoUri() =
         UriComponentsBuilder.fromUri(kontantstøtteUrl).pathSegment("api/bisys/hent-utbetalingsinfo")
             .build().toUri()
 
-    fun hentUtbetalingsinfo(barnIdents: List<String>): HentUtbetalingsinfoKontantstøtte {
+    fun hentUtbetalingsinfo(barnOgForelderIdenter: List<String>): HentUtbetalingsinfoKontantstøtte {
         return postForEntity(
             lagHentUtbetalingsinfoUri(),
-            HentUtbetalingsinfoKontantstøtteRequest(LocalDate.MIN.toString(), barnIdents),
+            HentUtbetalingsinfoKontantstøtteRequest(LocalDate.MIN.toString(), barnOgForelderIdenter),
         )
     }
 }
