@@ -1,6 +1,5 @@
 package no.nav.familie.ef.sak.vilkår.regler.vilkår
 
-import com.fasterxml.jackson.annotation.JsonIgnore
 import no.nav.familie.ef.sak.felles.util.norskFormat
 import no.nav.familie.ef.sak.vilkår.Delvilkårsvurdering
 import no.nav.familie.ef.sak.vilkår.VilkårType
@@ -15,8 +14,8 @@ import no.nav.familie.ef.sak.vilkår.regler.SvarId
 import no.nav.familie.ef.sak.vilkår.regler.Vilkårsregel
 import no.nav.familie.ef.sak.vilkår.regler.jaNeiSvarRegel
 import no.nav.familie.ef.sak.vilkår.regler.regelIder
+import no.nav.familie.ef.sak.vilkår.regler.vilkår.AlderPåBarnRegelUtil.harFullførtFjerdetrinn
 import no.nav.familie.kontrakter.felles.Fødselsnummer
-import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.util.UUID
 
@@ -27,42 +26,48 @@ class AlderPåBarnRegel :
         hovedregler = regelIder(HAR_ALDER_LAVERE_ENN_GRENSEVERDI),
     ) {
 
-    @JsonIgnore
-    private val secureLogger = LoggerFactory.getLogger("secureLogger")
-
     override fun initiereDelvilkårsvurdering(
         metadata: HovedregelMetadata,
         resultat: Vilkårsresultat,
         barnId: UUID?,
     ): List<Delvilkårsvurdering> {
-        val finnPersonIdentForGjeldendeBarn = metadata.barn.firstOrNull { it.id == barnId }?.personIdent
-        val harFullførtFjerdetrinn = if (finnPersonIdentForGjeldendeBarn == null ||
-            harFullførtFjerdetrinn(Fødselsnummer(finnPersonIdentForGjeldendeBarn).fødselsdato)
-        ) {
-            null
-        } else {
-            SvarId.NEI
+        if (resultat != Vilkårsresultat.IKKE_TATT_STILLING_TIL || barnId == null) { // barnId kan være null ved migreringer, da behandlingbarn ikke er opprettet enda
+            return super.initiereDelvilkårsvurdering(metadata, resultat, barnId)
         }
-        secureLogger.info("BarnId: $barnId harFullførtFjerdetrinn: $harFullførtFjerdetrinn fødselsdato")
-        return listOf(
-            Delvilkårsvurdering(
-                resultat = if (harFullførtFjerdetrinn == SvarId.NEI) Vilkårsresultat.AUTOMATISK_OPPFYLT else Vilkårsresultat.IKKE_TATT_STILLING_TIL,
-                listOf(
-                    Vurdering(
-                        regelId = RegelId.HAR_ALDER_LAVERE_ENN_GRENSEVERDI,
-                        svar = harFullførtFjerdetrinn,
-                        begrunnelse = if (harFullførtFjerdetrinn == SvarId.NEI) {
-                            "Automatisk vurdert: Ut ifra barnets alder er det ${
-                                LocalDate.now()
-                                    .norskFormat()
-                            } automatisk vurdert at barnet ikke har fullført 4. skoleår."
-                        } else {
-                            null
-                        },
-                    ),
+
+        return hovedregler.map {
+            if (it == RegelId.HAR_ALDER_LAVERE_ENN_GRENSEVERDI && !harFullførtFjerdetrinn(metadata, barnId)) {
+                automatisktOppfyltHarAlderLavereEnnGrenseverdi()
+            } else {
+                Delvilkårsvurdering(resultat, vurderinger = listOf(Vurdering(it)))
+            }
+        }
+    }
+
+    private fun automatisktOppfyltHarAlderLavereEnnGrenseverdi(): Delvilkårsvurdering {
+        val beskrivelse = "Automatisk vurdert: Ut ifra barnets alder er det ${LocalDate.now().norskFormat()}" +
+            " automatisk vurdert at barnet ikke har fullført 4. skoleår."
+        return Delvilkårsvurdering(
+            resultat = Vilkårsresultat.AUTOMATISK_OPPFYLT,
+            listOf(
+                Vurdering(
+                    regelId = RegelId.HAR_ALDER_LAVERE_ENN_GRENSEVERDI,
+                    svar = SvarId.NEI,
+                    begrunnelse = beskrivelse,
                 ),
             ),
         )
+    }
+
+    private fun harFullførtFjerdetrinn(
+        metadata: HovedregelMetadata,
+        barnId: UUID?,
+    ): Boolean {
+        val fødselsdato = metadata.barn.firstOrNull { it.id == barnId }
+            ?.personIdent
+            ?.let { Fødselsnummer(it).fødselsdato }
+            ?: error("Finner ikke ident til barn=$barnId")
+        return harFullførtFjerdetrinn(fødselsdato)
     }
 
     companion object {
@@ -90,15 +95,5 @@ class AlderPåBarnRegel :
                     hvisNei = SluttSvarRegel.OPPFYLT_MED_VALGFRI_BEGRUNNELSE,
                 ),
             )
-    }
-
-    fun harFullførtFjerdetrinn(fødselsdato: LocalDate, datoForBeregning: LocalDate = LocalDate.now()): Boolean {
-        val alder = datoForBeregning.year - fødselsdato.year
-        var skoletrinn = alder - 5 // Begynner på skolen i det året de fyller 6
-        if (datoForBeregning.month.plus(1).value < 6) { // Legger til en sikkerhetsmargin på 1 mnd tilfelle de fyller år mens saken behandles
-            skoletrinn--
-        }
-        secureLogger.info("Fødselsdato: $fødselsdato gir skoletrinn $skoletrinn")
-        return skoletrinn > 4
     }
 }

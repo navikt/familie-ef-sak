@@ -62,6 +62,7 @@ import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdSakResponse
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdSakResultat
 import no.nav.familie.kontrakter.ef.iverksett.IverksettStatus
 import no.nav.familie.kontrakter.felles.Månedsperiode
+import no.nav.familie.kontrakter.felles.ef.StønadType.BARNETILSYN
 import no.nav.familie.kontrakter.felles.ef.StønadType.OVERGANGSSTØNAD
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
@@ -779,10 +780,9 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
     inner class Barnetilsyn {
 
         @Test
-        internal fun `migrering av skolepenger`() {
+        internal fun `migrering av barnetilsyn`() {
             mockPerioder(utgifterBarnetilsyn = 100)
-
-            val fagsak = fagsakService.hentEllerOpprettFagsak("1", OVERGANGSSTØNAD)
+            val fagsak = fagsakService.hentEllerOpprettFagsak("1", BARNETILSYN)
             val behandlingId = testWithBrukerContext(groups = listOf(rolleConfig.beslutterRolle)) {
                 migreringService.migrerBarnetilsyn(fagsak.fagsakPersonId, MigrerRequestDto())
             }
