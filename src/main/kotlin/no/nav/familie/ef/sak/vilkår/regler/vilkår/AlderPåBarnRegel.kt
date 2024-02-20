@@ -31,20 +31,20 @@ class AlderPåBarnRegel :
         resultat: Vilkårsresultat,
         barnId: UUID?,
     ): List<Delvilkårsvurdering> {
-        if (resultat != Vilkårsresultat.IKKE_TATT_STILLING_TIL) {
+        if (resultat != Vilkårsresultat.IKKE_TATT_STILLING_TIL || barnId == null) { // barnId kan være null ved migreringer, da behandlingbarn ikke er opprettet enda
             return super.initiereDelvilkårsvurdering(metadata, resultat, barnId)
         }
 
         return hovedregler.map {
-            if (it == RegelId.HAR_ALDER_LAVERE_ENN_GRENSEVERDI && !harFullførtFjedetrinn(metadata, barnId)) {
-                automatisktOppgyltHarAlderLavereEnnGrenseverdi()
+            if (it == RegelId.HAR_ALDER_LAVERE_ENN_GRENSEVERDI && !harFullførtFjerdetrinn(metadata, barnId)) {
+                automatisktOppfyltHarAlderLavereEnnGrenseverdi()
             } else {
                 Delvilkårsvurdering(resultat, vurderinger = listOf(Vurdering(it)))
             }
         }
     }
 
-    private fun automatisktOppgyltHarAlderLavereEnnGrenseverdi(): Delvilkårsvurdering {
+    private fun automatisktOppfyltHarAlderLavereEnnGrenseverdi(): Delvilkårsvurdering {
         val beskrivelse = "Automatisk vurdert: Ut ifra barnets alder er det ${LocalDate.now().norskFormat()}" +
             " automatisk vurdert at barnet ikke har fullført 4. skoleår."
         return Delvilkårsvurdering(
@@ -59,7 +59,7 @@ class AlderPåBarnRegel :
         )
     }
 
-    private fun harFullførtFjedetrinn(
+    private fun harFullførtFjerdetrinn(
         metadata: HovedregelMetadata,
         barnId: UUID?,
     ): Boolean {
