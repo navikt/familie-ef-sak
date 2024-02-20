@@ -23,7 +23,7 @@ import no.nav.familie.ef.sak.no.nav.familie.ef.sak.cucumber.domeneparser.Beregni
 import no.nav.familie.ef.sak.vedtak.domain.PeriodetypeBarnetilsyn
 import no.nav.familie.ef.sak.vedtak.dto.PeriodeMedBeløpDto
 import no.nav.familie.ef.sak.vedtak.dto.UtgiftsperiodeDto
-import no.nav.familie.ef.sak.vilkår.regler.vilkår.AlderPåBarnRegel
+import no.nav.familie.ef.sak.vilkår.regler.vilkår.AlderPåBarnRegelUtil
 import no.nav.familie.kontrakter.felles.Månedsperiode
 import org.assertj.core.api.Assertions.assertThat
 import java.math.BigDecimal.ZERO
@@ -98,7 +98,7 @@ class BeregningBarnetilsynStepDefinitions {
     @Når("sjekk på om barn har fullført fjerde skoletrinn utføres den {string}")
     fun sjekk_har_fullført_fjerde_skoletrinn(datoSjekkUtføres: String) {
         datoForKjøring = parseDato(datoSjekkUtføres)
-        resultatHarFullførtFjerdetrinn = AlderPåBarnRegel().harFullførtFjerdetrinn(gittFødselsdato, parseDato(datoSjekkUtføres))
+        resultatHarFullførtFjerdetrinn = AlderPåBarnRegelUtil.harFullførtFjerdetrinn(gittFødselsdato, parseDato(datoSjekkUtføres))
     }
 
     @Når("vi beregner perioder med barnetilsyn")
