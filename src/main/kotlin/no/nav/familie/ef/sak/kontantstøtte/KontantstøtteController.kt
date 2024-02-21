@@ -22,13 +22,14 @@ class KontantstøtteController(
     private val tilgangService: TilgangService,
     private val behandlingService: BehandlingService,
 ) {
-
     @GetMapping("{behandlingId}/finnesUtbetalinger")
-    fun finnesKontantstøtteUtbetalinger(@PathVariable("behandlingId") behandlingId: UUID): Ressurs<HentUtbetalingsinfoKontantstøtteDto> {
+    fun finnesKontantstøtteUtbetalinger(
+        @PathVariable("behandlingId") behandlingId: UUID,
+    ): Ressurs<HentUtbetalingsinfoKontantstøtteDto> {
         if (!SikkerhetContext.erMaskinTilMaskinToken()) {
             tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.ACCESS)
         }
         val personIdent = behandlingService.hentAktivIdent(behandlingId)
-        return Ressurs.success(kontantstøtteService.finnesKontantstøtteUtbetalingerPåBrukersBarn(personIdent))
+        return Ressurs.success(kontantstøtteService.finnesKontantstøtteUtbetalingerPåBruker(personIdent))
     }
 }
