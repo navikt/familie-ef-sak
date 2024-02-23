@@ -244,7 +244,7 @@
             "vurderinger": [
               {
                 "regelId": "OMSORG_FOR_EGNE_ELLER_ADOPTERTE_BARN",
-                "svar": null,
+                "svar": "JA",
                 "begrunnelse": "Godkjent"
               }
             ]
