@@ -19,13 +19,13 @@ import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.util.UUID
 
+val secureLogger: Logger = LoggerFactory.getLogger("secureLogger")
+
 class MorEllerFarRegel : Vilkårsregel(
     vilkårType = VilkårType.MOR_ELLER_FAR,
     regler = setOf(OMSORG_FOR_EGNE_ELLER_ADOPTERTE_BARN),
     hovedregler = regelIder(OMSORG_FOR_EGNE_ELLER_ADOPTERTE_BARN),
 ) {
-
-    val secureLogger: Logger = LoggerFactory.getLogger("secureLogger")
 
     override fun initiereDelvilkårsvurdering(
         metadata: HovedregelMetadata,
