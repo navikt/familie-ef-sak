@@ -32,7 +32,7 @@ class MorEllerFarRegel : Vilkårsregel(
         resultat: Vilkårsresultat,
         barnId: UUID?,
     ): List<Delvilkårsvurdering> {
-        if (resultat != Vilkårsresultat.IKKE_TATT_STILLING_TIL || barnId == null) {
+        if (resultat != Vilkårsresultat.IKKE_TATT_STILLING_TIL) {
             return super.initiereDelvilkårsvurdering(metadata, resultat, barnId)
         }
 
