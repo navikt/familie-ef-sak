@@ -5,6 +5,7 @@ import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.kontrakter.felles.ef.StønadType
+import no.nav.familie.leader.LeaderClient
 import no.nav.familie.prosessering.internal.TaskService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -12,7 +13,6 @@ import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.temporal.IsoFields
-import kotlin.random.Random
 
 @Service
 class BehandlingsoppgaveService(
@@ -26,14 +26,15 @@ class BehandlingsoppgaveService(
 
     @Transactional
     fun opprettTask() {
-        val ukenummer = LocalDate.now().get(IsoFields.WEEK_OF_WEEK_BASED_YEAR)
-        Thread.sleep(Random.nextLong(5_000)) // YOLO unngå feil med att 2 samtidige podder oppretter task
-        val finnesTask =
-            taskService.finnTaskMedPayloadOgType(ukenummer.toString(), BehandlingUtenOppgaveTask.TYPE)
-        if (finnesTask == null) {
-            logger.info("Oppretter finnBehandlingUtenOppgave-task, da den ikke finnes fra før")
-            val task = BehandlingUtenOppgaveTask.opprettTask(ukenummer)
-            taskService.save(task)
+        if (LeaderClient.isLeader() == true) {
+            val ukenummer = LocalDate.now().get(IsoFields.WEEK_OF_WEEK_BASED_YEAR)
+            val year = LocalDate.now().year
+            val finnesTask = taskService.finnTaskMedPayloadOgType("År:$year Uke:$ukenummer", BehandlingUtenOppgaveTask.TYPE)
+            if (finnesTask == null) {
+                logger.info("Oppretter finnBehandlingUtenOppgave-task, da den ikke finnes fra før")
+                val task = BehandlingUtenOppgaveTask.opprettTask(ukenummer)
+                taskService.save(task)
+            }
         }
     }
 
