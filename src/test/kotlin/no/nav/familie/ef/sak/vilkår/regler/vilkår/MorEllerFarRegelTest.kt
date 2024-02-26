@@ -22,18 +22,17 @@ class MorEllerFarRegelTest {
     private val hovedregelMetadataMock = mockk<HovedregelMetadata>()
     private val barnMedSamværSøknadsgrunnlagDto = mockk<BarnMedSamværSøknadsgrunnlagDto>()
     private val barnMedSamværRegistergrunnlagDto = mockk<BarnMedSamværRegistergrunnlagDto>()
+
     @BeforeEach
     fun setup() {
         val behandling = behandling()
         every { hovedregelMetadataMock.behandling } returns behandling
         every { hovedregelMetadataMock.vilkårgrunnlagDto } returns VilkårTestUtil.mockVilkårGrunnlagDto()
         every { barnMedSamværRegistergrunnlagDto.fødselsnummer } returns "01010199999"
-
     }
 
     @Test
     fun `Automatisk vurder mor eller far vilkår med kun registerbarn for digital søknad`() {
-
         val registerBarn = BarnMedSamværDto(UUID.randomUUID(), barnMedSamværSøknadsgrunnlagDto, barnMedSamværRegistergrunnlagDto)
         every { hovedregelMetadataMock.vilkårgrunnlagDto } returns VilkårTestUtil.mockVilkårGrunnlagDto(
             barnMedSamvær = listOf(registerBarn),
