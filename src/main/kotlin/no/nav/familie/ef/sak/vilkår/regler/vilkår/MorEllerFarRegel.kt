@@ -1,6 +1,5 @@
 package no.nav.familie.ef.sak.vilkår.regler.vilkår
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.familie.ef.sak.felles.util.norskFormat
 import no.nav.familie.ef.sak.vilkår.Delvilkårsvurdering
 import no.nav.familie.ef.sak.vilkår.VilkårType
@@ -15,7 +14,6 @@ import no.nav.familie.ef.sak.vilkår.regler.Vilkårsregel
 import no.nav.familie.ef.sak.vilkår.regler.jaNeiSvarRegel
 import no.nav.familie.ef.sak.vilkår.regler.regelIder
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
-import no.nav.familie.kontrakter.felles.objectMapper
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
@@ -49,7 +47,7 @@ class MorEllerFarRegel : Vilkårsregel(
 
     fun erMorEllerFarForAlleBarn(metadata: HovedregelMetadata): Boolean {
         return metadata.behandling.årsak == BehandlingÅrsak.SØKNAD &&
-                metadata.vilkårgrunnlagDto.barnMedSamvær.all { it.registergrunnlag.fødselsnummer != null }
+            metadata.vilkårgrunnlagDto.barnMedSamvær.all { it.registergrunnlag.fødselsnummer != null }
     }
 
     private fun automatiskOppfyllErMorEllerFar(): Delvilkårsvurdering {
