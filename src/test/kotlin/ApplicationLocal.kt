@@ -1,16 +1,14 @@
 package no.nav.familie.ef.sak
 
 import no.nav.familie.ef.sak.database.DbContainerInitializer
-import no.nav.familie.ef.sak.infrastruktur.config.ApplicationConfig
-import org.springframework.boot.autoconfigure.SpringBootApplication
-import org.springframework.boot.autoconfigure.web.servlet.error.ErrorMvcAutoConfiguration
+import no.nav.security.token.support.spring.test.EnableMockOAuth2Server
 import org.springframework.boot.builder.SpringApplicationBuilder
 
-@SpringBootApplication(exclude = [ErrorMvcAutoConfiguration::class])
-class ApplicationLocal
+@EnableMockOAuth2Server
+class ApplicationLocal : ApplicationLocalSetup()
 
 fun main(args: Array<String>) {
-    SpringApplicationBuilder(ApplicationConfig::class.java)
+    SpringApplicationBuilder(ApplicationLocal::class.java)
         .initializers(DbContainerInitializer())
         .profiles(
             "local",
