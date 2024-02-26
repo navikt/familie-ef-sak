@@ -3,6 +3,7 @@ package no.nav.familie.ef.sak.vilkår.dto
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.AdresseDto
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.NavnDto
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.DokumentasjonFraSøknadDto
+import java.time.LocalDate
 import java.time.LocalDateTime
 
 data class VilkårDto(
@@ -30,6 +31,7 @@ data class PersonaliaDto(
     val navn: NavnDto,
     val personIdent: String,
     val bostedsadresse: AdresseDto?,
+    val fødselsdato: LocalDate?,
 )
 
 data class AdresseopplysningerDto(
