@@ -1,7 +1,7 @@
 package no.nav.familie.ef.sak.vilkår.regler.vilkår
 
-import no.nav.familie.ef.sak.vilkår.Delvilkårsvurdering
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.Folkeregisterpersonstatus
+import no.nav.familie.ef.sak.vilkår.Delvilkårsvurdering
 import no.nav.familie.ef.sak.vilkår.VilkårType
 import no.nav.familie.ef.sak.vilkår.Vilkårsresultat
 import no.nav.familie.ef.sak.vilkår.regler.*
@@ -16,9 +16,8 @@ class ForutgåendeMedlemskapRegel : Vilkårsregel(
     override fun initiereDelvilkårsvurdering(
         metadata: HovedregelMetadata,
         resultat: Vilkårsresultat,
-        barnId: UUID?
+        barnId: UUID?,
     ): List<Delvilkårsvurdering> {
-
         val søkerFødselsdato = metadata.vilkårgrunnlagDto.personalia.fødselsdato
         val personstatus = metadata.vilkårgrunnlagDto.medlemskap.registergrunnlag.folkeregisterpersonstatus
         val statsborgerskap =
@@ -49,7 +48,7 @@ class ForutgåendeMedlemskapRegel : Vilkårsregel(
             SvarId.MEDLEM_MER_ENN_5_ÅR_EØS,
             SvarId.MEDLEM_MER_ENN_5_ÅR_EØS_ANNEN_FORELDER_TRYGDEDEKKET_I_NORGE,
         ).associateWith { SluttSvarRegel.OPPFYLT_MED_PÅKREVD_BEGRUNNELSE } +
-                mapOf(SvarId.NEI to SluttSvarRegel.IKKE_OPPFYLT_MED_PÅKREVD_BEGRUNNELSE)
+            mapOf(SvarId.NEI to SluttSvarRegel.IKKE_OPPFYLT_MED_PÅKREVD_BEGRUNNELSE)
         private val MEDLEMSKAP_UNNTAK =
             RegelSteg(
                 regelId = RegelId.MEDLEMSKAP_UNNTAK,

@@ -71,7 +71,7 @@ class VilkårGrunnlagService(
                 personIdent = personident,
                 bostedsadresse = grunnlagsdata.søker.bostedsadresse.gjeldende()?.let { adresseMapper.tilAdresse(it) },
                 fødselsdato = grunnlagsdata.søker.fødsel.gjeldende().fødselsdato,
-                ),
+            ),
             tidligereVedtaksperioder = grunnlagsdata.tidligereVedtaksperioder.tilDto(),
             medlemskap = medlemskap,
             sivilstand = sivilstand,
