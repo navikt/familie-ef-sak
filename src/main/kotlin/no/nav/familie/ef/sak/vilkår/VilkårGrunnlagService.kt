@@ -74,12 +74,12 @@ class VilkårGrunnlagService(
 
         return VilkårGrunnlagDto(
             personalia =
-                PersonaliaDto(
-                    navn = NavnDto.fraNavn(grunnlagsdata.søker.navn),
-                    personIdent = personident,
-                    bostedsadresse = grunnlagsdata.søker.bostedsadresse.gjeldende()?.let { adresseMapper.tilAdresse(it) },
-                    fødeland = grunnlagsdata.søker.fødsel.gjeldende().fødeland,
-                ),
+            PersonaliaDto(
+                navn = NavnDto.fraNavn(grunnlagsdata.søker.navn),
+                personIdent = personident,
+                bostedsadresse = grunnlagsdata.søker.bostedsadresse.gjeldende()?.let { adresseMapper.tilAdresse(it) },
+                fødeland = grunnlagsdata.søker.fødsel.gjeldende().fødeland,
+            ),
             tidligereVedtaksperioder = grunnlagsdata.tidligereVedtaksperioder.tilDto(),
             medlemskap = medlemskap,
             sivilstand = sivilstand,
