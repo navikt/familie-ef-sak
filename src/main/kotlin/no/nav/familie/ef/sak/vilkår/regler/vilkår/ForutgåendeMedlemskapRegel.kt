@@ -1,6 +1,8 @@
 package no.nav.familie.ef.sak.vilkår.regler.vilkår
 
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.Folkeregisterpersonstatus
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.InnflyttingDto
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.UtflyttingDto
 import no.nav.familie.ef.sak.vilkår.Delvilkårsvurdering
 import no.nav.familie.ef.sak.vilkår.VilkårType
 import no.nav.familie.ef.sak.vilkår.Vilkårsresultat
@@ -13,7 +15,11 @@ import no.nav.familie.ef.sak.vilkår.regler.SvarId
 import no.nav.familie.ef.sak.vilkår.regler.Vilkårsregel
 import no.nav.familie.ef.sak.vilkår.regler.jaNeiSvarRegel
 import no.nav.familie.ef.sak.vilkår.regler.regelIder
+import java.time.LocalDate
 import java.util.UUID
+
+const val STATSBORGERSTAT_VERDI_NORGE = "norge"
+const val FØDELAND_NORGE = "NOR"
 
 class ForutgåendeMedlemskapRegel : Vilkårsregel(
     vilkårType = VilkårType.FORUTGÅENDE_MEDLEMSKAP,
@@ -25,20 +31,67 @@ class ForutgåendeMedlemskapRegel : Vilkårsregel(
         resultat: Vilkårsresultat,
         barnId: UUID?,
     ): List<Delvilkårsvurdering> {
-        val personstatus = metadata.vilkårgrunnlagDto.medlemskap.registergrunnlag.folkeregisterpersonstatus
-        val statsborgerskap =
-            metadata.vilkårgrunnlagDto.medlemskap.registergrunnlag.statsborgerskap.firstOrNull { it.land.lowercase() == "norge" }
-        val harNorskStatsborgerskap = statsborgerskap != null
-        val fødeland = metadata.vilkårgrunnlagDto.personalia.fødeland
+        val registergrunnlag = metadata.vilkårgrunnlagDto.medlemskap.registergrunnlag
+        val erBosatt = registergrunnlag.folkeregisterpersonstatus == Folkeregisterpersonstatus.BOSATT
+        val harNorskStatsborgerskap =
+            registergrunnlag.statsborgerskap.any {
+                it.land.lowercase() == STATSBORGERSTAT_VERDI_NORGE
+            }
+        val erFødtINorge = metadata.vilkårgrunnlagDto.personalia.fødeland == FØDELAND_NORGE
 
-        val harInnflyttet = metadata.vilkårgrunnlagDto.medlemskap.registergrunnlag.innflytting.isNotEmpty()
-        val harUtflyttet = metadata.vilkårgrunnlagDto.medlemskap.registergrunnlag.utflytting.isNotEmpty()
+        val harOppholdtSegINorgeBasertPåSøknadsgrunnlag = harOppholdtSegINorgeBasertPåSøknad(metadata)
 
-        if (fødeland == "NOR" && harNorskStatsborgerskap && personstatus == Folkeregisterpersonstatus.BOSATT && !harInnflyttet && !harUtflyttet) {
+        val harBoddINorgeSiste5år = harBoddINorgeSiste5år(registergrunnlag.innflytting, registergrunnlag.utflytting)
+
+        if (erFødtINorge && harNorskStatsborgerskap && erBosatt && harBoddINorgeSiste5år && harOppholdtSegINorgeBasertPåSøknadsgrunnlag) {
             return listOf(automatiskVurdertDelvilkår(RegelId.SØKER_MEDLEM_I_FOLKETRYGDEN, SvarId.JA, "Placeholder"))
         }
 
         return super.initiereDelvilkårsvurdering(metadata, resultat, barnId)
+    }
+
+    private fun harOppholdtSegINorgeBasertPåSøknad(metadata: HovedregelMetadata): Boolean {
+        val søknadsgrunnlag = metadata.vilkårgrunnlagDto.medlemskap.søknadsgrunnlag
+        val harOppholdtSegINorgeBasertPåSøknadsgrunnlag =
+            if (søknadsgrunnlag != null) {
+                søknadsgrunnlag.bosattNorgeSisteÅrene && søknadsgrunnlag.oppholderDuDegINorge
+            } else {
+                true
+            }
+        return harOppholdtSegINorgeBasertPåSøknadsgrunnlag
+    }
+
+    private fun harBoddINorgeSiste5år(
+        innflytting: List<InnflyttingDto>,
+        utflytting: List<UtflyttingDto>,
+    ): Boolean {
+        val harInnflyttet = innflytting.isNotEmpty()
+        val harUtflyttet = utflytting.isNotEmpty()
+        if (!harInnflyttet && !harUtflyttet) {
+            return true
+        }
+
+        val harInnfyttetMenManglerDato = innflytting.any { it.dato == null }
+        val harUtflyttetMenManglerDato = utflytting.any { it.dato == null }
+        if (harInnfyttetMenManglerDato || harUtflyttetMenManglerDato) {
+            return false
+        }
+
+        val sisteInnflyttetDato = innflytting.mapNotNull { it.dato }.maxOrNull()
+        val sisteUtflyttetDato = utflytting.mapNotNull { it.dato }.maxOrNull()
+
+        val femÅrSidenNå = LocalDate.now().minusYears(5)
+
+        val boddINorgeSisteFemÅr =
+            if (sisteInnflyttetDato == null) {
+                false
+            } else if (sisteUtflyttetDato == null) {
+                sisteInnflyttetDato < femÅrSidenNå
+            } else {
+                sisteInnflyttetDato < femÅrSidenNå && sisteUtflyttetDato < sisteInnflyttetDato
+            }
+
+        return boddINorgeSisteFemÅr
     }
 
     companion object {
