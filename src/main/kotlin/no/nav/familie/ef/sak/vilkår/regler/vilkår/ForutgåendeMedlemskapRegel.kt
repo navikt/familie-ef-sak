@@ -25,17 +25,16 @@ class ForutgåendeMedlemskapRegel : Vilkårsregel(
         resultat: Vilkårsresultat,
         barnId: UUID?,
     ): List<Delvilkårsvurdering> {
-        val søkerFødselsdato = metadata.vilkårgrunnlagDto.personalia.fødselsdato
         val personstatus = metadata.vilkårgrunnlagDto.medlemskap.registergrunnlag.folkeregisterpersonstatus
         val statsborgerskap =
             metadata.vilkårgrunnlagDto.medlemskap.registergrunnlag.statsborgerskap.firstOrNull { it.land.lowercase() == "norge" }
-        val statsborgerskapDato = statsborgerskap?.gyldigFraOgMedDato
-        val harStatsborgerskapFraFødsel = søkerFødselsdato != null && søkerFødselsdato == statsborgerskapDato
+        val harNorskStatsborgerskap = statsborgerskap != null
+        val fødeland = metadata.vilkårgrunnlagDto.personalia.fødeland
 
         val harInnflyttet = metadata.vilkårgrunnlagDto.medlemskap.registergrunnlag.innflytting.isNotEmpty()
         val harUtflyttet = metadata.vilkårgrunnlagDto.medlemskap.registergrunnlag.utflytting.isNotEmpty()
 
-        if (harStatsborgerskapFraFødsel && personstatus == Folkeregisterpersonstatus.BOSATT && !harInnflyttet && !harUtflyttet) {
+        if (fødeland == "NOR" && harNorskStatsborgerskap && personstatus == Folkeregisterpersonstatus.BOSATT && !harInnflyttet && !harUtflyttet) {
             return listOf(automatiskVurdertDelvilkår(RegelId.SØKER_MEDLEM_I_FOLKETRYGDEN, SvarId.JA, "Placeholder"))
         }
 
