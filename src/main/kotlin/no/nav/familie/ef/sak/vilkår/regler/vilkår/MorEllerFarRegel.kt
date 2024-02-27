@@ -1,6 +1,5 @@
 package no.nav.familie.ef.sak.vilkår.regler.vilkår
 
-import no.nav.familie.ef.sak.felles.util.norskFormat
 import no.nav.familie.ef.sak.vilkår.Delvilkårsvurdering
 import no.nav.familie.ef.sak.vilkår.VilkårType
 import no.nav.familie.ef.sak.vilkår.Vilkårsresultat
@@ -14,12 +13,7 @@ import no.nav.familie.ef.sak.vilkår.regler.Vilkårsregel
 import no.nav.familie.ef.sak.vilkår.regler.jaNeiSvarRegel
 import no.nav.familie.ef.sak.vilkår.regler.regelIder
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
-import java.time.LocalDate
 import java.util.UUID
-
-val secureLogger: Logger = LoggerFactory.getLogger("secureLogger")
 
 class MorEllerFarRegel : Vilkårsregel(
     vilkårType = VilkårType.MOR_ELLER_FAR,
@@ -38,7 +32,7 @@ class MorEllerFarRegel : Vilkårsregel(
 
         return hovedregler.map {
             if (it == RegelId.OMSORG_FOR_EGNE_ELLER_ADOPTERTE_BARN && erMorEllerFarForAlleBarn(metadata)) {
-                automatiskOppfyllErMorEllerFar()
+                automatiskVurdertDelvilkår(RegelId.OMSORG_FOR_EGNE_ELLER_ADOPTERTE_BARN, SvarId.JA, "Bruker søker stønad for egne/adopterte barn.")
             } else {
                 Delvilkårsvurdering(resultat, vurderinger = listOf(Vurdering(it)))
             }
@@ -48,21 +42,6 @@ class MorEllerFarRegel : Vilkårsregel(
     fun erMorEllerFarForAlleBarn(metadata: HovedregelMetadata): Boolean {
         return metadata.behandling.årsak == BehandlingÅrsak.SØKNAD &&
             metadata.vilkårgrunnlagDto.barnMedSamvær.all { it.registergrunnlag.fødselsnummer != null }
-    }
-
-    private fun automatiskOppfyllErMorEllerFar(): Delvilkårsvurdering {
-        val beskrivelse = "Automatisk vurdert: Den ${LocalDate.now().norskFormat()} er det" +
-            " automatisk vurdert at bruker søker stønad for egne/adopterte barn."
-        return Delvilkårsvurdering(
-            resultat = Vilkårsresultat.AUTOMATISK_OPPFYLT,
-            listOf(
-                Vurdering(
-                    regelId = RegelId.OMSORG_FOR_EGNE_ELLER_ADOPTERTE_BARN,
-                    svar = SvarId.JA,
-                    begrunnelse = beskrivelse,
-                ),
-            ),
-        )
     }
 
     companion object {
