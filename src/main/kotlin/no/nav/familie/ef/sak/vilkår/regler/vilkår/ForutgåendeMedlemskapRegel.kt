@@ -31,6 +31,10 @@ class ForutgåendeMedlemskapRegel : Vilkårsregel(
         resultat: Vilkårsresultat,
         barnId: UUID?,
     ): List<Delvilkårsvurdering> {
+        if (resultat != Vilkårsresultat.IKKE_TATT_STILLING_TIL) {
+            return super.initiereDelvilkårsvurdering(metadata, resultat, barnId)
+        }
+
         val registergrunnlag = metadata.vilkårgrunnlagDto.medlemskap.registergrunnlag
         val erBosatt = registergrunnlag.folkeregisterpersonstatus == Folkeregisterpersonstatus.BOSATT
         val harNorskStatsborgerskap =
@@ -44,7 +48,13 @@ class ForutgåendeMedlemskapRegel : Vilkårsregel(
         val harBoddINorgeSiste5år = harBoddINorgeSiste5år(registergrunnlag.innflytting, registergrunnlag.utflytting)
 
         if (erFødtINorge && harNorskStatsborgerskap && erBosatt && harBoddINorgeSiste5år && harOppholdtSegINorgeBasertPåSøknadsgrunnlag) {
-            return listOf(automatiskVurdertDelvilkår(RegelId.SØKER_MEDLEM_I_FOLKETRYGDEN, SvarId.JA, "Placeholder"))
+            return listOf(
+                automatiskVurdertDelvilkår(
+                    RegelId.SØKER_MEDLEM_I_FOLKETRYGDEN,
+                    SvarId.JA,
+                    "Bruker er født i Norge, har norsk statsborgerskap, er bosatt i Norge og har ikke oppholdt seg utenfor Norge de siste 5 årene basert på opplysninger fra folkeregister og søknad",
+                ),
+            )
         }
 
         return super.initiereDelvilkårsvurdering(metadata, resultat, barnId)
