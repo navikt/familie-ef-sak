@@ -14,19 +14,18 @@ import org.springframework.web.bind.annotation.RestController
 class FeatureToggleController(
     private val featureToggleService: FeatureToggleService,
 ) {
-
-    private val funksjonsbrytere = setOf(
-        Toggle.BEHANDLING_KORRIGERING,
-        Toggle.FRONTEND_VIS_IKKE_PUBLISERTE_BREVMALER,
-        Toggle.OPPRETT_BEHANDLING_FERDIGSTILT_JOURNALPOST,
-        Toggle.FRONTEND_AUTOMATISK_UTFYLLE_VILKÅR,
-        Toggle.FRONTEND_SATSENDRING,
-        Toggle.FRONTEND_VIS_INNTEKT_PERSONOVERSIKT,
-        Toggle.VIS_KA_VEDTAK_ALTERNATIV,
-        Toggle.VIS_NY_JOURNALFØRING,
-        Toggle.PAPIRSOKNAD_OG_TERMINBARN_REVURDERING,
-        Toggle.HENLEGG_BEHANDLING_UTEN_OPPGAVE,
-    )
+    private val funksjonsbrytere =
+        setOf(
+            Toggle.BEHANDLING_KORRIGERING,
+            Toggle.FRONTEND_VIS_IKKE_PUBLISERTE_BREVMALER,
+            Toggle.OPPRETT_BEHANDLING_FERDIGSTILT_JOURNALPOST,
+            Toggle.FRONTEND_AUTOMATISK_UTFYLLE_VILKÅR,
+            Toggle.FRONTEND_SATSENDRING,
+            Toggle.FRONTEND_VIS_INNTEKT_PERSONOVERSIKT,
+            Toggle.VIS_KA_VEDTAK_ALTERNATIV,
+            Toggle.VIS_NY_JOURNALFØRING,
+            Toggle.HENLEGG_BEHANDLING_UTEN_OPPGAVE,
+        )
 
     @GetMapping
     fun sjekkAlle(): Map<String, Boolean> {

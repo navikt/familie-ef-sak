@@ -5,12 +5,14 @@ import org.springframework.stereotype.Service
 
 @Service
 class FeatureToggleService(val unleashService: UnleashService) {
-
     fun isEnabled(toggle: Toggle): Boolean {
         return unleashService.isEnabled(toggle.toggleId)
     }
 
-    fun isEnabled(toggle: Toggle, defaultValue: Boolean): Boolean {
+    fun isEnabled(
+        toggle: Toggle,
+        defaultValue: Boolean,
+    ): Boolean {
         return unleashService.isEnabled(toggle.toggleId, defaultValue)
     }
 }
@@ -25,7 +27,6 @@ enum class Toggle(val toggleId: String, val beskrivelse: String? = null) {
     GJENBRUK_VILKÅR_PÅ_TVERS_AV_BEHANDLINGER("familie.ef.sak.gjenbruk-vilkaar-paa-tvers-av-behandlinger", "Må testes i preprod"),
     VIS_KA_VEDTAK_ALTERNATIV("familie.ef.sak.frontend.vis-ka-uten-brev"),
     VIS_NY_JOURNALFØRING("familie.ef.sak-ny-journalforing"),
-    PAPIRSOKNAD_OG_TERMINBARN_REVURDERING("familie.ef.sak.papirsoknad-og-terminbarn-paa-revurdering"),
 
     // Operational
     AUTOMATISK_MIGRERING("familie.ef.sak.automatisk-migrering", "Kan denne slettes?"),
