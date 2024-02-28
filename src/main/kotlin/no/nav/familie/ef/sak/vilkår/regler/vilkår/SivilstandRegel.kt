@@ -61,11 +61,11 @@ class SivilstandRegel : Vilkårsregel(
 
     private fun regelIdForSivilstandstypeSvarISøknad(
         sivilstandstype: Sivilstandstype,
-        sivilstandSøknad: Sivilstand?
+        sivilstandSøknad: Sivilstand?,
     ) = when {
         sivilstandstype.erUgiftEllerUoppgitt() &&
-                    sivilstandSøknad != null &&
-                    (sivilstandSøknad.erUformeltGift == true || sivilstandSøknad.erUformeltSeparertEllerSkilt == true) ->
+            sivilstandSøknad != null &&
+            (sivilstandSøknad.erUformeltGift == true || sivilstandSøknad.erUformeltSeparertEllerSkilt == true) ->
             KRAV_SIVILSTAND_PÅKREVD_BEGRUNNELSE
 
         sivilstandstype.erUgiftEllerUoppgitt() -> KRAV_SIVILSTAND_UTEN_PÅKREVD_BEGRUNNELSE
