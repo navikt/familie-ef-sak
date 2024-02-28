@@ -37,7 +37,7 @@ import java.time.YearMonth
  * where f.stonadstype='OVERGANGSSTØNAD' AND aty.stonad_fom <= '2024-02-01' AND aty.stonad_tom >= '2024-02-01'
  */
 @Disabled
-class GOmregningKalkyle2 : OppslagSpringRunnerTest() {
+class GOmregningKalkyle : OppslagSpringRunnerTest() {
     private val logger = LoggerFactory.getLogger(javaClass)
 
     @Autowired
@@ -55,7 +55,7 @@ class GOmregningKalkyle2 : OppslagSpringRunnerTest() {
         val sumBeløp = utførBeregningAvTotalbeløp()
         Assertions.assertThat(sumBeløp).isEqualTo(BigDecimal(123_488_015))
         logger.info("Utbetaling av totalen er $sumBeløp")
-        unmockkObject()
+        unmockGrunnbeløp()
     }
 
     @Test
@@ -66,7 +66,7 @@ class GOmregningKalkyle2 : OppslagSpringRunnerTest() {
         Assertions.assertThat(sumBeløpMedInntektsjustering).isEqualTo(BigDecimal(128_547_568))
         Assertions.assertThat(sumBeløp).isEqualTo(BigDecimal(132_542_698))
         logger.info("Diff mellom utbetaling for $justeringsfaktor4Prosent prosent økning: ${sumBeløp.minus(sumBeløpMedInntektsjustering)}")
-        unmockkObject()
+        unmockGrunnbeløp()
     }
 
     @Test
@@ -78,7 +78,7 @@ class GOmregningKalkyle2 : OppslagSpringRunnerTest() {
         Assertions.assertThat(sumBeløpMedInntektsjustering).isEqualTo(BigDecimal(127_308_776))
         Assertions.assertThat(sumBeløp).isEqualTo(BigDecimal(130_259_980))
         logger.info("Diff mellom utbetaling for $justeringsfaktor3Prosent prosent økning: ${sumBeløp.minus(sumBeløpMedInntektsjustering)}")
-        unmockkObject()
+        unmockGrunnbeløp()
     }
 
     @Test
@@ -90,7 +90,7 @@ class GOmregningKalkyle2 : OppslagSpringRunnerTest() {
         Assertions.assertThat(sumBeløpMedInntektsjustering).isEqualTo(BigDecimal(126_074_688))
         Assertions.assertThat(sumBeløp).isEqualTo(BigDecimal(127_997_127))
         logger.info("Diff mellom utbetaling for $justeringsfaktor2Prosent prosent økning: ${sumBeløp.minus(sumBeløpMedInntektsjustering)}")
-        unmockkObject()
+        unmockGrunnbeløp()
     }
 
     @Test
@@ -102,7 +102,7 @@ class GOmregningKalkyle2 : OppslagSpringRunnerTest() {
         Assertions.assertThat(sumBeløpMedInntektsjustering).isEqualTo(BigDecimal(124_847_384))
         Assertions.assertThat(sumBeløp).isEqualTo(BigDecimal(125_741_828))
         logger.info("Diff mellom utbetaling for $justeringsfaktor1Prosent prosent økning: ${sumBeløp.minus(sumBeløpMedInntektsjustering)}")
-        unmockkObject()
+        unmockGrunnbeløp()
     }
 
     private fun utførBeregningAvTotalbeløp(inntektsøkningsfaktor: BigDecimal = BigDecimal.ONE): BigDecimal {
@@ -166,6 +166,10 @@ class GOmregningKalkyle2 : OppslagSpringRunnerTest() {
 
     private fun readFile(filnavn: String): String {
         return this::class.java.getResource("/omregning/$filnavn")!!.readText()
+    }
+
+    private fun unmockGrunnbeløp() {
+        unmockkObject(Grunnbeløpsperioder)
     }
 
     private fun mockGrunnbeløp(grunnbeløp: Grunnbeløp) {
