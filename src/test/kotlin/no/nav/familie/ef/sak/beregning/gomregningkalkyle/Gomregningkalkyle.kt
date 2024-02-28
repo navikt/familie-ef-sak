@@ -50,7 +50,7 @@ class GOmregningKalkyle : OppslagSpringRunnerTest() {
     val utplukksMåned = YearMonth.of(2024, 2)
 
     @Test
-    fun `skal kalkulere utbetalingsbeløp - gitt 2024 G-beløp med uten økning (uten samordning)`() {
+    fun `skal kalkulere utbetalingsbeløp - gitt 2024 G-beløp uten økning (uten samordning)`() {
         mockGrunnbeløp(grunnbeløp())
         val sumBeløp = utførBeregningAvTotalbeløp()
         Assertions.assertThat(sumBeløp).isEqualTo(BigDecimal(123_488_015))
