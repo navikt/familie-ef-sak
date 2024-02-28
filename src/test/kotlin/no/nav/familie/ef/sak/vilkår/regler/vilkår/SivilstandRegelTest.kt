@@ -2,6 +2,7 @@ package no.nav.familie.ef.sak.no.nav.familie.ef.sak.vilkår.regler.vilkår
 
 import io.mockk.every
 import io.mockk.mockk
+import no.nav.familie.ef.sak.felles.util.norskFormat
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.Sivilstandstype
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.Sivilstand
 import no.nav.familie.ef.sak.repository.behandling
@@ -12,6 +13,7 @@ import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
 
 class SivilstandRegelTest {
 
@@ -30,6 +32,7 @@ class SivilstandRegelTest {
         val listDelvilkårsvurdering = SivilstandRegel().initiereDelvilkårsvurdering(hovedregelMetadataMock, Vilkårsresultat.IKKE_TATT_STILLING_TIL)
 
         Assertions.assertThat(listDelvilkårsvurdering.first().resultat).isEqualTo(Vilkårsresultat.AUTOMATISK_OPPFYLT)
+        Assertions.assertThat(listDelvilkårsvurdering.first().vurderinger.first().begrunnelse).isEqualTo("Automatisk vurdert (${LocalDate.now().norskFormat()}): Bruker fyller vilkåret om å være ugift, separert eller skilt.")
     }
 
     @Test
