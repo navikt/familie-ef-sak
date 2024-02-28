@@ -48,7 +48,7 @@ class SivilstandRegel : Vilkårsregel(
         }
 
         if (metadata.behandling.erDigitalSøknad() && metadata.sivilstandstype.erUgiftEllerSkilt() &&
-            metadata.sivilstandSøknad?.erIkkeUformeltGiftEllerSkilt() == true
+            metadata.sivilstandSøknad?.erUformeltGiftEllerSkilt() == false
         ) {
             return listOf(automatiskVurdertDelvilkår(RegelId.KRAV_SIVILSTAND_UTEN_PÅKREVD_BEGRUNNELSE, SvarId.JA, "Bruker fyller vilkåret om å være ugift, separert eller skilt."))
         }
@@ -65,7 +65,7 @@ class SivilstandRegel : Vilkårsregel(
     ) = when {
         sivilstandstype.erUgiftEllerUoppgitt() &&
             sivilstandSøknad != null &&
-            (sivilstandSøknad.erUformeltGift == true || sivilstandSøknad.erUformeltSeparertEllerSkilt == true) ->
+            (sivilstandSøknad.erUformeltGiftEllerSkilt()) ->
             KRAV_SIVILSTAND_PÅKREVD_BEGRUNNELSE
 
         sivilstandstype.erUgiftEllerUoppgitt() -> KRAV_SIVILSTAND_UTEN_PÅKREVD_BEGRUNNELSE
