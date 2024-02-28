@@ -50,7 +50,7 @@ class SivilstandRegel : Vilkårsregel(
         if (metadata.behandling.erDigitalSøknad() && metadata.sivilstandstype.erUgiftEllerSkilt() &&
             metadata.sivilstandSøknad?.erUformeltGiftEllerSkilt() == false
         ) {
-            return listOf(automatiskVurdertDelvilkår(RegelId.KRAV_SIVILSTAND_UTEN_PÅKREVD_BEGRUNNELSE, SvarId.JA, "Bruker fyller vilkåret om å være ugift, separert eller skilt."))
+            return listOf(automatiskVurdertDelvilkår(RegelId.KRAV_SIVILSTAND_UTEN_PÅKREVD_BEGRUNNELSE, SvarId.JA, "Bruker er ${metadata.sivilstandstype.visningsnavn.lowercase()}."))
         }
 
         return hovedregler.map {
