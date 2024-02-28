@@ -130,14 +130,14 @@ class GOmregningKalkyle : OppslagSpringRunnerTest() {
             BeregningRequest(
                 inntekt = listOf(inntekt),
                 vedtaksperioder =
-                    listOf(
-                        VedtaksperiodeDto(
-                            årMånedFra = utplukksMåned,
-                            årMånedTil = utplukksMåned,
-                            aktivitet = BARN_UNDER_ETT_ÅR,
-                            periodeType = HOVEDPERIODE,
-                        ),
+                listOf(
+                    VedtaksperiodeDto(
+                        årMånedFra = utplukksMåned,
+                        årMånedTil = utplukksMåned,
+                        aktivitet = BARN_UNDER_ETT_ÅR,
+                        periodeType = HOVEDPERIODE,
                     ),
+                ),
             )
 
         val beregnetYtelse =
