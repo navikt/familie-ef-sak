@@ -1,8 +1,6 @@
 package no.nav.familie.ef.sak.vilkår.regler.vilkår
 
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.Sivilstandstype
-import no.nav.familie.ef.sak.opplysninger.søknad.domain.Sivilstand
 import no.nav.familie.ef.sak.vilkår.Delvilkårsvurdering
 import no.nav.familie.ef.sak.vilkår.VilkårType
 import no.nav.familie.ef.sak.vilkår.Vilkårsresultat
@@ -41,7 +39,8 @@ class SivilstandRegel : Vilkårsregel(
         resultat: Vilkårsresultat,
         barnId: UUID?,
     ): List<Delvilkårsvurdering> {
-        val (sivilstandSøknad: Sivilstand?, sivilstandstype: Sivilstandstype) = metadata
+        val sivilstandstype = metadata.sivilstandstype
+        val sivilstandSøknad = metadata.sivilstandSøknad
 
         val hovedregel: RegelId = when {
             sivilstandstype.erUgiftEllerUoppgitt() &&
@@ -59,6 +58,16 @@ class SivilstandRegel : Vilkårsregel(
             sivilstandstype.erEnkeEllerEnkemann() -> UNNTAK
             else -> throw Feil("Finner ikke matchende sivilstand for $sivilstandstype")
         }.regelId
+
+        if (resultat != Vilkårsresultat.IKKE_TATT_STILLING_TIL) {
+            return super.initiereDelvilkårsvurdering(metadata, resultat, barnId)
+        }
+
+        if (metadata.behandling.erDigitalSøknad() && sivilstandstype.erUgiftEllerSkilt() &&
+            sivilstandSøknad?.erIkkeUformeltGiftEllerSkilt() == true
+        ) {
+            return listOf(automatiskVurdertDelvilkår(RegelId.KRAV_SIVILSTAND_UTEN_PÅKREVD_BEGRUNNELSE, SvarId.JA, "Krav til sivilstand er oppfylt."))
+        }
 
         return hovedregler.map {
             val resultatForDelvilkår = if (it == hovedregel) resultat else Vilkårsresultat.IKKE_AKTUELL

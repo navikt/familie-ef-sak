@@ -23,4 +23,6 @@ data class Sivilstand(
     val endringSamværsordningDato: LocalDate? = null,
     @Embedded(onEmpty = Embedded.OnEmpty.USE_NULL, prefix = "tidligere_samboer_")
     val tidligereSamboer: PersonMinimum? = null,
-)
+) {
+    fun erIkkeUformeltGiftEllerSkilt(): Boolean = erUformeltGift == false && erUformeltSeparertEllerSkilt == false
+}

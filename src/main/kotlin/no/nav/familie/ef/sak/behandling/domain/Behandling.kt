@@ -48,6 +48,8 @@ data class Behandling(
 
     fun erAvsluttet(): Boolean = status == BehandlingStatus.FERDIGSTILT
 
+    fun erDigitalSøknad(): Boolean = årsak == BehandlingÅrsak.SØKNAD
+
     fun vedtakstidspunktEllerFeil(): LocalDateTime =
         this.vedtakstidspunkt ?: error("Mangler vedtakstidspunkt for behandling=$id")
 

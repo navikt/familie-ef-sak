@@ -87,6 +87,8 @@ enum class Sivilstandstype {
     fun erSeparert(): Boolean = this == SEPARERT_PARTNER || this == SEPARERT
     fun erEnkeEllerEnkemann(): Boolean = this == ENKE_ELLER_ENKEMANN || this == GJENLEVENDE_PARTNER
     fun erSkilt(): Boolean = this == SKILT || this == SKILT_PARTNER
+
+    fun erUgiftEllerSkilt(): Boolean = this == UGIFT || this == SKILT
 }
 
 data class AdresseDto(
