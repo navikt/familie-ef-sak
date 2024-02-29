@@ -21,8 +21,6 @@ class FeatureToggleController(
             Toggle.OPPRETT_BEHANDLING_FERDIGSTILT_JOURNALPOST,
             Toggle.FRONTEND_AUTOMATISK_UTFYLLE_VILKÅR,
             Toggle.FRONTEND_SATSENDRING,
-            Toggle.FRONTEND_VIS_INNTEKT_PERSONOVERSIKT,
-            Toggle.VIS_KA_VEDTAK_ALTERNATIV,
             Toggle.HENLEGG_BEHANDLING_UTEN_OPPGAVE,
         )
 
