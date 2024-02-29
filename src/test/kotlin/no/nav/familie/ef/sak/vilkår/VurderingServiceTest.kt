@@ -11,7 +11,6 @@ import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.blankett.BlankettRepository
 import no.nav.familie.ef.sak.fagsak.FagsakService
-import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.vilkår.VilkårTestUtil.mockVilkårGrunnlagDto
 import no.nav.familie.ef.sak.oppgave.TilordnetRessursService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
@@ -49,7 +48,6 @@ import java.time.LocalDate
 import java.util.UUID
 
 internal class VurderingServiceTest {
-
     private val behandlingService = mockk<BehandlingService>()
     private val søknadService = mockk<SøknadService>()
     private val vilkårsvurderingRepository = mockk<VilkårsvurderingRepository>()
@@ -59,29 +57,35 @@ internal class VurderingServiceTest {
     private val vilkårGrunnlagService = mockk<VilkårGrunnlagService>()
     private val grunnlagsdataService = mockk<GrunnlagsdataService>()
     private val fagsakService = mockk<FagsakService>()
-    private val featureToggleService = mockk<FeatureToggleService>()
     private val gjenbrukVilkårService = mockk<GjenbrukVilkårService>()
     private val tilordnetRessursService = mockk<TilordnetRessursService>()
-    private val vurderingService = VurderingService(
-        behandlingService = behandlingService,
-        søknadService = søknadService,
-        vilkårsvurderingRepository = vilkårsvurderingRepository,
-        vilkårGrunnlagService = vilkårGrunnlagService,
-        grunnlagsdataService = grunnlagsdataService,
-        barnService = barnService,
-        fagsakService = fagsakService,
-        gjenbrukVilkårService = gjenbrukVilkårService,
-        featureToggleService = featureToggleService,
-        tilordnetRessursService = tilordnetRessursService,
-    )
-    private val søknad = SøknadsskjemaMapper.tilDomene(
-        TestsøknadBuilder.Builder().setBarn(
-            listOf(
-                TestsøknadBuilder.Builder().defaultBarn("Navn navnesen", no.nav.familie.util.FnrGenerator.generer(LocalDate.now().minusYears(5))),
-                TestsøknadBuilder.Builder().defaultBarn("Navn navnesen", no.nav.familie.util.FnrGenerator.generer(LocalDate.now().minusYears(3))),
-            ),
-        ).build().søknadOvergangsstønad,
-    ).tilSøknadsverdier()
+    private val vurderingService =
+        VurderingService(
+            behandlingService = behandlingService,
+            søknadService = søknadService,
+            vilkårsvurderingRepository = vilkårsvurderingRepository,
+            vilkårGrunnlagService = vilkårGrunnlagService,
+            grunnlagsdataService = grunnlagsdataService,
+            barnService = barnService,
+            fagsakService = fagsakService,
+            gjenbrukVilkårService = gjenbrukVilkårService,
+            tilordnetRessursService = tilordnetRessursService,
+        )
+    private val søknad =
+        SøknadsskjemaMapper.tilDomene(
+            TestsøknadBuilder.Builder().setBarn(
+                listOf(
+                    TestsøknadBuilder.Builder().defaultBarn(
+                        "Navn navnesen",
+                        no.nav.familie.util.FnrGenerator.generer(LocalDate.now().minusYears(5)),
+                    ),
+                    TestsøknadBuilder.Builder().defaultBarn(
+                        "Navn navnesen",
+                        no.nav.familie.util.FnrGenerator.generer(LocalDate.now().minusYears(3)),
+                    ),
+                ),
+            ).build().søknadOvergangsstønad,
+        ).tilSøknadsverdier()
     private val barn = søknadBarnTilBehandlingBarn(søknad.barn)
     private val behandling = behandling(fagsak(), BehandlingStatus.OPPRETTET, årsak = BehandlingÅrsak.PAPIRSØKNAD)
     private val behandlingId = UUID.randomUUID()
@@ -104,10 +108,11 @@ internal class VurderingServiceTest {
         every { vilkårsvurderingRepository.insertAll(any()) } answers { firstArg() }
         every { barnService.finnBarnPåBehandling(behandlingId) } returns barn
         every { fagsakService.hentFagsakForBehandling(behandlingId) } returns fagsak(stønadstype = OVERGANGSSTØNAD)
-        val sivilstand = SivilstandInngangsvilkårDto(
-            mockk(relaxed = true),
-            SivilstandRegistergrunnlagDto(Sivilstandstype.GIFT, "1", "Navn", null),
-        )
+        val sivilstand =
+            SivilstandInngangsvilkårDto(
+                mockk(relaxed = true),
+                SivilstandRegistergrunnlagDto(Sivilstandstype.GIFT, "1", "Navn", null),
+            )
 
         val barnMedSamvær = barn.map { lagBarnetilsynBarn(it.id) }
 
@@ -119,37 +124,40 @@ internal class VurderingServiceTest {
         every { tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandler(any()) } returns true
     }
 
-    private fun lagBarnetilsynBarn(barnId: UUID = UUID.randomUUID()) = BarnMedSamværDto(
-        barnId,
-        søknadsgrunnlag = mockk(relaxed = true),
-        registergrunnlag = BarnMedSamværRegistergrunnlagDto(
-            UUID.randomUUID(),
-            "navn",
-            "fnr",
-            false,
-            emptyList(),
-            false,
-            AnnenForelderDto(
-                "navn",
-                "fnr2",
-                LocalDate.now().minusYears(23),
-                true,
-                "Norge",
-                "Vei 1B",
-                null,
-                null,
-                AvstandTilSøkerDto(null, LangAvstandTilSøker.UKJENT),
-            ),
-            null,
-            null,
-        ),
-        barnepass = BarnepassDto(
+    private fun lagBarnetilsynBarn(barnId: UUID = UUID.randomUUID()) =
+        BarnMedSamværDto(
             barnId,
-            skalHaBarnepass = true,
-            barnepassordninger = listOf(),
-            årsakBarnepass = null,
-        ),
-    )
+            søknadsgrunnlag = mockk(relaxed = true),
+            registergrunnlag =
+                BarnMedSamværRegistergrunnlagDto(
+                    UUID.randomUUID(),
+                    "navn",
+                    "fnr",
+                    false,
+                    emptyList(),
+                    false,
+                    AnnenForelderDto(
+                        "navn",
+                        "fnr2",
+                        LocalDate.now().minusYears(23),
+                        true,
+                        "Norge",
+                        "Vei 1B",
+                        null,
+                        null,
+                        AvstandTilSøkerDto(null, LangAvstandTilSøker.UKJENT),
+                    ),
+                    null,
+                    null,
+                ),
+            barnepass =
+                BarnepassDto(
+                    barnId,
+                    skalHaBarnepass = true,
+                    barnepassordninger = listOf(),
+                    årsakBarnepass = null,
+                ),
+        )
 
     @Test
     fun `skal opprette nye Vilkårsvurdering for overgangsstønad med alle vilkår dersom ingen vurderinger finnes`() {
@@ -266,13 +274,14 @@ internal class VurderingServiceTest {
 
     @Test
     internal fun `skal ikke opprette vilkårsvurderinger hvis behandling er låst for videre vurdering`() {
-        val vilkårsvurderinger = listOf(
-            vilkårsvurdering(
-                resultat = OPPFYLT,
-                type = VilkårType.FORUTGÅENDE_MEDLEMSKAP,
-                behandlingId = behandlingId,
-            ),
-        )
+        val vilkårsvurderinger =
+            listOf(
+                vilkårsvurdering(
+                    resultat = OPPFYLT,
+                    type = VilkårType.FORUTGÅENDE_MEDLEMSKAP,
+                    behandlingId = behandlingId,
+                ),
+            )
         every { vilkårsvurderingRepository.findByBehandlingId(behandlingId) } returns vilkårsvurderinger
 
         val alleVilkårsvurderinger = vurderingService.hentEllerOpprettVurderinger(behandlingId).vurderinger
@@ -284,13 +293,14 @@ internal class VurderingServiceTest {
 
     @Test
     internal fun `Skal returnere ikke oppfylt hvis vilkårsvurderinger ikke inneholder alle vilkår`() {
-        val vilkårsvurderinger = listOf(
-            vilkårsvurdering(
-                resultat = OPPFYLT,
-                type = VilkårType.FORUTGÅENDE_MEDLEMSKAP,
-                behandlingId = behandlingId,
-            ),
-        )
+        val vilkårsvurderinger =
+            listOf(
+                vilkårsvurdering(
+                    resultat = OPPFYLT,
+                    type = VilkårType.FORUTGÅENDE_MEDLEMSKAP,
+                    behandlingId = behandlingId,
+                ),
+            )
         every { vilkårsvurderingRepository.findByBehandlingId(behandlingId) } returns vilkårsvurderinger
         val erAlleVilkårOppfylt = vurderingService.erAlleVilkårOppfylt(behandlingId)
         assertThat(erAlleVilkårOppfylt).isFalse
@@ -312,7 +322,7 @@ internal class VurderingServiceTest {
             (
                 vilkårsvurderinger.map { it.type }
                     .containsAll(VilkårType.hentVilkårForStønad(OVERGANGSSTØNAD))
-                ),
+            ),
         ).isTrue
         every { vilkårsvurderingRepository.findByBehandlingId(behandlingId) } returns vilkårsvurderinger
 
@@ -323,9 +333,8 @@ internal class VurderingServiceTest {
     private fun lagVilkårsvurderingerMedResultat(
         resultat1: Vilkårsresultat = OPPFYLT,
         resultat2: Vilkårsresultat = SKAL_IKKE_VURDERES,
-    ) =
-        lagVilkårsvurderinger(behandlingId, resultat1).subList(fromIndex = 0, toIndex = 3) +
-            lagVilkårsvurderinger(behandlingId, resultat2).subList(fromIndex = 3, toIndex = 10)
+    ) = lagVilkårsvurderinger(behandlingId, resultat1).subList(fromIndex = 0, toIndex = 3) +
+        lagVilkårsvurderinger(behandlingId, resultat2).subList(fromIndex = 3, toIndex = 10)
 
     private fun lagVilkårsvurderinger(
         behandlingId: UUID,

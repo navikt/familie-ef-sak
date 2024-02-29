@@ -10,8 +10,6 @@ import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvisIkke
-import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
-import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.ef.sak.oppgave.TilordnetRessursService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.GrunnlagsdataEndring
@@ -41,10 +39,8 @@ class VurderingService(
     private val grunnlagsdataService: GrunnlagsdataService,
     private val fagsakService: FagsakService,
     private val gjenbrukVilkårService: GjenbrukVilkårService,
-    private val featureToggleService: FeatureToggleService,
     private val tilordnetRessursService: TilordnetRessursService,
 ) {
-
     private val logger = LoggerFactory.getLogger(javaClass)
     private val secureLogger = LoggerFactory.getLogger("secureLogger")
 
@@ -93,12 +89,13 @@ class VurderingService(
         val (_, metadata) = hentGrunnlagOgMetadata(behandling.id)
         val stønadstype = fagsakService.hentFagsakForBehandling(behandling.id).stønadstype
 
-        val nyeVilkårsvurderinger = opprettNyeVilkårsvurderinger(
-            behandlingId = behandling.id,
-            metadata = metadata.copy(erMigrering = true),
-            stønadstype = stønadstype,
-        )
-            .map { it.copy(resultat = Vilkårsresultat.OPPFYLT) }
+        val nyeVilkårsvurderinger =
+            opprettNyeVilkårsvurderinger(
+                behandlingId = behandling.id,
+                metadata = metadata.copy(erMigrering = true),
+                stønadstype = stønadstype,
+            )
+                .map { it.copy(resultat = Vilkårsresultat.OPPFYLT) }
         vilkårsvurderingRepository.insertAll(nyeVilkårsvurderinger)
         nyeVilkårsvurderinger.forEach {
             vilkårsvurderingRepository.settMaskinelltOpprettet(it.id)
@@ -127,15 +124,16 @@ class VurderingService(
             grunnlag.barnMedSamvær.filter { it.barnepass?.skalHaBarnepass == true }.map { it.barnId }
         val behandling = behandlingService.hentBehandling(behandlingId)
 
-        val metadata = HovedregelMetadata(
-            sivilstandstype = grunnlag.sivilstand.registergrunnlag.type,
-            sivilstandSøknad = søknad?.sivilstand,
-            barn = barn,
-            søktOmBarnetilsyn = søktOmBarnetilsyn,
-            langAvstandTilSøker = grunnlag.barnMedSamvær.map { it.mapTilBarnForelderLangAvstandTilSøker() },
-            vilkårgrunnlagDto = grunnlag,
-            behandling = behandling,
-        )
+        val metadata =
+            HovedregelMetadata(
+                sivilstandstype = grunnlag.sivilstand.registergrunnlag.type,
+                sivilstandSøknad = søknad?.sivilstand,
+                barn = barn,
+                søktOmBarnetilsyn = søktOmBarnetilsyn,
+                langAvstandTilSøker = grunnlag.barnMedSamvær.map { it.mapTilBarnForelderLangAvstandTilSøker() },
+                vilkårgrunnlagDto = grunnlag,
+                behandling = behandling,
+            )
         return Pair(grunnlag, metadata)
     }
 
@@ -164,11 +162,12 @@ class VurderingService(
         metadata: HovedregelMetadata,
     ): List<Vilkårsvurdering> {
         val stønadstype = fagsakService.hentFagsakForBehandling(behandlingId).stønadstype
-        val nyeVilkårsvurderinger: List<Vilkårsvurdering> = opprettNyeVilkårsvurderinger(
-            behandlingId = behandlingId,
-            metadata = metadata,
-            stønadstype = stønadstype,
-        )
+        val nyeVilkårsvurderinger: List<Vilkårsvurdering> =
+            opprettNyeVilkårsvurderinger(
+                behandlingId = behandlingId,
+                metadata = metadata,
+                stønadstype = stønadstype,
+            )
         return vilkårsvurderingRepository.insertAll(nyeVilkårsvurderinger)
     }
 
@@ -199,29 +198,29 @@ class VurderingService(
         val barnIdMap = byggBarnMapFraTidligereTilNyId(barnPåForrigeBehandling, metadata.barn)
         validerAtVurderingerKanKopieres(tidligereVurderinger, eksisterendeBehandlingId)
 
-        val kopiAvVurderinger: Map<UUID, Vilkårsvurdering> = lagKopiAvTidligereVurderinger(
-            tidligereVurderinger,
-            metadata.barn,
-            nyBehandlingsId,
-            barnIdMap,
-        )
+        val kopiAvVurderinger: Map<UUID, Vilkårsvurdering> =
+            lagKopiAvTidligereVurderinger(
+                tidligereVurderinger,
+                metadata.barn,
+                nyBehandlingsId,
+                barnIdMap,
+            )
 
         val nyeBarnVurderinger = opprettVurderingerForNyeBarn(kopiAvVurderinger, metadata, stønadType)
 
         vilkårsvurderingRepository.insertAll(kopiAvVurderinger.values.toList() + nyeBarnVurderinger)
 
-        val behandlingSomErGrunnlagForGjenbrukAvInngangsvilkår = finnBehandlingForGjenbrukAvInngangsvilkår(
-            alleredeGjenbruktBehandlingId = eksisterendeBehandlingId,
-            behandlingId = nyBehandlingsId,
-        )
+        val behandlingSomErGrunnlagForGjenbrukAvInngangsvilkår =
+            finnBehandlingForGjenbrukAvInngangsvilkår(
+                alleredeGjenbruktBehandlingId = eksisterendeBehandlingId,
+                behandlingId = nyBehandlingsId,
+            )
         behandlingSomErGrunnlagForGjenbrukAvInngangsvilkår?.let {
-            if (featureToggleService.isEnabled(Toggle.GJENBRUK_VILKÅR_PÅ_TVERS_AV_BEHANDLINGER)) {
-                logger.info("Gjenbruker inngangsvilkår fra behandling=$it til ny behandling=$nyBehandlingsId")
-                gjenbrukVilkårService.gjenbrukInngangsvilkårVurderinger(
-                    behandlingSomSkalOppdateres = nyBehandlingsId,
-                    behandlingIdSomSkalGjenbrukeInngangsvilkår = it.id,
-                )
-            }
+            logger.info("Gjenbruker inngangsvilkår fra behandling=$it til ny behandling=$nyBehandlingsId")
+            gjenbrukVilkårService.gjenbrukInngangsvilkårVurderinger(
+                behandlingSomSkalOppdateres = nyBehandlingsId,
+                behandlingIdSomSkalGjenbrukeInngangsvilkår = it.id,
+            )
         }
     }
 
@@ -231,9 +230,10 @@ class VurderingService(
     ): Behandling? {
         val fagsak = fagsakService.hentFagsakForBehandling(behandlingId)
         val eksisterendeBehandlinger = behandlingService.hentBehandlingerForGjenbrukAvVilkår(fagsak.fagsakPersonId)
-        val behandlingForGjenbruk = eksisterendeBehandlinger
-            .filterNot { it.id == behandlingId }
-            .firstOrNull()
+        val behandlingForGjenbruk =
+            eksisterendeBehandlinger
+                .filterNot { it.id == behandlingId }
+                .firstOrNull()
 
         return behandlingForGjenbruk?.let { behandling ->
             when (erUlikBehandlingenSomAlleredeErGjenbrukt(behandling, alleredeGjenbruktBehandlingId)) {
@@ -243,8 +243,10 @@ class VurderingService(
         }
     }
 
-    private fun erUlikBehandlingenSomAlleredeErGjenbrukt(behandling: Behandling, alleredeGjenbruktBehandlingId: UUID): Boolean =
-        behandling.id != alleredeGjenbruktBehandlingId
+    private fun erUlikBehandlingenSomAlleredeErGjenbrukt(
+        behandling: Behandling,
+        alleredeGjenbruktBehandlingId: UUID,
+    ): Boolean = behandling.id != alleredeGjenbruktBehandlingId
 
     private fun validerAtVurderingerKanKopieres(
         tidligereVurderinger: Map<UUID, Vilkårsvurdering>,
@@ -265,26 +267,29 @@ class VurderingService(
         tidligereVurderinger.values
             .filter { skalKopiereVurdering(it, barnPåGjeldendeBehandling.isNotEmpty()) }
             .associate { vurdering ->
-                vurdering.id to vurdering.copy(
-                    id = UUID.randomUUID(),
-                    behandlingId = nyBehandlingsId,
-                    sporbar = Sporbar(),
-                    barnId = finnBarnId(vurdering.barnId, barnIdMap),
-                    opphavsvilkår = vurdering.opprettOpphavsvilkår(),
-                )
+                vurdering.id to
+                    vurdering.copy(
+                        id = UUID.randomUUID(),
+                        behandlingId = nyBehandlingsId,
+                        sporbar = Sporbar(),
+                        barnId = finnBarnId(vurdering.barnId, barnIdMap),
+                        opphavsvilkår = vurdering.opprettOpphavsvilkår(),
+                    )
             }
 
     private fun opprettVurderingerForNyeBarn(
         vurderingerKopi: Map<UUID, Vilkårsvurdering>,
         metadata: HovedregelMetadata,
         stønadType: StønadType,
-    ) =
-        metadata.barn
-            .filter { barn -> vurderingerKopi.none { it.value.barnId == barn.id } }
-            .map { OppdaterVilkår.lagVilkårsvurderingForNyttBarn(metadata, it.behandlingId, it.id, stønadType) }
-            .flatten()
+    ) = metadata.barn
+        .filter { barn -> vurderingerKopi.none { it.value.barnId == barn.id } }
+        .map { OppdaterVilkår.lagVilkårsvurderingForNyttBarn(metadata, it.behandlingId, it.id, stønadType) }
+        .flatten()
 
-    private fun finnBarnId(barnId: UUID?, barnIdMap: Map<UUID, BehandlingBarn>): UUID? {
+    private fun finnBarnId(
+        barnId: UUID?,
+        barnIdMap: Map<UUID, BehandlingBarn>,
+    ): UUID? {
         return barnId?.let {
             val barnIdMapping = barnIdMap.map { it.key to it.value.id }.toMap()
             barnIdMap[it]?.id ?: error("Fant ikke barn=$it på gjeldende behandling med barnIdMapping=$barnIdMapping")
@@ -294,12 +299,11 @@ class VurderingService(
     private fun skalKopiereVurdering(
         it: Vilkårsvurdering,
         harNyeBarnForVurdering: Boolean,
-    ) =
-        if (it.type.gjelderFlereBarn() && it.barnId == null) {
-            !harNyeBarnForVurdering
-        } else {
-            true
-        }
+    ) = if (it.type.gjelderFlereBarn() && it.barnId == null) {
+        !harNyeBarnForVurdering
+    } else {
+        true
+    }
 
     fun erAlleVilkårOppfylt(behandlingId: UUID): Boolean {
         val stønadstype = fagsakService.hentFagsakForBehandling(behandlingId).stønadstype
@@ -309,7 +313,6 @@ class VurderingService(
     }
 
     companion object {
-
         fun byggBarnMapFraTidligereTilNyId(
             barnPåForrigeBehandling: List<BehandlingBarn>,
             barnPåGjeldendeBehandling: List<BehandlingBarn>,
