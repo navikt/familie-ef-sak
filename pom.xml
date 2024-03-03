@@ -11,7 +11,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.1.8</version>
+        <version>3.2.3</version>
     </parent>
     <repositories>
         <repository>
@@ -32,11 +32,11 @@
         <kotlin.version>1.9.22</kotlin.version>
         <kotlin-coroutines.version>1.8.0</kotlin-coroutines.version>
         <springdoc.version>2.3.0</springdoc.version>
-        <mockk.version>1.13.9</mockk.version>
-        <felles.version>2.20240221121155_f43df94</felles.version>
+        <mockk.version>1.13.10</mockk.version>
+        <felles.version>3.20240227112134_a79201c</felles.version>
         <prosessering.version>2.20240214140223_83c31de</prosessering.version>
         <start-class>no.nav.familie.ef.sak.ApplicationKt</start-class>
-        <kontrakter.version>3.0_20240215101759_cea211f</kontrakter.version>
+        <kontrakter.version>3.0_20240228112956_0728048</kontrakter.version>
         <mikrofrontend.builder.version>20230704114948-74aa2e9</mikrofrontend.builder.version>
         <eksterne.kontrakter.bisys.version>2.0_20230214104704_706e9c0</eksterne.kontrakter.bisys.version>
         <cucumber.version>7.15.0</cucumber.version>
