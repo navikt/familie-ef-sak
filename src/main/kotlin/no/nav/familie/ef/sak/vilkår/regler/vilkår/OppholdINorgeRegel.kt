@@ -15,13 +15,12 @@ class OppholdINorgeRegel : Vilkårsregel(
     regler = setOf(BOR_OG_OPPHOLDER_SEG_I_NORGE, OPPHOLD_UNNTAK),
     hovedregler = regelIder(BOR_OG_OPPHOLDER_SEG_I_NORGE),
 ) {
-
     companion object {
-
         private val OPPHOLD_UNNTAK =
             RegelSteg(
                 regelId = RegelId.OPPHOLD_UNNTAK,
-                svarMapping = mapOf(
+                svarMapping =
+                mapOf(
                     SvarId.ARBEID_NORSK_ARBEIDSGIVER to SluttSvarRegel.OPPFYLT_MED_PÅKREVD_BEGRUNNELSE,
                     SvarId.UTENLANDSOPPHOLD_MINDRE_ENN_6_UKER to SluttSvarRegel.OPPFYLT_MED_PÅKREVD_BEGRUNNELSE,
                     SvarId.OPPHOLDER_SEG_I_ANNET_EØS_LAND to SluttSvarRegel.OPPFYLT_MED_PÅKREVD_BEGRUNNELSE,
@@ -32,7 +31,8 @@ class OppholdINorgeRegel : Vilkårsregel(
         private val BOR_OG_OPPHOLDER_SEG_I_NORGE =
             RegelSteg(
                 regelId = RegelId.BOR_OG_OPPHOLDER_SEG_I_NORGE,
-                svarMapping = jaNeiSvarRegel(
+                svarMapping =
+                jaNeiSvarRegel(
                     hvisJa = SluttSvarRegel.OPPFYLT_MED_PÅKREVD_BEGRUNNELSE,
                     hvisNei = NesteRegel(OPPHOLD_UNNTAK.regelId),
                 ),
