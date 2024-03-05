@@ -128,10 +128,10 @@ class ForutgåendeMedlemskapRegel : Vilkårsregel(
             RegelSteg(
                 regelId = RegelId.SØKER_MEDLEM_I_FOLKETRYGDEN,
                 svarMapping =
-                    jaNeiSvarRegel(
-                        hvisJa = SluttSvarRegel.OPPFYLT_MED_PÅKREVD_BEGRUNNELSE,
-                        hvisNei = NesteRegel(MEDLEMSKAP_UNNTAK.regelId),
-                    ),
+                jaNeiSvarRegel(
+                    hvisJa = SluttSvarRegel.OPPFYLT_MED_PÅKREVD_BEGRUNNELSE,
+                    hvisNei = NesteRegel(MEDLEMSKAP_UNNTAK.regelId),
+                ),
             )
     }
 }
