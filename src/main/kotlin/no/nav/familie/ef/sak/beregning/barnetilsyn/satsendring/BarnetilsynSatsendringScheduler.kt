@@ -11,7 +11,7 @@ class BarnetilsynSatsendringScheduler(val barnetilsynSatsendringService: Barneti
 
     private val logger = LoggerFactory.getLogger(this::class.java)
 
-    @Scheduled(initialDelay = 60 * 1000L, fixedDelay = 365 * 24 * 60 * 60 * 1000L) // Kjører ved oppstart av app
+    //@Scheduled(initialDelay = 60 * 1000L, fixedDelay = 365 * 24 * 60 * 60 * 1000L) // Kjører ved oppstart av app
     fun opprettTask() {
         logger.info("Starter scheduler for satsendring av barnetilsyn")
         barnetilsynSatsendringService.opprettTask()
