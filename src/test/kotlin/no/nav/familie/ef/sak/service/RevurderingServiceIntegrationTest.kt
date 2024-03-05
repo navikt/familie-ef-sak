@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.service
 
+import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.barn.BarnRepository
@@ -496,6 +497,7 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
         behandling(
             fagsak = fagsak,
             status = BehandlingStatus.FERDIGSTILT,
+            årsak = BehandlingÅrsak.SØKNAD,
             resultat = resultat,
         ),
     )
@@ -563,6 +565,8 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
     }
 
     private fun lagSivilstandDelvilkår(sivilstand: Sivilstand?): List<Delvilkårsvurdering> {
+        val behandlingMock = mockk<Behandling>()
+        every { behandlingMock.erDigitalSøknad() } returns true
         val delvilkårsvurdering =
             SivilstandRegel().initiereDelvilkårsvurdering(
                 HovedregelMetadata(
@@ -571,7 +575,7 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
                     barn = emptyList(),
                     søktOmBarnetilsyn = emptyList(),
                     vilkårgrunnlagDto = mockk(),
-                    behandling = mockk(),
+                    behandling = behandlingMock,
                 ),
             )
         return delvilkårsvurdering

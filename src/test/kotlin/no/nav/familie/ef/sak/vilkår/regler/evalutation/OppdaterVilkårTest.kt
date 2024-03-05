@@ -343,7 +343,7 @@ internal class OppdaterVilkårTest {
                 barn = barn,
                 søktOmBarnetilsyn = emptyList(),
                 vilkårgrunnlagDto = mockk(),
-                behandling = mockk(),
+                behandling = behandling(),
             ),
         )
         val aktuelleDelvilkår = initDelvilkår.filter { it.resultat == Vilkårsresultat.IKKE_TATT_STILLING_TIL }
@@ -382,7 +382,7 @@ internal class OppdaterVilkårTest {
                 barn = barn,
                 søktOmBarnetilsyn = emptyList(),
                 vilkårgrunnlagDto = mockk(),
-                behandling = mockk(),
+                behandling = behandling(),
             ),
         )
 

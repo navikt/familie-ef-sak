@@ -246,7 +246,7 @@ internal class VurderingServiceTest {
                     barn = emptyList(),
                     søktOmBarnetilsyn = emptyList(),
                     vilkårgrunnlagDto = mockk(),
-                    behandling = mockk(),
+                    behandling = behandling,
                 ),
             )
         every { vilkårsvurderingRepository.findByBehandlingId(behandlingId) } returns

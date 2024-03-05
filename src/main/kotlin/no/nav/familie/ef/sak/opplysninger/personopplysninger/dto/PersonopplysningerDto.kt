@@ -68,18 +68,18 @@ data class SivilstandDto(
 )
 
 @Suppress("unused") // Kopi fra PDL
-enum class Sivilstandstype {
+enum class Sivilstandstype(val visningsnavn: String) {
 
-    UOPPGITT,
-    UGIFT,
-    GIFT,
-    ENKE_ELLER_ENKEMANN,
-    SKILT,
-    SEPARERT,
-    REGISTRERT_PARTNER,
-    SEPARERT_PARTNER,
-    SKILT_PARTNER,
-    GJENLEVENDE_PARTNER,
+    UOPPGITT("Uoppgitt"),
+    UGIFT("Ugift"),
+    GIFT("Gift"),
+    ENKE_ELLER_ENKEMANN("Enke eller enkemann"),
+    SKILT("Skilt"),
+    SEPARERT("Separert"),
+    REGISTRERT_PARTNER("Registrert partner"),
+    SEPARERT_PARTNER("Separert partner"),
+    SKILT_PARTNER("Skilt partner"),
+    GJENLEVENDE_PARTNER("Gjenlevende partner"),
     ;
 
     fun erGift(): Boolean = this == REGISTRERT_PARTNER || this == GIFT
@@ -87,6 +87,8 @@ enum class Sivilstandstype {
     fun erSeparert(): Boolean = this == SEPARERT_PARTNER || this == SEPARERT
     fun erEnkeEllerEnkemann(): Boolean = this == ENKE_ELLER_ENKEMANN || this == GJENLEVENDE_PARTNER
     fun erSkilt(): Boolean = this == SKILT || this == SKILT_PARTNER
+
+    fun erUgiftEllerSkilt(): Boolean = this == UGIFT || this == SKILT
 }
 
 data class AdresseDto(
