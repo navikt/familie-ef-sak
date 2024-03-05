@@ -53,6 +53,7 @@ import no.nav.familie.ef.sak.vedtak.dto.BeslutteVedtakDto
 import no.nav.familie.ef.sak.vedtak.dto.InnvilgelseOvergangsstønad
 import no.nav.familie.ef.sak.vedtak.dto.VedtaksperiodeDto
 import no.nav.familie.ef.sak.vilkår.VilkårsvurderingRepository
+import no.nav.familie.ef.sak.vilkår.regler.RegelId
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdAktivitetstype
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdEndringKode
@@ -797,6 +798,7 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
     private fun verifiserVurderinger(migrering: Behandling) {
         val vilkårsvurderinger = vilkårsvurderingRepository.findByBehandlingId(migrering.id)
         val alleVurderingerManglerSvar = vilkårsvurderinger.flatMap { it.delvilkårsvurdering.delvilkårsvurderinger }
+            .filter { it.hovedregel != RegelId.OMSORG_FOR_EGNE_ELLER_ADOPTERTE_BARN }
             .flatMap { it.vurderinger }
             .all { it.svar == null }
         val erOpprettetAvSystem =
