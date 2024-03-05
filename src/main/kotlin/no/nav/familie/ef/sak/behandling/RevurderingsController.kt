@@ -6,7 +6,6 @@ import no.nav.familie.ef.sak.behandling.dto.RevurderingsinformasjonDto
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
-import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.ef.sak.journalføring.dto.VilkårsbehandleNyeBarn
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
@@ -29,9 +28,10 @@ class RevurderingsController(
     private val tilgangService: TilgangService,
     private val featureToggleService: FeatureToggleService,
 ) {
-
     @PostMapping("{fagsakId}")
-    fun startRevurdering(@RequestBody revurderingInnhold: RevurderingDto): Ressurs<UUID> {
+    fun startRevurdering(
+        @RequestBody revurderingInnhold: RevurderingDto,
+    ): Ressurs<UUID> {
         tilgangService.validerTilgangTilFagsak(revurderingInnhold.fagsakId, AuditLoggerEvent.CREATE)
         tilgangService.validerHarSaksbehandlerrolle()
         brukerfeilHvis(revurderingInnhold.behandlingsårsak == BehandlingÅrsak.SØKNAD) {
@@ -45,10 +45,6 @@ class RevurderingsController(
                 revurderingInnhold.vilkårsbehandleNyeBarn != VilkårsbehandleNyeBarn.IKKE_VILKÅRSBEHANDLE,
         ) {
             "Kan ikke behandle nye barn på revurdering med årsak G-omregning"
-        }
-
-        feilHvis((revurderingInnhold.barnSomSkalFødes.isNotEmpty() || revurderingInnhold.behandlingsårsak == BehandlingÅrsak.PAPIRSØKNAD) && !featureToggleService.isEnabled(Toggle.PAPIRSOKNAD_OG_TERMINBARN_REVURDERING)) {
-            "Featuretoggle for papirsøknad / terminbarn på revurdering er ikke skrudd på"
         }
 
         val revurdering = revurderingService.opprettRevurderingManuelt(revurderingInnhold)
@@ -69,7 +65,9 @@ class RevurderingsController(
     }
 
     @DeleteMapping("informasjon/{behandlingId}")
-    fun slettRevurderingsinformasjon(@PathVariable behandlingId: UUID): Ressurs<String> {
+    fun slettRevurderingsinformasjon(
+        @PathVariable behandlingId: UUID,
+    ): Ressurs<String> {
         tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.CREATE)
         tilgangService.validerHarSaksbehandlerrolle()
 
