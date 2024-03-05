@@ -52,7 +52,7 @@ class ForutgåendeMedlemskapRegel : Vilkårsregel(
                 automatiskVurdertDelvilkår(
                     RegelId.SØKER_MEDLEM_I_FOLKETRYGDEN,
                     SvarId.JA,
-                    "Bruker er født i Norge, har norsk statsborgerskap, er bosatt i Norge og har ikke oppholdt seg utenfor Norge de siste 5 årene basert på opplysninger fra folkeregister og søknad",
+                    "Bruker er født i Norge, har norsk statsborgerskap, er bosatt i Norge og har ikke oppholdt seg utenfor Norge de siste 5 årene basert på opplysninger fra folkeregister og søknad.",
                 ),
             )
         }
@@ -128,10 +128,10 @@ class ForutgåendeMedlemskapRegel : Vilkårsregel(
             RegelSteg(
                 regelId = RegelId.SØKER_MEDLEM_I_FOLKETRYGDEN,
                 svarMapping =
-                jaNeiSvarRegel(
-                    hvisJa = SluttSvarRegel.OPPFYLT_MED_PÅKREVD_BEGRUNNELSE,
-                    hvisNei = NesteRegel(MEDLEMSKAP_UNNTAK.regelId),
-                ),
+                    jaNeiSvarRegel(
+                        hvisJa = SluttSvarRegel.OPPFYLT_MED_PÅKREVD_BEGRUNNELSE,
+                        hvisNei = NesteRegel(MEDLEMSKAP_UNNTAK.regelId),
+                    ),
             )
     }
 }
