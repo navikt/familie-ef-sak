@@ -33,6 +33,9 @@ class NyttBarnSammePartnerRegel : Vilkårsregel(
         resultat: Vilkårsresultat,
         barnId: UUID?,
     ): List<Delvilkårsvurdering> {
+        if (resultat != Vilkårsresultat.IKKE_TATT_STILLING_TIL) {
+            return super.initiereDelvilkårsvurdering(metadata, resultat, barnId)
+        }
         logger.info("Initiering av nytt barn samme partner regel. Antall barn: ${metadata.barn.size} - barnId: $barnId")
 
         if (metadata.barn.size == 1) {

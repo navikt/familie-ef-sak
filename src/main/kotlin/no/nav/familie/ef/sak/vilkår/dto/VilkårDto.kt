@@ -30,6 +30,7 @@ data class PersonaliaDto(
     val navn: NavnDto,
     val personIdent: String,
     val bostedsadresse: AdresseDto?,
+    val fødeland: String?,
 )
 
 data class AdresseopplysningerDto(

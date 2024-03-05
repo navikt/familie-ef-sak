@@ -130,7 +130,7 @@ internal class VurderingServiceIntegrasjonsTest : OppslagSpringRunnerTest() {
                 barn = barn,
                 søktOmBarnetilsyn = emptyList(),
                 vilkårgrunnlagDto = mockk(),
-                behandling = mockk(),
+                behandling = behandling,
             )
         val delvilkårsvurdering = SivilstandRegel().initiereDelvilkårsvurdering(hovedregelMetadata)
         val vilkårsvurderinger = listOf(

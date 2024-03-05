@@ -41,30 +41,45 @@ class SivilstandRegel : Vilkårsregel(
         resultat: Vilkårsresultat,
         barnId: UUID?,
     ): List<Delvilkårsvurdering> {
-        val (sivilstandSøknad: Sivilstand?, sivilstandstype: Sivilstandstype) = metadata
+        val hovedregel: RegelId = regelIdForSivilstandstypeSvarISøknad(metadata.sivilstandstype, metadata.sivilstandSøknad)
 
-        val hovedregel: RegelId = when {
-            sivilstandstype.erUgiftEllerUoppgitt() &&
-                sivilstandSøknad != null &&
-                (sivilstandSøknad.erUformeltGift == true || sivilstandSøknad.erUformeltSeparertEllerSkilt == true) ->
-                KRAV_SIVILSTAND_PÅKREVD_BEGRUNNELSE
-            sivilstandstype.erUgiftEllerUoppgitt() -> KRAV_SIVILSTAND_UTEN_PÅKREVD_BEGRUNNELSE
+        if (resultat != Vilkårsresultat.IKKE_TATT_STILLING_TIL) {
+            return super.initiereDelvilkårsvurdering(metadata, resultat, barnId)
+        }
 
-            sivilstandstype.erGift() && sivilstandSøknad != null && sivilstandSøknad.søktOmSkilsmisseSeparasjon == true ->
-                SAMLIVSBRUDD_LIKESTILT_MED_SEPARASJON
-            sivilstandstype.erGift() -> KRAV_SIVILSTAND_PÅKREVD_BEGRUNNELSE
-
-            sivilstandstype.erSeparert() -> SAMSVAR_DATO_SEPARASJON_OG_FRAFLYTTING
-            sivilstandstype.erSkilt() -> KRAV_SIVILSTAND_UTEN_PÅKREVD_BEGRUNNELSE
-            sivilstandstype.erEnkeEllerEnkemann() -> UNNTAK
-            else -> throw Feil("Finner ikke matchende sivilstand for $sivilstandstype")
-        }.regelId
+        if (metadata.behandling.erDigitalSøknad() && metadata.sivilstandstype.erUgiftEllerSkilt() &&
+            metadata.sivilstandSøknad?.erUformeltGiftEllerSkilt() == false
+        ) {
+            return listOf(automatiskVurdertDelvilkår(RegelId.KRAV_SIVILSTAND_UTEN_PÅKREVD_BEGRUNNELSE, SvarId.JA, "Bruker er ${metadata.sivilstandstype.visningsnavn.lowercase()}."))
+        }
 
         return hovedregler.map {
             val resultatForDelvilkår = if (it == hovedregel) resultat else Vilkårsresultat.IKKE_AKTUELL
             Delvilkårsvurdering(resultat = resultatForDelvilkår, listOf(Vurdering(it)))
         }
     }
+
+    private fun regelIdForSivilstandstypeSvarISøknad(
+        sivilstandstype: Sivilstandstype,
+        sivilstandSøknad: Sivilstand?,
+    ) = when {
+        sivilstandstype.erUgiftEllerUoppgitt() &&
+            sivilstandSøknad != null &&
+            (sivilstandSøknad.erUformeltGiftEllerSkilt()) ->
+            KRAV_SIVILSTAND_PÅKREVD_BEGRUNNELSE
+
+        sivilstandstype.erUgiftEllerUoppgitt() -> KRAV_SIVILSTAND_UTEN_PÅKREVD_BEGRUNNELSE
+
+        sivilstandstype.erGift() && sivilstandSøknad != null && sivilstandSøknad.søktOmSkilsmisseSeparasjon == true ->
+            SAMLIVSBRUDD_LIKESTILT_MED_SEPARASJON
+
+        sivilstandstype.erGift() -> KRAV_SIVILSTAND_PÅKREVD_BEGRUNNELSE
+
+        sivilstandstype.erSeparert() -> SAMSVAR_DATO_SEPARASJON_OG_FRAFLYTTING
+        sivilstandstype.erSkilt() -> KRAV_SIVILSTAND_UTEN_PÅKREVD_BEGRUNNELSE
+        sivilstandstype.erEnkeEllerEnkemann() -> UNNTAK
+        else -> throw Feil("Finner ikke matchende sivilstand for $sivilstandstype")
+    }.regelId
 
     companion object {
 
