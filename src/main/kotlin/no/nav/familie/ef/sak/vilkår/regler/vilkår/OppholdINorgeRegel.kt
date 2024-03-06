@@ -30,18 +30,7 @@ class OppholdINorgeRegel : Vilkårsregel(
             return super.initiereDelvilkårsvurdering(metadata, resultat, barnId)
         }
 
-        val erDigitalSøknad = metadata.behandling.årsak == BehandlingÅrsak.SØKNAD
-        val harBrukerSvartJaPåSpørsmålOmOppholdISøknad = metadata.vilkårgrunnlagDto.medlemskap.søknadsgrunnlag?.oppholderDuDegINorge == true
-        val harSøkerPersonstatusBosatt = metadata.vilkårgrunnlagDto.medlemskap.registergrunnlag.folkeregisterpersonstatus == Folkeregisterpersonstatus.BOSATT
-        val harAlleBarnSammeAdresseSomSøker = harAlleBarnSammeAdresseSomSøker(metadata)
-
-        val skalAutomatiskVudereVilkår =
-            erDigitalSøknad &&
-                harBrukerSvartJaPåSpørsmålOmOppholdISøknad &&
-                harSøkerPersonstatusBosatt &&
-                harAlleBarnSammeAdresseSomSøker
-
-        if (skalAutomatiskVudereVilkår) {
+        if (oppfyllerVilkårForAutomatiskVurdering(metadata)) {
             return listOf(
                 automatiskVurdertDelvilkår(
                     regelId = RegelId.BOR_OG_OPPHOLDER_SEG_I_NORGE,
@@ -56,6 +45,18 @@ class OppholdINorgeRegel : Vilkårsregel(
 
     fun harAlleBarnSammeAdresseSomSøker(metadata: HovedregelMetadata): Boolean {
         return metadata.vilkårgrunnlagDto.barnMedSamvær.all { it.registergrunnlag.harSammeAdresse == true }
+    }
+
+    fun oppfyllerVilkårForAutomatiskVurdering(metadata: HovedregelMetadata): Boolean {
+        val erDigitalSøknad = metadata.behandling.årsak == BehandlingÅrsak.SØKNAD
+        val harBrukerSvartJaPåSpørsmålOmOppholdISøknad = metadata.vilkårgrunnlagDto.medlemskap.søknadsgrunnlag?.oppholderDuDegINorge == true
+        val harSøkerPersonstatusBosatt = metadata.vilkårgrunnlagDto.medlemskap.registergrunnlag.folkeregisterpersonstatus == Folkeregisterpersonstatus.BOSATT
+        val harAlleBarnSammeAdresseSomSøker = harAlleBarnSammeAdresseSomSøker(metadata)
+
+        return erDigitalSøknad &&
+            harBrukerSvartJaPåSpørsmålOmOppholdISøknad &&
+            harSøkerPersonstatusBosatt &&
+            harAlleBarnSammeAdresseSomSøker
     }
 
     companion object {
