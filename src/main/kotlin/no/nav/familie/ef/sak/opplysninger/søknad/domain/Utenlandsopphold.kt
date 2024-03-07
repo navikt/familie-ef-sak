@@ -11,4 +11,6 @@ data class Utenlandsopphold(
     val land: String? = null,
     @Column("arsak_utenlandsopphold")
     val årsakUtenlandsopphold: String,
+    val personidentUtland: String? = null,
+    val adresseUtland: String? = null,
 )
