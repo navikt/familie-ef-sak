@@ -47,9 +47,9 @@ class MedlemskapMapper(
                     fraDato = it.fradato,
                     tilDato = it.tildato,
                     land = it.land?.let { land -> kodeverkService.hentLand(land, LocalDate.now()) },
-                    årsak = it.årsakUtenlandsopphold,
-                    personidentUtland = it.personidentUtland,
-                    adresseUtland = it.adresseUtland,
+                    årsak = it.årsak,
+                    personidentUtland = it.personident,
+                    adresseUtland = it.adresse,
                 )
             },
         )

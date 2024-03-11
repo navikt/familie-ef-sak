@@ -175,9 +175,9 @@ object SøknadsskjemaMapper {
                 fradato = it.fradato.verdi,
                 tildato = it.tildato.verdi,
                 land = it.land?.svarId,
-                årsakUtenlandsopphold = it.årsakUtenlandsopphold.verdi,
-                personidentUtland = it.personidentUtland?.verdi,
-                adresseUtland = it.adresseUtland?.verdi,
+                årsak = it.årsakUtenlandsopphold.verdi,
+                personident = it.personidentUtland?.verdi,
+                adresse = it.adresseUtland?.verdi,
             )
         }?.toSet() ?: emptySet()
 
