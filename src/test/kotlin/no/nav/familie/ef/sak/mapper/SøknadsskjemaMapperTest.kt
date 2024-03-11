@@ -138,7 +138,7 @@ internal class SøknadsskjemaMapperTest {
             assertThat(søknadTilLagring.medlemskap.utenlandsopphold.first().fradato).isEqualTo(LocalDate.of(2021, 1, 1))
             assertThat(søknadTilLagring.medlemskap.utenlandsopphold.first().tildato).isEqualTo(LocalDate.of(2022, 1, 1))
             assertThat(søknadTilLagring.medlemskap.utenlandsopphold.first().land).isEqualTo("ESP")
-            assertThat(søknadTilLagring.medlemskap.utenlandsopphold.first().årsak).isEqualTo("Ferie")
+            assertThat(søknadTilLagring.medlemskap.utenlandsopphold.first().årsakUtenlandsopphold).isEqualTo("Ferie")
         }
     }
 }
