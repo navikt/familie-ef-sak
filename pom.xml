@@ -11,7 +11,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.2.3</version>
+        <version>3.1.8</version>
     </parent>
     <repositories>
         <repository>
@@ -33,7 +33,7 @@
         <kotlin-coroutines.version>1.8.0</kotlin-coroutines.version>
         <springdoc.version>2.3.0</springdoc.version>
         <mockk.version>1.13.10</mockk.version>
-        <felles.version>3.20240227112134_a79201c</felles.version>
+        <felles.version>2.20240227113046_178d8bb</felles.version>
         <prosessering.version>2.20240214140223_83c31de</prosessering.version>
         <start-class>no.nav.familie.ef.sak.ApplicationKt</start-class>
         <kontrakter.version>3.0_20240307134842_b6c7d85</kontrakter.version>
