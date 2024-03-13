@@ -4,11 +4,13 @@ import no.nav.familie.ef.sak.fagsak.domain.FagsakPerson
 import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvisIkke
-import no.nav.familie.ef.sak.minside.MikrofrontendEnableBrukerTask
+import no.nav.familie.ef.sak.minside.AktiverMikrofrontendNyttFødselsnummerTask
+import no.nav.familie.ef.sak.minside.AktiverMikrofrontendTask
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.prosessering.internal.TaskService
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.time.LocalDate
 import java.util.UUID
 
 @Service
@@ -43,7 +45,7 @@ class FagsakPersonService(private val fagsakPersonRepository: FagsakPersonReposi
     fun oppdaterIdent(fagsakPerson: FagsakPerson, gjeldendePersonIdent: String): FagsakPerson {
         if (fagsakPerson.hentAktivIdent() != gjeldendePersonIdent) {
             val oppdatertFagsakPerson = fagsakPerson.medOppdatertGjeldendeIdent(gjeldendePersonIdent)
-            taskService.save(MikrofrontendEnableBrukerTask.opprettTask(oppdatertFagsakPerson))
+            taskService.save(AktiverMikrofrontendNyttFødselsnummerTask.opprettTask(oppdatertFagsakPerson))
             return fagsakPersonRepository.update(oppdatertFagsakPerson)
         } else {
             return fagsakPerson
@@ -52,7 +54,43 @@ class FagsakPersonService(private val fagsakPersonRepository: FagsakPersonReposi
 
     fun opprettFagsakPersonOgAktiverForMinSide(gjeldendePersonIdent: String): FagsakPerson {
         val fagsakPerson = fagsakPersonRepository.insert(FagsakPerson(identer = setOf(PersonIdent(gjeldendePersonIdent))))
-        taskService.save(MikrofrontendEnableBrukerTask.opprettTask(fagsakPerson))
+        taskService.save(AktiverMikrofrontendTask.opprettTask(fagsakPerson))
         return fagsakPerson
+    }
+
+    fun finnFagsakPersonForFagsakId(fagsakId: UUID): FagsakPerson =
+        fagsakPersonRepository.finnFagsakPersonForFagsakId(fagsakId)
+
+    fun oppdaterMedMikrofrontendAktivering(
+        fagsakPersonId: UUID,
+        aktivert: Boolean,
+    ) {
+        val fagsakPerson = hentPerson(fagsakPersonId).copy(harAktivertMikrofrontend = aktivert)
+        fagsakPersonRepository.update(fagsakPerson)
+    }
+
+    /**
+     * Regler  for når mikrofrontend skal deaktiveres:
+     * FagsakPerson.harAktivertMikrofrontend = true
+     *
+     * En av følgende
+     * - Ingen behandlinger og FagsakPerson opprettet for mer enn 1 mnd siden
+     * - Siste utbetaling for mer enn 4 år siden, ingen nye behandlinger siste 6 mnd og ingen åpne behandlinger
+     * - Kun henlagte behandlinger og siste behandling er avsluttet for mer enn 6 mnd siden
+     * - Kun avslåtte og henlagte behandlinger og siste behandling er mer enn 4 år gammmel
+     */
+    fun finnFagsakpersonIderKlarForDeaktiveringAvMikrofrontend(): List<UUID> {
+        val enMånedSiden = LocalDate.now().minusMonths(1)
+        val seksMånederSiden = LocalDate.now().minusMonths(6)
+        val fireÅrSiden = LocalDate.now().minusYears(4)
+        val fpIderUtenBehandling = fagsakPersonRepository.finnFagsakPersonIderUtenBehandlingOgEldreEnn(enMånedSiden)
+        val fpIderUtenÅpenBehandlingOgSisteUtbetalingMerEnnFireÅrSiden =
+            fagsakPersonRepository.finnFagsakPersonIderMedUtbetalingerSomKanSlettes(fireÅrSiden, seksMånederSiden)
+        val fpIderForDeSomKunHarHenlagteBehandlinger =
+            fagsakPersonRepository.finnFagsakPersonIderForDeSomKunHarHenlagteBehandlinger(seksMånederSiden)
+        val fpIderForDeSomKunHarAvslåtteBehandlinger =
+            fagsakPersonRepository.finnFagsakPersonIderForDeSomKunHarAvslåtteBehandlinger(fireÅrSiden)
+
+        return fpIderUtenBehandling + fpIderUtenÅpenBehandlingOgSisteUtbetalingMerEnnFireÅrSiden + fpIderForDeSomKunHarAvslåtteBehandlinger + fpIderForDeSomKunHarHenlagteBehandlinger
     }
 }
