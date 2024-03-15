@@ -1,6 +1,5 @@
 package no.nav.familie.ef.sak.no.nav.familie.ef.sak.vilkår.regler.vilkår
 
-import io.mockk.mockk
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.Folkeregisterpersonstatus
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.InnflyttingDto
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.NavnDto
@@ -9,6 +8,7 @@ import no.nav.familie.ef.sak.vilkår.dto.AnnenForelderDto
 import no.nav.familie.ef.sak.vilkår.dto.AvstandTilSøkerDto
 import no.nav.familie.ef.sak.vilkår.dto.BarnMedSamværDto
 import no.nav.familie.ef.sak.vilkår.dto.BarnMedSamværRegistergrunnlagDto
+import no.nav.familie.ef.sak.vilkår.dto.BarnMedSamværSøknadsgrunnlagDto
 import no.nav.familie.ef.sak.vilkår.dto.BarnepassDto
 import no.nav.familie.ef.sak.vilkår.dto.LangAvstandTilSøker
 import no.nav.familie.ef.sak.vilkår.dto.MedlUnntakDto
@@ -67,7 +67,7 @@ fun barnMedSamværDto(
     harSammeAdresse: Boolean,
 ) = BarnMedSamværDto(
     barnId,
-    søknadsgrunnlag = mockk(relaxed = true),
+    søknadsgrunnlag = tomtSøknadsgrunnlag(),
     registergrunnlag =
     BarnMedSamværRegistergrunnlagDto(
         UUID.randomUUID(),
@@ -89,6 +89,7 @@ fun barnMedSamværDto(
         ),
         null,
         null,
+        Folkeregisterpersonstatus.BOSATT,
     ),
     barnepass =
     BarnepassDto(
@@ -97,4 +98,25 @@ fun barnMedSamværDto(
         barnepassordninger = listOf(),
         årsakBarnepass = null,
     ),
+)
+
+fun terminbarnSøknadsgrunnlag() = tomtSøknadsgrunnlag().copy(fødselTermindato = LocalDate.now().plusMonths(2))
+fun tomtSøknadsgrunnlag() = BarnMedSamværSøknadsgrunnlagDto(
+    UUID.randomUUID(),
+    fødselTermindato = null,
+    navn = null,
+    harSammeAdresse = null,
+    skalBoBorHosSøker = null,
+    forelder = null,
+    ikkeOppgittAnnenForelderBegrunnelse = null,
+    spørsmålAvtaleOmDeltBosted = null,
+    skalAnnenForelderHaSamvær = null,
+    harDereSkriftligAvtaleOmSamvær = null,
+    hvordanPraktiseresSamværet = null,
+    borAnnenForelderISammeHus = null,
+    borAnnenForelderISammeHusBeskrivelse = null,
+    harDereTidligereBoddSammen = null,
+    nårFlyttetDereFraHverandre = null,
+    hvorMyeErDuSammenMedAnnenForelder = null,
+    beskrivSamværUtenBarn = null,
 )

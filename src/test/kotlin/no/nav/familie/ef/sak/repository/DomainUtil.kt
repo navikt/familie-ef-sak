@@ -461,6 +461,7 @@ fun barnMedIdent(fnr: String, navn: String, fødsel: Fødsel = fødsel(LocalDate
             ),
         ),
         personIdent = fnr,
+        null,
     )
 
 fun sivilstand(type: Sivilstandstype, gyldigFraOgMed: LocalDate = LocalDate.now(), metadata: Metadata = metadataGjeldende) =
