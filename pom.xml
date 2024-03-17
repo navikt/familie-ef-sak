@@ -11,7 +11,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.1.8</version>
+        <version>3.2.3</version>
     </parent>
     <repositories>
         <repository>
@@ -31,12 +31,12 @@
         <java.version>21</java.version>
         <kotlin.version>1.9.23</kotlin.version>
         <kotlin-coroutines.version>1.8.0</kotlin-coroutines.version>
-        <springdoc.version>2.3.0</springdoc.version>
+        <springdoc.version>2.4.0</springdoc.version>
         <mockk.version>1.13.10</mockk.version>
-        <felles.version>2.20240227113046_178d8bb</felles.version>
+        <felles.version>3.20240227112134_a79201c</felles.version>
         <prosessering.version>2.20240214140223_83c31de</prosessering.version>
         <start-class>no.nav.familie.ef.sak.ApplicationKt</start-class>
-        <kontrakter.version>3.0_20240307134842_b6c7d85</kontrakter.version>
+        <kontrakter.version>3.0_20240315123154_0271887</kontrakter.version>
         <mikrofrontend.builder.version>20230704114948-74aa2e9</mikrofrontend.builder.version>
         <eksterne.kontrakter.bisys.version>2.0_20230214104704_706e9c0</eksterne.kontrakter.bisys.version>
         <cucumber.version>7.15.0</cucumber.version>
@@ -308,7 +308,7 @@
                 <plugin>
                     <groupId>org.sonarsource.scanner.maven</groupId>
                     <artifactId>sonar-maven-plugin</artifactId>
-                    <version>3.10.0.2594</version>
+                    <version>3.11.0.3922</version>
                 </plugin>
                 <plugin>
                     <groupId>org.jacoco</groupId>
