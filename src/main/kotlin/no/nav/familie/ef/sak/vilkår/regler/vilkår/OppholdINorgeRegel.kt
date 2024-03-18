@@ -45,7 +45,7 @@ class OppholdINorgeRegel : Vilkårsregel(
 
     fun harBarnaPersonstatusBosatt(metadata: HovedregelMetadata): Boolean {
         return metadata.vilkårgrunnlagDto.barnMedSamvær.all {
-            it.registergrunnlag.folkeregisterpersonstatus == BOSATT || it.søknadsgrunnlag.fødselTermindato != null
+            it.registergrunnlag.erBosatt() || it.søknadsgrunnlag.erTerminbarn()
         }
     }
 

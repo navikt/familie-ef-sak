@@ -38,7 +38,10 @@ data class BarnMedSamværSøknadsgrunnlagDto(
     val nårFlyttetDereFraHverandre: LocalDate?,
     val hvorMyeErDuSammenMedAnnenForelder: String?,
     val beskrivSamværUtenBarn: String?,
-)
+){
+    fun erTerminbarn() = this.fødselTermindato != null
+}
+
 
 data class BarnMedSamværRegistergrunnlagDto(
     val id: UUID,
@@ -51,7 +54,9 @@ data class BarnMedSamværRegistergrunnlagDto(
     val dødsdato: LocalDate? = null,
     val fødselsdato: LocalDate?,
     val folkeregisterpersonstatus: Folkeregisterpersonstatus?,
-)
+) {
+    fun erBosatt() = this.folkeregisterpersonstatus == Folkeregisterpersonstatus.BOSATT
+}
 
 data class AnnenForelderDto(
     val navn: String?,
