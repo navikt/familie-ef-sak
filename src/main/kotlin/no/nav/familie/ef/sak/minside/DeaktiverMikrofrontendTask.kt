@@ -9,7 +9,11 @@ import no.nav.familie.prosessering.domene.Task
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
+import java.util.Properties
 import java.util.UUID
+import no.nav.familie.ef.sak.beregning.Grunnbeløpsperioder
+import no.nav.familie.log.IdUtils
+import no.nav.familie.log.mdc.MDCConstants
 
 @Service
 @TaskStepBeskrivelse(
@@ -39,7 +43,9 @@ class DeaktiverMikrofrontendTask(
             return Task(
                 type = TYPE,
                 payload = objectMapper.writeValueAsString(DeaktiverMikrofrontendDto(fagsakPersonId)),
-            )
+                properties = Properties().apply {
+                    this["fagsakPersonId"] = fagsakPersonId.toString()
+                })
         }
 
         const val TYPE = "deaktiverMikrofrontendTask"
