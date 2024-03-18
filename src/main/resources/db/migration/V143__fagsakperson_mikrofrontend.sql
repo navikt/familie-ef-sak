@@ -1,0 +1,1 @@
+ALTER TABLE fagsak_person ADD COLUMN har_aktivert_mikrofrontend BOOLEAN NOT NULL DEFAULT TRUE;

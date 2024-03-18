@@ -7,6 +7,7 @@ ON_PREM_URL_ENV: dev
 FRONTEND_OPPGAVE_URL: https://ensligmorellerfar.intern.dev.nav.no/oppgavebenk
 
 G_OMREGNING_CRON_EXPRESSION: 0 0 * * * ?
+DEAKTIVER_MIKROFRONTEND_CRON_EXPRESSION: 0 30 14 * * ? #kl 14:30 hver dag
 
 rolle:
   veileder: "19dcbfde-4cdb-4c64-a1ea-ac9802b03339"
