@@ -43,7 +43,7 @@ class OppholdINorgeRegel : Vilkårsregel(
         return super.initiereDelvilkårsvurdering(metadata, resultat, barnId)
     }
 
-    fun harBarnaPersonstatusBosatt(metadata: HovedregelMetadata): Boolean {
+    fun harBarnaPersonstatusBosattEllerErTerminbarn(metadata: HovedregelMetadata): Boolean {
         return metadata.vilkårgrunnlagDto.barnMedSamvær.all {
             it.registergrunnlag.erBosatt() || it.søknadsgrunnlag.erTerminbarn()
         }
@@ -57,7 +57,7 @@ class OppholdINorgeRegel : Vilkårsregel(
         val harSøkerNorskStatsborger = medlemskap.registergrunnlag.statsborgerskap.any {
             it.land.lowercase() == STATSBORGERSTAT_VERDI_NORGE
         }
-        val harBarnaPersonstatusBosatt = harBarnaPersonstatusBosatt(metadata)
+        val harBarnaPersonstatusBosatt = harBarnaPersonstatusBosattEllerErTerminbarn(metadata)
 
         return erDigitalSøknad &&
             harSøkerNorskStatsborger &&
