@@ -29,13 +29,6 @@ class VedleggController(
         return Ressurs.success(vedleggService.finnJournalposter(behandlingId))
     }
 
-    @Deprecated("Bruk endepunkt med fagsakPersonId")
-    @GetMapping("/person/{personIdent}")
-    fun finnVedleggForPerson(@PathVariable personIdent: String): Ressurs<List<DokumentinfoDto>> {
-        tilgangService.validerTilgangTilPerson(personIdent, AuditLoggerEvent.ACCESS)
-        return Ressurs.success(vedleggService.finnVedleggForPerson(personIdent))
-    }
-
     @Deprecated("Bruk POST-versjonen av dette endepunktet som har filtreringsparametere i request-body")
     @GetMapping("/fagsak-person/{fagsakPersonId}")
     fun finnVedleggForFagsakPerson(@PathVariable fagsakPersonId: UUID): Ressurs<List<DokumentinfoDto>> {
