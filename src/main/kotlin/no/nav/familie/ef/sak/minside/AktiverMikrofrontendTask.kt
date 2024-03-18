@@ -42,7 +42,7 @@ class AktiverMikrofrontendTask(
     ): FagsakPerson = when {
         fagsakPersonId != null -> fagsakPersonService.hentPerson(fagsakPersonId)
         fagsakId != null -> fagsakPersonService.finnFagsakPersonForFagsakId(fagsakId)
-        else -> error("Mangler både fagsakId og fagsakPersonId - kan ikke aktivere mikrforfontend for bruker")
+        else -> error("Mangler både fagsakId og fagsakPersonId - kan ikke aktivere mikrofrontend for bruker")
     }
 
     companion object {
