@@ -31,7 +31,7 @@ class DeaktiverMikrofrontendScheduler(
                     taskService.save(task)
                 }
             } else {
-                logger.info("featuretoggle er skrudd av - utfører ikke scheduler for deeaktivering av mikrofrontend")
+                logger.info("Featuretoggle er skrudd av - utfører ikke scheduler for deaktivering av mikrofrontend")
             }
         }
     }
