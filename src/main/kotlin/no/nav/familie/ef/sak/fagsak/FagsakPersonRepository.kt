@@ -53,7 +53,7 @@ interface FagsakPersonRepository : RepositoryInterface<FagsakPerson, UUID>, Inse
             HAVING MAX(aty.stonad_tom) < :sisteUtbetalingsdag
     """,
     )
-    fun finnFagsakPersonIderMedUtbetalingerSomKanSlettes(
+    fun finnFagsakPersonIderMedAktivertMikrofrontendOgSisteUtbetalingEldreEnnOgSistEndretEldreEnn(
         sisteUtbetalingsdag: LocalDate,
         sistEndretBehandling: LocalDate,
     ): List<UUID>
@@ -71,7 +71,7 @@ interface FagsakPersonRepository : RepositoryInterface<FagsakPerson, UUID>, Inse
             fp.har_aktivert_mikrofrontend = true
     """,
     )
-    fun finnFagsakPersonIderForDeSomKunHarHenlagteBehandlinger(
+    fun finnFagsakPersonIderForDeSomKunHarHenlagteBehandlingerOgAktivertMikrofrontend(
         sistEndretBehandling: LocalDate,
     ): List<UUID>
 
@@ -88,7 +88,7 @@ interface FagsakPersonRepository : RepositoryInterface<FagsakPerson, UUID>, Inse
             fp.har_aktivert_mikrofrontend = true
     """,
     )
-    fun finnFagsakPersonIderForDeSomKunHarAvslåtteBehandlinger(
+    fun finnFagsakPersonIderForDeSomKunHarAvslåtteBehandlingerOgAktivertMikrofrontend(
         sistEndretBehandling: LocalDate,
     ): List<UUID>
 }
