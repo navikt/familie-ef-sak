@@ -83,7 +83,7 @@ class FagsakPersonService(private val fagsakPersonRepository: FagsakPersonReposi
         val enMånedSiden = LocalDate.now().minusMonths(1)
         val seksMånederSiden = LocalDate.now().minusMonths(6)
         val fireÅrSiden = LocalDate.now().minusYears(4)
-        val fpIderUtenBehandling = fagsakPersonRepository.finnFagsakPersonIderUtenBehandlingOgEldreEnn(enMånedSiden)
+        val fpIderUtenBehandling = fagsakPersonRepository.finnFagsakPersonIderUtenBehandlingAktivertMikrofrontendOgEldreEnn(enMånedSiden)
         val fpIderUtenÅpenBehandlingOgSisteUtbetalingMerEnnFireÅrSiden =
             fagsakPersonRepository.finnFagsakPersonIderMedUtbetalingerSomKanSlettes(fireÅrSiden, seksMånederSiden)
         val fpIderForDeSomKunHarHenlagteBehandlinger =

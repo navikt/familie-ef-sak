@@ -15,7 +15,7 @@ import java.util.UUID
 @Service
 @TaskStepBeskrivelse(
     taskStepType = AktiverMikrofrontendTask.TYPE,
-    beskrivelse = "Sender over person til kafka-kø for minside",
+    beskrivelse = "Sender over person til kafka-kø for aktivering av minside-mikrofrontend",
 )
 class AktiverMikrofrontendTask(
     val minSideKafkaProducerService: MinSideKafkaProducerService,

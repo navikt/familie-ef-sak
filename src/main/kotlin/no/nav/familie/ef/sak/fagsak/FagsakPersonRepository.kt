@@ -34,7 +34,7 @@ interface FagsakPersonRepository : RepositoryInterface<FagsakPerson, UUID>, Inse
             AND fp.har_aktivert_mikrofrontend = true
     """,
     )
-    fun finnFagsakPersonIderUtenBehandlingOgEldreEnn(opprettetTid: LocalDate): List<UUID>
+    fun finnFagsakPersonIderUtenBehandlingAktivertMikrofrontendOgEldreEnn(opprettetTid: LocalDate): List<UUID>
 
     @Query(
         """
@@ -50,11 +50,11 @@ interface FagsakPersonRepository : RepositoryInterface<FagsakPerson, UUID>, Inse
         AND 
             fp.har_aktivert_mikrofrontend = true
         GROUP BY fp.id
-            HAVING MAX(aty.stonad_tom) < :sisteUtbetalingsDag
+            HAVING MAX(aty.stonad_tom) < :sisteUtbetalingsdag
     """,
     )
     fun finnFagsakPersonIderMedUtbetalingerSomKanSlettes(
-        sisteUtbetalingsDag: LocalDate,
+        sisteUtbetalingsdag: LocalDate,
         sistEndretBehandling: LocalDate,
     ): List<UUID>
 

@@ -150,9 +150,9 @@ internal class FagsakPersonServiceTest : OppslagSpringRunnerTest() {
 
         @Test
         fun `skal deaktivere mikrofrontend hvis fagsakperson ikke har behandlinger og er opprettet for mer enn 1 mnd siden`() {
-            val forNyFagsakPerson = opprettFagsakPerson("12345", opprettetTid = mindreEnnEnMånedSiden)
+            opprettFagsakPerson("12345", opprettetTid = mindreEnnEnMånedSiden) // For ny fagsakPerson - skal ikke deaktiveres
             val fagsakPersonForDeaktivering = opprettFagsakPerson("54321")
-            val fagsakPersonAldriAktivert = opprettFagsakPerson("543210", harAktivertMikrofrontend = false)
+            opprettFagsakPerson("543210", harAktivertMikrofrontend = false) // Har ikke aktivert mikrofrontend - skal ikke deaktiveres
             opprettFagsak(fagsakPersonForDeaktivering)
 
             val personIderForDeaktivering = fagsakPersonService.finnFagsakpersonIderKlarForDeaktiveringAvMikrofrontend()
