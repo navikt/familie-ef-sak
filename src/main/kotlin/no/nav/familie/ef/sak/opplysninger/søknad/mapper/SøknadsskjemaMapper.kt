@@ -178,6 +178,7 @@ object SøknadsskjemaMapper {
                 årsakUtenlandsopphold = it.årsakUtenlandsopphold.verdi,
                 personident = it.personidentEøsLand?.verdi,
                 adresse = it.adresseEøsLand?.verdi,
+                kanIkkeOppgiPersonident = it.kanIkkeOppgiPersonident?.verdi
             )
         }?.toSet() ?: emptySet()
 

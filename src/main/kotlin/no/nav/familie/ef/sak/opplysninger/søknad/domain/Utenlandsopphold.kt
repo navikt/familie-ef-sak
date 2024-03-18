@@ -13,4 +13,5 @@ data class Utenlandsopphold(
     val årsakUtenlandsopphold: String,
     val personident: String? = null,
     val adresse: String? = null,
+    val kanIkkeOppgiPersonident: Boolean? = null
 )
