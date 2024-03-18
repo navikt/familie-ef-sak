@@ -70,7 +70,7 @@ class OppholdINorgeRegelTest {
     @Test
     fun `Skal automatisk oppfylle vilkår for søker uten eksisterende barn, men terminbarn`() {
         val terminbarnRegisterGrunnlag = mockk<BarnMedSamværRegistergrunnlagDto>()
-        every { terminbarnRegisterGrunnlag.folkeregisterpersonstatus } returns null
+        every { terminbarnRegisterGrunnlag.erBosatt() } returns false
         val terminbarnSøknadGrunnlag = terminbarnSøknadsgrunnlag()
         val terminbarn = BarnMedSamværDto(UUID.randomUUID(), terminbarnSøknadGrunnlag, terminbarnRegisterGrunnlag)
 
@@ -98,7 +98,7 @@ class OppholdINorgeRegelTest {
     @Test
     fun `Skal automatisk oppfylle vilkår for søker med eksisterende barn som er ok, og et terminbarn`() {
         val terminbarnRegisterGrunnlag = mockk<BarnMedSamværRegistergrunnlagDto>()
-        every { terminbarnRegisterGrunnlag.folkeregisterpersonstatus } returns null
+        every { terminbarnRegisterGrunnlag.erBosatt() } returns false
         val terminbarnSøknadGrunnlag = terminbarnSøknadsgrunnlag()
         val terminbarn = BarnMedSamværDto(UUID.randomUUID(), terminbarnSøknadGrunnlag, terminbarnRegisterGrunnlag)
 
