@@ -36,7 +36,7 @@ class OppholdINorgeRegelTest {
     }
 
     @Test
-    fun `Skal automatisk oppfylle vilkår om opphold i Norge når det er en digital søknad, søker er norsk statsborger, øker oppholder seg i Norge, har personstatus bosatt, og alle barn har personstatus bosatt`() {
+    fun `Skal automatisk oppfylle vilkår om opphold i Norge når det er en digital søknad, søker er norsk statsborger, søker oppholder seg i Norge, har personstatus bosatt, og alle barn har personstatus bosatt`() {
         val listDelvilkårsvurdering =
             OppholdINorgeRegel().initiereDelvilkårsvurdering(
                 hovedregelMetadataMock,
