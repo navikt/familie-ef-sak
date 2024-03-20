@@ -9,6 +9,7 @@ import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.infrastruktur.config.PdlClientConfig
 import no.nav.familie.ef.sak.infrastruktur.config.PdlClientConfig.Companion.annenForelderFnr
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
+import no.nav.familie.ef.sak.kontantstøtte.KontantstøtteService
 import no.nav.familie.ef.sak.oppgave.TilordnetRessursService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataRegisterService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataRepository
@@ -37,7 +38,6 @@ import org.springframework.data.repository.findByIdOrNull
 import java.time.LocalDate
 
 internal class GrunnlagsdataServiceTest {
-
     private val featureToggleService = mockk<FeatureToggleService>()
     private val grunnlagsdataRepository = mockk<GrunnlagsdataRepository>()
     private val behandlingService = mockk<BehandlingService>()
@@ -48,32 +48,37 @@ internal class GrunnlagsdataServiceTest {
     private val personopplysningerIntegrasjonerClient = mockk<PersonopplysningerIntegrasjonerClient>()
     private val tidligereVedtaksperioderService = mockk<TidligereVedtaksperioderService>(relaxed = true)
     private val arbeidsforholdService = mockk<ArbeidsforholdService>(relaxed = true)
-    private val grunnlagsdataRegisterService = GrunnlagsdataRegisterService(
-        personService,
-        personopplysningerIntegrasjonerClient,
-        tidligereVedtaksperioderService,
-        arbeidsforholdService,
-    )
+    private val kontantstøtteService = mockk<KontantstøtteService>(relaxed = true)
+    private val grunnlagsdataRegisterService =
+        GrunnlagsdataRegisterService(
+            personService,
+            personopplysningerIntegrasjonerClient,
+            tidligereVedtaksperioderService,
+            arbeidsforholdService,
+            kontantstøtteService,
+        )
 
-    private val søknad = SøknadsskjemaMapper.tilDomene(
-        TestsøknadBuilder.Builder().setBarn(
-            listOf(
-                TestsøknadBuilder.Builder()
-                    .defaultBarn("Navn1 navnesen", fødselTermindato = LocalDate.now().plusMonths(4)),
-                TestsøknadBuilder.Builder()
-                    .defaultBarn("Navn2 navnesen", fødselTermindato = LocalDate.now().plusMonths(6)),
-            ),
-        ).build().søknadOvergangsstønad,
-    )
+    private val søknad =
+        SøknadsskjemaMapper.tilDomene(
+            TestsøknadBuilder.Builder().setBarn(
+                listOf(
+                    TestsøknadBuilder.Builder()
+                        .defaultBarn("Navn1 navnesen", fødselTermindato = LocalDate.now().plusMonths(4)),
+                    TestsøknadBuilder.Builder()
+                        .defaultBarn("Navn2 navnesen", fødselTermindato = LocalDate.now().plusMonths(6)),
+                ),
+            ).build().søknadOvergangsstønad,
+        )
 
-    private val service = GrunnlagsdataService(
-        grunnlagsdataRepository = grunnlagsdataRepository,
-        søknadService = søknadService,
-        grunnlagsdataRegisterService = grunnlagsdataRegisterService,
-        behandlingService = behandlingService,
-        mockk(),
-        tilordnetRessursService,
-    )
+    private val service =
+        GrunnlagsdataService(
+            grunnlagsdataRepository = grunnlagsdataRepository,
+            søknadService = søknadService,
+            grunnlagsdataRegisterService = grunnlagsdataRegisterService,
+            behandlingService = behandlingService,
+            mockk(),
+            tilordnetRessursService,
+        )
 
     @BeforeEach
     internal fun setUp() {
@@ -84,10 +89,11 @@ internal class GrunnlagsdataServiceTest {
 
     @Test
     internal fun `skal kaste feil hvis behandlingen savner grunnlagsdata`() {
-        val behandling = behandling(
-            fagsak(),
-            type = BehandlingType.FØRSTEGANGSBEHANDLING,
-        )
+        val behandling =
+            behandling(
+                fagsak(),
+                type = BehandlingType.FØRSTEGANGSBEHANDLING,
+            )
         val behandlingId = behandling.id
 
         every { featureToggleService.isEnabled(any(), any()) } returns true
@@ -101,10 +107,11 @@ internal class GrunnlagsdataServiceTest {
     @Test
     internal fun `skal hente navn til relatertVedSivilstand fra sivilstand når personen har sivilstand`() {
         val sivilstand = Sivilstand(Sivilstandstype.GIFT, null, "11111122222", null, Metadata(false))
-        val pdlSøker = PdlClientConfig.opprettPdlSøker().copy(
-            sivilstand = listOf(sivilstand),
-            vergemaalEllerFremtidsfullmakt = emptyList(),
-        )
+        val pdlSøker =
+            PdlClientConfig.opprettPdlSøker().copy(
+                sivilstand = listOf(sivilstand),
+                vergemaalEllerFremtidsfullmakt = emptyList(),
+            )
         val fullmakt = pdlSøker.fullmakt.map { it.motpartsPersonident }
         every { personService.hentSøker(any()) } returns pdlSøker
 
@@ -116,12 +123,13 @@ internal class GrunnlagsdataServiceTest {
     @Test
     internal fun `skal ikke hente navn til relatertVedSivilstand fra sivilstand når det ikke finnes sivilstand`() {
         val sivilstand = Sivilstand(Sivilstandstype.UOPPGITT, null, null, null, Metadata(false))
-        every { personService.hentSøker(any()) } returns PdlClientConfig.opprettPdlSøker()
-            .copy(
-                sivilstand = listOf(sivilstand),
-                fullmakt = emptyList(),
-                vergemaalEllerFremtidsfullmakt = emptyList(),
-            )
+        every { personService.hentSøker(any()) } returns
+            PdlClientConfig.opprettPdlSøker()
+                .copy(
+                    sivilstand = listOf(sivilstand),
+                    fullmakt = emptyList(),
+                    vergemaalEllerFremtidsfullmakt = emptyList(),
+                )
 
         service.hentFraRegisterForPersonOgAndreForeldre("1", emptyList())
 

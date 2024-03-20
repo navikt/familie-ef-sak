@@ -7,6 +7,7 @@ import no.nav.familie.ef.sak.arbeidsforhold.ekstern.ArbeidsforholdService
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.infrastruktur.config.KodeverkServiceMock
 import no.nav.familie.ef.sak.infrastruktur.config.PdlClientConfig
+import no.nav.familie.ef.sak.kontantstøtte.KontantstøtteService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataRegisterService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
@@ -27,7 +28,6 @@ import org.junit.jupiter.api.Test
 import org.springframework.cache.concurrent.ConcurrentMapCacheManager
 
 internal class PersonopplysningerServiceTest {
-
     private val kodeverkService = KodeverkServiceMock().kodeverkService()
 
     private lateinit var personopplysningerService: PersonopplysningerService
@@ -38,6 +38,7 @@ internal class PersonopplysningerServiceTest {
     private lateinit var søknadService: SøknadService
     private lateinit var behandlingService: BehandlingService
     private lateinit var arbeidsforholdService: ArbeidsforholdService
+    private lateinit var kontantstøtteService: KontantstøtteService
 
     private val tidligereVedtaksperioderService = mockk<TidligereVedtaksperioderService>(relaxed = true)
 
@@ -49,49 +50,55 @@ internal class PersonopplysningerServiceTest {
         søknadService = mockk()
         egenAnsattClient = mockk()
         arbeidsforholdService = mockk(relaxed = true)
+        kontantstøtteService = mockk()
         val personService = PersonService(PdlClientConfig().pdlClient(), ConcurrentMapCacheManager())
         every { egenAnsattClient.egenAnsatt(any()) } returns true
 
-        val grunnlagsdataRegisterService = GrunnlagsdataRegisterService(
-            personService,
-            personopplysningerIntegrasjonerClient,
-            tidligereVedtaksperioderService,
-            arbeidsforholdService,
-        )
+        val grunnlagsdataRegisterService =
+            GrunnlagsdataRegisterService(
+                personService,
+                personopplysningerIntegrasjonerClient,
+                tidligereVedtaksperioderService,
+                arbeidsforholdService,
+                kontantstøtteService,
+            )
 
-        grunnlagsdataService = GrunnlagsdataService(
-            mockk(),
-            søknadService,
-            grunnlagsdataRegisterService,
-            behandlingService,
-            mockk(),
-            mockk(),
-        )
+        grunnlagsdataService =
+            GrunnlagsdataService(
+                mockk(),
+                søknadService,
+                grunnlagsdataRegisterService,
+                behandlingService,
+                mockk(),
+                mockk(),
+            )
         val personopplysningerMapper =
             PersonopplysningerMapper(
                 adresseMapper,
                 StatsborgerskapMapper(kodeverkService),
                 InnflyttingUtflyttingMapper(kodeverkService),
             )
-        personopplysningerService = PersonopplysningerService(
-            personService,
-            behandlingService,
-            personopplysningerIntegrasjonerClient,
-            grunnlagsdataService,
-            personopplysningerMapper,
-            egenAnsattClient,
-            ConcurrentMapCacheManager(),
-        )
+        personopplysningerService =
+            PersonopplysningerService(
+                personService,
+                behandlingService,
+                personopplysningerIntegrasjonerClient,
+                grunnlagsdataService,
+                personopplysningerMapper,
+                egenAnsattClient,
+                ConcurrentMapCacheManager(),
+            )
     }
 
     @Test
     internal fun `mapper grunnlagsdata til PersonopplysningerDto`() {
-        every { personopplysningerIntegrasjonerClient.hentMedlemskapsinfo(any()) } returns Medlemskapsinfo(
-            "01010172272",
-            emptyList(),
-            emptyList(),
-            emptyList(),
-        )
+        every { personopplysningerIntegrasjonerClient.hentMedlemskapsinfo(any()) } returns
+            Medlemskapsinfo(
+                "01010172272",
+                emptyList(),
+                emptyList(),
+                emptyList(),
+            )
         val søker = personopplysningerService.hentPersonopplysningerUtenVedtakshistorikk("01010172272")
         assertThat(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(søker))
             .isEqualToIgnoringWhitespace(readFile("/json/personopplysningerDto.json"))
