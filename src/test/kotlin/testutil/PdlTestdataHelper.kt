@@ -106,6 +106,7 @@ object PdlTestdataHelper {
             forelderBarnRelasjon,
             listOfNotNull(fødsel),
             listOfNotNull(navn),
+            emptyList(),
         )
 
     fun fødsel(år: Int = 2018, måned: Int = 1, dag: Int = 1): Fødsel =

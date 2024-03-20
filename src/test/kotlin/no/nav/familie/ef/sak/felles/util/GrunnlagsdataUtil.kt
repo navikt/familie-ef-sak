@@ -68,4 +68,5 @@ fun opprettBarnMedIdent(
         fødsel = listOfNotNull(fødsel),
         navn = Navn("", "", "", Metadata(false)),
         personIdent = personIdent,
+        folkeregisterpersonstatus = null,
     )
