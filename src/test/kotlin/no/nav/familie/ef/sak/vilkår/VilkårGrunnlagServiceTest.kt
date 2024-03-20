@@ -97,20 +97,20 @@ internal class VilkårGrunnlagServiceTest {
                 navn = "Navn1 navnesen",
                 fødselTermindato = LocalDate.now().plusMonths(4),
                 barnepass =
-                    søknadsBuilder.defaultBarnepass(
-                        årsakSvarId = "trengerMerPassEnnJevnaldrede",
-                        ordninger = listOf(barnepassOrdning),
-                    ),
+                søknadsBuilder.defaultBarnepass(
+                    årsakSvarId = "trengerMerPassEnnJevnaldrede",
+                    ordninger = listOf(barnepassOrdning),
+                ),
                 skalHaBarnepass = true,
             ),
             søknadsBuilder.defaultBarn(
                 navn = "Navn2 navnesen",
                 fødselTermindato = LocalDate.now().plusMonths(6),
                 barnepass =
-                    søknadsBuilder.defaultBarnepass(
-                        årsakSvarId = null,
-                        ordninger = listOf(søknadsBuilder.defaultBarnepassordning(beløp = 2000.0)),
-                    ),
+                søknadsBuilder.defaultBarnepass(
+                    årsakSvarId = null,
+                    ordninger = listOf(søknadsBuilder.defaultBarnepassordning(beløp = 2000.0)),
+                ),
                 skalHaBarnepass = true,
             ),
         )
