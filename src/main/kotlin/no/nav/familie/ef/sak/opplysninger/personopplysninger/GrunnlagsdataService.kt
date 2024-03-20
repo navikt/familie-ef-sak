@@ -4,6 +4,7 @@ import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.felles.util.Timer.loggTid
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
+import no.nav.familie.ef.sak.kontantstøtte.KontantstøtteService
 import no.nav.familie.ef.sak.oppgave.TilordnetRessursService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.Grunnlagsdata
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.GrunnlagsdataDomene
@@ -24,11 +25,19 @@ class GrunnlagsdataService(
     private val behandlingService: BehandlingService,
     private val fagsakService: FagsakService,
     private val tilordnetRessursService: TilordnetRessursService,
+    private val kontantstøtteService: KontantstøtteService,
 ) {
-
     fun opprettGrunnlagsdata(behandlingId: UUID): GrunnlagsdataMedMetadata {
         val grunnlagsdataDomene = hentFraRegisterMedSøknadsdata(behandlingId)
-        val grunnlagsdata = Grunnlagsdata(behandlingId = behandlingId, data = grunnlagsdataDomene)
+
+        val personIdent = behandlingService.hentAktivIdent(behandlingId)
+        val harKontantstøttePerioder = kontantstøtteService.finnesKontantstøtteUtbetalingerPåBruker(personIdent).finnesUtbetaling
+
+        val grunnlagsdata =
+            Grunnlagsdata(
+                behandlingId = behandlingId,
+                data = grunnlagsdataDomene.copy(harKontantstøttePerioder = harKontantstøttePerioder),
+            )
         grunnlagsdataRepository.insert(grunnlagsdata)
         return GrunnlagsdataMedMetadata(
             grunnlagsdata.data,
@@ -76,11 +85,12 @@ class GrunnlagsdataService(
 
     fun hentFraRegisterMedSøknadsdata(behandlingId: UUID): GrunnlagsdataDomene {
         val stønadstype = fagsakService.hentFagsakForBehandling(behandlingId).stønadstype
-        val søknad = when (stønadstype) {
-            StønadType.OVERGANGSSTØNAD -> søknadService.hentOvergangsstønad(behandlingId)
-            StønadType.BARNETILSYN -> søknadService.hentBarnetilsyn(behandlingId)
-            StønadType.SKOLEPENGER -> søknadService.hentSkolepenger(behandlingId)
-        }
+        val søknad =
+            when (stønadstype) {
+                StønadType.OVERGANGSSTØNAD -> søknadService.hentOvergangsstønad(behandlingId)
+                StønadType.BARNETILSYN -> søknadService.hentBarnetilsyn(behandlingId)
+                StønadType.SKOLEPENGER -> søknadService.hentSkolepenger(behandlingId)
+            }
 
         return if (søknad == null) {
             hentFraRegisterForPersonOgAndreForeldre(behandlingService.hentAktivIdent(behandlingId), emptyList())
