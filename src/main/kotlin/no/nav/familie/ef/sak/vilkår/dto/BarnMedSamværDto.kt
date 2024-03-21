@@ -1,6 +1,7 @@
 package no.nav.familie.ef.sak.vilkår.dto
 
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.DeltBostedDto
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.Folkeregisterpersonstatus
 import no.nav.familie.ef.sak.vilkår.regler.BarnForelderLangAvstandTilSøker
 import java.time.LocalDate
 import java.util.UUID
@@ -37,7 +38,9 @@ data class BarnMedSamværSøknadsgrunnlagDto(
     val nårFlyttetDereFraHverandre: LocalDate?,
     val hvorMyeErDuSammenMedAnnenForelder: String?,
     val beskrivSamværUtenBarn: String?,
-)
+) {
+    fun erTerminbarn() = this.fødselTermindato != null
+}
 
 data class BarnMedSamværRegistergrunnlagDto(
     val id: UUID,
@@ -49,7 +52,10 @@ data class BarnMedSamværRegistergrunnlagDto(
     val forelder: AnnenForelderDto?,
     val dødsdato: LocalDate? = null,
     val fødselsdato: LocalDate?,
-)
+    val folkeregisterpersonstatus: Folkeregisterpersonstatus?,
+) {
+    fun erBosatt() = this.folkeregisterpersonstatus == Folkeregisterpersonstatus.BOSATT
+}
 
 data class AnnenForelderDto(
     val navn: String?,

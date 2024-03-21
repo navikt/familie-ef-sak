@@ -104,6 +104,13 @@ query($identer: [ID!]!){
                     historisk
                 }
             }
+            folkeregisterpersonstatus {
+                status
+                forenkletStatus
+                metadata {
+                    historisk
+                }
+            }
         }
     }
 }
