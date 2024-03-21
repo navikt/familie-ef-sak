@@ -27,6 +27,7 @@ import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
+import no.nav.familie.ef.sak.minside.AktiverMikrofrontendTask
 import no.nav.familie.ef.sak.oppgave.TilordnetRessursService
 import no.nav.familie.ef.sak.repository.findAllByIdOrThrow
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
@@ -151,6 +152,8 @@ class BehandlingService(
                 steg = VILKÅR,
             ),
         )
+
+        taskService.save(AktiverMikrofrontendTask.opprettTaskMedFagsakId(fagsakId = fagsakId))
 
         return behandling
     }
