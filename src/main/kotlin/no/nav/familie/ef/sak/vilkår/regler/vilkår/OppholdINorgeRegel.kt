@@ -1,6 +1,6 @@
 package no.nav.familie.ef.sak.vilkår.regler.vilkår
 
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.Folkeregisterpersonstatus
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.Folkeregisterpersonstatus.BOSATT
 import no.nav.familie.ef.sak.vilkår.Delvilkårsvurdering
 import no.nav.familie.ef.sak.vilkår.VilkårType
 import no.nav.familie.ef.sak.vilkår.Vilkårsresultat
@@ -35,7 +35,7 @@ class OppholdINorgeRegel : Vilkårsregel(
                 automatiskVurdertDelvilkår(
                     regelId = RegelId.BOR_OG_OPPHOLDER_SEG_I_NORGE,
                     svarId = SvarId.JA,
-                    begrunnelse = "Bruker og barn bor og oppholder seg i Norge.",
+                    begrunnelse = "Bruker og barn bor og oppholder seg i Norge og bruker er norsk statsborger",
                 ),
             )
         }
@@ -43,20 +43,27 @@ class OppholdINorgeRegel : Vilkårsregel(
         return super.initiereDelvilkårsvurdering(metadata, resultat, barnId)
     }
 
-    fun harAlleBarnSammeAdresseSomSøker(metadata: HovedregelMetadata): Boolean {
-        return metadata.vilkårgrunnlagDto.barnMedSamvær.all { it.registergrunnlag.harSammeAdresse == true }
+    fun harBarnaPersonstatusBosattEllerErTerminbarn(metadata: HovedregelMetadata): Boolean {
+        return metadata.vilkårgrunnlagDto.barnMedSamvær.all {
+            it.registergrunnlag.erBosatt() || it.søknadsgrunnlag.erTerminbarn()
+        }
     }
 
     fun oppfyllerVilkårForAutomatiskVurdering(metadata: HovedregelMetadata): Boolean {
         val erDigitalSøknad = metadata.behandling.årsak == BehandlingÅrsak.SØKNAD
-        val harBrukerSvartJaPåSpørsmålOmOppholdISøknad = metadata.vilkårgrunnlagDto.medlemskap.søknadsgrunnlag?.oppholderDuDegINorge == true
-        val harSøkerPersonstatusBosatt = metadata.vilkårgrunnlagDto.medlemskap.registergrunnlag.folkeregisterpersonstatus == Folkeregisterpersonstatus.BOSATT
-        val harAlleBarnSammeAdresseSomSøker = harAlleBarnSammeAdresseSomSøker(metadata)
+        val medlemskap = metadata.vilkårgrunnlagDto.medlemskap
+        val harBrukerSvartOppholderSegINorgeISøknad = medlemskap.søknadsgrunnlag?.oppholderDuDegINorge == true && medlemskap.søknadsgrunnlag.bosattNorgeSisteÅrene
+        val harSøkerPersonstatusBosatt = medlemskap.registergrunnlag.folkeregisterpersonstatus == BOSATT
+        val harSøkerNorskStatsborger = medlemskap.registergrunnlag.statsborgerskap.any {
+            it.land.lowercase() == STATSBORGERSTAT_VERDI_NORGE
+        }
+        val harBarnaPersonstatusBosatt = harBarnaPersonstatusBosattEllerErTerminbarn(metadata)
 
         return erDigitalSøknad &&
-            harBrukerSvartJaPåSpørsmålOmOppholdISøknad &&
+            harSøkerNorskStatsborger &&
+            harBrukerSvartOppholderSegINorgeISøknad &&
             harSøkerPersonstatusBosatt &&
-            harAlleBarnSammeAdresseSomSøker
+            harBarnaPersonstatusBosatt
     }
 
     companion object {

@@ -4,6 +4,7 @@ import no.nav.familie.ef.sak.barn.BehandlingBarn
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.AnnenForelderMedIdent
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.BarnMedIdent
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.DeltBostedDto
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.Folkeregisterpersonstatus
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper.AdresseHjelper
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper.AdresseMapper
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Bostedsadresse
@@ -160,6 +161,8 @@ class BarnMedSamværMapper(
             forelder = pdlAnnenForelder?.let { tilAnnenForelderDto(it, annenForelderFnr, søkerAdresse) },
             dødsdato = matchetBarn.barn?.dødsfall?.gjeldende()?.dødsdato,
             fødselsdato = matchetBarn.barn?.fødsel?.gjeldende()?.fødselsdato,
+            folkeregisterpersonstatus = matchetBarn.barn?.folkeregisterpersonstatus?.gjeldende()
+                ?.let(Folkeregisterpersonstatus::fraPdl),
         )
     }
 
