@@ -7,6 +7,7 @@ import no.nav.familie.ef.sak.arbeidsforhold.ekstern.ArbeidsforholdService
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.infrastruktur.config.KodeverkServiceMock
 import no.nav.familie.ef.sak.infrastruktur.config.PdlClientConfig
+import no.nav.familie.ef.sak.kontantstøtte.HentUtbetalingsinfoKontantstøtteDto
 import no.nav.familie.ef.sak.kontantstøtte.KontantstøtteService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataRegisterService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
@@ -53,6 +54,10 @@ internal class PersonopplysningerServiceTest {
         kontantstøtteService = mockk()
         val personService = PersonService(PdlClientConfig().pdlClient(), ConcurrentMapCacheManager())
         every { egenAnsattClient.egenAnsatt(any()) } returns true
+        every { kontantstøtteService.finnesKontantstøtteUtbetalingerPåBruker(any()) } returns
+            HentUtbetalingsinfoKontantstøtteDto(
+                finnesUtbetaling = false,
+            )
 
         val grunnlagsdataRegisterService =
             GrunnlagsdataRegisterService(
