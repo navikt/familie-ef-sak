@@ -118,6 +118,7 @@ data class BarnMedIdent(
     val fødsel: List<Fødsel>,
     val navn: Navn,
     val personIdent: String,
+    val folkeregisterpersonstatus: List<Folkeregisterpersonstatus>?,
 )
 
 data class ForelderBarnRelasjon(

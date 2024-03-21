@@ -133,6 +133,7 @@ data class PdlPersonForelderBarn(
     val forelderBarnRelasjon: List<ForelderBarnRelasjon>,
     @JsonProperty("foedsel") override val fødsel: List<Fødsel>,
     val navn: List<Navn>,
+    val folkeregisterpersonstatus: List<Folkeregisterpersonstatus>,
 ) : PdlPerson
 
 data class PdlAnnenForelder(

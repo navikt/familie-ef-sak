@@ -2158,6 +2158,35 @@
         "name" : "personIdent",
         "type" : "String",
         "nullable" : false
+      },
+      "folkeregisterpersonstatus" : {
+        "name" : "folkeregisterpersonstatus",
+        "type" : "Collection",
+        "fields" : {
+          "status" : {
+            "name" : "status",
+            "type" : "String",
+            "nullable" : false
+          },
+          "forenkletStatus" : {
+            "name" : "forenkletStatus",
+            "type" : "String",
+            "nullable" : false
+          },
+          "metadata" : {
+            "name" : "metadata",
+            "type" : "Object",
+            "fields" : {
+              "historisk" : {
+                "name" : "historisk",
+                "type" : "Boolean",
+                "nullable" : false
+              }
+            },
+            "nullable" : false
+          }
+        },
+        "nullable" : true
       }
     },
     "nullable" : false
