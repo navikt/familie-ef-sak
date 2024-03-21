@@ -50,6 +50,7 @@ class MedlemskapMapper(
                     årsak = it.årsakUtenlandsopphold,
                     personidentEøsLand = it.personidentEøsLand,
                     adresseEøsLand = it.adresseEøsLand,
+                    erEøsLand = it.erEøsland,
                 )
             },
         )
