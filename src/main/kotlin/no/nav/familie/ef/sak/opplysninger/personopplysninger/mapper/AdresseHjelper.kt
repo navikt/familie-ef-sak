@@ -27,12 +27,12 @@ object AdresseHjelper {
     ): Boolean {
         return bostedsadresseBarn?.matrikkelId != null && bostedsadresseForelder?.matrikkelId != null &&
             bostedsadresseBarn.matrikkelId == bostedsadresseForelder.matrikkelId &&
-            bostedsadresseBarn.bruksenhetsnummer == bostedsadresseForelder.bruksenhetsnummer
+            bostedsadresseBarn.bruksenhetsnummer ?: "" == bostedsadresseForelder.bruksenhetsnummer ?: ""
     }
 
     private fun sammeVegadresse(bostedsadresseForelder: Bostedsadresse?, bostedsadresseBarn: Bostedsadresse?): Boolean {
         return bostedsadresseBarn?.vegadresse != null && bostedsadresseForelder?.vegadresse != null &&
-            bostedsadresseBarn.vegadresse == bostedsadresseForelder.vegadresse
+            bostedsadresseBarn.vegadresse.erSammeAdresse(bostedsadresseForelder.vegadresse)
     }
 
     fun harDeltBosted(barn: BarnMedIdent?, dato: LocalDate): Boolean {
