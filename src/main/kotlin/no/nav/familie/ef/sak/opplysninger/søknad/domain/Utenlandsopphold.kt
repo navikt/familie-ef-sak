@@ -11,7 +11,11 @@ data class Utenlandsopphold(
     val land: String? = null,
     @Column("arsak_utenlandsopphold")
     val årsakUtenlandsopphold: String,
-    val personident: String? = null,
-    val adresse: String? = null,
+    @Column("personident_eos_land")
+    val personidentEøsLand: String? = null,
+    @Column("adresse_eos_land")
+    val adresseEøsLand: String? = null,
     val kanIkkeOppgiPersonident: Boolean? = null,
+    @Column("er_eos_land")
+    val erEøsland: Boolean? = null,
 )
