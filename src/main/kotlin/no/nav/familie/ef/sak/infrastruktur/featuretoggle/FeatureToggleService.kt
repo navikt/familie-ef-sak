@@ -23,6 +23,7 @@ enum class Toggle(val toggleId: String, val beskrivelse: String? = null) {
         "familie.ef.sak.inkluder-satt-pa-vent-gomregning",
         "Usikker på om vi ønsker denne eller ikke. Ta en vurdering før 2024?",
     ),
+    DEAKTIVERE_MIKROFRONTEND_FOR_INAKTIVE_BRUKERE("familie.ef.sak.deaktiver-mikrofrontend-for-inaktive-brukere"),
 
     // Operational
     AUTOMATISK_MIGRERING("familie.ef.sak.automatisk-migrering", "Kan denne slettes?"),

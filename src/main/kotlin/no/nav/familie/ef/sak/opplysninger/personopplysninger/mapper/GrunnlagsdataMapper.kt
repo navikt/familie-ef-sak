@@ -36,6 +36,7 @@ object GrunnlagsdataMapper {
             deltBosted = pdlPersonForelderBarn.deltBosted,
             forelderBarnRelasjon = pdlPersonForelderBarn.forelderBarnRelasjon.mapForelderBarnRelasjon(),
             personIdent = personIdent,
+            folkeregisterpersonstatus = pdlPersonForelderBarn.folkeregisterpersonstatus,
         )
 
     fun mapAnnenForelder(
