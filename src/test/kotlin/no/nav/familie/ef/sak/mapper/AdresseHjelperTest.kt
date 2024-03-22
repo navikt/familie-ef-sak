@@ -68,6 +68,20 @@ internal class AdresseHjelperTest {
         }
 
         @Test
+        internal fun `Forventer ulike adresser ved ulike bruksenhetsnummer `() {
+            val barnAdresse = adresseTromsø(brukenhetsnummer = "")
+            val forelderAdresse =adresseTromsø(brukenhetsnummer = null)
+
+            // Guard - forventer at de ikke er like da de har forskjellige bruksenhetsnummer: null og ""
+            assertThat(barnAdresse == forelderAdresse).isFalse
+            assertThat(barnAdresse.erSammeAdresse(forelderAdresse)).isTrue
+
+            val ulikVegadresseBarn = forelderAdresse.copy(bruksenhetsnummer = "H0404")
+            assertThat(ulikVegadresseBarn.erSammeAdresse(forelderAdresse)).isFalse
+        }
+
+
+        @Test
         internal fun `forelder og barn med samme vegadresse med matrikkelId`() {
             val barnAdresser = listOf(
                 lagAdresse(adresseTromsøMatrikkel(), now().minusDays(1)),
