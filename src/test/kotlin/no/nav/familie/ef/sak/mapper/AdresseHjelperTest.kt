@@ -63,7 +63,7 @@ internal class AdresseHjelperTest {
 
             // Forventer at de ikke er like da de har forskjellige bruksenhetsnummer: null og ""
             assertThat(vegadresseBarn == vegadresseForelder).isFalse
-            assertThat(vegadresseBarn.erSammeAdresse(vegadresseForelder)).isTrue
+            assertThat(vegadresseBarn.erSammeVegadresse(vegadresseForelder)).isTrue
             assertThat(AdresseHjelper.harRegistrertSammeBostedsadresseSomForelder(barn, forelderAdresser)).isTrue
         }
 
@@ -74,10 +74,10 @@ internal class AdresseHjelperTest {
 
             // Guard - forventer at de ikke er like da de har forskjellige bruksenhetsnummer: null og ""
             assertThat(barnAdresse == forelderAdresse).isFalse
-            assertThat(barnAdresse.erSammeAdresse(forelderAdresse)).isTrue
+            assertThat(barnAdresse.erSammeVegadresse(forelderAdresse)).isTrue
 
             val ulikVegadresseBarn = forelderAdresse.copy(bruksenhetsnummer = "H0404")
-            assertThat(ulikVegadresseBarn.erSammeAdresse(forelderAdresse)).isFalse
+            assertThat(ulikVegadresseBarn.erSammeVegadresse(forelderAdresse)).isFalse
         }
 
         @Test

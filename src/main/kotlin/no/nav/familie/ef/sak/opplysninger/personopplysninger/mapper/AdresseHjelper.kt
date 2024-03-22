@@ -32,7 +32,7 @@ object AdresseHjelper {
 
     private fun sammeVegadresse(bostedsadresseForelder: Bostedsadresse?, bostedsadresseBarn: Bostedsadresse?): Boolean {
         return bostedsadresseBarn?.vegadresse != null && bostedsadresseForelder?.vegadresse != null &&
-            bostedsadresseBarn.vegadresse.erSammeAdresse(bostedsadresseForelder.vegadresse)
+            bostedsadresseBarn.vegadresse.erSammeVegadresse(bostedsadresseForelder.vegadresse)
     }
 
     fun harDeltBosted(barn: BarnMedIdent?, dato: LocalDate): Boolean {
