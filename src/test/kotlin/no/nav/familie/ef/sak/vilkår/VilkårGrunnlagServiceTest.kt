@@ -9,6 +9,7 @@ import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
 import no.nav.familie.ef.sak.felles.kodeverk.KodeverkService
 import no.nav.familie.ef.sak.infrastruktur.config.PdlClientConfig
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
+import no.nav.familie.ef.sak.kontantstøtte.KontantstøtteService
 import no.nav.familie.ef.sak.oppgave.TilordnetRessursService
 import no.nav.familie.ef.sak.opplysninger.mapper.adresseMapper
 import no.nav.familie.ef.sak.opplysninger.mapper.barnMedSamværMapper
@@ -37,7 +38,6 @@ import org.springframework.data.repository.findByIdOrNull
 import java.time.LocalDate
 
 internal class VilkårGrunnlagServiceTest {
-
     private val grunnlagsdataRepository = mockk<GrunnlagsdataRepository>()
     private val personService = PersonService(PdlClientConfig().pdlClient(), ConcurrentMapCacheManager())
     private val personopplysningerIntegrasjonerClient = mockk<PersonopplysningerIntegrasjonerClient>()
@@ -49,65 +49,78 @@ internal class VilkårGrunnlagServiceTest {
     private val tidligereVedtaksperioderService = mockk<TidligereVedtaksperioderService>(relaxed = true)
     private val arbeidsforholdService = mockk<ArbeidsforholdService>(relaxed = true)
     private val tilordnetRessursService = mockk<TilordnetRessursService>(relaxed = true)
+    private val kontantstøtteService = mockk<KontantstøtteService>(relaxed = true)
 
-    private val grunnlagsdataRegisterService = GrunnlagsdataRegisterService(
-        personService,
-        personopplysningerIntegrasjonerClient,
-        tidligereVedtaksperioderService,
-        arbeidsforholdService,
-    )
+    private val grunnlagsdataRegisterService =
+        GrunnlagsdataRegisterService(
+            personService,
+            personopplysningerIntegrasjonerClient,
+            tidligereVedtaksperioderService,
+            arbeidsforholdService,
+            kontantstøtteService,
+        )
 
     private val fagsakService = mockk<FagsakService>()
-    private val grunnlagsdataService = GrunnlagsdataService(
-        grunnlagsdataRepository,
-        søknadService,
-        grunnlagsdataRegisterService,
-        behandlingService,
-        mockk(),
-        tilordnetRessursService,
-    )
+    private val grunnlagsdataService =
+        GrunnlagsdataService(
+            grunnlagsdataRepository,
+            søknadService,
+            grunnlagsdataRegisterService,
+            behandlingService,
+            mockk(),
+            tilordnetRessursService,
+        )
 
-    private val service = VilkårGrunnlagService(
-        medlemskapMapper = medlemskapMapper,
-        grunnlagsdataService = grunnlagsdataService,
-        fagsakService = fagsakService,
-        barnMedsamværMapper = barnMedSamværMapper(),
-        adresseMapper = adresseMapper(),
-    )
+    private val service =
+        VilkårGrunnlagService(
+            medlemskapMapper = medlemskapMapper,
+            grunnlagsdataService = grunnlagsdataService,
+            fagsakService = fagsakService,
+            barnMedsamværMapper = barnMedSamværMapper(),
+            adresseMapper = adresseMapper(),
+        )
     private val behandling = behandling(fagsak())
     private val behandlingId = behandling.id
 
     private val søknadsBuilder = TestsøknadBuilder.Builder()
-    val barnepassOrdning = søknadsBuilder.defaultBarnepassordning(
-        type = "barnehageOgLiknende",
-        navn = "Humpetitten barnehage",
-        fraDato = LocalDate.of(2021, 1, 1),
-        tilDato = LocalDate.of(2021, 6, 30),
-        beløp = 3000.0,
-    )
-    val søknadsbarn = listOf(
-        søknadsBuilder.defaultBarn(
-            navn = "Navn1 navnesen",
-            fødselTermindato = LocalDate.now().plusMonths(4),
-            barnepass = søknadsBuilder.defaultBarnepass(
-                årsakSvarId = "trengerMerPassEnnJevnaldrede",
-                ordninger = listOf(barnepassOrdning),
+    val barnepassOrdning =
+        søknadsBuilder.defaultBarnepassordning(
+            type = "barnehageOgLiknende",
+            navn = "Humpetitten barnehage",
+            fraDato = LocalDate.of(2021, 1, 1),
+            tilDato = LocalDate.of(2021, 6, 30),
+            beløp = 3000.0,
+        )
+    val søknadsbarn =
+        listOf(
+            søknadsBuilder.defaultBarn(
+                navn = "Navn1 navnesen",
+                fødselTermindato = LocalDate.now().plusMonths(4),
+                barnepass =
+                søknadsBuilder.defaultBarnepass(
+                    årsakSvarId = "trengerMerPassEnnJevnaldrede",
+                    ordninger = listOf(barnepassOrdning),
+                ),
+                skalHaBarnepass = true,
             ),
-            skalHaBarnepass = true,
-        ),
-        søknadsBuilder.defaultBarn(
-            navn = "Navn2 navnesen",
-            fødselTermindato = LocalDate.now().plusMonths(6),
-            barnepass = søknadsBuilder.defaultBarnepass(
-                årsakSvarId = null,
-                ordninger = listOf(søknadsBuilder.defaultBarnepassordning(beløp = 2000.0)),
+            søknadsBuilder.defaultBarn(
+                navn = "Navn2 navnesen",
+                fødselTermindato = LocalDate.now().plusMonths(6),
+                barnepass =
+                søknadsBuilder.defaultBarnepass(
+                    årsakSvarId = null,
+                    ordninger = listOf(søknadsBuilder.defaultBarnepassordning(beløp = 2000.0)),
+                ),
+                skalHaBarnepass = true,
             ),
-            skalHaBarnepass = true,
-        ),
-    )
+        )
     val oppholdsland = Søknadsfelt(label = "I hvilket land oppholder du deg?", verdi = "Polen", svarId = "POL")
     private val søknadOvergangsstønad =
-        SøknadsskjemaMapper.tilDomene(søknadsBuilder.setBarn(søknadsbarn).setMedlemskapsdetaljer(oppholderDuDegINorge = false, oppholdsland = oppholdsland).build().søknadOvergangsstønad)
+        SøknadsskjemaMapper.tilDomene(
+            søknadsBuilder.setBarn(
+                søknadsbarn,
+            ).setMedlemskapsdetaljer(oppholderDuDegINorge = false, oppholdsland = oppholdsland).build().søknadOvergangsstønad,
+        )
             .tilSøknadsverdier()
 
     private val søknadBarnetilsyn =

@@ -29,6 +29,7 @@ fun main(args: Array<String>) {
             "mock-historiskpensjon",
             "mock-featuretoggle",
             "mock-egen-ansatt",
+            "mock-kontantstøtte",
         )
         .run(*args)
 }

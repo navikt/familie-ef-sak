@@ -76,6 +76,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
     "mock-featuretoggle",
     "mock-egen-ansatt",
     "mock-kafka",
+    "mock-kontantstøtte",
 )
 @EnableMockOAuth2Server
 abstract class OppslagSpringRunnerTest {

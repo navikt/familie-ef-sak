@@ -2341,5 +2341,10 @@
     "name" : "harAvsluttetArbeidsforhold",
     "type" : "Boolean",
     "nullable" : true
+  },
+  "harKontantstøttePerioder" : {
+    "name" : "harKontantstøttePerioder",
+    "type" : "Boolean",
+    "nullable" : true
   }
 }

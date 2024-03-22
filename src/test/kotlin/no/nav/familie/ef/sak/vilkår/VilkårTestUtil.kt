@@ -16,7 +16,6 @@ import no.nav.familie.ef.sak.vilkår.dto.VilkårGrunnlagDto
 import java.time.LocalDateTime
 
 object VilkårTestUtil {
-
     fun mockVilkårGrunnlagDto(
         registergrunnlag: PersonaliaDto = mockk(relaxed = true),
         tidligereVedtaksperioder: TidligereVedtaksperioderDto = mockk(relaxed = true),
@@ -31,20 +30,21 @@ object VilkårTestUtil {
         adresseopplysninger: AdresseopplysningerDto = mockk(relaxed = true),
         dokumentasjon: DokumentasjonFraSøknadDto? = mockk(relaxed = true),
         harAvsluttetArbeidsforhold: Boolean = mockk(relaxed = true),
-    ) =
-        VilkårGrunnlagDto(
-            personalia = registergrunnlag,
-            tidligereVedtaksperioder = tidligereVedtaksperioder,
-            medlemskap = medlemskap,
-            sivilstand = sivilstand,
-            bosituasjon = bosituasjon,
-            barnMedSamvær = barnMedSamvær,
-            sivilstandsplaner = sivilstandsplaner,
-            aktivitet = aktivitet,
-            sagtOppEllerRedusertStilling = sagtOppEllerRedusertStilling,
-            registeropplysningerOpprettetTid = registeropplysningerOpprettetTid,
-            adresseopplysninger = adresseopplysninger,
-            dokumentasjon = dokumentasjon,
-            harAvsluttetArbeidsforhold = harAvsluttetArbeidsforhold,
-        )
+        harKontantstøttePerioder: Boolean = mockk(relaxed = true),
+    ) = VilkårGrunnlagDto(
+        personalia = registergrunnlag,
+        tidligereVedtaksperioder = tidligereVedtaksperioder,
+        medlemskap = medlemskap,
+        sivilstand = sivilstand,
+        bosituasjon = bosituasjon,
+        barnMedSamvær = barnMedSamvær,
+        sivilstandsplaner = sivilstandsplaner,
+        aktivitet = aktivitet,
+        sagtOppEllerRedusertStilling = sagtOppEllerRedusertStilling,
+        registeropplysningerOpprettetTid = registeropplysningerOpprettetTid,
+        adresseopplysninger = adresseopplysninger,
+        dokumentasjon = dokumentasjon,
+        harAvsluttetArbeidsforhold = harAvsluttetArbeidsforhold,
+        harKontantstøttePerioder = harKontantstøttePerioder,
+    )
 }
