@@ -9,6 +9,7 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.DeltBosted
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Matrikkeladresse
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Metadata
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Vegadresse
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.gjeldende
 import no.nav.familie.ef.sak.testutil.PdlTestdataHelper
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
@@ -20,7 +21,7 @@ internal class AdresseHjelperTest {
 
     private fun adresseOslo() = Vegadresse("1", "ABC", "123", "Oslogata", "01", null, "0101", null, null)
     private fun adresseTrondheim() = Vegadresse("1", "ABC", "123", "Trøndergata", "01", null, "7080", null, null)
-    private fun adresseTromsø() = Vegadresse("1", "ABC", "123", "Tromsøygata", "01", null, "9099", null, null)
+    private fun adresseTromsø(brukenhetsnummer: String? = "123") = Vegadresse("1", "ABC", brukenhetsnummer, "Tromsøygata", "01", null, "9099", null, null)
     private fun adresseTromsøMatrikkel() = Vegadresse("1", "ABC", "123", "Tromsøygata", "01", null, "9099", null, 123L)
     private fun adresseBergen() = Vegadresse("1", "ABC", "123", "Bergensgata", "01", null, "5020", null, null)
     private fun matrikkeladresse(matrikkelId: Long? = 123L) = Matrikkeladresse(matrikkelId, "H0103", null, null)
@@ -45,6 +46,38 @@ internal class AdresseHjelperTest {
             )
             val barn = opprettBarnMedIdent(personIdent = "", bostedsadresse = barnAdresser)
             assertThat(AdresseHjelper.harRegistrertSammeBostedsadresseSomForelder(barn, forelderAdresser)).isTrue
+        }
+
+        @Test
+        internal fun `forelder og barn bor på samme adresse også med brukenhetsnummer null og tom streng `() {
+            val barnAdresser = listOf(
+                lagAdresse(adresseTromsø(brukenhetsnummer = ""), now().minusDays(1), null, null, metadataGjeldende),
+            )
+            val forelderAdresser = listOf(
+                lagAdresse(adresseTromsø(brukenhetsnummer = null), now().minusDays(2), null, null, metadataGjeldende),
+            )
+            val barn = opprettBarnMedIdent(personIdent = "", bostedsadresse = barnAdresser)
+
+            val vegadresseForelder = forelderAdresser.gjeldende()!!.vegadresse!!
+            val vegadresseBarn = barn.bostedsadresse.gjeldende()!!.vegadresse!!
+
+            // Forventer at de ikke er like da de har forskjellige bruksenhetsnummer: null og ""
+            assertThat(vegadresseBarn == vegadresseForelder).isFalse
+            assertThat(vegadresseBarn.erSammeAdresse(vegadresseForelder)).isTrue
+            assertThat(AdresseHjelper.harRegistrertSammeBostedsadresseSomForelder(barn, forelderAdresser)).isTrue
+        }
+
+        @Test
+        internal fun `Forventer ulike adresser ved ulike bruksenhetsnummer `() {
+            val barnAdresse = adresseTromsø(brukenhetsnummer = "")
+            val forelderAdresse = adresseTromsø(brukenhetsnummer = null)
+
+            // Guard - forventer at de ikke er like da de har forskjellige bruksenhetsnummer: null og ""
+            assertThat(barnAdresse == forelderAdresse).isFalse
+            assertThat(barnAdresse.erSammeAdresse(forelderAdresse)).isTrue
+
+            val ulikVegadresseBarn = forelderAdresse.copy(bruksenhetsnummer = "H0404")
+            assertThat(ulikVegadresseBarn.erSammeAdresse(forelderAdresse)).isFalse
         }
 
         @Test
