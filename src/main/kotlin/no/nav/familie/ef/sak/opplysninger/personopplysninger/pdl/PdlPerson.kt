@@ -287,14 +287,47 @@ data class Vegadresse(
         )
     }
 
-    fun erSammeAdresse(other: Vegadresse): Boolean {
-        val likeMenBruksenhetsnummerIgnored = this == other.copy(bruksenhetsnummer = this.bruksenhetsnummer)
-        return likeMenBruksenhetsnummerIgnored && this.bruksenhetsnummer.erSammeEllerTom(other.bruksenhetsnummer)
+    fun erSammeVegadresse(other: Vegadresse): Boolean {
+        return påkrevdeFelterErLike(this, other) && likeadresserNullOgTomIgnorert(other, this)
     }
-}
 
-private fun String?.erSammeEllerTom(other: String?): Boolean {
-    return this ?: "" == other ?: ""
+    private fun likeadresserNullOgTomIgnorert(
+        other: Vegadresse,
+        vegadresse: Vegadresse,
+    ) = other.tilVegadresseDto() == vegadresse.tilVegadresseDto()
+
+    private fun påkrevdeFelterErLike(
+        vegadresse: Vegadresse,
+        other: Vegadresse,
+    ): Boolean {
+        // påkrevd likhet på noen felt for å sammenligne to vegadresser
+        val sammeAdressenavn = vegadresse.adressenavn != null && vegadresse.adressenavn == other.adressenavn
+        val sammeHusnummer = vegadresse.husnummer != null && vegadresse.husnummer == other.husnummer
+        val sammePostnummer = vegadresse.postnummer != null && vegadresse.postnummer == other.postnummer
+        return sammePostnummer && sammeHusnummer && sammeAdressenavn
+    }
+    private fun Vegadresse.tilVegadresseDto() = VegadresseDto(
+        adressenavn = adressenavn ?: "",
+        husnummer = husnummer ?: "",
+        postnummer = postnummer ?: "",
+        husbokstav = husbokstav ?: "",
+        bruksenhetsnummer = bruksenhetsnummer ?: "",
+        kommunenummer = kommunenummer ?: "",
+        tilleggsnavn = tilleggsnavn ?: "",
+        koordinater = koordinater,
+        matrikkelId = matrikkelId,
+    )
+    private data class VegadresseDto(
+        val adressenavn: String,
+        val postnummer: String,
+        val husnummer: String,
+        val husbokstav: String,
+        val bruksenhetsnummer: String,
+        val kommunenummer: String,
+        val tilleggsnavn: String,
+        val koordinater: Koordinater?,
+        val matrikkelId: Long?,
+    )
 }
 
 data class UkjentBosted(val bostedskommune: String?)
