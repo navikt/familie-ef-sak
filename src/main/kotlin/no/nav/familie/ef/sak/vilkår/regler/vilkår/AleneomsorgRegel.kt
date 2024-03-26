@@ -48,11 +48,13 @@ class AleneomsorgRegel : Vilkårsregel(
 
         val erDigitalSøknad = metadata.behandling.erDigitalSøknad()
 
+        if (erDigitalSøknad && erGjeldeneBarnDonor) {
+            return listOf(automatiskVurderAleneomsorgNårAnnenForelderErDonor())
+        }
+
         return hovedregler.map { hovedregel ->
             if (hovedregel == RegelId.NÆRE_BOFORHOLD && borLangtFraHverandre(metadata, barnId)) {
                 opprettAutomatiskBeregnetNæreBoforholdDelvilkår()
-            } else if (erDigitalSøknad && erGjeldeneBarnDonor) {
-                automatiskVurderAleneomsorgNårAnnenForelderErDonor()
             } else {
                 Delvilkårsvurdering(resultat, vurderinger = listOf(Vurdering(hovedregel)))
             }
