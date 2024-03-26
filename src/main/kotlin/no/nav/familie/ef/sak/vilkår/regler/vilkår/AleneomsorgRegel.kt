@@ -14,10 +14,14 @@ import no.nav.familie.ef.sak.vilkår.regler.SvarId
 import no.nav.familie.ef.sak.vilkår.regler.Vilkårsregel
 import no.nav.familie.ef.sak.vilkår.regler.jaNeiSvarRegel
 import no.nav.familie.ef.sak.vilkår.regler.regelIder
+import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import java.time.LocalDate
 import java.util.UUID
 
-class AleneomsorgRegel : Vilkårsregel(
+class AleneomsorgRegel(
+    hovedregler: Set<RegelId>? =
+        null,
+) : Vilkårsregel(
     vilkårType = VilkårType.ALENEOMSORG,
     regler =
     setOf(
@@ -26,7 +30,7 @@ class AleneomsorgRegel : Vilkårsregel(
         MER_AV_DAGLIG_OMSORG,
     ),
     hovedregler =
-    regelIder(
+    hovedregler ?: regelIder(
         SKRIFTLIG_AVTALE_OM_DELT_BOSTED,
         NÆRE_BOFORHOLD,
         MER_AV_DAGLIG_OMSORG,
@@ -41,14 +45,7 @@ class AleneomsorgRegel : Vilkårsregel(
             return super.initiereDelvilkårsvurdering(metadata, resultat, barnId)
         }
 
-        val erGjeldeneBarnDonor =
-            metadata.vilkårgrunnlagDto.barnMedSamvær.find {
-                it.barnId == barnId
-            }?.søknadsgrunnlag?.ikkeOppgittAnnenForelderBegrunnelse?.lowercase() == "donor"
-
-        val erDigitalSøknad = metadata.behandling.erDigitalSøknad()
-
-        if (erDigitalSøknad && erGjeldeneBarnDonor) {
+        if (erDigitalSøknadOgDonorBarn(metadata, barnId)) {
             return listOf(automatiskVurderAleneomsorgNårAnnenForelderErDonor())
         }
 
@@ -60,6 +57,14 @@ class AleneomsorgRegel : Vilkårsregel(
             }
         }
     }
+
+    private fun erDigitalSøknadOgDonorBarn(
+        metadata: HovedregelMetadata,
+        barnId: UUID?,
+    ) = metadata.behandling.årsak == BehandlingÅrsak.SØKNAD &&
+        metadata.vilkårgrunnlagDto.barnMedSamvær.find {
+            it.barnId == barnId
+        }?.søknadsgrunnlag?.ikkeOppgittAnnenForelderBegrunnelse?.lowercase() == "donor"
 
     private fun opprettAutomatiskBeregnetNæreBoforholdDelvilkår() =
         Delvilkårsvurdering(
