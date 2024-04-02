@@ -23,7 +23,7 @@ interface FagsakPersonRepository : RepositoryInterface<FagsakPerson, UUID>, Inse
     @Query("SELECT ident FROM person_ident WHERE fagsak_person_id = :personId ORDER BY endret_tid DESC LIMIT 1")
     fun hentAktivIdent(personId: UUID): String
 
-    @Query("SELECT * from fagsak_person fp join fagsak f on f.fagsak_person_id = fp.id AND f.id = :fagsakId")
+    @Query("SELECT fp.* from fagsak_person fp join fagsak f on f.fagsak_person_id = fp.id AND f.id = :fagsakId")
     fun finnFagsakPersonForFagsakId(fagsakId: UUID): FagsakPerson
 
     @Query(

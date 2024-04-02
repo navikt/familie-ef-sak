@@ -13,6 +13,7 @@ import org.postgresql.util.PSQLException
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.dao.IncorrectResultSizeDataAccessException
 import java.time.LocalDateTime
+import no.nav.familie.ef.sak.repository.fagsak
 
 internal class FagsakPersonRepositoryTest : OppslagSpringRunnerTest() {
 
@@ -77,5 +78,15 @@ internal class FagsakPersonRepositoryTest : OppslagSpringRunnerTest() {
             ),
         )
         assertThat(fagsakPersonRepository.hentAktivIdent(person.id)).isEqualTo("2")
+    }
+
+
+    @Test
+    internal fun `skal hente ut fagsakPerson basert på fagsakId`() {
+        val fagsak = fagsak()
+        testoppsettService.lagreFagsak(fagsak)
+        val fagsakPerson = fagsakPersonRepository.finnFagsakPersonForFagsakId(fagsak.id)
+
+        assertThat(fagsakPerson.hentAktivIdent()).isEqualTo(fagsak.hentAktivIdent())
     }
 }
