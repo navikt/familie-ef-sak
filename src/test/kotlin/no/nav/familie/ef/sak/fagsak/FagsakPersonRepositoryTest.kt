@@ -5,6 +5,7 @@ import no.nav.familie.ef.sak.fagsak.domain.FagsakPerson
 import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
 import no.nav.familie.ef.sak.felles.domain.Endret
 import no.nav.familie.ef.sak.felles.domain.Sporbar
+import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.testutil.hasCauseMessageContaining
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
@@ -13,7 +14,6 @@ import org.postgresql.util.PSQLException
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.dao.IncorrectResultSizeDataAccessException
 import java.time.LocalDateTime
-import no.nav.familie.ef.sak.repository.fagsak
 
 internal class FagsakPersonRepositoryTest : OppslagSpringRunnerTest() {
 
@@ -79,7 +79,6 @@ internal class FagsakPersonRepositoryTest : OppslagSpringRunnerTest() {
         )
         assertThat(fagsakPersonRepository.hentAktivIdent(person.id)).isEqualTo("2")
     }
-
 
     @Test
     internal fun `skal hente ut fagsakPerson basert på fagsakId`() {
