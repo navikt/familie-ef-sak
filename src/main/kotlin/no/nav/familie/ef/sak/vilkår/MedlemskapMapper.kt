@@ -51,6 +51,7 @@ class MedlemskapMapper(
                     personidentEøsLand = it.personidentEøsLand,
                     adresseEøsLand = it.adresseEøsLand,
                     erEøsLand = it.erEøsland,
+                    kanIkkeOppgiPersonIdent = it.kanIkkeOppgiPersonident,
                 )
             },
         )

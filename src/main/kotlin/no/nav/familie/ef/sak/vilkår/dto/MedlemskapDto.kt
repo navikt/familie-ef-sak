@@ -50,4 +50,5 @@ data class UtenlandsoppholdDto(
     val personidentEøsLand: String? = null,
     val adresseEøsLand: String? = null,
     val erEøsLand: Boolean? = null,
+    val kanIkkeOppgiPersonIdent: Boolean? = null,
 )
