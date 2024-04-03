@@ -275,7 +275,7 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     internal fun `hentMigreringInfo - historisk periode`() {
-        val startdato = YearMonth.now().minusYears(1).atDay(1)
+        val startdato = YearMonth.of(2023, 2).atDay(1)
         val sluttMåned = opphørsmåned.minusMonths(2)
         val periode = InfotrygdPeriodeTestUtil.lagInfotrygdPeriode(
             stønadFom = startdato,
@@ -639,12 +639,12 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
 
     @Nested
     inner class FlereAktivePerioder {
-
-        private val stønadFom = YearMonth.of(2021, 1)
+        private val forrigeÅr = YearMonth.now().year - 1
+        private val stønadFom = YearMonth.of(forrigeÅr, 1)
         private val periode1 = InfotrygdPeriodeTestUtil.lagInfotrygdPeriode(
             vedtakId = 1,
             stønadFom = stønadFom.atDay(1),
-            stønadTom = LocalDate.of(2021, 1, 31),
+            stønadTom = LocalDate.of(forrigeÅr, 1, 31),
             beløp = 10,
         )
 
@@ -652,8 +652,8 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
         internal fun `samme beløp som er sammenhengende`() {
             val periode2 = InfotrygdPeriodeTestUtil.lagInfotrygdPeriode(
                 vedtakId = 2,
-                stønadFom = LocalDate.of(2021, 2, 1),
-                stønadTom = LocalDate.of(2021, 3, 31),
+                stønadFom = LocalDate.of(forrigeÅr, 2, 1),
+                stønadTom = LocalDate.of(forrigeÅr, 3, 31),
                 beløp = 10,
             )
 
@@ -668,8 +668,8 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
         internal fun `ulik beløp som er sammenhengende`() {
             val periode2 = InfotrygdPeriodeTestUtil.lagInfotrygdPeriode(
                 vedtakId = 2,
-                stønadFom = LocalDate.of(2021, 2, 1),
-                stønadTom = LocalDate.of(2021, 3, 31),
+                stønadFom = LocalDate.of(forrigeÅr, 2, 1),
+                stønadTom = LocalDate.of(forrigeÅr, 3, 31),
                 beløp = 20,
             )
 
@@ -685,8 +685,8 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
         internal fun `samme beløp men ikke sammenhengende`() {
             val periode2 = InfotrygdPeriodeTestUtil.lagInfotrygdPeriode(
                 vedtakId = 2,
-                stønadFom = LocalDate.of(2021, 3, 1),
-                stønadTom = LocalDate.of(2021, 3, 31),
+                stønadFom = LocalDate.of(forrigeÅr, 3, 1),
+                stønadTom = LocalDate.of(forrigeÅr, 3, 31),
                 beløp = 20,
             )
 
@@ -702,8 +702,8 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
         internal fun `ulike aktiviteter`() {
             val periode2 = InfotrygdPeriodeTestUtil.lagInfotrygdPeriode(
                 vedtakId = 2,
-                stønadFom = LocalDate.of(2021, 2, 1),
-                stønadTom = LocalDate.of(2021, 3, 31),
+                stønadFom = LocalDate.of(forrigeÅr, 2, 1),
+                stønadTom = LocalDate.of(forrigeÅr, 3, 31),
                 beløp = 10,
                 aktivitetstype = InfotrygdAktivitetstype.IKKE_I_AKTIVITET,
             )
@@ -719,8 +719,8 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
         internal fun `flere perioder ulike aktiviteter, men der en av de er arbeidssøker`() {
             val periode2 = InfotrygdPeriodeTestUtil.lagInfotrygdPeriode(
                 vedtakId = 2,
-                stønadFom = LocalDate.of(2021, 2, 1),
-                stønadTom = LocalDate.of(2021, 3, 31),
+                stønadFom = LocalDate.of(forrigeÅr, 2, 1),
+                stønadTom = LocalDate.of(forrigeÅr, 3, 31),
                 beløp = 10,
                 aktivitetstype = InfotrygdAktivitetstype.TILMELDT_SOM_REELL_ARBEIDSSØKER,
             )
