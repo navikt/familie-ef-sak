@@ -37,7 +37,7 @@ class AleneomsorgRegel : Vilkårsregel(
         barnId: UUID?,
     ): List<Delvilkårsvurdering> {
         return hovedregler.map { hovedregel ->
-            if (hovedregel == RegelId.NÆRE_BOFORHOLD && borLangtFraHverandre(metadata, barnId)) {
+            if (hovedregel == RegelId.NÆRE_BOFORHOLD && annenForelderBorISammeHus(metadata).not() && borLangtFraHverandre(metadata, barnId)) {
                 opprettAutomatiskBeregnetNæreBoforholdDelvilkår()
             } else {
                 Delvilkårsvurdering(resultat, vurderinger = listOf(Vurdering(hovedregel)))
@@ -60,6 +60,8 @@ class AleneomsorgRegel : Vilkårsregel(
         metadata.langAvstandTilSøker.firstOrNull { it.barnId == barnId }?.langAvstandTilSøker?.let {
             it == LangAvstandTilSøker.JA_UPRESIS || it == LangAvstandTilSøker.JA
         } ?: false
+
+    private fun annenForelderBorISammeHus(metadata: HovedregelMetadata) = metadata.langAvstandTilSøker.any { it.borAnnenForelderISammeHus == "Ja" }
 
     companion object {
 
