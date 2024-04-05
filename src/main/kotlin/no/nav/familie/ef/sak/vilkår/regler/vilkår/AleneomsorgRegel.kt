@@ -14,30 +14,41 @@ import no.nav.familie.ef.sak.vilkår.regler.SvarId
 import no.nav.familie.ef.sak.vilkår.regler.Vilkårsregel
 import no.nav.familie.ef.sak.vilkår.regler.jaNeiSvarRegel
 import no.nav.familie.ef.sak.vilkår.regler.regelIder
+import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import java.time.LocalDate
 import java.util.UUID
 
 class AleneomsorgRegel : Vilkårsregel(
     vilkårType = VilkårType.ALENEOMSORG,
-    regler = setOf(
+    regler =
+    setOf(
         SKRIFTLIG_AVTALE_OM_DELT_BOSTED,
         NÆRE_BOFORHOLD,
         MER_AV_DAGLIG_OMSORG,
     ),
-    hovedregler = regelIder(
+    hovedregler =
+    regelIder(
         SKRIFTLIG_AVTALE_OM_DELT_BOSTED,
         NÆRE_BOFORHOLD,
         MER_AV_DAGLIG_OMSORG,
     ),
 ) {
-
     override fun initiereDelvilkårsvurdering(
         metadata: HovedregelMetadata,
         resultat: Vilkårsresultat,
         barnId: UUID?,
     ): List<Delvilkårsvurdering> {
         return hovedregler.map { hovedregel ->
-            if (hovedregel == RegelId.NÆRE_BOFORHOLD && borLangtFraHverandre(metadata, barnId)) {
+            if (resultat != Vilkårsresultat.IKKE_TATT_STILLING_TIL) {
+                return super.initiereDelvilkårsvurdering(metadata, resultat, barnId)
+            }
+
+            if (hovedregel == RegelId.NÆRE_BOFORHOLD &&
+                erDigitalSøknadOgBorLagtNokUnnaAnnenForelder(
+                    metadata,
+                    barnId,
+                )
+            ) {
                 opprettAutomatiskBeregnetNæreBoforholdDelvilkår()
             } else {
                 Delvilkårsvurdering(resultat, vurderinger = listOf(Vurdering(hovedregel)))
@@ -45,28 +56,38 @@ class AleneomsorgRegel : Vilkårsregel(
         }
     }
 
-    private fun opprettAutomatiskBeregnetNæreBoforholdDelvilkår() = Delvilkårsvurdering(
-        resultat = Vilkårsresultat.AUTOMATISK_OPPFYLT,
-        listOf(
-            Vurdering(
-                regelId = RegelId.NÆRE_BOFORHOLD,
-                svar = SvarId.NEI,
-                begrunnelse = "Automatisk vurdert (${LocalDate.now().norskFormat()}): Det er beregnet at annen forelder bor mer enn 1 km unna bruker.",
+    private fun opprettAutomatiskBeregnetNæreBoforholdDelvilkår() =
+        Delvilkårsvurdering(
+            resultat = Vilkårsresultat.AUTOMATISK_OPPFYLT,
+            listOf(
+                Vurdering(
+                    regelId = RegelId.NÆRE_BOFORHOLD,
+                    svar = SvarId.NEI,
+                    begrunnelse = "Automatisk vurdert (${LocalDate.now().norskFormat()}): Det er beregnet at annen forelder bor mer enn 200 meter unna bruker.",
+                ),
             ),
-        ),
-    )
+        )
 
-    private fun borLangtFraHverandre(metadata: HovedregelMetadata, barnId: UUID?) =
-        metadata.langAvstandTilSøker.firstOrNull { it.barnId == barnId }?.langAvstandTilSøker?.let {
-            it == LangAvstandTilSøker.JA_UPRESIS || it == LangAvstandTilSøker.JA
-        } ?: false
+    private fun erDigitalSøknadOgBorLagtNokUnnaAnnenForelder(
+        metadata: HovedregelMetadata,
+        barnId: UUID?,
+    ) = (metadata.behandling.årsak == BehandlingÅrsak.SØKNAD) && borIkkeISammeHusOgBorLangtNokFraHverandre(metadata, barnId)
+
+    private fun borIkkeISammeHusOgBorLangtNokFraHverandre(
+        metadata: HovedregelMetadata,
+        barnId: UUID?,
+    ) = metadata.langAvstandTilSøker.firstOrNull { it.barnId == barnId }?.langAvstandTilSøker?.let {
+        it == LangAvstandTilSøker.JA_UPRESIS || it == LangAvstandTilSøker.JA
+    } ?: false && metadata.langAvstandTilSøker.find {
+        it.barnId == barnId
+    }?.borAnnenForelderISammeHus?.let { it.isNotBlank() && it.lowercase() != "ja" } ?: false
 
     companion object {
-
         private val MER_AV_DAGLIG_OMSORG =
             RegelSteg(
                 regelId = RegelId.MER_AV_DAGLIG_OMSORG,
-                svarMapping = jaNeiSvarRegel(
+                svarMapping =
+                jaNeiSvarRegel(
                     hvisJa = SluttSvarRegel.OPPFYLT_MED_PÅKREVD_BEGRUNNELSE,
                     hvisNei = SluttSvarRegel.IKKE_OPPFYLT_MED_PÅKREVD_BEGRUNNELSE,
                 ),
