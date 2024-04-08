@@ -5,6 +5,7 @@ import no.nav.familie.ef.sak.fagsak.domain.FagsakPerson
 import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
 import no.nav.familie.ef.sak.felles.domain.Endret
 import no.nav.familie.ef.sak.felles.domain.Sporbar
+import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.testutil.hasCauseMessageContaining
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
@@ -77,5 +78,14 @@ internal class FagsakPersonRepositoryTest : OppslagSpringRunnerTest() {
             ),
         )
         assertThat(fagsakPersonRepository.hentAktivIdent(person.id)).isEqualTo("2")
+    }
+
+    @Test
+    internal fun `skal hente ut fagsakPerson basert på fagsakId`() {
+        val fagsak = fagsak()
+        testoppsettService.lagreFagsak(fagsak)
+        val fagsakPerson = fagsakPersonRepository.finnFagsakPersonForFagsakId(fagsak.id)
+
+        assertThat(fagsakPerson.hentAktivIdent()).isEqualTo(fagsak.hentAktivIdent())
     }
 }

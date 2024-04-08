@@ -105,7 +105,13 @@ class FamilieIntegrasjonerMock(integrasjonerConfig: IntegrasjonerConfig) {
                 ),
             get(urlPathMatching("${integrasjonerConfig.journalPostUri.path}/hentdokument/([0-9]*)/([0-9]*)"))
                 .withQueryParam("variantFormat", equalTo("ARKIV"))
-                .willReturn(okJson(objectMapper.writeValueAsString(Ressurs.success(pdfAsBase64String)))),
+                .willReturn(
+                    okJson(
+                        objectMapper.writeValueAsString(
+                            Ressurs.success(this::class.java.getResource("/dummy/fiktivt_skjema.pdf").readBytes()),
+                        ),
+                    ),
+                ),
             put(urlMatching("${integrasjonerConfig.dokarkivUri.path}.*"))
                 .willReturn(okJson(objectMapper.writeValueAsString(oppdatertJournalpostResponse))),
             post(urlMatching("${integrasjonerConfig.dokarkivUri.path}.*"))
