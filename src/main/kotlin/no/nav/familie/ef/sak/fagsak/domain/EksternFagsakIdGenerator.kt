@@ -7,12 +7,12 @@ import org.springframework.stereotype.Component
 
 @Component
 class EksternFagsakIdGenerator(private val jdbcTemplate: JdbcTemplate) : BeforeConvertCallback<FagsakDomain> {
-    override fun onBeforeConvert(aggregate: FagsakDomain): FagsakDomain {
-        if (aggregate.eksternId.id == 0L) {
+    override fun onBeforeConvert(fagsak: FagsakDomain): FagsakDomain {
+        if (fagsak.eksternId == 0L) {
             val id =
                 jdbcTemplate.queryForObject<Long>("SELECT nextval('fagsak_ekstern_id_seq')")
-            return aggregate.copy(eksternId = EksternFagsakId(id = id))
+            return fagsak.copy(eksternId = id)
         }
-        return aggregate
+        return fagsak
     }
 }

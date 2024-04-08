@@ -7,12 +7,12 @@ import org.springframework.stereotype.Component
 
 @Component
 class EksternBehandlingIdGenerator(private val jdbcTemplate: JdbcTemplate) : BeforeConvertCallback<Behandling> {
-    override fun onBeforeConvert(aggregate: Behandling): Behandling {
-        if (aggregate.eksternId.id == 0L) {
+    override fun onBeforeConvert(behandling: Behandling): Behandling {
+        if (behandling.eksternId == 0L) {
             val id =
                 jdbcTemplate.queryForObject<Long>("SELECT nextval('behandling_ekstern_id_seq')")
-            return aggregate.copy(eksternId = EksternBehandlingId(id = id))
+            return behandling.copy(eksternId = id)
         }
-        return aggregate
+        return behandling
     }
 }

@@ -116,7 +116,7 @@ class JournalpostService(private val journalpostClient: JournalpostClient) {
             oppdaterJournalpostMedFagsakOgDokumenttitler(
                 journalpost = journalpost,
                 dokumenttitler = dokumenttitler,
-                eksternFagsakId = fagsak.eksternId.id,
+                eksternFagsakId = fagsak.eksternId,
                 saksbehandler = saksbehandler,
                 nyAvsender = nyAvsender,
             )

@@ -233,7 +233,7 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
         val behandlingServiceObject = behandlingRepository.finnSaksbehandling(behandling.id)
 
         assertThat(behandlingServiceObject.id).isEqualTo(behandling.id)
-        assertThat(behandlingServiceObject.eksternId).isEqualTo(behandling.eksternId.id)
+        assertThat(behandlingServiceObject.eksternId).isEqualTo(behandling.eksternId)
         assertThat(behandlingServiceObject.forrigeBehandlingId).isEqualTo(behandling.forrigeBehandlingId)
         assertThat(behandlingServiceObject.type).isEqualTo(behandling.type)
         assertThat(behandlingServiceObject.status).isEqualTo(behandling.status)
@@ -244,7 +244,7 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
         assertThat(behandlingServiceObject.henlagtÅrsak).isEqualTo(behandling.henlagtÅrsak)
         assertThat(behandlingServiceObject.ident).isEqualTo("2")
         assertThat(behandlingServiceObject.fagsakId).isEqualTo(fagsak.id)
-        assertThat(behandlingServiceObject.eksternFagsakId).isEqualTo(fagsak.eksternId.id)
+        assertThat(behandlingServiceObject.eksternFagsakId).isEqualTo(fagsak.eksternId)
         assertThat(behandlingServiceObject.stønadstype).isEqualTo(fagsak.stønadstype)
         assertThat(behandlingServiceObject.migrert).isEqualTo(fagsak.migrert)
         assertThat(behandlingServiceObject.opprettetAv).isEqualTo(behandling.sporbar.opprettetAv)
@@ -258,7 +258,7 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
         val fagsak = testoppsettService.lagreFagsak(fagsak())
         val behandling = behandlingRepository.insert(behandling(fagsak))
         val findByBehandlingId = behandlingRepository.findById(behandling.id)
-        val findByEksternId = behandlingRepository.finnMedEksternId(behandling.eksternId.id)
+        val findByEksternId = behandlingRepository.finnMedEksternId(behandling.eksternId)
 
         assertThat(findByEksternId).isEqualTo(behandling)
         assertThat(findByEksternId).isEqualTo(findByBehandlingId.get())
@@ -322,14 +322,14 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
 
         val eksterneIder = behandlingRepository.finnEksterneIder(setOf(behandling.id))
 
-        assertThat(fagsak.eksternId.id).isNotEqualTo(0L)
-        assertThat(behandling.eksternId.id).isNotEqualTo(0L)
+        assertThat(fagsak.eksternId).isNotEqualTo(0L)
+        assertThat(behandling.eksternId).isNotEqualTo(0L)
 
         assertThat(eksterneIder).hasSize(1)
         val first = eksterneIder.first()
         assertThat(first.behandlingId).isEqualTo(behandling.id)
-        assertThat(first.eksternBehandlingId).isEqualTo(behandling.eksternId.id)
-        assertThat(first.eksternFagsakId).isEqualTo(fagsak.eksternId.id)
+        assertThat(first.eksternBehandlingId).isEqualTo(behandling.eksternId)
+        assertThat(first.eksternFagsakId).isEqualTo(fagsak.eksternId)
     }
 
     @Test
@@ -341,14 +341,14 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
 
         val eksterneIder = behandlingRepository.finnEksterneIder(setOf(annenBehandling.id))
 
-        assertThat(fagsak.eksternId.id).isNotEqualTo(0L)
-        assertThat(behandling.eksternId.id).isNotEqualTo(0L)
+        assertThat(fagsak.eksternId).isNotEqualTo(0L)
+        assertThat(behandling.eksternId).isNotEqualTo(0L)
 
         assertThat(eksterneIder).hasSize(1)
         val first = eksterneIder.first()
         assertThat(first.behandlingId).isEqualTo(annenBehandling.id)
-        assertThat(first.eksternBehandlingId).isEqualTo(annenBehandling.eksternId.id)
-        assertThat(first.eksternFagsakId).isEqualTo(annenFagsak.eksternId.id)
+        assertThat(first.eksternBehandlingId).isEqualTo(annenBehandling.eksternId)
+        assertThat(first.eksternFagsakId).isEqualTo(annenFagsak.eksternId)
     }
 
     @Test
