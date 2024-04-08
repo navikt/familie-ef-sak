@@ -14,6 +14,7 @@ import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
+import no.nav.familie.ef.sak.behandling.domain.EksternBehandlingId
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
@@ -238,6 +239,7 @@ internal class OmregningServiceTest : OppslagSpringRunnerTest() {
         val behandling = behandlingRepository.insert(
             behandling(
                 id = behandlingId,
+                eksternId = EksternBehandlingId(11),
                 fagsak = fagsak,
                 resultat = BehandlingResultat.INNVILGET,
                 status = BehandlingStatus.FERDIGSTILT,
