@@ -2,7 +2,7 @@ package no.nav.familie.ef.sak.behandling
 
 object OppgaveBeskrivelse {
 
-    val informereLokalkontorOmOvergangsstønad = """Bruker har søkt om overgangsstønad. Til informasjon.
+    val informereLokalkontorOmOvergangsstønad = """Bruker har søkt om overgangsstønad. Vurder oppfølging.
         
     """.trimMargin()
 

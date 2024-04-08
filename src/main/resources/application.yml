@@ -8,10 +8,14 @@ server:
       max-request-size: 200MB
 
 no.nav.security.jwt:
-  issuer.azuread:
-    discoveryurl: ${AZURE_APP_WELL_KNOWN_URL}
-    accepted_audience: ${AZURE_APP_CLIENT_ID}
-    cookie_name: azure_token
+  issuer:
+    tokenx:
+      discovery-url: ${TOKEN_X_WELL_KNOWN_URL}
+      accepted-audience: ${TOKEN_X_CLIENT_ID}
+    azuread:
+      discoveryurl: ${AZURE_APP_WELL_KNOWN_URL}
+      accepted_audience: ${AZURE_APP_CLIENT_ID}
+      cookie_name: azure_token
   client:
     registration:
       familie-integrasjoner:
@@ -271,6 +275,7 @@ GYLDIGE_SERVICE_BRUKERE: srvArena
 G_OMREGNING_CRON_EXPRESSION: 0 0 15 * * TUE
 FINN_BEHANDLINGER_UTEN_OPPGAVE_CRON_EXPRESSION: 0 0 8 * * MON #kl 08:00 hver mandag
 FINN_BEHANDLINGER_MED_GAMMEL_G_CRON_EXPRESSION: 0 0 8 1 * * #kl 08:00 den 1. hver måned
+DEAKTIVER_MIKROFRONTEND_CRON_EXPRESSION: 0 0 6 * * TUE #kl 06:00 hver tirsdag
 
 MIN_SIDE_TOPIC: min-side.aapen-microfrontend-v1
 

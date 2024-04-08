@@ -24,12 +24,14 @@ spec:
   replicas:
     min: 2
     max: 4
+  tokenx:
+    enabled: true
   resources:
     limits:
       memory: 2048Mi
     requests:
-      memory: 512Mi
-      cpu: 500m
+      memory: 1024Mi
+      cpu: 100m
   secureLogs:
     enabled: true
   gcp:
@@ -54,6 +56,7 @@ spec:
         - application: familie-klage
         - application: familie-ef-personhendelse
         - application: familie-ef-mottak
+        - application: familie-ef-soknad-api
         - application: familie-ef-proxy
           namespace: teamfamilie
           cluster: prod-fss

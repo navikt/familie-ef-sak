@@ -23,13 +23,15 @@ spec:
     path: /internal/prometheus
   replicas:
     min: 2
-    max: 4
+    max: 2
+  tokenx:
+    enabled: true
   resources:
     limits:
       memory: 1024Mi
     requests:
       memory: 512Mi
-      cpu: 500m
+      cpu: 50m
   secureLogs:
     enabled: true
   gcp:
@@ -54,6 +56,7 @@ spec:
         - application: familie-prosessering-lokal
         - application: familie-ef-sak-frontend-lokal
         - application: familie-ef-mottak
+        - application: familie-ef-soknad-api
         - application: familie-klage
         - application: familie-ef-proxy
           namespace: teamfamilie

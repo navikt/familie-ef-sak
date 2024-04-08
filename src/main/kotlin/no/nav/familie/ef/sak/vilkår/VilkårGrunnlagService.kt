@@ -38,7 +38,6 @@ class VilkårGrunnlagService(
     private val barnMedsamværMapper: BarnMedSamværMapper,
     private val adresseMapper: AdresseMapper,
 ) {
-
     fun hentGrunnlag(
         behandlingId: UUID,
         søknad: Søknadsverdier?,
@@ -49,27 +48,37 @@ class VilkårGrunnlagService(
         val grunnlagsdata = registergrunnlagData.grunnlagsdata
 
         val aktivitet =
-            søknad?.let { AktivitetMapper.tilDto(aktivitet = it.aktivitet, situasjon = it.situasjon, søknadBarn = it.barn, it.datoPåbegyntSøknad) }
+            søknad?.let {
+                AktivitetMapper.tilDto(
+                    aktivitet = it.aktivitet,
+                    situasjon = it.situasjon,
+                    søknadBarn = it.barn,
+                    it.datoPåbegyntSøknad,
+                )
+            }
         val søknadsbarn = søknad?.barn ?: emptyList()
         val stønadstype = fagsakService.hentFagsakForBehandling(behandlingId).stønadstype
-        val barnMedSamvær = mapBarnMedSamvær(
-            søknad?.fødselsnummer ?: personident,
-            grunnlagsdata,
-            barn,
-            søknadsbarn,
-            stønadstype,
-            registergrunnlagData.opprettetTidspunkt.toLocalDate(),
-        )
+        val barnMedSamvær =
+            mapBarnMedSamvær(
+                søknad?.fødselsnummer ?: personident,
+                grunnlagsdata,
+                barn,
+                søknadsbarn,
+                stønadstype,
+                registergrunnlagData.opprettetTidspunkt.toLocalDate(),
+            )
         val medlemskap = medlemskapMapper.tilDto(grunnlagsdata, søknad?.medlemskap)
         val sivilstand = SivilstandMapper.tilDto(grunnlagsdata, søknad?.sivilstand)
         val sivilstandsplaner = SivilstandsplanerMapper.tilDto(sivilstandsplaner = søknad?.sivilstandsplaner)
         val sagtOppEllerRedusertStilling = søknad?.situasjon?.let { SagtOppEllerRedusertStillingMapper.tilDto(situasjon = it) }
 
         return VilkårGrunnlagDto(
-            personalia = PersonaliaDto(
+            personalia =
+            PersonaliaDto(
                 navn = NavnDto.fraNavn(grunnlagsdata.søker.navn),
                 personIdent = personident,
                 bostedsadresse = grunnlagsdata.søker.bostedsadresse.gjeldende()?.let { adresseMapper.tilAdresse(it) },
+                fødeland = grunnlagsdata.søker.fødsel.gjeldende().fødeland,
             ),
             tidligereVedtaksperioder = grunnlagsdata.tidligereVedtaksperioder.tilDto(),
             medlemskap = medlemskap,
@@ -94,20 +103,22 @@ class VilkårGrunnlagService(
         stønadstype: StønadType,
         grunnlagsdataOpprettet: LocalDate,
     ): List<BarnMedSamværDto> {
-        val barnMedSamværRegistergrunnlag = barnMedsamværMapper.mapRegistergrunnlag(
-            personIdentSøker,
-            grunnlagsdata.barn,
-            grunnlagsdata.annenForelder,
-            barn,
-            søknadsbarn,
-            grunnlagsdata.søker.bostedsadresse,
-            grunnlagsdataOpprettet,
-        )
+        val barnMedSamværRegistergrunnlag =
+            barnMedsamværMapper.mapRegistergrunnlag(
+                personIdentSøker,
+                grunnlagsdata.barn,
+                grunnlagsdata.annenForelder,
+                barn,
+                søknadsbarn,
+                grunnlagsdata.søker.bostedsadresse,
+                grunnlagsdataOpprettet,
+            )
         val søknadsgrunnlag = barnMedsamværMapper.mapSøknadsgrunnlag(barn, søknadsbarn)
-        val barnepass: List<BarnepassDto> = when (stønadstype) {
-            StønadType.BARNETILSYN -> barnMedsamværMapper.mapBarnepass(barn, søknadsbarn)
-            else -> emptyList()
-        }
+        val barnepass: List<BarnepassDto> =
+            when (stønadstype) {
+                StønadType.BARNETILSYN -> barnMedsamværMapper.mapBarnepass(barn, søknadsbarn)
+                else -> emptyList()
+            }
         return barnMedsamværMapper
             .slåSammenBarnMedSamvær(søknadsgrunnlag, barnMedSamværRegistergrunnlag, barnepass)
             .sortedByDescending {

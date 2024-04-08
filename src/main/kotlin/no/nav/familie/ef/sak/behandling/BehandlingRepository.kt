@@ -177,6 +177,7 @@ interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUp
                                JOIN tilkjent_ytelse ty ON aty.tilkjent_ytelse = ty.id
              WHERE ty.id = aty.tilkjent_ytelse
                AND ty.behandling_id = gib.id
+               AND aty.belop > 0
                AND aty.stonad_tom >= 'now'::timestamp)
         EXCEPT
         (SELECT pi.ident

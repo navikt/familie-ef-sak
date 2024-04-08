@@ -177,5 +177,6 @@ internal class BarnMatcherTest {
             emptyList(),
             Navn("", "", "", Metadata(false)),
             fnr,
+            null,
         )
 }

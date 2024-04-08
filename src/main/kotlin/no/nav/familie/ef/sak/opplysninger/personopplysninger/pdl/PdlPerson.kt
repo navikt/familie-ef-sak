@@ -133,6 +133,7 @@ data class PdlPersonForelderBarn(
     val forelderBarnRelasjon: List<ForelderBarnRelasjon>,
     @JsonProperty("foedsel") override val fødsel: List<Fødsel>,
     val navn: List<Navn>,
+    val folkeregisterpersonstatus: List<Folkeregisterpersonstatus>,
 ) : PdlPerson
 
 data class PdlAnnenForelder(
@@ -285,6 +286,15 @@ data class Vegadresse(
                 (yKoordinat1 - yKoordinat2) * (yKoordinat1 - yKoordinat2),
         )
     }
+
+    fun erSammeAdresse(other: Vegadresse): Boolean {
+        val likeMenBruksenhetsnummerIgnored = this == other.copy(bruksenhetsnummer = this.bruksenhetsnummer)
+        return likeMenBruksenhetsnummerIgnored && this.bruksenhetsnummer.erSammeEllerTom(other.bruksenhetsnummer)
+    }
+}
+
+private fun String?.erSammeEllerTom(other: String?): Boolean {
+    return this ?: "" == other ?: ""
 }
 
 data class UkjentBosted(val bostedskommune: String?)

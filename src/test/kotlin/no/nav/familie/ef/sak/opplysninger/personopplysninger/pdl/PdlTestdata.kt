@@ -181,6 +181,7 @@ object PdlTestdata {
                         familierelasjon,
                         fødsel,
                         navn,
+                        listOf(Folkeregisterpersonstatus("bosatt", "", metadataGjeldende)),
                     ),
                 ),
             ),

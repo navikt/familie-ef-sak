@@ -5,6 +5,8 @@ import no.nav.familie.ef.sak.behandling.BehandlingRepository
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseRepository
+import no.nav.familie.ef.sak.vedtak.VedtakService
+import no.nav.familie.ef.sak.vedtak.dto.InnvilgelseOvergangsstønad
 import no.nav.familie.ef.sak.økonomi.lagAndelTilkjentYtelse
 import no.nav.familie.ef.sak.økonomi.lagTilkjentYtelse
 import no.nav.familie.kontrakter.ef.iverksett.OppgaveForOpprettelseType
@@ -23,16 +25,22 @@ class OppgaverForOpprettelseServiceIntegrationTest : OppslagSpringRunnerTest() {
     private lateinit var tilkjentYtelseRepository: TilkjentYtelseRepository
 
     @Autowired
+    private lateinit var vedtakService: VedtakService
+
+    @Autowired
     private lateinit var oppgaverForOpprettelseService: OppgaverForOpprettelseService
 
     val fagsak = fagsak()
-    val behandling = behandling(fagsak)
+    val behandling = behandling(fagsak = fagsak)
     val behandlingId = behandling.id
+
+    val vedtakRequest = InnvilgelseOvergangsstønad("", "")
 
     @BeforeEach
     internal fun setUp() {
         testoppsettService.lagreFagsak(fagsak)
         behandlingRepository.insert(behandling)
+        vedtakService.lagreVedtak(vedtakRequest, behandling.id, fagsak.stønadstype)
     }
 
     @Test

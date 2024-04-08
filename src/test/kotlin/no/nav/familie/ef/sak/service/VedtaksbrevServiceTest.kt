@@ -18,6 +18,7 @@ import no.nav.familie.ef.sak.felles.domain.Fil
 import no.nav.familie.ef.sak.felles.domain.SporbarUtils
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.clearBrukerContext
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.mockBrukerContext
+import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.oppgave.TilordnetRessursService
@@ -38,7 +39,6 @@ import org.junit.jupiter.api.assertThrows
 import org.springframework.http.HttpStatus.BAD_REQUEST
 
 internal class VedtaksbrevServiceTest {
-
     private val fagsak = fagsak(setOf(PersonIdent("12345678910")))
     private val behandling = behandling(fagsak)
 
@@ -108,15 +108,16 @@ internal class VedtaksbrevServiceTest {
     internal fun `lagBeslutterBrev - skal kaste feil hvis behandlingen ikke har riktig steg`() {
         every { vedtaksbrevRepository.findByIdOrThrow(any()) } returns vedtaksbrev
 
-        val feil = assertThrows<Feil> {
-            vedtaksbrevService.lagEndeligBeslutterbrev(
-                saksbehandling(
-                    fagsak,
-                    behandlingForBeslutter.copy(steg = StegType.VILKÅR),
-                ),
-                vedtakKreverBeslutter,
-            )
-        }
+        val feil =
+            assertThrows<Feil> {
+                vedtaksbrevService.lagEndeligBeslutterbrev(
+                    saksbehandling(
+                        fagsak,
+                        behandlingForBeslutter.copy(steg = StegType.VILKÅR),
+                    ),
+                    vedtakKreverBeslutter,
+                )
+            }
         assertThat(feil.message).contains("Behandling er i feil steg")
         assertThat(feil.httpStatus).isEqualTo(BAD_REQUEST)
     }
@@ -125,30 +126,32 @@ internal class VedtaksbrevServiceTest {
     internal fun `lagBeslutterBrev - skal kaste feil hvis behandlingen ikke har riktig status`() {
         every { vedtaksbrevRepository.findByIdOrThrow(any()) } returns vedtaksbrev
 
-        val feilFerdigstilt = assertThrows<Feil> {
-            vedtaksbrevService.lagEndeligBeslutterbrev(
-                saksbehandling(
-                    fagsak,
-                    behandlingForBeslutter.copy(
-                        status =
-                        BehandlingStatus.FERDIGSTILT,
+        val feilFerdigstilt =
+            assertThrows<Feil> {
+                vedtaksbrevService.lagEndeligBeslutterbrev(
+                    saksbehandling(
+                        fagsak,
+                        behandlingForBeslutter.copy(
+                            status =
+                            BehandlingStatus.FERDIGSTILT,
+                        ),
                     ),
-                ),
-                vedtakKreverBeslutter,
-            )
-        }
+                    vedtakKreverBeslutter,
+                )
+            }
         assertThat(feilFerdigstilt.httpStatus).isEqualTo(BAD_REQUEST)
         assertThat(feilFerdigstilt.message).contains("Behandling er i feil steg")
 
-        val feilUtredes = assertThrows<Feil> {
-            vedtaksbrevService.lagEndeligBeslutterbrev(
-                saksbehandling(
-                    fagsak,
-                    behandling.copy(status = BehandlingStatus.UTREDES),
-                ),
-                vedtakKreverBeslutter,
-            )
-        }
+        val feilUtredes =
+            assertThrows<Feil> {
+                vedtaksbrevService.lagEndeligBeslutterbrev(
+                    saksbehandling(
+                        fagsak,
+                        behandling.copy(status = BehandlingStatus.UTREDES),
+                    ),
+                    vedtakKreverBeslutter,
+                )
+            }
         assertThat(feilUtredes.httpStatus).isEqualTo(BAD_REQUEST)
         assertThat(feilUtredes.message).contains("Behandling er i feil steg")
     }
@@ -157,15 +160,16 @@ internal class VedtaksbrevServiceTest {
     internal fun `skal kaste feil når det finnes beslutterpdf i forveien`() {
         every { vedtaksbrevRepository.findByIdOrThrow(any()) } returns vedtaksbrev.copy(beslutterPdf = Fil("123".toByteArray()))
 
-        val feil = assertThrows<Feil> {
-            vedtaksbrevService.lagEndeligBeslutterbrev(
-                saksbehandling(
-                    fagsak,
-                    behandlingForBeslutter,
-                ),
-                vedtakKreverBeslutter,
-            )
-        }
+        val feil =
+            assertThrows<Feil> {
+                vedtaksbrevService.lagEndeligBeslutterbrev(
+                    saksbehandling(
+                        fagsak,
+                        behandlingForBeslutter,
+                    ),
+                    vedtakKreverBeslutter,
+                )
+            }
         assertThat(feil.message).isEqualTo("Det finnes allerede et beslutterbrev")
     }
 
@@ -188,7 +192,7 @@ internal class VedtaksbrevServiceTest {
 
     @Test
     internal fun `lagSaksbehandlerBrev skal kaste feil når behandling er låst for videre behandling`() {
-        assertThrows<Feil> {
+        assertThrows<ApiFeil> {
             vedtaksbrevService
                 .lagSaksbehandlerSanitybrev(
                     saksbehandling(
@@ -204,19 +208,24 @@ internal class VedtaksbrevServiceTest {
         }
     }
 
-    private val behandlingForBeslutter = behandling(
-        fagsak,
-        status = BehandlingStatus.FATTER_VEDTAK,
-        steg = StegType.BESLUTTE_VEDTAK,
-    )
+    private val behandlingForBeslutter =
+        behandling(
+            fagsak,
+            status = BehandlingStatus.FATTER_VEDTAK,
+            steg = StegType.BESLUTTE_VEDTAK,
+        )
 
-    private val behandlingForSaksbehandler = behandling(
-        fagsak,
-        status = BehandlingStatus.UTREDES,
-        steg = StegType.SEND_TIL_BESLUTTER,
-    )
+    private val behandlingForSaksbehandler =
+        behandling(
+            fagsak,
+            status = BehandlingStatus.UTREDES,
+            steg = StegType.SEND_TIL_BESLUTTER,
+        )
 
-    private fun lagVedtaksbrev(brevmal: String, saksbehandlerIdent: String = "123") = Vedtaksbrev(
+    private fun lagVedtaksbrev(
+        brevmal: String,
+        saksbehandlerIdent: String = "123",
+    ) = Vedtaksbrev(
         behandlingId = behandling.id,
         saksbehandlerHtml = "Brev med $BESLUTTER_SIGNATUR_PLACEHOLDER",
         brevmal = brevmal,
@@ -237,9 +246,10 @@ internal class VedtaksbrevServiceTest {
     fun `skal kaste feil hvis saksbehandlerHtml ikke inneholder placeholder for besluttersignatur`() {
         every { vedtaksbrevRepository.findByIdOrThrow(any()) } returns vedtaksbrev.copy(saksbehandlerHtml = "html uten placeholder")
 
-        val feilmelding = assertThrows<Feil> {
-            vedtaksbrevService.forhåndsvisBeslutterBrev(saksbehandling(fagsak, behandlingForBeslutter))
-        }.message
+        val feilmelding =
+            assertThrows<Feil> {
+                vedtaksbrevService.forhåndsvisBeslutterBrev(saksbehandling(fagsak, behandlingForBeslutter))
+            }.message
         assertThat(feilmelding).isEqualTo("Brev-HTML mangler placeholder for besluttersignatur")
     }
 
@@ -257,7 +267,9 @@ internal class VedtaksbrevServiceTest {
     fun `Skal erstatte placeholder med besluttersignatur`() {
         val htmlSlot = slot<String>()
 
-        every { vedtaksbrevRepository.findByIdOrThrow(any()) } returns vedtaksbrev.copy(saksbehandlerHtml = "html med placeholder $BESLUTTER_SIGNATUR_PLACEHOLDER og en liten avslutning")
+        every {
+            vedtaksbrevRepository.findByIdOrThrow(any())
+        } returns vedtaksbrev.copy(saksbehandlerHtml = "html med placeholder $BESLUTTER_SIGNATUR_PLACEHOLDER og en liten avslutning")
         every { vedtaksbrevRepository.update(any()) } returns vedtaksbrev
         every { familieDokumentClient.genererPdfFraHtml(capture(htmlSlot)) } returns "123".toByteArray()
 
