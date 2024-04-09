@@ -30,7 +30,6 @@ class AleneomsorgRegelTest {
         every { hovedregelMetadataMock.behandling } returns behandling
         every { hovedregelMetadataMock.vilkårgrunnlagDto } returns VilkårTestUtil.mockVilkårGrunnlagDto()
         every { hovedregelMetadataMock.langAvstandTilSøker } returns emptyList()
-        every { hovedregelMetadataMock.vilkårgrunnlagDto } returns VilkårTestUtil.mockVilkårGrunnlagDto()
     }
 
     val barnId = UUID.randomUUID()
@@ -39,6 +38,7 @@ class AleneomsorgRegelTest {
     fun `Skal automatisk vurdere vilkår om aleneomsorg når det er digital søknad og donor barn`() {
         every { hovedregelMetadataMock.behandling } returns behandling(årsak = BehandlingÅrsak.SØKNAD)
         every { barnMedSamværSøknadsgrunnlagDto.ikkeOppgittAnnenForelderBegrunnelse } returns "donor"
+        every { barnMedSamværSøknadsgrunnlagDto.skalBoBorHosSøker } returns "Ja, og vi har eller skal registere adressen i Folkeregisteret"
 
         val registerBarn = BarnMedSamværDto(barnId, barnMedSamværSøknadsgrunnlagDto, barnMedSamværRegistergrunnlagDto)
 
@@ -63,6 +63,7 @@ class AleneomsorgRegelTest {
     fun `Skal ikke ta stilling til vilkår om aleneomsorg når ikkeOppgittAnnenForelderBegrunnelse er annet`() {
         every { hovedregelMetadataMock.behandling } returns behandling(årsak = BehandlingÅrsak.SØKNAD)
         every { barnMedSamværSøknadsgrunnlagDto.ikkeOppgittAnnenForelderBegrunnelse } returns "annet"
+        every { barnMedSamværSøknadsgrunnlagDto.skalBoBorHosSøker } returns "Ja, og vi har eller skal registere adressen i Folkeregisteret"
 
         val registerBarn = BarnMedSamværDto(barnId, barnMedSamværSøknadsgrunnlagDto, barnMedSamværRegistergrunnlagDto)
 
@@ -87,6 +88,31 @@ class AleneomsorgRegelTest {
     fun `Skal ikke ta stilling til vilkår om aleneomsorg når det ikke er digital søknad`() {
         every { hovedregelMetadataMock.behandling } returns behandling(årsak = BehandlingÅrsak.PAPIRSØKNAD)
         every { barnMedSamværSøknadsgrunnlagDto.ikkeOppgittAnnenForelderBegrunnelse } returns "donor"
+
+        val registerBarn = BarnMedSamværDto(barnId, barnMedSamværSøknadsgrunnlagDto, barnMedSamværRegistergrunnlagDto)
+
+        every {
+            hovedregelMetadataMock.vilkårgrunnlagDto
+        } returns
+            VilkårTestUtil.mockVilkårGrunnlagDto(
+                barnMedSamvær = listOf(registerBarn),
+            )
+
+        val listDelvilkårsvurdering =
+            AleneomsorgRegel().initiereDelvilkårsvurdering(
+                hovedregelMetadataMock,
+                Vilkårsresultat.IKKE_TATT_STILLING_TIL,
+                barnId = barnId,
+            )
+
+        Assertions.assertThat(listDelvilkårsvurdering.first().resultat).isEqualTo(Vilkårsresultat.IKKE_TATT_STILLING_TIL)
+    }
+
+    @Test
+    fun `Skal ikke ta stilling til vilkår om aleneomsorg når barnet og søker ikke skal bo sammen`() {
+        every { hovedregelMetadataMock.behandling } returns behandling(årsak = BehandlingÅrsak.SØKNAD)
+        every { barnMedSamværSøknadsgrunnlagDto.ikkeOppgittAnnenForelderBegrunnelse } returns "donor"
+        every { barnMedSamværSøknadsgrunnlagDto.skalBoBorHosSøker } returns "Nei"
 
         val registerBarn = BarnMedSamværDto(barnId, barnMedSamværSøknadsgrunnlagDto, barnMedSamværRegistergrunnlagDto)
 
