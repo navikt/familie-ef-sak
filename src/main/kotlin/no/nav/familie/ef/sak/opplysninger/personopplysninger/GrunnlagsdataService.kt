@@ -25,11 +25,16 @@ class GrunnlagsdataService(
     private val fagsakService: FagsakService,
     private val tilordnetRessursService: TilordnetRessursService,
 ) {
-
     fun opprettGrunnlagsdata(behandlingId: UUID): GrunnlagsdataMedMetadata {
         val grunnlagsdataDomene = hentFraRegisterMedSøknadsdata(behandlingId)
-        val grunnlagsdata = Grunnlagsdata(behandlingId = behandlingId, data = grunnlagsdataDomene)
+
+        val grunnlagsdata =
+            Grunnlagsdata(
+                behandlingId = behandlingId,
+                data = grunnlagsdataDomene,
+            )
         grunnlagsdataRepository.insert(grunnlagsdata)
+
         return GrunnlagsdataMedMetadata(
             grunnlagsdata.data,
             grunnlagsdata.sporbar.opprettetTid,
@@ -76,11 +81,12 @@ class GrunnlagsdataService(
 
     fun hentFraRegisterMedSøknadsdata(behandlingId: UUID): GrunnlagsdataDomene {
         val stønadstype = fagsakService.hentFagsakForBehandling(behandlingId).stønadstype
-        val søknad = when (stønadstype) {
-            StønadType.OVERGANGSSTØNAD -> søknadService.hentOvergangsstønad(behandlingId)
-            StønadType.BARNETILSYN -> søknadService.hentBarnetilsyn(behandlingId)
-            StønadType.SKOLEPENGER -> søknadService.hentSkolepenger(behandlingId)
-        }
+        val søknad =
+            when (stønadstype) {
+                StønadType.OVERGANGSSTØNAD -> søknadService.hentOvergangsstønad(behandlingId)
+                StønadType.BARNETILSYN -> søknadService.hentBarnetilsyn(behandlingId)
+                StønadType.SKOLEPENGER -> søknadService.hentSkolepenger(behandlingId)
+            }
 
         return if (søknad == null) {
             hentFraRegisterForPersonOgAndreForeldre(behandlingService.hentAktivIdent(behandlingId), emptyList())
