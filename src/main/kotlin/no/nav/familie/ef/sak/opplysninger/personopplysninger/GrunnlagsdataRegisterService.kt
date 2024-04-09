@@ -2,6 +2,7 @@ package no.nav.familie.ef.sak.opplysninger.personopplysninger
 
 import no.nav.familie.ef.sak.arbeidsforhold.ekstern.ArbeidsforholdService
 import no.nav.familie.ef.sak.felles.util.Timer.loggTid
+import no.nav.familie.ef.sak.kontantstøtte.KontantstøtteService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.GrunnlagsdataDomene
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.TidligereVedtaksperioder
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper.GrunnlagsdataMapper.mapAnnenForelder
@@ -21,8 +22,8 @@ class GrunnlagsdataRegisterService(
     private val personopplysningerIntegrasjonerClient: PersonopplysningerIntegrasjonerClient,
     private val tidligereVedtaksperioderService: TidligereVedtaksperioderService,
     private val arbeidsforholdService: ArbeidsforholdService,
+    private val kontantstøtteService: KontantstøtteService,
 ) {
-
     fun hentGrunnlagsdataFraRegister(
         personIdent: String,
         barneforeldreFraSøknad: List<String>,
@@ -32,7 +33,12 @@ class GrunnlagsdataRegisterService(
         val tidligereVedtaksperioder =
             tidligereVedtaksperioderService.hentTidligereVedtaksperioder(grunnlagsdataFraPdl.søker.folkeregisteridentifikator)
         val tidligereVedtaksperioderAnnenForelder = hentTidligereVedtaksperioderAnnenForelder(grunnlagsdataFraPdl.barneForeldre)
-        val harAvsluttetArbeidsforhold = arbeidsforholdService.finnesAvsluttetArbeidsforholdSisteAntallMåneder(grunnlagsdataFraPdl.gjeldendeIdentForSøker())
+        val harAvsluttetArbeidsforhold =
+            arbeidsforholdService.finnesAvsluttetArbeidsforholdSisteAntallMåneder(
+                grunnlagsdataFraPdl.gjeldendeIdentForSøker(),
+            )
+        val harKontantstøttePerioder = kontantstøtteService.finnesKontantstøtteUtbetalingerPåBruker(personIdent).finnesUtbetaling
+
         return GrunnlagsdataDomene(
             søker = mapSøker(grunnlagsdataFraPdl.søker, grunnlagsdataFraPdl.andrePersoner),
             annenForelder = mapAnnenForelder(grunnlagsdataFraPdl.barneForeldre, tidligereVedtaksperioderAnnenForelder),
@@ -40,15 +46,16 @@ class GrunnlagsdataRegisterService(
             barn = mapBarn(grunnlagsdataFraPdl.barn),
             tidligereVedtaksperioder = tidligereVedtaksperioder,
             harAvsluttetArbeidsforhold = harAvsluttetArbeidsforhold,
+            harKontantstøttePerioder = harKontantstøttePerioder,
         )
     }
 
-    fun hentGrunnlagsdataUtenVedtakshitorikkFraRegister(
-        personIdent: String,
-    ): GrunnlagsdataDomene {
+    fun hentGrunnlagsdataUtenVedtakshitorikkFraRegister(personIdent: String): GrunnlagsdataDomene {
         val grunnlagsdataFraPdl = hentGrunnlagsdataFraPdl(personIdent, emptyList())
         val medlUnntak = personopplysningerIntegrasjonerClient.hentMedlemskapsinfo(personIdent)
         val harAvsluttetArbeidsforhold = arbeidsforholdService.finnesAvsluttetArbeidsforholdSisteAntallMåneder(personIdent)
+
+        val harKontantstøttePerioder = kontantstøtteService.finnesKontantstøtteUtbetalingerPåBruker(personIdent).finnesUtbetaling
         return GrunnlagsdataDomene(
             søker = mapSøker(grunnlagsdataFraPdl.søker, grunnlagsdataFraPdl.andrePersoner),
             annenForelder = mapAnnenForelder(grunnlagsdataFraPdl.barneForeldre, emptyMap()),
@@ -56,10 +63,14 @@ class GrunnlagsdataRegisterService(
             barn = mapBarn(grunnlagsdataFraPdl.barn),
             tidligereVedtaksperioder = null,
             harAvsluttetArbeidsforhold = harAvsluttetArbeidsforhold,
+            harKontantstøttePerioder = harKontantstøttePerioder,
         )
     }
 
-    private fun hentGrunnlagsdataFraPdl(personIdent: String, barneforeldreFraSøknad: List<String>): GrunnlagsdataFraPdl {
+    private fun hentGrunnlagsdataFraPdl(
+        personIdent: String,
+        barneforeldreFraSøknad: List<String>,
+    ): GrunnlagsdataFraPdl {
         val søker = personService.hentSøker(personIdent)
         val barn = hentPdlBarn(søker)
         val andreForeldre = hentPdlBarneForeldre(barn, personIdent, barneforeldreFraSøknad)
@@ -105,9 +116,10 @@ class GrunnlagsdataRegisterService(
     }
 
     private fun hentDataTilAndreIdenter(pdlSøker: PdlSøker): Map<String, PdlPersonKort> {
-        val andreIdenter = pdlSøker.sivilstand.mapNotNull { it.relatertVedSivilstand } +
-            pdlSøker.fullmakt.map { it.motpartsPersonident } +
-            pdlSøker.vergemaalEllerFremtidsfullmakt.mapNotNull { it.vergeEllerFullmektig.motpartsPersonident }
+        val andreIdenter =
+            pdlSøker.sivilstand.mapNotNull { it.relatertVedSivilstand } +
+                pdlSøker.fullmakt.map { it.motpartsPersonident } +
+                pdlSøker.vergemaalEllerFremtidsfullmakt.mapNotNull { it.vergeEllerFullmektig.motpartsPersonident }
         if (andreIdenter.isEmpty()) return emptyMap()
         return personService.hentPersonKortBolk(andreIdenter)
     }
