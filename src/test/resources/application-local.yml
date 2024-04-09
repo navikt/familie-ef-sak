@@ -36,7 +36,7 @@ FAMILIE_KLAGE_URL: http://localhost:8094
 FAMILIE_KS_SAK_URL: http://localhost:8083
 
 AZURE_APP_TENANT_ID: navq.onmicrosoft.com
-
+FAMILIE_INTEGRASJONER_SCOPE: api://${AZURE_APP_CLIENT_ID}/.default
 rolle:
   veileder: "19dcbfde-4cdb-4c64-a1ea-ac9802b03339"
   saksbehandler: "ee5e0b5e-454c-4612-b931-1fe363df7c2c"

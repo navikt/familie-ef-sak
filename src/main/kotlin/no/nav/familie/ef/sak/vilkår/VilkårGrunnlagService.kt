@@ -91,7 +91,8 @@ class VilkårGrunnlagService(
             registeropplysningerOpprettetTid = registergrunnlagData.opprettetTidspunkt,
             adresseopplysninger = AdresseopplysningerMapper.tilDto(søknad?.adresseopplysninger),
             dokumentasjon = søknad?.dokumentasjon,
-            harAvsluttetArbeidsforhold = registergrunnlagData.grunnlagsdata.harAvsluttetArbeidsforhold,
+            harAvsluttetArbeidsforhold = grunnlagsdata.harAvsluttetArbeidsforhold,
+            harKontantstøttePerioder = grunnlagsdata.harKontantstøttePerioder,
         )
     }
 

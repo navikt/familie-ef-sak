@@ -51,6 +51,7 @@ fun opprettGrunnlagsdata(
         ),
     ),
     false,
+    null,
 )
 
 fun opprettBarnMedIdent(
@@ -58,15 +59,14 @@ fun opprettBarnMedIdent(
     bostedsadresse: List<Bostedsadresse> = emptyList(),
     fødsel: Fødsel? = null,
     deltBosted: List<DeltBosted> = emptyList(),
-) =
-    BarnMedIdent(
-        adressebeskyttelse = emptyList(),
-        bostedsadresse = bostedsadresse,
-        deltBosted = deltBosted,
-        dødsfall = emptyList(),
-        forelderBarnRelasjon = emptyList(),
-        fødsel = listOfNotNull(fødsel),
-        navn = Navn("", "", "", Metadata(false)),
-        personIdent = personIdent,
-        folkeregisterpersonstatus = null,
-    )
+) = BarnMedIdent(
+    adressebeskyttelse = emptyList(),
+    bostedsadresse = bostedsadresse,
+    deltBosted = deltBosted,
+    dødsfall = emptyList(),
+    forelderBarnRelasjon = emptyList(),
+    fødsel = listOfNotNull(fødsel),
+    navn = Navn("", "", "", Metadata(false)),
+    personIdent = personIdent,
+    folkeregisterpersonstatus = null,
+)

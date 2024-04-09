@@ -29,32 +29,36 @@ class BlankettService(
     private val årsakRevurderingService: ÅrsakRevurderingService,
     private val grunnlagsdataService: GrunnlagsdataService,
 ) {
-
     fun lagBlankett(behandlingId: UUID): ByteArray {
         val behandling = behandlingService.hentSaksbehandling(behandlingId)
         val vilkårVurderinger = vurderingService.hentEllerOpprettVurderinger(behandlingId)
         val registergrunnlagData = grunnlagsdataService.hentGrunnlagsdata(behandlingId)
         val grunnlagsdata = registergrunnlagData.grunnlagsdata
 
-        val blankettPdfRequest = BlankettPdfRequest(
-            BlankettPdfBehandling(
-                årsak = behandling.årsak,
-                stønadstype = behandling.stønadstype,
-                årsakRevurdering = årsakRevurderingService.hentÅrsakRevurdering(behandlingId)?.tilDto(),
-                tidligereVedtaksperioder = grunnlagsdata.tidligereVedtaksperioder.tilDto(),
-            ),
-            lagPersonopplysningerDto(behandling),
-            vurderingService.hentEllerOpprettVurderinger(behandlingId),
-            hentVedtak(behandlingId),
-            lagSøknadsdatoer(behandlingId),
-            vilkårVurderinger.grunnlag.harAvsluttetArbeidsforhold,
-        )
+        val blankettPdfRequest =
+            BlankettPdfRequest(
+                BlankettPdfBehandling(
+                    årsak = behandling.årsak,
+                    stønadstype = behandling.stønadstype,
+                    årsakRevurdering = årsakRevurderingService.hentÅrsakRevurdering(behandlingId)?.tilDto(),
+                    tidligereVedtaksperioder = grunnlagsdata.tidligereVedtaksperioder.tilDto(),
+                    harKontantstøttePerioder = grunnlagsdata.harKontantstøttePerioder,
+                ),
+                lagPersonopplysningerDto(behandling),
+                vurderingService.hentEllerOpprettVurderinger(behandlingId),
+                hentVedtak(behandlingId),
+                lagSøknadsdatoer(behandlingId),
+                vilkårVurderinger.grunnlag.harAvsluttetArbeidsforhold,
+            )
         val blankettPdfAsByteArray = brevClient.genererBlankett(blankettPdfRequest)
         oppdaterEllerOpprettBlankett(behandlingId, blankettPdfAsByteArray)
         return blankettPdfAsByteArray
     }
 
-    private fun oppdaterEllerOpprettBlankett(behandlingId: UUID, pdf: ByteArray): Blankett {
+    private fun oppdaterEllerOpprettBlankett(
+        behandlingId: UUID,
+        pdf: ByteArray,
+    ): Blankett {
         val blankett = Blankett(behandlingId, Fil(pdf))
         if (blankettRepository.existsById(behandlingId)) {
             return blankettRepository.update(blankett)
