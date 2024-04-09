@@ -7,6 +7,7 @@
   "behandling": {
     "behandlingId": "08230110-9f26-4fa1-bdf5-1b5f1ea6f59d",
     "forrigeBehandlingId": "39c7dc82-adc1-43db-a6f9-64b8e4352ff6",
+    "forrigeBehandlingEksternId": 11,
     "eksternId": 2,
     "behandlingType": "REVURDERING",
     "behandlingÅrsak": "G_OMREGNING",
