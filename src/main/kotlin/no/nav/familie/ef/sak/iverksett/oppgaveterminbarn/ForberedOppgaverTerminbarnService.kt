@@ -35,7 +35,7 @@ class ForberedOppgaverTerminbarnService(
             val pdlBarn = pdlBarn(fødselsnummerSøker)
             val ugyldigeTerminbarn = terminbarnPåSøknad.filterNot { it.match(pdlBarn) }
             lagreOgMapTilOppgaverForUgyldigeTerminbarn(ugyldigeTerminbarn, fødselsnummerSøker)
-        }.flatten()
+        }.flatten().toSet()
         logger.info("Fant ${oppgaver.size} oppgaver for ugyldige terminbarn.")
         oppgaver.forEach { oppgave ->
             logger.info("Laget oppgave for behandlingID=${oppgave.behandlingId} for ugyldige terminbarn")
@@ -46,7 +46,7 @@ class ForberedOppgaverTerminbarnService(
     private fun pdlBarn(fødselsnummerSøker: String): List<PdlPersonForelderBarn> =
         personService.hentPersonMedBarn(fødselsnummerSøker).barn.values.toList()
 
-    private fun opprettTaskerForOppgaver(oppgaver: List<OppgaveForBarn>) {
+    private fun opprettTaskerForOppgaver(oppgaver: Collection<OppgaveForBarn>) {
         oppgaver.forEach { taskService.save(OpprettOppgaveTerminbarnTask.opprettTask(it)) }
     }
 
