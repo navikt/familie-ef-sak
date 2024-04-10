@@ -5,6 +5,7 @@ import no.nav.familie.ef.sak.behandling.BehandlingRepository
 import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
+import no.nav.familie.ef.sak.behandling.domain.EksternBehandlingId
 import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
 import no.nav.familie.ef.sak.felles.util.medContentTypeJsonUTF8
 import no.nav.familie.ef.sak.repository.behandling
@@ -43,13 +44,13 @@ internal class EksternVedtakControllerTest : OppslagSpringRunnerTest() {
             fagsak = fagsak,
             type = BehandlingType.FØRSTEGANGSBEHANDLING,
             status = BehandlingStatus.FERDIGSTILT,
-            eksternId = 1,
+            eksternId = EksternBehandlingId(1),
             resultat = BehandlingResultat.INNVILGET,
         )
 
         behandlingRepository.insertAll(listOf(førstegangsbehandling))
 
-        val vedtakResponse = hentVedtak(fagsak.eksternId).body.data!!
+        val vedtakResponse = hentVedtak(fagsak.eksternId.id).body.data!!
 
         assertThat(vedtakResponse).hasSize(2)
         assertThat(vedtakResponse.map { it.fagsystemType })

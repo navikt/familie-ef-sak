@@ -75,7 +75,7 @@ class TilbakekrevingService(
 
     fun finnesÅpenTilbakekrevingsBehandling(behandlingId: UUID): Boolean {
         val fagsak = fagsakService.hentFagsakForBehandling(behandlingId)
-        return tilbakekrevingClient.finnesÅpenBehandling(fagsakEksternId = fagsak.eksternId)
+        return tilbakekrevingClient.finnesÅpenBehandling(fagsakEksternId = fagsak.eksternId.id)
     }
 
     fun hentTilbakekrevingBehandlinger(fagsakId: UUID): List<TilbakekrevingBehandling> {
@@ -138,7 +138,7 @@ class TilbakekrevingService(
     fun opprettManuellTilbakekreving(fagsakId: UUID) {
         val fagsak = fagsakService.fagsakMedOppdatertPersonIdent(fagsakId)
         val kanBehandlingOpprettesManuelt =
-            tilbakekrevingClient.kanBehandlingOpprettesManuelt(fagsak.stønadstype, fagsak.eksternId)
+            tilbakekrevingClient.kanBehandlingOpprettesManuelt(fagsak.stønadstype, fagsak.eksternId.id)
         if (!kanBehandlingOpprettesManuelt.kanBehandlingOpprettes) {
             throw ApiFeil(kanBehandlingOpprettesManuelt.melding, HttpStatus.BAD_REQUEST)
         }
@@ -147,6 +147,6 @@ class TilbakekrevingService(
 
         behandlingService.hentBehandlingPåEksternId(kravgrunnlagsreferanse.toLong())
 
-        tilbakekrevingClient.opprettManuelTilbakekreving(fagsak.eksternId, kravgrunnlagsreferanse, fagsak.stønadstype)
+        tilbakekrevingClient.opprettManuelTilbakekreving(fagsak.eksternId.id, kravgrunnlagsreferanse, fagsak.stønadstype)
     }
 }

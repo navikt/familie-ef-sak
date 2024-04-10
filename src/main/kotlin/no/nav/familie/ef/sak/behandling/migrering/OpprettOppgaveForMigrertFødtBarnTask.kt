@@ -150,7 +150,7 @@ class OpprettOppgaveForMigrertFødtBarnTask(
                 objectMapper.writeValueAsString(
                     OpprettOppgaveForMigrertFødtBarnTaskData(
                         fagsakId = fagsak.id,
-                        eksternFagsakId = fagsak.eksternId,
+                        eksternFagsakId = fagsak.eksternId.id,
                         stønadType = fagsak.stønadstype,
                         personIdent = fagsak.hentAktivIdent(),
                         barn = nyeBarn,

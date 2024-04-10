@@ -42,7 +42,7 @@ class BehandlingsoppgaveService(
         val gamleBehandlinger = finnAlleBehandlingerOpprettetForMerEnnTreUkerSiden()
 
         val eksternFagsakIds =
-            gamleBehandlinger.map { fagsakService.hentFagsakForBehandling(it.id).eksternId.toString() }
+            gamleBehandlinger.map { fagsakService.hentFagsakForBehandling(it.id).eksternId.id.toString() }
 
         val opprettetTomTidspunktPåBehandleSakOppgave = LocalDateTime.now().minusWeeks(2).minusDays(5)
         val alleOppgaver = oppgaveService.finnBehandleSakOppgaver(opprettetTomTidspunktPåBehandleSakOppgave)

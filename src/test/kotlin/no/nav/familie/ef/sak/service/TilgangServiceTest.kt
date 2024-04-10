@@ -222,7 +222,7 @@ internal class TilgangServiceTest {
         every { personopplysningerIntegrajsonerClient.sjekkTilgangTilPersonMedRelasjoner(any()) } returns Tilgang(true)
         every { fagsakService.hentFagsakDtoPåEksternId(any()) } returns fagsak.tilDto(emptyList(), true)
 
-        tilgangService.validerTilgangTilEksternFagsak(fagsak.eksternId, AuditLoggerEvent.ACCESS)
+        tilgangService.validerTilgangTilEksternFagsak(fagsak.eksternId.id, AuditLoggerEvent.ACCESS)
     }
 
     private fun filtrer(personer: List<PdlSøker>): List<PdlSøker> =

@@ -6,12 +6,14 @@ import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
+import no.nav.familie.ef.sak.behandling.domain.EksternBehandlingId
 import no.nav.familie.ef.sak.behandling.domain.ÅrsakRevurdering
 import no.nav.familie.ef.sak.behandling.dto.HenlagtÅrsak
 import no.nav.familie.ef.sak.behandling.dto.RevurderingsinformasjonDto
 import no.nav.familie.ef.sak.behandling.dto.ÅrsakRevurderingDto
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.beregning.Inntektsperiode
+import no.nav.familie.ef.sak.fagsak.domain.EksternFagsakId
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.fagsak.domain.FagsakDomain
 import no.nav.familie.ef.sak.fagsak.domain.FagsakPerson
@@ -93,7 +95,7 @@ fun behandling(
     forrigeBehandlingId: UUID? = null,
     årsak: BehandlingÅrsak = BehandlingÅrsak.SØKNAD,
     henlagtÅrsak: HenlagtÅrsak? = HenlagtÅrsak.FEILREGISTRERT,
-    eksternId: Long = 0L,
+    eksternId: EksternBehandlingId = EksternBehandlingId(),
     vedtakstidspunkt: LocalDateTime? = null,
     kravMottatt: LocalDate? = null,
 ): Behandling =
@@ -152,7 +154,7 @@ fun saksbehandling(
 ): Saksbehandling =
     Saksbehandling(
         id = behandling.id,
-        eksternId = behandling.eksternId,
+        eksternId = behandling.eksternId.id,
         forrigeBehandlingId = behandling.forrigeBehandlingId,
         type = behandling.type,
         status = behandling.status,
@@ -164,7 +166,7 @@ fun saksbehandling(
         henlagtÅrsak = behandling.henlagtÅrsak,
         ident = fagsak.hentAktivIdent(),
         fagsakId = fagsak.id,
-        eksternFagsakId = fagsak.eksternId,
+        eksternFagsakId = fagsak.eksternId.id,
         stønadstype = fagsak.stønadstype,
         migrert = fagsak.migrert,
         opprettetAv = behandling.sporbar.opprettetAv,
@@ -189,7 +191,7 @@ fun fagsak(
     identer: Set<PersonIdent> = defaultIdenter,
     stønadstype: StønadType = StønadType.OVERGANGSSTØNAD,
     id: UUID = UUID.randomUUID(),
-    eksternId: Long = 0,
+    eksternId: EksternFagsakId = EksternFagsakId(),
     sporbar: Sporbar = Sporbar(),
     migrert: Boolean = false,
     fagsakPersonId: UUID = UUID.randomUUID(),
@@ -201,7 +203,7 @@ fun fagsak(
     stønadstype: StønadType = StønadType.OVERGANGSSTØNAD,
     id: UUID = UUID.randomUUID(),
     person: FagsakPerson,
-    eksternId: Long = 0,
+    eksternId: EksternFagsakId = EksternFagsakId(),
     sporbar: Sporbar = Sporbar(),
     migrert: Boolean = false,
 ): Fagsak {
@@ -220,7 +222,7 @@ fun fagsakDomain(
     id: UUID = UUID.randomUUID(),
     stønadstype: StønadType = StønadType.OVERGANGSSTØNAD,
     personId: UUID = UUID.randomUUID(),
-    eksternId: Long = 0,
+    eksternId: EksternFagsakId = EksternFagsakId(),
 ): FagsakDomain =
     FagsakDomain(
         id = id,

@@ -5,6 +5,7 @@ import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Embedded
+import org.springframework.data.relational.core.mapping.MappedCollection
 import org.springframework.data.relational.core.mapping.Table
 import java.util.UUID
 
@@ -18,7 +19,7 @@ data class Fagsak(
     val id: UUID,
     val fagsakPersonId: UUID,
     val personIdenter: Set<PersonIdent>,
-    val eksternId: Long,
+    val eksternId: EksternFagsakId,
     val stønadstype: StønadType,
     val migrert: Boolean,
     val sporbar: Sporbar,
@@ -36,7 +37,8 @@ data class FagsakDomain(
     @Id
     val id: UUID = UUID.randomUUID(),
     val fagsakPersonId: UUID,
-    val eksternId: Long = 0,
+    @MappedCollection(idColumn = "fagsak_id")
+    val eksternId: EksternFagsakId = EksternFagsakId(),
     @Column("stonadstype")
     val stønadstype: StønadType,
     val migrert: Boolean = false,

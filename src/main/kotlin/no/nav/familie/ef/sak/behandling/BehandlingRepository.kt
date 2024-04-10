@@ -14,20 +14,20 @@ import java.util.UUID
 
 @Repository
 interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUpdateRepository<Behandling> {
+
     fun findByFagsakId(fagsakId: UUID): List<Behandling>
 
-    fun findByFagsakIdAndStatus(
-        fagsakId: UUID,
-        status: BehandlingStatus,
-    ): List<Behandling>
+    fun findByFagsakIdAndStatus(fagsakId: UUID, status: BehandlingStatus): List<Behandling>
 
     fun existsByFagsakId(fagsakId: UUID): Boolean
 
     // language=PostgreSQL
     @Query(
-        """SELECT b.*         
+        """SELECT b.*, be.id AS eksternid_id         
                      FROM behandling b         
-                     WHERE b.ekstern_id = :eksternId""",
+                     JOIN behandling_ekstern be 
+                     ON be.behandling_id = b.id         
+                     WHERE be.id = :eksternId""",
     )
     fun finnMedEksternId(eksternId: Long): Behandling?
 
@@ -48,7 +48,7 @@ interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUp
         """SELECT
               b.id,
               b.forrige_behandling_id,
-              b.ekstern_id AS ekstern_id,
+              be.id AS ekstern_id,
               b.type,
               b.status,
               b.steg,
@@ -63,12 +63,14 @@ interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUp
               b.endret_tid,
               pi.ident,
               b.fagsak_id,
-              f.ekstern_id AS ekstern_fagsak_id,
+              fe.id AS ekstern_fagsak_id,
               f.stonadstype,
               f.migrert
              FROM fagsak f
              JOIN behandling b ON f.id = b.fagsak_id
              JOIN person_ident pi ON f.fagsak_person_id=pi.fagsak_person_id
+             JOIN behandling_ekstern be ON be.behandling_id = b.id         
+             JOIN fagsak_ekstern fe ON f.id = fe.fagsak_id         
              WHERE b.id = :behandlingId
              ORDER BY pi.endret_tid DESC
              LIMIT 1
@@ -81,7 +83,7 @@ interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUp
         """SELECT
               b.id,
               b.forrige_behandling_id,
-              b.ekstern_id AS ekstern_id,
+              be.id AS ekstern_id,
               b.type,
               b.status,
               b.steg,
@@ -96,13 +98,15 @@ interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUp
               b.endret_tid,
               pi.ident,
               b.fagsak_id,
-              f.ekstern_id AS ekstern_fagsak_id,
+              fe.id AS ekstern_fagsak_id,
               f.stonadstype,
               f.migrert
              FROM fagsak f
              JOIN behandling b ON f.id = b.fagsak_id
              JOIN person_ident pi ON f.fagsak_person_id=pi.fagsak_person_id
-             WHERE b.ekstern_id = :eksternBehandlingId
+             JOIN behandling_ekstern be ON be.behandling_id = b.id         
+             JOIN fagsak_ekstern fe ON f.id = fe.fagsak_id         
+             WHERE be.id = :eksternBehandlingId
              ORDER BY pi.endret_tid DESC
              LIMIT 1
              """,
@@ -112,8 +116,9 @@ interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUp
     // language=PostgreSQL
     @Query(
         """
-        SELECT b.*
+        SELECT b.*, be.id AS eksternid_id
         FROM behandling b
+        JOIN behandling_ekstern be ON b.id = be.behandling_id
         WHERE b.fagsak_id = :fagsakId
          AND b.resultat IN ('OPPHØRT', 'INNVILGET')
          AND b.status = 'FERDIGSTILT'
@@ -125,8 +130,9 @@ interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUp
 
     @Query(
         """
-        SELECT b.*
+        SELECT b.*, be.id AS eksternid_id
         FROM behandling b
+        JOIN behandling_ekstern be ON b.id = be.behandling_id
         JOIN fagsak f on b.fagsak_id = f.id 
         WHERE f.fagsak_person_id = :fagsakPersonId
          AND b.resultat IN ('OPPHØRT', 'INNVILGET', 'AVSLÅTT', 'IKKE_SATT')
@@ -136,23 +142,18 @@ interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUp
     )
     fun finnBehandlingerForGjenbrukAvVilkår(fagsakPersonId: UUID): List<Behandling>
 
-    fun existsByFagsakIdAndStatusIsNot(
-        fagsakId: UUID,
-        behandlingStatus: BehandlingStatus,
-    ): Boolean
+    fun existsByFagsakIdAndStatusIsNot(fagsakId: UUID, behandlingStatus: BehandlingStatus): Boolean
 
-    fun existsByFagsakIdAndStatusIsNotIn(
-        fagsakId: UUID,
-        behandlingStatus: List<BehandlingStatus>,
-    ): Boolean
+    fun existsByFagsakIdAndStatusIsNotIn(fagsakId: UUID, behandlingStatus: List<BehandlingStatus>): Boolean
 
     // language=PostgreSQL
     @Query(
         """
-        SELECT b.id AS behandling_id, b.ekstern_id AS ekstern_behandling_id, f.ekstern_id AS ekstern_fagsak_id
+        SELECT b.id behandling_id, be.id ekstern_behandling_id, fe.id ekstern_fagsak_id
         FROM behandling b
-            JOIN fagsak f ON b.fagsak_id = f.id 
-        WHERE b.id IN (:behandlingId)
+            JOIN behandling_ekstern be ON b.id = be.behandling_id
+            JOIN fagsak_ekstern fe ON b.fagsak_id = fe.fagsak_id 
+        WHERE behandling_id IN (:behandlingId)
         """,
     )
     fun finnEksterneIder(behandlingId: Set<UUID>): Set<EksternId>
@@ -178,10 +179,7 @@ interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUp
          WHERE behandling.status <> 'FERDIGSTILT' AND fagsak.stonadstype=:stønadstype)
         """,
     )
-    fun finnPersonerMedAktivStonadIkkeRevurdertSisteMåneder(
-        stønadstype: StønadType = StønadType.OVERGANGSSTØNAD,
-        antallMåneder: Int = 3,
-    ): List<String>
+    fun finnPersonerMedAktivStonadIkkeRevurdertSisteMåneder(stønadstype: StønadType = StønadType.OVERGANGSSTØNAD, antallMåneder: Int = 3): List<String>
 
     // language=PostgreSQL
     @Query(
@@ -212,10 +210,7 @@ interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUp
         AND f.stonadstype=:stønadstype
         """,
     )
-    fun hentUferdigeBehandlingerOpprettetFørDato(
-        stønadstype: StønadType,
-        opprettetTidFør: LocalDateTime,
-    ): List<Behandling>
+    fun hentUferdigeBehandlingerOpprettetFørDato(stønadstype: StønadType, opprettetTidFør: LocalDateTime): List<Behandling>
 
     @Query(
         """SELECT DISTINCT b.id 
