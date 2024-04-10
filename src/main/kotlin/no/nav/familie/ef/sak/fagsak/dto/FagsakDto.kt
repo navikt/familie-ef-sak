@@ -25,5 +25,5 @@ fun Fagsak.tilDto(behandlinger: List<BehandlingDto>, erLøpende: Boolean): Fagsa
         erLøpende = erLøpende,
         erMigrert = this.migrert,
         behandlinger = behandlinger,
-        eksternId = this.eksternId.id,
+        eksternId = this.eksternId,
     )

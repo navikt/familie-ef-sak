@@ -8,7 +8,6 @@ import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.fagsak.FagsakService
-import no.nav.familie.ef.sak.fagsak.domain.EksternFagsakId
 import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
 import no.nav.familie.ef.sak.felles.domain.Endret
 import no.nav.familie.ef.sak.felles.domain.Sporbar
@@ -186,7 +185,7 @@ internal class FagsakServiceTest : OppslagSpringRunnerTest() {
             val fagsakMedFeilregistrertIdent =
                 testoppsettService.lagreFagsak(
                     fagsak(
-                        eksternId = EksternFagsakId(id = 1234),
+                        eksternId = 1234,
                         stønadstype = StønadType.OVERGANGSSTØNAD,
                         identer = setOf(
                             PersonIdent(
@@ -226,7 +225,7 @@ internal class FagsakServiceTest : OppslagSpringRunnerTest() {
             val fagsakMedHistoriskIdent =
                 testoppsettService.lagreFagsak(
                     fagsak(
-                        eksternId = EksternFagsakId(id = 1234),
+                        eksternId = 1234,
                         stønadstype = StønadType.OVERGANGSSTØNAD,
                         identer = setOf(
                             PersonIdent(

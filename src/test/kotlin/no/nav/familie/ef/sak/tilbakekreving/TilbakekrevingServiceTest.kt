@@ -205,7 +205,7 @@ internal class TilbakekrevingServiceTest {
         fun `feiler hvis tilbakekrevingsbehandling ikke kan opprettes`() {
             val fagsak = fagsak(identer = setOf(PersonIdent("12345678901")))
             every { fagsakService.fagsakMedOppdatertPersonIdent(fagsak.id) } returns fagsak
-            every { tilbakekrevingClient.kanBehandlingOpprettesManuelt(fagsak.stønadstype, fagsak.eksternId.id) }
+            every { tilbakekrevingClient.kanBehandlingOpprettesManuelt(fagsak.stønadstype, fagsak.eksternId) }
                 .returns(KanBehandlingOpprettesManueltRespons(false, "Melding til front end."))
 
             val feil = assertFailsWith<ApiFeil> {
@@ -221,11 +221,11 @@ internal class TilbakekrevingServiceTest {
             every { fagsakService.fagsakMedOppdatertPersonIdent(fagsak.id) } returns fagsak
             val behandling = behandling(fagsak)
             every { behandlingService.hentBehandlingPåEksternId(654321) } returns behandling
-            every { tilbakekrevingClient.kanBehandlingOpprettesManuelt(fagsak.stønadstype, fagsak.eksternId.id) }
+            every { tilbakekrevingClient.kanBehandlingOpprettesManuelt(fagsak.stønadstype, fagsak.eksternId) }
                 .returns(KanBehandlingOpprettesManueltRespons(true, "Ok.", "654321"))
             every {
                 tilbakekrevingClient.opprettManuelTilbakekreving(
-                    fagsak.eksternId.id,
+                    fagsak.eksternId,
                     "654321",
                     fagsak.stønadstype,
                 )
@@ -235,7 +235,7 @@ internal class TilbakekrevingServiceTest {
 
             verify {
                 tilbakekrevingClient.opprettManuelTilbakekreving(
-                    fagsak.eksternId.id,
+                    fagsak.eksternId,
                     "654321",
                     fagsak.stønadstype,
                 )
