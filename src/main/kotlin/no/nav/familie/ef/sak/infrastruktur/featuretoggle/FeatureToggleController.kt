@@ -21,6 +21,7 @@ class FeatureToggleController(
             Toggle.OPPRETT_BEHANDLING_FERDIGSTILT_JOURNALPOST,
             Toggle.FRONTEND_AUTOMATISK_UTFYLLE_VILKÅR,
             Toggle.FRONTEND_SATSENDRING,
+            Toggle.FRONTEND_TILBAKEKREVING_UNDER_4X_RETTSGEBYR,
             Toggle.HENLEGG_BEHANDLING_UTEN_OPPGAVE,
         )
 
