@@ -14,7 +14,6 @@ import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
-import no.nav.familie.ef.sak.behandling.domain.EksternBehandlingId
 import no.nav.familie.ef.sak.behandling.domain.ÅrsakRevurdering
 import no.nav.familie.ef.sak.behandling.dto.HenlagtÅrsak
 import no.nav.familie.ef.sak.behandling.oppgaveforopprettelse.OppgaverForOpprettelseService
@@ -146,7 +145,7 @@ internal class IverksettingDtoMapperTest {
     private val fagsak = fagsak(fagsakpersoner(setOf("1")))
     private val forrigeBehandlingId = UUID.fromString("73144d90-d238-41d2-833b-fc719dae23cc")
     private val forrigeEksternBehandlingId = 22L
-    private val forrigeBehandling = behandling(fagsak = fagsak, id = forrigeBehandlingId, eksternId = EksternBehandlingId(forrigeEksternBehandlingId))
+    private val forrigeBehandling = behandling(fagsak = fagsak, id = forrigeBehandlingId, eksternId = forrigeEksternBehandlingId)
     private val behandling = behandling(fagsak = fagsak, forrigeBehandlingId = forrigeBehandlingId)
     private val saksbehandling = saksbehandling(fagsak, behandling)
 

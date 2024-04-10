@@ -275,7 +275,7 @@ class IverksettingDtoMapper(
             eksternId = saksbehandling.eksternId,
             vilkårsvurderinger = vilkårsvurderinger.map { it.tilIverksettDto() },
             forrigeBehandlingId = saksbehandling.forrigeBehandlingId,
-            forrigeBehandlingEksternId = forrigeBehandlingEksternId?.id,
+            forrigeBehandlingEksternId = forrigeBehandlingEksternId,
             kravMottatt = saksbehandling.kravMottatt,
             årsakRevurdering = mapÅrsakRevurdering(saksbehandling),
             kategori = saksbehandling.kategori,
