@@ -112,7 +112,7 @@ internal class SøkControllerTest : OppslagSpringRunnerTest() {
             val fagsak = testoppsettService.lagreFagsak(fagsak(person = fagsakPerson, stønadstype = StønadType.OVERGANGSSTØNAD))
             testoppsettService.lagreFagsak(fagsak(person = fagsakPerson, stønadstype = StønadType.BARNETILSYN))
 
-            val response = søkPerson(fagsak.eksternId.id)
+            val response = søkPerson(fagsak.eksternId)
 
             assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
             assertThat(response.body!!.status).isEqualTo(Status.SUKSESS)

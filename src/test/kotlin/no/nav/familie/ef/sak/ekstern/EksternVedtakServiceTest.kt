@@ -9,7 +9,6 @@ import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.fagsak.FagsakService
-import no.nav.familie.ef.sak.fagsak.domain.EksternFagsakId
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.tilbakekreving.TilbakekrevingClient
@@ -36,7 +35,7 @@ internal class EksternVedtakServiceTest {
     )
 
     private val eksternFagsakId: Long = 10
-    private val fagsak = fagsak(eksternId = EksternFagsakId(eksternFagsakId))
+    private val fagsak = fagsak(eksternId = eksternFagsakId)
 
     @BeforeEach
     internal fun setUp() {
@@ -54,7 +53,7 @@ internal class EksternVedtakServiceTest {
         assertThat(vedtak).hasSize(1)
         assertThat(vedtak[0].resultat).isEqualTo("Avslått")
         assertThat(vedtak[0].behandlingstype).isEqualTo("Førstegangsbehandling")
-        assertThat(vedtak[0].eksternBehandlingId).isEqualTo(behandling.eksternId.id.toString())
+        assertThat(vedtak[0].eksternBehandlingId).isEqualTo(behandling.eksternId.toString())
         assertThat(vedtak[0].vedtakstidspunkt).isEqualTo(vedtakstidspunkt)
         assertThat(vedtak[0].fagsystemType).isEqualTo(FagsystemType.ORDNIÆR)
     }

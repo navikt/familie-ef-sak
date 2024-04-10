@@ -69,7 +69,7 @@ class BehandlingsstatistikkTask(
         val søker = grunnlagsdataService.hentGrunnlagsdata(behandlingId).grunnlagsdata.søker
         val henvendelseTidspunkt = finnHenvendelsestidspunkt(saksbehandling)
         val relatertEksternBehandlingId =
-            saksbehandling.forrigeBehandlingId?.let { behandlingService.hentBehandling(it).eksternId.id }
+            saksbehandling.forrigeBehandlingId?.let { behandlingService.hentBehandling(it).eksternId }
         val erAutomatiskGOmregning = saksbehandling.årsak == BehandlingÅrsak.G_OMREGNING && saksbehandling.opprettetAv == "VL"
 
         val behandlingsstatistikkDto = BehandlingsstatistikkDto(
