@@ -112,7 +112,7 @@ class EksternBehandlingService(
             vilkårsbehandleNyeBarn = VilkårsbehandleNyeBarn.VILKÅRSBEHANDLE,
         )
         val behandling = revurderingService.opprettRevurderingManuelt(revurdering)
-        OpprettRevurderingResponse(Opprettet(behandling.eksternId.toString()))
+        OpprettRevurderingResponse(Opprettet(behandling.eksternId.id.toString()))
     } catch (e: Exception) {
         logger.error("Feilet opprettelse av revurdering for fagsak=${fagsak.id}, se secure logg for detaljer")
         secureLogger.error("Feilet opprettelse av revurdering for fagsak=${fagsak.id}", e)

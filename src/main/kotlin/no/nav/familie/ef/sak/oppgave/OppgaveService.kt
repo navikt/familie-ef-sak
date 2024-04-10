@@ -114,7 +114,7 @@ class OppgaveService(
         val enhetsnummer = arbeidsfordelingService.hentNavEnhetId(personIdent, oppgavetype)
         val opprettOppgave = OpprettOppgaveRequest(
             ident = OppgaveIdentV2(ident = personIdent, gruppe = IdentGruppe.FOLKEREGISTERIDENT),
-            saksId = fagsak.eksternId.toString(),
+            saksId = fagsak.eksternId.id.toString(),
             tema = Tema.ENF,
             oppgavetype = oppgavetype,
             fristFerdigstillelse = fristFerdigstillelse ?: lagFristForOppgave(LocalDateTime.now()),

@@ -9,6 +9,7 @@ import io.mockk.slot
 import io.mockk.verify
 import no.nav.familie.ef.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ef.sak.fagsak.FagsakService
+import no.nav.familie.ef.sak.fagsak.domain.EksternFagsakId
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
 import no.nav.familie.ef.sak.infrastruktur.config.OppgaveClientMock
@@ -454,7 +455,7 @@ internal class OppgaveServiceTest {
         return fagsak(
             id = FAGSAK_ID,
             stønadstype = StønadType.OVERGANGSSTØNAD,
-            eksternId = FAGSAK_EKSTERN_ID,
+            eksternId = EksternFagsakId(FAGSAK_EKSTERN_ID),
             identer = setOf(PersonIdent(ident = FNR)),
         )
     }

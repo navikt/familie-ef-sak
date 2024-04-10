@@ -33,9 +33,9 @@ class KlageService(
         val fagsaker = fagsakService.finnFagsakerForFagsakPersonId(fagsakPersonId)
         val eksternFagsakIder = fagsaker.let {
             listOfNotNull(
-                it.overgangsstønad?.eksternId,
-                it.barnetilsyn?.eksternId,
-                it.skolepenger?.eksternId,
+                it.overgangsstønad?.eksternId?.id,
+                it.barnetilsyn?.eksternId?.id,
+                it.skolepenger?.eksternId?.id,
             )
         }
         if (eksternFagsakIder.isEmpty()) {
@@ -47,9 +47,9 @@ class KlageService(
             }
 
         return KlagebehandlingerDto(
-            overgangsstønad = klagebehandlingerPåEksternId[fagsaker.overgangsstønad?.eksternId] ?: emptyList(),
-            barnetilsyn = klagebehandlingerPåEksternId[fagsaker.barnetilsyn?.eksternId] ?: emptyList(),
-            skolepenger = klagebehandlingerPåEksternId[fagsaker.skolepenger?.eksternId] ?: emptyList(),
+            overgangsstønad = klagebehandlingerPåEksternId[fagsaker.overgangsstønad?.eksternId?.id] ?: emptyList(),
+            barnetilsyn = klagebehandlingerPåEksternId[fagsaker.barnetilsyn?.eksternId?.id] ?: emptyList(),
+            skolepenger = klagebehandlingerPåEksternId[fagsaker.skolepenger?.eksternId?.id] ?: emptyList(),
         )
     }
 
@@ -71,7 +71,7 @@ class KlageService(
             OpprettKlagebehandlingRequest(
                 ident = aktivIdent,
                 stønadstype = Stønadstype.fraEfStønadstype(fagsak.stønadstype),
-                eksternFagsakId = fagsak.eksternId.toString(),
+                eksternFagsakId = fagsak.eksternId.id.toString(),
                 fagsystem = Fagsystem.EF,
                 klageMottatt = klageMottatt,
                 behandlendeEnhet = enhetId,

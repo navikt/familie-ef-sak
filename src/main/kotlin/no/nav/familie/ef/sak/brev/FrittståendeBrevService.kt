@@ -62,7 +62,7 @@ class FrittståendeBrevService(
         iverksettClient.sendFrittståendeBrev(
             FrittståendeBrevDtoIverksetting(
                 personIdent = ident,
-                eksternFagsakId = fagsak.eksternId,
+                eksternFagsakId = fagsak.eksternId.id,
                 stønadType = fagsak.stønadstype,
                 tittel = sendBrevRequest.tittel,
                 fil = sendBrevRequest.pdf,

@@ -69,7 +69,7 @@ class SendKarakterutskriftBrevTilIverksettTask(
                 fil = brev,
                 oppgaveId = payload.oppgaveId,
                 personIdent = ident,
-                eksternFagsakId = fagsak.eksternId,
+                eksternFagsakId = fagsak.eksternId.id,
                 journalførendeEnhet = journalFørendeEnhet,
                 brevtype = payload.brevtype,
                 gjeldendeÅr = payload.gjeldendeÅr,

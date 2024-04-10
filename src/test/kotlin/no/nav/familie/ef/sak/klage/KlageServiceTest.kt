@@ -6,9 +6,11 @@ import io.mockk.mockk
 import io.mockk.slot
 import no.nav.familie.ef.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ef.sak.arbeidsfordeling.Arbeidsfordelingsenhet
+import no.nav.familie.ef.sak.behandling.domain.EksternBehandlingId
 import no.nav.familie.ef.sak.brev.BrevsignaturService.Companion.ENHET_NAY
 import no.nav.familie.ef.sak.fagsak.FagsakPersonService
 import no.nav.familie.ef.sak.fagsak.FagsakService
+import no.nav.familie.ef.sak.fagsak.domain.EksternFagsakId
 import no.nav.familie.ef.sak.fagsak.domain.Fagsaker
 import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
 import no.nav.familie.ef.sak.infotrygd.InfotrygdService
@@ -67,10 +69,10 @@ internal class KlageServiceTest {
     private val eksternBehandlingId = 22L
     private val personIdent = "100"
     private val fagsakPerson = fagsakPerson(setOf(PersonIdent(personIdent)))
-    val fagsak = fagsak(eksternId = eksternFagsakId, person = fagsakPerson)
+    val fagsak = fagsak(eksternId = EksternFagsakId(eksternFagsakId), person = fagsakPerson)
     private val saksbehandling = saksbehandling(
         fagsak,
-        behandling(eksternId = eksternBehandlingId),
+        behandling(eksternId = EksternBehandlingId(eksternBehandlingId)),
     )
 
     private val opprettKlageSlot = slot<OpprettKlagebehandlingRequest>()
@@ -310,9 +312,9 @@ internal class KlageServiceTest {
         }
 
         private fun fagsaker() = Fagsaker(
-            fagsak(stønadstype = StønadType.OVERGANGSSTØNAD, eksternId = eksternIdOS),
-            fagsak(stønadstype = StønadType.BARNETILSYN, eksternId = eksternIdBT),
-            fagsak(stønadstype = StønadType.SKOLEPENGER, eksternId = eksternIdSP),
+            fagsak(stønadstype = StønadType.OVERGANGSSTØNAD, eksternId = EksternFagsakId(eksternIdOS)),
+            fagsak(stønadstype = StønadType.BARNETILSYN, eksternId = EksternFagsakId(eksternIdBT)),
+            fagsak(stønadstype = StønadType.SKOLEPENGER, eksternId = EksternFagsakId(eksternIdSP)),
         )
 
         private fun klageBehandlingDto(
