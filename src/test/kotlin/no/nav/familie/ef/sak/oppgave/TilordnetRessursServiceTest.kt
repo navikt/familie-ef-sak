@@ -33,7 +33,6 @@ internal class TilordnetRessursServiceTest {
     fun setUp() {
         mockkObject(SikkerhetContext)
         every { SikkerhetContext.hentSaksbehandler() } returns "NAV1234"
-        every { SikkerhetContext.erSaksbehandler() } returns true
         every { featureToggleService.isEnabled(any()) } returns false
     }
 
@@ -156,7 +155,6 @@ internal class TilordnetRessursServiceTest {
                 )
             } answers { efOppgave(firstArg<UUID>()) }
             every { oppgaveClient.finnOppgaveMedId(any()) } answers { oppgave(firstArg<Long>()).copy(tilordnetRessurs = "NAV2345") }
-            every { SikkerhetContext.erSaksbehandler() } returns true
             every { featureToggleService.isEnabled(any()) } returns true
 
             val erSaksbehandlerEllerNull =
@@ -171,15 +169,15 @@ internal class TilordnetRessursServiceTest {
 
         @Test
         internal fun `skal utlede at saksbehandlers rolle er INNLOGGET SAKSBEHANDLER`() {
-            val saksbehandler = saksbehandler(UUID.randomUUID(), "4405", "Vader", "Darth", "NAV1234")
+            val saksbehandler = saksbehandler(UUID.randomUUID(), "4499", "Skywalker", "Anakin", "NAV1234")
             val oppgave = Oppgave(tilordnetRessurs = "NAV1234", tema = Tema.ENF)
 
             every { oppgaveClient.hentSaksbehandlerInfo("NAV1234") } returns saksbehandler
 
             val saksbehandlerDto = tilordnetRessursService.utledAnsvarligSaksbehandlerForOppgave(oppgave)
 
-            assertThat(saksbehandlerDto.fornavn).isEqualTo("Darth")
-            assertThat(saksbehandlerDto.etternavn).isEqualTo("Vader")
+            assertThat(saksbehandlerDto.fornavn).isEqualTo("Anakin")
+            assertThat(saksbehandlerDto.etternavn).isEqualTo("Skywalker")
             assertThat(saksbehandlerDto.rolle).isEqualTo(SaksbehandlerRolle.INNLOGGET_SAKSBEHANDLER)
         }
 
@@ -225,7 +223,6 @@ internal class TilordnetRessursServiceTest {
             val oppgave = Oppgave(tilordnetRessurs = "NAV1234")
 
             every { oppgaveClient.hentSaksbehandlerInfo("NAV1234") } returns saksbehandler
-            every { SikkerhetContext.erSaksbehandler() } returns true
             every { featureToggleService.isEnabled(any()) } returns true
 
             val saksbehandlerDto = tilordnetRessursService.utledAnsvarligSaksbehandlerForOppgave(oppgave)
