@@ -5,6 +5,7 @@ import no.nav.familie.ef.sak.vilkår.Delvilkårsvurdering
 import no.nav.familie.ef.sak.vilkår.VilkårType
 import no.nav.familie.ef.sak.vilkår.Vilkårsresultat
 import no.nav.familie.ef.sak.vilkår.Vurdering
+import no.nav.familie.ef.sak.vilkår.dto.BarnMedSamværRegistergrunnlagDto
 import no.nav.familie.ef.sak.vilkår.dto.BarnMedSamværSøknadsgrunnlagDto
 import no.nav.familie.ef.sak.vilkår.dto.LangAvstandTilSøker
 import no.nav.familie.ef.sak.vilkår.regler.HovedregelMetadata
@@ -23,20 +24,20 @@ class AleneomsorgRegel(
     hovedregler: Set<RegelId>? =
         null,
 ) : Vilkårsregel(
-    vilkårType = VilkårType.ALENEOMSORG,
-    regler =
-    setOf(
-        SKRIFTLIG_AVTALE_OM_DELT_BOSTED,
-        NÆRE_BOFORHOLD,
-        MER_AV_DAGLIG_OMSORG,
-    ),
-    hovedregler =
-    hovedregler ?: regelIder(
-        SKRIFTLIG_AVTALE_OM_DELT_BOSTED,
-        NÆRE_BOFORHOLD,
-        MER_AV_DAGLIG_OMSORG,
-    ),
-) {
+        vilkårType = VilkårType.ALENEOMSORG,
+        regler =
+            setOf(
+                SKRIFTLIG_AVTALE_OM_DELT_BOSTED,
+                NÆRE_BOFORHOLD,
+                MER_AV_DAGLIG_OMSORG,
+            ),
+        hovedregler =
+            hovedregler ?: regelIder(
+                SKRIFTLIG_AVTALE_OM_DELT_BOSTED,
+                NÆRE_BOFORHOLD,
+                MER_AV_DAGLIG_OMSORG,
+            ),
+    ) {
     override fun initiereDelvilkårsvurdering(
         metadata: HovedregelMetadata,
         resultat: Vilkårsresultat,
@@ -68,15 +69,19 @@ class AleneomsorgRegel(
                 it.barnId == barnId
             }?.søknadsgrunnlag
 
-        return (metadata.behandling.årsak == BehandlingÅrsak.SØKNAD) && (søknadsgrunnlagBarn != null) &&
-            (erDonor(søknadsgrunnlagBarn) && !harSøkerOgBarnSammeAdresse(søknadsgrunnlagBarn))
+        val registergrunnlagBarn =
+            metadata.vilkårgrunnlagDto.barnMedSamvær.find {
+                it.barnId == barnId
+            }?.registergrunnlag
+
+        return (metadata.behandling.årsak == BehandlingÅrsak.SØKNAD) && (søknadsgrunnlagBarn != null) && (registergrunnlagBarn != null) &&
+            (erDonor(søknadsgrunnlagBarn) && harSammeAdresse(registergrunnlagBarn))
     }
+
+    private fun harSammeAdresse(registergrunnlagBarn: BarnMedSamværRegistergrunnlagDto) = registergrunnlagBarn.harSammeAdresse ?: false
 
     private fun erDonor(søknadsgrunnlagBarn: BarnMedSamværSøknadsgrunnlagDto) =
         søknadsgrunnlagBarn.ikkeOppgittAnnenForelderBegrunnelse?.lowercase() == "donor"
-
-    private fun harSøkerOgBarnSammeAdresse(søknadsgrunnlagBarn: BarnMedSamværSøknadsgrunnlagDto) =
-        søknadsgrunnlagBarn.skalBoBorHosSøker?.lowercase() == "nei"
 
     private fun opprettAutomatiskBeregnetNæreBoforholdDelvilkår() =
         Delvilkårsvurdering(
@@ -127,10 +132,10 @@ class AleneomsorgRegel(
             RegelSteg(
                 regelId = RegelId.MER_AV_DAGLIG_OMSORG,
                 svarMapping =
-                jaNeiSvarRegel(
-                    hvisJa = SluttSvarRegel.OPPFYLT_MED_PÅKREVD_BEGRUNNELSE,
-                    hvisNei = SluttSvarRegel.IKKE_OPPFYLT_MED_PÅKREVD_BEGRUNNELSE,
-                ),
+                    jaNeiSvarRegel(
+                        hvisJa = SluttSvarRegel.OPPFYLT_MED_PÅKREVD_BEGRUNNELSE,
+                        hvisNei = SluttSvarRegel.IKKE_OPPFYLT_MED_PÅKREVD_BEGRUNNELSE,
+                    ),
             )
 
         private val næreBoForholdMapping =

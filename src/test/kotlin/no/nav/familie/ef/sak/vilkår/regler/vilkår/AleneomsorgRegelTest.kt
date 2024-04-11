@@ -35,10 +35,10 @@ class AleneomsorgRegelTest {
     val barnId = UUID.randomUUID()
 
     @Test
-    fun `Skal automatisk vurdere vilkår om aleneomsorg når det er digital søknad og donor barn`() {
+    fun `Skal automatisk vurdere vilkår om aleneomsorg når det er digital søknad,donorbarn og har samme adresse`() {
         every { hovedregelMetadataMock.behandling } returns behandling(årsak = BehandlingÅrsak.SØKNAD)
         every { barnMedSamværSøknadsgrunnlagDto.ikkeOppgittAnnenForelderBegrunnelse } returns "donor"
-        every { barnMedSamværSøknadsgrunnlagDto.skalBoBorHosSøker } returns "Ja, og vi har eller skal registere adressen i Folkeregisteret"
+        every { barnMedSamværRegistergrunnlagDto.harSammeAdresse } returns true
 
         val registerBarn = BarnMedSamværDto(barnId, barnMedSamværSøknadsgrunnlagDto, barnMedSamværRegistergrunnlagDto)
 
@@ -63,7 +63,6 @@ class AleneomsorgRegelTest {
     fun `Skal ikke ta stilling til vilkår om aleneomsorg når ikkeOppgittAnnenForelderBegrunnelse er annet`() {
         every { hovedregelMetadataMock.behandling } returns behandling(årsak = BehandlingÅrsak.SØKNAD)
         every { barnMedSamværSøknadsgrunnlagDto.ikkeOppgittAnnenForelderBegrunnelse } returns "annet"
-        every { barnMedSamværSøknadsgrunnlagDto.skalBoBorHosSøker } returns "Ja, og vi har eller skal registere adressen i Folkeregisteret"
 
         val registerBarn = BarnMedSamværDto(barnId, barnMedSamværSøknadsgrunnlagDto, barnMedSamværRegistergrunnlagDto)
 
@@ -109,10 +108,10 @@ class AleneomsorgRegelTest {
     }
 
     @Test
-    fun `Skal ikke ta stilling til vilkår om aleneomsorg når barnet og søker ikke skal bo sammen`() {
+    fun `Skal ikke ta stilling til vilkår om aleneomsorg når barnet og søker ikke har samme adresse`() {
         every { hovedregelMetadataMock.behandling } returns behandling(årsak = BehandlingÅrsak.SØKNAD)
         every { barnMedSamværSøknadsgrunnlagDto.ikkeOppgittAnnenForelderBegrunnelse } returns "donor"
-        every { barnMedSamværSøknadsgrunnlagDto.skalBoBorHosSøker } returns "Nei"
+        every { barnMedSamværRegistergrunnlagDto.harSammeAdresse } returns false
 
         val registerBarn = BarnMedSamværDto(barnId, barnMedSamværSøknadsgrunnlagDto, barnMedSamværRegistergrunnlagDto)
 
