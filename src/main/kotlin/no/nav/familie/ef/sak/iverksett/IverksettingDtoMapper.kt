@@ -253,6 +253,7 @@ class IverksettingDtoMapper(
             Tilbakekrevingsvalg.AVVENT -> TilbakekrevingsvalgKontrakter.IGNORER_TILBAKEKREVING
             Tilbakekrevingsvalg.OPPRETT_MED_VARSEL -> TilbakekrevingsvalgKontrakter.OPPRETT_TILBAKEKREVING_MED_VARSEL
             Tilbakekrevingsvalg.OPPRETT_UTEN_VARSEL -> TilbakekrevingsvalgKontrakter.OPPRETT_TILBAKEKREVING_UTEN_VARSEL
+            Tilbakekrevingsvalg.OPPRETT_AUTOMATISK -> TilbakekrevingsvalgKontrakter.OPPRETT_TILBAKEKREVING_AUTOMATISK
         }
 
     private fun mapFagsakdetaljer(saksbehandling: Saksbehandling) =

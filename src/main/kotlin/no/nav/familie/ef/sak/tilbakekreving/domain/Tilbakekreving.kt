@@ -21,6 +21,7 @@ data class Tilbakekreving(
 enum class Tilbakekrevingsvalg {
     OPPRETT_MED_VARSEL,
     OPPRETT_UTEN_VARSEL,
+    OPPRETT_AUTOMATISK,
     AVVENT,
 }
 
