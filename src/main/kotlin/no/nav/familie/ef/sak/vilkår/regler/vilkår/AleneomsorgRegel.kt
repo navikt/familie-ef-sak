@@ -5,6 +5,7 @@ import no.nav.familie.ef.sak.vilkår.Delvilkårsvurdering
 import no.nav.familie.ef.sak.vilkår.VilkårType
 import no.nav.familie.ef.sak.vilkår.Vilkårsresultat
 import no.nav.familie.ef.sak.vilkår.Vurdering
+import no.nav.familie.ef.sak.vilkår.dto.BarnMedSamværSøknadsgrunnlagDto
 import no.nav.familie.ef.sak.vilkår.dto.LangAvstandTilSøker
 import no.nav.familie.ef.sak.vilkår.regler.HovedregelMetadata
 import no.nav.familie.ef.sak.vilkår.regler.RegelId
@@ -61,19 +62,21 @@ class AleneomsorgRegel(
     private fun erDigitalSøknadOgDonorbarnSomBorMedSøker(
         metadata: HovedregelMetadata,
         barnId: UUID?,
-    ) = (metadata.behandling.årsak == BehandlingÅrsak.SØKNAD) &&
-        (!barnetHarIkkeSammeAdresseSomSøker(metadata, barnId)) && (
+    ): Boolean {
+        val søknadsgrunnlagBarn =
             metadata.vilkårgrunnlagDto.barnMedSamvær.find {
                 it.barnId == barnId
-            }?.søknadsgrunnlag?.ikkeOppgittAnnenForelderBegrunnelse?.lowercase() == "donor"
-            )
+            }?.søknadsgrunnlag
 
-    private fun barnetHarIkkeSammeAdresseSomSøker(
-        metadata: HovedregelMetadata,
-        barnId: UUID?,
-    ) = metadata.vilkårgrunnlagDto.barnMedSamvær.find {
-        it.barnId == barnId
-    }?.søknadsgrunnlag?.skalBoBorHosSøker?.lowercase() == "nei"
+        return (metadata.behandling.årsak == BehandlingÅrsak.SØKNAD) && (søknadsgrunnlagBarn != null) &&
+            (erDonor(søknadsgrunnlagBarn) && !harSøkerOgBarnSammeAdresse(søknadsgrunnlagBarn))
+    }
+
+    private fun erDonor(søknadsgrunnlagBarn: BarnMedSamværSøknadsgrunnlagDto) =
+        søknadsgrunnlagBarn.ikkeOppgittAnnenForelderBegrunnelse?.lowercase() == "donor"
+
+    private fun harSøkerOgBarnSammeAdresse(søknadsgrunnlagBarn: BarnMedSamværSøknadsgrunnlagDto) =
+        søknadsgrunnlagBarn.skalBoBorHosSøker?.lowercase() == "nei"
 
     private fun opprettAutomatiskBeregnetNæreBoforholdDelvilkår() =
         Delvilkårsvurdering(
@@ -88,7 +91,7 @@ class AleneomsorgRegel(
         )
 
     private fun automatiskVurderAleneomsorgNårAnnenForelderErDonor(): Delvilkårsvurdering {
-        val begrunnelseTekst = "Automatisk vurdert (${LocalDate.now().norskFormat()}): Bruker oppgir at annen forelder er donor."
+        val begrunnelseTekst = "Automatisk vurdert (${LocalDate.now().norskFormat()}): Bruker og barn er registrert på samme adresse. Bruker har oppgitt at annen forelder er donor."
 
         return Delvilkårsvurdering(
             resultat = Vilkårsresultat.AUTOMATISK_OPPFYLT,
