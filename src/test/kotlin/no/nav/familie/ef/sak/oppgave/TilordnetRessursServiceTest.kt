@@ -169,7 +169,7 @@ internal class TilordnetRessursServiceTest {
 
         @Test
         internal fun `skal utlede at saksbehandlers rolle er INNLOGGET SAKSBEHANDLER`() {
-            val saksbehandler = saksbehandler(UUID.randomUUID(), "4499", "Skywalker", "Anakin", "NAV1234")
+            val saksbehandler = saksbehandler(UUID.randomUUID(), "Skywalker", "Anakin", "NAV1234")
             val oppgave = Oppgave(tilordnetRessurs = "NAV1234", tema = Tema.ENF)
 
             every { oppgaveClient.hentSaksbehandlerInfo("NAV1234") } returns saksbehandler
@@ -183,7 +183,7 @@ internal class TilordnetRessursServiceTest {
 
         @Test
         internal fun `skal utlede at saksbehandlers rolle er ANNEN SAKSBEHANDLER`() {
-            val saksbehandler = saksbehandler(UUID.randomUUID(), "4405", "Vader", "Darth", "NAV2345")
+            val saksbehandler = saksbehandler(UUID.randomUUID(), "Vader", "Darth", "NAV2345")
             val oppgave = Oppgave(tilordnetRessurs = "NAV2345", tema = Tema.ENF)
 
             every { oppgaveClient.hentSaksbehandlerInfo("NAV2345") } returns saksbehandler
@@ -219,7 +219,7 @@ internal class TilordnetRessursServiceTest {
 
         @Test
         internal fun `skal utlede at saksbehandlers rolle er UTVIKLER MED VEILEDERROLLE`() {
-            val saksbehandler = saksbehandler(UUID.randomUUID(), "4405", "Vader", "Darth", "NAV1234")
+            val saksbehandler = saksbehandler(UUID.randomUUID(), "Vader", "Darth", "NAV1234")
             val oppgave = Oppgave(tilordnetRessurs = "NAV1234")
 
             every { oppgaveClient.hentSaksbehandlerInfo("NAV1234") } returns saksbehandler
@@ -234,7 +234,7 @@ internal class TilordnetRessursServiceTest {
 
         @Test
         internal fun `skal utlede at saksbehandlers rolle er OPPGAVE_TILHØRER_IKKE_ENF`() {
-            val saksbehandler = saksbehandler(UUID.randomUUID(), "4405", "Vader", "Darth", "NAV2345")
+            val saksbehandler = saksbehandler(UUID.randomUUID(), "Vader", "Darth", "NAV2345")
             val oppgave = Oppgave(tilordnetRessurs = "NAV2345", tema = Tema.BAR)
 
             every { oppgaveClient.hentSaksbehandlerInfo("NAV2345") } returns saksbehandler
@@ -262,13 +262,12 @@ internal class TilordnetRessursServiceTest {
 
     private fun saksbehandler(
         azureId: UUID,
-        enhet: String,
         etternavn: String,
         fornavn: String,
         navIdent: String,
     ) = Saksbehandler(
         azureId = azureId,
-        enhet = enhet,
+        enhet = "4405",
         etternavn = etternavn,
         fornavn = fornavn,
         navIdent = navIdent,
