@@ -22,7 +22,7 @@ class EksternVedtakService(
 
     fun hentVedtak(eksternFagsakId: Long): List<FagsystemVedtak> {
         val fagsak = fagsakService.hentFagsakPåEksternId(eksternFagsakId)
-        val vedtakTilbakekreving = tilbakekrevingClient.finnVedtak(fagsak.eksternId.id)
+        val vedtakTilbakekreving = tilbakekrevingClient.finnVedtak(fagsak.eksternId)
         return hentFerdigstilteBehandlinger(fagsak) + vedtakTilbakekreving
     }
 
@@ -36,7 +36,7 @@ class EksternVedtakService(
         val (resultat, fagsystemType) = utledReultatOgFagsystemType(behandling)
 
         return FagsystemVedtak(
-            eksternBehandlingId = behandling.eksternId.id.toString(),
+            eksternBehandlingId = behandling.eksternId.toString(),
             behandlingstype = behandling.type.visningsnavn,
             resultat = resultat,
             vedtakstidspunkt = behandling.vedtakstidspunkt

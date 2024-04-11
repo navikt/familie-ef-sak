@@ -238,6 +238,7 @@ internal class OmregningServiceTest : OppslagSpringRunnerTest() {
         val behandling = behandlingRepository.insert(
             behandling(
                 id = behandlingId,
+                eksternId = 11,
                 fagsak = fagsak,
                 resultat = BehandlingResultat.INNVILGET,
                 status = BehandlingStatus.FERDIGSTILT,
@@ -535,12 +536,12 @@ internal class OmregningServiceTest : OppslagSpringRunnerTest() {
             expectedIverksettDto.vedtak.copy(tilkjentYtelse = tilkjentYtelseDto, vedtakstidspunkt = vedtakstidspunkt)
         val behandlingsdetaljerDto = expectedIverksettDto.behandling.copy(
             behandlingId = forrigeBehandling.id,
-            eksternId = forrigeBehandling.eksternId.id,
+            eksternId = forrigeBehandling.eksternId,
         )
         return expectedIverksettDto.copy(
             vedtak = vedtak,
             behandling = behandlingsdetaljerDto,
-            fagsak = expectedIverksettDto.fagsak.copy(eksternId = fagsak.eksternId.id),
+            fagsak = expectedIverksettDto.fagsak.copy(eksternId = fagsak.eksternId),
         )
     }
 

@@ -71,8 +71,8 @@ class TilkjentYtelseService(
 
             KonsistensavstemmingTilkjentYtelseDto(
                 behandlingId = tilkjentYtelse.behandlingId,
-                eksternBehandlingId = behandling.eksternId.id,
-                eksternFagsakId = fagsakMedOppdatertPersonIdent.eksternId.id,
+                eksternBehandlingId = behandling.eksternId,
+                eksternFagsakId = fagsakMedOppdatertPersonIdent.eksternId,
                 personIdent = fagsakMedOppdatertPersonIdent.hentAktivIdent(),
                 andelerTilkjentYtelse = andelerTilkjentYtelse,
             )

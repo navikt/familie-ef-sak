@@ -21,7 +21,6 @@ import no.nav.familie.ef.sak.behandling.migrering.InfotrygdPeriodeValideringServ
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.behandlingsflyt.task.OpprettOppgaveForOpprettetBehandlingTask
 import no.nav.familie.ef.sak.fagsak.FagsakService
-import no.nav.familie.ef.sak.fagsak.domain.EksternFagsakId
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.iverksett.IverksettService
@@ -105,7 +104,7 @@ internal class JournalføringServiceTest {
         )
 
     private val fagsakEksternId = 12345L
-    private val fagsak = fagsak(eksternId = EksternFagsakId(fagsakEksternId))
+    private val fagsak = fagsak(eksternId = fagsakEksternId)
     private val fagsakId: UUID = fagsak.id
     private val journalpostId = "98765"
     private val nyOppgaveId = 999999L
@@ -193,7 +192,7 @@ internal class JournalføringServiceTest {
         } returns fagsak(
             identer = fagsakpersoner(setOf("1")),
             id = fagsakId,
-            eksternId = EksternFagsakId(fagsakEksternId),
+            eksternId = fagsakEksternId,
         )
 
         mockOpprettBehandling(behandlingId)
@@ -255,7 +254,7 @@ internal class JournalføringServiceTest {
     internal fun `skal fullføre manuell journalføring på ny behandling`() {
         every { fagsakService.hentFagsak(fagsakId) } returns fagsak(
             id = fagsakId,
-            eksternId = EksternFagsakId(id = fagsakEksternId),
+            eksternId = fagsakEksternId,
             stønadstype = StønadType.OVERGANGSSTØNAD,
         )
 
@@ -287,7 +286,7 @@ internal class JournalføringServiceTest {
     internal fun `manuell journalføring på ny behandling kaster feil hvis personen finnes i infotrygd`() {
         every { fagsakService.hentFagsak(fagsakId) } returns fagsak(
             id = fagsakId,
-            eksternId = EksternFagsakId(id = fagsakEksternId),
+            eksternId = fagsakEksternId,
             stønadstype = StønadType.OVERGANGSSTØNAD,
         )
 
@@ -309,7 +308,7 @@ internal class JournalføringServiceTest {
     internal fun `skal opprette behandling og knytte til søknad for ferdigstilt journalpost`() {
         every { fagsakService.hentFagsak(fagsakId) } returns fagsak(
             id = fagsakId,
-            eksternId = EksternFagsakId(id = fagsakEksternId),
+            eksternId = fagsakEksternId,
             stønadstype = StønadType.OVERGANGSSTØNAD,
         )
         every { journalpostClient.hentJournalpost(journalpostId) } returns (journalpost.copy(journalstatus = Journalstatus.JOURNALFOERT))
@@ -335,7 +334,7 @@ internal class JournalføringServiceTest {
     internal fun `skal feile med opprettelse av behandling for ferdigstilt journalpost dersom journalposten ikke er ferdigstilt`() {
         every { fagsakService.hentFagsak(fagsakId) } returns fagsak(
             id = fagsakId,
-            eksternId = EksternFagsakId(id = fagsakEksternId),
+            eksternId = fagsakEksternId,
             stønadstype = StønadType.OVERGANGSSTØNAD,
         )
         every { journalpostClient.hentJournalpost(journalpostId) } returns (journalpost.copy(journalstatus = Journalstatus.MOTTATT))
