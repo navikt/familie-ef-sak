@@ -303,7 +303,7 @@ internal class FagsakRepositoryTest : OppslagSpringRunnerTest() {
     @Test
     internal fun finnMedEksternId() {
         val fagsak = testoppsettService.lagreFagsak(fagsak())
-        val findByEksternId = fagsakRepository.finnMedEksternId(fagsak.eksternId.id)
+        val findByEksternId = fagsakRepository.finnMedEksternId(fagsak.eksternId)
             ?: error("Fagsak med ekstern id ${fagsak.eksternId} finnes ikke")
 
         assertThat(findByEksternId).isEqualTo(fagsak.tilFagsakDomain())
@@ -351,7 +351,7 @@ internal class FagsakRepositoryTest : OppslagSpringRunnerTest() {
     @Test
     internal fun `skal sette eksternId til 200_000_000 som default`() {
         val fagsak = testoppsettService.lagreFagsak(fagsak())
-        assertThat(fagsak.eksternId.id).isGreaterThanOrEqualTo(200_000_000)
+        assertThat(fagsak.eksternId).isGreaterThanOrEqualTo(200_000_000)
     }
 
     @Test

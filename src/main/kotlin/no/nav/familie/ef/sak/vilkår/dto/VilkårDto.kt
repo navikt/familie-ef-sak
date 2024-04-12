@@ -24,6 +24,7 @@ data class VilkårGrunnlagDto(
     val adresseopplysninger: AdresseopplysningerDto?,
     val dokumentasjon: DokumentasjonFraSøknadDto?,
     val harAvsluttetArbeidsforhold: Boolean?,
+    val harKontantstøttePerioder: Boolean?,
 )
 
 data class PersonaliaDto(

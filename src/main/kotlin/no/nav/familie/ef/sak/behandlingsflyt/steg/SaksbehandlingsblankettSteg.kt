@@ -98,7 +98,7 @@ class SaksbehandlingsblankettSteg(
             personIdent,
             blankettPdf,
             enhet,
-            fagsak.eksternId.id,
+            fagsak.eksternId,
             saksbehandling.id,
             fagsak.stønadstype,
         )

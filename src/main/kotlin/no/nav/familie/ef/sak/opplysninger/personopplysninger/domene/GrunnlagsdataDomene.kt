@@ -34,7 +34,6 @@ data class GrunnlagsdataMedMetadata(
     val grunnlagsdata: GrunnlagsdataDomene,
     val opprettetTidspunkt: LocalDateTime,
 ) {
-
     fun endringerMellom(tidligereGrunnlagsdata: GrunnlagsdataMedMetadata): List<GrunnlagsdataEndring> {
         return GrunnlagsdataEndring.values().filter {
             when (it) {
@@ -51,10 +50,11 @@ data class GrunnlagsdataMedMetadata(
     }
 
     private fun erAdresserForAnnenForelderForskjelligMed(tidligereGrunnlagsdata: GrunnlagsdataMedMetadata): Boolean {
-        val harAnnenForelderEndretAdresse = tidligereGrunnlagsdata.grunnlagsdata.annenForelder.any { tidligereAnnenForelder ->
-            val annenForelder = this.grunnlagsdata.annenForelder.find { it.personIdent == tidligereAnnenForelder.personIdent }
-            tidligereAnnenForelder.bostedsadresse != annenForelder?.bostedsadresse
-        }
+        val harAnnenForelderEndretAdresse =
+            tidligereGrunnlagsdata.grunnlagsdata.annenForelder.any { tidligereAnnenForelder ->
+                val annenForelder = this.grunnlagsdata.annenForelder.find { it.personIdent == tidligereAnnenForelder.personIdent }
+                tidligereAnnenForelder.bostedsadresse != annenForelder?.bostedsadresse
+            }
         return harAnnenForelderEndretAdresse
     }
 
@@ -74,6 +74,7 @@ data class GrunnlagsdataDomene(
     val barn: List<BarnMedIdent>,
     val tidligereVedtaksperioder: TidligereVedtaksperioder?,
     val harAvsluttetArbeidsforhold: Boolean?,
+    val harKontantstøttePerioder: Boolean?,
 )
 
 data class Søker(

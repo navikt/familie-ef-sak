@@ -9,6 +9,7 @@ import io.mockk.verify
 import no.nav.familie.ef.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ef.sak.barn.BarnService
 import no.nav.familie.ef.sak.barn.BehandlingBarn
+import no.nav.familie.ef.sak.behandling.BehandlingRepository
 import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
@@ -96,6 +97,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.Month
 import java.time.YearMonth
+import java.util.Optional
 import java.util.UUID
 import no.nav.familie.kontrakter.ef.felles.BehandlingType as BehandlingTypeIverksett
 import no.nav.familie.kontrakter.ef.felles.RegelId as RegelIdIverksett
@@ -121,6 +123,7 @@ internal class IverksettingDtoMapperTest {
     private val barnMatcher = mockk<BarnMatcher>()
     private val årsakRevurderingsRepository = mockk<ÅrsakRevurderingsRepository>()
     private val oppgaverForOpprettelseService = mockk<OppgaverForOpprettelseService>()
+    private val behandlingRepository = mockk<BehandlingRepository>()
 
     private val iverksettingDtoMapper =
         IverksettingDtoMapper(
@@ -136,10 +139,14 @@ internal class IverksettingDtoMapperTest {
             brevmottakereRepository = brevmottakereRepository,
             årsakRevurderingsRepository = årsakRevurderingsRepository,
             oppgaverForOpprettelseService = oppgaverForOpprettelseService,
+            behandlingRepository = behandlingRepository,
         )
 
     private val fagsak = fagsak(fagsakpersoner(setOf("1")))
-    private val behandling = behandling(fagsak)
+    private val forrigeBehandlingId = UUID.fromString("73144d90-d238-41d2-833b-fc719dae23cc")
+    private val forrigeEksternBehandlingId = 22L
+    private val forrigeBehandling = behandling(fagsak = fagsak, id = forrigeBehandlingId, eksternId = forrigeEksternBehandlingId)
+    private val behandling = behandling(fagsak = fagsak, forrigeBehandlingId = forrigeBehandlingId)
     private val saksbehandling = saksbehandling(fagsak, behandling)
 
     @BeforeEach
@@ -160,6 +167,7 @@ internal class IverksettingDtoMapperTest {
             beskrivelse = "beskrivelse",
         )
         every { oppgaverForOpprettelseService.hentOppgaverForOpprettelseEllerNull(any()) } returns null
+        every { behandlingRepository.findById(any()) } returns Optional.of(forrigeBehandling)
     }
 
     @Test
@@ -365,7 +373,8 @@ internal class IverksettingDtoMapperTest {
         assertThat(behandling.behandlingId).isEqualTo(behandlingId)
         assertThat(behandling.behandlingType.name).isEqualTo(BehandlingType.FØRSTEGANGSBEHANDLING.name)
         assertThat(behandling.behandlingÅrsak).isEqualTo(BehandlingÅrsak.SØKNAD)
-        assertThat(behandling.forrigeBehandlingId).isEqualTo(UUID.fromString("73144d90-d238-41d2-833b-fc719dae23cc"))
+        assertThat(behandling.forrigeBehandlingId).isEqualTo(forrigeBehandlingId)
+        assertThat(behandling.forrigeBehandlingEksternId).isEqualTo(forrigeEksternBehandlingId)
         assertThat(behandling.eksternId).isEqualTo(1)
         assertThat(behandling.aktivitetspliktInntrefferDato).isNull() // Ikke i bruk?
         assertThat(behandling.kravMottatt).isEqualTo(LocalDate.of(2022, 3, 1))
