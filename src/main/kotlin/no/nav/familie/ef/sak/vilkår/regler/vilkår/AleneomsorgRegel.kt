@@ -74,9 +74,19 @@ class AleneomsorgRegel(
                 it.barnId == barnId
             }?.registergrunnlag
 
-        return (metadata.behandling.årsak == BehandlingÅrsak.SØKNAD) && (søknadsgrunnlagBarn != null) && (registergrunnlagBarn != null) &&
-            ((erDonor(søknadsgrunnlagBarn) && harSammeAdresse(registergrunnlagBarn)) || erTerminbarnOgHarSammeAdresse(søknadsgrunnlagBarn))
+        if (søknadsgrunnlagBarn == null || registergrunnlagBarn == null) return false
+
+        return erDigitalSøknad(
+            metadata,
+        ) && (erDonorbarnOgHarSammeAdresse(søknadsgrunnlagBarn, registergrunnlagBarn) || erTerminbarnOgHarSammeAdresse(søknadsgrunnlagBarn))
     }
+
+    private fun erDonorbarnOgHarSammeAdresse(
+        søknadsgrunnlagBarn: BarnMedSamværSøknadsgrunnlagDto,
+        registergrunnlagBarn: BarnMedSamværRegistergrunnlagDto,
+    ) = erDonor(søknadsgrunnlagBarn) && harSammeAdresse(registergrunnlagBarn)
+
+    private fun erDigitalSøknad(metadata: HovedregelMetadata) = metadata.behandling.årsak == BehandlingÅrsak.SØKNAD
 
     private fun harSammeAdresse(registergrunnlagBarn: BarnMedSamværRegistergrunnlagDto) = registergrunnlagBarn.harSammeAdresse ?: false
 
@@ -101,7 +111,7 @@ class AleneomsorgRegel(
     private fun automatiskVurderAleneomsorgNårAnnenForelderErDonor(): List<Delvilkårsvurdering> {
         val begrunnelseTekst = "Automatisk vurdert (${
             LocalDate.now().norskFormat()
-        }): Bruker og barn er registrert på samme adresse. Bruker har oppgitt at annen forelder er donor."
+        }): Bruker har oppgitt at annen forelder er donor."
 
         return listOf(
             Delvilkårsvurdering(

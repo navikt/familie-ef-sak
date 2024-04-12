@@ -117,6 +117,7 @@ class AleneomsorgRegelTest {
     fun `Skal ikke ta stilling til vilkår om aleneomsorg når ikkeOppgittAnnenForelderBegrunnelse er annet`() {
         every { hovedregelMetadataMock.behandling } returns behandling(årsak = BehandlingÅrsak.SØKNAD)
         every { barnMedSamværSøknadsgrunnlagDto.ikkeOppgittAnnenForelderBegrunnelse } returns "annet"
+        every { barnMedSamværSøknadsgrunnlagDto.erTerminbarn() } returns true
 
         val registerBarn = BarnMedSamværDto(barnId, barnMedSamværSøknadsgrunnlagDto, barnMedSamværRegistergrunnlagDto)
 
@@ -166,6 +167,7 @@ class AleneomsorgRegelTest {
         every { hovedregelMetadataMock.behandling } returns behandling(årsak = BehandlingÅrsak.SØKNAD)
         every { barnMedSamværSøknadsgrunnlagDto.ikkeOppgittAnnenForelderBegrunnelse } returns "donor"
         every { barnMedSamværRegistergrunnlagDto.harSammeAdresse } returns false
+        every { barnMedSamværSøknadsgrunnlagDto.erTerminbarn() } returns true
 
         val registerBarn = BarnMedSamværDto(barnId, barnMedSamværSøknadsgrunnlagDto, barnMedSamværRegistergrunnlagDto)
 
