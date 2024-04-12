@@ -8,10 +8,7 @@ import no.nav.familie.ef.sak.vilkår.Vilkårsresultat
 import no.nav.familie.ef.sak.vilkår.dto.BarnMedSamværDto
 import no.nav.familie.ef.sak.vilkår.dto.BarnMedSamværRegistergrunnlagDto
 import no.nav.familie.ef.sak.vilkår.dto.BarnMedSamværSøknadsgrunnlagDto
-import no.nav.familie.ef.sak.vilkår.dto.LangAvstandTilSøker
-import no.nav.familie.ef.sak.vilkår.regler.BarnForelderLangAvstandTilSøker
 import no.nav.familie.ef.sak.vilkår.regler.HovedregelMetadata
-import no.nav.familie.ef.sak.vilkår.regler.RegelId
 import no.nav.familie.ef.sak.vilkår.regler.vilkår.AleneomsorgRegel
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import org.assertj.core.api.Assertions
@@ -61,9 +58,9 @@ class AleneomsorgRegelTest {
     }
 
     @Test
-    fun `Skal automatisk vurdere vilkår om aleneomsorg når det er terminbarn og svart skal bo sammen i søknaden`() {
+    fun `Skal automatisk vurdere vilkår om aleneomsorg når det er terminbarn og donorbarn og svart skal bo sammen i søknaden`() {
         every { hovedregelMetadataMock.behandling } returns behandling(årsak = BehandlingÅrsak.SØKNAD)
-        every { barnMedSamværSøknadsgrunnlagDto.ikkeOppgittAnnenForelderBegrunnelse } returns "annet"
+        every { barnMedSamværSøknadsgrunnlagDto.ikkeOppgittAnnenForelderBegrunnelse } returns "donor"
         every { barnMedSamværRegistergrunnlagDto.harSammeAdresse } returns null
         every { barnMedSamværSøknadsgrunnlagDto.erTerminbarn() } returns true
         every { barnMedSamværSøknadsgrunnlagDto.harSammeAdresse } returns true
@@ -184,72 +181,6 @@ class AleneomsorgRegelTest {
 
         val listDelvilkårsvurdering =
             AleneomsorgRegel().initiereDelvilkårsvurdering(
-                hovedregelMetadataMock,
-                Vilkårsresultat.IKKE_TATT_STILLING_TIL,
-                barnId = barnId,
-            )
-
-        Assertions.assertThat(listDelvilkårsvurdering.first().resultat).isEqualTo(Vilkårsresultat.IKKE_TATT_STILLING_TIL)
-    }
-
-    @Test
-    fun `Skal automatisk vurdere delvilkår nære boforhold når søker og annen forelder bor langt nok unna hverandre`() {
-        every { hovedregelMetadataMock.behandling } returns behandling(årsak = BehandlingÅrsak.PAPIRSØKNAD)
-        every { barnMedSamværSøknadsgrunnlagDto.ikkeOppgittAnnenForelderBegrunnelse } returns "annet"
-        every { hovedregelMetadataMock.langAvstandTilSøker } returns
-            listOf(
-                BarnForelderLangAvstandTilSøker(
-                    barnId = barnId,
-                    langAvstandTilSøker = LangAvstandTilSøker.JA_UPRESIS,
-                ),
-            )
-
-        val registerBarn = BarnMedSamværDto(barnId, barnMedSamværSøknadsgrunnlagDto, barnMedSamværRegistergrunnlagDto)
-
-        every {
-            hovedregelMetadataMock.vilkårgrunnlagDto
-        } returns
-            VilkårTestUtil.mockVilkårGrunnlagDto(
-                barnMedSamvær = listOf(registerBarn),
-            )
-
-        val hovedregler: Set<RegelId> = setOf(RegelId.NÆRE_BOFORHOLD)
-
-        val listDelvilkårsvurdering =
-            AleneomsorgRegel(hovedregler = hovedregler).initiereDelvilkårsvurdering(
-                hovedregelMetadataMock,
-                Vilkårsresultat.IKKE_TATT_STILLING_TIL,
-                barnId = barnId,
-            )
-
-        Assertions.assertThat(listDelvilkårsvurdering.first().resultat).isEqualTo(Vilkårsresultat.AUTOMATISK_OPPFYLT)
-    }
-
-    @Test
-    fun `Skal ikke ta stilling til delvilkår nære boforhold når avstand mellom søker og annen forelder er ukjent`() {
-        every { hovedregelMetadataMock.behandling } returns behandling(årsak = BehandlingÅrsak.PAPIRSØKNAD)
-        every { barnMedSamværSøknadsgrunnlagDto.ikkeOppgittAnnenForelderBegrunnelse } returns "annet"
-        every { hovedregelMetadataMock.langAvstandTilSøker } returns
-            listOf(
-                BarnForelderLangAvstandTilSøker(
-                    barnId = barnId,
-                    langAvstandTilSøker = LangAvstandTilSøker.UKJENT,
-                ),
-            )
-
-        val registerBarn = BarnMedSamværDto(barnId, barnMedSamværSøknadsgrunnlagDto, barnMedSamværRegistergrunnlagDto)
-
-        every {
-            hovedregelMetadataMock.vilkårgrunnlagDto
-        } returns
-            VilkårTestUtil.mockVilkårGrunnlagDto(
-                barnMedSamvær = listOf(registerBarn),
-            )
-
-        val hovedregler: Set<RegelId> = setOf(RegelId.NÆRE_BOFORHOLD)
-
-        val listDelvilkårsvurdering =
-            AleneomsorgRegel(hovedregler = hovedregler).initiereDelvilkårsvurdering(
                 hovedregelMetadataMock,
                 Vilkårsresultat.IKKE_TATT_STILLING_TIL,
                 barnId = barnId,

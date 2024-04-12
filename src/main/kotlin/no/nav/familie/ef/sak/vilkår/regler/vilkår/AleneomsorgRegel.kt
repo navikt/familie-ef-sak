@@ -20,10 +20,7 @@ import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import java.time.LocalDate
 import java.util.UUID
 
-class AleneomsorgRegel(
-    hovedregler: Set<RegelId>? =
-        null,
-) : Vilkårsregel(
+class AleneomsorgRegel : Vilkårsregel(
     vilkårType = VilkårType.ALENEOMSORG,
     regler =
     setOf(
@@ -32,7 +29,7 @@ class AleneomsorgRegel(
         MER_AV_DAGLIG_OMSORG,
     ),
     hovedregler =
-    hovedregler ?: regelIder(
+    regelIder(
         SKRIFTLIG_AVTALE_OM_DELT_BOSTED,
         NÆRE_BOFORHOLD,
         MER_AV_DAGLIG_OMSORG,
@@ -47,7 +44,7 @@ class AleneomsorgRegel(
             return super.initiereDelvilkårsvurdering(metadata, resultat, barnId)
         }
 
-        if (erDigitalSøknadOgDonorbarnSomBorMedSøker(metadata, barnId)) {
+        if (erDigitalSøknadOgDonorbarnEllerTerminbarnOgDonorBarnOgHarSammeAdresse(metadata, barnId)) {
             return automatiskVurderAleneomsorgNårAnnenForelderErDonor()
         }
 
@@ -60,7 +57,7 @@ class AleneomsorgRegel(
         }
     }
 
-    private fun erDigitalSøknadOgDonorbarnSomBorMedSøker(
+    private fun erDigitalSøknadOgDonorbarnEllerTerminbarnOgDonorBarnOgHarSammeAdresse(
         metadata: HovedregelMetadata,
         barnId: UUID?,
     ): Boolean {
@@ -77,23 +74,28 @@ class AleneomsorgRegel(
         if (søknadsgrunnlagBarn == null || registergrunnlagBarn == null) return false
 
         return erDigitalSøknad(metadata) &&
-            (erDonorbarnOgHarSammeAdresse(søknadsgrunnlagBarn, registergrunnlagBarn) || erTerminbarnOgHarSammeAdresse(søknadsgrunnlagBarn))
+            (
+                erDonorbarnOgHarSammeAdresse(
+                    søknadsgrunnlagBarn,
+                    registergrunnlagBarn,
+                ) || erTerminbarnOgErDonorbarnOgHarSammeAdresse(søknadsgrunnlagBarn)
+                )
     }
 
     private fun erDonorbarnOgHarSammeAdresse(
         søknadsgrunnlagBarn: BarnMedSamværSøknadsgrunnlagDto,
         registergrunnlagBarn: BarnMedSamværRegistergrunnlagDto,
-    ) = erDonor(søknadsgrunnlagBarn) && harSammeAdresse(registergrunnlagBarn)
+    ) = erDonorbarn(søknadsgrunnlagBarn) && harSammeAdresse(registergrunnlagBarn)
 
     private fun erDigitalSøknad(metadata: HovedregelMetadata) = metadata.behandling.årsak == BehandlingÅrsak.SØKNAD
 
     private fun harSammeAdresse(registergrunnlagBarn: BarnMedSamværRegistergrunnlagDto) = registergrunnlagBarn.harSammeAdresse ?: false
 
-    private fun erDonor(søknadsgrunnlagBarn: BarnMedSamværSøknadsgrunnlagDto) =
+    private fun erDonorbarn(søknadsgrunnlagBarn: BarnMedSamværSøknadsgrunnlagDto) =
         søknadsgrunnlagBarn.ikkeOppgittAnnenForelderBegrunnelse?.lowercase() == "donor"
 
-    private fun erTerminbarnOgHarSammeAdresse(søknadsgrunnlagBarn: BarnMedSamværSøknadsgrunnlagDto) =
-        søknadsgrunnlagBarn.erTerminbarn() && søknadsgrunnlagBarn.harSammeAdresse == true
+    private fun erTerminbarnOgErDonorbarnOgHarSammeAdresse(søknadsgrunnlagBarn: BarnMedSamværSøknadsgrunnlagDto) =
+        søknadsgrunnlagBarn.erTerminbarn() && erDonorbarn(søknadsgrunnlagBarn) && søknadsgrunnlagBarn.harSammeAdresse == true
 
     private fun opprettAutomatiskBeregnetNæreBoforholdDelvilkår() =
         Delvilkårsvurdering(
