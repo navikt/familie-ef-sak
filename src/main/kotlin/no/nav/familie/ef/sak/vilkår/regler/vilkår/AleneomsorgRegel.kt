@@ -76,9 +76,8 @@ class AleneomsorgRegel(
 
         if (søknadsgrunnlagBarn == null || registergrunnlagBarn == null) return false
 
-        return erDigitalSøknad(
-            metadata,
-        ) && (erDonorbarnOgHarSammeAdresse(søknadsgrunnlagBarn, registergrunnlagBarn) || erTerminbarnOgHarSammeAdresse(søknadsgrunnlagBarn))
+        return erDigitalSøknad(metadata) &&
+            (erDonorbarnOgHarSammeAdresse(søknadsgrunnlagBarn, registergrunnlagBarn) || erTerminbarnOgHarSammeAdresse(søknadsgrunnlagBarn))
     }
 
     private fun erDonorbarnOgHarSammeAdresse(
