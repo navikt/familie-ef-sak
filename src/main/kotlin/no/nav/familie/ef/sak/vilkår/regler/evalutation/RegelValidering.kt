@@ -15,7 +15,6 @@ import no.nav.familie.ef.sak.vilkår.regler.SvarRegel
 import no.nav.familie.ef.sak.vilkår.regler.Vilkårsregel
 
 object RegelValidering {
-
     fun validerVurdering(
         vilkårsregel: Vilkårsregel,
         oppdatering: List<DelvilkårsvurderingDto>,
@@ -32,8 +31,10 @@ object RegelValidering {
     /**
      * Validerer att begrunnelse er ifylt hvis [SvarRegel.begrunnelseType]=[BegrunnelseType.PÅKREVD]
      */
-    fun manglerPåkrevdBegrunnelse(svarRegel: SvarRegel, vurdering: VurderingDto): Boolean =
-        svarRegel.begrunnelseType == BegrunnelseType.PÅKREVD && vurdering.begrunnelse?.trim().isNullOrEmpty()
+    fun manglerPåkrevdBegrunnelse(
+        svarRegel: SvarRegel,
+        vurdering: VurderingDto,
+    ): Boolean = svarRegel.begrunnelseType == BegrunnelseType.PÅKREVD && vurdering.begrunnelse?.trim().isNullOrEmpty()
 
     /**
      * Kaster feil hvis
@@ -64,7 +65,7 @@ object RegelValidering {
                 val svarMapping = regelMapping.svarMapping(svarId)
                 validerSavnerBegrunnelseHvisUtenBegrunnelse(vilkårType, svarMapping, svar)
                 feilHvis(svarMapping is SluttSvarRegel && erIkkeSisteSvaret) {
-                    "Finnes ikke noen flere regler, men finnes flere svar vilkårType=$vilkårType svarId=$svarId"
+                    "Finnes ikke noen flere regler, men finnes flere svar vilkårType=$vilkårType svarId=$svarId: TEST: svarMapping = $svarMapping erIkkeSisteSvaret = $erIkkeSisteSvaret regelId=$regelId svar=$svar regelMapping=$regelMapping"
                 }
             }
         }
@@ -74,7 +75,10 @@ object RegelValidering {
      * Skal validere att man sender inn minimum ett svar for ett delvilkår
      * Når backend initierar [Delvilkårsvurdering] så legges ett første svar in med regelId(hovedregel) for hvert delvilkår
      */
-    private fun validerAlleDelvilkårHarMinimumEttSvar(vilkårType: VilkårType, oppdatering: List<DelvilkårsvurderingDto>) {
+    private fun validerAlleDelvilkårHarMinimumEttSvar(
+        vilkårType: VilkårType,
+        oppdatering: List<DelvilkårsvurderingDto>,
+    ) {
         oppdatering.forEach { vurdering ->
             feilHvis(vurdering.vurderinger.isEmpty()) { "Savner svar for en av delvilkåren for vilkår=$vilkårType" }
         }
