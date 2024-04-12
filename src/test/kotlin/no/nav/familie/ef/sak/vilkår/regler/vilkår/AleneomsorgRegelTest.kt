@@ -60,6 +60,60 @@ class AleneomsorgRegelTest {
     }
 
     @Test
+    fun `Skal automatisk vurdere vilkår om aleneomsorg når det er terminbarn og svart skal bo sammen i søknaden`() {
+        every { hovedregelMetadataMock.behandling } returns behandling(årsak = BehandlingÅrsak.SØKNAD)
+        every { barnMedSamværSøknadsgrunnlagDto.ikkeOppgittAnnenForelderBegrunnelse } returns "annet"
+        every { barnMedSamværRegistergrunnlagDto.harSammeAdresse } returns null
+        every { barnMedSamværSøknadsgrunnlagDto.erTerminbarn() } returns true
+        every { barnMedSamværSøknadsgrunnlagDto.harSammeAdresse } returns true
+
+        val registerBarn = BarnMedSamværDto(barnId, barnMedSamværSøknadsgrunnlagDto, barnMedSamværRegistergrunnlagDto)
+
+        every {
+            hovedregelMetadataMock.vilkårgrunnlagDto
+        } returns
+            VilkårTestUtil.mockVilkårGrunnlagDto(
+                barnMedSamvær = listOf(registerBarn),
+            )
+
+        val listDelvilkårsvurdering =
+            AleneomsorgRegel().initiereDelvilkårsvurdering(
+                hovedregelMetadataMock,
+                Vilkårsresultat.IKKE_TATT_STILLING_TIL,
+                barnId = barnId,
+            )
+
+        Assertions.assertThat(listDelvilkårsvurdering.first().resultat).isEqualTo(Vilkårsresultat.AUTOMATISK_OPPFYLT)
+    }
+
+    @Test
+    fun `Skal ikke ta stilling til vilkår om aleneomsorg når det er terminbarn men ikke svart at ja på skal bo sammen i søknaden`() {
+        every { hovedregelMetadataMock.behandling } returns behandling(årsak = BehandlingÅrsak.SØKNAD)
+        every { barnMedSamværSøknadsgrunnlagDto.ikkeOppgittAnnenForelderBegrunnelse } returns "annet"
+        every { barnMedSamværRegistergrunnlagDto.harSammeAdresse } returns null
+        every { barnMedSamværSøknadsgrunnlagDto.erTerminbarn() } returns true
+        every { barnMedSamværSøknadsgrunnlagDto.harSammeAdresse } returns false
+
+        val registerBarn = BarnMedSamværDto(barnId, barnMedSamværSøknadsgrunnlagDto, barnMedSamværRegistergrunnlagDto)
+
+        every {
+            hovedregelMetadataMock.vilkårgrunnlagDto
+        } returns
+            VilkårTestUtil.mockVilkårGrunnlagDto(
+                barnMedSamvær = listOf(registerBarn),
+            )
+
+        val listDelvilkårsvurdering =
+            AleneomsorgRegel().initiereDelvilkårsvurdering(
+                hovedregelMetadataMock,
+                Vilkårsresultat.IKKE_TATT_STILLING_TIL,
+                barnId = barnId,
+            )
+
+        Assertions.assertThat(listDelvilkårsvurdering.first().resultat).isEqualTo(Vilkårsresultat.IKKE_TATT_STILLING_TIL)
+    }
+
+    @Test
     fun `Skal ikke ta stilling til vilkår om aleneomsorg når ikkeOppgittAnnenForelderBegrunnelse er annet`() {
         every { hovedregelMetadataMock.behandling } returns behandling(årsak = BehandlingÅrsak.SØKNAD)
         every { barnMedSamværSøknadsgrunnlagDto.ikkeOppgittAnnenForelderBegrunnelse } returns "annet"

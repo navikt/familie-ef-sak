@@ -75,14 +75,16 @@ class AleneomsorgRegel(
             }?.registergrunnlag
 
         return (metadata.behandling.årsak == BehandlingÅrsak.SØKNAD) && (søknadsgrunnlagBarn != null) && (registergrunnlagBarn != null) &&
-                (erDonor(søknadsgrunnlagBarn) && harSammeAdresse(registergrunnlagBarn))
+            ((erDonor(søknadsgrunnlagBarn) && harSammeAdresse(registergrunnlagBarn)) || erTerminbarnOgHarSammeAdresse(søknadsgrunnlagBarn))
     }
 
-    private fun harSammeAdresse(registergrunnlagBarn: BarnMedSamværRegistergrunnlagDto) =
-        registergrunnlagBarn.harSammeAdresse ?: false
+    private fun harSammeAdresse(registergrunnlagBarn: BarnMedSamværRegistergrunnlagDto) = registergrunnlagBarn.harSammeAdresse ?: false
 
     private fun erDonor(søknadsgrunnlagBarn: BarnMedSamværSøknadsgrunnlagDto) =
         søknadsgrunnlagBarn.ikkeOppgittAnnenForelderBegrunnelse?.lowercase() == "donor"
+
+    private fun erTerminbarnOgHarSammeAdresse(søknadsgrunnlagBarn: BarnMedSamværSøknadsgrunnlagDto) =
+        søknadsgrunnlagBarn.erTerminbarn() && søknadsgrunnlagBarn.harSammeAdresse == true
 
     private fun opprettAutomatiskBeregnetNæreBoforholdDelvilkår() =
         Delvilkårsvurdering(
@@ -91,9 +93,7 @@ class AleneomsorgRegel(
                 Vurdering(
                     regelId = RegelId.NÆRE_BOFORHOLD,
                     svar = SvarId.NEI,
-                    begrunnelse = "Automatisk vurdert (${
-                        LocalDate.now().norskFormat()
-                    }): Det er beregnet at annen forelder bor mer enn 1 km unna bruker.",
+                    begrunnelse = "Automatisk vurdert (${LocalDate.now().norskFormat()}): Det er beregnet at annen forelder bor mer enn 1 km unna bruker.",
                 ),
             ),
         )
