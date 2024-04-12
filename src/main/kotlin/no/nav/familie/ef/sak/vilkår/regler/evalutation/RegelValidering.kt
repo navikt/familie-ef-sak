@@ -65,7 +65,7 @@ object RegelValidering {
                 val svarMapping = regelMapping.svarMapping(svarId)
                 validerSavnerBegrunnelseHvisUtenBegrunnelse(vilkårType, svarMapping, svar)
                 feilHvis(svarMapping is SluttSvarRegel && erIkkeSisteSvaret) {
-                    "Finnes ikke noen flere regler, men finnes flere svar vilkårType=$vilkårType svarId=$svarId: TEST: svarMapping = $svarMapping erIkkeSisteSvaret = $erIkkeSisteSvaret regelId=$regelId svar=$svar regelMapping=$regelMapping"
+                    "Finnes ikke noen flere regler, men finnes flere svar vilkårType=$vilkårType svarId=$svarId:"
                 }
             }
         }

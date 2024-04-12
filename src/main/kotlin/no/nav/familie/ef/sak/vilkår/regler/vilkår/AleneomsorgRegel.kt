@@ -45,7 +45,7 @@ class AleneomsorgRegel : Vilkårsregel(
         }
 
         if (erDigitalSøknadOgDonorbarnEllerTerminbarnOgDonorBarnOgHarSammeAdresse(metadata, barnId)) {
-            return automatiskVurderAleneomsorgNårAnnenForelderErDonor()
+            return opprettAutomatiskVurdertAleneomsorgVilkår()
         }
 
         return hovedregler.map { hovedregel ->
@@ -109,7 +109,7 @@ class AleneomsorgRegel : Vilkårsregel(
             ),
         )
 
-    private fun automatiskVurderAleneomsorgNårAnnenForelderErDonor(): List<Delvilkårsvurdering> {
+    private fun opprettAutomatiskVurdertAleneomsorgVilkår(): List<Delvilkårsvurdering> {
         val begrunnelseTekst = "Automatisk vurdert (${
             LocalDate.now().norskFormat()
         }): Bruker har oppgitt at annen forelder er donor."
