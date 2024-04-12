@@ -39,6 +39,7 @@ class AleneomsorgRegelTest {
         every { hovedregelMetadataMock.behandling } returns behandling(årsak = BehandlingÅrsak.SØKNAD)
         every { barnMedSamværSøknadsgrunnlagDto.ikkeOppgittAnnenForelderBegrunnelse } returns "donor"
         every { barnMedSamværRegistergrunnlagDto.harSammeAdresse } returns true
+        every { barnMedSamværSøknadsgrunnlagDto.harSammeAdresse } returns false
 
         val registerBarn = BarnMedSamværDto(barnId, barnMedSamværSøknadsgrunnlagDto, barnMedSamværRegistergrunnlagDto)
 
@@ -118,6 +119,8 @@ class AleneomsorgRegelTest {
         every { hovedregelMetadataMock.behandling } returns behandling(årsak = BehandlingÅrsak.SØKNAD)
         every { barnMedSamværSøknadsgrunnlagDto.ikkeOppgittAnnenForelderBegrunnelse } returns "annet"
         every { barnMedSamværSøknadsgrunnlagDto.erTerminbarn() } returns true
+        every { barnMedSamværRegistergrunnlagDto.harSammeAdresse } returns true
+        every { barnMedSamværSøknadsgrunnlagDto.harSammeAdresse } returns false
 
         val registerBarn = BarnMedSamværDto(barnId, barnMedSamværSøknadsgrunnlagDto, barnMedSamværRegistergrunnlagDto)
 
@@ -168,6 +171,7 @@ class AleneomsorgRegelTest {
         every { barnMedSamværSøknadsgrunnlagDto.ikkeOppgittAnnenForelderBegrunnelse } returns "donor"
         every { barnMedSamværRegistergrunnlagDto.harSammeAdresse } returns false
         every { barnMedSamværSøknadsgrunnlagDto.erTerminbarn() } returns true
+        every { barnMedSamværSøknadsgrunnlagDto.harSammeAdresse } returns false
 
         val registerBarn = BarnMedSamværDto(barnId, barnMedSamværSøknadsgrunnlagDto, barnMedSamværRegistergrunnlagDto)
 
