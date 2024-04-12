@@ -48,7 +48,7 @@ class AleneomsorgRegel(
         }
 
         if (erDigitalSøknadOgDonorbarnSomBorMedSøker(metadata, barnId)) {
-            return listOf(automatiskVurderAleneomsorgNårAnnenForelderErDonor())
+            return automatiskVurderAleneomsorgNårAnnenForelderErDonor()
         }
 
         return hovedregler.map { hovedregel ->
@@ -75,10 +75,11 @@ class AleneomsorgRegel(
             }?.registergrunnlag
 
         return (metadata.behandling.årsak == BehandlingÅrsak.SØKNAD) && (søknadsgrunnlagBarn != null) && (registergrunnlagBarn != null) &&
-            (erDonor(søknadsgrunnlagBarn) && harSammeAdresse(registergrunnlagBarn))
+                (erDonor(søknadsgrunnlagBarn) && harSammeAdresse(registergrunnlagBarn))
     }
 
-    private fun harSammeAdresse(registergrunnlagBarn: BarnMedSamværRegistergrunnlagDto) = registergrunnlagBarn.harSammeAdresse ?: false
+    private fun harSammeAdresse(registergrunnlagBarn: BarnMedSamværRegistergrunnlagDto) =
+        registergrunnlagBarn.harSammeAdresse ?: false
 
     private fun erDonor(søknadsgrunnlagBarn: BarnMedSamværSøknadsgrunnlagDto) =
         søknadsgrunnlagBarn.ikkeOppgittAnnenForelderBegrunnelse?.lowercase() == "donor"
@@ -90,31 +91,47 @@ class AleneomsorgRegel(
                 Vurdering(
                     regelId = RegelId.NÆRE_BOFORHOLD,
                     svar = SvarId.NEI,
-                    begrunnelse = "Automatisk vurdert (${LocalDate.now().norskFormat()}): Det er beregnet at annen forelder bor mer enn 1 km unna bruker.",
+                    begrunnelse = "Automatisk vurdert (${
+                        LocalDate.now().norskFormat()
+                    }): Det er beregnet at annen forelder bor mer enn 1 km unna bruker.",
                 ),
             ),
         )
 
-    private fun automatiskVurderAleneomsorgNårAnnenForelderErDonor(): Delvilkårsvurdering {
-        val begrunnelseTekst = "Automatisk vurdert (${LocalDate.now().norskFormat()}): Bruker og barn er registrert på samme adresse. Bruker har oppgitt at annen forelder er donor."
+    private fun automatiskVurderAleneomsorgNårAnnenForelderErDonor(): List<Delvilkårsvurdering> {
+        val begrunnelseTekst = "Automatisk vurdert (${
+            LocalDate.now().norskFormat()
+        }): Bruker og barn er registrert på samme adresse. Bruker har oppgitt at annen forelder er donor."
 
-        return Delvilkårsvurdering(
-            resultat = Vilkårsresultat.AUTOMATISK_OPPFYLT,
-            listOf(
-                Vurdering(
-                    regelId = RegelId.SKRIFTLIG_AVTALE_OM_DELT_BOSTED,
-                    svar = SvarId.NEI,
-                    begrunnelse = begrunnelseTekst,
+        return listOf(
+            Delvilkårsvurdering(
+                resultat = Vilkårsresultat.AUTOMATISK_OPPFYLT,
+                listOf(
+                    Vurdering(
+                        regelId = RegelId.SKRIFTLIG_AVTALE_OM_DELT_BOSTED,
+                        svar = SvarId.NEI,
+                        begrunnelse = begrunnelseTekst,
+                    ),
                 ),
-                Vurdering(
-                    regelId = RegelId.NÆRE_BOFORHOLD,
-                    svar = SvarId.NEI,
-                    begrunnelse = begrunnelseTekst,
+            ),
+            Delvilkårsvurdering(
+                resultat = Vilkårsresultat.AUTOMATISK_OPPFYLT,
+                listOf(
+                    Vurdering(
+                        regelId = RegelId.NÆRE_BOFORHOLD,
+                        svar = SvarId.NEI,
+                        begrunnelse = begrunnelseTekst,
+                    ),
                 ),
-                Vurdering(
-                    regelId = RegelId.MER_AV_DAGLIG_OMSORG,
-                    svar = SvarId.JA,
-                    begrunnelse = begrunnelseTekst,
+            ),
+            Delvilkårsvurdering(
+                resultat = Vilkårsresultat.AUTOMATISK_OPPFYLT,
+                listOf(
+                    Vurdering(
+                        regelId = RegelId.MER_AV_DAGLIG_OMSORG,
+                        svar = SvarId.JA,
+                        begrunnelse = begrunnelseTekst,
+                    ),
                 ),
             ),
         )
