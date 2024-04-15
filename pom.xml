@@ -11,7 +11,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.1.8</version>
+        <version>3.2.4</version>
     </parent>
     <repositories>
         <repository>
@@ -40,6 +40,7 @@
         <mikrofrontend.builder.version>20230704114948-74aa2e9</mikrofrontend.builder.version>
         <eksterne.kontrakter.bisys.version>2.0_20230214104704_706e9c0</eksterne.kontrakter.bisys.version>
         <cucumber.version>7.15.0</cucumber.version>
+        <utdatert.spring.data.version>3.1.10</utdatert.spring.data.version>
 
 
         <!--suppress UnresolvedMavenProperty  Ligger som secret i github-->
@@ -75,7 +76,27 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-jdbc</artifactId>
+            <version>${utdatert.spring.data.version}</version>
         </dependency>
+        <!-- Slett de påfølgende avhengighetene når issuen nedenfor er løst -->
+        <!-- https://github.com/spring-projects/spring-data-relational/issues/1692 -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-jdbc</artifactId>
+            <version>${utdatert.spring.data.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.data</groupId>
+            <artifactId>spring-data-jdbc</artifactId>
+            <version>${utdatert.spring.data.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.data</groupId>
+            <artifactId>spring-data-relational</artifactId>
+            <version>${utdatert.spring.data.version}</version>
+        </dependency>
+        <!--- Slett det ovenfor når spring data jdbc issuen er løst -->
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-actuator</artifactId>
