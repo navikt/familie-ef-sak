@@ -104,18 +104,18 @@ internal class PersonopplysningerServiceTest {
                 emptyList(),
                 emptyList(),
             )
-        val søker = personopplysningerService.hentPersonopplysningerUtenVedtakshistorikk("01010172272")
+        val søker = personopplysningerService.hentPersonopplysningerFraRegister("01010172272")
         assertThat(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(søker))
             .isEqualToIgnoringWhitespace(readFile("/json/personopplysningerDto.json"))
     }
 
     @Test
     internal fun `skal cache egenAnsatt når man kaller med samme ident`() {
-        personopplysningerService.hentPersonopplysningerUtenVedtakshistorikk("1")
-        personopplysningerService.hentPersonopplysningerUtenVedtakshistorikk("1")
+        personopplysningerService.hentPersonopplysningerFraRegister("1")
+        personopplysningerService.hentPersonopplysningerFraRegister("1")
         verify(exactly = 1) { egenAnsattClient.egenAnsatt(any()) }
 
-        personopplysningerService.hentPersonopplysningerUtenVedtakshistorikk("2")
+        personopplysningerService.hentPersonopplysningerFraRegister("2")
         verify(exactly = 2) { egenAnsattClient.egenAnsatt(any()) }
     }
 

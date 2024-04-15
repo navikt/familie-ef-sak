@@ -39,7 +39,7 @@ class EndringerIPersonOpplysningerService(
         val nyGrunnlagsdata = hentOppdatertGrunnlagsdata(behandling, grunnlagsdata)
             ?: return EndringerIPersonopplysningerDto(grunnlagsdata.oppdaterteDataHentetTid, Endringer())
 
-        val endringer = personopplysningerService.finnEndringerIPersonopplysninger(
+        val endringer = personopplysningerService.finnEndringerIPersonopplysningerForBehandling(
             behandling,
             grunnlagsdata.tilGrunnlagsdataMedMetadata(),
             nyGrunnlagsdata,

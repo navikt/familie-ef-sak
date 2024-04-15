@@ -8,6 +8,7 @@ import no.nav.familie.ef.sak.oppgave.TilordnetRessursService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.Grunnlagsdata
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.GrunnlagsdataDomene
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.GrunnlagsdataMedMetadata
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.Personopplysninger
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.kontrakter.felles.ef.StønadType
@@ -109,9 +110,9 @@ class GrunnlagsdataService(
         }
     }
 
-    fun hentGrunnlagsdataUtenTidligereVedtakshistorikk(personIdent: String): GrunnlagsdataDomene {
+    fun hentPersonopplysninger(personIdent: String): Personopplysninger {
         return loggTid {
-            grunnlagsdataRegisterService.hentGrunnlagsdataUtenVedtakshitorikkFraRegister(personIdent)
+            grunnlagsdataRegisterService.hentPersonopplysninger(personIdent)
         }
     }
 
