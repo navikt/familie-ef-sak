@@ -31,7 +31,7 @@ internal class RegelEvalueringTest {
     }
 
     @Test
-    fun `utledVilkårResultat - er OPPFYLT når alle er AUTOMATISK_OPPFYLT`() {
+    fun `utledVilkårResultat - utledResultat skal gi AUTOMATISK_OPPFYLT når alle delvilkår er AUTOMATISK_OPPFYLT`() {
         assertThat(
             RegelEvaluering.utledVilkårResultat(
                 mapOf(
@@ -39,7 +39,7 @@ internal class RegelEvalueringTest {
                 ),
             ),
         )
-            .isEqualTo(Vilkårsresultat.OPPFYLT)
+            .isEqualTo(Vilkårsresultat.AUTOMATISK_OPPFYLT)
     }
 
     @Test
