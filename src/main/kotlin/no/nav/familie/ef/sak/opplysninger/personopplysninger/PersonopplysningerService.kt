@@ -35,7 +35,7 @@ class PersonopplysningerService(
 
     private val logger = LoggerFactory.getLogger(this::class.java)
 
-    fun hentPersonopplysninger(behandlingId: UUID): PersonopplysningerDto {
+    fun hentPersonopplysningerForBehandling(behandlingId: UUID): PersonopplysningerDto {
         val personIdent = behandlingService.hentAktivIdent(behandlingId)
         val søkerIdenter = personService.hentPersonIdenter(personIdent)
         val grunnlagsdata = grunnlagsdataService.hentGrunnlagsdata(behandlingId)
@@ -48,7 +48,7 @@ class PersonopplysningerService(
         )
     }
 
-    fun finnEndringerIPersonopplysninger(
+    fun finnEndringerIPersonopplysningerForBehandling(
         behandling: Saksbehandling,
         tidligereGrunnlagsdata: GrunnlagsdataMedMetadata,
         nyGrunnlagsdata: GrunnlagsdataMedMetadata,
@@ -72,18 +72,16 @@ class PersonopplysningerService(
     }
 
     @Cacheable("personopplysninger", cacheManager = "shortCache")
-    fun hentPersonopplysningerUtenVedtakshistorikk(personIdent: String): PersonopplysningerDto {
-        val grunnlagsdata = grunnlagsdataService.hentGrunnlagsdataUtenTidligereVedtakshistorikk(personIdent)
+    fun hentPersonopplysningerFraRegister(personIdent: String): PersonopplysningerDto {
+        val grunnlagsdata = grunnlagsdataService.hentPersonopplysninger(personIdent)
         val egenAnsatt = egenAnsatt(personIdent)
         val identerFraPdl = personService.hentPersonIdenter(personIdent)
 
         return personopplysningerMapper.tilPersonopplysninger(
-            GrunnlagsdataMedMetadata(
-                grunnlagsdata,
-                opprettetTidspunkt = LocalDateTime.now(),
-            ),
-            egenAnsatt,
-            identerFraPdl,
+            grunnlagsdata = grunnlagsdata,
+            grunnlagsdataOpprettet = LocalDateTime.now(),
+            egenAnsatt = egenAnsatt,
+            søkerIdenter = identerFraPdl,
         )
     }
 
