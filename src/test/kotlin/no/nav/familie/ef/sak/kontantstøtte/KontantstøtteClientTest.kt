@@ -77,7 +77,7 @@ class KontantstøtteClientTest {
         "infotrygdPerioder": [
           {
             "fomMåned": "2022-09",
-            "tomMåned": "2022-10",
+ 
             "beløp": 1000,
             "barna": [
               "01010199999"
