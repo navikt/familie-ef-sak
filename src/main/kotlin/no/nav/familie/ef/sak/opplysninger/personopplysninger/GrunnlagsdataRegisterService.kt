@@ -4,6 +4,7 @@ import no.nav.familie.ef.sak.arbeidsforhold.ekstern.ArbeidsforholdService
 import no.nav.familie.ef.sak.felles.util.Timer.loggTid
 import no.nav.familie.ef.sak.kontantstøtte.KontantstøtteService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.GrunnlagsdataDomene
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.Personopplysninger
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.TidligereVedtaksperioder
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper.GrunnlagsdataMapper.mapAnnenForelder
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper.GrunnlagsdataMapper.mapBarn
@@ -50,20 +51,12 @@ class GrunnlagsdataRegisterService(
         )
     }
 
-    fun hentGrunnlagsdataUtenVedtakshitorikkFraRegister(personIdent: String): GrunnlagsdataDomene {
+    fun hentPersonopplysninger(personIdent: String): Personopplysninger {
         val grunnlagsdataFraPdl = hentGrunnlagsdataFraPdl(personIdent, emptyList())
-        val medlUnntak = personopplysningerIntegrasjonerClient.hentMedlemskapsinfo(personIdent)
-        val harAvsluttetArbeidsforhold = arbeidsforholdService.finnesAvsluttetArbeidsforholdSisteAntallMåneder(personIdent)
-
-        val harKontantstøttePerioder = kontantstøtteService.finnesKontantstøtteUtbetalingerPåBruker(personIdent).finnesUtbetaling
-        return GrunnlagsdataDomene(
+        return Personopplysninger(
             søker = mapSøker(grunnlagsdataFraPdl.søker, grunnlagsdataFraPdl.andrePersoner),
             annenForelder = mapAnnenForelder(grunnlagsdataFraPdl.barneForeldre, emptyMap()),
-            medlUnntak = medlUnntak,
             barn = mapBarn(grunnlagsdataFraPdl.barn),
-            tidligereVedtaksperioder = null,
-            harAvsluttetArbeidsforhold = harAvsluttetArbeidsforhold,
-            harKontantstøttePerioder = harKontantstøttePerioder,
         )
     }
 

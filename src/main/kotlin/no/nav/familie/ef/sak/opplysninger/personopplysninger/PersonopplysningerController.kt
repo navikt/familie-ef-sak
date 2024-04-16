@@ -34,7 +34,7 @@ class PersonopplysningerController(
     @GetMapping("/behandling/{behandlingId}")
     fun personopplysninger(@PathVariable behandlingId: UUID): Ressurs<PersonopplysningerDto> {
         tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.ACCESS)
-        return Ressurs.success(personopplysningerService.hentPersonopplysninger(behandlingId))
+        return Ressurs.success(personopplysningerService.hentPersonopplysningerForBehandling(behandlingId))
     }
 
     @GetMapping("/behandling/{behandlingId}/endringer")
@@ -47,7 +47,7 @@ class PersonopplysningerController(
     fun personopplysningerFraFagsakPersonId(@PathVariable fagsakPersonId: UUID): Ressurs<PersonopplysningerDto> {
         tilgangService.validerTilgangTilFagsakPerson(fagsakPersonId, AuditLoggerEvent.ACCESS)
         val aktivIdent = fagsakPersonService.hentAktivIdent(fagsakPersonId)
-        return Ressurs.success(personopplysningerService.hentPersonopplysningerUtenVedtakshistorikk(aktivIdent))
+        return Ressurs.success(personopplysningerService.hentPersonopplysningerFraRegister(aktivIdent))
     }
 
     @PostMapping("/nav-kontor")
