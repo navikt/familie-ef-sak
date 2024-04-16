@@ -41,6 +41,7 @@ object RegelEvaluering {
 
     fun utledVilkårResultat(delvilkårResultat: Map<RegelId, Vilkårsresultat>): Vilkårsresultat {
         return when {
+            delvilkårResultat.values.all { it == Vilkårsresultat.AUTOMATISK_OPPFYLT } -> Vilkårsresultat.AUTOMATISK_OPPFYLT
             delvilkårResultat.values.all { it == Vilkårsresultat.OPPFYLT || it == Vilkårsresultat.AUTOMATISK_OPPFYLT } -> Vilkårsresultat.OPPFYLT
             delvilkårResultat.values.all { it == Vilkårsresultat.OPPFYLT || it == Vilkårsresultat.IKKE_OPPFYLT || it == Vilkårsresultat.AUTOMATISK_OPPFYLT } ->
                 Vilkårsresultat.IKKE_OPPFYLT

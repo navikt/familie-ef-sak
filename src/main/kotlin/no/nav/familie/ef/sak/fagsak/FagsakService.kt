@@ -149,7 +149,7 @@ class FagsakService(
             ?: throw Feil("Finner ikke fagsak til behandlingId=$behandlingId")
     }
 
-    fun hentEksternId(fagsakId: UUID): Long = fagsakRepository.findByIdOrThrow(fagsakId).eksternId.id
+    fun hentEksternId(fagsakId: UUID): Long = fagsakRepository.findByIdOrThrow(fagsakId).eksternId
 
     fun hentFagsakPåEksternId(eksternFagsakId: Long): Fagsak =
         fagsakRepository.finnMedEksternId(eksternFagsakId)

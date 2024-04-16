@@ -9,7 +9,6 @@ import no.nav.familie.kontrakter.ef.iverksett.BehandlingKategori
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Embedded
-import org.springframework.data.relational.core.mapping.MappedCollection
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
@@ -22,8 +21,7 @@ data class Behandling(
     val id: UUID = UUID.randomUUID(),
     val fagsakId: UUID,
     val forrigeBehandlingId: UUID? = null,
-    @MappedCollection(idColumn = "behandling_id")
-    val eksternId: EksternBehandlingId = EksternBehandlingId(),
+    val eksternId: Long = 0,
     val versjon: Int = 0,
 
     val type: BehandlingType,

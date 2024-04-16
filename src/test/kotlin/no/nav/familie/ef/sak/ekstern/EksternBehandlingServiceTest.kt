@@ -76,7 +76,7 @@ internal class EksternBehandlingServiceTest : OppslagSpringRunnerTest() {
             vilkårsvurderingRepository.insert(vilkårsvurdering(førstegangsbehandling.id))
 
             val result = testWithBrukerContext {
-                eksternBehandlingService.opprettRevurderingKlage(fagsakMedFerdigstiltBehandling.eksternId.id)
+                eksternBehandlingService.opprettRevurderingKlage(fagsakMedFerdigstiltBehandling.eksternId)
             }
 
             assertThat(result.opprettetBehandling).isTrue
@@ -90,7 +90,7 @@ internal class EksternBehandlingServiceTest : OppslagSpringRunnerTest() {
         internal fun `mangler behandling skal feile`() {
             val fagsakUtenBehandling = testoppsettService.lagreFagsak(fagsak(fagsakpersoner("1")))
 
-            val result = eksternBehandlingService.opprettRevurderingKlage(fagsakUtenBehandling.eksternId.id)
+            val result = eksternBehandlingService.opprettRevurderingKlage(fagsakUtenBehandling.eksternId)
 
             assertThat(result.opprettetBehandling).isFalse
             assertThat(result.ikkeOpprettet!!.årsak).isEqualTo(IkkeOpprettetÅrsak.INGEN_BEHANDLING)
@@ -107,7 +107,7 @@ internal class EksternBehandlingServiceTest : OppslagSpringRunnerTest() {
                 ),
             )
 
-            val result = eksternBehandlingService.opprettRevurderingKlage(fagsakMedHenlagtBehandling.eksternId.id)
+            val result = eksternBehandlingService.opprettRevurderingKlage(fagsakMedHenlagtBehandling.eksternId)
 
             assertThat(result.opprettetBehandling).isFalse
             assertThat(result.ikkeOpprettet!!.årsak).isEqualTo(IkkeOpprettetÅrsak.INGEN_BEHANDLING)
@@ -118,7 +118,7 @@ internal class EksternBehandlingServiceTest : OppslagSpringRunnerTest() {
             val fagsakMedÅpenBehandling = testoppsettService.lagreFagsak(fagsak(fagsakpersoner("2")))
             behandlingRepository.insert(behandling(fagsakMedÅpenBehandling))
 
-            val result = eksternBehandlingService.opprettRevurderingKlage(fagsakMedÅpenBehandling.eksternId.id)
+            val result = eksternBehandlingService.opprettRevurderingKlage(fagsakMedÅpenBehandling.eksternId)
 
             assertThat(result.opprettetBehandling).isFalse
             assertThat(result.ikkeOpprettet!!.årsak).isEqualTo(IkkeOpprettetÅrsak.ÅPEN_BEHANDLING)
@@ -138,7 +138,7 @@ internal class EksternBehandlingServiceTest : OppslagSpringRunnerTest() {
                     status = BehandlingStatus.FERDIGSTILT,
                 ),
             )
-            val result = eksternBehandlingService.kanOppretteRevurdering(fagsakMedFerdigstiltBehandling.eksternId.id)
+            val result = eksternBehandlingService.kanOppretteRevurdering(fagsakMedFerdigstiltBehandling.eksternId)
 
             assertThat(result.kanOpprettes).isTrue
             assertThat(result.årsak).isNull()
@@ -149,7 +149,7 @@ internal class EksternBehandlingServiceTest : OppslagSpringRunnerTest() {
             val fagsakMedÅpenBehandling = testoppsettService.lagreFagsak(fagsak(fagsakpersoner("2")))
             behandlingRepository.insert(behandling(fagsakMedÅpenBehandling))
 
-            val result = eksternBehandlingService.kanOppretteRevurdering(fagsakMedÅpenBehandling.eksternId.id)
+            val result = eksternBehandlingService.kanOppretteRevurdering(fagsakMedÅpenBehandling.eksternId)
 
             assertThat(result.kanOpprettes).isFalse
             assertThat(result.årsak).isEqualTo(KanIkkeOppretteRevurderingÅrsak.ÅPEN_BEHANDLING)
@@ -159,7 +159,7 @@ internal class EksternBehandlingServiceTest : OppslagSpringRunnerTest() {
         internal fun `kan ikke opprette revurdering hvis det ikke finnes noen behandlinger`() {
             val fagsakUtenBehandling = testoppsettService.lagreFagsak(fagsak(fagsakpersoner("1")))
 
-            val result = eksternBehandlingService.kanOppretteRevurdering(fagsakUtenBehandling.eksternId.id)
+            val result = eksternBehandlingService.kanOppretteRevurdering(fagsakUtenBehandling.eksternId)
 
             assertThat(result.kanOpprettes).isFalse
             assertThat(result.årsak).isEqualTo(KanIkkeOppretteRevurderingÅrsak.INGEN_BEHANDLING)

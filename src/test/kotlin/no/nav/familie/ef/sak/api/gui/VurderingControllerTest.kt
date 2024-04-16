@@ -28,13 +28,16 @@ import no.nav.familie.ef.sak.vilkår.regler.RegelId
 import no.nav.familie.ef.sak.vilkår.regler.SvarId
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.ef.iverksett.BehandlingKategori
+import no.nav.familie.kontrakter.ef.søknad.AnnenForelder
 import no.nav.familie.kontrakter.ef.søknad.Samvær
+import no.nav.familie.kontrakter.ef.søknad.SøknadOvergangsstønad
 import no.nav.familie.kontrakter.ef.søknad.Søknadsfelt
 import no.nav.familie.kontrakter.ef.søknad.TestsøknadBuilder
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.web.client.exchange
@@ -42,6 +45,7 @@ import org.springframework.http.HttpEntity
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import java.time.LocalDate
 
 internal class VurderingControllerTest : OppslagSpringRunnerTest() {
     @Autowired
@@ -88,8 +92,11 @@ internal class VurderingControllerTest : OppslagSpringRunnerTest() {
 
     @Test
     internal fun `Vilkår og grunnlagsdata skal oppdateres dersom adressen til en av de involverte er endret`() {
+        // Opprett søknad
+        val søknad = opprettSøknad()
+
         // Opprett behandling og inngangsvilkår
-        val behandling = opprettBehandlingMedGrunnlagsdata()
+        val behandling = opprettBehandlingMedGrunnlagsdata(søknad)
         val vurderinger = hentVilkår(behandling).body?.data?.vurderinger ?: error("Mangler vurderinger")
 
         // Endre grunnlagsdata - slik at dette nå er forskjellig fra ef-sak og pdl
@@ -109,17 +116,17 @@ internal class VurderingControllerTest : OppslagSpringRunnerTest() {
     private fun endreVegadresseForGrunnlagsdata(grunnlagsdata: Grunnlagsdata) =
         grunnlagsdata.copy(
             data =
-            grunnlagsdata.data.copy(
-                søker =
-                grunnlagsdata.data.søker.copy(
-                    bostedsadresse =
-                    listOf(
-                        grunnlagsdata.data.søker.bostedsadresse.first().copy(
-                            vegadresse = nyVegadresse(),
+                grunnlagsdata.data.copy(
+                    søker =
+                        grunnlagsdata.data.søker.copy(
+                            bostedsadresse =
+                                listOf(
+                                    grunnlagsdata.data.søker.bostedsadresse.first().copy(
+                                        vegadresse = nyVegadresse(),
+                                    ),
+                                ),
                         ),
-                    ),
                 ),
-            ),
         )
 
     private fun nyVegadresse() =
@@ -258,6 +265,76 @@ internal class VurderingControllerTest : OppslagSpringRunnerTest() {
         assertThat(respons.body?.data?.id).isEqualTo(oppdatertVilkårsvarMedJa.id)
     }
 
+    @Nested
+    inner class AleneOmsorgVilkår {
+        @Test
+        internal fun `initiering av ALENEOMSORG skal ikke automatisk oppfylle delvilkår siden annen forelder ikke er donor`() {
+            val annenForelder =
+                TestsøknadBuilder.Builder().defaultAnnenForelder(ikkeOppgittAnnenForelderBegrunnelse = "ikke donor")
+            val søknad =
+                opprettSøknad(
+                    skalHaSammeAdresse = true,
+                    fødselTermindato = LocalDate.now().plusDays(1),
+                    annenForelder = annenForelder,
+                )
+            val respons: ResponseEntity<Ressurs<VilkårDto>> = opprettVilkår(søknad)
+
+            assertThat(respons.statusCode).isEqualTo(HttpStatus.OK)
+            assertThat(respons.body?.status).isEqualTo(Ressurs.Status.SUKSESS)
+            assertThat(respons.body?.data).isNotNull
+
+            val aleneOmsorgVilkår = respons.body?.data?.vurderinger?.first { it.vilkårType == VilkårType.ALENEOMSORG }
+
+            val vurderingDeltBosted = utledVurdering(aleneOmsorgVilkår, RegelId.SKRIFTLIG_AVTALE_OM_DELT_BOSTED)
+            val vurderingNæreBoforhold = utledVurdering(aleneOmsorgVilkår, RegelId.NÆRE_BOFORHOLD)
+            val vurderingDagligOmsorg = utledVurdering(aleneOmsorgVilkår, RegelId.MER_AV_DAGLIG_OMSORG)
+
+            assertThat(vurderingDeltBosted?.svar).isNull()
+            assertThat(vurderingDeltBosted?.begrunnelse).isNull()
+
+            assertThat(vurderingNæreBoforhold?.svar).isEqualTo(SvarId.NEI)
+            assertThat(vurderingNæreBoforhold?.begrunnelse).contains("annen forelder bor mer enn 1 km unna bruker")
+
+            assertThat(vurderingDagligOmsorg?.svar).isNull()
+            assertThat(vurderingDagligOmsorg?.begrunnelse).isNull()
+        }
+
+        @Test
+        internal fun `initiering av ALENEOMSORG skal automatisk oppfylle delvilkår dersom annen forelder er donor og barnet har samme adresse`() {
+            val annenForelder =
+                TestsøknadBuilder.Builder().defaultAnnenForelder(ikkeOppgittAnnenForelderBegrunnelse = "donor")
+            val søknad =
+                opprettSøknad(
+                    skalHaSammeAdresse = true,
+                    fødselTermindato = LocalDate.now().plusDays(1),
+                    annenForelder = annenForelder,
+                )
+            val respons: ResponseEntity<Ressurs<VilkårDto>> = opprettVilkår(søknad)
+
+            assertThat(respons.statusCode).isEqualTo(HttpStatus.OK)
+            assertThat(respons.body?.status).isEqualTo(Ressurs.Status.SUKSESS)
+            assertThat(respons.body?.data).isNotNull
+
+            val aleneOmsorgVilkår = respons.body?.data?.vurderinger?.first { it.vilkårType == VilkårType.ALENEOMSORG }
+
+            val vurderingDeltBosted = utledVurdering(aleneOmsorgVilkår, RegelId.SKRIFTLIG_AVTALE_OM_DELT_BOSTED)
+            val vurderingNæreBoforhold = utledVurdering(aleneOmsorgVilkår, RegelId.NÆRE_BOFORHOLD)
+            val vurderingDagligOmsorg = utledVurdering(aleneOmsorgVilkår, RegelId.MER_AV_DAGLIG_OMSORG)
+
+            assertThat(vurderingDeltBosted?.svar).isEqualTo(SvarId.NEI)
+            assertThat(vurderingDeltBosted?.begrunnelse).contains("Automatisk vurdert")
+            assertThat(vurderingDeltBosted?.begrunnelse).contains("Bruker har oppgitt at annen forelder er donor.")
+
+            assertThat(vurderingNæreBoforhold?.svar).isEqualTo(SvarId.NEI)
+            assertThat(vurderingNæreBoforhold?.begrunnelse).contains("Automatisk vurdert")
+            assertThat(vurderingNæreBoforhold?.begrunnelse).contains("Bruker har oppgitt at annen forelder er donor.")
+
+            assertThat(vurderingDagligOmsorg?.svar).isEqualTo(SvarId.JA)
+            assertThat(vurderingDagligOmsorg?.begrunnelse).contains("Automatisk vurdert")
+            assertThat(vurderingDagligOmsorg?.begrunnelse).contains("Bruker har oppgitt at annen forelder er donor.")
+        }
+    }
+
     private fun lagOppdaterVilkårsvurdering(
         opprettetVurdering: VilkårDto,
         vilkårType: VilkårType,
@@ -272,18 +349,18 @@ internal class VurderingControllerTest : OppslagSpringRunnerTest() {
             id = it.id,
             behandlingId = it.behandlingId,
             delvilkårsvurderinger =
-            it.delvilkårsvurderinger.map {
-                it.copy(
-                    vurderinger =
-                    it.vurderinger.map { vurderingDto ->
-                        vurderingDto.copy(svar = SvarId.JA, begrunnelse = "En begrunnelse")
-                    },
-                )
-            },
+                it.delvilkårsvurderinger.map {
+                    it.copy(
+                        vurderinger =
+                            it.vurderinger.map { vurderingDto ->
+                                vurderingDto.copy(svar = SvarId.JA, begrunnelse = "En begrunnelse")
+                            },
+                    )
+                },
         )
 
-    private fun opprettVilkår(): ResponseEntity<Ressurs<VilkårDto>> {
-        val behandling = opprettBehandlingMedGrunnlagsdata()
+    private fun opprettVilkår(søknad: SøknadOvergangsstønad? = null): ResponseEntity<Ressurs<VilkårDto>> {
+        val behandling = opprettBehandlingMedGrunnlagsdata(søknad ?: opprettSøknad())
         return hentVilkår(behandling)
     }
 
@@ -294,42 +371,7 @@ internal class VurderingControllerTest : OppslagSpringRunnerTest() {
             HttpEntity<Any>(headers),
         )
 
-    private fun opprettBehandlingMedGrunnlagsdata(): Behandling {
-        val søknad =
-            TestsøknadBuilder.Builder()
-                .setBarn(
-                    listOf(
-                        TestsøknadBuilder.Builder().defaultBarn(
-                            "Navn navnesen",
-                            "14041385481",
-                            samvær =
-                            Samvær(
-                                borAnnenForelderISammeHus =
-                                Søknadsfelt(
-                                    label = "Bor annen forelder i samme hus",
-                                    verdi = "vet ikke",
-                                    svarId = "vet ikke",
-                                ),
-                            ),
-                        ),
-                        TestsøknadBuilder.Builder().defaultBarn(
-                            "Navn navnesen",
-                            "01012067050",
-                            samvær =
-                            Samvær(
-                                borAnnenForelderISammeHus =
-                                Søknadsfelt(
-                                    label = "Bor annen forelder i samme hus",
-                                    verdi = "nei",
-                                    svarId = "nei",
-                                ),
-                            ),
-                        ),
-                    ),
-                )
-                .setPersonalia("Navn på forsørger", "01010172272")
-                .build().søknadOvergangsstønad
-
+    private fun opprettBehandlingMedGrunnlagsdata(søknad: SøknadOvergangsstønad): Behandling {
         // val søknad = SøknadMedVedlegg(Testsøknad.søknadOvergangsstønad, emptyList())
         val fagsak =
             fagsakService.hentEllerOpprettFagsakMedBehandlinger(
@@ -357,26 +399,70 @@ internal class VurderingControllerTest : OppslagSpringRunnerTest() {
         return behandling
     }
 
+    private fun opprettSøknad(
+        skalHaSammeAdresse: Boolean = false,
+        fødselTermindato: LocalDate = LocalDate.of(2020, 5, 16),
+        annenForelder: AnnenForelder = TestsøknadBuilder.Builder().defaultAnnenForelder(),
+        samvær: Samvær =
+            Samvær(
+                borAnnenForelderISammeHus =
+                    Søknadsfelt(
+                        label = "Bor annen forelder i samme hus",
+                        verdi = "vet ikke",
+                        svarId = "vet ikke",
+                    ),
+            ),
+    ) = TestsøknadBuilder.Builder()
+        .setBarn(
+            listOf(
+                TestsøknadBuilder.Builder()
+                    .defaultBarn(
+                        "Navn navnesen",
+                        "14041385481",
+                        harSkalHaSammeAdresse = skalHaSammeAdresse,
+                        fødselTermindato = fødselTermindato,
+                        annenForelder = annenForelder,
+                        samvær = samvær,
+                    ),
+                TestsøknadBuilder.Builder()
+                    .defaultBarn(
+                        "Navn navnesen",
+                        "01012067050",
+                        harSkalHaSammeAdresse = skalHaSammeAdresse,
+                        fødselTermindato = fødselTermindato,
+                        annenForelder = annenForelder,
+                        samvær = samvær,
+                    ),
+            ),
+        )
+        .setPersonalia("Navn på forsørger", "01010172272")
+        .build().søknadOvergangsstønad
+
     private fun svarPåVurderingerDtoForEøsMedlemskap(it: VilkårsvurderingDto) =
         SvarPåVurderingerDto(
             id = it.id,
             behandlingId = it.behandlingId,
             delvilkårsvurderinger =
-            listOf(
-                DelvilkårsvurderingDto(
-                    Vilkårsresultat.IKKE_OPPFYLT,
-                    listOf(
-                        VurderingDto(
-                            RegelId.SØKER_MEDLEM_I_FOLKETRYGDEN,
-                            SvarId.NEI,
-                        ),
-                        VurderingDto(
-                            RegelId.MEDLEMSKAP_UNNTAK,
-                            SvarId.MEDLEM_MER_ENN_5_ÅR_EØS,
-                            "a",
+                listOf(
+                    DelvilkårsvurderingDto(
+                        Vilkårsresultat.IKKE_OPPFYLT,
+                        listOf(
+                            VurderingDto(
+                                RegelId.SØKER_MEDLEM_I_FOLKETRYGDEN,
+                                SvarId.NEI,
+                            ),
+                            VurderingDto(
+                                RegelId.MEDLEMSKAP_UNNTAK,
+                                SvarId.MEDLEM_MER_ENN_5_ÅR_EØS,
+                                "a",
+                            ),
                         ),
                     ),
                 ),
-            ),
         )
+
+    private fun utledVurdering(
+        vilkår: VilkårsvurderingDto?,
+        regelId: RegelId,
+    ) = vilkår?.delvilkårsvurderinger?.first { it.vurderinger.first().regelId == regelId }?.vurderinger?.first()
 }

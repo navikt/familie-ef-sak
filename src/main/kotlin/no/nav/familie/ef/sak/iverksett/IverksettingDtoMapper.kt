@@ -2,6 +2,7 @@ package no.nav.familie.ef.sak.iverksett
 
 import no.nav.familie.ef.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ef.sak.barn.BarnService
+import no.nav.familie.ef.sak.behandling.BehandlingRepository
 import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.behandling.oppgaveforopprettelse.OppgaverForOpprettelseService
 import no.nav.familie.ef.sak.behandling.ÅrsakRevurderingsRepository
@@ -19,6 +20,7 @@ import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.opplysninger.mapper.BarnMatcher
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
+import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.ef.sak.simulering.SimuleringService
 import no.nav.familie.ef.sak.simulering.hentSammenhengendePerioderMedFeilutbetaling
 import no.nav.familie.ef.sak.tilbakekreving.TilbakekrevingService
@@ -101,6 +103,7 @@ class IverksettingDtoMapper(
     private val brevmottakereRepository: BrevmottakereRepository,
     private val årsakRevurderingsRepository: ÅrsakRevurderingsRepository,
     private val oppgaverForOpprettelseService: OppgaverForOpprettelseService,
+    private val behandlingRepository: BehandlingRepository,
 ) {
 
     fun tilDto(saksbehandling: Saksbehandling, beslutter: String): IverksettDto {
@@ -250,6 +253,7 @@ class IverksettingDtoMapper(
             Tilbakekrevingsvalg.AVVENT -> TilbakekrevingsvalgKontrakter.IGNORER_TILBAKEKREVING
             Tilbakekrevingsvalg.OPPRETT_MED_VARSEL -> TilbakekrevingsvalgKontrakter.OPPRETT_TILBAKEKREVING_MED_VARSEL
             Tilbakekrevingsvalg.OPPRETT_UTEN_VARSEL -> TilbakekrevingsvalgKontrakter.OPPRETT_TILBAKEKREVING_UTEN_VARSEL
+            Tilbakekrevingsvalg.OPPRETT_AUTOMATISK -> TilbakekrevingsvalgKontrakter.OPPRETT_TILBAKEKREVING_AUTOMATISK
         }
 
     private fun mapFagsakdetaljer(saksbehandling: Saksbehandling) =
@@ -263,19 +267,21 @@ class IverksettingDtoMapper(
     private fun mapBehandlingsdetaljer(
         saksbehandling: Saksbehandling,
         vilkårsvurderinger: List<Vilkårsvurdering>,
-    ) =
-        BehandlingsdetaljerDto(
+    ): BehandlingsdetaljerDto {
+        val forrigeBehandlingEksternId = saksbehandling.forrigeBehandlingId?.let { behandlingRepository.findByIdOrThrow(it).eksternId }
+        return BehandlingsdetaljerDto(
             behandlingId = saksbehandling.id,
             behandlingType = BehandlingType.valueOf(saksbehandling.type.name),
             behandlingÅrsak = saksbehandling.årsak,
             eksternId = saksbehandling.eksternId,
             vilkårsvurderinger = vilkårsvurderinger.map { it.tilIverksettDto() },
             forrigeBehandlingId = saksbehandling.forrigeBehandlingId,
+            forrigeBehandlingEksternId = forrigeBehandlingEksternId,
             kravMottatt = saksbehandling.kravMottatt,
             årsakRevurdering = mapÅrsakRevurdering(saksbehandling),
             kategori = saksbehandling.kategori,
         )
-
+    }
     private fun mapÅrsakRevurdering(saksbehandling: Saksbehandling): ÅrsakRevurderingDto? =
         årsakRevurderingsRepository.findByIdOrNull(saksbehandling.id)
             ?.let { ÅrsakRevurderingDto(it.opplysningskilde, it.årsak) }

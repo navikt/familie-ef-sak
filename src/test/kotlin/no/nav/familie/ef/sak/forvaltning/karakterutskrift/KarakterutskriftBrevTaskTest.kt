@@ -44,7 +44,7 @@ internal class KarakterutskriftBrevTaskTest {
 
     @BeforeEach
     fun setUp() {
-        every { personopplysningerService.hentPersonopplysningerUtenVedtakshistorikk(any<String>()) } returns mockk {
+        every { personopplysningerService.hentPersonopplysningerFraRegister(any<String>()) } returns mockk {
             every { vergemål } returns emptyList()
         }
     }
@@ -92,7 +92,7 @@ internal class KarakterutskriftBrevTaskTest {
         )
         every { behandlingService.finnesBehandlingForFagsak(any()) } returns true
         every { fagsakService.finnFagsaker(any()) } returns listOf(fagsak())
-        every { personopplysningerService.hentPersonopplysningerUtenVedtakshistorikk(any<String>()) } returns mockk {
+        every { personopplysningerService.hentPersonopplysningerFraRegister(any<String>()) } returns mockk {
             every { vergemål } returns listOf(mockk())
         }
 

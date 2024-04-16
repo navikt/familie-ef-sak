@@ -75,6 +75,14 @@ data class GrunnlagsdataDomene(
     val tidligereVedtaksperioder: TidligereVedtaksperioder?,
     val harAvsluttetArbeidsforhold: Boolean?,
     val harKontantstøttePerioder: Boolean?,
+) {
+    fun tilPersonopplysninger() = Personopplysninger(søker = this.søker, annenForelder = this.annenForelder, barn = this.barn)
+}
+
+data class Personopplysninger(
+    val søker: Søker,
+    val annenForelder: List<AnnenForelderMedIdent>,
+    val barn: List<BarnMedIdent>,
 )
 
 data class Søker(
