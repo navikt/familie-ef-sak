@@ -5,6 +5,8 @@ import no.nav.familie.ef.sak.vilkår.Delvilkårsvurdering
 import no.nav.familie.ef.sak.vilkår.VilkårType
 import no.nav.familie.ef.sak.vilkår.Vilkårsresultat
 import no.nav.familie.ef.sak.vilkår.Vurdering
+import no.nav.familie.ef.sak.vilkår.dto.BarnMedSamværRegistergrunnlagDto
+import no.nav.familie.ef.sak.vilkår.dto.BarnMedSamværSøknadsgrunnlagDto
 import no.nav.familie.ef.sak.vilkår.dto.LangAvstandTilSøker
 import no.nav.familie.ef.sak.vilkår.regler.HovedregelMetadata
 import no.nav.familie.ef.sak.vilkår.regler.RegelId
@@ -14,28 +16,38 @@ import no.nav.familie.ef.sak.vilkår.regler.SvarId
 import no.nav.familie.ef.sak.vilkår.regler.Vilkårsregel
 import no.nav.familie.ef.sak.vilkår.regler.jaNeiSvarRegel
 import no.nav.familie.ef.sak.vilkår.regler.regelIder
+import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import java.time.LocalDate
 import java.util.UUID
 
 class AleneomsorgRegel : Vilkårsregel(
     vilkårType = VilkårType.ALENEOMSORG,
-    regler = setOf(
+    regler =
+    setOf(
         SKRIFTLIG_AVTALE_OM_DELT_BOSTED,
         NÆRE_BOFORHOLD,
         MER_AV_DAGLIG_OMSORG,
     ),
-    hovedregler = regelIder(
+    hovedregler =
+    regelIder(
         SKRIFTLIG_AVTALE_OM_DELT_BOSTED,
         NÆRE_BOFORHOLD,
         MER_AV_DAGLIG_OMSORG,
     ),
 ) {
-
     override fun initiereDelvilkårsvurdering(
         metadata: HovedregelMetadata,
         resultat: Vilkårsresultat,
         barnId: UUID?,
     ): List<Delvilkårsvurdering> {
+        if (resultat != Vilkårsresultat.IKKE_TATT_STILLING_TIL) {
+            return super.initiereDelvilkårsvurdering(metadata, resultat, barnId)
+        }
+
+        if (skalAutomatiskOppfylleVilkårGittDonorbarn(metadata, barnId)) {
+            return opprettAutomatiskVurdertAleneomsorgVilkår()
+        }
+
         return hovedregler.map { hovedregel ->
             if (hovedregel == RegelId.NÆRE_BOFORHOLD && borLangtFraHverandre(metadata, barnId)) {
                 opprettAutomatiskBeregnetNæreBoforholdDelvilkår()
@@ -45,28 +57,103 @@ class AleneomsorgRegel : Vilkårsregel(
         }
     }
 
-    private fun opprettAutomatiskBeregnetNæreBoforholdDelvilkår() = Delvilkårsvurdering(
-        resultat = Vilkårsresultat.AUTOMATISK_OPPFYLT,
-        listOf(
-            Vurdering(
-                regelId = RegelId.NÆRE_BOFORHOLD,
-                svar = SvarId.NEI,
-                begrunnelse = "Automatisk vurdert (${LocalDate.now().norskFormat()}): Det er beregnet at annen forelder bor mer enn 1 km unna bruker.",
-            ),
-        ),
-    )
+    private fun skalAutomatiskOppfylleVilkårGittDonorbarn(
+        metadata: HovedregelMetadata,
+        barnId: UUID?,
+    ): Boolean {
+        val søknadsgrunnlagBarn =
+            metadata.vilkårgrunnlagDto.barnMedSamvær.find {
+                it.barnId == barnId
+            }?.søknadsgrunnlag
 
-    private fun borLangtFraHverandre(metadata: HovedregelMetadata, barnId: UUID?) =
-        metadata.langAvstandTilSøker.firstOrNull { it.barnId == barnId }?.langAvstandTilSøker?.let {
-            it == LangAvstandTilSøker.JA_UPRESIS || it == LangAvstandTilSøker.JA
-        } ?: false
+        val registergrunnlagBarn =
+            metadata.vilkårgrunnlagDto.barnMedSamvær.find {
+                it.barnId == barnId
+            }?.registergrunnlag
+
+        if (søknadsgrunnlagBarn == null || registergrunnlagBarn == null) return false
+
+        return erDigitalSøknad(metadata) && erDonorbarn(søknadsgrunnlagBarn) &&
+            (harSammeAdresse(registergrunnlagBarn) || erTerminbarnOgOgHarSammeAdresse(søknadsgrunnlagBarn))
+    }
+
+    private fun erDigitalSøknad(metadata: HovedregelMetadata) = metadata.behandling.årsak == BehandlingÅrsak.SØKNAD
+
+    private fun harSammeAdresse(registergrunnlagBarn: BarnMedSamværRegistergrunnlagDto) =
+        registergrunnlagBarn.harSammeAdresse ?: false
+
+    private fun erDonorbarn(søknadsgrunnlagBarn: BarnMedSamværSøknadsgrunnlagDto) =
+        søknadsgrunnlagBarn.ikkeOppgittAnnenForelderBegrunnelse?.lowercase() == "donor"
+
+    private fun erTerminbarnOgOgHarSammeAdresse(søknadsgrunnlagBarn: BarnMedSamværSøknadsgrunnlagDto) =
+        søknadsgrunnlagBarn.erTerminbarn() && søknadsgrunnlagBarn.harSammeAdresse == true
+
+    private fun opprettAutomatiskBeregnetNæreBoforholdDelvilkår() =
+        Delvilkårsvurdering(
+            resultat = Vilkårsresultat.AUTOMATISK_OPPFYLT,
+            listOf(
+                Vurdering(
+                    regelId = RegelId.NÆRE_BOFORHOLD,
+                    svar = SvarId.NEI,
+                    begrunnelse = "Automatisk vurdert (${
+                        LocalDate.now().norskFormat()
+                    }): Det er beregnet at annen forelder bor mer enn 1 km unna bruker.",
+                ),
+            ),
+        )
+
+    private fun opprettAutomatiskVurdertAleneomsorgVilkår(): List<Delvilkårsvurdering> {
+        val begrunnelseTekst = "Automatisk vurdert (${
+            LocalDate.now().norskFormat()
+        }): Bruker har oppgitt at annen forelder er donor."
+
+        return listOf(
+            Delvilkårsvurdering(
+                resultat = Vilkårsresultat.AUTOMATISK_OPPFYLT,
+                listOf(
+                    Vurdering(
+                        regelId = RegelId.SKRIFTLIG_AVTALE_OM_DELT_BOSTED,
+                        svar = SvarId.NEI,
+                        begrunnelse = begrunnelseTekst,
+                    ),
+                ),
+            ),
+            Delvilkårsvurdering(
+                resultat = Vilkårsresultat.AUTOMATISK_OPPFYLT,
+                listOf(
+                    Vurdering(
+                        regelId = RegelId.NÆRE_BOFORHOLD,
+                        svar = SvarId.NEI,
+                        begrunnelse = begrunnelseTekst,
+                    ),
+                ),
+            ),
+            Delvilkårsvurdering(
+                resultat = Vilkårsresultat.AUTOMATISK_OPPFYLT,
+                listOf(
+                    Vurdering(
+                        regelId = RegelId.MER_AV_DAGLIG_OMSORG,
+                        svar = SvarId.JA,
+                        begrunnelse = begrunnelseTekst,
+                    ),
+                ),
+            ),
+        )
+    }
+
+    private fun borLangtFraHverandre(
+        metadata: HovedregelMetadata,
+        barnId: UUID?,
+    ) = metadata.langAvstandTilSøker.firstOrNull { it.barnId == barnId }?.langAvstandTilSøker?.let {
+        it == LangAvstandTilSøker.JA_UPRESIS || it == LangAvstandTilSøker.JA
+    } ?: false
 
     companion object {
-
         private val MER_AV_DAGLIG_OMSORG =
             RegelSteg(
                 regelId = RegelId.MER_AV_DAGLIG_OMSORG,
-                svarMapping = jaNeiSvarRegel(
+                svarMapping =
+                jaNeiSvarRegel(
                     hvisJa = SluttSvarRegel.OPPFYLT_MED_PÅKREVD_BEGRUNNELSE,
                     hvisNei = SluttSvarRegel.IKKE_OPPFYLT_MED_PÅKREVD_BEGRUNNELSE,
                 ),
