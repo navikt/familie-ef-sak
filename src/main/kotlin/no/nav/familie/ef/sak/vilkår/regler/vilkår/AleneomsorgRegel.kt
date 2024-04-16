@@ -74,7 +74,7 @@ class AleneomsorgRegel : Vilkårsregel(
         if (søknadsgrunnlagBarn == null || registergrunnlagBarn == null) return false
 
         return erDigitalSøknad(metadata) && erDonorbarn(søknadsgrunnlagBarn) &&
-                (harSammeAdresse(registergrunnlagBarn) || erTerminbarnOgOgHarSammeAdresse(søknadsgrunnlagBarn))
+            (harSammeAdresse(registergrunnlagBarn) || erTerminbarnOgOgHarSammeAdresse(søknadsgrunnlagBarn))
     }
 
     private fun erDigitalSøknad(metadata: HovedregelMetadata) = metadata.behandling.årsak == BehandlingÅrsak.SØKNAD

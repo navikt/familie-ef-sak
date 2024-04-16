@@ -28,7 +28,9 @@ import no.nav.familie.ef.sak.vilkår.regler.RegelId
 import no.nav.familie.ef.sak.vilkår.regler.SvarId
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.ef.iverksett.BehandlingKategori
-import no.nav.familie.kontrakter.ef.søknad.*
+import no.nav.familie.kontrakter.ef.søknad.AnnenForelder
+import no.nav.familie.kontrakter.ef.søknad.SøknadOvergangsstønad
+import no.nav.familie.kontrakter.ef.søknad.TestsøknadBuilder
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.assertj.core.api.Assertions.assertThat
@@ -271,7 +273,7 @@ internal class VurderingControllerTest : OppslagSpringRunnerTest() {
             val søknad = opprettSøknad(
                 skalHaSammeAdresse = true,
                 fødselTermindato = LocalDate.now().plusDays(1),
-                annenForelder = annenForelder
+                annenForelder = annenForelder,
             )
             val respons: ResponseEntity<Ressurs<VilkårDto>> = opprettVilkår(søknad)
 
@@ -302,7 +304,7 @@ internal class VurderingControllerTest : OppslagSpringRunnerTest() {
             val søknad = opprettSøknad(
                 skalHaSammeAdresse = true,
                 fødselTermindato = LocalDate.now().plusDays(1),
-                annenForelder = annenForelder
+                annenForelder = annenForelder,
             )
             val respons: ResponseEntity<Ressurs<VilkårDto>> = opprettVilkår(søknad)
 
@@ -329,7 +331,6 @@ internal class VurderingControllerTest : OppslagSpringRunnerTest() {
             assertThat(vurderingDagligOmsorg?.begrunnelse).contains("Bruker har oppgitt at annen forelder er donor.")
         }
     }
-
 
     private fun lagOppdaterVilkårsvurdering(
         opprettetVurdering: VilkårDto,
@@ -398,7 +399,7 @@ internal class VurderingControllerTest : OppslagSpringRunnerTest() {
     private fun opprettSøknad(
         skalHaSammeAdresse: Boolean = false,
         fødselTermindato: LocalDate = LocalDate.of(2020, 5, 16),
-        annenForelder: AnnenForelder = TestsøknadBuilder.Builder().defaultAnnenForelder()
+        annenForelder: AnnenForelder = TestsøknadBuilder.Builder().defaultAnnenForelder(),
     ) = TestsøknadBuilder.Builder()
         .setBarn(
             listOf(
@@ -408,7 +409,7 @@ internal class VurderingControllerTest : OppslagSpringRunnerTest() {
                         "14041385481",
                         harSkalHaSammeAdresse = skalHaSammeAdresse,
                         fødselTermindato = fødselTermindato,
-                        annenForelder = annenForelder
+                        annenForelder = annenForelder,
                     ),
                 TestsøknadBuilder.Builder()
                     .defaultBarn(
@@ -416,8 +417,8 @@ internal class VurderingControllerTest : OppslagSpringRunnerTest() {
                         "01012067050",
                         harSkalHaSammeAdresse = skalHaSammeAdresse,
                         fødselTermindato = fødselTermindato,
-                        annenForelder = annenForelder
-                    )
+                        annenForelder = annenForelder,
+                    ),
             ),
         )
         .setPersonalia("Navn på forsørger", "01010172272")
