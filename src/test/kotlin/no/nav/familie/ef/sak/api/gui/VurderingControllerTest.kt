@@ -75,19 +75,36 @@ internal class VurderingControllerTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    internal fun `Henter vilkår og sjekker initiering av nære boforhold`() {
-        val respons: ResponseEntity<Ressurs<VilkårDto>> = opprettVilkår()
+    internal fun `Delvilkåret næreboforhold skal automatisk vurderes når foreldre ikke bor sammen`() {
+        val samvær = opprettSamvær("Nei")
+        val søknad = opprettSøknad(samvær = samvær)
+        val respons: ResponseEntity<Ressurs<VilkårDto>> = opprettVilkår(søknad)
 
         assertThat(respons.statusCode).isEqualTo(HttpStatus.OK)
         assertThat(respons.body?.status).isEqualTo(Ressurs.Status.SUKSESS)
         assertThat(respons.body?.data).isNotNull
 
-        val næreBoforholdVurderingDto =
-            respons.body?.data?.vurderinger?.first { it.vilkårType == VilkårType.ALENEOMSORG }
-                ?.delvilkårsvurderinger?.first { it.vurderinger.first().regelId == RegelId.NÆRE_BOFORHOLD }?.vurderinger?.first()
+        val aleneOmsorgVilkår = respons.body?.data?.vurderinger?.first { it.vilkårType == VilkårType.ALENEOMSORG }
+        val vurderingNæreBoforhold = utledVurdering(aleneOmsorgVilkår, RegelId.NÆRE_BOFORHOLD)
 
-        assertThat(næreBoforholdVurderingDto?.svar).isEqualTo(SvarId.NEI)
-        assertThat(næreBoforholdVurderingDto?.begrunnelse).contains("annen forelder bor mer enn 200 meter unna bruker")
+        assertThat(vurderingNæreBoforhold?.svar).isEqualTo(SvarId.NEI)
+        assertThat(vurderingNæreBoforhold?.begrunnelse).contains("annen forelder bor mer enn 200 meter unna bruker")
+    }
+
+    @Test
+    internal fun `Delvilkåret næreboforhold skal ikke automatisk vurderes når foreldre bor sammen`() {
+        val søknad = opprettSøknad()
+        val respons: ResponseEntity<Ressurs<VilkårDto>> = opprettVilkår(søknad)
+
+        assertThat(respons.statusCode).isEqualTo(HttpStatus.OK)
+        assertThat(respons.body?.status).isEqualTo(Ressurs.Status.SUKSESS)
+        assertThat(respons.body?.data).isNotNull
+
+        val aleneOmsorgVilkår = respons.body?.data?.vurderinger?.first { it.vilkårType == VilkårType.ALENEOMSORG }
+        val vurderingNæreBoforhold = utledVurdering(aleneOmsorgVilkår, RegelId.NÆRE_BOFORHOLD)
+
+        assertThat(vurderingNæreBoforhold?.svar).isNull()
+        assertThat(vurderingNæreBoforhold?.begrunnelse).isNull()
     }
 
     @Test
@@ -116,17 +133,17 @@ internal class VurderingControllerTest : OppslagSpringRunnerTest() {
     private fun endreVegadresseForGrunnlagsdata(grunnlagsdata: Grunnlagsdata) =
         grunnlagsdata.copy(
             data =
-                grunnlagsdata.data.copy(
-                    søker =
-                        grunnlagsdata.data.søker.copy(
-                            bostedsadresse =
-                                listOf(
-                                    grunnlagsdata.data.søker.bostedsadresse.first().copy(
-                                        vegadresse = nyVegadresse(),
-                                    ),
-                                ),
+            grunnlagsdata.data.copy(
+                søker =
+                grunnlagsdata.data.søker.copy(
+                    bostedsadresse =
+                    listOf(
+                        grunnlagsdata.data.søker.bostedsadresse.first().copy(
+                            vegadresse = nyVegadresse(),
                         ),
+                    ),
                 ),
+            ),
         )
 
     private fun nyVegadresse() =
@@ -292,8 +309,8 @@ internal class VurderingControllerTest : OppslagSpringRunnerTest() {
             assertThat(vurderingDeltBosted?.svar).isNull()
             assertThat(vurderingDeltBosted?.begrunnelse).isNull()
 
-            assertThat(vurderingNæreBoforhold?.svar).isEqualTo(SvarId.NEI)
-            assertThat(vurderingNæreBoforhold?.begrunnelse).contains("annen forelder bor mer enn 1 km unna bruker")
+            assertThat(vurderingNæreBoforhold?.svar).isNull()
+            assertThat(vurderingNæreBoforhold?.begrunnelse).isNull()
 
             assertThat(vurderingDagligOmsorg?.svar).isNull()
             assertThat(vurderingDagligOmsorg?.begrunnelse).isNull()
@@ -349,14 +366,14 @@ internal class VurderingControllerTest : OppslagSpringRunnerTest() {
             id = it.id,
             behandlingId = it.behandlingId,
             delvilkårsvurderinger =
-                it.delvilkårsvurderinger.map {
-                    it.copy(
-                        vurderinger =
-                            it.vurderinger.map { vurderingDto ->
-                                vurderingDto.copy(svar = SvarId.JA, begrunnelse = "En begrunnelse")
-                            },
-                    )
-                },
+            it.delvilkårsvurderinger.map {
+                it.copy(
+                    vurderinger =
+                    it.vurderinger.map { vurderingDto ->
+                        vurderingDto.copy(svar = SvarId.JA, begrunnelse = "En begrunnelse")
+                    },
+                )
+            },
         )
 
     private fun opprettVilkår(søknad: SøknadOvergangsstønad? = null): ResponseEntity<Ressurs<VilkårDto>> {
@@ -399,19 +416,22 @@ internal class VurderingControllerTest : OppslagSpringRunnerTest() {
         return behandling
     }
 
+    private fun opprettSamvær(borSammenSvar: String): Samvær {
+        val samvær = Samvær(
+            borAnnenForelderISammeHus = Søknadsfelt(
+                label = "Bor du og den andre forelderen i samme hus, blokk, gårdstun, kvartal eller vei/gate?",
+                verdi = borSammenSvar,
+                svarId = borSammenSvar,
+            ),
+        )
+        return samvær
+    }
+
     private fun opprettSøknad(
         skalHaSammeAdresse: Boolean = false,
         fødselTermindato: LocalDate = LocalDate.of(2020, 5, 16),
         annenForelder: AnnenForelder = TestsøknadBuilder.Builder().defaultAnnenForelder(),
-        samvær: Samvær =
-            Samvær(
-                borAnnenForelderISammeHus =
-                    Søknadsfelt(
-                        label = "Bor annen forelder i samme hus",
-                        verdi = "vet ikke",
-                        svarId = "vet ikke",
-                    ),
-            ),
+        samvær: Samvær = opprettSamvær("Ja"),
     ) = TestsøknadBuilder.Builder()
         .setBarn(
             listOf(
@@ -443,22 +463,22 @@ internal class VurderingControllerTest : OppslagSpringRunnerTest() {
             id = it.id,
             behandlingId = it.behandlingId,
             delvilkårsvurderinger =
-                listOf(
-                    DelvilkårsvurderingDto(
-                        Vilkårsresultat.IKKE_OPPFYLT,
-                        listOf(
-                            VurderingDto(
-                                RegelId.SØKER_MEDLEM_I_FOLKETRYGDEN,
-                                SvarId.NEI,
-                            ),
-                            VurderingDto(
-                                RegelId.MEDLEMSKAP_UNNTAK,
-                                SvarId.MEDLEM_MER_ENN_5_ÅR_EØS,
-                                "a",
-                            ),
+            listOf(
+                DelvilkårsvurderingDto(
+                    Vilkårsresultat.IKKE_OPPFYLT,
+                    listOf(
+                        VurderingDto(
+                            RegelId.SØKER_MEDLEM_I_FOLKETRYGDEN,
+                            SvarId.NEI,
+                        ),
+                        VurderingDto(
+                            RegelId.MEDLEMSKAP_UNNTAK,
+                            SvarId.MEDLEM_MER_ENN_5_ÅR_EØS,
+                            "a",
                         ),
                     ),
                 ),
+            ),
         )
 
     private fun utledVurdering(

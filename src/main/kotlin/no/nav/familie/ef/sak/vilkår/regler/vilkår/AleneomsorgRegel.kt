@@ -23,17 +23,17 @@ import java.util.UUID
 class AleneomsorgRegel : Vilkårsregel(
     vilkårType = VilkårType.ALENEOMSORG,
     regler =
-        setOf(
-            SKRIFTLIG_AVTALE_OM_DELT_BOSTED,
-            NÆRE_BOFORHOLD,
-            MER_AV_DAGLIG_OMSORG,
-        ),
+    setOf(
+        SKRIFTLIG_AVTALE_OM_DELT_BOSTED,
+        NÆRE_BOFORHOLD,
+        MER_AV_DAGLIG_OMSORG,
+    ),
     hovedregler =
-        regelIder(
-            SKRIFTLIG_AVTALE_OM_DELT_BOSTED,
-            NÆRE_BOFORHOLD,
-            MER_AV_DAGLIG_OMSORG,
-        ),
+    regelIder(
+        SKRIFTLIG_AVTALE_OM_DELT_BOSTED,
+        NÆRE_BOFORHOLD,
+        MER_AV_DAGLIG_OMSORG,
+    ),
 ) {
     override fun initiereDelvilkårsvurdering(
         metadata: HovedregelMetadata,
@@ -49,15 +49,8 @@ class AleneomsorgRegel : Vilkårsregel(
         }
 
         return hovedregler.map { hovedregel ->
-            if (resultat != Vilkårsresultat.IKKE_TATT_STILLING_TIL) {
-                return super.initiereDelvilkårsvurdering(metadata, resultat, barnId)
-            }
-
-            if (hovedregel == RegelId.NÆRE_BOFORHOLD &&
-                erDigitalSøknadOgBorLagtNokUnnaAnnenForelder(
-                    metadata,
-                    barnId,
-                )
+            if (
+                skalAutomatiskOppfylleNæreBoforhold(hovedregel, metadata, barnId)
             ) {
                 opprettAutomatiskBeregnetNæreBoforholdDelvilkår()
             } else {
@@ -147,21 +140,25 @@ class AleneomsorgRegel : Vilkårsregel(
             ),
         )
 
-    private fun erDigitalSøknadOgBorLagtNokUnnaAnnenForelder(
+    private fun skalAutomatiskOppfylleNæreBoforhold(
+        hovedregel: RegelId,
         metadata: HovedregelMetadata,
         barnId: UUID?,
-    ) = (metadata.behandling.årsak == BehandlingÅrsak.SØKNAD) && borIkkeISammeHusOgBorLangtNokFraHverandre(metadata, barnId)
+    ) = hovedregel == RegelId.NÆRE_BOFORHOLD && erDigitalSøknad(metadata) && borIkkeISammeHusOgBorLangtNokFraHverandre(metadata, barnId)
 
     private fun borIkkeISammeHusOgBorLangtNokFraHverandre(
         metadata: HovedregelMetadata,
         barnId: UUID?,
-    ) = metadata.langAvstandTilSøker.firstOrNull { it.barnId == barnId }?.langAvstandTilSøker?.let {
-        it == LangAvstandTilSøker.JA_UPRESIS || it == LangAvstandTilSøker.JA
-    } ?: false && metadata.langAvstandTilSøker.find {
+    ) = borIkkeISammeHus(metadata, barnId) && borLangtNokFraHverandre(metadata, barnId)
+
+    private fun borIkkeISammeHus(
+        metadata: HovedregelMetadata,
+        barnId: UUID?,
+    ) = metadata.langAvstandTilSøker.find {
         it.barnId == barnId
     }?.borAnnenForelderISammeHus?.let { it.isNotBlank() && it.lowercase() != "ja" } ?: false
 
-    private fun borLangtFraHverandre(
+    private fun borLangtNokFraHverandre(
         metadata: HovedregelMetadata,
         barnId: UUID?,
     ) = metadata.langAvstandTilSøker.firstOrNull { it.barnId == barnId }?.langAvstandTilSøker?.let {
@@ -173,10 +170,10 @@ class AleneomsorgRegel : Vilkårsregel(
             RegelSteg(
                 regelId = RegelId.MER_AV_DAGLIG_OMSORG,
                 svarMapping =
-                    jaNeiSvarRegel(
-                        hvisJa = SluttSvarRegel.OPPFYLT_MED_PÅKREVD_BEGRUNNELSE,
-                        hvisNei = SluttSvarRegel.IKKE_OPPFYLT_MED_PÅKREVD_BEGRUNNELSE,
-                    ),
+                jaNeiSvarRegel(
+                    hvisJa = SluttSvarRegel.OPPFYLT_MED_PÅKREVD_BEGRUNNELSE,
+                    hvisNei = SluttSvarRegel.IKKE_OPPFYLT_MED_PÅKREVD_BEGRUNNELSE,
+                ),
             )
 
         private val næreBoForholdMapping =
