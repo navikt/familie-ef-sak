@@ -33,6 +33,7 @@ internal class TilordnetRessursServiceTest {
     fun setUp() {
         mockkObject(SikkerhetContext)
         every { SikkerhetContext.hentSaksbehandler() } returns "NAV1234"
+        every { SikkerhetContext.erSaksbehandler() } returns true
         every { featureToggleService.isEnabled(any()) } returns false
     }
 
@@ -155,6 +156,7 @@ internal class TilordnetRessursServiceTest {
                 )
             } answers { efOppgave(firstArg<UUID>()) }
             every { oppgaveClient.finnOppgaveMedId(any()) } answers { oppgave(firstArg<Long>()).copy(tilordnetRessurs = "NAV2345") }
+            every { SikkerhetContext.erSaksbehandler() } returns true
             every { featureToggleService.isEnabled(any()) } returns true
 
             val erSaksbehandlerEllerNull =
@@ -169,21 +171,21 @@ internal class TilordnetRessursServiceTest {
 
         @Test
         internal fun `skal utlede at saksbehandlers rolle er INNLOGGET SAKSBEHANDLER`() {
-            val saksbehandler = saksbehandler(UUID.randomUUID(), "Skywalker", "Anakin", "NAV1234")
+            val saksbehandler = saksbehandler(UUID.randomUUID(), "4405", "Vader", "Darth", "NAV1234")
             val oppgave = Oppgave(tilordnetRessurs = "NAV1234", tema = Tema.ENF)
 
             every { oppgaveClient.hentSaksbehandlerInfo("NAV1234") } returns saksbehandler
 
             val saksbehandlerDto = tilordnetRessursService.utledAnsvarligSaksbehandlerForOppgave(oppgave)
 
-            assertThat(saksbehandlerDto.fornavn).isEqualTo("Anakin")
-            assertThat(saksbehandlerDto.etternavn).isEqualTo("Skywalker")
+            assertThat(saksbehandlerDto.fornavn).isEqualTo("Darth")
+            assertThat(saksbehandlerDto.etternavn).isEqualTo("Vader")
             assertThat(saksbehandlerDto.rolle).isEqualTo(SaksbehandlerRolle.INNLOGGET_SAKSBEHANDLER)
         }
 
         @Test
         internal fun `skal utlede at saksbehandlers rolle er ANNEN SAKSBEHANDLER`() {
-            val saksbehandler = saksbehandler(UUID.randomUUID(), "Vader", "Darth", "NAV2345")
+            val saksbehandler = saksbehandler(UUID.randomUUID(), "4405", "Vader", "Darth", "NAV2345")
             val oppgave = Oppgave(tilordnetRessurs = "NAV2345", tema = Tema.ENF)
 
             every { oppgaveClient.hentSaksbehandlerInfo("NAV2345") } returns saksbehandler
@@ -219,10 +221,11 @@ internal class TilordnetRessursServiceTest {
 
         @Test
         internal fun `skal utlede at saksbehandlers rolle er UTVIKLER MED VEILEDERROLLE`() {
-            val saksbehandler = saksbehandler(UUID.randomUUID(), "Vader", "Darth", "NAV1234")
+            val saksbehandler = saksbehandler(UUID.randomUUID(), "4405", "Vader", "Darth", "NAV1234")
             val oppgave = Oppgave(tilordnetRessurs = "NAV1234")
 
             every { oppgaveClient.hentSaksbehandlerInfo("NAV1234") } returns saksbehandler
+            every { SikkerhetContext.erSaksbehandler() } returns true
             every { featureToggleService.isEnabled(any()) } returns true
 
             val saksbehandlerDto = tilordnetRessursService.utledAnsvarligSaksbehandlerForOppgave(oppgave)
@@ -234,7 +237,7 @@ internal class TilordnetRessursServiceTest {
 
         @Test
         internal fun `skal utlede at saksbehandlers rolle er OPPGAVE_TILHØRER_IKKE_ENF`() {
-            val saksbehandler = saksbehandler(UUID.randomUUID(), "Vader", "Darth", "NAV2345")
+            val saksbehandler = saksbehandler(UUID.randomUUID(), "4405", "Vader", "Darth", "NAV2345")
             val oppgave = Oppgave(tilordnetRessurs = "NAV2345", tema = Tema.BAR)
 
             every { oppgaveClient.hentSaksbehandlerInfo("NAV2345") } returns saksbehandler
@@ -262,12 +265,13 @@ internal class TilordnetRessursServiceTest {
 
     private fun saksbehandler(
         azureId: UUID,
+        enhet: String,
         etternavn: String,
         fornavn: String,
         navIdent: String,
     ) = Saksbehandler(
         azureId = azureId,
-        enhet = "4405",
+        enhet = enhet,
         etternavn = etternavn,
         fornavn = fornavn,
         navIdent = navIdent,
