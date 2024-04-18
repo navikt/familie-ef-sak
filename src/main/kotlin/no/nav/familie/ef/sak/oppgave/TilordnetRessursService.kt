@@ -88,5 +88,5 @@ class TilordnetRessursService(
     }
 
     private fun erUtviklerMedVeilderrolle(): Boolean =
-        SikkerhetContext.erSaksbehandler() && featureToggleService.isEnabled(Toggle.UTVIKLER_MED_VEILEDERRROLLE)
+        featureToggleService.isEnabled(Toggle.UTVIKLER_MED_VEILEDERRROLLE)
 }

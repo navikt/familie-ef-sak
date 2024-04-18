@@ -60,7 +60,7 @@ internal class EndringerIPersonOpplysningerServiceTest {
             assertThat(endringer.endringer.harEndringer).isFalse
 
             verify(exactly = 1) { grunnlagsdataService.hentFraRegister(any()) }
-            verify(exactly = 1) { personopplysningerService.finnEndringerIPersonopplysninger(any(), any(), any()) }
+            verify(exactly = 1) { personopplysningerService.finnEndringerIPersonopplysningerForBehandling(any(), any(), any()) }
             verify(exactly = 1) {
                 grunnlagsdataService.oppdaterEndringer(
                     coWithArg {
@@ -78,7 +78,7 @@ internal class EndringerIPersonOpplysningerServiceTest {
             assertThat(endringer.endringer.harEndringer).isTrue
 
             verify(exactly = 1) { grunnlagsdataService.hentFraRegister(any()) }
-            verify(exactly = 1) { personopplysningerService.finnEndringerIPersonopplysninger(any(), any(), any()) }
+            verify(exactly = 1) { personopplysningerService.finnEndringerIPersonopplysningerForBehandling(any(), any(), any()) }
             verify(exactly = 1) {
                 grunnlagsdataService.oppdaterEndringer(
                     coWithArg {
@@ -103,7 +103,7 @@ internal class EndringerIPersonOpplysningerServiceTest {
 
             assertThat(endringer.endringer.harEndringer).isTrue
 
-            verify(exactly = 1) { personopplysningerService.finnEndringerIPersonopplysninger(any(), any(), any()) }
+            verify(exactly = 1) { personopplysningerService.finnEndringerIPersonopplysningerForBehandling(any(), any(), any()) }
             verify(exactly = 0) { grunnlagsdataService.oppdaterEndringer(any()) }
             verify(exactly = 0) { grunnlagsdataService.hentFraRegister(any()) }
         }
@@ -116,7 +116,7 @@ internal class EndringerIPersonOpplysningerServiceTest {
 
             assertThat(endringer.endringer.harEndringer).isFalse
 
-            verify(exactly = 0) { personopplysningerService.finnEndringerIPersonopplysninger(any(), any(), any()) }
+            verify(exactly = 0) { personopplysningerService.finnEndringerIPersonopplysningerForBehandling(any(), any(), any()) }
             verify(exactly = 0) { grunnlagsdataService.oppdaterEndringer(any()) }
             verify(exactly = 0) { grunnlagsdataService.hentFraRegister(any()) }
         }
@@ -139,7 +139,7 @@ internal class EndringerIPersonOpplysningerServiceTest {
     private fun mockPersonopplysninger(harEndringer: Boolean) {
         val endringer = Endringer(folkeregisterpersonstatus = Endring(harEndringer = harEndringer))
         every {
-            personopplysningerService.finnEndringerIPersonopplysninger(
+            personopplysningerService.finnEndringerIPersonopplysningerForBehandling(
                 any(),
                 any(),
                 any(),

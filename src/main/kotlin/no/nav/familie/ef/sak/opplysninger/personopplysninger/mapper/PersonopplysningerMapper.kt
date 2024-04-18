@@ -4,6 +4,7 @@ import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.AnnenForelderMedIdent
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.BarnMedIdent
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.GrunnlagsdataMedMetadata
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.Personopplysninger
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.Søker
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.AdresseDto
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.Adressebeskyttelse
@@ -25,6 +26,7 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.identer
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.visningsnavn
 import org.springframework.stereotype.Component
 import java.time.LocalDate
+import java.time.LocalDateTime
 
 @Component
 class PersonopplysningerMapper(
@@ -34,11 +36,11 @@ class PersonopplysningerMapper(
 ) {
 
     fun tilPersonopplysninger(
-        grunnlagsdataMedMetadata: GrunnlagsdataMedMetadata,
+        grunnlagsdata: Personopplysninger,
+        grunnlagsdataOpprettet: LocalDateTime,
         egenAnsatt: Boolean,
         søkerIdenter: PdlIdenter,
     ): PersonopplysningerDto {
-        val grunnlagsdata = grunnlagsdataMedMetadata.grunnlagsdata
         val søker = grunnlagsdata.søker
         val annenForelderMap = grunnlagsdata.annenForelder.associateBy { it.personIdent }
 
@@ -81,7 +83,7 @@ class PersonopplysningerMapper(
                     søkerIdenter.identer(),
                     søker.bostedsadresse,
                     annenForelderMap,
-                    grunnlagsdataMedMetadata.opprettetTidspunkt.toLocalDate(),
+                    grunnlagsdataOpprettet.toLocalDate(),
                 )
             }.sortedBy { it.fødselsdato },
             innflyttingTilNorge = innflyttingUtflyttingMapper.mapInnflytting(søker.innflyttingTilNorge),
@@ -90,6 +92,17 @@ class PersonopplysningerMapper(
             vergemål = mapVergemål(søker),
         )
     }
+
+    fun tilPersonopplysninger(
+        grunnlagsdataMedMetadata: GrunnlagsdataMedMetadata,
+        egenAnsatt: Boolean,
+        søkerIdenter: PdlIdenter,
+    ): PersonopplysningerDto = tilPersonopplysninger(
+        grunnlagsdata = grunnlagsdataMedMetadata.grunnlagsdata.tilPersonopplysninger(),
+        grunnlagsdataOpprettet = grunnlagsdataMedMetadata.opprettetTidspunkt,
+        egenAnsatt = egenAnsatt,
+        søkerIdenter = søkerIdenter,
+    )
 
     private fun mapOmråde(område: String): String {
         return when (område) {

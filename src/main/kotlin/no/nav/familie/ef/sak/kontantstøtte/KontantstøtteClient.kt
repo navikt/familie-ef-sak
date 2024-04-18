@@ -35,22 +35,18 @@ data class HentUtbetalingsinfoKontantstøtteRequest(
 data class HentUtbetalingsinfoKontantstøtte(
     val infotrygdPerioder: List<KontantstøtteInfotrygdPeriode>,
     val ksSakPerioder: List<KsSakPeriode>,
-) {
-    fun finnesUtbetalinger(): Boolean {
-        return infotrygdPerioder.isNotEmpty() || ksSakPerioder.isNotEmpty()
-    }
-}
+)
 
 data class KontantstøtteInfotrygdPeriode(
     val fomMåned: YearMonth,
-    val tomMåned: YearMonth,
+    val tomMåned: YearMonth?,
     val beløp: Int,
     val barna: List<String>,
 )
 
 data class KsSakPeriode(
     val fomMåned: YearMonth,
-    val tomMåned: YearMonth,
+    val tomMåned: YearMonth?,
     val barn: KsBarn,
 )
 
