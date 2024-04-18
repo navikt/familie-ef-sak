@@ -87,7 +87,6 @@ internal class JournalpostClientTest {
             firstArg<Toggle>() != Toggle.UTVIKLER_MED_VEILEDERRROLLE
         }
         mockkObject(SikkerhetContext)
-        every { SikkerhetContext.erSaksbehandler() } returns true
     }
 
     @Test
