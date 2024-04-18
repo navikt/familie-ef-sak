@@ -42,6 +42,8 @@ object SikkerhetContext {
         return applikasjonsnavn.endsWith(forventetApplikasjonsSuffix)
     }
 
+    fun erSystembruker(): Boolean = hentSaksbehandlerEllerSystembruker() == SYSTEM_FORKORTELSE
+
     fun hentSaksbehandler(): String {
         val result = hentSaksbehandlerEllerSystembruker()
 
