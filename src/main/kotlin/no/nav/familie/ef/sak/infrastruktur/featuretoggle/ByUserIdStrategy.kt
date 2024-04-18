@@ -10,6 +10,9 @@ class ByUserIdStrategy : Strategy {
     }
 
     override fun isEnabled(map: MutableMap<String, String>): Boolean {
+        if (SikkerhetContext.erSystembruker()) {
+            return false
+        }
         return map["userIds"]
             ?.split(',')
             ?.any { SikkerhetContext.hentSaksbehandler() == it }
