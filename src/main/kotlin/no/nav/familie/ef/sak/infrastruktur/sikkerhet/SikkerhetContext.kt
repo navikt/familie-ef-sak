@@ -51,6 +51,9 @@ object SikkerhetContext {
         return result
     }
 
+    @Deprecated("Bytt til _har_veileder_rolle eller tilsvarende")
+    fun erSaksbehandler(): Boolean = hentSaksbehandlerEllerSystembruker() != SYSTEM_FORKORTELSE
+
     fun hentSaksbehandlerEllerSystembruker() =
         Result.runCatching { SpringTokenValidationContextHolder().tokenValidationContext }
             .fold(
