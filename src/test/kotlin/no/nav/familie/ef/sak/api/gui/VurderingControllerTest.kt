@@ -75,7 +75,7 @@ internal class VurderingControllerTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    internal fun `Delvilkåret næreboforhold skal automatisk vurderes når foreldre ikke bor sammen`() {
+    internal fun `Delvilkåret nære boforhold skal automatisk vurderes når foreldre ikke bor sammen`() {
         val samvær = opprettSamvær("Nei")
         val søknad = opprettSøknad(samvær = samvær)
         val respons: ResponseEntity<Ressurs<VilkårDto>> = opprettVilkår(søknad)
@@ -92,7 +92,7 @@ internal class VurderingControllerTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    internal fun `Delvilkåret næreboforhold skal ikke automatisk vurderes når foreldre bor sammen`() {
+    internal fun `Delvilkåret nære boforhold skal ikke automatisk vurderes når foreldre bor sammen`() {
         val søknad = opprettSøknad()
         val respons: ResponseEntity<Ressurs<VilkårDto>> = opprettVilkår(søknad)
 

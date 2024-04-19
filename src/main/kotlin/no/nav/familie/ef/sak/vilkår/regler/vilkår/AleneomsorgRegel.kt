@@ -144,19 +144,14 @@ class AleneomsorgRegel : Vilkårsregel(
         hovedregel: RegelId,
         metadata: HovedregelMetadata,
         barnId: UUID?,
-    ) = hovedregel == RegelId.NÆRE_BOFORHOLD && erDigitalSøknad(metadata) && borIkkeISammeHusOgBorLangtNokFraHverandre(metadata, barnId)
+    ) = hovedregel == RegelId.NÆRE_BOFORHOLD && erDigitalSøknad(metadata) && !borISammeHus(metadata, barnId) && borLangtNokFraHverandre(metadata, barnId)
 
-    private fun borIkkeISammeHusOgBorLangtNokFraHverandre(
-        metadata: HovedregelMetadata,
-        barnId: UUID?,
-    ) = borIkkeISammeHus(metadata, barnId) && borLangtNokFraHverandre(metadata, barnId)
-
-    private fun borIkkeISammeHus(
+    private fun borISammeHus(
         metadata: HovedregelMetadata,
         barnId: UUID?,
     ) = metadata.langAvstandTilSøker.find {
         it.barnId == barnId
-    }?.borAnnenForelderISammeHus?.let { it.isNotBlank() && it.lowercase() != "ja" } ?: false
+    }?.borAnnenForelderISammeHus?.let { it.isNotBlank() && it.lowercase() == "ja" } ?: false
 
     private fun borLangtNokFraHverandre(
         metadata: HovedregelMetadata,
