@@ -33,6 +33,7 @@ data class HovedregelMetadata(
 data class BarnForelderLangAvstandTilSøker(
     val barnId: UUID,
     val langAvstandTilSøker: LangAvstandTilSøker,
+    val borAnnenForelderISammeHus: String?,
 )
 
 abstract class Vilkårsregel(
@@ -41,7 +42,6 @@ abstract class Vilkårsregel(
     @JsonIgnore
     val hovedregler: Set<RegelId>,
 ) {
-
     open fun initiereDelvilkårsvurdering(
         metadata: HovedregelMetadata,
         resultat: Vilkårsresultat = Vilkårsresultat.IKKE_TATT_STILLING_TIL,
@@ -62,7 +62,11 @@ abstract class Vilkårsregel(
         return regler[regelId] ?: throw Feil("Finner ikke regelId=$regelId for vilkårType=$vilkårType")
     }
 
-    protected fun automatiskVurdertDelvilkår(regelId: RegelId, svarId: SvarId, begrunnelse: String): Delvilkårsvurdering {
+    protected fun automatiskVurdertDelvilkår(
+        regelId: RegelId,
+        svarId: SvarId,
+        begrunnelse: String,
+    ): Delvilkårsvurdering {
         return Delvilkårsvurdering(
             resultat = Vilkårsresultat.AUTOMATISK_OPPFYLT,
             listOf(
@@ -75,12 +79,14 @@ abstract class Vilkårsregel(
         )
     }
 
-    protected fun ubesvartDelvilkårsvurdering(regelId: RegelId) = Delvilkårsvurdering(
-        resultat = Vilkårsresultat.IKKE_TATT_STILLING_TIL,
-        vurderinger = listOf(
-            Vurdering(
-                regelId = regelId,
+    protected fun ubesvartDelvilkårsvurdering(regelId: RegelId) =
+        Delvilkårsvurdering(
+            resultat = Vilkårsresultat.IKKE_TATT_STILLING_TIL,
+            vurderinger =
+            listOf(
+                Vurdering(
+                    regelId = regelId,
+                ),
             ),
-        ),
-    )
+        )
 }
