@@ -60,7 +60,7 @@ class TilbakekrevingClientTestConfig {
         val dummyPdf = this::class.java.classLoader.getResource("dummy/pdf_dummy.pdf")!!.readBytes()
         every { tilbakekrevingClient.hentForhåndsvisningVarselbrev(any()) } returns dummyPdf
 
-        every { tilbakekrevingClient.opprettManuelTilbakekreving(any(), any(), any()) } just runs
+        every { tilbakekrevingClient.opprettManuellTilbakekreving(any(), any(), any()) } just runs
         val kanBehandleRespons = KanBehandlingOpprettesManueltRespons(kanBehandlingOpprettes = true, melding = "OK")
         every { tilbakekrevingClient.kanBehandlingOpprettesManuelt(any(), any()) } returns kanBehandleRespons
 

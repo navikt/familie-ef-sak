@@ -36,6 +36,8 @@ class TilbakekrevingClient(
     private val opprettManueltTilbakekrevingUri =
         UriComponentsBuilder.fromUri(familieTilbakeUri).pathSegment("api/behandling/manuelt/task/v1").build().toUri()
 
+    private val opprettAutomatiskTilbakekrevingUri = UriComponentsBuilder.fromUri(familieTilbakeUri).pathSegment("api/behandling/v1/automatisk").build().toUri()
+
     private fun kanBehandlingOpprettesManueltUri(
         stønadstype: StønadType,
         eksternFagsakId: Long,
@@ -99,7 +101,7 @@ class TilbakekrevingClient(
         return response.getDataOrThrow()
     }
 
-    fun opprettManuelTilbakekreving(
+    fun opprettManuellTilbakekreving(
         eksternFagsakId: Long,
         kravgrunnlagsreferanse: String,
         stønadstype: StønadType,

@@ -65,6 +65,7 @@ class TilbakekrevingService(
         ) {
             "Må fylle ut varseltekst for å lage tilbakekreving med varsel"
         }
+
         brukerfeilHvis(behandling.status.behandlingErLåstForVidereRedigering()) {
             "Behandlingen er låst for redigering"
         }
@@ -147,6 +148,6 @@ class TilbakekrevingService(
 
         behandlingService.hentBehandlingPåEksternId(kravgrunnlagsreferanse.toLong())
 
-        tilbakekrevingClient.opprettManuelTilbakekreving(fagsak.eksternId, kravgrunnlagsreferanse, fagsak.stønadstype)
+        tilbakekrevingClient.opprettManuellTilbakekreving(fagsak.eksternId, kravgrunnlagsreferanse, fagsak.stønadstype)
     }
 }
