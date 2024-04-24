@@ -265,13 +265,13 @@ data class Vegadresse(
         if (koordinater1.y > UTM_GRENSE || koordinater2.y > UTM_GRENSE) {
             val distanse = abs(koordinater2.y - koordinater1.y)
             return AvstandTilSøkerDto(
-                avstand = distanse,
+                avstand = distanse.toLong(),
                 langAvstandTilSøker = if (distanse > MINIMUM_AVSTAND_FOR_AUTOMATISK_BEREGNING_I_METER) JA_UPRESIS else UKJENT,
             )
         }
         val distanse = beregnAvstandIMeter(koordinater1.x, koordinater1.y, koordinater2.x, koordinater2.y)
         return AvstandTilSøkerDto(
-            avstand = distanse,
+            avstand = distanse.toLong(),
             langAvstandTilSøker = if (distanse > MINIMUM_AVSTAND_FOR_AUTOMATISK_BEREGNING_I_METER) JA else UKJENT,
         )
     }

@@ -86,7 +86,7 @@ data class BarnepassordningDto(
 )
 
 data class AvstandTilSøkerDto(
-    val avstand: Float?,
+    val avstand: Long?,
     val langAvstandTilSøker: LangAvstandTilSøker,
 )
 
