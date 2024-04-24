@@ -174,7 +174,7 @@ class BarnMedSamværMapper(
             bosattINorge = annenForelder.bosattNorge,
             land = annenForelder.land,
             visningsadresse = null,
-            avstandTilSøker = AvstandTilSøkerDto(avstandIKm = null, langAvstandTilSøker = LangAvstandTilSøker.UKJENT),
+            avstandTilSøker = AvstandTilSøkerDto(avstand = null, langAvstandTilSøker = LangAvstandTilSøker.UKJENT),
         )
     }
 
@@ -207,7 +207,7 @@ class BarnMedSamværMapper(
         bostedsadresse
             ?.vegadresse
             ?.fjerneBoforhold(søkerAdresse.gjeldende()?.vegadresse)
-            ?: AvstandTilSøkerDto(avstandIKm = null, langAvstandTilSøker = LangAvstandTilSøker.UKJENT)
+            ?: AvstandTilSøkerDto(avstand = null, langAvstandTilSøker = LangAvstandTilSøker.UKJENT)
 
     private fun List<DeltBosted>?.tilDto(): List<DeltBostedDto> {
         return this?.map {
