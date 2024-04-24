@@ -61,7 +61,7 @@ class TilbakekrevingController(
     }
 
     @GetMapping("/{behandlingId}/brev")
-    fun genererBrevMedEskisterendeVarseltekst(@PathVariable behandlingId: UUID): Ressurs<ByteArray> {
+    fun genererBrevMedEksisterendeVarseltekst(@PathVariable behandlingId: UUID): Ressurs<ByteArray> {
         val saksbehandling = behandlingService.hentSaksbehandling(behandlingId)
         tilgangService.validerTilgangTilBehandling(saksbehandling, AuditLoggerEvent.UPDATE)
         return Ressurs.success(tilbakekrevingService.genererBrevMedVarseltekstFraEksisterendeTilbakekreving(saksbehandling))

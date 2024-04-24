@@ -99,7 +99,7 @@ class TilbakekrevingClient(
         return response.getDataOrThrow()
     }
 
-    fun opprettManuelTilbakekreving(
+    fun opprettManuellTilbakekreving(
         eksternFagsakId: Long,
         kravgrunnlagsreferanse: String,
         stønadstype: StønadType,
