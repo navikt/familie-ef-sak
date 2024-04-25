@@ -252,26 +252,26 @@ data class Vegadresse(
 
     fun fjerneBoforhold(annenVegadresse: Vegadresse?): AvstandTilSøkerDto {
         if (this.koordinater == null || annenVegadresse?.koordinater == null) {
-            return AvstandTilSøkerDto(avstandIKm = null, langAvstandTilSøker = UKJENT)
+            return AvstandTilSøkerDto(avstand = null, langAvstandTilSøker = UKJENT)
         }
 
         val koordinater1 = this.koordinater
         val koordinater2 = annenVegadresse.koordinater
 
         if (koordinater1.x == null || koordinater1.y == null || koordinater2.x == null || koordinater2.y == null) {
-            return AvstandTilSøkerDto(avstandIKm = null, langAvstandTilSøker = UKJENT)
+            return AvstandTilSøkerDto(avstand = null, langAvstandTilSøker = UKJENT)
         }
 
         if (koordinater1.y > UTM_GRENSE || koordinater2.y > UTM_GRENSE) {
             val distanse = abs(koordinater2.y - koordinater1.y)
             return AvstandTilSøkerDto(
-                avstandIKm = distanse.div(1000).toLong(),
+                avstand = distanse.toLong(),
                 langAvstandTilSøker = if (distanse > MINIMUM_AVSTAND_FOR_AUTOMATISK_BEREGNING_I_METER) JA_UPRESIS else UKJENT,
             )
         }
         val distanse = beregnAvstandIMeter(koordinater1.x, koordinater1.y, koordinater2.x, koordinater2.y)
         return AvstandTilSøkerDto(
-            avstandIKm = distanse.div(1000).toLong(),
+            avstand = distanse.toLong(),
             langAvstandTilSøker = if (distanse > MINIMUM_AVSTAND_FOR_AUTOMATISK_BEREGNING_I_METER) JA else UKJENT,
         )
     }

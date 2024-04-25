@@ -21,7 +21,7 @@ internal class VegadresseTest {
             )
 
         assertThat(avstandTilAnnenAdresse.langAvstandTilSøker).isEqualTo(LangAvstandTilSøker.UKJENT)
-        assertThat(avstandTilAnnenAdresse.avstandIKm).isLessThan(1)
+        assertThat(avstandTilAnnenAdresse.avstand).isLessThan(200.toLong())
     }
 
     @Test
@@ -45,7 +45,7 @@ internal class VegadresseTest {
         val avstandTilAnnenAdresse =
             motzfeldtsgate.fjerneBoforhold(sofiemyr)
 
-        assertThat(avstandTilAnnenAdresse.avstandIKm).isGreaterThan(1)
+        assertThat(avstandTilAnnenAdresse.avstand).isGreaterThan(200.toLong())
         assertThat(avstandTilAnnenAdresse.langAvstandTilSøker).isEqualTo(LangAvstandTilSøker.JA)
     }
 
@@ -71,7 +71,7 @@ internal class VegadresseTest {
         val avstandTilAnnenAdresse =
             kirkenes.fjerneBoforhold(sofiemyr)
 
-        assertThat(avstandTilAnnenAdresse.avstandIKm).isGreaterThan(1)
+        assertThat(avstandTilAnnenAdresse.avstand).isGreaterThan(200.toLong())
         assertThat(avstandTilAnnenAdresse.langAvstandTilSøker).isEqualTo(LangAvstandTilSøker.JA_UPRESIS)
     }
 }
