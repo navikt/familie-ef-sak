@@ -228,6 +228,7 @@ class IverksettingDtoMapper(
             TilbakekrevingDto(
                 tilbakekrevingsvalg = mapTilbakekrevingsvalg(it.valg),
                 tilbakekrevingMedVarsel = mapTilbakekrevingMedVarsel(it, behandlingId),
+                begrunnelseForTilbakekreving = tilbakekreving.begrunnelse,
             )
         }
     }
