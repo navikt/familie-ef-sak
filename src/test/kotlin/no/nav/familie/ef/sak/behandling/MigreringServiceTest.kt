@@ -417,9 +417,9 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     internal fun `hentMigreringInfo - har perioder til og med neste måned i infotrygd`() {
-        val nå = YearMonth.of(2021, 1)
-        val stønadFom = nå.minusMonths(1).atDay(1)
-        val stønadTomMåned = nå.plusMonths(3)
+        val stønadStart = YearMonth.of(2021, 1)
+        val stønadFom = stønadStart.minusMonths(1).atDay(1)
+        val stønadTomMåned = stønadStart.plusMonths(3)
         val stønadTom = stønadTomMåned.atEndOfMonth()
         val infotrygdPeriode = InfotrygdPeriodeTestUtil.lagInfotrygdPeriode(
             stønadFom = stønadFom,
@@ -431,13 +431,13 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
             InfotrygdPeriodeResponse(listOf(infotrygdPeriode), emptyList(), emptyList())
         val fagsak = fagsakService.hentEllerOpprettFagsak("1", OVERGANGSSTØNAD)
 
-        val migreringInfo = migreringService.hentMigreringInfo(fagsak.fagsakPersonId, nå)
+        val migreringInfo = migreringService.hentMigreringInfo(fagsak.fagsakPersonId, stønadStart)
 
         assertThat(migreringInfo.kanMigreres).isTrue
         assertThat(migreringInfo.årsak).isNull()
-        assertThat(migreringInfo.stønadsperiode?.fom).isEqualTo(nå)
+        assertThat(migreringInfo.stønadsperiode?.fom).isEqualTo(stønadStart)
         assertThat(migreringInfo.stønadsperiode?.tom).isEqualTo(stønadTomMåned)
-        assertThat(migreringInfo.stønadFom).isEqualTo(nå)
+        assertThat(migreringInfo.stønadFom).isEqualTo(stønadStart)
         assertThat(migreringInfo.stønadTom).isEqualTo(stønadTomMåned)
         assertThat(migreringInfo.inntektsgrunnlag).isEqualTo(10)
         assertThat(migreringInfo.samordningsfradrag).isEqualTo(5)
@@ -445,7 +445,7 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
 
         val beløpsperiode = migreringInfo.beløpsperioder!![0]
         assertThat(beløpsperiode.beløp.toInt()).isEqualTo(18998)
-        assertThat(beløpsperiode.periode.fomDato).isEqualTo(nå.atDay(1))
+        assertThat(beløpsperiode.periode.fomDato).isEqualTo(stønadStart.atDay(1))
         assertThat(beløpsperiode.periode.tomDato).isEqualTo(stønadTom)
     }
 

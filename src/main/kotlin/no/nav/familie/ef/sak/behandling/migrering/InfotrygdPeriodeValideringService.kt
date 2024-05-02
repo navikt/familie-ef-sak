@@ -18,6 +18,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.time.YearMonth
+import no.nav.familie.ef.sak.felles.util.DatoUtil
 
 @Service
 class InfotrygdPeriodeValideringService(
@@ -225,7 +226,7 @@ class InfotrygdPeriodeValideringService(
 
         val årBakoverTillattVedMigrering = utledÅrBakoverTillattVedMigrering()
 
-        if (dato.isBefore(LocalDate.now().minusYears(årBakoverTillattVedMigrering))) {
+        if (dato.isBefore(DatoUtil.dagensDato().minusYears(årBakoverTillattVedMigrering))) {
             throw MigreringException(
                 "Kan ikke migrere når forrige utbetaling i infotrygd er mer enn $årBakoverTillattVedMigrering år tilbake i tid, dato=$dato",
                 MigreringExceptionType.ELDRE_PERIODER,
