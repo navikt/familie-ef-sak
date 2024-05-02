@@ -17,6 +17,8 @@ import no.nav.familie.ef.sak.brev.domain.MottakerRolle
 import no.nav.familie.ef.sak.felles.util.DatoUtil
 import no.nav.familie.ef.sak.felles.util.Skoleår
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.opplysninger.mapper.BarnMatcher
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
@@ -104,6 +106,7 @@ class IverksettingDtoMapper(
     private val årsakRevurderingsRepository: ÅrsakRevurderingsRepository,
     private val oppgaverForOpprettelseService: OppgaverForOpprettelseService,
     private val behandlingRepository: BehandlingRepository,
+    private val featureToggleService: FeatureToggleService,
 ) {
 
     fun tilDto(saksbehandling: Saksbehandling, beslutter: String): IverksettDto {
@@ -228,7 +231,7 @@ class IverksettingDtoMapper(
             TilbakekrevingDto(
                 tilbakekrevingsvalg = mapTilbakekrevingsvalg(it.valg),
                 tilbakekrevingMedVarsel = mapTilbakekrevingMedVarsel(it, behandlingId),
-                begrunnelseForTilbakekreving = tilbakekreving.begrunnelse,
+                begrunnelseForTilbakekreving = if (featureToggleService.isEnabled(Toggle.OVERSENDE_BEGRUNNELSE_FOR_TILBAKEKREVING)) tilbakekreving.begrunnelse else "",
             )
         }
     }
