@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import java.time.LocalDate
+import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 
 @RestController
 @RequestMapping("/api/oppgave/forvaltning/opprydding")
@@ -58,7 +59,10 @@ class OppgaveOppryddingForvaltningsController(
                 val oppgaveId = oppgave.id
                 if (oppgaveId == null) {
                     logger.error("Kan ikke ferdigstille oppgave - mangler ID")
-                    secureLogger.info("Kan ikke ferdigstille oppgave: $oppgave")
+                    secureLogger.info("Kan ikke ferdigstille oppgave pga manglende ID: $oppgave")
+                } else if (oppgave.oppgavetype != Oppgavetype.Fremlegg.name) {
+                    logger.error("Kan ikke ferdigstille oppgave - feil type")
+                    secureLogger.info("Kan ikke ferdigstille oppgave pga feil oppgavetype: $oppgave")
                 } else {
                     secureLogger.info("Ferdigstiller oppgave $oppgaveId")
                     oppgaveService.ferdigstillOppgave(oppgaveId)
