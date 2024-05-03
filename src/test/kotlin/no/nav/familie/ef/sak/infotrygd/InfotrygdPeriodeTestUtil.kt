@@ -1,20 +1,19 @@
 package no.nav.familie.ef.sak.no.nav.familie.ef.sak.infotrygd
 
+import no.nav.familie.ef.sak.felles.util.DatoUtil
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdAktivitetstype
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdEndringKode
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdOvergangsstønadKode
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPeriode
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdSakstype
 import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.YearMonth
 
 object InfotrygdPeriodeTestUtil {
 
     fun lagInfotrygdPeriode(
         personIdent: String = "1",
-        stønadFom: LocalDate = YearMonth.now().atDay(1),
-        stønadTom: LocalDate = YearMonth.now().atEndOfMonth(),
+        stønadFom: LocalDate = DatoUtil.årMånedNå().atDay(1),
+        stønadTom: LocalDate = DatoUtil.årMånedNå().atEndOfMonth(),
         opphørsdato: LocalDate? = null,
         stønadId: Int = 1,
         vedtakId: Int = 1,
@@ -44,8 +43,8 @@ object InfotrygdPeriodeTestUtil {
             utgifterBarnetilsyn = utgifterBarnetilsyn,
             månedsbeløp = beløp,
             engangsbeløp = beløp,
-            startDato = LocalDate.now(),
-            vedtakstidspunkt = LocalDateTime.now(),
+            startDato = DatoUtil.dagensDato(),
+            vedtakstidspunkt = DatoUtil.dagensDatoMedTid(),
             stønadFom = stønadFom,
             stønadTom = stønadTom,
             opphørsdato = opphørsdato,
