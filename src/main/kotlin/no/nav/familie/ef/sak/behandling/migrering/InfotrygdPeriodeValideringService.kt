@@ -2,6 +2,7 @@ package no.nav.familie.ef.sak.behandling.migrering
 
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
+import no.nav.familie.ef.sak.felles.util.DatoUtil
 import no.nav.familie.ef.sak.infotrygd.InfotrygdService
 import no.nav.familie.ef.sak.infotrygd.InfotrygdStønadPerioderDto
 import no.nav.familie.ef.sak.infotrygd.SummertInfotrygdPeriodeDto
@@ -16,9 +17,7 @@ import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdSakType
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
-import java.time.LocalDate
 import java.time.YearMonth
-import no.nav.familie.ef.sak.felles.util.DatoUtil
 
 @Service
 class InfotrygdPeriodeValideringService(
