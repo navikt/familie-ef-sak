@@ -77,19 +77,12 @@ Valideringen utføres når et vedtak besluttes. Lengden på overgangsperioden be
 
 #### Etterarbeid/sjekkliste:
 
-* Gå igjennom de med samordningsfradrag - disse må g-reguleres manuelt
+* `FinnBehandlingerMedGammelGTask` vil rapportere de som må håndteres manuelt (samordningsfradrag) den 1. i hver måned. De i denne listen som har samordning eller sanksjon skal overleveres til coachene. 
 
 * Gå igjennom de med sanksjon - disse må revurderes manuelt 
 (NB! ikke mulig å g-omregne mai-løpende, juni-sanksjon, juli-løpende). Denne vil kaste feil. 
 
-* Gå igjennom de som er satt på vent? Vurdere om disse skal kjøres maskinelt? 
-
 * Sjekk om det ligger noen som IKKE er g-omregnet. Typisk 0-utbetaling i juni og utover  - de som er tagget med 2022 etter g-omregningsdag
-
-* Sjekk om det det er innvilget vedtak (revurdering) med fom > mai2023 OG har 2022-verdi for mai/juni+++ som ikke ble omregnet automatisk og nytt vedtak fattet - som starter ETTER mai.  
-Spennende sql her / Lag kotlinkode som henter ut alle behandlinger som har 2023-tag, MEN ikke har noen g-omregningsbehandling for 2023. Gjør tørr-beregning (ikke "g-beregning" for disse fra mai 2023 og se om det blir diff i ATY)
-
-* Fallgruver: Behandlinger med samordningsfradrag blir ikke plukket opp - her må vi sjekke litt "jevnt og trutt" (!). Det vil bli laget en egen task som sjekker om det finnes behandlinger som ikke har blitt g-omregnet enda, før g-omregning 2024.  
 
 * Oppdater veiviser med barnetilsyn 6G (vilkår for å kunne motta = inntekt under 6G) 
 
@@ -97,5 +90,5 @@ Spennende sql her / Lag kotlinkode som henter ut alle behandlinger som har 2023-
 
 * Sjekk om det er riktig G brukt på nav.no? 
 
-* Kanskje sjekke om noen har fått avslag på førstegangsbehandling i mai på "BT" med begrunnelse over 6 gamle G 
+* Kanskje sjekke om noen har fått avslag på førstegangsbehandling i mai på "BT" med begrunnelse over 6 gamle G?  
 
