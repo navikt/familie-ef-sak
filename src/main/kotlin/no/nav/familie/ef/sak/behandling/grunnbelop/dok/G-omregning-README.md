@@ -18,34 +18,31 @@ valg vi har tatt og hva vi jobber med å endre før neste g-omregning.
 2. Legg inn ny G i no.nav.familie.ef.sak.beregning.Grunnbeløpsperioder
 3. Nye behandlinger vil nå bruke ny G
 4. Kjør gjerne en test med 1 fagsak (se ManuellGOmregningController under) før man setter på scheduler?
-5. Husk å oppdatere G i iverksett (eller skriv om kode - send G fra ef-sak)
-6. Se "etterarbeid under"
+5. Se "etterarbeid under"
 
 G-omregning starter vanligvis med at en scheduler finner kandidater for g-omregning (sql) 
 `no.nav.familie.ef.sak.behandling.grunnbelop.GOmregningTaskServiceScheduler`
 
-Scheduler kjøres typisk en gang i uka og vil prøve å finne ferdigstilte fagsaker med gammel G uten samordning.
-Det finnes to versjoner av denne - en som i tillegg henter saker på vent. Denne må toggle skrus på. 
+Scheduler kjøres typisk en gang i uka (tirsdager kl 15) og vil prøve å finne ferdigstilte fagsaker med gammel G uten samordning.
 
-Saker som var åpne ved første g-omregning vil bli forsøkt kjørt i neste ukes batch hvis de er ferdige. 
+Saker som var åpne ved første g-omregning vil bli forsøkt kjørt i neste ukes batch hvis de er ferdigstilt i mellomtiden. 
 
 Det finnes også en controller hvor man også kan kjøre omregning på _en_ fagsak
 `no.nav.familie.ef.sak.forvaltning.ManuellGOmregningController`
 
-##### 2. Utfør gomregning (kode)
-1. Vi kopier data fra forrige behandling -> ny G - behandling
-2. Vi justerer inntekt [HER ER DET GJORT NOEN VALG!!!]
-3. Vi beregner ytelse [HER ER DET GJORT NOEN VALG!!!]
-4. Vi iverksetter uten brev
-5. Vi oppretter ny task som poller status fra iverksett (vanlig flyt)
-
-* familie-ef-iverksett: Iverksetter mot økonomi og sender melding til ditt nav 
-(hvis dette ikke endres må ny G også oppdateres på iverksett)
+##### 2. Hvordan utføres gomregning (kode)
+1. Data kopieres fra forrige behandling -> ny G - behandling
+2. Inntekten justeres ihht G [HER ER DET GJORT NOEN VALG!!!]
+3. Ytelsen beregnes på nytt [HER ER DET GJORT NOEN VALG!!!]
+4. Iverksetting uten brev
+5. `familie-ef-iverksett`: Iverksetter mot økonomi og sender melding til Ditt NAV
+6. Task som poller status fra iverksett (vanlig flyt)
 
 ### Noen valg det er fint å vite om
 #### Indeksjustering av inntekt.
 `no.nav.familie.ef.sak.beregning.BeregningKt.finnGrunnbeløpsPerioder`
-Vi indeksjusterer inntekt når vi g-omregner. For hver inntektsperiode vi skal endre:
+Inntekten indeksjusteres ved g-omregning. Forslag til å slutte med dette er utarbeidet (mars 2024), men ikke løst. 
+For hver inntektsperiode vi skal endre:
 1. Vi finner omregningsfaktor 
 2. Vi finner total inntekt (dag + mnd + år). 
 3. Total inntekt rundes ned til nærmeste 1000 (finne F - forventet inntekt). *1

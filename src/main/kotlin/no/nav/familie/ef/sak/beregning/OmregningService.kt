@@ -11,7 +11,6 @@ import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.behandlingsflyt.task.PollStatusFraIverksettTask
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
-import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.iverksett.IverksettingDtoMapper
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
@@ -47,7 +46,6 @@ class OmregningService(
     private val iverksettingDtoMapper: IverksettingDtoMapper,
     private val søknadService: SøknadService,
     private val barnService: BarnService,
-    private val featureToggleService: FeatureToggleService,
 ) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -99,13 +97,8 @@ class OmregningService(
     }
 
     private fun validerBehandlingstatusForFagsak(fagsakId: UUID) {
-        when (featureToggleService.isEnabled(Toggle.G_BEREGNING_INKLUDER_SATT_PÅ_VENT)) {
-            false -> feilHvis(behandlingService.finnesÅpenBehandling(fagsakId)) {
-                "Kan ikke omregne, det finnes åpen behandling på fagsak: $fagsakId"
-            }
-            true -> feilHvis(behandlingService.finnesBehandlingSomIkkeErFerdigstiltEllerSattPåVent(fagsakId)) {
-                "Kan ikke omregne, det finnes åpen behandling på fagsak: $fagsakId"
-            }
+        feilHvis(behandlingService.finnesÅpenBehandling(fagsakId)) {
+            "Kan ikke omregne, det finnes åpen behandling på fagsak: $fagsakId"
         }
     }
 

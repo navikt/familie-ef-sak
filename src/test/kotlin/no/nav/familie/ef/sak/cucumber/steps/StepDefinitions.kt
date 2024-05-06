@@ -175,7 +175,6 @@ class StepDefinitions {
         iverksettingDtoMapper = iverksettingDtoMapper,
         søknadService = søknadService,
         barnService = barnServiceMock,
-        featureToggleService,
     )
 
     init {
