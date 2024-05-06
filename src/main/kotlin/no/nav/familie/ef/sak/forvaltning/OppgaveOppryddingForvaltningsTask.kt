@@ -59,7 +59,7 @@ class OppgaveOppryddingForvaltningsTask(
                 if (oppgaveId == null) {
                     logger.error("Kan ikke ferdigstille oppgave - mangler ID")
                     secureLogger.info("Kan ikke ferdigstille oppgave pga manglende ID: $oppgave")
-                } else if (oppgave.oppgavetype != Oppgavetype.Fremlegg.name) {
+                } else if (oppgave.oppgavetype != Oppgavetype.Fremlegg.value) {
                     logger.error("Kan ikke ferdigstille oppgave - feil type")
                     secureLogger.info("Kan ikke ferdigstille oppgave pga feil oppgavetype: $oppgave")
                 } else {
