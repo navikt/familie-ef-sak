@@ -84,9 +84,10 @@ class TestSaksbehandlingController(
     private val vurderingService: VurderingService,
     private val vurderingStegService: VurderingStegService,
 ) {
-
     @PostMapping("{behandlingId}/utfyll-vilkar")
-    fun utfyllVilkår(@PathVariable behandlingId: UUID): Ressurs<UUID> {
+    fun utfyllVilkår(
+        @PathVariable behandlingId: UUID,
+    ): Ressurs<UUID> {
         val vurderinger = vurderingService.hentAlleVurderinger(behandlingId)
         val saksbehandling = behandlingService.hentSaksbehandling(behandlingId)
         val regler = vilkårsreglerForStønad(saksbehandling.stønadstype).associateBy { it.vilkårType }
@@ -124,41 +125,50 @@ class TestSaksbehandlingController(
         SluttSvarRegel.OPPFYLT_MED_PÅKREVD_BEGRUNNELSE,
         SluttSvarRegel.OPPFYLT_MED_VALGFRI_BEGRUNNELSE,
         SluttSvarRegel.OPPFYLT,
-        -> delvilkår(
-            delvilkår.hovedregel(),
-            svarId,
-            if (svarRegel == SluttSvarRegel.OPPFYLT_MED_PÅKREVD_BEGRUNNELSE) "begrunnelse" else null,
-        )
+        ->
+            delvilkår(
+                delvilkår.hovedregel(),
+                svarId,
+                if (svarRegel == SluttSvarRegel.OPPFYLT_MED_PÅKREVD_BEGRUNNELSE) "begrunnelse" else null,
+            )
         else -> null
     }
 
-    private fun delvilkår(regelId: RegelId, svar: SvarId, begrunnelse: String? = null) = DelvilkårsvurderingDto(
+    private fun delvilkår(
+        regelId: RegelId,
+        svar: SvarId,
+        begrunnelse: String? = null,
+    ) = DelvilkårsvurderingDto(
         Vilkårsresultat.OPPFYLT,
         listOf(VurderingDto(regelId, svar, begrunnelse)),
     )
 
-    private fun delvilkårErUtdanningHensiktsmessig() = DelvilkårsvurderingDto(
-        Vilkårsresultat.OPPFYLT,
-        listOf(
-            VurderingDto(RegelId.NAVKONTOR_VURDERING, SvarId.JA),
-            VurderingDto(RegelId.SAKSBEHANDLER_VURDERING, SvarId.JA, "begrunnelse"),
-        ),
-    )
+    private fun delvilkårErUtdanningHensiktsmessig() =
+        DelvilkårsvurderingDto(
+            Vilkårsresultat.OPPFYLT,
+            listOf(
+                VurderingDto(RegelId.NAVKONTOR_VURDERING, SvarId.JA),
+                VurderingDto(RegelId.SAKSBEHANDLER_VURDERING, SvarId.JA, "begrunnelse"),
+            ),
+        )
 
     @Transactional
     @PostMapping(path = ["fagsak"], consumes = [MediaType.APPLICATION_JSON_VALUE])
-    fun opprettFagsakForTestperson(@RequestBody testFagsakRequest: TestFagsakRequest): Ressurs<UUID> {
+    fun opprettFagsakForTestperson(
+        @RequestBody testFagsakRequest: TestFagsakRequest,
+    ): Ressurs<UUID> {
         val personIdent = testFagsakRequest.personIdent
         val søknadBuilder = lagSøknad(personIdent)
         val fagsak =
             fagsakService.hentEllerOpprettFagsak(personIdent, testFagsakRequest.behandlingsType.tilStønadstype())
 
-        val behandling: Behandling = when (testFagsakRequest.behandlingsType) {
-            FØRSTEGANGSBEHANDLING -> lagFørstegangsbehandling(søknadBuilder.søknadOvergangsstønad, fagsak)
-            MIGRERING -> lagMigreringBehandling(fagsak)
-            BARNETILSYN -> lagBarnetilsynBehandling(søknadBuilder.søknadBarnetilsyn, fagsak)
-            SKOLEPENGER -> lagSkolepengerBehandling(søknadBuilder.søknadSkolepenger, fagsak)
-        }
+        val behandling: Behandling =
+            when (testFagsakRequest.behandlingsType) {
+                FØRSTEGANGSBEHANDLING -> lagFørstegangsbehandling(søknadBuilder.søknadOvergangsstønad, fagsak)
+                MIGRERING -> lagMigreringBehandling(fagsak)
+                BARNETILSYN -> lagBarnetilsynBehandling(søknadBuilder.søknadBarnetilsyn, fagsak)
+                SKOLEPENGER -> lagSkolepengerBehandling(søknadBuilder.søknadSkolepenger, fagsak)
+            }
 
         if (!behandling.erMigrering()) {
             iverksettService.startBehandling(behandling, fagsak)
@@ -176,12 +186,13 @@ class TestSaksbehandlingController(
                     steg = StegType.VILKÅR,
                 ),
             )
-            val oppgaveId = oppgaveService.opprettOppgave(
-                behandlingId = behandling.id,
-                oppgavetype = Oppgavetype.BehandleSak,
-                tilordnetNavIdent = SikkerhetContext.hentSaksbehandler(),
-                beskrivelse = "Dummy-oppgave opprettet i ny løsning",
-            )
+            val oppgaveId =
+                oppgaveService.opprettOppgave(
+                    behandlingId = behandling.id,
+                    oppgavetype = Oppgavetype.BehandleSak,
+                    tilordnetNavIdent = SikkerhetContext.hentSaksbehandler(),
+                    beskrivelse = "Dummy-oppgave opprettet i ny løsning",
+                )
             taskService.save(
                 taskService.save(
                     BehandlingsstatistikkTask.opprettMottattTask(
@@ -195,12 +206,16 @@ class TestSaksbehandlingController(
         return Ressurs.success(behandling.id)
     }
 
-    private fun lagBarnetilsynBehandling(søknadBarnetilsyn: SøknadBarnetilsyn, fagsak: Fagsak): Behandling {
-        val behandling = behandlingService.opprettBehandling(
-            BehandlingType.FØRSTEGANGSBEHANDLING,
-            fagsak.id,
-            behandlingsårsak = BehandlingÅrsak.SØKNAD,
-        )
+    private fun lagBarnetilsynBehandling(
+        søknadBarnetilsyn: SøknadBarnetilsyn,
+        fagsak: Fagsak,
+    ): Behandling {
+        val behandling =
+            behandlingService.opprettBehandling(
+                BehandlingType.FØRSTEGANGSBEHANDLING,
+                fagsak.id,
+                behandlingsårsak = BehandlingÅrsak.SØKNAD,
+            )
         val journalposter = behandlingService.hentBehandlingsjournalposter(behandling.id)
         søknadService.lagreSøknadForBarnetilsyn(
             søknadBarnetilsyn,
@@ -211,12 +226,16 @@ class TestSaksbehandlingController(
         return behandling
     }
 
-    private fun lagSkolepengerBehandling(søknadSkolepenger: SøknadSkolepenger, fagsak: Fagsak): Behandling {
-        val behandling = behandlingService.opprettBehandling(
-            BehandlingType.FØRSTEGANGSBEHANDLING,
-            fagsak.id,
-            behandlingsårsak = BehandlingÅrsak.SØKNAD,
-        )
+    private fun lagSkolepengerBehandling(
+        søknadSkolepenger: SøknadSkolepenger,
+        fagsak: Fagsak,
+    ): Behandling {
+        val behandling =
+            behandlingService.opprettBehandling(
+                BehandlingType.FØRSTEGANGSBEHANDLING,
+                fagsak.id,
+                behandlingsårsak = BehandlingÅrsak.SØKNAD,
+            )
         val journalposter = behandlingService.hentBehandlingsjournalposter(behandling.id)
         søknadService.lagreSøknadForSkolepenger(
             søknadSkolepenger,
@@ -243,7 +262,8 @@ class TestSaksbehandlingController(
             .setSivilstandsplaner(
                 harPlaner = true,
                 fraDato = LocalDate.of(2019, 9, 17),
-                vordendeSamboerEktefelle = TestsøknadBuilder.Builder()
+                vordendeSamboerEktefelle =
+                TestsøknadBuilder.Builder()
                     .defaultPersonMinimum(
                         navn = "Fyren som skal bli min samboer",
                         fødselsdato = LocalDate.of(1979, 9, 17),
@@ -253,45 +273,53 @@ class TestSaksbehandlingController(
     }
 
     private fun mapSøkersBarn(søkerMedBarn: SøkerMedBarn): List<Barn> {
-        val barneListe: List<Barn> = søkerMedBarn.barn.filter { it.value.fødsel.gjeldende().erUnder18År() }.map {
-            TestsøknadBuilder.Builder().defaultBarn(
-                navn = it.value.navn.gjeldende().visningsnavn(),
-                fødselsnummer = it.key,
-                harSkalHaSammeAdresse = true,
-                ikkeRegistrertPåSøkersAdresseBeskrivelse = "Fordi",
-                erBarnetFødt = true,
-                fødselTermindato = Fødselsnummer(it.key).fødselsdato,
-                annenForelder = TestsøknadBuilder.Builder().defaultAnnenForelder(
-                    ikkeOppgittAnnenForelderBegrunnelse = null,
-                    bosattINorge = false,
-                    land = "Sverige",
-                    personMinimum = TestsøknadBuilder.Builder()
-                        .defaultPersonMinimum("Bob Burger", LocalDate.of(1979, 9, 17)),
-                ),
-                samvær = TestsøknadBuilder.Builder().defaultSamvær(
-                    beskrivSamværUtenBarn = "Har sjelden sett noe til han",
-                    borAnnenForelderISammeHus = "ja",
-                    borAnnenForelderISammeHusBeskrivelse = "Samme blokk",
-                    harDereSkriftligAvtaleOmSamvær = "jaIkkeKonkreteTidspunkter",
-                    harDereTidligereBoddSammen = true,
-                    hvorMyeErDuSammenMedAnnenForelder = "møtesUtenom",
-                    hvordanPraktiseresSamværet = "Bytter litt på innimellom",
-                    nårFlyttetDereFraHverandre = LocalDate.of(2020, 12, 31),
-                    skalAnnenForelderHaSamvær = "jaMerEnnVanlig",
-                    spørsmålAvtaleOmDeltBosted = true,
-                ),
-                skalBoHosSøker = "jaMenSamarbeiderIkke",
-            )
-        }
+        val barneListe: List<Barn> =
+            søkerMedBarn.barn.filter { it.value.fødsel.gjeldende().erUnder18År() }.map {
+                TestsøknadBuilder.Builder().defaultBarn(
+                    navn = it.value.navn.gjeldende().visningsnavn(),
+                    fødselsnummer = it.key,
+                    harSkalHaSammeAdresse = true,
+                    ikkeRegistrertPåSøkersAdresseBeskrivelse = "Fordi",
+                    erBarnetFødt = true,
+                    fødselTermindato = Fødselsnummer(it.key).fødselsdato,
+                    annenForelder =
+                    TestsøknadBuilder.Builder().defaultAnnenForelder(
+                        ikkeOppgittAnnenForelderBegrunnelse = null,
+                        bosattINorge = false,
+                        land = "Sverige",
+                        personMinimum =
+                        TestsøknadBuilder.Builder()
+                            .defaultPersonMinimum("Bob Burger", LocalDate.of(1979, 9, 17)),
+                    ),
+                    samvær =
+                    TestsøknadBuilder.Builder().defaultSamvær(
+                        beskrivSamværUtenBarn = "Har sjelden sett noe til han",
+                        borAnnenForelderISammeHus = "ja",
+                        borAnnenForelderISammeHusBeskrivelse = "Samme blokk",
+                        harDereSkriftligAvtaleOmSamvær = "jaIkkeKonkreteTidspunkter",
+                        harDereTidligereBoddSammen = true,
+                        hvorMyeErDuSammenMedAnnenForelder = "møtesUtenom",
+                        hvordanPraktiseresSamværet = "Bytter litt på innimellom",
+                        nårFlyttetDereFraHverandre = LocalDate.of(2020, 12, 31),
+                        skalAnnenForelderHaSamvær = "jaMerEnnVanlig",
+                        spørsmålAvtaleOmDeltBosted = true,
+                    ),
+                    skalBoHosSøker = "jaMenSamarbeiderIkke",
+                )
+            }
         return barneListe
     }
 
-    private fun lagFørstegangsbehandling(søknad: SøknadOvergangsstønad, fagsak: Fagsak): Behandling {
-        val behandling = behandlingService.opprettBehandling(
-            BehandlingType.FØRSTEGANGSBEHANDLING,
-            fagsak.id,
-            behandlingsårsak = BehandlingÅrsak.SØKNAD,
-        )
+    private fun lagFørstegangsbehandling(
+        søknad: SøknadOvergangsstønad,
+        fagsak: Fagsak,
+    ): Behandling {
+        val behandling =
+            behandlingService.opprettBehandling(
+                BehandlingType.FØRSTEGANGSBEHANDLING,
+                fagsak.id,
+                behandlingsårsak = BehandlingÅrsak.SØKNAD,
+            )
         val journalposter = behandlingService.hentBehandlingsjournalposter(behandling.id)
         søknadService.lagreSøknadForOvergangsstønad(
             søknad,

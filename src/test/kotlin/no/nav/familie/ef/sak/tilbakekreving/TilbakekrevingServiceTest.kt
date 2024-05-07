@@ -224,7 +224,7 @@ internal class TilbakekrevingServiceTest {
             every { tilbakekrevingClient.kanBehandlingOpprettesManuelt(fagsak.stønadstype, fagsak.eksternId) }
                 .returns(KanBehandlingOpprettesManueltRespons(true, "Ok.", "654321"))
             every {
-                tilbakekrevingClient.opprettManuelTilbakekreving(
+                tilbakekrevingClient.opprettManuellTilbakekreving(
                     fagsak.eksternId,
                     "654321",
                     fagsak.stønadstype,
@@ -234,7 +234,7 @@ internal class TilbakekrevingServiceTest {
             tilbakekrevingService.opprettManuellTilbakekreving(fagsak.id)
 
             verify {
-                tilbakekrevingClient.opprettManuelTilbakekreving(
+                tilbakekrevingClient.opprettManuellTilbakekreving(
                     fagsak.eksternId,
                     "654321",
                     fagsak.stønadstype,

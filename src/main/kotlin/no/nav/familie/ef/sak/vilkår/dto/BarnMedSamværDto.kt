@@ -16,6 +16,7 @@ data class BarnMedSamværDto(
         return BarnForelderLangAvstandTilSøker(
             barnId = barnId,
             langAvstandTilSøker = registergrunnlag.forelder?.avstandTilSøker?.langAvstandTilSøker ?: LangAvstandTilSøker.UKJENT,
+            borAnnenForelderISammeHus = søknadsgrunnlag.borAnnenForelderISammeHus ?: "ukjent",
         )
     }
 }
@@ -85,7 +86,7 @@ data class BarnepassordningDto(
 )
 
 data class AvstandTilSøkerDto(
-    val avstandIKm: Long?,
+    val avstand: Long?,
     val langAvstandTilSøker: LangAvstandTilSøker,
 )
 

@@ -49,7 +49,9 @@ class AleneomsorgRegel : Vilkårsregel(
         }
 
         return hovedregler.map { hovedregel ->
-            if (hovedregel == RegelId.NÆRE_BOFORHOLD && borLangtFraHverandre(metadata, barnId)) {
+            if (
+                skalAutomatiskOppfylleNæreBoforhold(hovedregel, metadata, barnId)
+            ) {
                 opprettAutomatiskBeregnetNæreBoforholdDelvilkår()
             } else {
                 Delvilkårsvurdering(resultat, vurderinger = listOf(Vurdering(hovedregel)))
@@ -79,28 +81,13 @@ class AleneomsorgRegel : Vilkårsregel(
 
     private fun erDigitalSøknad(metadata: HovedregelMetadata) = metadata.behandling.årsak == BehandlingÅrsak.SØKNAD
 
-    private fun harSammeAdresse(registergrunnlagBarn: BarnMedSamværRegistergrunnlagDto) =
-        registergrunnlagBarn.harSammeAdresse ?: false
+    private fun harSammeAdresse(registergrunnlagBarn: BarnMedSamværRegistergrunnlagDto) = registergrunnlagBarn.harSammeAdresse ?: false
 
     private fun erDonorbarn(søknadsgrunnlagBarn: BarnMedSamværSøknadsgrunnlagDto) =
         søknadsgrunnlagBarn.ikkeOppgittAnnenForelderBegrunnelse?.lowercase() == "donor"
 
     private fun erTerminbarnOgOgHarSammeAdresse(søknadsgrunnlagBarn: BarnMedSamværSøknadsgrunnlagDto) =
         søknadsgrunnlagBarn.erTerminbarn() && søknadsgrunnlagBarn.harSammeAdresse == true
-
-    private fun opprettAutomatiskBeregnetNæreBoforholdDelvilkår() =
-        Delvilkårsvurdering(
-            resultat = Vilkårsresultat.AUTOMATISK_OPPFYLT,
-            listOf(
-                Vurdering(
-                    regelId = RegelId.NÆRE_BOFORHOLD,
-                    svar = SvarId.NEI,
-                    begrunnelse = "Automatisk vurdert (${
-                        LocalDate.now().norskFormat()
-                    }): Det er beregnet at annen forelder bor mer enn 1 km unna bruker.",
-                ),
-            ),
-        )
 
     private fun opprettAutomatiskVurdertAleneomsorgVilkår(): List<Delvilkårsvurdering> {
         val begrunnelseTekst = "Automatisk vurdert (${
@@ -141,7 +128,32 @@ class AleneomsorgRegel : Vilkårsregel(
         )
     }
 
-    private fun borLangtFraHverandre(
+    private fun opprettAutomatiskBeregnetNæreBoforholdDelvilkår() =
+        Delvilkårsvurdering(
+            resultat = Vilkårsresultat.AUTOMATISK_OPPFYLT,
+            listOf(
+                Vurdering(
+                    regelId = RegelId.NÆRE_BOFORHOLD,
+                    svar = SvarId.NEI,
+                    begrunnelse = "Automatisk vurdert (${LocalDate.now().norskFormat()}): Det er beregnet at annen forelder bor mer enn 200 meter unna bruker.",
+                ),
+            ),
+        )
+
+    private fun skalAutomatiskOppfylleNæreBoforhold(
+        hovedregel: RegelId,
+        metadata: HovedregelMetadata,
+        barnId: UUID?,
+    ) = hovedregel == RegelId.NÆRE_BOFORHOLD && erDigitalSøknad(metadata) && !borISammeHus(metadata, barnId) && borLangtNokFraHverandre(metadata, barnId)
+
+    private fun borISammeHus(
+        metadata: HovedregelMetadata,
+        barnId: UUID?,
+    ) = metadata.langAvstandTilSøker.find {
+        it.barnId == barnId
+    }?.borAnnenForelderISammeHus?.let { it.isNotBlank() && it.lowercase() == "ja" } ?: false
+
+    private fun borLangtNokFraHverandre(
         metadata: HovedregelMetadata,
         barnId: UUID?,
     ) = metadata.langAvstandTilSøker.firstOrNull { it.barnId == barnId }?.langAvstandTilSøker?.let {

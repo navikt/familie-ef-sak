@@ -67,7 +67,7 @@ class SendTilBeslutterSteg(
         ) {
             throw Feil("Brev mangler for behandling=${saksbehandling.id}")
         }
-        brukerfeilHvis(saksbehandlerMåTaStilingTilTilbakekreving(saksbehandling)) {
+        brukerfeilHvis(saksbehandlerMåTaStillingTilTilbakekreving(saksbehandling)) {
             "Feilutbetaling detektert. Må ta stilling til feilutbetalingsvarsel under simulering"
         }
         validerRiktigTilstandVedInvilgelse(saksbehandling)
@@ -99,7 +99,7 @@ class SendTilBeslutterSteg(
         }
     }
 
-    private fun saksbehandlerMåTaStilingTilTilbakekreving(saksbehandling: Saksbehandling): Boolean {
+    private fun saksbehandlerMåTaStillingTilTilbakekreving(saksbehandling: Saksbehandling): Boolean {
         if (erIkkeRelevantForTilbakekreving(saksbehandling)) {
             return false
         }
