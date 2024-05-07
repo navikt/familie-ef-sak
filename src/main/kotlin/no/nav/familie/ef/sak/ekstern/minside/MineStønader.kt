@@ -12,4 +12,6 @@ data class StønadsperiodeDto(
     val fraDato: LocalDate,
     val tilDato: LocalDate,
     val beløp: Int,
+    val inntektsgrunnlag: Int,
+    val samordningsfradrag: Int,
 )
