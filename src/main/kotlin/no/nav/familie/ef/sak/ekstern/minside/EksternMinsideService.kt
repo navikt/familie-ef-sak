@@ -38,6 +38,8 @@ class EksternMinsideService(
                 fraDato = andel.stønadFom,
                 tilDato = andel.stønadTom,
                 beløp = andel.beløp,
+                inntektsgrunnlag = andel.inntekt,
+                samordningsfradrag = andel.samordningsfradrag,
             )
         }
     }
