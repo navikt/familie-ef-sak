@@ -70,7 +70,7 @@ internal class FagsakRepositoryTest : OppslagSpringRunnerTest() {
                 ),
             )
             tilkjentYtelseRepository.insert(tilkjentYtelse(behandlingFerdig.id, fagsak.personIdenter.first().ident, 2022))
-            assertThat(fagsakRepository.finnFerdigstilteEllerSattPåVentFagsakerMedUtdatertGBelop(LocalDate.of(2022, 5, 1)).size).isEqualTo(1)
+            assertThat(fagsakRepository.finnFerdigstilteFagsakerMedUtdatertGBelop(LocalDate.of(2022, 5, 1)).size).isEqualTo(0)
         }
 
         @Test

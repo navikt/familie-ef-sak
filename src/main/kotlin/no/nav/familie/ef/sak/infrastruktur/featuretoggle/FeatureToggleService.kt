@@ -19,10 +19,6 @@ class FeatureToggleService(val unleashService: UnleashService) {
 
 enum class Toggle(val toggleId: String, val beskrivelse: String? = null) {
     // Release
-    G_BEREGNING_INKLUDER_SATT_PÅ_VENT(
-        "familie.ef.sak.inkluder-satt-pa-vent-gomregning",
-        "Usikker på om vi ønsker denne eller ikke. Ta en vurdering før 2024?",
-    ),
     DEAKTIVERE_MIKROFRONTEND_FOR_INAKTIVE_BRUKERE("familie.ef.sak.deaktiver-mikrofrontend-for-inaktive-brukere"),
     OVERSENDE_BEGRUNNELSE_FOR_TILBAKEKREVING("familie-ef-sak.begrunnelse-for-tilbakekreving", "Release"),
 
