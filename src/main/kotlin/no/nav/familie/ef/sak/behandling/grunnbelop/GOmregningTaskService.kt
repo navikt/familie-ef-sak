@@ -62,15 +62,7 @@ class GOmregningTaskService(
         return fagsakIder.size
     }
 
-    private fun finnFagsakIder(): List<UUID> {
-        val fagsakIder = when (featureToggleService.isEnabled(Toggle.G_BEREGNING_INKLUDER_SATT_PÅ_VENT)) {
-            false -> fagsakRepository.finnFerdigstilteFagsakerMedUtdatertGBelop(
-                nyesteGrunnbeløpGyldigFraOgMed.atDay(1),
-            )
-            true -> fagsakRepository.finnFerdigstilteEllerSattPåVentFagsakerMedUtdatertGBelop(
-                nyesteGrunnbeløpGyldigFraOgMed.atDay(1),
-            )
-        }
-        return fagsakIder
-    }
+    private fun finnFagsakIder(): List<UUID> = fagsakRepository.finnFerdigstilteFagsakerMedUtdatertGBelop(
+        nyesteGrunnbeløpGyldigFraOgMed.atDay(1),
+    )
 }

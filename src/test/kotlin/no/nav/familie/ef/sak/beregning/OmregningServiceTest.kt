@@ -20,6 +20,7 @@ import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil
 import no.nav.familie.ef.sak.infrastruktur.config.ObjectMapperProvider
 import no.nav.familie.ef.sak.infrastruktur.config.RolleConfig
+import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.vilkår.VilkårTestUtil
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
@@ -63,6 +64,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -158,7 +160,7 @@ internal class OmregningServiceTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    fun `Verifiser riktig beløp og inntektsjustering hvis finnes behandling på vent`() {
+    fun `Verifiser stans av gomregning dersom behandlingen er på vent`() {
         val inntektPeriode = lagInntekt(201, 2002, 200003, 2022)
         lagSøknadOgVilkårOgVedtak(behandlingId, fagsakId, inntektPeriode, stønadsår = 2022)
 
@@ -179,24 +181,11 @@ internal class OmregningServiceTest : OppslagSpringRunnerTest() {
         assertThat(inntektPeriode.totalinntekt().toInt()).isEqualTo(276287)
 
         mockTestMedGrunnbeløpFra2022 {
-            omregningService.utførGOmregning(fagsakId)
+            val feil = assertThrows<Feil> {
+                omregningService.utførGOmregning(fagsakId)
+            }
 
-            verify { iverksettClient.iverksettUtenBrev(capture(iverksettDtoSlot)) }
-            val iverksettDto = iverksettDtoSlot.captured
-
-            assertThat(iverksettDto.vedtak.tilkjentYtelse?.andelerTilkjentYtelse?.size).isEqualTo(2) // skal være splittet
-            // Sjekk andel etter ny g omregningsdato
-            val andelTilkjentYtelseOmregnet = finnAndelEtterNyGDato(iverksettDto)!!
-            assertThat(andelTilkjentYtelseOmregnet.inntekt).isEqualTo(289100) // justert med F
-            assertThat(andelTilkjentYtelseOmregnet.beløp).isEqualTo(12151) // Justert med F
-
-            // Sjekk inntektsperiode etter ny G omregning
-            val inntektsperiodeEtterGomregning = finnInntektsperiodeEtterNyGDato(iverksettDto.behandling.behandlingId, 2022)
-
-            assertThat(inntektsperiodeEtterGomregning.dagsats?.toInt()).isEqualTo(0)
-            assertThat(inntektsperiodeEtterGomregning.månedsinntekt?.toInt()).isEqualTo(0)
-            assertThat(inntektsperiodeEtterGomregning.inntekt.toInt()).isEqualTo(289100)
-            assertThat(inntektsperiodeEtterGomregning.totalinntekt().toInt()).isEqualTo(289100)
+            assertThat(feil.message).contains("det finnes åpen behandling på fagsak")
         }
     }
 
