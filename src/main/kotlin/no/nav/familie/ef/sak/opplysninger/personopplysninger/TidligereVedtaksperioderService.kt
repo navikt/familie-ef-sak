@@ -84,6 +84,8 @@ class TidligereVedtaksperioderService(
                     fom = it.andel.periode.fomDato,
                     tom = it.andel.periode.tomDato,
                     beløp = it.andel.beløp,
+                    inntekt = it.andel.inntekt,
+                    aktivitet = it.aktivitet?.name,
                 )
             }
     }
