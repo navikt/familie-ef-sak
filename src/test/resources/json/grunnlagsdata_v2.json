@@ -1456,6 +1456,16 @@
                     "name" : "beløp",
                     "type" : "Int",
                     "nullable" : false
+                  },
+                  "inntekt" : {
+                    "name" : "inntekt",
+                    "type" : "Int",
+                    "nullable" : true
+                  },
+                  "aktivitet" : {
+                    "name" : "aktivitet",
+                    "type" : "String",
+                    "nullable" : true
                   }
                 },
                 "nullable" : false
@@ -1523,6 +1533,16 @@
                     "name" : "beløp",
                     "type" : "Int",
                     "nullable" : false
+                  },
+                  "inntekt" : {
+                    "name" : "inntekt",
+                    "type" : "Int",
+                    "nullable" : true
+                  },
+                  "aktivitet" : {
+                    "name" : "aktivitet",
+                    "type" : "String",
+                    "nullable" : true
                   }
                 },
                 "nullable" : false
@@ -2238,6 +2258,16 @@
                 "name" : "beløp",
                 "type" : "Int",
                 "nullable" : false
+              },
+              "inntekt" : {
+                "name" : "inntekt",
+                "type" : "Int",
+                "nullable" : true
+              },
+              "aktivitet" : {
+                "name" : "aktivitet",
+                "type" : "String",
+                "nullable" : true
               }
             },
             "nullable" : false
@@ -2305,6 +2335,16 @@
                 "name" : "beløp",
                 "type" : "Int",
                 "nullable" : false
+              },
+              "inntekt" : {
+                "name" : "inntekt",
+                "type" : "Int",
+                "nullable" : true
+              },
+              "aktivitet" : {
+                "name" : "aktivitet",
+                "type" : "String",
+                "nullable" : true
               }
             },
             "nullable" : false
