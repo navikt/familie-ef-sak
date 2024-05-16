@@ -35,7 +35,7 @@ data class GrunnlagsdataPeriodeHistorikkDto(
     val tom: LocalDate,
     val antallMåneder: Long,
     val antallMånederUtenBeløp: Long = 0,
-    val inntekt: Int? = null,
+    val inntekt: Int?,
     val aktivitet: String?,
 )
 
