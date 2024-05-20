@@ -28,16 +28,16 @@ class KlageService(
     private val infotrygdService: InfotrygdService,
     private val arbeidsfordelingService: ArbeidsfordelingService,
 ) {
-
     fun hentBehandlinger(fagsakPersonId: UUID): KlagebehandlingerDto {
         val fagsaker = fagsakService.finnFagsakerForFagsakPersonId(fagsakPersonId)
-        val eksternFagsakIder = fagsaker.let {
-            listOfNotNull(
-                it.overgangsstønad?.eksternId,
-                it.barnetilsyn?.eksternId,
-                it.skolepenger?.eksternId,
-            )
-        }
+        val eksternFagsakIder =
+            fagsaker.let {
+                listOfNotNull(
+                    it.overgangsstønad?.eksternId,
+                    it.barnetilsyn?.eksternId,
+                    it.skolepenger?.eksternId,
+                )
+            }
         if (eksternFagsakIder.isEmpty()) {
             return KlagebehandlingerDto(emptyList(), emptyList(), emptyList())
         }
@@ -53,7 +53,10 @@ class KlageService(
         )
     }
 
-    fun opprettKlage(fagsakId: UUID, opprettKlageDto: OpprettKlageDto) {
+    fun opprettKlage(
+        fagsakId: UUID,
+        opprettKlageDto: OpprettKlageDto,
+    ) {
         val klageMottatt = opprettKlageDto.mottattDato
         brukerfeilHvis(klageMottatt.isAfter(LocalDate.now())) {
             "Kan ikke opprette klage med krav mottatt frem i tid for fagsak=$fagsakId"
@@ -61,7 +64,11 @@ class KlageService(
         opprettKlage(fagsakService.hentFagsak(fagsakId), opprettKlageDto.mottattDato, opprettKlageDto.klageGjelderTilbakekreving)
     }
 
-    fun opprettKlage(fagsak: Fagsak, klageMottatt: LocalDate, klageGjelderTilbakekreving: Boolean) {
+    fun opprettKlage(
+        fagsak: Fagsak,
+        klageMottatt: LocalDate,
+        klageGjelderTilbakekreving: Boolean,
+    ) {
         val aktivIdent = fagsak.hentAktivIdent()
         val enhetId = arbeidsfordelingService.hentNavEnhet(aktivIdent)?.enhetId
         brukerfeilHvis(enhetId == null) {
@@ -87,11 +94,12 @@ class KlageService(
 
     private fun brukVedtaksdatoFraKlageinstansHvisOversendt(klagebehandling: KlagebehandlingDto): KlagebehandlingDto {
         val erOversendtTilKlageinstans = klagebehandling.resultat == BehandlingResultat.IKKE_MEDHOLD
-        val vedtaksdato = if (erOversendtTilKlageinstans) {
-            klagebehandling.klageinstansResultat.singleOrNull { klageinnstansResultat -> klageinnstansResultat.type == BehandlingEventType.KLAGEBEHANDLING_AVSLUTTET || klageinnstansResultat.type == BehandlingEventType.BEHANDLING_FEILREGISTRERT }?.mottattEllerAvsluttetTidspunkt
-        } else {
-            klagebehandling.vedtaksdato
-        }
+        val vedtaksdato =
+            if (erOversendtTilKlageinstans) {
+                klagebehandling.klageinstansResultat.singleOrNull { klageinnstansResultat -> klageinnstansResultat.type == BehandlingEventType.KLAGEBEHANDLING_AVSLUTTET || klageinnstansResultat.type == BehandlingEventType.BEHANDLING_FEILREGISTRERT }?.mottattEllerAvsluttetTidspunkt
+            } else {
+                klagebehandling.vedtaksdato
+            }
         return klagebehandling.copy(vedtaksdato = vedtaksdato)
     }
 

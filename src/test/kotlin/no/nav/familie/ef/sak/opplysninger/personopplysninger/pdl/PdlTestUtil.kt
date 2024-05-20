@@ -6,7 +6,6 @@ import kotlin.reflect.full.declaredMemberProperties
 import kotlin.reflect.full.primaryConstructor
 
 object PdlTestUtil {
-
     fun parseSpørring(filnavn: String): Map<String, *> {
         val query = this::class.java.getResource(filnavn).readText()
         val readLines = query.reader().readLines()
@@ -75,13 +74,19 @@ object PdlTestUtil {
     /**
      * Henter ut verdien for felt på entitet.
      */
-    private fun getFeltverdi(felt: KProperty1<out Any, Any?>, entitet: Any) =
+    private fun getFeltverdi(
+        felt: KProperty1<out Any, Any?>,
+        entitet: Any,
+    ) =
         felt.getter.call(entitet)
 
     /**
      * Finn første (og eneste) felt på entiteten som har samme navn som konstruktørparameter.
      */
-    private fun finnSøknadsfelt(entity: Any, konstruktørparameter: KParameter) =
+    private fun finnSøknadsfelt(
+        entity: Any,
+        konstruktørparameter: KParameter,
+    ) =
         entity::class.declaredMemberProperties.first { it.name == konstruktørparameter.name }
 
     /**

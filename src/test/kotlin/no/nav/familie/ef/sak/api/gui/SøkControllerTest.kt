@@ -28,7 +28,6 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 
 internal class SøkControllerTest : OppslagSpringRunnerTest() {
-
     @Autowired
     private lateinit var fagsakRepository: FagsakRepository
 
@@ -104,7 +103,6 @@ internal class SøkControllerTest : OppslagSpringRunnerTest() {
 
     @Nested
     inner class SøkPersonForEksternFagsak {
-
         @Test
         internal fun `skal finne person hvis fagsaken eksisterer`() {
             val personIdent = "123"

@@ -7,7 +7,6 @@ import java.util.UUID
 
 @Repository
 interface BarnetilsynSatsendringRepository : RepositoryInterface<BarnetilsynSatsendringKandidat, UUID> {
-
     // language=PostgreSQL
     @Query(
         """

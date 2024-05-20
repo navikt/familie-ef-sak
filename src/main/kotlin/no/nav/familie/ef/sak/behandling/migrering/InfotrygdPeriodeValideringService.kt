@@ -25,7 +25,6 @@ class InfotrygdPeriodeValideringService(
     private val behandlingService: BehandlingService,
     private val featureToggleService: FeatureToggleService,
 ) {
-
     fun validerKanOppretteBehandlingGittInfotrygdData(fagsak: Fagsak) {
         if (!behandlingService.finnesBehandlingForFagsak(fagsak.id)) {
             when (fagsak.stønadstype) {
@@ -40,7 +39,10 @@ class InfotrygdPeriodeValideringService(
         }
     }
 
-    fun validerKanOppretteBehandlingUtenÅMigrereOvergangsstønad(personIdent: String, stønadType: StønadType) {
+    fun validerKanOppretteBehandlingUtenÅMigrereOvergangsstønad(
+        personIdent: String,
+        stønadType: StønadType,
+    ) {
         feilHvis(stønadType != StønadType.OVERGANGSSTØNAD) {
             "Har ikke støtte for å sjekke migrering av stønadstypen $stønadType"
         }
@@ -75,11 +77,12 @@ class InfotrygdPeriodeValideringService(
     ): SummertInfotrygdPeriodeDto {
         validerSakerIInfotrygd(personIdent, stønadType)
         val dtoPerioder = infotrygdService.hentDtoPerioder(personIdent)
-        val perioder = when (stønadType) {
-            StønadType.OVERGANGSSTØNAD -> dtoPerioder.overgangsstønad
-            StønadType.BARNETILSYN -> dtoPerioder.barnetilsyn
-            StønadType.SKOLEPENGER -> error("Har ikke støtte for å migrere skolepenger")
-        }
+        val perioder =
+            when (stønadType) {
+                StønadType.OVERGANGSSTØNAD -> dtoPerioder.overgangsstønad
+                StønadType.BARNETILSYN -> dtoPerioder.barnetilsyn
+                StønadType.SKOLEPENGER -> error("Har ikke støtte for å migrere skolepenger")
+            }
         validerHarKunEnIdentPåPerioder(perioder, personIdent)
         return periodeFremEllerBakITiden(perioder, kjøremåned)
     }
@@ -136,12 +139,14 @@ class InfotrygdPeriodeValideringService(
             )
         }
         return periode.copy(
-            stønadsperiode = periode.stønadsperiode.copy(
-                fom = maxOf(
-                    kjøremåned,
-                    periode.stønadsperiode.fom,
+            stønadsperiode =
+                periode.stønadsperiode.copy(
+                    fom =
+                        maxOf(
+                            kjøremåned,
+                            periode.stønadsperiode.fom,
+                        ),
                 ),
-            ),
         )
     }
 
@@ -233,7 +238,10 @@ class InfotrygdPeriodeValideringService(
         }
     }
 
-    private fun validerSakerIInfotrygd(personIdent: String, stønadType: StønadType): List<InfotrygdSak> {
+    private fun validerSakerIInfotrygd(
+        personIdent: String,
+        stønadType: StønadType,
+    ): List<InfotrygdSak> {
         val sakerForStønad =
             infotrygdService.hentSaker(personIdent).saker.filter { it.stønadType == stønadType }
         validerFinnesIkkeÅpenSak(sakerForStønad)

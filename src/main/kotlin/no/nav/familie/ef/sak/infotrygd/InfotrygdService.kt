@@ -22,11 +22,13 @@ class InfotrygdService(
     private val infotrygdReplikaClient: InfotrygdReplikaClient,
     private val personService: PersonService,
 ) {
-
     /**
      * Forslag på sjekk om en person eksisterer i infotrygd
      */
-    fun eksisterer(personIdent: String, stønadTyper: Set<StønadType> = StønadType.values().toSet()): Boolean {
+    fun eksisterer(
+        personIdent: String,
+        stønadTyper: Set<StønadType> = StønadType.values().toSet(),
+    ): Boolean {
         require(stønadTyper.isNotEmpty()) { "Forventer att stønadTyper ikke er empty" }
         val identer = hentPersonIdenter(personIdent)
         val response = infotrygdReplikaClient.hentInslagHosInfotrygd(InfotrygdSøkRequest(identer))
@@ -53,11 +55,12 @@ class InfotrygdService(
     fun hentSaker(personIdent: String): InfotrygdSakResponse {
         val response = infotrygdReplikaClient.hentSaker(InfotrygdSøkRequest(hentPersonIdenter(personIdent)))
         return response.copy(
-            saker = response.saker
-                .sortedWith(
-                    compareByDescending<InfotrygdSak, LocalDate?>(nullsLast()) { it.vedtaksdato }
-                        .thenByDescending(nullsLast()) { it.mottattDato },
-                ),
+            saker =
+                response.saker
+                    .sortedWith(
+                        compareByDescending<InfotrygdSak, LocalDate?>(nullsLast()) { it.vedtaksdato }
+                            .thenByDescending(nullsLast()) { it.mottattDato },
+                    ),
         )
     }
 
@@ -104,7 +107,10 @@ class InfotrygdService(
         )
     }
 
-    private fun mapPerioder(perioder: List<InfotrygdPeriode>, sammenSlåttePerioder: List<InfotrygdPeriode>) =
+    private fun mapPerioder(
+        perioder: List<InfotrygdPeriode>,
+        sammenSlåttePerioder: List<InfotrygdPeriode>,
+    ) =
         InfotrygdStønadPerioderDto(
             perioder.filter { it.kode != InfotrygdEndringKode.ANNULERT },
             sammenSlåttePerioder.map { it.tilSummertInfotrygdperiodeDto() },

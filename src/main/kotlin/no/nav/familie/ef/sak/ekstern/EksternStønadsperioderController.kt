@@ -30,13 +30,14 @@ class EksternStønadsperioderController(
     private val perioderForBarnetrygdService: PerioderForBarnetrygdService,
     private val tilgangService: TilgangService,
 ) {
-
     /**
      * Brukes av Arena
      */
     @PostMapping("alle-stonader", "")
     @ProtectedWithClaims(issuer = "azuread", claimMap = ["roles=access_as_application"])
-    fun hentPerioderForAlleStønader(@RequestBody request: EksternePerioderRequest): Ressurs<EksternePerioderResponse> {
+    fun hentPerioderForAlleStønader(
+        @RequestBody request: EksternePerioderRequest,
+    ): Ressurs<EksternePerioderResponse> {
         return try {
             Ressurs.success(eksternStønadsperioderService.hentPerioderForAlleStønader(request))
         } catch (e: Exception) {
@@ -49,7 +50,9 @@ class EksternStønadsperioderController(
      */
     @PostMapping("overgangsstonad")
     @ProtectedWithClaims(issuer = "azuread", claimMap = ["roles=access_as_application"])
-    fun hentPerioderForOvergangsstønad(@RequestBody request: EksternePerioderRequest): Ressurs<EksternePerioderResponse> {
+    fun hentPerioderForOvergangsstønad(
+        @RequestBody request: EksternePerioderRequest,
+    ): Ressurs<EksternePerioderResponse> {
         return try {
             Ressurs.success(EksternePerioderResponse(perioder = eksternStønadsperioderService.hentPerioderForOvergangsstønad(request)))
         } catch (e: Exception) {
@@ -62,7 +65,9 @@ class EksternStønadsperioderController(
      */
     @PostMapping("overgangsstonad/med-belop")
     @ProtectedWithClaims(issuer = "azuread", claimMap = ["roles=access_as_application"])
-    fun hentPerioderForOvergangsstønadMedBeløp(@RequestBody request: EksternePerioderRequest): Ressurs<EksternePerioderMedBeløpResponse> {
+    fun hentPerioderForOvergangsstønadMedBeløp(
+        @RequestBody request: EksternePerioderRequest,
+    ): Ressurs<EksternePerioderMedBeløpResponse> {
         return try {
             Ressurs.success(EksternePerioderMedBeløpResponse(perioder = eksternStønadsperioderService.hentPerioderForOvergangsstønadMedBeløp(request)))
         } catch (e: Exception) {
@@ -74,7 +79,9 @@ class EksternStønadsperioderController(
      * Brukes av Barnetrygd, for å vurdere utvidet barnetrygd, henter kun perioder med full overgangsstønad
      */
     @PostMapping("full-overgangsstonad")
-    fun hentPerioderMedFullOvergangsstonad(@RequestBody request: PersonIdent): Ressurs<EksternePerioderResponse> {
+    fun hentPerioderMedFullOvergangsstonad(
+        @RequestBody request: PersonIdent,
+    ): Ressurs<EksternePerioderResponse> {
         if (!SikkerhetContext.erMaskinTilMaskinToken()) {
             tilgangService.validerTilgangTilPerson(request.ident, AuditLoggerEvent.ACCESS)
         }

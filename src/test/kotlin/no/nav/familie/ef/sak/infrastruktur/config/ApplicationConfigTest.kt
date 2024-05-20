@@ -18,7 +18,6 @@ import java.time.LocalDate
 
 @Disabled
 internal class ApplicationConfigTest : OppslagSpringRunnerTest() {
-
     @Autowired
     private lateinit var restTemplateBuilder: RestTemplateBuilder
 
@@ -36,7 +35,6 @@ internal class ApplicationConfigTest : OppslagSpringRunnerTest() {
     }
 
     companion object {
-
         lateinit var wiremockServerItem: WireMockServer
 
         @BeforeAll

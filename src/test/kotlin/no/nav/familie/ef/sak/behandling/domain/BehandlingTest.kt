@@ -13,7 +13,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
 internal class BehandlingTest {
-
     val behandling = behandling(fagsak = fagsak())
 
     @Test

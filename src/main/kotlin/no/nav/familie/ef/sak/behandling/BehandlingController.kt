@@ -35,11 +35,11 @@ class BehandlingController(
     private val tilgangService: TilgangService,
     private val gjenbrukVilkårService: GjenbrukVilkårService,
     private val featureToggleService: FeatureToggleService,
-
 ) {
-
     @GetMapping("{behandlingId}")
-    fun hentBehandling(@PathVariable behandlingId: UUID): Ressurs<BehandlingDto> {
+    fun hentBehandling(
+        @PathVariable behandlingId: UUID,
+    ): Ressurs<BehandlingDto> {
         val saksbehandling: Saksbehandling = behandlingService.hentSaksbehandling(behandlingId)
         tilgangService.validerTilgangTilPersonMedBarn(saksbehandling.ident, AuditLoggerEvent.ACCESS)
         return Ressurs.success(saksbehandling.tilDto())
@@ -48,9 +48,10 @@ class BehandlingController(
     @GetMapping("gamle-behandlinger")
     fun hentGamleUferdigeBehandlinger(): Ressurs<List<BehandlingDto>> {
         val stønadstyper = listOf(StønadType.OVERGANGSSTØNAD, StønadType.SKOLEPENGER, StønadType.BARNETILSYN)
-        val gamleBehandlinger = stønadstyper.flatMap { stønadstype ->
-            behandlingService.hentUferdigeBehandlingerOpprettetFørDato(stønadstype).map { it.tilDto(stønadstype) }
-        }
+        val gamleBehandlinger =
+            stønadstyper.flatMap { stønadstype ->
+                behandlingService.hentUferdigeBehandlingerOpprettetFørDato(stønadstype).map { it.tilDto(stønadstype) }
+            }
         return Ressurs.success(gamleBehandlinger)
     }
 
@@ -67,14 +68,18 @@ class BehandlingController(
     }
 
     @GetMapping("{behandlingId}/kan-ta-av-vent")
-    fun kanTaAvVent(@PathVariable behandlingId: UUID): Ressurs<TaAvVentStatusDto> {
+    fun kanTaAvVent(
+        @PathVariable behandlingId: UUID,
+    ): Ressurs<TaAvVentStatusDto> {
         tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.ACCESS)
         tilgangService.validerHarSaksbehandlerrolle()
         return Ressurs.success(behandlingPåVentService.kanTaAvVent(behandlingId))
     }
 
     @PostMapping("{behandlingId}/aktiver")
-    fun taAvVent(@PathVariable behandlingId: UUID): Ressurs<UUID> {
+    fun taAvVent(
+        @PathVariable behandlingId: UUID,
+    ): Ressurs<UUID> {
         tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.UPDATE)
         tilgangService.validerHarSaksbehandlerrolle()
         behandlingPåVentService.taAvVent(behandlingId)
@@ -82,7 +87,10 @@ class BehandlingController(
     }
 
     @PostMapping("{behandlingId}/henlegg")
-    fun henleggBehandling(@PathVariable behandlingId: UUID, @RequestBody henlagt: HenlagtDto): Ressurs<BehandlingDto> {
+    fun henleggBehandling(
+        @PathVariable behandlingId: UUID,
+        @RequestBody henlagt: HenlagtDto,
+    ): Ressurs<BehandlingDto> {
         tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.UPDATE)
         tilgangService.validerHarSaksbehandlerrolle()
         val henlagtBehandling = henleggService.henleggBehandling(behandlingId, henlagt)
@@ -91,7 +99,10 @@ class BehandlingController(
     }
 
     @PostMapping("{behandlingId}/henlegg/behandling-uten-oppgave")
-    fun henleggBehandlingUtenOppgave(@PathVariable behandlingId: UUID, @RequestBody henlagt: HenlagtDto): Ressurs<BehandlingDto> {
+    fun henleggBehandlingUtenOppgave(
+        @PathVariable behandlingId: UUID,
+        @RequestBody henlagt: HenlagtDto,
+    ): Ressurs<BehandlingDto> {
         tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.UPDATE)
         tilgangService.validerHarSaksbehandlerrolle()
         feilHvis(!featureToggleService.isEnabled(toggle = Toggle.HENLEGG_BEHANDLING_UTEN_OPPGAVE)) {
@@ -104,14 +115,18 @@ class BehandlingController(
     }
 
     @GetMapping("/ekstern/{eksternBehandlingId}")
-    fun hentBehandling(@PathVariable eksternBehandlingId: Long): Ressurs<BehandlingDto> {
+    fun hentBehandling(
+        @PathVariable eksternBehandlingId: Long,
+    ): Ressurs<BehandlingDto> {
         val saksbehandling = behandlingService.hentSaksbehandling(eksternBehandlingId)
         tilgangService.validerTilgangTilPersonMedBarn(saksbehandling.ident, AuditLoggerEvent.ACCESS)
         return Ressurs.success(saksbehandling.tilDto())
     }
 
     @GetMapping("/gjenbruk/{behandlingId}")
-    fun hentBehandlingForGjenbrukAvVilkår(@PathVariable behandlingId: UUID): Ressurs<List<BehandlingDto>> {
+    fun hentBehandlingForGjenbrukAvVilkår(
+        @PathVariable behandlingId: UUID,
+    ): Ressurs<List<BehandlingDto>> {
         tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.UPDATE)
         tilgangService.validerHarSaksbehandlerrolle()
         return Ressurs.success(gjenbrukVilkårService.finnBehandlingerForGjenbruk(behandlingId))

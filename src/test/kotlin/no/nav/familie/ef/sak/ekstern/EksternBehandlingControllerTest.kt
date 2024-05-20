@@ -21,7 +21,6 @@ import java.time.LocalDate
 import java.util.UUID
 
 internal class EksternBehandlingControllerTest {
-
     private val tilgangService = mockk<TilgangService>(relaxed = true)
     private val behandlingService = mockk<BehandlingService>()
     private val fagsakService = mockk<FagsakService>()
@@ -72,39 +71,44 @@ internal class EksternBehandlingControllerTest {
 
     private fun opprettIkkeUtdatertTilkjentYtelse(): TilkjentYtelse {
         return lagTilkjentYtelse(
-            andelerTilkjentYtelse = listOf(
-                lagAndelTilkjentYtelse(
-                    beløp = 1,
-                    fraOgMed = LocalDate.of(2019, 1, 1),
-                    tilOgMed = LocalDate.of(2019, 2, 1),
+            andelerTilkjentYtelse =
+                listOf(
+                    lagAndelTilkjentYtelse(
+                        beløp = 1,
+                        fraOgMed = LocalDate.of(2019, 1, 1),
+                        tilOgMed = LocalDate.of(2019, 2, 1),
+                    ),
+                    lagAndelTilkjentYtelse(
+                        beløp = 1,
+                        fraOgMed = LocalDate.of(2020, 1, 1),
+                        tilOgMed = LocalDate.now().plusMonths(11),
+                    ),
                 ),
-                lagAndelTilkjentYtelse(
-                    beløp = 1,
-                    fraOgMed = LocalDate.of(2020, 1, 1),
-                    tilOgMed = LocalDate.now().plusMonths(11),
-                ),
-            ),
         )
     }
 
     private fun opprettUtdatertTilkjentYtelse(): TilkjentYtelse {
         return lagTilkjentYtelse(
-            andelerTilkjentYtelse = listOf(
-                lagAndelTilkjentYtelse(
-                    beløp = 1,
-                    fraOgMed = LocalDate.of(2019, 1, 1),
-                    tilOgMed = LocalDate.of(2019, 2, 1),
+            andelerTilkjentYtelse =
+                listOf(
+                    lagAndelTilkjentYtelse(
+                        beløp = 1,
+                        fraOgMed = LocalDate.of(2019, 1, 1),
+                        tilOgMed = LocalDate.of(2019, 2, 1),
+                    ),
+                    lagAndelTilkjentYtelse(
+                        beløp = 1,
+                        fraOgMed = LocalDate.now().minusMonths(14),
+                        tilOgMed = LocalDate.now().minusYears(1).minusMonths(1),
+                    ),
                 ),
-                lagAndelTilkjentYtelse(
-                    beløp = 1,
-                    fraOgMed = LocalDate.now().minusMonths(14),
-                    tilOgMed = LocalDate.now().minusYears(1).minusMonths(1),
-                ),
-            ),
         )
     }
 
-    private fun mockOpprettTilkjenteYtelser(tilkjentYtelse: TilkjentYtelse, annenTilkjentYtelse: TilkjentYtelse) {
+    private fun mockOpprettTilkjenteYtelser(
+        tilkjentYtelse: TilkjentYtelse,
+        annenTilkjentYtelse: TilkjentYtelse,
+    ) {
         val uuid1 = UUID.randomUUID()
         val uuid2 = UUID.randomUUID()
         val behandling1 = behandling(id = uuid1)

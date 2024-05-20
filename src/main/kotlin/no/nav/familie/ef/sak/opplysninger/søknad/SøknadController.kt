@@ -21,9 +21,10 @@ class SøknadController(
     private val søknadService: SøknadService,
     private val tilgangService: TilgangService,
 ) {
-
     @GetMapping("/{behandlingId}/datoer")
-    fun hentSøknadDatoer(@PathVariable behandlingId: UUID): Ressurs<SøknadDatoerDto> {
+    fun hentSøknadDatoer(
+        @PathVariable behandlingId: UUID,
+    ): Ressurs<SøknadDatoerDto> {
         tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.ACCESS)
         val søknadsgrunnlag = søknadService.hentSøknadsgrunnlag(behandlingId)
         brukerfeilHvis(søknadsgrunnlag == null) { "Mangler søknad for behandling=$behandlingId" }

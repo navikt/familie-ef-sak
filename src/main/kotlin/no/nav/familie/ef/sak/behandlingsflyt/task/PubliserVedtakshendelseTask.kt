@@ -14,20 +14,19 @@ import java.util.UUID
     beskrivelse = "Sender hendelse om vedtak",
 )
 class PubliserVedtakshendelseTask(private val stegService: StegService) : AsyncTaskStep {
-
     override fun doTask(task: Task) {
         stegService.publiserVedtakshendelse(UUID.fromString(task.payload))
     }
 
     companion object {
-
         fun opprettTask(behandlingId: UUID): Task =
             Task(
                 type = TYPE,
                 payload = behandlingId.toString(),
-                properties = Properties().apply {
-                    this["behandlingId"] = behandlingId.toString()
-                },
+                properties =
+                    Properties().apply {
+                        this["behandlingId"] = behandlingId.toString()
+                    },
             )
 
         const val TYPE = "publiserVedtakshendelse"

@@ -23,7 +23,6 @@ class BarnService(
     private val søknadService: SøknadService,
     private val behandlingService: BehandlingService,
 ) {
-
     /**
      * Barn som blir lagrede er:
      * [StønadType.BARNETILSYN]: Alle barnen fra registeret, med data fra søknaden
@@ -42,18 +41,19 @@ class BarnService(
         barnSomSkalFødes: List<BarnSomSkalFødes> = emptyList(),
         vilkårsbehandleNyeBarn: VilkårsbehandleNyeBarn = VilkårsbehandleNyeBarn.IKKE_VALGT,
     ) {
-        val barnPåBehandlingen: List<BehandlingBarn> = when (stønadstype) {
-            StønadType.BARNETILSYN -> barnForBarnetilsyn(barnSomSkalFødes, behandlingId, grunnlagsdataBarn)
-            StønadType.OVERGANGSSTØNAD, StønadType.SKOLEPENGER ->
-                kobleBarnForOvergangsstønadOgSkolepenger(
-                    fagsakId,
-                    behandlingId,
-                    ustrukturertDokumentasjonType,
-                    grunnlagsdataBarn,
-                    barnSomSkalFødes,
-                    vilkårsbehandleNyeBarn,
-                )
-        }
+        val barnPåBehandlingen: List<BehandlingBarn> =
+            when (stønadstype) {
+                StønadType.BARNETILSYN -> barnForBarnetilsyn(barnSomSkalFødes, behandlingId, grunnlagsdataBarn)
+                StønadType.OVERGANGSSTØNAD, StønadType.SKOLEPENGER ->
+                    kobleBarnForOvergangsstønadOgSkolepenger(
+                        fagsakId,
+                        behandlingId,
+                        ustrukturertDokumentasjonType,
+                        grunnlagsdataBarn,
+                        barnSomSkalFødes,
+                        vilkårsbehandleNyeBarn,
+                    )
+            }
         barnRepository.insertAll(barnPåBehandlingen)
     }
 
@@ -94,23 +94,26 @@ class BarnService(
             "Kan ikke legge til terminbarn med ustrukturertDokumentasjonType=$ustrukturertDokumentasjonType"
         }
         return when (ustrukturertDokumentasjonType) {
-            UstrukturertDokumentasjonType.PAPIRSØKNAD -> kobleBarnSomSkalFødesPlusAlleRegisterbarn(
-                behandlingId,
-                barnSomSkalFødes,
-                grunnlagsdataBarn,
-            )
-            UstrukturertDokumentasjonType.ETTERSENDING -> barnForEttersending(
-                fagsakId,
-                behandlingId,
-                vilkårsbehandleNyeBarn,
-                grunnlagsdataBarn,
-            )
-            UstrukturertDokumentasjonType.IKKE_VALGT -> {
-                val kobledeBarn = kobleBehandlingBarnOgRegisterBarnTilBehandlingBarn(
-                    finnSøknadsbarnOgMapTilBehandlingBarn(behandlingId = behandlingId),
-                    grunnlagsdataBarn,
+            UstrukturertDokumentasjonType.PAPIRSØKNAD ->
+                kobleBarnSomSkalFødesPlusAlleRegisterbarn(
                     behandlingId,
+                    barnSomSkalFødes,
+                    grunnlagsdataBarn,
                 )
+            UstrukturertDokumentasjonType.ETTERSENDING ->
+                barnForEttersending(
+                    fagsakId,
+                    behandlingId,
+                    vilkårsbehandleNyeBarn,
+                    grunnlagsdataBarn,
+                )
+            UstrukturertDokumentasjonType.IKKE_VALGT -> {
+                val kobledeBarn =
+                    kobleBehandlingBarnOgRegisterBarnTilBehandlingBarn(
+                        finnSøknadsbarnOgMapTilBehandlingBarn(behandlingId = behandlingId),
+                        grunnlagsdataBarn,
+                        behandlingId,
+                    )
                 kobledeBarnPlusRegisterbarn(behandlingId, grunnlagsdataBarn, kobledeBarn)
             }
         }
@@ -147,10 +150,11 @@ class BarnService(
         barnFraForrigeBehandlingen: List<BehandlingBarn>,
         grunnlagsdataBarn: List<BarnMedIdent>,
     ): List<BehandlingBarn> {
-        val barnSomSkalFødesFraForrigeBehandling = barnFraForrigeBehandlingen
-            .filter { it.personIdent == null }
-            .mapNotNull { it.fødselTermindato }
-            .map { BarnSomSkalFødes(it) }
+        val barnSomSkalFødesFraForrigeBehandling =
+            barnFraForrigeBehandlingen
+                .filter { it.personIdent == null }
+                .mapNotNull { it.fødselTermindato }
+                .map { BarnSomSkalFødes(it) }
         return kobleBarnSomSkalFødesPlusAlleRegisterbarn(
             behandlingId,
             barnSomSkalFødesFraForrigeBehandling,
@@ -168,11 +172,12 @@ class BarnService(
         grunnlagsdataBarn: List<BarnMedIdent>,
     ): List<BehandlingBarn> {
         val barnSomSkalFødesSomBehandlingBarn = barnSomSkalFødes.map { it.tilBehandlingBarn(behandlingId) }
-        val kobledeBarn = kobleBehandlingBarnOgRegisterBarnTilBehandlingBarn(
-            barnSomSkalFødesSomBehandlingBarn,
-            grunnlagsdataBarn,
-            behandlingId,
-        )
+        val kobledeBarn =
+            kobleBehandlingBarnOgRegisterBarnTilBehandlingBarn(
+                barnSomSkalFødesSomBehandlingBarn,
+                grunnlagsdataBarn,
+                behandlingId,
+            )
         return kobledeBarnPlusRegisterbarn(behandlingId, grunnlagsdataBarn, kobledeBarn)
     }
 
@@ -226,21 +231,23 @@ class BarnService(
         grunnlagsdataBarn: List<BarnMedIdent>,
         stønadstype: StønadType,
     ) {
-        val kobledeBarn: List<MatchetBehandlingBarn> = kobleAktuelleBarn(
-            forrigeBehandlingId = forrigeBehandlingId,
-            nyeBarnPåRevurdering = nyeBarnPåRevurdering,
-            grunnlagsdataBarn = grunnlagsdataBarn,
-            stønadstype = stønadstype,
-        )
-
-        val alleBarnPåRevurdering = kobledeBarn.map {
-            it.behandlingBarn.copy(
-                id = UUID.randomUUID(),
-                behandlingId = behandlingId,
-                personIdent = it.barn?.personIdent ?: it.behandlingBarn.personIdent,
-                navn = it.barn?.navn?.visningsnavn() ?: it.behandlingBarn.navn,
+        val kobledeBarn: List<MatchetBehandlingBarn> =
+            kobleAktuelleBarn(
+                forrigeBehandlingId = forrigeBehandlingId,
+                nyeBarnPåRevurdering = nyeBarnPåRevurdering,
+                grunnlagsdataBarn = grunnlagsdataBarn,
+                stønadstype = stønadstype,
             )
-        }
+
+        val alleBarnPåRevurdering =
+            kobledeBarn.map {
+                it.behandlingBarn.copy(
+                    id = UUID.randomUUID(),
+                    behandlingId = behandlingId,
+                    personIdent = it.barn?.personIdent ?: it.behandlingBarn.personIdent,
+                    navn = it.barn?.navn?.visningsnavn() ?: it.behandlingBarn.navn,
+                )
+            }
 
         barnRepository.insertAll(alleBarnPåRevurdering)
     }
@@ -291,7 +298,10 @@ class BarnService(
 
     fun finnBarnPåBehandling(behandlingId: UUID): List<BehandlingBarn> = barnRepository.findByBehandlingId(behandlingId)
 
-    fun validerBarnFinnesPåBehandling(behandlingId: UUID, barn: Set<UUID>) {
+    fun validerBarnFinnesPåBehandling(
+        behandlingId: UUID,
+        barn: Set<UUID>,
+    ) {
         val barnPåBehandling = finnBarnPåBehandling(behandlingId).map { it.id }.toSet()
         feilHvis(barn.any { !barnPåBehandling.contains(it) }) {
             "Et barn som ikke finnes på behandling=$behandlingId er lagt til, innsendte=$barn"
@@ -310,10 +320,11 @@ class BarnService(
         behandlingId: UUID,
         tidligereBarnIder: Set<UUID>,
     ): Map<UUID, UUID> {
-        val behandlingBarn = barnRepository.findByBehandlingId(behandlingId).associate {
-            val personIdent = it.personIdent ?: error("Mangler ident for barn=${it.id}")
-            personIdent to it.id
-        }
+        val behandlingBarn =
+            barnRepository.findByBehandlingId(behandlingId).associate {
+                val personIdent = it.personIdent ?: error("Mangler ident for barn=${it.id}")
+                personIdent to it.id
+            }
         val tidligereBarn = barnRepository.findAllByIdOrThrow(tidligereBarnIder) { it.id }
         return tidligereBarn.associate {
             val personIdent = it.personIdent ?: error("Mangler ident for barn=${it.id}")

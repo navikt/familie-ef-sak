@@ -35,7 +35,6 @@ import org.springframework.http.HttpStatus
 import org.springframework.web.client.HttpClientErrorException
 
 internal class SaksbehandlingsblankettStegTest {
-
     private val blankettServiceMock = mockk<BlankettService>()
     private val taskServiceMock = mockk<TaskService>()
     private val arbeidsfordelingServiceMock = mockk<ArbeidsfordelingService>()
@@ -44,15 +43,16 @@ internal class SaksbehandlingsblankettStegTest {
     private val behandlingServiceMock = mockk<BehandlingService>()
     private val fagsakServiceMock = mockk<FagsakService>()
 
-    private val saksbehandlingsblankettSteg = SaksbehandlingsblankettSteg(
-        blankettService = blankettServiceMock,
-        taskService = taskServiceMock,
-        arbeidsfordelingService = arbeidsfordelingServiceMock,
-        totrinnskontrollService = totrinnskontrollServiceMock,
-        journalpostClient = journalpostClientMock,
-        behandlingService = behandlingServiceMock,
-        fagsakService = fagsakServiceMock,
-    )
+    private val saksbehandlingsblankettSteg =
+        SaksbehandlingsblankettSteg(
+            blankettService = blankettServiceMock,
+            taskService = taskServiceMock,
+            arbeidsfordelingService = arbeidsfordelingServiceMock,
+            totrinnskontrollService = totrinnskontrollServiceMock,
+            journalpostClient = journalpostClientMock,
+            behandlingService = behandlingServiceMock,
+            fagsakService = fagsakServiceMock,
+        )
 
     val arkiverDokumentRequestSlot = slot<ArkiverDokumentRequest>()
 
@@ -98,10 +98,11 @@ internal class SaksbehandlingsblankettStegTest {
 
     @Test
     internal fun `skal journalføre blankett for barnetilsyn hvis det er revurdering`() {
-        every { fagsakServiceMock.hentFagsak(any()) } returns fagsak(
-            fagsakpersoner(setOf("12345678912")),
-            stønadstype = StønadType.BARNETILSYN,
-        )
+        every { fagsakServiceMock.hentFagsak(any()) } returns
+            fagsak(
+                fagsakpersoner(setOf("12345678912")),
+                stønadstype = StønadType.BARNETILSYN,
+            )
         val behandling = saksbehandling(type = BehandlingType.REVURDERING).copy(stønadstype = StønadType.BARNETILSYN)
         saksbehandlingsblankettSteg.utførSteg(behandling, null)
         verify(exactly = 1) { blankettServiceMock.lagBlankett(any()) }
@@ -113,33 +114,36 @@ internal class SaksbehandlingsblankettStegTest {
 
     @Test
     internal fun `skal håndtere 409 Conflict ved journalføring av  blankett`() {
-        every { fagsakServiceMock.hentFagsak(any()) } returns fagsak(
-            fagsakpersoner(setOf("12345678912")),
-            stønadstype = StønadType.BARNETILSYN,
-        )
+        every { fagsakServiceMock.hentFagsak(any()) } returns
+            fagsak(
+                fagsakpersoner(setOf("12345678912")),
+                stønadstype = StønadType.BARNETILSYN,
+            )
 
         every {
             journalpostClientMock.arkiverDokument(
                 capture(arkiverDokumentRequestSlot),
                 any(),
             )
-        } throws RessursException(
-            Ressurs.failure(),
-            HttpClientErrorException.create(null, HttpStatus.CONFLICT, null, null, null, null),
-            HttpStatus.CONFLICT,
-        )
+        } throws
+            RessursException(
+                Ressurs.failure(),
+                HttpClientErrorException.create(null, HttpStatus.CONFLICT, null, null, null, null),
+                HttpStatus.CONFLICT,
+            )
 
         val behandling = saksbehandling(type = BehandlingType.REVURDERING).copy(stønadstype = StønadType.BARNETILSYN)
         every {
             journalpostClientMock.finnJournalposter(any())
-        } returns listOf(
-            Journalpost(
-                journalpostId = "123456",
-                journalposttype = Journalposttype.N,
-                journalstatus = Journalstatus.JOURNALFOERT,
-                eksternReferanseId = "${behandling.id}-blankett",
-            ),
-        )
+        } returns
+            listOf(
+                Journalpost(
+                    journalpostId = "123456",
+                    journalposttype = Journalposttype.N,
+                    journalstatus = Journalstatus.JOURNALFOERT,
+                    eksternReferanseId = "${behandling.id}-blankett",
+                ),
+            )
 
         saksbehandlingsblankettSteg.utførSteg(behandling, null)
         verify(exactly = 1) { blankettServiceMock.lagBlankett(any()) }
@@ -156,21 +160,23 @@ internal class SaksbehandlingsblankettStegTest {
 
     @Test
     internal fun `skal ikke håndtere feil som ikke er av typen 409 conflict ved arkivering av blankett`() {
-        every { fagsakServiceMock.hentFagsak(any()) } returns fagsak(
-            fagsakpersoner(setOf("12345678912")),
-            stønadstype = StønadType.BARNETILSYN,
-        )
+        every { fagsakServiceMock.hentFagsak(any()) } returns
+            fagsak(
+                fagsakpersoner(setOf("12345678912")),
+                stønadstype = StønadType.BARNETILSYN,
+            )
 
         every {
             journalpostClientMock.arkiverDokument(
                 capture(arkiverDokumentRequestSlot),
                 any(),
             )
-        } throws RessursException(
-            Ressurs.failure(),
-            HttpClientErrorException.create(null, HttpStatus.BAD_REQUEST, null, null, null, null),
-            HttpStatus.BAD_REQUEST,
-        )
+        } throws
+            RessursException(
+                Ressurs.failure(),
+                HttpClientErrorException.create(null, HttpStatus.BAD_REQUEST, null, null, null, null),
+                HttpStatus.BAD_REQUEST,
+            )
 
         val behandling = saksbehandling(type = BehandlingType.REVURDERING).copy(stønadstype = StønadType.BARNETILSYN)
 

@@ -14,12 +14,14 @@ class HistoriskPensjonClient(
     private val historiskPensjonUri: URI,
     @Qualifier("azure") restOperations: RestOperations,
 ) : AbstractRestClient(restOperations, "pensjon") {
-
     private fun lagHarPensjonUri() =
         UriComponentsBuilder.fromUri(historiskPensjonUri).pathSegment("api/ensligForsoerger/harPensjonsdata")
             .build().toUri()
 
-    fun harPensjon(aktivIdent: String, alleRelaterteFoedselsnummer: Set<String>): HistoriskPensjonResponse {
+    fun harPensjon(
+        aktivIdent: String,
+        alleRelaterteFoedselsnummer: Set<String>,
+    ): HistoriskPensjonResponse {
         return postForEntity(
             lagHarPensjonUri(),
             EnsligForsoergerRequest(aktivIdent, alleRelaterteFoedselsnummer),

@@ -5,7 +5,6 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
 internal class AdresseopplysningerMapperTest {
-
     @Test
     internal fun `mapper til null hvis objektet er null`() {
         val dto = AdresseopplysningerMapper.tilDto(null)
@@ -20,12 +19,13 @@ internal class AdresseopplysningerMapperTest {
 
     @Test
     internal fun `skal mappe verdier`() {
-        val adresseopplysninger = Adresseopplysninger(
-            adresse = "adresse",
-            søkerBorPåRegistrertAdresse = false,
-            harMeldtAdresseendring = true,
-            dokumentasjonAdresseendring = null,
-        )
+        val adresseopplysninger =
+            Adresseopplysninger(
+                adresse = "adresse",
+                søkerBorPåRegistrertAdresse = false,
+                harMeldtAdresseendring = true,
+                dokumentasjonAdresseendring = null,
+            )
         val dto = AdresseopplysningerMapper.tilDto(adresseopplysninger)!!
         assertThat(dto.adresse).isEqualTo("adresse")
         assertThat(dto.søkerBorPåRegistrertAdresse).isFalse

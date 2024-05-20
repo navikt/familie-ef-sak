@@ -24,9 +24,10 @@ class MigreringController(
     private val migreringService: MigreringService,
     private val tilgangService: TilgangService,
 ) {
-
     @GetMapping("{fagsakPersonId}")
-    fun hentMigreringInfo(@PathVariable fagsakPersonId: UUID): Ressurs<MigreringInfo> {
+    fun hentMigreringInfo(
+        @PathVariable fagsakPersonId: UUID,
+    ): Ressurs<MigreringInfo> {
         tilgangService.validerTilgangTilFagsakPerson(fagsakPersonId, AuditLoggerEvent.ACCESS)
         return Ressurs.success(migreringService.hentMigreringInfo(fagsakPersonId))
     }

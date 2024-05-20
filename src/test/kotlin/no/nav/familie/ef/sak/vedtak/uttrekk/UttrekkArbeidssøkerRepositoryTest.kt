@@ -11,7 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import java.time.YearMonth
 
 internal class UttrekkArbeidssøkerRepositoryTest : OppslagSpringRunnerTest() {
-
     @Autowired
     private lateinit var behandlingRepository: BehandlingRepository
 

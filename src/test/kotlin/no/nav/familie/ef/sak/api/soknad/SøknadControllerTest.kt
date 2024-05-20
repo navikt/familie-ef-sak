@@ -27,7 +27,6 @@ import org.springframework.http.ResponseEntity
 import java.util.UUID
 
 internal class SøknadControllerTest : OppslagSpringRunnerTest() {
-
     @Autowired
     private lateinit var behandlingRepository: BehandlingRepository
 
@@ -59,16 +58,18 @@ internal class SøknadControllerTest : OppslagSpringRunnerTest() {
     @Test
     internal fun `Skal hente søknadsinformasjon gitt behandlingId`() {
         val søknad = SøknadMedVedlegg(Testsøknad.søknadOvergangsstønad, emptyList())
-        val fagsak = fagsakService.hentEllerOpprettFagsakMedBehandlinger(
-            søknad.søknad.personalia.verdi.fødselsnummer.verdi.verdi,
-            StønadType.OVERGANGSSTØNAD,
-        )
+        val fagsak =
+            fagsakService.hentEllerOpprettFagsakMedBehandlinger(
+                søknad.søknad.personalia.verdi.fødselsnummer.verdi.verdi,
+                StønadType.OVERGANGSSTØNAD,
+            )
         val behandlingÅrsak = BehandlingÅrsak.SØKNAD
-        val behandling = behandlingService.opprettBehandling(
-            BehandlingType.FØRSTEGANGSBEHANDLING,
-            fagsak.id,
-            behandlingsårsak = behandlingÅrsak,
-        )
+        val behandling =
+            behandlingService.opprettBehandling(
+                BehandlingType.FØRSTEGANGSBEHANDLING,
+                fagsak.id,
+                behandlingsårsak = behandlingÅrsak,
+            )
         søknadService.lagreSøknadForOvergangsstønad(søknad.søknad, behandling.id, fagsak.id, "1234")
         val søknadSkjema = søknadService.hentOvergangsstønad(behandling.id)!!
         val respons: ResponseEntity<Ressurs<SøknadDatoerDto>> = hentSøknadData(behandling.id)

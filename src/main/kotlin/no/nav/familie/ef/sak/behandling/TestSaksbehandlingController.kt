@@ -254,20 +254,20 @@ class TestSaksbehandlingController(
             .setBarn(barneListe)
             .setBosituasjon(
                 delerDuBolig =
-                EnumTekstverdiMedSvarId(
-                    verdi = "Nei, jeg bor alene med barn eller jeg er gravid og bor alene",
-                    svarId = "borAleneMedBarnEllerGravid",
-                ),
+                    EnumTekstverdiMedSvarId(
+                        verdi = "Nei, jeg bor alene med barn eller jeg er gravid og bor alene",
+                        svarId = "borAleneMedBarnEllerGravid",
+                    ),
             )
             .setSivilstandsplaner(
                 harPlaner = true,
                 fraDato = LocalDate.of(2019, 9, 17),
                 vordendeSamboerEktefelle =
-                TestsøknadBuilder.Builder()
-                    .defaultPersonMinimum(
-                        navn = "Fyren som skal bli min samboer",
-                        fødselsdato = LocalDate.of(1979, 9, 17),
-                    ),
+                    TestsøknadBuilder.Builder()
+                        .defaultPersonMinimum(
+                            navn = "Fyren som skal bli min samboer",
+                            fødselsdato = LocalDate.of(1979, 9, 17),
+                        ),
             )
             .build()
     }
@@ -283,27 +283,27 @@ class TestSaksbehandlingController(
                     erBarnetFødt = true,
                     fødselTermindato = Fødselsnummer(it.key).fødselsdato,
                     annenForelder =
-                    TestsøknadBuilder.Builder().defaultAnnenForelder(
-                        ikkeOppgittAnnenForelderBegrunnelse = null,
-                        bosattINorge = false,
-                        land = "Sverige",
-                        personMinimum =
-                        TestsøknadBuilder.Builder()
-                            .defaultPersonMinimum("Bob Burger", LocalDate.of(1979, 9, 17)),
-                    ),
+                        TestsøknadBuilder.Builder().defaultAnnenForelder(
+                            ikkeOppgittAnnenForelderBegrunnelse = null,
+                            bosattINorge = false,
+                            land = "Sverige",
+                            personMinimum =
+                                TestsøknadBuilder.Builder()
+                                    .defaultPersonMinimum("Bob Burger", LocalDate.of(1979, 9, 17)),
+                        ),
                     samvær =
-                    TestsøknadBuilder.Builder().defaultSamvær(
-                        beskrivSamværUtenBarn = "Har sjelden sett noe til han",
-                        borAnnenForelderISammeHus = "ja",
-                        borAnnenForelderISammeHusBeskrivelse = "Samme blokk",
-                        harDereSkriftligAvtaleOmSamvær = "jaIkkeKonkreteTidspunkter",
-                        harDereTidligereBoddSammen = true,
-                        hvorMyeErDuSammenMedAnnenForelder = "møtesUtenom",
-                        hvordanPraktiseresSamværet = "Bytter litt på innimellom",
-                        nårFlyttetDereFraHverandre = LocalDate.of(2020, 12, 31),
-                        skalAnnenForelderHaSamvær = "jaMerEnnVanlig",
-                        spørsmålAvtaleOmDeltBosted = true,
-                    ),
+                        TestsøknadBuilder.Builder().defaultSamvær(
+                            beskrivSamværUtenBarn = "Har sjelden sett noe til han",
+                            borAnnenForelderISammeHus = "ja",
+                            borAnnenForelderISammeHusBeskrivelse = "Samme blokk",
+                            harDereSkriftligAvtaleOmSamvær = "jaIkkeKonkreteTidspunkter",
+                            harDereTidligereBoddSammen = true,
+                            hvorMyeErDuSammenMedAnnenForelder = "møtesUtenom",
+                            hvordanPraktiseresSamværet = "Bytter litt på innimellom",
+                            nårFlyttetDereFraHverandre = LocalDate.of(2020, 12, 31),
+                            skalAnnenForelderHaSamvær = "jaMerEnnVanlig",
+                            spørsmålAvtaleOmDeltBosted = true,
+                        ),
                     skalBoHosSøker = "jaMenSamarbeiderIkke",
                 )
             }

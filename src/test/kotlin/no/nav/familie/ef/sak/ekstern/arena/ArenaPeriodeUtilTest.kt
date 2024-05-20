@@ -13,14 +13,14 @@ import java.time.YearMonth
 import java.time.YearMonth.of
 
 internal class ArenaPeriodeUtilTest {
-
     @Test
     internal fun `sammenhengende periode fra ef og infotrygd slås sammen tvers stønadstyper`() {
         val request = request(of(2022, 1), of(2022, 1))
-        val perioder = internePerioder(
-            listOf(periode(of(2021, 1), of(2022, 1))),
-            listOf(periode(of(2022, 2), of(2023, 1))),
-        )
+        val perioder =
+            internePerioder(
+                listOf(periode(of(2021, 1), of(2022, 1))),
+                listOf(periode(of(2022, 2), of(2023, 1))),
+            )
 
         val resultat = slåSammenPerioderFraEfOgInfotrygd(request, perioder)
         assertThat(resultat).containsExactly(lagResultatPeriode(of(2021, 1), of(2023, 1)))
@@ -29,10 +29,11 @@ internal class ArenaPeriodeUtilTest {
     @Test
     internal fun `ikke sammenhengende periode tvers stønadstyper fra ef og infotrygd returneres oppdelte`() {
         val request = request(of(2022, 1), of(2022, 4))
-        val perioder = internePerioder(
-            listOf(periode(of(2021, 1), of(2022, 1))),
-            listOf(periode(of(2022, 3), of(2023, 1))),
-        )
+        val perioder =
+            internePerioder(
+                listOf(periode(of(2021, 1), of(2022, 1))),
+                listOf(periode(of(2022, 3), of(2023, 1))),
+            )
 
         val resultat = slåSammenPerioderFraEfOgInfotrygd(request, perioder)
         assertThat(resultat).containsExactly(
@@ -44,12 +45,13 @@ internal class ArenaPeriodeUtilTest {
     @Test
     internal fun `ikke sammenhengende periode av en type stønad fra ef og infotrygd returneres oppdelte`() {
         val request = request(of(2022, 1), of(2022, 4))
-        val perioder = internePerioder(
-            listOf(
-                periode(of(2021, 1), of(2022, 1)),
-                periode(of(2022, 3), of(2023, 1)),
-            ),
-        )
+        val perioder =
+            internePerioder(
+                listOf(
+                    periode(of(2021, 1), of(2022, 1)),
+                    periode(of(2022, 3), of(2023, 1)),
+                ),
+            )
 
         val resultat = slåSammenPerioderFraEfOgInfotrygd(request, perioder)
         assertThat(resultat).containsExactly(
@@ -61,12 +63,13 @@ internal class ArenaPeriodeUtilTest {
     @Test
     internal fun `request overlapper kun en av periodene`() {
         val request = request(of(2022, 1), of(2022, 1))
-        val perioder = internePerioder(
-            listOf(
-                periode(of(2021, 1), of(2022, 1)),
-                periode(of(2022, 3), of(2023, 1)),
-            ),
-        )
+        val perioder =
+            internePerioder(
+                listOf(
+                    periode(of(2021, 1), of(2022, 1)),
+                    periode(of(2022, 3), of(2023, 1)),
+                ),
+            )
 
         val resultat = slåSammenPerioderFraEfOgInfotrygd(request, perioder)
         assertThat(resultat).containsExactly(lagResultatPeriode(of(2021, 1), of(2022, 1)))
@@ -75,10 +78,11 @@ internal class ArenaPeriodeUtilTest {
     @Test
     internal fun `overlappende periode fra ef og infotrygd slås sammen tvers stønadstyper`() {
         val request = request(of(2022, 1), of(2022, 1))
-        val perioder = internePerioder(
-            listOf(periode(of(2021, 11), of(2022, 1))),
-            listOf(periode(of(2021, 1), of(2023, 1))),
-        )
+        val perioder =
+            internePerioder(
+                listOf(periode(of(2021, 11), of(2022, 1))),
+                listOf(periode(of(2021, 1), of(2023, 1))),
+            )
 
         val resultat = slåSammenPerioderFraEfOgInfotrygd(request, perioder)
         assertThat(resultat).containsExactly(lagResultatPeriode(of(2021, 1), of(2023, 1)))
@@ -86,7 +90,6 @@ internal class ArenaPeriodeUtilTest {
 
     @Nested
     inner class `Overlappende datoer` {
-
         private val fom = of(2021, 3)
         private val tom = of(2021, 5)
         private val perioder = internePerioder(listOf(periode(fom, tom)))
@@ -138,10 +141,16 @@ internal class ArenaPeriodeUtilTest {
 
 private val ident = "01234567890"
 
-private fun request(fom: YearMonth, tom: YearMonth) =
+private fun request(
+    fom: YearMonth,
+    tom: YearMonth,
+) =
     EksternePerioderRequest(ident, fom.atDay(1), tom.atEndOfMonth())
 
-private fun periode(fom: YearMonth, tom: YearMonth) =
+private fun periode(
+    fom: YearMonth,
+    tom: YearMonth,
+) =
     InternPeriode(
         personIdent = ident,
         inntektsreduksjon = 0,
@@ -161,7 +170,10 @@ private fun internePerioder(
     skolepenger: List<InternPeriode> = emptyList(),
 ) = InternePerioder(overgangsstønad, barnetilsyn, skolepenger)
 
-private fun lagResultatPeriode(fom: YearMonth, tom: YearMonth) =
+private fun lagResultatPeriode(
+    fom: YearMonth,
+    tom: YearMonth,
+) =
     EksternPeriode(
         personIdent = ident,
         fomDato = fom.atDay(1),

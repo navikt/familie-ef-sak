@@ -20,7 +20,6 @@ import java.util.UUID
     maxAntallFeil = 3,
 )
 class FerdigstillOppgaveTask(private val oppgaveService: OppgaveService) : AsyncTaskStep {
-
     /**
      * Då payload er unik per task type, så settes unik inn
      */
@@ -39,18 +38,23 @@ class FerdigstillOppgaveTask(private val oppgaveService: OppgaveService) : Async
     }
 
     companion object {
-
-        fun opprettTask(behandlingId: UUID, oppgavetype: Oppgavetype, oppgaveId: Long?, personIdent: String?): Task {
+        fun opprettTask(
+            behandlingId: UUID,
+            oppgavetype: Oppgavetype,
+            oppgaveId: Long?,
+            personIdent: String?,
+        ): Task {
             return Task(
                 type = TYPE,
                 payload = objectMapper.writeValueAsString(FerdigstillOppgaveTaskData(behandlingId, oppgavetype)),
-                properties = Properties().apply {
-                    this["saksbehandler"] = SikkerhetContext.hentSaksbehandlerEllerSystembruker()
-                    this["behandlingId"] = behandlingId.toString()
-                    this["oppgavetype"] = oppgavetype.name
-                    this["oppgaveId"] = oppgaveId.toString()
-                    this["personIdent"] = personIdent ?: "ukjent"
-                },
+                properties =
+                    Properties().apply {
+                        this["saksbehandler"] = SikkerhetContext.hentSaksbehandlerEllerSystembruker()
+                        this["behandlingId"] = behandlingId.toString()
+                        this["oppgavetype"] = oppgavetype.name
+                        this["oppgaveId"] = oppgaveId.toString()
+                        this["personIdent"] = personIdent ?: "ukjent"
+                    },
             )
         }
 

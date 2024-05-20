@@ -21,7 +21,6 @@ import java.time.LocalDateTime
 import java.time.YearMonth
 
 internal class VedtakRepositoryTest : OppslagSpringRunnerTest() {
-
     @Autowired
     private lateinit var vedtakRepository: VedtakRepository
 
@@ -33,34 +32,37 @@ internal class VedtakRepositoryTest : OppslagSpringRunnerTest() {
         val fagsak = testoppsettService.lagreFagsak(fagsak())
         val behandling = behandlingRepository.insert(behandling(fagsak))
 
-        val vedtak = Vedtak(
-            behandlingId = behandling.id,
-            resultatType = ResultatType.INNVILGE,
-            periodeBegrunnelse = "begrunnelse for periode",
-            inntektBegrunnelse = "begrunnelse for inntekt",
-            perioder = PeriodeWrapper(
-                listOf(
-                    Vedtaksperiode(
-                        LocalDate.now(),
-                        LocalDate.now(),
-                        AktivitetType.FORSØRGER_ETABLERER_VIRKSOMHET,
-                        VedtaksperiodeType.HOVEDPERIODE,
+        val vedtak =
+            Vedtak(
+                behandlingId = behandling.id,
+                resultatType = ResultatType.INNVILGE,
+                periodeBegrunnelse = "begrunnelse for periode",
+                inntektBegrunnelse = "begrunnelse for inntekt",
+                perioder =
+                    PeriodeWrapper(
+                        listOf(
+                            Vedtaksperiode(
+                                LocalDate.now(),
+                                LocalDate.now(),
+                                AktivitetType.FORSØRGER_ETABLERER_VIRKSOMHET,
+                                VedtaksperiodeType.HOVEDPERIODE,
+                            ),
+                        ),
                     ),
-                ),
-            ),
-            inntekter = InntektWrapper(
-                listOf(
-                    Inntektsperiode(
-                        periode = Månedsperiode(YearMonth.now()),
-                        inntekt = BigDecimal(100),
-                        samordningsfradrag = BigDecimal(0),
+                inntekter =
+                    InntektWrapper(
+                        listOf(
+                            Inntektsperiode(
+                                periode = Månedsperiode(YearMonth.now()),
+                                inntekt = BigDecimal(100),
+                                samordningsfradrag = BigDecimal(0),
+                            ),
+                        ),
                     ),
-                ),
-            ),
-            saksbehandlerIdent = "VL",
-            opprettetAv = "VL",
-            opprettetTid = LocalDateTime.now(),
-        )
+                saksbehandlerIdent = "VL",
+                opprettetAv = "VL",
+                opprettetTid = LocalDateTime.now(),
+            )
 
         vedtakRepository.insert(vedtak)
 

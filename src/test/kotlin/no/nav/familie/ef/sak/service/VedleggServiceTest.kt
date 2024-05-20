@@ -23,7 +23,6 @@ import org.junit.jupiter.api.Test
 import java.util.UUID
 
 internal class VedleggServiceTest {
-
     private val behandlingService = mockk<BehandlingService>()
     private val journalpostService = mockk<JournalpostService>()
     private val fagsakPersonService = mockk<FagsakPersonService>()
@@ -123,74 +122,84 @@ internal class VedleggServiceTest {
         assertThat(skilsmissepapirer.journalpostId).isEqualTo(journalpostEttersendelse.journalpostId)
     }
 
-    private val søknadsdokument = DokumentInfo(
-        dokumentInfoId = "111",
-        tittel = "Søknad om overgangsstønad - dokument 1",
-        brevkode = DokumentBrevkode.OVERGANGSSTØNAD.verdi,
-        dokumentvarianter = listOf(
-            Dokumentvariant(
-                filnavn = "FilnavnDok1",
-                variantformat = Dokumentvariantformat.ARKIV,
-                saksbehandlerHarTilgang = true,
-            ),
-            Dokumentvariant(variantformat = Dokumentvariantformat.ORIGINAL, saksbehandlerHarTilgang = true),
-        ),
-    )
+    private val søknadsdokument =
+        DokumentInfo(
+            dokumentInfoId = "111",
+            tittel = "Søknad om overgangsstønad - dokument 1",
+            brevkode = DokumentBrevkode.OVERGANGSSTØNAD.verdi,
+            dokumentvarianter =
+                listOf(
+                    Dokumentvariant(
+                        filnavn = "FilnavnDok1",
+                        variantformat = Dokumentvariantformat.ARKIV,
+                        saksbehandlerHarTilgang = true,
+                    ),
+                    Dokumentvariant(variantformat = Dokumentvariantformat.ORIGINAL, saksbehandlerHarTilgang = true),
+                ),
+        )
 
-    private val syktBarnDokument = DokumentInfo(
-        dokumentInfoId = "222",
-        tittel = "Sykt barn",
-        dokumentvarianter = listOf(
-            Dokumentvariant(
-                filnavn = "FilnavnDok2",
-                variantformat = Dokumentvariantformat.ARKIV,
-                saksbehandlerHarTilgang = true,
-            ),
-        ),
-    )
+    private val syktBarnDokument =
+        DokumentInfo(
+            dokumentInfoId = "222",
+            tittel = "Sykt barn",
+            dokumentvarianter =
+                listOf(
+                    Dokumentvariant(
+                        filnavn = "FilnavnDok2",
+                        variantformat = Dokumentvariantformat.ARKIV,
+                        saksbehandlerHarTilgang = true,
+                    ),
+                ),
+        )
 
-    private val ukjentDokument = DokumentInfo(
-        dokumentInfoId = "404",
-        tittel = "Ukjent tittel",
-        dokumentvarianter = null,
-    )
+    private val ukjentDokument =
+        DokumentInfo(
+            dokumentInfoId = "404",
+            tittel = "Ukjent tittel",
+            dokumentvarianter = null,
+        )
 
-    private val samboerdokument = DokumentInfo(
-        dokumentInfoId = "333",
-        tittel = "Samboerkontrakt",
-        brevkode = DokumentBrevkode.OVERGANGSSTØNAD.verdi,
-        dokumentvarianter = listOf(
-            Dokumentvariant(
-                filnavn = "FilnavnDok3",
-                variantformat = Dokumentvariantformat.ARKIV,
-                saksbehandlerHarTilgang = true,
-            ),
-        ),
-    )
-    private val skilsmissedokument = DokumentInfo(
-        dokumentInfoId = "444",
-        tittel = "Skilsmissepapirer",
-        dokumentvarianter =
-        listOf(
-            Dokumentvariant(
-                filnavn = "FilnavnDok4",
-                variantformat = Dokumentvariantformat.ARKIV,
-                saksbehandlerHarTilgang = true,
-            ),
-        ),
-    )
+    private val samboerdokument =
+        DokumentInfo(
+            dokumentInfoId = "333",
+            tittel = "Samboerkontrakt",
+            brevkode = DokumentBrevkode.OVERGANGSSTØNAD.verdi,
+            dokumentvarianter =
+                listOf(
+                    Dokumentvariant(
+                        filnavn = "FilnavnDok3",
+                        variantformat = Dokumentvariantformat.ARKIV,
+                        saksbehandlerHarTilgang = true,
+                    ),
+                ),
+        )
+    private val skilsmissedokument =
+        DokumentInfo(
+            dokumentInfoId = "444",
+            tittel = "Skilsmissepapirer",
+            dokumentvarianter =
+                listOf(
+                    Dokumentvariant(
+                        filnavn = "FilnavnDok4",
+                        variantformat = Dokumentvariantformat.ARKIV,
+                        saksbehandlerHarTilgang = true,
+                    ),
+                ),
+        )
 
-    private val journalpostSøknad = Journalpost(
-        journalpostId = "1",
-        journalposttype = Journalposttype.I,
-        journalstatus = Journalstatus.MOTTATT,
-        dokumenter = listOf(søknadsdokument, syktBarnDokument, ukjentDokument),
-    )
+    private val journalpostSøknad =
+        Journalpost(
+            journalpostId = "1",
+            journalposttype = Journalposttype.I,
+            journalstatus = Journalstatus.MOTTATT,
+            dokumenter = listOf(søknadsdokument, syktBarnDokument, ukjentDokument),
+        )
 
-    private val journalpostEttersendelse = Journalpost(
-        journalpostId = "2",
-        journalposttype = Journalposttype.I,
-        journalstatus = Journalstatus.MOTTATT,
-        dokumenter = listOf(samboerdokument, skilsmissedokument),
-    )
+    private val journalpostEttersendelse =
+        Journalpost(
+            journalpostId = "2",
+            journalposttype = Journalposttype.I,
+            journalstatus = Journalstatus.MOTTATT,
+            dokumenter = listOf(samboerdokument, skilsmissedokument),
+        )
 }

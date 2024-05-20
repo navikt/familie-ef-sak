@@ -31,14 +31,15 @@ class EksternBehandlingController(
     private val tilgangService: TilgangService,
     private val eksternBehandlingService: EksternBehandlingService,
 ) {
-
     /**
      * Hvis man har alle identer til en person så kan man sende inn alle direkte, for å unngå oppslag mot pdl
      * Dette er alltså ikke ett bolk-oppslag for flere ulike personer
      */
     @PostMapping("har-loepende-stoenad")
     @ProtectedWithClaims(issuer = "azuread", claimMap = ["roles=access_as_application"])
-    fun harAktivStønad(@RequestBody personidenter: Set<String>): Ressurs<Boolean> {
+    fun harAktivStønad(
+        @RequestBody personidenter: Set<String>,
+    ): Ressurs<Boolean> {
         if (personidenter.isEmpty()) {
             return Ressurs.failure("Minst en ident påkrevd for søk")
         }
@@ -50,12 +51,16 @@ class EksternBehandlingController(
 
     @PostMapping("har-loepende-barnetilsyn")
     @ProtectedWithClaims(issuer = "azuread", claimMap = ["roles=access_as_application"])
-    fun harLøpendeBarnetilsyn(@RequestBody personIdent: PersonIdent): Ressurs<Boolean> {
+    fun harLøpendeBarnetilsyn(
+        @RequestBody personIdent: PersonIdent,
+    ): Ressurs<Boolean> {
         return Ressurs.success(eksternBehandlingService.harLøpendeBarnetilsyn(personIdent.ident))
     }
 
     @GetMapping("kan-opprette-revurdering-klage/{eksternFagsakId}")
-    fun kanOppretteRevurdering(@PathVariable eksternFagsakId: Long): Ressurs<KanOppretteRevurderingResponse> {
+    fun kanOppretteRevurdering(
+        @PathVariable eksternFagsakId: Long,
+    ): Ressurs<KanOppretteRevurderingResponse> {
         tilgangService.validerTilgangTilEksternFagsak(eksternFagsakId, AuditLoggerEvent.CREATE)
         tilgangService.validerHarSaksbehandlerrolle()
         feilHvisIkke(SikkerhetContext.kallKommerFraKlage(), HttpStatus.UNAUTHORIZED) {
@@ -65,7 +70,9 @@ class EksternBehandlingController(
     }
 
     @PostMapping("opprett-revurdering-klage/{eksternFagsakId}")
-    fun opprettRevurderingKlage(@PathVariable eksternFagsakId: Long): Ressurs<OpprettRevurderingResponse> {
+    fun opprettRevurderingKlage(
+        @PathVariable eksternFagsakId: Long,
+    ): Ressurs<OpprettRevurderingResponse> {
         tilgangService.validerTilgangTilEksternFagsak(eksternFagsakId, AuditLoggerEvent.CREATE)
         tilgangService.validerHarSaksbehandlerrolle()
         feilHvisIkke(SikkerhetContext.kallKommerFraKlage(), HttpStatus.UNAUTHORIZED) {

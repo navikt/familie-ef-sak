@@ -21,12 +21,13 @@ data class Utestengelse(
     val sporbar: Sporbar = Sporbar(),
 )
 
-fun Utestengelse.tilDto() = UtestengelseDto(
-    id = id,
-    periode = Månedsperiode(fom, tom),
-    slettet = slettet,
-    opprettetAv = sporbar.opprettetAv,
-    opprettetTid = sporbar.opprettetTid,
-    endretAv = sporbar.endret.endretAv,
-    endretTid = sporbar.endret.endretTid,
-)
+fun Utestengelse.tilDto() =
+    UtestengelseDto(
+        id = id,
+        periode = Månedsperiode(fom, tom),
+        slettet = slettet,
+        opprettetAv = sporbar.opprettetAv,
+        opprettetTid = sporbar.opprettetTid,
+        endretAv = sporbar.endret.endretAv,
+        endretTid = sporbar.endret.endretTid,
+    )

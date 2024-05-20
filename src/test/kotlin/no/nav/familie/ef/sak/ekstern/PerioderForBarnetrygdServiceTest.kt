@@ -11,7 +11,6 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
 internal class PerioderForBarnetrygdServiceTest {
-
     private val periodeService = mockk<PeriodeService>()
 
     private val service = PerioderForBarnetrygdService(periodeService)
@@ -37,10 +36,11 @@ internal class PerioderForBarnetrygdServiceTest {
             lagInternPeriode(beløp = 1, stønadFom = LocalDate.of(2008, 10, 1), stønadTom = LocalDate.of(2009, 1, 31))
         val periode2 =
             lagInternPeriode(beløp = 1, stønadFom = LocalDate.of(2008, 12, 1), stønadTom = LocalDate.of(2009, 3, 31))
-        every { periodeService.hentPerioderForOvergangsstønadFraEfOgInfotrygd(any()) } returns listOf(
-            periode1,
-            periode2,
-        )
+        every { periodeService.hentPerioderForOvergangsstønadFraEfOgInfotrygd(any()) } returns
+            listOf(
+                periode1,
+                periode2,
+            )
         val perioder = service.hentPerioderMedFullOvergangsstønad(PersonIdent(personIdent)).perioder
         assertThat(perioder).hasSize(2)
         assertThat(perioder.first().fomDato).isEqualTo(periode2.stønadFom)

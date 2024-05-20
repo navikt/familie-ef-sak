@@ -12,24 +12,25 @@ import org.springframework.context.annotation.Profile
 import java.time.LocalDate
 
 class SigrunClientMock {
-
     @Profile("mock-sigrun")
     @Bean
     @Primary
     fun sigrunClient(): SigrunClient {
         val mockk = mockk<SigrunClient>()
-        val beregnetSkattMockResponse = listOf(
-            BeregnetSkatt(
-                "tekniskNavn",
-                "verdi",
-            ),
-        )
+        val beregnetSkattMockResponse =
+            listOf(
+                BeregnetSkatt(
+                    "tekniskNavn",
+                    "verdi",
+                ),
+            )
 
-        val summertSkattegrunnlagMockResponse = SummertSkattegrunnlag(
-            listOf(Grunnlag("personinntektNaering", 400000)),
-            listOf(Grunnlag("svalbardPersoninntektNaering", 350000)),
-            LocalDate.of(2022, 12, 31).toString(),
-        )
+        val summertSkattegrunnlagMockResponse =
+            SummertSkattegrunnlag(
+                listOf(Grunnlag("personinntektNaering", 400000)),
+                listOf(Grunnlag("svalbardPersoninntektNaering", 350000)),
+                LocalDate.of(2022, 12, 31).toString(),
+            )
 
         every { mockk.hentBeregnetSkatt(any(), any()) } returns beregnetSkattMockResponse
         every { mockk.hentSummertSkattegrunnlag(any(), any()) } returns summertSkattegrunnlagMockResponse

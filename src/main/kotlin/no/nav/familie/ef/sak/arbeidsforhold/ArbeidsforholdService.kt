@@ -13,14 +13,19 @@ class ArbeidsforholdService(
     private val fagsakService: FagsakService,
     private val arbeidsforholdClient: ArbeidsforholdClient,
 ) {
-
-    fun hentArbeidsforhold(fagsakId: UUID, ansettelsesperiodeFom: LocalDate): List<Arbeidsforhold> {
+    fun hentArbeidsforhold(
+        fagsakId: UUID,
+        ansettelsesperiodeFom: LocalDate,
+    ): List<Arbeidsforhold> {
         val aktivIdent = fagsakService.hentAktivIdent(fagsakId)
         val arbeidsforholdResponse = arbeidsforholdClient.hentArbeidsforhold(aktivIdent, ansettelsesperiodeFom)
         return arbeidsforholdResponse.data ?: emptyList()
     }
 
-    fun finnesAvsluttetArbeidsforholdSisteAntallMåneder(aktivIdent: String, antallMåneder: Long = 6): Boolean {
+    fun finnesAvsluttetArbeidsforholdSisteAntallMåneder(
+        aktivIdent: String,
+        antallMåneder: Long = 6,
+    ): Boolean {
         val ansettelsesdato = LocalDate.now().minusMonths(antallMåneder)
         val arbeidsforhold = arbeidsforholdClient.hentArbeidsforhold(aktivIdent, ansettelsesdato).data
 

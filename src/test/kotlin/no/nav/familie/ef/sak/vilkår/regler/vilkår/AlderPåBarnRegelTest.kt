@@ -13,7 +13,6 @@ import org.junit.jupiter.api.Test
 import java.util.UUID
 
 class AlderPåBarnRegelTest {
-
     val hovedregelMetadataMock = mockk<HovedregelMetadata>()
     val behandlingBarnMedDnr = behandlingBarn(behandlingId = UUID.randomUUID(), personIdent = "06431960727", søknadBarnId = UUID.randomUUID())
     val behandlingBarn2 = behandlingBarn(behandlingId = UUID.randomUUID(), personIdent = "03041983106", søknadBarnId = UUID.randomUUID())
@@ -26,11 +25,12 @@ class AlderPåBarnRegelTest {
 
     @Test
     fun `Vilkår ikke tatt stilling til og har fullført fjerdetrinn - skal automatisk oppfylle vilkår`() {
-        val listDelvilkårsvurdering = AlderPåBarnRegel().initiereDelvilkårsvurdering(
-            hovedregelMetadataMock,
-            Vilkårsresultat.IKKE_TATT_STILLING_TIL,
-            behandlingBarnMedDnr.id,
-        )
+        val listDelvilkårsvurdering =
+            AlderPåBarnRegel().initiereDelvilkårsvurdering(
+                hovedregelMetadataMock,
+                Vilkårsresultat.IKKE_TATT_STILLING_TIL,
+                behandlingBarnMedDnr.id,
+            )
 
         Assertions.assertThat(listDelvilkårsvurdering.size).isEqualTo(1)
         Assertions.assertThat(listDelvilkårsvurdering.first().resultat).isEqualTo(Vilkårsresultat.AUTOMATISK_OPPFYLT)
@@ -38,11 +38,12 @@ class AlderPåBarnRegelTest {
 
     @Test
     fun `Vilkår tatt stilling til i resultat, skal ikke vurdere automatisk`() {
-        val listDelvilkårsvurdering = AlderPåBarnRegel().initiereDelvilkårsvurdering(
-            hovedregelMetadataMock,
-            Vilkårsresultat.OPPFYLT,
-            null,
-        )
+        val listDelvilkårsvurdering =
+            AlderPåBarnRegel().initiereDelvilkårsvurdering(
+                hovedregelMetadataMock,
+                Vilkårsresultat.OPPFYLT,
+                null,
+            )
 
         Assertions.assertThat(listDelvilkårsvurdering.size).isEqualTo(1)
         Assertions.assertThat(listDelvilkårsvurdering.first().resultat).isEqualTo(Vilkårsresultat.OPPFYLT)

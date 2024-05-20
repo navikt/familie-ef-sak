@@ -20,15 +20,15 @@ import java.time.LocalDate
 import java.util.UUID
 
 class TilkjentYtelseServiceTest {
-
     private val tilkjentYtelseRepository = mockk<TilkjentYtelseRepository>()
     private val behandlingService = mockk<BehandlingService>()
     private val fagsakService = mockk<FagsakService>()
-    private val tilkjentYtelseService = TilkjentYtelseService(
-        behandlingService,
-        tilkjentYtelseRepository,
-        fagsakService,
-    )
+    private val tilkjentYtelseService =
+        TilkjentYtelseService(
+            behandlingService,
+            tilkjentYtelseRepository,
+            fagsakService,
+        )
 
     private val fagsak = fagsak(setOf(PersonIdent("321")))
     private val behandling = behandling(fagsak = fagsak)
@@ -43,11 +43,11 @@ class TilkjentYtelseServiceTest {
 
     @Nested
     inner class FinnTilkjentYtelserTilKonsistensavstemming {
-
         @Test
         internal fun `deler opp kall mot service i bolker`() {
-            val fagsaker = (1..PdlClient.MAKS_ANTALL_IDENTER + 10)
-                .map { fagsak(setOf(PersonIdent("$it"))) }
+            val fagsaker =
+                (1..PdlClient.MAKS_ANTALL_IDENTER + 10)
+                    .map { fagsak(setOf(PersonIdent("$it"))) }
             val behandlinger = fagsaker.map { behandling(fagsak = it) }
             val ytelser = behandlinger.map { DataGenerator.tilfeldigTilkjentYtelse(it) }
             every { behandlingService.hentBehandlinger(any<Set<UUID>>()) } returns behandlinger
@@ -114,8 +114,9 @@ class TilkjentYtelseServiceTest {
         @Test
         internal fun `skal kaste feil hvis den ikke finner eksterneIder til behandling`() {
             val andelTilkjentYtelse = lagAndelTilkjentYtelse(1, LocalDate.of(2021, 1, 1), LocalDate.of(2023, 1, 31))
-            val tilkjentYtelse = DataGenerator.tilfeldigTilkjentYtelse(behandling)
-                .copy(andelerTilkjentYtelse = listOf(andelTilkjentYtelse))
+            val tilkjentYtelse =
+                DataGenerator.tilfeldigTilkjentYtelse(behandling)
+                    .copy(andelerTilkjentYtelse = listOf(andelTilkjentYtelse))
 
             every { behandlingService.hentEksterneIder(any()) } returns emptySet()
             every {
@@ -135,12 +136,12 @@ class TilkjentYtelseServiceTest {
 
     @Nested
     inner class HarLøpendeUtbetaling {
-
         @Test
         internal fun `skal returnere true hvis det finnes andel med sluttdato etter idag`() {
             val andelTilkjentYtelse = lagAndelTilkjentYtelse(1, LocalDate.of(2021, 1, 1), LocalDate.now().plusDays(1))
-            val tilkjentYtelse = DataGenerator.tilfeldigTilkjentYtelse(behandling)
-                .copy(andelerTilkjentYtelse = listOf(andelTilkjentYtelse))
+            val tilkjentYtelse =
+                DataGenerator.tilfeldigTilkjentYtelse(behandling)
+                    .copy(andelerTilkjentYtelse = listOf(andelTilkjentYtelse))
             every { tilkjentYtelseRepository.findByBehandlingId(any()) } returns tilkjentYtelse
             assertThat(tilkjentYtelseService.harLøpendeUtbetaling(behandling.id)).isTrue
         }
@@ -148,8 +149,9 @@ class TilkjentYtelseServiceTest {
         @Test
         internal fun `skal returnere false hvis det finnes andel mer sluttdato før idag`() {
             val andelTilkjentYtelse = lagAndelTilkjentYtelse(1, LocalDate.of(2021, 1, 1), LocalDate.now().minusMonths(1))
-            val tilkjentYtelse = DataGenerator.tilfeldigTilkjentYtelse(behandling)
-                .copy(andelerTilkjentYtelse = listOf(andelTilkjentYtelse))
+            val tilkjentYtelse =
+                DataGenerator.tilfeldigTilkjentYtelse(behandling)
+                    .copy(andelerTilkjentYtelse = listOf(andelTilkjentYtelse))
             every { tilkjentYtelseRepository.findByBehandlingId(any()) } returns tilkjentYtelse
             assertThat(tilkjentYtelseService.harLøpendeUtbetaling(behandling.id)).isFalse
         }

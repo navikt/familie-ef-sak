@@ -18,7 +18,6 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 
 internal class PeriodeControllerTest : OppslagSpringRunnerTest() {
-
     @Autowired
     lateinit var behandlingRepository: BehandlingRepository
 

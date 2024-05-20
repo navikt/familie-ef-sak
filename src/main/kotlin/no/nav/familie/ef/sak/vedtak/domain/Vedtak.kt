@@ -44,7 +44,6 @@ data class Vedtak(
     val opprettetTid: LocalDateTime = SporbarUtils.now(),
     val opprettetAv: String = SikkerhetContext.hentSaksbehandlerEllerSystembruker(),
 ) {
-
     fun erVedtakUtenBeslutter(): Boolean =
         resultatType == ResultatType.AVSLÅ && (avslåÅrsak == AvslagÅrsak.MINDRE_INNTEKTSENDRINGER || avslåÅrsak == AvslagÅrsak.KORTVARIG_AVBRUDD_JOBB)
 
@@ -68,7 +67,6 @@ data class Vedtaksperiode(
     val periodeType: VedtaksperiodeType,
     override val sanksjonsårsak: Sanksjonsårsak? = null,
 ) : VedtaksperiodeMedSanksjonsårsak {
-
     init {
         feilHvis(
             (periodeType != VedtaksperiodeType.SANKSJON && sanksjonsårsak != null) ||
@@ -124,7 +122,6 @@ data class Barnetilsynperiode(
     val periodetype: PeriodetypeBarnetilsyn,
     val aktivitetstype: AktivitetstypeBarnetilsyn? = null,
 ) : VedtaksperiodeMedSanksjonsårsak {
-
     init {
         validerSanksjon1Måned()
         feilHvis(
@@ -164,7 +161,6 @@ data class DelårsperiodeSkoleårSkolepenger(
     val datoTil: LocalDate,
     val studiebelastning: Int,
 ) {
-
     constructor(
         studietype: SkolepengerStudietype,
         periode: Månedsperiode,
@@ -196,21 +192,23 @@ data class PeriodeMedBeløp(
     val datoTil: LocalDate,
     val beløp: Int,
 ) {
-
     constructor(periode: Månedsperiode, beløp: Int) : this(periode.fomDato, periode.tomDato, beløp)
 
-    fun tilDto() = PeriodeMedBeløpDto(
-        årMånedFra = periode.fom,
-        årMånedTil = periode.tom,
-        periode = periode,
-        beløp = beløp,
-    )
+    fun tilDto() =
+        PeriodeMedBeløpDto(
+            årMånedFra = periode.fom,
+            årMånedTil = periode.tom,
+            periode = periode,
+            beløp = beløp,
+        )
 
     val periode get() = Månedsperiode(datoFra, datoTil)
 }
 
 data class PeriodeWrapper(val perioder: List<Vedtaksperiode>)
+
 data class InntektWrapper(val inntekter: List<Inntektsperiode>)
+
 data class TilleggsstønadWrapper(
     val harTilleggsstønad: Boolean,
     val perioder: List<PeriodeMedBeløp>,

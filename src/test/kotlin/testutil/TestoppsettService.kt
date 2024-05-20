@@ -17,7 +17,6 @@ class TestoppsettService(
     private val fagsakPersonRepository: FagsakPersonRepository,
     private val fagsakRepository: FagsakRepository,
 ) {
-
     fun opprettPerson(ident: String) = fagsakPersonRepository.insert(FagsakPerson(identer = setOf(PersonIdent(ident))))
 
     fun opprettPerson(person: FagsakPerson) = fagsakPersonRepository.insert(person)
@@ -47,10 +46,11 @@ class TestoppsettService(
             .takeIf { it.isNotEmpty() }
             ?.let { fagsakPersonRepository.findByIdent(it) }
 
-    private fun opprettPerson(fagsak: Fagsak) = fagsakPersonRepository.insert(
-        FagsakPerson(
-            fagsak.fagsakPersonId,
-            identer = fagsak.personIdenter,
-        ),
-    )
+    private fun opprettPerson(fagsak: Fagsak) =
+        fagsakPersonRepository.insert(
+            FagsakPerson(
+                fagsak.fagsakPersonId,
+                identer = fagsak.personIdenter,
+            ),
+        )
 }

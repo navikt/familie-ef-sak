@@ -6,7 +6,6 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Opphold
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Oppholdstillatelse
 
 object OppholdstillatelseMapper {
-
     fun map(opphold: List<Opphold>): List<OppholdstillatelseDto> =
         opphold.map {
             OppholdstillatelseDto(

@@ -24,28 +24,31 @@ data class KonsistensavstemmingPayload(
 class KonsistensavstemmingTask(
     private val avstemmingService: AvstemmingService,
 ) : AsyncTaskStep {
-
     override fun doTask(task: Task) {
         val payload = objectMapper.readValue<KonsistensavstemmingPayload>(task.payload)
         avstemmingService.konsistensavstemOppdrag(payload.stønadstype, LocalDateTime.now())
     }
 
     companion object {
-
         const val TYPE = "utførKonsistensavstemming"
 
-        fun opprettTask(payload: KonsistensavstemmingPayload, triggerTid: LocalDateTime): Task {
-            val task = Task(
-                type = TYPE,
-                payload = objectMapper.writeValueAsString(payload),
-                triggerTid = triggerTid,
-            )
-            val properties = PropertiesWrapper(
-                task.metadata.apply {
-                    this["stønadstype"] = payload.stønadstype.name
-                    this[MDCConstants.MDC_CALL_ID] = IdUtils.generateId()
-                },
-            )
+        fun opprettTask(
+            payload: KonsistensavstemmingPayload,
+            triggerTid: LocalDateTime,
+        ): Task {
+            val task =
+                Task(
+                    type = TYPE,
+                    payload = objectMapper.writeValueAsString(payload),
+                    triggerTid = triggerTid,
+                )
+            val properties =
+                PropertiesWrapper(
+                    task.metadata.apply {
+                        this["stønadstype"] = payload.stønadstype.name
+                        this[MDCConstants.MDC_CALL_ID] = IdUtils.generateId()
+                    },
+                )
             return task.copy(metadataWrapper = properties)
         }
     }

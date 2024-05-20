@@ -9,7 +9,6 @@ import org.springframework.context.annotation.Profile
 
 @Configuration
 class KafkaMock {
-
     @Profile("mock-kafka")
     @Bean
     @Primary

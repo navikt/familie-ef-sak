@@ -17,14 +17,18 @@ class MinsideForvaltningsController(
     private val tilgangService: TilgangService,
 ) {
     @PostMapping("aktiver")
-    fun aktiverPersonForMinSide(@RequestBody personIdentDto: PersonIdentDto) {
+    fun aktiverPersonForMinSide(
+        @RequestBody personIdentDto: PersonIdentDto,
+    ) {
         tilgangService.validerHarForvalterrolle()
         validerPersonIdent(personIdentDto)
         minSideKafkaProducerService.aktiver(personIdent = personIdentDto.personIdent)
     }
 
     @PostMapping("deaktiver")
-    fun deaktiverPersonForMinSide(@RequestBody personIdentDto: PersonIdentDto) {
+    fun deaktiverPersonForMinSide(
+        @RequestBody personIdentDto: PersonIdentDto,
+    ) {
         tilgangService.validerHarForvalterrolle()
         validerPersonIdent(personIdentDto)
         minSideKafkaProducerService.deaktiver(personIdent = personIdentDto.personIdent)

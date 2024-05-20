@@ -19,7 +19,6 @@ class PersonService(
     @Qualifier("shortCache")
     private val cacheManager: CacheManager,
 ) {
-
     fun hentSøker(ident: String): PdlSøker {
         return pdlClient.hentSøker(ident)
     }

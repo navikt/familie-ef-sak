@@ -7,8 +7,10 @@ import org.springframework.stereotype.Service
 
 @Service
 class VilkårSteg(private val behandlingService: BehandlingService) : BehandlingSteg<String?> {
-
-    override fun utførSteg(saksbehandling: Saksbehandling, data: String?) {
+    override fun utførSteg(
+        saksbehandling: Saksbehandling,
+        data: String?,
+    ) {
         behandlingService.oppdaterStatusPåBehandling(saksbehandling.id, BehandlingStatus.UTREDES)
     }
 

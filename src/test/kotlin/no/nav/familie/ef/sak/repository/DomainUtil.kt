@@ -110,8 +110,9 @@ fun behandling(
         årsak = årsak,
         henlagtÅrsak = henlagtÅrsak,
         eksternId = eksternId,
-        vedtakstidspunkt = vedtakstidspunkt
-            ?: if (resultat != BehandlingResultat.IKKE_SATT) SporbarUtils.now() else null,
+        vedtakstidspunkt =
+            vedtakstidspunkt
+                ?: if (resultat != BehandlingResultat.IKKE_SATT) SporbarUtils.now() else null,
         kravMottatt = kravMottatt,
     )
 
@@ -181,6 +182,7 @@ fun Behandling.innvilgetOgFerdigstilt() =
     )
 
 val defaultIdenter = setOf(PersonIdent("15"))
+
 fun fagsakPerson(
     identer: Set<PersonIdent> = defaultIdenter,
 ) = FagsakPerson(identer = identer)
@@ -255,17 +257,20 @@ fun vilkårsvurdering(
         opphavsvilkår = opphavsvilkår,
     )
 
-fun fagsakpersoner(vararg identer: String): Set<PersonIdent> = identer.map {
-    PersonIdent(ident = it)
-}.toSet()
+fun fagsakpersoner(vararg identer: String): Set<PersonIdent> =
+    identer.map {
+        PersonIdent(ident = it)
+    }.toSet()
 
-fun fagsakpersoner(identer: Set<String>): Set<PersonIdent> = identer.map {
-    PersonIdent(ident = it)
-}.toSet()
+fun fagsakpersoner(identer: Set<String>): Set<PersonIdent> =
+    identer.map {
+        PersonIdent(ident = it)
+    }.toSet()
 
-fun fagsakpersonerAvPersonIdenter(identer: Set<PersonIdent>): Set<PersonIdent> = identer.map {
-    PersonIdent(ident = it.ident, sporbar = it.sporbar)
-}.toSet()
+fun fagsakpersonerAvPersonIdenter(identer: Set<PersonIdent>): Set<PersonIdent> =
+    identer.map {
+        PersonIdent(ident = it.ident, sporbar = it.sporbar)
+    }.toSet()
 
 fun årsakRevurdering(
     behandlingId: UUID = UUID.randomUUID(),
@@ -280,10 +285,11 @@ fun årsakRevurdering(
         beskrivelse = beskrivelse,
     )
 
-fun revurderingsinformasjon() = RevurderingsinformasjonDto(
-    LocalDate.now(),
-    ÅrsakRevurderingDto(Opplysningskilde.MELDING_MODIA, Revurderingsårsak.ANNET, "beskrivelse"),
-)
+fun revurderingsinformasjon() =
+    RevurderingsinformasjonDto(
+        LocalDate.now(),
+        ÅrsakRevurderingDto(Opplysningskilde.MELDING_MODIA, Revurderingsårsak.ANNET, "beskrivelse"),
+    )
 
 fun tilkjentYtelse(
     behandlingId: UUID,
@@ -295,18 +301,19 @@ fun tilkjentYtelse(
     beløp: Int = 11554,
     inntekt: Int = 277100,
 ): TilkjentYtelse {
-    val andeler = listOf(
-        AndelTilkjentYtelse(
-            beløp = beløp,
-            stønadFom = LocalDate.of(stønadsår, 1, 1),
-            stønadTom = LocalDate.of(stønadsår, 12, 31),
-            personIdent = personIdent,
-            inntektsreduksjon = 8396,
-            inntekt = inntekt,
-            samordningsfradrag = samordningsfradrag,
-            kildeBehandlingId = behandlingId,
-        ),
-    )
+    val andeler =
+        listOf(
+            AndelTilkjentYtelse(
+                beløp = beløp,
+                stønadFom = LocalDate.of(stønadsår, 1, 1),
+                stønadTom = LocalDate.of(stønadsår, 12, 31),
+                personIdent = personIdent,
+                inntektsreduksjon = 8396,
+                inntekt = inntekt,
+                samordningsfradrag = samordningsfradrag,
+                kildeBehandlingId = behandlingId,
+            ),
+        )
     return TilkjentYtelse(
         behandlingId = behandlingId,
         personident = personIdent,
@@ -442,7 +449,11 @@ fun behandlingBarn(
     )
 }
 
-fun barnMedIdent(fnr: String, navn: String, fødsel: Fødsel = fødsel(LocalDate.now())): BarnMedIdent =
+fun barnMedIdent(
+    fnr: String,
+    navn: String,
+    fødsel: Fødsel = fødsel(LocalDate.now()),
+): BarnMedIdent =
     BarnMedIdent(
         adressebeskyttelse = emptyList(),
         bostedsadresse = emptyList(),
@@ -450,19 +461,25 @@ fun barnMedIdent(fnr: String, navn: String, fødsel: Fødsel = fødsel(LocalDate
         dødsfall = emptyList(),
         forelderBarnRelasjon = emptyList(),
         fødsel = listOf(fødsel),
-        navn = Navn(
-            fornavn = navn.split(" ")[0],
-            mellomnavn = null,
-            etternavn = navn.split(" ")[1],
-            metadata = Metadata(
-                historisk = false,
+        navn =
+            Navn(
+                fornavn = navn.split(" ")[0],
+                mellomnavn = null,
+                etternavn = navn.split(" ")[1],
+                metadata =
+                    Metadata(
+                        historisk = false,
+                    ),
             ),
-        ),
         personIdent = fnr,
         null,
     )
 
-fun sivilstand(type: Sivilstandstype, gyldigFraOgMed: LocalDate = LocalDate.now(), metadata: Metadata = metadataGjeldende) =
+fun sivilstand(
+    type: Sivilstandstype,
+    gyldigFraOgMed: LocalDate = LocalDate.now(),
+    metadata: Metadata = metadataGjeldende,
+) =
     SivilstandMedNavn(
         type = type,
         gyldigFraOgMed = gyldigFraOgMed,

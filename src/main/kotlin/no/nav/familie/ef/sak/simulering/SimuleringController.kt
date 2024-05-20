@@ -23,9 +23,10 @@ class SimuleringController(
     private val behandlingService: BehandlingService,
     private val simuleringService: SimuleringService,
 ) {
-
     @GetMapping("/{behandlingId}")
-    fun simulerForBehandling(@PathVariable behandlingId: UUID): Ressurs<Simuleringsoppsummering> {
+    fun simulerForBehandling(
+        @PathVariable behandlingId: UUID,
+    ): Ressurs<Simuleringsoppsummering> {
         val saksbehandling = behandlingService.hentSaksbehandling(behandlingId)
         tilgangService.validerTilgangTilBehandling(saksbehandling, AuditLoggerEvent.UPDATE)
         return Ressurs.success(simuleringService.simuler(saksbehandling))

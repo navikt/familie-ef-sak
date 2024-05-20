@@ -4,7 +4,6 @@ import no.nav.familie.ef.sak.opplysninger.søknad.domain.Adresseopplysninger
 import no.nav.familie.ef.sak.vilkår.dto.AdresseopplysningerDto
 
 object AdresseopplysningerMapper {
-
     fun tilDto(adresseopplysninger: Adresseopplysninger?): AdresseopplysningerDto? =
         adresseopplysninger?.søkerBorPåRegistrertAdresse?.let {
             AdresseopplysningerDto(

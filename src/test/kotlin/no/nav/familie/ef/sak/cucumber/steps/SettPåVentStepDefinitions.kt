@@ -44,7 +44,6 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 class SettPåVentStepDefinitions {
-
     lateinit var eksisterendeOppgave: Oppgave
     lateinit var settOppgavePåVentRequest: SettPåVentRequest
     lateinit var mapper: List<MappeDto>
@@ -57,14 +56,15 @@ class SettPåVentStepDefinitions {
     val oppgaveService = mockk<OppgaveService>()
     val tilordnetRessursService = mockk<TilordnetRessursService>()
 
-    val påVentService = BehandlingPåVentService(
-        behandlingService,
-        behandlingshistorikkService,
-        taskService,
-        nullstillVedtakService,
-        oppgaveService,
-        tilordnetRessursService,
-    )
+    val påVentService =
+        BehandlingPåVentService(
+            behandlingService,
+            behandlingshistorikkService,
+            taskService,
+            nullstillVedtakService,
+            oppgaveService,
+            tilordnetRessursService,
+        )
 
     var behandling = behandling()
     var saksbehandling = saksbehandling(behandling = behandling)
@@ -87,13 +87,14 @@ class SettPåVentStepDefinitions {
 
     @Gitt("mapper")
     fun gjeldendeMapper(dataTable: DataTable) {
-        mapper = dataTable.asMaps().map {
-            MappeDto(
-                id = parseInt(SettPåVentDomeneBegrep.MAPPE_ID, it),
-                navn = parseString(SettPåVentDomeneBegrep.MAPPE_NAVN, it),
-                "4489",
-            )
-        }
+        mapper =
+            dataTable.asMaps().map {
+                MappeDto(
+                    id = parseInt(SettPåVentDomeneBegrep.MAPPE_ID, it),
+                    navn = parseString(SettPåVentDomeneBegrep.MAPPE_NAVN, it),
+                    "4489",
+                )
+            }
     }
 
     @Gitt("sett på vent request")

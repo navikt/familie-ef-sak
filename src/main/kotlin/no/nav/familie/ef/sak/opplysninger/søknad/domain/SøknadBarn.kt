@@ -9,7 +9,6 @@ import java.time.LocalDate
 import java.util.UUID
 
 interface IBarn {
-
     val fødselsnummer: String?
     val annenForelder: IAnnenForelder?
 }
@@ -46,7 +45,6 @@ data class SøknadBarn(
 ) : IBarn
 
 interface IAnnenForelder {
-
     val person: PersonMinimum?
 }
 

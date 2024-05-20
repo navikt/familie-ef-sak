@@ -17,9 +17,7 @@ import java.net.URI
 import java.time.LocalDate
 
 class KontantstøtteClientTest {
-
     companion object {
-
         private val restOperations: RestOperations = RestTemplateBuilder().build()
         lateinit var kontantstøtteClient: KontantstøtteClient
         lateinit var wiremockServerItem: WireMockServer
@@ -62,7 +60,8 @@ class KontantstøtteClientTest {
     }
 
     private val fomDatoRequest = LocalDate.MIN.toString()
-    private val hentUtbetalingsinfoRequestJson = """
+    private val hentUtbetalingsinfoRequestJson =
+        """
         {
           "fom": "$fomDatoRequest",
           "identer": [
@@ -70,38 +69,39 @@ class KontantstøtteClientTest {
             "02020299999"
           ]
         }
-    """.trimIndent()
+        """.trimIndent()
 
-    private val hentUtbetalingsinfoResponseJson = """  
-      {
-        "infotrygdPerioder": [
-          {
-            "fomMåned": "2022-09",
- 
-            "beløp": 1000,
-            "barna": [
-              "01010199999"
-            ]
-          }
-        ],
-        "ksSakPerioder": [
-          {
-            "fomMåned": "2022-11",
-            "tomMåned": "2022-12",
-            "barn": {
-              "beløp": 2000,
-              "ident": "01010199999"
+    private val hentUtbetalingsinfoResponseJson =
+        """  
+        {
+          "infotrygdPerioder": [
+            {
+              "fomMåned": "2022-09",
+        
+              "beløp": 1000,
+              "barna": [
+                "01010199999"
+              ]
             }
-          },
-          {
-            "fomMåned": "2023-01",
-            "tomMåned": "2023-06",
-            "barn": {
-              "beløp": 3000,
-              "ident": "01010199998"
+          ],
+          "ksSakPerioder": [
+            {
+              "fomMåned": "2022-11",
+              "tomMåned": "2022-12",
+              "barn": {
+                "beløp": 2000,
+                "ident": "01010199999"
+              }
+            },
+            {
+              "fomMåned": "2023-01",
+              "tomMåned": "2023-06",
+              "barn": {
+                "beløp": 3000,
+                "ident": "01010199998"
+              }
             }
-          }
-        ]
-      }
-    """.trimIndent()
+          ]
+        }
+        """.trimIndent()
 }

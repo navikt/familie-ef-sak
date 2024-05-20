@@ -7,6 +7,7 @@ import java.time.LocalDate
 
 class MapperTestUtilTest {
     data class Foo(val navn: String? = "foo", val dato: LocalDate? = LocalDate.now(), val list: List<Bar>? = arrayListOf(Bar()))
+
     data class Bar(val navn: String? = "bar")
 
     @Test
@@ -37,5 +38,8 @@ class MapperTestUtilTest {
         feltnavn: String,
     ) = "$klassenavn har en tom liste i felt $feltnavn"
 
-    private fun forventetFeilmelding(klassenavn: String, feltnavn: String) = "$klassenavn har ingen verdi i felt $feltnavn"
+    private fun forventetFeilmelding(
+        klassenavn: String,
+        feltnavn: String,
+    ) = "$klassenavn har ingen verdi i felt $feltnavn"
 }

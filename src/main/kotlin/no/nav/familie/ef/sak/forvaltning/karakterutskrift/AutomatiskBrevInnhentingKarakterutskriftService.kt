@@ -19,26 +19,30 @@ class AutomatiskBrevInnhentingKarakterutskriftService(
     private val taskService: TaskService,
     private val oppgaveService: OppgaveService,
 ) {
-
     val logger: Logger = LoggerFactory.getLogger(javaClass)
 
     val fristHovedperiode = LocalDate.parse("2023-05-17")
     val fristutvidet = LocalDate.parse("2023-05-18")
 
     @Transactional
-    fun opprettTasks(brevtype: FrittståendeBrevType, liveRun: Boolean, taskLimit: Int) {
+    fun opprettTasks(
+        brevtype: FrittståendeBrevType,
+        liveRun: Boolean,
+        taskLimit: Int,
+    ) {
         val mappeId = hentUtdanningsmappeId()
 
         val oppgaveFrist = utledOppgavefrist(brevtype)
-        val opppgaver = oppgaveService.hentOppgaver(
-            FinnOppgaveRequest(
-                tema = Tema.ENF,
-                fristFomDato = oppgaveFrist,
-                fristTomDato = oppgaveFrist,
-                mappeId = mappeId.toLong(),
-                limit = taskLimit.toLong(),
-            ),
-        )
+        val opppgaver =
+            oppgaveService.hentOppgaver(
+                FinnOppgaveRequest(
+                    tema = Tema.ENF,
+                    fristFomDato = oppgaveFrist,
+                    fristTomDato = oppgaveFrist,
+                    mappeId = mappeId.toLong(),
+                    limit = taskLimit.toLong(),
+                ),
+            )
 
         val oppgaverUtenTilordnetRessurs = opppgaver.oppgaver.filter { it.tilordnetRessurs.isNullOrBlank() }
 
@@ -65,10 +69,14 @@ class AutomatiskBrevInnhentingKarakterutskriftService(
         }
     }
 
-    private fun harOpprettetTaskTidligere(oppgaveId: Long, brevtype: FrittståendeBrevType) = taskService.finnTaskMedPayloadOgType(
-        SendKarakterutskriftBrevTilIverksettTask.opprettTaskPayload(oppgaveId, brevtype, Year.now()),
-        SendKarakterutskriftBrevTilIverksettTask.TYPE,
-    ) != null
+    private fun harOpprettetTaskTidligere(
+        oppgaveId: Long,
+        brevtype: FrittståendeBrevType,
+    ) =
+        taskService.finnTaskMedPayloadOgType(
+            SendKarakterutskriftBrevTilIverksettTask.opprettTaskPayload(oppgaveId, brevtype, Year.now()),
+            SendKarakterutskriftBrevTilIverksettTask.TYPE,
+        ) != null
 
     private fun hentUtdanningsmappeId() =
         oppgaveService.finnMapper(OppgaveUtil.ENHET_NR_NAY).single { it.navn == "64 Utdanning" }.id

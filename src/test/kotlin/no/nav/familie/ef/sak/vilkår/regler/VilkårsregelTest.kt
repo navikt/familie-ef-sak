@@ -7,7 +7,6 @@ import org.junit.jupiter.api.Test
 import java.io.File
 
 internal class VilkårsregelTest {
-
     @Test
     internal fun `sjekker at output fortsatt er det samme på json`() {
         val objectWriter = objectMapper.writerWithDefaultPrettyPrinter()
@@ -21,7 +20,10 @@ internal class VilkårsregelTest {
     }
 
     @Suppress("unused")
-    private fun skrivTilFil(it: Vilkårsregel, json: String) {
+    private fun skrivTilFil(
+        it: Vilkårsregel,
+        json: String,
+    ) {
         val file = File("src/test/resources/regler/${it.vilkårType}.json")
         if (!file.exists()) {
             file.createNewFile()

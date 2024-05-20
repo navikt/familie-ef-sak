@@ -26,7 +26,6 @@ class StartBehandlingTask(
     private val fagsakService: FagsakService,
     private val behandlingRepository: BehandlingRepository,
 ) : AsyncTaskStep {
-
     override fun doTask(task: Task) {
         val behandlingId = UUID.fromString(task.payload)
         val fagsak = fagsakService.hentFagsakForBehandling(behandlingId)
@@ -42,17 +41,21 @@ class StartBehandlingTask(
         behandlingRepository.finnSisteIverksatteBehandling(fagsak.id) != null
 
     companion object {
-
-        fun opprettTask(behandlingId: UUID, fagsakId: UUID, personIdent: String): Task =
+        fun opprettTask(
+            behandlingId: UUID,
+            fagsakId: UUID,
+            personIdent: String,
+        ): Task =
             Task(
                 type = TYPE,
                 payload = behandlingId.toString(),
-                properties = Properties().apply {
-                    this["saksbehandler"] = SikkerhetContext.hentSaksbehandlerEllerSystembruker()
-                    this["behandlingId"] = behandlingId.toString()
-                    this["fagsakId"] = fagsakId.toString()
-                    this["personIdent"] = personIdent
-                },
+                properties =
+                    Properties().apply {
+                        this["saksbehandler"] = SikkerhetContext.hentSaksbehandlerEllerSystembruker()
+                        this["behandlingId"] = behandlingId.toString()
+                        this["fagsakId"] = fagsakId.toString()
+                        this["personIdent"] = personIdent
+                    },
             )
 
         const val TYPE = "startBehandlingTask"

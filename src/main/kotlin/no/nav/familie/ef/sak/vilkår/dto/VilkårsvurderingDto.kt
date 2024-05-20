@@ -41,7 +41,6 @@ data class DelvilkårsvurderingDto(
     val resultat: Vilkårsresultat,
     val vurderinger: List<VurderingDto>,
 ) {
-
     /**
      * @return regelId for første svaret som er hovedregeln på delvilkåret
      */
@@ -67,11 +66,13 @@ fun Vilkårsvurdering.tilDto() =
         barnId = this.barnId,
         endretAv = this.sporbar.endret.endretAv,
         endretTid = this.sporbar.endret.endretTid,
-        delvilkårsvurderinger = this.delvilkårsvurdering.delvilkårsvurderinger
-            .filter { it.resultat != Vilkårsresultat.IKKE_AKTUELL }
-            .map { it.tilDto() },
+        delvilkårsvurderinger =
+            this.delvilkårsvurdering.delvilkårsvurderinger
+                .filter { it.resultat != Vilkårsresultat.IKKE_AKTUELL }
+                .map { it.tilDto() },
         opphavsvilkår = this.opphavsvilkår?.let { OpphavsvilkårDto(it.behandlingId, it.vurderingstidspunkt) },
     )
 
 fun DelvilkårsvurderingDto.svarTilDomene() = this.vurderinger.map { it.tilDomene() }
+
 fun VurderingDto.tilDomene() = Vurdering(this.regelId, this.svar, this.begrunnelse)

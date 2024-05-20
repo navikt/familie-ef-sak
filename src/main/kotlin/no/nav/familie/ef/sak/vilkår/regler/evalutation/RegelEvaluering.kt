@@ -18,20 +18,22 @@ data class RegelResultat(
     val vilkår: Vilkårsresultat,
     val delvilkår: Map<RegelId, Vilkårsresultat>,
 ) {
-
     fun resultatHovedregel(hovedregel: RegelId) =
         delvilkår[hovedregel] ?: throw Feil("Savner resultat for regelId=$hovedregel vilkårType=$vilkårType")
 }
 
 object RegelEvaluering {
-
     /**
      * @return [RegelResultat] med resultat for vilkåret og delvilkår
      */
-    fun utledResultat(vilkårsregel: Vilkårsregel, delvilkår: List<DelvilkårsvurderingDto>): RegelResultat {
-        val delvilkårResultat = delvilkår.associate { vurdering ->
-            vurdering.hovedregel() to utledResultatForDelvilkår(vilkårsregel, vurdering)
-        }
+    fun utledResultat(
+        vilkårsregel: Vilkårsregel,
+        delvilkår: List<DelvilkårsvurderingDto>,
+    ): RegelResultat {
+        val delvilkårResultat =
+            delvilkår.associate { vurdering ->
+                vurdering.hovedregel() to utledResultatForDelvilkår(vilkårsregel, vurdering)
+            }
         return RegelResultat(
             vilkårType = vilkårsregel.vilkårType,
             vilkår = utledVilkårResultat(delvilkårResultat),

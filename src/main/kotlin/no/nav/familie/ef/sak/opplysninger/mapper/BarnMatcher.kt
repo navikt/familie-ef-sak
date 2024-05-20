@@ -7,16 +7,16 @@ import java.time.LocalDate
 import kotlin.math.abs
 
 object BarnMatcher {
-
     fun kobleBehandlingBarnOgRegisterBarn(
         behandlingBarn: List<BehandlingBarn>,
         grunnlagsbarn: List<BarnMedIdent>,
     ): List<MatchetBehandlingBarn> {
         val grunnlagsbarnPåIdent = grunnlagsbarn.associateBy { it.personIdent }
-        val behandlingBarnFnrMatchetTilPdlBarn = behandlingBarn.map {
-            val matchetBarnPåIdent = grunnlagsbarnPåIdent[it.personIdent]
-            MatchetBehandlingBarn(matchetBarnPåIdent?.personIdent, matchetBarnPåIdent, it)
-        }
+        val behandlingBarnFnrMatchetTilPdlBarn =
+            behandlingBarn.map {
+                val matchetBarnPåIdent = grunnlagsbarnPåIdent[it.personIdent]
+                MatchetBehandlingBarn(matchetBarnPåIdent?.personIdent, matchetBarnPåIdent, it)
+            }
 
         val pdlBarnIkkeIBehandlingBarn =
             grunnlagsbarnPåIdent.filter { entry -> behandlingBarn.none { it.personIdent == entry.key } }.toMutableMap()
@@ -59,7 +59,10 @@ data class MatchetBehandlingBarn(
     val behandlingBarn: BehandlingBarn,
 )
 
-fun finnBesteMatchPåFødselsnummerForTermindato(fødselsnumre: List<String>, termindato: LocalDate): String? {
+fun finnBesteMatchPåFødselsnummerForTermindato(
+    fødselsnumre: List<String>,
+    termindato: LocalDate,
+): String? {
     val uke20 = termindato.minusWeeks(20)
     val uke44 = termindato.plusWeeks(4)
 

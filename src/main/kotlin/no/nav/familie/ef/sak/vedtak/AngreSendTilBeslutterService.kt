@@ -27,7 +27,6 @@ class AngreSendTilBeslutterService(
     private val stegService: StegService,
     private val totrinnskontrollService: TotrinnskontrollService,
 ) {
-
     @Transactional
     fun angreSendTilBeslutter(behandlingId: UUID) {
         val saksbehandling = behandlingService.hentSaksbehandling(behandlingId)
@@ -81,11 +80,12 @@ class AngreSendTilBeslutterService(
             "Kan kun angre send til beslutter dersom du er saksbehandler på vedtaket"
         }
 
-        val efOppgave = oppgaveService.hentOppgaveSomIkkeErFerdigstilt(
-            oppgavetype = Oppgavetype.GodkjenneVedtak,
-            saksbehandling = saksbehandling,
-        )
-            ?: throw ApiFeil(feil = "Systemet har ikke rukket å opprette godkjenne vedtak oppgaven enda. Prøv igjen om litt.", httpStatus = HttpStatus.INTERNAL_SERVER_ERROR)
+        val efOppgave =
+            oppgaveService.hentOppgaveSomIkkeErFerdigstilt(
+                oppgavetype = Oppgavetype.GodkjenneVedtak,
+                saksbehandling = saksbehandling,
+            )
+                ?: throw ApiFeil(feil = "Systemet har ikke rukket å opprette godkjenne vedtak oppgaven enda. Prøv igjen om litt.", httpStatus = HttpStatus.INTERNAL_SERVER_ERROR)
 
         val tilordnetRessurs = oppgaveService.hentOppgave(efOppgave.gsakOppgaveId).tilordnetRessurs
         val oppgaveErTilordnetEnAnnenSaksbehandler =

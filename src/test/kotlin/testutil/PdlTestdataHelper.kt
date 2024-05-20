@@ -28,7 +28,6 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.VergemaalEllerF
 import java.time.LocalDate
 
 object PdlTestdataHelper {
-
     val metadataGjeldende = Metadata(historisk = false)
     val metadataHistorisk = Metadata(historisk = true)
 
@@ -109,7 +108,11 @@ object PdlTestdataHelper {
             emptyList(),
         )
 
-    fun fødsel(år: Int = 2018, måned: Int = 1, dag: Int = 1): Fødsel =
+    fun fødsel(
+        år: Int = 2018,
+        måned: Int = 1,
+        dag: Int = 1,
+    ): Fødsel =
         fødsel(LocalDate.of(år, måned, dag))
 
     fun fødsel(fødselsdato: LocalDate) =

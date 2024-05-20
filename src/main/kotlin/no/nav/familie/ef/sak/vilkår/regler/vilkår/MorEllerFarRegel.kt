@@ -20,7 +20,6 @@ class MorEllerFarRegel : Vilkårsregel(
     regler = setOf(OMSORG_FOR_EGNE_ELLER_ADOPTERTE_BARN),
     hovedregler = regelIder(OMSORG_FOR_EGNE_ELLER_ADOPTERTE_BARN),
 ) {
-
     override fun initiereDelvilkårsvurdering(
         metadata: HovedregelMetadata,
         resultat: Vilkårsresultat,
@@ -45,14 +44,14 @@ class MorEllerFarRegel : Vilkårsregel(
     }
 
     companion object {
-
         private val OMSORG_FOR_EGNE_ELLER_ADOPTERTE_BARN =
             RegelSteg(
                 regelId = RegelId.OMSORG_FOR_EGNE_ELLER_ADOPTERTE_BARN,
-                svarMapping = jaNeiSvarRegel(
-                    hvisJa = SluttSvarRegel.OPPFYLT_MED_VALGFRI_BEGRUNNELSE,
-                    hvisNei = SluttSvarRegel.IKKE_OPPFYLT_MED_PÅKREVD_BEGRUNNELSE,
-                ),
+                svarMapping =
+                    jaNeiSvarRegel(
+                        hvisJa = SluttSvarRegel.OPPFYLT_MED_VALGFRI_BEGRUNNELSE,
+                        hvisNei = SluttSvarRegel.IKKE_OPPFYLT_MED_PÅKREVD_BEGRUNNELSE,
+                    ),
             )
     }
 }

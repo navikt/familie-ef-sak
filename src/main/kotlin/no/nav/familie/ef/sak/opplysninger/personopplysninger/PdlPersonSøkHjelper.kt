@@ -6,7 +6,6 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.SearchRuleExist
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.SøkeKriterier
 
 object PdlPersonSøkHjelper {
-
     fun lagPdlPersonSøkKriterier(bostedsadresse: Bostedsadresse): List<SøkeKriterier> {
         if (bostedsadresse.matrikkeladresse != null) {
             val matrikkeladresse = bostedsadresse.matrikkeladresse
@@ -52,19 +51,28 @@ object PdlPersonSøkHjelper {
         return emptyList()
     }
 
-    private fun equalsEllerNotExists(søkefelt: String, søkeord: String?): SøkeKriterier {
+    private fun equalsEllerNotExists(
+        søkefelt: String,
+        søkeord: String?,
+    ): SøkeKriterier {
         return søkeord?.let { lagSøkeKriterier(søkefelt, it) }
             ?: lagSøkeKriterier(søkefelt, exists = false)
     }
 
-    private fun lagSøkeKriterier(søkefelt: String, søkeord: String): SøkeKriterier {
+    private fun lagSøkeKriterier(
+        søkefelt: String,
+        søkeord: String,
+    ): SøkeKriterier {
         return SøkeKriterier(
             fieldName = søkefelt,
             searchRule = SearchRuleEquals(equals = søkeord),
         )
     }
 
-    private fun lagSøkeKriterier(søkefelt: String, exists: Boolean): SøkeKriterier {
+    private fun lagSøkeKriterier(
+        søkefelt: String,
+        exists: Boolean,
+    ): SøkeKriterier {
         return SøkeKriterier(
             fieldName = søkefelt,
             searchRule = SearchRuleExists(exists = exists),

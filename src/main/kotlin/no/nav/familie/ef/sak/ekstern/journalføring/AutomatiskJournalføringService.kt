@@ -64,7 +64,10 @@ class AutomatiskJournalføringService(
         )
     }
 
-    fun kanOppretteBehandling(ident: String, stønadstype: StønadType): Boolean {
+    fun kanOppretteBehandling(
+        ident: String,
+        stønadstype: StønadType,
+    ): Boolean {
         val allePersonIdenter = personService.hentPersonIdenter(ident).identer()
         val fagsak = fagsakService.finnFagsak(allePersonIdenter, stønadstype)
         val behandlinger = fagsak?.let { behandlingService.hentBehandlinger(fagsak.id) } ?: emptyList()
@@ -80,7 +83,10 @@ class AutomatiskJournalføringService(
         }
     }
 
-    private fun kanAutomatiskJournalføreRevurdering(behandlinger: List<Behandling>, fagsak: Fagsak?): Boolean {
+    private fun kanAutomatiskJournalføreRevurdering(
+        behandlinger: List<Behandling>,
+        fagsak: Fagsak?,
+    ): Boolean {
         return if (!harÅpenBehandling(behandlinger)) {
             secureLogger.info("Kan automatisk journalføre for fagsak: ${fagsak?.id}")
             true
@@ -120,11 +126,12 @@ class AutomatiskJournalføringService(
         allePersonIdenter: Set<String>,
         gjeldendePersonIdent: String,
         journalpostBruker: Bruker,
-    ): Boolean = when (journalpostBruker.type) {
-        BrukerIdType.FNR -> allePersonIdenter.contains(journalpostBruker.id)
-        BrukerIdType.AKTOERID -> hentAktørIderForPerson(gjeldendePersonIdent).contains(journalpostBruker.id)
-        BrukerIdType.ORGNR -> false
-    }
+    ): Boolean =
+        when (journalpostBruker.type) {
+            BrukerIdType.FNR -> allePersonIdenter.contains(journalpostBruker.id)
+            BrukerIdType.AKTOERID -> hentAktørIderForPerson(gjeldendePersonIdent).contains(journalpostBruker.id)
+            BrukerIdType.ORGNR -> false
+        }
 
     private fun hentAktørIderForPerson(personIdent: String) =
         personService.hentAktørIder(personIdent).identer()

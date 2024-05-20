@@ -33,7 +33,6 @@ class FrittståendeBrevService(
     private val familieDokumentClient: FamilieDokumentClient,
     private val brevmottakereService: BrevmottakereService,
 ) {
-
     fun lagFrittståendeSanitybrev(
         fagsakId: UUID,
         brevmal: String,
@@ -42,18 +41,22 @@ class FrittståendeBrevService(
         val fagsak = fagsakService.hentFagsak(fagsakId)
         val signatur = brevsignaturService.lagSignaturMedEnhet(fagsak)
 
-        val html = brevClient.genererHtml(
-            brevmal = brevmal,
-            saksbehandlerBrevrequest = brevrequest,
-            saksbehandlersignatur = signatur.navn,
-            enhet = signatur.enhet,
-            skjulBeslutterSignatur = true,
-        ).replace(VedtaksbrevService.BESLUTTER_VEDTAKSDATO_PLACEHOLDER, LocalDate.now().norskFormat())
+        val html =
+            brevClient.genererHtml(
+                brevmal = brevmal,
+                saksbehandlerBrevrequest = brevrequest,
+                saksbehandlersignatur = signatur.navn,
+                enhet = signatur.enhet,
+                skjulBeslutterSignatur = true,
+            ).replace(VedtaksbrevService.BESLUTTER_VEDTAKSDATO_PLACEHOLDER, LocalDate.now().norskFormat())
 
         return familieDokumentClient.genererPdfFraHtml(html)
     }
 
-    fun sendFrittståendeSanitybrev(fagsakId: UUID, sendBrevRequest: FrittståendeSanitybrevDto) {
+    fun sendFrittståendeSanitybrev(
+        fagsakId: UUID,
+        sendBrevRequest: FrittståendeSanitybrevDto,
+    ) {
         val saksbehandlerIdent = SikkerhetContext.hentSaksbehandler()
         val brevmottakere = validerOgMapBrevmottakere(sendBrevRequest.mottakere)
         val fagsak = fagsakService.fagsakMedOppdatertPersonIdent(fagsakId)
@@ -75,16 +78,21 @@ class FrittståendeBrevService(
         brevmottakereService.slettBrevmottakereForFagsakOgSaksbehandlerHvisFinnes(fagsakId, saksbehandlerIdent)
     }
 
-    fun lagBrevForInnhentingAvKarakterutskrift(visningsnavn: String, personIdent: String, brevtype: FrittståendeBrevType): ByteArray {
+    fun lagBrevForInnhentingAvKarakterutskrift(
+        visningsnavn: String,
+        personIdent: String,
+        brevtype: FrittståendeBrevType,
+    ): ByteArray {
         val brevRequest = SanityBrevRequestInnhentingKarakterutskrift(flettefelter = Flettefelter(navn = listOf(visningsnavn), fodselsnummer = listOf(personIdent)))
 
-        val html = brevClient.genererHtml(
-            brevmal = utledBrevMal(brevtype),
-            saksbehandlerBrevrequest = objectMapper.valueToTree(brevRequest),
-            saksbehandlersignatur = "",
-            enhet = "NAV Arbeid og ytelser",
-            skjulBeslutterSignatur = true,
-        ).replace(VedtaksbrevService.BESLUTTER_VEDTAKSDATO_PLACEHOLDER, LocalDate.now().norskFormat())
+        val html =
+            brevClient.genererHtml(
+                brevmal = utledBrevMal(brevtype),
+                saksbehandlerBrevrequest = objectMapper.valueToTree(brevRequest),
+                saksbehandlersignatur = "",
+                enhet = "NAV Arbeid og ytelser",
+                skjulBeslutterSignatur = true,
+            ).replace(VedtaksbrevService.BESLUTTER_VEDTAKSDATO_PLACEHOLDER, LocalDate.now().norskFormat())
 
         return familieDokumentClient.genererPdfFraHtml(html)
     }
@@ -102,9 +110,10 @@ class FrittståendeBrevService(
         return mapMottakere(mottakere)
     }
 
-    private fun utledBrevMal(brevType: FrittståendeBrevType) = when (brevType) {
-        FrittståendeBrevType.INNHENTING_AV_KARAKTERUTSKRIFT_HOVEDPERIODE -> "innhentingKarakterutskriftHovedperiode"
-        FrittståendeBrevType.INNHENTING_AV_KARAKTERUTSKRIFT_UTVIDET_PERIODE -> "innhentingKarakterutskriftUtvidetPeriode"
-        else -> throw Feil("Skal ikke opprette automatiske innhentingsbrev for frittstående brev av type $brevType")
-    }
+    private fun utledBrevMal(brevType: FrittståendeBrevType) =
+        when (brevType) {
+            FrittståendeBrevType.INNHENTING_AV_KARAKTERUTSKRIFT_HOVEDPERIODE -> "innhentingKarakterutskriftHovedperiode"
+            FrittståendeBrevType.INNHENTING_AV_KARAKTERUTSKRIFT_UTVIDET_PERIODE -> "innhentingKarakterutskriftUtvidetPeriode"
+            else -> throw Feil("Skal ikke opprette automatiske innhentingsbrev for frittstående brev av type $brevType")
+        }
 }

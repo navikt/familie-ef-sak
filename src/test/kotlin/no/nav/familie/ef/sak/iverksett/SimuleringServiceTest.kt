@@ -34,7 +34,6 @@ import org.springframework.data.repository.findByIdOrNull
 import java.time.LocalDate
 
 internal class SimuleringServiceTest {
-
     private val iverksettClient = mockk<IverksettClient>()
     private val behandlingService = mockk<BehandlingService>()
     private val fagsakService = mockk<FagsakService>()
@@ -43,13 +42,14 @@ internal class SimuleringServiceTest {
     private val tilgangService = mockk<TilgangService>()
     private val tilordnetRessursService = mockk<TilordnetRessursService>()
 
-    private val simuleringService = SimuleringService(
-        iverksettClient = iverksettClient,
-        simuleringsresultatRepository = simuleringsresultatRepository,
-        tilkjentYtelseService = tilkjentYtelseService,
-        tilgangService = tilgangService,
-        tilordnetRessursService = tilordnetRessursService,
-    )
+    private val simuleringService =
+        SimuleringService(
+            iverksettClient = iverksettClient,
+            simuleringsresultatRepository = simuleringsresultatRepository,
+            tilkjentYtelseService = tilkjentYtelseService,
+            tilgangService = tilgangService,
+            tilordnetRessursService = tilordnetRessursService,
+        )
 
     private val personIdent = "12345678901"
     private val fagsak = fagsak(fagsakpersoner(setOf(personIdent)), StønadType.OVERGANGSSTØNAD)
@@ -65,18 +65,20 @@ internal class SimuleringServiceTest {
     @Test
     internal fun `skal bruke lagret tilkjentYtelse for simulering`() {
         val forrigeBehandlingId = behandling(fagsak).id
-        val behandling = behandling(
-            fagsak = fagsak,
-            type = BehandlingType.FØRSTEGANGSBEHANDLING,
-            forrigeBehandlingId = forrigeBehandlingId,
-        )
+        val behandling =
+            behandling(
+                fagsak = fagsak,
+                type = BehandlingType.FØRSTEGANGSBEHANDLING,
+                forrigeBehandlingId = forrigeBehandlingId,
+            )
 
         val tilkjentYtelse = tilkjentYtelse(behandlingId = behandling.id, personIdent = personIdent)
-        val simuleringsresultat = Simuleringsresultat(
-            behandlingId = behandling.id,
-            data = DetaljertSimuleringResultat(emptyList()),
-            beriketData = BeriketSimuleringsresultat(mockk(), mockk()),
-        )
+        val simuleringsresultat =
+            Simuleringsresultat(
+                behandlingId = behandling.id,
+                data = DetaljertSimuleringResultat(emptyList()),
+                beriketData = BeriketSimuleringsresultat(mockk(), mockk()),
+            )
         every { behandlingService.hentBehandling(any()) } returns behandling
         every { tilkjentYtelseService.hentForBehandling(any()) } returns tilkjentYtelse
         every { simuleringsresultatRepository.deleteById(any()) } just Runs
@@ -116,11 +118,12 @@ internal class SimuleringServiceTest {
         every { behandlingService.hentBehandling(any()) } returns behandling
         every {
             simuleringsresultatRepository.findByIdOrNull(behandling.id)
-        } returns Simuleringsresultat(
-            behandlingId = behandling.id,
-            data = DetaljertSimuleringResultat(emptyList()),
-            beriketData = BeriketSimuleringsresultat(mockk(), mockk()),
-        )
+        } returns
+            Simuleringsresultat(
+                behandlingId = behandling.id,
+                data = DetaljertSimuleringResultat(emptyList()),
+                beriketData = BeriketSimuleringsresultat(mockk(), mockk()),
+            )
         val simuleringsresultatDto = simuleringService.simuler(saksbehandling(fagsak, behandling))
         assertThat(simuleringsresultatDto).isNotNull
     }
@@ -128,11 +131,12 @@ internal class SimuleringServiceTest {
     @Test
     internal fun `skal berike simlueringsresultat`() {
         val forrigeBehandlingId = behandling(fagsak).id
-        val behandling = behandling(
-            fagsak = fagsak,
-            type = BehandlingType.FØRSTEGANGSBEHANDLING,
-            forrigeBehandlingId = forrigeBehandlingId,
-        )
+        val behandling =
+            behandling(
+                fagsak = fagsak,
+                type = BehandlingType.FØRSTEGANGSBEHANDLING,
+                forrigeBehandlingId = forrigeBehandlingId,
+            )
 
         val tilkjentYtelse = tilkjentYtelse(behandlingId = behandling.id, personIdent = personIdent)
 

@@ -49,7 +49,6 @@ import java.util.UUID
 import no.nav.familie.ef.sak.oppgave.Oppgave as EfOppgave
 
 internal class OppgaveServiceTest {
-
     private val oppgaveClient = OppgaveClientMock().oppgaveClient()
     private val arbeidsfordelingService = mockk<ArbeidsfordelingService>()
     private val fagsakService = mockk<FagsakService>()
@@ -75,18 +74,20 @@ internal class OppgaveServiceTest {
     @Test
     fun `Skal ikke lage ny VurderHenvendelseOppgave med type utdanning dersom det finnes en på behandling fra før`() {
         val eksisterendeGsakOppgaveId: Long = 987345
-        val oppgave = oppgave(
-            behandling = behandling(),
-            type = Oppgavetype.VurderHenvendelse,
-            gsakOppgaveId = eksisterendeGsakOppgaveId,
-        )
+        val oppgave =
+            oppgave(
+                behandling = behandling(),
+                type = Oppgavetype.VurderHenvendelse,
+                gsakOppgaveId = eksisterendeGsakOppgaveId,
+            )
         mockFinnVurderHenvendelseOppgave(returnValue = oppgave)
 
-        val opprettOppgave = oppgaveService.opprettOppgave(
-            BEHANDLING_ID,
-            Oppgavetype.VurderHenvendelse,
-            OppgaveSubtype.INNSTILLING_VEDRØRENDE_UTDANNING,
-        )
+        val opprettOppgave =
+            oppgaveService.opprettOppgave(
+                BEHANDLING_ID,
+                Oppgavetype.VurderHenvendelse,
+                OppgaveSubtype.INNSTILLING_VEDRØRENDE_UTDANNING,
+            )
 
         verify(exactly = 0) { oppgaveRepository.insert(any()) }
         assertThat(opprettOppgave).isEqualTo(eksisterendeGsakOppgaveId)
@@ -291,18 +292,19 @@ internal class OppgaveServiceTest {
 
     @Test
     fun `Skal sette frist for oppgave`() {
-        val frister = listOf<Pair<LocalDateTime, LocalDate>>(
-            Pair(torsdag.morgen(), fredagFrist),
-            Pair(torsdag.kveld(), mandagFrist),
-            Pair(fredag.morgen(), mandagFrist),
-            Pair(fredag.kveld(), tirsdagFrist),
-            Pair(lørdag.morgen(), tirsdagFrist),
-            Pair(lørdag.kveld(), tirsdagFrist),
-            Pair(søndag.morgen(), tirsdagFrist),
-            Pair(søndag.kveld(), tirsdagFrist),
-            Pair(mandag.morgen(), tirsdagFrist),
-            Pair(mandag.kveld(), onsdagFrist),
-        )
+        val frister =
+            listOf<Pair<LocalDateTime, LocalDate>>(
+                Pair(torsdag.morgen(), fredagFrist),
+                Pair(torsdag.kveld(), mandagFrist),
+                Pair(fredag.morgen(), mandagFrist),
+                Pair(fredag.kveld(), tirsdagFrist),
+                Pair(lørdag.morgen(), tirsdagFrist),
+                Pair(lørdag.kveld(), tirsdagFrist),
+                Pair(søndag.morgen(), tirsdagFrist),
+                Pair(søndag.kveld(), tirsdagFrist),
+                Pair(mandag.morgen(), tirsdagFrist),
+                Pair(mandag.kveld(), onsdagFrist),
+            )
 
         frister.forEach {
             assertThat(oppgaveService.lagFristForOppgave(it.first)).isEqualTo(it.second)
@@ -352,16 +354,17 @@ internal class OppgaveServiceTest {
 
     @Nested
     inner class FeilregistertOppgave {
+        private val feilregistrertException =
+            RessursException(
+                Ressurs.failure("Oppgave har status feilregistrert"),
+                HttpServerErrorException(HttpStatus.BAD_REQUEST),
+            )
 
-        private val feilregistrertException = RessursException(
-            Ressurs.failure("Oppgave har status feilregistrert"),
-            HttpServerErrorException(HttpStatus.BAD_REQUEST),
-        )
-
-        private val annenException = RessursException(
-            Ressurs.failure("Oppgave har status ferdigstilt"),
-            HttpServerErrorException(HttpStatus.BAD_REQUEST),
-        )
+        private val annenException =
+            RessursException(
+                Ressurs.failure("Oppgave har status ferdigstilt"),
+                HttpServerErrorException(HttpStatus.BAD_REQUEST),
+            )
 
         @BeforeEach
         internal fun setUp() {
@@ -404,7 +407,6 @@ internal class OppgaveServiceTest {
 
     @Nested
     inner class HenleggBehandlingUtenÅFerdigstilleOppgave {
-
         @Test
         internal fun `Dersom oppgave ikke finnes skal det ikke kastes feil`() {
             every {
@@ -475,7 +477,6 @@ internal class OppgaveServiceTest {
     }
 
     companion object {
-
         private val FAGSAK_ID = UUID.fromString("1242f220-cad3-4640-95c1-190ec814c91e")
         private const val FAGSAK_EKSTERN_ID = 98765L
         private const val GSAK_OPPGAVE_ID = 12345L

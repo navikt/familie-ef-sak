@@ -23,7 +23,6 @@ import java.time.YearMonth
 import java.util.UUID
 
 internal class VedtakHistorikkBeregnerTest {
-
     private val førsteFra = LocalDate.of(2021, 1, 1)
     private val førsteTil = LocalDate.of(2021, 3, 31)
 
@@ -119,7 +118,6 @@ internal class VedtakHistorikkBeregnerTest {
 
     @Nested
     inner class SplitteVedtaksperiodeBasertPåInntekter {
-
         val januar = YearMonth.of(2021, 1)
         val februar = YearMonth.of(2021, 2)
         val mars = YearMonth.of(2021, 3)
@@ -127,10 +125,11 @@ internal class VedtakHistorikkBeregnerTest {
 
         @Test
         internal fun `en periode med 2 inntektsperioder`() {
-            val vedtak = lagVedtak(
-                perioder = listOf(lagVedtaksperiode(januar.atDay(1), mars.atEndOfMonth())),
-                inntektsperioder = listOf(lagInntekt(januar, februar, 10), lagInntekt(mars, april, 5)),
-            )
+            val vedtak =
+                lagVedtak(
+                    perioder = listOf(lagVedtaksperiode(januar.atDay(1), mars.atEndOfMonth())),
+                    inntektsperioder = listOf(lagInntekt(januar, februar, 10), lagInntekt(mars, april, 5)),
+                )
 
             val vedtaksperioderPerBehandling = lagVedtaksperioderPerBehandling(listOf(vedtak))
             val vedtaksperioder = vedtaksperioderPerBehandling.values.toList()
@@ -150,13 +149,15 @@ internal class VedtakHistorikkBeregnerTest {
 
         @Test
         internal fun `2 perioder med 1 inntekt`() {
-            val vedtak = lagVedtak(
-                perioder = listOf(
-                    lagVedtaksperiode(januar.atDay(1), mars.atEndOfMonth()),
-                    lagVedtaksperiode(april.atDay(1), april.atEndOfMonth()),
-                ),
-                inntektsperioder = listOf(lagInntekt(januar, april, 10)),
-            )
+            val vedtak =
+                lagVedtak(
+                    perioder =
+                        listOf(
+                            lagVedtaksperiode(januar.atDay(1), mars.atEndOfMonth()),
+                            lagVedtaksperiode(april.atDay(1), april.atEndOfMonth()),
+                        ),
+                    inntektsperioder = listOf(lagInntekt(januar, april, 10)),
+                )
 
             val vedtaksperioderPerBehandling = lagVedtaksperioderPerBehandling(listOf(vedtak))
             val vedtaksperioder = vedtaksperioderPerBehandling.values.toList()
@@ -190,27 +191,32 @@ internal class VedtakHistorikkBeregnerTest {
 
     private fun lagVedtaksperioderPerBehandling(vedtak: List<Vedtak>): Map<UUID, List<Vedtakshistorikkperiode>> {
         var datoCount = 0L
-        val tilkjenteytelser = vedtak.associate {
-            val tilkjentYtelse = lagTilkjentYtelse(emptyList(), behandlingId = it.behandlingId)
-            val opprettetTid = LocalDate.of(2021, 1, 1).atStartOfDay().plusDays(datoCount++)
-            it.behandlingId to tilkjentYtelse.copy(sporbar = Sporbar(opprettetTid = opprettetTid))
-        }
-        val behandlingHistorikkData = vedtak.map {
-            BehandlingHistorikkData(
-                behandlingId = it.behandlingId,
-                vedtakstidspunkt = LocalDateTime.now(),
-                vedtakDto = it.tilVedtakDto(),
-                aktivitetArbeid = null,
-                tilkjentYtelse = tilkjenteytelser.getValue(it.behandlingId),
-            )
-        }
+        val tilkjenteytelser =
+            vedtak.associate {
+                val tilkjentYtelse = lagTilkjentYtelse(emptyList(), behandlingId = it.behandlingId)
+                val opprettetTid = LocalDate.of(2021, 1, 1).atStartOfDay().plusDays(datoCount++)
+                it.behandlingId to tilkjentYtelse.copy(sporbar = Sporbar(opprettetTid = opprettetTid))
+            }
+        val behandlingHistorikkData =
+            vedtak.map {
+                BehandlingHistorikkData(
+                    behandlingId = it.behandlingId,
+                    vedtakstidspunkt = LocalDateTime.now(),
+                    vedtakDto = it.tilVedtakDto(),
+                    aktivitetArbeid = null,
+                    tilkjentYtelse = tilkjenteytelser.getValue(it.behandlingId),
+                )
+            }
         val konfigurasjon = HistorikkKonfigurasjon(true)
         return VedtakHistorikkBeregner.lagVedtaksperioderPerBehandling(behandlingHistorikkData, konfigurasjon)
             .map { it.key to it.value.perioder }
             .toMap()
     }
 
-    private fun lagVedtaksperiode(fra: LocalDate, til: LocalDate): Vedtaksperiode =
+    private fun lagVedtaksperiode(
+        fra: LocalDate,
+        til: LocalDate,
+    ): Vedtaksperiode =
         Vedtaksperiode(
             datoFra = fra,
             datoTil = til,
@@ -218,12 +224,13 @@ internal class VedtakHistorikkBeregnerTest {
             periodeType = VedtaksperiodeType.PERIODE_FØR_FØDSEL,
         )
 
-    private fun Vedtaksperiode.tilHistorikk() = VedtakshistorikkperiodeOvergangsstønad(
-        Månedsperiode(this.datoFra, this.datoTil),
-        this.aktivitet,
-        this.periodeType,
-        Inntekt(YearMonth.from(this.datoFra), BigDecimal.ZERO, BigDecimal.ZERO),
-    )
+    private fun Vedtaksperiode.tilHistorikk() =
+        VedtakshistorikkperiodeOvergangsstønad(
+            Månedsperiode(this.datoFra, this.datoTil),
+            this.aktivitet,
+            this.periodeType,
+            Inntekt(YearMonth.from(this.datoFra), BigDecimal.ZERO, BigDecimal.ZERO),
+        )
 
     private fun lagVedtak(
         behandlingId: UUID = UUID.randomUUID(),
@@ -256,8 +263,9 @@ internal class VedtakHistorikkBeregnerTest {
         samordningsfradrag = BigDecimal.ZERO,
     )
 
-    private fun defaultInntektsperioder(perioder: List<Vedtaksperiode>?): InntektWrapper? = perioder?.let {
-        val inntekt = it.firstOrNull()?.let { lagInntekt(it.periode.fom, it.periode.tom, 0) }
-        InntektWrapper(listOfNotNull(inntekt))
-    }
+    private fun defaultInntektsperioder(perioder: List<Vedtaksperiode>?): InntektWrapper? =
+        perioder?.let {
+            val inntekt = it.firstOrNull()?.let { lagInntekt(it.periode.fom, it.periode.tom, 0) }
+            InntektWrapper(listOfNotNull(inntekt))
+        }
 }

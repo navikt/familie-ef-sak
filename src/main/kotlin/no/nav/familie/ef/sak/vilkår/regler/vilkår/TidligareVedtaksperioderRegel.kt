@@ -16,16 +16,17 @@ import java.util.UUID
 
 class TidligareVedtaksperioderRegel : Vilkårsregel(
     vilkårType = VilkårType.TIDLIGERE_VEDTAKSPERIODER,
-    regler = setOf(
-        HAR_TIDLIGERE_MOTTATT_OVERGANSSTØNAD,
-        HAR_TIDLIGERE_ANDRE_STØNADER_SOM_HAR_BETYDNING,
-    ),
-    hovedregler = regelIder(
-        HAR_TIDLIGERE_MOTTATT_OVERGANSSTØNAD,
-        HAR_TIDLIGERE_ANDRE_STØNADER_SOM_HAR_BETYDNING,
-    ),
+    regler =
+        setOf(
+            HAR_TIDLIGERE_MOTTATT_OVERGANSSTØNAD,
+            HAR_TIDLIGERE_ANDRE_STØNADER_SOM_HAR_BETYDNING,
+        ),
+    hovedregler =
+        regelIder(
+            HAR_TIDLIGERE_MOTTATT_OVERGANSSTØNAD,
+            HAR_TIDLIGERE_ANDRE_STØNADER_SOM_HAR_BETYDNING,
+        ),
 ) {
-
     override fun initiereDelvilkårsvurdering(
         metadata: HovedregelMetadata,
         resultat: Vilkårsresultat,
@@ -50,23 +51,24 @@ class TidligareVedtaksperioderRegel : Vilkårsregel(
     }
 
     companion object {
-
         private val HAR_TIDLIGERE_MOTTATT_OVERGANSSTØNAD =
             RegelSteg(
                 regelId = RegelId.HAR_TIDLIGERE_MOTTATT_OVERGANSSTØNAD,
-                svarMapping = jaNeiSvarRegel(
-                    hvisJa = SluttSvarRegel.OPPFYLT_MED_PÅKREVD_BEGRUNNELSE,
-                    hvisNei = SluttSvarRegel.OPPFYLT,
-                ),
+                svarMapping =
+                    jaNeiSvarRegel(
+                        hvisJa = SluttSvarRegel.OPPFYLT_MED_PÅKREVD_BEGRUNNELSE,
+                        hvisNei = SluttSvarRegel.OPPFYLT,
+                    ),
             )
 
         private val HAR_TIDLIGERE_ANDRE_STØNADER_SOM_HAR_BETYDNING =
             RegelSteg(
                 regelId = RegelId.HAR_TIDLIGERE_ANDRE_STØNADER_SOM_HAR_BETYDNING,
-                svarMapping = jaNeiSvarRegel(
-                    hvisJa = SluttSvarRegel.OPPFYLT_MED_PÅKREVD_BEGRUNNELSE,
-                    hvisNei = SluttSvarRegel.OPPFYLT_MED_VALGFRI_BEGRUNNELSE,
-                ),
+                svarMapping =
+                    jaNeiSvarRegel(
+                        hvisJa = SluttSvarRegel.OPPFYLT_MED_PÅKREVD_BEGRUNNELSE,
+                        hvisNei = SluttSvarRegel.OPPFYLT_MED_VALGFRI_BEGRUNNELSE,
+                    ),
             )
     }
 }

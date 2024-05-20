@@ -26,7 +26,6 @@ import java.time.LocalDateTime
 import java.time.YearMonth
 
 internal class FagsakRepositoryTest : OppslagSpringRunnerTest() {
-
     @Autowired
     private lateinit var tilkjentYtelseRepository: TilkjentYtelseRepository
 
@@ -41,19 +40,19 @@ internal class FagsakRepositoryTest : OppslagSpringRunnerTest() {
 
     @Nested
     inner class FinnFagsakerMedUtdatertGBelop {
-
         @Test
         fun `finnFerdigstilteEllerSattPåVentFagsakerMedUtdatertGBelop skal finne fagsak med behandling satt på vent`() {
             val fagsak = testoppsettService.lagreFagsak(fagsak())
             val fagsak2 = testoppsettService.lagreFagsak(fagsak(identer = setOf(PersonIdent("1"))))
-            val behandlingFerdig = behandlingRepository.insert(
-                behandling(
-                    fagsak,
-                    status = BehandlingStatus.FERDIGSTILT,
-                    resultat = BehandlingResultat.INNVILGET,
-                    opprettetTid = LocalDateTime.now().minusDays(5),
-                ),
-            )
+            val behandlingFerdig =
+                behandlingRepository.insert(
+                    behandling(
+                        fagsak,
+                        status = BehandlingStatus.FERDIGSTILT,
+                        resultat = BehandlingResultat.INNVILGET,
+                        opprettetTid = LocalDateTime.now().minusDays(5),
+                    ),
+                )
             behandlingRepository.insert(
                 behandling(
                     fagsak,
@@ -77,14 +76,15 @@ internal class FagsakRepositoryTest : OppslagSpringRunnerTest() {
         fun `finner alle ferdigstilte fagsaker med innvilget tilkjent ytelse etter ny G-dato med gammel grunnbeløpsdato`() {
             val fagsak = testoppsettService.lagreFagsak(fagsak())
             val fagsak2 = testoppsettService.lagreFagsak(fagsak(identer = setOf(PersonIdent("1"))))
-            val behandling = behandlingRepository.insert(
-                behandling(
-                    fagsak,
-                    status = BehandlingStatus.FERDIGSTILT,
-                    resultat = BehandlingResultat.INNVILGET,
-                    opprettetTid = LocalDateTime.now().minusDays(2),
-                ),
-            )
+            val behandling =
+                behandlingRepository.insert(
+                    behandling(
+                        fagsak,
+                        status = BehandlingStatus.FERDIGSTILT,
+                        resultat = BehandlingResultat.INNVILGET,
+                        opprettetTid = LocalDateTime.now().minusDays(2),
+                    ),
+                )
             behandlingRepository.insert(
                 behandling(
                     fagsak2,
@@ -108,14 +108,15 @@ internal class FagsakRepositoryTest : OppslagSpringRunnerTest() {
         fun `finnFerdigstilteFagsakerMedUtdatertGBelop - skal ikke finne fagsaker med samordningsfradrag`() {
             val fagsak = testoppsettService.lagreFagsak(fagsak())
             val fagsak2 = testoppsettService.lagreFagsak(fagsak(identer = setOf(PersonIdent("1"))))
-            val behandling = behandlingRepository.insert(
-                behandling(
-                    fagsak,
-                    status = BehandlingStatus.FERDIGSTILT,
-                    resultat = BehandlingResultat.INNVILGET,
-                    opprettetTid = LocalDateTime.now().minusDays(2),
-                ),
-            )
+            val behandling =
+                behandlingRepository.insert(
+                    behandling(
+                        fagsak,
+                        status = BehandlingStatus.FERDIGSTILT,
+                        resultat = BehandlingResultat.INNVILGET,
+                        opprettetTid = LocalDateTime.now().minusDays(2),
+                    ),
+                )
             behandlingRepository.insert(
                 behandling(
                     fagsak2,
@@ -139,14 +140,15 @@ internal class FagsakRepositoryTest : OppslagSpringRunnerTest() {
         fun `tar ikke med ferdigstilte fagsaker som har en åpen behandling`() {
             val fagsak = testoppsettService.lagreFagsak(fagsak())
             val fagsak2 = testoppsettService.lagreFagsak(fagsak(identer = setOf(PersonIdent("1"))))
-            val behandlingFerdig = behandlingRepository.insert(
-                behandling(
-                    fagsak,
-                    status = BehandlingStatus.FERDIGSTILT,
-                    resultat = BehandlingResultat.INNVILGET,
-                    opprettetTid = LocalDateTime.now().minusDays(5),
-                ),
-            )
+            val behandlingFerdig =
+                behandlingRepository.insert(
+                    behandling(
+                        fagsak,
+                        status = BehandlingStatus.FERDIGSTILT,
+                        resultat = BehandlingResultat.INNVILGET,
+                        opprettetTid = LocalDateTime.now().minusDays(5),
+                    ),
+                )
             behandlingRepository.insert(
                 behandling(
                     fagsak,
@@ -170,13 +172,14 @@ internal class FagsakRepositoryTest : OppslagSpringRunnerTest() {
     @Test
     fun `harLøpendeUtbetaling returnerer true for fagsak med ferdigstilt behandling med aktiv utbetaling`() {
         val fagsak = testoppsettService.lagreFagsak(fagsak(setOf(PersonIdent("321"))))
-        val behandling = behandlingRepository.insert(
-            behandling(
-                fagsak,
-                resultat = BehandlingResultat.INNVILGET,
-                status = BehandlingStatus.FERDIGSTILT,
-            ),
-        )
+        val behandling =
+            behandlingRepository.insert(
+                behandling(
+                    fagsak,
+                    resultat = BehandlingResultat.INNVILGET,
+                    status = BehandlingStatus.FERDIGSTILT,
+                ),
+            )
         tilkjentYtelseRepository.insert(tilkjentYtelse(behandling.id, "321", LocalDate.now().year))
 
         val harLøpendeUtbetaling = fagsakRepository.harLøpendeUtbetaling(fagsak.id)
@@ -187,13 +190,14 @@ internal class FagsakRepositoryTest : OppslagSpringRunnerTest() {
     @Test
     fun `harLøpendeUtbetaling returnerer true for fagsak med flere aktive ytelser`() {
         val fagsak = testoppsettService.lagreFagsak(fagsak(setOf(PersonIdent("321"))))
-        val behandling = behandlingRepository.insert(
-            behandling(
-                fagsak,
-                resultat = BehandlingResultat.INNVILGET,
-                status = BehandlingStatus.FERDIGSTILT,
-            ),
-        )
+        val behandling =
+            behandlingRepository.insert(
+                behandling(
+                    fagsak,
+                    resultat = BehandlingResultat.INNVILGET,
+                    status = BehandlingStatus.FERDIGSTILT,
+                ),
+            )
         tilkjentYtelseRepository.insert(tilkjentYtelse(behandling.id, "321", LocalDate.now().year))
         tilkjentYtelseRepository.insert(tilkjentYtelse(behandling.id, "321", LocalDate.now().year))
 
@@ -205,13 +209,14 @@ internal class FagsakRepositoryTest : OppslagSpringRunnerTest() {
     @Test
     fun `harLøpendeUtbetaling returnerer false for fagsak med ferdigstilt behandling med inaktiv utbetaling`() {
         val fagsak = testoppsettService.lagreFagsak(fagsak(setOf(PersonIdent("321"))))
-        val behandling = behandlingRepository.insert(
-            behandling(
-                fagsak,
-                resultat = BehandlingResultat.INNVILGET,
-                status = BehandlingStatus.FERDIGSTILT,
-            ),
-        )
+        val behandling =
+            behandlingRepository.insert(
+                behandling(
+                    fagsak,
+                    resultat = BehandlingResultat.INNVILGET,
+                    status = BehandlingStatus.FERDIGSTILT,
+                ),
+            )
         tilkjentYtelseRepository.insert(tilkjentYtelse(behandling.id, "321"))
 
         val harLøpendeUtbetaling = fagsakRepository.harLøpendeUtbetaling(fagsak.id)
@@ -261,8 +266,9 @@ internal class FagsakRepositoryTest : OppslagSpringRunnerTest() {
 
         assertThat(fagsakHentetFinnesIkke).isNull()
 
-        val fagsak = fagsakRepository.findBySøkerIdent(setOf("12345678901"), StønadType.OVERGANGSSTØNAD)
-            ?: error("Finner ikke fagsak")
+        val fagsak =
+            fagsakRepository.findBySøkerIdent(setOf("12345678901"), StønadType.OVERGANGSSTØNAD)
+                ?: error("Finner ikke fagsak")
         val person = fagsakPersonRepository.findByIdOrThrow(fagsak.fagsakPersonId)
 
         assertThat(person.identer.map { it.ident }).contains("12345678901")
@@ -273,18 +279,20 @@ internal class FagsakRepositoryTest : OppslagSpringRunnerTest() {
     internal fun `skal returnere en liste med fagsaker hvis stønadstypen ikke satt`() {
         val ident = "12345678901"
         val person = testoppsettService.opprettPerson(ident)
-        val fagsak1 = testoppsettService.lagreFagsak(
-            fagsak(
-                person = person,
-                stønadstype = StønadType.OVERGANGSSTØNAD,
-            ),
-        )
-        val fagsak2 = testoppsettService.lagreFagsak(
-            fagsak(
-                person = person,
-                stønadstype = StønadType.SKOLEPENGER,
-            ),
-        )
+        val fagsak1 =
+            testoppsettService.lagreFagsak(
+                fagsak(
+                    person = person,
+                    stønadstype = StønadType.OVERGANGSSTØNAD,
+                ),
+            )
+        val fagsak2 =
+            testoppsettService.lagreFagsak(
+                fagsak(
+                    person = person,
+                    stønadstype = StønadType.SKOLEPENGER,
+                ),
+            )
         val fagsaker = fagsakRepository.findBySøkerIdent(setOf(ident))
 
         assertThat(
@@ -303,8 +311,9 @@ internal class FagsakRepositoryTest : OppslagSpringRunnerTest() {
     @Test
     internal fun finnMedEksternId() {
         val fagsak = testoppsettService.lagreFagsak(fagsak())
-        val findByEksternId = fagsakRepository.finnMedEksternId(fagsak.eksternId)
-            ?: error("Fagsak med ekstern id ${fagsak.eksternId} finnes ikke")
+        val findByEksternId =
+            fagsakRepository.finnMedEksternId(fagsak.eksternId)
+                ?: error("Fagsak med ekstern id ${fagsak.eksternId} finnes ikke")
 
         assertThat(findByEksternId).isEqualTo(fagsak.tilFagsakDomain())
     }
@@ -388,7 +397,11 @@ internal class FagsakRepositoryTest : OppslagSpringRunnerTest() {
         assertThat(fagsakRepository.findBySøkerIdent(fagsakMedFlereIdenter.personIdenter.map { it.ident }.toSet())).hasSize(1)
     }
 
-    private fun opprettFagsakMedFlereIdenter(ident: String = "1", ident2: String = "2", ident3: String = "3"): Fagsak {
+    private fun opprettFagsakMedFlereIdenter(
+        ident: String = "1",
+        ident2: String = "2",
+        ident3: String = "3",
+    ): Fagsak {
         val endret2DagerSiden = Sporbar(endret = Endret(endretTid = LocalDateTime.now().plusDays(2)))
         return fagsak(
             setOf(

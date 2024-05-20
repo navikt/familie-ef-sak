@@ -25,7 +25,6 @@ import java.net.SocketTimeoutException
 import java.util.concurrent.TimeoutException
 
 internal class ApiExceptionHandlerTest : OppslagSpringRunnerTest() {
-
     @BeforeEach
     fun setUp() {
         headers.setBearerAuth(lokalTestToken)
@@ -63,11 +62,12 @@ internal class ApiExceptionHandlerTest : OppslagSpringRunnerTest() {
         assertThat(response.body?.melding).contains("manglertilgang123")
     }
 
-    private fun gjørKallSomKaster(feil: TestExceptionType) = restTemplate.exchange<Ressurs<String>>(
-        localhost("/api/testfeil/$feil"),
-        HttpMethod.GET,
-        HttpEntity<Ressurs<String>>(headers),
-    )
+    private fun gjørKallSomKaster(feil: TestExceptionType) =
+        restTemplate.exchange<Ressurs<String>>(
+            localhost("/api/testfeil/$feil"),
+            HttpMethod.GET,
+            HttpEntity<Ressurs<String>>(headers),
+        )
 }
 
 enum class TestExceptionType {
@@ -82,7 +82,9 @@ enum class TestExceptionType {
 @ProtectedWithClaims(issuer = "azuread")
 class TestController {
     @GetMapping(path = ["{exception}"])
-    fun kastTimeoutException(@PathVariable exception: TestExceptionType): Ressurs<String> {
+    fun kastTimeoutException(
+        @PathVariable exception: TestExceptionType,
+    ): Ressurs<String> {
         throw when (exception) {
             TIMEOUT -> RuntimeException(TimeoutException(""))
             SOCKET_TIMEOUT -> RuntimeException(ResourceAccessException(" ", SocketTimeoutException("Read timed out")))

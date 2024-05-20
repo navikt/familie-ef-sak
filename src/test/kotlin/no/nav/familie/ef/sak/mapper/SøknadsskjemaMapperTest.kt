@@ -13,20 +13,20 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
 internal class SøknadsskjemaMapperTest {
-
     @Test
     internal fun `skal mappe søknad som mangler datoer for stønadsstart`() {
-        val stønadsstart = Søknadsfelt(
-            "Stønadsstart",
-            Stønadsstart(
-                null,
-                null,
-                Søknadsfelt(
-                    "Søker du stønad fra et bestemt tidspunkt",
-                    false,
+        val stønadsstart =
+            Søknadsfelt(
+                "Stønadsstart",
+                Stønadsstart(
+                    null,
+                    null,
+                    Søknadsfelt(
+                        "Søker du stønad fra et bestemt tidspunkt",
+                        false,
+                    ),
                 ),
-            ),
-        )
+            )
         val kontraktsøknad = Testsøknad.søknadOvergangsstønad.copy(stønadsstart = stønadsstart)
         val søknadTilLagring = SøknadsskjemaMapper.tilDomene(kontraktsøknad)
         assertThat(søknadTilLagring.søkerFraBestemtMåned).isEqualTo(false)
@@ -47,13 +47,15 @@ internal class SøknadsskjemaMapperTest {
     @Test
     internal fun `skal mappe feltet skalBoHosSøker`() {
         val svarSkalBarnetBoHosSøker = "jaMenSamarbeiderIkke"
-        val barn = TestsøknadBuilder.Builder()
-            .defaultBarn()
-            .copy(
-                skalBarnetBoHosSøker = Søknadsfelt("", "", null, svarSkalBarnetBoHosSøker),
-            )
-        val søknad = TestsøknadBuilder.Builder()
-            .build().søknadOvergangsstønad.copy(barn = Søknadsfelt("", listOf(barn)))
+        val barn =
+            TestsøknadBuilder.Builder()
+                .defaultBarn()
+                .copy(
+                    skalBarnetBoHosSøker = Søknadsfelt("", "", null, svarSkalBarnetBoHosSøker),
+                )
+        val søknad =
+            TestsøknadBuilder.Builder()
+                .build().søknadOvergangsstønad.copy(barn = Søknadsfelt("", listOf(barn)))
 
         val søknadTilLagring = SøknadsskjemaMapper.tilDomene(søknad)
         assertThat(søknadTilLagring.barn.first().skalBoHosSøker).isEqualTo(svarSkalBarnetBoHosSøker)
@@ -63,36 +65,39 @@ internal class SøknadsskjemaMapperTest {
     inner class AdresseTilAdresseopplysninger {
         @Test
         internal fun `skal mappe adress fra personalia til opplysninger om adresse då det er den som vises til brukeren`() {
-            val adresse = Adresse(
-                adresse = "adresse",
-                postnummer = "1234",
-                poststedsnavn = "Sted",
-                land = null,
-            )
+            val adresse =
+                Adresse(
+                    adresse = "adresse",
+                    postnummer = "1234",
+                    poststedsnavn = "Sted",
+                    land = null,
+                )
             val søknad = TestsøknadBuilder.Builder().setPersonalia(adresse = adresse).build().søknadOvergangsstønad
             assertThat(SøknadsskjemaMapper.tilDomene(søknad).adresseopplysninger?.adresse).isEqualTo("adresse, 1234 Sted")
         }
 
         @Test
         internal fun `poststed skal ikke vises hvis det ikke er med`() {
-            val adresse = Adresse(
-                adresse = "adresse",
-                postnummer = "1234",
-                poststedsnavn = null,
-                land = "Land",
-            )
+            val adresse =
+                Adresse(
+                    adresse = "adresse",
+                    postnummer = "1234",
+                    poststedsnavn = null,
+                    land = "Land",
+                )
             val søknad = TestsøknadBuilder.Builder().setPersonalia(adresse = adresse).build().søknadOvergangsstønad
             assertThat(SøknadsskjemaMapper.tilDomene(søknad).adresseopplysninger?.adresse).isEqualTo("adresse, 1234, Land")
         }
 
         @Test
         internal fun `tomme element skal håndteres`() {
-            val adresse = Adresse(
-                adresse = "adresse",
-                postnummer = "",
-                poststedsnavn = null,
-                land = "",
-            )
+            val adresse =
+                Adresse(
+                    adresse = "adresse",
+                    postnummer = "",
+                    poststedsnavn = null,
+                    land = "",
+                )
             val søknad = TestsøknadBuilder.Builder().setPersonalia(adresse = adresse).build().søknadOvergangsstønad
             assertThat(SøknadsskjemaMapper.tilDomene(søknad).adresseopplysninger?.adresse).isEqualTo("adresse")
         }
@@ -110,11 +115,12 @@ internal class SøknadsskjemaMapperTest {
 
         @Test
         internal fun `skal inneholde oppholdsland om innsendt`() {
-            val oppholdsland = Søknadsfelt(
-                label = "I hvilket land oppholder du deg?",
-                verdi = "Polen",
-                svarId = "POL",
-            )
+            val oppholdsland =
+                Søknadsfelt(
+                    label = "I hvilket land oppholder du deg?",
+                    verdi = "Polen",
+                    svarId = "POL",
+                )
             val søknad = TestsøknadBuilder.Builder().setMedlemskapsdetaljer(oppholdsland = oppholdsland).build().søknadOvergangsstønad
 
             val søknadTilLagring = SøknadsskjemaMapper.tilDomene(søknad)
@@ -123,14 +129,15 @@ internal class SøknadsskjemaMapperTest {
 
         @Test
         internal fun `utenlandsperiode skal inneholde land om innsendt`() {
-            val utenlandsperioder = listOf(
-                Utenlandsopphold(
-                    fradato = Søknadsfelt("Fra", LocalDate.of(2021, 1, 1)),
-                    tildato = Søknadsfelt("Til", LocalDate.of(2022, 1, 1)),
-                    land = Søknadsfelt("I hvilket land oppholdt du deg i?", svarId = "ESP", verdi = "Spania"),
-                    årsakUtenlandsopphold = Søknadsfelt("Årsak til utenlandsopphold", "Ferie"),
-                ),
-            )
+            val utenlandsperioder =
+                listOf(
+                    Utenlandsopphold(
+                        fradato = Søknadsfelt("Fra", LocalDate.of(2021, 1, 1)),
+                        tildato = Søknadsfelt("Til", LocalDate.of(2022, 1, 1)),
+                        land = Søknadsfelt("I hvilket land oppholdt du deg i?", svarId = "ESP", verdi = "Spania"),
+                        årsakUtenlandsopphold = Søknadsfelt("Årsak til utenlandsopphold", "Ferie"),
+                    ),
+                )
 
             val søknad = TestsøknadBuilder.Builder().setMedlemskapsdetaljer(utenlandsopphold = utenlandsperioder).build().søknadOvergangsstønad
             val søknadTilLagring = SøknadsskjemaMapper.tilDomene(søknad)

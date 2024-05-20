@@ -7,7 +7,6 @@ import java.time.OffsetDateTime
 import java.time.temporal.ChronoUnit
 
 object OppgaveUtil {
-
     private val logger = LoggerFactory.getLogger(javaClass)
 
     val ENHET_NR_NAY = "4489"

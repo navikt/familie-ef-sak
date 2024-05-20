@@ -8,7 +8,6 @@ import org.junit.jupiter.api.Test
 import org.springframework.cache.concurrent.ConcurrentMapCacheManager
 
 internal class PersonServiceTest {
-
     private val pdlClient = mockk<PdlClient>()
     private val cache = ConcurrentMapCacheManager()
 

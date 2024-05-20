@@ -4,7 +4,6 @@ import org.springframework.data.relational.core.mapping.Column
 import java.time.LocalDate
 
 interface IPersonMinimum {
-
     val fødselsnummer: String?
 }
 

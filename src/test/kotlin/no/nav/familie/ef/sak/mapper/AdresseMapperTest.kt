@@ -21,30 +21,31 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
 internal class AdresseMapperTest {
-
     private val startdato = LocalDate.of(2020, 1, 1)
     private val sluttdato = startdato.plusDays(1)
 
     private val kodeverkService = KodeverkServiceMock().kodeverkService()
     private val mapper = AdresseMapper(kodeverkService)
     private val metadataGjeldende = Metadata(historisk = false)
-    private val matrikkeladresse = Matrikkeladresse(
-        matrikkelId = null,
-        bruksenhetsnummer = "bruksenhet",
-        tilleggsnavn = "tilleggsnavn",
-        postnummer = "",
-    )
-    private val bostedsadresse = Bostedsadresse(
-        angittFlyttedato = startdato.plusDays(1),
-        gyldigFraOgMed = startdato,
-        gyldigTilOgMed = startdato.plusDays(1),
-        coAdressenavn = null,
-        utenlandskAdresse = utenlandskAdresse(),
-        vegadresse = vegadresse(),
-        ukjentBosted = UkjentBosted(bostedskommune = "ukjentBostedKommune"),
-        matrikkeladresse = matrikkeladresse,
-        metadata = metadataGjeldende,
-    )
+    private val matrikkeladresse =
+        Matrikkeladresse(
+            matrikkelId = null,
+            bruksenhetsnummer = "bruksenhet",
+            tilleggsnavn = "tilleggsnavn",
+            postnummer = "",
+        )
+    private val bostedsadresse =
+        Bostedsadresse(
+            angittFlyttedato = startdato.plusDays(1),
+            gyldigFraOgMed = startdato,
+            gyldigTilOgMed = startdato.plusDays(1),
+            coAdressenavn = null,
+            utenlandskAdresse = utenlandskAdresse(),
+            vegadresse = vegadresse(),
+            ukjentBosted = UkjentBosted(bostedskommune = "ukjentBostedKommune"),
+            matrikkeladresse = matrikkeladresse,
+            metadata = metadataGjeldende,
+        )
 
     @Test
     internal fun `Bostedsadresse formatert adresse`() {
@@ -123,14 +124,15 @@ internal class AdresseMapperTest {
 
     @Test
     internal fun `Oppholdsadresse formatert adresse`() {
-        val oppholdsadresse = Oppholdsadresse(
-            gyldigFraOgMed = null,
-            coAdressenavn = null,
-            utenlandskAdresse = null,
-            vegadresse = null,
-            oppholdAnnetSted = null,
-            metadata = metadataGjeldende,
-        )
+        val oppholdsadresse =
+            Oppholdsadresse(
+                gyldigFraOgMed = null,
+                coAdressenavn = null,
+                utenlandskAdresse = null,
+                vegadresse = null,
+                oppholdAnnetSted = null,
+                metadata = metadataGjeldende,
+            )
 
         val adresseMedVegadresseMedAdressenavn = oppholdsadresse.copy(vegadresse = tomVegadresse().copy(adressenavn = "adresse"))
         assertThat(mapper.tilAdresse(adresseMedVegadresseMedAdressenavn).visningsadresse)
@@ -160,7 +162,7 @@ internal class AdresseMapperTest {
             mapper.tilAdresse(
                 kontaktadresse.copy(
                     utenlandskAdresseIFrittFormat =
-                    utenlandskAdresseFrittFormat(),
+                        utenlandskAdresseFrittFormat(),
                 ),
             ).visningsadresse,
         )
@@ -179,13 +181,15 @@ internal class AdresseMapperTest {
             .withFailMessage("Skal skrive ut co adressen")
             .isEqualTo("c/o co")
 
-        val adresseMedPostboksadresse = kontaktadresse.copy(
-            postboksadresse = Postboksadresse(
-                postboks = "postboks",
-                postbokseier = "eier",
-                postnummer = "0575",
-            ),
-        )
+        val adresseMedPostboksadresse =
+            kontaktadresse.copy(
+                postboksadresse =
+                    Postboksadresse(
+                        postboks = "postboks",
+                        postbokseier = "eier",
+                        postnummer = "0575",
+                    ),
+            )
         assertThat(mapper.tilAdresse(adresseMedPostboksadresse).visningsadresse)
             .withFailMessage("Skal skrive ut postboksadresse når vegadresse er null")
             .isEqualTo("eier, postboks, 0575 Oslo")

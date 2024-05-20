@@ -16,7 +16,10 @@ data class FagsakDto(
     val eksternId: Long,
 )
 
-fun Fagsak.tilDto(behandlinger: List<BehandlingDto>, erLøpende: Boolean): FagsakDto =
+fun Fagsak.tilDto(
+    behandlinger: List<BehandlingDto>,
+    erLøpende: Boolean,
+): FagsakDto =
     FagsakDto(
         id = this.id,
         fagsakPersonId = this.fagsakPersonId,

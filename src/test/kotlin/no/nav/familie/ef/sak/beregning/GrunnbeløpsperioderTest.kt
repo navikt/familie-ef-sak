@@ -5,7 +5,6 @@ import java.time.YearMonth
 import kotlin.test.assertTrue
 
 internal class GrunnbeløpsperioderTest {
-
     @Test
     fun nyesteGrunnbeløp() {
         assertTrue { Grunnbeløpsperioder.nyesteGrunnbeløp.periode.fom > YearMonth.of(2021, 5) }

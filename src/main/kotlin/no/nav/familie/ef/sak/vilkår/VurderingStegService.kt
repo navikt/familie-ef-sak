@@ -38,7 +38,6 @@ class VurderingStegService(
     private val behandlingshistorikkService: BehandlingshistorikkService,
     private val tilordnetRessursService: TilordnetRessursService,
 ) {
-
     @Transactional
     fun oppdaterVilkår(vilkårsvurderingDto: SvarPåVurderingerDto): VilkårsvurderingDto {
         val vilkårsvurdering = vilkårsvurderingRepository.findByIdOrThrow(vilkårsvurderingDto.id)
@@ -47,10 +46,11 @@ class VurderingStegService(
         validerLåstForVidereRedigering(behandlingId)
         validerBehandlingIdErLikIRequestOgIVilkåret(behandlingId, vilkårsvurderingDto.behandlingId)
 
-        val nyVilkårsvurdering = OppdaterVilkår.lagNyOppdatertVilkårsvurdering(
-            vilkårsvurdering,
-            vilkårsvurderingDto.delvilkårsvurderinger,
-        )
+        val nyVilkårsvurdering =
+            OppdaterVilkår.lagNyOppdatertVilkårsvurdering(
+                vilkårsvurdering,
+                vilkårsvurderingDto.delvilkårsvurderinger,
+            )
         blankettRepository.deleteById(behandlingId)
         val oppdatertVilkårsvurderingDto = vilkårsvurderingRepository.update(nyVilkårsvurdering).tilDto()
         oppdaterStegOgKategoriPåBehandling(vilkårsvurdering.behandlingId)
@@ -95,14 +95,18 @@ class VurderingStegService(
         oppdaterKategoriPåBehandling(saksbehandling, lagredeVilkårsvurderinger)
     }
 
-    private fun oppdaterStegPåBehandling(saksbehandling: Saksbehandling, vilkårsvurderinger: List<Vilkårsvurdering>) {
-        val vilkårsresultat = vilkårsvurderinger.groupBy { it.type }.map {
-            if (it.key.gjelderFlereBarn()) {
-                utledResultatForVilkårSomGjelderFlereBarn(it.value)
-            } else {
-                it.value.single().resultat
+    private fun oppdaterStegPåBehandling(
+        saksbehandling: Saksbehandling,
+        vilkårsvurderinger: List<Vilkårsvurdering>,
+    ) {
+        val vilkårsresultat =
+            vilkårsvurderinger.groupBy { it.type }.map {
+                if (it.key.gjelderFlereBarn()) {
+                    utledResultatForVilkårSomGjelderFlereBarn(it.value)
+                } else {
+                    it.value.single().resultat
+                }
             }
-        }
 
         if (saksbehandling.steg == StegType.VILKÅR && OppdaterVilkår.erAlleVilkårTattStillingTil(vilkårsresultat)) {
             stegService.håndterVilkår(saksbehandling).id
@@ -152,10 +156,11 @@ class VurderingStegService(
         vilkårsvurdering: Vilkårsvurdering,
     ): VilkårsvurderingDto {
         val metadata = hentHovedregelMetadata(behandlingId)
-        val nyeDelvilkår = hentVilkårsregel(vilkårsvurdering.type).initiereDelvilkårsvurdering(
-            metadata,
-            Vilkårsresultat.SKAL_IKKE_VURDERES,
-        )
+        val nyeDelvilkår =
+            hentVilkårsregel(vilkårsvurdering.type).initiereDelvilkårsvurdering(
+                metadata,
+                Vilkårsresultat.SKAL_IKKE_VURDERES,
+            )
         val delvilkårsvurdering = DelvilkårsvurderingWrapper(nyeDelvilkår)
         return vilkårsvurderingRepository.update(
             vilkårsvurdering.copy(
@@ -182,7 +187,10 @@ class VurderingStegService(
      * Tilgangskontroll sjekker att man har tilgang til behandlingId som blir sendt inn, men det er mulig å sende inn
      * en annen behandlingId enn den som er på vilkåret
      */
-    private fun validerBehandlingIdErLikIRequestOgIVilkåret(behandlingId: UUID, requestBehandlingId: UUID) {
+    private fun validerBehandlingIdErLikIRequestOgIVilkåret(
+        behandlingId: UUID,
+        requestBehandlingId: UUID,
+    ) {
         if (behandlingId != requestBehandlingId) {
             throw Feil(
                 "BehandlingId=$requestBehandlingId er ikke lik vilkårets sin behandlingId=$behandlingId",

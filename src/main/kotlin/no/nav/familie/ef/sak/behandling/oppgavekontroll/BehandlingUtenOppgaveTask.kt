@@ -5,7 +5,7 @@ import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
 import org.springframework.stereotype.Service
-import java.util.*
+import java.util.Properties
 
 @Service
 @TaskStepBeskrivelse(
@@ -15,14 +15,12 @@ import java.util.*
     beskrivelse = "Finn åpne behandlinger uten behandle sak oppgave",
 )
 class BehandlingUtenOppgaveTask(val behandlingsoppgaveService: BehandlingsoppgaveService) : AsyncTaskStep {
-
     override fun doTask(task: Task) {
         val antallÅpneBehandlingerUtenOppgave = behandlingsoppgaveService.antallÅpneBehandlingerUtenOppgave()
         feilHvis(antallÅpneBehandlingerUtenOppgave > 0) { "Åpne behandlinger uten behandleSak oppgave funnet på fagsak " }
     }
 
     companion object {
-
         const val TYPE = "finnBehandlingUtenOppgave"
 
         fun opprettTask(ukenummer: Int): Task {

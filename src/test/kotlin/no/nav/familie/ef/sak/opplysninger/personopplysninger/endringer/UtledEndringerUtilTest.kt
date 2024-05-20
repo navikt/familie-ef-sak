@@ -28,7 +28,6 @@ import java.time.LocalDate
 import kotlin.reflect.full.memberProperties
 
 internal class UtledEndringerUtilTest {
-
     val barnIdent = "ident"
     val forelderIdent = "forelderIdent"
 
@@ -43,38 +42,42 @@ internal class UtledEndringerUtilTest {
             BarnDto("barnFårEndretBorHosSøker", "2", null, emptyList(), true, emptyList(), false, null, null)
         val barnFårForelder = BarnDto("barnFårForelder", "2", null, emptyList(), true, emptyList(), false, null, null)
         val nyttBarn = BarnDto("nyttBarn", "2", null, emptyList(), true, emptyList(), false, null, null)
-        val tidligere = dto(
-            dødsdato = LocalDate.of(2021, 1, 1),
-            barn = listOf(barnBlirFjernet, barnsForelderBlirEndret, barnFårForelder, barnFårEndring),
-        )
-        val nye = dto(
-            status = Folkeregisterpersonstatus.UKJENT,
-            fødselsdato = LocalDate.of(2000, 12, 14),
-            dødsdato = LocalDate.of(2021, 1, 2),
-            statsborgerskap = listOf(StatsborgerskapDto("land 1", null, null)),
-            sivilstand = listOf(SivilstandDto(Sivilstandstype.GIFT, null, null, null, null, true)),
-            adresse = listOf(AdresseDto("2", AdresseType.BOSTEDADRESSE, null, null, null, true)),
-            fullmakt = listOf(FullmaktDto(LocalDate.now(), LocalDate.now(), "1", null, emptyList())),
-            barn = listOf(
-                barnsForelderBlirEndret.copy(
-                    annenForelder = annenForelder.copy(
-                        dødsdato = LocalDate.of(2022, 1, 1),
-                        bostedsadresse = "Annen adresse",
+        val tidligere =
+            dto(
+                dødsdato = LocalDate.of(2021, 1, 1),
+                barn = listOf(barnBlirFjernet, barnsForelderBlirEndret, barnFårForelder, barnFårEndring),
+            )
+        val nye =
+            dto(
+                status = Folkeregisterpersonstatus.UKJENT,
+                fødselsdato = LocalDate.of(2000, 12, 14),
+                dødsdato = LocalDate.of(2021, 1, 2),
+                statsborgerskap = listOf(StatsborgerskapDto("land 1", null, null)),
+                sivilstand = listOf(SivilstandDto(Sivilstandstype.GIFT, null, null, null, null, true)),
+                adresse = listOf(AdresseDto("2", AdresseType.BOSTEDADRESSE, null, null, null, true)),
+                fullmakt = listOf(FullmaktDto(LocalDate.now(), LocalDate.now(), "1", null, emptyList())),
+                barn =
+                    listOf(
+                        barnsForelderBlirEndret.copy(
+                            annenForelder =
+                                annenForelder.copy(
+                                    dødsdato = LocalDate.of(2022, 1, 1),
+                                    bostedsadresse = "Annen adresse",
+                                ),
+                        ),
+                        barnFårForelder.copy(annenForelder = annenForelder2),
+                        barnFårEndring.copy(
+                            borHosSøker = false,
+                            fødselsdato = LocalDate.of(2020, 1, 1),
+                            dødsdato = LocalDate.of(2021, 1, 1),
+                        ),
+                        nyttBarn,
                     ),
-                ),
-                barnFårForelder.copy(annenForelder = annenForelder2),
-                barnFårEndring.copy(
-                    borHosSøker = false,
-                    fødselsdato = LocalDate.of(2020, 1, 1),
-                    dødsdato = LocalDate.of(2021, 1, 1),
-                ),
-                nyttBarn,
-            ),
-            innflyttingTilNorge = listOf(InnflyttingDto("", null, null)),
-            utflyttingFraNorge = listOf(UtflyttingDto(null, null, null)),
-            oppholdstillatelse = listOf(OppholdstillatelseDto(OppholdType.UKJENT, null, null)),
-            vergemål = listOf(VergemålDto(null, null, null, null, null)),
-        )
+                innflyttingTilNorge = listOf(InnflyttingDto("", null, null)),
+                utflyttingFraNorge = listOf(UtflyttingDto(null, null, null)),
+                oppholdstillatelse = listOf(OppholdstillatelseDto(OppholdType.UKJENT, null, null)),
+                vergemål = listOf(VergemålDto(null, null, null, null, null)),
+            )
         val endringer = finnEndringer(tidligere, nye)
         val expected =
             this::class.java.classLoader.getResource("json/endringer-personopplysninger/endringer.json")!!.readText()
@@ -83,7 +86,6 @@ internal class UtledEndringerUtilTest {
 
     @Nested
     inner class UlikeTyperAsserts {
-
         @Test
         internal fun `har ingen endringer`() {
             val endringer = finnEndringer(dto(), dto())
@@ -105,10 +107,11 @@ internal class UtledEndringerUtilTest {
 
         @Test
         internal fun `folkeregisterpersonstatus endret fra et verdi til annet verdi`() {
-            val endringer = finnEndringer(
-                dto(status = Folkeregisterpersonstatus.DØD),
-                dto(status = Folkeregisterpersonstatus.BOSATT),
-            )
+            val endringer =
+                finnEndringer(
+                    dto(status = Folkeregisterpersonstatus.DØD),
+                    dto(status = Folkeregisterpersonstatus.BOSATT),
+                )
             assertThat(endringer.harEndringer).isTrue
             assertThat(endringer.folkeregisterpersonstatus.harEndringer).isTrue
             assertThat(endringer.folkeregisterpersonstatus.detaljer!!.tidligere).isEqualTo("Død")
@@ -125,10 +128,11 @@ internal class UtledEndringerUtilTest {
 
         @Test
         internal fun `2 lister med de liknende data`() {
-            val endringer = finnEndringer(
-                dto(statsborgerskap = listOf(StatsborgerskapDto("land 1", null, null))),
-                dto(statsborgerskap = listOf(StatsborgerskapDto("land 1", null, null))),
-            )
+            val endringer =
+                finnEndringer(
+                    dto(statsborgerskap = listOf(StatsborgerskapDto("land 1", null, null))),
+                    dto(statsborgerskap = listOf(StatsborgerskapDto("land 1", null, null))),
+                )
             assertThat(endringer.harEndringer).isFalse
             assertThat(endringer.statsborgerskap.harEndringer).isFalse
             assertIngenAndreEndringer(endringer)
@@ -137,7 +141,6 @@ internal class UtledEndringerUtilTest {
 
     @Nested
     inner class FeltNivå {
-
         @Test
         internal fun fødselsdato() {
             val tidligere = LocalDate.now()
@@ -164,10 +167,11 @@ internal class UtledEndringerUtilTest {
 
         @Test
         internal fun statsborgerskap() {
-            val endringer = finnEndringer(
-                dto(statsborgerskap = listOf(StatsborgerskapDto("land 1", null, null))),
-                dto(statsborgerskap = listOf(StatsborgerskapDto("land 2", null, null))),
-            )
+            val endringer =
+                finnEndringer(
+                    dto(statsborgerskap = listOf(StatsborgerskapDto("land 1", null, null))),
+                    dto(statsborgerskap = listOf(StatsborgerskapDto("land 2", null, null))),
+                )
             assertThat(endringer.harEndringer).isTrue
             assertThat(endringer.statsborgerskap.harEndringer).isTrue
             assertIngenAndreEndringer(endringer, "statsborgerskap")
@@ -175,10 +179,11 @@ internal class UtledEndringerUtilTest {
 
         @Test
         internal fun sivilstand() {
-            val endringer = finnEndringer(
-                dto(sivilstand = listOf(SivilstandDto(Sivilstandstype.UGIFT, null, null, null, null, true))),
-                dto(sivilstand = listOf(SivilstandDto(Sivilstandstype.GIFT, null, null, null, null, true))),
-            )
+            val endringer =
+                finnEndringer(
+                    dto(sivilstand = listOf(SivilstandDto(Sivilstandstype.UGIFT, null, null, null, null, true))),
+                    dto(sivilstand = listOf(SivilstandDto(Sivilstandstype.GIFT, null, null, null, null, true))),
+                )
             assertThat(endringer.harEndringer).isTrue
             assertThat(endringer.sivilstand.harEndringer).isTrue
             assertIngenAndreEndringer(endringer, "sivilstand")
@@ -186,10 +191,11 @@ internal class UtledEndringerUtilTest {
 
         @Test
         internal fun adresse() {
-            val endringer = finnEndringer(
-                dto(adresse = listOf(AdresseDto("1", AdresseType.BOSTEDADRESSE, null, null, null, true))),
-                dto(adresse = listOf(AdresseDto("2", AdresseType.BOSTEDADRESSE, null, null, null, true))),
-            )
+            val endringer =
+                finnEndringer(
+                    dto(adresse = listOf(AdresseDto("1", AdresseType.BOSTEDADRESSE, null, null, null, true))),
+                    dto(adresse = listOf(AdresseDto("2", AdresseType.BOSTEDADRESSE, null, null, null, true))),
+                )
             assertThat(endringer.harEndringer).isTrue
             assertThat(endringer.adresse.harEndringer).isTrue
             assertIngenAndreEndringer(endringer, "adresse")
@@ -198,10 +204,11 @@ internal class UtledEndringerUtilTest {
         @Test
         internal fun fullmakt() {
             val fullmaktDto = FullmaktDto(LocalDate.now(), LocalDate.now(), "1", null, emptyList())
-            val endringer = finnEndringer(
-                dto(fullmakt = listOf(fullmaktDto)),
-                dto(fullmakt = listOf(fullmaktDto.copy(motpartsPersonident = "2"))),
-            )
+            val endringer =
+                finnEndringer(
+                    dto(fullmakt = listOf(fullmaktDto)),
+                    dto(fullmakt = listOf(fullmaktDto.copy(motpartsPersonident = "2"))),
+                )
             assertThat(endringer.harEndringer).isTrue
             assertThat(endringer.fullmakt.harEndringer).isTrue
             assertIngenAndreEndringer(endringer, "fullmakt")
@@ -209,10 +216,11 @@ internal class UtledEndringerUtilTest {
 
         @Test
         internal fun innflyttingTilNorge() {
-            val endringer = finnEndringer(
-                dto(innflyttingTilNorge = listOf(InnflyttingDto(null, null, null))),
-                dto(innflyttingTilNorge = listOf(InnflyttingDto("", null, null))),
-            )
+            val endringer =
+                finnEndringer(
+                    dto(innflyttingTilNorge = listOf(InnflyttingDto(null, null, null))),
+                    dto(innflyttingTilNorge = listOf(InnflyttingDto("", null, null))),
+                )
             assertThat(endringer.harEndringer).isTrue
             assertThat(endringer.innflyttingTilNorge.harEndringer).isTrue
             assertIngenAndreEndringer(endringer, "innflyttingTilNorge")
@@ -220,10 +228,11 @@ internal class UtledEndringerUtilTest {
 
         @Test
         internal fun utflyttingFraNorge() {
-            val endringer = finnEndringer(
-                dto(utflyttingFraNorge = listOf(UtflyttingDto(null, null, null))),
-                dto(utflyttingFraNorge = listOf(UtflyttingDto("", null, null))),
-            )
+            val endringer =
+                finnEndringer(
+                    dto(utflyttingFraNorge = listOf(UtflyttingDto(null, null, null))),
+                    dto(utflyttingFraNorge = listOf(UtflyttingDto("", null, null))),
+                )
             assertThat(endringer.harEndringer).isTrue
             assertThat(endringer.utflyttingFraNorge.harEndringer).isTrue
             assertIngenAndreEndringer(endringer, "utflyttingFraNorge")
@@ -231,10 +240,11 @@ internal class UtledEndringerUtilTest {
 
         @Test
         internal fun oppholdstillatelse() {
-            val endringer = finnEndringer(
-                dto(oppholdstillatelse = listOf()),
-                dto(oppholdstillatelse = listOf(OppholdstillatelseDto(OppholdType.UKJENT, null, null))),
-            )
+            val endringer =
+                finnEndringer(
+                    dto(oppholdstillatelse = listOf()),
+                    dto(oppholdstillatelse = listOf(OppholdstillatelseDto(OppholdType.UKJENT, null, null))),
+                )
             assertThat(endringer.harEndringer).isTrue
             assertThat(endringer.oppholdstillatelse.harEndringer).isTrue
             assertIngenAndreEndringer(endringer, "oppholdstillatelse")
@@ -242,10 +252,11 @@ internal class UtledEndringerUtilTest {
 
         @Test
         internal fun vergemål() {
-            val endringer = finnEndringer(
-                dto(vergemål = listOf()),
-                dto(vergemål = listOf(VergemålDto(null, null, null, null, null))),
-            )
+            val endringer =
+                finnEndringer(
+                    dto(vergemål = listOf()),
+                    dto(vergemål = listOf(VergemålDto(null, null, null, null, null))),
+                )
             assertThat(endringer.harEndringer).isTrue
             assertThat(endringer.vergemål.harEndringer).isTrue
             assertIngenAndreEndringer(endringer, "vergemål")
@@ -257,10 +268,11 @@ internal class UtledEndringerUtilTest {
         @Test
         internal fun `nytt barn`() {
             val barn = BarnDto(barnIdent, "", null, emptyList(), true, emptyList(), false, null, null)
-            val endringer = finnEndringer(
-                dto(barn = listOf()),
-                dto(barn = listOf(barn)),
-            )
+            val endringer =
+                finnEndringer(
+                    dto(barn = listOf()),
+                    dto(barn = listOf(barn)),
+                )
             assertThat(endringer.harEndringer).isTrue
             assertNyPerson(endringer.barn, barnIdent)
 
@@ -270,10 +282,11 @@ internal class UtledEndringerUtilTest {
         @Test
         internal fun `fjernet barn`() {
             val barn = BarnDto("ident", "", null, emptyList(), true, emptyList(), false, null, null)
-            val endringer = finnEndringer(
-                dto(barn = listOf(barn)),
-                dto(barn = listOf()),
-            )
+            val endringer =
+                finnEndringer(
+                    dto(barn = listOf(barn)),
+                    dto(barn = listOf()),
+                )
             assertThat(endringer.harEndringer).isTrue
             assertThat(endringer.barn.harEndringer).isTrue
             val detaljer = endringer.barn.detaljer!!
@@ -290,10 +303,11 @@ internal class UtledEndringerUtilTest {
         internal fun `endring på navn trigger ikke endring`() {
             val barn = BarnDto(barnIdent, "", null, emptyList(), true, emptyList(), false, null, null)
             val barn2 = BarnDto(barnIdent, "2", null, emptyList(), true, emptyList(), false, null, null)
-            val endringer = finnEndringer(
-                dto(barn = listOf(barn)),
-                dto(barn = listOf(barn2)),
-            )
+            val endringer =
+                finnEndringer(
+                    dto(barn = listOf(barn)),
+                    dto(barn = listOf(barn2)),
+                )
             assertThat(endringer.harEndringer).isFalse
             assertThat(endringer.barn.harEndringer).isFalse
             val detaljer = endringer.barn.detaljer!!
@@ -306,10 +320,11 @@ internal class UtledEndringerUtilTest {
         internal fun `endring bor hos søker trigger endring`() {
             val barn = BarnDto(barnIdent, "", null, emptyList(), true, emptyList(), false, null, null)
             val barn2 = barn.copy(borHosSøker = false)
-            val endringer = finnEndringer(
-                dto(barn = listOf(barn)),
-                dto(barn = listOf(barn2)),
-            )
+            val endringer =
+                finnEndringer(
+                    dto(barn = listOf(barn)),
+                    dto(barn = listOf(barn2)),
+                )
             val detaljer = endringer.barn.detaljer!!
             assertBarnHarEndringerMedDetaljer(endringer)
 
@@ -328,10 +343,11 @@ internal class UtledEndringerUtilTest {
             val annenForelder = AnnenForelderMinimumDto(forelderIdent, "Navn", null, null)
             val barn = BarnDto(barnIdent, "", annenForelder, emptyList(), true, emptyList(), false, null, null)
             val barn2 = barn.copy(dødsdato = dødsdato)
-            val endringer = finnEndringer(
-                dto(barn = listOf(barn)),
-                dto(barn = listOf(barn2)),
-            )
+            val endringer =
+                finnEndringer(
+                    dto(barn = listOf(barn)),
+                    dto(barn = listOf(barn2)),
+                )
             val detaljer = endringer.barn.detaljer!!
             assertBarnHarEndringerMedDetaljer(endringer)
 
@@ -347,21 +363,23 @@ internal class UtledEndringerUtilTest {
         @Test
         internal fun `endring av personident på annen forelder trigger endring både på barn og annen forelder`() {
             val barn = BarnDto(barnIdent, "", null, emptyList(), true, emptyList(), false, null, null)
-            val barn2 = BarnDto(
-                barnIdent,
-                "2",
-                AnnenForelderMinimumDto("1", "", null, null),
-                emptyList(),
-                true,
-                emptyList(),
-                false,
-                null,
-                null,
-            )
-            val endringer = finnEndringer(
-                dto(barn = listOf(barn)),
-                dto(barn = listOf(barn2)),
-            )
+            val barn2 =
+                BarnDto(
+                    barnIdent,
+                    "2",
+                    AnnenForelderMinimumDto("1", "", null, null),
+                    emptyList(),
+                    true,
+                    emptyList(),
+                    false,
+                    null,
+                    null,
+                )
+            val endringer =
+                finnEndringer(
+                    dto(barn = listOf(barn)),
+                    dto(barn = listOf(barn2)),
+                )
             assertBarnHarEndringerMedDetaljer(endringer)
 
             val detaljer = endringer.barn.detaljer!!
@@ -382,10 +400,11 @@ internal class UtledEndringerUtilTest {
             val dødsdato = LocalDate.now()
             val barn = BarnDto("ident", "", annenForelder, emptyList(), true, emptyList(), false, null, null)
             val barn2 = barn.copy(annenForelder = annenForelder.copy(dødsdato = dødsdato))
-            val endringer = finnEndringer(
-                dto(barn = listOf(barn)),
-                dto(barn = listOf(barn2)),
-            )
+            val endringer =
+                finnEndringer(
+                    dto(barn = listOf(barn)),
+                    dto(barn = listOf(barn2)),
+                )
             assertForelderHarEndringerMedDetaljer(endringer)
 
             val detaljer = endringer.annenForelder.detaljer!!
@@ -403,10 +422,11 @@ internal class UtledEndringerUtilTest {
             val annenForelder = AnnenForelderMinimumDto(forelderIdent, "Navn", null, "Adresse 1")
             val barn = BarnDto(barnIdent, "", annenForelder, emptyList(), true, emptyList(), false, null, null)
             val barn2 = barn.copy(annenForelder = annenForelder.copy(bostedsadresse = "Adresse 2"))
-            val endringer = finnEndringer(
-                dto(barn = listOf(barn)),
-                dto(barn = listOf(barn2)),
-            )
+            val endringer =
+                finnEndringer(
+                    dto(barn = listOf(barn)),
+                    dto(barn = listOf(barn2)),
+                )
             assertThat(endringer.barn.harEndringer).isFalse
             val detaljer = endringer.annenForelder.detaljer!!
             assertForelderHarEndringerMedDetaljer(endringer)
@@ -424,10 +444,11 @@ internal class UtledEndringerUtilTest {
         internal fun `søkers barn får delt bosted trigger endring`() {
             val barn = BarnDto(barnIdent, "", null, emptyList(), true, emptyList(), false, null, null)
             val barn2 = barn.copy(harDeltBostedNå = true)
-            val endringer = finnEndringer(
-                dto(barn = listOf(barn)),
-                dto(barn = listOf(barn2)),
-            )
+            val endringer =
+                finnEndringer(
+                    dto(barn = listOf(barn)),
+                    dto(barn = listOf(barn2)),
+                )
             val detaljer = endringer.barn.detaljer!!
             assertBarnHarEndringerMedDetaljer(endringer)
             val endringsdetaljer = detaljer[0].endringer
@@ -442,24 +463,36 @@ internal class UtledEndringerUtilTest {
         internal fun `søkers barn får ny, utvidet, periode i delt bosted - trigger endring`() {
             val startdatoForOpprinneligKontrakt = LocalDate.now().minusYears(1)
             val sluttdatoForOpprinneligKontrakt = LocalDate.now().plusYears(1)
-            val deltBostedGammel = DeltBostedDto(
-                startdatoForKontrakt = startdatoForOpprinneligKontrakt,
-                sluttdatoForKontrakt = sluttdatoForOpprinneligKontrakt,
-                historisk = true,
-            )
-            val deltBostedNy = DeltBostedDto(
-                startdatoForKontrakt = sluttdatoForOpprinneligKontrakt,
-                sluttdatoForKontrakt = sluttdatoForOpprinneligKontrakt.plusYears(5),
-                historisk = false,
-            )
-            val barn = BarnDto(
-                barnIdent, "", null, emptyList(), true, listOf(deltBostedGammel), true, null, null,
-            )
+            val deltBostedGammel =
+                DeltBostedDto(
+                    startdatoForKontrakt = startdatoForOpprinneligKontrakt,
+                    sluttdatoForKontrakt = sluttdatoForOpprinneligKontrakt,
+                    historisk = true,
+                )
+            val deltBostedNy =
+                DeltBostedDto(
+                    startdatoForKontrakt = sluttdatoForOpprinneligKontrakt,
+                    sluttdatoForKontrakt = sluttdatoForOpprinneligKontrakt.plusYears(5),
+                    historisk = false,
+                )
+            val barn =
+                BarnDto(
+                    barnIdent,
+                    "",
+                    null,
+                    emptyList(),
+                    true,
+                    listOf(deltBostedGammel),
+                    true,
+                    null,
+                    null,
+                )
             val barn2 = barn.copy(deltBosted = listOf(deltBostedGammel, deltBostedNy))
-            val endringer = finnEndringer(
-                dto(barn = listOf(barn)),
-                dto(barn = listOf(barn2)),
-            )
+            val endringer =
+                finnEndringer(
+                    dto(barn = listOf(barn)),
+                    dto(barn = listOf(barn2)),
+                )
             val detaljer = endringer.barn.detaljer!!
             assertBarnHarEndringerMedDetaljer(endringer)
             val endringsdetaljer = detaljer[0].endringer
@@ -471,7 +504,10 @@ internal class UtledEndringerUtilTest {
         }
     }
 
-    private fun assertNyPerson(personendring: Endring<List<Personendring>>, ident: String) {
+    private fun assertNyPerson(
+        personendring: Endring<List<Personendring>>,
+        ident: String,
+    ) {
         assertThat(personendring.harEndringer).isTrue
         val detaljer = personendring.detaljer!!
         assertThat(detaljer).hasSize(1)
@@ -481,11 +517,17 @@ internal class UtledEndringerUtilTest {
         assertThat(detaljer[0].endringer).isEmpty()
     }
 
-    private fun assertBarnHarEndringerMedDetaljer(endringer: Endringer, ident: String = barnIdent) {
+    private fun assertBarnHarEndringerMedDetaljer(
+        endringer: Endringer,
+        ident: String = barnIdent,
+    ) {
         assertPersonHarEndringerMedDetaljer(endringer, ident) { it.barn }
     }
 
-    private fun assertForelderHarEndringerMedDetaljer(endringer: Endringer, ident: String = forelderIdent) {
+    private fun assertForelderHarEndringerMedDetaljer(
+        endringer: Endringer,
+        ident: String = forelderIdent,
+    ) {
         assertPersonHarEndringerMedDetaljer(endringer, ident) { it.annenForelder }
     }
 
@@ -505,7 +547,10 @@ internal class UtledEndringerUtilTest {
         assertThat(detaljer[0].fjernet).isFalse
     }
 
-    private fun assertIngenAndreEndringer(endringer: Endringer, vararg ignorerFelt: String) {
+    private fun assertIngenAndreEndringer(
+        endringer: Endringer,
+        vararg ignorerFelt: String,
+    ) {
         Endringer::class.memberProperties
             .filter { it.name != "harEndringer" && !ignorerFelt.toSet().contains(it.name) }
             .forEach {

@@ -30,28 +30,35 @@ class PersonopplysningerController(
     private val tilgangService: TilgangService,
     private val fagsakPersonService: FagsakPersonService,
 ) {
-
     @GetMapping("/behandling/{behandlingId}")
-    fun personopplysninger(@PathVariable behandlingId: UUID): Ressurs<PersonopplysningerDto> {
+    fun personopplysninger(
+        @PathVariable behandlingId: UUID,
+    ): Ressurs<PersonopplysningerDto> {
         tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.ACCESS)
         return Ressurs.success(personopplysningerService.hentPersonopplysningerForBehandling(behandlingId))
     }
 
     @GetMapping("/behandling/{behandlingId}/endringer")
-    fun hentEndringerPersonopplysninger(@PathVariable behandlingId: UUID): Ressurs<EndringerIPersonopplysningerDto> {
+    fun hentEndringerPersonopplysninger(
+        @PathVariable behandlingId: UUID,
+    ): Ressurs<EndringerIPersonopplysningerDto> {
         tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.ACCESS)
         return Ressurs.success(endringerIPersonOpplysningerService.hentEndringerPersonopplysninger(behandlingId))
     }
 
     @GetMapping("/fagsak-person/{fagsakPersonId}")
-    fun personopplysningerFraFagsakPersonId(@PathVariable fagsakPersonId: UUID): Ressurs<PersonopplysningerDto> {
+    fun personopplysningerFraFagsakPersonId(
+        @PathVariable fagsakPersonId: UUID,
+    ): Ressurs<PersonopplysningerDto> {
         tilgangService.validerTilgangTilFagsakPerson(fagsakPersonId, AuditLoggerEvent.ACCESS)
         val aktivIdent = fagsakPersonService.hentAktivIdent(fagsakPersonId)
         return Ressurs.success(personopplysningerService.hentPersonopplysningerFraRegister(aktivIdent))
     }
 
     @PostMapping("/nav-kontor")
-    fun hentNavKontorTilFagsak(@RequestBody personIdent: PersonIdentDto): Ressurs<NavKontorEnhet?> {
+    fun hentNavKontorTilFagsak(
+        @RequestBody personIdent: PersonIdentDto,
+    ): Ressurs<NavKontorEnhet?> {
         tilgangService.validerTilgangTilPersonMedBarn(personIdent.personIdent, AuditLoggerEvent.ACCESS)
         return Ressurs.success(personopplysningerService.hentNavKontor(personIdent.personIdent))
     }

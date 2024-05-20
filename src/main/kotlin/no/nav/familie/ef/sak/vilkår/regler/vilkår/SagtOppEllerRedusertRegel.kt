@@ -14,9 +14,7 @@ class SagtOppEllerRedusertRegel : Vilkårsregel(
     regler = setOf(SAGT_OPP_ELLER_REDUSERT, RIMELIG_GRUNN_SAGT_OPP),
     hovedregler = regelIder(SAGT_OPP_ELLER_REDUSERT),
 ) {
-
     companion object {
-
         private val RIMELIG_GRUNN_SAGT_OPP =
             RegelSteg(
                 regelId = RegelId.RIMELIG_GRUNN_SAGT_OPP,

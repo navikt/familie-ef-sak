@@ -20,22 +20,23 @@ class ForberedOppgaverTerminbarnService(
     private val terminbarnRepository: TerminbarnRepository,
     private val taskService: TaskService,
 ) {
-
     private val logger = LoggerFactory.getLogger(javaClass)
 
     @Transactional
     fun forberedOppgaverForUfødteTerminbarn() {
-        val gjeldendeBarn: Map<UUID, List<TerminbarnTilUtplukkForOppgave>> = terminbarnRepository
-            .finnBarnAvGjeldendeIverksatteBehandlingerUtgåtteTerminbarn(StønadType.OVERGANGSSTØNAD)
-            .groupBy { it.behandlingId }
+        val gjeldendeBarn: Map<UUID, List<TerminbarnTilUtplukkForOppgave>> =
+            terminbarnRepository
+                .finnBarnAvGjeldendeIverksatteBehandlingerUtgåtteTerminbarn(StønadType.OVERGANGSSTØNAD)
+                .groupBy { it.behandlingId }
 
         logger.info("Fant totalt ${gjeldendeBarn.size} terminbarn")
-        val oppgaver = gjeldendeBarn.values.map { terminbarnPåSøknad ->
-            val fødselsnummerSøker = fagsakService.hentAktivIdent(terminbarnPåSøknad.first().fagsakId)
-            val pdlBarn = pdlBarn(fødselsnummerSøker)
-            val ugyldigeTerminbarn = terminbarnPåSøknad.filterNot { it.match(pdlBarn) }
-            lagreOgMapTilOppgaverForUgyldigeTerminbarn(ugyldigeTerminbarn, fødselsnummerSøker)
-        }.flatten().toSet()
+        val oppgaver =
+            gjeldendeBarn.values.map { terminbarnPåSøknad ->
+                val fødselsnummerSøker = fagsakService.hentAktivIdent(terminbarnPåSøknad.first().fagsakId)
+                val pdlBarn = pdlBarn(fødselsnummerSøker)
+                val ugyldigeTerminbarn = terminbarnPåSøknad.filterNot { it.match(pdlBarn) }
+                lagreOgMapTilOppgaverForUgyldigeTerminbarn(ugyldigeTerminbarn, fødselsnummerSøker)
+            }.flatten().toSet()
         logger.info("Fant ${oppgaver.size} oppgaver for ugyldige terminbarn.")
         oppgaver.forEach { oppgave ->
             logger.info("Laget oppgave for behandlingID=${oppgave.behandlingId} for ugyldige terminbarn")
@@ -68,7 +69,10 @@ class ForberedOppgaverTerminbarnService(
     }
 }
 
-private fun matchBarn(søknadBarnTermindato: LocalDate, pdlBarnFødselsdato: LocalDate): Boolean {
+private fun matchBarn(
+    søknadBarnTermindato: LocalDate,
+    pdlBarnFødselsdato: LocalDate,
+): Boolean {
     return søknadBarnTermindato.minusMonths(3).isBefore(pdlBarnFødselsdato) &&
         søknadBarnTermindato.plusWeeks(4).isAfter(pdlBarnFødselsdato)
 }

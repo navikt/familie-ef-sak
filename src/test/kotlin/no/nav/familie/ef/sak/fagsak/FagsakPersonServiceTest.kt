@@ -80,10 +80,10 @@ internal class FagsakPersonServiceTest : OppslagSpringRunnerTest() {
             fagsakPersonRepository.insert(
                 FagsakPerson(
                     identer =
-                    setOf(
-                        PersonIdent(aktivIdent),
-                        PersonIdent(annenIdent),
-                    ),
+                        setOf(
+                            PersonIdent(aktivIdent),
+                            PersonIdent(annenIdent),
+                        ),
                 ),
             ).id
         jdbcTemplate.update("UPDATE person_ident SET endret_tid=(endret_tid - INTERVAL '1 DAY') WHERE ident = '2'")
@@ -225,7 +225,10 @@ internal class FagsakPersonServiceTest : OppslagSpringRunnerTest() {
             assertThat(personIderForDeaktivering).containsOnly(fagsakPersonForDeaktivering.id)
         }
 
-        private fun opprettTilkjentYtelse(behandling: Behandling, stønadsår: Int) {
+        private fun opprettTilkjentYtelse(
+            behandling: Behandling,
+            stønadsår: Int,
+        ) {
             tilkjentYtelseRepository.insert(tilkjentYtelse(behandling.id, "2222", stønadsår = stønadsår))
         }
 

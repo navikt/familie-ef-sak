@@ -21,7 +21,6 @@ import kotlin.random.Random
 @Profile("!integrasjonstest")
 @Service
 class KonsistensavstemmingScheduler(private val konsistensavstemmingService: KonsistensavstemmingService) {
-
     private val logger = LoggerFactory.getLogger(javaClass)
 
     @Scheduled(cron = "0 0 0/12 * * *")
@@ -44,7 +43,6 @@ class KonsistensavstemmingService(
     private val repository: KonsistensavstemmingJobbRepository,
     private val taskService: TaskService,
 ) {
-
     private val logger = LoggerFactory.getLogger(javaClass)
 
     @Transactional
@@ -75,7 +73,6 @@ class KonsistensavstemmingService(
 interface KonsistensavstemmingJobbRepository :
     RepositoryInterface<KonsistensavstemmingJobb, Int>,
     InsertUpdateRepository<KonsistensavstemmingJobb> {
-
     fun findAllByOpprettetIsFalseAndTriggerdatoIsBefore(tidspunkt: LocalDate): List<KonsistensavstemmingJobb>
 }
 

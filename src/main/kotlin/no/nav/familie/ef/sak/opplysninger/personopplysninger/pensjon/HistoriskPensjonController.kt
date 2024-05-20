@@ -16,14 +16,17 @@ class HistoriskPensjonController(
     val historiskPensjonService: HistoriskPensjonService,
     val featureToggleService: FeatureToggleService,
 ) {
-
     @GetMapping("{fagsakPersonId}")
-    fun hentHistoriskPensjon(@PathVariable fagsakPersonId: UUID): Ressurs<HistoriskPensjonResponse> {
+    fun hentHistoriskPensjon(
+        @PathVariable fagsakPersonId: UUID,
+    ): Ressurs<HistoriskPensjonResponse> {
         return Ressurs.success(historiskPensjonService.hentHistoriskPensjon(fagsakPersonId))
     }
 
     @GetMapping("fagsak/{fagsakId}")
-    fun hentHistoriskPensjonForFagsak(@PathVariable fagsakId: UUID): Ressurs<HistoriskPensjonResponse> {
+    fun hentHistoriskPensjonForFagsak(
+        @PathVariable fagsakId: UUID,
+    ): Ressurs<HistoriskPensjonResponse> {
         return Ressurs.success(historiskPensjonService.hentHistoriskPensjonForFagsak(fagsakId))
     }
 }

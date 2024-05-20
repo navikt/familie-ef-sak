@@ -21,9 +21,10 @@ class AutomatiskBrevInnhentingKarakterutskriftController(
     private val featureToggleService: FeatureToggleService,
     private val tilgangService: TilgangService,
 ) {
-
     @PostMapping("/opprett-tasks")
-    fun opprettTasks(@RequestBody karakterUtskriftRequest: KarakterutskriftRequest) {
+    fun opprettTasks(
+        @RequestBody karakterUtskriftRequest: KarakterutskriftRequest,
+    ) {
         tilgangService.validerHarForvalterrolle()
         feilHvis(!featureToggleService.isEnabled(Toggle.AUTOMATISKE_BREV_INNHENTING_KARAKTERUTSKRIFT) && karakterUtskriftRequest.liveRun) {
             "Toggle for automatiske brev for innhenting av karakterutskrift er ikke påskrudd"

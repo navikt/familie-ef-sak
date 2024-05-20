@@ -4,7 +4,6 @@ import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
 
 internal class FnrUtilTest {
-
     @Test
     internal fun `skal feile hvis fnr ikke inneholder 11 tegn`() {
         listOf("1", "1234567890", "123456789012").forEach {

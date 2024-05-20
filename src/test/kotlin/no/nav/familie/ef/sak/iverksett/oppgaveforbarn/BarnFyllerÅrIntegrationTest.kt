@@ -30,7 +30,6 @@ import org.springframework.transaction.UnexpectedRollbackException
 import java.time.LocalDate
 
 class BarnFyllerÅrIntegrationTest : OppslagSpringRunnerTest() {
-
     @Autowired private lateinit var barnFyllerÅrOppfølgingsoppgaveService: BarnFyllerÅrOppfølgingsoppgaveService
 
     @Autowired private lateinit var behandlingRepository: BehandlingRepository
@@ -89,13 +88,17 @@ class BarnFyllerÅrIntegrationTest : OppslagSpringRunnerTest() {
         assertThat(taskService.findAll().toList().isEmpty()).isTrue
     }
 
-    private fun lagreFremtidligAndel(behandling: Behandling, beløp: Int): TilkjentYtelse {
-        val andel = lagAndelTilkjentYtelse(
-            beløp = beløp,
-            kildeBehandlingId = behandling.id,
-            fraOgMed = LocalDate.now().minusMonths(1),
-            tilOgMed = LocalDate.now().plusMonths(1),
-        )
+    private fun lagreFremtidligAndel(
+        behandling: Behandling,
+        beløp: Int,
+    ): TilkjentYtelse {
+        val andel =
+            lagAndelTilkjentYtelse(
+                beløp = beløp,
+                kildeBehandlingId = behandling.id,
+                fraOgMed = LocalDate.now().minusMonths(1),
+                tilOgMed = LocalDate.now().plusMonths(1),
+            )
         return tilkjentYtelseRepository.insert(
             lagTilkjentYtelse(
                 behandlingId = behandling.id,

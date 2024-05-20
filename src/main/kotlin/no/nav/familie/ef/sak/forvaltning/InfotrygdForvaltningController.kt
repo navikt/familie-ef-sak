@@ -18,7 +18,6 @@ class InfotrygdForvaltningController(
     private val infotrygdService: InfotrygdService,
     private val tilgangService: TilgangService,
 ) {
-
     val logger: Logger = LoggerFactory.getLogger(javaClass)
 
     @GetMapping("rapport")

@@ -26,9 +26,11 @@ class TilbakekrevingController(
     private val behandlingService: BehandlingService,
     private val tilbakekrevingService: TilbakekrevingService,
 ) {
-
     @PostMapping("/{behandlingId}")
-    fun lagreTilbakekreving(@PathVariable behandlingId: UUID, @RequestBody tilbakekrevingDto: TilbakekrevingDto): Ressurs<UUID> {
+    fun lagreTilbakekreving(
+        @PathVariable behandlingId: UUID,
+        @RequestBody tilbakekrevingDto: TilbakekrevingDto,
+    ): Ressurs<UUID> {
         tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.UPDATE)
         tilgangService.validerHarSaksbehandlerrolle()
         tilbakekrevingService.lagreTilbakekreving(tilbakekrevingDto, behandlingId)
@@ -36,7 +38,9 @@ class TilbakekrevingController(
     }
 
     @PostMapping("/fagsak/{fagsakId}/opprett-tilbakekreving")
-    fun opprettManuellTilbakekreving(@PathVariable fagsakId: UUID): Ressurs<String> {
+    fun opprettManuellTilbakekreving(
+        @PathVariable fagsakId: UUID,
+    ): Ressurs<String> {
         tilgangService.validerTilgangTilFagsak(fagsakId = fagsakId, AuditLoggerEvent.CREATE)
         tilgangService.validerHarSaksbehandlerrolle()
         tilbakekrevingService.opprettManuellTilbakekreving(fagsakId)
@@ -44,24 +48,32 @@ class TilbakekrevingController(
     }
 
     @GetMapping("/{behandlingId}/er-allerede-opprettet")
-    fun finnesTilbakekreving(@PathVariable behandlingId: UUID): Ressurs<Boolean> {
+    fun finnesTilbakekreving(
+        @PathVariable behandlingId: UUID,
+    ): Ressurs<Boolean> {
         return Ressurs.success(tilbakekrevingService.finnesÅpenTilbakekrevingsBehandling(behandlingId))
     }
 
     @GetMapping("/{behandlingId}")
-    fun hentTilbakekreving(@PathVariable behandlingId: UUID): Ressurs<TilbakekrevingDto?> {
+    fun hentTilbakekreving(
+        @PathVariable behandlingId: UUID,
+    ): Ressurs<TilbakekrevingDto?> {
         tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.ACCESS)
         return Ressurs.success(tilbakekrevingService.hentTilbakekreving(behandlingId)?.tilDto())
     }
 
     @GetMapping("/behandlinger/{fagsakId}")
-    fun hentTilbakekekrevingBehandlinger(@PathVariable fagsakId: UUID): Ressurs<List<TilbakekrevingBehandling>> {
+    fun hentTilbakekekrevingBehandlinger(
+        @PathVariable fagsakId: UUID,
+    ): Ressurs<List<TilbakekrevingBehandling>> {
         tilgangService.validerTilgangTilFagsak(fagsakId, AuditLoggerEvent.ACCESS)
         return Ressurs.success(tilbakekrevingService.hentTilbakekrevingBehandlinger(fagsakId))
     }
 
     @GetMapping("/{behandlingId}/brev")
-    fun genererBrevMedEksisterendeVarseltekst(@PathVariable behandlingId: UUID): Ressurs<ByteArray> {
+    fun genererBrevMedEksisterendeVarseltekst(
+        @PathVariable behandlingId: UUID,
+    ): Ressurs<ByteArray> {
         val saksbehandling = behandlingService.hentSaksbehandling(behandlingId)
         tilgangService.validerTilgangTilBehandling(saksbehandling, AuditLoggerEvent.UPDATE)
         return Ressurs.success(tilbakekrevingService.genererBrevMedVarseltekstFraEksisterendeTilbakekreving(saksbehandling))

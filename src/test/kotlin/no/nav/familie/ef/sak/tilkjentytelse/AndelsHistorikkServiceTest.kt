@@ -13,10 +13,9 @@ import no.nav.familie.ef.sak.vilkår.regler.SvarId
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
-import java.util.*
+import java.util.UUID
 
 class AndelsHistorikkServiceTest {
-
     private val vilkårsvurderingRepository = mockk<VilkårsvurderingRepository>()
 
     val andelsHistorikkService = AndelsHistorikkService(mockk(), mockk(), mockk(), mockk(), vilkårsvurderingRepository, mockk(), mockk())
@@ -25,19 +24,21 @@ class AndelsHistorikkServiceTest {
 
     @Test
     internal fun `Skal returnere aktivitet i historikk`() {
-        val vilkårsvurderingList = VilkårType.hentVilkårForStønad(StønadType.BARNETILSYN).map {
-            vilkårsvurdering(
-                behandlingId = behandlingId,
-                resultat = Vilkårsresultat.OPPFYLT,
-                type = VilkårType.AKTIVITET_ARBEID,
-                delvilkårsvurdering = listOf(
-                    Delvilkårsvurdering(
-                        Vilkårsresultat.OPPFYLT,
-                        listOf(Vurdering(RegelId.ER_I_ARBEID_ELLER_FORBIGÅENDE_SYKDOM, SvarId.ER_I_ARBEID)),
-                    ),
-                ),
-            )
-        }
+        val vilkårsvurderingList =
+            VilkårType.hentVilkårForStønad(StønadType.BARNETILSYN).map {
+                vilkårsvurdering(
+                    behandlingId = behandlingId,
+                    resultat = Vilkårsresultat.OPPFYLT,
+                    type = VilkårType.AKTIVITET_ARBEID,
+                    delvilkårsvurdering =
+                        listOf(
+                            Delvilkårsvurdering(
+                                Vilkårsresultat.OPPFYLT,
+                                listOf(Vurdering(RegelId.ER_I_ARBEID_ELLER_FORBIGÅENDE_SYKDOM, SvarId.ER_I_ARBEID)),
+                            ),
+                        ),
+                )
+            }
 
         every {
             vilkårsvurderingRepository.findByTypeAndBehandlingIdIn(

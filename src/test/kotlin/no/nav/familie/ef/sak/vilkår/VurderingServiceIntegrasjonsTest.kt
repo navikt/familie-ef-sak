@@ -26,7 +26,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import java.util.UUID
 
 internal class VurderingServiceIntegrasjonsTest : OppslagSpringRunnerTest() {
-
     @Autowired
     lateinit var vilkårsvurderingRepository: VilkårsvurderingRepository
 
@@ -52,16 +51,17 @@ internal class VurderingServiceIntegrasjonsTest : OppslagSpringRunnerTest() {
         val barnPåRevurdering = barnRepository.insertAll(søknadBarnTilBehandlingBarn(søknadskjema.barn, revurdering.id))
 
         val vilkårForBehandling = opprettVilkårsvurderinger(søknadskjema, behandling, barnPåFørsteSøknad).first()
-        val metadata = HovedregelMetadata(
-            søknadskjema.sivilstand,
-            Sivilstandstype.SKILT,
-            false,
-            barnPåRevurdering,
-            emptyList(),
-            listOf(),
-            mockk(),
-            mockk(),
-        )
+        val metadata =
+            HovedregelMetadata(
+                søknadskjema.sivilstand,
+                Sivilstandstype.SKILT,
+                false,
+                barnPåRevurdering,
+                emptyList(),
+                listOf(),
+                mockk(),
+                mockk(),
+            )
         vurderingService.kopierVurderingerTilNyBehandling(behandling.id, revurdering.id, metadata, StønadType.OVERGANGSSTØNAD)
 
         val vilkårForRevurdering = vilkårsvurderingRepository.findByBehandlingId(revurdering.id).first()
@@ -95,16 +95,17 @@ internal class VurderingServiceIntegrasjonsTest : OppslagSpringRunnerTest() {
         val tidligereBehandlingId = UUID.randomUUID()
         val fagsak = testoppsettService.lagreFagsak(fagsak())
         val revurdering = behandlingRepository.insert(behandling(fagsak))
-        val metadata = HovedregelMetadata(
-            null,
-            Sivilstandstype.SKILT,
-            false,
-            emptyList(),
-            emptyList(),
-            emptyList(),
-            mockk(),
-            mockk(),
-        )
+        val metadata =
+            HovedregelMetadata(
+                null,
+                Sivilstandstype.SKILT,
+                false,
+                emptyList(),
+                emptyList(),
+                emptyList(),
+                mockk(),
+                mockk(),
+            )
         assertThat(
             catchThrowable {
                 vurderingService.kopierVurderingerTilNyBehandling(
@@ -133,15 +134,16 @@ internal class VurderingServiceIntegrasjonsTest : OppslagSpringRunnerTest() {
                 behandling = behandling,
             )
         val delvilkårsvurdering = SivilstandRegel().initiereDelvilkårsvurdering(hovedregelMetadata)
-        val vilkårsvurderinger = listOf(
-            vilkårsvurdering(
-                resultat = Vilkårsresultat.OPPFYLT,
-                type = VilkårType.SIVILSTAND,
-                behandlingId = behandling.id,
-                barnId = barn.first().id,
-                delvilkårsvurdering = delvilkårsvurdering,
-            ),
-        )
+        val vilkårsvurderinger =
+            listOf(
+                vilkårsvurdering(
+                    resultat = Vilkårsresultat.OPPFYLT,
+                    type = VilkårType.SIVILSTAND,
+                    behandlingId = behandling.id,
+                    barnId = barn.first().id,
+                    delvilkårsvurdering = delvilkårsvurdering,
+                ),
+            )
         return vilkårsvurderingRepository.insertAll(vilkårsvurderinger)
     }
 

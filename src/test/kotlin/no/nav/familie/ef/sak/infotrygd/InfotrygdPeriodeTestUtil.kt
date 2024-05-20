@@ -9,7 +9,6 @@ import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdSakstype
 import java.time.LocalDate
 
 object InfotrygdPeriodeTestUtil {
-
     fun lagInfotrygdPeriode(
         personIdent: String = "1",
         stønadFom: LocalDate = DatoUtil.årMånedNå().atDay(1),

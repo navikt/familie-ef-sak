@@ -20,7 +20,6 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
 
 internal class OpprettOppgaveForOpprettetBehandlingTaskTest {
-
     val behandlingService = mockk<BehandlingService>()
     val oppgaveService = mockk<OppgaveService>()
     val taskService = mockk<TaskService>()

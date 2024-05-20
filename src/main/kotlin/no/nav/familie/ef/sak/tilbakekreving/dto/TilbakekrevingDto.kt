@@ -10,9 +10,10 @@ data class TilbakekrevingDto(
     var begrunnelse: String,
 )
 
-fun TilbakekrevingDto.tilDomene(behandlingId: UUID) = Tilbakekreving(
-    behandlingId = behandlingId,
-    valg = this.valg,
-    varseltekst = this.varseltekst,
-    begrunnelse = this.begrunnelse,
-)
+fun TilbakekrevingDto.tilDomene(behandlingId: UUID) =
+    Tilbakekreving(
+        behandlingId = behandlingId,
+        valg = this.valg,
+        varseltekst = this.varseltekst,
+        begrunnelse = this.begrunnelse,
+    )

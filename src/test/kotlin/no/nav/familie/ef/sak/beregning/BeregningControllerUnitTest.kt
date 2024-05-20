@@ -24,31 +24,32 @@ import java.time.YearMonth
 import java.util.UUID
 
 internal class BeregningControllerUnitTest {
-
     val tilkjentytelseService = mockk<TilkjentYtelseService>()
     val vedtakService = mockk<VedtakService>()
 
-    val beregningController = BeregningController(
-        beregningService = BeregningService(),
-        tilgangService = mockk(relaxed = true),
-        tilkjentYtelseService = tilkjentytelseService,
-        vedtakService = vedtakService,
-    )
+    val beregningController =
+        BeregningController(
+            beregningService = BeregningService(),
+            tilgangService = mockk(relaxed = true),
+            tilkjentYtelseService = tilkjentytelseService,
+            vedtakService = vedtakService,
+        )
 
     @Test
     internal fun `skal ikke beregne med perioder som er opphør eller sanksjon`() {
         val årMåned = YearMonth.of(2021, 1)
 
-        val perioder = beregningController.beregnYtelserForRequest(
-            BeregningRequest(
-                listOf(Inntekt(årMåned, BigDecimal.ZERO, BigDecimal.ZERO)),
-                listOf(
-                    vedtaksperiodeDto(årMåned, årMåned, VedtaksperiodeType.HOVEDPERIODE),
-                    vedtaksperiodeDto(årMåned.plusMonths(1), årMåned.plusMonths(1), VedtaksperiodeType.SANKSJON),
-                    vedtaksperiodeDto(årMåned.plusMonths(2), årMåned.plusMonths(2), VedtaksperiodeType.MIDLERTIDIG_OPPHØR),
+        val perioder =
+            beregningController.beregnYtelserForRequest(
+                BeregningRequest(
+                    listOf(Inntekt(årMåned, BigDecimal.ZERO, BigDecimal.ZERO)),
+                    listOf(
+                        vedtaksperiodeDto(årMåned, årMåned, VedtaksperiodeType.HOVEDPERIODE),
+                        vedtaksperiodeDto(årMåned.plusMonths(1), årMåned.plusMonths(1), VedtaksperiodeType.SANKSJON),
+                        vedtaksperiodeDto(årMåned.plusMonths(2), årMåned.plusMonths(2), VedtaksperiodeType.MIDLERTIDIG_OPPHØR),
+                    ),
                 ),
-            ),
-        ).data!!
+            ).data!!
 
         assertThat(perioder).hasSize(1)
         assertThat(perioder.single().periode).isEqualTo(Månedsperiode(årMåned))
@@ -61,26 +62,28 @@ internal class BeregningControllerUnitTest {
                 behandlingId = UUID.randomUUID(),
                 resultatType = ResultatType.OPPHØRT,
                 perioder =
-                PeriodeWrapper(
-                    perioder = listOf(
-                        Vedtaksperiode(
-                            LocalDate.of(2022, 1, 1),
-                            datoTil = LocalDate.of(2022, 4, 30),
-                            aktivitet = AktivitetType.BARN_UNDER_ETT_ÅR,
-                            periodeType = VedtaksperiodeType.MIDLERTIDIG_OPPHØR,
-                        ),
+                    PeriodeWrapper(
+                        perioder =
+                            listOf(
+                                Vedtaksperiode(
+                                    LocalDate.of(2022, 1, 1),
+                                    datoTil = LocalDate.of(2022, 4, 30),
+                                    aktivitet = AktivitetType.BARN_UNDER_ETT_ÅR,
+                                    periodeType = VedtaksperiodeType.MIDLERTIDIG_OPPHØR,
+                                ),
+                            ),
                     ),
-                ),
             )
         every { tilkjentytelseService.hentForBehandling(any()) } returns
             lagTilkjentYtelse(
-                andelerTilkjentYtelse = listOf(
-                    lagAndelTilkjentYtelse(
-                        fraOgMed = LocalDate.of(2022, 1, 1),
-                        beløp = 10_000,
-                        tilOgMed = LocalDate.of(2022, 4, 30),
+                andelerTilkjentYtelse =
+                    listOf(
+                        lagAndelTilkjentYtelse(
+                            fraOgMed = LocalDate.of(2022, 1, 1),
+                            beløp = 10_000,
+                            tilOgMed = LocalDate.of(2022, 4, 30),
+                        ),
                     ),
-                ),
             )
         assertThrows<Feil> { beregningController.hentBeregnetBeløp(UUID.randomUUID()) }
     }

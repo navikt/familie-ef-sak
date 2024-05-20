@@ -24,7 +24,6 @@ import java.util.UUID
 )
 class OpprettOppgaveTask(private val oppgaveService: OppgaveService, private val behandlingService: BehandlingService) :
     AsyncTaskStep {
-
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     /**
@@ -56,30 +55,32 @@ class OpprettOppgaveTask(private val oppgaveService: OppgaveService, private val
             }
         }
 
-        val oppgaveId = oppgaveService.opprettOppgave(
-            behandlingId = data.behandlingId,
-            oppgavetype = oppgavetype,
-            vurderHenvendelseOppgaveSubtype = data.vurderHenvendelseOppgaveSubtype,
-            tilordnetNavIdent = data.tilordnetNavIdent,
-            beskrivelse = data.beskrivelse,
-        )
+        val oppgaveId =
+            oppgaveService.opprettOppgave(
+                behandlingId = data.behandlingId,
+                oppgavetype = oppgavetype,
+                vurderHenvendelseOppgaveSubtype = data.vurderHenvendelseOppgaveSubtype,
+                tilordnetNavIdent = data.tilordnetNavIdent,
+                beskrivelse = data.beskrivelse,
+            )
 
         task.metadata.setProperty("oppgaveId", oppgaveId.toString())
     }
 
     companion object {
-
         fun opprettTask(data: OpprettOppgaveTaskData): Task {
             return Task(
                 type = TYPE,
                 payload = objectMapper.writeValueAsString(data),
-                properties = Properties().apply {
-                    this["saksbehandler"] = SikkerhetContext.hentSaksbehandlerEllerSystembruker()
-                    this["behandlingId"] = data.behandlingId.toString()
-                    this["oppgavetype"] = data.oppgavetype.name
-                },
+                properties =
+                    Properties().apply {
+                        this["saksbehandler"] = SikkerhetContext.hentSaksbehandlerEllerSystembruker()
+                        this["behandlingId"] = data.behandlingId.toString()
+                        this["oppgavetype"] = data.oppgavetype.name
+                    },
             )
         }
+
         const val TYPE = "opprettOppgave"
     }
 }

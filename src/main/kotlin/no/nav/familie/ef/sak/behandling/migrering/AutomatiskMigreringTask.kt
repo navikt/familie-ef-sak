@@ -24,14 +24,12 @@ data class AutomatiskMigreringTaskData(val personIdent: String, val uniktId: UUI
     beskrivelse = "Automatisk migrering",
 )
 class AutomatiskMigreringTask(private val automatiskMigreringService: AutomatiskMigreringService) : AsyncTaskStep {
-
     override fun doTask(task: Task) {
         val personIdent = objectMapper.readValue<AutomatiskMigreringTaskData>(task.payload).personIdent
         automatiskMigreringService.migrerPersonAutomatisk(personIdent)
     }
 
     companion object {
-
         const val TYPE = "automatiskMigrering"
 
         fun opprettTask(ident: String): Task {

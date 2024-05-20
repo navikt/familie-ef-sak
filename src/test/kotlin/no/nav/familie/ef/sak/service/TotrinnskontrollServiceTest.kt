@@ -30,7 +30,6 @@ import org.junit.jupiter.api.Test
 import java.util.UUID
 
 internal class TotrinnskontrollServiceTest {
-
     private val behandlingshistorikkService = mockk<BehandlingshistorikkService>(relaxed = true)
     private val behandlingService = mockk<BehandlingService>(relaxed = true)
     private val tilgangService = mockk<TilgangService>()
@@ -50,12 +49,13 @@ internal class TotrinnskontrollServiceTest {
         val opprettetAv = "Behandler"
         every { behandlingshistorikkService.finnSisteBehandlingshistorikk(any()) } returns
             behandlingshistorikk(StegType.SEND_TIL_BESLUTTER, opprettetAv = opprettetAv)
-        val response = totrinnskontrollService
-            .lagreTotrinnskontrollOgReturnerBehandler(
-                saksbehandling(status = BehandlingStatus.UTREDES),
-                BeslutteVedtakDto(false, ""),
-                VedtakErUtenBeslutter(false),
-            )
+        val response =
+            totrinnskontrollService
+                .lagreTotrinnskontrollOgReturnerBehandler(
+                    saksbehandling(status = BehandlingStatus.UTREDES),
+                    BeslutteVedtakDto(false, ""),
+                    VedtakErUtenBeslutter(false),
+                )
         assertThat(response).isEqualTo(opprettetAv)
     }
 
@@ -64,8 +64,9 @@ internal class TotrinnskontrollServiceTest {
         val opprettetAv = "Behandler"
         every { behandlingshistorikkService.finnSisteBehandlingshistorikk(any(), StegType.SEND_TIL_BESLUTTER) } returns
             behandlingshistorikk(StegType.SEND_TIL_BESLUTTER, opprettetAv = opprettetAv)
-        val response = totrinnskontrollService
-            .hentSaksbehandlerSomSendteTilBeslutter(UUID.randomUUID())
+        val response =
+            totrinnskontrollService
+                .hentSaksbehandlerSomSendteTilBeslutter(UUID.randomUUID())
         assertThat(response).isEqualTo(opprettetAv)
     }
 
@@ -193,11 +194,12 @@ internal class TotrinnskontrollServiceTest {
                 steg = StegType.BESLUTTE_VEDTAK,
                 utfall = StegUtfall.BESLUTTE_VEDTAK_UNDERKJENT,
                 opprettetAv = "Noe",
-                beslutt = BeslutteVedtakDto(
-                    godkjent = false,
-                    begrunnelse = "begrunnelse",
-                    årsakerUnderkjent = listOf(ÅrsakUnderkjent.VEDTAKSBREV, ÅrsakUnderkjent.AKTIVITET),
-                ),
+                beslutt =
+                    BeslutteVedtakDto(
+                        godkjent = false,
+                        begrunnelse = "begrunnelse",
+                        årsakerUnderkjent = listOf(ÅrsakUnderkjent.VEDTAKSBREV, ÅrsakUnderkjent.AKTIVITET),
+                    ),
             )
 
         val totrinnskontroll = totrinnskontrollService.hentTotrinnskontrollStatus(ID)
@@ -217,11 +219,12 @@ internal class TotrinnskontrollServiceTest {
                 steg = StegType.BESLUTTE_VEDTAK,
                 utfall = StegUtfall.BESLUTTE_VEDTAK_UNDERKJENT,
                 opprettetAv = "Noe",
-                beslutt = BeslutteVedtakDto(
-                    godkjent = false,
-                    begrunnelse = "En god begrunnelse",
-                    årsakerUnderkjent = listOf(ÅrsakUnderkjent.SIMULERING),
-                ),
+                beslutt =
+                    BeslutteVedtakDto(
+                        godkjent = false,
+                        begrunnelse = "En god begrunnelse",
+                        årsakerUnderkjent = listOf(ÅrsakUnderkjent.SIMULERING),
+                    ),
             )
 
         val totrinnskontroll = totrinnskontrollService.hentTotrinnskontrollStatus(ID)
@@ -241,15 +244,15 @@ internal class TotrinnskontrollServiceTest {
             steg = steg,
             utfall = utfall,
             opprettetAv = opprettetAv,
-            metadata = beslutt?.let {
-                JsonWrapper(objectMapper.writeValueAsString(it))
-            },
+            metadata =
+                beslutt?.let {
+                    JsonWrapper(objectMapper.writeValueAsString(it))
+                },
         )
 
     private fun behandling(status: BehandlingStatus) = behandling(fagsak, status)
 
     companion object {
-
         private val ID = UUID.randomUUID()
         private val fagsak = fagsak()
     }

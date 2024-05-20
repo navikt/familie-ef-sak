@@ -46,7 +46,6 @@ class OmregningService(
     private val søknadService: SøknadService,
     private val barnService: BarnService,
 ) {
-
     private val logger = LoggerFactory.getLogger(javaClass)
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
@@ -82,8 +81,9 @@ class OmregningService(
     }
 
     private fun validerBehandlingOgHentSisteTilkjentYtelse(fagsakId: UUID): TilkjentYtelse {
-        val sisteBehandling = behandlingService.finnSisteIverksatteBehandling(fagsakId)
-            ?: error("FagsakId $fagsakId har mistet iverksatt behandling.")
+        val sisteBehandling =
+            behandlingService.finnSisteIverksatteBehandling(fagsakId)
+                ?: error("FagsakId $fagsakId har mistet iverksatt behandling.")
 
         validerBehandlingstatusForFagsak(fagsakId)
 
@@ -108,11 +108,12 @@ class OmregningService(
     ) {
         logger.info("Starter på g-omregning av fagsak=$fagsakId")
 
-        val behandling = behandlingService.opprettBehandling(
-            behandlingType = BehandlingType.REVURDERING,
-            fagsakId = fagsakId,
-            behandlingsårsak = BehandlingÅrsak.G_OMREGNING,
-        )
+        val behandling =
+            behandlingService.opprettBehandling(
+                behandlingType = BehandlingType.REVURDERING,
+                fagsakId = fagsakId,
+                behandlingsårsak = BehandlingÅrsak.G_OMREGNING,
+            )
         logger.info("G-omregner fagsak=$fagsakId behandling=${behandling.id} ")
 
         kopierDataFraForrigeBehandling(behandling)
@@ -145,8 +146,9 @@ class OmregningService(
     }
 
     private fun kopierDataFraForrigeBehandling(behandling: Behandling) {
-        val forrigeBehandlingId = behandling.forrigeBehandlingId
-            ?: error("Finner ikke forrigeBehandlingId til ${behandling.id}")
+        val forrigeBehandlingId =
+            behandling.forrigeBehandlingId
+                ?: error("Finner ikke forrigeBehandlingId til ${behandling.id}")
         søknadService.kopierSøknad(forrigeBehandlingId, behandling.id)
         val grunnlagsdata = grunnlagsdataService.opprettGrunnlagsdata(behandling.id)
         barnService.opprettBarnForRevurdering(

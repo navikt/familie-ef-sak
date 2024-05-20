@@ -8,7 +8,6 @@ import org.springframework.stereotype.Component
 
 @Component
 class StatsborgerskapMapper(private val kodeverkService: KodeverkService) {
-
     fun map(statsborgerskap: List<Statsborgerskap>): List<StatsborgerskapDto> {
         return statsborgerskap.map {
             val land = kodeverkService.hentLand(it.land, datoEllerIdag(it.gyldigFraOgMed)) ?: it.land

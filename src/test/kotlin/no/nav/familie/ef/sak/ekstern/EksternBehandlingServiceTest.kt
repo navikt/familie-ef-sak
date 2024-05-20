@@ -38,7 +38,6 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 internal class EksternBehandlingServiceTest : OppslagSpringRunnerTest() {
-
     @Autowired
     lateinit var behandlingRepository: BehandlingRepository
 
@@ -62,22 +61,23 @@ internal class EksternBehandlingServiceTest : OppslagSpringRunnerTest() {
 
     @Nested
     inner class OpprettRevurderingKlage {
-
         @Test
         internal fun `kan opprette revurdering hvis det finnes en ferdigstilt behandling`() {
             val fagsakMedFerdigstiltBehandling = testoppsettService.lagreFagsak(fagsak(fagsakpersoner("3")))
-            val førstegangsbehandling = behandlingRepository.insert(
-                behandling(
-                    fagsakMedFerdigstiltBehandling,
-                    resultat = BehandlingResultat.INNVILGET,
-                    status = BehandlingStatus.FERDIGSTILT,
-                ),
-            )
+            val førstegangsbehandling =
+                behandlingRepository.insert(
+                    behandling(
+                        fagsakMedFerdigstiltBehandling,
+                        resultat = BehandlingResultat.INNVILGET,
+                        status = BehandlingStatus.FERDIGSTILT,
+                    ),
+                )
             vilkårsvurderingRepository.insert(vilkårsvurdering(førstegangsbehandling.id))
 
-            val result = testWithBrukerContext {
-                eksternBehandlingService.opprettRevurderingKlage(fagsakMedFerdigstiltBehandling.eksternId)
-            }
+            val result =
+                testWithBrukerContext {
+                    eksternBehandlingService.opprettRevurderingKlage(fagsakMedFerdigstiltBehandling.eksternId)
+                }
 
             assertThat(result.opprettetBehandling).isTrue
 
@@ -127,7 +127,6 @@ internal class EksternBehandlingServiceTest : OppslagSpringRunnerTest() {
 
     @Nested
     inner class KanOppretteRevurdering {
-
         @Test
         internal fun `kan opprette revurdering hvis det finnes en ferdigstilt behandling`() {
             val fagsakMedFerdigstiltBehandling = testoppsettService.lagreFagsak(fagsak(fagsakpersoner("3")))
@@ -168,36 +167,37 @@ internal class EksternBehandlingServiceTest : OppslagSpringRunnerTest() {
 
     @Nested
     inner class BehandleSakOppgaveErPåbegynt {
-
         @Test
         internal fun `har ingen fagsak - skal returnere false`() {
-            val result = testWithBrukerContext {
-                eksternBehandlingService.tilhørendeBehandleSakOppgaveErPåbegynt(
-                    personIdent = personIdent,
-                    stønadType = StønadType.OVERGANGSSTØNAD,
-                    innsendtSøknadTidspunkt = søknadInnsendtTidspunkt,
-                )
-            }
+            val result =
+                testWithBrukerContext {
+                    eksternBehandlingService.tilhørendeBehandleSakOppgaveErPåbegynt(
+                        personIdent = PERSON_IDENT,
+                        stønadType = StønadType.OVERGANGSSTØNAD,
+                        innsendtSøknadTidspunkt = søknadInnsendtTidspunkt,
+                    )
+                }
             assertThat(result).isFalse
         }
 
         @Test
         internal fun `har fagsak men ingen behandlinger - skal returnere false`() {
-            testoppsettService.lagreFagsak(fagsak(fagsakpersoner(personIdent)))
+            testoppsettService.lagreFagsak(fagsak(fagsakpersoner(PERSON_IDENT)))
 
-            val result = testWithBrukerContext {
-                eksternBehandlingService.tilhørendeBehandleSakOppgaveErPåbegynt(
-                    personIdent = personIdent,
-                    stønadType = StønadType.OVERGANGSSTØNAD,
-                    innsendtSøknadTidspunkt = søknadInnsendtTidspunkt,
-                )
-            }
+            val result =
+                testWithBrukerContext {
+                    eksternBehandlingService.tilhørendeBehandleSakOppgaveErPåbegynt(
+                        personIdent = PERSON_IDENT,
+                        stønadType = StønadType.OVERGANGSSTØNAD,
+                        innsendtSøknadTidspunkt = søknadInnsendtTidspunkt,
+                    )
+                }
             assertThat(result).isFalse
         }
 
         @Test
         internal fun `har fagsak med behandling opprettet før innsendt søknad - skal returnere false`() {
-            val fagsak = testoppsettService.lagreFagsak(fagsak(fagsakpersoner(personIdent)))
+            val fagsak = testoppsettService.lagreFagsak(fagsak(fagsakpersoner(PERSON_IDENT)))
             val behandling =
                 behandlingRepository.insert(
                     behandling(
@@ -209,35 +209,38 @@ internal class EksternBehandlingServiceTest : OppslagSpringRunnerTest() {
             insertOppgave(behandling, 91L, Oppgavetype.BehandleSak)
             mockOppgaveClient(91L, "saksbehandler")
 
-            val result = testWithBrukerContext {
-                eksternBehandlingService.tilhørendeBehandleSakOppgaveErPåbegynt(
-                    personIdent = personIdent,
-                    stønadType = StønadType.OVERGANGSSTØNAD,
-                    innsendtSøknadTidspunkt = søknadInnsendtTidspunkt,
-                )
-            }
+            val result =
+                testWithBrukerContext {
+                    eksternBehandlingService.tilhørendeBehandleSakOppgaveErPåbegynt(
+                        personIdent = PERSON_IDENT,
+                        stønadType = StønadType.OVERGANGSSTØNAD,
+                        innsendtSøknadTidspunkt = søknadInnsendtTidspunkt,
+                    )
+                }
 
             assertThat(result).isFalse
         }
 
         @Test
         internal fun `har fagsak med flere behandlinger og oppgave uten tilordnet ressurs - skal returnere false`() {
-            val fagsakMedBehandlinger = testoppsettService.lagreFagsak(fagsak(fagsakpersoner(personIdent)))
-            val førstegangsbehandling = behandlingRepository.insert(
-                behandling(
-                    fagsak = fagsakMedBehandlinger,
-                    opprettetTid = søknadInnsendtTidspunkt.minusDays(1),
-                    status = BehandlingStatus.FERDIGSTILT,
-                    vedtakstidspunkt = søknadInnsendtTidspunkt.minusHours(1),
-                    resultat = BehandlingResultat.INNVILGET,
-                ),
-            )
-            val andregangsbehandling = behandlingRepository.insert(
-                behandling(
-                    fagsak = fagsakMedBehandlinger,
-                    opprettetTid = søknadInnsendtTidspunkt.plusDays(1),
-                ),
-            )
+            val fagsakMedBehandlinger = testoppsettService.lagreFagsak(fagsak(fagsakpersoner(PERSON_IDENT)))
+            val førstegangsbehandling =
+                behandlingRepository.insert(
+                    behandling(
+                        fagsak = fagsakMedBehandlinger,
+                        opprettetTid = søknadInnsendtTidspunkt.minusDays(1),
+                        status = BehandlingStatus.FERDIGSTILT,
+                        vedtakstidspunkt = søknadInnsendtTidspunkt.minusHours(1),
+                        resultat = BehandlingResultat.INNVILGET,
+                    ),
+                )
+            val andregangsbehandling =
+                behandlingRepository.insert(
+                    behandling(
+                        fagsak = fagsakMedBehandlinger,
+                        opprettetTid = søknadInnsendtTidspunkt.plusDays(1),
+                    ),
+                )
             insertOppgave(førstegangsbehandling, 91L, Oppgavetype.Journalføring)
             insertOppgave(førstegangsbehandling, 92L, Oppgavetype.BehandleSak)
             insertOppgave(andregangsbehandling, 93L, Oppgavetype.BehandleSak)
@@ -245,35 +248,38 @@ internal class EksternBehandlingServiceTest : OppslagSpringRunnerTest() {
             mockOppgaveClient(92L, "saksbehandler")
             mockOppgaveClient(93L)
 
-            val result = testWithBrukerContext {
-                eksternBehandlingService.tilhørendeBehandleSakOppgaveErPåbegynt(
-                    personIdent = personIdent,
-                    stønadType = StønadType.OVERGANGSSTØNAD,
-                    innsendtSøknadTidspunkt = søknadInnsendtTidspunkt,
-                )
-            }
+            val result =
+                testWithBrukerContext {
+                    eksternBehandlingService.tilhørendeBehandleSakOppgaveErPåbegynt(
+                        personIdent = PERSON_IDENT,
+                        stønadType = StønadType.OVERGANGSSTØNAD,
+                        innsendtSøknadTidspunkt = søknadInnsendtTidspunkt,
+                    )
+                }
 
             assertThat(result).isFalse
         }
 
         @Test
         internal fun `har fagsak med flere behandlinger og oppgave med tilordnet ressurs - skal returnere true`() {
-            val fagsakMedBehandlinger = testoppsettService.lagreFagsak(fagsak(fagsakpersoner(personIdent)))
-            val førstegangsbehandling = behandlingRepository.insert(
-                behandling(
-                    fagsak = fagsakMedBehandlinger,
-                    opprettetTid = søknadInnsendtTidspunkt.minusDays(1),
-                    status = BehandlingStatus.FERDIGSTILT,
-                    vedtakstidspunkt = søknadInnsendtTidspunkt.minusHours(1),
-                    resultat = BehandlingResultat.INNVILGET,
-                ),
-            )
-            val andregangsbehandling = behandlingRepository.insert(
-                behandling(
-                    fagsak = fagsakMedBehandlinger,
-                    opprettetTid = søknadInnsendtTidspunkt.plusDays(1),
-                ),
-            )
+            val fagsakMedBehandlinger = testoppsettService.lagreFagsak(fagsak(fagsakpersoner(PERSON_IDENT)))
+            val førstegangsbehandling =
+                behandlingRepository.insert(
+                    behandling(
+                        fagsak = fagsakMedBehandlinger,
+                        opprettetTid = søknadInnsendtTidspunkt.minusDays(1),
+                        status = BehandlingStatus.FERDIGSTILT,
+                        vedtakstidspunkt = søknadInnsendtTidspunkt.minusHours(1),
+                        resultat = BehandlingResultat.INNVILGET,
+                    ),
+                )
+            val andregangsbehandling =
+                behandlingRepository.insert(
+                    behandling(
+                        fagsak = fagsakMedBehandlinger,
+                        opprettetTid = søknadInnsendtTidspunkt.plusDays(1),
+                    ),
+                )
             insertOppgave(førstegangsbehandling, 91L, Oppgavetype.Journalføring)
             insertOppgave(førstegangsbehandling, 92L, Oppgavetype.BehandleSak)
             insertOppgave(andregangsbehandling, 93L, Oppgavetype.BehandleSak)
@@ -281,13 +287,14 @@ internal class EksternBehandlingServiceTest : OppslagSpringRunnerTest() {
             mockOppgaveClient(92L, "saksbehandler")
             mockOppgaveClient(93L, "saksbehandler")
 
-            val result = testWithBrukerContext {
-                eksternBehandlingService.tilhørendeBehandleSakOppgaveErPåbegynt(
-                    personIdent = personIdent,
-                    stønadType = StønadType.OVERGANGSSTØNAD,
-                    innsendtSøknadTidspunkt = søknadInnsendtTidspunkt,
-                )
-            }
+            val result =
+                testWithBrukerContext {
+                    eksternBehandlingService.tilhørendeBehandleSakOppgaveErPåbegynt(
+                        personIdent = PERSON_IDENT,
+                        stønadType = StønadType.OVERGANGSSTØNAD,
+                        innsendtSøknadTidspunkt = søknadInnsendtTidspunkt,
+                    )
+                }
 
             assertThat(result).isTrue
         }
@@ -295,7 +302,6 @@ internal class EksternBehandlingServiceTest : OppslagSpringRunnerTest() {
 
     @Nested
     inner class LøpendeBarnetilsyn {
-
         private val fagsakPersonService = mockk<FagsakPersonService>()
         private val fagsakPerson = mockk<FagsakPerson>()
         private val fagsak = mockk<Fagsak>()
@@ -316,11 +322,12 @@ internal class EksternBehandlingServiceTest : OppslagSpringRunnerTest() {
         internal fun `person som finnes i ef har ikke bt hvis fagsak for bt ikke finnes`() {
             every { fagsakPersonService.finnPerson(any()) } returns fagsakPerson
             every { fagsakPerson.id } returns UUID.randomUUID()
-            every { fagsakService.finnFagsakerForFagsakPersonId(any()) } returns Fagsaker(
-                overgangsstønad = null,
-                barnetilsyn = null,
-                skolepenger = null,
-            )
+            every { fagsakService.finnFagsakerForFagsakPersonId(any()) } returns
+                Fagsaker(
+                    overgangsstønad = null,
+                    barnetilsyn = null,
+                    skolepenger = null,
+                )
 
             val løpendeBarnetilsyn = eksternBehandlingService.harLøpendeBarnetilsyn("123")
 
@@ -332,11 +339,12 @@ internal class EksternBehandlingServiceTest : OppslagSpringRunnerTest() {
         internal fun `løpende bt for person som finnes i ef og som har løpende fagsak for bt`() {
             every { fagsakPersonService.finnPerson(any()) } returns fagsakPerson
             every { fagsakPerson.id } returns UUID.randomUUID()
-            every { fagsakService.finnFagsakerForFagsakPersonId(any()) } returns Fagsaker(
-                overgangsstønad = null,
-                barnetilsyn = fagsak,
-                skolepenger = null,
-            )
+            every { fagsakService.finnFagsakerForFagsakPersonId(any()) } returns
+                Fagsaker(
+                    overgangsstønad = null,
+                    barnetilsyn = fagsak,
+                    skolepenger = null,
+                )
             every { fagsakService.erLøpende(fagsak) } returns true
 
             val løpendeBarnetilsyn = eksternBehandlingService.harLøpendeBarnetilsyn("123")
@@ -349,11 +357,12 @@ internal class EksternBehandlingServiceTest : OppslagSpringRunnerTest() {
         internal fun `skal ikke sjekke om fagsak er løpende for andre stønader enn bt`() {
             every { fagsakPersonService.finnPerson(any()) } returns fagsakPerson
             every { fagsakPerson.id } returns UUID.randomUUID()
-            every { fagsakService.finnFagsakerForFagsakPersonId(any()) } returns Fagsaker(
-                overgangsstønad = fagsak,
-                barnetilsyn = null,
-                skolepenger = fagsak,
-            )
+            every { fagsakService.finnFagsakerForFagsakPersonId(any()) } returns
+                Fagsaker(
+                    overgangsstønad = fagsak,
+                    barnetilsyn = null,
+                    skolepenger = fagsak,
+                )
 
             val løpendeBarnetilsyn = eksternBehandlingService.harLøpendeBarnetilsyn("123")
 
@@ -362,7 +371,11 @@ internal class EksternBehandlingServiceTest : OppslagSpringRunnerTest() {
         }
     }
 
-    private fun insertOppgave(behandling: Behandling, oppgaveId: Long, oppgaveType: Oppgavetype) {
+    private fun insertOppgave(
+        behandling: Behandling,
+        oppgaveId: Long,
+        oppgaveType: Oppgavetype,
+    ) {
         oppgaveRepository.insert(
             oppgave(
                 behandling = behandling,
@@ -372,15 +385,19 @@ internal class EksternBehandlingServiceTest : OppslagSpringRunnerTest() {
         )
     }
 
-    private fun mockOppgaveClient(oppgaveId: Long, tilordnetRessurs: String? = null) {
-        every { oppgaveClient.finnOppgaveMedId(oppgaveId) } returns Oppgave(
-            id = oppgaveId,
-            tilordnetRessurs = tilordnetRessurs,
-        )
+    private fun mockOppgaveClient(
+        oppgaveId: Long,
+        tilordnetRessurs: String? = null,
+    ) {
+        every { oppgaveClient.finnOppgaveMedId(oppgaveId) } returns
+            Oppgave(
+                id = oppgaveId,
+                tilordnetRessurs = tilordnetRessurs,
+            )
     }
 
     companion object {
-        private const val personIdent = "12345678910"
+        private const val PERSON_IDENT = "12345678910"
         private val søknadInnsendtTidspunkt = LocalDateTime.of(2023, 6, 1, 0, 0)
     }
 }

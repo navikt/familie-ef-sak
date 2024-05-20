@@ -19,7 +19,6 @@ class HistoriskPensjonService(
     @Qualifier("longCache")
     private val cacheManager: CacheManager,
 ) {
-
     fun hentHistoriskPensjon(fagsakPersonId: UUID): HistoriskPensjonResponse {
         return hentHistoriskPensjon(fagsakPersonService.hentAktivIdent(fagsakPersonId))
     }
@@ -44,6 +43,7 @@ class HistoriskPensjonService(
 }
 
 data class HistoriskPensjonResponse(val harPensjonsdata: Boolean, val webAppUrl: String)
+
 data class EnsligForsoergerRequest(
     val aktivtFoedselsnummer: String,
     val alleRelaterteFoedselsnummer: Set<String>,

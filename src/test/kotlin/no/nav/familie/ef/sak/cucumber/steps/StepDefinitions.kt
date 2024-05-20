@@ -101,7 +101,6 @@ import java.time.YearMonth
 import java.util.UUID
 
 class StepDefinitions {
-
     private val logger: Logger = LoggerFactory.getLogger(javaClass)
 
     private var gittVedtak = listOf<Vedtak>()
@@ -119,10 +118,11 @@ class StepDefinitions {
     private val featureToggleService = mockFeatureToggleService()
     private val beregningService = BeregningService()
     private val beregningBarnetilsynService = BeregningBarnetilsynService(featureToggleService)
-    private val beregningSkolepengerService = BeregningSkolepengerService(
-        behandlingService = behandlingService,
-        vedtakService = vedtakService,
-    )
+    private val beregningSkolepengerService =
+        BeregningSkolepengerService(
+            behandlingService = behandlingService,
+            vedtakService = vedtakService,
+        )
     private val simuleringService = mockk<SimuleringService>(relaxed = true)
     private val tilbakekrevingService = mockk<TilbakekrevingService>(relaxed = true)
     private val barnRepository = mockk<BarnRepository>()
@@ -131,21 +131,22 @@ class StepDefinitions {
     private val validerOmregningService = mockk<ValiderOmregningService>(relaxed = true)
     private val oppgaverForOpprettelseService = mockk<OppgaverForOpprettelseService>(relaxed = true)
 
-    private val beregnYtelseSteg = BeregnYtelseSteg(
-        tilkjentYtelseService,
-        andelsHistorikkService,
-        beregningService,
-        beregningBarnetilsynService,
-        beregningSkolepengerService,
-        simuleringService,
-        vedtakService,
-        tilbakekrevingService,
-        barnService,
-        fagsakService,
-        validerOmregningService,
-        oppgaverForOpprettelseService,
-        featureToggleService,
-    )
+    private val beregnYtelseSteg =
+        BeregnYtelseSteg(
+            tilkjentYtelseService,
+            andelsHistorikkService,
+            beregningService,
+            beregningBarnetilsynService,
+            beregningSkolepengerService,
+            simuleringService,
+            vedtakService,
+            tilbakekrevingService,
+            barnService,
+            fagsakService,
+            validerOmregningService,
+            oppgaverForOpprettelseService,
+            featureToggleService,
+        )
 
     private val vedtakHistorikkService =
         VedtakHistorikkService(fagsakService, andelsHistorikkService, barnService, mockFeatureToggleService())
@@ -163,19 +164,20 @@ class StepDefinitions {
     val iverksettingDtoMapper = mockk<IverksettingDtoMapper>()
     val iverksettClient = mockk<IverksettClient>(relaxed = true)
     val taskService = mockk<TaskService>(relaxed = true)
-    private val omregningService = OmregningService(
-        behandlingService,
-        vedtakHistorikkService,
-        taskService = taskService,
-        iverksettClient = iverksettClient,
-        ytelseService = tilkjentYtelseService,
-        grunnlagsdataService = grunnlagsdataService,
-        vurderingService = vurderingService,
-        beregnYtelseSteg,
-        iverksettingDtoMapper = iverksettingDtoMapper,
-        søknadService = søknadService,
-        barnService = barnServiceMock,
-    )
+    private val omregningService =
+        OmregningService(
+            behandlingService,
+            vedtakHistorikkService,
+            taskService = taskService,
+            iverksettClient = iverksettClient,
+            ytelseService = tilkjentYtelseService,
+            grunnlagsdataService = grunnlagsdataService,
+            vurderingService = vurderingService,
+            beregnYtelseSteg,
+            iverksettingDtoMapper = iverksettingDtoMapper,
+            søknadService = søknadService,
+            barnService = barnServiceMock,
+        )
 
     init {
         every { behandlingService.hentSaksbehandling(any<UUID>()) } answers {
@@ -205,7 +207,10 @@ class StepDefinitions {
     }
 
     @Gitt("følgende behandlinger for {}")
-    fun følgende_behandlinger(stønadTypeArg: String, dataTable: DataTable) {
+    fun følgende_behandlinger(
+        stønadTypeArg: String,
+        dataTable: DataTable,
+    ) {
         stønadstype = StønadType.valueOf(stønadTypeArg.uppercase())
         saksbehandlinger = SaksbehandlingDomeneParser.mapSaksbehandlinger(dataTable, stønadstype)
     }
@@ -216,18 +221,22 @@ class StepDefinitions {
     }
 
     @Gitt("følgende vedtak for {}")
-    fun følgende_vedtak(stønadTypeArg: String, dataTable: DataTable) {
+    fun følgende_vedtak(
+        stønadTypeArg: String,
+        dataTable: DataTable,
+    ) {
         val stønadstype = StønadType.valueOf(stønadTypeArg.uppercase())
         validerOgSettStønadstype(stønadstype)
-        gittVedtak = when (stønadstype) {
-            StønadType.OVERGANGSSTØNAD -> VedtakDomeneParser.mapVedtakOvergangsstønad(dataTable)
-            StønadType.BARNETILSYN -> {
-                behandlingIdsToAktivitetArbeid.putAll(VedtakDomeneParser.mapAktivitetForBarnetilsyn(dataTable))
-                VedtakDomeneParser.mapVedtakForBarnetilsyn(dataTable)
-            }
+        gittVedtak =
+            when (stønadstype) {
+                StønadType.OVERGANGSSTØNAD -> VedtakDomeneParser.mapVedtakOvergangsstønad(dataTable)
+                StønadType.BARNETILSYN -> {
+                    behandlingIdsToAktivitetArbeid.putAll(VedtakDomeneParser.mapAktivitetForBarnetilsyn(dataTable))
+                    VedtakDomeneParser.mapVedtakForBarnetilsyn(dataTable)
+                }
 
-            StønadType.SKOLEPENGER -> VedtakDomeneParser.mapVedtakForSkolepenger(dataTable)
-        }
+                StønadType.SKOLEPENGER -> VedtakDomeneParser.mapVedtakForSkolepenger(dataTable)
+            }
     }
 
     @Gitt("behandling {int} opphører alle perioder for skolepenger")
@@ -250,12 +259,13 @@ class StepDefinitions {
 
     @Gitt("G i 2023 er 120_000")
     fun grunnbeløpI2023er120_000() {
-        grunnbeløp = Grunnbeløp(
-            periode = Månedsperiode(YearMonth.parse("2023-05"), YearMonth.from(LocalDate.MAX)),
-            grunnbeløp = 120_000.toBigDecimal(),
-            perMnd = 10000.toBigDecimal(),
-            gjennomsnittPerÅr = 117_160.toBigDecimal(),
-        )
+        grunnbeløp =
+            Grunnbeløp(
+                periode = Månedsperiode(YearMonth.parse("2023-05"), YearMonth.from(LocalDate.MAX)),
+                grunnbeløp = 120_000.toBigDecimal(),
+                perMnd = 10000.toBigDecimal(),
+                gjennomsnittPerÅr = 117_160.toBigDecimal(),
+            )
     }
 
     @Gitt("følgende kontantstøtte")
@@ -263,9 +273,10 @@ class StepDefinitions {
         feilHvis(stønadstype != StønadType.BARNETILSYN) {
             "Kan kun sette kontantstøtte på barnetilsyn"
         }
-        gittVedtak = VedtakDomeneParser.mapOgSettPeriodeMedBeløp(gittVedtak, dataTable) { vedtak, perioder ->
-            vedtak.copy(kontantstøtte = KontantstøtteWrapper(perioder))
-        }
+        gittVedtak =
+            VedtakDomeneParser.mapOgSettPeriodeMedBeløp(gittVedtak, dataTable) { vedtak, perioder ->
+                vedtak.copy(kontantstøtte = KontantstøtteWrapper(perioder))
+            }
     }
 
     @Gitt("følgende tilleggsstønad")
@@ -273,9 +284,10 @@ class StepDefinitions {
         feilHvis(stønadstype != StønadType.BARNETILSYN) {
             "Kan kun sette tilleggsstønad på barnetilsyn"
         }
-        gittVedtak = VedtakDomeneParser.mapOgSettPeriodeMedBeløp(gittVedtak, dataTable) { vedtak, perioder ->
-            vedtak.copy(tilleggsstønad = TilleggsstønadWrapper(true, perioder, null))
-        }
+        gittVedtak =
+            VedtakDomeneParser.mapOgSettPeriodeMedBeløp(gittVedtak, dataTable) { vedtak, perioder ->
+                vedtak.copy(tilleggsstønad = TilleggsstønadWrapper(true, perioder, null))
+            }
     }
 
     @Når("beregner ytelse kaster feil med innehold {}")
@@ -285,7 +297,10 @@ class StepDefinitions {
     }
 
     @Når("beregner ytelse med G for år {} med beløp {}")
-    fun `beregn ytelse med gitt grunnbeløp`(år: Int, beløp: Int) {
+    fun `beregn ytelse med gitt grunnbeløp`(
+        år: Int,
+        beløp: Int,
+    ) {
         settGrunnbeløp(år, beløp)
         mockTestMedGrunnbeløpFra(grunnbeløp!!) {
             `beregner ytelse`()
@@ -293,7 +308,10 @@ class StepDefinitions {
     }
 
     @Når("utfør g-omregning for år {} med beløp {}")
-    fun `utfør g-omregning`(år: Int, beløp: Int) {
+    fun `utfør g-omregning`(
+        år: Int,
+        beløp: Int,
+    ) {
         settGrunnbeløp(år, beløp)
         val fagsakId = saksbehandlinger.firstNotNullOf { saksb -> saksb.value.second }.fagsakId
 
@@ -306,14 +324,18 @@ class StepDefinitions {
         }
     }
 
-    private fun settGrunnbeløp(år: Int, beløp: Int) {
+    private fun settGrunnbeløp(
+        år: Int,
+        beløp: Int,
+    ) {
         val mai = YearMonth.of(år, 5)
-        grunnbeløp = Grunnbeløp(
-            periode = Månedsperiode(mai, YearMonth.from(LocalDate.MAX)),
-            grunnbeløp = beløp.toBigDecimal(),
-            perMnd = beløp.toBigDecimal().divide(BeregningUtils.ANTALL_MÅNEDER_ÅR, RoundingMode.HALF_UP),
-            gjennomsnittPerÅr = 0.toBigDecimal(),
-        )
+        grunnbeløp =
+            Grunnbeløp(
+                periode = Månedsperiode(mai, YearMonth.from(LocalDate.MAX)),
+                grunnbeløp = beløp.toBigDecimal(),
+                perMnd = beløp.toBigDecimal().divide(BeregningUtils.ANTALL_MÅNEDER_ÅR, RoundingMode.HALF_UP),
+                gjennomsnittPerÅr = 0.toBigDecimal(),
+            )
     }
 
     private fun mockGOmregning(
@@ -325,14 +347,15 @@ class StepDefinitions {
         every { behandlingService.finnesBehandlingSomIkkeErFerdigstiltEllerSattPåVent(any()) } returns false
 
         every { tilkjentYtelseService.hentForBehandling(any()) } returns tilkjentYtelser.values.first()
-        val behandling = behandling(
-            id = UUID.randomUUID(),
-            opprettetTid = LocalDateTime.now(),
-            type = BehandlingType.REVURDERING,
-            forrigeBehandlingId = forrigeBehandling.id,
-            vedtakstidspunkt = LocalDateTime.MIN,
-            årsak = BehandlingÅrsak.G_OMREGNING,
-        )
+        val behandling =
+            behandling(
+                id = UUID.randomUUID(),
+                opprettetTid = LocalDateTime.now(),
+                type = BehandlingType.REVURDERING,
+                forrigeBehandlingId = forrigeBehandling.id,
+                vedtakstidspunkt = LocalDateTime.MIN,
+                årsak = BehandlingÅrsak.G_OMREGNING,
+            )
         every {
             behandlingService.opprettBehandling(
                 BehandlingType.REVURDERING,
@@ -345,10 +368,11 @@ class StepDefinitions {
             )
         } returns behandling
 
-        every { behandlingService.hentSaksbehandling(behandling.id) } returns saksbehandling(
-            fagsak(id = fagsakId),
-            behandling,
-        )
+        every { behandlingService.hentSaksbehandling(behandling.id) } returns
+            saksbehandling(
+                fagsak(id = fagsakId),
+                behandling,
+            )
 
         every { behandlingService.oppdaterResultatPåBehandling(any(), any()) } returns behandling
         every {
@@ -382,9 +406,10 @@ class StepDefinitions {
 
         if (stønadstype == StønadType.OVERGANGSSTØNAD) {
             // Skriver over inntekt hvis inntekter er definiert
-            gittVedtak = gittVedtak.map {
-                it.copy(inntekter = inntekter[it.behandlingId] ?: it.inntekter)
-            }
+            gittVedtak =
+                gittVedtak.map {
+                    it.copy(inntekter = inntekter[it.behandlingId] ?: it.inntekter)
+                }
         }
 
         gittVedtak.map {
@@ -396,15 +421,16 @@ class StepDefinitions {
             }
             // kan ikke beregne historikk ennå
             if (stønadstype != StønadType.SKOLEPENGER) {
-                beregnetAndelHistorikkList = AndelHistorikkBeregner.lagHistorikk(
-                    stønadstype,
-                    tilkjentYtelser.values.toList(),
-                    lagredeVedtak,
-                    saksbehandlinger.values.map { it.first }.toList(),
-                    null,
-                    behandlingIdsToAktivitetArbeid,
-                    HistorikkKonfigurasjon(brukIkkeVedtatteSatser = false),
-                )
+                beregnetAndelHistorikkList =
+                    AndelHistorikkBeregner.lagHistorikk(
+                        stønadstype,
+                        tilkjentYtelser.values.toList(),
+                        lagredeVedtak,
+                        saksbehandlinger.values.map { it.first }.toList(),
+                        null,
+                        behandlingIdsToAktivitetArbeid,
+                        HistorikkKonfigurasjon(brukIkkeVedtatteSatser = false),
+                    )
             }
         }
     }
@@ -428,7 +454,10 @@ class StepDefinitions {
     }
 
     @Så("forvent følgende vedtaksperioder fra dato: {}")
-    fun `forvent følgende vedtaksperiodene fra dato`(årMåned: String, dataTable: DataTable) {
+    fun `forvent følgende vedtaksperiodene fra dato`(
+        årMåned: String,
+        dataTable: DataTable,
+    ) {
         val behandlingId = UUID.randomUUID()
         opprettBarnForNyBehandling(behandlingId)
         val vedtak = vedtakHistorikkService.hentVedtakFraDato(behandlingId, parseÅrMåned(årMåned))
@@ -471,7 +500,10 @@ class StepDefinitions {
         barnIder.values.flatMap { it.keys }.forEach { IdTIlUUIDHolder.hentEllerOpprettBarn(behandlingId, it) }
 
     @Så("forvent følgende inntektsperioder fra dato: {}")
-    fun `forvent følgende inntektsperioder fra dato`(årMåned: String, dataTable: DataTable) {
+    fun `forvent følgende inntektsperioder fra dato`(
+        årMåned: String,
+        dataTable: DataTable,
+    ) {
         val vedtak =
             vedtakHistorikkService.hentVedtakForOvergangsstønadFraDato(UUID.randomUUID(), parseÅrMåned(årMåned))
         val perioder = vedtak.inntekter
@@ -495,12 +527,18 @@ class StepDefinitions {
     }
 
     @Så("forvent følgende perioder for kontantstøtte fra dato: {}")
-    fun `forvent følgende perioder for kontantstøtte fra dato`(årMåned: String, dataTable: DataTable) {
+    fun `forvent følgende perioder for kontantstøtte fra dato`(
+        årMåned: String,
+        dataTable: DataTable,
+    ) {
         forventFølgendeBeløpsperioder(årMåned, dataTable) { it.perioderKontantstøtte }
     }
 
     @Så("forvent følgende perioder for tilleggsstønad fra dato: {}")
-    fun `forvent følgende perioder for tilleggsstønad fra dato`(årMåned: String, dataTable: DataTable) {
+    fun `forvent følgende perioder for tilleggsstønad fra dato`(
+        årMåned: String,
+        dataTable: DataTable,
+    ) {
         forventFølgendeBeløpsperioder(årMåned, dataTable) { it.tilleggsstønad.perioder }
     }
 
@@ -545,7 +583,10 @@ class StepDefinitions {
     }
 
     @Så("forvent følgende andeler lagret for behandling med id: {int}")
-    fun `forvent følgende andeler lagret`(behandling: Int, dataTable: DataTable) {
+    fun `forvent følgende andeler lagret`(
+        behandling: Int,
+        dataTable: DataTable,
+    ) {
         val behandlingId = behandlingIdTilUUID[behandling]
         val gjeldendeTilkjentYtelse: TilkjentYtelse =
             tilkjentYtelser[behandlingId] ?: error("Fant ikke tilkjent ytelse med id $behandlingId")
@@ -603,13 +644,14 @@ class StepDefinitions {
             .map { it.behandlingId }
             .distinct()
             .foldIndexed<UUID, List<Behandling>>(listOf()) { index, acc, id ->
-                acc + behandling(
-                    id = id,
-                    opprettetTid = LocalDateTime.now().plusMinutes(index.toLong()),
-                    type = if (index == 0) BehandlingType.FØRSTEGANGSBEHANDLING else BehandlingType.REVURDERING,
-                    forrigeBehandlingId = acc.lastOrNull()?.id,
-                    vedtakstidspunkt = LocalDateTime.MIN,
-                )
+                acc +
+                    behandling(
+                        id = id,
+                        opprettetTid = LocalDateTime.now().plusMinutes(index.toLong()),
+                        type = if (index == 0) BehandlingType.FØRSTEGANGSBEHANDLING else BehandlingType.REVURDERING,
+                        forrigeBehandlingId = acc.lastOrNull()?.id,
+                        vedtakstidspunkt = LocalDateTime.MIN,
+                    )
             }
             .map { it to saksbehandling(fagsak, it) }
             .associateBy { it.first.id }

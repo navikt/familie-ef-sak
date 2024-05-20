@@ -30,7 +30,6 @@ import java.time.LocalDate
 import java.util.UUID
 
 internal class OppgaverForOpprettelseServiceTest {
-
     private val oppgaverForOpprettelseRepository = mockk<OppgaverForOpprettelseRepository>()
     private val tilkjentYtelseService = mockk<TilkjentYtelseService>()
     private val behandlingService = mockk<BehandlingService>()
@@ -81,9 +80,10 @@ internal class OppgaverForOpprettelseServiceTest {
 
     @Test
     fun `oppdater innslag når det finnes innslag, og når man kan oppdatere oppgaver `() {
-        every { oppgaverForOpprettelseService.hentOppgavetyperSomKanOpprettes(any()) } returns listOf(
-            OppgaveForOpprettelseType.INNTEKTSKONTROLL_1_ÅR_FREM_I_TID,
-        )
+        every { oppgaverForOpprettelseService.hentOppgavetyperSomKanOpprettes(any()) } returns
+            listOf(
+                OppgaveForOpprettelseType.INNTEKTSKONTROLL_1_ÅR_FREM_I_TID,
+            )
         every { oppgaverForOpprettelseRepository.existsById(any()) } returns true
 
         oppgaverForOpprettelseService.opprettEllerErstatt(behandlingId, listOf())
@@ -95,9 +95,10 @@ internal class OppgaverForOpprettelseServiceTest {
 
     @Test
     fun `lag innslag når det ikke finnes innslag, og når man kan oppdatere oppgaver`() {
-        every { oppgaverForOpprettelseService.hentOppgavetyperSomKanOpprettes(any()) } returns listOf(
-            OppgaveForOpprettelseType.INNTEKTSKONTROLL_1_ÅR_FREM_I_TID,
-        )
+        every { oppgaverForOpprettelseService.hentOppgavetyperSomKanOpprettes(any()) } returns
+            listOf(
+                OppgaveForOpprettelseType.INNTEKTSKONTROLL_1_ÅR_FREM_I_TID,
+            )
         every { oppgaverForOpprettelseRepository.existsById(any()) } returns false
 
         oppgaverForOpprettelseService.opprettEllerErstatt(behandlingId, listOf())
@@ -211,27 +212,31 @@ internal class OppgaverForOpprettelseServiceTest {
         verify { behandlingService.finnSisteIverksatteBehandling(any()) }
     }
 
-    private val tilkjentYtelse2årFremITid = lagTilkjentYtelse(
-        andelerTilkjentYtelse = listOf(
-            lagAndelTilkjentYtelse(
-                fraOgMed = LocalDate.now(),
-                kildeBehandlingId = UUID.randomUUID(),
-                beløp = 10_000,
-                tilOgMed = LocalDate.now().plusYears(2),
-            ),
-        ),
-    )
+    private val tilkjentYtelse2årFremITid =
+        lagTilkjentYtelse(
+            andelerTilkjentYtelse =
+                listOf(
+                    lagAndelTilkjentYtelse(
+                        fraOgMed = LocalDate.now(),
+                        kildeBehandlingId = UUID.randomUUID(),
+                        beløp = 10_000,
+                        tilOgMed = LocalDate.now().plusYears(2),
+                    ),
+                ),
+        )
 
-    private val tilkjentYtelseUnder1årFremITid = lagTilkjentYtelse(
-        andelerTilkjentYtelse = listOf(
-            lagAndelTilkjentYtelse(
-                fraOgMed = LocalDate.now(),
-                kildeBehandlingId = UUID.randomUUID(),
-                beløp = 10_000,
-                tilOgMed = LocalDate.now().plusMonths(11),
-            ),
-        ),
-    )
+    private val tilkjentYtelseUnder1årFremITid =
+        lagTilkjentYtelse(
+            andelerTilkjentYtelse =
+                listOf(
+                    lagAndelTilkjentYtelse(
+                        fraOgMed = LocalDate.now(),
+                        kildeBehandlingId = UUID.randomUUID(),
+                        beløp = 10_000,
+                        tilOgMed = LocalDate.now().plusMonths(11),
+                    ),
+                ),
+        )
 
     private fun lagSaksbehandling(
         stønadType: StønadType = StønadType.OVERGANGSSTØNAD,

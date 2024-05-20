@@ -12,7 +12,6 @@ import java.util.UUID
 class UtestengelseService(
     private val utestengelseRepository: UtestengelseRepository,
 ) {
-
     fun opprettUtestengelse(dto: OpprettUtestengelseDto): UtestengelseDto {
         validerFinnesIkkeOverlappendePerioder(dto)
 
@@ -30,7 +29,10 @@ class UtestengelseService(
             .filterNot { it.slettet }
             .sortedWith(compareBy({ it.fom }, { it.sporbar.opprettetTid }))
 
-    fun slettUtestengelse(fagsakPersonId: UUID, id: UUID) {
+    fun slettUtestengelse(
+        fagsakPersonId: UUID,
+        id: UUID,
+    ) {
         val utestengelse = utestengelseRepository.findByIdOrThrow(id)
         feilHvis(fagsakPersonId != utestengelse.fagsakPersonId) {
             "FagsakPersonId=$fagsakPersonId er ikke lik utestengelse sin fagsakPersonId(${utestengelse.fagsakPersonId})"

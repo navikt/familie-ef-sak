@@ -16,7 +16,6 @@ import java.time.YearMonth
 
 @Service
 class BeregningBarnetilsynService(private val featureToggleService: FeatureToggleService) {
-
     fun beregnYtelseBarnetilsyn(
         utgiftsperioder: List<UtgiftsperiodeDto>,
         kontantstøttePerioder: List<PeriodeMedBeløpDto>,
@@ -110,11 +109,12 @@ class BeregningBarnetilsynService(private val featureToggleService: FeatureToggl
         utgiftsperioder: List<Månedsperiode>,
         reduksjonsperioder: List<Månedsperiode>,
     ): Boolean {
-        return reduksjonsperioder.isNotEmpty() && !reduksjonsperioder.any {
-            utgiftsperioder.any { ut ->
-                ut.overlapper(it)
+        return reduksjonsperioder.isNotEmpty() &&
+            !reduksjonsperioder.any {
+                utgiftsperioder.any { ut ->
+                    ut.overlapper(it)
+                }
             }
-        }
     }
 }
 
@@ -135,11 +135,12 @@ fun List<UtgiftsperiodeDto>.tilBeløpsperioderPerUtgiftsmåned(
     brukIkkeVedtatteSatser: Boolean,
 ) = this.map { it.split() }
     .flatten().associate { utgiftsMåned ->
-        utgiftsMåned.årMåned to utgiftsMåned.tilBeløpsperiodeBarnetilsynDto(
-            kontantstøttePerioder,
-            tilleggsstønadsperioder,
-            brukIkkeVedtatteSatser,
-        )
+        utgiftsMåned.årMåned to
+            utgiftsMåned.tilBeløpsperiodeBarnetilsynDto(
+                kontantstøttePerioder,
+                tilleggsstønadsperioder,
+                brukIkkeVedtatteSatser,
+            )
     }
 
 /**
@@ -163,8 +164,9 @@ fun UtgiftsperiodeDto.split(): List<UtgiftsMåned> {
  * @BeløpsperiodeBarnetilsynDto#beregningsgrunnlag (it.toKey()) er like.
  */
 fun List<BeløpsperiodeBarnetilsynDto>.mergeSammenhengendePerioder(): List<BeløpsperiodeBarnetilsynDto> {
-    val sortertPåDatoListe = this.sortedBy { it.periode }
-        .filter { it.periodetype == PeriodetypeBarnetilsyn.ORDINÆR }
+    val sortertPåDatoListe =
+        this.sortedBy { it.periode }
+            .filter { it.periodetype == PeriodetypeBarnetilsyn.ORDINÆR }
     return sortertPåDatoListe.fold(mutableListOf()) { acc, entry ->
         val last = acc.lastOrNull()
         if (

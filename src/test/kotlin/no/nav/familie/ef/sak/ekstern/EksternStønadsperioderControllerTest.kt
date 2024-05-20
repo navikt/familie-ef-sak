@@ -15,7 +15,6 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 
 internal class EksternStønadsperioderControllerTest : OppslagSpringRunnerTest() {
-
     @Test
     internal fun `perioder - kaller med access_as_application`() {
         headers.setBearerAuth(clientToken("familie-ef-proxy", true))

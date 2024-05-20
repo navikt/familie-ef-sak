@@ -14,24 +14,25 @@ class UtdanningErHensiktsmessigRegel : Vilkårsregel(
     regler = setOf(NAVKONTOR_VURDERING, SAKSBEHANDLER_VURDERING),
     hovedregler = regelIder(NAVKONTOR_VURDERING),
 ) {
-
     companion object {
         private val NAVKONTOR_VURDERING =
             RegelSteg(
                 regelId = RegelId.NAVKONTOR_VURDERING,
-                svarMapping = jaNeiSvarRegel(
-                    hvisJa = NesteRegel(RegelId.SAKSBEHANDLER_VURDERING),
-                    hvisNei = SluttSvarRegel.IKKE_OPPFYLT_MED_PÅKREVD_BEGRUNNELSE,
-                ),
+                svarMapping =
+                    jaNeiSvarRegel(
+                        hvisJa = NesteRegel(RegelId.SAKSBEHANDLER_VURDERING),
+                        hvisNei = SluttSvarRegel.IKKE_OPPFYLT_MED_PÅKREVD_BEGRUNNELSE,
+                    ),
             )
 
         private val SAKSBEHANDLER_VURDERING =
             RegelSteg(
                 regelId = RegelId.SAKSBEHANDLER_VURDERING,
-                svarMapping = jaNeiSvarRegel(
-                    hvisJa = SluttSvarRegel.OPPFYLT_MED_PÅKREVD_BEGRUNNELSE,
-                    hvisNei = SluttSvarRegel.IKKE_OPPFYLT_MED_PÅKREVD_BEGRUNNELSE,
-                ),
+                svarMapping =
+                    jaNeiSvarRegel(
+                        hvisJa = SluttSvarRegel.OPPFYLT_MED_PÅKREVD_BEGRUNNELSE,
+                        hvisNei = SluttSvarRegel.IKKE_OPPFYLT_MED_PÅKREVD_BEGRUNNELSE,
+                    ),
             )
     }
 }

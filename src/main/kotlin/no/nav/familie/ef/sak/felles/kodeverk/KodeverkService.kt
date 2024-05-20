@@ -6,12 +6,17 @@ import java.time.LocalDate
 
 @Service
 class KodeverkService(private val cachedKodeverkService: CachedKodeverkService) {
-
-    fun hentLand(landkode: String, gjeldendeDato: LocalDate): String? {
+    fun hentLand(
+        landkode: String,
+        gjeldendeDato: LocalDate,
+    ): String? {
         return cachedKodeverkService.hentLandkoder().hentGjeldende(landkode, gjeldendeDato, sisteGjeldende = true)
     }
 
-    fun hentPoststed(postnummer: String, gjeldendeDato: LocalDate): String? {
+    fun hentPoststed(
+        postnummer: String,
+        gjeldendeDato: LocalDate,
+    ): String? {
         return cachedKodeverkService.hentPoststed().hentGjeldende(postnummer, gjeldendeDato, sisteGjeldende = true)
     }
 }

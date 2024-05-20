@@ -1,6 +1,7 @@
 package no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl
 
 data class PdlPersonRequestVariables(val ident: String)
+
 data class PdlIdentRequestVariables(
     val ident: String,
     val gruppe: String,

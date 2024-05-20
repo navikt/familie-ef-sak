@@ -31,9 +31,11 @@ class FørstegangsbehandlingService(
     private val iverksettService: IverksettService,
     private val infotrygdPeriodeValideringService: InfotrygdPeriodeValideringService,
 ) {
-
     @Transactional
-    fun opprettFørstegangsbehandling(fagsakId: UUID, førstegangsBehandlingRequest: FørstegangsbehandlingDto): Behandling {
+    fun opprettFørstegangsbehandling(
+        fagsakId: UUID,
+        førstegangsBehandlingRequest: FørstegangsbehandlingDto,
+    ): Behandling {
         validerGyldigÅrsak(førstegangsBehandlingRequest.behandlingsårsak)
         val fagsak = fagsakService.fagsakMedOppdatertPersonIdent(fagsakId)
         infotrygdPeriodeValideringService.validerKanOppretteBehandlingGittInfotrygdData(fagsak)
@@ -59,12 +61,13 @@ class FørstegangsbehandlingService(
         fagsakId: UUID,
         førstegangsBehandlingRequest: FørstegangsbehandlingDto,
     ): Behandling {
-        val behandling = behandlingService.opprettBehandling(
-            behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
-            fagsakId = fagsakId,
-            behandlingsårsak = førstegangsBehandlingRequest.behandlingsårsak,
-            kravMottatt = førstegangsBehandlingRequest.kravMottatt,
-        )
+        val behandling =
+            behandlingService.opprettBehandling(
+                behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+                fagsakId = fagsakId,
+                behandlingsårsak = førstegangsBehandlingRequest.behandlingsårsak,
+                kravMottatt = førstegangsBehandlingRequest.kravMottatt,
+            )
         return behandling
     }
 

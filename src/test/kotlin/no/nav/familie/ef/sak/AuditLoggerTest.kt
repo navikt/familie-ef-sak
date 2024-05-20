@@ -15,7 +15,6 @@ import org.slf4j.MDC
 import org.springframework.mock.web.MockHttpServletRequest
 
 internal class AuditLoggerTest {
-
     private val auditLogger = AuditLogger("familie-ef-sak")
     private val navIdent = "Z1234567"
     private val method = "POST"

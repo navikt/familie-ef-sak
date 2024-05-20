@@ -27,9 +27,7 @@ import no.nav.familie.kontrakter.felles.ef.StønadType.SKOLEPENGER
  * Singleton for å holde på alle regler
  */
 class Vilkårsregler private constructor(val vilkårsregler: Map<VilkårType, Vilkårsregel>) {
-
     companion object {
-
         val ALLE_VILKÅRSREGLER = Vilkårsregler(alleVilkårsregler.associateBy { it.vilkårType })
     }
 }
@@ -38,44 +36,47 @@ private val alleVilkårsregler = StønadType.values().map { vilkårsreglerForSt�
 
 fun vilkårsreglerForStønad(stønadstype: StønadType): List<Vilkårsregel> =
     when (stønadstype) {
-        OVERGANGSSTØNAD -> listOf(
-            ForutgåendeMedlemskapRegel(),
-            OppholdINorgeRegel(),
-            MorEllerFarRegel(),
-            SivilstandRegel(),
-            SamlivRegel(),
-            AleneomsorgRegel(),
-            NyttBarnSammePartnerRegel(),
-            AktivitetRegel(),
-            SagtOppEllerRedusertRegel(),
-            TidligareVedtaksperioderRegel(),
-        )
-        BARNETILSYN -> listOf(
-            ForutgåendeMedlemskapRegel(),
-            OppholdINorgeRegel(),
-            MorEllerFarRegel(),
-            SivilstandRegel(),
-            SamlivRegel(),
-            AleneomsorgRegel(),
-            NyttBarnSammePartnerRegel(),
-            AktivitetArbeidRegel(),
-            InntektRegel(),
-            AlderPåBarnRegel(),
-            DokumentasjonTilsynsutgifterRegel(),
-        )
+        OVERGANGSSTØNAD ->
+            listOf(
+                ForutgåendeMedlemskapRegel(),
+                OppholdINorgeRegel(),
+                MorEllerFarRegel(),
+                SivilstandRegel(),
+                SamlivRegel(),
+                AleneomsorgRegel(),
+                NyttBarnSammePartnerRegel(),
+                AktivitetRegel(),
+                SagtOppEllerRedusertRegel(),
+                TidligareVedtaksperioderRegel(),
+            )
+        BARNETILSYN ->
+            listOf(
+                ForutgåendeMedlemskapRegel(),
+                OppholdINorgeRegel(),
+                MorEllerFarRegel(),
+                SivilstandRegel(),
+                SamlivRegel(),
+                AleneomsorgRegel(),
+                NyttBarnSammePartnerRegel(),
+                AktivitetArbeidRegel(),
+                InntektRegel(),
+                AlderPåBarnRegel(),
+                DokumentasjonTilsynsutgifterRegel(),
+            )
 
-        SKOLEPENGER -> listOf(
-            ForutgåendeMedlemskapRegel(),
-            OppholdINorgeRegel(),
-            MorEllerFarRegel(),
-            SivilstandRegel(),
-            SamlivRegel(),
-            AleneomsorgRegel(),
-            NyttBarnSammePartnerRegel(),
-            RettTilOvergangsstønadRegel(),
-            DokumentasjonAvUtdanningRegel(),
-            UtdanningErHensiktsmessigRegel(),
-        )
+        SKOLEPENGER ->
+            listOf(
+                ForutgåendeMedlemskapRegel(),
+                OppholdINorgeRegel(),
+                MorEllerFarRegel(),
+                SivilstandRegel(),
+                SamlivRegel(),
+                AleneomsorgRegel(),
+                NyttBarnSammePartnerRegel(),
+                RettTilOvergangsstønadRegel(),
+                DokumentasjonAvUtdanningRegel(),
+                UtdanningErHensiktsmessigRegel(),
+            )
     }
 
 fun hentVilkårsregel(vilkårType: VilkårType): Vilkårsregel {

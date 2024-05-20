@@ -32,7 +32,6 @@ class PersonopplysningerService(
     @Qualifier("shortCache")
     private val cacheManager: CacheManager,
 ) {
-
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     fun hentPersonopplysningerForBehandling(behandlingId: UUID): PersonopplysningerDto {
@@ -56,17 +55,19 @@ class PersonopplysningerService(
         val personIdent = behandling.ident
         val egenAnsatt = egenAnsatt(personIdent)
         val søkerIdenter = personService.hentPersonIdenter(personIdent)
-        val tidligerePersonopplysninger = personopplysningerMapper.tilPersonopplysninger(
-            tidligereGrunnlagsdata,
-            egenAnsatt,
-            søkerIdenter,
-        )
+        val tidligerePersonopplysninger =
+            personopplysningerMapper.tilPersonopplysninger(
+                tidligereGrunnlagsdata,
+                egenAnsatt,
+                søkerIdenter,
+            )
 
-        val nyePersonopplysninger = personopplysningerMapper.tilPersonopplysninger(
-            nyGrunnlagsdata,
-            egenAnsatt,
-            søkerIdenter,
-        )
+        val nyePersonopplysninger =
+            personopplysningerMapper.tilPersonopplysninger(
+                nyGrunnlagsdata,
+                egenAnsatt,
+                søkerIdenter,
+            )
         val endringer = finnEndringer(tidligerePersonopplysninger, nyePersonopplysninger)
         return EndringerIPersonopplysningerDto(LocalDateTime.now(), endringer)
     }
@@ -85,9 +86,10 @@ class PersonopplysningerService(
         )
     }
 
-    private fun egenAnsatt(personIdent: String) = cacheManager.getValue("egenAnsatt", personIdent) {
-        egenAnsattClient.egenAnsatt(personIdent)
-    }
+    private fun egenAnsatt(personIdent: String) =
+        cacheManager.getValue("egenAnsatt", personIdent) {
+            egenAnsattClient.egenAnsatt(personIdent)
+        }
 
     fun hentGjeldeneNavn(identer: List<String>): Map<String, String> {
         if (identer.isEmpty()) return emptyMap()

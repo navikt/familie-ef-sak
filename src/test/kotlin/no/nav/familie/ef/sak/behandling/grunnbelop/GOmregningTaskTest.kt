@@ -16,7 +16,6 @@ import org.slf4j.MDC
 import java.util.UUID
 
 internal class GOmregningTaskTest {
-
     private val taskService = mockk<TaskService>()
     private val gOmregningTask = GOmregningTask(mockk(), taskService)
 

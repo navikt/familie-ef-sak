@@ -64,7 +64,6 @@ import no.nav.familie.kontrakter.ef.søknad.Utenlandsopphold as KontraktUtenland
 import no.nav.familie.kontrakter.ef.søknad.Virksomhet as KontraktVirksomhet
 
 object SøknadsskjemaMapper {
-
     fun tilDomene(kontraktsøknad: KontraktSøknadOvergangsstønad): SøknadsskjemaOvergangsstønad {
         return SøknadsskjemaOvergangsstønad(
             fødselsnummer = kontraktsøknad.personalia.verdi.fødselsnummer.verdi.verdi,
@@ -130,7 +129,7 @@ object SøknadsskjemaMapper {
             erUformeltGiftDokumentasjon = tilDomene(sivilstandsdetaljer.erUformeltGiftDokumentasjon?.verdi),
             erUformeltSeparertEllerSkilt = sivilstandsdetaljer.erUformeltSeparertEllerSkilt?.verdi,
             erUformeltSeparertEllerSkiltDokumentasjon =
-            tilDomene(sivilstandsdetaljer.erUformeltSeparertEllerSkiltDokumentasjon?.verdi),
+                tilDomene(sivilstandsdetaljer.erUformeltSeparertEllerSkiltDokumentasjon?.verdi),
             søktOmSkilsmisseSeparasjon = sivilstandsdetaljer.søktOmSkilsmisseSeparasjon?.verdi,
             datoSøktSeparasjon = sivilstandsdetaljer.datoSøktSeparasjon?.verdi,
             separasjonsbekreftelse = tilDomene(sivilstandsdetaljer.separasjonsbekreftelse?.verdi),
@@ -190,7 +189,7 @@ object SøknadsskjemaMapper {
             sammenflyttingsdato = bosituasjon.sammenflyttingsdato?.verdi,
             datoFlyttetFraHverandre = bosituasjon.datoFlyttetFraHverandre?.verdi,
             tidligereSamboerFortsattRegistrertPåAdresse =
-            tilDomene(bosituasjon.tidligereSamboerFortsattRegistrertPåAdresse?.verdi),
+                tilDomene(bosituasjon.tidligereSamboerFortsattRegistrertPåAdresse?.verdi),
         )
 
     private fun tilDomene(sivilstandsplaner: KontraktSivilstandsplaner?): Sivilstandsplaner =
@@ -221,16 +220,19 @@ object SøknadsskjemaMapper {
             )
         }.toSet()
 
-    private fun tilBarnepass(list: List<KontraktBarnepassOrdning>?): Set<Barnepassordning> = list?.map {
-        Barnepassordning(
-            hvaSlagsBarnepassordning = it.hvaSlagsBarnepassOrdning.svarId
-                ?: error("Mangler verdi for hvaSlagsbarnepassOrdning"),
-            navn = it.navn.verdi,
-            datoperiode = it.datoperiode?.let { datoperiode -> tilDomene(datoperiode.verdi) }
-                ?: error("Mangler verdi for datoperiode i barnepassordningen"),
-            beløp = it.belop.verdi.roundToInt(),
-        )
-    }?.toSet() ?: emptySet()
+    private fun tilBarnepass(list: List<KontraktBarnepassOrdning>?): Set<Barnepassordning> =
+        list?.map {
+            Barnepassordning(
+                hvaSlagsBarnepassordning =
+                    it.hvaSlagsBarnepassOrdning.svarId
+                        ?: error("Mangler verdi for hvaSlagsbarnepassOrdning"),
+                navn = it.navn.verdi,
+                datoperiode =
+                    it.datoperiode?.let { datoperiode -> tilDomene(datoperiode.verdi) }
+                        ?: error("Mangler verdi for datoperiode i barnepassordningen"),
+                beløp = it.belop.verdi.roundToInt(),
+            )
+        }?.toSet() ?: emptySet()
 
     private fun tilDomene(datoperiode: KontraktDatoperiode?): Datoperiode? {
         return datoperiode?.let {
@@ -247,7 +249,7 @@ object SøknadsskjemaMapper {
                 harDereSkriftligAvtaleOmSamvær = it.harDereSkriftligAvtaleOmSamvær?.svarId,
                 samværsavtale = tilDomene(it.samværsavtale?.verdi),
                 skalBarnetBoHosSøkerMenAnnenForelderSamarbeiderIkke =
-                tilDomene(it.skalBarnetBoHosSøkerMenAnnenForelderSamarbeiderIkke?.verdi),
+                    tilDomene(it.skalBarnetBoHosSøkerMenAnnenForelderSamarbeiderIkke?.verdi),
                 hvordanPraktiseresSamværet = it.hvordanPraktiseresSamværet?.verdi,
                 borAnnenForelderISammeHus = it.borAnnenForelderISammeHus?.svarId,
                 borAnnenForelderISammeHusBeskrivelse = it.borAnnenForelderISammeHusBeskrivelse?.verdi,
@@ -281,7 +283,7 @@ object SøknadsskjemaMapper {
             erIArbeid = aktivitet.erIArbeid?.svarId,
             erIArbeidDokumentasjon = tilDomene(aktivitet.erIArbeidDokumentasjon?.verdi),
             tidligereUtdanninger =
-            tilTidligereUtdanninger(aktivitet.underUtdanning?.verdi?.tidligereUtdanninger?.verdi),
+                tilTidligereUtdanninger(aktivitet.underUtdanning?.verdi?.tidligereUtdanninger?.verdi),
         )
 
     private fun tilFirmaer(list: List<KontraktSelvstendig>?): Set<Selvstendig> =
@@ -296,12 +298,13 @@ object SøknadsskjemaMapper {
             )
         }?.toSet() ?: emptySet()
 
-    private fun tilAksjeselskap(list: List<KontraktAksjeselskap>?): Set<Aksjeselskap> = list?.map {
-        Aksjeselskap(
-            navn = it.navn.verdi,
-            arbeidsmengde = it.arbeidsmengde?.verdi,
-        )
-    }?.toSet() ?: emptySet()
+    private fun tilAksjeselskap(list: List<KontraktAksjeselskap>?): Set<Aksjeselskap> =
+        list?.map {
+            Aksjeselskap(
+                navn = it.navn.verdi,
+                arbeidsmengde = it.arbeidsmengde?.verdi,
+            )
+        }?.toSet() ?: emptySet()
 
     private fun tilDomene(underUtdanning: KontraktUnderUtdanning?): UnderUtdanning? =
         underUtdanning?.let {
@@ -325,14 +328,16 @@ object SøknadsskjemaMapper {
         list?.map {
             TidligereUtdanning(
                 linjeKursGrad = it.linjeKursGrad.verdi,
-                fra = YearMonth.of(
-                    it.nårVarSkalDuVæreElevStudent.verdi.fraÅr,
-                    it.nårVarSkalDuVæreElevStudent.verdi.fraMåned,
-                ),
-                til = YearMonth.of(
-                    it.nårVarSkalDuVæreElevStudent.verdi.tilÅr,
-                    it.nårVarSkalDuVæreElevStudent.verdi.tilMåned,
-                ),
+                fra =
+                    YearMonth.of(
+                        it.nårVarSkalDuVæreElevStudent.verdi.fraÅr,
+                        it.nårVarSkalDuVæreElevStudent.verdi.fraMåned,
+                    ),
+                til =
+                    YearMonth.of(
+                        it.nårVarSkalDuVæreElevStudent.verdi.tilÅr,
+                        it.nårVarSkalDuVæreElevStudent.verdi.tilMåned,
+                    ),
             )
         }?.toSet() ?: emptySet()
 
@@ -346,7 +351,7 @@ object SøknadsskjemaMapper {
                 hvorØnskerDuArbeid = it.hvorØnskerDuArbeid.verdi,
                 ønskerDuMinst50ProsentStilling = it.ønskerDuMinst50ProsentStilling.verdi,
                 ikkeVilligTilÅTaImotTilbudOmArbeidDokumentasjon =
-                tilDomene(it.ikkeVilligTilÅTaImotTilbudOmArbeidDokumentasjon?.verdi),
+                    tilDomene(it.ikkeVilligTilÅTaImotTilbudOmArbeidDokumentasjon?.verdi),
             )
         }
 
@@ -398,15 +403,16 @@ object SøknadsskjemaMapper {
         dokumentasjonAdresseendring = tilDomene(adresseopplysninger?.verdi?.dokumentasjonAdresseendring?.verdi),
     )
 
-    private fun mapAdresse(adresse: Adresse): String = adresse.let { adresse ->
-        listOfNotNull(
-            adresse.adresse,
-            "${adresse.postnummer}${adresse.poststedsnavn?.takeIf { it.isNotBlank() }?.let { " $it" } ?: ""}",
-            adresse.land,
-        )
-            .filter { it.isNotBlank() }
-            .joinToString(", ")
-    }
+    private fun mapAdresse(adresse: Adresse): String =
+        adresse.let { adresse ->
+            listOfNotNull(
+                adresse.adresse,
+                "${adresse.postnummer}${adresse.poststedsnavn?.takeIf { it.isNotBlank() }?.let { " $it" } ?: ""}",
+                adresse.land,
+            )
+                .filter { it.isNotBlank() }
+                .joinToString(", ")
+        }
 
     private fun tilDomene(stønadsstart: Stønadsstart): YearMonth? =
         stønadsstart.fraMåned?.verdi?.let { måned -> stønadsstart.fraÅr?.verdi?.let { år -> YearMonth.of(år, måned) } }

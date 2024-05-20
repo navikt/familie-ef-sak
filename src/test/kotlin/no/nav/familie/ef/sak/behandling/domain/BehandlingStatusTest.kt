@@ -5,7 +5,6 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
 
 internal class BehandlingStatusTest {
-
     @EnumSource(
         value = BehandlingStatus::class,
         names = ["UTREDES", "OPPRETTET"],

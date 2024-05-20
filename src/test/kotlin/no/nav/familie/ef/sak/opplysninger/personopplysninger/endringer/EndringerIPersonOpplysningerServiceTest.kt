@@ -21,7 +21,6 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
 
 internal class EndringerIPersonOpplysningerServiceTest {
-
     val behandlingService = mockk<BehandlingService>()
     val grunnlagsdataService = mockk<GrunnlagsdataService>()
     val personopplysningerService = mockk<PersonopplysningerService>()
@@ -43,7 +42,6 @@ internal class EndringerIPersonOpplysningerServiceTest {
 
     @Nested
     inner class EndringerMedSjekkLengreEnn4TimerSiden {
-
         val femTimerSiden = LocalDateTime.now().minusHours(5)
 
         @BeforeEach
@@ -92,7 +90,6 @@ internal class EndringerIPersonOpplysningerServiceTest {
 
     @Nested
     inner class EndringeneErNyligOppdatert {
-
         val treTimerSiden = LocalDateTime.now().minusHours(3)
 
         @Test

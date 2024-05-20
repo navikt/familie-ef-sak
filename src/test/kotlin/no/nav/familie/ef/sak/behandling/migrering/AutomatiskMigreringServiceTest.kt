@@ -15,18 +15,18 @@ import org.junit.jupiter.api.Test
 import java.util.Optional
 
 internal class AutomatiskMigreringServiceTest {
-
     private val migreringsstatusRepository = mockk<MigreringsstatusRepository>()
     private val infotrygdReplikaClient = mockk<InfotrygdReplikaClient>()
     private val migreringService = mockk<MigreringService>()
     private val taskService = mockk<TaskService>()
 
-    private val service = AutomatiskMigreringService(
-        migreringsstatusRepository,
-        migreringService,
-        infotrygdReplikaClient,
-        taskService,
-    )
+    private val service =
+        AutomatiskMigreringService(
+            migreringsstatusRepository,
+            migreringService,
+            infotrygdReplikaClient,
+            taskService,
+        )
 
     private val updateSlots = mutableListOf<Migreringsstatus>()
     private val insertAllSlot = slot<List<Migreringsstatus>>()

@@ -18,21 +18,21 @@ import java.math.BigDecimal
 import java.time.YearMonth
 
 class BeregningBarnetilsynEnPeriodeStepDefinitions {
-
     lateinit var resultat: BigDecimal
     lateinit var inputData: PeriodeDataDto
 
     @Gitt("følgende data")
     fun data(dataTable: DataTable) {
-        inputData = dataTable.asMaps().map {
-            PeriodeDataDto(
-                periodeutgift = parseBigDecimal(PERIODEUTGIFT, it),
-                kontantstøtteBeløp = parseBigDecimal(KONTANTSTØTTEBELØP, it),
-                tillegstønadbeløp = parseBigDecimal(TILLEGSSTØNADBELØP, it),
-                antallBarn = parseInt(ANTALL_BARN, it),
-                årMåned = parseÅrMåned(PERIODEDATO, it),
-            )
-        }.first()
+        inputData =
+            dataTable.asMaps().map {
+                PeriodeDataDto(
+                    periodeutgift = parseBigDecimal(PERIODEUTGIFT, it),
+                    kontantstøtteBeløp = parseBigDecimal(KONTANTSTØTTEBELØP, it),
+                    tillegstønadbeløp = parseBigDecimal(TILLEGSSTØNADBELØP, it),
+                    antallBarn = parseInt(ANTALL_BARN, it),
+                    årMåned = parseÅrMåned(PERIODEDATO, it),
+                )
+            }.first()
     }
 
     @Når("vi beregner barnetilsyn beløp")

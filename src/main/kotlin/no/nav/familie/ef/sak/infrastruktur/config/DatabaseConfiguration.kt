@@ -52,7 +52,6 @@ import javax.sql.DataSource
 @EnableJdbcAuditing
 @EnableJdbcRepositories("no.nav.familie")
 class DatabaseConfiguration : AbstractJdbcConfiguration() {
-
     @Bean
     fun operations(dataSource: DataSource): NamedParameterJdbcOperations {
         return NamedParameterJdbcTemplate(dataSource)
@@ -137,7 +136,6 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
 
     @WritingConverter
     class UtbetalingsoppdragTilStringConverter : Converter<Utbetalingsoppdrag, String> {
-
         override fun convert(utbetalingsoppdrag: Utbetalingsoppdrag): String {
             return objectMapper.writeValueAsString(utbetalingsoppdrag)
         }
@@ -145,7 +143,6 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
 
     @ReadingConverter
     class StringTilUtbetalingsoppdragConverter : Converter<String, Utbetalingsoppdrag> {
-
         override fun convert(string: String): Utbetalingsoppdrag {
             return objectMapper.readValue(string, Utbetalingsoppdrag::class.java)
         }
@@ -153,7 +150,6 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
 
     @WritingConverter
     class DokumentTilStringConverter : Converter<Dokumentasjon, String> {
-
         override fun convert(dokumentasjon: Dokumentasjon): String? {
             return objectMapper.writeValueAsString(dokumentasjon)
         }
@@ -161,7 +157,6 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
 
     @ReadingConverter
     class StringTilDokumentConverter : Converter<String, Dokumentasjon> {
-
         override fun convert(s: String): Dokumentasjon {
             return objectMapper.readValue(s, Dokumentasjon::class.java)
         }
@@ -169,7 +164,6 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
 
     @WritingConverter
     class YearMonthTilLocalDateConverter : Converter<YearMonth, LocalDate> {
-
         override fun convert(yearMonth: YearMonth): LocalDate {
             return yearMonth.atDay(1)
         }
@@ -177,7 +171,6 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
 
     @ReadingConverter
     class LocalDateTilYearMonthConverter : Converter<Date, YearMonth> {
-
         override fun convert(date: Date): YearMonth {
             return YearMonth.from(date.toLocalDate())
         }
@@ -185,7 +178,6 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
 
     @ReadingConverter
     class PGobjectTilDelvilkårConverter : Converter<PGobject, DelvilkårsvurderingWrapper> {
-
         override fun convert(pGobject: PGobject): DelvilkårsvurderingWrapper {
             return DelvilkårsvurderingWrapper(pGobject.value?.let { objectMapper.readValue(it) } ?: emptyList())
         }
@@ -193,7 +185,6 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
 
     @WritingConverter
     class DelvilkårTilPGobjectConverter : Converter<DelvilkårsvurderingWrapper, PGobject> {
-
         override fun convert(delvilkårsvurdering: DelvilkårsvurderingWrapper): PGobject =
             PGobject().apply {
                 type = "json"
@@ -203,7 +194,6 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
 
     @WritingConverter
     class GjelderDegTilStringConverter : Converter<GjelderDeg, String> {
-
         override fun convert(verdier: GjelderDeg): String {
             return StringUtils.join(verdier.verdier, ";")
         }
@@ -211,7 +201,6 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
 
     @ReadingConverter
     class StringTilGjelderDegConverter : Converter<String, GjelderDeg> {
-
         override fun convert(verdi: String): GjelderDeg {
             return GjelderDeg(verdi.split(";"))
         }
@@ -219,7 +208,6 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
 
     @WritingConverter
     class ArbeidssituasjonTilStringConverter : Converter<Arbeidssituasjon, String> {
-
         override fun convert(verdier: Arbeidssituasjon): String {
             return StringUtils.join(verdier.verdier, ";")
         }
@@ -227,7 +215,6 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
 
     @ReadingConverter
     class StringTilArbeidssituasjonConverter : Converter<String, Arbeidssituasjon> {
-
         override fun convert(verdi: String): Arbeidssituasjon {
             return Arbeidssituasjon(verdi.split(";"))
         }
@@ -235,7 +222,6 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
 
     @ReadingConverter
     class PGobjectTilJsonWrapperConverter : Converter<PGobject, JsonWrapper?> {
-
         override fun convert(pGobject: PGobject): JsonWrapper? {
             return pGobject.value?.let { JsonWrapper(it) }
         }
@@ -243,7 +229,6 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
 
     @WritingConverter
     class JsonWrapperTilPGobjectConverter : Converter<JsonWrapper, PGobject> {
-
         override fun convert(jsonWrapper: JsonWrapper): PGobject =
             PGobject().apply {
                 type = "json"
@@ -253,7 +238,6 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
 
     @WritingConverter
     class GrunnlagsdataTilPGobjectConverter : Converter<GrunnlagsdataDomene, PGobject> {
-
         override fun convert(data: GrunnlagsdataDomene): PGobject =
             PGobject().apply {
                 type = "json"
@@ -263,7 +247,6 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
 
     @ReadingConverter
     class PGobjectTilGrunnlagsdata : Converter<PGobject, GrunnlagsdataDomene> {
-
         override fun convert(pGobject: PGobject): GrunnlagsdataDomene {
             return objectMapper.readValue(pGobject.value!!)
         }
@@ -271,7 +254,6 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
 
     @WritingConverter
     class FilTilBytearrayConverter : Converter<Fil, ByteArray> {
-
         override fun convert(fil: Fil): ByteArray {
             return fil.bytes
         }
@@ -279,7 +261,6 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
 
     @ReadingConverter
     class BytearrayTilFilConverter : Converter<ByteArray, Fil> {
-
         override fun convert(bytes: ByteArray): Fil {
             return Fil(bytes)
         }
@@ -287,7 +268,6 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
 
     @ReadingConverter
     class PGobjectTilVedtaksperioder : Converter<PGobject, PeriodeWrapper> {
-
         override fun convert(pGobject: PGobject): PeriodeWrapper {
             return PeriodeWrapper(pGobject.value?.let { objectMapper.readValue(it) } ?: emptyList())
         }
@@ -295,7 +275,6 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
 
     @WritingConverter
     class VedtaksperiodeTilPGobjectConverter : Converter<PeriodeWrapper, PGobject> {
-
         override fun convert(perioder: PeriodeWrapper): PGobject =
             PGobject().apply {
                 type = "json"
@@ -305,7 +284,6 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
 
     @ReadingConverter
     class PGobjectTilInntektsperiode : Converter<PGobject, InntektWrapper> {
-
         override fun convert(pGobject: PGobject): InntektWrapper {
             return InntektWrapper(pGobject.value?.let { objectMapper.readValue(it) } ?: emptyList())
         }
@@ -313,7 +291,6 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
 
     @WritingConverter
     class InntektsperiodeTilPGobjectConverter : Converter<InntektWrapper, PGobject> {
-
         override fun convert(inntekter: InntektWrapper): PGobject =
             PGobject().apply {
                 type = "json"
@@ -323,7 +300,6 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
 
     @ReadingConverter
     class PGobjectTilBarnetilsynConverter : Converter<PGobject, BarnetilsynWrapper> {
-
         override fun convert(pGobject: PGobject): BarnetilsynWrapper {
             val barnetilsynVerdi: BarnetilsynWrapper? = pGobject.value?.let { objectMapper.readValue(it) }
             return barnetilsynVerdi ?: BarnetilsynWrapper(perioder = emptyList(), begrunnelse = null)
@@ -332,7 +308,6 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
 
     @WritingConverter
     class BarnetilsynTilPGobjectConverter : Converter<BarnetilsynWrapper, PGobject> {
-
         override fun convert(barnetilsyn: BarnetilsynWrapper): PGobject =
             PGobject().apply {
                 type = "json"
@@ -342,7 +317,6 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
 
     @ReadingConverter
     class PGobjectTilSkolepengerConverter : Converter<PGobject, SkolepengerWrapper> {
-
         override fun convert(pGobject: PGobject): SkolepengerWrapper {
             val eksisterendeVerdi: SkolepengerWrapper? = pGobject.value?.let { objectMapper.readValue(it) }
             return eksisterendeVerdi ?: SkolepengerWrapper(skoleårsperioder = emptyList(), begrunnelse = null)
@@ -351,7 +325,6 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
 
     @WritingConverter
     class SkolepengerTilPGobjectConverter : Converter<SkolepengerWrapper, PGobject> {
-
         override fun convert(barnetilsyn: SkolepengerWrapper): PGobject =
             PGobject().apply {
                 type = "json"
@@ -361,7 +334,6 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
 
     @ReadingConverter
     class PGobjectTilKontantstøtteConverter : Converter<PGobject, KontantstøtteWrapper> {
-
         override fun convert(pGobject: PGobject): KontantstøtteWrapper {
             val kontantstøtteVerdi: KontantstøtteWrapper? = pGobject.value?.let { objectMapper.readValue(it) }
             return kontantstøtteVerdi ?: KontantstøtteWrapper(perioder = emptyList())
@@ -370,7 +342,6 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
 
     @WritingConverter
     class KontantstøtteTilPGobjectConverter : Converter<KontantstøtteWrapper, PGobject> {
-
         override fun convert(kontantstøtte: KontantstøtteWrapper): PGobject =
             PGobject().apply {
                 type = "json"
@@ -380,7 +351,6 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
 
     @ReadingConverter
     class PGobjectTilTilleggsstønadConverter : Converter<PGobject, TilleggsstønadWrapper> {
-
         override fun convert(pGobject: PGobject): TilleggsstønadWrapper {
             val tilleggstønadVerdi: TilleggsstønadWrapper? = pGobject.value?.let { objectMapper.readValue(it) }
             return tilleggstønadVerdi ?: TilleggsstønadWrapper(
@@ -393,7 +363,6 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
 
     @WritingConverter
     class TilleggsstønadTilPGobjectConverter : Converter<TilleggsstønadWrapper, PGobject> {
-
         override fun convert(tilleggsstønad: TilleggsstønadWrapper): PGobject =
             PGobject().apply {
                 type = "json"
@@ -403,7 +372,6 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
 
     @ReadingConverter
     class PGobjectTilDetaljertSimuleringResultat : Converter<PGobject, DetaljertSimuleringResultat> {
-
         override fun convert(pGobject: PGobject): DetaljertSimuleringResultat {
             return DetaljertSimuleringResultat(pGobject.value?.let { objectMapper.readValue(it) } ?: emptyList())
         }
@@ -411,7 +379,6 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
 
     @WritingConverter
     class DetaljertSimuleringResultatTilPGobjectConverter : Converter<DetaljertSimuleringResultat, PGobject> {
-
         override fun convert(simuleringsresultat: DetaljertSimuleringResultat): PGobject =
             PGobject().apply {
                 type = "json"
@@ -421,7 +388,6 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
 
     @ReadingConverter
     class PGobjectTilBeriketSimuleringsresultat : Converter<PGobject, BeriketSimuleringsresultat?> {
-
         override fun convert(pGobject: PGobject): BeriketSimuleringsresultat? {
             return pGobject.value?.let { objectMapper.readValue(it) }
         }
@@ -429,7 +395,6 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
 
     @WritingConverter
     class BeriketSimuleringsresultatTilPGobjectConverter : Converter<BeriketSimuleringsresultat, PGobject> {
-
         override fun convert(simuleringsresultat: BeriketSimuleringsresultat): PGobject =
             PGobject().apply {
                 type = "json"
@@ -439,7 +404,6 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
 
     @ReadingConverter
     class PGobjectTilBrevmottakerPersoner : Converter<PGobject, PersonerWrapper> {
-
         override fun convert(pGobject: PGobject): PersonerWrapper? {
             return pGobject.value?.let { objectMapper.readValue(it) }
         }
@@ -447,7 +411,6 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
 
     @WritingConverter
     class BrevmottakerePersonerTilPGobjectConverter : Converter<PersonerWrapper, PGobject> {
-
         override fun convert(mottakere: PersonerWrapper): PGobject =
             PGobject().apply {
                 type = "json"
@@ -457,7 +420,6 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
 
     @ReadingConverter
     class PGobjectTilBrevmottakerOrganisasjoner : Converter<PGobject, OrganisasjonerWrapper> {
-
         override fun convert(pGobject: PGobject): OrganisasjonerWrapper? {
             return pGobject.value?.let { objectMapper.readValue(it) }
         }
@@ -465,7 +427,6 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
 
     @WritingConverter
     class BrevmottakereOrganisasjonerTilPGobjectConverter : Converter<OrganisasjonerWrapper, PGobject> {
-
         override fun convert(mottakere: OrganisasjonerWrapper): PGobject =
             PGobject().apply {
                 type = "json"

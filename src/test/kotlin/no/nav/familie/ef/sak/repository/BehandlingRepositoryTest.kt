@@ -53,7 +53,6 @@ import java.time.YearMonth
 import java.util.UUID
 
 internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
-
     @Autowired
     private lateinit var behandlingRepository: BehandlingRepository
 
@@ -86,10 +85,11 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
     @Test
     fun `skal finne alle personer med aktiv stønad som ikke er manuelt revurdert siste måneder - filtrer ut person med åpen behandling`() {
         val fagsak = lagrePersonMedVedtak("1", 12)
-        val åpenBehandling = behandling(
-            fagsak,
-            UTREDES,
-        )
+        val åpenBehandling =
+            behandling(
+                fagsak,
+                UTREDES,
+            )
         behandlingRepository.insert(åpenBehandling)
         lagrePersonMedVedtak("2", 12)
         val resultat = behandlingRepository.finnPersonerMedAktivStonadIkkeRevurdertSisteMåneder(antallMåneder = 4)
@@ -105,34 +105,42 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
         assertThat(resultat.size).isEqualTo(1)
     }
 
-    private fun lagrePersonMedVedtak(personIdent: String, antallMånederSidenForrigeRevurdering: Long, stønadTom: YearMonth = YearMonth.now().plusMonths(2), behandlingÅrsak: BehandlingÅrsak = BehandlingÅrsak.NYE_OPPLYSNINGER): Fagsak {
+    private fun lagrePersonMedVedtak(
+        personIdent: String,
+        antallMånederSidenForrigeRevurdering: Long,
+        stønadTom: YearMonth = YearMonth.now().plusMonths(2),
+        behandlingÅrsak: BehandlingÅrsak = BehandlingÅrsak.NYE_OPPLYSNINGER,
+    ): Fagsak {
         val stønadsperiode = Månedsperiode(YearMonth.now().minusMonths(antallMånederSidenForrigeRevurdering), stønadTom)
         val person1 = fagsakPerson(identer = setOf(PersonIdent(personIdent)))
         fagsakPersonRepository.insert(person1)
         val fagsak = testoppsettService.lagreFagsak(fagsak(person = person1))
-        val behandling = behandling(
-            fagsak,
-            resultat = INNVILGET,
-            vedtakstidspunkt = stønadsperiode.fomDato.atStartOfDay(),
-            årsak = behandlingÅrsak,
-            status = FERDIGSTILT,
-        )
-        val vedtaksperiodeList = listOf(
-            vedtaksperiode(
-                startDato = stønadsperiode.fomDato,
-                sluttDato = stønadsperiode.tomDato,
-                vedtaksperiodeType = VedtaksperiodeType.HOVEDPERIODE,
-            ),
-        )
+        val behandling =
+            behandling(
+                fagsak,
+                resultat = INNVILGET,
+                vedtakstidspunkt = stønadsperiode.fomDato.atStartOfDay(),
+                årsak = behandlingÅrsak,
+                status = FERDIGSTILT,
+            )
+        val vedtaksperiodeList =
+            listOf(
+                vedtaksperiode(
+                    startDato = stønadsperiode.fomDato,
+                    sluttDato = stønadsperiode.tomDato,
+                    vedtaksperiodeType = VedtaksperiodeType.HOVEDPERIODE,
+                ),
+            )
         behandlingRepository.insert(behandling)
         val vedtak = vedtak(behandlingId = behandling.id, perioder = PeriodeWrapper(vedtaksperiodeList))
         vedtakRepository.insert(vedtak)
-        val aty = lagAndelTilkjentYtelse(
-            10000,
-            stønadsperiode.fomDato,
-            stønadsperiode.tomDato,
-            kildeBehandlingId = behandling.id,
-        )
+        val aty =
+            lagAndelTilkjentYtelse(
+                10000,
+                stønadsperiode.fomDato,
+                stønadsperiode.tomDato,
+                kildeBehandlingId = behandling.id,
+            )
         val ty = lagTilkjentYtelse(listOf(aty), behandlingId = behandling.id, grunnbeløpsmåned = Grunnbeløpsperioder.forrigeGrunnbeløp.periode.fom)
         tilkjentYtelseRepository.insert(ty)
         return fagsak
@@ -210,24 +218,28 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `finnBehandlingServiceObject returnerer korrekt konstruert BehandlingServiceObject`() {
-        val fagsak = testoppsettService
-            .lagreFagsak(
-                fagsak(
-                    setOf(
-                        PersonIdent(ident = "1"),
-                        PersonIdent(
-                            ident = "2",
-                            sporbar = Sporbar(
-                                endret = Endret(
-                                    endretTid = LocalDateTime.now()
-                                        .plusDays(2),
-                                ),
+        val fagsak =
+            testoppsettService
+                .lagreFagsak(
+                    fagsak(
+                        setOf(
+                            PersonIdent(ident = "1"),
+                            PersonIdent(
+                                ident = "2",
+                                sporbar =
+                                    Sporbar(
+                                        endret =
+                                            Endret(
+                                                endretTid =
+                                                    LocalDateTime.now()
+                                                        .plusDays(2),
+                                            ),
+                                    ),
                             ),
+                            PersonIdent(ident = "3"),
                         ),
-                        PersonIdent(ident = "3"),
                     ),
-                ),
-            )
+                )
         val behandling = behandlingRepository.insert(behandling(fagsak, status = OPPRETTET, resultat = INNVILGET))
 
         val behandlingServiceObject = behandlingRepository.finnSaksbehandling(behandling.id)
@@ -266,18 +278,19 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `finnFnrForBehandlingId(sql) skal finne gjeldende fnr for behandlingsid`() {
-        val fagsak = testoppsettService.lagreFagsak(
-            fagsak(
-                setOf(
-                    PersonIdent(ident = "1"),
-                    PersonIdent(
-                        ident = "2",
-                        sporbar = Sporbar(endret = Endret(endretTid = LocalDateTime.now().plusDays(2))),
+        val fagsak =
+            testoppsettService.lagreFagsak(
+                fagsak(
+                    setOf(
+                        PersonIdent(ident = "1"),
+                        PersonIdent(
+                            ident = "2",
+                            sporbar = Sporbar(endret = Endret(endretTid = LocalDateTime.now().plusDays(2))),
+                        ),
+                        PersonIdent(ident = "3"),
                     ),
-                    PersonIdent(ident = "3"),
                 ),
-            ),
-        )
+            )
         val behandling = behandlingRepository.insert(behandling(fagsak))
         val fnr = behandlingRepository.finnAktivIdent(behandling.id)
         assertThat(fnr).isEqualTo("2")
@@ -370,7 +383,6 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
 
     @Nested
     inner class ExistsByFagsak {
-
         @Test
         fun `inner ikke når det ikke finnes noen behandlinger`() {
             assertThat(behandlingRepository.existsByFagsakId(UUID.randomUUID())).isFalse
@@ -405,7 +417,6 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
 
     @Nested
     inner class Maks1UtredesPerFagsak {
-
         @Test
         fun `skal ikke kunne ha flere behandlinger på samma fagsak med annen status enn ferdigstilt`() {
             val fagsak = testoppsettService.lagreFagsak(fagsak())
@@ -414,9 +425,10 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
             behandlingRepository.insert(behandling(fagsak, status = FERDIGSTILT))
 
             listOf(UTREDES, OPPRETTET, FATTER_VEDTAK, IVERKSETTER_VEDTAK).forEach { status ->
-                val cause = assertThatThrownBy {
-                    behandlingRepository.insert(behandling(fagsak, status = status))
-                }.cause
+                val cause =
+                    assertThatThrownBy {
+                        behandlingRepository.insert(behandling(fagsak, status = status))
+                    }.cause
                 cause.isInstanceOf(DuplicateKeyException::class.java)
                 cause.hasMessageContaining("duplicate key value violates unique constraint \"idx_behandlinger_i_arbeid\"")
             }
@@ -439,9 +451,10 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
             val påVent = behandlingRepository.insert(behandling(fagsak, status = SATT_PÅ_VENT))
             behandlingRepository.insert(behandling(fagsak, status = IVERKSETTER_VEDTAK))
 
-            val cause = assertThatThrownBy {
-                behandlingRepository.update(påVent.copy(status = UTREDES))
-            }.cause
+            val cause =
+                assertThatThrownBy {
+                    behandlingRepository.update(påVent.copy(status = UTREDES))
+                }.cause
             cause.isInstanceOf(DuplicateKeyException::class.java)
             cause.hasMessageContaining("duplicate key value violates unique constraint \"idx_behandlinger_i_arbeid\"")
         }
@@ -457,7 +470,6 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
 
     @Nested
     inner class ExistsByFagsakIdAndStatusIsNot {
-
         @Test
         fun `returnerer true hvis behandling med annen status finnes og false om behandling med annen status ikke finnes`() {
             val fagsak = testoppsettService.lagreFagsak(fagsak(fagsakpersoner("1")))
@@ -518,7 +530,6 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
 
     @Nested
     inner class Vedtakstidspunkt {
-
         private val fagsak = fagsak()
 
         @BeforeEach

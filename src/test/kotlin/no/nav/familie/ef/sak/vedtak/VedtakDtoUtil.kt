@@ -30,7 +30,6 @@ import java.time.YearMonth
 import java.util.UUID
 
 object VedtakDtoUtil {
-
     fun innvilgelseOvergangsstønadDto() =
         InnvilgelseOvergangsstønad(
             "periodebegrunnelse",
@@ -140,13 +139,14 @@ object VedtakDtoUtil {
     fun skolepengerperiodeDto() =
         SkoleårsperiodeSkolepengerDto(
             perioder = listOf(skolepengerDelårsperiode()),
-            utgiftsperioder = listOf(
-                SkolepengerUtgiftDto(
-                    id = UUID.fromString("c076a0b9-0eb9-4a1b-bdcb-d75ebc40570d"),
-                    årMånedFra = YearMonth.of(2021, 1),
-                    stønad = 500,
+            utgiftsperioder =
+                listOf(
+                    SkolepengerUtgiftDto(
+                        id = UUID.fromString("c076a0b9-0eb9-4a1b-bdcb-d75ebc40570d"),
+                        årMånedFra = YearMonth.of(2021, 1),
+                        stønad = 500,
+                    ),
                 ),
-            ),
         )
 
     fun skolepengerDelårsperiode() =

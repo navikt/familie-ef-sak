@@ -13,7 +13,6 @@ import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
 
 internal class FagsakPersonControllerTest : OppslagSpringRunnerTest() {
-
     @Autowired
     private lateinit var fagsakPersonController: FagsakPersonController
 

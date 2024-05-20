@@ -7,6 +7,5 @@ import java.util.UUID
 
 @Repository
 interface BarnRepository : RepositoryInterface<BehandlingBarn, UUID>, InsertUpdateRepository<BehandlingBarn> {
-
     fun findByBehandlingId(behandlingId: UUID): List<BehandlingBarn>
 }

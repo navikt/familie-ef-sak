@@ -28,8 +28,10 @@ class AndelsHistorikkService(
     private val barnService: BarnService,
     private val featureToggleService: FeatureToggleService,
 ) {
-
-    fun hentHistorikk(fagsakId: UUID, tilOgMedBehandlingId: UUID?): List<AndelHistorikkDto> {
+    fun hentHistorikk(
+        fagsakId: UUID,
+        tilOgMedBehandlingId: UUID?,
+    ): List<AndelHistorikkDto> {
         val tilkjenteYtelser = tilkjentYtelseRepository.finnAlleIverksatteForFagsak(fagsakId)
         if (tilkjenteYtelser.isEmpty()) {
             return emptyList()
@@ -60,9 +62,10 @@ class AndelsHistorikkService(
         return vilkårsvurderinger.associate { vilkårsvurdering ->
             val delvilkårsvurderinger = vilkårsvurdering.delvilkårsvurdering.delvilkårsvurderinger
 
-            vilkårsvurdering.behandlingId to delvilkårsvurderinger.map { delvilkårsvurdering ->
-                delvilkårsvurdering.vurderinger.single { it.regelId == RegelId.ER_I_ARBEID_ELLER_FORBIGÅENDE_SYKDOM }.svar
-            }.single()
+            vilkårsvurdering.behandlingId to
+                delvilkårsvurderinger.map { delvilkårsvurdering ->
+                    delvilkårsvurdering.vurderinger.single { it.regelId == RegelId.ER_I_ARBEID_ELLER_FORBIGÅENDE_SYKDOM }.svar
+                }.single()
         }
     }
 
@@ -74,12 +77,13 @@ class AndelsHistorikkService(
             val barnPåBehandling = barnService.finnBarnPåBehandling(behandlingId)
             val vedtaksdatoEllerDagensdato = behandling.vedtakstidspunkt?.toLocalDate() ?: LocalDate.now()
 
-            val barnIdForAlleAktuelleBehandlinger = hentHistorikk(fagsak.id, behandling.forrigeBehandlingId)
-                .filter { it.endring?.type != EndringType.FJERNET }
-                .filter { it.endring?.type != EndringType.ERSTATTET }
-                .filter { it.andel.beløp > 0 && it.andel.periode.toDatoperiode().inneholder(vedtaksdatoEllerDagensdato) }
-                .map { it.andel.barn }
-                .flatten()
+            val barnIdForAlleAktuelleBehandlinger =
+                hentHistorikk(fagsak.id, behandling.forrigeBehandlingId)
+                    .filter { it.endring?.type != EndringType.FJERNET }
+                    .filter { it.endring?.type != EndringType.ERSTATTET }
+                    .filter { it.andel.beløp > 0 && it.andel.periode.toDatoperiode().inneholder(vedtaksdatoEllerDagensdato) }
+                    .map { it.andel.barn }
+                    .flatten()
             val behandlingsbarn = barnService.hentBehandlingBarnForBarnIder(barnIdForAlleAktuelleBehandlinger)
             val barnMedLøpendeStønad =
                 barnPåBehandling.filter { barnetViSerPå -> behandlingsbarn.any { it.personIdent == barnetViSerPå.personIdent } }

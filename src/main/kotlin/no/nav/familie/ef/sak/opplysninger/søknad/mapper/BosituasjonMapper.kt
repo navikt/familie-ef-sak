@@ -5,7 +5,6 @@ import no.nav.familie.ef.sak.opplysninger.søknad.domain.Bosituasjon
 import no.nav.familie.ef.sak.vilkår.dto.BosituasjonDto
 
 object BosituasjonMapper {
-
     fun tilDto(bosituasjon: Bosituasjon): BosituasjonDto {
         val samboerDto = bosituasjon.samboer?.let { PersonMinimumDto(it.navn, it.fødselsdato, it.fødselsnummer) }
 

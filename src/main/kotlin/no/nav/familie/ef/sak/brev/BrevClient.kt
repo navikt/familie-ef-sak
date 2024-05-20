@@ -22,7 +22,6 @@ class BrevClient(
     @Qualifier("utenAuth")
     private val restOperations: RestOperations,
 ) : AbstractPingableRestClient(restOperations, "familie.brev") {
-
     override val pingUri: URI = URI.create("$familieBrevUri/api/status")
 
     override fun ping() {
@@ -62,9 +61,7 @@ class BrevClient(
     }
 
     companion object {
-
-        const val ef = "ef-brev"
-        const val test = "testdata"
+        const val EF = "ef-brev"
     }
 }
 

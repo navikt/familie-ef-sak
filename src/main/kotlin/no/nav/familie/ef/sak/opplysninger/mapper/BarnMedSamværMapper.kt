@@ -31,7 +31,6 @@ import java.time.LocalDate
 class BarnMedSamværMapper(
     private val adresseMapper: AdresseMapper,
 ) {
-
     fun slåSammenBarnMedSamvær(
         søknadsgrunnlag: List<BarnMedSamværSøknadsgrunnlagDto>,
         registergrunnlag: List<BarnMedSamværRegistergrunnlagDto>,
@@ -58,12 +57,18 @@ class BarnMedSamværMapper(
         return behandlingBarn.map { barn -> mapSøknadsgrunnlag(barn, barn.søknadBarnId?.let { søknadsbarn[it] }) }
     }
 
-    fun mapBarnepass(behandlingBarn: List<BehandlingBarn>, søknadBarn: Collection<SøknadBarn>): List<BarnepassDto> {
+    fun mapBarnepass(
+        behandlingBarn: List<BehandlingBarn>,
+        søknadBarn: Collection<SøknadBarn>,
+    ): List<BarnepassDto> {
         val søknadsbarn = søknadBarn.associateBy { it.id }
         return behandlingBarn.map { barn -> mapBarnepass(barn, barn.søknadBarnId?.let { søknadsbarn[it] }) }
     }
 
-    private fun mapBarnepass(behandlingBarn: BehandlingBarn, søknadBarn: SøknadBarn?): BarnepassDto {
+    private fun mapBarnepass(
+        behandlingBarn: BehandlingBarn,
+        søknadBarn: SøknadBarn?,
+    ): BarnepassDto {
         return BarnepassDto(
             id = behandlingBarn.id,
             skalHaBarnepass = søknadBarn?.skalHaBarnepass ?: false,
@@ -132,10 +137,11 @@ class BarnMedSamværMapper(
         personIdentSøker: String,
         søknadsbarn: Collection<SøknadBarn>,
     ): String? {
-        val fnr = barn.barn?.forelderBarnRelasjon?.firstOrNull {
-            it.relatertPersonsIdent != personIdentSøker && it.relatertPersonsRolle != Familierelasjonsrolle.BARN
-        }?.relatertPersonsIdent
-            ?: søknadsbarn.firstOrNull { it.id == barn.behandlingBarn.søknadBarnId }?.annenForelder?.person?.fødselsnummer
+        val fnr =
+            barn.barn?.forelderBarnRelasjon?.firstOrNull {
+                it.relatertPersonsIdent != personIdentSøker && it.relatertPersonsRolle != Familierelasjonsrolle.BARN
+            }?.relatertPersonsIdent
+                ?: søknadsbarn.firstOrNull { it.id == barn.behandlingBarn.søknadBarnId }?.annenForelder?.person?.fødselsnummer
         return fnr
     }
 
@@ -150,19 +156,22 @@ class BarnMedSamværMapper(
             id = matchetBarn.behandlingBarn.id,
             navn = matchetBarn.barn?.navn?.visningsnavn(),
             fødselsnummer = matchetBarn.fødselsnummer,
-            harSammeAdresse = matchetBarn.barn?.let {
-                AdresseHjelper.harRegistrertSammeBostedsadresseSomForelder(it, søkerAdresse)
-            },
+            harSammeAdresse =
+                matchetBarn.barn?.let {
+                    AdresseHjelper.harRegistrertSammeBostedsadresseSomForelder(it, søkerAdresse)
+                },
             deltBostedPerioder = matchetBarn.barn?.deltBosted.tilDto(),
-            harDeltBostedVedGrunnlagsdataopprettelse = AdresseHjelper.harDeltBosted(
-                matchetBarn.barn,
-                grunnlagsdataOpprettet,
-            ),
+            harDeltBostedVedGrunnlagsdataopprettelse =
+                AdresseHjelper.harDeltBosted(
+                    matchetBarn.barn,
+                    grunnlagsdataOpprettet,
+                ),
             forelder = pdlAnnenForelder?.let { tilAnnenForelderDto(it, annenForelderFnr, søkerAdresse) },
             dødsdato = matchetBarn.barn?.dødsfall?.gjeldende()?.dødsdato,
             fødselsdato = matchetBarn.barn?.fødsel?.gjeldende()?.fødselsdato,
-            folkeregisterpersonstatus = matchetBarn.barn?.folkeregisterpersonstatus?.gjeldende()
-                ?.let(Folkeregisterpersonstatus::fraPdl),
+            folkeregisterpersonstatus =
+                matchetBarn.barn?.folkeregisterpersonstatus?.gjeldende()
+                    ?.let(Folkeregisterpersonstatus::fraPdl),
         )
     }
 

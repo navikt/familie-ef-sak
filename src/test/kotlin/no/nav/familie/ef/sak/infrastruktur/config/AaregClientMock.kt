@@ -17,23 +17,23 @@ import org.springframework.context.annotation.Profile
 
 @Configuration
 class AaregClientMock {
-
     @Profile("mock-aareg")
     @Bean
     @Primary
     fun arbeidsforholdClient(): ArbeidsforholdClient {
         val mockk = mockk<ArbeidsforholdClient>()
-        val mockResponse = listOf(
-            Arbeidsforhold(
-                navArbeidsforholdId = 1L,
-                arbeidsforholdId = "1",
-                arbeidstaker = Arbeidstaker("type", "offentligIdent", "id"),
-                arbeidsgiver = Arbeidsgiver(ArbeidsgiverType.Organisasjon, "orgnummer", "offentligIdent"),
-                type = "type",
-                ansettelsesperiode = Ansettelsesperiode(),
-                arbeidsavtaler = listOf(Arbeidsavtaler()),
-            ),
-        )
+        val mockResponse =
+            listOf(
+                Arbeidsforhold(
+                    navArbeidsforholdId = 1L,
+                    arbeidsforholdId = "1",
+                    arbeidstaker = Arbeidstaker("type", "offentligIdent", "id"),
+                    arbeidsgiver = Arbeidsgiver(ArbeidsgiverType.Organisasjon, "orgnummer", "offentligIdent"),
+                    type = "type",
+                    ansettelsesperiode = Ansettelsesperiode(),
+                    arbeidsavtaler = listOf(Arbeidsavtaler()),
+                ),
+            )
         every { mockk.hentArbeidsforhold(any(), any()) } returns Ressurs.success(mockResponse)
         return mockk
     }

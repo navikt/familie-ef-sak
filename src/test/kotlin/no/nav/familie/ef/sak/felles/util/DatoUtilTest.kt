@@ -11,10 +11,8 @@ import java.time.Year
 import java.time.YearMonth
 
 internal class DatoUtilTest {
-
     @Nested
     inner class DatoEllerIdag {
-
         @Test
         internal fun `Hvis localDate er null skal den returnere dagens dato`() {
             assertThat(datoEllerIdag(null)).isEqualTo(LocalDate.now())
@@ -29,7 +27,6 @@ internal class DatoUtilTest {
 
     @Nested
     inner class IsEqualOrBefore {
-
         @Test
         internal fun `localdate - isEqualOrBefore`() {
             val første = LocalDate.now().minusDays(1)
@@ -51,7 +48,6 @@ internal class DatoUtilTest {
 
     @Nested
     inner class ErPåfølgende {
-
         @Test
         internal fun `er påfølgende måned`() {
             val gjeldende = YearMonth.of(2020, 12)
@@ -64,7 +60,6 @@ internal class DatoUtilTest {
 
     @Nested
     inner class Min {
-
         @Test
         internal fun `min av LocalDate`() {
             val first = LocalDate.of(2021, 1, 1)
@@ -92,7 +87,6 @@ internal class DatoUtilTest {
 
     @Nested
     inner class SkoleårTest {
-
         private val skoleår2021 = Skoleår(Year.of(2021))
 
         @Test
@@ -170,7 +164,6 @@ internal class DatoUtilTest {
 
     @Nested
     inner class HarGåttAntallTimer {
-
         @Test
         internal fun `sjekker har gått mer enn X timer`() {
             assertThat(LocalDateTime.now().harGåttAntallTimer(4)).isFalse

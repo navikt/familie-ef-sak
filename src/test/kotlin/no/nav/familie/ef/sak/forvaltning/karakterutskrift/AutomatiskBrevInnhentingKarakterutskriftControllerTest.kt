@@ -17,7 +17,6 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 
 internal class AutomatiskBrevInnhentingKarakterutskriftControllerTest : OppslagSpringRunnerTest() {
-
     @Autowired lateinit var taskService: TaskService
 
     @BeforeEach

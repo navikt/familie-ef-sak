@@ -67,15 +67,17 @@ class BeregnYtelseSteg(
     private val oppgaverForOpprettelseService: OppgaverForOpprettelseService,
     private val featureToggleService: FeatureToggleService,
 ) : BehandlingSteg<VedtakDto> {
-
     private val logger = LoggerFactory.getLogger(javaClass)
-    private val MIDLERTIDIG_OPPHØR_FEILMELDING = "Kan ikke starte vedtaket med opphørsperiode for en førstegangsbehandling"
+    private val midlertidigOpphørFeilmelding = "Kan ikke starte vedtaket med opphørsperiode for en førstegangsbehandling"
 
     override fun stegType(): StegType {
         return StegType.BEREGNE_YTELSE
     }
 
-    override fun utførSteg(saksbehandling: Saksbehandling, data: VedtakDto) {
+    override fun utførSteg(
+        saksbehandling: Saksbehandling,
+        data: VedtakDto,
+    ) {
         validerStønadstype(saksbehandling, data)
         validerGyldigeVedtaksperioder(saksbehandling, data)
 
@@ -129,39 +131,53 @@ class BeregnYtelseSteg(
         }
     }
 
-    private fun validerGyldigStartperiodeForOvergangsstønad(vedtak: InnvilgelseOvergangsstønad, behandling: Saksbehandling) {
+    private fun validerGyldigStartperiodeForOvergangsstønad(
+        vedtak: InnvilgelseOvergangsstønad,
+        behandling: Saksbehandling,
+    ) {
         if (behandling.type == FØRSTEGANGSBEHANDLING) {
             val starterMedMidlertidigOpphør = vedtak.perioder.firstOrNull()?.erMidlertidigOpphørEllerSanksjon() == true
-            feilHvis(starterMedMidlertidigOpphør) { MIDLERTIDIG_OPPHØR_FEILMELDING }
+            feilHvis(starterMedMidlertidigOpphør) { midlertidigOpphørFeilmelding }
         }
     }
 
-    private fun validerGyldigStartperiodeForBarnetilsyn(vedtak: InnvilgelseBarnetilsyn, behandling: Saksbehandling) {
+    private fun validerGyldigStartperiodeForBarnetilsyn(
+        vedtak: InnvilgelseBarnetilsyn,
+        behandling: Saksbehandling,
+    ) {
         if (behandling.type == FØRSTEGANGSBEHANDLING) {
             val starterMedMidlertidigOpphør = vedtak.perioder.firstOrNull()?.erMidlertidigOpphørEllerSanksjon == true
-            feilHvis(starterMedMidlertidigOpphør) { MIDLERTIDIG_OPPHØR_FEILMELDING }
+            feilHvis(starterMedMidlertidigOpphør) { midlertidigOpphørFeilmelding }
         }
     }
 
-    private fun validerSanksjoner(innvilget: InnvilgelseBarnetilsyn, behandling: Saksbehandling) {
+    private fun validerSanksjoner(
+        innvilget: InnvilgelseBarnetilsyn,
+        behandling: Saksbehandling,
+    ) {
         if (behandling.erMaskinellOmregning) {
             return
         }
 
-        val nyeSanksjonsperioder = innvilget.perioder
-            .filter { it.periodetype == PeriodetypeBarnetilsyn.SANKSJON_1_MND }
-            .map { it.periode to (it.sanksjonsårsak ?: error("Mangler sanksjonsårsak")) }
+        val nyeSanksjonsperioder =
+            innvilget.perioder
+                .filter { it.periodetype == PeriodetypeBarnetilsyn.SANKSJON_1_MND }
+                .map { it.periode to (it.sanksjonsårsak ?: error("Mangler sanksjonsårsak")) }
         validerHarIkkeLagtTilSanksjonsperioder(behandling, nyeSanksjonsperioder)
     }
 
-    private fun validerSanksjoner(innvilget: InnvilgelseOvergangsstønad, behandling: Saksbehandling) {
+    private fun validerSanksjoner(
+        innvilget: InnvilgelseOvergangsstønad,
+        behandling: Saksbehandling,
+    ) {
         if (behandling.erMaskinellOmregning) {
             return
         }
 
-        val nyeSanksjonsperioder = innvilget.perioder
-            .filter { it.periodeType == VedtaksperiodeType.SANKSJON }
-            .map { it.periode to (it.sanksjonsårsak ?: error("Mangler sanksjonsårsak")) }
+        val nyeSanksjonsperioder =
+            innvilget.perioder
+                .filter { it.periodeType == VedtaksperiodeType.SANKSJON }
+                .map { it.periode to (it.sanksjonsårsak ?: error("Mangler sanksjonsårsak")) }
         validerHarIkkeLagtTilSanksjonsperioder(behandling, nyeSanksjonsperioder)
     }
 
@@ -170,11 +186,12 @@ class BeregnYtelseSteg(
         nyeSanksjonsperioder: List<Pair<Månedsperiode, Sanksjonsårsak>>,
     ) {
         val historikk = andelsHistorikkService.hentHistorikk(behandling.fagsakId, null)
-        val historiskeSanksjonsperioder = historikk
-            .filter { it.erAktivVedtaksperiode() }
-            .filter { it.erSanksjon }
-            .map { it.andel.periode to it.sanksjonsårsak }
-            .toSet()
+        val historiskeSanksjonsperioder =
+            historikk
+                .filter { it.erAktivVedtaksperiode() }
+                .filter { it.erSanksjon }
+                .map { it.andel.periode to it.sanksjonsårsak }
+                .toSet()
 
         val nySanksjonsperiodeUtenTreff = nyeSanksjonsperioder.find { !historiskeSanksjonsperioder.contains(it) }
         feilHvis(nySanksjonsperiodeUtenTreff != null) {
@@ -183,13 +200,17 @@ class BeregnYtelseSteg(
         }
     }
 
-    private fun validerStartTidEtterSanksjon(vedtakFom: YearMonth, behandling: Saksbehandling) {
-        val nyesteSanksjonsperiode = andelsHistorikkService.hentHistorikk(behandling.fagsakId, null)
-            .filter { it.erAktivVedtaksperiode() }
-            .lastOrNull {
-                it.periodeType == VedtaksperiodeType.SANKSJON ||
-                    it.periodetypeBarnetilsyn == PeriodetypeBarnetilsyn.SANKSJON_1_MND
-            }
+    private fun validerStartTidEtterSanksjon(
+        vedtakFom: YearMonth,
+        behandling: Saksbehandling,
+    ) {
+        val nyesteSanksjonsperiode =
+            andelsHistorikkService.hentHistorikk(behandling.fagsakId, null)
+                .filter { it.erAktivVedtaksperiode() }
+                .lastOrNull {
+                    it.periodeType == VedtaksperiodeType.SANKSJON ||
+                        it.periodetypeBarnetilsyn == PeriodetypeBarnetilsyn.SANKSJON_1_MND
+                }
         nyesteSanksjonsperiode?.andel?.stønadFra?.let { sanksjonsdato ->
             feilHvis(sanksjonsdato >= vedtakFom.atDay(1)) {
                 "Systemet støtter ikke revurdering før sanksjonsperioden. Kontakt brukerstøtte for videre bistand"
@@ -197,7 +218,10 @@ class BeregnYtelseSteg(
         }
     }
 
-    private fun validerGyldigeVedtaksperioder(saksbehandling: Saksbehandling, data: VedtakDto) {
+    private fun validerGyldigeVedtaksperioder(
+        saksbehandling: Saksbehandling,
+        data: VedtakDto,
+    ) {
         if (data is InnvilgelseOvergangsstønad) {
             val harOpphørsperioder = data.perioder.any { it.periodeType == VedtaksperiodeType.MIDLERTIDIG_OPPHØR }
             val harInnvilgedePerioder = data.perioder.any { !it.erMidlertidigOpphørEllerSanksjon() }
@@ -270,33 +294,39 @@ class BeregnYtelseSteg(
         }
     }
 
-    private fun validerStønadstype(saksbehandling: Saksbehandling, data: VedtakDto) {
+    private fun validerStønadstype(
+        saksbehandling: Saksbehandling,
+        data: VedtakDto,
+    ) {
         when (saksbehandling.stønadstype) {
-            StønadType.OVERGANGSSTØNAD -> validerGyldigeVedtakstyper(
-                saksbehandling.stønadstype,
-                data,
-                InnvilgelseOvergangsstønad::class,
-                Avslå::class,
-                Opphør::class,
-                Sanksjonert::class,
-            )
+            StønadType.OVERGANGSSTØNAD ->
+                validerGyldigeVedtakstyper(
+                    saksbehandling.stønadstype,
+                    data,
+                    InnvilgelseOvergangsstønad::class,
+                    Avslå::class,
+                    Opphør::class,
+                    Sanksjonert::class,
+                )
 
-            StønadType.BARNETILSYN -> validerGyldigeVedtakstyper(
-                saksbehandling.stønadstype,
-                data,
-                InnvilgelseBarnetilsyn::class,
-                Avslå::class,
-                Opphør::class,
-                Sanksjonert::class,
-            )
+            StønadType.BARNETILSYN ->
+                validerGyldigeVedtakstyper(
+                    saksbehandling.stønadstype,
+                    data,
+                    InnvilgelseBarnetilsyn::class,
+                    Avslå::class,
+                    Opphør::class,
+                    Sanksjonert::class,
+                )
 
-            StønadType.SKOLEPENGER -> validerGyldigeVedtakstyper(
-                saksbehandling.stønadstype,
-                data,
-                InnvilgelseSkolepenger::class,
-                Avslå::class,
-                OpphørSkolepenger::class,
-            )
+            StønadType.SKOLEPENGER ->
+                validerGyldigeVedtakstyper(
+                    saksbehandling.stønadstype,
+                    data,
+                    InnvilgelseSkolepenger::class,
+                    Avslå::class,
+                    OpphørSkolepenger::class,
+                )
         }
     }
 
@@ -363,14 +393,16 @@ class BeregnYtelseSteg(
             lagBeløpsperioderForInnvilgelseOvergangsstønad(vedtak, saksbehandling)
         brukerfeilHvis(andelerTilkjentYtelse.isEmpty()) { "Innvilget vedtak må ha minimum en beløpsperiode" }
 
-        val (nyeAndeler, startdato) = when (saksbehandling.type) {
-            FØRSTEGANGSBEHANDLING -> andelerTilkjentYtelse to startdatoForFørstegangsbehandling(andelerTilkjentYtelse)
-            REVURDERING -> nyeAndelerForRevurderingAvOvergangsstønadMedStartdato(
-                saksbehandling,
-                vedtak,
-                andelerTilkjentYtelse,
-            )
-        }
+        val (nyeAndeler, startdato) =
+            when (saksbehandling.type) {
+                FØRSTEGANGSBEHANDLING -> andelerTilkjentYtelse to startdatoForFørstegangsbehandling(andelerTilkjentYtelse)
+                REVURDERING ->
+                    nyeAndelerForRevurderingAvOvergangsstønadMedStartdato(
+                        saksbehandling,
+                        vedtak,
+                        andelerTilkjentYtelse,
+                    )
+            }
 
         tilkjentYtelseService.opprettTilkjentYtelse(
             TilkjentYtelse(
@@ -393,14 +425,16 @@ class BeregnYtelseSteg(
             lagBeløpsperioderForInnvilgelseBarnetilsyn(vedtak, saksbehandling)
         brukerfeilHvis(andelerTilkjentYtelse.isEmpty()) { "Innvilget vedtak må ha minimum en beløpsperiode" }
 
-        val (nyeAndeler, startdato) = when (saksbehandling.type) {
-            FØRSTEGANGSBEHANDLING -> andelerTilkjentYtelse to startdatoForFørstegangsbehandling(andelerTilkjentYtelse)
-            REVURDERING -> nyeAndelerForRevurderingAvBarnetilsynMedStartdato(
-                saksbehandling,
-                vedtak,
-                andelerTilkjentYtelse,
-            )
-        }
+        val (nyeAndeler, startdato) =
+            when (saksbehandling.type) {
+                FØRSTEGANGSBEHANDLING -> andelerTilkjentYtelse to startdatoForFørstegangsbehandling(andelerTilkjentYtelse)
+                REVURDERING ->
+                    nyeAndelerForRevurderingAvBarnetilsynMedStartdato(
+                        saksbehandling,
+                        vedtak,
+                        andelerTilkjentYtelse,
+                    )
+            }
 
         tilkjentYtelseService.opprettTilkjentYtelse(
             TilkjentYtelse(
@@ -416,21 +450,24 @@ class BeregnYtelseSteg(
         vedtak: VedtakSkolepengerDto,
         saksbehandling: Saksbehandling,
     ) {
-        val forrigeTilkjentYtelse = saksbehandling.forrigeBehandlingId?.let { forrigeBehandlingId ->
-            tilkjentYtelseService.hentForBehandling(forrigeBehandlingId)
-        }
+        val forrigeTilkjentYtelse =
+            saksbehandling.forrigeBehandlingId?.let { forrigeBehandlingId ->
+                tilkjentYtelseService.hentForBehandling(forrigeBehandlingId)
+            }
         val andelerTilkjentYtelse = lagBeløpsperioderForInnvilgelseSkolepenger(vedtak, saksbehandling)
         validerSkolepenger(saksbehandling, vedtak, andelerTilkjentYtelse, forrigeTilkjentYtelse)
-        val (nyeAndeler, startdato) = when (saksbehandling.type) {
-            FØRSTEGANGSBEHANDLING -> andelerTilkjentYtelse to startdatoForFørstegangsbehandling(andelerTilkjentYtelse)
-            // Burde kanskje summere tidligere forbrukt fra andeler, per skoleår
-            REVURDERING -> {
-                val startdatoNyeAndeler = andelerTilkjentYtelse.minOfOrNull { it.stønadFom }
-                val nyttStartdato = min(forrigeTilkjentYtelse?.startdato, startdatoNyeAndeler)
-                    ?: error("Må ha startdato fra forrige behandling eller sende inn andeler")
-                andelerTilkjentYtelse to nyttStartdato
+        val (nyeAndeler, startdato) =
+            when (saksbehandling.type) {
+                FØRSTEGANGSBEHANDLING -> andelerTilkjentYtelse to startdatoForFørstegangsbehandling(andelerTilkjentYtelse)
+                // Burde kanskje summere tidligere forbrukt fra andeler, per skoleår
+                REVURDERING -> {
+                    val startdatoNyeAndeler = andelerTilkjentYtelse.minOfOrNull { it.stønadFom }
+                    val nyttStartdato =
+                        min(forrigeTilkjentYtelse?.startdato, startdatoNyeAndeler)
+                            ?: error("Må ha startdato fra forrige behandling eller sende inn andeler")
+                    andelerTilkjentYtelse to nyttStartdato
+                }
             }
-        }
 
         tilkjentYtelseService.opprettTilkjentYtelse(
             TilkjentYtelse(
@@ -546,9 +583,10 @@ class BeregnYtelseSteg(
         brukerfeilHvis(behandling.forrigeBehandlingId == null) {
             "Kan ikke opprette sanksjon når det ikke finnes en tidligere behandling"
         }
-        val erAlleredeSanksjonertOppgittMåned = andelsHistorikkService.hentHistorikk(behandling.fagsakId, null)
-            .filter { it.erAktivVedtaksperiode() }
-            .any { it.erSanksjon && it.andel.periode == vedtak.periode.tilPeriode() }
+        val erAlleredeSanksjonertOppgittMåned =
+            andelsHistorikkService.hentHistorikk(behandling.fagsakId, null)
+                .filter { it.erAktivVedtaksperiode() }
+                .any { it.erSanksjon && it.andel.periode == vedtak.periode.tilPeriode() }
         brukerfeilHvis(erAlleredeSanksjonertOppgittMåned) {
             "Behandlingen er allerede sanksjonert ${vedtak.periode.fom}"
         }
@@ -601,12 +639,13 @@ class BeregnYtelseSteg(
         vedtak: InnvilgelseBarnetilsyn,
         saksbehandling: Saksbehandling,
     ): List<AndelTilkjentYtelse> {
-        val beløpsperioder = beregningBarnetilsynService.beregnYtelseBarnetilsyn(
-            vedtak.perioder.filter { !it.erMidlertidigOpphørEllerSanksjon },
-            kontantstøttePerioder = vedtak.perioderKontantstøtte,
-            tilleggsstønadsperioder = vedtak.tilleggsstønad.perioder,
-            erMigrering = saksbehandling.erMigrering,
-        )
+        val beløpsperioder =
+            beregningBarnetilsynService.beregnYtelseBarnetilsyn(
+                vedtak.perioder.filter { !it.erMidlertidigOpphørEllerSanksjon },
+                kontantstøttePerioder = vedtak.perioderKontantstøtte,
+                tilleggsstønadsperioder = vedtak.tilleggsstønad.perioder,
+                erMigrering = saksbehandling.erMigrering,
+            )
         validerRiktigResultattypeForInnvilgetBarnetilsyn(beløpsperioder, vedtak)
         return beløpsperioder
             .map {
@@ -677,10 +716,11 @@ class BeregnYtelseSteg(
         forrigeTilkjenteYtelse: TilkjentYtelse,
         vedtak: Sanksjonert,
     ): List<AndelTilkjentYtelse> {
-        val andelerTilkjentYtelse = vurderPeriodeForOpphør(
-            forrigeTilkjenteYtelse.andelerTilkjentYtelse,
-            listOf(vedtak.periode.tilPeriode()),
-        )
+        val andelerTilkjentYtelse =
+            vurderPeriodeForOpphør(
+                forrigeTilkjenteYtelse.andelerTilkjentYtelse,
+                listOf(vedtak.periode.tilPeriode()),
+            )
         brukerfeilHvis(andelerTilkjentYtelse.isEmpty()) { "Innvilget vedtak må ha minimum en beløpsperiode" }
         return andelerTilkjentYtelse
     }
@@ -742,8 +782,9 @@ class BeregnYtelseSteg(
     }
 
     private fun hentForrigeTilkjenteYtelse(saksbehandling: Saksbehandling): TilkjentYtelse {
-        val forrigeBehandlingId = saksbehandling.forrigeBehandlingId
-            ?: error("Finner ikke forrige behandling til behandling=${saksbehandling.id}")
+        val forrigeBehandlingId =
+            saksbehandling.forrigeBehandlingId
+                ?: error("Finner ikke forrige behandling til behandling=${saksbehandling.id}")
         return tilkjentYtelseService.hentForBehandling(forrigeBehandlingId)
     }
 }

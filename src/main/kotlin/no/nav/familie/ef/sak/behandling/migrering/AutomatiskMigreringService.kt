@@ -20,7 +20,6 @@ class AutomatiskMigreringService(
     private val infotrygdReplikaClient: InfotrygdReplikaClient,
     private val taskService: TaskService,
 ) {
-
     private val logger: Logger = LoggerFactory.getLogger(javaClass)
 
     @Transactional
@@ -28,8 +27,9 @@ class AutomatiskMigreringService(
         val personerForMigrering = infotrygdReplikaClient.hentPersonerForMigrering(1000)
         val alleredeMigrert = migreringsstatusRepository.findAllByIdentIn(personerForMigrering).map { it.ident }
 
-        val filtrerteIdenter = personerForMigrering.filterNot { alleredeMigrert.contains(it) }
-            .take(antall) // henter fler fra infotrygd enn vi skal migrere, men plukker ut første X antall
+        val filtrerteIdenter =
+            personerForMigrering.filterNot { alleredeMigrert.contains(it) }
+                .take(antall) // henter fler fra infotrygd enn vi skal migrere, men plukker ut første X antall
 
         logger.info("Oppretter ${filtrerteIdenter.size} tasks for å migrere automatisk")
         migreringsstatusRepository.insertAll(filtrerteIdenter.map { Migreringsstatus(it, MigreringResultat.IKKE_KONTROLLERT) })

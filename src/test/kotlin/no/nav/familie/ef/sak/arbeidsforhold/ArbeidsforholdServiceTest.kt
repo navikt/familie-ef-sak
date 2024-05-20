@@ -14,49 +14,54 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
 class ArbeidsforholdServiceTest {
-
     val arbeidsforholdClient: ArbeidsforholdClient = mockk()
     val arbeidsforholdService = ArbeidsforholdService(mockk(), arbeidsforholdClient)
 
     @BeforeEach
     fun setup() {
-        every { arbeidsforholdClient.hentArbeidsforhold(any(), any()) } returns Ressurs.success(
-            listOf(
-                Arbeidsforhold(
-                    ansettelsesperiode = Ansettelsesperiode(
-                        Periode(LocalDate.now().minusYears(2), null),
+        every { arbeidsforholdClient.hentArbeidsforhold(any(), any()) } returns
+            Ressurs.success(
+                listOf(
+                    Arbeidsforhold(
+                        ansettelsesperiode =
+                            Ansettelsesperiode(
+                                Periode(LocalDate.now().minusYears(2), null),
+                            ),
                     ),
                 ),
-            ),
-        )
+            )
     }
 
     @Test
     fun `finnes avsluttet arbeidsforhold siste 6 mnd`() {
-        every { arbeidsforholdClient.hentArbeidsforhold(any(), any()) } returns Ressurs.success(
-            listOf(
-                Arbeidsforhold(
-                    ansettelsesperiode = Ansettelsesperiode(
-                        Periode(LocalDate.now().minusYears(2), LocalDate.now()),
+        every { arbeidsforholdClient.hentArbeidsforhold(any(), any()) } returns
+            Ressurs.success(
+                listOf(
+                    Arbeidsforhold(
+                        ansettelsesperiode =
+                            Ansettelsesperiode(
+                                Periode(LocalDate.now().minusYears(2), LocalDate.now()),
+                            ),
                     ),
                 ),
-            ),
-        )
+            )
         val finnesAvsluttetArbeidsforhold = arbeidsforholdService.finnesAvsluttetArbeidsforholdSisteAntallMåneder("1")
         assertThat(finnesAvsluttetArbeidsforhold).isTrue
     }
 
     @Test
     fun `finnes ikke avsluttet arbeidsforhold siste 6 mnd`() {
-        every { arbeidsforholdClient.hentArbeidsforhold(any(), any()) } returns Ressurs.success(
-            listOf(
-                Arbeidsforhold(
-                    ansettelsesperiode = Ansettelsesperiode(
-                        Periode(LocalDate.now().minusYears(2), null),
+        every { arbeidsforholdClient.hentArbeidsforhold(any(), any()) } returns
+            Ressurs.success(
+                listOf(
+                    Arbeidsforhold(
+                        ansettelsesperiode =
+                            Ansettelsesperiode(
+                                Periode(LocalDate.now().minusYears(2), null),
+                            ),
                     ),
                 ),
-            ),
-        )
+            )
         val finnesAvsluttetArbeidsforhold = arbeidsforholdService.finnesAvsluttetArbeidsforholdSisteAntallMåneder("1")
         assertThat(finnesAvsluttetArbeidsforhold).isFalse
     }

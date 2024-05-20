@@ -9,10 +9,11 @@ import java.time.LocalDate
 internal class InntektsperiodeTest {
     val inntektsperiode =
         Inntektsperiode(
-            periode = Månedsperiode(
-                LocalDate.of(2021, 1, 1),
-                LocalDate.of(2021, 4, 30),
-            ),
+            periode =
+                Månedsperiode(
+                    LocalDate.of(2021, 1, 1),
+                    LocalDate.of(2021, 4, 30),
+                ),
             inntekt = BigDecimal.ZERO,
             samordningsfradrag = BigDecimal.ZERO,
         )

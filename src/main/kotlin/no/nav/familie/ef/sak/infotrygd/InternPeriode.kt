@@ -32,6 +32,5 @@ data class InternPeriode(
     val opphørsdato: LocalDate?,
     val datakilde: Datakilde,
 ) {
-
     fun erFullOvergangsstønad(): Boolean = this.inntektsreduksjon == 0 && this.samordningsfradrag == 0
 }

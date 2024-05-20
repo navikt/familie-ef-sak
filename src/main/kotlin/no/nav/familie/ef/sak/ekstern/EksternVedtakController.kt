@@ -19,10 +19,11 @@ class EksternVedtakController(
     private val tilgangService: TilgangService,
     private val eksternVedtakService: EksternVedtakService,
 ) {
-
     @GetMapping("/{eksternFagsakId}")
     @ProtectedWithClaims(issuer = "azuread")
-    fun hentVedtak(@PathVariable eksternFagsakId: Long): Ressurs<List<FagsystemVedtak>> {
+    fun hentVedtak(
+        @PathVariable eksternFagsakId: Long,
+    ): Ressurs<List<FagsystemVedtak>> {
         if (!SikkerhetContext.erMaskinTilMaskinToken()) {
             tilgangService.validerTilgangTilEksternFagsak(eksternFagsakId, AuditLoggerEvent.ACCESS)
         }

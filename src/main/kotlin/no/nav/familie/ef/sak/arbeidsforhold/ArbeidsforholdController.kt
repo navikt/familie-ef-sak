@@ -23,7 +23,6 @@ class ArbeidsforholdController(
     private val tilgangService: TilgangService,
     private val arbeidsforholdService: ArbeidsforholdService,
 ) {
-
     @GetMapping("fagsak/{fagsakId}")
     fun hentArbeidsforhold(
         @PathVariable("fagsakId") fagsakId: UUID,

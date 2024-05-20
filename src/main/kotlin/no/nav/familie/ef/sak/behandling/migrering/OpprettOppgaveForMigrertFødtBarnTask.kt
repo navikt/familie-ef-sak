@@ -37,7 +37,6 @@ class OpprettOppgaveForMigrertFødtBarnTask(
     private val grunnlagsdataService: GrunnlagsdataService,
     private val taskService: TaskService,
 ) : AsyncTaskStep {
-
     private val logger: Logger = LoggerFactory.getLogger(javaClass)
 
     override fun doTask(task: Task) {
@@ -59,17 +58,18 @@ class OpprettOppgaveForMigrertFødtBarnTask(
     ) {
         val oppgaverForBarn = lagOppgaver(behandlingId, data, sisteUtbetalingsdato)
 
-        val opprettOppfølgingsoppgaveForBarnFyltÅrTasks = oppgaverForBarn.map {
-            OpprettOppfølgingsoppgaveForBarnFyltÅrTask.opprettTask(
-                OpprettOppgavePayload(
-                    behandlingId = it.behandlingId,
-                    barnPersonIdent = it.personIdent,
-                    søkerPersonIdent = data.personIdent,
-                    alder = it.alder,
-                    aktivFra = it.aktivFra,
-                ),
-            )
-        }
+        val opprettOppfølgingsoppgaveForBarnFyltÅrTasks =
+            oppgaverForBarn.map {
+                OpprettOppfølgingsoppgaveForBarnFyltÅrTask.opprettTask(
+                    OpprettOppgavePayload(
+                        behandlingId = it.behandlingId,
+                        barnPersonIdent = it.personIdent,
+                        søkerPersonIdent = data.personIdent,
+                        alder = it.alder,
+                        aktivFra = it.aktivFra,
+                    ),
+                )
+            }
 
         if (opprettOppfølgingsoppgaveForBarnFyltÅrTasks.isNotEmpty()) {
             taskService.saveAll(opprettOppfølgingsoppgaveForBarnFyltÅrTasks)
@@ -77,8 +77,9 @@ class OpprettOppgaveForMigrertFødtBarnTask(
     }
 
     private fun sisteIverksatteBehandling(fagsakId: UUID): UUID {
-        val behandling = behandlingService.finnSisteIverksatteBehandling(fagsakId)
-            ?: error("Finner ikke iverksatt behandling for fagsak=$fagsakId")
+        val behandling =
+            behandlingService.finnSisteIverksatteBehandling(fagsakId)
+                ?: error("Finner ikke iverksatt behandling for fagsak=$fagsakId")
         return behandling.id
     }
 
@@ -91,8 +92,9 @@ class OpprettOppgaveForMigrertFødtBarnTask(
         data: OpprettOppgaveForMigrertFødtBarnTaskData,
         sisteUtbetalingsdato: LocalDate,
     ): List<OppgaveForBarn> {
-        val kjenteFødselsdatoer = grunnlagsdataService.hentGrunnlagsdata(behandlingId).grunnlagsdata.barn
-            .flatMap { it.fødsel.mapNotNull(Fødsel::fødselsdato) }
+        val kjenteFødselsdatoer =
+            grunnlagsdataService.hentGrunnlagsdata(behandlingId).grunnlagsdata.barn
+                .flatMap { it.fødsel.mapNotNull(Fødsel::fødselsdato) }
         return data.barn.mapNotNull {
             val fødselsdato = it.fødselsdato
             if (fødselsdato == null) {
@@ -120,7 +122,10 @@ class OpprettOppgaveForMigrertFødtBarnTask(
      * Oppretter datoer for 6 og 12 måneder
      * Skal ikke opprette noen oppføglningsoppgaver hvis datoet for når barnet fyller 1 år er før siste utbetalingsperioden
      */
-    private fun datoOgAlder(fødselsdato: LocalDate, sisteUtbetalingsdato: LocalDate): List<Pair<LocalDate, Alder>> {
+    private fun datoOgAlder(
+        fødselsdato: LocalDate,
+        sisteUtbetalingsdato: LocalDate,
+    ): List<Pair<LocalDate, Alder>> {
         val datoOm1År = nesteVirkedagForDatoMinus1Uke(fødselsdato.plusYears(1))
         if (sisteUtbetalingsdato < datoOm1År) {
             logger.info("Dato for sisteUtbetalingsdato=$sisteUtbetalingsdato er før barnet fyller 1 år = $datoOm1År")
@@ -141,10 +146,12 @@ class OpprettOppgaveForMigrertFødtBarnTask(
     }
 
     companion object {
-
         const val TYPE = "opprettOppgaveForMigrertFødtBarn"
 
-        fun opprettOppgave(fagsak: Fagsak, nyeBarn: List<BarnMinimumDto>): Task {
+        fun opprettOppgave(
+            fagsak: Fagsak,
+            nyeBarn: List<BarnMinimumDto>,
+        ): Task {
             return Task(
                 TYPE,
                 objectMapper.writeValueAsString(

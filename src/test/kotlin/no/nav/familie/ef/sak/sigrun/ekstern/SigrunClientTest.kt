@@ -20,9 +20,7 @@ import java.net.URI
 import java.time.LocalDate
 
 class SigrunClientTest {
-
     companion object {
-
         private val restOperations: RestOperations = RestTemplateBuilder().build()
         lateinit var sigrunClient: SigrunClient
         lateinit var wiremockServerItem: WireMockServer
@@ -125,7 +123,8 @@ class SigrunClientTest {
         assertThat(summertSkattegrunnlag.svalbardGrunnlag.first().beloep).isEqualTo(779981)
     }
 
-    private val pensjonsgivendeInntektResponseJson = """
+    private val pensjonsgivendeInntektResponseJson =
+        """
         {
           "norskPersonidentifikator": "09528731462",
           "inntektsaar": 2022,
@@ -148,9 +147,10 @@ class SigrunClientTest {
             }
           ]
         }
-    """.trimIndent()
+        """.trimIndent()
 
-    private val beregnetSkattMedOppgjørsdatoJson = """
+    private val beregnetSkattMedOppgjørsdatoJson =
+        """
         [
           {
             "tekniskNavn": "skatteoppgjoersdato",
@@ -161,7 +161,7 @@ class SigrunClientTest {
             "verdi": "200000"
           }
         ]
-    """.trimIndent()
+        """.trimIndent()
 
     private val beregnetSkattRessursResponseJson = """
         [

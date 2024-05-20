@@ -25,15 +25,18 @@ class UtestengelseController(
     private val utestengelseService: UtestengelseService,
     private val fagsakService: FagsakService,
 ) {
-
     @GetMapping("/{fagsakPersonId}")
-    fun hentUtestengelser(@PathVariable fagsakPersonId: UUID): Ressurs<List<UtestengelseDto>> {
+    fun hentUtestengelser(
+        @PathVariable fagsakPersonId: UUID,
+    ): Ressurs<List<UtestengelseDto>> {
         tilgangService.validerTilgangTilFagsakPerson(fagsakPersonId, AuditLoggerEvent.ACCESS)
         return Ressurs.success(utestengelseService.hentUtestengelser(fagsakPersonId).map { it.tilDto() })
     }
 
     @GetMapping("/behandling/{behandlingId}")
-    fun hentUtestengelserForBehandling(@PathVariable behandlingId: UUID): Ressurs<List<UtestengelseDto>> {
+    fun hentUtestengelserForBehandling(
+        @PathVariable behandlingId: UUID,
+    ): Ressurs<List<UtestengelseDto>> {
         val fagsakPersonId = fagsakService.hentFagsakForBehandling(behandlingId).fagsakPersonId
         tilgangService.validerTilgangTilFagsakPerson(fagsakPersonId, AuditLoggerEvent.ACCESS)
         return Ressurs.success(utestengelseService.hentUtestengelser(fagsakPersonId).map { it.tilDto() })

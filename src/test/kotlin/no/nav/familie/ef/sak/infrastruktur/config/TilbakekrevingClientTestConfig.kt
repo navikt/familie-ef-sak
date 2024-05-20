@@ -22,40 +22,41 @@ import java.util.UUID
 
 @TestConfiguration
 class TilbakekrevingClientTestConfig {
-
     @Bean
     @Profile("mock-tilbakekreving")
     @Primary
     fun mockTilbakekrevingKlient(): TilbakekrevingClient {
         val tilbakekrevingClient: TilbakekrevingClient = mockk()
 
-        every { tilbakekrevingClient.hentForhåndsvisningVarselbrev(any()) } returns pdfAsBase64String.toByteArray()
+        every { tilbakekrevingClient.hentForhåndsvisningVarselbrev(any()) } returns PDF_AS_BASE64_STRING.toByteArray()
 
         every { tilbakekrevingClient.finnesÅpenBehandling(any()) } returns false
 
-        every { tilbakekrevingClient.finnBehandlinger(any()) } returns listOf(
-            Behandling(
-                behandlingId = UUID.randomUUID(),
-                opprettetTidspunkt = LocalDateTime.now(),
-                aktiv = true,
-                årsak = Behandlingsårsakstype.REVURDERING_OPPLYSNINGER_OM_VILKÅR,
-                type = Behandlingstype.TILBAKEKREVING,
-                status = Behandlingsstatus.OPPRETTET,
-                vedtaksdato = null,
-                resultat = null,
-            ),
-        )
+        every { tilbakekrevingClient.finnBehandlinger(any()) } returns
+            listOf(
+                Behandling(
+                    behandlingId = UUID.randomUUID(),
+                    opprettetTidspunkt = LocalDateTime.now(),
+                    aktiv = true,
+                    årsak = Behandlingsårsakstype.REVURDERING_OPPLYSNINGER_OM_VILKÅR,
+                    type = Behandlingstype.TILBAKEKREVING,
+                    status = Behandlingsstatus.OPPRETTET,
+                    vedtaksdato = null,
+                    resultat = null,
+                ),
+            )
 
-        every { tilbakekrevingClient.finnVedtak(any()) } returns listOf(
-            FagsystemVedtak(
-                eksternBehandlingId = UUID.randomUUID().toString(),
-                behandlingstype = "Tilbakekreving",
-                resultat = "Delvis tilbakebetaling",
-                vedtakstidspunkt = LocalDateTime.now(),
-                fagsystemType = FagsystemType.TILBAKEKREVING,
-                regelverk = Regelverk.NASJONAL,
-            ),
-        )
+        every { tilbakekrevingClient.finnVedtak(any()) } returns
+            listOf(
+                FagsystemVedtak(
+                    eksternBehandlingId = UUID.randomUUID().toString(),
+                    behandlingstype = "Tilbakekreving",
+                    resultat = "Delvis tilbakebetaling",
+                    vedtakstidspunkt = LocalDateTime.now(),
+                    fagsystemType = FagsystemType.TILBAKEKREVING,
+                    regelverk = Regelverk.NASJONAL,
+                ),
+            )
 
         val dummyPdf = this::class.java.classLoader.getResource("dummy/pdf_dummy.pdf")!!.readBytes()
         every { tilbakekrevingClient.hentForhåndsvisningVarselbrev(any()) } returns dummyPdf

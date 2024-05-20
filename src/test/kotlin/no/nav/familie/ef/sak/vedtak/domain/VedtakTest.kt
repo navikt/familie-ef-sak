@@ -9,7 +9,6 @@ import org.junit.jupiter.api.Test
 import java.time.YearMonth
 
 internal class VedtakTest {
-
     private val januar = YearMonth.of(2022, 1)
     private val febaruar = YearMonth.of(2022, 2)
     private val januarNesteÅr = YearMonth.of(2023, 1)
@@ -18,15 +17,15 @@ internal class VedtakTest {
 
     @Nested
     inner class Overgangsstønad {
-
         @Test
         internal fun `gyldig sanksjon`() {
-            val periode = Vedtaksperiode(
-                periode,
-                AktivitetType.IKKE_AKTIVITETSPLIKT,
-                VedtaksperiodeType.SANKSJON,
-                Sanksjonsårsak.SAGT_OPP_STILLING,
-            )
+            val periode =
+                Vedtaksperiode(
+                    periode,
+                    AktivitetType.IKKE_AKTIVITETSPLIKT,
+                    VedtaksperiodeType.SANKSJON,
+                    Sanksjonsårsak.SAGT_OPP_STILLING,
+                )
             assertThat(periode).isNotNull
         }
 
@@ -90,7 +89,6 @@ internal class VedtakTest {
 
     @Nested
     inner class Barnetilsyn {
-
         @Test
         internal fun `ordinær periode kan ikke inneholde sanksjonsårsak`() {
             assertThatThrownBy {
@@ -119,13 +117,14 @@ internal class VedtakTest {
 
         @Test
         internal fun `gyldig sanksjon`() {
-            val periode = Barnetilsynperiode(
-                periode,
-                1,
-                emptyList(),
-                Sanksjonsårsak.SAGT_OPP_STILLING,
-                PeriodetypeBarnetilsyn.SANKSJON_1_MND,
-            )
+            val periode =
+                Barnetilsynperiode(
+                    periode,
+                    1,
+                    emptyList(),
+                    Sanksjonsårsak.SAGT_OPP_STILLING,
+                    PeriodetypeBarnetilsyn.SANKSJON_1_MND,
+                )
             assertThat(periode).isNotNull
         }
 

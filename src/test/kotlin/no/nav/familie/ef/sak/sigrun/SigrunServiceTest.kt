@@ -16,7 +16,6 @@ import java.time.YearMonth
 import java.util.UUID
 
 internal class SigrunServiceTest {
-
     private val sigrunClient = mockk<SigrunClient>()
     private val fagsakPersonService = mockk<FagsakPersonService>()
 
@@ -31,10 +30,11 @@ internal class SigrunServiceTest {
             PensjonsgivendeInntektResponse(
                 "123",
                 secondArg<Int>(),
-                pensjonsgivendeInntekt = listOf(
-                    pensjonsgivendeInntektForSkatteordning(Skatteordning.FASTLAND),
-                    pensjonsgivendeInntektForSkatteordning(Skatteordning.SVALBARD),
-                ),
+                pensjonsgivendeInntekt =
+                    listOf(
+                        pensjonsgivendeInntektForSkatteordning(Skatteordning.FASTLAND),
+                        pensjonsgivendeInntektForSkatteordning(Skatteordning.SVALBARD),
+                    ),
             )
         }
 
@@ -42,10 +42,11 @@ internal class SigrunServiceTest {
             PensjonsgivendeInntektResponse(
                 "123",
                 2022,
-                pensjonsgivendeInntekt = listOf(
-                    pensjonsgivendeInntektForSkatteordning(Skatteordning.FASTLAND),
-                    pensjonsgivendeInntektForSkatteordning(Skatteordning.SVALBARD, 325_000, 20_000),
-                ),
+                pensjonsgivendeInntekt =
+                    listOf(
+                        pensjonsgivendeInntektForSkatteordning(Skatteordning.FASTLAND),
+                        pensjonsgivendeInntektForSkatteordning(Skatteordning.SVALBARD, 325_000, 20_000),
+                    ),
             )
         }
     }
@@ -62,11 +63,16 @@ internal class SigrunServiceTest {
     }
 }
 
-fun pensjonsgivendeInntektForSkatteordning(skatteordning: Skatteordning = Skatteordning.FASTLAND, lønnsinntekt: Int = 100_000, næringsinntekt: Int = 200_000) = PensjonsgivendeInntektForSkatteordning(
-    skatteordning,
-    LocalDate.now(),
-    lønnsinntekt,
-    null,
-    næringsinntekt,
-    50_000,
-)
+fun pensjonsgivendeInntektForSkatteordning(
+    skatteordning: Skatteordning = Skatteordning.FASTLAND,
+    lønnsinntekt: Int = 100_000,
+    næringsinntekt: Int = 200_000,
+) =
+    PensjonsgivendeInntektForSkatteordning(
+        skatteordning,
+        LocalDate.now(),
+        lønnsinntekt,
+        null,
+        næringsinntekt,
+        50_000,
+    )

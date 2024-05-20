@@ -17,9 +17,10 @@ data class SettPåVentRequest(
     val innstillingsoppgaveBeskjed: String?,
 )
 
-fun OppgaveSubtype.beskrivelse(innstillingsoppgaveBeskjed: String?) = when (this) {
-    OppgaveSubtype.INFORMERE_OM_SØKT_OVERGANGSSTØNAD -> OppgaveBeskrivelse.informereLokalkontorOmOvergangsstønad
-    OppgaveSubtype.INNSTILLING_VEDRØRENDE_UTDANNING ->
-        "${OppgaveBeskrivelse.innstillingOmBrukersUtdanning}" +
-            "${if (!innstillingsoppgaveBeskjed.isNullOrEmpty()) "\n $innstillingsoppgaveBeskjed \n" else ""}"
-}
+fun OppgaveSubtype.beskrivelse(innstillingsoppgaveBeskjed: String?) =
+    when (this) {
+        OppgaveSubtype.INFORMERE_OM_SØKT_OVERGANGSSTØNAD -> OppgaveBeskrivelse.informereLokalkontorOmOvergangsstønad
+        OppgaveSubtype.INNSTILLING_VEDRØRENDE_UTDANNING ->
+            "${OppgaveBeskrivelse.innstillingOmBrukersUtdanning}" +
+                "${if (!innstillingsoppgaveBeskjed.isNullOrEmpty()) "\n $innstillingsoppgaveBeskjed \n" else ""}"
+    }

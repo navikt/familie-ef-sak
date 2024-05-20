@@ -31,7 +31,6 @@ class IverksettClient(
     private val restOperations: RestOperations,
 ) :
     AbstractPingableRestClient(restOperations, "familie.ef.iverksett") {
-
     override val pingUri: URI = URI.create("$familieEfIverksettUri/api/status")
 
     override fun ping() {
@@ -60,12 +59,16 @@ class IverksettClient(
         postForEntity<Any>(URI.create("$familieEfIverksettUri/api/iverksett/vedtakshendelse/$behandlingId"), "")
     }
 
-    fun iverksett(iverksettDto: IverksettDto, fil: Fil) {
+    fun iverksett(
+        iverksettDto: IverksettDto,
+        fil: Fil,
+    ) {
         val url = URI.create("$familieEfIverksettUri/api/iverksett")
-        val request = MultipartBuilder()
-            .withJson("data", iverksettDto)
-            .withByteArray("fil", "vedtak", fil.bytes)
-            .build()
+        val request =
+            MultipartBuilder()
+                .withJson("data", iverksettDto)
+                .withByteArray("fil", "vedtak", fil.bytes)
+                .build()
         val headers = HttpHeaders().apply { this.add("Content-Type", "multipart/form-data") }
         postForEntity<Any>(url, request, headers)
     }
@@ -80,13 +83,22 @@ class IverksettClient(
         return getForEntity(url, HttpHeaders().medContentTypeJsonUTF8())
     }
 
-    fun sendStartmeldingKonsistensavstemming(request: KonsistensavstemmingDto, transaksjonId: UUID) =
+    fun sendStartmeldingKonsistensavstemming(
+        request: KonsistensavstemmingDto,
+        transaksjonId: UUID,
+    ) =
         konsistensavstemming(request, sendStartmelding = true, sendAvsluttmelding = false, transaksjonId)
 
-    fun sendSluttmeldingKonsistensavstemming(request: KonsistensavstemmingDto, transaksjonId: UUID) =
+    fun sendSluttmeldingKonsistensavstemming(
+        request: KonsistensavstemmingDto,
+        transaksjonId: UUID,
+    ) =
         konsistensavstemming(request, sendStartmelding = false, sendAvsluttmelding = true, transaksjonId)
 
-    fun sendKonsistensavstemming(request: KonsistensavstemmingDto, transaksjonId: UUID) =
+    fun sendKonsistensavstemming(
+        request: KonsistensavstemmingDto,
+        transaksjonId: UUID,
+    ) =
         konsistensavstemming(request, sendStartmelding = false, sendAvsluttmelding = false, transaksjonId)
 
     private fun konsistensavstemming(
@@ -95,11 +107,12 @@ class IverksettClient(
         sendAvsluttmelding: Boolean = true,
         transaksjonId: UUID = UUID.randomUUID(),
     ) {
-        val url = UriComponentsBuilder.fromUriString("$familieEfIverksettUri/api/konsistensavstemming")
-            .queryParam("sendStartmelding", sendStartmelding)
-            .queryParam("sendAvsluttmelding", sendAvsluttmelding)
-            .queryParam("transaksjonId", transaksjonId.toString())
-            .build().toUri()
+        val url =
+            UriComponentsBuilder.fromUriString("$familieEfIverksettUri/api/konsistensavstemming")
+                .queryParam("sendStartmelding", sendStartmelding)
+                .queryParam("sendAvsluttmelding", sendAvsluttmelding)
+                .queryParam("transaksjonId", transaksjonId.toString())
+                .build().toUri()
         postForEntity<Any>(url, request)
     }
 

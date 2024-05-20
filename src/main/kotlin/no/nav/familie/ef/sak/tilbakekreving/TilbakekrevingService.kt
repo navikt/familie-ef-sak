@@ -42,8 +42,10 @@ class TilbakekrevingService(
     private val arbeidsfordelingService: ArbeidsfordelingService,
     private val tilordnetRessursService: TilordnetRessursService,
 ) {
-
-    fun lagreTilbakekreving(tilbakekrevingDto: TilbakekrevingDto, behandlingId: UUID) {
+    fun lagreTilbakekreving(
+        tilbakekrevingDto: TilbakekrevingDto,
+        behandlingId: UUID,
+    ) {
         val behandling = behandlingService.hentBehandling(behandlingId)
         validerTilbakekreving(behandling, tilbakekrevingDto)
         tilbakekrevingRepository.deleteById(behandlingId)
@@ -58,7 +60,10 @@ class TilbakekrevingService(
         tilbakekrevingRepository.deleteById(behandlingId)
     }
 
-    private fun validerTilbakekreving(behandling: Behandling, tilbakekrevingDto: TilbakekrevingDto) {
+    private fun validerTilbakekreving(
+        behandling: Behandling,
+        tilbakekrevingDto: TilbakekrevingDto,
+    ) {
         brukerfeilHvis(
             tilbakekrevingDto.valg == Tilbakekrevingsvalg.OPPRETT_MED_VARSEL &&
                 tilbakekrevingDto.varseltekst.isNullOrBlank(),
@@ -89,25 +94,29 @@ class TilbakekrevingService(
         return tilbakekrevingRepository.existsById(behandlingsId)
     }
 
-    fun genererBrev(saksbehandling: Saksbehandling, varseltekst: String): ByteArray {
+    fun genererBrev(
+        saksbehandling: Saksbehandling,
+        varseltekst: String,
+    ): ByteArray {
         validerIkkeFerdigstiltBehandling(saksbehandling.id)
         val feilutbetaltePerioderDto = lagFeilutbetaltePerioderDto(saksbehandling)
         val navEnhet = arbeidsfordelingService.hentNavEnhet(saksbehandling.ident)
-        val request = ForhåndsvisVarselbrevRequest(
-            varseltekst = varseltekst,
-            ytelsestype = Ytelsestype.valueOf(saksbehandling.stønadstype.name),
-            behandlendeEnhetId = navEnhet?.enhetId ?: MASKINELL_JOURNALFOERENDE_ENHET,
-            behandlendeEnhetsNavn = navEnhet?.enhetNavn ?: "Ukjent",
-            saksbehandlerIdent = SikkerhetContext.hentSaksbehandler(),
-            språkkode = Språkkode.NB,
-            vedtaksdato = LocalDate.now(),
-            feilutbetaltePerioderDto = feilutbetaltePerioderDto,
-            fagsystem = Fagsystem.EF,
-            eksternFagsakId = saksbehandling.eksternFagsakId.toString(),
-            fagsystemsbehandlingId = saksbehandling.eksternId.toString(),
-            ident = saksbehandling.ident,
-            verge = null,
-        )
+        val request =
+            ForhåndsvisVarselbrevRequest(
+                varseltekst = varseltekst,
+                ytelsestype = Ytelsestype.valueOf(saksbehandling.stønadstype.name),
+                behandlendeEnhetId = navEnhet?.enhetId ?: MASKINELL_JOURNALFOERENDE_ENHET,
+                behandlendeEnhetsNavn = navEnhet?.enhetNavn ?: "Ukjent",
+                saksbehandlerIdent = SikkerhetContext.hentSaksbehandler(),
+                språkkode = Språkkode.NB,
+                vedtaksdato = LocalDate.now(),
+                feilutbetaltePerioderDto = feilutbetaltePerioderDto,
+                fagsystem = Fagsystem.EF,
+                eksternFagsakId = saksbehandling.eksternFagsakId.toString(),
+                fagsystemsbehandlingId = saksbehandling.eksternId.toString(),
+                ident = saksbehandling.ident,
+                verge = null,
+            )
         return tilbakekrevingClient.hentForhåndsvisningVarselbrev(forhåndsvisVarselbrevRequest = request)
     }
 
@@ -128,11 +137,12 @@ class TilbakekrevingService(
     }
 
     fun genererBrevMedVarseltekstFraEksisterendeTilbakekreving(saksbehandling: Saksbehandling): ByteArray {
-        val varseltekst = tilbakekrevingRepository.findByIdOrThrow(saksbehandling.id).varseltekst
-            ?: throw Feil(
-                "Kan ikke finne varseltekst for behandlingId=$saksbehandling",
-                frontendFeilmelding = "Kan ikke finne varseltekst på tilbakekrevingsvalg",
-            )
+        val varseltekst =
+            tilbakekrevingRepository.findByIdOrThrow(saksbehandling.id).varseltekst
+                ?: throw Feil(
+                    "Kan ikke finne varseltekst for behandlingId=$saksbehandling",
+                    frontendFeilmelding = "Kan ikke finne varseltekst på tilbakekrevingsvalg",
+                )
         return genererBrev(saksbehandling, varseltekst)
     }
 
@@ -143,8 +153,9 @@ class TilbakekrevingService(
         if (!kanBehandlingOpprettesManuelt.kanBehandlingOpprettes) {
             throw ApiFeil(kanBehandlingOpprettesManuelt.melding, HttpStatus.BAD_REQUEST)
         }
-        val kravgrunnlagsreferanse = kanBehandlingOpprettesManuelt.kravgrunnlagsreferanse
-            ?: error("Kravgrunnlagsreferanse mangler for fagsak: $fagsakId. Tilbakekreving kan ikke opprettes.")
+        val kravgrunnlagsreferanse =
+            kanBehandlingOpprettesManuelt.kravgrunnlagsreferanse
+                ?: error("Kravgrunnlagsreferanse mangler for fagsak: $fagsakId. Tilbakekreving kan ikke opprettes.")
 
         behandlingService.hentBehandlingPåEksternId(kravgrunnlagsreferanse.toLong())
 

@@ -12,7 +12,6 @@ import org.springframework.dao.OptimisticLockingFailureException
 import java.time.LocalDate
 
 internal class KonsistensavstemmingServiceTest : OppslagSpringRunnerTest() {
-
     @Autowired
     private lateinit var repository: KonsistensavstemmingJobbRepository
 

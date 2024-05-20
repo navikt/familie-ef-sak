@@ -17,7 +17,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
 
 internal class SøknadsskjemaOvergangsstønadRepositoryTest : OppslagSpringRunnerTest() {
-
     @Autowired
     private lateinit var søknadOvergangsstønadRepository: SøknadOvergangsstønadRepository
 
@@ -48,8 +47,9 @@ internal class SøknadsskjemaOvergangsstønadRepositoryTest : OppslagSpringRunne
 
     @Test
     internal fun `søknad om overgangsstønad uten opplysninger om adresse lagres korrekt`() {
-        val søknadTilLagring = SøknadsskjemaMapper.tilDomene(Testsøknad.søknadOvergangsstønad)
-            .copy(adresseopplysninger = Adresseopplysninger())
+        val søknadTilLagring =
+            SøknadsskjemaMapper.tilDomene(Testsøknad.søknadOvergangsstønad)
+                .copy(adresseopplysninger = Adresseopplysninger())
 
         søknadOvergangsstønadRepository.insert(søknadTilLagring)
         val søknadFraDatabase = søknadOvergangsstønadRepository.findByIdOrThrow(søknadTilLagring.id)
@@ -59,8 +59,9 @@ internal class SøknadsskjemaOvergangsstønadRepositoryTest : OppslagSpringRunne
 
     @Test
     internal fun `søknad om overgangsstønad uten opplysninger om adresse lagres korrekt 2`() {
-        val søknadTilLagring = SøknadsskjemaMapper.tilDomene(Testsøknad.søknadOvergangsstønad)
-            .copy(adresseopplysninger = null)
+        val søknadTilLagring =
+            SøknadsskjemaMapper.tilDomene(Testsøknad.søknadOvergangsstønad)
+                .copy(adresseopplysninger = null)
 
         søknadOvergangsstønadRepository.insert(søknadTilLagring)
         val søknadFraDatabase = søknadOvergangsstønadRepository.findByIdOrThrow(søknadTilLagring.id)
@@ -78,12 +79,13 @@ internal class SøknadsskjemaOvergangsstønadRepositoryTest : OppslagSpringRunne
         val barn = Testsøknad.søknadOvergangsstønad.barn
         val barnUtenBarnepass = barn.verdi.map { it.copy(barnepass = null) }
         val aktivitetUtenUtdanning = aktivitet.verdi.copy(underUtdanning = null)
-        val søknadTilLagring = SøknadsskjemaMapper.tilDomene(
-            Testsøknad.søknadOvergangsstønad.copy(
-                aktivitet = aktivitet.copy(verdi = aktivitetUtenUtdanning),
-                barn = Søknadsfelt("", barnUtenBarnepass),
-            ),
-        )
+        val søknadTilLagring =
+            SøknadsskjemaMapper.tilDomene(
+                Testsøknad.søknadOvergangsstønad.copy(
+                    aktivitet = aktivitet.copy(verdi = aktivitetUtenUtdanning),
+                    barn = Søknadsfelt("", barnUtenBarnepass),
+                ),
+            )
 
         søknadOvergangsstønadRepository.insert(søknadTilLagring)
         val søknadFraDatabase = søknadOvergangsstønadRepository.findByIdOrThrow(søknadTilLagring.id)

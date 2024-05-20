@@ -69,7 +69,6 @@ data class SivilstandDto(
 
 @Suppress("unused") // Kopi fra PDL
 enum class Sivilstandstype(val visningsnavn: String) {
-
     UOPPGITT("Uoppgitt"),
     UGIFT("Ugift"),
     GIFT("Gift"),
@@ -83,9 +82,13 @@ enum class Sivilstandstype(val visningsnavn: String) {
     ;
 
     fun erGift(): Boolean = this == REGISTRERT_PARTNER || this == GIFT
+
     fun erUgiftEllerUoppgitt(): Boolean = this == UGIFT || this == UOPPGITT
+
     fun erSeparert(): Boolean = this == SEPARERT_PARTNER || this == SEPARERT
+
     fun erEnkeEllerEnkemann(): Boolean = this == ENKE_ELLER_ENKEMANN || this == GJENLEVENDE_PARTNER
+
     fun erSkilt(): Boolean = this == SKILT || this == SKILT_PARTNER
 
     fun erUgiftEllerSkilt(): Boolean = this == UGIFT || this == SKILT
@@ -117,7 +120,6 @@ data class FullmaktDto(
 
 @Suppress("unused") // Kopi fra PDL
 enum class Adressebeskyttelse {
-
     STRENGT_FORTROLIG,
     STRENGT_FORTROLIG_UTLAND,
     FORTROLIG,
@@ -126,7 +128,6 @@ enum class Adressebeskyttelse {
 
 @Suppress("unused")
 enum class Folkeregisterpersonstatus(private val pdlStatus: String, val visningsnavn: String) {
-
     BOSATT("bosatt", "Bosatt"),
     UTFLYTTET("utflyttet", "Utflyttet"),
     FORSVUNNET("forsvunnet", "Forsvunnet"),
@@ -139,15 +140,14 @@ enum class Folkeregisterpersonstatus(private val pdlStatus: String, val visnings
     ;
 
     companion object {
-
         private val map = values().associateBy(Folkeregisterpersonstatus::pdlStatus)
+
         fun fraPdl(status: PdlFolkeregisterpersonstatus) = map.getOrDefault(status.status, UKJENT)
     }
 }
 
 @Suppress("unused") // Kopi fra PDL
 enum class Kjønn {
-
     KVINNE,
     MANN,
     UKJENT,
@@ -159,9 +159,7 @@ data class NavnDto(
     val etternavn: String,
     val visningsnavn: String,
 ) {
-
     companion object {
-
         fun fraNavn(navn: Navn): NavnDto = NavnDto(navn.fornavn, navn.mellomnavn, navn.etternavn, navn.visningsnavn())
     }
 }

@@ -20,7 +20,6 @@ class EndringerIPersonOpplysningerService(
     private val grunnlagsdataService: GrunnlagsdataService,
     private val personopplysningerService: PersonopplysningerService,
 ) {
-
     private val logger = LoggerFactory.getLogger(javaClass)
 
     fun hentEndringerPersonopplysninger(behandlingId: UUID): EndringerIPersonopplysningerDto {
@@ -36,14 +35,16 @@ class EndringerIPersonOpplysningerService(
         behandling: Saksbehandling,
         grunnlagsdata: Grunnlagsdata,
     ): EndringerIPersonopplysningerDto {
-        val nyGrunnlagsdata = hentOppdatertGrunnlagsdata(behandling, grunnlagsdata)
-            ?: return EndringerIPersonopplysningerDto(grunnlagsdata.oppdaterteDataHentetTid, Endringer())
+        val nyGrunnlagsdata =
+            hentOppdatertGrunnlagsdata(behandling, grunnlagsdata)
+                ?: return EndringerIPersonopplysningerDto(grunnlagsdata.oppdaterteDataHentetTid, Endringer())
 
-        val endringer = personopplysningerService.finnEndringerIPersonopplysningerForBehandling(
-            behandling,
-            grunnlagsdata.tilGrunnlagsdataMedMetadata(),
-            nyGrunnlagsdata,
-        )
+        val endringer =
+            personopplysningerService.finnEndringerIPersonopplysningerForBehandling(
+                behandling,
+                grunnlagsdata.tilGrunnlagsdataMedMetadata(),
+                nyGrunnlagsdata,
+            )
         if (grunnlagsdata.skalSjekkeDataFraRegisteret()) {
             logger.info(
                 "Endringer i fagsak=${behandling.fagsakId} behandling=${behandling.id}" +

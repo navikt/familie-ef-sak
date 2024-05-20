@@ -23,7 +23,6 @@ import org.springframework.http.ResponseEntity
 import java.util.UUID
 
 internal class BehandlingControllerTest : OppslagSpringRunnerTest() {
-
     @Autowired
     private lateinit var behandlingRepository: BehandlingRepository
 
@@ -81,7 +80,10 @@ internal class BehandlingControllerTest : OppslagSpringRunnerTest() {
         )
     }
 
-    private fun henlegg(id: UUID, henlagt: HenlagtDto): ResponseEntity<Ressurs<BehandlingDto>> {
+    private fun henlegg(
+        id: UUID,
+        henlagt: HenlagtDto,
+    ): ResponseEntity<Ressurs<BehandlingDto>> {
         return restTemplate.exchange<Ressurs<BehandlingDto>>(
             localhost("/api/behandling/$id/henlegg"),
             HttpMethod.POST,

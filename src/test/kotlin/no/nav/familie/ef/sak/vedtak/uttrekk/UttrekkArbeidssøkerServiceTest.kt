@@ -57,7 +57,6 @@ import java.util.UUID
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.Adressebeskyttelse as DtoAdressebeskyttelse
 
 internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
-
     @Autowired
     private lateinit var fagsakService: FagsakService
 
@@ -88,28 +87,31 @@ internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
     private val taskService = mockk<TaskService>()
     private val fagsak = fagsak(fagsakpersoner(setOf("1")))
     private val behandling = behandling(fagsak)
-    private val behandling2 = behandling(
-        fagsak,
-        type = BehandlingType.REVURDERING,
-        forrigeBehandlingId = behandling.id,
-        opprettetTid = behandling.sporbar.opprettetTid.plusDays(1),
-    )
+    private val behandling2 =
+        behandling(
+            fagsak,
+            type = BehandlingType.REVURDERING,
+            forrigeBehandlingId = behandling.id,
+            opprettetTid = behandling.sporbar.opprettetTid.plusDays(1),
+        )
 
     private val januar2021 = YearMonth.of(2021, 1)
     private val februar2021 = YearMonth.of(2021, 2)
     private val mars2021 = YearMonth.of(2021, 3)
 
     private val vedtaksperiode = opprettVedtaksperiode(januar2021, mars2021)
-    private val vedtaksperiode2 = opprettVedtaksperiode(
-        februar2021,
-        februar2021,
-        aktivitetType = BARNET_ER_SYKT,
-    )
-    private val vedtaksperiode3 = opprettVedtaksperiode(
-        mars2021,
-        mars2021,
-        aktivitetType = FORLENGELSE_STØNAD_PÅVENTE_ARBEID_REELL_ARBEIDSSØKER,
-    )
+    private val vedtaksperiode2 =
+        opprettVedtaksperiode(
+            februar2021,
+            februar2021,
+            aktivitetType = BARNET_ER_SYKT,
+        )
+    private val vedtaksperiode3 =
+        opprettVedtaksperiode(
+            mars2021,
+            mars2021,
+            aktivitetType = FORLENGELSE_STØNAD_PÅVENTE_ARBEID_REELL_ARBEIDSSØKER,
+        )
     private val navn = Navn("fornavn", "", "", Metadata(false))
 
     private val taskSlot = slot<Task>()
@@ -121,13 +123,14 @@ internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
         every { personService.hentPersonKortBolk(any()) } answers {
             firstArg<List<String>>().associateWith { lagPersonKort() }
         }
-        service = UttrekkArbeidssøkerService(
-            tilgangService,
-            uttrekkArbeidssøkerRepository,
-            fagsakService,
-            personService,
-            arbeidssøkerClient,
-        )
+        service =
+            UttrekkArbeidssøkerService(
+                tilgangService,
+                uttrekkArbeidssøkerRepository,
+                fagsakService,
+                personService,
+                arbeidssøkerClient,
+            )
         opprettUttrekkArbeidssøkerTask =
             OpprettUttrekkArbeidssøkerTask(service, fagsakService, taskService)
     }
@@ -204,7 +207,6 @@ internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
 
     @Nested
     inner class `Registrert som arbeidssøkere` {
-
         @Test
         internal fun `hentUttrekkArbeidssøkere - er registrert som arbeidssøker hvis det finnes periode siste dagen i måneden`() {
             listOf(
@@ -252,12 +254,13 @@ internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
     internal fun `hentUttrekkArbeidssøkere - skal inkludere de som er kontrollert og`() {
         opprettdata()
         for (i in 1..20) {
-            val arbeidssøkere = UttrekkArbeidssøkere(
-                fagsakId = fagsak.id,
-                vedtakId = behandling.id,
-                årMåned = mars2021,
-                registrertArbeidssøker = false,
-            )
+            val arbeidssøkere =
+                UttrekkArbeidssøkere(
+                    fagsakId = fagsak.id,
+                    vedtakId = behandling.id,
+                    årMåned = mars2021,
+                    registrertArbeidssøker = false,
+                )
             uttrekkArbeidssøkerRepository.insert(arbeidssøkere)
         }
         for (i in 1..2) {
@@ -291,47 +294,52 @@ internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
         val tilgangService = mockk<TilgangService>()
         val mockUttrekkArbeidssøkerRepository = mockk<UttrekkArbeidssøkerRepository>()
         val mockFagsakService = mockk<FagsakService>()
-        val uttrekkArbeidssøkerService = UttrekkArbeidssøkerService(
-            tilgangService,
-            mockUttrekkArbeidssøkerRepository,
-            mockFagsakService,
-            personService,
-            arbeidssøkerClient,
-        )
+        val uttrekkArbeidssøkerService =
+            UttrekkArbeidssøkerService(
+                tilgangService,
+                mockUttrekkArbeidssøkerRepository,
+                mockFagsakService,
+                personService,
+                arbeidssøkerClient,
+            )
         val opprettUttrekkArbeidssøkerTask =
             OpprettUttrekkArbeidssøkerTask(uttrekkArbeidssøkerService, mockFagsakService, taskService)
 
         val arbeidssøkerPeriode = ArbeidssøkerPeriode(vedtaksperiode.periode.fomDato, vedtaksperiode.periode.tomDato)
-        val periodeForUttrekk = VedtaksperioderForUttrekk(
-            UUID.randomUUID(),
-            UUID.randomUUID(),
-            UUID.randomUUID(),
-            PeriodeWrapper(listOf(vedtaksperiode).tilDomene()),
-        )
-        val periodeForUttrekk2 = VedtaksperioderForUttrekk(
-            UUID.randomUUID(),
-            UUID.randomUUID(),
-            UUID.randomUUID(),
-            PeriodeWrapper(listOf(vedtaksperiode).tilDomene()),
-        )
+        val periodeForUttrekk =
+            VedtaksperioderForUttrekk(
+                UUID.randomUUID(),
+                UUID.randomUUID(),
+                UUID.randomUUID(),
+                PeriodeWrapper(listOf(vedtaksperiode).tilDomene()),
+            )
+        val periodeForUttrekk2 =
+            VedtaksperioderForUttrekk(
+                UUID.randomUUID(),
+                UUID.randomUUID(),
+                UUID.randomUUID(),
+                PeriodeWrapper(listOf(vedtaksperiode).tilDomene()),
+            )
 
         val aktiveIdenter = mutableMapOf(periodeForUttrekk2.fagsakId to "")
 
         every { mockFagsakService.hentAktiveIdenter(any()) } returns aktiveIdenter
         every { mockUttrekkArbeidssøkerRepository.insert(capture(uttrekkSlot)) } returns mockk()
-        every { arbeidssøkerClient.hentPerioder(any(), any(), any()) } returns ArbeidssøkerResponse(
-            listOf(
-                arbeidssøkerPeriode,
-                arbeidssøkerPeriode,
-            ),
-        )
+        every { arbeidssøkerClient.hentPerioder(any(), any(), any()) } returns
+            ArbeidssøkerResponse(
+                listOf(
+                    arbeidssøkerPeriode,
+                    arbeidssøkerPeriode,
+                ),
+            )
 
         every {
             mockUttrekkArbeidssøkerRepository.hentVedtaksperioderForSisteFerdigstilteBehandlinger(any(), any())
-        } returns listOf(
-            periodeForUttrekk,
-            periodeForUttrekk2,
-        )
+        } returns
+            listOf(
+                periodeForUttrekk,
+                periodeForUttrekk2,
+            )
 
         every {
             mockUttrekkArbeidssøkerRepository.existsByÅrMånedAndFagsakId(any(), any())
@@ -351,20 +359,20 @@ internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
 
     @Nested
     inner class Tilgangstester {
+        private val identStrengtFortroligUtland = "1"
+        private val identStrengtFortrolig = "2"
+        private val identFortrolig = "3"
+        private val identUgradert = "4"
+        private val identUtenGradering = "5"
 
-        private val IDENT_STRENGT_FORTROLIG_UTLAND = "1"
-        private val IDENT_STRENGT_FORTROLIG = "2"
-        private val IDENT_FORTROLIG = "3"
-        private val IDENT_UGRADERT = "4"
-        private val IDENT_UTEN_GRADERING = "5"
-
-        private val identer = listOf(
-            IDENT_STRENGT_FORTROLIG_UTLAND to AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND,
-            IDENT_STRENGT_FORTROLIG to AdressebeskyttelseGradering.STRENGT_FORTROLIG,
-            IDENT_FORTROLIG to AdressebeskyttelseGradering.FORTROLIG,
-            IDENT_UGRADERT to AdressebeskyttelseGradering.UGRADERT,
-            IDENT_UTEN_GRADERING to null,
-        )
+        private val identer =
+            listOf(
+                identStrengtFortroligUtland to AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND,
+                identStrengtFortrolig to AdressebeskyttelseGradering.STRENGT_FORTROLIG,
+                identFortrolig to AdressebeskyttelseGradering.FORTROLIG,
+                identUgradert to AdressebeskyttelseGradering.UGRADERT,
+                identUtenGradering to null,
+            )
 
         @BeforeEach
         internal fun setUp() {
@@ -374,33 +382,34 @@ internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
             identer.forEach {
                 val fagsak = testoppsettService.lagreFagsak(fagsak(fagsakpersoner(setOf(it.first))))
                 val behandling = behandlingRepository.insert(behandling(fagsak))
-                val arbeidssøkere = UttrekkArbeidssøkere(
-                    fagsakId = fagsak.id,
-                    vedtakId = behandling.id,
-                    årMåned = mars2021,
-                    registrertArbeidssøker = false,
-                )
+                val arbeidssøkere =
+                    UttrekkArbeidssøkere(
+                        fagsakId = fagsak.id,
+                        vedtakId = behandling.id,
+                        årMåned = mars2021,
+                        registrertArbeidssøker = false,
+                    )
                 uttrekkArbeidssøkerRepository.insert(arbeidssøkere)
             }
         }
 
         @Test
         internal fun `hentUttrekkArbeidssøkere - uten rolle filtrerer vekk personer som man ikke har tilgang til`() {
-            val expected = listOf(IDENT_UGRADERT, IDENT_UTEN_GRADERING)
+            val expected = listOf(identUgradert, identUtenGradering)
             testWithSaksbehandlerContext {
                 val uttrekk = service.hentUttrekkArbeidssøkere(mars2021)
                 validerInneholderIdenter(uttrekk, expected)
                 assertThat(uttrekk.antallTotalt).isEqualTo(2)
                 assertThat(uttrekk.antallManglerKontrollUtenTilgang).isEqualTo(3)
                 assertThat(uttrekk.arbeidssøkere).hasSize(2)
-                validateAdressebeskyttelse(uttrekk, IDENT_UGRADERT, DtoAdressebeskyttelse.UGRADERT)
-                validateAdressebeskyttelse(uttrekk, IDENT_UTEN_GRADERING, null)
+                validateAdressebeskyttelse(uttrekk, identUgradert, DtoAdressebeskyttelse.UGRADERT)
+                validateAdressebeskyttelse(uttrekk, identUtenGradering, null)
             }
         }
 
         @Test
         internal fun `hentUttrekkArbeidssøkere - kode 6 tilgang`() {
-            val expected = listOf(IDENT_STRENGT_FORTROLIG, IDENT_STRENGT_FORTROLIG_UTLAND)
+            val expected = listOf(identStrengtFortrolig, identStrengtFortroligUtland)
             testWithSaksbehandlerContext(groups = listOf(rolleConfig.kode6)) {
                 val uttrekk = service.hentUttrekkArbeidssøkere(mars2021)
 
@@ -408,10 +417,10 @@ internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
                 assertThat(uttrekk.antallTotalt).isEqualTo(2)
                 assertThat(uttrekk.antallManglerKontrollUtenTilgang).isEqualTo(3)
                 assertThat(uttrekk.arbeidssøkere).hasSize(2)
-                validateAdressebeskyttelse(uttrekk, IDENT_STRENGT_FORTROLIG, DtoAdressebeskyttelse.STRENGT_FORTROLIG)
+                validateAdressebeskyttelse(uttrekk, identStrengtFortrolig, DtoAdressebeskyttelse.STRENGT_FORTROLIG)
                 validateAdressebeskyttelse(
                     uttrekk,
-                    IDENT_STRENGT_FORTROLIG_UTLAND,
+                    identStrengtFortroligUtland,
                     DtoAdressebeskyttelse.STRENGT_FORTROLIG_UTLAND,
                 )
             }
@@ -419,7 +428,7 @@ internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
 
         @Test
         internal fun `hentUttrekkArbeidssøkere - kode 7 tilgang`() {
-            val expected = listOf(IDENT_UGRADERT, IDENT_UTEN_GRADERING, IDENT_FORTROLIG)
+            val expected = listOf(identUgradert, identUtenGradering, identFortrolig)
             testWithSaksbehandlerContext(groups = listOf(rolleConfig.kode7)) {
                 val uttrekk = service.hentUttrekkArbeidssøkere(mars2021)
 
@@ -427,16 +436,16 @@ internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
                 assertThat(uttrekk.antallTotalt).isEqualTo(3)
                 assertThat(uttrekk.antallManglerKontrollUtenTilgang).isEqualTo(2)
                 assertThat(uttrekk.arbeidssøkere).hasSize(3)
-                validateAdressebeskyttelse(uttrekk, IDENT_FORTROLIG, DtoAdressebeskyttelse.FORTROLIG)
-                validateAdressebeskyttelse(uttrekk, IDENT_UGRADERT, DtoAdressebeskyttelse.UGRADERT)
-                validateAdressebeskyttelse(uttrekk, IDENT_UTEN_GRADERING, null)
+                validateAdressebeskyttelse(uttrekk, identFortrolig, DtoAdressebeskyttelse.FORTROLIG)
+                validateAdressebeskyttelse(uttrekk, identUgradert, DtoAdressebeskyttelse.UGRADERT)
+                validateAdressebeskyttelse(uttrekk, identUtenGradering, null)
             }
         }
 
         @Test
         internal fun `hentUttrekkArbeidssøkere - uten rolle og en kode6-arbeidsøker er kontrollert`() {
-            val expected = listOf(IDENT_UGRADERT, IDENT_UTEN_GRADERING)
-            fagsakRepository.findBySøkerIdent(setOf(IDENT_STRENGT_FORTROLIG))
+            val expected = listOf(identUgradert, identUtenGradering)
+            fagsakRepository.findBySøkerIdent(setOf(identStrengtFortrolig))
                 .single()
                 .let { fagsak ->
                     uttrekkArbeidssøkerRepository.findAllByÅrMånedAndRegistrertArbeidssøkerIsFalse(mars2021)
@@ -449,8 +458,8 @@ internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
                 assertThat(uttrekk.antallTotalt).isEqualTo(2)
                 assertThat(uttrekk.antallManglerKontrollUtenTilgang).isEqualTo(2)
                 assertThat(uttrekk.arbeidssøkere).hasSize(2)
-                validateAdressebeskyttelse(uttrekk, IDENT_UGRADERT, DtoAdressebeskyttelse.UGRADERT)
-                validateAdressebeskyttelse(uttrekk, IDENT_UTEN_GRADERING, null)
+                validateAdressebeskyttelse(uttrekk, identUgradert, DtoAdressebeskyttelse.UGRADERT)
+                validateAdressebeskyttelse(uttrekk, identUtenGradering, null)
             }
         }
 
@@ -463,7 +472,10 @@ internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
                 .containsExactly(adressebeskyttelse)
         }
 
-        private fun validerInneholderIdenter(uttrekk: UttrekkArbeidssøkereDto, identer: List<String>) {
+        private fun validerInneholderIdenter(
+            uttrekk: UttrekkArbeidssøkereDto,
+            identer: List<String>,
+        ) {
             assertThat(uttrekk.arbeidssøkere.map { it.personIdent }).containsExactlyInAnyOrderElementsOf(identer)
         }
     }
@@ -533,14 +545,15 @@ internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
 
     private fun opprettEkstraFagsak() {
         val fagsak = testoppsettService.lagreFagsak(fagsak(fagsakpersoner(setOf("2"))))
-        val behandling = behandlingRepository.insert(
-            behandling(
-                fagsak = fagsak,
-                type = BehandlingType.REVURDERING,
-                forrigeBehandlingId = behandling2.id,
-                opprettetTid = behandling2.sporbar.opprettetTid.plusDays(1),
-            ),
-        )
+        val behandling =
+            behandlingRepository.insert(
+                behandling(
+                    fagsak = fagsak,
+                    type = BehandlingType.REVURDERING,
+                    forrigeBehandlingId = behandling2.id,
+                    opprettetTid = behandling2.sporbar.opprettetTid.plusDays(1),
+                ),
+            )
         innvilg(
             fagsak,
             behandling,
@@ -573,12 +586,13 @@ internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
         vedtaksperioder: List<VedtaksperiodeDto>,
         inntekter: List<Inntekt> = listOf(Inntekt(vedtaksperioder.first().periode.fom, null, null)),
     ) {
-        val vedtak = InnvilgelseOvergangsstønad(
-            perioder = vedtaksperioder,
-            inntekter = inntekter,
-            periodeBegrunnelse = null,
-            inntektBegrunnelse = null,
-        )
+        val vedtak =
+            InnvilgelseOvergangsstønad(
+                perioder = vedtaksperioder,
+                inntekter = inntekter,
+                periodeBegrunnelse = null,
+                inntektBegrunnelse = null,
+            )
         beregnYtelseSteg.utførSteg(saksbehandling(fagsak, behandling), vedtak)
     }
 
@@ -595,7 +609,10 @@ internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
             emptyList(),
         )
 
-    fun testWithSaksbehandlerContext(groups: List<String> = emptyList(), fn: () -> Unit) {
+    fun testWithSaksbehandlerContext(
+        groups: List<String> = emptyList(),
+        fn: () -> Unit,
+    ) {
         testWithBrukerContext(groups = groups + rolleConfig.saksbehandlerRolle, fn = fn)
     }
 }

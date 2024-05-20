@@ -24,28 +24,28 @@ class OpprettOppfølgingsoppgaveForBarnFyltÅrTask(
     private val oppgaveRepository: OppgaveRepository,
     private val oppgaveService: OppgaveService,
 ) : AsyncTaskStep {
-
     override fun doTask(task: Task) {
         val opprettOppgavePayload = objectMapper.readValue<OpprettOppgavePayload>(task.payload)
-        val opprettetOppgaveId = oppgaveService.opprettOppgaveUtenÅLagreIRepository(
-            opprettOppgavePayload.behandlingId,
-            Oppgavetype.InnhentDokumentasjon,
-            opprettOppgavePayload.aktivFra,
-            opprettOppgavePayload.alder.oppgavebeskrivelse,
-            tilordnetNavIdent = null,
-        )
-        val oppgave = Oppgave(
-            gsakOppgaveId = opprettetOppgaveId,
-            behandlingId = opprettOppgavePayload.behandlingId,
-            barnPersonIdent = opprettOppgavePayload.barnPersonIdent,
-            type = Oppgavetype.InnhentDokumentasjon,
-            alder = opprettOppgavePayload.alder,
-        )
+        val opprettetOppgaveId =
+            oppgaveService.opprettOppgaveUtenÅLagreIRepository(
+                opprettOppgavePayload.behandlingId,
+                Oppgavetype.InnhentDokumentasjon,
+                opprettOppgavePayload.aktivFra,
+                opprettOppgavePayload.alder.oppgavebeskrivelse,
+                tilordnetNavIdent = null,
+            )
+        val oppgave =
+            Oppgave(
+                gsakOppgaveId = opprettetOppgaveId,
+                behandlingId = opprettOppgavePayload.behandlingId,
+                barnPersonIdent = opprettOppgavePayload.barnPersonIdent,
+                type = Oppgavetype.InnhentDokumentasjon,
+                alder = opprettOppgavePayload.alder,
+            )
         oppgaveRepository.insert(oppgave)
     }
 
     companion object {
-
         const val TYPE = "opprettOppfølgingsoppgaveForBarnFyltÅrTask"
 
         fun opprettTask(opprettOppgavePayload: OpprettOppgavePayload): Task {

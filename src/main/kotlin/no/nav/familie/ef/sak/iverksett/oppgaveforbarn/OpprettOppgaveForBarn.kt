@@ -18,7 +18,10 @@ enum class Alder(val oppgavebeskrivelse: String) {
     ;
 
     companion object {
-        fun fromFødselsdato(fødselsdato: LocalDate?, numberOfDaysCutoff: Long = 7): Alder? {
+        fun fromFødselsdato(
+            fødselsdato: LocalDate?,
+            numberOfDaysCutoff: Long = 7,
+        ): Alder? {
             fødselsdato?.let {
                 if (fødselsdato.erEttÅrEllerMerOgInnenforCutoff(numberOfDaysCutoff)) return ETT_ÅR
                 if (fødselsdato.er6MndEllerMerOgInnenforCutoff(numberOfDaysCutoff)) return SEKS_MND

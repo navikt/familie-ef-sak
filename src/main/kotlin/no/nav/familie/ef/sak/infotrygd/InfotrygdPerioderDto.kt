@@ -29,7 +29,6 @@ data class SummertInfotrygdPeriodeDto(
     val aktivitet: InfotrygdAktivitetstype?,
     val barnIdenter: List<String>,
 ) {
-
     @Deprecated("Bruk stønadsperiode", ReplaceWith("stønadsperiode.fom"))
     @get:JsonProperty
     val stønadFom: LocalDate get() = stønadsperiode.fomDato

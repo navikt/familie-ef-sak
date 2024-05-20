@@ -12,7 +12,6 @@ import org.junit.jupiter.api.Test
 import org.springframework.cache.concurrent.ConcurrentMapCacheManager
 
 internal class ArbeidsfordelingServiceTest {
-
     private lateinit var personopplysningerIntegrasjonerClient: PersonopplysningerIntegrasjonerClient
     private lateinit var arbeidsfordelingService: ArbeidsfordelingService
 
@@ -62,7 +61,6 @@ internal class ArbeidsfordelingServiceTest {
     }
 
     companion object {
-
         private const val IDENT_FORELDER = "1"
         private const val IDENT_BARN = "2"
     }

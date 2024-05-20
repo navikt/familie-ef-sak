@@ -29,9 +29,10 @@ class SøkController(
     private val personService: PersonService,
     private val tilgangService: TilgangService,
 ) {
-
     @PostMapping("", "/person")
-    fun søkPerson(@RequestBody personIdentRequest: PersonIdentDto): Ressurs<Søkeresultat> {
+    fun søkPerson(
+        @RequestBody personIdentRequest: PersonIdentDto,
+    ): Ressurs<Søkeresultat> {
         validerPersonIdent(personIdentRequest)
         val personIdenter = hentOgValiderAtIdentEksisterer(personIdentRequest)
         tilgangService.validerTilgangTilPersonMedBarn(personIdentRequest.personIdent, AuditLoggerEvent.ACCESS)
@@ -39,7 +40,9 @@ class SøkController(
     }
 
     @GetMapping("/person/fagsak-ekstern/{eksternFagsakId}")
-    fun søkPerson(@PathVariable eksternFagsakId: Long): Ressurs<Søkeresultat> {
+    fun søkPerson(
+        @PathVariable eksternFagsakId: Long,
+    ): Ressurs<Søkeresultat> {
         val søkeresultat = søkService.søkPersonForEksternFagsak(eksternFagsakId)
         søkeresultat.fagsakPersonId?.let {
             tilgangService.validerTilgangTilFagsakPerson(it, AuditLoggerEvent.ACCESS)
@@ -48,7 +51,9 @@ class SøkController(
     }
 
     @PostMapping("/person/uten-fagsak")
-    fun søkPersonUtenFagsak(@RequestBody personIdentRequest: PersonIdentDto): Ressurs<SøkeresultatUtenFagsak> {
+    fun søkPersonUtenFagsak(
+        @RequestBody personIdentRequest: PersonIdentDto,
+    ): Ressurs<SøkeresultatUtenFagsak> {
         validerPersonIdent(personIdentRequest)
         tilgangService.validerTilgangTilPerson(personIdentRequest.personIdent, AuditLoggerEvent.ACCESS)
 
@@ -56,19 +61,25 @@ class SøkController(
     }
 
     @GetMapping("{behandlingId}/samme-adresse")
-    fun søkPersonerMedSammeAdressePåBehandling(@PathVariable behandlingId: UUID): Ressurs<SøkeresultatPerson> {
+    fun søkPersonerMedSammeAdressePåBehandling(
+        @PathVariable behandlingId: UUID,
+    ): Ressurs<SøkeresultatPerson> {
         tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.ACCESS)
         return Ressurs.success(søkService.søkEtterPersonerMedSammeAdressePåBehandling(behandlingId))
     }
 
     @GetMapping("fagsak/{fagsakId}/samme-adresse")
-    fun søkPersonerMedSammeAdressePåFagsak(@PathVariable fagsakId: UUID): Ressurs<SøkeresultatPerson> {
+    fun søkPersonerMedSammeAdressePåFagsak(
+        @PathVariable fagsakId: UUID,
+    ): Ressurs<SøkeresultatPerson> {
         tilgangService.validerTilgangTilFagsak(fagsakId, AuditLoggerEvent.ACCESS)
         return Ressurs.success(søkService.søkEtterPersonerMedSammeAdressePåFagsak(fagsakId))
     }
 
     @GetMapping("fagsak-person/{fagsakPersonId}/samme-adresse")
-    fun søkPersonerMedSammeAdressePåFagsakPerson(@PathVariable fagsakPersonId: UUID): Ressurs<SøkeresultatPerson> {
+    fun søkPersonerMedSammeAdressePåFagsakPerson(
+        @PathVariable fagsakPersonId: UUID,
+    ): Ressurs<SøkeresultatPerson> {
         tilgangService.validerTilgangTilFagsakPerson(fagsakPersonId, AuditLoggerEvent.ACCESS)
         return Ressurs.success(søkService.søkEtterPersonerMedSammeAdressePåFagsakPerson(fagsakPersonId))
     }

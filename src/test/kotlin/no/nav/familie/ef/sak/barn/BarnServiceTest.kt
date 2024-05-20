@@ -34,7 +34,6 @@ import java.time.Year
 import java.util.UUID
 
 internal class BarnServiceTest {
-
     val barnRepository = mockk<BarnRepository>()
     val søknadService = mockk<SøknadService>()
     val behandlingService = mockk<BehandlingService>()
@@ -56,12 +55,13 @@ internal class BarnServiceTest {
 
     @Test
     internal fun `skal ha både barn fra søknad og grunnlagsdata for barnetilsyn`() {
-        val grunnlagsdatabarn = listOf(
-            barnMedIdent(fnrBarnD, "Barn D"),
-            barnMedIdent(fnrBarnC, "Barn C"),
-            barnMedIdent(fnrBarnB, "Barn B"),
-            barnMedIdent(fnrBarnA, "Barn A"),
-        )
+        val grunnlagsdatabarn =
+            listOf(
+                barnMedIdent(fnrBarnD, "Barn D"),
+                barnMedIdent(fnrBarnC, "Barn C"),
+                barnMedIdent(fnrBarnB, "Barn B"),
+                barnMedIdent(fnrBarnA, "Barn A"),
+            )
 
         every { søknadMock.barn } returns setOf(barnPåSøknadA, barnPåSøknadB)
 
@@ -84,12 +84,13 @@ internal class BarnServiceTest {
         mode = EnumSource.Mode.INCLUDE,
     )
     internal fun `skal ha med barn fra søknad og registeret for skolepenger`(stønadstype: StønadType) {
-        val grunnlagsdatabarn = listOf(
-            barnMedIdent(fnrBarnD, "Barn D"),
-            barnMedIdent(fnrBarnC, "Barn C"),
-            barnMedIdent(fnrBarnB, "Barn B"),
-            barnMedIdent(fnrBarnA, "Barn A"),
-        )
+        val grunnlagsdatabarn =
+            listOf(
+                barnMedIdent(fnrBarnD, "Barn D"),
+                barnMedIdent(fnrBarnC, "Barn C"),
+                barnMedIdent(fnrBarnB, "Barn B"),
+                barnMedIdent(fnrBarnA, "Barn A"),
+            )
 
         every { søknadMock.barn } returns setOf(barnPåSøknadA, barnPåSøknadB)
 
@@ -110,20 +111,22 @@ internal class BarnServiceTest {
 
     @Test
     internal fun `revurdering uten nye barn skal ta med terminbarn fra forrige behandling`() {
-        val grunnlagsdatabarn = listOf(
-            barnMedIdent(fnrBarnD, "Barn D"),
-        )
+        val grunnlagsdatabarn =
+            listOf(
+                barnMedIdent(fnrBarnD, "Barn D"),
+            )
 
         val forrigeBehandlingId = UUID.randomUUID()
 
         every { søknadMock.barn } returns setOf(barnPåSøknadA, terminbarnPåSøknad)
-        every { barnRepository.findByBehandlingId(any()) } returns søknadBarnTilBehandlingBarn(
-            setOf(
-                barnPåSøknadA,
-                terminbarnPåSøknad,
-            ),
-            forrigeBehandlingId,
-        )
+        every { barnRepository.findByBehandlingId(any()) } returns
+            søknadBarnTilBehandlingBarn(
+                setOf(
+                    barnPåSøknadA,
+                    terminbarnPåSøknad,
+                ),
+                forrigeBehandlingId,
+            )
         val nyeBarnPåRevurdering = emptyList<BehandlingBarn>()
         barnService.opprettBarnForRevurdering(
             behandlingId,
@@ -140,29 +143,32 @@ internal class BarnServiceTest {
 
     @Test
     internal fun `skal ta med ett nytt barn ved revurdering av Overgangsstønad hvor to barn eksisterer fra før`() {
-        val grunnlagsdatabarn = listOf(
-            barnMedIdent(fnrBarnC, "Barn C"),
-            barnMedIdent(fnrBarnB, "Barn B"),
-            barnMedIdent(fnrBarnA, "Barn A"),
-        )
+        val grunnlagsdatabarn =
+            listOf(
+                barnMedIdent(fnrBarnC, "Barn C"),
+                barnMedIdent(fnrBarnB, "Barn B"),
+                barnMedIdent(fnrBarnA, "Barn A"),
+            )
         val forrigeBehandlingId = UUID.randomUUID()
 
         every { søknadMock.barn } returns setOf(barnPåSøknadA, barnPåSøknadB)
-        every { barnRepository.findByBehandlingId(any()) } returns søknadBarnTilBehandlingBarn(
-            setOf(
-                barnPåSøknadA,
-                barnPåSøknadB,
-            ),
-            forrigeBehandlingId,
-        )
-        val nyeBarnPåRevurdering = listOf(
-            BehandlingBarn(
-                behandlingId = behandlingId,
-                søknadBarnId = null,
-                personIdent = fnrBarnC,
-                navn = "Barn C",
-            ),
-        )
+        every { barnRepository.findByBehandlingId(any()) } returns
+            søknadBarnTilBehandlingBarn(
+                setOf(
+                    barnPåSøknadA,
+                    barnPåSøknadB,
+                ),
+                forrigeBehandlingId,
+            )
+        val nyeBarnPåRevurdering =
+            listOf(
+                BehandlingBarn(
+                    behandlingId = behandlingId,
+                    søknadBarnId = null,
+                    personIdent = fnrBarnC,
+                    navn = "Barn C",
+                ),
+            )
         barnService.opprettBarnForRevurdering(
             behandlingId,
             forrigeBehandlingId,
@@ -178,77 +184,84 @@ internal class BarnServiceTest {
 
     @Test
     internal fun `skal kaste feil ved revurdering av Barnetilsyn dersom man ikke tar med alle barna som finnes i grunnlagsdataene`() {
-        val grunnlagsdatabarn = listOf(
-            barnMedIdent(fnrBarnD, "Barn D"),
-            barnMedIdent(fnrBarnC, "Barn C"),
-            barnMedIdent(fnrBarnB, "Barn B"),
-            barnMedIdent(fnrBarnA, "Barn A"),
-        )
+        val grunnlagsdatabarn =
+            listOf(
+                barnMedIdent(fnrBarnD, "Barn D"),
+                barnMedIdent(fnrBarnC, "Barn C"),
+                barnMedIdent(fnrBarnB, "Barn B"),
+                barnMedIdent(fnrBarnA, "Barn A"),
+            )
         val forrigeBehandlingId = UUID.randomUUID()
 
         every { søknadMock.barn } returns setOf(barnPåSøknadA, barnPåSøknadB)
-        every { barnRepository.findByBehandlingId(any()) } returns søknadBarnTilBehandlingBarn(
-            setOf(
-                barnPåSøknadA,
-                barnPåSøknadB,
-            ),
-            forrigeBehandlingId,
-        )
+        every { barnRepository.findByBehandlingId(any()) } returns
+            søknadBarnTilBehandlingBarn(
+                setOf(
+                    barnPåSøknadA,
+                    barnPåSøknadB,
+                ),
+                forrigeBehandlingId,
+            )
         every { barnRepository.insertAll(capture(barnSlot)) } returns emptyList()
 
-        val nyeBarnPåRevurdering = listOf(
-            BehandlingBarn(
-                behandlingId = behandlingId,
-                søknadBarnId = null,
-                personIdent = fnrBarnC,
-                navn = "Barn C",
-            ),
-        )
-        val feil = assertThrows<Feil> {
-            barnService.opprettBarnForRevurdering(
-                behandlingId,
-                forrigeBehandlingId,
-                nyeBarnPåRevurdering,
-                grunnlagsdatabarn,
-                BARNETILSYN,
+        val nyeBarnPåRevurdering =
+            listOf(
+                BehandlingBarn(
+                    behandlingId = behandlingId,
+                    søknadBarnId = null,
+                    personIdent = fnrBarnC,
+                    navn = "Barn C",
+                ),
             )
-        }
+        val feil =
+            assertThrows<Feil> {
+                barnService.opprettBarnForRevurdering(
+                    behandlingId,
+                    forrigeBehandlingId,
+                    nyeBarnPåRevurdering,
+                    grunnlagsdatabarn,
+                    BARNETILSYN,
+                )
+            }
 
         assertThat(feil.message).contains("Alle barn skal være med i revurderingen av en barnetilsynbehandling.")
     }
 
     @Test
     internal fun `skal ta med alle nye barn ved revurdering av Barnetilsyn hvor to barn eksisterer fra før`() {
-        val grunnlagsdatabarn = listOf(
-            barnMedIdent(fnrBarnD, "Barn D"),
-            barnMedIdent(fnrBarnC, "Barn C"),
-            barnMedIdent(fnrBarnB, "Barn B"),
-            barnMedIdent(fnrBarnA, "Barn A"),
-        )
+        val grunnlagsdatabarn =
+            listOf(
+                barnMedIdent(fnrBarnD, "Barn D"),
+                barnMedIdent(fnrBarnC, "Barn C"),
+                barnMedIdent(fnrBarnB, "Barn B"),
+                barnMedIdent(fnrBarnA, "Barn A"),
+            )
         val forrigeBehandlingId = UUID.randomUUID()
 
         every { søknadMock.barn } returns setOf(barnPåSøknadA, barnPåSøknadB)
-        every { barnRepository.findByBehandlingId(any()) } returns søknadBarnTilBehandlingBarn(
-            setOf(
-                barnPåSøknadA,
-                barnPåSøknadB,
-            ),
-            forrigeBehandlingId,
-        )
-        val nyeBarnPåRevurdering = listOf(
-            BehandlingBarn(
-                behandlingId = behandlingId,
-                søknadBarnId = null,
-                personIdent = fnrBarnD,
-                navn = "Barn C",
-            ),
-            BehandlingBarn(
-                behandlingId = behandlingId,
-                søknadBarnId = null,
-                personIdent = fnrBarnC,
-                navn = "Barn C",
-            ),
-        )
+        every { barnRepository.findByBehandlingId(any()) } returns
+            søknadBarnTilBehandlingBarn(
+                setOf(
+                    barnPåSøknadA,
+                    barnPåSøknadB,
+                ),
+                forrigeBehandlingId,
+            )
+        val nyeBarnPåRevurdering =
+            listOf(
+                BehandlingBarn(
+                    behandlingId = behandlingId,
+                    søknadBarnId = null,
+                    personIdent = fnrBarnD,
+                    navn = "Barn C",
+                ),
+                BehandlingBarn(
+                    behandlingId = behandlingId,
+                    søknadBarnId = null,
+                    personIdent = fnrBarnC,
+                    navn = "Barn C",
+                ),
+            )
         barnService.opprettBarnForRevurdering(
             behandlingId,
             forrigeBehandlingId,
@@ -268,10 +281,11 @@ internal class BarnServiceTest {
 
         val pdlTerminbarn = barnMedIdent(FnrGenerator.generer(fødselTermindato), "J B")
         val barnOver18 = barnMedIdent(fnrBarnOver18, "Barn Over 18", fødsel(år = 1986, 1, 1))
-        val grunnlagsdatabarn = listOf(
-            barnOver18,
-            pdlTerminbarn,
-        )
+        val grunnlagsdatabarn =
+            listOf(
+                barnOver18,
+                pdlTerminbarn,
+            )
 
         every { søknadMock.barn } returns setOf(terminbarnPåSøknad)
 
@@ -291,7 +305,6 @@ internal class BarnServiceTest {
 
     @Nested
     inner class TerminbarnFraPapirsøknad {
-
         @Test
         internal fun `skal ikke kunne sende inn terminbarn på annen behandling enn papirsøknad`() {
             val termindato = LocalDate.of(2021, 1, 1)
@@ -346,16 +359,18 @@ internal class BarnServiceTest {
         internal fun `skal ta med barn fra forrige behandling som var under 18`() {
             val eksisterendeBarn = barnMedIdent(fnrBarnA, "Barn A")
             val barnOver18 = barnMedIdent(fnrBarnOver18, "Barn Over 18", fødsel(år = 1986, 1, 1))
-            val grunnlagsdatabarn = listOf(
-                barnOver18,
-                eksisterendeBarn,
-            )
+            val grunnlagsdatabarn =
+                listOf(
+                    barnOver18,
+                    eksisterendeBarn,
+                )
 
             val forrigeBehandlingId = UUID.randomUUID()
-            val barnPåForrigeBehandling = listOf(
-                barnPåSøknadA.tilBehandlingBarn(forrigeBehandlingId),
-                barnOver18.tilBehandlingBarn(forrigeBehandlingId),
-            )
+            val barnPåForrigeBehandling =
+                listOf(
+                    barnPåSøknadA.tilBehandlingBarn(forrigeBehandlingId),
+                    barnOver18.tilBehandlingBarn(forrigeBehandlingId),
+                )
 
             every { barnRepository.findByBehandlingId(forrigeBehandlingId) } returns barnPåForrigeBehandling
             barnService.opprettBarnForRevurdering(
@@ -373,24 +388,26 @@ internal class BarnServiceTest {
         internal fun `skal ta med barn over 18 som ikke har innslag i forrige revurdering`() {
             val eksisterendeBarn = barnMedIdent(fnrBarnA, "Barn A")
             val barnOver18 = barnMedIdent(fnrBarnOver18, "Barn Over 18", fødsel(år = 1986, 1, 1))
-            val grunnlagsdatabarn = listOf(
-                barnOver18,
-                eksisterendeBarn,
-            )
+            val grunnlagsdatabarn =
+                listOf(
+                    barnOver18,
+                    eksisterendeBarn,
+                )
 
             val forrigeBehandlingId = UUID.randomUUID()
             val søknadsBarnTilBehandlingBarn = listOf(barnPåSøknadA.tilBehandlingBarn(forrigeBehandlingId))
 
             every { barnRepository.findByBehandlingId(forrigeBehandlingId) } returns søknadsBarnTilBehandlingBarn
 
-            val nyeBarnPåRevurdering = listOf(
-                BehandlingBarn(
-                    behandlingId = behandlingId,
-                    søknadBarnId = null,
-                    personIdent = fnrBarnOver18,
-                    navn = "Barn over 18",
-                ),
-            )
+            val nyeBarnPåRevurdering =
+                listOf(
+                    BehandlingBarn(
+                        behandlingId = behandlingId,
+                        søknadBarnId = null,
+                        personIdent = fnrBarnOver18,
+                        navn = "Barn over 18",
+                    ),
+                )
 
             barnService.opprettBarnForRevurdering(
                 behandlingId = behandlingId,
@@ -436,10 +453,11 @@ internal class BarnServiceTest {
         @Test
         internal fun `skal ha med barn over 18 år`() {
             val årOver18år = Year.now().minusYears(19).value
-            val grunnlagsdataBarn = listOf(
-                barnMedIdent(FnrGenerator.generer(Year.now().minusYears(1).value), "Under 18"),
-                barnMedIdent(FnrGenerator.generer(årOver18år), "Over 18", fødsel(årOver18år)),
-            )
+            val grunnlagsdataBarn =
+                listOf(
+                    barnMedIdent(FnrGenerator.generer(Year.now().minusYears(1).value), "Under 18"),
+                    barnMedIdent(FnrGenerator.generer(årOver18år), "Over 18", fødsel(årOver18år)),
+                )
             barnService.opprettBarnPåBehandlingMedSøknadsdata(
                 behandlingId,
                 fagsakId,
@@ -456,26 +474,27 @@ internal class BarnServiceTest {
 
     @Nested
     inner class Ettersending {
-
-        private val grunnlagsdataBarn = listOf(
-            barnMedIdent(FnrGenerator.generer(LocalDate.now().minusYears(1)), "J B"),
-        )
+        private val grunnlagsdataBarn =
+            listOf(
+                barnMedIdent(FnrGenerator.generer(LocalDate.now().minusYears(1)), "J B"),
+            )
         private val fødselTermindato = LocalDate.now().minusDays(1)
         private val tidligereBehandling = behandling()
-        private val barnPåForrigeBehandling = listOf(
-            BehandlingBarn(
-                behandlingId = tidligereBehandling.id,
-                søknadBarnId = UUID.randomUUID(),
-                personIdent = "1",
-                navn = "1",
-            ),
-            BehandlingBarn(
-                behandlingId = tidligereBehandling.id,
-                søknadBarnId = UUID.randomUUID(),
-                fødselTermindato = fødselTermindato,
-                navn = "asd",
-            ),
-        )
+        private val barnPåForrigeBehandling =
+            listOf(
+                BehandlingBarn(
+                    behandlingId = tidligereBehandling.id,
+                    søknadBarnId = UUID.randomUUID(),
+                    personIdent = "1",
+                    navn = "1",
+                ),
+                BehandlingBarn(
+                    behandlingId = tidligereBehandling.id,
+                    søknadBarnId = UUID.randomUUID(),
+                    fødselTermindato = fødselTermindato,
+                    navn = "asd",
+                ),
+            )
 
         @BeforeEach
         internal fun setUp() {
@@ -609,7 +628,6 @@ internal class BarnServiceTest {
 
     @Nested
     inner class ValiderBarnFinnesPåBehandling {
-
         private val barn = BehandlingBarn(id = UUID.randomUUID(), behandlingId = UUID.randomUUID(), søknadBarnId = null)
         private val barn2 =
             BehandlingBarn(id = UUID.randomUUID(), behandlingId = UUID.randomUUID(), søknadBarnId = null)
@@ -653,7 +671,6 @@ internal class BarnServiceTest {
 
     @Nested
     inner class MapTidligereBarnIdTilNårværende {
-
         private val barnA = BehandlingBarn(behandlingId = UUID.randomUUID(), personIdent = fnrBarnA)
         private val tidligereBarnA = BehandlingBarn(behandlingId = UUID.randomUUID(), personIdent = fnrBarnA)
 
@@ -701,35 +718,38 @@ internal class BarnServiceTest {
     val fnrBarnB = FnrGenerator.generer(Year.now().minusYears(2).value)
     val fnrBarnC = FnrGenerator.generer(Year.now().minusYears(4).value)
     val fnrBarnD = FnrGenerator.generer(Year.now().minusYears(4).value)
-    val barnPåSøknadA = SøknadBarn(
-        id = UUID.randomUUID(),
-        navn = "Barn A",
-        fødselsnummer = fnrBarnA,
-        harSkalHaSammeAdresse = false,
-        ikkeRegistrertPåSøkersAdresseBeskrivelse = null,
-        erBarnetFødt = true,
-        skalHaBarnepass = true,
-        lagtTilManuelt = false,
-    )
-    val barnPåSøknadB = SøknadBarn(
-        id = UUID.randomUUID(),
-        navn = "Barn B",
-        fødselsnummer = fnrBarnB,
-        harSkalHaSammeAdresse = false,
-        ikkeRegistrertPåSøkersAdresseBeskrivelse = null,
-        erBarnetFødt = true,
-        skalHaBarnepass = true,
-        lagtTilManuelt = false,
-    )
-    val terminbarnPåSøknad = SøknadBarn(
-        id = UUID.randomUUID(),
-        navn = "Terminbarn 1",
-        fødselsnummer = null,
-        harSkalHaSammeAdresse = false,
-        ikkeRegistrertPåSøkersAdresseBeskrivelse = null,
-        erBarnetFødt = false,
-        skalHaBarnepass = true,
-        lagtTilManuelt = true,
-        fødselTermindato = LocalDate.now(),
-    )
+    val barnPåSøknadA =
+        SøknadBarn(
+            id = UUID.randomUUID(),
+            navn = "Barn A",
+            fødselsnummer = fnrBarnA,
+            harSkalHaSammeAdresse = false,
+            ikkeRegistrertPåSøkersAdresseBeskrivelse = null,
+            erBarnetFødt = true,
+            skalHaBarnepass = true,
+            lagtTilManuelt = false,
+        )
+    val barnPåSøknadB =
+        SøknadBarn(
+            id = UUID.randomUUID(),
+            navn = "Barn B",
+            fødselsnummer = fnrBarnB,
+            harSkalHaSammeAdresse = false,
+            ikkeRegistrertPåSøkersAdresseBeskrivelse = null,
+            erBarnetFødt = true,
+            skalHaBarnepass = true,
+            lagtTilManuelt = false,
+        )
+    val terminbarnPåSøknad =
+        SøknadBarn(
+            id = UUID.randomUUID(),
+            navn = "Terminbarn 1",
+            fødselsnummer = null,
+            harSkalHaSammeAdresse = false,
+            ikkeRegistrertPåSøkersAdresseBeskrivelse = null,
+            erBarnetFødt = false,
+            skalHaBarnepass = true,
+            lagtTilManuelt = true,
+            fødselTermindato = LocalDate.now(),
+        )
 }
