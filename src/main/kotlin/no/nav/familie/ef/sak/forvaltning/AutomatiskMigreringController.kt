@@ -25,9 +25,10 @@ class AutomatiskMigreringController(
     private val featureToggleService: FeatureToggleService,
     private val tilgangService: TilgangService,
 ) {
-
     @GetMapping
-    fun migrerAutomatiskt(@RequestParam antall: Int) {
+    fun migrerAutomatiskt(
+        @RequestParam antall: Int,
+    ) {
         tilgangService.validerHarForvalterrolle()
         brukerfeilHvis(antall > 100) {
             "Kan ikke migrere fler enn 100"
@@ -39,13 +40,17 @@ class AutomatiskMigreringController(
     }
 
     @PostMapping("rekjoer")
-    fun rekjoer(@RequestBody personIdent: PersonIdent) {
+    fun rekjoer(
+        @RequestBody personIdent: PersonIdent,
+    ) {
         tilgangService.validerHarForvalterrolle()
         automatiskMigreringService.rekjør(personIdent.ident)
     }
 
     @PostMapping("rekjoer/{arsak}")
-    fun rekjoer(@PathVariable("arsak") årsak: MigreringExceptionType) {
+    fun rekjoer(
+        @PathVariable("arsak") årsak: MigreringExceptionType,
+    ) {
         tilgangService.validerHarForvalterrolle()
         automatiskMigreringService.rekjør(årsak)
     }

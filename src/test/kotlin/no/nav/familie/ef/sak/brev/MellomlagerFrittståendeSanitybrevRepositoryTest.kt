@@ -11,19 +11,19 @@ import org.springframework.beans.factory.annotation.Autowired
 import java.time.temporal.ChronoUnit
 
 internal class MellomlagerFrittståendeSanitybrevRepositoryTest : OppslagSpringRunnerTest() {
-
     @Autowired
     private lateinit var mellomlagerFrittståendeSanitybrevRepository: MellomlagerFrittståendeSanitybrevRepository
 
     @Test
     internal fun `skal lagre mellomlagret brev`() {
         val fagsak = testoppsettService.lagreFagsak(fagsak())
-        val mellomlagretBrev = MellomlagretFrittståendeSanitybrev(
-            fagsakId = fagsak.id,
-            brevverdier = "{}",
-            brevmal = "",
-            saksbehandlerIdent = "saksbehandler123",
-        )
+        val mellomlagretBrev =
+            MellomlagretFrittståendeSanitybrev(
+                fagsakId = fagsak.id,
+                brevverdier = "{}",
+                brevmal = "",
+                saksbehandlerIdent = "saksbehandler123",
+            )
 
         mellomlagerFrittståendeSanitybrevRepository.insert(mellomlagretBrev)
 
@@ -38,12 +38,13 @@ internal class MellomlagerFrittståendeSanitybrevRepositoryTest : OppslagSpringR
     internal fun `skal finne igjen mellomlagret brev fra fagsakId og saksbehandlers ident`() {
         val saksbehandlerIdent = "12345678910"
         val fagsak = testoppsettService.lagreFagsak(fagsak())
-        val mellomlagretBrev = MellomlagretFrittståendeSanitybrev(
-            fagsakId = fagsak.id,
-            brevverdier = "{}",
-            brevmal = "",
-            saksbehandlerIdent = saksbehandlerIdent,
-        )
+        val mellomlagretBrev =
+            MellomlagretFrittståendeSanitybrev(
+                fagsakId = fagsak.id,
+                brevverdier = "{}",
+                brevmal = "",
+                saksbehandlerIdent = saksbehandlerIdent,
+            )
 
         mellomlagerFrittståendeSanitybrevRepository.insert(mellomlagretBrev)
         val mellomlagretBrevFraDb =

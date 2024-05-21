@@ -17,14 +17,15 @@ import org.springframework.web.bind.annotation.RestController
 @ProtectedWithClaims(issuer = "azuread")
 @Validated
 class OrganisasjonController(val eregService: EregService) {
-
     @GetMapping("/{organisasjonsnummer}")
-    fun hentOrganisasjon(@PathVariable organisasjonsnummer: String): Ressurs<Organisasjon> {
-        if (!ORGNR_REGEX.matches(organisasjonsnummer)) {
+    fun hentOrganisasjon(
+        @PathVariable organisasjonsnummer: String,
+    ): Ressurs<Organisasjon> {
+        if (!organisasjonsnummerRegex.matches(organisasjonsnummer)) {
             throw ApiFeil("Ugyldig organisasjonsnummer", HttpStatus.BAD_REQUEST)
         }
         return Ressurs.success(eregService.hentOrganisasjon(organisasjonsnummer))
     }
 
-    private val ORGNR_REGEX = """\d{9}""".toRegex()
+    private val organisasjonsnummerRegex = """\d{9}""".toRegex()
 }

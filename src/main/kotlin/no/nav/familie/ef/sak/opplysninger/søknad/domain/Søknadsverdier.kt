@@ -54,50 +54,52 @@ data class DokumentasjonFraSøknadDto(
     val meldtAdresseendring: DokumentasjonDto? = null,
 )
 
-fun SøknadsskjemaSkolepenger.tilSøknadsverdier() = Søknadsverdier(
-    aktivitet = Aktivitet(underUtdanning = this.utdanning, tidligereUtdanninger = this.tidligereUtdanninger),
-    barn = this.barn,
-    fødselsnummer = this.fødselsnummer,
-    medlemskap = this.medlemskap,
-    sivilstand = this.sivilstand,
-    sivilstandsplaner = this.sivilstandsplaner,
-    bosituasjon = this.bosituasjon,
-    situasjon = null,
-    datoMottatt = this.datoMottatt,
-    datoPåbegyntSøknad = this.datoPåbegyntSøknad,
-    adresseopplysninger = this.adresseopplysninger,
-    dokumentasjon = DokumentasjonMapper.tilDokumentasjonDto(this),
-)
+fun SøknadsskjemaSkolepenger.tilSøknadsverdier() =
+    Søknadsverdier(
+        aktivitet = Aktivitet(underUtdanning = this.utdanning, tidligereUtdanninger = this.tidligereUtdanninger),
+        barn = this.barn,
+        fødselsnummer = this.fødselsnummer,
+        medlemskap = this.medlemskap,
+        sivilstand = this.sivilstand,
+        sivilstandsplaner = this.sivilstandsplaner,
+        bosituasjon = this.bosituasjon,
+        situasjon = null,
+        datoMottatt = this.datoMottatt,
+        datoPåbegyntSøknad = this.datoPåbegyntSøknad,
+        adresseopplysninger = this.adresseopplysninger,
+        dokumentasjon = DokumentasjonMapper.tilDokumentasjonDto(this),
+    )
 
-fun SøknadsskjemaBarnetilsyn.tilSøknadsverdier() = Søknadsverdier(
-    aktivitet = this.aktivitet,
-    barn = this.barn,
-    fødselsnummer = this.fødselsnummer,
-    medlemskap = this.medlemskap,
-    sivilstand = this.sivilstand,
-    sivilstandsplaner = this.sivilstandsplaner,
-    bosituasjon = this.bosituasjon,
-    situasjon = null,
-    datoMottatt = this.datoMottatt,
-    søkerFra = this.søkerFra,
-    adresseopplysninger = this.adresseopplysninger,
-    datoPåbegyntSøknad = this.datoPåbegyntSøknad,
-    dokumentasjon = DokumentasjonMapper.tilDokumentasjonDto(this),
+fun SøknadsskjemaBarnetilsyn.tilSøknadsverdier() =
+    Søknadsverdier(
+        aktivitet = this.aktivitet,
+        barn = this.barn,
+        fødselsnummer = this.fødselsnummer,
+        medlemskap = this.medlemskap,
+        sivilstand = this.sivilstand,
+        sivilstandsplaner = this.sivilstandsplaner,
+        bosituasjon = this.bosituasjon,
+        situasjon = null,
+        datoMottatt = this.datoMottatt,
+        søkerFra = this.søkerFra,
+        adresseopplysninger = this.adresseopplysninger,
+        datoPåbegyntSøknad = this.datoPåbegyntSøknad,
+        dokumentasjon = DokumentasjonMapper.tilDokumentasjonDto(this),
+    )
 
-)
-
-fun SøknadsskjemaOvergangsstønad.tilSøknadsverdier() = Søknadsverdier(
-    aktivitet = this.aktivitet,
-    barn = this.barn,
-    fødselsnummer = this.fødselsnummer,
-    medlemskap = this.medlemskap,
-    sivilstand = this.sivilstand,
-    sivilstandsplaner = this.sivilstandsplaner,
-    bosituasjon = this.bosituasjon,
-    situasjon = this.situasjon,
-    datoMottatt = this.datoMottatt,
-    søkerFra = this.søkerFra,
-    adresseopplysninger = this.adresseopplysninger,
-    datoPåbegyntSøknad = this.datoPåbegyntSøknad,
-    dokumentasjon = DokumentasjonMapper.tilDokumentasjonDto(this),
-)
+fun SøknadsskjemaOvergangsstønad.tilSøknadsverdier() =
+    Søknadsverdier(
+        aktivitet = this.aktivitet,
+        barn = this.barn,
+        fødselsnummer = this.fødselsnummer,
+        medlemskap = this.medlemskap,
+        sivilstand = this.sivilstand,
+        sivilstandsplaner = this.sivilstandsplaner,
+        bosituasjon = this.bosituasjon,
+        situasjon = this.situasjon,
+        datoMottatt = this.datoMottatt,
+        søkerFra = this.søkerFra,
+        adresseopplysninger = this.adresseopplysninger,
+        datoPåbegyntSøknad = this.datoPåbegyntSøknad,
+        dokumentasjon = DokumentasjonMapper.tilDokumentasjonDto(this),
+    )

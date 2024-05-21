@@ -15,7 +15,6 @@ import java.util.UUID
 import kotlin.random.Random.Default.nextInt
 
 internal class SøknadRepositoryTest : OppslagSpringRunnerTest() {
-
     @Autowired
     lateinit var søknadRepository: SøknadRepository
 
@@ -32,7 +31,11 @@ internal class SøknadRepositoryTest : OppslagSpringRunnerTest() {
         assertThat(søknad).isNotNull
     }
 
-    private fun opprettSøknad(saksnummer: String, fødselsnummer: String, behandlingId: UUID) {
+    private fun opprettSøknad(
+        saksnummer: String,
+        fødselsnummer: String,
+        behandlingId: UUID,
+    ) {
         søknadRepository
             .insert(
                 Søknad(
@@ -41,15 +44,17 @@ internal class SøknadRepositoryTest : OppslagSpringRunnerTest() {
                     type = SøknadType.OVERGANGSSTØNAD,
                     søker = Søker(fødselsnummer, "Navn"),
                     journalpostId = "journalId$saksnummer",
-                    sporbar = Sporbar(
-                        opprettetTid = LocalDateTime.of(
-                            nextInt(0, 2020),
-                            nextInt(11) + 1,
-                            nextInt(27) + 1,
-                            nextInt(23),
-                            nextInt(59),
+                    sporbar =
+                        Sporbar(
+                            opprettetTid =
+                                LocalDateTime.of(
+                                    nextInt(0, 2020),
+                                    nextInt(11) + 1,
+                                    nextInt(27) + 1,
+                                    nextInt(23),
+                                    nextInt(59),
+                                ),
                         ),
-                    ),
                     relaterteFnr = setOf("654654654"),
                 ),
             )

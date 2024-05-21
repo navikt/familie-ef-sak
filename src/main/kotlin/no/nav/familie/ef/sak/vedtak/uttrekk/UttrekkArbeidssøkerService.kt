@@ -27,7 +27,6 @@ class UttrekkArbeidssøkerService(
     private val personService: PersonService,
     private val arbeidssøkerClient: ArbeidssøkerClient,
 ) {
-
     fun forrigeMåned(): () -> YearMonth = { YearMonth.now().minusMonths(1) }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
@@ -72,16 +71,20 @@ class UttrekkArbeidssøkerService(
         )
     }
 
-    fun settKontrollert(id: UUID, kontrollert: Boolean): UttrekkArbeidssøkerDto {
+    fun settKontrollert(
+        id: UUID,
+        kontrollert: Boolean,
+    ): UttrekkArbeidssøkerDto {
         tilgangService.validerHarSaksbehandlerrolle()
         val uttrekkArbeidssøkere = uttrekkArbeidssøkerRepository.findByIdOrThrow(id)
         tilgangService.validerTilgangTilFagsak(uttrekkArbeidssøkere.fagsakId, AuditLoggerEvent.UPDATE)
 
-        val oppdatertArbeidssøker = if (uttrekkArbeidssøkere.kontrollert == kontrollert) {
-            uttrekkArbeidssøkere
-        } else {
-            uttrekkArbeidssøkerRepository.update(uttrekkArbeidssøkere.medKontrollert(kontrollert = kontrollert))
-        }
+        val oppdatertArbeidssøker =
+            if (uttrekkArbeidssøkere.kontrollert == kontrollert) {
+                uttrekkArbeidssøkere
+            } else {
+                uttrekkArbeidssøkerRepository.update(uttrekkArbeidssøkere.medKontrollert(kontrollert = kontrollert))
+            }
         return tilDtoMedAdressebeskyttelse(oppdatertArbeidssøker, hentPersondataTilFagsak(listOf(oppdatertArbeidssøker))).first
     }
 
@@ -93,17 +96,24 @@ class UttrekkArbeidssøkerService(
         return arbeidssøkere.filter { harPeriodeSomArbeidssøker(it, startdato, sluttdato) }
     }
 
-    fun uttrekkFinnes(årMåned: YearMonth, fagsakId: UUID): Boolean {
+    fun uttrekkFinnes(
+        årMåned: YearMonth,
+        fagsakId: UUID,
+    ): Boolean {
         return uttrekkArbeidssøkerRepository.existsByÅrMånedAndFagsakId(årMåned, fagsakId)
     }
 
-    private fun erRegistrertSomArbeidssøker(personIdent: String, årMåned: YearMonth): Boolean {
+    private fun erRegistrertSomArbeidssøker(
+        personIdent: String,
+        årMåned: YearMonth,
+    ): Boolean {
         val sisteIMåneden = årMåned.atEndOfMonth()
-        val perioder = arbeidssøkerClient.hentPerioder(
-            personIdent,
-            sisteIMåneden,
-            sisteIMåneden,
-        ).perioder
+        val perioder =
+            arbeidssøkerClient.hentPerioder(
+                personIdent,
+                sisteIMåneden,
+                sisteIMåneden,
+            ).perioder
         return perioder.any { it.fraOgMedDato <= sisteIMåneden && (it.tilOgMedDato == null || it.tilOgMedDato >= sisteIMåneden) }
     }
 
@@ -128,11 +138,12 @@ class UttrekkArbeidssøkerService(
         val persondata = persondataPåFagsak[it.fagsakId] ?: error("Finner ikke data til fagsak=${it.fagsakId}")
         val pdlPersonKort = persondata.pdlPersonKort
         val adressebeskyttelse = pdlPersonKort.adressebeskyttelse.gjeldende()
-        val dto = it.tilDto(
-            personIdent = persondata.personIdent,
-            navn = pdlPersonKort.navn.gjeldende().visningsnavn(),
-            adressebeskyttelse = adressebeskyttelse,
-        )
+        val dto =
+            it.tilDto(
+                personIdent = persondata.personIdent,
+                navn = pdlPersonKort.navn.gjeldende().visningsnavn(),
+                adressebeskyttelse = adressebeskyttelse,
+            )
         return dto to adressebeskyttelse
     }
 
@@ -160,7 +171,7 @@ class UttrekkArbeidssøkerService(
         (
             it.aktivitet == AktivitetType.FORSØRGER_REELL_ARBEIDSSØKER ||
                 it.aktivitet == AktivitetType.FORLENGELSE_STØNAD_PÅVENTE_ARBEID_REELL_ARBEIDSSØKER
-            )
+        )
 
     private data class Persondata(val personIdent: String, val pdlPersonKort: PdlPersonKort)
 }

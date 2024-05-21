@@ -26,7 +26,6 @@ import java.util.UUID
     beskrivelse = "Sjekker status for migrert sak",
 )
 class SjekkMigrertStatusIInfotrygdTask(private val migreringService: MigreringService) : AsyncTaskStep {
-
     override fun doTask(task: Task) {
         val (behandlingId, opphørsmåned) = objectMapper.readValue<SjekkMigrertStatusIInfotrygdData>(task.payload)
 
@@ -36,15 +35,19 @@ class SjekkMigrertStatusIInfotrygdTask(private val migreringService: MigreringSe
     }
 
     companion object {
-
-        fun opprettTask(behandlingId: UUID, opphørsmåned: YearMonth, personIdent: String): Task =
+        fun opprettTask(
+            behandlingId: UUID,
+            opphørsmåned: YearMonth,
+            personIdent: String,
+        ): Task =
             Task(
                 type = TYPE,
                 payload = objectMapper.writeValueAsString(SjekkMigrertStatusIInfotrygdData(behandlingId, opphørsmåned)),
-                properties = Properties().apply {
-                    this["behandlingId"] = behandlingId.toString()
-                    this["personIdent"] = personIdent
-                },
+                properties =
+                    Properties().apply {
+                        this["behandlingId"] = behandlingId.toString()
+                        this["personIdent"] = personIdent
+                    },
             ).copy(triggerTid = LocalDateTime.now().plusMinutes(16))
 
         const val TYPE = "sjekkMigrertStatus"

@@ -24,46 +24,48 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
 internal class VilkårTypeTest {
+    private val vilkårForOvergangsstønad =
+        listOf(
+            FORUTGÅENDE_MEDLEMSKAP,
+            LOVLIG_OPPHOLD,
+            MOR_ELLER_FAR,
+            SIVILSTAND,
+            SAMLIV,
+            ALENEOMSORG,
+            NYTT_BARN_SAMME_PARTNER,
+            SAGT_OPP_ELLER_REDUSERT,
+            AKTIVITET,
+            TIDLIGERE_VEDTAKSPERIODER,
+        )
 
-    private val vilkårForOvergangsstønad = listOf(
-        FORUTGÅENDE_MEDLEMSKAP,
-        LOVLIG_OPPHOLD,
-        MOR_ELLER_FAR,
-        SIVILSTAND,
-        SAMLIV,
-        ALENEOMSORG,
-        NYTT_BARN_SAMME_PARTNER,
-        SAGT_OPP_ELLER_REDUSERT,
-        AKTIVITET,
-        TIDLIGERE_VEDTAKSPERIODER,
-    )
+    private val vilkårForBarnetilsyn =
+        listOf(
+            FORUTGÅENDE_MEDLEMSKAP,
+            LOVLIG_OPPHOLD,
+            MOR_ELLER_FAR,
+            SIVILSTAND,
+            SAMLIV,
+            ALENEOMSORG,
+            NYTT_BARN_SAMME_PARTNER,
+            AKTIVITET_ARBEID,
+            INNTEKT,
+            ALDER_PÅ_BARN,
+            DOKUMENTASJON_TILSYNSUTGIFTER,
+        )
 
-    private val vilkårForBarnetilsyn = listOf(
-        FORUTGÅENDE_MEDLEMSKAP,
-        LOVLIG_OPPHOLD,
-        MOR_ELLER_FAR,
-        SIVILSTAND,
-        SAMLIV,
-        ALENEOMSORG,
-        NYTT_BARN_SAMME_PARTNER,
-        AKTIVITET_ARBEID,
-        INNTEKT,
-        ALDER_PÅ_BARN,
-        DOKUMENTASJON_TILSYNSUTGIFTER,
-    )
-
-    private val vilkårForSkolepenger = listOf(
-        FORUTGÅENDE_MEDLEMSKAP,
-        LOVLIG_OPPHOLD,
-        MOR_ELLER_FAR,
-        SIVILSTAND,
-        SAMLIV,
-        ALENEOMSORG,
-        NYTT_BARN_SAMME_PARTNER,
-        RETT_TIL_OVERGANGSSTØNAD,
-        DOKUMENTASJON_AV_UTDANNING,
-        ER_UTDANNING_HENSIKTSMESSIG,
-    )
+    private val vilkårForSkolepenger =
+        listOf(
+            FORUTGÅENDE_MEDLEMSKAP,
+            LOVLIG_OPPHOLD,
+            MOR_ELLER_FAR,
+            SIVILSTAND,
+            SAMLIV,
+            ALENEOMSORG,
+            NYTT_BARN_SAMME_PARTNER,
+            RETT_TIL_OVERGANGSSTØNAD,
+            DOKUMENTASJON_AV_UTDANNING,
+            ER_UTDANNING_HENSIKTSMESSIG,
+        )
 
     @Test
     internal fun `skal hente ut vilkår for overgangsstønad`() {

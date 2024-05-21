@@ -27,7 +27,6 @@ class SøknadService(
     private val søknadSkolepengerRepository: SøknadSkolepengerRepository,
     private val søknadBarnetilsynRepository: SøknadBarnetilsynRepository,
 ) {
-
     private val logger = LoggerFactory.getLogger(javaClass)
 
     fun hentSøknadsgrunnlag(behandlingId: UUID): Søknadsverdier? {
@@ -62,7 +61,10 @@ class SøknadService(
      * Vi kopierer nå for å ikke bryte mye annen funksjonalitet, men burde vurdere OM vi MÅ ha en søknad i en revurdering
      */
     @Transactional
-    fun kopierSøknad(forrigeBehandlingId: UUID, nyBehandlingId: UUID) {
+    fun kopierSøknad(
+        forrigeBehandlingId: UUID,
+        nyBehandlingId: UUID,
+    ) {
         val søknad = hentSøknad(forrigeBehandlingId)
         if (søknad == null) {
             logger.info("Finner ingen søknad på forrige behandling=$forrigeBehandlingId")
@@ -90,14 +92,24 @@ class SøknadService(
     }
 
     @Transactional
-    fun lagreSøknadForBarnetilsyn(søknad: SøknadBarnetilsyn, behandlingId: UUID, fagsakId: UUID, journalpostId: String) {
+    fun lagreSøknadForBarnetilsyn(
+        søknad: SøknadBarnetilsyn,
+        behandlingId: UUID,
+        fagsakId: UUID,
+        journalpostId: String,
+    ) {
         val søknadsskjema = SøknadsskjemaMapper.tilDomene(søknad)
         søknadBarnetilsynRepository.insert(søknadsskjema)
         søknadRepository.insert(SøknadMapper.toDomain(journalpostId, søknadsskjema, behandlingId))
     }
 
     @Transactional
-    fun lagreSøknadForSkolepenger(søknad: SøknadSkolepenger, behandlingId: UUID, fagsakId: UUID, journalpostId: String) {
+    fun lagreSøknadForSkolepenger(
+        søknad: SøknadSkolepenger,
+        behandlingId: UUID,
+        fagsakId: UUID,
+        journalpostId: String,
+    ) {
         val søknadsskjema = SøknadsskjemaMapper.tilDomene(søknad)
         søknadSkolepengerRepository.insert(søknadsskjema)
         søknadRepository.insert(SøknadMapper.toDomain(journalpostId, søknadsskjema, behandlingId))

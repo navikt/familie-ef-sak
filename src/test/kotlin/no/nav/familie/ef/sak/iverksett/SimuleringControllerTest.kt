@@ -27,7 +27,6 @@ import java.time.LocalDate
 import java.util.UUID
 
 internal class SimuleringControllerTest : OppslagSpringRunnerTest() {
-
     @Autowired
     private lateinit var behandlingRepository: BehandlingRepository
 
@@ -54,18 +53,19 @@ internal class SimuleringControllerTest : OppslagSpringRunnerTest() {
                     personident = personIdent,
                     type = TilkjentYtelseType.FØRSTEGANGSBEHANDLING,
                     startdato = LocalDate.of(2021, 1, 1),
-                    andelerTilkjentYtelse = listOf(
-                        AndelTilkjentYtelse(
-                            15000,
-                            LocalDate.of(2021, 1, 1),
-                            LocalDate.of(2021, 12, 31),
-                            personIdent,
-                            inntekt = 0,
-                            inntektsreduksjon = 0,
-                            samordningsfradrag = 0,
-                            kildeBehandlingId = behandling.id,
+                    andelerTilkjentYtelse =
+                        listOf(
+                            AndelTilkjentYtelse(
+                                15000,
+                                LocalDate.of(2021, 1, 1),
+                                LocalDate.of(2021, 12, 31),
+                                personIdent,
+                                inntekt = 0,
+                                inntektsreduksjon = 0,
+                                samordningsfradrag = 0,
+                                kildeBehandlingId = behandling.id,
+                            ),
                         ),
-                    ),
                 ),
             )
 

@@ -23,7 +23,6 @@ class InitOppfølgingsoppgaverForBarnTaskController(
     private val barnFyllerÅrOppfølgingsoppgaveService: BarnFyllerÅrOppfølgingsoppgaveService,
     private val tilgangService: TilgangService,
 ) {
-
     @PostMapping("/initialiser")
     fun opprettTask() {
         tilgangService.validerHarForvalterrolle()
@@ -31,7 +30,9 @@ class InitOppfølgingsoppgaverForBarnTaskController(
     }
 
     @PostMapping("/dry-run")
-    fun dryRun(@RequestParam referansedato: LocalDate) {
+    fun dryRun(
+        @RequestParam referansedato: LocalDate,
+    ) {
         tilgangService.validerHarForvalterrolle()
         barnFyllerÅrOppfølgingsoppgaveService.opprettTasksForAlleBarnSomHarFyltÅr(dryRun = true)
     }

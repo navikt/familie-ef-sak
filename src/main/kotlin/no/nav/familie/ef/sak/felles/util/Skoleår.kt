@@ -7,7 +7,6 @@ import java.time.Year
 import java.time.YearMonth
 
 data class Skoleår(val år: Year) {
-
     constructor(periode: Månedsperiode) : this(utledSkoleår(periode.fom, periode.tom))
 
     // ty = Year formatted with 2 digits
@@ -16,7 +15,10 @@ data class Skoleår(val år: Year) {
     }
 
     companion object {
-        fun utledSkoleår(fra: YearMonth, til: YearMonth): Year {
+        fun utledSkoleår(
+            fra: YearMonth,
+            til: YearMonth,
+        ): Year {
             brukerfeilHvis(til < fra) {
                 "Ugyldig skoleårsperiode: Tildato=$til må være etter eller lik fradato=$fra"
             }

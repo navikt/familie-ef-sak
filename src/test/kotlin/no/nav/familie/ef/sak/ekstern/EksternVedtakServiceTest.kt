@@ -23,16 +23,16 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 internal class EksternVedtakServiceTest {
-
     private val fagsakService = mockk<FagsakService>()
     private val behandlingService = mockk<BehandlingService>()
     private val tilbakekrevingClient = mockk<TilbakekrevingClient>()
 
-    private val service = EksternVedtakService(
-        fagsakService = fagsakService,
-        behandlingService = behandlingService,
-        tilbakekrevingClient = tilbakekrevingClient,
-    )
+    private val service =
+        EksternVedtakService(
+            fagsakService = fagsakService,
+            behandlingService = behandlingService,
+            tilbakekrevingClient = tilbakekrevingClient,
+        )
 
     private val eksternFagsakId: Long = 10
     private val fagsak = fagsak(eksternId = eksternFagsakId)
@@ -88,12 +88,13 @@ internal class EksternVedtakServiceTest {
 
     @Test
     internal fun `skal ikke returnere henlagte behandlinger`() {
-        val henlagtBehandling = behandling(
-            fagsak = fagsak,
-            type = BehandlingType.REVURDERING,
-            status = BehandlingStatus.FERDIGSTILT,
-            resultat = BehandlingResultat.HENLAGT,
-        )
+        val henlagtBehandling =
+            behandling(
+                fagsak = fagsak,
+                type = BehandlingType.REVURDERING,
+                status = BehandlingStatus.FERDIGSTILT,
+                resultat = BehandlingResultat.HENLAGT,
+            )
         every { behandlingService.hentBehandlinger(any<UUID>()) } returns listOf(henlagtBehandling)
 
         assertThat(service.hentVedtak(eksternFagsakId)).isEmpty()
@@ -101,31 +102,34 @@ internal class EksternVedtakServiceTest {
 
     @Test
     internal fun `skal ikke returnere behandlinger under behandling`() {
-        val henlagtBehandling = behandling(
-            fagsak = fagsak,
-            type = BehandlingType.REVURDERING,
-            status = BehandlingStatus.UTREDES,
-            resultat = BehandlingResultat.IKKE_SATT,
-        )
+        val henlagtBehandling =
+            behandling(
+                fagsak = fagsak,
+                type = BehandlingType.REVURDERING,
+                status = BehandlingStatus.UTREDES,
+                resultat = BehandlingResultat.IKKE_SATT,
+            )
         every { behandlingService.hentBehandlinger(any<UUID>()) } returns listOf(henlagtBehandling)
 
         assertThat(service.hentVedtak(eksternFagsakId)).isEmpty()
     }
 
-    private fun ferdigstiltBehandling(vedtakstidspunkt: LocalDateTime?): Behandling = behandling(
-        fagsak,
-        vedtakstidspunkt = vedtakstidspunkt,
-        resultat = BehandlingResultat.AVSLÅTT,
-        type = BehandlingType.FØRSTEGANGSBEHANDLING,
-        status = BehandlingStatus.FERDIGSTILT,
-    )
+    private fun ferdigstiltBehandling(vedtakstidspunkt: LocalDateTime?): Behandling =
+        behandling(
+            fagsak,
+            vedtakstidspunkt = vedtakstidspunkt,
+            resultat = BehandlingResultat.AVSLÅTT,
+            type = BehandlingType.FØRSTEGANGSBEHANDLING,
+            status = BehandlingStatus.FERDIGSTILT,
+        )
 
-    private fun fagsystemVedtakTilbakekreving() = FagsystemVedtak(
-        eksternBehandlingId = UUID.randomUUID().toString(),
-        behandlingstype = "Tilbakekreving",
-        resultat = "Delvis tilbakebetaling",
-        vedtakstidspunkt = LocalDateTime.now(),
-        fagsystemType = FagsystemType.TILBAKEKREVING,
-        regelverk = Regelverk.NASJONAL,
-    )
+    private fun fagsystemVedtakTilbakekreving() =
+        FagsystemVedtak(
+            eksternBehandlingId = UUID.randomUUID().toString(),
+            behandlingstype = "Tilbakekreving",
+            resultat = "Delvis tilbakebetaling",
+            vedtakstidspunkt = LocalDateTime.now(),
+            fagsystemType = FagsystemType.TILBAKEKREVING,
+            regelverk = Regelverk.NASJONAL,
+        )
 }

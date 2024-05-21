@@ -21,7 +21,6 @@ import java.util.UUID
 import no.nav.familie.ef.sak.oppgave.Oppgave as EFOppgave
 
 internal class TilordnetRessursServiceTest {
-
     private val oppgaveClient: OppgaveClient = mockk()
     private val oppgaveRepository: OppgaveRepository = mockk()
     private val featureToggleService: FeatureToggleService = mockk()
@@ -43,7 +42,6 @@ internal class TilordnetRessursServiceTest {
 
     @Nested
     inner class HentIkkeFerdigstiltOppgave {
-
         @Test
         internal fun `skal kunne hente ikke ferdigstilt oppgave på behandlingId`() {
             every {
@@ -82,7 +80,6 @@ internal class TilordnetRessursServiceTest {
 
     @Nested
     inner class UtledSaksbehandlerRolle {
-
         @Test
         internal fun `skal returnere false dersom tilordnet ressurs er null`() {
             every {
@@ -166,7 +163,6 @@ internal class TilordnetRessursServiceTest {
 
     @Nested
     inner class UtledAnsvarligSaksbehandler {
-
         @Test
         internal fun `skal utlede at saksbehandlers rolle er INNLOGGET SAKSBEHANDLER`() {
             val saksbehandler = saksbehandler(UUID.randomUUID(), "Skywalker", "Anakin", "NAV1234")
@@ -274,7 +270,6 @@ internal class TilordnetRessursServiceTest {
     )
 
     companion object {
-
         private val oppgaveTyper = setOf(Oppgavetype.BehandleSak, Oppgavetype.BehandleUnderkjentVedtak)
 
         private val saksbehandler = Saksbehandler(UUID.randomUUID(), "Z999999", "Darth", "Vader", "4405")

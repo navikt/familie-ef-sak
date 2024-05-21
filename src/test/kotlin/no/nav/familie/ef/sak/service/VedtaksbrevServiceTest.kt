@@ -133,7 +133,7 @@ internal class VedtaksbrevServiceTest {
                         fagsak,
                         behandlingForBeslutter.copy(
                             status =
-                            BehandlingStatus.FERDIGSTILT,
+                                BehandlingStatus.FERDIGSTILT,
                         ),
                     ),
                     vedtakKreverBeslutter,
@@ -199,7 +199,7 @@ internal class VedtaksbrevServiceTest {
                         fagsak,
                         behandlingForBeslutter.copy(
                             status =
-                            BehandlingStatus.FERDIGSTILT,
+                                BehandlingStatus.FERDIGSTILT,
                         ),
                     ),
                     TextNode(""),
@@ -231,7 +231,8 @@ internal class VedtaksbrevServiceTest {
         brevmal = brevmal,
         saksbehandlersignatur = "Saksbehandler Signatur",
         besluttersignatur = null,
-        beslutterPdf = null, enhet = "",
+        beslutterPdf = null,
+        enhet = "",
         saksbehandlerident = saksbehandlerIdent,
         beslutterident = "",
     )

@@ -52,9 +52,9 @@ class ForutgåendeMedlemskapTest {
             VilkårTestUtil.mockVilkårGrunnlagDto(
                 registergrunnlag = personaliaDto(),
                 medlemskap =
-                medlemskapDto(
-                    innflytting = listOf(InnflyttingDto("fraflyttingsland", LocalDate.now().minusYears(6))),
-                ),
+                    medlemskapDto(
+                        innflytting = listOf(InnflyttingDto("fraflyttingsland", LocalDate.now().minusYears(6))),
+                    ),
             )
 
         val listDelvilkårsvurdering =
@@ -75,14 +75,14 @@ class ForutgåendeMedlemskapTest {
             VilkårTestUtil.mockVilkårGrunnlagDto(
                 registergrunnlag = personaliaDto(),
                 medlemskap =
-                medlemskapDto(
-                    innflytting =
-                    listOf(
-                        InnflyttingDto("fraflyttingsland", LocalDate.now().minusYears(10)),
-                        InnflyttingDto("fraflyttingsland", LocalDate.now().minusYears(6)),
+                    medlemskapDto(
+                        innflytting =
+                            listOf(
+                                InnflyttingDto("fraflyttingsland", LocalDate.now().minusYears(10)),
+                                InnflyttingDto("fraflyttingsland", LocalDate.now().minusYears(6)),
+                            ),
+                        utflytting = listOf(UtflyttingDto("tilflyttingsland", LocalDate.now().minusYears(7))),
                     ),
-                    utflytting = listOf(UtflyttingDto("tilflyttingsland", LocalDate.now().minusYears(7))),
-                ),
             )
 
         val listDelvilkårsvurdering =
@@ -103,15 +103,15 @@ class ForutgåendeMedlemskapTest {
             VilkårTestUtil.mockVilkårGrunnlagDto(
                 registergrunnlag = personaliaDto(),
                 medlemskap =
-                medlemskapDto(
-                    innflytting =
-                    listOf(
-                        InnflyttingDto("fraflyttingsland", LocalDate.now().minusYears(10)),
-                        InnflyttingDto("fraflyttingsland", LocalDate.now().minusYears(6)),
+                    medlemskapDto(
+                        innflytting =
+                            listOf(
+                                InnflyttingDto("fraflyttingsland", LocalDate.now().minusYears(10)),
+                                InnflyttingDto("fraflyttingsland", LocalDate.now().minusYears(6)),
+                            ),
+                        utflytting = listOf(UtflyttingDto("tilflyttingsland", LocalDate.now().minusYears(7))),
+                        folkeregisterpersonstatus = Folkeregisterpersonstatus.UTFLYTTET,
                     ),
-                    utflytting = listOf(UtflyttingDto("tilflyttingsland", LocalDate.now().minusYears(7))),
-                    folkeregisterpersonstatus = Folkeregisterpersonstatus.UTFLYTTET,
-                ),
             )
 
         val listDelvilkårsvurdering =
@@ -172,15 +172,15 @@ class ForutgåendeMedlemskapTest {
             VilkårTestUtil.mockVilkårGrunnlagDto(
                 registergrunnlag = personaliaDto(),
                 medlemskap =
-                medlemskapDto(
-                    søknadsgrunnlag =
-                    MedlemskapSøknadsgrunnlagDto(
-                        bosattNorgeSisteÅrene = true,
-                        oppholderDuDegINorge = true,
-                        "noe annet",
-                        emptyList(),
+                    medlemskapDto(
+                        søknadsgrunnlag =
+                            MedlemskapSøknadsgrunnlagDto(
+                                bosattNorgeSisteÅrene = true,
+                                oppholderDuDegINorge = true,
+                                "noe annet",
+                                emptyList(),
+                            ),
                     ),
-                ),
             )
 
         val listDelvilkårsvurdering =
@@ -201,15 +201,15 @@ class ForutgåendeMedlemskapTest {
             VilkårTestUtil.mockVilkårGrunnlagDto(
                 registergrunnlag = personaliaDto(),
                 medlemskap =
-                medlemskapDto(
-                    søknadsgrunnlag =
-                    MedlemskapSøknadsgrunnlagDto(
-                        bosattNorgeSisteÅrene = false,
-                        oppholderDuDegINorge = false,
-                        "noe annet",
-                        emptyList(),
+                    medlemskapDto(
+                        søknadsgrunnlag =
+                            MedlemskapSøknadsgrunnlagDto(
+                                bosattNorgeSisteÅrene = false,
+                                oppholderDuDegINorge = false,
+                                "noe annet",
+                                emptyList(),
+                            ),
                     ),
-                ),
             )
 
         val listDelvilkårsvurdering =

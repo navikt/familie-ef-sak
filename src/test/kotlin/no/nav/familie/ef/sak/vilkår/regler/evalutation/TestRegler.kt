@@ -16,10 +16,11 @@ class VilkårsregelEnHovedregel :
             RegelSteg(
                 RegelId.BOR_OG_OPPHOLDER_SEG_I_NORGE,
                 jaNeiSvarRegel(
-                    hvisNei = NesteRegel(
-                        RegelId.KRAV_SIVILSTAND_PÅKREVD_BEGRUNNELSE,
-                        BegrunnelseType.PÅKREVD,
-                    ),
+                    hvisNei =
+                        NesteRegel(
+                            RegelId.KRAV_SIVILSTAND_PÅKREVD_BEGRUNNELSE,
+                            BegrunnelseType.PÅKREVD,
+                        ),
                 ),
             ),
             RegelSteg(
@@ -43,8 +44,9 @@ class VilkårsregelToHovedregler :
                 svarMapping = jaNeiSvarRegel(),
             ),
         ),
-        hovedregler = setOf(
-            RegelId.BOR_OG_OPPHOLDER_SEG_I_NORGE,
-            RegelId.KRAV_SIVILSTAND_PÅKREVD_BEGRUNNELSE,
-        ),
+        hovedregler =
+            setOf(
+                RegelId.BOR_OG_OPPHOLDER_SEG_I_NORGE,
+                RegelId.KRAV_SIVILSTAND_PÅKREVD_BEGRUNNELSE,
+            ),
     )

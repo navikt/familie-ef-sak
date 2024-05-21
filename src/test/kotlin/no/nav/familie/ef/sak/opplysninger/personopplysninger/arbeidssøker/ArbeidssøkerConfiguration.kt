@@ -10,7 +10,6 @@ import java.time.LocalDate
 @Profile("mock-arbeidssøker")
 @Configuration
 internal class ArbeidssøkerConfiguration {
-
     @Bean
     fun arbeidssøkerClient(): ArbeidssøkerClient {
         val client: ArbeidssøkerClient = mockk()

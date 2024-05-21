@@ -4,7 +4,6 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.PersonMinimumDt
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.PersonMinimum
 
 object PersonMinimumMapper {
-
     fun tilDto(personMinimum: PersonMinimum): PersonMinimumDto {
         return PersonMinimumDto(
             navn = personMinimum.navn,

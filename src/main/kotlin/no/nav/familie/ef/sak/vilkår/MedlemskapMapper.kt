@@ -26,7 +26,6 @@ class MedlemskapMapper(
     private val adresseMapper: AdresseMapper,
     private val kodeverkService: KodeverkService,
 ) {
-
     fun tilDto(
         grunnlagsdata: GrunnlagsdataDomene,
         medlemskapsdetaljer: Medlemskap?,
@@ -42,18 +41,19 @@ class MedlemskapMapper(
             bosattNorgeSisteÅrene = medlemskapsdetaljer.bosattNorgeSisteÅrene,
             oppholderDuDegINorge = medlemskapsdetaljer.oppholderDuDegINorge,
             oppholdsland = medlemskapsdetaljer.oppholdsland?.let { kodeverkService.hentLand(it, LocalDate.now()) },
-            utenlandsopphold = medlemskapsdetaljer.utenlandsopphold.map {
-                UtenlandsoppholdDto(
-                    fraDato = it.fradato,
-                    tilDato = it.tildato,
-                    land = it.land?.let { land -> kodeverkService.hentLand(land, LocalDate.now()) },
-                    årsak = it.årsakUtenlandsopphold,
-                    personidentEøsLand = it.personidentEøsLand,
-                    adresseEøsLand = it.adresseEøsLand,
-                    erEøsLand = it.erEøsland,
-                    kanIkkeOppgiPersonIdent = it.kanIkkeOppgiPersonident,
-                )
-            },
+            utenlandsopphold =
+                medlemskapsdetaljer.utenlandsopphold.map {
+                    UtenlandsoppholdDto(
+                        fraDato = it.fradato,
+                        tilDato = it.tildato,
+                        land = it.land?.let { land -> kodeverkService.hentLand(land, LocalDate.now()) },
+                        årsak = it.årsakUtenlandsopphold,
+                        personidentEøsLand = it.personidentEøsLand,
+                        adresseEøsLand = it.adresseEøsLand,
+                        erEøsLand = it.erEøsland,
+                        kanIkkeOppgiPersonIdent = it.kanIkkeOppgiPersonident,
+                    )
+                },
         )
     }
 
@@ -64,15 +64,16 @@ class MedlemskapMapper(
         val statsborgerskap = statsborgerskapMapper.map(søker.statsborgerskap)
         return MedlemskapRegistergrunnlagDto(
             nåværendeStatsborgerskap =
-            statsborgerskap.filter { it.gyldigTilOgMedDato == null }
-                .map { it.land },
+                statsborgerskap.filter { it.gyldigTilOgMedDato == null }
+                    .map { it.land },
             statsborgerskap = statsborgerskap,
             oppholdstatus = OppholdstillatelseMapper.map(søker.opphold),
             bostedsadresse = søker.bostedsadresse.map(adresseMapper::tilAdresse),
             innflytting = innflyttingUtflyttingMapper.mapInnflytting(søker.innflyttingTilNorge),
             utflytting = innflyttingUtflyttingMapper.mapUtflytting(søker.utflyttingFraNorge),
-            folkeregisterpersonstatus = søker.folkeregisterpersonstatus.gjeldende()
-                ?.let(Folkeregisterpersonstatus::fraPdl),
+            folkeregisterpersonstatus =
+                søker.folkeregisterpersonstatus.gjeldende()
+                    ?.let(Folkeregisterpersonstatus::fraPdl),
             medlUnntak = medlUnntak.tilDto(),
         )
     }

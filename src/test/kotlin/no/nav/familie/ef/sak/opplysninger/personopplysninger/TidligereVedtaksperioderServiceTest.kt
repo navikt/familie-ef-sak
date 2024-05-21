@@ -49,10 +49,9 @@ import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
-import java.util.*
+import java.util.UUID
 
 internal class TidligereVedtaksperioderServiceTest {
-
     private val andelsHistorikkService = mockk<AndelsHistorikkService>(relaxed = true)
     private val fagsakPersonService = mockk<FagsakPersonService>()
     private val fagsakService = mockk<FagsakService>()
@@ -63,15 +62,16 @@ internal class TidligereVedtaksperioderServiceTest {
     private val infotrygdReplikaClient = mockk<InfotrygdReplikaClient>()
     private val infotrygdService = InfotrygdService(infotrygdReplikaClient, personService)
 
-    private val service = TidligereVedtaksperioderService(
-        fagsakPersonService,
-        fagsakService,
-        behandlingService,
-        tilkjentYtelseService,
-        infotrygdService,
-        historiskPensjonService,
-        andelsHistorikkService,
-    )
+    private val service =
+        TidligereVedtaksperioderService(
+            fagsakPersonService,
+            fagsakService,
+            behandlingService,
+            tilkjentYtelseService,
+            infotrygdService,
+            historiskPensjonService,
+            andelsHistorikkService,
+        )
 
     private val infotrygdPeriodeRequestSlot = slot<InfotrygdPeriodeRequest>()
 
@@ -260,12 +260,13 @@ internal class TidligereVedtaksperioderServiceTest {
         val periode2 = Månedsperiode(YearMonth.of(2023, 1), YearMonth.of(2023, 12))
         val periode3 = Månedsperiode(YearMonth.of(2024, 1), YearMonth.of(2024, 12))
         val historikk1 = grunnlagsdataPeriodeHistorikk(123, periode1.fomDato, periode1.tomDato)
-        val historikk2 = grunnlagsdataPeriodeHistorikk(
-            123,
-            periode2.fomDato,
-            periode2.tomDato,
-            periodeType = VedtaksperiodeType.FORLENGELSE,
-        )
+        val historikk2 =
+            grunnlagsdataPeriodeHistorikk(
+                123,
+                periode2.fomDato,
+                periode2.tomDato,
+                periodeType = VedtaksperiodeType.FORLENGELSE,
+            )
         val historikk3 = grunnlagsdataPeriodeHistorikk(123, periode3.fomDato, periode3.tomDato)
 
         val perioderMedLikPeriodetype =
@@ -333,43 +334,46 @@ internal class TidligereVedtaksperioderServiceTest {
         every { tilkjentYtelseService.hentForBehandling(behandling.id) } returns lagTilkjentYtelse(andelerTilkjentYtelse)
     }
 
-    val andel = AndelHistorikkDto(
-        behandlingId = UUID.randomUUID(),
-        behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
-        behandlingÅrsak = BehandlingÅrsak.NYE_OPPLYSNINGER,
-        vedtakstidspunkt = LocalDateTime.now(),
-        saksbehandler = "",
-        vedtaksperiode = VedtakshistorikkperiodeOvergangsstønad(
-            periode = Månedsperiode(YearMonth.now()),
-            aktivitet = AktivitetType.IKKE_AKTIVITETSPLIKT,
+    val andel =
+        AndelHistorikkDto(
+            behandlingId = UUID.randomUUID(),
+            behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+            behandlingÅrsak = BehandlingÅrsak.NYE_OPPLYSNINGER,
+            vedtakstidspunkt = LocalDateTime.now(),
+            saksbehandler = "",
+            vedtaksperiode =
+                VedtakshistorikkperiodeOvergangsstønad(
+                    periode = Månedsperiode(YearMonth.now()),
+                    aktivitet = AktivitetType.IKKE_AKTIVITETSPLIKT,
+                    periodeType = HOVEDPERIODE,
+                    inntekt = Inntekt(YearMonth.now(), BigDecimal.ZERO, BigDecimal.ZERO),
+                ),
+            andel = andelMedGrunnlagDto(),
+            aktivitet = null,
+            aktivitetArbeid = null,
             periodeType = HOVEDPERIODE,
-            inntekt = Inntekt(YearMonth.now(), BigDecimal.ZERO, BigDecimal.ZERO),
-        ),
-        andel = andelMedGrunnlagDto(),
-        aktivitet = null,
-        aktivitetArbeid = null,
-        periodeType = HOVEDPERIODE,
-        erSanksjon = false,
-        sanksjonsårsak = null,
-        erOpphør = false,
-        periodetypeBarnetilsyn = null,
-        aktivitetBarnetilsyn = null,
-        endring = null,
-    )
+            erSanksjon = false,
+            sanksjonsårsak = null,
+            erOpphør = false,
+            periodetypeBarnetilsyn = null,
+            aktivitetBarnetilsyn = null,
+            endring = null,
+        )
 
-    private fun andelMedGrunnlagDto() = AndelMedGrunnlagDto(
-        beløp = 0,
-        periode = Månedsperiode(YearMonth.now()),
-        inntekt = 0,
-        inntektsreduksjon = 0,
-        samordningsfradrag = 0,
-        kontantstøtte = 0,
-        tilleggsstønad = 0,
-        antallBarn = 0,
-        barn = emptyList(),
-        sats = 0,
-        beløpFørFratrekkOgSatsJustering = 0,
-    )
+    private fun andelMedGrunnlagDto() =
+        AndelMedGrunnlagDto(
+            beløp = 0,
+            periode = Månedsperiode(YearMonth.now()),
+            inntekt = 0,
+            inntektsreduksjon = 0,
+            samordningsfradrag = 0,
+            kontantstøtte = 0,
+            tilleggsstønad = 0,
+            antallBarn = 0,
+            barn = emptyList(),
+            sats = 0,
+            beløpFørFratrekkOgSatsJustering = 0,
+        )
 
     private fun historikkEndring(type: EndringType) =
         HistorikkEndring(

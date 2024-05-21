@@ -13,7 +13,6 @@ import org.springframework.context.annotation.Profile
 
 @Configuration
 class EregClientMock {
-
     @Profile("mock-ereg")
     @Bean
     @Primary

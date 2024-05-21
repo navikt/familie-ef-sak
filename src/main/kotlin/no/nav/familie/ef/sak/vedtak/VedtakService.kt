@@ -20,8 +20,11 @@ class VedtakService(
     private val vedtakRepository: VedtakRepository,
     private val tilkjentYtelseRepository: TilkjentYtelseRepository,
 ) {
-
-    fun lagreVedtak(vedtakDto: VedtakDto, behandlingId: UUID, stønadstype: StønadType): UUID {
+    fun lagreVedtak(
+        vedtakDto: VedtakDto,
+        behandlingId: UUID,
+        stønadstype: StønadType,
+    ): UUID {
         return vedtakRepository.insert(vedtakDto.tilVedtak(behandlingId, stønadstype)).behandlingId
     }
 
@@ -49,24 +52,34 @@ class VedtakService(
         return vedtakRepository.findByIdOrNull(behandlingId)?.tilVedtakDto()
     }
 
-    fun oppdaterSaksbehandler(behandlingId: UUID, saksbehandlerIdent: String) {
+    fun oppdaterSaksbehandler(
+        behandlingId: UUID,
+        saksbehandlerIdent: String,
+    ) {
         val vedtak = hentVedtak(behandlingId)
         val oppdatertVedtak = vedtak.copy(saksbehandlerIdent = saksbehandlerIdent)
         vedtakRepository.update(oppdatertVedtak)
     }
 
-    fun oppdaterBeslutter(behandlingId: UUID, beslutterIdent: String) {
+    fun oppdaterBeslutter(
+        behandlingId: UUID,
+        beslutterIdent: String,
+    ) {
         val vedtak = hentVedtak(behandlingId)
         val oppdatertVedtak = vedtak.copy(beslutterIdent = beslutterIdent)
         vedtakRepository.update(oppdatertVedtak)
     }
 
-    fun hentForventetInntektForBehandlingIds(behandlingId: UUID, dato: LocalDate): Int? {
+    fun hentForventetInntektForBehandlingIds(
+        behandlingId: UUID,
+        dato: LocalDate,
+    ): Int? {
         val vedtak = vedtakRepository.findByIdOrNull(behandlingId)
         if (vedtak?.erVedtakAktivtForDato(dato) == true) {
-            val inntektsperiode = vedtak.inntekter?.inntekter?.firstOrNull {
-                it.periode.inneholder(YearMonth.from(dato))
-            }
+            val inntektsperiode =
+                vedtak.inntekter?.inntekter?.firstOrNull {
+                    it.periode.inneholder(YearMonth.from(dato))
+                }
             if (inntektsperiode?.inntekt == null && inntektsperiode?.månedsinntekt == null) {
                 return null
             }
@@ -96,14 +109,20 @@ class VedtakService(
         )
     }
 
-    private fun createForventetInntektForMåned(vedtak: Vedtak, forventetInntektForDato: YearMonth): Int? {
+    private fun createForventetInntektForMåned(
+        vedtak: Vedtak,
+        forventetInntektForDato: YearMonth,
+    ): Int? {
         val tilkjentYtelse = tilkjentYtelseRepository.findByBehandlingId(vedtak.behandlingId)
         return tilkjentYtelse?.andelerTilkjentYtelse?.firstOrNull {
             it.periode.inneholder(forventetInntektForDato)
         }?.inntekt
     }
 
-    fun hentHarAktivtVedtak(behandlingId: UUID, localDate: LocalDate = LocalDate.now()): Boolean {
+    fun hentHarAktivtVedtak(
+        behandlingId: UUID,
+        localDate: LocalDate = LocalDate.now(),
+    ): Boolean {
         return hentVedtak(behandlingId).erVedtakAktivtForDato(localDate)
     }
 }
@@ -129,6 +148,7 @@ data class ForventetInntektForPersonIdent(
     val forventetInntektFireMånederTilbake: Int?,
 )
 
-fun Vedtak.erVedtakAktivtForDato(dato: LocalDate) = this.perioder?.perioder?.any {
-    it.periode.inneholder(YearMonth.from(dato))
-} ?: false
+fun Vedtak.erVedtakAktivtForDato(dato: LocalDate) =
+    this.perioder?.perioder?.any {
+        it.periode.inneholder(YearMonth.from(dato))
+    } ?: false

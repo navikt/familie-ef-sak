@@ -16,7 +16,6 @@ import java.time.YearMonth
 import java.util.UUID
 
 internal class UtestengelseServiceTest : OppslagSpringRunnerTest() {
-
     @Autowired
     lateinit var utestengelseRepository: UtestengelseRepository
 
@@ -37,7 +36,6 @@ internal class UtestengelseServiceTest : OppslagSpringRunnerTest() {
 
     @Nested
     inner class OpprettUtestengelse {
-
         @Test
         internal fun `skal kunne opprette utestengelse når det finnes en fra før`() {
             utestengelseRepository.insert(utestengelse)
@@ -76,7 +74,6 @@ internal class UtestengelseServiceTest : OppslagSpringRunnerTest() {
 
     @Nested
     inner class SlettUtestengelse {
-
         @Test
         internal fun `markerer utestengelse som slettet`() {
             utestengelseRepository.insert(utestengelse)

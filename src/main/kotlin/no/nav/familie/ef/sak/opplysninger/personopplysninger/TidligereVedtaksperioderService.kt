@@ -29,7 +29,6 @@ class TidligereVedtaksperioderService(
     private val historiskPensjonService: HistoriskPensjonService,
     private val andelsHistorikkService: AndelsHistorikkService,
 ) {
-
     /**
      * @param folkeregisteridentifikatorer for 1 person
      */
@@ -66,12 +65,13 @@ class TidligereVedtaksperioderService(
             } ?: TidligereInnvilgetVedtak(false, false, false)
     }
 
-    private fun hentTidligereVedtaksperioder(fagsak: Fagsak?) = fagsak
-        ?.let { behandlingService.finnSisteIverksatteBehandling(it.id) }
-        ?.let {
-            val tilkjentYtelse = tilkjentYtelseService.hentForBehandling(it.id)
-            tilkjentYtelse.andelerTilkjentYtelse.isNotEmpty()
-        } ?: false
+    private fun hentTidligereVedtaksperioder(fagsak: Fagsak?) =
+        fagsak
+            ?.let { behandlingService.finnSisteIverksatteBehandling(it.id) }
+            ?.let {
+                val tilkjentYtelse = tilkjentYtelseService.hentForBehandling(it.id)
+                tilkjentYtelse.andelerTilkjentYtelse.isNotEmpty()
+            } ?: false
 
     private fun hentGjeldendeOvergangstønadsperioder(fagsaker: Fagsaker?): List<GrunnlagsdataPeriodeHistorikkOvergangsstønad> {
         return hentAndelshistorikkForOvergangsstønad(fagsaker)

@@ -20,22 +20,23 @@ import java.util.UUID
 
 class SivilstandRegel : Vilkårsregel(
     vilkårType = VilkårType.SIVILSTAND,
-    regler = setOf(
-        KRAV_SIVILSTAND_PÅKREVD_BEGRUNNELSE,
-        KRAV_SIVILSTAND_UTEN_PÅKREVD_BEGRUNNELSE,
-        SAMLIVSBRUDD_LIKESTILT_MED_SEPARASJON,
-        SAMSVAR_DATO_SEPARASJON_OG_FRAFLYTTING,
-        UNNTAK,
-    ),
-    hovedregler = regelIder(
-        KRAV_SIVILSTAND_PÅKREVD_BEGRUNNELSE,
-        KRAV_SIVILSTAND_UTEN_PÅKREVD_BEGRUNNELSE,
-        SAMLIVSBRUDD_LIKESTILT_MED_SEPARASJON,
-        SAMSVAR_DATO_SEPARASJON_OG_FRAFLYTTING,
-        UNNTAK,
-    ),
+    regler =
+        setOf(
+            KRAV_SIVILSTAND_PÅKREVD_BEGRUNNELSE,
+            KRAV_SIVILSTAND_UTEN_PÅKREVD_BEGRUNNELSE,
+            SAMLIVSBRUDD_LIKESTILT_MED_SEPARASJON,
+            SAMSVAR_DATO_SEPARASJON_OG_FRAFLYTTING,
+            UNNTAK,
+        ),
+    hovedregler =
+        regelIder(
+            KRAV_SIVILSTAND_PÅKREVD_BEGRUNNELSE,
+            KRAV_SIVILSTAND_UTEN_PÅKREVD_BEGRUNNELSE,
+            SAMLIVSBRUDD_LIKESTILT_MED_SEPARASJON,
+            SAMSVAR_DATO_SEPARASJON_OG_FRAFLYTTING,
+            UNNTAK,
+        ),
 ) {
-
     override fun initiereDelvilkårsvurdering(
         metadata: HovedregelMetadata,
         resultat: Vilkårsresultat,
@@ -82,24 +83,25 @@ class SivilstandRegel : Vilkårsregel(
     }.regelId
 
     companion object {
-
         private fun påkrevdBegrunnelse(regelId: RegelId) =
             RegelSteg(
                 regelId = regelId,
-                svarMapping = jaNeiSvarRegel(
-                    hvisJa = SluttSvarRegel.OPPFYLT_MED_PÅKREVD_BEGRUNNELSE,
-                    hvisNei = SluttSvarRegel.IKKE_OPPFYLT_MED_PÅKREVD_BEGRUNNELSE,
-                ),
+                svarMapping =
+                    jaNeiSvarRegel(
+                        hvisJa = SluttSvarRegel.OPPFYLT_MED_PÅKREVD_BEGRUNNELSE,
+                        hvisNei = SluttSvarRegel.IKKE_OPPFYLT_MED_PÅKREVD_BEGRUNNELSE,
+                    ),
             )
 
         private val KRAV_SIVILSTAND_PÅKREVD_BEGRUNNELSE = påkrevdBegrunnelse(RegelId.KRAV_SIVILSTAND_PÅKREVD_BEGRUNNELSE)
         private val KRAV_SIVILSTAND_UTEN_PÅKREVD_BEGRUNNELSE =
             RegelSteg(
                 regelId = RegelId.KRAV_SIVILSTAND_UTEN_PÅKREVD_BEGRUNNELSE,
-                svarMapping = jaNeiSvarRegel(
-                    hvisJa = SluttSvarRegel.OPPFYLT_MED_VALGFRI_BEGRUNNELSE,
-                    hvisNei = SluttSvarRegel.IKKE_OPPFYLT_MED_PÅKREVD_BEGRUNNELSE,
-                ),
+                svarMapping =
+                    jaNeiSvarRegel(
+                        hvisJa = SluttSvarRegel.OPPFYLT_MED_VALGFRI_BEGRUNNELSE,
+                        hvisNei = SluttSvarRegel.IKKE_OPPFYLT_MED_PÅKREVD_BEGRUNNELSE,
+                    ),
             )
 
         private val SAMLIVSBRUDD_LIKESTILT_MED_SEPARASJON = påkrevdBegrunnelse(RegelId.SAMLIVSBRUDD_LIKESTILT_MED_SEPARASJON)
@@ -107,20 +109,22 @@ class SivilstandRegel : Vilkårsregel(
         private val SAMSVAR_DATO_SEPARASJON_OG_FRAFLYTTING =
             RegelSteg(
                 regelId = RegelId.SAMSVAR_DATO_SEPARASJON_OG_FRAFLYTTING,
-                svarMapping = jaNeiSvarRegel(
-                    hvisJa = SluttSvarRegel.OPPFYLT_MED_PÅKREVD_BEGRUNNELSE,
-                    hvisNei = NesteRegel(KRAV_SIVILSTAND_PÅKREVD_BEGRUNNELSE.regelId),
-                ),
+                svarMapping =
+                    jaNeiSvarRegel(
+                        hvisJa = SluttSvarRegel.OPPFYLT_MED_PÅKREVD_BEGRUNNELSE,
+                        hvisNei = NesteRegel(KRAV_SIVILSTAND_PÅKREVD_BEGRUNNELSE.regelId),
+                    ),
             )
 
         private val UNNTAK =
             RegelSteg(
                 regelId = RegelId.SIVILSTAND_UNNTAK,
-                svarMapping = mapOf(
-                    SvarId.GJENLEVENDE_IKKE_RETT_TIL_YTELSER to SluttSvarRegel.OPPFYLT_MED_PÅKREVD_BEGRUNNELSE,
-                    SvarId.GJENLEVENDE_OVERTAR_OMSORG to SluttSvarRegel.OPPFYLT_MED_PÅKREVD_BEGRUNNELSE,
-                    SvarId.NEI to SluttSvarRegel.IKKE_OPPFYLT_MED_PÅKREVD_BEGRUNNELSE,
-                ),
+                svarMapping =
+                    mapOf(
+                        SvarId.GJENLEVENDE_IKKE_RETT_TIL_YTELSER to SluttSvarRegel.OPPFYLT_MED_PÅKREVD_BEGRUNNELSE,
+                        SvarId.GJENLEVENDE_OVERTAR_OMSORG to SluttSvarRegel.OPPFYLT_MED_PÅKREVD_BEGRUNNELSE,
+                        SvarId.NEI to SluttSvarRegel.IKKE_OPPFYLT_MED_PÅKREVD_BEGRUNNELSE,
+                    ),
             )
     }
 }

@@ -47,9 +47,7 @@ import org.springframework.web.client.RestOperations
 import java.net.URI
 
 internal class JournalpostClientTest {
-
     companion object {
-
         private val featureToggleService = mockk<FeatureToggleService>(relaxed = true)
         private val restOperations: RestOperations = RestTemplateBuilder().build()
         lateinit var journalpostClient: JournalpostClient
@@ -179,15 +177,17 @@ internal class JournalpostClientTest {
 
     @Test
     internal fun `skal kaste feil hvis innlogget bruker er utvikler med veillederrolle`() {
-        val journalposterForBrukerRequest = JournalposterForBrukerRequest(
-            brukerId = Bruker(
-                id = "1234",
-                type = BrukerIdType.FNR,
-            ),
-            antall = 100,
-            tema = listOf(Tema.ENF),
-            journalposttype = listOf(Journalposttype.N),
-        )
+        val journalposterForBrukerRequest =
+            JournalposterForBrukerRequest(
+                brukerId =
+                    Bruker(
+                        id = "1234",
+                        type = BrukerIdType.FNR,
+                    ),
+                antall = 100,
+                tema = listOf(Tema.ENF),
+                journalposttype = listOf(Journalposttype.N),
+            )
 
         every { featureToggleService.isEnabled(any()) } returns true
 

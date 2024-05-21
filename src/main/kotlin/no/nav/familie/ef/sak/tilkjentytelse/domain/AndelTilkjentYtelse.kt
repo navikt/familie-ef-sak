@@ -19,7 +19,6 @@ data class AndelTilkjentYtelse(
     val samordningsfradrag: Int,
     val kildeBehandlingId: UUID,
 ) {
-
     constructor(
         beløp: Int,
         periode: Månedsperiode,

@@ -22,7 +22,6 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 class TerminbarnRepositoryTest : OppslagSpringRunnerTest() {
-
     @Autowired
     private lateinit var terminbarnRepository: TerminbarnRepository
 
@@ -106,8 +105,9 @@ class TerminbarnRepositoryTest : OppslagSpringRunnerTest() {
     private fun lagreInnvilgetBehandling(
         fagsak: Fagsak,
         tidligereBehandling: Behandling? = null,
-        opprettetTid: LocalDateTime = tidligereBehandling?.sporbar?.opprettetTid?.plusHours(1)
-            ?: LocalDateTime.now(),
+        opprettetTid: LocalDateTime =
+            tidligereBehandling?.sporbar?.opprettetTid?.plusHours(1)
+                ?: LocalDateTime.now(),
     ) =
         behandlingRepository.insert(
             behandling(
@@ -119,7 +119,11 @@ class TerminbarnRepositoryTest : OppslagSpringRunnerTest() {
             ),
         )
 
-    private fun barn(behandlingId: UUID, personIdent: String? = null, termindato: LocalDate? = LocalDate.now()): BehandlingBarn {
+    private fun barn(
+        behandlingId: UUID,
+        personIdent: String? = null,
+        termindato: LocalDate? = LocalDate.now(),
+    ): BehandlingBarn {
         return BehandlingBarn(
             behandlingId = behandlingId,
             personIdent = personIdent,

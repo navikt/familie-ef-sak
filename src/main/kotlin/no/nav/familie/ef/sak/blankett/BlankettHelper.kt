@@ -8,7 +8,6 @@ import no.nav.familie.kontrakter.felles.ef.StønadType
 import java.util.UUID
 
 object BlankettHelper {
-
     fun lagArkiverBlankettRequestMotNyLøsning(
         personIdent: String,
         pdf: ByteArray,

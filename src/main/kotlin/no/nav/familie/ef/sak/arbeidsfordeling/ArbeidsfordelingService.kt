@@ -14,15 +14,18 @@ class ArbeidsfordelingService(
     @Qualifier("shortCache")
     private val cacheManager: CacheManager,
 ) {
-
     companion object {
         const val MASKINELL_JOURNALFOERENDE_ENHET = "9999"
     }
 
-    fun hentNavEnhetId(ident: String, oppgavetype: Oppgavetype) = when (oppgavetype) {
-        Oppgavetype.VurderHenvendelse -> hentNavEnhetForOppfølging(ident, oppgavetype)?.enhetId
-        else -> hentNavEnhet(ident)?.enhetId
-    }
+    fun hentNavEnhetId(
+        ident: String,
+        oppgavetype: Oppgavetype,
+    ) =
+        when (oppgavetype) {
+            Oppgavetype.VurderHenvendelse -> hentNavEnhetForOppfølging(ident, oppgavetype)?.enhetId
+            else -> hentNavEnhet(ident)?.enhetId
+        }
 
     fun hentNavEnhet(ident: String): Arbeidsfordelingsenhet? {
         return cacheManager.getNullable("navEnhet", ident) {
@@ -30,7 +33,10 @@ class ArbeidsfordelingService(
         }
     }
 
-    fun hentNavEnhetForOppfølging(ident: String, oppgavetype: Oppgavetype): Enhet? =
+    fun hentNavEnhetForOppfølging(
+        ident: String,
+        oppgavetype: Oppgavetype,
+    ): Enhet? =
         cacheManager.getNullable("navEnhetForOppfølging", ident) {
             personopplysningerIntegrasjonerClient.hentBehandlendeEnhetForOppfølging(ident)
                 ?: error("Fant ikke NAV-enhet for oppgave av type $oppgavetype")

@@ -4,25 +4,25 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 
 object PdlTestdata {
-
     private val metadataGjeldende = Metadata(false)
 
-    val vegadresse = Vegadresse(
-        "",
-        "",
-        "",
-        "",
-        "",
-        "",
-        "",
-        Koordinater(
-            1.0f,
-            1.0f,
-            1.0f,
-            1,
-        ),
-        1L,
-    )
+    val vegadresse =
+        Vegadresse(
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            Koordinater(
+                1.0f,
+                1.0f,
+                1.0f,
+                1,
+            ),
+            1L,
+        )
 
     private val matrikkeladresse = Matrikkeladresse(1L, "", "", "")
     private val utenlandskAdresse = UtenlandskAdresse("", "", "", "", "", "", "")
@@ -31,32 +31,34 @@ object PdlTestdata {
 
     private val navn = listOf(Navn("", "", "", metadataGjeldende))
 
-    private val pdlSøkerKortBolk = PersonBolk(
-        listOf(
-            PersonDataBolk(
-                "11111122222",
-                "ok",
-                PdlSøkerKort(listOf(Kjønn(KjønnType.KVINNE)), navn),
+    private val pdlSøkerKortBolk =
+        PersonBolk(
+            listOf(
+                PersonDataBolk(
+                    "11111122222",
+                    "ok",
+                    PdlSøkerKort(listOf(Kjønn(KjønnType.KVINNE)), navn),
+                ),
             ),
-        ),
-    )
+        )
 
     private val adressebeskyttelse =
         listOf(Adressebeskyttelse(AdressebeskyttelseGradering.FORTROLIG, metadataGjeldende))
 
-    private val bostedsadresse = listOf(
-        Bostedsadresse(
-            LocalDate.now().minusDays(10),
-            LocalDate.now(),
-            LocalDate.now(),
-            "",
-            utenlandskAdresse,
-            vegadresse,
-            UkjentBosted(""),
-            matrikkeladresse,
-            metadataGjeldende,
-        ),
-    )
+    private val bostedsadresse =
+        listOf(
+            Bostedsadresse(
+                LocalDate.now().minusDays(10),
+                LocalDate.now(),
+                LocalDate.now(),
+                "",
+                utenlandskAdresse,
+                vegadresse,
+                UkjentBosted(""),
+                matrikkeladresse,
+                metadataGjeldende,
+            ),
+        )
 
     private val dødsfall = listOf(Dødsfall(LocalDate.now()))
 
@@ -67,17 +69,18 @@ object PdlTestdata {
 
     private val opphold = listOf(Opphold(Oppholdstillatelse.MIDLERTIDIG, LocalDate.now(), LocalDate.now()))
 
-    private val oppholdsadresse = listOf(
-        Oppholdsadresse(
-            LocalDate.now(),
-            null,
-            "",
-            utenlandskAdresse,
-            vegadresse,
-            "",
-            metadataGjeldende,
-        ),
-    )
+    private val oppholdsadresse =
+        listOf(
+            Oppholdsadresse(
+                LocalDate.now(),
+                null,
+                "",
+                utenlandskAdresse,
+                vegadresse,
+                "",
+                metadataGjeldende,
+            ),
+        )
 
     private val statsborgerskap = listOf(Statsborgerskap("", LocalDate.now(), LocalDate.now()))
 
@@ -87,13 +90,14 @@ object PdlTestdata {
 
     val søkerIdentifikator = "1"
 
-    val folkeregisteridentifikatorSøker = listOf(
-        Folkeregisteridentifikator(
-            søkerIdentifikator,
-            FolkeregisteridentifikatorStatus.I_BRUK,
-            metadataGjeldende,
-        ),
-    )
+    val folkeregisteridentifikatorSøker =
+        listOf(
+            Folkeregisteridentifikator(
+                søkerIdentifikator,
+                FolkeregisteridentifikatorStatus.I_BRUK,
+                metadataGjeldende,
+            ),
+        )
 
     val pdlSøkerData =
         PdlSøkerData(
@@ -189,13 +193,14 @@ object PdlTestdata {
 
     val ennenForelderIdentifikator = "2"
 
-    val folkeregisteridentifikatorAnnenForelder = listOf(
-        Folkeregisteridentifikator(
-            ennenForelderIdentifikator,
-            FolkeregisteridentifikatorStatus.I_BRUK,
-            metadataGjeldende,
-        ),
-    )
+    val folkeregisteridentifikatorAnnenForelder =
+        listOf(
+            Folkeregisteridentifikator(
+                ennenForelderIdentifikator,
+                FolkeregisteridentifikatorStatus.I_BRUK,
+                metadataGjeldende,
+            ),
+        )
 
     val pdlAnnenForelderData =
         PersonBolk(
@@ -215,34 +220,37 @@ object PdlTestdata {
             ),
         )
 
-    val pdlPersonKortBolk = PersonBolk(
-        listOf(
-            PersonDataBolk(
-                "11111122222",
-                "ok",
-                PdlPersonKort(
-                    adressebeskyttelse,
-                    navn,
-                    dødsfall,
-                ),
-            ),
-        ),
-    )
-
-    val pdlPersonSøk = PersonSøk(
-        PersonSøkResultat(
-            hits = listOf(
-                PersonSøkTreff(
-                    PdlPersonFraSøk(
-                        listOf(FolkeregisteridentifikatorFraSøk("123456789")),
-                        bostedsadresse,
+    val pdlPersonKortBolk =
+        PersonBolk(
+            listOf(
+                PersonDataBolk(
+                    "11111122222",
+                    "ok",
+                    PdlPersonKort(
+                        adressebeskyttelse,
                         navn,
+                        dødsfall,
                     ),
                 ),
             ),
-            totalHits = 1,
-            pageNumber = 1,
-            totalPages = 1,
-        ),
-    )
+        )
+
+    val pdlPersonSøk =
+        PersonSøk(
+            PersonSøkResultat(
+                hits =
+                    listOf(
+                        PersonSøkTreff(
+                            PdlPersonFraSøk(
+                                listOf(FolkeregisteridentifikatorFraSøk("123456789")),
+                                bostedsadresse,
+                                navn,
+                            ),
+                        ),
+                    ),
+                totalHits = 1,
+                pageNumber = 1,
+                totalPages = 1,
+            ),
+        )
 }

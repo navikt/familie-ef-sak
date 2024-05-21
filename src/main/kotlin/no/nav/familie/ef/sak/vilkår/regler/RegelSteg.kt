@@ -26,7 +26,6 @@ data class RegelSteg(
     val regelId: RegelId,
     val svarMapping: Map<SvarId, SvarRegel>,
 ) {
-
     fun svarMapping(svarId: SvarId): SvarRegel {
         return svarMapping[svarId] ?: throw Feil("Finner ikke svarId=$svarId for regelId=$regelId")
     }

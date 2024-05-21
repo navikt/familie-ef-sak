@@ -22,7 +22,6 @@ class PollStatusFraIverksettTask(
     private val stegService: StegService,
     private val behandlingService: BehandlingService,
 ) : AsyncTaskStep {
-
     override fun doTask(task: Task) {
         val behandlingId = UUID.fromString(task.payload)
         val behandling = behandlingService.hentSaksbehandling(behandlingId)
@@ -30,14 +29,14 @@ class PollStatusFraIverksettTask(
     }
 
     companion object {
-
         fun opprettTask(behandlingId: UUID): Task =
             Task(
                 type = TYPE,
                 payload = behandlingId.toString(),
-                properties = Properties().apply {
-                    this["behandlingId"] = behandlingId.toString()
-                },
+                properties =
+                    Properties().apply {
+                        this["behandlingId"] = behandlingId.toString()
+                    },
             ).copy(triggerTid = LocalDateTime.now().plusSeconds(31))
 
         const val TYPE = "pollerStatusFraIverksett"

@@ -19,7 +19,6 @@ import java.math.BigDecimal
 @Configuration
 @Profile("mock-iverksett")
 class IverksettClientMock {
-
     @Bean
     @Primary
     fun iverksettClient(): IverksettClient {
@@ -29,10 +28,10 @@ class IverksettClientMock {
     }
 
     companion object {
-
-        private val simuleringsresultat = objectMapper.readValue<BeriketSimuleringsresultat>(
-            this::class.java.getResource("/json/simuleringsresultat_beriket.json")!!.readText(),
-        )
+        private val simuleringsresultat =
+            objectMapper.readValue<BeriketSimuleringsresultat>(
+                this::class.java.getResource("/json/simuleringsresultat_beriket.json")!!.readText(),
+            )
 
         fun clearMock(iverksettClient: IverksettClient) {
             clearMocks(iverksettClient)
@@ -40,18 +39,23 @@ class IverksettClientMock {
             every { iverksettClient.hentStatus(any()) } returns IverksettStatus.OK
         }
 
-        fun mockSimulering(iverksettClient: IverksettClient, etterbetaling: Int = 0, feilutbetaling: Int = 0) {
-            val oppsummering = Simuleringsoppsummering(
-                perioder = emptyList(),
-                fomDatoNestePeriode = null,
-                etterbetaling = BigDecimal(etterbetaling),
-                feilutbetaling = BigDecimal(feilutbetaling),
-                fom = null,
-                tomDatoNestePeriode = null,
-                forfallsdatoNestePeriode = null,
-                tidSimuleringHentet = null,
-                tomSisteUtbetaling = null,
-            )
+        fun mockSimulering(
+            iverksettClient: IverksettClient,
+            etterbetaling: Int = 0,
+            feilutbetaling: Int = 0,
+        ) {
+            val oppsummering =
+                Simuleringsoppsummering(
+                    perioder = emptyList(),
+                    fomDatoNestePeriode = null,
+                    etterbetaling = BigDecimal(etterbetaling),
+                    feilutbetaling = BigDecimal(feilutbetaling),
+                    fom = null,
+                    tomDatoNestePeriode = null,
+                    forfallsdatoNestePeriode = null,
+                    tidSimuleringHentet = null,
+                    tomSisteUtbetaling = null,
+                )
             every { iverksettClient.simuler(any()) } returns
                 BeriketSimuleringsresultat(DetaljertSimuleringResultat(emptyList()), oppsummering)
         }

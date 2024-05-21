@@ -47,7 +47,6 @@ import java.time.Month
 import java.util.UUID
 
 internal class BehandlingPåVentServiceTest {
-
     private val behandlingService = mockk<BehandlingService>(relaxed = true)
     private val taskService = mockk<TaskService>(relaxed = true)
     private val nullstillVedtakService = mockk<NullstillVedtakService>(relaxed = true)
@@ -103,7 +102,6 @@ internal class BehandlingPåVentServiceTest {
 
     @Nested
     inner class SettPåVent {
-
         @Test
         fun `skal oppdatere oppgavebeskrivelse ved sett på vent - med saksbehandler, prioritet, frist og mappe`() {
             mockHentBehandling(BehandlingStatus.UTREDES)
@@ -154,10 +152,11 @@ internal class BehandlingPåVentServiceTest {
             val oppgaveId = mockOppsettForAutomatiskeOppgaver()
 
             val oppfølgingsoppgaver = listOf(innstillingUtdanning)
-            val settPåVentRequest = settPåVentRequest(
-                oppgaveId,
-                oppfølgingsoppgaver,
-            )
+            val settPåVentRequest =
+                settPåVentRequest(
+                    oppgaveId,
+                    oppfølgingsoppgaver,
+                )
 
             behandlingPåVentService.settPåVent(
                 behandlingId,
@@ -181,10 +180,11 @@ internal class BehandlingPåVentServiceTest {
             val oppgaveId = mockOppsettForAutomatiskeOppgaver()
 
             val oppfølgingsoppgaver = listOf(informereOmSøktStønad)
-            val settPåVentRequest = settPåVentRequest(
-                oppgaveId,
-                oppfølgingsoppgaver,
-            )
+            val settPåVentRequest =
+                settPåVentRequest(
+                    oppgaveId,
+                    oppfølgingsoppgaver,
+                )
 
             behandlingPåVentService.settPåVent(
                 behandlingId,
@@ -208,10 +208,11 @@ internal class BehandlingPåVentServiceTest {
             val oppgaveId = mockOppsettForAutomatiskeOppgaver()
 
             val oppfølgingsoppgaver = listOf(informereOmSøktStønad, innstillingUtdanning)
-            val settPåVentRequest = settPåVentRequest(
-                oppgaveId,
-                oppfølgingsoppgaver,
-            )
+            val settPåVentRequest =
+                settPåVentRequest(
+                    oppgaveId,
+                    oppfølgingsoppgaver,
+                )
 
             behandlingPåVentService.settPåVent(
                 behandlingId,
@@ -246,10 +247,11 @@ internal class BehandlingPåVentServiceTest {
             val oppgaveId = mockOppsettForAutomatiskeOppgaver(stønadType = StønadType.SKOLEPENGER)
 
             val oppfølgingsoppgaver = listOf(informereOmSøktStønad)
-            val settPåVentRequest = settPåVentRequest(
-                oppgaveId,
-                oppfølgingsoppgaver,
-            )
+            val settPåVentRequest =
+                settPåVentRequest(
+                    oppgaveId,
+                    oppfølgingsoppgaver,
+                )
 
             val feil: Feil =
                 assertThrows { behandlingPåVentService.settPåVent(behandlingId, settPåVentRequest) }
@@ -262,10 +264,11 @@ internal class BehandlingPåVentServiceTest {
             val oppgaveId = mockOppsettForAutomatiskeOppgaver(stønadType = StønadType.BARNETILSYN)
 
             val oppfølgingsoppgaver = listOf(innstillingUtdanning)
-            val settPåVentRequest = settPåVentRequest(
-                oppgaveId,
-                oppfølgingsoppgaver,
-            )
+            val settPåVentRequest =
+                settPåVentRequest(
+                    oppgaveId,
+                    oppfølgingsoppgaver,
+                )
 
             val feil: Feil =
                 assertThrows { behandlingPåVentService.settPåVent(behandlingId, settPåVentRequest) }
@@ -286,7 +289,6 @@ internal class BehandlingPåVentServiceTest {
 
     @Nested
     inner class KanTaAvVent {
-
         @BeforeEach
         internal fun setUp() {
             mockHentBehandling(BehandlingStatus.SATT_PÅ_VENT)
@@ -354,7 +356,6 @@ internal class BehandlingPåVentServiceTest {
 
     @Nested
     inner class TaAvVent {
-
         @BeforeEach
         internal fun setUp() {
             mockHentBehandling(BehandlingStatus.SATT_PÅ_VENT)
@@ -432,7 +433,6 @@ internal class BehandlingPåVentServiceTest {
 
     @Nested
     inner class OppgaveSubtypeTest {
-
         @Test
         fun `skal returnere beskrivelse uten beskjed for info om søkt overgangsstønad`() {
             val subtype = OppgaveSubtype.INFORMERE_OM_SØKT_OVERGANGSSTØNAD
@@ -465,17 +465,21 @@ internal class BehandlingPåVentServiceTest {
         }
     }
 
-    private fun oppgave(oppgaveId: Long) = Oppgave(
-        id = oppgaveId,
-        tildeltEnhetsnr = "4489",
-        tilordnetRessurs = "gammel saksbehandler",
-        beskrivelse = "Gammel beskrivelse",
-        mappeId = 101,
-        fristFerdigstillelse = LocalDate.of(2002, Month.MARCH, 23).toString(),
-        prioritet = OppgavePrioritet.NORM,
-    )
+    private fun oppgave(oppgaveId: Long) =
+        Oppgave(
+            id = oppgaveId,
+            tildeltEnhetsnr = "4489",
+            tilordnetRessurs = "gammel saksbehandler",
+            beskrivelse = "Gammel beskrivelse",
+            mappeId = 101,
+            fristFerdigstillelse = LocalDate.of(2002, Month.MARCH, 23).toString(),
+            prioritet = OppgavePrioritet.NORM,
+        )
 
-    private fun settPåVentRequest(oppgaveId: Long, oppfølgingsoppgaver: List<OppgaveSubtype>) =
+    private fun settPåVentRequest(
+        oppgaveId: Long,
+        oppfølgingsoppgaver: List<OppgaveSubtype>,
+    ) =
         SettPåVentRequest(
             oppgaveId = oppgaveId,
             saksbehandler = "ny saksbehandler",

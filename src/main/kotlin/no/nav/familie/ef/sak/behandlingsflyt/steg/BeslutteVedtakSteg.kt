@@ -38,7 +38,6 @@ class BeslutteVedtakSteg(
     private val vedtakService: VedtakService,
     private val vedtaksbrevService: VedtaksbrevService,
 ) : BehandlingSteg<BeslutteVedtakDto> {
-
     override fun validerSteg(saksbehandling: Saksbehandling) {
         brukerfeilHvis(saksbehandling.steg.kommerEtter(stegType())) {
             "Behandlingen er allerede besluttet. Status på behandling er '${saksbehandling.status.visningsnavn()}'"
@@ -48,7 +47,10 @@ class BeslutteVedtakSteg(
         }
     }
 
-    override fun utførOgReturnerNesteSteg(saksbehandling: Saksbehandling, data: BeslutteVedtakDto): StegType {
+    override fun utførOgReturnerNesteSteg(
+        saksbehandling: Saksbehandling,
+        data: BeslutteVedtakDto,
+    ): StegType {
         fagsakService.fagsakMedOppdatertPersonIdent(saksbehandling.fagsakId)
         val vedtak = vedtakService.hentVedtak(saksbehandling.id)
         val vedtakErUtenBeslutter = vedtak.utledVedtakErUtenBeslutter()
@@ -93,7 +95,10 @@ class BeslutteVedtakSteg(
         }
     }
 
-    private fun opprettTaskForBehandlingsstatistikk(behandlingId: UUID, oppgaveId: Long?) =
+    private fun opprettTaskForBehandlingsstatistikk(
+        behandlingId: UUID,
+        oppgaveId: Long?,
+    ) =
         taskService.save(
             BehandlingsstatistikkTask.opprettBesluttetTask(
                 behandlingId = behandlingId,
@@ -104,10 +109,11 @@ class BeslutteVedtakSteg(
     private fun oppdaterResultatPåBehandling(behandlingId: UUID) {
         val resultat = vedtakService.hentVedtaksresultat(behandlingId)
         when (resultat) {
-            ResultatType.INNVILGE, ResultatType.INNVILGE_UTEN_UTBETALING -> behandlingService.oppdaterResultatPåBehandling(
-                behandlingId,
-                BehandlingResultat.INNVILGET,
-            )
+            ResultatType.INNVILGE, ResultatType.INNVILGE_UTEN_UTBETALING ->
+                behandlingService.oppdaterResultatPåBehandling(
+                    behandlingId,
+                    BehandlingResultat.INNVILGET,
+                )
             ResultatType.OPPHØRT -> behandlingService.oppdaterResultatPåBehandling(behandlingId, BehandlingResultat.OPPHØRT)
             ResultatType.AVSLÅ -> behandlingService.oppdaterResultatPåBehandling(behandlingId, BehandlingResultat.AVSLÅTT)
             ResultatType.SANKSJONERE -> behandlingService.oppdaterResultatPåBehandling(behandlingId, BehandlingResultat.INNVILGET)
@@ -131,7 +137,10 @@ class BeslutteVedtakSteg(
         }
     }
 
-    private fun opprettBehandleUnderkjentVedtakOppgave(saksbehandling: Saksbehandling, navIdent: String) {
+    private fun opprettBehandleUnderkjentVedtakOppgave(
+        saksbehandling: Saksbehandling,
+        navIdent: String,
+    ) {
         taskService.save(
             OpprettOppgaveTask.opprettTask(
                 OpprettOppgaveTaskData(
@@ -151,7 +160,10 @@ class BeslutteVedtakSteg(
         return StegType.BESLUTTE_VEDTAK
     }
 
-    override fun utførSteg(saksbehandling: Saksbehandling, data: BeslutteVedtakDto) {
+    override fun utførSteg(
+        saksbehandling: Saksbehandling,
+        data: BeslutteVedtakDto,
+    ) {
         error("Bruker utførOgReturnerNesteSteg")
     }
 

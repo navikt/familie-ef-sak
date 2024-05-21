@@ -19,7 +19,6 @@ import java.net.URI
 import java.time.LocalDate
 
 class ArbeidsforholdClientTest {
-
     companion object {
         val server: WireMockServer = WireMockServer(WireMockConfiguration.wireMockConfig().dynamicPort())
         private val restOperations: RestOperations = RestTemplateBuilder().build()
@@ -29,10 +28,11 @@ class ArbeidsforholdClientTest {
         @JvmStatic
         fun start() {
             server.start()
-            arbeidsforholdClient = ArbeidsforholdClient(
-                URI.create(server.baseUrl()),
-                restOperations,
-            )
+            arbeidsforholdClient =
+                ArbeidsforholdClient(
+                    URI.create(server.baseUrl()),
+                    restOperations,
+                )
         }
 
         @AfterAll
@@ -67,7 +67,8 @@ class ArbeidsforholdClientTest {
     private val queryMappingForHentOrganisasjon: MappingBuilder =
         WireMock.post(WireMock.urlPathEqualTo("/api/aareg/arbeidsforhold"))
 
-    val aaregIntegrasjonerResponse = """
+    val aaregIntegrasjonerResponse =
+        """
         {
             "data": [
                 {
@@ -118,5 +119,5 @@ class ArbeidsforholdClientTest {
             "frontendFeilmelding": null,
             "stacktrace": null
         }
-    """.trimIndent()
+        """.trimIndent()
 }

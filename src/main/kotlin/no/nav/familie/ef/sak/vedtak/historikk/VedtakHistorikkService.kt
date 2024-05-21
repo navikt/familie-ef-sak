@@ -31,8 +31,10 @@ class VedtakHistorikkService(
     private val barnService: BarnService,
     private val featureToggleService: FeatureToggleService,
 ) {
-
-    fun hentVedtakFraDato(behandlingId: UUID, fra: YearMonth): VedtakDto {
+    fun hentVedtakFraDato(
+        behandlingId: UUID,
+        fra: YearMonth,
+    ): VedtakDto {
         val fagsak = fagsakService.hentFagsakForBehandling(behandlingId)
         return when (fagsak.stønadstype) {
             StønadType.OVERGANGSSTØNAD -> hentVedtakForOvergangsstønadFraDato(fagsak, fra)
@@ -41,7 +43,10 @@ class VedtakHistorikkService(
         }
     }
 
-    fun hentVedtakForOvergangsstønadFraDato(fagsakId: UUID, fra: YearMonth): InnvilgelseOvergangsstønad {
+    fun hentVedtakForOvergangsstønadFraDato(
+        fagsakId: UUID,
+        fra: YearMonth,
+    ): InnvilgelseOvergangsstønad {
         return hentVedtakForOvergangsstønadFraDato(fagsakService.hentFagsak(fagsakId), fra)
     }
 
@@ -49,7 +54,10 @@ class VedtakHistorikkService(
      * Slår sammen perioder som er sammenhengende, med samme aktivitet, og samme periodetype, unntatt sanksjoner
      * Slår sammen inntekter som er sammenhengende, med samme inntekt og samordningsfradrag
      */
-    private fun hentVedtakForOvergangsstønadFraDato(fagsak: Fagsak, fra: YearMonth): InnvilgelseOvergangsstønad {
+    private fun hentVedtakForOvergangsstønadFraDato(
+        fagsak: Fagsak,
+        fra: YearMonth,
+    ): InnvilgelseOvergangsstønad {
         val historikk = hentAktivHistorikk(fagsak, StønadType.OVERGANGSSTØNAD)
         return InnvilgelseOvergangsstønad(
             periodeBegrunnelse = null,
@@ -71,13 +79,17 @@ class VedtakHistorikkService(
             begrunnelse = null,
             perioder = perioder,
             perioderKontantstøtte = mapUtgifterBarnetilsyn(historikk, fra) { it.kontantstøtte },
-            tilleggsstønad = mapUtgifterBarnetilsyn(historikk, fra) { it.tilleggsstønad }.let {
-                TilleggsstønadDto(harTilleggsstønad = it.isNotEmpty(), it, null)
-            },
+            tilleggsstønad =
+                mapUtgifterBarnetilsyn(historikk, fra) { it.tilleggsstønad }.let {
+                    TilleggsstønadDto(harTilleggsstønad = it.isNotEmpty(), it, null)
+                },
         )
     }
 
-    private fun hentAktivHistorikk(fagsak: Fagsak, forventetStønadstype: StønadType): List<AndelHistorikkDto> {
+    private fun hentAktivHistorikk(
+        fagsak: Fagsak,
+        forventetStønadstype: StønadType,
+    ): List<AndelHistorikkDto> {
         feilHvis(fagsak.stønadstype != forventetStønadstype) {
             "Kan kun hente data for $forventetStønadstype fra denne, " +
                 "men prøvde å hente for ${fagsak.stønadstype} fagsak=${fagsak.id}"
@@ -85,7 +97,10 @@ class VedtakHistorikkService(
         return hentAktivHistorikk(fagsak.id)
     }
 
-    private fun mapPerioder(historikk: List<AndelHistorikkDto>, fra: YearMonth): List<VedtaksperiodeDto> {
+    private fun mapPerioder(
+        historikk: List<AndelHistorikkDto>,
+        fra: YearMonth,
+    ): List<VedtaksperiodeDto> {
         return historikk
             .slåSammen { a, b ->
                 sammenhengende(a, b) &&
@@ -94,7 +109,7 @@ class VedtakHistorikkService(
                             b.vedtaksperiode is VedtakshistorikkperiodeOvergangsstønad &&
                             a.vedtaksperiode.aktivitet == b.vedtaksperiode.aktivitet &&
                             a.vedtaksperiode.periodeType == b.vedtaksperiode.periodeType
-                        )
+                    )
             }
             .fraDato(fra)
             .map {
@@ -109,7 +124,10 @@ class VedtakHistorikkService(
             }
     }
 
-    private fun mapInntekter(historikk: List<AndelHistorikkDto>, fra: YearMonth): List<Inntekt> {
+    private fun mapInntekter(
+        historikk: List<AndelHistorikkDto>,
+        fra: YearMonth,
+    ): List<Inntekt> {
         return historikk
             .filter { it.periodeType != VedtaksperiodeType.SANKSJON }
             .slåSammen { a, b ->
@@ -120,7 +138,7 @@ class VedtakHistorikkService(
                         a.vedtaksperiode.inntekt.månedsinntekt nullOrEquals b.vedtaksperiode.inntekt.månedsinntekt &&
                         a.vedtaksperiode.inntekt.forventetInntekt nullOrEquals b.vedtaksperiode.inntekt.forventetInntekt &&
                         a.vedtaksperiode.inntekt.samordningsfradrag nullOrEquals b.vedtaksperiode.inntekt.samordningsfradrag
-                    )
+                )
             }
             .fraDato(fra)
             .mapNotNull {

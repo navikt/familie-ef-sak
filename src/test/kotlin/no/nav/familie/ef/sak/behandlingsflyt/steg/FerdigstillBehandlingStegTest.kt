@@ -19,7 +19,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 internal class FerdigstillBehandlingStegTest {
-
     private val behandlingService = mockk<BehandlingService>(relaxed = true)
     private val taskService = mockk<TaskService>()
 

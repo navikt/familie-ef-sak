@@ -18,7 +18,6 @@ class KodeverkClient(
     private val integrasjonerConfig: IntegrasjonerConfig,
 ) :
     AbstractPingableRestClient(restOperations, "kodeverk") {
-
     override val pingUri: URI = integrasjonerConfig.pingUri
     private val logger: Logger = LoggerFactory.getLogger(this::class.java)
 

@@ -16,44 +16,49 @@ import java.time.LocalDate
 import java.util.UUID
 
 class VedtakServiceTest {
-
     private val vedtakRepository = mockk<VedtakRepository>()
     private val tilkjentYtelseRepository = mockk<TilkjentYtelseRepository>()
 
-    private val vedtakService = VedtakService(
-        vedtakRepository,
-        tilkjentYtelseRepository,
-    )
+    private val vedtakService =
+        VedtakService(
+            vedtakRepository,
+            tilkjentYtelseRepository,
+        )
     private val behandlingId = UUID.randomUUID()
-    private val inntektsperiodeUtenInntekt = inntektsperiode(
-        startDato = LocalDate.of(2021, 1, 1),
-        sluttDato = LocalDate.of(2021, 12, 31),
-        inntekt = BigDecimal.ZERO,
-    )
-    private val inntektsperiodeMedInntekt = inntektsperiode(
-        startDato = LocalDate.of(2022, 1, 1),
-        sluttDato = LocalDate.of(2024, 12, 31),
-        inntekt = BigDecimal.valueOf(400000),
-    )
+    private val inntektsperiodeUtenInntekt =
+        inntektsperiode(
+            startDato = LocalDate.of(2021, 1, 1),
+            sluttDato = LocalDate.of(2021, 12, 31),
+            inntekt = BigDecimal.ZERO,
+        )
+    private val inntektsperiodeMedInntekt =
+        inntektsperiode(
+            startDato = LocalDate.of(2022, 1, 1),
+            sluttDato = LocalDate.of(2024, 12, 31),
+            inntekt = BigDecimal.valueOf(400000),
+        )
     private val inntektWrapper = InntektWrapper(listOf(inntektsperiodeUtenInntekt, inntektsperiodeMedInntekt))
 
-    private val periodeUtenInntekt = vedtaksperiode(
-        startDato = LocalDate.of(2021, 1, 1),
-        sluttDato = LocalDate.of(2021, 12, 31),
-    )
-    private val periodeMedInntekt = vedtaksperiode(
-        startDato = LocalDate.of(2022, 1, 1),
-        sluttDato = LocalDate.of(2024, 12, 31),
-    )
+    private val periodeUtenInntekt =
+        vedtaksperiode(
+            startDato = LocalDate.of(2021, 1, 1),
+            sluttDato = LocalDate.of(2021, 12, 31),
+        )
+    private val periodeMedInntekt =
+        vedtaksperiode(
+            startDato = LocalDate.of(2022, 1, 1),
+            sluttDato = LocalDate.of(2024, 12, 31),
+        )
     private val periodeWrapper = PeriodeWrapper(listOf(periodeUtenInntekt, periodeMedInntekt))
 
     @BeforeEach
     fun setUp() {
-        every { vedtakService.hentVedtak(behandlingId) } returns vedtak(
-            behandlingId = behandlingId,
-            inntekter = inntektWrapper,
-            perioder = periodeWrapper,
-        )
+        every { vedtakService.hentVedtak(behandlingId) } returns
+            vedtak(
+                behandlingId = behandlingId,
+                inntekter = inntektWrapper,
+                perioder = periodeWrapper,
+            )
     }
 
     @Test

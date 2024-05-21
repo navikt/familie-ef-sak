@@ -13,7 +13,6 @@ import java.util.concurrent.atomic.AtomicInteger
 
 @Service
 class MålerService(private val målerRepository: MålerRepository) {
-
     private val åpneBehandlingerPerUkeGauge = MultiGauge.builder("KlarTilBehandlingPerUke").register(Metrics.globalRegistry)
     private val åpneBehandlingerGauge = MultiGauge.builder("KlarTilBehandling").register(Metrics.globalRegistry)
     private val løpendeBehandlingerGauge = MultiGauge.builder("LopendeBehandlinger").register(Metrics.globalRegistry)
@@ -34,10 +33,11 @@ class MålerService(private val målerRepository: MålerRepository) {
     @Scheduled(initialDelay = 60 * 1000L, fixedDelay = OPPDATERINGSFREKVENS)
     fun antallLøpendeSaker() {
         val now = YearMonth.now()
-        val løpendeSaker = målerRepository.finnAntallLøpendeSaker(
-            now.minusMonths(2).atDay(1),
-            now.plusMonths(2).atDay(1),
-        )
+        val løpendeSaker =
+            målerRepository.finnAntallLøpendeSaker(
+                now.minusMonths(2).atDay(1),
+                now.plusMonths(2).atDay(1),
+            )
 
         løpendeBehandlingerGauge.register(
             løpendeSaker.map {
@@ -81,17 +81,18 @@ class MålerService(private val målerRepository: MålerRepository) {
     fun åpneBehandlingerPerUke() {
         val behandlinger = målerRepository.finnÅpneBehandlingerPerUke()
         logger.info("Åpne behandlinger per uke returnerte ${behandlinger.sumOf { it.antall }} fordelt på ${behandlinger.size} uker.")
-        val rows = behandlinger.map {
-            MultiGauge.Row.of(
-                Tags.of(
-                    "ytelse",
-                    it.stonadstype.name,
-                    "uke",
-                    it.år.toString() + "-" + it.uke.toString().padStart(2, '0'),
-                ),
-                it.antall,
-            )
-        }
+        val rows =
+            behandlinger.map {
+                MultiGauge.Row.of(
+                    Tags.of(
+                        "ytelse",
+                        it.stonadstype.name,
+                        "uke",
+                        it.år.toString() + "-" + it.uke.toString().padStart(2, '0'),
+                    ),
+                    it.antall,
+                )
+            }
 
         åpneBehandlingerPerUkeGauge.register(rows, true)
     }
@@ -103,17 +104,18 @@ class MålerService(private val målerRepository: MålerRepository) {
             "Åpne behandlinger returnerte ${behandlinger.sumOf { it.antall }} " +
                 "fordelt på ${behandlinger.size} statuser.",
         )
-        val rows = behandlinger.map {
-            MultiGauge.Row.of(
-                Tags.of(
-                    "ytelse",
-                    it.stonadstype.name,
-                    "status",
-                    it.status.name,
-                ),
-                it.antall,
-            )
-        }
+        val rows =
+            behandlinger.map {
+                MultiGauge.Row.of(
+                    Tags.of(
+                        "ytelse",
+                        it.stonadstype.name,
+                        "status",
+                        it.status.name,
+                    ),
+                    it.antall,
+                )
+            }
 
         åpneBehandlingerGauge.register(rows, true)
     }
@@ -123,23 +125,28 @@ class MålerService(private val målerRepository: MålerRepository) {
         val data = målerRepository.finnVedtakPerUke()
         logger.info("Vedtak returnerte ${data.sumOf { it.antall }} fordelt på ${data.size} typer/uker.")
 
-        val rows = data.map {
-            MultiGauge.Row.of(
-                Tags.of(
-                    "ytelse", it.stonadstype.name,
-                    "resultat", it.resultat.name,
-                    "arsak", it.arsak.name,
-                    "henlagtarsak", it.henlagt_arsak?.name ?: "",
-                    "uke", it.år.toString() + "-" + it.uke.toString().padStart(2, '0'),
-                ),
-                it.antall,
-            )
-        }
+        val rows =
+            data.map {
+                MultiGauge.Row.of(
+                    Tags.of(
+                        "ytelse",
+                        it.stonadstype.name,
+                        "resultat",
+                        it.resultat.name,
+                        "arsak",
+                        it.arsak.name,
+                        "henlagtarsak",
+                        it.henlagt_arsak?.name ?: "",
+                        "uke",
+                        it.år.toString() + "-" + it.uke.toString().padStart(2, '0'),
+                    ),
+                    it.antall,
+                )
+            }
         vedtakGauge.register(rows)
     }
 
     companion object {
-
         const val OPPDATERINGSFREKVENS = 30 * 60 * 1000L
     }
 }

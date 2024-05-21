@@ -18,7 +18,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import java.util.UUID
 
 internal class BehandlingServiceIntegrationTest : OppslagSpringRunnerTest() {
-
     @Autowired
     lateinit var behandlingRepository: BehandlingRepository
 
@@ -75,9 +74,10 @@ internal class BehandlingServiceIntegrationTest : OppslagSpringRunnerTest() {
     @Test
     internal fun `skal finne siste behandling med avslåtte hvis kun avslått`() {
         val fagsak = testoppsettService.lagreFagsak(fagsak())
-        val behandling = behandlingRepository.insert(
-            behandling(fagsak, resultat = BehandlingResultat.AVSLÅTT, status = BehandlingStatus.FERDIGSTILT),
-        )
+        val behandling =
+            behandlingRepository.insert(
+                behandling(fagsak, resultat = BehandlingResultat.AVSLÅTT, status = BehandlingStatus.FERDIGSTILT),
+            )
         val sisteBehandling = behandlingService.finnSisteIverksatteBehandlingMedEventuellAvslått(fagsak.id)
         assertThat(sisteBehandling?.id).isEqualTo(behandling.id)
     }
@@ -85,9 +85,10 @@ internal class BehandlingServiceIntegrationTest : OppslagSpringRunnerTest() {
     @Test
     internal fun `skal finne siste behandling med avslåtte hvis avslått og henlagt`() {
         val fagsak = testoppsettService.lagreFagsak(fagsak())
-        val avslag = behandlingRepository.insert(
-            behandling(fagsak, resultat = BehandlingResultat.AVSLÅTT, status = BehandlingStatus.FERDIGSTILT),
-        )
+        val avslag =
+            behandlingRepository.insert(
+                behandling(fagsak, resultat = BehandlingResultat.AVSLÅTT, status = BehandlingStatus.FERDIGSTILT),
+            )
         behandlingRepository.insert(
             behandling(fagsak, resultat = BehandlingResultat.HENLAGT, status = BehandlingStatus.FERDIGSTILT),
         )
@@ -98,9 +99,10 @@ internal class BehandlingServiceIntegrationTest : OppslagSpringRunnerTest() {
     @Test
     internal fun `skal plukke ut førstegangsbehandling hvis det finnes førstegangsbehandling, avslått og henlagt`() {
         val fagsak = testoppsettService.lagreFagsak(fagsak())
-        val førstegang = behandlingRepository.insert(
-            behandling(fagsak, resultat = BehandlingResultat.INNVILGET, status = BehandlingStatus.FERDIGSTILT),
-        )
+        val førstegang =
+            behandlingRepository.insert(
+                behandling(fagsak, resultat = BehandlingResultat.INNVILGET, status = BehandlingStatus.FERDIGSTILT),
+            )
         behandlingRepository.insert(
             behandling(fagsak, resultat = BehandlingResultat.AVSLÅTT, status = BehandlingStatus.FERDIGSTILT),
         )
@@ -114,37 +116,43 @@ internal class BehandlingServiceIntegrationTest : OppslagSpringRunnerTest() {
     @Test
     internal fun `hentBehandlingForGjenbrukAvVilkår - skal returnere en sortert liste av aktuelle behandlinger for vilkårsgjenbruk`() {
         val fagsakPersonId = UUID.randomUUID()
-        val fagsakOs = testoppsettService.lagreFagsak(
-            fagsak(
-                stønadstype = StønadType.OVERGANGSSTØNAD,
-                fagsakPersonId = fagsakPersonId,
-            ),
-        )
-        val fagsakBt = testoppsettService.lagreFagsak(
-            fagsak(
-                stønadstype = StønadType.BARNETILSYN,
-                fagsakPersonId = fagsakPersonId,
-            ),
-        )
-        val fagsakSp = testoppsettService.lagreFagsak(
-            fagsak(
-                stønadstype = StønadType.SKOLEPENGER,
-                fagsakPersonId = fagsakPersonId,
-            ),
-        )
+        val fagsakOs =
+            testoppsettService.lagreFagsak(
+                fagsak(
+                    stønadstype = StønadType.OVERGANGSSTØNAD,
+                    fagsakPersonId = fagsakPersonId,
+                ),
+            )
+        val fagsakBt =
+            testoppsettService.lagreFagsak(
+                fagsak(
+                    stønadstype = StønadType.BARNETILSYN,
+                    fagsakPersonId = fagsakPersonId,
+                ),
+            )
+        val fagsakSp =
+            testoppsettService.lagreFagsak(
+                fagsak(
+                    stønadstype = StønadType.SKOLEPENGER,
+                    fagsakPersonId = fagsakPersonId,
+                ),
+            )
 
         behandlingRepository.insert(
             behandling(fagsakOs, resultat = BehandlingResultat.HENLAGT, status = BehandlingStatus.FERDIGSTILT),
         )
-        val førstegangBt = behandlingRepository.insert(
-            behandling(fagsakBt, resultat = BehandlingResultat.INNVILGET, status = BehandlingStatus.FERDIGSTILT),
-        )
-        val førstegangSp = behandlingRepository.insert(
-            behandling(fagsakSp, resultat = BehandlingResultat.INNVILGET, status = BehandlingStatus.FERDIGSTILT),
-        )
-        val revurderingUnderArbeidSP = behandlingRepository.insert(
-            behandling(fagsakSp, resultat = BehandlingResultat.IKKE_SATT, status = BehandlingStatus.UTREDES),
-        )
+        val førstegangBt =
+            behandlingRepository.insert(
+                behandling(fagsakBt, resultat = BehandlingResultat.INNVILGET, status = BehandlingStatus.FERDIGSTILT),
+            )
+        val førstegangSp =
+            behandlingRepository.insert(
+                behandling(fagsakSp, resultat = BehandlingResultat.INNVILGET, status = BehandlingStatus.FERDIGSTILT),
+            )
+        val revurderingUnderArbeidSP =
+            behandlingRepository.insert(
+                behandling(fagsakSp, resultat = BehandlingResultat.IKKE_SATT, status = BehandlingStatus.UTREDES),
+            )
 
         val behandlingerForVilkårsgjenbrukHentet = behandlingService.hentBehandlingerForGjenbrukAvVilkår(fagsakPersonId)
         val behandlingerForVilkårsgjenbrukkLagret = listOf(revurderingUnderArbeidSP, førstegangSp, førstegangBt)

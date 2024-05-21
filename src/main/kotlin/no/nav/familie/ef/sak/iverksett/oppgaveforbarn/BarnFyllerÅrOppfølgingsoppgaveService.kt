@@ -21,7 +21,6 @@ class BarnFyllerÅrOppfølgingsoppgaveService(
     private val taskService: TaskService,
     private val personService: PersonService,
 ) {
-
     private val logger = LoggerFactory.getLogger(javaClass)
     private val secureLogger = LoggerFactory.getLogger("secureLogger")
 
@@ -63,8 +62,9 @@ class BarnFyllerÅrOppfølgingsoppgaveService(
 
         return barnMedTermindato.map { barn ->
             val termindato = barn.termindatoBarn!!
-            val søkerPdlData = pdlPersonMedForelderBarnRelasjon[barn.fødselsnummerSøker]
-                ?: error("Finner ikke pdldata for søker=${barn.fødselsnummerSøker}")
+            val søkerPdlData =
+                pdlPersonMedForelderBarnRelasjon[barn.fødselsnummerSøker]
+                    ?: error("Finner ikke pdldata for søker=${barn.fødselsnummerSøker}")
             val forelderBarnRelasjoner = søkerPdlData.forelderBarnRelasjon.mapNotNull { it.relatertPersonsIdent }
             val besteMatch = finnBesteMatchPåFødselsnummerForTermindato(forelderBarnRelasjoner, termindato)
 

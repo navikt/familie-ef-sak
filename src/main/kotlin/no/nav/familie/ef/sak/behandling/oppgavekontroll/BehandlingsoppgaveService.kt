@@ -21,7 +21,6 @@ class BehandlingsoppgaveService(
     val fagsakService: FagsakService,
     val oppgaveService: OppgaveService,
 ) {
-
     private val logger = LoggerFactory.getLogger(javaClass)
 
     @Transactional
@@ -65,9 +64,10 @@ class BehandlingsoppgaveService(
     private fun finnAlleBehandlingerOpprettetForMerEnnTreUkerSiden(): List<Behandling> {
         val stønadstyper = listOf(StønadType.OVERGANGSSTØNAD, StønadType.SKOLEPENGER, StønadType.BARNETILSYN)
         val treUkerSiden = LocalDateTime.now().minusWeeks(3)
-        val gamleBehandlinger = stønadstyper.flatMap { stønadstype ->
-            behandlingService.hentUferdigeBehandlingerOpprettetFørDato(stønadstype, treUkerSiden)
-        }
+        val gamleBehandlinger =
+            stønadstyper.flatMap { stønadstype ->
+                behandlingService.hentUferdigeBehandlingerOpprettetFørDato(stønadstype, treUkerSiden)
+            }
         return gamleBehandlinger
     }
 }

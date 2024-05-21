@@ -47,22 +47,28 @@ fun søknad(
         stønadsstart = stønadsstart,
     )
 
-fun søknadBarnTilBehandlingBarn(barn: Set<SøknadBarn>, behandlingId: UUID = UUID.randomUUID()): List<BehandlingBarn> = barn.map {
-    it.tilBehandlingBarn(behandlingId)
-}
+fun søknadBarnTilBehandlingBarn(
+    barn: Set<SøknadBarn>,
+    behandlingId: UUID = UUID.randomUUID(),
+): List<BehandlingBarn> =
+    barn.map {
+        it.tilBehandlingBarn(behandlingId)
+    }
 
-fun SøknadBarn.tilBehandlingBarn(behandlingId: UUID) = BehandlingBarn(
-    behandlingId = behandlingId,
-    søknadBarnId = this.id,
-    personIdent = this.fødselsnummer,
-    navn = this.navn,
-    fødselTermindato = this.fødselTermindato,
-)
+fun SøknadBarn.tilBehandlingBarn(behandlingId: UUID) =
+    BehandlingBarn(
+        behandlingId = behandlingId,
+        søknadBarnId = this.id,
+        personIdent = this.fødselsnummer,
+        navn = this.navn,
+        fødselTermindato = this.fødselTermindato,
+    )
 
-fun BarnMedIdent.tilBehandlingBarn(behandlingId: UUID) = BehandlingBarn(
-    behandlingId = behandlingId,
-    søknadBarnId = null,
-    personIdent = this.personIdent,
-    navn = this.navn.visningsnavn(),
-    fødselTermindato = null,
-)
+fun BarnMedIdent.tilBehandlingBarn(behandlingId: UUID) =
+    BehandlingBarn(
+        behandlingId = behandlingId,
+        søknadBarnId = null,
+        personIdent = this.personIdent,
+        navn = this.navn.visningsnavn(),
+        fødselTermindato = null,
+    )

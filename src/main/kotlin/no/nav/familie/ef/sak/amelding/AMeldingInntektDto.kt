@@ -54,9 +54,10 @@ enum class Fordel(val verdi: String) {
     ;
 
     companion object {
-
         val map = values().associateBy { it.verdi }
-        fun fraVerdi(verdi: String): Fordel = map[verdi]
-            ?: error("Finner ikke mapping for $verdi i ${Fordel::class.java.simpleName}")
+
+        fun fraVerdi(verdi: String): Fordel =
+            map[verdi]
+                ?: error("Finner ikke mapping for $verdi i ${Fordel::class.java.simpleName}")
     }
 }

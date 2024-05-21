@@ -9,12 +9,10 @@ import org.junit.jupiter.api.Test
 import org.springframework.cache.concurrent.ConcurrentMapCacheManager
 
 interface CacheService {
-
     fun getValue(i: List<Int>): Map<Int, Int>
 }
 
 internal class CacheUtilTest {
-
     private val cacheManager = ConcurrentMapCacheManager()
     private val mock = mockk<CacheService>()
 

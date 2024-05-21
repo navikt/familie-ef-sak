@@ -32,7 +32,6 @@ import java.time.YearMonth
 import java.util.UUID
 
 class BeregningBarnetilsynStepDefinitions {
-
     private lateinit var gittFødselsdato: LocalDate
     private var datoForKjøring: LocalDate? = null
     private var resultatHarFullførtFjerdetrinn: Boolean? = null
@@ -114,12 +113,13 @@ class BeregningBarnetilsynStepDefinitions {
 
     @Så("forventer vi følgende perioder")
     fun `forventer vi barnetilsyn periodebeløp`(dataTable: DataTable) {
-        val forventet = dataTable.asMaps().map {
-            val beløp = parseInt(BELØP, it)
-            val fraÅrMåned = parseÅrMåned(FRA_MND, it)
-            val tilÅrMåned = parseÅrMåned(TIL_OG_MED_MND, it)
-            ForventetPeriode(beløp, fraÅrMåned, tilÅrMåned)
-        }
+        val forventet =
+            dataTable.asMaps().map {
+                val beløp = parseInt(BELØP, it)
+                val fraÅrMåned = parseÅrMåned(FRA_MND, it)
+                val tilÅrMåned = parseÅrMåned(TIL_OG_MED_MND, it)
+                ForventetPeriode(beløp, fraÅrMåned, tilÅrMåned)
+            }
         assertThat(beregnYtelseBarnetilsynResultat).size().isEqualTo(forventet.size)
         val sortedResultat = beregnYtelseBarnetilsynResultat.sortedBy { it.periode.fom }
         val sortetForventet = forventet.sortedBy { it.fraÅrMåned }
@@ -158,15 +158,16 @@ class BeregningBarnetilsynStepDefinitions {
         }
     }
 
-    private fun hentUtForventet(dataTable: DataTable) = dataTable.asMaps().map {
-        val beløp = it["Beløp"]!!.toInt()
-        val fraÅrMåned = parseÅrMåned(FRA_MND, it)
-        val tilÅrMåned = parseÅrMåned(TIL_OG_MED_MND, it)
-        val harKontantstøtte = parseBooleanJaIsTrue(HAR_KONTANTSTØTTE, it)
-        val harTilleggsstønad = parseBooleanJaIsTrue(HAR_TILLEGGSSTØNAD, it)
-        val antallBarn = it["Antall barn"]!!.toInt()
-        ForventetPeriodeMedGrunnlag(beløp, fraÅrMåned, tilÅrMåned, harKontantstøtte, harTilleggsstønad, antallBarn)
-    }
+    private fun hentUtForventet(dataTable: DataTable) =
+        dataTable.asMaps().map {
+            val beløp = it["Beløp"]!!.toInt()
+            val fraÅrMåned = parseÅrMåned(FRA_MND, it)
+            val tilÅrMåned = parseÅrMåned(TIL_OG_MED_MND, it)
+            val harKontantstøtte = parseBooleanJaIsTrue(HAR_KONTANTSTØTTE, it)
+            val harTilleggsstønad = parseBooleanJaIsTrue(HAR_TILLEGGSSTØNAD, it)
+            val antallBarn = it["Antall barn"]!!.toInt()
+            ForventetPeriodeMedGrunnlag(beløp, fraÅrMåned, tilÅrMåned, harKontantstøtte, harTilleggsstønad, antallBarn)
+        }
 
     private fun assertAllefelterErSomForventet(
         it: BeløpsperiodeBarnetilsynDto,
@@ -191,6 +192,7 @@ class BeregningBarnetilsynStepDefinitions {
     }
 
     data class ForventetPeriode(val beløp: Int, val fraÅrMåned: YearMonth, val tilÅrMåned: YearMonth)
+
     data class ForventetPeriodeMedGrunnlag(
         val beløp: Int,
         val fraÅrMåned: YearMonth,

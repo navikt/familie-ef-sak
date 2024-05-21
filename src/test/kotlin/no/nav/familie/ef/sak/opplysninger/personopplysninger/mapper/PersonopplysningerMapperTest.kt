@@ -25,17 +25,17 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 
 internal class PersonopplysningerMapperTest {
-
     val kodeverkService = KodeverkServiceMock().kodeverkService()
     val adresseMapper = AdresseMapper(kodeverkService = kodeverkService)
     val statsborgerskapMapper = StatsborgerskapMapper(kodeverkService = kodeverkService)
     val innflyttingUtflyttingMapper = InnflyttingUtflyttingMapper(kodeverkService = kodeverkService)
     val arbeidsfordelingService = mockk<ArbeidsfordelingService>()
-    val personopplysningerMapper = PersonopplysningerMapper(
-        adresseMapper = adresseMapper,
-        statsborgerskapMapper = statsborgerskapMapper,
-        innflyttingUtflyttingMapper = innflyttingUtflyttingMapper,
-    )
+    val personopplysningerMapper =
+        PersonopplysningerMapper(
+            adresseMapper = adresseMapper,
+            statsborgerskapMapper = statsborgerskapMapper,
+            innflyttingUtflyttingMapper = innflyttingUtflyttingMapper,
+        )
 
     @BeforeEach
     internal fun setUp() {
@@ -44,44 +44,53 @@ internal class PersonopplysningerMapperTest {
 
     @Test
     internal fun `skal mappe personopplysninger og sortere sivilstand på gjeldende - dernest dato`() {
-        val giftFørsteGang = sivilstand(
-            type = GIFT,
-            gyldigFraOgMed = LocalDate.now().minusDays(100),
-            metadata = PdlTestdataHelper.metadataHistorisk,
-        )
-        val separert = sivilstand(
-            type = SEPARERT,
-            gyldigFraOgMed = LocalDate.now(),
-            metadata = PdlTestdataHelper.metadataHistorisk,
-        )
-        val gifteMålOpphørt = sivilstand(
-            type = GIFT,
-            gyldigFraOgMed = LocalDate.now().minusDays(100),
-            metadata = PdlTestdataHelper.metadataGjeldende,
-        )
+        val giftFørsteGang =
+            sivilstand(
+                type = GIFT,
+                gyldigFraOgMed = LocalDate.now().minusDays(100),
+                metadata = PdlTestdataHelper.metadataHistorisk,
+            )
+        val separert =
+            sivilstand(
+                type = SEPARERT,
+                gyldigFraOgMed = LocalDate.now(),
+                metadata = PdlTestdataHelper.metadataHistorisk,
+            )
+        val gifteMålOpphørt =
+            sivilstand(
+                type = GIFT,
+                gyldigFraOgMed = LocalDate.now().minusDays(100),
+                metadata = PdlTestdataHelper.metadataGjeldende,
+            )
 
-        val sivilstandMedSeparasjonSomErOpphørt = listOf(
-            giftFørsteGang,
-            separert,
-            gifteMålOpphørt,
-        )
+        val sivilstandMedSeparasjonSomErOpphørt =
+            listOf(
+                giftFørsteGang,
+                separert,
+                gifteMålOpphørt,
+            )
 
         val søker = opprettGrunnlagsdata().søker
-        val grunnlagsdata = opprettGrunnlagsdata().copy(
-            søker = søker.copy(
-                sivilstand = sivilstandMedSeparasjonSomErOpphørt,
-                fødsel = listOf(
-                    PdlTestdataHelper.fødsel(LocalDate.now()),
-                ),
-            ),
-        )
-        val personOpplysninger = personopplysningerMapper.tilPersonopplysninger(
-            grunnlagsdataMedMetadata = GrunnlagsdataMedMetadata(grunnlagsdata, LocalDateTime.now()),
-            egenAnsatt = false,
-            søkerIdenter = PdlIdenter(
-                listOf(PdlIdent("11223344551", false)),
-            ),
-        )
+        val grunnlagsdata =
+            opprettGrunnlagsdata().copy(
+                søker =
+                    søker.copy(
+                        sivilstand = sivilstandMedSeparasjonSomErOpphørt,
+                        fødsel =
+                            listOf(
+                                PdlTestdataHelper.fødsel(LocalDate.now()),
+                            ),
+                    ),
+            )
+        val personOpplysninger =
+            personopplysningerMapper.tilPersonopplysninger(
+                grunnlagsdataMedMetadata = GrunnlagsdataMedMetadata(grunnlagsdata, LocalDateTime.now()),
+                egenAnsatt = false,
+                søkerIdenter =
+                    PdlIdenter(
+                        listOf(PdlIdent("11223344551", false)),
+                    ),
+            )
 
         Assertions.assertThat(personOpplysninger.sivilstand[0].erGjeldende).isEqualTo(true)
         Assertions.assertThat(personOpplysninger.sivilstand[0].type).isEqualTo(gifteMålOpphørt.type)
@@ -98,51 +107,61 @@ internal class PersonopplysningerMapperTest {
 
     @Test
     internal fun `skal mappe personopplysninger og sortere sivilstand`() {
-        val giftFørsteGang = sivilstand(
-            type = GIFT,
-            gyldigFraOgMed = LocalDate.now().minusDays(100),
-            metadata = PdlTestdataHelper.metadataHistorisk,
-        )
-        val separert = sivilstand(
-            type = SEPARERT,
-            gyldigFraOgMed = LocalDate.now().minusDays(85),
-            metadata = PdlTestdataHelper.metadataHistorisk,
-        )
-        val skilsmisse = sivilstand(
-            type = SKILT,
-            gyldigFraOgMed = LocalDate.now().minusDays(40),
-            metadata = PdlTestdataHelper.metadataHistorisk,
-        )
+        val giftFørsteGang =
+            sivilstand(
+                type = GIFT,
+                gyldigFraOgMed = LocalDate.now().minusDays(100),
+                metadata = PdlTestdataHelper.metadataHistorisk,
+            )
+        val separert =
+            sivilstand(
+                type = SEPARERT,
+                gyldigFraOgMed = LocalDate.now().minusDays(85),
+                metadata = PdlTestdataHelper.metadataHistorisk,
+            )
+        val skilsmisse =
+            sivilstand(
+                type = SKILT,
+                gyldigFraOgMed = LocalDate.now().minusDays(40),
+                metadata = PdlTestdataHelper.metadataHistorisk,
+            )
 
-        val giftPåNy = sivilstand(
-            type = GIFT,
-            gyldigFraOgMed = LocalDate.now().minusDays(20),
-            metadata = PdlTestdataHelper.metadataGjeldende,
-        )
+        val giftPåNy =
+            sivilstand(
+                type = GIFT,
+                gyldigFraOgMed = LocalDate.now().minusDays(20),
+                metadata = PdlTestdataHelper.metadataGjeldende,
+            )
 
-        val sivilstandMedSeparasjonSomErOpphørt = listOf(
-            separert,
-            giftPåNy,
-            skilsmisse,
-            giftFørsteGang,
-        )
+        val sivilstandMedSeparasjonSomErOpphørt =
+            listOf(
+                separert,
+                giftPåNy,
+                skilsmisse,
+                giftFørsteGang,
+            )
 
         val søker = opprettGrunnlagsdata().søker
-        val grunnlagsdata = opprettGrunnlagsdata().copy(
-            søker = søker.copy(
-                sivilstand = sivilstandMedSeparasjonSomErOpphørt,
-                fødsel = listOf(
-                    PdlTestdataHelper.fødsel(LocalDate.now()),
-                ),
-            ),
-        )
-        val personOpplysninger = personopplysningerMapper.tilPersonopplysninger(
-            grunnlagsdataMedMetadata = GrunnlagsdataMedMetadata(grunnlagsdata, LocalDateTime.now()),
-            egenAnsatt = false,
-            søkerIdenter = PdlIdenter(
-                listOf(PdlIdent("11223344551", false)),
-            ),
-        )
+        val grunnlagsdata =
+            opprettGrunnlagsdata().copy(
+                søker =
+                    søker.copy(
+                        sivilstand = sivilstandMedSeparasjonSomErOpphørt,
+                        fødsel =
+                            listOf(
+                                PdlTestdataHelper.fødsel(LocalDate.now()),
+                            ),
+                    ),
+            )
+        val personOpplysninger =
+            personopplysningerMapper.tilPersonopplysninger(
+                grunnlagsdataMedMetadata = GrunnlagsdataMedMetadata(grunnlagsdata, LocalDateTime.now()),
+                egenAnsatt = false,
+                søkerIdenter =
+                    PdlIdenter(
+                        listOf(PdlIdent("11223344551", false)),
+                    ),
+            )
 
         Assertions.assertThat(personOpplysninger.sivilstand[0].erGjeldende).isEqualTo(true)
         Assertions.assertThat(personOpplysninger.sivilstand[0].gyldigFraOgMed).isEqualTo(giftPåNy.gyldigFraOgMed)
@@ -167,13 +186,15 @@ internal class PersonopplysningerMapperTest {
         val deltBostedSlutt = LocalDate.of(2023, 1, 1)
         val grunnlagsdata = grunnlagsdataMedBarnMedDeltBosted(deltBostedStart, deltBostedSlutt)
 
-        val personOpplysningerI2022 = personopplysningerMapper.tilPersonopplysninger(
-            grunnlagsdataMedMetadata = GrunnlagsdataMedMetadata(grunnlagsdata, deltBostedStart.atStartOfDay()),
-            egenAnsatt = false,
-            søkerIdenter = PdlIdenter(
-                listOf(PdlIdent("11223344551", false)),
-            ),
-        )
+        val personOpplysningerI2022 =
+            personopplysningerMapper.tilPersonopplysninger(
+                grunnlagsdataMedMetadata = GrunnlagsdataMedMetadata(grunnlagsdata, deltBostedStart.atStartOfDay()),
+                egenAnsatt = false,
+                søkerIdenter =
+                    PdlIdenter(
+                        listOf(PdlIdent("11223344551", false)),
+                    ),
+            )
 
         Assertions.assertThat(personOpplysningerI2022.barn.first().harDeltBostedNå).isTrue()
     }
@@ -184,13 +205,15 @@ internal class PersonopplysningerMapperTest {
         val deltBostedSlutt = LocalDate.of(2023, 1, 1)
         val grunnlagsdata = grunnlagsdataMedBarnMedDeltBosted(deltBostedStart, deltBostedSlutt)
 
-        val personOpplysningerIFremtiden = personopplysningerMapper.tilPersonopplysninger(
-            grunnlagsdataMedMetadata = GrunnlagsdataMedMetadata(grunnlagsdata, LocalDateTime.MAX),
-            egenAnsatt = false,
-            søkerIdenter = PdlIdenter(
-                listOf(PdlIdent("11223344551", false)),
-            ),
-        )
+        val personOpplysningerIFremtiden =
+            personopplysningerMapper.tilPersonopplysninger(
+                grunnlagsdataMedMetadata = GrunnlagsdataMedMetadata(grunnlagsdata, LocalDateTime.MAX),
+                egenAnsatt = false,
+                søkerIdenter =
+                    PdlIdenter(
+                        listOf(PdlIdent("11223344551", false)),
+                    ),
+            )
 
         Assertions.assertThat(personOpplysningerIFremtiden.barn.first().harDeltBostedNå).isFalse()
     }
@@ -200,28 +223,33 @@ internal class PersonopplysningerMapperTest {
         deltBostedSlutt: LocalDate,
     ): GrunnlagsdataDomene {
         val søker = opprettGrunnlagsdata().søker
-        val grunnlagsdata = opprettGrunnlagsdata().copy(
-            søker = søker.copy(
-                fødsel = listOf(
-                    PdlTestdataHelper.fødsel(LocalDate.now()),
-                ),
-            ),
-            barn = listOf(
-                opprettBarnMedIdent(
-                    personIdent = "11223344551",
-                    deltBosted = listOf(
-                        DeltBosted(
-                            deltBostedStart,
-                            deltBostedSlutt,
-                            null,
-                            null,
-                            Metadata(false),
+        val grunnlagsdata =
+            opprettGrunnlagsdata().copy(
+                søker =
+                    søker.copy(
+                        fødsel =
+                            listOf(
+                                PdlTestdataHelper.fødsel(LocalDate.now()),
+                            ),
+                    ),
+                barn =
+                    listOf(
+                        opprettBarnMedIdent(
+                            personIdent = "11223344551",
+                            deltBosted =
+                                listOf(
+                                    DeltBosted(
+                                        deltBostedStart,
+                                        deltBostedSlutt,
+                                        null,
+                                        null,
+                                        Metadata(false),
+                                    ),
+                                ),
+                            fødsel = PdlTestdataHelper.fødsel(LocalDate.now()),
                         ),
                     ),
-                    fødsel = PdlTestdataHelper.fødsel(LocalDate.now()),
-                ),
-            ),
-        )
+            )
         return grunnlagsdata
     }
 }

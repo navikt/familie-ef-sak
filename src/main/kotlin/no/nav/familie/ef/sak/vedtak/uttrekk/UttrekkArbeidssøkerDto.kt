@@ -32,7 +32,11 @@ data class UttrekkArbeidssøkerDto(
     val kontrollertAv: String?,
 )
 
-fun UttrekkArbeidssøkere.tilDto(personIdent: String, navn: String, adressebeskyttelse: PdlAdressebeskyttelse?) =
+fun UttrekkArbeidssøkere.tilDto(
+    personIdent: String,
+    navn: String,
+    adressebeskyttelse: PdlAdressebeskyttelse?,
+) =
     UttrekkArbeidssøkerDto(
         id = this.id,
         fagsakId = this.fagsakId,

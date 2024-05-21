@@ -17,7 +17,9 @@ class OppgaveforvaltningsController(
     private val tilgangService: TilgangService,
 ) {
     @PostMapping("behandling/{behandlingId}")
-    fun loggOppgavemetadataFor(@PathVariable behandlingId: UUID) {
+    fun loggOppgavemetadataFor(
+        @PathVariable behandlingId: UUID,
+    ) {
         tilgangService.validerHarForvalterrolle()
         val task = LoggOppgaveMetadataTask.opprettTask(behandlingId)
         taskService.save(task)

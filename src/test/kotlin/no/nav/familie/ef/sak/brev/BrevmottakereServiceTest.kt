@@ -17,7 +17,6 @@ import org.junit.jupiter.api.assertThrows
 import org.springframework.data.repository.findByIdOrNull
 
 internal class BrevmottakereServiceTest {
-
     val brevmottakereRepository = mockk<BrevmottakereRepository>()
     val frittståendeBrevmottakereRepository = mockk<FrittståendeBrevmottakereRepository>()
     val tilordnetRessursService = mockk<TilordnetRessursService>()
@@ -35,9 +34,10 @@ internal class BrevmottakereServiceTest {
 
         val brevmottakereDto = BrevmottakereDto(personer = emptyList(), organisasjoner = emptyList())
 
-        val feil = assertThrows<ApiFeil> {
-            brevmottakereService.lagreBrevmottakere(behandlingId = behandling.id, brevmottakereDto = brevmottakereDto)
-        }
+        val feil =
+            assertThrows<ApiFeil> {
+                brevmottakereService.lagreBrevmottakere(behandlingId = behandling.id, brevmottakereDto = brevmottakereDto)
+            }
 
         assertThat(feil.feil).isEqualTo("Vedtaksbrevet må ha minst 1 mottaker")
     }
@@ -46,12 +46,13 @@ internal class BrevmottakereServiceTest {
     fun `skal feile hvis mer enn 2 brevmottakere`() {
         every { brevmottakereRepository.findByIdOrNull(behandling.id) } returns mockk()
 
-        val feil = assertThrows<ApiFeil> {
-            brevmottakereService.lagreBrevmottakere(
-                behandlingId = behandling.id,
-                brevmottakereDto = brevmottakereDtoMed3Mottakere,
-            )
-        }
+        val feil =
+            assertThrows<ApiFeil> {
+                brevmottakereService.lagreBrevmottakere(
+                    behandlingId = behandling.id,
+                    brevmottakereDto = brevmottakereDtoMed3Mottakere,
+                )
+            }
 
         assertThat(feil.feil).isEqualTo("Vedtaksbrevet kan ikke ha mer enn 2 mottakere")
     }
@@ -60,28 +61,31 @@ internal class BrevmottakereServiceTest {
     fun `skal feile hvis samme mottaker legges til flere ganger`() {
         every { brevmottakereRepository.findByIdOrNull(behandling.id) } returns mockk()
 
-        val brevmottakereDto = BrevmottakereDto(
-            personer = listOf(
-                BrevmottakerPerson(
-                    personIdent = "123",
-                    mottakerRolle = BRUKER,
-                    navn = "navn",
-                ),
-                BrevmottakerPerson(
-                    personIdent = "123",
-                    mottakerRolle = VERGE,
-                    navn = "navn",
-                ),
-            ),
-            organisasjoner = emptyList(),
-        )
-
-        val feil = assertThrows<ApiFeil> {
-            brevmottakereService.lagreBrevmottakere(
-                behandlingId = behandling.id,
-                brevmottakereDto = brevmottakereDto,
+        val brevmottakereDto =
+            BrevmottakereDto(
+                personer =
+                    listOf(
+                        BrevmottakerPerson(
+                            personIdent = "123",
+                            mottakerRolle = BRUKER,
+                            navn = "navn",
+                        ),
+                        BrevmottakerPerson(
+                            personIdent = "123",
+                            mottakerRolle = VERGE,
+                            navn = "navn",
+                        ),
+                    ),
+                organisasjoner = emptyList(),
             )
-        }
+
+        val feil =
+            assertThrows<ApiFeil> {
+                brevmottakereService.lagreBrevmottakere(
+                    behandlingId = behandling.id,
+                    brevmottakereDto = brevmottakereDto,
+                )
+            }
 
         assertThat(feil.feil).isEqualTo("En person kan bare legges til en gang som brevmottaker")
     }
@@ -91,23 +95,26 @@ internal class BrevmottakereServiceTest {
         every { brevmottakereRepository.findByIdOrNull(behandling.id) } returns mockk()
         every { tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandler(any()) } returns false
 
-        val brevmottakereDto = BrevmottakereDto(
-            personer = listOf(
-                BrevmottakerPerson(
-                    personIdent = "123",
-                    mottakerRolle = BRUKER,
-                    navn = "navn",
-                ),
-            ),
-            organisasjoner = emptyList(),
-        )
-
-        val feil = assertThrows<ApiFeil> {
-            brevmottakereService.lagreBrevmottakere(
-                behandlingId = behandling.id,
-                brevmottakereDto = brevmottakereDto,
+        val brevmottakereDto =
+            BrevmottakereDto(
+                personer =
+                    listOf(
+                        BrevmottakerPerson(
+                            personIdent = "123",
+                            mottakerRolle = BRUKER,
+                            navn = "navn",
+                        ),
+                    ),
+                organisasjoner = emptyList(),
             )
-        }
+
+        val feil =
+            assertThrows<ApiFeil> {
+                brevmottakereService.lagreBrevmottakere(
+                    behandlingId = behandling.id,
+                    brevmottakereDto = brevmottakereDto,
+                )
+            }
 
         assertThat(feil.feil).isEqualTo("Behandlingen eies av noen andre og brevmottakere kan derfor ikke endres av deg")
     }
@@ -116,51 +123,57 @@ internal class BrevmottakereServiceTest {
     fun `skal feile hvis samme organisasjon legges til flere ganger`() {
         every { brevmottakereRepository.findByIdOrNull(behandling.id) } returns mockk()
 
-        val brevmottakereDto = BrevmottakereDto(
-            personer = emptyList(),
-            organisasjoner = listOf(
-                BrevmottakerOrganisasjon(
-                    organisasjonsnummer = "123",
-                    navnHosOrganisasjon = "n",
-                    mottakerRolle = FULLMAKT,
-                ),
-                BrevmottakerOrganisasjon(
-                    organisasjonsnummer = "123",
-                    navnHosOrganisasjon = "n",
-                    mottakerRolle = FULLMAKT,
-                ),
-            ),
-        )
-
-        val feil = assertThrows<ApiFeil> {
-            brevmottakereService.lagreBrevmottakere(
-                behandlingId = behandling.id,
-                brevmottakereDto = brevmottakereDto,
+        val brevmottakereDto =
+            BrevmottakereDto(
+                personer = emptyList(),
+                organisasjoner =
+                    listOf(
+                        BrevmottakerOrganisasjon(
+                            organisasjonsnummer = "123",
+                            navnHosOrganisasjon = "n",
+                            mottakerRolle = FULLMAKT,
+                        ),
+                        BrevmottakerOrganisasjon(
+                            organisasjonsnummer = "123",
+                            navnHosOrganisasjon = "n",
+                            mottakerRolle = FULLMAKT,
+                        ),
+                    ),
             )
-        }
+
+        val feil =
+            assertThrows<ApiFeil> {
+                brevmottakereService.lagreBrevmottakere(
+                    behandlingId = behandling.id,
+                    brevmottakereDto = brevmottakereDto,
+                )
+            }
 
         assertThat(feil.feil).isEqualTo("En organisasjon kan bare legges til en gang som brevmottaker")
     }
 
-    private val brevmottakereDtoMed3Mottakere = BrevmottakereDto(
-        personer = listOf(
-            BrevmottakerPerson(
-                "A",
-                "A",
-                VERGE,
-            ),
-            BrevmottakerPerson(
-                "B",
-                "B",
-                BRUKER,
-            ),
-        ),
-        organisasjoner = listOf(
-            BrevmottakerOrganisasjon(
-                "C",
-                "C",
-                FULLMAKT,
-            ),
-        ),
-    )
+    private val brevmottakereDtoMed3Mottakere =
+        BrevmottakereDto(
+            personer =
+                listOf(
+                    BrevmottakerPerson(
+                        "A",
+                        "A",
+                        VERGE,
+                    ),
+                    BrevmottakerPerson(
+                        "B",
+                        "B",
+                        BRUKER,
+                    ),
+                ),
+            organisasjoner =
+                listOf(
+                    BrevmottakerOrganisasjon(
+                        "C",
+                        "C",
+                        FULLMAKT,
+                    ),
+                ),
+        )
 }

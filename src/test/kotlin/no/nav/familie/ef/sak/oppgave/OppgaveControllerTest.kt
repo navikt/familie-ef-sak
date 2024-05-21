@@ -26,7 +26,6 @@ import org.junit.jupiter.api.assertThrows
 import java.util.UUID
 
 internal class OppgaveControllerTest {
-
     private val tilgangService: TilgangService = mockk()
     private val oppgaveService: OppgaveService = mockk()
     private val personService: PersonService = mockk()
@@ -54,10 +53,11 @@ internal class OppgaveControllerTest {
         val finnOppgaveRequestSlot = slot<FinnOppgaveRequest>()
         tilgangOgRolleJustRuns()
         every { personService.hentAktørIder("12345678901") } returns PdlIdenter(listOf(PdlIdent("1234", false)))
-        every { oppgaveService.hentOppgaver(capture(finnOppgaveRequestSlot)) } returns FinnOppgaveResponseDto(
-            0,
-            listOf(),
-        )
+        every { oppgaveService.hentOppgaver(capture(finnOppgaveRequestSlot)) } returns
+            FinnOppgaveResponseDto(
+                0,
+                listOf(),
+            )
         oppgaveController.hentOppgaver(FinnOppgaveRequestDto(ident = "12345678901"))
         assertThat(finnOppgaveRequestSlot.captured.aktørId).isEqualTo("1234")
     }
@@ -85,10 +85,11 @@ internal class OppgaveControllerTest {
     internal fun `skal ikke feile hvis ident er tom`() {
         val finnOppgaveRequestSlot = slot<FinnOppgaveRequest>()
         tilgangOgRolleJustRuns()
-        every { oppgaveService.hentOppgaver(capture(finnOppgaveRequestSlot)) } returns FinnOppgaveResponseDto(
-            0,
-            listOf(),
-        )
+        every { oppgaveService.hentOppgaver(capture(finnOppgaveRequestSlot)) } returns
+            FinnOppgaveResponseDto(
+                0,
+                listOf(),
+            )
         oppgaveController.hentOppgaver(FinnOppgaveRequestDto(ident = " "))
         verify(exactly = 0) { personService.hentAktørIder(any()) }
         assertThat(finnOppgaveRequestSlot.captured.aktørId).isEqualTo(null)
@@ -98,10 +99,11 @@ internal class OppgaveControllerTest {
     internal fun `skal ikke feile hvis ident er null`() {
         val finnOppgaveRequestSlot = slot<FinnOppgaveRequest>()
         tilgangOgRolleJustRuns()
-        every { oppgaveService.hentOppgaver(capture(finnOppgaveRequestSlot)) } returns FinnOppgaveResponseDto(
-            0,
-            listOf(),
-        )
+        every { oppgaveService.hentOppgaver(capture(finnOppgaveRequestSlot)) } returns
+            FinnOppgaveResponseDto(
+                0,
+                listOf(),
+            )
         oppgaveController.hentOppgaver(FinnOppgaveRequestDto(ident = null))
         verify(exactly = 0) { personService.hentAktørIder(any()) }
         assertThat(finnOppgaveRequestSlot.captured.aktørId).isEqualTo(null)
@@ -154,7 +156,6 @@ internal class OppgaveControllerTest {
 
     @Nested
     inner class HentMapper {
-
         @Test
         internal fun `skal hente mappe for egen ansatt hvis man har riktig rolle`() {
             every { tilgangService.harEgenAnsattRolle() } returns true

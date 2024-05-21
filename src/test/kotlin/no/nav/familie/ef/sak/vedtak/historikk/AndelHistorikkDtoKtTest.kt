@@ -16,7 +16,6 @@ import java.time.YearMonth
 import java.util.UUID
 
 internal class AndelHistorikkDtoKtTest {
-
     @Test
     internal fun `andel er aktiv hvis perioden ikke har endring eller er splittet`() {
         assertThat(andel.erAktivVedtaksperiode()).isTrue
@@ -41,41 +40,44 @@ internal class AndelHistorikkDtoKtTest {
     private fun AndelHistorikkDto.medEndring(endringType: EndringType) =
         this.copy(endring = HistorikkEndring(endringType, UUID.randomUUID(), LocalDateTime.now()))
 
-    val andel = AndelHistorikkDto(
-        behandlingId = UUID.randomUUID(),
-        behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
-        behandlingÅrsak = BehandlingÅrsak.NYE_OPPLYSNINGER,
-        vedtakstidspunkt = LocalDateTime.now(),
-        saksbehandler = "",
-        vedtaksperiode = VedtakshistorikkperiodeOvergangsstønad(
-            periode = Månedsperiode(YearMonth.now()),
-            aktivitet = AktivitetType.IKKE_AKTIVITETSPLIKT,
-            periodeType = VedtaksperiodeType.HOVEDPERIODE,
-            inntekt = Inntekt(YearMonth.now(), BigDecimal.ZERO, BigDecimal.ZERO),
-        ),
-        andel = andelMedGrunnlagDto(),
-        aktivitet = null,
-        aktivitetArbeid = null,
-        periodeType = null,
-        erSanksjon = false,
-        sanksjonsårsak = null,
-        erOpphør = false,
-        periodetypeBarnetilsyn = PeriodetypeBarnetilsyn.ORDINÆR,
-        aktivitetBarnetilsyn = AktivitetstypeBarnetilsyn.I_ARBEID,
-        endring = null,
-    )
+    val andel =
+        AndelHistorikkDto(
+            behandlingId = UUID.randomUUID(),
+            behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+            behandlingÅrsak = BehandlingÅrsak.NYE_OPPLYSNINGER,
+            vedtakstidspunkt = LocalDateTime.now(),
+            saksbehandler = "",
+            vedtaksperiode =
+                VedtakshistorikkperiodeOvergangsstønad(
+                    periode = Månedsperiode(YearMonth.now()),
+                    aktivitet = AktivitetType.IKKE_AKTIVITETSPLIKT,
+                    periodeType = VedtaksperiodeType.HOVEDPERIODE,
+                    inntekt = Inntekt(YearMonth.now(), BigDecimal.ZERO, BigDecimal.ZERO),
+                ),
+            andel = andelMedGrunnlagDto(),
+            aktivitet = null,
+            aktivitetArbeid = null,
+            periodeType = null,
+            erSanksjon = false,
+            sanksjonsårsak = null,
+            erOpphør = false,
+            periodetypeBarnetilsyn = PeriodetypeBarnetilsyn.ORDINÆR,
+            aktivitetBarnetilsyn = AktivitetstypeBarnetilsyn.I_ARBEID,
+            endring = null,
+        )
 
-    private fun andelMedGrunnlagDto() = AndelMedGrunnlagDto(
-        beløp = 0,
-        periode = Månedsperiode(YearMonth.now()),
-        inntekt = 0,
-        inntektsreduksjon = 0,
-        samordningsfradrag = 0,
-        kontantstøtte = 0,
-        tilleggsstønad = 0,
-        antallBarn = 0,
-        barn = emptyList(),
-        sats = 0,
-        beløpFørFratrekkOgSatsJustering = 0,
-    )
+    private fun andelMedGrunnlagDto() =
+        AndelMedGrunnlagDto(
+            beløp = 0,
+            periode = Månedsperiode(YearMonth.now()),
+            inntekt = 0,
+            inntektsreduksjon = 0,
+            samordningsfradrag = 0,
+            kontantstøtte = 0,
+            tilleggsstønad = 0,
+            antallBarn = 0,
+            barn = emptyList(),
+            sats = 0,
+            beløpFørFratrekkOgSatsJustering = 0,
+        )
 }

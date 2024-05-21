@@ -16,7 +16,6 @@ import java.time.LocalDate
 import java.util.UUID
 
 class BarnRepositoryTest : OppslagSpringRunnerTest() {
-
     @Autowired
     private lateinit var behandlingRepository: BehandlingRepository
 
@@ -49,9 +48,10 @@ class BarnRepositoryTest : OppslagSpringRunnerTest() {
 
         barnRepository.insert(lagBarn(behandling, personIdent = personIdent))
 
-        val cause = assertThatThrownBy {
-            barnRepository.insert(lagBarn(behandling, personIdent = personIdent))
-        }.cause
+        val cause =
+            assertThatThrownBy {
+                barnRepository.insert(lagBarn(behandling, personIdent = personIdent))
+            }.cause
         cause.isInstanceOf(DataIntegrityViolationException::class.java)
         cause.hasMessageContaining("duplicate key value violates unique constraint")
     }
@@ -88,15 +88,20 @@ class BarnRepositoryTest : OppslagSpringRunnerTest() {
         val behandling = behandlingRepository.insert(behandling(fagsak))
         val nyttBarn = lagBarn(behandling, navn = "A")
 
-        val cause = assertThatThrownBy {
-            barnRepository.insert(nyttBarn)
-        }.cause
+        val cause =
+            assertThatThrownBy {
+                barnRepository.insert(nyttBarn)
+            }.cause
 
         cause.isInstanceOf(DataIntegrityViolationException::class.java)
         cause.hasMessageContaining("violates check constraint \"behandling_barn_ident_fodsel_termindato_check\"")
     }
 
-    private fun lagreOgVerifiserBarn(personIdent: String?, navn: String?, fødselTermindato: LocalDate?) {
+    private fun lagreOgVerifiserBarn(
+        personIdent: String?,
+        navn: String?,
+        fødselTermindato: LocalDate?,
+    ) {
         val fagsak = testoppsettService.lagreFagsak(fagsak())
         val behandling = behandlingRepository.insert(behandling(fagsak))
         val nyttBarn = lagBarn(behandling, personIdent, navn, fødselTermindato)

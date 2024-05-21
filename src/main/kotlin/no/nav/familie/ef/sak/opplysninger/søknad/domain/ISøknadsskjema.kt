@@ -7,7 +7,6 @@ import java.util.UUID
 
 @Table("soknadsskjema")
 interface ISøknadsskjema {
-
     val id: UUID
     val type: SøknadType
     val fødselsnummer: String

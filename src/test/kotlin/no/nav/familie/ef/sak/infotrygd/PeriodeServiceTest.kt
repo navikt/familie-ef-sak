@@ -27,20 +27,20 @@ import java.time.LocalDate
 import java.time.YearMonth
 
 internal class PeriodeServiceTest {
-
     private val personService = mockk<PersonService>()
     private val fagsakService = mockk<FagsakService>()
     private val behandlingService = mockk<BehandlingService>()
     private val tilkjentYtelseService = mockk<TilkjentYtelseService>()
     private val replikaClient = mockk<InfotrygdReplikaClient>()
 
-    private val service = PeriodeService(
-        personService = personService,
-        fagsakService = fagsakService,
-        behandlingService = behandlingService,
-        tilkjentYtelseService = tilkjentYtelseService,
-        infotrygdService = InfotrygdService(replikaClient, personService),
-    )
+    private val service =
+        PeriodeService(
+            personService = personService,
+            fagsakService = fagsakService,
+            behandlingService = behandlingService,
+            tilkjentYtelseService = tilkjentYtelseService,
+            infotrygdService = InfotrygdService(replikaClient, personService),
+        )
 
     private val personIdent = "123"
     private val fagsak = fagsak()
@@ -52,11 +52,12 @@ internal class PeriodeServiceTest {
         every {
             personService.hentPersonIdenter(personIdent)
         } returns PdlIdenter(listOf(PdlIdent(personIdent, false)))
-        every { replikaClient.hentSammenslåttePerioder(any()) } returns InfotrygdPeriodeResponse(
-            emptyList(),
-            emptyList(),
-            emptyList(),
-        )
+        every { replikaClient.hentSammenslåttePerioder(any()) } returns
+            InfotrygdPeriodeResponse(
+                emptyList(),
+                emptyList(),
+                emptyList(),
+            )
     }
 
     @Test
@@ -177,11 +178,12 @@ internal class PeriodeServiceTest {
     }
 
     private fun mockReplika(overgangsstønad: List<InfotrygdPeriode>) {
-        every { replikaClient.hentSammenslåttePerioder(any()) } returns InfotrygdPeriodeResponse(
-            overgangsstønad,
-            emptyList(),
-            emptyList(),
-        )
+        every { replikaClient.hentSammenslåttePerioder(any()) } returns
+            InfotrygdPeriodeResponse(
+                overgangsstønad,
+                emptyList(),
+                emptyList(),
+            )
     }
 
     private fun mockFagsak(fagsak: Fagsak? = this.fagsak) {

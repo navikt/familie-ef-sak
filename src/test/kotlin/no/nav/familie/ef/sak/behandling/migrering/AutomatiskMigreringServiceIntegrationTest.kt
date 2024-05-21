@@ -16,7 +16,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
 
 internal class AutomatiskMigreringServiceIntegrationTest : OppslagSpringRunnerTest() {
-
     @Autowired
     private lateinit var iverksettClient: IverksettClient
 
@@ -44,10 +43,11 @@ internal class AutomatiskMigreringServiceIntegrationTest : OppslagSpringRunnerTe
     internal fun `ruller tilbake opprettelse av fagsakperson men oppdaterer migreringsstatus ved feil`() {
         val personIdent = "1"
         migreringsstatusRepository.insert(Migreringsstatus(personIdent, MigreringResultat.IKKE_KONTROLLERT))
-        val perioderOvergangsstønad = listOf(
-            lagInfotrygdPeriode(vedtakId = 1, stønadFom = periode1dato, stønadTom = periode1dato.plusDays(1)),
-            lagInfotrygdPeriode(vedtakId = 2, stønadFom = periode2dato, stønadTom = periode2dato.plusDays(1)),
-        )
+        val perioderOvergangsstønad =
+            listOf(
+                lagInfotrygdPeriode(vedtakId = 1, stønadFom = periode1dato, stønadTom = periode1dato.plusDays(1)),
+                lagInfotrygdPeriode(vedtakId = 2, stønadFom = periode2dato, stønadTom = periode2dato.plusDays(1)),
+            )
         every { infotrygdReplikaClient.hentSammenslåttePerioder(any()) } returns
             InfotrygdPeriodeResponse(perioderOvergangsstønad, emptyList(), emptyList())
 

@@ -22,22 +22,27 @@ class VedleggController(
     private val vedleggService: VedleggService,
     private val tilgangService: TilgangService,
 ) {
-
     @GetMapping("/{behandlingId}")
-    fun finnVedleggForBehandling(@PathVariable behandlingId: UUID): Ressurs<JournalposterDto> {
+    fun finnVedleggForBehandling(
+        @PathVariable behandlingId: UUID,
+    ): Ressurs<JournalposterDto> {
         tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.ACCESS)
         return Ressurs.success(vedleggService.finnJournalposter(behandlingId))
     }
 
     @Deprecated("Bruk POST-versjonen av dette endepunktet som har filtreringsparametere i request-body")
     @GetMapping("/fagsak-person/{fagsakPersonId}")
-    fun finnVedleggForFagsakPerson(@PathVariable fagsakPersonId: UUID): Ressurs<List<DokumentinfoDto>> {
+    fun finnVedleggForFagsakPerson(
+        @PathVariable fagsakPersonId: UUID,
+    ): Ressurs<List<DokumentinfoDto>> {
         tilgangService.validerTilgangTilFagsakPerson(fagsakPersonId, AuditLoggerEvent.ACCESS)
         return Ressurs.success(vedleggService.finnVedleggForPerson(fagsakPersonId))
     }
 
     @PostMapping("/fagsak-person")
-    fun finnVedleggForVedleggRequest(@RequestBody vedleggRequest: VedleggRequest): Ressurs<List<DokumentinfoDto>> {
+    fun finnVedleggForVedleggRequest(
+        @RequestBody vedleggRequest: VedleggRequest,
+    ): Ressurs<List<DokumentinfoDto>> {
         tilgangService.validerTilgangTilFagsakPerson(vedleggRequest.fagsakPersonId, AuditLoggerEvent.ACCESS)
         return Ressurs.success(vedleggService.finnVedleggForVedleggRequest(vedleggRequest))
     }

@@ -15,7 +15,6 @@ import org.springframework.data.repository.findByIdOrNull
 import java.time.LocalDate
 
 internal class TilkjentYtelseRepositoryTest : OppslagSpringRunnerTest() {
-
     @Autowired
     private lateinit var repository: TilkjentYtelseRepository
 
@@ -107,18 +106,20 @@ internal class TilkjentYtelseRepositoryTest : OppslagSpringRunnerTest() {
     internal fun `finnTilkjentYtelserTilKonsistensavstemming skal ikke få med tilkjent ytelser som kun har 0-beløp`() {
         val beløp = 0
         val fagsak = testoppsettService.lagreFagsak(fagsak())
-        val behandling = behandlingRepository.insert(
-            behandling(fagsak, opprettetTid = LocalDate.of(2021, 1, 1).atStartOfDay())
-                .innvilgetOgFerdigstilt(),
-        )
-        val andelerTilkjentYtelse = listOf(
-            lagAndelTilkjentYtelse(
-                beløp = beløp,
-                fraOgMed = LocalDate.now(),
-                tilOgMed = LocalDate.now().plusDays(1),
-                kildeBehandlingId = behandling.id,
-            ),
-        )
+        val behandling =
+            behandlingRepository.insert(
+                behandling(fagsak, opprettetTid = LocalDate.of(2021, 1, 1).atStartOfDay())
+                    .innvilgetOgFerdigstilt(),
+            )
+        val andelerTilkjentYtelse =
+            listOf(
+                lagAndelTilkjentYtelse(
+                    beløp = beløp,
+                    fraOgMed = LocalDate.now(),
+                    tilOgMed = LocalDate.now().plusDays(1),
+                    kildeBehandlingId = behandling.id,
+                ),
+            )
         repository.insert(DataGenerator.tilfeldigTilkjentYtelse(behandling).copy(andelerTilkjentYtelse = andelerTilkjentYtelse))
 
         assertThat(repository.finnTilkjentYtelserTilKonsistensavstemming(fagsak.stønadstype, LocalDate.now()))

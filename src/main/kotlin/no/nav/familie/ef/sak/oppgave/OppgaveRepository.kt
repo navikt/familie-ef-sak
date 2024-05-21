@@ -10,8 +10,11 @@ import java.util.UUID
 
 @Repository
 interface OppgaveRepository : RepositoryInterface<Oppgave, Long>, InsertUpdateRepository<Oppgave> {
+    fun findByBehandlingIdAndTypeAndErFerdigstiltIsFalse(
+        behandlingId: UUID,
+        oppgavetype: Oppgavetype,
+    ): Oppgave?
 
-    fun findByBehandlingIdAndTypeAndErFerdigstiltIsFalse(behandlingId: UUID, oppgavetype: Oppgavetype): Oppgave?
     fun findByBehandlingIdAndTypeAndOppgaveSubtype(
         behandlingId: UUID,
         oppgavetype: Oppgavetype,
@@ -23,7 +26,11 @@ interface OppgaveRepository : RepositoryInterface<Oppgave, Long>, InsertUpdateRe
         oppgavetype: Oppgavetype,
     ): List<Oppgave>?
 
-    fun findByBehandlingIdAndErFerdigstiltIsFalseAndTypeIn(behandlingId: UUID, oppgavetype: Set<Oppgavetype>): Oppgave?
+    fun findByBehandlingIdAndErFerdigstiltIsFalseAndTypeIn(
+        behandlingId: UUID,
+        oppgavetype: Set<Oppgavetype>,
+    ): Oppgave?
+
     fun findByBehandlingIdAndBarnPersonIdentAndAlder(
         behandlingId: UUID,
         barnPersonIdent: String,
@@ -44,6 +51,11 @@ interface OppgaveRepository : RepositoryInterface<Oppgave, Long>, InsertUpdateRe
     ): List<Oppgave>
 
     fun findByGsakOppgaveId(gsakOppgaveId: Long): Oppgave?
+
     fun findTopByBehandlingIdOrderBySporbarOpprettetTidDesc(behandlingId: UUID): Oppgave?
-    fun findTopByBehandlingIdAndTypeOrderBySporbarOpprettetTidDesc(behandlingId: UUID, type: Oppgavetype): Oppgave?
+
+    fun findTopByBehandlingIdAndTypeOrderBySporbarOpprettetTidDesc(
+        behandlingId: UUID,
+        type: Oppgavetype,
+    ): Oppgave?
 }

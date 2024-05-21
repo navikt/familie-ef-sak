@@ -7,7 +7,6 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
 
 @Configuration
 class WebConfig(private val tilgangInterceptor: TilgangInterceptor) : WebMvcConfigurer {
-
     private val excludePatterns =
         listOf(
             "/api/task/**",

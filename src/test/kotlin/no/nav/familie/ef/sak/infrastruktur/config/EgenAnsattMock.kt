@@ -11,7 +11,6 @@ import org.springframework.context.annotation.Profile
 @Configuration
 @Profile("mock-egen-ansatt")
 class EgenAnsattMock {
-
     @Bean
     @Primary
     fun egenAnsattClient(): EgenAnsattClient {

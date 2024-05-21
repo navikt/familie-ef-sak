@@ -23,7 +23,6 @@ import org.junit.jupiter.api.assertThrows
 import java.time.Year
 
 internal class KarakterutskriftBrevTaskTest {
-
     private val behandlingService = mockk<BehandlingService>()
     private val fagsakService = mockk<FagsakService>()
     private val oppgaveService = mockk<OppgaveService>()
@@ -32,31 +31,34 @@ internal class KarakterutskriftBrevTaskTest {
     private val iverksettClient = mockk<IverksettClient>()
     private val arbeidsfordelingService = mockk<ArbeidsfordelingService>()
 
-    private val karakterutskriftBrevTask = SendKarakterutskriftBrevTilIverksettTask(
-        behandlingService,
-        fagsakService,
-        oppgaveService,
-        frittståendeBrevService,
-        personopplysningerService,
-        iverksettClient,
-        arbeidsfordelingService,
-    )
+    private val karakterutskriftBrevTask =
+        SendKarakterutskriftBrevTilIverksettTask(
+            behandlingService,
+            fagsakService,
+            oppgaveService,
+            frittståendeBrevService,
+            personopplysningerService,
+            iverksettClient,
+            arbeidsfordelingService,
+        )
 
     @BeforeEach
     fun setUp() {
-        every { personopplysningerService.hentPersonopplysningerFraRegister(any<String>()) } returns mockk {
-            every { vergemål } returns emptyList()
-        }
+        every { personopplysningerService.hentPersonopplysningerFraRegister(any<String>()) } returns
+            mockk {
+                every { vergemål } returns emptyList()
+            }
     }
 
     @Test
     internal fun `task skal feile dersom det ikke finnes fagsak for ident på oppgaven`() {
         val oppgaveId: Long = 123
 
-        every { oppgaveService.hentOppgave(oppgaveId) } returns Oppgave(
-            id = oppgaveId,
-            identer = listOf(OppgaveIdentV2("11111111", IdentGruppe.FOLKEREGISTERIDENT)),
-        )
+        every { oppgaveService.hentOppgave(oppgaveId) } returns
+            Oppgave(
+                id = oppgaveId,
+                identer = listOf(OppgaveIdentV2("11111111", IdentGruppe.FOLKEREGISTERIDENT)),
+            )
         every { fagsakService.finnFagsaker(any()) } returns emptyList()
 
         val task = SendKarakterutskriftBrevTilIverksettTask.opprettTask(oppgaveId, FrittståendeBrevType.INNHENTING_AV_KARAKTERUTSKRIFT_HOVEDPERIODE, Year.of(2023))
@@ -69,10 +71,11 @@ internal class KarakterutskriftBrevTaskTest {
     internal fun `task skal feile dersom det ikke finnes behandling for ident på oppgaven`() {
         val oppgaveId: Long = 123
 
-        every { oppgaveService.hentOppgave(oppgaveId) } returns Oppgave(
-            id = oppgaveId,
-            identer = listOf(OppgaveIdentV2("11111111", IdentGruppe.FOLKEREGISTERIDENT)),
-        )
+        every { oppgaveService.hentOppgave(oppgaveId) } returns
+            Oppgave(
+                id = oppgaveId,
+                identer = listOf(OppgaveIdentV2("11111111", IdentGruppe.FOLKEREGISTERIDENT)),
+            )
         every { behandlingService.finnesBehandlingForFagsak(any()) } returns false
         every { fagsakService.finnFagsaker(any()) } returns listOf(fagsak())
 
@@ -86,15 +89,17 @@ internal class KarakterutskriftBrevTaskTest {
     internal fun `task skal feile dersom bruker har vergemål`() {
         val oppgaveId: Long = 123
 
-        every { oppgaveService.hentOppgave(oppgaveId) } returns Oppgave(
-            id = oppgaveId,
-            identer = listOf(OppgaveIdentV2("11111111", IdentGruppe.FOLKEREGISTERIDENT)),
-        )
+        every { oppgaveService.hentOppgave(oppgaveId) } returns
+            Oppgave(
+                id = oppgaveId,
+                identer = listOf(OppgaveIdentV2("11111111", IdentGruppe.FOLKEREGISTERIDENT)),
+            )
         every { behandlingService.finnesBehandlingForFagsak(any()) } returns true
         every { fagsakService.finnFagsaker(any()) } returns listOf(fagsak())
-        every { personopplysningerService.hentPersonopplysningerFraRegister(any<String>()) } returns mockk {
-            every { vergemål } returns listOf(mockk())
-        }
+        every { personopplysningerService.hentPersonopplysningerFraRegister(any<String>()) } returns
+            mockk {
+                every { vergemål } returns listOf(mockk())
+            }
 
         val task = SendKarakterutskriftBrevTilIverksettTask.opprettTask(oppgaveId, FrittståendeBrevType.INNHENTING_AV_KARAKTERUTSKRIFT_HOVEDPERIODE, Year.of(2023))
 

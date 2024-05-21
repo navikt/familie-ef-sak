@@ -23,17 +23,17 @@ import java.util.UUID
 class AleneomsorgRegel : Vilkårsregel(
     vilkårType = VilkårType.ALENEOMSORG,
     regler =
-    setOf(
-        SKRIFTLIG_AVTALE_OM_DELT_BOSTED,
-        NÆRE_BOFORHOLD,
-        MER_AV_DAGLIG_OMSORG,
-    ),
+        setOf(
+            SKRIFTLIG_AVTALE_OM_DELT_BOSTED,
+            NÆRE_BOFORHOLD,
+            MER_AV_DAGLIG_OMSORG,
+        ),
     hovedregler =
-    regelIder(
-        SKRIFTLIG_AVTALE_OM_DELT_BOSTED,
-        NÆRE_BOFORHOLD,
-        MER_AV_DAGLIG_OMSORG,
-    ),
+        regelIder(
+            SKRIFTLIG_AVTALE_OM_DELT_BOSTED,
+            NÆRE_BOFORHOLD,
+            MER_AV_DAGLIG_OMSORG,
+        ),
 ) {
     override fun initiereDelvilkårsvurdering(
         metadata: HovedregelMetadata,
@@ -165,10 +165,10 @@ class AleneomsorgRegel : Vilkårsregel(
             RegelSteg(
                 regelId = RegelId.MER_AV_DAGLIG_OMSORG,
                 svarMapping =
-                jaNeiSvarRegel(
-                    hvisJa = SluttSvarRegel.OPPFYLT_MED_PÅKREVD_BEGRUNNELSE,
-                    hvisNei = SluttSvarRegel.IKKE_OPPFYLT_MED_PÅKREVD_BEGRUNNELSE,
-                ),
+                    jaNeiSvarRegel(
+                        hvisJa = SluttSvarRegel.OPPFYLT_MED_PÅKREVD_BEGRUNNELSE,
+                        hvisNei = SluttSvarRegel.IKKE_OPPFYLT_MED_PÅKREVD_BEGRUNNELSE,
+                    ),
             )
 
         private val næreBoForholdMapping =

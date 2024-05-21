@@ -48,7 +48,10 @@ data class Vilkårsvurdering(
         opphavsvilkår ?: Opphavsvilkår(behandlingId, sporbar.endret.endretTid)
 }
 
-fun List<Vilkårsvurdering>.utledVurderinger(vilkårType: VilkårType, regelId: RegelId) =
+fun List<Vilkårsvurdering>.utledVurderinger(
+    vilkårType: VilkårType,
+    regelId: RegelId,
+) =
     this.filter { it.type == vilkårType }.flatMap { it.delvilkårsvurdering.delvilkårsvurderinger }.flatMap { it.vurderinger }
         .filter { it.regelId == regelId }
 
@@ -72,7 +75,6 @@ data class Delvilkårsvurdering(
     val resultat: Vilkårsresultat = Vilkårsresultat.IKKE_TATT_STILLING_TIL,
     val vurderinger: List<Vurdering>,
 ) {
-
     // regelId for første svaret er det samme som hovedregel
     val hovedregel = vurderinger.first().regelId
 }
@@ -85,15 +87,16 @@ data class Vurdering(
 
 fun List<Vurdering>.harSvar(svarId: SvarId) = this.any { it.svar == svarId }
 
-val inngangsvilkår = listOf(
-    VilkårType.FORUTGÅENDE_MEDLEMSKAP,
-    VilkårType.LOVLIG_OPPHOLD,
-    VilkårType.MOR_ELLER_FAR,
-    VilkårType.SIVILSTAND,
-    VilkårType.SAMLIV,
-    VilkårType.ALENEOMSORG,
-    VilkårType.NYTT_BARN_SAMME_PARTNER,
-)
+val inngangsvilkår =
+    listOf(
+        VilkårType.FORUTGÅENDE_MEDLEMSKAP,
+        VilkårType.LOVLIG_OPPHOLD,
+        VilkårType.MOR_ELLER_FAR,
+        VilkårType.SIVILSTAND,
+        VilkårType.SAMLIV,
+        VilkårType.ALENEOMSORG,
+        VilkårType.NYTT_BARN_SAMME_PARTNER,
+    )
 
 enum class Vilkårsresultat(val beskrivelse: String) {
     OPPFYLT("Vilkåret er oppfylt når alle delvilkår er oppfylte"),
@@ -105,11 +108,11 @@ enum class Vilkårsresultat(val beskrivelse: String) {
     ;
 
     fun oppfyltEllerIkkeOppfylt() = this == OPPFYLT || this == IKKE_OPPFYLT
+
     fun erIkkeDelvilkårsresultat() = this != AUTOMATISK_OPPFYLT
 }
 
 enum class VilkårType(val beskrivelse: String, val gjelderStønader: List<StønadType>) {
-
     FORUTGÅENDE_MEDLEMSKAP("§15-2 Forutgående medlemskap", listOf(OVERGANGSSTØNAD, BARNETILSYN, SKOLEPENGER)),
     LOVLIG_OPPHOLD("§15-3 Lovlig opphold", listOf(OVERGANGSSTØNAD, BARNETILSYN, SKOLEPENGER)),
 
@@ -137,9 +140,9 @@ enum class VilkårType(val beskrivelse: String, val gjelderStønader: List<Støn
     fun erInngangsvilkår(): Boolean = inngangsvilkår.contains(this)
 
     companion object {
-
-        fun hentVilkårForStønad(stønadstype: StønadType): List<VilkårType> = values().filter {
-            it.gjelderStønader.contains(stønadstype)
-        }
+        fun hentVilkårForStønad(stønadstype: StønadType): List<VilkårType> =
+            values().filter {
+                it.gjelderStønader.contains(stønadstype)
+            }
     }
 }

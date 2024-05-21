@@ -11,7 +11,6 @@ import org.springframework.context.annotation.Profile
 
 @Configuration
 class HistoriskPensjonMock {
-
     @Profile("mock-historiskpensjon")
     @Bean
     @Primary

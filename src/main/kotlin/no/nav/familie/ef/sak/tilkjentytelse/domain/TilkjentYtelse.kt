@@ -40,16 +40,16 @@ data class TilkjentYtelse(
     @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
     val sporbar: Sporbar = Sporbar(),
 ) {
-
-    fun taMedAndelerFremTilDato(fom: LocalDate): List<AndelTilkjentYtelse> = andelerTilkjentYtelse
-        .filter { andel -> andel.periode.fomDato < fom }
-        .map { andel ->
-            if (andel.erStønadOverlappende(fom)) {
-                andel.copy(stønadTom = fom.minusMonths(1).with(TemporalAdjusters.lastDayOfMonth()))
-            } else {
-                andel
+    fun taMedAndelerFremTilDato(fom: LocalDate): List<AndelTilkjentYtelse> =
+        andelerTilkjentYtelse
+            .filter { andel -> andel.periode.fomDato < fom }
+            .map { andel ->
+                if (andel.erStønadOverlappende(fom)) {
+                    andel.copy(stønadTom = fom.minusMonths(1).with(TemporalAdjusters.lastDayOfMonth()))
+                } else {
+                    andel
+                }
             }
-        }
 }
 
 enum class TilkjentYtelseType {

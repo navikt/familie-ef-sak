@@ -17,7 +17,6 @@ import java.time.YearMonth
  * dette har vi blitt enige om å ikke gjøre i denne, nye tjenesten
  */
 object ArenaPeriodeUtil {
-
     fun slåSammenPerioderFraEfOgInfotrygd(
         request: EksternePerioderRequest,
         perioder: InternePerioder,
@@ -34,7 +33,10 @@ object ArenaPeriodeUtil {
         }.filter { overlapper(request, it) }
     }
 
-    private fun overlapper(request: EksternePerioderRequest, periode: EksternPeriode): Boolean {
+    private fun overlapper(
+        request: EksternePerioderRequest,
+        periode: EksternPeriode,
+    ): Boolean {
         val requestFom = request.fomDato ?: LocalDate.now() // Arena sender alltid fom/tom-datoer, burde endre kontraktet
         val requestTom = request.tomDato ?: LocalDate.now()
         val range = periode.fomDato..periode.tomDato

@@ -23,9 +23,11 @@ class KlageController(
     private val tilgangService: TilgangService,
     private val klageService: KlageService,
 ) {
-
     @PostMapping("/fagsak/{fagsakId}")
-    fun opprettKlage(@PathVariable fagsakId: UUID, @RequestBody opprettKlageDto: OpprettKlageDto): Ressurs<UUID> {
+    fun opprettKlage(
+        @PathVariable fagsakId: UUID,
+        @RequestBody opprettKlageDto: OpprettKlageDto,
+    ): Ressurs<UUID> {
         tilgangService.validerTilgangTilFagsak(fagsakId, AuditLoggerEvent.CREATE)
         tilgangService.validerHarSaksbehandlerrolle()
         klageService.opprettKlage(fagsakId, opprettKlageDto)
@@ -33,13 +35,17 @@ class KlageController(
     }
 
     @GetMapping("/fagsak-person/{fagsakPersonId}")
-    fun hentKlagebehandlinger(@PathVariable fagsakPersonId: UUID): Ressurs<KlagebehandlingerDto> {
+    fun hentKlagebehandlinger(
+        @PathVariable fagsakPersonId: UUID,
+    ): Ressurs<KlagebehandlingerDto> {
         tilgangService.validerTilgangTilFagsakPerson(fagsakPersonId, AuditLoggerEvent.ACCESS)
         return Ressurs.success(klageService.hentBehandlinger(fagsakPersonId))
     }
 
     @GetMapping("/fagsak-person/{fagsakPersonId}/infotrygd")
-    fun hentInfotrygdStatus(@PathVariable fagsakPersonId: UUID): Ressurs<ÅpneKlagerInfotrygdDto> {
+    fun hentInfotrygdStatus(
+        @PathVariable fagsakPersonId: UUID,
+    ): Ressurs<ÅpneKlagerInfotrygdDto> {
         tilgangService.validerTilgangTilFagsakPerson(fagsakPersonId, AuditLoggerEvent.ACCESS)
         return Ressurs.success(klageService.hentÅpneKlagerInfotrygd(fagsakPersonId))
     }

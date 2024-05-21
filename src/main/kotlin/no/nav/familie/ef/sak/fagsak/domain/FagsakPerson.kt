@@ -27,9 +27,10 @@ data class FagsakPerson(
 
     // Kopi av Fagsak -> fagsakMedOppdatertGjeldendeIdent
     fun medOppdatertGjeldendeIdent(gjeldendePersonIdent: String): FagsakPerson {
-        val personIdentForGjeldendeIdent: PersonIdent = this.identer.find { it.ident == gjeldendePersonIdent }?.let {
-            it.copy(sporbar = it.sporbar.copy(endret = Endret()))
-        } ?: PersonIdent(ident = gjeldendePersonIdent)
+        val personIdentForGjeldendeIdent: PersonIdent =
+            this.identer.find { it.ident == gjeldendePersonIdent }?.let {
+                it.copy(sporbar = it.sporbar.copy(endret = Endret()))
+            } ?: PersonIdent(ident = gjeldendePersonIdent)
         val søkerIdenterUtenGjeldende = this.identer.filter { it.ident != gjeldendePersonIdent }
 
         return this.copy(identer = søkerIdenterUtenGjeldende.toSet() + personIdentForGjeldendeIdent)

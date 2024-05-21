@@ -28,7 +28,6 @@ class NullstillVedtakService(
     private val oppgaverForOpprettelseService: OppgaverForOpprettelseService,
     private val tilordnetRessursService: TilordnetRessursService,
 ) {
-
     @Transactional
     fun nullstillVedtak(behandlingId: UUID) {
         val saksbehandling = behandlingService.hentSaksbehandling(behandlingId)

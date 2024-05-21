@@ -15,7 +15,6 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 
 internal class BrevmottakereRepositoryTest : OppslagSpringRunnerTest() {
-
     @Autowired
     private lateinit var behandlingRepository: BehandlingRepository
 
@@ -26,27 +25,30 @@ internal class BrevmottakereRepositoryTest : OppslagSpringRunnerTest() {
     internal fun `skal lagre brevmottaker`() {
         val fagsak = testoppsettService.lagreFagsak(fagsak())
         val behandling = behandlingRepository.insert(behandling(fagsak))
-        val brevmottakere = Brevmottakere(
-            behandlingId = behandling.id,
-            personer = PersonerWrapper(
-                listOf(
-                    BrevmottakerPerson(
-                        personIdent = "12345678910",
-                        navn = "Verge",
-                        mottakerRolle = MottakerRolle.VERGE,
+        val brevmottakere =
+            Brevmottakere(
+                behandlingId = behandling.id,
+                personer =
+                    PersonerWrapper(
+                        listOf(
+                            BrevmottakerPerson(
+                                personIdent = "12345678910",
+                                navn = "Verge",
+                                mottakerRolle = MottakerRolle.VERGE,
+                            ),
+                        ),
                     ),
-                ),
-            ),
-            organisasjoner = OrganisasjonerWrapper(
-                listOf(
-                    BrevmottakerOrganisasjon(
-                        organisasjonsnummer = "12345678",
-                        navnHosOrganisasjon = "Advokat",
-                        MottakerRolle.FULLMAKT,
+                organisasjoner =
+                    OrganisasjonerWrapper(
+                        listOf(
+                            BrevmottakerOrganisasjon(
+                                organisasjonsnummer = "12345678",
+                                navnHosOrganisasjon = "Advokat",
+                                MottakerRolle.FULLMAKT,
+                            ),
+                        ),
                     ),
-                ),
-            ),
-        )
+            )
 
         brevmottakereRepository.insert(brevmottakere)
 

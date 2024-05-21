@@ -40,7 +40,6 @@ class StegService(
     private val rolleConfig: RolleConfig,
     private val behandlingshistorikkService: BehandlingshistorikkService,
 ) {
-
     private val logger: Logger = LoggerFactory.getLogger(this::class.java)
     private val secureLogger = LoggerFactory.getLogger("secureLogger")
 
@@ -55,13 +54,19 @@ class StegService(
     }
 
     @Transactional
-    fun håndterBeregnYtelseForStønad(saksbehandling: Saksbehandling, vedtak: VedtakDto): Behandling {
+    fun håndterBeregnYtelseForStønad(
+        saksbehandling: Saksbehandling,
+        vedtak: VedtakDto,
+    ): Behandling {
         val behandlingSteg: BeregnYtelseSteg = hentBehandlingSteg(BEREGNE_YTELSE)
         return håndterSteg(saksbehandling, behandlingSteg, vedtak)
     }
 
     @Transactional
-    fun håndterFerdigstilleVedtakUtenBeslutter(saksbehandling: Saksbehandling, sendTilBeslutter: SendTilBeslutterDto?): Behandling {
+    fun håndterFerdigstilleVedtakUtenBeslutter(
+        saksbehandling: Saksbehandling,
+        sendTilBeslutter: SendTilBeslutterDto?,
+    ): Behandling {
         håndterSendTilBeslutter(saksbehandling, sendTilBeslutter)
         val oppdatertBehandling = behandlingService.hentSaksbehandling(saksbehandling.id)
         val godkjentBesluttetVedtak = BeslutteVedtakDto(godkjent = true)
@@ -69,21 +74,30 @@ class StegService(
     }
 
     @Transactional
-    fun håndterSendTilBeslutter(saksbehandling: Saksbehandling, sendTilBeslutter: SendTilBeslutterDto?): Behandling {
+    fun håndterSendTilBeslutter(
+        saksbehandling: Saksbehandling,
+        sendTilBeslutter: SendTilBeslutterDto?,
+    ): Behandling {
         val behandlingSteg: SendTilBeslutterSteg = hentBehandlingSteg(SEND_TIL_BESLUTTER)
 
         return håndterSteg(saksbehandling, behandlingSteg, sendTilBeslutter)
     }
 
     @Transactional
-    fun håndterBeslutteVedtak(saksbehandling: Saksbehandling, data: BeslutteVedtakDto): Behandling {
+    fun håndterBeslutteVedtak(
+        saksbehandling: Saksbehandling,
+        data: BeslutteVedtakDto,
+    ): Behandling {
         val behandlingSteg: BeslutteVedtakSteg = hentBehandlingSteg(BESLUTTE_VEDTAK)
 
         return håndterSteg(saksbehandling, behandlingSteg, data)
     }
 
     @Transactional
-    fun håndterÅrsakRevurdering(behandlingId: UUID, data: RevurderingsinformasjonDto): Behandling {
+    fun håndterÅrsakRevurdering(
+        behandlingId: UUID,
+        data: RevurderingsinformasjonDto,
+    ): Behandling {
         val årsakRevurderingSteg: ÅrsakRevurderingSteg = hentBehandlingSteg(REVURDERING_ÅRSAK)
 
         val saksbehandling = behandlingService.hentSaksbehandling(behandlingId)
@@ -120,7 +134,10 @@ class StegService(
     }
 
     @Transactional
-    fun resetSteg(behandlingId: UUID, steg: StegType) {
+    fun resetSteg(
+        behandlingId: UUID,
+        steg: StegType,
+    ) {
         val behandling = behandlingService.hentBehandling(behandlingId)
         if (behandling.status != BehandlingStatus.UTREDES) {
             error("Kan ikke endre steg når status=${behandling.status} behandling=$behandlingId")
@@ -196,7 +213,10 @@ class StegService(
         }
     }
 
-    private fun validerNesteSteg(nesteSteg: StegType, saksbehandling: Saksbehandling) {
+    private fun validerNesteSteg(
+        nesteSteg: StegType,
+        saksbehandling: Saksbehandling,
+    ) {
         if (!nesteSteg.erGyldigIKombinasjonMedStatus(behandlingService.hentBehandling(saksbehandling.id).status)) {
             error(
                 "Steg '${nesteSteg.displayName()}' kan ikke settes " +
@@ -216,7 +236,10 @@ class StegService(
         validerGyldigTilstand(saksbehandling, stegType, saksbehandlerIdent)
     }
 
-    private fun oppdaterMetrikk(stegType: StegType, metrikk: Map<StegType, Counter>) {
+    private fun oppdaterMetrikk(
+        stegType: StegType,
+        metrikk: Map<StegType, Counter>,
+    ) {
         metrikk[stegType]?.increment()
     }
 
@@ -303,21 +326,23 @@ class StegService(
     }
 
     private fun <T : BehandlingSteg<*>> hentBehandlingSteg(stegType: StegType): T {
-        val firstOrNull = behandlingSteg.singleOrNull { it.stegType() == stegType }
-            ?: error("Finner ikke behandling steg for type $stegType")
+        val firstOrNull =
+            behandlingSteg.singleOrNull { it.stegType() == stegType }
+                ?: error("Finner ikke behandling steg for type $stegType")
         @Suppress("UNCHECKED_CAST")
         return firstOrNull as T
     }
 
     private fun initStegMetrikker(type: String): Map<StegType, Counter> {
         return behandlingSteg.associate {
-            it.stegType() to Metrics.counter(
-                "behandling.steg.$type",
-                "steg",
-                it.stegType().name,
-                "beskrivelse",
-                "${it.stegType().rekkefølge} ${it.stegType().displayName()}",
-            )
+            it.stegType() to
+                Metrics.counter(
+                    "behandling.steg.$type",
+                    "steg",
+                    it.stegType().name,
+                    "beskrivelse",
+                    "${it.stegType().rekkefølge} ${it.stegType().displayName()}",
+                )
         }
     }
 }

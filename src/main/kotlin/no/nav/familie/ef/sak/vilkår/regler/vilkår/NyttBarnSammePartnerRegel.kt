@@ -24,7 +24,6 @@ class NyttBarnSammePartnerRegel : Vilkårsregel(
     regler = setOf(HAR_FÅTT_ELLER_VENTER_NYTT_BARN_MED_SAMME_PARTNER),
     hovedregler = regelIder(HAR_FÅTT_ELLER_VENTER_NYTT_BARN_MED_SAMME_PARTNER),
 ) {
-
     @JsonIgnore
     private val logger = LoggerFactory.getLogger(javaClass)
 
@@ -54,14 +53,14 @@ class NyttBarnSammePartnerRegel : Vilkårsregel(
             metadata.vilkårgrunnlagDto.barnMedSamvær.alleRegisterBarnHarRegistrertAnnenForelder()
 
     companion object {
-
         private val HAR_FÅTT_ELLER_VENTER_NYTT_BARN_MED_SAMME_PARTNER =
             RegelSteg(
                 regelId = RegelId.HAR_FÅTT_ELLER_VENTER_NYTT_BARN_MED_SAMME_PARTNER,
-                svarMapping = jaNeiSvarRegel(
-                    hvisJa = SluttSvarRegel.IKKE_OPPFYLT_MED_PÅKREVD_BEGRUNNELSE,
-                    hvisNei = SluttSvarRegel.OPPFYLT_MED_VALGFRI_BEGRUNNELSE,
-                ),
+                svarMapping =
+                    jaNeiSvarRegel(
+                        hvisJa = SluttSvarRegel.IKKE_OPPFYLT_MED_PÅKREVD_BEGRUNNELSE,
+                        hvisNei = SluttSvarRegel.OPPFYLT_MED_VALGFRI_BEGRUNNELSE,
+                    ),
             )
     }
 }

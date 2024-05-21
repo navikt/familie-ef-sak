@@ -13,9 +13,7 @@ class AktivitetRegel : Vilkårsregel(
     regler = setOf(FYLLER_BRUKER_AKTIVITETSPLIKT),
     hovedregler = regelIder(FYLLER_BRUKER_AKTIVITETSPLIKT),
 ) {
-
     companion object {
-
         private val FYLLER_BRUKER_AKTIVITETSPLIKT =
             RegelSteg(
                 regelId = RegelId.FYLLER_BRUKER_AKTIVITETSPLIKT,

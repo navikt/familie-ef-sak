@@ -10,16 +10,16 @@ import java.time.LocalDate
 import java.util.UUID
 
 internal class FørstegangsbehandlingServiceTest {
-
-    val førstegangsbehandlingService = FørstegangsbehandlingService(
-        mockk(),
-        mockk(),
-        mockk(),
-        mockk(),
-        mockk(),
-        mockk(),
-        mockk(),
-    )
+    val førstegangsbehandlingService =
+        FørstegangsbehandlingService(
+            mockk(),
+            mockk(),
+            mockk(),
+            mockk(),
+            mockk(),
+            mockk(),
+            mockk(),
+        )
 
     @Test
     internal fun `skal feile hvis behandlingsårsak er ugyldig for førstegangsbehandlinger`() {

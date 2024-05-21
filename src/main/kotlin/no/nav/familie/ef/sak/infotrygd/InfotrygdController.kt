@@ -18,15 +18,18 @@ class InfotrygdController(
     private val tilgangService: TilgangService,
     private val infotrygdService: InfotrygdService,
 ) {
-
     @PostMapping("perioder")
-    fun hentPerioder(@RequestBody personIdent: PersonIdentDto): Ressurs<InfotrygdPerioderDto> {
+    fun hentPerioder(
+        @RequestBody personIdent: PersonIdentDto,
+    ): Ressurs<InfotrygdPerioderDto> {
         tilgangService.validerTilgangTilPersonMedBarn(personIdent.personIdent, AuditLoggerEvent.ACCESS)
         return Ressurs.success(infotrygdService.hentDtoPerioder(personIdent.personIdent))
     }
 
     @PostMapping("saker")
-    fun hentSaker(@RequestBody personIdent: PersonIdentDto): Ressurs<InfotrygdSakResponse> {
+    fun hentSaker(
+        @RequestBody personIdent: PersonIdentDto,
+    ): Ressurs<InfotrygdSakResponse> {
         tilgangService.validerTilgangTilPersonMedBarn(personIdent.personIdent, AuditLoggerEvent.ACCESS)
         return Ressurs.success(infotrygdService.hentSaker(personIdent.personIdent))
     }

@@ -5,7 +5,6 @@ import org.junit.jupiter.api.Test
 import java.net.URI
 
 internal class IntegrasjonerConfigTest {
-
     private val integrasjonerConfig = IntegrasjonerConfig(URI("http://familie-integrasjoner"))
 
     @Test

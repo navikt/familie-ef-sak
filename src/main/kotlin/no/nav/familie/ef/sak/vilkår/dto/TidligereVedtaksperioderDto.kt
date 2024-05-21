@@ -38,7 +38,9 @@ data class GrunnlagsdataPeriodeHistorikkDto(
 )
 
 enum class OverlappMedOvergangsstønad {
-    NEI, JA, DELVIS,
+    NEI,
+    JA,
+    DELVIS,
 }
 
 data class GrunnlagsdataPeriodeHistorikkBarnetilsynDto(
@@ -47,13 +49,14 @@ data class GrunnlagsdataPeriodeHistorikkBarnetilsynDto(
     val overlapperMedOvergangsstønad: OverlappMedOvergangsstønad,
 )
 
-fun TidligereVedtaksperioder?.tilDto(): TidligereVedtaksperioderDto = this?.let {
-    TidligereVedtaksperioderDto(
-        infotrygd = it.infotrygd.tilDto(),
-        sak = it.sak?.tilDto(),
-        historiskPensjon = it.historiskPensjon,
-    )
-} ?: TidligereVedtaksperioderDto(null, null, null)
+fun TidligereVedtaksperioder?.tilDto(): TidligereVedtaksperioderDto =
+    this?.let {
+        TidligereVedtaksperioderDto(
+            infotrygd = it.infotrygd.tilDto(),
+            sak = it.sak?.tilDto(),
+            historiskPensjon = it.historiskPensjon,
+        )
+    } ?: TidligereVedtaksperioderDto(null, null, null)
 
 fun TidligereInnvilgetVedtak.tilDto() =
     TidligereInnvilgetVedtakDto(
@@ -64,9 +67,10 @@ fun TidligereInnvilgetVedtak.tilDto() =
         periodeHistorikkBarnetilsyn = this.periodeHistorikkBarnetilsyn.tilDtoBarnetilsyn(this.periodeHistorikkOvergangsstønad),
     )
 
-private fun List<GrunnlagsdataPeriodeHistorikkOvergangsstønad>.tilDtoOvergangsstønad() = this.map { it.tilDto() }
-    .slåSammenPåfølgendePerioderMedLikPeriodetype()
-    .sortedByDescending { it.fom }
+private fun List<GrunnlagsdataPeriodeHistorikkOvergangsstønad>.tilDtoOvergangsstønad() =
+    this.map { it.tilDto() }
+        .slåSammenPåfølgendePerioderMedLikPeriodetype()
+        .sortedByDescending { it.fom }
 
 private fun List<GrunnlagsdataPeriodeHistorikkBarnetilsynDto>.slåSammenHistoriskePerioder(
     grunnlagsdataPeriodeHistorikkOvergangsstønad: List<GrunnlagsdataPeriodeHistorikkOvergangsstønad>,
@@ -108,22 +112,24 @@ private fun List<GrunnlagsdataPeriodeHistorikkBarnetilsyn>.tilDtoBarnetilsyn(
     .slåSammenHistoriskePerioder(grunnlagsdataPeriodeHistorikkOvergangsstønad)
     .sortedByDescending { it.fom }
 
-private fun GrunnlagsdataPeriodeHistorikkOvergangsstønad.tilDto() = GrunnlagsdataPeriodeHistorikkDto(
-    vedtaksperiodeType = this.periodeType.name,
-    fom = this.fom,
-    tom = this.tom,
-    antallMåneder = månederMedBeløp(periodeType, beløp, fom, tom),
-    antallMånederUtenBeløp = månederUtenBeløp(periodeType, beløp, fom, tom),
-)
+private fun GrunnlagsdataPeriodeHistorikkOvergangsstønad.tilDto() =
+    GrunnlagsdataPeriodeHistorikkDto(
+        vedtaksperiodeType = this.periodeType.name,
+        fom = this.fom,
+        tom = this.tom,
+        antallMåneder = månederMedBeløp(periodeType, beløp, fom, tom),
+        antallMånederUtenBeløp = månederUtenBeløp(periodeType, beløp, fom, tom),
+    )
 
 private fun GrunnlagsdataPeriodeHistorikkBarnetilsyn.tilDto(grunnlagsdataPeriodeHistorikkOvergangsstønad: List<GrunnlagsdataPeriodeHistorikkOvergangsstønad>) =
     GrunnlagsdataPeriodeHistorikkBarnetilsynDto(
         fom = this.fom,
         tom = this.tom,
-        overlapperMedOvergangsstønad = grunnlagsdataPeriodeHistorikkOvergangsstønad.overlapperMedPeriode(
-            this.fom,
-            this.tom,
-        ),
+        overlapperMedOvergangsstønad =
+            grunnlagsdataPeriodeHistorikkOvergangsstønad.overlapperMedPeriode(
+                this.fom,
+                this.tom,
+            ),
     )
 
 private fun månederUtenBeløp(
@@ -187,4 +193,5 @@ private fun slåSammenPeriodeHistorikkDto(
 )
 
 private fun GrunnlagsdataPeriodeHistorikkDto.periode(): Månedsperiode = Månedsperiode(this.fom, this.tom)
+
 private fun GrunnlagsdataPeriodeHistorikkBarnetilsynDto.periode(): Månedsperiode = Månedsperiode(this.fom, this.tom)

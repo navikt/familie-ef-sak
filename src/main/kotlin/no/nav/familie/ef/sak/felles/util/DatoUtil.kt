@@ -8,7 +8,6 @@ import java.time.YearMonth
 import java.time.format.DateTimeFormatter
 
 object DatoFormat {
-
     val DATE_FORMAT_ISO_YEAR_MONTH = DateTimeFormatter.ofPattern("yyyy-MM")
     val YEAR_MONTH_FORMAT_NORSK = DateTimeFormatter.ofPattern("MM.yyyy")
     val DATE_FORMAT_NORSK = DateTimeFormatter.ofPattern("dd.MM.yyyy")
@@ -16,10 +15,12 @@ object DatoFormat {
 }
 
 object DatoUtil {
-
     fun dagensDatoMedTid(): LocalDateTime = LocalDateTime.now()
+
     fun dagensDato(): LocalDate = LocalDate.now()
+
     fun inneværendeÅr() = LocalDate.now().year
+
     fun årMånedNå() = YearMonth.now()
 }
 
@@ -29,7 +30,10 @@ fun LocalDate.norskFormat() = this.format(DATE_FORMAT_NORSK)
 
 fun datoEllerIdag(localDate: LocalDate?): LocalDate = localDate ?: LocalDate.now()
 
-fun min(first: LocalDateTime?, second: LocalDateTime?): LocalDateTime? {
+fun min(
+    first: LocalDateTime?,
+    second: LocalDateTime?,
+): LocalDateTime? {
     return when {
         first == null -> second
         second == null -> first
@@ -37,7 +41,10 @@ fun min(first: LocalDateTime?, second: LocalDateTime?): LocalDateTime? {
     }
 }
 
-fun min(first: LocalDate?, second: LocalDate?): LocalDate? {
+fun min(
+    first: LocalDate?,
+    second: LocalDate?,
+): LocalDate? {
     return when {
         first == null -> second
         second == null -> first
@@ -46,6 +53,7 @@ fun min(first: LocalDate?, second: LocalDate?): LocalDate? {
 }
 
 fun LocalDate.isEqualOrBefore(other: LocalDate) = this == other || this.isBefore(other)
+
 fun LocalDate.isEqualOrAfter(other: LocalDate) = this == other || this.isAfter(other)
 
 fun LocalDate.harPåfølgendeMåned(påfølgende: LocalDate): Boolean =

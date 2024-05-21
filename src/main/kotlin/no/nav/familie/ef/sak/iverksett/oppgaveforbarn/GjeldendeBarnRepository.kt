@@ -12,7 +12,6 @@ import java.util.UUID
 interface GjeldendeBarnRepository :
     RepositoryInterface<BarnTilUtplukkForOppgave, UUID>,
     InsertUpdateRepository<BarnTilUtplukkForOppgave> {
-
     // language=PostgreSQL
     @Query(
         """
@@ -28,7 +27,10 @@ interface GjeldendeBarnRepository :
           AND aty.stonad_tom >= :dato)
         """,
     )
-    fun finnBarnAvGjeldendeIverksatteBehandlinger(stønadstype: StønadType, dato: LocalDate): List<BarnTilUtplukkForOppgave>
+    fun finnBarnAvGjeldendeIverksatteBehandlinger(
+        stønadstype: StønadType,
+        dato: LocalDate,
+    ): List<BarnTilUtplukkForOppgave>
 
     @Query(
         """
@@ -47,5 +49,8 @@ interface GjeldendeBarnRepository :
          AND b.migrert = TRUE
     """,
     )
-    fun finnBarnTilMigrerteBehandlinger(stønadstype: StønadType, dato: LocalDate): List<BarnTilUtplukkForOppgave>
+    fun finnBarnTilMigrerteBehandlinger(
+        stønadstype: StønadType,
+        dato: LocalDate,
+    ): List<BarnTilUtplukkForOppgave>
 }

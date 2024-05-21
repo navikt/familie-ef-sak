@@ -19,7 +19,6 @@ class KonsistensavstemmingForvaltningController(
     private val taskService: TaskService,
     private val tilgangService: TilgangService,
 ) {
-
     private val logger = LoggerFactory.getLogger(javaClass)
 
     @PostMapping

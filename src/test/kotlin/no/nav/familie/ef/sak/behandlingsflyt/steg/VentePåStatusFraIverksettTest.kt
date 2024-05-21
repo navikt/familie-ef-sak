@@ -14,7 +14,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 internal class VentePåStatusFraIverksettTest {
-
     private val iverksettClient = mockk<IverksettClient>()
     private val taskService = mockk<TaskService>()
 

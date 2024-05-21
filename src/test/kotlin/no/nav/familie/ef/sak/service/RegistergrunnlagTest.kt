@@ -13,10 +13,10 @@ import kotlin.reflect.KClass
 import kotlin.reflect.full.isSubclassOf
 
 internal class RegistergrunnlagTest {
-
-    private val om = objectMapper.copy()
-        .setSerializationInclusion(JsonInclude.Include.NON_NULL)
-        .writerWithDefaultPrettyPrinter()
+    private val om =
+        objectMapper.copy()
+            .setSerializationInclusion(JsonInclude.Include.NON_NULL)
+            .writerWithDefaultPrettyPrinter()
 
     /**
      * For å få med seg breaking changes i Grunnlagsdata. Hvis noe faktiskt er breaking change får man vurdere om man skal
@@ -39,17 +39,18 @@ internal class RegistergrunnlagTest {
         val nullable: Boolean,
     )
 
-    private val endClasses = setOf(
-        String::class,
-        UUID::class,
-        Int::class,
-        Long::class,
-        Float::class,
-        LocalDate::class,
-        LocalDateTime::class,
-        YearMonth::class,
-        Boolean::class,
-    )
+    private val endClasses =
+        setOf(
+            String::class,
+            UUID::class,
+            Int::class,
+            Long::class,
+            Float::class,
+            LocalDate::class,
+            LocalDateTime::class,
+            YearMonth::class,
+            Boolean::class,
+        )
 
     private fun getClassInfo(kClass: KClass<*>): Map<String, ObjectInfo> {
         val className = kClass.qualifiedName

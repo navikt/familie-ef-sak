@@ -31,7 +31,6 @@ class SimuleringService(
     private val tilgangService: TilgangService,
     private val tilordnetRessursService: TilordnetRessursService,
 ) {
-
     private val logger = LoggerFactory.getLogger(javaClass)
 
     @Transactional

@@ -32,31 +32,38 @@ class BeregningController(
     private val tilgangService: TilgangService,
     private val vedtakService: VedtakService,
 ) {
-
     @PostMapping
-    fun beregnYtelserForRequest(@RequestBody beregningRequest: BeregningRequest): Ressurs<List<Beløpsperiode>> {
-        val vedtaksperioder: List<Månedsperiode> = beregningRequest.vedtaksperioder
-            .filterNot { it.erMidlertidigOpphørEllerSanksjon() }
-            .tilPerioder()
+    fun beregnYtelserForRequest(
+        @RequestBody beregningRequest: BeregningRequest,
+    ): Ressurs<List<Beløpsperiode>> {
+        val vedtaksperioder: List<Månedsperiode> =
+            beregningRequest.vedtaksperioder
+                .filterNot { it.erMidlertidigOpphørEllerSanksjon() }
+                .tilPerioder()
 
         val inntektsperioder = beregningRequest.inntekt.tilInntektsperioder()
         return Ressurs.success(beregningService.beregnYtelse(vedtaksperioder, inntektsperioder))
     }
 
     @GetMapping("/{behandlingId}")
-    fun hentBeregnetBeløp(@PathVariable behandlingId: UUID): Ressurs<List<Beløpsperiode>> {
+    fun hentBeregnetBeløp(
+        @PathVariable behandlingId: UUID,
+    ): Ressurs<List<Beløpsperiode>> {
         tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.UPDATE)
         val vedtakForBehandling = vedtakService.hentVedtak(behandlingId)
         if (vedtakForBehandling.resultatType === ResultatType.OPPHØRT) {
             throw Feil("Kan ikke vise fremtidige beløpsperioder for opphørt vedtak med id=$behandlingId")
         }
-        val startDatoForVedtak = vedtakForBehandling.perioder?.perioder?.minByOrNull { it.datoFra }?.datoFra
-            ?: error("Fant ingen startdato for vedtak på behandling med id=$behandlingId")
+        val startDatoForVedtak =
+            vedtakForBehandling.perioder?.perioder?.minByOrNull { it.datoFra }?.datoFra
+                ?: error("Fant ingen startdato for vedtak på behandling med id=$behandlingId")
         return Ressurs.success(tilkjentYtelseService.hentForBehandling(behandlingId).tilBeløpsperiode(startDatoForVedtak))
     }
 
     @GetMapping("/grunnbelopForPerioder")
-    fun hentNyesteGrunnbeløpOgAntallGrunnbeløpsperioderTilbakeITid(@RequestParam antall: Int): Ressurs<List<GrunnbeløpDTO>> {
+    fun hentNyesteGrunnbeløpOgAntallGrunnbeløpsperioderTilbakeITid(
+        @RequestParam antall: Int,
+    ): Ressurs<List<GrunnbeløpDTO>> {
         val listeMedGrunnbeløpsperioder = beregningService.hentNyesteGrunnbeløpOgAntallGrunnbeløpsperioderTilbakeITid(antall)
         val listeMedGrunnbeløpsperioderDTO = beregningService.listeMedGrunnbeløpTilDTO(listeMedGrunnbeløpsperioder)
         return Ressurs.success(listeMedGrunnbeløpsperioderDTO)

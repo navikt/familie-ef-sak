@@ -17,7 +17,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
 
 class OppgaverForOpprettelseServiceIntegrationTest : OppslagSpringRunnerTest() {
-
     @Autowired
     private lateinit var behandlingRepository: BehandlingRepository
 
@@ -74,12 +73,13 @@ class OppgaverForOpprettelseServiceIntegrationTest : OppslagSpringRunnerTest() {
     }
 
     private fun opprettTilkjentYtelse(beløp: Int) {
-        val andel = lagAndelTilkjentYtelse(
-            beløp = beløp,
-            fraOgMed = LocalDate.now(),
-            tilOgMed = LocalDate.now().plusYears(2),
-            kildeBehandlingId = behandlingId,
-        )
+        val andel =
+            lagAndelTilkjentYtelse(
+                beløp = beløp,
+                fraOgMed = LocalDate.now(),
+                tilOgMed = LocalDate.now().plusYears(2),
+                kildeBehandlingId = behandlingId,
+            )
         tilkjentYtelseRepository.insert(
             lagTilkjentYtelse(
                 behandlingId = behandlingId,

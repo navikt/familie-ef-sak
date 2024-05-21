@@ -17,7 +17,6 @@ import org.junit.jupiter.api.Test
 import java.util.UUID
 
 class VedtakDtoMapperTest {
-
     @Test
     fun `deserialiser og serialiser innvilget overgangsstønad vedtak dto`() {
         val vedtakJson = readFile("OvergangsstønadInnvilgetVedtakDto.json")
@@ -40,11 +39,12 @@ class VedtakDtoMapperTest {
     fun `deserialiser og serialiser innvilget barnetilsyn uten utbetaling vedtak dto`() {
         val vedtakJson = readFile("BarnetilsynInnvilgetUtenUtbetalingVedtakDto.json")
 
-        val vedtak = innvilgelseBarnetilsynDto(UUID.fromString("4ab497b2-a19c-4415-bf00-556ff8e9ce86"))
-            .copy(
-                resultatType = ResultatType.INNVILGE_UTEN_UTBETALING,
-                _type = "InnvilgelseBarnetilsynUtenUtbetaling",
-            )
+        val vedtak =
+            innvilgelseBarnetilsynDto(UUID.fromString("4ab497b2-a19c-4415-bf00-556ff8e9ce86"))
+                .copy(
+                    resultatType = ResultatType.INNVILGE_UTEN_UTBETALING,
+                    _type = "InnvilgelseBarnetilsynUtenUtbetaling",
+                )
         assertErLik(vedtak, vedtakJson)
     }
 
@@ -91,13 +91,19 @@ class VedtakDtoMapperTest {
         assertErLikUtenType(vedtak, vedtakJson)
     }
 
-    private fun assertErLik(vedtakDto: VedtakDto, vedtakJson: String) {
+    private fun assertErLik(
+        vedtakDto: VedtakDto,
+        vedtakJson: String,
+    ) {
         val serialisertVedtak = objectMapper.writeValueAsString(vedtakDto)
         assertThat(objectMapper.readValue<VedtakDto>(serialisertVedtak)).isEqualTo(objectMapper.readValue<VedtakDto>(vedtakJson))
         assertThat(objectMapper.readValue<VedtakDto>(vedtakJson)).isEqualTo(vedtakDto)
     }
 
-    private fun assertErLikUtenType(vedtakDto: VedtakDto, vedtakJson: String) {
+    private fun assertErLikUtenType(
+        vedtakDto: VedtakDto,
+        vedtakJson: String,
+    ) {
         val tree = objectMapper.readTree(vedtakJson)
         (tree as ObjectNode).remove("_type")
         val vedtakJsonUtenType = objectMapper.writeValueAsString(tree)

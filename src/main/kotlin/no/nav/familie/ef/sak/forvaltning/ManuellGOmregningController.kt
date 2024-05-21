@@ -30,9 +30,7 @@ class ManuellGOmregningController(
     private val behandlingService: BehandlingService,
     private val tilkjentYtelseService: TilkjentYtelseService,
     private val tilgangService: TilgangService,
-
 ) {
-
     val logger: Logger = LoggerFactory.getLogger(javaClass)
 
     @PostMapping(path = ["startjobb"])
@@ -43,7 +41,9 @@ class ManuellGOmregningController(
     }
 
     @PostMapping(path = ["{fagsakId}"])
-    fun opprettGOmregningTaskForFagsak(@PathVariable fagsakId: UUID) {
+    fun opprettGOmregningTaskForFagsak(
+        @PathVariable fagsakId: UUID,
+    ) {
         tilgangService.validerHarForvalterrolle()
         feilHvisIkke(featureToggleService.isEnabled(Toggle.G_BEREGNING_TILLAT_MANUELL_OPPRETTELSE_AV_G_TASK)) {
             "Opprettelse av gomregningstask for fagsak ikke enablet"

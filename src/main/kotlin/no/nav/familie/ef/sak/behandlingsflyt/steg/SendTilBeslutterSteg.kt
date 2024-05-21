@@ -54,7 +54,6 @@ class SendTilBeslutterSteg(
     private val behandlingshistorikkService: BehandlingshistorikkService,
     private val tilordnetRessursService: TilordnetRessursService,
 ) : BehandlingSteg<SendTilBeslutterDto?> {
-
     override fun validerSteg(saksbehandling: Saksbehandling) {
         if (saksbehandling.steg != stegType()) {
             throw ApiFeil("Behandling er i feil steg=${saksbehandling.steg}", HttpStatus.BAD_REQUEST)
@@ -121,7 +120,10 @@ class SendTilBeslutterSteg(
             resultatType == ResultatType.HENLEGGE
     }
 
-    override fun utførSteg(saksbehandling: Saksbehandling, data: SendTilBeslutterDto?) {
+    override fun utførSteg(
+        saksbehandling: Saksbehandling,
+        data: SendTilBeslutterDto?,
+    ) {
         behandlingService.oppdaterStatusPåBehandling(saksbehandling.id, BehandlingStatus.FATTER_VEDTAK)
         vedtakService.oppdaterSaksbehandler(saksbehandling.id, SikkerhetContext.hentSaksbehandler())
         if (!vedtakService.hentVedtak(saksbehandling.id).erVedtakUtenBeslutter()) {
@@ -145,11 +147,12 @@ class SendTilBeslutterSteg(
 
         val besluttetVedtakHendelse =
             behandlingshistorikkService.finnSisteBehandlingshistorikk(saksbehandling.id, StegType.BESLUTTE_VEDTAK)
-        val oppgavetype = if (besluttetVedtakHendelse?.utfall == StegUtfall.BESLUTTE_VEDTAK_UNDERKJENT) {
-            Oppgavetype.BehandleUnderkjentVedtak
-        } else {
-            Oppgavetype.BehandleSak
-        }
+        val oppgavetype =
+            if (besluttetVedtakHendelse?.utfall == StegUtfall.BESLUTTE_VEDTAK_UNDERKJENT) {
+                Oppgavetype.BehandleUnderkjentVedtak
+            } else {
+                Oppgavetype.BehandleSak
+            }
 
         taskService.save(
             FerdigstillOppgaveTask.opprettTask(

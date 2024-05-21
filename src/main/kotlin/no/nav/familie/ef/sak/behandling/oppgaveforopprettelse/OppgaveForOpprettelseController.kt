@@ -12,17 +12,19 @@ import java.util.UUID
 @RequestMapping("/api/oppgaverforopprettelse")
 @ProtectedWithClaims(issuer = "azuread")
 class OppgaveForOpprettelseController(private val oppgaverForOpprettelseService: OppgaverForOpprettelseService) {
-
     @GetMapping("/{behandlingid}")
-    fun hentOppgaverForOpprettelse(@PathVariable behandlingid: UUID): Ressurs<OppgaverForOpprettelseDto> {
+    fun hentOppgaverForOpprettelse(
+        @PathVariable behandlingid: UUID,
+    ): Ressurs<OppgaverForOpprettelseDto> {
         val lagretFremleggsoppgave = oppgaverForOpprettelseService.hentOppgaverForOpprettelseEllerNull(behandlingid)
         val oppgavetyperSomKanOpprettes = oppgaverForOpprettelseService.hentOppgavetyperSomKanOpprettes(behandlingid)
 
         return Ressurs.success(
             OppgaverForOpprettelseDto(
                 oppgavetyperSomKanOpprettes = oppgavetyperSomKanOpprettes,
-                oppgavetyperSomSkalOpprettes = lagretFremleggsoppgave?.oppgavetyper
-                    ?: oppgaverForOpprettelseService.initialVerdierForOppgaverSomSkalOpprettes(behandlingid),
+                oppgavetyperSomSkalOpprettes =
+                    lagretFremleggsoppgave?.oppgavetyper
+                        ?: oppgaverForOpprettelseService.initialVerdierForOppgaverSomSkalOpprettes(behandlingid),
             ),
         )
     }

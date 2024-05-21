@@ -21,6 +21,7 @@ enum class MottakerRolle {
 }
 
 data class BrevmottakerPerson(val personIdent: String, val navn: String, val mottakerRolle: MottakerRolle)
+
 data class BrevmottakerOrganisasjon(
     val organisasjonsnummer: String,
     val navnHosOrganisasjon: String,
@@ -28,6 +29,7 @@ data class BrevmottakerOrganisasjon(
 )
 
 data class PersonerWrapper(val personer: List<BrevmottakerPerson>)
+
 data class OrganisasjonerWrapper(val organisasjoner: List<BrevmottakerOrganisasjon>)
 
 @Table("brevmottakere_frittstaende_brev")

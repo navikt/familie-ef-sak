@@ -18,7 +18,6 @@ data class BehandlingHistorikkData(
 )
 
 object BehandlingHistorikkUtil {
-
     fun lagBehandlingHistorikkData(
         behandlinger: List<Behandling>,
         vedtaksliste: List<Vedtak>,
@@ -29,10 +28,12 @@ object BehandlingHistorikkUtil {
         val behandlingerPerBehandlingId = behandlinger.associateBy { it.id }
         return vedtaksliste.map {
             val behandlingId = it.behandlingId
-            val tilkjentYtelse = tilkjentYtelsePerBehandlingId[behandlingId]
-                ?: error("Mangler tilkjent ytelse for behandling=$behandlingId")
-            val vedtakstidspunkt = behandlingerPerBehandlingId.getValue(behandlingId).vedtakstidspunkt
-                ?: error("Mangler vedtakstidspunkt for behandling=$behandlingId")
+            val tilkjentYtelse =
+                tilkjentYtelsePerBehandlingId[behandlingId]
+                    ?: error("Mangler tilkjent ytelse for behandling=$behandlingId")
+            val vedtakstidspunkt =
+                behandlingerPerBehandlingId.getValue(behandlingId).vedtakstidspunkt
+                    ?: error("Mangler vedtakstidspunkt for behandling=$behandlingId")
             BehandlingHistorikkData(
                 behandlingId = behandlingId,
                 vedtakstidspunkt = vedtakstidspunkt,

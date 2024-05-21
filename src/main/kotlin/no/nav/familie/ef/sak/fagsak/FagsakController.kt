@@ -19,9 +19,10 @@ import java.util.UUID
 @ProtectedWithClaims(issuer = "azuread")
 @Validated
 class FagsakController(private val fagsakService: FagsakService, private val tilgangService: TilgangService) {
-
     @PostMapping
-    fun hentEllerOpprettFagsakForPerson(@RequestBody fagsakRequest: FagsakRequest): Ressurs<FagsakDto> {
+    fun hentEllerOpprettFagsakForPerson(
+        @RequestBody fagsakRequest: FagsakRequest,
+    ): Ressurs<FagsakDto> {
         tilgangService.validerTilgangTilPersonMedBarn(fagsakRequest.personIdent, AuditLoggerEvent.CREATE) // TODO dele opp denne?
         return Ressurs.success(
             fagsakService.hentEllerOpprettFagsakMedBehandlinger(
@@ -32,13 +33,17 @@ class FagsakController(private val fagsakService: FagsakService, private val til
     }
 
     @GetMapping("{fagsakId}")
-    fun hentFagsak(@PathVariable fagsakId: UUID): Ressurs<FagsakDto> {
+    fun hentFagsak(
+        @PathVariable fagsakId: UUID,
+    ): Ressurs<FagsakDto> {
         tilgangService.validerTilgangTilFagsak(fagsakId, AuditLoggerEvent.ACCESS)
         return Ressurs.success(fagsakService.hentFagsakMedBehandlinger(fagsakId))
     }
 
     @GetMapping("/ekstern/{eksternFagsakId}")
-    fun hentFagsak(@PathVariable eksternFagsakId: Long): Ressurs<FagsakDto> {
+    fun hentFagsak(
+        @PathVariable eksternFagsakId: Long,
+    ): Ressurs<FagsakDto> {
         val fagsakDto = fagsakService.hentFagsakDtoPåEksternId(eksternFagsakId)
         tilgangService.validerTilgangTilFagsak(fagsakDto.id, AuditLoggerEvent.ACCESS)
         return Ressurs.success(fagsakDto)

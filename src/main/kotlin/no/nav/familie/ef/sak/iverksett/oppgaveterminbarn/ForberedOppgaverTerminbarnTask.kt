@@ -20,7 +20,6 @@ class ForberedOppgaverTerminbarnTask(
     val forberedOppgaverTerminbarnService: ForberedOppgaverTerminbarnService,
     val featureToggleService: FeatureToggleService,
 ) : AsyncTaskStep {
-
     private val logger = LoggerFactory.getLogger(javaClass)
 
     override fun doTask(task: Task) {
@@ -39,7 +38,6 @@ class ForberedOppgaverTerminbarnTask(
     }
 
     companion object {
-
         const val TYPE = "forberedOppgaverForTerminbarnTask"
     }
 }

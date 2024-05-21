@@ -38,18 +38,22 @@ fun TilkjentYtelse.tilBeløpsperiode(startDato: LocalDate): List<Beløpsperiode>
         Beløpsperiode(
             beløp = andel.beløp.toBigDecimal(),
             periode = andel.periode,
-            beregningsgrunnlag = Beregningsgrunnlag(
-                inntekt = andel.inntekt.toBigDecimal(),
-                samordningsfradrag = andel.samordningsfradrag.toBigDecimal(),
-                samordningsfradragType = this.samordningsfradragType,
-                avkortningPerMåned = andel.inntektsreduksjon.toBigDecimal(),
-            ),
+            beregningsgrunnlag =
+                Beregningsgrunnlag(
+                    inntekt = andel.inntekt.toBigDecimal(),
+                    samordningsfradrag = andel.samordningsfradrag.toBigDecimal(),
+                    samordningsfradragType = this.samordningsfradragType,
+                    avkortningPerMåned = andel.inntektsreduksjon.toBigDecimal(),
+                ),
             beløpFørSamordning = andel.beløp.plus(andel.samordningsfradrag).toBigDecimal(),
         )
     }
 }
 
-fun TilkjentYtelse.tilBeløpsperiodeBarnetilsyn(vedtak: InnvilgelseBarnetilsyn, brukIkkeVedtatteSatser: Boolean): List<BeløpsperiodeBarnetilsynDto> {
+fun TilkjentYtelse.tilBeløpsperiodeBarnetilsyn(
+    vedtak: InnvilgelseBarnetilsyn,
+    brukIkkeVedtatteSatser: Boolean,
+): List<BeløpsperiodeBarnetilsynDto> {
     val startDato = vedtak.perioder.first().periode.fomDato
     val perioder = vedtak.tilBeløpsperioderPerUtgiftsmåned(brukIkkeVedtatteSatser)
 
@@ -58,12 +62,13 @@ fun TilkjentYtelse.tilBeløpsperiodeBarnetilsyn(vedtak: InnvilgelseBarnetilsyn, 
         BeløpsperiodeBarnetilsynDto(
             periode = it.periode,
             beløp = it.beløp,
-            beløpFørFratrekkOgSatsjustering = BeregningBarnetilsynUtil.kalkulerUtbetalingsbeløpFørFratrekkOgSatsjustering(
-                beløpsperiodeBarnetilsynDto.beregningsgrunnlag.utgifter,
-                beløpsperiodeBarnetilsynDto.beregningsgrunnlag.kontantstøttebeløp,
-            )
-                .roundUp()
-                .toInt(),
+            beløpFørFratrekkOgSatsjustering =
+                BeregningBarnetilsynUtil.kalkulerUtbetalingsbeløpFørFratrekkOgSatsjustering(
+                    beløpsperiodeBarnetilsynDto.beregningsgrunnlag.utgifter,
+                    beløpsperiodeBarnetilsynDto.beregningsgrunnlag.kontantstøttebeløp,
+                )
+                    .roundUp()
+                    .toInt(),
             sats = beløpsperiodeBarnetilsynDto.sats,
             beregningsgrunnlag = beløpsperiodeBarnetilsynDto.beregningsgrunnlag,
             aktivitetstype = beløpsperiodeBarnetilsynDto.aktivitetstype,

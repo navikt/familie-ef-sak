@@ -20,13 +20,11 @@ data class UttrekkArbeidssøkere(
     val årMåned: YearMonth,
     @Column("registert_arbeidssoker")
     val registrertArbeidssøker: Boolean? = null,
-
     val opprettetTid: LocalDateTime = SporbarUtils.now(),
     val kontrollert: Boolean = false,
     val kontrollertTid: LocalDateTime? = null,
     val kontrollertAv: String? = null,
 ) {
-
     fun medKontrollert(kontrollert: Boolean): UttrekkArbeidssøkere {
         return this.copy(
             kontrollert = kontrollert,

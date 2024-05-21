@@ -129,35 +129,35 @@ internal class VurderingServiceTest {
             barnId,
             søknadsgrunnlag = mockk(relaxed = true),
             registergrunnlag =
-            BarnMedSamværRegistergrunnlagDto(
-                UUID.randomUUID(),
-                "navn",
-                "fnr",
-                false,
-                emptyList(),
-                false,
-                AnnenForelderDto(
+                BarnMedSamværRegistergrunnlagDto(
+                    UUID.randomUUID(),
                     "navn",
-                    "fnr2",
-                    LocalDate.now().minusYears(23),
-                    true,
-                    "Norge",
-                    "Vei 1B",
+                    "fnr",
+                    false,
+                    emptyList(),
+                    false,
+                    AnnenForelderDto(
+                        "navn",
+                        "fnr2",
+                        LocalDate.now().minusYears(23),
+                        true,
+                        "Norge",
+                        "Vei 1B",
+                        null,
+                        null,
+                        AvstandTilSøkerDto(null, LangAvstandTilSøker.UKJENT),
+                    ),
                     null,
                     null,
-                    AvstandTilSøkerDto(null, LangAvstandTilSøker.UKJENT),
+                    null,
                 ),
-                null,
-                null,
-                null,
-            ),
             barnepass =
-            BarnepassDto(
-                barnId,
-                skalHaBarnepass = true,
-                barnepassordninger = listOf(),
-                årsakBarnepass = null,
-            ),
+                BarnepassDto(
+                    barnId,
+                    skalHaBarnepass = true,
+                    barnepassordninger = listOf(),
+                    årsakBarnepass = null,
+                ),
         )
 
     @Test
@@ -323,7 +323,7 @@ internal class VurderingServiceTest {
             (
                 vilkårsvurderinger.map { it.type }
                     .containsAll(VilkårType.hentVilkårForStønad(OVERGANGSSTØNAD))
-                ),
+            ),
         ).isTrue
         every { vilkårsvurderingRepository.findByBehandlingId(behandlingId) } returns vilkårsvurderinger
 

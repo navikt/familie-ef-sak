@@ -19,7 +19,6 @@ class TilordnetRessursService(
     private val oppgaveRepository: OppgaveRepository,
     private val featureToggleService: FeatureToggleService,
 ) {
-
     /**
      * [SaksbehandlerRolle.OPPGAVE_FINNES_IKKE]: I de tilfellene hvor man manuelt oppretter en revurdering
      * fra fagsakoversikten vil man øyeblikkelig bli redirectet inn i revurderingen. Da har ikke oppgavesystemet
@@ -43,10 +42,14 @@ class TilordnetRessursService(
     fun hentIkkeFerdigstiltOppgaveForBehandling(
         behandlingId: UUID,
         oppgavetyper: Set<Oppgavetype> = setOf(Oppgavetype.BehandleSak, Oppgavetype.BehandleUnderkjentVedtak),
-    ): Oppgave? = hentEFOppgaveSomIkkeErFerdigstilt(behandlingId, oppgavetyper)
-        ?.let { oppgaveClient.finnOppgaveMedId(it.gsakOppgaveId) }
+    ): Oppgave? =
+        hentEFOppgaveSomIkkeErFerdigstilt(behandlingId, oppgavetyper)
+            ?.let { oppgaveClient.finnOppgaveMedId(it.gsakOppgaveId) }
 
-    fun hentEFOppgaveSomIkkeErFerdigstilt(behandlingId: UUID, oppgavetyper: Set<Oppgavetype>): EFOppgave? =
+    fun hentEFOppgaveSomIkkeErFerdigstilt(
+        behandlingId: UUID,
+        oppgavetyper: Set<Oppgavetype>,
+    ): EFOppgave? =
         oppgaveRepository.findByBehandlingIdAndErFerdigstiltIsFalseAndTypeIn(
             behandlingId,
             oppgavetyper,

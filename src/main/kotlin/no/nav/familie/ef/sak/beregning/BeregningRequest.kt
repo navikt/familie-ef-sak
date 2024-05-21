@@ -30,7 +30,6 @@ data class Inntektsperiode(
     val inntekt: BigDecimal,
     val samordningsfradrag: BigDecimal,
 ) {
-
     fun totalinntekt(): BigDecimal {
         return this.inntekt +
             (this.dagsats ?: BigDecimal.ZERO).multiply(BeregningUtils.DAGSATS_ANTALL_DAGER) +
@@ -54,29 +53,33 @@ data class Inntektsperiode(
     }
 }
 
-fun List<Inntekt>.tilInntektsperioder() = this.mapIndexed { index, inntektsperiode ->
-    Inntektsperiode(
-        dagsats = inntektsperiode.dagsats ?: BigDecimal.ZERO,
-        månedsinntekt = inntektsperiode.månedsinntekt ?: BigDecimal.ZERO,
-        inntekt = inntektsperiode.forventetInntekt ?: BigDecimal.ZERO,
-        samordningsfradrag = inntektsperiode.samordningsfradrag ?: BigDecimal.ZERO,
-        periode = Månedsperiode(
-            fom = inntektsperiode.årMånedFra,
-            tom = if (index < this.lastIndex && this.size > 1) {
-                this[index + 1].årMånedFra.minusMonths(1)
-            } else {
-                YearMonth.from(LocalDate.MAX)
-            },
-        ),
-    )
-}
+fun List<Inntekt>.tilInntektsperioder() =
+    this.mapIndexed { index, inntektsperiode ->
+        Inntektsperiode(
+            dagsats = inntektsperiode.dagsats ?: BigDecimal.ZERO,
+            månedsinntekt = inntektsperiode.månedsinntekt ?: BigDecimal.ZERO,
+            inntekt = inntektsperiode.forventetInntekt ?: BigDecimal.ZERO,
+            samordningsfradrag = inntektsperiode.samordningsfradrag ?: BigDecimal.ZERO,
+            periode =
+                Månedsperiode(
+                    fom = inntektsperiode.årMånedFra,
+                    tom =
+                        if (index < this.lastIndex && this.size > 1) {
+                            this[index + 1].årMånedFra.minusMonths(1)
+                        } else {
+                            YearMonth.from(LocalDate.MAX)
+                        },
+                ),
+        )
+    }
 
-fun List<Inntektsperiode>.tilInntekt() = this.map { inntektsperiode ->
-    Inntekt(
-        dagsats = inntektsperiode.dagsats,
-        månedsinntekt = inntektsperiode.månedsinntekt,
-        forventetInntekt = inntektsperiode.inntekt,
-        samordningsfradrag = inntektsperiode.samordningsfradrag,
-        årMånedFra = inntektsperiode.periode.fom,
-    )
-}
+fun List<Inntektsperiode>.tilInntekt() =
+    this.map { inntektsperiode ->
+        Inntekt(
+            dagsats = inntektsperiode.dagsats,
+            månedsinntekt = inntektsperiode.månedsinntekt,
+            forventetInntekt = inntektsperiode.inntekt,
+            samordningsfradrag = inntektsperiode.samordningsfradrag,
+            årMånedFra = inntektsperiode.periode.fom,
+        )
+    }

@@ -19,7 +19,6 @@ class OpprettTasksForBarnFyltÅrTask(
     val taskService: TaskService,
     val barnFyllerÅrOppfølgingsoppgaveService: BarnFyllerÅrOppfølgingsoppgaveService,
 ) : AsyncTaskStep {
-
     override fun doTask(task: Task) {
         barnFyllerÅrOppfølgingsoppgaveService.opprettTasksForAlleBarnSomHarFyltÅr()
     }
@@ -29,7 +28,6 @@ class OpprettTasksForBarnFyltÅrTask(
     }
 
     companion object {
-
         const val TYPE = "opprettOppfølgingsoppgaverForBarnFyltÅrTask"
 
         fun opprettTask(dato: LocalDate): Task {

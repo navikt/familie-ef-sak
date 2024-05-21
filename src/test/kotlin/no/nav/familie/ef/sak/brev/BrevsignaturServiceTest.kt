@@ -11,7 +11,6 @@ import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
 
 internal class BrevsignaturServiceTest {
-
     val personopplysningerService = mockk<PersonopplysningerService>()
 
     val brevsignaturService = BrevsignaturService(personopplysningerService)

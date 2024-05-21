@@ -15,16 +15,21 @@ class MellomlagringBrevService(
     private val mellomlagerBrevRepository: MellomlagerBrevRepository,
     private val mellomlagerFrittståendeSanitybrevRepository: MellomlagerFrittståendeSanitybrevRepository,
 ) {
-
-    fun mellomLagreBrev(behandlingId: UUID, brevverdier: String, brevmal: String, sanityVersjon: String): UUID {
+    fun mellomLagreBrev(
+        behandlingId: UUID,
+        brevverdier: String,
+        brevmal: String,
+        sanityVersjon: String,
+    ): UUID {
         slettMellomlagringHvisFinnes(behandlingId)
-        val mellomlagretBrev = MellomlagretBrev(
-            behandlingId,
-            brevverdier,
-            brevmal,
-            sanityVersjon,
-            LocalDate.now(),
-        )
+        val mellomlagretBrev =
+            MellomlagretBrev(
+                behandlingId,
+                brevverdier,
+                brevmal,
+                sanityVersjon,
+                LocalDate.now(),
+            )
         return mellomlagerBrevRepository.insert(mellomlagretBrev).behandlingId
     }
 
@@ -34,11 +39,12 @@ class MellomlagringBrevService(
         brevmal: String,
     ): UUID {
         slettMellomlagretFrittståendeBrev(fagsakId, SikkerhetContext.hentSaksbehandler())
-        val mellomlagretBrev = MellomlagretFrittståendeSanitybrev(
-            fagsakId = fagsakId,
-            brevverdier = brevverdier,
-            brevmal = brevmal,
-        )
+        val mellomlagretBrev =
+            MellomlagretFrittståendeSanitybrev(
+                fagsakId = fagsakId,
+                brevverdier = brevverdier,
+                brevmal = brevmal,
+            )
         return mellomlagerFrittståendeSanitybrevRepository.insert(mellomlagretBrev).fagsakId
     }
 
@@ -48,21 +54,28 @@ class MellomlagringBrevService(
             SikkerhetContext.hentSaksbehandler(),
         )?.let { MellomlagretBrevSanity(brevverdier = it.brevverdier, brevmal = it.brevmal) }
 
-    fun hentOgValiderMellomlagretBrev(behhandlingId: UUID, sanityVersjon: String): MellomlagretBrevResponse? = mellomlagerBrevRepository.findByIdOrNull(behhandlingId)?.let {
-        if (sanityVersjon == it.sanityVersjon) {
-            return MellomlagretBrevSanity(
-                brevverdier = it.brevverdier,
-                brevmal = it.brevmal,
-            )
+    fun hentOgValiderMellomlagretBrev(
+        behhandlingId: UUID,
+        sanityVersjon: String,
+    ): MellomlagretBrevResponse? =
+        mellomlagerBrevRepository.findByIdOrNull(behhandlingId)?.let {
+            if (sanityVersjon == it.sanityVersjon) {
+                return MellomlagretBrevSanity(
+                    brevverdier = it.brevverdier,
+                    brevmal = it.brevmal,
+                )
+            }
+            return null
         }
-        return null
-    }
 
     fun slettMellomlagringHvisFinnes(behandlingId: UUID) {
         mellomlagerBrevRepository.deleteById(behandlingId)
     }
 
-    fun slettMellomlagretFrittståendeBrev(fagsakId: UUID, saksbehandlerIdent: String) {
+    fun slettMellomlagretFrittståendeBrev(
+        fagsakId: UUID,
+        saksbehandlerIdent: String,
+    ) {
         mellomlagerFrittståendeSanitybrevRepository.findByFagsakIdAndSaksbehandlerIdent(fagsakId, saksbehandlerIdent)
             ?.let { mellomlagerFrittståendeSanitybrevRepository.deleteById(it.id) }
     }

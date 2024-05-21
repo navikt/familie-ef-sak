@@ -16,7 +16,6 @@ import java.time.LocalDate
 import java.time.YearMonth
 
 internal class AMeldingInntektMapperTest {
-
     private val kodeverkService = mockk<CachedKodeverkService>()
     private val eregService = mockk<EregService>()
     private val inntektMapper = InntektMapper(kodeverkService, eregService)

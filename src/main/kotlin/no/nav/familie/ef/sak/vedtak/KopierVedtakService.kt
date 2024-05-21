@@ -28,7 +28,6 @@ class KopierVedtakService(
     val vedtakHistorikkService: VedtakHistorikkService,
     val behandlingService: BehandlingService,
 ) {
-
     fun lagVedtakDtoBasertPåTidligereVedtaksperioder(
         fagsakId: UUID,
         forrigeBehandlingId: UUID,
@@ -44,7 +43,11 @@ class KopierVedtakService(
         feilHvis(revurdering.årsak != BehandlingÅrsak.SATSENDRING) { "Kan bare kopiere vedtak hvis behandlingsÅrsak er satsendring" }
     }
 
-    fun mapTilBarnetilsynVedtak(fagsakId: UUID, behandlingBarn: List<BehandlingBarn>, forrigeBehandlingId: UUID): VedtakDto {
+    fun mapTilBarnetilsynVedtak(
+        fagsakId: UUID,
+        behandlingBarn: List<BehandlingBarn>,
+        forrigeBehandlingId: UUID,
+    ): VedtakDto {
         val fraDato = BeregningBarnetilsynUtil.satserForBarnetilsyn.maxOf { it.periode.fom }
         val historikk = vedtakHistorikkService.hentAktivHistorikk(fagsakId).fraDato(YearMonth.from(fraDato))
 
@@ -56,7 +59,11 @@ class KopierVedtakService(
             begrunnelse = "Satsendring barnetilsyn",
         )
     }
-    private fun mapTilleggsstønadDto(historikk: List<AndelHistorikkDto>, forrigeBehandlingId: UUID): TilleggsstønadDto {
+
+    private fun mapTilleggsstønadDto(
+        historikk: List<AndelHistorikkDto>,
+        forrigeBehandlingId: UUID,
+    ): TilleggsstønadDto {
         return TilleggsstønadDto(
             historikk.any { it.andel.tilleggsstønad > 0 },
             historikk.filter { it.andel.tilleggsstønad > 0 }.map {
@@ -76,26 +83,33 @@ class KopierVedtakService(
             }
     }
 
-    private fun mapUtgiftsperioder(historikk: List<AndelHistorikkDto>, behandlingBarn: List<BehandlingBarn>): List<UtgiftsperiodeDto> {
-        val map = historikk.map {
-            feilHvis(it.erSanksjon) {
-                "Støtter ikke sanksjon. Både erMidlertidigOpphør og sanksjonsårsak burde då settes"
+    private fun mapUtgiftsperioder(
+        historikk: List<AndelHistorikkDto>,
+        behandlingBarn: List<BehandlingBarn>,
+    ): List<UtgiftsperiodeDto> {
+        val map =
+            historikk.map {
+                feilHvis(it.erSanksjon) {
+                    "Støtter ikke sanksjon. Både erMidlertidigOpphør og sanksjonsårsak burde då settes"
+                }
+                UtgiftsperiodeDto(
+                    årMånedFra = it.andel.periode.fom,
+                    årMånedTil = it.andel.periode.tom,
+                    periode = it.andel.periode,
+                    barn = finnBehandlingBarnIdsGittTidligereAndelBarn(it.andel.barn, behandlingBarn),
+                    utgifter = it.andel.utgifter.toInt(),
+                    sanksjonsårsak = null,
+                    periodetype = it.periodetypeBarnetilsyn ?: error("Mangler periodetype $it"),
+                    aktivitetstype = it.aktivitetBarnetilsyn,
+                )
             }
-            UtgiftsperiodeDto(
-                årMånedFra = it.andel.periode.fom,
-                årMånedTil = it.andel.periode.tom,
-                periode = it.andel.periode,
-                barn = finnBehandlingBarnIdsGittTidligereAndelBarn(it.andel.barn, behandlingBarn),
-                utgifter = it.andel.utgifter.toInt(),
-                sanksjonsårsak = null,
-                periodetype = it.periodetypeBarnetilsyn ?: error("Mangler periodetype $it"),
-                aktivitetstype = it.aktivitetBarnetilsyn,
-            )
-        }
         return map.fyllUtPerioderUtenStønad()
     }
 
-    private fun finnBehandlingBarnIdsGittTidligereAndelBarn(andelBarn: List<UUID>, behandlingBarn: List<BehandlingBarn>): List<UUID> {
+    private fun finnBehandlingBarnIdsGittTidligereAndelBarn(
+        andelBarn: List<UUID>,
+        behandlingBarn: List<BehandlingBarn>,
+    ): List<UUID> {
         val tidligereValgteAndelBarn = barnRepository.findAllById(andelBarn).map { it.personIdent }
         return behandlingBarn.filter { it.personIdent in tidligereValgteAndelBarn }.map { it.id }
     }

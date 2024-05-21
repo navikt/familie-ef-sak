@@ -29,10 +29,10 @@ data class Vedtaksdata(
 )
 
 sealed class Vedtakshistorikkperiode {
-
     abstract val periode: Månedsperiode
 
     abstract fun medFra(fra: YearMonth): Vedtakshistorikkperiode
+
     abstract fun medTil(til: YearMonth): Vedtakshistorikkperiode
 }
 
@@ -40,7 +40,6 @@ data class Sanksjonsperiode(
     override val periode: Månedsperiode,
     val sanksjonsårsak: Sanksjonsårsak,
 ) : Vedtakshistorikkperiode() {
-
     override fun medFra(fra: YearMonth): Vedtakshistorikkperiode {
         error("Kan ikke endre fra-dato på opphør")
     }
@@ -68,7 +67,6 @@ data class VedtakshistorikkperiodeOvergangsstønad(
     val periodeType: VedtaksperiodeType,
     val inntekt: Inntekt,
 ) : Vedtakshistorikkperiode() {
-
     constructor(periode: Månedsperiode, vedtaksperiode: VedtaksperiodeDto, inntekt: Inntekt) :
         this(
             periode = periode,
@@ -102,7 +100,6 @@ data class VedtakshistorikkperiodeBarnetilsyn(
     val aktivitetstype: AktivitetstypeBarnetilsyn? = null,
     val periodetype: PeriodetypeBarnetilsyn,
 ) : Vedtakshistorikkperiode() {
-
     constructor(periode: BeløpsperiodeBarnetilsynDto, aktivitetArbeid: SvarId?) :
         this(
             periode = periode.periode,
@@ -128,7 +125,6 @@ data class VedtakshistorikkperiodeBarnetilsyn(
 }
 
 object VedtakHistorikkBeregner {
-
     private val logger = LoggerFactory.getLogger(javaClass)
 
     /**
@@ -141,10 +137,11 @@ object VedtakHistorikkBeregner {
         return vedtaksliste
             .sortedBy { it.tilkjentYtelse.sporbar.opprettetTid }
             .fold(listOf<Pair<UUID, Vedtaksdata>>()) { acc, vedtak ->
-                acc + Pair(
-                    vedtak.behandlingId,
-                    Vedtaksdata(vedtak.vedtakstidspunkt, lagTotalbildeForNyttVedtak(vedtak, acc, konfigurasjon)),
-                )
+                acc +
+                    Pair(
+                        vedtak.behandlingId,
+                        Vedtaksdata(vedtak.vedtakstidspunkt, lagTotalbildeForNyttVedtak(vedtak, acc, konfigurasjon)),
+                    )
             }
             .toMap()
     }
@@ -162,8 +159,9 @@ object VedtakHistorikkBeregner {
                 avkortTidligerePerioder(acc.lastOrNull(), førsteFomDato) + nyePerioder
             }
             is InnvilgelseBarnetilsyn -> {
-                val perioder = (perioderFraBeløp(vedtak, data, konfigurasjon) + sanksjonsperioder(vedtak))
-                    .sortedBy { it.periode }
+                val perioder =
+                    (perioderFraBeløp(vedtak, data, konfigurasjon) + sanksjonsperioder(vedtak))
+                        .sortedBy { it.periode }
                 val førsteFomDato = perioder.first().periode.fom
                 avkortTidligerePerioder(acc.lastOrNull(), førsteFomDato) + perioder
             }
@@ -207,10 +205,11 @@ object VedtakHistorikkBeregner {
         }
         return overlappendeInntekter.map { inntekt ->
             val inntektsperiode = inntekt.first
-            val periode = Månedsperiode(
-                maxOf(inntektsperiode.fom, vedtaksperiode.periode.fom),
-                minOf(inntektsperiode.tom, vedtaksperiode.periode.tom),
-            )
+            val periode =
+                Månedsperiode(
+                    maxOf(inntektsperiode.fom, vedtaksperiode.periode.fom),
+                    minOf(inntektsperiode.tom, vedtaksperiode.periode.tom),
+                )
             VedtakshistorikkperiodeOvergangsstønad(periode, vedtaksperiode, inntekt.second)
         }
     }

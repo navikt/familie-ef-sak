@@ -15,7 +15,6 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 internal class OppgaveRepositoryTest : OppslagSpringRunnerTest() {
-
     @Autowired
     private lateinit var oppgaveRepository: OppgaveRepository
 

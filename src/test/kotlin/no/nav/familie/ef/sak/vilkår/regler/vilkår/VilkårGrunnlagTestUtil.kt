@@ -35,16 +35,16 @@ fun medlemskapDto(
 ) = MedlemskapDto(
     søknadsgrunnlag = søknadsgrunnlag,
     registergrunnlag =
-    MedlemskapRegistergrunnlagDto(
-        nåværendeStatsborgerskap = listOf(),
-        statsborgerskap = listOf(StatsborgerskapDto(land = land, null, null)),
-        oppholdstatus = emptyList(),
-        bostedsadresse = emptyList(),
-        innflytting = innflytting,
-        utflytting = utflytting,
-        folkeregisterpersonstatus = folkeregisterpersonstatus,
-        medlUnntak = MedlUnntakDto(emptyList()),
-    ),
+        MedlemskapRegistergrunnlagDto(
+            nåværendeStatsborgerskap = listOf(),
+            statsborgerskap = listOf(StatsborgerskapDto(land = land, null, null)),
+            oppholdstatus = emptyList(),
+            bostedsadresse = emptyList(),
+            innflytting = innflytting,
+            utflytting = utflytting,
+            folkeregisterpersonstatus = folkeregisterpersonstatus,
+            medlUnntak = MedlUnntakDto(emptyList()),
+        ),
 )
 
 fun personaliaDto(fødeland: String = "NOR") =
@@ -69,54 +69,56 @@ fun barnMedSamværDto(
     barnId,
     søknadsgrunnlag = tomtSøknadsgrunnlag(),
     registergrunnlag =
-    BarnMedSamværRegistergrunnlagDto(
-        UUID.randomUUID(),
-        "navn",
-        "fnr",
-        harSammeAdresse = harSammeAdresse,
-        emptyList(),
-        false,
-        AnnenForelderDto(
+        BarnMedSamværRegistergrunnlagDto(
+            UUID.randomUUID(),
             "navn",
-            "fnr2",
-            LocalDate.now().minusYears(23),
-            true,
-            "Norge",
-            "Vei 1B",
+            "fnr",
+            harSammeAdresse = harSammeAdresse,
+            emptyList(),
+            false,
+            AnnenForelderDto(
+                "navn",
+                "fnr2",
+                LocalDate.now().minusYears(23),
+                true,
+                "Norge",
+                "Vei 1B",
+                null,
+                null,
+                AvstandTilSøkerDto(null, LangAvstandTilSøker.UKJENT),
+            ),
             null,
             null,
-            AvstandTilSøkerDto(null, LangAvstandTilSøker.UKJENT),
+            Folkeregisterpersonstatus.BOSATT,
         ),
-        null,
-        null,
-        Folkeregisterpersonstatus.BOSATT,
-    ),
     barnepass =
-    BarnepassDto(
-        barnId,
-        skalHaBarnepass = true,
-        barnepassordninger = listOf(),
-        årsakBarnepass = null,
-    ),
+        BarnepassDto(
+            barnId,
+            skalHaBarnepass = true,
+            barnepassordninger = listOf(),
+            årsakBarnepass = null,
+        ),
 )
 
 fun terminbarnSøknadsgrunnlag() = tomtSøknadsgrunnlag().copy(fødselTermindato = LocalDate.now().plusMonths(2))
-fun tomtSøknadsgrunnlag() = BarnMedSamværSøknadsgrunnlagDto(
-    UUID.randomUUID(),
-    fødselTermindato = null,
-    navn = null,
-    harSammeAdresse = null,
-    skalBoBorHosSøker = null,
-    forelder = null,
-    ikkeOppgittAnnenForelderBegrunnelse = null,
-    spørsmålAvtaleOmDeltBosted = null,
-    skalAnnenForelderHaSamvær = null,
-    harDereSkriftligAvtaleOmSamvær = null,
-    hvordanPraktiseresSamværet = null,
-    borAnnenForelderISammeHus = null,
-    borAnnenForelderISammeHusBeskrivelse = null,
-    harDereTidligereBoddSammen = null,
-    nårFlyttetDereFraHverandre = null,
-    hvorMyeErDuSammenMedAnnenForelder = null,
-    beskrivSamværUtenBarn = null,
-)
+
+fun tomtSøknadsgrunnlag() =
+    BarnMedSamværSøknadsgrunnlagDto(
+        UUID.randomUUID(),
+        fødselTermindato = null,
+        navn = null,
+        harSammeAdresse = null,
+        skalBoBorHosSøker = null,
+        forelder = null,
+        ikkeOppgittAnnenForelderBegrunnelse = null,
+        spørsmålAvtaleOmDeltBosted = null,
+        skalAnnenForelderHaSamvær = null,
+        harDereSkriftligAvtaleOmSamvær = null,
+        hvordanPraktiseresSamværet = null,
+        borAnnenForelderISammeHus = null,
+        borAnnenForelderISammeHusBeskrivelse = null,
+        harDereTidligereBoddSammen = null,
+        nårFlyttetDereFraHverandre = null,
+        hvorMyeErDuSammenMedAnnenForelder = null,
+        beskrivSamværUtenBarn = null,
+    )

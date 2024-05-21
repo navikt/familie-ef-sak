@@ -26,7 +26,6 @@ import java.util.UUID
 
 @Configuration
 class OppgaveClientMock {
-
     @Bean
     @Primary
     fun oppgaveClient(): OppgaveClient {
@@ -64,54 +63,56 @@ class OppgaveClientMock {
             if (enhetsnr == "4489") {
                 FinnMappeResponseDto(
                     antallTreffTotalt = 2,
-                    mapper = listOf(
-                        MappeDto(
-                            id = 101,
-                            navn = "EF Sak - 01 Uplassert lokal",
-                            enhetsnr = "4489",
+                    mapper =
+                        listOf(
+                            MappeDto(
+                                id = 101,
+                                navn = "EF Sak - 01 Uplassert lokal",
+                                enhetsnr = "4489",
+                            ),
+                            MappeDto(
+                                id = 104,
+                                navn = "EF Sak - 62 Hendelser",
+                                enhetsnr = "4489",
+                            ),
+                            MappeDto(
+                                id = 105,
+                                navn = "62 Hendelser",
+                                enhetsnr = "4489",
+                            ),
+                            MappeDto(
+                                id = 106,
+                                navn = "64 Utdanning",
+                                enhetsnr = "4489",
+                            ),
+                            MappeDto(
+                                id = 102,
+                                navn = "70 Godkjennevedtak",
+                                enhetsnr = "4489",
+                            ),
+                            MappeDto(
+                                id = 103,
+                                navn = "EF Sak - 99 testmappe lokal 99",
+                                enhetsnr = "4489",
+                            ),
                         ),
-                        MappeDto(
-                            id = 104,
-                            navn = "EF Sak - 62 Hendelser",
-                            enhetsnr = "4489",
-                        ),
-                        MappeDto(
-                            id = 105,
-                            navn = "62 Hendelser",
-                            enhetsnr = "4489",
-                        ),
-                        MappeDto(
-                            id = 106,
-                            navn = "64 Utdanning",
-                            enhetsnr = "4489",
-                        ),
-                        MappeDto(
-                            id = 102,
-                            navn = "70 Godkjennevedtak",
-                            enhetsnr = "4489",
-                        ),
-                        MappeDto(
-                            id = 103,
-                            navn = "EF Sak - 99 testmappe lokal 99",
-                            enhetsnr = "4489",
-                        ),
-                    ),
                 )
             } else if (enhetsnr == "4483") {
                 FinnMappeResponseDto(
                     antallTreffTotalt = 2,
-                    mapper = listOf(
-                        MappeDto(
-                            id = 202,
-                            navn = "70 Godkjennevedtak",
-                            enhetsnr = "4483",
+                    mapper =
+                        listOf(
+                            MappeDto(
+                                id = 202,
+                                navn = "70 Godkjennevedtak",
+                                enhetsnr = "4483",
+                            ),
+                            MappeDto(
+                                id = 203,
+                                navn = "EF Sak - 99 testmappe lokal 99",
+                                enhetsnr = "4483",
+                            ),
                         ),
-                        MappeDto(
-                            id = 203,
-                            navn = "EF Sak - 99 testmappe lokal 99",
-                            enhetsnr = "4483",
-                        ),
-                    ),
                 )
             } else {
                 FinnMappeResponseDto(0, emptyList())
@@ -121,22 +122,23 @@ class OppgaveClientMock {
         every { oppgaveClient.opprettOppgave(any()) } answers {
             val arg = firstArg<OpprettOppgaveRequest>()
             val nyOppgaveId = ++maxId
-            val oppgave = Oppgave(
-                id = nyOppgaveId,
-                identer = arg.ident?.let { listOf(it) },
-                saksreferanse = arg.saksId,
-                tema = arg.tema,
-                oppgavetype = arg.oppgavetype.value,
-                fristFerdigstillelse = arg.fristFerdigstillelse.format(DateTimeFormatter.ISO_DATE),
-                beskrivelse = arg.beskrivelse,
-                tildeltEnhetsnr = arg.enhetsnummer,
-                behandlingstema = arg.behandlingstema,
-                journalpostId = arg.journalpostId,
-                tilordnetRessurs = arg.tilordnetRessurs,
-                status = StatusEnum.OPPRETTET,
-                opprettetTidspunkt = LocalDate.now().toString(),
-                prioritet = OppgavePrioritet.NORM,
-            )
+            val oppgave =
+                Oppgave(
+                    id = nyOppgaveId,
+                    identer = arg.ident?.let { listOf(it) },
+                    saksreferanse = arg.saksId,
+                    tema = arg.tema,
+                    oppgavetype = arg.oppgavetype.value,
+                    fristFerdigstillelse = arg.fristFerdigstillelse.format(DateTimeFormatter.ISO_DATE),
+                    beskrivelse = arg.beskrivelse,
+                    tildeltEnhetsnr = arg.enhetsnummer,
+                    behandlingstema = arg.behandlingstema,
+                    journalpostId = arg.journalpostId,
+                    tilordnetRessurs = arg.tilordnetRessurs,
+                    status = StatusEnum.OPPRETTET,
+                    opprettetTidspunkt = LocalDate.now().toString(),
+                    prioritet = OppgavePrioritet.NORM,
+                )
             oppgaver[nyOppgaveId] = oppgave
             nyOppgaveId
         }
@@ -145,11 +147,13 @@ class OppgaveClientMock {
             val oppgaveId = firstArg<Long>()
             val saksbehandler = secondArg<String?>()
             val oppgave = oppgaver[oppgaveId] ?: error("Finner ikke oppgave med $oppgaveId")
-            oppgaver[oppgaveId] = oppgave.copy(
-                tilordnetRessurs = saksbehandler,
-                status = saksbehandler?.let { StatusEnum.UNDER_BEHANDLING }
-                    ?: StatusEnum.OPPRETTET,
-            )
+            oppgaver[oppgaveId] =
+                oppgave.copy(
+                    tilordnetRessurs = saksbehandler,
+                    status =
+                        saksbehandler?.let { StatusEnum.UNDER_BEHANDLING }
+                            ?: StatusEnum.OPPRETTET,
+                )
             oppgaveId
         }
 
@@ -218,20 +222,22 @@ class OppgaveClientMock {
             behandlesAvApplikasjon = "",
             journalpostId = "23458",
         )
-    private val tilbakekreving1 = lagOppgave(
-        4L,
-        Oppgavetype.BehandleSak,
-        beskivelse = "",
-        behandlingstype = "ae0161",
-        behandlesAvApplikasjon = "familie-tilbake",
-    )
+    private val tilbakekreving1 =
+        lagOppgave(
+            4L,
+            Oppgavetype.BehandleSak,
+            beskivelse = "",
+            behandlingstype = "ae0161",
+            behandlesAvApplikasjon = "familie-tilbake",
+        )
 
     private fun lagOppgave(
         oppgaveId: Long,
         oppgavetype: Oppgavetype,
         tilordnetRessurs: String? = null,
-        beskivelse: String? = "Beskrivelse av oppgaven. \n\n\n" +
-            "Denne teksten kan jo være lang, kort eller ikke inneholde noenting. ",
+        beskivelse: String? =
+            "Beskrivelse av oppgaven. \n\n\n" +
+                "Denne teksten kan jo være lang, kort eller ikke inneholde noenting. ",
         journalpostId: String? = "1234",
         behandlingstype: String? = null,
         behandlesAvApplikasjon: String,
@@ -259,9 +265,10 @@ class OppgaveClientMock {
         )
     }
 
-    private fun utledNavIdent(navIdent: String) = when (navIdent) {
-        "BESLUTTER" -> "ANNEN_SAKSBEHANDLER"
-        "julenissen" -> "julenissen"
-        else -> SikkerhetContext.hentSaksbehandler()
-    }
+    private fun utledNavIdent(navIdent: String) =
+        when (navIdent) {
+            "BESLUTTER" -> "ANNEN_SAKSBEHANDLER"
+            "julenissen" -> "julenissen"
+            else -> SikkerhetContext.hentSaksbehandler()
+        }
 }

@@ -13,9 +13,7 @@ class AktivitetArbeidRegel : Vilkårsregel(
     regler = setOf(ER_I_ARBEID_ELLER_SYK),
     hovedregler = regelIder(ER_I_ARBEID_ELLER_SYK),
 ) {
-
     companion object {
-
         private val arbeidEllerSykMapping =
             setOf(
                 SvarId.ER_I_ARBEID,

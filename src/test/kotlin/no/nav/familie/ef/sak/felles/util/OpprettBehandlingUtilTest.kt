@@ -14,7 +14,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 internal class OpprettBehandlingUtilTest {
-
     private val fagsak = fagsak()
 
     @Nested
@@ -26,22 +25,24 @@ internal class OpprettBehandlingUtilTest {
 
         @Test
         fun `det skal være mulig å opprette hvis eksisterende behandling er henlagt førstegangsbehandling`() {
-            val behandling = behandling(
-                fagsak = fagsak,
-                resultat = BehandlingResultat.HENLAGT,
-                status = BehandlingStatus.FERDIGSTILT,
-            )
+            val behandling =
+                behandling(
+                    fagsak = fagsak,
+                    resultat = BehandlingResultat.HENLAGT,
+                    status = BehandlingStatus.FERDIGSTILT,
+                )
             validerKanOppretteNyBehandling(BehandlingType.FØRSTEGANGSBEHANDLING, listOf(behandling))
         }
 
         @Test
         fun `det skal ikke være mulig å opprette hvis eksisterende behandling er en revurdering`() {
-            val behandling = behandling(
-                fagsak = fagsak,
-                resultat = BehandlingResultat.INNVILGET,
-                status = BehandlingStatus.FERDIGSTILT,
-                type = BehandlingType.REVURDERING,
-            )
+            val behandling =
+                behandling(
+                    fagsak = fagsak,
+                    resultat = BehandlingResultat.INNVILGET,
+                    status = BehandlingStatus.FERDIGSTILT,
+                    type = BehandlingType.REVURDERING,
+                )
             assertThatThrownBy {
                 validerKanOppretteNyBehandling(BehandlingType.FØRSTEGANGSBEHANDLING, listOf(behandling))
             }.hasMessage("Kan ikke opprette en førstegangsbehandling når forrige behandling ikke er en førstegangsbehandling")
@@ -49,11 +50,12 @@ internal class OpprettBehandlingUtilTest {
 
         @Test
         fun `det skal ikke være mulig å opprette hvis eksisterende behandling er avslått førstegangsbehandling`() {
-            val behandling = behandling(
-                fagsak = fagsak,
-                resultat = BehandlingResultat.AVSLÅTT,
-                status = BehandlingStatus.FERDIGSTILT,
-            )
+            val behandling =
+                behandling(
+                    fagsak = fagsak,
+                    resultat = BehandlingResultat.AVSLÅTT,
+                    status = BehandlingStatus.FERDIGSTILT,
+                )
             assertThatThrownBy {
                 validerKanOppretteNyBehandling(BehandlingType.FØRSTEGANGSBEHANDLING, listOf(behandling))
             }.hasMessage("Kan ikke opprette en førstegangsbehandling når siste behandling ikke er henlagt")
@@ -61,11 +63,12 @@ internal class OpprettBehandlingUtilTest {
 
         @Test
         fun `det skal ikke være mulig å opprette en førstegangsbehandling når det finnes en behandling på vent`() {
-            val behandling = behandling(
-                fagsak = fagsak,
-                resultat = BehandlingResultat.IKKE_SATT,
-                status = BehandlingStatus.SATT_PÅ_VENT,
-            )
+            val behandling =
+                behandling(
+                    fagsak = fagsak,
+                    resultat = BehandlingResultat.IKKE_SATT,
+                    status = BehandlingStatus.SATT_PÅ_VENT,
+                )
 
             assertThatThrownBy {
                 validerKanOppretteNyBehandling(BehandlingType.FØRSTEGANGSBEHANDLING, listOf(behandling))
@@ -74,11 +77,12 @@ internal class OpprettBehandlingUtilTest {
 
         @Test
         fun `det skal ikke være mulig å opprette en revurdering når det finnes en førstegangsbehandling på vent`() {
-            val behandling = behandling(
-                fagsak = fagsak,
-                resultat = BehandlingResultat.IKKE_SATT,
-                status = BehandlingStatus.SATT_PÅ_VENT,
-            )
+            val behandling =
+                behandling(
+                    fagsak = fagsak,
+                    resultat = BehandlingResultat.IKKE_SATT,
+                    status = BehandlingStatus.SATT_PÅ_VENT,
+                )
 
             assertThatThrownBy {
                 validerKanOppretteNyBehandling(BehandlingType.FØRSTEGANGSBEHANDLING, listOf(behandling))
@@ -90,59 +94,63 @@ internal class OpprettBehandlingUtilTest {
     inner class Revurdering {
         @Test
         fun `det skal ikke være mulig å opprette en revurdering hvis forrige behandling ikke er ferdigstilt`() {
-            val behandlinger = listOf(
-                behandling(
-                    fagsak = fagsak,
-                    status = BehandlingStatus.FERDIGSTILT,
-                    resultat = BehandlingResultat.INNVILGET,
-                ),
-                behandling(
-                    fagsak = fagsak,
-                    status = BehandlingStatus.UTREDES,
-                ),
-                behandling(
-                    fagsak = fagsak,
-                    status = BehandlingStatus.FERDIGSTILT,
-                    resultat = BehandlingResultat.INNVILGET,
-                ),
-            )
+            val behandlinger =
+                listOf(
+                    behandling(
+                        fagsak = fagsak,
+                        status = BehandlingStatus.FERDIGSTILT,
+                        resultat = BehandlingResultat.INNVILGET,
+                    ),
+                    behandling(
+                        fagsak = fagsak,
+                        status = BehandlingStatus.UTREDES,
+                    ),
+                    behandling(
+                        fagsak = fagsak,
+                        status = BehandlingStatus.FERDIGSTILT,
+                        resultat = BehandlingResultat.INNVILGET,
+                    ),
+                )
             assertThatThrownBy { validerKanOppretteNyBehandling(BehandlingType.REVURDERING, behandlinger) }
                 .hasMessage("Det finnes en behandling på fagsaken som ikke er ferdigstilt")
         }
 
         @Test
         internal fun `skal kunne opprette en ny behandling hvis en tidligere behandling er satt på vent`() {
-            val behandlinger = listOf(
-                behandling(
-                    fagsak = fagsak,
-                    status = BehandlingStatus.FERDIGSTILT,
-                ),
-                behandling(
-                    fagsak = fagsak,
-                    status = BehandlingStatus.SATT_PÅ_VENT,
-                    type = BehandlingType.REVURDERING,
-                ),
-            )
+            val behandlinger =
+                listOf(
+                    behandling(
+                        fagsak = fagsak,
+                        status = BehandlingStatus.FERDIGSTILT,
+                    ),
+                    behandling(
+                        fagsak = fagsak,
+                        status = BehandlingStatus.SATT_PÅ_VENT,
+                        type = BehandlingType.REVURDERING,
+                    ),
+                )
             validerKanOppretteNyBehandling(BehandlingType.REVURDERING, behandlinger)
         }
 
         @Test
         fun `det skal være mulig å opprette en revurdering hvis eksisterende behandling er avslått førstegangsbehandling`() {
-            val behandling = behandling(
-                fagsak = fagsak,
-                resultat = BehandlingResultat.AVSLÅTT,
-                status = BehandlingStatus.FERDIGSTILT,
-            )
+            val behandling =
+                behandling(
+                    fagsak = fagsak,
+                    resultat = BehandlingResultat.AVSLÅTT,
+                    status = BehandlingStatus.FERDIGSTILT,
+                )
             validerKanOppretteNyBehandling(BehandlingType.REVURDERING, listOf(behandling))
         }
 
         @Test
         fun `det skal ikke være mulig å opprette en revurdering om eksisterende behandling er henlagt`() {
-            val behandling = behandling(
-                fagsak = fagsak,
-                resultat = BehandlingResultat.HENLAGT,
-                status = BehandlingStatus.FERDIGSTILT,
-            )
+            val behandling =
+                behandling(
+                    fagsak = fagsak,
+                    resultat = BehandlingResultat.HENLAGT,
+                    status = BehandlingStatus.FERDIGSTILT,
+                )
             assertThatThrownBy {
                 validerKanOppretteNyBehandling(BehandlingType.REVURDERING, listOf(behandling))
             }.hasMessage("Det finnes ikke en tidligere behandling på fagsaken")
@@ -158,7 +166,6 @@ internal class OpprettBehandlingUtilTest {
 
     @Nested
     inner class Migrering {
-
         @Test
         internal fun `skal kunne opprette en migrering uten tidligere behandlinger`() {
             validerKanOppretteNyBehandling(BehandlingType.REVURDERING, listOf(), erMigrering = true)

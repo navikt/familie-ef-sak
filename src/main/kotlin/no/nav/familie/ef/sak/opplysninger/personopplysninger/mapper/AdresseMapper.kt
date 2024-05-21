@@ -19,7 +19,6 @@ import java.time.LocalDate
 
 @Component
 class AdresseMapper(private val kodeverkService: KodeverkService) {
-
     fun tilAdresse(adresse: Oppholdsadresse): AdresseDto {
         val visningsadresse = tilFormatertAdresse(adresse, datoEllerIdag(adresse.gyldigFraOgMed))
         return AdresseDto(
@@ -31,10 +30,11 @@ class AdresseMapper(private val kodeverkService: KodeverkService) {
     }
 
     fun tilAdresse(adresse: Kontaktadresse): AdresseDto {
-        val type = when (adresse.type) {
-            KontaktadresseType.INNLAND -> AdresseType.KONTAKTADRESSE
-            KontaktadresseType.UTLAND -> AdresseType.KONTAKTADRESSE_UTLAND
-        }
+        val type =
+            when (adresse.type) {
+                KontaktadresseType.INNLAND -> AdresseType.KONTAKTADRESSE
+                KontaktadresseType.UTLAND -> AdresseType.KONTAKTADRESSE_UTLAND
+            }
         return AdresseDto(
             visningsadresse = tilFormatertAdresse(adresse, datoEllerIdag(adresse.gyldigFraOgMed)),
             type = type,
@@ -63,38 +63,52 @@ class AdresseMapper(private val kodeverkService: KodeverkService) {
         }
     }
 
-    private fun tilFormatertAdresse(bostedsadresse: Bostedsadresse, gjeldendeDato: LocalDate): String? {
+    private fun tilFormatertAdresse(
+        bostedsadresse: Bostedsadresse,
+        gjeldendeDato: LocalDate,
+    ): String? {
         val (_, _, _, coAdressenavn, utenlandskAdresse, vegadresse, ukjentBosted, matrikkeladresse, _) = bostedsadresse
         val coAdresse = coAdresse(coAdressenavn)
-        val formattertAdresse: String? = when {
-            vegadresse != null -> tilFormatertAdresse(vegadresse, gjeldendeDato)
-            matrikkeladresse != null -> tilFormatertAdresse(matrikkeladresse, gjeldendeDato)
-            utenlandskAdresse != null -> tilFormatertAdresse(utenlandskAdresse, gjeldendeDato)
-            ukjentBosted != null -> "Ukjent bosted - ${ukjentBosted.bostedskommune}"
-            coAdresse != null -> ""
-            else -> "Ingen opplysninger tilgjenglig"
-        }
+        val formattertAdresse: String? =
+            when {
+                vegadresse != null -> tilFormatertAdresse(vegadresse, gjeldendeDato)
+                matrikkeladresse != null -> tilFormatertAdresse(matrikkeladresse, gjeldendeDato)
+                utenlandskAdresse != null -> tilFormatertAdresse(utenlandskAdresse, gjeldendeDato)
+                ukjentBosted != null -> "Ukjent bosted - ${ukjentBosted.bostedskommune}"
+                coAdresse != null -> ""
+                else -> "Ingen opplysninger tilgjenglig"
+            }
         return join(coAdresse, formattertAdresse)
     }
 
-    private fun tilFormatertAdresse(oppholdsadresse: Oppholdsadresse, gjeldendeDato: LocalDate): String? {
-        val adresse = oppholdsadresse.vegadresse?.let { tilFormatertAdresse(it, gjeldendeDato) }
-            ?: oppholdsadresse.utenlandskAdresse?.let { tilFormatertAdresse(it, gjeldendeDato) }
+    private fun tilFormatertAdresse(
+        oppholdsadresse: Oppholdsadresse,
+        gjeldendeDato: LocalDate,
+    ): String? {
+        val adresse =
+            oppholdsadresse.vegadresse?.let { tilFormatertAdresse(it, gjeldendeDato) }
+                ?: oppholdsadresse.utenlandskAdresse?.let { tilFormatertAdresse(it, gjeldendeDato) }
         return join(coAdresse(oppholdsadresse.coAdressenavn), adresse)
     }
 
-    private fun tilFormatertAdresse(kontaktadresse: Kontaktadresse, gjeldendeDato: LocalDate): String? {
-        val adresse = when (kontaktadresse.type) {
-            KontaktadresseType.INNLAND -> when {
-                kontaktadresse.vegadresse != null -> tilFormatertAdresse(kontaktadresse.vegadresse, gjeldendeDato)
-                kontaktadresse.postboksadresse != null -> tilFormatertAdresse(kontaktadresse.postboksadresse, gjeldendeDato)
-                else -> kontaktadresse.postadresseIFrittFormat?.let { tilFormatertAdresse(it, gjeldendeDato) }
+    private fun tilFormatertAdresse(
+        kontaktadresse: Kontaktadresse,
+        gjeldendeDato: LocalDate,
+    ): String? {
+        val adresse =
+            when (kontaktadresse.type) {
+                KontaktadresseType.INNLAND ->
+                    when {
+                        kontaktadresse.vegadresse != null -> tilFormatertAdresse(kontaktadresse.vegadresse, gjeldendeDato)
+                        kontaktadresse.postboksadresse != null -> tilFormatertAdresse(kontaktadresse.postboksadresse, gjeldendeDato)
+                        else -> kontaktadresse.postadresseIFrittFormat?.let { tilFormatertAdresse(it, gjeldendeDato) }
+                    }
+                KontaktadresseType.UTLAND ->
+                    when {
+                        kontaktadresse.utenlandskAdresse != null -> tilFormatertAdresse(kontaktadresse.utenlandskAdresse, gjeldendeDato)
+                        else -> kontaktadresse.utenlandskAdresseIFrittFormat?.let { tilFormatertAdresse(it, gjeldendeDato) }
+                    }
             }
-            KontaktadresseType.UTLAND -> when {
-                kontaktadresse.utenlandskAdresse != null -> tilFormatertAdresse(kontaktadresse.utenlandskAdresse, gjeldendeDato)
-                else -> kontaktadresse.utenlandskAdresseIFrittFormat?.let { tilFormatertAdresse(it, gjeldendeDato) }
-            }
-        }
         return join(coAdresse(kontaktadresse.coAdressenavn), adresse)
     }
 
@@ -115,21 +129,30 @@ class AdresseMapper(private val kodeverkService: KodeverkService) {
     }
 
     // må feltet "postboks" ha med "postboks" i strengen? "postboks ${postboks}" ?
-    private fun tilFormatertAdresse(postboksadresse: Postboksadresse, gjeldendeDato: LocalDate): String? =
+    private fun tilFormatertAdresse(
+        postboksadresse: Postboksadresse,
+        gjeldendeDato: LocalDate,
+    ): String? =
         join(
             postboksadresse.postbokseier,
             postboksadresse.postboks,
             space(postboksadresse.postnummer, poststed(postboksadresse.postnummer, gjeldendeDato)),
         )
 
-    private fun tilFormatertAdresse(matrikkeladresse: Matrikkeladresse, gjeldendeDato: LocalDate): String? =
+    private fun tilFormatertAdresse(
+        matrikkeladresse: Matrikkeladresse,
+        gjeldendeDato: LocalDate,
+    ): String? =
         join(
             matrikkeladresse.tilleggsnavn,
             matrikkeladresse.bruksenhetsnummer,
             space(matrikkeladresse.postnummer, poststed(matrikkeladresse.postnummer, gjeldendeDato)),
         )
 
-    private fun tilFormatertAdresse(postadresseIFrittFormat: PostadresseIFrittFormat, gjeldendeDato: LocalDate): String? =
+    private fun tilFormatertAdresse(
+        postadresseIFrittFormat: PostadresseIFrittFormat,
+        gjeldendeDato: LocalDate,
+    ): String? =
         join(
             postadresseIFrittFormat.adresselinje1,
             postadresseIFrittFormat.adresselinje2,
@@ -138,7 +161,10 @@ class AdresseMapper(private val kodeverkService: KodeverkService) {
         )
 
     // har ikke med bygningEtasjeLeilighet, postboksNummerNavn
-    private fun tilFormatertAdresse(utenlandskAdresse: UtenlandskAdresse, gjeldendeDato: LocalDate): String? {
+    private fun tilFormatertAdresse(
+        utenlandskAdresse: UtenlandskAdresse,
+        gjeldendeDato: LocalDate,
+    ): String? {
         return join(
             utenlandskAdresse.adressenavnNummer,
             space(utenlandskAdresse.postkode, utenlandskAdresse.bySted),
@@ -160,7 +186,10 @@ class AdresseMapper(private val kodeverkService: KodeverkService) {
         )
     }
 
-    private fun tilFormatertAdresse(vegadresse: Vegadresse, gjeldendeDato: LocalDate): String? {
+    private fun tilFormatertAdresse(
+        vegadresse: Vegadresse,
+        gjeldendeDato: LocalDate,
+    ): String? {
         return join(
             space(vegadresse.adressenavn, vegadresse.husnummer, vegadresse.husbokstav),
             vegadresse.tilleggsnavn,
@@ -169,19 +198,28 @@ class AdresseMapper(private val kodeverkService: KodeverkService) {
         )
     }
 
-    private fun poststed(postnummer: String?, gjeldendeDato: LocalDate): String? {
+    private fun poststed(
+        postnummer: String?,
+        gjeldendeDato: LocalDate,
+    ): String? {
         if (postnummer == null) return null
         return kodeverkService.hentPoststed(postnummer, gjeldendeDato)
     }
 
-    private fun land(landkode: String?, gjeldendeDato: LocalDate): String? {
+    private fun land(
+        landkode: String?,
+        gjeldendeDato: LocalDate,
+    ): String? {
         if (landkode == null) return null
         return kodeverkService.hentLand(landkode, gjeldendeDato)
     }
 
     private fun space(vararg args: String?): String? = join(*args, separator = " ")
 
-    private fun join(vararg args: String?, separator: String = ", "): String? {
+    private fun join(
+        vararg args: String?,
+        separator: String = ", ",
+    ): String? {
         val filterNotNull = args.filterNotNull().filterNot(String::isEmpty)
         return if (filterNotNull.isEmpty()) {
             null

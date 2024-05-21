@@ -10,10 +10,12 @@ import java.util.Random
 import java.util.UUID
 
 object DataGenerator {
-
     private fun tilfeldigFødselsnummer() = Random().nextInt(Int.MAX_VALUE).toString()
 
-    private fun flereTilfeldigeAndelerTilkjentYtelse(antall: Int, behandlingId: UUID): List<AndelTilkjentYtelse> =
+    private fun flereTilfeldigeAndelerTilkjentYtelse(
+        antall: Int,
+        behandlingId: UUID,
+    ): List<AndelTilkjentYtelse> =
         (1..antall).map { tilfeldigAndelTilkjentYtelse(behandlingId = behandlingId) }.toList()
 
     private fun tilfeldigAndelTilkjentYtelse(

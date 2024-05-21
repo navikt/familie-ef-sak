@@ -52,7 +52,6 @@ class BehandlingsstatistikkTask(
     private val grunnlagsdataService: GrunnlagsdataService,
     private val årsakRevurderingService: ÅrsakRevurderingService,
 ) : AsyncTaskStep {
-
     private val zoneIdOslo = ZoneId.of("Europe/Oslo")
 
     override fun doTask(task: Task) {
@@ -72,48 +71,55 @@ class BehandlingsstatistikkTask(
             saksbehandling.forrigeBehandlingId?.let { behandlingService.hentBehandling(it).eksternId }
         val erAutomatiskGOmregning = saksbehandling.årsak == BehandlingÅrsak.G_OMREGNING && saksbehandling.opprettetAv == "VL"
 
-        val behandlingsstatistikkDto = BehandlingsstatistikkDto(
-            behandlingId = behandlingId,
-            eksternBehandlingId = saksbehandling.eksternId,
-            personIdent = saksbehandling.ident,
-            gjeldendeSaksbehandlerId = if (erAutomatiskGOmregning) {
-                "VL"
-            } else {
-                finnSaksbehandler(hendelse, vedtak, gjeldendeSaksbehandler)
-            },
-            beslutterId = if (hendelse.erBesluttetEllerFerdig()) {
-                vedtak?.beslutterIdent
-            } else {
-                null
-            },
-            eksternFagsakId = saksbehandling.eksternFagsakId,
-            hendelseTidspunkt = hendelseTidspunkt.atZone(zoneIdOslo),
-            behandlingOpprettetTidspunkt = saksbehandling.opprettetTid.atZone(zoneIdOslo),
-            hendelse = hendelse,
-            behandlingResultat = saksbehandling.resultat.name,
-            resultatBegrunnelse = resultatBegrunnelse,
-            opprettetEnhet = sisteOppgaveForBehandling?.opprettetAvEnhetsnr ?: MASKINELL_JOURNALFOERENDE_ENHET,
-            ansvarligEnhet = sisteOppgaveForBehandling?.tildeltEnhetsnr ?: MASKINELL_JOURNALFOERENDE_ENHET,
-            strengtFortroligAdresse = søker.adressebeskyttelse?.erStrengtFortrolig() ?: false,
-            stønadstype = saksbehandling.stønadstype,
-            behandlingstype = BehandlingType.valueOf(saksbehandling.type.name),
-            henvendelseTidspunkt = henvendelseTidspunkt.atZone(zoneIdOslo),
-            relatertEksternBehandlingId = relatertEksternBehandlingId,
-            relatertBehandlingId = null,
-            behandlingMetode = behandlingMetode,
-            behandlingÅrsak = saksbehandling.årsak,
-            kravMottatt = saksbehandling.kravMottatt,
-            årsakRevurdering = årsakRevurdering?.let {
-                ÅrsakRevurderingDto(it.opplysningskilde, it.årsak)
-            },
-            avslagÅrsak = vedtak?.avslåÅrsak,
-            kategori = saksbehandling.kategori,
-        )
+        val behandlingsstatistikkDto =
+            BehandlingsstatistikkDto(
+                behandlingId = behandlingId,
+                eksternBehandlingId = saksbehandling.eksternId,
+                personIdent = saksbehandling.ident,
+                gjeldendeSaksbehandlerId =
+                    if (erAutomatiskGOmregning) {
+                        "VL"
+                    } else {
+                        finnSaksbehandler(hendelse, vedtak, gjeldendeSaksbehandler)
+                    },
+                beslutterId =
+                    if (hendelse.erBesluttetEllerFerdig()) {
+                        vedtak?.beslutterIdent
+                    } else {
+                        null
+                    },
+                eksternFagsakId = saksbehandling.eksternFagsakId,
+                hendelseTidspunkt = hendelseTidspunkt.atZone(zoneIdOslo),
+                behandlingOpprettetTidspunkt = saksbehandling.opprettetTid.atZone(zoneIdOslo),
+                hendelse = hendelse,
+                behandlingResultat = saksbehandling.resultat.name,
+                resultatBegrunnelse = resultatBegrunnelse,
+                opprettetEnhet = sisteOppgaveForBehandling?.opprettetAvEnhetsnr ?: MASKINELL_JOURNALFOERENDE_ENHET,
+                ansvarligEnhet = sisteOppgaveForBehandling?.tildeltEnhetsnr ?: MASKINELL_JOURNALFOERENDE_ENHET,
+                strengtFortroligAdresse = søker.adressebeskyttelse?.erStrengtFortrolig() ?: false,
+                stønadstype = saksbehandling.stønadstype,
+                behandlingstype = BehandlingType.valueOf(saksbehandling.type.name),
+                henvendelseTidspunkt = henvendelseTidspunkt.atZone(zoneIdOslo),
+                relatertEksternBehandlingId = relatertEksternBehandlingId,
+                relatertBehandlingId = null,
+                behandlingMetode = behandlingMetode,
+                behandlingÅrsak = saksbehandling.årsak,
+                kravMottatt = saksbehandling.kravMottatt,
+                årsakRevurdering =
+                    årsakRevurdering?.let {
+                        ÅrsakRevurderingDto(it.opplysningskilde, it.årsak)
+                    },
+                avslagÅrsak = vedtak?.avslåÅrsak,
+                kategori = saksbehandling.kategori,
+            )
 
         iverksettClient.sendBehandlingsstatistikk(behandlingsstatistikkDto)
     }
 
-    private fun finnSisteOppgaveForBehandlingen(behandlingId: UUID, oppgaveId: Long?): Oppgave? {
+    private fun finnSisteOppgaveForBehandlingen(
+        behandlingId: UUID,
+        oppgaveId: Long?,
+    ): Oppgave? {
         val gsakOppgaveId = oppgaveId ?: oppgaveService.finnSisteOppgaveForBehandling(behandlingId)?.gsakOppgaveId
 
         return gsakOppgaveId?.let { oppgaveService.hentOppgave(it) }
@@ -121,7 +127,11 @@ class BehandlingsstatistikkTask(
 
     private fun Hendelse.erBesluttetEllerFerdig() = this.name == Hendelse.BESLUTTET.name || this.name == Hendelse.FERDIG.name
 
-    private fun finnResultatBegrunnelse(hendelse: Hendelse, vedtak: Vedtak?, saksbehandling: Saksbehandling): String? {
+    private fun finnResultatBegrunnelse(
+        hendelse: Hendelse,
+        vedtak: Vedtak?,
+        saksbehandling: Saksbehandling,
+    ): String? {
         if (saksbehandling.resultat == BehandlingResultat.HENLAGT) {
             return saksbehandling.henlagtÅrsak?.name ?: error("Mangler henlagtårsak for henlagt behandling")
         }
@@ -129,10 +139,11 @@ class BehandlingsstatistikkTask(
             Hendelse.PÅBEGYNT, Hendelse.MOTTATT, Hendelse.VENTER -> null
             Hendelse.VEDTATT, Hendelse.BESLUTTET, Hendelse.HENLAGT, Hendelse.FERDIG -> {
                 return when (vedtak?.resultatType) {
-                    ResultatType.INNVILGE, ResultatType.INNVILGE_UTEN_UTBETALING -> utledBegrunnelseForInnvilgetVedtak(
-                        saksbehandling.stønadstype,
-                        vedtak,
-                    )
+                    ResultatType.INNVILGE, ResultatType.INNVILGE_UTEN_UTBETALING ->
+                        utledBegrunnelseForInnvilgetVedtak(
+                            saksbehandling.stønadstype,
+                            vedtak,
+                        )
                     ResultatType.AVSLÅ, ResultatType.OPPHØRT -> vedtak.avslåBegrunnelse
                     ResultatType.HENLEGGE -> error("ResultatType henlegge er ikke i bruk for vedtak")
                     ResultatType.SANKSJONERE -> vedtak.internBegrunnelse
@@ -142,14 +153,21 @@ class BehandlingsstatistikkTask(
         }
     }
 
-    private fun utledBegrunnelseForInnvilgetVedtak(stønadType: StønadType, vedtak: Vedtak) =
+    private fun utledBegrunnelseForInnvilgetVedtak(
+        stønadType: StønadType,
+        vedtak: Vedtak,
+    ) =
         when (stønadType) {
             OVERGANGSSTØNAD -> vedtak.periodeBegrunnelse
             BARNETILSYN -> vedtak.barnetilsyn?.begrunnelse
             SKOLEPENGER -> vedtak.skolepenger?.begrunnelse
         }
 
-    private fun finnSaksbehandler(hendelse: Hendelse, vedtak: Vedtak?, gjeldendeSaksbehandler: String?): String {
+    private fun finnSaksbehandler(
+        hendelse: Hendelse,
+        vedtak: Vedtak?,
+        gjeldendeSaksbehandler: String?,
+    ): String {
         return when (hendelse) {
             Hendelse.MOTTATT, Hendelse.PÅBEGYNT, Hendelse.VENTER, Hendelse.HENLAGT ->
                 gjeldendeSaksbehandler ?: error("Mangler saksbehandler for hendelse")
@@ -166,7 +184,6 @@ class BehandlingsstatistikkTask(
     }
 
     companion object {
-
         fun opprettMottattTask(
             behandlingId: UUID,
             hendelseTidspunkt: LocalDateTime = LocalDateTime.now(),
@@ -222,7 +239,11 @@ class BehandlingsstatistikkTask(
                 hendelseTidspunkt = LocalDateTime.now(),
             )
 
-        fun opprettHenlagtTask(behandlingId: UUID, hendelseTidspunkt: LocalDateTime, gjeldendeSaksbehandler: String): Task =
+        fun opprettHenlagtTask(
+            behandlingId: UUID,
+            hendelseTidspunkt: LocalDateTime,
+            gjeldendeSaksbehandler: String,
+        ): Task =
             opprettTask(
                 behandlingId = behandlingId,
                 hendelse = Hendelse.FERDIG,
@@ -240,23 +261,25 @@ class BehandlingsstatistikkTask(
         ): Task =
             Task(
                 type = TYPE,
-                payload = objectMapper.writeValueAsString(
-                    BehandlingsstatistikkTaskPayload(
-                        behandlingId,
-                        hendelse,
-                        hendelseTidspunkt,
-                        gjeldendeSaksbehandler,
-                        oppgaveId,
-                        behandlingMetode,
+                payload =
+                    objectMapper.writeValueAsString(
+                        BehandlingsstatistikkTaskPayload(
+                            behandlingId,
+                            hendelse,
+                            hendelseTidspunkt,
+                            gjeldendeSaksbehandler,
+                            oppgaveId,
+                            behandlingMetode,
+                        ),
                     ),
-                ),
-                properties = Properties().apply {
-                    this["saksbehandler"] = gjeldendeSaksbehandler ?: ""
-                    this["behandlingId"] = behandlingId.toString()
-                    this["hendelse"] = hendelse.name
-                    this["hendelseTidspunkt"] = hendelseTidspunkt.toString()
-                    this["oppgaveId"] = oppgaveId?.toString() ?: ""
-                },
+                properties =
+                    Properties().apply {
+                        this["saksbehandler"] = gjeldendeSaksbehandler ?: ""
+                        this["behandlingId"] = behandlingId.toString()
+                        this["hendelse"] = hendelse.name
+                        this["hendelseTidspunkt"] = hendelseTidspunkt.toString()
+                        this["oppgaveId"] = oppgaveId?.toString() ?: ""
+                    },
             )
 
         const val TYPE = "behandlingsstatistikkTask"

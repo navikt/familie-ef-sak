@@ -11,15 +11,15 @@ data class VedtaksperiodeDto(
     @Deprecated("Bruk periode", ReplaceWith("periode.fom")) val årMånedFra: YearMonth? = null,
     @Deprecated("Bruk periode", ReplaceWith("periode.tom")) val årMånedTil: YearMonth? = null,
     @JsonIgnore
-    val periode: Månedsperiode = Månedsperiode(
-        årMånedFra ?: error("periode eller årMånedFra må ha verdi"),
-        årMånedTil ?: error("periode eller årMånedTil må ha verdi"),
-    ),
+    val periode: Månedsperiode =
+        Månedsperiode(
+            årMånedFra ?: error("periode eller årMånedFra må ha verdi"),
+            årMånedTil ?: error("periode eller årMånedTil må ha verdi"),
+        ),
     val aktivitet: AktivitetType,
     val periodeType: VedtaksperiodeType,
     val sanksjonsårsak: Sanksjonsårsak? = null,
 ) {
-
     fun erMidlertidigOpphørEllerSanksjon(): Boolean = periodeType.midlertidigOpphørEllerSanksjon()
 }
 

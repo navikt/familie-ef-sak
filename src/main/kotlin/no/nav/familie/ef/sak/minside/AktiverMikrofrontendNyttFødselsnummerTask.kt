@@ -18,7 +18,6 @@ class AktiverMikrofrontendNyttFødselsnummerTask(
     val minSideKafkaProducerService: MinSideKafkaProducerService,
     val fagsakPersonService: FagsakPersonService,
 ) : AsyncTaskStep {
-
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     override fun doTask(task: Task) {

@@ -17,7 +17,6 @@ import org.springframework.web.client.RestOperations
 import java.net.URI
 
 class EregClientTest {
-
     companion object {
         val server: WireMockServer = WireMockServer(WireMockConfiguration.wireMockConfig().dynamicPort())
         private val restOperations: RestOperations = RestTemplateBuilder().build()

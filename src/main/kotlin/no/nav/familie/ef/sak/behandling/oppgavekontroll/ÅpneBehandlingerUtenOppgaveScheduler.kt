@@ -8,7 +8,6 @@ import org.springframework.transaction.annotation.Transactional
 @Profile("!integrasjonstest")
 @Service
 class ÅpneBehandlingerUtenOppgaveScheduler(val behandlingsoppgaveService: BehandlingsoppgaveService) {
-
     @Scheduled(cron = "\${FINN_BEHANDLINGER_UTEN_OPPGAVE_CRON_EXPRESSION}")
     @Transactional
     fun opprettTaskFinnÅpneBehandlingerUtenOppgave() {

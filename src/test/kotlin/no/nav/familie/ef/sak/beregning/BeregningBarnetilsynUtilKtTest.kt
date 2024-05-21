@@ -7,7 +7,6 @@ import org.junit.jupiter.api.Test
 import java.time.YearMonth
 
 internal class BeregningBarnetilsynUtilKtTest {
-
     @Test
     fun `hente riktig sats for barn for år 2023`() {
         val juli2023 = YearMonth.of(2023, 7)

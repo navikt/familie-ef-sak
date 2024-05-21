@@ -29,7 +29,6 @@ enum class SøknadType {
 }
 
 object SøknadMapper {
-
     fun toDomain(
         journalpostId: String,
         søknad: ISøknadsskjema,
@@ -41,10 +40,11 @@ object SøknadMapper {
             journalpostId = journalpostId,
             søker = Søker(søknad.fødselsnummer, søknad.navn),
             type = søknad.type,
-            relaterteFnr = søknad.barn.map { listOf(it.fødselsnummer, it.annenForelder?.person?.fødselsnummer) }
-                .flatten()
-                .filterNotNull()
-                .toSet(),
+            relaterteFnr =
+                søknad.barn.map { listOf(it.fødselsnummer, it.annenForelder?.person?.fødselsnummer) }
+                    .flatten()
+                    .filterNotNull()
+                    .toSet(),
         )
     }
 }

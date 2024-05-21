@@ -26,9 +26,10 @@ class PeriodeController(
     private val tilkjentYtelseService: TilkjentYtelseService,
     private val andelsHistorikkService: AndelsHistorikkService,
 ) {
-
     @GetMapping("/{behandlingId}")
-    fun hentPerioder(@PathVariable behandlingId: UUID): Ressurs<TilkjentYtelseDto> {
+    fun hentPerioder(
+        @PathVariable behandlingId: UUID,
+    ): Ressurs<TilkjentYtelseDto> {
         tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.ACCESS)
         return Ressurs.success(tilkjentYtelseService.hentForBehandling(behandlingId).tilDto())
     }

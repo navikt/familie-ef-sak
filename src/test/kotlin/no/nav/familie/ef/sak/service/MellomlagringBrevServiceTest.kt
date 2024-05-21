@@ -21,13 +21,13 @@ import java.util.UUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class MellomlagringBrevServiceTest {
-
     private val mellomlagerBrevRepository = mockk<MellomlagerBrevRepository>()
     private val mellomlagerFrittståendeSanitybrevRepository = mockk<MellomlagerFrittståendeSanitybrevRepository>()
-    private val mellomlagringBrevService = no.nav.familie.ef.sak.brev.MellomlagringBrevService(
-        mellomlagerBrevRepository,
-        mellomlagerFrittståendeSanitybrevRepository,
-    )
+    private val mellomlagringBrevService =
+        no.nav.familie.ef.sak.brev.MellomlagringBrevService(
+            mellomlagerBrevRepository,
+            mellomlagerFrittståendeSanitybrevRepository,
+        )
 
     @BeforeAll
     fun setUp() {
@@ -60,13 +60,14 @@ internal class MellomlagringBrevServiceTest {
 
     @Test
     fun `hentOgValiderMellomlagretBrev skal returnere null når sanityVersjon ikke matcher`() {
-        every { mellomlagerBrevRepository.findByIdOrNull(behandlingId) } returns MellomlagretBrev(
-            behandlingId,
-            brevverdier,
-            brevmal,
-            "1",
-            LocalDate.now(),
-        )
+        every { mellomlagerBrevRepository.findByIdOrNull(behandlingId) } returns
+            MellomlagretBrev(
+                behandlingId,
+                brevverdier,
+                brevmal,
+                "1",
+                LocalDate.now(),
+            )
         assertThat(mellomlagringBrevService.hentOgValiderMellomlagretBrev(behandlingId, "2")).isNull()
     }
 
@@ -74,11 +75,12 @@ internal class MellomlagringBrevServiceTest {
     fun `hentMellomlagretFrittståendeSanityBrev skal returnere mellomlagret frittstående brev`() {
         val fagsakId = UUID.randomUUID()
 
-        val brev = MellomlagretFrittståendeSanitybrev(
-            fagsakId = fagsakId,
-            brevverdier = mellomlagretBrev.brevverdier,
-            brevmal = mellomlagretBrev.brevmal,
-        )
+        val brev =
+            MellomlagretFrittståendeSanitybrev(
+                fagsakId = fagsakId,
+                brevverdier = mellomlagretBrev.brevverdier,
+                brevmal = mellomlagretBrev.brevmal,
+            )
 
         every { mellomlagerFrittståendeSanitybrevRepository.findByFagsakIdAndSaksbehandlerIdent(fagsakId, any()) } returns brev
 

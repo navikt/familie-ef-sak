@@ -9,14 +9,14 @@ import org.springframework.context.annotation.Import
 @SpringBootApplication(exclude = [ErrorMvcAutoConfiguration::class])
 @Import(ApplicationConfig::class)
 class UnitTestLauncher {
-
     fun main(args: Array<String>) {
-        val app = SpringApplicationBuilder(ApplicationConfig::class.java)
-            .profiles(
-                "local",
-                "mock-oauth",
-            )
-            .build()
+        val app =
+            SpringApplicationBuilder(ApplicationConfig::class.java)
+                .profiles(
+                    "local",
+                    "mock-oauth",
+                )
+                .build()
         app.run(*args)
     }
 }

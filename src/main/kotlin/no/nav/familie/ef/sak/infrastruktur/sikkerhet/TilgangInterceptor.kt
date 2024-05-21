@@ -11,8 +11,11 @@ import org.springframework.web.servlet.AsyncHandlerInterceptor
 
 @Component
 class TilgangInterceptor(private val rolleConfig: RolleConfig) : AsyncHandlerInterceptor {
-
-    override fun preHandle(request: HttpServletRequest, response: HttpServletResponse, handler: Any): Boolean {
+    override fun preHandle(
+        request: HttpServletRequest,
+        response: HttpServletResponse,
+        handler: Any,
+    ): Boolean {
         return if (SikkerhetContext.harTilgangTilGittRolle(rolleConfig = rolleConfig, BehandlerRolle.VEILEDER)) {
             super.preHandle(request, response, handler)
         } else {
@@ -25,7 +28,6 @@ class TilgangInterceptor(private val rolleConfig: RolleConfig) : AsyncHandlerInt
     }
 
     companion object {
-
         private val logger = LoggerFactory.getLogger(this::class.java)
     }
 }

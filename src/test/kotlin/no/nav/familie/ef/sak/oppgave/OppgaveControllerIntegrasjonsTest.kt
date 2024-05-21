@@ -24,7 +24,6 @@ import org.springframework.http.ResponseEntity
 import java.util.UUID
 
 internal class OppgaveControllerIntegrasjonsTest : OppslagSpringRunnerTest() {
-
     @Autowired
     private lateinit var oppgaveRepository: OppgaveRepository
 

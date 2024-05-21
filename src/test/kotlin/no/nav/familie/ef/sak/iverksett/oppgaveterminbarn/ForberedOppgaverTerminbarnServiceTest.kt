@@ -27,7 +27,6 @@ import java.time.LocalDate
 import java.util.UUID
 
 internal class ForberedOppgaverTerminbarnServiceTest {
-
     private val personService: PersonService = mockk()
     private val fagsakService: FagsakService = mockk()
     private val terminbarnRepository: TerminbarnRepository = mockk()
@@ -81,10 +80,11 @@ internal class ForberedOppgaverTerminbarnServiceTest {
     @Test
     fun `ett utløpt terminbarn som ikke finnes i terminbarnRepo, to umatchede barn i PDL, forvent at oppgave opprettes`() {
         val terminBarn = listOf(opprettTerminbarn())
-        val pdlBarn = listOf(
-            opprettPdlBarn(fødselsdato = LocalDate.now().minusYears(1)),
-            opprettPdlBarn(fødselsdato = LocalDate.now().minusYears(2)),
-        )
+        val pdlBarn =
+            listOf(
+                opprettPdlBarn(fødselsdato = LocalDate.now().minusYears(1)),
+                opprettPdlBarn(fødselsdato = LocalDate.now().minusYears(2)),
+            )
 
         every { personService.hentPersonMedBarn(any()).barn.values } returns pdlBarn
         every { terminbarnRepository.finnBarnAvGjeldendeIverksatteBehandlingerUtgåtteTerminbarn(StønadType.OVERGANGSSTØNAD) } returns terminBarn
@@ -98,10 +98,11 @@ internal class ForberedOppgaverTerminbarnServiceTest {
     @Test
     fun `ett utløpt terminbarn, ett av to matchede PDL barn, forvent at oppgave ikke opprettes`() {
         val terminBarn = listOf(opprettTerminbarn())
-        val pdlBarn = listOf(
-            opprettPdlBarn(fødselsdato = LocalDate.now().plusWeeks(3)),
-            opprettPdlBarn(fødselsdato = LocalDate.now().minusYears(2)),
-        )
+        val pdlBarn =
+            listOf(
+                opprettPdlBarn(fødselsdato = LocalDate.now().plusWeeks(3)),
+                opprettPdlBarn(fødselsdato = LocalDate.now().minusYears(2)),
+            )
         every { personService.hentPersonMedBarn(any()).barn.values } returns pdlBarn
         every { terminbarnRepository.finnBarnAvGjeldendeIverksatteBehandlingerUtgåtteTerminbarn(StønadType.OVERGANGSSTØNAD) } returns terminBarn
         every { taskService.save(any()) } returns mockk()
@@ -114,10 +115,11 @@ internal class ForberedOppgaverTerminbarnServiceTest {
     @Test
     fun `ingen terminbarn finnes, to PDL barn finnes, forvent at oppgave ikke opprettes`() {
         val terminBarn = emptyList<TerminbarnTilUtplukkForOppgave>()
-        val pdlBarn = listOf(
-            opprettPdlBarn(fødselsdato = LocalDate.now().plusWeeks(3)),
-            opprettPdlBarn(fødselsdato = LocalDate.now().minusYears(2)),
-        )
+        val pdlBarn =
+            listOf(
+                opprettPdlBarn(fødselsdato = LocalDate.now().plusWeeks(3)),
+                opprettPdlBarn(fødselsdato = LocalDate.now().minusYears(2)),
+            )
         every { personService.hentPersonMedBarn(any()).barn.values } returns pdlBarn
         every { terminbarnRepository.finnBarnAvGjeldendeIverksatteBehandlingerUtgåtteTerminbarn(StønadType.OVERGANGSSTØNAD) } returns terminBarn
         every { taskService.save(any()) } returns mockk()

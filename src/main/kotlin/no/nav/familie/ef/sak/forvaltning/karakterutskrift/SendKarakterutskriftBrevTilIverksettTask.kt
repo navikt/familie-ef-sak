@@ -78,7 +78,10 @@ class SendKarakterutskriftBrevTilIverksettTask(
         )
     }
 
-    private fun validerHarIkkeVergemål(ident: String, opggave: Oppgave) {
+    private fun validerHarIkkeVergemål(
+        ident: String,
+        opggave: Oppgave,
+    ) {
         val personopplysninger = personopplysningerService.hentPersonopplysningerFraRegister(ident)
         val harVerge = personopplysninger.vergemål.isNotEmpty()
         feilHvis(harVerge) {
@@ -102,19 +105,27 @@ class SendKarakterutskriftBrevTilIverksettTask(
     }
 
     companion object {
-
-        fun opprettTask(oppgaveId: Long, brevType: FrittståendeBrevType, gjeldendeÅr: Year): Task {
+        fun opprettTask(
+            oppgaveId: Long,
+            brevType: FrittståendeBrevType,
+            gjeldendeÅr: Year,
+        ): Task {
             val payload = opprettTaskPayload(oppgaveId, brevType, gjeldendeÅr)
 
-            val properties = Properties().apply {
-                setProperty("oppgaveId", oppgaveId.toString())
-                setProperty(MDCConstants.MDC_CALL_ID, IdUtils.generateId())
-            }
+            val properties =
+                Properties().apply {
+                    setProperty("oppgaveId", oppgaveId.toString())
+                    setProperty(MDCConstants.MDC_CALL_ID, IdUtils.generateId())
+                }
 
             return Task(TYPE, payload).copy(metadataWrapper = PropertiesWrapper(properties))
         }
 
-        fun opprettTaskPayload(oppgaveId: Long, brevType: FrittståendeBrevType, gjeldendeÅr: Year): String =
+        fun opprettTaskPayload(
+            oppgaveId: Long,
+            brevType: FrittståendeBrevType,
+            gjeldendeÅr: Year,
+        ): String =
             objectMapper.writeValueAsString(
                 AutomatiskBrevKarakterutskriftPayload(oppgaveId, brevType, gjeldendeÅr),
             )

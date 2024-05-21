@@ -7,7 +7,8 @@ import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
-import java.util.*
+import java.util.Properties
+import java.util.UUID
 
 @Service
 @TaskStepBeskrivelse(
@@ -19,7 +20,6 @@ import java.util.*
 class LoggOppgaveMetadataTask(
     private val tilordnetRessursService: TilordnetRessursService,
 ) : AsyncTaskStep {
-
     private val logger = LoggerFactory.getLogger(javaClass)
     private val secureLogger = LoggerFactory.getLogger("secureLogger")
 
@@ -34,8 +34,8 @@ class LoggOppgaveMetadataTask(
     }
 
     companion object {
-
         const val TYPE = "loggOppgaveMetadataTask"
+
         fun opprettTask(behandlingId: UUID): Task {
             return Task(
                 TYPE,

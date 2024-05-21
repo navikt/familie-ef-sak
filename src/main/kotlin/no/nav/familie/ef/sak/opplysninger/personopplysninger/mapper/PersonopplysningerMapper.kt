@@ -34,7 +34,6 @@ class PersonopplysningerMapper(
     private val statsborgerskapMapper: StatsborgerskapMapper,
     private val innflyttingUtflyttingMapper: InnflyttingUtflyttingMapper,
 ) {
-
     fun tilPersonopplysninger(
         grunnlagsdata: Personopplysninger,
         grunnlagsdataOpprettet: LocalDateTime,
@@ -46,46 +45,51 @@ class PersonopplysningerMapper(
 
         val gjeldendePersonIdent = søkerIdenter.gjeldende().ident
         return PersonopplysningerDto(
-            adressebeskyttelse = søker.adressebeskyttelse
-                ?.let { Adressebeskyttelse.valueOf(it.gradering.name) },
-            folkeregisterpersonstatus = søker.folkeregisterpersonstatus.gjeldende()
-                ?.let { Folkeregisterpersonstatus.fraPdl(it) },
+            adressebeskyttelse =
+                søker.adressebeskyttelse
+                    ?.let { Adressebeskyttelse.valueOf(it.gradering.name) },
+            folkeregisterpersonstatus =
+                søker.folkeregisterpersonstatus.gjeldende()
+                    ?.let { Folkeregisterpersonstatus.fraPdl(it) },
             fødselsdato = søker.fødsel.gjeldende().fødselsdato,
             dødsdato = søker.dødsfall?.dødsdato,
             navn = NavnDto.fraNavn(søker.navn),
             kjønn = KjønnMapper.tilKjønn(søker.kjønn),
             personIdent = gjeldendePersonIdent,
             statsborgerskap = statsborgerskapMapper.map(søker.statsborgerskap),
-            sivilstand = søker.sivilstand.map {
-                SivilstandDto(
-                    type = Sivilstandstype.valueOf(it.type.name),
-                    gyldigFraOgMed = it.gyldigFraOgMed ?: it.bekreftelsesdato,
-                    relatertVedSivilstand = it.relatertVedSivilstand,
-                    navn = it.navn,
-                    dødsdato = it.dødsfall?.dødsdato,
-                    erGjeldende = !it.metadata.historisk,
-                )
-            }.sortedWith(compareByDescending<SivilstandDto> { it.erGjeldende }.thenByDescending { it.gyldigFraOgMed }),
+            sivilstand =
+                søker.sivilstand.map {
+                    SivilstandDto(
+                        type = Sivilstandstype.valueOf(it.type.name),
+                        gyldigFraOgMed = it.gyldigFraOgMed ?: it.bekreftelsesdato,
+                        relatertVedSivilstand = it.relatertVedSivilstand,
+                        navn = it.navn,
+                        dødsdato = it.dødsfall?.dødsdato,
+                        erGjeldende = !it.metadata.historisk,
+                    )
+                }.sortedWith(compareByDescending<SivilstandDto> { it.erGjeldende }.thenByDescending { it.gyldigFraOgMed }),
             adresse = tilAdresser(søker),
-            fullmakt = søker.fullmakt.map {
-                FullmaktDto(
-                    gyldigFraOgMed = it.gyldigFraOgMed,
-                    gyldigTilOgMed = it.gyldigTilOgMed,
-                    motpartsPersonident = it.motpartsPersonident,
-                    navn = it.navn,
-                    områder = it.områder?.let { it.map { område -> mapOmråde(område) } } ?: emptyList(),
-                )
-            }.sortedByDescending { it.gyldigFraOgMed },
+            fullmakt =
+                søker.fullmakt.map {
+                    FullmaktDto(
+                        gyldigFraOgMed = it.gyldigFraOgMed,
+                        gyldigTilOgMed = it.gyldigTilOgMed,
+                        motpartsPersonident = it.motpartsPersonident,
+                        navn = it.navn,
+                        områder = it.områder?.let { it.map { område -> mapOmråde(område) } } ?: emptyList(),
+                    )
+                }.sortedByDescending { it.gyldigFraOgMed },
             egenAnsatt = egenAnsatt,
-            barn = grunnlagsdata.barn.map {
-                mapBarn(
-                    it,
-                    søkerIdenter.identer(),
-                    søker.bostedsadresse,
-                    annenForelderMap,
-                    grunnlagsdataOpprettet.toLocalDate(),
-                )
-            }.sortedBy { it.fødselsdato },
+            barn =
+                grunnlagsdata.barn.map {
+                    mapBarn(
+                        it,
+                        søkerIdenter.identer(),
+                        søker.bostedsadresse,
+                        annenForelderMap,
+                        grunnlagsdataOpprettet.toLocalDate(),
+                    )
+                }.sortedBy { it.fødselsdato },
             innflyttingTilNorge = innflyttingUtflyttingMapper.mapInnflytting(søker.innflyttingTilNorge),
             utflyttingFraNorge = innflyttingUtflyttingMapper.mapUtflytting(søker.utflyttingFraNorge),
             oppholdstillatelse = OppholdstillatelseMapper.map(søker.opphold),
@@ -97,12 +101,13 @@ class PersonopplysningerMapper(
         grunnlagsdataMedMetadata: GrunnlagsdataMedMetadata,
         egenAnsatt: Boolean,
         søkerIdenter: PdlIdenter,
-    ): PersonopplysningerDto = tilPersonopplysninger(
-        grunnlagsdata = grunnlagsdataMedMetadata.grunnlagsdata.tilPersonopplysninger(),
-        grunnlagsdataOpprettet = grunnlagsdataMedMetadata.opprettetTidspunkt,
-        egenAnsatt = egenAnsatt,
-        søkerIdenter = søkerIdenter,
-    )
+    ): PersonopplysningerDto =
+        tilPersonopplysninger(
+            grunnlagsdata = grunnlagsdataMedMetadata.grunnlagsdata.tilPersonopplysninger(),
+            grunnlagsdataOpprettet = grunnlagsdataMedMetadata.opprettetTidspunkt,
+            egenAnsatt = egenAnsatt,
+            søkerIdenter = søkerIdenter,
+        )
 
     private fun mapOmråde(område: String): String {
         return when (område) {
@@ -138,9 +143,10 @@ class PersonopplysningerMapper(
         annenForelderMap: Map<String, AnnenForelderMedIdent>,
         grunnlagsdataOpprettet: LocalDate,
     ): BarnDto {
-        val annenForelderIdent = barn.forelderBarnRelasjon.find {
-            !søkerIdenter.contains(it.relatertPersonsIdent) && it.relatertPersonsRolle != Familierelasjonsrolle.BARN
-        }?.relatertPersonsIdent
+        val annenForelderIdent =
+            barn.forelderBarnRelasjon.find {
+                !søkerIdenter.contains(it.relatertPersonsIdent) && it.relatertPersonsRolle != Familierelasjonsrolle.BARN
+            }?.relatertPersonsIdent
 
         feilHvis(barn.deltBosted.filter { !it.metadata.historisk }.size > 1) { "Fant mer enn en ikke-historisk delt bosted." }
         val deltBostedDto =
@@ -149,16 +155,18 @@ class PersonopplysningerMapper(
         return BarnDto(
             personIdent = barn.personIdent,
             navn = barn.navn.visningsnavn(),
-            annenForelder = annenForelderIdent?.let {
-                val annenForelder = annenForelderMap[it]
-                AnnenForelderMinimumDto(
-                    personIdent = it,
-                    navn = annenForelder?.navn?.visningsnavn() ?: "Finner ikke navn",
-                    dødsdato = annenForelder?.dødsfall?.gjeldende()?.dødsdato,
-                    bostedsadresse = annenForelder?.bostedsadresse?.gjeldende()
-                        ?.let { adresseMapper.tilAdresse(it).visningsadresse },
-                )
-            },
+            annenForelder =
+                annenForelderIdent?.let {
+                    val annenForelder = annenForelderMap[it]
+                    AnnenForelderMinimumDto(
+                        personIdent = it,
+                        navn = annenForelder?.navn?.visningsnavn() ?: "Finner ikke navn",
+                        dødsdato = annenForelder?.dødsfall?.gjeldende()?.dødsdato,
+                        bostedsadresse =
+                            annenForelder?.bostedsadresse?.gjeldende()
+                                ?.let { adresseMapper.tilAdresse(it).visningsadresse },
+                    )
+                },
             adresse = barn.bostedsadresse.map(adresseMapper::tilAdresse),
             borHosSøker = AdresseHjelper.harRegistrertSammeBostedsadresseSomForelder(barn, bostedsadresserForelder),
             deltBosted = deltBostedDto,

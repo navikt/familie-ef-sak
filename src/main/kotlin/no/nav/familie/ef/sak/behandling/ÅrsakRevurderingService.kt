@@ -22,13 +22,13 @@ class ÅrsakRevurderingService(
     private val årsakRevurderingsRepository: ÅrsakRevurderingsRepository,
     private val tilordnetRessursService: TilordnetRessursService,
 ) {
-
-    private val årsakerSomIkkeHarRevurderingsinformasjon = setOf(
-        BehandlingÅrsak.G_OMREGNING,
-        BehandlingÅrsak.SATSENDRING,
-        BehandlingÅrsak.MIGRERING,
-        BehandlingÅrsak.SANKSJON_1_MND,
-    )
+    private val årsakerSomIkkeHarRevurderingsinformasjon =
+        setOf(
+            BehandlingÅrsak.G_OMREGNING,
+            BehandlingÅrsak.SATSENDRING,
+            BehandlingÅrsak.MIGRERING,
+            BehandlingÅrsak.SANKSJON_1_MND,
+        )
 
     fun validerHarGyldigRevurderingsinformasjon(saksbehandling: Saksbehandling) {
         if (

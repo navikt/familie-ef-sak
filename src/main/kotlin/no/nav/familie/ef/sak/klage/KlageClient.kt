@@ -20,7 +20,6 @@ class KlageClient(
     @Value("\${FAMILIE_KLAGE_URL}") private val familieKlageUri: URI,
 ) :
     AbstractRestClient(restOperations, "familie.klage") {
-
     private val opprettKlage =
         UriComponentsBuilder.fromUri(familieKlageUri).pathSegment("api/ekstern/behandling/opprett").build().toUri()
 
@@ -34,9 +33,10 @@ class KlageClient(
     }
 
     fun hentKlagebehandlinger(eksternIder: Set<Long>): Map<Long, List<KlagebehandlingDto>> {
-        val uri = UriComponentsBuilder.fromUri(hentKlagebehandlinger)
-            .queryParam("eksternFagsakId", eksternIder.joinToString(","))
-            .build().toUri()
+        val uri =
+            UriComponentsBuilder.fromUri(hentKlagebehandlinger)
+                .queryParam("eksternFagsakId", eksternIder.joinToString(","))
+                .build().toUri()
         return getForEntity<Ressurs<Map<Long, List<KlagebehandlingDto>>>>(uri).getDataOrThrow()
     }
 

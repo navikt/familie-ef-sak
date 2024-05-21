@@ -29,7 +29,6 @@ import org.junit.jupiter.api.assertThrows
 import no.nav.familie.kontrakter.ef.felles.FrittståendeBrevDto as KontrakterFrittståendeBrevDto
 
 internal class FrittståendeBrevServiceTest {
-
     private val brevClient = mockk<BrevClient>()
     private val fagsakService = mockk<FagsakService>()
     private val arbeidsfordelingService = mockk<ArbeidsfordelingService>()
@@ -52,14 +51,16 @@ internal class FrittståendeBrevServiceTest {
         )
     private val fagsak = fagsak(fagsakpersoner(identer = setOf("01010172272")))
 
-    private val frittståendeSanitybrevDto = FrittståendeSanitybrevDto(
-        "123".toByteArray(),
-        mottakere = BrevmottakereDto(
-            personer = listOf(BrevmottakerPerson("mottakerIdent", "navn", MottakerRolle.BRUKER)),
-            organisasjoner = emptyList(),
-        ),
-        tittel = "tittel",
-    )
+    private val frittståendeSanitybrevDto =
+        FrittståendeSanitybrevDto(
+            "123".toByteArray(),
+            mottakere =
+                BrevmottakereDto(
+                    personer = listOf(BrevmottakerPerson("mottakerIdent", "navn", MottakerRolle.BRUKER)),
+                    organisasjoner = emptyList(),
+                ),
+            tittel = "tittel",
+        )
 
     private val frittståendeBrevSlot = slot<KontrakterFrittståendeBrevDto>()
 
@@ -77,20 +78,20 @@ internal class FrittståendeBrevServiceTest {
 
     @Nested
     inner class Mottakere {
-
         private val organisasjon = BrevmottakerOrganisasjon("org1", "navn", MottakerRolle.FULLMAKT)
         private val person = BrevmottakerPerson("ident", "navn", MottakerRolle.BRUKER)
 
         @Test
         internal fun `Sanitybrev - skal kaste feil dersom både personer og organisasjoner i mottakere i dto er tomme lister`() {
-            val feil = assertThrows<ApiFeil> {
-                frittståendeBrevService.sendFrittståendeSanitybrev(
-                    fagsak.id,
-                    frittståendeSanitybrevDto.copy(
-                        mottakere = BrevmottakereDto(emptyList(), emptyList()),
-                    ),
-                )
-            }
+            val feil =
+                assertThrows<ApiFeil> {
+                    frittståendeBrevService.sendFrittståendeSanitybrev(
+                        fagsak.id,
+                        frittståendeSanitybrevDto.copy(
+                            mottakere = BrevmottakereDto(emptyList(), emptyList()),
+                        ),
+                    )
+                }
             assertThat(feil.message).contains("Kan ikke sende frittstående brev uten at minst en brevmottaker er lagt til")
         }
 
@@ -148,18 +149,18 @@ internal class FrittståendeBrevServiceTest {
         every { fagsakService.hentFagsak(any()) } returns fagsak
         every { fagsakService.hentEksternId(any()) } returns Long.MAX_VALUE
         every { arbeidsfordelingService.hentNavEnhetIdEllerBrukMaskinellEnhetHvisNull(any()) } returns "123"
-        every { brevsignaturService.lagSignaturMedEnhet(any<Fagsak>()) } returns SignaturDto(
-            "Navn Navnesen",
-            "En enhet",
-            false,
-        )
+        every { brevsignaturService.lagSignaturMedEnhet(any<Fagsak>()) } returns
+            SignaturDto(
+                "Navn Navnesen",
+                "En enhet",
+                false,
+            )
         justRun { iverksettClient.sendFrittståendeBrev(capture(frittståendeBrevSlot)) }
         justRun { mellomlagringBrevService.slettMellomlagretFrittståendeBrev(any(), any()) }
         justRun { brevmottakereService.slettBrevmottakereForFagsakOgSaksbehandlerHvisFinnes(any(), any()) }
     }
 
     companion object {
-
         @AfterAll
         @JvmStatic
         fun tearDown() {

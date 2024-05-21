@@ -14,7 +14,6 @@ import no.nav.familie.ef.sak.opplysninger.søknad.domain.SøknadsskjemaOvergangs
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.SøknadsskjemaSkolepenger
 
 object DokumentasjonMapper {
-
     fun tilDokumentasjonDto(søknadsskjema: SøknadsskjemaBarnetilsyn): DokumentasjonFraSøknadDto =
         tilDokumentasjonDto(
             aktivitet = søknadsskjema.aktivitet,
@@ -60,15 +59,12 @@ object DokumentasjonMapper {
         barnetilsynDokumentasjon: BarnetilsynDokumentasjon?,
         utdanningsutgifter: Dokumentasjon?,
         adresseopplysninger: Adresseopplysninger?,
-
     ): DokumentasjonFraSøknadDto =
         DokumentasjonFraSøknadDto(
             erIArbeid = aktivitet?.erIArbeidDokumentasjon?.tilDto(),
             virksomhet = aktivitet?.virksomhet?.dokumentasjon?.tilDto(),
             ikkeVilligTilÅTaImotTilbudOmArbeid = aktivitet?.arbeidssøker?.ikkeVilligTilÅTaImotTilbudOmArbeidDokumentasjon?.tilDto(),
-
             tidligereSamboerFortsattRegistrertPåAdresse = bosituasjon.tidligereSamboerFortsattRegistrertPåAdresse?.tilDto(),
-
             uformeltGift = sivilstand.erUformeltGiftDokumentasjon?.tilDto(),
             uformeltSeparertEllerSkilt = sivilstand.erUformeltSeparertEllerSkiltDokumentasjon?.tilDto(),
             separasjonsbekreftelse = sivilstand.separasjonsbekreftelse?.tilDto(),
@@ -79,17 +75,16 @@ object DokumentasjonMapper {
              */
             avtaleOmDeltBosted = barn.firstNotNullOfOrNull { it.samvær?.avtaleOmDeltBosted }?.tilDto(),
             samværsavtale = barn.firstNotNullOfOrNull { it.samvær?.samværsavtale }?.tilDto(),
-            skalBarnetBoHosSøkerMenAnnenForelderSamarbeiderIkke = barn.firstNotNullOfOrNull { it.samvær?.skalBarnetBoHosSøkerMenAnnenForelderSamarbeiderIkke }
-                ?.tilDto(),
+            skalBarnetBoHosSøkerMenAnnenForelderSamarbeiderIkke =
+                barn.firstNotNullOfOrNull { it.samvær?.skalBarnetBoHosSøkerMenAnnenForelderSamarbeiderIkke }
+                    ?.tilDto(),
             erklæringOmSamlivsbrudd = barn.firstNotNullOfOrNull { it.samvær?.erklæringOmSamlivsbrudd }?.tilDto(),
             terminbekreftelse = barn.firstNotNullOfOrNull { it.terminbekreftelse }?.tilDto(),
-
             barnepassordningFaktura = barnetilsynDokumentasjon?.barnepassordningFaktura?.tilDto(),
             avtaleBarnepasser = barnetilsynDokumentasjon?.avtaleBarnepasser?.tilDto(),
             arbeidstid = barnetilsynDokumentasjon?.arbeidstid?.tilDto(),
             roterendeArbeidstid = barnetilsynDokumentasjon?.roterendeArbeidstid?.tilDto(),
             spesielleBehov = barnetilsynDokumentasjon?.spesielleBehov?.tilDto(),
-
             sykdom = situasjon?.sykdom?.tilDto(),
             barnsSykdom = situasjon?.barnsSykdom?.tilDto(),
             manglendeBarnepass = situasjon?.manglendeBarnepass?.tilDto(),
@@ -99,7 +94,6 @@ object DokumentasjonMapper {
             utdanningstilbud = situasjon?.utdanningstilbud?.tilDto(),
             reduksjonAvArbeidsforhold = situasjon?.reduksjonAvArbeidsforholdDokumentasjon?.tilDto(),
             oppsigelse = situasjon?.oppsigelseDokumentasjon?.tilDto(),
-
             utdanningsutgifter = utdanningsutgifter?.tilDto(),
             meldtAdresseendring = adresseopplysninger?.dokumentasjonAdresseendring?.tilDto(),
         )

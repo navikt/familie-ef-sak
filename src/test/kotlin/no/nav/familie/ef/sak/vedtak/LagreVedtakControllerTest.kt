@@ -43,7 +43,6 @@ import java.time.YearMonth
 import java.util.UUID
 
 internal class LagreVedtakControllerTest : OppslagSpringRunnerTest() {
-
     @Autowired
     private lateinit var behandlingRepository: BehandlingRepository
 
@@ -62,36 +61,39 @@ internal class LagreVedtakControllerTest : OppslagSpringRunnerTest() {
     internal fun `Skal innvilge vedtak for barnetilsyn `() {
         val (behandling, barn) = opprettFagsakOgBehandlingMedBarn()
         val utgiftsperiode = lagUtgiftsperioder(barn)
-        val vedtakDto = InnvilgelseBarnetilsyn(
-            begrunnelse = "",
-            perioder = listOf(utgiftsperiode),
-            perioderKontantstøtte = listOf(),
-            tilleggsstønad = tomTillegsstønad(),
-        )
+        val vedtakDto =
+            InnvilgelseBarnetilsyn(
+                begrunnelse = "",
+                perioder = listOf(utgiftsperiode),
+                perioderKontantstøtte = listOf(),
+                tilleggsstønad = tomTillegsstønad(),
+            )
 
         val respons: ResponseEntity<Ressurs<UUID>> = fullførVedtak(behandling.id, vedtakDto)
-        val vedtak = Vedtak(
-            behandlingId = behandling.id,
-            resultatType = ResultatType.INNVILGE,
-            avslåBegrunnelse = null,
-            barnetilsyn = BarnetilsynWrapper(
-                perioder = listOf(
-                    Barnetilsynperiode(
-                        periode = utgiftsperiode.periode,
-                        utgifter = utgiftsperiode.utgifter,
-                        barn = utgiftsperiode.barn,
-                        periodetype = PeriodetypeBarnetilsyn.ORDINÆR,
-                        aktivitet = AktivitetstypeBarnetilsyn.I_ARBEID,
+        val vedtak =
+            Vedtak(
+                behandlingId = behandling.id,
+                resultatType = ResultatType.INNVILGE,
+                avslåBegrunnelse = null,
+                barnetilsyn =
+                    BarnetilsynWrapper(
+                        perioder =
+                            listOf(
+                                Barnetilsynperiode(
+                                    periode = utgiftsperiode.periode,
+                                    utgifter = utgiftsperiode.utgifter,
+                                    barn = utgiftsperiode.barn,
+                                    periodetype = PeriodetypeBarnetilsyn.ORDINÆR,
+                                    aktivitet = AktivitetstypeBarnetilsyn.I_ARBEID,
+                                ),
+                            ),
+                        begrunnelse = "",
                     ),
-                ),
-                begrunnelse = "",
-            ),
-            kontantstøtte = KontantstøtteWrapper(emptyList()),
-            tilleggsstønad = TilleggsstønadWrapper(false, emptyList(), null),
-            saksbehandlerIdent = "julenissen",
-            opprettetAv = "julenissen",
-
-        )
+                kontantstøtte = KontantstøtteWrapper(emptyList()),
+                tilleggsstønad = TilleggsstønadWrapper(false, emptyList(), null),
+                saksbehandlerIdent = "julenissen",
+                opprettetAv = "julenissen",
+            )
 
         val vedtakRespons: ResponseEntity<Ressurs<InnvilgelseBarnetilsyn?>> = hentVedtak(behandling.id)
 
@@ -110,44 +112,48 @@ internal class LagreVedtakControllerTest : OppslagSpringRunnerTest() {
         val (behandling, barn) = opprettFagsakOgBehandlingMedBarn()
         val utgiftsperiode = lagUtgiftsperioder(barn)
         val kontantstøttePeriode = lagKontantstøttePeriode(3000)
-        val vedtakDto = InnvilgelseBarnetilsyn(
-            begrunnelse = "",
-            perioder = listOf(utgiftsperiode),
-            perioderKontantstøtte = listOf(kontantstøttePeriode),
-            tilleggsstønad = tomTillegsstønad(),
-            _type = "InnvilgelseBarnetilsynUtenUtbetaling",
-        )
+        val vedtakDto =
+            InnvilgelseBarnetilsyn(
+                begrunnelse = "",
+                perioder = listOf(utgiftsperiode),
+                perioderKontantstøtte = listOf(kontantstøttePeriode),
+                tilleggsstønad = tomTillegsstønad(),
+                _type = "InnvilgelseBarnetilsynUtenUtbetaling",
+            )
 
         val respons: ResponseEntity<Ressurs<UUID>> = fullførVedtak(behandling.id, vedtakDto)
-        val vedtak = Vedtak(
-            behandlingId = behandling.id,
-            resultatType = ResultatType.INNVILGE_UTEN_UTBETALING,
-            avslåBegrunnelse = null,
-            barnetilsyn = BarnetilsynWrapper(
-                perioder = listOf(
-                    Barnetilsynperiode(
-                        periode = utgiftsperiode.periode,
-                        utgifter = utgiftsperiode.utgifter,
-                        barn = utgiftsperiode.barn,
-                        periodetype = PeriodetypeBarnetilsyn.ORDINÆR,
-                        aktivitet = AktivitetstypeBarnetilsyn.I_ARBEID,
+        val vedtak =
+            Vedtak(
+                behandlingId = behandling.id,
+                resultatType = ResultatType.INNVILGE_UTEN_UTBETALING,
+                avslåBegrunnelse = null,
+                barnetilsyn =
+                    BarnetilsynWrapper(
+                        perioder =
+                            listOf(
+                                Barnetilsynperiode(
+                                    periode = utgiftsperiode.periode,
+                                    utgifter = utgiftsperiode.utgifter,
+                                    barn = utgiftsperiode.barn,
+                                    periodetype = PeriodetypeBarnetilsyn.ORDINÆR,
+                                    aktivitet = AktivitetstypeBarnetilsyn.I_ARBEID,
+                                ),
+                            ),
+                        begrunnelse = "",
                     ),
-                ),
-                begrunnelse = "",
-            ),
-            kontantstøtte = KontantstøtteWrapper(
-                listOf(
-                    PeriodeMedBeløp(
-                        periode = kontantstøttePeriode.periode,
-                        beløp = kontantstøttePeriode.beløp,
-
+                kontantstøtte =
+                    KontantstøtteWrapper(
+                        listOf(
+                            PeriodeMedBeløp(
+                                periode = kontantstøttePeriode.periode,
+                                beløp = kontantstøttePeriode.beløp,
+                            ),
+                        ),
                     ),
-                ),
-            ),
-            tilleggsstønad = TilleggsstønadWrapper(false, emptyList(), null),
-            saksbehandlerIdent = "julenissen",
-            opprettetAv = "julenissen",
-        )
+                tilleggsstønad = TilleggsstønadWrapper(false, emptyList(), null),
+                saksbehandlerIdent = "julenissen",
+                opprettetAv = "julenissen",
+            )
 
         val vedtakRespons: ResponseEntity<Ressurs<InnvilgelseBarnetilsyn?>> = hentVedtak(behandling.id)
 
@@ -165,13 +171,14 @@ internal class LagreVedtakControllerTest : OppslagSpringRunnerTest() {
         val (behandling, barn) = opprettFagsakOgBehandlingMedBarn()
         val utgiftsperiode = lagUtgiftsperioder(barn)
         val kontantstøttePeriode = lagKontantstøttePeriode(0)
-        val vedtakDto = InnvilgelseBarnetilsyn(
-            begrunnelse = "",
-            perioder = listOf(utgiftsperiode),
-            perioderKontantstøtte = listOf(kontantstøttePeriode),
-            tilleggsstønad = tomTillegsstønad(),
-            _type = "InnvilgelseBarnetilsynUtenUtbetaling",
-        )
+        val vedtakDto =
+            InnvilgelseBarnetilsyn(
+                begrunnelse = "",
+                perioder = listOf(utgiftsperiode),
+                perioderKontantstøtte = listOf(kontantstøttePeriode),
+                tilleggsstønad = tomTillegsstønad(),
+                _type = "InnvilgelseBarnetilsynUtenUtbetaling",
+            )
 
         val respons: ResponseEntity<Ressurs<UUID>> = fullførVedtak(behandling.id, vedtakDto)
 
@@ -185,13 +192,14 @@ internal class LagreVedtakControllerTest : OppslagSpringRunnerTest() {
         val (behandling, barn) = opprettFagsakOgBehandlingMedBarn()
         val utgiftsperiode = lagUtgiftsperioder(barn)
         val kontantstøttePeriode = lagKontantstøttePeriode(3000)
-        val vedtakDto = InnvilgelseBarnetilsyn(
-            begrunnelse = "",
-            perioder = listOf(utgiftsperiode),
-            perioderKontantstøtte = listOf(kontantstøttePeriode),
-            tilleggsstønad = tomTillegsstønad(),
-            _type = "InnvilgelseBarnetilsyn",
-        )
+        val vedtakDto =
+            InnvilgelseBarnetilsyn(
+                begrunnelse = "",
+                perioder = listOf(utgiftsperiode),
+                perioderKontantstøtte = listOf(kontantstøttePeriode),
+                tilleggsstønad = tomTillegsstønad(),
+                _type = "InnvilgelseBarnetilsyn",
+            )
 
         val respons: ResponseEntity<Ressurs<UUID>> = fullførVedtak(behandling.id, vedtakDto)
 
@@ -200,63 +208,72 @@ internal class LagreVedtakControllerTest : OppslagSpringRunnerTest() {
         Assertions.assertThat(respons.body?.data).isNull()
     }
 
-    private fun tomTillegsstønad() = TilleggsstønadDto(
-        harTilleggsstønad = false,
-        perioder = listOf(),
-        begrunnelse = null,
-    )
+    private fun tomTillegsstønad() =
+        TilleggsstønadDto(
+            harTilleggsstønad = false,
+            perioder = listOf(),
+            begrunnelse = null,
+        )
 
-    private fun lagKontantstøttePeriode(beløp: Int): PeriodeMedBeløpDto = PeriodeMedBeløpDto(
-        årMånedFra = YearMonth.of(2022, 1),
-        årMånedTil = YearMonth.of(2022, 3),
-        periode = Månedsperiode(YearMonth.of(2022, 1), YearMonth.of(2022, 3)),
-        beløp = beløp,
-    )
-
-    private fun lagUtgiftsperioder(barn: BehandlingBarn): UtgiftsperiodeDto {
-        val utgiftsperiode = UtgiftsperiodeDto(
+    private fun lagKontantstøttePeriode(beløp: Int): PeriodeMedBeløpDto =
+        PeriodeMedBeløpDto(
             årMånedFra = YearMonth.of(2022, 1),
             årMånedTil = YearMonth.of(2022, 3),
             periode = Månedsperiode(YearMonth.of(2022, 1), YearMonth.of(2022, 3)),
-            barn = listOf(barn.id),
-            utgifter = 2500,
-            periodetype = PeriodetypeBarnetilsyn.ORDINÆR,
-            aktivitetstype = AktivitetstypeBarnetilsyn.I_ARBEID,
-            sanksjonsårsak = null,
+            beløp = beløp,
         )
+
+    private fun lagUtgiftsperioder(barn: BehandlingBarn): UtgiftsperiodeDto {
+        val utgiftsperiode =
+            UtgiftsperiodeDto(
+                årMånedFra = YearMonth.of(2022, 1),
+                årMånedTil = YearMonth.of(2022, 3),
+                periode = Månedsperiode(YearMonth.of(2022, 1), YearMonth.of(2022, 3)),
+                barn = listOf(barn.id),
+                utgifter = 2500,
+                periodetype = PeriodetypeBarnetilsyn.ORDINÆR,
+                aktivitetstype = AktivitetstypeBarnetilsyn.I_ARBEID,
+                sanksjonsårsak = null,
+            )
         return utgiftsperiode
     }
 
     private fun opprettFagsakOgBehandlingMedBarn(): Pair<Behandling, BehandlingBarn> {
-        val fagsak = testoppsettService.lagreFagsak(
-            fagsak(
-                stønadstype = StønadType.BARNETILSYN,
-                identer = setOf(PersonIdent("")),
-            ),
-        )
-        val behandling = behandlingRepository.insert(
-            behandling(
-                fagsak,
-                steg = StegType.BEREGNE_YTELSE,
-                type = BehandlingType.FØRSTEGANGSBEHANDLING,
-                status = BehandlingStatus.UTREDES,
-            ),
-        )
+        val fagsak =
+            testoppsettService.lagreFagsak(
+                fagsak(
+                    stønadstype = StønadType.BARNETILSYN,
+                    identer = setOf(PersonIdent("")),
+                ),
+            )
+        val behandling =
+            behandlingRepository.insert(
+                behandling(
+                    fagsak,
+                    steg = StegType.BEREGNE_YTELSE,
+                    type = BehandlingType.FØRSTEGANGSBEHANDLING,
+                    status = BehandlingStatus.UTREDES,
+                ),
+            )
 
-        val barn = barnRepository.insert(
-            behandlingBarn(
-                UUID.randomUUID(),
-                behandling.id,
-                UUID.randomUUID(),
-                "01012212345",
-                "Junior",
-                LocalDate.now(),
-            ),
-        )
+        val barn =
+            barnRepository.insert(
+                behandlingBarn(
+                    UUID.randomUUID(),
+                    behandling.id,
+                    UUID.randomUUID(),
+                    "01012212345",
+                    "Junior",
+                    LocalDate.now(),
+                ),
+            )
         return Pair(behandling, barn)
     }
 
-    private fun fullførVedtak(id: UUID, vedtakDto: VedtakDto): ResponseEntity<Ressurs<UUID>> {
+    private fun fullførVedtak(
+        id: UUID,
+        vedtakDto: VedtakDto,
+    ): ResponseEntity<Ressurs<UUID>> {
         return restTemplate.exchange(
             localhost("/api/vedtak/$id/lagre-vedtak"),
             HttpMethod.POST,

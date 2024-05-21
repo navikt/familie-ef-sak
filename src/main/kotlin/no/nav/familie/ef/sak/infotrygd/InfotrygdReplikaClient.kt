@@ -21,7 +21,6 @@ class InfotrygdReplikaClient(
     restOperations: RestOperations,
 ) :
     AbstractPingableRestClient(restOperations, "infotrygd.replika") {
-
     private val perioderUri: URI =
         UriComponentsBuilder.fromUri(infotrygdReplikaUri).pathSegment("api/perioder").build().toUri()
 
