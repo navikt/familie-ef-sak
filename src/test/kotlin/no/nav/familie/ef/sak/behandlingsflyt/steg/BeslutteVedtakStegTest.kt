@@ -56,7 +56,6 @@ import java.util.Properties
 import java.util.UUID
 
 internal class BeslutteVedtakStegTest {
-
     private val taskService = mockk<TaskService>()
     private val fagsakService = mockk<FagsakService>()
     private val totrinnskontrollService = mockk<TotrinnskontrollService>(relaxed = true)
@@ -67,35 +66,38 @@ internal class BeslutteVedtakStegTest {
     private val vedtaksbrevService = mockk<VedtaksbrevService>()
     private val behandlingService = mockk<BehandlingService>()
 
-    private val beslutteVedtakSteg = BeslutteVedtakSteg(
-        taskService = taskService,
-        fagsakService = fagsakService,
-        oppgaveService = oppgaveService,
-        iverksettClient = iverksett,
-        iverksettingDtoMapper = iverksettingDtoMapper,
-        totrinnskontrollService = totrinnskontrollService,
-        behandlingService = behandlingService,
-        vedtakService = vedtakService,
-        vedtaksbrevService = vedtaksbrevService,
-    )
+    private val beslutteVedtakSteg =
+        BeslutteVedtakSteg(
+            taskService = taskService,
+            fagsakService = fagsakService,
+            oppgaveService = oppgaveService,
+            iverksettClient = iverksett,
+            iverksettingDtoMapper = iverksettingDtoMapper,
+            totrinnskontrollService = totrinnskontrollService,
+            behandlingService = behandlingService,
+            vedtakService = vedtakService,
+            vedtaksbrevService = vedtaksbrevService,
+        )
 
     private val vedtakKreverBeslutter = VedtakErUtenBeslutter(false)
     private val vedtakErUtenBeslutter = VedtakErUtenBeslutter(true)
     private val innloggetBeslutter = "sign2"
 
-    private val fagsak = fagsak(
-        stønadstype = StønadType.OVERGANGSSTØNAD,
-        identer = setOf(PersonIdent(ident = "12345678901")),
-    )
+    private val fagsak =
+        fagsak(
+            stønadstype = StønadType.OVERGANGSSTØNAD,
+            identer = setOf(PersonIdent(ident = "12345678901")),
+        )
     private val behandlingId = UUID.randomUUID()
 
-    private val oppgave = Oppgave(
-        id = UUID.randomUUID(),
-        behandlingId = behandlingId,
-        gsakOppgaveId = 123L,
-        type = Oppgavetype.BehandleSak,
-        erFerdigstilt = false,
-    )
+    private val oppgave =
+        Oppgave(
+            id = UUID.randomUUID(),
+            behandlingId = behandlingId,
+            gsakOppgaveId = 123L,
+            type = Oppgavetype.BehandleSak,
+            erFerdigstilt = false,
+        )
     private lateinit var taskSlot: MutableList<Task>
 
     @BeforeEach
@@ -159,11 +161,12 @@ internal class BeslutteVedtakStegTest {
 
     @Test
     internal fun `skal opprette opprettBehandleUnderkjentVedtakOppgave etter beslutte vedtak hvis underkjent`() {
-        val nesteSteg = utførTotrinnskontroll(
-            godkjent = false,
-            begrunnelse = "begrunnelse",
-            årsakerUnderkjent = listOf(ÅrsakUnderkjent.AKTIVITET),
-        )
+        val nesteSteg =
+            utførTotrinnskontroll(
+                godkjent = false,
+                begrunnelse = "begrunnelse",
+                årsakerUnderkjent = listOf(ÅrsakUnderkjent.AKTIVITET),
+            )
 
         val deserializedPayload = objectMapper.readValue<OpprettOppgaveTask.OpprettOppgaveTaskData>(taskSlot[1].payload)
 
@@ -199,9 +202,10 @@ internal class BeslutteVedtakStegTest {
 
     @Test
     internal fun `skal ikke ha beslutter ved avslag og mindre inntektsendringer`() {
-        every { vedtakService.hentVedtak(any()) } returns vedtak(behandlingId, resultatType = ResultatType.AVSLÅ).copy(
-            avslåÅrsak = AvslagÅrsak.MINDRE_INNTEKTSENDRINGER,
-        )
+        every { vedtakService.hentVedtak(any()) } returns
+            vedtak(behandlingId, resultatType = ResultatType.AVSLÅ).copy(
+                avslåÅrsak = AvslagÅrsak.MINDRE_INNTEKTSENDRINGER,
+            )
         every {
             vedtaksbrevService.lagEndeligBeslutterbrev(any(), vedtakErUtenBeslutter)
         } returns Fil("123".toByteArray())

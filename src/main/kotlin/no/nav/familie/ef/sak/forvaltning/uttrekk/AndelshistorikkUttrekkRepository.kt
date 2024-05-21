@@ -7,7 +7,6 @@ import java.util.UUID
 
 @Repository
 interface AndelshistorikkUttrekkRepository : RepositoryInterface<UttrekkFagsakMedAndelshistorikk, UUID> {
-
     @Query(
         """
          select distinct(f.id)

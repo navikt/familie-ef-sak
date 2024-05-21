@@ -23,7 +23,6 @@ data class Fagsak(
     val migrert: Boolean,
     val sporbar: Sporbar,
 ) {
-
     fun erAktivIdent(personIdent: String): Boolean = hentAktivIdent() == personIdent
 
     fun hentAktivIdent(): String {

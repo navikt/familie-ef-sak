@@ -25,10 +25,11 @@ class BarnController(
     private val nyeBarnService: NyeBarnService,
     private val tilgangService: TilgangService,
 ) {
-
     // denne skal kalles på fra ef-personhendelse(client_credential) for å opprette oppgaver for nye eller for tidligt fødte barn
     @PostMapping("nye-eller-tidligere-fodte-barn")
-    fun finnNyeEllerTidligereFødteBarn(@RequestBody personIdent: PersonIdent): Ressurs<NyeBarnDto> {
+    fun finnNyeEllerTidligereFødteBarn(
+        @RequestBody personIdent: PersonIdent,
+    ): Ressurs<NyeBarnDto> {
         if (!SikkerhetContext.erMaskinTilMaskinToken()) {
             tilgangService.validerTilgangTilPerson(personIdent.ident, AuditLoggerEvent.ACCESS)
         }

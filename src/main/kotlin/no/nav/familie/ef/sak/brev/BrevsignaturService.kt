@@ -12,7 +12,6 @@ import org.springframework.stereotype.Service
 
 @Service
 class BrevsignaturService(val personopplysningerService: PersonopplysningerService) {
-
     fun lagSignaturMedEnhet(saksbehandling: Saksbehandling): SignaturDto {
         return lagSignaturDto(saksbehandling.ident)
     }
@@ -21,7 +20,10 @@ class BrevsignaturService(val personopplysningerService: PersonopplysningerServi
         return lagSignaturDto(fagsak.hentAktivIdent())
     }
 
-    fun lagSignaturMedEnhet(saksbehandling: Saksbehandling, vedtakErUtenBeslutter: VedtakErUtenBeslutter): SignaturDto {
+    fun lagSignaturMedEnhet(
+        saksbehandling: Saksbehandling,
+        vedtakErUtenBeslutter: VedtakErUtenBeslutter,
+    ): SignaturDto {
         if (vedtakErUtenBeslutter.value) {
             return SignaturDto("", "", true)
         }
@@ -41,7 +43,6 @@ class BrevsignaturService(val personopplysningerService: PersonopplysningerServi
     }
 
     companion object {
-
         val NAV_ANONYM_NAVN = "NAV anonym"
         val ENHET_VIKAFOSSEN = "NAV Vikafossen"
         val ENHET_NAY = "NAV Arbeid og ytelser"

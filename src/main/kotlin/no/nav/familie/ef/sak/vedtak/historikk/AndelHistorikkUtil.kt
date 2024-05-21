@@ -6,7 +6,6 @@ import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
 import no.nav.familie.kontrakter.felles.ef.StønadType
 
 object AndelHistorikkUtil {
-
     fun List<AndelHistorikkDto>.slåSammen(harSammeVerdi: (AndelHistorikkDto, AndelHistorikkDto) -> Boolean): List<AndelHistorikkDto> {
         return this.fold(mutableListOf()) { acc, entry ->
             val last = acc.lastOrNull()
@@ -29,35 +28,38 @@ object AndelHistorikkUtil {
     fun periodeTypeOvergangsstønad(
         stønadstype: StønadType,
         vedtaksperiode: Vedtakshistorikkperiode,
-    ): VedtaksperiodeType? = when {
-        stønadstype != StønadType.OVERGANGSSTØNAD -> null
-        vedtaksperiode is VedtakshistorikkperiodeOvergangsstønad -> vedtaksperiode.periodeType
-        vedtaksperiode is Sanksjonsperiode -> VedtaksperiodeType.SANKSJON
-        vedtaksperiode is Opphørsperiode -> null
-        else -> error("Kan ikke mappe ${vedtaksperiode.javaClass.simpleName}")
-    }
+    ): VedtaksperiodeType? =
+        when {
+            stønadstype != StønadType.OVERGANGSSTØNAD -> null
+            vedtaksperiode is VedtakshistorikkperiodeOvergangsstønad -> vedtaksperiode.periodeType
+            vedtaksperiode is Sanksjonsperiode -> VedtaksperiodeType.SANKSJON
+            vedtaksperiode is Opphørsperiode -> null
+            else -> error("Kan ikke mappe ${vedtaksperiode.javaClass.simpleName}")
+        }
 
     fun periodeTypeBarnetilsyn(
         stønadstype: StønadType,
         vedtaksperiode: Vedtakshistorikkperiode,
-    ): PeriodetypeBarnetilsyn? = when {
-        stønadstype != StønadType.BARNETILSYN -> null
-        vedtaksperiode is VedtakshistorikkperiodeBarnetilsyn -> vedtaksperiode.periodetype
-        vedtaksperiode is Sanksjonsperiode -> PeriodetypeBarnetilsyn.SANKSJON_1_MND
-        vedtaksperiode is Opphørsperiode -> null
-        else -> error("Kan ikke mappe ${vedtaksperiode.javaClass.simpleName}")
-    }
+    ): PeriodetypeBarnetilsyn? =
+        when {
+            stønadstype != StønadType.BARNETILSYN -> null
+            vedtaksperiode is VedtakshistorikkperiodeBarnetilsyn -> vedtaksperiode.periodetype
+            vedtaksperiode is Sanksjonsperiode -> PeriodetypeBarnetilsyn.SANKSJON_1_MND
+            vedtaksperiode is Opphørsperiode -> null
+            else -> error("Kan ikke mappe ${vedtaksperiode.javaClass.simpleName}")
+        }
 
     fun aktivitetOvergangsstønad(
         stønadstype: StønadType,
         vedtaksperiode: Vedtakshistorikkperiode,
-    ): AktivitetType? = when {
-        stønadstype != StønadType.OVERGANGSSTØNAD -> null
-        vedtaksperiode is VedtakshistorikkperiodeOvergangsstønad -> vedtaksperiode.aktivitet
-        vedtaksperiode is Sanksjonsperiode -> AktivitetType.IKKE_AKTIVITETSPLIKT
-        vedtaksperiode is Opphørsperiode -> AktivitetType.IKKE_AKTIVITETSPLIKT
-        else -> error("Kan ikke mappe ${vedtaksperiode.javaClass.simpleName}")
-    }
+    ): AktivitetType? =
+        when {
+            stønadstype != StønadType.OVERGANGSSTØNAD -> null
+            vedtaksperiode is VedtakshistorikkperiodeOvergangsstønad -> vedtaksperiode.aktivitet
+            vedtaksperiode is Sanksjonsperiode -> AktivitetType.IKKE_AKTIVITETSPLIKT
+            vedtaksperiode is Opphørsperiode -> AktivitetType.IKKE_AKTIVITETSPLIKT
+            else -> error("Kan ikke mappe ${vedtaksperiode.javaClass.simpleName}")
+        }
 }
 
 data class HistorikkKonfigurasjon(

@@ -24,7 +24,6 @@ import java.time.LocalDate
 import java.util.UUID
 
 internal class ÅrsakRevurderingServiceTest {
-
     private val behandlingService = mockk<BehandlingService>()
     private val årsakRevurderingsRepository = mockk<ÅrsakRevurderingsRepository>()
     private val tilordnetRessursService = mockk<TilordnetRessursService>()
@@ -52,7 +51,6 @@ internal class ÅrsakRevurderingServiceTest {
 
     @Nested
     inner class ValiderHarGyldigRevurderingsinformasjon {
-
         @Test
         internal fun `skal ikke validere hvis det er førstegångsbehandling`() {
             service.validerHarGyldigRevurderingsinformasjon(førstegångsbehandling)
@@ -85,19 +83,20 @@ internal class ÅrsakRevurderingServiceTest {
          */
         @Test
         internal fun `validerHarGyldigRevurderingsinformasjon har tatt stilling til alle behandlingsårsaker`() {
-            val årsakerSomErTattStillingTil = setOf(
-                BehandlingÅrsak.KLAGE,
-                BehandlingÅrsak.NYE_OPPLYSNINGER,
-                BehandlingÅrsak.SANKSJON_1_MND,
-                BehandlingÅrsak.SØKNAD,
-                BehandlingÅrsak.MIGRERING,
-                BehandlingÅrsak.G_OMREGNING,
-                BehandlingÅrsak.IVERKSETTE_KA_VEDTAK,
-                BehandlingÅrsak.KORRIGERING_UTEN_BREV,
-                BehandlingÅrsak.PAPIRSØKNAD,
-                BehandlingÅrsak.SATSENDRING,
-                BehandlingÅrsak.MANUELT_OPPRETTET,
-            )
+            val årsakerSomErTattStillingTil =
+                setOf(
+                    BehandlingÅrsak.KLAGE,
+                    BehandlingÅrsak.NYE_OPPLYSNINGER,
+                    BehandlingÅrsak.SANKSJON_1_MND,
+                    BehandlingÅrsak.SØKNAD,
+                    BehandlingÅrsak.MIGRERING,
+                    BehandlingÅrsak.G_OMREGNING,
+                    BehandlingÅrsak.IVERKSETTE_KA_VEDTAK,
+                    BehandlingÅrsak.KORRIGERING_UTEN_BREV,
+                    BehandlingÅrsak.PAPIRSØKNAD,
+                    BehandlingÅrsak.SATSENDRING,
+                    BehandlingÅrsak.MANUELT_OPPRETTET,
+                )
             val alleÅrsaker = BehandlingÅrsak.values().toSet()
             assertThat(årsakerSomErTattStillingTil).containsExactlyInAnyOrderElementsOf(alleÅrsaker)
         }

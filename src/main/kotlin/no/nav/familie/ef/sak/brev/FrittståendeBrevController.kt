@@ -20,7 +20,6 @@ class FrittståendeBrevController(
     private val frittståendeBrevService: FrittståendeBrevService,
     private val tilgangService: TilgangService,
 ) {
-
     @PostMapping("/{fagsakId}/{brevMal}")
     fun forhåndsvisFrittsåendeSanitybrev(
         @PathVariable fagsakId: UUID,

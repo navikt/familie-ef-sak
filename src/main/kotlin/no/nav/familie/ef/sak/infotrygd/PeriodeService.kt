@@ -21,24 +21,26 @@ class PeriodeService(
     private val tilkjentYtelseService: TilkjentYtelseService,
     private val infotrygdService: InfotrygdService,
 ) {
-
     fun hentPerioderFraEfOgInfotrygd(personIdent: String): InternePerioder {
         val personIdenter = personService.hentPersonIdenter(personIdent).identer()
         val perioderFraReplika = infotrygdService.hentSammenslåttePerioderSomInternPerioder(personIdenter)
 
         return InternePerioder(
-            overgangsstønad = slåSammenPerioder(
-                hentPerioderFraEf(personIdenter, StønadType.OVERGANGSSTØNAD),
-                perioderFraReplika.overgangsstønad,
-            ),
-            barnetilsyn = slåSammenPerioder(
-                hentPerioderFraEf(personIdenter, StønadType.BARNETILSYN),
-                perioderFraReplika.barnetilsyn,
-            ),
-            skolepenger = slåSammenPerioder(
-                hentPerioderFraEf(personIdenter, StønadType.SKOLEPENGER),
-                perioderFraReplika.skolepenger,
-            ),
+            overgangsstønad =
+                slåSammenPerioder(
+                    hentPerioderFraEf(personIdenter, StønadType.OVERGANGSSTØNAD),
+                    perioderFraReplika.overgangsstønad,
+                ),
+            barnetilsyn =
+                slåSammenPerioder(
+                    hentPerioderFraEf(personIdenter, StønadType.BARNETILSYN),
+                    perioderFraReplika.barnetilsyn,
+                ),
+            skolepenger =
+                slåSammenPerioder(
+                    hentPerioderFraEf(personIdenter, StønadType.SKOLEPENGER),
+                    perioderFraReplika.skolepenger,
+                ),
         )
     }
 
@@ -51,7 +53,10 @@ class PeriodeService(
         return slåSammenPerioder(perioderFraEf, perioderFraReplika)
     }
 
-    private fun hentPerioderFraEf(personIdenter: Set<String>, stønadstype: StønadType): EfInternPerioder? {
+    private fun hentPerioderFraEf(
+        personIdenter: Set<String>,
+        stønadstype: StønadType,
+    ): EfInternPerioder? {
         return fagsakService.finnFagsak(personIdenter, stønadstype)
             ?.let { behandlingService.finnSisteIverksatteBehandling(it.id) }
             ?.let { behandling ->
@@ -69,28 +74,30 @@ class PeriodeService(
             .sortedWith(compareBy<InternPeriode> { it.stønadFom }.reversed())
 }
 
-private fun AndelTilkjentYtelse.tilInternPeriode(): InternPeriode = InternPeriode(
-    personIdent = this.personIdent,
-    inntektsreduksjon = this.inntektsreduksjon,
-    samordningsfradrag = this.samordningsfradrag,
-    utgifterBarnetilsyn = 0, // this.utgifterBarnetilsyn TODO
-    månedsbeløp = this.beløp,
-    engangsbeløp = this.beløp,
-    stønadFom = this.stønadFom,
-    stønadTom = this.stønadTom,
-    opphørsdato = null,
-    datakilde = Datakilde.EF,
-)
+private fun AndelTilkjentYtelse.tilInternPeriode(): InternPeriode =
+    InternPeriode(
+        personIdent = this.personIdent,
+        inntektsreduksjon = this.inntektsreduksjon,
+        samordningsfradrag = this.samordningsfradrag,
+        utgifterBarnetilsyn = 0, // this.utgifterBarnetilsyn TODO
+        månedsbeløp = this.beløp,
+        engangsbeløp = this.beløp,
+        stønadFom = this.stønadFom,
+        stønadTom = this.stønadTom,
+        opphørsdato = null,
+        datakilde = Datakilde.EF,
+    )
 
-fun InfotrygdPeriode.tilInternPeriode(): InternPeriode = InternPeriode(
-    personIdent = this.personIdent,
-    inntektsreduksjon = this.inntektsreduksjon,
-    samordningsfradrag = this.samordningsfradrag,
-    utgifterBarnetilsyn = this.utgifterBarnetilsyn,
-    månedsbeløp = this.månedsbeløp,
-    engangsbeløp = this.engangsbeløp,
-    stønadFom = this.stønadFom,
-    stønadTom = this.stønadTom,
-    opphørsdato = this.opphørsdato,
-    datakilde = Datakilde.INFOTRYGD,
-)
+fun InfotrygdPeriode.tilInternPeriode(): InternPeriode =
+    InternPeriode(
+        personIdent = this.personIdent,
+        inntektsreduksjon = this.inntektsreduksjon,
+        samordningsfradrag = this.samordningsfradrag,
+        utgifterBarnetilsyn = this.utgifterBarnetilsyn,
+        månedsbeløp = this.månedsbeløp,
+        engangsbeløp = this.engangsbeløp,
+        stønadFom = this.stønadFom,
+        stønadTom = this.stønadTom,
+        opphørsdato = this.opphørsdato,
+        datakilde = Datakilde.INFOTRYGD,
+    )

@@ -19,7 +19,6 @@ import java.time.YearMonth
 import java.util.UUID
 
 internal class AMeldingInntektControllerTest : OppslagSpringRunnerTest() {
-
     @Autowired
     private lateinit var aMeldingInntektClient: AMeldingInntektClient
 

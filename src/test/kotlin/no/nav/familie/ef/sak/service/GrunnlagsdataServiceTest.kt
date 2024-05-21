@@ -7,7 +7,7 @@ import no.nav.familie.ef.sak.arbeidsforhold.ekstern.ArbeidsforholdService
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.infrastruktur.config.PdlClientConfig
-import no.nav.familie.ef.sak.infrastruktur.config.PdlClientConfig.Companion.annenForelderFnr
+import no.nav.familie.ef.sak.infrastruktur.config.PdlClientConfig.Companion.ANNEN_FORELDER_FNR
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.kontantstøtte.KontantstøtteService
 import no.nav.familie.ef.sak.oppgave.TilordnetRessursService
@@ -138,8 +138,8 @@ internal class GrunnlagsdataServiceTest {
 
     @Test
     internal fun `skal sjekke om personen har historikk i infotrygd`() {
-        val identifikatorSøker = folkeregisteridentifikator(PdlClientConfig.søkerFnr)
-        val folkeregisteridentifikatorAnnenForelder = folkeregisteridentifikator(annenForelderFnr)
+        val identifikatorSøker = folkeregisteridentifikator(PdlClientConfig.SØKER_FNR)
+        val folkeregisteridentifikatorAnnenForelder = folkeregisteridentifikator(ANNEN_FORELDER_FNR)
         val defaultTidligereInnvilgetVedtak = TidligereInnvilgetVedtak(true, true, false)
 
         every { tidligereVedtaksperioderService.hentTidligereVedtaksperioder(eq(listOf(identifikatorSøker))) } returns

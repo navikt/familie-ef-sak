@@ -43,7 +43,6 @@ class OppgaveController(
     private val personService: PersonService,
     private val tilordnetRessursService: TilordnetRessursService,
 ) {
-
     private val logger = LoggerFactory.getLogger(javaClass)
     private val secureLogger = LoggerFactory.getLogger("secureLogger")
 
@@ -52,11 +51,14 @@ class OppgaveController(
         consumes = [MediaType.APPLICATION_JSON_VALUE],
         produces = [MediaType.APPLICATION_JSON_VALUE],
     )
-    fun hentOppgaver(@RequestBody finnOppgaveRequest: FinnOppgaveRequestDto): Ressurs<OppgaveResponseDto> {
+    fun hentOppgaver(
+        @RequestBody finnOppgaveRequest: FinnOppgaveRequestDto,
+    ): Ressurs<OppgaveResponseDto> {
         validerOptionalIdent(finnOppgaveRequest.ident)
 
-        val aktørId = finnOppgaveRequest.ident.takeUnless { it.isNullOrBlank() }
-            ?.let { personService.hentAktørIder(it).identer.first().ident }
+        val aktørId =
+            finnOppgaveRequest.ident.takeUnless { it.isNullOrBlank() }
+                ?.let { personService.hentAktørIder(it).identer.first().ident }
 
         secureLogger.info("AktoerId: $aktørId, Ident: ${finnOppgaveRequest.ident}")
         val oppgaveRepons = oppgaveService.hentOppgaver(finnOppgaveRequest.tilFinnOppgaveRequest(aktørId))
@@ -86,7 +88,9 @@ class OppgaveController(
     }
 
     @GetMapping(path = ["/{gsakOppgaveId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun hentOppgave(@PathVariable(name = "gsakOppgaveId") gsakOppgaveId: Long): Ressurs<OppgaveDto> {
+    fun hentOppgave(
+        @PathVariable(name = "gsakOppgaveId") gsakOppgaveId: Long,
+    ): Ressurs<OppgaveDto> {
         tilgangService.validerHarSaksbehandlerrolle()
         val efOppgave = oppgaveService.hentEfOppgave(gsakOppgaveId)
         return efOppgave?.let { Ressurs.success(OppgaveDto(it.behandlingId, it.gsakOppgaveId)) }
@@ -97,14 +101,18 @@ class OppgaveController(
     }
 
     @GetMapping("/oppslag/{gsakOppgaveId}")
-    fun hentOppgaveFraGosys(@PathVariable(name = "gsakOppgaveId") gsakOppgaveId: Long): Ressurs<OppgaveEfDto> {
+    fun hentOppgaveFraGosys(
+        @PathVariable(name = "gsakOppgaveId") gsakOppgaveId: Long,
+    ): Ressurs<OppgaveEfDto> {
         tilgangService.validerHarSaksbehandlerrolle()
         return Ressurs.success(oppgaveService.hentOppgave(gsakOppgaveId).tilDto())
     }
 
     @Deprecated("Har ikke lenger behov for logging - fjern etter at frontend slutter å kalle på dette endepunktet")
     @GetMapping("{behandlingId}/tilordnet-ressurs")
-    fun hentTilordnetRessursForBehandlingId(@PathVariable behandlingId: UUID): Ressurs<String?> {
+    fun hentTilordnetRessursForBehandlingId(
+        @PathVariable behandlingId: UUID,
+    ): Ressurs<String?> {
         val saksbehandlerIdent = SikkerhetContext.hentSaksbehandlerEllerSystembruker()
         val oppgave = tilordnetRessursService.hentIkkeFerdigstiltOppgaveForBehandling(behandlingId)
         val saksbehandlerIdentIOppgaveSystemet = oppgave?.tilordnetRessurs
@@ -120,17 +128,22 @@ class OppgaveController(
     }
 
     @GetMapping("{behandlingId}/ansvarlig-saksbehandler")
-    fun hentAnsvarligSaksbehandlerForBehandling(@PathVariable behandlingId: UUID): Ressurs<SaksbehandlerDto> {
-        val oppgave = tilordnetRessursService.hentIkkeFerdigstiltOppgaveForBehandling(
-            behandlingId,
-            setOf(Oppgavetype.BehandleSak, Oppgavetype.BehandleUnderkjentVedtak, Oppgavetype.GodkjenneVedtak),
-        )
+    fun hentAnsvarligSaksbehandlerForBehandling(
+        @PathVariable behandlingId: UUID,
+    ): Ressurs<SaksbehandlerDto> {
+        val oppgave =
+            tilordnetRessursService.hentIkkeFerdigstiltOppgaveForBehandling(
+                behandlingId,
+                setOf(Oppgavetype.BehandleSak, Oppgavetype.BehandleUnderkjentVedtak, Oppgavetype.GodkjenneVedtak),
+            )
 
         return Ressurs.success(tilordnetRessursService.utledAnsvarligSaksbehandlerForOppgave(oppgave))
     }
 
     @GetMapping("/behandling/{behandlingId}")
-    fun hentOppgaveForBehandlingId(@PathVariable behandlingId: UUID): Ressurs<Oppgave> {
+    fun hentOppgaveForBehandlingId(
+        @PathVariable behandlingId: UUID,
+    ): Ressurs<Oppgave> {
         val oppgave = tilordnetRessursService.hentIkkeFerdigstiltOppgaveForBehandling(behandlingId)
 
         return oppgave?.let { Ressurs.success(it) } ?: throw ApiFeil(
@@ -140,7 +153,9 @@ class OppgaveController(
     }
 
     @GetMapping("/behandling/{behandlingId}/settpavent-oppgavestatus")
-    fun hentVurderHenvendelseStatus(@PathVariable behandlingId: UUID): Ressurs<List<VurderHenvendelseOppgaveDto>> {
+    fun hentVurderHenvendelseStatus(
+        @PathVariable behandlingId: UUID,
+    ): Ressurs<List<VurderHenvendelseOppgaveDto>> {
         val status: List<VurderHenvendelseOppgaveDto> = oppgaveService.finnVurderHenvendelseOppgaver(behandlingId)
         return Ressurs.success(status)
     }
@@ -155,15 +170,18 @@ class OppgaveController(
     }
 
     @GetMapping(path = ["/utdanningsuttrekk"])
-    fun utdanningsuttrekk(@RequestParam frist: LocalDate): Ressurs<List<UtdanningOppgaveDto>> {
+    fun utdanningsuttrekk(
+        @RequestParam frist: LocalDate,
+    ): Ressurs<List<UtdanningOppgaveDto>> {
         return Ressurs.success(oppgaveService.finnOppgaverIUtdanningsmappe(frist))
     }
 }
 
 private fun FinnOppgaveResponseDto.tilDto(): OppgaveResponseDto {
-    val oppgaver = oppgaver.map {
-        it.tilDto()
-    }
+    val oppgaver =
+        oppgaver.map {
+            it.tilDto()
+        }
     return OppgaveResponseDto(antallTreffTotalt, oppgaver)
 }
 

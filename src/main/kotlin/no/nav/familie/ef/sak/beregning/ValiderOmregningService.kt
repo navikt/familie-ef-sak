@@ -24,7 +24,6 @@ class ValiderOmregningService(
     private val beregningService: BeregningService,
     private val vedtakHistorikkService: VedtakHistorikkService,
 ) {
-
     fun validerHarSammePerioderSomTidligereVedtak(
         data: InnvilgelseOvergangsstønad,
         saksbehandling: Saksbehandling,
@@ -49,8 +48,9 @@ class ValiderOmregningService(
         }
         data.perioder.forEach {
             val fra = it.periode.fom
-            val tidligerePeriode = tidligerePerioder[fra]
-                ?: throw ApiFeil("Finner ikke periode fra $fra", HttpStatus.BAD_REQUEST)
+            val tidligerePeriode =
+                tidligerePerioder[fra]
+                    ?: throw ApiFeil("Finner ikke periode fra $fra", HttpStatus.BAD_REQUEST)
             brukerfeilHvis(tidligerePeriode.periode.tom != it.periode.tom) {
                 "Perioden fra $fra har annet tom-dato(${it.periode.tom} enn " +
                     "tidligere periode (${tidligerePeriode.periode.tom})"
@@ -93,11 +93,12 @@ class ValiderOmregningService(
         tilkjentYtelse.andelerTilkjentYtelse
             .filter { it.stønadTom > Grunnbeløpsperioder.nyesteGrunnbeløpGyldigFraOgMed.atDay(1) }
             .forEach { andel ->
-                val inntektsperiodeForAndel = Inntektsperiode(
-                    periode = andel.periode,
-                    inntekt = andel.inntekt.toBigDecimal(),
-                    samordningsfradrag = andel.samordningsfradrag.toBigDecimal(),
-                )
+                val inntektsperiodeForAndel =
+                    Inntektsperiode(
+                        periode = andel.periode,
+                        inntekt = andel.inntekt.toBigDecimal(),
+                        samordningsfradrag = andel.samordningsfradrag.toBigDecimal(),
+                    )
                 val beregnetAndel = beregningService.beregnYtelse(listOf(andel.periode), listOf(inntektsperiodeForAndel))
                 brukerfeilHvis(beregnetAndel.size != 1 || beregnetAndel.first().beløp.toInt() != andel.beløp) {
                     feilmeldingForFeilGBeløp(andel)

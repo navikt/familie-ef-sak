@@ -7,7 +7,6 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.gjeldende
 import java.time.LocalDate
 
 object AdresseHjelper {
-
     fun sorterAdresser(adresser: List<AdresseDto>): List<AdresseDto> {
         return adresser.sortedWith(
             compareBy<AdresseDto> { it.type.rekkefølge }
@@ -16,7 +15,10 @@ object AdresseHjelper {
         )
     }
 
-    fun harRegistrertSammeBostedsadresseSomForelder(barn: BarnMedIdent, bostedsadresserForelder: List<Bostedsadresse>): Boolean {
+    fun harRegistrertSammeBostedsadresseSomForelder(
+        barn: BarnMedIdent,
+        bostedsadresserForelder: List<Bostedsadresse>,
+    ): Boolean {
         return sammeMatrikkeladresse(bostedsadresserForelder.gjeldende(), barn.bostedsadresse.gjeldende()) ||
             sammeVegadresse(bostedsadresserForelder.gjeldende(), barn.bostedsadresse.gjeldende())
     }
@@ -30,12 +32,18 @@ object AdresseHjelper {
             bostedsadresseBarn.bruksenhetsnummer ?: "" == bostedsadresseForelder.bruksenhetsnummer ?: ""
     }
 
-    private fun sammeVegadresse(bostedsadresseForelder: Bostedsadresse?, bostedsadresseBarn: Bostedsadresse?): Boolean {
+    private fun sammeVegadresse(
+        bostedsadresseForelder: Bostedsadresse?,
+        bostedsadresseBarn: Bostedsadresse?,
+    ): Boolean {
         return bostedsadresseBarn?.vegadresse != null && bostedsadresseForelder?.vegadresse != null &&
             bostedsadresseBarn.vegadresse.erSammeVegadresse(bostedsadresseForelder.vegadresse)
     }
 
-    fun harDeltBosted(barn: BarnMedIdent?, dato: LocalDate): Boolean {
+    fun harDeltBosted(
+        barn: BarnMedIdent?,
+        dato: LocalDate,
+    ): Boolean {
         if (barn == null || barn.erOver18År()) {
             return false
         }

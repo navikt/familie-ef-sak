@@ -28,7 +28,6 @@ import org.junit.jupiter.api.assertThrows
 import java.time.YearMonth
 
 internal class InfotrygdPeriodeValideringServiceTest {
-
     private val infotrygdService = mockk<InfotrygdService>()
     private val behandlingService = mockk<BehandlingService>()
     private val featureToggleService = mockk<FeatureToggleService>()
@@ -47,7 +46,6 @@ internal class InfotrygdPeriodeValideringServiceTest {
 
     @Nested
     inner class ValiderKanJournalføreUtenÅMigrere {
-
         @Test
         internal fun `skal kunne journalføre når personen ikke har noen saker i infotrygd`() {
             every { infotrygdService.hentDtoPerioder(personIdent) } returns infotrygdPerioderDto(emptyList())
@@ -221,20 +219,21 @@ internal class InfotrygdPeriodeValideringServiceTest {
 
     @Nested
     inner class ValiderHarIkkeÅpenSakIInfotrygd {
-
         @Test
         internal fun `skal kunne migrere selv om personen har en klagesak`() {
             val fagsak = fagsak(stønadstype = BARNETILSYN)
-            every { infotrygdService.hentSaker(any()) } returns InfotrygdSakResponse(
-                saker = listOf(
-                    InfotrygdSak(
-                        personIdent = fagsak.hentAktivIdent(),
-                        stønadType = fagsak.stønadstype,
-                        resultat = InfotrygdSakResultat.ÅPEN_SAK,
-                        type = InfotrygdSakType.KLAGE,
-                    ),
-                ),
-            )
+            every { infotrygdService.hentSaker(any()) } returns
+                InfotrygdSakResponse(
+                    saker =
+                        listOf(
+                            InfotrygdSak(
+                                personIdent = fagsak.hentAktivIdent(),
+                                stønadType = fagsak.stønadstype,
+                                resultat = InfotrygdSakResultat.ÅPEN_SAK,
+                                type = InfotrygdSakType.KLAGE,
+                            ),
+                        ),
+                )
 
             service.validerHarIkkeÅpenSakIInfotrygd(fagsak)
         }
@@ -242,16 +241,18 @@ internal class InfotrygdPeriodeValideringServiceTest {
         @Test
         internal fun `skal kunne migrere selv om personen har en klagesak for tilbakekreving`() {
             val fagsak = fagsak(stønadstype = BARNETILSYN)
-            every { infotrygdService.hentSaker(any()) } returns InfotrygdSakResponse(
-                saker = listOf(
-                    InfotrygdSak(
-                        personIdent = fagsak.hentAktivIdent(),
-                        stønadType = fagsak.stønadstype,
-                        resultat = InfotrygdSakResultat.ÅPEN_SAK,
-                        type = InfotrygdSakType.KLAGE_TILBAKEBETALING,
-                    ),
-                ),
-            )
+            every { infotrygdService.hentSaker(any()) } returns
+                InfotrygdSakResponse(
+                    saker =
+                        listOf(
+                            InfotrygdSak(
+                                personIdent = fagsak.hentAktivIdent(),
+                                stønadType = fagsak.stønadstype,
+                                resultat = InfotrygdSakResultat.ÅPEN_SAK,
+                                type = InfotrygdSakType.KLAGE_TILBAKEBETALING,
+                            ),
+                        ),
+                )
 
             service.validerHarIkkeÅpenSakIInfotrygd(fagsak)
         }
@@ -259,19 +260,20 @@ internal class InfotrygdPeriodeValideringServiceTest {
 
     @Nested
     inner class ValiderHarÅpenBarnetilsynSakIInfotrygd {
-
         @Test
         fun `skal ikke kunne journalføre barnetilsyn når åpen sak i innfotrygd`() {
             val fagsak = fagsak(stønadstype = BARNETILSYN)
-            every { infotrygdService.hentSaker(any()) } returns InfotrygdSakResponse(
-                saker = listOf(
-                    InfotrygdSak(
-                        personIdent = fagsak.hentAktivIdent(),
-                        stønadType = fagsak.stønadstype,
-                        resultat = InfotrygdSakResultat.ÅPEN_SAK,
-                    ),
-                ),
-            )
+            every { infotrygdService.hentSaker(any()) } returns
+                InfotrygdSakResponse(
+                    saker =
+                        listOf(
+                            InfotrygdSak(
+                                personIdent = fagsak.hentAktivIdent(),
+                                stønadType = fagsak.stønadstype,
+                                resultat = InfotrygdSakResultat.ÅPEN_SAK,
+                            ),
+                        ),
+                )
 
             assertThatThrownBy { service.validerHarIkkeÅpenSakIInfotrygd(fagsak) }
                 .isInstanceOf(MigreringException::class.java)
@@ -282,15 +284,17 @@ internal class InfotrygdPeriodeValideringServiceTest {
         @Test
         fun `skal kunne journalføre barnetilsyn med ferdigstilt sak i innfotrygd`() {
             val fagsak = fagsak(stønadstype = BARNETILSYN)
-            every { infotrygdService.hentSaker(any()) } returns InfotrygdSakResponse(
-                saker = listOf(
-                    InfotrygdSak(
-                        personIdent = fagsak.hentAktivIdent(),
-                        stønadType = fagsak.stønadstype,
-                        resultat = InfotrygdSakResultat.INNVILGET,
-                    ),
-                ),
-            )
+            every { infotrygdService.hentSaker(any()) } returns
+                InfotrygdSakResponse(
+                    saker =
+                        listOf(
+                            InfotrygdSak(
+                                personIdent = fagsak.hentAktivIdent(),
+                                stønadType = fagsak.stønadstype,
+                                resultat = InfotrygdSakResultat.INNVILGET,
+                            ),
+                        ),
+                )
 
             service.validerHarIkkeÅpenSakIInfotrygd(fagsak)
         }

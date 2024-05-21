@@ -19,7 +19,6 @@ import java.net.URI
 import java.nio.charset.Charset
 
 internal class TilbakekrevingClientTest {
-
     @AfterEach
     fun tearDownEachTest() {
         wiremockServerItem.resetAll()
@@ -43,7 +42,6 @@ internal class TilbakekrevingClientTest {
     }
 
     companion object {
-
         private val restOperations: RestOperations = RestTemplateBuilder().build()
         lateinit var client: TilbakekrevingClient
         lateinit var wiremockServerItem: WireMockServer

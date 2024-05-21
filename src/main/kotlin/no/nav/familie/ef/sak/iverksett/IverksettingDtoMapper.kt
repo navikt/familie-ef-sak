@@ -108,8 +108,10 @@ class IverksettingDtoMapper(
     private val behandlingRepository: BehandlingRepository,
     private val featureToggleService: FeatureToggleService,
 ) {
-
-    fun tilDto(saksbehandling: Saksbehandling, beslutter: String): IverksettDto {
+    fun tilDto(
+        saksbehandling: Saksbehandling,
+        beslutter: String,
+    ): IverksettDto {
         val saksbehandler =
             behandlingshistorikkService.finnSisteBehandlingshistorikk(
                 saksbehandling.id,
@@ -162,14 +164,15 @@ class IverksettingDtoMapper(
             }
 
             StønadType.BARNETILSYN -> {
-                val vedtakDto = mapVedtaksdetaljerBarnetilsynDto(
-                    vedtak,
-                    saksbehandler,
-                    beslutter,
-                    tilkjentYtelse,
-                    tilbakekreving,
-                    brevmottakere,
-                )
+                val vedtakDto =
+                    mapVedtaksdetaljerBarnetilsynDto(
+                        vedtak,
+                        saksbehandler,
+                        beslutter,
+                        tilkjentYtelse,
+                        tilbakekreving,
+                        brevmottakere,
+                    )
                 IverksettBarnetilsynDto(
                     behandling = behandlingsdetaljer,
                     fagsak = fagsakdetaljerDto,
@@ -179,14 +182,15 @@ class IverksettingDtoMapper(
             }
 
             StønadType.SKOLEPENGER -> {
-                val vedtakDto = mapVedtaksdetaljerSkolepengerDto(
-                    vedtak,
-                    saksbehandler,
-                    beslutter,
-                    tilkjentYtelse,
-                    tilbakekreving,
-                    brevmottakere,
-                )
+                val vedtakDto =
+                    mapVedtaksdetaljerSkolepengerDto(
+                        vedtak,
+                        saksbehandler,
+                        beslutter,
+                        tilkjentYtelse,
+                        tilbakekreving,
+                        brevmottakere,
+                    )
                 IverksettSkolepengerDto(
                     behandling = behandlingsdetaljer,
                     fagsak = fagsakdetaljerDto,
@@ -212,7 +216,10 @@ class IverksettingDtoMapper(
         }
     }
 
-    private fun validerBehandlingBrukerNyesteG(gMånedTilkjentYtelse: YearMonth, feilmelding: String) {
+    private fun validerBehandlingBrukerNyesteG(
+        gMånedTilkjentYtelse: YearMonth,
+        feilmelding: String,
+    ) {
         brukerfeilHvis(gMånedTilkjentYtelse != Grunnbeløpsperioder.nyesteGrunnbeløpGyldigFraOgMed) { feilmelding }
     }
 
@@ -286,6 +293,7 @@ class IverksettingDtoMapper(
             kategori = saksbehandling.kategori,
         )
     }
+
     private fun mapÅrsakRevurdering(saksbehandling: Saksbehandling): ÅrsakRevurderingDto? =
         årsakRevurderingsRepository.findByIdOrNull(saksbehandling.id)
             ?.let { ÅrsakRevurderingDto(it.opplysningskilde, it.årsak) }
@@ -306,15 +314,16 @@ class IverksettingDtoMapper(
             saksbehandlerId = saksbehandler,
             beslutterId = beslutter,
             tilkjentYtelse = tilkjentYtelse?.tilIverksettDto(),
-            vedtaksperioder = vedtak.perioder?.tilVedtaksperioder()
-                ?: emptyList(),
+            vedtaksperioder =
+                vedtak.perioder?.tilVedtaksperioder()
+                    ?: emptyList(),
             tilbakekreving = tilbakekreving,
             brevmottakere = brevmottakere,
             avslagÅrsak = vedtak.avslåÅrsak,
             oppgaverForOpprettelse =
-            oppgaverForOpprettelseService.hentOppgaverForOpprettelseEllerNull(vedtak.behandlingId)?.let {
-                OppgaverForOpprettelseDto(oppgavetyper = it.oppgavetyper)
-            } ?: OppgaverForOpprettelseDto(oppgavetyper = emptyList()),
+                oppgaverForOpprettelseService.hentOppgaverForOpprettelseEllerNull(vedtak.behandlingId)?.let {
+                    OppgaverForOpprettelseDto(oppgavetyper = it.oppgavetyper)
+                } ?: OppgaverForOpprettelseDto(oppgavetyper = emptyList()),
             grunnbeløp = grunnbeløpFraTilkjentYtelse(tilkjentYtelse),
         )
 
@@ -334,8 +343,9 @@ class IverksettingDtoMapper(
             saksbehandlerId = saksbehandler,
             beslutterId = beslutter,
             tilkjentYtelse = tilkjentYtelse?.tilIverksettDto(),
-            vedtaksperioder = vedtak.barnetilsyn?.tilVedtaksperioder()
-                ?: emptyList(),
+            vedtaksperioder =
+                vedtak.barnetilsyn?.tilVedtaksperioder()
+                    ?: emptyList(),
             tilbakekreving = tilbakekreving,
             brevmottakere = brevmottakere,
             kontantstøtte = mapPerioderMedBeløp(vedtak.kontantstøtte?.perioder),
@@ -359,8 +369,9 @@ class IverksettingDtoMapper(
             saksbehandlerId = saksbehandler,
             beslutterId = beslutter,
             tilkjentYtelse = tilkjentYtelse?.tilIverksettDto(),
-            vedtaksperioder = vedtak.skolepenger?.tilVedtaksperioder()
-                ?: emptyList(),
+            vedtaksperioder =
+                vedtak.skolepenger?.tilVedtaksperioder()
+                    ?: emptyList(),
             tilbakekreving = tilbakekreving,
             brevmottakere = brevmottakere,
             begrunnelse = vedtak.skolepenger?.begrunnelse,
@@ -396,79 +407,88 @@ class IverksettingDtoMapper(
     }
 }
 
-fun TilkjentYtelse.tilIverksettDto(): TilkjentYtelseDto = TilkjentYtelseDto(
-    andelerTilkjentYtelse = andelerTilkjentYtelse.map { andel -> andel.tilIverksettDto() },
-    startmåned = YearMonth.from(startdato),
-)
+fun TilkjentYtelse.tilIverksettDto(): TilkjentYtelseDto =
+    TilkjentYtelseDto(
+        andelerTilkjentYtelse = andelerTilkjentYtelse.map { andel -> andel.tilIverksettDto() },
+        startmåned = YearMonth.from(startdato),
+    )
 
-fun Vurdering.tilIverksettDto(): VurderingDto = VurderingDto(
-    regelId = RegelIdIverksett.valueOf(this.regelId.name),
-    svar = this.svar?.let { SvarIdIverksett.valueOf(it.name) },
-    begrunnelse = this.begrunnelse,
-)
+fun Vurdering.tilIverksettDto(): VurderingDto =
+    VurderingDto(
+        regelId = RegelIdIverksett.valueOf(this.regelId.name),
+        svar = this.svar?.let { SvarIdIverksett.valueOf(it.name) },
+        begrunnelse = this.begrunnelse,
+    )
 
-fun Delvilkårsvurdering.tilIverksettDto(): DelvilkårsvurderingDto = DelvilkårsvurderingDto(
-    resultat = VilkårsresultatIverksett.valueOf(this.resultat.name),
-    vurderinger = this.vurderinger.map { vurdering -> vurdering.tilIverksettDto() },
+fun Delvilkårsvurdering.tilIverksettDto(): DelvilkårsvurderingDto =
+    DelvilkårsvurderingDto(
+        resultat = VilkårsresultatIverksett.valueOf(this.resultat.name),
+        vurderinger = this.vurderinger.map { vurdering -> vurdering.tilIverksettDto() },
+    )
 
-)
+fun Vilkårsvurdering.tilIverksettDto(): VilkårsvurderingDto =
+    VilkårsvurderingDto(
+        vilkårType = VilkårTypeIverksett.valueOf(this.type.name),
+        resultat = VilkårsresultatIverksett.valueOf(this.resultat.name),
+        delvilkårsvurderinger =
+            this.delvilkårsvurdering.delvilkårsvurderinger.map { delvilkårsvurdering ->
+                delvilkårsvurdering.tilIverksettDto()
+            },
+    )
 
-fun Vilkårsvurdering.tilIverksettDto(): VilkårsvurderingDto = VilkårsvurderingDto(
-    vilkårType = VilkårTypeIverksett.valueOf(this.type.name),
-    resultat = VilkårsresultatIverksett.valueOf(this.resultat.name),
-    delvilkårsvurderinger = this.delvilkårsvurdering.delvilkårsvurderinger.map { delvilkårsvurdering ->
-        delvilkårsvurdering.tilIverksettDto()
-    },
-)
+fun PeriodeWrapper.tilVedtaksperioder(): List<VedtaksperiodeOvergangsstønadDto> =
+    this.perioder
+        .filter { it.periodeType != no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType.MIDLERTIDIG_OPPHØR }
+        .map {
+            VedtaksperiodeOvergangsstønadDto(
+                fraOgMed = it.datoFra,
+                tilOgMed = it.datoTil,
+                periode = it.periode,
+                aktivitet = AktivitetType.valueOf(it.aktivitet.name),
+                periodeType = VedtaksperiodeType.valueOf(it.periodeType.name),
+            )
+        }
 
-fun PeriodeWrapper.tilVedtaksperioder(): List<VedtaksperiodeOvergangsstønadDto> = this.perioder
-    .filter { it.periodeType != no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType.MIDLERTIDIG_OPPHØR }
-    .map {
-        VedtaksperiodeOvergangsstønadDto(
-            fraOgMed = it.datoFra,
-            tilOgMed = it.datoTil,
-            periode = it.periode,
-            aktivitet = AktivitetType.valueOf(it.aktivitet.name),
-            periodeType = VedtaksperiodeType.valueOf(it.periodeType.name),
-        )
-    }
+fun BarnetilsynWrapper.tilVedtaksperioder(): List<VedtaksperiodeBarnetilsynDto> =
+    this.perioder
+        .map {
+            VedtaksperiodeBarnetilsynDto(
+                fraOgMed = it.periode.fomDato,
+                tilOgMed = it.periode.tomDato,
+                periode = it.periode,
+                utgifter = it.utgifter,
+                antallBarn = it.barn.size,
+            )
+        }
 
-fun BarnetilsynWrapper.tilVedtaksperioder(): List<VedtaksperiodeBarnetilsynDto> = this.perioder
-    .map {
-        VedtaksperiodeBarnetilsynDto(
-            fraOgMed = it.periode.fomDato,
-            tilOgMed = it.periode.tomDato,
-            periode = it.periode,
-            utgifter = it.utgifter,
-            antallBarn = it.barn.size,
-        )
-    }
+fun SkolepengerWrapper.tilVedtaksperioder(): List<VedtaksperiodeSkolepengerDto> =
+    this.skoleårsperioder
+        .map { skoleårsperiode ->
+            VedtaksperiodeSkolepengerDto(
+                perioder = skoleårsperiode.perioder.map { it.tilIverksettDto() },
+                utgiftsperioder = skoleårsperiode.utgiftsperioder.map { it.tilIverksettDto() },
+            )
+        }
 
-fun SkolepengerWrapper.tilVedtaksperioder(): List<VedtaksperiodeSkolepengerDto> = this.skoleårsperioder
-    .map { skoleårsperiode ->
-        VedtaksperiodeSkolepengerDto(
-            perioder = skoleårsperiode.perioder.map { it.tilIverksettDto() },
-            utgiftsperioder = skoleårsperiode.utgiftsperioder.map { it.tilIverksettDto() },
-        )
-    }
+fun DelårsperiodeSkoleårSkolepenger.tilIverksettDto() =
+    DelårsperiodeSkoleårSkolepengerDto(
+        studietype = SkolepengerStudietype.valueOf(this.studietype.name),
+        fraOgMed = this.periode.fomDato,
+        tilOgMed = this.periode.tomDato,
+        periode = this.periode,
+        studiebelastning = this.studiebelastning,
+        maksSatsForSkoleår =
+            SkolepengerMaksbeløp.maksbeløp(
+                this.studietype,
+                Skoleår(this.periode),
+            ),
+    )
 
-fun DelårsperiodeSkoleårSkolepenger.tilIverksettDto() = DelårsperiodeSkoleårSkolepengerDto(
-    studietype = SkolepengerStudietype.valueOf(this.studietype.name),
-    fraOgMed = this.periode.fomDato,
-    tilOgMed = this.periode.tomDato,
-    periode = this.periode,
-    studiebelastning = this.studiebelastning,
-    maksSatsForSkoleår = SkolepengerMaksbeløp.maksbeløp(
-        this.studietype,
-        Skoleår(this.periode),
-    ),
-
-)
-
-fun SkolepengerUtgift.tilIverksettDto() = SkolepengerUtgiftDto(
-    utgiftsdato = this.utgiftsdato,
-    stønad = this.stønad,
-)
+fun SkolepengerUtgift.tilIverksettDto() =
+    SkolepengerUtgiftDto(
+        utgiftsdato = this.utgiftsdato,
+        stønad = this.stønad,
+    )
 
 private fun mapPerioderMedBeløp(perioder: List<PeriodeMedBeløp>?) =
     perioder?.map { it.tilPeriodeMedBeløpDto() } ?: emptyList()

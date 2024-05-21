@@ -22,7 +22,6 @@ class InntektController(
     private val tilgangService: TilgangService,
     private val inntektService: InntektService,
 ) {
-
     @GetMapping("fagsak/{fagsakId}")
     fun hentInntekt(
         @PathVariable("fagsakId") fagsakId: UUID,
@@ -30,28 +29,35 @@ class InntektController(
         @RequestParam tom: YearMonth?,
     ): Ressurs<AMeldingInntektDto> {
         tilgangService.validerTilgangTilFagsak(fagsakId, AuditLoggerEvent.ACCESS)
-        val inntekt = inntektService.hentInntekt(
-            fagsakId = fagsakId,
-            fom = fom ?: YearMonth.now().minusMonths(2),
-            tom = tom ?: YearMonth.now(),
-        )
+        val inntekt =
+            inntektService.hentInntekt(
+                fagsakId = fagsakId,
+                fom = fom ?: YearMonth.now().minusMonths(2),
+                tom = tom ?: YearMonth.now(),
+            )
         return success(inntekt)
     }
 
     @GetMapping("fagsak/{fagsakId}/generer-url")
-    fun genererAInntektUrlFagsak(@PathVariable("fagsakId") fagsakId: UUID): Ressurs<String> {
+    fun genererAInntektUrlFagsak(
+        @PathVariable("fagsakId") fagsakId: UUID,
+    ): Ressurs<String> {
         tilgangService.validerTilgangTilFagsak(fagsakId, AuditLoggerEvent.ACCESS)
         return success(inntektService.genererAInntektUrlFagsak(fagsakId))
     }
 
     @GetMapping("fagsak-person/{fagsakPersonId}/generer-url")
-    fun genererAInntektUrl(@PathVariable("fagsakPersonId") fagsakPersonId: UUID): Ressurs<String> {
+    fun genererAInntektUrl(
+        @PathVariable("fagsakPersonId") fagsakPersonId: UUID,
+    ): Ressurs<String> {
         tilgangService.validerTilgangTilFagsakPerson(fagsakPersonId, AuditLoggerEvent.ACCESS)
         return success(inntektService.genererAInntektUrl(fagsakPersonId))
     }
 
     @GetMapping("fagsak/{fagsakId}/generer-url-arbeidsforhold")
-    fun genererAInntektArbeidsforholdUrl(@PathVariable("fagsakId") fagsakId: UUID): Ressurs<String> {
+    fun genererAInntektArbeidsforholdUrl(
+        @PathVariable("fagsakId") fagsakId: UUID,
+    ): Ressurs<String> {
         tilgangService.validerTilgangTilFagsak(fagsakId, AuditLoggerEvent.ACCESS)
         return success(inntektService.genererAInntektArbeidsforholdUrl(fagsakId))
     }

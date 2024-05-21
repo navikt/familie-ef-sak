@@ -34,8 +34,10 @@ class FagsakService(
     private val featureToggleService: FeatureToggleService,
     private val infotrygdService: InfotrygdService,
 ) {
-
-    fun hentEllerOpprettFagsakMedBehandlinger(personIdent: String, stønadstype: StønadType): FagsakDto {
+    fun hentEllerOpprettFagsakMedBehandlinger(
+        personIdent: String,
+        stønadstype: StønadType,
+    ): FagsakDto {
         return fagsakTilDto(hentEllerOpprettFagsak(personIdent, stønadstype))
     }
 
@@ -48,8 +50,9 @@ class FagsakService(
         val gjeldendePersonIdent = personIdenter.gjeldende()
         val person = fagsakPersonService.hentEllerOpprettPerson(personIdenter.identer(), gjeldendePersonIdent.ident)
         val oppdatertPerson = oppdatertPerson(person, gjeldendePersonIdent)
-        val fagsak = fagsakRepository.findByFagsakPersonIdAndStønadstype(oppdatertPerson.id, stønadstype)
-            ?: opprettFagsak(stønadstype, oppdatertPerson)
+        val fagsak =
+            fagsakRepository.findByFagsakPersonIdAndStønadstype(oppdatertPerson.id, stønadstype)
+                ?: opprettFagsak(stønadstype, oppdatertPerson)
 
         return fagsak.tilFagsakMedPerson(oppdatertPerson.identer)
     }
@@ -79,7 +82,10 @@ class FagsakService(
         return fagsakRepository.update(fagsak.copy(migrert = true)).tilFagsakMedPerson()
     }
 
-    fun finnFagsak(personIdenter: Set<String>, stønadstype: StønadType): Fagsak? =
+    fun finnFagsak(
+        personIdenter: Set<String>,
+        stønadstype: StønadType,
+    ): Fagsak? =
         fagsakRepository.findBySøkerIdent(personIdenter, stønadstype)?.tilFagsakMedPerson()
 
     fun finnFagsaker(personIdenter: Set<String>): List<Fagsak> =
@@ -93,17 +99,19 @@ class FagsakService(
         val behandlinger: List<Behandling> = behandlingService.hentBehandlinger(fagsak.id)
         val erLøpende = erLøpende(fagsak)
         return fagsak.tilDto(
-            behandlinger = behandlinger.map {
-                it.tilDto(fagsak.stønadstype)
-            },
+            behandlinger =
+                behandlinger.map {
+                    it.tilDto(fagsak.stønadstype)
+                },
             erLøpende = erLøpende,
         )
     }
 
     fun finnFagsakerForFagsakPersonId(fagsakPersonId: UUID): Fagsaker {
-        val fagsaker = fagsakRepository.findByFagsakPersonId(fagsakPersonId)
-            .map { it.tilFagsakMedPerson() }
-            .associateBy { it.stønadstype }
+        val fagsaker =
+            fagsakRepository.findByFagsakPersonId(fagsakPersonId)
+                .map { it.tilFagsakMedPerson() }
+                .associateBy { it.stønadstype }
         return Fagsaker(
             overgangsstønad = fagsaker[StønadType.OVERGANGSSTØNAD],
             barnetilsyn = fagsaker[StønadType.BARNETILSYN],
@@ -179,7 +187,10 @@ class FagsakService(
         return aktiveIdenter.associateBy({ it.first }, { it.second })
     }
 
-    private fun opprettFagsak(stønadstype: StønadType, fagsakPerson: FagsakPerson): FagsakDomain {
+    private fun opprettFagsak(
+        stønadstype: StønadType,
+        fagsakPerson: FagsakPerson,
+    ): FagsakDomain {
         return fagsakRepository.insert(
             FagsakDomain(
                 stønadstype = stønadstype,

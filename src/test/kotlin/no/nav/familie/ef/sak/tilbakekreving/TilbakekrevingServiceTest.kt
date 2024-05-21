@@ -43,7 +43,6 @@ import kotlin.test.assertFailsWith
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class TilbakekrevingServiceTest {
-
     private val tilbakekrevingRepository = mockk<TilbakekrevingRepository>()
     private val behandlingService = mockk<BehandlingService>()
     private val fagsakService = mockk<FagsakService>()
@@ -76,7 +75,6 @@ internal class TilbakekrevingServiceTest {
 
     @Nested
     inner class LagreTilbakekreving {
-
         @Test
         internal fun `skal ikke være mulig å lagre tilbakekreving for låst behandlig `() {
             every { behandlingService.hentBehandling(any()) } returns behandling(fagsak = fagsak(), status = FERDIGSTILT)
@@ -86,12 +84,13 @@ internal class TilbakekrevingServiceTest {
                     varseltekst = "",
                     begrunnelse = "Dette er tekst ",
                 )
-            val feil = assertThrows<ApiFeil> {
-                tilbakekrevingService.lagreTilbakekreving(
-                    tilbakekrevingDto,
-                    behandlingId = UUID.randomUUID(),
-                )
-            }
+            val feil =
+                assertThrows<ApiFeil> {
+                    tilbakekrevingService.lagreTilbakekreving(
+                        tilbakekrevingDto,
+                        behandlingId = UUID.randomUUID(),
+                    )
+                }
             assertThat(feil.message).isEqualTo("Behandlingen er låst for redigering")
         }
 
@@ -105,12 +104,13 @@ internal class TilbakekrevingServiceTest {
                     begrunnelse = "tekst her",
                 )
 
-            val feil = assertThrows<ApiFeil> {
-                tilbakekrevingService.lagreTilbakekreving(
-                    tilbakekrevingDto,
-                    behandlingId = UUID.randomUUID(),
-                )
-            }
+            val feil =
+                assertThrows<ApiFeil> {
+                    tilbakekrevingService.lagreTilbakekreving(
+                        tilbakekrevingDto,
+                        behandlingId = UUID.randomUUID(),
+                    )
+                }
             assertThat(feil.message).isEqualTo("Må fylle ut varseltekst for å lage tilbakekreving med varsel")
         }
 
@@ -124,12 +124,13 @@ internal class TilbakekrevingServiceTest {
                     begrunnelse = "tekst her",
                 )
 
-            val feil = assertThrows<ApiFeil> {
-                tilbakekrevingService.lagreTilbakekreving(
-                    tilbakekrevingDto,
-                    behandlingId = UUID.randomUUID(),
-                )
-            }
+            val feil =
+                assertThrows<ApiFeil> {
+                    tilbakekrevingService.lagreTilbakekreving(
+                        tilbakekrevingDto,
+                        behandlingId = UUID.randomUUID(),
+                    )
+                }
             assertThat(feil.message).isEqualTo("Må fylle ut varseltekst for å lage tilbakekreving med varsel")
         }
 
@@ -157,18 +158,18 @@ internal class TilbakekrevingServiceTest {
 
     @Nested
     inner class GenererBrev {
-
-        val simuleringsoppsummering = Simuleringsoppsummering(
-            perioder = listOf(),
-            fomDatoNestePeriode = null,
-            etterbetaling = BigDecimal.valueOf(5000),
-            feilutbetaling = BigDecimal.valueOf(40_000),
-            fom = LocalDate.of(2021, 1, 1),
-            tomDatoNestePeriode = null,
-            forfallsdatoNestePeriode = null,
-            tidSimuleringHentet = LocalDate.of(2021, 11, 1),
-            tomSisteUtbetaling = LocalDate.of(2021, 10, 31),
-        )
+        val simuleringsoppsummering =
+            Simuleringsoppsummering(
+                perioder = listOf(),
+                fomDatoNestePeriode = null,
+                etterbetaling = BigDecimal.valueOf(5000),
+                feilutbetaling = BigDecimal.valueOf(40_000),
+                fom = LocalDate.of(2021, 1, 1),
+                tomDatoNestePeriode = null,
+                forfallsdatoNestePeriode = null,
+                tidSimuleringHentet = LocalDate.of(2021, 11, 1),
+                tomSisteUtbetaling = LocalDate.of(2021, 10, 31),
+            )
 
         @Test
         internal fun `Varselbrev må lages med riktig varseltekst`() {
@@ -200,7 +201,6 @@ internal class TilbakekrevingServiceTest {
 
     @Nested
     inner class OpprettManuellTilbakekreving {
-
         @Test
         fun `feiler hvis tilbakekrevingsbehandling ikke kan opprettes`() {
             val fagsak = fagsak(identer = setOf(PersonIdent("12345678901")))
@@ -208,9 +208,10 @@ internal class TilbakekrevingServiceTest {
             every { tilbakekrevingClient.kanBehandlingOpprettesManuelt(fagsak.stønadstype, fagsak.eksternId) }
                 .returns(KanBehandlingOpprettesManueltRespons(false, "Melding til front end."))
 
-            val feil = assertFailsWith<ApiFeil> {
-                tilbakekrevingService.opprettManuellTilbakekreving(fagsak.id)
-            }
+            val feil =
+                assertFailsWith<ApiFeil> {
+                    tilbakekrevingService.opprettManuellTilbakekreving(fagsak.id)
+                }
 
             assertThat(feil.feil).isEqualTo("Melding til front end.")
         }

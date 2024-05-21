@@ -25,7 +25,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import java.util.Properties
 
 class StartBehandlingTaskTest : OppslagSpringRunnerTest() {
-
     @Autowired
     private lateinit var behandlingRepository: BehandlingRepository
 

@@ -28,8 +28,10 @@ class BisysBarnetilsynService(
     private val andelsHistorikkService: AndelsHistorikkService,
     private val infotrygdService: InfotrygdService,
 ) {
-
-    fun hentBarnetilsynperioderFraEfOgInfotrygd(personIdent: String, fomDato: LocalDate): BarnetilsynBisysResponse {
+    fun hentBarnetilsynperioderFraEfOgInfotrygd(
+        personIdent: String,
+        fomDato: LocalDate,
+    ): BarnetilsynBisysResponse {
         val barnetilsynBisysPerioder = kombinerBarnetilsynperioderFraEfOgInfotrygd(personIdent, fomDato)
         return BarnetilsynBisysResponse(barnetilsynBisysPerioder.mergeSammenhengendePerioder())
     }
@@ -79,23 +81,26 @@ class BisysBarnetilsynService(
         val sisteGjeldendeBehandling = behandlingService.finnSisteIverksatteBehandling(fagsak.id) ?: return null
         val startdato = tilkjentYtelseService.hentForBehandling(sisteGjeldendeBehandling.id).startdato
 
-        val historikk = andelsHistorikkService.hentHistorikk(fagsak.id, null)
-            .filter { it.erAktivVedtaksperiode() }
-            .filter { it.andel.beløp > 0 && it.andel.periode.tomDato >= fomDato }
+        val historikk =
+            andelsHistorikkService.hentHistorikk(fagsak.id, null)
+                .filter { it.erAktivVedtaksperiode() }
+                .filter { it.andel.beløp > 0 && it.andel.periode.tomDato >= fomDato }
 
-        val barnIdenter = historikk.flatMap { it.andel.barn }
-            .distinct()
-            .let { barnService.hentBehandlingBarnForBarnIder(it) }
-            .associate { it.id to it.personIdent }
+        val barnIdenter =
+            historikk.flatMap { it.andel.barn }
+                .distinct()
+                .let { barnService.hentBehandlingBarnForBarnIder(it) }
+                .associate { it.id to it.personIdent }
 
-        val barnetilsynBisysPerioder = historikk.map { andel ->
-            BarnetilsynBisysPeriode(
-                Periode(andel.andel.periode.fomDato, andel.andel.periode.tomDato),
-                andel.andel.barn.map {
-                    barnIdenter[it] ?: error("Fant ingen personident for barn=$it")
-                },
-            )
-        }
+        val barnetilsynBisysPerioder =
+            historikk.map { andel ->
+                BarnetilsynBisysPeriode(
+                    Periode(andel.andel.periode.fomDato, andel.andel.periode.tomDato),
+                    andel.andel.barn.map {
+                        barnIdenter[it] ?: error("Fant ingen personident for barn=$it")
+                    },
+                )
+            }
         return EfPerioder(startdato, barnetilsynBisysPerioder.sortedBy { it.periode.fom })
     }
 
@@ -123,15 +128,16 @@ class BisysBarnetilsynService(
         val startdato = efPerioder.startdato
         val perioder = efPerioder.perioder
 
-        val perioderFraInfotrygdSomBeholdes = infotrygdPerioder.mapNotNull {
-            if (it.periode.fom >= startdato) {
-                null
-            } else if (it.periode.tom > startdato) {
-                it.copy(periode = it.periode.copy(tom = startdato.minusDays(1)))
-            } else {
-                it
+        val perioderFraInfotrygdSomBeholdes =
+            infotrygdPerioder.mapNotNull {
+                if (it.periode.fom >= startdato) {
+                    null
+                } else if (it.periode.tom > startdato) {
+                    it.copy(periode = it.periode.copy(tom = startdato.minusDays(1)))
+                } else {
+                    it
+                }
             }
-        }
         return (perioderFraInfotrygdSomBeholdes + perioder).sortedBy { it.periode.fom }
     }
 

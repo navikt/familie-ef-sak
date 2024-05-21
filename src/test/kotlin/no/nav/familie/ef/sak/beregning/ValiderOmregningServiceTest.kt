@@ -32,17 +32,17 @@ import java.time.YearMonth
 import java.util.UUID
 
 class ValiderOmregningServiceTest {
-
     val vedtakService = mockk<VedtakService>()
     val tilkjentYtelseRepository = mockk<TilkjentYtelseRepository>()
     val beregningService = BeregningService()
     val vedtakHistorikkService = mockk<VedtakHistorikkService>()
-    val validerOmregningService = ValiderOmregningService(
-        vedtakService,
-        tilkjentYtelseRepository,
-        beregningService,
-        vedtakHistorikkService,
-    )
+    val validerOmregningService =
+        ValiderOmregningService(
+            vedtakService,
+            tilkjentYtelseRepository,
+            beregningService,
+            vedtakHistorikkService,
+        )
 
     @Test
     internal fun `validerHarGammelGOgKanLagres har beregnet med feil beløp`() {
@@ -71,14 +71,15 @@ class ValiderOmregningServiceTest {
 
         every { tilkjentYtelseRepository.findByBehandlingId(saksbehandling.id) } returns
             lagTilkjentYtelse(
-                andelerTilkjentYtelse = listOf(
-                    lagAndelTilkjentYtelse(
-                        fraOgMed = LocalDate.of(2022, 4, 1),
-                        tilOgMed = LocalDate.of(2022, 8, 30),
-                        samordningsfradrag = 5000,
-                        beløp = 0,
+                andelerTilkjentYtelse =
+                    listOf(
+                        lagAndelTilkjentYtelse(
+                            fraOgMed = LocalDate.of(2022, 4, 1),
+                            tilOgMed = LocalDate.of(2022, 8, 30),
+                            samordningsfradrag = 5000,
+                            beløp = 0,
+                        ),
                     ),
-                ),
                 grunnbeløpsmåned = YearMonth.of(2021, 5),
             )
 
@@ -87,7 +88,6 @@ class ValiderOmregningServiceTest {
 
     @Nested
     inner class ValiderHarSammePerioderSomTidligereVedtak {
-
         private val år = Grunnbeløpsperioder.nyesteGrunnbeløpGyldigFraOgMed.year
 
         @Test
@@ -353,23 +353,27 @@ class ValiderOmregningServiceTest {
             saksbehandling(årsak = BehandlingÅrsak.G_OMREGNING).copy(opprettetAv = "saksbehandler")
     }
 
-    private fun mockNyTilkjentYtelse(saksbehandling: Saksbehandling, medRiktigBeløp: Boolean = true) {
+    private fun mockNyTilkjentYtelse(
+        saksbehandling: Saksbehandling,
+        medRiktigBeløp: Boolean = true,
+    ) {
         every { tilkjentYtelseRepository.findByBehandlingId(saksbehandling.id) } returns
             lagTilkjentYtelse(
-                andelerTilkjentYtelse = listOf(
-                    lagAndelTilkjentYtelse(
-                        fraOgMed = LocalDate.of(2022, 4, 1),
-                        tilOgMed = LocalDate.of(2022, 4, 30),
-                        samordningsfradrag = 5000,
-                        beløp = 14950,
+                andelerTilkjentYtelse =
+                    listOf(
+                        lagAndelTilkjentYtelse(
+                            fraOgMed = LocalDate.of(2022, 4, 1),
+                            tilOgMed = LocalDate.of(2022, 4, 30),
+                            samordningsfradrag = 5000,
+                            beløp = 14950,
+                        ),
+                        lagAndelTilkjentYtelse(
+                            fraOgMed = LocalDate.of(2022, 5, 1),
+                            tilOgMed = LocalDate.of(2022, 8, 30),
+                            samordningsfradrag = 5000,
+                            beløp = if (medRiktigBeløp) 15902 else 0,
+                        ),
                     ),
-                    lagAndelTilkjentYtelse(
-                        fraOgMed = LocalDate.of(2022, 5, 1),
-                        tilOgMed = LocalDate.of(2022, 8, 30),
-                        samordningsfradrag = 5000,
-                        beløp = if (medRiktigBeløp) 15902 else 0,
-                    ),
-                ),
             )
     }
 

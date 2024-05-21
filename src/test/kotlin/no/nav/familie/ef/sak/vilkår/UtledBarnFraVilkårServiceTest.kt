@@ -7,7 +7,6 @@ import java.time.LocalDate
 import java.util.UUID
 
 internal class UtledBarnFraVilkårServiceTest {
-
     @Test
     internal fun `skal finne ny barnId for barn for barn fra søknaden`() {
         val søknadBarnId = UUID.randomUUID()
@@ -15,10 +14,11 @@ internal class UtledBarnFraVilkårServiceTest {
         val nyttBarn = opprettBarn(søknadBarnId = søknadBarnId)
         val alleBarnPåForrigeBehandling = listOf(tidligereBarn)
         val alleBarnPåGjeldendeBehandling = listOf(nyttBarn)
-        val utledetBarnIdMap = VurderingService.byggBarnMapFraTidligereTilNyId(
-            alleBarnPåForrigeBehandling,
-            alleBarnPåGjeldendeBehandling,
-        )
+        val utledetBarnIdMap =
+            VurderingService.byggBarnMapFraTidligereTilNyId(
+                alleBarnPåForrigeBehandling,
+                alleBarnPåGjeldendeBehandling,
+            )
 
         assertThat(utledetBarnIdMap[tidligereBarn.id]?.id).isEqualTo(nyttBarn.id)
     }
@@ -31,10 +31,11 @@ internal class UtledBarnFraVilkårServiceTest {
         val nyttBarnB = opprettBarn(søknadBarnId = søknadBarnId)
         val alleBarnPåForrigeBehandling = listOf(tidligereBarn)
         val alleBarnPåGjeldendeBehandling = listOf(nyttBarnA, nyttBarnB)
-        val utledetBarnIdMap = VurderingService.byggBarnMapFraTidligereTilNyId(
-            alleBarnPåForrigeBehandling,
-            alleBarnPåGjeldendeBehandling,
-        )
+        val utledetBarnIdMap =
+            VurderingService.byggBarnMapFraTidligereTilNyId(
+                alleBarnPåForrigeBehandling,
+                alleBarnPåGjeldendeBehandling,
+            )
 
         assertThat(utledetBarnIdMap[tidligereBarn.id]?.id).isEqualTo(nyttBarnA.id)
         assertThat(utledetBarnIdMap).hasSize(1)
@@ -50,10 +51,11 @@ internal class UtledBarnFraVilkårServiceTest {
         val nyttBarnB = opprettBarn(personIdent = personIdentB)
         val alleBarnPåForrigeBehandling = listOf(tidligereBarnA, tidligereBarnB)
         val alleBarnPåGjeldendeBehandling = listOf(nyttBarnB, nyttBarnA)
-        val utledetBarnIdMap = VurderingService.byggBarnMapFraTidligereTilNyId(
-            alleBarnPåForrigeBehandling,
-            alleBarnPåGjeldendeBehandling,
-        )
+        val utledetBarnIdMap =
+            VurderingService.byggBarnMapFraTidligereTilNyId(
+                alleBarnPåForrigeBehandling,
+                alleBarnPåGjeldendeBehandling,
+            )
 
         assertThat(utledetBarnIdMap[tidligereBarnA.id]?.id).isEqualTo(nyttBarnA.id)
         assertThat(utledetBarnIdMap[tidligereBarnB.id]?.id).isEqualTo(nyttBarnB.id)
@@ -69,10 +71,11 @@ internal class UtledBarnFraVilkårServiceTest {
         val nyttBarnB = opprettBarn(fødselTermindato = fødselTermindatoB)
         val alleBarnPåForrigeBehandling = listOf(tidligereBarnA, tidligereBarnB)
         val alleBarnPåGjeldendeBehandling = listOf(nyttBarnB, nyttBarnA)
-        val utledetBarnIdMap = VurderingService.byggBarnMapFraTidligereTilNyId(
-            alleBarnPåForrigeBehandling,
-            alleBarnPåGjeldendeBehandling,
-        )
+        val utledetBarnIdMap =
+            VurderingService.byggBarnMapFraTidligereTilNyId(
+                alleBarnPåForrigeBehandling,
+                alleBarnPåGjeldendeBehandling,
+            )
 
         assertThat(utledetBarnIdMap[tidligereBarnA.id]?.id).isNotNull
         assertThat(utledetBarnIdMap[tidligereBarnB.id]?.id).isNotNull
@@ -84,11 +87,12 @@ internal class UtledBarnFraVilkårServiceTest {
         navn: String? = null,
         fødselTermindato: LocalDate? = null,
         personIdent: String? = null,
-    ): BehandlingBarn = BehandlingBarn(
-        behandlingId = UUID.randomUUID(),
-        søknadBarnId = søknadBarnId,
-        navn = navn,
-        personIdent = personIdent,
-        fødselTermindato = fødselTermindato,
-    )
+    ): BehandlingBarn =
+        BehandlingBarn(
+            behandlingId = UUID.randomUUID(),
+            søknadBarnId = søknadBarnId,
+            navn = navn,
+            personIdent = personIdent,
+            fødselTermindato = fødselTermindato,
+        )
 }

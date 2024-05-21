@@ -29,12 +29,14 @@ class JournalføringKlageService(
     private val klageService: KlageService,
     private val taskService: TaskService,
 ) {
-
     private val logger = LoggerFactory.getLogger(javaClass)
 
     @Deprecated("Bruk V2")
     @Transactional
-    fun fullførJournalpost(journalføringRequest: JournalføringKlageRequest, journalpostId: String) {
+    fun fullførJournalpost(
+        journalføringRequest: JournalføringKlageRequest,
+        journalpostId: String,
+    ) {
         val journalpost = journalpostService.hentJournalpost(journalpostId)
         validerMottakerFinnes(journalpost)
 
@@ -46,7 +48,10 @@ class JournalføringKlageService(
     }
 
     @Transactional
-    fun fullførJournalpostV2(journalføringRequest: JournalføringRequestV2, journalpost: Journalpost) {
+    fun fullførJournalpostV2(
+        journalføringRequest: JournalføringRequestV2,
+        journalpost: Journalpost,
+    ) {
         validerGyldigAvsender(journalpost, journalføringRequest)
 
         return if (journalføringRequest.skalJournalføreTilNyBehandling()) {
@@ -177,7 +182,10 @@ class JournalføringKlageService(
         ferdigstillJournalføringsoppgave(journalføringRequest.oppgaveId.toLong())
     }
 
-    private fun validerKlagebehandlinger(fagsak: Fagsak, behandlingId: UUID) {
+    private fun validerKlagebehandlinger(
+        fagsak: Fagsak,
+        behandlingId: UUID,
+    ) {
         val klagebehandlinger = hentKlagebehandlinger(fagsak)
         klagebehandlinger.singleOrNull { it.id == behandlingId }
             ?: error("Klagebehandlinger for person=${fagsak.fagsakPersonId} mangler behandlingId=$behandlingId")

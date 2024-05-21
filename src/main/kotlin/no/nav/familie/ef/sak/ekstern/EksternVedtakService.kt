@@ -19,7 +19,6 @@ class EksternVedtakService(
     private val behandlingService: BehandlingService,
     private val tilbakekrevingClient: TilbakekrevingClient,
 ) {
-
     fun hentVedtak(eksternFagsakId: Long): List<FagsystemVedtak> {
         val fagsak = fagsakService.hentFagsakPåEksternId(eksternFagsakId)
         val vedtakTilbakekreving = tilbakekrevingClient.finnVedtak(fagsak.eksternId)
@@ -39,20 +38,23 @@ class EksternVedtakService(
             eksternBehandlingId = behandling.eksternId.toString(),
             behandlingstype = behandling.type.visningsnavn,
             resultat = resultat,
-            vedtakstidspunkt = behandling.vedtakstidspunkt
-                ?: error("Mangler vedtakstidspunkt for behandling=${behandling.id}"),
+            vedtakstidspunkt =
+                behandling.vedtakstidspunkt
+                    ?: error("Mangler vedtakstidspunkt for behandling=${behandling.id}"),
             fagsystemType = fagsystemType,
             regelverk = mapTilRegelverk(behandling.kategori),
         )
     }
 
-    private fun utledReultatOgFagsystemType(behandling: Behandling): Pair<String, FagsystemType> = when (behandling.årsak) {
-        BehandlingÅrsak.SANKSJON_1_MND -> Pair("Sanksjon 1 måned", FagsystemType.SANKSJON_1_MND)
-        else -> Pair(behandling.resultat.displayName, FagsystemType.ORDNIÆR)
-    }
+    private fun utledReultatOgFagsystemType(behandling: Behandling): Pair<String, FagsystemType> =
+        when (behandling.årsak) {
+            BehandlingÅrsak.SANKSJON_1_MND -> Pair("Sanksjon 1 måned", FagsystemType.SANKSJON_1_MND)
+            else -> Pair(behandling.resultat.displayName, FagsystemType.ORDNIÆR)
+        }
 
-    private fun mapTilRegelverk(kategori: BehandlingKategori) = when (kategori) {
-        BehandlingKategori.EØS -> Regelverk.EØS
-        BehandlingKategori.NASJONAL -> Regelverk.NASJONAL
-    }
+    private fun mapTilRegelverk(kategori: BehandlingKategori) =
+        when (kategori) {
+            BehandlingKategori.EØS -> Regelverk.EØS
+            BehandlingKategori.NASJONAL -> Regelverk.NASJONAL
+        }
 }

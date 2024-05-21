@@ -27,8 +27,9 @@ fun ÅrsakRevurderingDto.tilDomene(behandlingId: UUID) =
         beskrivelse = this.beskrivelse,
     )
 
-fun ÅrsakRevurdering.tilDto() = ÅrsakRevurderingDto(
-    opplysningskilde = this.opplysningskilde,
-    årsak = this.årsak,
-    beskrivelse = this.beskrivelse,
-)
+fun ÅrsakRevurdering.tilDto() =
+    ÅrsakRevurderingDto(
+        opplysningskilde = this.opplysningskilde,
+        årsak = this.årsak,
+        beskrivelse = this.beskrivelse,
+    )

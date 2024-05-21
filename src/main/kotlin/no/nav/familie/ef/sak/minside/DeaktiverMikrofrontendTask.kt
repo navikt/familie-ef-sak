@@ -40,9 +40,10 @@ class DeaktiverMikrofrontendTask(
             return Task(
                 type = TYPE,
                 payload = objectMapper.writeValueAsString(DeaktiverMikrofrontendDto(fagsakPersonId)),
-                properties = Properties().apply {
-                    this["fagsakPersonId"] = fagsakPersonId.toString()
-                },
+                properties =
+                    Properties().apply {
+                        this["fagsakPersonId"] = fagsakPersonId.toString()
+                    },
             )
         }
 

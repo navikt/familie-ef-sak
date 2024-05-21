@@ -6,7 +6,6 @@ import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
 
 internal class SikkerhetContextTest {
-
     @Test
     internal fun `skal ikke godkjenne kall fra familie-ef-mottak for andre applikasjoner`() {
         mockBrukerContext("", azp_name = "prod-gcp:teamfamilie:familie-ef-personhendelse")

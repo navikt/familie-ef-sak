@@ -10,7 +10,6 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
 internal class StatsborgerskapMapperTest {
-
     private val kodeverkService: KodeverkService = mockk()
     private val statsborgerskapMapper = StatsborgerskapMapper(kodeverkService)
 

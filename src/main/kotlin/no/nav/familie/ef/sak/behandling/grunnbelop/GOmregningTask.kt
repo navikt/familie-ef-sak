@@ -32,7 +32,6 @@ class GOmregningTask(
     private val omregningService: OmregningService,
     private val taskService: TaskService,
 ) : AsyncTaskStep {
-
     val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
     override fun doTask(task: Task) {
@@ -49,11 +48,12 @@ class GOmregningTask(
             return false
         }
 
-        val properties = Properties().apply {
-            setProperty("fagsakId", fagsakId.toString())
-            setProperty("grunnbeløpsdato", Grunnbeløpsperioder.nyesteGrunnbeløpGyldigFraOgMed.toString())
-            setProperty(MDCConstants.MDC_CALL_ID, IdUtils.generateId())
-        }
+        val properties =
+            Properties().apply {
+                setProperty("fagsakId", fagsakId.toString())
+                setProperty("grunnbeløpsdato", Grunnbeløpsperioder.nyesteGrunnbeløpGyldigFraOgMed.toString())
+                setProperty(MDCConstants.MDC_CALL_ID, IdUtils.generateId())
+            }
 
         val task = Task(TYPE, payload).copy(metadataWrapper = PropertiesWrapper(properties))
 
@@ -62,7 +62,6 @@ class GOmregningTask(
     }
 
     companion object {
-
         const val TYPE = "G-omregning"
     }
 }

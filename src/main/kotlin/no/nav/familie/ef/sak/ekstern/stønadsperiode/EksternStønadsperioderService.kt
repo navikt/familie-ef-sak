@@ -15,7 +15,6 @@ import java.time.LocalDate
 class EksternStønadsperioderService(
     private val periodeService: PeriodeService,
 ) {
-
     /**
      * Brukes av arena: OBS: fom/tom-dato begrenses til DAGENS dato dersom det ikke er satt!
      */

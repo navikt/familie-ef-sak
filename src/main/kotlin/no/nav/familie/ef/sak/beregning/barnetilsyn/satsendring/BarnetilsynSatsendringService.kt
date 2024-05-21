@@ -52,13 +52,14 @@ class BarnetilsynSatsendringService(
             fagsakIds.map { BarnetilsynSatsendringKandidat(it, vedtakHistorikkService.hentAktivHistorikk(it)) }
         logger.info("Antall kandidater til satsendring: ${barnetilsynSatsendringKandidat.size}")
 
-        val kandidaterMedSkalRevurderesSatt = barnetilsynSatsendringKandidat.map {
-            val nåværendeAndelerForNesteÅr = it.andelerEtter(YearMonth.of(YearMonth.now().year, 6))
-            val nyBeregningMånedsperioder = gjørNyBeregning(nåværendeAndelerForNesteÅr, brukIkkeVedtatteSatser)
-            val skalRevurderes: Boolean =
-                finnesStørreBeløpINyBeregning(nyBeregningMånedsperioder, nåværendeAndelerForNesteÅr)
-            it.copy(skalRevurderes = skalRevurderes)
-        }
+        val kandidaterMedSkalRevurderesSatt =
+            barnetilsynSatsendringKandidat.map {
+                val nåværendeAndelerForNesteÅr = it.andelerEtter(YearMonth.of(YearMonth.now().year, 6))
+                val nyBeregningMånedsperioder = gjørNyBeregning(nåværendeAndelerForNesteÅr, brukIkkeVedtatteSatser)
+                val skalRevurderes: Boolean =
+                    finnesStørreBeløpINyBeregning(nyBeregningMånedsperioder, nåværendeAndelerForNesteÅr)
+                it.copy(skalRevurderes = skalRevurderes)
+            }
 
         return kandidaterMedSkalRevurderesSatt.filter { it.skalRevurderes }
     }
@@ -90,19 +91,20 @@ class BarnetilsynSatsendringService(
     }
 
     private fun mapAndelerForNesteÅrTilUtgiftsperiodeDto(andeler2023: List<AndelHistorikkDto>): List<UtgiftsperiodeDto> {
-        val utgiftsperiode = andeler2023.map {
-            feilHvis(it.erSanksjon) {
-                "Støtter ikke sanksjon. Både erMidlertidigOpphør og sanksjonsårsak burde då settes"
+        val utgiftsperiode =
+            andeler2023.map {
+                feilHvis(it.erSanksjon) {
+                    "Støtter ikke sanksjon. Både erMidlertidigOpphør og sanksjonsårsak burde då settes"
+                }
+                UtgiftsperiodeDto(
+                    periode = it.andel.periode,
+                    barn = it.andel.barn,
+                    utgifter = it.andel.utgifter.toInt(),
+                    sanksjonsårsak = null,
+                    periodetype = it.periodetypeBarnetilsyn ?: error("Mangler periodetype $it"),
+                    aktivitetstype = it.aktivitetBarnetilsyn,
+                ) // TODO sjekk erMidlertidigOpphør???...
             }
-            UtgiftsperiodeDto(
-                periode = it.andel.periode,
-                barn = it.andel.barn,
-                utgifter = it.andel.utgifter.toInt(),
-                sanksjonsårsak = null,
-                periodetype = it.periodetypeBarnetilsyn ?: error("Mangler periodetype $it"),
-                aktivitetstype = it.aktivitetBarnetilsyn,
-            ) // TODO sjekk erMidlertidigOpphør???...
-        }
         return utgiftsperiode
     }
 

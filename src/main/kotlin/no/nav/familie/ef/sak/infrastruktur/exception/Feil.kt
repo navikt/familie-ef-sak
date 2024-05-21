@@ -12,13 +12,16 @@ class Feil(
     val httpStatus: HttpStatus = HttpStatus.INTERNAL_SERVER_ERROR,
     throwable: Throwable? = null,
 ) : RuntimeException(message, throwable) {
-
     constructor(message: String, throwable: Throwable?, httpStatus: HttpStatus = HttpStatus.INTERNAL_SERVER_ERROR) :
         this(message, null, httpStatus, throwable)
 }
 
 @OptIn(ExperimentalContracts::class)
-inline fun feilHvis(boolean: Boolean, httpStatus: HttpStatus = HttpStatus.INTERNAL_SERVER_ERROR, lazyMessage: () -> String) {
+inline fun feilHvis(
+    boolean: Boolean,
+    httpStatus: HttpStatus = HttpStatus.INTERNAL_SERVER_ERROR,
+    lazyMessage: () -> String,
+) {
     contract {
         returns() implies !boolean
     }
@@ -28,7 +31,11 @@ inline fun feilHvis(boolean: Boolean, httpStatus: HttpStatus = HttpStatus.INTERN
 }
 
 @OptIn(ExperimentalContracts::class)
-inline fun brukerfeilHvis(boolean: Boolean, httpStatus: HttpStatus = HttpStatus.BAD_REQUEST, lazyMessage: () -> String) {
+inline fun brukerfeilHvis(
+    boolean: Boolean,
+    httpStatus: HttpStatus = HttpStatus.BAD_REQUEST,
+    lazyMessage: () -> String,
+) {
     contract {
         returns() implies !boolean
     }
@@ -37,11 +44,19 @@ inline fun brukerfeilHvis(boolean: Boolean, httpStatus: HttpStatus = HttpStatus.
     }
 }
 
-inline fun feilHvisIkke(boolean: Boolean, httpStatus: HttpStatus = HttpStatus.INTERNAL_SERVER_ERROR, lazyMessage: () -> String) {
+inline fun feilHvisIkke(
+    boolean: Boolean,
+    httpStatus: HttpStatus = HttpStatus.INTERNAL_SERVER_ERROR,
+    lazyMessage: () -> String,
+) {
     feilHvis(!boolean, httpStatus) { lazyMessage() }
 }
 
-inline fun brukerfeilHvisIkke(boolean: Boolean, httpStatus: HttpStatus = HttpStatus.BAD_REQUEST, lazyMessage: () -> String) {
+inline fun brukerfeilHvisIkke(
+    boolean: Boolean,
+    httpStatus: HttpStatus = HttpStatus.BAD_REQUEST,
+    lazyMessage: () -> String,
+) {
     brukerfeilHvis(!boolean, httpStatus) { lazyMessage() }
 }
 

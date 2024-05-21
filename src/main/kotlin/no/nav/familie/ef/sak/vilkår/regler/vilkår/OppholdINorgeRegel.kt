@@ -54,9 +54,10 @@ class OppholdINorgeRegel : Vilkårsregel(
         val medlemskap = metadata.vilkårgrunnlagDto.medlemskap
         val harBrukerSvartOppholderSegINorgeISøknad = medlemskap.søknadsgrunnlag?.oppholderDuDegINorge == true && medlemskap.søknadsgrunnlag.bosattNorgeSisteÅrene
         val harSøkerPersonstatusBosatt = medlemskap.registergrunnlag.folkeregisterpersonstatus == BOSATT
-        val harSøkerNorskStatsborger = medlemskap.registergrunnlag.statsborgerskap.any {
-            it.land.lowercase() == STATSBORGERSTAT_VERDI_NORGE
-        }
+        val harSøkerNorskStatsborger =
+            medlemskap.registergrunnlag.statsborgerskap.any {
+                it.land.lowercase() == STATSBORGERSTAT_VERDI_NORGE
+            }
         val harBarnaPersonstatusBosatt = harBarnaPersonstatusBosattEllerErTerminbarn(metadata)
 
         return erDigitalSøknad &&
@@ -71,22 +72,22 @@ class OppholdINorgeRegel : Vilkårsregel(
             RegelSteg(
                 regelId = RegelId.OPPHOLD_UNNTAK,
                 svarMapping =
-                mapOf(
-                    SvarId.ARBEID_NORSK_ARBEIDSGIVER to SluttSvarRegel.OPPFYLT_MED_PÅKREVD_BEGRUNNELSE,
-                    SvarId.UTENLANDSOPPHOLD_MINDRE_ENN_6_UKER to SluttSvarRegel.OPPFYLT_MED_PÅKREVD_BEGRUNNELSE,
-                    SvarId.OPPHOLDER_SEG_I_ANNET_EØS_LAND to SluttSvarRegel.OPPFYLT_MED_PÅKREVD_BEGRUNNELSE,
-                    SvarId.NEI to SluttSvarRegel.IKKE_OPPFYLT_MED_PÅKREVD_BEGRUNNELSE,
-                ),
+                    mapOf(
+                        SvarId.ARBEID_NORSK_ARBEIDSGIVER to SluttSvarRegel.OPPFYLT_MED_PÅKREVD_BEGRUNNELSE,
+                        SvarId.UTENLANDSOPPHOLD_MINDRE_ENN_6_UKER to SluttSvarRegel.OPPFYLT_MED_PÅKREVD_BEGRUNNELSE,
+                        SvarId.OPPHOLDER_SEG_I_ANNET_EØS_LAND to SluttSvarRegel.OPPFYLT_MED_PÅKREVD_BEGRUNNELSE,
+                        SvarId.NEI to SluttSvarRegel.IKKE_OPPFYLT_MED_PÅKREVD_BEGRUNNELSE,
+                    ),
             )
 
         private val BOR_OG_OPPHOLDER_SEG_I_NORGE =
             RegelSteg(
                 regelId = RegelId.BOR_OG_OPPHOLDER_SEG_I_NORGE,
                 svarMapping =
-                jaNeiSvarRegel(
-                    hvisJa = SluttSvarRegel.OPPFYLT_MED_PÅKREVD_BEGRUNNELSE,
-                    hvisNei = NesteRegel(OPPHOLD_UNNTAK.regelId),
-                ),
+                    jaNeiSvarRegel(
+                        hvisJa = SluttSvarRegel.OPPFYLT_MED_PÅKREVD_BEGRUNNELSE,
+                        hvisNei = NesteRegel(OPPHOLD_UNNTAK.regelId),
+                    ),
             )
     }
 }

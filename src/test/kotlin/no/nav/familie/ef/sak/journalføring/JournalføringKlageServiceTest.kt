@@ -35,7 +35,6 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 internal class JournalføringKlageServiceTest {
-
     private val klageService = mockk<KlageService>()
     private val oppgaveService = mockk<OppgaveService>()
     private val fagsakService = mockk<FagsakService>()
@@ -49,17 +48,18 @@ internal class JournalføringKlageServiceTest {
     private val journalpostId = "journalpostId"
     private val oppgaveId = "123"
 
-    private val klagebehandling = KlagebehandlingDto(
-        id = UUID.randomUUID(),
-        fagsakId = fagsak.id,
-        status = BehandlingStatus.FERDIGSTILT,
-        opprettet = LocalDateTime.now(),
-        mottattDato = LocalDate.now(),
-        resultat = null,
-        årsak = null,
-        vedtaksdato = null,
-        klageinstansResultat = emptyList(),
-    )
+    private val klagebehandling =
+        KlagebehandlingDto(
+            id = UUID.randomUUID(),
+            fagsakId = fagsak.id,
+            status = BehandlingStatus.FERDIGSTILT,
+            opprettet = LocalDateTime.now(),
+            mottattDato = LocalDate.now(),
+            resultat = null,
+            årsak = null,
+            vedtaksdato = null,
+            klageinstansResultat = emptyList(),
+        )
 
     @BeforeEach
     internal fun setUp() {
@@ -81,7 +81,6 @@ internal class JournalføringKlageServiceTest {
 
     @Nested
     inner class NyBehandling {
-
         @Test
         internal fun `happy case`() {
             service.fullførJournalpost(lagRequest(JournalføringKlageBehandling()), journalpostId)
@@ -101,7 +100,6 @@ internal class JournalføringKlageServiceTest {
 
     @Nested
     inner class EskisterendeBehandling {
-
         @Test
         internal fun `happy case`() {
             service.fullførJournalpost(
@@ -114,10 +112,11 @@ internal class JournalføringKlageServiceTest {
 
         @Test
         internal fun `skal opprette task for å oppdatere behandlingstema om klage gjelder tilbakekreving`() {
-            val oppdaterTask = Task(
-                type = OppdaterOppgaveTilÅGjeldeTilbakekrevingTask.TYPE,
-                payload = UUID.randomUUID().toString(),
-            )
+            val oppdaterTask =
+                Task(
+                    type = OppdaterOppgaveTilÅGjeldeTilbakekrevingTask.TYPE,
+                    payload = UUID.randomUUID().toString(),
+                )
 
             val taskSlot = slot<Task>()
             every { taskService.save(capture(taskSlot)) } returns oppdaterTask
@@ -143,14 +142,20 @@ internal class JournalføringKlageServiceTest {
         }
     }
 
-    private fun verifyKall(opprettKlageKall: Int = 1, oppdaterOppgaveKall: Int = 0) {
+    private fun verifyKall(
+        opprettKlageKall: Int = 1,
+        oppdaterOppgaveKall: Int = 0,
+    ) {
         verify(exactly = opprettKlageKall) { klageService.opprettKlage(any<Fagsak>(), any(), any()) }
         verify { journalpostService.oppdaterOgFerdigstillJournalpost(any(), any(), any(), any(), any(), any()) }
         verify { oppgaveService.ferdigstillOppgave(any()) }
         verify(exactly = oppdaterOppgaveKall) { taskService.save(any()) }
     }
 
-    private fun lagRequest(behandling: JournalføringKlageBehandling, klageGjelderTilbakekreving: Boolean = false) =
+    private fun lagRequest(
+        behandling: JournalføringKlageBehandling,
+        klageGjelderTilbakekreving: Boolean = false,
+    ) =
         JournalføringKlageRequest(emptyMap(), fagsakId, oppgaveId, behandling, "enhet", klageGjelderTilbakekreving)
 
     fun lagjournalpost(mottattDato: LocalDate? = null) =

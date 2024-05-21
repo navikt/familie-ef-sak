@@ -13,16 +13,21 @@ class HenleggService(
     private val behandlingService: BehandlingService,
     private val oppgaveService: OppgaveService,
 ) {
-
     @Transactional
-    fun henleggBehandling(behandlingId: UUID, henlagt: HenlagtDto): Behandling {
+    fun henleggBehandling(
+        behandlingId: UUID,
+        henlagt: HenlagtDto,
+    ): Behandling {
         val behandling = behandlingService.henleggBehandling(behandlingId, henlagt)
         ferdigstillOppgaveTask(behandling)
         return behandling
     }
 
     @Transactional
-    fun henleggBehandlingUtenOppgave(behandlingId: UUID, henlagt: HenlagtDto): Behandling {
+    fun henleggBehandlingUtenOppgave(
+        behandlingId: UUID,
+        henlagt: HenlagtDto,
+    ): Behandling {
         val behandling = behandlingService.henleggBehandling(behandlingId, henlagt, false)
         settEfOppgaveTilFerdig(behandling)
         return behandling

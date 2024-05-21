@@ -24,7 +24,6 @@ import org.springframework.stereotype.Service
 
 @Service
 class JournalpostService(private val journalpostClient: JournalpostClient) {
-
     private val secureLogger = LoggerFactory.getLogger("secureLogger")
 
     fun hentJournalpost(journalpostId: String): Journalpost {
@@ -38,10 +37,11 @@ class JournalpostService(private val journalpostClient: JournalpostClient) {
     ): List<Journalpost> {
         return journalpostClient.finnJournalposter(
             JournalposterForBrukerRequest(
-                brukerId = Bruker(
-                    id = personIdent,
-                    type = BrukerIdType.FNR,
-                ),
+                brukerId =
+                    Bruker(
+                        id = personIdent,
+                        type = BrukerIdType.FNR,
+                    ),
                 antall = antall,
                 tema = listOf(Tema.ENF),
                 journalposttype = typer,
@@ -55,10 +55,11 @@ class JournalpostService(private val journalpostClient: JournalpostClient) {
     ): List<Journalpost> {
         return journalpostClient.finnJournalposterForBrukerOgTema(
             JournalposterForVedleggRequest(
-                brukerId = Bruker(
-                    id = personIdent,
-                    type = BrukerIdType.FNR,
-                ),
+                brukerId =
+                    Bruker(
+                        id = personIdent,
+                        type = BrukerIdType.FNR,
+                    ),
                 tema = vedleggRequest.tema,
                 dokumenttype = vedleggRequest.dokumenttype,
                 journalpostStatus = vedleggRequest.journalpostStatus,
@@ -128,7 +129,10 @@ class JournalpostService(private val journalpostClient: JournalpostClient) {
         }
     }
 
-    private fun oppdaterLogiskeVedlegg(journalpost: Journalpost, logiskeVedlegg: Map<String, List<LogiskVedlegg>>?) {
+    private fun oppdaterLogiskeVedlegg(
+        journalpost: Journalpost,
+        logiskeVedlegg: Map<String, List<LogiskVedlegg>>?,
+    ) {
         // Skal ikke endre på logiske vedlegg dersom man journalfører fra gammel løsning. Gammel løsning sender ikke inn logiske vedlegg og vil derfor resultere i null her. Ny løsning vil sende inn tom liste.
         if (logiskeVedlegg == null) {
             return

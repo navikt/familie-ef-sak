@@ -46,7 +46,6 @@ class RevurderingService(
     private val nyeBarnService: NyeBarnService,
     private val tilordnetRessursService: TilordnetRessursService,
 ) {
-
     fun hentRevurderingsinformasjon(behandlingId: UUID): RevurderingsinformasjonDto {
         return årsakRevurderingService.hentRevurderingsinformasjon(behandlingId)
     }
@@ -75,16 +74,18 @@ class RevurderingService(
         val fagsak = fagsakService.fagsakMedOppdatertPersonIdent(revurderingInnhold.fagsakId)
         validerOpprettRevurdering(fagsak, revurderingInnhold)
 
-        val revurdering = behandlingService.opprettBehandling(
-            behandlingType = BehandlingType.REVURDERING,
-            fagsakId = revurderingInnhold.fagsakId,
-            status = BehandlingStatus.UTREDES,
-            stegType = StegType.BEREGNE_YTELSE,
-            behandlingsårsak = revurderingInnhold.behandlingsårsak,
-            kravMottatt = revurderingInnhold.kravMottatt,
-        )
-        val forrigeBehandlingId = behandlingService.finnSisteIverksatteBehandlingMedEventuellAvslått(fagsak.id)?.id
-            ?: error("Revurdering må ha eksisterende iverksatt behandling")
+        val revurdering =
+            behandlingService.opprettBehandling(
+                behandlingType = BehandlingType.REVURDERING,
+                fagsakId = revurderingInnhold.fagsakId,
+                status = BehandlingStatus.UTREDES,
+                stegType = StegType.BEREGNE_YTELSE,
+                behandlingsårsak = revurderingInnhold.behandlingsårsak,
+                kravMottatt = revurderingInnhold.kravMottatt,
+            )
+        val forrigeBehandlingId =
+            behandlingService.finnSisteIverksatteBehandlingMedEventuellAvslått(fagsak.id)?.id
+                ?: error("Revurdering må ha eksisterende iverksatt behandling")
         val saksbehandler = SikkerhetContext.hentSaksbehandler()
 
         søknadService.kopierSøknad(forrigeBehandlingId, revurdering.id)
@@ -118,11 +119,12 @@ class RevurderingService(
         taskService.save(BehandlingsstatistikkTask.opprettPåbegyntTask(behandlingId = revurdering.id))
 
         if (erSatsendring(revurderingInnhold)) {
-            val vedtakDto = kopierVedtakService.lagVedtakDtoBasertPåTidligereVedtaksperioder(
-                fagsakId = fagsak.id,
-                forrigeBehandlingId = forrigeBehandlingId,
-                revurderingId = revurdering.id,
-            )
+            val vedtakDto =
+                kopierVedtakService.lagVedtakDtoBasertPåTidligereVedtaksperioder(
+                    fagsakId = fagsak.id,
+                    forrigeBehandlingId = forrigeBehandlingId,
+                    revurderingId = revurdering.id,
+                )
             vedtakService.lagreVedtak(
                 vedtakDto = vedtakDto,
                 behandlingId = revurdering.id,
@@ -174,7 +176,10 @@ class RevurderingService(
         }
     }
 
-    private fun validerOpprettRevurdering(fagsak: Fagsak, revurderingInnhold: RevurderingDto) {
+    private fun validerOpprettRevurdering(
+        fagsak: Fagsak,
+        revurderingInnhold: RevurderingDto,
+    ) {
         feilHvis(
             fagsak.stønadstype != StønadType.OVERGANGSSTØNAD &&
                 revurderingInnhold.behandlingsårsak == BehandlingÅrsak.G_OMREGNING,

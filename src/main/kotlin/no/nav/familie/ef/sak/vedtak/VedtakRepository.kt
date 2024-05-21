@@ -9,6 +9,5 @@ import java.util.UUID
 
 @Repository
 interface VedtakRepository : RepositoryInterface<Vedtak, UUID>, InsertUpdateRepository<Vedtak> {
-
     fun findAllByResultatType(resultatType: ResultatType): List<Vedtak>
 }

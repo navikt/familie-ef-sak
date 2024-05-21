@@ -31,10 +31,11 @@ data class PeriodeMedBeløpDto(
     @Deprecated("Bruk periode!", ReplaceWith("periode.fom")) val årMånedFra: YearMonth? = null,
     @Deprecated("Bruk periode!", ReplaceWith("periode.tom")) val årMånedTil: YearMonth? = null,
     @JsonIgnore
-    val periode: Månedsperiode = Månedsperiode(
-        årMånedFra ?: error("periode eller årMånedFra må ha verdi"),
-        årMånedTil ?: error("periode eller årMånedTil må ha verdi"),
-    ),
+    val periode: Månedsperiode =
+        Månedsperiode(
+            årMånedFra ?: error("periode eller årMånedFra må ha verdi"),
+            årMånedTil ?: error("periode eller årMånedTil må ha verdi"),
+        ),
     val beløp: Int,
 )
 
@@ -42,17 +43,17 @@ data class UtgiftsperiodeDto(
     @Deprecated("Bruk periode!", ReplaceWith("periode.fom")) val årMånedFra: YearMonth? = null,
     @Deprecated("Bruk periode!", ReplaceWith("periode.tom")) val årMånedTil: YearMonth? = null,
     @JsonIgnore
-    val periode: Månedsperiode = Månedsperiode(
-        årMånedFra ?: error("periode eller årMånedFra må ha verdi"),
-        årMånedTil ?: error("periode eller årMånedTil må ha verdi"),
-    ),
+    val periode: Månedsperiode =
+        Månedsperiode(
+            årMånedFra ?: error("periode eller årMånedFra må ha verdi"),
+            årMånedTil ?: error("periode eller årMånedTil må ha verdi"),
+        ),
     val barn: List<UUID>,
     val utgifter: Int,
     val sanksjonsårsak: Sanksjonsårsak?,
     val periodetype: PeriodetypeBarnetilsyn,
     val aktivitetstype: AktivitetstypeBarnetilsyn?,
 ) {
-
     val erMidlertidigOpphørEllerSanksjon get() = periodetype.midlertidigOpphørEllerSanksjon()
 }
 
@@ -82,29 +83,32 @@ fun Vedtak.mapInnvilgelseBarnetilsyn(resultatType: ResultatType = ResultatType.I
     }
     return InnvilgelseBarnetilsyn(
         begrunnelse = barnetilsyn.begrunnelse,
-        perioder = barnetilsyn.perioder.map {
-            UtgiftsperiodeDto(
-                årMånedFra = YearMonth.from(it.datoFra),
-                årMånedTil = YearMonth.from(it.datoTil),
-                periode = it.periode,
-                utgifter = it.utgifter,
-                barn = it.barn,
-                sanksjonsårsak = it.sanksjonsårsak,
-                periodetype = it.periodetype,
-                aktivitetstype = it.aktivitetstype,
-            )
-        },
+        perioder =
+            barnetilsyn.perioder.map {
+                UtgiftsperiodeDto(
+                    årMånedFra = YearMonth.from(it.datoFra),
+                    årMånedTil = YearMonth.from(it.datoTil),
+                    periode = it.periode,
+                    utgifter = it.utgifter,
+                    barn = it.barn,
+                    sanksjonsårsak = it.sanksjonsårsak,
+                    periodetype = it.periodetype,
+                    aktivitetstype = it.aktivitetstype,
+                )
+            },
         perioderKontantstøtte = this.kontantstøtte.perioder.map { it.tilDto() },
-        tilleggsstønad = TilleggsstønadDto(
-            harTilleggsstønad = this.tilleggsstønad.harTilleggsstønad,
-            perioder = this.tilleggsstønad.perioder.map { it.tilDto() },
-            begrunnelse = this.tilleggsstønad.begrunnelse,
-        ),
+        tilleggsstønad =
+            TilleggsstønadDto(
+                harTilleggsstønad = this.tilleggsstønad.harTilleggsstønad,
+                perioder = this.tilleggsstønad.perioder.map { it.tilDto() },
+                begrunnelse = this.tilleggsstønad.begrunnelse,
+            ),
         resultatType = resultatType,
-        _type = when (resultatType) {
-            ResultatType.INNVILGE -> "InnvilgelseBarnetilsyn"
-            ResultatType.INNVILGE_UTEN_UTBETALING -> "InnvilgelseBarnetilsynUtenUtbetaling"
-            else -> error("Ugyldig resultattype $this")
-        },
+        _type =
+            when (resultatType) {
+                ResultatType.INNVILGE -> "InnvilgelseBarnetilsyn"
+                ResultatType.INNVILGE_UTEN_UTBETALING -> "InnvilgelseBarnetilsynUtenUtbetaling"
+                else -> error("Ugyldig resultattype $this")
+            },
     )
 }

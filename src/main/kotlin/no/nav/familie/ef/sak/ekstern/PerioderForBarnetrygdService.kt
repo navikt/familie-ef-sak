@@ -18,12 +18,12 @@ import org.springframework.stereotype.Service
 class PerioderForBarnetrygdService(
     private val periodeService: PeriodeService,
 ) {
-
     fun hentPerioderMedFullOvergangsstønad(request: PersonIdent): EksternePerioderResponse {
-        val perioderPåDatakilde = periodeService.hentPerioderForOvergangsstønadFraEfOgInfotrygd(request.ident)
-            .filter(InternPeriode::erFullOvergangsstønad)
-            .map(InternPeriode::tilEksternEksternPeriode)
-            .groupBy { it.datakilde }
+        val perioderPåDatakilde =
+            periodeService.hentPerioderForOvergangsstønadFraEfOgInfotrygd(request.ident)
+                .filter(InternPeriode::erFullOvergangsstønad)
+                .map(InternPeriode::tilEksternEksternPeriode)
+                .groupBy { it.datakilde }
 
         val perioderInfotrygd = infotrygdperioderUtenOverlapp(perioderPåDatakilde.getOrDefault(Datakilde.INFOTRYGD, emptyList()))
         val perioderEF = perioderPåDatakilde.getOrDefault(Datakilde.EF, emptyList())
@@ -41,6 +41,7 @@ class PerioderForBarnetrygdService(
 }
 
 private fun EksternPeriode.tilPeriode(): Datoperiode = Datoperiode(this.fomDato, this.tomDato)
+
 private fun EksternPeriode.omsluttesAv(annen: EksternPeriode): Boolean =
     this.tilPeriode().omsluttesAv(annen.tilPeriode())
 

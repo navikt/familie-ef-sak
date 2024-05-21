@@ -18,16 +18,16 @@ import org.junit.jupiter.api.assertThrows
 import org.springframework.http.HttpStatus
 
 internal class AutomatiskJournalføringControllerTest {
-
     val automatiskJournalføringService = mockk<AutomatiskJournalføringService>(relaxed = true)
     val automatiskJournalføringController = AutomatiskJournalføringController(automatiskJournalføringService)
 
-    val request = AutomatiskJournalføringRequest(
-        "12345678901",
-        "1234",
-        OVERGANGSSTØNAD,
-        1234L,
-    )
+    val request =
+        AutomatiskJournalføringRequest(
+            "12345678901",
+            "1234",
+            OVERGANGSSTØNAD,
+            1234L,
+        )
 
     @BeforeEach
     internal fun setUp() {
@@ -50,9 +50,10 @@ internal class AutomatiskJournalføringControllerTest {
     @Test
     internal fun `skal feile hvis en annen applikasjon enn familie-ef-mottak kaller på sjekk om behandling kan opprettes`() {
         every { SikkerhetContext.kallKommerFraFamilieEfMottak() } returns false
-        val feil = assertThrows<Feil> {
-            automatiskJournalføringController.kanOppretteBehandling(PersonIdent("12345678901"), OVERGANGSSTØNAD)
-        }
+        val feil =
+            assertThrows<Feil> {
+                automatiskJournalføringController.kanOppretteBehandling(PersonIdent("12345678901"), OVERGANGSSTØNAD)
+            }
 
         assertThat(feil.httpStatus).isEqualTo(HttpStatus.UNAUTHORIZED)
     }

@@ -39,7 +39,10 @@ object JournalføringHelper {
         }
     }
 
-    fun validerGyldigAvsender(journalpost: Journalpost, request: JournalføringRequestV2) {
+    fun validerGyldigAvsender(
+        journalpost: Journalpost,
+        request: JournalføringRequestV2,
+    ) {
         if (journalpost.manglerAvsenderMottaker()) {
             brukerfeilHvis(request.nyAvsender == null) {
                 "Kan ikke journalføre uten avsender"
@@ -57,7 +60,10 @@ object JournalføringHelper {
         }
     }
 
-    fun utledNyAvsender(nyAvsender: NyAvsender?, bruker: Bruker?): AvsenderMottaker? =
+    fun utledNyAvsender(
+        nyAvsender: NyAvsender?,
+        bruker: Bruker?,
+    ): AvsenderMottaker? =
         when (nyAvsender?.erBruker) {
             null -> null
             true -> AvsenderMottaker(id = nyAvsender.personIdent, idType = BrukerIdType.FNR, navn = nyAvsender.navn!!)
@@ -125,28 +131,32 @@ object JournalføringHelper {
         nyAvsender: AvsenderMottaker?,
     ) = OppdaterJournalpostRequest(
         avsenderMottaker = nyAvsender,
-        bruker = journalpost.bruker?.let {
-            DokarkivBruker(idType = BrukerIdType.valueOf(it.type.toString()), id = it.id)
-        },
+        bruker =
+            journalpost.bruker?.let {
+                DokarkivBruker(idType = BrukerIdType.valueOf(it.type.toString()), id = it.id)
+            },
         tema = journalpost.tema?.let { Tema.valueOf(it) },
         behandlingstema = journalpost.behandlingstema?.let { Behandlingstema.fromValue(it) },
         tittel = journalpost.tittel,
         journalfoerendeEnhet = journalpost.journalforendeEnhet,
-        sak = Sak(
-            fagsakId = eksternFagsakId.toString(),
-            fagsaksystem = Fagsystem.EF,
-            sakstype = "FAGSAK",
-        ),
-        dokumenter = dokumenttitler?.let {
-            journalpost.dokumenter?.map { dokumentInfo ->
-                DokumentInfo(
-                    dokumentInfoId = dokumentInfo.dokumentInfoId,
-                    tittel = dokumenttitler[dokumentInfo.dokumentInfoId]
-                        ?: dokumentInfo.tittel,
-                    brevkode = dokumentInfo.brevkode,
-                )
-            }
-        },
+        sak =
+            Sak(
+                fagsakId = eksternFagsakId.toString(),
+                fagsaksystem = Fagsystem.EF,
+                sakstype = "FAGSAK",
+            ),
+        dokumenter =
+            dokumenttitler?.let {
+                journalpost.dokumenter?.map { dokumentInfo ->
+                    DokumentInfo(
+                        dokumentInfoId = dokumentInfo.dokumentInfoId,
+                        tittel =
+                            dokumenttitler[dokumentInfo.dokumentInfoId]
+                                ?: dokumentInfo.tittel,
+                        brevkode = dokumentInfo.brevkode,
+                    )
+                }
+            },
     )
 
     fun utledNesteBehandlingstype(behandlinger: List<Behandling>): BehandlingType {

@@ -37,7 +37,6 @@ class NyeBarnService(
     private val barnService: BarnService,
     private val taskService: TaskService,
 ) {
-
     private val logger: Logger = LoggerFactory.getLogger(javaClass)
 
     fun finnNyeEllerUtenforTerminFødteBarn(personIdent: PersonIdent): NyeBarnDto {
@@ -63,7 +62,10 @@ class NyeBarnService(
     }
 
     // TODO slett 4 måneder etter att siste migreringen er klar
-    private fun opprettOppfølgningsoppgaveForBarn(fagsak: Fagsak, nyeBarn: List<BarnMinimumDto>) {
+    private fun opprettOppfølgningsoppgaveForBarn(
+        fagsak: Fagsak,
+        nyeBarn: List<BarnMinimumDto>,
+    ) {
         if (fagsak.migrert) {
             try {
                 taskService.save(OpprettOppgaveForMigrertFødtBarnTask.opprettOppgave(fagsak, nyeBarn))
@@ -98,7 +100,10 @@ class NyeBarnService(
         return finnKobledeBarn(behandling.id, aktivIdent)
     }
 
-    private fun finnKobledeBarn(behandlingId: UUID, personIdent: String): NyeBarnData {
+    private fun finnKobledeBarn(
+        behandlingId: UUID,
+        personIdent: String,
+    ): NyeBarnData {
         val alleBarnPåBehandlingen = barnService.finnBarnPåBehandling(behandlingId)
         val pdlBarn = GrunnlagsdataMapper.mapBarn(personService.hentPersonMedBarn(personIdent).barn)
         val kobledeBarn = BarnMatcher.kobleBehandlingBarnOgRegisterBarn(alleBarnPåBehandlingen, pdlBarn)
@@ -106,7 +111,10 @@ class NyeBarnService(
         return NyeBarnData(pdlBarn, kobledeBarn)
     }
 
-    private fun finnForTidligtFødteBarn(kobledeBarn: NyeBarnData, stønadstype: StønadType): List<NyttBarn> {
+    private fun finnForTidligtFødteBarn(
+        kobledeBarn: NyeBarnData,
+        stønadstype: StønadType,
+    ): List<NyttBarn> {
         return kobledeBarn.kobledeBarn
             .filter { it.behandlingBarn.personIdent == null }
             .filter { barnFødtFørTermin(it) }
@@ -116,16 +124,21 @@ class NyeBarnService(
             }
     }
 
-    private fun finnForSentFødteBarn(kobledeBarn: NyeBarnData, stønadstype: StønadType): List<NyttBarn> {
-        val forSentFødteBarn = kobledeBarn.kobledeBarn
-            .filter { it.behandlingBarn.personIdent == null }
-            .filter { barnFødtEtterTermin(it) }
-            .map {
-                val barn = it.barn ?: error("Skal ha filtrert ut matchet barn uten barn")
-                NyttBarn(barn.personIdent, stønadstype, NyttBarnÅrsak.FØDT_ETTER_TERMIN)
-            }
+    private fun finnForSentFødteBarn(
+        kobledeBarn: NyeBarnData,
+        stønadstype: StønadType,
+    ): List<NyttBarn> {
+        val forSentFødteBarn =
+            kobledeBarn.kobledeBarn
+                .filter { it.behandlingBarn.personIdent == null }
+                .filter { barnFødtEtterTermin(it) }
+                .map {
+                    val barn = it.barn ?: error("Skal ha filtrert ut matchet barn uten barn")
+                    NyttBarn(barn.personIdent, stønadstype, NyttBarnÅrsak.FØDT_ETTER_TERMIN)
+                }
         return forSentFødteBarn
     }
+
     private fun barnFødtFørTermin(barn: MatchetBehandlingBarn): Boolean {
         val pdlBarn = barn.barn
         val behandlingBarn = barn.behandlingBarn

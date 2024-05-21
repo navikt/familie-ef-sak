@@ -10,7 +10,6 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 
 internal class FinnOppgaveRequestDtoTest {
-
     @Test
     internal fun `skal mappe om finnOppgaveRequestDto til FinnOppgaveRequest`() {
         val eksternInput = HashMap<String, String>()

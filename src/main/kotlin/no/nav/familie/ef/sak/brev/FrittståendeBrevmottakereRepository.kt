@@ -10,6 +10,8 @@ import java.util.UUID
 interface FrittståendeBrevmottakereRepository :
     RepositoryInterface<BrevmottakereFrittståendeBrev, UUID>,
     InsertUpdateRepository<BrevmottakereFrittståendeBrev> {
-
-    fun findByFagsakIdAndSaksbehandlerIdent(fagsakId: UUID, saksbehandlerIdent: String): BrevmottakereFrittståendeBrev?
+    fun findByFagsakIdAndSaksbehandlerIdent(
+        fagsakId: UUID,
+        saksbehandlerIdent: String,
+    ): BrevmottakereFrittståendeBrev?
 }

@@ -42,41 +42,43 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 internal class GjenbrukVilkårServiceTest {
-
     private val behandlingService = mockk<BehandlingService>()
     private val fagsakService = mockk<FagsakService>()
     private val vilkårsvurderingRepository = mockk<VilkårsvurderingRepository>()
     private val grunnlagsdataService = mockk<GrunnlagsdataService>()
     private val barnService = mockk<BarnService>()
     private val tilordnetRessursService = mockk<TilordnetRessursService>()
-    private val gjenbrukVilkårService = GjenbrukVilkårService(
-        behandlingService = behandlingService,
-        fagsakService = fagsakService,
-        vilkårsvurderingRepository = vilkårsvurderingRepository,
-        grunnlagsdataService = grunnlagsdataService,
-        barnService = barnService,
-        tilordnetRessursService = tilordnetRessursService,
-    )
+    private val gjenbrukVilkårService =
+        GjenbrukVilkårService(
+            behandlingService = behandlingService,
+            fagsakService = fagsakService,
+            vilkårsvurderingRepository = vilkårsvurderingRepository,
+            grunnlagsdataService = grunnlagsdataService,
+            barnService = barnService,
+            tilordnetRessursService = tilordnetRessursService,
+        )
 
     private val barn1 = FnrGenerator.generer(LocalDate.now())
     private val barn2 = FnrGenerator.generer(LocalDate.now().minusYears(5))
     private val barn3 = FnrGenerator.generer(LocalDate.now().minusYears(12))
-    private val søknadOS = SøknadsskjemaMapper.tilDomene(
-        TestsøknadBuilder.Builder().setBarn(
-            listOf(
-                TestsøknadBuilder.Builder().defaultBarn("Barn Nummer En", barn1),
-                TestsøknadBuilder.Builder().defaultBarn("Barn Nummer To", barn2),
-            ),
-        ).build().søknadOvergangsstønad,
-    ).tilSøknadsverdier()
-    private val søknadBT = SøknadsskjemaMapper.tilDomene(
-        TestsøknadBuilder.Builder().setBarn(
-            listOf(
-                TestsøknadBuilder.Builder().defaultBarn("Barn Nummer To", barn2),
-                TestsøknadBuilder.Builder().defaultBarn("Barn Nummer Tre", barn3),
-            ),
-        ).build().søknadBarnetilsyn,
-    ).tilSøknadsverdier()
+    private val søknadOS =
+        SøknadsskjemaMapper.tilDomene(
+            TestsøknadBuilder.Builder().setBarn(
+                listOf(
+                    TestsøknadBuilder.Builder().defaultBarn("Barn Nummer En", barn1),
+                    TestsøknadBuilder.Builder().defaultBarn("Barn Nummer To", barn2),
+                ),
+            ).build().søknadOvergangsstønad,
+        ).tilSøknadsverdier()
+    private val søknadBT =
+        SøknadsskjemaMapper.tilDomene(
+            TestsøknadBuilder.Builder().setBarn(
+                listOf(
+                    TestsøknadBuilder.Builder().defaultBarn("Barn Nummer To", barn2),
+                    TestsøknadBuilder.Builder().defaultBarn("Barn Nummer Tre", barn3),
+                ),
+            ).build().søknadBarnetilsyn,
+        ).tilSøknadsverdier()
 
     private val fagsakPersonId = UUID.randomUUID()
     private val fagsakOS = fagsak(stønadstype = StønadType.OVERGANGSSTØNAD, fagsakPersonId = fagsakPersonId)
@@ -112,10 +114,11 @@ internal class GjenbrukVilkårServiceTest {
 
             every { barnService.finnBarnPåBehandling(it.behandling.id) } returns it.behandlingBarn
         }
-        every { behandlingService.hentBehandlingerForGjenbrukAvVilkår(fagsakPersonId) } returns listOf(
-            ferdigstiltBehandlingOS,
-            nyBehandlingBT,
-        )
+        every { behandlingService.hentBehandlingerForGjenbrukAvVilkår(fagsakPersonId) } returns
+            listOf(
+                ferdigstiltBehandlingOS,
+                nyBehandlingBT,
+            )
 
         every { vilkårsvurderingRepository.updateAll(capture(vilkårsvurderingerSlot)) } answers { firstArg() }
         every { tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandler(any()) } returns true
@@ -211,11 +214,15 @@ internal class GjenbrukVilkårServiceTest {
         )
     }
 
-    private fun mockGrunnlagsdata(behandlingId: UUID, sivilstandstype: Sivilstandstype) {
-        val grunnlagsdata = opprettGrunnlagsdata().copy(
-            søker = søker(sivilstand = listOf(sivilstand(sivilstandstype))),
-            barn = listOf(barnMedIdent(fnr = "123", navn = "fornavn etternavn")),
-        )
+    private fun mockGrunnlagsdata(
+        behandlingId: UUID,
+        sivilstandstype: Sivilstandstype,
+    ) {
+        val grunnlagsdata =
+            opprettGrunnlagsdata().copy(
+                søker = søker(sivilstand = listOf(sivilstand(sivilstandstype))),
+                barn = listOf(barnMedIdent(fnr = "123", navn = "fornavn etternavn")),
+            )
         every { grunnlagsdataService.hentGrunnlagsdata(behandlingId) } returns
             GrunnlagsdataMedMetadata(grunnlagsdata, LocalDateTime.now())
     }
@@ -235,14 +242,15 @@ internal class GjenbrukVilkårServiceTest {
 
         init {
             sivilstandsvilkår = vilkårsvurdering(behandling.id, vilkårsresultat, type = VilkårType.SIVILSTAND)
-            aleneomsorgsvilkår = behandlingBarn.map {
-                vilkårsvurdering(
-                    behandling.id,
-                    vilkårsresultat,
-                    type = VilkårType.ALENEOMSORG,
-                    barnId = it.id,
-                )
-            }
+            aleneomsorgsvilkår =
+                behandlingBarn.map {
+                    vilkårsvurdering(
+                        behandling.id,
+                        vilkårsresultat,
+                        type = VilkårType.ALENEOMSORG,
+                        barnId = it.id,
+                    )
+                }
             aktivitetsvilkår = vilkårsvurdering(behandling.id, vilkårsresultat, type = VilkårType.AKTIVITET)
         }
     }

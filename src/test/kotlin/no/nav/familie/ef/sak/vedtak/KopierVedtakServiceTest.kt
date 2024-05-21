@@ -32,41 +32,42 @@ import java.time.YearMonth
 import java.util.UUID
 
 internal class KopierVedtakServiceTest {
-
     val barnRepository = mockk<BarnRepository>()
     val vedtakHistorikkService = mockk<VedtakHistorikkService>()
     val vedtakService = mockk<VedtakService>()
 
     val behandlingService = mockk<BehandlingService>()
-    val kopierVedtakService: KopierVedtakService = KopierVedtakService(
-        barnRepository = barnRepository,
-        vedtakService = vedtakService,
-        vedtakHistorikkService = vedtakHistorikkService,
-        behandlingService = behandlingService,
-
-    )
+    val kopierVedtakService: KopierVedtakService =
+        KopierVedtakService(
+            barnRepository = barnRepository,
+            vedtakService = vedtakService,
+            vedtakHistorikkService = vedtakHistorikkService,
+            behandlingService = behandlingService,
+        )
 
     val fagsak = fagsak()
     val forrigeBehandling = behandling(fagsak)
     val revurdering = behandling(fagsak = fagsak, forrigeBehandlingId = forrigeBehandling.id, årsak = BehandlingÅrsak.SATSENDRING)
 
-    val historiskBehandlingsbarn = behandlingBarn(
-        id = UUID.randomUUID(),
-        behandlingId = forrigeBehandling.id,
-        søknadBarnId = UUID.randomUUID(),
-        personIdent = "01010112345",
-        navn = "Ola",
-        fødselTermindato = LocalDate.now(),
-    )
+    val historiskBehandlingsbarn =
+        behandlingBarn(
+            id = UUID.randomUUID(),
+            behandlingId = forrigeBehandling.id,
+            søknadBarnId = UUID.randomUUID(),
+            personIdent = "01010112345",
+            navn = "Ola",
+            fødselTermindato = LocalDate.now(),
+        )
 
-    val barn = behandlingBarn(
-        id = UUID.randomUUID(),
-        behandlingId = revurdering.id,
-        søknadBarnId = UUID.randomUUID(),
-        personIdent = "01010112345",
-        navn = "Ola",
-        fødselTermindato = LocalDate.now(),
-    )
+    val barn =
+        behandlingBarn(
+            id = UUID.randomUUID(),
+            behandlingId = revurdering.id,
+            søknadBarnId = UUID.randomUUID(),
+            personIdent = "01010112345",
+            navn = "Ola",
+            fødselTermindato = LocalDate.now(),
+        )
 
     val forventetFomYearMonth = YearMonth.from(BeregningBarnetilsynUtil.satserForBarnetilsyn.maxOf { it.periode.fom })
     val førsteAndelFraOgMedDato = forventetFomYearMonth.minusMonths(2)
@@ -83,12 +84,13 @@ internal class KopierVedtakServiceTest {
         every { barnRepository.findAllById(listOf(historiskBehandlingsbarn.id)) } returns listOf(historiskBehandlingsbarn)
         every { vedtakService.lagreVedtak(any(), revurdering.id, StønadType.BARNETILSYN) } returns revurdering.id
         every { vedtakService.hentVedtak(forrigeBehandling.id) } returns vedtak(forrigeBehandling.id, ResultatType.INNVILGE).copy(tilleggsstønad = TilleggsstønadWrapper(false, listOf(), "Testbegrunnelse tilleggsstønad"))
-        val barnetilsynperiode = Barnetilsynperiode(
-            periode = Månedsperiode(YearMonth.now()),
-            utgifter = 1000,
-            barn = listOf(),
-            periodetype = PeriodetypeBarnetilsyn.ORDINÆR,
-        )
+        val barnetilsynperiode =
+            Barnetilsynperiode(
+                periode = Månedsperiode(YearMonth.now()),
+                utgifter = 1000,
+                barn = listOf(),
+                periodetype = PeriodetypeBarnetilsyn.ORDINÆR,
+            )
         every { vedtakService.hentVedtak(not(forrigeBehandling.id)) } returns
             vedtak(UUID.randomUUID(), ResultatType.INNVILGE)
                 .copy(barnetilsyn = BarnetilsynWrapper(listOf(barnetilsynperiode), "begrunnelse"))
@@ -101,11 +103,12 @@ internal class KopierVedtakServiceTest {
         every { vedtakHistorikkService.hentAktivHistorikk(any()) } returns andelHistorikkDtos
         every { behandlingService.hentBehandling(revurdering.id) } returns revurdering
 
-        val vedtakDto = kopierVedtakService.lagVedtakDtoBasertPåTidligereVedtaksperioder(
-            fagsakId = fagsak.id,
-            revurderingId = revurdering.id,
-            forrigeBehandlingId = forrigeBehandling.id,
-        ) as InnvilgelseBarnetilsyn
+        val vedtakDto =
+            kopierVedtakService.lagVedtakDtoBasertPåTidligereVedtaksperioder(
+                fagsakId = fagsak.id,
+                revurderingId = revurdering.id,
+                forrigeBehandlingId = forrigeBehandling.id,
+            ) as InnvilgelseBarnetilsyn
 
         assertThat(vedtakDto.perioder).hasSize(1)
         assertThat(vedtakDto.perioder.first().utgifter).isEqualTo(1000)

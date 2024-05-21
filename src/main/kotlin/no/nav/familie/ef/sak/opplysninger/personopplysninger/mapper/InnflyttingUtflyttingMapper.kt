@@ -10,7 +10,6 @@ import java.time.LocalDate
 
 @Component
 class InnflyttingUtflyttingMapper(val kodeverkService: KodeverkService) {
-
     fun mapInnflytting(innflytting: List<InnflyttingTilNorge>): List<InnflyttingDto> =
         innflytting.map {
             InnflyttingDto(

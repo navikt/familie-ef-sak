@@ -19,7 +19,6 @@ import java.time.LocalDate
 import java.util.UUID
 
 internal class ArbeidsforholdControllerTest : OppslagSpringRunnerTest() {
-
     @Autowired
     private lateinit var arbeidsforholdClient: ArbeidsforholdClient
 

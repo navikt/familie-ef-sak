@@ -225,17 +225,17 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
                 barn = barnRepository.findByBehandlingId(behandling.id).map { it.id },
                 beløp = 8000,
                 kontantstøtteWrapper =
-                KontantstøtteWrapper(
-                    listOf(
-                        PeriodeMedBeløp(
-                            Månedsperiode(
-                                YearMonth.of(2024, 9),
-                                YearMonth.of(2024, 10),
+                    KontantstøtteWrapper(
+                        listOf(
+                            PeriodeMedBeløp(
+                                Månedsperiode(
+                                    YearMonth.of(2024, 9),
+                                    YearMonth.of(2024, 10),
+                                ),
+                                1000,
                             ),
-                            1000,
                         ),
                     ),
-                ),
                 fom = YearMonth.of(2023, 6),
                 tom = YearMonth.of(2024, 12),
             )
@@ -443,7 +443,7 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
     @Test
     internal fun `revurdering med nye barn - skal kopiere vilkår`() {
         val behandling = opprettFerdigstiltBehandling(fagsak)
-        val barn = listOf(TestsøknadBuilder.Builder().defaultBarn("Barn Barnesen", PdlClientConfig.barnFnr))
+        val barn = listOf(TestsøknadBuilder.Builder().defaultBarn("Barn Barnesen", PdlClientConfig.BARN_FNR))
         opprettVilkår(behandling, lagreSøknad(behandling, barn).sivilstand)
 
         val revurdering = revurderingService.opprettRevurderingManuelt(revurderingDto)
@@ -524,8 +524,8 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
         behandling: Behandling,
         barn: List<Barn> =
             listOf(
-                TestsøknadBuilder.Builder().defaultBarn("Barn Barnesen", PdlClientConfig.barnFnr),
-                TestsøknadBuilder.Builder().defaultBarn("Barn2 Barnesen", PdlClientConfig.barn2Fnr),
+                TestsøknadBuilder.Builder().defaultBarn("Barn Barnesen", PdlClientConfig.BARN_FNR),
+                TestsøknadBuilder.Builder().defaultBarn("Barn2 Barnesen", PdlClientConfig.BARN2_FNR),
             ),
     ): SøknadsskjemaOvergangsstønad {
         val søknad = TestsøknadBuilder.Builder().setBarn(barn).build().søknadOvergangsstønad
@@ -541,8 +541,8 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
         val søknad =
             TestsøknadBuilder.Builder().setBarn(
                 listOf(
-                    TestsøknadBuilder.Builder().defaultBarn("Barn Barnesen", PdlClientConfig.barnFnr),
-                    TestsøknadBuilder.Builder().defaultBarn("Barn2 Barnesen", PdlClientConfig.barn2Fnr),
+                    TestsøknadBuilder.Builder().defaultBarn("Barn Barnesen", PdlClientConfig.BARN_FNR),
+                    TestsøknadBuilder.Builder().defaultBarn("Barn2 Barnesen", PdlClientConfig.BARN2_FNR),
                 ),
             ).build().søknadBarnetilsyn
         søknadService.lagreSøknadForBarnetilsyn(søknad, behandling.id, behandling.fagsakId, "1L")

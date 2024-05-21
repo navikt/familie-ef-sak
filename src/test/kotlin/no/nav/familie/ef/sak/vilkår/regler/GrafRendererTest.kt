@@ -14,18 +14,18 @@ import org.junit.jupiter.api.Test
 
 @Disabled
 internal class GrafRendererTest {
-
     private val objectMapper = no.nav.familie.kontrakter.felles.objectMapper.writerWithDefaultPrettyPrinter()
 
     @Test
     internal fun `print alle vilkår`() {
-        val vilkårsregler = Vilkårsregler.ALLE_VILKÅRSREGLER.vilkårsregler.filter { it.key != VilkårType.SIVILSTAND }.map {
-            val regler = it.value.regler
-            mapOf(
-                "name" to it.key,
-                "children" to it.value.hovedregler.map { regelId -> mapSpørsmål(regler, regelId) },
-            )
-        }
+        val vilkårsregler =
+            Vilkårsregler.ALLE_VILKÅRSREGLER.vilkårsregler.filter { it.key != VilkårType.SIVILSTAND }.map {
+                val regler = it.value.regler
+                mapOf(
+                    "name" to it.key,
+                    "children" to it.value.hovedregler.map { regelId -> mapSpørsmål(regler, regelId) },
+                )
+            }
         println(
             objectMapper.writeValueAsString(
                 mapOf(
@@ -55,26 +55,29 @@ internal class GrafRendererTest {
     @Test
     internal fun `print sivilstand`() {
         val regel = SivilstandRegel()
-        val sivilstandregler = SivilstandData.values().map {
-            val initereDelvilkårsvurdering = regel.initiereDelvilkårsvurdering(
-                HovedregelMetadata(
-                    it.søknad.sivilstand,
-                    it.sivilstandstype,
-                    barn = emptyList(),
-                    søktOmBarnetilsyn = emptyList(),
-                    vilkårgrunnlagDto = mockk(),
-                    behandling = mockk(),
-                ),
-            )
-            val hovedregler = initereDelvilkårsvurdering.filter { delvilkårsvurdering ->
-                delvilkårsvurdering.resultat != Vilkårsresultat.IKKE_AKTUELL
-            }.map { delvilkår -> mapSpørsmål(regel.regler, delvilkår.hovedregel) }
+        val sivilstandregler =
+            SivilstandData.values().map {
+                val initereDelvilkårsvurdering =
+                    regel.initiereDelvilkårsvurdering(
+                        HovedregelMetadata(
+                            it.søknad.sivilstand,
+                            it.sivilstandstype,
+                            barn = emptyList(),
+                            søktOmBarnetilsyn = emptyList(),
+                            vilkårgrunnlagDto = mockk(),
+                            behandling = mockk(),
+                        ),
+                    )
+                val hovedregler =
+                    initereDelvilkårsvurdering.filter { delvilkårsvurdering ->
+                        delvilkårsvurdering.resultat != Vilkårsresultat.IKKE_AKTUELL
+                    }.map { delvilkår -> mapSpørsmål(regel.regler, delvilkår.hovedregel) }
 
-            mapOf(
-                "name" to it.name,
-                "children" to hovedregler,
-            )
-        }
+                mapOf(
+                    "name" to it.name,
+                    "children" to hovedregler,
+                )
+            }
         println(
             objectMapper.writeValueAsString(
                 mapOf(
@@ -92,7 +95,6 @@ internal class GrafRendererTest {
         val name: RegelId,
         val children: List<Svar>,
     ) {
-
         val type = "spørsmål"
     }
 
@@ -102,11 +104,13 @@ internal class GrafRendererTest {
         val children: List<Spørsmål>,
         val resultat: Vilkårsresultat? = null,
     ) {
-
         val type = "svar"
     }
 
-    private fun mapSvar(regler: Map<RegelId, RegelSteg>, svarMapping: Map<SvarId, SvarRegel>): List<Svar> {
+    private fun mapSvar(
+        regler: Map<RegelId, RegelSteg>,
+        svarMapping: Map<SvarId, SvarRegel>,
+    ): List<Svar> {
         return svarMapping.map {
             try {
                 val value = it.value
@@ -121,13 +125,15 @@ internal class GrafRendererTest {
         }
     }
 
-    private fun mapSpørsmål(regler: Map<RegelId, RegelSteg>, regelId: RegelId): Spørsmål {
+    private fun mapSpørsmål(
+        regler: Map<RegelId, RegelSteg>,
+        regelId: RegelId,
+    ): Spørsmål {
         val svarMapping = regler[regelId]!!.svarMapping
         return Spørsmål(regelId, mapSvar(regler, svarMapping))
     }
 
     companion object {
-
         fun søknadBuilder(changeSivilstand: (Sivilstand) -> Sivilstand = { it }): SøknadsskjemaOvergangsstønad {
             val builder = TestsøknadBuilder.Builder()
             builder.setSivilstandsdetaljer(

@@ -20,7 +20,6 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
 internal class ÅrsakRevurderingStegTest {
-
     private val årsakRevurderingService = mockk<ÅrsakRevurderingService>()
     private val tilordnetRessursService = mockk<TilordnetRessursService>()
 
@@ -68,7 +67,6 @@ internal class ÅrsakRevurderingStegTest {
 
     @Nested
     inner class Validering {
-
         @Test
         internal fun `feiler hvis kravMottatt mangler`() {
             assertThatThrownBy { utførOgReturnerNesteSteg(RevurderingsinformasjonDto()) }
@@ -83,10 +81,11 @@ internal class ÅrsakRevurderingStegTest {
 
         @Test
         internal fun `feiler hvis man man sender inn en årsak som ikke er gyldig for gitt stønadstype`() {
-            val dto = RevurderingsinformasjonDto(
-                LocalDate.now(),
-                ÅrsakRevurderingDto(Opplysningskilde.BESKJED_ANNEN_ENHET, ugyldigÅrsak, null),
-            )
+            val dto =
+                RevurderingsinformasjonDto(
+                    LocalDate.now(),
+                    ÅrsakRevurderingDto(Opplysningskilde.BESKJED_ANNEN_ENHET, ugyldigÅrsak, null),
+                )
             assertThatThrownBy { utførOgReturnerNesteSteg(dto) }
                 .hasMessage("Årsak er ikke gyldig for stønadstype")
         }
@@ -94,10 +93,11 @@ internal class ÅrsakRevurderingStegTest {
         @Test
         internal fun `må angi beskrivelse når årsak=ANNET`() {
             val årsak = Revurderingsårsak.ANNET
-            val dto = RevurderingsinformasjonDto(
-                LocalDate.now(),
-                ÅrsakRevurderingDto(Opplysningskilde.BESKJED_ANNEN_ENHET, årsak, "   "),
-            )
+            val dto =
+                RevurderingsinformasjonDto(
+                    LocalDate.now(),
+                    ÅrsakRevurderingDto(Opplysningskilde.BESKJED_ANNEN_ENHET, årsak, "   "),
+                )
             assertThatThrownBy { utførOgReturnerNesteSteg(dto) }
                 .hasMessage("Må ha med beskrivelse når årsak er annet")
         }

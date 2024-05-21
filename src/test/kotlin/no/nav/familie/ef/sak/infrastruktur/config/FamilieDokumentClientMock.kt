@@ -11,7 +11,6 @@ import org.springframework.context.annotation.Profile
 @Configuration
 @Profile("mock-dokument")
 class FamilieDokumentClientMock {
-
     @Bean
     @Primary
     fun familieDokument(): FamilieDokumentClient {

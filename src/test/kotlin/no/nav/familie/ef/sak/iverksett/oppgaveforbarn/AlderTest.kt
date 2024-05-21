@@ -6,7 +6,6 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
 class AlderTest {
-
     @Test
     fun `barn regnes som 6 mnd gammelt når fødselsdato er mer enn 182 dager siden`() {
         val fødselsdato = LocalDate.now().minusDays(183)

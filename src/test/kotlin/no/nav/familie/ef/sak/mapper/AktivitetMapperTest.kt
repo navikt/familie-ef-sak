@@ -20,7 +20,6 @@ import java.time.YearMonth
 import java.util.UUID
 
 internal class AktivitetMapperTest {
-
     @Test
     internal fun `sjekker at mappet aktivitet har fått satt alle verdier`() {
         val dto = AktivitetMapper.tilDto(aktivitet(), situasjon(), barn(), LocalDate.now())
@@ -32,13 +31,14 @@ internal class AktivitetMapperTest {
             arbeidskontrakt = dokumentliste(),
             barnMedSærligeBehov = dokumentliste(),
             barnsSykdom = dokumentliste(),
-            gjelderDetteDeg = GjelderDeg(
-                listOf(
-                    " Jeg har søkt om barnepass, men ikke fått plass enda; " +
-                        "Jeg har barn som har behov for særlig tilsyn på grunn av fysiske, " +
-                        "psykiske eller store sosiale problemer",
+            gjelderDetteDeg =
+                GjelderDeg(
+                    listOf(
+                        " Jeg har søkt om barnepass, men ikke fått plass enda; " +
+                            "Jeg har barn som har behov for særlig tilsyn på grunn av fysiske, " +
+                            "psykiske eller store sosiale problemer",
+                    ),
                 ),
-            ),
             manglendeBarnepass = dokumentliste(),
             oppsigelseDokumentasjon = dokumentliste(),
             oppsigelseReduksjonTidspunkt = LocalDate.now(),
@@ -123,7 +123,7 @@ internal class AktivitetMapperTest {
                     arbeidsmengde = 50,
                 ),
             )
-            )
+        )
 
     private fun arbeidssøker(): Arbeidssøker =
         Arbeidssøker(

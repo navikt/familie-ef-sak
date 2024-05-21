@@ -44,7 +44,6 @@ import java.time.YearMonth
 import java.util.UUID
 
 internal class BeregningBarnetilsynControllerTest : OppslagSpringRunnerTest() {
-
     @Autowired
     private lateinit var behandlingRepository: BehandlingRepository
 
@@ -94,64 +93,72 @@ internal class BeregningBarnetilsynControllerTest : OppslagSpringRunnerTest() {
     }
 
     private fun lagFagsakOgBehandling(stegType: StegType = StegType.BESLUTTE_VEDTAK): Pair<Fagsak, Behandling> {
-        val fagsak = testoppsettService.lagreFagsak(
-            fagsak(
-                stønadstype = StønadType.BARNETILSYN,
-                identer = setOf(PersonIdent("12345678910")),
-            ),
-        )
-        val førstegangsbehandling = behandlingRepository.insert(
-            behandling(
-                fagsak,
-                steg = stegType,
-                type = BehandlingType.FØRSTEGANGSBEHANDLING,
-                status = BehandlingStatus.FERDIGSTILT,
-            ),
-        )
-        val barn = barnRepository.insert(
-            behandlingBarn(
-                UUID.randomUUID(),
-                førstegangsbehandling.id,
-                UUID.randomUUID(),
-                "01012212345",
-                "Junior",
-                LocalDate.now(),
-            ),
-        )
+        val fagsak =
+            testoppsettService.lagreFagsak(
+                fagsak(
+                    stønadstype = StønadType.BARNETILSYN,
+                    identer = setOf(PersonIdent("12345678910")),
+                ),
+            )
+        val førstegangsbehandling =
+            behandlingRepository.insert(
+                behandling(
+                    fagsak,
+                    steg = stegType,
+                    type = BehandlingType.FØRSTEGANGSBEHANDLING,
+                    status = BehandlingStatus.FERDIGSTILT,
+                ),
+            )
+        val barn =
+            barnRepository.insert(
+                behandlingBarn(
+                    UUID.randomUUID(),
+                    førstegangsbehandling.id,
+                    UUID.randomUUID(),
+                    "01012212345",
+                    "Junior",
+                    LocalDate.now(),
+                ),
+            )
 
         val søknad = SøknadMedVedlegg(Testsøknad.søknadBarnetilsyn, emptyList())
-        val tilkjentYtelse = lagTilkjentYtelse(
-            behandlingId = førstegangsbehandling.id,
-            andelerTilkjentYtelse = listOf(
-                lagAndelTilkjentYtelse(
-                    fraOgMed = LocalDate.of(2022, 1, 1),
-                    kildeBehandlingId = førstegangsbehandling.id,
-                    beløp = 2000,
-                    tilOgMed = LocalDate.of(2022, 4, 30),
-                ),
-            ),
-        )
-        val utgiftsperiode = UtgiftsperiodeDto(
-            årMånedFra = YearMonth.of(2022, 1),
-            årMånedTil = YearMonth.of(2022, 4),
-            periode = Månedsperiode(YearMonth.of(2022, 1), YearMonth.of(2022, 4)),
-            barn = listOf(barn.id),
-            utgifter = 2500,
-            periodetype = PeriodetypeBarnetilsyn.ORDINÆR,
-            aktivitetstype = AktivitetstypeBarnetilsyn.I_ARBEID,
-            sanksjonsårsak = null,
-        )
+        val tilkjentYtelse =
+            lagTilkjentYtelse(
+                behandlingId = førstegangsbehandling.id,
+                andelerTilkjentYtelse =
+                    listOf(
+                        lagAndelTilkjentYtelse(
+                            fraOgMed = LocalDate.of(2022, 1, 1),
+                            kildeBehandlingId = førstegangsbehandling.id,
+                            beløp = 2000,
+                            tilOgMed = LocalDate.of(2022, 4, 30),
+                        ),
+                    ),
+            )
+        val utgiftsperiode =
+            UtgiftsperiodeDto(
+                årMånedFra = YearMonth.of(2022, 1),
+                årMånedTil = YearMonth.of(2022, 4),
+                periode = Månedsperiode(YearMonth.of(2022, 1), YearMonth.of(2022, 4)),
+                barn = listOf(barn.id),
+                utgifter = 2500,
+                periodetype = PeriodetypeBarnetilsyn.ORDINÆR,
+                aktivitetstype = AktivitetstypeBarnetilsyn.I_ARBEID,
+                sanksjonsårsak = null,
+            )
 
-        val vedtakDto = InnvilgelseBarnetilsyn(
-            begrunnelse = "",
-            perioder = listOf(utgiftsperiode),
-            perioderKontantstøtte = listOf(),
-            tilleggsstønad = TilleggsstønadDto(
-                harTilleggsstønad = false,
-                perioder = listOf(),
-                begrunnelse = null,
-            ),
-        )
+        val vedtakDto =
+            InnvilgelseBarnetilsyn(
+                begrunnelse = "",
+                perioder = listOf(utgiftsperiode),
+                perioderKontantstøtte = listOf(),
+                tilleggsstønad =
+                    TilleggsstønadDto(
+                        harTilleggsstønad = false,
+                        perioder = listOf(),
+                        begrunnelse = null,
+                    ),
+            )
 
         søknadService.lagreSøknadForBarnetilsyn(søknad.søknad, førstegangsbehandling.id, fagsak.id, "1234")
         tilkjentYtelseRepository.insert(tilkjentYtelse)
@@ -166,64 +173,72 @@ internal class BeregningBarnetilsynControllerTest : OppslagSpringRunnerTest() {
         fagsak: Fagsak,
         forrigeBehandlingId: UUID,
     ): Behandling {
-        val revurdering = behandlingRepository.insert(
-            behandling(
-                fagsak,
-                steg = stegType,
-                type = BehandlingType.REVURDERING,
-                status = BehandlingStatus.UTREDES,
-            ),
-        )
+        val revurdering =
+            behandlingRepository.insert(
+                behandling(
+                    fagsak,
+                    steg = stegType,
+                    type = BehandlingType.REVURDERING,
+                    status = BehandlingStatus.UTREDES,
+                ),
+            )
         val tilkjentYtelse =
             lagTilkjentYtelse(
                 behandlingId = revurdering.id,
                 andelerTilkjentYtelse =
-                listOf(
-                    lagAndelTilkjentYtelse(
-                        fraOgMed = LocalDate.of(2022, 1, 1),
-                        beløp = 2000,
-                        kildeBehandlingId = revurdering.id,
-                        tilOgMed = LocalDate.of(2022, 2, 28),
+                    listOf(
+                        lagAndelTilkjentYtelse(
+                            fraOgMed = LocalDate.of(2022, 1, 1),
+                            beløp = 2000,
+                            kildeBehandlingId = revurdering.id,
+                            tilOgMed = LocalDate.of(2022, 2, 28),
+                        ),
+                        lagAndelTilkjentYtelse(
+                            fraOgMed = LocalDate.of(2022, 3, 1),
+                            beløp = 3000,
+                            kildeBehandlingId = revurdering.id,
+                            tilOgMed = LocalDate.of(2022, 6, 30),
+                        ),
                     ),
-                    lagAndelTilkjentYtelse(
-                        fraOgMed = LocalDate.of(2022, 3, 1),
-                        beløp = 3000,
-                        kildeBehandlingId = revurdering.id,
-                        tilOgMed = LocalDate.of(2022, 6, 30),
-                    ),
-                ),
             )
 
-        val barn = barnRepository.findByBehandlingId(forrigeBehandlingId)
-            .map { it.copy(behandlingId = revurdering.id, id = UUID.randomUUID()) }
+        val barn =
+            barnRepository.findByBehandlingId(forrigeBehandlingId)
+                .map { it.copy(behandlingId = revurdering.id, id = UUID.randomUUID()) }
         barnRepository.insertAll(barn)
-        val utgiftsperiode = UtgiftsperiodeDto(
-            årMånedFra = YearMonth.of(2022, 3),
-            årMånedTil = YearMonth.of(2022, 6),
-            periode = Månedsperiode(YearMonth.of(2022, 3), YearMonth.of(2022, 6)),
-            barn = barn.map { it.id },
-            utgifter = 3000,
-            periodetype = PeriodetypeBarnetilsyn.ORDINÆR,
-            aktivitetstype = AktivitetstypeBarnetilsyn.I_ARBEID,
-            sanksjonsårsak = null,
-        )
+        val utgiftsperiode =
+            UtgiftsperiodeDto(
+                årMånedFra = YearMonth.of(2022, 3),
+                årMånedTil = YearMonth.of(2022, 6),
+                periode = Månedsperiode(YearMonth.of(2022, 3), YearMonth.of(2022, 6)),
+                barn = barn.map { it.id },
+                utgifter = 3000,
+                periodetype = PeriodetypeBarnetilsyn.ORDINÆR,
+                aktivitetstype = AktivitetstypeBarnetilsyn.I_ARBEID,
+                sanksjonsårsak = null,
+            )
 
-        val vedtakDto = InnvilgelseBarnetilsyn(
-            begrunnelse = "",
-            perioder = listOf(utgiftsperiode),
-            perioderKontantstøtte = listOf(),
-            tilleggsstønad = TilleggsstønadDto(
-                harTilleggsstønad = false,
-                perioder = listOf(),
-                begrunnelse = null,
-            ),
-        )
+        val vedtakDto =
+            InnvilgelseBarnetilsyn(
+                begrunnelse = "",
+                perioder = listOf(utgiftsperiode),
+                perioderKontantstøtte = listOf(),
+                tilleggsstønad =
+                    TilleggsstønadDto(
+                        harTilleggsstønad = false,
+                        perioder = listOf(),
+                        begrunnelse = null,
+                    ),
+            )
         tilkjentYtelseRepository.insert(tilkjentYtelse)
         vedtakService.lagreVedtak(vedtakDto, revurdering.id, fagsak.stønadstype)
         return revurdering
     }
 
-    private fun fullførVedtak(id: UUID, vedtakDto: VedtakDto): ResponseEntity<Ressurs<UUID>> {
+    private fun fullførVedtak(
+        id: UUID,
+        vedtakDto: VedtakDto,
+    ): ResponseEntity<Ressurs<UUID>> {
         return restTemplate.exchange(
             localhost("/api/vedtak/$id/lagre-vedtak"),
             HttpMethod.POST,

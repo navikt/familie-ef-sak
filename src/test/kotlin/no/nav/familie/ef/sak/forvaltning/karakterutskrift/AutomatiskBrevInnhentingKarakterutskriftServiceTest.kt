@@ -23,7 +23,6 @@ import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
 
 internal class AutomatiskBrevInnhentingKarakterutskriftServiceTest {
-
     val taskService = mockk<TaskService>()
     val oppgaveService = mockk<OppgaveService>()
 
@@ -43,10 +42,11 @@ internal class AutomatiskBrevInnhentingKarakterutskriftServiceTest {
 
         every { taskService.finnTaskMedPayloadOgType(any(), SendKarakterutskriftBrevTilIverksettTask.TYPE) } returns null
         every { taskService.save(capture(taskSlots)) } returns mockk()
-        every { oppgaveService.hentOppgaver(any()) } returns FinnOppgaveResponseDto(
-            antallTreffTotalt = oppgaver.size.toLong(),
-            oppgaver = oppgaver,
-        )
+        every { oppgaveService.hentOppgaver(any()) } returns
+            FinnOppgaveResponseDto(
+                antallTreffTotalt = oppgaver.size.toLong(),
+                oppgaver = oppgaver,
+            )
 
         automatiskBrevInnhentingKarakterutskriftService.opprettTasks(
             brevtype = FrittståendeBrevType.INNHENTING_AV_KARAKTERUTSKRIFT_HOVEDPERIODE,
@@ -67,10 +67,11 @@ internal class AutomatiskBrevInnhentingKarakterutskriftServiceTest {
         val oppgaver = listOf(oppgave(), oppgave(), oppgave(), oppgave(), oppgave())
 
         every { taskService.save(capture(taskSlots)) } returns mockk()
-        every { oppgaveService.hentOppgaver(any()) } returns FinnOppgaveResponseDto(
-            antallTreffTotalt = oppgaver.size.toLong(),
-            oppgaver = oppgaver,
-        )
+        every { oppgaveService.hentOppgaver(any()) } returns
+            FinnOppgaveResponseDto(
+                antallTreffTotalt = oppgaver.size.toLong(),
+                oppgaver = oppgaver,
+            )
 
         automatiskBrevInnhentingKarakterutskriftService.opprettTasks(
             brevtype = FrittståendeBrevType.INNHENTING_AV_KARAKTERUTSKRIFT_HOVEDPERIODE,
@@ -91,10 +92,11 @@ internal class AutomatiskBrevInnhentingKarakterutskriftServiceTest {
 
         every { taskService.finnTaskMedPayloadOgType(any(), SendKarakterutskriftBrevTilIverksettTask.TYPE) } returns null
         every { taskService.save(capture(taskSlots)) } returns mockk()
-        every { oppgaveService.hentOppgaver(any()) } returns FinnOppgaveResponseDto(
-            antallTreffTotalt = oppgaver.size.toLong(),
-            oppgaver = oppgaver,
-        )
+        every { oppgaveService.hentOppgaver(any()) } returns
+            FinnOppgaveResponseDto(
+                antallTreffTotalt = oppgaver.size.toLong(),
+                oppgaver = oppgaver,
+            )
 
         automatiskBrevInnhentingKarakterutskriftService.opprettTasks(
             brevtype = FrittståendeBrevType.INNHENTING_AV_KARAKTERUTSKRIFT_HOVEDPERIODE,
@@ -111,10 +113,11 @@ internal class AutomatiskBrevInnhentingKarakterutskriftServiceTest {
     fun `Skal hente oppgaver med frist 17-05-2023 dersom brevtype er INNHENTING_AV_KARAKTERUTSKRIFT_HOVEDPERIODE`() {
         val finnOppgaveRequestSlot = slot<FinnOppgaveRequest>()
 
-        every { oppgaveService.hentOppgaver(capture(finnOppgaveRequestSlot)) } returns FinnOppgaveResponseDto(
-            0,
-            oppgaver = emptyList(),
-        )
+        every { oppgaveService.hentOppgaver(capture(finnOppgaveRequestSlot)) } returns
+            FinnOppgaveResponseDto(
+                0,
+                oppgaver = emptyList(),
+            )
 
         automatiskBrevInnhentingKarakterutskriftService.opprettTasks(
             FrittståendeBrevType.INNHENTING_AV_KARAKTERUTSKRIFT_HOVEDPERIODE,
@@ -131,10 +134,11 @@ internal class AutomatiskBrevInnhentingKarakterutskriftServiceTest {
     fun `Skal hente oppgaver med frist 18-05-2023 dersom brevtype er INNHENTING_AV_KARAKTERUTSKRIFT_UTVIDET_PERIODE`() {
         val finnOppgaveRequestSlot = slot<FinnOppgaveRequest>()
 
-        every { oppgaveService.hentOppgaver(capture(finnOppgaveRequestSlot)) } returns FinnOppgaveResponseDto(
-            0,
-            oppgaver = emptyList(),
-        )
+        every { oppgaveService.hentOppgaver(capture(finnOppgaveRequestSlot)) } returns
+            FinnOppgaveResponseDto(
+                0,
+                oppgaver = emptyList(),
+            )
 
         automatiskBrevInnhentingKarakterutskriftService.opprettTasks(
             FrittståendeBrevType.INNHENTING_AV_KARAKTERUTSKRIFT_UTVIDET_PERIODE,
@@ -151,23 +155,28 @@ internal class AutomatiskBrevInnhentingKarakterutskriftServiceTest {
     fun `Skal feile opprettelse av tasks dersom brevtype er ugyldig`() {
         val finnOppgaveRequestSlot = slot<FinnOppgaveRequest>()
 
-        every { oppgaveService.hentOppgaver(capture(finnOppgaveRequestSlot)) } returns FinnOppgaveResponseDto(
-            0,
-            oppgaver = emptyList(),
-        )
-
-        val feil = assertThrows<Feil> {
-            automatiskBrevInnhentingKarakterutskriftService.opprettTasks(
-                FrittståendeBrevType.BREV_OM_FORLENGET_SVARTID,
-                true,
-                10,
+        every { oppgaveService.hentOppgaver(capture(finnOppgaveRequestSlot)) } returns
+            FinnOppgaveResponseDto(
+                0,
+                oppgaver = emptyList(),
             )
-        }
+
+        val feil =
+            assertThrows<Feil> {
+                automatiskBrevInnhentingKarakterutskriftService.opprettTasks(
+                    FrittståendeBrevType.BREV_OM_FORLENGET_SVARTID,
+                    true,
+                    10,
+                )
+            }
         assertThat(feil.message).contains("Skal ikke opprette automatiske innhentingsbrev for frittstående brev av type")
         verify(exactly = 0) { oppgaveService.hentOppgaver(any()) }
     }
 
-    private fun verifyOppgaveRequest(taskLimit: Int, frist: String) {
+    private fun verifyOppgaveRequest(
+        taskLimit: Int,
+        frist: String,
+    ) {
         verify(exactly = 1) {
             oppgaveService.hentOppgaver(
                 FinnOppgaveRequest(
@@ -183,6 +192,7 @@ internal class AutomatiskBrevInnhentingKarakterutskriftServiceTest {
 
     companion object {
         private var oppgaveTeller = 1
+
         private fun oppgave(tilordnetRessurs: String? = null) = Oppgave(id = oppgaveTeller++.toLong(), tilordnetRessurs = tilordnetRessurs)
     }
 }

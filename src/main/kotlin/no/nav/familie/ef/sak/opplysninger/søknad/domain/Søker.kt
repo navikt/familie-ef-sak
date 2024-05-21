@@ -13,7 +13,6 @@ data class Søker(
 )
 
 object SøkerMapper {
-
     fun toDomain(personalia: Søknadsfelt<Personalia>): Søker {
         return Søker(
             personalia.verdi.fødselsnummer.verdi.verdi,

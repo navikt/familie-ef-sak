@@ -23,7 +23,6 @@ import org.springframework.context.annotation.Profile
 @Configuration
 @Profile("mock-infotrygd-replika")
 class InfotrygdReplikaMock {
-
     @Bean
     @Primary
     fun infotrygdReplikaClient(): InfotrygdReplikaClient {
@@ -33,7 +32,6 @@ class InfotrygdReplikaMock {
     }
 
     companion object {
-
         fun resetMock(client: InfotrygdReplikaClient) {
             clearMocks(client)
             every { client.hentPerioder(any()) } answers {
@@ -73,16 +71,17 @@ class InfotrygdReplikaMock {
             val personIdent = request.personIdenter.first()
             return InfotrygdPeriodeResponse(
                 overgangsstønad = listOf(lagInfotrygdPeriode(personIdent)),
-                barnetilsyn = listOf(
-                    lagInfotrygdPeriode(
-                        personIdent = personIdent,
-                        beløp = 234,
-                        inntektsgrunnlag = 321,
-                        samordningsfradrag = 0,
-                        utgifterBarnetilsyn = 1000,
-                        barnIdenter = listOf("123", "234"),
+                barnetilsyn =
+                    listOf(
+                        lagInfotrygdPeriode(
+                            personIdent = personIdent,
+                            beløp = 234,
+                            inntektsgrunnlag = 321,
+                            samordningsfradrag = 0,
+                            utgifterBarnetilsyn = 1000,
+                            barnIdenter = listOf("123", "234"),
+                        ),
                     ),
-                ),
                 skolepenger = emptyList(),
             )
         }

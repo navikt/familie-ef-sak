@@ -29,7 +29,6 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 internal class FagsakServiceTest : OppslagSpringRunnerTest() {
-
     @Autowired
     lateinit var fagsakService: FagsakService
 
@@ -43,7 +42,6 @@ internal class FagsakServiceTest : OppslagSpringRunnerTest() {
 
     @Nested
     inner class FagsakerMedOppdatertePersonIdenter {
-
         private val fagsakTilknyttetPesonIdent123 = fagsak(setOf(PersonIdent("123")))
         private val fagsakTilknyttetPesonIdent456 = fagsak(setOf(PersonIdent("456")))
         private val fagsakTilknyttetPesonIdent111 = fagsak(setOf(PersonIdent("111")))
@@ -100,7 +98,6 @@ internal class FagsakServiceTest : OppslagSpringRunnerTest() {
 
     @Nested
     inner class HentEllerOpprettFagsakMedBehandlinger {
-
         @Test
         internal fun `skal hente fagsak med tilhørende behandlinger som ikke finnes fra før`() {
             val personIdent = "23118612345"
@@ -114,32 +111,35 @@ internal class FagsakServiceTest : OppslagSpringRunnerTest() {
         internal fun `skal hente fagsak med tilhørende behandlinger som finnes fra før`() {
             val personIdent = "23118612345"
 
-            val fagsakRequest = fagsak(
-                stønadstype = StønadType.BARNETILSYN,
-                identer = setOf(PersonIdent(ident = personIdent)),
-            )
+            val fagsakRequest =
+                fagsak(
+                    stønadstype = StønadType.BARNETILSYN,
+                    identer = setOf(PersonIdent(ident = personIdent)),
+                )
             val fagsakDB = testoppsettService.lagreFagsak(fagsakRequest)
 
-            val behandling1 = Behandling(
-                fagsakId = fagsakDB.id,
-                type = BehandlingType.FØRSTEGANGSBEHANDLING,
-                status = BehandlingStatus.FERDIGSTILT,
-                steg = StegType.BEHANDLING_FERDIGSTILT,
-                resultat = BehandlingResultat.INNVILGET,
-                årsak = BehandlingÅrsak.SØKNAD,
-                vedtakstidspunkt = SporbarUtils.now(),
-                kategori = BehandlingKategori.NASJONAL,
-            )
-            val behandling2 = Behandling(
-                fagsakId = fagsakDB.id,
-                type = BehandlingType.REVURDERING,
-                status = BehandlingStatus.UTREDES,
-                steg = StegType.VILKÅR,
-                resultat = BehandlingResultat.INNVILGET,
-                årsak = BehandlingÅrsak.SØKNAD,
-                vedtakstidspunkt = SporbarUtils.now(),
-                kategori = BehandlingKategori.NASJONAL,
-            )
+            val behandling1 =
+                Behandling(
+                    fagsakId = fagsakDB.id,
+                    type = BehandlingType.FØRSTEGANGSBEHANDLING,
+                    status = BehandlingStatus.FERDIGSTILT,
+                    steg = StegType.BEHANDLING_FERDIGSTILT,
+                    resultat = BehandlingResultat.INNVILGET,
+                    årsak = BehandlingÅrsak.SØKNAD,
+                    vedtakstidspunkt = SporbarUtils.now(),
+                    kategori = BehandlingKategori.NASJONAL,
+                )
+            val behandling2 =
+                Behandling(
+                    fagsakId = fagsakDB.id,
+                    type = BehandlingType.REVURDERING,
+                    status = BehandlingStatus.UTREDES,
+                    steg = StegType.VILKÅR,
+                    resultat = BehandlingResultat.INNVILGET,
+                    årsak = BehandlingÅrsak.SØKNAD,
+                    vedtakstidspunkt = SporbarUtils.now(),
+                    kategori = BehandlingKategori.NASJONAL,
+                )
 
             behandlingRepository.insert(behandling1)
             behandlingRepository.insert(behandling2)
@@ -166,19 +166,20 @@ internal class FagsakServiceTest : OppslagSpringRunnerTest() {
 
     @Nested
     inner class HentEllerOpprettFagsak {
-
         @Test
         internal fun `skal oppdatere personident på fagsak dersom personen har fått ny ident som er tidligere registrert`() {
-            val iGår = Sporbar(
-                opprettetAv = "XY",
-                opprettetTid = LocalDateTime.now().minusDays(1),
-                endret = Endret(endretAv = "XY", endretTid = LocalDateTime.now().minusDays(1)),
-            )
-            val iDag = Sporbar(
-                opprettetAv = "XY",
-                opprettetTid = LocalDateTime.now().minusHours(1),
-                endret = Endret(endretAv = "XY", endretTid = LocalDateTime.now().minusHours(1)),
-            )
+            val iGår =
+                Sporbar(
+                    opprettetAv = "XY",
+                    opprettetTid = LocalDateTime.now().minusDays(1),
+                    endret = Endret(endretAv = "XY", endretTid = LocalDateTime.now().minusDays(1)),
+                )
+            val iDag =
+                Sporbar(
+                    opprettetAv = "XY",
+                    opprettetTid = LocalDateTime.now().minusHours(1),
+                    endret = Endret(endretAv = "XY", endretTid = LocalDateTime.now().minusHours(1)),
+                )
 
             val gjeldendeIdent = "12345678901"
             val feilRegistrertIdent = "99988877712"
@@ -187,16 +188,17 @@ internal class FagsakServiceTest : OppslagSpringRunnerTest() {
                     fagsak(
                         eksternId = 1234,
                         stønadstype = StønadType.OVERGANGSSTØNAD,
-                        identer = setOf(
-                            PersonIdent(
-                                ident = gjeldendeIdent,
-                                sporbar = iGår,
+                        identer =
+                            setOf(
+                                PersonIdent(
+                                    ident = gjeldendeIdent,
+                                    sporbar = iGår,
+                                ),
+                                PersonIdent(
+                                    ident = feilRegistrertIdent,
+                                    sporbar = iDag,
+                                ),
                             ),
-                            PersonIdent(
-                                ident = feilRegistrertIdent,
-                                sporbar = iDag,
-                            ),
-                        ),
                     ),
                 )
 
@@ -214,11 +216,12 @@ internal class FagsakServiceTest : OppslagSpringRunnerTest() {
 
         @Test
         internal fun `skal oppdatere personident hvis fagsak har gammel ident`() {
-            val iGår = Sporbar(
-                opprettetAv = "XY",
-                opprettetTid = LocalDateTime.now().minusDays(1),
-                endret = Endret(endretAv = "XY", endretTid = LocalDateTime.now().minusDays(1)),
-            )
+            val iGår =
+                Sporbar(
+                    opprettetAv = "XY",
+                    opprettetTid = LocalDateTime.now().minusDays(1),
+                    endret = Endret(endretAv = "XY", endretTid = LocalDateTime.now().minusDays(1)),
+                )
 
             val gjeldendeIdent = "12345678901"
             val historiskIdent = "98765432109"
@@ -227,12 +230,13 @@ internal class FagsakServiceTest : OppslagSpringRunnerTest() {
                     fagsak(
                         eksternId = 1234,
                         stønadstype = StønadType.OVERGANGSSTØNAD,
-                        identer = setOf(
-                            PersonIdent(
-                                ident = historiskIdent,
-                                sporbar = iGår,
+                        identer =
+                            setOf(
+                                PersonIdent(
+                                    ident = historiskIdent,
+                                    sporbar = iGår,
+                                ),
                             ),
-                        ),
                     ),
                 )
 

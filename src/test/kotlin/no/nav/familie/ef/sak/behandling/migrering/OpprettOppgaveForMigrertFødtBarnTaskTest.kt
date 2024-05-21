@@ -30,17 +30,17 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 
 internal class OpprettOppgaveForMigrertFødtBarnTaskTest {
-
     val behandlingService = mockk<BehandlingService>()
     val tilkjentYtelseService = mockk<TilkjentYtelseService>()
     val grunnlagsdataService = mockk<GrunnlagsdataService>()
     val taskService = mockk<TaskService>()
-    val service = OpprettOppgaveForMigrertFødtBarnTask(
-        behandlingService,
-        tilkjentYtelseService,
-        grunnlagsdataService,
-        taskService,
-    )
+    val service =
+        OpprettOppgaveForMigrertFødtBarnTask(
+            behandlingService,
+            tilkjentYtelseService,
+            grunnlagsdataService,
+            taskService,
+        )
 
     val taskSlot = slot<List<Task>>()
 
@@ -102,22 +102,24 @@ internal class OpprettOppgaveForMigrertFødtBarnTaskTest {
         )
     }
 
-    private fun tilkjentYtelse(tilOgMed: LocalDate) = lagTilkjentYtelse(
-        listOf(
-            lagAndelTilkjentYtelse(1, fraOgMed = LocalDate.now(), tilOgMed = tilOgMed),
-        ),
-    )
+    private fun tilkjentYtelse(tilOgMed: LocalDate) =
+        lagTilkjentYtelse(
+            listOf(
+                lagAndelTilkjentYtelse(1, fraOgMed = LocalDate.now(), tilOgMed = tilOgMed),
+            ),
+        )
 
     private fun opprettGrunnlagsdata(barnFødelsdato: LocalDate?): GrunnlagsdataMedMetadata {
         val grunnlagsdata = opprettGrunnlagsdata()
-        val fødsel = Fødsel(
-            fødselsdato = barnFødelsdato,
-            fødekommune = null,
-            fødeland = null,
-            fødested = null,
-            fødselsår = null,
-            metadata = Metadata(false),
-        )
+        val fødsel =
+            Fødsel(
+                fødselsdato = barnFødelsdato,
+                fødekommune = null,
+                fødeland = null,
+                fødested = null,
+                fødselsår = null,
+                metadata = Metadata(false),
+            )
         val barn = opprettBarnMedIdent("1", fødsel = fødsel)
         return GrunnlagsdataMedMetadata(grunnlagsdata.copy(barn = listOf(barn)), LocalDateTime.now())
     }

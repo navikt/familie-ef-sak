@@ -30,12 +30,13 @@ internal class OpprettOppgaveTaskTest {
     fun `skal ikke opprette behandle sak oppgave om status er låst for videre redigering`() {
         every { behandlingService.hentBehandling(behandlingId) } returns behandling(id = behandlingId, status = BehandlingStatus.FATTER_VEDTAK)
 
-        val task = OpprettOppgaveTask.opprettTask(
-            OpprettOppgaveTask.OpprettOppgaveTaskData(
-                behandlingId = behandlingId,
-                oppgavetype = Oppgavetype.BehandleSak,
-            ),
-        )
+        val task =
+            OpprettOppgaveTask.opprettTask(
+                OpprettOppgaveTask.OpprettOppgaveTaskData(
+                    behandlingId = behandlingId,
+                    oppgavetype = Oppgavetype.BehandleSak,
+                ),
+            )
 
         opprettOppgaveTask.doTask(task)
         verifyOpprettOppgaveMedLagringKall(0)
@@ -46,12 +47,13 @@ internal class OpprettOppgaveTaskTest {
     fun `skal opprette behandle sak oppgave om behandling ikke er låst for videre redigering`() {
         every { behandlingService.hentBehandling(behandlingId) } returns behandling(id = behandlingId, status = BehandlingStatus.UTREDES)
 
-        val task = OpprettOppgaveTask.opprettTask(
-            OpprettOppgaveTask.OpprettOppgaveTaskData(
-                behandlingId = behandlingId,
-                oppgavetype = Oppgavetype.BehandleSak,
-            ),
-        )
+        val task =
+            OpprettOppgaveTask.opprettTask(
+                OpprettOppgaveTask.OpprettOppgaveTaskData(
+                    behandlingId = behandlingId,
+                    oppgavetype = Oppgavetype.BehandleSak,
+                ),
+            )
 
         opprettOppgaveTask.doTask(task)
         verifyOpprettOppgaveMedLagringKall(1)
@@ -63,12 +65,13 @@ internal class OpprettOppgaveTaskTest {
         every { behandlingService.hentBehandling(behandlingId) } returns behandling(id = behandlingId, status = BehandlingStatus.UTREDES)
         every { oppgaveService.lagOppgaveTekst(any()) } returns ""
 
-        val task = OpprettOppgaveTask.opprettTask(
-            OpprettOppgaveTask.OpprettOppgaveTaskData(
-                behandlingId = behandlingId,
-                oppgavetype = Oppgavetype.VurderHenvendelse,
-            ),
-        )
+        val task =
+            OpprettOppgaveTask.opprettTask(
+                OpprettOppgaveTask.OpprettOppgaveTaskData(
+                    behandlingId = behandlingId,
+                    oppgavetype = Oppgavetype.VurderHenvendelse,
+                ),
+            )
 
         opprettOppgaveTask.doTask(task)
         verifyOpprettOppgaveMedLagringKall(1)

@@ -11,7 +11,6 @@ import org.springframework.context.annotation.Profile
 @Configuration
 @Profile("mock-kodeverk")
 class KodeverkServiceMock {
-
     @Bean
     @Primary
     fun kodeverkService(): KodeverkService {

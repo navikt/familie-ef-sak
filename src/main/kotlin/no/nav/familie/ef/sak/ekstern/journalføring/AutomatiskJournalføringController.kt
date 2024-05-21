@@ -26,7 +26,6 @@ import org.springframework.web.bind.annotation.RestController
 class AutomatiskJournalføringController(
     private val automatiskJournalføringService: AutomatiskJournalføringService,
 ) {
-
     /**
      * Skal bare brukes av familie-ef-mottak for å vurdere om en journalføring skal automatisk ferdigstilles
      * eller manuelt gjennomgås.

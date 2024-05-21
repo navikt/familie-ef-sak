@@ -14,8 +14,11 @@ class InntektService(
     private val fagsakPersonService: FagsakPersonService,
     private val inntektMapper: InntektMapper,
 ) {
-
-    fun hentInntekt(fagsakId: UUID, fom: YearMonth, tom: YearMonth): AMeldingInntektDto {
+    fun hentInntekt(
+        fagsakId: UUID,
+        fom: YearMonth,
+        tom: YearMonth,
+    ): AMeldingInntektDto {
         val aktivIdent = fagsakService.hentAktivIdent(fagsakId)
         val inntekt = aMeldingInntektClient.hentInntekt(aktivIdent, fom, tom)
         return inntektMapper.mapInntekt(inntekt)

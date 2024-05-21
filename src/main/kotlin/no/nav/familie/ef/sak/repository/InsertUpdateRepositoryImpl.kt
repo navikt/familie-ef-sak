@@ -6,7 +6,6 @@ import org.springframework.transaction.annotation.Transactional
 
 @Component
 class InsertUpdateRepositoryImpl<T>(val entityOperations: JdbcAggregateOperations) : InsertUpdateRepository<T> {
-
     @Transactional
     override fun insert(t: T): T {
         return entityOperations.insert(t)

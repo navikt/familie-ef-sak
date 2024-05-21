@@ -13,7 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.relational.core.conversion.DbActionExecutionException
 
 internal class InsertUpdateRepositoryImplTest : OppslagSpringRunnerTest() {
-
     @Autowired
     private lateinit var fagsakPersonRepository: FagsakPersonRepository
 
@@ -98,8 +97,9 @@ internal class InsertUpdateRepositoryImplTest : OppslagSpringRunnerTest() {
         val oppdatertPerson =
             fagsakPersonRepository.update(
                 person.copy(
-                    identer = person.identer.map { it.copy(ident = nyPersonIdent) }
-                        .toSet() + PersonIdent(annenIdent),
+                    identer =
+                        person.identer.map { it.copy(ident = nyPersonIdent) }
+                            .toSet() + PersonIdent(annenIdent),
                 ),
             )
         val oppdatertSøkerIdent = oppdatertPerson.identer.first { it.ident == nyPersonIdent }

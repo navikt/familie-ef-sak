@@ -11,7 +11,6 @@ import java.util.UUID
 interface TerminbarnRepository :
     RepositoryInterface<TerminbarnOppgave, UUID>,
     InsertUpdateRepository<TerminbarnOppgave> {
-
     // language=PostgreSQL
     @Query(
         """

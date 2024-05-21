@@ -47,15 +47,16 @@ internal class AutomatiskJournalføringServiceTest {
     val arbeidsfordelingService: ArbeidsfordelingService = mockk()
     val journalpostService: JournalpostService = mockk()
 
-    val automatiskJournalføringService = AutomatiskJournalføringService(
-        journalføringService = journalføringService,
-        behandlingService = behandlingService,
-        fagsakService = fagsakService,
-        personService = personService,
-        infotrygdService = infotrygdService,
-        arbeidsfordelingService = arbeidsfordelingService,
-        journalpostService = journalpostService,
-    )
+    val automatiskJournalføringService =
+        AutomatiskJournalføringService(
+            journalføringService = journalføringService,
+            behandlingService = behandlingService,
+            fagsakService = fagsakService,
+            personService = personService,
+            infotrygdService = infotrygdService,
+            arbeidsfordelingService = arbeidsfordelingService,
+            journalpostService = journalpostService,
+        )
 
     val enhet = "4489"
     val mappeId = null
@@ -66,22 +67,25 @@ internal class AutomatiskJournalføringServiceTest {
     val aktørIdAnnen = "987654321012783123"
     val fagsak = fagsak()
     val journalpostId = "1"
-    val journalpost = Journalpost(
-        journalpostId = journalpostId,
-        journalposttype = Journalposttype.I,
-        journalstatus = Journalstatus.MOTTATT,
-        dokumenter = emptyList(),
-        bruker = Bruker(personIdent, FNR),
-    )
+    val journalpost =
+        Journalpost(
+            journalpostId = journalpostId,
+            journalposttype = Journalposttype.I,
+            journalstatus = Journalstatus.MOTTATT,
+            dokumenter = emptyList(),
+            bruker = Bruker(personIdent, FNR),
+        )
 
     @BeforeEach
     internal fun setUp() {
-        every { personService.hentPersonIdenter(any()) } returns PdlIdenter(
-            identer = listOf(
-                PdlIdent(personIdent, false),
-                PdlIdent(tidligerePersonIdent, false),
-            ),
-        )
+        every { personService.hentPersonIdenter(any()) } returns
+            PdlIdenter(
+                identer =
+                    listOf(
+                        PdlIdent(personIdent, false),
+                        PdlIdent(tidligerePersonIdent, false),
+                    ),
+            )
         every { fagsakService.hentEllerOpprettFagsak(any(), any()) } returns fagsak
         every { arbeidsfordelingService.hentNavEnhetIdEllerBrukMaskinellEnhetHvisNull(any()) } returns enhet
         every { fagsakService.finnFagsak(any(), any()) } returns fagsak
@@ -146,13 +150,14 @@ internal class AutomatiskJournalføringServiceTest {
     @Test
     internal fun `kan opprette behandling hvis det finnes innslag i infotrygd og alle behandlinger i ny løsning er ferdigstilt`() {
         every { infotrygdService.eksisterer(any(), any()) } returns false
-        every { behandlingService.hentBehandlinger(fagsak.id) } returns listOf(
-            behandling(
-                resultat = INNVILGET,
-                status = BehandlingStatus.FERDIGSTILT,
-            ),
-            behandling(resultat = AVSLÅTT, status = BehandlingStatus.FERDIGSTILT),
-        )
+        every { behandlingService.hentBehandlinger(fagsak.id) } returns
+            listOf(
+                behandling(
+                    resultat = INNVILGET,
+                    status = BehandlingStatus.FERDIGSTILT,
+                ),
+                behandling(resultat = AVSLÅTT, status = BehandlingStatus.FERDIGSTILT),
+            )
         val kanOppretteBehandling =
             automatiskJournalføringService.kanOppretteBehandling(personIdent, StønadType.OVERGANGSSTØNAD)
         assertThat(kanOppretteBehandling).isTrue
@@ -160,44 +165,48 @@ internal class AutomatiskJournalføringServiceTest {
 
     @Test
     internal fun `skal ikke kunne automatisk journalføre hvis journalpostens bruker og personident ikke samsvarer`() {
-        val enAnnenBruker = Bruker(
-            id = personIdentAnnen,
-            type = FNR,
-        )
+        val enAnnenBruker =
+            Bruker(
+                id = personIdentAnnen,
+                type = FNR,
+            )
         every { journalpostService.hentJournalpost(journalpostId) } returns journalpost.copy(bruker = enAnnenBruker)
         every { behandlingService.hentBehandlinger(fagsak.id) } returns emptyList()
-        val feil = assertThrows<Feil> {
-            automatiskJournalføringService.automatiskJournalførTilBehandling(
-                journalpostId,
-                personIdent,
-                StønadType.OVERGANGSSTØNAD,
-                mappeId,
-                OppgavePrioritet.NORM,
-            )
-        }
+        val feil =
+            assertThrows<Feil> {
+                automatiskJournalføringService.automatiskJournalførTilBehandling(
+                    journalpostId,
+                    personIdent,
+                    StønadType.OVERGANGSSTØNAD,
+                    mappeId,
+                    OppgavePrioritet.NORM,
+                )
+            }
         assertThat(feil.message).contains("Ikke samsvar mellom personident på journalposten")
     }
 
     @Test
     internal fun `skal ikke kunne automatisk journalføre hvis journalpostens aktørId-bruker og personident ikke samsvarer`() {
-        val enAnnenBruker = Bruker(
-            id = aktørIdAnnen,
-            type = AKTOERID,
-        )
+        val enAnnenBruker =
+            Bruker(
+                id = aktørIdAnnen,
+                type = AKTOERID,
+            )
         every { journalpostService.hentJournalpost(journalpostId) } returns journalpost.copy(bruker = enAnnenBruker)
         every { fagsakService.finnFagsak(any(), any()) } returns fagsak
         every { behandlingService.hentBehandlinger(fagsak.id) } returns emptyList()
         every { infotrygdService.eksisterer(any(), any()) } returns false
         every { personService.hentAktørIder(any()) } returns PdlIdenter(listOf(PdlIdent(personIdentAnnen, false)))
-        val feil = assertThrows<Feil> {
-            automatiskJournalføringService.automatiskJournalførTilBehandling(
-                journalpostId,
-                personIdent,
-                StønadType.OVERGANGSSTØNAD,
-                mappeId,
-                OppgavePrioritet.NORM,
-            )
-        }
+        val feil =
+            assertThrows<Feil> {
+                automatiskJournalføringService.automatiskJournalførTilBehandling(
+                    journalpostId,
+                    personIdent,
+                    StønadType.OVERGANGSSTØNAD,
+                    mappeId,
+                    OppgavePrioritet.NORM,
+                )
+            }
         assertThat(feil.message).contains("Ikke samsvar mellom personident på journalposten")
     }
 
@@ -208,47 +217,51 @@ internal class AutomatiskJournalføringServiceTest {
         every { behandlingService.hentBehandlinger(fagsak.id) } returns emptyList()
         every { infotrygdService.eksisterer(any(), any()) } returns false
         every { personService.hentAktørIder(any()) } returns PdlIdenter(listOf(PdlIdent(aktørId, false)))
-        val feil = assertThrows<Feil> {
-            automatiskJournalføringService.automatiskJournalførTilBehandling(
-                journalpostId,
-                personIdent,
-                StønadType.OVERGANGSSTØNAD,
-                mappeId,
-                OppgavePrioritet.NORM,
-            )
-        }
+        val feil =
+            assertThrows<Feil> {
+                automatiskJournalføringService.automatiskJournalførTilBehandling(
+                    journalpostId,
+                    personIdent,
+                    StønadType.OVERGANGSSTØNAD,
+                    mappeId,
+                    OppgavePrioritet.NORM,
+                )
+            }
         assertThat(feil.message).contains("Journalposten mangler bruker")
     }
 
     @Test
     internal fun `skal ikke kunne automatisk journalføre hvis journalpostens bruker er orgnr`() {
-        val enAnnenBruker = Bruker(
-            id = aktørIdAnnen,
-            type = ORGNR,
-        )
+        val enAnnenBruker =
+            Bruker(
+                id = aktørIdAnnen,
+                type = ORGNR,
+            )
         every { journalpostService.hentJournalpost(journalpostId) } returns journalpost.copy(bruker = enAnnenBruker)
         every { fagsakService.finnFagsak(any(), any()) } returns fagsak
         every { behandlingService.hentBehandlinger(fagsak.id) } returns emptyList()
         every { infotrygdService.eksisterer(any(), any()) } returns false
         every { personService.hentAktørIder(any()) } returns PdlIdenter(listOf(PdlIdent(aktørId, false)))
-        val feil = assertThrows<Feil> {
-            automatiskJournalføringService.automatiskJournalførTilBehandling(
-                journalpostId,
-                personIdent,
-                StønadType.OVERGANGSSTØNAD,
-                mappeId,
-                OppgavePrioritet.NORM,
-            )
-        }
+        val feil =
+            assertThrows<Feil> {
+                automatiskJournalføringService.automatiskJournalførTilBehandling(
+                    journalpostId,
+                    personIdent,
+                    StønadType.OVERGANGSSTØNAD,
+                    mappeId,
+                    OppgavePrioritet.NORM,
+                )
+            }
         assertThat(feil.message).contains("Ikke samsvar mellom personident på journalposten")
     }
 
     @Test
     internal fun `skal kunne automatisk journalføre hvis journalpostens aktørId-bruker og personident samsvarer`() {
-        val aktørIdBruker = Bruker(
-            id = aktørId,
-            type = AKTOERID,
-        )
+        val aktørIdBruker =
+            Bruker(
+                id = aktørId,
+                type = AKTOERID,
+            )
         val journalpostMedAktørId = journalpost.copy(bruker = aktørIdBruker)
         every { journalpostService.hentJournalpost(journalpostId) } returns journalpostMedAktørId
         every { fagsakService.finnFagsak(any(), any()) } returns fagsak
@@ -277,10 +290,11 @@ internal class AutomatiskJournalføringServiceTest {
 
     @Test
     internal fun `skal kunne automatisk journalføre hvis journalpostens personIdent er en historisk ident`() {
-        val enAnnenBruker = Bruker(
-            id = tidligerePersonIdent,
-            type = FNR,
-        )
+        val enAnnenBruker =
+            Bruker(
+                id = tidligerePersonIdent,
+                type = FNR,
+            )
         every { journalpostService.hentJournalpost(journalpostId) } returns journalpost.copy(bruker = enAnnenBruker)
         every { fagsakService.finnFagsak(any(), any()) } returns fagsak
 
@@ -310,15 +324,16 @@ internal class AutomatiskJournalføringServiceTest {
         every { journalpostService.hentJournalpost(journalpostId) } returns journalpost
         every { behandlingService.hentBehandlinger(fagsak.id) } returns emptyList()
         every { infotrygdService.eksisterer(any(), any()) } returns true
-        val feil = assertThrows<Feil> {
-            automatiskJournalføringService.automatiskJournalførTilBehandling(
-                journalpostId,
-                personIdent,
-                StønadType.OVERGANGSSTØNAD,
-                mappeId,
-                OppgavePrioritet.NORM,
-            )
-        }
+        val feil =
+            assertThrows<Feil> {
+                automatiskJournalføringService.automatiskJournalførTilBehandling(
+                    journalpostId,
+                    personIdent,
+                    StønadType.OVERGANGSSTØNAD,
+                    mappeId,
+                    OppgavePrioritet.NORM,
+                )
+            }
         assertThat(feil.message).contains("Kan ikke opprette førstegangsbehandling")
     }
 
@@ -329,11 +344,12 @@ internal class AutomatiskJournalføringServiceTest {
             val behandling = behandling(fagsak = fagsak, resultat = behandlingsresultat, status = BehandlingStatus.FERDIGSTILT)
             val henlagtBehandling = behandling(fagsak = fagsak, resultat = HENLAGT, status = BehandlingStatus.FERDIGSTILT)
             every { journalpostService.hentJournalpost(journalpostId) } returns journalpost
-            every { behandlingService.hentBehandlinger(fagsak.id) } returns listOf(
-                henlagtBehandling,
-                behandling,
-                henlagtBehandling,
-            )
+            every { behandlingService.hentBehandlinger(fagsak.id) } returns
+                listOf(
+                    henlagtBehandling,
+                    behandling,
+                    henlagtBehandling,
+                )
             automatiskJournalføringService.automatiskJournalførTilBehandling(
                 journalpostId,
                 personIdent,
@@ -403,15 +419,16 @@ internal class AutomatiskJournalføringServiceTest {
         Journalstatus.values().filter { it != Journalstatus.MOTTATT }.forEach { journalstatus ->
             every { journalpostService.hentJournalpost(journalpostId) } returns journalpost.copy(journalstatus = journalstatus)
             every { behandlingService.hentBehandlinger(fagsak.id) } returns emptyList()
-            val feil = assertThrows<Feil> {
-                automatiskJournalføringService.automatiskJournalførTilBehandling(
-                    journalpostId,
-                    personIdent,
-                    StønadType.OVERGANGSSTØNAD,
-                    mappeId,
-                    OppgavePrioritet.NORM,
-                )
-            }
+            val feil =
+                assertThrows<Feil> {
+                    automatiskJournalføringService.automatiskJournalførTilBehandling(
+                        journalpostId,
+                        personIdent,
+                        StønadType.OVERGANGSSTØNAD,
+                        mappeId,
+                        OppgavePrioritet.NORM,
+                    )
+                }
             assertThat(feil.message).contains("Journalposten har ugyldig journalstatus $journalstatus")
         }
     }

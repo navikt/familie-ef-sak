@@ -41,11 +41,13 @@ class BehandlingPåVentService(
     private val oppgaveService: OppgaveService,
     private val tilordnetRessursService: TilordnetRessursService,
 ) {
-
     val logger: Logger = LoggerFactory.getLogger(javaClass)
 
     @Transactional
-    fun settPåVent(behandlingId: UUID, settPåVentRequest: SettPåVentRequest) {
+    fun settPåVent(
+        behandlingId: UUID,
+        settPåVentRequest: SettPåVentRequest,
+    ) {
         val behandling = behandlingService.hentBehandling(behandlingId)
 
         validerKanSettePåVent(behandling)
@@ -146,11 +148,12 @@ class BehandlingPåVentService(
     private fun utledPrioritetBeskrivelse(
         oppgave: Oppgave,
         settPåVentRequest: SettPåVentRequest,
-    ): String = if (oppgave.prioritet != settPåVentRequest.prioritet) {
-        "Oppgave endret fra prioritet ${oppgave.prioritet?.name} til ${settPåVentRequest.prioritet}\n"
-    } else {
-        ""
-    }
+    ): String =
+        if (oppgave.prioritet != settPåVentRequest.prioritet) {
+            "Oppgave endret fra prioritet ${oppgave.prioritet?.name} til ${settPåVentRequest.prioritet}\n"
+        } else {
+            ""
+        }
 
     private fun utledNyBeskrivelse(
         harEndringer: Boolean,
@@ -175,9 +178,10 @@ class BehandlingPåVentService(
         oppgave: Oppgave,
         settPåVentRequest: SettPåVentRequest,
     ): String {
-        val mapper = oppgaveService.finnMapper(
-            oppgave.tildeltEnhetsnr ?: throw Feil("Kan ikke finne mapper når oppgave mangler enhet"),
-        )
+        val mapper =
+            oppgaveService.finnMapper(
+                oppgave.tildeltEnhetsnr ?: throw Feil("Kan ikke finne mapper når oppgave mangler enhet"),
+            )
 
         val eksisterendeMappenavn = mapper.find { it.id.toLong() == oppgave.mappeId }?.navn
         val nyMappeNavn = mapper.find { it.id.toLong() == settPåVentRequest.mappe }?.navn
@@ -274,7 +278,10 @@ class BehandlingPåVentService(
         }
     }
 
-    private fun opprettHistorikkInnslag(behandling: Behandling, stegUtfall: StegUtfall) {
+    private fun opprettHistorikkInnslag(
+        behandling: Behandling,
+        stegUtfall: StegUtfall,
+    ) {
         behandlingshistorikkService.opprettHistorikkInnslag(behandling.id, behandling.steg, stegUtfall, null)
     }
 

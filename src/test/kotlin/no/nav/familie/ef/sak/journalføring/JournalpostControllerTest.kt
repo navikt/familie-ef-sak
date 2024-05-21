@@ -39,7 +39,6 @@ import java.util.UUID
 import kotlin.test.assertFailsWith
 
 internal class JournalpostControllerTest {
-
     private val journalføringService = mockk<JournalføringService>()
     private val journalføringKlageService = mockk<JournalføringKlageService>()
     private val journalpostService = mockk<JournalpostService>()
@@ -207,36 +206,39 @@ internal class JournalpostControllerTest {
         every { journalføringService.fullførJournalpostV2(any(), any()) } returns 1L
     }
 
-    private fun opprettJournalføringRequestV2(årsak: Journalføringsårsak) = JournalføringRequestV2(
-        dokumentTitler = emptyMap(),
-        logiskeVedlegg = emptyMap(),
-        fagsakId = UUID.randomUUID(),
-        oppgaveId = "21345",
-        journalførendeEnhet = "9999",
-        årsak = årsak,
-        aksjon = Journalføringsaksjon.OPPRETT_BEHANDLING,
-        mottattDato = LocalDate.now(),
-    )
+    private fun opprettJournalføringRequestV2(årsak: Journalføringsårsak) =
+        JournalføringRequestV2(
+            dokumentTitler = emptyMap(),
+            logiskeVedlegg = emptyMap(),
+            fagsakId = UUID.randomUUID(),
+            oppgaveId = "21345",
+            journalførendeEnhet = "9999",
+            årsak = årsak,
+            aksjon = Journalføringsaksjon.OPPRETT_BEHANDLING,
+            mottattDato = LocalDate.now(),
+        )
 
     @Nested
     inner class HentDokument {
-
         @Test
         internal fun `skal kaste ApiFeil hvis vedlegget ikke inneholder dokumentvariant ARKIV`() {
             every {
                 journalpostService.hentJournalpost(any())
-            } returns journalpostMedFødselsnummer.copy(
-                dokumenter = journalpostMedFødselsnummer.dokumenter!!.map {
-                    it.copy(
-                        dokumentvarianter = listOf(
-                            Dokumentvariant(
-                                Dokumentvariantformat.PRODUKSJON_DLF,
-                                saksbehandlerHarTilgang = true,
-                            ),
-                        ),
-                    )
-                },
-            )
+            } returns
+                journalpostMedFødselsnummer.copy(
+                    dokumenter =
+                        journalpostMedFødselsnummer.dokumenter!!.map {
+                            it.copy(
+                                dokumentvarianter =
+                                    listOf(
+                                        Dokumentvariant(
+                                            Dokumentvariantformat.PRODUKSJON_DLF,
+                                            saksbehandlerHarTilgang = true,
+                                        ),
+                                    ),
+                            )
+                        },
+                )
 
             assertThrows<ApiFeil> { journalpostController.hentDokument(journalpostId, dokumentInfoId) }
         }
@@ -245,16 +247,19 @@ internal class JournalpostControllerTest {
         internal fun `skal kunne hente dokument med dokumentvariant ARKIV`() {
             every {
                 journalpostService.hentJournalpost(any())
-            } returns journalpostMedFødselsnummer.copy(
-                dokumenter = journalpostMedFødselsnummer.dokumenter!!.map {
-                    it.copy(
-                        dokumentvarianter = listOf(
-                            Dokumentvariant(Dokumentvariantformat.PRODUKSJON_DLF, saksbehandlerHarTilgang = true),
-                            Dokumentvariant(Dokumentvariantformat.ARKIV, saksbehandlerHarTilgang = true),
-                        ),
-                    )
-                },
-            )
+            } returns
+                journalpostMedFødselsnummer.copy(
+                    dokumenter =
+                        journalpostMedFødselsnummer.dokumenter!!.map {
+                            it.copy(
+                                dokumentvarianter =
+                                    listOf(
+                                        Dokumentvariant(Dokumentvariantformat.PRODUKSJON_DLF, saksbehandlerHarTilgang = true),
+                                        Dokumentvariant(Dokumentvariantformat.ARKIV, saksbehandlerHarTilgang = true),
+                                    ),
+                            )
+                        },
+                )
 
             every { journalpostService.hentDokument(any(), any()) } returns byteArrayOf()
 
@@ -264,13 +269,14 @@ internal class JournalpostControllerTest {
         }
     }
 
-    private fun avsenderMottaker(erLikBruker: Boolean = true) = AvsenderMottaker(
-        id = "1",
-        type = AvsenderMottakerIdType.FNR,
-        navn = "navn",
-        land = "land",
-        erLikBruker = erLikBruker,
-    )
+    private fun avsenderMottaker(erLikBruker: Boolean = true) =
+        AvsenderMottaker(
+            id = "1",
+            type = AvsenderMottakerIdType.FNR,
+            navn = "navn",
+            land = "land",
+            erLikBruker = erLikBruker,
+        )
 
     private val aktørId = "11111111111"
     private val personIdentFraPdl = "12345678901"
@@ -289,14 +295,14 @@ internal class JournalpostControllerTest {
             journalforendeEnhet = "4817",
             kanal = "SKAN_IM",
             dokumenter =
-            listOf(
-                DokumentInfo(
-                    dokumentInfoId = dokumentInfoId,
-                    tittel = "Tittel",
-                    brevkode = DokumentBrevkode.OVERGANGSSTØNAD.verdi,
-                    dokumentvarianter = listOf(Dokumentvariant(Dokumentvariantformat.ARKIV, saksbehandlerHarTilgang = true)),
+                listOf(
+                    DokumentInfo(
+                        dokumentInfoId = dokumentInfoId,
+                        tittel = "Tittel",
+                        brevkode = DokumentBrevkode.OVERGANGSSTØNAD.verdi,
+                        dokumentvarianter = listOf(Dokumentvariant(Dokumentvariantformat.ARKIV, saksbehandlerHarTilgang = true)),
+                    ),
                 ),
-            ),
         )
 
     private val journalpostMedFødselsnummer =

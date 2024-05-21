@@ -12,7 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import java.time.YearMonth
 
 internal class UtestengelseRepositoryTest : OppslagSpringRunnerTest() {
-
     @Autowired
     lateinit var utestengelseRepository: UtestengelseRepository
 

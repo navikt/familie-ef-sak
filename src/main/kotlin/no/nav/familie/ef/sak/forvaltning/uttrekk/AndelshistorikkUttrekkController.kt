@@ -24,7 +24,6 @@ class AndelshistorikkUttrekkController(
     val vedtakHistorikkService: VedtakHistorikkService,
     private val tilgangService: TilgangService,
 ) {
-
     private val logger = LoggerFactory.getLogger(javaClass)
     private val secureLogger = LoggerFactory.getLogger("secureLogger")
 
@@ -40,18 +39,20 @@ class AndelshistorikkUttrekkController(
 
         val alleSomManglerTilsynForÅr = fagsakerMedAndelshistorikk.filter { it.harAndelOgManglerTilsyn(2022) }
 
-        val alleAvsluttedeMedBeløpOgAntallMåneder: List<ResultatPerFagsak> = alleSomManglerTilsynForÅr
-            .filter { it.harAvsluttetPeriodeMedManglendeTilsyn() }
-            .map {
-                val resultatPerFagsak = ResultatPerFagsak(
-                    it.fagsakId,
-                    it.antallMånederMedManglendeTilsynSomErAvsluttet(),
-                    it.beløpForManglendeTilsynSomErAvsluttet(),
-                    it.tidligsteFom(),
-                )
-                secureLogger.info("Snittutregning-manglertilsyn: $resultatPerFagsak ")
-                resultatPerFagsak
-            }
+        val alleAvsluttedeMedBeløpOgAntallMåneder: List<ResultatPerFagsak> =
+            alleSomManglerTilsynForÅr
+                .filter { it.harAvsluttetPeriodeMedManglendeTilsyn() }
+                .map {
+                    val resultatPerFagsak =
+                        ResultatPerFagsak(
+                            it.fagsakId,
+                            it.antallMånederMedManglendeTilsynSomErAvsluttet(),
+                            it.beløpForManglendeTilsynSomErAvsluttet(),
+                            it.tidligsteFom(),
+                        )
+                    secureLogger.info("Snittutregning-manglertilsyn: $resultatPerFagsak ")
+                    resultatPerFagsak
+                }
 
         val alleMnd = BigDecimal.valueOf(alleAvsluttedeMedBeløpOgAntallMåneder.sumOf { it.antallMåneder })
         val snittAntMnd = alleMnd.div(BigDecimal(alleAvsluttedeMedBeløpOgAntallMåneder.size))

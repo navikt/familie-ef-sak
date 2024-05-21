@@ -10,13 +10,16 @@ import java.time.LocalDate
 private typealias PersonendringDetaljerFn<T> = (T, T) -> EndringFelt?
 
 object UtledEndringerUtil {
-
-    fun finnEndringer(tidligere: PersonopplysningerDto, nye: PersonopplysningerDto): Endringer {
+    fun finnEndringer(
+        tidligere: PersonopplysningerDto,
+        nye: PersonopplysningerDto,
+    ): Endringer {
         return Endringer(
-            folkeregisterpersonstatus = utledEndringer(
-                tidligere.folkeregisterpersonstatus,
-                nye.folkeregisterpersonstatus,
-            ),
+            folkeregisterpersonstatus =
+                utledEndringer(
+                    tidligere.folkeregisterpersonstatus,
+                    nye.folkeregisterpersonstatus,
+                ),
             fødselsdato = utledEndringer(tidligere.fødselsdato, nye.fødselsdato),
             dødsdato = utledEndringer(tidligere.dødsdato, nye.dødsdato),
             statsborgerskap = utledEndringerUtenDetaljer(tidligere.statsborgerskap, nye.statsborgerskap),
@@ -48,20 +51,22 @@ object UtledEndringerUtil {
         }
     }
 
-    private val barnEndringer: List<PersonendringDetaljerFn<BarnDto>> = listOf(
-        formatterEndring(BarnDto::borHosSøker, "Bor hos søker"),
-        formatterEndring(BarnDto::dødsdato, "Dødsdato"),
-        formatterEndring(BarnDto::fødselsdato, "Fødselsdato"),
-        formatterEndring({ it.annenForelder?.personIdent }, "Annen forelder"),
-        formatterEndring(BarnDto::harDeltBostedNå, "Delt bosted"),
-        formatterEndring(BarnDto::deltBosted, "Delt bosted perioder"),
-        // TODO adresse ?? Er den interessant å vise som endret hvis man ikke har endring i borHosSøker ? si eks at barnet på > 18 flytter
-    )
+    private val barnEndringer: List<PersonendringDetaljerFn<BarnDto>> =
+        listOf(
+            formatterEndring(BarnDto::borHosSøker, "Bor hos søker"),
+            formatterEndring(BarnDto::dødsdato, "Dødsdato"),
+            formatterEndring(BarnDto::fødselsdato, "Fødselsdato"),
+            formatterEndring({ it.annenForelder?.personIdent }, "Annen forelder"),
+            formatterEndring(BarnDto::harDeltBostedNå, "Delt bosted"),
+            formatterEndring(BarnDto::deltBosted, "Delt bosted perioder"),
+            // TODO adresse ?? Er den interessant å vise som endret hvis man ikke har endring i borHosSøker ? si eks at barnet på > 18 flytter
+        )
 
-    private val annenForelderEndringer: List<PersonendringDetaljerFn<AnnenForelderMinimumDto>> = listOf(
-        formatterEndring(AnnenForelderMinimumDto::dødsdato, "Dødsdato"),
-        formatterEndring(AnnenForelderMinimumDto::bostedsadresse, "Bostedsadresse"),
-    )
+    private val annenForelderEndringer: List<PersonendringDetaljerFn<AnnenForelderMinimumDto>> =
+        listOf(
+            formatterEndring(AnnenForelderMinimumDto::dødsdato, "Dødsdato"),
+            formatterEndring(AnnenForelderMinimumDto::bostedsadresse, "Bostedsadresse"),
+        )
 
     private fun utledEndringerBarn(
         tidligere: List<BarnDto>,
@@ -86,20 +91,22 @@ object UtledEndringerUtil {
         val tidligerePåIdent = tidligere.associateBy { ident(it) }
         val nyePåIdent = nye.associateBy { ident(it) }
 
-        val endringerPåNye = nyePåIdent.mapNotNull { (ident, nyPerson) ->
-            val tidligerePerson = tidligerePåIdent[ident]
-            if (tidligerePerson != null) {
-                endringer
-                    .mapNotNull { it(tidligerePerson, nyPerson) }
-                    .takeIf { it.isNotEmpty() }
-                    ?.let { Personendring(ident, it) }
-            } else {
-                Personendring(ident, ny = true)
+        val endringerPåNye =
+            nyePåIdent.mapNotNull { (ident, nyPerson) ->
+                val tidligerePerson = tidligerePåIdent[ident]
+                if (tidligerePerson != null) {
+                    endringer
+                        .mapNotNull { it(tidligerePerson, nyPerson) }
+                        .takeIf { it.isNotEmpty() }
+                        ?.let { Personendring(ident, it) }
+                } else {
+                    Personendring(ident, ny = true)
+                }
             }
-        }
-        val fjernede = tidligerePåIdent.keys
-            .filterNot { nyePåIdent.containsKey(it) }
-            .map { Personendring(it, fjernet = true) }
+        val fjernede =
+            tidligerePåIdent.keys
+                .filterNot { nyePåIdent.containsKey(it) }
+                .map { Personendring(it, fjernet = true) }
         val alleEndringer = fjernede + endringerPåNye
         return Endring(alleEndringer.isNotEmpty(), alleEndringer)
     }
@@ -123,12 +130,13 @@ object UtledEndringerUtil {
             }
         }
 
-    private fun format(verdi: Any?): String = when (verdi) {
-        null -> "Mangler verdi"
-        is Boolean -> if (verdi) "Ja" else "Nei"
-        is LocalDate -> verdi.norskFormat()
-        is Folkeregisterpersonstatus -> verdi.visningsnavn
-        is List<*> -> ""
-        else -> "$verdi"
-    }
+    private fun format(verdi: Any?): String =
+        when (verdi) {
+            null -> "Mangler verdi"
+            is Boolean -> if (verdi) "Ja" else "Nei"
+            is LocalDate -> verdi.norskFormat()
+            is Folkeregisterpersonstatus -> verdi.visningsnavn
+            is List<*> -> ""
+            else -> "$verdi"
+        }
 }

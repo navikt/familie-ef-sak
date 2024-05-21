@@ -6,7 +6,6 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 
 internal class MigreringsstatusRepositoryTest : OppslagSpringRunnerTest() {
-
     @Autowired
     lateinit var migreringsstatusRepository: MigreringsstatusRepository
 

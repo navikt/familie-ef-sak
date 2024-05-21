@@ -11,7 +11,6 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
 internal class PdlPersonSøkHjelperTest {
-
     @Test
     internal fun `søker har matrikkeladresse uten bruksenhetsnummer`() {
         val matrikkelId = 123L
@@ -47,17 +46,18 @@ internal class PdlPersonSøkHjelperTest {
 
     @Test
     internal fun `søker har bare vegadresse`() {
-        val vegadresse = Vegadresse(
-            "1",
-            "ABC",
-            "123",
-            "Oslogata",
-            "01",
-            null,
-            "0101",
-            null,
-            null,
-        )
+        val vegadresse =
+            Vegadresse(
+                "1",
+                "ABC",
+                "123",
+                "Oslogata",
+                "01",
+                null,
+                "0101",
+                null,
+                null,
+            )
 
         val resultat = PdlPersonSøkHjelper.lagPdlPersonSøkKriterier(lagAdresse(vegadresse, null))
         assertThat(resultat.size).isEqualTo(5)
@@ -75,17 +75,18 @@ internal class PdlPersonSøkHjelperTest {
 
     @Test
     internal fun `søker har bare vegadresse uten husbokstav og bruksenhet`() {
-        val vegadresse = Vegadresse(
-            "1",
-            null,
-            null,
-            "Oslogata",
-            "01",
-            null,
-            "0101",
-            null,
-            null,
-        )
+        val vegadresse =
+            Vegadresse(
+                "1",
+                null,
+                null,
+                "Oslogata",
+                "01",
+                null,
+                "0101",
+                null,
+                null,
+            )
 
         val resultat = PdlPersonSøkHjelper.lagPdlPersonSøkKriterier(lagAdresse(vegadresse, null))
         assertThat(resultat.size).isEqualTo(5)
@@ -101,7 +102,10 @@ internal class PdlPersonSøkHjelperTest {
         assertThat((resultat[4].searchRule as SearchRuleEquals).equals).isEqualTo(vegadresse.postnummer)
     }
 
-    private fun lagAdresse(vegadresse: Vegadresse?, matrikkeladresse: Matrikkeladresse?): Bostedsadresse {
+    private fun lagAdresse(
+        vegadresse: Vegadresse?,
+        matrikkeladresse: Matrikkeladresse?,
+    ): Bostedsadresse {
         return Bostedsadresse(
             angittFlyttedato = null,
             gyldigFraOgMed = null,

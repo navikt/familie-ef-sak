@@ -3,7 +3,6 @@ package no.nav.familie.ef.sak.brev
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvisIkke
 
 object BrevmottakerUtil {
-
     fun validerUnikeBrevmottakere(brevmottakereDto: BrevmottakereDto) {
         val personmottakerIdenter = brevmottakereDto.personer.map { it.personIdent }
         brukerfeilHvisIkke(personmottakerIdenter.distinct().size == personmottakerIdenter.size) {

@@ -19,10 +19,9 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
-import java.util.*
+import java.util.UUID
 
 class NyttBarnSammePartnerRegelTest {
-
     val hovedregelMetadataMock = mockk<HovedregelMetadata>()
     val behandlingBarn = behandlingBarn(behandlingId = UUID.randomUUID())
     val behandlingBarn2 = behandlingBarn(behandlingId = UUID.randomUUID())
@@ -41,16 +40,18 @@ class NyttBarnSammePartnerRegelTest {
         val annenForelderDto = mockk<AnnenForelderDto>()
         every { annenForelderDto.tidligereVedtaksperioder } returns TidligereVedtaksperioderDto(null, TidligereInnvilgetVedtakDto(false, true, false), false)
         every { barnMedSamværSøknadsgrunnlagDto.forelder } returns annenForelderDto
-        every { hovedregelMetadataMock.vilkårgrunnlagDto } returns VilkårTestUtil.mockVilkårGrunnlagDto(
-            barnMedSamvær = listOf(BarnMedSamværDto(UUID.randomUUID(), barnMedSamværSøknadsgrunnlagDto, barnMedSamværRegistergrunnlagDto)),
-            tidligereVedtaksperioder = TidligereVedtaksperioderDto(TidligereInnvilgetVedtakDto(true, false, false), TidligereInnvilgetVedtakDto(false, false, false), false),
-        )
+        every { hovedregelMetadataMock.vilkårgrunnlagDto } returns
+            VilkårTestUtil.mockVilkårGrunnlagDto(
+                barnMedSamvær = listOf(BarnMedSamværDto(UUID.randomUUID(), barnMedSamværSøknadsgrunnlagDto, barnMedSamværRegistergrunnlagDto)),
+                tidligereVedtaksperioder = TidligereVedtaksperioderDto(TidligereInnvilgetVedtakDto(true, false, false), TidligereInnvilgetVedtakDto(false, false, false), false),
+            )
 
-        val listDelvilkårsvurdering = NyttBarnSammePartnerRegel().initiereDelvilkårsvurdering(
-            hovedregelMetadataMock,
-            Vilkårsresultat.IKKE_TATT_STILLING_TIL,
-            null,
-        )
+        val listDelvilkårsvurdering =
+            NyttBarnSammePartnerRegel().initiereDelvilkårsvurdering(
+                hovedregelMetadataMock,
+                Vilkårsresultat.IKKE_TATT_STILLING_TIL,
+                null,
+            )
 
         assertThat(listDelvilkårsvurdering.size).isEqualTo(1)
         assertThat(listDelvilkårsvurdering.first().resultat).isEqualTo(Vilkårsresultat.AUTOMATISK_OPPFYLT)
@@ -63,11 +64,12 @@ class NyttBarnSammePartnerRegelTest {
     fun `Gitt at bruker eller annen foreldre ikke har tidligere vedtak, og alle barn har registrert annen forelder, når initiereDelvilkår, så skal vilkåret automatisk oppfylles`() {
         every { hovedregelMetadataMock.vilkårgrunnlagDto } returns VilkårTestUtil.mockVilkårGrunnlagDto()
 
-        val listDelvilkårsvurdering = NyttBarnSammePartnerRegel().initiereDelvilkårsvurdering(
-            hovedregelMetadataMock,
-            Vilkårsresultat.IKKE_TATT_STILLING_TIL,
-            null,
-        )
+        val listDelvilkårsvurdering =
+            NyttBarnSammePartnerRegel().initiereDelvilkårsvurdering(
+                hovedregelMetadataMock,
+                Vilkårsresultat.IKKE_TATT_STILLING_TIL,
+                null,
+            )
 
         assertThat(listDelvilkårsvurdering.size).isEqualTo(1)
         assertThat(listDelvilkårsvurdering.first().resultat).isEqualTo(Vilkårsresultat.AUTOMATISK_OPPFYLT)
@@ -84,22 +86,25 @@ class NyttBarnSammePartnerRegelTest {
         val annenForelderDto = mockk<AnnenForelderDto>()
 
         every { barnMedSamværRegistergrunnlagDto.fødselsnummer } returns "01010199999"
-        every { hovedregelMetadataMock.vilkårgrunnlagDto } returns VilkårTestUtil.mockVilkårGrunnlagDto(
-            barnMedSamvær = listOf(BarnMedSamværDto(UUID.randomUUID(), barnMedSamværSøknadsgrunnlagDto, barnMedSamværRegistergrunnlagDto)),
-            tidligereVedtaksperioder = TidligereVedtaksperioderDto(
-                TidligereInnvilgetVedtakDto(true, false, false),
-                TidligereInnvilgetVedtakDto(false, false, false),
-                false,
-            ),
-        )
+        every { hovedregelMetadataMock.vilkårgrunnlagDto } returns
+            VilkårTestUtil.mockVilkårGrunnlagDto(
+                barnMedSamvær = listOf(BarnMedSamværDto(UUID.randomUUID(), barnMedSamværSøknadsgrunnlagDto, barnMedSamværRegistergrunnlagDto)),
+                tidligereVedtaksperioder =
+                    TidligereVedtaksperioderDto(
+                        TidligereInnvilgetVedtakDto(true, false, false),
+                        TidligereInnvilgetVedtakDto(false, false, false),
+                        false,
+                    ),
+            )
         every { annenForelderDto.tidligereVedtaksperioder } returns TidligereVedtaksperioderDto(null, null, false)
         every { barnMedSamværSøknadsgrunnlagDto.forelder } returns annenForelderDto
         every { barnMedSamværRegistergrunnlagDto.forelder } returns annenForelderDto
-        val listDelvilkårsvurdering = NyttBarnSammePartnerRegel().initiereDelvilkårsvurdering(
-            hovedregelMetadataMock,
-            Vilkårsresultat.IKKE_TATT_STILLING_TIL,
-            null,
-        )
+        val listDelvilkårsvurdering =
+            NyttBarnSammePartnerRegel().initiereDelvilkårsvurdering(
+                hovedregelMetadataMock,
+                Vilkårsresultat.IKKE_TATT_STILLING_TIL,
+                null,
+            )
 
         assertThat(listDelvilkårsvurdering.size).isEqualTo(1)
         assertThat(listDelvilkårsvurdering.first().resultat).isEqualTo(Vilkårsresultat.IKKE_TATT_STILLING_TIL)
@@ -115,17 +120,19 @@ class NyttBarnSammePartnerRegelTest {
         val annenForelderDto = mockk<AnnenForelderDto>()
 
         every { barnMedSamværRegistergrunnlagDto.fødselsnummer } returns "01010199999"
-        every { hovedregelMetadataMock.vilkårgrunnlagDto } returns VilkårTestUtil.mockVilkårGrunnlagDto(
-            barnMedSamvær = listOf(BarnMedSamværDto(UUID.randomUUID(), barnMedSamværSøknadsgrunnlagDto, barnMedSamværRegistergrunnlagDto)),
-        )
+        every { hovedregelMetadataMock.vilkårgrunnlagDto } returns
+            VilkårTestUtil.mockVilkårGrunnlagDto(
+                barnMedSamvær = listOf(BarnMedSamværDto(UUID.randomUUID(), barnMedSamværSøknadsgrunnlagDto, barnMedSamværRegistergrunnlagDto)),
+            )
         every { annenForelderDto.tidligereVedtaksperioder } returns TidligereVedtaksperioderDto(null, null, false)
         every { barnMedSamværSøknadsgrunnlagDto.forelder } returns annenForelderDto
         every { barnMedSamværRegistergrunnlagDto.forelder } returns null
-        val listDelvilkårsvurdering = NyttBarnSammePartnerRegel().initiereDelvilkårsvurdering(
-            hovedregelMetadataMock,
-            Vilkårsresultat.IKKE_TATT_STILLING_TIL,
-            null,
-        )
+        val listDelvilkårsvurdering =
+            NyttBarnSammePartnerRegel().initiereDelvilkårsvurdering(
+                hovedregelMetadataMock,
+                Vilkårsresultat.IKKE_TATT_STILLING_TIL,
+                null,
+            )
 
         assertThat(listDelvilkårsvurdering.size).isEqualTo(1)
         assertThat(listDelvilkårsvurdering.first().resultat).isEqualTo(Vilkårsresultat.IKKE_TATT_STILLING_TIL)
@@ -151,18 +158,20 @@ class NyttBarnSammePartnerRegelTest {
         every { barnMedSamværRegistergrunnlagDto.forelder } returns annenForelderDto
         every { barnMedSamværRegistergrunnlagDto.fødselsnummer } returns "01010199999"
 
-        every { hovedregelMetadataMock.vilkårgrunnlagDto } returns VilkårTestUtil.mockVilkårGrunnlagDto(
-            barnMedSamvær = listOf(BarnMedSamværDto(UUID.randomUUID(), barnMedSamværSøknadsgrunnlagDto, barnMedSamværRegistergrunnlagDto)),
-            tidligereVedtaksperioder = tidligereVedtaksperioderDtoIkkeTidligereInnvilget(),
-        )
+        every { hovedregelMetadataMock.vilkårgrunnlagDto } returns
+            VilkårTestUtil.mockVilkårGrunnlagDto(
+                barnMedSamvær = listOf(BarnMedSamværDto(UUID.randomUUID(), barnMedSamværSøknadsgrunnlagDto, barnMedSamværRegistergrunnlagDto)),
+                tidligereVedtaksperioder = tidligereVedtaksperioderDtoIkkeTidligereInnvilget(),
+            )
         val annenForelderUtenFødselsnummer = mockk<AnnenForelderDto>()
         every { barnMedSamværSøknadsgrunnlagDto.forelder } returns annenForelderUtenFødselsnummer
         every { annenForelderUtenFødselsnummer.fødselsnummer } returns null
-        val listDelvilkårsvurdering = NyttBarnSammePartnerRegel().initiereDelvilkårsvurdering(
-            hovedregelMetadataMock,
-            Vilkårsresultat.IKKE_TATT_STILLING_TIL,
-            null,
-        )
+        val listDelvilkårsvurdering =
+            NyttBarnSammePartnerRegel().initiereDelvilkårsvurdering(
+                hovedregelMetadataMock,
+                Vilkårsresultat.IKKE_TATT_STILLING_TIL,
+                null,
+            )
 
         assertThat(listDelvilkårsvurdering.size).isEqualTo(1)
         assertThat(listDelvilkårsvurdering.first().resultat).isEqualTo(Vilkårsresultat.AUTOMATISK_OPPFYLT)

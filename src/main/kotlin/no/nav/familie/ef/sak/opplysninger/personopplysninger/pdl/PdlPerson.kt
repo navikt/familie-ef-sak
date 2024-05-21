@@ -241,14 +241,16 @@ data class Vegadresse(
     val koordinater: Koordinater?,
     val matrikkelId: Long?,
 ) {
-    /**
-     * Norge er delt i tre UTM-soner (32, 33 og 35) - men PDL returnerer ikke hvilken sone et koordinat tilhører
-     * Pga dette vil det være vanskelig å sammenligne x-verdi på tvers av soner. Grensen mellom 32 og 33 ligger på ca 7 200 000
-     * og alt sør for dette kan avstandsberegnes med både x- og y-koordinater. Nord for dette gjør vi ren avstandsberegning på
-     * y-koordinater inntil vi evt får riktig UTM-sone i datagrunnlaget.
-     */
-    val UTM_GRENSE = 7_200_000
-    val MINIMUM_AVSTAND_FOR_AUTOMATISK_BEREGNING_I_METER = 200
+    companion object {
+        /**
+         * Norge er delt i tre UTM-soner (32, 33 og 35) - men PDL returnerer ikke hvilken sone et koordinat tilhører
+         * Pga dette vil det være vanskelig å sammenligne x-verdi på tvers av soner. Grensen mellom 32 og 33 ligger på ca 7 200 000
+         * og alt sør for dette kan avstandsberegnes med både x- og y-koordinater. Nord for dette gjør vi ren avstandsberegning på
+         * y-koordinater inntil vi evt får riktig UTM-sone i datagrunnlaget.
+         */
+        const val UTM_GRENSE = 7_200_000
+        const val MINIMUM_AVSTAND_FOR_AUTOMATISK_BEREGNING_I_METER = 200
+    }
 
     fun fjerneBoforhold(annenVegadresse: Vegadresse?): AvstandTilSøkerDto {
         if (this.koordinater == null || annenVegadresse?.koordinater == null) {
@@ -307,17 +309,20 @@ data class Vegadresse(
         val sammePostnummer = vegadresse.postnummer != null && vegadresse.postnummer == other.postnummer
         return sammePostnummer && sammeHusnummer && sammeAdressenavn
     }
-    private fun Vegadresse.tilVegadresseDto() = VegadresseDto(
-        adressenavn = adressenavn ?: "",
-        husnummer = husnummer ?: "",
-        postnummer = postnummer ?: "",
-        husbokstav = husbokstav ?: "",
-        bruksenhetsnummer = bruksenhetsnummer ?: "",
-        kommunenummer = kommunenummer ?: "",
-        tilleggsnavn = tilleggsnavn ?: "",
-        koordinater = koordinater,
-        matrikkelId = matrikkelId,
-    )
+
+    private fun Vegadresse.tilVegadresseDto() =
+        VegadresseDto(
+            adressenavn = adressenavn ?: "",
+            husnummer = husnummer ?: "",
+            postnummer = postnummer ?: "",
+            husbokstav = husbokstav ?: "",
+            bruksenhetsnummer = bruksenhetsnummer ?: "",
+            kommunenummer = kommunenummer ?: "",
+            tilleggsnavn = tilleggsnavn ?: "",
+            koordinater = koordinater,
+            matrikkelId = matrikkelId,
+        )
+
     private data class VegadresseDto(
         val adressenavn: String,
         val postnummer: String,

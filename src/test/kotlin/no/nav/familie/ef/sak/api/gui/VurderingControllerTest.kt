@@ -133,17 +133,17 @@ internal class VurderingControllerTest : OppslagSpringRunnerTest() {
     private fun endreVegadresseForGrunnlagsdata(grunnlagsdata: Grunnlagsdata) =
         grunnlagsdata.copy(
             data =
-            grunnlagsdata.data.copy(
-                søker =
-                grunnlagsdata.data.søker.copy(
-                    bostedsadresse =
-                    listOf(
-                        grunnlagsdata.data.søker.bostedsadresse.first().copy(
-                            vegadresse = nyVegadresse(),
+                grunnlagsdata.data.copy(
+                    søker =
+                        grunnlagsdata.data.søker.copy(
+                            bostedsadresse =
+                                listOf(
+                                    grunnlagsdata.data.søker.bostedsadresse.first().copy(
+                                        vegadresse = nyVegadresse(),
+                                    ),
+                                ),
                         ),
-                    ),
                 ),
-            ),
         )
 
     private fun nyVegadresse() =
@@ -366,14 +366,14 @@ internal class VurderingControllerTest : OppslagSpringRunnerTest() {
             id = it.id,
             behandlingId = it.behandlingId,
             delvilkårsvurderinger =
-            it.delvilkårsvurderinger.map {
-                it.copy(
-                    vurderinger =
-                    it.vurderinger.map { vurderingDto ->
-                        vurderingDto.copy(svar = SvarId.JA, begrunnelse = "En begrunnelse")
-                    },
-                )
-            },
+                it.delvilkårsvurderinger.map {
+                    it.copy(
+                        vurderinger =
+                            it.vurderinger.map { vurderingDto ->
+                                vurderingDto.copy(svar = SvarId.JA, begrunnelse = "En begrunnelse")
+                            },
+                    )
+                },
         )
 
     private fun opprettVilkår(søknad: SøknadOvergangsstønad? = null): ResponseEntity<Ressurs<VilkårDto>> {
@@ -417,13 +417,15 @@ internal class VurderingControllerTest : OppslagSpringRunnerTest() {
     }
 
     private fun opprettSamvær(borSammenSvar: String): Samvær {
-        val samvær = Samvær(
-            borAnnenForelderISammeHus = Søknadsfelt(
-                label = "Bor du og den andre forelderen i samme hus, blokk, gårdstun, kvartal eller vei/gate?",
-                verdi = borSammenSvar,
-                svarId = borSammenSvar,
-            ),
-        )
+        val samvær =
+            Samvær(
+                borAnnenForelderISammeHus =
+                    Søknadsfelt(
+                        label = "Bor du og den andre forelderen i samme hus, blokk, gårdstun, kvartal eller vei/gate?",
+                        verdi = borSammenSvar,
+                        svarId = borSammenSvar,
+                    ),
+            )
         return samvær
     }
 
@@ -463,22 +465,22 @@ internal class VurderingControllerTest : OppslagSpringRunnerTest() {
             id = it.id,
             behandlingId = it.behandlingId,
             delvilkårsvurderinger =
-            listOf(
-                DelvilkårsvurderingDto(
-                    Vilkårsresultat.IKKE_OPPFYLT,
-                    listOf(
-                        VurderingDto(
-                            RegelId.SØKER_MEDLEM_I_FOLKETRYGDEN,
-                            SvarId.NEI,
-                        ),
-                        VurderingDto(
-                            RegelId.MEDLEMSKAP_UNNTAK,
-                            SvarId.MEDLEM_MER_ENN_5_ÅR_EØS,
-                            "a",
+                listOf(
+                    DelvilkårsvurderingDto(
+                        Vilkårsresultat.IKKE_OPPFYLT,
+                        listOf(
+                            VurderingDto(
+                                RegelId.SØKER_MEDLEM_I_FOLKETRYGDEN,
+                                SvarId.NEI,
+                            ),
+                            VurderingDto(
+                                RegelId.MEDLEMSKAP_UNNTAK,
+                                SvarId.MEDLEM_MER_ENN_5_ÅR_EØS,
+                                "a",
+                            ),
                         ),
                     ),
                 ),
-            ),
         )
 
     private fun utledVurdering(

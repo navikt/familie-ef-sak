@@ -6,8 +6,10 @@ import org.springframework.stereotype.Service
 
 @Service
 class PubliserVedtakshendelseSteg(private val iverksettClient: IverksettClient) : BehandlingSteg<Void?> {
-
-    override fun utførSteg(saksbehandling: Saksbehandling, data: Void?) {
+    override fun utførSteg(
+        saksbehandling: Saksbehandling,
+        data: Void?,
+    ) {
         iverksettClient.publiserVedtakshendelse(saksbehandling.id)
     }
 

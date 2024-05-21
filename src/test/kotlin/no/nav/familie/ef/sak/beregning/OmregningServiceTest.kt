@@ -73,7 +73,6 @@ import java.time.YearMonth
 import java.util.UUID
 
 internal class OmregningServiceTest : OppslagSpringRunnerTest() {
-
     @Autowired
     lateinit var fagsakService: FagsakService
 
@@ -164,13 +163,14 @@ internal class OmregningServiceTest : OppslagSpringRunnerTest() {
         val inntektPeriode = lagInntekt(201, 2002, 200003, 2022)
         lagSøknadOgVilkårOgVedtak(behandlingId, fagsakId, inntektPeriode, stønadsår = 2022)
 
-        val behandlingSattPåVent = behandling(
-            id = UUID.randomUUID(),
-            fagsak = fagsakService.hentFagsak(fagsakId),
-            resultat = BehandlingResultat.INNVILGET,
-            status = BehandlingStatus.SATT_PÅ_VENT,
-            type = BehandlingType.REVURDERING,
-        )
+        val behandlingSattPåVent =
+            behandling(
+                id = UUID.randomUUID(),
+                fagsak = fagsakService.hentFagsak(fagsakId),
+                resultat = BehandlingResultat.INNVILGET,
+                status = BehandlingStatus.SATT_PÅ_VENT,
+                type = BehandlingType.REVURDERING,
+            )
         behandlingRepository.insert(behandlingSattPåVent)
         grunnlagsdataService.opprettGrunnlagsdata(behandlingSattPåVent.id)
 
@@ -181,9 +181,10 @@ internal class OmregningServiceTest : OppslagSpringRunnerTest() {
         assertThat(inntektPeriode.totalinntekt().toInt()).isEqualTo(276287)
 
         mockTestMedGrunnbeløpFra2022 {
-            val feil = assertThrows<Feil> {
-                omregningService.utførGOmregning(fagsakId)
-            }
+            val feil =
+                assertThrows<Feil> {
+                    omregningService.utførGOmregning(fagsakId)
+                }
 
             assertThat(feil.message).contains("det finnes åpen behandling på fagsak")
         }
@@ -224,26 +225,28 @@ internal class OmregningServiceTest : OppslagSpringRunnerTest() {
         val fagsakId = UUID.fromString("3549f9e2-ddd1-467d-82be-bfdb6c7f07e1")
         val behandlingId = UUID.fromString("39c7dc82-adc1-43db-a6f9-64b8e4352ff6")
         val fagsak = testoppsettService.lagreFagsak(fagsak(id = fagsakId, identer = setOf(PersonIdent("321"))))
-        val behandling = behandlingRepository.insert(
-            behandling(
-                id = behandlingId,
-                eksternId = 11,
-                fagsak = fagsak,
-                resultat = BehandlingResultat.INNVILGET,
-                status = BehandlingStatus.FERDIGSTILT,
-            ),
-        )
+        val behandling =
+            behandlingRepository.insert(
+                behandling(
+                    id = behandlingId,
+                    eksternId = 11,
+                    fagsak = fagsak,
+                    resultat = BehandlingResultat.INNVILGET,
+                    status = BehandlingStatus.FERDIGSTILT,
+                ),
+            )
         tilkjentYtelseRepository.insert(tilkjentYtelse(behandling.id, "321", 2022))
         val inntekter =
             listOf(inntektsperiode(2022, inntekt = BigDecimal(277_100), samordningsfradrag = BigDecimal.ZERO))
         vedtakRepository.insert(vedtak(behandling.id, år = 2022, inntekter = InntektWrapper(inntekter)))
-        val barn = barnRepository.insert(
-            behandlingBarn(
-                behandlingId = behandling.id,
-                personIdent = "01012067050",
-                navn = "Kid Kiddesen",
-            ),
-        )
+        val barn =
+            barnRepository.insert(
+                behandlingBarn(
+                    behandlingId = behandling.id,
+                    personIdent = "01012067050",
+                    navn = "Kid Kiddesen",
+                ),
+            )
         søknadService.lagreSøknadForOvergangsstønad(
             Testsøknad.søknadOvergangsstønad,
             behandling.id,
@@ -285,27 +288,29 @@ internal class OmregningServiceTest : OppslagSpringRunnerTest() {
         behandlingId: UUID,
     ): Pair<Fagsak, Behandling> {
         val fagsak = testoppsettService.lagreFagsak(fagsak(id = fagsakId, identer = setOf(PersonIdent("321"))))
-        val behandling = behandlingRepository.insert(
-            behandling(
-                id = behandlingId,
-                fagsak = fagsak,
-                resultat = BehandlingResultat.INNVILGET,
-                status = BehandlingStatus.FERDIGSTILT,
-            ),
-        )
+        val behandling =
+            behandlingRepository.insert(
+                behandling(
+                    id = behandlingId,
+                    fagsak = fagsak,
+                    resultat = BehandlingResultat.INNVILGET,
+                    status = BehandlingStatus.FERDIGSTILT,
+                ),
+            )
         return Pair(fagsak, behandling)
     }
 
     @Test
     fun `utførGOmregning med samordningsfradrag returner og etterlater seg ingen spor i databasen i live run`() {
         val fagsak = testoppsettService.lagreFagsak(fagsak(identer = setOf(PersonIdent("321"))))
-        val behandling = behandlingRepository.insert(
-            behandling(
-                fagsak = fagsak,
-                resultat = BehandlingResultat.INNVILGET,
-                status = BehandlingStatus.FERDIGSTILT,
-            ),
-        )
+        val behandling =
+            behandlingRepository.insert(
+                behandling(
+                    fagsak = fagsak,
+                    resultat = BehandlingResultat.INNVILGET,
+                    status = BehandlingStatus.FERDIGSTILT,
+                ),
+            )
         tilkjentYtelseRepository.insert(tilkjentYtelse(behandling.id, "321", år, samordningsfradrag = 10))
         val inntektsperiode = inntektsperiode(år = år, samordningsfradrag = 100.toBigDecimal())
         vedtakRepository.insert(vedtak(behandling.id, år = år, inntekter = InntektWrapper(listOf(inntektsperiode))))
@@ -321,20 +326,22 @@ internal class OmregningServiceTest : OppslagSpringRunnerTest() {
     @Test
     fun `utførGOmregning med sanksjon returner og etterlater seg ingen spor i databasen i live run`() {
         val fagsak = testoppsettService.lagreFagsak(fagsak(identer = setOf(PersonIdent("321"))))
-        val behandling = behandlingRepository.insert(
-            behandling(
-                fagsak = fagsak,
-                resultat = BehandlingResultat.INNVILGET,
-                status = BehandlingStatus.FERDIGSTILT,
-            ),
-        )
+        val behandling =
+            behandlingRepository.insert(
+                behandling(
+                    fagsak = fagsak,
+                    resultat = BehandlingResultat.INNVILGET,
+                    status = BehandlingStatus.FERDIGSTILT,
+                ),
+            )
         tilkjentYtelseRepository.insert(tilkjentYtelse(behandling.id, "321", år, samordningsfradrag = 10))
         val inntektsperiode = inntektsperiode(år = år, samordningsfradrag = 100.toBigDecimal())
-        val vedtaksperiode = vedtaksperiode(
-            startDato = LocalDate.of(år, 1, 1),
-            sluttDato = LocalDate.of(år, 1, 31),
-            vedtaksperiodeType = VedtaksperiodeType.SANKSJON,
-        )
+        val vedtaksperiode =
+            vedtaksperiode(
+                startDato = LocalDate.of(år, 1, 1),
+                sluttDato = LocalDate.of(år, 1, 31),
+                vedtaksperiodeType = VedtaksperiodeType.SANKSJON,
+            )
         vedtakRepository.insert(
             vedtak(
                 behandlingId = behandling.id,
@@ -373,63 +380,69 @@ internal class OmregningServiceTest : OppslagSpringRunnerTest() {
 
     private fun insertVedtakMed0BeløpSomSkalGOmregnes(): Fagsak {
         val fagsak = testoppsettService.lagreFagsak(fagsak(id = UUID.randomUUID(), identer = setOf(PersonIdent("123"))))
-        val behandling = behandlingRepository.insert(
-            behandling(
-                id = UUID.randomUUID(),
-                fagsak = fagsak,
-                resultat = BehandlingResultat.INNVILGET,
-                status = BehandlingStatus.FERDIGSTILT,
-            ),
-        )
+        val behandling =
+            behandlingRepository.insert(
+                behandling(
+                    id = UUID.randomUUID(),
+                    fagsak = fagsak,
+                    resultat = BehandlingResultat.INNVILGET,
+                    status = BehandlingStatus.FERDIGSTILT,
+                ),
+            )
 
-        val andelTilkjentYtelse = lagAndelTilkjentYtelse(
-            beløp = 0,
-            fraOgMed = LocalDate.of(2021, 8, 1),
-            tilOgMed = LocalDate.of(2021, 11, 30),
-            personIdent = "123",
-            inntekt = 700000,
-            inntektsreduksjon = 5543,
-            kildeBehandlingId = behandling.id,
-        )
+        val andelTilkjentYtelse =
+            lagAndelTilkjentYtelse(
+                beløp = 0,
+                fraOgMed = LocalDate.of(2021, 8, 1),
+                tilOgMed = LocalDate.of(2021, 11, 30),
+                personIdent = "123",
+                inntekt = 700000,
+                inntektsreduksjon = 5543,
+                kildeBehandlingId = behandling.id,
+            )
 
-        val andelTilkjentYtelse2 = lagAndelTilkjentYtelse(
-            beløp = 0,
-            fraOgMed = LocalDate.of(2021, 12, 1),
-            tilOgMed = LocalDate.of(2024, 7, 31),
-            personIdent = "123",
-            inntekt = 700000,
-            inntektsreduksjon = 5543,
-            kildeBehandlingId = behandling.id,
-        )
+        val andelTilkjentYtelse2 =
+            lagAndelTilkjentYtelse(
+                beløp = 0,
+                fraOgMed = LocalDate.of(2021, 12, 1),
+                tilOgMed = LocalDate.of(2024, 7, 31),
+                personIdent = "123",
+                inntekt = 700000,
+                inntektsreduksjon = 5543,
+                kildeBehandlingId = behandling.id,
+            )
 
-        val tilkjentYtelse = lagTilkjentYtelse(
-            andelerTilkjentYtelse = listOf(andelTilkjentYtelse, andelTilkjentYtelse2),
-            startdato = LocalDate.of(2021, 8, 1),
-            grunnbeløpsmåned = YearMonth.of(2021, 5),
-            behandlingId = behandling.id,
-        )
+        val tilkjentYtelse =
+            lagTilkjentYtelse(
+                andelerTilkjentYtelse = listOf(andelTilkjentYtelse, andelTilkjentYtelse2),
+                startdato = LocalDate.of(2021, 8, 1),
+                grunnbeløpsmåned = YearMonth.of(2021, 5),
+                behandlingId = behandling.id,
+            )
         tilkjentYtelseRepository.insert(tilkjentYtelse)
 
-        val perioder = listOf(
-            vedtaksperiode(
+        val perioder =
+            listOf(
+                vedtaksperiode(
+                    startDato = LocalDate.of(2021, 8, 1),
+                    sluttDato = LocalDate.of(2021, 11, 30),
+                    vedtaksperiodeType = VedtaksperiodeType.HOVEDPERIODE,
+                    aktivitetstype = AktivitetType.BARN_UNDER_ETT_ÅR,
+                ),
+                vedtaksperiode(
+                    startDato = LocalDate.of(2021, 12, 1),
+                    sluttDato = LocalDate.of(2024, 7, 31),
+                    vedtaksperiodeType = VedtaksperiodeType.HOVEDPERIODE,
+                    aktivitetstype = AktivitetType.FORSØRGER_ER_SYK,
+                ),
+            )
+        val inntekt =
+            inntektsperiode(
                 startDato = LocalDate.of(2021, 8, 1),
-                sluttDato = LocalDate.of(2021, 11, 30),
-                vedtaksperiodeType = VedtaksperiodeType.HOVEDPERIODE,
-                aktivitetstype = AktivitetType.BARN_UNDER_ETT_ÅR,
-            ),
-            vedtaksperiode(
-                startDato = LocalDate.of(2021, 12, 1),
-                sluttDato = LocalDate.of(2024, 7, 31),
-                vedtaksperiodeType = VedtaksperiodeType.HOVEDPERIODE,
-                aktivitetstype = AktivitetType.FORSØRGER_ER_SYK,
-            ),
-        )
-        val inntekt = inntektsperiode(
-            startDato = LocalDate.of(2021, 8, 1),
-            sluttDato = LocalDate.MAX,
-            inntekt = BigDecimal.valueOf(700000),
-            samordningsfradrag = BigDecimal.ZERO,
-        )
+                sluttDato = LocalDate.MAX,
+                inntekt = BigDecimal.valueOf(700000),
+                samordningsfradrag = BigDecimal.ZERO,
+            )
 
         vedtakRepository.insert(
             vedtak(
@@ -439,13 +452,14 @@ internal class OmregningServiceTest : OppslagSpringRunnerTest() {
                 perioder = PeriodeWrapper(perioder),
             ),
         )
-        val barn = barnRepository.insert(
-            behandlingBarn(
-                behandlingId = behandling.id,
-                personIdent = "01012067050",
-                navn = "Kid Kiddesen",
-            ),
-        )
+        val barn =
+            barnRepository.insert(
+                behandlingBarn(
+                    behandlingId = behandling.id,
+                    personIdent = "01012067050",
+                    navn = "Kid Kiddesen",
+                ),
+            )
         søknadService.lagreSøknadForOvergangsstønad(Testsøknad.søknadOvergangsstønad, behandling.id, fagsak.id, "1L")
 
         val vilkårsvurderinger = lagVilkårsvurderinger(barn, behandling.id)
@@ -453,49 +467,54 @@ internal class OmregningServiceTest : OppslagSpringRunnerTest() {
         return fagsak
     }
 
-    private fun lagBarn(behandling: Behandling) = barnRepository.insert(
-        behandlingBarn(
-            behandlingId = behandling.id,
-            personIdent = "01012067050",
-            navn = "Kid Kiddesen",
-        ),
-    )
+    private fun lagBarn(behandling: Behandling) =
+        barnRepository.insert(
+            behandlingBarn(
+                behandlingId = behandling.id,
+                personIdent = "01012067050",
+                navn = "Kid Kiddesen",
+            ),
+        )
 
     private fun lagVilkårsvurderinger(
         barn: BehandlingBarn,
         behandlingId: UUID,
     ): List<Vilkårsvurdering> {
-        val vilkårsvurderinger = vilkårsreglerForStønad(StønadType.OVERGANGSSTØNAD).map { vilkårsregel ->
-            val delvilkårsvurdering = vilkårsregel.initiereDelvilkårsvurdering(
-                HovedregelMetadata(
-                    sivilstandSøknad = null,
-                    sivilstandstype = Sivilstandstype.UGIFT,
-                    erMigrering = false,
-                    barn = listOf(barn),
-                    søktOmBarnetilsyn = emptyList(),
-                    langAvstandTilSøker = listOf(),
-                    vilkårgrunnlagDto = VilkårTestUtil.mockVilkårGrunnlagDto(),
-                    behandling = behandling(),
-                ),
-            )
-            Vilkårsvurdering(
-                behandlingId = behandlingId,
-                resultat = Vilkårsresultat.OPPFYLT,
-                type = vilkårsregel.vilkårType,
-                barnId = if (vilkårsregel.vilkårType == VilkårType.ALENEOMSORG) barn.id else null,
-                delvilkårsvurdering = DelvilkårsvurderingWrapper(
-                    delvilkårsvurdering.map {
-                        it.copy(
-                            resultat = Vilkårsresultat.OPPFYLT,
-                            vurderinger = it.vurderinger.map { vurdering ->
-                                vurdering.copy(begrunnelse = "Godkjent")
+        val vilkårsvurderinger =
+            vilkårsreglerForStønad(StønadType.OVERGANGSSTØNAD).map { vilkårsregel ->
+                val delvilkårsvurdering =
+                    vilkårsregel.initiereDelvilkårsvurdering(
+                        HovedregelMetadata(
+                            sivilstandSøknad = null,
+                            sivilstandstype = Sivilstandstype.UGIFT,
+                            erMigrering = false,
+                            barn = listOf(barn),
+                            søktOmBarnetilsyn = emptyList(),
+                            langAvstandTilSøker = listOf(),
+                            vilkårgrunnlagDto = VilkårTestUtil.mockVilkårGrunnlagDto(),
+                            behandling = behandling(),
+                        ),
+                    )
+                Vilkårsvurdering(
+                    behandlingId = behandlingId,
+                    resultat = Vilkårsresultat.OPPFYLT,
+                    type = vilkårsregel.vilkårType,
+                    barnId = if (vilkårsregel.vilkårType == VilkårType.ALENEOMSORG) barn.id else null,
+                    delvilkårsvurdering =
+                        DelvilkårsvurderingWrapper(
+                            delvilkårsvurdering.map {
+                                it.copy(
+                                    resultat = Vilkårsresultat.OPPFYLT,
+                                    vurderinger =
+                                        it.vurderinger.map { vurdering ->
+                                            vurdering.copy(begrunnelse = "Godkjent")
+                                        },
+                                )
                             },
-                        )
-                    },
-                ),
-                opphavsvilkår = null,
-            )
-        }
+                        ),
+                    opphavsvilkår = null,
+                )
+            }
         return vilkårsvurderinger
     }
 
@@ -505,28 +524,31 @@ internal class OmregningServiceTest : OppslagSpringRunnerTest() {
         vedtakstidspunkt: LocalDateTime,
     ): IverksettOvergangsstønadDto {
         val personidenter = fagsak.personIdenter.map { it.ident }.toSet()
-        val forrigeBehandling = fagsakService.finnFagsak(personidenter, StønadType.OVERGANGSSTØNAD)?.let {
-            behandlingRepository.findByFagsakId(it.id).maxByOrNull { it.sporbar.opprettetTid }
-        } ?: error("Finner ikke tidligere iverksatt behandling")
+        val forrigeBehandling =
+            fagsakService.finnFagsak(personidenter, StønadType.OVERGANGSSTØNAD)?.let {
+                behandlingRepository.findByFagsakId(it.id).maxByOrNull { it.sporbar.opprettetTid }
+            } ?: error("Finner ikke tidligere iverksatt behandling")
 
         val expectedIverksettDto: IverksettOvergangsstønadDto =
             ObjectMapperProvider.objectMapper.readValue(readFile("expectedIverksettDto.json"))
 
-        val andelerTilkjentYtelse = expectedIverksettDto.vedtak.tilkjentYtelse?.andelerTilkjentYtelse?.map {
-            if (it.periode.fomDato >= Grunnbeløpsperioder.nyesteGrunnbeløpGyldigFraOgMed.atDay(1)) {
-                it.copy(kildeBehandlingId = forrigeBehandling.id)
-            } else {
-                it.copy(kildeBehandlingId = behandling.id)
-            }
-        } ?: emptyList()
+        val andelerTilkjentYtelse =
+            expectedIverksettDto.vedtak.tilkjentYtelse?.andelerTilkjentYtelse?.map {
+                if (it.periode.fomDato >= Grunnbeløpsperioder.nyesteGrunnbeløpGyldigFraOgMed.atDay(1)) {
+                    it.copy(kildeBehandlingId = forrigeBehandling.id)
+                } else {
+                    it.copy(kildeBehandlingId = behandling.id)
+                }
+            } ?: emptyList()
         val tilkjentYtelseDto =
             expectedIverksettDto.vedtak.tilkjentYtelse?.copy(andelerTilkjentYtelse = andelerTilkjentYtelse)
         val vedtak =
             expectedIverksettDto.vedtak.copy(tilkjentYtelse = tilkjentYtelseDto, vedtakstidspunkt = vedtakstidspunkt)
-        val behandlingsdetaljerDto = expectedIverksettDto.behandling.copy(
-            behandlingId = forrigeBehandling.id,
-            eksternId = forrigeBehandling.eksternId,
-        )
+        val behandlingsdetaljerDto =
+            expectedIverksettDto.behandling.copy(
+                behandlingId = forrigeBehandling.id,
+                eksternId = forrigeBehandling.eksternId,
+            )
         return expectedIverksettDto.copy(
             vedtak = vedtak,
             behandling = behandlingsdetaljerDto,
@@ -542,18 +564,22 @@ internal class OmregningServiceTest : OppslagSpringRunnerTest() {
         behandlingId: UUID,
         stønadsår: Int,
     ): TilkjentYtelse {
-        val tilkjentYtelse = tilkjentYtelse(
-            behandlingId = behandlingId,
-            personIdent = "321",
-            stønadsår = stønadsår,
-            inntekt = 1,
-            beløp = 1,
-        )
+        val tilkjentYtelse =
+            tilkjentYtelse(
+                behandlingId = behandlingId,
+                personIdent = "321",
+                stønadsår = stønadsår,
+                inntekt = 1,
+                beløp = 1,
+            )
         tilkjentYtelseRepository.insert(tilkjentYtelse)
         return tilkjentYtelse
     }
 
-    private fun finnInntektsperiodeEtterNyGDato(behandlingId: UUID, grunnbeløpsår: Int): Inntektsperiode {
+    private fun finnInntektsperiodeEtterNyGDato(
+        behandlingId: UUID,
+        grunnbeløpsår: Int,
+    ): Inntektsperiode {
         val behandlingNy = behandlingRepository.findByIdOrThrow(behandlingId)
         val vedtakNy = vedtakRepository.findByIdOrThrow(behandlingNy.id)
         return vedtakNy.inntekter?.inntekter!!.first { it.periode.inneholder(YearMonth.of(grunnbeløpsår, 6)) }
@@ -583,14 +609,20 @@ internal class OmregningServiceTest : OppslagSpringRunnerTest() {
         vedtakRepository.insert(vedtak)
     }
 
-    private fun lagInntekt(dagsats: Int, månedsinntekt: Int, inntekt: Int, år: Int): Inntektsperiode {
-        val inntektPeriode = inntektsperiode(
-            år = år,
-            dagsats = dagsats.toBigDecimal(),
-            månedsinntekt = månedsinntekt.toBigDecimal(),
-            inntekt = inntekt.toBigDecimal(),
-            samordningsfradrag = BigDecimal.ZERO,
-        )
+    private fun lagInntekt(
+        dagsats: Int,
+        månedsinntekt: Int,
+        inntekt: Int,
+        år: Int,
+    ): Inntektsperiode {
+        val inntektPeriode =
+            inntektsperiode(
+                år = år,
+                dagsats = dagsats.toBigDecimal(),
+                månedsinntekt = månedsinntekt.toBigDecimal(),
+                inntekt = inntekt.toBigDecimal(),
+                samordningsfradrag = BigDecimal.ZERO,
+            )
         return inntektPeriode
     }
 }

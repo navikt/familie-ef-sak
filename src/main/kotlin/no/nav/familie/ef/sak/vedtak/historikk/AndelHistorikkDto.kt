@@ -62,7 +62,6 @@ data class AndelMedGrunnlagDto(
     val sats: Int,
     val beløpFørFratrekkOgSatsJustering: Int,
 ) {
-
     constructor(
         andel: AndelTilkjentYtelse,
         vedtaksinformasjon: VedtakshistorikkperiodeBarnetilsyn?,

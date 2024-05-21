@@ -17,9 +17,10 @@ import java.util.UUID
 @ProtectedWithClaims(issuer = "azuread")
 @Validated
 class UttrekkController(private val uttrekkVedtakService: UttrekkArbeidssøkerService) {
-
     @GetMapping("arbeidssoker")
-    fun hentArbeidssøkere(@RequestParam(defaultValue = "false") visKontrollerte: Boolean): Ressurs<UttrekkArbeidssøkereDto> {
+    fun hentArbeidssøkere(
+        @RequestParam(defaultValue = "false") visKontrollerte: Boolean,
+    ): Ressurs<UttrekkArbeidssøkereDto> {
         return success(uttrekkVedtakService.hentUttrekkArbeidssøkere(visKontrollerte = visKontrollerte))
     }
 

@@ -10,6 +10,8 @@ import java.util.UUID
 interface MellomlagerFrittståendeSanitybrevRepository :
     RepositoryInterface<MellomlagretFrittståendeSanitybrev, UUID>,
     InsertUpdateRepository<MellomlagretFrittståendeSanitybrev> {
-
-    fun findByFagsakIdAndSaksbehandlerIdent(fagsakId: UUID, saksehandlerIdent: String): MellomlagretFrittståendeSanitybrev?
+    fun findByFagsakIdAndSaksbehandlerIdent(
+        fagsakId: UUID,
+        saksehandlerIdent: String,
+    ): MellomlagretFrittståendeSanitybrev?
 }

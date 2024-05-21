@@ -16,23 +16,23 @@ import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
 
 internal class RevurderingServiceTest {
-
     val fagsakService = mockk<FagsakService>()
-    val revurderingService: RevurderingService = RevurderingService(
-        søknadService = mockk(),
-        behandlingService = mockk(),
-        vurderingService = mockk(),
-        grunnlagsdataService = mockk(),
-        taskService = mockk(),
-        barnService = mockk(),
-        fagsakService = fagsakService,
-        stegService = mockk(),
-        årsakRevurderingService = mockk(),
-        kopierVedtakService = mockk(),
-        vedtakService = mockk(),
-        nyeBarnService = mockk(),
-        tilordnetRessursService = mockk(),
-    )
+    val revurderingService: RevurderingService =
+        RevurderingService(
+            søknadService = mockk(),
+            behandlingService = mockk(),
+            vurderingService = mockk(),
+            grunnlagsdataService = mockk(),
+            taskService = mockk(),
+            barnService = mockk(),
+            fagsakService = fagsakService,
+            stegService = mockk(),
+            årsakRevurderingService = mockk(),
+            kopierVedtakService = mockk(),
+            vedtakService = mockk(),
+            nyeBarnService = mockk(),
+            tilordnetRessursService = mockk(),
+        )
 
     @Test
     internal fun `revurdering - skal kaste feil dersom satsendring på overgangsstønad`() {

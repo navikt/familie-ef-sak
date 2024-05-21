@@ -37,7 +37,6 @@ import java.time.YearMonth
 import java.util.UUID
 
 internal class BeregnYtelseStegBarnetilsynIntegrationTest : OppslagSpringRunnerTest() {
-
     @Autowired
     private lateinit var behandlingRepository: BehandlingRepository
 
@@ -52,14 +51,15 @@ internal class BeregnYtelseStegBarnetilsynIntegrationTest : OppslagSpringRunnerT
 
     private val fagsak = fagsak(fagsakpersoner(setOf("1")), StønadType.BARNETILSYN)
     private val behandling = behandling(fagsak)
-    val barn = behandlingBarn(
-        id = UUID.randomUUID(),
-        behandlingId = behandling.id,
-        søknadBarnId = UUID.randomUUID(),
-        personIdent = "01010112345",
-        navn = "Ola",
-        fødselTermindato = LocalDate.now(),
-    )
+    val barn =
+        behandlingBarn(
+            id = UUID.randomUUID(),
+            behandlingId = behandling.id,
+            søknadBarnId = UUID.randomUUID(),
+            personIdent = "01010112345",
+            navn = "Ola",
+            fødselTermindato = LocalDate.now(),
+        )
     private val barnBehandling1 = listOf(barn)
     private val saksbehandling = saksbehandling(fagsak, behandling)
 
@@ -117,9 +117,10 @@ internal class BeregnYtelseStegBarnetilsynIntegrationTest : OppslagSpringRunnerT
     internal fun `skal ikke kunne midlertidig opphøre en periode ved å legge inn 0 i utgifter`() {
         val utgiftsperiode = opprettUtgiftsperiode(januar, mars, barnBehandling1.map { it.id }, BigDecimal(0))
         opprettBehandlingOgBarn(behandling, barnBehandling1)
-        val feil: ApiFeil = assertThrows {
-            innvilge(saksbehandling, listOf(utgiftsperiode))
-        }
+        val feil: ApiFeil =
+            assertThrows {
+                innvilge(saksbehandling, listOf(utgiftsperiode))
+            }
         assertThat(feil.feil).contains("Kan ikke ha null utgifter på en periode som ikke er et midlertidig opphør eller sanksjon, på behandling=")
     }
 
@@ -131,9 +132,10 @@ internal class BeregnYtelseStegBarnetilsynIntegrationTest : OppslagSpringRunnerT
         val utgiftsperiodeUtbetaling =
             opprettUtgiftsperiode(mars, april, barnId, BigDecimal(100), periodetype = PeriodetypeBarnetilsyn.ORDINÆR)
         opprettBehandlingOgBarn(behandling.copy(type = BehandlingType.FØRSTEGANGSBEHANDLING), barnBehandling1)
-        val feil: ApiFeil = assertThrows {
-            innvilge(saksbehandling, listOf(utgiftsperiodeOpphør, utgiftsperiodeUtbetaling))
-        }
+        val feil: ApiFeil =
+            assertThrows {
+                innvilge(saksbehandling, listOf(utgiftsperiodeOpphør, utgiftsperiodeUtbetaling))
+            }
         assertThat(feil.feil).contains("Første periode kan ikke være en opphørsperiode, på førstegangsbehandling=")
     }
 
@@ -184,20 +186,25 @@ internal class BeregnYtelseStegBarnetilsynIntegrationTest : OppslagSpringRunnerT
         saksbehandling: Saksbehandling,
         utgiftsperioder: List<UtgiftsperiodeDto>,
     ) {
-        val vedtak = InnvilgelseBarnetilsyn(
-            perioder = utgiftsperioder,
-            begrunnelse = null,
-            perioderKontantstøtte = listOf(),
-            tilleggsstønad = TilleggsstønadDto(
-                harTilleggsstønad = false,
-                perioder = listOf(),
+        val vedtak =
+            InnvilgelseBarnetilsyn(
+                perioder = utgiftsperioder,
                 begrunnelse = null,
-            ),
-        )
+                perioderKontantstøtte = listOf(),
+                tilleggsstønad =
+                    TilleggsstønadDto(
+                        harTilleggsstønad = false,
+                        perioder = listOf(),
+                        begrunnelse = null,
+                    ),
+            )
         beregnYtelseSteg.utførSteg(saksbehandling, vedtak)
     }
 
-    private fun opprettBehandlingOgBarn(behandling: Behandling, barn: List<BehandlingBarn>) {
+    private fun opprettBehandlingOgBarn(
+        behandling: Behandling,
+        barn: List<BehandlingBarn>,
+    ) {
         behandlingRepository.insert(behandling)
         barnRepository.insertAll(barn)
     }

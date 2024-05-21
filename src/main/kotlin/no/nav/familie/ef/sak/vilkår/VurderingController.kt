@@ -33,7 +33,6 @@ class VurderingController(
     private val tilgangService: TilgangService,
     private val gjenbrukVilkårService: GjenbrukVilkårService,
 ) {
-
     private val secureLogger = LoggerFactory.getLogger("secureLogger")
 
     @GetMapping("regler")
@@ -42,7 +41,9 @@ class VurderingController(
     }
 
     @PostMapping("vilkar")
-    fun oppdaterVurderingVilkår(@RequestBody vilkårsvurdering: SvarPåVurderingerDto): Ressurs<VilkårsvurderingDto> {
+    fun oppdaterVurderingVilkår(
+        @RequestBody vilkårsvurdering: SvarPåVurderingerDto,
+    ): Ressurs<VilkårsvurderingDto> {
         tilgangService.validerTilgangTilBehandling(vilkårsvurdering.behandlingId, AuditLoggerEvent.UPDATE)
         tilgangService.validerHarSaksbehandlerrolle()
         try {
@@ -59,34 +60,44 @@ class VurderingController(
     }
 
     @PostMapping("nullstill")
-    fun nullstillVilkår(@RequestBody request: OppdaterVilkårsvurderingDto): Ressurs<VilkårsvurderingDto> {
+    fun nullstillVilkår(
+        @RequestBody request: OppdaterVilkårsvurderingDto,
+    ): Ressurs<VilkårsvurderingDto> {
         tilgangService.validerTilgangTilBehandling(request.behandlingId, AuditLoggerEvent.DELETE)
         tilgangService.validerHarSaksbehandlerrolle()
         return Ressurs.success(vurderingStegService.nullstillVilkår(request))
     }
 
     @PostMapping("ikkevurder")
-    fun settVilkårTilSkalIkkeVurderes(@RequestBody request: OppdaterVilkårsvurderingDto): Ressurs<VilkårsvurderingDto> {
+    fun settVilkårTilSkalIkkeVurderes(
+        @RequestBody request: OppdaterVilkårsvurderingDto,
+    ): Ressurs<VilkårsvurderingDto> {
         tilgangService.validerTilgangTilBehandling(request.behandlingId, AuditLoggerEvent.UPDATE)
         tilgangService.validerHarSaksbehandlerrolle()
         return Ressurs.success(vurderingStegService.settVilkårTilSkalIkkeVurderes(request))
     }
 
     @GetMapping("{behandlingId}/vilkar")
-    fun getVilkår(@PathVariable behandlingId: UUID): Ressurs<VilkårDto> {
+    fun getVilkår(
+        @PathVariable behandlingId: UUID,
+    ): Ressurs<VilkårDto> {
         tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.ACCESS)
         return Ressurs.success(vurderingService.hentOpprettEllerOppdaterVurderinger(behandlingId))
     }
 
     @GetMapping("{behandlingId}/oppdater")
-    fun oppdaterRegisterdata(@PathVariable behandlingId: UUID): Ressurs<VilkårDto> {
+    fun oppdaterRegisterdata(
+        @PathVariable behandlingId: UUID,
+    ): Ressurs<VilkårDto> {
         tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.UPDATE)
         tilgangService.validerHarSaksbehandlerrolle()
         return Ressurs.success(vurderingService.oppdaterGrunnlagsdataOgHentEllerOpprettVurderinger(behandlingId))
     }
 
     @PostMapping("gjenbruk")
-    fun gjenbrukVilkår(@RequestBody request: GjenbrukVilkårsvurderingerDto): Ressurs<VilkårDto> {
+    fun gjenbrukVilkår(
+        @RequestBody request: GjenbrukVilkårsvurderingerDto,
+    ): Ressurs<VilkårDto> {
         tilgangService.validerTilgangTilBehandling(request.kopierBehandlingId, AuditLoggerEvent.ACCESS)
         tilgangService.validerTilgangTilBehandling(request.behandlingId, AuditLoggerEvent.UPDATE)
         tilgangService.validerHarSaksbehandlerrolle()

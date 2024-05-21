@@ -19,7 +19,6 @@ class GOmregningTaskServiceScheduler(
     private val gOmregningTaskService: GOmregningTaskService,
     private val featureToggleService: FeatureToggleService,
 ) {
-
     val logger: Logger = LoggerFactory.getLogger(javaClass)
 
     @Scheduled(cron = "\${G_OMREGNING_CRON_EXPRESSION}")
@@ -36,7 +35,6 @@ class GOmregningTaskService(
     private val gOmregningTask: GOmregningTask,
     private val featureToggleService: FeatureToggleService,
 ) {
-
     val logger: Logger = LoggerFactory.getLogger(javaClass)
 
     fun opprettGOmregningTaskForBehandlingerMedUtdatertG(): Int {
@@ -62,7 +60,8 @@ class GOmregningTaskService(
         return fagsakIder.size
     }
 
-    private fun finnFagsakIder(): List<UUID> = fagsakRepository.finnFerdigstilteFagsakerMedUtdatertGBelop(
-        nyesteGrunnbeløpGyldigFraOgMed.atDay(1),
-    )
+    private fun finnFagsakIder(): List<UUID> =
+        fagsakRepository.finnFerdigstilteFagsakerMedUtdatertGBelop(
+            nyesteGrunnbeløpGyldigFraOgMed.atDay(1),
+        )
 }

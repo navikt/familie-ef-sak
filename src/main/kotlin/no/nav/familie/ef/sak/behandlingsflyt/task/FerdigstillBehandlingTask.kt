@@ -22,7 +22,6 @@ class FerdigstillBehandlingTask(
     private val stegService: StegService,
     private val behandlingService: BehandlingService,
 ) : AsyncTaskStep {
-
     override fun doTask(task: Task) {
         val behandlingId = UUID.fromString(task.payload)
         val behandling = behandlingService.hentSaksbehandling(behandlingId)
@@ -30,14 +29,14 @@ class FerdigstillBehandlingTask(
     }
 
     companion object {
-
         fun opprettTask(saksbehandling: Saksbehandling): Task =
             Task(
                 type = TYPE,
                 payload = saksbehandling.id.toString(),
-                properties = Properties().apply {
-                    this["behandlingId"] = saksbehandling.id.toString()
-                },
+                properties =
+                    Properties().apply {
+                        this["behandlingId"] = saksbehandling.id.toString()
+                    },
             )
 
         const val TYPE = "ferdigstillBehandling"

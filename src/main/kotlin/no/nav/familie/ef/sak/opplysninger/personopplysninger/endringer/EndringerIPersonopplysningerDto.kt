@@ -22,22 +22,22 @@ data class Endringer(
     val oppholdstillatelse: EndringUtenDetaljer = Endring(),
     val vergemål: EndringUtenDetaljer = Endring(),
 ) {
-
-    val harEndringer = listOf(
-        folkeregisterpersonstatus,
-        fødselsdato,
-        dødsdato,
-        statsborgerskap,
-        sivilstand,
-        adresse,
-        fullmakt,
-        barn,
-        annenForelder,
-        innflyttingTilNorge,
-        utflyttingFraNorge,
-        oppholdstillatelse,
-        vergemål,
-    ).any { it.harEndringer }
+    val harEndringer =
+        listOf(
+            folkeregisterpersonstatus,
+            fødselsdato,
+            dødsdato,
+            statsborgerskap,
+            sivilstand,
+            adresse,
+            fullmakt,
+            barn,
+            annenForelder,
+            innflyttingTilNorge,
+            utflyttingFraNorge,
+            oppholdstillatelse,
+            vergemål,
+        ).any { it.harEndringer }
 
     fun felterMedEndringerString(): String {
         return listOf(

@@ -46,10 +46,11 @@ internal class BrevMellomlagerControllerTest : OppslagSpringRunnerTest() {
         assertThat(respons.body?.data?.brevtype).isEqualTo(Brevtype.SANITYBREV)
     }
 
-    private fun mottakere() = BrevmottakereDto(
-        personer = listOf(BrevmottakerPerson("12345678901", "Hei", MottakerRolle.VERGE)),
-        organisasjoner = emptyList(),
-    )
+    private fun mottakere() =
+        BrevmottakereDto(
+            personer = listOf(BrevmottakerPerson("12345678901", "Hei", MottakerRolle.VERGE)),
+            organisasjoner = emptyList(),
+        )
 
     private fun frittståendeSanitybrevDto(
         tittel: String = "tittel123",
@@ -62,7 +63,10 @@ internal class BrevMellomlagerControllerTest : OppslagSpringRunnerTest() {
         )
     }
 
-    private fun mellomlagreSanitybrev(fagsakId: UUID, mellomlagreBrevRequestDto: MellomlagreBrevRequestDto): ResponseEntity<Ressurs<UUID>> {
+    private fun mellomlagreSanitybrev(
+        fagsakId: UUID,
+        mellomlagreBrevRequestDto: MellomlagreBrevRequestDto,
+    ): ResponseEntity<Ressurs<UUID>> {
         return restTemplate.exchange(
             localhost("/api/brev/mellomlager/fagsak/$fagsakId"),
             HttpMethod.POST,

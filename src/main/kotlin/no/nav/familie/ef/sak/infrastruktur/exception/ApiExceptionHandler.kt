@@ -16,7 +16,6 @@ import java.util.concurrent.TimeoutException
 @Suppress("unused")
 @ControllerAdvice
 class ApiExceptionHandler(val featureToggleService: FeatureToggleService) {
-
     private val logger = LoggerFactory.getLogger(ApiExceptionHandler::class.java)
     private val secureLogger = LoggerFactory.getLogger("secureLogger")
 
@@ -39,10 +38,11 @@ class ApiExceptionHandler(val featureToggleService: FeatureToggleService) {
             .body(Ressurs.failure(errorMessage = "Uventet feil", frontendFeilmelding = "En uventet feil oppstod."))
     }
 
-    private fun lagTimeoutfeilRessurs(): Ressurs<Nothing> = Ressurs.failure(
-        errorMessage = "Timeout feil",
-        frontendFeilmelding = "Kommunikasjonsproblemer med andre systemer - prøv igjen",
-    )
+    private fun lagTimeoutfeilRessurs(): Ressurs<Nothing> =
+        Ressurs.failure(
+            errorMessage = "Timeout feil",
+            frontendFeilmelding = "Kommunikasjonsproblemer med andre systemer - prøv igjen",
+        )
 
     @ExceptionHandler(JwtTokenMissingException::class)
     fun handleJwtTokenMissingException(jwtTokenMissingException: JwtTokenMissingException): ResponseEntity<Ressurs<Nothing>> {
@@ -127,11 +127,12 @@ class ApiExceptionHandler(val featureToggleService: FeatureToggleService) {
     }
 
     fun finnMetodeSomFeiler(e: Throwable): String {
-        val firstElement = e.stackTrace.firstOrNull {
-            it.className.startsWith("no.nav.familie.ef.sak") &&
-                !it.className.contains("$") &&
-                !it.className.contains("InsertUpdateRepositoryImpl")
-        }
+        val firstElement =
+            e.stackTrace.firstOrNull {
+                it.className.startsWith("no.nav.familie.ef.sak") &&
+                    !it.className.contains("$") &&
+                    !it.className.contains("InsertUpdateRepositoryImpl")
+            }
         if (firstElement != null) {
             val className = firstElement.className.split(".").lastOrNull()
             return "$className::${firstElement.methodName}(${firstElement.lineNumber})"

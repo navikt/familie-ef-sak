@@ -16,14 +16,17 @@ class AvstemmingService(
     private val iverksettClient: IverksettClient,
     private val tilkjentYtelseService: TilkjentYtelseService,
 ) {
-
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    fun konsistensavstemOppdrag(stønadstype: StønadType, avstemmingstidspunkt: LocalDateTime) {
+    fun konsistensavstemOppdrag(
+        stønadstype: StønadType,
+        avstemmingstidspunkt: LocalDateTime,
+    ) {
         val emptyDto = KonsistensavstemmingDto(stønadstype, emptyList(), avstemmingstidspunkt)
         val datoForAvstemming = avstemmingstidspunkt.toLocalDate()
-        val tilkjenteYtelser = tilkjentYtelseService
-            .finnTilkjentYtelserTilKonsistensavstemming(datoForAvstemming = datoForAvstemming, stønadstype = stønadstype)
+        val tilkjenteYtelser =
+            tilkjentYtelseService
+                .finnTilkjentYtelserTilKonsistensavstemming(datoForAvstemming = datoForAvstemming, stønadstype = stønadstype)
         val transaksjonId = UUID.randomUUID()
         val chunks = tilkjenteYtelser.chunked(1000)
         loggKonsistensavstemming(stønadstype, tilkjenteYtelser, transaksjonId, chunks.size)

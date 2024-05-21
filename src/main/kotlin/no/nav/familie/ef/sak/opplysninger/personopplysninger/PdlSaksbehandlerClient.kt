@@ -24,20 +24,22 @@ class PdlSaksbehandlerClient(
     @Qualifier("azureOnBehalfOf") restTemplate: RestOperations,
 ) :
     AbstractRestClient(restTemplate, "pdl.personinfo.saksbehandler") {
-
     fun søkPersonerMedSammeAdresse(søkeKriterier: List<SøkeKriterier>): PersonSøkResultat {
-        val pdlPersonSøkRequest = PdlPersonSøkRequest(
-            variables = PdlPersonSøkRequestVariables(
-                paging = Paging(1, 30),
-                criteria = søkeKriterier,
-            ),
-            query = PdlConfig.søkPersonQuery,
-        )
-        val pdlResponse: PdlResponse<PersonSøk> = postForEntity(
-            pdlConfig.pdlUri,
-            pdlPersonSøkRequest,
-            httpHeaders(),
-        )
+        val pdlPersonSøkRequest =
+            PdlPersonSøkRequest(
+                variables =
+                    PdlPersonSøkRequestVariables(
+                        paging = Paging(1, 30),
+                        criteria = søkeKriterier,
+                    ),
+                query = PdlConfig.søkPersonQuery,
+            )
+        val pdlResponse: PdlResponse<PersonSøk> =
+            postForEntity(
+                pdlConfig.pdlUri,
+                pdlPersonSøkRequest,
+                httpHeaders(),
+            )
         return feilsjekkOgReturnerData(null, pdlResponse) { it.sokPerson }
     }
 

@@ -17,7 +17,6 @@ import java.time.format.DateTimeFormatter
 @RequestMapping(path = ["/api/oppgaver-for-terminbarn"])
 @ProtectedWithClaims(issuer = "azuread")
 class InitForberedOppgaverForTerminBarnTaskController(private val taskService: TaskService, private val tilgangService: TilgangService) {
-
     @PostMapping("/initialiser")
     fun opprettTask(): ResponseEntity<Unit> {
         tilgangService.validerHarForvalterrolle()

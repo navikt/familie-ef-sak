@@ -10,7 +10,6 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 
 internal class InnflyttingUtflyttingMapperTest {
-
     private val mapper = InnflyttingUtflyttingMapper(KodeverkServiceMock().kodeverkService())
     private val dato = LocalDate.of(2021, 1, 1)
 
@@ -65,10 +64,11 @@ internal class InnflyttingUtflyttingMapperTest {
         InnflyttingTilNorge(
             fraflyttingsland = "SWE",
             fraflyttingsstedIUtlandet = "Sted",
-            folkeregistermetadata = Folkeregistermetadata(
-                gyldighetstidspunkt = gyldighetstidspunkt?.atStartOfDay(),
-                opphørstidspunkt = LocalDateTime.now(),
-            ),
+            folkeregistermetadata =
+                Folkeregistermetadata(
+                    gyldighetstidspunkt = gyldighetstidspunkt?.atStartOfDay(),
+                    opphørstidspunkt = LocalDateTime.now(),
+                ),
         )
 
     private fun lagUtflytting(utflyttingsdato: LocalDate? = null) =
@@ -76,9 +76,10 @@ internal class InnflyttingUtflyttingMapperTest {
             tilflyttingsland = "SWE",
             tilflyttingsstedIUtlandet = "Sted",
             utflyttingsdato = utflyttingsdato,
-            folkeregistermetadata = Folkeregistermetadata(
-                gyldighetstidspunkt = null,
-                opphørstidspunkt = null,
-            ),
+            folkeregistermetadata =
+                Folkeregistermetadata(
+                    gyldighetstidspunkt = null,
+                    opphørstidspunkt = null,
+                ),
         )
 }

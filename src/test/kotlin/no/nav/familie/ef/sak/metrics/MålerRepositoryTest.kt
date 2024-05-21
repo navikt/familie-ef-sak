@@ -38,7 +38,6 @@ import java.time.YearMonth
 import java.time.temporal.IsoFields
 
 class MålerRepositoryTest : OppslagSpringRunnerTest() {
-
     @Autowired
     lateinit var målerRepository: MålerRepository
 
@@ -198,7 +197,10 @@ class MålerRepositoryTest : OppslagSpringRunnerTest() {
         assertThat(nesteMåned.belop).isEqualTo(3000)
     }
 
-    private fun opprettFerdigstiltBehandling(fagsak: Fagsak, opprettetTid: LocalDateTime = LocalDateTime.now()) =
+    private fun opprettFerdigstiltBehandling(
+        fagsak: Fagsak,
+        opprettetTid: LocalDateTime = LocalDateTime.now(),
+    ) =
         behandlingRepository.insert(
             behandling(
                 fagsak,
@@ -208,7 +210,10 @@ class MålerRepositoryTest : OppslagSpringRunnerTest() {
             ),
         )
 
-    private fun lagreTilkjentYtelse(behandling: Behandling, vararg andelTilkjentYtelse: AndelTilkjentYtelse) {
+    private fun lagreTilkjentYtelse(
+        behandling: Behandling,
+        vararg andelTilkjentYtelse: AndelTilkjentYtelse,
+    ) {
         val andeler = andelTilkjentYtelse.map { it.copy(kildeBehandlingId = behandling.id) }.toList()
         tilkjentYtelseRepository.insert(lagTilkjentYtelse(andeler, behandlingId = behandling.id))
     }

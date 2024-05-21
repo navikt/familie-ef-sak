@@ -17,18 +17,18 @@ class VedleggService(
     private val fagsakPersonService: FagsakPersonService,
     private val journalpostService: JournalpostService,
 ) {
-
     fun finnJournalposter(behandlingId: UUID): JournalposterDto {
         val behandlingsjournalposter = behandlingService.hentBehandlingsjournalposter(behandlingId)
         val journalposter = finnJournalposter(behandlingId, behandlingsjournalposter)
 
-        val dokumentinfoDtoList = journalposter
-            .flatMap { journalpost -> journalpost.dokumenter?.map { tilDokumentInfoDto(it, journalpost) } ?: emptyList() }
-            .partition { dokumentInfoDto ->
-                behandlingsjournalposter.any {
-                    it.journalpostId == dokumentInfoDto.journalpostId
+        val dokumentinfoDtoList =
+            journalposter
+                .flatMap { journalpost -> journalpost.dokumenter?.map { tilDokumentInfoDto(it, journalpost) } ?: emptyList() }
+                .partition { dokumentInfoDto ->
+                    behandlingsjournalposter.any {
+                        it.journalpostId == dokumentInfoDto.journalpostId
+                    }
                 }
-            }
 
         return JournalposterDto(
             dokumenterKnyttetTilBehandlingen = dokumentinfoDtoList.first,
@@ -53,10 +53,11 @@ class VedleggService(
 
     fun finnVedleggForVedleggRequest(vedleggRequest: VedleggRequest): List<DokumentinfoDto> {
         val aktivIdent = fagsakPersonService.hentAktivIdent(vedleggRequest.fagsakPersonId)
-        val journalposter = journalpostService.finnJournalposterForVedleggRequest(
-            personIdent = aktivIdent,
-            vedleggRequest,
-        )
+        val journalposter =
+            journalpostService.finnJournalposterForVedleggRequest(
+                personIdent = aktivIdent,
+                vedleggRequest,
+            )
         return journalposter.flatMap { journalpost -> journalpost.dokumenter?.map { tilDokumentInfoDto(it, journalpost) } ?: emptyList() }
     }
 

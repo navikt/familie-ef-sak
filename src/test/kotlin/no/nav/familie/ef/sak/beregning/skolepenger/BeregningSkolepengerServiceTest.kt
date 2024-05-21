@@ -27,7 +27,6 @@ import java.time.YearMonth
 import java.util.UUID
 
 internal class BeregningSkolepengerServiceTest {
-
     private val behandlingService = mockk<BehandlingService>()
     private val vedtakService = mockk<VedtakService>()
     private val service = BeregningSkolepengerService(behandlingService, vedtakService)
@@ -89,7 +88,6 @@ internal class BeregningSkolepengerServiceTest {
 
     @Nested
     inner class Skoleårsvalidering {
-
         @Test
         internal fun `ulike skoleår i fra og til er ikke gyldig`() {
             val delårsperiode = delårsperiode(til = YearMonth.of(2022, 9))
@@ -103,10 +101,11 @@ internal class BeregningSkolepengerServiceTest {
         @Test
         internal fun `ulike skoleår i ulike delårperioder er ikke gyldig`() {
             val delårsperiode1 = delårsperiode()
-            val delårsperiode2 = delårsperiode(
-                fra = defaultFra.plusYears(1),
-                til = defaultTil.plusYears(1),
-            )
+            val delårsperiode2 =
+                delårsperiode(
+                    fra = defaultFra.plusYears(1),
+                    til = defaultTil.plusYears(1),
+                )
             val skoleårsperioder =
                 listOf(SkoleårsperiodeSkolepengerDto(listOf(delårsperiode1, delårsperiode2), listOf(utgift())))
             assertThatThrownBy { service.beregnYtelse(skoleårsperioder, førstegangsbehandling.id) }
@@ -128,9 +127,10 @@ internal class BeregningSkolepengerServiceTest {
 
         @Test
         internal fun `overlappende skoleår er ikke gyldig`() {
-            val skoleårsperioder = listOf(
-                SkoleårsperiodeSkolepengerDto(listOf(delårsperiode(), delårsperiode()), listOf(utgift())),
-            )
+            val skoleårsperioder =
+                listOf(
+                    SkoleårsperiodeSkolepengerDto(listOf(delårsperiode(), delårsperiode()), listOf(utgift())),
+                )
 
             assertThatThrownBy { service.beregnYtelse(skoleårsperioder, førstegangsbehandling.id) }
                 .isInstanceOf(ApiFeil::class.java)
@@ -140,9 +140,10 @@ internal class BeregningSkolepengerServiceTest {
         @Test
         internal fun `utgifter med samme ider er ikke gyldig`() {
             val utgift = utgift()
-            val skoleårsperioder = listOf(
-                SkoleårsperiodeSkolepengerDto(listOf(delårsperiode()), listOf(utgift, utgift)),
-            )
+            val skoleårsperioder =
+                listOf(
+                    SkoleårsperiodeSkolepengerDto(listOf(delårsperiode()), listOf(utgift, utgift)),
+                )
 
             assertThatThrownBy { service.beregnYtelse(skoleårsperioder, førstegangsbehandling.id) }
                 .isInstanceOf(Feil::class.java) // Dette er ikke brukerfeil
@@ -154,9 +155,10 @@ internal class BeregningSkolepengerServiceTest {
             val delårsperiode1 = delårsperiode(til = defaultFra)
             val delårsperiode2 =
                 delårsperiode(fra = defaultFra.plusMonths(1), studietype = SkolepengerStudietype.VIDEREGÅENDE)
-            val skoleårsperioder = listOf(
-                SkoleårsperiodeSkolepengerDto(listOf(delårsperiode1, delårsperiode2), listOf(utgift())),
-            )
+            val skoleårsperioder =
+                listOf(
+                    SkoleårsperiodeSkolepengerDto(listOf(delårsperiode1, delårsperiode2), listOf(utgift())),
+                )
 
             assertThatThrownBy { service.beregnYtelse(skoleårsperioder, førstegangsbehandling.id) }
                 .isInstanceOf(Feil::class.java) // Dette burde vært håndtert i frontend
@@ -167,20 +169,22 @@ internal class BeregningSkolepengerServiceTest {
         internal fun `skal kunne flytte på ordningen av skoleårsperioder`() {
             val utgift = utgift()
             val utgift2 = utgift()
-            val tidligerePerioder = listOf(
-                SkoleårsperiodeSkolepengerDto(listOf(delårsperiode()), listOf(utgift)),
-                SkoleårsperiodeSkolepengerDto(
-                    listOf(delårsperiode(fra = defaultFra.plusYears(1), til = defaultTil.plusYears(1))),
-                    listOf(utgift2),
-                ),
-            )
-            val skoleårsperioder = listOf(
-                SkoleårsperiodeSkolepengerDto(
-                    listOf(delårsperiode(fra = defaultFra.plusYears(1), til = defaultTil.plusYears(1))),
-                    listOf(utgift2),
-                ),
-                SkoleårsperiodeSkolepengerDto(listOf(delårsperiode()), listOf(utgift)),
-            )
+            val tidligerePerioder =
+                listOf(
+                    SkoleårsperiodeSkolepengerDto(listOf(delårsperiode()), listOf(utgift)),
+                    SkoleårsperiodeSkolepengerDto(
+                        listOf(delårsperiode(fra = defaultFra.plusYears(1), til = defaultTil.plusYears(1))),
+                        listOf(utgift2),
+                    ),
+                )
+            val skoleårsperioder =
+                listOf(
+                    SkoleårsperiodeSkolepengerDto(
+                        listOf(delårsperiode(fra = defaultFra.plusYears(1), til = defaultTil.plusYears(1))),
+                        listOf(utgift2),
+                    ),
+                    SkoleårsperiodeSkolepengerDto(listOf(delårsperiode()), listOf(utgift)),
+                )
 
             every { vedtakService.hentVedtak(førstegangsbehandling.id) } returns vedtak(tidligerePerioder)
 
@@ -193,7 +197,6 @@ internal class BeregningSkolepengerServiceTest {
 
     @Nested
     inner class ValideringAvBeløp {
-
         @Test
         internal fun `stønad kan ikke være under 0kr`() {
             val periode = SkoleårsperiodeSkolepengerDto(listOf(delårsperiode()), listOf(utgift(stønad = -1)))
@@ -238,7 +241,6 @@ internal class BeregningSkolepengerServiceTest {
 
     @Nested
     inner class Revurdering {
-
         @Test
         internal fun `revurdering uten endringer`() {
             val utgift = utgift()
@@ -287,7 +289,6 @@ internal class BeregningSkolepengerServiceTest {
 
     @Nested
     inner class OpphørValiderFinnesEndringer {
-
         @Test
         internal fun `ingen endringer kaster feil`() {
             val utgift = utgift()
@@ -315,13 +316,14 @@ internal class BeregningSkolepengerServiceTest {
         @Test
         internal fun `skal oppdage hvis en skoleårsperioder er fjernet`() {
             val utgift = utgift()
-            val tidligerePerioder = listOf(
-                SkoleårsperiodeSkolepengerDto(listOf(delårsperiode()), listOf(utgift)),
-                SkoleårsperiodeSkolepengerDto(
-                    listOf(delårsperiode(fra = defaultFra.plusYears(1), til = defaultTil.plusYears(1))),
-                    listOf(utgift()),
-                ),
-            )
+            val tidligerePerioder =
+                listOf(
+                    SkoleårsperiodeSkolepengerDto(listOf(delårsperiode()), listOf(utgift)),
+                    SkoleårsperiodeSkolepengerDto(
+                        listOf(delårsperiode(fra = defaultFra.plusYears(1), til = defaultTil.plusYears(1))),
+                        listOf(utgift()),
+                    ),
+                )
             val skoleårsperioder = listOf(SkoleårsperiodeSkolepengerDto(listOf(delårsperiode()), listOf(utgift)))
 
             every { vedtakService.hentVedtak(førstegangsbehandling.id) } returns vedtak(tidligerePerioder)
@@ -334,15 +336,17 @@ internal class BeregningSkolepengerServiceTest {
         @Test
         internal fun `skal oppdage hvis alle delårsperiode er fjernet`() {
             val utgift = utgift()
-            val tidligerePerioder = listOf(
-                SkoleårsperiodeSkolepengerDto(
-                    listOf(delårsperiode(til = defaultFra), delårsperiode(fra = defaultTil)),
-                    listOf(utgift),
-                ),
-            )
-            val skoleårsperioder = listOf(
-                SkoleårsperiodeSkolepengerDto(listOf(delårsperiode(til = defaultFra)), listOf(utgift.copy())),
-            )
+            val tidligerePerioder =
+                listOf(
+                    SkoleårsperiodeSkolepengerDto(
+                        listOf(delårsperiode(til = defaultFra), delårsperiode(fra = defaultTil)),
+                        listOf(utgift),
+                    ),
+                )
+            val skoleårsperioder =
+                listOf(
+                    SkoleårsperiodeSkolepengerDto(listOf(delårsperiode(til = defaultFra)), listOf(utgift.copy())),
+                )
 
             every { vedtakService.hentVedtak(førstegangsbehandling.id) } returns vedtak(tidligerePerioder)
 
@@ -355,12 +359,14 @@ internal class BeregningSkolepengerServiceTest {
         internal fun `skal oppdage hvis en utgift er fjernet`() {
             val utgift1 = utgift()
             val utgift2 = utgift()
-            val tidligerePerioder = listOf(
-                SkoleårsperiodeSkolepengerDto(listOf(delårsperiode()), listOf(utgift1, utgift2)),
-            )
-            val skoleårsperioder = listOf(
-                SkoleårsperiodeSkolepengerDto(listOf(delårsperiode()), listOf(utgift1)),
-            )
+            val tidligerePerioder =
+                listOf(
+                    SkoleårsperiodeSkolepengerDto(listOf(delårsperiode()), listOf(utgift1, utgift2)),
+                )
+            val skoleårsperioder =
+                listOf(
+                    SkoleårsperiodeSkolepengerDto(listOf(delårsperiode()), listOf(utgift1)),
+                )
 
             every { vedtakService.hentVedtak(førstegangsbehandling.id) } returns vedtak(tidligerePerioder)
 
@@ -372,17 +378,17 @@ internal class BeregningSkolepengerServiceTest {
 
     @Nested
     inner class OpphørValiderIngenNyePerioderFinnes {
-
         @Test
         internal fun `skal oppdage en ny skoleårsperioder`() {
             val tidligerePerioder = listOf(SkoleårsperiodeSkolepengerDto(listOf(delårsperiode()), listOf(utgift())))
-            val skoleårsperioder = listOf(
-                SkoleårsperiodeSkolepengerDto(listOf(delårsperiode()), listOf(utgift())),
-                SkoleårsperiodeSkolepengerDto(
-                    listOf(delårsperiode(fra = defaultFra.plusYears(1), til = defaultTil.plusYears(1))),
-                    listOf(utgift()),
-                ),
-            )
+            val skoleårsperioder =
+                listOf(
+                    SkoleårsperiodeSkolepengerDto(listOf(delårsperiode()), listOf(utgift())),
+                    SkoleårsperiodeSkolepengerDto(
+                        listOf(delårsperiode(fra = defaultFra.plusYears(1), til = defaultTil.plusYears(1))),
+                        listOf(utgift()),
+                    ),
+                )
 
             every { vedtakService.hentVedtak(førstegangsbehandling.id) } returns vedtak(tidligerePerioder)
 
@@ -393,18 +399,20 @@ internal class BeregningSkolepengerServiceTest {
 
         @Test
         internal fun `skal oppdage hvis en delårsperiode er lagt til`() {
-            val tidligerePerioder = listOf(
-                SkoleårsperiodeSkolepengerDto(
-                    listOf(delårsperiode(til = defaultFra)),
-                    listOf(utgift()),
-                ),
-            )
-            val skoleårsperioder = listOf(
-                SkoleårsperiodeSkolepengerDto(
-                    listOf(delårsperiode(til = defaultFra), delårsperiode(fra = defaultTil)),
-                    listOf(utgift()),
-                ),
-            )
+            val tidligerePerioder =
+                listOf(
+                    SkoleårsperiodeSkolepengerDto(
+                        listOf(delårsperiode(til = defaultFra)),
+                        listOf(utgift()),
+                    ),
+                )
+            val skoleårsperioder =
+                listOf(
+                    SkoleårsperiodeSkolepengerDto(
+                        listOf(delårsperiode(til = defaultFra), delårsperiode(fra = defaultTil)),
+                        listOf(utgift()),
+                    ),
+                )
 
             every { vedtakService.hentVedtak(førstegangsbehandling.id) } returns vedtak(tidligerePerioder)
 
@@ -416,15 +424,17 @@ internal class BeregningSkolepengerServiceTest {
         @Test
         internal fun `skal tillate endringer på delårsperioder`() {
             val utgift = utgift()
-            val tidligerePerioder = listOf(
-                SkoleårsperiodeSkolepengerDto(
-                    listOf(delårsperiode()),
-                    listOf(utgift),
-                ),
-            )
-            val skoleårsperioder = listOf(
-                SkoleårsperiodeSkolepengerDto(listOf(delårsperiode(til = defaultFra)), listOf(utgift)),
-            )
+            val tidligerePerioder =
+                listOf(
+                    SkoleårsperiodeSkolepengerDto(
+                        listOf(delårsperiode()),
+                        listOf(utgift),
+                    ),
+                )
+            val skoleårsperioder =
+                listOf(
+                    SkoleårsperiodeSkolepengerDto(listOf(delårsperiode(til = defaultFra)), listOf(utgift)),
+                )
 
             every { vedtakService.hentVedtak(førstegangsbehandling.id) } returns vedtak(tidligerePerioder)
 
@@ -435,18 +445,20 @@ internal class BeregningSkolepengerServiceTest {
 
         @Test
         internal fun `skal oppdage hvis en utgift er lagt til`() {
-            val tidligerePerioder = listOf(
-                SkoleårsperiodeSkolepengerDto(
-                    listOf(delårsperiode()),
-                    listOf(utgift()),
-                ),
-            )
-            val skoleårsperioder = listOf(
-                SkoleårsperiodeSkolepengerDto(
-                    listOf(delårsperiode()),
-                    listOf(utgift(), utgift()),
-                ),
-            )
+            val tidligerePerioder =
+                listOf(
+                    SkoleårsperiodeSkolepengerDto(
+                        listOf(delårsperiode()),
+                        listOf(utgift()),
+                    ),
+                )
+            val skoleårsperioder =
+                listOf(
+                    SkoleårsperiodeSkolepengerDto(
+                        listOf(delårsperiode()),
+                        listOf(utgift(), utgift()),
+                    ),
+                )
 
             every { vedtakService.hentVedtak(førstegangsbehandling.id) } returns vedtak(tidligerePerioder)
 
@@ -457,15 +469,17 @@ internal class BeregningSkolepengerServiceTest {
 
         @Test
         internal fun `skal oppdage hvis en utgiftsperiode er endret`() {
-            val tidligerePerioder = listOf(
-                SkoleårsperiodeSkolepengerDto(
-                    listOf(delårsperiode()),
-                    listOf(utgift()),
-                ),
-            )
-            val skoleårsperioder = listOf(
-                SkoleårsperiodeSkolepengerDto(listOf(delårsperiode()), listOf(utgift(stønad = 1))),
-            )
+            val tidligerePerioder =
+                listOf(
+                    SkoleårsperiodeSkolepengerDto(
+                        listOf(delårsperiode()),
+                        listOf(utgift()),
+                    ),
+                )
+            val skoleårsperioder =
+                listOf(
+                    SkoleårsperiodeSkolepengerDto(listOf(delårsperiode()), listOf(utgift(stønad = 1))),
+                )
 
             every { vedtakService.hentVedtak(førstegangsbehandling.id) } returns vedtak(tidligerePerioder)
 

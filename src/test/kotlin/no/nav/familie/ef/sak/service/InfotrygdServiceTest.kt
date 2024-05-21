@@ -20,7 +20,6 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
 internal class InfotrygdServiceTest {
-
     private val personService = mockk<PersonService>()
     private val infotrygdReplikaClient = mockk<InfotrygdReplikaClient>()
     private val infotrygdService = InfotrygdService(infotrygdReplikaClient, personService)
@@ -66,7 +65,10 @@ internal class InfotrygdServiceTest {
 
     @Test
     internal fun `finnSaker - skal sortere de vedtaksdato desc, mottattDato desc`() {
-        fun sak(vedtaksdato: LocalDate?, mottattDato: LocalDate?) =
+        fun sak(
+            vedtaksdato: LocalDate?,
+            mottattDato: LocalDate?,
+        ) =
             InfotrygdSak(
                 "1",
                 resultat = InfotrygdSakResultat.INNVILGET,

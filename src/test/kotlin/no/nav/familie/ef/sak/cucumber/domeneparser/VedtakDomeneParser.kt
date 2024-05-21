@@ -39,7 +39,6 @@ import java.time.YearMonth
 import java.util.UUID
 
 object VedtakDomeneParser {
-
     fun mapVedtakOvergangsstønad(dataTable: DataTable): List<Vedtak> {
         return mapVedtak(dataTable) { vedtak, rader ->
             if (vedtak.resultatType != ResultatType.OPPHØRT) {
@@ -64,16 +63,17 @@ object VedtakDomeneParser {
 
     fun mapVedtakForBarnetilsyn(dataTable: DataTable): List<Vedtak> {
         return mapVedtak(dataTable) { vedtak, rader ->
-            val perioder = when (vedtak.resultatType) {
-                ResultatType.INNVILGE -> mapPerioderForBarnetilsyn(vedtak.resultatType, rader)
-                ResultatType.SANKSJONERE -> {
-                    val perioderForBarnetilsyn = mapPerioderForBarnetilsyn(vedtak.resultatType, rader)
-                    validerSanksjon(perioderForBarnetilsyn)
-                    perioderForBarnetilsyn
-                }
+            val perioder =
+                when (vedtak.resultatType) {
+                    ResultatType.INNVILGE -> mapPerioderForBarnetilsyn(vedtak.resultatType, rader)
+                    ResultatType.SANKSJONERE -> {
+                        val perioderForBarnetilsyn = mapPerioderForBarnetilsyn(vedtak.resultatType, rader)
+                        validerSanksjon(perioderForBarnetilsyn)
+                        perioderForBarnetilsyn
+                    }
 
-                else -> emptyList()
-            }
+                    else -> emptyList()
+                }
             vedtak.copy(
                 barnetilsyn = BarnetilsynWrapper(perioder, null),
                 kontantstøtte = KontantstøtteWrapper(emptyList()), // overskreves i egen "Gitt"
@@ -82,39 +82,42 @@ object VedtakDomeneParser {
         }
     }
 
-    fun opphørSkolepengerUtenPerioder(behandlingId: UUID) = Vedtak(
-        resultatType = ResultatType.OPPHØRT,
-        skolepenger = SkolepengerWrapper(emptyList(), null),
-        behandlingId = behandlingId,
-    )
+    fun opphørSkolepengerUtenPerioder(behandlingId: UUID) =
+        Vedtak(
+            resultatType = ResultatType.OPPHØRT,
+            skolepenger = SkolepengerWrapper(emptyList(), null),
+            behandlingId = behandlingId,
+        )
 
     fun mapVedtakForSkolepenger(dataTable: DataTable): List<Vedtak> {
-        val gyldigeKolonner = listOf(
-            Domenebegrep.BEHANDLING_ID,
-            VedtakDomenebegrep.RESULTAT_TYPE,
-            Domenebegrep.FRA_OG_MED_DATO,
-            Domenebegrep.TIL_OG_MED_DATO,
-            VedtakDomenebegrep.ID_UTGIFT,
-            VedtakDomenebegrep.STUDIETYPE,
-            VedtakDomenebegrep.STUDIEBELASTNING,
-            VedtakDomenebegrep.DATO_FAKTURA,
-            VedtakDomenebegrep.UTGIFTER,
-            VedtakDomenebegrep.BELØP,
-        )
+        val gyldigeKolonner =
+            listOf(
+                Domenebegrep.BEHANDLING_ID,
+                VedtakDomenebegrep.RESULTAT_TYPE,
+                Domenebegrep.FRA_OG_MED_DATO,
+                Domenebegrep.TIL_OG_MED_DATO,
+                VedtakDomenebegrep.ID_UTGIFT,
+                VedtakDomenebegrep.STUDIETYPE,
+                VedtakDomenebegrep.STUDIEBELASTNING,
+                VedtakDomenebegrep.DATO_FAKTURA,
+                VedtakDomenebegrep.UTGIFTER,
+                VedtakDomenebegrep.BELØP,
+            )
         return mapVedtak(dataTable, gyldigeKolonner) { vedtak, rader ->
-            val perioder = when (vedtak.resultatType) {
-                ResultatType.OPPHØRT,
-                ResultatType.INNVILGE,
-                -> mapPerioderForSkolepenger(rader)
+            val perioder =
+                when (vedtak.resultatType) {
+                    ResultatType.OPPHØRT,
+                    ResultatType.INNVILGE,
+                    -> mapPerioderForSkolepenger(rader)
 
-                ResultatType.SANKSJONERE -> {
-                    val perioderForBarnetilsyn = mapPerioderForSkolepenger(rader)
-                    validerSanksjonSkolepenger(perioderForBarnetilsyn)
-                    perioderForBarnetilsyn
+                    ResultatType.SANKSJONERE -> {
+                        val perioderForBarnetilsyn = mapPerioderForSkolepenger(rader)
+                        validerSanksjonSkolepenger(perioderForBarnetilsyn)
+                        perioderForBarnetilsyn
+                    }
+
+                    else -> emptyList()
                 }
-
-                else -> emptyList()
-            }
             vedtak.copy(skolepenger = SkolepengerWrapper(perioder, null))
         }
     }
@@ -219,9 +222,10 @@ object VedtakDomeneParser {
         return rader.map { rad ->
             val behandlingId = behandlingIdTilUUID[parseInt(Domenebegrep.BEHANDLING_ID, rad)]!!
             val sanksjonsårsak = sanksjonsårsak(rad, resultatType)
-            val barn = mapBarn(behandlingId, rad) ?: parseValgfriInt(VedtakDomenebegrep.ANTALL_BARN, rad)?.let {
-                IntRange(1, it).map { UUID.randomUUID() }
-            } ?: emptyList()
+            val barn =
+                mapBarn(behandlingId, rad) ?: parseValgfriInt(VedtakDomenebegrep.ANTALL_BARN, rad)?.let {
+                    IntRange(1, it).map { UUID.randomUUID() }
+                } ?: emptyList()
             val periodetype = parsePeriodetypeBarnetilsyn(rad) ?: PeriodetypeBarnetilsyn.ORDINÆR
             val aktivitetstype =
                 parseAktivitetstypeBarnetilsyn(rad) ?: periodetype.takeIf { it == PeriodetypeBarnetilsyn.ORDINÆR }
@@ -244,7 +248,10 @@ object VedtakDomeneParser {
         }
     }
 
-    fun mapBarn(behandlingId: UUID, rad: Map<String, String>): List<UUID>? {
+    fun mapBarn(
+        behandlingId: UUID,
+        rad: Map<String, String>,
+    ): List<UUID>? {
         return parseValgfriString(VedtakDomenebegrep.BARN, rad)?.let { barnListeString ->
             barnListeString.split(",")
                 .map { it.trim() }
@@ -260,12 +267,14 @@ object VedtakDomeneParser {
             val delårsperiode = mapDelårsperiodeSkolepenger(rad, datoFra)
             val utgift = mapSkolepengerUtgift(rad)
 
-            val skoleårsperiode: SkoleårsperiodeSkolepenger = skoleårsperioder
-                .getOrDefault(skoleår, SkoleårsperiodeSkolepenger(emptyList(), emptyList()))
-            skoleårsperioder[skoleår] = skoleårsperiode.copy(
-                perioder = (skoleårsperiode.perioder.toSet() + delårsperiode).toList(),
-                utgiftsperioder = skoleårsperiode.utgiftsperioder + utgift,
-            )
+            val skoleårsperiode: SkoleårsperiodeSkolepenger =
+                skoleårsperioder
+                    .getOrDefault(skoleår, SkoleårsperiodeSkolepenger(emptyList(), emptyList()))
+            skoleårsperioder[skoleår] =
+                skoleårsperiode.copy(
+                    perioder = (skoleårsperiode.perioder.toSet() + delårsperiode).toList(),
+                    utgiftsperioder = skoleårsperiode.utgiftsperioder + utgift,
+                )
         }
         return skoleårsperioder.values.toList()
     }
@@ -284,10 +293,11 @@ object VedtakDomeneParser {
     private fun mapSkolepengerUtgift(rad: Map<String, String>): SkolepengerUtgift {
         return SkolepengerUtgift(
             id = hentUtgiftUUID(parseValgfriInt(VedtakDomenebegrep.ID_UTGIFT, rad) ?: 1),
-            utgiftsdato = parseValgfriÅrMånedEllerDato(
-                VedtakDomenebegrep.DATO_FAKTURA,
-                rad,
-            ).førsteDagenIMånedenEllerDefault(),
+            utgiftsdato =
+                parseValgfriÅrMånedEllerDato(
+                    VedtakDomenebegrep.DATO_FAKTURA,
+                    rad,
+                ).førsteDagenIMånedenEllerDefault(),
             utgifter = parseValgfriInt(VedtakDomenebegrep.UTGIFTER, rad) ?: 0,
             stønad = parseValgfriInt(VedtakDomenebegrep.BELØP, rad) ?: 0,
         )
@@ -298,14 +308,16 @@ object VedtakDomeneParser {
         dataTable: DataTable,
         oppdaterVedtak: (Vedtak, List<PeriodeMedBeløp>) -> Vedtak,
     ): List<Vedtak> {
-        val beløpsperioder = dataTable.forHverBehandling { behandlingId, rader ->
-            behandlingId to rader.map { rad ->
-                PeriodeMedBeløp(
-                    Månedsperiode(parseFraOgMed(rad), parseTilOgMed(rad)),
-                    beløp = parseValgfriInt(VedtakDomenebegrep.BELØP, rad) ?: 0,
-                )
-            }
-        }.toMap()
+        val beløpsperioder =
+            dataTable.forHverBehandling { behandlingId, rader ->
+                behandlingId to
+                    rader.map { rad ->
+                        PeriodeMedBeløp(
+                            Månedsperiode(parseFraOgMed(rad), parseTilOgMed(rad)),
+                            beløp = parseValgfriInt(VedtakDomenebegrep.BELØP, rad) ?: 0,
+                        )
+                    }
+            }.toMap()
         return vedtak.map {
             val perioder = beløpsperioder[it.behandlingId] ?: emptyList()
             oppdaterVedtak(it, perioder)
@@ -325,30 +337,35 @@ object VedtakDomeneParser {
 
     fun mapInntekter(dataTable: DataTable): Map<UUID, InntektWrapper> {
         return dataTable.forHverBehandling { behandlingId, rader ->
-            val inntektsperioder = rader.fold(mutableListOf<Inntektsperiode>()) { acc, rad ->
-                val datoFra = parseFraOgMed(rad)
-                val nyPeriode = acc.lastOrNull()?.periode?.copy(tom = YearMonth.from(datoFra.minusDays(1)))
-                if (nyPeriode != null) {
-                    acc.removeLastOrNull()?.copy(periode = nyPeriode)?.let { acc.add(it) }
-                }
-                acc.add(
-                    Inntektsperiode(
-                        periode = Månedsperiode(datoFra, LocalDate.MAX),
-                        dagsats = BigDecimal(parseValgfriInt(VedtakDomenebegrep.DAGSATS, rad) ?: 0),
-                        månedsinntekt = BigDecimal(parseValgfriInt(VedtakDomenebegrep.MÅNEDSINNTEKT, rad) ?: 0),
-                        inntekt = BigDecimal(parseValgfriInt(VedtakDomenebegrep.INNTEKT, rad) ?: 0),
-                        samordningsfradrag = BigDecimal(
-                            parseValgfriInt(VedtakDomenebegrep.SAMORDNINGSFRADRAG, rad) ?: 0,
+            val inntektsperioder =
+                rader.fold(mutableListOf<Inntektsperiode>()) { acc, rad ->
+                    val datoFra = parseFraOgMed(rad)
+                    val nyPeriode = acc.lastOrNull()?.periode?.copy(tom = YearMonth.from(datoFra.minusDays(1)))
+                    if (nyPeriode != null) {
+                        acc.removeLastOrNull()?.copy(periode = nyPeriode)?.let { acc.add(it) }
+                    }
+                    acc.add(
+                        Inntektsperiode(
+                            periode = Månedsperiode(datoFra, LocalDate.MAX),
+                            dagsats = BigDecimal(parseValgfriInt(VedtakDomenebegrep.DAGSATS, rad) ?: 0),
+                            månedsinntekt = BigDecimal(parseValgfriInt(VedtakDomenebegrep.MÅNEDSINNTEKT, rad) ?: 0),
+                            inntekt = BigDecimal(parseValgfriInt(VedtakDomenebegrep.INNTEKT, rad) ?: 0),
+                            samordningsfradrag =
+                                BigDecimal(
+                                    parseValgfriInt(VedtakDomenebegrep.SAMORDNINGSFRADRAG, rad) ?: 0,
+                                ),
                         ),
-                    ),
-                )
-                acc
-            }
+                    )
+                    acc
+                }
             behandlingId to InntektWrapper(inntektsperioder)
         }.toMap()
     }
 
-    fun mapBehandlingForHistorikkEndring(dataTable: DataTable, stønadstype: StønadType): List<ForventetHistorikk> {
+    fun mapBehandlingForHistorikkEndring(
+        dataTable: DataTable,
+        stønadstype: StønadType,
+    ): List<ForventetHistorikk> {
         return dataTable.asMaps().map {
             BehandlingForHistorikkEndringMapper().mapRad(it, stønadstype)
         }
@@ -377,22 +394,25 @@ object VedtakDomeneParser {
     )
 
     class BehandlingForHistorikkEndringMapper {
-
-        fun mapRad(rad: Map<String, String>, stønadstype: StønadType): ForventetHistorikk {
+        fun mapRad(
+            rad: Map<String, String>,
+            stønadstype: StønadType,
+        ): ForventetHistorikk {
             val erOpphør = erOpphør(stønadstype, rad)
             val erSanksjon = erSanksjon(stønadstype, rad)
             return ForventetHistorikk(
                 behandlingId = behandlingIdTilUUID[parseInt(Domenebegrep.BEHANDLING_ID, rad)]!!,
-                historikkEndring = parseEndringType(rad)?.let { endringType ->
-                    val vedtakstidspunkt =
-                        parseValgfriDato(VedtakDomenebegrep.ENDRET_I_VEDTAKSDATO, rad)?.atStartOfDay()
-                            ?: LocalDateTime.MIN
-                    HistorikkEndring(
-                        type = endringType,
-                        behandlingId = behandlingIdTilUUID[parseInt(VedtakDomenebegrep.ENDRET_I_BEHANDLING_ID, rad)]!!,
-                        vedtakstidspunkt = vedtakstidspunkt,
-                    )
-                },
+                historikkEndring =
+                    parseEndringType(rad)?.let { endringType ->
+                        val vedtakstidspunkt =
+                            parseValgfriDato(VedtakDomenebegrep.ENDRET_I_VEDTAKSDATO, rad)?.atStartOfDay()
+                                ?: LocalDateTime.MIN
+                        HistorikkEndring(
+                            type = endringType,
+                            behandlingId = behandlingIdTilUUID[parseInt(VedtakDomenebegrep.ENDRET_I_BEHANDLING_ID, rad)]!!,
+                            vedtakstidspunkt = vedtakstidspunkt,
+                        )
+                    },
                 stønadFra = parseFraOgMed(rad),
                 stønadTil = parseTilOgMed(rad),
                 inntekt = parseValgfriInt(VedtakDomenebegrep.INNTEKT, rad),
@@ -413,7 +433,10 @@ object VedtakDomeneParser {
             )
         }
 
-        private fun erSanksjon(stønadstype: StønadType, rad: Map<String, String>): Boolean {
+        private fun erSanksjon(
+            stønadstype: StønadType,
+            rad: Map<String, String>,
+        ): Boolean {
             val erSanksjon = parseValgfriBoolean(VedtakDomenebegrep.ER_SANKSJON, rad)
             return when {
                 erSanksjon != null -> erSanksjon
@@ -423,7 +446,10 @@ object VedtakDomeneParser {
             }
         }
 
-        private fun erOpphør(stønadstype: StønadType, rad: Map<String, String>): Boolean {
+        private fun erOpphør(
+            stønadstype: StønadType,
+            rad: Map<String, String>,
+        ): Boolean {
             val erOpphør = parseValgfriBoolean(VedtakDomenebegrep.ER_OPPHØR, rad)
             return when {
                 erOpphør != null -> erOpphør
@@ -437,11 +463,12 @@ object VedtakDomeneParser {
             stønadstype: StønadType,
             rad: Map<String, String>,
             erSanksjon: Boolean,
-        ): PeriodetypeBarnetilsyn? = when {
-            stønadstype != StønadType.BARNETILSYN -> null
-            erSanksjon -> PeriodetypeBarnetilsyn.SANKSJON_1_MND
-            else -> parsePeriodetypeBarnetilsyn(rad) ?: PeriodetypeBarnetilsyn.ORDINÆR
-        }
+        ): PeriodetypeBarnetilsyn? =
+            when {
+                stønadstype != StønadType.BARNETILSYN -> null
+                erSanksjon -> PeriodetypeBarnetilsyn.SANKSJON_1_MND
+                else -> parsePeriodetypeBarnetilsyn(rad) ?: PeriodetypeBarnetilsyn.ORDINÆR
+            }
 
         private fun aktivitetstype(
             stønadstype: StønadType,

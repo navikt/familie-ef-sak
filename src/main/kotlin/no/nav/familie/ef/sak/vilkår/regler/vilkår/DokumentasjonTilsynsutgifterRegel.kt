@@ -13,16 +13,15 @@ class DokumentasjonTilsynsutgifterRegel : Vilkårsregel(
     regler = setOf(HAR_DOKUMENTERTE_TILSYNSUTGIFTER),
     hovedregler = regelIder(HAR_DOKUMENTERTE_TILSYNSUTGIFTER),
 ) {
-
     companion object {
-
         private val HAR_DOKUMENTERTE_TILSYNSUTGIFTER =
             RegelSteg(
                 regelId = RegelId.HAR_DOKUMENTERTE_TILSYNSUTGIFTER,
-                svarMapping = jaNeiSvarRegel(
-                    hvisJa = SluttSvarRegel.OPPFYLT_MED_PÅKREVD_BEGRUNNELSE,
-                    hvisNei = SluttSvarRegel.IKKE_OPPFYLT_MED_PÅKREVD_BEGRUNNELSE,
-                ),
+                svarMapping =
+                    jaNeiSvarRegel(
+                        hvisJa = SluttSvarRegel.OPPFYLT_MED_PÅKREVD_BEGRUNNELSE,
+                        hvisNei = SluttSvarRegel.IKKE_OPPFYLT_MED_PÅKREVD_BEGRUNNELSE,
+                    ),
             )
     }
 }

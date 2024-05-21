@@ -34,7 +34,6 @@ import org.springframework.cache.concurrent.ConcurrentMapCacheManager
 import kotlin.test.assertFailsWith
 
 internal class TilgangServiceTest {
-
     private val personopplysningerIntegrajsonerClient = mockk<PersonopplysningerIntegrasjonerClient>()
     private val behandlingService = mockk<BehandlingService>()
     private val fagsakService = mockk<FagsakService>()
@@ -94,12 +93,13 @@ internal class TilgangServiceTest {
         val tilgangsfeilNavAnsatt = Tilgang(false, "NAV-ansatt")
         every { personopplysningerIntegrajsonerClient.sjekkTilgangTilPersonMedRelasjoner(any()) } returns tilgangsfeilNavAnsatt
 
-        val feil = assertFailsWith<ManglerTilgang> {
-            tilgangService.validerTilgangTilBehandling(
-                behandling.id,
-                AuditLoggerEvent.ACCESS,
-            )
-        }
+        val feil =
+            assertFailsWith<ManglerTilgang> {
+                tilgangService.validerTilgangTilBehandling(
+                    behandling.id,
+                    AuditLoggerEvent.ACCESS,
+                )
+            }
 
         assertThat(feil.frontendFeilmelding).contains(tilgangsfeilNavAnsatt.begrunnelse)
         assertThat(feil.frontendFeilmelding).contains(tilgangsfeilNavAnsatt.utledÅrsakstekst())

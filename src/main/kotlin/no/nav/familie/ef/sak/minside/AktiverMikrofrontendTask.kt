@@ -39,11 +39,12 @@ class AktiverMikrofrontendTask(
     private fun utledFagsakPerson(
         fagsakPersonId: UUID?,
         fagsakId: UUID?,
-    ): FagsakPerson = when {
-        fagsakPersonId != null -> fagsakPersonService.hentPerson(fagsakPersonId)
-        fagsakId != null -> fagsakPersonService.finnFagsakPersonForFagsakId(fagsakId)
-        else -> error("Mangler både fagsakId og fagsakPersonId - kan ikke aktivere mikrofrontend for bruker")
-    }
+    ): FagsakPerson =
+        when {
+            fagsakPersonId != null -> fagsakPersonService.hentPerson(fagsakPersonId)
+            fagsakId != null -> fagsakPersonService.finnFagsakPersonForFagsakId(fagsakId)
+            else -> error("Mangler både fagsakId og fagsakPersonId - kan ikke aktivere mikrofrontend for bruker")
+        }
 
     companion object {
         fun opprettTask(fagsakPerson: FagsakPerson): Task {

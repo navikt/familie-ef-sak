@@ -9,7 +9,6 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 
 internal class VedtaksbrevRepositoryTest : OppslagSpringRunnerTest() {
-
     @Autowired
     private lateinit var vedtaksbrevRepository: VedtaksbrevRepository
 
@@ -20,17 +19,18 @@ internal class VedtaksbrevRepositoryTest : OppslagSpringRunnerTest() {
     internal fun findByBehandlingId() {
         val fagsak = testoppsettService.lagreFagsak(fagsak())
         val behandling = behandlingRepository.insert(behandling(fagsak))
-        val vedtaksbrev = Vedtaksbrev(
-            behandlingId = behandling.id,
-            saksbehandlerHtml = "",
-            brevmal = "brevmalnavn",
-            saksbehandlersignatur = "Sakliga Behandlersen",
-            besluttersignatur = "",
-            beslutterPdf = null,
-            enhet = "",
-            saksbehandlerident = "",
-            beslutterident = "",
-        )
+        val vedtaksbrev =
+            Vedtaksbrev(
+                behandlingId = behandling.id,
+                saksbehandlerHtml = "",
+                brevmal = "brevmalnavn",
+                saksbehandlersignatur = "Sakliga Behandlersen",
+                besluttersignatur = "",
+                beslutterPdf = null,
+                enhet = "",
+                saksbehandlerident = "",
+                beslutterident = "",
+            )
 
         vedtaksbrevRepository.insert(vedtaksbrev)
 

@@ -27,7 +27,6 @@ class BeregningSkolepengerService(
     private val behandlingService: BehandlingService,
     private val vedtakService: VedtakService,
 ) {
-
     fun beregnYtelse(
         utgiftsperioder: List<SkoleårsperiodeSkolepengerDto>,
         behandlingId: UUID,
@@ -106,7 +105,10 @@ class BeregningSkolepengerService(
         }
     }
 
-    private fun validerGyldigePerioder(skoleårsperioder: List<SkoleårsperiodeSkolepengerDto>, erOpphør: Boolean) {
+    private fun validerGyldigePerioder(
+        skoleårsperioder: List<SkoleårsperiodeSkolepengerDto>,
+        erOpphør: Boolean,
+    ) {
         feilHvis(!erOpphør && skoleårsperioder.isEmpty()) {
             "Mangler skoleår"
         }
@@ -151,9 +153,10 @@ class BeregningSkolepengerService(
         erOpphør: Boolean,
     ) {
         if (forrigePerioder.isEmpty()) return
-        val tidligereUtgiftIder = forrigePerioder.flatMap { periode ->
-            periode.utgiftsperioder.map { it.id to it }
-        }.toMap()
+        val tidligereUtgiftIder =
+            forrigePerioder.flatMap { periode ->
+                periode.utgiftsperioder.map { it.id to it }
+            }.toMap()
         if (erOpphør) {
             validerIngenNyePerioderFinnes(perioder, forrigePerioder)
             validerNoeErFjernet(perioder, forrigePerioder)
@@ -216,10 +219,11 @@ class BeregningSkolepengerService(
     ) {
         skoleårsperioder.forEach { skoleårsperiode ->
             val skoleår = skoleårsperiode.perioder.first().skoleår
-            val endretUtgift = skoleårsperiode.utgiftsperioder.find { utgift ->
-                val tidligereUtgift = tidligereUtgiftIder[utgift.id]
-                tidligereUtgift != null && tidligereUtgift != utgift
-            }
+            val endretUtgift =
+                skoleårsperiode.utgiftsperioder.find { utgift ->
+                    val tidligereUtgift = tidligereUtgiftIder[utgift.id]
+                    tidligereUtgift != null && tidligereUtgift != utgift
+                }
             feilHvis(endretUtgift != null) {
                 "Utgiftsperiode er endret for skoleår=$skoleår id=${endretUtgift?.id} er endret" +
                     "ny=$endretUtgift tidligere=${tidligereUtgiftIder[endretUtgift?.id]}"
@@ -234,10 +238,11 @@ class BeregningSkolepengerService(
         val nyeIder = skoleårsperioder.flatMap { periode -> periode.utgiftsperioder.map { it.id } }.toSet()
         val manglende = tidligereUtgiftIder.entries.filterNot { nyeIder.contains(it.key) }
         brukerfeilHvis(manglende.isNotEmpty()) {
-            val manglendePerioder = manglende.joinToString(", \n") { (_, utgiftsperiode) ->
-                "fakturadato=${utgiftsperiode.årMånedFra} " +
-                    "stønad=${utgiftsperiode.stønad}"
-            }
+            val manglendePerioder =
+                manglende.joinToString(", \n") { (_, utgiftsperiode) ->
+                    "fakturadato=${utgiftsperiode.årMånedFra} " +
+                        "stønad=${utgiftsperiode.stønad}"
+                }
             "Mangler utgiftsperioder fra forrige vedtak \n$manglendePerioder"
         }
     }

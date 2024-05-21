@@ -18,7 +18,6 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 object SaksbehandlingDomeneParser {
-
     fun mapSaksbehandlinger(
         dataTable: DataTable,
         stønadstype: StønadType,
@@ -31,14 +30,16 @@ object SaksbehandlingDomeneParser {
                 behandlingIdTilUUID[parseValgfriInt(SaksbehandlingDomeneBegrep.FORRIGE_BEHANDLING, rad)]
                     ?: forrigeBehandlingId
             forrigeBehandlingId = behandlingId
-            val behandling = behandling(
-                fagsak = fagsak,
-                id = behandlingId,
-                forrigeBehandlingId = forrigeBehandlingIdFraRad,
-                type = parseBehandlingstype(rad) ?: BehandlingType.FØRSTEGANGSBEHANDLING,
-                vedtakstidspunkt = parseValgfriDato(SaksbehandlingDomeneBegrep.VEDTAKSDATO, rad)?.atStartOfDay()
-                    ?: LocalDateTime.now(),
-            )
+            val behandling =
+                behandling(
+                    fagsak = fagsak,
+                    id = behandlingId,
+                    forrigeBehandlingId = forrigeBehandlingIdFraRad,
+                    type = parseBehandlingstype(rad) ?: BehandlingType.FØRSTEGANGSBEHANDLING,
+                    vedtakstidspunkt =
+                        parseValgfriDato(SaksbehandlingDomeneBegrep.VEDTAKSDATO, rad)?.atStartOfDay()
+                            ?: LocalDateTime.now(),
+                )
             behandling.id to Pair(behandling, saksbehandling(fagsak, behandling))
         }.toMap()
     }

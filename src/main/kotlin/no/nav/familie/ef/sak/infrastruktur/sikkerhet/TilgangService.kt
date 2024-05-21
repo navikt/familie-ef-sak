@@ -35,11 +35,13 @@ class TilgangService(
     private val cacheManager: CacheManager,
     private val auditLogger: AuditLogger,
 ) {
-
     /**
      * Kun ved tilgangskontroll for enskild person, ellers bruk [validerTilgangTilPersonMedBarn]
      */
-    fun validerTilgangTilPerson(personIdent: String, event: AuditLoggerEvent) {
+    fun validerTilgangTilPerson(
+        personIdent: String,
+        event: AuditLoggerEvent,
+    ) {
         val tilgang = personopplysningerIntegrasjonerClient.sjekkTilgangTilPerson(personIdent)
         auditLogger.log(Sporingsdata(event, personIdent, tilgang))
         if (!tilgang.harTilgang) {
@@ -48,14 +50,18 @@ class TilgangService(
                     "har ikke tilgang til $personIdent",
             )
             throw ManglerTilgang(
-                melding = "Saksbehandler ${SikkerhetContext.hentSaksbehandlerEllerSystembruker()} " +
-                    "har ikke tilgang til person",
+                melding =
+                    "Saksbehandler ${SikkerhetContext.hentSaksbehandlerEllerSystembruker()} " +
+                        "har ikke tilgang til person",
                 frontendFeilmelding = "Mangler tilgang til opplysningene. ${tilgang.utledÅrsakstekst()}",
             )
         }
     }
 
-    fun validerTilgangTilPersonMedBarn(personIdent: String, event: AuditLoggerEvent) {
+    fun validerTilgangTilPersonMedBarn(
+        personIdent: String,
+        event: AuditLoggerEvent,
+    ) {
         val tilgang = harTilgangTilPersonMedRelasjoner(personIdent)
         auditLogger.log(Sporingsdata(event, personIdent, tilgang))
         if (!tilgang.harTilgang) {
@@ -64,17 +70,22 @@ class TilgangService(
                     "har ikke tilgang til $personIdent eller dets barn",
             )
             throw ManglerTilgang(
-                melding = "Saksbehandler ${SikkerhetContext.hentSaksbehandlerEllerSystembruker()} " +
-                    "har ikke tilgang til person eller dets barn",
+                melding =
+                    "Saksbehandler ${SikkerhetContext.hentSaksbehandlerEllerSystembruker()} " +
+                        "har ikke tilgang til person eller dets barn",
                 frontendFeilmelding = "Mangler tilgang til opplysningene. ${tilgang.utledÅrsakstekst()}",
             )
         }
     }
 
-    fun validerTilgangTilBehandling(behandlingId: UUID, event: AuditLoggerEvent) {
-        val personIdent = cacheManager.getValue("behandlingPersonIdent", behandlingId) {
-            behandlingService.hentAktivIdent(behandlingId)
-        }
+    fun validerTilgangTilBehandling(
+        behandlingId: UUID,
+        event: AuditLoggerEvent,
+    ) {
+        val personIdent =
+            cacheManager.getValue("behandlingPersonIdent", behandlingId) {
+                behandlingService.hentAktivIdent(behandlingId)
+            }
         val tilgang = harTilgangTilPersonMedRelasjoner(personIdent)
         auditLogger.log(
             Sporingsdata(
@@ -86,14 +97,18 @@ class TilgangService(
         )
         if (!tilgang.harTilgang) {
             throw ManglerTilgang(
-                melding = "Saksbehandler ${SikkerhetContext.hentSaksbehandlerEllerSystembruker()} " +
-                    "har ikke tilgang til behandling=$behandlingId",
+                melding =
+                    "Saksbehandler ${SikkerhetContext.hentSaksbehandlerEllerSystembruker()} " +
+                        "har ikke tilgang til behandling=$behandlingId",
                 frontendFeilmelding = "Mangler tilgang til opplysningene. ${tilgang.utledÅrsakstekst()}",
             )
         }
     }
 
-    fun validerTilgangTilBehandling(saksbehandling: Saksbehandling, event: AuditLoggerEvent) {
+    fun validerTilgangTilBehandling(
+        saksbehandling: Saksbehandling,
+        event: AuditLoggerEvent,
+    ) {
         val tilgang = harTilgangTilPersonMedRelasjoner(saksbehandling.ident)
         auditLogger.log(
             Sporingsdata(
@@ -105,39 +120,53 @@ class TilgangService(
         )
         if (!tilgang.harTilgang) {
             throw ManglerTilgang(
-                melding = "Saksbehandler ${SikkerhetContext.hentSaksbehandlerEllerSystembruker()} " +
-                    "har ikke tilgang til behandling=${saksbehandling.id}",
+                melding =
+                    "Saksbehandler ${SikkerhetContext.hentSaksbehandlerEllerSystembruker()} " +
+                        "har ikke tilgang til behandling=${saksbehandling.id}",
                 frontendFeilmelding = "Mangler tilgang til opplysningene. ${tilgang.utledÅrsakstekst()}",
             )
         }
     }
 
-    fun validerTilgangTilFagsak(fagsakId: UUID, event: AuditLoggerEvent) {
-        val personIdent = cacheManager.getValue("fagsakIdent", fagsakId) {
-            fagsakService.hentAktivIdent(fagsakId)
-        }
+    fun validerTilgangTilFagsak(
+        fagsakId: UUID,
+        event: AuditLoggerEvent,
+    ) {
+        val personIdent =
+            cacheManager.getValue("fagsakIdent", fagsakId) {
+                fagsakService.hentAktivIdent(fagsakId)
+            }
         val tilgang = harTilgangTilPersonMedRelasjoner(personIdent)
         auditLogger.log(Sporingsdata(event, personIdent, tilgang, custom1 = CustomKeyValue("fagsak", fagsakId.toString())))
         if (!tilgang.harTilgang) {
             throw ManglerTilgang(
-                melding = "Saksbehandler ${SikkerhetContext.hentSaksbehandlerEllerSystembruker()} " +
-                    "har ikke tilgang til fagsak=$fagsakId",
+                melding =
+                    "Saksbehandler ${SikkerhetContext.hentSaksbehandlerEllerSystembruker()} " +
+                        "har ikke tilgang til fagsak=$fagsakId",
                 frontendFeilmelding = "Mangler tilgang til opplysningene. ${tilgang.utledÅrsakstekst()}",
             )
         }
     }
 
-    fun validerTilgangTilEksternFagsak(eksternFagsakId: Long, event: AuditLoggerEvent) {
-        val fagsakId = cacheManager.getValue("eksternFagsakId", eksternFagsakId) {
-            fagsakService.hentFagsakDtoPåEksternId(eksternFagsakId = eksternFagsakId).id
-        }
+    fun validerTilgangTilEksternFagsak(
+        eksternFagsakId: Long,
+        event: AuditLoggerEvent,
+    ) {
+        val fagsakId =
+            cacheManager.getValue("eksternFagsakId", eksternFagsakId) {
+                fagsakService.hentFagsakDtoPåEksternId(eksternFagsakId = eksternFagsakId).id
+            }
         validerTilgangTilFagsak(fagsakId, event)
     }
 
-    fun validerTilgangTilFagsakPerson(fagsakPersonId: UUID, event: AuditLoggerEvent) {
-        val personIdent = cacheManager.getValue("fagsakPersonIdent", fagsakPersonId) {
-            fagsakPersonService.hentAktivIdent(fagsakPersonId)
-        }
+    fun validerTilgangTilFagsakPerson(
+        fagsakPersonId: UUID,
+        event: AuditLoggerEvent,
+    ) {
+        val personIdent =
+            cacheManager.getValue("fagsakPersonIdent", fagsakPersonId) {
+                fagsakPersonService.hentAktivIdent(fagsakPersonId)
+            }
         val tilgang = harTilgangTilPersonMedRelasjoner(personIdent)
         auditLogger.log(
             Sporingsdata(
@@ -149,8 +178,9 @@ class TilgangService(
         )
         if (!tilgang.harTilgang) {
             throw ManglerTilgang(
-                melding = "Saksbehandler ${SikkerhetContext.hentSaksbehandlerEllerSystembruker()} " +
-                    "har ikke tilgang til fagsakPerson=$fagsakPersonId",
+                melding =
+                    "Saksbehandler ${SikkerhetContext.hentSaksbehandlerEllerSystembruker()} " +
+                        "har ikke tilgang til fagsakPerson=$fagsakPersonId",
                 frontendFeilmelding = "Mangler tilgang til opplysningene. ${tilgang.utledÅrsakstekst()}",
             )
         }
@@ -173,8 +203,9 @@ class TilgangService(
     fun validerTilgangTilRolle(minimumsrolle: BehandlerRolle) {
         if (!harTilgangTilRolle(minimumsrolle)) {
             throw ManglerTilgang(
-                melding = "Saksbehandler ${SikkerhetContext.hentSaksbehandlerEllerSystembruker()} har ikke tilgang " +
-                    "til å utføre denne operasjonen som krever minimumsrolle $minimumsrolle",
+                melding =
+                    "Saksbehandler ${SikkerhetContext.hentSaksbehandlerEllerSystembruker()} har ikke tilgang " +
+                        "til å utføre denne operasjonen som krever minimumsrolle $minimumsrolle",
                 frontendFeilmelding = "Mangler nødvendig saksbehandlerrolle for å utføre handlingen",
             )
         }
@@ -193,7 +224,10 @@ class TilgangService(
      * Filtrerer data basert på om man har tilgang til den eller ikke
      * Filtrer ikke på egen ansatt
      */
-    fun <T> filtrerUtFortroligDataForRolle(values: List<T>, fn: (T) -> Adressebeskyttelse?): List<T> {
+    fun <T> filtrerUtFortroligDataForRolle(
+        values: List<T>,
+        fn: (T) -> Adressebeskyttelse?,
+    ): List<T> {
         val grupper = hentGrupperFraToken()
         val kode6gruppe = grupper.contains(rolleConfig.kode6)
         val kode7Gruppe = grupper.contains(rolleConfig.kode7)
@@ -212,7 +246,10 @@ class TilgangService(
      *
      * @param verdi verdiet som man ønsket å hente cache for, eks behandlingId, eller personIdent
      */
-    private fun <T> harSaksbehandlerTilgangTilPersonMedBarn(verdi: T, hentVerdi: () -> Tilgang): Tilgang {
+    private fun <T> harSaksbehandlerTilgangTilPersonMedBarn(
+        verdi: T,
+        hentVerdi: () -> Tilgang,
+    ): Tilgang {
         val cache = cacheManager.getCache("validerTilgangTilPersonMedBarn") ?: error("Finner ikke cache=validerTilgangTilPersonMedBarn")
         return cache.get(Pair(verdi, SikkerhetContext.hentSaksbehandler())) {
             hentVerdi()

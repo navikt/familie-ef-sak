@@ -43,7 +43,6 @@ import java.time.Month
 import java.util.UUID
 
 internal class KlageServiceTest {
-
     private val fagsakService = mockk<FagsakService>()
 
     private val fagsakPersonService = mockk<FagsakPersonService>()
@@ -68,10 +67,11 @@ internal class KlageServiceTest {
     private val personIdent = "100"
     private val fagsakPerson = fagsakPerson(setOf(PersonIdent(personIdent)))
     val fagsak = fagsak(eksternId = eksternFagsakId, person = fagsakPerson)
-    private val saksbehandling = saksbehandling(
-        fagsak,
-        behandling(eksternId = eksternBehandlingId),
-    )
+    private val saksbehandling =
+        saksbehandling(
+            fagsak,
+            behandling(eksternId = eksternBehandlingId),
+        )
 
     private val opprettKlageSlot = slot<OpprettKlagebehandlingRequest>()
 
@@ -87,7 +87,6 @@ internal class KlageServiceTest {
 
     @Nested
     inner class OpprettKlage {
-
         @Test
         internal fun `skal mappe riktige verdier ved manuelt opprettet klage`() {
             klageService.opprettKlage(fagsak.id, OpprettKlageDto(LocalDate.now(), true))
@@ -106,7 +105,6 @@ internal class KlageServiceTest {
 
     @Nested
     inner class HarÅpenKlage {
-
         @Test
         internal fun `har ikke noen åpen sak`() {
             every { infotrygdService.hentÅpneKlagesaker(fagsakPerson.hentAktivIdent()) } returns listOf()
@@ -119,28 +117,29 @@ internal class KlageServiceTest {
         @ParameterizedTest
         @EnumSource(StønadType::class)
         internal fun `har åpen sak for stønadstype`(stønadType: StønadType) {
-            every { infotrygdService.hentÅpneKlagesaker(fagsakPerson.hentAktivIdent()) } returns listOf(
-                åpenSak(
-                    stønadstype = stønadType,
-                ),
-            )
+            every { infotrygdService.hentÅpneKlagesaker(fagsakPerson.hentAktivIdent()) } returns
+                listOf(
+                    åpenSak(
+                        stønadstype = stønadType,
+                    ),
+                )
 
             val åpneKlager = klageService.hentÅpneKlagerInfotrygd(fagsakPerson.id)
 
             assertThat(åpneKlager.stønadstyper).containsExactly(stønadType)
         }
 
-        private fun åpenSak(stønadstype: StønadType = StønadType.OVERGANGSSTØNAD) = InfotrygdSak(
-            "1",
-            stønadType = stønadstype,
-            resultat = InfotrygdSakResultat.ÅPEN_SAK,
-            type = InfotrygdSakType.KLAGE,
-        )
+        private fun åpenSak(stønadstype: StønadType = StønadType.OVERGANGSSTØNAD) =
+            InfotrygdSak(
+                "1",
+                stønadType = stønadstype,
+                resultat = InfotrygdSakResultat.ÅPEN_SAK,
+                type = InfotrygdSakType.KLAGE,
+            )
     }
 
     @Nested
     inner class Mapping {
-
         val eksternIdBT = 1L
         val eksternIdOS = 2L
         val eksternIdSP = 3L
@@ -195,26 +194,29 @@ internal class KlageServiceTest {
             val tidsPunktAvsluttetIKabal = LocalDateTime.of(2022, Month.OCTOBER, 1, 0, 0)
             val tidspunktAvsluttetIFamilieKlage = LocalDateTime.of(2022, Month.AUGUST, 1, 0, 0)
 
-            val klagebehandlingAvsluttetKabal = klageBehandlingDto(
-                resultat = BehandlingResultat.IKKE_MEDHOLD,
-                klageinstansResultat = listOf(
-                    KlageinstansResultatDto(
-                        type = BehandlingEventType.KLAGEBEHANDLING_AVSLUTTET,
-                        utfall = null,
-                        mottattEllerAvsluttetTidspunkt = tidsPunktAvsluttetIKabal,
-                        journalpostReferanser = listOf(),
-                        årsakFeilregistrert = null,
-                    ),
-                ),
-                vedtaksdato = tidspunktAvsluttetIFamilieKlage,
-            )
+            val klagebehandlingAvsluttetKabal =
+                klageBehandlingDto(
+                    resultat = BehandlingResultat.IKKE_MEDHOLD,
+                    klageinstansResultat =
+                        listOf(
+                            KlageinstansResultatDto(
+                                type = BehandlingEventType.KLAGEBEHANDLING_AVSLUTTET,
+                                utfall = null,
+                                mottattEllerAvsluttetTidspunkt = tidsPunktAvsluttetIKabal,
+                                journalpostReferanser = listOf(),
+                                årsakFeilregistrert = null,
+                            ),
+                        ),
+                    vedtaksdato = tidspunktAvsluttetIFamilieKlage,
+                )
 
             every { fagsakService.finnFagsakerForFagsakPersonId(any()) } returns fagsaker
-            every { klageClient.hentKlagebehandlinger(any()) } returns mapOf(
-                eksternIdOS to listOf(klagebehandlingAvsluttetKabal),
-                eksternIdBT to emptyList(),
-                eksternIdSP to emptyList(),
-            )
+            every { klageClient.hentKlagebehandlinger(any()) } returns
+                mapOf(
+                    eksternIdOS to listOf(klagebehandlingAvsluttetKabal),
+                    eksternIdBT to emptyList(),
+                    eksternIdSP to emptyList(),
+                )
 
             val klager = klageService.hentBehandlinger(UUID.randomUUID())
 
@@ -226,18 +228,20 @@ internal class KlageServiceTest {
             val fagsaker = fagsaker()
             val tidspunktAvsluttetFamilieKlage = LocalDateTime.of(2022, Month.AUGUST, 1, 0, 0)
 
-            val klagebehandlingIkkeAvsluttetKabal = klageBehandlingDto(
-                resultat = BehandlingResultat.IKKE_MEDHOLD,
-                klageinstansResultat = emptyList(),
-                vedtaksdato = tidspunktAvsluttetFamilieKlage,
-            )
+            val klagebehandlingIkkeAvsluttetKabal =
+                klageBehandlingDto(
+                    resultat = BehandlingResultat.IKKE_MEDHOLD,
+                    klageinstansResultat = emptyList(),
+                    vedtaksdato = tidspunktAvsluttetFamilieKlage,
+                )
 
             every { fagsakService.finnFagsakerForFagsakPersonId(any()) } returns fagsaker
-            every { klageClient.hentKlagebehandlinger(any()) } returns mapOf(
-                eksternIdOS to listOf(klagebehandlingIkkeAvsluttetKabal),
-                eksternIdBT to emptyList(),
-                eksternIdSP to emptyList(),
-            )
+            every { klageClient.hentKlagebehandlinger(any()) } returns
+                mapOf(
+                    eksternIdOS to listOf(klagebehandlingIkkeAvsluttetKabal),
+                    eksternIdBT to emptyList(),
+                    eksternIdSP to emptyList(),
+                )
 
             val klager = klageService.hentBehandlinger(UUID.randomUUID())
 
@@ -250,23 +254,26 @@ internal class KlageServiceTest {
             val tidspunktAvsluttetFamilieKlage = LocalDateTime.of(2022, Month.AUGUST, 1, 0, 0)
 
             every { fagsakService.finnFagsakerForFagsakPersonId(any()) } returns fagsaker
-            every { klageClient.hentKlagebehandlinger(any()) } returns mapOf(
-                eksternIdOS to listOf(
-                    klageBehandlingDto(
-                        resultat = BehandlingResultat.MEDHOLD,
-                        klageinstansResultat = emptyList(),
-                        vedtaksdato = tidspunktAvsluttetFamilieKlage,
-                    ),
-                ),
-                eksternIdBT to listOf(
-                    klageBehandlingDto(
-                        resultat = BehandlingResultat.IKKE_MEDHOLD_FORMKRAV_AVVIST,
-                        klageinstansResultat = emptyList(),
-                        vedtaksdato = tidspunktAvsluttetFamilieKlage,
-                    ),
-                ),
-                eksternIdSP to emptyList(),
-            )
+            every { klageClient.hentKlagebehandlinger(any()) } returns
+                mapOf(
+                    eksternIdOS to
+                        listOf(
+                            klageBehandlingDto(
+                                resultat = BehandlingResultat.MEDHOLD,
+                                klageinstansResultat = emptyList(),
+                                vedtaksdato = tidspunktAvsluttetFamilieKlage,
+                            ),
+                        ),
+                    eksternIdBT to
+                        listOf(
+                            klageBehandlingDto(
+                                resultat = BehandlingResultat.IKKE_MEDHOLD_FORMKRAV_AVVIST,
+                                klageinstansResultat = emptyList(),
+                                vedtaksdato = tidspunktAvsluttetFamilieKlage,
+                            ),
+                        ),
+                    eksternIdSP to emptyList(),
+                )
 
             val klager = klageService.hentBehandlinger(UUID.randomUUID())
 
@@ -282,26 +289,29 @@ internal class KlageServiceTest {
             val tidspunktAvsluttetIFamilieKlage = LocalDateTime.of(2022, Month.AUGUST, 1, 0, 0)
 
             val årsakFeilregistrert = "Klage registrert på feil vedtak"
-            val klagebehandlingAvsluttetKabal = klageBehandlingDto(
-                resultat = BehandlingResultat.IKKE_MEDHOLD,
-                klageinstansResultat = listOf(
-                    KlageinstansResultatDto(
-                        type = BehandlingEventType.BEHANDLING_FEILREGISTRERT,
-                        utfall = null,
-                        mottattEllerAvsluttetTidspunkt = tidsPunktAvsluttetIKabal,
-                        journalpostReferanser = listOf(),
-                        årsakFeilregistrert = årsakFeilregistrert,
-                    ),
-                ),
-                vedtaksdato = tidspunktAvsluttetIFamilieKlage,
-            )
+            val klagebehandlingAvsluttetKabal =
+                klageBehandlingDto(
+                    resultat = BehandlingResultat.IKKE_MEDHOLD,
+                    klageinstansResultat =
+                        listOf(
+                            KlageinstansResultatDto(
+                                type = BehandlingEventType.BEHANDLING_FEILREGISTRERT,
+                                utfall = null,
+                                mottattEllerAvsluttetTidspunkt = tidsPunktAvsluttetIKabal,
+                                journalpostReferanser = listOf(),
+                                årsakFeilregistrert = årsakFeilregistrert,
+                            ),
+                        ),
+                    vedtaksdato = tidspunktAvsluttetIFamilieKlage,
+                )
 
             every { fagsakService.finnFagsakerForFagsakPersonId(any()) } returns fagsaker
-            every { klageClient.hentKlagebehandlinger(any()) } returns mapOf(
-                eksternIdOS to listOf(klagebehandlingAvsluttetKabal),
-                eksternIdBT to emptyList(),
-                eksternIdSP to emptyList(),
-            )
+            every { klageClient.hentKlagebehandlinger(any()) } returns
+                mapOf(
+                    eksternIdOS to listOf(klagebehandlingAvsluttetKabal),
+                    eksternIdBT to emptyList(),
+                    eksternIdSP to emptyList(),
+                )
 
             val klager = klageService.hentBehandlinger(UUID.randomUUID())
 
@@ -309,11 +319,12 @@ internal class KlageServiceTest {
             assertThat(klager.overgangsstønad.first().klageinstansResultat.first().årsakFeilregistrert).isEqualTo(årsakFeilregistrert)
         }
 
-        private fun fagsaker() = Fagsaker(
-            fagsak(stønadstype = StønadType.OVERGANGSSTØNAD, eksternId = eksternIdOS),
-            fagsak(stønadstype = StønadType.BARNETILSYN, eksternId = eksternIdBT),
-            fagsak(stønadstype = StønadType.SKOLEPENGER, eksternId = eksternIdSP),
-        )
+        private fun fagsaker() =
+            Fagsaker(
+                fagsak(stønadstype = StønadType.OVERGANGSSTØNAD, eksternId = eksternIdOS),
+                fagsak(stønadstype = StønadType.BARNETILSYN, eksternId = eksternIdBT),
+                fagsak(stønadstype = StønadType.SKOLEPENGER, eksternId = eksternIdSP),
+            )
 
         private fun klageBehandlingDto(
             resultat: BehandlingResultat? = null,
@@ -331,16 +342,16 @@ internal class KlageServiceTest {
             klageinstansResultat = klageinstansResultat,
         )
 
-        private fun klageBehandlingerDto() = mapOf(
-            eksternIdOS to listOf(klageBehandlingDto()),
-            eksternIdBT to listOf(klageBehandlingDto()),
-            eksternIdSP to listOf(klageBehandlingDto()),
-        )
+        private fun klageBehandlingerDto() =
+            mapOf(
+                eksternIdOS to listOf(klageBehandlingDto()),
+                eksternIdBT to listOf(klageBehandlingDto()),
+                eksternIdSP to listOf(klageBehandlingDto()),
+            )
     }
 
     @Nested
     inner class Validering {
-
         @Test
         internal fun `skal ikke kunne opprette klage med krav mottatt frem i tid`() {
             val opprettKlageDto = OpprettKlageDto(mottattDato = LocalDate.now().plusDays(1), false)

@@ -24,9 +24,10 @@ class VedtaksbrevController(
     private val behandlingService: BehandlingService,
     private val tilgangService: TilgangService,
 ) {
-
     @GetMapping("/{behandlingId}")
-    fun hentBeslutterbrevEllerRekonstruerSaksbehandlerBrev(@PathVariable behandlingId: UUID): Ressurs<ByteArray> {
+    fun hentBeslutterbrevEllerRekonstruerSaksbehandlerBrev(
+        @PathVariable behandlingId: UUID,
+    ): Ressurs<ByteArray> {
         tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.ACCESS)
         return Ressurs.success(brevService.hentBeslutterbrevEllerRekonstruerSaksbehandlerBrev(behandlingId))
     }
@@ -45,12 +46,16 @@ class VedtaksbrevController(
 
     @Deprecated("Slettes - bruk forhåndsvisBeslutterbrev")
     @PostMapping("/{behandlingId}")
-    fun lagBeslutterbrev(@PathVariable behandlingId: UUID): Ressurs<ByteArray> {
+    fun lagBeslutterbrev(
+        @PathVariable behandlingId: UUID,
+    ): Ressurs<ByteArray> {
         return foråndsvisBeslutterbrev(behandlingId)
     }
 
     @PostMapping("/beslutter/vis/{behandlingId}")
-    fun forhåndsvisBeslutterbrev(@PathVariable behandlingId: UUID): Ressurs<ByteArray> {
+    fun forhåndsvisBeslutterbrev(
+        @PathVariable behandlingId: UUID,
+    ): Ressurs<ByteArray> {
         return foråndsvisBeslutterbrev(behandlingId)
     }
 

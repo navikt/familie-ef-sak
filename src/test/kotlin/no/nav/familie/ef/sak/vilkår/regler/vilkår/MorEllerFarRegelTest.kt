@@ -18,7 +18,6 @@ import org.junit.jupiter.api.Test
 import java.util.UUID
 
 class MorEllerFarRegelTest {
-
     private val hovedregelMetadataMock = mockk<HovedregelMetadata>()
     private val barnMedSamværSøknadsgrunnlagDto = mockk<BarnMedSamværSøknadsgrunnlagDto>()
     private val barnMedSamværRegistergrunnlagDto = mockk<BarnMedSamværRegistergrunnlagDto>()
@@ -34,14 +33,16 @@ class MorEllerFarRegelTest {
     @Test
     fun `Automatisk vurder mor eller far vilkår med kun registerbarn for digital søknad`() {
         val registerBarn = BarnMedSamværDto(UUID.randomUUID(), barnMedSamværSøknadsgrunnlagDto, barnMedSamværRegistergrunnlagDto)
-        every { hovedregelMetadataMock.vilkårgrunnlagDto } returns VilkårTestUtil.mockVilkårGrunnlagDto(
-            barnMedSamvær = listOf(registerBarn),
-        )
+        every { hovedregelMetadataMock.vilkårgrunnlagDto } returns
+            VilkårTestUtil.mockVilkårGrunnlagDto(
+                barnMedSamvær = listOf(registerBarn),
+            )
 
-        val listDelvilkårsvurdering = MorEllerFarRegel().initiereDelvilkårsvurdering(
-            hovedregelMetadataMock,
-            Vilkårsresultat.IKKE_TATT_STILLING_TIL,
-        )
+        val listDelvilkårsvurdering =
+            MorEllerFarRegel().initiereDelvilkårsvurdering(
+                hovedregelMetadataMock,
+                Vilkårsresultat.IKKE_TATT_STILLING_TIL,
+            )
 
         Assertions.assertThat(listDelvilkårsvurdering.size).isEqualTo(1)
         Assertions.assertThat(listDelvilkårsvurdering.first().resultat).isEqualTo(Vilkårsresultat.AUTOMATISK_OPPFYLT)
@@ -56,14 +57,16 @@ class MorEllerFarRegelTest {
         val terminbarn =
             BarnMedSamværDto(UUID.randomUUID(), barnMedSamværSøknadsgrunnlagDto, terminbarnMedSamværRegistergrunnlagDto)
 
-        every { hovedregelMetadataMock.vilkårgrunnlagDto } returns VilkårTestUtil.mockVilkårGrunnlagDto(
-            barnMedSamvær = listOf(terminbarn, registerBarn),
-        )
+        every { hovedregelMetadataMock.vilkårgrunnlagDto } returns
+            VilkårTestUtil.mockVilkårGrunnlagDto(
+                barnMedSamvær = listOf(terminbarn, registerBarn),
+            )
 
-        val listDelvilkårsvurdering = AlderPåBarnRegel().initiereDelvilkårsvurdering(
-            hovedregelMetadataMock,
-            Vilkårsresultat.IKKE_TATT_STILLING_TIL,
-        )
+        val listDelvilkårsvurdering =
+            AlderPåBarnRegel().initiereDelvilkårsvurdering(
+                hovedregelMetadataMock,
+                Vilkårsresultat.IKKE_TATT_STILLING_TIL,
+            )
 
         Assertions.assertThat(listDelvilkårsvurdering.size).isEqualTo(1)
         Assertions.assertThat(listDelvilkårsvurdering.first().resultat).isEqualTo(Vilkårsresultat.IKKE_TATT_STILLING_TIL)
@@ -73,10 +76,11 @@ class MorEllerFarRegelTest {
     fun `Papirsøknad skal ikke automatisk vurderes`() {
         every { hovedregelMetadataMock.behandling } returns behandling(årsak = BehandlingÅrsak.PAPIRSØKNAD)
 
-        val listDelvilkårsvurdering = MorEllerFarRegel().initiereDelvilkårsvurdering(
-            hovedregelMetadataMock,
-            Vilkårsresultat.IKKE_TATT_STILLING_TIL,
-        )
+        val listDelvilkårsvurdering =
+            MorEllerFarRegel().initiereDelvilkårsvurdering(
+                hovedregelMetadataMock,
+                Vilkårsresultat.IKKE_TATT_STILLING_TIL,
+            )
 
         Assertions.assertThat(listDelvilkårsvurdering.size).isEqualTo(1)
         Assertions.assertThat(listDelvilkårsvurdering.first().resultat).isEqualTo(Vilkårsresultat.IKKE_TATT_STILLING_TIL)

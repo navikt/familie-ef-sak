@@ -15,13 +15,11 @@ import java.util.Properties
     beskrivelse = "Barnetilsyn satsendring",
 )
 class BarnetilsynSatsendringTask(val barnetilsynSatsendringService: BarnetilsynSatsendringService) : AsyncTaskStep {
-
     override fun doTask(task: Task) {
         barnetilsynSatsendringService.finnFagsakerSomSkalSatsendresMedNySatsDersomBaselineErOk()
     }
 
     companion object {
-
         const val TYPE = "barnetilsynSatsendring"
 
         fun opprettTask(payload: String): Task {

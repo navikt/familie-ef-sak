@@ -33,18 +33,17 @@ class EksternBehandlingService(
     private val fagsakPersonService: FagsakPersonService,
     private val revurderingService: RevurderingService,
     private val oppgaveService: OppgaveService,
-
 ) {
-
     private val logger = LoggerFactory.getLogger(javaClass)
     private val secureLogger = LoggerFactory.getLogger("secureLogger")
 
     fun harLøpendeStønad(personidenter: Set<String>): Boolean {
         val behandlingIDer = hentAlleBehandlingIDer(personidenter)
-        val sisteStønadsdato = behandlingIDer
-            .map(tilkjentYtelseService::hentForBehandling)
-            .mapNotNull { it.andelerTilkjentYtelse.maxOfOrNull(AndelTilkjentYtelse::stønadTom) }
-            .maxOfOrNull { it } ?: LocalDate.MIN
+        val sisteStønadsdato =
+            behandlingIDer
+                .map(tilkjentYtelseService::hentForBehandling)
+                .mapNotNull { it.andelerTilkjentYtelse.maxOfOrNull(AndelTilkjentYtelse::stønadTom) }
+                .maxOfOrNull { it } ?: LocalDate.MIN
         return sisteStønadsdato >= LocalDate.now()
     }
 
@@ -104,20 +103,22 @@ class EksternBehandlingService(
         }
     }
 
-    private fun opprettRevurdering(fagsak: Fagsak) = try {
-        val revurdering = RevurderingDto(
-            fagsakId = fagsak.id,
-            behandlingsårsak = BehandlingÅrsak.KLAGE,
-            kravMottatt = LocalDate.now(),
-            vilkårsbehandleNyeBarn = VilkårsbehandleNyeBarn.VILKÅRSBEHANDLE,
-        )
-        val behandling = revurderingService.opprettRevurderingManuelt(revurdering)
-        OpprettRevurderingResponse(Opprettet(behandling.eksternId.toString()))
-    } catch (e: Exception) {
-        logger.error("Feilet opprettelse av revurdering for fagsak=${fagsak.id}, se secure logg for detaljer")
-        secureLogger.error("Feilet opprettelse av revurdering for fagsak=${fagsak.id}", e)
-        OpprettRevurderingResponse(IkkeOpprettet(IkkeOpprettetÅrsak.FEIL, e.message))
-    }
+    private fun opprettRevurdering(fagsak: Fagsak) =
+        try {
+            val revurdering =
+                RevurderingDto(
+                    fagsakId = fagsak.id,
+                    behandlingsårsak = BehandlingÅrsak.KLAGE,
+                    kravMottatt = LocalDate.now(),
+                    vilkårsbehandleNyeBarn = VilkårsbehandleNyeBarn.VILKÅRSBEHANDLE,
+                )
+            val behandling = revurderingService.opprettRevurderingManuelt(revurdering)
+            OpprettRevurderingResponse(Opprettet(behandling.eksternId.toString()))
+        } catch (e: Exception) {
+            logger.error("Feilet opprettelse av revurdering for fagsak=${fagsak.id}, se secure logg for detaljer")
+            secureLogger.error("Feilet opprettelse av revurdering for fagsak=${fagsak.id}", e)
+            OpprettRevurderingResponse(IkkeOpprettet(IkkeOpprettetÅrsak.FEIL, e.message))
+        }
 
     private fun utledKanOppretteRevurdering(fagsak: Fagsak): KanOppretteRevurderingResultat {
         val finnesÅpenBehandling = behandlingService.finnesÅpenBehandling(fagsak.id)
@@ -138,7 +139,9 @@ class EksternBehandlingService(
 }
 
 private sealed interface KanOppretteRevurderingResultat
+
 private class KanOppretteRevurdering : KanOppretteRevurderingResultat
+
 private data class KanIkkeOppretteRevurdering(val årsak: Årsak) : KanOppretteRevurderingResultat
 
 private enum class Årsak(

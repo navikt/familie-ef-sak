@@ -12,7 +12,6 @@ import java.time.YearMonth
 @Profile("!integrasjonstest")
 @Service
 class BehandlingerMedGammelGScheduler(val taskService: TaskService) {
-
     @Scheduled(cron = "\${FINN_BEHANDLINGER_MED_GAMMEL_G_CRON_EXPRESSION}")
     @Transactional
     fun opprettTaskFinnBehandlingerMedGammelG() {
@@ -20,10 +19,11 @@ class BehandlingerMedGammelGScheduler(val taskService: TaskService) {
             val finnesTask =
                 taskService.finnTaskMedPayloadOgType(YearMonth.now().toString(), FinnBehandlingerMedGammelGTask.TYPE)
             if (finnesTask == null) {
-                val task = Task(
-                    type = FinnBehandlingerMedGammelGTask.TYPE,
-                    payload = YearMonth.now().toString(),
-                )
+                val task =
+                    Task(
+                        type = FinnBehandlingerMedGammelGTask.TYPE,
+                        payload = YearMonth.now().toString(),
+                    )
                 taskService.save(task)
             }
         }

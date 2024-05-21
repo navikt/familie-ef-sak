@@ -10,7 +10,6 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
 internal class RegelEvalueringTest {
-
     @Test
     fun `utledVilkårResultat - er OPPFYLT når alle vilkår er OPPFYLT`() {
         assertThat(RegelEvaluering.utledVilkårResultat(mapOf(RegelId.OPPHOLD_UNNTAK to Vilkårsresultat.OPPFYLT)))

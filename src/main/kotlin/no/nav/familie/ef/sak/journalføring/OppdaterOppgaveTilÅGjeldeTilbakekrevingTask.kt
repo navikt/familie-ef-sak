@@ -14,14 +14,12 @@ import java.util.UUID
     maxAntallFeil = 3,
 )
 class OppdaterOppgaveTilÅGjeldeTilbakekrevingTask(private val klageClient: KlageClient) : AsyncTaskStep {
-
     override fun doTask(task: Task) {
         val behandlingId = UUID.fromString(task.payload)
         klageClient.oppdaterOppgaveTilÅGjeldeTilbakekreving(behandlingId)
     }
 
     companion object {
-
         fun opprettTask(behandlingId: UUID): Task {
             return Task(
                 type = TYPE,

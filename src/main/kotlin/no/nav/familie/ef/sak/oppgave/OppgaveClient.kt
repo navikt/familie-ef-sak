@@ -32,7 +32,6 @@ class OppgaveClient(
     private val featureToggleService: FeatureToggleService,
 ) :
     AbstractPingableRestClient(restOperations, "oppgave") {
-
     override val pingUri: URI = integrasjonerConfig.pingUri
     private val oppgaveUri: URI = integrasjonerConfig.oppgaveUri
     private val saksbehandlerUri: URI = integrasjonerConfig.saksbehandlerUri
@@ -73,7 +72,11 @@ class OppgaveClient(
         return pakkUtRespons(respons, uri, "hentSaksbehandlerInfo")
     }
 
-    fun fordelOppgave(oppgaveId: Long, saksbehandler: String?, versjon: Int? = null): Long {
+    fun fordelOppgave(
+        oppgaveId: Long,
+        saksbehandler: String?,
+        versjon: Int? = null,
+    ): Long {
         var uri = URI.create("$oppgaveUri/$oppgaveId/fordel")
 
         if (saksbehandler != null) {
@@ -112,11 +115,12 @@ class OppgaveClient(
     fun oppdaterOppgave(oppgave: Oppgave): Long {
         try {
             val oppgaveId = oppgave.id ?: error("Oppgave mangler id")
-            val response = patchForEntity<Ressurs<OppgaveResponse>>(
-                URI.create("$oppgaveUri/$oppgaveId/oppdater"),
-                oppgave,
-                HttpHeaders().medContentTypeJsonUTF8(),
-            )
+            val response =
+                patchForEntity<Ressurs<OppgaveResponse>>(
+                    URI.create("$oppgaveUri/$oppgaveId/oppdater"),
+                    oppgave,
+                    HttpHeaders().medContentTypeJsonUTF8(),
+                )
             return response.getDataOrThrow().oppgaveId
         } catch (e: RessursException) {
             if (e.httpStatus == HttpStatus.CONFLICT) {
@@ -129,13 +133,17 @@ class OppgaveClient(
         }
     }
 
-    fun finnMapper(enhetsnummer: String, limit: Int): FinnMappeResponseDto {
-        val uri = UriComponentsBuilder.fromUri(oppgaveUri)
-            .pathSegment("mappe", "sok")
-            .queryParam("enhetsnr", enhetsnummer)
-            .queryParam("limit", limit)
-            .build()
-            .toUri()
+    fun finnMapper(
+        enhetsnummer: String,
+        limit: Int,
+    ): FinnMappeResponseDto {
+        val uri =
+            UriComponentsBuilder.fromUri(oppgaveUri)
+                .pathSegment("mappe", "sok")
+                .queryParam("enhetsnr", enhetsnummer)
+                .queryParam("limit", limit)
+                .build()
+                .toUri()
         val respons = getForEntity<Ressurs<FinnMappeResponseDto>>(uri)
         return pakkUtRespons(respons, uri, "finnMappe")
     }

@@ -29,22 +29,23 @@ import java.time.LocalDate
 import java.util.UUID
 
 internal class FørstegangsbehandlingControllerTest : OppslagSpringRunnerTest() {
-
     private val fagsakUtenBehandling = fagsak(stønadstype = StønadType.OVERGANGSSTØNAD)
     private val fagsakMedBehandling = fagsak(stønadstype = StønadType.SKOLEPENGER)
     private val fagsakMedHenlagtBehandling = fagsak(stønadstype = StønadType.BARNETILSYN)
-    private val eksisterendeBehandling = behandling(
-        fagsakMedBehandling,
-        status = BehandlingStatus.FERDIGSTILT,
-        steg = StegType.BEHANDLING_FERDIGSTILT,
-        resultat = BehandlingResultat.INNVILGET,
-    )
-    private val henlagtBehandling = behandling(
-        fagsakMedBehandling,
-        status = BehandlingStatus.FERDIGSTILT,
-        steg = StegType.BEHANDLING_FERDIGSTILT,
-        resultat = BehandlingResultat.HENLAGT,
-    )
+    private val eksisterendeBehandling =
+        behandling(
+            fagsakMedBehandling,
+            status = BehandlingStatus.FERDIGSTILT,
+            steg = StegType.BEHANDLING_FERDIGSTILT,
+            resultat = BehandlingResultat.INNVILGET,
+        )
+    private val henlagtBehandling =
+        behandling(
+            fagsakMedBehandling,
+            status = BehandlingStatus.FERDIGSTILT,
+            steg = StegType.BEHANDLING_FERDIGSTILT,
+            resultat = BehandlingResultat.HENLAGT,
+        )
 
     @Autowired
     private lateinit var behandlingRepository: BehandlingRepository
@@ -60,11 +61,12 @@ internal class FørstegangsbehandlingControllerTest : OppslagSpringRunnerTest() 
         testoppsettService.lagreFagsak(fagsakMedHenlagtBehandling)
         behandlingRepository.insert(eksisterendeBehandling)
         behandlingRepository.insert(henlagtBehandling)
-        every { infotrygdReplikaClient.hentSammenslåttePerioder(any()) } returns InfotrygdPeriodeResponse(
-            emptyList(),
-            emptyList(),
-            emptyList(),
-        )
+        every { infotrygdReplikaClient.hentSammenslåttePerioder(any()) } returns
+            InfotrygdPeriodeResponse(
+                emptyList(),
+                emptyList(),
+                emptyList(),
+            )
     }
 
     @AfterEach
@@ -117,11 +119,12 @@ internal class FørstegangsbehandlingControllerTest : OppslagSpringRunnerTest() 
         førstegangsbehandlingRequest: FørstegangsbehandlingDto,
         validator: (ResponseEntity<Ressurs<UUID>>) -> Unit = responseOK(),
     ) {
-        val response = restTemplate.exchange<Ressurs<UUID>>(
-            localhost("/api/forstegangsbehandling/$fagsakId/opprett"),
-            HttpMethod.POST,
-            HttpEntity(førstegangsbehandlingRequest, headers),
-        )
+        val response =
+            restTemplate.exchange<Ressurs<UUID>>(
+                localhost("/api/forstegangsbehandling/$fagsakId/opprett"),
+                HttpMethod.POST,
+                HttpEntity(førstegangsbehandlingRequest, headers),
+            )
         validator.invoke(response)
     }
 

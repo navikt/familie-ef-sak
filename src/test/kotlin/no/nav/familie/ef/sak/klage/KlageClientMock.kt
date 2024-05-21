@@ -18,7 +18,6 @@ import java.util.UUID
 
 @Configuration
 class KlageClientMock {
-
     @Profile("mock-klage")
     @Bean
     @Primary

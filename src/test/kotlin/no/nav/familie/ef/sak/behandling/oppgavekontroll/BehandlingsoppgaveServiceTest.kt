@@ -15,7 +15,6 @@ import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
 
 class BehandlingsoppgaveServiceTest {
-
     private val taskService = mockk<TaskService>(relaxed = true)
     private val behandlingService: BehandlingService = mockk()
     private val fagsakService: FagsakService = mockk()
@@ -35,9 +34,10 @@ class BehandlingsoppgaveServiceTest {
         every { fagsakService.hentFagsakForBehandling(returnGamleÅpneBehandlinger[1].id) } returns fagsak(eksternId = 1)
         every { fagsakService.hentFagsakForBehandling(returnGamleÅpneBehandlinger[2].id) } returns fagsak(eksternId = 2)
 
-        every { oppgaveService.finnBehandleSakOppgaver(any()) } returns listOf(
-            FinnOppgaveResponseDto(1, listOf(Oppgave(saksreferanse = fagsakMedOppgave.eksternId.toString()))),
-        )
+        every { oppgaveService.finnBehandleSakOppgaver(any()) } returns
+            listOf(
+                FinnOppgaveResponseDto(1, listOf(Oppgave(saksreferanse = fagsakMedOppgave.eksternId.toString()))),
+            )
 
         val antallÅpneBehandlingerUtenOppgave = behandlingsoppgaveService.antallÅpneBehandlingerUtenOppgave()
 

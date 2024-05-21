@@ -87,13 +87,14 @@ object BeregningBarnetilsynUtil {
             beløp = beregnedeBeløp.utbetaltBeløp.roundUp().toInt(),
             beløpFørFratrekkOgSatsjustering = beregnedeBeløp.beløpFørFratrekkOgSatsjustering.roundUp().toInt(),
             sats = beregnedeBeløp.makssats,
-            beregningsgrunnlag = BeregningsgrunnlagBarnetilsynDto(
-                utgifter = utgiftsperiode.utgifter,
-                kontantstøttebeløp = kontantstøtteBeløp,
-                tilleggsstønadsbeløp = tilleggsstønadBeløp,
-                antallBarn = barn.size,
-                barn = barn,
-            ),
+            beregningsgrunnlag =
+                BeregningsgrunnlagBarnetilsynDto(
+                    utgifter = utgiftsperiode.utgifter,
+                    kontantstøttebeløp = kontantstøtteBeløp,
+                    tilleggsstønadsbeløp = tilleggsstønadBeløp,
+                    antallBarn = barn.size,
+                    barn = barn,
+                ),
             aktivitetstype = utgiftsperiode.aktivitetstype,
             periodetype = utgiftsperiode.periodetype,
         )
@@ -112,10 +113,11 @@ object BeregningBarnetilsynUtil {
         val beløpFørFratrekkOgSatsjustering =
             kalkulerUtbetalingsbeløpFørFratrekkOgSatsjustering(periodeutgift, kontantstøtteBeløp)
 
-        val maxSatsBeløp = when (brukIkkeVedtatteSatser) {
-            true -> ikkeGjeldendeSatserForBarnetilsyn.hentSatsFor(antallBarn, årMåned).toBigDecimal()
-            false -> satserForBarnetilsyn.hentSatsFor(antallBarn, årMåned).toBigDecimal()
-        }
+        val maxSatsBeløp =
+            when (brukIkkeVedtatteSatser) {
+                true -> ikkeGjeldendeSatserForBarnetilsyn.hentSatsFor(antallBarn, årMåned).toBigDecimal()
+                false -> satserForBarnetilsyn.hentSatsFor(antallBarn, årMåned).toBigDecimal()
+            }
 
         val beløpFørFratrekk = minOf(beløpFørFratrekkOgSatsjustering, maxSatsBeløp)
         val utbetaltBeløp = beløpFørFratrekk - tilleggsstønadBeløp
@@ -136,13 +138,17 @@ object BeregningBarnetilsynUtil {
 
 fun BigDecimal.roundUp(): BigDecimal = this.setScale(0, RoundingMode.UP)
 
-fun List<MaxbeløpBarnetilsynSats>.hentSatsFor(antallBarn: Int, årMåned: YearMonth): Int {
+fun List<MaxbeløpBarnetilsynSats>.hentSatsFor(
+    antallBarn: Int,
+    årMåned: YearMonth,
+): Int {
     if (antallBarn == 0) {
         return 0
     }
-    val maxbeløpBarnetilsynSats = this.singleOrNull {
-        it.periode.inneholder(årMåned.atDay(1))
-    } ?: error("Kunne ikke finne barnetilsyn sats for dato: $årMåned ")
+    val maxbeløpBarnetilsynSats =
+        this.singleOrNull {
+            it.periode.inneholder(årMåned.atDay(1))
+        } ?: error("Kunne ikke finne barnetilsyn sats for dato: $årMåned ")
 
     return maxbeløpBarnetilsynSats.maxbeløp[minOf(antallBarn, 3)]
         ?: error { "Kunne ikke finne barnetilsyn sats for antallBarn: $antallBarn periode: $årMåned " }

@@ -83,10 +83,10 @@ abstract class Vilkårsregel(
         Delvilkårsvurdering(
             resultat = Vilkårsresultat.IKKE_TATT_STILLING_TIL,
             vurderinger =
-            listOf(
-                Vurdering(
-                    regelId = regelId,
+                listOf(
+                    Vurdering(
+                        regelId = regelId,
+                    ),
                 ),
-            ),
         )
 }

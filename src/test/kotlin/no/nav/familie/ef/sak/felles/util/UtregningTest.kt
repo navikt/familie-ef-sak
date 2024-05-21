@@ -7,7 +7,6 @@ import org.junit.jupiter.api.Test
 import java.math.BigDecimal
 
 internal class UtregningTest {
-
     @Test
     internal fun `skal avrunde ned til næmeste 100`() {
         assertThat(rundNedTilNærmeste100(BigDecimal(0))).isEqualTo(0.toBigDecimal())

@@ -23,7 +23,6 @@ import org.springframework.http.ResponseEntity
 import java.util.UUID
 
 internal class FagsakControllerTest : OppslagSpringRunnerTest() {
-
     @Autowired
     private lateinit var behandlingRepository: BehandlingRepository
 
@@ -64,11 +63,12 @@ internal class FagsakControllerTest : OppslagSpringRunnerTest() {
     }
 
     private fun hentFagsakForId(fagsakId: UUID): Ressurs<FagsakDto>? {
-        val response = restTemplate.exchange<Ressurs<FagsakDto>>(
-            localhost("/api/fagsak/$fagsakId"),
-            HttpMethod.GET,
-            HttpEntity<Any>(headers),
-        )
+        val response =
+            restTemplate.exchange<Ressurs<FagsakDto>>(
+                localhost("/api/fagsak/$fagsakId"),
+                HttpMethod.GET,
+                HttpEntity<Any>(headers),
+            )
 
         Assertions.assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
         Assertions.assertThat(response.body?.status).isEqualTo(Ressurs.Status.SUKSESS)

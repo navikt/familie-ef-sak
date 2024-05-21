@@ -12,7 +12,6 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 internal class AvstemmingServiceTest {
-
     private val iverksettClient = mockk<IverksettClient>(relaxed = true)
     private val tilkjentYtelseService = mockk<TilkjentYtelseService>()
 

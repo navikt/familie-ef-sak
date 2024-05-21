@@ -5,7 +5,6 @@ import no.nav.familie.kontrakter.felles.ef.Datakilde
 import java.time.LocalDate
 
 object InternPeriodeTestUtil {
-
     fun lagInternPeriode(
         inntektsreduksjon: Int = 0,
         samordningsfradrag: Int = 0,

@@ -18,15 +18,18 @@ class TilkjentYtelseController(
     private val andelsHistorikkService: AndelsHistorikkService,
     private val tilgangService: TilgangService,
 ) {
-
     @GetMapping("/behandling/{behandlingId}")
-    fun hentTilkjentYtelseForBehandling(@PathVariable behandlingId: UUID): Ressurs<TilkjentYtelseDto> {
+    fun hentTilkjentYtelseForBehandling(
+        @PathVariable behandlingId: UUID,
+    ): Ressurs<TilkjentYtelseDto> {
         tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.ACCESS)
         return Ressurs.success(tilkjentYtelseService.hentForBehandling(behandlingId).tilDto())
     }
 
     @GetMapping("/barn/{behandlingId}")
-    fun hentBarnMedLøpendeUtbetalinger(@PathVariable behandlingId: UUID): Ressurs<BarnMedLøpendeStønad> {
+    fun hentBarnMedLøpendeUtbetalinger(
+        @PathVariable behandlingId: UUID,
+    ): Ressurs<BarnMedLøpendeStønad> {
         tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.ACCESS)
         return Ressurs.success(andelsHistorikkService.utledLøpendeUtbetalingForBarnIBarnetilsyn(behandlingId))
     }

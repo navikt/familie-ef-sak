@@ -32,7 +32,6 @@ import java.time.YearMonth
 import java.util.UUID
 
 class NyeBarnServiceTest {
-
     val behandlingService = mockk<BehandlingService>()
     val fagsakService = mockk<FagsakService>()
     val personService = mockk<PersonService>()
@@ -64,10 +63,11 @@ class NyeBarnServiceTest {
 
     @Test
     fun `finnNyeEllerUtenforTerminFødteBarn med et nytt barn i PDL siden behandling, forvent ett nytt barn`() {
-        val pdlBarn = mapOf(
-            fnrForEksisterendeBarn to pdlBarn(fødsel = fødsel(fødselsdato = fødselsdatoEksisterendeBarn)),
-            fnrForNyttBarn to pdlBarn(fødsel = fødsel(fødselsdato = fødselsdatoNyttBarn)),
-        )
+        val pdlBarn =
+            mapOf(
+                fnrForEksisterendeBarn to pdlBarn(fødsel = fødsel(fødselsdato = fødselsdatoEksisterendeBarn)),
+                fnrForNyttBarn to pdlBarn(fødsel = fødsel(fødselsdato = fødselsdatoNyttBarn)),
+            )
         every { personService.hentPersonMedBarn(any()) } returns søkerMedBarn(pdlBarn)
         every { barnService.finnBarnPåBehandling(any()) } returns listOf(behandlingBarn(fnrForEksisterendeBarn))
 
@@ -81,15 +81,17 @@ class NyeBarnServiceTest {
         val terminDato = YearMonth.now().atEndOfMonth()
         val fødselsdato = YearMonth.now().atDay(15)
         val fnrForPdlBarn = FnrGenerator.generer(fødselsdato)
-        val pdlBarn = mapOf(
-            fnrForEksisterendeBarn to pdlBarn(fødsel = fødsel(fødselsdato = fødselsdatoEksisterendeBarn)),
-            fnrForPdlBarn to pdlBarn(fødsel = fødsel(fødselsdato = fødselsdato)),
-        )
+        val pdlBarn =
+            mapOf(
+                fnrForEksisterendeBarn to pdlBarn(fødsel = fødsel(fødselsdato = fødselsdatoEksisterendeBarn)),
+                fnrForPdlBarn to pdlBarn(fødsel = fødsel(fødselsdato = fødselsdato)),
+            )
         every { personService.hentPersonMedBarn(any()) } returns søkerMedBarn(pdlBarn)
-        every { barnService.finnBarnPåBehandling(any()) } returns listOf(
-            behandlingBarn(fnrForEksisterendeBarn),
-            behandlingBarn(fødselTermindato = terminDato),
-        )
+        every { barnService.finnBarnPåBehandling(any()) } returns
+            listOf(
+                behandlingBarn(fnrForEksisterendeBarn),
+                behandlingBarn(fødselTermindato = terminDato),
+            )
 
         val barn = nyeBarnService.finnNyeEllerUtenforTerminFødteBarn(PersonIdent("fnr til søker")).nyeBarn
         assertThat(barn).hasSize(0)
@@ -101,17 +103,19 @@ class NyeBarnServiceTest {
         val fødselsdato = YearMonth.now().atDay(15)
         val fnrForTerminbarn = FnrGenerator.generer(fødselsdato)
         val fnrForTvillingbarn = FnrGenerator.generer(fødselsdato)
-        val pdlBarn = mapOf(
-            fnrForEksisterendeBarn to pdlBarn(fødsel = fødsel(fødselsdato = fødselsdatoEksisterendeBarn)),
-            fnrForTerminbarn to pdlBarn(fødsel = fødsel(fødselsdato = fødselsdato)),
-            fnrForTvillingbarn to pdlBarn(fødsel = fødsel(fødselsdato = fødselsdato)),
-        )
+        val pdlBarn =
+            mapOf(
+                fnrForEksisterendeBarn to pdlBarn(fødsel = fødsel(fødselsdato = fødselsdatoEksisterendeBarn)),
+                fnrForTerminbarn to pdlBarn(fødsel = fødsel(fødselsdato = fødselsdato)),
+                fnrForTvillingbarn to pdlBarn(fødsel = fødsel(fødselsdato = fødselsdato)),
+            )
         every { personService.hentPersonMedBarn(any()) } returns søkerMedBarn(pdlBarn)
-        every { barnService.finnBarnPåBehandling(any()) } returns listOf(
-            behandlingBarn(fnrForEksisterendeBarn),
-            behandlingBarn(fødselTermindato = terminDato),
-            behandlingBarn(fødselTermindato = terminDato),
-        )
+        every { barnService.finnBarnPåBehandling(any()) } returns
+            listOf(
+                behandlingBarn(fnrForEksisterendeBarn),
+                behandlingBarn(fødselTermindato = terminDato),
+                behandlingBarn(fødselTermindato = terminDato),
+            )
 
         val barn = nyeBarnService.finnNyeEllerUtenforTerminFødteBarn(PersonIdent("fnr til søker")).nyeBarn
         assertThat(barn).hasSize(0)
@@ -123,16 +127,18 @@ class NyeBarnServiceTest {
         val fødselsdato = YearMonth.now().atDay(15)
         val fnrForTerminbarn = FnrGenerator.generer(fødselsdato)
         val fnrForTvillingbarn = FnrGenerator.generer(fødselsdato)
-        val pdlBarn = mapOf(
-            fnrForEksisterendeBarn to pdlBarn(fødsel = fødsel(fødselsdato = fødselsdatoEksisterendeBarn)),
-            fnrForTerminbarn to pdlBarn(fødsel = fødsel(fødselsdato = fødselsdato)),
-            fnrForTvillingbarn to pdlBarn(fødsel = fødsel(fødselsdato = fødselsdato)),
-        )
+        val pdlBarn =
+            mapOf(
+                fnrForEksisterendeBarn to pdlBarn(fødsel = fødsel(fødselsdato = fødselsdatoEksisterendeBarn)),
+                fnrForTerminbarn to pdlBarn(fødsel = fødsel(fødselsdato = fødselsdato)),
+                fnrForTvillingbarn to pdlBarn(fødsel = fødsel(fødselsdato = fødselsdato)),
+            )
         every { personService.hentPersonMedBarn(any()) } returns søkerMedBarn(pdlBarn)
-        every { barnService.finnBarnPåBehandling(any()) } returns listOf(
-            behandlingBarn(fnrForEksisterendeBarn),
-            behandlingBarn(fødselTermindato = terminDato),
-        )
+        every { barnService.finnBarnPåBehandling(any()) } returns
+            listOf(
+                behandlingBarn(fnrForEksisterendeBarn),
+                behandlingBarn(fødselTermindato = terminDato),
+            )
 
         val barn = nyeBarnService.finnNyeEllerUtenforTerminFødteBarn(PersonIdent("fnr til søker")).nyeBarn
         assertThat(barn).hasSize(1)
@@ -151,10 +157,11 @@ class NyeBarnServiceTest {
 
     @Test
     fun `finnNyeEllerUtenforTerminFødteBarn med ett ekstra voksent barn i PDL skal returnere det voksne barnet som nytt barn`() {
-        val pdlBarn = mapOf(
-            fnrForEksisterendeBarn to pdlBarn(fødsel = fødsel(fødselsdato = fødselsdatoEksisterendeBarn)),
-            fnrForVoksentBarn to pdlBarn(fødsel = fødsel(fødselsdato = fødselsdatoVoksentBarn)),
-        )
+        val pdlBarn =
+            mapOf(
+                fnrForEksisterendeBarn to pdlBarn(fødsel = fødsel(fødselsdato = fødselsdatoEksisterendeBarn)),
+                fnrForVoksentBarn to pdlBarn(fødsel = fødsel(fødselsdato = fødselsdatoVoksentBarn)),
+            )
         every { personService.hentPersonMedBarn(any()) } returns søkerMedBarn(pdlBarn)
         every { barnService.finnBarnPåBehandling(any()) } returns listOf(behandlingBarn(fnrForEksisterendeBarn))
 
@@ -165,15 +172,17 @@ class NyeBarnServiceTest {
 
     @Test
     fun `finnNyeEllerUtenforTerminFødteBarn med ett ekstra terminbarn i PDL, forvent ingen treff`() {
-        val pdlBarn = mapOf(
-            fnrForEksisterendeBarn to pdlBarn(fødsel = fødsel(fødselsdato = fødselsdatoEksisterendeBarn)),
-            fnrForNyttBarn to pdlBarn(fødsel = fødsel(fødselsdato = fødselsdatoNyttBarn)),
-        )
+        val pdlBarn =
+            mapOf(
+                fnrForEksisterendeBarn to pdlBarn(fødsel = fødsel(fødselsdato = fødselsdatoEksisterendeBarn)),
+                fnrForNyttBarn to pdlBarn(fødsel = fødsel(fødselsdato = fødselsdatoNyttBarn)),
+            )
         every { personService.hentPersonMedBarn(any()) } returns søkerMedBarn(pdlBarn)
-        every { barnService.finnBarnPåBehandling(any()) } returns listOf(
-            behandlingBarn(fnrForEksisterendeBarn),
-            behandlingBarn(fødselTermindato = fødselsdatoNyttBarn),
-        )
+        every { barnService.finnBarnPåBehandling(any()) } returns
+            listOf(
+                behandlingBarn(fnrForEksisterendeBarn),
+                behandlingBarn(fødselTermindato = fødselsdatoNyttBarn),
+            )
 
         val barn = nyeBarnService.finnNyeEllerUtenforTerminFødteBarn(PersonIdent("fnr til søker")).nyeBarn
         assertThat(barn).hasSize(0)
@@ -181,21 +190,22 @@ class NyeBarnServiceTest {
 
     @Nested
     inner class FinnNyeEllerUtenforTerminFødteBarn {
-
         @Test
         internal fun `finnNyeEllerUtenforTerminFødteBarn - skal finne barn som blir født i en tidligere måned`() {
             val terminDato = LocalDate.of(2021, 2, 1)
             val fødselsdato = terminDato.minusMonths(1)
             val fnrForTerminbarn = FnrGenerator.generer(fødselsdato)
-            val pdlBarn = mapOf(
-                fnrForEksisterendeBarn to pdlBarn(fødsel = fødsel(fødselsdato = fødselsdatoEksisterendeBarn)),
-                fnrForTerminbarn to pdlBarn(fødsel = fødsel(fødselsdato = fødselsdato)),
-            )
+            val pdlBarn =
+                mapOf(
+                    fnrForEksisterendeBarn to pdlBarn(fødsel = fødsel(fødselsdato = fødselsdatoEksisterendeBarn)),
+                    fnrForTerminbarn to pdlBarn(fødsel = fødsel(fødselsdato = fødselsdato)),
+                )
             every { personService.hentPersonMedBarn(any()) } returns søkerMedBarn(pdlBarn)
-            every { barnService.finnBarnPåBehandling(any()) } returns listOf(
-                behandlingBarn(fnrForEksisterendeBarn),
-                behandlingBarn(fødselTermindato = terminDato),
-            )
+            every { barnService.finnBarnPåBehandling(any()) } returns
+                listOf(
+                    behandlingBarn(fnrForEksisterendeBarn),
+                    behandlingBarn(fødselTermindato = terminDato),
+                )
 
             val barn = nyeBarnService.finnNyeEllerUtenforTerminFødteBarn(PersonIdent("fnr til søker")).nyeBarn
             assertThat(barn).hasSize(1)
@@ -207,15 +217,17 @@ class NyeBarnServiceTest {
             val terminDato = LocalDate.of(2021, 1, 30)
             val fødselsdato = terminDato.plusWeeks(3)
             val fnrForTerminbarn = FnrGenerator.generer(fødselsdato)
-            val pdlBarn = mapOf(
-                fnrForEksisterendeBarn to pdlBarn(fødsel = fødsel(fødselsdato = fødselsdatoEksisterendeBarn)),
-                fnrForTerminbarn to pdlBarn(fødsel = fødsel(fødselsdato = fødselsdato)),
-            )
+            val pdlBarn =
+                mapOf(
+                    fnrForEksisterendeBarn to pdlBarn(fødsel = fødsel(fødselsdato = fødselsdatoEksisterendeBarn)),
+                    fnrForTerminbarn to pdlBarn(fødsel = fødsel(fødselsdato = fødselsdato)),
+                )
             every { personService.hentPersonMedBarn(any()) } returns søkerMedBarn(pdlBarn)
-            every { barnService.finnBarnPåBehandling(any()) } returns listOf(
-                behandlingBarn(fnrForEksisterendeBarn),
-                behandlingBarn(fødselTermindato = terminDato),
-            )
+            every { barnService.finnBarnPåBehandling(any()) } returns
+                listOf(
+                    behandlingBarn(fnrForEksisterendeBarn),
+                    behandlingBarn(fødselTermindato = terminDato),
+                )
 
             val barn = nyeBarnService.finnNyeEllerUtenforTerminFødteBarn(PersonIdent("fnr til søker")).nyeBarn
             assertThat(barn).hasSize(1)
@@ -227,15 +239,17 @@ class NyeBarnServiceTest {
             val terminDato = LocalDate.of(2021, 1, 1)
             val fødselsdato = terminDato.plusWeeks(3)
             val fnrForTerminbarn = FnrGenerator.generer(fødselsdato)
-            val pdlBarn = mapOf(
-                fnrForEksisterendeBarn to pdlBarn(fødsel = fødsel(fødselsdato = fødselsdatoEksisterendeBarn)),
-                fnrForTerminbarn to pdlBarn(fødsel = fødsel(fødselsdato = fødselsdato)),
-            )
+            val pdlBarn =
+                mapOf(
+                    fnrForEksisterendeBarn to pdlBarn(fødsel = fødsel(fødselsdato = fødselsdatoEksisterendeBarn)),
+                    fnrForTerminbarn to pdlBarn(fødsel = fødsel(fødselsdato = fødselsdato)),
+                )
             every { personService.hentPersonMedBarn(any()) } returns søkerMedBarn(pdlBarn)
-            every { barnService.finnBarnPåBehandling(any()) } returns listOf(
-                behandlingBarn(fnrForEksisterendeBarn),
-                behandlingBarn(fødselTermindato = terminDato),
-            )
+            every { barnService.finnBarnPåBehandling(any()) } returns
+                listOf(
+                    behandlingBarn(fnrForEksisterendeBarn),
+                    behandlingBarn(fødselTermindato = terminDato),
+                )
 
             val barn = nyeBarnService.finnNyeEllerUtenforTerminFødteBarn(PersonIdent("fnr til søker")).nyeBarn
             assertThat(barn).isEmpty()
@@ -246,15 +260,17 @@ class NyeBarnServiceTest {
             val terminDato = LocalDate.of(2021, 3, 31)
             val fødselsdato = LocalDate.of(2021, 3, 1)
             val fnrForTerminbarn = FnrGenerator.generer(fødselsdato)
-            val pdlBarn = mapOf(
-                fnrForEksisterendeBarn to pdlBarn(fødsel = fødsel(fødselsdato = fødselsdatoEksisterendeBarn)),
-                fnrForTerminbarn to pdlBarn(fødsel = fødsel(fødselsdato = fødselsdato)),
-            )
+            val pdlBarn =
+                mapOf(
+                    fnrForEksisterendeBarn to pdlBarn(fødsel = fødsel(fødselsdato = fødselsdatoEksisterendeBarn)),
+                    fnrForTerminbarn to pdlBarn(fødsel = fødsel(fødselsdato = fødselsdato)),
+                )
             every { personService.hentPersonMedBarn(any()) } returns søkerMedBarn(pdlBarn)
-            every { barnService.finnBarnPåBehandling(any()) } returns listOf(
-                behandlingBarn(fnrForEksisterendeBarn),
-                behandlingBarn(fødselTermindato = terminDato),
-            )
+            every { barnService.finnBarnPåBehandling(any()) } returns
+                listOf(
+                    behandlingBarn(fnrForEksisterendeBarn),
+                    behandlingBarn(fødselTermindato = terminDato),
+                )
 
             val barn = nyeBarnService.finnNyeEllerUtenforTerminFødteBarn(PersonIdent("fnr til søker")).nyeBarn
             assertThat(barn).isEmpty()
@@ -265,15 +281,17 @@ class NyeBarnServiceTest {
             val terminDato = LocalDate.of(2021, 3, 1)
             val fødselsdato = terminDato.minusMonths(1)
             val fnrForTerminbarn = FnrGenerator.generer(fødselsdato)
-            val pdlBarn = mapOf(
-                fnrForEksisterendeBarn to pdlBarn(fødsel = fødsel(fødselsdato = fødselsdatoEksisterendeBarn)),
-                fnrForTerminbarn to pdlBarn(fødsel = fødsel(fødselsdato = fødselsdato)),
-            )
+            val pdlBarn =
+                mapOf(
+                    fnrForEksisterendeBarn to pdlBarn(fødsel = fødsel(fødselsdato = fødselsdatoEksisterendeBarn)),
+                    fnrForTerminbarn to pdlBarn(fødsel = fødsel(fødselsdato = fødselsdato)),
+                )
             every { personService.hentPersonMedBarn(any()) } returns søkerMedBarn(pdlBarn)
-            every { barnService.finnBarnPåBehandling(any()) } returns listOf(
-                behandlingBarn(fnrForEksisterendeBarn),
-                behandlingBarn(fødselTermindato = terminDato, fnr = fnrForTerminbarn),
-            )
+            every { barnService.finnBarnPåBehandling(any()) } returns
+                listOf(
+                    behandlingBarn(fnrForEksisterendeBarn),
+                    behandlingBarn(fødselTermindato = terminDato, fnr = fnrForTerminbarn),
+                )
 
             val barn = nyeBarnService.finnNyeEllerUtenforTerminFødteBarn(PersonIdent("fnr til søker")).nyeBarn
             assertThat(barn).isEmpty()
@@ -284,14 +302,16 @@ class NyeBarnServiceTest {
             val terminDato = LocalDate.of(2021, 3, 1)
             val fødselsdato = terminDato.minusMonths(1)
             val fnrForTerminbarn = FnrGenerator.generer(fødselsdato)
-            val pdlBarn = mapOf(
-                fnrForEksisterendeBarn to pdlBarn(fødsel = fødsel(fødselsdato = fødselsdatoEksisterendeBarn)),
-                fnrForTerminbarn to pdlBarn(fødsel = fødsel(fødselsdato = fødselsdato)),
-            )
+            val pdlBarn =
+                mapOf(
+                    fnrForEksisterendeBarn to pdlBarn(fødsel = fødsel(fødselsdato = fødselsdatoEksisterendeBarn)),
+                    fnrForTerminbarn to pdlBarn(fødsel = fødsel(fødselsdato = fødselsdato)),
+                )
             every { personService.hentPersonMedBarn(any()) } returns søkerMedBarn(pdlBarn)
-            every { barnService.finnBarnPåBehandling(any()) } returns listOf(
-                behandlingBarn(fnrForEksisterendeBarn),
-            )
+            every { barnService.finnBarnPåBehandling(any()) } returns
+                listOf(
+                    behandlingBarn(fnrForEksisterendeBarn),
+                )
 
             val barn = nyeBarnService.finnNyeEllerUtenforTerminFødteBarn(PersonIdent("fnr til søker")).nyeBarn
             assertThat(barn).hasSize(1)
@@ -301,7 +321,6 @@ class NyeBarnServiceTest {
 
     @Nested
     inner class FinnNyeBarnSidenGjeldendeBehandlingForFagsak {
-
         @Test
         internal fun `har ikke barn fra før, og har ikke noen nye barn`() {
             val pdlPersonForelderBarn = emptyMap<String, PdlPersonForelderBarn>()
@@ -315,9 +334,10 @@ class NyeBarnServiceTest {
 
         @Test
         internal fun `har ikke barn fra før, men har nytt barn`() {
-            val pdlBarn = mapOf(
-                fnrForNyttBarn to pdlBarn(fødsel = fødsel(fødselsdato = fødselsdatoNyttBarn)),
-            )
+            val pdlBarn =
+                mapOf(
+                    fnrForNyttBarn to pdlBarn(fødsel = fødsel(fødselsdato = fødselsdatoNyttBarn)),
+                )
             every { personService.hentPersonMedBarn(any()) } returns søkerMedBarn(pdlBarn)
             every { barnService.finnBarnPåBehandling(any()) } returns emptyList()
             val dto = nyeBarnService.finnNyeBarnSidenGjeldendeBehandlingForFagsak(UUID.randomUUID())
@@ -329,9 +349,10 @@ class NyeBarnServiceTest {
 
         @Test
         internal fun `har barn fra før, og ikke noen nye barn`() {
-            val pdlBarn = mapOf(
-                fnrForEksisterendeBarn to pdlBarn(fødsel = fødsel(fødselsdato = fødselsdatoEksisterendeBarn)),
-            )
+            val pdlBarn =
+                mapOf(
+                    fnrForEksisterendeBarn to pdlBarn(fødsel = fødsel(fødselsdato = fødselsdatoEksisterendeBarn)),
+                )
             every { personService.hentPersonMedBarn(any()) } returns søkerMedBarn(pdlBarn)
             every { barnService.finnBarnPåBehandling(any()) } returns listOf(behandlingBarn(fnrForEksisterendeBarn))
             val dto = nyeBarnService.finnNyeBarnSidenGjeldendeBehandlingForFagsak(UUID.randomUUID())
@@ -342,10 +363,11 @@ class NyeBarnServiceTest {
 
         @Test
         internal fun `har barn fra før, og nye barn`() {
-            val pdlBarn = mapOf(
-                fnrForEksisterendeBarn to pdlBarn(fødsel = fødsel(fødselsdato = fødselsdatoEksisterendeBarn)),
-                fnrForNyttBarn to pdlBarn(fødsel = fødsel(fødselsdato = fødselsdatoNyttBarn)),
-            )
+            val pdlBarn =
+                mapOf(
+                    fnrForEksisterendeBarn to pdlBarn(fødsel = fødsel(fødselsdato = fødselsdatoEksisterendeBarn)),
+                    fnrForNyttBarn to pdlBarn(fødsel = fødsel(fødselsdato = fødselsdatoNyttBarn)),
+                )
             every { personService.hentPersonMedBarn(any()) } returns søkerMedBarn(pdlBarn)
             every { barnService.finnBarnPåBehandling(any()) } returns listOf(behandlingBarn(fnrForEksisterendeBarn))
             val dto = nyeBarnService.finnNyeBarnSidenGjeldendeBehandlingForFagsak(UUID.randomUUID())
@@ -370,9 +392,10 @@ class NyeBarnServiceTest {
         internal fun `har terminbarn fra før, som nå er født`() {
             val terminDato = LocalDate.of(2021, 3, 1)
             val fnrForTerminbarn = FnrGenerator.generer(terminDato)
-            val pdlBarn = mapOf(
-                fnrForTerminbarn to pdlBarn(fødsel = fødsel(fødselsdato = terminDato)),
-            )
+            val pdlBarn =
+                mapOf(
+                    fnrForTerminbarn to pdlBarn(fødsel = fødsel(fødselsdato = terminDato)),
+                )
             every { personService.hentPersonMedBarn(any()) } returns søkerMedBarn(pdlBarn)
             every { barnService.finnBarnPåBehandling(any()) } returns listOf(behandlingBarn(fødselTermindato = terminDato))
             val dto = nyeBarnService.finnNyeBarnSidenGjeldendeBehandlingForFagsak(UUID.randomUUID())
@@ -386,9 +409,10 @@ class NyeBarnServiceTest {
             val terminDato = LocalDate.of(2021, 3, 1)
             val fødselsdato = terminDato.minusMonths(1)
             val fnrForTerminbarn = FnrGenerator.generer(fødselsdato)
-            val pdlBarn = mapOf(
-                fnrForTerminbarn to pdlBarn(fødsel = fødsel(fødselsdato = fødselsdato)),
-            )
+            val pdlBarn =
+                mapOf(
+                    fnrForTerminbarn to pdlBarn(fødsel = fødsel(fødselsdato = fødselsdato)),
+                )
             every { personService.hentPersonMedBarn(any()) } returns søkerMedBarn(pdlBarn)
             every { barnService.finnBarnPåBehandling(any()) } returns listOf(behandlingBarn(fødselTermindato = terminDato))
             val dto = nyeBarnService.finnNyeBarnSidenGjeldendeBehandlingForFagsak(UUID.randomUUID())

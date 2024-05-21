@@ -13,8 +13,10 @@ class VentePåStatusFraIverksett(
     private val iverksettClient: IverksettClient,
     private val taskService: TaskService,
 ) : BehandlingSteg<Void?> {
-
-    override fun utførSteg(saksbehandling: Saksbehandling, data: Void?) {
+    override fun utførSteg(
+        saksbehandling: Saksbehandling,
+        data: Void?,
+    ) {
         iverksettClient.hentStatus(saksbehandling.id).let {
             when {
                 saksbehandling.skalIkkeSendeBrev && it == IverksettStatus.OK_MOT_OPPDRAG -> opprettLagSaksbehandlingsblankettTask(saksbehandling)

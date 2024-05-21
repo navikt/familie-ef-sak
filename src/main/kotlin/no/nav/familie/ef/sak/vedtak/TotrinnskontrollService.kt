@@ -38,7 +38,6 @@ class TotrinnskontrollService(
     private val tilgangService: TilgangService,
     private val validerOmregningService: ValiderOmregningService,
 ) {
-
     /**
      * Lagrer data om besluttning av totrinnskontroll
      * og returnerer navIdent til saksbehandleren som sendte behandling til beslutter
@@ -162,10 +161,11 @@ class TotrinnskontrollService(
                 )
             }
             ANGRE_SEND_TIL_BESLUTTER -> TotrinnskontrollStatusDto(UAKTUELT)
-            else -> error(
-                "Skal ikke kunne være annen status enn UNDERKJENT når " +
-                    "behandligStatus!=${BehandlingStatus.FATTER_VEDTAK}",
-            )
+            else ->
+                error(
+                    "Skal ikke kunne være annen status enn UNDERKJENT når " +
+                        "behandligStatus!=${BehandlingStatus.FATTER_VEDTAK}",
+                )
         }
     }
 

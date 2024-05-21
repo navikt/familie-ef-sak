@@ -29,9 +29,10 @@ class FagsakPersonController(
     private val fagsakService: FagsakService,
     private val personService: PersonService,
 ) {
-
     @GetMapping("{fagsakPersonId}")
-    fun hentFagsakPerson(@PathVariable fagsakPersonId: UUID): Ressurs<FagsakPersonDto> {
+    fun hentFagsakPerson(
+        @PathVariable fagsakPersonId: UUID,
+    ): Ressurs<FagsakPersonDto> {
         tilgangService.validerTilgangTilFagsakPerson(fagsakPersonId, AuditLoggerEvent.ACCESS)
         val person = fagsakPersonService.hentPerson(fagsakPersonId)
         val fagsaker = fagsakService.finnFagsakerForFagsakPersonId(person.id)
@@ -46,7 +47,9 @@ class FagsakPersonController(
     }
 
     @GetMapping("{fagsakPersonId}/utvidet")
-    fun hentFagsakPersonUtvidet(@PathVariable fagsakPersonId: UUID): Ressurs<FagsakPersonUtvidetDto> {
+    fun hentFagsakPersonUtvidet(
+        @PathVariable fagsakPersonId: UUID,
+    ): Ressurs<FagsakPersonUtvidetDto> {
         tilgangService.validerTilgangTilFagsakPerson(fagsakPersonId, AuditLoggerEvent.ACCESS)
         val person = fagsakPersonService.hentPerson(fagsakPersonId)
         val fagsaker = fagsakService.finnFagsakerForFagsakPersonId(person.id)
@@ -61,14 +64,17 @@ class FagsakPersonController(
     }
 
     @PostMapping
-    fun hentFagsakPersonIdForPerson(@RequestBody personIdentRequest: PersonIdentDto): Ressurs<UUID> {
+    fun hentFagsakPersonIdForPerson(
+        @RequestBody personIdentRequest: PersonIdentDto,
+    ): Ressurs<UUID> {
         validerIdent(personIdentRequest.personIdent)
         val personIdenter = personService.hentPersonIdenter(personIdentRequest.personIdent)
         tilgangService.validerTilgangTilPersonMedBarn(personIdentRequest.personIdent, AuditLoggerEvent.ACCESS)
-        val fagsakPersonId = fagsakPersonService.hentEllerOpprettPerson(
-            personIdenter.identer(),
-            personIdenter.gjeldende().ident,
-        ).id
+        val fagsakPersonId =
+            fagsakPersonService.hentEllerOpprettPerson(
+                personIdenter.identer(),
+                personIdenter.gjeldende().ident,
+            ).id
         return Ressurs.success(
             fagsakPersonId,
         )

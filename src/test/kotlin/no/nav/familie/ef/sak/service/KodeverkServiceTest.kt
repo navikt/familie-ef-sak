@@ -11,7 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
 
 internal class KodeverkServiceTest : OppslagSpringRunnerTest() {
-
     @Autowired
     lateinit var kodeverkService: KodeverkService
 

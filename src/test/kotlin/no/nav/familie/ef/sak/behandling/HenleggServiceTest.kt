@@ -17,7 +17,6 @@ import org.junit.jupiter.api.Test
 import java.util.UUID
 
 class HenleggServiceTest {
-
     private val behandlingService: BehandlingService = mockk()
     private val oppgaveService: OppgaveService = mockk()
     private val henleggService = HenleggService(behandlingService, oppgaveService)

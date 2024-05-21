@@ -46,7 +46,6 @@ import java.time.YearMonth
 import java.util.UUID
 
 class AndelHistorikkBeregnerTest {
-
     @Test
     internal fun `periode forlenges`() {
         run("/økonomi/periode_forlenges.csv")
@@ -79,7 +78,6 @@ class AndelHistorikkBeregnerTest {
 
     @Nested
     inner class Sanksjon {
-
         @Test
         internal fun `sanksjon midt i en periode`() {
             run("/økonomi/sanksjon_midt_i.csv")
@@ -111,33 +109,40 @@ class AndelHistorikkBeregnerTest {
         }
     }
 
-    private fun run(filnavn: String, tilOgMedBehandlingId: Int? = null) {
+    private fun run(
+        filnavn: String,
+        tilOgMedBehandlingId: Int? = null,
+    ) {
         AndelHistorikkRunner.run(javaClass.getResource(filnavn)!!, tilOgMedBehandlingId)
     }
 }
 
 object AndelHistorikkRunner {
-
-    fun run(url: URL, tilOgMedBehandlingId: Int?) {
+    fun run(
+        url: URL,
+        tilOgMedBehandlingId: Int?,
+    ) {
         val grupper = AndelHistorikkParser.parseGroup(url)
 
         validerInput(grupper)
 
         val now = LocalDateTime.now()
-        val behandlinger = grupper.input.map { it.behandlingId }.distinct().mapIndexed { index, id ->
-            behandling(id = id, opprettetTid = now.plusMinutes(index.toLong()), vedtakstidspunkt = LocalDateTime.now())
-        }
+        val behandlinger =
+            grupper.input.map { it.behandlingId }.distinct().mapIndexed { index, id ->
+                behandling(id = id, opprettetTid = now.plusMinutes(index.toLong()), vedtakstidspunkt = LocalDateTime.now())
+            }
         val behandlingId = tilOgMedBehandlingId?.let { generateBehandlingId(it) }
 
-        val output = AndelHistorikkBeregner.lagHistorikk(
-            StønadType.OVERGANGSSTØNAD,
-            grupper.input,
-            grupper.vedtaksliste,
-            behandlinger,
-            behandlingId,
-            mapOf(),
-            HistorikkKonfigurasjon(brukIkkeVedtatteSatser = true),
-        )
+        val output =
+            AndelHistorikkBeregner.lagHistorikk(
+                StønadType.OVERGANGSSTØNAD,
+                grupper.input,
+                grupper.vedtaksliste,
+                behandlinger,
+                behandlingId,
+                mapOf(),
+                HistorikkKonfigurasjon(brukIkkeVedtatteSatser = true),
+            )
 
         assertThat(toString(output)).isEqualTo(toString(grupper.expectedOutput))
     }
@@ -168,7 +173,10 @@ object AndelHistorikkRunner {
 
     private val headerString = values().joinToString(", ") { mapValue(it, it.key) }
 
-    private fun mapValue(key: AndelHistorikkHeader, value: Any?): String {
+    private fun mapValue(
+        key: AndelHistorikkHeader,
+        value: Any?,
+    ): String {
         return String.format("%-${key.minHeaderValue}s", value ?: "")
     }
 
@@ -208,7 +216,9 @@ data class ParsetAndelHistorikkData(
 )
 
 private val oppdragIdn = mutableMapOf<Int, UUID>()
+
 private fun generateBehandlingId(behandlingId: Int): UUID = oppdragIdn.getOrPut(behandlingId) { UUID.randomUUID() }
+
 private fun hentBehandlingId(behandlingId: UUID) = oppdragIdn.entries.first { it.value == behandlingId }.key
 
 /**
@@ -219,7 +229,6 @@ private enum class AndelHistorikkHeader(
     val value: (AndelHistorikkDto) -> Any?,
     val minHeaderValue: Int = key.length,
 ) {
-
     TEST_TYPE("type", { "" }),
     BEHANDLING("behandling_id", { hentBehandlingId(it.behandlingId) }),
     FOM("fom", { YearMonth.from(it.andel.stønadFra) }, 11),
@@ -235,14 +244,14 @@ private enum class AndelHistorikkHeader(
 }
 
 object AndelHistorikkParser {
-
     private const val PERSON_IDENT = "1"
 
     private fun parse(url: URL): List<AndelHistorikkData> {
         val fileContent = url.openStream()!!
-        val rows: List<Map<String, String>> = csvReader().readAllWithHeader(fileContent)
-            .map { it.entries.associate { entry -> entry.key.trim() to entry.value.trim() } }
-            .filterNot { it.getValue(TEST_TYPE.key).startsWith("!") }
+        val rows: List<Map<String, String>> =
+            csvReader().readAllWithHeader(fileContent)
+                .map { it.entries.associate { entry -> entry.key.trim() to entry.value.trim() } }
+                .filterNot { it.getValue(TEST_TYPE.key).startsWith("!") }
 
         return rows
             .map { row -> row.entries.associate { it.key.trim() to it.value.trim() } }
@@ -292,7 +301,9 @@ object AndelHistorikkParser {
         )
 
     private fun Map<String, String>.getValue(header: AndelHistorikkHeader) = getValue(header.key)
+
     private fun Map<String, String>.getOptionalValue(header: AndelHistorikkHeader) = get(header.key)?.let { emptyAsNull(it) }
+
     private fun Map<String, String>.getOptionalInt(header: AndelHistorikkHeader) = getOptionalValue(header)?.toInt()
 
     private fun emptyAsNull(s: String?): String? =
@@ -331,16 +342,17 @@ object AndelHistorikkParser {
                     resultat = ResultatType.OPPHØRT
                     opphørFom = YearMonth.from(vedtaksperioder.single().stønadFom) ?: error("Mangler stønadFom i opphør")
                 }
-                val inntekter = periodeWrapper?.perioder?.firstOrNull()
-                    ?.let {
-                        listOf(
-                            Inntektsperiode(
-                                periode = Månedsperiode(it.datoFra, it.datoTil),
-                                inntekt = BigDecimal.ZERO,
-                                samordningsfradrag = BigDecimal.ZERO,
-                            ),
-                        )
-                    } ?: emptyList()
+                val inntekter =
+                    periodeWrapper?.perioder?.firstOrNull()
+                        ?.let {
+                            listOf(
+                                Inntektsperiode(
+                                    periode = Månedsperiode(it.datoFra, it.datoTil),
+                                    inntekt = BigDecimal.ZERO,
+                                    samordningsfradrag = BigDecimal.ZERO,
+                                ),
+                            )
+                        } ?: emptyList()
                 Vedtak(
                     behandlingId = behandlingId,
                     resultatType = resultat,
@@ -357,7 +369,10 @@ object AndelHistorikkParser {
             }
     }
 
-    private fun mapVedtaksperioder(vedtaksperioder: List<AndelHistorikkData>, sanksjonsårsak: Sanksjonsårsak? = null) =
+    private fun mapVedtaksperioder(
+        vedtaksperioder: List<AndelHistorikkData>,
+        sanksjonsårsak: Sanksjonsårsak? = null,
+    ) =
         PeriodeWrapper(
             vedtaksperioder.map {
                 Vedtaksperiode(
@@ -377,23 +392,25 @@ object AndelHistorikkParser {
             behandlingÅrsak = BehandlingÅrsak.NYE_OPPLYSNINGER,
             vedtakstidspunkt = LocalDateTime.now(), // burde denne testes? EKs att man oppretter vedtaksdato per behandlingId
             saksbehandler = "",
-            vedtaksperiode = VedtakshistorikkperiodeOvergangsstønad(
-                periode = Månedsperiode(it.stønadFom!!, it.stønadFom!!),
-                aktivitet = AktivitetType.IKKE_AKTIVITETSPLIKT,
-                periodeType = VedtaksperiodeType.HOVEDPERIODE,
-                inntekt = Inntekt(YearMonth.from(it.stønadFom), BigDecimal.ZERO, BigDecimal.ZERO),
-            ),
+            vedtaksperiode =
+                VedtakshistorikkperiodeOvergangsstønad(
+                    periode = Månedsperiode(it.stønadFom!!, it.stønadFom!!),
+                    aktivitet = AktivitetType.IKKE_AKTIVITETSPLIKT,
+                    periodeType = VedtaksperiodeType.HOVEDPERIODE,
+                    inntekt = Inntekt(YearMonth.from(it.stønadFom), BigDecimal.ZERO, BigDecimal.ZERO),
+                ),
             andel = AndelMedGrunnlagDto(mapAndel(it), null),
             aktivitet = it.aktivitet!!,
             periodeType = it.periodeType!!,
-            endring = it.type?.let { type ->
-                HistorikkEndring(
-                    type,
-                    it.endretI
-                        ?: error("Trenger id til behandling hvis det finnes en endring"),
-                    LocalDateTime.now(),
-                )
-            },
+            endring =
+                it.type?.let { type ->
+                    HistorikkEndring(
+                        type,
+                        it.endretI
+                            ?: error("Trenger id til behandling hvis det finnes en endring"),
+                        LocalDateTime.now(),
+                    )
+                },
             aktivitetArbeid = null,
             erSanksjon = false,
             sanksjonsårsak = null,

@@ -12,7 +12,6 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 
 internal class ÅrsakRevurderingsRepositoryTest : OppslagSpringRunnerTest() {
-
     @Autowired
     lateinit var behandlingRepository: BehandlingRepository
 
@@ -24,12 +23,13 @@ internal class ÅrsakRevurderingsRepositoryTest : OppslagSpringRunnerTest() {
         val fagsak = testoppsettService.lagreFagsak(fagsak())
         val behandling = behandlingRepository.insert(behandling(fagsak))
 
-        val årsakRevurdering = ÅrsakRevurdering(
-            behandling.id,
-            Opplysningskilde.MELDING_MODIA,
-            Revurderingsårsak.ENDRING_AKTIVITET,
-            "beskrivelse",
-        )
+        val årsakRevurdering =
+            ÅrsakRevurdering(
+                behandling.id,
+                Opplysningskilde.MELDING_MODIA,
+                Revurderingsårsak.ENDRING_AKTIVITET,
+                "beskrivelse",
+            )
         repository.insert(årsakRevurdering)
 
         val hentetÅrsakRevurdering = repository.findByIdOrThrow(behandling.id)

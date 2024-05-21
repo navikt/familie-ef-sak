@@ -41,7 +41,6 @@ class OppgaveService(
     private val cacheManager: CacheManager,
     @Value("\${FRONTEND_OPPGAVE_URL}") private val frontendOppgaveUrl: URI,
 ) {
-
     private val logger = LoggerFactory.getLogger(javaClass)
 
     fun opprettOppgave(
@@ -67,12 +66,13 @@ class OppgaveService(
                     mappeId = mappeId,
                     prioritet = prioritet,
                 )
-            val oppgave = EfOppgave(
-                gsakOppgaveId = opprettetOppgaveId,
-                behandlingId = behandlingId,
-                type = oppgavetype,
-                oppgaveSubtype = vurderHenvendelseOppgaveSubtype,
-            )
+            val oppgave =
+                EfOppgave(
+                    gsakOppgaveId = opprettetOppgaveId,
+                    behandlingId = behandlingId,
+                    type = oppgavetype,
+                    oppgaveSubtype = vurderHenvendelseOppgaveSubtype,
+                )
             oppgaveRepository.insert(oppgave)
             opprettetOppgaveId
         }
@@ -112,20 +112,21 @@ class OppgaveService(
         val fagsak = fagsakService.hentFagsakForBehandling(behandlingId)
         val personIdent = fagsak.hentAktivIdent()
         val enhetsnummer = arbeidsfordelingService.hentNavEnhetId(personIdent, oppgavetype)
-        val opprettOppgave = OpprettOppgaveRequest(
-            ident = OppgaveIdentV2(ident = personIdent, gruppe = IdentGruppe.FOLKEREGISTERIDENT),
-            saksId = fagsak.eksternId.toString(),
-            tema = Tema.ENF,
-            oppgavetype = oppgavetype,
-            fristFerdigstillelse = fristFerdigstillelse ?: lagFristForOppgave(LocalDateTime.now()),
-            beskrivelse = beskrivelse,
-            enhetsnummer = enhetsnummer,
-            behandlingstema = finnBehandlingstema(fagsak.stønadstype).value,
-            tilordnetRessurs = tilordnetNavIdent,
-            behandlesAvApplikasjon = if (settBehandlesAvApplikasjon) "familie-ef-sak" else null,
-            mappeId = mappeId ?: finnAktuellMappe(enhetsnummer, oppgavetype),
-            prioritet = prioritet,
-        )
+        val opprettOppgave =
+            OpprettOppgaveRequest(
+                ident = OppgaveIdentV2(ident = personIdent, gruppe = IdentGruppe.FOLKEREGISTERIDENT),
+                saksId = fagsak.eksternId.toString(),
+                tema = Tema.ENF,
+                oppgavetype = oppgavetype,
+                fristFerdigstillelse = fristFerdigstillelse ?: lagFristForOppgave(LocalDateTime.now()),
+                beskrivelse = beskrivelse,
+                enhetsnummer = enhetsnummer,
+                behandlingstema = finnBehandlingstema(fagsak.stønadstype).value,
+                tilordnetRessurs = tilordnetNavIdent,
+                behandlesAvApplikasjon = if (settBehandlesAvApplikasjon) "familie-ef-sak" else null,
+                mappeId = mappeId ?: finnAktuellMappe(enhetsnummer, oppgavetype),
+                prioritet = prioritet,
+            )
 
         return try {
             oppgaveClient.opprettOppgave(opprettOppgave)
@@ -141,13 +142,17 @@ class OppgaveService(
     private fun finnerIkkeGyldigArbeidsfordeling(e: Exception): Boolean =
         e.message?.contains("Fant ingen gyldig arbeidsfordeling for oppgaven") ?: false
 
-    private fun finnAktuellMappe(enhetsnummer: String?, oppgavetype: Oppgavetype): Long? {
+    private fun finnAktuellMappe(
+        enhetsnummer: String?,
+        oppgavetype: Oppgavetype,
+    ): Long? {
         if (enhetsnummer == "4489" && oppgavetype == Oppgavetype.GodkjenneVedtak) {
             val mapper = finnMapper(enhetsnummer)
-            val mappeIdForGodkjenneVedtak = mapper.find {
-                (it.navn.contains("70 Godkjennevedtak") || it.navn.contains("70 Godkjenne vedtak")) &&
-                    !it.navn.contains("EF Sak")
-            }?.id?.toLong()
+            val mappeIdForGodkjenneVedtak =
+                mapper.find {
+                    (it.navn.contains("70 Godkjennevedtak") || it.navn.contains("70 Godkjenne vedtak")) &&
+                        !it.navn.contains("EF Sak")
+                }?.id?.toLong()
             mappeIdForGodkjenneVedtak?.let {
                 logger.info("Legger oppgave i Godkjenne vedtak-mappe")
             } ?: run {
@@ -163,14 +168,19 @@ class OppgaveService(
 
     fun finnHendelseMappeId(enhetsnummer: String): Long? {
         val mapperResponse = oppgaveClient.finnMapper(enhetsnummer, 1000)
-        val mappe = mapperResponse.mapper.find {
-            it.navn.contains("62 Hendelser") && !it.navn.contains("EF Sak")
-        }
-            ?: error("Fant ikke mappe for hendelser")
+        val mappe =
+            mapperResponse.mapper.find {
+                it.navn.contains("62 Hendelser") && !it.navn.contains("EF Sak")
+            }
+                ?: error("Fant ikke mappe for hendelser")
         return mappe.id.toLong()
     }
 
-    fun fordelOppgave(gsakOppgaveId: Long, saksbehandler: String, versjon: Int? = null): Long {
+    fun fordelOppgave(
+        gsakOppgaveId: Long,
+        saksbehandler: String,
+        versjon: Int? = null,
+    ): Long {
         return oppgaveClient.fordelOppgave(
             gsakOppgaveId,
             saksbehandler,
@@ -178,11 +188,17 @@ class OppgaveService(
         )
     }
 
-    fun tilbakestillFordelingPåOppgave(gsakOppgaveId: Long, versjon: Int? = null): Long {
+    fun tilbakestillFordelingPåOppgave(
+        gsakOppgaveId: Long,
+        versjon: Int? = null,
+    ): Long {
         return oppgaveClient.fordelOppgave(gsakOppgaveId, null, versjon = versjon)
     }
 
-    fun hentOppgaveSomIkkeErFerdigstilt(oppgavetype: Oppgavetype, saksbehandling: Saksbehandling): EfOppgave? {
+    fun hentOppgaveSomIkkeErFerdigstilt(
+        oppgavetype: Oppgavetype,
+        saksbehandling: Saksbehandling,
+    ): EfOppgave? {
         return oppgaveRepository.findByBehandlingIdAndTypeAndErFerdigstiltIsFalse(saksbehandling.id, oppgavetype)
     }
 
@@ -194,9 +210,13 @@ class OppgaveService(
         return oppgaveRepository.findByGsakOppgaveId(gsakOppgaveId)
     }
 
-    fun ferdigstillBehandleOppgave(behandlingId: UUID, oppgavetype: Oppgavetype) {
-        val oppgave = oppgaveRepository.findByBehandlingIdAndTypeAndErFerdigstiltIsFalse(behandlingId, oppgavetype)
-            ?: error("Finner ikke oppgave for behandling $behandlingId")
+    fun ferdigstillBehandleOppgave(
+        behandlingId: UUID,
+        oppgavetype: Oppgavetype,
+    ) {
+        val oppgave =
+            oppgaveRepository.findByBehandlingIdAndTypeAndErFerdigstiltIsFalse(behandlingId, oppgavetype)
+                ?: error("Finner ikke oppgave for behandling $behandlingId")
         ferdigstillOppgaveOgSettEfOppgaveTilFerdig(oppgave)
     }
 
@@ -216,7 +236,10 @@ class OppgaveService(
         }
     }
 
-    private fun ferdigstillOppgaveOgSettEfOppgaveTilFerdig(oppgave: EfOppgave, ignorerFeilregistrert: Boolean = false) {
+    private fun ferdigstillOppgaveOgSettEfOppgaveTilFerdig(
+        oppgave: EfOppgave,
+        ignorerFeilregistrert: Boolean = false,
+    ) {
         try {
             ferdigstillOppgave(oppgave.gsakOppgaveId)
         } catch (e: RessursException) {
@@ -234,7 +257,10 @@ class OppgaveService(
         oppgaveClient.ferdigstillOppgave(gsakOppgaveId)
     }
 
-    fun settEfOppgaveTilFerdig(behandlingId: UUID, oppgavetype: Oppgavetype): EfOppgave? {
+    fun settEfOppgaveTilFerdig(
+        behandlingId: UUID,
+        oppgavetype: Oppgavetype,
+    ): EfOppgave? {
         val oppgave = oppgaveRepository.findByBehandlingIdAndTypeAndErFerdigstiltIsFalse(behandlingId, oppgavetype)
         return oppgave?.let {
             oppgaveRepository.update(it.copy(erFerdigstilt = true))
@@ -283,12 +309,13 @@ class OppgaveService(
      *
      */
     fun lagFristForOppgave(gjeldendeTid: LocalDateTime): LocalDate {
-        val frist = when (gjeldendeTid.dayOfWeek) {
-            DayOfWeek.FRIDAY -> fristBasertPåKlokkeslett(gjeldendeTid.plusDays(2))
-            DayOfWeek.SATURDAY -> fristBasertPåKlokkeslett(gjeldendeTid.plusDays(2).withHour(8))
-            DayOfWeek.SUNDAY -> fristBasertPåKlokkeslett(gjeldendeTid.plusDays(1).withHour(8))
-            else -> fristBasertPåKlokkeslett(gjeldendeTid)
-        }
+        val frist =
+            when (gjeldendeTid.dayOfWeek) {
+                DayOfWeek.FRIDAY -> fristBasertPåKlokkeslett(gjeldendeTid.plusDays(2))
+                DayOfWeek.SATURDAY -> fristBasertPåKlokkeslett(gjeldendeTid.plusDays(2).withHour(8))
+                DayOfWeek.SUNDAY -> fristBasertPåKlokkeslett(gjeldendeTid.plusDays(1).withHour(8))
+                else -> fristBasertPåKlokkeslett(gjeldendeTid)
+            }
 
         return when (frist.dayOfWeek) {
             DayOfWeek.SATURDAY -> frist.plusDays(2)
@@ -304,10 +331,11 @@ class OppgaveService(
     fun finnMapper(enhet: String): List<MappeDto> {
         return cacheManager.getValue("oppgave-mappe", enhet) {
             logger.info("Henter mapper på nytt")
-            val mappeRespons = oppgaveClient.finnMapper(
-                enhetsnummer = enhet,
-                limit = 1000,
-            )
+            val mappeRespons =
+                oppgaveClient.finnMapper(
+                    enhetsnummer = enhet,
+                    limit = 1000,
+                )
             if (mappeRespons.antallTreffTotalt > mappeRespons.mapper.size) {
                 logger.error(
                     "Det finnes flere mapper (${mappeRespons.antallTreffTotalt}) " +
@@ -327,14 +355,15 @@ class OppgaveService(
     }
 
     fun finnOppgaverIUtdanningsmappe(fristDato: LocalDate): List<UtdanningOppgaveDto> {
-        val oppgaver = oppgaveClient.hentOppgaver(
-            FinnOppgaveRequest(
-                tema = Tema.ENF,
-                mappeId = 100026882, // Mappenavn: 64 - Utdanning
-                fristFomDato = fristDato,
-                fristTomDato = fristDato,
-            ),
-        ).oppgaver
+        val oppgaver =
+            oppgaveClient.hentOppgaver(
+                FinnOppgaveRequest(
+                    tema = Tema.ENF,
+                    mappeId = 100026882, // Mappenavn: 64 - Utdanning
+                    fristFomDato = fristDato,
+                    fristTomDato = fristDato,
+                ),
+            ).oppgaver
 
         return oppgaver.map { oppgave ->
             UtdanningOppgaveDto(
@@ -351,30 +380,36 @@ class OppgaveService(
     ): List<FinnOppgaveResponseDto> {
         val limit: Long = 2000
 
-        val behandleSakOppgaver = oppgaveClient.hentOppgaver(
-            finnOppgaveRequest = FinnOppgaveRequest(
-                tema = Tema.ENF,
-                oppgavetype = Oppgavetype.BehandleSak,
-                limit = limit,
-                opprettetTomTidspunkt = opprettetTomTidspunktPåBehandleSakOppgave,
-            ),
-        )
+        val behandleSakOppgaver =
+            oppgaveClient.hentOppgaver(
+                finnOppgaveRequest =
+                    FinnOppgaveRequest(
+                        tema = Tema.ENF,
+                        oppgavetype = Oppgavetype.BehandleSak,
+                        limit = limit,
+                        opprettetTomTidspunkt = opprettetTomTidspunktPåBehandleSakOppgave,
+                    ),
+            )
 
-        val behandleUnderkjent = oppgaveClient.hentOppgaver(
-            finnOppgaveRequest = FinnOppgaveRequest(
-                tema = Tema.ENF,
-                oppgavetype = Oppgavetype.BehandleUnderkjentVedtak,
-                limit = limit,
-            ),
-        )
+        val behandleUnderkjent =
+            oppgaveClient.hentOppgaver(
+                finnOppgaveRequest =
+                    FinnOppgaveRequest(
+                        tema = Tema.ENF,
+                        oppgavetype = Oppgavetype.BehandleUnderkjentVedtak,
+                        limit = limit,
+                    ),
+            )
 
-        val godkjenne = oppgaveClient.hentOppgaver(
-            finnOppgaveRequest = FinnOppgaveRequest(
-                tema = Tema.ENF,
-                oppgavetype = Oppgavetype.GodkjenneVedtak,
-                limit = limit,
-            ),
-        )
+        val godkjenne =
+            oppgaveClient.hentOppgaver(
+                finnOppgaveRequest =
+                    FinnOppgaveRequest(
+                        tema = Tema.ENF,
+                        oppgavetype = Oppgavetype.GodkjenneVedtak,
+                        limit = limit,
+                    ),
+            )
 
         logger.info("Hentet oppgaver:  ${behandleSakOppgaver.antallTreffTotalt}, ${behandleUnderkjent.antallTreffTotalt}, ${godkjenne.antallTreffTotalt}")
 
@@ -399,14 +434,15 @@ class OppgaveService(
         }
     }
 
-    private fun utledSettBehandlesAvApplikasjon(oppgavetype: Oppgavetype) = when (oppgavetype) {
-        Oppgavetype.BehandleSak,
-        Oppgavetype.BehandleUnderkjentVedtak,
-        Oppgavetype.GodkjenneVedtak,
-        -> true
+    private fun utledSettBehandlesAvApplikasjon(oppgavetype: Oppgavetype) =
+        when (oppgavetype) {
+            Oppgavetype.BehandleSak,
+            Oppgavetype.BehandleUnderkjentVedtak,
+            Oppgavetype.GodkjenneVedtak,
+            -> true
 
-        Oppgavetype.InnhentDokumentasjon -> false
-        Oppgavetype.VurderHenvendelse -> false
-        else -> error("Håndterer ikke behandlesAvApplikasjon for $oppgavetype")
-    }
+            Oppgavetype.InnhentDokumentasjon -> false
+            Oppgavetype.VurderHenvendelse -> false
+            else -> error("Håndterer ikke behandlesAvApplikasjon for $oppgavetype")
+        }
 }

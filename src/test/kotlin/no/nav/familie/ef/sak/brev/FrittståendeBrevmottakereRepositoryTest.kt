@@ -22,7 +22,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import java.time.temporal.ChronoUnit
 
 internal class FrittståendeBrevmottakereRepositoryTest : OppslagSpringRunnerTest() {
-
     @Autowired
     private lateinit var frittståendeBrevmottakereRepository: FrittståendeBrevmottakereRepository
 
@@ -40,27 +39,30 @@ internal class FrittståendeBrevmottakereRepositoryTest : OppslagSpringRunnerTes
     @Test
     internal fun `skal lagre brevmottaker for fagsak`() {
         val fagsak = testoppsettService.lagreFagsak(fagsak())
-        val brevmottakere = BrevmottakereFrittståendeBrev(
-            fagsakId = fagsak.id,
-            personer = PersonerWrapper(
-                listOf(
-                    BrevmottakerPerson(
-                        personIdent = "12345678910",
-                        navn = "Verge",
-                        mottakerRolle = MottakerRolle.VERGE,
+        val brevmottakere =
+            BrevmottakereFrittståendeBrev(
+                fagsakId = fagsak.id,
+                personer =
+                    PersonerWrapper(
+                        listOf(
+                            BrevmottakerPerson(
+                                personIdent = "12345678910",
+                                navn = "Verge",
+                                mottakerRolle = MottakerRolle.VERGE,
+                            ),
+                        ),
                     ),
-                ),
-            ),
-            organisasjoner = OrganisasjonerWrapper(
-                listOf(
-                    BrevmottakerOrganisasjon(
-                        organisasjonsnummer = "12345678",
-                        navnHosOrganisasjon = "Advokat",
-                        MottakerRolle.FULLMAKT,
+                organisasjoner =
+                    OrganisasjonerWrapper(
+                        listOf(
+                            BrevmottakerOrganisasjon(
+                                organisasjonsnummer = "12345678",
+                                navnHosOrganisasjon = "Advokat",
+                                MottakerRolle.FULLMAKT,
+                            ),
+                        ),
                     ),
-                ),
-            ),
-        )
+            )
 
         frittståendeBrevmottakereRepository.insert(brevmottakere)
 

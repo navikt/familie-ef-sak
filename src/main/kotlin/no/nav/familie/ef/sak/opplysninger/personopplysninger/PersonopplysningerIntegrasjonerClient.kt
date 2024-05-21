@@ -26,7 +26,6 @@ class PersonopplysningerIntegrasjonerClient(
     private val integrasjonerConfig: IntegrasjonerConfig,
 ) :
     AbstractPingableRestClient(restOperations, "familie.integrasjoner") {
-
     override val pingUri: URI = integrasjonerConfig.pingUri
 
     fun sjekkTilgangTilPerson(personIdent: String): Tilgang {
@@ -95,7 +94,6 @@ class PersonopplysningerIntegrasjonerClient(
     }
 
     companion object {
-
         const val HEADER_NAV_TEMA = "Nav-Tema"
         const val HEADER_NAV_TEMA_ENF = "ENF"
     }

@@ -28,7 +28,6 @@ class BeregningBarnetilsynController(
     private val tilkjentYtelseService: TilkjentYtelseService,
     private val featureToggleService: FeatureToggleService,
 ) {
-
     @PostMapping
     fun beregnYtelserForBarnetilsyn(
         @RequestBody
@@ -44,7 +43,9 @@ class BeregningBarnetilsynController(
     }
 
     @GetMapping("/{behandlingId}")
-    fun hentBeregning(@PathVariable behandlingId: UUID): Ressurs<List<BeløpsperiodeBarnetilsynDto>> {
+    fun hentBeregning(
+        @PathVariable behandlingId: UUID,
+    ): Ressurs<List<BeløpsperiodeBarnetilsynDto>> {
         tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.UPDATE)
         val vedtak = vedtakService.hentVedtakDto(behandlingId)
 

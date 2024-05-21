@@ -19,7 +19,6 @@ class FørstegangsbehandlingController(
     private val førstegangsbehandlingService: FørstegangsbehandlingService,
     private val tilgangService: TilgangService,
 ) {
-
     @PostMapping("{fagsakId}/opprett")
     fun opprettFørstegangsbehandlingManuelt(
         @PathVariable fagsakId: UUID,

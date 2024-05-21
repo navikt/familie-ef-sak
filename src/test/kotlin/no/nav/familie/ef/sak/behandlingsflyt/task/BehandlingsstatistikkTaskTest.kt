@@ -47,27 +47,28 @@ import java.time.ZonedDateTime
 import java.util.TimeZone
 
 internal class BehandlingsstatistikkTaskTest {
-
     init {
         TimeZone.setDefault(TimeZone.getTimeZone(ZoneId.of("Europe/Oslo")))
     }
 
     val personIdent = "123456789012"
     val fagsak = fagsak(identer = fagsakpersoner(setOf(personIdent)))
-    val behandling = behandling(
-        fagsak,
-        resultat = BehandlingResultat.INNVILGET,
-        type = FØRSTEGANGSBEHANDLING,
-        kategori = BehandlingKategori.NASJONAL,
-        kravMottatt = LocalDate.of(2022, 3, 1),
-    )
-    val avslåttBehandling = behandling(
-        fagsak,
-        resultat = BehandlingResultat.AVSLÅTT,
-        type = FØRSTEGANGSBEHANDLING,
-        kategori = BehandlingKategori.NASJONAL,
-        kravMottatt = LocalDate.of(2022, 3, 1),
-    )
+    val behandling =
+        behandling(
+            fagsak,
+            resultat = BehandlingResultat.INNVILGET,
+            type = FØRSTEGANGSBEHANDLING,
+            kategori = BehandlingKategori.NASJONAL,
+            kravMottatt = LocalDate.of(2022, 3, 1),
+        )
+    val avslåttBehandling =
+        behandling(
+            fagsak,
+            resultat = BehandlingResultat.AVSLÅTT,
+            type = FØRSTEGANGSBEHANDLING,
+            kategori = BehandlingKategori.NASJONAL,
+            kravMottatt = LocalDate.of(2022, 3, 1),
+        )
     val avslåttSaksbehandling = saksbehandling(fagsak, avslåttBehandling)
     val saksbehandling = saksbehandling(fagsak, behandling)
     val hendelse = Hendelse.BESLUTTET
@@ -81,14 +82,15 @@ internal class BehandlingsstatistikkTaskTest {
     val periodeBegrunnelse = "Lorem ipsum"
     val inntektBegrunnelse = "Inntektus loremus ipsums"
     val behandlingMetode = BehandlingMetode.MANUELL
-    val payload = BehandlingsstatistikkTaskPayload(
-        behandling.id,
-        hendelse,
-        hendelseTidspunkt.toLocalDateTime(),
-        saksbehandlerId,
-        oppgaveId,
-        behandlingMetode,
-    )
+    val payload =
+        BehandlingsstatistikkTaskPayload(
+            behandling.id,
+            hendelse,
+            hendelseTidspunkt.toLocalDateTime(),
+            saksbehandlerId,
+            oppgaveId,
+            behandlingMetode,
+        )
 
     val oppgaveMock = mockk<Oppgave>()
     val grunnlagsdataMock = mockk<GrunnlagsdataMedMetadata>()
@@ -101,15 +103,16 @@ internal class BehandlingsstatistikkTaskTest {
     val oppgaveService = mockk<OppgaveService>()
     val årsakRevurderingService = mockk<ÅrsakRevurderingService>()
 
-    val behandlingsstatistikkTask = BehandlingsstatistikkTask(
-        iverksettClient = iverksettClient,
-        behandlingService = behandlingService,
-        søknadService = søknadService,
-        vedtakRepository = vedtakRepository,
-        oppgaveService = oppgaveService,
-        grunnlagsdataService = grunnlagsdataService,
-        årsakRevurderingService = årsakRevurderingService,
-    )
+    val behandlingsstatistikkTask =
+        BehandlingsstatistikkTask(
+            iverksettClient = iverksettClient,
+            behandlingService = behandlingService,
+            søknadService = søknadService,
+            vedtakRepository = vedtakRepository,
+            oppgaveService = oppgaveService,
+            grunnlagsdataService = grunnlagsdataService,
+            årsakRevurderingService = årsakRevurderingService,
+        )
 
     @BeforeEach
     internal fun setUp() {
@@ -118,14 +121,15 @@ internal class BehandlingsstatistikkTaskTest {
         every { oppgaveService.hentOppgave(oppgaveId) } returns oppgaveMock
         every { søknadService.finnDatoMottattForSøknad(any()) } returns søknadstidspunkt.toLocalDateTime()
         every { grunnlagsdataService.hentGrunnlagsdata(behandling.id) } returns grunnlagsdataMock
-        every { vedtakRepository.findByIdOrNull(behandling.id) } returns Vedtak(
-            behandlingId = behandling.id,
-            resultatType = ResultatType.INNVILGE,
-            periodeBegrunnelse = periodeBegrunnelse,
-            inntektBegrunnelse = inntektBegrunnelse,
-            saksbehandlerIdent = saksbehandlerId,
-            beslutterIdent = beslutterId,
-        )
+        every { vedtakRepository.findByIdOrNull(behandling.id) } returns
+            Vedtak(
+                behandlingId = behandling.id,
+                resultatType = ResultatType.INNVILGE,
+                periodeBegrunnelse = periodeBegrunnelse,
+                inntektBegrunnelse = inntektBegrunnelse,
+                saksbehandlerIdent = saksbehandlerId,
+                beslutterIdent = beslutterId,
+            )
         every { oppgaveMock.tildeltEnhetsnr } returns tildeltEnhet
         every { oppgaveMock.opprettetAvEnhetsnr } returns opprettetEnhet
         every { grunnlagsdataMock.grunnlagsdata.søker.adressebeskyttelse } returns null
@@ -138,10 +142,11 @@ internal class BehandlingsstatistikkTaskTest {
 
         every { iverksettClient.sendBehandlingsstatistikk(capture(behandlingsstatistikkSlot)) } just Runs
 
-        val task = Task(
-            type = "behandlingsstatistikkTask",
-            payload = objectMapper.writeValueAsString(payload),
-        )
+        val task =
+            Task(
+                type = "behandlingsstatistikkTask",
+                payload = objectMapper.writeValueAsString(payload),
+            )
 
         behandlingsstatistikkTask.doTask(task)
 
@@ -170,10 +175,11 @@ internal class BehandlingsstatistikkTaskTest {
         every { søknadService.finnDatoMottattForSøknad(any()) } returns null
         every { iverksettClient.sendBehandlingsstatistikk(capture(behandlingsstatistikkSlot)) } just Runs
 
-        val task = Task(
-            type = "behandlingsstatistikkTask",
-            payload = objectMapper.writeValueAsString(payload),
-        )
+        val task =
+            Task(
+                type = "behandlingsstatistikkTask",
+                payload = objectMapper.writeValueAsString(payload),
+            )
 
         behandlingsstatistikkTask.doTask(task)
 
@@ -187,19 +193,21 @@ internal class BehandlingsstatistikkTaskTest {
         val behandlingsstatistikkSlot = slot<BehandlingsstatistikkDto>()
         every { iverksettClient.sendBehandlingsstatistikk(capture(behandlingsstatistikkSlot)) } just Runs
         every { behandlingService.hentSaksbehandling(behandling.id) } returns avslåttSaksbehandling
-        every { vedtakRepository.findByIdOrNull(behandling.id) } returns Vedtak(
-            behandlingId = behandling.id,
-            resultatType = ResultatType.AVSLÅ,
-            periodeBegrunnelse = periodeBegrunnelse,
-            inntektBegrunnelse = inntektBegrunnelse,
-            saksbehandlerIdent = saksbehandlerId,
-            beslutterIdent = beslutterId,
-            avslåÅrsak = AvslagÅrsak.MINDRE_INNTEKTSENDRINGER,
-        )
-        val task = Task(
-            type = "behandlingsstatistikkTask",
-            payload = objectMapper.writeValueAsString(payload),
-        )
+        every { vedtakRepository.findByIdOrNull(behandling.id) } returns
+            Vedtak(
+                behandlingId = behandling.id,
+                resultatType = ResultatType.AVSLÅ,
+                periodeBegrunnelse = periodeBegrunnelse,
+                inntektBegrunnelse = inntektBegrunnelse,
+                saksbehandlerIdent = saksbehandlerId,
+                beslutterIdent = beslutterId,
+                avslåÅrsak = AvslagÅrsak.MINDRE_INNTEKTSENDRINGER,
+            )
+        val task =
+            Task(
+                type = "behandlingsstatistikkTask",
+                payload = objectMapper.writeValueAsString(payload),
+            )
 
         behandlingsstatistikkTask.doTask(task)
 
@@ -216,22 +224,25 @@ internal class BehandlingsstatistikkTaskTest {
         every { iverksettClient.sendBehandlingsstatistikk(capture(behandlingsstatistikkSlot)) } just Runs
         every { behandlingService.hentSaksbehandling(behandling.id) } returns
             saksbehandling.copy(stønadstype = StønadType.BARNETILSYN)
-        every { vedtakRepository.findByIdOrNull(behandling.id) } returns Vedtak(
-            behandlingId = behandling.id,
-            resultatType = ResultatType.INNVILGE,
-            inntektBegrunnelse = inntektBegrunnelse,
-            barnetilsyn = BarnetilsynWrapper(
-                emptyList(),
-                begrunnelse,
-            ),
-            saksbehandlerIdent = saksbehandlerId,
-            beslutterIdent = beslutterId,
-        )
+        every { vedtakRepository.findByIdOrNull(behandling.id) } returns
+            Vedtak(
+                behandlingId = behandling.id,
+                resultatType = ResultatType.INNVILGE,
+                inntektBegrunnelse = inntektBegrunnelse,
+                barnetilsyn =
+                    BarnetilsynWrapper(
+                        emptyList(),
+                        begrunnelse,
+                    ),
+                saksbehandlerIdent = saksbehandlerId,
+                beslutterIdent = beslutterId,
+            )
 
-        val task = Task(
-            type = "behandlingsstatistikkTask",
-            payload = objectMapper.writeValueAsString(payload),
-        )
+        val task =
+            Task(
+                type = "behandlingsstatistikkTask",
+                payload = objectMapper.writeValueAsString(payload),
+            )
 
         behandlingsstatistikkTask.doTask(task)
 

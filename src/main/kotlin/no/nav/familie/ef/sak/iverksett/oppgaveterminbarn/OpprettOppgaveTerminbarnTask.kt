@@ -22,7 +22,6 @@ class OpprettOppgaveTerminbarnTask(
     val opprettOppgaverForTerminbarnService: OpprettOppgaverTerminbarnService,
     val featureToggleService: FeatureToggleService,
 ) : AsyncTaskStep {
-
     override fun doTask(task: Task) {
         val oppgaveForBarn = objectMapper.readValue<OppgaveForBarn>(task.payload)
         opprettOppgaverForTerminbarnService.opprettOppgaveForTerminbarn(oppgaveForBarn)

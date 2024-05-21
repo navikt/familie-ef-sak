@@ -63,7 +63,6 @@ import java.util.Properties
 import java.util.UUID
 
 internal class SendTilBeslutterStegTest {
-
     private val taskService = mockk<TaskService>()
     private val fagsakService = mockk<FagsakService>()
     private val behandlingService = mockk<BehandlingService>(relaxed = true)
@@ -77,17 +76,18 @@ internal class SendTilBeslutterStegTest {
     private val oppgaverForOpprettelseService = mockk<OppgaverForOpprettelseService>(relaxed = true)
     private val behandlingshistorikkService = mockk<BehandlingshistorikkService>()
     private val tilordnetRessursService = mockk<TilordnetRessursService>()
-    private val simuleringsoppsummering = Simuleringsoppsummering(
-        perioder = listOf(),
-        fomDatoNestePeriode = null,
-        etterbetaling = BigDecimal.ZERO,
-        feilutbetaling = BigDecimal.ZERO,
-        fom = null,
-        tomDatoNestePeriode = null,
-        forfallsdatoNestePeriode = null,
-        tidSimuleringHentet = null,
-        tomSisteUtbetaling = null,
-    )
+    private val simuleringsoppsummering =
+        Simuleringsoppsummering(
+            perioder = listOf(),
+            fomDatoNestePeriode = null,
+            etterbetaling = BigDecimal.ZERO,
+            feilutbetaling = BigDecimal.ZERO,
+            fom = null,
+            tomDatoNestePeriode = null,
+            forfallsdatoNestePeriode = null,
+            tidSimuleringHentet = null,
+            tomSisteUtbetaling = null,
+        )
 
     private val beslutteVedtakSteg =
         SendTilBeslutterSteg(
@@ -105,33 +105,36 @@ internal class SendTilBeslutterStegTest {
             behandlingshistorikkService,
             tilordnetRessursService,
         )
-    private val fagsak = fagsak(
-        stønadstype = StønadType.OVERGANGSSTØNAD,
-        identer = setOf(PersonIdent(ident = "12345678901")),
-    )
+    private val fagsak =
+        fagsak(
+            stønadstype = StønadType.OVERGANGSSTØNAD,
+            identer = setOf(PersonIdent(ident = "12345678901")),
+        )
     private val saksbehandlerNavn = "saksbehandlernavn"
-    private val vedtaksbrev = Vedtaksbrev(
-        behandlingId = UUID.randomUUID(),
-        brevmal = "",
-        saksbehandlersignatur = saksbehandlerNavn,
-        beslutterPdf = null,
-        enhet = "enhet",
-        saksbehandlerident = saksbehandlerNavn,
-        saksbehandlerHtml = "",
-    )
+    private val vedtaksbrev =
+        Vedtaksbrev(
+            behandlingId = UUID.randomUUID(),
+            brevmal = "",
+            saksbehandlersignatur = saksbehandlerNavn,
+            beslutterPdf = null,
+            enhet = "enhet",
+            saksbehandlerident = saksbehandlerNavn,
+            saksbehandlerHtml = "",
+        )
 
-    private val behandling = saksbehandling(
-        fagsak,
-        Behandling(
-            fagsakId = fagsak.id,
-            type = BehandlingType.FØRSTEGANGSBEHANDLING,
-            status = BehandlingStatus.UTREDES,
-            steg = beslutteVedtakSteg.stegType(),
-            resultat = BehandlingResultat.IKKE_SATT,
-            årsak = BehandlingÅrsak.SØKNAD,
-            kategori = BehandlingKategori.NASJONAL,
-        ),
-    )
+    private val behandling =
+        saksbehandling(
+            fagsak,
+            Behandling(
+                fagsakId = fagsak.id,
+                type = BehandlingType.FØRSTEGANGSBEHANDLING,
+                status = BehandlingStatus.UTREDES,
+                steg = beslutteVedtakSteg.stegType(),
+                resultat = BehandlingResultat.IKKE_SATT,
+                årsak = BehandlingÅrsak.SØKNAD,
+                kategori = BehandlingKategori.NASJONAL,
+            ),
+        )
 
     private val revurdering = behandling.copy(type = BehandlingType.REVURDERING, resultat = INNVILGET)
 
@@ -149,11 +152,12 @@ internal class SendTilBeslutterStegTest {
         every {
             taskService.save(capture(taskSlot))
         } returns Task("", "", Properties())
-        every { tilordnetRessursService.hentEFOppgaveSomIkkeErFerdigstilt(any(), any()) } returns Oppgave(
-            behandlingId = behandling.id,
-            gsakOppgaveId = 1234L,
-            type = Oppgavetype.BehandleSak,
-        )
+        every { tilordnetRessursService.hentEFOppgaveSomIkkeErFerdigstilt(any(), any()) } returns
+            Oppgave(
+                behandlingId = behandling.id,
+                gsakOppgaveId = 1234L,
+                type = Oppgavetype.BehandleSak,
+            )
 
         every { vedtaksbrevRepository.findByIdOrThrow(any()) } returns vedtaksbrev
         every { vedtaksbrevRepository.update(any()) } returns vedtaksbrev
@@ -319,11 +323,13 @@ internal class SendTilBeslutterStegTest {
     private fun mockTilbakekrevingValideringsfeil() {
         // tilbakekrevingService.
         every { vedtakService.hentVedtaksresultat(any()) } returns ResultatType.INNVILGE
-        every { simuleringService.hentLagretSimuleringsoppsummering(any()) } returns simuleringsoppsummering.copy(
-            feilutbetaling = BigDecimal(
-                1000,
-            ),
-        )
+        every { simuleringService.hentLagretSimuleringsoppsummering(any()) } returns
+            simuleringsoppsummering.copy(
+                feilutbetaling =
+                    BigDecimal(
+                        1000,
+                    ),
+            )
 
         every { tilbakekrevingService.harSaksbehandlerTattStillingTilTilbakekreving(any()) } returns false
         every { tilbakekrevingService.finnesÅpenTilbakekrevingsBehandling(any()) } returns false

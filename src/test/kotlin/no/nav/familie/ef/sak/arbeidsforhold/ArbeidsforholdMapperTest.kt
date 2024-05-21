@@ -12,7 +12,6 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
 internal class ArbeidsforholdMapperTest {
-
     @Test
     internal fun `Sjekk mapping av alle felt fra arbeidsforhold til arbeidsforholdDTO`() {
         val arbeidsforholdDtoList = arbeidsforholdList.tilDto()
@@ -51,17 +50,18 @@ internal class ArbeidsforholdMapperTest {
             arbeidsgiver = Arbeidsgiver(ArbeidsgiverType.Organisasjon, "orgnummer", "offentligIdent"),
             type = "type",
             ansettelsesperiode = Ansettelsesperiode(gyldighetsperiode, bruksperiode),
-            arbeidsavtaler = listOf(
-                Arbeidsavtaler(
-                    arbeidstidsordning = "arbeidstidsordning",
-                    yrke = "yrke",
-                    stillingsprosent = 20.0,
-                    antallTimerPrUke = 37.5,
-                    beregnetAntallTimerPrUke = 7.5,
-                    bruksperiode = bruksperiode,
-                    gyldighetsperiode = gyldighetsperiode,
+            arbeidsavtaler =
+                listOf(
+                    Arbeidsavtaler(
+                        arbeidstidsordning = "arbeidstidsordning",
+                        yrke = "yrke",
+                        stillingsprosent = 20.0,
+                        antallTimerPrUke = 37.5,
+                        beregnetAntallTimerPrUke = 7.5,
+                        bruksperiode = bruksperiode,
+                        gyldighetsperiode = gyldighetsperiode,
+                    ),
                 ),
-            ),
         )
 
     private val arbeidsforhold2 =

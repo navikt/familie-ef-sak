@@ -14,7 +14,6 @@ class SatsendringBarnetilsynTestController(
     private val barnetilsynSatsendringService: BarnetilsynSatsendringService,
     private val tilgangService: TilgangService,
 ) {
-
     @GetMapping
     fun finnKanditater() {
         tilgangService.validerHarForvalterrolle()

@@ -37,16 +37,17 @@ class SøkService(
     private val adresseMapper: AdresseMapper,
     private val fagsakService: FagsakService,
 ) {
-
     private val secureLogger = LoggerFactory.getLogger("secureLogger")
 
     fun søkPersonForEksternFagsak(eksternFagsakId: Long): Søkeresultat {
-        val fagsak = fagsakService.hentFagsakPåEksternIdHvisEksisterer(eksternFagsakId)
-            ?: throw ApiFeil("Finner ikke fagsak for eksternFagsakId=$eksternFagsakId", HttpStatus.BAD_REQUEST)
+        val fagsak =
+            fagsakService.hentFagsakPåEksternIdHvisEksisterer(eksternFagsakId)
+                ?: throw ApiFeil("Finner ikke fagsak for eksternFagsakId=$eksternFagsakId", HttpStatus.BAD_REQUEST)
         val fagsakPerson = fagsakPersonService.hentPerson(fagsak.fagsakPersonId)
-        val fagsaker = fagsakService.finnFagsakerForFagsakPersonId(fagsak.fagsakPersonId).let {
-            listOfNotNull(it.overgangsstønad, it.barnetilsyn, it.skolepenger)
-        }
+        val fagsaker =
+            fagsakService.finnFagsakerForFagsakPersonId(fagsak.fagsakPersonId).let {
+                listOfNotNull(it.overgangsstønad, it.barnetilsyn, it.skolepenger)
+            }
         return tilSøkeresultat(fagsakPerson.hentAktivIdent(), fagsakPerson, fagsaker)
     }
 
@@ -74,14 +75,15 @@ class SøkService(
             kjønn = KjønnMapper.tilKjønn(person.kjønn.first().kjønn),
             visningsnavn = NavnDto.fraNavn(person.navn.gjeldende()).visningsnavn,
             fagsakPersonId = fagsakPerson?.id,
-            fagsaker = fagsaker.map {
-                FagsakForSøkeresultat(
-                    fagsakId = it.id,
-                    stønadstype = it.stønadstype,
-                    erLøpende = fagsakService.erLøpende(it),
-                    erMigrert = it.migrert,
-                )
-            },
+            fagsaker =
+                fagsaker.map {
+                    FagsakForSøkeresultat(
+                        fagsakId = it.id,
+                        stønadstype = it.stønadstype,
+                        erLøpende = fagsakService.erLøpende(it),
+                        erMigrert = it.migrert,
+                    )
+                },
         )
     }
 
@@ -148,8 +150,9 @@ class SøkService(
     private fun tilPersonFraSøk(person: PdlPersonFraSøk): PersonFraSøk {
         return PersonFraSøk(
             personIdent = person.folkeregisteridentifikator.gjeldende().identifikasjonsnummer,
-            visningsadresse = person.bostedsadresse.gjeldende()
-                ?.let { adresseMapper.tilAdresse(it).visningsadresse },
+            visningsadresse =
+                person.bostedsadresse.gjeldende()
+                    ?.let { adresseMapper.tilAdresse(it).visningsadresse },
             visningsnavn = NavnDto.fraNavn(person.navn.gjeldende()).visningsnavn,
         )
     }

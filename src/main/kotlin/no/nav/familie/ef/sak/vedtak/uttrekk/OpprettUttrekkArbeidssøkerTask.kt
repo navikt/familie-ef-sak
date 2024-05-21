@@ -26,7 +26,6 @@ class OpprettUttrekkArbeidssøkerTask(
     private val fagsakService: FagsakService,
     private val taskService: TaskService,
 ) : AsyncTaskStep {
-
     private val secureLogger = LoggerFactory.getLogger("secureLogger")
     private val logger = LoggerFactory.getLogger(javaClass)
 
@@ -46,8 +45,9 @@ class OpprettUttrekkArbeidssøkerTask(
                     årMåned = årMåned,
                     fagsakId = it.fagsakId,
                     behandlingIdForVedtak = it.behandlingIdForVedtak,
-                    personIdent = aktiveIdenter[it.fagsakId]
-                        ?: error("Kunne ikke finne fagsakID"),
+                    personIdent =
+                        aktiveIdenter[it.fagsakId]
+                            ?: error("Kunne ikke finne fagsakID"),
                 )
                 ++antallOk
             } catch (ex: Exception) {
@@ -74,7 +74,6 @@ class OpprettUttrekkArbeidssøkerTask(
     }
 
     companion object {
-
         const val TYPE = "opprettUttrekkArbeidssøker"
 
         fun opprettTask(utrekksmåned: YearMonth): Task {

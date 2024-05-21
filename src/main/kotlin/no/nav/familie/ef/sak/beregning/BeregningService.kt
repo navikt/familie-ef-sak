@@ -9,7 +9,6 @@ import java.math.BigDecimal
 
 @Service
 class BeregningService {
-
     fun beregnYtelse(
         vedtaksperioder: List<Månedsperiode>,
         inntektsperioder: List<Inntektsperiode>,
@@ -17,9 +16,10 @@ class BeregningService {
         validerInnteksperioder(inntektsperioder, vedtaksperioder)
         validerVedtaksperioder(vedtaksperioder)
 
-        val beløpForInnteksperioder = inntektsperioder.flatMap {
-            BeregningUtils.beregnStønadForInntekt(it)
-        }
+        val beløpForInnteksperioder =
+            inntektsperioder.flatMap {
+                BeregningUtils.beregnStønadForInntekt(it)
+            }
 
         return vedtaksperioder.flatMap {
             BeregningUtils.finnStartDatoOgSluttDatoForBeløpsperiode(beløpForInnteksperioder, it)
@@ -32,7 +32,10 @@ class BeregningService {
         ) { "Vedtaksperioder $vedtaksperioder overlapper" }
     }
 
-    private fun validerInnteksperioder(inntektsperioder: List<Inntektsperiode>, vedtaksperioder: List<Månedsperiode>) {
+    private fun validerInnteksperioder(
+        inntektsperioder: List<Inntektsperiode>,
+        vedtaksperioder: List<Månedsperiode>,
+    ) {
         brukerfeilHvis(inntektsperioder.isEmpty()) {
             "Inntektsperioder kan ikke være tom liste"
         }

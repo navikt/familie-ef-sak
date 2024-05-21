@@ -10,7 +10,6 @@ import java.math.RoundingMode
 import java.time.YearMonth
 
 object BeregningUtils {
-
     private val REDUKSJONSFAKTOR = BigDecimal(0.45)
     val DAGSATS_ANTALL_DAGER = BigDecimal(260)
     val ANTALL_MÅNEDER_ÅR = BigDecimal(12)
@@ -21,8 +20,9 @@ object BeregningUtils {
         val totalInntekt = beregnTotalinntekt(inntektsperiode)
 
         return finnGrunnbeløpsPerioder(periode).map {
-            val avkortningPerMåned = beregnAvkortning(it.beløp, totalInntekt).divide(ANTALL_MÅNEDER_ÅR)
-                .setScale(0, RoundingMode.HALF_DOWN)
+            val avkortningPerMåned =
+                beregnAvkortning(it.beløp, totalInntekt).divide(ANTALL_MÅNEDER_ÅR)
+                    .setScale(0, RoundingMode.HALF_DOWN)
 
             val fullOvergangsStønadPerMåned =
                 it.beløp.multiply(BigDecimal(2.25)).divide(ANTALL_MÅNEDER_ÅR).setScale(0, RoundingMode.HALF_EVEN)
@@ -42,13 +42,14 @@ object BeregningUtils {
                 periode = it.periode,
                 beløp = beløpTilUtbetalning,
                 beløpFørSamordning = beløpFørSamordning,
-                beregningsgrunnlag = Beregningsgrunnlag(
-                    samordningsfradrag = samordningsfradrag,
-                    avkortningPerMåned = avkortningPerMåned,
-                    fullOvergangsStønadPerMåned = fullOvergangsStønadPerMåned,
-                    inntekt = totalInntekt,
-                    grunnbeløp = it.beløp,
-                ),
+                beregningsgrunnlag =
+                    Beregningsgrunnlag(
+                        samordningsfradrag = samordningsfradrag,
+                        avkortningPerMåned = avkortningPerMåned,
+                        fullOvergangsStønadPerMåned = fullOvergangsStønadPerMåned,
+                        inntekt = totalInntekt,
+                        grunnbeløp = it.beløp,
+                    ),
             )
         }
     }
@@ -60,7 +61,10 @@ object BeregningUtils {
         return if (skalRundeNedBasertPåInntektsperiodensVerdier) BigDecimal(rundNedTilNærmeste1000(totalInntekt)) else totalInntekt
     }
 
-    private fun beregnAvkortning(grunnbeløp: BigDecimal, inntekt: BigDecimal): BigDecimal {
+    private fun beregnAvkortning(
+        grunnbeløp: BigDecimal,
+        inntekt: BigDecimal,
+    ): BigDecimal {
         val inntektOverHalveGrunnbeløp = inntekt.subtract(grunnbeløp.multiply(BigDecimal(0.5)))
         return if (inntektOverHalveGrunnbeløp > ZERO) {
             inntektOverHalveGrunnbeløp.multiply(REDUKSJONSFAKTOR).setScale(5, RoundingMode.HALF_DOWN)

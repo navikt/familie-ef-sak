@@ -13,7 +13,6 @@ class DokumentasjonAvUtdanningRegel : Vilkårsregel(
     regler = setOf(DOKUMENTASJON_AV_UTDANNING, DOKUMENTASJON_AV_UTGIFTER_UTDANNING),
     hovedregler = regelIder(DOKUMENTASJON_AV_UTDANNING, DOKUMENTASJON_AV_UTGIFTER_UTDANNING),
 ) {
-
     companion object {
         private val DOKUMENTASJON_AV_UTDANNING =
             RegelSteg(

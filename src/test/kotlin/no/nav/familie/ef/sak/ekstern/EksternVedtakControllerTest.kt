@@ -23,7 +23,6 @@ import org.springframework.http.HttpMethod
 import org.springframework.http.ResponseEntity
 
 internal class EksternVedtakControllerTest : OppslagSpringRunnerTest() {
-
     @BeforeEach
     fun setUp() {
         headers.setBearerAuth(lokalTestToken)
@@ -39,13 +38,14 @@ internal class EksternVedtakControllerTest : OppslagSpringRunnerTest() {
     @Test
     fun `hentVedtak skal returnere behandlinger fra ef-sak og tilbakekreving`() {
         val fagsak = testoppsettService.lagreFagsak(fagsak(identer = setOf(PersonIdent("123"))))
-        val førstegangsbehandling = behandling(
-            fagsak = fagsak,
-            type = BehandlingType.FØRSTEGANGSBEHANDLING,
-            status = BehandlingStatus.FERDIGSTILT,
-            eksternId = 1,
-            resultat = BehandlingResultat.INNVILGET,
-        )
+        val førstegangsbehandling =
+            behandling(
+                fagsak = fagsak,
+                type = BehandlingType.FØRSTEGANGSBEHANDLING,
+                status = BehandlingStatus.FERDIGSTILT,
+                eksternId = 1,
+                resultat = BehandlingResultat.INNVILGET,
+            )
 
         behandlingRepository.insertAll(listOf(førstegangsbehandling))
 

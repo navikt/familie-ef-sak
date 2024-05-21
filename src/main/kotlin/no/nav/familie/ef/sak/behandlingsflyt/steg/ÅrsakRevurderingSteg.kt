@@ -16,12 +16,14 @@ class ÅrsakRevurderingSteg(
     private val årsakRevurderingService: ÅrsakRevurderingService,
     private val tilordnetRessursService: TilordnetRessursService,
 ) : BehandlingSteg<RevurderingsinformasjonDto> {
-
     override fun stegType(): StegType {
         return StegType.REVURDERING_ÅRSAK
     }
 
-    override fun utførOgReturnerNesteSteg(saksbehandling: Saksbehandling, data: RevurderingsinformasjonDto): StegType {
+    override fun utførOgReturnerNesteSteg(
+        saksbehandling: Saksbehandling,
+        data: RevurderingsinformasjonDto,
+    ): StegType {
         val (kravMottatt, årsakRevurdering) = data
 
         feilHvis(kravMottatt == null) {
@@ -57,7 +59,10 @@ class ÅrsakRevurderingSteg(
         }
     }
 
-    override fun utførSteg(saksbehandling: Saksbehandling, data: RevurderingsinformasjonDto) {
+    override fun utførSteg(
+        saksbehandling: Saksbehandling,
+        data: RevurderingsinformasjonDto,
+    ) {
         error("utførOgReturnerNesteSteg utfør og returnerer steg")
     }
 }

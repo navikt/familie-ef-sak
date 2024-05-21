@@ -29,7 +29,6 @@ import no.nav.familie.kontrakter.felles.ef.StønadType.SKOLEPENGER
 import java.util.UUID
 
 object OppdaterVilkår {
-
     /**
      * Oppdaterer [Vilkårsvurdering] med nye svar og resultat
      * Validerer att svaren er gyldige
@@ -56,8 +55,9 @@ object OppdaterVilkår {
 
     private fun validerAttResultatErOppfyltEllerIkkeOppfylt(vilkårsresultat: RegelResultat) {
         if (!vilkårsresultat.vilkår.oppfyltEllerIkkeOppfylt()) {
-            val message = "Mangler fullstendig vilkårsvurdering for ${vilkårsresultat.vilkårType}. " +
-                "Svar på alle spørsmål samt fyll inn evt. påkrevd begrunnelsesfelt"
+            val message =
+                "Mangler fullstendig vilkårsvurdering for ${vilkårsresultat.vilkårType}. " +
+                    "Svar på alle spørsmål samt fyll inn evt. påkrevd begrunnelsesfelt"
             throw Feil(message = message, frontendFeilmelding = message)
         }
     }
@@ -75,25 +75,26 @@ object OppdaterVilkår {
         oppdatering: List<DelvilkårsvurderingDto>,
     ): DelvilkårsvurderingWrapper {
         val vurderingerPåType = oppdatering.associateBy { it.vurderinger.first().regelId }
-        val delvilkårsvurderinger = vilkårsvurdering.delvilkårsvurdering.delvilkårsvurderinger.map {
-            if (it.resultat == Vilkårsresultat.IKKE_AKTUELL) {
-                it
-            } else {
-                val hovedregel = it.hovedregel
-                val resultat = vilkårsresultat.resultatHovedregel(hovedregel)
-                val svar = vurderingerPåType[hovedregel] ?: throw Feil("Savner svar for hovedregel=$hovedregel")
-
-                if (resultat.oppfyltEllerIkkeOppfylt()) {
-                    it.copy(
-                        resultat = resultat,
-                        vurderinger = svar.svarTilDomene(),
-                    )
+        val delvilkårsvurderinger =
+            vilkårsvurdering.delvilkårsvurdering.delvilkårsvurderinger.map {
+                if (it.resultat == Vilkårsresultat.IKKE_AKTUELL) {
+                    it
                 } else {
-                    // TODO håndtering for [Vilkårsresultat.SKAL_IKKE_VURDERES] som burde beholde første svaret i det delvilkåret
-                    throw Feil("Håndterer ikke oppdatering av resultat=$resultat ennå")
+                    val hovedregel = it.hovedregel
+                    val resultat = vilkårsresultat.resultatHovedregel(hovedregel)
+                    val svar = vurderingerPåType[hovedregel] ?: throw Feil("Savner svar for hovedregel=$hovedregel")
+
+                    if (resultat.oppfyltEllerIkkeOppfylt()) {
+                        it.copy(
+                            resultat = resultat,
+                            vurderinger = svar.svarTilDomene(),
+                        )
+                    } else {
+                        // TODO håndtering for [Vilkårsresultat.SKAL_IKKE_VURDERES] som burde beholde første svaret i det delvilkåret
+                        throw Feil("Håndterer ikke oppdatering av resultat=$resultat ennå")
+                    }
                 }
-            }
-        }.toList()
+            }.toList()
         return vilkårsvurdering.delvilkårsvurdering.copy(delvilkårsvurderinger = delvilkårsvurderinger)
     }
 
@@ -167,13 +168,14 @@ object OppdaterVilkår {
     }
 
     private fun utledVilkårsresultat(lagredeVilkårsvurderinger: List<Vilkårsvurdering>): List<Vilkårsresultat> {
-        val vilkårsresultat = lagredeVilkårsvurderinger.groupBy { it.type }.map {
-            if (it.key.gjelderFlereBarn()) {
-                utledResultatForVilkårSomGjelderFlereBarn(it.value)
-            } else {
-                it.value.single().resultat
+        val vilkårsresultat =
+            lagredeVilkårsvurderinger.groupBy { it.type }.map {
+                if (it.key.gjelderFlereBarn()) {
+                    utledResultatForVilkårSomGjelderFlereBarn(it.value)
+                } else {
+                    it.value.single().resultat
+                }
             }
-        }
         return vilkårsresultat
     }
 
@@ -211,19 +213,21 @@ object OppdaterVilkår {
         stønadstype: StønadType,
     ): List<Vilkårsvurdering> {
         return when (stønadstype) {
-            OVERGANGSSTØNAD, SKOLEPENGER -> listOf(
-                lagNyVilkårsvurdering(
-                    AleneomsorgRegel(),
-                    metadata,
-                    behandlingId,
-                    barnId,
-                ),
-            )
+            OVERGANGSSTØNAD, SKOLEPENGER ->
+                listOf(
+                    lagNyVilkårsvurdering(
+                        AleneomsorgRegel(),
+                        metadata,
+                        behandlingId,
+                        barnId,
+                    ),
+                )
 
-            BARNETILSYN -> listOf(
-                lagNyVilkårsvurdering(AleneomsorgRegel(), metadata, behandlingId, barnId),
-                lagNyVilkårsvurdering(AlderPåBarnRegel(), metadata, behandlingId, barnId),
-            )
+            BARNETILSYN ->
+                listOf(
+                    lagNyVilkårsvurdering(AleneomsorgRegel(), metadata, behandlingId, barnId),
+                    lagNyVilkårsvurdering(AlderPåBarnRegel(), metadata, behandlingId, barnId),
+                )
         }
     }
 

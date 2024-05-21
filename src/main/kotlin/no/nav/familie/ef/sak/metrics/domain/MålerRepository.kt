@@ -10,7 +10,6 @@ import java.util.UUID
 
 @Repository
 interface MålerRepository : CrudRepository<Behandling, UUID> {
-
     // language=PostgreSQL
     @Query("""SELECT COUNT(*) FROM behandling WHERE arsak = :behandlingsårsak""")
     fun finnAntallBehandlingerAvÅrsak(behandlingsårsak: BehandlingÅrsak): Int
@@ -24,7 +23,10 @@ interface MålerRepository : CrudRepository<Behandling, UUID> {
                   ON dato BETWEEN aty.stonad_fom AND aty.stonad_tom
               GROUP BY b.stonadstype, dato""",
     )
-    fun finnAntallLøpendeSaker(fra: LocalDate, til: LocalDate): List<LøpendeBehandling>
+    fun finnAntallLøpendeSaker(
+        fra: LocalDate,
+        til: LocalDate,
+    ): List<LøpendeBehandling>
 
     // language=PostgreSQL
     @Query(

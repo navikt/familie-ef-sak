@@ -31,7 +31,6 @@ import java.time.LocalDateTime
 import java.time.Month
 
 internal class BehandlingPåVentServiceIntegrationTest : OppslagSpringRunnerTest() {
-
     @Autowired
     lateinit var behandlingRepository: BehandlingRepository
 
@@ -112,7 +111,10 @@ internal class BehandlingPåVentServiceIntegrationTest : OppslagSpringRunnerTest
         assertThat(behandlingRepository.finnSisteIverksatteBehandling(fagsak.id)?.id).isEqualTo(behandling.id)
     }
 
-    private fun assertKanTaAvVent(behandling: Behandling, taAvVentStatus: TaAvVentStatus) {
+    private fun assertKanTaAvVent(
+        behandling: Behandling,
+        taAvVentStatus: TaAvVentStatus,
+    ) {
         val kanTaAvVent = behandlingPåVentService.kanTaAvVent(behandling.id)
         assertThat(kanTaAvVent.status).isEqualTo(taAvVentStatus)
     }
@@ -134,7 +136,10 @@ internal class BehandlingPåVentServiceIntegrationTest : OppslagSpringRunnerTest
             ),
         )
 
-    private fun settPåVentRequest(oppgaveId: Long, oppfølgingsoppgaver: List<OppgaveSubtype>) =
+    private fun settPåVentRequest(
+        oppgaveId: Long,
+        oppfølgingsoppgaver: List<OppgaveSubtype>,
+    ) =
         SettPåVentRequest(
             oppgaveId = oppgaveId,
             saksbehandler = "ny saksbehandler",

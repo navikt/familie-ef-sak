@@ -25,7 +25,6 @@ class AlderPåBarnRegel :
         regler = setOf(HAR_ALDER_LAVERE_ENN_GRENSEVERDI, UNNTAK_ALDER),
         hovedregler = regelIder(HAR_ALDER_LAVERE_ENN_GRENSEVERDI),
     ) {
-
     override fun initiereDelvilkårsvurdering(
         metadata: HovedregelMetadata,
         resultat: Vilkårsresultat,
@@ -45,8 +44,9 @@ class AlderPåBarnRegel :
     }
 
     private fun automatisktOppfyltHarAlderLavereEnnGrenseverdi(): Delvilkårsvurdering {
-        val beskrivelse = "Automatisk vurdert: Ut ifra barnets alder er det ${LocalDate.now().norskFormat()}" +
-            " automatisk vurdert at barnet ikke har fullført 4. skoleår."
+        val beskrivelse =
+            "Automatisk vurdert: Ut ifra barnets alder er det ${LocalDate.now().norskFormat()}" +
+                " automatisk vurdert at barnet ikke har fullført 4. skoleår."
         return Delvilkårsvurdering(
             resultat = Vilkårsresultat.AUTOMATISK_OPPFYLT,
             listOf(
@@ -63,15 +63,15 @@ class AlderPåBarnRegel :
         metadata: HovedregelMetadata,
         barnId: UUID?,
     ): Boolean {
-        val fødselsdato = metadata.barn.firstOrNull { it.id == barnId }
-            ?.personIdent
-            ?.let { Fødselsnummer(it).fødselsdato }
-            ?: error("Finner ikke ident til barn=$barnId")
+        val fødselsdato =
+            metadata.barn.firstOrNull { it.id == barnId }
+                ?.personIdent
+                ?.let { Fødselsnummer(it).fødselsdato }
+                ?: error("Finner ikke ident til barn=$barnId")
         return harFullførtFjerdetrinn(fødselsdato)
     }
 
     companion object {
-
         private val unntakAlderMapping =
             setOf(
                 SvarId.TRENGER_MER_TILSYN_ENN_JEVNALDRENDE,
@@ -90,10 +90,11 @@ class AlderPåBarnRegel :
         private val HAR_ALDER_LAVERE_ENN_GRENSEVERDI =
             RegelSteg(
                 regelId = RegelId.HAR_ALDER_LAVERE_ENN_GRENSEVERDI,
-                svarMapping = jaNeiSvarRegel(
-                    hvisJa = NesteRegel(UNNTAK_ALDER.regelId),
-                    hvisNei = SluttSvarRegel.OPPFYLT_MED_VALGFRI_BEGRUNNELSE,
-                ),
+                svarMapping =
+                    jaNeiSvarRegel(
+                        hvisJa = NesteRegel(UNNTAK_ALDER.regelId),
+                        hvisNei = SluttSvarRegel.OPPFYLT_MED_VALGFRI_BEGRUNNELSE,
+                    ),
             )
     }
 }

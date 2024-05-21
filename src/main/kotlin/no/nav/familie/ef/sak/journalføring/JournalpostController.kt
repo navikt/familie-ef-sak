@@ -41,9 +41,10 @@ class JournalpostController(
     private val tilgangService: TilgangService,
     private val featureToggleService: FeatureToggleService,
 ) {
-
     @GetMapping("/{journalpostId}")
-    fun hentJournalPost(@PathVariable journalpostId: String): Ressurs<JournalføringResponse> {
+    fun hentJournalPost(
+        @PathVariable journalpostId: String,
+    ): Ressurs<JournalføringResponse> {
         val (journalpost, personIdent) = finnJournalpostOgPersonIdent(journalpostId)
         tilgangService.validerTilgangTilPersonMedBarn(personIdent, AuditLoggerEvent.ACCESS)
         return Ressurs.success(
@@ -57,7 +58,10 @@ class JournalpostController(
     }
 
     @GetMapping("/{journalpostId}/dokument/{dokumentInfoId}")
-    fun hentDokument(@PathVariable journalpostId: String, @PathVariable dokumentInfoId: String): Ressurs<ByteArray> {
+    fun hentDokument(
+        @PathVariable journalpostId: String,
+        @PathVariable dokumentInfoId: String,
+    ): Ressurs<ByteArray> {
         val (journalpost, personIdent) = finnJournalpostOgPersonIdent(journalpostId)
         tilgangService.validerTilgangTilPersonMedBarn(personIdent, AuditLoggerEvent.ACCESS)
         validerDokumentKanHentes(journalpost, dokumentInfoId, journalpostId)
@@ -65,7 +69,10 @@ class JournalpostController(
     }
 
     @GetMapping(path = ["/{journalpostId}/dokument-pdf/{dokumentInfoId}", "/{journalpostId}/dokument-pdf/{dokumentInfoId}/{filnavn}"], produces = [MediaType.APPLICATION_PDF_VALUE])
-    fun hentDokumentSomPdf(@PathVariable journalpostId: String, @PathVariable dokumentInfoId: String): ByteArray {
+    fun hentDokumentSomPdf(
+        @PathVariable journalpostId: String,
+        @PathVariable dokumentInfoId: String,
+    ): ByteArray {
         val (journalpost, personIdent) = finnJournalpostOgPersonIdent(journalpostId)
         tilgangService.validerTilgangTilPersonMedBarn(personIdent, AuditLoggerEvent.ACCESS)
         validerDokumentKanHentes(journalpost, dokumentInfoId, journalpostId)
@@ -150,13 +157,14 @@ class JournalpostController(
 
     private fun finnJournalpostOgPersonIdent(journalpostId: String): Pair<Journalpost, String> {
         val journalpost = journalpostService.hentJournalpost(journalpostId)
-        val personIdent = journalpost.bruker?.let {
-            when (it.type) {
-                BrukerIdType.FNR -> it.id
-                BrukerIdType.AKTOERID -> personService.hentPersonIdenter(it.id).gjeldende().ident
-                BrukerIdType.ORGNR -> error("Kan ikke hente journalpost=$journalpostId for orgnr")
-            }
-        } ?: error("Kan ikke hente journalpost=$journalpostId uten bruker")
+        val personIdent =
+            journalpost.bruker?.let {
+                when (it.type) {
+                    BrukerIdType.FNR -> it.id
+                    BrukerIdType.AKTOERID -> personService.hentPersonIdenter(it.id).gjeldende().ident
+                    BrukerIdType.ORGNR -> error("Kan ikke hente journalpost=$journalpostId for orgnr")
+                }
+            } ?: error("Kan ikke hente journalpost=$journalpostId uten bruker")
         return Pair(journalpost, personIdent)
     }
 

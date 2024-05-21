@@ -18,17 +18,20 @@ class BrevmottakereService(
     val frittståendeBrevmottakereRepository: FrittståendeBrevmottakereRepository,
     val tilordnetRessursService: TilordnetRessursService,
 ) {
-
-    fun lagreBrevmottakere(behandlingId: UUID, brevmottakereDto: BrevmottakereDto): UUID {
+    fun lagreBrevmottakere(
+        behandlingId: UUID,
+        brevmottakereDto: BrevmottakereDto,
+    ): UUID {
         validerAntallBrevmottakere(brevmottakereDto)
         validerUnikeBrevmottakere(brevmottakereDto)
         validerAtSaksbehandlerEierbehandling(behandlingId)
 
-        val brevmottakere = Brevmottakere(
-            behandlingId,
-            PersonerWrapper(brevmottakereDto.personer),
-            OrganisasjonerWrapper(brevmottakereDto.organisasjoner),
-        )
+        val brevmottakere =
+            Brevmottakere(
+                behandlingId,
+                PersonerWrapper(brevmottakereDto.personer),
+                OrganisasjonerWrapper(brevmottakereDto.organisasjoner),
+            )
 
         return when (brevmottakereRepository.existsById(behandlingId)) {
             true ->
@@ -52,7 +55,10 @@ class BrevmottakereService(
         )?.let { BrevmottakereDto(personer = it.personer.personer, organisasjoner = it.organisasjoner.organisasjoner) }
     }
 
-    fun lagreBrevmottakereForFagsak(fagsakId: UUID, brevmottakereDto: BrevmottakereDto): UUID {
+    fun lagreBrevmottakereForFagsak(
+        fagsakId: UUID,
+        brevmottakereDto: BrevmottakereDto,
+    ): UUID {
         validerAntallBrevmottakere(brevmottakereDto)
         validerUnikeBrevmottakere(brevmottakereDto)
 
@@ -69,7 +75,10 @@ class BrevmottakereService(
         }.fagsakId
     }
 
-    fun slettBrevmottakereForFagsakOgSaksbehandlerHvisFinnes(fagsakId: UUID, saksbehandlerIdent: String) =
+    fun slettBrevmottakereForFagsakOgSaksbehandlerHvisFinnes(
+        fagsakId: UUID,
+        saksbehandlerIdent: String,
+    ) =
         frittståendeBrevmottakereRepository.findByFagsakIdAndSaksbehandlerIdent(fagsakId, saksbehandlerIdent)?.let {
             frittståendeBrevmottakereRepository.deleteById(it.id)
         }

@@ -13,7 +13,6 @@ import org.junit.jupiter.api.Test
 import java.time.Year
 
 internal class SkolepengerMaksbeløpTest {
-
     @Test
     internal fun `maksbeløp for universitet`() {
         assertThat(maksbeløpForÅr(HØGSKOLE_UNIVERSITET, Year.of(2021))).isEqualTo(68_136)
@@ -68,13 +67,12 @@ internal class SkolepengerMaksbeløpTest {
 
     /**
      * Disse testene må oppdateres med år når man legger inn nytt maksbeløp for neste år
-     * * [ÅR_OM_2_ÅR] må oppdateres
+     * * [årOm2År] må oppdateres
      * * Beløp må oppdateres
      */
     @Nested
     inner class MaksBeløpEtÅrFremITiden {
-
-        private val ÅR_OM_2_ÅR = Year.now().plusYears(2)
+        private val årOm2År = Year.now().plusYears(2)
 
         @Test
         internal fun `Skolepenger skal returnere maksbeløp for siste høyskole år når man ber om året etter`() {
@@ -92,16 +90,19 @@ internal class SkolepengerMaksbeløpTest {
 
         @Test
         internal fun `maksbeløp for skoleår 2 år frem i tiden kaster exception`() {
-            assertThatThrownBy { assertThat(maksbeløpForÅr(HØGSKOLE_UNIVERSITET, ÅR_OM_2_ÅR)) }
+            assertThatThrownBy { assertThat(maksbeløpForÅr(HØGSKOLE_UNIVERSITET, årOm2År)) }
                 .isInstanceOf(ApiFeil::class.java)
                 .hasMessageContaining("Finner ikke maksbeløp for studietype=HØGSKOLE_UNIVERSITET")
-            assertThatThrownBy { assertThat(maksbeløpForÅr(VIDEREGÅENDE, ÅR_OM_2_ÅR)) }
+            assertThatThrownBy { assertThat(maksbeløpForÅr(VIDEREGÅENDE, årOm2År)) }
                 .isInstanceOf(ApiFeil::class.java)
                 .hasMessageContaining("Finner ikke maksbeløp for studietype=VIDEREGÅENDE")
         }
     }
 
-    private fun maksbeløpForÅr(studietype: SkolepengerStudietype, skoleår: Year): Int {
+    private fun maksbeløpForÅr(
+        studietype: SkolepengerStudietype,
+        skoleår: Year,
+    ): Int {
         return maksbeløp(studietype, Skoleår(skoleår))
     }
 }

@@ -22,9 +22,11 @@ class OppgaverForOpprettelseService(
     private val tilkjentYtelseService: TilkjentYtelseService,
     private val vedtakService: VedtakService,
 ) {
-
     @Transactional
-    fun opprettEllerErstatt(behandlingId: UUID, nyeOppgaver: List<OppgaveForOpprettelseType>) {
+    fun opprettEllerErstatt(
+        behandlingId: UUID,
+        nyeOppgaver: List<OppgaveForOpprettelseType>,
+    ) {
         val oppgavetyperSomKanOpprettes = hentOppgavetyperSomKanOpprettes(behandlingId)
         if (oppgavetyperSomKanOpprettes.isEmpty()) {
             oppgaverForOpprettelseRepository.deleteById(behandlingId)
@@ -50,13 +52,14 @@ class OppgaverForOpprettelseService(
         }
 
         val vedtak = vedtakService.hentVedtak(behandlingId)
-        val tilkjentYtelse = when {
-            vedtak.resultatType == ResultatType.AVSLÅ && vedtak.avslåÅrsak == AvslagÅrsak.MINDRE_INNTEKTSENDRINGER ->
-                hentSisteTilkjentYtelse(saksbehandling.fagsakId)
-            vedtak.resultatType == ResultatType.INNVILGE ->
-                tilkjentYtelseService.hentForBehandlingEllerNull(behandlingId)
-            else -> null
-        }
+        val tilkjentYtelse =
+            when {
+                vedtak.resultatType == ResultatType.AVSLÅ && vedtak.avslåÅrsak == AvslagÅrsak.MINDRE_INNTEKTSENDRINGER ->
+                    hentSisteTilkjentYtelse(saksbehandling.fagsakId)
+                vedtak.resultatType == ResultatType.INNVILGE ->
+                    tilkjentYtelseService.hentForBehandlingEllerNull(behandlingId)
+                else -> null
+            }
 
         return if (kanOppretteOppgaveForInntektskontrollFremITid(tilkjentYtelse)) listOf(OppgaveForOpprettelseType.INNTEKTSKONTROLL_1_ÅR_FREM_I_TID) else emptyList()
     }
@@ -76,9 +79,10 @@ class OppgaverForOpprettelseService(
     ): Boolean {
         if (tilkjentYtelse == null) return false
 
-        val harUtbetalingEtterDetNesteÅret = tilkjentYtelse.andelerTilkjentYtelse
-            .filter { it.stønadTom > LocalDate.now().plusYears(1) }
-            .any { it.beløp > 0 }
+        val harUtbetalingEtterDetNesteÅret =
+            tilkjentYtelse.andelerTilkjentYtelse
+                .filter { it.stønadTom > LocalDate.now().plusYears(1) }
+                .any { it.beløp > 0 }
 
         return harUtbetalingEtterDetNesteÅret
     }
