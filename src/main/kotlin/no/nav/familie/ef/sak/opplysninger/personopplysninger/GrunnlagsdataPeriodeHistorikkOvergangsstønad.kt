@@ -8,6 +8,8 @@ data class GrunnlagsdataPeriodeHistorikkOvergangsstønad(
     val fom: LocalDate,
     val tom: LocalDate,
     val beløp: Int,
+    val inntekt: Int?,
+    val aktivitet: String?,
 )
 
 data class GrunnlagsdataPeriodeHistorikkBarnetilsyn(
