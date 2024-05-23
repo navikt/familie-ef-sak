@@ -122,7 +122,7 @@ private fun GrunnlagsdataPeriodeHistorikkOvergangsstønad.tilDto() =
         antallMåneder = månederMedBeløp(periodeType, beløp, fom, tom),
         antallMånederUtenBeløp = månederUtenBeløp(periodeType, beløp, fom, tom),
         inntekt = this.inntekt,
-       samordningsfradrag = this.samordningsfradrag,
+        samordningsfradrag = this.samordningsfradrag,
     )
 
 private fun GrunnlagsdataPeriodeHistorikkBarnetilsyn.tilDto(grunnlagsdataPeriodeHistorikkOvergangsstønad: List<GrunnlagsdataPeriodeHistorikkOvergangsstønad>) =
