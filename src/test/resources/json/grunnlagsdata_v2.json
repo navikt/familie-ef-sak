@@ -1462,9 +1462,9 @@
                     "type" : "Int",
                     "nullable" : true
                   },
-                  "aktivitet" : {
-                    "name" : "aktivitet",
-                    "type" : "String",
+                  "samordningsfradrag" : {
+                    "name" : "samordningsfradrag",
+                    "type" : "Int",
                     "nullable" : true
                   }
                 },
@@ -1539,9 +1539,9 @@
                     "type" : "Int",
                     "nullable" : true
                   },
-                  "aktivitet" : {
-                    "name" : "aktivitet",
-                    "type" : "String",
+                  "samordningsfradrag" : {
+                    "name" : "samordningsfradrag",
+                    "type" : "Int",
                     "nullable" : true
                   }
                 },
@@ -2264,9 +2264,9 @@
                 "type" : "Int",
                 "nullable" : true
               },
-              "aktivitet" : {
-                "name" : "aktivitet",
-                "type" : "String",
+              "samordningsfradrag" : {
+                "name" : "samordningsfradrag",
+                "type" : "Int",
                 "nullable" : true
               }
             },
@@ -2341,9 +2341,9 @@
                 "type" : "Int",
                 "nullable" : true
               },
-              "aktivitet" : {
-                "name" : "aktivitet",
-                "type" : "String",
+              "samordningsfradrag" : {
+                "name" : "samordningsfradrag",
+                "type" : "Int",
                 "nullable" : true
               }
             },

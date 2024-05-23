@@ -9,7 +9,7 @@ data class GrunnlagsdataPeriodeHistorikkOvergangsstønad(
     val tom: LocalDate,
     val beløp: Int,
     val inntekt: Int?,
-    val aktivitet: String?,
+    val samordningsfradrag: Int?,
 )
 
 data class GrunnlagsdataPeriodeHistorikkBarnetilsyn(
