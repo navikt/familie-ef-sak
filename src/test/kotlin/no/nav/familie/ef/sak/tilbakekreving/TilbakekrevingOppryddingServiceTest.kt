@@ -4,6 +4,8 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
+import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
+import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
@@ -16,6 +18,7 @@ import no.nav.familie.kontrakter.felles.simulering.DetaljertSimuleringResultat
 import no.nav.familie.kontrakter.felles.simulering.Simuleringsoppsummering
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.springframework.data.repository.findByIdOrNull
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -44,14 +47,16 @@ class TilbakekrevingOppryddingServiceTest() {
 
     @BeforeEach
     fun setUp() {
+        mockHentLagretSimuleringsresultat(feilutbetaltBeløp = 1234)
+        mockHentLagretTilbakekreving(tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_AUTOMATISK)
         mockhentBehandling()
     }
 
     @Test
     internal fun `Skal slette tilbakekreving dersom det ikke er feilutbetaling i ny simulering`() {
-        mockHentLagretSimuleringsresultat(feilutbetaltBeløp = 1234)
-        mockHentLagretTilbakekreving(tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_UTEN_VARSEL)
+        mockHentLagretTilbakekreving(tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_MED_VARSEL)
         val nySimuleringsoppsummering = simuleringsoppsummering.copy(feilutbetaling = BigDecimal.ZERO)
+
         oppryddingService.slettTilbakekrevingsvalgHvisIngenFeilutbetalingEllerForskjelligBeløp(UUID.randomUUID(), nySimuleringsoppsummering)
 
         verify(exactly = 1) { tilbakekrevingRepository.deleteById(any()) }
@@ -69,7 +74,7 @@ class TilbakekrevingOppryddingServiceTest() {
 
     @Test
     internal fun `Skal ikke slette tilbakekreving dersom tilbakekrevingsvalg ikke er OPPRETT AUTOMATISK`() {
-        mockHentLagretSimuleringsresultat(feilutbetaltBeløp = 1234)
+
         mockHentLagretTilbakekreving(tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_MED_VARSEL)
 
         oppryddingService.slettTilbakekrevingsvalgHvisIngenFeilutbetalingEllerForskjelligBeløp(UUID.randomUUID(), simuleringsoppsummering)
@@ -87,18 +92,24 @@ class TilbakekrevingOppryddingServiceTest() {
         verify(exactly = 0) { tilbakekrevingRepository.deleteById(any()) }
     }
 
+    @Test
+    internal fun `Skal ikke slette tilbakekreving dersom behandling er låst`() {
+        every { behandlingRepository.findByIdOrThrow(any()) } returns behandling.copy(status = BehandlingStatus.FERDIGSTILT)
+        assertThrows<Feil> { oppryddingService.slettTilbakekrevingsvalgHvisIngenFeilutbetalingEllerForskjelligBeløp(UUID.randomUUID(), simuleringsoppsummering) }
+    }
+
     private fun mockhentBehandling() {
         every { behandlingRepository.findByIdOrThrow(any()) } returns behandling
     }
 
     private fun mockHentLagretTilbakekreving(tilbakekrevingsvalg: Tilbakekrevingsvalg) {
         every { tilbakekrevingRepository.findByIdOrThrow(any()) } returns
-            Tilbakekreving(
-                behandlingId = UUID.randomUUID(),
-                valg = tilbakekrevingsvalg,
-                varseltekst = "forventetVarseltekst",
-                begrunnelse = "ingen",
-            )
+                Tilbakekreving(
+                    behandlingId = UUID.randomUUID(),
+                    valg = tilbakekrevingsvalg,
+                    varseltekst = "forventetVarseltekst",
+                    begrunnelse = "ingen",
+                )
     }
 
     private fun mockHentLagretSimuleringsresultat(feilutbetaltBeløp: Int) {
@@ -108,10 +119,10 @@ class TilbakekrevingOppryddingServiceTest() {
                     behandlingId = UUID.randomUUID(),
                     data = DetaljertSimuleringResultat(emptyList()),
                     beriketData =
-                        BeriketSimuleringsresultat(
-                            mockk(),
-                            simuleringsoppsummering.copy(feilutbetaling = BigDecimal(feilutbetaltBeløp)),
-                        ),
+                    BeriketSimuleringsresultat(
+                        mockk(),
+                        simuleringsoppsummering.copy(feilutbetaling = BigDecimal(feilutbetaltBeløp)),
+                    ),
                 ),
             )
     }
