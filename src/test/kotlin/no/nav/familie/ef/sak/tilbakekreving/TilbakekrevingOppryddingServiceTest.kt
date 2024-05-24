@@ -74,7 +74,6 @@ class TilbakekrevingOppryddingServiceTest() {
 
     @Test
     internal fun `Skal ikke slette tilbakekreving dersom tilbakekrevingsvalg ikke er OPPRETT AUTOMATISK`() {
-
         mockHentLagretTilbakekreving(tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_MED_VARSEL)
 
         oppryddingService.slettTilbakekrevingsvalgHvisIngenFeilutbetalingEllerForskjelligBeløp(UUID.randomUUID(), simuleringsoppsummering)
@@ -104,12 +103,12 @@ class TilbakekrevingOppryddingServiceTest() {
 
     private fun mockHentLagretTilbakekreving(tilbakekrevingsvalg: Tilbakekrevingsvalg) {
         every { tilbakekrevingRepository.findByIdOrThrow(any()) } returns
-                Tilbakekreving(
-                    behandlingId = UUID.randomUUID(),
-                    valg = tilbakekrevingsvalg,
-                    varseltekst = "forventetVarseltekst",
-                    begrunnelse = "ingen",
-                )
+            Tilbakekreving(
+                behandlingId = UUID.randomUUID(),
+                valg = tilbakekrevingsvalg,
+                varseltekst = "forventetVarseltekst",
+                begrunnelse = "ingen",
+            )
     }
 
     private fun mockHentLagretSimuleringsresultat(feilutbetaltBeløp: Int) {
@@ -119,10 +118,10 @@ class TilbakekrevingOppryddingServiceTest() {
                     behandlingId = UUID.randomUUID(),
                     data = DetaljertSimuleringResultat(emptyList()),
                     beriketData =
-                    BeriketSimuleringsresultat(
-                        mockk(),
-                        simuleringsoppsummering.copy(feilutbetaling = BigDecimal(feilutbetaltBeløp)),
-                    ),
+                        BeriketSimuleringsresultat(
+                            mockk(),
+                            simuleringsoppsummering.copy(feilutbetaling = BigDecimal(feilutbetaltBeløp)),
+                        ),
                 ),
             )
     }
