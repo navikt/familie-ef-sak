@@ -31,8 +31,8 @@ class TilbakekrevingOppryddingService(
     }
 
     private fun slettTilbakekrevingsvalgUnder4rettsgebyr(behandlingId: UUID) {
-        val tilbakekreving = tilbakekrevingRepository.findByIdOrThrow(behandlingId)
-        if (tilbakekreving.valg == Tilbakekrevingsvalg.OPPRETT_AUTOMATISK) {
+        val tilbakekreving = tilbakekrevingRepository.findByIdOrNull(behandlingId)
+        if (tilbakekreving != null && tilbakekreving.valg == Tilbakekrevingsvalg.OPPRETT_AUTOMATISK) {
             slettTilbakekrevingsvalg(behandlingId)
         }
     }
