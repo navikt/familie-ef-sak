@@ -7,6 +7,7 @@ import io.mockk.just
 import io.mockk.mockk
 import io.mockk.slot
 import no.nav.familie.ef.sak.behandling.BehandlingService
+import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.fagsak.FagsakService
@@ -15,11 +16,13 @@ import no.nav.familie.ef.sak.oppgave.TilordnetRessursService
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.fagsakpersoner
+import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.ef.sak.repository.saksbehandling
 import no.nav.familie.ef.sak.repository.tilkjentYtelse
 import no.nav.familie.ef.sak.simulering.SimuleringService
 import no.nav.familie.ef.sak.simulering.Simuleringsresultat
 import no.nav.familie.ef.sak.simulering.SimuleringsresultatRepository
+import no.nav.familie.ef.sak.tilbakekreving.TilbakekrevingOppryddingService
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.kontrakter.ef.iverksett.SimuleringDto
 import no.nav.familie.kontrakter.felles.ef.StønadType
@@ -41,6 +44,7 @@ internal class SimuleringServiceTest {
     private val tilkjentYtelseService = mockk<TilkjentYtelseService>()
     private val tilgangService = mockk<TilgangService>()
     private val tilordnetRessursService = mockk<TilordnetRessursService>()
+    private val tilbakekrevingOppryddingService = mockk<TilbakekrevingOppryddingService>(relaxed = true)
 
     private val simuleringService =
         SimuleringService(
@@ -49,6 +53,7 @@ internal class SimuleringServiceTest {
             tilkjentYtelseService = tilkjentYtelseService,
             tilgangService = tilgangService,
             tilordnetRessursService = tilordnetRessursService,
+            tilbakekrevingOppryddingService = tilbakekrevingOppryddingService,
         )
 
     private val personIdent = "12345678901"
@@ -73,24 +78,22 @@ internal class SimuleringServiceTest {
             )
 
         val tilkjentYtelse = tilkjentYtelse(behandlingId = behandling.id, personIdent = personIdent)
-        val simuleringsresultat =
-            Simuleringsresultat(
-                behandlingId = behandling.id,
-                data = DetaljertSimuleringResultat(emptyList()),
-                beriketData = BeriketSimuleringsresultat(mockk(), mockk()),
-            )
+        val simuleringsresultat = mockSimuleringsResultat(behandling)
         every { behandlingService.hentBehandling(any()) } returns behandling
         every { tilkjentYtelseService.hentForBehandling(any()) } returns tilkjentYtelse
         every { simuleringsresultatRepository.deleteById(any()) } just Runs
         every { simuleringsresultatRepository.insert(any()) } returns simuleringsresultat
         every { tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandler(any()) } returns true
 
+        every {
+            simuleringsresultatRepository.findByIdOrNull(behandling.id)
+        } returns mockSimuleringsResultat(behandling)
+
         val simulerSlot = slot<SimuleringDto>()
         every {
             iverksettClient.simuler(capture(simulerSlot))
         } returns BeriketSimuleringsresultat(mockk(), mockk())
         simuleringService.simuler(saksbehandling(fagsak, behandling))
-
         assertThat(simulerSlot.captured.nyTilkjentYtelseMedMetaData.behandlingId).isEqualTo(tilkjentYtelse.behandlingId)
         assertThat(simulerSlot.captured.nyTilkjentYtelseMedMetaData.tilkjentYtelse.andelerTilkjentYtelse.first().beløp)
             .isEqualTo(tilkjentYtelse.andelerTilkjentYtelse.first().beløp)
@@ -118,12 +121,7 @@ internal class SimuleringServiceTest {
         every { behandlingService.hentBehandling(any()) } returns behandling
         every {
             simuleringsresultatRepository.findByIdOrNull(behandling.id)
-        } returns
-            Simuleringsresultat(
-                behandlingId = behandling.id,
-                data = DetaljertSimuleringResultat(emptyList()),
-                beriketData = BeriketSimuleringsresultat(mockk(), mockk()),
-            )
+        } returns mockSimuleringsResultat(behandling)
         val simuleringsresultatDto = simuleringService.simuler(saksbehandling(fagsak, behandling))
         assertThat(simuleringsresultatDto).isNotNull
     }
@@ -140,8 +138,9 @@ internal class SimuleringServiceTest {
 
         val tilkjentYtelse = tilkjentYtelse(behandlingId = behandling.id, personIdent = personIdent)
 
+        val beriketSimuleringsresultat = objectMapper.readValue<BeriketSimuleringsresultat>(readFile("simuleringsresultat_beriket.json"))
         every { iverksettClient.simuler(any()) } returns
-            objectMapper.readValue(readFile("simuleringsresultat_beriket.json"))
+            beriketSimuleringsresultat
 
         every { behandlingService.hentBehandling(any()) } returns behandling
         every { tilkjentYtelseService.hentForBehandling(any()) } returns tilkjentYtelse
@@ -150,12 +149,20 @@ internal class SimuleringServiceTest {
 
         val simulerSlot = slot<Simuleringsresultat>()
         every { simuleringsresultatRepository.insert(capture(simulerSlot)) } answers { firstArg() }
+        every { simuleringsresultatRepository.findByIdOrThrow(any()) } returns mockSimuleringsResultat(behandling)
 
         simuleringService.simuler(saksbehandling(id = behandling.id))
 
         assertThat(simulerSlot.captured.beriketData.oppsummering.fom)
             .isEqualTo(LocalDate.of(2021, 2, 1))
     }
+
+    private fun mockSimuleringsResultat(behandling: Behandling) =
+        Simuleringsresultat(
+            behandlingId = behandling.id,
+            data = DetaljertSimuleringResultat(emptyList()),
+            beriketData = BeriketSimuleringsresultat(mockk(), mockk()),
+        )
 
     private fun readFile(filnavn: String): String {
         return this::class.java.getResource("/json/$filnavn").readText()
