@@ -10,6 +10,7 @@ import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.oppgave.TilordnetRessursService
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
+import no.nav.familie.ef.sak.tilbakekreving.TilbakekrevingOppryddingService
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.ef.sak.tilkjentytelse.tilTilkjentYtelseMedMetaData
 import no.nav.familie.http.client.RessursException
@@ -30,6 +31,7 @@ class SimuleringService(
     private val tilkjentYtelseService: TilkjentYtelseService,
     private val tilgangService: TilgangService,
     private val tilordnetRessursService: TilordnetRessursService,
+    private val tilbakekrevingOppryddingService: TilbakekrevingOppryddingService,
 ) {
     private val logger = LoggerFactory.getLogger(javaClass)
 
@@ -50,7 +52,8 @@ class SimuleringService(
     }
 
     fun hentLagretSimmuleringsresultat(behandlingId: UUID): BeriketSimuleringsresultat {
-        return simuleringsresultatRepository.findByIdOrThrow(behandlingId).beriketData
+        val simuleringsresultat = simuleringsresultatRepository.findByIdOrThrow(behandlingId)
+        return simuleringsresultat.beriketData
     }
 
     fun slettSimuleringForBehandling(saksbehandling: Saksbehandling) {
@@ -60,17 +63,18 @@ class SimuleringService(
         }
         logger.info("Sletter simulering for behandling=$behandlingId")
         simuleringsresultatRepository.deleteById(behandlingId)
+        tilbakekrevingOppryddingService.slettTilbakekrevingsvalg(behandlingId)
     }
 
     @Transactional
     fun hentOgLagreSimuleringsresultat(saksbehandling: Saksbehandling): Simuleringsresultat {
         tilgangService.validerHarSaksbehandlerrolle()
-
         feilHvis(saksbehandling.status.behandlingErLåstForVidereRedigering()) {
             "Kan ikke hente og lagre simuleringsresultat då behandling=${saksbehandling.id} er låst"
         }
 
         val beriketSimuleringsresultat = simulerMedTilkjentYtelse(saksbehandling)
+        tilbakekrevingOppryddingService.slettTilbakekrevingsvalgHvisIngenFeilutbetalingEllerForskjelligBeløp(saksbehandling.id, beriketSimuleringsresultat.oppsummering)
         simuleringsresultatRepository.deleteById(saksbehandling.id)
         return simuleringsresultatRepository.insert(
             Simuleringsresultat(
