@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.opplysninger.personopplysninger.pensjon
 
+import java.net.URI
 import no.nav.familie.http.client.AbstractRestClient
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
@@ -7,7 +8,6 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
 import org.springframework.web.client.RestOperations
 import org.springframework.web.util.UriComponentsBuilder
-import java.net.URI
 
 @Component
 class HistoriskPensjonClient(
@@ -27,15 +27,19 @@ class HistoriskPensjonClient(
         aktivIdent: String,
         alleRelaterteFoedselsnummer: Set<String>,
     ): HistoriskPensjonDto {
-        repeat(2) {
+        val antallForsøk = 2
+        repeat(antallForsøk) { teller ->
             try {
                 return postForEntity<HistoriskPensjonResponse>(
                     lagHarPensjonUri(),
                     EnsligForsoergerRequest(aktivIdent, alleRelaterteFoedselsnummer),
                 ).tilDto()
             } catch (e: Exception) {
-                logger.error("Kunne ikke kalle historisk pensjon for uthenting")
-                secureLogger.error("Kunne ikke kalle historisk pensjon for uthenting", e)
+                val skalLoggeSisteForsøk = teller == (antallForsøk - 1)
+                if (skalLoggeSisteForsøk) {
+                    logger.error("Kunne ikke kalle historisk pensjon for uthenting")
+                    secureLogger.error("Kunne ikke kalle historisk pensjon for uthenting", e)
+                }
             }
         }
         return HistoriskPensjonDto(HistoriskPensjonStatus.UKJENT, null)
