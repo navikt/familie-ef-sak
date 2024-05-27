@@ -25,7 +25,7 @@ data class TidligereInnvilgetVedtakDto(
     val harTidligereSkolepenger: Boolean,
     val periodeHistorikkOvergangsstønad: List<GrunnlagsdataPeriodeHistorikkDto> = emptyList(),
     val periodeHistorikkBarnetilsyn: List<GrunnlagsdataPeriodeHistorikkBarnetilsynDto> = emptyList(),
-    val sistePeriodeMedOvergangsstønad: SistePeriodeMedOvergangsstønad? = null,
+    val sistePeriodeMedOvergangsstønad: List<SistePeriodeMedOvergangsstønad>? = emptyList(),
 ) {
     fun harTidligereInnvilgetVedtak() =
         harTidligereOvergangsstønad || harTidligereBarnetilsyn || harTidligereSkolepenger

@@ -1479,7 +1479,7 @@
               },
               "sistePeriodeMedOvergangsstønad" : {
                 "name" : "sistePeriodeMedOvergangsstønad",
-                "type" : "Object",
+                "type" : "Collection",
                 "fields" : {
                   "fom" : {
                     "name" : "fom",
@@ -1573,7 +1573,7 @@
               },
               "sistePeriodeMedOvergangsstønad" : {
                 "name" : "sistePeriodeMedOvergangsstønad",
-                "type" : "Object",
+                "type" : "Collection",
                 "fields" : {
                   "fom" : {
                     "name" : "fom",
@@ -2315,7 +2315,7 @@
           },
           "sistePeriodeMedOvergangsstønad" : {
             "name" : "sistePeriodeMedOvergangsstønad",
-            "type" : "Object",
+            "type" : "Collection",
             "fields" : {
               "fom" : {
                 "name" : "fom",
@@ -2409,7 +2409,7 @@
           },
           "sistePeriodeMedOvergangsstønad" : {
             "name" : "sistePeriodeMedOvergangsstønad",
-            "type" : "Object",
+            "type" : "Collection",
             "fields" : {
               "fom" : {
                 "name" : "fom",
