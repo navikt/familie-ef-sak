@@ -2,6 +2,7 @@ package no.nav.familie.ef.sak.vilkår.dto
 
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataPeriodeHistorikkBarnetilsyn
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataPeriodeHistorikkOvergangsstønad
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.SistePeriodeMedOvergangsstønad
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.TidligereInnvilgetVedtak
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.TidligereVedtaksperioder
 import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
@@ -24,6 +25,7 @@ data class TidligereInnvilgetVedtakDto(
     val harTidligereSkolepenger: Boolean,
     val periodeHistorikkOvergangsstønad: List<GrunnlagsdataPeriodeHistorikkDto> = emptyList(),
     val periodeHistorikkBarnetilsyn: List<GrunnlagsdataPeriodeHistorikkBarnetilsynDto> = emptyList(),
+    val sistePeriodeMedOvergangsstønad: SistePeriodeMedOvergangsstønad? = null,
 ) {
     fun harTidligereInnvilgetVedtak() =
         harTidligereOvergangsstønad || harTidligereBarnetilsyn || harTidligereSkolepenger
@@ -65,6 +67,7 @@ fun TidligereInnvilgetVedtak.tilDto() =
         harTidligereSkolepenger = this.harTidligereSkolepenger,
         periodeHistorikkOvergangsstønad = this.periodeHistorikkOvergangsstønad.tilDtoOvergangsstønad(),
         periodeHistorikkBarnetilsyn = this.periodeHistorikkBarnetilsyn.tilDtoBarnetilsyn(this.periodeHistorikkOvergangsstønad),
+        sistePeriodeMedOvergangsstønad = this.sistePeriodeMedOvergangsstønad,
     )
 
 private fun List<GrunnlagsdataPeriodeHistorikkOvergangsstønad>.tilDtoOvergangsstønad() =
