@@ -70,7 +70,7 @@ class TidligereVedtaksperioderService(
         return hentAndelshistorikkForOvergangsstønad(fagsaker)
             .filterNot(erstattetEllerFjernet())
             .filterNot { it.erOpphør }
-            .last()
+            .lastOrNull()
             ?.let {
                 feilHvis(it.periodeType == null) { "Overgangsstønad skal ha periodetype" }
                 SistePeriodeMedOvergangsstønad(
