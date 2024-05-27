@@ -66,11 +66,12 @@ class TidligereVedtaksperioderService(
             } ?: TidligereInnvilgetVedtak(false, false, false)
     }
 
-    private fun hentSistePeriodeMedOvergangsstønad(fagsaker: Fagsaker): List<SistePeriodeMedOvergangsstønad>? {
+    private fun hentSistePeriodeMedOvergangsstønad(fagsaker: Fagsaker): SistePeriodeMedOvergangsstønad? {
         return hentAndelshistorikkForOvergangsstønad(fagsaker)
             .filterNot(erstattetEllerFjernet())
             .filterNot { it.erOpphør }
-            .map {
+            .lastOrNull()
+            ?.let {
                 feilHvis(it.periodeType == null) { "Overgangsstønad skal ha periodetype" }
                 SistePeriodeMedOvergangsstønad(
                     fom = it.andel.periode.fomDato,
