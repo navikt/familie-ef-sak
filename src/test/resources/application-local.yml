@@ -16,11 +16,9 @@ no.nav.security.jwt:
     tokenx:
       discovery-url: http://localhost:${mock-oauth2-server.port}/tokenx/.well-known/openid-configuration
       accepted-audience: aud-localhost
-      cookie_name: localhost-idtoken
     azuread:
       discoveryurl: https://login.microsoftonline.com/navq.onmicrosoft.com/v2.0/.well-known/openid-configuration
       accepted_audience: ${AZURE_APP_CLIENT_ID}
-      cookie_name: azure_token
 
 AZUREAD_TOKEN_ENDPOINT_URL: https://login.microsoftonline.com/navq.onmicrosoft.com/oauth2/v2.0/token
 AUTHORIZATION_URL: https://login.microsoftonline.com/${AZURE_APP_TENANT_ID}/oauth2/v2.0/authorize

@@ -35,8 +35,8 @@
         <mockk.version>1.13.10</mockk.version>
         <felles.version>3.20240515152313_9dd5659</felles.version>
         <prosessering.version>2.20240426120029_490d299</prosessering.version>
-<!--        <felles.version>2.20240227113046_178d8bb</felles.version>-->
-<!--        <prosessering.version>2.20240214140223_83c31de</prosessering.version>-->
+        <token-validation-spring.version>4.1.4</token-validation-spring.version>
+
         <start-class>no.nav.familie.ef.sak.ApplicationKt</start-class>
         <kontrakter.version>3.0_20240430083848_be12d55</kontrakter.version>
         <mikrofrontend.builder.version>20230704114948-74aa2e9</mikrofrontend.builder.version>
@@ -48,7 +48,7 @@
         <sonar.projectKey>${SONAR_PROJECTKEY}</sonar.projectKey>
         <sonar.organization>navit</sonar.organization>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
-        <nav.security.version>3.2.0</nav.security.version> <!-- Denne burde være samme versjon som i felles -->
+        <nav.security.version>4.1.5</nav.security.version> <!-- Denne burde være samme versjon som i felles -->
         <okhttp3.version>4.9.1</okhttp3.version> <!-- overskrever spring sin versjon, blir brukt av mock-oauth2-server -->
         <!--suppress UnresolvedMavenProperty -->
         <sonar.login>${SONAR_LOGIN}</sonar.login>
@@ -95,6 +95,16 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-validation</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>no.nav.security</groupId>
+            <artifactId>token-client-core</artifactId>
+            <version>${token-validation-spring.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>no.nav.security</groupId>
+            <artifactId>token-validation-core</artifactId>
+            <version>${token-validation-spring.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.kafka</groupId>
