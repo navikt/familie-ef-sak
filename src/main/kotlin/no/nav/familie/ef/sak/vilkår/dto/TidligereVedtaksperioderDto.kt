@@ -5,6 +5,7 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataPeriod
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.SistePeriodeMedOvergangsstønad
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.TidligereInnvilgetVedtak
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.TidligereVedtaksperioder
+import no.nav.familie.ef.sak.vedtak.domain.SamordningsfradragType
 import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
 import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType.SANKSJON
 import no.nav.familie.kontrakter.felles.Månedsperiode
@@ -25,7 +26,7 @@ data class TidligereInnvilgetVedtakDto(
     val harTidligereSkolepenger: Boolean,
     val periodeHistorikkOvergangsstønad: List<GrunnlagsdataPeriodeHistorikkDto> = emptyList(),
     val periodeHistorikkBarnetilsyn: List<GrunnlagsdataPeriodeHistorikkBarnetilsynDto> = emptyList(),
-    val sistePeriodeMedOvergangsstønad: SistePeriodeMedOvergangsstønad? = null,
+    val sistePeriodeMedOvergangsstønad: SistePeriodeMedOvergangsstønadDto? = null,
 ) {
     fun harTidligereInnvilgetVedtak() =
         harTidligereOvergangsstønad || harTidligereBarnetilsyn || harTidligereSkolepenger
@@ -37,6 +38,14 @@ data class GrunnlagsdataPeriodeHistorikkDto(
     val tom: LocalDate,
     val antallMåneder: Long,
     val antallMånederUtenBeløp: Long = 0,
+)
+
+data class SistePeriodeMedOvergangsstønadDto(
+    val fom: LocalDate,
+    val tom: LocalDate,
+    val vedtaksperiodeType: String,
+    val inntekt: Int,
+    val samordningsfradrag: Int?,
 )
 
 enum class OverlappMedOvergangsstønad {
@@ -67,7 +76,17 @@ fun TidligereInnvilgetVedtak.tilDto() =
         harTidligereSkolepenger = this.harTidligereSkolepenger,
         periodeHistorikkOvergangsstønad = this.periodeHistorikkOvergangsstønad.tilDtoOvergangsstønad(),
         periodeHistorikkBarnetilsyn = this.periodeHistorikkBarnetilsyn.tilDtoBarnetilsyn(this.periodeHistorikkOvergangsstønad),
-        sistePeriodeMedOvergangsstønad = this.sistePeriodeMedOvergangsstønad,
+        sistePeriodeMedOvergangsstønad = this.sistePeriodeMedOvergangsstønad?.tilDto(),
+    )
+
+
+private fun SistePeriodeMedOvergangsstønad.tilDto() =
+    SistePeriodeMedOvergangsstønadDto(
+        fom = this.fom,
+        tom = this.tom,
+        vedtaksperiodeType = this.periodeType.name,
+        inntekt = this.inntekt ?: 0,
+        samordningsfradrag = this.samordningsfradrag,
     )
 
 private fun List<GrunnlagsdataPeriodeHistorikkOvergangsstønad>.tilDtoOvergangsstønad() =
