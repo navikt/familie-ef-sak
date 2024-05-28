@@ -78,14 +78,23 @@ Når G-omregningen er ferdigkjørt er det viktig å gå igjennom denne listen fo
 * `FinnBehandlingerMedGammelGTask` vil rapportere de som må håndteres manuelt (samordningsfradrag) den 1. i hver måned. 
   * De i denne listen som har samordning skal overleveres til coachene.
   * Hvis G-omregning skjer etter 1. juni: Rekjør denne tasken når G-omregningen er ferdigkjørt
+  * Kan bruke `finnFerdigstilteFagsakerMedUtdatertGBelop` og sjekke `samordningsfradrag > 0` samt `beløp > 0` for å finne liste for oversendelse til coacher
 
 * For de tilfellene med sanksjonsperioder vil G-omregningstasken feile. Denne må manuelt G-omregnes av coachene og tasken kan avvikshåndteres
 
-* Oppdater veiviser med barnetilsyn 6G (vilkår for å kunne motta = inntekt under 6G) 
+* Oppdatere sanity
+    * Veiviser: https://familie-ef-veiviser.sanity.studio/prod/desk/brodtekst;5ebe8916-440b-4f88-a843-b0392b8af6e7
+    * Veiviser: https://familie-ef-veiviser.sanity.studio/prod/desk/brodtekst;8cfae020-a502-4f6d-a04c-8563a6011cac
+    * Veiviser: https://familie-ef-veiviser.sanity.studio/prod/desk/brodtekst;ace56c71-1fe3-4892-aad6-c5423f31698c
+    * Brev: https://familie-brev.sanity.studio/ef-brev/structure/innhold;revurderingsbrev;beregningOgUtbetaling;df5b4cb0-f35d-449a-a9f6-6459c5c77ac2
+    * Brev: https://familie-brev.sanity.studio/ef-brev/structure/innhold;avansertDelmal-a8530c4d-b70c-4eaa-a7a1-e6b810fb06bd
+    * Brev: https://familie-brev.sanity.studio/ef-brev/structure/innhold;revurderingsbrev;beregningOgUtbetaling;8ed34dc2-476f-4214-90a4-1d504b7817eb
+    * Brev: https://familie-brev.sanity.studio/ef-brev/structure/innhold;98b6b428-ad1e-42da-b4d2-5c6e3f7c11f3
+    * Brev: https://familie-brev.sanity.studio/ef-brev/structure/innhold;27b438c3-54e1-4229-8c71-1899bf756451
+    * Brev: https://familie-brev.sanity.studio/ef-brev/structure/innhold;innvilgelsesbrev;beregningOgUtbetaling;4ac0848c-d6c8-4690-9720-d0906b7fb932
 
-* Oppdater veiviser med inntekt som tipper OS over i 0-beløp (2023 - )
-
-* Sjekk om det er riktig G brukt på nav.no? 
+* Sjekk om det er riktig G brukt på nav.no?
+    * https://www.nav.no/overgangsstonad-enslig#hvor-mye - både tekst og kalkulator
 
 * Kanskje sjekke om noen har fått avslag på førstegangsbehandling i mai på "BT" med begrunnelse over 6 gamle G?  
 
