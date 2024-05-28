@@ -5,7 +5,6 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataPeriod
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.SistePeriodeMedOvergangsstønad
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.TidligereInnvilgetVedtak
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.TidligereVedtaksperioder
-import no.nav.familie.ef.sak.vedtak.domain.SamordningsfradragType
 import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
 import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType.SANKSJON
 import no.nav.familie.kontrakter.felles.Månedsperiode
@@ -78,7 +77,6 @@ fun TidligereInnvilgetVedtak.tilDto() =
         periodeHistorikkBarnetilsyn = this.periodeHistorikkBarnetilsyn.tilDtoBarnetilsyn(this.periodeHistorikkOvergangsstønad),
         sistePeriodeMedOvergangsstønad = this.sistePeriodeMedOvergangsstønad?.tilDto(),
     )
-
 
 private fun SistePeriodeMedOvergangsstønad.tilDto() =
     SistePeriodeMedOvergangsstønadDto(
