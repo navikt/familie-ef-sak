@@ -322,10 +322,10 @@ internal class TidligereVedtaksperioderServiceTest {
         fom: LocalDate,
         tom: LocalDate,
         periodeType: VedtaksperiodeType = HOVEDPERIODE,
-        inntekt: Int = 0,
-        samordningsfradrag: Int = 0,
+        inntekt: Int? = null,
+        samordningsfradrag: Int? = null,
     ) =
-        GrunnlagsdataPeriodeHistorikkOvergangsstønad(periodeType = periodeType, fom = fom, tom = tom, beløp, inntekt = inntekt, samordningsfradrag = samordningsfradrag)
+        GrunnlagsdataPeriodeHistorikkOvergangsstønad(periodeType = periodeType, fom = fom, tom = tom, beløp, inntekt, samordningsfradrag)
 
     private fun mockTidligereVedtakEfSak(harAndeler: Boolean = false) {
         every { fagsakPersonService.finnPerson(any()) } returns fagsakPerson
