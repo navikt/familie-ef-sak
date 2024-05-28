@@ -77,22 +77,18 @@ fun TidligereInnvilgetVedtak.tilDto() =
         sistePeriodeMedOvergangsstønad = this.periodeHistorikkOvergangsstønad.tilSistePeriodeDto(),
     )
 
-private fun List<GrunnlagsdataPeriodeHistorikkOvergangsstønad>.tilSistePeriodeDto(): SistePeriodeMedOvergangsstønadDto? {
-    val sistePeriode =
-        this.sortedBy { it.fom }
-            .lastOrNull()
-
-    return if (sistePeriode != null) {
-        SistePeriodeMedOvergangsstønadDto(
-            fom = sistePeriode.fom,
-            tom = sistePeriode.tom,
-            vedtaksperiodeType = sistePeriode.periodeType.name,
-            inntekt = sistePeriode.inntekt ?: 0,
-            samordningsfradrag = sistePeriode.samordningsfradrag,
-        )
-    } else {
-        null
-    }
+fun List<GrunnlagsdataPeriodeHistorikkOvergangsstønad>.tilSistePeriodeDto(): SistePeriodeMedOvergangsstønadDto? {
+    return this.sortedBy { it.fom }
+        .lastOrNull()
+        ?.let { sistePeriode ->
+            SistePeriodeMedOvergangsstønadDto(
+                fom = sistePeriode.fom,
+                tom = sistePeriode.tom,
+                vedtaksperiodeType = sistePeriode.periodeType.name,
+                inntekt = sistePeriode.inntekt ?: 0,
+                samordningsfradrag = sistePeriode.samordningsfradrag,
+            )
+        }
 }
 
 private fun List<GrunnlagsdataPeriodeHistorikkOvergangsstønad>.tilDtoOvergangsstønad() =

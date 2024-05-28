@@ -37,6 +37,7 @@ import no.nav.familie.ef.sak.vedtak.historikk.HistorikkEndring
 import no.nav.familie.ef.sak.vedtak.historikk.Sanksjonsperiode
 import no.nav.familie.ef.sak.vedtak.historikk.VedtakshistorikkperiodeOvergangsstønad
 import no.nav.familie.ef.sak.vilkår.dto.tilDto
+import no.nav.familie.ef.sak.vilkår.dto.tilSistePeriodeDto
 import no.nav.familie.ef.sak.økonomi.lagAndelTilkjentYtelse
 import no.nav.familie.ef.sak.økonomi.lagTilkjentYtelse
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
@@ -315,6 +316,45 @@ internal class TidligereVedtaksperioderServiceTest {
         assertThat(periodeHistorikkDtos).hasSize(1)
         assertThat(periodeHistorikkDtos.first().antallMånederUtenBeløp).isEqualTo(24)
         assertThat(periodeHistorikkDtos.first().antallMåneder).isEqualTo(24)
+    }
+
+    @Test
+    fun `tilSistePeriodeDto skal sortere på fom, slik at nyeste periode blir brukt`() {
+        val perioder =
+            listOf(
+                GrunnlagsdataPeriodeHistorikkOvergangsstønad(
+                    fom = LocalDate.of(2022, 5, 1),
+                    tom = LocalDate.of(2022, 9, 30),
+                    periodeType = VedtaksperiodeType.SANKSJON,
+                    beløp = 5555,
+                    inntekt = 5555,
+                    samordningsfradrag = 5555,
+                ),
+                GrunnlagsdataPeriodeHistorikkOvergangsstønad(
+                    fom = LocalDate.of(2024, 2, 1),
+                    tom = LocalDate.of(2024, 3, 31),
+                    periodeType = VedtaksperiodeType.SANKSJON,
+                    beløp = 4444,
+                    inntekt = 4444,
+                    samordningsfradrag = 4444,
+                ),
+                GrunnlagsdataPeriodeHistorikkOvergangsstønad(
+                    fom = LocalDate.of(2023, 3, 1),
+                    tom = LocalDate.of(2023, 7, 31),
+                    periodeType = VedtaksperiodeType.SANKSJON,
+                    beløp = 3333,
+                    inntekt = 3333,
+                    samordningsfradrag = 3333,
+                ),
+            )
+
+        val sistePeriode = perioder.tilSistePeriodeDto()
+
+        assertThat(sistePeriode).isNotNull
+        assertThat(sistePeriode?.fom).isEqualTo(LocalDate.of(2024, 2, 1))
+        assertThat(sistePeriode?.tom).isEqualTo(LocalDate.of(2024, 3, 31))
+        assertThat(sistePeriode?.inntekt).isEqualTo(4444)
+        assertThat(sistePeriode?.samordningsfradrag).isEqualTo(4444)
     }
 
     private fun grunnlagsdataPeriodeHistorikk(
