@@ -2,7 +2,6 @@ package no.nav.familie.ef.sak.vilkår.dto
 
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataPeriodeHistorikkBarnetilsyn
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataPeriodeHistorikkOvergangsstønad
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.SistePeriodeMedOvergangsstønad
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.TidligereInnvilgetVedtak
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.TidligereVedtaksperioder
 import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
@@ -75,17 +74,26 @@ fun TidligereInnvilgetVedtak.tilDto() =
         harTidligereSkolepenger = this.harTidligereSkolepenger,
         periodeHistorikkOvergangsstønad = this.periodeHistorikkOvergangsstønad.tilDtoOvergangsstønad(),
         periodeHistorikkBarnetilsyn = this.periodeHistorikkBarnetilsyn.tilDtoBarnetilsyn(this.periodeHistorikkOvergangsstønad),
-        sistePeriodeMedOvergangsstønad = this.sistePeriodeMedOvergangsstønad?.tilDto(),
+        sistePeriodeMedOvergangsstønad = this.periodeHistorikkOvergangsstønad.tilSistePeriodeDto(),
     )
 
-private fun SistePeriodeMedOvergangsstønad.tilDto() =
-    SistePeriodeMedOvergangsstønadDto(
-        fom = this.fom,
-        tom = this.tom,
-        vedtaksperiodeType = this.periodeType.name,
-        inntekt = this.inntekt ?: 0,
-        samordningsfradrag = this.samordningsfradrag,
-    )
+private fun List<GrunnlagsdataPeriodeHistorikkOvergangsstønad>.tilSistePeriodeDto(): SistePeriodeMedOvergangsstønadDto? {
+    val sistePeriode = this.sortedBy { it.fom }
+        .lastOrNull()
+
+    return if (sistePeriode != null) {
+        SistePeriodeMedOvergangsstønadDto(
+            fom = sistePeriode.fom,
+            tom = sistePeriode.tom,
+            vedtaksperiodeType = sistePeriode.periodeType.name,
+            inntekt = sistePeriode.inntekt ?: 0,
+            samordningsfradrag = sistePeriode.samordningsfradrag,
+        )
+    } else {
+        null
+    }
+}
+
 
 private fun List<GrunnlagsdataPeriodeHistorikkOvergangsstønad>.tilDtoOvergangsstønad() =
     this.map { it.tilDto() }

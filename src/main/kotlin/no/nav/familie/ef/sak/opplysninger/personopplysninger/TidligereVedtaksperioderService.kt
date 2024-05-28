@@ -61,26 +61,8 @@ class TidligereVedtaksperioderService(
                     harTidligereSkolepenger = hentTidligereVedtaksperioder(it.skolepenger),
                     periodeHistorikkOvergangsstønad = hentGjeldendeOvergangstønadsperioder(it),
                     periodeHistorikkBarnetilsyn = hentGjeldendeBarnetilsynsperioder(it),
-                    sistePeriodeMedOvergangsstønad = hentSistePeriodeMedOvergangsstønad(it),
                 )
             } ?: TidligereInnvilgetVedtak(false, false, false)
-    }
-
-    private fun hentSistePeriodeMedOvergangsstønad(fagsaker: Fagsaker): SistePeriodeMedOvergangsstønad? {
-        return hentAndelshistorikkForOvergangsstønad(fagsaker)
-            .filterNot(erstattetEllerFjernet())
-            .filterNot { it.erOpphør }
-            .lastOrNull()
-            ?.let {
-                feilHvis(it.periodeType == null) { "Overgangsstønad skal ha periodetype" }
-                SistePeriodeMedOvergangsstønad(
-                    fom = it.andel.periode.fomDato,
-                    tom = it.andel.periode.tomDato,
-                    periodeType = it.periodeType,
-                    inntekt = it.andel.inntekt,
-                    samordningsfradrag = it.andel.samordningsfradrag,
-                )
-            }
     }
 
     private fun hentTidligereVedtaksperioder(fagsak: Fagsak?) =
@@ -102,6 +84,8 @@ class TidligereVedtaksperioderService(
                     fom = it.andel.periode.fomDato,
                     tom = it.andel.periode.tomDato,
                     beløp = it.andel.beløp,
+                    inntekt = it.andel.inntekt,
+                    samordningsfradrag = it.andel.samordningsfradrag,
                 )
             }
     }

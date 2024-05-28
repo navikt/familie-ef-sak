@@ -1456,6 +1456,16 @@
                     "name" : "beløp",
                     "type" : "Int",
                     "nullable" : false
+                  },
+                  "inntekt" : {
+                    "name" : "inntekt",
+                    "type" : "Int",
+                    "nullable" : true
+                  },
+                  "samordningsfradrag" : {
+                    "name" : "samordningsfradrag",
+                    "type" : "Int",
+                    "nullable" : true
                   }
                 },
                 "nullable" : false
@@ -1476,39 +1486,6 @@
                   }
                 },
                 "nullable" : false
-              },
-              "sistePeriodeMedOvergangsstønad" : {
-                "name" : "sistePeriodeMedOvergangsstønad",
-                "type" : "Object",
-                "fields" : {
-                  "fom" : {
-                    "name" : "fom",
-                    "type" : "LocalDate",
-                    "nullable" : false
-                  },
-                  "tom" : {
-                    "name" : "tom",
-                    "type" : "LocalDate",
-                    "nullable" : false
-                  },
-                  "periodeType" : {
-                    "name" : "periodeType",
-                    "type" : "Enum",
-                    "values" : [ "FORLENGELSE", "HOVEDPERIODE", "MIDLERTIDIG_OPPHØR", "MIGRERING", "PERIODE_FØR_FØDSEL", "SANKSJON", "UTVIDELSE", "NY_PERIODE_FOR_NYTT_BARN" ],
-                    "nullable" : false
-                  },
-                  "inntekt" : {
-                    "name" : "inntekt",
-                    "type" : "Int",
-                    "nullable" : true
-                  },
-                  "samordningsfradrag" : {
-                    "name" : "samordningsfradrag",
-                    "type" : "Int",
-                    "nullable" : true
-                  }
-                },
-                "nullable" : true
               }
             },
             "nullable" : false
@@ -1556,6 +1533,16 @@
                     "name" : "beløp",
                     "type" : "Int",
                     "nullable" : false
+                  },
+                  "inntekt" : {
+                    "name" : "inntekt",
+                    "type" : "Int",
+                    "nullable" : true
+                  },
+                  "samordningsfradrag" : {
+                    "name" : "samordningsfradrag",
+                    "type" : "Int",
+                    "nullable" : true
                   }
                 },
                 "nullable" : false
@@ -1576,39 +1563,6 @@
                   }
                 },
                 "nullable" : false
-              },
-              "sistePeriodeMedOvergangsstønad" : {
-                "name" : "sistePeriodeMedOvergangsstønad",
-                "type" : "Object",
-                "fields" : {
-                  "fom" : {
-                    "name" : "fom",
-                    "type" : "LocalDate",
-                    "nullable" : false
-                  },
-                  "tom" : {
-                    "name" : "tom",
-                    "type" : "LocalDate",
-                    "nullable" : false
-                  },
-                  "periodeType" : {
-                    "name" : "periodeType",
-                    "type" : "Enum",
-                    "values" : [ "FORLENGELSE", "HOVEDPERIODE", "MIDLERTIDIG_OPPHØR", "MIGRERING", "PERIODE_FØR_FØDSEL", "SANKSJON", "UTVIDELSE", "NY_PERIODE_FOR_NYTT_BARN" ],
-                    "nullable" : false
-                  },
-                  "inntekt" : {
-                    "name" : "inntekt",
-                    "type" : "Int",
-                    "nullable" : true
-                  },
-                  "samordningsfradrag" : {
-                    "name" : "samordningsfradrag",
-                    "type" : "Int",
-                    "nullable" : true
-                  }
-                },
-                "nullable" : true
               }
             },
             "nullable" : true
@@ -2304,6 +2258,16 @@
                 "name" : "beløp",
                 "type" : "Int",
                 "nullable" : false
+              },
+              "inntekt" : {
+                "name" : "inntekt",
+                "type" : "Int",
+                "nullable" : true
+              },
+              "samordningsfradrag" : {
+                "name" : "samordningsfradrag",
+                "type" : "Int",
+                "nullable" : true
               }
             },
             "nullable" : false
@@ -2324,39 +2288,6 @@
               }
             },
             "nullable" : false
-          },
-          "sistePeriodeMedOvergangsstønad" : {
-            "name" : "sistePeriodeMedOvergangsstønad",
-            "type" : "Object",
-            "fields" : {
-              "fom" : {
-                "name" : "fom",
-                "type" : "LocalDate",
-                "nullable" : false
-              },
-              "tom" : {
-                "name" : "tom",
-                "type" : "LocalDate",
-                "nullable" : false
-              },
-              "periodeType" : {
-                "name" : "periodeType",
-                "type" : "Enum",
-                "values" : [ "FORLENGELSE", "HOVEDPERIODE", "MIDLERTIDIG_OPPHØR", "MIGRERING", "PERIODE_FØR_FØDSEL", "SANKSJON", "UTVIDELSE", "NY_PERIODE_FOR_NYTT_BARN" ],
-                "nullable" : false
-              },
-              "inntekt" : {
-                "name" : "inntekt",
-                "type" : "Int",
-                "nullable" : true
-              },
-              "samordningsfradrag" : {
-                "name" : "samordningsfradrag",
-                "type" : "Int",
-                "nullable" : true
-              }
-            },
-            "nullable" : true
           }
         },
         "nullable" : false
@@ -2404,6 +2335,16 @@
                 "name" : "beløp",
                 "type" : "Int",
                 "nullable" : false
+              },
+              "inntekt" : {
+                "name" : "inntekt",
+                "type" : "Int",
+                "nullable" : true
+              },
+              "samordningsfradrag" : {
+                "name" : "samordningsfradrag",
+                "type" : "Int",
+                "nullable" : true
               }
             },
             "nullable" : false
@@ -2424,39 +2365,6 @@
               }
             },
             "nullable" : false
-          },
-          "sistePeriodeMedOvergangsstønad" : {
-            "name" : "sistePeriodeMedOvergangsstønad",
-            "type" : "Object",
-            "fields" : {
-              "fom" : {
-                "name" : "fom",
-                "type" : "LocalDate",
-                "nullable" : false
-              },
-              "tom" : {
-                "name" : "tom",
-                "type" : "LocalDate",
-                "nullable" : false
-              },
-              "periodeType" : {
-                "name" : "periodeType",
-                "type" : "Enum",
-                "values" : [ "FORLENGELSE", "HOVEDPERIODE", "MIDLERTIDIG_OPPHØR", "MIGRERING", "PERIODE_FØR_FØDSEL", "SANKSJON", "UTVIDELSE", "NY_PERIODE_FOR_NYTT_BARN" ],
-                "nullable" : false
-              },
-              "inntekt" : {
-                "name" : "inntekt",
-                "type" : "Int",
-                "nullable" : true
-              },
-              "samordningsfradrag" : {
-                "name" : "samordningsfradrag",
-                "type" : "Int",
-                "nullable" : true
-              }
-            },
-            "nullable" : true
           }
         },
         "nullable" : true
