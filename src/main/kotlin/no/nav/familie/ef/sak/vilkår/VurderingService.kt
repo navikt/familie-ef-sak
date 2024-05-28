@@ -210,18 +210,22 @@ class VurderingService(
 
         vilkårsvurderingRepository.insertAll(kopiAvVurderinger.values.toList() + nyeBarnVurderinger)
 
-        val behandlingSomErGrunnlagForGjenbrukAvInngangsvilkår =
-            finnBehandlingForGjenbrukAvInngangsvilkår(
-                alleredeGjenbruktBehandlingId = eksisterendeBehandlingId,
-                behandlingId = nyBehandlingsId,
-            )
-        behandlingSomErGrunnlagForGjenbrukAvInngangsvilkår?.let {
-            logger.info("Gjenbruker inngangsvilkår fra behandling=$it til ny behandling=$nyBehandlingsId")
-            gjenbrukVilkårService.gjenbrukInngangsvilkårVurderinger(
-                behandlingSomSkalOppdateres = nyBehandlingsId,
-                behandlingIdSomSkalGjenbrukeInngangsvilkår = it.id,
-            )
+        if(behandlingService.hentBehandling(nyBehandlingsId).årsak != BehandlingÅrsak.G_OMREGNING){
+            val behandlingSomErGrunnlagForGjenbrukAvInngangsvilkår =
+                finnBehandlingForGjenbrukAvInngangsvilkår(
+                    alleredeGjenbruktBehandlingId = eksisterendeBehandlingId,
+                    behandlingId = nyBehandlingsId,
+                )
+            behandlingSomErGrunnlagForGjenbrukAvInngangsvilkår?.let {
+                logger.info("Gjenbruker inngangsvilkår fra behandling=$it til ny behandling=$nyBehandlingsId")
+                gjenbrukVilkårService.gjenbrukInngangsvilkårVurderinger(
+                    behandlingSomSkalOppdateres = nyBehandlingsId,
+                    behandlingIdSomSkalGjenbrukeInngangsvilkår = it.id,
+                )
+            }
         }
+
+
     }
 
     private fun finnBehandlingForGjenbrukAvInngangsvilkår(
