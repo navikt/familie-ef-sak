@@ -76,6 +76,7 @@ class TidligereVedtaksperioderService(
                 SistePeriodeMedOvergangsstønad(
                     fom = it.andel.periode.fomDato,
                     tom = it.andel.periode.tomDato,
+                    periodeType = it.periodeType,
                     inntekt = it.andel.inntekt,
                     samordningsfradrag = it.andel.samordningsfradrag,
                 )

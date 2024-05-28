@@ -1491,6 +1491,12 @@
                     "type" : "LocalDate",
                     "nullable" : false
                   },
+                  "periodeType" : {
+                    "name" : "periodeType",
+                    "type" : "Enum",
+                    "values" : [ "FORLENGELSE", "HOVEDPERIODE", "MIDLERTIDIG_OPPHØR", "MIGRERING", "PERIODE_FØR_FØDSEL", "SANKSJON", "UTVIDELSE", "NY_PERIODE_FOR_NYTT_BARN" ],
+                    "nullable" : false
+                  },
                   "inntekt" : {
                     "name" : "inntekt",
                     "type" : "Int",
@@ -1583,6 +1589,12 @@
                   "tom" : {
                     "name" : "tom",
                     "type" : "LocalDate",
+                    "nullable" : false
+                  },
+                  "periodeType" : {
+                    "name" : "periodeType",
+                    "type" : "Enum",
+                    "values" : [ "FORLENGELSE", "HOVEDPERIODE", "MIDLERTIDIG_OPPHØR", "MIGRERING", "PERIODE_FØR_FØDSEL", "SANKSJON", "UTVIDELSE", "NY_PERIODE_FOR_NYTT_BARN" ],
                     "nullable" : false
                   },
                   "inntekt" : {
@@ -2327,6 +2339,12 @@
                 "type" : "LocalDate",
                 "nullable" : false
               },
+              "periodeType" : {
+                "name" : "periodeType",
+                "type" : "Enum",
+                "values" : [ "FORLENGELSE", "HOVEDPERIODE", "MIDLERTIDIG_OPPHØR", "MIGRERING", "PERIODE_FØR_FØDSEL", "SANKSJON", "UTVIDELSE", "NY_PERIODE_FOR_NYTT_BARN" ],
+                "nullable" : false
+              },
               "inntekt" : {
                 "name" : "inntekt",
                 "type" : "Int",
@@ -2419,6 +2437,12 @@
               "tom" : {
                 "name" : "tom",
                 "type" : "LocalDate",
+                "nullable" : false
+              },
+              "periodeType" : {
+                "name" : "periodeType",
+                "type" : "Enum",
+                "values" : [ "FORLENGELSE", "HOVEDPERIODE", "MIDLERTIDIG_OPPHØR", "MIGRERING", "PERIODE_FØR_FØDSEL", "SANKSJON", "UTVIDELSE", "NY_PERIODE_FOR_NYTT_BARN" ],
                 "nullable" : false
               },
               "inntekt" : {
