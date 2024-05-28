@@ -78,8 +78,9 @@ fun TidligereInnvilgetVedtak.tilDto() =
     )
 
 private fun List<GrunnlagsdataPeriodeHistorikkOvergangsstønad>.tilSistePeriodeDto(): SistePeriodeMedOvergangsstønadDto? {
-    val sistePeriode = this.sortedBy { it.fom }
-        .lastOrNull()
+    val sistePeriode =
+        this.sortedBy { it.fom }
+            .lastOrNull()
 
     return if (sistePeriode != null) {
         SistePeriodeMedOvergangsstønadDto(
@@ -93,7 +94,6 @@ private fun List<GrunnlagsdataPeriodeHistorikkOvergangsstønad>.tilSistePeriodeD
         null
     }
 }
-
 
 private fun List<GrunnlagsdataPeriodeHistorikkOvergangsstønad>.tilDtoOvergangsstønad() =
     this.map { it.tilDto() }
