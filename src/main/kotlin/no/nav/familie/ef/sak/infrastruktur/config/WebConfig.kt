@@ -19,7 +19,7 @@ class WebConfig(private val tilgangInterceptor: TilgangInterceptor) : WebMvcConf
             "/v2/api-docs/**",
             "/v2/api-docs",
             "/api/ekstern/perioder/full-overgangsstonad", // håndteres i controllern
-            "/api/ekstern/minside/stonadsperioder", // håndteres i controllern
+            "/api/ekstern/minside/stonadsperioder", // urelevant å sjekke roller for tokenx/kall fra min-side
         )
 
     override fun addInterceptors(registry: InterceptorRegistry) {
