@@ -80,7 +80,8 @@ Når G-omregningen er ferdigkjørt er det viktig å gå igjennom denne listen fo
   * Hvis G-omregning skjer etter 1. juni: Rekjør denne tasken når G-omregningen er ferdigkjørt
   * Kan bruke `finnFerdigstilteFagsakerMedUtdatertGBelop` og sjekke `samordningsfradrag > 0` samt `beløp > 0` for å finne liste for oversendelse til coacher
 
-* For de tilfellene med sanksjonsperioder vil G-omregningstasken feile. Denne må manuelt G-omregnes av coachene og tasken kan avvikshåndteres
+* Sanksjon
+    * For de tilfellene med sanksjonsperioder vil G-omregningstaskene logge `Fagsak med id ... har sanksjon og må manuelt behandles` med `x_tags: G-omregning - Manuell`. Disse må sendes over til coachene.
 
 * Oppdatere sanity
     * Veiviser: https://familie-ef-veiviser.sanity.studio/prod/desk/brodtekst;5ebe8916-440b-4f88-a843-b0392b8af6e7
