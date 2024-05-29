@@ -67,6 +67,8 @@ spec:
         - application: tiltakspenger-overgangsstonad
           namespace: tpts
           cluster: prod-gcp
+        - application: tilleggsstonader-integrasjoner
+          namespace: tilleggsstonader
     outbound:
       rules:
         - application: familie-tilbake

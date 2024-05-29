@@ -73,8 +73,6 @@ class TilordnetRessursService(
             return SaksbehandlerRolle.UTVIKLER_MED_VEILDERROLLE
         }
 
-        val innloggetSaksbehandler = SikkerhetContext.hentSaksbehandler()
-
         if (oppgave == null) {
             return SaksbehandlerRolle.OPPGAVE_FINNES_IKKE
         }
@@ -83,6 +81,7 @@ class TilordnetRessursService(
             return SaksbehandlerRolle.OPPGAVE_TILHØRER_IKKE_ENF
         }
 
+        val innloggetSaksbehandler = SikkerhetContext.hentSaksbehandler()
         return when (oppgave.tilordnetRessurs) {
             innloggetSaksbehandler -> SaksbehandlerRolle.INNLOGGET_SAKSBEHANDLER
             null -> SaksbehandlerRolle.IKKE_SATT

@@ -36,7 +36,7 @@ data class GrunnlagsdataPeriodeHistorikkDto(
     val antallMåneder: Long,
     val antallMånederUtenBeløp: Long = 0,
     val inntekt: Int?,
-    val aktivitet: String?,
+    val samordningsfradrag: Int?,
 )
 
 enum class OverlappMedOvergangsstønad {
@@ -122,7 +122,7 @@ private fun GrunnlagsdataPeriodeHistorikkOvergangsstønad.tilDto() =
         antallMåneder = månederMedBeløp(periodeType, beløp, fom, tom),
         antallMånederUtenBeløp = månederUtenBeløp(periodeType, beløp, fom, tom),
         inntekt = this.inntekt,
-        aktivitet = this.aktivitet,
+        samordningsfradrag = this.samordningsfradrag,
     )
 
 private fun GrunnlagsdataPeriodeHistorikkBarnetilsyn.tilDto(grunnlagsdataPeriodeHistorikkOvergangsstønad: List<GrunnlagsdataPeriodeHistorikkOvergangsstønad>) =
@@ -195,7 +195,7 @@ private fun slåSammenPeriodeHistorikkDto(
     antallMåneder = forrige.antallMåneder + denne.antallMåneder,
     antallMånederUtenBeløp = forrige.antallMånederUtenBeløp + denne.antallMånederUtenBeløp,
     inntekt = forrige.inntekt,
-    aktivitet = forrige.aktivitet,
+    samordningsfradrag = forrige.samordningsfradrag,
 )
 
 private fun GrunnlagsdataPeriodeHistorikkDto.periode(): Månedsperiode = Månedsperiode(this.fom, this.tom)

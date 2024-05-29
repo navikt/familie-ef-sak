@@ -72,7 +72,13 @@ object Grunnbeløpsperioder {
     val grunnbeløpsperioder: List<Grunnbeløp> =
         listOf(
             Grunnbeløp(
-                periode = Månedsperiode(YearMonth.parse("2023-05"), YearMonth.from(LocalDate.MAX)),
+                periode = Månedsperiode(YearMonth.parse("2024-05"), YearMonth.from(LocalDate.MAX)),
+                grunnbeløp = 124_028.toBigDecimal(),
+                perMnd = 10_335.toBigDecimal(),
+                gjennomsnittPerÅr = 122_225.toBigDecimal(),
+            ),
+            Grunnbeløp(
+                periode = Månedsperiode("2023-05" to "2024-04"),
                 grunnbeløp = 118_620.toBigDecimal(),
                 perMnd = 9_885.toBigDecimal(),
                 gjennomsnittPerÅr = 116_239.toBigDecimal(),

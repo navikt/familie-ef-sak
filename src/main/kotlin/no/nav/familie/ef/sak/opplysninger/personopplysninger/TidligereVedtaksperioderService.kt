@@ -85,7 +85,7 @@ class TidligereVedtaksperioderService(
                     tom = it.andel.periode.tomDato,
                     beløp = it.andel.beløp,
                     inntekt = it.andel.inntekt,
-                    aktivitet = it.aktivitet?.name,
+                    samordningsfradrag = it.andel.samordningsfradrag,
                 )
             }
     }
