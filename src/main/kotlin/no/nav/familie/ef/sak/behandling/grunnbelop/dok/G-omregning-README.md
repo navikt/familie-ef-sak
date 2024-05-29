@@ -97,5 +97,8 @@ Når G-omregningen er ferdigkjørt er det viktig å gå igjennom denne listen fo
 * Sjekk om det er riktig G brukt på nav.no?
     * https://www.nav.no/overgangsstonad-enslig#hvor-mye - både tekst og kalkulator
 
-* Kanskje sjekke om noen har fått avslag på førstegangsbehandling i mai på "BT" med begrunnelse over 6 gamle G?  
+* Kanskje sjekke om noen har fått avslag på førstegangsbehandling i mai på "BT" med begrunnelse over 6 gamle G?
+* Oppdatere G-verdi i andre løsninger
+  * familie-ef-personhendelse
+  * familie-tilbake
 
