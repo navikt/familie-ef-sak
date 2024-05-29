@@ -6,11 +6,9 @@ no.nav.security.jwt:
     tokenx:
       discovery-url: http://localhost:${mock-oauth2-server.port}/tokenx/.well-known/openid-configuration
       accepted-audience: aud-localhost
-      cookie_name: localhost-idtoken
     azuread:
       discoveryurl: http://localhost:${mock-oauth2-server.port}/azuread/.well-known/openid-configuration
       accepted_audience: aud-localhost
-      cookie_name: localhost-idtoken
 
 unleash:
   enabled: false
