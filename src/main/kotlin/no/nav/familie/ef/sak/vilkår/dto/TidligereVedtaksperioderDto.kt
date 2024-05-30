@@ -24,6 +24,7 @@ data class TidligereInnvilgetVedtakDto(
     val harTidligereSkolepenger: Boolean,
     val periodeHistorikkOvergangsstønad: List<GrunnlagsdataPeriodeHistorikkDto> = emptyList(),
     val periodeHistorikkBarnetilsyn: List<GrunnlagsdataPeriodeHistorikkBarnetilsynDto> = emptyList(),
+    val sistePeriodeMedOvergangsstønad: SistePeriodeMedOvergangsstønadDto? = null,
 ) {
     fun harTidligereInnvilgetVedtak() =
         harTidligereOvergangsstønad || harTidligereBarnetilsyn || harTidligereSkolepenger
@@ -35,7 +36,13 @@ data class GrunnlagsdataPeriodeHistorikkDto(
     val tom: LocalDate,
     val antallMåneder: Long,
     val antallMånederUtenBeløp: Long = 0,
-    val inntekt: Int?,
+)
+
+data class SistePeriodeMedOvergangsstønadDto(
+    val fom: LocalDate,
+    val tom: LocalDate,
+    val vedtaksperiodeType: String,
+    val inntekt: Int,
     val samordningsfradrag: Int?,
 )
 
@@ -67,7 +74,22 @@ fun TidligereInnvilgetVedtak.tilDto() =
         harTidligereSkolepenger = this.harTidligereSkolepenger,
         periodeHistorikkOvergangsstønad = this.periodeHistorikkOvergangsstønad.tilDtoOvergangsstønad(),
         periodeHistorikkBarnetilsyn = this.periodeHistorikkBarnetilsyn.tilDtoBarnetilsyn(this.periodeHistorikkOvergangsstønad),
+        sistePeriodeMedOvergangsstønad = this.periodeHistorikkOvergangsstønad.tilSistePeriodeDto(),
     )
+
+fun List<GrunnlagsdataPeriodeHistorikkOvergangsstønad>.tilSistePeriodeDto(): SistePeriodeMedOvergangsstønadDto? {
+    return this.sortedBy { it.fom }
+        .lastOrNull()
+        ?.let { sistePeriode ->
+            SistePeriodeMedOvergangsstønadDto(
+                fom = sistePeriode.fom,
+                tom = sistePeriode.tom,
+                vedtaksperiodeType = sistePeriode.periodeType.name,
+                inntekt = sistePeriode.inntekt ?: 0,
+                samordningsfradrag = sistePeriode.samordningsfradrag,
+            )
+        }
+}
 
 private fun List<GrunnlagsdataPeriodeHistorikkOvergangsstønad>.tilDtoOvergangsstønad() =
     this.map { it.tilDto() }
@@ -121,8 +143,6 @@ private fun GrunnlagsdataPeriodeHistorikkOvergangsstønad.tilDto() =
         tom = this.tom,
         antallMåneder = månederMedBeløp(periodeType, beløp, fom, tom),
         antallMånederUtenBeløp = månederUtenBeløp(periodeType, beløp, fom, tom),
-        inntekt = this.inntekt,
-        samordningsfradrag = this.samordningsfradrag,
     )
 
 private fun GrunnlagsdataPeriodeHistorikkBarnetilsyn.tilDto(grunnlagsdataPeriodeHistorikkOvergangsstønad: List<GrunnlagsdataPeriodeHistorikkOvergangsstønad>) =
@@ -194,8 +214,6 @@ private fun slåSammenPeriodeHistorikkDto(
     tom = denne.tom,
     antallMåneder = forrige.antallMåneder + denne.antallMåneder,
     antallMånederUtenBeløp = forrige.antallMånederUtenBeløp + denne.antallMånederUtenBeløp,
-    inntekt = forrige.inntekt,
-    samordningsfradrag = forrige.samordningsfradrag,
 )
 
 private fun GrunnlagsdataPeriodeHistorikkDto.periode(): Månedsperiode = Månedsperiode(this.fom, this.tom)
