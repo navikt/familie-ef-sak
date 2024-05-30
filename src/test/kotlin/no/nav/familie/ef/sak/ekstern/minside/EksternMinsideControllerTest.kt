@@ -86,6 +86,14 @@ class EksternMinsideControllerTest : OppslagSpringRunnerTest() {
         assertThat(response.statusCode).isNotEqualTo(HttpStatus.OK)
     }
 
+    @Test
+    fun `skal ikke kunne hente ut stønader som sluttbruker dersom token har level 3 som er for lavt`() {
+        val søkerToken = søkerToken(personident, "Level3")
+        headers.setBearerAuth(søkerToken)
+        val response = hentMineStønadsperioder()
+        assertThat(response.statusCode).isNotEqualTo(HttpStatus.OK)
+    }
+
     private fun hentMineStønadsperioder(): ResponseEntity<Ressurs<MineStønaderDto>> =
         restTemplate.exchange(
             localhost("/api/ekstern/minside/stonadsperioder"),
