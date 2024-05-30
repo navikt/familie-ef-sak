@@ -75,14 +75,16 @@ Valideringen utføres når et vedtak besluttes. Lengden på overgangsperioden be
 ### Etterarbeid:
 Når G-omregningen er ferdigkjørt er det viktig å gå igjennom denne listen for å passe på at alle rutinene er fulgt og oppdatert. 
 
-* `FinnBehandlingerMedGammelGTask` vil rapportere de som må håndteres manuelt (samordningsfradrag) den 1. i hver måned. 
-  * De i denne listen som har samordning skal overleveres til coachene.
-  * Hvis G-omregning skjer etter 1. juni: Rekjør denne tasken når G-omregningen er ferdigkjørt
-  * Kan bruke `finnFerdigstilteFagsakerMedUtdatertGBelop` og sjekke `samordningsfradrag > 0` samt `beløp > 0` for å finne liste for oversendelse til coacher
+* **Samordningsfradrag**  
+  * `FinnBehandlingerMedGammelGTask` vil rapportere de som må håndteres manuelt (samordningsfradrag) den 1. i hver måned. 
+    * De i denne listen som har samordning skal overleveres til coachene.
+    * Hvis G-omregning skjer etter 1. juni: Rekjør denne tasken når G-omregningen er ferdigkjørt
+    * Kan bruke `finnFerdigstilteFagsakerMedUtdatertGBelop` og sjekke `samordningsfradrag > 0` samt `beløp > 0` for å finne liste for oversendelse til coacher
 
-* For de tilfellene med sanksjonsperioder vil G-omregningstasken feile. Denne må manuelt G-omregnes av coachene og tasken kan avvikshåndteres
+* **Sanksjon**
+    * For de tilfellene med sanksjonsperioder vil G-omregningstaskene logge `Fagsak med id ... har sanksjon og må manuelt behandles` med `x_tags: G-omregning - Manuell`. Disse må sendes over til coachene.
 
-* Oppdatere sanity
+* **Oppdatere sanity**
     * Veiviser: https://familie-ef-veiviser.sanity.studio/prod/desk/brodtekst;5ebe8916-440b-4f88-a843-b0392b8af6e7
     * Veiviser: https://familie-ef-veiviser.sanity.studio/prod/desk/brodtekst;8cfae020-a502-4f6d-a04c-8563a6011cac
     * Veiviser: https://familie-ef-veiviser.sanity.studio/prod/desk/brodtekst;ace56c71-1fe3-4892-aad6-c5423f31698c
@@ -93,8 +95,12 @@ Når G-omregningen er ferdigkjørt er det viktig å gå igjennom denne listen fo
     * Brev: https://familie-brev.sanity.studio/ef-brev/structure/innhold;27b438c3-54e1-4229-8c71-1899bf756451
     * Brev: https://familie-brev.sanity.studio/ef-brev/structure/innhold;innvilgelsesbrev;beregningOgUtbetaling;4ac0848c-d6c8-4690-9720-d0906b7fb932
 
-* Sjekk om det er riktig G brukt på nav.no?
+* **Nav.no**
     * https://www.nav.no/overgangsstonad-enslig#hvor-mye - både tekst og kalkulator
 
-* Kanskje sjekke om noen har fått avslag på førstegangsbehandling i mai på "BT" med begrunnelse over 6 gamle G?  
+* **Oppdatere G-verdi i andre løsninger**
+    * familie-ef-personhendelse
+    * familie-tilbake
 
+* **Barnetilsyn avslag**
+    * Kanskje sjekke om noen har fått avslag på førstegangsbehandling i mai på "BT" med begrunnelse over 6 gamle G?
