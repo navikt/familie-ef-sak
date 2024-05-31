@@ -31,7 +31,6 @@ class EksternStønadsperioderController(
     private val perioderForBarnetrygdService: PerioderForBarnetrygdService,
     private val tilgangService: TilgangService,
 ) {
-
     private val secureLogger = LoggerFactory.getLogger("secureLogger")
 
     /**
