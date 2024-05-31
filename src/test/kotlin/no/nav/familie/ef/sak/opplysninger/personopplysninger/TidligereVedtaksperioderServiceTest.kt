@@ -327,6 +327,7 @@ internal class TidligereVedtaksperioderServiceTest {
                     fom = LocalDate.of(2022, 5, 1),
                     tom = LocalDate.of(2022, 9, 30),
                     periodeType = VedtaksperiodeType.SANKSJON,
+                    aktivitet = AktivitetType.FORSØRGER_I_ARBEID,
                     beløp = 5555,
                     inntekt = 5555,
                     samordningsfradrag = 5555,
@@ -335,6 +336,7 @@ internal class TidligereVedtaksperioderServiceTest {
                     fom = LocalDate.of(2024, 2, 1),
                     tom = LocalDate.of(2024, 3, 31),
                     periodeType = VedtaksperiodeType.SANKSJON,
+                    aktivitet = AktivitetType.FORSØRGER_I_ARBEID,
                     beløp = 4444,
                     inntekt = 4444,
                     samordningsfradrag = 4444,
@@ -343,6 +345,7 @@ internal class TidligereVedtaksperioderServiceTest {
                     fom = LocalDate.of(2023, 3, 1),
                     tom = LocalDate.of(2023, 7, 31),
                     periodeType = VedtaksperiodeType.SANKSJON,
+                    aktivitet = AktivitetType.FORSØRGER_I_ARBEID,
                     beløp = 3333,
                     inntekt = 3333,
                     samordningsfradrag = 3333,
@@ -363,10 +366,11 @@ internal class TidligereVedtaksperioderServiceTest {
         fom: LocalDate,
         tom: LocalDate,
         periodeType: VedtaksperiodeType = HOVEDPERIODE,
+        aktivitet: AktivitetType = AktivitetType.FORSØRGER_I_ARBEID,
         inntekt: Int? = null,
         samordningsfradrag: Int? = null,
     ) =
-        GrunnlagsdataPeriodeHistorikkOvergangsstønad(periodeType = periodeType, fom = fom, tom = tom, beløp, inntekt, samordningsfradrag)
+        GrunnlagsdataPeriodeHistorikkOvergangsstønad(periodeType = periodeType, fom = fom, tom = tom, aktivitet, beløp, inntekt, samordningsfradrag)
 
     private fun mockTidligereVedtakEfSak(harAndeler: Boolean = false) {
         every { fagsakPersonService.finnPerson(any()) } returns fagsakPerson

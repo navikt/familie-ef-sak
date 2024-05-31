@@ -1452,6 +1452,12 @@
                     "type" : "LocalDate",
                     "nullable" : false
                   },
+                  "aktivitet" : {
+                    "name" : "aktivitet",
+                    "type" : "Enum",
+                    "values" : [ "MIGRERING", "IKKE_AKTIVITETSPLIKT", "BARN_UNDER_ETT_ÅR", "FORSØRGER_I_ARBEID", "FORSØRGER_I_UTDANNING", "FORSØRGER_REELL_ARBEIDSSØKER", "FORSØRGER_ETABLERER_VIRKSOMHET", "BARNET_SÆRLIG_TILSYNSKREVENDE", "FORSØRGER_MANGLER_TILSYNSORDNING", "FORSØRGER_ER_SYK", "BARNET_ER_SYKT", "UTVIDELSE_FORSØRGER_I_UTDANNING", "UTVIDELSE_BARNET_SÆRLIG_TILSYNSKREVENDE", "FORLENGELSE_MIDLERTIDIG_SYKDOM", "FORLENGELSE_STØNAD_PÅVENTE_ARBEID", "FORLENGELSE_STØNAD_PÅVENTE_ARBEID_REELL_ARBEIDSSØKER", "FORLENGELSE_STØNAD_PÅVENTE_OPPSTART_KVALIFISERINGSPROGRAM", "FORLENGELSE_STØNAD_PÅVENTE_TILSYNSORDNING", "FORLENGELSE_STØNAD_PÅVENTE_UTDANNING", "FORLENGELSE_STØNAD_UT_SKOLEÅRET" ],
+                    "nullable" : true
+                  },
                   "beløp" : {
                     "name" : "beløp",
                     "type" : "Int",
@@ -1528,6 +1534,12 @@
                     "name" : "tom",
                     "type" : "LocalDate",
                     "nullable" : false
+                  },
+                  "aktivitet" : {
+                    "name" : "aktivitet",
+                    "type" : "Enum",
+                    "values" : [ "MIGRERING", "IKKE_AKTIVITETSPLIKT", "BARN_UNDER_ETT_ÅR", "FORSØRGER_I_ARBEID", "FORSØRGER_I_UTDANNING", "FORSØRGER_REELL_ARBEIDSSØKER", "FORSØRGER_ETABLERER_VIRKSOMHET", "BARNET_SÆRLIG_TILSYNSKREVENDE", "FORSØRGER_MANGLER_TILSYNSORDNING", "FORSØRGER_ER_SYK", "BARNET_ER_SYKT", "UTVIDELSE_FORSØRGER_I_UTDANNING", "UTVIDELSE_BARNET_SÆRLIG_TILSYNSKREVENDE", "FORLENGELSE_MIDLERTIDIG_SYKDOM", "FORLENGELSE_STØNAD_PÅVENTE_ARBEID", "FORLENGELSE_STØNAD_PÅVENTE_ARBEID_REELL_ARBEIDSSØKER", "FORLENGELSE_STØNAD_PÅVENTE_OPPSTART_KVALIFISERINGSPROGRAM", "FORLENGELSE_STØNAD_PÅVENTE_TILSYNSORDNING", "FORLENGELSE_STØNAD_PÅVENTE_UTDANNING", "FORLENGELSE_STØNAD_UT_SKOLEÅRET" ],
+                    "nullable" : true
                   },
                   "beløp" : {
                     "name" : "beløp",
@@ -2254,6 +2266,12 @@
                 "type" : "LocalDate",
                 "nullable" : false
               },
+              "aktivitet" : {
+                "name" : "aktivitet",
+                "type" : "Enum",
+                "values" : [ "MIGRERING", "IKKE_AKTIVITETSPLIKT", "BARN_UNDER_ETT_ÅR", "FORSØRGER_I_ARBEID", "FORSØRGER_I_UTDANNING", "FORSØRGER_REELL_ARBEIDSSØKER", "FORSØRGER_ETABLERER_VIRKSOMHET", "BARNET_SÆRLIG_TILSYNSKREVENDE", "FORSØRGER_MANGLER_TILSYNSORDNING", "FORSØRGER_ER_SYK", "BARNET_ER_SYKT", "UTVIDELSE_FORSØRGER_I_UTDANNING", "UTVIDELSE_BARNET_SÆRLIG_TILSYNSKREVENDE", "FORLENGELSE_MIDLERTIDIG_SYKDOM", "FORLENGELSE_STØNAD_PÅVENTE_ARBEID", "FORLENGELSE_STØNAD_PÅVENTE_ARBEID_REELL_ARBEIDSSØKER", "FORLENGELSE_STØNAD_PÅVENTE_OPPSTART_KVALIFISERINGSPROGRAM", "FORLENGELSE_STØNAD_PÅVENTE_TILSYNSORDNING", "FORLENGELSE_STØNAD_PÅVENTE_UTDANNING", "FORLENGELSE_STØNAD_UT_SKOLEÅRET" ],
+                "nullable" : true
+              },
               "beløp" : {
                 "name" : "beløp",
                 "type" : "Int",
@@ -2330,6 +2348,12 @@
                 "name" : "tom",
                 "type" : "LocalDate",
                 "nullable" : false
+              },
+              "aktivitet" : {
+                "name" : "aktivitet",
+                "type" : "Enum",
+                "values" : [ "MIGRERING", "IKKE_AKTIVITETSPLIKT", "BARN_UNDER_ETT_ÅR", "FORSØRGER_I_ARBEID", "FORSØRGER_I_UTDANNING", "FORSØRGER_REELL_ARBEIDSSØKER", "FORSØRGER_ETABLERER_VIRKSOMHET", "BARNET_SÆRLIG_TILSYNSKREVENDE", "FORSØRGER_MANGLER_TILSYNSORDNING", "FORSØRGER_ER_SYK", "BARNET_ER_SYKT", "UTVIDELSE_FORSØRGER_I_UTDANNING", "UTVIDELSE_BARNET_SÆRLIG_TILSYNSKREVENDE", "FORLENGELSE_MIDLERTIDIG_SYKDOM", "FORLENGELSE_STØNAD_PÅVENTE_ARBEID", "FORLENGELSE_STØNAD_PÅVENTE_ARBEID_REELL_ARBEIDSSØKER", "FORLENGELSE_STØNAD_PÅVENTE_OPPSTART_KVALIFISERINGSPROGRAM", "FORLENGELSE_STØNAD_PÅVENTE_TILSYNSORDNING", "FORLENGELSE_STØNAD_PÅVENTE_UTDANNING", "FORLENGELSE_STØNAD_UT_SKOLEÅRET" ],
+                "nullable" : true
               },
               "beløp" : {
                 "name" : "beløp",
