@@ -37,7 +37,7 @@ jobs:
           team: teamfamilie
           identity_provider: ${{ secrets.NAIS_WORKLOAD_IDENTITY_PROVIDER }}
           project_id: ${{ vars.NAIS_MANAGEMENT_PROJECT_ID }}
-          byosbom: target/bom.json
+          byosbom: target/classes/META-INF/sbom/application.cdx.json
       - name: Post build failures to Slack
         if: failure()
         run: |

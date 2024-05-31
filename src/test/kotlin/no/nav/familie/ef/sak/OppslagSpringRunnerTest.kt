@@ -212,7 +212,10 @@ abstract class OppslagSpringRunnerTest {
         return TokenUtil.clientToken(mockOAuth2Server, clientId, accessAsApplication)
     }
 
-    protected fun søkerToken(personident: String) = TokenUtil.søkerBearerToken(mockOAuth2Server, personident)
+    protected fun søkerToken(
+        personident: String,
+        level: String = "Level4",
+    ) = TokenUtil.søkerBearerToken(mockOAuth2Server, personident, level)
 
     companion object {
         private const val LOCALHOST = "http://localhost:"
