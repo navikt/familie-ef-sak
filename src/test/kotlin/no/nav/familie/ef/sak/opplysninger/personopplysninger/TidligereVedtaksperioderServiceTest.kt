@@ -16,8 +16,9 @@ import no.nav.familie.ef.sak.infrastruktur.config.InfotrygdReplikaMock
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.TidligereInnvilgetVedtak
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlIdent
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlIdenter
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.pensjon.HistoriskPensjonResponse
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pensjon.HistoriskPensjonDto
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pensjon.HistoriskPensjonService
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pensjon.HistoriskPensjonStatus
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.fagsakPerson
@@ -92,7 +93,7 @@ internal class TidligereVedtaksperioderServiceTest {
         every { personService.hentPersonIdenter(personIdent.ident) } returns
             PdlIdenter(listOf(PdlIdent(personIdent.ident, false)))
         every { historiskPensjonService.hentHistoriskPensjon(any(), any()) } returns
-            HistoriskPensjonResponse(false, "")
+            HistoriskPensjonDto(HistoriskPensjonStatus.HAR_IKKE_HISTORIKK, "")
     }
 
     @Test

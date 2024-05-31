@@ -3,7 +3,8 @@ package no.nav.familie.ef.sak.no.nav.familie.ef.sak.infrastruktur.config
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pensjon.HistoriskPensjonClient
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.pensjon.HistoriskPensjonResponse
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pensjon.HistoriskPensjonDto
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pensjon.HistoriskPensjonStatus
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Primary
@@ -16,7 +17,7 @@ class HistoriskPensjonMock {
     @Primary
     fun historiskPensjonClient(): HistoriskPensjonClient {
         val mockk = mockk<HistoriskPensjonClient>()
-        every { mockk.harPensjon(any(), any()) } returns HistoriskPensjonResponse(true, "")
+        every { mockk.hentHistoriskPensjonStatusForIdent(any(), any()) } returns HistoriskPensjonDto(HistoriskPensjonStatus.HAR_HISTORIKK, "")
         return mockk
     }
 }

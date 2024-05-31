@@ -40,7 +40,7 @@ class TidligereVedtaksperioderService(
         return TidligereVedtaksperioder(
             infotrygd = tidligereInnvilgetVedtak,
             sak = hentTidligereInnvilgedeVedtakEf(alleIdenter),
-            historiskPensjon = historiskPensjonService.hentHistoriskPensjon(aktivIdent, alleIdenter).harPensjonsdata,
+            historiskPensjon = historiskPensjonService.hentHistoriskPensjon(aktivIdent, alleIdenter).harPensjonsdata(),
         )
     }
 
