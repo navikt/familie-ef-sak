@@ -10,6 +10,7 @@ import no.nav.familie.kontrakter.felles.ef.EksternePerioderMedBeløpResponse
 import no.nav.familie.kontrakter.felles.ef.EksternePerioderRequest
 import no.nav.familie.kontrakter.felles.ef.EksternePerioderResponse
 import no.nav.security.token.support.core.api.ProtectedWithClaims
+import org.slf4j.LoggerFactory
 import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.PostMapping
@@ -30,6 +31,8 @@ class EksternStønadsperioderController(
     private val perioderForBarnetrygdService: PerioderForBarnetrygdService,
     private val tilgangService: TilgangService,
 ) {
+    private val secureLogger = LoggerFactory.getLogger("secureLogger")
+
     /**
      * Brukes av Arena
      */
@@ -41,6 +44,7 @@ class EksternStønadsperioderController(
         return try {
             Ressurs.success(eksternStønadsperioderService.hentPerioderForAlleStønader(request))
         } catch (e: Exception) {
+            secureLogger.error("Kunne ikke hente perioder for ${request.personIdent}", e)
             Ressurs.failure("Henting av perioder for overgangsstønad feilet", error = e)
         }
     }
@@ -56,6 +60,7 @@ class EksternStønadsperioderController(
         return try {
             Ressurs.success(EksternePerioderResponse(perioder = eksternStønadsperioderService.hentPerioderForOvergangsstønad(request)))
         } catch (e: Exception) {
+            secureLogger.error("Kunne ikke hente perioder for ${request.personIdent}", e)
             Ressurs.failure("Henting av perioder for overgangsstønad feilet", error = e)
         }
     }
@@ -71,6 +76,7 @@ class EksternStønadsperioderController(
         return try {
             Ressurs.success(EksternePerioderMedBeløpResponse(perioder = eksternStønadsperioderService.hentPerioderForOvergangsstønadMedBeløp(request)))
         } catch (e: Exception) {
+            secureLogger.error("Kunne ikke hente perioder for ${request.personIdent}", e)
             Ressurs.failure("Henting av perioder for overgangsstønad feilet", error = e)
         }
     }
