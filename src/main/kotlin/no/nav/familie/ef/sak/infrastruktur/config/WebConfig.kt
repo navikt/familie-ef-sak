@@ -16,8 +16,8 @@ class WebConfig(private val tilgangInterceptor: TilgangInterceptor) : WebMvcConf
             "/swagger-resources",
             "/swagger-ui/**",
             "/swagger-ui",
-            "/v2/api-docs/**",
-            "/v2/api-docs",
+            "/v3/api-docs/**",
+            "/v3/api-docs",
             "/api/ekstern/perioder/full-overgangsstonad", // håndteres i controllern
             "/api/ekstern/minside/stonadsperioder", // urelevant å sjekke roller for tokenx/kall fra min-side
         )

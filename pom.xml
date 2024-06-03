@@ -29,26 +29,26 @@
         <sha1/>
         <changelist>-SNAPSHOT</changelist>
         <java.version>21</java.version>
-        <kotlin.version>1.9.23</kotlin.version>
-        <kotlin-coroutines.version>1.8.0</kotlin-coroutines.version>
-        <springdoc.version>2.3.0</springdoc.version>
-        <mockk.version>1.13.10</mockk.version>
+        <kotlin.version>2.0.0</kotlin.version>
+        <kotlin-coroutines.version>1.8.1</kotlin-coroutines.version>
+        <springdoc.version>2.5.0</springdoc.version>
+        <mockk.version>1.13.11</mockk.version>
         <felles.version>3.20240515152313_9dd5659</felles.version>
         <prosessering.version>2.20240426120029_490d299</prosessering.version>
-        <token-validation-spring.version>4.1.4</token-validation-spring.version>
+        <token-validation-spring.version>4.1.8</token-validation-spring.version>
 
         <start-class>no.nav.familie.ef.sak.ApplicationKt</start-class>
-        <kontrakter.version>3.0_20240430083848_be12d55</kontrakter.version>
+        <kontrakter.version>3.0_20240515103524_00490ae</kontrakter.version>
         <mikrofrontend.builder.version>20230704114948-74aa2e9</mikrofrontend.builder.version>
         <eksterne.kontrakter.bisys.version>2.0_20230214104704_706e9c0</eksterne.kontrakter.bisys.version>
-        <cucumber.version>7.15.0</cucumber.version>
+        <cucumber.version>7.18.0</cucumber.version>
 
 
         <!--suppress UnresolvedMavenProperty  Ligger som secret i github-->
         <sonar.projectKey>${SONAR_PROJECTKEY}</sonar.projectKey>
         <sonar.organization>navit</sonar.organization>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
-        <nav.security.version>4.1.5</nav.security.version> <!-- Denne burde være samme versjon som i felles -->
+        <nav.security.version>4.1.8</nav.security.version> <!-- Denne burde være samme versjon som i felles -->
         <okhttp3.version>4.9.1</okhttp3.version> <!-- overskrever spring sin versjon, blir brukt av mock-oauth2-server -->
         <!--suppress UnresolvedMavenProperty -->
         <sonar.login>${SONAR_LOGIN}</sonar.login>
@@ -215,7 +215,7 @@
         <dependency>
             <groupId>org.wiremock</groupId>
             <artifactId>wiremock-standalone</artifactId>
-            <version>3.4.2</version>
+            <version>3.6.0</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -249,7 +249,7 @@
         <dependency>
             <groupId>org.testcontainers</groupId>
             <artifactId>postgresql</artifactId>
-            <version>1.19.7</version>
+            <version>1.19.8</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -320,12 +320,12 @@
                 <plugin>
                     <groupId>org.sonarsource.scanner.maven</groupId>
                     <artifactId>sonar-maven-plugin</artifactId>
-                    <version>3.10.0.2594</version>
+                    <version>4.0.0.4121</version>
                 </plugin>
                 <plugin>
                     <groupId>org.jacoco</groupId>
                     <artifactId>jacoco-maven-plugin</artifactId>
-                    <version>0.8.11</version>
+                    <version>0.8.12</version>
                 </plugin>
             </plugins>
         </pluginManagement>
@@ -414,7 +414,7 @@
             <plugin>
                 <groupId>org.cyclonedx</groupId>
                 <artifactId>cyclonedx-maven-plugin</artifactId>
-                <version>2.7.11</version>
+                <version>2.8.0</version>
                 <executions>
                     <execution>
                         <phase>package</phase>
