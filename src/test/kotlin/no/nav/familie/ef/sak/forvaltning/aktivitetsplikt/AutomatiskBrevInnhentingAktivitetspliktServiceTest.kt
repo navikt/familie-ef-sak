@@ -1,14 +1,10 @@
-package no.nav.familie.ef.sak.no.nav.familie.ef.sak.forvaltning.karakterutskrift
+package no.nav.familie.ef.sak.forvaltning.aktivitetsplikt
 
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
-import no.nav.familie.ef.sak.forvaltning.karakterutskrift.AutomatiskBrevInnhentingKarakterutskriftService
-import no.nav.familie.ef.sak.forvaltning.karakterutskrift.SendKarakterutskriftBrevTilIverksettTask
-import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.oppgave.OppgaveService
-import no.nav.familie.kontrakter.ef.felles.FrittståendeBrevType
 import no.nav.familie.kontrakter.felles.Tema
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveRequest
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveResponseDto
@@ -19,15 +15,14 @@ import no.nav.familie.prosessering.internal.TaskService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
 
-internal class AutomatiskBrevInnhentingKarakterutskriftServiceTest {
+internal class AutomatiskBrevInnhentingAktivitetspliktServiceTest {
     val taskService = mockk<TaskService>()
     val oppgaveService = mockk<OppgaveService>()
 
-    private val automatiskBrevInnhentingKarakterutskriftService =
-        AutomatiskBrevInnhentingKarakterutskriftService(taskService, oppgaveService)
+    private val automatiskBrevInnhentingAktivitetspliktService =
+        AutomatiskBrevInnhentingAktivitetspliktService(taskService, oppgaveService)
 
     @BeforeEach
     fun setUp() {
@@ -40,7 +35,7 @@ internal class AutomatiskBrevInnhentingKarakterutskriftServiceTest {
 
         val oppgaver = listOf(oppgave(), oppgave(), oppgave(), oppgave(), oppgave())
 
-        every { taskService.finnTaskMedPayloadOgType(any(), SendKarakterutskriftBrevTilIverksettTask.TYPE) } returns null
+        every { taskService.finnTaskMedPayloadOgType(any(), SendAktivitetspliktBrevTilIverksettTask.TYPE) } returns null
         every { taskService.save(capture(taskSlots)) } returns mockk()
         every { oppgaveService.hentOppgaver(any()) } returns
             FinnOppgaveResponseDto(
@@ -48,16 +43,15 @@ internal class AutomatiskBrevInnhentingKarakterutskriftServiceTest {
                 oppgaver = oppgaver,
             )
 
-        automatiskBrevInnhentingKarakterutskriftService.opprettTasks(
-            brevtype = FrittståendeBrevType.INNHENTING_AV_KARAKTERUTSKRIFT_HOVEDPERIODE,
+        automatiskBrevInnhentingAktivitetspliktService.opprettTasks(
             liveRun = true,
             taskLimit = 5,
         )
 
-        verifyOppgaveRequest(5, "2023-05-17")
+        verifyOppgaveRequest(5, "2024-05-17")
         verify(exactly = oppgaver.size) { taskService.save(any()) }
         assertThat(taskSlots.size).isEqualTo(oppgaver.size)
-        assertThat(taskSlots.all { it.type === SendKarakterutskriftBrevTilIverksettTask.TYPE }).isTrue
+        assertThat(taskSlots.all { it.type === SendAktivitetspliktBrevTilIverksettTask.TYPE }).isTrue
     }
 
     @Test
@@ -73,13 +67,12 @@ internal class AutomatiskBrevInnhentingKarakterutskriftServiceTest {
                 oppgaver = oppgaver,
             )
 
-        automatiskBrevInnhentingKarakterutskriftService.opprettTasks(
-            brevtype = FrittståendeBrevType.INNHENTING_AV_KARAKTERUTSKRIFT_HOVEDPERIODE,
+        automatiskBrevInnhentingAktivitetspliktService.opprettTasks(
             liveRun = false,
             taskLimit = 5,
         )
 
-        verifyOppgaveRequest(5, "2023-05-17")
+        verifyOppgaveRequest(5, "2024-05-17")
         verify(exactly = 0) { taskService.save(any()) }
         assertThat(taskSlots.isEmpty()).isTrue
     }
@@ -90,7 +83,7 @@ internal class AutomatiskBrevInnhentingKarakterutskriftServiceTest {
 
         val oppgaver = listOf(oppgave(tilordnetRessurs = "SaksbehandlerA"), oppgave(tilordnetRessurs = "SaksbehandlerB"), oppgave(), oppgave(), oppgave())
 
-        every { taskService.finnTaskMedPayloadOgType(any(), SendKarakterutskriftBrevTilIverksettTask.TYPE) } returns null
+        every { taskService.finnTaskMedPayloadOgType(any(), SendAktivitetspliktBrevTilIverksettTask.TYPE) } returns null
         every { taskService.save(capture(taskSlots)) } returns mockk()
         every { oppgaveService.hentOppgaver(any()) } returns
             FinnOppgaveResponseDto(
@@ -98,19 +91,18 @@ internal class AutomatiskBrevInnhentingKarakterutskriftServiceTest {
                 oppgaver = oppgaver,
             )
 
-        automatiskBrevInnhentingKarakterutskriftService.opprettTasks(
-            brevtype = FrittståendeBrevType.INNHENTING_AV_KARAKTERUTSKRIFT_HOVEDPERIODE,
+        automatiskBrevInnhentingAktivitetspliktService.opprettTasks(
             liveRun = true,
             taskLimit = 5,
         )
 
-        verifyOppgaveRequest(5, "2023-05-17")
+        verifyOppgaveRequest(5, "2024-05-17")
         verify(exactly = 3) { taskService.save(any()) }
         assertThat(taskSlots.size).isEqualTo(3)
     }
 
     @Test
-    fun `Skal hente oppgaver med frist 17-05-2023 dersom brevtype er INNHENTING_AV_KARAKTERUTSKRIFT_HOVEDPERIODE`() {
+    fun `Skal hente oppgaver med frist 17-05-2024`() {
         val finnOppgaveRequestSlot = slot<FinnOppgaveRequest>()
 
         every { oppgaveService.hentOppgaver(capture(finnOppgaveRequestSlot)) } returns
@@ -119,58 +111,14 @@ internal class AutomatiskBrevInnhentingKarakterutskriftServiceTest {
                 oppgaver = emptyList(),
             )
 
-        automatiskBrevInnhentingKarakterutskriftService.opprettTasks(
-            FrittståendeBrevType.INNHENTING_AV_KARAKTERUTSKRIFT_HOVEDPERIODE,
+        automatiskBrevInnhentingAktivitetspliktService.opprettTasks(
             true,
             10,
         )
 
-        verifyOppgaveRequest(10, "2023-05-17")
-        assertThat(finnOppgaveRequestSlot.captured.fristFomDato).isEqualTo(LocalDate.parse("2023-05-17"))
-        assertThat(finnOppgaveRequestSlot.captured.fristTomDato).isEqualTo(LocalDate.parse("2023-05-17"))
-    }
-
-    @Test
-    fun `Skal hente oppgaver med frist 18-05-2023 dersom brevtype er INNHENTING_AV_KARAKTERUTSKRIFT_UTVIDET_PERIODE`() {
-        val finnOppgaveRequestSlot = slot<FinnOppgaveRequest>()
-
-        every { oppgaveService.hentOppgaver(capture(finnOppgaveRequestSlot)) } returns
-            FinnOppgaveResponseDto(
-                0,
-                oppgaver = emptyList(),
-            )
-
-        automatiskBrevInnhentingKarakterutskriftService.opprettTasks(
-            FrittståendeBrevType.INNHENTING_AV_KARAKTERUTSKRIFT_UTVIDET_PERIODE,
-            true,
-            10,
-        )
-
-        verifyOppgaveRequest(10, "2023-05-18")
-        assertThat(finnOppgaveRequestSlot.captured.fristFomDato).isEqualTo(LocalDate.parse("2023-05-18"))
-        assertThat(finnOppgaveRequestSlot.captured.fristTomDato).isEqualTo(LocalDate.parse("2023-05-18"))
-    }
-
-    @Test
-    fun `Skal feile opprettelse av tasks dersom brevtype er ugyldig`() {
-        val finnOppgaveRequestSlot = slot<FinnOppgaveRequest>()
-
-        every { oppgaveService.hentOppgaver(capture(finnOppgaveRequestSlot)) } returns
-            FinnOppgaveResponseDto(
-                0,
-                oppgaver = emptyList(),
-            )
-
-        val feil =
-            assertThrows<Feil> {
-                automatiskBrevInnhentingKarakterutskriftService.opprettTasks(
-                    FrittståendeBrevType.BREV_OM_FORLENGET_SVARTID,
-                    true,
-                    10,
-                )
-            }
-        assertThat(feil.message).contains("Skal ikke opprette automatiske innhentingsbrev for frittstående brev av type")
-        verify(exactly = 0) { oppgaveService.hentOppgaver(any()) }
+        verifyOppgaveRequest(10, "2024-05-17")
+        assertThat(finnOppgaveRequestSlot.captured.fristFomDato).isEqualTo(LocalDate.parse("2024-05-17"))
+        assertThat(finnOppgaveRequestSlot.captured.fristTomDato).isEqualTo(LocalDate.parse("2024-05-17"))
     }
 
     private fun verifyOppgaveRequest(

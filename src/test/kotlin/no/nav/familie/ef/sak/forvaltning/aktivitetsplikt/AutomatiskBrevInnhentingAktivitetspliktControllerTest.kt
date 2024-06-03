@@ -1,9 +1,6 @@
-package no.nav.familie.ef.sak.no.nav.familie.ef.sak.forvaltning.karakterutskrift
+package no.nav.familie.ef.sak.forvaltning.aktivitetsplikt
 
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
-import no.nav.familie.ef.sak.forvaltning.karakterutskrift.KarakterutskriftRequest
-import no.nav.familie.ef.sak.forvaltning.karakterutskrift.SendKarakterutskriftBrevTilIverksettTask
-import no.nav.familie.kontrakter.ef.felles.FrittståendeBrevType
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.prosessering.internal.TaskService
 import org.assertj.core.api.Assertions.assertThat
@@ -16,7 +13,7 @@ import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 
-internal class AutomatiskBrevInnhentingKarakterutskriftControllerTest : OppslagSpringRunnerTest() {
+internal class AutomatiskBrevInnhentingAktivitetspliktControllerTest : OppslagSpringRunnerTest() {
     @Autowired lateinit var taskService: TaskService
 
     @BeforeEach
@@ -29,7 +26,7 @@ internal class AutomatiskBrevInnhentingKarakterutskriftControllerTest : OppslagS
         val respons = opprettTasks(liveRun = false, taskLimit = 10)
 
         assertThat(respons.statusCode).isEqualTo(HttpStatus.OK)
-        assertThat(taskService.findAll().none { it.type == SendKarakterutskriftBrevTilIverksettTask.TYPE }).isTrue
+        assertThat(taskService.findAll().none { it.type == SendAktivitetspliktBrevTilIverksettTask.TYPE }).isTrue
     }
 
     @Test
@@ -37,7 +34,7 @@ internal class AutomatiskBrevInnhentingKarakterutskriftControllerTest : OppslagS
         val respons = opprettTasks(liveRun = true, taskLimit = 10)
 
         assertThat(respons.statusCode).isEqualTo(HttpStatus.OK)
-        assertThat(taskService.findAll().any { it.type == SendKarakterutskriftBrevTilIverksettTask.TYPE }).isTrue
+        assertThat(taskService.findAll().any { it.type == SendAktivitetspliktBrevTilIverksettTask.TYPE }).isTrue
     }
 
     @Test
@@ -45,7 +42,7 @@ internal class AutomatiskBrevInnhentingKarakterutskriftControllerTest : OppslagS
         val respons = opprettTasks(liveRun = true, taskLimit = 10)
 
         assertThat(respons.statusCode).isEqualTo(HttpStatus.OK)
-        assertThat(taskService.findAll().any { it.type == SendKarakterutskriftBrevTilIverksettTask.TYPE }).isTrue
+        assertThat(taskService.findAll().any { it.type == SendAktivitetspliktBrevTilIverksettTask.TYPE }).isTrue
         assertThat(taskService.findAll().map { it.callId }).doesNotHaveDuplicates()
         assertThat(taskService.findAll().size > 1).isTrue
     }
@@ -53,11 +50,11 @@ internal class AutomatiskBrevInnhentingKarakterutskriftControllerTest : OppslagS
     @Test
     internal fun `Skal ikke opprette tasker for oppgaver det allerede er opprettet for`() {
         val førsteRespons = opprettTasks(liveRun = true, taskLimit = 10)
-        val antallTaskerEtterFørsteKjøring = taskService.findAll().any { it.type == SendKarakterutskriftBrevTilIverksettTask.TYPE }
+        val antallTaskerEtterFørsteKjøring = taskService.findAll().any { it.type == SendAktivitetspliktBrevTilIverksettTask.TYPE }
 
         val andreRespons = opprettTasks(liveRun = true, taskLimit = 10)
 
-        val antallTaskerEtterAndreKjøring = taskService.findAll().any { it.type == SendKarakterutskriftBrevTilIverksettTask.TYPE }
+        val antallTaskerEtterAndreKjøring = taskService.findAll().any { it.type == SendAktivitetspliktBrevTilIverksettTask.TYPE }
 
         assertThat(førsteRespons.statusCode).isEqualTo(HttpStatus.OK)
         assertThat(andreRespons.statusCode).isEqualTo(HttpStatus.OK)
@@ -66,13 +63,12 @@ internal class AutomatiskBrevInnhentingKarakterutskriftControllerTest : OppslagS
 
     private fun opprettTasks(
         liveRun: Boolean = true,
-        brevtype: FrittståendeBrevType = FrittståendeBrevType.INNHENTING_AV_KARAKTERUTSKRIFT_HOVEDPERIODE,
         taskLimit: Int,
     ): ResponseEntity<Ressurs<Unit>> {
         return restTemplate.exchange(
-            localhost("/api/automatisk-brev-innhenting-karakterutskrift/opprett-tasks"),
+            localhost("/api/automatisk-brev-innhenting-aktivitetsplikt/opprett-tasks"),
             HttpMethod.POST,
-            HttpEntity(KarakterutskriftRequest(liveRun = liveRun, frittståendeBrevType = brevtype, taskLimit = taskLimit), headers),
+            HttpEntity(AktivitetspliktRequest(liveRun = liveRun, taskLimit = taskLimit), headers),
         )
     }
 }
