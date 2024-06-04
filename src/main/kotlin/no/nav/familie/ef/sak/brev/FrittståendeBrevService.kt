@@ -6,15 +6,13 @@ import no.nav.familie.ef.sak.brev.domain.BrevmottakerOrganisasjon
 import no.nav.familie.ef.sak.brev.domain.BrevmottakerPerson
 import no.nav.familie.ef.sak.brev.dto.Flettefelter
 import no.nav.familie.ef.sak.brev.dto.FrittståendeSanitybrevDto
-import no.nav.familie.ef.sak.brev.dto.SanityBrevRequestInnhentingKarakterutskrift
+import no.nav.familie.ef.sak.brev.dto.SanityBrevRequestInnhentingAktivitetsplikt
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.felles.util.norskFormat
-import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.iverksett.tilIverksettDto
-import no.nav.familie.kontrakter.ef.felles.FrittståendeBrevType
 import no.nav.familie.kontrakter.ef.iverksett.Brevmottaker
 import no.nav.familie.kontrakter.felles.objectMapper
 import org.springframework.stereotype.Service
@@ -78,16 +76,15 @@ class FrittståendeBrevService(
         brevmottakereService.slettBrevmottakereForFagsakOgSaksbehandlerHvisFinnes(fagsakId, saksbehandlerIdent)
     }
 
-    fun lagBrevForInnhentingAvKarakterutskrift(
+    fun lagBrevForInnhentingAvAktivitetsplikt(
         visningsnavn: String,
         personIdent: String,
-        brevtype: FrittståendeBrevType,
     ): ByteArray {
-        val brevRequest = SanityBrevRequestInnhentingKarakterutskrift(flettefelter = Flettefelter(navn = listOf(visningsnavn), fodselsnummer = listOf(personIdent)))
+        val brevRequest = SanityBrevRequestInnhentingAktivitetsplikt(flettefelter = Flettefelter(navn = listOf(visningsnavn), fodselsnummer = listOf(personIdent)))
 
         val html =
             brevClient.genererHtml(
-                brevmal = utledBrevMal(brevtype),
+                brevmal = "innhentingOpplysningerAktivitetEtterUtdanning",
                 saksbehandlerBrevrequest = objectMapper.valueToTree(brevRequest),
                 saksbehandlersignatur = "",
                 enhet = "NAV Arbeid og ytelser",
@@ -109,11 +106,4 @@ class FrittståendeBrevService(
         }
         return mapMottakere(mottakere)
     }
-
-    private fun utledBrevMal(brevType: FrittståendeBrevType) =
-        when (brevType) {
-            FrittståendeBrevType.INNHENTING_AV_KARAKTERUTSKRIFT_HOVEDPERIODE -> "innhentingKarakterutskriftHovedperiode"
-            FrittståendeBrevType.INNHENTING_AV_KARAKTERUTSKRIFT_UTVIDET_PERIODE -> "innhentingKarakterutskriftUtvidetPeriode"
-            else -> throw Feil("Skal ikke opprette automatiske innhentingsbrev for frittstående brev av type $brevType")
-        }
 }
