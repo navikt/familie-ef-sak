@@ -16,6 +16,8 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
+import java.time.Month
+import java.time.YearMonth
 
 internal class AutomatiskBrevInnhentingAktivitetspliktServiceTest {
     val taskService = mockk<TaskService>()
@@ -28,6 +30,8 @@ internal class AutomatiskBrevInnhentingAktivitetspliktServiceTest {
     fun setUp() {
         every { oppgaveService.finnMapper(any<String>()) } returns listOf(MappeDto(1, "64 Utdanning", "4489"))
     }
+
+    val gjeldendeFrist = "2024-05-17"
 
     @Test
     fun `Skal opprette tasks for oppgaver`() {
@@ -48,7 +52,7 @@ internal class AutomatiskBrevInnhentingAktivitetspliktServiceTest {
             taskLimit = 5,
         )
 
-        verifyOppgaveRequest(5, "2024-05-17")
+        verifyOppgaveRequest(5, gjeldendeFrist)
         verify(exactly = oppgaver.size) { taskService.save(any()) }
         assertThat(taskSlots.size).isEqualTo(oppgaver.size)
         assertThat(taskSlots.all { it.type === SendAktivitetspliktBrevTilIverksettTask.TYPE }).isTrue
@@ -72,7 +76,7 @@ internal class AutomatiskBrevInnhentingAktivitetspliktServiceTest {
             taskLimit = 5,
         )
 
-        verifyOppgaveRequest(5, "2024-05-17")
+        verifyOppgaveRequest(5, gjeldendeFrist)
         verify(exactly = 0) { taskService.save(any()) }
         assertThat(taskSlots.isEmpty()).isTrue
     }
@@ -96,7 +100,7 @@ internal class AutomatiskBrevInnhentingAktivitetspliktServiceTest {
             taskLimit = 5,
         )
 
-        verifyOppgaveRequest(5, "2024-05-17")
+        verifyOppgaveRequest(5, gjeldendeFrist)
         verify(exactly = 3) { taskService.save(any()) }
         assertThat(taskSlots.size).isEqualTo(3)
     }
@@ -116,9 +120,16 @@ internal class AutomatiskBrevInnhentingAktivitetspliktServiceTest {
             10,
         )
 
-        verifyOppgaveRequest(10, "2024-05-17")
-        assertThat(finnOppgaveRequestSlot.captured.fristFomDato).isEqualTo(LocalDate.parse("2024-05-17"))
-        assertThat(finnOppgaveRequestSlot.captured.fristTomDato).isEqualTo(LocalDate.parse("2024-05-17"))
+        verifyOppgaveRequest(10, gjeldendeFrist)
+        assertThat(finnOppgaveRequestSlot.captured.fristFomDato).isEqualTo(LocalDate.parse(gjeldendeFrist))
+        assertThat(finnOppgaveRequestSlot.captured.fristTomDato).isEqualTo(LocalDate.parse(gjeldendeFrist))
+    }
+
+    @Test
+    fun `skal huske å oppdatere gjeldende frist innen juni neste år`() {
+        if (YearMonth.now().month >= Month.JUNE) {
+            assertThat(LocalDate.parse(gjeldendeFrist).year).isEqualTo(YearMonth.now().year)
+        }
     }
 
     private fun verifyOppgaveRequest(
