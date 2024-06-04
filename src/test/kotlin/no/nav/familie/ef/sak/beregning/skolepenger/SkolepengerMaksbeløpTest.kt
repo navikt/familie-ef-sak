@@ -66,7 +66,7 @@ internal class SkolepengerMaksbeløpTest {
             val ifjor = Year.now().minusYears(1)
             assertThat(sisteRegistrerteÅr).isGreaterThanOrEqualTo(ifjor)
         } else {
-            assertThat(sisteRegistrerteÅr).isEqualTo(Year.now()).withFailMessage("Makssats for skolepenger burde være vedtatt for år ${Year.now()} - legg denne inn i SkolepengerMaksbeløp.kt")
+            assertThat(sisteRegistrerteÅr).isEqualTo(Year.now()).withFailMessage("Makssats for skolepenger burde være vedtatt for år ${Year.now()} - legg denne inn i SkolepengerMaksbeløp.kt og i ef-sak-frontend (skoleår.ts)")
         }
     }
 
