@@ -84,7 +84,7 @@ class FrittståendeBrevService(
 
         val html =
             brevClient.genererHtml(
-                brevmal = "innhentingAktivitetspliktAutobrev",
+                brevmal = "innhentingOpplysningerAktivitet",
                 saksbehandlerBrevrequest = objectMapper.valueToTree(brevRequest),
                 saksbehandlersignatur = "",
                 enhet = "NAV Arbeid og ytelser",

@@ -20,11 +20,11 @@ med følgende verdier i request-bodyen:
 Velg `true` om du ønsker å lagre ned tasks for generering og utsending av brev basert på oppgavesøket.
 - **taskLimit** `[Int]`: Et øvre tak for hvor mange oppgaver som hentes ut.
 
-I tillegg er man nødt til å [gå inn i unleash og aktivere feature toggle for automatisk brevinnhenting av aktivitetsplikt for prod miljøet.](https://teamfamilie-unleash-web.nav.cloud.nais.io/projects/default/features/familie.ef.sak.automatiske-brev-innhenting-aktivitetsplikt)
+I tillegg er man nødt til å [gå inn i unleash og aktivere feature toggle for automatisk brevinnhenting av aktivitetsplikt for prod miljøet.](https://teamfamilie-unleash-web.iap.nav.cloud.nais.io/projects/default/features/familie.ef.sak.automatiske-brev-innhenting-aktivitetsplikt)
 
 ### Teknisk
 Ved `liveRun` satt til `true` ved innsending av `POST-request` vil følgende skje:
-1. Det gjøres et søk etter oppgaver med frist satt til 17.05 
+1. Det gjøres et søk etter oppgaver med frist satt til `17.05`, tema `ENF` og mappe `64 Utdanning` uten en tilordnet ressurs
 2. Deretter lagres det ned en task av typen`SendAktivitetspliktBrevTilIverksettTask` med ansvar for å generere brev og 
 sende over data for videre flyt til `familie-ef-iverksett`.
 2. Der vil det lagres ned en task av typen `JournalførFrittståendeBrevTask` med ansvar for å journalføre brevet. Selve
