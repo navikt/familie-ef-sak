@@ -23,23 +23,15 @@ internal class AutomatiskBrevInnhentingAktivitetspliktControllerTest : OppslagSp
     }
 
     @Test
-    internal fun `Skal ikke opprette tasks når liveRun er false`() {
+    internal fun `Skal opprette start task når liveRun er false`() {
         val respons = opprettTasks(liveRun = false, taskLimit = 10)
 
         assertThat(respons.statusCode).isEqualTo(HttpStatus.OK)
-        assertThat(taskService.findAll().none { it.type == StartUtsendingAvAktivitetspliktBrevTask.TYPE }).isTrue
+        assertThat(taskService.findAll().any { it.type == StartUtsendingAvAktivitetspliktBrevTask.TYPE }).isTrue
     }
 
     @Test
-    internal fun `Skal opprette tasks når liveRun er true`() {
-        val respons = opprettTasks(liveRun = true, taskLimit = 10)
-
-        assertThat(respons.statusCode).isEqualTo(HttpStatus.OK)
-        assertThat(taskService.findAll().any { it.type == SendAktivitetspliktBrevTilIverksettTask.TYPE }).isTrue
-    }
-
-    @Test
-    internal fun `Skal opprette start task`() {
+    internal fun `Skal opprette start task når liveRun er true`() {
         val respons = opprettTasks(liveRun = true, taskLimit = 10)
 
         assertThat(respons.statusCode).isEqualTo(HttpStatus.OK)
