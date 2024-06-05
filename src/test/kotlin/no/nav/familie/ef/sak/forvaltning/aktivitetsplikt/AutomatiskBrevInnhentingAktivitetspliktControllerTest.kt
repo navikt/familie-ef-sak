@@ -14,7 +14,8 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 
 internal class AutomatiskBrevInnhentingAktivitetspliktControllerTest : OppslagSpringRunnerTest() {
-    @Autowired lateinit var taskService: TaskService
+    @Autowired
+    lateinit var taskService: TaskService
 
     @BeforeEach
     fun setUp() {
@@ -26,7 +27,7 @@ internal class AutomatiskBrevInnhentingAktivitetspliktControllerTest : OppslagSp
         val respons = opprettTasks(liveRun = false, taskLimit = 10)
 
         assertThat(respons.statusCode).isEqualTo(HttpStatus.OK)
-        assertThat(taskService.findAll().none { it.type == SendAktivitetspliktBrevTilIverksettTask.TYPE }).isTrue
+        assertThat(taskService.findAll().none { it.type == StartUtsendingAvAktivitetspliktBrevTask.TYPE }).isTrue
     }
 
     @Test
@@ -38,27 +39,22 @@ internal class AutomatiskBrevInnhentingAktivitetspliktControllerTest : OppslagSp
     }
 
     @Test
-    internal fun `Tasker skal ha unik callId`() {
+    internal fun `Skal opprette start task`() {
         val respons = opprettTasks(liveRun = true, taskLimit = 10)
 
         assertThat(respons.statusCode).isEqualTo(HttpStatus.OK)
-        assertThat(taskService.findAll().any { it.type == SendAktivitetspliktBrevTilIverksettTask.TYPE }).isTrue
-        assertThat(taskService.findAll().map { it.callId }).doesNotHaveDuplicates()
-        assertThat(taskService.findAll().size > 1).isTrue
+        assertThat(taskService.findAll().any { it.type == StartUtsendingAvAktivitetspliktBrevTask.TYPE }).isTrue
     }
 
     @Test
-    internal fun `Skal ikke opprette tasker for oppgaver det allerede er opprettet for`() {
-        val førsteRespons = opprettTasks(liveRun = true, taskLimit = 10)
-        val antallTaskerEtterFørsteKjøring = taskService.findAll().any { it.type == SendAktivitetspliktBrevTilIverksettTask.TYPE }
+    internal fun `Skal kunne kjøre to ganger etter hverandre med samme payload`() {
+        val respons = opprettTasks(liveRun = true, taskLimit = 10)
 
-        val andreRespons = opprettTasks(liveRun = true, taskLimit = 10)
-
-        val antallTaskerEtterAndreKjøring = taskService.findAll().any { it.type == SendAktivitetspliktBrevTilIverksettTask.TYPE }
-
-        assertThat(førsteRespons.statusCode).isEqualTo(HttpStatus.OK)
-        assertThat(andreRespons.statusCode).isEqualTo(HttpStatus.OK)
-        assertThat(antallTaskerEtterFørsteKjøring).isEqualTo(antallTaskerEtterAndreKjøring)
+        assertThat(respons.statusCode).isEqualTo(HttpStatus.OK)
+        assertThat(taskService.findAll().any { it.type == StartUtsendingAvAktivitetspliktBrevTask.TYPE }).isTrue
+        val responsAndreRunde = opprettTasks(liveRun = true, taskLimit = 10)
+        assertThat(respons.statusCode).isEqualTo(HttpStatus.OK)
+        assertThat(taskService.findAll().count { it.type == StartUtsendingAvAktivitetspliktBrevTask.TYPE }).isEqualTo(2)
     }
 
     private fun opprettTasks(

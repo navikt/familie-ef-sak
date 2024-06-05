@@ -4,6 +4,7 @@ import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
+import no.nav.familie.prosessering.internal.TaskService
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
@@ -16,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController
 )
 @ProtectedWithClaims(issuer = "azuread")
 class AutomatiskBrevInnhentingAktivitetspliktController(
-    private val automatiskBrevInnhentingAktivitetspliktService: AutomatiskBrevInnhentingAktivitetspliktService,
+    private val taskService: TaskService,
     private val featureToggleService: FeatureToggleService,
     private val tilgangService: TilgangService,
 ) {
@@ -29,10 +30,7 @@ class AutomatiskBrevInnhentingAktivitetspliktController(
             "Toggle for automatiske brev for innhenting av aktiitetsplikt er ikke påskrudd"
         }
 
-        automatiskBrevInnhentingAktivitetspliktService.opprettTasks(
-            liveRun = aktivitetspliktRequest.liveRun,
-            taskLimit = aktivitetspliktRequest.taskLimit,
-        )
+        taskService.save(StartUtsendingAvAktivitetspliktBrevTask.opprettTask(aktivitetspliktRequest))
     }
 }
 
