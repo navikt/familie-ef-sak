@@ -43,6 +43,7 @@ import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
+import org.springframework.http.HttpStatus
 
 class BeregningControllerTest : OppslagSpringRunnerTest() {
     @Autowired
@@ -140,6 +141,26 @@ class BeregningControllerTest : OppslagSpringRunnerTest() {
         assertThat(beløpsperioderRevurdering?.first()?.deprecatedPeriode?.fradato).isEqualTo(LocalDate.of(2022, 3, 1))
         assertThat(beløpsperioderRevurdering?.first()?.deprecatedPeriode?.tildato).isEqualTo(LocalDate.of(2022, 6, 30))
         assertThat(beløpsperioderRevurdering?.first()?.beløp).isEqualTo(BigDecimal(12_000))
+    }
+
+
+    @Test
+    internal fun `Skal kaste feil og returnere 400 dersom behandlingen ikke har et vedtak`() {
+        val fagsak = testoppsettService.lagreFagsak(fagsak(identer = setOf(PersonIdent("12345678910"))))
+        val behandling =
+            behandlingRepository.insert(
+                behandling(
+                    fagsak,
+                    steg = StegType.BEREGNE_YTELSE,
+                    type = BehandlingType.FØRSTEGANGSBEHANDLING,
+                    status = BehandlingStatus.UTREDES,
+                ),
+            )
+
+        val feiletVedtak: ResponseEntity<Ressurs<List<Beløpsperiode>>> =
+            hentBeløpsperioderForBehandling(behandling.id)
+        assertThat(feiletVedtak.statusCode).isEqualTo(HttpStatus.BAD_REQUEST)
+        assertThat(feiletVedtak.body?.status).isEqualTo(Ressurs.Status.FUNKSJONELL_FEIL)
     }
 
     private fun lagFagsakOgBehandling(

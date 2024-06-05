@@ -36,6 +36,10 @@ class VedtakService(
         return vedtakRepository.findByIdOrThrow(behandlingId)
     }
 
+    fun hentVedtakHvisEksisterer(behandlingId: UUID): Vedtak? {
+        return vedtakRepository.findByIdOrNull(behandlingId)
+    }
+
     fun hentVedtaksresultat(behandlingId: UUID): ResultatType {
         return hentVedtak(behandlingId).resultatType
     }
@@ -45,10 +49,10 @@ class VedtakService(
     }
 
     fun hentVedtakDto(behandlingId: UUID): VedtakDto {
-        return hentVedtakHvisEksisterer(behandlingId) ?: error("Finner ikke vedtak for behandling=$behandlingId")
+        return hentVedtakDtoHvisEksisterer(behandlingId) ?: error("Finner ikke vedtak for behandling=$behandlingId")
     }
 
-    fun hentVedtakHvisEksisterer(behandlingId: UUID): VedtakDto? {
+    fun hentVedtakDtoHvisEksisterer(behandlingId: UUID): VedtakDto? {
         return vedtakRepository.findByIdOrNull(behandlingId)?.tilVedtakDto()
     }
 
