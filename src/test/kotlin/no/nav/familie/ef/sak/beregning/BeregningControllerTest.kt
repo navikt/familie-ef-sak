@@ -38,12 +38,12 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.web.client.exchange
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpMethod
+import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
-import org.springframework.http.HttpStatus
 
 class BeregningControllerTest : OppslagSpringRunnerTest() {
     @Autowired
@@ -142,7 +142,6 @@ class BeregningControllerTest : OppslagSpringRunnerTest() {
         assertThat(beløpsperioderRevurdering?.first()?.deprecatedPeriode?.tildato).isEqualTo(LocalDate.of(2022, 6, 30))
         assertThat(beløpsperioderRevurdering?.first()?.beløp).isEqualTo(BigDecimal(12_000))
     }
-
 
     @Test
     internal fun `Skal kaste feil og returnere 400 dersom behandlingen ikke har et vedtak`() {
