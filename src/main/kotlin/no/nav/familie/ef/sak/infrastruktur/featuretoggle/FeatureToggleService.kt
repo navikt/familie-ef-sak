@@ -38,8 +38,8 @@ enum class Toggle(val toggleId: String, val beskrivelse: String? = null) {
         "familie.ef.sak.frontend.tilbakekreving-under-4x-rettsgebyr",
         "Release",
     ),
-    AUTOMATISKE_BREV_INNHENTING_KARAKTERUTSKRIFT(
-        "familie.ef.sak.automatiske-brev-innhenting-karakterutskrift",
+    AUTOMATISKE_BREV_INNHENTING_AKTIVITETSPLIKT(
+        "familie.ef.sak.automatiske-brev-innhenting-aktivitetsplikt",
         "Operational - sesongavhengig",
     ),
 

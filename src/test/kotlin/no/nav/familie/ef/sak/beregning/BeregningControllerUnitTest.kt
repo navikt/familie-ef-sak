@@ -57,7 +57,7 @@ internal class BeregningControllerUnitTest {
 
     @Test
     internal fun `skal kaste feil dersom vedtak har resultattypen OPPHØRT`() {
-        every { vedtakService.hentVedtak(any()) } returns
+        every { vedtakService.hentVedtakHvisEksisterer(any()) } returns
             Vedtak(
                 behandlingId = UUID.randomUUID(),
                 resultatType = ResultatType.OPPHØRT,

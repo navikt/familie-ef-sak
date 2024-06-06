@@ -4,6 +4,7 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataPeriod
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataPeriodeHistorikkOvergangsstønad
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.TidligereInnvilgetVedtak
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.TidligereVedtaksperioder
+import no.nav.familie.ef.sak.vedtak.domain.AktivitetType
 import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
 import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType.SANKSJON
 import no.nav.familie.kontrakter.felles.Månedsperiode
@@ -42,6 +43,7 @@ data class SistePeriodeMedOvergangsstønadDto(
     val fom: LocalDate,
     val tom: LocalDate,
     val vedtaksperiodeType: String,
+    val aktivitet: AktivitetType?,
     val inntekt: Int,
     val samordningsfradrag: Int?,
 )
@@ -85,6 +87,7 @@ fun List<GrunnlagsdataPeriodeHistorikkOvergangsstønad>.tilSistePeriodeDto(): Si
                 fom = sistePeriode.fom,
                 tom = sistePeriode.tom,
                 vedtaksperiodeType = sistePeriode.periodeType.name,
+                aktivitet = sistePeriode.aktivitet,
                 inntekt = sistePeriode.inntekt ?: 0,
                 samordningsfradrag = sistePeriode.samordningsfradrag,
             )
