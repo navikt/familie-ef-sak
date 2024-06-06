@@ -1,6 +1,7 @@
 package no.nav.familie.ef.sak.beregning
 
 import no.nav.familie.ef.sak.AuditLoggerEvent
+import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
@@ -11,6 +12,7 @@ import no.nav.familie.ef.sak.vedtak.dto.tilPerioder
 import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
+import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.GetMapping
@@ -50,7 +52,7 @@ class BeregningController(
         @PathVariable behandlingId: UUID,
     ): Ressurs<List<Beløpsperiode>> {
         tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.UPDATE)
-        val vedtakForBehandling = vedtakService.hentVedtak(behandlingId)
+        val vedtakForBehandling = vedtakService.hentVedtakHvisEksisterer(behandlingId) ?: throw ApiFeil("Vedtak for behandling=$behandlingId finnes ikke", HttpStatus.BAD_REQUEST)
         if (vedtakForBehandling.resultatType === ResultatType.OPPHØRT) {
             throw Feil("Kan ikke vise fremtidige beløpsperioder for opphørt vedtak med id=$behandlingId")
         }

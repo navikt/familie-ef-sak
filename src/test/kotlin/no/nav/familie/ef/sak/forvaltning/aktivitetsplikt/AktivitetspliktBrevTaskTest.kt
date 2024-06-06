@@ -1,4 +1,4 @@
-package no.nav.familie.ef.sak.no.nav.familie.ef.sak.forvaltning.karakterutskrift
+package no.nav.familie.ef.sak.forvaltning.aktivitetsplikt
 
 import io.mockk.every
 import io.mockk.mockk
@@ -6,13 +6,11 @@ import no.nav.familie.ef.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.brev.FrittståendeBrevService
 import no.nav.familie.ef.sak.fagsak.FagsakService
-import no.nav.familie.ef.sak.forvaltning.karakterutskrift.SendKarakterutskriftBrevTilIverksettTask
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerService
 import no.nav.familie.ef.sak.repository.fagsak
-import no.nav.familie.kontrakter.ef.felles.FrittståendeBrevType
 import no.nav.familie.kontrakter.felles.oppgave.IdentGruppe
 import no.nav.familie.kontrakter.felles.oppgave.Oppgave
 import no.nav.familie.kontrakter.felles.oppgave.OppgaveIdentV2
@@ -22,7 +20,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.time.Year
 
-internal class KarakterutskriftBrevTaskTest {
+internal class AktivitetspliktBrevTaskTest {
     private val behandlingService = mockk<BehandlingService>()
     private val fagsakService = mockk<FagsakService>()
     private val oppgaveService = mockk<OppgaveService>()
@@ -31,8 +29,8 @@ internal class KarakterutskriftBrevTaskTest {
     private val iverksettClient = mockk<IverksettClient>()
     private val arbeidsfordelingService = mockk<ArbeidsfordelingService>()
 
-    private val karakterutskriftBrevTask =
-        SendKarakterutskriftBrevTilIverksettTask(
+    private val aktivitetspliktBrevTask =
+        SendAktivitetspliktBrevTilIverksettTask(
             behandlingService,
             fagsakService,
             oppgaveService,
@@ -61,9 +59,9 @@ internal class KarakterutskriftBrevTaskTest {
             )
         every { fagsakService.finnFagsaker(any()) } returns emptyList()
 
-        val task = SendKarakterutskriftBrevTilIverksettTask.opprettTask(oppgaveId, FrittståendeBrevType.INNHENTING_AV_KARAKTERUTSKRIFT_HOVEDPERIODE, Year.of(2023))
+        val task = SendAktivitetspliktBrevTilIverksettTask.opprettTask(oppgaveId, Year.of(2023))
 
-        val feil = assertThrows<Feil> { karakterutskriftBrevTask.doTask(task) }
+        val feil = assertThrows<Feil> { aktivitetspliktBrevTask.doTask(task) }
         assertThat(feil.frontendFeilmelding?.contains("Fant ikke fagsak"))
     }
 
@@ -79,9 +77,9 @@ internal class KarakterutskriftBrevTaskTest {
         every { behandlingService.finnesBehandlingForFagsak(any()) } returns false
         every { fagsakService.finnFagsaker(any()) } returns listOf(fagsak())
 
-        val task = SendKarakterutskriftBrevTilIverksettTask.opprettTask(oppgaveId, FrittståendeBrevType.INNHENTING_AV_KARAKTERUTSKRIFT_HOVEDPERIODE, Year.of(2023))
+        val task = SendAktivitetspliktBrevTilIverksettTask.opprettTask(oppgaveId, Year.of(2023))
 
-        val feil = assertThrows<Feil> { karakterutskriftBrevTask.doTask(task) }
+        val feil = assertThrows<Feil> { aktivitetspliktBrevTask.doTask(task) }
         assertThat(feil.frontendFeilmelding?.contains("Fant ikke behandling"))
     }
 
@@ -101,9 +99,9 @@ internal class KarakterutskriftBrevTaskTest {
                 every { vergemål } returns listOf(mockk())
             }
 
-        val task = SendKarakterutskriftBrevTilIverksettTask.opprettTask(oppgaveId, FrittståendeBrevType.INNHENTING_AV_KARAKTERUTSKRIFT_HOVEDPERIODE, Year.of(2023))
+        val task = SendAktivitetspliktBrevTilIverksettTask.opprettTask(oppgaveId, Year.of(2023))
 
-        val feil = assertThrows<Feil> { karakterutskriftBrevTask.doTask(task) }
-        assertThat(feil.frontendFeilmelding?.contains("Kan ikke automatisk sende brev for oppgaveId=$oppgaveId. Brev om innhenting av karakterutskrift skal ikke sendes automatisk fordi bruker har vergemål. Saken må følges opp manuelt og tasken kan avvikshåndteres."))
+        val feil = assertThrows<Feil> { aktivitetspliktBrevTask.doTask(task) }
+        assertThat(feil.frontendFeilmelding?.contains("Kan ikke automatisk sende brev for oppgaveId=$oppgaveId. Brev om innhenting av aktivitetsplikt skal ikke sendes automatisk fordi bruker har vergemål. Saken må følges opp manuelt og tasken kan avvikshåndteres."))
     }
 }

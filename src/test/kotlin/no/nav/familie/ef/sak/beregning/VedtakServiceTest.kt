@@ -123,7 +123,7 @@ internal class VedtakServiceTest : OppslagSpringRunnerTest() {
 
         vedtakService.lagreVedtak(vedtakDto, behandling.id, fagsak.stønadstype)
 
-        assertThat(vedtakService.hentVedtakHvisEksisterer(behandling.id)).usingRecursiveComparison().isEqualTo(vedtakDto)
+        assertThat(vedtakService.hentVedtakDtoHvisEksisterer(behandling.id)).usingRecursiveComparison().isEqualTo(vedtakDto)
     }
 
     @Test

@@ -116,7 +116,7 @@ class VedtakController(
         @PathVariable behandlingId: UUID,
     ): Ressurs<VedtakDto?> {
         tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.ACCESS)
-        return Ressurs.success(vedtakService.hentVedtakHvisEksisterer(behandlingId))
+        return Ressurs.success(vedtakService.hentVedtakDtoHvisEksisterer(behandlingId))
     }
 
     @GetMapping("fagsak/{fagsakId}/historikk/{fra}")

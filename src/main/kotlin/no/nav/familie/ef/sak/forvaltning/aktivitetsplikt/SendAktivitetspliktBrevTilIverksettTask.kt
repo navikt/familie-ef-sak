@@ -1,4 +1,4 @@
-package no.nav.familie.ef.sak.forvaltning.karakterutskrift
+package no.nav.familie.ef.sak.forvaltning.aktivitetsplikt
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.familie.ef.sak.arbeidsfordeling.ArbeidsfordelingService
@@ -12,8 +12,7 @@ import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.ef.sak.oppgave.OppgaveUtil
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerService
-import no.nav.familie.kontrakter.ef.felles.FrittståendeBrevType
-import no.nav.familie.kontrakter.ef.felles.KarakterutskriftBrevDto
+import no.nav.familie.kontrakter.ef.felles.PeriodiskAktivitetspliktBrevDto
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.oppgave.Oppgave
@@ -31,13 +30,13 @@ import java.util.Properties
 
 @Service
 @TaskStepBeskrivelse(
-    taskStepType = SendKarakterutskriftBrevTilIverksettTask.TYPE,
+    taskStepType = SendAktivitetspliktBrevTilIverksettTask.TYPE,
     maxAntallFeil = 1,
     settTilManuellOppfølgning = true,
     triggerTidVedFeilISekunder = 15 * 60L,
-    beskrivelse = "Automatisk utsend brev for innhenting av karakterutskrift",
+    beskrivelse = "Automatisk utsend brev for innhenting av aktivitetsplikt",
 )
-class SendKarakterutskriftBrevTilIverksettTask(
+class SendAktivitetspliktBrevTilIverksettTask(
     private val behandlingService: BehandlingService,
     private val fagsakService: FagsakService,
     private val oppgaveService: OppgaveService,
@@ -49,7 +48,7 @@ class SendKarakterutskriftBrevTilIverksettTask(
     val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
     override fun doTask(task: Task) {
-        val payload = objectMapper.readValue<AutomatiskBrevKarakterutskriftPayload>(task.payload)
+        val payload = objectMapper.readValue<AutomatiskBrevAktivitetspliktPayload>(task.payload)
         val oppgave = oppgaveService.hentOppgave(payload.oppgaveId)
         val ident = OppgaveUtil.finnPersonidentForOppgave(oppgave) ?: throw Feil("Fant ikke ident for oppgave=${oppgave.id}")
         val fagsaker = fagsakService.finnFagsaker(setOf(ident))
@@ -58,20 +57,19 @@ class SendKarakterutskriftBrevTilIverksettTask(
         validerHarFagsakOgBehandling(fagsaker, oppgave)
 
         val visningsnavn = personopplysningerService.hentGjeldeneNavn(listOf(ident)).getValue(ident)
-        val brev = frittståendeBrevService.lagBrevForInnhentingAvKarakterutskrift(visningsnavn, ident, payload.brevtype)
+        val brev = frittståendeBrevService.lagBrevForInnhentingAvAktivitetsplikt(visningsnavn, ident)
         val journalFørendeEnhet = arbeidsfordelingService.hentNavEnhetIdEllerBrukMaskinellEnhetHvisNull(ident)
         val fagsak = utledFagsak(fagsaker)
 
-        logger.info("Starter utsending karakterutskriftsbrev for oppgaveId=${oppgave.id} og eksternFagsakId=${fagsak.eksternId}")
+        logger.info("Starter utsending aktivitetsplikt for oppgaveId=${oppgave.id} og eksternFagsakId=${fagsak.eksternId}")
 
-        iverksettClient.håndterUtsendingAvKarakterutskriftBrev(
-            KarakterutskriftBrevDto(
+        iverksettClient.håndterUtsendingAvAktivitetspliktBrev(
+            PeriodiskAktivitetspliktBrevDto(
                 fil = brev,
                 oppgaveId = payload.oppgaveId,
                 personIdent = ident,
                 eksternFagsakId = fagsak.eksternId,
                 journalførendeEnhet = journalFørendeEnhet,
-                brevtype = payload.brevtype,
                 gjeldendeÅr = payload.gjeldendeÅr,
                 stønadType = fagsak.stønadstype,
             ),
@@ -85,7 +83,7 @@ class SendKarakterutskriftBrevTilIverksettTask(
         val personopplysninger = personopplysningerService.hentPersonopplysningerFraRegister(ident)
         val harVerge = personopplysninger.vergemål.isNotEmpty()
         feilHvis(harVerge) {
-            "Kan ikke automatisk sende brev for oppgaveId=${opggave.id}. Brev om innhenting av karakterutskrift skal ikke sendes automatisk fordi bruker har vergemål. Saken må følges opp manuelt og tasken kan avvikshåndteres."
+            "Kan ikke automatisk sende brev for oppgaveId=${opggave.id}. Brev om innhenting av aktivitetsplikt skal ikke sendes automatisk fordi bruker har vergemål. Saken må følges opp manuelt og tasken kan avvikshåndteres."
         }
     }
 
@@ -107,10 +105,9 @@ class SendKarakterutskriftBrevTilIverksettTask(
     companion object {
         fun opprettTask(
             oppgaveId: Long,
-            brevType: FrittståendeBrevType,
             gjeldendeÅr: Year,
         ): Task {
-            val payload = opprettTaskPayload(oppgaveId, brevType, gjeldendeÅr)
+            val payload = opprettTaskPayload(oppgaveId, gjeldendeÅr)
 
             val properties =
                 Properties().apply {
@@ -123,19 +120,17 @@ class SendKarakterutskriftBrevTilIverksettTask(
 
         fun opprettTaskPayload(
             oppgaveId: Long,
-            brevType: FrittståendeBrevType,
             gjeldendeÅr: Year,
         ): String =
             objectMapper.writeValueAsString(
-                AutomatiskBrevKarakterutskriftPayload(oppgaveId, brevType, gjeldendeÅr),
+                AutomatiskBrevAktivitetspliktPayload(oppgaveId, gjeldendeÅr),
             )
 
-        const val TYPE = "SendKarakterutskriftBrevTilIverksettTask"
+        const val TYPE = "SendAktivitetspliktBrevTilIverksettTask"
     }
 }
 
-data class AutomatiskBrevKarakterutskriftPayload(
+data class AutomatiskBrevAktivitetspliktPayload(
     val oppgaveId: Long,
-    val brevtype: FrittståendeBrevType,
     val gjeldendeÅr: Year,
 )
