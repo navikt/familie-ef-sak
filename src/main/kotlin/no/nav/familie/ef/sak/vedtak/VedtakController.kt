@@ -5,6 +5,7 @@ import no.nav.familie.ef.sak.behandling.BehandlingRepository
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegService
+import no.nav.familie.ef.sak.beregning.ValiderOmregningService
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvisIkke
@@ -54,6 +55,7 @@ class VedtakController(
     private val nullstillVedtakService: NullstillVedtakService,
     private val angreSendTilBeslutterService: AngreSendTilBeslutterService,
     private val tilordnetRessursService: TilordnetRessursService,
+    private val validerOmregningService: ValiderOmregningService,
 ) {
     private val logger = LoggerFactory.getLogger(javaClass)
 
@@ -144,6 +146,7 @@ class VedtakController(
     ): Ressurs<UUID> {
         val behandling = behandlingService.hentSaksbehandling(behandlingId)
         tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.UPDATE)
+        validerOmregningService.validerHarGammelGOgKanLagres(behandling)
         validerKanRedigereBehandling(behandling)
         validerAlleVilkårOppfyltDersomInvilgelse(vedtak, behandlingId)
         return Ressurs.success(stegService.håndterBeregnYtelseForStønad(behandling, vedtak).id)

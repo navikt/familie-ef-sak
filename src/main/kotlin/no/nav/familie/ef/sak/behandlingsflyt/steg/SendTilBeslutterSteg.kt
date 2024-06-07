@@ -71,7 +71,6 @@ class SendTilBeslutterSteg(
         }
         validerRiktigTilstandVedInvilgelse(saksbehandling)
         validerSaksbehandlersignatur(saksbehandling)
-        validerOmregningService.validerHarGammelGOgKanLagres(saksbehandling)
 
         årsakRevurderingService.validerHarGyldigRevurderingsinformasjon(saksbehandling)
         validerAtDetFinnesOppgave(saksbehandling)
