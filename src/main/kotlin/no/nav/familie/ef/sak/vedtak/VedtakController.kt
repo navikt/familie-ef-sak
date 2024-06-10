@@ -146,7 +146,6 @@ class VedtakController(
     ): Ressurs<UUID> {
         val behandling = behandlingService.hentSaksbehandling(behandlingId)
         tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.UPDATE)
-        validerOmregningService.validerHarGammelGOgKanLagres(behandling)
         validerKanRedigereBehandling(behandling)
         validerAlleVilkårOppfyltDersomInvilgelse(vedtak, behandlingId)
         return Ressurs.success(stegService.håndterBeregnYtelseForStønad(behandling, vedtak).id)
