@@ -8,6 +8,23 @@ import java.time.YearMonth
 
 internal class BeregningBarnetilsynUtilKtTest {
     @Test
+    fun `Sjekk at det er lagt inn ny makssats for dette året`() {
+        val åretsMakssats = satserForBarnetilsyn.hentSatsFor(antallBarn = 1, årMåned = YearMonth.now())
+        val fjoråretsMakssats = satserForBarnetilsyn.hentSatsFor(antallBarn = 1, årMåned = YearMonth.now().minusYears(1))
+        assertThat(åretsMakssats).isNotEqualTo(fjoråretsMakssats)
+    }
+
+    @Test
+    fun `hente riktig sats for barn for år 2024`() {
+        val juli2023 = YearMonth.of(2024, 1)
+        assertThat(satserForBarnetilsyn.hentSatsFor(antallBarn = 4, årMåned = juli2023)).isEqualTo(6875)
+        assertThat(satserForBarnetilsyn.hentSatsFor(antallBarn = 3, årMåned = juli2023)).isEqualTo(6875)
+        assertThat(satserForBarnetilsyn.hentSatsFor(antallBarn = 2, årMåned = juli2023)).isEqualTo(6066)
+        assertThat(satserForBarnetilsyn.hentSatsFor(antallBarn = 1, årMåned = juli2023)).isEqualTo(4650)
+        assertThat(satserForBarnetilsyn.hentSatsFor(antallBarn = 0, årMåned = juli2023)).isEqualTo(0)
+    }
+
+    @Test
     fun `hente riktig sats for barn for år 2023`() {
         val juli2023 = YearMonth.of(2023, 7)
         assertThat(satserForBarnetilsyn.hentSatsFor(antallBarn = 4, årMåned = juli2023)).isEqualTo(6623)

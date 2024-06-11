@@ -11,6 +11,7 @@ import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import java.time.Year
+import java.time.YearMonth
 
 internal class SkolepengerMaksbeløpTest {
     @Test
@@ -59,10 +60,14 @@ internal class SkolepengerMaksbeløpTest {
     }
 
     @Test
-    internal fun `Må holde maksbeløp skolepenger oppdatert, men tåler ett år forsinkelse`() {
+    internal fun `Må holde maksbeløp skolepenger oppdatert innen juni`() {
         val sisteRegistrerteÅr = SkolepengerMaksbeløp.hentSisteÅrRegistrertMaksbeløpHøyskole()
-        val ifjor = Year.now().minusYears(1)
-        assertThat(sisteRegistrerteÅr).isGreaterThanOrEqualTo(ifjor)
+        if (YearMonth.now().month.value < 6) {
+            val ifjor = Year.now().minusYears(1)
+            assertThat(sisteRegistrerteÅr).isGreaterThanOrEqualTo(ifjor)
+        } else {
+            assertThat(sisteRegistrerteÅr).isEqualTo(Year.now()).withFailMessage("Makssats for skolepenger burde være vedtatt for år ${Year.now()} - legg denne inn i SkolepengerMaksbeløp.kt og i ef-sak-frontend (skoleår.ts)")
+        }
     }
 
     /**
