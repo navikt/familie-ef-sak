@@ -10,7 +10,6 @@ import java.util.UUID
 
 @Repository
 interface TilbakekrevingRepository : RepositoryInterface<Tilbakekreving, UUID>, InsertUpdateRepository<Tilbakekreving> {
-
     // language=PostgreSQL
     @Query(
         """SELECT COUNT(*) from behandling b
@@ -23,5 +22,8 @@ interface TilbakekrevingRepository : RepositoryInterface<Tilbakekreving, UUID>, 
                 AND b.vedtakstidspunkt > :etterTidspunkt;
          """,
     )
-    fun finnAntallTilbakekrevingerValgtEtterGittDatoForPersonIdent(personIdent: String, etterTidspunkt: LocalDate): Int
+    fun finnAntallTilbakekrevingerValgtEtterGittDatoForPersonIdent(
+        personIdent: String,
+        etterTidspunkt: LocalDate,
+    ): Int
 }
