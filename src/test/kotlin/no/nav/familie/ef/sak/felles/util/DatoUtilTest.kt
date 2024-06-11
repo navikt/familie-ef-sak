@@ -171,4 +171,13 @@ internal class DatoUtilTest {
             assertThat(LocalDateTime.now().minusHours(5).harGåttAntallTimer(4)).isTrue
         }
     }
+
+    @Nested
+    inner class FormaterYearMonth {
+        @Test
+        internal fun `Sjekker at formaterYearMonthTilMånedÅr formaterer til norsk månednavn og år`() {
+            assertThat(YearMonth.of(2021, 1).formaterYearMonthTilMånedÅr()).isEqualTo("januar 2021")
+            assertThat(YearMonth.of(2021, 12).formaterYearMonthTilMånedÅr()).isEqualTo("desember 2021")
+        }
+    }
 }
