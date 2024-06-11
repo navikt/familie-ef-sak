@@ -54,6 +54,13 @@ class TilbakekrevingController(
         return Ressurs.success(tilbakekrevingService.finnesÅpenTilbakekrevingsBehandling(behandlingId))
     }
 
+    @GetMapping("/{behandlingId}/finnesFlereTilbakekrevingerValgtSisteÅr")
+    fun finnesFlereTilbakekrevingerValgtSisteÅr(
+        @PathVariable behandlingId: UUID,
+    ): Ressurs<Boolean> {
+        return Ressurs.success(tilbakekrevingService.finnesFlereTilbakekrevingerValgtSisteÅr(behandlingId))
+    }
+
     @GetMapping("/{behandlingId}")
     fun hentTilbakekreving(
         @PathVariable behandlingId: UUID,

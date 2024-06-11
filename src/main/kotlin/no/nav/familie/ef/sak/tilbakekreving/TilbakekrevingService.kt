@@ -29,6 +29,7 @@ import org.springframework.data.repository.findByIdOrNull
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import java.time.LocalDate
+import java.time.ZoneOffset
 import java.util.UUID
 import no.nav.familie.kontrakter.felles.tilbakekreving.Behandling as TilbakekrevingBehandling
 
@@ -160,5 +161,12 @@ class TilbakekrevingService(
         behandlingService.hentBehandlingPåEksternId(kravgrunnlagsreferanse.toLong())
 
         tilbakekrevingClient.opprettManuellTilbakekreving(fagsak.eksternId, kravgrunnlagsreferanse, fagsak.stønadstype)
+    }
+
+    fun finnesFlereTilbakekrevingerValgtSisteÅr(behandlingId: UUID): Boolean {
+        val ident = behandlingService.hentAktivIdent(behandlingId)
+        val ettÅrTilbake = LocalDate.now().minusYears(1)
+        val antall = tilbakekrevingRepository.finnAntallTilbakekrevingerValgtEtterGittDatoForPersonIdent(ident, ettÅrTilbake)
+        return antall > 1
     }
 }
