@@ -6,6 +6,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
+import java.util.Locale
 
 object DatoFormat {
     val DATE_FORMAT_ISO_YEAR_MONTH = DateTimeFormatter.ofPattern("yyyy-MM")
@@ -83,3 +84,10 @@ fun LocalDateTime.harGåttAntallTimer(timer: Int) =
     this.plusHours(timer.toLong()) < LocalDateTime.now()
 
 fun dagensDatoMedTidNorskFormat(): String = dagensDatoMedTid().format(DatoFormat.GOSYS_DATE_TIME)
+
+fun YearMonth.formaterYearMonthTilMånedÅr(): String {
+    val yearMonth = YearMonth.parse(this.toString())
+    val locale = Locale.Builder().setLanguage("no").setRegion("NO").build()
+    val formatter = DateTimeFormatter.ofPattern("MMMM yyyy", locale)
+    return yearMonth.format(formatter)
+}

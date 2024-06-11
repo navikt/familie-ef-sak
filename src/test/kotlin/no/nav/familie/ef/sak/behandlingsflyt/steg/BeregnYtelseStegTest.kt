@@ -212,6 +212,24 @@ internal class BeregnYtelseStegTest {
         }
 
         @Test
+        internal fun `Skal validere og gi feilmelding om at det må revurderes med annen dato hvis det er ny G`() {
+            every { beregningService.beregnYtelse(any(), any()) } returns
+                listOf(
+                    lagBeløpsperiode(
+                        LocalDate.now(),
+                        LocalDate.now(),
+                    ),
+                )
+            every { validerOmregningService.validerHarGammelGOgKanLagres(any()) } throws ApiFeil("Feil", httpStatus = org.springframework.http.HttpStatus.BAD_REQUEST)
+
+            assertThrows<ApiFeil> {
+                utførSteg(BehandlingType.FØRSTEGANGSBEHANDLING)
+            }
+
+            verify(exactly = 0) { simuleringService.hentOgLagreSimuleringsresultat(any()) }
+        }
+
+        @Test
         internal fun `skal opphøre vedtak fra dato`() {
             val opphørFom = YearMonth.of(2021, 6)
 
