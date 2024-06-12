@@ -59,11 +59,12 @@ class BeslutteVedtakSteg(
         val beslutter = SikkerhetContext.hentSaksbehandler()
         val oppgaveId = ferdigstillOppgave(saksbehandling)
 
-        val tilordnetNavIdent = if (data.årsakerUnderkjent.isNotEmpty()) beslutter else saksbehandler
+        val erUnderkjent = data.årsakerUnderkjent.isNotEmpty()
+        val tilordnetNavIdent = if (erUnderkjent && vedtak.beslutterIdent != null) vedtak.beslutterIdent else saksbehandler
 
         return if (data.godkjent) {
             validerGodkjentVedtak(data)
-            vedtakService.oppdaterBeslutter(saksbehandling.id, SikkerhetContext.hentSaksbehandler())
+            vedtakService.oppdaterBeslutter(saksbehandling.id, tilordnetNavIdent)
             val iverksettDto = iverksettingDtoMapper.tilDto(saksbehandling, beslutter)
             oppdaterResultatPåBehandling(saksbehandling.id)
             opprettPollForStatusOppgave(saksbehandling.id)
@@ -77,7 +78,7 @@ class BeslutteVedtakSteg(
             StegType.VENTE_PÅ_STATUS_FRA_IVERKSETT
         } else {
             validerUnderkjentVedtak(data)
-            opprettBehandleUnderkjentVedtakOppgave(saksbehandling, tilordnetNavIdent)
+            opprettBehandleUnderkjentVedtakOppgave(saksbehandling, saksbehandler)
             StegType.SEND_TIL_BESLUTTER
         }
     }
