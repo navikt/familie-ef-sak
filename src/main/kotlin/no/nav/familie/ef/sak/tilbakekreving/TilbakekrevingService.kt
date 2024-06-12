@@ -161,4 +161,11 @@ class TilbakekrevingService(
 
         tilbakekrevingClient.opprettManuellTilbakekreving(fagsak.eksternId, kravgrunnlagsreferanse, fagsak.stønadstype)
     }
+
+    fun finnesFlereTilbakekrevingerValgtSisteÅr(behandlingId: UUID): Boolean {
+        val ident = behandlingService.hentAktivIdent(behandlingId)
+        val ettÅrTilbake = LocalDate.now().minusYears(1)
+        val antall = tilbakekrevingRepository.finnAntallTilbakekrevingerValgtEtterGittDatoForPersonIdent(ident, ettÅrTilbake)
+        return antall > 1
+    }
 }

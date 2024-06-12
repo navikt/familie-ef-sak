@@ -137,6 +137,14 @@ class PdlClientConfig {
                 ),
             )
 
+        every { pdlClient.hentIdenterBolk(listOf("222", "111")) }
+            .returns(
+                mapOf(
+                    "111" to PdlIdent("222", false),
+                    "222" to PdlIdent("111", false),
+                ),
+            )
+
         return pdlClient
     }
 
