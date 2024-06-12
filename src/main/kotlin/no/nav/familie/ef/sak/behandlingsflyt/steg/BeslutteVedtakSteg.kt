@@ -59,6 +59,8 @@ class BeslutteVedtakSteg(
         val beslutter = SikkerhetContext.hentSaksbehandler()
         val oppgaveId = ferdigstillOppgave(saksbehandling)
 
+        val tilordnetNavIdent = if (data.årsakerUnderkjent.isNotEmpty()) beslutter else saksbehandler
+
         return if (data.godkjent) {
             validerGodkjentVedtak(data)
             vedtakService.oppdaterBeslutter(saksbehandling.id, SikkerhetContext.hentSaksbehandler())
@@ -75,7 +77,7 @@ class BeslutteVedtakSteg(
             StegType.VENTE_PÅ_STATUS_FRA_IVERKSETT
         } else {
             validerUnderkjentVedtak(data)
-            opprettBehandleUnderkjentVedtakOppgave(saksbehandling, saksbehandler)
+            opprettBehandleUnderkjentVedtakOppgave(saksbehandling, tilordnetNavIdent)
             StegType.SEND_TIL_BESLUTTER
         }
     }
@@ -139,14 +141,14 @@ class BeslutteVedtakSteg(
 
     private fun opprettBehandleUnderkjentVedtakOppgave(
         saksbehandling: Saksbehandling,
-        navIdent: String,
+        tilordnetNavIdent: String,
     ) {
         taskService.save(
             OpprettOppgaveTask.opprettTask(
                 OpprettOppgaveTaskData(
                     behandlingId = saksbehandling.id,
                     oppgavetype = Oppgavetype.BehandleUnderkjentVedtak,
-                    tilordnetNavIdent = navIdent,
+                    tilordnetNavIdent = tilordnetNavIdent,
                 ),
             ),
         )
