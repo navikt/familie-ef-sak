@@ -96,6 +96,7 @@ class BeregnYtelseSteg(
                 validerOmregningService.validerHarSammePerioderSomTidligereVedtak(data, saksbehandlingMedOppdatertIdent)
                 validerSanksjoner(data, saksbehandlingMedOppdatertIdent)
                 opprettTilkjentYtelseForInnvilgetOvergangsstønad(data, saksbehandlingMedOppdatertIdent)
+                validerOmregningService.validerHarGammelGOgKanLagres(saksbehandlingMedOppdatertIdent)
                 simuleringService.hentOgLagreSimuleringsresultat(saksbehandlingMedOppdatertIdent)
             }
 

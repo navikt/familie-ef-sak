@@ -1,6 +1,7 @@
 package no.nav.familie.ef.sak.beregning
 
 import no.nav.familie.ef.sak.behandling.Saksbehandling
+import no.nav.familie.ef.sak.felles.util.formaterYearMonthTilMånedÅr
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseRepository
@@ -108,5 +109,5 @@ class ValiderOmregningService(
 
     private fun feilmeldingForFeilGBeløp(andel: AndelTilkjentYtelse) =
         "Kan ikke fullføre behandling: Det må revurderes fra " +
-            "${maxOf(andel.periode.fom, Grunnbeløpsperioder.nyesteGrunnbeløpGyldigFraOgMed)} for at beregning av ny G blir riktig"
+            "${(maxOf(andel.periode.fom, Grunnbeløpsperioder.nyesteGrunnbeløpGyldigFraOgMed)).formaterYearMonthTilMånedÅr()} for at beregning av ny G blir riktig"
 }
