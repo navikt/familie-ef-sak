@@ -20,6 +20,7 @@ interface TilbakekrevingRepository : RepositoryInterface<Tilbakekreving, UUID>, 
                 AND t.valg = 'OPPRETT_AUTOMATISK'
                 AND b.status = 'FERDIGSTILT' 
                 AND b.resultat NOT IN ('HENLAGT', 'AVSLÅTT')
+                AND b.vedtakstidspunkt > :etterTidspunkt
                 ;
          """,
     )
