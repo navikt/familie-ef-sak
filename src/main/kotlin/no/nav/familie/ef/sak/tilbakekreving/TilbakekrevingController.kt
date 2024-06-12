@@ -58,6 +58,8 @@ class TilbakekrevingController(
     fun finnesFlereTilbakekrevingerValgtSisteÅr(
         @PathVariable behandlingId: UUID,
     ): Ressurs<Boolean> {
+        tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.UPDATE)
+        tilgangService.validerHarSaksbehandlerrolle()
         return Ressurs.success(tilbakekrevingService.finnesFlereTilbakekrevingerValgtSisteÅr(behandlingId))
     }
 

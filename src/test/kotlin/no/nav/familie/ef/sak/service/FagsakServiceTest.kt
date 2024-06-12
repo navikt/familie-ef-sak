@@ -76,7 +76,7 @@ internal class FagsakServiceTest : OppslagSpringRunnerTest() {
         }
 
         @Test
-        fun `skal returnere fagsaker med eksiterende peronIdent når det ikke finnes ny ident i pdl`() {
+        fun `skal returnere fagsaker med eksisterende peronIdent når det ikke finnes ny ident i pdl`() {
             val fagsakerMedOppdatertePersonIdenter =
                 fagsakService.fagsakerMedOppdatertePersonIdenter(
                     listOf(

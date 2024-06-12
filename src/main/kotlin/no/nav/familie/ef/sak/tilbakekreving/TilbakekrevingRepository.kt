@@ -17,9 +17,10 @@ interface TilbakekrevingRepository : RepositoryInterface<Tilbakekreving, UUID>, 
                 JOIN person_ident pi ON pi.fagsak_person_id = f.fagsak_person_id
                 JOIN tilbakekreving t ON t.behandling_id = b.id
             WHERE pi.ident = :personIdent 
+                AND t.valg = 'OPPRETT_AUTOMATISK'
                 AND b.status = 'FERDIGSTILT' 
                 AND b.resultat NOT IN ('HENLAGT', 'AVSLÅTT')
-                AND b.vedtakstidspunkt > :etterTidspunkt;
+                ;
          """,
     )
     fun finnAntallTilbakekrevingerValgtEtterGittDatoForPersonIdent(
