@@ -56,11 +56,11 @@ class BeslutteVedtakSteg(
         val vedtakErUtenBeslutter = vedtak.utledVedtakErUtenBeslutter()
         val saksbehandler =
             totrinnskontrollService.lagreTotrinnskontrollOgReturnerBehandler(saksbehandling, data, vedtakErUtenBeslutter)
-        val beslutter = SikkerhetContext.hentSaksbehandler()
+//        val beslutter = SikkerhetContext.hentSaksbehandler()
         val oppgaveId = ferdigstillOppgave(saksbehandling)
-
+        val beslutter = totrinnskontrollService.hentBeslutter(saksbehandling.id)
         val erUnderkjent = data.årsakerUnderkjent.isNotEmpty()
-        val tilordnetNavIdent = if (erUnderkjent && vedtak.beslutterIdent != null) vedtak.beslutterIdent else saksbehandler
+        val tilordnetNavIdent = if (erUnderkjent && beslutter != null) beslutter else saksbehandler
 
         return if (data.godkjent) {
             validerGodkjentVedtak(data)
