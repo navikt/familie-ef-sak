@@ -65,7 +65,7 @@ class BeslutteVedtakSteg(
         return if (data.godkjent) {
             validerGodkjentVedtak(data)
             vedtakService.oppdaterBeslutter(saksbehandling.id, tilordnetNavIdent)
-            val iverksettDto = iverksettingDtoMapper.tilDto(saksbehandling, beslutter)
+            val iverksettDto = iverksettingDtoMapper.tilDto(saksbehandling, tilordnetNavIdent)
             oppdaterResultatPåBehandling(saksbehandling.id)
             opprettPollForStatusOppgave(saksbehandling.id)
             opprettTaskForBehandlingsstatistikk(saksbehandling.id, oppgaveId)
@@ -154,7 +154,6 @@ class BeslutteVedtakSteg(
             ),
         )
     }
-
     private fun opprettPollForStatusOppgave(behandlingId: UUID) {
         taskService.save(PollStatusFraIverksettTask.opprettTask(behandlingId))
     }
