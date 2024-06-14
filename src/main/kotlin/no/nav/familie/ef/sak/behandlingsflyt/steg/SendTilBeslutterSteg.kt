@@ -134,9 +134,9 @@ class SendTilBeslutterSteg(
 
         behandlingService.oppdaterStatusPåBehandling(saksbehandling.id, BehandlingStatus.FATTER_VEDTAK)
         vedtakService.oppdaterSaksbehandler(saksbehandling.id, SikkerhetContext.hentSaksbehandler())
-        if (!vedtakService.hentVedtak(saksbehandling.id).erVedtakUtenBeslutter()) {
-            opprettGodkjennVedtakOppgave(saksbehandling)
-        }
+//        if (!vedtakService.hentVedtak(saksbehandling.id).erVedtakUtenBeslutter() || beslutterIdent != null) {
+        opprettGodkjennVedtakOppgave(saksbehandling, beslutterIdent)
+//        }
         ferdigstillOppgave(saksbehandling)
         opprettTaskForBehandlingsstatistikk(saksbehandling.id)
         if (data != null) {
@@ -172,13 +172,17 @@ class SendTilBeslutterSteg(
         )
     }
 
-    private fun opprettGodkjennVedtakOppgave(saksbehandling: Saksbehandling) {
+    private fun opprettGodkjennVedtakOppgave(
+        saksbehandling: Saksbehandling,
+        beslutterIdent: String?,
+    ) {
         taskService.save(
             OpprettOppgaveTask.opprettTask(
                 OpprettOppgaveTaskData(
                     behandlingId = saksbehandling.id,
                     oppgavetype = Oppgavetype.GodkjenneVedtak,
                     beskrivelse = "Sendt til godkjenning av ${SikkerhetContext.hentSaksbehandlerNavn(true)}.",
+                    tilordnetNavIdent = beslutterIdent,
                 ),
             ),
         )
