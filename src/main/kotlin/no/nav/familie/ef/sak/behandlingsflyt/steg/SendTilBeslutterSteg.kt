@@ -133,7 +133,7 @@ class SendTilBeslutterSteg(
 //        val ansvarlig: String = if (harVærtUnderkjent && besluttetVedtakHendelse?.opprettetAvNavn != null) besluttetVedtakHendelse.opprettetAvNavn else SikkerhetContext.hentSaksbehandler()
 
         behandlingService.oppdaterStatusPåBehandling(saksbehandling.id, BehandlingStatus.FATTER_VEDTAK)
-        vedtakService.oppdaterSaksbehandler(saksbehandling.id, ansvarlig)
+        vedtakService.oppdaterSaksbehandler(saksbehandling.id, SikkerhetContext.hentSaksbehandler())
         if (!vedtakService.hentVedtak(saksbehandling.id).erVedtakUtenBeslutter()) {
             opprettGodkjennVedtakOppgave(saksbehandling)
         }
