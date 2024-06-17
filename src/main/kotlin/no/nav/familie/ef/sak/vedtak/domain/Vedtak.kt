@@ -47,6 +47,8 @@ data class Vedtak(
     fun erVedtakUtenBeslutter(): Boolean =
         resultatType == ResultatType.AVSLÅ && (avslåÅrsak == AvslagÅrsak.MINDRE_INNTEKTSENDRINGER || avslåÅrsak == AvslagÅrsak.KORTVARIG_AVBRUDD_JOBB)
 
+    fun skalVedtakBesluttes(): Boolean = !erVedtakUtenBeslutter()
+
     fun utledVedtakErUtenBeslutter(): VedtakErUtenBeslutter = VedtakErUtenBeslutter(erVedtakUtenBeslutter())
 }
 

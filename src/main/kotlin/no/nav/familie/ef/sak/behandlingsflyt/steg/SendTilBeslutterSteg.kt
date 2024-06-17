@@ -126,17 +126,14 @@ class SendTilBeslutterSteg(
     ) {
         val besluttetVedtakHendelse =
             behandlingshistorikkService.finnSisteBehandlingshistorikk(saksbehandling.id, StegType.BESLUTTE_VEDTAK)
-        val harVærtUnderkjent = besluttetVedtakHendelse?.utfall == StegUtfall.BESLUTTE_VEDTAK_UNDERKJENT
-        val beslutterIdent = vedtakService.hentVedtak(saksbehandling.id).beslutterIdent
-
-        val ansvarlig: String = if (beslutterIdent != null) beslutterIdent else SikkerhetContext.hentSaksbehandler()
-//        val ansvarlig: String = if (harVærtUnderkjent && besluttetVedtakHendelse?.opprettetAvNavn != null) besluttetVedtakHendelse.opprettetAvNavn else SikkerhetContext.hentSaksbehandler()
 
         behandlingService.oppdaterStatusPåBehandling(saksbehandling.id, BehandlingStatus.FATTER_VEDTAK)
         vedtakService.oppdaterSaksbehandler(saksbehandling.id, SikkerhetContext.hentSaksbehandler())
-//        if (!vedtakService.hentVedtak(saksbehandling.id).erVedtakUtenBeslutter() || beslutterIdent != null) {
-        opprettGodkjennVedtakOppgave(saksbehandling, besluttetVedtakHendelse?.opprettetAv)
-//        }
+
+        if (vedtakService.hentVedtak(saksbehandling.id).skalVedtakBesluttes()) {
+            opprettGodkjennVedtakOppgave(saksbehandling, besluttetVedtakHendelse?.opprettetAv)
+        }
+
         ferdigstillOppgave(saksbehandling)
         opprettTaskForBehandlingsstatistikk(saksbehandling.id)
         if (data != null) {
