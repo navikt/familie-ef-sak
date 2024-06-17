@@ -137,23 +137,22 @@ class SøkService(
         )
     }
 
-    fun søkPersonUtenFagsak(personIdent: String): SøkeresultatUtenFagsak {
-        return personService.hentPersonKortBolk(listOf(personIdent))[personIdent]?.let {
+    fun søkPersonUtenFagsak(personIdent: String): SøkeresultatUtenFagsak =
+        personService.hentPersonKortBolk(listOf(personIdent))[personIdent]?.let {
             SøkeresultatUtenFagsak(
                 personIdent = personIdent,
                 navn = it.navn.gjeldende().visningsnavn(),
             )
         }
             ?: throw ApiFeil("Finner ingen personer for søket", HttpStatus.BAD_REQUEST)
-    }
 
-    private fun tilPersonFraSøk(person: PdlPersonFraSøk): PersonFraSøk {
-        return PersonFraSøk(
+    private fun tilPersonFraSøk(person: PdlPersonFraSøk): PersonFraSøk =
+        PersonFraSøk(
             personIdent = person.folkeregisteridentifikator.gjeldende().identifikasjonsnummer,
             visningsadresse =
-                person.bostedsadresse.gjeldende()
+                person.bostedsadresse
+                    .gjeldende()
                     ?.let { adresseMapper.tilAdresse(it).visningsadresse },
             visningsnavn = NavnDto.fraNavn(person.navn.gjeldende()).visningsnavn,
         )
-    }
 }

@@ -31,7 +31,14 @@ class SivilstandRegelTest {
         val listDelvilkårsvurdering = SivilstandRegel().initiereDelvilkårsvurdering(hovedregelMetadataMock, Vilkårsresultat.IKKE_TATT_STILLING_TIL)
 
         Assertions.assertThat(listDelvilkårsvurdering.first().resultat).isEqualTo(Vilkårsresultat.AUTOMATISK_OPPFYLT)
-        Assertions.assertThat(listDelvilkårsvurdering.first().vurderinger.first().begrunnelse).isEqualTo("Automatisk vurdert (${LocalDate.now().norskFormat()}): Bruker er skilt.")
+        Assertions
+            .assertThat(
+                listDelvilkårsvurdering
+                    .first()
+                    .vurderinger
+                    .first()
+                    .begrunnelse,
+            ).isEqualTo("Automatisk vurdert (${LocalDate.now().norskFormat()}): Bruker er skilt.")
     }
 
     @Test

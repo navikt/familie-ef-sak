@@ -19,23 +19,18 @@ class TilkjentYtelseService(
     private val tilkjentYtelseRepository: TilkjentYtelseRepository,
     private val fagsakService: FagsakService,
 ) {
-    fun hentForBehandlingEllerNull(behandlingId: UUID): TilkjentYtelse? {
-        return tilkjentYtelseRepository.findByBehandlingId(behandlingId)
-    }
+    fun hentForBehandlingEllerNull(behandlingId: UUID): TilkjentYtelse? = tilkjentYtelseRepository.findByBehandlingId(behandlingId)
 
-    fun hentForBehandling(behandlingId: UUID): TilkjentYtelse {
-        return tilkjentYtelseRepository.findByBehandlingId(behandlingId)
+    fun hentForBehandling(behandlingId: UUID): TilkjentYtelse =
+        tilkjentYtelseRepository.findByBehandlingId(behandlingId)
             ?: error("Fant ikke tilkjent ytelse med behandlingsid $behandlingId")
-    }
 
-    fun opprettTilkjentYtelse(nyTilkjentYtelse: TilkjentYtelse): TilkjentYtelse {
-        return tilkjentYtelseRepository.insert(nyTilkjentYtelse)
-    }
+    fun opprettTilkjentYtelse(nyTilkjentYtelse: TilkjentYtelse): TilkjentYtelse = tilkjentYtelseRepository.insert(nyTilkjentYtelse)
 
-    fun harLøpendeUtbetaling(behandlingId: UUID): Boolean {
-        return tilkjentYtelseRepository.findByBehandlingId(behandlingId)
+    fun harLøpendeUtbetaling(behandlingId: UUID): Boolean =
+        tilkjentYtelseRepository
+            .findByBehandlingId(behandlingId)
             ?.let { it.andelerTilkjentYtelse.any { andel -> andel.stønadTom.isAfter(LocalDate.now()) } } ?: false
-    }
 
     fun finnTilkjentYtelserTilKonsistensavstemming(
         stønadstype: StønadType,
@@ -51,11 +46,13 @@ class TilkjentYtelseService(
         datoForAvstemming: LocalDate,
     ): List<KonsistensavstemmingTilkjentYtelseDto> {
         val behandlinger =
-            behandlingService.hentBehandlinger(tilkjenteYtelser.map { it.behandlingId }.toSet())
+            behandlingService
+                .hentBehandlinger(tilkjenteYtelser.map { it.behandlingId }.toSet())
                 .associateBy { it.id }
 
         val fagsakerMedOppdatertPersonIdenter =
-            fagsakService.fagsakerMedOppdatertePersonIdenter(behandlinger.map { it.value.fagsakId })
+            fagsakService
+                .fagsakerMedOppdatertePersonIdenter(behandlinger.map { it.value.fagsakId })
                 .associateBy { it.id }
 
         return tilkjenteYtelser.map { tilkjentYtelse ->

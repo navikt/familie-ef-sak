@@ -13,7 +13,10 @@ import java.util.UUID
  * @param uniktId settes då payload er unikt på en task og ønsker å kunne opprette en ny task for samme ident, då disse taskene
  * settes til OK for å ikke spamme med feilede tasker for migrering hvis det er en eller annen MigreringException
  */
-data class AutomatiskMigreringTaskData(val personIdent: String, val uniktId: UUID = UUID.randomUUID())
+data class AutomatiskMigreringTaskData(
+    val personIdent: String,
+    val uniktId: UUID = UUID.randomUUID(),
+)
 
 @Service
 @TaskStepBeskrivelse(
@@ -23,7 +26,9 @@ data class AutomatiskMigreringTaskData(val personIdent: String, val uniktId: UUI
     triggerTidVedFeilISekunder = 15 * 60L,
     beskrivelse = "Automatisk migrering",
 )
-class AutomatiskMigreringTask(private val automatiskMigreringService: AutomatiskMigreringService) : AsyncTaskStep {
+class AutomatiskMigreringTask(
+    private val automatiskMigreringService: AutomatiskMigreringService,
+) : AsyncTaskStep {
     override fun doTask(task: Task) {
         val personIdent = objectMapper.readValue<AutomatiskMigreringTaskData>(task.payload).personIdent
         automatiskMigreringService.migrerPersonAutomatisk(personIdent)
@@ -32,14 +37,13 @@ class AutomatiskMigreringTask(private val automatiskMigreringService: Automatisk
     companion object {
         const val TYPE = "automatiskMigrering"
 
-        fun opprettTask(ident: String): Task {
-            return Task(
+        fun opprettTask(ident: String): Task =
+            Task(
                 TYPE,
                 objectMapper.writeValueAsString(AutomatiskMigreringTaskData(ident)),
                 Properties().apply {
                     this["personIdent"] = ident
                 },
             )
-        }
     }
 }

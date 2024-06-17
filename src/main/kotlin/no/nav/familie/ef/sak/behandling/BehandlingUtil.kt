@@ -10,6 +10,7 @@ object BehandlingUtil {
         this.sortedBy { it.vedtakstidspunkt ?: it.sporbar.endret.endretTid }
 
     fun List<Behandling>.sisteFerdigstilteBehandling() =
-        this.filter { it.erAvsluttet() }
+        this
+            .filter { it.erAvsluttet() }
             .maxByOrNull { it.vedtakstidspunktEllerFeil() }
 }

@@ -26,4 +26,6 @@ data class DokumentinfoDto(
     val utsendingsinfo: Utsendingsinfo?,
 )
 
-data class LogiskVedleggDto(val tittel: String)
+data class LogiskVedleggDto(
+    val tittel: String,
+)

@@ -13,14 +13,20 @@ class EgenAnsattClient(
     @Value("\${SKJERMEDE_PERSONER_URL}") private val uri: URI,
     @Qualifier("azure") restOperations: RestOperations,
 ) : AbstractRestClient(restOperations, "egenansatt") {
-    private val egenAnsattUri: URI = UriComponentsBuilder.fromUri(uri).pathSegment("skjermet").build().toUri()
+    private val egenAnsattUri: URI =
+        UriComponentsBuilder
+            .fromUri(uri)
+            .pathSegment("skjermet")
+            .build()
+            .toUri()
 
-    fun egenAnsatt(ident: String): Boolean {
-        return postForEntity<Boolean>(
+    fun egenAnsatt(ident: String): Boolean =
+        postForEntity<Boolean>(
             egenAnsattUri,
             EgenAnsattRequest(ident),
         )
-    }
 }
 
-data class EgenAnsattRequest(val personident: String)
+data class EgenAnsattRequest(
+    val personident: String,
+)

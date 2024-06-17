@@ -36,8 +36,8 @@ class DeaktiverMikrofrontendTask(
     }
 
     companion object {
-        fun opprettTask(fagsakPersonId: UUID): Task {
-            return Task(
+        fun opprettTask(fagsakPersonId: UUID): Task =
+            Task(
                 type = TYPE,
                 payload = objectMapper.writeValueAsString(DeaktiverMikrofrontendDto(fagsakPersonId)),
                 properties =
@@ -45,7 +45,6 @@ class DeaktiverMikrofrontendTask(
                         this["fagsakPersonId"] = fagsakPersonId.toString()
                     },
             )
-        }
 
         const val TYPE = "deaktiverMikrofrontendTask"
     }

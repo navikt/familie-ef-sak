@@ -79,8 +79,9 @@ fun TidligereInnvilgetVedtak.tilDto() =
         sistePeriodeMedOvergangsstønad = this.periodeHistorikkOvergangsstønad.tilSistePeriodeDto(),
     )
 
-fun List<GrunnlagsdataPeriodeHistorikkOvergangsstønad>.tilSistePeriodeDto(): SistePeriodeMedOvergangsstønadDto? {
-    return this.sortedBy { it.fom }
+fun List<GrunnlagsdataPeriodeHistorikkOvergangsstønad>.tilSistePeriodeDto(): SistePeriodeMedOvergangsstønadDto? =
+    this
+        .sortedBy { it.fom }
         .lastOrNull()
         ?.let { sistePeriode ->
             SistePeriodeMedOvergangsstønadDto(
@@ -92,10 +93,10 @@ fun List<GrunnlagsdataPeriodeHistorikkOvergangsstønad>.tilSistePeriodeDto(): Si
                 samordningsfradrag = sistePeriode.samordningsfradrag,
             )
         }
-}
 
 private fun List<GrunnlagsdataPeriodeHistorikkOvergangsstønad>.tilDtoOvergangsstønad() =
-    this.map { it.tilDto() }
+    this
+        .map { it.tilDto() }
         .slåSammenPåfølgendePerioderMedLikPeriodetype()
         .sortedByDescending { it.fom }
 
@@ -135,7 +136,8 @@ private fun List<GrunnlagsdataPeriodeHistorikkOvergangsstønad>.overlapperMedPer
 
 private fun List<GrunnlagsdataPeriodeHistorikkBarnetilsyn>.tilDtoBarnetilsyn(
     grunnlagsdataPeriodeHistorikkOvergangsstønad: List<GrunnlagsdataPeriodeHistorikkOvergangsstønad>,
-) = this.map { it.tilDto(grunnlagsdataPeriodeHistorikkOvergangsstønad) }
+) = this
+    .map { it.tilDto(grunnlagsdataPeriodeHistorikkOvergangsstønad) }
     .slåSammenHistoriskePerioder(grunnlagsdataPeriodeHistorikkOvergangsstønad)
     .sortedByDescending { it.fom }
 

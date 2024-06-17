@@ -109,10 +109,11 @@ internal class OppgaveRepositoryTest : OppslagSpringRunnerTest() {
         )
 
         assertThat(
-            oppgaveRepository.findByTypeAndAlderIsNotNullAndBarnPersonIdenter(
-                Oppgavetype.InnhentDokumentasjon,
-                listOf("1"),
-            ).size,
+            oppgaveRepository
+                .findByTypeAndAlderIsNotNullAndBarnPersonIdenter(
+                    Oppgavetype.InnhentDokumentasjon,
+                    listOf("1"),
+                ).size,
         ).isEqualTo(1)
     }
 

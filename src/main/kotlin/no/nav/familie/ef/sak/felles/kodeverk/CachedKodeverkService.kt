@@ -14,26 +14,24 @@ import org.springframework.stereotype.Service
 
 @Service
 @CacheConfig(cacheManager = "kodeverkCache")
-class CachedKodeverkService(private val kodeverkClient: KodeverkClient) {
+class CachedKodeverkService(
+    private val kodeverkClient: KodeverkClient,
+) {
     @Cacheable("kodeverk_landkoder")
-    fun hentLandkoder(): KodeverkDto {
-        return kodeverkClient.hentKodeverkLandkoder()
-    }
+    fun hentLandkoder(): KodeverkDto = kodeverkClient.hentKodeverkLandkoder()
 
     @Cacheable("kodeverk_poststed")
-    fun hentPoststed(): KodeverkDto {
-        return kodeverkClient.hentKodeverkPoststed()
-    }
+    fun hentPoststed(): KodeverkDto = kodeverkClient.hentKodeverkPoststed()
 
     @Cacheable("kodeverk_inntekt")
-    fun hentInntekt(): InntektKodeverkDto {
-        return kodeverkClient.hentKodeverkInntekt()
-    }
+    fun hentInntekt(): InntektKodeverkDto = kodeverkClient.hentKodeverkInntekt()
 }
 
 @Profile("!integrasjonstest")
 @Component
-class KodeverkInitializer(private val cachedKodeverkService: CachedKodeverkService) : ApplicationListener<ApplicationReadyEvent> {
+class KodeverkInitializer(
+    private val cachedKodeverkService: CachedKodeverkService,
+) : ApplicationListener<ApplicationReadyEvent> {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     @Scheduled(cron = "0 0 2 * * *")

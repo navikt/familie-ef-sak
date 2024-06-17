@@ -32,4 +32,7 @@ data class SøkeresultatPerson(
     val totalPages: Int,
 )
 
-data class SøkeresultatUtenFagsak(val personIdent: String, val navn: String)
+data class SøkeresultatUtenFagsak(
+    val personIdent: String,
+    val navn: String,
+)

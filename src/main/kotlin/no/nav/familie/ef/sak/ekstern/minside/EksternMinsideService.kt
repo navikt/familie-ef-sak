@@ -47,9 +47,9 @@ class EksternMinsideService(
     private fun tilkjentYtelseForStønad(
         personIdenter: Set<String>,
         stønadstype: StønadType,
-    ): TilkjentYtelse? {
-        return fagsakService.finnFagsak(personIdenter, stønadstype)
+    ): TilkjentYtelse? =
+        fagsakService
+            .finnFagsak(personIdenter, stønadstype)
             ?.let { fagsak -> behandlingService.finnSisteIverksatteBehandling(fagsak.id) }
             ?.let { behandling -> tilkjentYtelseService.hentForBehandling(behandling.id) }
-    }
 }

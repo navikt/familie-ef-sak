@@ -39,8 +39,8 @@ data class Endringer(
             vergemål,
         ).any { it.harEndringer }
 
-    fun felterMedEndringerString(): String {
-        return listOf(
+    fun felterMedEndringerString(): String =
+        listOf(
             "folkeregisterpersonstatus=${folkeregisterpersonstatus.harEndringer}",
             "fødselsdato=${fødselsdato.harEndringer}",
             "dødsdato=${dødsdato.harEndringer}",
@@ -54,7 +54,6 @@ data class Endringer(
             "oppholdstillatelse=${oppholdstillatelse.harEndringer}",
             "vergemål=${vergemål.harEndringer}",
         ).joinToString(", ")
-    }
 }
 
 data class Endring<DETALJER>(

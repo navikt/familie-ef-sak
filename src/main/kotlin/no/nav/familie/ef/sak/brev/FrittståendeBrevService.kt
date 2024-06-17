@@ -40,13 +40,14 @@ class FrittståendeBrevService(
         val signatur = brevsignaturService.lagSignaturMedEnhet(fagsak)
 
         val html =
-            brevClient.genererHtml(
-                brevmal = brevmal,
-                saksbehandlerBrevrequest = brevrequest,
-                saksbehandlersignatur = signatur.navn,
-                enhet = signatur.enhet,
-                skjulBeslutterSignatur = true,
-            ).replace(VedtaksbrevService.BESLUTTER_VEDTAKSDATO_PLACEHOLDER, LocalDate.now().norskFormat())
+            brevClient
+                .genererHtml(
+                    brevmal = brevmal,
+                    saksbehandlerBrevrequest = brevrequest,
+                    saksbehandlersignatur = signatur.navn,
+                    enhet = signatur.enhet,
+                    skjulBeslutterSignatur = true,
+                ).replace(VedtaksbrevService.BESLUTTER_VEDTAKSDATO_PLACEHOLDER, LocalDate.now().norskFormat())
 
         return familieDokumentClient.genererPdfFraHtml(html)
     }
@@ -83,13 +84,14 @@ class FrittståendeBrevService(
         val brevRequest = SanityBrevRequestInnhentingAktivitetsplikt(flettefelter = Flettefelter(navn = listOf(visningsnavn), fodselsnummer = listOf(personIdent)))
 
         val html =
-            brevClient.genererHtml(
-                brevmal = "innhentingOpplysningerAktivitetEtterUtdanning",
-                saksbehandlerBrevrequest = objectMapper.valueToTree(brevRequest),
-                saksbehandlersignatur = "",
-                enhet = "NAV Arbeid og ytelser",
-                skjulBeslutterSignatur = true,
-            ).replace(VedtaksbrevService.BESLUTTER_VEDTAKSDATO_PLACEHOLDER, LocalDate.now().norskFormat())
+            brevClient
+                .genererHtml(
+                    brevmal = "innhentingOpplysningerAktivitetEtterUtdanning",
+                    saksbehandlerBrevrequest = objectMapper.valueToTree(brevRequest),
+                    saksbehandlersignatur = "",
+                    enhet = "NAV Arbeid og ytelser",
+                    skjulBeslutterSignatur = true,
+                ).replace(VedtaksbrevService.BESLUTTER_VEDTAKSDATO_PLACEHOLDER, LocalDate.now().norskFormat())
 
         return familieDokumentClient.genererPdfFraHtml(html)
     }

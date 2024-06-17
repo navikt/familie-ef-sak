@@ -50,9 +50,7 @@ class TilbakekrevingController(
     @GetMapping("/{behandlingId}/er-allerede-opprettet")
     fun finnesTilbakekreving(
         @PathVariable behandlingId: UUID,
-    ): Ressurs<Boolean> {
-        return Ressurs.success(tilbakekrevingService.finnesÅpenTilbakekrevingsBehandling(behandlingId))
-    }
+    ): Ressurs<Boolean> = Ressurs.success(tilbakekrevingService.finnesÅpenTilbakekrevingsBehandling(behandlingId))
 
     @GetMapping("/{behandlingId}/finnes-flere-tilbakekrevinger-valgt-siste-aar")
     fun finnesFlereTilbakekrevingerValgtSisteÅr(

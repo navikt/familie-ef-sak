@@ -24,15 +24,17 @@ class BeregningBarnetilsynEnPeriodeStepDefinitions {
     @Gitt("følgende data")
     fun data(dataTable: DataTable) {
         inputData =
-            dataTable.asMaps().map {
-                PeriodeDataDto(
-                    periodeutgift = parseBigDecimal(PERIODEUTGIFT, it),
-                    kontantstøtteBeløp = parseBigDecimal(KONTANTSTØTTEBELØP, it),
-                    tillegstønadbeløp = parseBigDecimal(TILLEGSSTØNADBELØP, it),
-                    antallBarn = parseInt(ANTALL_BARN, it),
-                    årMåned = parseÅrMåned(PERIODEDATO, it),
-                )
-            }.first()
+            dataTable
+                .asMaps()
+                .map {
+                    PeriodeDataDto(
+                        periodeutgift = parseBigDecimal(PERIODEUTGIFT, it),
+                        kontantstøtteBeløp = parseBigDecimal(KONTANTSTØTTEBELØP, it),
+                        tillegstønadbeløp = parseBigDecimal(TILLEGSSTØNADBELØP, it),
+                        antallBarn = parseInt(ANTALL_BARN, it),
+                        årMåned = parseÅrMåned(PERIODEDATO, it),
+                    )
+                }.first()
     }
 
     @Når("vi beregner barnetilsyn beløp")

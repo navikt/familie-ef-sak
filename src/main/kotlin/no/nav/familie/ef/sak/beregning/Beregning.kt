@@ -18,7 +18,8 @@ data class Beløpsperiode(
     @get:JsonProperty("periode")
     val deprecatedPeriode: no.nav.familie.ef.sak.felles.dto.Periode
         get() =
-            no.nav.familie.ef.sak.felles.dto.Periode(periode.fomDato, periode.tomDato)
+            no.nav.familie.ef.sak.felles.dto
+                .Periode(periode.fomDato, periode.tomDato)
 }
 
 data class Beregningsgrunnlag(
@@ -45,8 +46,8 @@ data class GrunnbeløpDTO(
     val seksGangerGrunnbeløpPerMåned: BigDecimal,
 )
 
-fun finnGrunnbeløpsPerioder(periode: Månedsperiode): List<Beløpsperiode> {
-    return Grunnbeløpsperioder.grunnbeløpsperioder
+fun finnGrunnbeløpsPerioder(periode: Månedsperiode): List<Beløpsperiode> =
+    Grunnbeløpsperioder.grunnbeløpsperioder
         .filter { it.periode.overlapper(periode) }
         .map {
             Beløpsperiode(
@@ -58,9 +59,7 @@ fun finnGrunnbeløpsPerioder(periode: Månedsperiode): List<Beløpsperiode> {
                 beløp = it.grunnbeløp,
                 beløpFørSamordning = it.grunnbeløp,
             )
-        }
-        .sortedBy { it.periode }
-}
+        }.sortedBy { it.periode }
 
 object Grunnbeløpsperioder {
     fun finnGrunnbeløp(måned: YearMonth) =

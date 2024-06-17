@@ -113,17 +113,16 @@ class IverksettingDtoMapper(
         beslutter: String,
     ): IverksettDto {
         val saksbehandler =
-            behandlingshistorikkService.finnSisteBehandlingshistorikk(
-                saksbehandling.id,
-                StegType.SEND_TIL_BESLUTTER,
-            )?.opprettetAv
+            behandlingshistorikkService
+                .finnSisteBehandlingshistorikk(
+                    saksbehandling.id,
+                    StegType.SEND_TIL_BESLUTTER,
+                )?.opprettetAv
                 ?: error("Kan ikke finne saksbehandler på behandlingen")
         return tilDto(saksbehandling, saksbehandler, beslutter)
     }
 
-    fun tilDtoMaskineltBehandlet(saksbehandling: Saksbehandling): IverksettDto {
-        return tilDto(saksbehandling, SikkerhetContext.SYSTEM_FORKORTELSE, SikkerhetContext.SYSTEM_FORKORTELSE)
-    }
+    fun tilDtoMaskineltBehandlet(saksbehandling: Saksbehandling): IverksettDto = tilDto(saksbehandling, SikkerhetContext.SYSTEM_FORKORTELSE, SikkerhetContext.SYSTEM_FORKORTELSE)
 
     private fun tilDto(
         saksbehandling: Saksbehandling,
@@ -295,7 +294,8 @@ class IverksettingDtoMapper(
     }
 
     private fun mapÅrsakRevurdering(saksbehandling: Saksbehandling): ÅrsakRevurderingDto? =
-        årsakRevurderingsRepository.findByIdOrNull(saksbehandling.id)
+        årsakRevurderingsRepository
+            .findByIdOrNull(saksbehandling.id)
             ?.let { ÅrsakRevurderingDto(it.opplysningskilde, it.årsak) }
 
     @Improvement("Opphørårsak må utledes ved revurdering")
@@ -398,13 +398,12 @@ class IverksettingDtoMapper(
         )
     }
 
-    private fun mapBrevmottakere(behandlingId: UUID): List<Brevmottaker> {
-        return brevmottakereRepository.findByIdOrNull(behandlingId)?.let {
+    private fun mapBrevmottakere(behandlingId: UUID): List<Brevmottaker> =
+        brevmottakereRepository.findByIdOrNull(behandlingId)?.let {
             val personer = it.personer.personer.map(BrevmottakerPerson::tilIverksettDto)
             val organisasjoner = it.organisasjoner.organisasjoner.map(BrevmottakerOrganisasjon::tilIverksettDto)
             personer + organisasjoner
         } ?: emptyList()
-    }
 }
 
 fun TilkjentYtelse.tilIverksettDto(): TilkjentYtelseDto =

@@ -34,7 +34,10 @@ data class Grunnlag(
     val beloep: Int,
 )
 
-data class BeregnetSkatt(val tekniskNavn: String, val verdi: String)
+data class BeregnetSkatt(
+    val tekniskNavn: String,
+    val verdi: String,
+)
 
 /*
 {

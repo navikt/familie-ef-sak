@@ -64,7 +64,8 @@ class AlderPåBarnRegel :
         barnId: UUID?,
     ): Boolean {
         val fødselsdato =
-            metadata.barn.firstOrNull { it.id == barnId }
+            metadata.barn
+                .firstOrNull { it.id == barnId }
                 ?.personIdent
                 ?.let { Fødselsnummer(it).fødselsdato }
                 ?: error("Finner ikke ident til barn=$barnId")
@@ -76,10 +77,9 @@ class AlderPåBarnRegel :
             setOf(
                 SvarId.TRENGER_MER_TILSYN_ENN_JEVNALDRENDE,
                 SvarId.FORSØRGER_HAR_LANGVARIG_ELLER_UREGELMESSIG_ARBEIDSTID,
-            )
-                .associateWith {
-                    SluttSvarRegel.OPPFYLT_MED_PÅKREVD_BEGRUNNELSE
-                } + mapOf(SvarId.NEI to SluttSvarRegel.IKKE_OPPFYLT_MED_PÅKREVD_BEGRUNNELSE)
+            ).associateWith {
+                SluttSvarRegel.OPPFYLT_MED_PÅKREVD_BEGRUNNELSE
+            } + mapOf(SvarId.NEI to SluttSvarRegel.IKKE_OPPFYLT_MED_PÅKREVD_BEGRUNNELSE)
 
         private val UNNTAK_ALDER =
             RegelSteg(

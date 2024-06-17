@@ -48,11 +48,10 @@ class OpprettOppfølgingsoppgaveForBarnFyltÅrTask(
     companion object {
         const val TYPE = "opprettOppfølgingsoppgaveForBarnFyltÅrTask"
 
-        fun opprettTask(opprettOppgavePayload: OpprettOppgavePayload): Task {
-            return Task(TYPE, objectMapper.writeValueAsString(opprettOppgavePayload)).apply {
+        fun opprettTask(opprettOppgavePayload: OpprettOppgavePayload): Task =
+            Task(TYPE, objectMapper.writeValueAsString(opprettOppgavePayload)).apply {
                 this.metadata[MDCConstants.MDC_CALL_ID] = IdUtils.generateId()
             }
-        }
     }
 }
 

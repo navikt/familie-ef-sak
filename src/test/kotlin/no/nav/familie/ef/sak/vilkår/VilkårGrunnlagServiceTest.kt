@@ -116,15 +116,19 @@ internal class VilkårGrunnlagServiceTest {
         )
     val oppholdsland = Søknadsfelt(label = "I hvilket land oppholder du deg?", verdi = "Polen", svarId = "POL")
     private val søknadOvergangsstønad =
-        SøknadsskjemaMapper.tilDomene(
-            søknadsBuilder.setBarn(
-                søknadsbarn,
-            ).setMedlemskapsdetaljer(oppholderDuDegINorge = false, oppholdsland = oppholdsland).build().søknadOvergangsstønad,
-        )
-            .tilSøknadsverdier()
+        SøknadsskjemaMapper
+            .tilDomene(
+                søknadsBuilder
+                    .setBarn(
+                        søknadsbarn,
+                    ).setMedlemskapsdetaljer(oppholderDuDegINorge = false, oppholdsland = oppholdsland)
+                    .build()
+                    .søknadOvergangsstønad,
+            ).tilSøknadsverdier()
 
     private val søknadBarnetilsyn =
-        SøknadsskjemaMapper.tilDomene(søknadsBuilder.setBarn(søknadsbarn).build().søknadOvergangsstønad)
+        SøknadsskjemaMapper
+            .tilDomene(søknadsBuilder.setBarn(søknadsbarn).build().søknadOvergangsstønad)
             .tilSøknadsverdier()
     private val barn = søknadBarnTilBehandlingBarn(søknadOvergangsstønad.barn)
     private val barnBarnetilsyn = søknadBarnTilBehandlingBarn(søknadBarnetilsyn.barn)
@@ -185,16 +189,52 @@ internal class VilkårGrunnlagServiceTest {
         assertThat(grunnlag.barnMedSamvær[0].barnepass?.skalHaBarnepass).isTrue()
         assertThat(grunnlag.barnMedSamvær[0].barnepass?.årsakBarnepass).isNull()
         assertThat(grunnlag.barnMedSamvær[0].barnepass?.barnepassordninger).hasSize(1)
-        assertThat(grunnlag.barnMedSamvær[0].barnepass?.barnepassordninger?.first()?.beløp).isEqualTo(2000)
+        assertThat(
+            grunnlag.barnMedSamvær[0]
+                .barnepass
+                ?.barnepassordninger
+                ?.first()
+                ?.beløp,
+        ).isEqualTo(2000)
 
         assertThat(grunnlag.barnMedSamvær[1].barnepass?.skalHaBarnepass).isTrue()
         assertThat(grunnlag.barnMedSamvær[1].barnepass?.årsakBarnepass).isEqualTo("trengerMerPassEnnJevnaldrede")
         assertThat(grunnlag.barnMedSamvær[1].barnepass?.barnepassordninger).hasSize(1)
-        assertThat(grunnlag.barnMedSamvær[1].barnepass?.barnepassordninger?.first()?.navn).isEqualTo("Humpetitten barnehage")
-        assertThat(grunnlag.barnMedSamvær[1].barnepass?.barnepassordninger?.first()?.beløp).isEqualTo(3000)
-        assertThat(grunnlag.barnMedSamvær[1].barnepass?.barnepassordninger?.first()?.fra).isEqualTo(LocalDate.of(2021, 1, 1))
-        assertThat(grunnlag.barnMedSamvær[1].barnepass?.barnepassordninger?.first()?.til).isEqualTo(LocalDate.of(2021, 6, 30))
-        assertThat(grunnlag.barnMedSamvær[1].barnepass?.barnepassordninger?.first()?.type).isEqualTo("barnehageOgLiknende")
+        assertThat(
+            grunnlag.barnMedSamvær[1]
+                .barnepass
+                ?.barnepassordninger
+                ?.first()
+                ?.navn,
+        ).isEqualTo("Humpetitten barnehage")
+        assertThat(
+            grunnlag.barnMedSamvær[1]
+                .barnepass
+                ?.barnepassordninger
+                ?.first()
+                ?.beløp,
+        ).isEqualTo(3000)
+        assertThat(
+            grunnlag.barnMedSamvær[1]
+                .barnepass
+                ?.barnepassordninger
+                ?.first()
+                ?.fra,
+        ).isEqualTo(LocalDate.of(2021, 1, 1))
+        assertThat(
+            grunnlag.barnMedSamvær[1]
+                .barnepass
+                ?.barnepassordninger
+                ?.first()
+                ?.til,
+        ).isEqualTo(LocalDate.of(2021, 6, 30))
+        assertThat(
+            grunnlag.barnMedSamvær[1]
+                .barnepass
+                ?.barnepassordninger
+                ?.first()
+                ?.type,
+        ).isEqualTo("barnehageOgLiknende")
     }
 
     @Test

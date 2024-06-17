@@ -261,12 +261,11 @@ internal class BeslutteVedtakStegTest {
         saksbehandling: Saksbehandling = opprettSaksbehandling(),
         begrunnelse: String? = null,
         årsakerUnderkjent: List<ÅrsakUnderkjent> = emptyList(),
-    ): StegType {
-        return beslutteVedtakSteg.utførOgReturnerNesteSteg(
+    ): StegType =
+        beslutteVedtakSteg.utførOgReturnerNesteSteg(
             saksbehandling,
             BeslutteVedtakDto(godkjent = godkjent, begrunnelse = begrunnelse, årsakerUnderkjent = årsakerUnderkjent),
         )
-    }
 
     private fun opprettSaksbehandling(årsak: BehandlingÅrsak = BehandlingÅrsak.SØKNAD) =
         saksbehandling(

@@ -8,11 +8,12 @@ import no.nav.familie.ef.sak.vilkår.regler.SvarId
 import no.nav.familie.ef.sak.vilkår.regler.Vilkårsregel
 import no.nav.familie.ef.sak.vilkår.regler.regelIder
 
-class InntektRegel : Vilkårsregel(
-    vilkårType = VilkårType.INNTEKT,
-    regler = setOf(LAVERE_INNTEKT_ENN_GRENSEN, SAMSVARER_INNTEKT_MED_OS),
-    hovedregler = regelIder(LAVERE_INNTEKT_ENN_GRENSEN, SAMSVARER_INNTEKT_MED_OS),
-) {
+class InntektRegel :
+    Vilkårsregel(
+        vilkårType = VilkårType.INNTEKT,
+        regler = setOf(LAVERE_INNTEKT_ENN_GRENSEN, SAMSVARER_INNTEKT_MED_OS),
+        hovedregler = regelIder(LAVERE_INNTEKT_ENN_GRENSEN, SAMSVARER_INNTEKT_MED_OS),
+    ) {
     companion object {
         private val lavereInntektEnnGrensenMapping =
             mapOf(

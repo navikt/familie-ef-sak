@@ -51,7 +51,8 @@ internal class PdlSaksbehandlerClientTest {
     @Test
     fun `pdlClient håndterer response for person søk gitt bostedsadresse`() {
         wiremockServerItem.stubFor(
-            WireMock.post(WireMock.urlEqualTo("/${PdlConfig.PATH_GRAPHQL}"))
+            WireMock
+                .post(WireMock.urlEqualTo("/${PdlConfig.PATH_GRAPHQL}"))
                 .willReturn(WireMock.okJson(readFile("person_søk.json"))),
         )
         val bostedsadresse =
@@ -80,11 +81,21 @@ internal class PdlSaksbehandlerClientTest {
         val response =
             pdlClient.søkPersonerMedSammeAdresse(PdlPersonSøkHjelper.lagPdlPersonSøkKriterier(bostedsadresse))
         assertThat(response.totalHits).isEqualTo(1)
-        assertThat(response.hits.first().person.navn.first().fornavn).isEqualTo("BRÅKETE")
-        assertThat(response.hits.first().person.folkeregisteridentifikator.first().identifikasjonsnummer).isEqualTo("15078817191")
+        assertThat(
+            response.hits
+                .first()
+                .person.navn
+                .first()
+                .fornavn,
+        ).isEqualTo("BRÅKETE")
+        assertThat(
+            response.hits
+                .first()
+                .person.folkeregisteridentifikator
+                .first()
+                .identifikasjonsnummer,
+        ).isEqualTo("15078817191")
     }
 
-    private fun readFile(filnavn: String): String {
-        return this::class.java.getResource("/json/$filnavn").readText()
-    }
+    private fun readFile(filnavn: String): String = this::class.java.getResource("/json/$filnavn").readText()
 }

@@ -386,8 +386,8 @@ class PdlClientConfig {
                 matrikkelId = 0,
             )
 
-        private fun vergemaalEllerFremtidsfullmakt(): List<VergemaalEllerFremtidsfullmakt> {
-            return listOf(
+        private fun vergemaalEllerFremtidsfullmakt(): List<VergemaalEllerFremtidsfullmakt> =
+            listOf(
                 VergemaalEllerFremtidsfullmakt(
                     embete = null,
                     folkeregistermetadata = null,
@@ -413,6 +413,5 @@ class PdlClientConfig {
                         ),
                 ),
             )
-        }
     }
 }

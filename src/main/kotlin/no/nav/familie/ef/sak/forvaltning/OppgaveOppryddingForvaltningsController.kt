@@ -29,5 +29,7 @@ class OppgaveOppryddingForvaltningsController(
         logger.info("Opprettet task for opprydding av oppfølgingsoppgaver: ${task.id}")
     }
 
-    data class RunType(val liveRun: Boolean)
+    data class RunType(
+        val liveRun: Boolean,
+    )
 }

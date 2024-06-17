@@ -32,9 +32,15 @@ data class MedlemskapRegistergrunnlagDto(
     val medlUnntak: MedlUnntakDto,
 )
 
-data class MedlUnntakDto(val gyldigeVedtaksPerioder: List<MedlUnntaksperiodeDto>)
+data class MedlUnntakDto(
+    val gyldigeVedtaksPerioder: List<MedlUnntaksperiodeDto>,
+)
 
-data class MedlUnntaksperiodeDto(val fraogmedDato: LocalDate, val tilogmedDato: LocalDate, val erMedlemIFolketrygden: Boolean)
+data class MedlUnntaksperiodeDto(
+    val fraogmedDato: LocalDate,
+    val tilogmedDato: LocalDate,
+    val erMedlemIFolketrygden: Boolean,
+)
 
 fun Medlemskapsinfo.tilDto(): MedlUnntakDto =
     MedlUnntakDto(this.gyldigePerioder.map { it.tilDto() })

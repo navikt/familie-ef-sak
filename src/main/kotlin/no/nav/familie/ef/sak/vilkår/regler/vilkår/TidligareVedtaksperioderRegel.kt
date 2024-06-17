@@ -14,19 +14,20 @@ import no.nav.familie.ef.sak.vilkår.regler.jaNeiSvarRegel
 import no.nav.familie.ef.sak.vilkår.regler.regelIder
 import java.util.UUID
 
-class TidligareVedtaksperioderRegel : Vilkårsregel(
-    vilkårType = VilkårType.TIDLIGERE_VEDTAKSPERIODER,
-    regler =
-        setOf(
-            HAR_TIDLIGERE_MOTTATT_OVERGANSSTØNAD,
-            HAR_TIDLIGERE_ANDRE_STØNADER_SOM_HAR_BETYDNING,
-        ),
-    hovedregler =
-        regelIder(
-            HAR_TIDLIGERE_MOTTATT_OVERGANSSTØNAD,
-            HAR_TIDLIGERE_ANDRE_STØNADER_SOM_HAR_BETYDNING,
-        ),
-) {
+class TidligareVedtaksperioderRegel :
+    Vilkårsregel(
+        vilkårType = VilkårType.TIDLIGERE_VEDTAKSPERIODER,
+        regler =
+            setOf(
+                HAR_TIDLIGERE_MOTTATT_OVERGANSSTØNAD,
+                HAR_TIDLIGERE_ANDRE_STØNADER_SOM_HAR_BETYDNING,
+            ),
+        hovedregler =
+            regelIder(
+                HAR_TIDLIGERE_MOTTATT_OVERGANSSTØNAD,
+                HAR_TIDLIGERE_ANDRE_STØNADER_SOM_HAR_BETYDNING,
+            ),
+    ) {
     override fun initiereDelvilkårsvurdering(
         metadata: HovedregelMetadata,
         resultat: Vilkårsresultat,

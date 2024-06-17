@@ -19,13 +19,9 @@ class HistoriskPensjonService(
     @Qualifier("longCache")
     private val cacheManager: CacheManager,
 ) {
-    fun hentHistoriskPensjon(fagsakPersonId: UUID): HistoriskPensjonDto {
-        return hentHistoriskPensjon(fagsakPersonService.hentAktivIdent(fagsakPersonId))
-    }
+    fun hentHistoriskPensjon(fagsakPersonId: UUID): HistoriskPensjonDto = hentHistoriskPensjon(fagsakPersonService.hentAktivIdent(fagsakPersonId))
 
-    fun hentHistoriskPensjonForFagsak(fagsakId: UUID): HistoriskPensjonDto {
-        return hentHistoriskPensjon(fagsakService.hentAktivIdent(fagsakId))
-    }
+    fun hentHistoriskPensjonForFagsak(fagsakId: UUID): HistoriskPensjonDto = hentHistoriskPensjon(fagsakService.hentAktivIdent(fagsakId))
 
     private fun hentHistoriskPensjon(aktivIdent: String): HistoriskPensjonDto {
         val identer = personService.hentPersonIdenter(aktivIdent).identer()
@@ -35,27 +31,29 @@ class HistoriskPensjonService(
     fun hentHistoriskPensjon(
         aktivIdent: String,
         identer: Set<String>,
-    ): HistoriskPensjonDto {
-        return cacheManager.getValue("historiskPensjon", aktivIdent) {
+    ): HistoriskPensjonDto =
+        cacheManager.getValue("historiskPensjon", aktivIdent) {
             historiskPensjonClient.hentHistoriskPensjonStatusForIdent(aktivIdent, identer)
         }
-    }
 }
 
-data class HistoriskPensjonResponse(val harPensjonsdata: Boolean, val webAppUrl: String) {
-    fun tilDto(): HistoriskPensjonDto {
-        return if (harPensjonsdata) HistoriskPensjonDto(HistoriskPensjonStatus.HAR_HISTORIKK, webAppUrl) else HistoriskPensjonDto(HistoriskPensjonStatus.HAR_IKKE_HISTORIKK, webAppUrl)
-    }
+data class HistoriskPensjonResponse(
+    val harPensjonsdata: Boolean,
+    val webAppUrl: String,
+) {
+    fun tilDto(): HistoriskPensjonDto = if (harPensjonsdata) HistoriskPensjonDto(HistoriskPensjonStatus.HAR_HISTORIKK, webAppUrl) else HistoriskPensjonDto(HistoriskPensjonStatus.HAR_IKKE_HISTORIKK, webAppUrl)
 }
 
-data class HistoriskPensjonDto(val historiskPensjonStatus: HistoriskPensjonStatus, val webAppUrl: String?) {
-    fun harPensjonsdata(): Boolean? {
-        return when (historiskPensjonStatus) {
+data class HistoriskPensjonDto(
+    val historiskPensjonStatus: HistoriskPensjonStatus,
+    val webAppUrl: String?,
+) {
+    fun harPensjonsdata(): Boolean? =
+        when (historiskPensjonStatus) {
             HistoriskPensjonStatus.UKJENT -> null
             HistoriskPensjonStatus.HAR_HISTORIKK -> true
             HistoriskPensjonStatus.HAR_IKKE_HISTORIKK -> false
         }
-    }
 }
 
 enum class HistoriskPensjonStatus {

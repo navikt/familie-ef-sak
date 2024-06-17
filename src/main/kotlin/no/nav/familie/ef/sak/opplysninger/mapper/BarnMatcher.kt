@@ -66,13 +66,14 @@ fun finnBesteMatchPåFødselsnummerForTermindato(
     val uke20 = termindato.minusWeeks(20)
     val uke44 = termindato.plusWeeks(4)
 
-    return fødselsnumre.filter {
-        val fødselsnummer = Fødselsnummer(it)
-        val fødselsdato = fødselsnummer.fødselsdato
-        fødselsdato.isBefore(uke44) and fødselsdato.isAfter(uke20)
-    }.minByOrNull {
-        val epochDayForFødsel = Fødselsnummer(it).fødselsdato.toEpochDay()
-        val epochDayTermindato = termindato.toEpochDay()
-        abs(epochDayForFødsel - epochDayTermindato)
-    }
+    return fødselsnumre
+        .filter {
+            val fødselsnummer = Fødselsnummer(it)
+            val fødselsdato = fødselsnummer.fødselsdato
+            fødselsdato.isBefore(uke44) and fødselsdato.isAfter(uke20)
+        }.minByOrNull {
+            val epochDayForFødsel = Fødselsnummer(it).fødselsdato.toEpochDay()
+            val epochDayTermindato = termindato.toEpochDay()
+            abs(epochDayForFødsel - epochDayTermindato)
+        }
 }

@@ -37,9 +37,7 @@ class FagsakService(
     fun hentEllerOpprettFagsakMedBehandlinger(
         personIdent: String,
         stønadstype: StønadType,
-    ): FagsakDto {
-        return fagsakTilDto(hentEllerOpprettFagsak(personIdent, stønadstype))
-    }
+    ): FagsakDto = fagsakTilDto(hentEllerOpprettFagsak(personIdent, stønadstype))
 
     @Transactional
     fun hentEllerOpprettFagsak(
@@ -91,9 +89,7 @@ class FagsakService(
     fun finnFagsaker(personIdenter: Set<String>): List<Fagsak> =
         fagsakRepository.findBySøkerIdent(personIdenter).map { it.tilFagsakMedPerson() }
 
-    fun hentFagsakMedBehandlinger(fagsakId: UUID): FagsakDto {
-        return fagsakTilDto(hentFagsak(fagsakId))
-    }
+    fun hentFagsakMedBehandlinger(fagsakId: UUID): FagsakDto = fagsakTilDto(hentFagsak(fagsakId))
 
     fun fagsakTilDto(fagsak: Fagsak): FagsakDto {
         val behandlinger: List<Behandling> = behandlingService.hentBehandlinger(fagsak.id)
@@ -109,7 +105,8 @@ class FagsakService(
 
     fun finnFagsakerForFagsakPersonId(fagsakPersonId: UUID): Fagsaker {
         val fagsaker =
-            fagsakRepository.findByFagsakPersonId(fagsakPersonId)
+            fagsakRepository
+                .findByFagsakPersonId(fagsakPersonId)
                 .map { it.tilFagsakMedPerson() }
                 .associateBy { it.stønadstype }
         return Fagsaker(
@@ -119,9 +116,7 @@ class FagsakService(
         )
     }
 
-    fun erLøpende(fagsak: Fagsak): Boolean {
-        return fagsakRepository.harLøpendeUtbetaling(fagsak.id)
-    }
+    fun erLøpende(fagsak: Fagsak): Boolean = fagsakRepository.harLøpendeUtbetaling(fagsak.id)
 
     fun hentFagsak(fagsakId: UUID): Fagsak = fagsakRepository.findByIdOrThrow(fagsakId).tilFagsakMedPerson()
 
@@ -152,28 +147,27 @@ class FagsakService(
         gjeldendePersonIdent: PdlIdent,
     ) = fagsakPersonService.oppdaterIdent(person, gjeldendePersonIdent.ident)
 
-    fun hentFagsakForBehandling(behandlingId: UUID): Fagsak {
-        return fagsakRepository.finnFagsakTilBehandling(behandlingId)?.tilFagsakMedPerson()
+    fun hentFagsakForBehandling(behandlingId: UUID): Fagsak =
+        fagsakRepository.finnFagsakTilBehandling(behandlingId)?.tilFagsakMedPerson()
             ?: throw Feil("Finner ikke fagsak til behandlingId=$behandlingId")
-    }
 
     fun hentEksternId(fagsakId: UUID): Long = fagsakRepository.findByIdOrThrow(fagsakId).eksternId
 
     fun hentFagsakPåEksternId(eksternFagsakId: Long): Fagsak =
-        fagsakRepository.finnMedEksternId(eksternFagsakId)
+        fagsakRepository
+            .finnMedEksternId(eksternFagsakId)
             ?.tilFagsakMedPerson()
             ?: error("Finner ikke fagsak til eksternFagsakId=$eksternFagsakId")
 
-    fun hentFagsakDtoPåEksternId(eksternFagsakId: Long): FagsakDto {
-        return hentFagsakPåEksternIdHvisEksisterer(eksternFagsakId)
+    fun hentFagsakDtoPåEksternId(eksternFagsakId: Long): FagsakDto =
+        hentFagsakPåEksternIdHvisEksisterer(eksternFagsakId)
             ?: error("Kan ikke finne fagsak med eksternId=$eksternFagsakId")
-    }
 
-    fun hentFagsakPåEksternIdHvisEksisterer(eksternFagsakId: Long): FagsakDto? {
-        return fagsakRepository.finnMedEksternId(eksternFagsakId)
+    fun hentFagsakPåEksternIdHvisEksisterer(eksternFagsakId: Long): FagsakDto? =
+        fagsakRepository
+            .finnMedEksternId(eksternFagsakId)
             ?.tilFagsakMedPerson()
             ?.let { fagsakTilDto(it) }
-    }
 
     fun hentAktivIdent(fagsakId: UUID): String = fagsakRepository.finnAktivIdent(fagsakId)
 
@@ -190,14 +184,13 @@ class FagsakService(
     private fun opprettFagsak(
         stønadstype: StønadType,
         fagsakPerson: FagsakPerson,
-    ): FagsakDomain {
-        return fagsakRepository.insert(
+    ): FagsakDomain =
+        fagsakRepository.insert(
             FagsakDomain(
                 stønadstype = stønadstype,
                 fagsakPersonId = fagsakPerson.id,
             ),
         )
-    }
 
     fun FagsakDomain.tilFagsakMedPerson(): Fagsak {
         val personIdenter = fagsakPersonService.hentIdenter(this.fagsakPersonId)

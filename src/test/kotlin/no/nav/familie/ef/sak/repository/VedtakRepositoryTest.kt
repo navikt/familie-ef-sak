@@ -66,8 +66,10 @@ internal class VedtakRepositoryTest : OppslagSpringRunnerTest() {
 
         vedtakRepository.insert(vedtak)
 
-        assertThat(vedtakRepository.findById(behandling.id)).get()
-            .usingRecursiveComparison().ignoringFields("opprettetTid")
+        assertThat(vedtakRepository.findById(behandling.id))
+            .get()
+            .usingRecursiveComparison()
+            .ignoringFields("opprettetTid")
             .isEqualTo(vedtak)
     }
 }

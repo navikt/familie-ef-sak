@@ -74,13 +74,9 @@ class BlankettService(
         )
     }
 
-    private fun lagPersonopplysningerDto(saksbehandling: Saksbehandling): PersonopplysningerDto {
-        return PersonopplysningerDto(hentGjeldendeNavn(saksbehandling.ident), saksbehandling.ident)
-    }
+    private fun lagPersonopplysningerDto(saksbehandling: Saksbehandling): PersonopplysningerDto = PersonopplysningerDto(hentGjeldendeNavn(saksbehandling.ident), saksbehandling.ident)
 
-    private fun hentVedtak(behandlingId: UUID): VedtakDto {
-        return vedtakService.hentVedtakDto(behandlingId)
-    }
+    private fun hentVedtak(behandlingId: UUID): VedtakDto = vedtakService.hentVedtakDto(behandlingId)
 
     private fun hentGjeldendeNavn(hentAktivIdent: String): String {
         val navnMap = personopplysningerService.hentGjeldeneNavn(listOf(hentAktivIdent))

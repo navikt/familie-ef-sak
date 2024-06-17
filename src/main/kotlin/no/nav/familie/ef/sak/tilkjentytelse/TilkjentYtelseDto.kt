@@ -28,4 +28,7 @@ data class AndelTilkjentYtelseDto(
     val stønadTil: LocalDate get() = periode.tomDato
 }
 
-data class BarnMedLøpendeStønad(val barn: List<UUID>, val dato: LocalDate)
+data class BarnMedLøpendeStønad(
+    val barn: List<UUID>,
+    val dato: LocalDate,
+)

@@ -38,9 +38,7 @@ class InfotrygdService(
         return harVedtak || harSak
     }
 
-    fun hentÅpneSaker(): InfotrygdReplikaClient.ÅpnesakerRapport {
-        return infotrygdReplikaClient.hentÅpneSaker()
-    }
+    fun hentÅpneSaker(): InfotrygdReplikaClient.ÅpnesakerRapport = infotrygdReplikaClient.hentÅpneSaker()
 
     fun hentDtoPerioder(personIdent: String): InfotrygdPerioderDto {
         val perioder = hentPerioderFraReplika(personIdent)
@@ -64,11 +62,10 @@ class InfotrygdService(
         )
     }
 
-    fun hentÅpneKlagesaker(personIdent: String): List<InfotrygdSak> {
-        return hentSaker(personIdent).saker.filter {
+    fun hentÅpneKlagesaker(personIdent: String): List<InfotrygdSak> =
+        hentSaker(personIdent).saker.filter {
             it.resultat == InfotrygdSakResultat.ÅPEN_SAK && KLAGETYPER.contains(it.type)
         }
-    }
 
     /**
      * Returnerer perioder uten å slå de sammen, brukes når man eks kun ønsker å se om det finnes innslag i infotrygd fra før
@@ -137,7 +134,5 @@ class InfotrygdService(
         return infotrygdReplikaClient.hentSammenslåttePerioder(request)
     }
 
-    private fun hentPersonIdenter(personIdent: String): Set<String> {
-        return personService.hentPersonIdenter(personIdent).identer()
-    }
+    private fun hentPersonIdenter(personIdent: String): Set<String> = personService.hentPersonIdenter(personIdent).identer()
 }

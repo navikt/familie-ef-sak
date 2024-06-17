@@ -124,7 +124,8 @@ internal class BeregningServiceTest {
         val fullOvergangsstønad = grunnbeløp.multiply(BigDecimal(2.25)).divide(BigDecimal(12))
 
         val avkortning =
-            inntekt.subtract(grunnbeløp.multiply(BigDecimal(0.5)))
+            inntekt
+                .subtract(grunnbeløp.multiply(BigDecimal(0.5)))
                 .multiply(BigDecimal(0.45))
                 .divide(BigDecimal(12))
                 .setScale(0, RoundingMode.HALF_DOWN)
@@ -188,7 +189,8 @@ internal class BeregningServiceTest {
         val fullOvergangsstønad2018PerMåned =
             grunnbeløp2018.multiply(BigDecimal(2.25)).divide(BigDecimal(12)).setScale(0, RoundingMode.HALF_UP)
         val avkortningPerMåned =
-            inntekt.subtract(grunnbeløp2018.multiply(BigDecimal(0.5)))
+            inntekt
+                .subtract(grunnbeløp2018.multiply(BigDecimal(0.5)))
                 .multiply(BigDecimal(0.45))
                 .setScale(5, RoundingMode.HALF_DOWN)
                 .divide(BigDecimal(12))

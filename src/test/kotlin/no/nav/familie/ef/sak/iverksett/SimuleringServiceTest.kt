@@ -95,12 +95,21 @@ internal class SimuleringServiceTest {
         } returns BeriketSimuleringsresultat(mockk(), mockk())
         simuleringService.simuler(saksbehandling(fagsak, behandling))
         assertThat(simulerSlot.captured.nyTilkjentYtelseMedMetaData.behandlingId).isEqualTo(tilkjentYtelse.behandlingId)
-        assertThat(simulerSlot.captured.nyTilkjentYtelseMedMetaData.tilkjentYtelse.andelerTilkjentYtelse.first().beløp)
-            .isEqualTo(tilkjentYtelse.andelerTilkjentYtelse.first().beløp)
-        assertThat(simulerSlot.captured.nyTilkjentYtelseMedMetaData.tilkjentYtelse.andelerTilkjentYtelse.first().fraOgMed)
-            .isEqualTo(tilkjentYtelse.andelerTilkjentYtelse.first().stønadFom)
-        assertThat(simulerSlot.captured.nyTilkjentYtelseMedMetaData.tilkjentYtelse.andelerTilkjentYtelse.first().tilOgMed)
-            .isEqualTo(tilkjentYtelse.andelerTilkjentYtelse.first().stønadTom)
+        assertThat(
+            simulerSlot.captured.nyTilkjentYtelseMedMetaData.tilkjentYtelse.andelerTilkjentYtelse
+                .first()
+                .beløp,
+        ).isEqualTo(tilkjentYtelse.andelerTilkjentYtelse.first().beløp)
+        assertThat(
+            simulerSlot.captured.nyTilkjentYtelseMedMetaData.tilkjentYtelse.andelerTilkjentYtelse
+                .first()
+                .fraOgMed,
+        ).isEqualTo(tilkjentYtelse.andelerTilkjentYtelse.first().stønadFom)
+        assertThat(
+            simulerSlot.captured.nyTilkjentYtelseMedMetaData.tilkjentYtelse.andelerTilkjentYtelse
+                .first()
+                .tilOgMed,
+        ).isEqualTo(tilkjentYtelse.andelerTilkjentYtelse.first().stønadTom)
         assertThat(simulerSlot.captured.forrigeBehandlingId).isEqualTo(forrigeBehandlingId)
     }
 
@@ -164,7 +173,5 @@ internal class SimuleringServiceTest {
             beriketData = BeriketSimuleringsresultat(mockk(), mockk()),
         )
 
-    private fun readFile(filnavn: String): String {
-        return this::class.java.getResource("/json/$filnavn").readText()
-    }
+    private fun readFile(filnavn: String): String = this::class.java.getResource("/json/$filnavn").readText()
 }

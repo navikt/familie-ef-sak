@@ -161,7 +161,12 @@ internal class BehandlingshistorikkControllerTest : OppslagSpringRunnerTest() {
         )
 
         val respons = hentHistorikk(behandling.id)
-        assertThat(respons.body?.data?.first()?.metadata).isEqualTo(jsonMap)
+        assertThat(
+            respons.body
+                ?.data
+                ?.first()
+                ?.metadata,
+        ).isEqualTo(jsonMap)
     }
 
     private fun leggInnHistorikk(
@@ -183,11 +188,10 @@ internal class BehandlingshistorikkControllerTest : OppslagSpringRunnerTest() {
         )
     }
 
-    private fun hentHistorikk(id: UUID): ResponseEntity<Ressurs<List<HendelseshistorikkDto>>> {
-        return restTemplate.exchange(
+    private fun hentHistorikk(id: UUID): ResponseEntity<Ressurs<List<HendelseshistorikkDto>>> =
+        restTemplate.exchange(
             localhost("/api/behandlingshistorikk/$id"),
             HttpMethod.GET,
             HttpEntity<Ressurs<List<BehandlingshistorikkDto>>>(headers),
         )
-    }
 }

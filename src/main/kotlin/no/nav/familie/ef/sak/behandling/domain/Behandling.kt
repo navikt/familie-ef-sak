@@ -55,7 +55,9 @@ data class Behandling(
     }
 }
 
-enum class BehandlingType(val visningsnavn: String) {
+enum class BehandlingType(
+    val visningsnavn: String,
+) {
     FØRSTEGANGSBEHANDLING("Førstegangsbehandling"),
     REVURDERING("Revurdering"),
 }
@@ -63,7 +65,9 @@ enum class BehandlingType(val visningsnavn: String) {
 /**
  * Sjekkes sammen med vedtakstidspunkt i [behandling_resultat_vedtakstidspunkt_check]
  */
-enum class BehandlingResultat(val displayName: String) {
+enum class BehandlingResultat(
+    val displayName: String,
+) {
     INNVILGET(displayName = "Innvilget"),
     OPPHØRT(displayName = "Opphørt"),
     AVSLÅTT(displayName = "Avslått"),
@@ -81,9 +85,11 @@ enum class BehandlingStatus {
 
     ;
 
-    fun visningsnavn(): String {
-        return this.name.replace('_', ' ').lowercase().replaceFirstChar { it.uppercase() }
-    }
+    fun visningsnavn(): String =
+        this.name
+            .replace('_', ' ')
+            .lowercase()
+            .replaceFirstChar { it.uppercase() }
 
     fun behandlingErLåstForVidereRedigering(): Boolean =
         setOf(FATTER_VEDTAK, IVERKSETTER_VEDTAK, FERDIGSTILT, SATT_PÅ_VENT).contains(this)

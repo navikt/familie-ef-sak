@@ -14,7 +14,9 @@ import org.junit.jupiter.api.Test
 
 @Disabled
 internal class GrafRendererTest {
-    private val objectMapper = no.nav.familie.kontrakter.felles.objectMapper.writerWithDefaultPrettyPrinter()
+    private val objectMapper =
+        no.nav.familie.kontrakter.felles.objectMapper
+            .writerWithDefaultPrettyPrinter()
 
     @Test
     internal fun `print alle vilkår`() {
@@ -36,7 +38,10 @@ internal class GrafRendererTest {
         )
     }
 
-    enum class SivilstandData(val sivilstandstype: Sivilstandstype, val søknad: SøknadsskjemaOvergangsstønad = søknadBuilder()) {
+    enum class SivilstandData(
+        val sivilstandstype: Sivilstandstype,
+        val søknad: SøknadsskjemaOvergangsstønad = søknadBuilder(),
+    ) {
         UGIFT__UFORMELT_GIFT__ELLER__UFORMELT_SKILT(
             Sivilstandstype.UGIFT,
             søknadBuilder { it.copy(erUformeltGift = true) },
@@ -69,9 +74,10 @@ internal class GrafRendererTest {
                         ),
                     )
                 val hovedregler =
-                    initereDelvilkårsvurdering.filter { delvilkårsvurdering ->
-                        delvilkårsvurdering.resultat != Vilkårsresultat.IKKE_AKTUELL
-                    }.map { delvilkår -> mapSpørsmål(regel.regler, delvilkår.hovedregel) }
+                    initereDelvilkårsvurdering
+                        .filter { delvilkårsvurdering ->
+                            delvilkårsvurdering.resultat != Vilkårsresultat.IKKE_AKTUELL
+                        }.map { delvilkår -> mapSpørsmål(regel.regler, delvilkår.hovedregel) }
 
                 mapOf(
                     "name" to it.name,
@@ -110,8 +116,8 @@ internal class GrafRendererTest {
     private fun mapSvar(
         regler: Map<RegelId, RegelSteg>,
         svarMapping: Map<SvarId, SvarRegel>,
-    ): List<Svar> {
-        return svarMapping.map {
+    ): List<Svar> =
+        svarMapping.map {
             try {
                 val value = it.value
                 if (value is SluttSvarRegel) {
@@ -123,7 +129,6 @@ internal class GrafRendererTest {
                 throw e
             }
         }
-    }
 
     private fun mapSpørsmål(
         regler: Map<RegelId, RegelSteg>,

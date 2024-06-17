@@ -25,15 +25,14 @@ class BeregningSkolepengerController(
     @PostMapping
     fun beregnYtelse(
         @RequestBody request: BeregningSkolepengerRequest,
-    ): Ressurs<BeregningSkolepengerResponse> {
-        return Ressurs.success(
+    ): Ressurs<BeregningSkolepengerResponse> =
+        Ressurs.success(
             beregningSkolepengerService.beregnYtelse(
                 request.skoleårsperioder,
                 request.behandlingId,
                 request.erOpphør,
             ),
         )
-    }
 
     @GetMapping("/{behandlingId}")
     fun hentBeregning(

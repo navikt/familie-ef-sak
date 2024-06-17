@@ -81,8 +81,8 @@ class OpprettOppgaveForOpprettetBehandlingTask(
     }
 
     companion object {
-        fun opprettTask(data: OpprettOppgaveTaskData): Task {
-            return Task(
+        fun opprettTask(data: OpprettOppgaveTaskData): Task =
+            Task(
                 type = TYPE,
                 payload = objectMapper.writeValueAsString(data),
                 properties =
@@ -91,7 +91,6 @@ class OpprettOppgaveForOpprettetBehandlingTask(
                         this["behandlingId"] = data.behandlingId.toString()
                     },
             )
-        }
 
         const val TYPE = "opprettOppgaveForOpprettetBehandling"
     }

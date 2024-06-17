@@ -23,14 +23,15 @@ object ArenaPeriodeUtil {
     ): List<EksternPeriode> {
         val måneder = finnUnikeÅrMånedForPerioder(perioder)
         val sammenslåtteÅrMåneder = slåSammenÅrMåneder(måneder)
-        return sammenslåtteÅrMåneder.map {
-            EksternPeriode(
-                personIdent = request.personIdent,
-                fomDato = it.first.atDay(1),
-                tomDato = it.second.atEndOfMonth(),
-                datakilde = Datakilde.EF,
-            )
-        }.filter { overlapper(request, it) }
+        return sammenslåtteÅrMåneder
+            .map {
+                EksternPeriode(
+                    personIdent = request.personIdent,
+                    fomDato = it.first.atDay(1),
+                    tomDato = it.second.atEndOfMonth(),
+                    datakilde = Datakilde.EF,
+                )
+            }.filter { overlapper(request, it) }
     }
 
     private fun overlapper(
@@ -45,8 +46,8 @@ object ArenaPeriodeUtil {
             (requestFom < periode.fomDato && requestTom > periode.tomDato) // omslutter
     }
 
-    private fun slåSammenÅrMåneder(måneder: MutableSet<YearMonth>): MutableList<Pair<YearMonth, YearMonth>> {
-        return måneder.toList().sorted().fold(mutableListOf()) { acc, yearMonth ->
+    private fun slåSammenÅrMåneder(måneder: MutableSet<YearMonth>): MutableList<Pair<YearMonth, YearMonth>> =
+        måneder.toList().sorted().fold(mutableListOf()) { acc, yearMonth ->
             val last = acc.lastOrNull()
             if (last == null || last.second.plusMonths(1) != yearMonth) {
                 acc.add(Pair(yearMonth, yearMonth))
@@ -56,7 +57,6 @@ object ArenaPeriodeUtil {
             }
             acc
         }
-    }
 
     private fun finnUnikeÅrMånedForPerioder(perioder: InternePerioder): MutableSet<YearMonth> {
         val måneder = mutableSetOf<YearMonth>()

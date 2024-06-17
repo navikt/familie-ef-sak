@@ -77,7 +77,8 @@ internal class VurderingServiceIntegrasjonsTest : OppslagSpringRunnerTest() {
         assertThat(vilkårForRevurdering.opphavsvilkår)
             .isEqualTo(Opphavsvilkår(behandling.id, vilkårForBehandling.sporbar.endret.endretTid))
 
-        assertThat(vilkårForBehandling).usingRecursiveComparison()
+        assertThat(vilkårForBehandling)
+            .usingRecursiveComparison()
             .ignoringFields("id", "sporbar", "behandlingId", "barnId", "opphavsvilkår")
             .isEqualTo(vilkårForRevurdering)
     }
@@ -115,8 +116,7 @@ internal class VurderingServiceIntegrasjonsTest : OppslagSpringRunnerTest() {
                     StønadType.OVERGANGSSTØNAD,
                 )
             },
-        )
-            .hasMessage("Tidligere behandling=$tidligereBehandlingId har ikke noen vilkår")
+        ).hasMessage("Tidligere behandling=$tidligereBehandlingId har ikke noen vilkår")
     }
 
     private fun opprettVilkårsvurderinger(

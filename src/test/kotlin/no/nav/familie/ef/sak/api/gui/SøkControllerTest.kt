@@ -56,7 +56,13 @@ internal class SøkControllerTest : OppslagSpringRunnerTest() {
         assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
         assertThat(response.body?.data?.fagsakPersonId).isEqualTo(fagsak.fagsakPersonId)
         assertThat(response.body?.data?.personIdent).isEqualTo("01010199999")
-        assertThat(response.body?.data?.fagsaker?.first()?.stønadstype).isEqualTo(StønadType.OVERGANGSSTØNAD)
+        assertThat(
+            response.body
+                ?.data
+                ?.fagsaker
+                ?.first()
+                ?.stønadstype,
+        ).isEqualTo(StønadType.OVERGANGSSTØNAD)
     }
 
     @Test
@@ -132,20 +138,18 @@ internal class SøkControllerTest : OppslagSpringRunnerTest() {
                 .isEqualTo("Finner ikke fagsak for eksternFagsakId=100")
         }
 
-        private fun søkPerson(eksternFagsakId: Long): ResponseEntity<Ressurs<Søkeresultat>> {
-            return restTemplate.exchange(
+        private fun søkPerson(eksternFagsakId: Long): ResponseEntity<Ressurs<Søkeresultat>> =
+            restTemplate.exchange(
                 localhost("/api/sok/person/fagsak-ekstern/$eksternFagsakId"),
                 HttpMethod.GET,
                 HttpEntity<Any>(headers),
             )
-        }
     }
 
-    private fun søkPerson(personIdent: String): ResponseEntity<Ressurs<Søkeresultat>> {
-        return restTemplate.exchange(
+    private fun søkPerson(personIdent: String): ResponseEntity<Ressurs<Søkeresultat>> =
+        restTemplate.exchange(
             localhost("/api/sok"),
             HttpMethod.POST,
             HttpEntity(PersonIdentDto(personIdent = personIdent), headers),
         )
-    }
 }

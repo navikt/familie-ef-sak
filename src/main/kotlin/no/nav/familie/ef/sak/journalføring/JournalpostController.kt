@@ -175,12 +175,17 @@ class JournalpostController(
     private fun hentBrukersNavn(
         journalpost: Journalpost,
         personIdent: String,
-    ): String {
-        return journalpost.avsenderMottaker
-            ?.takeIf { it.erLikBruker }?.navn
+    ): String =
+        journalpost.avsenderMottaker
+            ?.takeIf { it.erLikBruker }
+            ?.navn
             ?: hentNavnFraPdl(personIdent)
-    }
 
     private fun hentNavnFraPdl(personIdent: String) =
-        personService.hentPersonKortBolk(listOf(personIdent)).getValue(personIdent).navn.gjeldende().visningsnavn()
+        personService
+            .hentPersonKortBolk(listOf(personIdent))
+            .getValue(personIdent)
+            .navn
+            .gjeldende()
+            .visningsnavn()
 }

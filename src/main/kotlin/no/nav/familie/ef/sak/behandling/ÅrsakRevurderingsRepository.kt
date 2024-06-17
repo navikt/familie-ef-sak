@@ -8,4 +8,5 @@ import java.util.UUID
 
 @Repository
 interface ÅrsakRevurderingsRepository :
-    RepositoryInterface<ÅrsakRevurdering, UUID>, InsertUpdateRepository<ÅrsakRevurdering>
+    RepositoryInterface<ÅrsakRevurdering, UUID>,
+    InsertUpdateRepository<ÅrsakRevurdering>

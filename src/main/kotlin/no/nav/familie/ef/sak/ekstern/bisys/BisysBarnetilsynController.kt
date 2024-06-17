@@ -10,15 +10,16 @@ import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @RequestMapping(path = ["/api/ekstern/bisys"])
-class BisysBarnetilsynController(val bisysBarnetilsynService: BisysBarnetilsynService) {
+class BisysBarnetilsynController(
+    val bisysBarnetilsynService: BisysBarnetilsynService,
+) {
     @PostMapping("/perioder-barnetilsyn")
     @ProtectedWithClaims(issuer = "azuread", claimMap = ["roles=access_as_application"])
     fun hentPerioderBarnetilsyn(
         @RequestBody barnetilsynBisysRequest: BarnetilsynBisysRequest,
-    ): BarnetilsynBisysResponse {
-        return bisysBarnetilsynService.hentBarnetilsynperioderFraEfOgInfotrygd(
+    ): BarnetilsynBisysResponse =
+        bisysBarnetilsynService.hentBarnetilsynperioderFraEfOgInfotrygd(
             barnetilsynBisysRequest.ident,
             barnetilsynBisysRequest.fomDato,
         )
-    }
 }

@@ -1,11 +1,10 @@
 package no.nav.familie.ef.sak.infrastruktur.config
 
 import io.mockk.every
-import io.mockk.just
 import io.mockk.mockk
-import io.mockk.runs
 import no.nav.familie.ef.sak.tilbakekreving.TilbakekrevingClient
 import no.nav.familie.kontrakter.felles.Regelverk
+import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.klage.FagsystemType
 import no.nav.familie.kontrakter.felles.klage.FagsystemVedtak
 import no.nav.familie.kontrakter.felles.tilbakekreving.Behandling
@@ -58,10 +57,13 @@ class TilbakekrevingClientTestConfig {
                 ),
             )
 
-        val dummyPdf = this::class.java.classLoader.getResource("dummy/pdf_dummy.pdf")!!.readBytes()
+        val dummyPdf =
+            this::class.java.classLoader
+                .getResource("dummy/pdf_dummy.pdf")!!
+                .readBytes()
         every { tilbakekrevingClient.hentForhåndsvisningVarselbrev(any()) } returns dummyPdf
 
-        every { tilbakekrevingClient.opprettManuellTilbakekreving(any(), any(), any()) } just runs
+        every { tilbakekrevingClient.opprettManuellTilbakekreving(any(), any(), any()) } returns Ressurs.success("OK")
         val kanBehandleRespons = KanBehandlingOpprettesManueltRespons(kanBehandlingOpprettes = true, melding = "OK")
         every { tilbakekrevingClient.kanBehandlingOpprettesManuelt(any(), any()) } returns kanBehandleRespons
 

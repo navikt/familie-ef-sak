@@ -49,10 +49,11 @@ class MellomlagringBrevService(
     }
 
     fun hentMellomlagretFrittståendeSanitybrev(fagsakId: UUID): MellomlagretBrevResponse? =
-        mellomlagerFrittståendeSanitybrevRepository.findByFagsakIdAndSaksbehandlerIdent(
-            fagsakId,
-            SikkerhetContext.hentSaksbehandler(),
-        )?.let { MellomlagretBrevSanity(brevverdier = it.brevverdier, brevmal = it.brevmal) }
+        mellomlagerFrittståendeSanitybrevRepository
+            .findByFagsakIdAndSaksbehandlerIdent(
+                fagsakId,
+                SikkerhetContext.hentSaksbehandler(),
+            )?.let { MellomlagretBrevSanity(brevverdier = it.brevverdier, brevmal = it.brevmal) }
 
     fun hentOgValiderMellomlagretBrev(
         behhandlingId: UUID,
@@ -76,7 +77,8 @@ class MellomlagringBrevService(
         fagsakId: UUID,
         saksbehandlerIdent: String,
     ) {
-        mellomlagerFrittståendeSanitybrevRepository.findByFagsakIdAndSaksbehandlerIdent(fagsakId, saksbehandlerIdent)
+        mellomlagerFrittståendeSanitybrevRepository
+            .findByFagsakIdAndSaksbehandlerIdent(fagsakId, saksbehandlerIdent)
             ?.let { mellomlagerFrittståendeSanitybrevRepository.deleteById(it.id) }
     }
 }

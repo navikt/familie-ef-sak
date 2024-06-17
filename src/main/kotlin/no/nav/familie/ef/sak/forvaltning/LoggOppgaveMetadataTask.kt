@@ -36,17 +36,14 @@ class LoggOppgaveMetadataTask(
     companion object {
         const val TYPE = "loggOppgaveMetadataTask"
 
-        fun opprettTask(behandlingId: UUID): Task {
-            return Task(
+        fun opprettTask(behandlingId: UUID): Task =
+            Task(
                 TYPE,
                 behandlingId.toString(),
                 Properties(),
             )
-        }
     }
 }
 
 // Uten beskrivelse, bnr, identer, aktørid og metadata
-fun Oppgave.toLogString(): String {
-    return "Oppgave(aktivDato=$aktivDato, behandlesAvApplikasjon=$behandlesAvApplikasjon, behandlingstema=$behandlingstema, behandlingstype=$behandlingstype, endretAv=$endretAv, endretAvEnhetsnr=$endretAvEnhetsnr, endretTidspunkt=$endretTidspunkt, ferdigstiltTidspunkt=$ferdigstiltTidspunkt, fristFerdigstillelse=$fristFerdigstillelse, id=$id, journalpostId=$journalpostId, journalpostkilde=$journalpostkilde, mappeId=$mappeId, oppgavetype=$oppgavetype, opprettetAv=$opprettetAv, opprettetAvEnhetsnr=$opprettetAvEnhetsnr, opprettetTidspunkt=$opprettetTidspunkt, orgnr=$orgnr, prioritet=$prioritet, saksreferanse=$saksreferanse, samhandlernr=$samhandlernr, status=$status, tema=$tema, temagruppe=$temagruppe, tildeltEnhetsnr=$tildeltEnhetsnr, tilordnetRessurs=$tilordnetRessurs, versjon=$versjon)"
-}
+fun Oppgave.toLogString(): String = "Oppgave(aktivDato=$aktivDato, behandlesAvApplikasjon=$behandlesAvApplikasjon, behandlingstema=$behandlingstema, behandlingstype=$behandlingstype, endretAv=$endretAv, endretAvEnhetsnr=$endretAvEnhetsnr, endretTidspunkt=$endretTidspunkt, ferdigstiltTidspunkt=$ferdigstiltTidspunkt, fristFerdigstillelse=$fristFerdigstillelse, id=$id, journalpostId=$journalpostId, journalpostkilde=$journalpostkilde, mappeId=$mappeId, oppgavetype=$oppgavetype, opprettetAv=$opprettetAv, opprettetAvEnhetsnr=$opprettetAvEnhetsnr, opprettetTidspunkt=$opprettetTidspunkt, orgnr=$orgnr, prioritet=$prioritet, saksreferanse=$saksreferanse, samhandlernr=$samhandlernr, status=$status, tema=$tema, temagruppe=$temagruppe, tildeltEnhetsnr=$tildeltEnhetsnr, tilordnetRessurs=$tilordnetRessurs, versjon=$versjon)"

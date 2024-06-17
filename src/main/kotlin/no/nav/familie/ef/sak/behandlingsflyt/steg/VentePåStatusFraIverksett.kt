@@ -30,7 +30,5 @@ class VentePåStatusFraIverksett(
         taskService.save(LagSaksbehandlingsblankettTask.opprettTask(saksbehandling.id))
     }
 
-    override fun stegType(): StegType {
-        return StegType.VENTE_PÅ_STATUS_FRA_IVERKSETT
-    }
+    override fun stegType(): StegType = StegType.VENTE_PÅ_STATUS_FRA_IVERKSETT
 }

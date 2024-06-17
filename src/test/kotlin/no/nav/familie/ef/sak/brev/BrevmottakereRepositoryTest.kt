@@ -52,7 +52,10 @@ internal class BrevmottakereRepositoryTest : OppslagSpringRunnerTest() {
 
         brevmottakereRepository.insert(brevmottakere)
 
-        Assertions.assertThat(brevmottakereRepository.findById(behandling.id))
-            .get().usingRecursiveComparison().isEqualTo(brevmottakere)
+        Assertions
+            .assertThat(brevmottakereRepository.findById(behandling.id))
+            .get()
+            .usingRecursiveComparison()
+            .isEqualTo(brevmottakere)
     }
 }

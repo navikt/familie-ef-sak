@@ -6,9 +6,15 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
 class MapperTestUtilTest {
-    data class Foo(val navn: String? = "foo", val dato: LocalDate? = LocalDate.now(), val list: List<Bar>? = arrayListOf(Bar()))
+    data class Foo(
+        val navn: String? = "foo",
+        val dato: LocalDate? = LocalDate.now(),
+        val list: List<Bar>? = arrayListOf(Bar()),
+    )
 
-    data class Bar(val navn: String? = "bar")
+    data class Bar(
+        val navn: String? = "bar",
+    )
 
     @Test
     internal fun `alle verdier er satt`() {

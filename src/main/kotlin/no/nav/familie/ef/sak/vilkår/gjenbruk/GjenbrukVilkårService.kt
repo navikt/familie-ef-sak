@@ -40,7 +40,8 @@ class GjenbrukVilkårService(
             behandlingService.hentBehandlingerForGjenbrukAvVilkår(fagsak.fagsakPersonId)
         val fagsaker: Map<UUID, Fagsak> =
             behandlingerForGjenbruk.map { it.fagsakId }.distinct().associateWith { fagsakService.hentFagsak(it) }
-        return behandlingerForGjenbruk.map { it.tilDto(fagsaker.getValue(it.fagsakId).stønadstype) }
+        return behandlingerForGjenbruk
+            .map { it.tilDto(fagsaker.getValue(it.fagsakId).stønadstype) }
             .filterNot { it.id == behandlingId }
     }
 
@@ -98,7 +99,8 @@ class GjenbrukVilkårService(
     ) = tidligereVurderinger.mapNotNull { tidligereVurdering ->
         // Dersom tidligere vurdering og matchende nåværende vurdering ikke gjelder barn vil tidligere vurdering kopieres
         val barnForVurdering = forrigeBarnIdTilNåværendeBarnMap[tidligereVurdering.barnId]
-        nåværendeVurderinger.firstOrNull { it.type == tidligereVurdering.type && it.barnId == barnForVurdering?.id }
+        nåværendeVurderinger
+            .firstOrNull { it.type == tidligereVurdering.type && it.barnId == barnForVurdering?.id }
             ?.let {
                 tidligereVurdering.copy(
                     id = it.id,
@@ -116,9 +118,10 @@ class GjenbrukVilkårService(
     ): Map<UUID, BehandlingBarn> {
         val behandlingBarn = barnService.finnBarnPåBehandling(behandlingId).associateBy { it.personIdent }
         val barnPåForrigeBehandling = barnService.finnBarnPåBehandling(tidligereBehandlingId)
-        return barnPåForrigeBehandling.mapNotNull { forrige ->
-            behandlingBarn[forrige.personIdent]?.let { forrige.id to it }
-        }.toMap()
+        return barnPåForrigeBehandling
+            .mapNotNull { forrige ->
+                behandlingBarn[forrige.personIdent]?.let { forrige.id to it }
+            }.toMap()
     }
 
     private fun hentVurderingerSomSkalGjenbrukes(
@@ -127,7 +130,8 @@ class GjenbrukVilkårService(
         tidligereBehandlingId: UUID,
         barnPåBeggeBehandlinger: Map<UUID, BehandlingBarn>,
     ): List<Vilkårsvurdering> =
-        vilkårsvurderingRepository.findByBehandlingId(tidligereBehandlingId)
+        vilkårsvurderingRepository
+            .findByBehandlingId(tidligereBehandlingId)
             .filter { it.type.erInngangsvilkår() }
             .filter { skalGjenbrukeVurdering(it, sivilstandErLik, erSammeStønadstype, barnPåBeggeBehandlinger) }
 
@@ -137,7 +141,10 @@ class GjenbrukVilkårService(
     ): Boolean {
         val tidligereGrunnlagsdata = grunnlagsdataService.hentGrunnlagsdata(tidligereBehandlingId)
         val nåværendeGrunnlagsdata = grunnlagsdataService.hentGrunnlagsdata(behandlingId)
-        return tidligereGrunnlagsdata.grunnlagsdata.søker.sivilstand.gjeldende() == nåværendeGrunnlagsdata.grunnlagsdata.søker.sivilstand.gjeldende()
+        return tidligereGrunnlagsdata.grunnlagsdata.søker.sivilstand
+            .gjeldende() ==
+            nåværendeGrunnlagsdata.grunnlagsdata.søker.sivilstand
+                .gjeldende()
     }
 
     private fun validerBehandlingForGjenbruk(
@@ -169,11 +176,10 @@ class GjenbrukVilkårService(
         sivilstandErLik: Boolean,
         erSammeStønadstype: Boolean,
         barnPåBeggeBehandlinger: Map<UUID, BehandlingBarn>,
-    ): Boolean {
-        return when (vurdering.type) {
+    ): Boolean =
+        when (vurdering.type) {
             VilkårType.SIVILSTAND -> sivilstandErLik
             VilkårType.ALENEOMSORG -> barnPåBeggeBehandlinger.containsKey(vurdering.barnId) && (erSammeStønadstype || vurdering.resultat != Vilkårsresultat.SKAL_IKKE_VURDERES)
             else -> true
         }
-    }
 }

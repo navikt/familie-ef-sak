@@ -108,7 +108,8 @@ class GOmregningKalkyle : OppslagSpringRunnerTest() {
     private fun utførBeregningAvTotalbeløp(inntektsøkningsfaktor: BigDecimal = BigDecimal.ONE): BigDecimal {
         val readFile = readFile("basis-2024-gomregning.csv")
         val sumBeløp =
-            readFile.lines()
+            readFile
+                .lines()
                 .mapIndexedNotNull(::parseRad)
                 .filter { rad -> rad.samordningsfradrag == BigDecimal.ZERO }
                 .map { rad -> kalkulerBeløpForRad(rad, inntektsøkningsfaktor) }
@@ -164,9 +165,7 @@ class GOmregningKalkyle : OppslagSpringRunnerTest() {
         )
     }
 
-    private fun readFile(filnavn: String): String {
-        return this::class.java.getResource("/omregning/$filnavn")!!.readText()
-    }
+    private fun readFile(filnavn: String): String = this::class.java.getResource("/omregning/$filnavn")!!.readText()
 
     private fun unmockGrunnbeløp() {
         unmockkObject(Grunnbeløpsperioder)

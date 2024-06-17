@@ -12,19 +12,22 @@ import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.stereotype.Service
 
 @Service
-class MinSideKafkaProducerService(private val kafkaTemplate: KafkaTemplate<String, String>) {
+class MinSideKafkaProducerService(
+    private val kafkaTemplate: KafkaTemplate<String, String>,
+) {
     @Value("\${MIN_SIDE_TOPIC}")
     lateinit var topic: String
     private val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
     fun aktiver(personIdent: String) {
         val melding =
-            MicrofrontendMessageBuilder.enable {
-                ident = personIdent
-                initiatedBy = "teamfamilie"
-                microfrontendId = "familie-ef-mikrofrontend-minside"
-                sensitivitet = Sensitivitet.HIGH
-            }.text()
+            MicrofrontendMessageBuilder
+                .enable {
+                    ident = personIdent
+                    initiatedBy = "teamfamilie"
+                    microfrontendId = "familie-ef-mikrofrontend-minside"
+                    sensitivitet = Sensitivitet.HIGH
+                }.text()
         val callId = MDC.get(MDCConstants.MDC_CALL_ID) ?: IdUtils.generateId()
         logger.info("Sender aktivere minside melding for callId=$callId")
         kafkaTemplate.send(topic, callId, melding)
@@ -32,11 +35,12 @@ class MinSideKafkaProducerService(private val kafkaTemplate: KafkaTemplate<Strin
 
     fun deaktiver(personIdent: String) {
         val melding =
-            MicrofrontendMessageBuilder.disable {
-                ident = personIdent
-                initiatedBy = "teamfamilie"
-                microfrontendId = "familie-ef-mikrofrontend-minside"
-            }.text()
+            MicrofrontendMessageBuilder
+                .disable {
+                    ident = personIdent
+                    initiatedBy = "teamfamilie"
+                    microfrontendId = "familie-ef-mikrofrontend-minside"
+                }.text()
         val callId = MDC.get(MDCConstants.MDC_CALL_ID) ?: IdUtils.generateId()
         logger.info("Sender deaktivere minside melding for callId=$callId")
         kafkaTemplate.send(topic, callId, melding)

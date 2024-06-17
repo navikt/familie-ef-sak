@@ -37,8 +37,7 @@ class JournalpostClient(
     @Qualifier("azure") restOperations: RestOperations,
     integrasjonerConfig: IntegrasjonerConfig,
     private val featureToggleService: FeatureToggleService,
-) :
-    AbstractPingableRestClient(restOperations, "journalpost") {
+) : AbstractPingableRestClient(restOperations, "journalpost") {
     override val pingUri: URI = integrasjonerConfig.pingUri
     private val journalpostURI: URI = integrasjonerConfig.journalPostUri
     private val dokarkivUri: URI = integrasjonerConfig.dokarkivUri
@@ -93,12 +92,10 @@ class JournalpostClient(
                 .fromUriString(
                     "$journalpostURI/hentdokument/" +
                         "$journalpostId/$dokumentInfoId",
-                )
-                .queryParam("variantFormat", dokumentVariantformat)
+                ).queryParam("variantFormat", dokumentVariantformat)
                 .build()
                 .toUri(),
-        )
-            .getDataOrThrow()
+        ).getDataOrThrow()
     }
 
     fun hentOvergangsstønadSøknad(
@@ -128,39 +125,36 @@ class JournalpostClient(
     private fun jsonDokumentUri(
         journalpostId: String,
         dokumentInfoId: String,
-    ): URI {
-        return UriComponentsBuilder
+    ): URI =
+        UriComponentsBuilder
             .fromUri(journalpostURI)
             .pathSegment("hentdokument", journalpostId, dokumentInfoId)
             .queryParam("variantFormat", DokumentVariantformat.ORIGINAL)
             .build()
             .toUri()
-    }
 
     fun oppdaterJournalpost(
         oppdaterJournalpostRequest: OppdaterJournalpostRequest,
         journalpostId: String,
         saksbehandler: String?,
-    ): OppdaterJournalpostResponse {
-        return putForEntity<Ressurs<OppdaterJournalpostResponse>>(
+    ): OppdaterJournalpostResponse =
+        putForEntity<Ressurs<OppdaterJournalpostResponse>>(
             URI.create("$dokarkivUri/v2/$journalpostId"),
             oppdaterJournalpostRequest,
             headerMedSaksbehandler(saksbehandler),
         ).data
             ?: error("Kunne ikke oppdatere journalpost med id $journalpostId")
-    }
 
     fun arkiverDokument(
         arkiverDokumentRequest: ArkiverDokumentRequest,
         saksbehandler: String?,
-    ): ArkiverDokumentResponse {
-        return postForEntity<Ressurs<ArkiverDokumentResponse>>(
+    ): ArkiverDokumentResponse =
+        postForEntity<Ressurs<ArkiverDokumentResponse>>(
             URI.create("$dokarkivUri/v4"),
             arkiverDokumentRequest,
             headerMedSaksbehandler(saksbehandler),
         ).data
             ?: error("Kunne ikke arkivere dokument med fagsakid ${arkiverDokumentRequest.fagsakId}")
-    }
 
     fun ferdigstillJournalpost(
         journalpostId: String,
@@ -198,10 +192,9 @@ class JournalpostClient(
     fun oppdaterLogiskeVedlegg(
         dokumentInfoId: String,
         request: BulkOppdaterLogiskVedleggRequest,
-    ): String {
-        return putForEntity<Ressurs<String>>(
+    ): String =
+        putForEntity<Ressurs<String>>(
             URI.create("$dokarkivUri/dokument/$dokumentInfoId/logiskVedlegg"),
             request,
         ).data ?: error("Kunne ikke bulk oppdatere logiske vedlegg på dokument med id=$dokumentInfoId")
-    }
 }

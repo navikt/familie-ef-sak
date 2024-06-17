@@ -15,7 +15,9 @@ import java.time.Month
 import java.time.YearMonth
 
 @Service
-class BeregningBarnetilsynService(private val featureToggleService: FeatureToggleService) {
+class BeregningBarnetilsynService(
+    private val featureToggleService: FeatureToggleService,
+) {
     fun beregnYtelseBarnetilsyn(
         utgiftsperioder: List<UtgiftsperiodeDto>,
         kontantstøttePerioder: List<PeriodeMedBeløpDto>,
@@ -26,12 +28,13 @@ class BeregningBarnetilsynService(private val featureToggleService: FeatureToggl
         validerFornuftigeBeløp(utgiftsperioder, kontantstøttePerioder, tilleggsstønadsperioder)
 
         val brukIkkeVedtatteSatser = featureToggleService.isEnabled(Toggle.SATSENDRING_BRUK_IKKE_VEDTATT_MAXSATS)
-        return utgiftsperioder.tilBeløpsperioderPerUtgiftsmåned(
-            kontantstøttePerioder,
-            tilleggsstønadsperioder,
-            brukIkkeVedtatteSatser,
-        )
-            .values.toList()
+        return utgiftsperioder
+            .tilBeløpsperioderPerUtgiftsmåned(
+                kontantstøttePerioder,
+                tilleggsstønadsperioder,
+                brukIkkeVedtatteSatser,
+            ).values
+            .toList()
             .mergeSammenhengendePerioder()
     }
 
@@ -108,19 +111,16 @@ class BeregningBarnetilsynService(private val featureToggleService: FeatureToggl
     private fun harUrelevantReduksjonsPeriode(
         utgiftsperioder: List<Månedsperiode>,
         reduksjonsperioder: List<Månedsperiode>,
-    ): Boolean {
-        return reduksjonsperioder.isNotEmpty() &&
+    ): Boolean =
+        reduksjonsperioder.isNotEmpty() &&
             !reduksjonsperioder.any {
                 utgiftsperioder.any { ut ->
                     ut.overlapper(it)
                 }
             }
-    }
 }
 
-private fun List<Månedsperiode>.harPeriodeFør(årMåned: YearMonth): Boolean {
-    return this.any { it.fom < årMåned }
-}
+private fun List<Månedsperiode>.harPeriodeFør(årMåned: YearMonth): Boolean = this.any { it.fom < årMåned }
 
 fun InnvilgelseBarnetilsyn.tilBeløpsperioderPerUtgiftsmåned(brukIkkeVedtatteSatser: Boolean) =
     this.perioder.tilBeløpsperioderPerUtgiftsmåned(
@@ -133,8 +133,10 @@ fun List<UtgiftsperiodeDto>.tilBeløpsperioderPerUtgiftsmåned(
     kontantstøttePerioder: List<PeriodeMedBeløpDto>,
     tilleggsstønadsperioder: List<PeriodeMedBeløpDto>,
     brukIkkeVedtatteSatser: Boolean,
-) = this.map { it.split() }
-    .flatten().associate { utgiftsMåned ->
+) = this
+    .map { it.split() }
+    .flatten()
+    .associate { utgiftsMåned ->
         utgiftsMåned.årMåned to
             utgiftsMåned.tilBeløpsperiodeBarnetilsynDto(
                 kontantstøttePerioder,
@@ -165,12 +167,14 @@ fun UtgiftsperiodeDto.split(): List<UtgiftsMåned> {
  */
 fun List<BeløpsperiodeBarnetilsynDto>.mergeSammenhengendePerioder(): List<BeløpsperiodeBarnetilsynDto> {
     val sortertPåDatoListe =
-        this.sortedBy { it.periode }
+        this
+            .sortedBy { it.periode }
             .filter { it.periodetype == PeriodetypeBarnetilsyn.ORDINÆR }
     return sortertPåDatoListe.fold(mutableListOf()) { acc, entry ->
         val last = acc.lastOrNull()
         if (
-            last != null && last.hengerSammenMed(entry) &&
+            last != null &&
+            last.hengerSammenMed(entry) &&
             last.sammeBeløpOgBeregningsgrunnlag(entry) &&
             last.sammeAktivitet(entry)
         ) {

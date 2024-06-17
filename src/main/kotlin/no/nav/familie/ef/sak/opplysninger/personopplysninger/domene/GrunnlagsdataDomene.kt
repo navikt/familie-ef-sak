@@ -34,8 +34,8 @@ data class GrunnlagsdataMedMetadata(
     val grunnlagsdata: GrunnlagsdataDomene,
     val opprettetTidspunkt: LocalDateTime,
 ) {
-    fun endringerMellom(tidligereGrunnlagsdata: GrunnlagsdataMedMetadata): List<GrunnlagsdataEndring> {
-        return GrunnlagsdataEndring.values().filter {
+    fun endringerMellom(tidligereGrunnlagsdata: GrunnlagsdataMedMetadata): List<GrunnlagsdataEndring> =
+        GrunnlagsdataEndring.values().filter {
             when (it) {
                 GrunnlagsdataEndring.BARN -> erBarnForskjelligMed(tidligereGrunnlagsdata)
                 GrunnlagsdataEndring.SIVILSTAND -> erSivilstandOppdatertForskjelligMed(tidligereGrunnlagsdata)
@@ -43,11 +43,8 @@ data class GrunnlagsdataMedMetadata(
                 GrunnlagsdataEndring.ADRESSE_ANNEN_FORELDER -> erAdresserForAnnenForelderForskjelligMed(tidligereGrunnlagsdata)
             }
         }
-    }
 
-    private fun erAdresseForSøkerForskjelligMed(tidligereGrunnlagsdata: GrunnlagsdataMedMetadata): Boolean {
-        return tidligereGrunnlagsdata.grunnlagsdata.søker.bostedsadresse != this.grunnlagsdata.søker.bostedsadresse
-    }
+    private fun erAdresseForSøkerForskjelligMed(tidligereGrunnlagsdata: GrunnlagsdataMedMetadata): Boolean = tidligereGrunnlagsdata.grunnlagsdata.søker.bostedsadresse != this.grunnlagsdata.søker.bostedsadresse
 
     private fun erAdresserForAnnenForelderForskjelligMed(tidligereGrunnlagsdata: GrunnlagsdataMedMetadata): Boolean {
         val harAnnenForelderEndretAdresse =
@@ -58,13 +55,9 @@ data class GrunnlagsdataMedMetadata(
         return harAnnenForelderEndretAdresse
     }
 
-    private fun erSivilstandOppdatertForskjelligMed(tidligereGrunnlagsdata: GrunnlagsdataMedMetadata): Boolean {
-        return this.grunnlagsdata.søker.sivilstand != tidligereGrunnlagsdata.grunnlagsdata.søker.sivilstand
-    }
+    private fun erSivilstandOppdatertForskjelligMed(tidligereGrunnlagsdata: GrunnlagsdataMedMetadata): Boolean = this.grunnlagsdata.søker.sivilstand != tidligereGrunnlagsdata.grunnlagsdata.søker.sivilstand
 
-    private fun erBarnForskjelligMed(tidligereGrunnlagsdata: GrunnlagsdataMedMetadata): Boolean {
-        return this.grunnlagsdata.barn != tidligereGrunnlagsdata.grunnlagsdata.barn
-    }
+    private fun erBarnForskjelligMed(tidligereGrunnlagsdata: GrunnlagsdataMedMetadata): Boolean = this.grunnlagsdata.barn != tidligereGrunnlagsdata.grunnlagsdata.barn
 }
 
 data class GrunnlagsdataDomene(

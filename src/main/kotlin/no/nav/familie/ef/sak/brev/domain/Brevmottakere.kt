@@ -20,7 +20,11 @@ enum class MottakerRolle {
     FULLMAKT,
 }
 
-data class BrevmottakerPerson(val personIdent: String, val navn: String, val mottakerRolle: MottakerRolle)
+data class BrevmottakerPerson(
+    val personIdent: String,
+    val navn: String,
+    val mottakerRolle: MottakerRolle,
+)
 
 data class BrevmottakerOrganisasjon(
     val organisasjonsnummer: String,
@@ -28,9 +32,13 @@ data class BrevmottakerOrganisasjon(
     val mottakerRolle: MottakerRolle,
 )
 
-data class PersonerWrapper(val personer: List<BrevmottakerPerson>)
+data class PersonerWrapper(
+    val personer: List<BrevmottakerPerson>,
+)
 
-data class OrganisasjonerWrapper(val organisasjoner: List<BrevmottakerOrganisasjon>)
+data class OrganisasjonerWrapper(
+    val organisasjoner: List<BrevmottakerOrganisasjon>,
+)
 
 @Table("brevmottakere_frittstaende_brev")
 data class BrevmottakereFrittståendeBrev(

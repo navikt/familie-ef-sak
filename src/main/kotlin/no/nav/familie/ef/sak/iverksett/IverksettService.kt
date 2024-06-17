@@ -7,7 +7,9 @@ import no.nav.familie.prosessering.internal.TaskService
 import org.springframework.stereotype.Service
 
 @Service
-class IverksettService(private val taskService: TaskService) {
+class IverksettService(
+    private val taskService: TaskService,
+) {
     fun startBehandling(
         behandling: Behandling,
         fagsak: Fagsak,

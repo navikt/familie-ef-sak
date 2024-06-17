@@ -20,7 +20,8 @@ class PerioderForBarnetrygdService(
 ) {
     fun hentPerioderMedFullOvergangsstønad(request: PersonIdent): EksternePerioderResponse {
         val perioderPåDatakilde =
-            periodeService.hentPerioderForOvergangsstønadFraEfOgInfotrygd(request.ident)
+            periodeService
+                .hentPerioderForOvergangsstønadFraEfOgInfotrygd(request.ident)
                 .filter(InternPeriode::erFullOvergangsstønad)
                 .map(InternPeriode::tilEksternEksternPeriode)
                 .groupBy { it.datakilde }
@@ -36,8 +37,7 @@ class PerioderForBarnetrygdService(
             .sortedWith(compareByDescending<EksternPeriode> { it.tomDato }.thenByDescending { it.fomDato })
             .fold(mutableListOf<EksternPeriode>()) { acc, gjeldende ->
                 acc.fjernDuplikatOgSplittOverlappendePeriode(gjeldende)
-            }
-            .sortedByDescending { it.fomDato }
+            }.sortedByDescending { it.fomDato }
 }
 
 private fun EksternPeriode.tilPeriode(): Datoperiode = Datoperiode(this.fomDato, this.tomDato)

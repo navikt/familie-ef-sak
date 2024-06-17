@@ -8,9 +8,8 @@ data class OppgaverForOpprettelseDto(
     val oppgavetyperSomSkalOpprettes: List<OppgaveForOpprettelseType>,
 )
 
-fun OppgaverForOpprettelseDto.tilDomene(behandlingId: UUID): OppgaverForOpprettelse {
-    return OppgaverForOpprettelse(
+fun OppgaverForOpprettelseDto.tilDomene(behandlingId: UUID): OppgaverForOpprettelse =
+    OppgaverForOpprettelse(
         behandlingId = behandlingId,
         oppgavetyper = this.oppgavetyperSomSkalOpprettes,
     )
-}

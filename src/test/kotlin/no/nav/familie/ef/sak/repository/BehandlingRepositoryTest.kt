@@ -231,7 +231,8 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
                                         endret =
                                             Endret(
                                                 endretTid =
-                                                    LocalDateTime.now()
+                                                    LocalDateTime
+                                                        .now()
                                                         .plusDays(2),
                                             ),
                                     ),
@@ -579,8 +580,8 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
         status: BehandlingStatus,
         resultat: BehandlingResultat,
         fagsak: Fagsak,
-    ): Behandling {
-        return behandlingRepository.insert(
+    ): Behandling =
+        behandlingRepository.insert(
             behandling(
                 id = behandlingId,
                 status = status,
@@ -588,19 +589,17 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
                 fagsak = fagsak,
             ),
         )
-    }
 
     private fun lagreFagsak(
         fagsakId: UUID,
         stønadType: StønadType,
         fagsakPersonId: UUID,
-    ): Fagsak {
-        return testoppsettService.lagreFagsak(
+    ): Fagsak =
+        testoppsettService.lagreFagsak(
             fagsak(
                 id = fagsakId,
                 stønadstype = stønadType,
                 fagsakPersonId = fagsakPersonId,
             ),
         )
-    }
 }

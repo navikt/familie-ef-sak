@@ -24,34 +24,35 @@ object SaksbehandlingDomeneParser {
     ): Map<UUID, Pair<Behandling, Saksbehandling>> {
         val fagsak = fagsak(stønadstype = stønadstype)
         var forrigeBehandlingId: UUID? = null
-        return dataTable.forHverBehandling { behandlingId, rader ->
-            val rad = rader.first()
-            val forrigeBehandlingIdFraRad =
-                behandlingIdTilUUID[parseValgfriInt(SaksbehandlingDomeneBegrep.FORRIGE_BEHANDLING, rad)]
-                    ?: forrigeBehandlingId
-            forrigeBehandlingId = behandlingId
-            val behandling =
-                behandling(
-                    fagsak = fagsak,
-                    id = behandlingId,
-                    forrigeBehandlingId = forrigeBehandlingIdFraRad,
-                    type = parseBehandlingstype(rad) ?: BehandlingType.FØRSTEGANGSBEHANDLING,
-                    vedtakstidspunkt =
-                        parseValgfriDato(SaksbehandlingDomeneBegrep.VEDTAKSDATO, rad)?.atStartOfDay()
-                            ?: LocalDateTime.now(),
-                )
-            behandling.id to Pair(behandling, saksbehandling(fagsak, behandling))
-        }.toMap()
+        return dataTable
+            .forHverBehandling { behandlingId, rader ->
+                val rad = rader.first()
+                val forrigeBehandlingIdFraRad =
+                    behandlingIdTilUUID[parseValgfriInt(SaksbehandlingDomeneBegrep.FORRIGE_BEHANDLING, rad)]
+                        ?: forrigeBehandlingId
+                forrigeBehandlingId = behandlingId
+                val behandling =
+                    behandling(
+                        fagsak = fagsak,
+                        id = behandlingId,
+                        forrigeBehandlingId = forrigeBehandlingIdFraRad,
+                        type = parseBehandlingstype(rad) ?: BehandlingType.FØRSTEGANGSBEHANDLING,
+                        vedtakstidspunkt =
+                            parseValgfriDato(SaksbehandlingDomeneBegrep.VEDTAKSDATO, rad)?.atStartOfDay()
+                                ?: LocalDateTime.now(),
+                    )
+                behandling.id to Pair(behandling, saksbehandling(fagsak, behandling))
+            }.toMap()
     }
 }
 
-enum class SaksbehandlingDomeneBegrep(val nøkkel: String) : Domenenøkkel {
+enum class SaksbehandlingDomeneBegrep(
+    val nøkkel: String,
+) : Domenenøkkel {
     BEHANDLINGSTYPE("Behandlingstype"),
     FORRIGE_BEHANDLING("Forrige behandling"),
     VEDTAKSDATO("Vedtaksdato"),
     ;
 
-    override fun nøkkel(): String {
-        return nøkkel
-    }
+    override fun nøkkel(): String = nøkkel
 }

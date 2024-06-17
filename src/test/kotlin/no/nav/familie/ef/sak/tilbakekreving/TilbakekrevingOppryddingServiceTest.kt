@@ -24,7 +24,7 @@ import java.math.BigDecimal
 import java.time.LocalDate
 import java.util.UUID
 
-class TilbakekrevingOppryddingServiceTest() {
+class TilbakekrevingOppryddingServiceTest {
     val simuleringsresultatRepository = mockk<SimuleringsresultatRepository>()
     val tilbakekrevingRepository = mockk<TilbakekrevingRepository>(relaxed = true)
     val behandlingRepository = mockk<BehandlingRepository>()

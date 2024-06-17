@@ -8,11 +8,12 @@ import no.nav.familie.ef.sak.vilkår.regler.Vilkårsregel
 import no.nav.familie.ef.sak.vilkår.regler.jaNeiSvarRegel
 import no.nav.familie.ef.sak.vilkår.regler.regelIder
 
-class AktivitetRegel : Vilkårsregel(
-    vilkårType = VilkårType.AKTIVITET,
-    regler = setOf(FYLLER_BRUKER_AKTIVITETSPLIKT),
-    hovedregler = regelIder(FYLLER_BRUKER_AKTIVITETSPLIKT),
-) {
+class AktivitetRegel :
+    Vilkårsregel(
+        vilkårType = VilkårType.AKTIVITET,
+        regler = setOf(FYLLER_BRUKER_AKTIVITETSPLIKT),
+        hovedregler = regelIder(FYLLER_BRUKER_AKTIVITETSPLIKT),
+    ) {
     companion object {
         private val FYLLER_BRUKER_AKTIVITETSPLIKT =
             RegelSteg(

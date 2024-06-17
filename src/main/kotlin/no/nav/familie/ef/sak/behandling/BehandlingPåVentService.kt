@@ -158,13 +158,12 @@ class BehandlingPåVentService(
     private fun utledNyBeskrivelse(
         harEndringer: Boolean,
         settPåVentRequest: SettPåVentRequest,
-    ): String {
-        return when {
+    ): String =
+        when {
             settPåVentRequest.beskrivelse.isBlank() -> ""
             harEndringer -> "${settPåVentRequest.beskrivelse}\n"
             else -> "${settPåVentRequest.beskrivelse}\n"
         }
-    }
 
     private fun utledBeskrivelsePrefix(): String {
         val innloggetSaksbehandlerIdent = SikkerhetContext.hentSaksbehandlerEllerSystembruker()

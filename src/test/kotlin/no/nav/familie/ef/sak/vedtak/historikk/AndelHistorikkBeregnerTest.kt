@@ -153,7 +153,8 @@ object AndelHistorikkRunner {
     }
 
     private fun validerHarMaks1SanksjonPerVedtak(grupper: ParsetAndelHistorikkData) {
-        grupper.vedtaksliste.mapNotNull { it.perioder?.perioder }
+        grupper.vedtaksliste
+            .mapNotNull { it.perioder?.perioder }
             .forEach { perioder -> perioder.count { it.periodeType == VedtaksperiodeType.SANKSJON } < 2 }
     }
 
@@ -176,16 +177,13 @@ object AndelHistorikkRunner {
     private fun mapValue(
         key: AndelHistorikkHeader,
         value: Any?,
-    ): String {
-        return String.format("%-${key.minHeaderValue}s", value ?: "")
-    }
+    ): String = String.format("%-${key.minHeaderValue}s", value ?: "")
 
-    private fun toString(andeler: List<AndelHistorikkDto>): String {
-        return "\n$headerString\n" +
+    private fun toString(andeler: List<AndelHistorikkDto>): String =
+        "\n$headerString\n" +
             andeler.joinToString("\n") { andel ->
                 values().joinToString(", ") { mapValue(it, it.value.invoke(andel)) }
             } + "\n"
-    }
 }
 
 enum class TestType {
@@ -249,7 +247,8 @@ object AndelHistorikkParser {
     private fun parse(url: URL): List<AndelHistorikkData> {
         val fileContent = url.openStream()!!
         val rows: List<Map<String, String>> =
-            csvReader().readAllWithHeader(fileContent)
+            csvReader()
+                .readAllWithHeader(fileContent)
                 .map { it.entries.associate { entry -> entry.key.trim() to entry.value.trim() } }
                 .filterNot { it.getValue(TEST_TYPE.key).startsWith("!") }
 
@@ -322,8 +321,9 @@ object AndelHistorikkParser {
     /**
      * Mapper vedtak med kun startdato til å være av typen opphør
      */
-    private fun mapVedtaksPerioder(list: List<AndelHistorikkData>): List<Vedtak> {
-        return list.map { it.behandlingId to it }
+    private fun mapVedtaksPerioder(list: List<AndelHistorikkData>): List<Vedtak> =
+        list
+            .map { it.behandlingId to it }
             .groupBy({ it.first }, { it.second })
             .map { (behandlingId, vedtaksperioder) ->
                 val resultat: ResultatType
@@ -343,7 +343,9 @@ object AndelHistorikkParser {
                     opphørFom = YearMonth.from(vedtaksperioder.single().stønadFom) ?: error("Mangler stønadFom i opphør")
                 }
                 val inntekter =
-                    periodeWrapper?.perioder?.firstOrNull()
+                    periodeWrapper
+                        ?.perioder
+                        ?.firstOrNull()
                         ?.let {
                             listOf(
                                 Inntektsperiode(
@@ -367,7 +369,6 @@ object AndelHistorikkParser {
                     internBegrunnelse = "",
                 )
             }
-    }
 
     private fun mapVedtaksperioder(
         vedtaksperioder: List<AndelHistorikkData>,
@@ -419,13 +420,16 @@ object AndelHistorikkParser {
             aktivitetBarnetilsyn = AktivitetstypeBarnetilsyn.I_ARBEID,
         )
 
-    data class AndelTilkjentHolder(val behandlingId: UUID, val andeler: MutableList<AndelTilkjentYtelse?>)
+    data class AndelTilkjentHolder(
+        val behandlingId: UUID,
+        val andeler: MutableList<AndelTilkjentYtelse?>,
+    )
 
     /**
      * Mapper andel uten start og sluttdato til en [TilkjentYtelse] med tom liste av andeler
      */
-    private fun mapInput(input: List<AndelHistorikkData>): List<TilkjentYtelse> {
-        return input
+    private fun mapInput(input: List<AndelHistorikkData>): List<TilkjentYtelse> =
+        input
             .fold(mutableListOf<AndelTilkjentHolder>()) { acc, pair ->
                 val last = acc.lastOrNull()
                 val andel = if (pair.stønadFom == null || pair.stønadTom == null) null else mapAndel(pair)
@@ -435,8 +439,7 @@ object AndelHistorikkParser {
                     last.andeler.add(andel)
                 }
                 acc
-            }
-            .map { holder ->
+            }.map { holder ->
                 @Suppress("UNCHECKED_CAST")
                 val andelerTilkjentYtelse =
                     if (holder.andeler.contains(null)) {
@@ -455,5 +458,4 @@ object AndelHistorikkParser {
                     startdato = andelerTilkjentYtelse.minOfOrNull { it.stønadFom } ?: LocalDate.now(),
                 )
             }
-    }
 }

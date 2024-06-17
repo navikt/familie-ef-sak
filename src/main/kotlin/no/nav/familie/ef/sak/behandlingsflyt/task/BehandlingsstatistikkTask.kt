@@ -167,21 +167,19 @@ class BehandlingsstatistikkTask(
         hendelse: Hendelse,
         vedtak: Vedtak?,
         gjeldendeSaksbehandler: String?,
-    ): String {
-        return when (hendelse) {
+    ): String =
+        when (hendelse) {
             Hendelse.MOTTATT, Hendelse.PÅBEGYNT, Hendelse.VENTER, Hendelse.HENLAGT ->
                 gjeldendeSaksbehandler ?: error("Mangler saksbehandler for hendelse")
             Hendelse.VEDTATT, Hendelse.BESLUTTET, Hendelse.FERDIG ->
                 vedtak?.saksbehandlerIdent ?: gjeldendeSaksbehandler ?: error("Mangler saksbehandler på vedtaket")
         }
-    }
 
-    private fun finnHenvendelsestidspunkt(saksbehandling: Saksbehandling): LocalDateTime {
-        return when (saksbehandling.type) {
+    private fun finnHenvendelsestidspunkt(saksbehandling: Saksbehandling): LocalDateTime =
+        when (saksbehandling.type) {
             FØRSTEGANGSBEHANDLING -> søknadService.finnDatoMottattForSøknad(saksbehandling.id) ?: saksbehandling.opprettetTid
             REVURDERING -> saksbehandling.opprettetTid
         }
-    }
 
     companion object {
         fun opprettMottattTask(

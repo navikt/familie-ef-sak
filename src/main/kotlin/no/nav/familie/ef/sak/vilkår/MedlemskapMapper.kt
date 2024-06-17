@@ -29,15 +29,14 @@ class MedlemskapMapper(
     fun tilDto(
         grunnlagsdata: GrunnlagsdataDomene,
         medlemskapsdetaljer: Medlemskap?,
-    ): MedlemskapDto {
-        return MedlemskapDto(
+    ): MedlemskapDto =
+        MedlemskapDto(
             søknadsgrunnlag = medlemskapsdetaljer?.let { mapSøknadsgrunnlag(it) },
             registergrunnlag = mapRegistergrunnlag(grunnlagsdata.søker, grunnlagsdata.medlUnntak),
         )
-    }
 
-    fun mapSøknadsgrunnlag(medlemskapsdetaljer: Medlemskap): MedlemskapSøknadsgrunnlagDto {
-        return MedlemskapSøknadsgrunnlagDto(
+    fun mapSøknadsgrunnlag(medlemskapsdetaljer: Medlemskap): MedlemskapSøknadsgrunnlagDto =
+        MedlemskapSøknadsgrunnlagDto(
             bosattNorgeSisteÅrene = medlemskapsdetaljer.bosattNorgeSisteÅrene,
             oppholderDuDegINorge = medlemskapsdetaljer.oppholderDuDegINorge,
             oppholdsland = medlemskapsdetaljer.oppholdsland?.let { kodeverkService.hentLand(it, LocalDate.now()) },
@@ -55,7 +54,6 @@ class MedlemskapMapper(
                     )
                 },
         )
-    }
 
     fun mapRegistergrunnlag(
         søker: Søker,
@@ -64,7 +62,8 @@ class MedlemskapMapper(
         val statsborgerskap = statsborgerskapMapper.map(søker.statsborgerskap)
         return MedlemskapRegistergrunnlagDto(
             nåværendeStatsborgerskap =
-                statsborgerskap.filter { it.gyldigTilOgMedDato == null }
+                statsborgerskap
+                    .filter { it.gyldigTilOgMedDato == null }
                     .map { it.land },
             statsborgerskap = statsborgerskap,
             oppholdstatus = OppholdstillatelseMapper.map(søker.opphold),
@@ -72,7 +71,8 @@ class MedlemskapMapper(
             innflytting = innflyttingUtflyttingMapper.mapInnflytting(søker.innflyttingTilNorge),
             utflytting = innflyttingUtflyttingMapper.mapUtflytting(søker.utflyttingFraNorge),
             folkeregisterpersonstatus =
-                søker.folkeregisterpersonstatus.gjeldende()
+                søker.folkeregisterpersonstatus
+                    .gjeldende()
                     ?.let(Folkeregisterpersonstatus::fraPdl),
             medlUnntak = medlUnntak.tilDto(),
         )

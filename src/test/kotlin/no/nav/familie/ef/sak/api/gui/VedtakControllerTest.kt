@@ -114,7 +114,9 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
     private val behandling = behandling(fagsak)
     private val saksbehandling = saksbehandling(fagsak, behandling)
 
-    private enum class Saksbehandler(val beslutter: Boolean = false) {
+    private enum class Saksbehandler(
+        val beslutter: Boolean = false,
+    ) {
         SAKSBEHANDLER,
         BESLUTTER(true),
         BESLUTTER_2(true),
@@ -416,14 +418,12 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
             val gjeldendeTasks =
                 taskService.findAll().filter { task -> task.metadata["behandlingId"] == behandlingId.toString() }
             assertThat(
-                gjeldendeTasks.single {
-                        task ->
+                gjeldendeTasks.single { task ->
                     task.type == FerdigstillOppgaveTask.TYPE && task.metadata["oppgavetype"] == "GodkjenneVedtak"
                 },
             ).isNotNull
             assertThat(
-                gjeldendeTasks.single {
-                        task ->
+                gjeldendeTasks.single { task ->
                     task.type == OpprettOppgaveTask.TYPE && task.metadata["oppgavetype"] == "BehandleSak"
                 },
             ).isNotNull
@@ -670,14 +670,16 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
         ikkeLag: Int = 0,
     ) {
         val vilkårsvurderinger =
-            VilkårType.hentVilkårForStønad(OVERGANGSSTØNAD).map {
-                vilkårsvurdering(
-                    behandlingId = behandlingId,
-                    resultat = resultat,
-                    type = it,
-                    delvilkårsvurdering = listOf(),
-                )
-            }.dropLast(ikkeLag)
+            VilkårType
+                .hentVilkårForStønad(OVERGANGSSTØNAD)
+                .map {
+                    vilkårsvurdering(
+                        behandlingId = behandlingId,
+                        resultat = resultat,
+                        type = it,
+                        delvilkårsvurdering = listOf(),
+                    )
+                }.dropLast(ikkeLag)
         vilkårsvurderingRepository.insertAll(vilkårsvurderinger)
     }
 }

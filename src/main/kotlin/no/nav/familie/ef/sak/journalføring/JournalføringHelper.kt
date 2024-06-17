@@ -159,7 +159,5 @@ object JournalføringHelper {
             },
     )
 
-    fun utledNesteBehandlingstype(behandlinger: List<Behandling>): BehandlingType {
-        return if (behandlinger.all { it.resultat == BehandlingResultat.HENLAGT }) BehandlingType.FØRSTEGANGSBEHANDLING else BehandlingType.REVURDERING
-    }
+    fun utledNesteBehandlingstype(behandlinger: List<Behandling>): BehandlingType = if (behandlinger.all { it.resultat == BehandlingResultat.HENLAGT }) BehandlingType.FØRSTEGANGSBEHANDLING else BehandlingType.REVURDERING
 }

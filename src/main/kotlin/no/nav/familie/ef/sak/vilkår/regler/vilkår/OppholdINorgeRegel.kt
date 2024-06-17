@@ -16,11 +16,12 @@ import no.nav.familie.ef.sak.vilkår.regler.regelIder
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import java.util.UUID
 
-class OppholdINorgeRegel : Vilkårsregel(
-    vilkårType = VilkårType.LOVLIG_OPPHOLD,
-    regler = setOf(BOR_OG_OPPHOLDER_SEG_I_NORGE, OPPHOLD_UNNTAK),
-    hovedregler = regelIder(BOR_OG_OPPHOLDER_SEG_I_NORGE),
-) {
+class OppholdINorgeRegel :
+    Vilkårsregel(
+        vilkårType = VilkårType.LOVLIG_OPPHOLD,
+        regler = setOf(BOR_OG_OPPHOLDER_SEG_I_NORGE, OPPHOLD_UNNTAK),
+        hovedregler = regelIder(BOR_OG_OPPHOLDER_SEG_I_NORGE),
+    ) {
     override fun initiereDelvilkårsvurdering(
         metadata: HovedregelMetadata,
         resultat: Vilkårsresultat,
@@ -43,11 +44,10 @@ class OppholdINorgeRegel : Vilkårsregel(
         return super.initiereDelvilkårsvurdering(metadata, resultat, barnId)
     }
 
-    fun harBarnaPersonstatusBosattEllerErTerminbarn(metadata: HovedregelMetadata): Boolean {
-        return metadata.vilkårgrunnlagDto.barnMedSamvær.all {
+    fun harBarnaPersonstatusBosattEllerErTerminbarn(metadata: HovedregelMetadata): Boolean =
+        metadata.vilkårgrunnlagDto.barnMedSamvær.all {
             it.registergrunnlag.erBosatt() || it.søknadsgrunnlag.erTerminbarn()
         }
-    }
 
     fun oppfyllerVilkårForAutomatiskVurdering(metadata: HovedregelMetadata): Boolean {
         val erDigitalSøknad = metadata.behandling.årsak == BehandlingÅrsak.SØKNAD

@@ -240,8 +240,7 @@ internal class OppgaveServiceTest {
                 BEHANDLING_ID,
                 Oppgavetype.BehandleSak,
             )
-        }
-            .hasMessage("Finner ikke oppgave for behandling $BEHANDLING_ID")
+        }.hasMessage("Finner ikke oppgave for behandling $BEHANDLING_ID")
             .isInstanceOf(java.lang.IllegalStateException::class.java)
     }
 
@@ -452,29 +451,25 @@ internal class OppgaveServiceTest {
         }
     }
 
-    private fun lagTestFagsak(): Fagsak {
-        return fagsak(
+    private fun lagTestFagsak(): Fagsak =
+        fagsak(
             id = FAGSAK_ID,
             stønadstype = StønadType.OVERGANGSSTØNAD,
             eksternId = FAGSAK_EKSTERN_ID,
             identer = setOf(PersonIdent(ident = FNR)),
         )
-    }
 
-    private fun lagTestOppgave(): Oppgave {
-        return Oppgave(behandlingId = BEHANDLING_ID, type = Oppgavetype.BehandleSak, gsakOppgaveId = GSAK_OPPGAVE_ID)
-    }
+    private fun lagTestOppgave(): Oppgave = Oppgave(behandlingId = BEHANDLING_ID, type = Oppgavetype.BehandleSak, gsakOppgaveId = GSAK_OPPGAVE_ID)
 
-    private fun lagEksternTestOppgave(): no.nav.familie.kontrakter.felles.oppgave.Oppgave {
-        return no.nav.familie.kontrakter.felles.oppgave.Oppgave(id = GSAK_OPPGAVE_ID)
-    }
+    private fun lagEksternTestOppgave(): no.nav.familie.kontrakter.felles.oppgave.Oppgave =
+        no.nav.familie.kontrakter.felles.oppgave
+            .Oppgave(id = GSAK_OPPGAVE_ID)
 
-    private fun lagFinnOppgaveResponseDto(): FinnOppgaveResponseDto {
-        return FinnOppgaveResponseDto(
+    private fun lagFinnOppgaveResponseDto(): FinnOppgaveResponseDto =
+        FinnOppgaveResponseDto(
             antallTreffTotalt = 1,
             oppgaver = listOf(lagEksternTestOppgave()),
         )
-    }
 
     companion object {
         private val FAGSAK_ID = UUID.fromString("1242f220-cad3-4640-95c1-190ec814c91e")
@@ -488,13 +483,9 @@ internal class OppgaveServiceTest {
     }
 }
 
-private fun LocalDateTime.kveld(): LocalDateTime {
-    return this.withHour(20)
-}
+private fun LocalDateTime.kveld(): LocalDateTime = this.withHour(20)
 
-private fun LocalDateTime.morgen(): LocalDateTime {
-    return this.withHour(8)
-}
+private fun LocalDateTime.morgen(): LocalDateTime = this.withHour(8)
 
 private val torsdag = LocalDateTime.of(2021, 4, 1, 12, 0)
 private val fredag = LocalDateTime.of(2021, 4, 2, 12, 0)

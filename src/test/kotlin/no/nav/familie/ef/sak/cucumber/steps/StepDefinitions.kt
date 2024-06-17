@@ -194,14 +194,16 @@ class StepDefinitions {
 
     private fun mockBarnRepository() {
         every { barnRepository.findAllById(any()) } answers {
-            barnIder.entries.flatMap { behandlingBarn ->
-                behandlingBarn.value.entries.map {
-                    BehandlingBarn(it.value, behandlingBarn.key, personIdent = it.key)
-                }
-            }.distinct()
+            barnIder.entries
+                .flatMap { behandlingBarn ->
+                    behandlingBarn.value.entries.map {
+                        BehandlingBarn(it.value, behandlingBarn.key, personIdent = it.key)
+                    }
+                }.distinct()
         }
         every { barnRepository.findByBehandlingId(any()) } answers {
-            barnIder.getOrDefault(firstArg(), emptyMap())
+            barnIder
+                .getOrDefault(firstArg(), emptyMap())
                 .map { BehandlingBarn(it.value, firstArg(), personIdent = it.key) }
         }
     }
@@ -292,7 +294,8 @@ class StepDefinitions {
 
     @Når("beregner ytelse kaster feil med innehold {}")
     fun `beregner ytelse kaster feil pga validering`(feilmelding: String) {
-        Assertions.assertThatThrownBy { `beregner ytelse`() }
+        Assertions
+            .assertThatThrownBy { `beregner ytelse`() }
             .hasMessageContaining(feilmelding)
     }
 
@@ -394,9 +397,7 @@ class StepDefinitions {
         every { iverksettingDtoMapper.tilDtoMaskineltBehandlet(any()) } returns expectedIverksettDto
     }
 
-    private fun readFile(filnavn: String): String {
-        return this::class.java.getResource("/omregning/$filnavn")!!.readText()
-    }
+    private fun readFile(filnavn: String): String = this::class.java.getResource("/omregning/$filnavn")!!.readText()
 
     @Når("beregner ytelse")
     fun `beregner ytelse`() {
@@ -652,8 +653,7 @@ class StepDefinitions {
                         forrigeBehandlingId = acc.lastOrNull()?.id,
                         vedtakstidspunkt = LocalDateTime.MIN,
                     )
-            }
-            .map { it to saksbehandling(fagsak, it) }
+            }.map { it to saksbehandling(fagsak, it) }
             .associateBy { it.first.id }
     }
 
@@ -729,8 +729,10 @@ class StepDefinitions {
             logger.info(
                 listOf(
                     behandlingIdTilUUID.entries.find { it.value == andel.behandlingId }!!.key,
-                    andel.andel.periode.fom.format(YEAR_MONTH_FORMAT_NORSK),
-                    andel.andel.periode.tom.format(YEAR_MONTH_FORMAT_NORSK),
+                    andel.andel.periode.fom
+                        .format(YEAR_MONTH_FORMAT_NORSK),
+                    andel.andel.periode.tom
+                        .format(YEAR_MONTH_FORMAT_NORSK),
                     andel.endring?.type ?: "",
                     andel.endring?.behandlingId?.let { bid -> behandlingIdTilUUID.entries.find { it.value == bid }!!.key }
                         ?: "",
@@ -809,7 +811,8 @@ class StepDefinitions {
             assertThat(beregnetAndelHistorikk.endring?.behandlingId)
                 .isEqualTo(forventetHistorikkEndring.historikkEndring?.behandlingId)
 
-            forventetHistorikkEndring.historikkEndring?.vedtakstidspunkt
+            forventetHistorikkEndring.historikkEndring
+                ?.vedtakstidspunkt
                 ?.takeIf { it != LocalDateTime.MIN } // denne er satt til MIN som default då den er required
                 ?.let { assertThat(beregnetAndelHistorikk.endring?.vedtakstidspunkt).isEqualTo(it) }
         }

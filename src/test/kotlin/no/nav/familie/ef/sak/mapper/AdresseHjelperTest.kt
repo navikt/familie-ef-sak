@@ -34,7 +34,7 @@ internal class AdresseHjelperTest {
     private val metadataHistorisk = Metadata(true)
 
     @Nested
-    inner class BorPåSammeAdresse() {
+    inner class BorPåSammeAdresse {
         @Test
         internal fun `forelder og barn bor på samme adresse`() {
             val barnAdresser =
@@ -313,8 +313,8 @@ internal class AdresseHjelperTest {
         opphørstidspunkt: LocalDate? = null,
         matrikkeladresse: Matrikkeladresse? = null,
         metadata: Metadata? = null,
-    ): Bostedsadresse {
-        return Bostedsadresse(
+    ): Bostedsadresse =
+        Bostedsadresse(
             vegadresse = vegadresse,
             angittFlyttedato = null,
             gyldigFraOgMed = gyldighetstidspunkt,
@@ -325,20 +325,18 @@ internal class AdresseHjelperTest {
             matrikkeladresse = matrikkeladresse,
             metadata = metadata ?: metadataGjeldende,
         )
-    }
 
     private fun lagAdresseDto(
         type: AdresseType,
         gyldigFraOgMed: LocalDate?,
         gyldigTilOgMed: LocalDate? = null,
         erGjeldende: Boolean = false,
-    ): AdresseDto {
-        return AdresseDto(
+    ): AdresseDto =
+        AdresseDto(
             visningsadresse = "Oslogata 1",
             type = type,
             gyldigFraOgMed = gyldigFraOgMed,
             gyldigTilOgMed = gyldigTilOgMed,
             erGjeldende = erGjeldende,
         )
-    }
 }

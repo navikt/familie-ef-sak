@@ -185,8 +185,9 @@ class BarnService(
         barnFraSøknad: List<BehandlingBarn>,
         grunnlagsdataBarn: List<BarnMedIdent>,
         behandlingId: UUID,
-    ): List<BehandlingBarn> {
-        return BarnMatcher.kobleBehandlingBarnOgRegisterBarn(barnFraSøknad, grunnlagsdataBarn)
+    ): List<BehandlingBarn> =
+        BarnMatcher
+            .kobleBehandlingBarnOgRegisterBarn(barnFraSøknad, grunnlagsdataBarn)
             .map {
                 BehandlingBarn(
                     id = it.behandlingBarn.id,
@@ -197,7 +198,6 @@ class BarnService(
                     fødselTermindato = it.behandlingBarn.fødselTermindato,
                 )
             }
-    }
 
     /**
      * Legger sammen koblede barn plus de fra registeret som mangler
@@ -308,9 +308,7 @@ class BarnService(
         }
     }
 
-    fun hentBehandlingBarnForBarnIder(barnId: List<UUID>): List<BehandlingBarn> {
-        return barnRepository.findAllByIdOrThrow(barnId.toSet()) { it.id }
-    }
+    fun hentBehandlingBarnForBarnIder(barnId: List<UUID>): List<BehandlingBarn> = barnRepository.findAllByIdOrThrow(barnId.toSet()) { it.id }
 
     /**
      * Kan strengt tatt kun brukes for barnetilsyn då den er avhengig av at personIdent finnes

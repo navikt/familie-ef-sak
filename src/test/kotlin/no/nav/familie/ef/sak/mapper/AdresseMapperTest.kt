@@ -67,28 +67,28 @@ internal class AdresseMapperTest {
             .isEqualTo("Vei 1, 19800 Svenskt sted, region, Sverige")
 
         assertThat(
-            mapper.tilAdresse(
-                bostedsadresse.copy(
-                    vegadresse = null,
-                    matrikkeladresse = null,
-                    utenlandskAdresse = null,
-                ),
-            ).visningsadresse,
-        )
-            .withFailMessage("Skal skrive ut ukjentBosted når vegadresse er null")
+            mapper
+                .tilAdresse(
+                    bostedsadresse.copy(
+                        vegadresse = null,
+                        matrikkeladresse = null,
+                        utenlandskAdresse = null,
+                    ),
+                ).visningsadresse,
+        ).withFailMessage("Skal skrive ut ukjentBosted når vegadresse er null")
             .isEqualTo("Ukjent bosted - ukjentBostedKommune")
 
         assertThat(
-            mapper.tilAdresse(
-                bostedsadresse.copy(
-                    vegadresse = null,
-                    matrikkeladresse = null,
-                    utenlandskAdresse = null,
-                    ukjentBosted = null,
-                ),
-            ).visningsadresse,
-        )
-            .withFailMessage("Skal skrive ut Ingen opplysninger tilgjenglig når alle adressene mangler")
+            mapper
+                .tilAdresse(
+                    bostedsadresse.copy(
+                        vegadresse = null,
+                        matrikkeladresse = null,
+                        utenlandskAdresse = null,
+                        ukjentBosted = null,
+                    ),
+                ).visningsadresse,
+        ).withFailMessage("Skal skrive ut Ingen opplysninger tilgjenglig når alle adressene mangler")
             .isEqualTo("Ingen opplysninger tilgjenglig")
     }
 
@@ -159,14 +159,14 @@ internal class AdresseMapperTest {
             .isEqualTo("c/o co")
 
         assertThat(
-            mapper.tilAdresse(
-                kontaktadresse.copy(
-                    utenlandskAdresseIFrittFormat =
-                        utenlandskAdresseFrittFormat(),
-                ),
-            ).visningsadresse,
-        )
-            .withFailMessage("Skal skrive ut utenlandskAdresseIFrittFormat når utenlandskAdresse er null")
+            mapper
+                .tilAdresse(
+                    kontaktadresse.copy(
+                        utenlandskAdresseIFrittFormat =
+                            utenlandskAdresseFrittFormat(),
+                    ),
+                ).visningsadresse,
+        ).withFailMessage("Skal skrive ut utenlandskAdresseIFrittFormat når utenlandskAdresse er null")
             .isEqualTo("1, 2, 3, 0575 by, Norge")
     }
 
@@ -195,11 +195,11 @@ internal class AdresseMapperTest {
             .isEqualTo("eier, postboks, 0575 Oslo")
 
         assertThat(
-            mapper.tilAdresse(
-                kontaktadresse.copy(postadresseIFrittFormat = postadresseFrittFormat()),
-            ).visningsadresse,
-        )
-            .withFailMessage("Skal skrive ut postboksadresse når vegadresse er null")
+            mapper
+                .tilAdresse(
+                    kontaktadresse.copy(postadresseIFrittFormat = postadresseFrittFormat()),
+                ).visningsadresse,
+        ).withFailMessage("Skal skrive ut postboksadresse når vegadresse er null")
             .isEqualTo("1, 2, 3, 0575 Oslo")
     }
 
@@ -230,8 +230,8 @@ internal class AdresseMapperTest {
         assertThat(adresseDto.gyldigTilOgMed).isEqualTo(oppholdsadresse.gyldigTilOgMed)
     }
 
-    private fun utenlandskAdresseFrittFormat(): UtenlandskAdresseIFrittFormat {
-        return UtenlandskAdresseIFrittFormat(
+    private fun utenlandskAdresseFrittFormat(): UtenlandskAdresseIFrittFormat =
+        UtenlandskAdresseIFrittFormat(
             "1",
             "2",
             "3",
@@ -239,16 +239,14 @@ internal class AdresseMapperTest {
             "NOR",
             "0575",
         )
-    }
 
-    private fun postadresseFrittFormat(): PostadresseIFrittFormat {
-        return PostadresseIFrittFormat(
+    private fun postadresseFrittFormat(): PostadresseIFrittFormat =
+        PostadresseIFrittFormat(
             "1",
             "2",
             "3",
             "0575",
         )
-    }
 
     private fun kontaktadresse(kontaktadresseType: KontaktadresseType) =
         Kontaktadresse(

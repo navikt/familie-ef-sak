@@ -133,11 +133,7 @@ internal class ForberedOppgaverTerminbarnServiceTest {
         fagsakId: UUID = UUID.randomUUID(),
         eksternId: Long = 0,
         termindato: LocalDate = LocalDate.now(),
-    ): TerminbarnTilUtplukkForOppgave {
-        return TerminbarnTilUtplukkForOppgave(behandlingId, fagsakId, eksternId, termindato)
-    }
+    ): TerminbarnTilUtplukkForOppgave = TerminbarnTilUtplukkForOppgave(behandlingId, fagsakId, eksternId, termindato)
 
-    private fun opprettPdlBarn(fødselsdato: LocalDate): PdlPersonForelderBarn {
-        return pdlBarn(fødsel = fødsel(fødselsdato = fødselsdato))
-    }
+    private fun opprettPdlBarn(fødselsdato: LocalDate): PdlPersonForelderBarn = pdlBarn(fødsel = fødsel(fødselsdato = fødselsdato))
 }

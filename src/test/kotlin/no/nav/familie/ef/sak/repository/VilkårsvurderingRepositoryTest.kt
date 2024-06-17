@@ -83,7 +83,11 @@ internal class VilkårsvurderingRepositoryTest : OppslagSpringRunnerTest() {
 
         vilkårsvurderingRepository.oppdaterEndretTid(vilkårsvurdering.id, nyttTidspunkt)
 
-        assertThat(vilkårsvurderingRepository.findByIdOrThrow(vilkårsvurdering.id).sporbar.endret.endretTid).isEqualTo(
+        assertThat(
+            vilkårsvurderingRepository
+                .findByIdOrThrow(vilkårsvurdering.id)
+                .sporbar.endret.endretTid,
+        ).isEqualTo(
             nyttTidspunkt,
         )
     }

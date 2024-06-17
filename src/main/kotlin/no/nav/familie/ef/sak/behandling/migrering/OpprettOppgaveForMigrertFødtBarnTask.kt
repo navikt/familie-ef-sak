@@ -83,9 +83,7 @@ class OpprettOppgaveForMigrertFødtBarnTask(
         return behandling.id
     }
 
-    private fun finnSisteUtbetalingsdato(behandlingId: UUID): LocalDate? {
-        return tilkjentYtelseService.hentForBehandling(behandlingId).andelerTilkjentYtelse.maxOfOrNull { it.stønadTom }
-    }
+    private fun finnSisteUtbetalingsdato(behandlingId: UUID): LocalDate? = tilkjentYtelseService.hentForBehandling(behandlingId).andelerTilkjentYtelse.maxOfOrNull { it.stønadTom }
 
     private fun lagOppgaver(
         behandlingId: UUID,
@@ -93,29 +91,32 @@ class OpprettOppgaveForMigrertFødtBarnTask(
         sisteUtbetalingsdato: LocalDate,
     ): List<OppgaveForBarn> {
         val kjenteFødselsdatoer =
-            grunnlagsdataService.hentGrunnlagsdata(behandlingId).grunnlagsdata.barn
+            grunnlagsdataService
+                .hentGrunnlagsdata(behandlingId)
+                .grunnlagsdata.barn
                 .flatMap { it.fødsel.mapNotNull(Fødsel::fødselsdato) }
-        return data.barn.mapNotNull {
-            val fødselsdato = it.fødselsdato
-            if (fødselsdato == null) {
-                logger.warn("Kan ikke opprette oppgave for barn uten fødselsdato personident=${it.personIdent}")
-                return@mapNotNull null
-            }
-            if (kjenteFødselsdatoer.contains(fødselsdato)) {
-                logger.info("Fødselsdato=$fødselsdato finnes allerede i grunnlagsdata, oppretter ikke oppgave")
-                return@mapNotNull null
-            }
-            datoOgAlder(fødselsdato, sisteUtbetalingsdato)
-                .map { datoOgBeskrivelse ->
-                    OppgaveForBarn(
-                        behandlingId = behandlingId,
-                        personIdent = it.personIdent,
-                        stønadType = data.stønadType,
-                        aktivFra = datoOgBeskrivelse.first,
-                        alder = datoOgBeskrivelse.second,
-                    )
+        return data.barn
+            .mapNotNull {
+                val fødselsdato = it.fødselsdato
+                if (fødselsdato == null) {
+                    logger.warn("Kan ikke opprette oppgave for barn uten fødselsdato personident=${it.personIdent}")
+                    return@mapNotNull null
                 }
-        }.flatten()
+                if (kjenteFødselsdatoer.contains(fødselsdato)) {
+                    logger.info("Fødselsdato=$fødselsdato finnes allerede i grunnlagsdata, oppretter ikke oppgave")
+                    return@mapNotNull null
+                }
+                datoOgAlder(fødselsdato, sisteUtbetalingsdato)
+                    .map { datoOgBeskrivelse ->
+                        OppgaveForBarn(
+                            behandlingId = behandlingId,
+                            personIdent = it.personIdent,
+                            stønadType = data.stønadType,
+                            aktivFra = datoOgBeskrivelse.first,
+                            alder = datoOgBeskrivelse.second,
+                        )
+                    }
+            }.flatten()
     }
 
     /**
@@ -141,9 +142,7 @@ class OpprettOppgaveForMigrertFødtBarnTask(
      * Setter dato minus 1 uke for å sette fristFerdigstilling til 1 uke før barnet fyller år
      * For å unngå att fristen settes på en helgdag, så brukes nesteVirkedag
      */
-    private fun nesteVirkedagForDatoMinus1Uke(localDate: LocalDate): LocalDate {
-        return nesteVirkedag(localDate.minusWeeks(1).minusDays(1))
-    }
+    private fun nesteVirkedagForDatoMinus1Uke(localDate: LocalDate): LocalDate = nesteVirkedag(localDate.minusWeeks(1).minusDays(1))
 
     companion object {
         const val TYPE = "opprettOppgaveForMigrertFødtBarn"
@@ -151,8 +150,8 @@ class OpprettOppgaveForMigrertFødtBarnTask(
         fun opprettOppgave(
             fagsak: Fagsak,
             nyeBarn: List<BarnMinimumDto>,
-        ): Task {
-            return Task(
+        ): Task =
+            Task(
                 TYPE,
                 objectMapper.writeValueAsString(
                     OpprettOppgaveForMigrertFødtBarnTaskData(
@@ -164,7 +163,6 @@ class OpprettOppgaveForMigrertFødtBarnTask(
                     ),
                 ),
             )
-        }
     }
 }
 

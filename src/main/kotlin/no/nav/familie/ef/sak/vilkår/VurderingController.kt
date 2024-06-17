@@ -36,9 +36,7 @@ class VurderingController(
     private val secureLogger = LoggerFactory.getLogger("secureLogger")
 
     @GetMapping("regler")
-    fun hentRegler(): Ressurs<Vilkårsregler> {
-        return Ressurs.success(Vilkårsregler.ALLE_VILKÅRSREGLER)
-    }
+    fun hentRegler(): Ressurs<Vilkårsregler> = Ressurs.success(Vilkårsregler.ALLE_VILKÅRSREGLER)
 
     @PostMapping("vilkar")
     fun oppdaterVurderingVilkår(

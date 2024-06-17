@@ -13,7 +13,9 @@ enum class BegrunnelseType {
  * Brukes for å mappe ett svar til ett vilkårsresultat,
  * Vi er kun interessert i å mappe [Vilkårsresultat.OPPFYLT] og [Vilkårsresultat.IKKE_OPPFYLT] og ikke de andre verdiene
  */
-enum class Resultat(val vilkårsresultat: Vilkårsresultat) {
+enum class Resultat(
+    val vilkårsresultat: Vilkårsresultat,
+) {
     OPPFYLT(Vilkårsresultat.OPPFYLT),
     IKKE_OPPFYLT(Vilkårsresultat.IKKE_OPPFYLT),
 }

@@ -19,14 +19,10 @@ class HistoriskPensjonController(
     @GetMapping("{fagsakPersonId}")
     fun hentHistoriskPensjon(
         @PathVariable fagsakPersonId: UUID,
-    ): Ressurs<HistoriskPensjonDto> {
-        return Ressurs.success(historiskPensjonService.hentHistoriskPensjon(fagsakPersonId))
-    }
+    ): Ressurs<HistoriskPensjonDto> = Ressurs.success(historiskPensjonService.hentHistoriskPensjon(fagsakPersonId))
 
     @GetMapping("fagsak/{fagsakId}")
     fun hentHistoriskPensjonForFagsak(
         @PathVariable fagsakId: UUID,
-    ): Ressurs<HistoriskPensjonDto> {
-        return Ressurs.success(historiskPensjonService.hentHistoriskPensjonForFagsak(fagsakId))
-    }
+    ): Ressurs<HistoriskPensjonDto> = Ressurs.success(historiskPensjonService.hentHistoriskPensjonForFagsak(fagsakId))
 }

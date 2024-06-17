@@ -21,13 +21,9 @@ object SikkerhetContext {
             claims.getAsList("roles").contains("access_as_application")
     }
 
-    fun kallKommerFraFamilieEfMottak(): Boolean {
-        return kallKommerFra("teamfamilie:familie-ef-mottak")
-    }
+    fun kallKommerFraFamilieEfMottak(): Boolean = kallKommerFra("teamfamilie:familie-ef-mottak")
 
-    fun kallKommerFraKlage(): Boolean {
-        return kallKommerFra("teamfamilie:familie-klage")
-    }
+    fun kallKommerFraKlage(): Boolean = kallKommerFra("teamfamilie:familie-klage")
 
     fun kallKommerFraFamilieEfSøknadApi(): Boolean {
         val claims = SpringTokenValidationContextHolder().getTokenValidationContext().getClaims(EksternBrukerUtils.ISSUER_TOKENX)
@@ -54,7 +50,8 @@ object SikkerhetContext {
     }
 
     fun hentSaksbehandlerEllerSystembruker() =
-        Result.runCatching { SpringTokenValidationContextHolder().getTokenValidationContext() }
+        Result
+            .runCatching { SpringTokenValidationContextHolder().getTokenValidationContext() }
             .fold(
                 onSuccess = {
                     it.getClaims("azuread")?.get("NAVident")?.toString() ?: SYSTEM_FORKORTELSE
@@ -62,8 +59,9 @@ object SikkerhetContext {
                 onFailure = { SYSTEM_FORKORTELSE },
             )
 
-    fun hentSaksbehandlerNavn(strict: Boolean = false): String {
-        return Result.runCatching { SpringTokenValidationContextHolder().getTokenValidationContext() }
+    fun hentSaksbehandlerNavn(strict: Boolean = false): String =
+        Result
+            .runCatching { SpringTokenValidationContextHolder().getTokenValidationContext() }
             .fold(
                 onSuccess = {
                     it.getClaims("azuread")?.get("name")?.toString()
@@ -71,10 +69,10 @@ object SikkerhetContext {
                 },
                 onFailure = { if (strict) error("Finner ikke navn på innlogget bruker") else SYSTEM_NAVN },
             )
-    }
 
-    fun hentGrupperFraToken(): Set<String> {
-        return Result.runCatching { SpringTokenValidationContextHolder().getTokenValidationContext() }
+    fun hentGrupperFraToken(): Set<String> =
+        Result
+            .runCatching { SpringTokenValidationContextHolder().getTokenValidationContext() }
             .fold(
                 onSuccess = {
                     @Suppress("UNCHECKED_CAST")
@@ -83,7 +81,6 @@ object SikkerhetContext {
                 },
                 onFailure = { emptySet() },
             )
-    }
 
     fun harTilgangTilGittRolle(
         rolleConfig: RolleConfig,
@@ -117,7 +114,5 @@ object SikkerhetContext {
         return rollerForBruker.contains(minimumsrolle)
     }
 
-    fun harRolle(rolleId: String): Boolean {
-        return hentGrupperFraToken().contains(rolleId)
-    }
+    fun harRolle(rolleId: String): Boolean = hentGrupperFraToken().contains(rolleId)
 }
