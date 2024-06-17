@@ -126,12 +126,13 @@ class SendTilBeslutterSteg(
     ) {
         val besluttetVedtakHendelse =
             behandlingshistorikkService.finnSisteBehandlingshistorikk(saksbehandling.id, StegType.BESLUTTE_VEDTAK)
+        val beslutterIdent = besluttetVedtakHendelse?.opprettetAv
 
         behandlingService.oppdaterStatusPåBehandling(saksbehandling.id, BehandlingStatus.FATTER_VEDTAK)
         vedtakService.oppdaterSaksbehandler(saksbehandling.id, SikkerhetContext.hentSaksbehandler())
 
         if (vedtakService.hentVedtak(saksbehandling.id).skalVedtakBesluttes()) {
-            opprettGodkjennVedtakOppgave(saksbehandling, besluttetVedtakHendelse?.opprettetAv)
+            opprettGodkjennVedtakOppgave(saksbehandling, beslutterIdent)
         }
 
         ferdigstillOppgave(saksbehandling)
