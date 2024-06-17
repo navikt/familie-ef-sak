@@ -135,7 +135,7 @@ class SendTilBeslutterSteg(
         behandlingService.oppdaterStatusPåBehandling(saksbehandling.id, BehandlingStatus.FATTER_VEDTAK)
         vedtakService.oppdaterSaksbehandler(saksbehandling.id, SikkerhetContext.hentSaksbehandler())
 //        if (!vedtakService.hentVedtak(saksbehandling.id).erVedtakUtenBeslutter() || beslutterIdent != null) {
-        opprettGodkjennVedtakOppgave(saksbehandling, besluttetVedtakHendelse?.opprettetAvNavn)
+        opprettGodkjennVedtakOppgave(saksbehandling, besluttetVedtakHendelse?.opprettetAv)
 //        }
         ferdigstillOppgave(saksbehandling)
         opprettTaskForBehandlingsstatistikk(saksbehandling.id)
