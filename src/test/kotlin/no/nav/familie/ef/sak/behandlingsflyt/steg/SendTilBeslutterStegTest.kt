@@ -288,6 +288,37 @@ internal class SendTilBeslutterStegTest {
         }
     }
 
+    @Test
+    internal fun `Sjekker at beslutter ident blir med i opprett oppgave task`() {
+        val beslutterIdent = "beslutterIdent"
+        every { vedtakService.oppdaterSaksbehandler(any(), any()) } just Runs
+        every { behandlingshistorikkService.finnSisteBehandlingshistorikk(any(), StegType.BESLUTTE_VEDTAK) } returns
+            Behandlingshistorikk(
+                behandlingId = UUID.randomUUID(),
+                steg = StegType.BESLUTTE_VEDTAK,
+                utfall = StegUtfall.BESLUTTE_VEDTAK_UNDERKJENT,
+                opprettetAv = beslutterIdent,
+                opprettetAvNavn = "beslutterNavn",
+            )
+
+        utførSteg()
+
+        assertThat(taskSlot[0].type).isEqualTo(OpprettOppgaveTask.TYPE)
+        assertThat(taskSlot[0].payload).contains(beslutterIdent)
+    }
+
+    @Test
+    internal fun `Første gangen finnes det ikke beslutter ident i behandlingsshistorikk`() {
+        every { vedtakService.oppdaterSaksbehandler(any(), any()) } just Runs
+        every { behandlingshistorikkService.finnSisteBehandlingshistorikk(any(), StegType.BESLUTTE_VEDTAK) } returns null
+
+        utførSteg()
+
+        assertThat(taskSlot[0].type).isEqualTo(OpprettOppgaveTask.TYPE)
+        val tilordnetNavIdent = objectMapper.readValue<OpprettOppgaveTaskData>(taskSlot[0].payload).tilordnetNavIdent
+        assertThat(tilordnetNavIdent).isNull()
+    }
+
     private fun verifiserVedtattBehandlingsstatistikkTask() {
         assertThat(taskSlot[2].type).isEqualTo(BehandlingsstatistikkTask.TYPE)
         assertThat(objectMapper.readValue<BehandlingsstatistikkTaskPayload>(taskSlot[2].payload).hendelse)
