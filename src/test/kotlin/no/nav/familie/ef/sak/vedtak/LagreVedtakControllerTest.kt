@@ -97,7 +97,8 @@ internal class LagreVedtakControllerTest : OppslagSpringRunnerTest() {
 
         val vedtakRespons: ResponseEntity<Ressurs<InnvilgelseBarnetilsyn?>> = hentVedtak(behandling.id)
 
-        Assertions.assertThat(vedtakService.hentVedtak(respons.body?.data!!))
+        Assertions
+            .assertThat(vedtakService.hentVedtak(respons.body?.data!!))
             .usingRecursiveComparison()
             .ignoringFields("opprettetTid")
             .isEqualTo(vedtak)
@@ -157,8 +158,10 @@ internal class LagreVedtakControllerTest : OppslagSpringRunnerTest() {
 
         val vedtakRespons: ResponseEntity<Ressurs<InnvilgelseBarnetilsyn?>> = hentVedtak(behandling.id)
 
-        Assertions.assertThat(vedtakService.hentVedtak(respons.body?.data!!))
-            .usingRecursiveComparison().ignoringFields("opprettetTid")
+        Assertions
+            .assertThat(vedtakService.hentVedtak(respons.body?.data!!))
+            .usingRecursiveComparison()
+            .ignoringFields("opprettetTid")
             .isEqualTo(vedtak)
         Assertions.assertThat(vedtakRespons.statusCode).isEqualTo(HttpStatus.OK)
         Assertions.assertThat(vedtakRespons.body?.data).isNotNull
@@ -273,19 +276,17 @@ internal class LagreVedtakControllerTest : OppslagSpringRunnerTest() {
     private fun fullførVedtak(
         id: UUID,
         vedtakDto: VedtakDto,
-    ): ResponseEntity<Ressurs<UUID>> {
-        return restTemplate.exchange(
+    ): ResponseEntity<Ressurs<UUID>> =
+        restTemplate.exchange(
             localhost("/api/vedtak/$id/lagre-vedtak"),
             HttpMethod.POST,
             HttpEntity(vedtakDto, headers),
         )
-    }
 
-    private fun hentVedtak(id: UUID): ResponseEntity<Ressurs<InnvilgelseBarnetilsyn?>> {
-        return restTemplate.exchange(
+    private fun hentVedtak(id: UUID): ResponseEntity<Ressurs<InnvilgelseBarnetilsyn?>> =
+        restTemplate.exchange(
             localhost("/api/vedtak/$id"),
             HttpMethod.GET,
             HttpEntity<Ressurs<InnvilgelseBarnetilsyn?>>(headers),
         )
-    }
 }

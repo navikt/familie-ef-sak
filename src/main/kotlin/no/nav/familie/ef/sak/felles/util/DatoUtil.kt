@@ -34,24 +34,22 @@ fun datoEllerIdag(localDate: LocalDate?): LocalDate = localDate ?: LocalDate.now
 fun min(
     first: LocalDateTime?,
     second: LocalDateTime?,
-): LocalDateTime? {
-    return when {
+): LocalDateTime? =
+    when {
         first == null -> second
         second == null -> first
         else -> minOf(first, second)
     }
-}
 
 fun min(
     first: LocalDate?,
     second: LocalDate?,
-): LocalDate? {
-    return when {
+): LocalDate? =
+    when {
         first == null -> second
         second == null -> first
         else -> minOf(first, second)
     }
-}
 
 fun LocalDate.isEqualOrBefore(other: LocalDate) = this == other || this.isBefore(other)
 
@@ -62,23 +60,17 @@ fun LocalDate.harPåfølgendeMåned(påfølgende: LocalDate): Boolean =
 
 fun YearMonth.erPåfølgende(påfølgende: YearMonth): Boolean = this.plusMonths(1) == påfølgende
 
-fun LocalDate.er6MndEllerMer(): Boolean {
-    return this.plusDays(183) <= LocalDate.now()
-}
+fun LocalDate.er6MndEllerMer(): Boolean = this.plusDays(183) <= LocalDate.now()
 
-fun LocalDate.erEttÅrEllerMer(): Boolean {
-    return this.plusYears(1) <= LocalDate.now()
-}
+fun LocalDate.erEttÅrEllerMer(): Boolean = this.plusYears(1) <= LocalDate.now()
 
-fun LocalDate.er6MndEllerMerOgInnenforCutoff(numberOfDaysCutoff: Long): Boolean {
-    return this.er6MndEllerMer() &&
+fun LocalDate.er6MndEllerMerOgInnenforCutoff(numberOfDaysCutoff: Long): Boolean =
+    this.er6MndEllerMer() &&
         LocalDate.now() < this.plusDays(182).plusDays(numberOfDaysCutoff)
-}
 
-fun LocalDate.erEttÅrEllerMerOgInnenforCutoff(numberOfDaysCutoff: Long): Boolean {
-    return erEttÅrEllerMer() &&
+fun LocalDate.erEttÅrEllerMerOgInnenforCutoff(numberOfDaysCutoff: Long): Boolean =
+    erEttÅrEllerMer() &&
         LocalDate.now() <= this.plusYears(1).plusDays(numberOfDaysCutoff)
-}
 
 fun LocalDateTime.harGåttAntallTimer(timer: Int) =
     this.plusHours(timer.toLong()) < LocalDateTime.now()
@@ -87,7 +79,12 @@ fun dagensDatoMedTidNorskFormat(): String = dagensDatoMedTid().format(DatoFormat
 
 fun YearMonth.formaterYearMonthTilMånedÅr(): String {
     val yearMonth = YearMonth.parse(this.toString())
-    val locale = Locale.Builder().setLanguage("no").setRegion("NO").build()
+    val locale =
+        Locale
+            .Builder()
+            .setLanguage("no")
+            .setRegion("NO")
+            .build()
     val formatter = DateTimeFormatter.ofPattern("MMMM yyyy", locale)
     return yearMonth.format(formatter)
 }

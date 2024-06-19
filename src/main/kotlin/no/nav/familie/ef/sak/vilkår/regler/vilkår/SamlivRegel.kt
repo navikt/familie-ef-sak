@@ -8,15 +8,16 @@ import no.nav.familie.ef.sak.vilkår.regler.Vilkårsregel
 import no.nav.familie.ef.sak.vilkår.regler.jaNeiSvarRegel
 import no.nav.familie.ef.sak.vilkår.regler.regelIder
 
-class SamlivRegel : Vilkårsregel(
-    vilkårType = VilkårType.SAMLIV,
-    regler = setOf(LEVER_IKKE_MED_ANNEN_FORELDER, LEVER_IKKE_I_EKTESKAPLIGNENDE_FORHOLD),
-    hovedregler =
-        regelIder(
-            LEVER_IKKE_MED_ANNEN_FORELDER,
-            LEVER_IKKE_I_EKTESKAPLIGNENDE_FORHOLD,
-        ),
-) {
+class SamlivRegel :
+    Vilkårsregel(
+        vilkårType = VilkårType.SAMLIV,
+        regler = setOf(LEVER_IKKE_MED_ANNEN_FORELDER, LEVER_IKKE_I_EKTESKAPLIGNENDE_FORHOLD),
+        hovedregler =
+            regelIder(
+                LEVER_IKKE_MED_ANNEN_FORELDER,
+                LEVER_IKKE_I_EKTESKAPLIGNENDE_FORHOLD,
+            ),
+    ) {
     companion object {
         private val LEVER_IKKE_MED_ANNEN_FORELDER =
             RegelSteg(

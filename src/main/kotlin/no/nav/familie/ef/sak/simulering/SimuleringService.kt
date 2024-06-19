@@ -47,9 +47,7 @@ class SimuleringService(
         return simuleringsresultat.beriketData.oppsummering
     }
 
-    fun hentLagretSimuleringsoppsummering(behandlingId: UUID): Simuleringsoppsummering {
-        return hentLagretSimmuleringsresultat(behandlingId).oppsummering
-    }
+    fun hentLagretSimuleringsoppsummering(behandlingId: UUID): Simuleringsoppsummering = hentLagretSimmuleringsresultat(behandlingId).oppsummering
 
     fun hentLagretSimmuleringsresultat(behandlingId: UUID): BeriketSimuleringsresultat {
         val simuleringsresultat = simuleringsresultatRepository.findByIdOrThrow(behandlingId)

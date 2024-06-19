@@ -419,12 +419,12 @@ class BeregningBarnetilsynServiceTest {
         val periode = barnetilsynperiodeDto(januar2021, desember2022, listOf(UUID.randomUUID()), 39000)
 
         val beregnYtelseBarnetilsyn =
-            service.beregnYtelseBarnetilsyn(
-                utgiftsperioder = listOf(periode),
-                kontantstøttePerioder = listOf(),
-                tilleggsstønadsperioder = listOf(),
-            )
-                .sortedBy { it.periode.fom }
+            service
+                .beregnYtelseBarnetilsyn(
+                    utgiftsperioder = listOf(periode),
+                    kontantstøttePerioder = listOf(),
+                    tilleggsstønadsperioder = listOf(),
+                ).sortedBy { it.periode.fom }
         assertThat(beregnYtelseBarnetilsyn).hasSize(2)
         assertThat(beregnYtelseBarnetilsyn.first().beløp).isLessThan(beregnYtelseBarnetilsyn.last().beløp)
         assertThat(beregnYtelseBarnetilsyn.first().beløp).isEqualTo(forventetBeløp2021)
@@ -609,8 +609,8 @@ class BeregningBarnetilsynServiceTest {
         fraDato: LocalDate,
         tilDato: LocalDate,
         beløp: BigDecimal = BigDecimal(100),
-    ): BeløpsperiodeBarnetilsynDto {
-        return BeløpsperiodeBarnetilsynDto(
+    ): BeløpsperiodeBarnetilsynDto =
+        BeløpsperiodeBarnetilsynDto(
             periode = Månedsperiode(fraDato, tilDato),
             beløp = beløp.roundUp().toInt(),
             beløpFørFratrekkOgSatsjustering = beløp.roundUp().toInt(),
@@ -626,14 +626,13 @@ class BeregningBarnetilsynServiceTest {
             periodetype = PeriodetypeBarnetilsyn.ORDINÆR,
             aktivitetstype = AktivitetstypeBarnetilsyn.I_ARBEID,
         )
-    }
 
     private fun listeMedEnPeriodeMedBeløp(
         fra: YearMonth = januar2022,
         til: YearMonth = februar2022,
         beløp: Int = 10,
-    ): List<PeriodeMedBeløpDto> {
-        return listOf(
+    ): List<PeriodeMedBeløpDto> =
+        listOf(
             PeriodeMedBeløpDto(
                 årMånedFra = fra,
                 årMånedTil = til,
@@ -641,7 +640,6 @@ class BeregningBarnetilsynServiceTest {
                 beløp = beløp,
             ),
         )
-    }
 
     private fun listeMedEnUtgiftsperiode(
         fra: YearMonth = januar2022,
@@ -650,8 +648,8 @@ class BeregningBarnetilsynServiceTest {
         periodetype: PeriodetypeBarnetilsyn = PeriodetypeBarnetilsyn.ORDINÆR,
         aktivitetstype: AktivitetstypeBarnetilsyn? = AktivitetstypeBarnetilsyn.I_ARBEID,
         barn: List<UUID>? = null,
-    ): List<UtgiftsperiodeDto> {
-        return listOf(
+    ): List<UtgiftsperiodeDto> =
+        listOf(
             UtgiftsperiodeDto(
                 årMånedFra = fra,
                 årMånedTil = til,
@@ -663,5 +661,4 @@ class BeregningBarnetilsynServiceTest {
                 aktivitetstype = aktivitetstype,
             ),
         )
-    }
 }

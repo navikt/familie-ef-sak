@@ -30,8 +30,7 @@ class OppgaveClient(
     @Qualifier("azure") restOperations: RestOperations,
     integrasjonerConfig: IntegrasjonerConfig,
     private val featureToggleService: FeatureToggleService,
-) :
-    AbstractPingableRestClient(restOperations, "oppgave") {
+) : AbstractPingableRestClient(restOperations, "oppgave") {
     override val pingUri: URI = integrasjonerConfig.pingUri
     private val oppgaveUri: URI = integrasjonerConfig.oppgaveUri
     private val saksbehandlerUri: URI = integrasjonerConfig.saksbehandlerUri
@@ -80,11 +79,21 @@ class OppgaveClient(
         var uri = URI.create("$oppgaveUri/$oppgaveId/fordel")
 
         if (saksbehandler != null) {
-            uri = UriComponentsBuilder.fromUri(uri).queryParam("saksbehandler", saksbehandler).build().toUri()
+            uri =
+                UriComponentsBuilder
+                    .fromUri(uri)
+                    .queryParam("saksbehandler", saksbehandler)
+                    .build()
+                    .toUri()
         }
 
         if (versjon != null) {
-            uri = UriComponentsBuilder.fromUri(uri).queryParam("versjon", versjon).build().toUri()
+            uri =
+                UriComponentsBuilder
+                    .fromUri(uri)
+                    .queryParam("versjon", versjon)
+                    .build()
+                    .toUri()
         }
 
         try {
@@ -138,7 +147,8 @@ class OppgaveClient(
         limit: Int,
     ): FinnMappeResponseDto {
         val uri =
-            UriComponentsBuilder.fromUri(oppgaveUri)
+            UriComponentsBuilder
+                .fromUri(oppgaveUri)
                 .pathSegment("mappe", "sok")
                 .queryParam("enhetsnr", enhetsnummer)
                 .queryParam("limit", limit)

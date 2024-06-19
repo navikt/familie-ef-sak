@@ -18,8 +18,11 @@ class HistoriskPensjonClient(
     private val logger = LoggerFactory.getLogger(javaClass)
 
     private fun lagHarPensjonUri() =
-        UriComponentsBuilder.fromUri(historiskPensjonUri).pathSegment("api/ensligForsoerger/harPensjonsdata")
-            .build().toUri()
+        UriComponentsBuilder
+            .fromUri(historiskPensjonUri)
+            .pathSegment("api/ensligForsoerger/harPensjonsdata")
+            .build()
+            .toUri()
 
     val manglendeRespons = HistoriskPensjonResponse(false, "")
 

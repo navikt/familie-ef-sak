@@ -9,11 +9,12 @@ import no.nav.familie.ef.sak.vilkår.regler.Vilkårsregel
 import no.nav.familie.ef.sak.vilkår.regler.jaNeiSvarRegel
 import no.nav.familie.ef.sak.vilkår.regler.regelIder
 
-class UtdanningErHensiktsmessigRegel : Vilkårsregel(
-    vilkårType = VilkårType.ER_UTDANNING_HENSIKTSMESSIG,
-    regler = setOf(NAVKONTOR_VURDERING, SAKSBEHANDLER_VURDERING),
-    hovedregler = regelIder(NAVKONTOR_VURDERING),
-) {
+class UtdanningErHensiktsmessigRegel :
+    Vilkårsregel(
+        vilkårType = VilkårType.ER_UTDANNING_HENSIKTSMESSIG,
+        regler = setOf(NAVKONTOR_VURDERING, SAKSBEHANDLER_VURDERING),
+        hovedregler = regelIder(NAVKONTOR_VURDERING),
+    ) {
     companion object {
         private val NAVKONTOR_VURDERING =
             RegelSteg(

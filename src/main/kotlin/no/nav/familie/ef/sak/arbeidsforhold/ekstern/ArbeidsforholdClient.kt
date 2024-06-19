@@ -17,14 +17,16 @@ class ArbeidsforholdClient(
     @Qualifier("azure") restOperations: RestOperations,
 ) : AbstractRestClient(restOperations, "arbeidsforhold") {
     private fun lagArbeidsforholdUri() =
-        UriComponentsBuilder.fromUri(uri).pathSegment("api/aareg/arbeidsforhold").build().toUri()
+        UriComponentsBuilder
+            .fromUri(uri)
+            .pathSegment("api/aareg/arbeidsforhold")
+            .build()
+            .toUri()
 
     fun hentArbeidsforhold(
         personIdent: String,
         ansettelsesperiodeFom: LocalDate,
-    ): Ressurs<List<Arbeidsforhold>> {
-        return postForEntity(lagArbeidsforholdUri(), ArbeidsforholdRequest(personIdent, ansettelsesperiodeFom))
-    }
+    ): Ressurs<List<Arbeidsforhold>> = postForEntity(lagArbeidsforholdUri(), ArbeidsforholdRequest(personIdent, ansettelsesperiodeFom))
 }
 
 class ArbeidsforholdRequest(

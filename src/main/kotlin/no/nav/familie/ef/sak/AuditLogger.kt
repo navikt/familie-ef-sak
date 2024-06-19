@@ -25,14 +25,19 @@ data class Sporingsdata(
     val custom3: CustomKeyValue? = null,
 )
 
-enum class AuditLoggerEvent(val type: String) {
+enum class AuditLoggerEvent(
+    val type: String,
+) {
     CREATE("create"),
     UPDATE("update"),
     DELETE("delete"),
     ACCESS("access"),
 }
 
-data class CustomKeyValue(val key: String, val value: String)
+data class CustomKeyValue(
+    val key: String,
+    val value: String,
+)
 
 @Component
 class AuditLogger(
@@ -53,12 +58,12 @@ class AuditLogger(
         }
     }
 
-    private fun getRequest(): HttpServletRequest? {
-        return RequestContextHolder.getRequestAttributes()
+    private fun getRequest(): HttpServletRequest? =
+        RequestContextHolder
+            .getRequestAttributes()
             ?.takeIf { it is ServletRequestAttributes }
             ?.let { it as ServletRequestAttributes }
             ?.request
-    }
 
     private fun createAuditLogString(
         data: Sporingsdata,
@@ -89,16 +94,12 @@ class AuditLogger(
         }
     }
 
-    private fun createCustomString(data: Sporingsdata): String {
-        return listOfNotNull(
+    private fun createCustomString(data: Sporingsdata): String =
+        listOfNotNull(
             data.custom1?.let { "cs3Label=${it.key} cs3=${it.value}" },
             data.custom2?.let { "cs5Label=${it.key} cs5=${it.value}" },
             data.custom3?.let { "cs6Label=${it.key} cs6=${it.value}" },
-        )
-            .joinToString(" ")
-    }
+        ).joinToString(" ")
 
-    private fun getCallId(): String {
-        return MDC.get(MDCConstants.MDC_CALL_ID) ?: throw IllegalStateException("Mangler callId")
-    }
+    private fun getCallId(): String = MDC.get(MDCConstants.MDC_CALL_ID) ?: throw IllegalStateException("Mangler callId")
 }

@@ -27,7 +27,10 @@ data class OpphavsvilkårDto(
     val endretTid: LocalDateTime,
 )
 
-data class OppdaterVilkårsvurderingDto(val id: UUID, val behandlingId: UUID)
+data class OppdaterVilkårsvurderingDto(
+    val id: UUID,
+    val behandlingId: UUID,
+)
 
 data class SvarPåVurderingerDto(
     val id: UUID,
@@ -35,7 +38,10 @@ data class SvarPåVurderingerDto(
     val delvilkårsvurderinger: List<DelvilkårsvurderingDto>,
 )
 
-data class GjenbrukVilkårsvurderingerDto(val behandlingId: UUID, val kopierBehandlingId: UUID)
+data class GjenbrukVilkårsvurderingerDto(
+    val behandlingId: UUID,
+    val kopierBehandlingId: UUID,
+)
 
 data class DelvilkårsvurderingDto(
     val resultat: Vilkårsresultat,

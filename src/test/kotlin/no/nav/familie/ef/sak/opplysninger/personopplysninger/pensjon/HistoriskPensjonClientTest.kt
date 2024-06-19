@@ -45,7 +45,8 @@ class HistoriskPensjonClientTest {
     fun `skal hente historisk pensjon status for person med historikk`() {
         WireMock.stubFor(
             queryForHistoriskPensjonForIdent.willReturn(
-                WireMock.aResponse()
+                WireMock
+                    .aResponse()
                     .withStatus(HttpStatus.OK.value())
                     .withHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.mimeType)
                     .withBody(harHistoriskPensjonRespons),
@@ -62,7 +63,8 @@ class HistoriskPensjonClientTest {
     fun `skal hente historisk pensjon status med ukjent verdi dersom kallet feiler`() {
         WireMock.stubFor(
             queryForHistoriskPensjonForIdent.willReturn(
-                WireMock.aResponse()
+                WireMock
+                    .aResponse()
                     .withStatus(HttpStatus.INTERNAL_SERVER_ERROR.value()),
             ),
         )
@@ -77,7 +79,8 @@ class HistoriskPensjonClientTest {
     fun `skal hente historisk pensjon status for person uten historikk`() {
         WireMock.stubFor(
             queryForHistoriskPensjonForIdent.willReturn(
-                WireMock.aResponse()
+                WireMock
+                    .aResponse()
                     .withStatus(HttpStatus.OK.value())
                     .withHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.mimeType)
                     .withBody(harIkkeHistoriskPensjonRespons),

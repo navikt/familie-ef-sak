@@ -768,8 +768,8 @@ internal class JournalføringServiceTest {
         journalføringBehandling: JournalføringBehandling,
         vilkårsbehandleNyeBarn: VilkårsbehandleNyeBarn = VilkårsbehandleNyeBarn.IKKE_VALGT,
         barnSomSkalFødes: List<BarnSomSkalFødes> = emptyList(),
-    ): JournalføringRequest {
-        return JournalføringRequest(
+    ): JournalføringRequest =
+        JournalføringRequest(
             dokumentTitler,
             fagsakId,
             oppgaveId,
@@ -778,7 +778,6 @@ internal class JournalføringServiceTest {
             barnSomSkalFødes,
             vilkårsbehandleNyeBarn,
         )
-    }
 
     private fun lagRequestV2(
         dokumentTitler: Map<String, String>? = null,

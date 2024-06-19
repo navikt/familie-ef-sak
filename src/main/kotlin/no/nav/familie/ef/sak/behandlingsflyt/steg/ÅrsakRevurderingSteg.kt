@@ -16,9 +16,7 @@ class ÅrsakRevurderingSteg(
     private val årsakRevurderingService: ÅrsakRevurderingService,
     private val tilordnetRessursService: TilordnetRessursService,
 ) : BehandlingSteg<RevurderingsinformasjonDto> {
-    override fun stegType(): StegType {
-        return StegType.REVURDERING_ÅRSAK
-    }
+    override fun stegType(): StegType = StegType.REVURDERING_ÅRSAK
 
     override fun utførOgReturnerNesteSteg(
         saksbehandling: Saksbehandling,

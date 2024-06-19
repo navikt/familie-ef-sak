@@ -48,9 +48,11 @@ class SigrunClientTest {
     @Test
     fun `hent pensjonsgivende inntekt fra sigrun og map til objekt`() {
         wiremockServerItem.stubFor(
-            WireMock.post(urlEqualTo("/api/sigrun/pensjonsgivendeinntekt?inntektsaar=2022"))
+            WireMock
+                .post(urlEqualTo("/api/sigrun/pensjonsgivendeinntekt?inntektsaar=2022"))
                 .willReturn(
-                    WireMock.aResponse()
+                    WireMock
+                        .aResponse()
                         .withStatus(HttpStatus.OK.value())
                         .withHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.mimeType)
                         .withBody(pensjonsgivendeInntektResponseJson),
@@ -73,9 +75,11 @@ class SigrunClientTest {
     @Test
     fun `hent beregnetskatt fra sigrun og map til objekt`() {
         wiremockServerItem.stubFor(
-            WireMock.post(urlEqualTo("/api/sigrun/beregnetskatt?inntektsaar=2022"))
+            WireMock
+                .post(urlEqualTo("/api/sigrun/beregnetskatt?inntektsaar=2022"))
                 .willReturn(
-                    WireMock.aResponse()
+                    WireMock
+                        .aResponse()
                         .withStatus(HttpStatus.OK.value())
                         .withHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.mimeType)
                         .withBody(beregnetSkattRessursResponseJson),
@@ -90,9 +94,11 @@ class SigrunClientTest {
     @Test
     fun `hent beregnetskatt fra sigrun og map til objekt med skatteoppgjørsdato`() {
         wiremockServerItem.stubFor(
-            WireMock.post(urlEqualTo("/api/sigrun/beregnetskatt?inntektsaar=2022"))
+            WireMock
+                .post(urlEqualTo("/api/sigrun/beregnetskatt?inntektsaar=2022"))
                 .willReturn(
-                    WireMock.aResponse()
+                    WireMock
+                        .aResponse()
                         .withStatus(HttpStatus.OK.value())
                         .withHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.mimeType)
                         .withBody(beregnetSkattMedOppgjørsdatoJson),
@@ -107,9 +113,11 @@ class SigrunClientTest {
     @Test
     fun `hent summertskattegrunnlag fra sigrun og map til objekt`() {
         wiremockServerItem.stubFor(
-            WireMock.post(urlEqualTo("/api/sigrun/summertskattegrunnlag?inntektsaar=2018"))
+            WireMock
+                .post(urlEqualTo("/api/sigrun/summertskattegrunnlag?inntektsaar=2018"))
                 .willReturn(
-                    WireMock.aResponse()
+                    WireMock
+                        .aResponse()
                         .withStatus(HttpStatus.OK.value())
                         .withHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.mimeType)
                         .withBody(summertSkattegrunnlagJson),

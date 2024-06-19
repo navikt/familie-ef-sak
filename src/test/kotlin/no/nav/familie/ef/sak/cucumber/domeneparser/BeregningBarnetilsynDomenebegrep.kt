@@ -2,7 +2,9 @@ package no.nav.familie.ef.sak.no.nav.familie.ef.sak.cucumber.domeneparser
 
 import no.nav.familie.ef.sak.cucumber.domeneparser.Domenenøkkel
 
-enum class BeregningBarnetilsynDomenebegrep(val nøkkel: String) : Domenenøkkel {
+enum class BeregningBarnetilsynDomenebegrep(
+    val nøkkel: String,
+) : Domenenøkkel {
     PERIODEUTGIFT("Periodeutgift"),
     KONTANTSTØTTEBELØP("Kontantstøttebeløp"),
     TILLEGSSTØNADBELØP("Tillegsstønadbeløp"),
@@ -17,7 +19,5 @@ enum class BeregningBarnetilsynDomenebegrep(val nøkkel: String) : Domenenøkkel
 
     ;
 
-    override fun nøkkel(): String {
-        return nøkkel
-    }
+    override fun nøkkel(): String = nøkkel
 }

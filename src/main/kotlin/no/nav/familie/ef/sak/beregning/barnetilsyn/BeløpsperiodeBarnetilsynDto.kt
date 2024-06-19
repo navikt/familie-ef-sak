@@ -21,7 +21,8 @@ data class BeløpsperiodeBarnetilsynDto(
     @get:JsonProperty("periode")
     val deprecatedPeriode: no.nav.familie.ef.sak.felles.dto.Periode
         get() =
-            no.nav.familie.ef.sak.felles.dto.Periode(periode.fomDato, periode.tomDato)
+            no.nav.familie.ef.sak.felles.dto
+                .Periode(periode.fomDato, periode.tomDato)
 }
 
 data class BeregningsgrunnlagBarnetilsynDto(

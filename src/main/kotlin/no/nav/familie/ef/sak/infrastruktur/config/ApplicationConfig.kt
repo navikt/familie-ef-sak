@@ -90,12 +90,12 @@ class ApplicationConfig {
     fun restTemplate(
         restTemplateBuilder: RestTemplateBuilder,
         consumerIdClientInterceptor: ConsumerIdClientInterceptor,
-    ): RestOperations {
-        return restTemplateBuilder.additionalInterceptors(
-            consumerIdClientInterceptor,
-            MdcValuesPropagatingClientInterceptor(),
-        ).build()
-    }
+    ): RestOperations =
+        restTemplateBuilder
+            .additionalInterceptors(
+                consumerIdClientInterceptor,
+                MdcValuesPropagatingClientInterceptor(),
+            ).build()
 
     /**
      * Overskrever OAuth2HttpClient som settes opp i token-support som ikke kan få med objectMapper fra felles
@@ -104,15 +104,15 @@ class ApplicationConfig {
      */
     @Bean
     @Primary
-    fun oAuth2HttpClient(): OAuth2HttpClient {
-        return RetryOAuth2HttpClient(
+    fun oAuth2HttpClient(): OAuth2HttpClient =
+        RetryOAuth2HttpClient(
             RestClient.create(
                 RestTemplateBuilder()
                     .setConnectTimeout(Duration.of(2, ChronoUnit.SECONDS))
-                    .setReadTimeout(Duration.of(2, ChronoUnit.SECONDS)).build(),
+                    .setReadTimeout(Duration.of(2, ChronoUnit.SECONDS))
+                    .build(),
             ),
         )
-    }
 
     @Bean
     fun prosesseringInfoProvider(
@@ -121,14 +121,14 @@ class ApplicationConfig {
         object : ProsesseringInfoProvider {
             override fun hentBrukernavn(): String =
                 try {
-                    SpringTokenValidationContextHolder().getTokenValidationContext().getClaims("azuread")
+                    SpringTokenValidationContextHolder()
+                        .getTokenValidationContext()
+                        .getClaims("azuread")
                         .getStringClaim("preferred_username")
                 } catch (e: Exception) {
                     throw e
                 }
 
-            override fun harTilgang(): Boolean {
-                return harRolle(prosesseringRolle)
-            }
+            override fun harTilgang(): Boolean = harRolle(prosesseringRolle)
         }
 }

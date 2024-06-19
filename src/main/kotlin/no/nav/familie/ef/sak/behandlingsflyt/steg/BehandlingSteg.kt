@@ -91,20 +91,18 @@ enum class StegType(
     ),
     ;
 
-    fun displayName(): String {
-        return this.name.replace('_', ' ').lowercase().replaceFirstChar { it.uppercase() }
-    }
+    fun displayName(): String =
+        this.name
+            .replace('_', ' ')
+            .lowercase()
+            .replaceFirstChar { it.uppercase() }
 
-    fun kommerEtter(steg: StegType): Boolean {
-        return this.rekkefølge > steg.rekkefølge
-    }
+    fun kommerEtter(steg: StegType): Boolean = this.rekkefølge > steg.rekkefølge
 
-    fun erGyldigIKombinasjonMedStatus(behandlingStatus: BehandlingStatus): Boolean {
-        return this.gyldigIKombinasjonMedStatus.contains(behandlingStatus)
-    }
+    fun erGyldigIKombinasjonMedStatus(behandlingStatus: BehandlingStatus): Boolean = this.gyldigIKombinasjonMedStatus.contains(behandlingStatus)
 
-    fun hentNesteSteg(): StegType {
-        return when (this) {
+    fun hentNesteSteg(): StegType =
+        when (this) {
             REVURDERING_ÅRSAK -> VILKÅR
             VILKÅR -> BEREGNE_YTELSE
             BEREGNE_YTELSE -> SEND_TIL_BESLUTTER
@@ -116,10 +114,11 @@ enum class StegType(
             PUBLISER_VEDTAKSHENDELSE -> BEHANDLING_FERDIGSTILT
             BEHANDLING_FERDIGSTILT -> BEHANDLING_FERDIGSTILT
         }
-    }
 }
 
-enum class BehandlerRolle(val nivå: Int) {
+enum class BehandlerRolle(
+    val nivå: Int,
+) {
     SYSTEM(4),
     BESLUTTER(3),
     SAKSBEHANDLER(2),

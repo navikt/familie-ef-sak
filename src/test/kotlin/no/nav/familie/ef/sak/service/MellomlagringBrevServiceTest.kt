@@ -49,13 +49,12 @@ internal class MellomlagringBrevServiceTest {
                 behandlingId,
                 sanityVersjon,
             ),
+        ).isEqualTo(
+            MellomlagretBrevSanity(
+                brevmal = mellomlagretBrev.brevmal,
+                brevverdier = mellomlagretBrev.brevverdier,
+            ),
         )
-            .isEqualTo(
-                MellomlagretBrevSanity(
-                    brevmal = mellomlagretBrev.brevmal,
-                    brevverdier = mellomlagretBrev.brevverdier,
-                ),
-            )
     }
 
     @Test

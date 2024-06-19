@@ -75,16 +75,13 @@ data class VedtakshistorikkperiodeOvergangsstønad(
             inntekt = inntekt,
         )
 
-    override fun medFra(fra: YearMonth): Vedtakshistorikkperiode {
-        return this.copy(
+    override fun medFra(fra: YearMonth): Vedtakshistorikkperiode =
+        this.copy(
             periode = this.periode.copy(fom = fra),
             inntekt = this.inntekt.copy(årMånedFra = fra),
         )
-    }
 
-    override fun medTil(til: YearMonth): Vedtakshistorikkperiode {
-        return this.copy(periode = this.periode.copy(tom = til))
-    }
+    override fun medTil(til: YearMonth): Vedtakshistorikkperiode = this.copy(periode = this.periode.copy(tom = til))
 }
 
 data class VedtakshistorikkperiodeBarnetilsyn(
@@ -115,13 +112,9 @@ data class VedtakshistorikkperiodeBarnetilsyn(
             periodetype = periode.periodetype,
         )
 
-    override fun medFra(fra: YearMonth): Vedtakshistorikkperiode {
-        return this.copy(periode = this.periode.copy(fom = fra))
-    }
+    override fun medFra(fra: YearMonth): Vedtakshistorikkperiode = this.copy(periode = this.periode.copy(fom = fra))
 
-    override fun medTil(til: YearMonth): Vedtakshistorikkperiode {
-        return this.copy(periode = this.periode.copy(tom = til))
-    }
+    override fun medTil(til: YearMonth): Vedtakshistorikkperiode = this.copy(periode = this.periode.copy(tom = til))
 }
 
 object VedtakHistorikkBeregner {
@@ -133,8 +126,8 @@ object VedtakHistorikkBeregner {
     fun lagVedtaksperioderPerBehandling(
         vedtaksliste: List<BehandlingHistorikkData>,
         konfigurasjon: HistorikkKonfigurasjon,
-    ): Map<UUID, Vedtaksdata> {
-        return vedtaksliste
+    ): Map<UUID, Vedtaksdata> =
+        vedtaksliste
             .sortedBy { it.tilkjentYtelse.sporbar.opprettetTid }
             .fold(listOf<Pair<UUID, Vedtaksdata>>()) { acc, vedtak ->
                 acc +
@@ -142,9 +135,7 @@ object VedtakHistorikkBeregner {
                         vedtak.behandlingId,
                         Vedtaksdata(vedtak.vedtakstidspunkt, lagTotalbildeForNyttVedtak(vedtak, acc, konfigurasjon)),
                     )
-            }
-            .toMap()
-    }
+            }.toMap()
 
     private fun lagTotalbildeForNyttVedtak(
         data: BehandlingHistorikkData,
@@ -214,24 +205,24 @@ object VedtakHistorikkBeregner {
         }
     }
 
-    private fun inntektsperioder(vedtak: InnvilgelseOvergangsstønad): List<Pair<Månedsperiode, Inntekt>> {
-        return vedtak.inntekter.windowed(2, 1, true).map { inntektWindow ->
+    private fun inntektsperioder(vedtak: InnvilgelseOvergangsstønad): List<Pair<Månedsperiode, Inntekt>> =
+        vedtak.inntekter.windowed(2, 1, true).map { inntektWindow ->
             val tom = inntektWindow.getOrNull(1)?.årMånedFra?.minusMonths(1) ?: YEAR_MONTH_MAX
             val periode = Månedsperiode(inntektWindow[0].årMånedFra, tom)
             periode to inntektWindow[0]
         }
-    }
 
-    private fun sanksjonsperioder(vedtak: InnvilgelseBarnetilsyn): List<Sanksjonsperiode> {
-        return vedtak.perioder.filter { it.periodetype == PeriodetypeBarnetilsyn.SANKSJON_1_MND }
+    private fun sanksjonsperioder(vedtak: InnvilgelseBarnetilsyn): List<Sanksjonsperiode> =
+        vedtak.perioder
+            .filter { it.periodetype == PeriodetypeBarnetilsyn.SANKSJON_1_MND }
             .map { Sanksjonsperiode(it.periode, it.sanksjonsårsak ?: error("Mangler sanksjonsårsak")) }
-    }
 
     private fun perioderFraBeløp(
         vedtak: InnvilgelseBarnetilsyn,
         data: BehandlingHistorikkData,
         konfigurasjon: HistorikkKonfigurasjon,
-    ) = data.tilkjentYtelse.tilBeløpsperiodeBarnetilsyn(vedtak, konfigurasjon.brukIkkeVedtatteSatser)
+    ) = data.tilkjentYtelse
+        .tilBeløpsperiodeBarnetilsyn(vedtak, konfigurasjon.brukIkkeVedtatteSatser)
         .map { VedtakshistorikkperiodeBarnetilsyn(it, data.aktivitetArbeid) }
 
     private fun splitOppPerioderSomErSanksjonert(

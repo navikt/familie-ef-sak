@@ -52,7 +52,10 @@ fun List<Vilkårsvurdering>.utledVurderinger(
     vilkårType: VilkårType,
     regelId: RegelId,
 ) =
-    this.filter { it.type == vilkårType }.flatMap { it.delvilkårsvurdering.delvilkårsvurderinger }.flatMap { it.vurderinger }
+    this
+        .filter { it.type == vilkårType }
+        .flatMap { it.delvilkårsvurdering.delvilkårsvurderinger }
+        .flatMap { it.vurderinger }
         .filter { it.regelId == regelId }
 
 /**
@@ -69,7 +72,9 @@ data class Opphavsvilkår(
 )
 
 // Ingen støtte for å ha en liste direkt i entiteten, wrapper+converter virker
-data class DelvilkårsvurderingWrapper(val delvilkårsvurderinger: List<Delvilkårsvurdering>)
+data class DelvilkårsvurderingWrapper(
+    val delvilkårsvurderinger: List<Delvilkårsvurdering>,
+)
 
 data class Delvilkårsvurdering(
     val resultat: Vilkårsresultat = Vilkårsresultat.IKKE_TATT_STILLING_TIL,
@@ -98,7 +103,9 @@ val inngangsvilkår =
         VilkårType.NYTT_BARN_SAMME_PARTNER,
     )
 
-enum class Vilkårsresultat(val beskrivelse: String) {
+enum class Vilkårsresultat(
+    val beskrivelse: String,
+) {
     OPPFYLT("Vilkåret er oppfylt når alle delvilkår er oppfylte"),
     AUTOMATISK_OPPFYLT("Delvilkår er oppfylt med automatisk beregning"),
     IKKE_OPPFYLT("Vilkåret er ikke oppfylt hvis alle delvilkår er oppfylt eller ikke oppfylt, men minimum 1 ikke oppfylt"),
@@ -112,7 +119,10 @@ enum class Vilkårsresultat(val beskrivelse: String) {
     fun erIkkeDelvilkårsresultat() = this != AUTOMATISK_OPPFYLT
 }
 
-enum class VilkårType(val beskrivelse: String, val gjelderStønader: List<StønadType>) {
+enum class VilkårType(
+    val beskrivelse: String,
+    val gjelderStønader: List<StønadType>,
+) {
     FORUTGÅENDE_MEDLEMSKAP("§15-2 Forutgående medlemskap", listOf(OVERGANGSSTØNAD, BARNETILSYN, SKOLEPENGER)),
     LOVLIG_OPPHOLD("§15-3 Lovlig opphold", listOf(OVERGANGSSTØNAD, BARNETILSYN, SKOLEPENGER)),
 

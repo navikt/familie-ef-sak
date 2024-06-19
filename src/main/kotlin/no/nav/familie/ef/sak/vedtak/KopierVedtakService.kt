@@ -63,25 +63,24 @@ class KopierVedtakService(
     private fun mapTilleggsstønadDto(
         historikk: List<AndelHistorikkDto>,
         forrigeBehandlingId: UUID,
-    ): TilleggsstønadDto {
-        return TilleggsstønadDto(
+    ): TilleggsstønadDto =
+        TilleggsstønadDto(
             historikk.any { it.andel.tilleggsstønad > 0 },
             historikk.filter { it.andel.tilleggsstønad > 0 }.map {
                 PeriodeMedBeløpDto(periode = it.andel.periode, beløp = it.andel.tilleggsstønad)
             },
             vedtakService.hentVedtak(forrigeBehandlingId).tilleggsstønad?.begrunnelse,
         )
-    }
 
-    private fun mapPerioderKontantstøtte(historikk: List<AndelHistorikkDto>): List<PeriodeMedBeløpDto> {
-        return historikk.filter { kontantstøtte -> kontantstøtte.andel.kontantstøtte > 0 }
+    private fun mapPerioderKontantstøtte(historikk: List<AndelHistorikkDto>): List<PeriodeMedBeløpDto> =
+        historikk
+            .filter { kontantstøtte -> kontantstøtte.andel.kontantstøtte > 0 }
             .map {
                 PeriodeMedBeløpDto(
                     periode = it.andel.periode,
                     beløp = it.andel.kontantstøtte,
                 )
             }
-    }
 
     private fun mapUtgiftsperioder(
         historikk: List<AndelHistorikkDto>,
@@ -115,9 +114,7 @@ class KopierVedtakService(
     }
 }
 
-private fun Månedsperiode.ikkePåfølgesAv(periode: Månedsperiode): Boolean {
-    return !this.påfølgesAv(periode)
-}
+private fun Månedsperiode.ikkePåfølgesAv(periode: Månedsperiode): Boolean = !this.påfølgesAv(periode)
 
 private fun List<UtgiftsperiodeDto>.fyllUtPerioderUtenStønad(): List<UtgiftsperiodeDto> {
     val perioderUtenStønad = mutableListOf<UtgiftsperiodeDto>()

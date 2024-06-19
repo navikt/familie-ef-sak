@@ -25,9 +25,7 @@ data class Fagsak(
 ) {
     fun erAktivIdent(personIdent: String): Boolean = hentAktivIdent() == personIdent
 
-    fun hentAktivIdent(): String {
-        return personIdenter.maxByOrNull { it.sporbar.endret.endretTid }?.ident ?: error("Fant ingen ident på fagsak $id")
-    }
+    fun hentAktivIdent(): String = personIdenter.maxByOrNull { it.sporbar.endret.endretTid }?.ident ?: error("Fant ingen ident på fagsak $id")
 }
 
 @Table("fagsak")

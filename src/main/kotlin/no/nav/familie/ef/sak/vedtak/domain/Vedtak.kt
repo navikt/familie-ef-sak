@@ -50,7 +50,9 @@ data class Vedtak(
     fun utledVedtakErUtenBeslutter(): VedtakErUtenBeslutter = VedtakErUtenBeslutter(erVedtakUtenBeslutter())
 }
 
-data class VedtakErUtenBeslutter(val value: Boolean)
+data class VedtakErUtenBeslutter(
+    val value: Boolean,
+)
 
 sealed interface VedtaksperiodeMedSanksjonsårsak {
     val datoFra: LocalDate
@@ -205,9 +207,13 @@ data class PeriodeMedBeløp(
     val periode get() = Månedsperiode(datoFra, datoTil)
 }
 
-data class PeriodeWrapper(val perioder: List<Vedtaksperiode>)
+data class PeriodeWrapper(
+    val perioder: List<Vedtaksperiode>,
+)
 
-data class InntektWrapper(val inntekter: List<Inntektsperiode>)
+data class InntektWrapper(
+    val inntekter: List<Inntektsperiode>,
+)
 
 data class TilleggsstønadWrapper(
     val harTilleggsstønad: Boolean,
@@ -215,7 +221,9 @@ data class TilleggsstønadWrapper(
     val begrunnelse: String?,
 )
 
-data class KontantstøtteWrapper(val perioder: List<PeriodeMedBeløp>)
+data class KontantstøtteWrapper(
+    val perioder: List<PeriodeMedBeløp>,
+)
 
 data class BarnetilsynWrapper(
     val perioder: List<Barnetilsynperiode>,

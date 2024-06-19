@@ -15,11 +15,12 @@ import no.nav.familie.ef.sak.vilkår.regler.regelIder
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import java.util.UUID
 
-class MorEllerFarRegel : Vilkårsregel(
-    vilkårType = VilkårType.MOR_ELLER_FAR,
-    regler = setOf(OMSORG_FOR_EGNE_ELLER_ADOPTERTE_BARN),
-    hovedregler = regelIder(OMSORG_FOR_EGNE_ELLER_ADOPTERTE_BARN),
-) {
+class MorEllerFarRegel :
+    Vilkårsregel(
+        vilkårType = VilkårType.MOR_ELLER_FAR,
+        regler = setOf(OMSORG_FOR_EGNE_ELLER_ADOPTERTE_BARN),
+        hovedregler = regelIder(OMSORG_FOR_EGNE_ELLER_ADOPTERTE_BARN),
+    ) {
     override fun initiereDelvilkårsvurdering(
         metadata: HovedregelMetadata,
         resultat: Vilkårsresultat,
@@ -38,10 +39,9 @@ class MorEllerFarRegel : Vilkårsregel(
         }
     }
 
-    fun erMorEllerFarForAlleBarn(metadata: HovedregelMetadata): Boolean {
-        return metadata.behandling.årsak == BehandlingÅrsak.SØKNAD &&
+    fun erMorEllerFarForAlleBarn(metadata: HovedregelMetadata): Boolean =
+        metadata.behandling.årsak == BehandlingÅrsak.SØKNAD &&
             metadata.vilkårgrunnlagDto.barnMedSamvær.all { it.registergrunnlag.fødselsnummer != null }
-    }
 
     companion object {
         private val OMSORG_FOR_EGNE_ELLER_ADOPTERTE_BARN =

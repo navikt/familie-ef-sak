@@ -290,7 +290,9 @@ internal class IverksettingDtoMapperTest {
         every { vedtakService.hentVedtak(any()) } returns innvilgetVedtak
         val iverksettDto = iverksettingDtoMapper.tilDto(saksbehandling, "beslutter")
         val periodetyper =
-            iverksettDto.vedtak.vedtaksperioder.map { it as VedtaksperiodeOvergangsstønadDto }.map { it.periodeType }
+            iverksettDto.vedtak.vedtaksperioder
+                .map { it as VedtaksperiodeOvergangsstønadDto }
+                .map { it.periodeType }
         val hovedperiode = no.nav.familie.kontrakter.ef.iverksett.VedtaksperiodeType.HOVEDPERIODE
         val sanksjon = no.nav.familie.kontrakter.ef.iverksett.VedtaksperiodeType.SANKSJON
         assertThat(periodetyper).containsExactly(hovedperiode, sanksjon)
@@ -313,7 +315,9 @@ internal class IverksettingDtoMapperTest {
         every { vedtakService.hentVedtak(any()) } returns innvilgetVedtak
         val iverksettDto = iverksettingDtoMapper.tilDto(saksbehandling, "beslutter")
         val periodetyper =
-            iverksettDto.vedtak.vedtaksperioder.map { it as VedtaksperiodeOvergangsstønadDto }.map { it.periodeType }
+            iverksettDto.vedtak.vedtaksperioder
+                .map { it as VedtaksperiodeOvergangsstønadDto }
+                .map { it.periodeType }
         val hovedperiode = no.nav.familie.kontrakter.ef.iverksett.VedtaksperiodeType.HOVEDPERIODE
         assertThat(periodetyper).containsExactly(hovedperiode, hovedperiode)
     }
@@ -328,7 +332,8 @@ internal class IverksettingDtoMapperTest {
         Vilkårsresultat.values().forEach { VilkårsresultatIverksett.valueOf(it.name) }
 
         AktivitetType.values().forEach { AktivitetTypeIverksett.valueOf(it.name) }
-        VedtaksperiodeType.values()
+        VedtaksperiodeType
+            .values()
             .filter { it != MIDLERTIDIG_OPPHØR }
             .forEach { VedtaksperiodeTypeIverksett.valueOf(it.name) }
 

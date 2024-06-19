@@ -36,11 +36,10 @@ class BeregningSkolepengerService(
         return beregnYtelse(utgiftsperioder, forrigePerioder, erOpphør)
     }
 
-    private fun hentPerioderFraForrigeVedtak(behandlingId: UUID): List<SkoleårsperiodeSkolepengerDto> {
-        return behandlingService.hentSaksbehandling(behandlingId).forrigeBehandlingId?.let { forrigeBehandlingId ->
+    private fun hentPerioderFraForrigeVedtak(behandlingId: UUID): List<SkoleårsperiodeSkolepengerDto> =
+        behandlingService.hentSaksbehandling(behandlingId).forrigeBehandlingId?.let { forrigeBehandlingId ->
             hentPerioder(forrigeBehandlingId)
         } ?: emptyList()
-    }
 
     private fun hentPerioder(forrigeBehandlingId: UUID): List<SkoleårsperiodeSkolepengerDto> {
         val vedtak = vedtakService.hentVedtak(forrigeBehandlingId)
@@ -66,8 +65,8 @@ class BeregningSkolepengerService(
 
     private fun beregnSkoleårsperioder(
         perioder: List<SkoleårsperiodeSkolepengerDto>,
-    ): List<BeløpsperiodeSkolepenger> {
-        return perioder
+    ): List<BeløpsperiodeSkolepenger> =
+        perioder
             .flatMap { skoleårsperiode -> skoleårsperiode.utgiftsperioder }
             .groupBy { it.årMånedFra }
             .toSortedMap()
@@ -77,7 +76,6 @@ class BeregningSkolepengerService(
                     beløp = value.sumOf { it.stønad },
                 )
             }
-    }
 
     private fun validerFornuftigeBeløp(skoleårsperioder: List<SkoleårsperiodeSkolepengerDto>) {
         brukerfeilHvis(skoleårsperioder.any { periode -> periode.utgiftsperioder.any { it.stønad < 0 } }) {
@@ -154,9 +152,10 @@ class BeregningSkolepengerService(
     ) {
         if (forrigePerioder.isEmpty()) return
         val tidligereUtgiftIder =
-            forrigePerioder.flatMap { periode ->
-                periode.utgiftsperioder.map { it.id to it }
-            }.toMap()
+            forrigePerioder
+                .flatMap { periode ->
+                    periode.utgiftsperioder.map { it.id to it }
+                }.toMap()
         if (erOpphør) {
             validerIngenNyePerioderFinnes(perioder, forrigePerioder)
             validerNoeErFjernet(perioder, forrigePerioder)

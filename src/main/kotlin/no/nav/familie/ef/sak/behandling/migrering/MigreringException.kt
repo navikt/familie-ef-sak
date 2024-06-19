@@ -3,9 +3,14 @@ package no.nav.familie.ef.sak.behandling.migrering
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import org.springframework.http.HttpStatus
 
-class MigreringException(val årsak: String, val type: MigreringExceptionType) : ApiFeil(årsak, HttpStatus.BAD_REQUEST)
+class MigreringException(
+    val årsak: String,
+    val type: MigreringExceptionType,
+) : ApiFeil(årsak, HttpStatus.BAD_REQUEST)
 
-enum class MigreringExceptionType(val kanGåVidereTilJournalføring: Boolean = false) {
+enum class MigreringExceptionType(
+    val kanGåVidereTilJournalføring: Boolean = false,
+) {
     ÅPEN_SAK,
     FLERE_IDENTER,
     FLERE_AKTIVE_PERIODER,

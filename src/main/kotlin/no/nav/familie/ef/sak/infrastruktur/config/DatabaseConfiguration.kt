@@ -53,21 +53,16 @@ import javax.sql.DataSource
 @EnableJdbcRepositories("no.nav.familie")
 class DatabaseConfiguration : AbstractJdbcConfiguration() {
     @Bean
-    fun operations(dataSource: DataSource): NamedParameterJdbcOperations {
-        return NamedParameterJdbcTemplate(dataSource)
-    }
+    fun operations(dataSource: DataSource): NamedParameterJdbcOperations = NamedParameterJdbcTemplate(dataSource)
 
     @Bean
-    fun transactionManager(dataSource: DataSource): PlatformTransactionManager {
-        return DataSourceTransactionManager(dataSource)
-    }
+    fun transactionManager(dataSource: DataSource): PlatformTransactionManager = DataSourceTransactionManager(dataSource)
 
     @Bean
-    fun auditSporbarEndret(): AuditorAware<Endret> {
-        return AuditorAware {
+    fun auditSporbarEndret(): AuditorAware<Endret> =
+        AuditorAware {
             Optional.of(Endret())
         }
-    }
 
     @Bean
     fun verifyIgnoreIfProd(
@@ -87,8 +82,8 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
     }
 
     @Bean
-    override fun jdbcCustomConversions(): JdbcCustomConversions {
-        return JdbcCustomConversions(
+    override fun jdbcCustomConversions(): JdbcCustomConversions =
+        JdbcCustomConversions(
             listOf(
                 UtbetalingsoppdragTilStringConverter(),
                 StringTilUtbetalingsoppdragConverter(),
@@ -132,55 +127,40 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
                 SkolepengerTilPGobjectConverter(),
             ),
         )
-    }
 
     @WritingConverter
     class UtbetalingsoppdragTilStringConverter : Converter<Utbetalingsoppdrag, String> {
-        override fun convert(utbetalingsoppdrag: Utbetalingsoppdrag): String {
-            return objectMapper.writeValueAsString(utbetalingsoppdrag)
-        }
+        override fun convert(utbetalingsoppdrag: Utbetalingsoppdrag): String = objectMapper.writeValueAsString(utbetalingsoppdrag)
     }
 
     @ReadingConverter
     class StringTilUtbetalingsoppdragConverter : Converter<String, Utbetalingsoppdrag> {
-        override fun convert(string: String): Utbetalingsoppdrag {
-            return objectMapper.readValue(string, Utbetalingsoppdrag::class.java)
-        }
+        override fun convert(string: String): Utbetalingsoppdrag = objectMapper.readValue(string, Utbetalingsoppdrag::class.java)
     }
 
     @WritingConverter
     class DokumentTilStringConverter : Converter<Dokumentasjon, String> {
-        override fun convert(dokumentasjon: Dokumentasjon): String? {
-            return objectMapper.writeValueAsString(dokumentasjon)
-        }
+        override fun convert(dokumentasjon: Dokumentasjon): String? = objectMapper.writeValueAsString(dokumentasjon)
     }
 
     @ReadingConverter
     class StringTilDokumentConverter : Converter<String, Dokumentasjon> {
-        override fun convert(s: String): Dokumentasjon {
-            return objectMapper.readValue(s, Dokumentasjon::class.java)
-        }
+        override fun convert(s: String): Dokumentasjon = objectMapper.readValue(s, Dokumentasjon::class.java)
     }
 
     @WritingConverter
     class YearMonthTilLocalDateConverter : Converter<YearMonth, LocalDate> {
-        override fun convert(yearMonth: YearMonth): LocalDate {
-            return yearMonth.atDay(1)
-        }
+        override fun convert(yearMonth: YearMonth): LocalDate = yearMonth.atDay(1)
     }
 
     @ReadingConverter
     class LocalDateTilYearMonthConverter : Converter<Date, YearMonth> {
-        override fun convert(date: Date): YearMonth {
-            return YearMonth.from(date.toLocalDate())
-        }
+        override fun convert(date: Date): YearMonth = YearMonth.from(date.toLocalDate())
     }
 
     @ReadingConverter
     class PGobjectTilDelvilkårConverter : Converter<PGobject, DelvilkårsvurderingWrapper> {
-        override fun convert(pGobject: PGobject): DelvilkårsvurderingWrapper {
-            return DelvilkårsvurderingWrapper(pGobject.value?.let { objectMapper.readValue(it) } ?: emptyList())
-        }
+        override fun convert(pGobject: PGobject): DelvilkårsvurderingWrapper = DelvilkårsvurderingWrapper(pGobject.value?.let { objectMapper.readValue(it) } ?: emptyList())
     }
 
     @WritingConverter
@@ -194,37 +174,27 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
 
     @WritingConverter
     class GjelderDegTilStringConverter : Converter<GjelderDeg, String> {
-        override fun convert(verdier: GjelderDeg): String {
-            return StringUtils.join(verdier.verdier, ";")
-        }
+        override fun convert(verdier: GjelderDeg): String = StringUtils.join(verdier.verdier, ";")
     }
 
     @ReadingConverter
     class StringTilGjelderDegConverter : Converter<String, GjelderDeg> {
-        override fun convert(verdi: String): GjelderDeg {
-            return GjelderDeg(verdi.split(";"))
-        }
+        override fun convert(verdi: String): GjelderDeg = GjelderDeg(verdi.split(";"))
     }
 
     @WritingConverter
     class ArbeidssituasjonTilStringConverter : Converter<Arbeidssituasjon, String> {
-        override fun convert(verdier: Arbeidssituasjon): String {
-            return StringUtils.join(verdier.verdier, ";")
-        }
+        override fun convert(verdier: Arbeidssituasjon): String = StringUtils.join(verdier.verdier, ";")
     }
 
     @ReadingConverter
     class StringTilArbeidssituasjonConverter : Converter<String, Arbeidssituasjon> {
-        override fun convert(verdi: String): Arbeidssituasjon {
-            return Arbeidssituasjon(verdi.split(";"))
-        }
+        override fun convert(verdi: String): Arbeidssituasjon = Arbeidssituasjon(verdi.split(";"))
     }
 
     @ReadingConverter
     class PGobjectTilJsonWrapperConverter : Converter<PGobject, JsonWrapper?> {
-        override fun convert(pGobject: PGobject): JsonWrapper? {
-            return pGobject.value?.let { JsonWrapper(it) }
-        }
+        override fun convert(pGobject: PGobject): JsonWrapper? = pGobject.value?.let { JsonWrapper(it) }
     }
 
     @WritingConverter
@@ -247,30 +217,22 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
 
     @ReadingConverter
     class PGobjectTilGrunnlagsdata : Converter<PGobject, GrunnlagsdataDomene> {
-        override fun convert(pGobject: PGobject): GrunnlagsdataDomene {
-            return objectMapper.readValue(pGobject.value!!)
-        }
+        override fun convert(pGobject: PGobject): GrunnlagsdataDomene = objectMapper.readValue(pGobject.value!!)
     }
 
     @WritingConverter
     class FilTilBytearrayConverter : Converter<Fil, ByteArray> {
-        override fun convert(fil: Fil): ByteArray {
-            return fil.bytes
-        }
+        override fun convert(fil: Fil): ByteArray = fil.bytes
     }
 
     @ReadingConverter
     class BytearrayTilFilConverter : Converter<ByteArray, Fil> {
-        override fun convert(bytes: ByteArray): Fil {
-            return Fil(bytes)
-        }
+        override fun convert(bytes: ByteArray): Fil = Fil(bytes)
     }
 
     @ReadingConverter
     class PGobjectTilVedtaksperioder : Converter<PGobject, PeriodeWrapper> {
-        override fun convert(pGobject: PGobject): PeriodeWrapper {
-            return PeriodeWrapper(pGobject.value?.let { objectMapper.readValue(it) } ?: emptyList())
-        }
+        override fun convert(pGobject: PGobject): PeriodeWrapper = PeriodeWrapper(pGobject.value?.let { objectMapper.readValue(it) } ?: emptyList())
     }
 
     @WritingConverter
@@ -284,9 +246,7 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
 
     @ReadingConverter
     class PGobjectTilInntektsperiode : Converter<PGobject, InntektWrapper> {
-        override fun convert(pGobject: PGobject): InntektWrapper {
-            return InntektWrapper(pGobject.value?.let { objectMapper.readValue(it) } ?: emptyList())
-        }
+        override fun convert(pGobject: PGobject): InntektWrapper = InntektWrapper(pGobject.value?.let { objectMapper.readValue(it) } ?: emptyList())
     }
 
     @WritingConverter
@@ -372,9 +332,7 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
 
     @ReadingConverter
     class PGobjectTilDetaljertSimuleringResultat : Converter<PGobject, DetaljertSimuleringResultat> {
-        override fun convert(pGobject: PGobject): DetaljertSimuleringResultat {
-            return DetaljertSimuleringResultat(pGobject.value?.let { objectMapper.readValue(it) } ?: emptyList())
-        }
+        override fun convert(pGobject: PGobject): DetaljertSimuleringResultat = DetaljertSimuleringResultat(pGobject.value?.let { objectMapper.readValue(it) } ?: emptyList())
     }
 
     @WritingConverter
@@ -388,9 +346,7 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
 
     @ReadingConverter
     class PGobjectTilBeriketSimuleringsresultat : Converter<PGobject, BeriketSimuleringsresultat?> {
-        override fun convert(pGobject: PGobject): BeriketSimuleringsresultat? {
-            return pGobject.value?.let { objectMapper.readValue(it) }
-        }
+        override fun convert(pGobject: PGobject): BeriketSimuleringsresultat? = pGobject.value?.let { objectMapper.readValue(it) }
     }
 
     @WritingConverter
@@ -404,9 +360,7 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
 
     @ReadingConverter
     class PGobjectTilBrevmottakerPersoner : Converter<PGobject, PersonerWrapper> {
-        override fun convert(pGobject: PGobject): PersonerWrapper? {
-            return pGobject.value?.let { objectMapper.readValue(it) }
-        }
+        override fun convert(pGobject: PGobject): PersonerWrapper? = pGobject.value?.let { objectMapper.readValue(it) }
     }
 
     @WritingConverter
@@ -420,9 +374,7 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
 
     @ReadingConverter
     class PGobjectTilBrevmottakerOrganisasjoner : Converter<PGobject, OrganisasjonerWrapper> {
-        override fun convert(pGobject: PGobject): OrganisasjonerWrapper? {
-            return pGobject.value?.let { objectMapper.readValue(it) }
-        }
+        override fun convert(pGobject: PGobject): OrganisasjonerWrapper? = pGobject.value?.let { objectMapper.readValue(it) }
     }
 
     @WritingConverter

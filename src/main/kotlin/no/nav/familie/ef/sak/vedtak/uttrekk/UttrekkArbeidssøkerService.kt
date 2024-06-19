@@ -99,9 +99,7 @@ class UttrekkArbeidssøkerService(
     fun uttrekkFinnes(
         årMåned: YearMonth,
         fagsakId: UUID,
-    ): Boolean {
-        return uttrekkArbeidssøkerRepository.existsByÅrMånedAndFagsakId(årMåned, fagsakId)
-    }
+    ): Boolean = uttrekkArbeidssøkerRepository.existsByÅrMånedAndFagsakId(årMåned, fagsakId)
 
     private fun erRegistrertSomArbeidssøker(
         personIdent: String,
@@ -109,11 +107,12 @@ class UttrekkArbeidssøkerService(
     ): Boolean {
         val sisteIMåneden = årMåned.atEndOfMonth()
         val perioder =
-            arbeidssøkerClient.hentPerioder(
-                personIdent,
-                sisteIMåneden,
-                sisteIMåneden,
-            ).perioder
+            arbeidssøkerClient
+                .hentPerioder(
+                    personIdent,
+                    sisteIMåneden,
+                    sisteIMåneden,
+                ).perioder
         return perioder.any { it.fraOgMedDato <= sisteIMåneden && (it.tilOgMedDato == null || it.tilOgMedDato >= sisteIMåneden) }
     }
 
@@ -173,5 +172,8 @@ class UttrekkArbeidssøkerService(
                 it.aktivitet == AktivitetType.FORLENGELSE_STØNAD_PÅVENTE_ARBEID_REELL_ARBEIDSSØKER
         )
 
-    private data class Persondata(val personIdent: String, val pdlPersonKort: PdlPersonKort)
+    private data class Persondata(
+        val personIdent: String,
+        val pdlPersonKort: PdlPersonKort,
+    )
 }

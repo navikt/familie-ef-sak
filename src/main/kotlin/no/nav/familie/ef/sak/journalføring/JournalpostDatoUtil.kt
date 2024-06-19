@@ -4,9 +4,7 @@ import no.nav.familie.kontrakter.felles.journalpost.Journalpost
 import java.time.LocalDateTime
 
 object JournalpostDatoUtil {
-    fun mestRelevanteDato(journalpost: Journalpost): LocalDateTime? {
-        return journalpost.datoMottatt ?: journalpost.relevanteDatoer?.maxByOrNull { datoTyperSortert(it.datotype) }?.dato
-    }
+    fun mestRelevanteDato(journalpost: Journalpost): LocalDateTime? = journalpost.datoMottatt ?: journalpost.relevanteDatoer?.maxByOrNull { datoTyperSortert(it.datotype) }?.dato
 
     private fun datoTyperSortert(datoType: String) =
         when (datoType) {

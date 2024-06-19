@@ -19,47 +19,61 @@ class InfotrygdReplikaClient(
     private val infotrygdReplikaUri: URI,
     @Qualifier("azure")
     restOperations: RestOperations,
-) :
-    AbstractPingableRestClient(restOperations, "infotrygd.replika") {
+) : AbstractPingableRestClient(restOperations, "infotrygd.replika") {
     private val perioderUri: URI =
-        UriComponentsBuilder.fromUri(infotrygdReplikaUri).pathSegment("api/perioder").build().toUri()
+        UriComponentsBuilder
+            .fromUri(infotrygdReplikaUri)
+            .pathSegment("api/perioder")
+            .build()
+            .toUri()
 
     private val sammenslåttePerioderUri: URI =
-        UriComponentsBuilder.fromUri(infotrygdReplikaUri).pathSegment("api/perioder/sammenslatte").build().toUri()
+        UriComponentsBuilder
+            .fromUri(infotrygdReplikaUri)
+            .pathSegment("api/perioder/sammenslatte")
+            .build()
+            .toUri()
 
     private val finnSakerUri: URI =
-        UriComponentsBuilder.fromUri(infotrygdReplikaUri).pathSegment("api/saker/finn").build().toUri()
+        UriComponentsBuilder
+            .fromUri(infotrygdReplikaUri)
+            .pathSegment("api/saker/finn")
+            .build()
+            .toUri()
 
     private val åpnesakerUri: URI =
-        UriComponentsBuilder.fromUri(infotrygdReplikaUri).pathSegment("api/saker/hentrapport").build().toUri()
+        UriComponentsBuilder
+            .fromUri(infotrygdReplikaUri)
+            .pathSegment("api/saker/hentrapport")
+            .build()
+            .toUri()
 
     private val eksistererUri: URI =
-        UriComponentsBuilder.fromUri(infotrygdReplikaUri).pathSegment("api/stonad/eksisterer").build().toUri()
+        UriComponentsBuilder
+            .fromUri(infotrygdReplikaUri)
+            .pathSegment("api/stonad/eksisterer")
+            .build()
+            .toUri()
 
     private fun migreringspersonerUri(antall: Int): URI =
-        UriComponentsBuilder.fromUri(infotrygdReplikaUri)
+        UriComponentsBuilder
+            .fromUri(infotrygdReplikaUri)
             .pathSegment("api/perioder/migreringspersoner")
             .queryParam("antall", antall)
             .build()
             .toUri()
 
-    fun hentPerioder(request: InfotrygdPeriodeRequest): InfotrygdPeriodeResponse {
-        return postForEntity(perioderUri, request)
-    }
+    fun hentPerioder(request: InfotrygdPeriodeRequest): InfotrygdPeriodeResponse = postForEntity(perioderUri, request)
 
-    fun hentSammenslåttePerioder(request: InfotrygdPeriodeRequest): InfotrygdPeriodeResponse {
-        return postForEntity(sammenslåttePerioderUri, request)
-    }
+    fun hentSammenslåttePerioder(request: InfotrygdPeriodeRequest): InfotrygdPeriodeResponse = postForEntity(sammenslåttePerioderUri, request)
 
-    fun hentSaker(request: InfotrygdSøkRequest): InfotrygdSakResponse {
-        return postForEntity(finnSakerUri, request)
-    }
+    fun hentSaker(request: InfotrygdSøkRequest): InfotrygdSakResponse = postForEntity(finnSakerUri, request)
 
-    data class ÅpnesakerRapport(val typeMedAntall: Map<String, Int>)
+    data class ÅpnesakerRapport(
+        val typeMedAntall: Map<String, Int>,
+    )
 
-    fun hentÅpneSaker(): ÅpnesakerRapport {
-        return getForEntity(åpnesakerUri)
-    }
+    fun hentÅpneSaker(): ÅpnesakerRapport = getForEntity(åpnesakerUri)
 
     fun hentPersonerForMigrering(antall: Int): Set<String> {
         val response = getForEntity<Map<String, Any>>(migreringspersonerUri(antall))
@@ -76,5 +90,10 @@ class InfotrygdReplikaClient(
     }
 
     override val pingUri: URI
-        get() = UriComponentsBuilder.fromUri(infotrygdReplikaUri).pathSegment("api/ping").build().toUri()
+        get() =
+            UriComponentsBuilder
+                .fromUri(infotrygdReplikaUri)
+                .pathSegment("api/ping")
+                .build()
+                .toUri()
 }

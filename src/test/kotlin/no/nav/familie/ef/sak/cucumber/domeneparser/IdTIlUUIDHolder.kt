@@ -15,9 +15,7 @@ object IdTIlUUIDHolder {
      */
     val barnIder = mutableMapOf<UUID, MutableMap<String, UUID>>()
 
-    fun hentUtgiftUUID(int: Int): UUID {
-        return utgiftIder.getOrPut(int) { UUID.randomUUID() }
-    }
+    fun hentUtgiftUUID(int: Int): UUID = utgiftIder.getOrPut(int) { UUID.randomUUID() }
 
     fun hentEllerOpprettBarn(
         behandlingId: UUID,

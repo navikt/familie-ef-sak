@@ -46,9 +46,7 @@ class RevurderingService(
     private val nyeBarnService: NyeBarnService,
     private val tilordnetRessursService: TilordnetRessursService,
 ) {
-    fun hentRevurderingsinformasjon(behandlingId: UUID): RevurderingsinformasjonDto {
-        return årsakRevurderingService.hentRevurderingsinformasjon(behandlingId)
-    }
+    fun hentRevurderingsinformasjon(behandlingId: UUID): RevurderingsinformasjonDto = årsakRevurderingService.hentRevurderingsinformasjon(behandlingId)
 
     fun lagreRevurderingsinformasjon(
         behandlingId: UUID,

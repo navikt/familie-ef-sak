@@ -94,17 +94,18 @@ class PersonopplysningerService(
     fun hentGjeldeneNavn(identer: List<String>): Map<String, String> {
         if (identer.isEmpty()) return emptyMap()
         logger.info("Henter navn til {} personer", identer.size)
-        return personService.hentPersonKortBolk(identer)
-            .map { it.key to it.value.navn.gjeldende().visningsnavn() }
-            .toMap()
+        return personService
+            .hentPersonKortBolk(identer)
+            .map {
+                it.key to
+                    it.value.navn
+                        .gjeldende()
+                        .visningsnavn()
+            }.toMap()
     }
 
     @Cacheable("navKontor")
-    fun hentNavKontor(ident: String): NavKontorEnhet? {
-        return personopplysningerIntegrasjonerClient.hentNavKontor(ident)
-    }
+    fun hentNavKontor(ident: String): NavKontorEnhet? = personopplysningerIntegrasjonerClient.hentNavKontor(ident)
 
-    fun hentStrengesteAdressebeskyttelseForPersonMedRelasjoner(personIdent: String): ADRESSEBESKYTTELSEGRADERING {
-        return personopplysningerIntegrasjonerClient.hentStrengesteAdressebeskyttelseForPersonMedRelasjoner(personIdent)
-    }
+    fun hentStrengesteAdressebeskyttelseForPersonMedRelasjoner(personIdent: String): ADRESSEBESKYTTELSEGRADERING = personopplysningerIntegrasjonerClient.hentStrengesteAdressebeskyttelseForPersonMedRelasjoner(personIdent)
 }

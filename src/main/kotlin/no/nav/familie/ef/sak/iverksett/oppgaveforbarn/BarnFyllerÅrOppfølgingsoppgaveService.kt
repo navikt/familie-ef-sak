@@ -82,8 +82,8 @@ class BarnFyllerÅrOppfølgingsoppgaveService(
             .toSet()
     }
 
-    private fun opprettOppgaveForBarn(barn: List<BarnTilUtplukkForOppgave>): List<OpprettOppgaveForBarn> {
-        return barn.mapNotNull {
+    private fun opprettOppgaveForBarn(barn: List<BarnTilUtplukkForOppgave>): List<OpprettOppgaveForBarn> =
+        barn.mapNotNull {
             Alder.fromFødselsdato(fødselsdato(it))?.let { alder ->
                 OpprettOppgaveForBarn(
                     it.fødselsnummerBarn!!,
@@ -93,54 +93,57 @@ class BarnFyllerÅrOppfølgingsoppgaveService(
                 )
             }
         }
-    }
 
     private fun finnOpprettedeOppgaver(oppgaverForBarn: List<OpprettOppgaveForBarn>): Set<FødselsnummerOgAlder> {
         if (oppgaverForBarn.isEmpty()) return emptySet()
 
-        return oppgaveRepository.findByTypeAndAlderIsNotNullAndBarnPersonIdenter(
-            Oppgavetype.InnhentDokumentasjon,
-            oppgaverForBarn.map { it.fødselsnummer },
-        ).mapNotNull {
-            if (it.barnPersonIdent != null && it.alder != null) {
-                FødselsnummerOgAlder(it.barnPersonIdent, it.alder)
-            } else {
-                null
-            }
-        }.toSet()
+        return oppgaveRepository
+            .findByTypeAndAlderIsNotNullAndBarnPersonIdenter(
+                Oppgavetype.InnhentDokumentasjon,
+                oppgaverForBarn.map { it.fødselsnummer },
+            ).mapNotNull {
+                if (it.barnPersonIdent != null && it.alder != null) {
+                    FødselsnummerOgAlder(it.barnPersonIdent, it.alder)
+                } else {
+                    null
+                }
+            }.toSet()
     }
 
     private fun opprettOppgaveTasksForBarn(oppgaver: Set<OpprettOppgaveForBarn>) {
         if (oppgaver.isEmpty()) return
 
-        oppgaver.map {
-            OpprettOppgavePayload(
-                it.behandlingId,
-                it.fødselsnummer,
-                it.fødselsnummerSøker,
-                it.alder,
-            )
-        }.forEach {
-            try {
-                taskService.save(OpprettOppfølgingsoppgaveForBarnFyltÅrTask.opprettTask(it))
-            } catch (e: DbActionExecutionException) {
-                if (e.cause is DuplicateKeyException) {
-                    logger.info(
-                        "Oppgave finnes allerede for barn fylt ${it.alder} " +
-                            "på behandling ${it.behandlingId}. Oppretter ikke task.",
-                    )
-                } else {
-                    throw e
+        oppgaver
+            .map {
+                OpprettOppgavePayload(
+                    it.behandlingId,
+                    it.fødselsnummer,
+                    it.fødselsnummerSøker,
+                    it.alder,
+                )
+            }.forEach {
+                try {
+                    taskService.save(OpprettOppfølgingsoppgaveForBarnFyltÅrTask.opprettTask(it))
+                } catch (e: DbActionExecutionException) {
+                    if (e.cause is DuplicateKeyException) {
+                        logger.info(
+                            "Oppgave finnes allerede for barn fylt ${it.alder} " +
+                                "på behandling ${it.behandlingId}. Oppretter ikke task.",
+                        )
+                    } else {
+                        throw e
+                    }
                 }
             }
-        }
     }
 
-    private fun fødselsdato(barnTilUtplukkForOppgave: BarnTilUtplukkForOppgave): LocalDate? {
-        return barnTilUtplukkForOppgave.fødselsnummerBarn?.let {
+    private fun fødselsdato(barnTilUtplukkForOppgave: BarnTilUtplukkForOppgave): LocalDate? =
+        barnTilUtplukkForOppgave.fødselsnummerBarn?.let {
             Fødselsnummer(it).fødselsdato
         }
-    }
 
-    private data class FødselsnummerOgAlder(val fødselsnummer: String, val alder: Alder)
+    private data class FødselsnummerOgAlder(
+        val fødselsnummer: String,
+        val alder: Alder,
+    )
 }

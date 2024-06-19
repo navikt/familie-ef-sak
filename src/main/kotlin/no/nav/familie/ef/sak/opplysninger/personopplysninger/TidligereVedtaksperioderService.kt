@@ -51,8 +51,9 @@ class TidligereVedtaksperioderService(
             harTidligereSkolepenger = periodeResponse.skolepenger.isNotEmpty(),
         )
 
-    private fun hentTidligereInnvilgedeVedtakEf(identer: Set<String>): TidligereInnvilgetVedtak {
-        return fagsakPersonService.finnPerson(identer)
+    private fun hentTidligereInnvilgedeVedtakEf(identer: Set<String>): TidligereInnvilgetVedtak =
+        fagsakPersonService
+            .finnPerson(identer)
             ?.let { fagsakService.finnFagsakerForFagsakPersonId(it.id) }
             ?.let {
                 TidligereInnvilgetVedtak(
@@ -63,7 +64,6 @@ class TidligereVedtaksperioderService(
                     periodeHistorikkBarnetilsyn = hentGjeldendeBarnetilsynsperioder(it),
                 )
             } ?: TidligereInnvilgetVedtak(false, false, false)
-    }
 
     private fun hentTidligereVedtaksperioder(fagsak: Fagsak?) =
         fagsak
@@ -73,8 +73,8 @@ class TidligereVedtaksperioderService(
                 tilkjentYtelse.andelerTilkjentYtelse.isNotEmpty()
             } ?: false
 
-    private fun hentGjeldendeOvergangstønadsperioder(fagsaker: Fagsaker?): List<GrunnlagsdataPeriodeHistorikkOvergangsstønad> {
-        return hentAndelshistorikkForOvergangsstønad(fagsaker)
+    private fun hentGjeldendeOvergangstønadsperioder(fagsaker: Fagsaker?): List<GrunnlagsdataPeriodeHistorikkOvergangsstønad> =
+        hentAndelshistorikkForOvergangsstønad(fagsaker)
             .filterNot(erstattetEllerFjernet())
             .filterNot { it.erOpphør }
             .map {
@@ -89,10 +89,9 @@ class TidligereVedtaksperioderService(
                     samordningsfradrag = it.andel.samordningsfradrag,
                 )
             }
-    }
 
-    private fun hentGjeldendeBarnetilsynsperioder(fagsaker: Fagsaker?): List<GrunnlagsdataPeriodeHistorikkBarnetilsyn> {
-        return hentAndelshistorikkForBarnetilsyn(fagsaker)
+    private fun hentGjeldendeBarnetilsynsperioder(fagsaker: Fagsaker?): List<GrunnlagsdataPeriodeHistorikkBarnetilsyn> =
+        hentAndelshistorikkForBarnetilsyn(fagsaker)
             .filterNot(erstattetEllerFjernet())
             .filterNot { it.erOpphør }
             .map {
@@ -101,7 +100,6 @@ class TidligereVedtaksperioderService(
                     tom = it.andel.periode.tomDato,
                 )
             }
-    }
 
     private fun hentAndelshistorikkForOvergangsstønad(fagsaker: Fagsaker?) =
         fagsaker?.overgangsstønad?.id?.let { andelsHistorikkService.hentHistorikk(it, null) } ?: emptyList()

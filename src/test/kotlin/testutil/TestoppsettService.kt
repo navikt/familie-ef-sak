@@ -23,26 +23,27 @@ class TestoppsettService(
 
     fun lagreFagsak(fagsak: Fagsak): Fagsak {
         val person = hentEllerOpprettPerson(fagsak)
-        return fagsakRepository.insert(
-            FagsakDomain(
-                id = fagsak.id,
-                fagsakPersonId = person.id,
-                stønadstype = fagsak.stønadstype,
-                eksternId = fagsak.eksternId,
-                migrert = fagsak.migrert,
-                sporbar = fagsak.sporbar,
-            ),
-        ).tilFagsakMedPerson(person.identer)
+        return fagsakRepository
+            .insert(
+                FagsakDomain(
+                    id = fagsak.id,
+                    fagsakPersonId = person.id,
+                    stønadstype = fagsak.stønadstype,
+                    eksternId = fagsak.eksternId,
+                    migrert = fagsak.migrert,
+                    sporbar = fagsak.sporbar,
+                ),
+            ).tilFagsakMedPerson(person.identer)
     }
 
-    private fun hentEllerOpprettPerson(fagsak: Fagsak): FagsakPerson {
-        return fagsakPersonRepository.findByIdOrNull(fagsak.fagsakPersonId)
+    private fun hentEllerOpprettPerson(fagsak: Fagsak): FagsakPerson =
+        fagsakPersonRepository.findByIdOrNull(fagsak.fagsakPersonId)
             ?: hentPersonFraIdenter(fagsak)
             ?: opprettPerson(fagsak)
-    }
 
     private fun hentPersonFraIdenter(fagsak: Fagsak): FagsakPerson? =
-        fagsak.personIdenter.map { it.ident }
+        fagsak.personIdenter
+            .map { it.ident }
             .takeIf { it.isNotEmpty() }
             ?.let { fagsakPersonRepository.findByIdent(it) }
 

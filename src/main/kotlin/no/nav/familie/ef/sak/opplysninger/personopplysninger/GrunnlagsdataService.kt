@@ -76,9 +76,7 @@ class GrunnlagsdataService(
         grunnlagsdataRepository.deleteById(behandlingId)
     }
 
-    fun hentLagretGrunnlagsdata(behandlingId: UUID): Grunnlagsdata {
-        return grunnlagsdataRepository.findByIdOrThrow(behandlingId)
-    }
+    fun hentLagretGrunnlagsdata(behandlingId: UUID): Grunnlagsdata = grunnlagsdataRepository.findByIdOrThrow(behandlingId)
 
     fun hentFraRegisterMedSøknadsdata(behandlingId: UUID): GrunnlagsdataDomene {
         val stønadstype = fagsakService.hentFagsakForBehandling(behandlingId).stønadstype
@@ -101,22 +99,18 @@ class GrunnlagsdataService(
     fun hentFraRegisterForPersonOgAndreForeldre(
         personIdent: String,
         barneforeldreFraSøknad: List<String>,
-    ): GrunnlagsdataDomene {
-        return loggTid {
+    ): GrunnlagsdataDomene =
+        loggTid {
             grunnlagsdataRegisterService.hentGrunnlagsdataFraRegister(
                 personIdent,
                 barneforeldreFraSøknad,
             )
         }
-    }
 
-    fun hentPersonopplysninger(personIdent: String): Personopplysninger {
-        return loggTid {
+    fun hentPersonopplysninger(personIdent: String): Personopplysninger =
+        loggTid {
             grunnlagsdataRegisterService.hentPersonopplysninger(personIdent)
         }
-    }
 
-    fun oppdaterEndringer(grunnlagsdata: Grunnlagsdata): Grunnlagsdata {
-        return grunnlagsdataRepository.update(grunnlagsdata)
-    }
+    fun oppdaterEndringer(grunnlagsdata: Grunnlagsdata): Grunnlagsdata = grunnlagsdataRepository.update(grunnlagsdata)
 }

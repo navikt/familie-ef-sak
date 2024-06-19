@@ -25,8 +25,7 @@ internal class RegelEvalueringTest {
                     RegelId.MEDLEMSKAP_UNNTAK to Vilkårsresultat.IKKE_OPPFYLT,
                 ),
             ),
-        )
-            .isEqualTo(Vilkårsresultat.IKKE_OPPFYLT)
+        ).isEqualTo(Vilkårsresultat.IKKE_OPPFYLT)
     }
 
     @Test
@@ -37,8 +36,7 @@ internal class RegelEvalueringTest {
                     RegelId.HAR_ALDER_LAVERE_ENN_GRENSEVERDI to Vilkårsresultat.AUTOMATISK_OPPFYLT,
                 ),
             ),
-        )
-            .isEqualTo(Vilkårsresultat.AUTOMATISK_OPPFYLT)
+        ).isEqualTo(Vilkårsresultat.AUTOMATISK_OPPFYLT)
     }
 
     @Test
@@ -66,7 +64,6 @@ internal class RegelEvalueringTest {
                         Vilkårsresultat.IKKE_TATT_STILLING_TIL,
                 ),
             ),
-        )
-            .isEqualTo(Vilkårsresultat.IKKE_TATT_STILLING_TIL)
+        ).isEqualTo(Vilkårsresultat.IKKE_TATT_STILLING_TIL)
     }
 }

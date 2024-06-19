@@ -248,8 +248,16 @@ internal class BeregnYtelseStegTest {
             )
 
             assertThat(slot.captured.andelerTilkjentYtelse).hasSize(1)
-            assertThat(slot.captured.andelerTilkjentYtelse.first().stønadFom).isEqualTo(forventetNyAndelFom)
-            assertThat(slot.captured.andelerTilkjentYtelse.first().stønadTom).isEqualTo(forventetNyAndelTom)
+            assertThat(
+                slot.captured.andelerTilkjentYtelse
+                    .first()
+                    .stønadFom,
+            ).isEqualTo(forventetNyAndelFom)
+            assertThat(
+                slot.captured.andelerTilkjentYtelse
+                    .first()
+                    .stønadTom,
+            ).isEqualTo(forventetNyAndelTom)
         }
 
         @Test
@@ -303,7 +311,8 @@ internal class BeregnYtelseStegTest {
             assertThat(andelerTilkjentYtelse.size).isEqualTo(2)
             assertThat(andelerTilkjentYtelse.firstOrNull()?.stønadFom).isEqualTo(innvilgetFom1.atDay(1))
             assertThat(andelerTilkjentYtelse.firstOrNull()?.stønadTom).isEqualTo(
-                opphørFom.minusMonths(1)
+                opphørFom
+                    .minusMonths(1)
                     .atEndOfMonth(),
             )
             assertThat(andelerTilkjentYtelse.lastOrNull()?.stønadFom).isEqualTo(innvilgetFom2.atDay(1))
@@ -395,10 +404,26 @@ internal class BeregnYtelseStegTest {
             )
 
             assertThat(slot.captured.andelerTilkjentYtelse).hasSize(2)
-            assertThat(slot.captured.andelerTilkjentYtelse.first().stønadFom).isEqualTo(forventetNyAndelFom1)
-            assertThat(slot.captured.andelerTilkjentYtelse.first().stønadTom).isEqualTo(forventetNyAndelTom1)
-            assertThat(slot.captured.andelerTilkjentYtelse.last().stønadFom).isEqualTo(forventetNyAndelFom2)
-            assertThat(slot.captured.andelerTilkjentYtelse.last().stønadTom).isEqualTo(forventetNyAndelTom2)
+            assertThat(
+                slot.captured.andelerTilkjentYtelse
+                    .first()
+                    .stønadFom,
+            ).isEqualTo(forventetNyAndelFom1)
+            assertThat(
+                slot.captured.andelerTilkjentYtelse
+                    .first()
+                    .stønadTom,
+            ).isEqualTo(forventetNyAndelTom1)
+            assertThat(
+                slot.captured.andelerTilkjentYtelse
+                    .last()
+                    .stønadFom,
+            ).isEqualTo(forventetNyAndelFom2)
+            assertThat(
+                slot.captured.andelerTilkjentYtelse
+                    .last()
+                    .stønadTom,
+            ).isEqualTo(forventetNyAndelTom2)
         }
 
         @Test
@@ -471,8 +496,16 @@ internal class BeregnYtelseStegTest {
             )
 
             assertThat(slot.captured.andelerTilkjentYtelse).hasSize(1)
-            assertThat(slot.captured.andelerTilkjentYtelse.first().stønadFom).isEqualTo(andel1Fom)
-            assertThat(slot.captured.andelerTilkjentYtelse.first().stønadTom).isEqualTo(andel1Tom)
+            assertThat(
+                slot.captured.andelerTilkjentYtelse
+                    .first()
+                    .stønadFom,
+            ).isEqualTo(andel1Fom)
+            assertThat(
+                slot.captured.andelerTilkjentYtelse
+                    .first()
+                    .stønadTom,
+            ).isEqualTo(andel1Tom)
         }
 
         @Test
@@ -499,8 +532,16 @@ internal class BeregnYtelseStegTest {
             )
 
             assertThat(slot.captured.andelerTilkjentYtelse).hasSize(1)
-            assertThat(slot.captured.andelerTilkjentYtelse.first().stønadFom).isEqualTo(andel1Fom)
-            assertThat(slot.captured.andelerTilkjentYtelse.first().stønadTom).isEqualTo(andel1Tom)
+            assertThat(
+                slot.captured.andelerTilkjentYtelse
+                    .first()
+                    .stønadFom,
+            ).isEqualTo(andel1Fom)
+            assertThat(
+                slot.captured.andelerTilkjentYtelse
+                    .first()
+                    .stønadTom,
+            ).isEqualTo(andel1Tom)
         }
 
         @Test
@@ -530,8 +571,16 @@ internal class BeregnYtelseStegTest {
             )
 
             assertThat(slot.captured.andelerTilkjentYtelse).hasSize(1)
-            assertThat(slot.captured.andelerTilkjentYtelse.first().stønadFom).isEqualTo(forventetNyAndelFom)
-            assertThat(slot.captured.andelerTilkjentYtelse.first().stønadTom).isEqualTo(forventetNyAndelTom)
+            assertThat(
+                slot.captured.andelerTilkjentYtelse
+                    .first()
+                    .stønadFom,
+            ).isEqualTo(forventetNyAndelFom)
+            assertThat(
+                slot.captured.andelerTilkjentYtelse
+                    .first()
+                    .stønadTom,
+            ).isEqualTo(forventetNyAndelTom)
         }
 
         @Test
@@ -2010,7 +2059,12 @@ internal class BeregnYtelseStegTest {
             begrunnelse = null,
         )
 
-    data class DatoBarnOgUtgifter(val andelFom: LocalDate, val andelTom: LocalDate, val barn: List<UUID>, val utgifter: Int)
+    data class DatoBarnOgUtgifter(
+        val andelFom: LocalDate,
+        val andelTom: LocalDate,
+        val barn: List<UUID>,
+        val utgifter: Int,
+    )
 
     private fun innvilgetBarnetilsynMedFlerePerioder(data: List<DatoBarnOgUtgifter>) =
         InnvilgelseBarnetilsyn(

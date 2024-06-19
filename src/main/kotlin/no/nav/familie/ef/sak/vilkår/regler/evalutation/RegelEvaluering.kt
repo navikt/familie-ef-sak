@@ -41,8 +41,8 @@ object RegelEvaluering {
         )
     }
 
-    fun utledVilkårResultat(delvilkårResultat: Map<RegelId, Vilkårsresultat>): Vilkårsresultat {
-        return when {
+    fun utledVilkårResultat(delvilkårResultat: Map<RegelId, Vilkårsresultat>): Vilkårsresultat =
+        when {
             delvilkårResultat.values.all { it == Vilkårsresultat.AUTOMATISK_OPPFYLT } -> Vilkårsresultat.AUTOMATISK_OPPFYLT
             delvilkårResultat.values.all { it == Vilkårsresultat.OPPFYLT || it == Vilkårsresultat.AUTOMATISK_OPPFYLT } -> Vilkårsresultat.OPPFYLT
             delvilkårResultat.values.all { it == Vilkårsresultat.OPPFYLT || it == Vilkårsresultat.IKKE_OPPFYLT || it == Vilkårsresultat.AUTOMATISK_OPPFYLT } ->
@@ -52,7 +52,6 @@ object RegelEvaluering {
                 Vilkårsresultat.IKKE_TATT_STILLING_TIL
             else -> error("Håndterer ikke situasjonen med resultat=${delvilkårResultat.values}")
         }
-    }
 
     /**
      * Dette setter foreløpig resultat, men fortsetter å validere resterende svar slik att man fortsatt har ett gyldig svar

@@ -19,14 +19,13 @@ class PersonService(
     @Qualifier("shortCache")
     private val cacheManager: CacheManager,
 ) {
-    fun hentSøker(ident: String): PdlSøker {
-        return pdlClient.hentSøker(ident)
-    }
+    fun hentSøker(ident: String): PdlSøker = pdlClient.hentSøker(ident)
 
     fun hentPersonMedBarn(ident: String): SøkerMedBarn {
         val søker = hentSøker(ident)
         val barnIdentifikatorer =
-            søker.forelderBarnRelasjon.filter { it.relatertPersonsRolle == Familierelasjonsrolle.BARN }
+            søker.forelderBarnRelasjon
+                .filter { it.relatertPersonsRolle == Familierelasjonsrolle.BARN }
                 .mapNotNull { it.relatertPersonsIdent }
         return SøkerMedBarn(ident, søker, hentPersonForelderBarnRelasjon(barnIdentifikatorer))
     }
@@ -34,9 +33,7 @@ class PersonService(
     fun hentPersonForelderBarnRelasjon(barnIdentifikatorer: List<String>) =
         pdlClient.hentPersonForelderBarnRelasjon(barnIdentifikatorer)
 
-    fun hentAndreForeldre(personIdenter: List<String>): Map<String, PdlAnnenForelder> {
-        return pdlClient.hentAndreForeldre(personIdenter)
-    }
+    fun hentAndreForeldre(personIdenter: List<String>): Map<String, PdlAnnenForelder> = pdlClient.hentAndreForeldre(personIdenter)
 
     @Cacheable("personidenter")
     fun hentPersonIdenter(ident: String): PdlIdenter =
@@ -48,11 +45,10 @@ class PersonService(
     /**
      * PDL gjør ingen tilgangskontroll i bolkoppslag, så bruker av denne metode må ha gjort tilgangskontroll
      */
-    fun hentPersonKortBolk(identer: List<String>): Map<String, PdlPersonKort> {
-        return cacheManager.getCachedOrLoad("pdl-person-kort-bulk", identer.distinct()) { identerUtenCache ->
+    fun hentPersonKortBolk(identer: List<String>): Map<String, PdlPersonKort> =
+        cacheManager.getCachedOrLoad("pdl-person-kort-bulk", identer.distinct()) { identerUtenCache ->
             identerUtenCache.chunked(50).map { pdlClient.hentPersonKortBolk(it) }.reduce { acc, it -> acc + it }
         }
-    }
 
     fun hentAktørIder(ident: String): PdlIdenter = pdlClient.hentAktørIder(ident)
 }

@@ -13,16 +13,19 @@ import org.springframework.stereotype.Service
 import java.util.UUID
 
 @Service
-class BehandlingshistorikkService(private val behandlingshistorikkRepository: BehandlingshistorikkRepository) {
+class BehandlingshistorikkService(
+    private val behandlingshistorikkRepository: BehandlingshistorikkRepository,
+) {
     fun finnHendelseshistorikk(saksbehandling: Saksbehandling): List<HendelseshistorikkDto> {
         val (hendelserOpprettet, andreHendelser) =
-            behandlingshistorikkRepository.findByBehandlingIdOrderByEndretTidDesc(
-                saksbehandling.id,
-            ).map {
-                it.tilHendelseshistorikkDto(saksbehandling)
-            }.filter {
-                it.hendelse != Hendelse.UKJENT
-            }.partition { it.hendelse == Hendelse.OPPRETTET }
+            behandlingshistorikkRepository
+                .findByBehandlingIdOrderByEndretTidDesc(
+                    saksbehandling.id,
+                ).map {
+                    it.tilHendelseshistorikkDto(saksbehandling)
+                }.filter {
+                    it.hendelse != Hendelse.UKJENT
+                }.partition { it.hendelse == Hendelse.OPPRETTET }
         val sisteOpprettetHendelse = hendelserOpprettet.lastOrNull()
         return if (sisteOpprettetHendelse != null) {
             andreHendelser + sisteOpprettetHendelse
@@ -31,9 +34,7 @@ class BehandlingshistorikkService(private val behandlingshistorikkRepository: Be
         }
     }
 
-    fun finnSisteBehandlingshistorikk(behandlingId: UUID): Behandlingshistorikk {
-        return behandlingshistorikkRepository.findTopByBehandlingIdOrderByEndretTidDesc(behandlingId)
-    }
+    fun finnSisteBehandlingshistorikk(behandlingId: UUID): Behandlingshistorikk = behandlingshistorikkRepository.findTopByBehandlingIdOrderByEndretTidDesc(behandlingId)
 
     fun finnSisteBehandlingshistorikk(
         behandlingId: UUID,

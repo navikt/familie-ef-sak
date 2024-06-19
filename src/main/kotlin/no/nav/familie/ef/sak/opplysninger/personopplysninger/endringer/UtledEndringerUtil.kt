@@ -13,8 +13,8 @@ object UtledEndringerUtil {
     fun finnEndringer(
         tidligere: PersonopplysningerDto,
         nye: PersonopplysningerDto,
-    ): Endringer {
-        return Endringer(
+    ): Endringer =
+        Endringer(
             folkeregisterpersonstatus =
                 utledEndringer(
                     tidligere.folkeregisterpersonstatus,
@@ -33,7 +33,6 @@ object UtledEndringerUtil {
             oppholdstillatelse = utledEndringerUtenDetaljer(tidligere.oppholdstillatelse, nye.oppholdstillatelse),
             vergemål = utledEndringerUtenDetaljer(tidligere.vergemål, nye.vergemål),
         )
-    }
 
     private fun <T> utledEndringerUtenDetaljer(
         tidligere: T,
@@ -43,13 +42,12 @@ object UtledEndringerUtil {
     private fun <T> utledEndringer(
         tidligere: T,
         ny: T,
-    ): Endring<EndringVerdi> {
-        return if (tidligere != ny) {
+    ): Endring<EndringVerdi> =
+        if (tidligere != ny) {
             Endring(true, EndringVerdi(format(tidligere), format(ny)))
         } else {
             Endring(false)
         }
-    }
 
     private val barnEndringer: List<PersonendringDetaljerFn<BarnDto>> =
         listOf(

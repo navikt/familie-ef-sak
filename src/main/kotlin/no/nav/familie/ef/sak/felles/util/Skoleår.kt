@@ -6,13 +6,13 @@ import java.time.Month
 import java.time.Year
 import java.time.YearMonth
 
-data class Skoleår(val år: Year) {
+data class Skoleår(
+    val år: Year,
+) {
     constructor(periode: Månedsperiode) : this(utledSkoleår(periode.fom, periode.tom))
 
     // ty = Year formatted with 2 digits
-    override fun toString(): String {
-        return String.format("%ty/%ty", år, år.plusYears(1))
-    }
+    override fun toString(): String = String.format("%ty/%ty", år, år.plusYears(1))
 
     companion object {
         fun utledSkoleår(

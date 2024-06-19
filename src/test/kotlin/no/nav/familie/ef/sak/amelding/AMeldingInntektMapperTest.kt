@@ -50,7 +50,11 @@ internal class AMeldingInntektMapperTest {
     internal fun `Sjekker mapping på alle felt`() {
         val inntektDto = inntektMapper.mapInntekt(lagResponse())
         val inntektForVirksomhet = inntektDto.inntektPerVirksomhet.single()
-        val inntekt = inntektForVirksomhet.inntektPerMåned.values.first().inntekt.first()
+        val inntekt =
+            inntektForVirksomhet.inntektPerMåned.values
+                .first()
+                .inntekt
+                .first()
 
         assertThat(inntekt.beløp).isEqualTo(50)
         assertThat(inntekt.beskrivelse).isEqualTo("Fastlønn")
@@ -68,7 +72,5 @@ internal class AMeldingInntektMapperTest {
         assertThat(inntektDto.avvik.first()).isEqualTo("805824352 (2021-10) - Feil på innsendt a-melding.")
     }
 
-    private fun lagResponse(): HentInntektListeResponse {
-        return objectMapper.readValue(this::class.java.classLoader.getResource("inntekt/inntektResponse.json")!!)
-    }
+    private fun lagResponse(): HentInntektListeResponse = objectMapper.readValue(this::class.java.classLoader.getResource("inntekt/inntektResponse.json")!!)
 }

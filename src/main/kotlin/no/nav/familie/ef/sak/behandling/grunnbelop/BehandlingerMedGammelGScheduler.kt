@@ -11,7 +11,9 @@ import java.time.YearMonth
 
 @Profile("!integrasjonstest")
 @Service
-class BehandlingerMedGammelGScheduler(val taskService: TaskService) {
+class BehandlingerMedGammelGScheduler(
+    val taskService: TaskService,
+) {
     @Scheduled(cron = "\${FINN_BEHANDLINGER_MED_GAMMEL_G_CRON_EXPRESSION}")
     @Transactional
     fun opprettTaskFinnBehandlingerMedGammelG() {

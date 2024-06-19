@@ -193,7 +193,5 @@ class PdlClientTest {
         }
     }
 
-    private fun readFile(filnavn: String): String {
-        return this::class.java.getResource("/json/$filnavn").readText()
-    }
+    private fun readFile(filnavn: String): String = this::class.java.getResource("/json/$filnavn").readText()
 }

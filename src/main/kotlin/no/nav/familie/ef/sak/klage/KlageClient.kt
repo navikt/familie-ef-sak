@@ -18,25 +18,31 @@ import java.util.UUID
 class KlageClient(
     @Qualifier("azure") restOperations: RestOperations,
     @Value("\${FAMILIE_KLAGE_URL}") private val familieKlageUri: URI,
-) :
-    AbstractRestClient(restOperations, "familie.klage") {
+) : AbstractRestClient(restOperations, "familie.klage") {
     private val opprettKlage =
-        UriComponentsBuilder.fromUri(familieKlageUri).pathSegment("api/ekstern/behandling/opprett").build().toUri()
+        UriComponentsBuilder
+            .fromUri(familieKlageUri)
+            .pathSegment("api/ekstern/behandling/opprett")
+            .build()
+            .toUri()
 
     private val hentKlagebehandlinger =
-        UriComponentsBuilder.fromUri(familieKlageUri).pathSegment(
-            "api/ekstern/behandling/${Fagsystem.EF}",
-        ).build().toUri()
+        UriComponentsBuilder
+            .fromUri(familieKlageUri)
+            .pathSegment(
+                "api/ekstern/behandling/${Fagsystem.EF}",
+            ).build()
+            .toUri()
 
-    fun opprettKlage(opprettKlagebehandlingRequest: OpprettKlagebehandlingRequest) {
-        return postForEntity(opprettKlage, opprettKlagebehandlingRequest)
-    }
+    fun opprettKlage(opprettKlagebehandlingRequest: OpprettKlagebehandlingRequest): Unit = postForEntity(opprettKlage, opprettKlagebehandlingRequest)
 
     fun hentKlagebehandlinger(eksternIder: Set<Long>): Map<Long, List<KlagebehandlingDto>> {
         val uri =
-            UriComponentsBuilder.fromUri(hentKlagebehandlinger)
+            UriComponentsBuilder
+                .fromUri(hentKlagebehandlinger)
                 .queryParam("eksternFagsakId", eksternIder.joinToString(","))
-                .build().toUri()
+                .build()
+                .toUri()
         return getForEntity<Ressurs<Map<Long, List<KlagebehandlingDto>>>>(uri).getDataOrThrow()
     }
 

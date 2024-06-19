@@ -109,8 +109,20 @@ class NyttBarnSammePartnerRegelTest {
         assertThat(listDelvilkårsvurdering.size).isEqualTo(1)
         assertThat(listDelvilkårsvurdering.first().resultat).isEqualTo(Vilkårsresultat.IKKE_TATT_STILLING_TIL)
         assertThat(listDelvilkårsvurdering.first().vurderinger.size).isEqualTo(1)
-        assertThat(listDelvilkårsvurdering.first().vurderinger.first().svar).isNull()
-        assertThat(listDelvilkårsvurdering.first().vurderinger.first().begrunnelse).isNull()
+        assertThat(
+            listDelvilkårsvurdering
+                .first()
+                .vurderinger
+                .first()
+                .svar,
+        ).isNull()
+        assertThat(
+            listDelvilkårsvurdering
+                .first()
+                .vurderinger
+                .first()
+                .begrunnelse,
+        ).isNull()
     }
 
     @Test
@@ -137,8 +149,20 @@ class NyttBarnSammePartnerRegelTest {
         assertThat(listDelvilkårsvurdering.size).isEqualTo(1)
         assertThat(listDelvilkårsvurdering.first().resultat).isEqualTo(Vilkårsresultat.IKKE_TATT_STILLING_TIL)
         assertThat(listDelvilkårsvurdering.first().vurderinger.size).isEqualTo(1)
-        assertThat(listDelvilkårsvurdering.first().vurderinger.first().svar).isNull()
-        assertThat(listDelvilkårsvurdering.first().vurderinger.first().begrunnelse).isNull()
+        assertThat(
+            listDelvilkårsvurdering
+                .first()
+                .vurderinger
+                .first()
+                .svar,
+        ).isNull()
+        assertThat(
+            listDelvilkårsvurdering
+                .first()
+                .vurderinger
+                .first()
+                .begrunnelse,
+        ).isNull()
     }
 
     @Test
@@ -181,11 +205,10 @@ class NyttBarnSammePartnerRegelTest {
         assertThat(delvilkårsvurdering.begrunnelse).isEqualTo("Automatisk vurdert (${LocalDate.now().norskFormat()}): Verken bruker eller annen forelder får eller har fått stønad for felles barn.")
     }
 
-    private fun tidligereVedtaksperioderDtoIkkeTidligereInnvilget(): TidligereVedtaksperioderDto {
-        return TidligereVedtaksperioderDto(
+    private fun tidligereVedtaksperioderDtoIkkeTidligereInnvilget(): TidligereVedtaksperioderDto =
+        TidligereVedtaksperioderDto(
             TidligereInnvilgetVedtakDto(false, false, false),
             TidligereInnvilgetVedtakDto(false, false, false),
             false,
         )
-    }
 }

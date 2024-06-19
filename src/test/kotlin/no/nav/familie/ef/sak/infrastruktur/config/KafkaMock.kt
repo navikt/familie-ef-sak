@@ -12,7 +12,5 @@ class KafkaMock {
     @Profile("mock-kafka")
     @Bean
     @Primary
-    fun minSideKafkaProducerService(): MinSideKafkaProducerService {
-        return mockk(relaxed = true)
-    }
+    fun minSideKafkaProducerService(): MinSideKafkaProducerService = mockk(relaxed = true)
 }

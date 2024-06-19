@@ -39,9 +39,7 @@ object SkolepengerMaksbeløp {
     private fun hentBeløpForSkoleårEllerSkoleåretFør(
         map: Map<Year, Int>,
         skoleår: Skoleår,
-    ): Int? {
-        return map[skoleår.år] ?: map[skoleår.år.minusYears(1)]
-    }
+    ): Int? = map[skoleår.år] ?: map[skoleår.år.minusYears(1)]
 
     fun maksbeløp(
         studietype: SkolepengerStudietype,
@@ -58,11 +56,7 @@ object SkolepengerMaksbeløp {
         return maksbeløp
     }
 
-    fun hentSisteÅrRegistrertMaksbeløpHøyskole(): Year {
-        return this.høgskoleUniversitet.keys.max()
-    }
+    fun hentSisteÅrRegistrertMaksbeløpHøyskole(): Year = this.høgskoleUniversitet.keys.max()
 
-    fun hentSisteÅrRegistrertMaksbeløpVideregående(): Year {
-        return this.videregående.keys.max()
-    }
+    fun hentSisteÅrRegistrertMaksbeløpVideregående(): Year = this.videregående.keys.max()
 }

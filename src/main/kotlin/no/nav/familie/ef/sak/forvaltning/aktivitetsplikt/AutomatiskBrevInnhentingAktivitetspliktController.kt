@@ -34,4 +34,7 @@ class AutomatiskBrevInnhentingAktivitetspliktController(
     }
 }
 
-data class AktivitetspliktRequest(val liveRun: Boolean, val taskLimit: Int)
+data class AktivitetspliktRequest(
+    val liveRun: Boolean,
+    val taskLimit: Int,
+)

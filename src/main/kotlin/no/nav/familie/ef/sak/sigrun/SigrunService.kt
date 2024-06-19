@@ -10,7 +10,10 @@ import java.time.YearMonth
 import java.util.UUID
 
 @Service
-class SigrunService(val sigrunClient: SigrunClient, val fagsakPersonService: FagsakPersonService) {
+class SigrunService(
+    val sigrunClient: SigrunClient,
+    val fagsakPersonService: FagsakPersonService,
+) {
     fun hentInntektForAlleÅrMedInntekt(fagsakPersonId: UUID): List<PensjonsgivendeInntektVisning> {
         val aktivIdent = fagsakPersonService.hentAktivIdent(fagsakPersonId)
 

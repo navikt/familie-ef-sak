@@ -119,7 +119,5 @@ internal class PersonopplysningerServiceTest {
         verify(exactly = 2) { egenAnsattClient.egenAnsatt(any()) }
     }
 
-    private fun readFile(filnavn: String): String {
-        return this::class.java.getResource(filnavn)!!.readText()
-    }
+    private fun readFile(filnavn: String): String = this::class.java.getResource(filnavn)!!.readText()
 }

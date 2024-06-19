@@ -21,11 +21,15 @@ object BeregningUtils {
 
         return finnGrunnbeløpsPerioder(periode).map {
             val avkortningPerMåned =
-                beregnAvkortning(it.beløp, totalInntekt).divide(ANTALL_MÅNEDER_ÅR)
+                beregnAvkortning(it.beløp, totalInntekt)
+                    .divide(ANTALL_MÅNEDER_ÅR)
                     .setScale(0, RoundingMode.HALF_DOWN)
 
             val fullOvergangsStønadPerMåned =
-                it.beløp.multiply(BigDecimal(2.25)).divide(ANTALL_MÅNEDER_ÅR).setScale(0, RoundingMode.HALF_EVEN)
+                it.beløp
+                    .multiply(BigDecimal(2.25))
+                    .divide(ANTALL_MÅNEDER_ÅR)
+                    .setScale(0, RoundingMode.HALF_EVEN)
 
             val beløpFørSamordningUtenAvrunding =
                 fullOvergangsStønadPerMåned.subtract(avkortningPerMåned).setScale(0, RoundingMode.HALF_UP)
@@ -130,8 +134,8 @@ object BeregningUtils {
     fun finnStartDatoOgSluttDatoForBeløpsperiode(
         beløpForInnteksperioder: List<Beløpsperiode>,
         vedtaksperiode: Månedsperiode,
-    ): List<Beløpsperiode> {
-        return beløpForInnteksperioder.mapNotNull {
+    ): List<Beløpsperiode> =
+        beløpForInnteksperioder.mapNotNull {
             when {
                 it.periode.omsluttesAv(vedtaksperiode) -> {
                     it
@@ -154,5 +158,4 @@ object BeregningUtils {
                 }
             }
         }
-    }
 }

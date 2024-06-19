@@ -16,12 +16,11 @@ class InntektMapper(
     private val kodeverkService: CachedKodeverkService,
     private val eregService: EregService,
 ) {
-    fun mapInntekt(response: HentInntektListeResponse): AMeldingInntektDto {
-        return AMeldingInntektDto(
+    fun mapInntekt(response: HentInntektListeResponse): AMeldingInntektDto =
+        AMeldingInntektDto(
             inntektPerVirksomhet = mapOrganisasjoner(response),
             avvik = mapAvvik(response),
         )
-    }
 
     private fun mapOrganisasjoner(response: HentInntektListeResponse): List<InntektForVirksomhetDto> {
         val inntektPerMånedOgAktør = mapInntektresponseTilInntektPerVirksomhetOgPeriode(response)
@@ -47,7 +46,8 @@ class InntektMapper(
         val map: MutableMap<Aktør, MutableMap<YearMonth, MutableList<AMeldingInntekt>>> = mutableMapOf()
         response.arbeidsinntektMåned?.forEach { arbeidsInntektMaaned ->
             arbeidsInntektMaaned.arbeidsInntektInformasjon?.inntektListe?.forEach { inntekt ->
-                map.getOrPut(inntekt.virksomhet) { mutableMapOf() }
+                map
+                    .getOrPut(inntekt.virksomhet) { mutableMapOf() }
                     .getOrPut(arbeidsInntektMaaned.årMåned) { mutableListOf() }
                     .add(inntekt)
             }
@@ -60,7 +60,8 @@ class InntektMapper(
             aktører
                 .filter { it.aktørType == AktørType.ORGANISASJON }
                 .map { it.identifikator }
-        return eregService.hentOrganisasjoner(organisasjonsnumre)
+        return eregService
+            .hentOrganisasjoner(organisasjonsnumre)
             .associate { it.organisasjonsnummer to it.navn }
     }
 
@@ -87,23 +88,21 @@ class InntektMapper(
     ) =
         kodeverkService.hentInntekt()[type]?.get(verdi) ?: "$verdi (mangler verdi i kodeverk)"
 
-    private fun mapInntektType(type: EksternInntektType): InntektType {
-        return when (type) {
+    private fun mapInntektType(type: EksternInntektType): InntektType =
+        when (type) {
             EksternInntektType.LOENNSINNTEKT -> InntektType.LØNNSINNTEKT
             EksternInntektType.NAERINGSINNTEKT -> InntektType.NÆRINGSINNTEKT
             EksternInntektType.PENSJON_ELLER_TRYGD -> InntektType.PENSJON_ELLER_TRYGD
             EksternInntektType.YTELSE_FRA_OFFENTLIGE -> InntektType.YTELSE_FRA_OFFENTLIGE
         }
-    }
 
-    private fun mapInntektTypeTilKodeverkType(type: EksternInntektType): InntektKodeverkType {
-        return when (type) {
+    private fun mapInntektTypeTilKodeverkType(type: EksternInntektType): InntektKodeverkType =
+        when (type) {
             EksternInntektType.LOENNSINNTEKT -> InntektKodeverkType.LOENNSINNTEKT
             EksternInntektType.NAERINGSINNTEKT -> InntektKodeverkType.NAERINGSINNTEKT
             EksternInntektType.PENSJON_ELLER_TRYGD -> InntektKodeverkType.PENSJON_ELLER_TRYGD
             EksternInntektType.YTELSE_FRA_OFFENTLIGE -> InntektKodeverkType.YTELSE_FRA_OFFENTLIGE
         }
-    }
 
     private fun mapAvvik(response: HentInntektListeResponse) =
         response.arbeidsinntektMåned

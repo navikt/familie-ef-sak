@@ -96,8 +96,7 @@ internal class InfotrygdPeriodeValideringServiceTest {
                     personIdent,
                     OVERGANGSSTØNAD,
                 )
-            }
-                .isInstanceOf(ApiFeil::class.java)
+            }.isInstanceOf(ApiFeil::class.java)
         }
 
         @Test
@@ -115,8 +114,7 @@ internal class InfotrygdPeriodeValideringServiceTest {
                     personIdent,
                     OVERGANGSSTØNAD,
                 )
-            }
-                .isInstanceOf(ApiFeil::class.java)
+            }.isInstanceOf(ApiFeil::class.java)
         }
     }
 

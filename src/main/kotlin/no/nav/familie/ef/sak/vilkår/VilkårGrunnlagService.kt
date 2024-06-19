@@ -77,8 +77,14 @@ class VilkårGrunnlagService(
                 PersonaliaDto(
                     navn = NavnDto.fraNavn(grunnlagsdata.søker.navn),
                     personIdent = personident,
-                    bostedsadresse = grunnlagsdata.søker.bostedsadresse.gjeldende()?.let { adresseMapper.tilAdresse(it) },
-                    fødeland = grunnlagsdata.søker.fødsel.gjeldende().fødeland,
+                    bostedsadresse =
+                        grunnlagsdata.søker.bostedsadresse
+                            .gjeldende()
+                            ?.let { adresseMapper.tilAdresse(it) },
+                    fødeland =
+                        grunnlagsdata.søker.fødsel
+                            .gjeldende()
+                            .fødeland,
                 ),
             tidligereVedtaksperioder = grunnlagsdata.tidligereVedtaksperioder.tilDto(),
             medlemskap = medlemskap,

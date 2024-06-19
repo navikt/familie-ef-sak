@@ -179,7 +179,9 @@ class SettPåVentStepDefinitions {
         assertThat(taskSlot.captured.payload).contains(parseValgfriString(SettPåVentDomeneBegrep.OPPGAVEBESKRIVELSE, verdier).orEmpty())
     }
 
-    enum class SettPåVentDomeneBegrep(val nøkkel: String) : Domenenøkkel {
+    enum class SettPåVentDomeneBegrep(
+        val nøkkel: String,
+    ) : Domenenøkkel {
         MAPPE_ID("Mappeid"),
         MAPPE_NAVN("Mappenavn"),
 
@@ -198,8 +200,6 @@ class SettPåVentStepDefinitions {
         OPPFØLGINGSOPPGAVE("oppfølgingsopppgave"),
         ;
 
-        override fun nøkkel(): String {
-            return nøkkel
-        }
+        override fun nøkkel(): String = nøkkel
     }
 }

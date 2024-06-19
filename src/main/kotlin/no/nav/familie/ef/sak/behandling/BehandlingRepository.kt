@@ -13,7 +13,9 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 @Repository
-interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUpdateRepository<Behandling> {
+interface BehandlingRepository :
+    RepositoryInterface<Behandling, UUID>,
+    InsertUpdateRepository<Behandling> {
     fun findByFagsakId(fagsakId: UUID): List<Behandling>
 
     fun findByFagsakIdAndStatus(

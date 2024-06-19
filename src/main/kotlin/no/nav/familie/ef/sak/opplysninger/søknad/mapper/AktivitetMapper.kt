@@ -26,8 +26,8 @@ object AktivitetMapper {
         situasjon: Situasjon?,
         søknadBarn: Set<SøknadBarn>,
         datoPåbegyntSøknad: LocalDate?,
-    ): AktivitetDto {
-        return AktivitetDto(
+    ): AktivitetDto =
+        AktivitetDto(
             arbeidssituasjon = aktivitet?.hvordanErArbeidssituasjonen?.verdier ?: emptyList(),
             arbeidsforhold = tilArbeidforholdDto(aktivitet?.arbeidsforhold),
             selvstendig = tilSelvstendigDto(aktivitet?.firmaer, datoPåbegyntSøknad),
@@ -44,10 +44,9 @@ object AktivitetMapper {
             datoOppstartJobb = situasjon?.oppstartNyJobb,
             erIArbeid = aktivitet?.erIArbeid,
         )
-    }
 
-    private fun tilArbeidforholdDto(arbeidsgivere: Set<Arbeidsgiver>?): List<ArbeidsforholdSøknadDto> {
-        return arbeidsgivere?.map {
+    private fun tilArbeidforholdDto(arbeidsgivere: Set<Arbeidsgiver>?): List<ArbeidsforholdSøknadDto> =
+        arbeidsgivere?.map {
             ArbeidsforholdSøknadDto(
                 arbeidsgivernavn = it.arbeidsgivernavn,
                 arbeidsmengde = it.arbeidsmengde,
@@ -56,13 +55,12 @@ object AktivitetMapper {
                 harSluttdato = it.harSluttdato,
             )
         } ?: emptyList()
-    }
 
     private fun tilSelvstendigDto(
         firmaer: Set<Selvstendig>?,
         datoPåbegyntSøknad: LocalDate?,
-    ): List<SelvstendigDto> {
-        return firmaer?.map {
+    ): List<SelvstendigDto> =
+        firmaer?.map {
             SelvstendigDto(
                 firmanavn = it.firmanavn,
                 arbeidsmengde = it.arbeidsmengde,
@@ -73,19 +71,17 @@ object AktivitetMapper {
                 overskuddGjelderÅr = datoPåbegyntSøknad?.year,
             )
         } ?: emptyList()
-    }
 
-    private fun tilAksjeselskapDto(aksjeselskap: Set<Aksjeselskap>?): List<AksjeselskapDto> {
-        return aksjeselskap?.map {
+    private fun tilAksjeselskapDto(aksjeselskap: Set<Aksjeselskap>?): List<AksjeselskapDto> =
+        aksjeselskap?.map {
             AksjeselskapDto(
                 navn = it.navn,
                 arbeidsmengde = it.arbeidsmengde,
             )
         } ?: emptyList()
-    }
 
-    private fun tilArbeidssøkerDto(arbeidssøker: Arbeidssøker?): ArbeidssøkerDto? {
-        return arbeidssøker?.let {
+    private fun tilArbeidssøkerDto(arbeidssøker: Arbeidssøker?): ArbeidssøkerDto? =
+        arbeidssøker?.let {
             ArbeidssøkerDto(
                 registrertSomArbeidssøkerNav = it.registrertSomArbeidssøkerNav,
                 villigTilÅTaImotTilbudOmArbeid = it.villigTilÅTaImotTilbudOmArbeid,
@@ -95,10 +91,9 @@ object AktivitetMapper {
                 ønskerDuMinst50ProsentStilling = it.ønskerDuMinst50ProsentStilling,
             )
         }
-    }
 
-    private fun tilUnderUtdanningDto(utdanning: UnderUtdanning?): UnderUtdanningDto? {
-        return utdanning?.let {
+    private fun tilUnderUtdanningDto(utdanning: UnderUtdanning?): UnderUtdanningDto? =
+        utdanning?.let {
             UnderUtdanningDto(
                 skoleUtdanningssted = utdanning.skoleUtdanningssted,
                 linjeKursGrad = utdanning.linjeKursGrad,
@@ -114,20 +109,18 @@ object AktivitetMapper {
                 eksamensgebyr = utdanning.eksamensgebyr,
             )
         }
-    }
 
-    private fun tilTidligereUtdanningDto(tidligereUtdanning: Set<TidligereUtdanning>?): List<TidligereUtdanningDto> {
-        return tidligereUtdanning?.map {
+    private fun tilTidligereUtdanningDto(tidligereUtdanning: Set<TidligereUtdanning>?): List<TidligereUtdanningDto> =
+        tidligereUtdanning?.map {
             TidligereUtdanningDto(
                 linjeKursGrad = it.linjeKursGrad,
                 fra = it.fra,
                 til = it.til,
             )
         } ?: emptyList()
-    }
 
-    private fun tilSærligeTilsynsbehovDto(søknadBarn: Set<SøknadBarn>): List<SærligeTilsynsbehovDto> {
-        return søknadBarn.filter { it.særligeTilsynsbehov != null }.map {
+    private fun tilSærligeTilsynsbehovDto(søknadBarn: Set<SøknadBarn>): List<SærligeTilsynsbehovDto> =
+        søknadBarn.filter { it.særligeTilsynsbehov != null }.map {
             SærligeTilsynsbehovDto(
                 id = it.id,
                 navn = it.navn,
@@ -136,5 +129,4 @@ object AktivitetMapper {
                 særligeTilsynsbehov = it.særligeTilsynsbehov,
             )
         }
-    }
 }

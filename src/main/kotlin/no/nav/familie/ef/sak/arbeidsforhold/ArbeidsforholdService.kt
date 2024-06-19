@@ -30,8 +30,14 @@ class ArbeidsforholdService(
         val arbeidsforhold = arbeidsforholdClient.hentArbeidsforhold(aktivIdent, ansettelsesdato).data
 
         return arbeidsforhold?.any {
-            it.ansettelsesperiode?.periode?.fom?.isEqualOrBefore(ansettelsesdato) == true &&
-                it.ansettelsesperiode?.periode?.tom?.isEqualOrAfter(ansettelsesdato) == true
+            it.ansettelsesperiode
+                ?.periode
+                ?.fom
+                ?.isEqualOrBefore(ansettelsesdato) == true &&
+                it.ansettelsesperiode
+                    ?.periode
+                    ?.tom
+                    ?.isEqualOrAfter(ansettelsesdato) == true
         } == true
     }
 }

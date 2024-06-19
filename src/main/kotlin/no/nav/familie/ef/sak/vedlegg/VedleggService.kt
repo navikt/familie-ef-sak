@@ -81,8 +81,8 @@ class VedleggService(
     private fun tilDokumentInfoDto(
         dokumentInfo: DokumentInfo,
         journalpost: Journalpost,
-    ): DokumentinfoDto {
-        return DokumentinfoDto(
+    ): DokumentinfoDto =
+        DokumentinfoDto(
             dokumentinfoId = dokumentInfo.dokumentInfoId,
             filnavn = dokumentInfo.dokumentvarianter?.find { it.variantformat == Dokumentvariantformat.ARKIV }?.filnavn,
             tittel = dokumentInfo.tittel ?: "Tittel mangler",
@@ -96,5 +96,4 @@ class VedleggService(
             tema = journalpost.tema,
             harSaksbehandlerTilgang = dokumentInfo.dokumentvarianter?.find { it.variantformat == Dokumentvariantformat.ARKIV }?.saksbehandlerHarTilgang ?: false,
         )
-    }
 }

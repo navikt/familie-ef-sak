@@ -64,30 +64,27 @@ internal class BehandlingControllerTest : OppslagSpringRunnerTest() {
         assertThat(respons.body?.data!!.henlagtÅrsak).isEqualTo(HenlagtÅrsak.FEILREGISTRERT)
     }
 
-    private fun hentBehandling(id: UUID): ResponseEntity<Ressurs<BehandlingDto>> {
-        return restTemplate.exchange(
+    private fun hentBehandling(id: UUID): ResponseEntity<Ressurs<BehandlingDto>> =
+        restTemplate.exchange(
             localhost("/api/behandling/$id"),
             HttpMethod.GET,
             HttpEntity<Ressurs<BehandlingDto>>(headers),
         )
-    }
 
-    private fun henleggBehandling(id: UUID): ResponseEntity<Ressurs<BehandlingDto>> {
-        return restTemplate.exchange(
+    private fun henleggBehandling(id: UUID): ResponseEntity<Ressurs<BehandlingDto>> =
+        restTemplate.exchange(
             localhost("/api/behandling/$id/henlegg"),
             HttpMethod.POST,
             HttpEntity<Ressurs<BehandlingDto>>(headers),
         )
-    }
 
     private fun henlegg(
         id: UUID,
         henlagt: HenlagtDto,
-    ): ResponseEntity<Ressurs<BehandlingDto>> {
-        return restTemplate.exchange<Ressurs<BehandlingDto>>(
+    ): ResponseEntity<Ressurs<BehandlingDto>> =
+        restTemplate.exchange<Ressurs<BehandlingDto>>(
             localhost("/api/behandling/$id/henlegg"),
             HttpMethod.POST,
             HttpEntity(henlagt, headers),
         )
-    }
 }

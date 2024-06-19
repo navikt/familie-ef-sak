@@ -107,7 +107,5 @@ internal class SkolepengerMaksbeløpTest {
     private fun maksbeløpForÅr(
         studietype: SkolepengerStudietype,
         skoleår: Year,
-    ): Int {
-        return maksbeløp(studietype, Skoleår(skoleår))
-    }
+    ): Int = maksbeløp(studietype, Skoleår(skoleår))
 }

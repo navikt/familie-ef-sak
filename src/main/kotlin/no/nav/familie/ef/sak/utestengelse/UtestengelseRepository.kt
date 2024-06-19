@@ -6,6 +6,8 @@ import org.springframework.stereotype.Repository
 import java.util.UUID
 
 @Repository
-interface UtestengelseRepository : RepositoryInterface<Utestengelse, UUID>, InsertUpdateRepository<Utestengelse> {
+interface UtestengelseRepository :
+    RepositoryInterface<Utestengelse, UUID>,
+    InsertUpdateRepository<Utestengelse> {
     fun findAllByFagsakPersonId(fagsakPersonId: UUID): List<Utestengelse>
 }

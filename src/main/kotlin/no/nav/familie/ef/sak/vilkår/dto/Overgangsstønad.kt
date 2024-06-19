@@ -54,7 +54,9 @@ data class AksjeselskapDto(
     val arbeidsmengde: Int?,
 )
 
-data class VirksomhetDto(val virksomhetsbeskrivelse: String)
+data class VirksomhetDto(
+    val virksomhetsbeskrivelse: String,
+)
 
 data class ArbeidssøkerDto(
     val registrertSomArbeidssøkerNav: Boolean,

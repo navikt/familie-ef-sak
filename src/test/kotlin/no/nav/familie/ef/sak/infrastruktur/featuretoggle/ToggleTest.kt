@@ -19,7 +19,8 @@ internal class ToggleTest {
             }
             if (!regex.matches(toggle.toggleId)) {
                 val ugyldigeTegn =
-                    toggle.toggleId.split("")
+                    toggle.toggleId
+                        .split("")
                         .filter { it.isNotEmpty() }
                         .filterNot { regex.matches(it) }
                         .map { "'$it'" }

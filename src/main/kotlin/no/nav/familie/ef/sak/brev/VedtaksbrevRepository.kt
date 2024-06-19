@@ -7,4 +7,6 @@ import org.springframework.stereotype.Repository
 import java.util.UUID
 
 @Repository
-interface VedtaksbrevRepository : RepositoryInterface<Vedtaksbrev, UUID>, InsertUpdateRepository<Vedtaksbrev>
+interface VedtaksbrevRepository :
+    RepositoryInterface<Vedtaksbrev, UUID>,
+    InsertUpdateRepository<Vedtaksbrev>

@@ -15,26 +15,24 @@ import no.nav.familie.kontrakter.felles.ef.StønadType
 import java.time.LocalDate
 import java.time.YearMonth
 
-fun TilkjentYtelse.tilDto(): TilkjentYtelseDto {
-    return TilkjentYtelseDto(
+fun TilkjentYtelse.tilDto(): TilkjentYtelseDto =
+    TilkjentYtelseDto(
         behandlingId = this.behandlingId,
         andeler = this.andelerTilkjentYtelse.map { andel -> andel.tilDto() },
         samordningsfradragType = this.samordningsfradragType,
     )
-}
 
-fun AndelTilkjentYtelse.tilDto(): AndelTilkjentYtelseDto {
-    return AndelTilkjentYtelseDto(
+fun AndelTilkjentYtelse.tilDto(): AndelTilkjentYtelseDto =
+    AndelTilkjentYtelseDto(
         beløp = this.beløp,
         periode = this.periode,
         inntekt = this.inntekt,
         inntektsreduksjon = this.inntektsreduksjon,
         samordningsfradrag = this.samordningsfradrag,
     )
-}
 
-fun TilkjentYtelse.tilBeløpsperiode(startDato: LocalDate): List<Beløpsperiode> {
-    return this.andelerTilkjentYtelse.filter { andel -> andel.periode.fomDato >= startDato }.map { andel ->
+fun TilkjentYtelse.tilBeløpsperiode(startDato: LocalDate): List<Beløpsperiode> =
+    this.andelerTilkjentYtelse.filter { andel -> andel.periode.fomDato >= startDato }.map { andel ->
         Beløpsperiode(
             beløp = andel.beløp.toBigDecimal(),
             periode = andel.periode,
@@ -48,13 +46,15 @@ fun TilkjentYtelse.tilBeløpsperiode(startDato: LocalDate): List<Beløpsperiode>
             beløpFørSamordning = andel.beløp.plus(andel.samordningsfradrag).toBigDecimal(),
         )
     }
-}
 
 fun TilkjentYtelse.tilBeløpsperiodeBarnetilsyn(
     vedtak: InnvilgelseBarnetilsyn,
     brukIkkeVedtatteSatser: Boolean,
 ): List<BeløpsperiodeBarnetilsynDto> {
-    val startDato = vedtak.perioder.first().periode.fomDato
+    val startDato =
+        vedtak.perioder
+            .first()
+            .periode.fomDato
     val perioder = vedtak.tilBeløpsperioderPerUtgiftsmåned(brukIkkeVedtatteSatser)
 
     return this.andelerTilkjentYtelse.filter { andel -> andel.stønadFom >= startDato }.map {
@@ -63,11 +63,11 @@ fun TilkjentYtelse.tilBeløpsperiodeBarnetilsyn(
             periode = it.periode,
             beløp = it.beløp,
             beløpFørFratrekkOgSatsjustering =
-                BeregningBarnetilsynUtil.kalkulerUtbetalingsbeløpFørFratrekkOgSatsjustering(
-                    beløpsperiodeBarnetilsynDto.beregningsgrunnlag.utgifter,
-                    beløpsperiodeBarnetilsynDto.beregningsgrunnlag.kontantstøttebeløp,
-                )
-                    .roundUp()
+                BeregningBarnetilsynUtil
+                    .kalkulerUtbetalingsbeløpFørFratrekkOgSatsjustering(
+                        beløpsperiodeBarnetilsynDto.beregningsgrunnlag.utgifter,
+                        beløpsperiodeBarnetilsynDto.beregningsgrunnlag.kontantstøttebeløp,
+                    ).roundUp()
                     .toInt(),
             sats = beløpsperiodeBarnetilsynDto.sats,
             beregningsgrunnlag = beløpsperiodeBarnetilsynDto.beregningsgrunnlag,
@@ -83,8 +83,8 @@ fun TilkjentYtelse.tilTilkjentYtelseMedMetaData(
     stønadstype: StønadType,
     eksternFagsakId: Long,
     vedtaksdato: LocalDate,
-): TilkjentYtelseMedMetadata {
-    return TilkjentYtelseMedMetadata(
+): TilkjentYtelseMedMetadata =
+    TilkjentYtelseMedMetadata(
         tilkjentYtelse = this.tilIverksettDto(),
         saksbehandlerId = saksbehandlerId,
         eksternBehandlingId = eksternBehandlingId,
@@ -94,4 +94,3 @@ fun TilkjentYtelse.tilTilkjentYtelseMedMetaData(
         behandlingId = this.behandlingId,
         vedtaksdato = vedtaksdato,
     )
-}

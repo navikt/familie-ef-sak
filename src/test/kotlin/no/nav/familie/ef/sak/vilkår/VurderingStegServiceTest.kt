@@ -96,14 +96,18 @@ internal class VurderingStegServiceTest {
             tilordnetRessursService = tilordnetRessursService,
         )
     private val søknad =
-        SøknadsskjemaMapper.tilDomene(
-            TestsøknadBuilder.Builder().setBarn(
-                listOf(
-                    TestsøknadBuilder.Builder().defaultBarn("Navn navnesen", "14041385481"),
-                    TestsøknadBuilder.Builder().defaultBarn("Navn navnesen", "01012067050"),
-                ),
-            ).build().søknadOvergangsstønad,
-        ).tilSøknadsverdier()
+        SøknadsskjemaMapper
+            .tilDomene(
+                TestsøknadBuilder
+                    .Builder()
+                    .setBarn(
+                        listOf(
+                            TestsøknadBuilder.Builder().defaultBarn("Navn navnesen", "14041385481"),
+                            TestsøknadBuilder.Builder().defaultBarn("Navn navnesen", "01012067050"),
+                        ),
+                    ).build()
+                    .søknadOvergangsstønad,
+            ).tilSøknadsverdier()
     private val barn = søknadBarnTilBehandlingBarn(søknad.barn)
     val fagsak = fagsak()
     private val behandling = behandling(fagsak, BehandlingStatus.OPPRETTET)
@@ -196,7 +200,9 @@ internal class VurderingStegServiceTest {
         assertThat(lagretVilkårsvurdering.captured.type).isEqualTo(vilkårsvurdering.type)
         assertThat(lagretVilkårsvurdering.captured.opphavsvilkår).isNull()
 
-        val delvilkårsvurdering = lagretVilkårsvurdering.captured.delvilkårsvurdering.delvilkårsvurderinger.first()
+        val delvilkårsvurdering =
+            lagretVilkårsvurdering.captured.delvilkårsvurdering.delvilkårsvurderinger
+                .first()
         assertThat(delvilkårsvurdering.resultat).isEqualTo(Vilkårsresultat.OPPFYLT)
         assertThat(delvilkårsvurdering.vurderinger).hasSize(1)
         assertThat(delvilkårsvurdering.vurderinger.first().svar).isEqualTo(SvarId.JA)
@@ -220,7 +226,9 @@ internal class VurderingStegServiceTest {
         assertThat(oppdatertVurdering.captured.type).isEqualTo(vilkårsvurdering.type)
         assertThat(oppdatertVurdering.captured.opphavsvilkår).isNull()
 
-        val delvilkårsvurdering = oppdatertVurdering.captured.delvilkårsvurdering.delvilkårsvurderinger.first()
+        val delvilkårsvurdering =
+            oppdatertVurdering.captured.delvilkårsvurdering.delvilkårsvurderinger
+                .first()
         assertThat(delvilkårsvurdering.resultat).isEqualTo(Vilkårsresultat.SKAL_IKKE_VURDERES)
         assertThat(delvilkårsvurdering.vurderinger).hasSize(1)
         assertThat(delvilkårsvurdering.vurderinger.first().svar).isNull()
@@ -386,8 +394,7 @@ internal class VurderingStegServiceTest {
                     behandling = behandling,
                 ),
                 OVERGANGSSTØNAD,
-            )
-                .map { if (it.type == vilkårsvurdering.type) vilkårsvurdering else it }
+            ).map { if (it.type == vilkårsvurdering.type) vilkårsvurdering else it }
 
         every { vilkårsvurderingRepository.findByIdOrNull(vilkårsvurdering.id) } returns vilkårsvurdering
         every { vilkårsvurderingRepository.findByBehandlingId(behandlingId) } returns vilkårsvurderinger

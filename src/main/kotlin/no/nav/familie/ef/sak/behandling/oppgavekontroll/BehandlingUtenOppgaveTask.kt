@@ -14,7 +14,9 @@ import java.util.Properties
     settTilManuellOppfølgning = true,
     beskrivelse = "Finn åpne behandlinger uten behandle sak oppgave",
 )
-class BehandlingUtenOppgaveTask(val behandlingsoppgaveService: BehandlingsoppgaveService) : AsyncTaskStep {
+class BehandlingUtenOppgaveTask(
+    val behandlingsoppgaveService: BehandlingsoppgaveService,
+) : AsyncTaskStep {
     override fun doTask(task: Task) {
         val antallÅpneBehandlingerUtenOppgave = behandlingsoppgaveService.antallÅpneBehandlingerUtenOppgave()
         feilHvis(antallÅpneBehandlingerUtenOppgave > 0) { "Åpne behandlinger uten behandleSak oppgave funnet på fagsak " }
@@ -23,12 +25,11 @@ class BehandlingUtenOppgaveTask(val behandlingsoppgaveService: Behandlingsoppgav
     companion object {
         const val TYPE = "finnBehandlingUtenOppgave"
 
-        fun opprettTask(ukenummer: Int): Task {
-            return Task(
+        fun opprettTask(ukenummer: Int): Task =
+            Task(
                 TYPE,
                 ukenummer.toString(),
                 Properties(),
             )
-        }
     }
 }

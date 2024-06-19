@@ -25,7 +25,9 @@ import java.util.UUID
     triggerTidVedFeilISekunder = 120L,
     beskrivelse = "Sjekker status for migrert sak",
 )
-class SjekkMigrertStatusIInfotrygdTask(private val migreringService: MigreringService) : AsyncTaskStep {
+class SjekkMigrertStatusIInfotrygdTask(
+    private val migreringService: MigreringService,
+) : AsyncTaskStep {
     override fun doTask(task: Task) {
         val (behandlingId, opphørsmåned) = objectMapper.readValue<SjekkMigrertStatusIInfotrygdData>(task.payload)
 
@@ -53,5 +55,8 @@ class SjekkMigrertStatusIInfotrygdTask(private val migreringService: MigreringSe
         const val TYPE = "sjekkMigrertStatus"
     }
 
-    data class SjekkMigrertStatusIInfotrygdData(val behandlingId: UUID, val opphørsmåned: YearMonth)
+    data class SjekkMigrertStatusIInfotrygdData(
+        val behandlingId: UUID,
+        val opphørsmåned: YearMonth,
+    )
 }

@@ -80,11 +80,10 @@ internal class SøknadControllerTest : OppslagSpringRunnerTest() {
         Assertions.assertThat(respons.body?.data?.søknadsdato).isEqualTo(søknadSkjema.datoMottatt)
     }
 
-    private fun hentSøknadData(behandlingId: UUID): ResponseEntity<Ressurs<SøknadDatoerDto>> {
-        return restTemplate.exchange(
+    private fun hentSøknadData(behandlingId: UUID): ResponseEntity<Ressurs<SøknadDatoerDto>> =
+        restTemplate.exchange(
             localhost("/api/soknad/$behandlingId/datoer"),
             HttpMethod.GET,
             HttpEntity<Ressurs<SøknadDatoerDto>>(headers),
         )
-    }
 }

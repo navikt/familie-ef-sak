@@ -14,8 +14,8 @@ object InternPeriodeTestUtil {
         stønadTom: LocalDate = LocalDate.now().plusDays(1),
         opphørdato: LocalDate? = null,
         datakilde: Datakilde = Datakilde.INFOTRYGD,
-    ): InternPeriode {
-        return InternPeriode(
+    ): InternPeriode =
+        InternPeriode(
             personIdent = "1",
             inntektsreduksjon = inntektsreduksjon,
             samordningsfradrag = samordningsfradrag,
@@ -27,5 +27,4 @@ object InternPeriodeTestUtil {
             opphørsdato = opphørdato,
             datakilde = datakilde,
         )
-    }
 }
