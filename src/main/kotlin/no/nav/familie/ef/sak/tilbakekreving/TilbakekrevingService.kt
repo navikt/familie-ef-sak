@@ -52,9 +52,7 @@ class TilbakekrevingService(
         tilbakekrevingRepository.insert(tilbakekrevingDto.tilDomene(behandlingId))
     }
 
-    fun hentTilbakekreving(behandlingId: UUID): Tilbakekreving? {
-        return tilbakekrevingRepository.findByIdOrNull(behandlingId)
-    }
+    fun hentTilbakekreving(behandlingId: UUID): Tilbakekreving? = tilbakekrevingRepository.findByIdOrNull(behandlingId)
 
     fun slettTilbakekreving(behandlingId: UUID) {
         tilbakekrevingRepository.deleteById(behandlingId)
@@ -90,9 +88,7 @@ class TilbakekrevingService(
         return tilbakekrevingClient.finnBehandlinger(eksternFagsakId)
     }
 
-    fun harSaksbehandlerTattStillingTilTilbakekreving(behandlingsId: UUID): Boolean {
-        return tilbakekrevingRepository.existsById(behandlingsId)
-    }
+    fun harSaksbehandlerTattStillingTilTilbakekreving(behandlingsId: UUID): Boolean = tilbakekrevingRepository.existsById(behandlingsId)
 
     fun genererBrev(
         saksbehandling: Saksbehandling,

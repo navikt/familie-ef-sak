@@ -316,7 +316,13 @@ internal class KlageServiceTest {
             val klager = klageService.hentBehandlinger(UUID.randomUUID())
 
             assertThat(klager.overgangsstønad.first().vedtaksdato).isEqualTo(tidsPunktAvsluttetIKabal)
-            assertThat(klager.overgangsstønad.first().klageinstansResultat.first().årsakFeilregistrert).isEqualTo(årsakFeilregistrert)
+            assertThat(
+                klager.overgangsstønad
+                    .first()
+                    .klageinstansResultat
+                    .first()
+                    .årsakFeilregistrert,
+            ).isEqualTo(årsakFeilregistrert)
         }
 
         private fun fagsaker() =

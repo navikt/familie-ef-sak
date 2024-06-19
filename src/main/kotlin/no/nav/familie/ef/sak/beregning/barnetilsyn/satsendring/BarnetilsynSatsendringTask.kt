@@ -14,7 +14,9 @@ import java.util.Properties
     triggerTidVedFeilISekunder = 15 * 60L,
     beskrivelse = "Barnetilsyn satsendring",
 )
-class BarnetilsynSatsendringTask(val barnetilsynSatsendringService: BarnetilsynSatsendringService) : AsyncTaskStep {
+class BarnetilsynSatsendringTask(
+    val barnetilsynSatsendringService: BarnetilsynSatsendringService,
+) : AsyncTaskStep {
     override fun doTask(task: Task) {
         barnetilsynSatsendringService.finnFagsakerSomSkalSatsendresMedNySatsDersomBaselineErOk()
     }
@@ -22,12 +24,11 @@ class BarnetilsynSatsendringTask(val barnetilsynSatsendringService: BarnetilsynS
     companion object {
         const val TYPE = "barnetilsynSatsendring"
 
-        fun opprettTask(payload: String): Task {
-            return Task(
+        fun opprettTask(payload: String): Task =
+            Task(
                 TYPE,
                 payload,
                 Properties(),
             )
-        }
     }
 }

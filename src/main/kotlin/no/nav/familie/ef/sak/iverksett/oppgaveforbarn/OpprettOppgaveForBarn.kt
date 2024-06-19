@@ -12,7 +12,9 @@ data class OpprettOppgaveForBarn(
     val behandlingId: UUID,
 )
 
-enum class Alder(val oppgavebeskrivelse: String) {
+enum class Alder(
+    val oppgavebeskrivelse: String,
+) {
     SEKS_MND("Barn 1/2 år. Send varsel om aktivitetsplikt."),
     ETT_ÅR("Barn 1 år. Vurder aktivitetsplikten."),
     ;
@@ -32,4 +34,9 @@ enum class Alder(val oppgavebeskrivelse: String) {
     }
 }
 
-data class BarnTilOppgave(val barnPersonIdent: String, val behandlingId: UUID, val eksternBehandlingId: Long, val eksternFagsakId: Long)
+data class BarnTilOppgave(
+    val barnPersonIdent: String,
+    val behandlingId: UUID,
+    val eksternBehandlingId: Long,
+    val eksternFagsakId: Long,
+)

@@ -58,7 +58,8 @@ class BehandlingService(
     fun hentAktivIdent(behandlingId: UUID): String = behandlingRepository.finnAktivIdent(behandlingId)
 
     fun hentEksterneIder(behandlingIder: Set<UUID>) =
-        behandlingIder.takeIf { it.isNotEmpty() }
+        behandlingIder
+            .takeIf { it.isNotEmpty() }
             ?.let { behandlingRepository.finnEksterneIder(it) } ?: emptySet()
 
     fun finnSisteIverksatteBehandling(fagsakId: UUID) =
@@ -67,9 +68,7 @@ class BehandlingService(
     fun hentUferdigeBehandlingerOpprettetFørDato(
         stønadtype: StønadType,
         opprettetFørDato: LocalDateTime = LocalDateTime.now().minusMonths(1),
-    ): List<Behandling> {
-        return behandlingRepository.hentUferdigeBehandlingerOpprettetFørDato(stønadtype, opprettetFørDato)
-    }
+    ): List<Behandling> = behandlingRepository.hentUferdigeBehandlingerOpprettetFørDato(stønadtype, opprettetFørDato)
 
     fun finnesÅpenBehandling(fagsakId: UUID) =
         behandlingRepository.existsByFagsakIdAndStatusIsNot(fagsakId, FERDIGSTILT)
@@ -83,25 +82,22 @@ class BehandlingService(
                 it.status == FERDIGSTILT && it.resultat != HENLAGT
             }
 
-    fun hentBehandlingsjournalposter(behandlingId: UUID): List<Behandlingsjournalpost> {
-        return behandlingsjournalpostRepository.findAllByBehandlingId(behandlingId)
-    }
+    fun hentBehandlingsjournalposter(behandlingId: UUID): List<Behandlingsjournalpost> = behandlingsjournalpostRepository.findAllByBehandlingId(behandlingId)
 
-    fun hentBehandlingerForGjenbrukAvVilkår(fagsakPersonId: UUID): List<Behandling> {
-        return behandlingRepository.finnBehandlingerForGjenbrukAvVilkår(fagsakPersonId)
+    fun hentBehandlingerForGjenbrukAvVilkår(fagsakPersonId: UUID): List<Behandling> =
+        behandlingRepository
+            .finnBehandlingerForGjenbrukAvVilkår(fagsakPersonId)
             .sortertEtterVedtakstidspunktEllerEndretTid()
             .reversed()
-    }
 
     @Transactional
-    fun opprettMigrering(fagsakId: UUID): Behandling {
-        return opprettBehandling(
+    fun opprettMigrering(fagsakId: UUID): Behandling =
+        opprettBehandling(
             behandlingType = BehandlingType.REVURDERING,
             fagsakId = fagsakId,
             behandlingsårsak = BehandlingÅrsak.MIGRERING,
             erMigrering = true,
         )
-    }
 
     @Transactional
     fun opprettBehandling(
@@ -229,16 +225,12 @@ class BehandlingService(
     fun oppdaterKravMottatt(
         behandlingId: UUID,
         kravMottatt: LocalDate?,
-    ): Behandling {
-        return behandlingRepository.update(hentBehandling(behandlingId).copy(kravMottatt = kravMottatt))
-    }
+    ): Behandling = behandlingRepository.update(hentBehandling(behandlingId).copy(kravMottatt = kravMottatt))
 
     fun finnesBehandlingForFagsak(fagsakId: UUID) =
         behandlingRepository.existsByFagsakId(fagsakId)
 
-    fun hentBehandlinger(fagsakId: UUID): List<Behandling> {
-        return behandlingRepository.findByFagsakId(fagsakId).sortertEtterVedtakstidspunkt()
-    }
+    fun hentBehandlinger(fagsakId: UUID): List<Behandling> = behandlingRepository.findByFagsakId(fagsakId).sortertEtterVedtakstidspunkt()
 
     fun leggTilBehandlingsjournalpost(
         journalpostId: String,

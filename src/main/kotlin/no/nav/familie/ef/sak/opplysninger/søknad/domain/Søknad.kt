@@ -33,18 +33,18 @@ object SøknadMapper {
         journalpostId: String,
         søknad: ISøknadsskjema,
         behandlingId: UUID,
-    ): Søknad {
-        return Søknad(
+    ): Søknad =
+        Søknad(
             soknadsskjemaId = søknad.id,
             behandlingId = behandlingId,
             journalpostId = journalpostId,
             søker = Søker(søknad.fødselsnummer, søknad.navn),
             type = søknad.type,
             relaterteFnr =
-                søknad.barn.map { listOf(it.fødselsnummer, it.annenForelder?.person?.fødselsnummer) }
+                søknad.barn
+                    .map { listOf(it.fødselsnummer, it.annenForelder?.person?.fødselsnummer) }
                     .flatten()
                     .filterNotNull()
                     .toSet(),
         )
-    }
 }

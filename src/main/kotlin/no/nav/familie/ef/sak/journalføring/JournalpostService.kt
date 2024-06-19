@@ -23,19 +23,19 @@ import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
 @Service
-class JournalpostService(private val journalpostClient: JournalpostClient) {
+class JournalpostService(
+    private val journalpostClient: JournalpostClient,
+) {
     private val secureLogger = LoggerFactory.getLogger("secureLogger")
 
-    fun hentJournalpost(journalpostId: String): Journalpost {
-        return journalpostClient.hentJournalpost(journalpostId)
-    }
+    fun hentJournalpost(journalpostId: String): Journalpost = journalpostClient.hentJournalpost(journalpostId)
 
     fun finnJournalposter(
         personIdent: String,
         antall: Int = 20,
         typer: List<Journalposttype> = Journalposttype.values().toList(),
-    ): List<Journalpost> {
-        return journalpostClient.finnJournalposter(
+    ): List<Journalpost> =
+        journalpostClient.finnJournalposter(
             JournalposterForBrukerRequest(
                 brukerId =
                     Bruker(
@@ -47,13 +47,12 @@ class JournalpostService(private val journalpostClient: JournalpostClient) {
                 journalposttype = typer,
             ),
         )
-    }
 
     fun finnJournalposterForVedleggRequest(
         personIdent: String,
         vedleggRequest: VedleggRequest,
-    ): List<Journalpost> {
-        return journalpostClient.finnJournalposterForBrukerOgTema(
+    ): List<Journalpost> =
+        journalpostClient.finnJournalposterForBrukerOgTema(
             JournalposterForVedleggRequest(
                 brukerId =
                     Bruker(
@@ -66,15 +65,12 @@ class JournalpostService(private val journalpostClient: JournalpostClient) {
                 antall = 200,
             ),
         )
-    }
 
     fun hentDokument(
         journalpostId: String,
         dokumentInfoId: String,
         dokumentVariantformat: DokumentVariantformat = DokumentVariantformat.ARKIV,
-    ): ByteArray {
-        return journalpostClient.hentDokument(journalpostId, dokumentInfoId, dokumentVariantformat)
-    }
+    ): ByteArray = journalpostClient.hentDokument(journalpostId, dokumentInfoId, dokumentVariantformat)
 
     fun hentSøknadFraJournalpostForOvergangsstønad(journalpost: Journalpost): SøknadOvergangsstønad {
         val dokumentinfo = JournalføringHelper.plukkUtOriginaldokument(journalpost, DokumentBrevkode.OVERGANGSSTØNAD)

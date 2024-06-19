@@ -46,28 +46,25 @@ abstract class Vilkårsregel(
         metadata: HovedregelMetadata,
         resultat: Vilkårsresultat = Vilkårsresultat.IKKE_TATT_STILLING_TIL,
         barnId: UUID? = null,
-    ): List<Delvilkårsvurdering> {
-        return hovedregler.map {
+    ): List<Delvilkårsvurdering> =
+        hovedregler.map {
             Delvilkårsvurdering(
                 resultat,
                 vurderinger = listOf(Vurdering(it)),
             )
         }
-    }
 
     constructor(vilkårType: VilkårType, regler: Set<RegelSteg>, hovedregler: Set<RegelId>) :
         this(vilkårType, regler.associateBy { it.regelId }, hovedregler)
 
-    fun regel(regelId: RegelId): RegelSteg {
-        return regler[regelId] ?: throw Feil("Finner ikke regelId=$regelId for vilkårType=$vilkårType")
-    }
+    fun regel(regelId: RegelId): RegelSteg = regler[regelId] ?: throw Feil("Finner ikke regelId=$regelId for vilkårType=$vilkårType")
 
     protected fun automatiskVurdertDelvilkår(
         regelId: RegelId,
         svarId: SvarId,
         begrunnelse: String,
-    ): Delvilkårsvurdering {
-        return Delvilkårsvurdering(
+    ): Delvilkårsvurdering =
+        Delvilkårsvurdering(
             resultat = Vilkårsresultat.AUTOMATISK_OPPFYLT,
             listOf(
                 Vurdering(
@@ -77,7 +74,6 @@ abstract class Vilkårsregel(
                 ),
             ),
         )
-    }
 
     protected fun ubesvartDelvilkårsvurdering(regelId: RegelId) =
         Delvilkårsvurdering(

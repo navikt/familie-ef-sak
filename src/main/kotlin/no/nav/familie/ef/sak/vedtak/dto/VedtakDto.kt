@@ -65,7 +65,10 @@ fun ResultatType.tilVedtaksresultat(): Vedtaksresultat =
 /*@JsonTypeInfo(use = JsonTypeInfo.Id.NAME,
               include = JsonTypeInfo.As.PROPERTY,
               property = "_type")*/
-sealed class VedtakDto(open val resultatType: ResultatType, open val _type: String)
+sealed class VedtakDto(
+    open val resultatType: ResultatType,
+    open val _type: String,
+)
 
 // Rename til dto? InnvilgelseOvergangsstønadDto, AvslagDto, OpphørDto, SanksjoneringDto
 data class InnvilgelseOvergangsstønad(
@@ -155,7 +158,8 @@ fun VedtakDto.tilVedtak(
                 skolepenger =
                     SkolepengerWrapper(
                         skoleårsperioder =
-                            this.skoleårsperioder.map { it.tilDomene() }
+                            this.skoleårsperioder
+                                .map { it.tilDomene() }
                                 .sortedBy { it.perioder.first().periode },
                         begrunnelse = this.begrunnelse,
                     ),
@@ -306,7 +310,8 @@ private class VedtakDtoDeserializer : StdDeserializer<VedtakDto>(VedtakDto::clas
         }
 
         if (node.get("_type") != null && node.get("_type").textValue() == "InnvilgelseBarnetilsynUtenUtbetaling") {
-            return mapper.treeToValue(node, InnvilgelseBarnetilsyn::class.java)
+            return mapper
+                .treeToValue(node, InnvilgelseBarnetilsyn::class.java)
                 .copy(resultatType = ResultatType.INNVILGE_UTEN_UTBETALING)
         }
 

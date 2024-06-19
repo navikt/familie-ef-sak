@@ -333,8 +333,8 @@ class StegService(
         return firstOrNull as T
     }
 
-    private fun initStegMetrikker(type: String): Map<StegType, Counter> {
-        return behandlingSteg.associate {
+    private fun initStegMetrikker(type: String): Map<StegType, Counter> =
+        behandlingSteg.associate {
             it.stegType() to
                 Metrics.counter(
                     "behandling.steg.$type",
@@ -344,5 +344,4 @@ class StegService(
                     "${it.stegType().rekkefølge} ${it.stegType().displayName()}",
                 )
         }
-    }
 }

@@ -150,8 +150,9 @@ class InfotrygdPeriodeValideringService(
         )
     }
 
-    private fun slåSammenFremtidligePerioderHvisLike(perioderFremITiden: List<SummertInfotrygdPeriodeDto>): List<SummertInfotrygdPeriodeDto> {
-        return perioderFremITiden.sortedBy { it.stønadsperiode }
+    private fun slåSammenFremtidligePerioderHvisLike(perioderFremITiden: List<SummertInfotrygdPeriodeDto>): List<SummertInfotrygdPeriodeDto> =
+        perioderFremITiden
+            .sortedBy { it.stønadsperiode }
             .fold<SummertInfotrygdPeriodeDto, MutableList<SummertInfotrygdPeriodeDto>>(mutableListOf()) { acc, periode ->
                 val last = acc.removeLastOrNull()
                 if (last == null) {
@@ -163,9 +164,7 @@ class InfotrygdPeriodeValideringService(
                     acc.add(periode)
                 }
                 acc
-            }
-            .toList()
-    }
+            }.toList()
 
     /**
      * Då vi mapper aktivitet for perioder som er arbeidssøker er det viktig at de er like, og trenger ikke å sjekke periodetype
@@ -282,8 +281,8 @@ class InfotrygdPeriodeValideringService(
                 it.type != InfotrygdSakType.KLAGE &&
                     it.type != InfotrygdSakType.KLAGE_TILBAKEBETALING &&
                     it.type != InfotrygdSakType.ANKE
-            }
-            .find { it.resultat == InfotrygdSakResultat.ÅPEN_SAK }?.let {
+            }.find { it.resultat == InfotrygdSakResultat.ÅPEN_SAK }
+            ?.let {
                 throw MigreringException(
                     "Har åpen sak. ${lagSakFeilinfo(it)}",
                     MigreringExceptionType.ÅPEN_SAK,
@@ -300,8 +299,7 @@ class InfotrygdPeriodeValideringService(
         return 3
     }
 
-    private fun lagSakFeilinfo(sak: InfotrygdSak): String {
-        return "saksblokk=${sak.saksblokk} saksnr=${sak.saksnr} " +
+    private fun lagSakFeilinfo(sak: InfotrygdSak): String =
+        "saksblokk=${sak.saksblokk} saksnr=${sak.saksnr} " +
             "registrertDato=${sak.registrertDato} mottattDato=${sak.mottattDato}"
-    }
 }

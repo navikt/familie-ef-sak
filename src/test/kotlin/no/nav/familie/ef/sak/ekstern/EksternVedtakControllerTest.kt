@@ -56,11 +56,10 @@ internal class EksternVedtakControllerTest : OppslagSpringRunnerTest() {
             .containsExactlyInAnyOrder(FagsystemType.ORDNIÆR, FagsystemType.TILBAKEKREVING)
     }
 
-    private fun hentVedtak(eksternFagsakId: Long): ResponseEntity<Ressurs<List<FagsystemVedtak>>> {
-        return restTemplate.exchange(
+    private fun hentVedtak(eksternFagsakId: Long): ResponseEntity<Ressurs<List<FagsystemVedtak>>> =
+        restTemplate.exchange(
             localhost("/api/ekstern/vedtak/$eksternFagsakId"),
             HttpMethod.GET,
             HttpEntity(null, headers.medContentTypeJsonUTF8()),
         )
-    }
 }

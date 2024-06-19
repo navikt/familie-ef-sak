@@ -71,10 +71,11 @@ class FagsakPersonController(
         val personIdenter = personService.hentPersonIdenter(personIdentRequest.personIdent)
         tilgangService.validerTilgangTilPersonMedBarn(personIdentRequest.personIdent, AuditLoggerEvent.ACCESS)
         val fagsakPersonId =
-            fagsakPersonService.hentEllerOpprettPerson(
-                personIdenter.identer(),
-                personIdenter.gjeldende().ident,
-            ).id
+            fagsakPersonService
+                .hentEllerOpprettPerson(
+                    personIdenter.identer(),
+                    personIdenter.gjeldende().ident,
+                ).id
         return Ressurs.success(
             fagsakPersonId,
         )

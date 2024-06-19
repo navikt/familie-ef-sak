@@ -6,7 +6,9 @@ import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 
 @Service
-class EregService(private val eregClient: EregClient) {
+class EregService(
+    private val eregClient: EregClient,
+) {
     fun hentOrganisasjoner(organisasjonsnumre: List<String>): List<Organisasjon> {
         val organisasjoner = eregClient.hentOrganisasjoner(organisasjonsnumre)
         return mapEregResultat(organisasjoner)

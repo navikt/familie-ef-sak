@@ -7,15 +7,17 @@ import no.nav.familie.ef.sak.vilkår.dto.StatsborgerskapDto
 import org.springframework.stereotype.Component
 
 @Component
-class StatsborgerskapMapper(private val kodeverkService: KodeverkService) {
-    fun map(statsborgerskap: List<Statsborgerskap>): List<StatsborgerskapDto> {
-        return statsborgerskap.map {
-            val land = kodeverkService.hentLand(it.land, datoEllerIdag(it.gyldigFraOgMed)) ?: it.land
-            StatsborgerskapDto(
-                land = land,
-                gyldigFraOgMedDato = it.gyldigFraOgMed,
-                gyldigTilOgMedDato = it.gyldigTilOgMed,
-            )
-        }.sortedByDescending { it.gyldigFraOgMedDato }
-    }
+class StatsborgerskapMapper(
+    private val kodeverkService: KodeverkService,
+) {
+    fun map(statsborgerskap: List<Statsborgerskap>): List<StatsborgerskapDto> =
+        statsborgerskap
+            .map {
+                val land = kodeverkService.hentLand(it.land, datoEllerIdag(it.gyldigFraOgMed)) ?: it.land
+                StatsborgerskapDto(
+                    land = land,
+                    gyldigFraOgMedDato = it.gyldigFraOgMed,
+                    gyldigTilOgMedDato = it.gyldigTilOgMed,
+                )
+            }.sortedByDescending { it.gyldigFraOgMedDato }
 }

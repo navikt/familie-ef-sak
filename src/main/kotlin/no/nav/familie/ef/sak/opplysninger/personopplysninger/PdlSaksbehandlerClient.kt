@@ -22,8 +22,7 @@ import org.springframework.web.client.RestOperations
 class PdlSaksbehandlerClient(
     val pdlConfig: PdlConfig,
     @Qualifier("azureOnBehalfOf") restTemplate: RestOperations,
-) :
-    AbstractRestClient(restTemplate, "pdl.personinfo.saksbehandler") {
+) : AbstractRestClient(restTemplate, "pdl.personinfo.saksbehandler") {
     fun søkPersonerMedSammeAdresse(søkeKriterier: List<SøkeKriterier>): PersonSøkResultat {
         val pdlPersonSøkRequest =
             PdlPersonSøkRequest(
@@ -43,10 +42,9 @@ class PdlSaksbehandlerClient(
         return feilsjekkOgReturnerData(null, pdlResponse) { it.sokPerson }
     }
 
-    private fun httpHeaders(): HttpHeaders {
-        return HttpHeaders().apply {
+    private fun httpHeaders(): HttpHeaders =
+        HttpHeaders().apply {
             add("Tema", "ENF")
             add("behandlingsnummer", Tema.ENF.behandlingsnummer)
         }
-    }
 }

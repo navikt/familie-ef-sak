@@ -9,7 +9,9 @@ import java.time.LocalDate
 import java.util.UUID
 
 @Repository
-interface TilbakekrevingRepository : RepositoryInterface<Tilbakekreving, UUID>, InsertUpdateRepository<Tilbakekreving> {
+interface TilbakekrevingRepository :
+    RepositoryInterface<Tilbakekreving, UUID>,
+    InsertUpdateRepository<Tilbakekreving> {
     // language=PostgreSQL
     @Query(
         """SELECT COUNT(*) from behandling b

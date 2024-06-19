@@ -9,11 +9,12 @@ import no.nav.familie.ef.sak.vilkår.regler.Vilkårsregel
 import no.nav.familie.ef.sak.vilkår.regler.jaNeiSvarRegel
 import no.nav.familie.ef.sak.vilkår.regler.regelIder
 
-class SagtOppEllerRedusertRegel : Vilkårsregel(
-    vilkårType = VilkårType.SAGT_OPP_ELLER_REDUSERT,
-    regler = setOf(SAGT_OPP_ELLER_REDUSERT, RIMELIG_GRUNN_SAGT_OPP),
-    hovedregler = regelIder(SAGT_OPP_ELLER_REDUSERT),
-) {
+class SagtOppEllerRedusertRegel :
+    Vilkårsregel(
+        vilkårType = VilkårType.SAGT_OPP_ELLER_REDUSERT,
+        regler = setOf(SAGT_OPP_ELLER_REDUSERT, RIMELIG_GRUNN_SAGT_OPP),
+        hovedregler = regelIder(SAGT_OPP_ELLER_REDUSERT),
+    ) {
     companion object {
         private val RIMELIG_GRUNN_SAGT_OPP =
             RegelSteg(

@@ -7,5 +7,6 @@ import org.springframework.stereotype.Component
 
 @Component
 @Profile("!local")
-class InfotrygdReplikaHealth(client: InfotrygdReplikaClient) :
-    AbstractHealthIndicator(client, "infotrygd.replika")
+class InfotrygdReplikaHealth(
+    client: InfotrygdReplikaClient,
+) : AbstractHealthIndicator(client, "infotrygd.replika")

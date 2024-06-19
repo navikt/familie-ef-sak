@@ -53,4 +53,7 @@ class StartUtsendingAvAktivitetspliktBrevTask(
     }
 }
 
-private data class PayLoad(val aktivitetspliktRequest: AktivitetspliktRequest, val tidspunkt: LocalDateTime)
+private data class PayLoad(
+    val aktivitetspliktRequest: AktivitetspliktRequest,
+    val tidspunkt: LocalDateTime,
+)

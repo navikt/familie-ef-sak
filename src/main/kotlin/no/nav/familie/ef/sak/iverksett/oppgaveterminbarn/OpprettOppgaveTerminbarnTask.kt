@@ -28,11 +28,10 @@ class OpprettOppgaveTerminbarnTask(
     }
 
     companion object {
-        fun opprettTask(opprettOppgavePayload: OppgaveForBarn): Task {
-            return Task(TYPE, objectMapper.writeValueAsString(opprettOppgavePayload)).apply {
+        fun opprettTask(opprettOppgavePayload: OppgaveForBarn): Task =
+            Task(TYPE, objectMapper.writeValueAsString(opprettOppgavePayload)).apply {
                 this.metadata[MDCConstants.MDC_CALL_ID] = IdUtils.generateId()
             }
-        }
 
         const val TYPE = "opprettOppgaveTerminbarnTask"
     }

@@ -62,23 +62,31 @@ internal class GjenbrukVilkårServiceTest {
     private val barn2 = FnrGenerator.generer(LocalDate.now().minusYears(5))
     private val barn3 = FnrGenerator.generer(LocalDate.now().minusYears(12))
     private val søknadOS =
-        SøknadsskjemaMapper.tilDomene(
-            TestsøknadBuilder.Builder().setBarn(
-                listOf(
-                    TestsøknadBuilder.Builder().defaultBarn("Barn Nummer En", barn1),
-                    TestsøknadBuilder.Builder().defaultBarn("Barn Nummer To", barn2),
-                ),
-            ).build().søknadOvergangsstønad,
-        ).tilSøknadsverdier()
+        SøknadsskjemaMapper
+            .tilDomene(
+                TestsøknadBuilder
+                    .Builder()
+                    .setBarn(
+                        listOf(
+                            TestsøknadBuilder.Builder().defaultBarn("Barn Nummer En", barn1),
+                            TestsøknadBuilder.Builder().defaultBarn("Barn Nummer To", barn2),
+                        ),
+                    ).build()
+                    .søknadOvergangsstønad,
+            ).tilSøknadsverdier()
     private val søknadBT =
-        SøknadsskjemaMapper.tilDomene(
-            TestsøknadBuilder.Builder().setBarn(
-                listOf(
-                    TestsøknadBuilder.Builder().defaultBarn("Barn Nummer To", barn2),
-                    TestsøknadBuilder.Builder().defaultBarn("Barn Nummer Tre", barn3),
-                ),
-            ).build().søknadBarnetilsyn,
-        ).tilSøknadsverdier()
+        SøknadsskjemaMapper
+            .tilDomene(
+                TestsøknadBuilder
+                    .Builder()
+                    .setBarn(
+                        listOf(
+                            TestsøknadBuilder.Builder().defaultBarn("Barn Nummer To", barn2),
+                            TestsøknadBuilder.Builder().defaultBarn("Barn Nummer Tre", barn3),
+                        ),
+                    ).build()
+                    .søknadBarnetilsyn,
+            ).tilSøknadsverdier()
 
     private val fagsakPersonId = UUID.randomUUID()
     private val fagsakOS = fagsak(stønadstype = StønadType.OVERGANGSSTØNAD, fagsakPersonId = fagsakPersonId)

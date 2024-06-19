@@ -25,13 +25,12 @@ data class UttrekkArbeidssøkere(
     val kontrollertTid: LocalDateTime? = null,
     val kontrollertAv: String? = null,
 ) {
-    fun medKontrollert(kontrollert: Boolean): UttrekkArbeidssøkere {
-        return this.copy(
+    fun medKontrollert(kontrollert: Boolean): UttrekkArbeidssøkere =
+        this.copy(
             kontrollert = kontrollert,
             kontrollertTid = SporbarUtils.now(),
             kontrollertAv = SikkerhetContext.hentSaksbehandlerEllerSystembruker(),
         )
-    }
 }
 
 /**

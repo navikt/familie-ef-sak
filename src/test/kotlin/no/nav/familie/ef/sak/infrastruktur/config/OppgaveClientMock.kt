@@ -242,8 +242,8 @@ class OppgaveClientMock {
         behandlingstype: String? = null,
         behandlesAvApplikasjon: String,
         behandlingstema: Behandlingstema = Behandlingstema.Overgangsstønad,
-    ): Oppgave {
-        return Oppgave(
+    ): Oppgave =
+        Oppgave(
             id = oppgaveId,
             aktoerId = "1234",
             identer = listOf(OppgaveIdentV2("11111111111", IdentGruppe.FOLKEREGISTERIDENT)),
@@ -263,7 +263,6 @@ class OppgaveClientMock {
             status = StatusEnum.OPPRETTET,
             versjon = 2,
         )
-    }
 
     private fun utledNavIdent(navIdent: String) =
         when (navIdent) {

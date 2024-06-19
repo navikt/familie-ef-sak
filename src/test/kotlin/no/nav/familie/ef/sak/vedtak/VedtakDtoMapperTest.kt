@@ -110,7 +110,5 @@ class VedtakDtoMapperTest {
         assertThat(objectMapper.readValue<VedtakDto>(vedtakJsonUtenType)).isEqualTo(vedtakDto)
     }
 
-    private fun readFile(filnavn: String): String {
-        return this::class.java.getResource("/vedtak/$filnavn")!!.readText()
-    }
+    private fun readFile(filnavn: String): String = this::class.java.getResource("/vedtak/$filnavn")!!.readText()
 }

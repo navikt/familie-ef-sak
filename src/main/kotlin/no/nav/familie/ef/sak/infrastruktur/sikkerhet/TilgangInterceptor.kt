@@ -10,13 +10,15 @@ import org.springframework.stereotype.Component
 import org.springframework.web.servlet.AsyncHandlerInterceptor
 
 @Component
-class TilgangInterceptor(private val rolleConfig: RolleConfig) : AsyncHandlerInterceptor {
+class TilgangInterceptor(
+    private val rolleConfig: RolleConfig,
+) : AsyncHandlerInterceptor {
     override fun preHandle(
         request: HttpServletRequest,
         response: HttpServletResponse,
         handler: Any,
-    ): Boolean {
-        return if (SikkerhetContext.harTilgangTilGittRolle(rolleConfig = rolleConfig, BehandlerRolle.VEILEDER)) {
+    ): Boolean =
+        if (SikkerhetContext.harTilgangTilGittRolle(rolleConfig = rolleConfig, BehandlerRolle.VEILEDER)) {
             super.preHandle(request, response, handler)
         } else {
             logger.warn("Saksbehandler ${SikkerhetContext.hentSaksbehandlerEllerSystembruker()} har ikke tilgang til saksbehandlingsløsningen")
@@ -25,7 +27,6 @@ class TilgangInterceptor(private val rolleConfig: RolleConfig) : AsyncHandlerInt
                 frontendFeilmelding = "Du mangler tilgang til denne saksbehandlingsløsningen",
             )
         }
-    }
 
     companion object {
         private val logger = LoggerFactory.getLogger(this::class.java)

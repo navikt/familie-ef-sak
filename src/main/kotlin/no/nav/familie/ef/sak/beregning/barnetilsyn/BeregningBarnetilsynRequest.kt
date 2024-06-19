@@ -39,6 +39,4 @@ fun UtgiftsMåned.tilBeløpsperiodeBarnetilsynDto(
     )
 }
 
-private fun List<PeriodeMedBeløpDto>.finnPeriodeBeløp(utgiftsMåned: UtgiftsMåned): Int {
-    return this.find { it.periode.inneholder(utgiftsMåned.årMåned) }?.beløp ?: 0
-}
+private fun List<PeriodeMedBeløpDto>.finnPeriodeBeløp(utgiftsMåned: UtgiftsMåned): Int = this.find { it.periode.inneholder(utgiftsMåned.årMåned) }?.beløp ?: 0

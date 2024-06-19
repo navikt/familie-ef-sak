@@ -56,8 +56,9 @@ class PeriodeService(
     private fun hentPerioderFraEf(
         personIdenter: Set<String>,
         stønadstype: StønadType,
-    ): EfInternPerioder? {
-        return fagsakService.finnFagsak(personIdenter, stønadstype)
+    ): EfInternPerioder? =
+        fagsakService
+            .finnFagsak(personIdenter, stønadstype)
             ?.let { behandlingService.finnSisteIverksatteBehandling(it.id) }
             ?.let { behandling ->
                 val tilkjentYtelse = tilkjentYtelseService.hentForBehandling(behandling.id)
@@ -65,10 +66,10 @@ class PeriodeService(
                 val startdato = tilkjentYtelse.startdato
                 EfInternPerioder(startdato, internperioder)
             }
-    }
 
     private fun tilInternPeriode(tilkjentYtelse: TilkjentYtelse) =
-        tilkjentYtelse.andelerTilkjentYtelse.map(AndelTilkjentYtelse::tilInternPeriode)
+        tilkjentYtelse.andelerTilkjentYtelse
+            .map(AndelTilkjentYtelse::tilInternPeriode)
             // trenger å sortere de revers pga filtrerOgSorterPerioderFraInfotrygd gjør det,
             // då vi ønsker de sortert på siste hendelsen først
             .sortedWith(compareBy<InternPeriode> { it.stønadFom }.reversed())

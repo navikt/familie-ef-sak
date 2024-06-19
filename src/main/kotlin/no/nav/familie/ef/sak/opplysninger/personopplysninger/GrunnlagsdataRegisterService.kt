@@ -79,34 +79,32 @@ class GrunnlagsdataRegisterService(
 
     private fun hentTidligereVedtaksperioderAnnenForelder(
         barneForeldre: Map<String, PdlAnnenForelder>,
-    ): Map<String, TidligereVedtaksperioder> {
-        return loggTid("antall=${barneForeldre.size}") {
+    ): Map<String, TidligereVedtaksperioder> =
+        loggTid("antall=${barneForeldre.size}") {
             barneForeldre.entries.associate { (ident, annenForelder) ->
                 val folkeregisteridentifikatorer = annenForelder.folkeregisteridentifikator
                 ident to tidligereVedtaksperioderService.hentTidligereVedtaksperioder(folkeregisteridentifikatorer)
             }
         }
-    }
 
-    private fun hentPdlBarn(pdlSøker: PdlSøker): Map<String, PdlPersonForelderBarn> {
-        return pdlSøker.forelderBarnRelasjon
+    private fun hentPdlBarn(pdlSøker: PdlSøker): Map<String, PdlPersonForelderBarn> =
+        pdlSøker.forelderBarnRelasjon
             .filter { it.relatertPersonsRolle == Familierelasjonsrolle.BARN }
             .mapNotNull { it.relatertPersonsIdent }
             .let { personService.hentPersonForelderBarnRelasjon(it) }
-    }
 
     private fun hentPdlBarneForeldre(
         barn: Map<String, PdlPersonForelderBarn>,
         personIdent: String,
         barneforeldrePersonIdentFraSøknad: List<String>,
-    ): Map<String, PdlAnnenForelder> {
-        return barn.flatMap { it.value.forelderBarnRelasjon }
+    ): Map<String, PdlAnnenForelder> =
+        barn
+            .flatMap { it.value.forelderBarnRelasjon }
             .filter { it.relatertPersonsIdent != personIdent && it.relatertPersonsRolle != Familierelasjonsrolle.BARN }
             .mapNotNull { it.relatertPersonsIdent }
             .plus(barneforeldrePersonIdentFraSøknad)
             .distinct()
             .let { personService.hentAndreForeldre(it) }
-    }
 
     private fun hentDataTilAndreIdenter(pdlSøker: PdlSøker): Map<String, PdlPersonKort> {
         val andreIdenter =
@@ -125,4 +123,7 @@ data class GrunnlagsdataFraPdl(
     val andrePersoner: Map<String, PdlPersonKort>,
 )
 
-fun GrunnlagsdataFraPdl.gjeldendeIdentForSøker() = this.søker.folkeregisteridentifikator.gjeldende().ident
+fun GrunnlagsdataFraPdl.gjeldendeIdentForSøker() =
+    this.søker.folkeregisteridentifikator
+        .gjeldende()
+        .ident

@@ -78,15 +78,17 @@ class BarnetilsynSatsendringService(
         val utgiftsperiode = mapAndelerForNesteÅrTilUtgiftsperiodeDto(andelerNesteÅr)
 
         val simulertNyBeregning =
-            utgiftsperiode.tilBeløpsperioderPerUtgiftsmåned(
-                andelerNesteÅr.map {
-                    PeriodeMedBeløpDto(periode = it.andel.periode, beløp = it.andel.kontantstøtte)
-                },
-                andelerNesteÅr.map {
-                    PeriodeMedBeløpDto(periode = it.andel.periode, beløp = it.andel.tilleggsstønad)
-                },
-                brukIkkeVedtatteSatser = brukIkkeVedtatteSatser,
-            ).values.toList()
+            utgiftsperiode
+                .tilBeløpsperioderPerUtgiftsmåned(
+                    andelerNesteÅr.map {
+                        PeriodeMedBeløpDto(periode = it.andel.periode, beløp = it.andel.kontantstøtte)
+                    },
+                    andelerNesteÅr.map {
+                        PeriodeMedBeløpDto(periode = it.andel.periode, beløp = it.andel.tilleggsstønad)
+                    },
+                    brukIkkeVedtatteSatser = brukIkkeVedtatteSatser,
+                ).values
+                .toList()
         return simulertNyBeregning
     }
 
@@ -125,7 +127,9 @@ data class BarnetilsynSatsendringKandidat(
     val andelshistorikk: List<AndelHistorikkDto>,
     val skalRevurderes: Boolean = false,
 ) {
-    fun andelerEtter(yearMonth: YearMonth): List<AndelHistorikkDto> {
-        return andelshistorikk.filter { it.andel.periode.tom.isAfter(yearMonth) }
-    }
+    fun andelerEtter(yearMonth: YearMonth): List<AndelHistorikkDto> =
+        andelshistorikk.filter {
+            it.andel.periode.tom
+                .isAfter(yearMonth)
+        }
 }

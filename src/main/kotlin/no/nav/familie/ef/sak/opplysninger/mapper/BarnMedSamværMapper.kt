@@ -68,14 +68,13 @@ class BarnMedSamværMapper(
     private fun mapBarnepass(
         behandlingBarn: BehandlingBarn,
         søknadBarn: SøknadBarn?,
-    ): BarnepassDto {
-        return BarnepassDto(
+    ): BarnepassDto =
+        BarnepassDto(
             id = behandlingBarn.id,
             skalHaBarnepass = søknadBarn?.skalHaBarnepass ?: false,
             barnepassordninger = søknadBarn?.barnepassordninger?.map(this::mapBarnepassordning) ?: emptyList(),
             årsakBarnepass = søknadBarn?.årsakBarnepass,
         )
-    }
 
     private fun mapBarnepassordning(it: Barnepassordning) =
         BarnepassordningDto(
@@ -138,10 +137,16 @@ class BarnMedSamværMapper(
         søknadsbarn: Collection<SøknadBarn>,
     ): String? {
         val fnr =
-            barn.barn?.forelderBarnRelasjon?.firstOrNull {
-                it.relatertPersonsIdent != personIdentSøker && it.relatertPersonsRolle != Familierelasjonsrolle.BARN
-            }?.relatertPersonsIdent
-                ?: søknadsbarn.firstOrNull { it.id == barn.behandlingBarn.søknadBarnId }?.annenForelder?.person?.fødselsnummer
+            barn.barn
+                ?.forelderBarnRelasjon
+                ?.firstOrNull {
+                    it.relatertPersonsIdent != personIdentSøker && it.relatertPersonsRolle != Familierelasjonsrolle.BARN
+                }?.relatertPersonsIdent
+                ?: søknadsbarn
+                    .firstOrNull { it.id == barn.behandlingBarn.søknadBarnId }
+                    ?.annenForelder
+                    ?.person
+                    ?.fødselsnummer
         return fnr
     }
 
@@ -151,8 +156,8 @@ class BarnMedSamværMapper(
         pdlAnnenForelder: AnnenForelderMedIdent?,
         annenForelderFnr: String?,
         grunnlagsdataOpprettet: LocalDate,
-    ): BarnMedSamværRegistergrunnlagDto {
-        return BarnMedSamværRegistergrunnlagDto(
+    ): BarnMedSamværRegistergrunnlagDto =
+        BarnMedSamværRegistergrunnlagDto(
             id = matchetBarn.behandlingBarn.id,
             navn = matchetBarn.barn?.navn?.visningsnavn(),
             fødselsnummer = matchetBarn.fødselsnummer,
@@ -167,16 +172,25 @@ class BarnMedSamværMapper(
                     grunnlagsdataOpprettet,
                 ),
             forelder = pdlAnnenForelder?.let { tilAnnenForelderDto(it, annenForelderFnr, søkerAdresse) },
-            dødsdato = matchetBarn.barn?.dødsfall?.gjeldende()?.dødsdato,
-            fødselsdato = matchetBarn.barn?.fødsel?.gjeldende()?.fødselsdato,
+            dødsdato =
+                matchetBarn.barn
+                    ?.dødsfall
+                    ?.gjeldende()
+                    ?.dødsdato,
+            fødselsdato =
+                matchetBarn.barn
+                    ?.fødsel
+                    ?.gjeldende()
+                    ?.fødselsdato,
             folkeregisterpersonstatus =
-                matchetBarn.barn?.folkeregisterpersonstatus?.gjeldende()
+                matchetBarn.barn
+                    ?.folkeregisterpersonstatus
+                    ?.gjeldende()
                     ?.let(Folkeregisterpersonstatus::fraPdl),
         )
-    }
 
-    private fun tilAnnenForelderDto(annenForelder: AnnenForelder): AnnenForelderDto {
-        return AnnenForelderDto(
+    private fun tilAnnenForelderDto(annenForelder: AnnenForelder): AnnenForelderDto =
+        AnnenForelderDto(
             navn = annenForelder.person?.navn,
             fødselsnummer = annenForelder.person?.fødselsnummer,
             fødselsdato = annenForelder.person?.fødselsdato,
@@ -185,28 +199,35 @@ class BarnMedSamværMapper(
             visningsadresse = null,
             avstandTilSøker = AvstandTilSøkerDto(avstand = null, langAvstandTilSøker = LangAvstandTilSøker.UKJENT),
         )
-    }
 
     private fun tilAnnenForelderDto(
         pdlAnnenForelder: AnnenForelderMedIdent,
         annenForelderFnr: String?,
         søkerAdresse: List<Bostedsadresse>,
-    ): AnnenForelderDto {
-        return AnnenForelderDto(
+    ): AnnenForelderDto =
+        AnnenForelderDto(
             navn = pdlAnnenForelder.navn.visningsnavn(),
             fødselsnummer = annenForelderFnr,
             fødselsdato = pdlAnnenForelder.fødsel.gjeldende().fødselsdato,
             dødsfall = pdlAnnenForelder.dødsfall.gjeldende()?.dødsdato,
-            bosattINorge = pdlAnnenForelder.bostedsadresse.gjeldende()?.utenlandskAdresse?.let { false } ?: true,
-            land = pdlAnnenForelder.bostedsadresse.gjeldende()?.utenlandskAdresse?.landkode,
+            bosattINorge =
+                pdlAnnenForelder.bostedsadresse
+                    .gjeldende()
+                    ?.utenlandskAdresse
+                    ?.let { false } ?: true,
+            land =
+                pdlAnnenForelder.bostedsadresse
+                    .gjeldende()
+                    ?.utenlandskAdresse
+                    ?.landkode,
             visningsadresse = visningsadresse(pdlAnnenForelder),
             tidligereVedtaksperioder = pdlAnnenForelder.tidligereVedtaksperioder?.tilDto(),
             avstandTilSøker = langAvstandTilSøker(søkerAdresse, pdlAnnenForelder.bostedsadresse.gjeldende()),
         )
-    }
 
     private fun visningsadresse(pdlAnnenForelder: AnnenForelderMedIdent): String? =
-        pdlAnnenForelder.bostedsadresse.gjeldende()
+        pdlAnnenForelder.bostedsadresse
+            .gjeldende()
             ?.let { adresseMapper.tilAdresse(it).visningsadresse }
 
     private fun langAvstandTilSøker(
@@ -218,9 +239,8 @@ class BarnMedSamværMapper(
             ?.fjerneBoforhold(søkerAdresse.gjeldende()?.vegadresse)
             ?: AvstandTilSøkerDto(avstand = null, langAvstandTilSøker = LangAvstandTilSøker.UKJENT)
 
-    private fun List<DeltBosted>?.tilDto(): List<DeltBostedDto> {
-        return this?.map {
+    private fun List<DeltBosted>?.tilDto(): List<DeltBostedDto> =
+        this?.map {
             DeltBostedDto(it.startdatoForKontrakt, it.sluttdatoForKontrakt, it.metadata.historisk)
         } ?: emptyList()
-    }
 }

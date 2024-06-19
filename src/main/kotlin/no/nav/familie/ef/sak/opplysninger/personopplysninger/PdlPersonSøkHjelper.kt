@@ -54,28 +54,25 @@ object PdlPersonSøkHjelper {
     private fun equalsEllerNotExists(
         søkefelt: String,
         søkeord: String?,
-    ): SøkeKriterier {
-        return søkeord?.let { lagSøkeKriterier(søkefelt, it) }
+    ): SøkeKriterier =
+        søkeord?.let { lagSøkeKriterier(søkefelt, it) }
             ?: lagSøkeKriterier(søkefelt, exists = false)
-    }
 
     private fun lagSøkeKriterier(
         søkefelt: String,
         søkeord: String,
-    ): SøkeKriterier {
-        return SøkeKriterier(
+    ): SøkeKriterier =
+        SøkeKriterier(
             fieldName = søkefelt,
             searchRule = SearchRuleEquals(equals = søkeord),
         )
-    }
 
     private fun lagSøkeKriterier(
         søkefelt: String,
         exists: Boolean,
-    ): SøkeKriterier {
-        return SøkeKriterier(
+    ): SøkeKriterier =
+        SøkeKriterier(
             fieldName = søkefelt,
             searchRule = SearchRuleExists(exists = exists),
         )
-    }
 }

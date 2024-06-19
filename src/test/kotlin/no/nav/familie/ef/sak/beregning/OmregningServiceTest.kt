@@ -143,7 +143,11 @@ internal class OmregningServiceTest : OppslagSpringRunnerTest() {
             verify { iverksettClient.iverksettUtenBrev(capture(iverksettDtoSlot)) }
             val iverksettDto = iverksettDtoSlot.captured
 
-            assertThat(iverksettDto.vedtak.tilkjentYtelse?.andelerTilkjentYtelse?.size).isEqualTo(2) // skal være splittet
+            assertThat(
+                iverksettDto.vedtak.tilkjentYtelse
+                    ?.andelerTilkjentYtelse
+                    ?.size,
+            ).isEqualTo(2) // skal være splittet
             // Sjekk andel etter ny g omregningsdato
             val andelTilkjentYtelseOmregnet = finnAndelEtterNyGDato(iverksettDto)!!
             assertThat(andelTilkjentYtelseOmregnet.inntekt).isEqualTo(289100) // justert med F
@@ -206,7 +210,11 @@ internal class OmregningServiceTest : OppslagSpringRunnerTest() {
             verify { iverksettClient.iverksettUtenBrev(capture(iverksettDtoSlot)) }
             val iverksettDto = iverksettDtoSlot.captured
 
-            assertThat(iverksettDto.vedtak.tilkjentYtelse?.andelerTilkjentYtelse?.size).isEqualTo(2) // skal være splittet
+            assertThat(
+                iverksettDto.vedtak.tilkjentYtelse
+                    ?.andelerTilkjentYtelse
+                    ?.size,
+            ).isEqualTo(2) // skal være splittet
             // Sjekk andel etter ny g omregningsdato
             val andelTilkjentYtelseOmregnet = finnAndelEtterNyGDato(iverksettDto)!!
             assertThat(andelTilkjentYtelseOmregnet.inntekt).isEqualTo(223400)
@@ -269,7 +277,8 @@ internal class OmregningServiceTest : OppslagSpringRunnerTest() {
             val iverksettDto = iverksettDtoSlot.captured
             val expectedIverksettDto =
                 iverksettMedOppdaterteIder(fagsak, behandling, iverksettDto.vedtak.vedtakstidspunkt)
-            assertThat(iverksettDto).usingRecursiveComparison()
+            assertThat(iverksettDto)
+                .usingRecursiveComparison()
                 .ignoringCollectionOrder()
                 .isEqualTo(expectedIverksettDto)
             assertThat(søknadService.hentSøknadsgrunnlag(nyBehandling.id)).isNotNull
@@ -277,8 +286,10 @@ internal class OmregningServiceTest : OppslagSpringRunnerTest() {
                 barnRepository.findByBehandlingId(nyBehandling.id).single().personIdent,
             ).isEqualTo(barn.personIdent)
             assertThat(
-                vilkårsvurderingRepository.findByBehandlingId(nyBehandling.id)
-                    .single { it.type == VilkårType.ALENEOMSORG }.barnId,
+                vilkårsvurderingRepository
+                    .findByBehandlingId(nyBehandling.id)
+                    .single { it.type == VilkårType.ALENEOMSORG }
+                    .barnId,
             ).isNotNull
         }
     }
@@ -373,7 +384,11 @@ internal class OmregningServiceTest : OppslagSpringRunnerTest() {
         val iverksettDtoSlot = slot<IverksettOvergangsstønadDto>()
         verify { iverksettClient.iverksettUtenBrev(capture(iverksettDtoSlot)) }
         val iverksettDto = iverksettDtoSlot.captured
-        assertThat(iverksettDto.vedtak.tilkjentYtelse?.andelerTilkjentYtelse?.all { it.beløp == 0 }).isTrue
+        assertThat(
+            iverksettDto.vedtak.tilkjentYtelse
+                ?.andelerTilkjentYtelse
+                ?.all { it.beløp == 0 },
+        ).isTrue
         val oppdatertTilkjentYtelse = tilkjentYtelseRepository.findByBehandlingId(iverksettDto.behandling.behandlingId)
         assertThat(oppdatertTilkjentYtelse?.grunnbeløpsmåned).isEqualTo(YearMonth.of(2022, 5))
     }
@@ -556,9 +571,7 @@ internal class OmregningServiceTest : OppslagSpringRunnerTest() {
         )
     }
 
-    private fun readFile(filnavn: String): String {
-        return this::class.java.getResource("/omregning/$filnavn")!!.readText()
-    }
+    private fun readFile(filnavn: String): String = this::class.java.getResource("/omregning/$filnavn")!!.readText()
 
     private fun lagreTilkjentYtelse(
         behandlingId: UUID,

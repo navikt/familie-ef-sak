@@ -24,8 +24,8 @@ class EksternStønadsperioderService(
         return EksternePerioderResponse(perioderFraITogEF)
     }
 
-    fun hentPerioderForOvergangsstønad(request: EksternePerioderRequest): List<EksternPeriode> {
-        return hentPerioderForOvergangsstønadMedBeløp(request).map {
+    fun hentPerioderForOvergangsstønad(request: EksternePerioderRequest): List<EksternPeriode> =
+        hentPerioderForOvergangsstønadMedBeløp(request).map {
             EksternPeriode(
                 personIdent = request.personIdent,
                 fomDato = it.fomDato,
@@ -33,10 +33,9 @@ class EksternStønadsperioderService(
                 datakilde = it.datakilde,
             )
         }
-    }
 
-    fun hentPerioderForOvergangsstønadMedBeløp(request: EksternePerioderRequest): List<EksternPeriodeMedBeløp> {
-        return hentPerioderForOvergangsstønadAvgrensetPeriode(
+    fun hentPerioderForOvergangsstønadMedBeløp(request: EksternePerioderRequest): List<EksternPeriodeMedBeløp> =
+        hentPerioderForOvergangsstønadAvgrensetPeriode(
             personIdent = request.personIdent,
             fomDato = request.fomDato,
             tomDato = request.tomDato,
@@ -49,7 +48,6 @@ class EksternStønadsperioderService(
                 beløp = it.månedsbeløp,
             )
         }
-    }
 
     private fun hentPerioderForOvergangsstønadAvgrensetPeriode(
         personIdent: String,

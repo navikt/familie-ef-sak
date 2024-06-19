@@ -220,12 +220,15 @@ class MålerRepositoryTest : OppslagSpringRunnerTest() {
 
     private fun opprettBehandlingerTestdata() {
         var fnr = 50000
-        repeat(3) { // 3 behandlinger
+        repeat(3) {
+            // 3 behandlinger
             StønadType.values().forEach { stønadType ->
-                BehandlingStatus.values().forEach { status -> // per status
+                BehandlingStatus.values().forEach { status ->
+                    // per status
                     val fagsak = testoppsettService.lagreFagsak(fagsak(fagsakpersoner("${++fnr}"), stønadstype = stønadType))
                     if (status == BehandlingStatus.FERDIGSTILT) {
-                        BehandlingResultat.values().forEach { resultat -> // per resultat for ferdigstilte
+                        BehandlingResultat.values().forEach { resultat ->
+                            // per resultat for ferdigstilte
                             val henlagtÅrsak = if (resultat == HENLAGT) FEILREGISTRERT else null
                             behandlingRepository.insert(
                                 behandling(

@@ -6,7 +6,10 @@ import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.YearMonth
 
-data class BeregningRequest(val inntekt: List<Inntekt>, val vedtaksperioder: List<VedtaksperiodeDto>)
+data class BeregningRequest(
+    val inntekt: List<Inntekt>,
+    val vedtaksperioder: List<VedtaksperiodeDto>,
+)
 
 data class Inntekt(
     val årMånedFra: YearMonth,
@@ -30,11 +33,10 @@ data class Inntektsperiode(
     val inntekt: BigDecimal,
     val samordningsfradrag: BigDecimal,
 ) {
-    fun totalinntekt(): BigDecimal {
-        return this.inntekt +
+    fun totalinntekt(): BigDecimal =
+        this.inntekt +
             (this.dagsats ?: BigDecimal.ZERO).multiply(BeregningUtils.DAGSATS_ANTALL_DAGER) +
             (this.månedsinntekt ?: BigDecimal.ZERO).multiply(BeregningUtils.ANTALL_MÅNEDER_ÅR)
-    }
 
     /**
      * Dersom den eksisterende årsinntekten er g-omregnet til nærmeste 100,

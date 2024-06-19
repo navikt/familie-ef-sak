@@ -29,9 +29,7 @@ class AktiverMikrofrontendNyttFødselsnummerTask(
     }
 
     companion object {
-        fun opprettTask(fagsakPerson: FagsakPerson): Task {
-            return Task(type = TYPE, payload = fagsakPerson.id.toString())
-        }
+        fun opprettTask(fagsakPerson: FagsakPerson): Task = Task(type = TYPE, payload = fagsakPerson.id.toString())
 
         const val TYPE = "aktiverMikrofrontendForNyttFodselsnummerTask"
     }

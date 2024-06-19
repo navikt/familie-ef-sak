@@ -32,15 +32,14 @@ class BeregningBarnetilsynController(
     fun beregnYtelserForBarnetilsyn(
         @RequestBody
         barnetilsynBeregningRequest: BeregningBarnetilsynRequest,
-    ): Ressurs<List<BeløpsperiodeBarnetilsynDto>> {
-        return Ressurs.success(
+    ): Ressurs<List<BeløpsperiodeBarnetilsynDto>> =
+        Ressurs.success(
             beregningBarnetilsynService.beregnYtelseBarnetilsyn(
                 barnetilsynBeregningRequest.utgiftsperioder,
                 barnetilsynBeregningRequest.kontantstøtteperioder,
                 barnetilsynBeregningRequest.tilleggsstønadsperioder,
             ),
         )
-    }
 
     @GetMapping("/{behandlingId}")
     fun hentBeregning(

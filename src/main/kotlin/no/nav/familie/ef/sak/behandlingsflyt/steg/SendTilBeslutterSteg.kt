@@ -196,7 +196,5 @@ class SendTilBeslutterSteg(
         }
     }
 
-    override fun stegType(): StegType {
-        return StegType.SEND_TIL_BESLUTTER
-    }
+    override fun stegType(): StegType = StegType.SEND_TIL_BESLUTTER
 }

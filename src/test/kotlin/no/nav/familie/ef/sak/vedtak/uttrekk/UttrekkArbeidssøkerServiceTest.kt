@@ -445,13 +445,14 @@ internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
         @Test
         internal fun `hentUttrekkArbeidssøkere - uten rolle og en kode6-arbeidsøker er kontrollert`() {
             val expected = listOf(identUgradert, identUtenGradering)
-            fagsakRepository.findBySøkerIdent(setOf(identStrengtFortrolig))
+            fagsakRepository
+                .findBySøkerIdent(setOf(identStrengtFortrolig))
                 .single()
                 .let { fagsak ->
-                    uttrekkArbeidssøkerRepository.findAllByÅrMånedAndRegistrertArbeidssøkerIsFalse(mars2021)
+                    uttrekkArbeidssøkerRepository
+                        .findAllByÅrMånedAndRegistrertArbeidssøkerIsFalse(mars2021)
                         .single { it.fagsakId == fagsak.id }
-                }
-                .let { uttrekkArbeidssøkerRepository.update(it.copy(kontrollert = true)) }
+                }.let { uttrekkArbeidssøkerRepository.update(it.copy(kontrollert = true)) }
             testWithSaksbehandlerContext {
                 val uttrekk = service.hentUttrekkArbeidssøkere(mars2021)
                 validerInneholderIdenter(uttrekk, expected)
@@ -484,7 +485,12 @@ internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
     internal fun `settKontrollert - sett arbeidssøker til kontrollert`() {
         opprettdata()
         opprettUttrekkArbeidssøkerTask.doTask(OpprettUttrekkArbeidssøkerTask.opprettTask(mars2021))
-        val id = service.hentUttrekkArbeidssøkere(mars2021).arbeidssøkere.single().id
+        val id =
+            service
+                .hentUttrekkArbeidssøkere(mars2021)
+                .arbeidssøkere
+                .single()
+                .id
 
         testWithSaksbehandlerContext { service.settKontrollert(id, true) }
 

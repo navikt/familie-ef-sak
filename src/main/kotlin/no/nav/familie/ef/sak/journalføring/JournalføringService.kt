@@ -388,13 +388,12 @@ class JournalføringService(
     private fun opprettBehandleSakOppgave(
         behandling: Behandling,
         navIdent: String,
-    ): Long {
-        return oppgaveService.opprettOppgave(
+    ): Long =
+        oppgaveService.opprettOppgave(
             behandlingId = behandling.id,
             oppgavetype = Oppgavetype.BehandleSak,
             tilordnetNavIdent = navIdent,
         )
-    }
 
     private fun opprettBehandleSakOppgaveTask(opprettOppgaveTaskData: OpprettOppgaveTaskData) {
         taskService.save(OpprettOppgaveForOpprettetBehandlingTask.opprettTask(opprettOppgaveTaskData))
@@ -408,9 +407,7 @@ class JournalføringService(
         hentEksisterendeBehandling(journalføringRequest.behandling.behandlingsId)
             ?: error("Finner ikke behandling med id=${journalføringRequest.behandling.behandlingsId}")
 
-    private fun hentEksisterendeBehandling(behandlingId: UUID?): Behandling? {
-        return behandlingId?.let { behandlingService.hentBehandling(it) }
-    }
+    private fun hentEksisterendeBehandling(behandlingId: UUID?): Behandling? = behandlingId?.let { behandlingService.hentBehandling(it) }
 
     private fun knyttJournalpostTilBehandling(
         journalpost: Journalpost,

@@ -84,7 +84,11 @@ internal class VurderingControllerTest : OppslagSpringRunnerTest() {
         assertThat(respons.body?.status).isEqualTo(Ressurs.Status.SUKSESS)
         assertThat(respons.body?.data).isNotNull
 
-        val aleneOmsorgVilkår = respons.body?.data?.vurderinger?.first { it.vilkårType == VilkårType.ALENEOMSORG }
+        val aleneOmsorgVilkår =
+            respons.body
+                ?.data
+                ?.vurderinger
+                ?.first { it.vilkårType == VilkårType.ALENEOMSORG }
         val vurderingNæreBoforhold = utledVurdering(aleneOmsorgVilkår, RegelId.NÆRE_BOFORHOLD)
 
         assertThat(vurderingNæreBoforhold?.svar).isEqualTo(SvarId.NEI)
@@ -100,7 +104,11 @@ internal class VurderingControllerTest : OppslagSpringRunnerTest() {
         assertThat(respons.body?.status).isEqualTo(Ressurs.Status.SUKSESS)
         assertThat(respons.body?.data).isNotNull
 
-        val aleneOmsorgVilkår = respons.body?.data?.vurderinger?.first { it.vilkårType == VilkårType.ALENEOMSORG }
+        val aleneOmsorgVilkår =
+            respons.body
+                ?.data
+                ?.vurderinger
+                ?.first { it.vilkårType == VilkårType.ALENEOMSORG }
         val vurderingNæreBoforhold = utledVurdering(aleneOmsorgVilkår, RegelId.NÆRE_BOFORHOLD)
 
         assertThat(vurderingNæreBoforhold?.svar).isNull()
@@ -266,16 +274,22 @@ internal class VurderingControllerTest : OppslagSpringRunnerTest() {
         assertThat(respons.statusCode).isEqualTo(HttpStatus.OK)
         assertThat(respons.body?.status).isEqualTo(Ressurs.Status.SUKSESS)
         assertThat(
-            respons.body?.data?.delvilkårsvurderinger?.first {
-                it.vurderinger.first().regelId == RegelId.HAR_TIDLIGERE_ANDRE_STØNADER_SOM_HAR_BETYDNING
-            }?.resultat,
+            respons.body
+                ?.data
+                ?.delvilkårsvurderinger
+                ?.first {
+                    it.vurderinger.first().regelId == RegelId.HAR_TIDLIGERE_ANDRE_STØNADER_SOM_HAR_BETYDNING
+                }?.resultat,
         ).isEqualTo(
             Vilkårsresultat.IKKE_TATT_STILLING_TIL,
         )
         assertThat(
-            respons.body?.data?.delvilkårsvurderinger?.first {
-                it.vurderinger.first().regelId == RegelId.HAR_TIDLIGERE_MOTTATT_OVERGANSSTØNAD
-            }?.resultat,
+            respons.body
+                ?.data
+                ?.delvilkårsvurderinger
+                ?.first {
+                    it.vurderinger.first().regelId == RegelId.HAR_TIDLIGERE_MOTTATT_OVERGANSSTØNAD
+                }?.resultat,
         ).isEqualTo(
             Vilkårsresultat.OPPFYLT,
         )
@@ -300,7 +314,11 @@ internal class VurderingControllerTest : OppslagSpringRunnerTest() {
             assertThat(respons.body?.status).isEqualTo(Ressurs.Status.SUKSESS)
             assertThat(respons.body?.data).isNotNull
 
-            val aleneOmsorgVilkår = respons.body?.data?.vurderinger?.first { it.vilkårType == VilkårType.ALENEOMSORG }
+            val aleneOmsorgVilkår =
+                respons.body
+                    ?.data
+                    ?.vurderinger
+                    ?.first { it.vilkårType == VilkårType.ALENEOMSORG }
 
             val vurderingDeltBosted = utledVurdering(aleneOmsorgVilkår, RegelId.SKRIFTLIG_AVTALE_OM_DELT_BOSTED)
             val vurderingNæreBoforhold = utledVurdering(aleneOmsorgVilkår, RegelId.NÆRE_BOFORHOLD)
@@ -332,7 +350,11 @@ internal class VurderingControllerTest : OppslagSpringRunnerTest() {
             assertThat(respons.body?.status).isEqualTo(Ressurs.Status.SUKSESS)
             assertThat(respons.body?.data).isNotNull
 
-            val aleneOmsorgVilkår = respons.body?.data?.vurderinger?.first { it.vilkårType == VilkårType.ALENEOMSORG }
+            val aleneOmsorgVilkår =
+                respons.body
+                    ?.data
+                    ?.vurderinger
+                    ?.first { it.vilkårType == VilkårType.ALENEOMSORG }
 
             val vurderingDeltBosted = utledVurdering(aleneOmsorgVilkår, RegelId.SKRIFTLIG_AVTALE_OM_DELT_BOSTED)
             val vurderingNæreBoforhold = utledVurdering(aleneOmsorgVilkår, RegelId.NÆRE_BOFORHOLD)
@@ -355,11 +377,10 @@ internal class VurderingControllerTest : OppslagSpringRunnerTest() {
     private fun lagOppdaterVilkårsvurdering(
         opprettetVurdering: VilkårDto,
         vilkårType: VilkårType,
-    ): SvarPåVurderingerDto {
-        return opprettetVurdering.vurderinger.first { it.vilkårType == vilkårType }.let {
+    ): SvarPåVurderingerDto =
+        opprettetVurdering.vurderinger.first { it.vilkårType == vilkårType }.let {
             lagOppdaterVilkårsvurderingMedSvarJa(it)
         }
-    }
 
     private fun lagOppdaterVilkårsvurderingMedSvarJa(it: VilkårsvurderingDto) =
         SvarPåVurderingerDto(
@@ -434,10 +455,12 @@ internal class VurderingControllerTest : OppslagSpringRunnerTest() {
         fødselTermindato: LocalDate = LocalDate.of(2020, 5, 16),
         annenForelder: AnnenForelder = TestsøknadBuilder.Builder().defaultAnnenForelder(),
         samvær: Samvær = opprettSamvær("Ja"),
-    ) = TestsøknadBuilder.Builder()
+    ) = TestsøknadBuilder
+        .Builder()
         .setBarn(
             listOf(
-                TestsøknadBuilder.Builder()
+                TestsøknadBuilder
+                    .Builder()
                     .defaultBarn(
                         "Navn navnesen",
                         "14041385481",
@@ -446,7 +469,8 @@ internal class VurderingControllerTest : OppslagSpringRunnerTest() {
                         annenForelder = annenForelder,
                         samvær = samvær,
                     ),
-                TestsøknadBuilder.Builder()
+                TestsøknadBuilder
+                    .Builder()
                     .defaultBarn(
                         "Navn navnesen",
                         "01012067050",
@@ -456,9 +480,9 @@ internal class VurderingControllerTest : OppslagSpringRunnerTest() {
                         samvær = samvær,
                     ),
             ),
-        )
-        .setPersonalia("Navn på forsørger", "01010172272")
-        .build().søknadOvergangsstønad
+        ).setPersonalia("Navn på forsørger", "01010172272")
+        .build()
+        .søknadOvergangsstønad
 
     private fun svarPåVurderingerDtoForEøsMedlemskap(it: VilkårsvurderingDto) =
         SvarPåVurderingerDto(
@@ -486,5 +510,9 @@ internal class VurderingControllerTest : OppslagSpringRunnerTest() {
     private fun utledVurdering(
         vilkår: VilkårsvurderingDto?,
         regelId: RegelId,
-    ) = vilkår?.delvilkårsvurderinger?.first { it.vurderinger.first().regelId == regelId }?.vurderinger?.first()
+    ) = vilkår
+        ?.delvilkårsvurderinger
+        ?.first { it.vurderinger.first().regelId == regelId }
+        ?.vurderinger
+        ?.first()
 }

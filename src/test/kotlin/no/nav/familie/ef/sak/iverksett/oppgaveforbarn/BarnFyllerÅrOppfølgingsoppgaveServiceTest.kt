@@ -61,7 +61,8 @@ internal class BarnFyllerÅrOppfølgingsoppgaveServiceTest {
         every { gjeldendeBarnRepository.finnBarnTilMigrerteBehandlinger(any(), any()) } returns emptyList()
         every { behandlingRepository.finnEksterneIder(capture(eksterneIderSlot)) } answers {
             firstArg<Set<UUID>>()
-                .mapIndexed { index, behandlingId -> EksternId(behandlingId, index.toLong(), index.toLong()) }.toSet()
+                .mapIndexed { index, behandlingId -> EksternId(behandlingId, index.toLong(), index.toLong()) }
+                .toSet()
         }
         every { oppgaveRepository.findByBehandlingIdAndBarnPersonIdentAndAlder(any(), any(), any()) } returns null
         every { oppgaveService.lagFristForOppgave(any()) } returns LocalDate.now().plusDays(1)
@@ -290,7 +291,5 @@ internal class BarnFyllerÅrOppfølgingsoppgaveServiceTest {
         fødselsnummer: String? = null,
         termindato: LocalDate? = null,
         fraMigrering: Boolean = false,
-    ): BarnTilUtplukkForOppgave {
-        return BarnTilUtplukkForOppgave(behandlingId, fødselsnummerSøker, fødselsnummer, termindato, fraMigrering)
-    }
+    ): BarnTilUtplukkForOppgave = BarnTilUtplukkForOppgave(behandlingId, fødselsnummerSøker, fødselsnummer, termindato, fraMigrering)
 }

@@ -73,11 +73,11 @@ class ValiderOmregningService(
     }
 
     private fun hentVedtakshistorikkFraNyesteGrunnbeløp(saksbehandling: Saksbehandling) =
-        vedtakHistorikkService.hentVedtakForOvergangsstønadFraDato(
-            saksbehandling.fagsakId,
-            YearMonth.from(Grunnbeløpsperioder.nyesteGrunnbeløpGyldigFraOgMed),
-        )
-            .perioder
+        vedtakHistorikkService
+            .hentVedtakForOvergangsstønadFraDato(
+                saksbehandling.fagsakId,
+                YearMonth.from(Grunnbeløpsperioder.nyesteGrunnbeløpGyldigFraOgMed),
+            ).perioder
             .filter { it.periodeType != VedtaksperiodeType.SANKSJON }
             .associateBy { it.periode.fom }
 

@@ -47,20 +47,19 @@ internal class BeregningTest {
                                 LocalDate.parse(periode.second),
                             ),
                         ),
+                    ).isEqualTo(
+                        fasit.map {
+                            Beløpsperiode(
+                                Månedsperiode(
+                                    LocalDate.parse(it.first),
+                                    LocalDate.parse(it.second),
+                                ),
+                                beregningsgrunnlag = null,
+                                beløp = it.third.toBigDecimal(),
+                                beløpFørSamordning = it.third.toBigDecimal(),
+                            )
+                        },
                     )
-                        .isEqualTo(
-                            fasit.map {
-                                Beløpsperiode(
-                                    Månedsperiode(
-                                        LocalDate.parse(it.first),
-                                        LocalDate.parse(it.second),
-                                    ),
-                                    beregningsgrunnlag = null,
-                                    beløp = it.third.toBigDecimal(),
-                                    beløpFørSamordning = it.third.toBigDecimal(),
-                                )
-                            },
-                        )
                 }
             }
     }

@@ -156,9 +156,7 @@ class BeslutteVedtakSteg(
         taskService.save(PollStatusFraIverksettTask.opprettTask(behandlingId))
     }
 
-    override fun stegType(): StegType {
-        return StegType.BESLUTTE_VEDTAK
-    }
+    override fun stegType(): StegType = StegType.BESLUTTE_VEDTAK
 
     override fun utførSteg(
         saksbehandling: Saksbehandling,

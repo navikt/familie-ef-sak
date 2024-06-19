@@ -19,11 +19,12 @@ import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import org.slf4j.LoggerFactory
 import java.util.UUID
 
-class NyttBarnSammePartnerRegel : Vilkårsregel(
-    vilkårType = VilkårType.NYTT_BARN_SAMME_PARTNER,
-    regler = setOf(HAR_FÅTT_ELLER_VENTER_NYTT_BARN_MED_SAMME_PARTNER),
-    hovedregler = regelIder(HAR_FÅTT_ELLER_VENTER_NYTT_BARN_MED_SAMME_PARTNER),
-) {
+class NyttBarnSammePartnerRegel :
+    Vilkårsregel(
+        vilkårType = VilkårType.NYTT_BARN_SAMME_PARTNER,
+        regler = setOf(HAR_FÅTT_ELLER_VENTER_NYTT_BARN_MED_SAMME_PARTNER),
+        hovedregler = regelIder(HAR_FÅTT_ELLER_VENTER_NYTT_BARN_MED_SAMME_PARTNER),
+    ) {
     @JsonIgnore
     private val logger = LoggerFactory.getLogger(javaClass)
 
@@ -68,11 +69,13 @@ class NyttBarnSammePartnerRegel : Vilkårsregel(
 private fun Behandling.erSøknadSomBehandlingÅrsak() = this.årsak == BehandlingÅrsak.SØKNAD
 
 private fun VilkårGrunnlagDto.harBrukerEllerAnnenForelderTidligereVedtak() =
-    this.barnMedSamvær.filter { it.registergrunnlag.fødselsnummer != null }
+    this.barnMedSamvær
+        .filter { it.registergrunnlag.fødselsnummer != null }
         .mapNotNull { it.registergrunnlag.forelder?.tidligereVedtaksperioder }
         .any { it.harTidligereVedtaksperioder() } ||
         this.tidligereVedtaksperioder.harTidligereVedtaksperioder()
 
 private fun List<BarnMedSamværDto>.alleRegisterBarnHarRegistrertAnnenForelder() =
-    this.filter { it.registergrunnlag.fødselsnummer != null }
+    this
+        .filter { it.registergrunnlag.fødselsnummer != null }
         .all { it.registergrunnlag.forelder?.fødselsnummer != null }

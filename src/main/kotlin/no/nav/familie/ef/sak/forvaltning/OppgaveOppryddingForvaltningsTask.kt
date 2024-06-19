@@ -73,13 +73,12 @@ class OppgaveOppryddingForvaltningsTask(
     companion object {
         const val TYPE = "oppryddingAvForvaltningsoppgaver"
 
-        fun opprettTask(runType: OppgaveOppryddingForvaltningsController.RunType): Task {
-            return Task(
+        fun opprettTask(runType: OppgaveOppryddingForvaltningsController.RunType): Task =
+            Task(
                 TYPE,
                 objectMapper.writeValueAsString(runType),
                 Properties(),
             )
-        }
     }
 
     private fun hentFremleggMappeId() = oppgaveService.finnMapper(OppgaveUtil.ENHET_NR_NAY).single { mappeNavn.contains(it.navn) }.id

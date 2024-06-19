@@ -14,7 +14,8 @@ import kotlin.reflect.full.isSubclassOf
 
 internal class RegistergrunnlagTest {
     private val om =
-        objectMapper.copy()
+        objectMapper
+            .copy()
             .setSerializationInclusion(JsonInclude.Include.NON_NULL)
             .writerWithDefaultPrettyPrinter()
 
@@ -58,28 +59,36 @@ internal class RegistergrunnlagTest {
         if (constructors.size != 1) {
             error("$className has ${constructors.size} constructors")
         }
-        return constructors.first().parameters.map { parameter ->
-            val name = parameter.name!!
-            val classifier = parameter.type.classifier as KClass<*>
-            val simpleName = classifier.simpleName!!
-            val qualifiedName = classifier.qualifiedName!!
-            val nullable = parameter.type.isMarkedNullable
-            when {
-                classifier in endClasses -> ObjectInfo(name, simpleName, nullable = nullable)
-                classifier.isSubclassOf(Collection::class) -> {
-                    val arguments = parameter.type.arguments
-                    if (arguments.size != 1) {
-                        error("$className Cannot handle collections with more than one type argument $qualifiedName")
+        return constructors
+            .first()
+            .parameters
+            .map { parameter ->
+                val name = parameter.name!!
+                val classifier = parameter.type.classifier as KClass<*>
+                val simpleName = classifier.simpleName!!
+                val qualifiedName = classifier.qualifiedName!!
+                val nullable = parameter.type.isMarkedNullable
+                when {
+                    classifier in endClasses -> ObjectInfo(name, simpleName, nullable = nullable)
+                    classifier.isSubclassOf(Collection::class) -> {
+                        val arguments = parameter.type.arguments
+                        if (arguments.size != 1) {
+                            error("$className Cannot handle collections with more than one type argument $qualifiedName")
+                        }
+                        val classInfo =
+                            getClassInfo(
+                                parameter.type.arguments[0]
+                                    .type!!
+                                    .classifier as KClass<*>,
+                            )
+                        ObjectInfo(name, "Collection", classInfo, nullable = nullable)
                     }
-                    val classInfo = getClassInfo(parameter.type.arguments[0].type!!.classifier as KClass<*>)
-                    ObjectInfo(name, "Collection", classInfo, nullable = nullable)
+                    classifier.isSubclassOf(Enum::class) ->
+                        ObjectInfo(name, "Enum", null, classifier.java.enumConstants.map { it.toString() }, nullable)
+                    qualifiedName.startsWith("java.") || qualifiedName.startsWith("kotlin.") ->
+                        error("$className - Class is not defined: $qualifiedName")
+                    else -> ObjectInfo(name, "Object", getClassInfo(classifier), nullable = nullable)
                 }
-                classifier.isSubclassOf(Enum::class) ->
-                    ObjectInfo(name, "Enum", null, classifier.java.enumConstants.map { it.toString() }, nullable)
-                qualifiedName.startsWith("java.") || qualifiedName.startsWith("kotlin.") ->
-                    error("$className - Class is not defined: $qualifiedName")
-                else -> ObjectInfo(name, "Object", getClassInfo(classifier), nullable = nullable)
-            }
-        }.associateBy { it.name }
+            }.associateBy { it.name }
     }
 }

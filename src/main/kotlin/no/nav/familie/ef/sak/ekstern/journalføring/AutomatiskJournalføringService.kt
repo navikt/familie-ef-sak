@@ -86,15 +86,14 @@ class AutomatiskJournalføringService(
     private fun kanAutomatiskJournalføreRevurdering(
         behandlinger: List<Behandling>,
         fagsak: Fagsak?,
-    ): Boolean {
-        return if (!harÅpenBehandling(behandlinger)) {
+    ): Boolean =
+        if (!harÅpenBehandling(behandlinger)) {
             secureLogger.info("Kan automatisk journalføre for fagsak: ${fagsak?.id}")
             true
         } else {
             secureLogger.info("Kan ikke automatisk journalføre for fagsak: ${fagsak?.id}")
             false
         }
-    }
 
     private fun validerKanAutomatiskJournalføre(
         personIdent: String,
@@ -141,7 +140,5 @@ class AutomatiskJournalføringService(
         type: StønadType,
     ) = !infotrygdService.eksisterer(ident, setOf(type))
 
-    private fun harÅpenBehandling(behandlinger: List<Behandling>): Boolean {
-        return behandlinger.any { !it.erAvsluttet() }
-    }
+    private fun harÅpenBehandling(behandlinger: List<Behandling>): Boolean = behandlinger.any { !it.erAvsluttet() }
 }

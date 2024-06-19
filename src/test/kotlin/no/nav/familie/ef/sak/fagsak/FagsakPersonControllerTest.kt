@@ -53,7 +53,8 @@ internal class FagsakPersonControllerTest : OppslagSpringRunnerTest() {
     internal fun `skal ikke opprette fagsakperson når man søker etter personident som ikke finnes i pdl`() {
         assertThrows<PdlNotFoundException> {
             testWithBrukerContext {
-                fagsakPersonController.hentFagsakPersonIdForPerson(PersonIdentDto("19117313797"))
+                fagsakPersonController
+                    .hentFagsakPersonIdForPerson(PersonIdentDto("19117313797"))
                     .getDataOrThrow()
             }
         }

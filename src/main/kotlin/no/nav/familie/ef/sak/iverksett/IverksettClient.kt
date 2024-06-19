@@ -29,8 +29,7 @@ class IverksettClient(
     private val familieEfIverksettUri: String,
     @Qualifier("azure")
     private val restOperations: RestOperations,
-) :
-    AbstractPingableRestClient(restOperations, "familie.ef.iverksett") {
+) : AbstractPingableRestClient(restOperations, "familie.ef.iverksett") {
     override val pingUri: URI = URI.create("$familieEfIverksettUri/api/status")
 
     override fun ping() {
@@ -108,11 +107,13 @@ class IverksettClient(
         transaksjonId: UUID = UUID.randomUUID(),
     ) {
         val url =
-            UriComponentsBuilder.fromUriString("$familieEfIverksettUri/api/konsistensavstemming")
+            UriComponentsBuilder
+                .fromUriString("$familieEfIverksettUri/api/konsistensavstemming")
                 .queryParam("sendStartmelding", sendStartmelding)
                 .queryParam("sendAvsluttmelding", sendAvsluttmelding)
                 .queryParam("transaksjonId", transaksjonId.toString())
-                .build().toUri()
+                .build()
+                .toUri()
         postForEntity<Any>(url, request)
     }
 

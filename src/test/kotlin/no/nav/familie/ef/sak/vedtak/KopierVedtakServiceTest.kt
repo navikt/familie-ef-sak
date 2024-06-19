@@ -112,7 +112,11 @@ internal class KopierVedtakServiceTest {
 
         assertThat(vedtakDto.perioder).hasSize(1)
         assertThat(vedtakDto.perioder.first().utgifter).isEqualTo(1000)
-        assertThat(vedtakDto.perioder.first().periode.fom).isEqualTo(forventetFomYearMonth)
+        assertThat(
+            vedtakDto.perioder
+                .first()
+                .periode.fom,
+        ).isEqualTo(forventetFomYearMonth)
     }
 
     @Test
@@ -161,8 +165,16 @@ internal class KopierVedtakServiceTest {
         val vedtakDto = kopierVedtakService.mapTilBarnetilsynVedtak(fagsak.id, listOf(barn), forrigeBehandling.id) as InnvilgelseBarnetilsyn
 
         assertThat(vedtakDto.tilleggsstønad.perioder).hasSize(2)
-        assertThat(vedtakDto.tilleggsstønad.perioder.find { it.periode.fom == YearMonth.from(forventetFomYearMonth) }?.beløp).isEqualTo(1000)
-        assertThat(vedtakDto.tilleggsstønad.perioder.find { it.periode.tom == YearMonth.from(andreAndelTilOgMedDato) }?.beløp).isEqualTo(2000)
+        assertThat(
+            vedtakDto.tilleggsstønad.perioder
+                .find { it.periode.fom == YearMonth.from(forventetFomYearMonth) }
+                ?.beløp,
+        ).isEqualTo(1000)
+        assertThat(
+            vedtakDto.tilleggsstønad.perioder
+                .find { it.periode.tom == YearMonth.from(andreAndelTilOgMedDato) }
+                ?.beløp,
+        ).isEqualTo(2000)
     }
 
     @Test

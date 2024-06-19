@@ -94,13 +94,12 @@ class TerminbarnRepositoryTest : OppslagSpringRunnerTest() {
     private fun opprettTerminbarnOppgave(
         fagsak: UUID = UUID.randomUUID(),
         termindato: LocalDate = LocalDate.now(),
-    ): TerminbarnOppgave {
-        return TerminbarnOppgave(
+    ): TerminbarnOppgave =
+        TerminbarnOppgave(
             fagsakId = fagsak,
             termindato = termindato,
             opprettetTid = LocalDate.now(),
         )
-    }
 
     private fun lagreInnvilgetBehandling(
         fagsak: Fagsak,
@@ -123,13 +122,12 @@ class TerminbarnRepositoryTest : OppslagSpringRunnerTest() {
         behandlingId: UUID,
         personIdent: String? = null,
         termindato: LocalDate? = LocalDate.now(),
-    ): BehandlingBarn {
-        return BehandlingBarn(
+    ): BehandlingBarn =
+        BehandlingBarn(
             behandlingId = behandlingId,
             personIdent = personIdent,
             fødselTermindato = termindato,
             navn = null,
             søknadBarnId = UUID.randomUUID(),
         )
-    }
 }

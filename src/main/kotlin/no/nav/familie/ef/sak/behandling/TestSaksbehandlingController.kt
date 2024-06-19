@@ -110,9 +110,10 @@ class TestSaksbehandlingController(
         return vurdering.delvilkårsvurderinger.map { delvilkår ->
             val hovedregel = delvilkår.hovedregel()
             val regelSteg = vilkårsregel.regler.getValue(hovedregel)
-            regelSteg.svarMapping.mapNotNull { (svarId, svarRegel) ->
-                lagOppfyltVilkår(delvilkår, svarRegel, svarId)
-            }.firstOrNull()
+            regelSteg.svarMapping
+                .mapNotNull { (svarId, svarRegel) ->
+                    lagOppfyltVilkår(delvilkår, svarRegel, svarId)
+                }.firstOrNull()
                 ?: error("Finner ikke oppfylt svar for vilkårstype=${vurdering.vilkårType} hovedregel=$hovedregel")
         }
     }
@@ -249,64 +250,77 @@ class TestSaksbehandlingController(
     private fun lagSøknad(personIdent: String): TestsøknadBuilder {
         val søkerMedBarn = personService.hentPersonMedBarn(personIdent)
         val barneListe: List<Barn> = mapSøkersBarn(søkerMedBarn)
-        return TestsøknadBuilder.Builder()
-            .setPersonalia(søkerMedBarn.søker.navn.gjeldende().visningsnavn(), søkerMedBarn.søkerIdent)
-            .setBarn(barneListe)
+        return TestsøknadBuilder
+            .Builder()
+            .setPersonalia(
+                søkerMedBarn.søker.navn
+                    .gjeldende()
+                    .visningsnavn(),
+                søkerMedBarn.søkerIdent,
+            ).setBarn(barneListe)
             .setBosituasjon(
                 delerDuBolig =
                     EnumTekstverdiMedSvarId(
                         verdi = "Nei, jeg bor alene med barn eller jeg er gravid og bor alene",
                         svarId = "borAleneMedBarnEllerGravid",
                     ),
-            )
-            .setSivilstandsplaner(
+            ).setSivilstandsplaner(
                 harPlaner = true,
                 fraDato = LocalDate.of(2019, 9, 17),
                 vordendeSamboerEktefelle =
-                    TestsøknadBuilder.Builder()
+                    TestsøknadBuilder
+                        .Builder()
                         .defaultPersonMinimum(
                             navn = "Fyren som skal bli min samboer",
                             fødselsdato = LocalDate.of(1979, 9, 17),
                         ),
-            )
-            .build()
+            ).build()
     }
 
     private fun mapSøkersBarn(søkerMedBarn: SøkerMedBarn): List<Barn> {
         val barneListe: List<Barn> =
-            søkerMedBarn.barn.filter { it.value.fødsel.gjeldende().erUnder18År() }.map {
-                TestsøknadBuilder.Builder().defaultBarn(
-                    navn = it.value.navn.gjeldende().visningsnavn(),
-                    fødselsnummer = it.key,
-                    harSkalHaSammeAdresse = true,
-                    ikkeRegistrertPåSøkersAdresseBeskrivelse = "Fordi",
-                    erBarnetFødt = true,
-                    fødselTermindato = Fødselsnummer(it.key).fødselsdato,
-                    annenForelder =
-                        TestsøknadBuilder.Builder().defaultAnnenForelder(
-                            ikkeOppgittAnnenForelderBegrunnelse = null,
-                            bosattINorge = false,
-                            land = "Sverige",
-                            personMinimum =
-                                TestsøknadBuilder.Builder()
-                                    .defaultPersonMinimum("Bob Burger", LocalDate.of(1979, 9, 17)),
-                        ),
-                    samvær =
-                        TestsøknadBuilder.Builder().defaultSamvær(
-                            beskrivSamværUtenBarn = "Har sjelden sett noe til han",
-                            borAnnenForelderISammeHus = "ja",
-                            borAnnenForelderISammeHusBeskrivelse = "Samme blokk",
-                            harDereSkriftligAvtaleOmSamvær = "jaIkkeKonkreteTidspunkter",
-                            harDereTidligereBoddSammen = true,
-                            hvorMyeErDuSammenMedAnnenForelder = "møtesUtenom",
-                            hvordanPraktiseresSamværet = "Bytter litt på innimellom",
-                            nårFlyttetDereFraHverandre = LocalDate.of(2020, 12, 31),
-                            skalAnnenForelderHaSamvær = "jaMerEnnVanlig",
-                            spørsmålAvtaleOmDeltBosted = true,
-                        ),
-                    skalBoHosSøker = "jaMenSamarbeiderIkke",
-                )
-            }
+            søkerMedBarn.barn
+                .filter {
+                    it.value.fødsel
+                        .gjeldende()
+                        .erUnder18År()
+                }.map {
+                    TestsøknadBuilder.Builder().defaultBarn(
+                        navn =
+                            it.value.navn
+                                .gjeldende()
+                                .visningsnavn(),
+                        fødselsnummer = it.key,
+                        harSkalHaSammeAdresse = true,
+                        ikkeRegistrertPåSøkersAdresseBeskrivelse = "Fordi",
+                        erBarnetFødt = true,
+                        fødselTermindato = Fødselsnummer(it.key).fødselsdato,
+                        annenForelder =
+                            TestsøknadBuilder.Builder().defaultAnnenForelder(
+                                ikkeOppgittAnnenForelderBegrunnelse = null,
+                                bosattINorge = false,
+                                land = "Sverige",
+                                personMinimum =
+                                    TestsøknadBuilder
+                                        .Builder()
+                                        .defaultPersonMinimum("Bob Burger", LocalDate.of(1979, 9, 17)),
+                            ),
+                        samvær =
+                            TestsøknadBuilder.Builder().defaultSamvær(
+                                beskrivSamværUtenBarn = "Har sjelden sett noe til han",
+                                borAnnenForelderISammeHus = "ja",
+                                borAnnenForelderISammeHusBeskrivelse = "Samme blokk",
+                                harDereSkriftligAvtaleOmSamvær = "jaIkkeKonkreteTidspunkter",
+                                harDereTidligereBoddSammen = true,
+                                hvorMyeErDuSammenMedAnnenForelder = "møtesUtenom",
+                                hvordanPraktiseresSamværet = "Bytter litt på innimellom",
+                                nårFlyttetDereFraHverandre = LocalDate.of(2020, 12, 31),
+                                skalAnnenForelderHaSamvær = "jaMerEnnVanlig",
+                                spørsmålAvtaleOmDeltBosted = true,
+                            ),
+                        skalBoHosSøker = "jaMenSamarbeiderIkke",
+                    )
+                }
         return barneListe
     }
 
@@ -330,15 +344,14 @@ class TestSaksbehandlingController(
         return behandling
     }
 
-    private fun lagMigreringBehandling(fagsak: Fagsak): Behandling {
-        return migreringService.opprettMigrering(
+    private fun lagMigreringBehandling(fagsak: Fagsak): Behandling =
+        migreringService.opprettMigrering(
             fagsak = fagsak,
             periode = Månedsperiode(YearMonth.now(), YearMonth.now().plusMonths(1)),
             inntektsgrunnlag = 0,
             samordningsfradrag = 0,
             ignorerFeilISimulering = true,
         )
-    }
 }
 
 private fun TestBehandlingsType.tilStønadstype(): StønadType =

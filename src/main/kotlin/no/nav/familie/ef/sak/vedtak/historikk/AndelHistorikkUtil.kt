@@ -6,8 +6,8 @@ import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
 import no.nav.familie.kontrakter.felles.ef.StønadType
 
 object AndelHistorikkUtil {
-    fun List<AndelHistorikkDto>.slåSammen(harSammeVerdi: (AndelHistorikkDto, AndelHistorikkDto) -> Boolean): List<AndelHistorikkDto> {
-        return this.fold(mutableListOf()) { acc, entry ->
+    fun List<AndelHistorikkDto>.slåSammen(harSammeVerdi: (AndelHistorikkDto, AndelHistorikkDto) -> Boolean): List<AndelHistorikkDto> =
+        this.fold(mutableListOf()) { acc, entry ->
             val last = acc.lastOrNull()
             if (last != null && harSammeVerdi(last, entry)) {
                 acc.removeLast()
@@ -17,7 +17,6 @@ object AndelHistorikkUtil {
             }
             acc
         }
-    }
 
     fun sammenhengende(
         first: AndelHistorikkDto,

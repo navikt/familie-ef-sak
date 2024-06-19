@@ -22,8 +22,10 @@ import java.util.UUID
     beskrivelse = "Opprett oppgave i GOSYS for behandling",
     maxAntallFeil = 3,
 )
-class OpprettOppgaveTask(private val oppgaveService: OppgaveService, private val behandlingService: BehandlingService) :
-    AsyncTaskStep {
+class OpprettOppgaveTask(
+    private val oppgaveService: OppgaveService,
+    private val behandlingService: BehandlingService,
+) : AsyncTaskStep {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     /**
@@ -68,8 +70,8 @@ class OpprettOppgaveTask(private val oppgaveService: OppgaveService, private val
     }
 
     companion object {
-        fun opprettTask(data: OpprettOppgaveTaskData): Task {
-            return Task(
+        fun opprettTask(data: OpprettOppgaveTaskData): Task =
+            Task(
                 type = TYPE,
                 payload = objectMapper.writeValueAsString(data),
                 properties =
@@ -79,7 +81,6 @@ class OpprettOppgaveTask(private val oppgaveService: OppgaveService, private val
                         this["oppgavetype"] = data.oppgavetype.name
                     },
             )
-        }
 
         const val TYPE = "opprettOppgave"
     }

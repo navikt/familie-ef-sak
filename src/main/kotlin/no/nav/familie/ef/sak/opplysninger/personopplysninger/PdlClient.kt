@@ -33,8 +33,7 @@ import java.net.URI
 class PdlClient(
     val pdlConfig: PdlConfig,
     @Qualifier("azureClientCredential") restTemplate: RestOperations,
-) :
-    AbstractPingableRestClient(restTemplate, "pdl.personinfo") {
+) : AbstractPingableRestClient(restTemplate, "pdl.personinfo") {
     override val pingUri: URI
         get() = pdlConfig.pdlUri
 
@@ -172,12 +171,11 @@ class PdlClient(
         return feilmeldOgReturnerData(pdlResponse)
     }
 
-    private fun httpHeaders(): HttpHeaders {
-        return HttpHeaders().apply {
+    private fun httpHeaders(): HttpHeaders =
+        HttpHeaders().apply {
             add("Tema", "ENF")
             add("behandlingsnummer", Tema.ENF.behandlingsnummer)
         }
-    }
 
     companion object {
         const val MAKS_ANTALL_IDENTER = 100

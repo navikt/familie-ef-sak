@@ -26,9 +26,7 @@ class FeatureToggleController(
         )
 
     @GetMapping
-    fun sjekkAlle(): Map<String, Boolean> {
-        return funksjonsbrytere.associate { it.toggleId to featureToggleService.isEnabled(it) }
-    }
+    fun sjekkAlle(): Map<String, Boolean> = funksjonsbrytere.associate { it.toggleId to featureToggleService.isEnabled(it) }
 
     @GetMapping("/{toggleId}")
     fun sjekkFunksjonsbryter(

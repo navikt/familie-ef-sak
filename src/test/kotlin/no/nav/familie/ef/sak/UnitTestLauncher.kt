@@ -15,8 +15,7 @@ class UnitTestLauncher {
                 .profiles(
                     "local",
                     "mock-oauth",
-                )
-                .build()
+                ).build()
         app.run(*args)
     }
 }

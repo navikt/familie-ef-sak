@@ -77,13 +77,14 @@ fun SkoleårsperiodeSkolepengerDto.tilDomene() =
     SkoleårsperiodeSkolepenger(
         perioder = this.perioder.map { it.tilDomene() }.sortedBy { it.periode },
         utgiftsperioder =
-            this.utgiftsperioder.map {
-                SkolepengerUtgift(
-                    id = it.id,
-                    utgiftsdato = it.årMånedFra.atDay(1),
-                    stønad = it.stønad,
-                )
-            }.sortedBy { it.utgiftsdato },
+            this.utgiftsperioder
+                .map {
+                    SkolepengerUtgift(
+                        id = it.id,
+                        utgiftsdato = it.årMånedFra.atDay(1),
+                        stønad = it.stønad,
+                    )
+                }.sortedBy { it.utgiftsdato },
     )
 
 fun DelårsperiodeSkoleårDto.tilDomene() =

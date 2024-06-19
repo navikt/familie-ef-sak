@@ -16,7 +16,9 @@ import org.springframework.web.bind.annotation.RestController
 @RequestMapping("/api/organisasjon")
 @ProtectedWithClaims(issuer = "azuread")
 @Validated
-class OrganisasjonController(val eregService: EregService) {
+class OrganisasjonController(
+    val eregService: EregService,
+) {
     @GetMapping("/{organisasjonsnummer}")
     fun hentOrganisasjon(
         @PathVariable organisasjonsnummer: String,

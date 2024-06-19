@@ -11,14 +11,12 @@ import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADE
 import org.springframework.stereotype.Service
 
 @Service
-class BrevsignaturService(val personopplysningerService: PersonopplysningerService) {
-    fun lagSignaturMedEnhet(saksbehandling: Saksbehandling): SignaturDto {
-        return lagSignaturDto(saksbehandling.ident)
-    }
+class BrevsignaturService(
+    val personopplysningerService: PersonopplysningerService,
+) {
+    fun lagSignaturMedEnhet(saksbehandling: Saksbehandling): SignaturDto = lagSignaturDto(saksbehandling.ident)
 
-    fun lagSignaturMedEnhet(fagsak: Fagsak): SignaturDto {
-        return lagSignaturDto(fagsak.hentAktivIdent())
-    }
+    fun lagSignaturMedEnhet(fagsak: Fagsak): SignaturDto = lagSignaturDto(fagsak.hentAktivIdent())
 
     fun lagSignaturMedEnhet(
         saksbehandling: Saksbehandling,
@@ -32,7 +30,8 @@ class BrevsignaturService(val personopplysningerService: PersonopplysningerServi
 
     private fun lagSignaturDto(ident: String): SignaturDto {
         val harStrengtFortroligAdresse: Boolean =
-            personopplysningerService.hentStrengesteAdressebeskyttelseForPersonMedRelasjoner(ident)
+            personopplysningerService
+                .hentStrengesteAdressebeskyttelseForPersonMedRelasjoner(ident)
                 .let { it == STRENGT_FORTROLIG || it == STRENGT_FORTROLIG_UTLAND }
 
         return if (harStrengtFortroligAdresse) {

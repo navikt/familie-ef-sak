@@ -110,7 +110,8 @@ internal class VedtakHistorikkBeregnerTest {
             vedtaksperioderPerBehandling,
             andreVedtak.behandlingId,
             listOf(
-                førstePeriode.copy(datoTil = LocalDate.of(2021, 1, 31))
+                førstePeriode
+                    .copy(datoTil = LocalDate.of(2021, 1, 31))
                     .tilHistorikk(),
             ) + andreVedtak.vedtaksperioder(),
         )
@@ -208,7 +209,8 @@ internal class VedtakHistorikkBeregnerTest {
                 )
             }
         val konfigurasjon = HistorikkKonfigurasjon(true)
-        return VedtakHistorikkBeregner.lagVedtaksperioderPerBehandling(behandlingHistorikkData, konfigurasjon)
+        return VedtakHistorikkBeregner
+            .lagVedtaksperioderPerBehandling(behandlingHistorikkData, konfigurasjon)
             .map { it.key to it.value.perioder }
             .toMap()
     }

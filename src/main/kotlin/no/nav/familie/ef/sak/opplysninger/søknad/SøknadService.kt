@@ -53,9 +53,7 @@ class SøknadService(
         return søknadBarnetilsynRepository.findByIdOrThrow(søknad.soknadsskjemaId)
     }
 
-    fun finnDatoMottattForSøknad(behandlingId: UUID): LocalDateTime? {
-        return søknadRepository.finnDatoMottattForSøknad(behandlingId)
-    }
+    fun finnDatoMottattForSøknad(behandlingId: UUID): LocalDateTime? = søknadRepository.finnDatoMottattForSøknad(behandlingId)
 
     /**
      * Vi kopierer nå for å ikke bryte mye annen funksjonalitet, men burde vurdere OM vi MÅ ha en søknad i en revurdering
@@ -115,7 +113,5 @@ class SøknadService(
         søknadRepository.insert(SøknadMapper.toDomain(journalpostId, søknadsskjema, behandlingId))
     }
 
-    private fun hentSøknad(behandlingId: UUID): Søknad? {
-        return søknadRepository.findByBehandlingId(behandlingId)
-    }
+    private fun hentSøknad(behandlingId: UUID): Søknad? = søknadRepository.findByBehandlingId(behandlingId)
 }

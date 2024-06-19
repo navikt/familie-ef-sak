@@ -52,11 +52,10 @@ internal class AutomatiskBrevInnhentingAktivitetspliktControllerTest : OppslagSp
     private fun opprettTasks(
         liveRun: Boolean = true,
         taskLimit: Int,
-    ): ResponseEntity<Ressurs<Unit>> {
-        return restTemplate.exchange(
+    ): ResponseEntity<Ressurs<Unit>> =
+        restTemplate.exchange(
             localhost("/api/automatisk-brev-innhenting-aktivitetsplikt/opprett-tasks"),
             HttpMethod.POST,
             HttpEntity(AktivitetspliktRequest(liveRun = liveRun, taskLimit = taskLimit), headers),
         )
-    }
 }

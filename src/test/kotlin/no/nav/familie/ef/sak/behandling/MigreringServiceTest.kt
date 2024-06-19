@@ -376,7 +376,12 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
         assertThat(migreringInfo.kanMigreres).isTrue
         assertThat(migreringInfo.stønadsperiode?.fom).isEqualTo(månedenFør)
         assertThat(migreringInfo.stønadsperiode?.tom).isEqualTo(månedenFør)
-        assertThat(migreringInfo.beløpsperioder?.first()?.beløp?.toInt()).isEqualTo(19949)
+        assertThat(
+            migreringInfo.beløpsperioder
+                ?.first()
+                ?.beløp
+                ?.toInt(),
+        ).isEqualTo(19949)
     }
 
     @Test
@@ -621,8 +626,7 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
                     OVERGANGSSTØNAD,
                     DatoUtil.dagensDato(),
                 ),
-            )
-                .isEmpty()
+            ).isEmpty()
         }
 
         @Test
@@ -634,8 +638,7 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
                     OVERGANGSSTØNAD,
                     DatoUtil.dagensDato(),
                 ),
-            )
-                .isEmpty()
+            ).isEmpty()
             val migrerteBarn = gjeldendeBarnRepository.finnBarnTilMigrerteBehandlinger(OVERGANGSSTØNAD, DatoUtil.dagensDato())
             assertThat(migrerteBarn).hasSize(2)
             assertThat(migrerteBarn.map { it.behandlingId }.toSet()).containsExactly(revurdering.id)
@@ -807,12 +810,14 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
     private fun verifiserVurderinger(migrering: Behandling) {
         val vilkårsvurderinger = vilkårsvurderingRepository.findByBehandlingId(migrering.id)
         val alleVurderingerManglerSvar =
-            vilkårsvurderinger.flatMap { it.delvilkårsvurdering.delvilkårsvurderinger }
+            vilkårsvurderinger
+                .flatMap { it.delvilkårsvurdering.delvilkårsvurderinger }
                 .filter { it.hovedregel != RegelId.OMSORG_FOR_EGNE_ELLER_ADOPTERTE_BARN }
                 .flatMap { it.vurderinger }
                 .all { it.svar == null }
         val erOpprettetAvSystem =
-            vilkårsvurderinger.flatMap { listOf(it.sporbar.opprettetAv, it.sporbar.endret.endretAv) }
+            vilkårsvurderinger
+                .flatMap { listOf(it.sporbar.opprettetAv, it.sporbar.endret.endretAv) }
                 .all { it == SikkerhetContext.SYSTEM_FORKORTELSE }
         assertThat(alleVurderingerManglerSvar).isTrue
         assertThat(erOpprettetAvSystem).isTrue
@@ -962,7 +967,8 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
         ).forEach { type ->
             try {
                 val task =
-                    taskService.findAll()
+                    taskService
+                        .findAll()
                         .filter { it.status == Status.KLAR_TIL_PLUKK || it.status == Status.UBEHANDLET }
                         .single { it.type == type }
                 taskWorker.markerPlukket(task.id)

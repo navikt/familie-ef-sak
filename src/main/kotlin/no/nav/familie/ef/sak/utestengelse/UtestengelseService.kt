@@ -15,17 +15,19 @@ class UtestengelseService(
     fun opprettUtestengelse(dto: OpprettUtestengelseDto): UtestengelseDto {
         validerFinnesIkkeOverlappendePerioder(dto)
 
-        return utestengelseRepository.insert(
-            Utestengelse(
-                fagsakPersonId = dto.fagsakPersonId,
-                fom = dto.periode.fomDato,
-                tom = dto.periode.tomDato,
-            ),
-        ).tilDto()
+        return utestengelseRepository
+            .insert(
+                Utestengelse(
+                    fagsakPersonId = dto.fagsakPersonId,
+                    fom = dto.periode.fomDato,
+                    tom = dto.periode.tomDato,
+                ),
+            ).tilDto()
     }
 
     fun hentUtestengelser(fagsakPersonId: UUID): List<Utestengelse> =
-        utestengelseRepository.findAllByFagsakPersonId(fagsakPersonId)
+        utestengelseRepository
+            .findAllByFagsakPersonId(fagsakPersonId)
             .filterNot { it.slettet }
             .sortedWith(compareBy({ it.fom }, { it.sporbar.opprettetTid }))
 

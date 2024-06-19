@@ -30,8 +30,7 @@ internal class BeregningUtilsTest {
                     beløpForInnteksperioder = listOf(beløpsperiode),
                     vedtaksperiode = vedtaksperiode,
                 ).first(),
-            )
-                .isEqualTo(beløpsperiode.copy(periode = vedtaksperiode))
+            ).isEqualTo(beløpsperiode.copy(periode = vedtaksperiode))
         }
 
         @Test
@@ -52,8 +51,7 @@ internal class BeregningUtilsTest {
                     beløpForInnteksperioder = listOf(beløpsperiode),
                     vedtaksperiode = vedtaksperiode,
                 ).first(),
-            )
-                .isEqualTo(beløpsperiode)
+            ).isEqualTo(beløpsperiode)
         }
 
         @Test
@@ -78,16 +76,15 @@ internal class BeregningUtilsTest {
                     beløpForInnteksperioder = listOf(beløpsperiode),
                     vedtaksperiode = vedtaksperiode,
                 ).first(),
+            ).isEqualTo(
+                beløpsperiode.copy(
+                    periode =
+                        vedtaksperiode.copy(
+                            fom = YearMonth.parse("2020-05"),
+                            tom = YearMonth.parse("2020-06"),
+                        ),
+                ),
             )
-                .isEqualTo(
-                    beløpsperiode.copy(
-                        periode =
-                            vedtaksperiode.copy(
-                                fom = YearMonth.parse("2020-05"),
-                                tom = YearMonth.parse("2020-06"),
-                            ),
-                    ),
-                )
         }
 
         @Test
@@ -112,16 +109,15 @@ internal class BeregningUtilsTest {
                     beløpForInnteksperioder = listOf(beløpsperiode),
                     vedtaksperiode = vedtaksperiode,
                 ).first(),
+            ).isEqualTo(
+                beløpsperiode.copy(
+                    periode =
+                        vedtaksperiode.copy(
+                            fom = YearMonth.parse("2020-09"),
+                            tom = YearMonth.parse("2020-12"),
+                        ),
+                ),
             )
-                .isEqualTo(
-                    beløpsperiode.copy(
-                        periode =
-                            vedtaksperiode.copy(
-                                fom = YearMonth.parse("2020-09"),
-                                tom = YearMonth.parse("2020-12"),
-                            ),
-                    ),
-                )
         }
 
         @Test
@@ -146,8 +142,7 @@ internal class BeregningUtilsTest {
                     beløpForInnteksperioder = listOf(beløpsperiode),
                     vedtaksperiode = vedtaksperiode,
                 ),
-            )
-                .isEqualTo(emptyList<Beløpsperiode>())
+            ).isEqualTo(emptyList<Beløpsperiode>())
         }
     }
 

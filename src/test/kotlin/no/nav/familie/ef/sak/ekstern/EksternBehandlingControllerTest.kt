@@ -69,8 +69,8 @@ internal class EksternBehandlingControllerTest {
         assertThat(eksternBehandlingController.harAktivStønad(setOf("12345678910")).data).isEqualTo(false)
     }
 
-    private fun opprettIkkeUtdatertTilkjentYtelse(): TilkjentYtelse {
-        return lagTilkjentYtelse(
+    private fun opprettIkkeUtdatertTilkjentYtelse(): TilkjentYtelse =
+        lagTilkjentYtelse(
             andelerTilkjentYtelse =
                 listOf(
                     lagAndelTilkjentYtelse(
@@ -85,10 +85,9 @@ internal class EksternBehandlingControllerTest {
                     ),
                 ),
         )
-    }
 
-    private fun opprettUtdatertTilkjentYtelse(): TilkjentYtelse {
-        return lagTilkjentYtelse(
+    private fun opprettUtdatertTilkjentYtelse(): TilkjentYtelse =
+        lagTilkjentYtelse(
             andelerTilkjentYtelse =
                 listOf(
                     lagAndelTilkjentYtelse(
@@ -103,7 +102,6 @@ internal class EksternBehandlingControllerTest {
                     ),
                 ),
         )
-    }
 
     private fun mockOpprettTilkjenteYtelser(
         tilkjentYtelse: TilkjentYtelse,

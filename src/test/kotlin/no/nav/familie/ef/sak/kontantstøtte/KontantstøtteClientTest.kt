@@ -45,10 +45,12 @@ class KontantstøtteClientTest {
     @Test
     fun `hent utbetalingsinfo kontantstøtte og map response`() {
         wiremockServerItem.stubFor(
-            WireMock.post(WireMock.urlEqualTo("/api/bisys/hent-utbetalingsinfo"))
+            WireMock
+                .post(WireMock.urlEqualTo("/api/bisys/hent-utbetalingsinfo"))
                 .withRequestBody(WireMock.equalToJson(hentUtbetalingsinfoRequestJson))
                 .willReturn(
-                    WireMock.aResponse()
+                    WireMock
+                        .aResponse()
                         .withStatus(HttpStatus.OK.value())
                         .withHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.mimeType)
                         .withBody(hentUtbetalingsinfoResponseJson),

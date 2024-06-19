@@ -195,9 +195,7 @@ fun fagsak(
     sporbar: Sporbar = Sporbar(),
     migrert: Boolean = false,
     fagsakPersonId: UUID = UUID.randomUUID(),
-): Fagsak {
-    return fagsak(stønadstype, id, FagsakPerson(id = fagsakPersonId, identer = identer), eksternId, sporbar, migrert = migrert)
-}
+): Fagsak = fagsak(stønadstype, id, FagsakPerson(id = fagsakPersonId, identer = identer), eksternId, sporbar, migrert = migrert)
 
 fun fagsak(
     stønadstype: StønadType = StønadType.OVERGANGSSTØNAD,
@@ -206,8 +204,8 @@ fun fagsak(
     eksternId: Long = 0,
     sporbar: Sporbar = Sporbar(),
     migrert: Boolean = false,
-): Fagsak {
-    return Fagsak(
+): Fagsak =
+    Fagsak(
         id = id,
         fagsakPersonId = person.id,
         personIdenter = person.identer,
@@ -216,7 +214,6 @@ fun fagsak(
         migrert = migrert,
         sporbar = sporbar,
     )
-}
 
 fun fagsakDomain(
     id: UUID = UUID.randomUUID(),
@@ -258,19 +255,22 @@ fun vilkårsvurdering(
     )
 
 fun fagsakpersoner(vararg identer: String): Set<PersonIdent> =
-    identer.map {
-        PersonIdent(ident = it)
-    }.toSet()
+    identer
+        .map {
+            PersonIdent(ident = it)
+        }.toSet()
 
 fun fagsakpersoner(identer: Set<String>): Set<PersonIdent> =
-    identer.map {
-        PersonIdent(ident = it)
-    }.toSet()
+    identer
+        .map {
+            PersonIdent(ident = it)
+        }.toSet()
 
 fun fagsakpersonerAvPersonIdenter(identer: Set<PersonIdent>): Set<PersonIdent> =
-    identer.map {
-        PersonIdent(ident = it.ident, sporbar = it.sporbar)
-    }.toSet()
+    identer
+        .map {
+            PersonIdent(ident = it.ident, sporbar = it.sporbar)
+        }.toSet()
 
 fun årsakRevurdering(
     behandlingId: UUID = UUID.randomUUID(),
@@ -437,8 +437,8 @@ fun behandlingBarn(
     personIdent: String? = null,
     navn: String? = null,
     fødselTermindato: LocalDate? = null,
-): BehandlingBarn {
-    return BehandlingBarn(
+): BehandlingBarn =
+    BehandlingBarn(
         id = id,
         behandlingId = behandlingId,
         søknadBarnId = søknadBarnId,
@@ -447,7 +447,6 @@ fun behandlingBarn(
         fødselTermindato = fødselTermindato,
         sporbar = Sporbar(opprettetAv = "opprettetAv"),
     )
-}
 
 fun barnMedIdent(
     fnr: String,

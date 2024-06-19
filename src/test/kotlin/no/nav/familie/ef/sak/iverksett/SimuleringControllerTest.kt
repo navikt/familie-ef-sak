@@ -79,14 +79,18 @@ internal class SimuleringControllerTest : OppslagSpringRunnerTest() {
 
         // Verifiser at simuleringsresultatet er lagret
         Assertions.assertThat(simuleringsresultat.data.simuleringMottaker).hasSize(1)
-        Assertions.assertThat(simuleringsresultat.data.simuleringMottaker.first().simulertPostering).hasSizeGreaterThan(1)
+        Assertions
+            .assertThat(
+                simuleringsresultat.data.simuleringMottaker
+                    .first()
+                    .simulertPostering,
+            ).hasSizeGreaterThan(1)
     }
 
-    private fun simulerForBehandling(behandlingId: UUID): ResponseEntity<Ressurs<Simuleringsoppsummering>> {
-        return restTemplate.exchange(
+    private fun simulerForBehandling(behandlingId: UUID): ResponseEntity<Ressurs<Simuleringsoppsummering>> =
+        restTemplate.exchange(
             localhost("/api/simulering/$behandlingId"),
             HttpMethod.GET,
             HttpEntity<Ressurs<BehandlingDto>>(headers),
         )
-    }
 }

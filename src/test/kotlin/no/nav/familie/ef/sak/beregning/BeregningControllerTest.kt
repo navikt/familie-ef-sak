@@ -94,7 +94,8 @@ class BeregningControllerTest : OppslagSpringRunnerTest() {
         val respons: ResponseEntity<Ressurs<UUID>> = fullførVedtak(behandling.id, vedtakDto)
 
         assertThat(vedtakService.hentVedtak(respons.body?.data!!))
-            .usingRecursiveComparison().ignoringFields("opprettetTid")
+            .usingRecursiveComparison()
+            .ignoringFields("opprettetTid")
             .isEqualTo(vedtak)
     }
 
@@ -273,19 +274,17 @@ class BeregningControllerTest : OppslagSpringRunnerTest() {
     private fun fullførVedtak(
         id: UUID,
         vedtakDto: VedtakDto,
-    ): ResponseEntity<Ressurs<UUID>> {
-        return restTemplate.exchange(
+    ): ResponseEntity<Ressurs<UUID>> =
+        restTemplate.exchange(
             localhost("/api/vedtak/$id/lagre-vedtak"),
             HttpMethod.POST,
             HttpEntity(vedtakDto, headers),
         )
-    }
 
-    private fun hentBeløpsperioderForBehandling(id: UUID): ResponseEntity<Ressurs<List<Beløpsperiode>>> {
-        return restTemplate.exchange(
+    private fun hentBeløpsperioderForBehandling(id: UUID): ResponseEntity<Ressurs<List<Beløpsperiode>>> =
+        restTemplate.exchange(
             localhost("/api/beregning/$id"),
             HttpMethod.GET,
             HttpEntity<Ressurs<List<Beløpsperiode>>>(headers),
         )
-    }
 }

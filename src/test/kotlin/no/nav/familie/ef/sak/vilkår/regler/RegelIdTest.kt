@@ -27,7 +27,9 @@ internal class RegelIdTest {
             regelId: RegelId,
         ): List<RegelId> {
             val regler =
-                vilkårsregel.regel(regelId).svarMapping.values
+                vilkårsregel
+                    .regel(regelId)
+                    .svarMapping.values
                     .map(SvarRegel::regelId)
                     .filterNot { it == RegelId.SLUTT_NODE }
             val childrenRegler = regler.flatMap { getRegler(vilkårsregel, it) }

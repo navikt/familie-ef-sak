@@ -48,7 +48,8 @@ internal class SøknadsskjemaOvergangsstønadRepositoryTest : OppslagSpringRunne
     @Test
     internal fun `søknad om overgangsstønad uten opplysninger om adresse lagres korrekt`() {
         val søknadTilLagring =
-            SøknadsskjemaMapper.tilDomene(Testsøknad.søknadOvergangsstønad)
+            SøknadsskjemaMapper
+                .tilDomene(Testsøknad.søknadOvergangsstønad)
                 .copy(adresseopplysninger = Adresseopplysninger())
 
         søknadOvergangsstønadRepository.insert(søknadTilLagring)
@@ -60,7 +61,8 @@ internal class SøknadsskjemaOvergangsstønadRepositoryTest : OppslagSpringRunne
     @Test
     internal fun `søknad om overgangsstønad uten opplysninger om adresse lagres korrekt 2`() {
         val søknadTilLagring =
-            SøknadsskjemaMapper.tilDomene(Testsøknad.søknadOvergangsstønad)
+            SøknadsskjemaMapper
+                .tilDomene(Testsøknad.søknadOvergangsstønad)
                 .copy(adresseopplysninger = null)
 
         søknadOvergangsstønadRepository.insert(søknadTilLagring)

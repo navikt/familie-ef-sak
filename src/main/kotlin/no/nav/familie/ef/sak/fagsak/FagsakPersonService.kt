@@ -14,7 +14,10 @@ import java.time.LocalDate
 import java.util.UUID
 
 @Service
-class FagsakPersonService(private val fagsakPersonRepository: FagsakPersonRepository, private val taskService: TaskService) {
+class FagsakPersonService(
+    private val fagsakPersonRepository: FagsakPersonRepository,
+    private val taskService: TaskService,
+) {
     fun hentPerson(personId: UUID): FagsakPerson = fagsakPersonRepository.findByIdOrThrow(personId)
 
     fun hentPersoner(personId: List<UUID>): Iterable<FagsakPerson> = fagsakPersonRepository.findAllById(personId)

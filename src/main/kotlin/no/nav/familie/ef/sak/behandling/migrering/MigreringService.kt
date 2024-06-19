@@ -266,8 +266,8 @@ class MigreringService(
         samordningsfradrag: Int,
         erReellArbeidssøker: Boolean = false,
         ignorerFeilISimulering: Boolean = false,
-    ): Behandling {
-        return opprettMigrering(
+    ): Behandling =
+        opprettMigrering(
             fagsak,
             periode,
             ignorerFeilISimulering = ignorerFeilISimulering,
@@ -281,7 +281,6 @@ class MigreringService(
                 inntekter = inntekter,
             )
         }
-    }
 
     @Transactional
     fun opprettMigrering(
@@ -446,7 +445,8 @@ class MigreringService(
             throw MigreringException("Fagsak er allerede migrert", MigreringExceptionType.ALLEREDE_MIGRERT)
         } else {
             val behandlinger =
-                behandlingService.hentBehandlinger(fagsak.id)
+                behandlingService
+                    .hentBehandlinger(fagsak.id)
                     .filterNot { it.erAvsluttet() && it.resultat == BehandlingResultat.HENLAGT }
             if (behandlinger.isNotEmpty()) {
                 throw MigreringException(

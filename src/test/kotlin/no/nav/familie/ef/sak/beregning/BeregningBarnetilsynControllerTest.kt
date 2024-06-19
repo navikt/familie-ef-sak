@@ -203,7 +203,8 @@ internal class BeregningBarnetilsynControllerTest : OppslagSpringRunnerTest() {
             )
 
         val barn =
-            barnRepository.findByBehandlingId(forrigeBehandlingId)
+            barnRepository
+                .findByBehandlingId(forrigeBehandlingId)
                 .map { it.copy(behandlingId = revurdering.id, id = UUID.randomUUID()) }
         barnRepository.insertAll(barn)
         val utgiftsperiode =
@@ -238,19 +239,17 @@ internal class BeregningBarnetilsynControllerTest : OppslagSpringRunnerTest() {
     private fun fullførVedtak(
         id: UUID,
         vedtakDto: VedtakDto,
-    ): ResponseEntity<Ressurs<UUID>> {
-        return restTemplate.exchange(
+    ): ResponseEntity<Ressurs<UUID>> =
+        restTemplate.exchange(
             localhost("/api/vedtak/$id/lagre-vedtak"),
             HttpMethod.POST,
             HttpEntity(vedtakDto, headers),
         )
-    }
 
-    private fun hentBeløpsperioderForBehandling(id: UUID): ResponseEntity<Ressurs<List<BeløpsperiodeBarnetilsynDto>>> {
-        return restTemplate.exchange(
+    private fun hentBeløpsperioderForBehandling(id: UUID): ResponseEntity<Ressurs<List<BeløpsperiodeBarnetilsynDto>>> =
+        restTemplate.exchange(
             localhost("/api/beregning/barnetilsyn/$id"),
             HttpMethod.GET,
             HttpEntity<Ressurs<List<BeløpsperiodeBarnetilsynDto>>>(headers),
         )
-    }
 }

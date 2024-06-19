@@ -39,5 +39,7 @@ internal class VilkårsregelTest {
     }
 
     private fun readFile(it: Vilkårsregel) =
-        this::class.java.classLoader.getResource("regler/${it.vilkårType}.json").readText()
+        this::class.java.classLoader
+            .getResource("regler/${it.vilkårType}.json")
+            .readText()
 }

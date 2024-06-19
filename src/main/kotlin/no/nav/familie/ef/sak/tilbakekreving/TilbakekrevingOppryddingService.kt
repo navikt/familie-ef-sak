@@ -44,9 +44,7 @@ class TilbakekrevingOppryddingService(
 
     private fun Simuleringsoppsummering.harIngenFeilutbetaling() = this.feilutbetaling.toLong() == 0L
 
-    private fun Simuleringsoppsummering.harUlikeBeløp(oppsummering: Simuleringsoppsummering): Boolean {
-        return this.feilutbetaling != oppsummering.feilutbetaling || this.etterbetaling != oppsummering.etterbetaling
-    }
+    private fun Simuleringsoppsummering.harUlikeBeløp(oppsummering: Simuleringsoppsummering): Boolean = this.feilutbetaling != oppsummering.feilutbetaling || this.etterbetaling != oppsummering.etterbetaling
 
     fun slettTilbakekrevingsvalg(behandlingId: UUID) {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)

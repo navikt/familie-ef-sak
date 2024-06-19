@@ -100,7 +100,11 @@ object BeregningBarnetilsynUtil {
         )
     }
 
-    data class BeregnedeBeløp(val utbetaltBeløp: BigDecimal, val beløpFørFratrekkOgSatsjustering: BigDecimal, val makssats: Int)
+    data class BeregnedeBeløp(
+        val utbetaltBeløp: BigDecimal,
+        val beløpFørFratrekkOgSatsjustering: BigDecimal,
+        val makssats: Int,
+    )
 
     fun beregnPeriodeBeløp(
         periodeutgift: BigDecimal,

@@ -24,48 +24,42 @@ import java.net.URI
 class PersonopplysningerIntegrasjonerClient(
     @Qualifier("azure") restOperations: RestOperations,
     private val integrasjonerConfig: IntegrasjonerConfig,
-) :
-    AbstractPingableRestClient(restOperations, "familie.integrasjoner") {
+) : AbstractPingableRestClient(restOperations, "familie.integrasjoner") {
     override val pingUri: URI = integrasjonerConfig.pingUri
 
-    fun sjekkTilgangTilPerson(personIdent: String): Tilgang {
-        return postForEntity<List<Tilgang>>(
+    fun sjekkTilgangTilPerson(personIdent: String): Tilgang =
+        postForEntity<List<Tilgang>>(
             integrasjonerConfig.tilgangPersonUri,
             listOf(personIdent),
             HttpHeaders().also {
                 it.set(HEADER_NAV_TEMA, HEADER_NAV_TEMA_ENF)
             },
         ).single()
-    }
 
-    fun sjekkTilgangTilPersonMedRelasjoner(personIdent: String): Tilgang {
-        return postForEntity(
+    fun sjekkTilgangTilPersonMedRelasjoner(personIdent: String): Tilgang =
+        postForEntity(
             integrasjonerConfig.tilgangRelasjonerUri,
             PersonIdent(personIdent),
             HttpHeaders().also {
                 it.set(HEADER_NAV_TEMA, HEADER_NAV_TEMA_ENF)
             },
         )
-    }
 
-    fun hentMedlemskapsinfo(ident: String): Medlemskapsinfo {
-        return postForEntity<Ressurs<Medlemskapsinfo>>(integrasjonerConfig.medlemskapUri, PersonIdent(ident)).data!!
-    }
+    fun hentMedlemskapsinfo(ident: String): Medlemskapsinfo = postForEntity<Ressurs<Medlemskapsinfo>>(integrasjonerConfig.medlemskapUri, PersonIdent(ident)).data!!
 
     fun hentNavEnhetForPersonMedRelasjoner(ident: String): List<Arbeidsfordelingsenhet> {
         val uri = integrasjonerConfig.arbeidsfordelingMedRelasjonerUri
         return hentArbeidsfordelingEnhet(uri, ident)
     }
 
-    fun hentStrengesteAdressebeskyttelseForPersonMedRelasjoner(personIdent: String): ADRESSEBESKYTTELSEGRADERING {
-        return postForEntity<Ressurs<ADRESSEBESKYTTELSEGRADERING>>(
+    fun hentStrengesteAdressebeskyttelseForPersonMedRelasjoner(personIdent: String): ADRESSEBESKYTTELSEGRADERING =
+        postForEntity<Ressurs<ADRESSEBESKYTTELSEGRADERING>>(
             integrasjonerConfig.adressebeskyttelse,
             PersonIdent(personIdent),
             HttpHeaders().also {
                 it.set(HEADER_NAV_TEMA, HEADER_NAV_TEMA_ENF)
             },
         ).getDataOrThrow()
-    }
 
     fun hentBehandlendeEnhetForOppfølging(personident: String): Enhet? {
         val response =
@@ -76,14 +70,13 @@ class PersonopplysningerIntegrasjonerClient(
     private fun hentArbeidsfordelingEnhet(
         uri: URI,
         ident: String,
-    ): List<Arbeidsfordelingsenhet> {
-        return try {
+    ): List<Arbeidsfordelingsenhet> =
+        try {
             val response = postForEntity<Ressurs<List<Arbeidsfordelingsenhet>>>(uri, PersonIdent(ident))
             response.data ?: throw Feil("Objektet fra integrasjonstjenesten mot arbeidsfordeling er tomt uri=$uri")
         } catch (e: RestClientException) {
             throw Feil("Kall mot integrasjon feilet ved henting av arbeidsfordelingsenhet uri=$uri", e)
         }
-    }
 
     fun hentNavKontor(ident: String): NavKontorEnhet? {
         val ressurs = postForEntity<Ressurs<NavKontorEnhet>>(integrasjonerConfig.navKontorUri, PersonIdent(ident))

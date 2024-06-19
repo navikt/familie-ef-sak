@@ -447,8 +447,7 @@ internal class OppdaterVilkårTest {
                     aleneomsorg(Vilkårsresultat.IKKE_OPPFYLT),
                 ),
             ),
-        )
-            .isEqualTo(Vilkårsresultat.OPPFYLT)
+        ).isEqualTo(Vilkårsresultat.OPPFYLT)
         assertThat(
             utledResultatForVilkårSomGjelderFlereBarn(
                 listOf(
@@ -456,8 +455,7 @@ internal class OppdaterVilkårTest {
                     aleneomsorg(Vilkårsresultat.IKKE_TATT_STILLING_TIL),
                 ),
             ),
-        )
-            .isEqualTo(Vilkårsresultat.OPPFYLT)
+        ).isEqualTo(Vilkårsresultat.OPPFYLT)
         assertThat(
             utledResultatForVilkårSomGjelderFlereBarn(
                 listOf(
@@ -465,8 +463,7 @@ internal class OppdaterVilkårTest {
                     aleneomsorg(Vilkårsresultat.SKAL_IKKE_VURDERES),
                 ),
             ),
-        )
-            .isEqualTo(Vilkårsresultat.OPPFYLT)
+        ).isEqualTo(Vilkårsresultat.OPPFYLT)
     }
 
     @Test
@@ -480,8 +477,7 @@ internal class OppdaterVilkårTest {
                     aleneomsorg(Vilkårsresultat.SKAL_IKKE_VURDERES),
                 ),
             ),
-        )
-            .isEqualTo(Vilkårsresultat.IKKE_OPPFYLT)
+        ).isEqualTo(Vilkårsresultat.IKKE_OPPFYLT)
         assertThat(
             utledResultatForVilkårSomGjelderFlereBarn(
                 listOf(
@@ -489,8 +485,7 @@ internal class OppdaterVilkårTest {
                     aleneomsorg(Vilkårsresultat.IKKE_TATT_STILLING_TIL),
                 ),
             ),
-        )
-            .isEqualTo(Vilkårsresultat.IKKE_TATT_STILLING_TIL)
+        ).isEqualTo(Vilkårsresultat.IKKE_TATT_STILLING_TIL)
     }
 
     @Test
@@ -510,8 +505,7 @@ internal class OppdaterVilkårTest {
                     aleneomsorg(Vilkårsresultat.SKAL_IKKE_VURDERES, barn2),
                 ),
             ),
-        )
-            .isEqualTo(Vilkårsresultat.IKKE_TATT_STILLING_TIL)
+        ).isEqualTo(Vilkårsresultat.IKKE_TATT_STILLING_TIL)
     }
 
     @Test
@@ -525,8 +519,7 @@ internal class OppdaterVilkårTest {
                     alderPåBarn(Vilkårsresultat.SKAL_IKKE_VURDERES, barn2),
                 ),
             ),
-        )
-            .isEqualTo(Vilkårsresultat.IKKE_TATT_STILLING_TIL)
+        ).isEqualTo(Vilkårsresultat.IKKE_TATT_STILLING_TIL)
     }
 
     @Test
@@ -540,8 +533,7 @@ internal class OppdaterVilkårTest {
                     aleneomsorg(Vilkårsresultat.SKAL_IKKE_VURDERES),
                 ),
             ),
-        )
-            .isEqualTo(Vilkårsresultat.IKKE_TATT_STILLING_TIL)
+        ).isEqualTo(Vilkårsresultat.IKKE_TATT_STILLING_TIL)
     }
 
     @Test
@@ -555,8 +547,7 @@ internal class OppdaterVilkårTest {
                     alderPåBarn(Vilkårsresultat.SKAL_IKKE_VURDERES),
                 ),
             ),
-        )
-            .isEqualTo(Vilkårsresultat.IKKE_TATT_STILLING_TIL)
+        ).isEqualTo(Vilkårsresultat.IKKE_TATT_STILLING_TIL)
     }
 
     @Test
@@ -581,8 +572,7 @@ internal class OppdaterVilkårTest {
                     Vilkårsresultat.SKAL_IKKE_VURDERES,
                 ),
             ),
-        )
-            .isTrue
+        ).isTrue
     }
 
     @Test
@@ -594,8 +584,7 @@ internal class OppdaterVilkårTest {
                     Vilkårsresultat.OPPFYLT,
                 ),
             ),
-        )
-            .isTrue
+        ).isTrue
         assertThat(
             erAlleVilkårTattStillingTil(
                 listOf(
@@ -603,8 +592,7 @@ internal class OppdaterVilkårTest {
                     Vilkårsresultat.SKAL_IKKE_VURDERES,
                 ),
             ),
-        )
-            .isTrue
+        ).isTrue
         assertThat(
             erAlleVilkårTattStillingTil(
                 listOf(
@@ -612,8 +600,7 @@ internal class OppdaterVilkårTest {
                     Vilkårsresultat.IKKE_OPPFYLT,
                 ),
             ),
-        )
-            .isTrue
+        ).isTrue
     }
 
     @Test
@@ -625,8 +612,7 @@ internal class OppdaterVilkårTest {
                     Vilkårsresultat.IKKE_TATT_STILLING_TIL,
                 ),
             ),
-        )
-            .isFalse
+        ).isFalse
         assertThat(
             erAlleVilkårTattStillingTil(
                 listOf(
@@ -634,8 +620,7 @@ internal class OppdaterVilkårTest {
                     Vilkårsresultat.IKKE_TATT_STILLING_TIL,
                 ),
             ),
-        )
-            .isFalse
+        ).isFalse
         assertThat(
             erAlleVilkårTattStillingTil(
                 listOf(
@@ -643,8 +628,7 @@ internal class OppdaterVilkårTest {
                     Vilkårsresultat.IKKE_TATT_STILLING_TIL,
                 ),
             ),
-        )
-            .isFalse
+        ).isFalse
     }
 
     @Test
@@ -656,8 +640,7 @@ internal class OppdaterVilkårTest {
                     Vilkårsresultat.IKKE_OPPFYLT,
                 ),
             ),
-        )
-            .isTrue
+        ).isTrue
 
         assertThat(
             erAlleVilkårTattStillingTil(
@@ -666,8 +649,7 @@ internal class OppdaterVilkårTest {
                     Vilkårsresultat.SKAL_IKKE_VURDERES,
                 ),
             ),
-        )
-            .withFailMessage("Alle vilkår skal kunne være satt til SKAL_IKKE_VURDERES")
+        ).withFailMessage("Alle vilkår skal kunne være satt til SKAL_IKKE_VURDERES")
             .isTrue
         assertThat(
             erAlleVilkårTattStillingTil(
@@ -676,8 +658,7 @@ internal class OppdaterVilkårTest {
                     Vilkårsresultat.OPPFYLT,
                 ),
             ),
-        )
-            .withFailMessage("Alle vilkår skal kunne være satt til enten SKAL_IKKE_VURDERES eller OPPFYLT")
+        ).withFailMessage("Alle vilkår skal kunne være satt til enten SKAL_IKKE_VURDERES eller OPPFYLT")
             .isTrue
     }
 
@@ -811,21 +792,18 @@ internal class OppdaterVilkårTest {
         vilkårsvurdering: Vilkårsvurdering,
         regel: Vilkårsregel,
         vararg vurderinger: VurderingDto,
-    ): Vilkårsvurdering {
-        return validerOgOppdater(vilkårsvurdering, regel, delvilkårsvurderingDto(*vurderinger))
-    }
+    ): Vilkårsvurdering = validerOgOppdater(vilkårsvurdering, regel, delvilkårsvurderingDto(*vurderinger))
 
     private fun validerOgOppdater(
         vilkårsvurdering: Vilkårsvurdering,
         regel: Vilkårsregel,
         vararg delvilkårsvurderingDto: DelvilkårsvurderingDto,
-    ): Vilkårsvurdering {
-        return OppdaterVilkår.lagNyOppdatertVilkårsvurdering(
+    ): Vilkårsvurdering =
+        OppdaterVilkår.lagNyOppdatertVilkårsvurdering(
             vilkårsvurdering = vilkårsvurdering,
             vilkårsregler = mapOf(regel.vilkårType to regel),
             oppdatering = delvilkårsvurderingDto.toList(),
         )
-    }
 
     private fun opprettVurdering(regel: Vilkårsregel): Vilkårsvurdering {
         val delvilkårsvurderinger =

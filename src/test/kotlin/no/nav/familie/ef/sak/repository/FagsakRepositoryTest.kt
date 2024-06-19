@@ -387,7 +387,8 @@ internal class FagsakRepositoryTest : OppslagSpringRunnerTest() {
         assertThat(
             fagsakRepository.findBySøkerIdent(
                 setOf(
-                    fagsakMedFlereIdenter.personIdenter.map { it.ident }
+                    fagsakMedFlereIdenter.personIdenter
+                        .map { it.ident }
                         .first(),
                 ),
             ),

@@ -33,7 +33,5 @@ class FerdigstillBehandlingSteg(
         }
     }
 
-    override fun stegType(): StegType {
-        return StegType.FERDIGSTILLE_BEHANDLING
-    }
+    override fun stegType(): StegType = StegType.FERDIGSTILLE_BEHANDLING
 }
