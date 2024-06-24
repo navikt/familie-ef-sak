@@ -290,7 +290,7 @@ internal class SendTilBeslutterStegTest {
 
     @Test
     internal fun `Sjekker at beslutter ident blir med i opprett oppgave task`() {
-        val beslutterIdent = "beslutterIdent"
+        val beslutterIdent = "B123456"
         every { vedtakService.oppdaterSaksbehandler(any(), any()) } just Runs
         every { behandlingshistorikkService.finnSisteBehandlingshistorikk(any(), StegType.BESLUTTE_VEDTAK) } returns
             Behandlingshistorikk(
