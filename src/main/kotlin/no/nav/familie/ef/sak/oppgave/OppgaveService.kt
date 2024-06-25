@@ -182,12 +182,19 @@ class OppgaveService(
         gsakOppgaveId: Long,
         saksbehandler: String,
         versjon: Int? = null,
-    ): Long =
-        oppgaveClient.fordelOppgave(
-            gsakOppgaveId,
-            saksbehandler,
-            versjon,
-        )
+    ): Long {
+        val oppgave = hentOppgave(gsakOppgaveId)
+
+        return if (oppgave.tilordnetRessurs == saksbehandler) {
+            gsakOppgaveId
+        } else {
+            oppgaveClient.fordelOppgave(
+                gsakOppgaveId,
+                saksbehandler,
+                versjon,
+            )
+        }
+    }
 
     fun tilbakestillFordelingPåOppgave(
         gsakOppgaveId: Long,
