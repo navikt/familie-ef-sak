@@ -272,10 +272,22 @@ internal class OppgaveServiceTest {
 
         every { oppgaveClient.fordelOppgave(capture(oppgaveSlot), capture(saksbehandlerSlot)) } returns GSAK_OPPGAVE_ID
 
-        oppgaveService.fordelOppgave(GSAK_OPPGAVE_ID, SAKSBEHANDLER_ID)
+        val id = oppgaveService.fordelOppgave(GSAK_OPPGAVE_ID, SAKSBEHANDLER_ID)
 
         assertThat(GSAK_OPPGAVE_ID).isEqualTo(oppgaveSlot.captured)
         assertThat(SAKSBEHANDLER_ID).isEqualTo(saksbehandlerSlot.captured)
+        assertThat(id).isEqualTo(GSAK_OPPGAVE_ID)
+        verify(exactly = 1) { oppgaveClient.fordelOppgave(any(), any(), any()) }
+    }
+
+    @Test
+    fun `Fordel oppgave skal ikke tildele oppgave til saksbehandler dersom saksbehandler allerde er tildelt oppgaven`() {
+        every { oppgaveClient.finnOppgaveMedId(GSAK_OPPGAVE_ID) } returns lagEksternTestOppgave(SAKSBEHANDLER_ID)
+
+        val id = oppgaveService.fordelOppgave(GSAK_OPPGAVE_ID, SAKSBEHANDLER_ID)
+
+        assertThat(id).isEqualTo(GSAK_OPPGAVE_ID)
+        verify(exactly = 0) { oppgaveClient.fordelOppgave(any(), any(), any()) }
     }
 
     @Test
@@ -461,9 +473,9 @@ internal class OppgaveServiceTest {
 
     private fun lagTestOppgave(): Oppgave = Oppgave(behandlingId = BEHANDLING_ID, type = Oppgavetype.BehandleSak, gsakOppgaveId = GSAK_OPPGAVE_ID)
 
-    private fun lagEksternTestOppgave(): no.nav.familie.kontrakter.felles.oppgave.Oppgave =
+    private fun lagEksternTestOppgave(tilordnetRessurs: String? = null): no.nav.familie.kontrakter.felles.oppgave.Oppgave =
         no.nav.familie.kontrakter.felles.oppgave
-            .Oppgave(id = GSAK_OPPGAVE_ID)
+            .Oppgave(id = GSAK_OPPGAVE_ID, tilordnetRessurs = tilordnetRessurs)
 
     private fun lagFinnOppgaveResponseDto(): FinnOppgaveResponseDto =
         FinnOppgaveResponseDto(
