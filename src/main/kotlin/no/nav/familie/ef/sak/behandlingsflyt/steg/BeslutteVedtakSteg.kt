@@ -61,7 +61,7 @@ class BeslutteVedtakSteg(
 
         return if (data.godkjent) {
             validerGodkjentVedtak(data)
-            vedtakService.oppdaterBeslutter(saksbehandling.id, SikkerhetContext.hentSaksbehandler())
+            vedtakService.oppdaterBeslutter(saksbehandling.id, beslutter)
             val iverksettDto = iverksettingDtoMapper.tilDto(saksbehandling, beslutter)
             oppdaterResultatPåBehandling(saksbehandling.id)
             opprettPollForStatusOppgave(saksbehandling.id)
@@ -139,14 +139,14 @@ class BeslutteVedtakSteg(
 
     private fun opprettBehandleUnderkjentVedtakOppgave(
         saksbehandling: Saksbehandling,
-        navIdent: String,
+        tilordnetNavIdent: String,
     ) {
         taskService.save(
             OpprettOppgaveTask.opprettTask(
                 OpprettOppgaveTaskData(
                     behandlingId = saksbehandling.id,
                     oppgavetype = Oppgavetype.BehandleUnderkjentVedtak,
-                    tilordnetNavIdent = navIdent,
+                    tilordnetNavIdent = tilordnetNavIdent,
                 ),
             ),
         )
