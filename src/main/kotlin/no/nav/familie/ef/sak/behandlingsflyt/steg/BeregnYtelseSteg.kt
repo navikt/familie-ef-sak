@@ -769,7 +769,7 @@ class BeregnYtelseSteg(
         brukerfeilHvis(
             forrigeTilkjentYtelse.andelerTilkjentYtelse.maxOfOrNull { it.stønadTom }?.isBefore(opphørFom) ?: false,
         ) {
-            "Kan ikke opphøre frem i tiden"
+            "Kan ikke opphøre fra et tidspunkt bruker ikke har stønad."
         }
 
         brukerfeilHvis(

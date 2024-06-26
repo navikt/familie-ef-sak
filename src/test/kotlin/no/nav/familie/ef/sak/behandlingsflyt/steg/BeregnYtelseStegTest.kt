@@ -1394,7 +1394,7 @@ internal class BeregnYtelseStegTest {
                     Opphør(opphørFom = opphørFom, begrunnelse = "null"),
                     forrigeBehandlingId = UUID.randomUUID(),
                 )
-            }.hasMessageContaining("Kan ikke opphøre frem i tiden")
+            }.hasMessageContaining("Kan ikke opphøre fra et tidspunkt bruker ikke har stønad.")
         }
 
         @Test
