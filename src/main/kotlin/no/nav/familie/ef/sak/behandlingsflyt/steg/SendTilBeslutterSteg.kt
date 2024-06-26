@@ -175,13 +175,14 @@ class SendTilBeslutterSteg(
         saksbehandling: Saksbehandling,
         beslutterIdent: String?,
     ) {
+        val erIkkeSammeBeslutterOgSaksbehandler = beslutterIdent != SikkerhetContext.hentSaksbehandler()
         taskService.save(
             OpprettOppgaveTask.opprettTask(
                 OpprettOppgaveTaskData(
                     behandlingId = saksbehandling.id,
                     oppgavetype = Oppgavetype.GodkjenneVedtak,
                     beskrivelse = "Sendt til godkjenning av ${SikkerhetContext.hentSaksbehandlerNavn(true)}.",
-                    tilordnetNavIdent = beslutterIdent,
+                    tilordnetNavIdent = if (erIkkeSammeBeslutterOgSaksbehandler) beslutterIdent else null,
                 ),
             ),
         )
