@@ -90,6 +90,7 @@ fun barnMedSamværDto(
             null,
             null,
             Folkeregisterpersonstatus.BOSATT,
+            null,
         ),
     barnepass =
         BarnepassDto(
