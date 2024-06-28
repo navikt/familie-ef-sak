@@ -156,6 +156,7 @@ internal class VurderingServiceTest {
                     null,
                     null,
                     null,
+                    null,
                 ),
             barnepass =
                 BarnepassDto(

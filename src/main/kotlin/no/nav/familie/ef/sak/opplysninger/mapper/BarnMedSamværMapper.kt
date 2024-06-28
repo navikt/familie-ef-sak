@@ -187,6 +187,12 @@ class BarnMedSamværMapper(
                     ?.folkeregisterpersonstatus
                     ?.gjeldende()
                     ?.let(Folkeregisterpersonstatus::fraPdl),
+            adresse =
+                matchetBarn.barn
+                    ?.bostedsadresse
+                    ?.gjeldende()
+                    ?.let(adresseMapper::tilAdresse)
+                    ?.visningsadresse,
         )
 
     private fun tilAnnenForelderDto(annenForelder: AnnenForelder): AnnenForelderDto =

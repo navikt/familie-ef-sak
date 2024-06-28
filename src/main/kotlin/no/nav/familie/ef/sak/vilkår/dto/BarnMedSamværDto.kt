@@ -53,6 +53,7 @@ data class BarnMedSamværRegistergrunnlagDto(
     val dødsdato: LocalDate? = null,
     val fødselsdato: LocalDate?,
     val folkeregisterpersonstatus: Folkeregisterpersonstatus?,
+    val adresse: String?,
 ) {
     fun erBosatt() = this.folkeregisterpersonstatus == Folkeregisterpersonstatus.BOSATT
 }
