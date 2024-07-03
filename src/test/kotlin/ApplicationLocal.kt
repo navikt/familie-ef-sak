@@ -31,6 +31,5 @@ fun main(args: Array<String>) {
             "mock-egen-ansatt",
             "mock-kontantstøtte",
             "mock-fullmakt",
-        )
-        .run(*args)
+        ).run(*args)
 }

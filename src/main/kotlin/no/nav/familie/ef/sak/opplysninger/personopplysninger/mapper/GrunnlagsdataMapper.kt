@@ -146,5 +146,4 @@ object GrunnlagsdataMapper {
                 områder = it.omraader,
             )
         } ?: emptyList()
-    }
 }

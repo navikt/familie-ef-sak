@@ -5,7 +5,9 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.MotpartsRolle
 import org.springframework.stereotype.Service
 
 @Service
-class FullmaktService(val fullmaktClient: FullmaktClient) {
+class FullmaktService(
+    val fullmaktClient: FullmaktClient,
+) {
     fun hentFullmakt(ident: String): List<Fullmakt> {
         val fullmakt = fullmaktClient.hentFullmakt(ident)
 
