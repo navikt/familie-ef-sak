@@ -114,7 +114,7 @@ class GrunnlagsdataRegisterService(
     private fun hentDataTilAndreIdenter(pdlSøker: PdlSøker): Map<String, PdlPersonKort> {
         val andreIdenter =
             pdlSøker.sivilstand.mapNotNull { it.relatertVedSivilstand } +
-                pdlSøker.fullmakt.map { it.motpartsPersonident } +
+                (pdlSøker.fullmakt?.map { it.motpartsPersonident } ?: emptyList()) +
                 pdlSøker.vergemaalEllerFremtidsfullmakt.mapNotNull { it.vergeEllerFullmektig.motpartsPersonident }
         if (andreIdenter.isEmpty()) return emptyMap()
         return personService.hentPersonKortBolk(andreIdenter)

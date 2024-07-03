@@ -127,7 +127,7 @@ internal class GrunnlagsdataServiceTest {
                 sivilstand = listOf(sivilstand),
                 vergemaalEllerFremtidsfullmakt = emptyList(),
             )
-        val fullmakt = pdlSøker.fullmakt.map { it.motpartsPersonident }
+        val fullmakt = pdlSøker.fullmakt?.map { it.motpartsPersonident } ?: emptyList()
         every { personService.hentSøker(any()) } returns pdlSøker
 
         service.hentFraRegisterForPersonOgAndreForeldre("1", emptyList())

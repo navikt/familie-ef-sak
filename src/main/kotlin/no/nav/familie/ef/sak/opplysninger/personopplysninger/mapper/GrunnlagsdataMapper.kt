@@ -135,7 +135,7 @@ object GrunnlagsdataMapper {
         pdlSøker: PdlSøker,
         andrePersoner: Map<String, PdlPersonKort>,
     ): List<FullmaktMedNavn> {
-        return pdlSøker.fullmakt.map {
+        return pdlSøker.fullmakt?.map {
             FullmaktMedNavn(
                 gyldigFraOgMed = it.gyldigFraOgMed,
                 gyldigTilOgMed = it.gyldigTilOgMed,
@@ -143,6 +143,6 @@ object GrunnlagsdataMapper {
                 navn = andrePersoner[it.motpartsPersonident]?.navn?.gjeldende()?.visningsnavn(),
                 områder = it.omraader,
             )
-        }
+        } ?: emptyList()
     }
 }
