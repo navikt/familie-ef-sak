@@ -21,6 +21,8 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
+private const val IKKE_AUTORISERT_KLIENT_MELDING = "Kallet utføres ikke av en autorisert klient"
+
 @RestController
 @RequestMapping(
     path = ["/api/ekstern/behandling"],
@@ -62,7 +64,7 @@ class EksternBehandlingController(
         tilgangService.validerTilgangTilEksternFagsak(eksternFagsakId, AuditLoggerEvent.CREATE)
         tilgangService.validerHarSaksbehandlerrolle()
         feilHvisIkke(SikkerhetContext.kallKommerFraKlage(), HttpStatus.UNAUTHORIZED) {
-            "Kallet utføres ikke av en autorisert klient"
+            IKKE_AUTORISERT_KLIENT_MELDING
         }
         return Ressurs.success(eksternBehandlingService.kanOppretteRevurdering(eksternFagsakId))
     }
@@ -74,7 +76,7 @@ class EksternBehandlingController(
         tilgangService.validerTilgangTilEksternFagsak(eksternFagsakId, AuditLoggerEvent.CREATE)
         tilgangService.validerHarSaksbehandlerrolle()
         feilHvisIkke(SikkerhetContext.kallKommerFraKlage(), HttpStatus.UNAUTHORIZED) {
-            "Kallet utføres ikke av en autorisert klient"
+            IKKE_AUTORISERT_KLIENT_MELDING
         }
         return Ressurs.success(eksternBehandlingService.opprettRevurderingKlage(eksternFagsakId))
     }
@@ -85,7 +87,7 @@ class EksternBehandlingController(
         @RequestBody kanSendePåminnelseRequest: KanSendePåminnelseRequest,
     ): Ressurs<Boolean> {
         if (!SikkerhetContext.kallKommerFraFamilieEfMottak()) {
-            throw Feil(message = "Kallet utføres ikke av en autorisert klient", httpStatus = HttpStatus.UNAUTHORIZED)
+            throw Feil(message = IKKE_AUTORISERT_KLIENT_MELDING, httpStatus = HttpStatus.UNAUTHORIZED)
         }
         FnrUtil.validerIdent(kanSendePåminnelseRequest.personIdent)
         return Ressurs.success(

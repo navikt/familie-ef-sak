@@ -271,7 +271,7 @@ class MigreringService(
             fagsak,
             periode,
             ignorerFeilISimulering = ignorerFeilISimulering,
-        ) { saksbehandling, grunnlagsdata ->
+        ) { _, _ ->
             val inntekter = inntekter(periode.fom, inntektsgrunnlag, samordningsfradrag)
             val vedtaksperioder = vedtaksperioder(periode, erReellArbeidssøker)
             InnvilgelseOvergangsstønad(
