@@ -56,26 +56,43 @@ class SendTilBeslutterSteg(
     private val tilordnetRessursService: TilordnetRessursService,
 ) : BehandlingSteg<SendTilBeslutterDto?> {
     override fun validerSteg(saksbehandling: Saksbehandling) {
-        if (saksbehandling.steg != stegType()) {
-            throw ApiFeil("Behandling er i feil steg=${saksbehandling.steg}", HttpStatus.BAD_REQUEST)
-        }
-
+        validerSaksbehandlingHarSammeStegtype(saksbehandling)
         validerAtSaksbehandlerErAnsvarligForBehandling(saksbehandling)
+        validerBrev(saksbehandling)
+        validerTilbakekrevingsvalgUtført(saksbehandling)
+        validerRiktigTilstandVedInvilgelse(saksbehandling)
+        validerSaksbehandlersignatur(saksbehandling)
+        validerHarGammelGOgKanLagres(saksbehandling)
+        validerHarGyldigRevurderingsinformasjon(saksbehandling)
+        validerAtDetFinnesOppgave(saksbehandling)
+    }
 
+    private fun validerHarGyldigRevurderingsinformasjon(saksbehandling: Saksbehandling) {
+        årsakRevurderingService.validerHarGyldigRevurderingsinformasjon(saksbehandling)
+    }
+
+    private fun validerHarGammelGOgKanLagres(saksbehandling: Saksbehandling) {
+        validerOmregningService.validerHarGammelGOgKanLagres(saksbehandling)
+    }
+
+    private fun validerTilbakekrevingsvalgUtført(saksbehandling: Saksbehandling) {
+        brukerfeilHvis(saksbehandlerMåTaStillingTilTilbakekreving(saksbehandling)) {
+            "Feilutbetaling detektert. Må ta stilling til feilutbetalingsvarsel under simulering"
+        }
+    }
+
+    private fun validerBrev(saksbehandling: Saksbehandling) {
         if (saksbehandling.skalSendeBrev &&
             !vedtaksbrevRepository.existsById(saksbehandling.id)
         ) {
             throw Feil("Brev mangler for behandling=${saksbehandling.id}")
         }
-        brukerfeilHvis(saksbehandlerMåTaStillingTilTilbakekreving(saksbehandling)) {
-            "Feilutbetaling detektert. Må ta stilling til feilutbetalingsvarsel under simulering"
-        }
-        validerRiktigTilstandVedInvilgelse(saksbehandling)
-        validerSaksbehandlersignatur(saksbehandling)
-        validerOmregningService.validerHarGammelGOgKanLagres(saksbehandling)
+    }
 
-        årsakRevurderingService.validerHarGyldigRevurderingsinformasjon(saksbehandling)
-        validerAtDetFinnesOppgave(saksbehandling)
+    private fun validerSaksbehandlingHarSammeStegtype(saksbehandling: Saksbehandling) {
+        if (saksbehandling.steg != stegType()) {
+            throw ApiFeil("Behandling er i feil steg=${saksbehandling.steg}", HttpStatus.BAD_REQUEST)
+        }
     }
 
     private fun validerAtDetFinnesOppgave(saksbehandling: Saksbehandling) {
@@ -117,8 +134,8 @@ class SendTilBeslutterSteg(
     private fun erIkkeRelevantForTilbakekreving(saksbehandling: Saksbehandling): Boolean {
         val resultatType = vedtakService.hentVedtaksresultat(saksbehandling.id)
         return saksbehandling.type == BehandlingType.FØRSTEGANGSBEHANDLING ||
-            resultatType == ResultatType.AVSLÅ ||
-            resultatType == ResultatType.HENLEGGE
+                resultatType == ResultatType.AVSLÅ ||
+                resultatType == ResultatType.HENLEGGE
     }
 
     override fun utførSteg(
@@ -127,7 +144,7 @@ class SendTilBeslutterSteg(
     ) {
         val besluttetVedtakHendelse =
             behandlingshistorikkService.finnSisteBehandlingshistorikk(saksbehandling.id, StegType.BESLUTTE_VEDTAK)
-        val beslutterIdent = besluttetVedtakHendelse?.opprettetAv ?.takeIf { NAVIDENT_REGEX.matches(it) }
+        val beslutterIdent = besluttetVedtakHendelse?.opprettetAv?.takeIf { NAVIDENT_REGEX.matches(it) }
 
         behandlingService.oppdaterStatusPåBehandling(saksbehandling.id, BehandlingStatus.FATTER_VEDTAK)
         vedtakService.oppdaterSaksbehandler(saksbehandling.id, SikkerhetContext.hentSaksbehandler())

@@ -4,7 +4,7 @@ import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 
 interface BehandlingSteg<T> {
-    fun validerSteg(saksbehandling: Saksbehandling) {}
+    fun validerSteg(saksbehandling: Saksbehandling) { /* default implementasjon av pre-validering for alle stegtyper */ }
 
     /**
      * Hvis man trenger å overridea vanlige flytet og returnere en annen stegtype kan man overridea denne metoden,
