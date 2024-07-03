@@ -45,7 +45,8 @@ class EregClientTest {
     fun `hent organisasjon response`() {
         WireMock.stubFor(
             queryMappingForHentOrganisasjon.willReturn(
-                WireMock.aResponse()
+                WireMock
+                    .aResponse()
                     .withStatus(HttpStatus.OK.value())
                     .withHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.mimeType)
                     .withBody(eregHentOrganisasjonResponse),

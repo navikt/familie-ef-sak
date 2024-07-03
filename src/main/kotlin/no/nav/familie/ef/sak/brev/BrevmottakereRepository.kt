@@ -7,4 +7,6 @@ import org.springframework.stereotype.Repository
 import java.util.UUID
 
 @Repository
-interface BrevmottakereRepository : RepositoryInterface<Brevmottakere, UUID>, InsertUpdateRepository<Brevmottakere>
+interface BrevmottakereRepository :
+    RepositoryInterface<Brevmottakere, UUID>,
+    InsertUpdateRepository<Brevmottakere>

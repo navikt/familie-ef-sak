@@ -82,12 +82,14 @@ class BisysBarnetilsynService(
         val startdato = tilkjentYtelseService.hentForBehandling(sisteGjeldendeBehandling.id).startdato
 
         val historikk =
-            andelsHistorikkService.hentHistorikk(fagsak.id, null)
+            andelsHistorikkService
+                .hentHistorikk(fagsak.id, null)
                 .filter { it.erAktivVedtaksperiode() }
                 .filter { it.andel.beløp > 0 && it.andel.periode.tomDato >= fomDato }
 
         val barnIdenter =
-            historikk.flatMap { it.andel.barn }
+            historikk
+                .flatMap { it.andel.barn }
                 .distinct()
                 .let { barnService.hentBehandlingBarnForBarnIder(it) }
                 .associate { it.id to it.personIdent }
@@ -107,8 +109,9 @@ class BisysBarnetilsynService(
     private fun hentInfotrygdPerioderBarnetilsyn(
         personIdent: String,
         fomDato: LocalDate,
-    ): List<BarnetilsynBisysPeriode> {
-        return infotrygdService.hentSammenslåtteBarnetilsynPerioderFraReplika(personIdent)
+    ): List<BarnetilsynBisysPeriode> =
+        infotrygdService
+            .hentSammenslåtteBarnetilsynPerioderFraReplika(personIdent)
             .filter { it.stønadTom >= fomDato }
             .map { periode ->
                 BarnetilsynBisysPeriode(
@@ -116,7 +119,6 @@ class BisysBarnetilsynService(
                     barnIdenter = periode.barnIdenter,
                 )
             }
-    }
 
     private fun slåSammenPerioder(
         infotrygdPerioder: List<BarnetilsynBisysPeriode>,
@@ -141,13 +143,12 @@ class BisysBarnetilsynService(
         return (perioderFraInfotrygdSomBeholdes + perioder).sortedBy { it.periode.fom }
     }
 
-    data class EfPerioder(val startdato: LocalDate, val perioder: List<BarnetilsynBisysPeriode>)
+    data class EfPerioder(
+        val startdato: LocalDate,
+        val perioder: List<BarnetilsynBisysPeriode>,
+    )
 }
 
-private fun Periode.union(periode: Periode): Periode {
-    return Periode(fom = minOf(this.fom, periode.fom), tom = maxOf(this.tom, periode.tom))
-}
+private fun Periode.union(periode: Periode): Periode = Periode(fom = minOf(this.fom, periode.fom), tom = maxOf(this.tom, periode.tom))
 
-private fun BarnetilsynBisysPeriode.harSammeBarn(entry: BarnetilsynBisysPeriode): Boolean {
-    return barnIdenter.toSet() == entry.barnIdenter.toSet()
-}
+private fun BarnetilsynBisysPeriode.harSammeBarn(entry: BarnetilsynBisysPeriode): Boolean = barnIdenter.toSet() == entry.barnIdenter.toSet()

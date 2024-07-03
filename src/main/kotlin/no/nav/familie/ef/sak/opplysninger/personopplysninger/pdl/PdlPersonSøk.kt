@@ -7,7 +7,9 @@ data class PersonSøkResultat(
     val totalPages: Int,
 )
 
-data class PersonSøkTreff(val person: PdlPersonFraSøk)
+data class PersonSøkTreff(
+    val person: PdlPersonFraSøk,
+)
 
 data class PdlPersonFraSøk(
     val folkeregisteridentifikator: List<FolkeregisteridentifikatorFraSøk>,
@@ -15,6 +17,10 @@ data class PdlPersonFraSøk(
     val navn: List<Navn>,
 )
 
-data class FolkeregisteridentifikatorFraSøk(val identifikasjonsnummer: String)
+data class FolkeregisteridentifikatorFraSøk(
+    val identifikasjonsnummer: String,
+)
 
-data class PersonSøk(val sokPerson: PersonSøkResultat?)
+data class PersonSøk(
+    val sokPerson: PersonSøkResultat?,
+)

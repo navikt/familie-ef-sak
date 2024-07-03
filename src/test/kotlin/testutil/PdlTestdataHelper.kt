@@ -38,14 +38,13 @@ object PdlTestdataHelper {
         mellomnavn: String? = "mellomnavn",
         etternavn: String = "Etternavn",
         historisk: Boolean = false,
-    ): Navn {
-        return Navn(
+    ): Navn =
+        Navn(
             fornavn,
             mellomnavn,
             etternavn,
             Metadata(historisk = historisk),
         )
-    }
 
     fun pdlSøker(
         adressebeskyttelse: List<Adressebeskyttelse> = emptyList(),

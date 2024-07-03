@@ -26,7 +26,9 @@ import no.nav.familie.kontrakter.felles.ef.StønadType.SKOLEPENGER
 /**
  * Singleton for å holde på alle regler
  */
-class Vilkårsregler private constructor(val vilkårsregler: Map<VilkårType, Vilkårsregel>) {
+class Vilkårsregler private constructor(
+    val vilkårsregler: Map<VilkårType, Vilkårsregel>,
+) {
     companion object {
         val ALLE_VILKÅRSREGLER = Vilkårsregler(alleVilkårsregler.associateBy { it.vilkårType })
     }
@@ -79,7 +81,6 @@ fun vilkårsreglerForStønad(stønadstype: StønadType): List<Vilkårsregel> =
             )
     }
 
-fun hentVilkårsregel(vilkårType: VilkårType): Vilkårsregel {
-    return Vilkårsregler.ALLE_VILKÅRSREGLER.vilkårsregler[vilkårType]
+fun hentVilkårsregel(vilkårType: VilkårType): Vilkårsregel =
+    Vilkårsregler.ALLE_VILKÅRSREGLER.vilkårsregler[vilkårType]
         ?: error("Finner ikke vilkårsregler for vilkårType=$vilkårType")
-}

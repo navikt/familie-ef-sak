@@ -17,7 +17,8 @@ class EregClient(
 ) : AbstractPingableRestClient(restOperations, "ereg") {
     fun hentOrganisasjoner(organisasjonsnumre: List<String>): List<OrganisasjonDto> {
         val uriBuilder =
-            UriComponentsBuilder.fromUri(familieEfProxyUri)
+            UriComponentsBuilder
+                .fromUri(familieEfProxyUri)
                 .pathSegment("api/ereg")
                 .queryParam("organisasjonsnumre", organisasjonsnumre)
 

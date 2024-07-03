@@ -127,7 +127,8 @@ abstract class OppslagSpringRunnerTest {
 
     private fun clearCaches() {
         listOf(cacheManagerKodeverk, cacheManager).forEach {
-            it.cacheNames.mapNotNull { cacheName -> it.getCache(cacheName) }
+            it.cacheNames
+                .mapNotNull { cacheName -> it.getCache(cacheName) }
                 .forEach { cache -> cache.clear() }
         }
     }
@@ -167,20 +168,14 @@ abstract class OppslagSpringRunnerTest {
         ).forEach { jdbcAggregateOperations.deleteAll(it.java) }
     }
 
-    protected fun getPort(): String {
-        return port.toString()
-    }
+    protected fun getPort(): String = port.toString()
 
-    protected fun localhost(uri: String): String {
-        return LOCALHOST + getPort() + uri
-    }
+    protected fun localhost(uri: String): String = LOCALHOST + getPort() + uri
 
     protected fun url(
         baseUrl: String,
         uri: String,
-    ): String {
-        return baseUrl + uri
-    }
+    ): String = baseUrl + uri
 
     protected val lokalTestToken: String
         get() {
@@ -195,23 +190,17 @@ abstract class OppslagSpringRunnerTest {
     protected fun onBehalfOfToken(
         role: String = rolleConfig.beslutterRolle,
         saksbehandler: String = "julenissen",
-    ): String {
-        return onBehalfOfToken(listOf(role), saksbehandler)
-    }
+    ): String = onBehalfOfToken(listOf(role), saksbehandler)
 
     protected fun onBehalfOfToken(
         roles: List<String>,
         saksbehandler: String = "julenissen",
-    ): String {
-        return TokenUtil.onBehalfOfToken(mockOAuth2Server, roles, saksbehandler)
-    }
+    ): String = TokenUtil.onBehalfOfToken(mockOAuth2Server, roles, saksbehandler)
 
     protected fun clientToken(
         clientId: String = "1",
         accessAsApplication: Boolean = true,
-    ): String {
-        return TokenUtil.clientToken(mockOAuth2Server, clientId, accessAsApplication)
-    }
+    ): String = TokenUtil.clientToken(mockOAuth2Server, clientId, accessAsApplication)
 
     protected fun søkerToken(
         personident: String,

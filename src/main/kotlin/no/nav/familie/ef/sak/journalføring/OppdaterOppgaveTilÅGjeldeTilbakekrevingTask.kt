@@ -13,19 +13,20 @@ import java.util.UUID
     beskrivelse = "Oppdater behandlingstema for behandle sak oppgave i klage til tilbakekreving",
     maxAntallFeil = 3,
 )
-class OppdaterOppgaveTilÅGjeldeTilbakekrevingTask(private val klageClient: KlageClient) : AsyncTaskStep {
+class OppdaterOppgaveTilÅGjeldeTilbakekrevingTask(
+    private val klageClient: KlageClient,
+) : AsyncTaskStep {
     override fun doTask(task: Task) {
         val behandlingId = UUID.fromString(task.payload)
         klageClient.oppdaterOppgaveTilÅGjeldeTilbakekreving(behandlingId)
     }
 
     companion object {
-        fun opprettTask(behandlingId: UUID): Task {
-            return Task(
+        fun opprettTask(behandlingId: UUID): Task =
+            Task(
                 type = TYPE,
                 payload = behandlingId.toString(),
             )
-        }
 
         const val TYPE = "oppdaterOppgaveTilÅGjeldeTilbakekreving"
     }

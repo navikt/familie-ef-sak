@@ -57,8 +57,15 @@ class OppgaveController(
         validerOptionalIdent(finnOppgaveRequest.ident)
 
         val aktørId =
-            finnOppgaveRequest.ident.takeUnless { it.isNullOrBlank() }
-                ?.let { personService.hentAktørIder(it).identer.first().ident }
+            finnOppgaveRequest.ident
+                .takeUnless { it.isNullOrBlank() }
+                ?.let {
+                    personService
+                        .hentAktørIder(it)
+                        .identer
+                        .first()
+                        .ident
+                }
 
         secureLogger.info("AktoerId: $aktørId, Ident: ${finnOppgaveRequest.ident}")
         val oppgaveRepons = oppgaveService.hentOppgaver(finnOppgaveRequest.tilFinnOppgaveRequest(aktørId))
@@ -172,9 +179,7 @@ class OppgaveController(
     @GetMapping(path = ["/utdanningsuttrekk"])
     fun utdanningsuttrekk(
         @RequestParam frist: LocalDate,
-    ): Ressurs<List<UtdanningOppgaveDto>> {
-        return Ressurs.success(oppgaveService.finnOppgaverIUtdanningsmappe(frist))
-    }
+    ): Ressurs<List<UtdanningOppgaveDto>> = Ressurs.success(oppgaveService.finnOppgaverIUtdanningsmappe(frist))
 }
 
 private fun FinnOppgaveResponseDto.tilDto(): OppgaveResponseDto {
@@ -185,8 +190,8 @@ private fun FinnOppgaveResponseDto.tilDto(): OppgaveResponseDto {
     return OppgaveResponseDto(antallTreffTotalt, oppgaver)
 }
 
-private fun Oppgave.tilDto(): OppgaveEfDto {
-    return OppgaveEfDto(
+private fun Oppgave.tilDto(): OppgaveEfDto =
+    OppgaveEfDto(
         id = id,
         identer = identer,
         tildeltEnhetsnr = tildeltEnhetsnr,
@@ -219,4 +224,3 @@ private fun Oppgave.tilDto(): OppgaveEfDto {
         prioritet = prioritet,
         status = status,
     )
-}

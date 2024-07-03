@@ -23,7 +23,8 @@ object BehandlingOppsettUtil {
                 sporbar =
                     Sporbar(
                         opprettetTid =
-                            LocalDateTime.now()
+                            LocalDateTime
+                                .now()
                                 .minusDays(4),
                     ),
             )

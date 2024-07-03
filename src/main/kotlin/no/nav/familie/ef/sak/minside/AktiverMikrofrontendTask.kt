@@ -47,19 +47,17 @@ class AktiverMikrofrontendTask(
         }
 
     companion object {
-        fun opprettTask(fagsakPerson: FagsakPerson): Task {
-            return Task(
+        fun opprettTask(fagsakPerson: FagsakPerson): Task =
+            Task(
                 type = TYPE,
                 payload = objectMapper.writeValueAsString(AktiverMikrofrontendDto(fagsakPersonId = fagsakPerson.id)),
             )
-        }
 
-        fun opprettTaskMedFagsakId(fagsakId: UUID): Task {
-            return Task(
+        fun opprettTaskMedFagsakId(fagsakId: UUID): Task =
+            Task(
                 type = TYPE,
                 payload = objectMapper.writeValueAsString(AktiverMikrofrontendDto(fagsakId = fagsakId)),
             )
-        }
 
         const val TYPE = "aktiverMikrofrontendTask"
     }

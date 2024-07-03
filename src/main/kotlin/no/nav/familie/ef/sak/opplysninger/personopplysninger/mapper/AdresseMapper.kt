@@ -18,7 +18,9 @@ import org.springframework.stereotype.Component
 import java.time.LocalDate
 
 @Component
-class AdresseMapper(private val kodeverkService: KodeverkService) {
+class AdresseMapper(
+    private val kodeverkService: KodeverkService,
+) {
     fun tilAdresse(adresse: Oppholdsadresse): AdresseDto {
         val visningsadresse = tilFormatertAdresse(adresse, datoEllerIdag(adresse.gyldigFraOgMed))
         return AdresseDto(
@@ -55,13 +57,12 @@ class AdresseMapper(private val kodeverkService: KodeverkService) {
         )
     }
 
-    private fun angittFlyttedato(localDate: LocalDate?): LocalDate? {
-        return if (localDate == LocalDate.of(1, 1, 1)) {
+    private fun angittFlyttedato(localDate: LocalDate?): LocalDate? =
+        if (localDate == LocalDate.of(1, 1, 1)) {
             null
         } else {
             localDate
         }
-    }
 
     private fun tilFormatertAdresse(
         bostedsadresse: Bostedsadresse,
@@ -121,12 +122,11 @@ class AdresseMapper(private val kodeverkService: KodeverkService) {
         return "c/o $coAdressenavn"
     }
 
-    private fun harPrefiks(coAdressenavn: String): Boolean {
-        return coAdressenavn.startsWith("c/o", true) ||
+    private fun harPrefiks(coAdressenavn: String): Boolean =
+        coAdressenavn.startsWith("c/o", true) ||
             coAdressenavn.startsWith("V/", true) ||
             coAdressenavn.startsWith("DBO v/", true) ||
             coAdressenavn.startsWith("v/DBO", true)
-    }
 
     // må feltet "postboks" ha med "postboks" i strengen? "postboks ${postboks}" ?
     private fun tilFormatertAdresse(
@@ -164,39 +164,36 @@ class AdresseMapper(private val kodeverkService: KodeverkService) {
     private fun tilFormatertAdresse(
         utenlandskAdresse: UtenlandskAdresse,
         gjeldendeDato: LocalDate,
-    ): String? {
-        return join(
+    ): String? =
+        join(
             utenlandskAdresse.adressenavnNummer,
             space(utenlandskAdresse.postkode, utenlandskAdresse.bySted),
             utenlandskAdresse.regionDistriktOmraade,
             land(utenlandskAdresse.landkode, gjeldendeDato),
         )
-    }
 
     private fun tilFormatertAdresse(
         utenlandskAdresseIFrittFormat: UtenlandskAdresseIFrittFormat,
         gjeldendeDato: LocalDate,
-    ): String? {
-        return join(
+    ): String? =
+        join(
             utenlandskAdresseIFrittFormat.adresselinje1,
             utenlandskAdresseIFrittFormat.adresselinje2,
             utenlandskAdresseIFrittFormat.adresselinje3,
             space(utenlandskAdresseIFrittFormat.postkode, utenlandskAdresseIFrittFormat.byEllerStedsnavn),
             land(utenlandskAdresseIFrittFormat.landkode, gjeldendeDato),
         )
-    }
 
     private fun tilFormatertAdresse(
         vegadresse: Vegadresse,
         gjeldendeDato: LocalDate,
-    ): String? {
-        return join(
+    ): String? =
+        join(
             space(vegadresse.adressenavn, vegadresse.husnummer, vegadresse.husbokstav),
             vegadresse.tilleggsnavn,
             vegadresse.bruksenhetsnummer,
             space(vegadresse.postnummer, poststed(vegadresse.postnummer, gjeldendeDato)),
         )
-    }
 
     private fun poststed(
         postnummer: String?,

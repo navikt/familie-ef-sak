@@ -63,9 +63,10 @@ class AndelsHistorikkService(
             val delvilkårsvurderinger = vilkårsvurdering.delvilkårsvurdering.delvilkårsvurderinger
 
             vilkårsvurdering.behandlingId to
-                delvilkårsvurderinger.map { delvilkårsvurdering ->
-                    delvilkårsvurdering.vurderinger.single { it.regelId == RegelId.ER_I_ARBEID_ELLER_FORBIGÅENDE_SYKDOM }.svar
-                }.single()
+                delvilkårsvurderinger
+                    .map { delvilkårsvurdering ->
+                        delvilkårsvurdering.vurderinger.single { it.regelId == RegelId.ER_I_ARBEID_ELLER_FORBIGÅENDE_SYKDOM }.svar
+                    }.single()
         }
     }
 
@@ -81,12 +82,17 @@ class AndelsHistorikkService(
                 hentHistorikk(fagsak.id, behandling.forrigeBehandlingId)
                     .filter { it.endring?.type != EndringType.FJERNET }
                     .filter { it.endring?.type != EndringType.ERSTATTET }
-                    .filter { it.andel.beløp > 0 && it.andel.periode.toDatoperiode().inneholder(vedtaksdatoEllerDagensdato) }
-                    .map { it.andel.barn }
+                    .filter {
+                        it.andel.beløp > 0 &&
+                            it.andel.periode
+                                .toDatoperiode()
+                                .inneholder(vedtaksdatoEllerDagensdato)
+                    }.map { it.andel.barn }
                     .flatten()
             val behandlingsbarn = barnService.hentBehandlingBarnForBarnIder(barnIdForAlleAktuelleBehandlinger)
             val barnMedLøpendeStønad =
-                barnPåBehandling.filter { barnetViSerPå -> behandlingsbarn.any { it.personIdent == barnetViSerPå.personIdent } }
+                barnPåBehandling
+                    .filter { barnetViSerPå -> behandlingsbarn.any { it.personIdent == barnetViSerPå.personIdent } }
                     .map { it.id }
             return BarnMedLøpendeStønad(barn = barnMedLøpendeStønad, dato = vedtaksdatoEllerDagensdato)
         } ?: BarnMedLøpendeStønad(barn = emptyList(), dato = LocalDate.now())

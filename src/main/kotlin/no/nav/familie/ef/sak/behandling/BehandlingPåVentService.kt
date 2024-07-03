@@ -32,6 +32,8 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
 
+private const val INGEN_MAPPE = "<ingen>"
+
 @Service
 class BehandlingPåVentService(
     private val behandlingService: BehandlingService,
@@ -158,13 +160,12 @@ class BehandlingPåVentService(
     private fun utledNyBeskrivelse(
         harEndringer: Boolean,
         settPåVentRequest: SettPåVentRequest,
-    ): String {
-        return when {
+    ): String =
+        when {
             settPåVentRequest.beskrivelse.isBlank() -> ""
             harEndringer -> "${settPåVentRequest.beskrivelse}\n"
             else -> "${settPåVentRequest.beskrivelse}\n"
         }
-    }
 
     private fun utledBeskrivelsePrefix(): String {
         val innloggetSaksbehandlerIdent = SikkerhetContext.hentSaksbehandlerEllerSystembruker()
@@ -186,8 +187,8 @@ class BehandlingPåVentService(
         val eksisterendeMappenavn = mapper.find { it.id.toLong() == oppgave.mappeId }?.navn
         val nyMappeNavn = mapper.find { it.id.toLong() == settPåVentRequest.mappe }?.navn
 
-        val eksisterendeMappe = eksisterendeMappenavn ?: "<ingen>"
-        val nyMappe = nyMappeNavn ?: "<ingen>"
+        val eksisterendeMappe = eksisterendeMappenavn ?: INGEN_MAPPE
+        val nyMappe = nyMappeNavn ?: INGEN_MAPPE
 
         return if (eksisterendeMappe == nyMappe) "" else "Oppgave flyttet fra mappe $eksisterendeMappe til ${nyMappe}\n"
     }
@@ -196,7 +197,7 @@ class BehandlingPåVentService(
         oppgave: Oppgave,
         settPåVentRequest: SettPåVentRequest,
     ): String {
-        val eksisterendeFrist = oppgave.fristFerdigstillelse ?: "<ingen>"
+        val eksisterendeFrist = oppgave.fristFerdigstillelse ?: INGEN_MAPPE
         val nyFrist = settPåVentRequest.frist
         return if (eksisterendeFrist == nyFrist) "" else "Oppgave endret frist fra $eksisterendeFrist til ${nyFrist}\n"
     }
@@ -205,9 +206,9 @@ class BehandlingPåVentService(
         oppgave: Oppgave,
         settPåVentRequest: SettPåVentRequest,
     ): String {
-        val eksisterendeSaksbehandler = oppgave.tilordnetRessurs ?: "<ingen>"
+        val eksisterendeSaksbehandler = oppgave.tilordnetRessurs ?: INGEN_MAPPE
         val nySaksbehandler =
-            if (settPåVentRequest.saksbehandler == "") "<ingen>" else settPåVentRequest.saksbehandler
+            if (settPåVentRequest.saksbehandler == "") INGEN_MAPPE else settPåVentRequest.saksbehandler
 
         return if (eksisterendeSaksbehandler == nySaksbehandler) {
             ""

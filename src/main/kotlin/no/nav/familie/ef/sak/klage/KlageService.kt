@@ -103,8 +103,9 @@ class KlageService(
         return klagebehandling.copy(vedtaksdato = vedtaksdato)
     }
 
-    private fun hentÅpneKlagerFraInfotrygd(fagsakPerson: FagsakPerson): ÅpneKlagerInfotrygdDto {
-        return infotrygdService.hentÅpneKlagesaker(fagsakPerson.hentAktivIdent()).map { it.stønadType }
+    private fun hentÅpneKlagerFraInfotrygd(fagsakPerson: FagsakPerson): ÅpneKlagerInfotrygdDto =
+        infotrygdService
+            .hentÅpneKlagesaker(fagsakPerson.hentAktivIdent())
+            .map { it.stønadType }
             .let { ÅpneKlagerInfotrygdDto(stønadstyper = it.toSet()) }
-    }
 }

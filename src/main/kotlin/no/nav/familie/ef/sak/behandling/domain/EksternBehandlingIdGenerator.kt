@@ -6,7 +6,9 @@ import org.springframework.jdbc.core.queryForObject
 import org.springframework.stereotype.Component
 
 @Component
-class EksternBehandlingIdGenerator(private val jdbcTemplate: JdbcTemplate) : BeforeConvertCallback<Behandling> {
+class EksternBehandlingIdGenerator(
+    private val jdbcTemplate: JdbcTemplate,
+) : BeforeConvertCallback<Behandling> {
     override fun onBeforeConvert(behandling: Behandling): Behandling {
         if (behandling.eksternId == 0L) {
             val id =

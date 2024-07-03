@@ -64,4 +64,6 @@ data class Situasjon(
     val oppsigelseDokumentasjon: Dokumentasjon? = null,
 )
 
-data class GjelderDeg(val verdier: List<String>)
+data class GjelderDeg(
+    val verdier: List<String>,
+)

@@ -293,13 +293,12 @@ class GjeldendeBarnRepositoryTest : OppslagSpringRunnerTest() {
         behandlingId: UUID,
         personIdent: String? = null,
         termindato: LocalDate? = LocalDate.now(),
-    ): BehandlingBarn {
-        return BehandlingBarn(
+    ): BehandlingBarn =
+        BehandlingBarn(
             behandlingId = behandlingId,
             personIdent = personIdent,
             fødselTermindato = termindato,
             navn = null,
             søknadBarnId = UUID.randomUUID(),
         )
-    }
 }

@@ -66,11 +66,13 @@ internal class FagsakServiceTest : OppslagSpringRunnerTest() {
                 )
 
             assertThat(
-                fagsakerMedOppdatertePersonIdenter.first { it.id == fagsakTilknyttetPesonIdent123.id }
+                fagsakerMedOppdatertePersonIdenter
+                    .first { it.id == fagsakTilknyttetPesonIdent123.id }
                     .hentAktivIdent(),
             ).isEqualTo("ny123")
             assertThat(
-                fagsakerMedOppdatertePersonIdenter.first { it.id == fagsakTilknyttetPesonIdent456.id }
+                fagsakerMedOppdatertePersonIdenter
+                    .first { it.id == fagsakTilknyttetPesonIdent456.id }
                     .hentAktivIdent(),
             ).isEqualTo("ny456")
         }
@@ -86,11 +88,13 @@ internal class FagsakServiceTest : OppslagSpringRunnerTest() {
                 )
 
             assertThat(
-                fagsakerMedOppdatertePersonIdenter.first { it.id == fagsakTilknyttetPesonIdent111.id }
+                fagsakerMedOppdatertePersonIdenter
+                    .first { it.id == fagsakTilknyttetPesonIdent111.id }
                     .hentAktivIdent(),
             ).isEqualTo("111")
             assertThat(
-                fagsakerMedOppdatertePersonIdenter.first { it.id == fagsakTilknyttetPesonIdent222.id }
+                fagsakerMedOppdatertePersonIdenter
+                    .first { it.id == fagsakTilknyttetPesonIdent222.id }
                     .hentAktivIdent(),
             ).isEqualTo("222")
         }

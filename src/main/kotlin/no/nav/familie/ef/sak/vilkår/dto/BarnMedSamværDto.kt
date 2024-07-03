@@ -12,13 +12,12 @@ data class BarnMedSamværDto(
     val registergrunnlag: BarnMedSamværRegistergrunnlagDto,
     val barnepass: BarnepassDto? = null,
 ) {
-    fun mapTilBarnForelderLangAvstandTilSøker(): BarnForelderLangAvstandTilSøker {
-        return BarnForelderLangAvstandTilSøker(
+    fun mapTilBarnForelderLangAvstandTilSøker(): BarnForelderLangAvstandTilSøker =
+        BarnForelderLangAvstandTilSøker(
             barnId = barnId,
             langAvstandTilSøker = registergrunnlag.forelder?.avstandTilSøker?.langAvstandTilSøker ?: LangAvstandTilSøker.UKJENT,
             borAnnenForelderISammeHus = søknadsgrunnlag.borAnnenForelderISammeHus ?: "ukjent",
         )
-    }
 }
 
 data class BarnMedSamværSøknadsgrunnlagDto(
@@ -54,6 +53,7 @@ data class BarnMedSamværRegistergrunnlagDto(
     val dødsdato: LocalDate? = null,
     val fødselsdato: LocalDate?,
     val folkeregisterpersonstatus: Folkeregisterpersonstatus?,
+    val adresse: String?,
 ) {
     fun erBosatt() = this.folkeregisterpersonstatus == Folkeregisterpersonstatus.BOSATT
 }

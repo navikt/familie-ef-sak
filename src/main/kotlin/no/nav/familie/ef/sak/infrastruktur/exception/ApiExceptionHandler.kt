@@ -15,7 +15,9 @@ import java.util.concurrent.TimeoutException
 
 @Suppress("unused")
 @ControllerAdvice
-class ApiExceptionHandler(val featureToggleService: FeatureToggleService) {
+class ApiExceptionHandler(
+    val featureToggleService: FeatureToggleService,
+) {
     private val logger = LoggerFactory.getLogger(ApiExceptionHandler::class.java)
     private val secureLogger = LoggerFactory.getLogger("secureLogger")
 
@@ -45,8 +47,8 @@ class ApiExceptionHandler(val featureToggleService: FeatureToggleService) {
         )
 
     @ExceptionHandler(JwtTokenMissingException::class)
-    fun handleJwtTokenMissingException(jwtTokenMissingException: JwtTokenMissingException): ResponseEntity<Ressurs<Nothing>> {
-        return ResponseEntity
+    fun handleJwtTokenMissingException(jwtTokenMissingException: JwtTokenMissingException): ResponseEntity<Ressurs<Nothing>> =
+        ResponseEntity
             .status(HttpStatus.UNAUTHORIZED)
             .body(
                 Ressurs.failure(
@@ -54,7 +56,6 @@ class ApiExceptionHandler(val featureToggleService: FeatureToggleService) {
                     frontendFeilmelding = "En uventet feil oppstod: Kall ikke autorisert",
                 ),
             )
-    }
 
     @ExceptionHandler(ApiFeil::class)
     fun handleThrowable(feil: ApiFeil): ResponseEntity<Ressurs<Nothing>> {
@@ -86,14 +87,16 @@ class ApiExceptionHandler(val featureToggleService: FeatureToggleService) {
                 )
             }: ${feil.message} ",
         )
-        return ResponseEntity.status(feil.httpStatus)
+        return ResponseEntity
+            .status(feil.httpStatus)
             .body(Ressurs.failure(frontendFeilmelding = feil.frontendFeilmelding))
     }
 
     @ExceptionHandler(PdlNotFoundException::class)
     fun handleThrowable(feil: PdlNotFoundException): ResponseEntity<Ressurs<Nothing>> {
         logger.warn("Finner ikke personen i PDL")
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+        return ResponseEntity
+            .status(HttpStatus.BAD_REQUEST)
             .body(
                 Ressurs.funksjonellFeil(
                     frontendFeilmelding = "Finner ingen personer for valgt personident",
@@ -106,7 +109,8 @@ class ApiExceptionHandler(val featureToggleService: FeatureToggleService) {
     fun handleThrowable(manglerTilgang: ManglerTilgang): ResponseEntity<Ressurs<Nothing>> {
         secureLogger.warn("En håndtert tilgangsfeil har oppstått - ${manglerTilgang.melding}", manglerTilgang)
         logger.warn("En håndtert tilgangsfeil har oppstått")
-        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+        return ResponseEntity
+            .status(HttpStatus.FORBIDDEN)
             .body(
                 Ressurs(
                     data = null,
@@ -122,7 +126,8 @@ class ApiExceptionHandler(val featureToggleService: FeatureToggleService) {
     fun handleThrowable(feil: IntegrasjonException): ResponseEntity<Ressurs<Nothing>> {
         secureLogger.error("Feil mot integrasjonsclienten har oppstått: uri={} data={}", feil.uri, feil.data, feil)
         logger.error("Feil mot integrasjonsclienten har oppstått exception=${rootCause(feil)}")
-        return ResponseEntity.status(INTERNAL_SERVER_ERROR)
+        return ResponseEntity
+            .status(INTERNAL_SERVER_ERROR)
             .body(Ressurs.failure(frontendFeilmelding = feil.message))
     }
 
@@ -140,11 +145,7 @@ class ApiExceptionHandler(val featureToggleService: FeatureToggleService) {
         return e.cause?.let { finnMetodeSomFeiler(it) } ?: "(Ukjent metode som feiler)"
     }
 
-    private fun rootCause(throwable: Throwable): String {
-        return throwable.getMostSpecificCause().javaClass.simpleName
-    }
+    private fun rootCause(throwable: Throwable): String = throwable.getMostSpecificCause().javaClass.simpleName
 
-    private fun Throwable.getMostSpecificCause(): Throwable {
-        return NestedExceptionUtils.getMostSpecificCause(this)
-    }
+    private fun Throwable.getMostSpecificCause(): Throwable = NestedExceptionUtils.getMostSpecificCause(this)
 }

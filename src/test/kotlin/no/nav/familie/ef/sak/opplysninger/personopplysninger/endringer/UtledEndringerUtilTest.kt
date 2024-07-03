@@ -80,7 +80,9 @@ internal class UtledEndringerUtilTest {
             )
         val endringer = finnEndringer(tidligere, nye)
         val expected =
-            this::class.java.classLoader.getResource("json/endringer-personopplysninger/endringer.json")!!.readText()
+            this::class.java.classLoader
+                .getResource("json/endringer-personopplysninger/endringer.json")!!
+                .readText()
         assertThat(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(endringer)).isEqualTo(expected)
     }
 
@@ -551,7 +553,8 @@ internal class UtledEndringerUtilTest {
         endringer: Endringer,
         vararg ignorerFelt: String,
     ) {
-        Endringer::class.memberProperties
+        Endringer::class
+            .memberProperties
             .filter { it.name != "harEndringer" && !ignorerFelt.toSet().contains(it.name) }
             .forEach {
                 try {

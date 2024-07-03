@@ -9,47 +9,124 @@ import java.net.URI
 class IntegrasjonerConfig(
     @Value("\${FAMILIE_INTEGRASJONER_URL}") private val integrasjonUri: URI,
 ) {
-    val pingUri: URI = UriComponentsBuilder.fromUri(integrasjonUri).pathSegment(PATH_PING).build().toUri()
+    val pingUri: URI =
+        UriComponentsBuilder
+            .fromUri(integrasjonUri)
+            .pathSegment(PATH_PING)
+            .build()
+            .toUri()
 
     val tilgangRelasjonerUri: URI =
-        UriComponentsBuilder.fromUri(integrasjonUri).pathSegment(PATH_TILGANG_RELASJONER).build().toUri()
-    val tilgangPersonUri: URI = UriComponentsBuilder.fromUri(integrasjonUri).pathSegment(PATH_TILGANG_PERSON).build().toUri()
+        UriComponentsBuilder
+            .fromUri(integrasjonUri)
+            .pathSegment(PATH_TILGANG_RELASJONER)
+            .build()
+            .toUri()
+    val tilgangPersonUri: URI =
+        UriComponentsBuilder
+            .fromUri(integrasjonUri)
+            .pathSegment(PATH_TILGANG_PERSON)
+            .build()
+            .toUri()
 
     val adressebeskyttelse: URI =
-        UriComponentsBuilder.fromUri(integrasjonUri).pathSegment(PATH_ADRESSEBESKYTTELSE).build().toUri()
+        UriComponentsBuilder
+            .fromUri(integrasjonUri)
+            .pathSegment(PATH_ADRESSEBESKYTTELSE)
+            .build()
+            .toUri()
 
     val kodeverkLandkoderUri: URI =
-        UriComponentsBuilder.fromUri(integrasjonUri).pathSegment(PATH_KODEVERK_LANDKODER).build().toUri()
+        UriComponentsBuilder
+            .fromUri(integrasjonUri)
+            .pathSegment(PATH_KODEVERK_LANDKODER)
+            .build()
+            .toUri()
 
     val kodeverkPoststedUri: URI =
-        UriComponentsBuilder.fromUri(integrasjonUri).pathSegment(PATH_KODEVERK_POSTSTED).build().toUri()
+        UriComponentsBuilder
+            .fromUri(integrasjonUri)
+            .pathSegment(PATH_KODEVERK_POSTSTED)
+            .build()
+            .toUri()
 
     val kodeverkInntektUri: URI =
-        UriComponentsBuilder.fromUri(integrasjonUri).pathSegment(PATH_KODEVERK_INNTEKT).build().toUri()
+        UriComponentsBuilder
+            .fromUri(integrasjonUri)
+            .pathSegment(PATH_KODEVERK_INNTEKT)
+            .build()
+            .toUri()
 
-    val arbeidsfordelingUri: URI = UriComponentsBuilder.fromUri(integrasjonUri).pathSegment(PATH_ARBEIDSFORDELING).build().toUri()
+    val arbeidsfordelingUri: URI =
+        UriComponentsBuilder
+            .fromUri(integrasjonUri)
+            .pathSegment(PATH_ARBEIDSFORDELING)
+            .build()
+            .toUri()
 
     val arbeidsfordelingMedRelasjonerUri: URI =
-        UriComponentsBuilder.fromUri(integrasjonUri).pathSegment(PATH_BEHANDLENDE_ENHET_MED_RELASJONER).build().toUri()
+        UriComponentsBuilder
+            .fromUri(integrasjonUri)
+            .pathSegment(PATH_BEHANDLENDE_ENHET_MED_RELASJONER)
+            .build()
+            .toUri()
 
-    val arbeidsforholdUri: URI = UriComponentsBuilder.fromUri(integrasjonUri).pathSegment(PATH_ARBEIDSFORHOLD).build().toUri()
+    val arbeidsforholdUri: URI =
+        UriComponentsBuilder
+            .fromUri(integrasjonUri)
+            .pathSegment(PATH_ARBEIDSFORHOLD)
+            .build()
+            .toUri()
 
-    val oppgaveUri: URI = UriComponentsBuilder.fromUri(integrasjonUri).pathSegment(PATH_OPPGAVE).build().toUri()
+    val oppgaveUri: URI =
+        UriComponentsBuilder
+            .fromUri(integrasjonUri)
+            .pathSegment(PATH_OPPGAVE)
+            .build()
+            .toUri()
 
-    val saksbehandlerUri: URI = UriComponentsBuilder.fromUri(integrasjonUri).pathSegment(PATH_SAKSBEHANDLER).build().toUri()
+    val saksbehandlerUri: URI =
+        UriComponentsBuilder
+            .fromUri(integrasjonUri)
+            .pathSegment(PATH_SAKSBEHANDLER)
+            .build()
+            .toUri()
 
-    val journalPostUri: URI = UriComponentsBuilder.fromUri(integrasjonUri).pathSegment(PATH_JOURNALPOST).build().toUri()
+    val journalPostUri: URI =
+        UriComponentsBuilder
+            .fromUri(integrasjonUri)
+            .pathSegment(PATH_JOURNALPOST)
+            .build()
+            .toUri()
 
-    val dokarkivUri: URI = UriComponentsBuilder.fromUri(integrasjonUri).pathSegment(PATH_DOKARKIV).build().toUri()
+    val dokarkivUri: URI =
+        UriComponentsBuilder
+            .fromUri(integrasjonUri)
+            .pathSegment(PATH_DOKARKIV)
+            .build()
+            .toUri()
 
-    val medlemskapUri: URI = UriComponentsBuilder.fromUri(integrasjonUri).pathSegment(PATH_MEDLEMSKAP).build().toUri()
+    val medlemskapUri: URI =
+        UriComponentsBuilder
+            .fromUri(integrasjonUri)
+            .pathSegment(PATH_MEDLEMSKAP)
+            .build()
+            .toUri()
 
-    val navKontorUri: URI = UriComponentsBuilder.fromUri(integrasjonUri).pathSegment(PATH_NAV_KONTOR).build().toUri()
+    val navKontorUri: URI =
+        UriComponentsBuilder
+            .fromUri(integrasjonUri)
+            .pathSegment(PATH_NAV_KONTOR)
+            .build()
+            .toUri()
 
     val arbeidsfordelingOppfølgingUri: URI =
-        UriComponentsBuilder.fromUri(integrasjonUri).pathSegment(
-            PATH_ARBEIDSFORDELING_OPPFØLGING,
-        ).build().toUri()
+        UriComponentsBuilder
+            .fromUri(integrasjonUri)
+            .pathSegment(
+                PATH_ARBEIDSFORDELING_OPPFØLGING,
+            ).build()
+            .toUri()
 
     companion object {
         private const val PATH_PING = "api/ping"

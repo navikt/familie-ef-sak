@@ -10,7 +10,9 @@ import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Repository
 
 internal class RepositoryUtilTest {
-    private data class TestDomene(val s: String)
+    private data class TestDomene(
+        val s: String,
+    )
 
     @Repository
     private interface TestRepository : CrudRepository<TestDomene, String>

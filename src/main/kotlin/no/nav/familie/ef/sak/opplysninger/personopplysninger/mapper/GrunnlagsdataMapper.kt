@@ -107,7 +107,10 @@ object GrunnlagsdataMapper {
     ) =
         pdlSøker.vergemaalEllerFremtidsfullmakt.map { vergemaal ->
             val personIdent = vergemaal.vergeEllerFullmektig.motpartsPersonident
-            personIdent?.let { andrePersoner[it] }?.navn?.gjeldende()
+            personIdent
+                ?.let { andrePersoner[it] }
+                ?.navn
+                ?.gjeldende()
                 ?.let { Personnavn(etternavn = it.etternavn, fornavn = it.fornavn, mellomnavn = it.mellomnavn) }
                 ?.let { vergemaal.copy(vergeEllerFullmektig = vergemaal.vergeEllerFullmektig.copy(navn = it)) }
                 ?: vergemaal
@@ -116,8 +119,8 @@ object GrunnlagsdataMapper {
     private fun mapSivivilstand(
         pdlSøker: PdlSøker,
         andrePersoner: Map<String, PdlPersonKort>,
-    ): List<SivilstandMedNavn> {
-        return pdlSøker.sivilstand.map {
+    ): List<SivilstandMedNavn> =
+        pdlSøker.sivilstand.map {
             val person = andrePersoner[it.relatertVedSivilstand]
             SivilstandMedNavn(
                 type = Sivilstandstype.valueOf(it.type.name),
@@ -129,13 +132,12 @@ object GrunnlagsdataMapper {
                 navn = person?.navn?.gjeldende()?.visningsnavn(),
             )
         }
-    }
 
     private fun mapFullmakt(
         pdlSøker: PdlSøker,
         andrePersoner: Map<String, PdlPersonKort>,
-    ): List<FullmaktMedNavn> {
-        return pdlSøker.fullmakt?.map {
+    ): List<FullmaktMedNavn> =
+        pdlSøker.fullmakt?.map {
             FullmaktMedNavn(
                 gyldigFraOgMed = it.gyldigFraOgMed,
                 gyldigTilOgMed = it.gyldigTilOgMed,

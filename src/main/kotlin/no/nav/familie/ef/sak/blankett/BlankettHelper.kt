@@ -29,11 +29,10 @@ object BlankettHelper {
         )
     }
 
-    private fun utledSakbehandlingsblankettDokumenttype(stønadstype: StønadType): Dokumenttype {
-        return when (stønadstype) {
+    private fun utledSakbehandlingsblankettDokumenttype(stønadstype: StønadType): Dokumenttype =
+        when (stønadstype) {
             StønadType.OVERGANGSSTØNAD -> Dokumenttype.OVERGANGSSTØNAD_BLANKETT_SAKSBEHANDLING
             StønadType.BARNETILSYN -> Dokumenttype.BARNETILSYN_BLANKETT_SAKSBEHANDLING
             StønadType.SKOLEPENGER -> Dokumenttype.SKOLEPENGER_BLANKETT_SAKSBEHANDLING
         }
-    }
 }

@@ -8,11 +8,12 @@ import no.nav.familie.ef.sak.vilkår.regler.Vilkårsregel
 import no.nav.familie.ef.sak.vilkår.regler.jaNeiSvarRegel
 import no.nav.familie.ef.sak.vilkår.regler.regelIder
 
-class RettTilOvergangsstønadRegel : Vilkårsregel(
-    vilkårType = VilkårType.RETT_TIL_OVERGANGSSTØNAD,
-    regler = setOf(RETT_TIL_OVERGANGSSTØNAD),
-    hovedregler = regelIder(RETT_TIL_OVERGANGSSTØNAD),
-) {
+class RettTilOvergangsstønadRegel :
+    Vilkårsregel(
+        vilkårType = VilkårType.RETT_TIL_OVERGANGSSTØNAD,
+        regler = setOf(RETT_TIL_OVERGANGSSTØNAD),
+        hovedregler = regelIder(RETT_TIL_OVERGANGSSTØNAD),
+    ) {
     companion object {
         private val RETT_TIL_OVERGANGSSTØNAD =
             RegelSteg(

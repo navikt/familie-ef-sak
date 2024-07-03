@@ -86,11 +86,11 @@ class TotrinnskontrollService(
         return sisteBehandlingshistorikk?.opprettetAv ?: throw Feil("Fant ikke saksbehandler som sendte til beslutter")
     }
 
-    fun hentBeslutter(behandlingId: UUID): String? {
-        return behandlingshistorikkService.finnSisteBehandlingshistorikk(behandlingId, StegType.BESLUTTE_VEDTAK)
+    fun hentBeslutter(behandlingId: UUID): String? =
+        behandlingshistorikkService
+            .finnSisteBehandlingshistorikk(behandlingId, StegType.BESLUTTE_VEDTAK)
             ?.opprettetAv
             ?.takeIf { NAVIDENT_REGEX.matches(it) }
-    }
 
     fun hentTotrinnskontrollStatus(behandlingId: UUID): TotrinnskontrollStatusDto {
         val behandlingStatus = behandlingService.hentBehandling(behandlingId).status

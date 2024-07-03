@@ -191,7 +191,11 @@ class BeregningBarnetilsynStepDefinitions {
         }
     }
 
-    data class ForventetPeriode(val beløp: Int, val fraÅrMåned: YearMonth, val tilÅrMåned: YearMonth)
+    data class ForventetPeriode(
+        val beløp: Int,
+        val fraÅrMåned: YearMonth,
+        val tilÅrMåned: YearMonth,
+    )
 
     data class ForventetPeriodeMedGrunnlag(
         val beløp: Int,

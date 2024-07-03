@@ -42,18 +42,17 @@ class BrevmottakereService(
         }.behandlingId
     }
 
-    fun hentBrevmottakere(behandlingId: UUID): BrevmottakereDto? {
-        return brevmottakereRepository.findByIdOrNull(behandlingId)?.let {
+    fun hentBrevmottakere(behandlingId: UUID): BrevmottakereDto? =
+        brevmottakereRepository.findByIdOrNull(behandlingId)?.let {
             BrevmottakereDto(personer = it.personer.personer, organisasjoner = it.organisasjoner.organisasjoner)
         }
-    }
 
-    fun hentBrevnottakereForFagsak(fagsakId: UUID): BrevmottakereDto? {
-        return frittståendeBrevmottakereRepository.findByFagsakIdAndSaksbehandlerIdent(
-            fagsakId,
-            SikkerhetContext.hentSaksbehandler(),
-        )?.let { BrevmottakereDto(personer = it.personer.personer, organisasjoner = it.organisasjoner.organisasjoner) }
-    }
+    fun hentBrevnottakereForFagsak(fagsakId: UUID): BrevmottakereDto? =
+        frittståendeBrevmottakereRepository
+            .findByFagsakIdAndSaksbehandlerIdent(
+                fagsakId,
+                SikkerhetContext.hentSaksbehandler(),
+            )?.let { BrevmottakereDto(personer = it.personer.personer, organisasjoner = it.organisasjoner.organisasjoner) }
 
     fun lagreBrevmottakereForFagsak(
         fagsakId: UUID,

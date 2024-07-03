@@ -41,9 +41,7 @@ class OppgaverForOpprettelseService(
         }
     }
 
-    fun hentOppgaverForOpprettelseEllerNull(behandlingId: UUID): OppgaverForOpprettelse? {
-        return oppgaverForOpprettelseRepository.findByIdOrNull(behandlingId)
-    }
+    fun hentOppgaverForOpprettelseEllerNull(behandlingId: UUID): OppgaverForOpprettelse? = oppgaverForOpprettelseRepository.findByIdOrNull(behandlingId)
 
     fun hentOppgavetyperSomKanOpprettes(behandlingId: UUID): List<OppgaveForOpprettelseType> {
         val saksbehandling = behandlingService.hentSaksbehandling(behandlingId)

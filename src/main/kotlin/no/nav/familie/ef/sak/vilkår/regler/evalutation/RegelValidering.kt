@@ -101,12 +101,11 @@ object RegelValidering {
         }
     }
 
-    private fun aktuelleDelvilkår(tidligereDelvilkårsvurderinger: List<Delvilkårsvurdering>): Set<RegelId> {
-        return tidligereDelvilkårsvurderinger
+    private fun aktuelleDelvilkår(tidligereDelvilkårsvurderinger: List<Delvilkårsvurdering>): Set<RegelId> =
+        tidligereDelvilkårsvurderinger
             .filter { it.resultat != Vilkårsresultat.IKKE_AKTUELL }
             .map { it.hovedregel }
             .toSet()
-    }
 
     /**
      * Valider att begrunnelse i svaret savnes hvis [SvarRegel.begrunnelseType]=[BegrunnelseType.UTEN]

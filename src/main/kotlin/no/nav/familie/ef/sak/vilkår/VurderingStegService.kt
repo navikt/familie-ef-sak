@@ -142,13 +142,14 @@ class VurderingStegService(
         val metadata = hentHovedregelMetadata(behandlingId)
         val nyeDelvilkår = hentVilkårsregel(vilkårsvurdering.type).initiereDelvilkårsvurdering(metadata)
         val delvilkårsvurdering = DelvilkårsvurderingWrapper(nyeDelvilkår)
-        return vilkårsvurderingRepository.update(
-            vilkårsvurdering.copy(
-                resultat = Vilkårsresultat.IKKE_TATT_STILLING_TIL,
-                delvilkårsvurdering = delvilkårsvurdering,
-                opphavsvilkår = null,
-            ),
-        ).tilDto()
+        return vilkårsvurderingRepository
+            .update(
+                vilkårsvurdering.copy(
+                    resultat = Vilkårsresultat.IKKE_TATT_STILLING_TIL,
+                    delvilkårsvurdering = delvilkårsvurdering,
+                    opphavsvilkår = null,
+                ),
+            ).tilDto()
     }
 
     private fun oppdaterVilkårsvurderingTilSkalIkkeVurderes(
@@ -162,13 +163,14 @@ class VurderingStegService(
                 Vilkårsresultat.SKAL_IKKE_VURDERES,
             )
         val delvilkårsvurdering = DelvilkårsvurderingWrapper(nyeDelvilkår)
-        return vilkårsvurderingRepository.update(
-            vilkårsvurdering.copy(
-                resultat = Vilkårsresultat.SKAL_IKKE_VURDERES,
-                delvilkårsvurdering = delvilkårsvurdering,
-                opphavsvilkår = null,
-            ),
-        ).tilDto()
+        return vilkårsvurderingRepository
+            .update(
+                vilkårsvurdering.copy(
+                    resultat = Vilkårsresultat.SKAL_IKKE_VURDERES,
+                    delvilkårsvurdering = delvilkårsvurdering,
+                    opphavsvilkår = null,
+                ),
+            ).tilDto()
     }
 
     private fun hentHovedregelMetadata(behandlingId: UUID) =

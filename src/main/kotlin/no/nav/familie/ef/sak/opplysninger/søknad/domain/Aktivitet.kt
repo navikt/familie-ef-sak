@@ -55,4 +55,6 @@ data class Aksjeselskap(
     val arbeidsmengde: Int? = null,
 )
 
-data class Arbeidssituasjon(val verdier: List<String>)
+data class Arbeidssituasjon(
+    val verdier: List<String>,
+)

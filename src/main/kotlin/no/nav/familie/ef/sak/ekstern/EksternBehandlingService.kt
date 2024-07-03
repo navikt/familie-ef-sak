@@ -54,12 +54,13 @@ class EksternBehandlingService(
         return fagsak?.let { fagsakService.erLøpende(fagsak) } ?: false
     }
 
-    private fun hentAlleBehandlingIDer(personidenter: Set<String>): Set<UUID> {
-        return StønadType.values().mapNotNull { fagsakService.finnFagsak(personidenter, it) }
+    private fun hentAlleBehandlingIDer(personidenter: Set<String>): Set<UUID> =
+        StønadType
+            .values()
+            .mapNotNull { fagsakService.finnFagsak(personidenter, it) }
             .mapNotNull { behandlingService.finnSisteIverksatteBehandling(it.id) }
             .map { it.id }
             .toSet()
-    }
 
     @Transactional(readOnly = true)
     fun kanOppretteRevurdering(eksternFagsakId: Long): KanOppretteRevurderingResponse {
@@ -142,7 +143,9 @@ private sealed interface KanOppretteRevurderingResultat
 
 private class KanOppretteRevurdering : KanOppretteRevurderingResultat
 
-private data class KanIkkeOppretteRevurdering(val årsak: Årsak) : KanOppretteRevurderingResultat
+private data class KanIkkeOppretteRevurdering(
+    val årsak: Årsak,
+) : KanOppretteRevurderingResultat
 
 private enum class Årsak(
     val ikkeOpprettetÅrsak: IkkeOpprettetÅrsak,

@@ -98,7 +98,8 @@ internal class InsertUpdateRepositoryImplTest : OppslagSpringRunnerTest() {
             fagsakPersonRepository.update(
                 person.copy(
                     identer =
-                        person.identer.map { it.copy(ident = nyPersonIdent) }
+                        person.identer
+                            .map { it.copy(ident = nyPersonIdent) }
                             .toSet() + PersonIdent(annenIdent),
                 ),
             )

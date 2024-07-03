@@ -75,7 +75,5 @@ class SimuleringUtilTest {
         )
     }
 
-    private fun <E> List<E>.second(): E {
-        return this[1]
-    }
+    private fun <E> List<E>.second(): E = this[1]
 }

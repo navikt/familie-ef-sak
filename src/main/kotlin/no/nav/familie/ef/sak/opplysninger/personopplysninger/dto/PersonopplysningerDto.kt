@@ -31,7 +31,11 @@ data class PersonopplysningerDto(
     val vergemål: List<VergemålDto>,
 )
 
-data class DeltBostedDto(val startdatoForKontrakt: LocalDate, val sluttdatoForKontrakt: LocalDate?, val historisk: Boolean)
+data class DeltBostedDto(
+    val startdatoForKontrakt: LocalDate,
+    val sluttdatoForKontrakt: LocalDate?,
+    val historisk: Boolean,
+)
 
 data class BarnDto(
     val personIdent: String,
@@ -68,7 +72,9 @@ data class SivilstandDto(
 )
 
 @Suppress("unused") // Kopi fra PDL
-enum class Sivilstandstype(val visningsnavn: String) {
+enum class Sivilstandstype(
+    val visningsnavn: String,
+) {
     UOPPGITT("Uoppgitt"),
     UGIFT("Ugift"),
     GIFT("Gift"),
@@ -103,7 +109,9 @@ data class AdresseDto(
     val erGjeldende: Boolean = false,
 )
 
-enum class AdresseType(val rekkefølge: Int) {
+enum class AdresseType(
+    val rekkefølge: Int,
+) {
     BOSTEDADRESSE(1),
     OPPHOLDSADRESSE(2),
     KONTAKTADRESSE(3),
@@ -127,7 +135,10 @@ enum class Adressebeskyttelse {
 }
 
 @Suppress("unused")
-enum class Folkeregisterpersonstatus(private val pdlStatus: String, val visningsnavn: String) {
+enum class Folkeregisterpersonstatus(
+    private val pdlStatus: String,
+    val visningsnavn: String,
+) {
     BOSATT("bosatt", "Bosatt"),
     UTFLYTTET("utflyttet", "Utflyttet"),
     FORSVUNNET("forsvunnet", "Forsvunnet"),

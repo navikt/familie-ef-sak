@@ -72,20 +72,26 @@ internal class VurderingServiceTest {
             tilordnetRessursService = tilordnetRessursService,
         )
     private val søknad =
-        SøknadsskjemaMapper.tilDomene(
-            TestsøknadBuilder.Builder().setBarn(
-                listOf(
-                    TestsøknadBuilder.Builder().defaultBarn(
-                        "Navn navnesen",
-                        no.nav.familie.util.FnrGenerator.generer(LocalDate.now().minusYears(5)),
-                    ),
-                    TestsøknadBuilder.Builder().defaultBarn(
-                        "Navn navnesen",
-                        no.nav.familie.util.FnrGenerator.generer(LocalDate.now().minusYears(3)),
-                    ),
-                ),
-            ).build().søknadOvergangsstønad,
-        ).tilSøknadsverdier()
+        SøknadsskjemaMapper
+            .tilDomene(
+                TestsøknadBuilder
+                    .Builder()
+                    .setBarn(
+                        listOf(
+                            TestsøknadBuilder.Builder().defaultBarn(
+                                "Navn navnesen",
+                                no.nav.familie.util.FnrGenerator
+                                    .generer(LocalDate.now().minusYears(5)),
+                            ),
+                            TestsøknadBuilder.Builder().defaultBarn(
+                                "Navn navnesen",
+                                no.nav.familie.util.FnrGenerator
+                                    .generer(LocalDate.now().minusYears(3)),
+                            ),
+                        ),
+                    ).build()
+                    .søknadOvergangsstønad,
+            ).tilSøknadsverdier()
     private val barn = søknadBarnTilBehandlingBarn(søknad.barn)
     private val behandling = behandling(fagsak(), BehandlingStatus.OPPRETTET, årsak = BehandlingÅrsak.PAPIRSØKNAD)
     private val behandlingId = UUID.randomUUID()
@@ -150,6 +156,7 @@ internal class VurderingServiceTest {
                     null,
                     null,
                     null,
+                    null,
                 ),
             barnepass =
                 BarnepassDto(
@@ -176,13 +183,15 @@ internal class VurderingServiceTest {
 
         assertThat(nyeVilkårsvurderinger.captured).hasSize(vilkår.size + 1) // 2 barn
         assertThat(
-            nyeVilkårsvurderinger.captured.map { it.type }
+            nyeVilkårsvurderinger.captured
+                .map { it.type }
                 .distinct(),
         ).containsExactlyInAnyOrderElementsOf(vilkår)
         assertThat(nyeVilkårsvurderinger.captured.filter { it.type == VilkårType.ALENEOMSORG }).hasSize(2)
         assertThat(nyeVilkårsvurderinger.captured.filter { it.barnId != null }).hasSize(2)
         assertThat(
-            nyeVilkårsvurderinger.captured.map { it.resultat }
+            nyeVilkårsvurderinger.captured
+                .map { it.resultat }
                 .toSet(),
         ).containsOnly(Vilkårsresultat.IKKE_TATT_STILLING_TIL)
         assertThat(nyeVilkårsvurderinger.captured.map { it.behandlingId }.toSet()).containsOnly(behandlingId)
@@ -201,19 +210,22 @@ internal class VurderingServiceTest {
 
         assertThat(nyeVilkårsvurderinger.captured).hasSize(vilkår.size + 2) // 2 barn, Ekstra aleneomsorgsvilkår og aldersvilkår
         assertThat(
-            nyeVilkårsvurderinger.captured.map { it.type }
+            nyeVilkårsvurderinger.captured
+                .map { it.type }
                 .distinct(),
         ).containsExactlyInAnyOrderElementsOf(vilkår)
         assertThat(nyeVilkårsvurderinger.captured.filter { it.type == VilkårType.ALENEOMSORG }).hasSize(2)
         assertThat(nyeVilkårsvurderinger.captured.filter { it.type == VilkårType.ALDER_PÅ_BARN }).hasSize(2)
         assertThat(nyeVilkårsvurderinger.captured.filter { it.barnId != null }).hasSize(4)
         assertThat(
-            nyeVilkårsvurderinger.captured.filter { it.type == VilkårType.ALENEOMSORG }
+            nyeVilkårsvurderinger.captured
+                .filter { it.type == VilkårType.ALENEOMSORG }
                 .map { it.resultat }
                 .toSet(),
         ).containsOnly(Vilkårsresultat.IKKE_TATT_STILLING_TIL)
         assertThat(
-            nyeVilkårsvurderinger.captured.filter { it.type == VilkårType.ALDER_PÅ_BARN }
+            nyeVilkårsvurderinger.captured
+                .filter { it.type == VilkårType.ALDER_PÅ_BARN }
                 .map { it.resultat }
                 .toSet(),
         ).containsOnly(OPPFYLT)
@@ -321,7 +333,8 @@ internal class VurderingServiceTest {
         // Guard
         assertThat(
             (
-                vilkårsvurderinger.map { it.type }
+                vilkårsvurderinger
+                    .map { it.type }
                     .containsAll(VilkårType.hentVilkårForStønad(OVERGANGSSTØNAD))
             ),
         ).isTrue
@@ -340,8 +353,8 @@ internal class VurderingServiceTest {
     private fun lagVilkårsvurderinger(
         behandlingId: UUID,
         resultat: Vilkårsresultat = OPPFYLT,
-    ): List<Vilkårsvurdering> {
-        return VilkårType.hentVilkårForStønad(OVERGANGSSTØNAD).map {
+    ): List<Vilkårsvurdering> =
+        VilkårType.hentVilkårForStønad(OVERGANGSSTØNAD).map {
             vilkårsvurdering(
                 behandlingId = behandlingId,
                 resultat = resultat,
@@ -349,5 +362,4 @@ internal class VurderingServiceTest {
                 delvilkårsvurdering = listOf(),
             )
         }
-    }
 }

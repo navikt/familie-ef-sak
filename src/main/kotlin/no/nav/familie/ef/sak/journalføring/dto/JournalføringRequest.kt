@@ -34,29 +34,32 @@ data class JournalføringRequestV2(
     val vilkårsbehandleNyeBarn: VilkårsbehandleNyeBarn = VilkårsbehandleNyeBarn.IKKE_VALGT,
     val nyAvsender: NyAvsender? = null,
 ) {
-    fun gjelderKlage(): Boolean {
-        return årsak == Journalføringsårsak.KLAGE || årsak == Journalføringsårsak.KLAGE_TILBAKEKREVING
-    }
+    fun gjelderKlage(): Boolean = årsak == Journalføringsårsak.KLAGE || årsak == Journalføringsårsak.KLAGE_TILBAKEKREVING
 
-    fun tilUstrukturertDokumentasjonType(): UstrukturertDokumentasjonType {
-        return when (årsak) {
+    fun tilUstrukturertDokumentasjonType(): UstrukturertDokumentasjonType =
+        when (årsak) {
             Journalføringsårsak.ETTERSENDING -> UstrukturertDokumentasjonType.ETTERSENDING
             Journalføringsårsak.PAPIRSØKNAD -> UstrukturertDokumentasjonType.PAPIRSØKNAD
             Journalføringsårsak.DIGITAL_SØKNAD, Journalføringsårsak.KLAGE_TILBAKEKREVING, Journalføringsårsak.KLAGE -> UstrukturertDokumentasjonType.IKKE_VALGT
         }
-    }
 
     fun skalJournalføreTilNyBehandling(): Boolean = aksjon == Journalføringsaksjon.OPPRETT_BEHANDLING
 }
 
-data class NyAvsender(val erBruker: Boolean, val navn: String?, val personIdent: String?)
+data class NyAvsender(
+    val erBruker: Boolean,
+    val navn: String?,
+    val personIdent: String?,
+)
 
 enum class Journalføringsaksjon {
     OPPRETT_BEHANDLING,
     JOURNALFØR_PÅ_FAGSAK,
 }
 
-enum class Journalføringsårsak(val behandlingsårsak: BehandlingÅrsak) {
+enum class Journalføringsårsak(
+    val behandlingsårsak: BehandlingÅrsak,
+) {
     KLAGE_TILBAKEKREVING(BehandlingÅrsak.KLAGE),
     KLAGE(BehandlingÅrsak.KLAGE),
     PAPIRSØKNAD(BehandlingÅrsak.PAPIRSØKNAD),
@@ -64,7 +67,9 @@ enum class Journalføringsårsak(val behandlingsårsak: BehandlingÅrsak) {
     ETTERSENDING(BehandlingÅrsak.NYE_OPPLYSNINGER),
 }
 
-data class BarnSomSkalFødes(val fødselTerminDato: LocalDate) {
+data class BarnSomSkalFødes(
+    val fødselTerminDato: LocalDate,
+) {
     fun tilBehandlingBarn(behandlingId: UUID): BehandlingBarn =
         BehandlingBarn(
             behandlingId = behandlingId,
@@ -78,7 +83,9 @@ data class BarnSomSkalFødes(val fødselTerminDato: LocalDate) {
 /**
  * [IKKE_VALGT] er indirekte det samme som digital søknad, der man ikke velger ustrukturert dokumentasjonstype
  */
-enum class UstrukturertDokumentasjonType(val behandlingÅrsak: () -> BehandlingÅrsak) {
+enum class UstrukturertDokumentasjonType(
+    val behandlingÅrsak: () -> BehandlingÅrsak,
+) {
     PAPIRSØKNAD({ BehandlingÅrsak.PAPIRSØKNAD }),
     ETTERSENDING({ BehandlingÅrsak.NYE_OPPLYSNINGER }),
     IKKE_VALGT({ error("Kan ikke bruke behandlingsårsak fra $IKKE_VALGT") }), ;

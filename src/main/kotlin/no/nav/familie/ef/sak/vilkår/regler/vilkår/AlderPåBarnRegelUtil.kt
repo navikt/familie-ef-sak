@@ -18,11 +18,10 @@ object AlderPåBarnRegelUtil {
     fun harFullførtFjerdetrinn(
         fødselsdato: LocalDate,
         datoForBeregning: LocalDate = LocalDate.now(),
-    ): Boolean {
-        return if (datoForBeregning.month >= Month.JUNE) {
+    ): Boolean =
+        if (datoForBeregning.month >= Month.JUNE) {
             datoForBeregning.year - fødselsdato.year > 9
         } else {
             datoForBeregning.year - fødselsdato.year > 10
         }
-    }
 }

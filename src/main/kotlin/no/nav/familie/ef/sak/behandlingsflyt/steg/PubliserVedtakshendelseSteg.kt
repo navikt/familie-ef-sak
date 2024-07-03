@@ -5,7 +5,9 @@ import no.nav.familie.ef.sak.iverksett.IverksettClient
 import org.springframework.stereotype.Service
 
 @Service
-class PubliserVedtakshendelseSteg(private val iverksettClient: IverksettClient) : BehandlingSteg<Void?> {
+class PubliserVedtakshendelseSteg(
+    private val iverksettClient: IverksettClient,
+) : BehandlingSteg<Void?> {
     override fun utførSteg(
         saksbehandling: Saksbehandling,
         data: Void?,
@@ -13,7 +15,5 @@ class PubliserVedtakshendelseSteg(private val iverksettClient: IverksettClient) 
         iverksettClient.publiserVedtakshendelse(saksbehandling.id)
     }
 
-    override fun stegType(): StegType {
-        return StegType.PUBLISER_VEDTAKSHENDELSE
-    }
+    override fun stegType(): StegType = StegType.PUBLISER_VEDTAKSHENDELSE
 }

@@ -112,9 +112,7 @@ class SaksbehandlingsblankettSteg(
         )
     }
 
-    override fun stegType(): StegType {
-        return StegType.LAG_SAKSBEHANDLINGSBLANKETT
-    }
+    override fun stegType(): StegType = StegType.LAG_SAKSBEHANDLINGSBLANKETT
 
     private fun opprettFerdigstillBehandlingTask(saksbehandling: Saksbehandling) {
         taskService.save(FerdigstillBehandlingTask.opprettTask(saksbehandling))

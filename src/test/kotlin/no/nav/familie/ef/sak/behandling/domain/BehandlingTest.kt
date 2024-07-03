@@ -35,7 +35,5 @@ internal class BehandlingTest {
         behandlingResultat: BehandlingResultat,
         henlagtÅrsak: HenlagtÅrsak?,
         type: BehandlingType,
-    ): Behandling {
-        return behandling.copy(resultat = behandlingResultat, henlagtÅrsak = henlagtÅrsak, type = type)
-    }
+    ): Behandling = behandling.copy(resultat = behandlingResultat, henlagtÅrsak = henlagtÅrsak, type = type)
 }

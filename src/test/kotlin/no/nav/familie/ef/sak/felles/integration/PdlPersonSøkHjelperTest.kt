@@ -105,8 +105,8 @@ internal class PdlPersonSøkHjelperTest {
     private fun lagAdresse(
         vegadresse: Vegadresse?,
         matrikkeladresse: Matrikkeladresse?,
-    ): Bostedsadresse {
-        return Bostedsadresse(
+    ): Bostedsadresse =
+        Bostedsadresse(
             angittFlyttedato = null,
             gyldigFraOgMed = null,
             gyldigTilOgMed = null,
@@ -117,5 +117,4 @@ internal class PdlPersonSøkHjelperTest {
             ukjentBosted = null,
             metadata = Metadata(false),
         )
-    }
 }

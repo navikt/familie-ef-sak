@@ -6,7 +6,9 @@ import org.springframework.jdbc.core.queryForObject
 import org.springframework.stereotype.Component
 
 @Component
-class EksternFagsakIdGenerator(private val jdbcTemplate: JdbcTemplate) : BeforeConvertCallback<FagsakDomain> {
+class EksternFagsakIdGenerator(
+    private val jdbcTemplate: JdbcTemplate,
+) : BeforeConvertCallback<FagsakDomain> {
     override fun onBeforeConvert(fagsak: FagsakDomain): FagsakDomain {
         if (fagsak.eksternId == 0L) {
             val id =

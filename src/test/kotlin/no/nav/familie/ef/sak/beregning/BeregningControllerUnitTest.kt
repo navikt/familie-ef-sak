@@ -40,16 +40,17 @@ internal class BeregningControllerUnitTest {
         val årMåned = YearMonth.of(2021, 1)
 
         val perioder =
-            beregningController.beregnYtelserForRequest(
-                BeregningRequest(
-                    listOf(Inntekt(årMåned, BigDecimal.ZERO, BigDecimal.ZERO)),
-                    listOf(
-                        vedtaksperiodeDto(årMåned, årMåned, VedtaksperiodeType.HOVEDPERIODE),
-                        vedtaksperiodeDto(årMåned.plusMonths(1), årMåned.plusMonths(1), VedtaksperiodeType.SANKSJON),
-                        vedtaksperiodeDto(årMåned.plusMonths(2), årMåned.plusMonths(2), VedtaksperiodeType.MIDLERTIDIG_OPPHØR),
+            beregningController
+                .beregnYtelserForRequest(
+                    BeregningRequest(
+                        listOf(Inntekt(årMåned, BigDecimal.ZERO, BigDecimal.ZERO)),
+                        listOf(
+                            vedtaksperiodeDto(årMåned, årMåned, VedtaksperiodeType.HOVEDPERIODE),
+                            vedtaksperiodeDto(årMåned.plusMonths(1), årMåned.plusMonths(1), VedtaksperiodeType.SANKSJON),
+                            vedtaksperiodeDto(årMåned.plusMonths(2), årMåned.plusMonths(2), VedtaksperiodeType.MIDLERTIDIG_OPPHØR),
+                        ),
                     ),
-                ),
-            ).data!!
+                ).data!!
 
         assertThat(perioder).hasSize(1)
         assertThat(perioder.single().periode).isEqualTo(Månedsperiode(årMåned))

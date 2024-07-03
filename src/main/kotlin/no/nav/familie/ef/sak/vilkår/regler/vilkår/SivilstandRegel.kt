@@ -18,25 +18,26 @@ import no.nav.familie.ef.sak.vilkår.regler.jaNeiSvarRegel
 import no.nav.familie.ef.sak.vilkår.regler.regelIder
 import java.util.UUID
 
-class SivilstandRegel : Vilkårsregel(
-    vilkårType = VilkårType.SIVILSTAND,
-    regler =
-        setOf(
-            KRAV_SIVILSTAND_PÅKREVD_BEGRUNNELSE,
-            KRAV_SIVILSTAND_UTEN_PÅKREVD_BEGRUNNELSE,
-            SAMLIVSBRUDD_LIKESTILT_MED_SEPARASJON,
-            SAMSVAR_DATO_SEPARASJON_OG_FRAFLYTTING,
-            UNNTAK,
-        ),
-    hovedregler =
-        regelIder(
-            KRAV_SIVILSTAND_PÅKREVD_BEGRUNNELSE,
-            KRAV_SIVILSTAND_UTEN_PÅKREVD_BEGRUNNELSE,
-            SAMLIVSBRUDD_LIKESTILT_MED_SEPARASJON,
-            SAMSVAR_DATO_SEPARASJON_OG_FRAFLYTTING,
-            UNNTAK,
-        ),
-) {
+class SivilstandRegel :
+    Vilkårsregel(
+        vilkårType = VilkårType.SIVILSTAND,
+        regler =
+            setOf(
+                KRAV_SIVILSTAND_PÅKREVD_BEGRUNNELSE,
+                KRAV_SIVILSTAND_UTEN_PÅKREVD_BEGRUNNELSE,
+                SAMLIVSBRUDD_LIKESTILT_MED_SEPARASJON,
+                SAMSVAR_DATO_SEPARASJON_OG_FRAFLYTTING,
+                UNNTAK,
+            ),
+        hovedregler =
+            regelIder(
+                KRAV_SIVILSTAND_PÅKREVD_BEGRUNNELSE,
+                KRAV_SIVILSTAND_UTEN_PÅKREVD_BEGRUNNELSE,
+                SAMLIVSBRUDD_LIKESTILT_MED_SEPARASJON,
+                SAMSVAR_DATO_SEPARASJON_OG_FRAFLYTTING,
+                UNNTAK,
+            ),
+    ) {
     override fun initiereDelvilkårsvurdering(
         metadata: HovedregelMetadata,
         resultat: Vilkårsresultat,
@@ -48,7 +49,8 @@ class SivilstandRegel : Vilkårsregel(
             return super.initiereDelvilkårsvurdering(metadata, resultat, barnId)
         }
 
-        if (metadata.behandling.erDigitalSøknad() && metadata.sivilstandstype.erUgiftEllerSkilt() &&
+        if (metadata.behandling.erDigitalSøknad() &&
+            metadata.sivilstandstype.erUgiftEllerSkilt() &&
             metadata.sivilstandSøknad?.erUformeltGiftEllerSkilt() == false
         ) {
             return listOf(automatiskVurdertDelvilkår(RegelId.KRAV_SIVILSTAND_UTEN_PÅKREVD_BEGRUNNELSE, SvarId.JA, "Bruker er ${metadata.sivilstandstype.visningsnavn.lowercase()}."))

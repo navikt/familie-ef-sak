@@ -28,9 +28,14 @@ internal class MellomlagerFrittståendeSanitybrevRepositoryTest : OppslagSpringR
         mellomlagerFrittståendeSanitybrevRepository.insert(mellomlagretBrev)
 
         val mellomlagretBrevFraDb = mellomlagerFrittståendeSanitybrevRepository.findById(mellomlagretBrev.id)
-        Assertions.assertThat(mellomlagretBrevFraDb)
-            .get().usingRecursiveComparison().ignoringFields("opprettetTid").isEqualTo(mellomlagretBrev)
-        Assertions.assertThat(mellomlagretBrevFraDb.get().opprettetTid)
+        Assertions
+            .assertThat(mellomlagretBrevFraDb)
+            .get()
+            .usingRecursiveComparison()
+            .ignoringFields("opprettetTid")
+            .isEqualTo(mellomlagretBrev)
+        Assertions
+            .assertThat(mellomlagretBrevFraDb.get().opprettetTid)
             .isCloseTo(mellomlagretBrev.opprettetTid, within(1, ChronoUnit.SECONDS))
     }
 
@@ -49,7 +54,8 @@ internal class MellomlagerFrittståendeSanitybrevRepositoryTest : OppslagSpringR
         mellomlagerFrittståendeSanitybrevRepository.insert(mellomlagretBrev)
         val mellomlagretBrevFraDb =
             mellomlagerFrittståendeSanitybrevRepository.findByFagsakIdAndSaksbehandlerIdent(fagsak.id, saksbehandlerIdent)
-        Assertions.assertThat(mellomlagretBrevFraDb)
+        Assertions
+            .assertThat(mellomlagretBrevFraDb)
             .usingRecursiveComparison()
             .ignoringFields("opprettetTid")
             .isEqualTo(mellomlagretBrev)

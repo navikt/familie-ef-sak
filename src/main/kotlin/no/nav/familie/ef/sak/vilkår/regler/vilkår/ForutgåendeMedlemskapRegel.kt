@@ -21,11 +21,12 @@ import java.util.UUID
 const val STATSBORGERSTAT_VERDI_NORGE = "norge"
 const val FØDELAND_NORGE = "NOR"
 
-class ForutgåendeMedlemskapRegel : Vilkårsregel(
-    vilkårType = VilkårType.FORUTGÅENDE_MEDLEMSKAP,
-    regler = setOf(SØKER_MEDLEM_I_FOLKETRYGDEN, MEDLEMSKAP_UNNTAK),
-    hovedregler = regelIder(SØKER_MEDLEM_I_FOLKETRYGDEN),
-) {
+class ForutgåendeMedlemskapRegel :
+    Vilkårsregel(
+        vilkårType = VilkårType.FORUTGÅENDE_MEDLEMSKAP,
+        regler = setOf(SØKER_MEDLEM_I_FOLKETRYGDEN, MEDLEMSKAP_UNNTAK),
+        hovedregler = regelIder(SØKER_MEDLEM_I_FOLKETRYGDEN),
+    ) {
     override fun initiereDelvilkårsvurdering(
         metadata: HovedregelMetadata,
         resultat: Vilkårsresultat,

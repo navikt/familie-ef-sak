@@ -1,3 +1,5 @@
 package no.nav.familie.ef.sak.behandling.dto
 
-data class HenlagtDto(val årsak: HenlagtÅrsak)
+data class HenlagtDto(
+    val årsak: HenlagtÅrsak,
+)

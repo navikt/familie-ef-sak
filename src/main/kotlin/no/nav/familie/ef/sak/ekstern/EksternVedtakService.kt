@@ -25,11 +25,11 @@ class EksternVedtakService(
         return hentFerdigstilteBehandlinger(fagsak) + vedtakTilbakekreving
     }
 
-    private fun hentFerdigstilteBehandlinger(fagsak: Fagsak): List<FagsystemVedtak> {
-        return behandlingService.hentBehandlinger(fagsakId = fagsak.id)
+    private fun hentFerdigstilteBehandlinger(fagsak: Fagsak): List<FagsystemVedtak> =
+        behandlingService
+            .hentBehandlinger(fagsakId = fagsak.id)
             .filter { it.erAvsluttet() && it.resultat != BehandlingResultat.HENLAGT }
             .map { tilFagsystemVedtak(it) }
-    }
 
     private fun tilFagsystemVedtak(behandling: Behandling): FagsystemVedtak {
         val (resultat, fagsystemType) = utledReultatOgFagsystemType(behandling)

@@ -19,9 +19,7 @@ data class FagsakPerson(
     val opprettetTid: LocalDateTime = SporbarUtils.now(),
     val harAktivertMikrofrontend: Boolean = false,
 ) {
-    fun hentAktivIdent(): String {
-        return identer.maxByOrNull { it.sporbar.endret.endretTid }?.ident ?: error("Fant ingen ident på person $id")
-    }
+    fun hentAktivIdent(): String = identer.maxByOrNull { it.sporbar.endret.endretTid }?.ident ?: error("Fant ingen ident på person $id")
 
     fun erAktivIdent(personIdent: String): Boolean = hentAktivIdent() == personIdent
 

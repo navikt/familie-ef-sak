@@ -12,7 +12,9 @@ import java.time.YearMonth
 import java.util.concurrent.atomic.AtomicInteger
 
 @Service
-class MålerService(private val målerRepository: MålerRepository) {
+class MålerService(
+    private val målerRepository: MålerRepository,
+) {
     private val åpneBehandlingerPerUkeGauge = MultiGauge.builder("KlarTilBehandlingPerUke").register(Metrics.globalRegistry)
     private val åpneBehandlingerGauge = MultiGauge.builder("KlarTilBehandling").register(Metrics.globalRegistry)
     private val løpendeBehandlingerGauge = MultiGauge.builder("LopendeBehandlinger").register(Metrics.globalRegistry)
@@ -46,7 +48,10 @@ class MålerService(private val målerRepository: MålerRepository) {
                         "ytelse",
                         it.stonadstype.name,
                         "maned",
-                        it.dato.year.toString() + "-" + it.dato.monthValue.toString().padStart(2, '0'),
+                        it.dato.year.toString() + "-" +
+                            it.dato.monthValue
+                                .toString()
+                                .padStart(2, '0'),
                     ),
                     it.antall,
                 )
@@ -61,7 +66,10 @@ class MålerService(private val målerRepository: MålerRepository) {
                         "ytelse",
                         it.stonadstype.name,
                         "maned",
-                        it.dato.year.toString() + "-" + it.dato.monthValue.toString().padStart(2, '0'),
+                        it.dato.year.toString() + "-" +
+                            it.dato.monthValue
+                                .toString()
+                                .padStart(2, '0'),
                     ),
                     it.belop,
                 )

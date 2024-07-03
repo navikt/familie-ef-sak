@@ -158,8 +158,7 @@ class ValiderOmregningServiceTest {
                     vedtak,
                     saksbehandling,
                 )
-            }
-                .isInstanceOf(ApiFeil::class.java)
+            }.isInstanceOf(ApiFeil::class.java)
                 .hasMessageContaining("ikke har noen tidligere perioder")
         }
 
@@ -188,8 +187,7 @@ class ValiderOmregningServiceTest {
                     vedtak,
                     saksbehandling,
                 )
-            }
-                .isInstanceOf(ApiFeil::class.java)
+            }.isInstanceOf(ApiFeil::class.java)
                 .hasMessageContaining("har annen aktivitet")
         }
 
@@ -218,8 +216,7 @@ class ValiderOmregningServiceTest {
                     vedtak,
                     saksbehandling,
                 )
-            }
-                .isInstanceOf(ApiFeil::class.java)
+            }.isInstanceOf(ApiFeil::class.java)
                 .hasMessageContaining("annen type periode")
         }
 
@@ -258,8 +255,7 @@ class ValiderOmregningServiceTest {
                     vedtak,
                     saksbehandling,
                 )
-            }
-                .isInstanceOf(ApiFeil::class.java)
+            }.isInstanceOf(ApiFeil::class.java)
                 .hasMessageContaining("har annet tom-dato")
         }
 
@@ -286,8 +282,7 @@ class ValiderOmregningServiceTest {
                     vedtak,
                     saksbehandling,
                 )
-            }
-                .isInstanceOf(ApiFeil::class.java)
+            }.isInstanceOf(ApiFeil::class.java)
                 .hasMessageContaining("Antall vedtaksperioder er ulikt fra tidligere vedtak")
         }
 

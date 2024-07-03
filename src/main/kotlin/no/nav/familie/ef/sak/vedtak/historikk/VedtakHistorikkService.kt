@@ -46,9 +46,7 @@ class VedtakHistorikkService(
     fun hentVedtakForOvergangsstønadFraDato(
         fagsakId: UUID,
         fra: YearMonth,
-    ): InnvilgelseOvergangsstønad {
-        return hentVedtakForOvergangsstønadFraDato(fagsakService.hentFagsak(fagsakId), fra)
-    }
+    ): InnvilgelseOvergangsstønad = hentVedtakForOvergangsstønadFraDato(fagsakService.hentFagsak(fagsakId), fra)
 
     /**
      * Slår sammen perioder som er sammenhengende, med samme aktivitet, og samme periodetype, unntatt sanksjoner
@@ -100,8 +98,8 @@ class VedtakHistorikkService(
     private fun mapPerioder(
         historikk: List<AndelHistorikkDto>,
         fra: YearMonth,
-    ): List<VedtaksperiodeDto> {
-        return historikk
+    ): List<VedtaksperiodeDto> =
+        historikk
             .slåSammen { a, b ->
                 sammenhengende(a, b) &&
                     (
@@ -110,8 +108,7 @@ class VedtakHistorikkService(
                             a.vedtaksperiode.aktivitet == b.vedtaksperiode.aktivitet &&
                             a.vedtaksperiode.periodeType == b.vedtaksperiode.periodeType
                     )
-            }
-            .fraDato(fra)
+            }.fraDato(fra)
             .map {
                 VedtaksperiodeDto(
                     årMånedFra = it.andel.periode.fom,
@@ -122,13 +119,12 @@ class VedtakHistorikkService(
                     sanksjonsårsak = it.sanksjonsårsak,
                 )
             }
-    }
 
     private fun mapInntekter(
         historikk: List<AndelHistorikkDto>,
         fra: YearMonth,
-    ): List<Inntekt> {
-        return historikk
+    ): List<Inntekt> =
+        historikk
             .filter { it.periodeType != VedtaksperiodeType.SANKSJON }
             .slåSammen { a, b ->
                 (
@@ -139,8 +135,7 @@ class VedtakHistorikkService(
                         a.vedtaksperiode.inntekt.forventetInntekt nullOrEquals b.vedtaksperiode.inntekt.forventetInntekt &&
                         a.vedtaksperiode.inntekt.samordningsfradrag nullOrEquals b.vedtaksperiode.inntekt.samordningsfradrag
                 )
-            }
-            .fraDato(fra)
+            }.fraDato(fra)
             .mapNotNull {
                 // fraDato korter av andelen men ikke vedtaksperiode/inntekt, så riktig dato må brukes
                 if (it.vedtaksperiode is VedtakshistorikkperiodeOvergangsstønad) {
@@ -148,8 +143,7 @@ class VedtakHistorikkService(
                 } else {
                     null
                 }
-            }
-            .map { (årMånedFra, inntekt) ->
+            }.map { (årMånedFra, inntekt) ->
                 Inntekt(
                     årMånedFra = årMånedFra,
                     dagsats = inntekt.dagsats,
@@ -158,24 +152,23 @@ class VedtakHistorikkService(
                     samordningsfradrag = inntekt.samordningsfradrag,
                 )
             }
-    }
 
     private infix fun BigDecimal?.nullOrEquals(other: BigDecimal?) =
-        this == null && other == null ||
+        this == null &&
+            other == null ||
             (this !== null && other != null && this.compareTo(other) == 0)
 
     private fun mapUtgifterBarnetilsyn(
         historikk: List<AndelHistorikkDto>,
         fra: YearMonth,
         beløp: (AndelMedGrunnlagDto) -> Int,
-    ): List<PeriodeMedBeløpDto> {
-        return historikk
+    ): List<PeriodeMedBeløpDto> =
+        historikk
             .filter { beløp(it.andel) > 0 }
             .slåSammen { a, b ->
                 sammenhengende(a, b) &&
                     beløp(a.andel) == beløp(b.andel)
-            }
-            .fraDato(fra)
+            }.fraDato(fra)
             .map {
                 PeriodeMedBeløpDto(
                     årMånedFra = it.andel.periode.fom,
@@ -184,7 +177,6 @@ class VedtakHistorikkService(
                     beløp(it.andel),
                 )
             }
-    }
 
     private fun mapBarnetilsynPerioder(
         historikk: List<AndelHistorikkDto>,
@@ -200,8 +192,7 @@ class VedtakHistorikkService(
                     a.aktivitetBarnetilsyn == b.aktivitetBarnetilsyn &&
                     a.periodetypeBarnetilsyn == b.periodetypeBarnetilsyn &&
                     a.periodetypeBarnetilsyn != PeriodetypeBarnetilsyn.SANKSJON_1_MND
-            }
-            .fraDato(fra)
+            }.fraDato(fra)
             .map {
                 UtgiftsperiodeDto(
                     årMånedFra = it.andel.periode.fom,
@@ -224,18 +215,18 @@ class VedtakHistorikkService(
         return barnService.kobleBarnForBarnetilsyn(behandlingId, historiskeBarnIder)
     }
 
-    fun hentAktivHistorikk(fagsakId: UUID): List<AndelHistorikkDto> {
-        return andelsHistorikkService.hentHistorikk(fagsakId, null)
+    fun hentAktivHistorikk(fagsakId: UUID): List<AndelHistorikkDto> =
+        andelsHistorikkService
+            .hentHistorikk(fagsakId, null)
             .filter { it.erAktivVedtaksperiode() }
             .sortedBy { it.andel.periode.fom }
-    }
 }
 
 /**
  * Noter! Denne setter kun fra-dato på andelen, og ikke vedtaksperiode/inntekt
  */
-fun List<AndelHistorikkDto>.fraDato(fra: YearMonth): List<AndelHistorikkDto> {
-    return this.mapNotNull {
+fun List<AndelHistorikkDto>.fraDato(fra: YearMonth): List<AndelHistorikkDto> =
+    this.mapNotNull {
         if (it.andel.periode.fom >= fra) {
             it
         } else if (it.andel.periode.tom >= fra) {
@@ -244,4 +235,3 @@ fun List<AndelHistorikkDto>.fraDato(fra: YearMonth): List<AndelHistorikkDto> {
             null
         }
     }
-}

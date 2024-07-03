@@ -25,12 +25,13 @@ object TokenUtil {
                 "roles" to if (accessAsApplication) listOf("access_as_application") else emptyList(),
             )
 
-        return mockOAuth2Server.issueToken(
-            issuerId = "azuread",
-            subject = thisId,
-            audience = "aud-localhost",
-            claims = claims,
-        ).serialize()
+        return mockOAuth2Server
+            .issueToken(
+                issuerId = "azuread",
+                subject = thisId,
+                audience = "aud-localhost",
+                claims = claims,
+            ).serialize()
     }
 
     /**
@@ -55,12 +56,13 @@ object TokenUtil {
                 "groups" to roles,
             )
 
-        return mockOAuth2Server.issueToken(
-            issuerId = "azuread",
-            subject = UUID.randomUUID().toString(),
-            audience = "aud-localhost",
-            claims = claims,
-        ).serialize()
+        return mockOAuth2Server
+            .issueToken(
+                issuerId = "azuread",
+                subject = UUID.randomUUID().toString(),
+                audience = "aud-localhost",
+                claims = claims,
+            ).serialize()
     }
 
     fun søkerBearerToken(
@@ -69,16 +71,17 @@ object TokenUtil {
         level: String,
     ): String {
         val clientId = "lokal:teamfamilie:familie-ef-soknad-api"
-        return mockOAuth2Server.issueToken(
-            issuerId = "tokenx",
-            clientId,
-            DefaultOAuth2TokenCallback(
+        return mockOAuth2Server
+            .issueToken(
                 issuerId = "tokenx",
-                subject = personident,
-                audience = listOf("aud-localhost"),
-                claims = mapOf("acr" to level, "client_id" to clientId),
-                expiry = 3600,
-            ),
-        ).serialize()
+                clientId,
+                DefaultOAuth2TokenCallback(
+                    issuerId = "tokenx",
+                    subject = personident,
+                    audience = listOf("aud-localhost"),
+                    claims = mapOf("acr" to level, "client_id" to clientId),
+                    expiry = 3600,
+                ),
+            ).serialize()
     }
 }

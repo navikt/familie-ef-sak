@@ -15,11 +15,10 @@ class KontantstøtteService(
     }
 }
 
-fun HentUtbetalingsinfoKontantstøtte.tilDto(): HentUtbetalingsinfoKontantstøtteDto {
-    return HentUtbetalingsinfoKontantstøtteDto(
+fun HentUtbetalingsinfoKontantstøtte.tilDto(): HentUtbetalingsinfoKontantstøtteDto =
+    HentUtbetalingsinfoKontantstøtteDto(
         this.ksSakPerioder.isNotEmpty() || this.infotrygdPerioder.isNotEmpty(),
     )
-}
 
 data class HentUtbetalingsinfoKontantstøtteDto(
     val finnesUtbetaling: Boolean,

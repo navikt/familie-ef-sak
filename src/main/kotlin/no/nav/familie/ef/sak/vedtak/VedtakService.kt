@@ -24,37 +24,23 @@ class VedtakService(
         vedtakDto: VedtakDto,
         behandlingId: UUID,
         stønadstype: StønadType,
-    ): UUID {
-        return vedtakRepository.insert(vedtakDto.tilVedtak(behandlingId, stønadstype)).behandlingId
-    }
+    ): UUID = vedtakRepository.insert(vedtakDto.tilVedtak(behandlingId, stønadstype)).behandlingId
 
     fun slettVedtakHvisFinnes(behandlingId: UUID) {
         vedtakRepository.deleteById(behandlingId)
     }
 
-    fun hentVedtak(behandlingId: UUID): Vedtak {
-        return vedtakRepository.findByIdOrThrow(behandlingId)
-    }
+    fun hentVedtak(behandlingId: UUID): Vedtak = vedtakRepository.findByIdOrThrow(behandlingId)
 
-    fun hentVedtakHvisEksisterer(behandlingId: UUID): Vedtak? {
-        return vedtakRepository.findByIdOrNull(behandlingId)
-    }
+    fun hentVedtakHvisEksisterer(behandlingId: UUID): Vedtak? = vedtakRepository.findByIdOrNull(behandlingId)
 
-    fun hentVedtaksresultat(behandlingId: UUID): ResultatType {
-        return hentVedtak(behandlingId).resultatType
-    }
+    fun hentVedtaksresultat(behandlingId: UUID): ResultatType = hentVedtak(behandlingId).resultatType
 
-    fun hentVedtakForBehandlinger(behandlingIder: Set<UUID>): List<Vedtak> {
-        return vedtakRepository.findAllByIdOrThrow(behandlingIder) { it.behandlingId }
-    }
+    fun hentVedtakForBehandlinger(behandlingIder: Set<UUID>): List<Vedtak> = vedtakRepository.findAllByIdOrThrow(behandlingIder) { it.behandlingId }
 
-    fun hentVedtakDto(behandlingId: UUID): VedtakDto {
-        return hentVedtakDtoHvisEksisterer(behandlingId) ?: error("Finner ikke vedtak for behandling=$behandlingId")
-    }
+    fun hentVedtakDto(behandlingId: UUID): VedtakDto = hentVedtakDtoHvisEksisterer(behandlingId) ?: error("Finner ikke vedtak for behandling=$behandlingId")
 
-    fun hentVedtakDtoHvisEksisterer(behandlingId: UUID): VedtakDto? {
-        return vedtakRepository.findByIdOrNull(behandlingId)?.tilVedtakDto()
-    }
+    fun hentVedtakDtoHvisEksisterer(behandlingId: UUID): VedtakDto? = vedtakRepository.findByIdOrNull(behandlingId)?.tilVedtakDto()
 
     fun oppdaterSaksbehandler(
         behandlingId: UUID,
@@ -93,42 +79,42 @@ class VedtakService(
         return null
     }
 
-    fun hentForventetInntektForBehandlingIds(behandlingIds: Collection<UUID>): Map<UUID, ForventetInntektForBehandling> {
-        return vedtakRepository.findAllById(behandlingIds).map { vedtak ->
-            if (vedtak.erVedtakAktivtForDato(LocalDate.now())) {
-                createForventetInntektForBehandling(vedtak)
-            } else {
-                ForventetInntektForBehandling(vedtak.behandlingId, null, null, null, null)
-            }
-        }.associateBy { it.behandlingId }
-    }
+    fun hentForventetInntektForBehandlingIds(behandlingIds: Collection<UUID>): Map<UUID, ForventetInntektForBehandling> =
+        vedtakRepository
+            .findAllById(behandlingIds)
+            .map { vedtak ->
+                if (vedtak.erVedtakAktivtForDato(LocalDate.now())) {
+                    createForventetInntektForBehandling(vedtak)
+                } else {
+                    ForventetInntektForBehandling(vedtak.behandlingId, null, null, null, null)
+                }
+            }.associateBy { it.behandlingId }
 
-    private fun createForventetInntektForBehandling(vedtak: Vedtak): ForventetInntektForBehandling {
-        return ForventetInntektForBehandling(
+    private fun createForventetInntektForBehandling(vedtak: Vedtak): ForventetInntektForBehandling =
+        ForventetInntektForBehandling(
             vedtak.behandlingId,
             createForventetInntektForMåned(vedtak, YearMonth.now().minusMonths(1)),
             createForventetInntektForMåned(vedtak, YearMonth.now().minusMonths(2)),
             createForventetInntektForMåned(vedtak, YearMonth.now().minusMonths(3)),
             createForventetInntektForMåned(vedtak, YearMonth.now().minusMonths(4)),
         )
-    }
 
     private fun createForventetInntektForMåned(
         vedtak: Vedtak,
         forventetInntektForDato: YearMonth,
     ): Int? {
         val tilkjentYtelse = tilkjentYtelseRepository.findByBehandlingId(vedtak.behandlingId)
-        return tilkjentYtelse?.andelerTilkjentYtelse?.firstOrNull {
-            it.periode.inneholder(forventetInntektForDato)
-        }?.inntekt
+        return tilkjentYtelse
+            ?.andelerTilkjentYtelse
+            ?.firstOrNull {
+                it.periode.inneholder(forventetInntektForDato)
+            }?.inntekt
     }
 
     fun hentHarAktivtVedtak(
         behandlingId: UUID,
         localDate: LocalDate = LocalDate.now(),
-    ): Boolean {
-        return hentVedtak(behandlingId).erVedtakAktivtForDato(localDate)
-    }
+    ): Boolean = hentVedtak(behandlingId).erVedtakAktivtForDato(localDate)
 }
 
 data class PersonIdentMedForventetInntekt(

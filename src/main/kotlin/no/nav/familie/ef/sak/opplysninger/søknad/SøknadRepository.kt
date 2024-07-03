@@ -9,7 +9,9 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 @Repository
-interface SøknadRepository : RepositoryInterface<Søknad, UUID>, InsertUpdateRepository<Søknad> {
+interface SøknadRepository :
+    RepositoryInterface<Søknad, UUID>,
+    InsertUpdateRepository<Søknad> {
     fun findByBehandlingId(behandlingId: UUID): Søknad?
 
     // language=PostgreSQL

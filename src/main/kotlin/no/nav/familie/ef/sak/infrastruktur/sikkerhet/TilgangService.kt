@@ -186,11 +186,10 @@ class TilgangService(
         }
     }
 
-    private fun harTilgangTilPersonMedRelasjoner(personIdent: String): Tilgang {
-        return harSaksbehandlerTilgangTilPersonMedBarn(personIdent) {
+    private fun harTilgangTilPersonMedRelasjoner(personIdent: String): Tilgang =
+        harSaksbehandlerTilgangTilPersonMedBarn(personIdent) {
             personopplysningerIntegrasjonerClient.sjekkTilgangTilPersonMedRelasjoner(personIdent)
         }
-    }
 
     fun validerHarSaksbehandlerrolle() {
         validerTilgangTilRolle(BehandlerRolle.SAKSBEHANDLER)
@@ -211,9 +210,7 @@ class TilgangService(
         }
     }
 
-    fun harTilgangTilRolle(minimumsrolle: BehandlerRolle): Boolean {
-        return SikkerhetContext.harTilgangTilGittRolle(rolleConfig, minimumsrolle)
-    }
+    fun harTilgangTilRolle(minimumsrolle: BehandlerRolle): Boolean = SikkerhetContext.harTilgangTilGittRolle(rolleConfig, minimumsrolle)
 
     fun harForvalterrolle() = SikkerhetContext.harRolle(rolleConfig.forvalter)
 
@@ -256,9 +253,7 @@ class TilgangService(
         } ?: error("Finner ikke verdi fra cache=validerTilgangTilPersonMedBarn")
     }
 
-    fun validerSaksbehandler(saksbehandler: String): Boolean {
-        return SikkerhetContext.hentSaksbehandlerEllerSystembruker() == saksbehandler
-    }
+    fun validerSaksbehandler(saksbehandler: String): Boolean = SikkerhetContext.hentSaksbehandlerEllerSystembruker() == saksbehandler
 
     fun validerHarForvalterrolle() {
         feilHvisIkke(harForvalterrolle()) { "Innlogget bruker har ikke forvalterrolle" }

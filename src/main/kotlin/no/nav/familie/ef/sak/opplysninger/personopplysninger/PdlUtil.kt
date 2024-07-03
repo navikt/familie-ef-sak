@@ -46,7 +46,10 @@ inline fun <reified T : Any> feilsjekkOgReturnerData(pdlResponse: PdlBolkRespons
         throw PdlRequestException("Data er null fra PDL -  ${T::class}. Se secure logg for detaljer.")
     }
 
-    val feil = pdlResponse.data.personBolk.filter { it.code != "ok" }.associate { it.ident to it.code }
+    val feil =
+        pdlResponse.data.personBolk
+            .filter { it.code != "ok" }
+            .associate { it.ident to it.code }
     if (feil.isNotEmpty()) {
         secureLogger.error("Feil ved henting av ${T::class} fra PDL: $feil")
         throw PdlRequestException("Feil ved henting av ${T::class} fra PDL. Se secure logg for detaljer.")
@@ -64,7 +67,10 @@ fun feilmeldOgReturnerData(pdlResponse: PdlIdentBolkResponse): Map<String, PdlId
         throw PdlRequestException("Data er null fra PDL -  ${PdlIdentBolkResponse::class}. Se secure logg for detaljer.")
     }
 
-    val feil = pdlResponse.data.hentIdenterBolk.filter { it.code != "ok" }.associate { it.ident to it.code }
+    val feil =
+        pdlResponse.data.hentIdenterBolk
+            .filter { it.code != "ok" }
+            .associate { it.ident to it.code }
     if (feil.isNotEmpty()) {
         // Logg feil og gå vider. Ved feil returneres nåværende ident.
         logger.error("Feil ved henting av ${PdlIdentBolkResponse::class}. Nåværende ident returnert.")

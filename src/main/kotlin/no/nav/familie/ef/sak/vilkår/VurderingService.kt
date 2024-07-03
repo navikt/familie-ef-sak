@@ -94,8 +94,7 @@ class VurderingService(
                 behandlingId = behandling.id,
                 metadata = metadata.copy(erMigrering = true),
                 stønadstype = stønadstype,
-            )
-                .map { it.copy(resultat = Vilkårsresultat.OPPFYLT) }
+            ).map { it.copy(resultat = Vilkårsresultat.OPPFYLT) }
         vilkårsvurderingRepository.insertAll(nyeVilkårsvurderinger)
         nyeVilkårsvurderinger.forEach {
             vilkårsvurderingRepository.settMaskinelltOpprettet(it.id)
@@ -140,9 +139,7 @@ class VurderingService(
     private fun hentEllerOpprettVurderinger(
         behandlingId: UUID,
         metadata: HovedregelMetadata,
-    ): List<VilkårsvurderingDto> {
-        return hentEllerOpprettVurderingerForVilkår(behandlingId, metadata).map(Vilkårsvurdering::tilDto)
-    }
+    ): List<VilkårsvurderingDto> = hentEllerOpprettVurderingerForVilkår(behandlingId, metadata).map(Vilkårsvurdering::tilDto)
 
     private fun hentEllerOpprettVurderingerForVilkår(
         behandlingId: UUID,
@@ -291,12 +288,11 @@ class VurderingService(
     private fun finnBarnId(
         barnId: UUID?,
         barnIdMap: Map<UUID, BehandlingBarn>,
-    ): UUID? {
-        return barnId?.let {
+    ): UUID? =
+        barnId?.let {
             val barnIdMapping = barnIdMap.map { it.key to it.value.id }.toMap()
             barnIdMap[it]?.id ?: error("Fant ikke barn=$it på gjeldende behandling med barnIdMapping=$barnIdMapping")
         }
-    }
 
     private fun skalKopiereVurdering(
         it: Vilkårsvurdering,
@@ -320,12 +316,13 @@ class VurderingService(
             barnPåGjeldendeBehandling: List<BehandlingBarn>,
         ): Map<UUID, BehandlingBarn> {
             val barnFraForrigeBehandlingMap = barnPåForrigeBehandling.associateBy { it.id }.toMutableMap()
-            return barnPåGjeldendeBehandling.mapNotNull { nyttBarn ->
-                val forrigeBarnId =
-                    barnFraForrigeBehandlingMap.entries.firstOrNull { nyttBarn.erMatchendeBarn(it.value) }?.key
-                barnFraForrigeBehandlingMap.remove(forrigeBarnId)
-                forrigeBarnId?.let { Pair(forrigeBarnId, nyttBarn) }
-            }.associate { it.first to it.second }
+            return barnPåGjeldendeBehandling
+                .mapNotNull { nyttBarn ->
+                    val forrigeBarnId =
+                        barnFraForrigeBehandlingMap.entries.firstOrNull { nyttBarn.erMatchendeBarn(it.value) }?.key
+                    barnFraForrigeBehandlingMap.remove(forrigeBarnId)
+                    forrigeBarnId?.let { Pair(forrigeBarnId, nyttBarn) }
+                }.associate { it.first to it.second }
         }
     }
 }

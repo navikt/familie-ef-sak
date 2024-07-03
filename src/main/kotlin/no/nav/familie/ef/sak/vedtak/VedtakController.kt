@@ -219,9 +219,7 @@ class VedtakController(
     @ProtectedWithClaims(issuer = "azuread", claimMap = ["roles=access_as_application"]) // Familie-ef-personhendelse bruker denne
     fun hentPersonerMedAktivStonadIkkeManueltRevurdertSisteToMåneder(
         @RequestParam antallMaaneder: Int = 3,
-    ): Ressurs<List<String>> {
-        return Ressurs.success(behandlingRepository.finnPersonerMedAktivStonadIkkeRevurdertSisteMåneder(antallMåneder = antallMaaneder))
-    }
+    ): Ressurs<List<String>> = Ressurs.success(behandlingRepository.finnPersonerMedAktivStonadIkkeRevurdertSisteMåneder(antallMåneder = antallMaaneder))
 
     @PostMapping("/gjeldendeIverksatteBehandlingerMedInntekt")
     @ProtectedWithClaims(issuer = "azuread", claimMap = ["roles=access_as_application"]) // Familie-ef-personhendelse bruker denne

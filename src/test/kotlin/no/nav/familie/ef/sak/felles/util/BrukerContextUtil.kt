@@ -26,7 +26,8 @@ object BrukerContextUtil {
         val tokenValidationContext = mockk<TokenValidationContext>()
         val jwtTokenClaims =
             JwtTokenClaims(
-                JWTClaimsSet.Builder()
+                JWTClaimsSet
+                    .Builder()
                     .claim("preferred_username", preferredUsername)
                     .claim("NAVident", preferredUsername)
                     .claim("name", preferredUsername)

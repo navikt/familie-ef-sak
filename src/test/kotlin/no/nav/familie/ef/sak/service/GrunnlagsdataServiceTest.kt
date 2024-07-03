@@ -65,14 +65,19 @@ internal class GrunnlagsdataServiceTest {
 
     private val søknad =
         SøknadsskjemaMapper.tilDomene(
-            TestsøknadBuilder.Builder().setBarn(
-                listOf(
-                    TestsøknadBuilder.Builder()
-                        .defaultBarn("Navn1 navnesen", fødselTermindato = LocalDate.now().plusMonths(4)),
-                    TestsøknadBuilder.Builder()
-                        .defaultBarn("Navn2 navnesen", fødselTermindato = LocalDate.now().plusMonths(6)),
-                ),
-            ).build().søknadOvergangsstønad,
+            TestsøknadBuilder
+                .Builder()
+                .setBarn(
+                    listOf(
+                        TestsøknadBuilder
+                            .Builder()
+                            .defaultBarn("Navn1 navnesen", fødselTermindato = LocalDate.now().plusMonths(4)),
+                        TestsøknadBuilder
+                            .Builder()
+                            .defaultBarn("Navn2 navnesen", fødselTermindato = LocalDate.now().plusMonths(6)),
+                    ),
+                ).build()
+                .søknadOvergangsstønad,
         )
 
     private val service =
@@ -139,7 +144,8 @@ internal class GrunnlagsdataServiceTest {
     internal fun `skal ikke hente navn til relatertVedSivilstand fra sivilstand når det ikke finnes sivilstand`() {
         val sivilstand = Sivilstand(Sivilstandstype.UOPPGITT, null, null, null, Metadata(false))
         every { personService.hentSøker(any()) } returns
-            PdlClientConfig.opprettPdlSøker()
+            PdlClientConfig
+                .opprettPdlSøker()
                 .copy(
                     sivilstand = listOf(sivilstand),
                     fullmakt = emptyList(),

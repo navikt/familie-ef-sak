@@ -76,7 +76,8 @@ object DokumentasjonMapper {
             avtaleOmDeltBosted = barn.firstNotNullOfOrNull { it.samvær?.avtaleOmDeltBosted }?.tilDto(),
             samværsavtale = barn.firstNotNullOfOrNull { it.samvær?.samværsavtale }?.tilDto(),
             skalBarnetBoHosSøkerMenAnnenForelderSamarbeiderIkke =
-                barn.firstNotNullOfOrNull { it.samvær?.skalBarnetBoHosSøkerMenAnnenForelderSamarbeiderIkke }
+                barn
+                    .firstNotNullOfOrNull { it.samvær?.skalBarnetBoHosSøkerMenAnnenForelderSamarbeiderIkke }
                     ?.tilDto(),
             erklæringOmSamlivsbrudd = barn.firstNotNullOfOrNull { it.samvær?.erklæringOmSamlivsbrudd }?.tilDto(),
             terminbekreftelse = barn.firstNotNullOfOrNull { it.terminbekreftelse }?.tilDto(),

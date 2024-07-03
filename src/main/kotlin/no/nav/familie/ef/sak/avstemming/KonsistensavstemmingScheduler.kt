@@ -20,7 +20,9 @@ import kotlin.random.Random
 
 @Profile("!integrasjonstest")
 @Service
-class KonsistensavstemmingScheduler(private val konsistensavstemmingService: KonsistensavstemmingService) {
+class KonsistensavstemmingScheduler(
+    private val konsistensavstemmingService: KonsistensavstemmingService,
+) {
     private val logger = LoggerFactory.getLogger(javaClass)
 
     @Scheduled(cron = "0 0 0/12 * * *")

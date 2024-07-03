@@ -10,7 +10,9 @@ import java.time.LocalDate
 import java.util.UUID
 
 @Repository
-interface FagsakRepository : RepositoryInterface<FagsakDomain, UUID>, InsertUpdateRepository<FagsakDomain> {
+interface FagsakRepository :
+    RepositoryInterface<FagsakDomain, UUID>,
+    InsertUpdateRepository<FagsakDomain> {
     // language=PostgreSQL
     @Query(
         """SELECT DISTINCT f.*

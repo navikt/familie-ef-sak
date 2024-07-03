@@ -87,19 +87,17 @@ internal class OppgaveControllerIntegrasjonsTest : OppslagSpringRunnerTest() {
         assertThat(response.body?.data?.rolle).isEqualTo(SaksbehandlerRolle.IKKE_SATT)
     }
 
-    private fun søkOppgave(personIdent: String): ResponseEntity<Ressurs<OppgaveResponseDto>> {
-        return restTemplate.exchange(
+    private fun søkOppgave(personIdent: String): ResponseEntity<Ressurs<OppgaveResponseDto>> =
+        restTemplate.exchange(
             localhost("/api/oppgave/soek"),
             HttpMethod.POST,
             HttpEntity(FinnOppgaveRequestDto(ident = personIdent), headers),
         )
-    }
 
-    private fun hentAnsvarligSaksbehandler(behandlingId: UUID): ResponseEntity<Ressurs<SaksbehandlerDto>> {
-        return restTemplate.exchange(
+    private fun hentAnsvarligSaksbehandler(behandlingId: UUID): ResponseEntity<Ressurs<SaksbehandlerDto>> =
+        restTemplate.exchange(
             localhost("/api/oppgave/$behandlingId/ansvarlig-saksbehandler"),
             HttpMethod.GET,
             HttpEntity<Ressurs<SaksbehandlerDto>>(headers),
         )
-    }
 }

@@ -30,12 +30,11 @@ class OpprettTasksForBarnFyltÅrTask(
     companion object {
         const val TYPE = "opprettOppfølgingsoppgaverForBarnFyltÅrTask"
 
-        fun opprettTask(dato: LocalDate): Task {
-            return Task(TYPE, dato.format(DateTimeFormatter.ISO_LOCAL_DATE))
+        fun opprettTask(dato: LocalDate): Task =
+            Task(TYPE, dato.format(DateTimeFormatter.ISO_LOCAL_DATE))
                 .medTriggerTid(dato.atTime(22, 0))
                 .apply {
                     this.metadata[MDCConstants.MDC_CALL_ID] = IdUtils.generateId()
                 }
-        }
     }
 }

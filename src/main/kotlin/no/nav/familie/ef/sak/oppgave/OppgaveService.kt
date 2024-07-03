@@ -149,10 +149,12 @@ class OppgaveService(
         if (enhetsnummer == "4489" && oppgavetype == Oppgavetype.GodkjenneVedtak) {
             val mapper = finnMapper(enhetsnummer)
             val mappeIdForGodkjenneVedtak =
-                mapper.find {
-                    (it.navn.contains("70 Godkjennevedtak") || it.navn.contains("70 Godkjenne vedtak")) &&
-                        !it.navn.contains("EF Sak")
-                }?.id?.toLong()
+                mapper
+                    .find {
+                        (it.navn.contains("70 Godkjennevedtak") || it.navn.contains("70 Godkjenne vedtak")) &&
+                            !it.navn.contains("EF Sak")
+                    }?.id
+                    ?.toLong()
             mappeIdForGodkjenneVedtak?.let {
                 logger.info("Legger oppgave i Godkjenne vedtak-mappe")
             } ?: run {
@@ -181,34 +183,32 @@ class OppgaveService(
         saksbehandler: String,
         versjon: Int? = null,
     ): Long {
-        return oppgaveClient.fordelOppgave(
-            gsakOppgaveId,
-            saksbehandler,
-            versjon,
-        )
+        val oppgave = hentOppgave(gsakOppgaveId)
+
+        return if (oppgave.tilordnetRessurs == saksbehandler) {
+            gsakOppgaveId
+        } else {
+            oppgaveClient.fordelOppgave(
+                gsakOppgaveId,
+                saksbehandler,
+                versjon,
+            )
+        }
     }
 
     fun tilbakestillFordelingPåOppgave(
         gsakOppgaveId: Long,
         versjon: Int? = null,
-    ): Long {
-        return oppgaveClient.fordelOppgave(gsakOppgaveId, null, versjon = versjon)
-    }
+    ): Long = oppgaveClient.fordelOppgave(gsakOppgaveId, null, versjon = versjon)
 
     fun hentOppgaveSomIkkeErFerdigstilt(
         oppgavetype: Oppgavetype,
         saksbehandling: Saksbehandling,
-    ): EfOppgave? {
-        return oppgaveRepository.findByBehandlingIdAndTypeAndErFerdigstiltIsFalse(saksbehandling.id, oppgavetype)
-    }
+    ): EfOppgave? = oppgaveRepository.findByBehandlingIdAndTypeAndErFerdigstiltIsFalse(saksbehandling.id, oppgavetype)
 
-    fun hentOppgave(gsakOppgaveId: Long): Oppgave {
-        return oppgaveClient.finnOppgaveMedId(gsakOppgaveId)
-    }
+    fun hentOppgave(gsakOppgaveId: Long): Oppgave = oppgaveClient.finnOppgaveMedId(gsakOppgaveId)
 
-    fun hentEfOppgave(gsakOppgaveId: Long): EfOppgave? {
-        return oppgaveRepository.findByGsakOppgaveId(gsakOppgaveId)
-    }
+    fun hentEfOppgave(gsakOppgaveId: Long): EfOppgave? = oppgaveRepository.findByGsakOppgaveId(gsakOppgaveId)
 
     fun ferdigstillBehandleOppgave(
         behandlingId: UUID,
@@ -273,12 +273,10 @@ class OppgaveService(
             Oppgavetype.BehandleSak,
         )
 
-    fun finnSisteOppgaveForBehandling(behandlingId: UUID): EfOppgave? {
-        return oppgaveRepository.findTopByBehandlingIdOrderBySporbarOpprettetTidDesc(behandlingId)
-    }
+    fun finnSisteOppgaveForBehandling(behandlingId: UUID): EfOppgave? = oppgaveRepository.findTopByBehandlingIdOrderBySporbarOpprettetTidDesc(behandlingId)
 
-    fun lagOppgaveTekst(beskrivelse: String? = null): String {
-        return if (beskrivelse != null) {
+    fun lagOppgaveTekst(beskrivelse: String? = null): String =
+        if (beskrivelse != null) {
             beskrivelse + "\n"
         } else {
             ""
@@ -287,19 +285,15 @@ class OppgaveService(
                 LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME)
             } --- \n" +
             "$frontendOppgaveUrl" + "\n----- Oppgave må behandles i ny løsning"
-    }
 
-    fun hentOppgaver(finnOppgaveRequest: FinnOppgaveRequest): FinnOppgaveResponseDto {
-        return oppgaveClient.hentOppgaver(finnOppgaveRequest)
-    }
+    fun hentOppgaver(finnOppgaveRequest: FinnOppgaveRequest): FinnOppgaveResponseDto = oppgaveClient.hentOppgaver(finnOppgaveRequest)
 
-    private fun finnBehandlingstema(stønadstype: StønadType): Behandlingstema {
-        return when (stønadstype) {
+    private fun finnBehandlingstema(stønadstype: StønadType): Behandlingstema =
+        when (stønadstype) {
             StønadType.OVERGANGSSTØNAD -> Behandlingstema.Overgangsstønad
             StønadType.BARNETILSYN -> Behandlingstema.Barnetilsyn
             StønadType.SKOLEPENGER -> Behandlingstema.Skolepenger
         }
-    }
 
     /**
      * Frist skal være 1 dag hvis den opprettes før kl. 12
@@ -324,12 +318,10 @@ class OppgaveService(
         }
     }
 
-    fun finnMapper(enheter: List<String>): List<MappeDto> {
-        return enheter.flatMap { finnMapper(it) }
-    }
+    fun finnMapper(enheter: List<String>): List<MappeDto> = enheter.flatMap { finnMapper(it) }
 
-    fun finnMapper(enhet: String): List<MappeDto> {
-        return cacheManager.getValue("oppgave-mappe", enhet) {
+    fun finnMapper(enhet: String): List<MappeDto> =
+        cacheManager.getValue("oppgave-mappe", enhet) {
             logger.info("Henter mapper på nytt")
             val mappeRespons =
                 oppgaveClient.finnMapper(
@@ -344,7 +336,6 @@ class OppgaveService(
             }
             mappeRespons.mapper
         }
-    }
 
     private fun fristBasertPåKlokkeslett(gjeldendeTid: LocalDateTime): LocalDate {
         return if (gjeldendeTid.hour >= 12) {
@@ -356,14 +347,15 @@ class OppgaveService(
 
     fun finnOppgaverIUtdanningsmappe(fristDato: LocalDate): List<UtdanningOppgaveDto> {
         val oppgaver =
-            oppgaveClient.hentOppgaver(
-                FinnOppgaveRequest(
-                    tema = Tema.ENF,
-                    mappeId = 100026882, // Mappenavn: 64 - Utdanning
-                    fristFomDato = fristDato,
-                    fristTomDato = fristDato,
-                ),
-            ).oppgaver
+            oppgaveClient
+                .hentOppgaver(
+                    FinnOppgaveRequest(
+                        tema = Tema.ENF,
+                        mappeId = 100026882, // Mappenavn: 64 - Utdanning
+                        fristFomDato = fristDato,
+                        fristTomDato = fristDato,
+                    ),
+                ).oppgaver
 
         return oppgaver.map { oppgave ->
             UtdanningOppgaveDto(

@@ -6,7 +6,9 @@ import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import org.springframework.stereotype.Service
 
 @Service
-class VilkårSteg(private val behandlingService: BehandlingService) : BehandlingSteg<String?> {
+class VilkårSteg(
+    private val behandlingService: BehandlingService,
+) : BehandlingSteg<String?> {
     override fun utførSteg(
         saksbehandling: Saksbehandling,
         data: String?,
@@ -14,7 +16,5 @@ class VilkårSteg(private val behandlingService: BehandlingService) : Behandling
         behandlingService.oppdaterStatusPåBehandling(saksbehandling.id, BehandlingStatus.UTREDES)
     }
 
-    override fun stegType(): StegType {
-        return StegType.VILKÅR
-    }
+    override fun stegType(): StegType = StegType.VILKÅR
 }

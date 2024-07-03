@@ -28,7 +28,8 @@ class AutomatiskMigreringService(
         val alleredeMigrert = migreringsstatusRepository.findAllByIdentIn(personerForMigrering).map { it.ident }
 
         val filtrerteIdenter =
-            personerForMigrering.filterNot { alleredeMigrert.contains(it) }
+            personerForMigrering
+                .filterNot { alleredeMigrert.contains(it) }
                 .take(antall) // henter fler fra infotrygd enn vi skal migrere, men plukker ut første X antall
 
         logger.info("Oppretter ${filtrerteIdenter.size} tasks for å migrere automatisk")
@@ -36,12 +37,11 @@ class AutomatiskMigreringService(
         taskService.saveAll(filtrerteIdenter.map { personIdent -> opprettTask(personIdent) })
     }
 
-    private fun opprettTask(personIdent: String): Task {
-        return AutomatiskMigreringTask.opprettTask(personIdent).apply {
+    private fun opprettTask(personIdent: String): Task =
+        AutomatiskMigreringTask.opprettTask(personIdent).apply {
             this.metadata[MDCConstants.MDC_CALL_ID] = IdUtils.generateId()
             this.metadata["personIdent"] = personIdent
         }
-    }
 
     fun rekjør(personIdent: String) {
         taskService.save(opprettTask(personIdent))

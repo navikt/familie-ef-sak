@@ -55,30 +55,27 @@ internal class BrevMellomlagerControllerTest : OppslagSpringRunnerTest() {
     private fun frittståendeSanitybrevDto(
         tittel: String = "tittel123",
         mottakere: BrevmottakereDto = mottakere(),
-    ): FrittståendeSanitybrevDto {
-        return FrittståendeSanitybrevDto(
+    ): FrittståendeSanitybrevDto =
+        FrittståendeSanitybrevDto(
             tittel = tittel,
             pdf = "123".toByteArray(),
             mottakere = mottakere,
         )
-    }
 
     private fun mellomlagreSanitybrev(
         fagsakId: UUID,
         mellomlagreBrevRequestDto: MellomlagreBrevRequestDto,
-    ): ResponseEntity<Ressurs<UUID>> {
-        return restTemplate.exchange(
+    ): ResponseEntity<Ressurs<UUID>> =
+        restTemplate.exchange(
             localhost("/api/brev/mellomlager/fagsak/$fagsakId"),
             HttpMethod.POST,
             HttpEntity(mellomlagreBrevRequestDto, headers),
         )
-    }
 
-    private fun hentMellomlagretSanitybrev(fagsakId: UUID): ResponseEntity<Ressurs<MellomlagretBrevSanity?>> {
-        return restTemplate.exchange(
+    private fun hentMellomlagretSanitybrev(fagsakId: UUID): ResponseEntity<Ressurs<MellomlagretBrevSanity?>> =
+        restTemplate.exchange(
             localhost("/api/brev/mellomlager/fagsak/$fagsakId"),
             HttpMethod.GET,
             HttpEntity<Ressurs<MellomlagretBrevSanity?>>(headers),
         )
-    }
 }

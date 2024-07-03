@@ -18,7 +18,10 @@ import java.util.UUID
 @RequestMapping(path = ["/api/fagsak"])
 @ProtectedWithClaims(issuer = "azuread")
 @Validated
-class FagsakController(private val fagsakService: FagsakService, private val tilgangService: TilgangService) {
+class FagsakController(
+    private val fagsakService: FagsakService,
+    private val tilgangService: TilgangService,
+) {
     @PostMapping
     fun hentEllerOpprettFagsakForPerson(
         @RequestBody fagsakRequest: FagsakRequest,

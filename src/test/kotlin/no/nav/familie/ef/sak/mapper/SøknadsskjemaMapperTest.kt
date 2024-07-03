@@ -38,7 +38,11 @@ internal class SøknadsskjemaMapperTest {
     internal fun `skal mappe samboer fødselsdato`() {
         val nyPerson = TestsøknadBuilder.Builder().defaultPersonMinimum(fødselsdato = LocalDate.now())
         val søknad =
-            TestsøknadBuilder.Builder().setBosituasjon(samboerdetaljer = nyPerson).build().søknadOvergangsstønad
+            TestsøknadBuilder
+                .Builder()
+                .setBosituasjon(samboerdetaljer = nyPerson)
+                .build()
+                .søknadOvergangsstønad
 
         val søknadTilLagring = SøknadsskjemaMapper.tilDomene(søknad)
         assertThat(søknadTilLagring.bosituasjon.samboer!!.fødselsdato!!).isEqualTo(LocalDate.now())
@@ -48,14 +52,18 @@ internal class SøknadsskjemaMapperTest {
     internal fun `skal mappe feltet skalBoHosSøker`() {
         val svarSkalBarnetBoHosSøker = "jaMenSamarbeiderIkke"
         val barn =
-            TestsøknadBuilder.Builder()
+            TestsøknadBuilder
+                .Builder()
                 .defaultBarn()
                 .copy(
                     skalBarnetBoHosSøker = Søknadsfelt("", "", null, svarSkalBarnetBoHosSøker),
                 )
         val søknad =
-            TestsøknadBuilder.Builder()
-                .build().søknadOvergangsstønad.copy(barn = Søknadsfelt("", listOf(barn)))
+            TestsøknadBuilder
+                .Builder()
+                .build()
+                .søknadOvergangsstønad
+                .copy(barn = Søknadsfelt("", listOf(barn)))
 
         val søknadTilLagring = SøknadsskjemaMapper.tilDomene(søknad)
         assertThat(søknadTilLagring.barn.first().skalBoHosSøker).isEqualTo(svarSkalBarnetBoHosSøker)
@@ -72,7 +80,12 @@ internal class SøknadsskjemaMapperTest {
                     poststedsnavn = "Sted",
                     land = null,
                 )
-            val søknad = TestsøknadBuilder.Builder().setPersonalia(adresse = adresse).build().søknadOvergangsstønad
+            val søknad =
+                TestsøknadBuilder
+                    .Builder()
+                    .setPersonalia(adresse = adresse)
+                    .build()
+                    .søknadOvergangsstønad
             assertThat(SøknadsskjemaMapper.tilDomene(søknad).adresseopplysninger?.adresse).isEqualTo("adresse, 1234 Sted")
         }
 
@@ -85,7 +98,12 @@ internal class SøknadsskjemaMapperTest {
                     poststedsnavn = null,
                     land = "Land",
                 )
-            val søknad = TestsøknadBuilder.Builder().setPersonalia(adresse = adresse).build().søknadOvergangsstønad
+            val søknad =
+                TestsøknadBuilder
+                    .Builder()
+                    .setPersonalia(adresse = adresse)
+                    .build()
+                    .søknadOvergangsstønad
             assertThat(SøknadsskjemaMapper.tilDomene(søknad).adresseopplysninger?.adresse).isEqualTo("adresse, 1234, Land")
         }
 
@@ -98,7 +116,12 @@ internal class SøknadsskjemaMapperTest {
                     poststedsnavn = null,
                     land = "",
                 )
-            val søknad = TestsøknadBuilder.Builder().setPersonalia(adresse = adresse).build().søknadOvergangsstønad
+            val søknad =
+                TestsøknadBuilder
+                    .Builder()
+                    .setPersonalia(adresse = adresse)
+                    .build()
+                    .søknadOvergangsstønad
             assertThat(SøknadsskjemaMapper.tilDomene(søknad).adresseopplysninger?.adresse).isEqualTo("adresse")
         }
     }
@@ -121,7 +144,12 @@ internal class SøknadsskjemaMapperTest {
                     verdi = "Polen",
                     svarId = "POL",
                 )
-            val søknad = TestsøknadBuilder.Builder().setMedlemskapsdetaljer(oppholdsland = oppholdsland).build().søknadOvergangsstønad
+            val søknad =
+                TestsøknadBuilder
+                    .Builder()
+                    .setMedlemskapsdetaljer(oppholdsland = oppholdsland)
+                    .build()
+                    .søknadOvergangsstønad
 
             val søknadTilLagring = SøknadsskjemaMapper.tilDomene(søknad)
             assertThat(søknadTilLagring.medlemskap.oppholdsland).isEqualTo("POL")
@@ -139,13 +167,34 @@ internal class SøknadsskjemaMapperTest {
                     ),
                 )
 
-            val søknad = TestsøknadBuilder.Builder().setMedlemskapsdetaljer(utenlandsopphold = utenlandsperioder).build().søknadOvergangsstønad
+            val søknad =
+                TestsøknadBuilder
+                    .Builder()
+                    .setMedlemskapsdetaljer(utenlandsopphold = utenlandsperioder)
+                    .build()
+                    .søknadOvergangsstønad
             val søknadTilLagring = SøknadsskjemaMapper.tilDomene(søknad)
 
-            assertThat(søknadTilLagring.medlemskap.utenlandsopphold.first().fradato).isEqualTo(LocalDate.of(2021, 1, 1))
-            assertThat(søknadTilLagring.medlemskap.utenlandsopphold.first().tildato).isEqualTo(LocalDate.of(2022, 1, 1))
-            assertThat(søknadTilLagring.medlemskap.utenlandsopphold.first().land).isEqualTo("ESP")
-            assertThat(søknadTilLagring.medlemskap.utenlandsopphold.first().årsakUtenlandsopphold).isEqualTo("Ferie")
+            assertThat(
+                søknadTilLagring.medlemskap.utenlandsopphold
+                    .first()
+                    .fradato,
+            ).isEqualTo(LocalDate.of(2021, 1, 1))
+            assertThat(
+                søknadTilLagring.medlemskap.utenlandsopphold
+                    .first()
+                    .tildato,
+            ).isEqualTo(LocalDate.of(2022, 1, 1))
+            assertThat(
+                søknadTilLagring.medlemskap.utenlandsopphold
+                    .first()
+                    .land,
+            ).isEqualTo("ESP")
+            assertThat(
+                søknadTilLagring.medlemskap.utenlandsopphold
+                    .first()
+                    .årsakUtenlandsopphold,
+            ).isEqualTo("Ferie")
         }
     }
 }

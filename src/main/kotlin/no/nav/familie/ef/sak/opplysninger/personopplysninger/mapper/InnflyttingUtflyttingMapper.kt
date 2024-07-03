@@ -9,22 +9,26 @@ import org.springframework.stereotype.Component
 import java.time.LocalDate
 
 @Component
-class InnflyttingUtflyttingMapper(val kodeverkService: KodeverkService) {
+class InnflyttingUtflyttingMapper(
+    val kodeverkService: KodeverkService,
+) {
     fun mapInnflytting(innflytting: List<InnflyttingTilNorge>): List<InnflyttingDto> =
-        innflytting.map {
-            InnflyttingDto(
-                it.fraflyttingsland?.let { land -> kodeverkService.hentLand(land, LocalDate.now()) },
-                it.folkeregistermetadata.gyldighetstidspunkt?.toLocalDate(),
-                it.fraflyttingsstedIUtlandet,
-            )
-        }.sortedByDescending { it.dato ?: LocalDate.MIN }
+        innflytting
+            .map {
+                InnflyttingDto(
+                    it.fraflyttingsland?.let { land -> kodeverkService.hentLand(land, LocalDate.now()) },
+                    it.folkeregistermetadata.gyldighetstidspunkt?.toLocalDate(),
+                    it.fraflyttingsstedIUtlandet,
+                )
+            }.sortedByDescending { it.dato ?: LocalDate.MIN }
 
     fun mapUtflytting(utflytting: List<UtflyttingFraNorge>): List<UtflyttingDto> =
-        utflytting.map {
-            UtflyttingDto(
-                it.tilflyttingsland?.let { land -> kodeverkService.hentLand(land, LocalDate.now()) },
-                it.utflyttingsdato,
-                it.tilflyttingsstedIUtlandet,
-            )
-        }.sortedByDescending { it.dato ?: LocalDate.MIN }
+        utflytting
+            .map {
+                UtflyttingDto(
+                    it.tilflyttingsland?.let { land -> kodeverkService.hentLand(land, LocalDate.now()) },
+                    it.utflyttingsdato,
+                    it.tilflyttingsstedIUtlandet,
+                )
+            }.sortedByDescending { it.dato ?: LocalDate.MIN }
 }

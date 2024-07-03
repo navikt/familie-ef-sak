@@ -71,8 +71,8 @@ internal class PdlPersonUtilTest {
         gate: String,
         nr: String,
         historisk: Boolean,
-    ): Bostedsadresse {
-        return Bostedsadresse(
+    ): Bostedsadresse =
+        Bostedsadresse(
             null,
             null,
             null,
@@ -83,14 +83,13 @@ internal class PdlPersonUtilTest {
             null,
             Metadata(historisk),
         )
-    }
 
     private fun oppholdsadresse(
         gate: String,
         nr: String,
         historisk: Boolean,
-    ): Oppholdsadresse {
-        return Oppholdsadresse(
+    ): Oppholdsadresse =
+        Oppholdsadresse(
             null,
             null,
             null,
@@ -99,5 +98,4 @@ internal class PdlPersonUtilTest {
             null,
             Metadata(historisk),
         )
-    }
 }

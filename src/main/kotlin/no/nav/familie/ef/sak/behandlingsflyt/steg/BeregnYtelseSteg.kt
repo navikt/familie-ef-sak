@@ -70,9 +70,7 @@ class BeregnYtelseSteg(
     private val logger = LoggerFactory.getLogger(javaClass)
     private val midlertidigOpphørFeilmelding = "Kan ikke starte vedtaket med opphørsperiode for en førstegangsbehandling"
 
-    override fun stegType(): StegType {
-        return StegType.BEREGNE_YTELSE
-    }
+    override fun stegType(): StegType = StegType.BEREGNE_YTELSE
 
     override fun utførSteg(
         saksbehandling: Saksbehandling,
@@ -206,7 +204,8 @@ class BeregnYtelseSteg(
         behandling: Saksbehandling,
     ) {
         val nyesteSanksjonsperiode =
-            andelsHistorikkService.hentHistorikk(behandling.fagsakId, null)
+            andelsHistorikkService
+                .hentHistorikk(behandling.fagsakId, null)
                 .filter { it.erAktivVedtaksperiode() }
                 .lastOrNull {
                     it.periodeType == VedtaksperiodeType.SANKSJON ||
@@ -501,10 +500,9 @@ class BeregnYtelseSteg(
         }
     }
 
-    private fun startdatoForFørstegangsbehandling(andelerTilkjentYtelse: List<AndelTilkjentYtelse>): LocalDate {
-        return andelerTilkjentYtelse.minOfOrNull { it.stønadFom }
+    private fun startdatoForFørstegangsbehandling(andelerTilkjentYtelse: List<AndelTilkjentYtelse>): LocalDate =
+        andelerTilkjentYtelse.minOfOrNull { it.stønadFom }
             ?: error("Må ha med en periode i førstegangsbehandling")
-    }
 
     private fun nyeAndelerForRevurderingAvOvergangsstønadMedStartdato(
         saksbehandling: Saksbehandling,
@@ -585,7 +583,8 @@ class BeregnYtelseSteg(
             "Kan ikke opprette sanksjon når det ikke finnes en tidligere behandling"
         }
         val erAlleredeSanksjonertOppgittMåned =
-            andelsHistorikkService.hentHistorikk(behandling.fagsakId, null)
+            andelsHistorikkService
+                .hentHistorikk(behandling.fagsakId, null)
                 .filter { it.erAktivVedtaksperiode() }
                 .any { it.erSanksjon && it.andel.periode == vedtak.periode.tilPeriode() }
         brukerfeilHvis(erAlleredeSanksjonertOppgittMåned) {
@@ -623,7 +622,8 @@ class BeregnYtelseSteg(
         vedtak: InnvilgelseOvergangsstønad,
         saksbehandling: Saksbehandling,
     ) =
-        beregningService.beregnYtelse(finnInnvilgedePerioder(vedtak), vedtak.inntekter.tilInntektsperioder())
+        beregningService
+            .beregnYtelse(finnInnvilgedePerioder(vedtak), vedtak.inntekter.tilInntektsperioder())
             .map {
                 AndelTilkjentYtelse(
                     beløp = it.beløp.toInt(),
@@ -665,12 +665,13 @@ class BeregnYtelseSteg(
     private fun lagBeløpsperioderForInnvilgelseSkolepenger(
         vedtak: VedtakSkolepengerDto,
         saksbehandling: Saksbehandling,
-    ): List<AndelTilkjentYtelse> {
-        return beregningSkolepengerService.beregnYtelse(
-            vedtak.skoleårsperioder,
-            saksbehandling.id,
-            vedtak.erOpphør(),
-        ).perioder
+    ): List<AndelTilkjentYtelse> =
+        beregningSkolepengerService
+            .beregnYtelse(
+                vedtak.skoleårsperioder,
+                saksbehandling.id,
+                vedtak.erOpphør(),
+            ).perioder
             .filter { it.beløp > 0 }
             .map {
                 AndelTilkjentYtelse(
@@ -684,7 +685,6 @@ class BeregnYtelseSteg(
                     personIdent = saksbehandling.ident,
                 )
             }
-    }
 
     private fun validerRiktigResultattypeForInnvilgetBarnetilsyn(
         beløpsperioder: List<BeløpsperiodeBarnetilsynDto>,
@@ -729,38 +729,38 @@ class BeregnYtelseSteg(
     fun vurderPeriodeForOpphør(
         andelTilkjentYtelser: List<AndelTilkjentYtelse>,
         opphørsperioder: List<Månedsperiode>,
-    ): List<AndelTilkjentYtelse> {
-        return andelTilkjentYtelser.map {
-            val tilkjentPeriode = it.periode
-            if (opphørsperioder.none { periode -> periode.overlapper(tilkjentPeriode) }) {
-                listOf(it)
-            } else if (opphørsperioder.any { periode -> periode.inneholder(tilkjentPeriode) }) {
-                listOf()
-            } else {
-                val overlappendeOpphør = opphørsperioder.first { periode -> periode.overlapper(tilkjentPeriode) }
+    ): List<AndelTilkjentYtelse> =
+        andelTilkjentYtelser
+            .map {
+                val tilkjentPeriode = it.periode
+                if (opphørsperioder.none { periode -> periode.overlapper(tilkjentPeriode) }) {
+                    listOf(it)
+                } else if (opphørsperioder.any { periode -> periode.inneholder(tilkjentPeriode) }) {
+                    listOf()
+                } else {
+                    val overlappendeOpphør = opphørsperioder.first { periode -> periode.overlapper(tilkjentPeriode) }
 
-                if (overlappendeOpphør.overlapperKunIStartenAv(tilkjentPeriode)) {
-                    vurderPeriodeForOpphør(
-                        listOf(it.copy(stønadFom = overlappendeOpphør.tomDato.plusDays(1))),
-                        opphørsperioder,
-                    )
-                } else if (overlappendeOpphør.overlapperKunISluttenAv(tilkjentPeriode)) {
-                    vurderPeriodeForOpphør(
-                        listOf(it.copy(stønadTom = overlappendeOpphør.fomDato.minusDays(1))),
-                        opphørsperioder,
-                    )
-                } else { // periode blir delt i to av opphold.
-                    vurderPeriodeForOpphør(
-                        listOf(
-                            it.copy(stønadTom = overlappendeOpphør.fomDato.minusDays(1)),
-                            it.copy(stønadFom = overlappendeOpphør.tomDato.plusDays(1)),
-                        ),
-                        opphørsperioder,
-                    )
+                    if (overlappendeOpphør.overlapperKunIStartenAv(tilkjentPeriode)) {
+                        vurderPeriodeForOpphør(
+                            listOf(it.copy(stønadFom = overlappendeOpphør.tomDato.plusDays(1))),
+                            opphørsperioder,
+                        )
+                    } else if (overlappendeOpphør.overlapperKunISluttenAv(tilkjentPeriode)) {
+                        vurderPeriodeForOpphør(
+                            listOf(it.copy(stønadTom = overlappendeOpphør.fomDato.minusDays(1))),
+                            opphørsperioder,
+                        )
+                    } else { // periode blir delt i to av opphold.
+                        vurderPeriodeForOpphør(
+                            listOf(
+                                it.copy(stønadTom = overlappendeOpphør.fomDato.minusDays(1)),
+                                it.copy(stønadFom = overlappendeOpphør.tomDato.plusDays(1)),
+                            ),
+                            opphørsperioder,
+                        )
+                    }
                 }
-            }
-        }.flatten()
-    }
+            }.flatten()
 
     private fun andelerForOpphør(
         forrigeTilkjentYtelse: TilkjentYtelse,
@@ -769,7 +769,7 @@ class BeregnYtelseSteg(
         brukerfeilHvis(
             forrigeTilkjentYtelse.andelerTilkjentYtelse.maxOfOrNull { it.stønadTom }?.isBefore(opphørFom) ?: false,
         ) {
-            "Kan ikke opphøre frem i tiden"
+            "Kan ikke opphøre fra et tidspunkt bruker ikke har stønad."
         }
 
         brukerfeilHvis(

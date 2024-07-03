@@ -20,21 +20,22 @@ import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import java.time.LocalDate
 import java.util.UUID
 
-class AleneomsorgRegel : Vilkårsregel(
-    vilkårType = VilkårType.ALENEOMSORG,
-    regler =
-        setOf(
-            SKRIFTLIG_AVTALE_OM_DELT_BOSTED,
-            NÆRE_BOFORHOLD,
-            MER_AV_DAGLIG_OMSORG,
-        ),
-    hovedregler =
-        regelIder(
-            SKRIFTLIG_AVTALE_OM_DELT_BOSTED,
-            NÆRE_BOFORHOLD,
-            MER_AV_DAGLIG_OMSORG,
-        ),
-) {
+class AleneomsorgRegel :
+    Vilkårsregel(
+        vilkårType = VilkårType.ALENEOMSORG,
+        regler =
+            setOf(
+                SKRIFTLIG_AVTALE_OM_DELT_BOSTED,
+                NÆRE_BOFORHOLD,
+                MER_AV_DAGLIG_OMSORG,
+            ),
+        hovedregler =
+            regelIder(
+                SKRIFTLIG_AVTALE_OM_DELT_BOSTED,
+                NÆRE_BOFORHOLD,
+                MER_AV_DAGLIG_OMSORG,
+            ),
+    ) {
     override fun initiereDelvilkårsvurdering(
         metadata: HovedregelMetadata,
         resultat: Vilkårsresultat,
@@ -64,18 +65,21 @@ class AleneomsorgRegel : Vilkårsregel(
         barnId: UUID?,
     ): Boolean {
         val søknadsgrunnlagBarn =
-            metadata.vilkårgrunnlagDto.barnMedSamvær.find {
-                it.barnId == barnId
-            }?.søknadsgrunnlag
+            metadata.vilkårgrunnlagDto.barnMedSamvær
+                .find {
+                    it.barnId == barnId
+                }?.søknadsgrunnlag
 
         val registergrunnlagBarn =
-            metadata.vilkårgrunnlagDto.barnMedSamvær.find {
-                it.barnId == barnId
-            }?.registergrunnlag
+            metadata.vilkårgrunnlagDto.barnMedSamvær
+                .find {
+                    it.barnId == barnId
+                }?.registergrunnlag
 
         if (søknadsgrunnlagBarn == null || registergrunnlagBarn == null) return false
 
-        return erDigitalSøknad(metadata) && erDonorbarn(søknadsgrunnlagBarn) &&
+        return erDigitalSøknad(metadata) &&
+            erDonorbarn(søknadsgrunnlagBarn) &&
             (harSammeAdresse(registergrunnlagBarn) || erTerminbarnOgOgHarSammeAdresse(søknadsgrunnlagBarn))
     }
 
@@ -149,9 +153,11 @@ class AleneomsorgRegel : Vilkårsregel(
     private fun borISammeHus(
         metadata: HovedregelMetadata,
         barnId: UUID?,
-    ) = metadata.langAvstandTilSøker.find {
-        it.barnId == barnId
-    }?.borAnnenForelderISammeHus?.let { it.isNotBlank() && it.lowercase() == "ja" } ?: false
+    ) = metadata.langAvstandTilSøker
+        .find {
+            it.barnId == barnId
+        }?.borAnnenForelderISammeHus
+        ?.let { it.isNotBlank() && it.lowercase() == "ja" } ?: false
 
     private fun borLangtNokFraHverandre(
         metadata: HovedregelMetadata,
@@ -179,10 +185,9 @@ class AleneomsorgRegel : Vilkårsregel(
                 SvarId.SELVSTENDIGE_BOLIGER_SAMME_TOMT,
                 SvarId.NÆRMESTE_BOLIG_ELLER_REKKEHUS_I_SAMMEGATE,
                 SvarId.TILSTØTENDE_BOLIGER_ELLER_REKKEHUS_I_SAMMEGATE,
-            )
-                .associateWith {
-                    SluttSvarRegel.IKKE_OPPFYLT_MED_PÅKREVD_BEGRUNNELSE
-                } + mapOf(SvarId.NEI to SluttSvarRegel.OPPFYLT_MED_PÅKREVD_BEGRUNNELSE)
+            ).associateWith {
+                SluttSvarRegel.IKKE_OPPFYLT_MED_PÅKREVD_BEGRUNNELSE
+            } + mapOf(SvarId.NEI to SluttSvarRegel.OPPFYLT_MED_PÅKREVD_BEGRUNNELSE)
         private val NÆRE_BOFORHOLD =
             RegelSteg(
                 regelId = RegelId.NÆRE_BOFORHOLD,

@@ -21,6 +21,7 @@ import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvisIkke
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
+import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext.NAVIDENT_REGEX
 import no.nav.familie.ef.sak.oppgave.TilordnetRessursService
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.ef.sak.simulering.SimuleringService
@@ -124,11 +125,17 @@ class SendTilBeslutterSteg(
         saksbehandling: Saksbehandling,
         data: SendTilBeslutterDto?,
     ) {
+        val besluttetVedtakHendelse =
+            behandlingshistorikkService.finnSisteBehandlingshistorikk(saksbehandling.id, StegType.BESLUTTE_VEDTAK)
+        val beslutterIdent = besluttetVedtakHendelse?.opprettetAv ?.takeIf { NAVIDENT_REGEX.matches(it) }
+
         behandlingService.oppdaterStatusPåBehandling(saksbehandling.id, BehandlingStatus.FATTER_VEDTAK)
         vedtakService.oppdaterSaksbehandler(saksbehandling.id, SikkerhetContext.hentSaksbehandler())
-        if (!vedtakService.hentVedtak(saksbehandling.id).erVedtakUtenBeslutter()) {
-            opprettGodkjennVedtakOppgave(saksbehandling)
+
+        if (vedtakService.hentVedtak(saksbehandling.id).skalVedtakBesluttes()) {
+            opprettGodkjennVedtakOppgave(saksbehandling, beslutterIdent)
         }
+
         ferdigstillOppgave(saksbehandling)
         opprettTaskForBehandlingsstatistikk(saksbehandling.id)
         if (data != null) {
@@ -164,13 +171,18 @@ class SendTilBeslutterSteg(
         )
     }
 
-    private fun opprettGodkjennVedtakOppgave(saksbehandling: Saksbehandling) {
+    private fun opprettGodkjennVedtakOppgave(
+        saksbehandling: Saksbehandling,
+        beslutterIdent: String?,
+    ) {
+        val erIkkeSammeBeslutterOgSaksbehandler = beslutterIdent != SikkerhetContext.hentSaksbehandler()
         taskService.save(
             OpprettOppgaveTask.opprettTask(
                 OpprettOppgaveTaskData(
                     behandlingId = saksbehandling.id,
                     oppgavetype = Oppgavetype.GodkjenneVedtak,
                     beskrivelse = "Sendt til godkjenning av ${SikkerhetContext.hentSaksbehandlerNavn(true)}.",
+                    tilordnetNavIdent = if (erIkkeSammeBeslutterOgSaksbehandler) beslutterIdent else null,
                 ),
             ),
         )
@@ -186,7 +198,5 @@ class SendTilBeslutterSteg(
         }
     }
 
-    override fun stegType(): StegType {
-        return StegType.SEND_TIL_BESLUTTER
-    }
+    override fun stegType(): StegType = StegType.SEND_TIL_BESLUTTER
 }

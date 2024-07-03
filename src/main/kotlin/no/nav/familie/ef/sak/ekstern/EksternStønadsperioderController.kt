@@ -40,14 +40,13 @@ class EksternStønadsperioderController(
     @ProtectedWithClaims(issuer = "azuread", claimMap = ["roles=access_as_application"])
     fun hentPerioderForAlleStønader(
         @RequestBody request: EksternePerioderRequest,
-    ): Ressurs<EksternePerioderResponse> {
-        return try {
+    ): Ressurs<EksternePerioderResponse> =
+        try {
             Ressurs.success(eksternStønadsperioderService.hentPerioderForAlleStønader(request))
         } catch (e: Exception) {
             secureLogger.error("Kunne ikke hente perioder for ${request.personIdent}", e)
             Ressurs.failure("Henting av perioder for overgangsstønad feilet", error = e)
         }
-    }
 
     /**
      * Brukes av Tiltakspenger-overgangsstønad
@@ -56,14 +55,13 @@ class EksternStønadsperioderController(
     @ProtectedWithClaims(issuer = "azuread", claimMap = ["roles=access_as_application"])
     fun hentPerioderForOvergangsstønad(
         @RequestBody request: EksternePerioderRequest,
-    ): Ressurs<EksternePerioderResponse> {
-        return try {
+    ): Ressurs<EksternePerioderResponse> =
+        try {
             Ressurs.success(EksternePerioderResponse(perioder = eksternStønadsperioderService.hentPerioderForOvergangsstønad(request)))
         } catch (e: Exception) {
             secureLogger.error("Kunne ikke hente perioder for ${request.personIdent}", e)
             Ressurs.failure("Henting av perioder for overgangsstønad feilet", error = e)
         }
-    }
 
     /**
      * Brukes av Bidrag
@@ -72,14 +70,13 @@ class EksternStønadsperioderController(
     @ProtectedWithClaims(issuer = "azuread", claimMap = ["roles=access_as_application"])
     fun hentPerioderForOvergangsstønadMedBeløp(
         @RequestBody request: EksternePerioderRequest,
-    ): Ressurs<EksternePerioderMedBeløpResponse> {
-        return try {
+    ): Ressurs<EksternePerioderMedBeløpResponse> =
+        try {
             Ressurs.success(EksternePerioderMedBeløpResponse(perioder = eksternStønadsperioderService.hentPerioderForOvergangsstønadMedBeløp(request)))
         } catch (e: Exception) {
             secureLogger.error("Kunne ikke hente perioder for ${request.personIdent}", e)
             Ressurs.failure("Henting av perioder for overgangsstønad feilet", error = e)
         }
-    }
 
     /**
      * Brukes av Barnetrygd, for å vurdere utvidet barnetrygd, henter kun perioder med full overgangsstønad

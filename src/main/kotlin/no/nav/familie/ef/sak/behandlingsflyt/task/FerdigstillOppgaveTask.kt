@@ -19,7 +19,9 @@ import java.util.UUID
     beskrivelse = "Avslutt oppgave i GOSYS",
     maxAntallFeil = 3,
 )
-class FerdigstillOppgaveTask(private val oppgaveService: OppgaveService) : AsyncTaskStep {
+class FerdigstillOppgaveTask(
+    private val oppgaveService: OppgaveService,
+) : AsyncTaskStep {
     /**
      * Då payload er unik per task type, så settes unik inn
      */
@@ -43,8 +45,8 @@ class FerdigstillOppgaveTask(private val oppgaveService: OppgaveService) : Async
             oppgavetype: Oppgavetype,
             oppgaveId: Long?,
             personIdent: String?,
-        ): Task {
-            return Task(
+        ): Task =
+            Task(
                 type = TYPE,
                 payload = objectMapper.writeValueAsString(FerdigstillOppgaveTaskData(behandlingId, oppgavetype)),
                 properties =
@@ -56,7 +58,6 @@ class FerdigstillOppgaveTask(private val oppgaveService: OppgaveService) : Async
                         this["personIdent"] = personIdent ?: "ukjent"
                     },
             )
-        }
 
         const val TYPE = "ferdigstillOppgave"
     }

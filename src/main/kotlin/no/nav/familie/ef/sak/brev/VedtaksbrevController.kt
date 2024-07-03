@@ -48,16 +48,12 @@ class VedtaksbrevController(
     @PostMapping("/{behandlingId}")
     fun lagBeslutterbrev(
         @PathVariable behandlingId: UUID,
-    ): Ressurs<ByteArray> {
-        return foråndsvisBeslutterbrev(behandlingId)
-    }
+    ): Ressurs<ByteArray> = foråndsvisBeslutterbrev(behandlingId)
 
     @PostMapping("/beslutter/vis/{behandlingId}")
     fun forhåndsvisBeslutterbrev(
         @PathVariable behandlingId: UUID,
-    ): Ressurs<ByteArray> {
-        return foråndsvisBeslutterbrev(behandlingId)
-    }
+    ): Ressurs<ByteArray> = foråndsvisBeslutterbrev(behandlingId)
 
     private fun foråndsvisBeslutterbrev(behandlingId: UUID): Ressurs<ByteArray> {
         val saksbehandling = behandlingService.hentSaksbehandling(behandlingId)

@@ -7,38 +7,36 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.gjeldende
 import java.time.LocalDate
 
 object AdresseHjelper {
-    fun sorterAdresser(adresser: List<AdresseDto>): List<AdresseDto> {
-        return adresser.sortedWith(
+    fun sorterAdresser(adresser: List<AdresseDto>): List<AdresseDto> =
+        adresser.sortedWith(
             compareBy<AdresseDto> { it.type.rekkefølge }
                 .thenByDescending { it.erGjeldende }
                 .thenByDescending { it.angittFlyttedato ?: it.gyldigFraOgMed },
         )
-    }
 
     fun harRegistrertSammeBostedsadresseSomForelder(
         barn: BarnMedIdent,
         bostedsadresserForelder: List<Bostedsadresse>,
-    ): Boolean {
-        return sammeMatrikkeladresse(bostedsadresserForelder.gjeldende(), barn.bostedsadresse.gjeldende()) ||
+    ): Boolean =
+        sammeMatrikkeladresse(bostedsadresserForelder.gjeldende(), barn.bostedsadresse.gjeldende()) ||
             sammeVegadresse(bostedsadresserForelder.gjeldende(), barn.bostedsadresse.gjeldende())
-    }
 
     private fun sammeMatrikkeladresse(
         bostedsadresseForelder: Bostedsadresse?,
         bostedsadresseBarn: Bostedsadresse?,
-    ): Boolean {
-        return bostedsadresseBarn?.matrikkelId != null && bostedsadresseForelder?.matrikkelId != null &&
+    ): Boolean =
+        bostedsadresseBarn?.matrikkelId != null &&
+            bostedsadresseForelder?.matrikkelId != null &&
             bostedsadresseBarn.matrikkelId == bostedsadresseForelder.matrikkelId &&
             bostedsadresseBarn.bruksenhetsnummer ?: "" == bostedsadresseForelder.bruksenhetsnummer ?: ""
-    }
 
     private fun sammeVegadresse(
         bostedsadresseForelder: Bostedsadresse?,
         bostedsadresseBarn: Bostedsadresse?,
-    ): Boolean {
-        return bostedsadresseBarn?.vegadresse != null && bostedsadresseForelder?.vegadresse != null &&
+    ): Boolean =
+        bostedsadresseBarn?.vegadresse != null &&
+            bostedsadresseForelder?.vegadresse != null &&
             bostedsadresseBarn.vegadresse.erSammeVegadresse(bostedsadresseForelder.vegadresse)
-    }
 
     fun harDeltBosted(
         barn: BarnMedIdent?,
@@ -53,7 +51,5 @@ object AdresseHjelper {
             (gjeldende.sluttdatoForKontrakt == null || gjeldende.sluttdatoForKontrakt >= dato)
     }
 
-    private fun BarnMedIdent.erOver18År(): Boolean {
-        return !fødsel.gjeldende().erUnder18År()
-    }
+    private fun BarnMedIdent.erOver18År(): Boolean = !fødsel.gjeldende().erUnder18År()
 }

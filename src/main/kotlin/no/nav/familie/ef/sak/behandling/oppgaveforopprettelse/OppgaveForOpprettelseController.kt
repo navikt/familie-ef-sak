@@ -11,7 +11,9 @@ import java.util.UUID
 @RestController
 @RequestMapping("/api/oppgaverforopprettelse")
 @ProtectedWithClaims(issuer = "azuread")
-class OppgaveForOpprettelseController(private val oppgaverForOpprettelseService: OppgaverForOpprettelseService) {
+class OppgaveForOpprettelseController(
+    private val oppgaverForOpprettelseService: OppgaverForOpprettelseService,
+) {
     @GetMapping("/{behandlingid}")
     fun hentOppgaverForOpprettelse(
         @PathVariable behandlingid: UUID,

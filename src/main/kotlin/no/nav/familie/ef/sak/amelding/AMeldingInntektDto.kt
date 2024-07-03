@@ -47,7 +47,9 @@ enum class InntektType {
     YTELSE_FRA_OFFENTLIGE,
 }
 
-enum class Fordel(val verdi: String) {
+enum class Fordel(
+    val verdi: String,
+) {
     KONTANTYTELSE("kontantytelse"),
     NATURALYTELSE("naturalytelse"),
     UTGIFTSGODTGJØRELSE("utgiftsgodtgjoerelse"),

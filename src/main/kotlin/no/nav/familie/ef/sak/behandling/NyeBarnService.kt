@@ -114,15 +114,14 @@ class NyeBarnService(
     private fun finnForTidligtFødteBarn(
         kobledeBarn: NyeBarnData,
         stønadstype: StønadType,
-    ): List<NyttBarn> {
-        return kobledeBarn.kobledeBarn
+    ): List<NyttBarn> =
+        kobledeBarn.kobledeBarn
             .filter { it.behandlingBarn.personIdent == null }
             .filter { barnFødtFørTermin(it) }
             .map {
                 val barn = it.barn ?: error("Skal ha filtrert ut matchet barn uten barn")
                 NyttBarn(barn.personIdent, stønadstype, NyttBarnÅrsak.FØDT_FØR_TERMIN)
             }
-    }
 
     private fun finnForSentFødteBarn(
         kobledeBarn: NyeBarnData,

@@ -79,9 +79,7 @@ class BeregningService {
         ) { "Inntektsperioder $inntektsperioder overlapper eller er ikke sammenhengde" }
     }
 
-    fun hentNyesteGrunnbeløpOgAntallGrunnbeløpsperioderTilbakeITid(antall: Int): List<Grunnbeløp> {
-        return Grunnbeløpsperioder.grunnbeløpsperioder.subList(0, antall)
-    }
+    fun hentNyesteGrunnbeløpOgAntallGrunnbeløpsperioderTilbakeITid(antall: Int): List<Grunnbeløp> = Grunnbeløpsperioder.grunnbeløpsperioder.subList(0, antall)
 
     fun grunnbeløpsperiodeDTO(grunnbeløpParameter: Grunnbeløp): GrunnbeløpDTO {
         val periode = grunnbeløpParameter.periode
@@ -98,7 +96,5 @@ class BeregningService {
         )
     }
 
-    fun listeMedGrunnbeløpTilDTO(grunnbeløp: List<Grunnbeløp>): List<GrunnbeløpDTO> {
-        return grunnbeløp.map { grunnbeløpsperiodeDTO(it) }
-    }
+    fun listeMedGrunnbeløpTilDTO(grunnbeløp: List<Grunnbeløp>): List<GrunnbeløpDTO> = grunnbeløp.map { grunnbeløpsperiodeDTO(it) }
 }
