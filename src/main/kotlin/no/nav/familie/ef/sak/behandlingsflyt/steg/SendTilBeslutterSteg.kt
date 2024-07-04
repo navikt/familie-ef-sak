@@ -134,8 +134,8 @@ class SendTilBeslutterSteg(
     private fun erIkkeRelevantForTilbakekreving(saksbehandling: Saksbehandling): Boolean {
         val resultatType = vedtakService.hentVedtaksresultat(saksbehandling.id)
         return saksbehandling.type == BehandlingType.FØRSTEGANGSBEHANDLING ||
-                resultatType == ResultatType.AVSLÅ ||
-                resultatType == ResultatType.HENLEGGE
+            resultatType == ResultatType.AVSLÅ ||
+            resultatType == ResultatType.HENLEGGE
     }
 
     override fun utførSteg(
