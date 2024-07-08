@@ -31,4 +31,12 @@ class SimuleringController(
         tilgangService.validerTilgangTilBehandling(saksbehandling, AuditLoggerEvent.UPDATE)
         return Ressurs.success(simuleringService.simuler(saksbehandling))
     }
+
+    @GetMapping("/resultatstatus/{behandlingId}")
+    fun simuleringsresultatStatus(
+        @PathVariable behandlingId: UUID,
+    ): Ressurs<Boolean> {
+        val saksbehandling = behandlingService.hentSaksbehandling(behandlingId)
+        return Ressurs.success(simuleringService.simuleringOppsummeringerErUlike(saksbehandling))
+    }
 }
