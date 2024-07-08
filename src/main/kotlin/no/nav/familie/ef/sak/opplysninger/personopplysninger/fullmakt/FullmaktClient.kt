@@ -2,11 +2,13 @@ package no.nav.familie.ef.sak.opplysninger.personopplysninger.fullmakt
 
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.FullmaktDto
 import no.nav.familie.http.client.AbstractPingableRestClient
+import org.apache.hc.client5.http.utils.Base64
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import org.springframework.web.client.RestOperations
 import java.net.URI
+import kotlin.io.encoding.Base64.Default.encode
 
 @Service
 class FullmaktClient(
@@ -19,7 +21,8 @@ class FullmaktClient(
 
     fun hentFullmakt(ident: String): FullmaktDto {
         val url = URI.create("$fullmaktUrl/api/internbruker/fullmektig")
-        return postForEntity(url, FullmaktRequest(ident))
+        val base64EncodedIdent = Base64.encodeBase64String(ident.toByteArray())
+        return postForEntity(url, FullmaktRequest(base64EncodedIdent))
     }
 }
 
