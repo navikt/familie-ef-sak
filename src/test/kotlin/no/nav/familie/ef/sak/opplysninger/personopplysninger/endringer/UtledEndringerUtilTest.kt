@@ -209,7 +209,7 @@ internal class UtledEndringerUtilTest {
             val endringer =
                 finnEndringer(
                     dto(fullmakt = listOf(fullmaktDto)),
-                    dto(fullmakt = listOf(fullmaktDto.copy(motpartsPersonident = "2"))),
+                    dto(fullmakt = listOf(fullmaktDto.copy(fullmektig = "2"))),
                 )
             assertThat(endringer.harEndringer).isTrue
             assertThat(endringer.fullmakt.harEndringer).isTrue
