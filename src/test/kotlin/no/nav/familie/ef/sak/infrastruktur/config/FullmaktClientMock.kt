@@ -18,12 +18,14 @@ class FullmaktClientMock {
     fun fullmaktClient(): FullmaktClient {
         val fullmaktClient: FullmaktClient = mockk()
         every { fullmaktClient.hentFullmakt(any()) } returns
-            FullmaktDto(
-                LocalDate.now().minusYears(1),
-                LocalDate.now().plusYears(1),
-                "1",
-                "Navn",
-                listOf("OMRÅDE"),
+            listOf(
+                FullmaktDto(
+                    LocalDate.now().minusYears(1),
+                    LocalDate.now().plusYears(1),
+                    "1",
+                    "Navn",
+                    listOf("OMRÅDE"),
+                ),
             )
 
         return fullmaktClient

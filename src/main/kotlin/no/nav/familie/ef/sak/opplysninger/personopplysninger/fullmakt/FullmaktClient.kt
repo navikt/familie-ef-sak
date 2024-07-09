@@ -9,7 +9,6 @@ import org.springframework.stereotype.Service
 import org.springframework.web.client.RestOperations
 import java.net.URI
 
-
 @Service
 class FullmaktClient(
     @Value("\${PDL_FULLMAKT_URL}")
