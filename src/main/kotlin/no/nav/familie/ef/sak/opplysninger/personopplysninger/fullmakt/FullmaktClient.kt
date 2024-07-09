@@ -8,7 +8,7 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import org.springframework.web.client.RestOperations
 import java.net.URI
-import kotlin.io.encoding.Base64.Default.encode
+
 
 @Service
 class FullmaktClient(
@@ -21,9 +21,10 @@ class FullmaktClient(
 
     fun hentFullmakt(ident: String): FullmaktDto {
         val url = URI.create("$fullmaktUrl/api/internbruker/fullmektig")
-        val base64EncodedIdent = Base64.encodeBase64String(ident.toByteArray())
-        return postForEntity(url, FullmaktRequest(base64EncodedIdent))
+        return postForEntity(url, fullmaktRequest(ident))
     }
+
+    private fun fullmaktRequest(ident: String) = FullmaktRequest(ident = Base64.encodeBase64String("\"$ident\"".toByteArray()))
 }
 
 data class FullmaktRequest(
