@@ -121,7 +121,7 @@ enum class AdresseType(
 data class FullmaktDto(
     val gyldigFraOgMed: LocalDate,
     val gyldigTilOgMed: LocalDate,
-    val fullmektig: String,
+    val motpartsPersonident: String,
     val navn: String?,
     val områder: List<String>,
 )

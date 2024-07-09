@@ -2,8 +2,10 @@ package no.nav.familie.ef.sak.no.nav.familie.ef.sak.infrastruktur.config
 
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.FullmaktDto
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.fullmakt.FullmaktClient
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.fullmakt.FullmaktResponse
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.fullmakt.Handling
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.fullmakt.Område
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Primary
@@ -19,12 +21,12 @@ class FullmaktClientMock {
         val fullmaktClient: FullmaktClient = mockk()
         every { fullmaktClient.hentFullmakt(any()) } returns
             listOf(
-                FullmaktDto(
+                FullmaktResponse(
                     LocalDate.now().minusYears(1),
                     LocalDate.now().plusYears(1),
-                    "1",
+                    "01010199999",
                     "Navn",
-                    listOf("OMRÅDE"),
+                    listOf(Område("ENF", listOf(Handling.LES))),
                 ),
             )
 

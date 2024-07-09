@@ -77,7 +77,7 @@ class PersonopplysningerMapper(
                         FullmaktDto(
                             gyldigFraOgMed = it.gyldigFraOgMed,
                             gyldigTilOgMed = it.gyldigTilOgMed,
-                            fullmektig = it.motpartsPersonident,
+                            motpartsPersonident = it.motpartsPersonident,
                             navn = it.navn,
                             områder = it.områder?.let { it.map { område -> mapOmråde(område) } } ?: emptyList(),
                         )

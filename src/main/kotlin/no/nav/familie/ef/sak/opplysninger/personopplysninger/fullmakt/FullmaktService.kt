@@ -20,7 +20,7 @@ class FullmaktService(
                 it.gyldigTilOgMed,
                 it.fullmektig,
                 MotpartsRolle.FULLMEKTIG,
-                it.områder,
+                it.omraade.map { it.tema },
             )
         }
     }
