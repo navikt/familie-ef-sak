@@ -19,7 +19,7 @@ class FullmaktService(
             Fullmakt(
                 it.gyldigFraOgMed,
                 it.gyldigTilOgMed,
-                it.motpartsPersonident,
+                it.fullmektig,
                 MotpartsRolle.FULLMEKTIG,
                 it.områder,
             )
