@@ -19,12 +19,11 @@ class FullmaktClient(
 ) : AbstractPingableRestClient(restOperations, "repr.fullmakt") {
     override val pingUri: URI = URI.create(fullmaktUrl)
 
-    fun hentFullmakt(ident: String): FullmaktDto {
+    fun hentFullmakt(ident: String): List<FullmaktDto> {
         val url = URI.create("$fullmaktUrl/api/internbruker/fullmektig")
-        return postForEntity(url, fullmaktRequest(ident))
+        val base64EncodedIdent = Base64.encodeBase64String(ident.toByteArray())
+        return postForEntity(url, FullmaktRequest(base64EncodedIdent))
     }
-
-    private fun fullmaktRequest(ident: String) = FullmaktRequest(ident = Base64.encodeBase64String("\"$ident\"".toByteArray()))
 }
 
 data class FullmaktRequest(

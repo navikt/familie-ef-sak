@@ -9,16 +9,16 @@ class FullmaktService(
     val fullmaktClient: FullmaktClient,
 ) {
     fun hentFullmakt(ident: String): List<Fullmakt> {
-        val fullmakt = fullmaktClient.hentFullmakt(ident)
+        val fullmaktResponse = fullmaktClient.hentFullmakt(ident)
 
-        return listOf(
+        return fullmaktResponse.map {
             Fullmakt(
-                fullmakt.gyldigFraOgMed,
-                fullmakt.gyldigTilOgMed,
-                fullmakt.motpartsPersonident,
+                it.gyldigFraOgMed,
+                it.gyldigTilOgMed,
+                it.motpartsPersonident,
                 MotpartsRolle.FULLMEKTIG,
-                fullmakt.områder,
-            ),
-        )
+                it.områder,
+            )
+        }
     }
 }
