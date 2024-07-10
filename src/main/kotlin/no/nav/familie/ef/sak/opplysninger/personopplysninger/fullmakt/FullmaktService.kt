@@ -13,7 +13,6 @@ class FullmaktService(
 
     fun hentFullmakt(ident: String): List<Fullmakt> {
         val fullmaktResponse = fullmaktClient.hentFullmakt(ident)
-        secureLogger.info("FullmaktResponse: $fullmaktResponse")
         return fullmaktResponse.map {
             Fullmakt(
                 it.gyldigFraOgMed,
