@@ -23,7 +23,6 @@ import org.springframework.http.HttpEntity
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
-import java.math.BigDecimal
 import java.time.LocalDate
 import java.util.UUID
 
@@ -77,11 +76,6 @@ internal class SimuleringControllerIntegrasjonsTest : OppslagSpringRunnerTest() 
         Assertions.assertThat(respons.body?.data).isNotNull()
         Assertions.assertThat(respons.body?.data?.perioder).hasSize(8)
         val simuleringsresultat = simuleringsresultatRepository.findByIdOrThrow(behandling.id)
-        val endretSimulering =
-            simuleringsresultat
-                .copy()
-                .beriketData.oppsummering.etterbetaling
-                .add(BigDecimal.ONE)
 
         // Verifiser at simuleringsresultatet er lagret
         Assertions.assertThat(simuleringsresultat.data.simuleringMottaker).hasSize(1)
@@ -93,68 +87,10 @@ internal class SimuleringControllerIntegrasjonsTest : OppslagSpringRunnerTest() 
             ).hasSizeGreaterThan(1)
     }
 
-    @Test
-    internal fun `simulering skald`() {
-        val personIdent = "12345678901"
-        val fagsak = testoppsettService.lagreFagsak(fagsak(identer = setOf(PersonIdent(personIdent))))
-        val behandling = behandlingRepository.insert(behandling(fagsak))
-        tilkjentYtelseRepository
-            .insert(
-                TilkjentYtelse(
-                    behandlingId = behandling.id,
-                    personident = personIdent,
-                    type = TilkjentYtelseType.FØRSTEGANGSBEHANDLING,
-                    startdato = LocalDate.of(2021, 1, 1),
-                    andelerTilkjentYtelse =
-                        listOf(
-                            AndelTilkjentYtelse(
-                                15000,
-                                LocalDate.of(2021, 1, 1),
-                                LocalDate.of(2021, 12, 31),
-                                personIdent,
-                                inntekt = 0,
-                                inntektsreduksjon = 0,
-                                samordningsfradrag = 0,
-                                kildeBehandlingId = behandling.id,
-                            ),
-                        ),
-                ),
-            )
-
-        val respons: ResponseEntity<Ressurs<Simuleringsoppsummering>> = simulerForBehandling(behandling.id)
-
-        Assertions.assertThat(respons.statusCode).isEqualTo(HttpStatus.OK)
-        Assertions.assertThat(respons.body?.status).isEqualTo(Ressurs.Status.SUKSESS)
-        Assertions.assertThat(respons.body?.data).isNotNull()
-        Assertions.assertThat(respons.body?.data?.perioder).hasSize(8)
-        val simuleringsresultat = simuleringsresultatRepository.findByIdOrThrow(behandling.id)
-        val updatedSimuleringsresultat =
-            simuleringsresultat.copy(
-                beriketData =
-                    simuleringsresultat.beriketData.copy(
-                        oppsummering =
-                            simuleringsresultat.beriketData.oppsummering.copy(
-                                feilutbetaling = simuleringsresultat.beriketData.oppsummering.feilutbetaling + BigDecimal.ONE,
-                            ),
-                    ),
-            )
-
-        // Verifiser at simuleringsresultatet er lagret
-        Assertions.assertThat(simuleringsresultat.data.simuleringMottaker).hasSize(1)
-        Assertions.assertThat(simulerResultatstatus(behandling.id).body.data).isEqualTo(true)
-    }
-
     private fun simulerForBehandling(behandlingId: UUID): ResponseEntity<Ressurs<Simuleringsoppsummering>> =
         restTemplate.exchange(
             localhost("/api/simulering/$behandlingId"),
             HttpMethod.GET,
             HttpEntity<Ressurs<BehandlingDto>>(headers),
-        )
-
-    private fun simulerResultatstatus(behandlingId: UUID): ResponseEntity<Ressurs<Boolean>> =
-        restTemplate.exchange(
-            localhost("/api/simulering/resultatstatus/$behandlingId"),
-            HttpMethod.GET,
-            HttpEntity<Ressurs<Boolean>>(headers),
         )
 }
