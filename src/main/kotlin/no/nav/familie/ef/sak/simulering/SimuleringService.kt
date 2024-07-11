@@ -83,15 +83,13 @@ class SimuleringService(
         )
     }
 
-    fun simuleringOppsummeringerErUlike(saksbehandling: Saksbehandling): Boolean {
-        val lagretSimuleringoppsummering = hentLagretSimuleringsoppsummering(saksbehandling.id)
-        val simulertTilkjentYtelse = simulerMedTilkjentYtelse(saksbehandling).oppsummering
-        return lagretSimuleringoppsummering.ulikEtterbetalingEllerFeilutbetaling(simulertTilkjentYtelse)
+    fun erSimuleringsoppsummeringEndret(saksbehandling: Saksbehandling): Boolean {
+        val lagretSimuleringsoppsummering = hentLagretSimuleringsoppsummering(saksbehandling.id)
+        val nySimuleringoppsummering = simulerMedTilkjentYtelse(saksbehandling).oppsummering
+        return lagretSimuleringsoppsummering.harUlikEtterbetalingEllerFeilutbetaling(nySimuleringoppsummering)
     }
 
-    private fun Simuleringsoppsummering.ulikEtterbetalingEllerFeilutbetaling(simuleringOppsummering: Simuleringsoppsummering): Boolean {
-        return this.etterbetaling != simuleringOppsummering.etterbetaling || this.feilutbetaling != simuleringOppsummering.feilutbetaling
-    }
+    private fun Simuleringsoppsummering.harUlikEtterbetalingEllerFeilutbetaling(simuleringOppsummering: Simuleringsoppsummering): Boolean = this.etterbetaling != simuleringOppsummering.etterbetaling || this.feilutbetaling != simuleringOppsummering.feilutbetaling
 
     private fun simulerMedTilkjentYtelse(saksbehandling: Saksbehandling): BeriketSimuleringsresultat {
         val tilkjentYtelse = tilkjentYtelseService.hentForBehandling(saksbehandling.id)
