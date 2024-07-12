@@ -43,18 +43,18 @@ internal class BrevmottakereServiceTest {
     }
 
     @Test
-    fun `skal feile hvis mer enn 2 brevmottakere`() {
+    fun `skal feile hvis mer enn 4 brevmottakere`() {
         every { brevmottakereRepository.findByIdOrNull(behandling.id) } returns mockk()
 
         val feil =
             assertThrows<ApiFeil> {
                 brevmottakereService.lagreBrevmottakere(
                     behandlingId = behandling.id,
-                    brevmottakereDto = brevmottakereDtoMed3Mottakere,
+                    brevmottakereDto = brevmottakereDtoMed5Mottakere,
                 )
             }
 
-        assertThat(feil.feil).isEqualTo("Vedtaksbrevet kan ikke ha mer enn 2 mottakere")
+        assertThat(feil.feil).isEqualTo("Vedtaksbrevet kan ikke ha mer enn 4 mottakere")
     }
 
     @Test
@@ -152,7 +152,7 @@ internal class BrevmottakereServiceTest {
         assertThat(feil.feil).isEqualTo("En organisasjon kan bare legges til en gang som brevmottaker")
     }
 
-    private val brevmottakereDtoMed3Mottakere =
+    private val brevmottakereDtoMed5Mottakere =
         BrevmottakereDto(
             personer =
                 listOf(
@@ -166,12 +166,22 @@ internal class BrevmottakereServiceTest {
                         "B",
                         BRUKER,
                     ),
+                    BrevmottakerPerson(
+                        "E",
+                        "E",
+                        BRUKER,
+                    ),
                 ),
             organisasjoner =
                 listOf(
                     BrevmottakerOrganisasjon(
                         "C",
                         "C",
+                        FULLMAKT,
+                    ),
+                    BrevmottakerOrganisasjon(
+                        "D",
+                        "D",
                         FULLMAKT,
                     ),
                 ),
