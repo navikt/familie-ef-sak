@@ -153,7 +153,7 @@ internal class SimuleringServiceTest {
 
         val beriketSimuleringsresultat = objectMapper.readValue<BeriketSimuleringsresultat>(readFile("simuleringsresultat_beriket.json"))
         every { iverksettClient.simuler(any()) } returns
-                beriketSimuleringsresultat
+            beriketSimuleringsresultat
 
         every { behandlingService.hentBehandling(any()) } returns behandling
         every { tilkjentYtelseService.hentForBehandling(any()) } returns tilkjentYtelse
@@ -203,7 +203,10 @@ internal class SimuleringServiceTest {
         assertFalse { simuleringService.erSimuleringsoppsummeringEndret(saksbehandling) }
     }
 
-    private fun mockErSimuleringsoppsummeringEndret(lagretSimulering: Simuleringsoppsummering, nySimulering: Simuleringsoppsummering) {
+    private fun mockErSimuleringsoppsummeringEndret(
+        lagretSimulering: Simuleringsoppsummering,
+        nySimulering: Simuleringsoppsummering,
+    ) {
         val behandling = behandling()
         val tilkjentYtelse = tilkjentYtelse(behandlingId = behandling.id, personIdent = personIdent)
 
@@ -214,24 +217,31 @@ internal class SimuleringServiceTest {
         every { iverksettClient.simuler(any()) } returns BeriketSimuleringsresultat(mockk(), nySimulering)
     }
 
-    private fun mockSimuleringsResultat(behandling: Behandling, simuleringsoppsummering: Simuleringsoppsummering? = null) =
+    private fun mockSimuleringsResultat(
+        behandling: Behandling,
+        simuleringsoppsummering: Simuleringsoppsummering? = null,
+    ) =
         Simuleringsresultat(
             behandlingId = behandling.id,
             data = DetaljertSimuleringResultat(emptyList()),
             beriketData = BeriketSimuleringsresultat(mockk(), simuleringsoppsummering ?: mockk()),
         )
 
-    private fun mockSimuleringsoppsummering(etterbetaling: BigDecimal, feilutbetaling: BigDecimal) = Simuleringsoppsummering(
-        perioder = listOf(),
-        fomDatoNestePeriode = null,
-        etterbetaling = etterbetaling,
-        feilutbetaling = feilutbetaling,
-        fom = null,
-        tomDatoNestePeriode = null,
-        forfallsdatoNestePeriode = null,
-        tidSimuleringHentet = null,
-        tomSisteUtbetaling = null,
-    )
+    private fun mockSimuleringsoppsummering(
+        etterbetaling: BigDecimal,
+        feilutbetaling: BigDecimal,
+    ) =
+        Simuleringsoppsummering(
+            perioder = listOf(),
+            fomDatoNestePeriode = null,
+            etterbetaling = etterbetaling,
+            feilutbetaling = feilutbetaling,
+            fom = null,
+            tomDatoNestePeriode = null,
+            forfallsdatoNestePeriode = null,
+            tidSimuleringHentet = null,
+            tomSisteUtbetaling = null,
+        )
 
     private fun readFile(filnavn: String): String = this::class.java.getResource("/json/$filnavn").readText()
 }
