@@ -47,7 +47,7 @@ internal class TilordnetRessursServiceTest {
             every {
                 oppgaveRepository.findByBehandlingIdAndErFerdigstiltIsFalseAndTypeIn(
                     any(),
-                    oppgaveTyper,
+                    oppgaveTyperMedGodkjenneVedtak,
                 )
             } answers { efOppgave(firstArg<UUID>()) }
             every { oppgaveClient.finnOppgaveMedId(any()) } answers { oppgave(firstArg<Long>()) }
@@ -64,7 +64,7 @@ internal class TilordnetRessursServiceTest {
             every {
                 oppgaveRepository.findByBehandlingIdAndErFerdigstiltIsFalseAndTypeIn(
                     any(),
-                    oppgaveTyper,
+                    oppgaveTyperMedGodkjenneVedtak,
                 )
             } returns null
             every { oppgaveClient.finnOppgaveMedId(any()) } answers { oppgave(firstArg<Long>()) }
@@ -270,7 +270,8 @@ internal class TilordnetRessursServiceTest {
     )
 
     companion object {
-        private val oppgaveTyper = setOf(Oppgavetype.BehandleSak, Oppgavetype.BehandleUnderkjentVedtak, Oppgavetype.GodkjenneVedtak)
+        private val oppgaveTyper = setOf(Oppgavetype.BehandleSak, Oppgavetype.BehandleUnderkjentVedtak)
+        private val oppgaveTyperMedGodkjenneVedtak = oppgaveTyper + Oppgavetype.GodkjenneVedtak
 
         private val saksbehandler = Saksbehandler(UUID.randomUUID(), "Z999999", "Darth", "Vader", "4405")
     }
