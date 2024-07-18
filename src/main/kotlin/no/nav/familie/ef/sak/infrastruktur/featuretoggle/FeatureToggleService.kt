@@ -43,6 +43,10 @@ enum class Toggle(
         "familie.ef.sak.automatiske-brev-innhenting-aktivitetsplikt",
         "Operational - sesongavhengig",
     ),
+    FRONTED_VIS_TILDEL_OPPGAVE_BEHANDLING(
+        "familie.ef.sak.frontend-tildel-oppgave-knapp",
+        "Operational - kun preprod",
+    ),
 
     // Permission
     MIGRERING_BARNETILSYN("familie.ef.sak.migrering.barnetilsyn", "Permission"),
