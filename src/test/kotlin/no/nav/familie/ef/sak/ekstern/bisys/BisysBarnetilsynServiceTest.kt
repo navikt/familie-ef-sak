@@ -464,6 +464,8 @@ fun lagAndelHistorikkDto(
     behandlingBarn: List<BehandlingBarn> = emptyList(),
     beløp: Int = 1,
     endring: HistorikkEndring? = null,
+    aktivitet: AktivitetType? = null,
+    periodeType: VedtaksperiodeType? = null,
 ): AndelHistorikkDto =
     AndelHistorikkDto(
         behandlingId = UUID.randomUUID(),
@@ -486,9 +488,9 @@ fun lagAndelHistorikkDto(
                 ),
                 null,
             ).copy(barn = behandlingBarn.map { it.id }),
-        aktivitet = null,
+        aktivitet = aktivitet,
         aktivitetArbeid = null,
-        periodeType = null,
+        periodeType = periodeType,
         erSanksjon = false,
         sanksjonsårsak = null,
         endring = endring,

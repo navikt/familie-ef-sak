@@ -1,12 +1,13 @@
 package no.nav.familie.ef.sak.vedtak.historikk
 
 import no.nav.familie.ef.sak.barn.BarnService
+import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.beregning.Inntekt
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
-import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.tilkjentytelse.AndelsHistorikkService
+import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.ef.sak.vedtak.domain.PeriodetypeBarnetilsyn
 import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
 import no.nav.familie.ef.sak.vedtak.dto.InnvilgelseBarnetilsyn
@@ -29,7 +30,8 @@ class VedtakHistorikkService(
     private val fagsakService: FagsakService,
     private val andelsHistorikkService: AndelsHistorikkService,
     private val barnService: BarnService,
-    private val featureToggleService: FeatureToggleService,
+    private val behandlingService: BehandlingService,
+    private val vedtakService: VedtakService,
 ) {
     fun hentVedtakFraDato(
         behandlingId: UUID,
@@ -37,9 +39,9 @@ class VedtakHistorikkService(
     ): VedtakDto {
         val fagsak = fagsakService.hentFagsakForBehandling(behandlingId)
         return when (fagsak.stønadstype) {
-            StønadType.OVERGANGSSTØNAD -> hentVedtakForOvergangsstønadFraDato(fagsak, fra)
+            StønadType.OVERGANGSSTØNAD -> hentVedtakMedSamordningsfradragType(behandlingId, fagsak, fra)
             StønadType.BARNETILSYN -> hentVedtakForBarnetilsynFraDato(fagsak, behandlingId, fra)
-            StønadType.SKOLEPENGER -> error("Støtter ikke henting av skolepenger ")
+            StønadType.SKOLEPENGER -> error("Støtter ikke henting av skolepenger")
         }
     }
 
@@ -64,6 +66,19 @@ class VedtakHistorikkService(
             inntekter = mapInntekter(historikk, fra),
             samordningsfradragType = null,
         )
+    }
+
+    private fun hentVedtakMedSamordningsfradragType(
+        behandlingId: UUID,
+        fagsak: Fagsak,
+        fra: YearMonth,
+    ): InnvilgelseOvergangsstønad {
+        if (fagsak.stønadstype != StønadType.OVERGANGSSTØNAD) {
+            error("Kan kun utlede samordningsfradragstype på vedtak som gjelder overgangsstønad")
+        }
+        val forrigeBehandlingId = behandlingService.hentBehandling(behandlingId).forrigeBehandlingId
+        val forrigeSamordningsfradragType = forrigeBehandlingId?.let { vedtakService.hentVedtak(it).samordningsfradragType }
+        return hentVedtakForOvergangsstønadFraDato(fagsak, fra).copy(samordningsfradragType = forrigeSamordningsfradragType)
     }
 
     private fun hentVedtakForBarnetilsynFraDato(
