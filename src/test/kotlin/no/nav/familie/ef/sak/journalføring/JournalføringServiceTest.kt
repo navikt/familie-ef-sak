@@ -389,7 +389,6 @@ internal class JournalføringServiceTest {
                 )
             }.hasMessage("Årsak til journalføring må være digital søknad siden det foreligger en digital søknad på journalposten")
         }
-
     }
 
     @Nested
@@ -409,7 +408,7 @@ internal class JournalføringServiceTest {
                 årsak = Journalføringsårsak.PAPIRSØKNAD,
                 aksjon = Journalføringsaksjon.OPPRETT_BEHANDLING,
                 vilkårsbehandleNyeBarn = VilkårsbehandleNyeBarn.IKKE_VALGT,
-                journalpost = ustrukturertJournalpost
+                journalpost = ustrukturertJournalpost,
             )
             verify(exactly = 0) { vurderingService.kopierVurderingerTilNyBehandling(any(), any(), any(), any()) }
         }
@@ -489,7 +488,7 @@ internal class JournalføringServiceTest {
                     årsak = Journalføringsårsak.ETTERSENDING,
                     aksjon = Journalføringsaksjon.OPPRETT_BEHANDLING,
                     vilkårsbehandleNyeBarn = it,
-                    journalpost = ustrukturertJournalpost
+                    journalpost = ustrukturertJournalpost,
                 )
             }
         }
@@ -501,7 +500,7 @@ internal class JournalføringServiceTest {
                 årsak = Journalføringsårsak.ETTERSENDING,
                 aksjon = Journalføringsaksjon.JOURNALFØR_PÅ_FAGSAK,
                 vilkårsbehandleNyeBarn = VilkårsbehandleNyeBarn.IKKE_VALGT,
-                journalpost = ustrukturertJournalpost
+                journalpost = ustrukturertJournalpost,
             )
             verify(exactly = 0) { vurderingService.kopierVurderingerTilNyBehandling(any(), any(), any(), any()) }
         }
@@ -533,7 +532,7 @@ internal class JournalføringServiceTest {
                 årsak = Journalføringsårsak.ETTERSENDING,
                 aksjon = Journalføringsaksjon.OPPRETT_BEHANDLING,
                 vilkårsbehandleNyeBarn = VilkårsbehandleNyeBarn.VILKÅRSBEHANDLE,
-                journalpost = ustrukturertJournalpost
+                journalpost = ustrukturertJournalpost,
             )
             verify(exactly = 1) {
                 vurderingService.kopierVurderingerTilNyBehandling(
@@ -580,7 +579,7 @@ internal class JournalføringServiceTest {
                 årsak = Journalføringsårsak.ETTERSENDING,
                 aksjon = Journalføringsaksjon.OPPRETT_BEHANDLING,
                 vilkårsbehandleNyeBarn = VilkårsbehandleNyeBarn.VILKÅRSBEHANDLE,
-                journalpost = ustrukturertJournalpost
+                journalpost = ustrukturertJournalpost,
             )
             verifyOrder {
                 barnService.opprettBarnPåBehandlingMedSøknadsdata(any(), any(), any(), any(), any(), any(), any())
@@ -620,7 +619,7 @@ internal class JournalføringServiceTest {
                     fullførJournalpost(
                         årsak = Journalføringsårsak.ETTERSENDING,
                         aksjon = Journalføringsaksjon.JOURNALFØR_PÅ_FAGSAK,
-                        vilkårsbehandleNyeBarn = it
+                        vilkårsbehandleNyeBarn = it,
                     )
                 }.hasMessage("Kan ikke vilkårsbehandle nye barn på en eksisterende behandling")
             }
@@ -713,7 +712,7 @@ internal class JournalføringServiceTest {
         årsak: Journalføringsårsak,
         vilkårsbehandleNyeBarn: VilkårsbehandleNyeBarn,
         barnSomSkalFødes: List<BarnSomSkalFødes> = emptyList(),
-        journalpost: Journalpost = journalpostDigitalSøknad
+        journalpost: Journalpost = journalpostDigitalSøknad,
     ) {
         journalføringService.fullførJournalpostV2(
             lagRequest(årsak = årsak, aksjon = aksjon, vilkårsbehandleNyeBarn = vilkårsbehandleNyeBarn, barnSomSkalFødes = barnSomSkalFødes),

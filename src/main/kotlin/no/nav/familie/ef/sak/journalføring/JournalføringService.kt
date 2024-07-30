@@ -97,7 +97,6 @@ class JournalføringService(
         return journalføringRequest.oppgaveId.toLong()
     }
 
-
     private fun journalførSøknadTilNyBehandlingV2(
         journalføringRequest: JournalføringRequestV2,
         journalpost: Journalpost,

@@ -159,7 +159,7 @@ internal class JournalpostControllerTest {
                     oppgaveId = "dummy-oppgave",
                     journalførendeEnhet = "9991",
                     aksjon = Journalføringsaksjon.OPPRETT_BEHANDLING,
-                    årsak = Journalføringsårsak.DIGITAL_SØKNAD
+                    årsak = Journalføringsårsak.DIGITAL_SØKNAD,
                 ),
             )
         }

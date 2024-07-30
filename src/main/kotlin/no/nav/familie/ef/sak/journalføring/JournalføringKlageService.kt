@@ -99,5 +99,4 @@ class JournalføringKlageService(
     private fun ferdigstillJournalføringsoppgave(oppgaveId: Long) {
         oppgaveService.ferdigstillOppgave(oppgaveId)
     }
-
 }

@@ -8,6 +8,10 @@ import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.clearBrukerContext
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.mockBrukerContext
+import no.nav.familie.ef.sak.journalføring.dto.JournalføringRequestV2
+import no.nav.familie.ef.sak.journalføring.dto.Journalføringsaksjon
+import no.nav.familie.ef.sak.journalføring.dto.Journalføringsårsak
+import no.nav.familie.ef.sak.journalføring.dto.NyAvsender
 import no.nav.familie.ef.sak.klage.KlageService
 import no.nav.familie.ef.sak.klage.dto.KlagebehandlingerDto
 import no.nav.familie.ef.sak.oppgave.OppgaveService
@@ -27,10 +31,6 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.familie.ef.sak.journalføring.dto.JournalføringRequestV2
-import no.nav.familie.ef.sak.journalføring.dto.Journalføringsaksjon
-import no.nav.familie.ef.sak.journalføring.dto.Journalføringsårsak
-import no.nav.familie.ef.sak.journalføring.dto.NyAvsender
 
 internal class JournalføringKlageServiceTest {
     private val klageService = mockk<KlageService>()
@@ -94,7 +94,6 @@ internal class JournalføringKlageServiceTest {
 
         @Test
         internal fun `må sende inn mottattDato hvis journalposten mangler mottattDato`() {
-
             assertThatThrownBy {
                 service.fullførJournalpostV2(lagRequest(), lagjournalpost())
             }.hasMessageContaining("Mangler dato mottatt")
@@ -112,7 +111,6 @@ internal class JournalføringKlageServiceTest {
 
             verifyKall(opprettKlageKall = 0)
         }
-
     }
 
     private fun verifyKall(
@@ -127,7 +125,7 @@ internal class JournalføringKlageServiceTest {
         aksjon: Journalføringsaksjon = Journalføringsaksjon.OPPRETT_BEHANDLING,
         årsak: Journalføringsårsak = Journalføringsårsak.KLAGE,
     ) =
-        JournalføringRequestV2(aksjon = aksjon, årsak = årsak, dokumentTitler = emptyMap(), fagsakId = fagsakId, oppgaveId = oppgaveId, journalførendeEnhet =  "enhet", nyAvsender = NyAvsender(erBruker = false, navn = "Fjas", personIdent = null))
+        JournalføringRequestV2(aksjon = aksjon, årsak = årsak, dokumentTitler = emptyMap(), fagsakId = fagsakId, oppgaveId = oppgaveId, journalførendeEnhet = "enhet", nyAvsender = NyAvsender(erBruker = false, navn = "Fjas", personIdent = null))
 
     fun lagjournalpost(mottattDato: LocalDate? = null) =
         Journalpost(

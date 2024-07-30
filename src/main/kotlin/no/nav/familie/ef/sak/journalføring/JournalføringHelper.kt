@@ -26,7 +26,6 @@ import no.nav.familie.kontrakter.felles.journalpost.Journalpost
 import org.springframework.http.HttpStatus
 
 object JournalføringHelper {
-
     fun validerGyldigAvsender(
         journalpost: Journalpost,
         request: JournalføringRequestV2,
