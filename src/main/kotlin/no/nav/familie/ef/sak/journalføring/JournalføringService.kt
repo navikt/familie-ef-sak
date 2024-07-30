@@ -12,21 +12,17 @@ import no.nav.familie.ef.sak.behandlingsflyt.task.OpprettOppgaveForOpprettetBeha
 import no.nav.familie.ef.sak.behandlingsflyt.task.OpprettOppgaveForOpprettetBehandlingTask.OpprettOppgaveTaskData
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
-import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvisIkke
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.iverksett.IverksettService
 import no.nav.familie.ef.sak.journalføring.JournalføringHelper.utledNyAvsender
 import no.nav.familie.ef.sak.journalføring.JournalføringHelper.validerGyldigAvsender
 import no.nav.familie.ef.sak.journalføring.JournalføringHelper.validerJournalføringNyBehandling
-import no.nav.familie.ef.sak.journalføring.JournalføringHelper.validerMottakerFinnes
 import no.nav.familie.ef.sak.journalføring.dto.BarnSomSkalFødes
-import no.nav.familie.ef.sak.journalføring.dto.JournalføringRequest
 import no.nav.familie.ef.sak.journalføring.dto.JournalføringRequestV2
 import no.nav.familie.ef.sak.journalføring.dto.JournalføringTilNyBehandlingRequest
 import no.nav.familie.ef.sak.journalføring.dto.UstrukturertDokumentasjonType
 import no.nav.familie.ef.sak.journalføring.dto.VilkårsbehandleNyeBarn
-import no.nav.familie.ef.sak.journalføring.dto.skalJournalførePåEksisterendeBehandling
 import no.nav.familie.ef.sak.journalføring.dto.valider
 import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
@@ -41,7 +37,6 @@ import no.nav.familie.kontrakter.felles.oppgave.OppgavePrioritet
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.internal.TaskService
 import org.slf4j.LoggerFactory
-import org.springframework.http.HttpStatus.BAD_REQUEST
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
@@ -62,23 +57,6 @@ class JournalføringService(
 ) {
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    @Deprecated("Bruk v2")
-    @Transactional
-    fun fullførJournalpost(
-        journalføringRequest: JournalføringRequest,
-        journalpostId: String,
-    ): Long {
-        journalføringRequest.valider()
-        val journalpost = journalpostService.hentJournalpost(journalpostId)
-        validerMottakerFinnes(journalpost)
-
-        return if (journalføringRequest.skalJournalførePåEksisterendeBehandling()) {
-            journalførSøknadTilEksisterendeBehandling(journalføringRequest, journalpost)
-        } else {
-            journalførSøknadTilNyBehandling(journalføringRequest, journalpost)
-        }
-    }
-
     @Transactional
     fun fullførJournalpostV2(
         journalføringRequest: JournalføringRequestV2,
@@ -93,30 +71,6 @@ class JournalføringService(
         } else {
             journalførSøknadTilEksisterendeBehandlingV2(journalføringRequest, journalpost)
         }
-    }
-
-    @Deprecated("Bruk v2")
-    private fun journalførSøknadTilEksisterendeBehandling(
-        journalføringRequest: JournalføringRequest,
-        journalpost: Journalpost,
-    ): Long {
-        val saksbehandler = SikkerhetContext.hentSaksbehandler()
-        val behandling: Behandling = hentBehandling(journalføringRequest)
-        val fagsak = fagsakService.fagsakMedOppdatertPersonIdent(journalføringRequest.fagsakId)
-        logger.info(
-            "Journalfører journalpost=${journalpost.journalpostId} på eksisterende behandling=${behandling.id} på " +
-                "fagsak=${fagsak.id} stønadstype=${fagsak.stønadstype} ",
-        )
-        knyttJournalpostTilBehandling(journalpost, behandling)
-        journalpostService.oppdaterOgFerdigstillJournalpost(
-            journalpost = journalpost,
-            dokumenttitler = journalføringRequest.dokumentTitler,
-            journalførendeEnhet = journalføringRequest.journalførendeEnhet,
-            fagsak = fagsak,
-            saksbehandler = saksbehandler,
-        )
-        ferdigstillJournalføringsoppgave(journalføringRequest.oppgaveId.toLong())
-        return journalføringRequest.oppgaveId.toLong()
     }
 
     private fun journalførSøknadTilEksisterendeBehandlingV2(
@@ -143,52 +97,6 @@ class JournalføringService(
         return journalføringRequest.oppgaveId.toLong()
     }
 
-    @Deprecated("Bruk v2")
-    private fun journalførSøknadTilNyBehandling(
-        journalføringRequest: JournalføringRequest,
-        journalpost: Journalpost,
-    ): Long {
-        val saksbehandler = SikkerhetContext.hentSaksbehandler()
-        val behandlingstype =
-            journalføringRequest.behandling.behandlingstype
-                ?: throw ApiFeil("Kan ikke journalføre til ny behandling uten behandlingstype", BAD_REQUEST)
-        val fagsak = fagsakService.fagsakMedOppdatertPersonIdent(journalføringRequest.fagsakId)
-        logger.info(
-            "Journalfører journalpost=${journalpost.journalpostId} på ny behandling på " +
-                "fagsak=${fagsak.id} stønadstype=${fagsak.stønadstype} " +
-                " vilkårsbehandleNyeBarn=${journalføringRequest.vilkårsbehandleNyeBarn} " +
-                " dokumentasjonstype=${journalføringRequest.behandling.ustrukturertDokumentasjonType}",
-        )
-        validerJournalføringNyBehandling(
-            journalpost,
-            journalføringRequest,
-        )
-
-        infotrygdPeriodeValideringService.validerKanOppretteBehandlingGittInfotrygdData(fagsak)
-
-        val behandling =
-            opprettBehandlingOgPopulerGrunnlagsdata(
-                behandlingstype = behandlingstype,
-                fagsak = fagsak,
-                journalpost = journalpost,
-                barnSomSkalFødes = journalføringRequest.barnSomSkalFødes,
-                ustrukturertDokumentasjonType = journalføringRequest.behandling.ustrukturertDokumentasjonType,
-                vilkårsbehandleNyeBarn = journalføringRequest.vilkårsbehandleNyeBarn,
-            )
-
-        journalpostService.oppdaterOgFerdigstillJournalpost(
-            journalpost = journalpost,
-            dokumenttitler = journalføringRequest.dokumentTitler,
-            journalførendeEnhet = journalføringRequest.journalførendeEnhet,
-            fagsak = fagsak,
-            saksbehandler = saksbehandler,
-        )
-
-        ferdigstillJournalføringsoppgave(journalføringRequest.oppgaveId.toLong())
-        opprettBehandlingsstatistikkTask(behandling.id, journalføringRequest.oppgaveId.toLong())
-
-        return opprettBehandleSakOppgave(behandling, saksbehandler)
-    }
 
     private fun journalførSøknadTilNyBehandlingV2(
         journalføringRequest: JournalføringRequestV2,
@@ -402,12 +310,6 @@ class JournalføringService(
     private fun ferdigstillJournalføringsoppgave(oppgaveId: Long) {
         oppgaveService.ferdigstillOppgave(oppgaveId)
     }
-
-    private fun hentBehandling(journalføringRequest: JournalføringRequest): Behandling =
-        hentEksisterendeBehandling(journalføringRequest.behandling.behandlingsId)
-            ?: error("Finner ikke behandling med id=${journalføringRequest.behandling.behandlingsId}")
-
-    private fun hentEksisterendeBehandling(behandlingId: UUID?): Behandling? = behandlingId?.let { behandlingService.hentBehandling(it) }
 
     private fun knyttJournalpostTilBehandling(
         journalpost: Journalpost,
