@@ -43,6 +43,14 @@ class FagsakController(
         return Ressurs.success(fagsakService.hentFagsakMedBehandlinger(fagsakId))
     }
 
+    @GetMapping("/behandling/{behandlingId}")
+    fun hentFagsakForBehandling(
+        @PathVariable behandlingId: UUID,
+    ): Ressurs<FagsakDto> {
+        tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.ACCESS)
+        return Ressurs.success(fagsakService.hentFagsakDtoForBehandling(behandlingId))
+    }
+
     @GetMapping("/ekstern/{eksternFagsakId}")
     fun hentFagsak(
         @PathVariable eksternFagsakId: Long,
