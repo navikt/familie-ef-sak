@@ -45,23 +45,6 @@ class FagsakPersonController(
         )
     }
 
-    @GetMapping("{fagsakPersonId}/utvidet")
-    fun hentFagsakPersonUtvidet(
-        @PathVariable fagsakPersonId: UUID,
-    ): Ressurs<FagsakPersonDto> {
-        tilgangService.validerTilgangTilFagsakPerson(fagsakPersonId, AuditLoggerEvent.ACCESS)
-        val person = fagsakPersonService.hentPerson(fagsakPersonId)
-        val fagsaker = fagsakService.finnFagsakerForFagsakPersonId(person.id)
-        return Ressurs.success(
-            FagsakPersonDto(
-                person.id,
-                overgangsstønad = fagsaker.overgangsstønad?.let { fagsakService.fagsakTilDto(it) },
-                barnetilsyn = fagsaker.barnetilsyn?.let { fagsakService.fagsakTilDto(it) },
-                skolepenger = fagsaker.skolepenger?.let { fagsakService.fagsakTilDto(it) },
-            ),
-        )
-    }
-
     @PostMapping
     fun hentFagsakPersonIdForPerson(
         @RequestBody personIdentRequest: PersonIdentDto,
