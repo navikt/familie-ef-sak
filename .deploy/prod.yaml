@@ -64,9 +64,6 @@ spec:
         - application: bidrag-grunnlag
           namespace: bidrag
           cluster: prod-gcp
-        - application: tiltakspenger-overgangsstonad
-          namespace: tpts
-          cluster: prod-gcp
         - application: tilleggsstonader-integrasjoner
           namespace: tilleggsstonader
     outbound:
