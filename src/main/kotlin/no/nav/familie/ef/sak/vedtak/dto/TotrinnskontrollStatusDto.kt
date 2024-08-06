@@ -37,4 +37,5 @@ enum class ÅrsakUnderkjent {
     SIMULERING,
     VEDTAKSBREV,
     RETUR_ETTER_ØNSKE_FRA_SAKSBEHANDLER,
+    SIMULERING_ENDRET,
 }

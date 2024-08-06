@@ -41,7 +41,7 @@ class TilordnetRessursService(
 
     fun hentIkkeFerdigstiltOppgaveForBehandling(
         behandlingId: UUID,
-        oppgavetyper: Set<Oppgavetype> = setOf(Oppgavetype.BehandleSak, Oppgavetype.BehandleUnderkjentVedtak),
+        oppgavetyper: Set<Oppgavetype> = setOf(Oppgavetype.BehandleSak, Oppgavetype.BehandleUnderkjentVedtak, Oppgavetype.GodkjenneVedtak),
     ): Oppgave? =
         hentEFOppgaveSomIkkeErFerdigstilt(behandlingId, oppgavetyper)
             ?.let { oppgaveClient.finnOppgaveMedId(it.gsakOppgaveId) }

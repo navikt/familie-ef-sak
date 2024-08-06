@@ -55,9 +55,9 @@ class BehandlingsoppgaveService(
     }
 
     private fun loggManglerOppgave(fagsakerMedÅpenBehandlingSomManglerOppgave: List<String>) {
-        logger.info("Fagsak med åpen behandling uten oppgave antall ${fagsakerMedÅpenBehandlingSomManglerOppgave.size}")
+        logger.info("Antall fagsaker med åpen behandling uten tilhørende oppgave: ${fagsakerMedÅpenBehandlingSomManglerOppgave.size}")
         fagsakerMedÅpenBehandlingSomManglerOppgave.forEach {
-            logger.warn("Fagsaker med åpen behandling uten oppgave: $it")
+            logger.warn("Ekstern-fagsak-id for fagsak med åpen behandling uten tilhørende oppgave: $it")
         }
     }
 

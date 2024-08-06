@@ -23,6 +23,7 @@ class FeatureToggleController(
             Toggle.FRONTEND_SATSENDRING,
             Toggle.FRONTEND_TILBAKEKREVING_UNDER_4X_RETTSGEBYR,
             Toggle.HENLEGG_BEHANDLING_UTEN_OPPGAVE,
+            Toggle.FRONTED_VIS_TILDEL_OPPGAVE_BEHANDLING,
         )
 
     @GetMapping

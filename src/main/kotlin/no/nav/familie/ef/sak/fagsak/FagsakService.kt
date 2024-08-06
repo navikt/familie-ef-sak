@@ -147,6 +147,8 @@ class FagsakService(
         gjeldendePersonIdent: PdlIdent,
     ) = fagsakPersonService.oppdaterIdent(person, gjeldendePersonIdent.ident)
 
+    fun hentFagsakDtoForBehandling(behandlingId: UUID) = fagsakTilDto(hentFagsakForBehandling(behandlingId))
+
     fun hentFagsakForBehandling(behandlingId: UUID): Fagsak =
         fagsakRepository.finnFagsakTilBehandling(behandlingId)?.tilFagsakMedPerson()
             ?: throw Feil("Finner ikke fagsak til behandlingId=$behandlingId")

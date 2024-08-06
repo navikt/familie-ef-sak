@@ -10,8 +10,6 @@ import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.infrastruktur.exception.ManglerTilgang
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
-import no.nav.familie.ef.sak.journalføring.dto.JournalføringBehandling
-import no.nav.familie.ef.sak.journalføring.dto.JournalføringRequest
 import no.nav.familie.ef.sak.journalføring.dto.JournalføringRequestV2
 import no.nav.familie.ef.sak.journalføring.dto.Journalføringsaksjon
 import no.nav.familie.ef.sak.journalføring.dto.Journalføringsårsak
@@ -153,14 +151,15 @@ internal class JournalpostControllerTest {
         } throws ManglerTilgang("Bruker mangler tilgang", "Mangler tilgang til bruker")
 
         assertThrows<ManglerTilgang> {
-            journalpostController.fullførJournalpost(
+            journalpostController.fullførJournalpostV2(
                 journalpostMedFødselsnummer.journalpostId,
-                JournalføringRequest(
-                    null,
-                    UUID.randomUUID(),
-                    "dummy-oppgave",
-                    JournalføringBehandling(UUID.randomUUID()),
-                    "9991",
+                JournalføringRequestV2(
+                    dokumentTitler = null,
+                    fagsakId = UUID.randomUUID(),
+                    oppgaveId = "dummy-oppgave",
+                    journalførendeEnhet = "9991",
+                    aksjon = Journalføringsaksjon.OPPRETT_BEHANDLING,
+                    årsak = Journalføringsårsak.DIGITAL_SØKNAD,
                 ),
             )
         }

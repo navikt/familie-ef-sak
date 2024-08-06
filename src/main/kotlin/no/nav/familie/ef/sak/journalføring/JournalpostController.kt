@@ -7,8 +7,6 @@ import no.nav.familie.ef.sak.infrastruktur.exception.feilHvisIkke
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
-import no.nav.familie.ef.sak.journalføring.dto.JournalføringKlageRequest
-import no.nav.familie.ef.sak.journalføring.dto.JournalføringRequest
 import no.nav.familie.ef.sak.journalføring.dto.JournalføringRequestV2
 import no.nav.familie.ef.sak.journalføring.dto.JournalføringResponse
 import no.nav.familie.ef.sak.journalføring.dto.JournalføringTilNyBehandlingRequest
@@ -79,18 +77,6 @@ class JournalpostController(
         return journalpostService.hentDokument(journalpostId, dokumentInfoId)
     }
 
-    @Deprecated("Bruk v2")
-    @PostMapping("/{journalpostId}/fullfor")
-    fun fullførJournalpost(
-        @PathVariable journalpostId: String,
-        @RequestBody journalføringRequest: JournalføringRequest,
-    ): Ressurs<Long> {
-        val (_, personIdent) = finnJournalpostOgPersonIdent(journalpostId)
-        tilgangService.validerTilgangTilPersonMedBarn(personIdent, AuditLoggerEvent.UPDATE)
-        tilgangService.validerHarSaksbehandlerrolle()
-        return Ressurs.success(journalføringService.fullførJournalpost(journalføringRequest, journalpostId))
-    }
-
     @PostMapping("/{journalpostId}/fullfor/v2")
     fun fullførJournalpostV2(
         @PathVariable journalpostId: String,
@@ -105,19 +91,6 @@ class JournalpostController(
         } else {
             journalføringService.fullførJournalpostV2(journalføringRequest, journalpost)
         }
-        return Ressurs.success(journalpostId)
-    }
-
-    @Deprecated("Bruk V2 - den skal dekke både klage og vanlig journalføring")
-    @PostMapping("/{journalpostId}/klage/fullfor")
-    fun fullførJournalpostKlage(
-        @PathVariable journalpostId: String,
-        @RequestBody journalføringRequest: JournalføringKlageRequest,
-    ): Ressurs<String> {
-        val (_, personIdent) = finnJournalpostOgPersonIdent(journalpostId)
-        tilgangService.validerTilgangTilPersonMedBarn(personIdent, AuditLoggerEvent.UPDATE)
-        tilgangService.validerHarSaksbehandlerrolle()
-        journalføringKlageService.fullførJournalpost(journalføringRequest, journalpostId)
         return Ressurs.success(journalpostId)
     }
 
