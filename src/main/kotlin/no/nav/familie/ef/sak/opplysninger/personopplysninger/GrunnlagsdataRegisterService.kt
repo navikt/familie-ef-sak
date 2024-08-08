@@ -6,6 +6,7 @@ import no.nav.familie.ef.sak.kontantstøtte.KontantstøtteService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.GrunnlagsdataDomene
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.Personopplysninger
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.TidligereVedtaksperioder
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.fullmakt.FullmaktService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper.GrunnlagsdataMapper.mapAnnenForelder
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper.GrunnlagsdataMapper.mapBarn
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper.GrunnlagsdataMapper.mapSøker
@@ -24,6 +25,7 @@ class GrunnlagsdataRegisterService(
     private val tidligereVedtaksperioderService: TidligereVedtaksperioderService,
     private val arbeidsforholdService: ArbeidsforholdService,
     private val kontantstøtteService: KontantstøtteService,
+    private val fullmaktService: FullmaktService,
 ) {
     fun hentGrunnlagsdataFraRegister(
         personIdent: String,
@@ -65,12 +67,13 @@ class GrunnlagsdataRegisterService(
         barneforeldreFraSøknad: List<String>,
     ): GrunnlagsdataFraPdl {
         val søker = personService.hentSøker(personIdent)
-        val barn = hentPdlBarn(søker)
+        val søkerMedFullmakt = søker.copy(fullmakt = fullmaktService.hentFullmakt(personIdent))
+        val barn = hentPdlBarn(søkerMedFullmakt)
         val andreForeldre = hentPdlBarneForeldre(barn, personIdent, barneforeldreFraSøknad)
-        val dataTilAndreIdenter = hentDataTilAndreIdenter(søker)
+        val dataTilAndreIdenter = hentDataTilAndreIdenter(søkerMedFullmakt)
 
         return GrunnlagsdataFraPdl(
-            søker = søker,
+            søker = søkerMedFullmakt,
             barn = barn,
             barneForeldre = andreForeldre,
             andrePersoner = dataTilAndreIdenter,
@@ -109,7 +112,7 @@ class GrunnlagsdataRegisterService(
     private fun hentDataTilAndreIdenter(pdlSøker: PdlSøker): Map<String, PdlPersonKort> {
         val andreIdenter =
             pdlSøker.sivilstand.mapNotNull { it.relatertVedSivilstand } +
-                pdlSøker.fullmakt.map { it.motpartsPersonident } +
+                (pdlSøker.fullmakt?.map { it.motpartsPersonident } ?: emptyList()) +
                 pdlSøker.vergemaalEllerFremtidsfullmakt.mapNotNull { it.vergeEllerFullmektig.motpartsPersonident }
         if (andreIdenter.isEmpty()) return emptyMap()
         return personService.hentPersonKortBolk(andreIdenter)

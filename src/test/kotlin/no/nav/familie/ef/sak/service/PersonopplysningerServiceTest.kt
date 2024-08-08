@@ -16,10 +16,13 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerI
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.TidligereVedtaksperioderService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.egenansatt.EgenAnsattClient
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.fullmakt.FullmaktService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper.AdresseMapper
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper.InnflyttingUtflyttingMapper
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper.PersonopplysningerMapper
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper.StatsborgerskapMapper
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Fullmakt
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.MotpartsRolle
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
 import no.nav.familie.kontrakter.felles.medlemskap.Medlemskapsinfo
 import no.nav.familie.kontrakter.felles.objectMapper
@@ -27,6 +30,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.cache.concurrent.ConcurrentMapCacheManager
+import java.time.LocalDate
 
 internal class PersonopplysningerServiceTest {
     private val kodeverkService = KodeverkServiceMock().kodeverkService()
@@ -40,6 +44,7 @@ internal class PersonopplysningerServiceTest {
     private lateinit var behandlingService: BehandlingService
     private lateinit var arbeidsforholdService: ArbeidsforholdService
     private lateinit var kontantstøtteService: KontantstøtteService
+    private lateinit var fullmaktService: FullmaktService
 
     private val tidligereVedtaksperioderService = mockk<TidligereVedtaksperioderService>(relaxed = true)
 
@@ -52,13 +57,15 @@ internal class PersonopplysningerServiceTest {
         egenAnsattClient = mockk()
         arbeidsforholdService = mockk(relaxed = true)
         kontantstøtteService = mockk()
+        fullmaktService = mockk()
+
         val personService = PersonService(PdlClientConfig().pdlClient(), ConcurrentMapCacheManager())
         every { egenAnsattClient.egenAnsatt(any()) } returns true
         every { kontantstøtteService.finnesKontantstøtteUtbetalingerPåBruker(any()) } returns
             HentUtbetalingsinfoKontantstøtteDto(
                 finnesUtbetaling = false,
             )
-
+        every { fullmaktService.hentFullmakt(any()) } returns listOf(Fullmakt(LocalDate.of(2020, 1, 1), LocalDate.of(2021, 1, 1), "11111133333", MotpartsRolle.FULLMEKTIG, listOf()))
         val grunnlagsdataRegisterService =
             GrunnlagsdataRegisterService(
                 personService,
@@ -66,6 +73,7 @@ internal class PersonopplysningerServiceTest {
                 tidligereVedtaksperioderService,
                 arbeidsforholdService,
                 kontantstøtteService,
+                fullmaktService,
             )
 
         grunnlagsdataService =
