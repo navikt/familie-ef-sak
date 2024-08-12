@@ -134,10 +134,10 @@ object PdlTestdataHelper {
         Fødsel(
             fødselsår = fødselsdato.year,
             fødselsdato = fødselsdato,
-            metadata = metadataGjeldende,
             fødested = null,
             fødekommune = null,
             fødeland = null,
+            metadata = Metadata(historisk = false),
         )
 
     fun ukjentBostedsadresse(

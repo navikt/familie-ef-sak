@@ -65,8 +65,8 @@ object PdlTestdata {
     private val familierelasjon =
         listOf(ForelderBarnRelasjon("", Familierelasjonsrolle.BARN, Familierelasjonsrolle.FAR))
 
-    private val fødselsdato = listOf(Fødselsdato(1995, LocalDate.now(), metadataGjeldende))
-    private val fødested = listOf(Fødested(null, null, null, metadataGjeldende))
+    private val fødselsdato = listOf(Fødselsdato(1995, LocalDate.now()))
+    private val fødested = listOf(Fødested(null, null, null))
 
     private val opphold = listOf(Opphold(Oppholdstillatelse.MIDLERTIDIG, LocalDate.now(), LocalDate.now()))
 
