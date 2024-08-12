@@ -1,6 +1,5 @@
 package no.nav.familie.ef.sak.opplysninger.personopplysninger.domene
 
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Metadata
 import java.time.LocalDate
 
 data class Fødsel(
@@ -9,7 +8,6 @@ data class Fødsel(
     val fødeland: String?,
     val fødested: String?,
     val fødekommune: String?,
-    val metadata: Metadata,
 ) {
     fun erUnder18År() =
         this.fødselsdato?.let { LocalDate.now() < it.plusYears(18) }

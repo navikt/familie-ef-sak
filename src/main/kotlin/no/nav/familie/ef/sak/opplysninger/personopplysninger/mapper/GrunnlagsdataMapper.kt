@@ -13,7 +13,6 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.Sivilstandstype
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Fødested
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Fødselsdato
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.KjønnType
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Metadata
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlAnnenForelder
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlPersonForelderBarn
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlPersonKort
@@ -66,7 +65,7 @@ object GrunnlagsdataMapper {
     fun mapFødsel(
         fødselsdato: Fødselsdato,
         fødested: Fødested,
-    ): Fødsel = Fødsel(fødselsdato.fødselsår, fødselsdato.fødselsdato, fødested.fødeland, fødested.fødested, fødested.fødekommune, Metadata(historisk = fødselsdato.metadata.historisk))
+    ): Fødsel = Fødsel(fødselsdato.fødselsår, fødselsdato.fødselsdato, fødested.fødeland, fødested.fødested, fødested.fødekommune)
 
     fun mapFødsler(
         fødselsdato: List<Fødselsdato>,

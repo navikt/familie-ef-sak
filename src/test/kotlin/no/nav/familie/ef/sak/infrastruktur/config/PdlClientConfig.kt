@@ -27,7 +27,6 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.KjønnType
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Kontaktadresse
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.KontaktadresseType
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Koordinater
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Metadata
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.MotpartsRolle
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Navn
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Opphold
@@ -193,7 +192,7 @@ class PdlClientConfig {
                 forelderBarnRelasjon = forelderBarnRelasjoner(),
                 folkeregisteridentifikator = listOf(folkeregisteridentifikatorSøker),
                 fødselsdato = listOf(fødselsdato(2018, LocalDate.of(2018, 1, 1))),
-                fødested = listOf(Fødested("Norge", "Oslo", "Oslo", Metadata(historisk = false))),
+                fødested = listOf(Fødested("Norge", "Oslo", "Oslo")),
                 folkeregisterpersonstatus =
                     listOf(
                         Folkeregisterpersonstatus(
@@ -270,7 +269,7 @@ class PdlClientConfig {
                 bostedsadresse = bostedsadresse(Koordinater(x = 598845f, y = 6643333f, z = null, kvalitet = null)),
                 dødsfall = listOf(Dødsfall(LocalDate.of(2021, 9, 22))),
                 fødselsdato = listOf(fødselsdato(1994, LocalDate.of(1994, 11, 11))),
-                fødested = listOf(Fødested(null, null, null, Metadata(historisk = false))),
+                fødested = listOf(Fødested(null, null, null)),
                 navn = listOf(Navn("Bob", "", "Burger", metadataGjeldende)),
                 folkeregisteridentifikator =
                     listOf(

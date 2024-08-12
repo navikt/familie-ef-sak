@@ -122,13 +122,13 @@ object PdlTestdataHelper {
     fun fødselsdato(
         år: Int? = 2018,
         dato: LocalDate?,
-    ): Fødselsdato = Fødselsdato(år, dato, Metadata(historisk = false))
+    ): Fødselsdato = Fødselsdato(år, dato)
 
     fun fødested(
         fødeland: String?,
         fødested: String?,
         fødekommune: String?,
-    ): Fødested = Fødested(fødeland, fødested, fødekommune, Metadata(historisk = false))
+    ): Fødested = Fødested(fødeland, fødested, fødekommune)
 
     fun fødsel(fødselsdato: LocalDate) =
         Fødsel(

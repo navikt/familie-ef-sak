@@ -387,7 +387,6 @@ enum class AdressebeskyttelseGradering {
 data class Fødselsdato(
     @JsonProperty("foedselsaar") val fødselsår: Int?,
     @JsonProperty("foedselsdato") val fødselsdato: LocalDate?,
-    val metadata: Metadata,
 ) {
     fun erUnder18År() =
         this.fødselsdato?.let { LocalDate.now() < it.plusYears(18) }
@@ -399,7 +398,6 @@ data class Fødested(
     @JsonProperty("foedeland") val fødeland: String?,
     @JsonProperty("foedested") val fødested: String?,
     @JsonProperty("foedekommune") val fødekommune: String?,
-    val metadata: Metadata,
 )
 
 data class Dødsfall(

@@ -104,10 +104,9 @@ type FalskIdentitetIdentifiserendeInformasjon {
     statsborgerskap: [String!]!
 }
 
-type Foedsel {
+type Foedselsdato {
     foedselsaar: Int,
     foedselsdato: LocalDate,
-    metadata: Metadata!,
 }
 
 type Foedested {

@@ -60,9 +60,6 @@ query($ident: ID!){
         foedselsdato {
             foedselsaar
             foedselsdato
-            metadata {
-                historisk
-            }
         }
         foedested {
             foedeland

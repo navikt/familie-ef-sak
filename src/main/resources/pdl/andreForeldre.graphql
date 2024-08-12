@@ -58,17 +58,11 @@ query($identer: [ID!]!){
             foedselsdato {
                 foedselsaar
                 foedselsdato
-                metadata {
-                    historisk
-                }
             }
             foedested {
                 foedeland
                 foedested
                 foedekommune
-                metadata {
-                    historisk
-                }
             }
             folkeregisteridentifikator(historikk: true) {
                 identifikasjonsnummer

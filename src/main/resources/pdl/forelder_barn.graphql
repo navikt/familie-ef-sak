@@ -89,17 +89,11 @@ query($identer: [ID!]!){
             foedselsdato {
                 foedselsaar
                 foedselsdato
-                metadata {
-                    historisk
-                }
             }
             foedested {
                 foedeland
                 foedested
                 foedekommune
-                metadata {
-                    historisk
-                }
             }
             navn {
                 fornavn

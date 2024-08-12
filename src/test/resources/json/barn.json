@@ -48,9 +48,6 @@
             {
               "foedselsaar": 1966,
               "foedselsdato": "1966-11-18",
-              "metadata": {
-                "historisk": false
-              }
             }
           ],
           "foedested": [
@@ -58,9 +55,6 @@
               "foedeland": "Norge",
               "foedested": "Oslo",
               "foedekommune": "Oslo",
-              "metadata": {
-                "historisk": false
-              }
             }
           ],
           "navn": [
