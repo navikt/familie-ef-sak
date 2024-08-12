@@ -66,7 +66,7 @@ object GrunnlagsdataMapper {
     fun mapFødsel(
         fødselsdato: Fødselsdato,
         fødested: Fødested,
-    ): Fødsel = Fødsel(fødselsdato.fødselsår, fødselsdato.fødselsdato, fødested.fødeland, fødested.fødested, fødested.fødekommune, Metadata(historisk = false))
+    ): Fødsel = Fødsel(fødselsdato.fødselsår, fødselsdato.fødselsdato, fødested.fødeland, fødested.fødested, fødested.fødekommune, Metadata(historisk = fødselsdato.metadata.historisk))
 
     fun mapFødsler(
         fødselsdato: List<Fødselsdato>,
