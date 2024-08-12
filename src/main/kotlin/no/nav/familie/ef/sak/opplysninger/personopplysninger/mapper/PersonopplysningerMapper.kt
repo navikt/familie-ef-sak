@@ -6,6 +6,7 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.BarnMedIdent
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.GrunnlagsdataMedMetadata
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.Personopplysninger
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.Søker
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.gjeldende
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.AdresseDto
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.Adressebeskyttelse
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.AnnenForelderMinimumDto
@@ -52,7 +53,7 @@ class PersonopplysningerMapper(
                 søker.folkeregisterpersonstatus
                     .gjeldende()
                     ?.let { Folkeregisterpersonstatus.fraPdl(it) },
-            fødselsdato = søker.fødsel.gjeldende().fødselsdato,
+            fødselsdato = søker.fødsel?.gjeldende()?.fødselsdato,
             dødsdato = søker.dødsfall?.dødsdato,
             navn = NavnDto.fraNavn(søker.navn),
             kjønn = KjønnMapper.tilKjønn(søker.kjønn),

@@ -21,11 +21,13 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Folkeregisterme
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Folkeregisterpersonstatus
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.ForelderBarnRelasjon
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Fullmakt
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Fødested
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.InnflyttingTilNorge
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.KjønnType
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Kontaktadresse
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.KontaktadresseType
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Koordinater
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Metadata
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.MotpartsRolle
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Navn
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Opphold
@@ -46,6 +48,7 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Vegadresse
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.VergeEllerFullmektig
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.VergemaalEllerFremtidsfullmakt
 import no.nav.familie.ef.sak.testutil.PdlTestdataHelper.fødsel
+import no.nav.familie.ef.sak.testutil.PdlTestdataHelper.fødselsdato
 import no.nav.familie.ef.sak.testutil.PdlTestdataHelper.lagKjønn
 import no.nav.familie.ef.sak.testutil.PdlTestdataHelper.lagNavn
 import no.nav.familie.ef.sak.testutil.PdlTestdataHelper.metadataGjeldende
@@ -189,7 +192,8 @@ class PdlClientConfig {
                 dødsfall = listOf(),
                 forelderBarnRelasjon = forelderBarnRelasjoner(),
                 folkeregisteridentifikator = listOf(folkeregisteridentifikatorSøker),
-                fødsel = listOf(fødsel()),
+                fødselsdato = listOf(fødselsdato(2018, LocalDate.of(2018, 1, 1))),
+                fødested = listOf(Fødested("Norge", "Oslo", "Oslo", Metadata(historisk = false))),
                 folkeregisterpersonstatus =
                     listOf(
                         Folkeregisterpersonstatus(
@@ -265,7 +269,8 @@ class PdlClientConfig {
                 adressebeskyttelse = emptyList(),
                 bostedsadresse = bostedsadresse(Koordinater(x = 598845f, y = 6643333f, z = null, kvalitet = null)),
                 dødsfall = listOf(Dødsfall(LocalDate.of(2021, 9, 22))),
-                fødsel = listOf(fødsel(1994, 11, 1)),
+                fødselsdato = listOf(fødselsdato(1994, LocalDate.of(1994, 11, 11))),
+                fødested = listOf(Fødested(null, null, null, Metadata(historisk = false))),
                 navn = listOf(Navn("Bob", "", "Burger", metadataGjeldende)),
                 folkeregisteridentifikator =
                     listOf(

@@ -10,9 +10,9 @@ import no.nav.familie.ef.sak.felles.util.opprettBarnMedIdent
 import no.nav.familie.ef.sak.felles.util.opprettGrunnlagsdata
 import no.nav.familie.ef.sak.iverksett.oppgaveforbarn.OpprettOppgavePayload
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.Fødsel
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.GrunnlagsdataMedMetadata
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.BarnMinimumDto
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Fødsel
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Metadata
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak

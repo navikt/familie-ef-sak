@@ -86,9 +86,14 @@ query($identer: [ID!]!){
                 relatertPersonsRolle
                 minRolleForPerson
             }
-            foedsel {
+            foedselsdato {
                 foedselsaar
                 foedselsdato
+                metadata {
+                    historisk
+                }
+            }
+            foedested {
                 foedeland
                 foedested
                 foedekommune

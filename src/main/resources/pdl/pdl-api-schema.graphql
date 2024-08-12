@@ -105,13 +105,15 @@ type FalskIdentitetIdentifiserendeInformasjon {
 }
 
 type Foedsel {
-    foedekommune: String
-    foedeland: String
-    foedested: String
-    foedselsaar: Int
-    foedselsdato: Date
-    folkeregistermetadata: Folkeregistermetadata
-    metadata: Metadata!
+    foedselsaar: Int,
+    foedselsdato: LocalDate,
+    metadata: Metadata!,
+}
+
+type Foedested {
+    foedeland: String?,
+    foedested: String?,
+    foedekommune: String?,
 }
 
 type Folkeregisteridentifikator {

@@ -24,7 +24,9 @@ fun List<Oppholdsadresse>.gjeldende(): Oppholdsadresse? = this.find { !it.metada
 
 fun List<Sivilstand>.gjeldende(): Sivilstand = this.find { !it.metadata.historisk } ?: this.first()
 
-fun List<Fødsel>.gjeldende(): Fødsel = this.first()
+fun List<Fødselsdato>.gjeldende(): Fødselsdato = this.first()
+
+fun List<Fødested>.gjeldende(): Fødested = this.first()
 
 fun List<DeltBosted>.gjeldende(): DeltBosted? = this.find { !it.metadata.historisk }
 

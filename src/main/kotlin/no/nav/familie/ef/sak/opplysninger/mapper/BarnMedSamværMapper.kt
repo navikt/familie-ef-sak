@@ -3,6 +3,7 @@ package no.nav.familie.ef.sak.opplysninger.mapper
 import no.nav.familie.ef.sak.barn.BehandlingBarn
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.AnnenForelderMedIdent
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.BarnMedIdent
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.gjeldende
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.DeltBostedDto
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.Folkeregisterpersonstatus
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper.AdresseHjelper

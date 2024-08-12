@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.testutil
 
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.Fødsel
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Adressebeskyttelse
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Bostedsadresse
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.DeltBosted
@@ -9,7 +10,8 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Folkeregisterid
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Folkeregisterpersonstatus
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.ForelderBarnRelasjon
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Fullmakt
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Fødsel
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Fødested
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Fødselsdato
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.InnflyttingTilNorge
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Kjønn
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.KjønnType
@@ -51,7 +53,8 @@ object PdlTestdataHelper {
         bostedsadresse: List<Bostedsadresse> = emptyList(),
         dødsfall: List<Dødsfall> = emptyList(),
         forelderBarnRelasjon: List<ForelderBarnRelasjon> = emptyList(),
-        fødsel: List<Fødsel> = emptyList(),
+        fødselsdato: List<Fødselsdato> = emptyList(),
+        fødested: List<Fødested> = emptyList(),
         folkeregisterpersonstatus: List<Folkeregisterpersonstatus> = emptyList(),
         fullmakt: List<Fullmakt> = emptyList(),
         kjønn: Kjønn? = null,
@@ -72,7 +75,8 @@ object PdlTestdataHelper {
             dødsfall,
             forelderBarnRelasjon,
             folkeregisteridentifikator,
-            fødsel,
+            fødselsdato,
+            fødested,
             folkeregisterpersonstatus,
             fullmakt,
             listOfNotNull(kjønn),
@@ -102,7 +106,8 @@ object PdlTestdataHelper {
             deltBosted,
             dødsfall,
             forelderBarnRelasjon,
-            listOfNotNull(fødsel),
+            listOfNotNull(fødselsdato(fødsel?.fødselsår, fødsel?.fødselsdato)),
+            listOfNotNull(fødested(fødsel?.fødeland, fødsel?.fødested, fødsel?.fødekommune)),
             listOfNotNull(navn),
             emptyList(),
         )
@@ -113,6 +118,17 @@ object PdlTestdataHelper {
         dag: Int = 1,
     ): Fødsel =
         fødsel(LocalDate.of(år, måned, dag))
+
+    fun fødselsdato(
+        år: Int? = 2018,
+        dato: LocalDate?,
+    ): Fødselsdato = Fødselsdato(år, dato, Metadata(historisk = false))
+
+    fun fødested(
+        fødeland: String?,
+        fødested: String?,
+        fødekommune: String?,
+    ): Fødested = Fødested(fødeland, fødested, fødekommune, Metadata(historisk = false))
 
     fun fødsel(fødselsdato: LocalDate) =
         Fødsel(

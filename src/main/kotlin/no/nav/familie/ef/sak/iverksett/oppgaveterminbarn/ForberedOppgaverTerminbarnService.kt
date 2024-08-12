@@ -82,7 +82,7 @@ private fun matchBarn(
 
 private fun TerminbarnTilUtplukkForOppgave.match(pdlPersonForelderBarn: List<PdlPersonForelderBarn>): Boolean =
     pdlPersonForelderBarn
-        .map { it.fødsel.gjeldende().fødselsdato }
+        .map { it.fødselsdato.gjeldende().fødselsdato }
         .any { matchBarn(this.termindatoBarn, it ?: error("Fødselsdato er null")) }
 
 data class TerminbarnTilUtplukkForOppgave(

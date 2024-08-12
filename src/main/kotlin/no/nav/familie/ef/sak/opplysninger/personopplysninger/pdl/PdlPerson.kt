@@ -69,7 +69,8 @@ data class PersonBolk<T>(
 )
 
 interface PdlPerson {
-    val fødsel: List<Fødsel>
+    val fødselsdato: List<Fødselsdato>
+    val fødested: List<Fødested>
     val bostedsadresse: List<Bostedsadresse>
 }
 
@@ -124,7 +125,8 @@ data class PdlSøker(
     @JsonProperty("doedsfall") val dødsfall: List<Dødsfall>,
     val forelderBarnRelasjon: List<ForelderBarnRelasjon>,
     val folkeregisteridentifikator: List<Folkeregisteridentifikator>,
-    @JsonProperty("foedsel") override val fødsel: List<Fødsel>,
+    @JsonProperty("foedselsdato") override val fødselsdato: List<Fødselsdato>,
+    @JsonProperty("foedested") override val fødested: List<Fødested>,
     val folkeregisterpersonstatus: List<Folkeregisterpersonstatus>,
     val fullmakt: List<Fullmakt>,
     @JsonProperty("kjoenn") val kjønn: List<Kjønn>,
@@ -147,7 +149,8 @@ data class PdlPersonForelderBarn(
     val deltBosted: List<DeltBosted>,
     @JsonProperty("doedsfall") val dødsfall: List<Dødsfall>,
     val forelderBarnRelasjon: List<ForelderBarnRelasjon>,
-    @JsonProperty("foedsel") override val fødsel: List<Fødsel>,
+    @JsonProperty("foedselsdato") override val fødselsdato: List<Fødselsdato>,
+    @JsonProperty("foedested") override val fødested: List<Fødested>,
     val navn: List<Navn>,
     val folkeregisterpersonstatus: List<Folkeregisterpersonstatus>,
 ) : PdlPerson
@@ -156,7 +159,8 @@ data class PdlAnnenForelder(
     val adressebeskyttelse: List<Adressebeskyttelse>,
     override val bostedsadresse: List<Bostedsadresse>,
     @JsonProperty("doedsfall") val dødsfall: List<Dødsfall>,
-    @JsonProperty("foedsel") override val fødsel: List<Fødsel>,
+    @JsonProperty("foedselsdato") override val fødselsdato: List<Fødselsdato>,
+    @JsonProperty("foedested") override val fødested: List<Fødested>,
     val folkeregisteridentifikator: List<Folkeregisteridentifikator>,
     val navn: List<Navn>,
 ) : PdlPerson
@@ -380,12 +384,9 @@ enum class AdressebeskyttelseGradering {
     UGRADERT,
 }
 
-data class Fødsel(
+data class Fødselsdato(
     @JsonProperty("foedselsaar") val fødselsår: Int?,
     @JsonProperty("foedselsdato") val fødselsdato: LocalDate?,
-    @JsonProperty("foedeland") val fødeland: String?,
-    @JsonProperty("foedested") val fødested: String?,
-    @JsonProperty("foedekommune") val fødekommune: String?,
     val metadata: Metadata,
 ) {
     fun erUnder18År() =
@@ -393,6 +394,13 @@ data class Fødsel(
             ?: this.fødselsår?.let { LocalDate.now() < LocalDate.of(it, 1, 1).plusYears(18) }
             ?: true
 }
+
+data class Fødested(
+    @JsonProperty("foedeland") val fødeland: String?,
+    @JsonProperty("foedested") val fødested: String?,
+    @JsonProperty("foedekommune") val fødekommune: String?,
+    val metadata: Metadata,
+)
 
 data class Dødsfall(
     @JsonProperty("doedsdato") val dødsdato: LocalDate?,

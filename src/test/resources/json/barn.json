@@ -44,13 +44,20 @@
           "deltBosted": [],
           "doedsfall": [],
           "forelderBarnRelasjon": [],
-          "foedsel": [
+          "foedselsdato": [
             {
-              "foedselsaar": null,
+              "foedselsaar": 1966,
               "foedselsdato": "1966-11-18",
-              "foedeland": null,
-              "foedested": null,
-              "foedekommune": null,
+              "metadata": {
+                "historisk": false
+              }
+            }
+          ],
+          "foedested": [
+            {
+              "foedeland": "Norge",
+              "foedested": "Oslo",
+              "foedekommune": "Oslo",
               "metadata": {
                 "historisk": false
               }
