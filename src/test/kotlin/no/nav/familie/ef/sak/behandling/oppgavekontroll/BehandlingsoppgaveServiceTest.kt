@@ -33,7 +33,7 @@ class BehandlingsoppgaveServiceTest {
         kjørSomLeader {
             behandlingsoppgaveService.opprettTask()
         }
-        verify(exactly = 1) { taskService.finnTaskMedPayloadOgType(payloadOgUnikNøkkel, BehandlingUtenOppgaveTask.TYPE)}
+        verify(exactly = 1) { taskService.finnTaskMedPayloadOgType(payloadOgUnikNøkkel, BehandlingUtenOppgaveTask.TYPE) }
     }
 
     @Test
@@ -66,12 +66,11 @@ class BehandlingsoppgaveServiceTest {
 
     @Test
     internal fun `Skal ikke lage task dersom ikke leder`() {
-
         kjørSomLeader(erLeder = false) {
             behandlingsoppgaveService.opprettTask()
         }
 
-        verify(exactly = 0)  { taskService.finnTaskMedPayloadOgType(any(), any()) }
+        verify(exactly = 0) { taskService.finnTaskMedPayloadOgType(any(), any()) }
         verify(exactly = 0) { taskService.save(any()) }
     }
 
