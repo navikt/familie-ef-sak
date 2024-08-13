@@ -267,7 +267,6 @@ class InfotrygdPeriodeValideringService(
         personIdent: String,
     ) {
         sakerForOvergangsstønad.find { it.personIdent != personIdent }?.let {
-            logger
             throw MigreringException(
                 "Finnes sak med annen personIdent for personen. ${lagSakFeilinfo(it)} " +
                     "personIdent=${it.personIdent}. " +
