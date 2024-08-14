@@ -25,10 +25,10 @@ class BehandlingUtenOppgaveTask(
     companion object {
         const val TYPE = "finnBehandlingUtenOppgave"
 
-        fun opprettTask(ukenummer: Int): Task =
+        fun opprettTask(payloadÅrOgUke: String): Task =
             Task(
                 TYPE,
-                ukenummer.toString(),
+                payloadÅrOgUke,
                 Properties(),
             )
     }
