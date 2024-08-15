@@ -65,9 +65,6 @@ query($ident: ID!){
             foedeland
             foedested
             foedekommune
-            metadata {
-                historisk
-            }
         }
         folkeregisteridentifikator(historikk: true) {
             identifikasjonsnummer

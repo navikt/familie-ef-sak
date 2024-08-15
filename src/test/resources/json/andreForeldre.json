@@ -39,14 +39,14 @@
           "foedselsdato": [
             {
               "foedselsaar": 1966,
-              "foedselsdato": "1966-11-18",
+              "foedselsdato": "1966-11-18"
             }
           ],
           "foedested": [
             {
               "foedeland": "Norge",
               "foedested": "Oslo",
-              "foedekommune": "Oslo",
+              "foedekommune": "Oslo"
             }
           ],
           "folkeregisterpersonstatus": [
