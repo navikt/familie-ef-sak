@@ -52,7 +52,7 @@ data class FinnOppgaveRequestDto(
             aktivFomDato = null,
             aktivTomDato = null,
             mappeId = this.mappeId,
-            limit = 150,
+            limit = null,
             offset = 0,
         )
 }
