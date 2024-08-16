@@ -267,12 +267,8 @@ class InfotrygdPeriodeValideringService(
         personIdent: String,
     ) {
         sakerForOvergangsstønad.find { it.personIdent != personIdent }?.let {
-            throw MigreringException(
-                "Finnes sak med annen personIdent for personen. ${lagSakFeilinfo(it)} " +
-                    "personIdent=${it.personIdent}. " +
-                    "Disse sakene må oppdateres med aktivt fnr i Infotrygd",
-                MigreringExceptionType.FLERE_IDENTER,
-            )
+            logger.warn("Det finnes perioder med ulike fødselsnummer i infotrygd")
+            secureLogger.warn("Det finnes perioder med ulike fødselsnummer i infotrygd - fnrInfotrygd=${it.personIdent} fnrGjeldende=$personIdent ")
         }
     }
 
