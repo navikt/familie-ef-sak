@@ -4,9 +4,9 @@ import no.nav.familie.kontrakter.felles.Behandlingstema
 import no.nav.familie.kontrakter.felles.Tema
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveRequest
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
-import java.time.LocalDate
 import no.nav.familie.kontrakter.felles.oppgave.Sorteringsfelt
 import no.nav.familie.kontrakter.felles.oppgave.Sorteringsrekkefølge
+import java.time.LocalDate
 
 data class FinnOppgaveRequestDto(
     val behandlingstema: String? = null,
