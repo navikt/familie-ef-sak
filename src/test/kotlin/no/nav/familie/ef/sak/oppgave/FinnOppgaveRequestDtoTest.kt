@@ -42,7 +42,7 @@ internal class FinnOppgaveRequestDtoTest {
         Assertions.assertThat(finnOppgaveRequest.opprettetTomTidspunkt).isEqualTo(LocalDateTime.of(2020, 1, 3, 0, 0, 0))
         Assertions.assertThat(finnOppgaveRequest.fristFomDato).isEqualTo(LocalDate.of(2020, 1, 2))
         Assertions.assertThat(finnOppgaveRequest.fristTomDato).isEqualTo(LocalDate.of(2020, 1, 2))
-        Assertions.assertThat(finnOppgaveRequest.limit).isEqualTo(300)
+        Assertions.assertThat(finnOppgaveRequest.limit).isEqualTo(150)
         Assertions.assertThat(finnOppgaveRequest.offset).isEqualTo(0)
         Assertions.assertThat(finnOppgaveRequest.mappeId).isEqualTo(1234L)
     }

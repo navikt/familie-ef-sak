@@ -54,7 +54,7 @@ data class FinnOppgaveRequestDto(
             aktivFomDato = null,
             aktivTomDato = null,
             mappeId = this.mappeId,
-            limit = 300,
+            limit = 150,
             offset = 0,
             sorteringsfelt = Sorteringsfelt.FRIST,
             sorteringsrekkefølge = Sorteringsrekkefølge.ASC,
