@@ -5,6 +5,8 @@ import no.nav.familie.kontrakter.felles.Tema
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveRequest
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import java.time.LocalDate
+import no.nav.familie.kontrakter.felles.oppgave.Sorteringsfelt
+import no.nav.familie.kontrakter.felles.oppgave.Sorteringsrekkefølge
 
 data class FinnOppgaveRequestDto(
     val behandlingstema: String? = null,
@@ -52,7 +54,9 @@ data class FinnOppgaveRequestDto(
             aktivFomDato = null,
             aktivTomDato = null,
             mappeId = this.mappeId,
-            limit = 150,
+            limit = 300,
             offset = 0,
+            sorteringsfelt = Sorteringsfelt.FRIST,
+            sorteringsrekkefølge = Sorteringsrekkefølge.ASC,
         )
 }
