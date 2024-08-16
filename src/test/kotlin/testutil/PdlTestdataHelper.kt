@@ -137,7 +137,6 @@ object PdlTestdataHelper {
             fødested = null,
             fødekommune = null,
             fødeland = null,
-            metadata = Metadata(historisk = false),
         )
 
     fun ukjentBostedsadresse(

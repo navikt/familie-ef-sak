@@ -1,7 +1,6 @@
 package no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper
 
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.Fødsel
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Metadata
 import no.nav.familie.ef.sak.testutil.PdlTestdataHelper.fødested
 import no.nav.familie.ef.sak.testutil.PdlTestdataHelper.fødselsdato
 import org.assertj.core.api.Assertions.assertThat
@@ -24,7 +23,6 @@ internal class GrunnlagsdataMapperTest {
                 fødested = fødested.fødested,
                 fødekommune = fødested.fødekommune,
                 fødeland = fødested.fødeland,
-                metadata = Metadata(historisk = false),
             )
 
         val annenFødsel =
@@ -34,7 +32,6 @@ internal class GrunnlagsdataMapperTest {
                 fødested = annetFødested.fødested,
                 fødekommune = annetFødested.fødekommune,
                 fødeland = annetFødested.fødeland,
-                metadata = Metadata(historisk = false),
             )
 
         val zippedeFødsler = GrunnlagsdataMapper.mapFødsler(listOf(fødselsdato, annenFødselsdato), listOf(fødested, annetFødested))

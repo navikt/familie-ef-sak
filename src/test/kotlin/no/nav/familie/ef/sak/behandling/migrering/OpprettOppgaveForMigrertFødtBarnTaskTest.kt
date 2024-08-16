@@ -13,7 +13,6 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataServic
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.Fødsel
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.GrunnlagsdataMedMetadata
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.BarnMinimumDto
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Metadata
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.fagsakpersoner
@@ -118,7 +117,6 @@ internal class OpprettOppgaveForMigrertFødtBarnTaskTest {
                 fødeland = null,
                 fødested = null,
                 fødselsår = null,
-                metadata = Metadata(historisk = false),
             )
         val barn = opprettBarnMedIdent("1", fødsel = fødsel)
         return GrunnlagsdataMedMetadata(grunnlagsdata.copy(barn = listOf(barn)), LocalDateTime.now())
