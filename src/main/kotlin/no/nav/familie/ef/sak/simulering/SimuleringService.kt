@@ -9,6 +9,7 @@ import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.oppgave.TilordnetRessursService
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.secureLogger
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.ef.sak.tilbakekreving.TilbakekrevingOppryddingService
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
@@ -86,10 +87,17 @@ class SimuleringService(
     fun erSimuleringsoppsummeringEndret(saksbehandling: Saksbehandling): Boolean {
         val lagretSimuleringsoppsummering = hentLagretSimuleringsoppsummering(saksbehandling.id)
         val nySimuleringoppsummering = simulerMedTilkjentYtelse(saksbehandling).oppsummering
-        return lagretSimuleringsoppsummering.harUlikEtterbetalingEllerFeilutbetaling(nySimuleringoppsummering)
-    }
+        val ulikFeilutbetaling = lagretSimuleringsoppsummering.feilutbetaling != nySimuleringoppsummering.feilutbetaling
+        if (ulikFeilutbetaling) {
+            secureLogger.warn(
+                "Behandling med ulikt simuleringsresultat i beslutter-steget. BehandlingId: ${saksbehandling.id} \n" +
+                    "lagretSimuleringsoppsummering: $lagretSimuleringsoppsummering \n" +
+                    "nySimuleringoppsummering: $nySimuleringoppsummering",
+            )
+        }
 
-    private fun Simuleringsoppsummering.harUlikEtterbetalingEllerFeilutbetaling(simuleringOppsummering: Simuleringsoppsummering): Boolean = this.etterbetaling != simuleringOppsummering.etterbetaling || this.feilutbetaling != simuleringOppsummering.feilutbetaling
+        return ulikFeilutbetaling
+    }
 
     private fun simulerMedTilkjentYtelse(saksbehandling: Saksbehandling): BeriketSimuleringsresultat {
         val tilkjentYtelse = tilkjentYtelseService.hentForBehandling(saksbehandling.id)
