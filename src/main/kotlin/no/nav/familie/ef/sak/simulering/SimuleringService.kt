@@ -87,18 +87,17 @@ class SimuleringService(
     fun erSimuleringsoppsummeringEndret(saksbehandling: Saksbehandling): Boolean {
         val lagretSimuleringsoppsummering = hentLagretSimuleringsoppsummering(saksbehandling.id)
         val nySimuleringoppsummering = simulerMedTilkjentYtelse(saksbehandling).oppsummering
-        val harUlikEtterbetalingEllerFeilutbetaling = lagretSimuleringsoppsummering.harUlikEtterbetalingEllerFeilutbetaling(nySimuleringoppsummering)
-        if (harUlikEtterbetalingEllerFeilutbetaling) {
+        val harUlikFeilutbetaling = lagretSimuleringsoppsummering.feilutbetaling != nySimuleringoppsummering.feilutbetaling
+        if (harUlikFeilutbetaling) {
             secureLogger.warn(
                 "Behandling med ulikt simuleringsresultat i beslutter-steget. BehandlingId: ${saksbehandling.id} \n" +
                     "lagretSimuleringsoppsummering: $lagretSimuleringsoppsummering \n" +
                     "nySimuleringoppsummering: $nySimuleringoppsummering",
             )
         }
-        return harUlikEtterbetalingEllerFeilutbetaling
-    }
 
-    private fun Simuleringsoppsummering.harUlikEtterbetalingEllerFeilutbetaling(simuleringOppsummering: Simuleringsoppsummering): Boolean = this.etterbetaling != simuleringOppsummering.etterbetaling || this.feilutbetaling != simuleringOppsummering.feilutbetaling
+        return harUlikFeilutbetaling
+    }
 
     private fun simulerMedTilkjentYtelse(saksbehandling: Saksbehandling): BeriketSimuleringsresultat {
         val tilkjentYtelse = tilkjentYtelseService.hentForBehandling(saksbehandling.id)
