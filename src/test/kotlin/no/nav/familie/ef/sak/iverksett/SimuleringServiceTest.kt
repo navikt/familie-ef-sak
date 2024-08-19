@@ -29,12 +29,16 @@ import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.simulering.BeriketSimuleringsresultat
 import no.nav.familie.kontrakter.felles.simulering.DetaljertSimuleringResultat
+import no.nav.familie.kontrakter.felles.simulering.Simuleringsoppsummering
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.data.repository.findByIdOrNull
+import java.math.BigDecimal
 import java.time.LocalDate
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 
 internal class SimuleringServiceTest {
     private val iverksettClient = mockk<IverksettClient>()
@@ -166,11 +170,66 @@ internal class SimuleringServiceTest {
             .isEqualTo(LocalDate.of(2021, 2, 1))
     }
 
-    private fun mockSimuleringsResultat(behandling: Behandling) =
+    @Test
+    internal fun `erSimuleringsoppsummeringEndret - skal returnere true for ulik feilutbetaling`() {
+        val saksbehandling = saksbehandling()
+        val lagretSimuleringsoppsummering = mockSimuleringsoppsummering(BigDecimal.TEN, BigDecimal.ONE)
+        val nySimuleringsoppsummering = mockSimuleringsoppsummering(BigDecimal.TEN, BigDecimal.TEN)
+
+        mockErSimuleringsoppsummeringEndret(lagretSimuleringsoppsummering, nySimuleringsoppsummering)
+
+        assertTrue { simuleringService.erSimuleringsoppsummeringEndret(saksbehandling) }
+    }
+
+    @Test
+    internal fun `erSimuleringsoppsummeringEndret - skal returnere false for lik etterbetaling og lik feilutbetaling`() {
+        val saksbehandling = saksbehandling()
+        val lagretSimuleringsoppsummering = mockSimuleringsoppsummering(BigDecimal.TEN, BigDecimal.ONE)
+        val nySimuleringsoppsummering = mockSimuleringsoppsummering(BigDecimal.TEN, BigDecimal.ONE)
+
+        mockErSimuleringsoppsummeringEndret(lagretSimuleringsoppsummering, nySimuleringsoppsummering)
+
+        assertFalse { simuleringService.erSimuleringsoppsummeringEndret(saksbehandling) }
+    }
+
+    private fun mockErSimuleringsoppsummeringEndret(
+        lagretSimulering: Simuleringsoppsummering,
+        nySimulering: Simuleringsoppsummering,
+    ) {
+        val behandling = behandling()
+        val tilkjentYtelse = tilkjentYtelse(behandlingId = behandling.id, personIdent = personIdent)
+
+        every {
+            simuleringsresultatRepository.findByIdOrNull(any())
+        } returns mockSimuleringsResultat(behandling, lagretSimulering)
+        every { tilkjentYtelseService.hentForBehandling(any()) } returns tilkjentYtelse
+        every { iverksettClient.simuler(any()) } returns BeriketSimuleringsresultat(mockk(), nySimulering)
+    }
+
+    private fun mockSimuleringsResultat(
+        behandling: Behandling,
+        simuleringsoppsummering: Simuleringsoppsummering? = null,
+    ) =
         Simuleringsresultat(
             behandlingId = behandling.id,
             data = DetaljertSimuleringResultat(emptyList()),
-            beriketData = BeriketSimuleringsresultat(mockk(), mockk()),
+            beriketData = BeriketSimuleringsresultat(mockk(), simuleringsoppsummering ?: mockk()),
+        )
+
+    private fun mockSimuleringsoppsummering(
+        etterbetaling: BigDecimal,
+        feilutbetaling: BigDecimal,
+    ) =
+        Simuleringsoppsummering(
+            perioder = listOf(),
+            fomDatoNestePeriode = null,
+            etterbetaling = etterbetaling,
+            feilutbetaling = feilutbetaling,
+            fom = null,
+            tomDatoNestePeriode = null,
+            forfallsdatoNestePeriode = null,
+            tidSimuleringHentet = null,
+            tomSisteUtbetaling = null,
         )
 
     private fun readFile(filnavn: String): String = this::class.java.getResource("/json/$filnavn").readText()

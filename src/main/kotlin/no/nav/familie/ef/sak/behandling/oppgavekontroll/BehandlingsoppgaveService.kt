@@ -28,10 +28,11 @@ class BehandlingsoppgaveService(
         if (LeaderClient.isLeader() == true) {
             val ukenummer = LocalDate.now().get(IsoFields.WEEK_OF_WEEK_BASED_YEAR)
             val year = LocalDate.now().year
-            val finnesTask = taskService.finnTaskMedPayloadOgType("År:$year Uke:$ukenummer", BehandlingUtenOppgaveTask.TYPE)
+            val payloadOgUnikNøkkel = "År:$year Uke:$ukenummer"
+            val finnesTask = taskService.finnTaskMedPayloadOgType(payloadOgUnikNøkkel, BehandlingUtenOppgaveTask.TYPE)
             if (finnesTask == null) {
                 logger.info("Oppretter finnBehandlingUtenOppgave-task, da den ikke finnes fra før")
-                val task = BehandlingUtenOppgaveTask.opprettTask(ukenummer)
+                val task = BehandlingUtenOppgaveTask.opprettTask(payloadOgUnikNøkkel)
                 taskService.save(task)
             }
         }
@@ -55,9 +56,9 @@ class BehandlingsoppgaveService(
     }
 
     private fun loggManglerOppgave(fagsakerMedÅpenBehandlingSomManglerOppgave: List<String>) {
-        logger.info("Fagsak med åpen behandling uten oppgave antall ${fagsakerMedÅpenBehandlingSomManglerOppgave.size}")
+        logger.info("Antall fagsaker med åpen behandling uten tilhørende oppgave: ${fagsakerMedÅpenBehandlingSomManglerOppgave.size}")
         fagsakerMedÅpenBehandlingSomManglerOppgave.forEach {
-            logger.warn("Fagsaker med åpen behandling uten oppgave: $it")
+            logger.warn("Ekstern-fagsak-id for fagsak med åpen behandling uten tilhørende oppgave: $it")
         }
     }
 

@@ -149,7 +149,7 @@ class StepDefinitions {
         )
 
     private val vedtakHistorikkService =
-        VedtakHistorikkService(fagsakService, andelsHistorikkService, barnService, mockFeatureToggleService())
+        VedtakHistorikkService(fagsakService, andelsHistorikkService, barnService, behandlingService, vedtakService)
 
     private lateinit var stønadstype: StønadType
     private val behandlingIdsToAktivitetArbeid = mutableMapOf<UUID, SvarId?>()
@@ -187,6 +187,7 @@ class StepDefinitions {
                 saksbehandlinger[behandlingId] ?: error("Finner ikke behandling=$behandlingId ($behandlingIdInt)")
             pair.second
         }
+        every { behandlingService.hentBehandling(any()) } answers { behandling() }
         every { vedtakService.hentVedtak(any()) } answers { lagredeVedtak.single { it.behandlingId == firstArg() } }
         justRun { barnService.validerBarnFinnesPåBehandling(any(), any()) }
         mockBarnRepository()
@@ -406,7 +407,7 @@ class StepDefinitions {
         saksbehandlinger = mapBehandlinger()
 
         if (stønadstype == StønadType.OVERGANGSSTØNAD) {
-            // Skriver over inntekt hvis inntekter er definiert
+            // Skriver over inntekt hvis inntekter er definert
             gittVedtak =
                 gittVedtak.map {
                     it.copy(inntekter = inntekter[it.behandlingId] ?: it.inntekter)

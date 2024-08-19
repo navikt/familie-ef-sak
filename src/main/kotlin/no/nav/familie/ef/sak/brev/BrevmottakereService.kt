@@ -113,8 +113,8 @@ class BrevmottakereService(
         brukerfeilHvis(antallMottakere == 0) {
             "Vedtaksbrevet må ha minst 1 mottaker"
         }
-        brukerfeilHvis(antallMottakere > 2) {
-            "Vedtaksbrevet kan ikke ha mer enn 2 mottakere"
+        brukerfeilHvis(antallMottakere > 4) {
+            "Vedtaksbrevet kan ikke ha mer enn 4 mottakere"
         }
     }
 

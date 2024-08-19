@@ -40,16 +40,6 @@ internal class FagsakControllerTest : OppslagSpringRunnerTest() {
         Assertions.assertThat(respons.body?.data).isNull()
     }
 
-    private fun hentFagsakForPerson(): ResponseEntity<Ressurs<FagsakDto>> {
-        val fagsakRequest = FagsakRequest("ikkeTilgang", StønadType.OVERGANGSSTØNAD)
-
-        return restTemplate.exchange(
-            localhost("/api/fagsak"),
-            HttpMethod.POST,
-            HttpEntity(fagsakRequest, headers),
-        )
-    }
-
     @Test
     internal fun `Gitt fagsak med behandlinger finnes når get fagsak endpoint kalles skal det returneres 200 OK med fagsakDto`() {
         val fagsak = testoppsettService.lagreFagsak(fagsak(identer = setOf(PersonIdent("01010199999"))))
@@ -62,10 +52,52 @@ internal class FagsakControllerTest : OppslagSpringRunnerTest() {
         Assertions.assertThat(fagsakForId?.data?.behandlinger!!.all { it.resultat == BehandlingResultat.IKKE_SATT })
     }
 
+    @Test
+    internal fun `Skal returnere fagsak på behandlingId `() {
+        val fagsak = testoppsettService.lagreFagsak(fagsak(identer = setOf(PersonIdent("01010199999"))))
+        val behandling = behandling(fagsak)
+        behandlingRepository.insert(behandling)
+
+        val hentetFagsak = hentFagsakPåBehandlingId(behandling.id)
+        Assertions.assertThat(hentetFagsak?.data?.id).isEqualTo(fagsak.id)
+        Assertions.assertThat(hentetFagsak?.data?.behandlinger?.size).isEqualTo(1)
+        Assertions
+            .assertThat(
+                hentetFagsak
+                    ?.data
+                    ?.behandlinger
+                    ?.first()
+                    ?.id,
+            ).isEqualTo(behandling.id)
+    }
+
+    private fun hentFagsakForPerson(): ResponseEntity<Ressurs<FagsakDto>> {
+        val fagsakRequest = FagsakRequest("ikkeTilgang", StønadType.OVERGANGSSTØNAD)
+
+        return restTemplate.exchange(
+            localhost("/api/fagsak"),
+            HttpMethod.POST,
+            HttpEntity(fagsakRequest, headers),
+        )
+    }
+
     private fun hentFagsakForId(fagsakId: UUID): Ressurs<FagsakDto>? {
         val response =
             restTemplate.exchange<Ressurs<FagsakDto>>(
                 localhost("/api/fagsak/$fagsakId"),
+                HttpMethod.GET,
+                HttpEntity<Any>(headers),
+            )
+
+        Assertions.assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
+        Assertions.assertThat(response.body?.status).isEqualTo(Ressurs.Status.SUKSESS)
+        return response.body
+    }
+
+    private fun hentFagsakPåBehandlingId(behandlingId: UUID): Ressurs<FagsakDto>? {
+        val response =
+            restTemplate.exchange<Ressurs<FagsakDto>>(
+                localhost("/api/fagsak/behandling/$behandlingId"),
                 HttpMethod.GET,
                 HttpEntity<Any>(headers),
             )

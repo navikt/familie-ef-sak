@@ -15,6 +15,7 @@ import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdSak
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdSakResultat
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdSakType
 import no.nav.familie.kontrakter.felles.ef.StønadType
+import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import java.time.YearMonth
@@ -25,6 +26,9 @@ class InfotrygdPeriodeValideringService(
     private val behandlingService: BehandlingService,
     private val featureToggleService: FeatureToggleService,
 ) {
+    private val logger = LoggerFactory.getLogger(javaClass)
+    private val secureLogger = LoggerFactory.getLogger("secureLogger")
+
     fun validerKanOppretteBehandlingGittInfotrygdData(fagsak: Fagsak) {
         if (!behandlingService.finnesBehandlingForFagsak(fagsak.id)) {
             when (fagsak.stønadstype) {
@@ -253,11 +257,8 @@ class InfotrygdPeriodeValideringService(
         personIdent: String,
     ) {
         perioder.perioder.find { it.personIdent != personIdent }?.let {
-            throw MigreringException(
-                "Det finnes perioder som inneholder annet fnr=${it.personIdent}. " +
-                    "Disse vedtaken må endres til aktivt fnr i Infotrygd",
-                MigreringExceptionType.FLERE_IDENTER_VEDTAK,
-            )
+            logger.warn("Det finnes perioder med ulike fødselsnummer i infotrygd")
+            secureLogger.warn("Det finnes perioder med ulike fødselsnummer i infotrygd - fnrInfotrygd=${it.personIdent} fnrGjeldende=$personIdent ")
         }
     }
 
@@ -266,12 +267,8 @@ class InfotrygdPeriodeValideringService(
         personIdent: String,
     ) {
         sakerForOvergangsstønad.find { it.personIdent != personIdent }?.let {
-            throw MigreringException(
-                "Finnes sak med annen personIdent for personen. ${lagSakFeilinfo(it)} " +
-                    "personIdent=${it.personIdent}. " +
-                    "Disse sakene må oppdateres med aktivt fnr i Infotrygd",
-                MigreringExceptionType.FLERE_IDENTER,
-            )
+            logger.warn("Det finnes perioder med ulike fødselsnummer i infotrygd")
+            secureLogger.warn("Det finnes perioder med ulike fødselsnummer i infotrygd - fnrInfotrygd=${it.personIdent} fnrGjeldende=$personIdent ")
         }
     }
 

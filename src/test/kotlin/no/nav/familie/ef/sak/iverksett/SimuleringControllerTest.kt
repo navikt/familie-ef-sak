@@ -1,96 +1,160 @@
-package no.nav.familie.ef.sak.iverksett
+package no.nav.familie.ef.sak.no.nav.familie.ef.sak.iverksett
 
-import no.nav.familie.ef.sak.OppslagSpringRunnerTest
-import no.nav.familie.ef.sak.behandling.BehandlingRepository
-import no.nav.familie.ef.sak.behandling.dto.BehandlingDto
-import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
-import no.nav.familie.ef.sak.repository.behandling
-import no.nav.familie.ef.sak.repository.fagsak
-import no.nav.familie.ef.sak.repository.findByIdOrThrow
+import io.mockk.every
+import io.mockk.mockk
+import no.nav.familie.ef.sak.AuditLoggerEvent
+import no.nav.familie.ef.sak.behandling.BehandlingService
+import no.nav.familie.ef.sak.behandling.Saksbehandling
+import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
+import no.nav.familie.ef.sak.iverksett.IverksettClient
+import no.nav.familie.ef.sak.oppgave.TilordnetRessursService
+import no.nav.familie.ef.sak.simulering.SimuleringController
+import no.nav.familie.ef.sak.simulering.SimuleringService
 import no.nav.familie.ef.sak.simulering.SimuleringsresultatRepository
-import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseRepository
+import no.nav.familie.ef.sak.tilbakekreving.TilbakekrevingOppryddingService
+import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.ef.sak.tilkjentytelse.domain.AndelTilkjentYtelse
 import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelseType
 import no.nav.familie.kontrakter.felles.Ressurs
+import no.nav.familie.kontrakter.felles.ef.StønadType
+import no.nav.familie.kontrakter.felles.simulering.BeriketSimuleringsresultat
+import no.nav.familie.kontrakter.felles.simulering.DetaljertSimuleringResultat
 import no.nav.familie.kontrakter.felles.simulering.Simuleringsoppsummering
-import org.assertj.core.api.Assertions
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.web.client.exchange
-import org.springframework.http.HttpEntity
-import org.springframework.http.HttpMethod
-import org.springframework.http.HttpStatus
-import org.springframework.http.ResponseEntity
+import java.math.BigDecimal
 import java.time.LocalDate
 import java.util.UUID
 
-internal class SimuleringControllerTest : OppslagSpringRunnerTest() {
-    @Autowired
-    private lateinit var behandlingRepository: BehandlingRepository
+internal class SimuleringControllerTest {
+    private val tilgangService: TilgangService = mockk()
+    private val iverksettClient: IverksettClient = mockk()
+    private val simuleringResultatRepository: SimuleringsresultatRepository = mockk()
+    private val tilkjentYtelseService: TilkjentYtelseService = mockk()
+    private val tilordnetRessursService: TilordnetRessursService = mockk()
+    private val tilbakekrevingOppryddingService: TilbakekrevingOppryddingService = mockk()
+    private val behandlingService: BehandlingService = mockk()
+    private val simuleringService: SimuleringService = SimuleringService(iverksettClient, simuleringResultatRepository, tilkjentYtelseService, tilgangService, tilordnetRessursService, tilbakekrevingOppryddingService)
+    private val controller: SimuleringController =
+        SimuleringController(
+            tilgangService,
+            behandlingService,
+            simuleringService,
+        )
 
-    @Autowired
-    private lateinit var tilkjentYtelseRepository: TilkjentYtelseRepository
-
-    @Autowired
-    private lateinit var simuleringsresultatRepository: SimuleringsresultatRepository
+    val behandlingId = UUID.randomUUID()
 
     @BeforeEach
-    fun setUp() {
-        headers.setBearerAuth(lokalTestToken)
+    fun init() {
+        val saksbehandling = mockk<Saksbehandling>()
+        val tilkjentYtelse = lagTilkjentytelse(behandlingId)
+        every { tilkjentYtelseService.hentForBehandling(any()) } returns tilkjentYtelse
+        every { saksbehandling.eksternId } returns 0L
+        every { saksbehandling.eksternFagsakId } returns 0L
+        every { saksbehandling.stønadstype } returns StønadType.OVERGANGSSTØNAD
+        every { saksbehandling.forrigeBehandlingId } returns UUID.randomUUID()
+        every { behandlingService.hentSaksbehandling(behandlingId) } returns saksbehandling
+        every { tilgangService.validerTilgangTilBehandling(saksbehandling, AuditLoggerEvent.UPDATE) } returns Unit
+        every { simuleringService.simuler(saksbehandling) } returns lagSimuleringoppsummering()
     }
 
     @Test
-    internal fun `Skal returnere 200 OK for simulering av behandling`() {
-        val personIdent = "12345678901"
-        val fagsak = testoppsettService.lagreFagsak(fagsak(identer = setOf(PersonIdent(personIdent))))
-        val behandling = behandlingRepository.insert(behandling(fagsak))
-        tilkjentYtelseRepository
-            .insert(
-                TilkjentYtelse(
-                    behandlingId = behandling.id,
-                    personident = personIdent,
-                    type = TilkjentYtelseType.FØRSTEGANGSBEHANDLING,
-                    startdato = LocalDate.of(2021, 1, 1),
-                    andelerTilkjentYtelse =
-                        listOf(
-                            AndelTilkjentYtelse(
-                                15000,
-                                LocalDate.of(2021, 1, 1),
-                                LocalDate.of(2021, 12, 31),
-                                personIdent,
-                                inntekt = 0,
-                                inntektsreduksjon = 0,
-                                samordningsfradrag = 0,
-                                kildeBehandlingId = behandling.id,
-                            ),
-                        ),
-                ),
+    internal fun `simuleringsoppsummering skal være endret hvis feilutbetaling har endret seg fra nedlagret simulering`() {
+        val lagretSimuleringoppsummering = lagSimuleringoppsummering()
+        val simuleringOppsummering = lagSimuleringoppsummering(feilutbetaling = BigDecimal.ONE)
+
+        every { simuleringService.hentLagretSimmuleringsresultat(any()) } returns
+            BeriketSimuleringsresultat(
+                DetaljertSimuleringResultat(emptyList()),
+                lagretSimuleringoppsummering,
+            )
+        every { iverksettClient.simuler(any()) } returns
+            BeriketSimuleringsresultat(
+                DetaljertSimuleringResultat(emptyList()),
+                simuleringOppsummering,
             )
 
-        val respons: ResponseEntity<Ressurs<Simuleringsoppsummering>> = simulerForBehandling(behandling.id)
-
-        Assertions.assertThat(respons.statusCode).isEqualTo(HttpStatus.OK)
-        Assertions.assertThat(respons.body?.status).isEqualTo(Ressurs.Status.SUKSESS)
-        Assertions.assertThat(respons.body?.data).isNotNull()
-        Assertions.assertThat(respons.body?.data?.perioder).hasSize(8)
-        val simuleringsresultat = simuleringsresultatRepository.findByIdOrThrow(behandling.id)
-
-        // Verifiser at simuleringsresultatet er lagret
-        Assertions.assertThat(simuleringsresultat.data.simuleringMottaker).hasSize(1)
-        Assertions
-            .assertThat(
-                simuleringsresultat.data.simuleringMottaker
-                    .first()
-                    .simulertPostering,
-            ).hasSizeGreaterThan(1)
+        val response: Ressurs<Boolean> = controller.erSimuleringsoppsummeringEndret(behandlingId)
+        assertThat(response.data).isTrue()
     }
 
-    private fun simulerForBehandling(behandlingId: UUID): ResponseEntity<Ressurs<Simuleringsoppsummering>> =
-        restTemplate.exchange(
-            localhost("/api/simulering/$behandlingId"),
-            HttpMethod.GET,
-            HttpEntity<Ressurs<BehandlingDto>>(headers),
+    @Test
+    internal fun `simuleringsoppsummering skal være endret hvis feilutbetaling og etterbetaling har endret seg fra nedlagret simulering`() {
+        val lagretSimuleringoppsummering = lagSimuleringoppsummering()
+        val simuleringOppsummering = lagSimuleringoppsummering(feilutbetaling = BigDecimal.ONE, etterbetaling = BigDecimal.ONE)
+
+        every { simuleringService.hentLagretSimmuleringsresultat(any()) } returns
+            BeriketSimuleringsresultat(
+                DetaljertSimuleringResultat(emptyList()),
+                lagretSimuleringoppsummering,
+            )
+        every { iverksettClient.simuler(any()) } returns
+            BeriketSimuleringsresultat(
+                DetaljertSimuleringResultat(emptyList()),
+                simuleringOppsummering,
+            )
+
+        val response: Ressurs<Boolean> = controller.erSimuleringsoppsummeringEndret(behandlingId)
+        assertThat(response.data).isTrue()
+    }
+
+    @Test
+    internal fun `simuleringsoppsummering skal ikke være endret hvis feilutbetaling og etterbetaling er uendret`() {
+        val lagretSimuleringoppsummering = lagSimuleringoppsummering()
+        val simuleringOppsummering = lagSimuleringoppsummering()
+
+        every { simuleringService.hentLagretSimmuleringsresultat(any()) } returns
+            BeriketSimuleringsresultat(
+                DetaljertSimuleringResultat(emptyList()),
+                lagretSimuleringoppsummering,
+            )
+        every { iverksettClient.simuler(any()) } returns
+            BeriketSimuleringsresultat(
+                DetaljertSimuleringResultat(emptyList()),
+                simuleringOppsummering,
+            )
+
+        val response: Ressurs<Boolean> = controller.erSimuleringsoppsummeringEndret(behandlingId)
+        assertThat(response.data).isFalse()
+    }
+
+    private fun lagTilkjentytelse(behandlingId: UUID) =
+        TilkjentYtelse(
+            behandlingId = behandlingId,
+            personident = "123",
+            type = TilkjentYtelseType.FØRSTEGANGSBEHANDLING,
+            startdato = LocalDate.of(2021, 1, 1),
+            andelerTilkjentYtelse =
+                listOf(
+                    AndelTilkjentYtelse(
+                        15000,
+                        LocalDate.of(2021, 1, 1),
+                        LocalDate.of(2021, 12, 31),
+                        "123",
+                        inntekt = 0,
+                        inntektsreduksjon = 0,
+                        samordningsfradrag = 0,
+                        kildeBehandlingId = behandlingId,
+                    ),
+                ),
+        )
+
+    private fun lagSimuleringoppsummering(
+        etterbetaling: BigDecimal = BigDecimal.ZERO,
+        feilutbetaling: BigDecimal = BigDecimal.ZERO,
+    ) =
+        Simuleringsoppsummering(
+            perioder = listOf(),
+            fomDatoNestePeriode = LocalDate.now(),
+            etterbetaling = etterbetaling,
+            feilutbetaling = feilutbetaling,
+            fom = LocalDate.now(),
+            tomDatoNestePeriode = LocalDate.now(),
+            forfallsdatoNestePeriode = LocalDate.now(),
+            tidSimuleringHentet = LocalDate.now(),
+            tomSisteUtbetaling = LocalDate.now(),
+            sumManuellePosteringer = BigDecimal.ZERO,
         )
 }

@@ -400,8 +400,8 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
 
         val migreringInfo = migreringService.hentMigreringInfo(fagsak.fagsakPersonId)
 
-        assertThat(migreringInfo.kanMigreres).isFalse
-        assertThat(migreringInfo.årsak).contains("Finnes sak med annen personIdent for personen")
+        assertThat(migreringInfo.kanMigreres).isTrue
+        assertThat(migreringInfo.årsak).isNull()
     }
 
     @Test
