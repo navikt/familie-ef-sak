@@ -89,9 +89,11 @@ class SimuleringService(
         val nySimuleringoppsummering = simulerMedTilkjentYtelse(saksbehandling).oppsummering
         val harUlikEtterbetalingEllerFeilutbetaling = lagretSimuleringsoppsummering.harUlikEtterbetalingEllerFeilutbetaling(nySimuleringoppsummering)
         if (harUlikEtterbetalingEllerFeilutbetaling) {
-            secureLogger.warn("Behandling med ulikt simuleringsresultat i beslutter-steget. BehandlingId: ${saksbehandling.id} \n" +
+            secureLogger.warn(
+                "Behandling med ulikt simuleringsresultat i beslutter-steget. BehandlingId: ${saksbehandling.id} \n" +
                     "lagretSimuleringsoppsummering: $lagretSimuleringsoppsummering \n" +
-                    "nySimuleringoppsummering: $nySimuleringoppsummering")
+                    "nySimuleringoppsummering: $nySimuleringoppsummering",
+            )
         }
         return harUlikEtterbetalingEllerFeilutbetaling
     }
