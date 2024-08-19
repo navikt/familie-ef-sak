@@ -87,8 +87,8 @@ class SimuleringService(
     fun erSimuleringsoppsummeringEndret(saksbehandling: Saksbehandling): Boolean {
         val lagretSimuleringsoppsummering = hentLagretSimuleringsoppsummering(saksbehandling.id)
         val nySimuleringoppsummering = simulerMedTilkjentYtelse(saksbehandling).oppsummering
-        val ulikFeilutbetaling = lagretSimuleringsoppsummering.feilutbetaling != nySimuleringoppsummering.feilutbetaling
-        if (ulikFeilutbetaling) {
+        val harUlikFeilutbetaling = lagretSimuleringsoppsummering.feilutbetaling != nySimuleringoppsummering.feilutbetaling
+        if (harUlikFeilutbetaling) {
             secureLogger.warn(
                 "Behandling med ulikt simuleringsresultat i beslutter-steget. BehandlingId: ${saksbehandling.id} \n" +
                     "lagretSimuleringsoppsummering: $lagretSimuleringsoppsummering \n" +
@@ -96,7 +96,7 @@ class SimuleringService(
             )
         }
 
-        return ulikFeilutbetaling
+        return harUlikFeilutbetaling
     }
 
     private fun simulerMedTilkjentYtelse(saksbehandling: Saksbehandling): BeriketSimuleringsresultat {
