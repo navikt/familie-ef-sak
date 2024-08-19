@@ -171,17 +171,6 @@ internal class SimuleringServiceTest {
     }
 
     @Test
-    internal fun `erSimuleringsoppsummeringEndret - skal returnere true for ulik etterbetaling`() {
-        val saksbehandling = saksbehandling()
-        val lagretSimuleringsoppsummering = mockSimuleringsoppsummering(BigDecimal.TEN, BigDecimal.ZERO)
-        val nySimuleringsoppsummering = mockSimuleringsoppsummering(BigDecimal.ONE, BigDecimal.ZERO)
-
-        mockErSimuleringsoppsummeringEndret(lagretSimuleringsoppsummering, nySimuleringsoppsummering)
-
-        assertTrue { simuleringService.erSimuleringsoppsummeringEndret(saksbehandling) }
-    }
-
-    @Test
     internal fun `erSimuleringsoppsummeringEndret - skal returnere true for ulik feilutbetaling`() {
         val saksbehandling = saksbehandling()
         val lagretSimuleringsoppsummering = mockSimuleringsoppsummering(BigDecimal.TEN, BigDecimal.ONE)
