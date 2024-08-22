@@ -3,6 +3,7 @@ package no.nav.familie.ef.sak.beregning
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.kontrakter.felles.Månedsperiode
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.math.BigDecimal
@@ -415,5 +416,21 @@ internal class BeregningServiceTest {
                 vedtaksperioder = vedtakperioder,
             )
         }
+    }
+
+    @Test
+    fun `grunnbeløpsperiodeDTO skal returnere korrekt grunnbeløp`() {
+        val G = 124028.toBigDecimal()
+        val grunnbeløp =
+            Grunnbeløp(
+                periode = Månedsperiode(LocalDate.of(2024, 5, 1), LocalDate.of(2025, 4, 30)),
+                grunnbeløp = G,
+                perMnd = 10335.toBigDecimal(), // G 124028/12 = 10335.6666667
+            )
+        val grunnbeløpsperiodeDTO = beregningService.grunnbeløpsperiodeDTO(grunnbeløp)
+
+        val korrektSeksGrunnbeløpPerMnd = 62014.toBigDecimal()
+
+        Assertions.assertEquals(korrektSeksGrunnbeløpPerMnd, grunnbeløpsperiodeDTO.seksGangerGrunnbeløpPerMåned)
     }
 }
