@@ -419,12 +419,12 @@ internal class BeregningServiceTest {
     }
 
     @Test
-    fun `grunnbeløpsperiodeDTO skal returnere korrekt grunnbeløp`() {
-        val G = 124028.toBigDecimal()
+    fun `grunnbeløpsperiodeDTO skal returnere korrekt seks ganger grunnbeløp per måned`() {
+        val g = 124028.toBigDecimal()
         val grunnbeløp =
             Grunnbeløp(
                 periode = Månedsperiode(LocalDate.of(2024, 5, 1), LocalDate.of(2025, 4, 30)),
-                grunnbeløp = G,
+                grunnbeløp = g,
                 perMnd = 10335.toBigDecimal(), // G 124028/12 = 10335.6666667
             )
         val grunnbeløpsperiodeDTO = beregningService.grunnbeløpsperiodeDTO(grunnbeløp)
