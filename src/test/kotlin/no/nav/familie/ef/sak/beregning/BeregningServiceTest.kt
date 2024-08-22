@@ -429,8 +429,8 @@ internal class BeregningServiceTest {
             )
         val grunnbeløpsperiodeDTO = beregningService.grunnbeløpsperiodeDTO(grunnbeløp)
 
-        val korrektSeksGrunnbeløpPerMnd = 62014.toBigDecimal()
+        val korrektSeksGangerGrunnbeløpPerMåned = 62014.toBigDecimal()
 
-        Assertions.assertEquals(korrektSeksGrunnbeløpPerMnd, grunnbeløpsperiodeDTO.seksGangerGrunnbeløpPerMåned)
+        Assertions.assertEquals(korrektSeksGangerGrunnbeløpPerMåned, grunnbeløpsperiodeDTO.seksGangerGrunnbeløpPerMåned)
     }
 }
