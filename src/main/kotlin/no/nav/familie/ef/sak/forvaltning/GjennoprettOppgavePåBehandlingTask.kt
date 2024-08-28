@@ -13,6 +13,7 @@ import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.oppgave.OppgaveRepository
 import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.ef.sak.oppgave.TilordnetRessursService
+import no.nav.familie.kontrakter.felles.oppgave.Oppgave
 import no.nav.familie.kontrakter.felles.oppgave.OppgavePrioritet
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.kontrakter.felles.oppgave.StatusEnum.FEILREGISTRERT
@@ -46,12 +47,14 @@ class GjennoprettOppgavePåBehandlingTask(
         logger.info("Gjenoppretter oppgave for behandling ${task.payload}")
         val behandling = behandligService.hentBehandling(UUID.fromString(task.payload))
         feilHvis(behandling.status.erFerdigbehandlet()) { "Behandling er ferdig behandlet" }
+
+        val opprinneligOppgave = tilordnetRessursService.hentIkkeFerdigstiltOppgaveForBehandling(behandling.id, setOf(Oppgavetype.BehandleSak, Oppgavetype.GodkjenneVedtak, Oppgavetype.BehandleUnderkjentVedtak))
         ferdigstillReferanseTilIkkeeksisterendeEksternOppgave(behandling)
-        opprettNyOppgave(behandling)
+        opprettNyOppgave(behandling, opprinneligOppgave.erFeilregistrert())
     }
 
     private fun ferdigstillReferanseTilIkkeeksisterendeEksternOppgave(behandling: Behandling) {
-        val efOppgave = oppgaveRepository.findByBehandlingIdAndErFerdigstiltIsFalseAndTypeIn(behandling.id, setOf(Oppgavetype.BehandleSak, Oppgavetype.GodkjenneVedtak, Oppgavetype.BehandleUnderkjentVedtak))
+        val efOppgave :EFOppgave? = oppgaveRepository.findByBehandlingIdAndErFerdigstiltIsFalseAndTypeIn(behandling.id, setOf(Oppgavetype.BehandleSak, Oppgavetype.GodkjenneVedtak, Oppgavetype.BehandleUnderkjentVedtak))
         if (efOppgave != null) {
             ferdigstillGammelOppgave(efOppgave)
         }
@@ -61,19 +64,13 @@ class GjennoprettOppgavePåBehandlingTask(
         oppgaveRepository.update(efOppgave.copy(erFerdigstilt = true))
     }
 
-    private fun opprettNyOppgave(behandling: Behandling) {
-        val erFeilregistrert = erFeilregistrert(behandling)
+    private fun opprettNyOppgave(behandling: Behandling, erFeilregistrert: Boolean ) {
         val beskrivelse: String =
             when (erFeilregistrert) {
                 true -> "Opprinnelig oppgave er feilregistrert. For å kunne utføre behandling har det blitt opprettet en ny oppgave."
                 false -> "Opprinnelig oppgave har blitt flyttet eller endret. For å kunne utføre behandling har det blitt opprettet en ny oppgave."
             }
         oppgaveService.opprettOppgave(behandling.id, finnOppgavetype(behandling), prioritet = OppgavePrioritet.HOY, beskrivelse = beskrivelse, fristFerdigstillelse = LocalDate.now())
-    }
-
-    private fun erFeilregistrert(behandling: Behandling): Boolean {
-        val opprinneligOppgave = tilordnetRessursService.hentIkkeFerdigstiltOppgaveForBehandling(behandling.id, setOf(Oppgavetype.BehandleSak, Oppgavetype.GodkjenneVedtak, Oppgavetype.BehandleUnderkjentVedtak))
-        return opprinneligOppgave?.status == FEILREGISTRERT
     }
 
     private fun finnOppgavetype(behandling: Behandling) =
@@ -98,4 +95,8 @@ class GjennoprettOppgavePåBehandlingTask(
             FERDIGSTILT, IVERKSETTER_VEDTAK -> true
             FATTER_VEDTAK, UTREDES, SATT_PÅ_VENT, OPPRETTET -> false
         }
+}
+
+private fun Oppgave?.erFeilregistrert(): Boolean {
+    return this?.status == FEILREGISTRERT
 }
