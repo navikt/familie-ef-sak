@@ -51,6 +51,7 @@ class OppgaveService(
         beskrivelse: String? = null,
         mappeId: Long? = null, // Dersom denne er satt vil vi ikke prøve å finne mappe basert på oppgavens innhold
         prioritet: OppgavePrioritet = OppgavePrioritet.NORM,
+        fristFerdigstillelse: LocalDate? = null,
     ): Long {
         val oppgaveFinnesFraFør = getOppgaveFinnesFraFør(oppgavetype, vurderHenvendelseOppgaveSubtype, behandlingId)
         return if (oppgaveFinnesFraFør !== null) {
@@ -60,7 +61,7 @@ class OppgaveService(
                 opprettOppgaveUtenÅLagreIRepository(
                     behandlingId = behandlingId,
                     oppgavetype = oppgavetype,
-                    fristFerdigstillelse = null,
+                    fristFerdigstillelse = fristFerdigstillelse,
                     beskrivelse = lagOppgaveTekst(beskrivelse),
                     tilordnetNavIdent = tilordnetNavIdent,
                     mappeId = mappeId,
