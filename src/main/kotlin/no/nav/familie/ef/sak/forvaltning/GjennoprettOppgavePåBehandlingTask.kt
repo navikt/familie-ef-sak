@@ -54,7 +54,7 @@ class GjennoprettOppgavePåBehandlingTask(
     }
 
     private fun ferdigstillReferanseTilIkkeeksisterendeEksternOppgave(behandling: Behandling) {
-        val efOppgave :EFOppgave? = oppgaveRepository.findByBehandlingIdAndErFerdigstiltIsFalseAndTypeIn(behandling.id, setOf(Oppgavetype.BehandleSak, Oppgavetype.GodkjenneVedtak, Oppgavetype.BehandleUnderkjentVedtak))
+        val efOppgave: EFOppgave? = oppgaveRepository.findByBehandlingIdAndErFerdigstiltIsFalseAndTypeIn(behandling.id, setOf(Oppgavetype.BehandleSak, Oppgavetype.GodkjenneVedtak, Oppgavetype.BehandleUnderkjentVedtak))
         if (efOppgave != null) {
             ferdigstillGammelOppgave(efOppgave)
         }
@@ -64,7 +64,10 @@ class GjennoprettOppgavePåBehandlingTask(
         oppgaveRepository.update(efOppgave.copy(erFerdigstilt = true))
     }
 
-    private fun opprettNyOppgave(behandling: Behandling, erFeilregistrert: Boolean ) {
+    private fun opprettNyOppgave(
+        behandling: Behandling,
+        erFeilregistrert: Boolean,
+    ) {
         val beskrivelse: String =
             when (erFeilregistrert) {
                 true -> "Opprinnelig oppgave er feilregistrert. For å kunne utføre behandling har det blitt opprettet en ny oppgave."
@@ -97,6 +100,4 @@ class GjennoprettOppgavePåBehandlingTask(
         }
 }
 
-private fun Oppgave?.erFeilregistrert(): Boolean {
-    return this?.status == FEILREGISTRERT
-}
+private fun Oppgave?.erFeilregistrert(): Boolean = this?.status == FEILREGISTRERT
