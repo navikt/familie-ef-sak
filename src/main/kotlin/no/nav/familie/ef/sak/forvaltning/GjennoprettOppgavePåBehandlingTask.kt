@@ -43,7 +43,7 @@ class GjennoprettOppgavePåBehandlingTask(
     private val logger = LoggerFactory.getLogger(javaClass)
 
     override fun doTask(task: Task) {
-        logger.info("Henter oppgave for behandling ${task.payload}")
+        logger.info("Gjenoppretter oppgave for behandling ${task.payload}")
         val behandling = behandligService.hentBehandling(UUID.fromString(task.payload))
         feilHvis(behandling.status.erFerdigbehandlet()) { "Behandling er ferdig behandlet" }
         ferdigstillReferanseTilIkkeeksisterendeEksternOppgave(behandling)
