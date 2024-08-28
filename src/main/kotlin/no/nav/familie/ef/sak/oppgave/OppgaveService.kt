@@ -3,6 +3,7 @@ package no.nav.familie.ef.sak.oppgave
 import no.nav.familie.ef.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.fagsak.FagsakService
+import no.nav.familie.ef.sak.felles.util.dagensDatoMedTidNorskFormat
 import no.nav.familie.ef.sak.infrastruktur.config.getValue
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.oppgave.OppgaveUtil.ENHET_NR_NAY
@@ -21,14 +22,11 @@ import no.nav.familie.kontrakter.felles.oppgave.OppgavePrioritet
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.kontrakter.felles.oppgave.OpprettOppgaveRequest
 import org.slf4j.LoggerFactory
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.cache.CacheManager
 import org.springframework.stereotype.Service
-import java.net.URI
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 import java.util.UUID
 import no.nav.familie.ef.sak.oppgave.Oppgave as EfOppgave
 
@@ -39,7 +37,6 @@ class OppgaveService(
     private val oppgaveRepository: OppgaveRepository,
     private val arbeidsfordelingService: ArbeidsfordelingService,
     private val cacheManager: CacheManager,
-    @Value("\${FRONTEND_OPPGAVE_URL}") private val frontendOppgaveUrl: URI,
 ) {
     private val logger = LoggerFactory.getLogger(javaClass)
 
@@ -62,7 +59,7 @@ class OppgaveService(
                     behandlingId = behandlingId,
                     oppgavetype = oppgavetype,
                     fristFerdigstillelse = fristFerdigstillelse,
-                    beskrivelse = lagOppgaveTekst(beskrivelse),
+                    beskrivelse = lagOpprettOppgavebeskrivelse(beskrivelse),
                     tilordnetNavIdent = tilordnetNavIdent,
                     mappeId = mappeId,
                     prioritet = prioritet,
@@ -276,17 +273,6 @@ class OppgaveService(
 
     fun finnSisteOppgaveForBehandling(behandlingId: UUID): EfOppgave? = oppgaveRepository.findTopByBehandlingIdOrderBySporbarOpprettetTidDesc(behandlingId)
 
-    fun lagOppgaveTekst(beskrivelse: String? = null): String =
-        if (beskrivelse != null) {
-            beskrivelse + "\n"
-        } else {
-            ""
-        } +
-            "----- Opprettet av familie-ef-sak ${
-                LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME)
-            } --- \n" +
-            "$frontendOppgaveUrl" + "\n----- Oppgave må behandles i ny løsning"
-
     fun hentOppgaver(finnOppgaveRequest: FinnOppgaveRequest): FinnOppgaveResponseDto = oppgaveClient.hentOppgaver(finnOppgaveRequest)
 
     private fun finnBehandlingstema(stønadstype: StønadType): Behandlingstema =
@@ -438,4 +424,7 @@ class OppgaveService(
             Oppgavetype.VurderHenvendelse -> false
             else -> error("Håndterer ikke behandlesAvApplikasjon for $oppgavetype")
         }
+
+    private fun lagOpprettOppgavebeskrivelse(beskrivelse: String?) =
+        "--- ${dagensDatoMedTidNorskFormat()} opprettet --- \n${beskrivelse.orEmpty()}"
 }

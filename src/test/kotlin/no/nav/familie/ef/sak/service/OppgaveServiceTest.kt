@@ -11,6 +11,7 @@ import no.nav.familie.ef.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
+import no.nav.familie.ef.sak.felles.util.dagensDatoMedTidNorskFormat
 import no.nav.familie.ef.sak.infrastruktur.config.OppgaveClientMock
 import no.nav.familie.ef.sak.infrastruktur.exception.IntegrasjonException
 import no.nav.familie.ef.sak.iverksett.oppgaveforbarn.Alder
@@ -32,7 +33,6 @@ import no.nav.familie.kontrakter.felles.oppgave.IdentGruppe
 import no.nav.familie.kontrakter.felles.oppgave.OppgaveIdentV2
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.kontrakter.felles.oppgave.OpprettOppgaveRequest
-import no.nav.familie.kontrakter.felles.saksbehandler.Saksbehandler
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.BeforeEach
@@ -42,7 +42,6 @@ import org.junit.jupiter.api.assertThrows
 import org.springframework.cache.concurrent.ConcurrentMapCacheManager
 import org.springframework.http.HttpStatus
 import org.springframework.web.client.HttpServerErrorException
-import java.net.URI
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
@@ -62,7 +61,6 @@ internal class OppgaveServiceTest {
             oppgaveRepository,
             arbeidsfordelingService,
             cacheManager,
-            URI.create("https://ensligmorellerfar.intern.nav.no/oppgavebenk"),
         )
 
     @BeforeEach
@@ -133,7 +131,7 @@ internal class OppgaveServiceTest {
         assertThat(slot.captured.fristFerdigstillelse).isAfterOrEqualTo(LocalDate.now().plusDays(1))
         assertThat(slot.captured.aktivFra).isEqualTo(LocalDate.now())
         assertThat(slot.captured.tema).isEqualTo(Tema.ENF)
-        assertThat(slot.captured.beskrivelse).contains("https://ensligmorellerfar.intern.nav.no/oppgavebenk")
+        assertThat(slot.captured.beskrivelse).contains(dagensDatoMedTidNorskFormat())
     }
 
     @Test
@@ -171,7 +169,7 @@ internal class OppgaveServiceTest {
         assertThat(slot.captured.fristFerdigstillelse).isAfterOrEqualTo(LocalDate.now().plusDays(1))
         assertThat(slot.captured.aktivFra).isEqualTo(LocalDate.now())
         assertThat(slot.captured.tema).isEqualTo(Tema.ENF)
-        assertThat(slot.captured.beskrivelse).contains("https://ensligmorellerfar.intern.nav.no/oppgavebenk")
+        assertThat(slot.captured.beskrivelse).contains(dagensDatoMedTidNorskFormat())
     }
 
     @Test
@@ -195,7 +193,7 @@ internal class OppgaveServiceTest {
         assertThat(slot.captured.fristFerdigstillelse).isAfterOrEqualTo(LocalDate.now().plusDays(1))
         assertThat(slot.captured.aktivFra).isEqualTo(LocalDate.now())
         assertThat(slot.captured.tema).isEqualTo(Tema.ENF)
-        assertThat(slot.captured.beskrivelse).contains("https://ensligmorellerfar.intern.nav.no/oppgavebenk")
+        assertThat(slot.captured.beskrivelse).contains(dagensDatoMedTidNorskFormat())
     }
 
     @Test
@@ -489,7 +487,6 @@ internal class OppgaveServiceTest {
         private const val GSAK_OPPGAVE_ID = 12345L
         private val BEHANDLING_ID = UUID.fromString("1c4209bd-3217-4130-8316-8658fe300a84")
         private const val ENHETSNUMMER = "4489"
-        private const val ENHETSNAVN = "enhetsnavn"
         private const val FNR = "11223312345"
         private const val SAKSBEHANDLER_ID = "Z999999"
     }
@@ -509,5 +506,3 @@ private val fredagFrist = LocalDate.of(2021, 4, 2)
 private val mandagFrist = LocalDate.of(2021, 4, 5)
 private val tirsdagFrist = LocalDate.of(2021, 4, 6)
 private val onsdagFrist = LocalDate.of(2021, 4, 7)
-
-private val saksbehandler = Saksbehandler(UUID.randomUUID(), "Z999999", "Darth", "Vader", "4405")
