@@ -131,7 +131,8 @@ internal class OppgaveServiceTest {
         assertThat(slot.captured.fristFerdigstillelse).isAfterOrEqualTo(LocalDate.now().plusDays(1))
         assertThat(slot.captured.aktivFra).isEqualTo(LocalDate.now())
         assertThat(slot.captured.tema).isEqualTo(Tema.ENF)
-        assertThat(slot.captured.beskrivelse).contains(dagensDatoMedTidNorskFormat())
+        val forventetBeskrivelse = "--- ${dagensDatoMedTidNorskFormat()} familie-ef-sak --- \nOppgave opprettet"
+        assertThat(slot.captured.beskrivelse).isEqualTo(forventetBeskrivelse)
     }
 
     @Test
@@ -159,7 +160,8 @@ internal class OppgaveServiceTest {
         val slot = slot<OpprettOppgaveRequest>()
         mockOpprettOppgave(slot)
 
-        oppgaveService.opprettOppgave(BEHANDLING_ID, Oppgavetype.GodkjenneVedtak)
+        val beskrivelse = "Oppgave tekst her"
+        oppgaveService.opprettOppgave(behandlingId = BEHANDLING_ID, oppgavetype = Oppgavetype.GodkjenneVedtak, beskrivelse = beskrivelse)
 
         assertThat(slot.captured.enhetsnummer).isEqualTo(ENHETSNUMMER)
         assertThat(slot.captured.mappeId).isNotNull
@@ -169,7 +171,8 @@ internal class OppgaveServiceTest {
         assertThat(slot.captured.fristFerdigstillelse).isAfterOrEqualTo(LocalDate.now().plusDays(1))
         assertThat(slot.captured.aktivFra).isEqualTo(LocalDate.now())
         assertThat(slot.captured.tema).isEqualTo(Tema.ENF)
-        assertThat(slot.captured.beskrivelse).contains(dagensDatoMedTidNorskFormat())
+        val forventetBeskrivelse = "--- ${dagensDatoMedTidNorskFormat()} familie-ef-sak --- \n$beskrivelse"
+        assertThat(slot.captured.beskrivelse).isEqualTo(forventetBeskrivelse)
     }
 
     @Test
@@ -183,7 +186,7 @@ internal class OppgaveServiceTest {
         val slot = slot<OpprettOppgaveRequest>()
         every { oppgaveClient.opprettOppgave(capture(slot)) } returns GSAK_OPPGAVE_ID
 
-        oppgaveService.opprettOppgave(BEHANDLING_ID, Oppgavetype.GodkjenneVedtak)
+        oppgaveService.opprettOppgave(BEHANDLING_ID, Oppgavetype.GodkjenneVedtak, beskrivelse = "")
 
         assertThat(slot.captured.enhetsnummer).isEqualTo("1234")
         assertThat(slot.captured.mappeId).isNull()
@@ -193,7 +196,9 @@ internal class OppgaveServiceTest {
         assertThat(slot.captured.fristFerdigstillelse).isAfterOrEqualTo(LocalDate.now().plusDays(1))
         assertThat(slot.captured.aktivFra).isEqualTo(LocalDate.now())
         assertThat(slot.captured.tema).isEqualTo(Tema.ENF)
-        assertThat(slot.captured.beskrivelse).contains(dagensDatoMedTidNorskFormat())
+        val forventetBeskrivelse = "--- ${dagensDatoMedTidNorskFormat()} familie-ef-sak --- \n"
+
+        assertThat(slot.captured.beskrivelse).isEqualTo(forventetBeskrivelse)
     }
 
     @Test
