@@ -47,11 +47,12 @@ class GjennoprettOppgavePåBehandlingTask(
         logger.info("Gjenoppretter oppgave for behandling ${task.payload}")
         val behandling = behandligService.hentBehandling(UUID.fromString(task.payload))
         feilHvis(behandling.status.erFerdigbehandlet()) { "Behandling er ferdig behandlet" }
-
-        val opprinneligOppgave = tilordnetRessursService.hentIkkeFerdigstiltOppgaveForBehandling(behandling.id, setOf(Oppgavetype.BehandleSak, Oppgavetype.GodkjenneVedtak, Oppgavetype.BehandleUnderkjentVedtak))
+        val erFeilregistrert = erOppgaveFeilregistrert(behandling)
         ferdigstillReferanseTilIkkeeksisterendeEksternOppgave(behandling)
-        opprettNyOppgave(behandling, opprinneligOppgave.erFeilregistrert())
+        opprettNyOppgave(behandling, erFeilregistrert)
     }
+
+    private fun erOppgaveFeilregistrert(behandling: Behandling) = tilordnetRessursService.hentIkkeFerdigstiltOppgaveForBehandling(behandling.id, setOf(Oppgavetype.BehandleSak, Oppgavetype.GodkjenneVedtak, Oppgavetype.BehandleUnderkjentVedtak)).erFeilregistrert()
 
     private fun ferdigstillReferanseTilIkkeeksisterendeEksternOppgave(behandling: Behandling) {
         val efOppgave: EFOppgave? = oppgaveRepository.findByBehandlingIdAndErFerdigstiltIsFalseAndTypeIn(behandling.id, setOf(Oppgavetype.BehandleSak, Oppgavetype.GodkjenneVedtak, Oppgavetype.BehandleUnderkjentVedtak))
