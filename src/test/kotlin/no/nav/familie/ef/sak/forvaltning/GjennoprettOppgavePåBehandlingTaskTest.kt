@@ -8,7 +8,6 @@ import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.oppgave.OppgaveRepository
 import no.nav.familie.ef.sak.oppgave.OppgaveService
-import no.nav.familie.ef.sak.oppgave.TilordnetRessursService
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.kontrakter.felles.oppgave.Oppgave
 import no.nav.familie.kontrakter.felles.oppgave.OppgavePrioritet
@@ -19,12 +18,11 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
 class GjennoprettOppgavePåBehandlingTaskTest {
-    private val tilordnetRessursService: TilordnetRessursService = mockk<TilordnetRessursService>()
     private val behandligService: BehandlingService = mockk<BehandlingService>()
     private val oppgaveService: OppgaveService = mockk<OppgaveService>(relaxed = true)
     private val oppgaveRepository: OppgaveRepository = mockk<OppgaveRepository>()
 
-    private val gjennoprettOppgavePåBehandlingTask = GjennoprettOppgavePåBehandlingTask(tilordnetRessursService = tilordnetRessursService, behandligService = behandligService, oppgaveService = oppgaveService, oppgaveRepository = oppgaveRepository)
+    private val gjennoprettOppgavePåBehandlingTask = GjennoprettOppgavePåBehandlingTask(behandligService = behandligService, oppgaveService = oppgaveService, oppgaveRepository = oppgaveRepository)
 
     @Test
     fun `Ikke opprett oppgave hvis behandling er FERDIGSTILT`() {
@@ -51,13 +49,13 @@ class GjennoprettOppgavePåBehandlingTaskTest {
     }
 
     @Test
-    fun `Opprett oppgave med henvisning til feilregistrert oppgave dersom dette er status på opprinnelig oppgave `() {
+    fun `Opprett oppgave med beskrivelse om feilregistrert oppgave`() {
         val forventetBeskrivelse = "Opprinnelig oppgave er feilregistrert. For å kunne utføre behandling har det blitt opprettet en ny oppgave."
         val behandling = behandling()
 
         every { behandligService.hentBehandling(behandling.id) } returns behandling
         every { oppgaveRepository.findByBehandlingIdAndErFerdigstiltIsFalseAndTypeIn(behandling.id, setOf(Oppgavetype.BehandleSak, Oppgavetype.GodkjenneVedtak, Oppgavetype.BehandleUnderkjentVedtak)) } returns null
-        every { tilordnetRessursService.hentIkkeFerdigstiltOppgaveForBehandling(behandling.id, setOf(Oppgavetype.BehandleSak, Oppgavetype.GodkjenneVedtak, Oppgavetype.BehandleUnderkjentVedtak)) } returns Oppgave(status = StatusEnum.FEILREGISTRERT)
+        every { oppgaveService.finnBehandlingsoppgaveSistEndretIEFSak(behandling.id) } returns Oppgave(status = StatusEnum.FEILREGISTRERT)
 
         gjennoprettOppgavePåBehandlingTask.doTask(GjennoprettOppgavePåBehandlingTask.opprettTask(behandling.id))
 

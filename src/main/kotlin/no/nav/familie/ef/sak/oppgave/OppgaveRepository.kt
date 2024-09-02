@@ -28,6 +28,11 @@ interface OppgaveRepository :
         oppgavetype: Oppgavetype,
     ): List<Oppgave>?
 
+    fun findByBehandlingIdAndTypeIn(
+        behandlingId: UUID,
+        oppgavetype: Set<Oppgavetype>,
+    ): List<Oppgave>?
+
     fun findByBehandlingIdAndErFerdigstiltIsFalseAndTypeIn(
         behandlingId: UUID,
         oppgavetype: Set<Oppgavetype>,
