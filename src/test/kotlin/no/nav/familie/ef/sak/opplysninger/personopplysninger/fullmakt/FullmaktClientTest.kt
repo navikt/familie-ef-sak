@@ -71,7 +71,7 @@ class FullmaktClientTest {
         ).isEqualTo("ENF")
     }
 
-    private val queryMappingForHentFullmakt: MappingBuilder = WireMock.post(WireMock.urlPathEqualTo("/api/internbruker/fullmektig"))
+    private val queryMappingForHentFullmakt: MappingBuilder = WireMock.post(WireMock.urlPathEqualTo("/api/internbruker/fullmaktsgiver"))
 
     private val hentFullmaktResponse =
         """

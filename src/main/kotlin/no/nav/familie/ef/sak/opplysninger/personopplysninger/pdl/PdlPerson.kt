@@ -419,7 +419,7 @@ data class Folkeregisterpersonstatus(
 
 data class Fullmakt(
     val gyldigFraOgMed: LocalDate,
-    val gyldigTilOgMed: LocalDate,
+    val gyldigTilOgMed: LocalDate?,
     val motpartsPersonident: String,
     val motpartsRolle: MotpartsRolle,
     val omraader: List<String>,
