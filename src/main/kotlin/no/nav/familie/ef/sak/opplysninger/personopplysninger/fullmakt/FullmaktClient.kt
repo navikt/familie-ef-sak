@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.opplysninger.personopplysninger.fullmakt
 
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.logger
 import no.nav.familie.http.client.AbstractPingableRestClient
 import org.apache.hc.client5.http.utils.Base64
 import org.springframework.beans.factory.annotation.Qualifier
@@ -19,9 +20,12 @@ class FullmaktClient(
     override val pingUri: URI = URI.create(fullmaktUrl)
 
     fun hentFullmakt(ident: String): List<FullmaktResponse> {
+        logger.info("Kaller PDL fullmakt")
         val url = URI.create("$fullmaktUrl/api/internbruker/fullmektig")
         val base64EncodedIdent = Base64.encodeBase64String(ident.toByteArray())
-        return postForEntity(url, FullmaktRequest(base64EncodedIdent))
+        val fullmaktResponse = postForEntity<List<FullmaktResponse>>(url, FullmaktRequest(base64EncodedIdent))
+        secureLogger.info("Fullmakt response: $fullmaktResponse")
+        return fullmaktResponse
     }
 }
 
