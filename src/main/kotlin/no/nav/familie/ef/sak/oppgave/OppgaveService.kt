@@ -20,6 +20,11 @@ import no.nav.familie.kontrakter.felles.oppgave.Oppgave
 import no.nav.familie.kontrakter.felles.oppgave.OppgaveIdentV2
 import no.nav.familie.kontrakter.felles.oppgave.OppgavePrioritet
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
+import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype.BehandleSak
+import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype.BehandleUnderkjentVedtak
+import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype.GodkjenneVedtak
+import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype.InnhentDokumentasjon
+import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype.VurderHenvendelse
 import no.nav.familie.kontrakter.felles.oppgave.OpprettOppgaveRequest
 import org.slf4j.LoggerFactory
 import org.springframework.cache.CacheManager
@@ -80,7 +85,7 @@ class OppgaveService(
         oppgavetype: Oppgavetype,
         vurderHenvendelseOppgaveSubtype: OppgaveSubtype?,
         behandlingId: UUID,
-    ) = if (oppgavetype == Oppgavetype.VurderHenvendelse && vurderHenvendelseOppgaveSubtype != null) {
+    ) = if (oppgavetype == VurderHenvendelse && vurderHenvendelseOppgaveSubtype != null) {
         oppgaveRepository.findByBehandlingIdAndTypeAndOppgaveSubtype(
             behandlingId,
             oppgavetype,
@@ -144,7 +149,7 @@ class OppgaveService(
         enhetsnummer: String?,
         oppgavetype: Oppgavetype,
     ): Long? {
-        if (enhetsnummer == "4489" && oppgavetype == Oppgavetype.GodkjenneVedtak) {
+        if (enhetsnummer == "4489" && oppgavetype == GodkjenneVedtak) {
             val mapper = finnMapper(enhetsnummer)
             val mappeIdForGodkjenneVedtak =
                 mapper
@@ -160,7 +165,7 @@ class OppgaveService(
             }
             return mappeIdForGodkjenneVedtak
         }
-        if (enhetsnummer == "4489" && oppgavetype == Oppgavetype.InnhentDokumentasjon) { // Skjermede personer skal ikke puttes i mappe
+        if (enhetsnummer == "4489" && oppgavetype == InnhentDokumentasjon) { // Skjermede personer skal ikke puttes i mappe
             return finnHendelseMappeId(enhetsnummer)
         }
         return null
@@ -268,7 +273,7 @@ class OppgaveService(
     fun finnSisteBehandleSakOppgaveForBehandling(behandlingId: UUID): EfOppgave? =
         oppgaveRepository.findTopByBehandlingIdAndTypeOrderBySporbarOpprettetTidDesc(
             behandlingId,
-            Oppgavetype.BehandleSak,
+            BehandleSak,
         )
 
     fun finnSisteOppgaveForBehandling(behandlingId: UUID): EfOppgave? = oppgaveRepository.findTopByBehandlingIdOrderBySporbarOpprettetTidDesc(behandlingId)
@@ -364,7 +369,7 @@ class OppgaveService(
                 finnOppgaveRequest =
                     FinnOppgaveRequest(
                         tema = Tema.ENF,
-                        oppgavetype = Oppgavetype.BehandleSak,
+                        oppgavetype = BehandleSak,
                         limit = limit,
                         opprettetTomTidspunkt = opprettetTomTidspunktPåBehandleSakOppgave,
                     ),
@@ -375,7 +380,7 @@ class OppgaveService(
                 finnOppgaveRequest =
                     FinnOppgaveRequest(
                         tema = Tema.ENF,
-                        oppgavetype = Oppgavetype.BehandleUnderkjentVedtak,
+                        oppgavetype = BehandleUnderkjentVedtak,
                         limit = limit,
                     ),
             )
@@ -385,7 +390,7 @@ class OppgaveService(
                 finnOppgaveRequest =
                     FinnOppgaveRequest(
                         tema = Tema.ENF,
-                        oppgavetype = Oppgavetype.GodkjenneVedtak,
+                        oppgavetype = GodkjenneVedtak,
                         limit = limit,
                     ),
             )
@@ -399,9 +404,22 @@ class OppgaveService(
         return listOf(behandleSakOppgaver, behandleUnderkjent, godkjenne)
     }
 
+    fun finnBehandlingsoppgaveSistEndretIEFSak(behandlingId: UUID): Oppgave? {
+        val oppgaveSistEndret =
+            oppgaveRepository
+                .findByBehandlingIdAndTypeIn(
+                    behandlingId,
+                    setOf(BehandleSak, GodkjenneVedtak, BehandleUnderkjentVedtak),
+                ).oppgaveSistEndret()
+
+        return oppgaveSistEndret?.let {
+            hentOppgave(it.gsakOppgaveId)
+        }
+    }
+
     fun finnVurderHenvendelseOppgaver(behandlingId: UUID): List<VurderHenvendelseOppgaveDto> {
         val vurderHenvendelsOppgave =
-            oppgaveRepository.findByBehandlingIdAndType(behandlingId, Oppgavetype.VurderHenvendelse)
+            oppgaveRepository.findByBehandlingIdAndType(behandlingId, VurderHenvendelse)
         val oppgaveListe = vurderHenvendelsOppgave?.filter { it.oppgaveSubtype != null } ?: emptyList()
 
         return oppgaveListe.map {
@@ -415,13 +433,17 @@ class OppgaveService(
 
     private fun utledSettBehandlesAvApplikasjon(oppgavetype: Oppgavetype) =
         when (oppgavetype) {
-            Oppgavetype.BehandleSak,
-            Oppgavetype.BehandleUnderkjentVedtak,
-            Oppgavetype.GodkjenneVedtak,
+            BehandleSak,
+            BehandleUnderkjentVedtak,
+            GodkjenneVedtak,
             -> true
 
-            Oppgavetype.InnhentDokumentasjon -> false
-            Oppgavetype.VurderHenvendelse -> false
+            InnhentDokumentasjon -> false
+            VurderHenvendelse -> false
             else -> error("Håndterer ikke behandlesAvApplikasjon for $oppgavetype")
         }
+
+    private fun List<no.nav.familie.ef.sak.oppgave.Oppgave>?.oppgaveSistEndret(): no.nav.familie.ef.sak.oppgave.Oppgave? = this?.sortedBy { it.sistEndret() }?.last()
+
+    private fun no.nav.familie.ef.sak.oppgave.Oppgave.sistEndret(): LocalDateTime = this.sporbar.endret.endretTid
 }
