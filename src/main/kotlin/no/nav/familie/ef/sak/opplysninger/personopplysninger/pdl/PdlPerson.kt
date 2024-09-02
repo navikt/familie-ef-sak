@@ -126,7 +126,7 @@ data class PdlSøker(
     val folkeregisteridentifikator: List<Folkeregisteridentifikator>,
     @JsonProperty("foedsel") override val fødsel: List<Fødsel>,
     val folkeregisterpersonstatus: List<Folkeregisterpersonstatus>,
-    val fullmakt: List<Fullmakt>,
+    val fullmakt: List<Fullmakt>?,
     @JsonProperty("kjoenn") val kjønn: List<Kjønn>,
     val kontaktadresse: List<Kontaktadresse>,
     val navn: List<Navn>,
@@ -419,7 +419,7 @@ data class Folkeregisterpersonstatus(
 
 data class Fullmakt(
     val gyldigFraOgMed: LocalDate,
-    val gyldigTilOgMed: LocalDate,
+    val gyldigTilOgMed: LocalDate?,
     val motpartsPersonident: String,
     val motpartsRolle: MotpartsRolle,
     val omraader: List<String>,

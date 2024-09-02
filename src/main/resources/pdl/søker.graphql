@@ -81,13 +81,6 @@ query($ident: ID!){
                 historisk
             }
         }
-        fullmakt(historikk: true) {
-            gyldigFraOgMed
-            gyldigTilOgMed
-            motpartsPersonident
-            motpartsRolle
-            omraader
-        }
         kjoenn {
             kjoenn
         }

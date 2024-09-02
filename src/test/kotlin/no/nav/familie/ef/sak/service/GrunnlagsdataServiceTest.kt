@@ -19,7 +19,10 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerI
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.TidligereVedtaksperioderService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.TidligereInnvilgetVedtak
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.TidligereVedtaksperioder
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.fullmakt.FullmaktService
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Fullmakt
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Metadata
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.MotpartsRolle
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Sivilstand
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Sivilstandstype
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
@@ -49,6 +52,7 @@ internal class GrunnlagsdataServiceTest {
     private val tidligereVedtaksperioderService = mockk<TidligereVedtaksperioderService>(relaxed = true)
     private val arbeidsforholdService = mockk<ArbeidsforholdService>(relaxed = true)
     private val kontantstøtteService = mockk<KontantstøtteService>(relaxed = true)
+    private val fullmaktService = mockk<FullmaktService>(relaxed = true)
     private val grunnlagsdataRegisterService =
         GrunnlagsdataRegisterService(
             personService,
@@ -56,6 +60,7 @@ internal class GrunnlagsdataServiceTest {
             tidligereVedtaksperioderService,
             arbeidsforholdService,
             kontantstøtteService,
+            fullmaktService,
         )
 
     private val søknad =
@@ -90,6 +95,16 @@ internal class GrunnlagsdataServiceTest {
         every { søknadService.hentOvergangsstønad(any()) } returns søknad
         every { personopplysningerIntegrasjonerClient.hentMedlemskapsinfo(any()) } returns
             Medlemskapsinfo("", emptyList(), emptyList(), emptyList())
+        every { fullmaktService.hentFullmakt(any()) } returns
+            listOf(
+                Fullmakt(
+                    LocalDate.of(2020, 1, 1),
+                    LocalDate.of(2021, 1, 1),
+                    "11111133333",
+                    MotpartsRolle.FULLMEKTIG,
+                    listOf(),
+                ),
+            )
     }
 
     @Test
@@ -117,7 +132,7 @@ internal class GrunnlagsdataServiceTest {
                 sivilstand = listOf(sivilstand),
                 vergemaalEllerFremtidsfullmakt = emptyList(),
             )
-        val fullmakt = pdlSøker.fullmakt.map { it.motpartsPersonident }
+        val fullmakt = pdlSøker.fullmakt?.map { it.motpartsPersonident } ?: emptyList()
         every { personService.hentSøker(any()) } returns pdlSøker
 
         service.hentFraRegisterForPersonOgAndreForeldre("1", emptyList())
@@ -136,7 +151,7 @@ internal class GrunnlagsdataServiceTest {
                     fullmakt = emptyList(),
                     vergemaalEllerFremtidsfullmakt = emptyList(),
                 )
-
+        every { fullmaktService.hentFullmakt(any()) } returns listOf()
         service.hentFraRegisterForPersonOgAndreForeldre("1", emptyList())
 
         verify(exactly = 0) { pdlClient.hentPersonKortBolk(any()) }
