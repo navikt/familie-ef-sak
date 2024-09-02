@@ -40,7 +40,7 @@ internal class OpprettOppgaveTaskTest {
 
         opprettOppgaveTask.doTask(task)
         verifyOpprettOppgaveMedLagringKall(0)
-        verifyOpprettOppgaveUtenLagringKall(0)
+        verifyOpprettOppgaveUtenLagringKall()
     }
 
     @Test
@@ -57,13 +57,12 @@ internal class OpprettOppgaveTaskTest {
 
         opprettOppgaveTask.doTask(task)
         verifyOpprettOppgaveMedLagringKall(1)
-        verifyOpprettOppgaveUtenLagringKall(0)
+        verifyOpprettOppgaveUtenLagringKall()
     }
 
     @Test
     fun `skal lagre ned oppgave om oppgavetypen er vurder henvendelse`() {
         every { behandlingService.hentBehandling(behandlingId) } returns behandling(id = behandlingId, status = BehandlingStatus.UTREDES)
-        every { oppgaveService.lagOppgaveTekst(any()) } returns ""
 
         val task =
             OpprettOppgaveTask.opprettTask(
@@ -81,7 +80,7 @@ internal class OpprettOppgaveTaskTest {
         verify(exactly = opprettOppgaveKall) { oppgaveService.opprettOppgave(any(), any(), any(), any(), any()) }
     }
 
-    private fun verifyOpprettOppgaveUtenLagringKall(opprettOppgaveKall: Int) {
-        verify(exactly = opprettOppgaveKall) { oppgaveService.opprettOppgaveUtenÅLagreIRepository(any(), any(), any(), any(), any()) }
+    private fun verifyOpprettOppgaveUtenLagringKall() {
+        verify(exactly = 0) { oppgaveService.opprettOppgaveUtenÅLagreIRepository(any(), any(), any(), any(), any()) }
     }
 }
