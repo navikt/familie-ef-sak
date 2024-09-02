@@ -73,7 +73,7 @@ object Grunnbeløpsperioder {
             Grunnbeløp(
                 periode = Månedsperiode(YearMonth.parse("2024-05"), YearMonth.from(LocalDate.MAX)),
                 grunnbeløp = 124_028.toBigDecimal(),
-                perMnd = 10_335.toBigDecimal(),
+                perMnd = 10_336.toBigDecimal(),
                 gjennomsnittPerÅr = 122_225.toBigDecimal(),
             ),
             Grunnbeløp(

@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.oppgave
 
+import no.nav.familie.ef.sak.felles.util.dagensDatoMedTidNorskFormat
 import no.nav.familie.kontrakter.felles.oppgave.IdentGruppe
 import no.nav.familie.kontrakter.felles.oppgave.Oppgave
 import org.slf4j.LoggerFactory
@@ -28,4 +29,9 @@ object OppgaveUtil {
 
     fun finnPersonidentForOppgave(oppgave: Oppgave): String? =
         oppgave.identer?.first { it.gruppe == IdentGruppe.FOLKEREGISTERIDENT }?.ident
+
+    fun lagOpprettOppgavebeskrivelse(beskrivelse: String?): String {
+        val beskrivelseEllerDefault = beskrivelse ?: "Oppgave opprettet"
+        return "--- ${dagensDatoMedTidNorskFormat()} familie-ef-sak --- \n$beskrivelseEllerDefault"
+    }
 }

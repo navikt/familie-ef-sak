@@ -11,6 +11,8 @@ import no.nav.familie.ef.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
+import no.nav.familie.ef.sak.felles.domain.Endret
+import no.nav.familie.ef.sak.felles.util.dagensDatoMedTidNorskFormat
 import no.nav.familie.ef.sak.infrastruktur.config.OppgaveClientMock
 import no.nav.familie.ef.sak.infrastruktur.exception.IntegrasjonException
 import no.nav.familie.ef.sak.iverksett.oppgaveforbarn.Alder
@@ -30,9 +32,14 @@ import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveRequest
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveResponseDto
 import no.nav.familie.kontrakter.felles.oppgave.IdentGruppe
 import no.nav.familie.kontrakter.felles.oppgave.OppgaveIdentV2
-import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
+import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype.BehandleSak
+import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype.BehandleUnderkjentVedtak
+import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype.GodkjenneVedtak
+import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype.InnhentDokumentasjon
+import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype.VurderHenvendelse
 import no.nav.familie.kontrakter.felles.oppgave.OpprettOppgaveRequest
-import no.nav.familie.kontrakter.felles.saksbehandler.Saksbehandler
+import no.nav.familie.kontrakter.felles.oppgave.StatusEnum.FEILREGISTRERT
+import no.nav.familie.kontrakter.felles.oppgave.StatusEnum.FERDIGSTILT
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.BeforeEach
@@ -42,7 +49,6 @@ import org.junit.jupiter.api.assertThrows
 import org.springframework.cache.concurrent.ConcurrentMapCacheManager
 import org.springframework.http.HttpStatus
 import org.springframework.web.client.HttpServerErrorException
-import java.net.URI
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
@@ -62,7 +68,6 @@ internal class OppgaveServiceTest {
             oppgaveRepository,
             arbeidsfordelingService,
             cacheManager,
-            URI.create("https://ensligmorellerfar.intern.nav.no/oppgavebenk"),
         )
 
     @BeforeEach
@@ -77,7 +82,7 @@ internal class OppgaveServiceTest {
         val oppgave =
             oppgave(
                 behandling = behandling(),
-                type = Oppgavetype.VurderHenvendelse,
+                type = VurderHenvendelse,
                 gsakOppgaveId = eksisterendeGsakOppgaveId,
             )
         mockFinnVurderHenvendelseOppgave(returnValue = oppgave)
@@ -85,7 +90,7 @@ internal class OppgaveServiceTest {
         val opprettOppgave =
             oppgaveService.opprettOppgave(
                 BEHANDLING_ID,
-                Oppgavetype.VurderHenvendelse,
+                VurderHenvendelse,
                 OppgaveSubtype.INNSTILLING_VEDRØRENDE_UTDANNING,
             )
 
@@ -102,7 +107,7 @@ internal class OppgaveServiceTest {
 
         oppgaveService.opprettOppgave(
             BEHANDLING_ID,
-            Oppgavetype.VurderHenvendelse,
+            VurderHenvendelse,
             OppgaveSubtype.INNSTILLING_VEDRØRENDE_UTDANNING,
         )
 
@@ -124,7 +129,7 @@ internal class OppgaveServiceTest {
         val slot = slot<OpprettOppgaveRequest>()
         mockOpprettOppgave(slot)
 
-        oppgaveService.opprettOppgave(BEHANDLING_ID, Oppgavetype.BehandleSak)
+        oppgaveService.opprettOppgave(BEHANDLING_ID, BehandleSak)
 
         assertThat(slot.captured.enhetsnummer).isEqualTo(ENHETSNUMMER)
         assertThat(slot.captured.saksId).isEqualTo(FAGSAK_EKSTERN_ID.toString())
@@ -133,7 +138,8 @@ internal class OppgaveServiceTest {
         assertThat(slot.captured.fristFerdigstillelse).isAfterOrEqualTo(LocalDate.now().plusDays(1))
         assertThat(slot.captured.aktivFra).isEqualTo(LocalDate.now())
         assertThat(slot.captured.tema).isEqualTo(Tema.ENF)
-        assertThat(slot.captured.beskrivelse).contains("https://ensligmorellerfar.intern.nav.no/oppgavebenk")
+        val forventetBeskrivelse = "--- ${dagensDatoMedTidNorskFormat()} familie-ef-sak --- \nOppgave opprettet"
+        assertThat(slot.captured.beskrivelse).isEqualTo(forventetBeskrivelse)
     }
 
     @Test
@@ -141,7 +147,7 @@ internal class OppgaveServiceTest {
         val slot = slot<OpprettOppgaveRequest>()
         mockOpprettOppgave(slot)
         every { arbeidsfordelingService.hentNavEnhetId(any(), any()) } returns null
-        oppgaveService.opprettOppgave(BEHANDLING_ID, Oppgavetype.BehandleSak)
+        oppgaveService.opprettOppgave(BEHANDLING_ID, BehandleSak)
 
         verify(exactly = 2) { oppgaveClient.opprettOppgave(any()) }
     }
@@ -152,7 +158,7 @@ internal class OppgaveServiceTest {
         mockOpprettOppgave(slot)
         every { oppgaveClient.opprettOppgave(any()) } throws IntegrasjonException("En merkelig feil vi ikke kjenner til")
         assertThrows<IntegrasjonException> {
-            oppgaveService.opprettOppgave(BEHANDLING_ID, Oppgavetype.BehandleSak)
+            oppgaveService.opprettOppgave(BEHANDLING_ID, BehandleSak)
         }
     }
 
@@ -161,7 +167,8 @@ internal class OppgaveServiceTest {
         val slot = slot<OpprettOppgaveRequest>()
         mockOpprettOppgave(slot)
 
-        oppgaveService.opprettOppgave(BEHANDLING_ID, Oppgavetype.GodkjenneVedtak)
+        val beskrivelse = "Oppgave tekst her"
+        oppgaveService.opprettOppgave(behandlingId = BEHANDLING_ID, oppgavetype = GodkjenneVedtak, beskrivelse = beskrivelse)
 
         assertThat(slot.captured.enhetsnummer).isEqualTo(ENHETSNUMMER)
         assertThat(slot.captured.mappeId).isNotNull
@@ -171,7 +178,8 @@ internal class OppgaveServiceTest {
         assertThat(slot.captured.fristFerdigstillelse).isAfterOrEqualTo(LocalDate.now().plusDays(1))
         assertThat(slot.captured.aktivFra).isEqualTo(LocalDate.now())
         assertThat(slot.captured.tema).isEqualTo(Tema.ENF)
-        assertThat(slot.captured.beskrivelse).contains("https://ensligmorellerfar.intern.nav.no/oppgavebenk")
+        val forventetBeskrivelse = "--- ${dagensDatoMedTidNorskFormat()} familie-ef-sak --- \n$beskrivelse"
+        assertThat(slot.captured.beskrivelse).isEqualTo(forventetBeskrivelse)
     }
 
     @Test
@@ -185,7 +193,7 @@ internal class OppgaveServiceTest {
         val slot = slot<OpprettOppgaveRequest>()
         every { oppgaveClient.opprettOppgave(capture(slot)) } returns GSAK_OPPGAVE_ID
 
-        oppgaveService.opprettOppgave(BEHANDLING_ID, Oppgavetype.GodkjenneVedtak)
+        oppgaveService.opprettOppgave(BEHANDLING_ID, GodkjenneVedtak, beskrivelse = "")
 
         assertThat(slot.captured.enhetsnummer).isEqualTo("1234")
         assertThat(slot.captured.mappeId).isNull()
@@ -195,7 +203,9 @@ internal class OppgaveServiceTest {
         assertThat(slot.captured.fristFerdigstillelse).isAfterOrEqualTo(LocalDate.now().plusDays(1))
         assertThat(slot.captured.aktivFra).isEqualTo(LocalDate.now())
         assertThat(slot.captured.tema).isEqualTo(Tema.ENF)
-        assertThat(slot.captured.beskrivelse).contains("https://ensligmorellerfar.intern.nav.no/oppgavebenk")
+        val forventetBeskrivelse = "--- ${dagensDatoMedTidNorskFormat()} familie-ef-sak --- \n"
+
+        assertThat(slot.captured.beskrivelse).isEqualTo(forventetBeskrivelse)
     }
 
     @Test
@@ -204,6 +214,46 @@ internal class OppgaveServiceTest {
         val oppgave = oppgaveService.hentOppgave(GSAK_OPPGAVE_ID)
 
         assertThat(oppgave.id).isEqualTo(GSAK_OPPGAVE_ID)
+    }
+
+    @Test
+    fun `Finn oppgave sist endret i familie-ef-sak`() {
+        val oppgaveList = oppgaveList() // Ny, eldre og eldst
+
+        every {
+            oppgaveRepository.findByBehandlingIdAndTypeIn(
+                BEHANDLING_ID,
+                setOf(BehandleSak, GodkjenneVedtak, BehandleUnderkjentVedtak),
+            )
+        } returns oppgaveList
+
+        every { oppgaveClient.finnOppgaveMedId(GSAK_OPPGAVE_ID) } returns lagEksternTestOppgave().copy(status = FEILREGISTRERT)
+        every { oppgaveClient.finnOppgaveMedId(GSAK_OPPGAVE_ID_2) } returns lagEksternTestOppgave().copy(status = FERDIGSTILT)
+        every { oppgaveClient.finnOppgaveMedId(GSAK_OPPGAVE_ID_3) } returns lagEksternTestOppgave().copy(status = FERDIGSTILT)
+
+        val oppgave = oppgaveService.finnBehandlingsoppgaveSistEndretIEFSak(BEHANDLING_ID)
+
+        // skal finne nyeste oppgave som er feilregistrert
+        assertThat(oppgave!!.status).isEqualTo(FEILREGISTRERT)
+
+        verify(exactly = 0) { oppgaveClient.finnOppgaveMedId(GSAK_OPPGAVE_ID_3) }
+        verify(exactly = 0) { oppgaveClient.finnOppgaveMedId(GSAK_OPPGAVE_ID_2) }
+        verify(exactly = 1) { oppgaveClient.finnOppgaveMedId(GSAK_OPPGAVE_ID) }
+    }
+
+    private fun oppgaveList(): List<Oppgave> {
+        val testOppgave1 = lagTestOppgave(GSAK_OPPGAVE_ID)
+        val testOppgave2 = lagTestOppgave(GSAK_OPPGAVE_ID_2)
+        val testOppgave3 = lagTestOppgave(GSAK_OPPGAVE_ID_3)
+
+        val sporbarNyest = testOppgave1.sporbar.copy(endret = Endret(endretAv = "123", endretTid = LocalDateTime.now().minusDays(1)))
+        val sporbarMellom = testOppgave2.sporbar.copy(endret = Endret(endretAv = "123", endretTid = LocalDateTime.now().minusDays(2)))
+        val sporbarGammel = testOppgave3.sporbar.copy(endret = Endret(endretAv = "123", endretTid = LocalDateTime.now().minusDays(3)))
+
+        val ny = testOppgave1.copy(sporbar = sporbarNyest)
+        val mellom = testOppgave2.copy(sporbar = sporbarMellom)
+        val gammel = testOppgave3.copy(sporbar = sporbarGammel)
+        return listOf(mellom, ny, gammel)
     }
 
     @Test
@@ -224,7 +274,7 @@ internal class OppgaveServiceTest {
         val slot = slot<Long>()
         every { oppgaveClient.ferdigstillOppgave(capture(slot)) } just runs
 
-        oppgaveService.ferdigstillBehandleOppgave(BEHANDLING_ID, Oppgavetype.BehandleSak)
+        oppgaveService.ferdigstillBehandleOppgave(BEHANDLING_ID, BehandleSak)
         assertThat(slot.captured).isEqualTo(GSAK_OPPGAVE_ID)
     }
 
@@ -238,7 +288,7 @@ internal class OppgaveServiceTest {
         assertThatThrownBy {
             oppgaveService.ferdigstillBehandleOppgave(
                 BEHANDLING_ID,
-                Oppgavetype.BehandleSak,
+                BehandleSak,
             )
         }.hasMessage("Finner ikke oppgave for behandling $BEHANDLING_ID")
             .isInstanceOf(java.lang.IllegalStateException::class.java)
@@ -249,7 +299,7 @@ internal class OppgaveServiceTest {
         every {
             oppgaveRepository.findByBehandlingIdAndTypeAndErFerdigstiltIsFalse(any(), any())
         } returns null
-        oppgaveService.ferdigstillOppgaveHvisOppgaveFinnes(BEHANDLING_ID, Oppgavetype.BehandleSak)
+        oppgaveService.ferdigstillOppgaveHvisOppgaveFinnes(BEHANDLING_ID, BehandleSak)
     }
 
     @Test
@@ -261,7 +311,7 @@ internal class OppgaveServiceTest {
         val slot = slot<Long>()
         every { oppgaveClient.ferdigstillOppgave(capture(slot)) } just runs
 
-        oppgaveService.ferdigstillOppgaveHvisOppgaveFinnes(BEHANDLING_ID, Oppgavetype.BehandleSak)
+        oppgaveService.ferdigstillOppgaveHvisOppgaveFinnes(BEHANDLING_ID, BehandleSak)
         assertThat(slot.captured).isEqualTo(GSAK_OPPGAVE_ID)
     }
 
@@ -337,8 +387,8 @@ internal class OppgaveServiceTest {
         val slot = slot<OpprettOppgaveRequest>()
         mockOpprettOppgave(slot)
 
-        oppgaveService.opprettOppgave(BEHANDLING_ID, Oppgavetype.GodkjenneVedtak)
-        oppgaveService.opprettOppgave(BEHANDLING_ID, Oppgavetype.GodkjenneVedtak)
+        oppgaveService.opprettOppgave(BEHANDLING_ID, GodkjenneVedtak)
+        oppgaveService.opprettOppgave(BEHANDLING_ID, GodkjenneVedtak)
 
         verify(exactly = 1) { oppgaveClient.finnMapper(any(), any()) }
     }
@@ -355,7 +405,7 @@ internal class OppgaveServiceTest {
 
         oppgaveService.opprettOppgave(
             behandlingId,
-            Oppgavetype.InnhentDokumentasjon,
+            InnhentDokumentasjon,
             null,
             Alder.ETT_ÅR.oppgavebeskrivelse,
         )
@@ -388,7 +438,7 @@ internal class OppgaveServiceTest {
         internal fun `skal ignorere feil fra ferdigstillOppgave hvis den er feilregistrert og vi skal ignorere feilregistrert`() {
             every { oppgaveClient.ferdigstillOppgave(any()) } throws feilregistrertException
 
-            oppgaveService.ferdigstillOppgaveHvisOppgaveFinnes(UUID.randomUUID(), Oppgavetype.BehandleSak, true)
+            oppgaveService.ferdigstillOppgaveHvisOppgaveFinnes(UUID.randomUUID(), BehandleSak, true)
 
             verify(exactly = 1) { oppgaveRepository.update(any()) }
         }
@@ -398,7 +448,7 @@ internal class OppgaveServiceTest {
             every { oppgaveClient.ferdigstillOppgave(any()) } throws feilregistrertException
 
             assertThatThrownBy {
-                oppgaveService.ferdigstillOppgaveHvisOppgaveFinnes(UUID.randomUUID(), Oppgavetype.BehandleSak, false)
+                oppgaveService.ferdigstillOppgaveHvisOppgaveFinnes(UUID.randomUUID(), BehandleSak, false)
             }.isInstanceOf(RessursException::class.java)
 
             verify(exactly = 0) { oppgaveRepository.update(any()) }
@@ -409,7 +459,7 @@ internal class OppgaveServiceTest {
             every { oppgaveClient.ferdigstillOppgave(any()) } throws annenException
 
             assertThatThrownBy {
-                oppgaveService.ferdigstillOppgaveHvisOppgaveFinnes(UUID.randomUUID(), Oppgavetype.BehandleSak, true)
+                oppgaveService.ferdigstillOppgaveHvisOppgaveFinnes(UUID.randomUUID(), BehandleSak, true)
             }.isInstanceOf(RessursException::class.java)
 
             verify(exactly = 0) { oppgaveRepository.update(any()) }
@@ -423,7 +473,7 @@ internal class OppgaveServiceTest {
             every {
                 oppgaveRepository.findByBehandlingIdAndTypeAndErFerdigstiltIsFalse(any(), any())
             } returns null
-            val ferdigstiltOppgave = oppgaveService.settEfOppgaveTilFerdig(BEHANDLING_ID, Oppgavetype.BehandleSak)
+            val ferdigstiltOppgave = oppgaveService.settEfOppgaveTilFerdig(BEHANDLING_ID, BehandleSak)
 
             verify(exactly = 1) { oppgaveRepository.findByBehandlingIdAndTypeAndErFerdigstiltIsFalse(any(), any()) }
             verify(exactly = 0) { oppgaveRepository.update(any()) }
@@ -437,7 +487,7 @@ internal class OppgaveServiceTest {
             } returns lagTestOppgave()
             every { oppgaveRepository.update(any()) } returns lagTestOppgave().copy(erFerdigstilt = true)
 
-            val ferdigstiltOppgave = oppgaveService.settEfOppgaveTilFerdig(BEHANDLING_ID, Oppgavetype.BehandleSak)
+            val ferdigstiltOppgave = oppgaveService.settEfOppgaveTilFerdig(BEHANDLING_ID, BehandleSak)
             assertThat(ferdigstiltOppgave).isNotNull
             assertThat(ferdigstiltOppgave?.behandlingId).isEqualTo(BEHANDLING_ID)
             assertThat(ferdigstiltOppgave?.erFerdigstilt).isTrue()
@@ -471,7 +521,7 @@ internal class OppgaveServiceTest {
             identer = setOf(PersonIdent(ident = FNR)),
         )
 
-    private fun lagTestOppgave(): Oppgave = Oppgave(behandlingId = BEHANDLING_ID, type = Oppgavetype.BehandleSak, gsakOppgaveId = GSAK_OPPGAVE_ID)
+    private fun lagTestOppgave(gsakOppgaveId: Long = GSAK_OPPGAVE_ID): Oppgave = Oppgave(behandlingId = BEHANDLING_ID, type = BehandleSak, gsakOppgaveId = gsakOppgaveId)
 
     private fun lagEksternTestOppgave(tilordnetRessurs: String? = null): no.nav.familie.kontrakter.felles.oppgave.Oppgave =
         no.nav.familie.kontrakter.felles.oppgave
@@ -487,9 +537,10 @@ internal class OppgaveServiceTest {
         private val FAGSAK_ID = UUID.fromString("1242f220-cad3-4640-95c1-190ec814c91e")
         private const val FAGSAK_EKSTERN_ID = 98765L
         private const val GSAK_OPPGAVE_ID = 12345L
+        private const val GSAK_OPPGAVE_ID_2 = 54321L
+        private const val GSAK_OPPGAVE_ID_3 = 98765L
         private val BEHANDLING_ID = UUID.fromString("1c4209bd-3217-4130-8316-8658fe300a84")
         private const val ENHETSNUMMER = "4489"
-        private const val ENHETSNAVN = "enhetsnavn"
         private const val FNR = "11223312345"
         private const val SAKSBEHANDLER_ID = "Z999999"
     }
@@ -509,5 +560,3 @@ private val fredagFrist = LocalDate.of(2021, 4, 2)
 private val mandagFrist = LocalDate.of(2021, 4, 5)
 private val tirsdagFrist = LocalDate.of(2021, 4, 6)
 private val onsdagFrist = LocalDate.of(2021, 4, 7)
-
-private val saksbehandler = Saksbehandler(UUID.randomUUID(), "Z999999", "Darth", "Vader", "4405")
