@@ -24,7 +24,7 @@ class OppgaveUtilTest {
     @Test
     fun `skal legge på beskrivelse hvis beskrivelse ikke er null`() {
         val beskrivelse = "Dette er tekst"
-        val forventetOppgavebeskrivelse = "--- ${dagensDatoMedTidNorskFormat()} familie-ef-sak --- \n$beskrivelse"
+        val forventetOppgavebeskrivelse = "--- ${dagensDatoMedTidNorskFormat()} (familie-ef-sak) --- \n$beskrivelse"
         val lagOpprettOppgavebeskrivelse = lagOpprettOppgavebeskrivelse(beskrivelse)
         assertThat(lagOpprettOppgavebeskrivelse).isEqualTo(forventetOppgavebeskrivelse)
     }

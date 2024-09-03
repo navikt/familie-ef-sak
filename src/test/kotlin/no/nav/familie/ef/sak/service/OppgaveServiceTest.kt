@@ -138,7 +138,7 @@ internal class OppgaveServiceTest {
         assertThat(slot.captured.fristFerdigstillelse).isAfterOrEqualTo(LocalDate.now().plusDays(1))
         assertThat(slot.captured.aktivFra).isEqualTo(LocalDate.now())
         assertThat(slot.captured.tema).isEqualTo(Tema.ENF)
-        val forventetBeskrivelse = "--- ${dagensDatoMedTidNorskFormat()} familie-ef-sak --- \nOppgave opprettet"
+        val forventetBeskrivelse = "--- ${dagensDatoMedTidNorskFormat()} (familie-ef-sak) --- \nOppgave opprettet"
         assertThat(slot.captured.beskrivelse).isEqualTo(forventetBeskrivelse)
     }
 
@@ -178,7 +178,7 @@ internal class OppgaveServiceTest {
         assertThat(slot.captured.fristFerdigstillelse).isAfterOrEqualTo(LocalDate.now().plusDays(1))
         assertThat(slot.captured.aktivFra).isEqualTo(LocalDate.now())
         assertThat(slot.captured.tema).isEqualTo(Tema.ENF)
-        val forventetBeskrivelse = "--- ${dagensDatoMedTidNorskFormat()} familie-ef-sak --- \n$beskrivelse"
+        val forventetBeskrivelse = "--- ${dagensDatoMedTidNorskFormat()} (familie-ef-sak) --- \n$beskrivelse"
         assertThat(slot.captured.beskrivelse).isEqualTo(forventetBeskrivelse)
     }
 
@@ -203,7 +203,7 @@ internal class OppgaveServiceTest {
         assertThat(slot.captured.fristFerdigstillelse).isAfterOrEqualTo(LocalDate.now().plusDays(1))
         assertThat(slot.captured.aktivFra).isEqualTo(LocalDate.now())
         assertThat(slot.captured.tema).isEqualTo(Tema.ENF)
-        val forventetBeskrivelse = "--- ${dagensDatoMedTidNorskFormat()} familie-ef-sak --- \n"
+        val forventetBeskrivelse = "--- ${dagensDatoMedTidNorskFormat()} (familie-ef-sak) --- \n"
 
         assertThat(slot.captured.beskrivelse).isEqualTo(forventetBeskrivelse)
     }
