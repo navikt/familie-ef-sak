@@ -331,7 +331,7 @@
           "gyldigTilOgMed" : {
             "name" : "gyldigTilOgMed",
             "type" : "LocalDate",
-            "nullable" : false
+            "nullable" : true
           },
           "motpartsPersonident" : {
             "name" : "motpartsPersonident",
