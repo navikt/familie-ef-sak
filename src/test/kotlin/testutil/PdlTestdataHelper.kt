@@ -106,8 +106,8 @@ object PdlTestdataHelper {
             deltBosted,
             dødsfall,
             forelderBarnRelasjon,
-            listOfNotNull(fødselsdato(fødsel?.fødselsår, fødsel?.fødselsdato)),
-            listOfNotNull(fødested(fødsel?.fødeland, fødsel?.fødested, fødsel?.fødekommune)),
+            listOfNotNull(fødselsdato(fødsel?.foedselsaar, fødsel?.foedselsdato)),
+            listOfNotNull(fødested(fødsel?.foedeland, fødsel?.foedested, fødsel?.foedekommune)),
             listOfNotNull(navn),
             emptyList(),
         )
@@ -132,11 +132,11 @@ object PdlTestdataHelper {
 
     fun fødsel(fødselsdato: LocalDate) =
         Fødsel(
-            fødselsår = fødselsdato.year,
-            fødselsdato = fødselsdato,
-            fødested = null,
-            fødekommune = null,
-            fødeland = null,
+            foedselsaar = fødselsdato.year,
+            foedselsdato = fødselsdato,
+            foedested = null,
+            foedekommune = null,
+            foedeland = null,
         )
 
     fun ukjentBostedsadresse(

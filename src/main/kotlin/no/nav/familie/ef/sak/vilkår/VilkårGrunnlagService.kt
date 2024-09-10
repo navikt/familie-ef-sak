@@ -85,7 +85,7 @@ class VilkårGrunnlagService(
                     fødeland =
                         grunnlagsdata.søker.fødsel
                             .gjeldende()
-                            .fødeland,
+                            .foedeland,
                 ),
             tidligereVedtaksperioder = grunnlagsdata.tidligereVedtaksperioder.tilDto(),
             medlemskap = medlemskap,

@@ -94,7 +94,7 @@ class OpprettOppgaveForMigrertFødtBarnTask(
             grunnlagsdataService
                 .hentGrunnlagsdata(behandlingId)
                 .grunnlagsdata.barn
-                .flatMap { it.fødsel.mapNotNull(Fødsel::fødselsdato) }
+                .flatMap { it.fødsel.mapNotNull(Fødsel::foedselsdato) }
         return data.barn
             .mapNotNull {
                 val fødselsdato = it.fødselsdato
