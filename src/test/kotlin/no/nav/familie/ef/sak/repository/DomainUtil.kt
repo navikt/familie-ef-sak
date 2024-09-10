@@ -43,6 +43,7 @@ import no.nav.familie.ef.sak.vedtak.domain.KontantstøtteWrapper
 import no.nav.familie.ef.sak.vedtak.domain.PeriodeWrapper
 import no.nav.familie.ef.sak.vedtak.domain.PeriodetypeBarnetilsyn
 import no.nav.familie.ef.sak.vedtak.domain.SamordningsfradragType
+import no.nav.familie.ef.sak.vedtak.domain.SkolepengerWrapper
 import no.nav.familie.ef.sak.vedtak.domain.TilleggsstønadWrapper
 import no.nav.familie.ef.sak.vedtak.domain.Vedtak
 import no.nav.familie.ef.sak.vedtak.domain.Vedtaksperiode
@@ -330,6 +331,7 @@ fun vedtak(
     år: Int = 2021,
     inntekter: InntektWrapper = InntektWrapper(listOf(inntektsperiode(år = år))),
     perioder: PeriodeWrapper = PeriodeWrapper(listOf(vedtaksperiode(år = år))),
+    skolepenger: SkolepengerWrapper? = null,
     samordningsfradragType: SamordningsfradragType? = null,
 ): Vedtak =
     Vedtak(
@@ -340,6 +342,7 @@ fun vedtak(
         avslåBegrunnelse = null,
         perioder = perioder,
         inntekter = inntekter,
+        skolepenger = skolepenger,
         saksbehandlerIdent = "VL",
         opprettetAv = "VL",
         opprettetTid = LocalDateTime.now(),

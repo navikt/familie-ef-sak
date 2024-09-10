@@ -8,8 +8,10 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.identer
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.ef.sak.tilkjentytelse.domain.AndelTilkjentYtelse
 import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
+import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPeriode
 import no.nav.familie.kontrakter.felles.ef.Datakilde
+import no.nav.familie.kontrakter.felles.ef.EksternPeriodeMedStønadstype
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.springframework.stereotype.Component
 
@@ -20,6 +22,7 @@ class PeriodeService(
     private val behandlingService: BehandlingService,
     private val tilkjentYtelseService: TilkjentYtelseService,
     private val infotrygdService: InfotrygdService,
+    private val vedtakService: VedtakService,
 ) {
     fun hentPerioderFraEfOgInfotrygd(personIdent: String): InternePerioder {
         val personIdenter = personService.hentPersonIdenter(personIdent).identer()
@@ -53,7 +56,30 @@ class PeriodeService(
         return slåSammenPerioder(perioderFraEf, perioderFraReplika)
     }
 
-    fun hentPerioderFraEf(
+    fun hentPeriodeFraVedtakForSkolepenger(personIdent: String): List<EksternPeriodeMedStønadstype> {
+        val personIdenter = personService.hentPersonIdenter(personIdent).identer()
+        val skoleårsperioder =
+            fagsakService
+                .finnFagsak(personIdenter, StønadType.SKOLEPENGER)
+                ?.let { behandlingService.finnSisteIverksatteBehandling(it.id) }
+                ?.let { vedtakService.hentVedtak(it.id) }
+                ?.let { it.skolepenger?.skoleårsperioder }
+
+        val skoleårsperioderList =
+            skoleårsperioder
+                ?.flatMap { it.perioder }
+                ?.map {
+                    EksternPeriodeMedStønadstype(
+                        fomDato = it.datoFra,
+                        tomDato = it.datoTil,
+                        StønadType.SKOLEPENGER,
+                    )
+                } ?: emptyList()
+
+        return skoleårsperioderList
+    }
+
+    private fun hentPerioderFraEf(
         personIdenter: Set<String>,
         stønadstype: StønadType,
     ): EfInternPerioder? =

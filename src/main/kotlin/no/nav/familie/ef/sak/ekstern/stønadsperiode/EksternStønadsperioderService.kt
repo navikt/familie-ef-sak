@@ -28,26 +28,22 @@ class EksternStønadsperioderService(
     }
 
     fun hentPerioderForOvergangsstønadOgSkolepenger(request: EksternePerioderRequest): OvergangsstønadOgSkolepengerResponse {
-        val perioderOS = periodeService.hentPerioderFraEf(setOf(request.personIdent), StønadType.OVERGANGSSTØNAD)
-        val perioderSP = periodeService.hentPerioderFraEf(setOf(request.personIdent), StønadType.SKOLEPENGER)
+        val perioderOS = periodeService.hentPerioderForOvergangsstønadFraEfOgInfotrygd(request.personIdent)
+        val begrensetPeriode = Datoperiode(fom = request.fomDato ?: LocalDate.MIN, tom = request.tomDato ?: LocalDate.MAX)
 
         val eksternPeriodeMedStønadstypeOS =
-            perioderOS?.internperioder?.map {
-                EksternPeriodeMedStønadstype(
-                    it.stønadFom,
-                    it.stønadTom,
-                    StønadType.OVERGANGSSTØNAD,
-                )
-            } ?: emptyList()
+            perioderOS
+                .filter { periode ->
+                    Datoperiode(fom = periode.stønadFom, tom = periode.stønadTom).overlapper(begrensetPeriode)
+                }.map {
+                    EksternPeriodeMedStønadstype(
+                        it.stønadFom,
+                        it.stønadTom,
+                        StønadType.OVERGANGSSTØNAD,
+                    )
+                }
 
-        val eksternPeriodeMedStønadstypeSP =
-            perioderSP?.internperioder?.map {
-                EksternPeriodeMedStønadstype(
-                    it.stønadFom,
-                    it.stønadTom,
-                    StønadType.SKOLEPENGER,
-                )
-            } ?: emptyList()
+        val eksternPeriodeMedStønadstypeSP = periodeService.hentPeriodeFraVedtakForSkolepenger(request.personIdent)
 
         return OvergangsstønadOgSkolepengerResponse(request.personIdent, eksternPeriodeMedStønadstypeOS + eksternPeriodeMedStønadstypeSP)
     }
