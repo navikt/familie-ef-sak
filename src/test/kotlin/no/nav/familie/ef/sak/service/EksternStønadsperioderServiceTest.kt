@@ -52,6 +52,9 @@ internal class EksternStønadsperioderServiceTest {
     private val fagsakOvergangsstønad = fagsak(stønadstype = StønadType.OVERGANGSSTØNAD)
     private val behandlingOvergangsstønad = behandling(fagsakOvergangsstønad)
 
+    private val fagsakSkolepenger = fagsak(stønadstype = StønadType.SKOLEPENGER)
+    private val behandlingSkolepenger = behandling(fagsakSkolepenger)
+
     @BeforeEach
     internal fun setUp() {
         every { infotrygdReplikaClient.hentSammenslåttePerioder(any()) } returns
@@ -63,6 +66,7 @@ internal class EksternStønadsperioderServiceTest {
         every { behandlingService.finnSisteIverksatteBehandling(any()) } returns null
         every { fagsakService.finnFagsak(any(), any()) } returns null
         every { fagsakService.finnFagsak(any(), StønadType.OVERGANGSSTØNAD) } returns fagsakOvergangsstønad
+        every { fagsakService.finnFagsak(any(), StønadType.SKOLEPENGER) } returns fagsakSkolepenger
     }
 
     @Test
@@ -137,6 +141,23 @@ internal class EksternStønadsperioderServiceTest {
         assertThat(perioder.first().tomDato).isEqualTo(nyLøsning.atEndOfMonth())
     }
 
+    @Test
+    internal fun `finner perioder med stønadstype`() {
+        val efSakPeriode = YearMonth.of(2021, 3)
+        mockPdl()
+        mockNyLøsning(efSakPeriode.atDay(1), efSakPeriode.atEndOfMonth())
+        val perioder = service.hentPerioderForOvergangsstønadOgSkolepenger(EksternePerioderRequest(ident)).perioder
+
+        assertThat(perioder).hasSize(2)
+        assertThat(perioder.first().fomDato).isEqualTo(efSakPeriode.atDay(1))
+        assertThat(perioder.first().tomDato).isEqualTo(efSakPeriode.atEndOfMonth())
+        assertThat(perioder.first().stønadstype).isEqualTo(StønadType.OVERGANGSSTØNAD)
+
+        assertThat(perioder.last().fomDato).isEqualTo(efSakPeriode.atDay(1))
+        assertThat(perioder.last().tomDato).isEqualTo(efSakPeriode.atEndOfMonth())
+        assertThat(perioder.last().stønadstype).isEqualTo(StønadType.SKOLEPENGER)
+    }
+
     private fun mockInfotrygd(
         stønadFom: LocalDate,
         stønadTom: LocalDate,
@@ -152,6 +173,10 @@ internal class EksternStønadsperioderServiceTest {
     ) {
         every { behandlingService.finnSisteIverksatteBehandling(fagsakOvergangsstønad.id) } returns behandlingOvergangsstønad
         every { tilkjentYtelseService.hentForBehandling(behandlingOvergangsstønad.id) } returns
+            lagTilkjentYtelse(listOf(lagAndelTilkjentYtelse(1000, stønadFom, stønadTom, ident)))
+
+        every { behandlingService.finnSisteIverksatteBehandling(fagsakSkolepenger.id) } returns behandlingSkolepenger
+        every { tilkjentYtelseService.hentForBehandling(behandlingSkolepenger.id) } returns
             lagTilkjentYtelse(listOf(lagAndelTilkjentYtelse(1000, stønadFom, stønadTom, ident)))
     }
 

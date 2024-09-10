@@ -53,7 +53,7 @@ class PeriodeService(
         return slåSammenPerioder(perioderFraEf, perioderFraReplika)
     }
 
-    private fun hentPerioderFraEf(
+    fun hentPerioderFraEf(
         personIdenter: Set<String>,
         stønadstype: StønadType,
     ): EfInternPerioder? =

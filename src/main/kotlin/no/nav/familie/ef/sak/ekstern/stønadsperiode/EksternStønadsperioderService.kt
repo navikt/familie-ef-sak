@@ -6,8 +6,11 @@ import no.nav.familie.ef.sak.infotrygd.PeriodeService
 import no.nav.familie.kontrakter.felles.Datoperiode
 import no.nav.familie.kontrakter.felles.ef.EksternPeriode
 import no.nav.familie.kontrakter.felles.ef.EksternPeriodeMedBeløp
+import no.nav.familie.kontrakter.felles.ef.EksternPeriodeMedStønadstype
 import no.nav.familie.kontrakter.felles.ef.EksternePerioderRequest
 import no.nav.familie.kontrakter.felles.ef.EksternePerioderResponse
+import no.nav.familie.kontrakter.felles.ef.OvergangsstønadOgSkolepengerResponse
+import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 
@@ -22,6 +25,31 @@ class EksternStønadsperioderService(
         val perioder = periodeService.hentPerioderFraEfOgInfotrygd(request.personIdent)
         val perioderFraITogEF = ArenaPeriodeUtil.slåSammenPerioderFraEfOgInfotrygd(request, perioder)
         return EksternePerioderResponse(perioderFraITogEF)
+    }
+
+    fun hentPerioderForOvergangsstønadOgSkolepenger(request: EksternePerioderRequest): OvergangsstønadOgSkolepengerResponse {
+        val perioderOS = periodeService.hentPerioderFraEf(setOf(request.personIdent), StønadType.OVERGANGSSTØNAD)
+        val perioderSP = periodeService.hentPerioderFraEf(setOf(request.personIdent), StønadType.SKOLEPENGER)
+
+        val eksternPeriodeMedStønadstypeOS =
+            perioderOS?.internperioder?.map {
+                EksternPeriodeMedStønadstype(
+                    it.stønadFom,
+                    it.stønadTom,
+                    StønadType.OVERGANGSSTØNAD,
+                )
+            } ?: emptyList()
+
+        val eksternPeriodeMedStønadstypeSP =
+            perioderSP?.internperioder?.map {
+                EksternPeriodeMedStønadstype(
+                    it.stønadFom,
+                    it.stønadTom,
+                    StønadType.SKOLEPENGER,
+                )
+            } ?: emptyList()
+
+        return OvergangsstønadOgSkolepengerResponse(request.personIdent, eksternPeriodeMedStønadstypeOS + eksternPeriodeMedStønadstypeSP)
     }
 
     fun hentPerioderForOvergangsstønad(request: EksternePerioderRequest): List<EksternPeriode> =
