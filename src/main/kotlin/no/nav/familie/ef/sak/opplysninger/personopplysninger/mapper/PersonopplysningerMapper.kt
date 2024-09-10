@@ -53,7 +53,7 @@ class PersonopplysningerMapper(
                 søker.folkeregisterpersonstatus
                     .gjeldende()
                     ?.let { Folkeregisterpersonstatus.fraPdl(it) },
-            fødselsdato = søker.fødsel?.gjeldende()?.foedselsdato,
+            fødselsdato = søker.fødsel?.gjeldende()?.fødselsdato,
             dødsdato = søker.dødsfall?.dødsdato,
             navn = NavnDto.fraNavn(søker.navn),
             kjønn = KjønnMapper.tilKjønn(søker.kjønn),
@@ -178,7 +178,7 @@ class PersonopplysningerMapper(
             borHosSøker = AdresseHjelper.harRegistrertSammeBostedsadresseSomForelder(barn, bostedsadresserForelder),
             deltBosted = deltBostedDto,
             harDeltBostedNå = AdresseHjelper.harDeltBosted(barn, grunnlagsdataOpprettet),
-            fødselsdato = barn.fødsel.gjeldende().foedselsdato,
+            fødselsdato = barn.fødsel.gjeldende().fødselsdato,
             dødsdato = barn.dødsfall.gjeldende()?.dødsdato,
         )
     }

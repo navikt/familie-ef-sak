@@ -182,7 +182,7 @@ class BarnMedSamværMapper(
                 matchetBarn.barn
                     ?.fødsel
                     ?.gjeldende()
-                    ?.foedselsdato,
+                    ?.fødselsdato,
             folkeregisterpersonstatus =
                 matchetBarn.barn
                     ?.folkeregisterpersonstatus
@@ -215,7 +215,7 @@ class BarnMedSamværMapper(
         AnnenForelderDto(
             navn = pdlAnnenForelder.navn.visningsnavn(),
             fødselsnummer = annenForelderFnr,
-            fødselsdato = pdlAnnenForelder.fødsel.gjeldende().foedselsdato,
+            fødselsdato = pdlAnnenForelder.fødsel.gjeldende().fødselsdato,
             dødsfall = pdlAnnenForelder.dødsfall.gjeldende()?.dødsdato,
             bosattINorge =
                 pdlAnnenForelder.bostedsadresse

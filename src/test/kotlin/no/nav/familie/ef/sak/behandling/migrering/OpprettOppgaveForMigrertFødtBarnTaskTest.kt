@@ -112,11 +112,11 @@ internal class OpprettOppgaveForMigrertFødtBarnTaskTest {
         val grunnlagsdata = opprettGrunnlagsdata()
         val fødsel =
             Fødsel(
-                foedselsdato = barnFødelsdato,
-                foedekommune = null,
-                foedeland = null,
-                foedested = null,
-                foedselsaar = null,
+                fødselsdato = barnFødelsdato,
+                fødekommune = null,
+                fødeland = null,
+                fødested = null,
+                fødselsår = null,
             )
         val barn = opprettBarnMedIdent("1", fødsel = fødsel)
         return GrunnlagsdataMedMetadata(grunnlagsdata.copy(barn = listOf(barn)), LocalDateTime.now())

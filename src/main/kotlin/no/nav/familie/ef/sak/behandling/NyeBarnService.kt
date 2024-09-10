@@ -144,7 +144,7 @@ class NyeBarnService(
         if (pdlBarn == null || behandlingBarn.fødselTermindato == null) {
             return false
         }
-        val fødselsdato = pdlBarn.fødsel.gjeldende().foedselsdato ?: return false
+        val fødselsdato = pdlBarn.fødsel.gjeldende().fødselsdato ?: return false
         return YearMonth.from(fødselsdato) < YearMonth.from(behandlingBarn.fødselTermindato)
     }
 
@@ -154,7 +154,7 @@ class NyeBarnService(
         if (pdlBarn == null || behandlingBarn.fødselTermindato == null) {
             return false
         }
-        val fødselsdato = pdlBarn.fødsel.gjeldende().foedselsdato ?: return false
+        val fødselsdato = pdlBarn.fødsel.gjeldende().fødselsdato ?: return false
         return YearMonth.from(fødselsdato).month > YearMonth.from(behandlingBarn.fødselTermindato).month
     }
 
@@ -172,6 +172,6 @@ class NyeBarnService(
         BarnMinimumDto(
             personIdent = it.personIdent,
             navn = it.navn.visningsnavn(),
-            fødselsdato = it.fødsel.gjeldende().foedselsdato,
+            fødselsdato = it.fødsel.gjeldende().fødselsdato,
         )
 }

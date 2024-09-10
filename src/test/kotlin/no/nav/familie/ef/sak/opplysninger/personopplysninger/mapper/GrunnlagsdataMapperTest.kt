@@ -18,20 +18,20 @@ internal class GrunnlagsdataMapperTest {
 
         val fødsel =
             Fødsel(
-                foedselsaar = fødselsdato.fødselsår,
-                foedselsdato = fødselsdato.fødselsdato,
-                foedested = fødested.fødested,
-                foedekommune = fødested.fødekommune,
-                foedeland = fødested.fødeland,
+                fødselsår = fødselsdato.fødselsår,
+                fødselsdato = fødselsdato.fødselsdato,
+                fødested = fødested.fødested,
+                fødekommune = fødested.fødekommune,
+                fødeland = fødested.fødeland,
             )
 
         val annenFødsel =
             Fødsel(
-                foedselsaar = annenFødselsdato.fødselsår,
-                foedselsdato = annenFødselsdato.fødselsdato,
-                foedested = annetFødested.fødested,
-                foedekommune = annetFødested.fødekommune,
-                foedeland = annetFødested.fødeland,
+                fødselsår = annenFødselsdato.fødselsår,
+                fødselsdato = annenFødselsdato.fødselsdato,
+                fødested = annetFødested.fødested,
+                fødekommune = annetFødested.fødekommune,
+                fødeland = annetFødested.fødeland,
             )
 
         val zippedeFødsler = GrunnlagsdataMapper.mapFødsler(listOf(fødselsdato, annenFødselsdato), listOf(fødested, annetFødested))
