@@ -19,7 +19,7 @@ object OppgaveUtil {
             try {
                 OffsetDateTime.parse(endretTidspunkt).until(OffsetDateTime.now(), ChronoUnit.SECONDS)
             } catch (e: Exception) {
-                logger.warn("Feilet parsing av endretTidspunkt=$endretTidspunkt for opgave=$oppgave")
+                logger.warn("Feilet parsing av endretTidspunkt=$endretTidspunkt for oppgave=$oppgave")
                 null
             }
         } else {
@@ -32,6 +32,6 @@ object OppgaveUtil {
 
     fun lagOpprettOppgavebeskrivelse(beskrivelse: String?): String {
         val beskrivelseEllerDefault = beskrivelse ?: "Oppgave opprettet"
-        return "--- ${dagensDatoMedTidNorskFormat()} familie-ef-sak --- \n$beskrivelseEllerDefault"
+        return "--- ${dagensDatoMedTidNorskFormat()} (familie-ef-sak) --- \n$beskrivelseEllerDefault"
     }
 }
