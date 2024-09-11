@@ -14,10 +14,18 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlIdent
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlIdenter
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
+import no.nav.familie.ef.sak.repository.vedtak
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
+import no.nav.familie.ef.sak.vedtak.VedtakService
+import no.nav.familie.ef.sak.vedtak.domain.DelårsperiodeSkoleårSkolepenger
+import no.nav.familie.ef.sak.vedtak.domain.SkolepengerStudietype
+import no.nav.familie.ef.sak.vedtak.domain.SkolepengerUtgift
+import no.nav.familie.ef.sak.vedtak.domain.SkolepengerWrapper
+import no.nav.familie.ef.sak.vedtak.domain.SkoleårsperiodeSkolepenger
 import no.nav.familie.ef.sak.økonomi.lagAndelTilkjentYtelse
 import no.nav.familie.ef.sak.økonomi.lagTilkjentYtelse
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPeriodeResponse
+import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.kontrakter.felles.ef.Datakilde
 import no.nav.familie.kontrakter.felles.ef.EksternPeriode
 import no.nav.familie.kontrakter.felles.ef.EksternePerioderRequest
@@ -36,6 +44,7 @@ internal class EksternStønadsperioderServiceTest {
     private val behandlingService = mockk<BehandlingService>(relaxed = true)
     private val tilkjentYtelseService = mockk<TilkjentYtelseService>()
     private val fagsakService = mockk<FagsakService>()
+    private val vedtakService = mockk<VedtakService>()
     private val periodeService =
         PeriodeService(
             personService,
@@ -43,6 +52,7 @@ internal class EksternStønadsperioderServiceTest {
             behandlingService,
             tilkjentYtelseService,
             InfotrygdService(infotrygdReplikaClient, personService),
+            vedtakService,
         )
 
     private val service = EksternStønadsperioderService(periodeService = periodeService)
@@ -51,6 +61,9 @@ internal class EksternStønadsperioderServiceTest {
 
     private val fagsakOvergangsstønad = fagsak(stønadstype = StønadType.OVERGANGSSTØNAD)
     private val behandlingOvergangsstønad = behandling(fagsakOvergangsstønad)
+
+    private val fagsakSkolepenger = fagsak(stønadstype = StønadType.SKOLEPENGER)
+    private val behandlingSkolepenger = behandling(fagsakSkolepenger)
 
     @BeforeEach
     internal fun setUp() {
@@ -63,6 +76,7 @@ internal class EksternStønadsperioderServiceTest {
         every { behandlingService.finnSisteIverksatteBehandling(any()) } returns null
         every { fagsakService.finnFagsak(any(), any()) } returns null
         every { fagsakService.finnFagsak(any(), StønadType.OVERGANGSSTØNAD) } returns fagsakOvergangsstønad
+        every { fagsakService.finnFagsak(any(), StønadType.SKOLEPENGER) } returns fagsakSkolepenger
     }
 
     @Test
@@ -137,6 +151,23 @@ internal class EksternStønadsperioderServiceTest {
         assertThat(perioder.first().tomDato).isEqualTo(nyLøsning.atEndOfMonth())
     }
 
+    @Test
+    internal fun `finner perioder med stønadstype`() {
+        val efSakPeriode = YearMonth.of(2021, 3)
+        mockPdl()
+        mockNyLøsning(efSakPeriode.atDay(1), efSakPeriode.atEndOfMonth())
+        val perioder = service.hentPerioderForOvergangsstønadOgSkolepenger(EksternePerioderRequest(ident)).perioder
+
+        assertThat(perioder).hasSize(2)
+        assertThat(perioder.first().fomDato).isEqualTo(efSakPeriode.atDay(1))
+        assertThat(perioder.first().tomDato).isEqualTo(efSakPeriode.atEndOfMonth())
+        assertThat(perioder.first().stønadstype).isEqualTo(StønadType.OVERGANGSSTØNAD)
+
+        assertThat(perioder.last().fomDato).isEqualTo(of(2023, 8, 1))
+        assertThat(perioder.last().tomDato).isEqualTo(of(2024, 6, 30))
+        assertThat(perioder.last().stønadstype).isEqualTo(StønadType.SKOLEPENGER)
+    }
+
     private fun mockInfotrygd(
         stønadFom: LocalDate,
         stønadTom: LocalDate,
@@ -153,6 +184,31 @@ internal class EksternStønadsperioderServiceTest {
         every { behandlingService.finnSisteIverksatteBehandling(fagsakOvergangsstønad.id) } returns behandlingOvergangsstønad
         every { tilkjentYtelseService.hentForBehandling(behandlingOvergangsstønad.id) } returns
             lagTilkjentYtelse(listOf(lagAndelTilkjentYtelse(1000, stønadFom, stønadTom, ident)))
+
+        every { behandlingService.finnSisteIverksatteBehandling(fagsakSkolepenger.id) } returns behandlingSkolepenger
+        every { tilkjentYtelseService.hentForBehandling(behandlingSkolepenger.id) } returns
+            lagTilkjentYtelse(listOf(lagAndelTilkjentYtelse(1000, stønadFom, stønadTom, ident)))
+
+        val skolepengerWrapper =
+            SkolepengerWrapper(
+                skoleårsperioder =
+                    listOf(
+                        SkoleårsperiodeSkolepenger(
+                            perioder =
+                                listOf(
+                                    DelårsperiodeSkoleårSkolepenger(
+                                        studietype = SkolepengerStudietype.HØGSKOLE_UNIVERSITET,
+                                        periode = Månedsperiode(YearMonth.of(2023, 8), YearMonth.of(2024, 6)),
+                                        100,
+                                    ),
+                                ),
+                            utgiftsperioder = listOf<SkolepengerUtgift>(),
+                        ),
+                    ),
+                begrunnelse = "begrunnelse",
+            )
+
+        every { vedtakService.hentVedtak(behandlingSkolepenger.id) } returns vedtak(behandlingId = behandlingSkolepenger.id, skolepenger = skolepengerWrapper)
     }
 
     private fun mockPdl() {

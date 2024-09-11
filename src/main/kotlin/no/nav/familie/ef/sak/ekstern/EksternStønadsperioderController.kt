@@ -9,6 +9,7 @@ import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.ef.EksternePerioderMedBeløpResponse
 import no.nav.familie.kontrakter.felles.ef.EksternePerioderRequest
 import no.nav.familie.kontrakter.felles.ef.EksternePerioderResponse
+import no.nav.familie.kontrakter.felles.ef.OvergangsstønadOgSkolepengerResponse
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.slf4j.LoggerFactory
 import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
@@ -90,4 +91,18 @@ class EksternStønadsperioderController(
         }
         return Ressurs.success(perioderForBarnetrygdService.hentPerioderMedFullOvergangsstønad(request))
     }
+
+    /**
+     * Brukes av tilleggstønader, for å vurdere barnetilsyn-ytelse. Henter kun perioder med OS og SP.
+     */
+    @PostMapping("overgangsstonad-og-skolepenger")
+    fun hentPerioderMedOvergangsstonadOgSkolepenger(
+        @RequestBody request: EksternePerioderRequest,
+    ): Ressurs<OvergangsstønadOgSkolepengerResponse> =
+        try {
+            Ressurs.success(eksternStønadsperioderService.hentPerioderForOvergangsstønadOgSkolepenger(request))
+        } catch (e: Exception) {
+            secureLogger.error("Kunne ikke hente perioder for $request", e)
+            Ressurs.failure("Henting av perioder for overgangsstønad feilet", error = e)
+        }
 }

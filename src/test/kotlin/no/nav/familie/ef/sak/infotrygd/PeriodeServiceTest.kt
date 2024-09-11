@@ -14,6 +14,7 @@ import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.ef.sak.tilkjentytelse.domain.AndelTilkjentYtelse
+import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.ef.sak.økonomi.lagAndelTilkjentYtelse
 import no.nav.familie.ef.sak.økonomi.lagTilkjentYtelse
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPeriode
@@ -32,6 +33,7 @@ internal class PeriodeServiceTest {
     private val behandlingService = mockk<BehandlingService>()
     private val tilkjentYtelseService = mockk<TilkjentYtelseService>()
     private val replikaClient = mockk<InfotrygdReplikaClient>()
+    private val vedtakService = mockk<VedtakService>()
 
     private val service =
         PeriodeService(
@@ -40,6 +42,7 @@ internal class PeriodeServiceTest {
             behandlingService = behandlingService,
             tilkjentYtelseService = tilkjentYtelseService,
             infotrygdService = InfotrygdService(replikaClient, personService),
+            vedtakService = vedtakService,
         )
 
     private val personIdent = "123"
