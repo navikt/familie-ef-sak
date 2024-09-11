@@ -31,19 +31,20 @@ object ArenaPeriodeUtil {
                     tomDato = it.second.atEndOfMonth(),
                     datakilde = Datakilde.EF,
                 )
-            }.filter { overlapper(request, it) }
+            }.filter { overlapper(request, it.fomDato, it.tomDato) }
     }
 
     private fun overlapper(
         request: EksternePerioderRequest,
-        periode: EksternPeriode,
+        eksternPeriodeFomDato: LocalDate,
+        eksternPeriodeTomDato: LocalDate,
     ): Boolean {
         val requestFom = request.fomDato ?: LocalDate.now() // Arena sender alltid fom/tom-datoer, burde endre kontraktet
         val requestTom = request.tomDato ?: LocalDate.now()
-        val range = periode.fomDato..periode.tomDato
+        val range = eksternPeriodeFomDato..eksternPeriodeTomDato
         return requestFom in range ||
             requestTom in range ||
-            (requestFom < periode.fomDato && requestTom > periode.tomDato) // omslutter
+            (requestFom < eksternPeriodeFomDato && requestTom > eksternPeriodeTomDato) // omslutter
     }
 
     private fun slåSammenÅrMåneder(måneder: MutableSet<YearMonth>): MutableList<Pair<YearMonth, YearMonth>> =
