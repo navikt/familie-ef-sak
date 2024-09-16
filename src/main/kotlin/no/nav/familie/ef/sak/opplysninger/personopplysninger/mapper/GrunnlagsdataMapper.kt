@@ -34,7 +34,7 @@ object GrunnlagsdataMapper {
         personIdent: String,
     ) =
         BarnMedIdent(
-            fødsel = mapFødsler(pdlPersonForelderBarn.fødselsdato, pdlPersonForelderBarn.fødested),
+            fødsel = mapFødsel(pdlPersonForelderBarn.fødselsdato.first(), pdlPersonForelderBarn.fødested.first()),
             adressebeskyttelse = pdlPersonForelderBarn.adressebeskyttelse,
             navn = pdlPersonForelderBarn.navn.gjeldende(),
             bostedsadresse = pdlPersonForelderBarn.bostedsadresse,
@@ -53,7 +53,7 @@ object GrunnlagsdataMapper {
             AnnenForelderMedIdent(
                 adressebeskyttelse = it.value.adressebeskyttelse,
                 personIdent = it.key,
-                fødsel = mapFødsler(it.value.fødselsdato, it.value.fødested),
+                fødsel = mapFødsel(it.value.fødselsdato.first(), it.value.fødested.first()),
                 bostedsadresse = it.value.bostedsadresse,
                 dødsfall = it.value.dødsfall,
                 navn = it.value.navn.gjeldende(),
@@ -65,12 +65,7 @@ object GrunnlagsdataMapper {
     fun mapFødsel(
         fødselsdato: Fødselsdato,
         fødested: Fødested,
-    ): Fødsel = Fødsel(fødselsdato.fødselsår, fødselsdato.fødselsdato, fødested.fødeland, fødested.fødested, fødested.fødekommune)
-
-    fun mapFødsler(
-        fødselsdato: List<Fødselsdato>,
-        fødested: List<Fødested>,
-    ): List<Fødsel> = fødselsdato.zip(fødested) { fødselsdato, fødested -> mapFødsel(fødselsdato, fødested) }
+    ): List<Fødsel> = listOf(Fødsel(fødselsdato.fødselsår, fødselsdato.fødselsdato, fødested.fødeland, fødested.fødested, fødested.fødekommune))
 
     fun mapSøker(
         pdlSøker: PdlSøker,
@@ -83,7 +78,7 @@ object GrunnlagsdataMapper {
             dødsfall = pdlSøker.dødsfall.gjeldende(),
             forelderBarnRelasjon = pdlSøker.forelderBarnRelasjon.mapForelderBarnRelasjon(),
             fullmakt = mapFullmakt(pdlSøker, andrePersoner),
-            fødsel = mapFødsler(pdlSøker.fødselsdato, pdlSøker.fødested),
+            fødsel = mapFødsel(pdlSøker.fødselsdato.first(), pdlSøker.fødested.first()),
             folkeregisterpersonstatus = pdlSøker.folkeregisterpersonstatus,
             innflyttingTilNorge = pdlSøker.innflyttingTilNorge,
             kjønn = pdlSøker.kjønn.firstOrNull()?.kjønn ?: KjønnType.UKJENT,

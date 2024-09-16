@@ -9,12 +9,9 @@ import java.time.LocalDate
 
 internal class GrunnlagsdataMapperTest {
     @Test
-    fun `to forskjellige fødselsdatoer og fødesteder skal bli merget til to Fødsel-objekter`() {
+    fun `en fødselsdato og ett fødested skal bli merget til en fødsel`() {
         val fødselsdato = fødselsdato(2020, LocalDate.of(2020, 1, 1))
         val fødested = fødested("land", "sted", "kommune")
-
-        val annenFødselsdato = fødselsdato(2020, LocalDate.of(2022, 1, 1))
-        val annetFødested = fødested("annetLand", "annetSted", "annenKommune")
 
         val fødsel =
             Fødsel(
@@ -25,18 +22,27 @@ internal class GrunnlagsdataMapperTest {
                 fødeland = fødested.fødeland,
             )
 
-        val annenFødsel =
+        val mappetFødsel = GrunnlagsdataMapper.mapFødsel(fødselsdato, fødested)
+
+        assertThat(mappetFødsel).contains(fødsel)
+    }
+
+    @Test
+    fun `påser at fødested blir mappet selv om fødselsår og dato mangler`() {
+        val fødselsdato = fødselsdato(null, null)
+        val fødested = fødested("land", "sted", "kommune")
+
+        val fødsel =
             Fødsel(
-                fødselsår = annenFødselsdato.fødselsår,
-                fødselsdato = annenFødselsdato.fødselsdato,
-                fødested = annetFødested.fødested,
-                fødekommune = annetFødested.fødekommune,
-                fødeland = annetFødested.fødeland,
+                fødselsår = fødselsdato.fødselsår,
+                fødselsdato = fødselsdato.fødselsdato,
+                fødested = fødested.fødested,
+                fødekommune = fødested.fødekommune,
+                fødeland = fødested.fødeland,
             )
 
-        val zippedeFødsler = GrunnlagsdataMapper.mapFødsler(listOf(fødselsdato, annenFødselsdato), listOf(fødested, annetFødested))
+        val mappetFødsel = GrunnlagsdataMapper.mapFødsel(fødselsdato, fødested)
 
-        assertThat(zippedeFødsler).contains(fødsel)
-        assertThat(zippedeFødsler).contains(annenFødsel)
+        assertThat(mappetFødsel).contains(fødsel)
     }
 }
