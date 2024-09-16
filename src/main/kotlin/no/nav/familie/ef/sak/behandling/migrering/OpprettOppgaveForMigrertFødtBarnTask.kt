@@ -7,8 +7,8 @@ import no.nav.familie.ef.sak.iverksett.oppgaveforbarn.Alder
 import no.nav.familie.ef.sak.iverksett.oppgaveforbarn.OpprettOppfølgingsoppgaveForBarnFyltÅrTask
 import no.nav.familie.ef.sak.iverksett.oppgaveforbarn.OpprettOppgavePayload
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.Fødsel
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.BarnMinimumDto
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Fødsel
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.kontrakter.felles.objectMapper

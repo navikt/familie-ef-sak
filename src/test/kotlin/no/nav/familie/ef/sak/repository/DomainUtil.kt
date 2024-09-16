@@ -21,12 +21,12 @@ import no.nav.familie.ef.sak.felles.domain.SporbarUtils
 import no.nav.familie.ef.sak.felles.util.min
 import no.nav.familie.ef.sak.oppgave.Oppgave
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.BarnMedIdent
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.Fødsel
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.SivilstandMedNavn
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.Søker
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.Sivilstandstype
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Adressebeskyttelse
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.AdressebeskyttelseGradering
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Fødsel
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.KjønnType
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Metadata
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Navn

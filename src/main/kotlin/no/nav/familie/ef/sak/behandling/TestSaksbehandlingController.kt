@@ -279,8 +279,8 @@ class TestSaksbehandlingController(
         val barneListe: List<Barn> =
             søkerMedBarn.barn
                 .filter {
-                    it.value.fødsel
-                        .gjeldende()
+                    it.value.fødselsdato
+                        .first()
                         .erUnder18År()
                 }.map {
                     TestsøknadBuilder.Builder().defaultBarn(

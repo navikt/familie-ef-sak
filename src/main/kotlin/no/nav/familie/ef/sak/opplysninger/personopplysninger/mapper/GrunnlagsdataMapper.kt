@@ -5,10 +5,13 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.BarnMedIdent
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.Folkeregisteridentifikator
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.ForelderBarnRelasjon
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.FullmaktMedNavn
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.Fødsel
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.SivilstandMedNavn
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.Søker
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.TidligereVedtaksperioder
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.Sivilstandstype
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Fødested
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Fødselsdato
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.KjønnType
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlAnnenForelder
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlPersonForelderBarn
@@ -31,7 +34,7 @@ object GrunnlagsdataMapper {
         personIdent: String,
     ) =
         BarnMedIdent(
-            fødsel = pdlPersonForelderBarn.fødsel,
+            fødsel = mapFødsel(pdlPersonForelderBarn.fødselsdato.first(), pdlPersonForelderBarn.fødested.first()),
             adressebeskyttelse = pdlPersonForelderBarn.adressebeskyttelse,
             navn = pdlPersonForelderBarn.navn.gjeldende(),
             bostedsadresse = pdlPersonForelderBarn.bostedsadresse,
@@ -50,7 +53,7 @@ object GrunnlagsdataMapper {
             AnnenForelderMedIdent(
                 adressebeskyttelse = it.value.adressebeskyttelse,
                 personIdent = it.key,
-                fødsel = it.value.fødsel,
+                fødsel = mapFødsel(it.value.fødselsdato.first(), it.value.fødested.first()),
                 bostedsadresse = it.value.bostedsadresse,
                 dødsfall = it.value.dødsfall,
                 navn = it.value.navn.gjeldende(),
@@ -58,6 +61,11 @@ object GrunnlagsdataMapper {
                 tidligereVedtaksperioder = tidligereVedtaksperioderAnnenForelder[it.key],
             )
         }
+
+    fun mapFødsel(
+        fødselsdato: Fødselsdato,
+        fødested: Fødested,
+    ): List<Fødsel> = listOf(Fødsel(fødselsdato.fødselsår, fødselsdato.fødselsdato, fødested.fødeland, fødested.fødested, fødested.fødekommune))
 
     fun mapSøker(
         pdlSøker: PdlSøker,
@@ -70,7 +78,7 @@ object GrunnlagsdataMapper {
             dødsfall = pdlSøker.dødsfall.gjeldende(),
             forelderBarnRelasjon = pdlSøker.forelderBarnRelasjon.mapForelderBarnRelasjon(),
             fullmakt = mapFullmakt(pdlSøker, andrePersoner),
-            fødsel = pdlSøker.fødsel,
+            fødsel = mapFødsel(pdlSøker.fødselsdato.first(), pdlSøker.fødested.first()),
             folkeregisterpersonstatus = pdlSøker.folkeregisterpersonstatus,
             innflyttingTilNorge = pdlSøker.innflyttingTilNorge,
             kjønn = pdlSøker.kjønn.firstOrNull()?.kjønn ?: KjønnType.UKJENT,

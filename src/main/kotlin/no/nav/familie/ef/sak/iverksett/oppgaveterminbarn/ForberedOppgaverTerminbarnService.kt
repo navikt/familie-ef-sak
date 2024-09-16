@@ -3,7 +3,6 @@ package no.nav.familie.ef.sak.iverksett.oppgaveterminbarn
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlPersonForelderBarn
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.gjeldende
 import no.nav.familie.kontrakter.ef.iverksett.OppgaveForBarn
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.prosessering.internal.TaskService
@@ -82,7 +81,7 @@ private fun matchBarn(
 
 private fun TerminbarnTilUtplukkForOppgave.match(pdlPersonForelderBarn: List<PdlPersonForelderBarn>): Boolean =
     pdlPersonForelderBarn
-        .map { it.fødsel.gjeldende().fødselsdato }
+        .map { it.fødselsdato.first().fødselsdato }
         .any { matchBarn(this.termindatoBarn, it ?: error("Fødselsdato er null")) }
 
 data class TerminbarnTilUtplukkForOppgave(

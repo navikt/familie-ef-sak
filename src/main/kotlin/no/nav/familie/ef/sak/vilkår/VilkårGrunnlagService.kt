@@ -83,7 +83,7 @@ class VilkårGrunnlagService(
                             ?.let { adresseMapper.tilAdresse(it) },
                     fødeland =
                         grunnlagsdata.søker.fødsel
-                            .gjeldende()
+                            .first()
                             .fødeland,
                 ),
             tidligereVedtaksperioder = grunnlagsdata.tidligereVedtaksperioder.tilDto(),

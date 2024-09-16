@@ -36,16 +36,17 @@
             }
           ],
           "doedsfall": [],
-          "foedsel": [
+          "foedselsdato": [
             {
-              "foedselsaar": null,
-              "foedselsdato": "1966-11-18",
-              "foedeland": null,
-              "foedested": null,
-              "foedekommune": null,
-              "metadata":  {
-                "historisk": false
-              }
+              "foedselsaar": 1966,
+              "foedselsdato": "1966-11-18"
+            }
+          ],
+          "foedested": [
+            {
+              "foedeland": "Norge",
+              "foedested": "Oslo",
+              "foedekommune": "Oslo"
             }
           ],
           "folkeregisterpersonstatus": [
