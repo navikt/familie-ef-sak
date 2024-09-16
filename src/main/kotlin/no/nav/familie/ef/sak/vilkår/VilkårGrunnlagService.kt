@@ -78,13 +78,13 @@ class VilkårGrunnlagService(
                     navn = NavnDto.fraNavn(grunnlagsdata.søker.navn),
                     personIdent = personident,
                     bostedsadresse =
-                    grunnlagsdata.søker.bostedsadresse
-                        .gjeldende()
-                        ?.let { adresseMapper.tilAdresse(it) },
+                        grunnlagsdata.søker.bostedsadresse
+                            .gjeldende()
+                            ?.let { adresseMapper.tilAdresse(it) },
                     fødeland =
-                    grunnlagsdata.søker.fødsel
-                        .first()
-                        .fødeland,
+                        grunnlagsdata.søker.fødsel
+                            .first()
+                            .fødeland,
                 ),
             tidligereVedtaksperioder = grunnlagsdata.tidligereVedtaksperioder.tilDto(),
             medlemskap = medlemskap,

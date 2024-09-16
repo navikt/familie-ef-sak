@@ -162,37 +162,37 @@ class BarnMedSamværMapper(
             navn = matchetBarn.barn?.navn?.visningsnavn(),
             fødselsnummer = matchetBarn.fødselsnummer,
             harSammeAdresse =
-            matchetBarn.barn?.let {
-                AdresseHjelper.harRegistrertSammeBostedsadresseSomForelder(it, søkerAdresse)
-            },
+                matchetBarn.barn?.let {
+                    AdresseHjelper.harRegistrertSammeBostedsadresseSomForelder(it, søkerAdresse)
+                },
             deltBostedPerioder = matchetBarn.barn?.deltBosted.tilDto(),
             harDeltBostedVedGrunnlagsdataopprettelse =
-            AdresseHjelper.harDeltBosted(
-                matchetBarn.barn,
-                grunnlagsdataOpprettet,
-            ),
+                AdresseHjelper.harDeltBosted(
+                    matchetBarn.barn,
+                    grunnlagsdataOpprettet,
+                ),
             forelder = pdlAnnenForelder?.let { tilAnnenForelderDto(it, annenForelderFnr, søkerAdresse) },
             dødsdato =
-            matchetBarn.barn
-                ?.dødsfall
-                ?.gjeldende()
-                ?.dødsdato,
+                matchetBarn.barn
+                    ?.dødsfall
+                    ?.gjeldende()
+                    ?.dødsdato,
             fødselsdato =
-            matchetBarn.barn
-                ?.fødsel
-                ?.first()
-                ?.fødselsdato,
+                matchetBarn.barn
+                    ?.fødsel
+                    ?.first()
+                    ?.fødselsdato,
             folkeregisterpersonstatus =
-            matchetBarn.barn
-                ?.folkeregisterpersonstatus
-                ?.gjeldende()
-                ?.let(Folkeregisterpersonstatus::fraPdl),
+                matchetBarn.barn
+                    ?.folkeregisterpersonstatus
+                    ?.gjeldende()
+                    ?.let(Folkeregisterpersonstatus::fraPdl),
             adresse =
-            matchetBarn.barn
-                ?.bostedsadresse
-                ?.gjeldende()
-                ?.let(adresseMapper::tilAdresse)
-                ?.visningsadresse,
+                matchetBarn.barn
+                    ?.bostedsadresse
+                    ?.gjeldende()
+                    ?.let(adresseMapper::tilAdresse)
+                    ?.visningsadresse,
         )
 
     private fun tilAnnenForelderDto(annenForelder: AnnenForelder): AnnenForelderDto =
@@ -217,15 +217,15 @@ class BarnMedSamværMapper(
             fødselsdato = pdlAnnenForelder.fødsel.first().fødselsdato,
             dødsfall = pdlAnnenForelder.dødsfall.gjeldende()?.dødsdato,
             bosattINorge =
-            pdlAnnenForelder.bostedsadresse
-                .gjeldende()
-                ?.utenlandskAdresse
-                ?.let { false } ?: true,
+                pdlAnnenForelder.bostedsadresse
+                    .gjeldende()
+                    ?.utenlandskAdresse
+                    ?.let { false } ?: true,
             land =
-            pdlAnnenForelder.bostedsadresse
-                .gjeldende()
-                ?.utenlandskAdresse
-                ?.landkode,
+                pdlAnnenForelder.bostedsadresse
+                    .gjeldende()
+                    ?.utenlandskAdresse
+                    ?.landkode,
             visningsadresse = visningsadresse(pdlAnnenForelder),
             tidligereVedtaksperioder = pdlAnnenForelder.tidligereVedtaksperioder?.tilDto(),
             avstandTilSøker = langAvstandTilSøker(søkerAdresse, pdlAnnenForelder.bostedsadresse.gjeldende()),
