@@ -6,7 +6,6 @@ import no.nav.familie.ef.sak.opplysninger.mapper.BarnMedSamværMapper
 import no.nav.familie.ef.sak.opplysninger.mapper.SivilstandMapper
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.GrunnlagsdataDomene
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.gjeldende
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.NavnDto
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper.AdresseMapper
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.gjeldende
@@ -79,13 +78,13 @@ class VilkårGrunnlagService(
                     navn = NavnDto.fraNavn(grunnlagsdata.søker.navn),
                     personIdent = personident,
                     bostedsadresse =
-                        grunnlagsdata.søker.bostedsadresse
-                            .gjeldende()
-                            ?.let { adresseMapper.tilAdresse(it) },
+                    grunnlagsdata.søker.bostedsadresse
+                        .gjeldende()
+                        ?.let { adresseMapper.tilAdresse(it) },
                     fødeland =
-                        grunnlagsdata.søker.fødsel
-                            .gjeldende()
-                            .fødeland,
+                    grunnlagsdata.søker.fødsel
+                        .first()
+                        .fødeland,
                 ),
             tidligereVedtaksperioder = grunnlagsdata.tidligereVedtaksperioder.tilDto(),
             medlemskap = medlemskap,

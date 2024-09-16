@@ -15,5 +15,3 @@ data class Fødsel(
             ?: this.fødselsår?.let { LocalDate.now() < LocalDate.of(it, 1, 1).plusYears(18) }
             ?: true
 }
-
-fun List<Fødsel>.gjeldende(): Fødsel = this.first()

@@ -280,7 +280,7 @@ class TestSaksbehandlingController(
             søkerMedBarn.barn
                 .filter {
                     it.value.fødselsdato
-                        .gjeldende()
+                        .first()
                         .erUnder18År()
                 }.map {
                     TestsøknadBuilder.Builder().defaultBarn(

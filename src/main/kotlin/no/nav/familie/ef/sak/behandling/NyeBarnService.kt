@@ -10,7 +10,6 @@ import no.nav.familie.ef.sak.opplysninger.mapper.BarnMatcher
 import no.nav.familie.ef.sak.opplysninger.mapper.MatchetBehandlingBarn
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.BarnMedIdent
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.gjeldende
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.BarnMinimumDto
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper.GrunnlagsdataMapper
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.identer
@@ -144,7 +143,7 @@ class NyeBarnService(
         if (pdlBarn == null || behandlingBarn.fødselTermindato == null) {
             return false
         }
-        val fødselsdato = pdlBarn.fødsel.gjeldende().fødselsdato ?: return false
+        val fødselsdato = pdlBarn.fødsel.first().fødselsdato ?: return false
         return YearMonth.from(fødselsdato) < YearMonth.from(behandlingBarn.fødselTermindato)
     }
 
@@ -154,7 +153,7 @@ class NyeBarnService(
         if (pdlBarn == null || behandlingBarn.fødselTermindato == null) {
             return false
         }
-        val fødselsdato = pdlBarn.fødsel.gjeldende().fødselsdato ?: return false
+        val fødselsdato = pdlBarn.fødsel.first().fødselsdato ?: return false
         return YearMonth.from(fødselsdato).month > YearMonth.from(behandlingBarn.fødselTermindato).month
     }
 
@@ -172,6 +171,6 @@ class NyeBarnService(
         BarnMinimumDto(
             personIdent = it.personIdent,
             navn = it.navn.visningsnavn(),
-            fødselsdato = it.fødsel.gjeldende().fødselsdato,
+            fødselsdato = it.fødsel.first().fødselsdato,
         )
 }

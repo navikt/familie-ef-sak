@@ -1,7 +1,6 @@
 package no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper
 
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.BarnMedIdent
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.gjeldende
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.AdresseDto
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Bostedsadresse
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.gjeldende
@@ -52,5 +51,5 @@ object AdresseHjelper {
             (gjeldende.sluttdatoForKontrakt == null || gjeldende.sluttdatoForKontrakt >= dato)
     }
 
-    private fun BarnMedIdent.erOver18År(): Boolean = !fødsel.gjeldende().erUnder18År()
+    private fun BarnMedIdent.erOver18År(): Boolean = !fødsel.first().erUnder18År()
 }
