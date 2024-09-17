@@ -295,8 +295,8 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    internal fun `hentMigreringInfo - periode eldre enn 3 år - kan gå videre til journalføring`() {
-        val stønadsmåned = YearMonth.now().minusYears(3).minusMonths(1)
+    internal fun `hentMigreringInfo - periode eldre enn 5 år - kan gå videre til journalføring`() {
+        val stønadsmåned = YearMonth.now().minusYears(5).minusMonths(1)
         val periode =
             InfotrygdPeriodeTestUtil.lagInfotrygdPeriode(
                 stønadFom = stønadsmåned.atDay(1),
@@ -313,7 +313,7 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
 
         assertThat(migreringInfo.kanMigreres).isFalse
         assertThat(migreringInfo.kanGåVidereTilJournalføring).isTrue
-        assertThat(migreringInfo.årsak).contains("Kan ikke migrere når forrige utbetaling i infotrygd er mer enn 3 år tilbake")
+        assertThat(migreringInfo.årsak).contains("Kan ikke migrere når forrige utbetaling i infotrygd er mer enn 5 år tilbake")
     }
 
     @Test
