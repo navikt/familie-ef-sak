@@ -55,7 +55,7 @@ internal class InfotrygdPeriodeValideringServiceTest {
 
         @Test
         internal fun `skal kunne journalføre når det ikke trengs migrering - når personen har perioder langt bak i tiden`() {
-            val dato = YearMonth.now().minusYears(4)
+            val dato = YearMonth.now().minusYears(6)
             every { infotrygdService.hentDtoPerioder(personIdent) } returns
                 infotrygdPerioderDto(
                     listOf(
@@ -121,8 +121,8 @@ internal class InfotrygdPeriodeValideringServiceTest {
     @Nested
     inner class ValiderHentPeriodeForMigrering {
         @Test
-        internal fun `Skal kaste feil hvis perioder er mer enn tre år tilbake i tid`() {
-            val dato = YearMonth.now().minusYears(4)
+        internal fun `Skal kaste feil hvis perioder er mer enn fem år tilbake i tid`() {
+            val dato = YearMonth.now().minusYears(6)
             every { infotrygdService.hentDtoPerioder(personIdent) } returns
                 infotrygdPerioderDto(
                     listOf(
@@ -140,7 +140,7 @@ internal class InfotrygdPeriodeValideringServiceTest {
                         OVERGANGSSTØNAD,
                     )
                 }.message
-            assertThat(message).contains("Kan ikke migrere når forrige utbetaling i infotrygd er mer enn 3 år tilbake i tid")
+            assertThat(message).contains("Kan ikke migrere når forrige utbetaling i infotrygd er mer enn 5 år tilbake i tid")
         }
 
         @Test
