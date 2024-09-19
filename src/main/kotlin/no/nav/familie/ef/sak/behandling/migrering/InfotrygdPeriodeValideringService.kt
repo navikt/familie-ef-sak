@@ -66,8 +66,7 @@ class InfotrygdPeriodeValideringService(
 
     private fun trengerMigrering(personIdent: String): Boolean =
         gjeldendeInfotrygdOvergangsstønadPerioder(personIdent)
-            .filter { it.harBeløp() && it.harNyerePerioder() }
-            .isNotEmpty()
+            .any { it.harBeløp() && it.harNyerePerioder() }
 
     private fun gjeldendeInfotrygdOvergangsstønadPerioder(personIdent: String) =
         infotrygdService
