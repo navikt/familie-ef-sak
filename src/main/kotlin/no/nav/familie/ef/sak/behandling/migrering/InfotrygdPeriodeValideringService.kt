@@ -18,6 +18,7 @@ import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
+import java.time.LocalDate
 import java.time.YearMonth
 
 @Service
@@ -63,16 +64,14 @@ class InfotrygdPeriodeValideringService(
         validerSakerIInfotrygd(fagsak.hentAktivIdent(), fagsak.stønadstype)
     }
 
-    private fun trengerMigrering(personIdent: String): Boolean {
-        try {
-            hentPeriodeForMigrering(personIdent, StønadType.OVERGANGSSTØNAD)
-        } catch (e: MigreringException) {
-            if (e.type.kanGåVidereTilJournalføring) {
-                return false
-            }
-        }
-        return true
-    }
+    private fun trengerMigrering(personIdent: String): Boolean =
+        gjeldendeInfotrygdOvergangsstønadPerioder(personIdent)
+            .any { it.harBeløp() && it.harNyerePerioder() }
+
+    private fun gjeldendeInfotrygdOvergangsstønadPerioder(personIdent: String) =
+        infotrygdService
+            .hentDtoPerioder(personIdent)
+            .overgangsstønad.summert
 
     fun hentPeriodeForMigrering(
         personIdent: String,
@@ -298,3 +297,10 @@ class InfotrygdPeriodeValideringService(
         "saksblokk=${sak.saksblokk} saksnr=${sak.saksnr} " +
             "registrertDato=${sak.registrertDato} mottattDato=${sak.mottattDato}"
 }
+
+private fun SummertInfotrygdPeriodeDto.harNyerePerioder(): Boolean {
+    val antallÅrUtenGjeldendeInfotrygperioder: Long = 5
+    return this.stønadsperiode.tomDato > LocalDate.now().minusYears(antallÅrUtenGjeldendeInfotrygperioder)
+}
+
+private fun SummertInfotrygdPeriodeDto.harBeløp(): Boolean = this.månedsbeløp > 0

@@ -100,7 +100,6 @@ class MigreringService(
                 return MigreringInfo(
                     kanMigreres = false,
                     e.årsak,
-                    kanGåVidereTilJournalføring = e.type.kanGåVidereTilJournalføring,
                 )
             }
         logger.info("Kan migrere fagsakPerson=$fagsakPersonId")
