@@ -18,6 +18,7 @@ import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
+import java.time.LocalDate
 import java.time.YearMonth
 
 @Service
@@ -64,14 +65,13 @@ class InfotrygdPeriodeValideringService(
     }
 
     private fun trengerMigrering(personIdent: String): Boolean {
-        try {
-            hentPeriodeForMigrering(personIdent, StønadType.OVERGANGSSTØNAD)
-        } catch (e: MigreringException) {
-            if (e.type.kanGåVidereTilJournalføring) {
-                return false
-            }
-        }
-        return true
+        val antallÅrUtenGjeldendeInfotrygperioder: Long = 5
+        val perioder =
+            infotrygdService
+                .hentDtoPerioder(personIdent).overgangsstønad.summert // gjeldende perioder
+                .filter { it.månedsbeløp > 0 }
+                .filter { it.stønadsperiode.tomDato > LocalDate.now().minusYears(antallÅrUtenGjeldendeInfotrygperioder) }
+        return perioder.isNotEmpty()
     }
 
     fun hentPeriodeForMigrering(

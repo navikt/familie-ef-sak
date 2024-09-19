@@ -62,11 +62,11 @@ internal class FørstegangsbehandlingControllerTest : OppslagSpringRunnerTest() 
         behandlingRepository.insert(eksisterendeBehandling)
         behandlingRepository.insert(henlagtBehandling)
         every { infotrygdReplikaClient.hentSammenslåttePerioder(any()) } returns
-            InfotrygdPeriodeResponse(
-                emptyList(),
-                emptyList(),
-                emptyList(),
-            )
+                InfotrygdPeriodeResponse(
+                    emptyList(),
+                    emptyList(),
+                    emptyList(),
+                )
     }
 
     @AfterEach
