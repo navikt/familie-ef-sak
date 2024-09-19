@@ -65,15 +65,14 @@ class InfotrygdPeriodeValideringService(
     }
 
     private fun trengerMigrering(personIdent: String): Boolean {
-        val antallÅrUtenGjeldendeInfotrygperioder: Long = 5
-        val perioder =
-            infotrygdService
-                .hentDtoPerioder(personIdent)
-                .overgangsstønad.summert // gjeldende perioder
-                .filter { it.månedsbeløp > 0 }
-                .filter { it.stønadsperiode.tomDato > LocalDate.now().minusYears(antallÅrUtenGjeldendeInfotrygperioder) }
-        return perioder.isNotEmpty()
+        return gjeldendeInfotrygdOvergangsstønadPerioder(personIdent)
+                .filter { it.harBeløp() && it.harNyerePerioder() }
+                .isNotEmpty()
     }
+
+    private fun gjeldendeInfotrygdOvergangsstønadPerioder(personIdent: String) = infotrygdService
+        .hentDtoPerioder(personIdent)
+        .overgangsstønad.summert
 
     fun hentPeriodeForMigrering(
         personIdent: String,
@@ -298,4 +297,13 @@ class InfotrygdPeriodeValideringService(
     private fun lagSakFeilinfo(sak: InfotrygdSak): String =
         "saksblokk=${sak.saksblokk} saksnr=${sak.saksnr} " +
             "registrertDato=${sak.registrertDato} mottattDato=${sak.mottattDato}"
+}
+
+private fun SummertInfotrygdPeriodeDto.harNyerePerioder(): Boolean {
+    val antallÅrUtenGjeldendeInfotrygperioder: Long = 5
+    return this.stønadsperiode.tomDato > LocalDate.now().minusYears(antallÅrUtenGjeldendeInfotrygperioder)
+}
+
+private fun SummertInfotrygdPeriodeDto.harBeløp(): Boolean {
+    return this.månedsbeløp > 0
 }
