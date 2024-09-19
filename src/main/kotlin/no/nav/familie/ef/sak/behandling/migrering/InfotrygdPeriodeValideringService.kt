@@ -64,15 +64,15 @@ class InfotrygdPeriodeValideringService(
         validerSakerIInfotrygd(fagsak.hentAktivIdent(), fagsak.stønadstype)
     }
 
-    private fun trengerMigrering(personIdent: String): Boolean {
-        return gjeldendeInfotrygdOvergangsstønadPerioder(personIdent)
-                .filter { it.harBeløp() && it.harNyerePerioder() }
-                .isNotEmpty()
-    }
+    private fun trengerMigrering(personIdent: String): Boolean =
+        gjeldendeInfotrygdOvergangsstønadPerioder(personIdent)
+            .filter { it.harBeløp() && it.harNyerePerioder() }
+            .isNotEmpty()
 
-    private fun gjeldendeInfotrygdOvergangsstønadPerioder(personIdent: String) = infotrygdService
-        .hentDtoPerioder(personIdent)
-        .overgangsstønad.summert
+    private fun gjeldendeInfotrygdOvergangsstønadPerioder(personIdent: String) =
+        infotrygdService
+            .hentDtoPerioder(personIdent)
+            .overgangsstønad.summert
 
     fun hentPeriodeForMigrering(
         personIdent: String,
@@ -304,6 +304,4 @@ private fun SummertInfotrygdPeriodeDto.harNyerePerioder(): Boolean {
     return this.stønadsperiode.tomDato > LocalDate.now().minusYears(antallÅrUtenGjeldendeInfotrygperioder)
 }
 
-private fun SummertInfotrygdPeriodeDto.harBeløp(): Boolean {
-    return this.månedsbeløp > 0
-}
+private fun SummertInfotrygdPeriodeDto.harBeløp(): Boolean = this.månedsbeløp > 0
