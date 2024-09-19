@@ -312,7 +312,6 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
         val migreringInfo = migreringService.hentMigreringInfo(fagsak.fagsakPersonId)
 
         assertThat(migreringInfo.kanMigreres).isFalse
-        assertThat(migreringInfo.kanGåVidereTilJournalføring).isTrue
         assertThat(migreringInfo.årsak).contains("Kan ikke migrere når forrige utbetaling i infotrygd er mer enn 5 år tilbake")
     }
 
@@ -534,7 +533,6 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
         val migreringInfo = migreringService.hentMigreringInfo(fagsak.fagsakPersonId, startDatoStønad)
 
         assertThat(migreringInfo.kanMigreres).isFalse
-        assertThat(migreringInfo.kanGåVidereTilJournalføring).isTrue
         assertThat(migreringInfo.årsak).contains("Har ikke noen perioder å migrere")
     }
 
@@ -558,7 +556,6 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
         val migreringInfo = migreringService.hentMigreringInfo(fagsak.fagsakPersonId, startDatoStønad)
 
         assertThat(migreringInfo.kanMigreres).isFalse
-        assertThat(migreringInfo.kanGåVidereTilJournalføring).isFalse
         assertThat(migreringInfo.årsak).contains("Har åpen sak. ")
     }
 
