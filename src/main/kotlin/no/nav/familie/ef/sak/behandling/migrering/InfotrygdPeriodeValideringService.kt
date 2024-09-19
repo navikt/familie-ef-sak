@@ -68,7 +68,8 @@ class InfotrygdPeriodeValideringService(
         val antallÅrUtenGjeldendeInfotrygperioder: Long = 5
         val perioder =
             infotrygdService
-                .hentDtoPerioder(personIdent).overgangsstønad.summert // gjeldende perioder
+                .hentDtoPerioder(personIdent)
+                .overgangsstønad.summert // gjeldende perioder
                 .filter { it.månedsbeløp > 0 }
                 .filter { it.stønadsperiode.tomDato > LocalDate.now().minusYears(antallÅrUtenGjeldendeInfotrygperioder) }
         return perioder.isNotEmpty()
