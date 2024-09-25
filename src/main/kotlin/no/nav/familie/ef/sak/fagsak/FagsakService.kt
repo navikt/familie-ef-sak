@@ -67,7 +67,7 @@ class FagsakService(
                 fagsakPersonService.hentEllerOpprettPerson(personIdenter, gjeldendePersonIdent)
                 return listOf()
             }
-            throw ApiFeil("Finner ikke fagsak for søkte personen", HttpStatus.BAD_REQUEST)
+            return listOf()
         }
         return fagsaker.map { it.tilFagsakMedPerson(fagsakPersonService.hentIdenter(it.fagsakPersonId)) }
     }

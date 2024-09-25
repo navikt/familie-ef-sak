@@ -54,13 +54,7 @@ class InfotrygdReplikaMock {
             }
             every { client.hentInslagHosInfotrygd(any()) } answers {
                 InfotrygdFinnesResponse(
-                    listOf(
-                        Vedtakstreff(
-                            firstArg<InfotrygdSøkRequest>().personIdenter.first(),
-                            StønadType.OVERGANGSSTØNAD,
-                            false,
-                        ),
-                    ),
+                    emptyList(),
                     emptyList(),
                 )
             }
