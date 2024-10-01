@@ -83,7 +83,7 @@ class BarnFyllerÅrOppfølgingsoppgaveService(
 
     private fun opprettOppgaveForBarn(barn: List<BarnTilUtplukkForOppgave>): List<OpprettOppgaveForBarn> =
         barn.mapNotNull {
-            Alder.fromFødselsdato(fødselsdato(it))?.let { alder ->
+            Alder.fromFødselsdato(it.termindatoBarn)?.let { alder ->
                 OpprettOppgaveForBarn(
                     it.fødselsnummerBarn!!,
                     it.fødselsnummerSøker,
@@ -135,8 +135,6 @@ class BarnFyllerÅrOppfølgingsoppgaveService(
                 }
             }
     }
-
-    private fun fødselsdato(barnTilUtplukkForOppgave: BarnTilUtplukkForOppgave): LocalDate? = barnTilUtplukkForOppgave.termindatoBarn
 
     private data class FødselsnummerOgAlder(
         val fødselsnummer: String,
