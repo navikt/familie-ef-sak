@@ -3,7 +3,6 @@ package no.nav.familie.ef.sak.iverksett.oppgaveforbarn
 import no.nav.familie.ef.sak.oppgave.OppgaveRepository
 import no.nav.familie.ef.sak.opplysninger.mapper.finnBesteMatchPåFødselsnummerForTermindato
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
-import no.nav.familie.kontrakter.felles.Fødselsnummer
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.internal.TaskService
@@ -138,8 +137,8 @@ class BarnFyllerÅrOppfølgingsoppgaveService(
     }
 
     private fun fødselsdato(barnTilUtplukkForOppgave: BarnTilUtplukkForOppgave): LocalDate? =
-        barnTilUtplukkForOppgave.fødselsnummerBarn?.let {
-            Fødselsnummer(it).fødselsdato
+        barnTilUtplukkForOppgave.termindatoBarn?.let {
+            it
         }
 
     private data class FødselsnummerOgAlder(
