@@ -13,7 +13,6 @@ import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdSakResponse
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdSakResultat
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdSakType
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdSøkRequest
-import no.nav.familie.kontrakter.ef.infotrygd.Vedtakstreff
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -54,13 +53,7 @@ class InfotrygdReplikaMock {
             }
             every { client.hentInslagHosInfotrygd(any()) } answers {
                 InfotrygdFinnesResponse(
-                    listOf(
-                        Vedtakstreff(
-                            firstArg<InfotrygdSøkRequest>().personIdenter.first(),
-                            StønadType.OVERGANGSSTØNAD,
-                            false,
-                        ),
-                    ),
+                    emptyList(),
                     emptyList(),
                 )
             }
