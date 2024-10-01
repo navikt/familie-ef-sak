@@ -136,10 +136,7 @@ class BarnFyllerÅrOppfølgingsoppgaveService(
             }
     }
 
-    private fun fødselsdato(barnTilUtplukkForOppgave: BarnTilUtplukkForOppgave): LocalDate? =
-        barnTilUtplukkForOppgave.termindatoBarn?.let {
-            it
-        }
+    private fun fødselsdato(barnTilUtplukkForOppgave: BarnTilUtplukkForOppgave): LocalDate? = barnTilUtplukkForOppgave.termindatoBarn
 
     private data class FødselsnummerOgAlder(
         val fødselsnummer: String,
