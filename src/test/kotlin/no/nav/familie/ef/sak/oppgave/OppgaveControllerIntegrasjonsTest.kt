@@ -22,6 +22,7 @@ import org.springframework.http.HttpEntity
 import org.springframework.http.HttpMethod
 import org.springframework.http.ResponseEntity
 import java.util.UUID
+import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 
 internal class OppgaveControllerIntegrasjonsTest : OppslagSpringRunnerTest() {
     @Autowired
@@ -78,6 +79,67 @@ internal class OppgaveControllerIntegrasjonsTest : OppslagSpringRunnerTest() {
         val behandling = behandlingRepository.insert(behandling(fagsak))
 
         oppgaveRepository.insert(Oppgave(behandlingId = behandling.id, gsakOppgaveId = 24683L, type = Oppgavetype.BehandleSak))
+
+        val response = hentAnsvarligSaksbehandler(behandling.id)
+
+        assertThat(response.body?.status).isEqualTo(Ressurs.Status.SUKSESS)
+        assertThat(response.body?.data?.fornavn).isEqualTo("")
+        assertThat(response.body?.data?.etternavn).isEqualTo("")
+        assertThat(response.body?.data?.rolle).isEqualTo(SaksbehandlerRolle.IKKE_SATT)
+    }
+
+    @Test
+    internal fun `Skal returnere OPPGAVE_FINNES_IKKE dersom behandlingen akkurat er sendt til beslutter uten at behandle-sak-oppgaven er ferdigstilt`() {
+        val fagsak = testoppsettService.lagreFagsak(fagsak(identer = setOf(PersonIdent(""))))
+        val behandling = behandlingRepository.insert(behandling(fagsak, steg = StegType.BESLUTTE_VEDTAK))
+
+        oppgaveRepository.insert(Oppgave(behandlingId = behandling.id, gsakOppgaveId = 24683L, type = Oppgavetype.BehandleSak))
+
+        val response = hentAnsvarligSaksbehandler(behandling.id)
+
+        assertThat(response.body?.status).isEqualTo(Ressurs.Status.SUKSESS)
+        assertThat(response.body?.data?.fornavn).isEqualTo("")
+        assertThat(response.body?.data?.etternavn).isEqualTo("")
+        assertThat(response.body?.data?.rolle).isEqualTo(SaksbehandlerRolle.OPPGAVE_FINNES_IKKE)
+    }
+
+    @Test
+    internal fun `Skal returnere OPPGAVE_FINNES_IKKE dersom behandlingen akkurat er sendt til beslutter uten at behandle-underkjent-sak-oppgaven er ferdigstilt`() {
+        val fagsak = testoppsettService.lagreFagsak(fagsak(identer = setOf(PersonIdent(""))))
+        val behandling = behandlingRepository.insert(behandling(fagsak, steg = StegType.BESLUTTE_VEDTAK))
+
+        oppgaveRepository.insert(Oppgave(behandlingId = behandling.id, gsakOppgaveId = 24683L, type = Oppgavetype.BehandleUnderkjentVedtak))
+
+        val response = hentAnsvarligSaksbehandler(behandling.id)
+
+        assertThat(response.body?.status).isEqualTo(Ressurs.Status.SUKSESS)
+        assertThat(response.body?.data?.fornavn).isEqualTo("")
+        assertThat(response.body?.data?.etternavn).isEqualTo("")
+        assertThat(response.body?.data?.rolle).isEqualTo(SaksbehandlerRolle.OPPGAVE_FINNES_IKKE)
+    }
+
+
+    @Test
+    internal fun `Skal returnere OPPGAVE_FINNES_IKKE dersom behandlingen akkurat er besluttet uten at godkjenne-vedtak-oppgaven er ferdigstilt`() {
+        val fagsak = testoppsettService.lagreFagsak(fagsak(identer = setOf(PersonIdent(""))))
+        val behandling = behandlingRepository.insert(behandling(fagsak, steg = StegType.VENTE_PÅ_STATUS_FRA_IVERKSETT))
+
+        oppgaveRepository.insert(Oppgave(behandlingId = behandling.id, gsakOppgaveId = 24683L, type = Oppgavetype.GodkjenneVedtak))
+
+        val response = hentAnsvarligSaksbehandler(behandling.id)
+
+        assertThat(response.body?.status).isEqualTo(Ressurs.Status.SUKSESS)
+        assertThat(response.body?.data?.fornavn).isEqualTo("")
+        assertThat(response.body?.data?.etternavn).isEqualTo("")
+        assertThat(response.body?.data?.rolle).isEqualTo(SaksbehandlerRolle.OPPGAVE_FINNES_IKKE)
+    }
+
+    @Test
+    internal fun `Skal returnere IKKE_SATT dersom behandlingen akkurat er er i beslutte-vedtak-steg uten ansvarlig saksbehandler`() {
+        val fagsak = testoppsettService.lagreFagsak(fagsak(identer = setOf(PersonIdent(""))))
+        val behandling = behandlingRepository.insert(behandling(fagsak, steg = StegType.BESLUTTE_VEDTAK))
+
+        oppgaveRepository.insert(Oppgave(behandlingId = behandling.id, gsakOppgaveId = 24683L, type = Oppgavetype.GodkjenneVedtak))
 
         val response = hentAnsvarligSaksbehandler(behandling.id)
 

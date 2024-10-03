@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.oppgave
 
+import no.nav.familie.ef.sak.behandlingsflyt.steg.BehandlerRolle
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
@@ -11,6 +12,8 @@ import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.kontrakter.felles.oppgave.StatusEnum
 import org.springframework.stereotype.Service
 import java.util.UUID
+import no.nav.familie.ef.sak.behandling.BehandlingRepository
+import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.ef.sak.oppgave.Oppgave as EFOppgave
 
 @Service
@@ -18,6 +21,7 @@ class TilordnetRessursService(
     private val oppgaveClient: OppgaveClient,
     private val oppgaveRepository: OppgaveRepository,
     private val featureToggleService: FeatureToggleService,
+    private val behandlingRepository: BehandlingRepository,
 ) {
     /**
      * [SaksbehandlerRolle.OPPGAVE_FINNES_IKKE]: I de tilfellene hvor man manuelt oppretter en revurdering
@@ -45,6 +49,21 @@ class TilordnetRessursService(
     ): Oppgave? =
         hentEFOppgaveSomIkkeErFerdigstilt(behandlingId, oppgavetyper)
             ?.let { oppgaveClient.finnOppgaveMedId(it.gsakOppgaveId) }
+
+    fun hentIkkeFerdigstiltOppgaveForBehandlingGittStegtype(
+        behandlingId: UUID,
+    ): Oppgave? {
+        val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
+        val oppgavetyper =
+            when (behandling.steg.tillattFor) {
+                BehandlerRolle.SAKSBEHANDLER -> setOf(Oppgavetype.BehandleSak, Oppgavetype.BehandleUnderkjentVedtak)
+                BehandlerRolle.BESLUTTER -> setOf(Oppgavetype.GodkjenneVedtak)
+                else -> emptySet()
+            }
+
+        return hentEFOppgaveSomIkkeErFerdigstilt(behandlingId, oppgavetyper)
+            ?.let { oppgaveClient.finnOppgaveMedId(it.gsakOppgaveId) }
+    }
 
     fun hentEFOppgaveSomIkkeErFerdigstilt(
         behandlingId: UUID,

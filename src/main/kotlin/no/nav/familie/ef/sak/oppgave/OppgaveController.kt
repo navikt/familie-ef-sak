@@ -138,12 +138,7 @@ class OppgaveController(
     fun hentAnsvarligSaksbehandlerForBehandling(
         @PathVariable behandlingId: UUID,
     ): Ressurs<SaksbehandlerDto> {
-        val oppgave =
-            tilordnetRessursService.hentIkkeFerdigstiltOppgaveForBehandling(
-                behandlingId,
-                setOf(Oppgavetype.BehandleSak, Oppgavetype.BehandleUnderkjentVedtak, Oppgavetype.GodkjenneVedtak),
-            )
-
+        val oppgave = tilordnetRessursService.hentIkkeFerdigstiltOppgaveForBehandlingGittStegtype(behandlingId)
         return Ressurs.success(tilordnetRessursService.utledAnsvarligSaksbehandlerForOppgave(oppgave))
     }
 
