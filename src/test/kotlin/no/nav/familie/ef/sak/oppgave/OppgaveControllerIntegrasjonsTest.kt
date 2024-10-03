@@ -2,6 +2,7 @@ package no.nav.familie.ef.sak.no.nav.familie.ef.sak.oppgave
 
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
+import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
 import no.nav.familie.ef.sak.oppgave.Oppgave
 import no.nav.familie.ef.sak.oppgave.OppgaveRepository
@@ -22,7 +23,6 @@ import org.springframework.http.HttpEntity
 import org.springframework.http.HttpMethod
 import org.springframework.http.ResponseEntity
 import java.util.UUID
-import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 
 internal class OppgaveControllerIntegrasjonsTest : OppslagSpringRunnerTest() {
     @Autowired
@@ -117,7 +117,6 @@ internal class OppgaveControllerIntegrasjonsTest : OppslagSpringRunnerTest() {
         assertThat(response.body?.data?.etternavn).isEqualTo("")
         assertThat(response.body?.data?.rolle).isEqualTo(SaksbehandlerRolle.OPPGAVE_FINNES_IKKE)
     }
-
 
     @Test
     internal fun `Skal returnere OPPGAVE_FINNES_IKKE dersom behandlingen akkurat er besluttet uten at godkjenne-vedtak-oppgaven er ferdigstilt`() {

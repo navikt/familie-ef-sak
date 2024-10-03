@@ -5,19 +5,6 @@ import io.mockk.mockk
 import io.mockk.mockkObject
 import io.mockk.unmockkObject
 import io.mockk.verify
-import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
-import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
-import no.nav.familie.ef.sak.oppgave.dto.SaksbehandlerRolle
-import no.nav.familie.kontrakter.felles.Tema
-import no.nav.familie.kontrakter.felles.oppgave.Oppgave
-import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
-import no.nav.familie.kontrakter.felles.saksbehandler.Saksbehandler
-import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
-import java.util.UUID
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType.BEHANDLING_FERDIGSTILT
@@ -29,9 +16,22 @@ import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType.PUBLISER_VEDTAKSHENDE
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType.REVURDERING_ÅRSAK
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType.SEND_TIL_BESLUTTER
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType.VILKÅR
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
+import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
+import no.nav.familie.ef.sak.oppgave.dto.SaksbehandlerRolle
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
+import no.nav.familie.kontrakter.felles.Tema
+import no.nav.familie.kontrakter.felles.oppgave.Oppgave
+import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
+import no.nav.familie.kontrakter.felles.saksbehandler.Saksbehandler
+import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
+import java.util.UUID
 import no.nav.familie.ef.sak.oppgave.Oppgave as EFOppgave
 
 internal class TilordnetRessursServiceTest {
@@ -271,7 +271,7 @@ internal class TilordnetRessursServiceTest {
         every { oppgaveRepository.findByBehandlingIdAndErFerdigstiltIsFalseAndTypeIn(any(), any()) } returns null
         val behandlesakOppgavetyper = listOf(REVURDERING_ÅRSAK, VILKÅR, BEREGNE_YTELSE, SEND_TIL_BESLUTTER)
         val godkjenneVedtakOppgavetyper = listOf(BESLUTTE_VEDTAK)
-        val ingenOppgavetyper = listOf(StegType.VENTE_PÅ_STATUS_FRA_IVERKSETT, LAG_SAKSBEHANDLINGSBLANKETT,FERDIGSTILLE_BEHANDLING, PUBLISER_VEDTAKSHENDELSE, BEHANDLING_FERDIGSTILT)
+        val ingenOppgavetyper = listOf(StegType.VENTE_PÅ_STATUS_FRA_IVERKSETT, LAG_SAKSBEHANDLINGSBLANKETT, FERDIGSTILLE_BEHANDLING, PUBLISER_VEDTAKSHENDELSE, BEHANDLING_FERDIGSTILT)
 
         behandlesakOppgavetyper.forEach { steg ->
             val behandlingId = UUID.randomUUID()
@@ -293,7 +293,6 @@ internal class TilordnetRessursServiceTest {
             tilordnetRessursService.hentIkkeFerdigstiltOppgaveForBehandlingGittStegtype(behandlingId)
             verify { oppgaveRepository.findByBehandlingIdAndErFerdigstiltIsFalseAndTypeIn(behandlingId, setOf()) }
         }
-
     }
 
     private fun efOppgave(behandlingId: UUID) =

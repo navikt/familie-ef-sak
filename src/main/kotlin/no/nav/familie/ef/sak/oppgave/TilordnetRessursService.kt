@@ -1,19 +1,19 @@
 package no.nav.familie.ef.sak.oppgave
 
+import no.nav.familie.ef.sak.behandling.BehandlingRepository
 import no.nav.familie.ef.sak.behandlingsflyt.steg.BehandlerRolle
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.oppgave.dto.SaksbehandlerDto
 import no.nav.familie.ef.sak.oppgave.dto.SaksbehandlerRolle
+import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.kontrakter.felles.Tema
 import no.nav.familie.kontrakter.felles.oppgave.Oppgave
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.kontrakter.felles.oppgave.StatusEnum
 import org.springframework.stereotype.Service
 import java.util.UUID
-import no.nav.familie.ef.sak.behandling.BehandlingRepository
-import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.ef.sak.oppgave.Oppgave as EFOppgave
 
 @Service
