@@ -22,14 +22,7 @@ import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdSak
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdSakResultat
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdSakType
 import no.nav.familie.kontrakter.felles.ef.StønadType
-import no.nav.familie.kontrakter.felles.klage.BehandlingEventType
-import no.nav.familie.kontrakter.felles.klage.BehandlingResultat
-import no.nav.familie.kontrakter.felles.klage.BehandlingStatus
-import no.nav.familie.kontrakter.felles.klage.Fagsystem
-import no.nav.familie.kontrakter.felles.klage.KlagebehandlingDto
-import no.nav.familie.kontrakter.felles.klage.KlageinstansResultatDto
-import no.nav.familie.kontrakter.felles.klage.OpprettKlagebehandlingRequest
-import no.nav.familie.kontrakter.felles.klage.Stønadstype
+import no.nav.familie.kontrakter.felles.klage.*
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
@@ -89,7 +82,7 @@ internal class KlageServiceTest {
     inner class OpprettKlage {
         @Test
         internal fun `skal mappe riktige verdier ved manuelt opprettet klage`() {
-            klageService.opprettKlage(fagsak.id, OpprettKlageDto(LocalDate.now(), true))
+            klageService.validerOgOpprettKlage(fagsak, OpprettKlageDto(LocalDate.now(), true, Klagebehandlingsårsak.ORDINÆR))
 
             val request = opprettKlageSlot.captured
 
@@ -360,8 +353,8 @@ internal class KlageServiceTest {
     inner class Validering {
         @Test
         internal fun `skal ikke kunne opprette klage med krav mottatt frem i tid`() {
-            val opprettKlageDto = OpprettKlageDto(mottattDato = LocalDate.now().plusDays(1), false)
-            val feil = assertThrows<ApiFeil> { klageService.opprettKlage(UUID.randomUUID(), opprettKlageDto) }
+            val opprettKlageDto = OpprettKlageDto(mottattDato = LocalDate.now().plusDays(1), false, Klagebehandlingsårsak.ORDINÆR)
+            val feil = assertThrows<ApiFeil> { klageService.validerOgOpprettKlage(fagsak(), opprettKlageDto) }
 
             assertThat(feil.feil).contains("Kan ikke opprette klage med krav mottatt frem i tid for fagsak=")
         }
@@ -370,8 +363,8 @@ internal class KlageServiceTest {
         internal fun `skal ikke kunne opprette dersom enhetId ikke finnes`() {
             every { arbeidsfordelingService.hentNavEnhet(any()) } returns null
 
-            val opprettKlageDto = OpprettKlageDto(mottattDato = LocalDate.now(), false)
-            val feil = assertThrows<ApiFeil> { klageService.opprettKlage(fagsak.id, opprettKlageDto) }
+            val opprettKlageDto = OpprettKlageDto(mottattDato = LocalDate.now(), false, Klagebehandlingsårsak.ORDINÆR)
+            val feil = assertThrows<ApiFeil> { klageService.validerOgOpprettKlage(fagsak, opprettKlageDto) }
 
             assertThat(feil.feil).isEqualTo("Finner ikke behandlende enhet for personen")
         }
