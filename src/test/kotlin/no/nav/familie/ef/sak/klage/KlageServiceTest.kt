@@ -13,6 +13,7 @@ import no.nav.familie.ef.sak.fagsak.domain.Fagsaker
 import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
 import no.nav.familie.ef.sak.infotrygd.InfotrygdService
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.klage.dto.OpprettKlageDto
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
@@ -22,7 +23,15 @@ import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdSak
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdSakResultat
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdSakType
 import no.nav.familie.kontrakter.felles.ef.StønadType
-import no.nav.familie.kontrakter.felles.klage.*
+import no.nav.familie.kontrakter.felles.klage.BehandlingEventType
+import no.nav.familie.kontrakter.felles.klage.BehandlingResultat
+import no.nav.familie.kontrakter.felles.klage.BehandlingStatus
+import no.nav.familie.kontrakter.felles.klage.Fagsystem
+import no.nav.familie.kontrakter.felles.klage.KlagebehandlingDto
+import no.nav.familie.kontrakter.felles.klage.Klagebehandlingsårsak
+import no.nav.familie.kontrakter.felles.klage.KlageinstansResultatDto
+import no.nav.familie.kontrakter.felles.klage.OpprettKlagebehandlingRequest
+import no.nav.familie.kontrakter.felles.klage.Stønadstype
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
@@ -46,6 +55,8 @@ internal class KlageServiceTest {
 
     private val arbeidsfordelingService = mockk<ArbeidsfordelingService>()
 
+    private val featureToggleService = mockk<FeatureToggleService>(relaxed = true)
+
     private val klageService =
         KlageService(
             fagsakService,
@@ -53,6 +64,7 @@ internal class KlageServiceTest {
             klageClient,
             infotrygdService,
             arbeidsfordelingService,
+            featureToggleService,
         )
 
     private val eksternFagsakId = 11L
@@ -75,6 +87,8 @@ internal class KlageServiceTest {
         every { fagsakService.hentAktivIdent(saksbehandling.fagsakId) } returns personIdent
         every { fagsakPersonService.hentPerson(any()) } returns fagsakPerson
         every { arbeidsfordelingService.hentNavEnhet(any()) } returns Arbeidsfordelingsenhet(ENHET_NAY, "enhet")
+        every { featureToggleService.isEnabled(any()) } returns true
+
         justRun { klageClient.opprettKlage(capture(opprettKlageSlot)) }
     }
 
