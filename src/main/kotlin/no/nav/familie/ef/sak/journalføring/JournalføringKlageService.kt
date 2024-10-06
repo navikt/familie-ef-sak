@@ -7,8 +7,10 @@ import no.nav.familie.ef.sak.journalføring.JournalføringHelper.validerGyldigAv
 import no.nav.familie.ef.sak.journalføring.dto.JournalføringRequestV2
 import no.nav.familie.ef.sak.journalføring.dto.Journalføringsårsak
 import no.nav.familie.ef.sak.klage.KlageService
+import no.nav.familie.ef.sak.klage.dto.OpprettKlageDto
 import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.kontrakter.felles.journalpost.Journalpost
+import no.nav.familie.kontrakter.felles.klage.Klagebehandlingsårsak
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -81,7 +83,9 @@ class JournalføringKlageService(
             "Mangler dato mottatt"
         }
 
-        klageService.opprettKlage(fagsak, klageMottatt, journalføringRequest.årsak == Journalføringsårsak.KLAGE_TILBAKEKREVING)
+        val opprettKlageDto = OpprettKlageDto(klageMottatt, journalføringRequest.årsak == Journalføringsårsak.KLAGE_TILBAKEKREVING, Klagebehandlingsårsak.ORDINÆR)
+
+        klageService.validerOgOpprettKlage(fagsak, opprettKlageDto)
 
         journalpostService.oppdaterOgFerdigstillJournalpost(
             journalpost = journalpost,

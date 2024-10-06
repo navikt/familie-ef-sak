@@ -1,6 +1,7 @@
 package no.nav.familie.ef.sak.klage
 
 import no.nav.familie.ef.sak.AuditLoggerEvent
+import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.ef.sak.klage.dto.KlagebehandlingerDto
 import no.nav.familie.ef.sak.klage.dto.OpprettKlageDto
@@ -22,6 +23,7 @@ import java.util.UUID
 class KlageController(
     private val tilgangService: TilgangService,
     private val klageService: KlageService,
+    private val fagsakService: FagsakService,
 ) {
     @PostMapping("/fagsak/{fagsakId}")
     fun opprettKlage(
@@ -30,7 +32,7 @@ class KlageController(
     ): Ressurs<UUID> {
         tilgangService.validerTilgangTilFagsak(fagsakId, AuditLoggerEvent.CREATE)
         tilgangService.validerHarSaksbehandlerrolle()
-        klageService.opprettKlage(fagsakId, opprettKlageDto)
+        klageService.validerOgOpprettKlage(fagsakService.hentFagsak(fagsakId), opprettKlageDto)
         return Ressurs.success(fagsakId)
     }
 

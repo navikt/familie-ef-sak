@@ -13,6 +13,7 @@ import no.nav.familie.ef.sak.fagsak.domain.Fagsaker
 import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
 import no.nav.familie.ef.sak.infotrygd.InfotrygdService
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.klage.dto.OpprettKlageDto
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
@@ -27,6 +28,7 @@ import no.nav.familie.kontrakter.felles.klage.BehandlingResultat
 import no.nav.familie.kontrakter.felles.klage.BehandlingStatus
 import no.nav.familie.kontrakter.felles.klage.Fagsystem
 import no.nav.familie.kontrakter.felles.klage.KlagebehandlingDto
+import no.nav.familie.kontrakter.felles.klage.Klagebehandlingsårsak
 import no.nav.familie.kontrakter.felles.klage.KlageinstansResultatDto
 import no.nav.familie.kontrakter.felles.klage.OpprettKlagebehandlingRequest
 import no.nav.familie.kontrakter.felles.klage.Stønadstype
@@ -53,6 +55,8 @@ internal class KlageServiceTest {
 
     private val arbeidsfordelingService = mockk<ArbeidsfordelingService>()
 
+    private val featureToggleService = mockk<FeatureToggleService>(relaxed = true)
+
     private val klageService =
         KlageService(
             fagsakService,
@@ -60,6 +64,7 @@ internal class KlageServiceTest {
             klageClient,
             infotrygdService,
             arbeidsfordelingService,
+            featureToggleService,
         )
 
     private val eksternFagsakId = 11L
@@ -82,6 +87,8 @@ internal class KlageServiceTest {
         every { fagsakService.hentAktivIdent(saksbehandling.fagsakId) } returns personIdent
         every { fagsakPersonService.hentPerson(any()) } returns fagsakPerson
         every { arbeidsfordelingService.hentNavEnhet(any()) } returns Arbeidsfordelingsenhet(ENHET_NAY, "enhet")
+        every { featureToggleService.isEnabled(any()) } returns true
+
         justRun { klageClient.opprettKlage(capture(opprettKlageSlot)) }
     }
 
@@ -89,7 +96,7 @@ internal class KlageServiceTest {
     inner class OpprettKlage {
         @Test
         internal fun `skal mappe riktige verdier ved manuelt opprettet klage`() {
-            klageService.opprettKlage(fagsak.id, OpprettKlageDto(LocalDate.now(), true))
+            klageService.validerOgOpprettKlage(fagsak, OpprettKlageDto(LocalDate.now(), true, Klagebehandlingsårsak.ORDINÆR))
 
             val request = opprettKlageSlot.captured
 
@@ -360,8 +367,8 @@ internal class KlageServiceTest {
     inner class Validering {
         @Test
         internal fun `skal ikke kunne opprette klage med krav mottatt frem i tid`() {
-            val opprettKlageDto = OpprettKlageDto(mottattDato = LocalDate.now().plusDays(1), false)
-            val feil = assertThrows<ApiFeil> { klageService.opprettKlage(UUID.randomUUID(), opprettKlageDto) }
+            val opprettKlageDto = OpprettKlageDto(mottattDato = LocalDate.now().plusDays(1), false, Klagebehandlingsårsak.ORDINÆR)
+            val feil = assertThrows<ApiFeil> { klageService.validerOgOpprettKlage(fagsak(), opprettKlageDto) }
 
             assertThat(feil.feil).contains("Kan ikke opprette klage med krav mottatt frem i tid for fagsak=")
         }
@@ -370,8 +377,8 @@ internal class KlageServiceTest {
         internal fun `skal ikke kunne opprette dersom enhetId ikke finnes`() {
             every { arbeidsfordelingService.hentNavEnhet(any()) } returns null
 
-            val opprettKlageDto = OpprettKlageDto(mottattDato = LocalDate.now(), false)
-            val feil = assertThrows<ApiFeil> { klageService.opprettKlage(fagsak.id, opprettKlageDto) }
+            val opprettKlageDto = OpprettKlageDto(mottattDato = LocalDate.now(), false, Klagebehandlingsårsak.ORDINÆR)
+            val feil = assertThrows<ApiFeil> { klageService.validerOgOpprettKlage(fagsak, opprettKlageDto) }
 
             assertThat(feil.feil).isEqualTo("Finner ikke behandlende enhet for personen")
         }
