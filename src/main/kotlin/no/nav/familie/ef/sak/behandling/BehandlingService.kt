@@ -269,13 +269,13 @@ class BehandlingService(
             utfall = StegUtfall.HENLAGT,
             metadata = henlagt,
         )
-        opprettStatistikkTask(henlagtBehandling)
+        opprettStatistikkTaskForHenlagtBehandling(henlagtBehandling)
         return behandlingRepository.update(henlagtBehandling)
     }
 
-    private fun opprettStatistikkTask(behandling: Behandling) {
+    private fun opprettStatistikkTaskForHenlagtBehandling(behandling: Behandling) {
         taskService.save(
-            BehandlingsstatistikkTask.opprettHenlagtTask(
+            BehandlingsstatistikkTask.opprettFerdigTask(
                 behandlingId = behandling.id,
                 hendelseTidspunkt = LocalDateTime.now(),
                 gjeldendeSaksbehandler = SikkerhetContext.hentSaksbehandler(),
