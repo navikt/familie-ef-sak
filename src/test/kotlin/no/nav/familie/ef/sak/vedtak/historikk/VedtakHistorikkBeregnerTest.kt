@@ -2,6 +2,7 @@ package no.nav.familie.ef.sak.vedtak.historikk
 
 import no.nav.familie.ef.sak.beregning.Inntekt
 import no.nav.familie.ef.sak.beregning.Inntektsperiode
+import no.nav.familie.ef.sak.beregning.barnetilsyn.BeregningsgrunnlagBarnetilsynDto
 import no.nav.familie.ef.sak.felles.domain.Sporbar
 import no.nav.familie.ef.sak.vedtak.domain.AktivitetType
 import no.nav.familie.ef.sak.vedtak.domain.InntektWrapper
@@ -35,7 +36,6 @@ internal class VedtakHistorikkBeregnerTest {
         val andreVedtak = lagVedtak(perioder = null, opphørFom = opphørFom)
 
         val vedtaksperioderPerBehandling = lagVedtaksperioderPerBehandling(listOf(førsteVedtak, andreVedtak))
-
         validerFørsteVedtakErUendret(vedtaksperioderPerBehandling)
         validerPeriode(
             vedtaksperioderPerBehandling,
@@ -175,6 +175,20 @@ internal class VedtakHistorikkBeregnerTest {
         }
     }
 
+    @Test
+    internal fun `beregnetAntallMåneder skal returnere korrekt antall måneder`() {
+        val periodeOS = Månedsperiode(YearMonth.of(2021, 1), YearMonth.of(2021, 3))
+        val vedtakshistorikkperiodeOS =
+            VedtakshistorikkperiodeOvergangsstønad(
+                periode = periodeOS,
+                aktivitet = AktivitetType.BARNET_ER_SYKT,
+                periodeType = VedtaksperiodeType.PERIODE_FØR_FØDSEL,
+                inntekt = Inntekt(YearMonth.of(2021, 1), BigDecimal.ZERO, BigDecimal.ZERO),
+            )
+
+        assertThat(vedtakshistorikkperiodeOS.beregnetAntallMåneder).isEqualTo(3)
+    }
+
     private fun validerFørsteVedtakErUendret(vedtaksperioderPerBehandling: Map<UUID, List<Vedtakshistorikkperiode>>) {
         validerPeriode(vedtaksperioderPerBehandling, førsteVedtak.behandlingId, førsteVedtak.vedtaksperioder())
     }
@@ -270,4 +284,13 @@ internal class VedtakHistorikkBeregnerTest {
             val inntekt = it.firstOrNull()?.let { lagInntekt(it.periode.fom, it.periode.tom, 0) }
             InntektWrapper(listOfNotNull(inntekt))
         }
+
+    private fun grunnlag() =
+        BeregningsgrunnlagBarnetilsynDto(
+            BigDecimal.ONE,
+            BigDecimal.ZERO,
+            BigDecimal.ZERO,
+            0,
+            emptyList(),
+        )
 }
