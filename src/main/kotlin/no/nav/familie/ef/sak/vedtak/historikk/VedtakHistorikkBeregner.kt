@@ -21,7 +21,6 @@ import org.slf4j.LoggerFactory
 import java.math.BigDecimal
 import java.time.LocalDateTime
 import java.time.YearMonth
-import java.time.temporal.ChronoUnit
 import java.util.UUID
 
 data class Vedtaksdata(
@@ -35,8 +34,6 @@ sealed class Vedtakshistorikkperiode {
     abstract fun medFra(fra: YearMonth): Vedtakshistorikkperiode
 
     abstract fun medTil(til: YearMonth): Vedtakshistorikkperiode
-
-    val beregnetAntallMåneder get() = VedtakHistorikkBeregner.regnUtAntallMåneder(periode)
 }
 
 data class Sanksjonsperiode(
@@ -274,10 +271,5 @@ object VedtakHistorikkBeregner {
                 it.medTil(til = datoSomTidligerePeriodeOpphør.minusMonths(1))
             }
         }
-    }
-
-    fun regnUtAntallMåneder(periode: Månedsperiode): Int {
-        val beregnetAntallMåneder = periode.fom.until(periode.tom, ChronoUnit.MONTHS) + 1
-        return beregnetAntallMåneder.toInt()
     }
 }

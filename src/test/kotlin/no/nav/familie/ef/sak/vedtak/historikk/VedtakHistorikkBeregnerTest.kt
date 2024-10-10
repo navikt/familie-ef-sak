@@ -175,20 +175,6 @@ internal class VedtakHistorikkBeregnerTest {
         }
     }
 
-    @Test
-    internal fun `beregnetAntallMåneder skal returnere korrekt antall måneder`() {
-        val periodeOS = Månedsperiode(YearMonth.of(2021, 1), YearMonth.of(2021, 3))
-        val vedtakshistorikkperiodeOS =
-            VedtakshistorikkperiodeOvergangsstønad(
-                periode = periodeOS,
-                aktivitet = AktivitetType.BARNET_ER_SYKT,
-                periodeType = VedtaksperiodeType.PERIODE_FØR_FØDSEL,
-                inntekt = Inntekt(YearMonth.of(2021, 1), BigDecimal.ZERO, BigDecimal.ZERO),
-            )
-
-        assertThat(vedtakshistorikkperiodeOS.beregnetAntallMåneder).isEqualTo(3)
-    }
-
     private fun validerFørsteVedtakErUendret(vedtaksperioderPerBehandling: Map<UUID, List<Vedtakshistorikkperiode>>) {
         validerPeriode(vedtaksperioderPerBehandling, førsteVedtak.behandlingId, førsteVedtak.vedtaksperioder())
     }

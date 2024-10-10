@@ -61,7 +61,6 @@ data class AndelMedGrunnlagDto(
     val barn: List<UUID>,
     val sats: Int,
     val beløpFørFratrekkOgSatsJustering: Int,
-    val beregnetAntallMåneder: Int,
 ) {
     constructor(
         andel: AndelTilkjentYtelse,
@@ -79,7 +78,6 @@ data class AndelMedGrunnlagDto(
         barn = vedtaksinformasjon?.barn ?: emptyList(),
         sats = vedtaksinformasjon?.sats ?: 0,
         beløpFørFratrekkOgSatsJustering = vedtaksinformasjon?.beløpFørFratrekkOgSatsjustering ?: 0,
-        beregnetAntallMåneder = vedtaksinformasjon?.beregnetAntallMåneder ?: 0,
     )
 
     @Deprecated("Bruk periode!", ReplaceWith("periode.fomDato"))
@@ -89,6 +87,8 @@ data class AndelMedGrunnlagDto(
     @Deprecated("Bruk periode!", ReplaceWith("periode.tomDato"))
     @get:JsonProperty
     val stønadTil: LocalDate get() = periode.tomDato
+
+    val beregnetAntallMåneder get() = AndelHistorikkBeregner.regnUtAntallMåneder(periode)
 }
 
 data class HistorikkEndring(

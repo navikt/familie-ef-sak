@@ -2176,7 +2176,6 @@ internal class BeregnYtelseStegTest {
             barn = emptyList(),
             sats = 0,
             beløpFørFratrekkOgSatsJustering = 0,
-            beregnetAntallMåneder = 0,
         )
 
     private fun lagBeløpsperiode(
