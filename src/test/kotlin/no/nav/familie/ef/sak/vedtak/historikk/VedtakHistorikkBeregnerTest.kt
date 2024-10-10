@@ -269,5 +269,4 @@ internal class VedtakHistorikkBeregnerTest {
             val inntekt = it.firstOrNull()?.let { lagInntekt(it.periode.fom, it.periode.tom, 0) }
             InntektWrapper(listOfNotNull(inntekt))
         }
-
 }
