@@ -163,7 +163,7 @@ internal class TidligereVedtaksperioderServiceTest {
 
     @Test
     internal fun `Skal ha en periode med null utbetaling`() {
-        val andel2 = andel.copy(andel = andelMedGrunnlagDto().copy(beløp = 0))
+        val andel2 = andel.copy(andel = andelMedGrunnlagDto().copy(beløp = 0, beregnetAntallMåneder = 0))
         every { andelsHistorikkService.hentHistorikk(fagsaker.overgangsstønad!!.id, null) } returns
             listOf(andel2)
 
@@ -420,6 +420,7 @@ internal class TidligereVedtaksperioderServiceTest {
             barn = emptyList(),
             sats = 0,
             beløpFørFratrekkOgSatsJustering = 0,
+            beregnetAntallMåneder = 0,
         )
 
     private fun historikkEndring(type: EndringType) =

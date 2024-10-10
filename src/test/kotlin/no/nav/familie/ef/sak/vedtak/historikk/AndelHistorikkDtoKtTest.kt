@@ -79,5 +79,6 @@ internal class AndelHistorikkDtoKtTest {
             barn = emptyList(),
             sats = 0,
             beløpFørFratrekkOgSatsJustering = 0,
+            beregnetAntallMåneder = 0,
         )
 }
