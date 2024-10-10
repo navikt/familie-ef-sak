@@ -2,7 +2,6 @@ package no.nav.familie.ef.sak.vedtak.historikk
 
 import no.nav.familie.ef.sak.beregning.Inntekt
 import no.nav.familie.ef.sak.beregning.Inntektsperiode
-import no.nav.familie.ef.sak.beregning.barnetilsyn.BeregningsgrunnlagBarnetilsynDto
 import no.nav.familie.ef.sak.felles.domain.Sporbar
 import no.nav.familie.ef.sak.vedtak.domain.AktivitetType
 import no.nav.familie.ef.sak.vedtak.domain.InntektWrapper
@@ -271,12 +270,4 @@ internal class VedtakHistorikkBeregnerTest {
             InntektWrapper(listOfNotNull(inntekt))
         }
 
-    private fun grunnlag() =
-        BeregningsgrunnlagBarnetilsynDto(
-            BigDecimal.ONE,
-            BigDecimal.ZERO,
-            BigDecimal.ZERO,
-            0,
-            emptyList(),
-        )
 }

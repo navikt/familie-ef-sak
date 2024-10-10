@@ -88,7 +88,7 @@ data class AndelMedGrunnlagDto(
     @get:JsonProperty
     val stønadTil: LocalDate get() = periode.tomDato
 
-    val beregnetAntallMåneder get() = AndelHistorikkBeregner.regnUtAntallMåneder(periode)
+    val beregnetAntallMåneder: Int get() = AndelHistorikkBeregner.regnUtAntallMåneder(periode)
 }
 
 data class HistorikkEndring(
