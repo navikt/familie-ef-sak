@@ -33,9 +33,6 @@ class AutomatiskMigreringController(
         brukerfeilHvis(antall > 100) {
             "Kan ikke migrere fler enn 100"
         }
-        brukerfeilHvisIkke(featureToggleService.isEnabled(Toggle.AUTOMATISK_MIGRERING)) {
-            "Feature toggle for migrering er slått av"
-        }
         automatiskMigreringService.migrerAutomatisk(antall)
     }
 
