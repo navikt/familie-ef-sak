@@ -87,6 +87,9 @@ data class AndelMedGrunnlagDto(
     @Deprecated("Bruk periode!", ReplaceWith("periode.tomDato"))
     @get:JsonProperty
     val stønadTil: LocalDate get() = periode.tomDato
+
+    @get:JsonProperty
+    val beregnetAntallMåneder: Int get() = AndelHistorikkBeregner.regnUtAntallMåneder(periode)
 }
 
 data class HistorikkEndring(

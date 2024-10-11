@@ -35,7 +35,6 @@ internal class VedtakHistorikkBeregnerTest {
         val andreVedtak = lagVedtak(perioder = null, opphørFom = opphørFom)
 
         val vedtaksperioderPerBehandling = lagVedtaksperioderPerBehandling(listOf(førsteVedtak, andreVedtak))
-
         validerFørsteVedtakErUendret(vedtaksperioderPerBehandling)
         validerPeriode(
             vedtaksperioderPerBehandling,
