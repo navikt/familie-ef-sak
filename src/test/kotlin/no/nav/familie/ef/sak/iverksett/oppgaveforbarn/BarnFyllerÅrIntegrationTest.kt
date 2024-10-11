@@ -55,18 +55,7 @@ class BarnFyllerÅrIntegrationTest : OppslagSpringRunnerTest() {
         val barnPersonIdent = "01012067050" // Se PdlClientConfig
         barnRepository.insert(BehandlingBarn(personIdent = barnPersonIdent, behandlingId = behandling.id))
         grunnlagsdataService.opprettGrunnlagsdata(behandling.id)
-        val lagretGrunnlagsdata = grunnlagsdataService.hentLagretGrunnlagsdata(behandling.id)
-        val oppdatertBarneListe =
-            lagretGrunnlagsdata.data.barn.map { barn ->
-                if (barn == lagretGrunnlagsdata.data.barn.first()) {
-                    barn.copy(fødsel = listOf(fødsel(fødselsdato)))
-                } else {
-                    barn
-                }
-            }
-        val oppdatertGrunnlagsdataDomene = lagretGrunnlagsdata.data.copy(barn = oppdatertBarneListe)
-        val updatedGrunnlagsdata = lagretGrunnlagsdata.copy(data = oppdatertGrunnlagsdataDomene)
-        grunnlagsdataService.oppdaterEndringer(updatedGrunnlagsdata)
+        oppdaterGrunnlagsdata(behandling, fødselsdato)
         vedtakRepository.insert(vedtak(behandling.id))
         lagreFremtidligAndel(behandling, 4000)
 
@@ -99,6 +88,23 @@ class BarnFyllerÅrIntegrationTest : OppslagSpringRunnerTest() {
 
         barnFyllerÅrOppfølgingsoppgaveService.opprettTasksForAlleBarnSomHarFyltÅr()
         assertThat(taskService.findAll().toList().isEmpty()).isTrue
+    }
+
+    private fun oppdaterGrunnlagsdata(
+        behandling: Behandling,
+        fødselsdato: LocalDate
+    ) {
+        val lagretGrunnlagsdata = grunnlagsdataService.hentLagretGrunnlagsdata(behandling.id)
+        val oppdatertBarneListe =
+            lagretGrunnlagsdata.data.barn.map { barn ->
+                if (barn == lagretGrunnlagsdata.data.barn.first()) {
+                    barn.copy(fødsel = listOf(fødsel(fødselsdato)))
+                } else {
+                    barn
+                }
+            }
+        val lagretGrunnlagsdataMedOppdatertBarn = lagretGrunnlagsdata.copy(data = lagretGrunnlagsdata.data.copy(barn = oppdatertBarneListe))
+        grunnlagsdataService.oppdaterEndringer(lagretGrunnlagsdataMedOppdatertBarn)
     }
 
     private fun lagreFremtidligAndel(
