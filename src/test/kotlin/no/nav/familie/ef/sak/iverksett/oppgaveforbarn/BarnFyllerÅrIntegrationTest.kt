@@ -92,7 +92,7 @@ class BarnFyllerÅrIntegrationTest : OppslagSpringRunnerTest() {
 
     private fun oppdaterGrunnlagsdata(
         behandling: Behandling,
-        fødselsdato: LocalDate
+        fødselsdato: LocalDate,
     ) {
         val lagretGrunnlagsdata = grunnlagsdataService.hentLagretGrunnlagsdata(behandling.id)
         val oppdatertBarneListe =
