@@ -113,7 +113,7 @@ internal class BarnServiceTest {
     internal fun `revurdering uten nye barn skal ta med terminbarn fra forrige behandling`() {
         val grunnlagsdatabarn =
             listOf(
-                barnMedIdent(fnrBarnD, "Barn D"),
+                barnMedIdent(fnrBarnD, "Barn D", fødsel(fødselsdatoBarnD)),
             )
 
         val forrigeBehandlingId = UUID.randomUUID()
@@ -145,9 +145,9 @@ internal class BarnServiceTest {
     internal fun `skal ta med ett nytt barn ved revurdering av Overgangsstønad hvor to barn eksisterer fra før`() {
         val grunnlagsdatabarn =
             listOf(
-                barnMedIdent(fnrBarnC, "Barn C"),
-                barnMedIdent(fnrBarnB, "Barn B"),
-                barnMedIdent(fnrBarnA, "Barn A"),
+                barnMedIdent(fnrBarnC, "Barn C", fødsel(fødselsdatoBarnC)),
+                barnMedIdent(fnrBarnB, "Barn B", fødsel(fødselsdatoBarnB)),
+                barnMedIdent(fnrBarnA, "Barn A", fødsel(fødselsdatoBarnA)),
             )
         val forrigeBehandlingId = UUID.randomUUID()
 
@@ -186,10 +186,10 @@ internal class BarnServiceTest {
     internal fun `skal kaste feil ved revurdering av Barnetilsyn dersom man ikke tar med alle barna som finnes i grunnlagsdataene`() {
         val grunnlagsdatabarn =
             listOf(
-                barnMedIdent(fnrBarnD, "Barn D"),
-                barnMedIdent(fnrBarnC, "Barn C"),
-                barnMedIdent(fnrBarnB, "Barn B"),
-                barnMedIdent(fnrBarnA, "Barn A"),
+                barnMedIdent(fnrBarnD, "Barn D", fødsel(fødselsdatoBarnD)),
+                barnMedIdent(fnrBarnC, "Barn C", fødsel(fødselsdatoBarnC)),
+                barnMedIdent(fnrBarnB, "Barn B", fødsel(fødselsdatoBarnB)),
+                barnMedIdent(fnrBarnA, "Barn A", fødsel(fødselsdatoBarnA)),
             )
         val forrigeBehandlingId = UUID.randomUUID()
 
@@ -231,10 +231,10 @@ internal class BarnServiceTest {
     internal fun `skal ta med alle nye barn ved revurdering av Barnetilsyn hvor to barn eksisterer fra før`() {
         val grunnlagsdatabarn =
             listOf(
-                barnMedIdent(fnrBarnD, "Barn D"),
-                barnMedIdent(fnrBarnC, "Barn C"),
-                barnMedIdent(fnrBarnB, "Barn B"),
-                barnMedIdent(fnrBarnA, "Barn A"),
+                barnMedIdent(fnrBarnD, "Barn D", fødsel(fødselsdatoBarnD)),
+                barnMedIdent(fnrBarnC, "Barn C", fødsel(fødselsdatoBarnC)),
+                barnMedIdent(fnrBarnB, "Barn B", fødsel(fødselsdatoBarnB)),
+                barnMedIdent(fnrBarnA, "Barn A", fødsel(fødselsdatoBarnA)),
             )
         val forrigeBehandlingId = UUID.randomUUID()
 
@@ -476,7 +476,7 @@ internal class BarnServiceTest {
     inner class Ettersending {
         private val grunnlagsdataBarn =
             listOf(
-                barnMedIdent(FnrGenerator.generer(LocalDate.now().minusYears(1)), "J B"),
+                barnMedIdent(FnrGenerator.generer(), "J B", fødsel(LocalDate.now().minusYears(1))),
             )
         private val fødselTermindato = LocalDate.now().minusDays(1)
         private val tidligereBehandling = behandling()
@@ -713,11 +713,16 @@ internal class BarnServiceTest {
         }
     }
 
-    val fnrBarnA = FnrGenerator.generer(Year.now().minusYears(1).value)
-    val fnrBarnOver18 = FnrGenerator.generer(Year.now().minusYears(19).value)
-    val fnrBarnB = FnrGenerator.generer(Year.now().minusYears(2).value)
-    val fnrBarnC = FnrGenerator.generer(Year.now().minusYears(4).value)
-    val fnrBarnD = FnrGenerator.generer(Year.now().minusYears(4).value)
+    val fnrBarnA = FnrGenerator.generer()
+    val fnrBarnOver18 = FnrGenerator.generer()
+    val fnrBarnB = FnrGenerator.generer()
+    val fnrBarnC = FnrGenerator.generer()
+    val fnrBarnD = FnrGenerator.generer()
+    val fødselsdatoBarnA = LocalDate.now().minusYears(1)
+    val fødselsdatoBarnB = LocalDate.now().minusYears(2)
+    val fødselsdatoBarnC = LocalDate.now().minusYears(4)
+    val fødselsdatoBarnD = LocalDate.now().minusYears(4)
+
     val barnPåSøknadA =
         SøknadBarn(
             id = UUID.randomUUID(),
