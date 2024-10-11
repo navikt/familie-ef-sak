@@ -45,9 +45,6 @@ class ManuellGOmregningController(
         @PathVariable fagsakId: UUID,
     ) {
         tilgangService.validerHarForvalterrolle()
-        feilHvisIkke(featureToggleService.isEnabled(Toggle.G_BEREGNING_TILLAT_MANUELL_OPPRETTELSE_AV_G_TASK)) {
-            "Opprettelse av gomregningstask for fagsak ikke enablet"
-        }
         validerHarLøpendeStønadEtterSisteGrunnbeløpdato(fagsakId)
 
         val opprettTask = gOmregningTask.opprettTask(fagsakId)

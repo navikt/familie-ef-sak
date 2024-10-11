@@ -51,7 +51,6 @@ enum class Toggle(
 
     // Permission
     MIGRERING_BARNETILSYN("familie.ef.sak.migrering.barnetilsyn", "Permission"),
-    G_BEREGNING_TILLAT_MANUELL_OPPRETTELSE_AV_G_TASK("familie.ef.sak.tillat-opprettelse-av-g-task", "Permission"),
     OPPRETT_BEHANDLING_FERDIGSTILT_JOURNALPOST(
         "familie.ef.sak.opprett-behandling-for-ferdigstilt-journalpost",
         "Permission",
