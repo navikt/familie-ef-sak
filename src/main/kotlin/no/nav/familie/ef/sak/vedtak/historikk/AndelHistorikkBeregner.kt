@@ -10,8 +10,10 @@ import no.nav.familie.ef.sak.vedtak.historikk.AndelHistorikkUtil.periodeTypeOver
 import no.nav.familie.ef.sak.vedtak.historikk.BehandlingHistorikkUtil.lagBehandlingHistorikkData
 import no.nav.familie.ef.sak.vedtak.historikk.VedtakHistorikkBeregner.lagVedtaksperioderPerBehandling
 import no.nav.familie.ef.sak.vilkår.regler.SvarId
+import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import java.time.LocalDateTime
+import java.time.temporal.ChronoUnit
 import java.util.UUID
 
 object AndelHistorikkBeregner {
@@ -422,4 +424,9 @@ object AndelHistorikkBeregner {
         historikk.endring?.type == EndringType.FJERNET ||
             historikk.endring?.type == EndringType.ERSTATTET ||
             historikk.kontrollert == tilkjentYtelse.id
+
+    fun regnUtAntallMåneder(periode: Månedsperiode): Int {
+        val beregnetAntallMåneder = periode.fom.until(periode.tom, ChronoUnit.MONTHS) + 1
+        return beregnetAntallMåneder.toInt()
+    }
 }

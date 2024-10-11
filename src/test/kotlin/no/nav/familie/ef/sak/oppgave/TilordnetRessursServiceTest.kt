@@ -5,9 +5,23 @@ import io.mockk.mockk
 import io.mockk.mockkObject
 import io.mockk.unmockkObject
 import io.mockk.verify
+import no.nav.familie.ef.sak.behandling.BehandlingRepository
+import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
+import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType.BEHANDLING_FERDIGSTILT
+import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType.BEREGNE_YTELSE
+import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType.BESLUTTE_VEDTAK
+import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType.FERDIGSTILLE_BEHANDLING
+import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType.LAG_SAKSBEHANDLINGSBLANKETT
+import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType.PUBLISER_VEDTAKSHENDELSE
+import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType.REVURDERING_ÅRSAK
+import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType.SEND_TIL_BESLUTTER
+import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType.VILKÅR
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.oppgave.dto.SaksbehandlerRolle
+import no.nav.familie.ef.sak.repository.behandling
+import no.nav.familie.ef.sak.repository.fagsak
+import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.kontrakter.felles.Tema
 import no.nav.familie.kontrakter.felles.oppgave.Oppgave
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
@@ -24,9 +38,10 @@ internal class TilordnetRessursServiceTest {
     private val oppgaveClient: OppgaveClient = mockk()
     private val oppgaveRepository: OppgaveRepository = mockk()
     private val featureToggleService: FeatureToggleService = mockk()
+    private val behandlingRepository: BehandlingRepository = mockk()
 
     private val tilordnetRessursService: TilordnetRessursService =
-        TilordnetRessursService(oppgaveClient, oppgaveRepository, featureToggleService)
+        TilordnetRessursService(oppgaveClient, oppgaveRepository, featureToggleService, behandlingRepository)
 
     @BeforeEach
     fun setUp() {
@@ -249,6 +264,35 @@ internal class TilordnetRessursServiceTest {
         val ansvarligSaksbehandler = tilordnetRessursService.hentSaksbehandlerInfo("Z999999")
 
         assertThat(ansvarligSaksbehandler).isEqualTo(saksbehandler)
+    }
+
+    @Test
+    fun `skal utføre kall mot åpne oppgaver med riktig oppgavetype basert på stegtypen i behandlingen`() {
+        every { oppgaveRepository.findByBehandlingIdAndErFerdigstiltIsFalseAndTypeIn(any(), any()) } returns null
+        val behandlesakOppgavetyper = listOf(REVURDERING_ÅRSAK, VILKÅR, BEREGNE_YTELSE, SEND_TIL_BESLUTTER)
+        val godkjenneVedtakOppgavetyper = listOf(BESLUTTE_VEDTAK)
+        val ingenOppgavetyper = listOf(StegType.VENTE_PÅ_STATUS_FRA_IVERKSETT, LAG_SAKSBEHANDLINGSBLANKETT, FERDIGSTILLE_BEHANDLING, PUBLISER_VEDTAKSHENDELSE, BEHANDLING_FERDIGSTILT)
+
+        behandlesakOppgavetyper.forEach { steg ->
+            val behandlingId = UUID.randomUUID()
+            every { behandlingRepository.findByIdOrThrow(any()) } returns behandling(fagsak(), steg = steg)
+            tilordnetRessursService.hentIkkeFerdigstiltOppgaveForBehandlingGittStegtype(behandlingId)
+            verify { oppgaveRepository.findByBehandlingIdAndErFerdigstiltIsFalseAndTypeIn(behandlingId, setOf(Oppgavetype.BehandleSak, Oppgavetype.BehandleUnderkjentVedtak)) }
+        }
+
+        godkjenneVedtakOppgavetyper.forEach { steg ->
+            val behandlingId = UUID.randomUUID()
+            every { behandlingRepository.findByIdOrThrow(any()) } returns behandling(fagsak(), steg = steg)
+            tilordnetRessursService.hentIkkeFerdigstiltOppgaveForBehandlingGittStegtype(behandlingId)
+            verify { oppgaveRepository.findByBehandlingIdAndErFerdigstiltIsFalseAndTypeIn(behandlingId, setOf(Oppgavetype.GodkjenneVedtak)) }
+        }
+
+        ingenOppgavetyper.forEach { steg ->
+            val behandlingId = UUID.randomUUID()
+            every { behandlingRepository.findByIdOrThrow(any()) } returns behandling(fagsak(), steg = steg)
+            tilordnetRessursService.hentIkkeFerdigstiltOppgaveForBehandlingGittStegtype(behandlingId)
+            verify { oppgaveRepository.findByBehandlingIdAndErFerdigstiltIsFalseAndTypeIn(behandlingId, setOf()) }
+        }
     }
 
     private fun efOppgave(behandlingId: UUID) =

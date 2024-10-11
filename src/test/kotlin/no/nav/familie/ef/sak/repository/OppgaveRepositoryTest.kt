@@ -22,6 +22,15 @@ internal class OppgaveRepositoryTest : OppslagSpringRunnerTest() {
     private lateinit var behandlingRepository: BehandlingRepository
 
     @Test
+    internal fun `skal ikke finne oppgaver hvis man sender inn tomt set med oppgavetyper`() {
+        val fagsak = testoppsettService.lagreFagsak(fagsak())
+        val behandling = behandlingRepository.insert(behandling(fagsak))
+        oppgaveRepository.insert(oppgave(behandling))
+        assertThat(oppgaveRepository.findByBehandlingIdAndErFerdigstiltIsFalseAndTypeIn(behandling.id, emptySet()))
+            .isNull()
+    }
+
+    @Test
     internal fun findByBehandlingIdAndTypeAndErFerdigstiltIsFalse() {
         val fagsak = testoppsettService.lagreFagsak(fagsak())
         val behandling = behandlingRepository.insert(behandling(fagsak))
