@@ -58,7 +58,6 @@ enum class Toggle(
     ),
     BEHANDLING_KORRIGERING("familie.ef.sak.behandling-korrigering", "Permission"),
     FRONTEND_SATSENDRING("familie.ef.sak.frontend-vis-satsendring", "Permission"),
-    TILLAT_MIGRERING_5_ÅR_TILBAKE("familie.ef.sak.tillat-migrering-5-ar-tilbake", "Permission"),
     TILLAT_MIGRERING_7_ÅR_TILBAKE("familie.ef.sak.tillat-migrering-7-ar-tilbake", "Permission"),
     UTVIKLER_MED_VEILEDERRROLLE("familie.ef.sak.utviklere-med-veilederrolle", "Permission"),
     HENLEGG_BEHANDLING_UTEN_OPPGAVE("familie.ef.sak.henlegg-behandling-uten-oppgave", "Permission"),
