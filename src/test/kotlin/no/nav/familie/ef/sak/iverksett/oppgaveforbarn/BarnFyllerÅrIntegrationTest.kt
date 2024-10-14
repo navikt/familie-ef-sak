@@ -8,7 +8,7 @@ import no.nav.familie.ef.sak.behandling.BehandlingRepository
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
-import no.nav.familie.ef.sak.iverksett.oppgaveforbarn.Alder
+import no.nav.familie.ef.sak.iverksett.oppgaveforbarn.AktivitetspliktigAlder
 import no.nav.familie.ef.sak.iverksett.oppgaveforbarn.BarnFyllerÅrOppfølgingsoppgaveService
 import no.nav.familie.ef.sak.iverksett.oppgaveforbarn.OpprettOppgavePayload
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
@@ -65,7 +65,7 @@ class BarnFyllerÅrIntegrationTest : OppslagSpringRunnerTest() {
         assertThat(tasks.size).isEqualTo(1)
 
         val opprettOppgavePayload = objectMapper.readValue<OpprettOppgavePayload>(tasks.first().payload)
-        assertThat(opprettOppgavePayload.alder).isEqualTo(Alder.SEKS_MND)
+        assertThat(opprettOppgavePayload.alder).isEqualTo(AktivitetspliktigAlder.SEKS_MND)
         assertThat(opprettOppgavePayload.barnPersonIdent).isEqualTo(barnPersonIdent)
 
         assertThatThrownBy { barnFyllerÅrOppfølgingsoppgaveService.opprettTasksForAlleBarnSomHarFyltÅr() }

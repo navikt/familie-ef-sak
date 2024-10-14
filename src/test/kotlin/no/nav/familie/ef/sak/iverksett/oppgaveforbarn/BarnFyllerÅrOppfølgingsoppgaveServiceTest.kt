@@ -173,13 +173,13 @@ internal class BarnFyllerÅrOppfølgingsoppgaveServiceTest {
                 ),
             )
 
-        every { personService.hentPersonForelderBarnRelasjon(any()) } returns
-            mapOf(
-                Pair(
-                    fødselsnummerSøker,
-                    PdlTestdataHelper.pdlBarn(
-                        fødsel = PdlTestdataHelper.fødsel(fødselsdato = termindato),
-                        forelderBarnRelasjon =
+        every { personService.hentPersonForelderBarnRelasjon(listOf(fødselsnummerSøker)) } returns
+                mapOf(
+                    Pair(
+                        fødselsnummerSøker,
+                        PdlTestdataHelper.pdlBarn(
+                            fødsel = PdlTestdataHelper.fødsel(fødselsdato = LocalDate.of(1992,1,1)),
+                            forelderBarnRelasjon =
                             listOf(
                                 ForelderBarnRelasjon(
                                     fødselsnummerBarn,
@@ -187,13 +187,24 @@ internal class BarnFyllerÅrOppfølgingsoppgaveServiceTest {
                                     Familierelasjonsrolle.MOR,
                                 ),
                             ),
+                        ),
                     ),
-                ),
-            )
+                )
+
+        every { personService.hentPersonForelderBarnRelasjon(listOf(fødselsnummerBarn)) } returns
+                mapOf(
+                    Pair(
+                        fødselsnummerBarn,
+                        PdlTestdataHelper.pdlBarn(
+                            fødsel = PdlTestdataHelper.fødsel(fødselsdato = termindato),
+                            forelderBarnRelasjon = listOf(),
+                        ),
+                    ),
+                )
 
         opprettOppgaveForBarnService.opprettTasksForAlleBarnSomHarFyltÅr()
         val opprettOppgavePayload = objectMapper.readValue<OpprettOppgavePayload>(taskSlot.captured.payload)
-        assertThat(opprettOppgavePayload.alder).isEqualTo(Alder.ETT_ÅR)
+        assertThat(opprettOppgavePayload.alder).isEqualTo(AktivitetspliktigAlder.ETT_ÅR)
     }
 
     @Test
@@ -254,7 +265,7 @@ internal class BarnFyllerÅrOppfølgingsoppgaveServiceTest {
 
         verify(exactly = 1) { taskService.save(any()) }
         val opprettOppgavePayload = objectMapper.readValue<OpprettOppgavePayload>(taskSlot.captured.payload)
-        assertThat(opprettOppgavePayload.alder).isEqualTo(Alder.ETT_ÅR)
+        assertThat(opprettOppgavePayload.alder).isEqualTo(AktivitetspliktigAlder.ETT_ÅR)
     }
 
     @Test

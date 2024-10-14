@@ -59,6 +59,6 @@ data class OpprettOppgavePayload(
     val behandlingId: UUID,
     val barnPersonIdent: String,
     val søkerPersonIdent: String,
-    val alder: Alder,
+    val alder: AktivitetspliktigAlder,
     val aktivFra: LocalDate? = null,
 )

@@ -15,7 +15,7 @@ import no.nav.familie.ef.sak.felles.domain.Endret
 import no.nav.familie.ef.sak.felles.util.dagensDatoMedTidNorskFormat
 import no.nav.familie.ef.sak.infrastruktur.config.OppgaveClientMock
 import no.nav.familie.ef.sak.infrastruktur.exception.IntegrasjonException
-import no.nav.familie.ef.sak.iverksett.oppgaveforbarn.Alder
+import no.nav.familie.ef.sak.iverksett.oppgaveforbarn.AktivitetspliktigAlder
 import no.nav.familie.ef.sak.oppgave.Oppgave
 import no.nav.familie.ef.sak.oppgave.OppgaveRepository
 import no.nav.familie.ef.sak.oppgave.OppgaveService
@@ -407,7 +407,7 @@ internal class OppgaveServiceTest {
             behandlingId,
             InnhentDokumentasjon,
             null,
-            Alder.ETT_ÅR.oppgavebeskrivelse,
+            AktivitetspliktigAlder.ETT_ÅR.oppgavebeskrivelse,
         )
 
         assertThat(opprettOppgaveRequestSlot.captured.mappeId).isEqualTo(105)

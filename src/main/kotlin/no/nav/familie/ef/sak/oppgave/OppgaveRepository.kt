@@ -1,6 +1,6 @@
 package no.nav.familie.ef.sak.oppgave
 
-import no.nav.familie.ef.sak.iverksett.oppgaveforbarn.Alder
+import no.nav.familie.ef.sak.iverksett.oppgaveforbarn.AktivitetspliktigAlder
 import no.nav.familie.ef.sak.repository.InsertUpdateRepository
 import no.nav.familie.ef.sak.repository.RepositoryInterface
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
@@ -41,7 +41,7 @@ interface OppgaveRepository :
     fun findByBehandlingIdAndBarnPersonIdentAndAlder(
         behandlingId: UUID,
         barnPersonIdent: String,
-        alder: Alder?,
+        alder: AktivitetspliktigAlder?,
     ): Oppgave?
 
     // language=PostgreSQL

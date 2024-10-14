@@ -59,7 +59,7 @@ object BarnMatcher {
                     )
                 },
                 fødselTermindato,
-            )
+            )?.barnIdent
         return pdlBarnIkkeISøknad[besteMatch]
     }
 }
@@ -73,7 +73,7 @@ data class MatchetBehandlingBarn(
 fun finnBesteMatchPåFødselsnummerForTermindato(
     barn: List<BarnMedFødselsdatoDto>,
     termindato: LocalDate,
-): String? {
+): BarnMedFødselsdatoDto? {
     val uke20 = termindato.minusWeeks(20)
     val uke44 = termindato.plusWeeks(4)
 
@@ -82,5 +82,5 @@ fun finnBesteMatchPåFødselsnummerForTermindato(
             it.fødselsdato != null && (it.fødselsdato.isBefore(uke44) and it.fødselsdato.isAfter(uke20))
         }.minByOrNull { barn ->
             abs(barn.fødselsdato!!.toEpochDay() - termindato.toEpochDay())
-        }?.barnIdent
+        }
 }

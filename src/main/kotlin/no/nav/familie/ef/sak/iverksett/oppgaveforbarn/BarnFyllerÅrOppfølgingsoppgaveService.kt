@@ -44,20 +44,37 @@ class BarnFyllerÅrOppfølgingsoppgaveService(
             skalOpprettes.forEach {
                 secureLogger.info(
                     "Ville opprettet oppgave for barn med fødselsnummer: " +
-                        "${it.fødselsnummer} med alder ${it.alder}",
+                        "${it.fødselsnummer} med alder ${it.aktivitetspliktigAlder}",
                 )
             }
         }
         logger.info("Oppretting av oppfølgingsoppgave-tasks ferdig")
     }
 
-    private fun hentFødselsnummerTilTermindatoBarn(barnTilUtplukkForOppgave: List<BarnTilUtplukkForOppgave>): List<BarnTilUtplukkForOppgave> {
-        val barnUtenFødselsnummer =
-            barnTilUtplukkForOppgave.filter { it.termindatoBarn != null && it.fødselsnummerBarn == null }
-        val barnMedFødselsnummer = barnTilUtplukkForOppgave.filter { it.fødselsnummerBarn != null }
-        val barnUtenIdentOppdatertMedIdentFraPdl = finnFødselsnummerTilTerminbarn(barnUtenFødselsnummer)
-        return barnMedFødselsnummer + barnUtenIdentOppdatertMedIdentFraPdl
+    // TODO: Rename funksjon
+    private fun hentFødselsnummerTilTermindatoBarn(barnTilUtplukkForOppgave: List<BarnTilUtplukkForOppgave>): Set<OpprettOppgaveForBarn> {
+        val barnFraGrunnlagsdataIAktuellAlder: Set<OpprettOppgaveForBarn> =
+            barnTilUtplukkForOppgave.filter { it.fødselsnummerBarn != null }
+                .mapNotNull { barn ->
+                    val alder = AktivitetspliktigAlder.fromFødselsdato(hentFødselsdatoFraGrunnlagsdata(barn))
+                    if (alder != null) {
+                        OpprettOppgaveForBarn(
+                            fødselsnummer = barn.fødselsnummerBarn ?: error("Fødselsnummer skal være satt her pga filter ovenfor"),
+                            fødselsnummerSøker = barn.fødselsnummerSøker,
+                            aktivitetspliktigAlder = alder,
+                            behandlingId = barn.behandlingId,
+                        )
+                    } else {
+                        null
+                    }
+                }.toSet()
+
+        val terminbarnIAktuellAlder = finnFødselsnummerTilTerminbarn(filtrerTerminbarn(barnTilUtplukkForOppgave))
+
+        return barnFraGrunnlagsdataIAktuellAlder + terminbarnIAktuellAlder
     }
+
+    private fun filtrerTerminbarn(barnTilUtplukkForOppgave: List<BarnTilUtplukkForOppgave>) = barnTilUtplukkForOppgave.filter { it.termindatoBarn != null && it.fødselsnummerBarn == null }
 
     private fun hentFødselsdatoFraGrunnlagsdata(barn: BarnTilUtplukkForOppgave): LocalDate? {
         val grunnlagsdata = grunnlagsdataService.hentGrunnlagsdata(barn.behandlingId)
@@ -69,39 +86,53 @@ class BarnFyllerÅrOppfølgingsoppgaveService(
             .fødselsdato
     }
 
-    private fun finnFødselsnummerTilTerminbarn(barnMedTermindato: List<BarnTilUtplukkForOppgave>): List<BarnTilUtplukkForOppgave> {
+    // TODO: Rename
+    private fun finnFødselsnummerTilTerminbarn(barnMedTermindato: List<BarnTilUtplukkForOppgave>): Set<OpprettOppgaveForBarn> {
         val forelderBarn: Map<ForelderIdentDto, List<BarnMedFødselsdatoDto>> = hentForelderMedBarnFor(barnMedTermindato)
 
-        return barnMedTermindato.map { barn ->
+        return barnMedTermindato.mapNotNull { barn ->
             val alleBarnaTilForelder = forelderBarn[ForelderIdentDto(barn.fødselsnummerSøker)] ?: emptyList()
             val besteMatch = finnBesteMatchPåFødselsnummerForTermindato(alleBarnaTilForelder, barn.termindatoBarn ?: error("Termindato er null"))
-            barn.copy(fødselsnummerBarn = besteMatch)
-        }
+
+            besteMatch?.let {
+                val alderForOppfølgingsoppgave = AktivitetspliktigAlder.fromFødselsdato(besteMatch.fødselsdato)
+                alderForOppfølgingsoppgave?.let {
+                    OpprettOppgaveForBarn(
+                        fødselsnummer = besteMatch.barnIdent,
+                        fødselsnummerSøker = barn.fødselsnummerSøker,
+                        aktivitetspliktigAlder = alderForOppfølgingsoppgave,
+                        behandlingId = barn.behandlingId,
+                    )
+                }
+            }
+        }.toSet()
     }
 
     private fun hentForelderMedBarnFor(barnMedTermindato: List<BarnTilUtplukkForOppgave>): Map<ForelderIdentDto, List<BarnMedFødselsdatoDto>> {
-        val forelderIdentMedBarn: Map<ForelderIdentDto, List<String>> = hentForeldreMedBarn(barnMedTermindato)
-        logger.info("Antall foreldre vi prøver å matche: ${forelderIdentMedBarn.keys.size}")
-        val alleBarn = forelderIdentMedBarn.values.flatten()
-        val barnMedFødselsdato: Map<String, LocalDate?> = hentBarnFødselsdatoer(alleBarn)
-        logger.info("Antall barn hentet ut med fødselsdatoer: ${alleBarn.size}")
-        return forelderIdentMedBarn.map { it.key to it.value.map { barneIdent -> BarnMedFødselsdatoDto(barneIdent, barnMedFødselsdato[it.key.ident]) } }.toMap()
+        val forelderIdentMedBarn: List<ForelderMedBarnRelasjon> = hentForeldreMedBarn(barnMedTermindato)
+        logger.info("Antall foreldre vi prøver å matche: ${forelderIdentMedBarn.size}")
+        val barnMedFødselsdato: Map<String, LocalDate?> = hentBarnFødselsdatoer(forelderIdentMedBarn)
+        return forelderIdentMedBarn.map { forelder -> ForelderIdentDto(forelder.forelderIdent) to forelder.barnIdenter.map { barneIdent -> BarnMedFødselsdatoDto(barneIdent, barnMedFødselsdato[barneIdent]) } }.toMap()
     }
 
-    private fun hentForeldreMedBarn(barnMedTermindato: List<BarnTilUtplukkForOppgave>) =
+    private fun hentForeldreMedBarn(barnMedTermindato: List<BarnTilUtplukkForOppgave>): List<ForelderMedBarnRelasjon> =
         personService
             .hentPersonForelderBarnRelasjon(barnMedTermindato.map { it.fødselsnummerSøker })
-            .map {
-                ForelderIdentDto(it.key) to
-                    it.value.forelderBarnRelasjon
-                        .filter { it.relatertPersonsRolle == Familierelasjonsrolle.BARN }
-                        .mapNotNull { it.relatertPersonsIdent }
-            }.toMap()
+            .map { pdlPerson ->
+                ForelderMedBarnRelasjon(
+                    forelderIdent = pdlPerson.key,
+                    barnIdenter =
+                        pdlPerson.value.forelderBarnRelasjon
+                            .filter { relasjon -> relasjon.relatertPersonsRolle == Familierelasjonsrolle.BARN }
+                            .mapNotNull { relasjon -> relasjon.relatertPersonsIdent },
+                )
+            }
 
     private fun hentBarnFødselsdatoer(
-        barneIdentListe: List<String>,
+        forelderMedBarnRelasjoner: List<ForelderMedBarnRelasjon>,
     ): Map<String, LocalDate?> {
         // TODO ny person_fooedsel.graphql query?
+        val barneIdentListe = forelderMedBarnRelasjoner.flatMap { relasjon -> relasjon.barnIdenter }
         return personService
             .hentPersonForelderBarnRelasjon(barneIdentListe)
             .map {
@@ -112,19 +143,22 @@ class BarnFyllerÅrOppfølgingsoppgaveService(
             }.toMap()
     }
 
+    // TODO: Rename funksjonen
     private fun lagOpprettOppgaveForBarn(barnTilUtplukkForOppgave: List<BarnTilUtplukkForOppgave>): Set<OpprettOppgaveForBarn> {
-        val barn = hentFødselsnummerTilTermindatoBarn(barnTilUtplukkForOppgave)
-        val oppgaverForBarn = opprettOppgaveForBarn(barn)
-        val opprettedeOppgaver = finnOpprettedeOppgaver(oppgaverForBarn)
-
-        return oppgaverForBarn
-            .filterNot { opprettedeOppgaver.contains(FødselsnummerOgAlder(it.fødselsnummer, it.alder)) }
-            .toSet()
+        return hentFødselsnummerTilTermindatoBarn(barnTilUtplukkForOppgave)
+            .filter { it.erAktuellAlder() }
+            .filter { finnesOppgaveFraFør(it) }
+//        val oppgaverForBarn = opprettOppgaveForBarn(barn)
+//        val opprettedeOppgaver = finnOpprettedeOppgaver(oppgaverForBarn)
+//
+//        return oppgaverForBarn
+//            .filterNot { opprettedeOppgaver.contains(FødselsnummerOgAlder(it.fødselsnummer, it.alder)) }
+//            .toSet()
     }
 
     private fun opprettOppgaveForBarn(barn: List<BarnTilUtplukkForOppgave>): List<OpprettOppgaveForBarn> =
         barn.mapNotNull {
-            Alder.fromFødselsdato(hentFødselsdatoFraGrunnlagsdata(it))?.let { alder ->
+            AktivitetspliktigAlder.fromFødselsdato(hentFødselsdatoFraGrunnlagsdata(it))?.let { alder ->
                 OpprettOppgaveForBarn(
                     it.fødselsnummerBarn!!,
                     it.fødselsnummerSøker,
@@ -159,7 +193,7 @@ class BarnFyllerÅrOppfølgingsoppgaveService(
                     it.behandlingId,
                     it.fødselsnummer,
                     it.fødselsnummerSøker,
-                    it.alder,
+                    it.aktivitetspliktigAlder,
                 )
             }.forEach {
                 try {
@@ -179,7 +213,7 @@ class BarnFyllerÅrOppfølgingsoppgaveService(
 
     private data class FødselsnummerOgAlder(
         val fødselsnummer: String,
-        val alder: Alder,
+        val alder: AktivitetspliktigAlder,
     )
 }
 
@@ -190,4 +224,10 @@ data class ForelderIdentDto(
 data class BarnMedFødselsdatoDto(
     val barnIdent: String,
     val fødselsdato: LocalDate?,
+)
+
+// TODO: Rename til noe litt mer særeget
+data class ForelderMedBarnRelasjon(
+    val forelderIdent: String,
+    val barnIdenter: List<String>,
 )
