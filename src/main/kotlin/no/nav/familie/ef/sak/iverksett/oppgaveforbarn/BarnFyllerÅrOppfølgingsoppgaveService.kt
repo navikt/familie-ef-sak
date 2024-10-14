@@ -59,7 +59,6 @@ class BarnFyllerÅrOppfølgingsoppgaveService(
         return barnFraGrunnlagsdataIAktuellAlder + terminbarnIAktuellAlder
     }
 
-
     private fun List<BarnTilUtplukkForOppgave>.hentPDLDataOgmapTilBehandlingMedBarnIAktivitetspliktigAlder(): Set<BehandlingMedBarnIAktivitetspliktigAlder> {
         val forelderBarn: Map<ForelderIdentDto, List<BarnMedFødselsdatoDto>> = hentForelderMedBarnFor(this)
 
