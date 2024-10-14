@@ -52,13 +52,13 @@ class BarnFyllerÅrOppfølgingsoppgaveService(
     }
 
     // TODO: Rename funksjon
-    private fun hentFødselsnummerTilTermindatoBarn(barnTilUtplukkForOppgave: List<BarnTilUtplukkForOppgave>): Set<OpprettOppgaveForBarn> {
-        val barnFraGrunnlagsdataIAktuellAlder: Set<OpprettOppgaveForBarn> =
+    private fun hentFødselsnummerTilTermindatoBarn(barnTilUtplukkForOppgave: List<BarnTilUtplukkForOppgave>): Set<BehandlingMedBarnIAktivitetspliktigAlder> {
+        val barnFraGrunnlagsdataIAktuellAlder: Set<BehandlingMedBarnIAktivitetspliktigAlder> =
             barnTilUtplukkForOppgave.filter { it.fødselsnummerBarn != null }
                 .mapNotNull { barn ->
                     val alder = AktivitetspliktigAlder.fromFødselsdato(hentFødselsdatoFraGrunnlagsdata(barn))
                     if (alder != null) {
-                        OpprettOppgaveForBarn(
+                        BehandlingMedBarnIAktivitetspliktigAlder(
                             fødselsnummer = barn.fødselsnummerBarn ?: error("Fødselsnummer skal være satt her pga filter ovenfor"),
                             fødselsnummerSøker = barn.fødselsnummerSøker,
                             aktivitetspliktigAlder = alder,
@@ -87,7 +87,7 @@ class BarnFyllerÅrOppfølgingsoppgaveService(
     }
 
     // TODO: Rename
-    private fun finnFødselsnummerTilTerminbarn(barnMedTermindato: List<BarnTilUtplukkForOppgave>): Set<OpprettOppgaveForBarn> {
+    private fun finnFødselsnummerTilTerminbarn(barnMedTermindato: List<BarnTilUtplukkForOppgave>): Set<BehandlingMedBarnIAktivitetspliktigAlder> {
         val forelderBarn: Map<ForelderIdentDto, List<BarnMedFødselsdatoDto>> = hentForelderMedBarnFor(barnMedTermindato)
 
         return barnMedTermindato.mapNotNull { barn ->
@@ -97,7 +97,7 @@ class BarnFyllerÅrOppfølgingsoppgaveService(
             besteMatch?.let {
                 val alderForOppfølgingsoppgave = AktivitetspliktigAlder.fromFødselsdato(besteMatch.fødselsdato)
                 alderForOppfølgingsoppgave?.let {
-                    OpprettOppgaveForBarn(
+                    BehandlingMedBarnIAktivitetspliktigAlder(
                         fødselsnummer = besteMatch.barnIdent,
                         fødselsnummerSøker = barn.fødselsnummerSøker,
                         aktivitetspliktigAlder = alderForOppfølgingsoppgave,
@@ -144,7 +144,7 @@ class BarnFyllerÅrOppfølgingsoppgaveService(
     }
 
     // TODO: Rename funksjonen
-    private fun lagOpprettOppgaveForBarn(barnTilUtplukkForOppgave: List<BarnTilUtplukkForOppgave>): Set<OpprettOppgaveForBarn> {
+    private fun lagOpprettOppgaveForBarn(barnTilUtplukkForOppgave: List<BarnTilUtplukkForOppgave>): Set<BehandlingMedBarnIAktivitetspliktigAlder> {
         return hentFødselsnummerTilTermindatoBarn(barnTilUtplukkForOppgave)
             .filter { it.erAktuellAlder() }
             .filter { finnesOppgaveFraFør(it) }
@@ -156,10 +156,10 @@ class BarnFyllerÅrOppfølgingsoppgaveService(
 //            .toSet()
     }
 
-    private fun opprettOppgaveForBarn(barn: List<BarnTilUtplukkForOppgave>): List<OpprettOppgaveForBarn> =
+    private fun opprettOppgaveForBarn(barn: List<BarnTilUtplukkForOppgave>): List<BehandlingMedBarnIAktivitetspliktigAlder> =
         barn.mapNotNull {
             AktivitetspliktigAlder.fromFødselsdato(hentFødselsdatoFraGrunnlagsdata(it))?.let { alder ->
-                OpprettOppgaveForBarn(
+                BehandlingMedBarnIAktivitetspliktigAlder(
                     it.fødselsnummerBarn!!,
                     it.fødselsnummerSøker,
                     alder,
@@ -168,7 +168,7 @@ class BarnFyllerÅrOppfølgingsoppgaveService(
             }
         }
 
-    private fun finnOpprettedeOppgaver(oppgaverForBarn: List<OpprettOppgaveForBarn>): Set<FødselsnummerOgAlder> {
+    private fun finnOpprettedeOppgaver(oppgaverForBarn: List<BehandlingMedBarnIAktivitetspliktigAlder>): Set<FødselsnummerOgAlder> {
         if (oppgaverForBarn.isEmpty()) return emptySet()
 
         return oppgaveRepository
@@ -184,7 +184,7 @@ class BarnFyllerÅrOppfølgingsoppgaveService(
             }.toSet()
     }
 
-    private fun opprettOppgaveTasksForBarn(oppgaver: Set<OpprettOppgaveForBarn>) {
+    private fun opprettOppgaveTasksForBarn(oppgaver: Set<BehandlingMedBarnIAktivitetspliktigAlder>) {
         if (oppgaver.isEmpty()) return
 
         oppgaver

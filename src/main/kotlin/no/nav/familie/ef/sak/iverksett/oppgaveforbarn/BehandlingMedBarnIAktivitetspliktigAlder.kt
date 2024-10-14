@@ -5,7 +5,7 @@ import no.nav.familie.ef.sak.felles.util.erEttÅrEllerMerOgInnenforCutoff
 import java.time.LocalDate
 import java.util.UUID
 
-data class OpprettOppgaveForBarn(
+data class BehandlingMedBarnIAktivitetspliktigAlder(
     val fødselsnummer: String,
     val fødselsnummerSøker: String,
     val aktivitetspliktigAlder: AktivitetspliktigAlder,
