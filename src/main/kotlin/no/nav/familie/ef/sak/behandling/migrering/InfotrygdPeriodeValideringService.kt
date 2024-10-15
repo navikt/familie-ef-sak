@@ -2,7 +2,6 @@ package no.nav.familie.ef.sak.behandling.migrering
 
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
-import no.nav.familie.ef.sak.felles.util.DatoUtil
 import no.nav.familie.ef.sak.infotrygd.InfotrygdService
 import no.nav.familie.ef.sak.infotrygd.InfotrygdStønadPerioderDto
 import no.nav.familie.ef.sak.infotrygd.SummertInfotrygdPeriodeDto
@@ -232,9 +231,9 @@ class InfotrygdPeriodeValideringService(
 
         val årBakoverTillattVedMigrering = utledÅrBakoverTillattVedMigrering()
 
-        if (dato.isBefore(DatoUtil.dagensDato().minusYears(årBakoverTillattVedMigrering))) {
+        if (dato.isBefore(årBakoverTillattVedMigrering)) {
             throw MigreringException(
-                "Kan ikke migrere når forrige utbetaling i infotrygd er mer enn $årBakoverTillattVedMigrering år tilbake i tid, dato=$dato",
+                "Kan ikke migrere når forrige utbetaling i infotrygd er før $årBakoverTillattVedMigrering, dato=$dato",
                 MigreringExceptionType.ELDRE_PERIODER,
             )
         }
@@ -286,11 +285,11 @@ class InfotrygdPeriodeValideringService(
             }
     }
 
-    private fun utledÅrBakoverTillattVedMigrering(): Long {
+    private fun utledÅrBakoverTillattVedMigrering(): LocalDate {
         if (featureToggleService.isEnabled(Toggle.TILLAT_MIGRERING_7_ÅR_TILBAKE)) {
-            return 8 // tillater 8 for utvalgt saksbehandler i kort periode
+            return LocalDate.of(2016, 1, 1)
         }
-        return 5
+        return LocalDate.of(2019, 1, 1)
     }
 
     private fun lagSakFeilinfo(sak: InfotrygdSak): String =
