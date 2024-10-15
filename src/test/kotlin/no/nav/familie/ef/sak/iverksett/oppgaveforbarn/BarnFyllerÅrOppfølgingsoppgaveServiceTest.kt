@@ -174,12 +174,12 @@ internal class BarnFyllerÅrOppfølgingsoppgaveServiceTest {
             )
 
         every { personService.hentPersonForelderBarnRelasjon(listOf(fødselsnummerSøker)) } returns
-                mapOf(
-                    Pair(
-                        fødselsnummerSøker,
-                        PdlTestdataHelper.pdlBarn(
-                            fødsel = PdlTestdataHelper.fødsel(fødselsdato = LocalDate.of(1992,1,1)),
-                            forelderBarnRelasjon =
+            mapOf(
+                Pair(
+                    fødselsnummerSøker,
+                    PdlTestdataHelper.pdlBarn(
+                        fødsel = PdlTestdataHelper.fødsel(fødselsdato = LocalDate.of(1992, 1, 1)),
+                        forelderBarnRelasjon =
                             listOf(
                                 ForelderBarnRelasjon(
                                     fødselsnummerBarn,
@@ -187,20 +187,20 @@ internal class BarnFyllerÅrOppfølgingsoppgaveServiceTest {
                                     Familierelasjonsrolle.MOR,
                                 ),
                             ),
-                        ),
                     ),
-                )
+                ),
+            )
 
         every { personService.hentPersonForelderBarnRelasjon(listOf(fødselsnummerBarn)) } returns
-                mapOf(
-                    Pair(
-                        fødselsnummerBarn,
-                        PdlTestdataHelper.pdlBarn(
-                            fødsel = PdlTestdataHelper.fødsel(fødselsdato = termindato),
-                            forelderBarnRelasjon = listOf(),
-                        ),
+            mapOf(
+                Pair(
+                    fødselsnummerBarn,
+                    PdlTestdataHelper.pdlBarn(
+                        fødsel = PdlTestdataHelper.fødsel(fødselsdato = termindato),
+                        forelderBarnRelasjon = listOf(),
                     ),
-                )
+                ),
+            )
 
         opprettOppgaveForBarnService.opprettTasksForAlleBarnSomHarFyltÅr()
         val opprettOppgavePayload = objectMapper.readValue<OpprettOppgavePayload>(taskSlot.captured.payload)
@@ -208,7 +208,7 @@ internal class BarnFyllerÅrOppfølgingsoppgaveServiceTest {
     }
 
     @Test
-    fun `to barn som fyller år på samme behandling, forvent at bare en oppgave er gjeldende`() {
+    fun `to barn som fyller år på samme behandling, forvent at bare en oppgave er gjeldende grunnlagsdatabarn`() {
         val termindato = LocalDate.now().minusYears(1).minusDays(5)
         val behandlingId = UUID.randomUUID()
         val fødselsnummerSøker = FnrGenerator.generer()
@@ -226,13 +226,13 @@ internal class BarnFyllerÅrOppfølgingsoppgaveServiceTest {
             listOf(
                 opprettBarn(
                     behandlingId = behandlingId,
-                    fødselsnummer = null,
+                    fødselsnummer = fødselsnummerBarn,
                     termindato = termindato,
                     fødselsnummerSøker = fødselsnummerSøker,
                 ),
                 opprettBarn(
                     behandlingId = behandlingId,
-                    fødselsnummer = null,
+                    fødselsnummer = fødselsnummerBarn2,
                     termindato = termindato,
                     fødselsnummerSøker = fødselsnummerSøker,
                 ),
@@ -261,27 +261,71 @@ internal class BarnFyllerÅrOppfølgingsoppgaveServiceTest {
                 ),
             )
 
+        opprettOppgaveForBarnService.opprettTasksForAlleBarnSomHarFyltÅr()
+
+        verify(exactly = 1) { taskService.save(any()) }
+        val opprettOppgavePayload = objectMapper.readValue<OpprettOppgavePayload>(taskSlot.captured.payload)
+        assertThat(opprettOppgavePayload.alder).isEqualTo(AktivitetspliktigAlder.ETT_ÅR)
+    }
+
+    @Test
+    fun `terminbarn som fyller år på behandling, forvent at det oppdateres med data fra pdl`() {
+        val termindato = LocalDate.now().minusYears(1).minusDays(5)
+        val behandlingId = UUID.randomUUID()
+        val fødselsnummerSøker = FnrGenerator.generer()
+        val fødselsnummerBarn = FnrGenerator.generer()
+
+        every {
+            gjeldendeBarnRepository.finnBarnAvGjeldendeIverksatteBehandlinger(StønadType.OVERGANGSSTØNAD, any())
+        } returns
+            listOf(
+                opprettBarn(
+                    behandlingId = behandlingId,
+                    fødselsnummer = null,
+                    termindato = termindato,
+                    fødselsnummerSøker = fødselsnummerSøker,
+                ),
+            )
+
+        every { personService.hentPersonForelderBarnRelasjon(listOf(fødselsnummerSøker)) } returns
+            mapOf(
+                Pair(
+                    fødselsnummerSøker,
+                    PdlTestdataHelper.pdlPerson(
+                        fødsel = PdlTestdataHelper.fødsel(fødselsdato = LocalDate.now().minusYears(30)),
+                        forelderBarnRelasjon =
+                            listOf(
+                                ForelderBarnRelasjon(
+                                    relatertPersonsIdent = fødselsnummerBarn,
+                                    relatertPersonsRolle = Familierelasjonsrolle.BARN,
+                                    minRolleForPerson = Familierelasjonsrolle.MOR,
+                                ),
+                            ),
+                    ),
+                ),
+            )
+
         every { personService.hentPersonForelderBarnRelasjon(listOf(fødselsnummerBarn)) } returns
             mapOf(
                 Pair(
                     fødselsnummerBarn,
-                    PdlTestdataHelper.pdlBarn(
+                    PdlTestdataHelper.pdlPerson(
                         fødsel = PdlTestdataHelper.fødsel(fødselsdato = termindato),
                         forelderBarnRelasjon =
-                        listOf(
-                            ForelderBarnRelasjon(
-                                relatertPersonsIdent = fødselsnummerSøker,
-                                relatertPersonsRolle = Familierelasjonsrolle.MOR,
-                                minRolleForPerson = Familierelasjonsrolle.BARN,
+                            listOf(
+                                ForelderBarnRelasjon(
+                                    relatertPersonsIdent = fødselsnummerSøker,
+                                    relatertPersonsRolle = Familierelasjonsrolle.MOR,
+                                    minRolleForPerson = Familierelasjonsrolle.BARN,
+                                ),
                             ),
-                        ),
                     ),
                 ),
             )
 
         opprettOppgaveForBarnService.opprettTasksForAlleBarnSomHarFyltÅr()
 
-        verify { taskService.save(any()) }
+        verify(exactly = 1) { taskService.save(any()) }
         val opprettOppgavePayload = objectMapper.readValue<OpprettOppgavePayload>(taskSlot.captured.payload)
         assertThat(opprettOppgavePayload.alder).isEqualTo(AktivitetspliktigAlder.ETT_ÅR)
     }
