@@ -25,6 +25,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import java.time.LocalDate
 import java.time.YearMonth
 
 internal class InfotrygdPeriodeValideringServiceTest {
@@ -121,7 +122,7 @@ internal class InfotrygdPeriodeValideringServiceTest {
     inner class ValiderHentPeriodeForMigrering {
         @Test
         internal fun `Skal kaste feil hvis perioder er mer enn fem år tilbake i tid`() {
-            val dato = YearMonth.now().minusYears(6)
+            val dato = YearMonth.of(2018, 12)
             every { infotrygdService.hentDtoPerioder(personIdent) } returns
                 infotrygdPerioderDto(
                     listOf(
@@ -139,12 +140,37 @@ internal class InfotrygdPeriodeValideringServiceTest {
                         OVERGANGSSTØNAD,
                     )
                 }.message
-            assertThat(message).contains("Kan ikke migrere når forrige utbetaling i infotrygd er mer enn 5 år tilbake i tid")
+            assertThat(message).contains("Kan ikke migrere når forrige utbetaling i infotrygd er før 2019-01-01, dato=2018-12-31")
         }
 
         @Test
-        internal fun `Skal kaste feil hvis perioder er mer enn sju år tilbake i tid`() {
-            val dato = YearMonth.now().minusYears(8)
+        internal fun `Skal ikke kaste feil hvis perioder er etter 2016-01-01`() {
+            val dato = YearMonth.of(2017, 1)
+            every { featureToggleService.isEnabled(Toggle.TILLAT_MIGRERING_7_ÅR_TILBAKE) } returns true
+            every { infotrygdService.hentDtoPerioder(personIdent) } returns
+                infotrygdPerioderDto(
+                    listOf(
+                        lagInfotrygdPeriode(
+                            personIdent = "1",
+                            stønadFom = dato.atDay(1),
+                            stønadTom = dato.atEndOfMonth(),
+                        ),
+                    ),
+                )
+
+            val hentPeriodeForMigrering =
+                service.hentPeriodeForMigrering(
+                    personIdent,
+                    OVERGANGSSTØNAD,
+                )
+            assertThat(hentPeriodeForMigrering).isNotNull
+        }
+
+        @Test
+        internal fun `Skal kaste feil hvis perioder er før 2016-01-01`() {
+            val dato = YearMonth.of(2015, 12)
+            val grense = LocalDate.of(2016, 1, 1)
+
             every { featureToggleService.isEnabled(Toggle.TILLAT_MIGRERING_7_ÅR_TILBAKE) } returns true
             every { infotrygdService.hentDtoPerioder(personIdent) } returns
                 infotrygdPerioderDto(
@@ -163,7 +189,7 @@ internal class InfotrygdPeriodeValideringServiceTest {
                         OVERGANGSSTØNAD,
                     )
                 }.message
-            assertThat(message).contains("Kan ikke migrere når forrige utbetaling i infotrygd er mer enn 7 år tilbake i tid")
+            assertThat(message).contains("Kan ikke migrere når forrige utbetaling i infotrygd er før $grense")
         }
 
         @Test
