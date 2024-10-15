@@ -141,7 +141,7 @@ internal class InfotrygdPeriodeValideringServiceTest {
                         OVERGANGSSTØNAD,
                     )
                 }.message
-            assertThat(message).contains("Kan ikke migrere når forrige utbetaling i infotrygd er før 2019-01-01, dato=2018-10-31")
+            assertThat(message).contains("Kan ikke migrere når forrige utbetaling i infotrygd er før 2019-01-01, dato=2018-12-31")
         }
 
         @Test
