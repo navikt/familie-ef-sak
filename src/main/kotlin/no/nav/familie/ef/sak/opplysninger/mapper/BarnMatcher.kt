@@ -80,7 +80,7 @@ fun finnBesteMatchPåFødselsnummerForTermindato(
     return barn
         .filter {
             it.fødselsdato != null && (it.fødselsdato.isBefore(uke44) and it.fødselsdato.isAfter(uke20))
-        }.minByOrNull { barn ->
-            abs(barn.fødselsdato!!.toEpochDay() - termindato.toEpochDay())
+        }.minByOrNull { akuteltBarn ->
+            abs(akuteltBarn.fødselsdato!!.toEpochDay() - termindato.toEpochDay())
         }
 }
