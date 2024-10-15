@@ -41,7 +41,6 @@ internal class InfotrygdPeriodeValideringServiceTest {
     internal fun setUp() {
         every { infotrygdService.eksisterer(any(), any()) } returns true
         every { infotrygdService.hentSaker(any()) } returns InfotrygdSakResponse(emptyList())
-        every { featureToggleService.isEnabled(Toggle.TILLAT_MIGRERING_5_ÅR_TILBAKE) } returns false
         every { featureToggleService.isEnabled(Toggle.TILLAT_MIGRERING_7_ÅR_TILBAKE) } returns false
     }
 
@@ -196,7 +195,6 @@ internal class InfotrygdPeriodeValideringServiceTest {
         @Test
         internal fun `Skal ikke kaste feil hvis perioder er 4 år tilbake i tid og toggle tillater 5`() {
             val dato = YearMonth.now().minusYears(4)
-            every { featureToggleService.isEnabled(Toggle.TILLAT_MIGRERING_5_ÅR_TILBAKE) } returns true
             every { infotrygdService.hentDtoPerioder(personIdent) } returns
                 infotrygdPerioderDto(
                     listOf(
