@@ -17,7 +17,6 @@ class FeatureToggleMock {
     fun featureToggleService(): FeatureToggleService {
         val mockk = mockk<FeatureToggleService>()
         every { mockk.isEnabled(any()) } returns true
-        every { mockk.isEnabled(Toggle.TILLAT_MIGRERING_5_ÅR_TILBAKE) } returns false
         every { mockk.isEnabled(Toggle.TILLAT_MIGRERING_7_ÅR_TILBAKE) } returns false
         every { mockk.isEnabled(Toggle.SATSENDRING_BRUK_IKKE_VEDTATT_MAXSATS) } returns false
         every { mockk.isEnabled(Toggle.UTVIKLER_MED_VEILEDERRROLLE) } returns false
