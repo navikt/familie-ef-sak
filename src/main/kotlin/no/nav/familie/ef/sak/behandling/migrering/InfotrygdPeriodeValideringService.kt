@@ -288,7 +288,7 @@ class InfotrygdPeriodeValideringService(
 
     private fun utledÅrBakoverTillattVedMigrering(): Long {
         if (featureToggleService.isEnabled(Toggle.TILLAT_MIGRERING_7_ÅR_TILBAKE)) {
-            return 7
+            return 8 // tillater 8 for utvalgt saksbehandler i kort periode
         }
         return 5
     }
