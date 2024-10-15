@@ -229,11 +229,11 @@ class InfotrygdPeriodeValideringService(
             )
         }
 
-        val årBakoverTillattVedMigrering = utledÅrBakoverTillattVedMigrering()
+        val datogrenseForMigrering = hentDatogrenseForMigrering()
 
-        if (dato.isBefore(årBakoverTillattVedMigrering)) {
+        if (dato.isBefore(datogrenseForMigrering)) {
             throw MigreringException(
-                "Kan ikke migrere når forrige utbetaling i infotrygd er før $årBakoverTillattVedMigrering, dato=$dato",
+                "Kan ikke migrere når forrige utbetaling i infotrygd er før $datogrenseForMigrering, dato=$dato",
                 MigreringExceptionType.ELDRE_PERIODER,
             )
         }
@@ -285,7 +285,7 @@ class InfotrygdPeriodeValideringService(
             }
     }
 
-    private fun utledÅrBakoverTillattVedMigrering(): LocalDate {
+    private fun hentDatogrenseForMigrering(): LocalDate {
         if (featureToggleService.isEnabled(Toggle.TILLAT_MIGRERING_7_ÅR_TILBAKE)) {
             return LocalDate.of(2016, 1, 1)
         }
