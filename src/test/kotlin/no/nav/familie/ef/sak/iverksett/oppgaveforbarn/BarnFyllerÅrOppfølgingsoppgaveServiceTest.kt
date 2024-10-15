@@ -232,13 +232,13 @@ internal class BarnFyllerÅrOppfølgingsoppgaveServiceTest {
                     PdlTestdataHelper.pdlBarn(
                         fødsel = PdlTestdataHelper.fødsel(fødselsdato = LocalDate.of(1992, 1, 1)),
                         forelderBarnRelasjon =
-                        listOf(
-                            ForelderBarnRelasjon(
-                                fødselsnummerBarn,
-                                Familierelasjonsrolle.BARN,
-                                Familierelasjonsrolle.MOR,
+                            listOf(
+                                ForelderBarnRelasjon(
+                                    fødselsnummerBarn,
+                                    Familierelasjonsrolle.BARN,
+                                    Familierelasjonsrolle.MOR,
+                                ),
                             ),
-                        ),
                     ),
                 ),
             )

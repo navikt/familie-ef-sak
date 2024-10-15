@@ -96,8 +96,7 @@ class BarnFyllerÅrOppfølgingsoppgaveService(
                 } else {
                     null
                 }
-            }
-            .distinctBy { it.behandlingId }
+            }.distinctBy { it.behandlingId }
             .toSet()
 
     private fun finnTerminbarn(barnTilUtplukkForOppgave: List<BarnTilUtplukkForOppgave>) = barnTilUtplukkForOppgave.filter { it.termindatoBarn != null && it.fødselsnummerBarn == null }
