@@ -56,6 +56,15 @@ class PeriodeService(
         return slåSammenPerioder(perioderFraEf, perioderFraReplika)
     }
 
+    fun hentPerioderForBarnetilsynFraEfOgInfotrygd(personIdent: String): List<InternPeriode> {
+        val personIdenter = personService.hentPersonIdenter(personIdent).identer()
+        val perioderFraReplika =
+            infotrygdService.hentSammenslåttePerioderSomInternPerioder(personIdenter).barnetilsyn
+        val perioderFraEf = hentPerioderFraEf(personIdenter, StønadType.BARNETILSYN)
+
+        return slåSammenPerioder(perioderFraEf, perioderFraReplika)
+    }
+
     fun hentPeriodeFraVedtakForSkolepenger(personIdent: String): List<EksternPeriodeMedStønadstype> {
         val personIdenter = personService.hentPersonIdenter(personIdent).identer()
         val skoleårsperioder =

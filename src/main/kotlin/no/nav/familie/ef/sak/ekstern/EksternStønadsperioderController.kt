@@ -6,10 +6,11 @@ import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.PersonIdent
 import no.nav.familie.kontrakter.felles.Ressurs
+import no.nav.familie.kontrakter.felles.ef.EksternePerioderForStønadstyperRequest
 import no.nav.familie.kontrakter.felles.ef.EksternePerioderMedBeløpResponse
+import no.nav.familie.kontrakter.felles.ef.EksternePerioderMedStønadstypeResponse
 import no.nav.familie.kontrakter.felles.ef.EksternePerioderRequest
 import no.nav.familie.kontrakter.felles.ef.EksternePerioderResponse
-import no.nav.familie.kontrakter.felles.ef.OvergangsstønadOgSkolepengerResponse
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.slf4j.LoggerFactory
 import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
@@ -98,9 +99,23 @@ class EksternStønadsperioderController(
     @PostMapping("overgangsstonad-og-skolepenger")
     fun hentPerioderMedOvergangsstonadOgSkolepenger(
         @RequestBody request: EksternePerioderRequest,
-    ): Ressurs<OvergangsstønadOgSkolepengerResponse> =
+    ): Ressurs<EksternePerioderMedStønadstypeResponse> =
         try {
             Ressurs.success(eksternStønadsperioderService.hentPerioderForOvergangsstønadOgSkolepenger(request))
+        } catch (e: Exception) {
+            secureLogger.error("Kunne ikke hente perioder for $request", e)
+            Ressurs.failure("Henting av perioder for overgangsstønad feilet", error = e)
+        }
+
+    /**
+     * Brukes av tilleggstønader, for å vurdere barnetilsyn-ytelse. Trenger noen ganger å filtrere vekk barnetilsyn.
+     */
+    @PostMapping("perioder-for-ytelser")
+    fun hentPerioderForYtelser(
+        @RequestBody request: EksternePerioderForStønadstyperRequest,
+    ): Ressurs<EksternePerioderMedStønadstypeResponse> =
+        try {
+            Ressurs.success(eksternStønadsperioderService.hentPerioderForYtelser(request))
         } catch (e: Exception) {
             secureLogger.error("Kunne ikke hente perioder for $request", e)
             Ressurs.failure("Henting av perioder for overgangsstønad feilet", error = e)
