@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.iverksett.oppgaveforbarn
 
+import no.nav.familie.ef.sak.oppgave.Oppgave
 import no.nav.familie.ef.sak.oppgave.OppgaveRepository
 import no.nav.familie.ef.sak.opplysninger.mapper.finnBesteMatchPåFødselsnummerForTermindato
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
@@ -51,8 +52,6 @@ class BarnFyllerÅrOppfølgingsoppgaveService(
         logger.info("Oppretting av oppfølgingsoppgave-tasks ferdig")
     }
 
-    // map grunnlagsdata barn til BehandlingMedBarnIAktivitetspliktigAlder
-    // map termindato-barn til BehandlingMedBarnIAktivitetspliktigAlder (hent data fra pdl)
     private fun finnBarnIAktuellAlder(barnTilUtplukkForOppgave: List<BarnTilUtplukkForOppgave>): Set<BehandlingMedBarnIAktivitetspliktigAlder> {
         val barnFraGrunnlagsdataIAktuellAlder = mapTilBehandlingMedBarnIAktivitetspliktigAlderAvGrunnlagsdatabarn(barnTilUtplukkForOppgave)
         val terminbarnIAktuellAlder = finnTerminbarn(barnTilUtplukkForOppgave).hentPDLDataOgmapTilBehandlingMedBarnIAktivitetspliktigAlder()
@@ -156,24 +155,18 @@ class BarnFyllerÅrOppfølgingsoppgaveService(
     }
 
     private fun oppgaveOpprettetTidligere(
-        opprettedeOppgaver: Set<FødselsnummerOgAlder>,
-        it: BehandlingMedBarnIAktivitetspliktigAlder,
-    ) = opprettedeOppgaver.contains(FødselsnummerOgAlder(it.fødselsnummer, it.aktivitetspliktigAlder))
+        opprettedeOppgaver: Set<Oppgave>,
+        behandlingBarn: BehandlingMedBarnIAktivitetspliktigAlder,
+    ) = opprettedeOppgaver.any { oppgave -> oppgave.barnPersonIdent == behandlingBarn.fødselsnummer && behandlingBarn.aktivitetspliktigAlder == oppgave.alder }
 
-    private fun finnOpprettedeOppgaver(oppgaverForBarn: Set<BehandlingMedBarnIAktivitetspliktigAlder>): Set<FødselsnummerOgAlder> {
+    private fun finnOpprettedeOppgaver(oppgaverForBarn: Set<BehandlingMedBarnIAktivitetspliktigAlder>): Set<Oppgave> {
         if (oppgaverForBarn.isEmpty()) return emptySet()
-
         return oppgaveRepository
             .findByTypeAndAlderIsNotNullAndBarnPersonIdenter(
                 Oppgavetype.InnhentDokumentasjon,
                 oppgaverForBarn.map { it.fødselsnummer },
-            ).mapNotNull {
-                if (it.barnPersonIdent != null && it.alder != null) {
-                    FødselsnummerOgAlder(it.barnPersonIdent, it.alder)
-                } else {
-                    null
-                }
-            }.toSet()
+            ).filter { it.alder != null && it.barnPersonIdent != null }
+            .toSet()
     }
 
     private fun opprettOppgaveTasksForBarn(oppgaver: Set<BehandlingMedBarnIAktivitetspliktigAlder>) {
