@@ -1,7 +1,6 @@
 package no.nav.familie.ef.sak.opplysninger.mapper
 
 import no.nav.familie.ef.sak.barn.BehandlingBarn
-import no.nav.familie.ef.sak.iverksett.oppgaveforbarn.BarnMedFødselsdatoDto
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.BarnMedIdent
 import java.time.LocalDate
 import kotlin.math.abs
@@ -84,3 +83,8 @@ fun finnBesteMatchPåFødselsnummerForTermindato(
             abs(akuteltBarn.fødselsdato!!.toEpochDay() - termindato.toEpochDay())
         }
 }
+
+data class BarnMedFødselsdatoDto(
+    val barnIdent: String,
+    val fødselsdato: LocalDate?,
+)
