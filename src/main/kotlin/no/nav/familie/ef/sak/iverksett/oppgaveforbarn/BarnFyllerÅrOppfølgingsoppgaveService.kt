@@ -148,10 +148,7 @@ class BarnFyllerÅrOppfølgingsoppgaveService(
     private fun finnBarnIAktuellAlderUtenOppgave(barnTilUtplukkForOppgave: List<BarnTilUtplukkForOppgave>): Set<BehandlingMedBarnIAktivitetspliktigAlder> {
         val barnIAktuellAlder = finnBarnIAktuellAlder(barnTilUtplukkForOppgave)
         val opprettedeOppgaver = finnOpprettedeOppgaver(barnIAktuellAlder)
-        return barnIAktuellAlder
-            .filterNot {
-                oppgaveOpprettetTidligere(opprettedeOppgaver, it)
-            }.toSet()
+        return barnIAktuellAlder.filtererBortBarnSomAlleredeHarOppgave(opprettedeOppgaver)
     }
 
     private fun oppgaveOpprettetTidligere(
@@ -195,6 +192,8 @@ class BarnFyllerÅrOppfølgingsoppgaveService(
                 }
             }
     }
+
+    private fun Set<BehandlingMedBarnIAktivitetspliktigAlder>.filtererBortBarnSomAlleredeHarOppgave(opprettedeOppgaver: Set<Oppgave>): Set<BehandlingMedBarnIAktivitetspliktigAlder> = this.filterNot { oppgaveOpprettetTidligere(opprettedeOppgaver, it) }.toSet()
 }
 
 data class ForelderIdentDto(

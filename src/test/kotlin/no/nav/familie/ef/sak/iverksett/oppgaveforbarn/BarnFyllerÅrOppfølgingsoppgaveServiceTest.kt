@@ -22,6 +22,8 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.Grunnlagsdat
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Familierelasjonsrolle
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.ForelderBarnRelasjon
 import no.nav.familie.ef.sak.repository.barnMedIdent
+import no.nav.familie.ef.sak.repository.behandling
+import no.nav.familie.ef.sak.repository.oppgave
 import no.nav.familie.ef.sak.testutil.PdlTestdataHelper
 import no.nav.familie.ef.sak.testutil.PdlTestdataHelper.fødsel
 import no.nav.familie.kontrakter.felles.ef.StønadType
@@ -140,7 +142,7 @@ internal class BarnFyllerÅrOppfølgingsoppgaveServiceTest {
     }
 
     @Test
-    fun `5 av 13 barn har blitt 6 mnd, forvent at 7 oppgaver opprettes`() {
+    fun `5 av 13 barn har blitt 6 mnd, forvent at 5 oppgaver opprettes`() {
         val fødselsdatoer = (-5..7).asSequence().map { LocalDate.now().minusDays(182).plusDays(it.toLong()) }.toList()
         val opprettBarnForFødselsdatoer = fødselsdatoer.map { opprettBarn(fødselsnummer = FnrGenerator.generer(it)) }
         every { grunnlagsdataDomene.barn } returns opprettBarnForFødselsdatoer.mapIndexed { i, it -> barnMedIdent(it.fødselsnummerBarn.toString(), "fornavn etternavn", fødsel(fødselsdatoer[i])) }
@@ -247,6 +249,7 @@ internal class BarnFyllerÅrOppfølgingsoppgaveServiceTest {
         verify(exactly = 0) { taskService.save(any()) }
     }
 
+
     @Test
     fun `to barn som fyller år på samme behandling, forvent at bare en oppgave er gjeldende grunnlagsdatabarn`() {
         val termindato = LocalDate.now().minusYears(1).minusDays(5)
@@ -306,6 +309,56 @@ internal class BarnFyllerÅrOppfølgingsoppgaveServiceTest {
         verify(exactly = 1) { taskService.save(any()) }
         val opprettOppgavePayload = objectMapper.readValue<OpprettOppgavePayload>(taskSlot.captured.payload)
         assertThat(opprettOppgavePayload.alder).isEqualTo(AktivitetspliktigAlder.ETT_ÅR)
+    }
+
+    @Test
+    fun `barn i rett aldre filtreres bort fordi det finnes oppgave fra før`() {
+        val termindato = LocalDate.now().minusYears(1).minusDays(5)
+        val behandlingId = UUID.randomUUID()
+        val fødselsnummerSøker = FnrGenerator.generer()
+        val fødselsnummerBarn = FnrGenerator.generer()
+
+        val oppgave = oppgave(behandling = behandling()).copy(barnPersonIdent = fødselsnummerBarn, alder = AktivitetspliktigAlder.ETT_ÅR)
+        every { oppgaveRepository.findByTypeAndAlderIsNotNullAndBarnPersonIdenter(any(), any()) } returns listOf(oppgave)
+
+        every { grunnlagsdataDomene.barn } returns
+            listOf(
+                barnMedIdent(fødselsnummerBarn, "Fornavn etternavn", fødsel(termindato)),
+            )
+
+        every {
+            gjeldendeBarnRepository.finnBarnAvGjeldendeIverksatteBehandlinger(StønadType.OVERGANGSSTØNAD, any())
+        } returns
+            listOf(
+                opprettBarn(
+                    behandlingId = behandlingId,
+                    fødselsnummer = fødselsnummerBarn,
+                    termindato = termindato,
+                    fødselsnummerSøker = fødselsnummerSøker,
+                ),
+            )
+
+        every { personService.hentPersonForelderBarnRelasjon(listOf(fødselsnummerSøker)) } returns
+            mapOf(
+                Pair(
+                    fødselsnummerSøker,
+                    PdlTestdataHelper.pdlBarn(
+                        fødsel = PdlTestdataHelper.fødsel(fødselsdato = termindato),
+                        forelderBarnRelasjon =
+                        listOf(
+                            ForelderBarnRelasjon(
+                                fødselsnummerBarn,
+                                Familierelasjonsrolle.BARN,
+                                Familierelasjonsrolle.MOR,
+                            ),
+                        ),
+                    ),
+                ),
+            )
+
+        opprettOppgaveForBarnService.opprettTasksForAlleBarnSomHarFyltÅr()
+
+        verify(exactly = 0) { taskService.save(any()) }
     }
 
     @Test
