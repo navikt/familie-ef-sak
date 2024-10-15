@@ -208,6 +208,46 @@ internal class BarnFyllerÅrOppfølgingsoppgaveServiceTest {
     }
 
     @Test
+    fun `et eldre barn i grunnlagsdata, forvent ingen opprettelser av oppgaver`() {
+        val termindato = LocalDate.now().minusYears(10)
+        val fødselsnummerSøker = FnrGenerator.generer(1992)
+        val fødselsnummerBarn = FnrGenerator.generer(termindato)
+        every { grunnlagsdataDomene.barn } returns listOf(barnMedIdent(fødselsnummerBarn, "Fornavn etternavn", fødsel(termindato)))
+
+        every {
+            gjeldendeBarnRepository.finnBarnAvGjeldendeIverksatteBehandlinger(StønadType.OVERGANGSSTØNAD, any())
+        } returns
+            listOf(
+                opprettBarn(
+                    fødselsnummer = fødselsnummerBarn,
+                    termindato = termindato,
+                    fødselsnummerSøker = fødselsnummerSøker,
+                ),
+            )
+
+        every { personService.hentPersonForelderBarnRelasjon(listOf(fødselsnummerSøker)) } returns
+            mapOf(
+                Pair(
+                    fødselsnummerSøker,
+                    PdlTestdataHelper.pdlBarn(
+                        fødsel = PdlTestdataHelper.fødsel(fødselsdato = LocalDate.of(1992, 1, 1)),
+                        forelderBarnRelasjon =
+                        listOf(
+                            ForelderBarnRelasjon(
+                                fødselsnummerBarn,
+                                Familierelasjonsrolle.BARN,
+                                Familierelasjonsrolle.MOR,
+                            ),
+                        ),
+                    ),
+                ),
+            )
+
+        opprettOppgaveForBarnService.opprettTasksForAlleBarnSomHarFyltÅr()
+        verify(exactly = 0) { taskService.save(any()) }
+    }
+
+    @Test
     fun `to barn som fyller år på samme behandling, forvent at bare en oppgave er gjeldende grunnlagsdatabarn`() {
         val termindato = LocalDate.now().minusYears(1).minusDays(5)
         val behandlingId = UUID.randomUUID()
