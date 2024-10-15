@@ -249,7 +249,6 @@ internal class BarnFyllerÅrOppfølgingsoppgaveServiceTest {
         verify(exactly = 0) { taskService.save(any()) }
     }
 
-
     @Test
     fun `to barn som fyller år på samme behandling, forvent at bare en oppgave er gjeldende grunnlagsdatabarn`() {
         val termindato = LocalDate.now().minusYears(1).minusDays(5)
@@ -345,13 +344,13 @@ internal class BarnFyllerÅrOppfølgingsoppgaveServiceTest {
                     PdlTestdataHelper.pdlBarn(
                         fødsel = PdlTestdataHelper.fødsel(fødselsdato = termindato),
                         forelderBarnRelasjon =
-                        listOf(
-                            ForelderBarnRelasjon(
-                                fødselsnummerBarn,
-                                Familierelasjonsrolle.BARN,
-                                Familierelasjonsrolle.MOR,
+                            listOf(
+                                ForelderBarnRelasjon(
+                                    fødselsnummerBarn,
+                                    Familierelasjonsrolle.BARN,
+                                    Familierelasjonsrolle.MOR,
+                                ),
                             ),
-                        ),
                     ),
                 ),
             )
