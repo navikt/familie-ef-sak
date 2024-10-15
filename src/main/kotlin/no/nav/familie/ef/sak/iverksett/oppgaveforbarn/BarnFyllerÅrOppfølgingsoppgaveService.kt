@@ -195,11 +195,6 @@ class BarnFyllerÅrOppfølgingsoppgaveService(
                 }
             }
     }
-
-    private data class FødselsnummerOgAlder(
-        val fødselsnummer: String,
-        val alder: AktivitetspliktigAlder,
-    )
 }
 
 data class ForelderIdentDto(
