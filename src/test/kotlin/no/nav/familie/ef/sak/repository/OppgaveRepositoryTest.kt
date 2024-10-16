@@ -4,7 +4,7 @@ import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.felles.domain.Sporbar
-import no.nav.familie.ef.sak.iverksett.oppgaveforbarn.Alder
+import no.nav.familie.ef.sak.iverksett.oppgaveforbarn.AktivitetspliktigAlder
 import no.nav.familie.ef.sak.oppgave.Oppgave
 import no.nav.familie.ef.sak.oppgave.OppgaveRepository
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
@@ -102,7 +102,7 @@ internal class OppgaveRepositoryTest : OppslagSpringRunnerTest() {
             Oppgave(
                 behandlingId = behandling.id,
                 type = Oppgavetype.InnhentDokumentasjon,
-                alder = Alder.SEKS_MND,
+                alder = AktivitetspliktigAlder.SEKS_MND,
                 gsakOppgaveId = 1,
                 barnPersonIdent = "1",
             ),
@@ -111,7 +111,7 @@ internal class OppgaveRepositoryTest : OppslagSpringRunnerTest() {
             Oppgave(
                 behandlingId = behandling.id,
                 type = Oppgavetype.InnhentDokumentasjon,
-                alder = Alder.SEKS_MND,
+                alder = AktivitetspliktigAlder.SEKS_MND,
                 gsakOppgaveId = 1,
                 barnPersonIdent = "2",
             ),

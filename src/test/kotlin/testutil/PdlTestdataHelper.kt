@@ -112,6 +112,27 @@ object PdlTestdataHelper {
             emptyList(),
         )
 
+    fun pdlPerson(
+        adressebeskyttelse: List<Adressebeskyttelse> = emptyList(),
+        bostedsadresse: List<Bostedsadresse> = emptyList(),
+        deltBosted: List<DeltBosted> = emptyList(),
+        dødsfall: List<Dødsfall> = emptyList(),
+        forelderBarnRelasjon: List<ForelderBarnRelasjon> = emptyList(),
+        fødsel: Fødsel? = null,
+        navn: Navn = lagNavn(),
+    ) =
+        PdlPersonForelderBarn(
+            adressebeskyttelse,
+            bostedsadresse,
+            deltBosted,
+            dødsfall,
+            forelderBarnRelasjon,
+            listOfNotNull(fødselsdato(fødsel?.fødselsår, fødsel?.fødselsdato)),
+            listOfNotNull(fødested(fødsel?.fødeland, fødsel?.fødested, fødsel?.fødekommune)),
+            listOfNotNull(navn),
+            emptyList(),
+        )
+
     fun fødsel(
         år: Int = 2018,
         måned: Int = 1,
