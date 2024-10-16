@@ -5,8 +5,9 @@ import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.fagsak.domain.FagsakPerson
 import no.nav.familie.ef.sak.fagsak.dto.FagsakForSøkeresultat
 import no.nav.familie.ef.sak.fagsak.dto.PersonFraSøk
+import no.nav.familie.ef.sak.fagsak.dto.PersonFraSøkEkstraInfo
 import no.nav.familie.ef.sak.fagsak.dto.Søkeresultat
-import no.nav.familie.ef.sak.fagsak.dto.SøkeresultatPerson
+import no.nav.familie.ef.sak.fagsak.dto.SøkeresultatPersonEkstra
 import no.nav.familie.ef.sak.fagsak.dto.SøkeresultatUtenFagsak
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
@@ -23,6 +24,8 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlPersonFraSø
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.gjeldende
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.identer
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.visningsnavn
+import no.nav.familie.ef.sak.vilkår.VurderingService
+import no.nav.familie.ef.sak.vilkår.dto.VilkårGrunnlagDto
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
@@ -36,6 +39,7 @@ class SøkService(
     private val pdlSaksbehandlerClient: PdlSaksbehandlerClient,
     private val adresseMapper: AdresseMapper,
     private val fagsakService: FagsakService,
+    private val vurderingService: VurderingService,
 ) {
     private val secureLogger = LoggerFactory.getLogger("secureLogger")
 
@@ -91,22 +95,27 @@ class SøkService(
     // Pdl gjører tilgangskontroll for søkPersoner
     // Midlertidlig løsning med å hente søker fra PDL
     // dette kan endres til å hente bosstedsadresse fra databasen når PDL-data blir lagret i databasen
-    fun søkEtterPersonerMedSammeAdressePåFagsak(fagsakId: UUID): SøkeresultatPerson {
+    fun søkEtterPersonerMedSammeAdressePåFagsak(fagsakId: UUID): SøkeresultatPersonEkstra {
         val aktivIdent = fagsakService.hentAktivIdent(fagsakId)
         return søkEtterPersonerMedSammeAdresse(aktivIdent)
     }
 
-    fun søkEtterPersonerMedSammeAdressePåFagsakPerson(fagsakPersonId: UUID): SøkeresultatPerson {
+    fun søkEtterPersonerMedSammeAdressePåFagsakPerson(fagsakPersonId: UUID): SøkeresultatPersonEkstra {
         val aktivIdent = fagsakPersonService.hentAktivIdent(fagsakPersonId)
         return søkEtterPersonerMedSammeAdresse(aktivIdent)
     }
 
-    fun søkEtterPersonerMedSammeAdressePåBehandling(behandlingId: UUID): SøkeresultatPerson {
+    fun søkEtterPersonerMedSammeAdressePåBehandling(behandlingId: UUID): SøkeresultatPersonEkstra {
+        val (grunnlag) = vurderingService.hentGrunnlagOgMetadata(behandlingId)
+
         val aktivIdent = behandlingService.hentAktivIdent(behandlingId)
-        return søkEtterPersonerMedSammeAdresse(aktivIdent)
+        return søkEtterPersonerMedSammeAdresse(aktivIdent, grunnlag)
     }
 
-    private fun søkEtterPersonerMedSammeAdresse(aktivIdent: String): SøkeresultatPerson {
+    private fun søkEtterPersonerMedSammeAdresse(
+        aktivIdent: String,
+        grunnlag: VilkårGrunnlagDto? = null,
+    ): SøkeresultatPersonEkstra {
         val søker = personService.hentSøker(aktivIdent)
         val aktuelleBostedsadresser = søker.bostedsadresse.filterNot { it.metadata.historisk }
         val bostedsadresse = aktuelleBostedsadresser.singleOrNull()
@@ -127,13 +136,10 @@ class SøkService(
             )
         }
 
-        val personSøkResultat = pdlSaksbehandlerClient.søkPersonerMedSammeAdresse(søkeKriterier)
+        val personSøkResultat = pdlSaksbehandlerClient.søkPersonerMedSammeAdresse(søkeKriterier).hits
 
-        return SøkeresultatPerson(
-            hits = personSøkResultat.hits.map { tilPersonFraSøk(it.person) },
-            totalHits = personSøkResultat.totalHits,
-            pageNumber = personSøkResultat.pageNumber,
-            totalPages = personSøkResultat.totalPages,
+        return SøkeresultatPersonEkstra(
+            personer = personSøkResultat.map { tilPersonEkstraFraSøk(it.person, grunnlag) },
         )
     }
 
@@ -155,4 +161,24 @@ class SøkService(
                     ?.let { adresseMapper.tilAdresse(it).visningsadresse },
             visningsnavn = NavnDto.fraNavn(person.navn.gjeldende()).visningsnavn,
         )
+
+    private fun tilPersonEkstraFraSøk(
+        person: PdlPersonFraSøk,
+        grunnlag: VilkårGrunnlagDto?,
+    ): PersonFraSøkEkstraInfo {
+        val gjeldeneBarn = grunnlag?.barnMedSamvær?.find { it.registergrunnlag.fødselsnummer == person.folkeregisteridentifikator.gjeldende().identifikasjonsnummer }
+        val erSøker = grunnlag?.personalia?.personIdent == person.folkeregisteridentifikator.gjeldende().identifikasjonsnummer
+        val erBarn = grunnlag?.barnMedSamvær?.any { it.registergrunnlag.fødselsnummer == person.folkeregisteridentifikator.gjeldende().identifikasjonsnummer }
+        return PersonFraSøkEkstraInfo(
+            personIdent = person.folkeregisteridentifikator.gjeldende().identifikasjonsnummer,
+            visningsadresse =
+                person.bostedsadresse
+                    .gjeldende()
+                    ?.let { adresseMapper.tilAdresse(it).visningsadresse },
+            visningsnavn = NavnDto.fraNavn(person.navn.gjeldende()).visningsnavn,
+            fødselsdato = gjeldeneBarn?.registergrunnlag?.fødselsdato,
+            erSøker = erSøker,
+            erBarn = erBarn,
+        )
+    }
 }
