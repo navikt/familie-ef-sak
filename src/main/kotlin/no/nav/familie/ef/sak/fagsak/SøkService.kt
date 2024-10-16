@@ -144,7 +144,7 @@ class SøkService(
                     .sortedWith(
                         compareByDescending<PersonFraSøkEkstraInfo> { it.erSøker }
                             .thenByDescending { it.erBarn }
-                            .thenBy { it.fødselsdato },
+                            .thenByDescending { it.fødselsdato },
                     ),
         )
     }
