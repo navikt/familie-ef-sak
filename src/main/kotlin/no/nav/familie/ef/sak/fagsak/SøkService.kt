@@ -4,7 +4,6 @@ import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.fagsak.domain.FagsakPerson
 import no.nav.familie.ef.sak.fagsak.dto.FagsakForSøkeresultat
-import no.nav.familie.ef.sak.fagsak.dto.PersonFraSøk
 import no.nav.familie.ef.sak.fagsak.dto.PersonFraSøkEkstraInfo
 import no.nav.familie.ef.sak.fagsak.dto.Søkeresultat
 import no.nav.familie.ef.sak.fagsak.dto.SøkeresultatPersonEkstra
@@ -139,7 +138,14 @@ class SøkService(
         val personSøkResultat = pdlSaksbehandlerClient.søkPersonerMedSammeAdresse(søkeKriterier).hits
 
         return SøkeresultatPersonEkstra(
-            personer = personSøkResultat.map { tilPersonEkstraFraSøk(it.person, grunnlag) },
+            personer =
+                personSøkResultat
+                    .map { tilPersonEkstraFraSøk(it.person, grunnlag) }
+                    .sortedWith(
+                        compareByDescending<PersonFraSøkEkstraInfo> { it.erSøker }
+                            .thenByDescending { it.erBarn }
+                            .thenBy { it.fødselsdato },
+                    ),
         )
     }
 
@@ -151,16 +157,6 @@ class SøkService(
             )
         }
             ?: throw ApiFeil("Finner ingen personer for søket", HttpStatus.BAD_REQUEST)
-
-    private fun tilPersonFraSøk(person: PdlPersonFraSøk): PersonFraSøk =
-        PersonFraSøk(
-            personIdent = person.folkeregisteridentifikator.gjeldende().identifikasjonsnummer,
-            visningsadresse =
-                person.bostedsadresse
-                    .gjeldende()
-                    ?.let { adresseMapper.tilAdresse(it).visningsadresse },
-            visningsnavn = NavnDto.fraNavn(person.navn.gjeldende()).visningsnavn,
-        )
 
     private fun tilPersonEkstraFraSøk(
         person: PdlPersonFraSøk,
