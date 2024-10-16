@@ -105,6 +105,7 @@ class BarnFyllerÅrOppfølgingsoppgaveService(
         val barnAvGrunnlagsdata = grunnlagsdata.grunnlagsdata.barn.filter { it.personIdent == barn.fødselsnummerBarn }
         if (barnAvGrunnlagsdata.isEmpty()) {
             secureLogger.warn("Fant ikke barn i grunnlagsdata for behandling ${barn.behandlingId} og fødselsnummer ${barn.fødselsnummerBarn}")
+            return null
         }
         return barnAvGrunnlagsdata
             .first()
