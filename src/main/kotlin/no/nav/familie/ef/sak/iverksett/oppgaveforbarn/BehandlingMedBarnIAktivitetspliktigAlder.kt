@@ -5,14 +5,14 @@ import no.nav.familie.ef.sak.felles.util.erEttÅrEllerMerOgInnenforCutoff
 import java.time.LocalDate
 import java.util.UUID
 
-data class OpprettOppgaveForBarn(
+data class BehandlingMedBarnIAktivitetspliktigAlder(
     val fødselsnummer: String,
     val fødselsnummerSøker: String,
-    val alder: Alder,
+    val aktivitetspliktigAlder: AktivitetspliktigAlder,
     val behandlingId: UUID,
 )
 
-enum class Alder(
+enum class AktivitetspliktigAlder(
     val oppgavebeskrivelse: String,
 ) {
     SEKS_MND("Barn 1/2 år. Send varsel om aktivitetsplikt."),
@@ -23,7 +23,7 @@ enum class Alder(
         fun fromFødselsdato(
             fødselsdato: LocalDate?,
             numberOfDaysCutoff: Long = 7,
-        ): Alder? {
+        ): AktivitetspliktigAlder? {
             fødselsdato?.let {
                 if (fødselsdato.erEttÅrEllerMerOgInnenforCutoff(numberOfDaysCutoff)) return ETT_ÅR
                 if (fødselsdato.er6MndEllerMerOgInnenforCutoff(numberOfDaysCutoff)) return SEKS_MND

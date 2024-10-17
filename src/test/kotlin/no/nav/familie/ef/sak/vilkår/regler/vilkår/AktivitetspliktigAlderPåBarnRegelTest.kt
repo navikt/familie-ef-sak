@@ -12,7 +12,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.util.UUID
 
-class AlderPåBarnRegelTest {
+class AktivitetspliktigAlderPåBarnRegelTest {
     val hovedregelMetadataMock = mockk<HovedregelMetadata>()
     val behandlingBarnMedDnr = behandlingBarn(behandlingId = UUID.randomUUID(), personIdent = "06431960727", søknadBarnId = UUID.randomUUID())
     val behandlingBarn2 = behandlingBarn(behandlingId = UUID.randomUUID(), personIdent = "03041983106", søknadBarnId = UUID.randomUUID())

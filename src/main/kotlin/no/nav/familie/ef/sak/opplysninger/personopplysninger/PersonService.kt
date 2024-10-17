@@ -30,8 +30,8 @@ class PersonService(
         return SøkerMedBarn(ident, søker, hentPersonForelderBarnRelasjon(barnIdentifikatorer))
     }
 
-    fun hentPersonForelderBarnRelasjon(barnIdentifikatorer: List<String>) =
-        pdlClient.hentPersonForelderBarnRelasjon(barnIdentifikatorer)
+    fun hentPersonForelderBarnRelasjon(identer: List<String>) =
+        pdlClient.hentPersonForelderBarnRelasjon(identer)
 
     fun hentAndreForeldre(personIdenter: List<String>): Map<String, PdlAnnenForelder> = pdlClient.hentAndreForeldre(personIdenter)
 

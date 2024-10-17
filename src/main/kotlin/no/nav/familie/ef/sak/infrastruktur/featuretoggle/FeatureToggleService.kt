@@ -21,9 +21,9 @@ enum class Toggle(
 ) {
     // Release
     OVERSENDE_BEGRUNNELSE_FOR_TILBAKEKREVING("familie-ef-sak.begrunnelse-for-tilbakekreving", "Release"),
+    BRUK_FAMILIE_BREV_FELTER_V2("familie.ef.sak.frontend-bruk-brev-endepunkt-felter-v2", "Release"),
 
     // Operational
-    AUTOMATISK_MIGRERING("familie.ef.sak.automatisk-migrering", "Kan denne slettes?"),
     G_BEREGNING("familie.ef.sak.g-beregning", "Operational"),
     G_BEREGNING_SCHEDULER("familie.ef.sak.g-beregning-scheduler", "Operational"),
     SATSENDRING_BRUK_IKKE_VEDTATT_MAXSATS("familie.ef.sak.bruk-nye-maxsatser", "Operational"),
@@ -50,14 +50,12 @@ enum class Toggle(
 
     // Permission
     MIGRERING_BARNETILSYN("familie.ef.sak.migrering.barnetilsyn", "Permission"),
-    G_BEREGNING_TILLAT_MANUELL_OPPRETTELSE_AV_G_TASK("familie.ef.sak.tillat-opprettelse-av-g-task", "Permission"),
     OPPRETT_BEHANDLING_FERDIGSTILT_JOURNALPOST(
         "familie.ef.sak.opprett-behandling-for-ferdigstilt-journalpost",
         "Permission",
     ),
     BEHANDLING_KORRIGERING("familie.ef.sak.behandling-korrigering", "Permission"),
     FRONTEND_SATSENDRING("familie.ef.sak.frontend-vis-satsendring", "Permission"),
-    TILLAT_MIGRERING_5_ÅR_TILBAKE("familie.ef.sak.tillat-migrering-5-ar-tilbake", "Permission"),
     TILLAT_MIGRERING_7_ÅR_TILBAKE("familie.ef.sak.tillat-migrering-7-ar-tilbake", "Permission"),
     UTVIKLER_MED_VEILEDERRROLLE("familie.ef.sak.utviklere-med-veilederrolle", "Permission"),
     HENLEGG_BEHANDLING_UTEN_OPPGAVE("familie.ef.sak.henlegg-behandling-uten-oppgave", "Permission"),
