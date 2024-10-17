@@ -16,7 +16,7 @@ fun Personnavn.visningsnavn(): String =
         "$fornavn $mellomnavn $etternavn"
     }
 
-fun List<Navn>.gjeldende(): Navn = this.single()
+fun List<Navn>.gjeldende(): Navn = this.find { !it.metadata.historisk } ?: this.first()
 
 fun List<Bostedsadresse>.gjeldende(): Bostedsadresse? = this.find { !it.metadata.historisk }
 
