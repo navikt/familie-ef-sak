@@ -2,6 +2,7 @@ package no.nav.familie.ef.sak.fagsak.dto
 
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.Kjønn
 import no.nav.familie.kontrakter.felles.ef.StønadType
+import java.time.LocalDate
 import java.util.UUID
 
 data class Søkeresultat(
@@ -23,13 +24,13 @@ data class PersonFraSøk(
     val personIdent: String,
     val visningsadresse: String?,
     val visningsnavn: String,
+    val fødselsdato: LocalDate?,
+    val erSøker: Boolean?,
+    val erBarn: Boolean?,
 )
 
 data class SøkeresultatPerson(
-    val hits: List<PersonFraSøk>,
-    val totalHits: Int,
-    val pageNumber: Int,
-    val totalPages: Int,
+    val personer: List<PersonFraSøk>,
 )
 
 data class SøkeresultatUtenFagsak(
