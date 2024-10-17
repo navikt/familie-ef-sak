@@ -88,11 +88,12 @@ class TilordnetRessursService(
     ): SaksbehandlerDto {
         val rolle = utledSaksbehandlerRolle(behandlingId, behandleSakOppgave)
 
-        val tilordnetRessurs = if (rolle == SaksbehandlerRolle.OPPGAVE_FINNES_IKKE_SANNSYNLIGVIS_INNLOGGET_SAKSBEHANDLER ) {
-            hentSaksbehandlerInfo(SikkerhetContext.hentSaksbehandler())
-        } else {
-            behandleSakOppgave?.tilordnetRessurs?.let { hentSaksbehandlerInfo(it) }
-        }
+        val tilordnetRessurs =
+            if (rolle == SaksbehandlerRolle.OPPGAVE_FINNES_IKKE_SANNSYNLIGVIS_INNLOGGET_SAKSBEHANDLER) {
+                hentSaksbehandlerInfo(SikkerhetContext.hentSaksbehandler())
+            } else {
+                behandleSakOppgave?.tilordnetRessurs?.let { hentSaksbehandlerInfo(it) }
+            }
 
         return SaksbehandlerDto(
             etternavn = tilordnetRessurs?.etternavn ?: "",

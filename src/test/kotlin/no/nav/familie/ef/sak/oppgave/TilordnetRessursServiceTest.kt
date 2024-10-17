@@ -23,7 +23,6 @@ import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.kontrakter.felles.Tema
-import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.kontrakter.felles.oppgave.Oppgave
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.kontrakter.felles.saksbehandler.Saksbehandler
@@ -123,7 +122,7 @@ internal class TilordnetRessursServiceTest {
                     oppgaveTyper,
                 )
             } answers { null }
-            every { behandlingRepository.findByIdOrThrow(any()) } returns behandling( steg = behandlingSteg)
+            every { behandlingRepository.findByIdOrThrow(any()) } returns behandling(steg = behandlingSteg)
 
             val erSaksbehandlerEllerNull =
                 tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandler(UUID.randomUUID())
@@ -232,7 +231,7 @@ internal class TilordnetRessursServiceTest {
             mode = EnumSource.Mode.EXCLUDE,
         )
         internal fun `skal utlede at saksbehandlers rolle er OPPGAVE FINNES IKKE`(behandlingSteg: StegType) {
-            every { behandlingRepository.findByIdOrThrow(any()) } returns behandling( steg = behandlingSteg)
+            every { behandlingRepository.findByIdOrThrow(any()) } returns behandling(steg = behandlingSteg)
 
             val saksbehandlerDto = tilordnetRessursService.utledAnsvarligSaksbehandlerForOppgave(UUID.randomUUID(), null)
 
@@ -252,7 +251,7 @@ internal class TilordnetRessursServiceTest {
             val saksbehandler = saksbehandler(UUID.randomUUID(), "Skywalker", "Anakin", "NAV1234")
 
             every { oppgaveClient.hentSaksbehandlerInfo("NAV1234") } returns saksbehandler
-            every { behandlingRepository.findByIdOrThrow(any()) } returns behandling( steg = behandlingSteg)
+            every { behandlingRepository.findByIdOrThrow(any()) } returns behandling(steg = behandlingSteg)
 
             val saksbehandlerDto = tilordnetRessursService.utledAnsvarligSaksbehandlerForOppgave(UUID.randomUUID(), null)
 
