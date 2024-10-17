@@ -24,26 +24,13 @@ data class PersonFraSøk(
     val personIdent: String,
     val visningsadresse: String?,
     val visningsnavn: String,
-)
-
-data class PersonFraSøkEkstraInfo( // TODO: rename
-    val personIdent: String,
-    val visningsadresse: String?,
-    val visningsnavn: String,
     val fødselsdato: LocalDate?,
     val erSøker: Boolean?,
     val erBarn: Boolean?,
 )
 
-data class SøkeresultatPersonEkstra(
-    val personer: List<PersonFraSøkEkstraInfo>,
-)
-
 data class SøkeresultatPerson(
-    val hits: List<PersonFraSøk>,
-    val totalHits: Int,
-    val pageNumber: Int,
-    val totalPages: Int,
+    val personer: List<PersonFraSøk>,
 )
 
 data class SøkeresultatUtenFagsak(

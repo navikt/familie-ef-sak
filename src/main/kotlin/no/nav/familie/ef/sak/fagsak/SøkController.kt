@@ -2,7 +2,7 @@ package no.nav.familie.ef.sak.fagsak
 
 import no.nav.familie.ef.sak.AuditLoggerEvent
 import no.nav.familie.ef.sak.fagsak.dto.Søkeresultat
-import no.nav.familie.ef.sak.fagsak.dto.SøkeresultatPersonEkstra
+import no.nav.familie.ef.sak.fagsak.dto.SøkeresultatPerson
 import no.nav.familie.ef.sak.fagsak.dto.SøkeresultatUtenFagsak
 import no.nav.familie.ef.sak.felles.dto.PersonIdentDto
 import no.nav.familie.ef.sak.felles.util.FnrUtil.validerIdent
@@ -63,7 +63,7 @@ class SøkController(
     @GetMapping("{behandlingId}/samme-adresse")
     fun søkPersonerMedSammeAdressePåBehandling(
         @PathVariable behandlingId: UUID,
-    ): Ressurs<SøkeresultatPersonEkstra> {
+    ): Ressurs<SøkeresultatPerson> {
         tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.ACCESS)
         return Ressurs.success(søkService.søkEtterPersonerMedSammeAdressePåBehandling(behandlingId))
     }
@@ -71,7 +71,7 @@ class SøkController(
     @GetMapping("fagsak/{fagsakId}/samme-adresse")
     fun søkPersonerMedSammeAdressePåFagsak(
         @PathVariable fagsakId: UUID,
-    ): Ressurs<SøkeresultatPersonEkstra> {
+    ): Ressurs<SøkeresultatPerson> {
         tilgangService.validerTilgangTilFagsak(fagsakId, AuditLoggerEvent.ACCESS)
         return Ressurs.success(søkService.søkEtterPersonerMedSammeAdressePåFagsak(fagsakId))
     }
@@ -79,7 +79,7 @@ class SøkController(
     @GetMapping("fagsak-person/{fagsakPersonId}/samme-adresse")
     fun søkPersonerMedSammeAdressePåFagsakPerson(
         @PathVariable fagsakPersonId: UUID,
-    ): Ressurs<SøkeresultatPersonEkstra> {
+    ): Ressurs<SøkeresultatPerson> {
         tilgangService.validerTilgangTilFagsakPerson(fagsakPersonId, AuditLoggerEvent.ACCESS)
         return Ressurs.success(søkService.søkEtterPersonerMedSammeAdressePåFagsakPerson(fagsakPersonId))
     }

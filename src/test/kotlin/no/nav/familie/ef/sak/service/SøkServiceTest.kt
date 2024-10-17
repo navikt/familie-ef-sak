@@ -6,8 +6,8 @@ import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.fagsak.FagsakPersonService
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.SøkService
-import no.nav.familie.ef.sak.fagsak.dto.PersonFraSøkEkstraInfo
-import no.nav.familie.ef.sak.fagsak.dto.SøkeresultatPersonEkstra
+import no.nav.familie.ef.sak.fagsak.dto.PersonFraSøk
+import no.nav.familie.ef.sak.fagsak.dto.SøkeresultatPerson
 import no.nav.familie.ef.sak.infrastruktur.config.KodeverkServiceMock
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.vilkår.VilkårTestUtil.mockVilkårGrunnlagDto
@@ -130,7 +130,7 @@ internal class SøkServiceTest {
         } returns pdlSøker(bostedsadresse = bostedsadresseFraPdl)
 
         val forventetResultat =
-            PersonFraSøkEkstraInfo(
+            PersonFraSøk(
                 personIdent = "123456789",
                 visningsadresse = "Adressenavn 23 A, 0000 Oslo",
                 "Fornavn Mellomnavn Etternavn",
@@ -139,7 +139,7 @@ internal class SøkServiceTest {
                 erBarn = false,
             )
 
-        val person = SøkeresultatPersonEkstra(listOf(forventetResultat))
+        val person = SøkeresultatPerson(listOf(forventetResultat))
         assertThat(søkService.søkEtterPersonerMedSammeAdressePåBehandling(UUID.randomUUID())).isEqualTo(person)
     }
 

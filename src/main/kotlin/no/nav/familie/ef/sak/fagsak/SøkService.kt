@@ -4,9 +4,9 @@ import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.fagsak.domain.FagsakPerson
 import no.nav.familie.ef.sak.fagsak.dto.FagsakForSøkeresultat
-import no.nav.familie.ef.sak.fagsak.dto.PersonFraSøkEkstraInfo
+import no.nav.familie.ef.sak.fagsak.dto.PersonFraSøk
 import no.nav.familie.ef.sak.fagsak.dto.Søkeresultat
-import no.nav.familie.ef.sak.fagsak.dto.SøkeresultatPersonEkstra
+import no.nav.familie.ef.sak.fagsak.dto.SøkeresultatPerson
 import no.nav.familie.ef.sak.fagsak.dto.SøkeresultatUtenFagsak
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
@@ -94,17 +94,17 @@ class SøkService(
     // Pdl gjører tilgangskontroll for søkPersoner
     // Midlertidlig løsning med å hente søker fra PDL
     // dette kan endres til å hente bosstedsadresse fra databasen når PDL-data blir lagret i databasen
-    fun søkEtterPersonerMedSammeAdressePåFagsak(fagsakId: UUID): SøkeresultatPersonEkstra {
+    fun søkEtterPersonerMedSammeAdressePåFagsak(fagsakId: UUID): SøkeresultatPerson {
         val aktivIdent = fagsakService.hentAktivIdent(fagsakId)
         return søkEtterPersonerMedSammeAdresse(aktivIdent)
     }
 
-    fun søkEtterPersonerMedSammeAdressePåFagsakPerson(fagsakPersonId: UUID): SøkeresultatPersonEkstra {
+    fun søkEtterPersonerMedSammeAdressePåFagsakPerson(fagsakPersonId: UUID): SøkeresultatPerson {
         val aktivIdent = fagsakPersonService.hentAktivIdent(fagsakPersonId)
         return søkEtterPersonerMedSammeAdresse(aktivIdent)
     }
 
-    fun søkEtterPersonerMedSammeAdressePåBehandling(behandlingId: UUID): SøkeresultatPersonEkstra {
+    fun søkEtterPersonerMedSammeAdressePåBehandling(behandlingId: UUID): SøkeresultatPerson {
         val (grunnlag) = vurderingService.hentGrunnlagOgMetadata(behandlingId)
 
         val aktivIdent = behandlingService.hentAktivIdent(behandlingId)
@@ -114,7 +114,7 @@ class SøkService(
     private fun søkEtterPersonerMedSammeAdresse(
         aktivIdent: String,
         grunnlag: VilkårGrunnlagDto? = null,
-    ): SøkeresultatPersonEkstra {
+    ): SøkeresultatPerson {
         val søker = personService.hentSøker(aktivIdent)
         val aktuelleBostedsadresser = søker.bostedsadresse.filterNot { it.metadata.historisk }
         val bostedsadresse = aktuelleBostedsadresser.singleOrNull()
@@ -137,12 +137,12 @@ class SøkService(
 
         val personSøkResultat = pdlSaksbehandlerClient.søkPersonerMedSammeAdresse(søkeKriterier).hits
 
-        return SøkeresultatPersonEkstra(
+        return SøkeresultatPerson(
             personer =
                 personSøkResultat
-                    .map { tilPersonEkstraFraSøk(it.person, grunnlag) }
+                    .map { tilPersonFraSøk(it.person, grunnlag) }
                     .sortedWith(
-                        compareByDescending<PersonFraSøkEkstraInfo> { it.erSøker }
+                        compareByDescending<PersonFraSøk> { it.erSøker }
                             .thenByDescending { it.erBarn }
                             .thenByDescending { it.fødselsdato },
                     ),
@@ -158,14 +158,14 @@ class SøkService(
         }
             ?: throw ApiFeil("Finner ingen personer for søket", HttpStatus.BAD_REQUEST)
 
-    private fun tilPersonEkstraFraSøk(
+    private fun tilPersonFraSøk(
         person: PdlPersonFraSøk,
         grunnlag: VilkårGrunnlagDto?,
-    ): PersonFraSøkEkstraInfo {
+    ): PersonFraSøk {
         val gjeldeneBarn = grunnlag?.barnMedSamvær?.find { it.registergrunnlag.fødselsnummer == person.folkeregisteridentifikator.gjeldende().identifikasjonsnummer }
         val erSøker = grunnlag?.personalia?.personIdent == person.folkeregisteridentifikator.gjeldende().identifikasjonsnummer
         val erBarn = grunnlag?.barnMedSamvær?.any { it.registergrunnlag.fødselsnummer == person.folkeregisteridentifikator.gjeldende().identifikasjonsnummer }
-        return PersonFraSøkEkstraInfo(
+        return PersonFraSøk(
             personIdent = person.folkeregisteridentifikator.gjeldende().identifikasjonsnummer,
             visningsadresse =
                 person.bostedsadresse
