@@ -41,6 +41,8 @@ class OppgaveClientMock {
                 oppgave6,
                 oppgave7,
                 oppgave8,
+                oppgave9,
+                oppgave10,
                 tilbakekreving1,
                 oppgavePapirsøknad,
                 oppgaveEttersending,
@@ -198,6 +200,10 @@ class OppgaveClientMock {
         lagOppgave(24684L, Oppgavetype.BehandleSak, tilordnetRessurs = "julenissen", behandlesAvApplikasjon = "familie-ef-sak")
     private val oppgave8 =
         lagOppgave(24685L, Oppgavetype.BehandleSak, tilordnetRessurs = "BESLUTTER_2", behandlesAvApplikasjon = "familie-ef-sak")
+    private val oppgave9 =
+        lagOppgave(24686L, Oppgavetype.BehandleSak, tilordnetRessurs = "julenissen", behandlesAvApplikasjon = "familie-ef-sak", ytelsestema = Tema.BAR)
+    private val oppgave10 =
+        lagOppgave(24687L, Oppgavetype.BehandleSak, tilordnetRessurs = "julenissen", behandlesAvApplikasjon = "familie-ef-sak", status = StatusEnum.FEILREGISTRERT)
     private val oppgavePapirsøknad =
         lagOppgave(
             5L,
@@ -242,6 +248,8 @@ class OppgaveClientMock {
         behandlingstype: String? = null,
         behandlesAvApplikasjon: String,
         behandlingstema: Behandlingstema = Behandlingstema.Overgangsstønad,
+        ytelsestema: Tema = Tema.ENF,
+        status: StatusEnum = StatusEnum.OPPRETTET,
     ): Oppgave =
         Oppgave(
             id = oppgaveId,
@@ -254,13 +262,13 @@ class OppgaveClientMock {
             mappeId = 123,
             behandlesAvApplikasjon = behandlesAvApplikasjon,
             beskrivelse = beskivelse,
-            tema = Tema.ENF,
+            tema = ytelsestema,
             behandlingstema = behandlingstema.value,
             oppgavetype = oppgavetype.value,
             opprettetTidspunkt = LocalDate.of(2020, 1, 1).toString(),
             fristFerdigstillelse = LocalDate.of(2020, 2, 1).toString(),
             prioritet = OppgavePrioritet.NORM,
-            status = StatusEnum.OPPRETTET,
+            status = status,
             versjon = 2,
         )
 

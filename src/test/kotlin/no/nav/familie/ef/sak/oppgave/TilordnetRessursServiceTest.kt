@@ -31,6 +31,8 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.EnumSource
 import java.util.UUID
 import no.nav.familie.ef.sak.oppgave.Oppgave as EFOppgave
 
@@ -111,14 +113,16 @@ internal class TilordnetRessursServiceTest {
             assertThat(erSaksbehandlerEllerNull).isFalse()
         }
 
-        @Test
-        internal fun `skal returnere true dersom returnert oppgave er null`() {
+        @ParameterizedTest
+        @EnumSource(value = StegType::class)
+        internal fun `skal returnere true dersom returnert oppgave er null`(behandlingSteg: StegType) {
             every {
                 oppgaveRepository.findByBehandlingIdAndErFerdigstiltIsFalseAndTypeIn(
                     any(),
                     oppgaveTyper,
                 )
             } answers { null }
+            every { behandlingRepository.findByIdOrThrow(any()) } returns behandling(steg = behandlingSteg)
 
             val erSaksbehandlerEllerNull =
                 tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandler(UUID.randomUUID())
@@ -185,11 +189,12 @@ internal class TilordnetRessursServiceTest {
 
             every { oppgaveClient.hentSaksbehandlerInfo("NAV1234") } returns saksbehandler
 
-            val saksbehandlerDto = tilordnetRessursService.utledAnsvarligSaksbehandlerForOppgave(oppgave)
+            val saksbehandlerDto = tilordnetRessursService.utledAnsvarligSaksbehandlerForOppgave(UUID.randomUUID(), oppgave)
 
             assertThat(saksbehandlerDto.fornavn).isEqualTo("Anakin")
             assertThat(saksbehandlerDto.etternavn).isEqualTo("Skywalker")
             assertThat(saksbehandlerDto.rolle).isEqualTo(SaksbehandlerRolle.INNLOGGET_SAKSBEHANDLER)
+            verify(exactly = 1) { oppgaveClient.hentSaksbehandlerInfo("NAV1234") }
         }
 
         @Test
@@ -199,18 +204,19 @@ internal class TilordnetRessursServiceTest {
 
             every { oppgaveClient.hentSaksbehandlerInfo("NAV2345") } returns saksbehandler
 
-            val saksbehandlerDto = tilordnetRessursService.utledAnsvarligSaksbehandlerForOppgave(oppgave)
+            val saksbehandlerDto = tilordnetRessursService.utledAnsvarligSaksbehandlerForOppgave(UUID.randomUUID(), oppgave)
 
             assertThat(saksbehandlerDto.fornavn).isEqualTo("Darth")
             assertThat(saksbehandlerDto.etternavn).isEqualTo("Vader")
             assertThat(saksbehandlerDto.rolle).isEqualTo(SaksbehandlerRolle.ANNEN_SAKSBEHANDLER)
+            verify(exactly = 1) { oppgaveClient.hentSaksbehandlerInfo("NAV2345") }
         }
 
         @Test
         internal fun `skal utlede at saksbehandlers rolle er IKKE SATT`() {
             val oppgave = Oppgave(tilordnetRessurs = null, tema = Tema.ENF)
 
-            val saksbehandlerDto = tilordnetRessursService.utledAnsvarligSaksbehandlerForOppgave(oppgave)
+            val saksbehandlerDto = tilordnetRessursService.utledAnsvarligSaksbehandlerForOppgave(UUID.randomUUID(), oppgave)
 
             assertThat(saksbehandlerDto.fornavn).isEqualTo("")
             assertThat(saksbehandlerDto.etternavn).isEqualTo("")
@@ -218,14 +224,41 @@ internal class TilordnetRessursServiceTest {
             verify(exactly = 0) { oppgaveClient.hentSaksbehandlerInfo(any()) }
         }
 
-        @Test
-        internal fun `skal utlede at saksbehandlers rolle er OPPGAVE FINNES IKKE`() {
-            val saksbehandlerDto = tilordnetRessursService.utledAnsvarligSaksbehandlerForOppgave(null)
+        @ParameterizedTest
+        @EnumSource(
+            value = StegType::class,
+            names = ["REVURDERING_ÅRSAK", "VILKÅR", "BEREGNE_YTELSE"],
+            mode = EnumSource.Mode.EXCLUDE,
+        )
+        internal fun `skal utlede at saksbehandlers rolle er OPPGAVE FINNES IKKE`(behandlingSteg: StegType) {
+            every { behandlingRepository.findByIdOrThrow(any()) } returns behandling(steg = behandlingSteg)
+
+            val saksbehandlerDto = tilordnetRessursService.utledAnsvarligSaksbehandlerForOppgave(UUID.randomUUID(), null)
 
             assertThat(saksbehandlerDto.fornavn).isEqualTo("")
             assertThat(saksbehandlerDto.etternavn).isEqualTo("")
             assertThat(saksbehandlerDto.rolle).isEqualTo(SaksbehandlerRolle.OPPGAVE_FINNES_IKKE)
             verify(exactly = 0) { oppgaveClient.hentSaksbehandlerInfo(any()) }
+        }
+
+        @ParameterizedTest
+        @EnumSource(
+            value = StegType::class,
+            names = ["REVURDERING_ÅRSAK", "VILKÅR", "BEREGNE_YTELSE"],
+            mode = EnumSource.Mode.INCLUDE,
+        )
+        internal fun `skal utlede at saksbehandlers rolle er OPPGAVE FINNES IKKE_SANNSYNLIGVIS_INNLOGGET_SAKSBEHANDLER`(behandlingSteg: StegType) {
+            val saksbehandler = saksbehandler(UUID.randomUUID(), "Skywalker", "Anakin", "NAV1234")
+
+            every { oppgaveClient.hentSaksbehandlerInfo("NAV1234") } returns saksbehandler
+            every { behandlingRepository.findByIdOrThrow(any()) } returns behandling(steg = behandlingSteg)
+
+            val saksbehandlerDto = tilordnetRessursService.utledAnsvarligSaksbehandlerForOppgave(UUID.randomUUID(), null)
+
+            assertThat(saksbehandlerDto.fornavn).isEqualTo("Anakin")
+            assertThat(saksbehandlerDto.etternavn).isEqualTo("Skywalker")
+            assertThat(saksbehandlerDto.rolle).isEqualTo(SaksbehandlerRolle.OPPGAVE_FINNES_IKKE_SANNSYNLIGVIS_INNLOGGET_SAKSBEHANDLER)
+            verify(exactly = 1) { oppgaveClient.hentSaksbehandlerInfo("NAV1234") }
         }
 
         @Test
@@ -236,7 +269,7 @@ internal class TilordnetRessursServiceTest {
             every { oppgaveClient.hentSaksbehandlerInfo("NAV1234") } returns saksbehandler
             every { featureToggleService.isEnabled(any()) } returns true
 
-            val saksbehandlerDto = tilordnetRessursService.utledAnsvarligSaksbehandlerForOppgave(oppgave)
+            val saksbehandlerDto = tilordnetRessursService.utledAnsvarligSaksbehandlerForOppgave(UUID.randomUUID(), oppgave)
 
             assertThat(saksbehandlerDto.fornavn).isEqualTo("Darth")
             assertThat(saksbehandlerDto.etternavn).isEqualTo("Vader")
@@ -250,7 +283,7 @@ internal class TilordnetRessursServiceTest {
 
             every { oppgaveClient.hentSaksbehandlerInfo("NAV2345") } returns saksbehandler
 
-            val saksbehandlerDto = tilordnetRessursService.utledAnsvarligSaksbehandlerForOppgave(oppgave)
+            val saksbehandlerDto = tilordnetRessursService.utledAnsvarligSaksbehandlerForOppgave(UUID.randomUUID(), oppgave)
 
             assertThat(saksbehandlerDto.fornavn).isEqualTo("Darth")
             assertThat(saksbehandlerDto.etternavn).isEqualTo("Vader")
