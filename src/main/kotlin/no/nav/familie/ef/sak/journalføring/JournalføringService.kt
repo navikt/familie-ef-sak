@@ -225,6 +225,7 @@ class JournalføringService(
                 behandlingType = behandlingstype,
                 fagsakId = fagsak.id,
                 behandlingsårsak = utledBehandlingÅrsak(journalpost, ustrukturertDokumentasjonType),
+                kravMottatt = journalpost.datoMottatt?.toLocalDate(),
             )
         iverksettService.startBehandling(behandling, fagsak)
         if (journalpost.harStrukturertSøknad()) {

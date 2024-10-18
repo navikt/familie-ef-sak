@@ -16,6 +16,7 @@ import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType.FØRSTEGANGSBEHANDLING
+import no.nav.familie.ef.sak.behandling.domain.BehandlingType.REVURDERING
 import no.nav.familie.ef.sak.behandling.migrering.InfotrygdPeriodeValideringService
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.behandlingsflyt.task.OpprettOppgaveForOpprettetBehandlingTask
@@ -39,6 +40,7 @@ import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.fagsakpersoner
 import no.nav.familie.ef.sak.vilkår.VurderingService
 import no.nav.familie.ef.sak.vilkår.regler.HovedregelMetadata
+import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak.NYE_OPPLYSNINGER
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak.SØKNAD
 import no.nav.familie.kontrakter.ef.iverksett.BehandlingKategori
 import no.nav.familie.kontrakter.ef.sak.DokumentBrevkode
@@ -56,6 +58,7 @@ import no.nav.familie.kontrakter.felles.journalpost.Journalpost
 import no.nav.familie.kontrakter.felles.journalpost.Journalposttype
 import no.nav.familie.kontrakter.felles.journalpost.Journalstatus
 import no.nav.familie.kontrakter.felles.journalpost.LogiskVedlegg
+import no.nav.familie.kontrakter.felles.journalpost.RelevantDato
 import no.nav.familie.kontrakter.felles.oppgave.OppgavePrioritet
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.internal.TaskService
@@ -107,6 +110,9 @@ internal class JournalføringServiceTest {
     private val oppgaveId = "1234567"
     private val dokumentTitler = hashMapOf("12345" to "Asbjørns skilsmissepapirer", "23456" to "Eiriks samværsdokument")
     private val dokumentInfoIdMedJsonVerdi = "12345"
+    private val journalpostdatoRegistrert = LocalDate.of(2024, 5, 30)
+    private val journalpostdatoUkjent = LocalDate.of(2024, 1, 1)
+
     private val journalpostDigitalSøknad =
         Journalpost(
             avsenderMottaker = JournalføringTestUtil.avsenderMottaker,
@@ -146,6 +152,7 @@ internal class JournalføringServiceTest {
                     ),
                 ),
             tittel = "Søknad om overgangsstønad",
+            relevanteDatoer = listOf(RelevantDato(journalpostdatoRegistrert.atStartOfDay(), "DATO_REGISTRERT"), RelevantDato(journalpostdatoUkjent.atStartOfDay(), "DATO_UKJENT")),
         )
     private val papirInnsendingsdokument =
         DokumentInfo(
@@ -271,6 +278,14 @@ internal class JournalføringServiceTest {
                 journalføringRequest = lagRequest(årsak = Journalføringsårsak.DIGITAL_SØKNAD, aksjon = Journalføringsaksjon.OPPRETT_BEHANDLING),
             )
 
+        verify {
+            behandlingService.opprettBehandling(
+                behandlingType = FØRSTEGANGSBEHANDLING,
+                fagsakId = fagsakId,
+                behandlingsårsak = SØKNAD,
+                kravMottatt = journalpostdatoRegistrert,
+            )
+        }
         assertThat(behandleSakOppgaveId).isEqualTo(nyOppgaveId)
         assertThat(slotJournalpost.captured.sak?.fagsakId).isEqualTo(fagsakEksternId.toString())
         assertThat(slotJournalpost.captured.sak?.sakstype).isEqualTo("FAGSAK")
@@ -550,13 +565,15 @@ internal class JournalføringServiceTest {
         internal fun `ny behandling - skal kopiere vurderinger fra forrige behandling etter at barn er opprettet`() {
             val forrigeBehandlingId = UUID.randomUUID()
             mockOpprettBehandling(behandlingId, forrigeBehandlingId)
-            mockSisteIverksatteBehandlinger(
+            val forrigeBehandling =
                 behandling(
                     id = forrigeBehandlingId,
                     resultat = BehandlingResultat.INNVILGET,
                     status = BehandlingStatus.FERDIGSTILT,
-                ),
-            )
+                )
+            mockSisteIverksatteBehandlinger(forrigeBehandling)
+            every { behandlingService.hentBehandlinger(fagsakId) } returns listOf(forrigeBehandling)
+
             justRun {
                 vurderingService.kopierVurderingerTilNyBehandling(forrigeBehandlingId, behandlingId, any(), any())
             }
@@ -586,6 +603,15 @@ internal class JournalføringServiceTest {
                 vurderingService.kopierVurderingerTilNyBehandling(forrigeBehandlingId, behandlingId, any(), any())
                 behandlingService.oppdaterStatusPåBehandling(behandlingId, BehandlingStatus.UTREDES)
                 behandlingService.oppdaterStegPåBehandling(behandlingId, StegType.BEREGNE_YTELSE)
+            }
+
+            verify {
+                behandlingService.opprettBehandling(
+                    behandlingType = REVURDERING,
+                    fagsakId = fagsakId,
+                    behandlingsårsak = NYE_OPPLYSNINGER,
+                    kravMottatt = journalpostdatoRegistrert,
+                )
             }
         }
 
@@ -660,6 +686,7 @@ internal class JournalføringServiceTest {
                     behandlingType = FØRSTEGANGSBEHANDLING,
                     fagsakId = fagsakId,
                     behandlingsårsak = SØKNAD,
+                    kravMottatt = journalpostdatoRegistrert,
                 )
             }
             verify(exactly = 0) { oppgaveService.opprettOppgave(any(), any(), any(), any(), any()) }
@@ -697,7 +724,7 @@ internal class JournalføringServiceTest {
                 kategori = BehandlingKategori.NASJONAL,
             )
         every { behandlingService.hentBehandling(behandlingId) } returns behandling
-        every { behandlingService.opprettBehandling(any(), any(), behandlingsårsak = any()) } returns behandling
+        every { behandlingService.opprettBehandling(any(), any(), behandlingsårsak = any(), kravMottatt = any()) } returns behandling
         every { behandlingService.finnSisteIverksatteBehandlingMedEventuellAvslått(any()) } returns
             forrigeBehandlingId?.let {
                 behandling.copy(
