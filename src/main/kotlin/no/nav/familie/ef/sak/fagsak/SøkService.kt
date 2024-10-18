@@ -23,6 +23,8 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlPersonFraSø
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.gjeldende
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.identer
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.visningsnavn
+import no.nav.familie.ef.sak.vilkår.VurderingService
+import no.nav.familie.ef.sak.vilkår.dto.VilkårGrunnlagDto
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
@@ -36,6 +38,7 @@ class SøkService(
     private val pdlSaksbehandlerClient: PdlSaksbehandlerClient,
     private val adresseMapper: AdresseMapper,
     private val fagsakService: FagsakService,
+    private val vurderingService: VurderingService,
 ) {
     private val secureLogger = LoggerFactory.getLogger("secureLogger")
 
@@ -102,11 +105,16 @@ class SøkService(
     }
 
     fun søkEtterPersonerMedSammeAdressePåBehandling(behandlingId: UUID): SøkeresultatPerson {
+        val (grunnlag) = vurderingService.hentGrunnlagOgMetadata(behandlingId)
+
         val aktivIdent = behandlingService.hentAktivIdent(behandlingId)
-        return søkEtterPersonerMedSammeAdresse(aktivIdent)
+        return søkEtterPersonerMedSammeAdresse(aktivIdent, grunnlag)
     }
 
-    private fun søkEtterPersonerMedSammeAdresse(aktivIdent: String): SøkeresultatPerson {
+    private fun søkEtterPersonerMedSammeAdresse(
+        aktivIdent: String,
+        grunnlag: VilkårGrunnlagDto? = null,
+    ): SøkeresultatPerson {
         val søker = personService.hentSøker(aktivIdent)
         val aktuelleBostedsadresser = søker.bostedsadresse.filterNot { it.metadata.historisk }
         val bostedsadresse = aktuelleBostedsadresser.singleOrNull()
@@ -127,13 +135,17 @@ class SøkService(
             )
         }
 
-        val personSøkResultat = pdlSaksbehandlerClient.søkPersonerMedSammeAdresse(søkeKriterier)
+        val personSøkResultat = pdlSaksbehandlerClient.søkPersonerMedSammeAdresse(søkeKriterier).hits
 
         return SøkeresultatPerson(
-            hits = personSøkResultat.hits.map { tilPersonFraSøk(it.person) },
-            totalHits = personSøkResultat.totalHits,
-            pageNumber = personSøkResultat.pageNumber,
-            totalPages = personSøkResultat.totalPages,
+            personer =
+                personSøkResultat
+                    .map { tilPersonFraSøk(it.person, grunnlag) }
+                    .sortedWith(
+                        compareByDescending<PersonFraSøk> { it.erSøker }
+                            .thenByDescending { it.erBarn }
+                            .thenByDescending { it.fødselsdato },
+                    ),
         )
     }
 
@@ -146,13 +158,23 @@ class SøkService(
         }
             ?: throw ApiFeil("Finner ingen personer for søket", HttpStatus.BAD_REQUEST)
 
-    private fun tilPersonFraSøk(person: PdlPersonFraSøk): PersonFraSøk =
-        PersonFraSøk(
+    private fun tilPersonFraSøk(
+        person: PdlPersonFraSøk,
+        grunnlag: VilkårGrunnlagDto?,
+    ): PersonFraSøk {
+        val gjeldendeBarn = grunnlag?.barnMedSamvær?.find { it.registergrunnlag.fødselsnummer == person.folkeregisteridentifikator.gjeldende().identifikasjonsnummer }
+        val erSøker = grunnlag?.personalia?.personIdent == person.folkeregisteridentifikator.gjeldende().identifikasjonsnummer
+        val erBarn = grunnlag?.barnMedSamvær?.any { it.registergrunnlag.fødselsnummer == person.folkeregisteridentifikator.gjeldende().identifikasjonsnummer }
+        return PersonFraSøk(
             personIdent = person.folkeregisteridentifikator.gjeldende().identifikasjonsnummer,
             visningsadresse =
                 person.bostedsadresse
                     .gjeldende()
                     ?.let { adresseMapper.tilAdresse(it).visningsadresse },
             visningsnavn = NavnDto.fraNavn(person.navn.gjeldende()).visningsnavn,
+            fødselsdato = gjeldendeBarn?.registergrunnlag?.fødselsdato,
+            erSøker = erSøker,
+            erBarn = erBarn,
         )
+    }
 }
