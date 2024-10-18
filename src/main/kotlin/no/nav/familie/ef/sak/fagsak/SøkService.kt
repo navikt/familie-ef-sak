@@ -162,7 +162,7 @@ class SøkService(
         person: PdlPersonFraSøk,
         grunnlag: VilkårGrunnlagDto?,
     ): PersonFraSøk {
-        val gjeldeneBarn = grunnlag?.barnMedSamvær?.find { it.registergrunnlag.fødselsnummer == person.folkeregisteridentifikator.gjeldende().identifikasjonsnummer }
+        val gjeldendeBarn = grunnlag?.barnMedSamvær?.find { it.registergrunnlag.fødselsnummer == person.folkeregisteridentifikator.gjeldende().identifikasjonsnummer }
         val erSøker = grunnlag?.personalia?.personIdent == person.folkeregisteridentifikator.gjeldende().identifikasjonsnummer
         val erBarn = grunnlag?.barnMedSamvær?.any { it.registergrunnlag.fødselsnummer == person.folkeregisteridentifikator.gjeldende().identifikasjonsnummer }
         return PersonFraSøk(
@@ -172,7 +172,7 @@ class SøkService(
                     .gjeldende()
                     ?.let { adresseMapper.tilAdresse(it).visningsadresse },
             visningsnavn = NavnDto.fraNavn(person.navn.gjeldende()).visningsnavn,
-            fødselsdato = gjeldeneBarn?.registergrunnlag?.fødselsdato,
+            fødselsdato = gjeldendeBarn?.registergrunnlag?.fødselsdato,
             erSøker = erSøker,
             erBarn = erBarn,
         )
