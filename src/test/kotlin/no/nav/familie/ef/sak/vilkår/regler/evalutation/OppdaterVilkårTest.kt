@@ -52,7 +52,7 @@ internal class OppdaterVilkårTest {
                 søknadBarnId = null,
                 personIdent = "01472152579",
                 navn = null,
-                fødselTermindato = null,
+                fødselTermindato = LocalDate.now().minusYears(3),
             )
         val barnUtenSøknad = barn.copy(id = UUID.randomUUID())
         val metadata =
@@ -89,7 +89,7 @@ internal class OppdaterVilkårTest {
                 søknadBarnId = null,
                 personIdent = FnrGenerator.generer(LocalDate.now().minusYears(5)),
                 navn = null,
-                fødselTermindato = null,
+                fødselTermindato = LocalDate.now().minusYears(5),
             )
         val barnUtenSøknad =
             barn.copy(
@@ -133,7 +133,7 @@ internal class OppdaterVilkårTest {
                 søknadBarnId = null,
                 personIdent = "03441983106",
                 navn = null,
-                fødselTermindato = null,
+                fødselTermindato = LocalDate.now().minusYears(5),
             )
         val barnUtenSøknad = barn.copy(id = UUID.randomUUID())
         val metadata =
