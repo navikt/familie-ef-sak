@@ -28,27 +28,6 @@ class EksternStønadsperioderService(
         return EksternePerioderResponse(perioderFraITogEF)
     }
 
-    fun hentPerioderForOvergangsstønadOgSkolepenger(request: EksternePerioderRequest): EksternePerioderMedStønadstypeResponse {
-        val perioderOS = periodeService.hentPerioderForOvergangsstønadFraEfOgInfotrygd(request.personIdent)
-        val begrensetPeriode = Datoperiode(fom = request.fomDato ?: LocalDate.MIN, tom = request.tomDato ?: LocalDate.MAX)
-
-        val eksternPeriodeMedStønadstypeOS =
-            perioderOS
-                .filter { periode ->
-                    Datoperiode(fom = periode.stønadFom, tom = periode.stønadTom).overlapper(begrensetPeriode)
-                }.map {
-                    EksternPeriodeMedStønadstype(
-                        it.stønadFom,
-                        it.stønadTom,
-                        StønadType.OVERGANGSSTØNAD,
-                    )
-                }
-
-        val eksternPeriodeMedStønadstypeSP = periodeService.hentPeriodeFraVedtakForSkolepenger(request.personIdent)
-
-        return EksternePerioderMedStønadstypeResponse(request.personIdent, eksternPeriodeMedStønadstypeOS + eksternPeriodeMedStønadstypeSP)
-    }
-
     fun hentPerioderForYtelser(request: EksternePerioderForStønadstyperRequest): EksternePerioderMedStønadstypeResponse {
         val periodeFraRequest = Datoperiode(fom = request.fomDato ?: LocalDate.MIN, tom = request.tomDato ?: LocalDate.MAX)
         val stønadstyper =
