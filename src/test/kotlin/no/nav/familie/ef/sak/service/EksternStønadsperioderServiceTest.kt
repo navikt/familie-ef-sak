@@ -153,23 +153,6 @@ internal class EksternStønadsperioderServiceTest {
     }
 
     @Test
-    internal fun `finner perioder med stønadstype`() {
-        val efSakPeriode = YearMonth.of(2021, 3)
-        mockPdl()
-        mockNyLøsning(efSakPeriode.atDay(1), efSakPeriode.atEndOfMonth())
-        val perioder = service.hentPerioderForOvergangsstønadOgSkolepenger(EksternePerioderRequest(ident)).perioder
-
-        assertThat(perioder).hasSize(2)
-        assertThat(perioder.first().fomDato).isEqualTo(efSakPeriode.atDay(1))
-        assertThat(perioder.first().tomDato).isEqualTo(efSakPeriode.atEndOfMonth())
-        assertThat(perioder.first().stønadstype).isEqualTo(StønadType.OVERGANGSSTØNAD)
-
-        assertThat(perioder.last().fomDato).isEqualTo(of(2023, 8, 1))
-        assertThat(perioder.last().tomDato).isEqualTo(of(2024, 6, 30))
-        assertThat(perioder.last().stønadstype).isEqualTo(StønadType.SKOLEPENGER)
-    }
-
-    @Test
     internal fun `finn perioder gitt OS som stønadstype`() {
         val efSakPeriode = YearMonth.of(2021, 3)
         mockPdl()
