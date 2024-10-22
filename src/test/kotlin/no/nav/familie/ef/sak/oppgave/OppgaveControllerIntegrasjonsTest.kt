@@ -74,6 +74,36 @@ internal class OppgaveControllerIntegrasjonsTest : OppslagSpringRunnerTest() {
     }
 
     @Test
+    internal fun `Skal returnere saksbehandlerRolle OPPGAVE_TILHØRER_IKKE_ENF dersom oppgaven har et annet tema en ENF`() {
+        val fagsak = testoppsettService.lagreFagsak(fagsak(identer = setOf(PersonIdent(""))))
+        val behandling = behandlingRepository.insert(behandling(fagsak))
+
+        oppgaveRepository.insert(Oppgave(behandlingId = behandling.id, gsakOppgaveId = 24687L, type = Oppgavetype.BehandleSak))
+
+        val response = hentAnsvarligSaksbehandler(behandling.id)
+
+        assertThat(response.body?.status).isEqualTo(Ressurs.Status.SUKSESS)
+        assertThat(response.body?.data?.fornavn).isEqualTo("julenissen")
+        assertThat(response.body?.data?.etternavn).isEqualTo("Saksbehandlersen")
+        assertThat(response.body?.data?.rolle).isEqualTo(SaksbehandlerRolle.OPPGAVE_TILHØRER_IKKE_ENF)
+    }
+
+    @Test
+    internal fun `Skal returnere saksbehandlerRolle OPPGAVE_TILHØRER_IKKE_ENF dersom oppgaven er feilregistrert`() {
+        val fagsak = testoppsettService.lagreFagsak(fagsak(identer = setOf(PersonIdent(""))))
+        val behandling = behandlingRepository.insert(behandling(fagsak))
+
+        oppgaveRepository.insert(Oppgave(behandlingId = behandling.id, gsakOppgaveId = 24687L, type = Oppgavetype.BehandleSak))
+
+        val response = hentAnsvarligSaksbehandler(behandling.id)
+
+        assertThat(response.body?.status).isEqualTo(Ressurs.Status.SUKSESS)
+        assertThat(response.body?.data?.fornavn).isEqualTo("julenissen")
+        assertThat(response.body?.data?.etternavn).isEqualTo("Saksbehandlersen")
+        assertThat(response.body?.data?.rolle).isEqualTo(SaksbehandlerRolle.OPPGAVE_TILHØRER_IKKE_ENF)
+    }
+
+    @Test
     internal fun `Skal returnere saksbehandlerRolle IKKE SATT dersom behandling ikke har ansvarlig saksbehandler`() {
         val fagsak = testoppsettService.lagreFagsak(fagsak(identer = setOf(PersonIdent(""))))
         val behandling = behandlingRepository.insert(behandling(fagsak))
@@ -134,7 +164,7 @@ internal class OppgaveControllerIntegrasjonsTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    internal fun `Skal returnere IKKE_SATT dersom behandlingen akkurat er er i beslutte-vedtak-steg uten ansvarlig saksbehandler`() {
+    internal fun `Skal returnere IKKE_SATT dersom behandlingen akkurat er i beslutte-vedtak-steg uten ansvarlig saksbehandler`() {
         val fagsak = testoppsettService.lagreFagsak(fagsak(identer = setOf(PersonIdent(""))))
         val behandling = behandlingRepository.insert(behandling(fagsak, steg = StegType.BESLUTTE_VEDTAK))
 
@@ -146,6 +176,45 @@ internal class OppgaveControllerIntegrasjonsTest : OppslagSpringRunnerTest() {
         assertThat(response.body?.data?.fornavn).isEqualTo("")
         assertThat(response.body?.data?.etternavn).isEqualTo("")
         assertThat(response.body?.data?.rolle).isEqualTo(SaksbehandlerRolle.IKKE_SATT)
+    }
+
+    @Test
+    internal fun `Skal returnere SANNSYNLIGVIS_SAKSBEHANDLER dersom behandlingen er i revurdering-årsaksteg og akkurat har blitt opprettet`() {
+        val fagsak = testoppsettService.lagreFagsak(fagsak(identer = setOf(PersonIdent(""))))
+        val behandling = behandlingRepository.insert(behandling(fagsak, steg = StegType.REVURDERING_ÅRSAK))
+
+        val response = hentAnsvarligSaksbehandler(behandling.id)
+
+        assertThat(response.body?.status).isEqualTo(Ressurs.Status.SUKSESS)
+        assertThat(response.body?.data?.fornavn).isEqualTo("julenissen")
+        assertThat(response.body?.data?.etternavn).isEqualTo("Saksbehandlersen")
+        assertThat(response.body?.data?.rolle).isEqualTo(SaksbehandlerRolle.OPPGAVE_FINNES_IKKE_SANNSYNLIGVIS_INNLOGGET_SAKSBEHANDLER)
+    }
+
+    @Test
+    internal fun `Skal returnere SANNSYNLIGVIS_SAKSBEHANDLER dersom behandlingen er i vilkårsteg og akkurat har blitt opprettet`() {
+        val fagsak = testoppsettService.lagreFagsak(fagsak(identer = setOf(PersonIdent(""))))
+        val behandling = behandlingRepository.insert(behandling(fagsak, steg = StegType.VILKÅR))
+
+        val response = hentAnsvarligSaksbehandler(behandling.id)
+
+        assertThat(response.body?.status).isEqualTo(Ressurs.Status.SUKSESS)
+        assertThat(response.body?.data?.fornavn).isEqualTo("julenissen")
+        assertThat(response.body?.data?.etternavn).isEqualTo("Saksbehandlersen")
+        assertThat(response.body?.data?.rolle).isEqualTo(SaksbehandlerRolle.OPPGAVE_FINNES_IKKE_SANNSYNLIGVIS_INNLOGGET_SAKSBEHANDLER)
+    }
+
+    @Test
+    internal fun `Skal returnere SANNSYNLIGVIS_SAKSBEHANDLER dersom behandlingen er i beregn-ytelsesteg og akkurat har blitt opprettet`() {
+        val fagsak = testoppsettService.lagreFagsak(fagsak(identer = setOf(PersonIdent(""))))
+        val behandling = behandlingRepository.insert(behandling(fagsak, steg = StegType.BEREGNE_YTELSE))
+
+        val response = hentAnsvarligSaksbehandler(behandling.id)
+
+        assertThat(response.body?.status).isEqualTo(Ressurs.Status.SUKSESS)
+        assertThat(response.body?.data?.fornavn).isEqualTo("julenissen")
+        assertThat(response.body?.data?.etternavn).isEqualTo("Saksbehandlersen")
+        assertThat(response.body?.data?.rolle).isEqualTo(SaksbehandlerRolle.OPPGAVE_FINNES_IKKE_SANNSYNLIGVIS_INNLOGGET_SAKSBEHANDLER)
     }
 
     private fun søkOppgave(personIdent: String): ResponseEntity<Ressurs<OppgaveResponseDto>> =

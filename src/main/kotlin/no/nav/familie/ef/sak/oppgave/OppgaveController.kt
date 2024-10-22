@@ -138,7 +138,7 @@ class OppgaveController(
         @PathVariable behandlingId: UUID,
     ): Ressurs<SaksbehandlerDto> {
         val oppgave = tilordnetRessursService.hentIkkeFerdigstiltOppgaveForBehandlingGittStegtype(behandlingId)
-        return Ressurs.success(tilordnetRessursService.utledAnsvarligSaksbehandlerForOppgave(oppgave))
+        return Ressurs.success(tilordnetRessursService.utledAnsvarligSaksbehandlerForOppgave(behandlingId, oppgave))
     }
 
     @GetMapping("/behandling/{behandlingId}")
