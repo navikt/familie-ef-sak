@@ -10,11 +10,12 @@ import no.nav.familie.ef.sak.vilkår.regler.vilkår.AlderPåBarnRegel
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
 import java.util.UUID
 
 class AktivitetspliktigAlderPåBarnRegelTest {
     val hovedregelMetadataMock = mockk<HovedregelMetadata>()
-    val behandlingBarnMedDnr = behandlingBarn(behandlingId = UUID.randomUUID(), personIdent = "06431960727", søknadBarnId = UUID.randomUUID())
+    val behandlingBarnMedDnr = behandlingBarn(behandlingId = UUID.randomUUID(), personIdent = "06431960727", søknadBarnId = UUID.randomUUID(), fødselTermindato = LocalDate.now().minusYears(5))
     val behandlingBarn2 = behandlingBarn(behandlingId = UUID.randomUUID(), personIdent = "03041983106", søknadBarnId = UUID.randomUUID())
 
     @BeforeEach
@@ -24,7 +25,7 @@ class AktivitetspliktigAlderPåBarnRegelTest {
     }
 
     @Test
-    fun `Vilkår ikke tatt stilling til og har fullført fjerdetrinn - skal automatisk oppfylle vilkår`() {
+    fun `Vilkår ikke tatt stilling til og har ikke fullført fjerdetrinn - skal automatisk oppfylle vilkår`() {
         val listDelvilkårsvurdering =
             AlderPåBarnRegel().initiereDelvilkårsvurdering(
                 hovedregelMetadataMock,

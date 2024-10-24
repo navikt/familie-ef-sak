@@ -15,7 +15,6 @@ import no.nav.familie.ef.sak.vilkår.regler.Vilkårsregel
 import no.nav.familie.ef.sak.vilkår.regler.jaNeiSvarRegel
 import no.nav.familie.ef.sak.vilkår.regler.regelIder
 import no.nav.familie.ef.sak.vilkår.regler.vilkår.AlderPåBarnRegelUtil.harFullførtFjerdetrinn
-import no.nav.familie.kontrakter.felles.Fødselsnummer
 import java.time.LocalDate
 import java.util.UUID
 
@@ -66,9 +65,7 @@ class AlderPåBarnRegel :
         val fødselsdato =
             metadata.barn
                 .firstOrNull { it.id == barnId }
-                ?.personIdent
-                ?.let { Fødselsnummer(it).fødselsdato }
-                ?: error("Finner ikke ident til barn=$barnId")
+                ?.fødselTermindato ?: error("Finnes ingen fødsel-termindato for barn=$barnId")
         return harFullførtFjerdetrinn(fødselsdato)
     }
 
