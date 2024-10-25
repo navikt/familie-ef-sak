@@ -62,7 +62,7 @@ class JournalpostService(
                 tema = vedleggRequest.tema,
                 dokumenttype = vedleggRequest.dokumenttype,
                 journalpostStatus = vedleggRequest.journalpostStatus,
-                antall = 200,
+                antall = 10000,
             ),
         )
 

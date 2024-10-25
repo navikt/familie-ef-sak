@@ -10,6 +10,7 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.Grunnlagsdat
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.GrunnlagsdataMedMetadata
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.Personopplysninger
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
+import no.nav.familie.ef.sak.repository.findAllByIdOrThrow
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.springframework.stereotype.Service
@@ -58,6 +59,11 @@ class GrunnlagsdataService(
         )
     }
 
+    fun hentGrunnlagsdataForBehandlinger(behandlingIder: Set<UUID>): Map<UUID, GrunnlagsdataMedMetadata> {
+        val grunnlagsdataForBehandlinger = hentLagretGrunnlagsdataForBehandlinger(behandlingIder)
+        return grunnlagsdataForBehandlinger.associate { it.behandlingId to GrunnlagsdataMedMetadata(it.data, it.sporbar.opprettetTid) }
+    }
+
     @Transactional
     fun oppdaterOgHentNyGrunnlagsdata(behandlingId: UUID): GrunnlagsdataMedMetadata {
         val behandling = behandlingService.hentBehandling(behandlingId)
@@ -77,6 +83,8 @@ class GrunnlagsdataService(
     }
 
     fun hentLagretGrunnlagsdata(behandlingId: UUID): Grunnlagsdata = grunnlagsdataRepository.findByIdOrThrow(behandlingId)
+
+    fun hentLagretGrunnlagsdataForBehandlinger(behandlingIder: Set<UUID>): List<Grunnlagsdata> = grunnlagsdataRepository.findAllByIdOrThrow(behandlingIder) { it.behandlingId }
 
     fun hentFraRegisterMedSøknadsdata(behandlingId: UUID): GrunnlagsdataDomene {
         val stønadstype = fagsakService.hentFagsakForBehandling(behandlingId).stønadstype
