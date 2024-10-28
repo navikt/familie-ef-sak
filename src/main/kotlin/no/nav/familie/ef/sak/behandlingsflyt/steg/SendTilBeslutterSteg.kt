@@ -37,6 +37,7 @@ import no.nav.familie.prosessering.internal.TaskService
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
+import java.time.LocalDateTime
 import java.util.UUID
 
 @Service
@@ -142,15 +143,11 @@ class SendTilBeslutterSteg(
         saksbehandling: Saksbehandling,
         data: SendTilBeslutterDto?,
     ) {
-        val besluttetVedtakHendelse =
-            behandlingshistorikkService.finnSisteBehandlingshistorikk(saksbehandling.id, StegType.BESLUTTE_VEDTAK)
-        val beslutterIdent = besluttetVedtakHendelse?.opprettetAv?.takeIf { NAVIDENT_REGEX.matches(it) }
-
         behandlingService.oppdaterStatusPåBehandling(saksbehandling.id, BehandlingStatus.FATTER_VEDTAK)
         vedtakService.oppdaterSaksbehandler(saksbehandling.id, SikkerhetContext.hentSaksbehandler())
 
         if (vedtakService.hentVedtak(saksbehandling.id).skalVedtakBesluttes()) {
-            opprettGodkjennVedtakOppgave(saksbehandling, beslutterIdent)
+            opprettGodkjennVedtakOppgave(saksbehandling)
         }
 
         ferdigstillOppgave(saksbehandling)
@@ -190,20 +187,29 @@ class SendTilBeslutterSteg(
 
     private fun opprettGodkjennVedtakOppgave(
         saksbehandling: Saksbehandling,
-        beslutterIdent: String?,
     ) {
-        val erIkkeSammeBeslutterOgSaksbehandler = beslutterIdent != SikkerhetContext.hentSaksbehandler()
         taskService.save(
             OpprettOppgaveTask.opprettTask(
                 OpprettOppgaveTaskData(
                     behandlingId = saksbehandling.id,
                     oppgavetype = Oppgavetype.GodkjenneVedtak,
                     beskrivelse = "Sendt til godkjenning av ${SikkerhetContext.hentSaksbehandlerNavn(true)}.",
-                    tilordnetNavIdent = if (erIkkeSammeBeslutterOgSaksbehandler) beslutterIdent else null,
+                    tilordnetNavIdent = utledBeslutterIdent(saksbehandling),
                 ),
             ),
         )
     }
+
+    private fun utledBeslutterIdent(saksbehandling: Saksbehandling): String? =
+        behandlingshistorikkService
+            .finnSisteBehandlingshistorikk(saksbehandling.id, StegType.BESLUTTE_VEDTAK)
+            ?.let { vedtak ->
+                val beslutterIdent = vedtak.opprettetAv.takeIf { NAVIDENT_REGEX.matches(it) }
+                val skalTilordneNavIdent =
+                    beslutterIdent != SikkerhetContext.hentSaksbehandler() &&
+                        vedtak.endretTid.isAfter(LocalDateTime.now().minusMonths(1))
+                beslutterIdent.takeIf { skalTilordneNavIdent }
+            }
 
     private fun validerSaksbehandlersignatur(saksbehandling: Saksbehandling) {
         if (saksbehandling.skalIkkeSendeBrev) return
