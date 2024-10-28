@@ -287,7 +287,7 @@ class InfotrygdPeriodeValideringService(
 
     private fun hentDatogrenseForMigrering(): LocalDate {
         if (featureToggleService.isEnabled(Toggle.TILLAT_MIGRERING_7_ÅR_TILBAKE)) {
-            return LocalDate.of(2009, 1, 1)
+            return LocalDate.of(2016, 1, 1)
         }
         return LocalDate.of(2019, 1, 1)
     }
