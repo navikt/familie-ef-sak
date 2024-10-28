@@ -294,7 +294,7 @@ class TestSaksbehandlingController(
                         fødselTermindato =
                             it.value.fødselsdato
                                 .first()
-                                .fødselsdato ?: LocalDate.now(),
+                                .fødselsdato ?: error("Fødselsdato kan ikke være null"),
                         annenForelder =
                             TestsøknadBuilder.Builder().defaultAnnenForelder(
                                 ikkeOppgittAnnenForelderBegrunnelse = null,
