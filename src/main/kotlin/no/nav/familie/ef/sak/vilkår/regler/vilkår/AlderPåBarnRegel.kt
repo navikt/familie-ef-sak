@@ -5,6 +5,7 @@ import no.nav.familie.ef.sak.vilkår.Delvilkårsvurdering
 import no.nav.familie.ef.sak.vilkår.VilkårType
 import no.nav.familie.ef.sak.vilkår.Vilkårsresultat
 import no.nav.familie.ef.sak.vilkår.Vurdering
+import no.nav.familie.ef.sak.vilkår.dto.VilkårGrunnlagDto
 import no.nav.familie.ef.sak.vilkår.regler.HovedregelMetadata
 import no.nav.familie.ef.sak.vilkår.regler.NesteRegel
 import no.nav.familie.ef.sak.vilkår.regler.RegelId
@@ -62,12 +63,16 @@ class AlderPåBarnRegel :
         metadata: HovedregelMetadata,
         barnId: UUID?,
     ): Boolean {
-        val fødselsdato =
-            metadata.barn
-                .firstOrNull { it.id == barnId }
-                ?.fødselTermindato ?: error("Finnes ingen fødsel-termindato for barn=$barnId")
+        val fødselsdato = metadata.finnFødselsdatoEllerTermindatoForBarn(barnId)
         return harFullførtFjerdetrinn(fødselsdato)
     }
+
+    private fun HovedregelMetadata.finnFødselsdatoEllerTermindatoForBarn(barnId: UUID?): LocalDate =
+        vilkårgrunnlagDto.finnFødselsdatoForBarn(barnId)
+            ?: barn.firstOrNull { it.id == barnId }?.fødselTermindato
+            ?: error("Kunne ikke finne hverken fødselsdato fra registerdata eller termindato")
+
+    private fun VilkårGrunnlagDto.finnFødselsdatoForBarn(barnId: UUID?): LocalDate? = barnMedSamvær.firstOrNull { it.barnId == barnId }?.registergrunnlag?.fødselsdato
 
     companion object {
         private val unntakAlderMapping =
