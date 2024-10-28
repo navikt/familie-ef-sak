@@ -94,20 +94,6 @@ class EksternStønadsperioderController(
     }
 
     /**
-     * Brukes av tilleggstønader, for å vurdere barnetilsyn-ytelse. Henter kun perioder med OS og SP.
-     */
-    @PostMapping("overgangsstonad-og-skolepenger")
-    fun hentPerioderMedOvergangsstonadOgSkolepenger(
-        @RequestBody request: EksternePerioderRequest,
-    ): Ressurs<EksternePerioderMedStønadstypeResponse> =
-        try {
-            Ressurs.success(eksternStønadsperioderService.hentPerioderForOvergangsstønadOgSkolepenger(request))
-        } catch (e: Exception) {
-            secureLogger.error("Kunne ikke hente perioder for $request", e)
-            Ressurs.failure("Henting av perioder for overgangsstønad feilet", error = e)
-        }
-
-    /**
      * Brukes av tilleggstønader, for å vurdere barnetilsyn-ytelse. Trenger noen ganger å filtrere vekk barnetilsyn.
      */
     @PostMapping("perioder-for-ytelser")

@@ -89,10 +89,9 @@ internal class BarnFyllerÅrOppfølgingsoppgaveServiceTest {
         every { oppgaveRepository.findByTypeAndAlderIsNotNullAndBarnPersonIdenter(any(), any()) } returns emptyList()
         every { taskService.save(capture(taskSlot)) } returns mockk()
         every { personService.hentPersonForelderBarnRelasjon(any()) } returns emptyMap()
-        every { grunnlagsdataService.hentGrunnlagsdata(any()) } returns grunnlagsDataMedMetadata
         every { grunnlagsDataMedMetadata.grunnlagsdata } returns grunnlagsdataDomene
         every { grunnlagsdataDomene.barn } returns listOf(barnMedIdent("04042495250", "fornavn etternavn"))
-        every { grunnlagsdataService.hentGrunnlagsdata(any()) } returns grunnlagsDataMedMetadata
+        every { grunnlagsdataService.hentGrunnlagsdataForBehandlinger(any()) } answers { firstArg<Set<UUID>>().associateWith { grunnlagsDataMedMetadata } }
     }
 
     @AfterEach
