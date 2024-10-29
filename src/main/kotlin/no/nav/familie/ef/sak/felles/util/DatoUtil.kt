@@ -55,8 +55,7 @@ fun LocalDate.isEqualOrBefore(other: LocalDate) = this == other || this.isBefore
 
 fun LocalDate.isEqualOrAfter(other: LocalDate) = this == other || this.isAfter(other)
 
-fun LocalDate.harPåfølgendeMåned(påfølgende: LocalDate): Boolean =
-    YearMonth.from(this).erPåfølgende(YearMonth.from(påfølgende))
+fun LocalDate.harPåfølgendeMåned(påfølgende: LocalDate): Boolean = YearMonth.from(this).erPåfølgende(YearMonth.from(påfølgende))
 
 fun YearMonth.erPåfølgende(påfølgende: YearMonth): Boolean = this.plusMonths(1) == påfølgende
 
@@ -72,8 +71,7 @@ fun LocalDate.erEttÅrEllerMerOgInnenforCutoff(numberOfDaysCutoff: Long): Boolea
     erEttÅrEllerMer() &&
         LocalDate.now() <= this.plusYears(1).plusDays(numberOfDaysCutoff)
 
-fun LocalDateTime.harGåttAntallTimer(timer: Int) =
-    this.plusHours(timer.toLong()) < LocalDateTime.now()
+fun LocalDateTime.harGåttAntallTimer(timer: Int) = this.plusHours(timer.toLong()) < LocalDateTime.now()
 
 fun dagensDatoMedTidNorskFormat(): String = dagensDatoMedTid().format(DatoFormat.GOSYS_DATE_TIME)
 

@@ -440,8 +440,7 @@ object SøknadsskjemaMapper {
                 .joinToString(", ")
         }
 
-    private fun tilDomene(stønadsstart: Stønadsstart): YearMonth? =
-        stønadsstart.fraMåned?.verdi?.let { måned -> stønadsstart.fraÅr?.verdi?.let { år -> YearMonth.of(år, måned) } }
+    private fun tilDomene(stønadsstart: Stønadsstart): YearMonth? = stønadsstart.fraMåned?.verdi?.let { måned -> stønadsstart.fraÅr?.verdi?.let { år -> YearMonth.of(år, måned) } }
 
     private fun tilDomene(dokumentasjon: KontraktDokumentasjon?): Dokumentasjon? =
         dokumentasjon?.let { dok ->

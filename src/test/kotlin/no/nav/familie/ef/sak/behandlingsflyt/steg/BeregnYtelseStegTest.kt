@@ -2015,13 +2015,12 @@ internal class BeregnYtelseStegTest {
     private fun innvilget(
         perioder: List<VedtaksperiodeDto>,
         inntekter: List<Inntekt>,
-    ) =
-        InnvilgelseOvergangsstønad(
-            perioder = perioder,
-            inntekter = inntekter,
-            inntektBegrunnelse = "null",
-            periodeBegrunnelse = "null",
-        )
+    ) = InnvilgelseOvergangsstønad(
+        perioder = perioder,
+        inntekter = inntekter,
+        inntektBegrunnelse = "null",
+        periodeBegrunnelse = "null",
+    )
 
     @Deprecated("Bruk metode med YearMonth")
     private fun innvilgetBarnetilsyn(
@@ -2039,25 +2038,24 @@ internal class BeregnYtelseStegTest {
         utgifter: Int? = 2500,
         periodeType: PeriodetypeBarnetilsyn = PeriodetypeBarnetilsyn.ORDINÆR,
         sanksjonsårsak: Sanksjonsårsak? = null,
-    ) =
-        InnvilgelseBarnetilsyn(
-            perioder =
-                listOf(
-                    UtgiftsperiodeDto(
-                        årMånedFra = startDato,
-                        årMånedTil = sluttDato,
-                        periode = Månedsperiode(startDato, sluttDato),
-                        barn = barn ?: emptyList(),
-                        utgifter = utgifter ?: 2500,
-                        periodetype = periodeType,
-                        aktivitetstype = if (utgifter == 0) null else AktivitetstypeBarnetilsyn.I_ARBEID,
-                        sanksjonsårsak = sanksjonsårsak,
-                    ),
+    ) = InnvilgelseBarnetilsyn(
+        perioder =
+            listOf(
+                UtgiftsperiodeDto(
+                    årMånedFra = startDato,
+                    årMånedTil = sluttDato,
+                    periode = Månedsperiode(startDato, sluttDato),
+                    barn = barn ?: emptyList(),
+                    utgifter = utgifter ?: 2500,
+                    periodetype = periodeType,
+                    aktivitetstype = if (utgifter == 0) null else AktivitetstypeBarnetilsyn.I_ARBEID,
+                    sanksjonsårsak = sanksjonsårsak,
                 ),
-            perioderKontantstøtte = emptyList(),
-            tilleggsstønad = TilleggsstønadDto(true, emptyList(), null),
-            begrunnelse = null,
-        )
+            ),
+        perioderKontantstøtte = emptyList(),
+        tilleggsstønad = TilleggsstønadDto(true, emptyList(), null),
+        begrunnelse = null,
+    )
 
     data class DatoBarnOgUtgifter(
         val andelFom: LocalDate,
@@ -2107,111 +2105,105 @@ internal class BeregnYtelseStegTest {
     private fun andelhistorikkInnvilget(
         fom: YearMonth,
         tom: YearMonth,
-    ) =
-        AndelHistorikkDto(
-            behandlingId = UUID.randomUUID(),
-            behandlingType = BehandlingType.REVURDERING,
-            behandlingÅrsak = BehandlingÅrsak.NYE_OPPLYSNINGER,
-            vedtakstidspunkt = LocalDateTime.now(),
-            saksbehandler = "",
-            vedtaksperiode =
-                VedtakshistorikkperiodeOvergangsstønad(
-                    periode = Månedsperiode(fom, tom),
-                    aktivitet = AktivitetType.IKKE_AKTIVITETSPLIKT,
-                    periodeType = VedtaksperiodeType.HOVEDPERIODE,
-                    inntekt = Inntekt(fom, BigDecimal.ZERO, BigDecimal.ZERO),
-                ),
-            andel = andelDto(1, fom, tom),
-            aktivitet = AktivitetType.IKKE_AKTIVITETSPLIKT,
-            periodeType = VedtaksperiodeType.HOVEDPERIODE,
-            endring = null,
-            aktivitetArbeid = null,
-            erSanksjon = false,
-            sanksjonsårsak = null,
-            periodetypeBarnetilsyn = PeriodetypeBarnetilsyn.ORDINÆR,
-            aktivitetBarnetilsyn = AktivitetstypeBarnetilsyn.I_ARBEID,
-            erOpphør = false,
-        )
+    ) = AndelHistorikkDto(
+        behandlingId = UUID.randomUUID(),
+        behandlingType = BehandlingType.REVURDERING,
+        behandlingÅrsak = BehandlingÅrsak.NYE_OPPLYSNINGER,
+        vedtakstidspunkt = LocalDateTime.now(),
+        saksbehandler = "",
+        vedtaksperiode =
+            VedtakshistorikkperiodeOvergangsstønad(
+                periode = Månedsperiode(fom, tom),
+                aktivitet = AktivitetType.IKKE_AKTIVITETSPLIKT,
+                periodeType = VedtaksperiodeType.HOVEDPERIODE,
+                inntekt = Inntekt(fom, BigDecimal.ZERO, BigDecimal.ZERO),
+            ),
+        andel = andelDto(1, fom, tom),
+        aktivitet = AktivitetType.IKKE_AKTIVITETSPLIKT,
+        periodeType = VedtaksperiodeType.HOVEDPERIODE,
+        endring = null,
+        aktivitetArbeid = null,
+        erSanksjon = false,
+        sanksjonsårsak = null,
+        periodetypeBarnetilsyn = PeriodetypeBarnetilsyn.ORDINÆR,
+        aktivitetBarnetilsyn = AktivitetstypeBarnetilsyn.I_ARBEID,
+        erOpphør = false,
+    )
 
     private val fjernetHistorikkEndring = HistorikkEndring(EndringType.FJERNET, UUID.randomUUID(), LocalDateTime.now())
 
     private fun andelhistorikkSanksjon(
         sanksjonMåned: YearMonth,
         endring: HistorikkEndring? = null,
-    ) =
-        AndelHistorikkDto(
-            behandlingId = UUID.randomUUID(),
-            behandlingType = BehandlingType.REVURDERING,
-            behandlingÅrsak = BehandlingÅrsak.SANKSJON_1_MND,
-            vedtakstidspunkt = LocalDateTime.now(),
-            saksbehandler = "",
-            vedtaksperiode = Sanksjonsperiode(Månedsperiode(sanksjonMåned), Sanksjonsårsak.SAGT_OPP_STILLING),
-            andel = andelDto(0, sanksjonMåned, sanksjonMåned),
-            aktivitet = AktivitetType.IKKE_AKTIVITETSPLIKT,
-            periodeType = VedtaksperiodeType.SANKSJON,
-            endring = endring,
-            aktivitetArbeid = null,
-            erSanksjon = true,
-            sanksjonsårsak = Sanksjonsårsak.SAGT_OPP_STILLING,
-            erOpphør = false,
-            periodetypeBarnetilsyn = PeriodetypeBarnetilsyn.SANKSJON_1_MND,
-            aktivitetBarnetilsyn = null,
-        )
+    ) = AndelHistorikkDto(
+        behandlingId = UUID.randomUUID(),
+        behandlingType = BehandlingType.REVURDERING,
+        behandlingÅrsak = BehandlingÅrsak.SANKSJON_1_MND,
+        vedtakstidspunkt = LocalDateTime.now(),
+        saksbehandler = "",
+        vedtaksperiode = Sanksjonsperiode(Månedsperiode(sanksjonMåned), Sanksjonsårsak.SAGT_OPP_STILLING),
+        andel = andelDto(0, sanksjonMåned, sanksjonMåned),
+        aktivitet = AktivitetType.IKKE_AKTIVITETSPLIKT,
+        periodeType = VedtaksperiodeType.SANKSJON,
+        endring = endring,
+        aktivitetArbeid = null,
+        erSanksjon = true,
+        sanksjonsårsak = Sanksjonsårsak.SAGT_OPP_STILLING,
+        erOpphør = false,
+        periodetypeBarnetilsyn = PeriodetypeBarnetilsyn.SANKSJON_1_MND,
+        aktivitetBarnetilsyn = null,
+    )
 
     private fun andelDto(
         beløp: Int,
         fom: YearMonth,
         tom: YearMonth,
-    ) =
-        AndelMedGrunnlagDto(
-            beløp = beløp,
-            periode = Månedsperiode(fom, tom),
-            inntekt = 0,
-            inntektsreduksjon = 0,
-            samordningsfradrag = 0,
-            kontantstøtte = 0,
-            tilleggsstønad = 0,
-            antallBarn = 0,
-            utgifter = BigDecimal.ZERO,
-            barn = emptyList(),
-            sats = 0,
-            beløpFørFratrekkOgSatsJustering = 0,
-        )
+    ) = AndelMedGrunnlagDto(
+        beløp = beløp,
+        periode = Månedsperiode(fom, tom),
+        inntekt = 0,
+        inntektsreduksjon = 0,
+        samordningsfradrag = 0,
+        kontantstøtte = 0,
+        tilleggsstønad = 0,
+        antallBarn = 0,
+        utgifter = BigDecimal.ZERO,
+        barn = emptyList(),
+        sats = 0,
+        beløpFørFratrekkOgSatsJustering = 0,
+    )
 
     private fun lagBeløpsperiode(
         fom: LocalDate,
         tom: LocalDate,
-    ) =
-        Beløpsperiode(
-            periode = Månedsperiode(fom, tom),
-            beregningsgrunnlag = null,
-            beløp = BigDecimal.ZERO,
-            beløpFørSamordning = BigDecimal.ZERO,
-        )
+    ) = Beløpsperiode(
+        periode = Månedsperiode(fom, tom),
+        beregningsgrunnlag = null,
+        beløp = BigDecimal.ZERO,
+        beløpFørSamordning = BigDecimal.ZERO,
+    )
 
     private fun opphørsperiode(
         opphørFom: YearMonth,
         opphørTom: YearMonth,
-    ) =
-        VedtaksperiodeDto(
-            årMånedFra = opphørFom,
-            årMånedTil = opphørTom,
-            periode = Månedsperiode(opphørFom, opphørTom),
-            aktivitet = AktivitetType.IKKE_AKTIVITETSPLIKT,
-            periodeType = VedtaksperiodeType.MIDLERTIDIG_OPPHØR,
-        )
+    ) = VedtaksperiodeDto(
+        årMånedFra = opphørFom,
+        årMånedTil = opphørTom,
+        periode = Månedsperiode(opphørFom, opphørTom),
+        aktivitet = AktivitetType.IKKE_AKTIVITETSPLIKT,
+        periodeType = VedtaksperiodeType.MIDLERTIDIG_OPPHØR,
+    )
 
     private fun innvilgetPeriode(
         andelFom: YearMonth,
         andelTom: YearMonth,
-    ) =
-        VedtaksperiodeDto(
-            årMånedFra = andelFom,
-            årMånedTil = andelTom,
-            periode = Månedsperiode(andelFom, andelTom),
-            aktivitet = AktivitetType.FORLENGELSE_STØNAD_PÅVENTE_ARBEID,
-            periodeType = VedtaksperiodeType.HOVEDPERIODE,
-        )
+    ) = VedtaksperiodeDto(
+        årMånedFra = andelFom,
+        årMånedTil = andelTom,
+        periode = Månedsperiode(andelFom, andelTom),
+        aktivitet = AktivitetType.FORLENGELSE_STØNAD_PÅVENTE_ARBEID,
+        periodeType = VedtaksperiodeType.HOVEDPERIODE,
+    )
 
     private fun vedtaksperiodeSanksjon(sanksjonsmåned: YearMonth) =
         VedtaksperiodeDto(

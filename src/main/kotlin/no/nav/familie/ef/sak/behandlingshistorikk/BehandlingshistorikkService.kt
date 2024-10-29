@@ -39,8 +39,7 @@ class BehandlingshistorikkService(
     fun finnSisteBehandlingshistorikk(
         behandlingId: UUID,
         type: StegType,
-    ): Behandlingshistorikk? =
-        behandlingshistorikkRepository.findTopByBehandlingIdAndStegOrderByEndretTidDesc(behandlingId, type)
+    ): Behandlingshistorikk? = behandlingshistorikkRepository.findTopByBehandlingIdAndStegOrderByEndretTidDesc(behandlingId, type)
 
     fun opprettHistorikkInnslag(behandlingshistorikk: Behandlingshistorikk) {
         behandlingshistorikkRepository.insert(behandlingshistorikk)

@@ -340,8 +340,7 @@ class BeregnYtelseSteg(
         }
     }
 
-    private fun harPeriodeEllerAktivitetMigrering(data: InnvilgelseOvergangsstønad) =
-        data.perioder.any { it.periodeType == VedtaksperiodeType.MIGRERING || it.aktivitet == AktivitetType.MIGRERING }
+    private fun harPeriodeEllerAktivitetMigrering(data: InnvilgelseOvergangsstønad) = data.perioder.any { it.periodeType == VedtaksperiodeType.MIGRERING || it.aktivitet == AktivitetType.MIGRERING }
 
     private fun nullstillEksisterendeVedtakPåBehandling(behandlingId: UUID) {
         tilkjentYtelseService.slettTilkjentYtelseForBehandling(behandlingId)
@@ -558,10 +557,9 @@ class BeregnYtelseSteg(
         forrigeTilkjenteYtelse: TilkjentYtelse?,
         andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
         opphørsperioder: List<Månedsperiode>,
-    ) =
-        forrigeTilkjenteYtelse?.let {
-            slåSammenAndelerSomSkalVidereføres(andelerTilkjentYtelse, forrigeTilkjenteYtelse, opphørsperioder)
-        } ?: andelerTilkjentYtelse
+    ) = forrigeTilkjenteYtelse?.let {
+        slåSammenAndelerSomSkalVidereføres(andelerTilkjentYtelse, forrigeTilkjenteYtelse, opphørsperioder)
+    } ?: andelerTilkjentYtelse
 
     private fun nyttStartdato(
         behandlingId: UUID,
@@ -604,37 +602,33 @@ class BeregnYtelseSteg(
         )
     }
 
-    private fun finnOpphørsperioder(vedtak: InnvilgelseOvergangsstønad) =
-        vedtak.perioder.filter { it.periodeType == VedtaksperiodeType.MIDLERTIDIG_OPPHØR }.tilPerioder()
+    private fun finnOpphørsperioder(vedtak: InnvilgelseOvergangsstønad) = vedtak.perioder.filter { it.periodeType == VedtaksperiodeType.MIDLERTIDIG_OPPHØR }.tilPerioder()
 
-    private fun finnOpphørsperioder(vedtak: InnvilgelseBarnetilsyn) =
-        vedtak.perioder.filter { it.utgifter == 0 }.tilPerioder()
+    private fun finnOpphørsperioder(vedtak: InnvilgelseBarnetilsyn) = vedtak.perioder.filter { it.utgifter == 0 }.tilPerioder()
 
     private fun finnInnvilgedePerioder(vedtak: InnvilgelseOvergangsstønad) =
         vedtak.perioder
             .filterNot { it.erMidlertidigOpphørEllerSanksjon() }
             .tilPerioder()
 
-    private fun finnInnvilgedePerioder(vedtak: InnvilgelseBarnetilsyn) =
-        vedtak.perioder.filter { it.utgifter != 0 }.tilPerioder()
+    private fun finnInnvilgedePerioder(vedtak: InnvilgelseBarnetilsyn) = vedtak.perioder.filter { it.utgifter != 0 }.tilPerioder()
 
     private fun lagBeløpsperioderForInnvilgelseOvergangsstønad(
         vedtak: InnvilgelseOvergangsstønad,
         saksbehandling: Saksbehandling,
-    ) =
-        beregningService
-            .beregnYtelse(finnInnvilgedePerioder(vedtak), vedtak.inntekter.tilInntektsperioder())
-            .map {
-                AndelTilkjentYtelse(
-                    beløp = it.beløp.toInt(),
-                    periode = it.periode,
-                    kildeBehandlingId = saksbehandling.id,
-                    personIdent = saksbehandling.ident,
-                    samordningsfradrag = it.beregningsgrunnlag?.samordningsfradrag?.toInt() ?: 0,
-                    inntekt = it.beregningsgrunnlag?.inntekt?.toInt() ?: 0,
-                    inntektsreduksjon = it.beregningsgrunnlag?.avkortningPerMåned?.toInt() ?: 0,
-                )
-            }
+    ) = beregningService
+        .beregnYtelse(finnInnvilgedePerioder(vedtak), vedtak.inntekter.tilInntektsperioder())
+        .map {
+            AndelTilkjentYtelse(
+                beløp = it.beløp.toInt(),
+                periode = it.periode,
+                kildeBehandlingId = saksbehandling.id,
+                personIdent = saksbehandling.ident,
+                samordningsfradrag = it.beregningsgrunnlag?.samordningsfradrag?.toInt() ?: 0,
+                inntekt = it.beregningsgrunnlag?.inntekt?.toInt() ?: 0,
+                inntektsreduksjon = it.beregningsgrunnlag?.avkortningPerMåned?.toInt() ?: 0,
+            )
+        }
 
     private fun lagBeløpsperioderForInnvilgelseBarnetilsyn(
         vedtak: InnvilgelseBarnetilsyn,

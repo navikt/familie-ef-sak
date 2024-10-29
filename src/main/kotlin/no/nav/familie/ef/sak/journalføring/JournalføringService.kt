@@ -278,8 +278,7 @@ class JournalføringService(
         ustrukturertDokumentasjonType: UstrukturertDokumentasjonType,
     ): Boolean = ustrukturertDokumentasjonType.erEttersending()
 
-    private fun finnForrigeIverksatteEllerAvslåtteBehandling(fagsak: Fagsak) =
-        behandlingService.finnSisteIverksatteBehandlingMedEventuellAvslått(fagsak.id)
+    private fun finnForrigeIverksatteEllerAvslåtteBehandling(fagsak: Fagsak) = behandlingService.finnSisteIverksatteBehandlingMedEventuellAvslått(fagsak.id)
 
     private fun opprettBehandlingsstatistikkTask(
         behandlingId: UUID,

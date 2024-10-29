@@ -107,16 +107,15 @@ class TerminbarnRepositoryTest : OppslagSpringRunnerTest() {
         opprettetTid: LocalDateTime =
             tidligereBehandling?.sporbar?.opprettetTid?.plusHours(1)
                 ?: LocalDateTime.now(),
-    ) =
-        behandlingRepository.insert(
-            behandling(
-                fagsak,
-                status = BehandlingStatus.FERDIGSTILT,
-                resultat = BehandlingResultat.INNVILGET,
-                forrigeBehandlingId = tidligereBehandling?.id,
-                opprettetTid = opprettetTid,
-            ),
-        )
+    ) = behandlingRepository.insert(
+        behandling(
+            fagsak,
+            status = BehandlingStatus.FERDIGSTILT,
+            resultat = BehandlingResultat.INNVILGET,
+            forrigeBehandlingId = tidligereBehandling?.id,
+            opprettetTid = opprettetTid,
+        ),
+    )
 
     private fun barn(
         behandlingId: UUID,

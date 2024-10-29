@@ -68,14 +68,13 @@ internal class InfotrygdServiceTest {
         fun sak(
             vedtaksdato: LocalDate?,
             mottattDato: LocalDate?,
-        ) =
-            InfotrygdSak(
-                "1",
-                resultat = InfotrygdSakResultat.INNVILGET,
-                stønadType = StønadType.OVERGANGSSTØNAD,
-                vedtaksdato = vedtaksdato,
-                mottattDato = mottattDato,
-            )
+        ) = InfotrygdSak(
+            "1",
+            resultat = InfotrygdSakResultat.INNVILGET,
+            stønadType = StønadType.OVERGANGSSTØNAD,
+            vedtaksdato = vedtaksdato,
+            mottattDato = mottattDato,
+        )
 
         val a = sak(LocalDate.of(2021, 1, 1), null)
         val b = sak(LocalDate.of(2021, 3, 1), null)

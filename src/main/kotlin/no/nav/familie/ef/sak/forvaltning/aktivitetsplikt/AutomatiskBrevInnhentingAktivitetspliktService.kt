@@ -67,12 +67,10 @@ class AutomatiskBrevInnhentingAktivitetspliktService(
 
     private fun harOpprettetTaskTidligere(
         oppgaveId: Long,
-    ) =
-        taskService.finnTaskMedPayloadOgType(
-            SendAktivitetspliktBrevTilIverksettTask.opprettTaskPayload(oppgaveId, Year.now()),
-            SendAktivitetspliktBrevTilIverksettTask.TYPE,
-        ) != null
+    ) = taskService.finnTaskMedPayloadOgType(
+        SendAktivitetspliktBrevTilIverksettTask.opprettTaskPayload(oppgaveId, Year.now()),
+        SendAktivitetspliktBrevTilIverksettTask.TYPE,
+    ) != null
 
-    private fun hentUtdanningsmappeId() =
-        oppgaveService.finnMapper(OppgaveUtil.ENHET_NR_NAY).single { it.navn == "64 Utdanning" }.id
+    private fun hentUtdanningsmappeId() = oppgaveService.finnMapper(OppgaveUtil.ENHET_NR_NAY).single { it.navn == "64 Utdanning" }.id
 }

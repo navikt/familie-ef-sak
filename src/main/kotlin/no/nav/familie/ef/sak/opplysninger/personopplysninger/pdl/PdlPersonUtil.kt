@@ -37,8 +37,7 @@ fun List<FolkeregisteridentifikatorFraSøk>.gjeldende(): Folkeregisteridentifika
         .distinct()
         .single() // Distinkt luker vekk feilen med at samme person kan ha flere identiske identer som begge er i bruk
 
-fun List<Folkeregisteridentifikator>.gjeldende(): Folkeregisteridentifikator =
-    this.single { it.status == FolkeregisteridentifikatorStatus.I_BRUK && !it.metadata.historisk }
+fun List<Folkeregisteridentifikator>.gjeldende(): Folkeregisteridentifikator = this.single { it.status == FolkeregisteridentifikatorStatus.I_BRUK && !it.metadata.historisk }
 
 fun List<SivilstandMedNavn>.gjeldende(): SivilstandMedNavn = this.find { !it.metadata.historisk } ?: this.first()
 

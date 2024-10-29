@@ -77,10 +77,9 @@ class BrevmottakereService(
     fun slettBrevmottakereForFagsakOgSaksbehandlerHvisFinnes(
         fagsakId: UUID,
         saksbehandlerIdent: String,
-    ) =
-        frittståendeBrevmottakereRepository.findByFagsakIdAndSaksbehandlerIdent(fagsakId, saksbehandlerIdent)?.let {
-            frittståendeBrevmottakereRepository.deleteById(it.id)
-        }
+    ) = frittståendeBrevmottakereRepository.findByFagsakIdAndSaksbehandlerIdent(fagsakId, saksbehandlerIdent)?.let {
+        frittståendeBrevmottakereRepository.deleteById(it.id)
+    }
 
     private fun opprettBrevmottakere(
         fagsakId: UUID,

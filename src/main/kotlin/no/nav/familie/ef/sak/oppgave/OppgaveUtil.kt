@@ -27,8 +27,7 @@ object OppgaveUtil {
         }
     }
 
-    fun finnPersonidentForOppgave(oppgave: Oppgave): String? =
-        oppgave.identer?.first { it.gruppe == IdentGruppe.FOLKEREGISTERIDENT }?.ident
+    fun finnPersonidentForOppgave(oppgave: Oppgave): String? = oppgave.identer?.first { it.gruppe == IdentGruppe.FOLKEREGISTERIDENT }?.ident
 
     fun lagOpprettOppgavebeskrivelse(beskrivelse: String?): String {
         val beskrivelseEllerDefault = beskrivelse ?: "Oppgave opprettet"

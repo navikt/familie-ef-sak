@@ -169,6 +169,5 @@ class TotrinnskontrollService(
         }
     }
 
-    private fun beslutterErLikBehandler(beslutteVedtakHendelse: Behandlingshistorikk) =
-        SikkerhetContext.hentSaksbehandlerEllerSystembruker() == beslutteVedtakHendelse.opprettetAv
+    private fun beslutterErLikBehandler(beslutteVedtakHendelse: Behandlingshistorikk) = SikkerhetContext.hentSaksbehandlerEllerSystembruker() == beslutteVedtakHendelse.opprettetAv
 }

@@ -232,11 +232,10 @@ internal class EksternStønadsperioderServiceTest {
     private fun lagResultatPeriode(
         fom: YearMonth,
         tom: YearMonth,
-    ) =
-        EksternPeriode(
-            personIdent = ident,
-            fomDato = fom.atDay(1),
-            tomDato = tom.atEndOfMonth(),
-            datakilde = Datakilde.EF,
-        )
+    ) = EksternPeriode(
+        personIdent = ident,
+        fomDato = fom.atDay(1),
+        tomDato = tom.atEndOfMonth(),
+        datakilde = Datakilde.EF,
+    )
 }

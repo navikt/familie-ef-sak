@@ -191,12 +191,10 @@ fun List<BeløpsperiodeBarnetilsynDto>.mergeSammenhengendePerioder(): List<Belø
     }
 }
 
-fun BeløpsperiodeBarnetilsynDto.hengerSammenMed(other: BeløpsperiodeBarnetilsynDto) =
-    this.periode påfølgesAv other.periode
+fun BeløpsperiodeBarnetilsynDto.hengerSammenMed(other: BeløpsperiodeBarnetilsynDto) = this.periode påfølgesAv other.periode
 
 fun BeløpsperiodeBarnetilsynDto.sammeBeløpOgBeregningsgrunnlag(other: BeløpsperiodeBarnetilsynDto) =
     this.beløp == other.beløp &&
         this.beregningsgrunnlag == other.beregningsgrunnlag
 
-fun BeløpsperiodeBarnetilsynDto.sammeAktivitet(other: BeløpsperiodeBarnetilsynDto) =
-    this.aktivitetstype == other.aktivitetstype
+fun BeløpsperiodeBarnetilsynDto.sammeAktivitet(other: BeløpsperiodeBarnetilsynDto) = this.aktivitetstype == other.aktivitetstype

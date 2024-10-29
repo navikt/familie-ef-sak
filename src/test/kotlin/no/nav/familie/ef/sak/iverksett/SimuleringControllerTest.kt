@@ -144,17 +144,16 @@ internal class SimuleringControllerTest {
     private fun lagSimuleringoppsummering(
         etterbetaling: BigDecimal = BigDecimal.ZERO,
         feilutbetaling: BigDecimal = BigDecimal.ZERO,
-    ) =
-        Simuleringsoppsummering(
-            perioder = listOf(),
-            fomDatoNestePeriode = LocalDate.now(),
-            etterbetaling = etterbetaling,
-            feilutbetaling = feilutbetaling,
-            fom = LocalDate.now(),
-            tomDatoNestePeriode = LocalDate.now(),
-            forfallsdatoNestePeriode = LocalDate.now(),
-            tidSimuleringHentet = LocalDate.now(),
-            tomSisteUtbetaling = LocalDate.now(),
-            sumManuellePosteringer = BigDecimal.ZERO,
-        )
+    ) = Simuleringsoppsummering(
+        perioder = listOf(),
+        fomDatoNestePeriode = LocalDate.now(),
+        etterbetaling = etterbetaling,
+        feilutbetaling = feilutbetaling,
+        fom = LocalDate.now(),
+        tomDatoNestePeriode = LocalDate.now(),
+        forfallsdatoNestePeriode = LocalDate.now(),
+        tidSimuleringHentet = LocalDate.now(),
+        tomSisteUtbetaling = LocalDate.now(),
+        sumManuellePosteringer = BigDecimal.ZERO,
+    )
 }

@@ -144,25 +144,23 @@ private val ident = "01234567890"
 private fun request(
     fom: YearMonth,
     tom: YearMonth,
-) =
-    EksternePerioderRequest(ident, fom.atDay(1), tom.atEndOfMonth())
+) = EksternePerioderRequest(ident, fom.atDay(1), tom.atEndOfMonth())
 
 private fun periode(
     fom: YearMonth,
     tom: YearMonth,
-) =
-    InternPeriode(
-        personIdent = ident,
-        inntektsreduksjon = 0,
-        samordningsfradrag = 0,
-        utgifterBarnetilsyn = 0,
-        månedsbeløp = 0,
-        engangsbeløp = 0,
-        stønadFom = fom.atDay(1),
-        stønadTom = tom.atEndOfMonth(),
-        opphørsdato = null,
-        datakilde = Datakilde.EF,
-    )
+) = InternPeriode(
+    personIdent = ident,
+    inntektsreduksjon = 0,
+    samordningsfradrag = 0,
+    utgifterBarnetilsyn = 0,
+    månedsbeløp = 0,
+    engangsbeløp = 0,
+    stønadFom = fom.atDay(1),
+    stønadTom = tom.atEndOfMonth(),
+    opphørsdato = null,
+    datakilde = Datakilde.EF,
+)
 
 private fun internePerioder(
     overgangsstønad: List<InternPeriode> = emptyList(),
@@ -173,10 +171,9 @@ private fun internePerioder(
 private fun lagResultatPeriode(
     fom: YearMonth,
     tom: YearMonth,
-) =
-    EksternPeriode(
-        personIdent = ident,
-        fomDato = fom.atDay(1),
-        tomDato = tom.atEndOfMonth(),
-        datakilde = Datakilde.EF,
-    )
+) = EksternPeriode(
+    personIdent = ident,
+    fomDato = fom.atDay(1),
+    tomDato = tom.atEndOfMonth(),
+    datakilde = Datakilde.EF,
+)
