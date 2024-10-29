@@ -70,7 +70,7 @@ class AlderPåBarnRegel :
     private fun HovedregelMetadata.finnFødselsdatoEllerTermindatoForBarn(barnId: UUID?): LocalDate =
         vilkårgrunnlagDto.finnFødselsdatoForBarn(barnId)
             ?: barn.firstOrNull { it.id == barnId }?.fødselTermindato
-            ?: error("Kunne ikke finne hverken fødselsdato fra registerdata eller termindato")
+            ?: error("Kunne ikke finne hverken fødselsdato fra registerdata eller termindato for barnID=$barnId")
 
     private fun VilkårGrunnlagDto.finnFødselsdatoForBarn(barnId: UUID?): LocalDate? = barnMedSamvær.firstOrNull { it.barnId == barnId }?.registergrunnlag?.fødselsdato
 
