@@ -44,7 +44,6 @@ import no.nav.familie.kontrakter.ef.søknad.SøknadBarnetilsyn
 import no.nav.familie.kontrakter.ef.søknad.SøknadOvergangsstønad
 import no.nav.familie.kontrakter.ef.søknad.SøknadSkolepenger
 import no.nav.familie.kontrakter.ef.søknad.TestsøknadBuilder
-import no.nav.familie.kontrakter.felles.Fødselsnummer
 import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.ef.StønadType
@@ -292,7 +291,10 @@ class TestSaksbehandlingController(
                         harSkalHaSammeAdresse = true,
                         ikkeRegistrertPåSøkersAdresseBeskrivelse = "Fordi",
                         erBarnetFødt = true,
-                        fødselTermindato = Fødselsnummer(it.key).fødselsdato,
+                        fødselTermindato =
+                            it.value.fødselsdato
+                                .first()
+                                .fødselsdato ?: error("Fødselsdato kan ikke være null"),
                         annenForelder =
                             TestsøknadBuilder.Builder().defaultAnnenForelder(
                                 ikkeOppgittAnnenForelderBegrunnelse = null,
