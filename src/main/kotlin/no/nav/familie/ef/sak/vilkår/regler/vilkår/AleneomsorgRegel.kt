@@ -11,6 +11,7 @@ import no.nav.familie.ef.sak.vilkår.dto.LangAvstandTilSøker
 import no.nav.familie.ef.sak.vilkår.regler.HovedregelMetadata
 import no.nav.familie.ef.sak.vilkår.regler.RegelId
 import no.nav.familie.ef.sak.vilkår.regler.RegelSteg
+import no.nav.familie.ef.sak.vilkår.regler.RegelVersjon
 import no.nav.familie.ef.sak.vilkår.regler.SluttSvarRegel
 import no.nav.familie.ef.sak.vilkår.regler.SvarId
 import no.nav.familie.ef.sak.vilkår.regler.Vilkårsregel
@@ -49,7 +50,7 @@ class AleneomsorgRegel :
             return opprettAutomatiskVurdertAleneomsorgVilkår()
         }
 
-        return hovedregler.map { hovedregel ->
+        return gjeldendeHovedregler().map { hovedregel ->
             if (
                 skalAutomatiskOppfylleNæreBoforhold(hovedregel, metadata, barnId)
             ) {
@@ -188,6 +189,7 @@ class AleneomsorgRegel :
             ).associateWith {
                 SluttSvarRegel.IKKE_OPPFYLT_MED_PÅKREVD_BEGRUNNELSE
             } + mapOf(SvarId.NEI to SluttSvarRegel.OPPFYLT_MED_PÅKREVD_BEGRUNNELSE)
+
         private val NÆRE_BOFORHOLD =
             RegelSteg(
                 regelId = RegelId.NÆRE_BOFORHOLD,
@@ -201,6 +203,7 @@ class AleneomsorgRegel :
                     hvisJa = SluttSvarRegel.OPPFYLT_MED_VALGFRI_BEGRUNNELSE,
                     hvisNei = SluttSvarRegel.OPPFYLT_MED_VALGFRI_BEGRUNNELSE,
                 ),
+                versjon = RegelVersjon.HISTORISK,
             )
     }
 }

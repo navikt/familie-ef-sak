@@ -20,6 +20,7 @@ import no.nav.familie.ef.sak.vilkår.dto.VilkårsvurderingDto
 import no.nav.familie.ef.sak.vilkår.dto.tilDto
 import no.nav.familie.ef.sak.vilkår.gjenbruk.GjenbrukVilkårService
 import no.nav.familie.ef.sak.vilkår.regler.HovedregelMetadata
+import no.nav.familie.ef.sak.vilkår.regler.RegelVersjon
 import no.nav.familie.ef.sak.vilkår.regler.evalutation.OppdaterVilkår
 import no.nav.familie.ef.sak.vilkår.regler.evalutation.OppdaterVilkår.opprettNyeVilkårsvurderinger
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
@@ -273,6 +274,7 @@ class VurderingService(
                         sporbar = Sporbar(),
                         barnId = finnBarnId(vurdering.barnId, barnIdMap),
                         opphavsvilkår = vurdering.opprettOpphavsvilkår(),
+                        delvilkårsvurdering = vurdering.delvilkårsvurdering.copy(delvilkårsvurderinger = vurdering.delvilkårsvurdering.delvilkårsvurderinger.filter { it.hovedregel.regelVersjon == RegelVersjon.GJELDENDE }),
                     )
             }
 

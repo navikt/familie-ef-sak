@@ -16,7 +16,8 @@
           "begrunnelseType" : "PÅKREVD",
           "regelId" : "SLUTT_NODE"
         }
-      }
+      },
+      "versjon" : "GJELDENDE"
     },
     "INNTEKT_SAMSVARER_MED_OS" : {
       "regelId" : "INNTEKT_SAMSVARER_MED_OS",
@@ -33,7 +34,8 @@
           "begrunnelseType" : "PÅKREVD",
           "regelId" : "SLUTT_NODE"
         }
-      }
+      },
+      "versjon" : "GJELDENDE"
     }
   }
 }

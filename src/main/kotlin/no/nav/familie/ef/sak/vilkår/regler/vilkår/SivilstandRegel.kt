@@ -56,7 +56,7 @@ class SivilstandRegel :
             return listOf(automatiskVurdertDelvilkår(RegelId.KRAV_SIVILSTAND_UTEN_PÅKREVD_BEGRUNNELSE, SvarId.JA, "Bruker er ${metadata.sivilstandstype.visningsnavn.lowercase()}."))
         }
 
-        return hovedregler.map {
+        return gjeldendeHovedregler().map {
             val resultatForDelvilkår = if (it == hovedregel) resultat else Vilkårsresultat.IKKE_AKTUELL
             Delvilkårsvurdering(resultat = resultatForDelvilkår, listOf(Vurdering(it)))
         }

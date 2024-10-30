@@ -12,7 +12,8 @@
           "begrunnelseType" : "PÅKREVD",
           "regelId" : "SLUTT_NODE"
         }
-      }
+      },
+      "versjon" : "GJELDENDE"
     },
     "KRAV_SIVILSTAND_UTEN_PÅKREVD_BEGRUNNELSE" : {
       "regelId" : "KRAV_SIVILSTAND_UTEN_PÅKREVD_BEGRUNNELSE",
@@ -25,7 +26,8 @@
           "begrunnelseType" : "PÅKREVD",
           "regelId" : "SLUTT_NODE"
         }
-      }
+      },
+      "versjon" : "GJELDENDE"
     },
     "SAMLIVSBRUDD_LIKESTILT_MED_SEPARASJON" : {
       "regelId" : "SAMLIVSBRUDD_LIKESTILT_MED_SEPARASJON",
@@ -38,7 +40,8 @@
           "begrunnelseType" : "PÅKREVD",
           "regelId" : "SLUTT_NODE"
         }
-      }
+      },
+      "versjon" : "GJELDENDE"
     },
     "SAMSVAR_DATO_SEPARASJON_OG_FRAFLYTTING" : {
       "regelId" : "SAMSVAR_DATO_SEPARASJON_OG_FRAFLYTTING",
@@ -51,7 +54,8 @@
           "regelId" : "KRAV_SIVILSTAND_PÅKREVD_BEGRUNNELSE",
           "begrunnelseType" : "UTEN"
         }
-      }
+      },
+      "versjon" : "GJELDENDE"
     },
     "SIVILSTAND_UNNTAK" : {
       "regelId" : "SIVILSTAND_UNNTAK",
@@ -68,7 +72,8 @@
           "begrunnelseType" : "PÅKREVD",
           "regelId" : "SLUTT_NODE"
         }
-      }
+      },
+      "versjon" : "GJELDENDE"
     }
   }
 }

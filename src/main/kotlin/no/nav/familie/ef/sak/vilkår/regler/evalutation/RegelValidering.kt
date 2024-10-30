@@ -9,6 +9,7 @@ import no.nav.familie.ef.sak.vilkår.dto.DelvilkårsvurderingDto
 import no.nav.familie.ef.sak.vilkår.dto.VurderingDto
 import no.nav.familie.ef.sak.vilkår.regler.BegrunnelseType
 import no.nav.familie.ef.sak.vilkår.regler.RegelId
+import no.nav.familie.ef.sak.vilkår.regler.RegelVersjon
 import no.nav.familie.ef.sak.vilkår.regler.SluttSvarRegel
 import no.nav.familie.ef.sak.vilkår.regler.SvarId
 import no.nav.familie.ef.sak.vilkår.regler.SvarRegel
@@ -20,7 +21,7 @@ object RegelValidering {
         oppdatering: List<DelvilkårsvurderingDto>,
         tidligereDelvilkårsvurderinger: List<Delvilkårsvurdering>,
     ) {
-        validerAlleDelvilkårHarMinimumEttSvar(vilkårsregel.vilkårType, oppdatering)
+        validerAlleDelvilkårErBesvartUtFraRegelverksversjon(vilkårsregel, oppdatering)
         validerAlleHovedreglerFinnesMed(vilkårsregel, oppdatering, tidligereDelvilkårsvurderinger)
 
         oppdatering.forEach { delvilkårsvurderingDto ->
@@ -75,12 +76,14 @@ object RegelValidering {
      * Skal validere att man sender inn minimum ett svar for ett delvilkår
      * Når backend initierar [Delvilkårsvurdering] så legges ett første svar in med regelId(hovedregel) for hvert delvilkår
      */
-    private fun validerAlleDelvilkårHarMinimumEttSvar(
-        vilkårType: VilkårType,
+    private fun validerAlleDelvilkårErBesvartUtFraRegelverksversjon(
+        vilkårsregel: Vilkårsregel,
         oppdatering: List<DelvilkårsvurderingDto>,
     ) {
         oppdatering.forEach { vurdering ->
-            feilHvis(vurdering.vurderinger.isEmpty()) { "Savner svar for en av delvilkåren for vilkår=$vilkårType" }
+            val regelSteg = vilkårsregel.regler[vurdering.hovedregel()] ?: error("Fant ikke regelSteg for ${vurdering.hovedregel()}")
+            feilHvis(vurdering.vurderinger.isEmpty() && regelSteg.versjon == RegelVersjon.GJELDENDE) { "Mangler svar for et delvilkår for vilkår=${vilkårsregel.vilkårType}" }
+            feilHvis(vurdering.vurderinger.isNotEmpty() && regelSteg.versjon == RegelVersjon.HISTORISK) { "Kan ikke oppdatere et historisk delvilkår. Vilkår=${vilkårsregel.vilkårType}" }
         }
     }
 

@@ -12,7 +12,8 @@
           "begrunnelseType" : "VALGFRI",
           "regelId" : "SLUTT_NODE"
         }
-      }
+      },
+      "versjon" : "GJELDENDE"
     },
     "UNNTAK_ALDER" : {
       "regelId" : "UNNTAK_ALDER",
@@ -29,7 +30,8 @@
           "begrunnelseType" : "PÅKREVD",
           "regelId" : "SLUTT_NODE"
         }
-      }
+      },
+      "versjon" : "GJELDENDE"
     }
   }
 }

@@ -50,7 +50,7 @@ fun vilkårsreglerForStønad(stønadstype: StønadType): List<Vilkårsregel> =
                 AktivitetRegel(),
                 SagtOppEllerRedusertRegel(),
                 TidligareVedtaksperioderRegel(),
-            )
+            ).map { vilkårsregel -> vilkårsregel }
         BARNETILSYN ->
             listOf(
                 ForutgåendeMedlemskapRegel(),

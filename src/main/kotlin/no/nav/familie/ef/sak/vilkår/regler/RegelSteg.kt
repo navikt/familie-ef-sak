@@ -6,6 +6,7 @@ import no.nav.familie.ef.sak.infrastruktur.exception.Feil
  * Ett [RegelSteg] er en regel med ett spørsmål med flere svar som mapper til en [SvarRegel]
  * @param regelId er id for spørsmålet
  * @param svarMapping er en mapping mellom svarId og regel for det svaret
+ * @param versjon forteller om spørsmålet tilhører nåværende regelverk eller er foreldet
  *
  * Eks
  * SPØRSMÅL_1 har 2 ulike svar,
@@ -19,12 +20,14 @@ import no.nav.familie.ef.sak.infrastruktur.exception.Feil
  *          "regelId": "SPØRSMÅL_2",
  *          "begrunnelseType": "UTEN"
  *      }
- *  }
+ *  },
+ *  [versjon]: "GJELDENDE",
  * }
  */
 data class RegelSteg(
     val regelId: RegelId,
     val svarMapping: Map<SvarId, SvarRegel>,
+    val versjon: RegelVersjon = RegelVersjon.GJELDENDE,
 ) {
     fun svarMapping(svarId: SvarId): SvarRegel = svarMapping[svarId] ?: throw Feil("Finner ikke svarId=$svarId for regelId=$regelId")
 }
