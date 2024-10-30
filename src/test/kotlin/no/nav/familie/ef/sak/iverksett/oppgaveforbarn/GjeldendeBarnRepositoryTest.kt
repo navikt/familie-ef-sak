@@ -228,11 +228,9 @@ class GjeldendeBarnRepositoryTest : OppslagSpringRunnerTest() {
         }
     }
 
-    private fun finnBarnTilMigrerteBehandlinger() =
-        gjeldendeBarnRepository.finnBarnTilMigrerteBehandlinger(StønadType.OVERGANGSSTØNAD, LocalDate.now())
+    private fun finnBarnTilMigrerteBehandlinger() = gjeldendeBarnRepository.finnBarnTilMigrerteBehandlinger(StønadType.OVERGANGSSTØNAD, LocalDate.now())
 
-    private fun finnBarnAvGjeldendeIverksatteBehandlinger() =
-        gjeldendeBarnRepository.finnBarnAvGjeldendeIverksatteBehandlinger(StønadType.OVERGANGSSTØNAD, LocalDate.now())
+    private fun finnBarnAvGjeldendeIverksatteBehandlinger() = gjeldendeBarnRepository.finnBarnAvGjeldendeIverksatteBehandlinger(StønadType.OVERGANGSSTØNAD, LocalDate.now())
 
     private fun lagreInnvilgetBehandling(
         fagsak: Fagsak,
@@ -240,16 +238,15 @@ class GjeldendeBarnRepositoryTest : OppslagSpringRunnerTest() {
         opprettetTid: LocalDateTime =
             tidligereBehandling?.sporbar?.opprettetTid?.plusHours(1)
                 ?: LocalDateTime.now(),
-    ) =
-        behandlingRepository.insert(
-            behandling(
-                fagsak,
-                status = BehandlingStatus.FERDIGSTILT,
-                resultat = BehandlingResultat.INNVILGET,
-                forrigeBehandlingId = tidligereBehandling?.id,
-                opprettetTid = opprettetTid,
-            ),
-        )
+    ) = behandlingRepository.insert(
+        behandling(
+            fagsak,
+            status = BehandlingStatus.FERDIGSTILT,
+            resultat = BehandlingResultat.INNVILGET,
+            forrigeBehandlingId = tidligereBehandling?.id,
+            opprettetTid = opprettetTid,
+        ),
+    )
 
     private fun lagreHistoriskAndel(
         behandling: Behandling,

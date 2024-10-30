@@ -21,11 +21,10 @@ class ArbeidsfordelingService(
     fun hentNavEnhetId(
         ident: String,
         oppgavetype: Oppgavetype,
-    ) =
-        when (oppgavetype) {
-            Oppgavetype.VurderHenvendelse -> hentNavEnhetForOppfølging(ident, oppgavetype)?.enhetId
-            else -> hentNavEnhet(ident)?.enhetId
-        }
+    ) = when (oppgavetype) {
+        Oppgavetype.VurderHenvendelse -> hentNavEnhetForOppfølging(ident, oppgavetype)?.enhetId
+        else -> hentNavEnhet(ident)?.enhetId
+    }
 
     fun hentNavEnhet(ident: String): Arbeidsfordelingsenhet? =
         cacheManager.getNullable("navEnhet", ident) {

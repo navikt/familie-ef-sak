@@ -159,12 +159,11 @@ class UttrekkArbeidssøkerService(
         it: VedtaksperioderForUttrekk,
         startdato: LocalDate,
         sluttdato: LocalDate,
-    ) =
-        it.perioder.perioder.any {
-            it.datoFra <= startdato &&
-                it.datoTil >= sluttdato &&
-                erArbeidssøker(it)
-        }
+    ) = it.perioder.perioder.any {
+        it.datoFra <= startdato &&
+            it.datoTil >= sluttdato &&
+            erArbeidssøker(it)
+    }
 
     private fun erArbeidssøker(it: Vedtaksperiode) =
         (

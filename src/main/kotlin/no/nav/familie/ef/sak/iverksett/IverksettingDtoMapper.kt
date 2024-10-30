@@ -489,8 +489,7 @@ fun SkolepengerUtgift.tilIverksettDto() =
         stønad = this.stønad,
     )
 
-private fun mapPerioderMedBeløp(perioder: List<PeriodeMedBeløp>?) =
-    perioder?.map { it.tilPeriodeMedBeløpDto() } ?: emptyList()
+private fun mapPerioderMedBeløp(perioder: List<PeriodeMedBeløp>?) = perioder?.map { it.tilPeriodeMedBeløpDto() } ?: emptyList()
 
 fun PeriodeMedBeløp.tilPeriodeMedBeløpDto(): PeriodeMedBeløpDto =
     PeriodeMedBeløpDto(

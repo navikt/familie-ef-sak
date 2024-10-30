@@ -88,8 +88,7 @@ fun <K : Any, T> CacheManager.getValue(
     cache: String,
     key: K,
     valueLoader: () -> T,
-): T =
-    this.getNullable(cache, key, valueLoader) ?: error("Finner ikke cache for cache=$cache key=$key")
+): T = this.getNullable(cache, key, valueLoader) ?: error("Finner ikke cache for cache=$cache key=$key")
 
 /**
  * Kan inneholde
@@ -99,8 +98,7 @@ fun <K : Any, T> CacheManager.getNullable(
     cache: String,
     key: K,
     valueLoader: () -> T?,
-): T? =
-    (getCacheOrThrow(cache)).get(key, valueLoader)
+): T? = (getCacheOrThrow(cache)).get(key, valueLoader)
 
 fun CacheManager.getCacheOrThrow(cache: String) = this.getCache(cache) ?: error("Finner ikke cache=$cache")
 

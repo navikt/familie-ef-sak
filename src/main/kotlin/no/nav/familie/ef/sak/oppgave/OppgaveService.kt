@@ -142,8 +142,7 @@ class OppgaveService(
         }
     }
 
-    private fun finnerIkkeGyldigArbeidsfordeling(e: Exception): Boolean =
-        e.message?.contains("Fant ingen gyldig arbeidsfordeling for oppgaven") ?: false
+    private fun finnerIkkeGyldigArbeidsfordeling(e: Exception): Boolean = e.message?.contains("Fant ingen gyldig arbeidsfordeling for oppgaven") ?: false
 
     private fun finnAktuellMappe(
         enhetsnummer: String?,

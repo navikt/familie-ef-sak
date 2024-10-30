@@ -76,21 +76,18 @@ object VedtakDtoUtil {
     fun avslagDto(
         årsak: AvslagÅrsak = AvslagÅrsak.BARN_OVER_ÅTTE_ÅR,
         begrunnelse: String? = "en god begrunnelse",
-    ) =
-        Avslå(årsak, begrunnelse)
+    ) = Avslå(årsak, begrunnelse)
 
     fun opphørDto(
         fom: YearMonth = YearMonth.of(2022, 1),
         begrunnelse: String? = "en god begrunnelse",
-    ) =
-        Opphør(fom, begrunnelse)
+    ) = Opphør(fom, begrunnelse)
 
     fun sanksjonertDto(
         årsak: Sanksjonsårsak = Sanksjonsårsak.SAGT_OPP_STILLING,
         periode: SanksjonertPeriodeDto = sanksjonertPeriodeDto(),
         begrunnelse: String = "begrunnelse",
-    ) =
-        Sanksjonert(årsak, periode, begrunnelse)
+    ) = Sanksjonert(årsak, periode, begrunnelse)
 
     fun barnetilsynperiodeDto(
         fom: YearMonth,
@@ -100,17 +97,16 @@ object VedtakDtoUtil {
         periodetype: PeriodetypeBarnetilsyn = PeriodetypeBarnetilsyn.ORDINÆR,
         aktivitetType: AktivitetstypeBarnetilsyn? = if (periodetype == PeriodetypeBarnetilsyn.ORDINÆR) AktivitetstypeBarnetilsyn.I_ARBEID else null,
         sanksjonsårsak: Sanksjonsårsak? = null,
-    ) =
-        UtgiftsperiodeDto(
-            årMånedFra = fom,
-            årMånedTil = tom,
-            periode = Månedsperiode(fom, tom),
-            barn = barn,
-            utgifter = utgifter,
-            sanksjonsårsak = sanksjonsårsak,
-            periodetype = periodetype,
-            aktivitetstype = aktivitetType,
-        )
+    ) = UtgiftsperiodeDto(
+        årMånedFra = fom,
+        årMånedTil = tom,
+        periode = Månedsperiode(fom, tom),
+        barn = barn,
+        utgifter = utgifter,
+        sanksjonsårsak = sanksjonsårsak,
+        periodetype = periodetype,
+        aktivitetstype = aktivitetType,
+    )
 
     fun periodeMedBeløpDto() =
         PeriodeMedBeløpDto(

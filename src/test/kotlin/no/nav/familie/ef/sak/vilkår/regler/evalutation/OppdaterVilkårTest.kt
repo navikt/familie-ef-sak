@@ -756,28 +756,26 @@ internal class OppdaterVilkårTest {
     private fun aleneomsorg(
         vilkårsresultat: Vilkårsresultat,
         barnId: UUID? = null,
-    ) =
-        Vilkårsvurdering(
-            behandlingId = UUID.randomUUID(),
-            resultat = vilkårsresultat,
-            type = VilkårType.ALENEOMSORG,
-            delvilkårsvurdering = DelvilkårsvurderingWrapper(emptyList()),
-            opphavsvilkår = null,
-            barnId = barnId,
-        )
+    ) = Vilkårsvurdering(
+        behandlingId = UUID.randomUUID(),
+        resultat = vilkårsresultat,
+        type = VilkårType.ALENEOMSORG,
+        delvilkårsvurdering = DelvilkårsvurderingWrapper(emptyList()),
+        opphavsvilkår = null,
+        barnId = barnId,
+    )
 
     private fun alderPåBarn(
         vilkårsresultat: Vilkårsresultat,
         barnId: UUID? = null,
-    ) =
-        Vilkårsvurdering(
-            behandlingId = UUID.randomUUID(),
-            resultat = vilkårsresultat,
-            type = VilkårType.ALDER_PÅ_BARN,
-            delvilkårsvurdering = DelvilkårsvurderingWrapper(emptyList()),
-            opphavsvilkår = null,
-            barnId = barnId,
-        )
+    ) = Vilkårsvurdering(
+        behandlingId = UUID.randomUUID(),
+        resultat = vilkårsresultat,
+        type = VilkårType.ALDER_PÅ_BARN,
+        delvilkårsvurdering = DelvilkårsvurderingWrapper(emptyList()),
+        opphavsvilkår = null,
+        barnId = barnId,
+    )
 
     private fun Vilkårsvurdering.delvilkår(regelId: RegelId) =
         this.delvilkårsvurdering.delvilkårsvurderinger.singleOrNull { it.hovedregel == regelId }
@@ -785,8 +783,7 @@ internal class OppdaterVilkårTest {
 
     private fun Vilkårsvurdering.førsteDelvilkår() = this.delvilkårsvurdering.delvilkårsvurderinger.first()
 
-    private fun delvilkårsvurderingDto(vararg vurderinger: VurderingDto) =
-        DelvilkårsvurderingDto(resultat = Vilkårsresultat.IKKE_AKTUELL, vurderinger = vurderinger.toList())
+    private fun delvilkårsvurderingDto(vararg vurderinger: VurderingDto) = DelvilkårsvurderingDto(resultat = Vilkårsresultat.IKKE_AKTUELL, vurderinger = vurderinger.toList())
 
     private fun validerOgOppdater(
         vilkårsvurdering: Vilkårsvurdering,

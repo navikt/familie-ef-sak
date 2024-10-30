@@ -98,13 +98,12 @@ class BeslutteVedtakSteg(
     private fun opprettTaskForBehandlingsstatistikk(
         behandlingId: UUID,
         oppgaveId: Long?,
-    ) =
-        taskService.save(
-            BehandlingsstatistikkTask.opprettBesluttetTask(
-                behandlingId = behandlingId,
-                oppgaveId = oppgaveId,
-            ),
-        )
+    ) = taskService.save(
+        BehandlingsstatistikkTask.opprettBesluttetTask(
+            behandlingId = behandlingId,
+            oppgaveId = oppgaveId,
+        ),
+    )
 
     private fun oppdaterResultatPåBehandling(behandlingId: UUID) {
         val resultat = vedtakService.hentVedtaksresultat(behandlingId)

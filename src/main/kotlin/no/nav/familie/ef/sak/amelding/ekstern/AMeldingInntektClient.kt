@@ -20,14 +20,13 @@ class AMeldingInntektClient(
     private fun lagInntektUri(
         fom: YearMonth,
         tom: YearMonth,
-    ) =
-        UriComponentsBuilder
-            .fromUri(uri)
-            .pathSegment("api/inntekt")
-            .queryParam("fom", fom)
-            .queryParam("tom", tom)
-            .build()
-            .toUri()
+    ) = UriComponentsBuilder
+        .fromUri(uri)
+        .pathSegment("api/inntekt")
+        .queryParam("fom", fom)
+        .queryParam("tom", tom)
+        .build()
+        .toUri()
 
     private val genererUrlUri =
         UriComponentsBuilder

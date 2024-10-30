@@ -214,8 +214,7 @@ class TilgangService(
 
     fun harForvalterrolle() = SikkerhetContext.harRolle(rolleConfig.forvalter)
 
-    fun harEgenAnsattRolle(): Boolean =
-        hentGrupperFraToken().contains(rolleConfig.egenAnsatt)
+    fun harEgenAnsattRolle(): Boolean = hentGrupperFraToken().contains(rolleConfig.egenAnsatt)
 
     /**
      * Filtrerer data basert på om man har tilgang til den eller ikke

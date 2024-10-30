@@ -150,13 +150,12 @@ object VedtakDomeneParser {
     private fun mapVedtakDomene(
         rad: Map<String, String>,
         resultatType: ResultatType,
-    ) =
-        Vedtak(
-            behandlingId = behandlingIdTilUUID[parseInt(Domenebegrep.BEHANDLING_ID, rad)]!!,
-            resultatType = resultatType,
-            opphørFom = parseValgfriÅrMåned(VedtakDomenebegrep.OPPHØRSDATO, rad),
-            internBegrunnelse = if (resultatType == ResultatType.SANKSJONERE) "Ok" else null,
-        )
+    ) = Vedtak(
+        behandlingId = behandlingIdTilUUID[parseInt(Domenebegrep.BEHANDLING_ID, rad)]!!,
+        resultatType = resultatType,
+        opphørFom = parseValgfriÅrMåned(VedtakDomenebegrep.OPPHØRSDATO, rad),
+        internBegrunnelse = if (resultatType == ResultatType.SANKSJONERE) "Ok" else null,
+    )
 
     private fun validerSanksjon(perioder: List<Barnetilsynperiode>) {
         feilHvisIkke(perioder.size == 1) {

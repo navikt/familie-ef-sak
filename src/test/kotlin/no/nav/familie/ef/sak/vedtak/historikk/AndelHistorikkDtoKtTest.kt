@@ -49,8 +49,7 @@ internal class AndelHistorikkDtoKtTest {
 
     private fun AndelHistorikkDto.medOpphør() = this.copy(erOpphør = true)
 
-    private fun AndelHistorikkDto.medEndring(endringType: EndringType) =
-        this.copy(endring = HistorikkEndring(endringType, UUID.randomUUID(), LocalDateTime.now()))
+    private fun AndelHistorikkDto.medEndring(endringType: EndringType) = this.copy(endring = HistorikkEndring(endringType, UUID.randomUUID(), LocalDateTime.now()))
 
     val andel =
         AndelHistorikkDto(

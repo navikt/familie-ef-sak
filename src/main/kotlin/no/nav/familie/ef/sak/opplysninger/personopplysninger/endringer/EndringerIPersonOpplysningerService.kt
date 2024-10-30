@@ -69,6 +69,5 @@ class EndringerIPersonOpplysningerService(
         grunnlagsdata.oppdaterteData?.let { GrunnlagsdataMedMetadata(it, grunnlagsdata.oppdaterteDataHentetTid) }
     }
 
-    private fun Grunnlagsdata.skalSjekkeDataFraRegisteret() =
-        this.oppdaterteDataHentetTid.harGåttAntallTimer(4)
+    private fun Grunnlagsdata.skalSjekkeDataFraRegisteret() = this.oppdaterteDataHentetTid.harGåttAntallTimer(4)
 }

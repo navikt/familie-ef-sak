@@ -341,11 +341,9 @@ class ValiderOmregningServiceTest {
             validerOmregningService.validerHarSammePerioderSomTidligereVedtak(vedtak, saksbehandling)
         }
 
-        private fun innvilge(vararg perioder: VedtaksperiodeDto) =
-            InnvilgelseOvergangsstønad(null, null, perioder.toList())
+        private fun innvilge(vararg perioder: VedtaksperiodeDto) = InnvilgelseOvergangsstønad(null, null, perioder.toList())
 
-        private fun manuellGOmregning() =
-            saksbehandling(årsak = BehandlingÅrsak.G_OMREGNING).copy(opprettetAv = "saksbehandler")
+        private fun manuellGOmregning() = saksbehandling(årsak = BehandlingÅrsak.G_OMREGNING).copy(opprettetAv = "saksbehandler")
     }
 
     private fun mockNyTilkjentYtelse(

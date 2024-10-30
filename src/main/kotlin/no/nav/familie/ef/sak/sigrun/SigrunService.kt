@@ -45,8 +45,7 @@ private fun PensjonsgivendeInntektResponse.mapTilPensjonsgivendeInntektVisning(i
     )
 }
 
-fun PensjonsgivendeInntektForSkatteordning.næringsinntekt() =
-    (this.pensjonsgivendeInntektAvNaeringsinntekt ?: 0) + (this.pensjonsgivendeInntektAvNaeringsinntektFraFiskeFangstEllerFamiliebarnehage ?: 0)
+fun PensjonsgivendeInntektForSkatteordning.næringsinntekt() = (this.pensjonsgivendeInntektAvNaeringsinntekt ?: 0) + (this.pensjonsgivendeInntektAvNaeringsinntektFraFiskeFangstEllerFamiliebarnehage ?: 0)
 
 fun PensjonsgivendeInntektVisning.totalInntektOverNull() = (this.næring + this.person + (this.svalbard?.næring ?: 0) + (this.svalbard?.person ?: 0)) > 0
 

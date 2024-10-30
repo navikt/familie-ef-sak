@@ -120,12 +120,11 @@ class BarnRepositoryTest : OppslagSpringRunnerTest() {
         personIdent: String? = null,
         navn: String? = null,
         fødselTermindato: LocalDate? = null,
-    ) =
-        BehandlingBarn(
-            behandlingId = behandling.id,
-            søknadBarnId = UUID.randomUUID(),
-            personIdent = personIdent,
-            navn = navn,
-            fødselTermindato = fødselTermindato,
-        )
+    ) = BehandlingBarn(
+        behandlingId = behandling.id,
+        søknadBarnId = UUID.randomUUID(),
+        personIdent = personIdent,
+        navn = navn,
+        fødselTermindato = fødselTermindato,
+    )
 }

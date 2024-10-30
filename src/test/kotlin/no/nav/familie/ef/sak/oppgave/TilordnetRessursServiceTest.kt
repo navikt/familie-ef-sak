@@ -328,8 +328,7 @@ internal class TilordnetRessursServiceTest {
         }
     }
 
-    private fun efOppgave(behandlingId: UUID) =
-        EFOppgave(behandlingId = behandlingId, gsakOppgaveId = 1L, type = Oppgavetype.BehandleSak)
+    private fun efOppgave(behandlingId: UUID) = EFOppgave(behandlingId = behandlingId, gsakOppgaveId = 1L, type = Oppgavetype.BehandleSak)
 
     private fun oppgave(oppgaveId: Long) = Oppgave(id = oppgaveId)
 

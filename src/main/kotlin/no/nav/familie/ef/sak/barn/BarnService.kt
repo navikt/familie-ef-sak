@@ -293,8 +293,7 @@ class BarnService(
         }
     }
 
-    private fun hentSøknadsbarnForBehandling(behandlingId: UUID) =
-        søknadService.hentSøknadsgrunnlag(behandlingId)?.barn ?: emptyList()
+    private fun hentSøknadsbarnForBehandling(behandlingId: UUID) = søknadService.hentSøknadsgrunnlag(behandlingId)?.barn ?: emptyList()
 
     fun finnBarnPåBehandling(behandlingId: UUID): List<BehandlingBarn> = barnRepository.findByBehandlingId(behandlingId)
 

@@ -225,9 +225,7 @@ internal class TilgangServiceTest {
         tilgangService.validerTilgangTilEksternFagsak(fagsak.eksternId, AuditLoggerEvent.ACCESS)
     }
 
-    private fun filtrer(personer: List<PdlSøker>): List<PdlSøker> =
-        tilgangService.filtrerUtFortroligDataForRolle(personer) { it.adressebeskyttelse.gjeldende() }
+    private fun filtrer(personer: List<PdlSøker>): List<PdlSøker> = tilgangService.filtrerUtFortroligDataForRolle(personer) { it.adressebeskyttelse.gjeldende() }
 
-    private fun adresseBeskyttelse(gradering: AdressebeskyttelseGradering) =
-        listOf(Adressebeskyttelse(gradering, Metadata(false)))
+    private fun adresseBeskyttelse(gradering: AdressebeskyttelseGradering) = listOf(Adressebeskyttelse(gradering, Metadata(false)))
 }

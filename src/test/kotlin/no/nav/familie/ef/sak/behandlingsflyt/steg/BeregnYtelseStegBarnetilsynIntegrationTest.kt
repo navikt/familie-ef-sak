@@ -160,8 +160,7 @@ internal class BeregnYtelseStegBarnetilsynIntegrationTest : OppslagSpringRunnerT
         )
     }
 
-    private fun hentAndeler(behandlingId: UUID): List<AndelTilkjentYtelse> =
-        tilkjentytelseRepository.findByBehandlingId(behandlingId)!!.andelerTilkjentYtelse.sortedBy { it.stønadFom }
+    private fun hentAndeler(behandlingId: UUID): List<AndelTilkjentYtelse> = tilkjentytelseRepository.findByBehandlingId(behandlingId)!!.andelerTilkjentYtelse.sortedBy { it.stønadFom }
 
     private fun opprettUtgiftsperiode(
         fra: YearMonth,
@@ -170,17 +169,16 @@ internal class BeregnYtelseStegBarnetilsynIntegrationTest : OppslagSpringRunnerT
         beløp: BigDecimal,
         periodetype: PeriodetypeBarnetilsyn = PeriodetypeBarnetilsyn.ORDINÆR,
         aktivitetstype: AktivitetstypeBarnetilsyn? = AktivitetstypeBarnetilsyn.I_ARBEID,
-    ) =
-        UtgiftsperiodeDto(
-            fra,
-            til,
-            Månedsperiode(fra, til),
-            barnId,
-            beløp.toInt(),
-            null,
-            periodetype,
-            aktivitetstype,
-        )
+    ) = UtgiftsperiodeDto(
+        fra,
+        til,
+        Månedsperiode(fra, til),
+        barnId,
+        beløp.toInt(),
+        null,
+        periodetype,
+        aktivitetstype,
+    )
 
     private fun innvilge(
         saksbehandling: Saksbehandling,

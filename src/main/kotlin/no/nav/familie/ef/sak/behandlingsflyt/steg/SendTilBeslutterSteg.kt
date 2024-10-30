@@ -160,8 +160,7 @@ class SendTilBeslutterSteg(
         }
     }
 
-    private fun opprettTaskForBehandlingsstatistikk(behandlingId: UUID) =
-        taskService.save(BehandlingsstatistikkTask.opprettVedtattTask(behandlingId = behandlingId))
+    private fun opprettTaskForBehandlingsstatistikk(behandlingId: UUID) = taskService.save(BehandlingsstatistikkTask.opprettVedtattTask(behandlingId = behandlingId))
 
     private fun ferdigstillOppgave(saksbehandling: Saksbehandling) {
         val aktivIdent = fagsakService.hentAktivIdent(saksbehandling.fagsakId)

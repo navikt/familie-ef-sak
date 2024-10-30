@@ -238,17 +238,16 @@ internal class TotrinnskontrollServiceTest {
         utfall: StegUtfall? = null,
         opprettetAv: String,
         beslutt: BeslutteVedtakDto? = null,
-    ) =
-        Behandlingshistorikk(
-            behandlingId = UUID.randomUUID(),
-            steg = steg,
-            utfall = utfall,
-            opprettetAv = opprettetAv,
-            metadata =
-                beslutt?.let {
-                    JsonWrapper(objectMapper.writeValueAsString(it))
-                },
-        )
+    ) = Behandlingshistorikk(
+        behandlingId = UUID.randomUUID(),
+        steg = steg,
+        utfall = utfall,
+        opprettetAv = opprettetAv,
+        metadata =
+            beslutt?.let {
+                JsonWrapper(objectMapper.writeValueAsString(it))
+            },
+    )
 
     private fun behandling(status: BehandlingStatus) = behandling(fagsak, status)
 

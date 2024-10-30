@@ -37,8 +37,7 @@ class StartBehandlingTask(
         }
     }
 
-    private fun finnesEnIverksattBehandlingFor(fagsak: Fagsak) =
-        behandlingRepository.finnSisteIverksatteBehandling(fagsak.id) != null
+    private fun finnesEnIverksattBehandlingFor(fagsak: Fagsak) = behandlingRepository.finnSisteIverksatteBehandling(fagsak.id) != null
 
     companion object {
         fun opprettTask(

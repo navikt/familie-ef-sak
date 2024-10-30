@@ -209,28 +209,26 @@ internal class SimuleringServiceTest {
     private fun mockSimuleringsResultat(
         behandling: Behandling,
         simuleringsoppsummering: Simuleringsoppsummering? = null,
-    ) =
-        Simuleringsresultat(
-            behandlingId = behandling.id,
-            data = DetaljertSimuleringResultat(emptyList()),
-            beriketData = BeriketSimuleringsresultat(mockk(), simuleringsoppsummering ?: mockk()),
-        )
+    ) = Simuleringsresultat(
+        behandlingId = behandling.id,
+        data = DetaljertSimuleringResultat(emptyList()),
+        beriketData = BeriketSimuleringsresultat(mockk(), simuleringsoppsummering ?: mockk()),
+    )
 
     private fun mockSimuleringsoppsummering(
         etterbetaling: BigDecimal,
         feilutbetaling: BigDecimal,
-    ) =
-        Simuleringsoppsummering(
-            perioder = listOf(),
-            fomDatoNestePeriode = null,
-            etterbetaling = etterbetaling,
-            feilutbetaling = feilutbetaling,
-            fom = null,
-            tomDatoNestePeriode = null,
-            forfallsdatoNestePeriode = null,
-            tidSimuleringHentet = null,
-            tomSisteUtbetaling = null,
-        )
+    ) = Simuleringsoppsummering(
+        perioder = listOf(),
+        fomDatoNestePeriode = null,
+        etterbetaling = etterbetaling,
+        feilutbetaling = feilutbetaling,
+        fom = null,
+        tomDatoNestePeriode = null,
+        forfallsdatoNestePeriode = null,
+        tidSimuleringHentet = null,
+        tomSisteUtbetaling = null,
+    )
 
     private fun readFile(filnavn: String): String = this::class.java.getResource("/json/$filnavn").readText()
 }

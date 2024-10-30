@@ -81,8 +81,7 @@ object PdlTestUtil {
     private fun getFeltverdi(
         felt: KProperty1<out Any, Any?>,
         entitet: Any,
-    ) =
-        felt.getter.call(entitet)
+    ) = felt.getter.call(entitet)
 
     /**
      * Finn første (og eneste) felt på entiteten som har samme navn som konstruktørparameter.
@@ -90,8 +89,7 @@ object PdlTestUtil {
     private fun finnSøknadsfelt(
         entity: Any,
         konstruktørparameter: KParameter,
-    ) =
-        entity::class.declaredMemberProperties.first { it.name == konstruktørparameter.name }
+    ) = entity::class.declaredMemberProperties.first { it.name == konstruktørparameter.name }
 
     /**
      * Konstruktørparametere er det eneste som gir oss en garantert rekkefølge for feltene, så vi henter disse først.

@@ -101,16 +101,15 @@ class TidligereVedtaksperioderService(
                 )
             }
 
-    private fun hentAndelshistorikkForOvergangsstønad(fagsaker: Fagsaker?) =
-        fagsaker?.overgangsstønad?.id?.let { andelsHistorikkService.hentHistorikk(it, null) } ?: emptyList()
+    private fun hentAndelshistorikkForOvergangsstønad(fagsaker: Fagsaker?) = fagsaker?.overgangsstønad?.id?.let { andelsHistorikkService.hentHistorikk(it, null) } ?: emptyList()
 
-    private fun hentAndelshistorikkForBarnetilsyn(fagsaker: Fagsaker?) =
-        fagsaker?.barnetilsyn?.id?.let { andelsHistorikkService.hentHistorikk(it, null) } ?: emptyList()
+    private fun hentAndelshistorikkForBarnetilsyn(fagsaker: Fagsaker?) = fagsaker?.barnetilsyn?.id?.let { andelsHistorikkService.hentHistorikk(it, null) } ?: emptyList()
 
-    private fun erstattetEllerFjernet(): (AndelHistorikkDto) -> Boolean = {
-        listOf(
-            EndringType.FJERNET,
-            EndringType.ERSTATTET,
-        ).contains(it.endring?.type)
-    }
+    private fun erstattetEllerFjernet(): (AndelHistorikkDto) -> Boolean =
+        {
+            listOf(
+                EndringType.FJERNET,
+                EndringType.ERSTATTET,
+            ).contains(it.endring?.type)
+        }
 }

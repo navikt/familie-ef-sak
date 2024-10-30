@@ -132,8 +132,7 @@ class AutomatiskJournalføringService(
             BrukerIdType.ORGNR -> false
         }
 
-    private fun hentAktørIderForPerson(personIdent: String) =
-        personService.hentAktørIder(personIdent).identer()
+    private fun hentAktørIderForPerson(personIdent: String) = personService.hentAktørIder(personIdent).identer()
 
     private fun harIngenInnslagIInfotrygd(
         ident: String,

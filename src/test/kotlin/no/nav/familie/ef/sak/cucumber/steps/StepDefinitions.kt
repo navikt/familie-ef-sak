@@ -498,8 +498,7 @@ class StepDefinitions {
         }
     }
 
-    private fun opprettBarnForNyBehandling(behandlingId: UUID) =
-        barnIder.values.flatMap { it.keys }.forEach { IdTIlUUIDHolder.hentEllerOpprettBarn(behandlingId, it) }
+    private fun opprettBarnForNyBehandling(behandlingId: UUID) = barnIder.values.flatMap { it.keys }.forEach { IdTIlUUIDHolder.hentEllerOpprettBarn(behandlingId, it) }
 
     @Så("forvent følgende inntektsperioder fra dato: {}")
     fun `forvent følgende inntektsperioder fra dato`(

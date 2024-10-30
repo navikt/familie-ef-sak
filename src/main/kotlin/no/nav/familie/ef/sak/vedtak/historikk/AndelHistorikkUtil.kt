@@ -21,8 +21,7 @@ object AndelHistorikkUtil {
     fun sammenhengende(
         first: AndelHistorikkDto,
         second: AndelHistorikkDto,
-    ) =
-        first.andel.periode.påfølgesAv(second.andel.periode)
+    ) = first.andel.periode.påfølgesAv(second.andel.periode)
 
     fun periodeTypeOvergangsstønad(
         stønadstype: StønadType,

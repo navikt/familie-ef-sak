@@ -66,8 +66,7 @@ class FagsakPersonService(
         return fagsakPerson
     }
 
-    fun finnFagsakPersonForFagsakId(fagsakId: UUID): FagsakPerson =
-        fagsakPersonRepository.finnFagsakPersonForFagsakId(fagsakId)
+    fun finnFagsakPersonForFagsakId(fagsakId: UUID): FagsakPerson = fagsakPersonRepository.finnFagsakPersonForFagsakId(fagsakId)
 
     fun oppdaterMedMikrofrontendAktivering(
         fagsakPersonId: UUID,

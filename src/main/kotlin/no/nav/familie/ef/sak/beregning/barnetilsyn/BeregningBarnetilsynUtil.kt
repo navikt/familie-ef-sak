@@ -136,8 +136,7 @@ object BeregningBarnetilsynUtil {
     fun kalkulerUtbetalingsbeløpFørFratrekkOgSatsjustering(
         periodeutgift: BigDecimal,
         kontantstøtteBeløp: BigDecimal,
-    ) =
-        maxOf(ZERO, (periodeutgift - kontantstøtteBeløp).multiply(0.64.toBigDecimal()))
+    ) = maxOf(ZERO, (periodeutgift - kontantstøtteBeløp).multiply(0.64.toBigDecimal()))
 }
 
 fun BigDecimal.roundUp(): BigDecimal = this.setScale(0, RoundingMode.UP)

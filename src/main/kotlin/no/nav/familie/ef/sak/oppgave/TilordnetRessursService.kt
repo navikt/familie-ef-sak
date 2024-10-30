@@ -133,6 +133,5 @@ class TilordnetRessursService(
         }
     }
 
-    private fun erUtviklerMedVeilderrolle(): Boolean =
-        featureToggleService.isEnabled(Toggle.UTVIKLER_MED_VEILEDERRROLLE)
+    private fun erUtviklerMedVeilderrolle(): Boolean = featureToggleService.isEnabled(Toggle.UTVIKLER_MED_VEILEDERRROLLE)
 }
