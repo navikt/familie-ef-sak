@@ -20,6 +20,7 @@ import no.nav.familie.kontrakter.felles.dokarkiv.DokarkivBruker
 import no.nav.familie.kontrakter.felles.dokarkiv.DokumentInfo
 import no.nav.familie.kontrakter.felles.dokarkiv.OppdaterJournalpostRequest
 import no.nav.familie.kontrakter.felles.dokarkiv.Sak
+import no.nav.familie.kontrakter.felles.journalpost.AvsenderMottakerIdType
 import no.nav.familie.kontrakter.felles.journalpost.Bruker
 import no.nav.familie.kontrakter.felles.journalpost.Dokumentvariantformat
 import no.nav.familie.kontrakter.felles.journalpost.Journalpost
@@ -53,7 +54,7 @@ object JournalføringHelper {
     ): AvsenderMottaker? =
         when (nyAvsender?.erBruker) {
             null -> null
-            true -> AvsenderMottaker(id = nyAvsender.personIdent, idType = BrukerIdType.FNR, navn = nyAvsender.navn!!)
+            true -> AvsenderMottaker(id = nyAvsender.personIdent, idType = AvsenderMottakerIdType.FNR, navn = nyAvsender.navn!!)
             false -> AvsenderMottaker(id = null, idType = null, navn = nyAvsender.navn!!)
         }
 
