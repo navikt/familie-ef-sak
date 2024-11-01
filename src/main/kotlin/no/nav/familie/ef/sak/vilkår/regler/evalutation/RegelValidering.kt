@@ -93,14 +93,14 @@ object RegelValidering {
         tidligereDelvilkårsvurderinger: List<Delvilkårsvurdering>,
     ) {
         val aktuelleDelvilkår = aktuelleDelvilkår(tidligereDelvilkårsvurderinger)
-        val delvilkårRegelIdn = delvilkår.map { it.hovedregel() }
-        val aktuelleHvovedregler = vilkårsregel.hovedregler.filter { aktuelleDelvilkår.contains(it) }
-        feilHvis(!aktuelleHvovedregler.containsAll(delvilkårRegelIdn)) {
-            "Delvilkårsvurderinger savner svar på hovedregler - hovedregler=$aktuelleHvovedregler delvilkår=$delvilkårRegelIdn"
+        val delvilkårRegelIds = delvilkår.map { it.hovedregel() }
+        val aktuelleHovedregler = vilkårsregel.gjeldendeHovedregler().filter { aktuelleDelvilkår.contains(it) }
+        feilHvis(!aktuelleHovedregler.containsAll(delvilkårRegelIds)) {
+            "Delvilkårsvurderinger savner svar på hovedregler - hovedregler=$aktuelleHovedregler delvilkår=$delvilkårRegelIds"
         }
-        feilHvis(delvilkårRegelIdn.size != aktuelleHvovedregler.size) {
-            "Feil i antall regler dto har ${delvilkårRegelIdn.size} " +
-                "mens vilkår har ${aktuelleHvovedregler.size} aktuelle delvilkår"
+        feilHvis(delvilkårRegelIds.size != aktuelleHovedregler.size) {
+            "Feil i antall regler dto har ${delvilkårRegelIds.size} " +
+                "mens vilkår har ${aktuelleHovedregler.size} aktuelle delvilkår"
         }
     }
 

@@ -88,11 +88,9 @@ class AleneomsorgRegel :
 
     private fun harSammeAdresse(registergrunnlagBarn: BarnMedSamværRegistergrunnlagDto) = registergrunnlagBarn.harSammeAdresse ?: false
 
-    private fun erDonorbarn(søknadsgrunnlagBarn: BarnMedSamværSøknadsgrunnlagDto) =
-        søknadsgrunnlagBarn.ikkeOppgittAnnenForelderBegrunnelse?.lowercase() == "donor"
+    private fun erDonorbarn(søknadsgrunnlagBarn: BarnMedSamværSøknadsgrunnlagDto) = søknadsgrunnlagBarn.ikkeOppgittAnnenForelderBegrunnelse?.lowercase() == "donor"
 
-    private fun erTerminbarnOgOgHarSammeAdresse(søknadsgrunnlagBarn: BarnMedSamværSøknadsgrunnlagDto) =
-        søknadsgrunnlagBarn.erTerminbarn() && søknadsgrunnlagBarn.harSammeAdresse == true
+    private fun erTerminbarnOgOgHarSammeAdresse(søknadsgrunnlagBarn: BarnMedSamværSøknadsgrunnlagDto) = søknadsgrunnlagBarn.erTerminbarn() && søknadsgrunnlagBarn.harSammeAdresse == true
 
     private fun opprettAutomatiskVurdertAleneomsorgVilkår(): List<Delvilkårsvurdering> {
         val begrunnelseTekst = "Automatisk vurdert (${
