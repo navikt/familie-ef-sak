@@ -200,15 +200,14 @@ class MålerRepositoryTest : OppslagSpringRunnerTest() {
     private fun opprettFerdigstiltBehandling(
         fagsak: Fagsak,
         opprettetTid: LocalDateTime = LocalDateTime.now(),
-    ) =
-        behandlingRepository.insert(
-            behandling(
-                fagsak,
-                status = BehandlingStatus.FERDIGSTILT,
-                resultat = INNVILGET,
-                opprettetTid = opprettetTid,
-            ),
-        )
+    ) = behandlingRepository.insert(
+        behandling(
+            fagsak,
+            status = BehandlingStatus.FERDIGSTILT,
+            resultat = INNVILGET,
+            opprettetTid = opprettetTid,
+        ),
+    )
 
     private fun lagreTilkjentYtelse(
         behandling: Behandling,

@@ -173,8 +173,7 @@ class VurderingStegService(
             ).tilDto()
     }
 
-    private fun hentHovedregelMetadata(behandlingId: UUID) =
-        vurderingService.hentGrunnlagOgMetadata(behandlingId).second
+    private fun hentHovedregelMetadata(behandlingId: UUID) = vurderingService.hentGrunnlagOgMetadata(behandlingId).second
 
     private fun validerLåstForVidereRedigering(behandlingId: UUID) {
         if (behandlingErLåstForVidereRedigering(behandlingId)) {
@@ -202,6 +201,5 @@ class VurderingStegService(
         }
     }
 
-    private fun behandlingErLåstForVidereRedigering(behandlingId: UUID) =
-        behandlingService.hentBehandling(behandlingId).status.behandlingErLåstForVidereRedigering()
+    private fun behandlingErLåstForVidereRedigering(behandlingId: UUID) = behandlingService.hentBehandling(behandlingId).status.behandlingErLåstForVidereRedigering()
 }

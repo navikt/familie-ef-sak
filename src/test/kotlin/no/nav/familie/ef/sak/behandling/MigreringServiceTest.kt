@@ -561,8 +561,7 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
 
     @Nested
     inner class StateIEfSak {
-        private fun henlagtBehandling() =
-            behandling(fagsak, status = BehandlingStatus.FERDIGSTILT, resultat = BehandlingResultat.HENLAGT)
+        private fun henlagtBehandling() = behandling(fagsak, status = BehandlingStatus.FERDIGSTILT, resultat = BehandlingResultat.HENLAGT)
 
         @Test
         internal fun `har ikke fagsak, men fagsakPerson`() {

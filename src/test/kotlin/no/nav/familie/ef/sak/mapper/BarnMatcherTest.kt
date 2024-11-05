@@ -172,28 +172,26 @@ internal class BarnMatcherTest {
     private fun behandlingBarn(
         terminDato: LocalDate? = null,
         fnr: String? = null,
-    ) =
-        BehandlingBarn(
-            personIdent = fnr,
-            fødselTermindato = terminDato,
-            behandlingId = UUID.randomUUID(),
-            navn = "navn",
-            søknadBarnId = null,
-        )
+    ) = BehandlingBarn(
+        personIdent = fnr,
+        fødselTermindato = terminDato,
+        behandlingId = UUID.randomUUID(),
+        navn = "navn",
+        søknadBarnId = null,
+    )
 
     private fun pdlBarn(
         fnr: String,
         fødsel: Fødsel,
-    ) =
-        BarnMedIdent(
-            emptyList(),
-            emptyList(),
-            emptyList(),
-            emptyList(),
-            emptyList(),
-            listOf(fødsel),
-            Navn("", "", "", Metadata(false)),
-            fnr,
-            null,
-        )
+    ) = BarnMedIdent(
+        emptyList(),
+        emptyList(),
+        emptyList(),
+        emptyList(),
+        emptyList(),
+        listOf(fødsel),
+        Navn("", "", "", Metadata(false)),
+        fnr,
+        null,
+    )
 }

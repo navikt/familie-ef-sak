@@ -5,6 +5,7 @@ import no.nav.familie.ef.sak.vilkår.Delvilkårsvurdering
 import no.nav.familie.ef.sak.vilkår.VilkårType
 import no.nav.familie.ef.sak.vilkår.Vilkårsresultat
 import no.nav.familie.ef.sak.vilkår.Vurdering
+import no.nav.familie.ef.sak.vilkår.dto.VilkårGrunnlagDto
 import no.nav.familie.ef.sak.vilkår.regler.HovedregelMetadata
 import no.nav.familie.ef.sak.vilkår.regler.NesteRegel
 import no.nav.familie.ef.sak.vilkår.regler.RegelId
@@ -15,7 +16,6 @@ import no.nav.familie.ef.sak.vilkår.regler.Vilkårsregel
 import no.nav.familie.ef.sak.vilkår.regler.jaNeiSvarRegel
 import no.nav.familie.ef.sak.vilkår.regler.regelIder
 import no.nav.familie.ef.sak.vilkår.regler.vilkår.AlderPåBarnRegelUtil.harFullførtFjerdetrinn
-import no.nav.familie.kontrakter.felles.Fødselsnummer
 import java.time.LocalDate
 import java.util.UUID
 
@@ -63,14 +63,16 @@ class AlderPåBarnRegel :
         metadata: HovedregelMetadata,
         barnId: UUID?,
     ): Boolean {
-        val fødselsdato =
-            metadata.barn
-                .firstOrNull { it.id == barnId }
-                ?.personIdent
-                ?.let { Fødselsnummer(it).fødselsdato }
-                ?: error("Finner ikke ident til barn=$barnId")
+        val fødselsdato = metadata.finnFødselsdatoEllerTermindatoForBarn(barnId)
         return harFullførtFjerdetrinn(fødselsdato)
     }
+
+    private fun HovedregelMetadata.finnFødselsdatoEllerTermindatoForBarn(barnId: UUID?): LocalDate =
+        vilkårgrunnlagDto.finnFødselsdatoForBarn(barnId)
+            ?: barn.firstOrNull { it.id == barnId }?.fødselTermindato
+            ?: error("Kunne ikke finne hverken fødselsdato fra registerdata eller termindato for barnID=$barnId")
+
+    private fun VilkårGrunnlagDto.finnFødselsdatoForBarn(barnId: UUID?): LocalDate? = barnMedSamvær.firstOrNull { it.barnId == barnId }?.registergrunnlag?.fødselsdato
 
     companion object {
         private val unntakAlderMapping =

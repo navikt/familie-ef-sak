@@ -250,8 +250,7 @@ object VedtakHistorikkBeregner {
         }
     }
 
-    private fun lagSanksjonertPeriode(vedtak: Sanksjonert) =
-        Sanksjonsperiode(vedtak.periode.tilPeriode(), vedtak.sanksjonsårsak)
+    private fun lagSanksjonertPeriode(vedtak: Sanksjonert) = Sanksjonsperiode(vedtak.periode.tilPeriode(), vedtak.sanksjonsårsak)
 
     /**
      * Då ett nytt vedtak splitter tidligere vedtaksperioder,

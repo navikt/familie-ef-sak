@@ -69,8 +69,7 @@ class OppgaverForOpprettelseService(
         }
     }
 
-    fun initialVerdierForOppgaverSomSkalOpprettes(behandlingId: UUID) =
-        hentOppgavetyperSomKanOpprettes(behandlingId)
+    fun initialVerdierForOppgaverSomSkalOpprettes(behandlingId: UUID) = hentOppgavetyperSomKanOpprettes(behandlingId)
 
     private fun kanOppretteOppgaveForInntektskontrollFremITid(
         tilkjentYtelse: TilkjentYtelse?,

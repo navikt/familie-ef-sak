@@ -285,13 +285,12 @@ fun årsakRevurdering(
     opplysningskilde: Opplysningskilde = Opplysningskilde.MELDING_MODIA,
     årsak: Revurderingsårsak = Revurderingsårsak.ANNET,
     beskrivelse: String? = null,
-) =
-    ÅrsakRevurdering(
-        behandlingId = behandlingId,
-        opplysningskilde = opplysningskilde,
-        årsak = årsak,
-        beskrivelse = beskrivelse,
-    )
+) = ÅrsakRevurdering(
+    behandlingId = behandlingId,
+    opplysningskilde = opplysningskilde,
+    årsak = årsak,
+    beskrivelse = beskrivelse,
+)
 
 fun revurderingsinformasjon() =
     RevurderingsinformasjonDto(
@@ -400,8 +399,7 @@ fun inntektsperiode(
     samordningsfradrag: BigDecimal = BigDecimal.valueOf(500),
     dagsats: BigDecimal? = null,
     månedsinntekt: BigDecimal? = null,
-) =
-    Inntektsperiode(periode = Månedsperiode(startDato, sluttDato), dagsats = dagsats, månedsinntekt = månedsinntekt, inntekt = inntekt, samordningsfradrag = samordningsfradrag)
+) = Inntektsperiode(periode = Månedsperiode(startDato, sluttDato), dagsats = dagsats, månedsinntekt = månedsinntekt, inntekt = inntekt, samordningsfradrag = samordningsfradrag)
 
 fun vedtaksperiode(
     år: Int = 2021,
@@ -412,35 +410,32 @@ fun vedtaksperiode(
         if (vedtaksperiodeType == VedtaksperiodeType.SANKSJON) AktivitetType.IKKE_AKTIVITETSPLIKT else AktivitetType.BARN_UNDER_ETT_ÅR,
     sanksjonsårsak: Sanksjonsårsak? =
         if (vedtaksperiodeType == VedtaksperiodeType.SANKSJON) Sanksjonsårsak.SAGT_OPP_STILLING else null,
-) =
-    Vedtaksperiode(startDato, sluttDato, aktivitetstype, vedtaksperiodeType, sanksjonsårsak)
+) = Vedtaksperiode(startDato, sluttDato, aktivitetstype, vedtaksperiodeType, sanksjonsårsak)
 
 fun vedtaksperiodeDto(
     årMånedFra: LocalDate = LocalDate.of(2021, 1, 1),
     årMånedTil: LocalDate = LocalDate.of(2021, 12, 1),
     periodeType: VedtaksperiodeType = VedtaksperiodeType.HOVEDPERIODE,
     aktivitet: AktivitetType = AktivitetType.BARN_UNDER_ETT_ÅR,
-) =
-    vedtaksperiodeDto(
-        årMånedFra = YearMonth.from(årMånedFra),
-        årMånedTil = YearMonth.from(årMånedTil),
-        periodeType = periodeType,
-        aktivitet = aktivitet,
-    )
+) = vedtaksperiodeDto(
+    årMånedFra = YearMonth.from(årMånedFra),
+    årMånedTil = YearMonth.from(årMånedTil),
+    periodeType = periodeType,
+    aktivitet = aktivitet,
+)
 
 fun vedtaksperiodeDto(
     årMånedFra: YearMonth = YearMonth.of(2021, 1),
     årMånedTil: YearMonth = YearMonth.of(2021, 12),
     periodeType: VedtaksperiodeType = VedtaksperiodeType.HOVEDPERIODE,
     aktivitet: AktivitetType = AktivitetType.BARN_UNDER_ETT_ÅR,
-) =
-    VedtaksperiodeDto(
-        årMånedFra = årMånedFra,
-        årMånedTil = årMånedTil,
-        periode = Månedsperiode(årMånedFra, årMånedTil),
-        aktivitet = aktivitet,
-        periodeType = periodeType,
-    )
+) = VedtaksperiodeDto(
+    årMånedFra = årMånedFra,
+    årMånedTil = årMånedTil,
+    periode = Månedsperiode(årMånedFra, årMånedTil),
+    aktivitet = aktivitet,
+    periodeType = periodeType,
+)
 
 fun behandlingBarn(
     id: UUID = UUID.randomUUID(),
@@ -490,16 +485,15 @@ fun sivilstand(
     type: Sivilstandstype,
     gyldigFraOgMed: LocalDate = LocalDate.now(),
     metadata: Metadata = metadataGjeldende,
-) =
-    SivilstandMedNavn(
-        type = type,
-        gyldigFraOgMed = gyldigFraOgMed,
-        relatertVedSivilstand = null,
-        bekreftelsesdato = null,
-        dødsfall = null,
-        navn = null,
-        metadata = metadata,
-    )
+) = SivilstandMedNavn(
+    type = type,
+    gyldigFraOgMed = gyldigFraOgMed,
+    relatertVedSivilstand = null,
+    bekreftelsesdato = null,
+    dødsfall = null,
+    navn = null,
+    metadata = metadata,
+)
 
 fun søker(sivilstand: List<SivilstandMedNavn> = emptyList()): Søker =
     Søker(

@@ -88,6 +88,5 @@ class SøkController(
         validerIdent(personIdentRequest.personIdent)
     }
 
-    private fun hentOgValiderAtIdentEksisterer(personIdentRequest: PersonIdentDto): PdlIdenter =
-        personService.hentPersonIdenter(personIdentRequest.personIdent)
+    private fun hentOgValiderAtIdentEksisterer(personIdentRequest: PersonIdentDto): PdlIdenter = personService.hentPersonIdenter(personIdentRequest.personIdent)
 }

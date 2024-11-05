@@ -36,16 +36,15 @@ fun UttrekkArbeidssøkere.tilDto(
     personIdent: String,
     navn: String,
     adressebeskyttelse: PdlAdressebeskyttelse?,
-) =
-    UttrekkArbeidssøkerDto(
-        id = this.id,
-        fagsakId = this.fagsakId,
-        behandlingIdForVedtak = this.vedtakId,
-        personIdent = personIdent,
-        navn = navn,
-        registrertArbeidssøker = this.registrertArbeidssøker,
-        adressebeskyttelse = adressebeskyttelse?.let { Adressebeskyttelse.valueOf(it.gradering.name) },
-        kontrollert = this.kontrollert,
-        kontrollertTid = this.kontrollertTid,
-        kontrollertAv = this.kontrollertAv,
-    )
+) = UttrekkArbeidssøkerDto(
+    id = this.id,
+    fagsakId = this.fagsakId,
+    behandlingIdForVedtak = this.vedtakId,
+    personIdent = personIdent,
+    navn = navn,
+    registrertArbeidssøker = this.registrertArbeidssøker,
+    adressebeskyttelse = adressebeskyttelse?.let { Adressebeskyttelse.valueOf(it.gradering.name) },
+    kontrollert = this.kontrollert,
+    kontrollertTid = this.kontrollertTid,
+    kontrollertAv = this.kontrollertAv,
+)

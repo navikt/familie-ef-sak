@@ -493,15 +493,14 @@ internal class BeregningSkolepengerServiceTest {
         skoleårsperioder: List<SkoleårsperiodeSkolepengerDto>,
         behandlingId: UUID = UUID.randomUUID(),
         resultatType: ResultatType = ResultatType.INNVILGE,
-    ) =
-        Vedtak(
-            behandlingId = behandlingId,
-            resultatType = resultatType,
-            periodeBegrunnelse = "OK",
-            inntektBegrunnelse = "OK",
-            avslåBegrunnelse = null,
-            skolepenger = SkolepengerWrapper(skoleårsperioder.map { it.tilDomene() }, begrunnelse = null),
-        )
+    ) = Vedtak(
+        behandlingId = behandlingId,
+        resultatType = resultatType,
+        periodeBegrunnelse = "OK",
+        inntektBegrunnelse = "OK",
+        avslåBegrunnelse = null,
+        skolepenger = SkolepengerWrapper(skoleårsperioder.map { it.tilDomene() }, begrunnelse = null),
+    )
 
     private fun utgift(
         id: UUID = UUID.randomUUID(),

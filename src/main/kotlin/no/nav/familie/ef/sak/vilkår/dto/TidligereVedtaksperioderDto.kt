@@ -15,8 +15,7 @@ data class TidligereVedtaksperioderDto(
     val sak: TidligereInnvilgetVedtakDto?,
     val historiskPensjon: Boolean?,
 ) {
-    fun harTidligereVedtaksperioder() =
-        infotrygd?.harTidligereInnvilgetVedtak() ?: false || sak?.harTidligereInnvilgetVedtak() ?: false || historiskPensjon ?: true
+    fun harTidligereVedtaksperioder() = infotrygd?.harTidligereInnvilgetVedtak() ?: false || sak?.harTidligereInnvilgetVedtak() ?: false || historiskPensjon ?: true
 }
 
 data class TidligereInnvilgetVedtakDto(
@@ -27,8 +26,7 @@ data class TidligereInnvilgetVedtakDto(
     val periodeHistorikkBarnetilsyn: List<GrunnlagsdataPeriodeHistorikkBarnetilsynDto> = emptyList(),
     val sistePeriodeMedOvergangsstønad: SistePeriodeMedOvergangsstønadDto? = null,
 ) {
-    fun harTidligereInnvilgetVedtak() =
-        harTidligereOvergangsstønad || harTidligereBarnetilsyn || harTidligereSkolepenger
+    fun harTidligereInnvilgetVedtak() = harTidligereOvergangsstønad || harTidligereBarnetilsyn || harTidligereSkolepenger
 }
 
 data class GrunnlagsdataPeriodeHistorikkDto(

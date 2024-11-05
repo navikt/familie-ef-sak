@@ -42,8 +42,7 @@ class PerioderForBarnetrygdService(
 
 private fun EksternPeriode.tilPeriode(): Datoperiode = Datoperiode(this.fomDato, this.tomDato)
 
-private fun EksternPeriode.omsluttesAv(annen: EksternPeriode): Boolean =
-    this.tilPeriode().omsluttesAv(annen.tilPeriode())
+private fun EksternPeriode.omsluttesAv(annen: EksternPeriode): Boolean = this.tilPeriode().omsluttesAv(annen.tilPeriode())
 
 private fun MutableList<EksternPeriode>.fjernDuplikatOgSplittOverlappendePeriode(gjeldende: EksternPeriode): MutableList<EksternPeriode> {
     val forrige = this.removeLastOrNull()

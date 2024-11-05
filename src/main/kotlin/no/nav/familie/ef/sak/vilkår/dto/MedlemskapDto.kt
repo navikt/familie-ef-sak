@@ -42,11 +42,9 @@ data class MedlUnntaksperiodeDto(
     val erMedlemIFolketrygden: Boolean,
 )
 
-fun Medlemskapsinfo.tilDto(): MedlUnntakDto =
-    MedlUnntakDto(this.gyldigePerioder.map { it.tilDto() })
+fun Medlemskapsinfo.tilDto(): MedlUnntakDto = MedlUnntakDto(this.gyldigePerioder.map { it.tilDto() })
 
-fun PeriodeInfo.tilDto(): MedlUnntaksperiodeDto =
-    MedlUnntaksperiodeDto(this.fom, this.tom, this.gjelderMedlemskapIFolketrygden)
+fun PeriodeInfo.tilDto(): MedlUnntaksperiodeDto = MedlUnntaksperiodeDto(this.fom, this.tom, this.gjelderMedlemskapIFolketrygden)
 
 data class UtenlandsoppholdDto(
     val fraDato: LocalDate? = null,

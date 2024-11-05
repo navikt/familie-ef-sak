@@ -38,5 +38,4 @@ data class RegelSteg(
 fun jaNeiSvarRegel(
     hvisJa: SvarRegel = SluttSvarRegel.OPPFYLT,
     hvisNei: SvarRegel = SluttSvarRegel.IKKE_OPPFYLT,
-): Map<SvarId, SvarRegel> =
-    mapOf(SvarId.JA to hvisJa, SvarId.NEI to hvisNei)
+): Map<SvarId, SvarRegel> = mapOf(SvarId.JA to hvisJa, SvarId.NEI to hvisNei)

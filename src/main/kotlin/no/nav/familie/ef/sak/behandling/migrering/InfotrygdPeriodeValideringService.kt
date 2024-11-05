@@ -174,17 +174,15 @@ class InfotrygdPeriodeValideringService(
     private fun perioderErSammenhengendeMedSammeAktivitetOgMånedsbeløp(
         last: SummertInfotrygdPeriodeDto,
         periode: SummertInfotrygdPeriodeDto,
-    ) =
-        last.stønadsperiode påfølgesAv periode.stønadsperiode &&
-            sammeAktivitetEllerIkkeArbeidssøker(last, periode) &&
-            last.månedsbeløp == periode.månedsbeløp
+    ) = last.stønadsperiode påfølgesAv periode.stønadsperiode &&
+        sammeAktivitetEllerIkkeArbeidssøker(last, periode) &&
+        last.månedsbeløp == periode.månedsbeløp
 
     private fun sammeAktivitetEllerIkkeArbeidssøker(
         last: SummertInfotrygdPeriodeDto,
         periode: SummertInfotrygdPeriodeDto,
-    ) =
-        last.aktivitet == periode.aktivitet ||
-            (last.aktivitet != TILMELDT_SOM_REELL_ARBEIDSSØKER && periode.aktivitet != TILMELDT_SOM_REELL_ARBEIDSSØKER)
+    ) = last.aktivitet == periode.aktivitet ||
+        (last.aktivitet != TILMELDT_SOM_REELL_ARBEIDSSØKER && periode.aktivitet != TILMELDT_SOM_REELL_ARBEIDSSØKER)
 
     /**
      * Henter siste måneden for en periode bak i tiden

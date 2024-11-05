@@ -42,8 +42,7 @@ class ÅrsakRevurderingService(
         }
     }
 
-    fun hentÅrsakRevurdering(behandlingId: UUID): ÅrsakRevurdering? =
-        årsakRevurderingsRepository.findByIdOrNull(behandlingId)
+    fun hentÅrsakRevurdering(behandlingId: UUID): ÅrsakRevurdering? = årsakRevurderingsRepository.findByIdOrNull(behandlingId)
 
     fun hentRevurderingsinformasjon(behandlingId: UUID): RevurderingsinformasjonDto {
         val kravMottatt = behandlingService.hentSaksbehandling(behandlingId).kravMottatt

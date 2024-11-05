@@ -124,8 +124,7 @@ internal class JournalføringKlageServiceTest {
     private fun lagRequest(
         aksjon: Journalføringsaksjon = Journalføringsaksjon.OPPRETT_BEHANDLING,
         årsak: Journalføringsårsak = Journalføringsårsak.KLAGE,
-    ) =
-        JournalføringRequestV2(aksjon = aksjon, årsak = årsak, dokumentTitler = emptyMap(), fagsakId = fagsakId, oppgaveId = oppgaveId, journalførendeEnhet = "enhet", nyAvsender = NyAvsender(erBruker = false, navn = "Fjas", personIdent = null))
+    ) = JournalføringRequestV2(aksjon = aksjon, årsak = årsak, dokumentTitler = emptyMap(), fagsakId = fagsakId, oppgaveId = oppgaveId, journalførendeEnhet = "enhet", nyAvsender = NyAvsender(erBruker = false, navn = "Fjas", personIdent = null))
 
     fun lagjournalpost(mottattDato: LocalDate? = null) =
         Journalpost(
