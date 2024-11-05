@@ -102,16 +102,6 @@
             "resultat": "OPPFYLT",
             "vurderinger": [
               {
-                "regelId": "SKRIFTLIG_AVTALE_OM_DELT_BOSTED",
-                "svar": null,
-                "begrunnelse": "Godkjent"
-              }
-            ]
-          },
-          {
-            "resultat": "OPPFYLT",
-            "vurderinger": [
-              {
                 "regelId": "NÆRE_BOFORHOLD",
                 "svar": null,
                 "begrunnelse": "Godkjent"

@@ -31,6 +31,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
 import org.springframework.beans.factory.annotation.Autowired
+import java.time.LocalDate
 import java.util.UUID
 
 internal class TestSaksbehandlingControllerTest : OppslagSpringRunnerTest() {
@@ -159,8 +160,21 @@ internal class TestSaksbehandlingControllerTest : OppslagSpringRunnerTest() {
             )
 
         // Opprett behandlingsbarn
-        barnRepository.insert(BehandlingBarn(behandlingId = førstegangsbehandling.id, personIdent = "13481975357"))
-        barnRepository.insert(BehandlingBarn(behandlingId = revurdering.id, personIdent = "13481975357"))
+        val fødselTerminDato = LocalDate.now().minusYears(2)
+        barnRepository.insert(
+            BehandlingBarn(
+                behandlingId = førstegangsbehandling.id,
+                personIdent = "18411577259",
+                fødselTermindato = fødselTerminDato,
+            ),
+        )
+        barnRepository.insert(
+            BehandlingBarn(
+                behandlingId = revurdering.id,
+                personIdent = "18411577259",
+                fødselTermindato = fødselTerminDato,
+            ),
+        )
 
         // Opprett grunnlagsdata
         grunnlagsdataService.opprettGrunnlagsdata(førstegangsbehandling.id)
@@ -169,7 +183,7 @@ internal class TestSaksbehandlingControllerTest : OppslagSpringRunnerTest() {
         // Opprett alle vurderinger (med historiske vilkår) for førstegangsbehandling
         val vurderingerForFørstegangsbehandling = vilkårsvurderingRepository.insertAll(opprettAlleVurderinger(førstegangsbehandling.id, stønadType))
 
-        // Opprett vurderiner (uten historiske vilkår) for revurdering
+        // Opprett vurderinger (uten historiske vilkår) for revurdering
         testWithBrukerContext(preferredUsername = "Z999999", groups = listOf(rolleConfig.saksbehandlerRolle)) {
             // Initier vilkår for revurdering
             vurderingService.hentEllerOpprettVurderinger(revurdering.id)
