@@ -21,7 +21,7 @@ object RegelValidering {
         oppdatering: List<DelvilkårsvurderingDto>,
         tidligereDelvilkårsvurderinger: List<Delvilkårsvurdering>,
     ) {
-        validerAlleDelvilkårErBesvartUtFraRegelverksversjon(vilkårsregel, oppdatering)
+        validerAlleDelvilkårErBesvartUtFraRegelverksversjon(vilkårsregel.vilkårType, oppdatering)
         validerAlleHovedreglerFinnesMed(vilkårsregel, oppdatering, tidligereDelvilkårsvurderinger)
 
         oppdatering.forEach { delvilkårsvurderingDto ->
@@ -77,13 +77,12 @@ object RegelValidering {
      * Når backend initierar [Delvilkårsvurdering] så legges ett første svar in med regelId(hovedregel) for hvert delvilkår
      */
     private fun validerAlleDelvilkårErBesvartUtFraRegelverksversjon(
-        vilkårsregel: Vilkårsregel,
+        vilkårType: VilkårType,
         oppdatering: List<DelvilkårsvurderingDto>,
     ) {
         oppdatering.forEach { vurdering ->
-            val regelSteg = vilkårsregel.regler[vurdering.hovedregel()] ?: error("Fant ikke regelSteg for ${vurdering.hovedregel()}")
-            feilHvis(vurdering.vurderinger.isEmpty() && regelSteg.versjon == RegelVersjon.GJELDENDE) { "Mangler svar for et delvilkår for vilkår=${vilkårsregel.vilkårType}" }
-            feilHvis(vurdering.vurderinger.isNotEmpty() && regelSteg.versjon == RegelVersjon.HISTORISK) { "Kan ikke oppdatere et historisk delvilkår. Vilkår=${vilkårsregel.vilkårType}" }
+            feilHvis(vurdering.hovedregel().regelVersjon == RegelVersjon.GJELDENDE && vurdering.vurderinger.isEmpty()) { "Mangler svar for et delvilkår for vilkår=$vilkårType" }
+            feilHvis(vurdering.hovedregel().regelVersjon == RegelVersjon.HISTORISK && vurdering.vurderinger.isNotEmpty()) { "Kan ikke oppdatere et historisk delvilkår. Vilkår=$vilkårType" }
         }
     }
 
@@ -96,7 +95,7 @@ object RegelValidering {
         val delvilkårRegelIds = delvilkår.map { it.hovedregel() }
         val aktuelleHovedregler = vilkårsregel.gjeldendeHovedregler().filter { aktuelleDelvilkår.contains(it) }
         feilHvis(!aktuelleHovedregler.containsAll(delvilkårRegelIds)) {
-            "Delvilkårsvurderinger savner svar på hovedregler - hovedregler=$aktuelleHovedregler delvilkår=$delvilkårRegelIds"
+            "Delvilkårsvurderinger mangler svar på hovedregler - hovedregler=$aktuelleHovedregler delvilkår=$delvilkårRegelIds"
         }
         feilHvis(delvilkårRegelIds.size != aktuelleHovedregler.size) {
             "Feil i antall regler dto har ${delvilkårRegelIds.size} " +

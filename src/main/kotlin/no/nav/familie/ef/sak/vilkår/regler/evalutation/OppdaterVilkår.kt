@@ -12,7 +12,6 @@ import no.nav.familie.ef.sak.vilkår.dto.tilDto
 import no.nav.familie.ef.sak.vilkår.harSvar
 import no.nav.familie.ef.sak.vilkår.regler.HovedregelMetadata
 import no.nav.familie.ef.sak.vilkår.regler.RegelId
-import no.nav.familie.ef.sak.vilkår.regler.RegelVersjon
 import no.nav.familie.ef.sak.vilkår.regler.SvarId
 import no.nav.familie.ef.sak.vilkår.regler.Vilkårsregel
 import no.nav.familie.ef.sak.vilkår.regler.Vilkårsregler.Companion.ALLE_VILKÅRSREGLER
@@ -77,10 +76,9 @@ object OppdaterVilkår {
     ): DelvilkårsvurderingWrapper {
         val vurderingerPåType = oppdatering.associateBy { it.vurderinger.first().regelId }
         val delvilkårsvurderinger =
-            vilkårsvurdering.delvilkårsvurdering.delvilkårsvurderinger
-                .filter {
-                    it.hovedregel.regelVersjon == RegelVersjon.GJELDENDE
-                }.map {
+            vilkårsvurdering
+                .gjeldendeDelvilkårsvurderinger()
+                .map {
                     if (it.resultat == Vilkårsresultat.IKKE_AKTUELL) {
                         it
                     } else {

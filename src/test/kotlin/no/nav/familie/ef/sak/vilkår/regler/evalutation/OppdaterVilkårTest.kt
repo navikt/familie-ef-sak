@@ -431,7 +431,7 @@ internal class OppdaterVilkårTest {
             )
         assertThat(catchThrowable { OppdaterVilkår.lagNyOppdatertVilkårsvurdering(vilkårsvurdering, oppdatering) })
             .hasMessage(
-                "Delvilkårsvurderinger savner svar på hovedregler - " +
+                "Delvilkårsvurderinger mangler svar på hovedregler - " +
                     "hovedregler=[KRAV_SIVILSTAND_UTEN_PÅKREVD_BEGRUNNELSE] delvilkår=[SIVILSTAND_UNNTAK]",
             )
     }

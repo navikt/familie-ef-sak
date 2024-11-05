@@ -54,7 +54,7 @@ abstract class Vilkårsregel(
             )
         }
 
-    fun gjeldendeHovedregler() = hovedregler.filter { regelId -> regler[regelId]?.let { it.versjon != RegelVersjon.HISTORISK } ?: error("Kan ikke initiere delvilkårsvurdering for regel som ikke finnes. RegelId=$regelId") }
+    fun gjeldendeHovedregler() = hovedregler.filter { it.regelVersjon == RegelVersjon.GJELDENDE }
 
     constructor(vilkårType: VilkårType, regler: Set<RegelSteg>, hovedregler: Set<RegelId>) :
         this(vilkårType, regler.associateBy { it.regelId }, hovedregler)

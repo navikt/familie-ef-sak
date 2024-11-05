@@ -18,7 +18,6 @@ import no.nav.familie.ef.sak.vilkår.VilkårType
 import no.nav.familie.ef.sak.vilkår.Vilkårsresultat
 import no.nav.familie.ef.sak.vilkår.Vilkårsvurdering
 import no.nav.familie.ef.sak.vilkår.VilkårsvurderingRepository
-import no.nav.familie.ef.sak.vilkår.regler.RegelVersjon
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -112,9 +111,7 @@ class GjenbrukVilkårService(
                     delvilkårsvurdering =
                         vurdering.delvilkårsvurdering.copy(
                             delvilkårsvurderinger =
-                                vurdering.delvilkårsvurdering.delvilkårsvurderinger.filter { delvurdering ->
-                                    delvurdering.hovedregel.regelVersjon == RegelVersjon.GJELDENDE
-                                },
+                                vurdering.gjeldendeDelvilkårsvurderinger(),
                         ),
                 )
             }
