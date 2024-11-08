@@ -101,17 +101,17 @@ class GjenbrukVilkårService(
         val barnForVurdering = forrigeBarnIdTilNåværendeBarnMap[tidligereVurdering.barnId]
         nåværendeVurderinger
             .firstOrNull { it.type == tidligereVurdering.type && it.barnId == barnForVurdering?.id }
-            ?.let { vurdering ->
+            ?.let { nåværendeVurdering ->
                 tidligereVurdering.copy(
-                    id = vurdering.id,
+                    id = nåværendeVurdering.id,
                     behandlingId = behandlingId,
-                    sporbar = vurdering.sporbar,
-                    barnId = vurdering.barnId,
+                    sporbar = nåværendeVurdering.sporbar,
+                    barnId = nåværendeVurdering.barnId,
                     opphavsvilkår = tidligereVurdering.opprettOpphavsvilkår(),
                     delvilkårsvurdering =
-                        vurdering.delvilkårsvurdering.copy(
+                        tidligereVurdering.delvilkårsvurdering.copy(
                             delvilkårsvurderinger =
-                                vurdering.gjeldendeDelvilkårsvurderinger(),
+                                tidligereVurdering.gjeldendeDelvilkårsvurderinger(),
                         ),
                 )
             }
