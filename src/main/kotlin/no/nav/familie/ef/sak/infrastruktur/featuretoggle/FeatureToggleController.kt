@@ -25,7 +25,6 @@ class FeatureToggleController(
             Toggle.HENLEGG_BEHANDLING_UTEN_OPPGAVE,
             Toggle.FRONTED_VIS_TILDEL_OPPGAVE_BEHANDLING,
             Toggle.VELG_ÅRSAK_VED_KLAGE_OPPRETTELSE,
-            Toggle.BRUK_FAMILIE_BREV_FELTER_V2,
         )
 
     @GetMapping
