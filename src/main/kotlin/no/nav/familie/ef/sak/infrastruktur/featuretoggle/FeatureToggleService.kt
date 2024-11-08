@@ -21,7 +21,6 @@ enum class Toggle(
 ) {
     // Release
     OVERSENDE_BEGRUNNELSE_FOR_TILBAKEKREVING("familie-ef-sak.begrunnelse-for-tilbakekreving", "Release"),
-    BRUK_FAMILIE_BREV_FELTER_V2("familie.ef.sak.frontend-bruk-brev-endepunkt-felter-v2", "Release"),
 
     // Operational
     G_BEREGNING("familie.ef.sak.g-beregning", "Operational"),
