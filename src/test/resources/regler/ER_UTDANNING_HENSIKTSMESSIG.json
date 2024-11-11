@@ -12,7 +12,8 @@
           "begrunnelseType" : "PÅKREVD",
           "regelId" : "SLUTT_NODE"
         }
-      }
+      },
+      "versjon" : "GJELDENDE"
     },
     "SAKSBEHANDLER_VURDERING" : {
       "regelId" : "SAKSBEHANDLER_VURDERING",
@@ -25,7 +26,8 @@
           "begrunnelseType" : "PÅKREVD",
           "regelId" : "SLUTT_NODE"
         }
-      }
+      },
+      "versjon" : "GJELDENDE"
     }
   }
 }

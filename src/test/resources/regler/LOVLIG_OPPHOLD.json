@@ -12,7 +12,8 @@
           "regelId" : "OPPHOLD_UNNTAK",
           "begrunnelseType" : "UTEN"
         }
-      }
+      },
+      "versjon" : "GJELDENDE"
     },
     "OPPHOLD_UNNTAK" : {
       "regelId" : "OPPHOLD_UNNTAK",
@@ -33,7 +34,8 @@
           "begrunnelseType" : "PÅKREVD",
           "regelId" : "SLUTT_NODE"
         }
-      }
+      },
+      "versjon" : "GJELDENDE"
     }
   }
 }

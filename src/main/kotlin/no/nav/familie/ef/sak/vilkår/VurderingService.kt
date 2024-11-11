@@ -273,6 +273,7 @@ class VurderingService(
                         sporbar = Sporbar(),
                         barnId = finnBarnId(vurdering.barnId, barnIdMap),
                         opphavsvilkår = vurdering.opprettOpphavsvilkår(),
+                        delvilkårsvurdering = vurdering.delvilkårsvurdering.copy(delvilkårsvurderinger = vurdering.gjeldendeDelvilkårsvurderinger()),
                     )
             }
 

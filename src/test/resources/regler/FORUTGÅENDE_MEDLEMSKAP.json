@@ -12,7 +12,8 @@
           "regelId" : "MEDLEMSKAP_UNNTAK",
           "begrunnelseType" : "UTEN"
         }
-      }
+      },
+      "versjon" : "GJELDENDE"
     },
     "MEDLEMSKAP_UNNTAK" : {
       "regelId" : "MEDLEMSKAP_UNNTAK",
@@ -57,7 +58,8 @@
           "begrunnelseType" : "PÅKREVD",
           "regelId" : "SLUTT_NODE"
         }
-      }
+      },
+      "versjon" : "GJELDENDE"
     }
   }
 }

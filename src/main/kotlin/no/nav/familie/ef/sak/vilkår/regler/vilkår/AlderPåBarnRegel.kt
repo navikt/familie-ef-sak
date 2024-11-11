@@ -34,7 +34,7 @@ class AlderPåBarnRegel :
             return super.initiereDelvilkårsvurdering(metadata, resultat, barnId)
         }
 
-        return hovedregler.map {
+        return gjeldendeHovedregler().map {
             if (it == RegelId.HAR_ALDER_LAVERE_ENN_GRENSEVERDI && !harFullførtFjerdetrinn(metadata, barnId)) {
                 automatisktOppfyltHarAlderLavereEnnGrenseverdi()
             } else {

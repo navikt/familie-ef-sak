@@ -9,6 +9,7 @@ import no.nav.familie.ef.sak.vilkår.dto.DelvilkårsvurderingDto
 import no.nav.familie.ef.sak.vilkår.dto.VurderingDto
 import no.nav.familie.ef.sak.vilkår.regler.BegrunnelseType
 import no.nav.familie.ef.sak.vilkår.regler.RegelId
+import no.nav.familie.ef.sak.vilkår.regler.RegelVersjon
 import no.nav.familie.ef.sak.vilkår.regler.SluttSvarRegel
 import no.nav.familie.ef.sak.vilkår.regler.SvarId
 import no.nav.familie.ef.sak.vilkår.regler.SvarRegel
@@ -20,7 +21,7 @@ object RegelValidering {
         oppdatering: List<DelvilkårsvurderingDto>,
         tidligereDelvilkårsvurderinger: List<Delvilkårsvurdering>,
     ) {
-        validerAlleDelvilkårHarMinimumEttSvar(vilkårsregel.vilkårType, oppdatering)
+        validerAlleDelvilkårErBesvartUtFraRegelverksversjon(vilkårsregel.vilkårType, oppdatering)
         validerAlleHovedreglerFinnesMed(vilkårsregel, oppdatering, tidligereDelvilkårsvurderinger)
 
         oppdatering.forEach { delvilkårsvurderingDto ->
@@ -75,12 +76,13 @@ object RegelValidering {
      * Skal validere att man sender inn minimum ett svar for ett delvilkår
      * Når backend initierar [Delvilkårsvurdering] så legges ett første svar in med regelId(hovedregel) for hvert delvilkår
      */
-    private fun validerAlleDelvilkårHarMinimumEttSvar(
+    private fun validerAlleDelvilkårErBesvartUtFraRegelverksversjon(
         vilkårType: VilkårType,
         oppdatering: List<DelvilkårsvurderingDto>,
     ) {
         oppdatering.forEach { vurdering ->
-            feilHvis(vurdering.vurderinger.isEmpty()) { "Savner svar for en av delvilkåren for vilkår=$vilkårType" }
+            feilHvis(vurdering.hovedregel().regelVersjon == RegelVersjon.GJELDENDE && vurdering.vurderinger.isEmpty()) { "Mangler svar for et delvilkår for vilkår=$vilkårType" }
+            feilHvis(vurdering.hovedregel().regelVersjon == RegelVersjon.HISTORISK && vurdering.vurderinger.isNotEmpty()) { "Kan ikke oppdatere et historisk delvilkår. Vilkår=$vilkårType" }
         }
     }
 
@@ -90,14 +92,14 @@ object RegelValidering {
         tidligereDelvilkårsvurderinger: List<Delvilkårsvurdering>,
     ) {
         val aktuelleDelvilkår = aktuelleDelvilkår(tidligereDelvilkårsvurderinger)
-        val delvilkårRegelIdn = delvilkår.map { it.hovedregel() }
-        val aktuelleHvovedregler = vilkårsregel.hovedregler.filter { aktuelleDelvilkår.contains(it) }
-        feilHvis(!aktuelleHvovedregler.containsAll(delvilkårRegelIdn)) {
-            "Delvilkårsvurderinger savner svar på hovedregler - hovedregler=$aktuelleHvovedregler delvilkår=$delvilkårRegelIdn"
+        val delvilkårRegelIds = delvilkår.map { it.hovedregel() }
+        val aktuelleHovedregler = vilkårsregel.gjeldendeHovedregler().filter { aktuelleDelvilkår.contains(it) }
+        feilHvis(!aktuelleHovedregler.containsAll(delvilkårRegelIds)) {
+            "Delvilkårsvurderinger mangler svar på hovedregler - hovedregler=$aktuelleHovedregler delvilkår=$delvilkårRegelIds"
         }
-        feilHvis(delvilkårRegelIdn.size != aktuelleHvovedregler.size) {
-            "Feil i antall regler dto har ${delvilkårRegelIdn.size} " +
-                "mens vilkår har ${aktuelleHvovedregler.size} aktuelle delvilkår"
+        feilHvis(delvilkårRegelIds.size != aktuelleHovedregler.size) {
+            "Feil i antall regler dto har ${delvilkårRegelIds.size} " +
+                "mens vilkår har ${aktuelleHovedregler.size} aktuelle delvilkår"
         }
     }
 

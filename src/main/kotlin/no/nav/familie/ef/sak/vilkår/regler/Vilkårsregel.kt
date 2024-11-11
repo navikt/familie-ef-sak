@@ -47,12 +47,14 @@ abstract class Vilkårsregel(
         resultat: Vilkårsresultat = Vilkårsresultat.IKKE_TATT_STILLING_TIL,
         barnId: UUID? = null,
     ): List<Delvilkårsvurdering> =
-        hovedregler.map {
+        gjeldendeHovedregler().map {
             Delvilkårsvurdering(
                 resultat,
                 vurderinger = listOf(Vurdering(it)),
             )
         }
+
+    fun gjeldendeHovedregler() = hovedregler.filter { it.regelVersjon == RegelVersjon.GJELDENDE }
 
     constructor(vilkårType: VilkårType, regler: Set<RegelSteg>, hovedregler: Set<RegelId>) :
         this(vilkårType, regler.associateBy { it.regelId }, hovedregler)

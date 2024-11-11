@@ -320,12 +320,15 @@ internal class VurderingControllerTest : OppslagSpringRunnerTest() {
                     ?.vurderinger
                     ?.first { it.vilkårType == VilkårType.ALENEOMSORG }
 
-            val vurderingDeltBosted = utledVurdering(aleneOmsorgVilkår, RegelId.SKRIFTLIG_AVTALE_OM_DELT_BOSTED)
             val vurderingNæreBoforhold = utledVurdering(aleneOmsorgVilkår, RegelId.NÆRE_BOFORHOLD)
             val vurderingDagligOmsorg = utledVurdering(aleneOmsorgVilkår, RegelId.MER_AV_DAGLIG_OMSORG)
 
-            assertThat(vurderingDeltBosted?.svar).isNull()
-            assertThat(vurderingDeltBosted?.begrunnelse).isNull()
+            assertThat(aleneOmsorgVilkår?.delvilkårsvurderinger?.size).isEqualTo(2)
+            assertThat(
+                aleneOmsorgVilkår?.delvilkårsvurderinger?.flatMap { delvurdering ->
+                    delvurdering.vurderinger.map { it.regelId }
+                },
+            ).doesNotContain(RegelId.SKRIFTLIG_AVTALE_OM_DELT_BOSTED)
 
             assertThat(vurderingNæreBoforhold?.svar).isNull()
             assertThat(vurderingNæreBoforhold?.begrunnelse).isNull()

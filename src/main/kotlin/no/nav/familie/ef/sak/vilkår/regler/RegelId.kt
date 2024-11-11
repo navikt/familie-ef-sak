@@ -2,6 +2,7 @@ package no.nav.familie.ef.sak.vilkår.regler
 
 enum class RegelId(
     val beskrivelse: String,
+    val regelVersjon: RegelVersjon = RegelVersjon.GJELDENDE,
 ) {
     SLUTT_NODE("SLUTT_NODE"),
 
@@ -21,7 +22,7 @@ enum class RegelId(
     ),
 
     // Aleneomsorg
-    SKRIFTLIG_AVTALE_OM_DELT_BOSTED(""),
+    SKRIFTLIG_AVTALE_OM_DELT_BOSTED("", RegelVersjon.HISTORISK),
     NÆRE_BOFORHOLD(""),
     MER_AV_DAGLIG_OMSORG(""),
 

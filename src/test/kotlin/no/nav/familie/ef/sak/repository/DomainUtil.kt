@@ -57,6 +57,12 @@ import no.nav.familie.ef.sak.vilkår.Opphavsvilkår
 import no.nav.familie.ef.sak.vilkår.VilkårType
 import no.nav.familie.ef.sak.vilkår.Vilkårsresultat
 import no.nav.familie.ef.sak.vilkår.Vilkårsvurdering
+import no.nav.familie.ef.sak.vilkår.Vurdering
+import no.nav.familie.ef.sak.vilkår.dto.tilDto
+import no.nav.familie.ef.sak.vilkår.regler.HovedregelMetadata
+import no.nav.familie.ef.sak.vilkår.regler.Vilkårsregel
+import no.nav.familie.ef.sak.vilkår.regler.evalutation.RegelEvaluering.utledResultat
+import no.nav.familie.ef.sak.vilkår.regler.vilkårsreglerForStønad
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.ef.felles.Opplysningskilde
 import no.nav.familie.kontrakter.ef.felles.Revurderingsårsak
@@ -510,3 +516,56 @@ fun søker(sivilstand: List<SivilstandMedNavn> = emptyList()): Søker =
         listOf(),
         listOf(),
     )
+
+/**
+ * Oppretter alle vilkårsvurderiger med alle delvilkår - både gjeldende og historiske
+ * */
+fun opprettAlleVilkårsvurderinger(
+    behandlingId: UUID,
+    metadata: HovedregelMetadata,
+    stønadstype: StønadType,
+): List<Vilkårsvurdering> =
+    vilkårsreglerForStønad(stønadstype).flatMap { vilkårsregel ->
+        if (vilkårsregel.vilkårType.gjelderFlereBarn() && metadata.barn.isNotEmpty()) {
+            metadata.barn.map { lagNyVilkårsvurdering(vilkårsregel, metadata, behandlingId, it.id) }
+        } else {
+            listOf(lagNyVilkårsvurdering(vilkårsregel, metadata, behandlingId))
+        }
+    }
+
+private fun lagNyVilkårsvurdering(
+    vilkårsregel: Vilkårsregel,
+    metadata: HovedregelMetadata,
+    behandlingId: UUID,
+    barnId: UUID? = null,
+): Vilkårsvurdering {
+    val delvilkårsvurdering = initierDelvilkårsvurderinger(vilkårsregel, metadata, barnId)
+    return Vilkårsvurdering(
+        behandlingId = behandlingId,
+        type = vilkårsregel.vilkårType,
+        barnId = barnId,
+        delvilkårsvurdering = DelvilkårsvurderingWrapper(delvilkårsvurdering),
+        resultat = utledResultat(vilkårsregel, delvilkårsvurdering.map { it.tilDto() }).vilkår,
+        opphavsvilkår = null,
+    )
+}
+
+private fun initierDelvilkårsvurderinger(
+    vilkårsregel: Vilkårsregel,
+    metadata: HovedregelMetadata,
+    barnId: UUID? = null,
+): List<Delvilkårsvurdering> =
+    when (vilkårsregel.vilkårType) {
+        VilkårType.ALENEOMSORG -> initierDelvilkårsvurderingForHovedregler(vilkårsregel)
+        else -> vilkårsregel.initiereDelvilkårsvurdering(metadata, barnId = barnId)
+    }
+
+private fun initierDelvilkårsvurderingForHovedregler(
+    vilkårsregel: Vilkårsregel,
+): List<Delvilkårsvurdering> =
+    vilkårsregel.hovedregler.map {
+        Delvilkårsvurdering(
+            Vilkårsresultat.IKKE_TATT_STILLING_TIL,
+            vurderinger = listOf(Vurdering(it)),
+        )
+    }

@@ -76,7 +76,8 @@ object OppdaterVilkår {
     ): DelvilkårsvurderingWrapper {
         val vurderingerPåType = oppdatering.associateBy { it.vurderinger.first().regelId }
         val delvilkårsvurderinger =
-            vilkårsvurdering.delvilkårsvurdering.delvilkårsvurderinger
+            vilkårsvurdering
+                .gjeldendeDelvilkårsvurderinger()
                 .map {
                     if (it.resultat == Vilkårsresultat.IKKE_AKTUELL) {
                         it
