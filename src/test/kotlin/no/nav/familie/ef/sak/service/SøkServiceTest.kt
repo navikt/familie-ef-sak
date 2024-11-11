@@ -11,6 +11,7 @@ import no.nav.familie.ef.sak.fagsak.dto.SøkeresultatPerson
 import no.nav.familie.ef.sak.infrastruktur.config.KodeverkServiceMock
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.vilkår.VilkårTestUtil.mockVilkårGrunnlagDto
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataRegisterService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlSaksbehandlerClient
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.Sivilstandstype
@@ -42,6 +43,7 @@ internal class SøkServiceTest {
     private val behandlingService = mockk<BehandlingService>()
     private val fagsakPersonService = mockk<FagsakPersonService>()
     private val vurderingService = mockk<VurderingService>()
+    private val grunnlagsdataRegisterService = mockk<GrunnlagsdataRegisterService>()
     private val søkService =
         SøkService(
             fagsakPersonService,
@@ -51,6 +53,7 @@ internal class SøkServiceTest {
             adresseMapper,
             fagsakService,
             vurderingService,
+            grunnlagsdataRegisterService,
         )
 
     @BeforeEach

@@ -12,9 +12,11 @@ import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataRegisterService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlPersonSøkHjelper
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlSaksbehandlerClient
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.GrunnlagsdataDomene
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.NavnDto
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper.AdresseMapper
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper.KjønnMapper
@@ -39,6 +41,7 @@ class SøkService(
     private val adresseMapper: AdresseMapper,
     private val fagsakService: FagsakService,
     private val vurderingService: VurderingService,
+    private val grunnlagsdataRegisterService: GrunnlagsdataRegisterService,
 ) {
     private val secureLogger = LoggerFactory.getLogger("secureLogger")
 
@@ -101,7 +104,8 @@ class SøkService(
 
     fun søkEtterPersonerMedSammeAdressePåFagsakPerson(fagsakPersonId: UUID): SøkeresultatPerson {
         val aktivIdent = fagsakPersonService.hentAktivIdent(fagsakPersonId)
-        return søkEtterPersonerMedSammeAdresse(aktivIdent)
+        val grunnlagsdataDomene = grunnlagsdataRegisterService.hentGrunnlagsdataFraRegister(aktivIdent, emptyList())
+        return søkEtterPersonerMedSammeAdresse(aktivIdent, grunnlagsdataDomene = grunnlagsdataDomene)
     }
 
     fun søkEtterPersonerMedSammeAdressePåBehandling(behandlingId: UUID): SøkeresultatPerson {
@@ -114,6 +118,7 @@ class SøkService(
     private fun søkEtterPersonerMedSammeAdresse(
         aktivIdent: String,
         grunnlag: VilkårGrunnlagDto? = null,
+        grunnlagsdataDomene: GrunnlagsdataDomene? = null,
     ): SøkeresultatPerson {
         val søker = personService.hentSøker(aktivIdent)
         val aktuelleBostedsadresser = søker.bostedsadresse.filterNot { it.metadata.historisk }
@@ -140,7 +145,7 @@ class SøkService(
         return SøkeresultatPerson(
             personer =
                 personSøkResultat
-                    .map { tilPersonFraSøk(it.person, grunnlag) }
+                    .map { tilPersonFraSøk(it.person, grunnlag, grunnlagsdataDomene) }
                     .sortedWith(
                         compareByDescending<PersonFraSøk> { it.erSøker }
                             .thenByDescending { it.erBarn }
@@ -161,10 +166,17 @@ class SøkService(
     private fun tilPersonFraSøk(
         person: PdlPersonFraSøk,
         grunnlag: VilkårGrunnlagDto?,
+        grunnlagsdataDomene: GrunnlagsdataDomene?,
     ): PersonFraSøk {
         val gjeldendeBarn = grunnlag?.barnMedSamvær?.find { it.registergrunnlag.fødselsnummer == person.folkeregisteridentifikator.gjeldende().identifikasjonsnummer }
-        val erSøker = grunnlag?.personalia?.personIdent == person.folkeregisteridentifikator.gjeldende().identifikasjonsnummer
-        val erBarn = grunnlag?.barnMedSamvær?.any { it.registergrunnlag.fødselsnummer == person.folkeregisteridentifikator.gjeldende().identifikasjonsnummer }
+        val erSøkerGrunnlag = grunnlag?.personalia?.personIdent == person.folkeregisteridentifikator.gjeldende().identifikasjonsnummer
+        val erSøkerGrunnlagsdataDomene = grunnlagsdataDomene?.medlUnntak?.personIdent == person.folkeregisteridentifikator.gjeldende().identifikasjonsnummer
+        val erBarnGrunnlag = grunnlag?.barnMedSamvær?.any { it.registergrunnlag.fødselsnummer == person.folkeregisteridentifikator.gjeldende().identifikasjonsnummer }
+        val erBarnGrunnlagsdataDomene = grunnlagsdataDomene?.barn?.any { it.personIdent == person.folkeregisteridentifikator.gjeldende().identifikasjonsnummer }
+
+        val erSøker = erSøkerGrunnlag || erSøkerGrunnlagsdataDomene
+        val erBarn = (erBarnGrunnlag ?: false) || (erBarnGrunnlagsdataDomene ?: false)
+
         return PersonFraSøk(
             personIdent = person.folkeregisteridentifikator.gjeldende().identifikasjonsnummer,
             visningsadresse =
