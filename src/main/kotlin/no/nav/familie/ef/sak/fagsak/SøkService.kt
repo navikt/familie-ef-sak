@@ -182,13 +182,19 @@ class SøkService(
                 personopplysninger?.barn?.any { it.personIdent == personIdent },
             ).any { it == true }
 
-        val gjeldendeBarn = grunnlag?.barnMedSamvær?.find { it.registergrunnlag.fødselsnummer == personIdent }
+        val barnFødselsdato =
+            grunnlag
+                ?.barnMedSamvær
+                ?.find { it.registergrunnlag.fødselsnummer == personIdent }
+                ?.registergrunnlag
+                ?.fødselsdato
+                ?: personopplysninger?.barn?.find { it.personIdent == personIdent }?.fødselsdato
 
         return PersonFraSøk(
             personIdent = personIdent,
             visningsadresse = person.bostedsadresse.gjeldende()?.let { adresseMapper.tilAdresse(it).visningsadresse },
             visningsnavn = NavnDto.fraNavn(person.navn.gjeldende()).visningsnavn,
-            fødselsdato = gjeldendeBarn?.registergrunnlag?.fødselsdato,
+            fødselsdato = barnFødselsdato,
             erSøker = erSøker,
             erBarn = erBarn,
         )
