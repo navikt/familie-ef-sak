@@ -167,9 +167,9 @@ internal class InfotrygdPeriodeValideringServiceTest {
         }
 
         @Test
-        internal fun `Skal kaste feil hvis perioder er før 2009-01-01`() {
-            val dato = YearMonth.of(2008, 12)
-            val grense = LocalDate.of(2009, 1, 1)
+        internal fun `Skal kaste feil hvis perioder er før 2016-01-01`() {
+            val dato = YearMonth.of(2015, 12)
+            val grense = LocalDate.of(2016, 1, 1)
 
             every { featureToggleService.isEnabled(Toggle.TILLAT_MIGRERING_7_ÅR_TILBAKE) } returns true
             every { infotrygdService.hentDtoPerioder(personIdent) } returns
