@@ -138,8 +138,8 @@ internal class SøkServiceTest {
                 visningsadresse = "Adressenavn 23 A, 0000 Oslo",
                 "Fornavn Mellomnavn Etternavn",
                 fødselsdato = null,
-                erSøker = false,
-                erBarn = false,
+                erSøker = null,
+                erBarn = null,
             )
 
         val person = SøkeresultatPerson(listOf(forventetResultat))
