@@ -164,7 +164,7 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
                 ),
             )
         grunnlagsdataService.opprettGrunnlagsdata(revurdering1.id)
-        opprettVilkår(behandling, lagreSøknad(revurdering1).sivilstand)
+        opprettVilkår(revurdering1, lagreSøknad(revurdering1).sivilstand)
         grunnlagsdataService.opprettGrunnlagsdata(behandling.id)
         val revurdering2 = revurderingService.opprettRevurderingManuelt(revurderingDto)
 
@@ -271,15 +271,14 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
         val revurdering = revurderingService.opprettRevurderingManuelt(revurderingDto)
         val vilkårForBT = vilkårsvurderingRepository.findByBehandlingId(førstegangsbehandlingBT.id)
         val vilkårForRevurdering = vilkårsvurderingRepository.findByBehandlingId(revurdering.id)
-        val barnPåRevurdering =
-            barnRepository.findByBehandlingId(revurdering.id).first {
-                it.navn.equals("Barn Barnesen")
-            }
+
+        val barnPåRevurdering = barnRepository.findByBehandlingId(revurdering.id).first { it.navn.equals("Barn Barnesen") }
+        val barnForBT = barnRepository.findByBehandlingId(førstegangsbehandlingBT.id).first { it.navn.equals("Barn Barnesen") }
 
         val sivilstandVilkårForBT = vilkårForBT.first { it.type == VilkårType.SIVILSTAND }
         val sivilstandVilkårForRevurdering = vilkårForRevurdering.first { it.type == VilkårType.SIVILSTAND }
 
-        val aleneomsorgVilkårForBT = vilkårForBT.first { it.type == VilkårType.ALENEOMSORG }
+        val aleneomsorgVilkårForBT = vilkårForBT.first { it.type == VilkårType.ALENEOMSORG && it.barnId == barnForBT.id }
         val aleneomsorgVilkårForRevurdering =
             vilkårForRevurdering.first { it.type == VilkårType.ALENEOMSORG && it.barnId == barnPåRevurdering.id }
 
@@ -304,14 +303,18 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
         val vilkårForOS = vilkårsvurderingRepository.findByBehandlingId(førstegangsbehandlingOS.id)
         val vilkårForBT = vilkårsvurderingRepository.findByBehandlingId(førstegangsbehandlingBT.id)
 
+        val barnPåOS = barnRepository.findByBehandlingId(førstegangsbehandlingOS.id).first { it.navn.equals("Barn Barnesen") }
+        val barnPåBT = barnRepository.findByBehandlingId(førstegangsbehandlingBT.id).first { it.navn.equals("Barn Barnesen") }
+
         val aleneomsorgVilkårForBTMedSkalIkkeVurderes =
             vilkårForBT
-                .first { it.type == VilkårType.ALENEOMSORG }
+                .first { it.type == VilkårType.ALENEOMSORG && it.barnId == barnPåBT.id }
                 .copy(resultat = Vilkårsresultat.SKAL_IKKE_VURDERES)
         vilkårsvurderingRepository.update(aleneomsorgVilkårForBTMedSkalIkkeVurderes)
 
         val revurdering = revurderingService.opprettRevurderingManuelt(revurderingDto)
         val vilkårForRevurdering = vilkårsvurderingRepository.findByBehandlingId(revurdering.id)
+
         val barnPåRevurdering =
             barnRepository.findByBehandlingId(revurdering.id).first {
                 it.navn.equals("Barn Barnesen")
@@ -322,7 +325,7 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
 
         val aleneomsorgVilkårForRevurdering =
             vilkårForRevurdering.first { it.type == VilkårType.ALENEOMSORG && it.barnId == barnPåRevurdering.id }
-        val aleneomsorgVilkårForOS = vilkårForOS.first { it.type == VilkårType.ALENEOMSORG }
+        val aleneomsorgVilkårForOS = vilkårForOS.first { it.type == VilkårType.ALENEOMSORG && it.barnId == barnPåOS.id }
 
         validerVilkårUtenBarn(sivilstandVilkårForBT, sivilstandVilkårForRevurdering, førstegangsbehandlingBT)
         validerVilkårMedBarn(aleneomsorgVilkårForOS, aleneomsorgVilkårForRevurdering, barnPåRevurdering, førstegangsbehandlingOS)
