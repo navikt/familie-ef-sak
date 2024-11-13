@@ -20,17 +20,17 @@ data class FagsakForSøkeresultat(
     val erMigrert: Boolean,
 )
 
-data class PersonFraSøk(
+data class PersonPåAdresse(
     val personIdent: String,
     val visningsadresse: String?,
     val visningsnavn: String,
-    val fødselsdato: LocalDate?,
-    val erSøker: Boolean?,
-    val erBarn: Boolean?,
+    val fødselsdato: LocalDate? = null,
+    val erSøker: Boolean? = null,
+    val erBarn: Boolean? = null,
 )
 
 data class SøkeresultatPerson(
-    val personer: List<PersonFraSøk>,
+    val personer: List<PersonPåAdresse>,
 )
 
 data class SøkeresultatUtenFagsak(

@@ -6,7 +6,7 @@ import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.fagsak.FagsakPersonService
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.SøkService
-import no.nav.familie.ef.sak.fagsak.dto.PersonFraSøk
+import no.nav.familie.ef.sak.fagsak.dto.PersonPåAdresse
 import no.nav.familie.ef.sak.fagsak.dto.SøkeresultatPerson
 import no.nav.familie.ef.sak.infrastruktur.config.KodeverkServiceMock
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
@@ -133,7 +133,7 @@ internal class SøkServiceTest {
         } returns pdlSøker(bostedsadresse = bostedsadresseFraPdl)
 
         val forventetResultat =
-            PersonFraSøk(
+            PersonPåAdresse(
                 personIdent = "123456789",
                 visningsadresse = "Adressenavn 23 A, 0000 Oslo",
                 "Fornavn Mellomnavn Etternavn",
