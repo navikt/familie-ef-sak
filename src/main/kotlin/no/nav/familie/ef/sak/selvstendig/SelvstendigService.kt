@@ -23,11 +23,13 @@ class SelvstendigService(
     val behandlingService: BehandlingService,
     val vedtakService: VedtakService,
 ) {
+    private val logger = LoggerFactory.getLogger(javaClass)
     private val secureLogger = LoggerFactory.getLogger("secureLogger")
 
     fun hentOppgaver() {
         val mappeIdForSelvstendigNæringsdrivende = oppgaveService.finnMapper(OppgaveUtil.ENHET_NR_NAY).single { it.navn == "61 Selvstendig Næringsdrivende" }.id
         secureLogger.info("MappeId for selvstendige: $mappeIdForSelvstendigNæringsdrivende")
+        logger.info("MappeId for selvstendige: $mappeIdForSelvstendigNæringsdrivende")
         val finnOppgaveRequest =
             FinnOppgaveRequest(
                 tema = Tema.ENF,
