@@ -27,7 +27,7 @@ class SelvstendigService(
     private val secureLogger = LoggerFactory.getLogger("secureLogger")
 
     fun hentOppgaver() {
-        val mappeIdForSelvstendigNæringsdrivende = oppgaveService.finnMapper(OppgaveUtil.ENHET_NR_NAY).single { it.navn == "61 Selvstendig Næringsdrivende" }.id
+        val mappeIdForSelvstendigNæringsdrivende = oppgaveService.finnMapper(OppgaveUtil.ENHET_NR_NAY).single { it.navn == "61 Selvstendig næringsdrivende" }.id
         secureLogger.info("MappeId for selvstendige: $mappeIdForSelvstendigNæringsdrivende")
         logger.info("MappeId for selvstendige: $mappeIdForSelvstendigNæringsdrivende")
         val finnOppgaveRequest =
