@@ -117,8 +117,8 @@ class SøkService(
             allePersonerPåAdresse.map { personPåAdresse ->
                 val barnetAvBruker = barnAvBruker.find { it.personIdent == personPåAdresse.personIdent }
                 personPåAdresse.copy(
-                    erSøker = personPåAdresse.personIdent == brukersPersonIdent,
-                    erBarn = barnetAvBruker != null,
+                    erSøker = if (personPåAdresse.personIdent == brukersPersonIdent) true else null,
+                    erBarn = if (barnetAvBruker != null) true else null,
                     fødselsdato = barnetAvBruker?.fødselsdato,
                 )
             }
