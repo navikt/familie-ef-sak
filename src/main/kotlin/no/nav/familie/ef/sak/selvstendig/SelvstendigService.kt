@@ -63,8 +63,8 @@ class SelvstendigService(
 
             secureLogger.info("Kontroller person med ident: $personIdent")
             val fagsaker = fagsakService.finnFagsaker(setOf(personIdent))
-            val fagsakIds = fagsaker.filter { it.stønadstype == StønadType.OVERGANGSSTØNAD }.map { it.id }
-            val behandlinger = behandlingService.hentBehandlinger(fagsakIds.toSet())
+            val fagsakId = fagsaker.filter { it.stønadstype == StønadType.OVERGANGSSTØNAD }.map { it.id }.firstOrNull() ?: throw Exception("Fant ikke OS behandling")
+            val behandlinger = behandlingService.hentBehandlinger(fagsakId)
 
             val vedtak = vedtakService.hentVedtak(behandlinger.first().id)
 
