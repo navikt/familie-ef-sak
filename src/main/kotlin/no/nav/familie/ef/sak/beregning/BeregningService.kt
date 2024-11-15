@@ -6,6 +6,7 @@ import no.nav.familie.kontrakter.felles.erSammenhengende
 import no.nav.familie.kontrakter.felles.harOverlappende
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
+import java.math.RoundingMode
 
 @Service
 class BeregningService {
@@ -84,9 +85,9 @@ class BeregningService {
     fun grunnbeløpsperiodeDTO(grunnbeløpParameter: Grunnbeløp): GrunnbeløpDTO {
         val periode = grunnbeløpParameter.periode
         val grunnbeløp = grunnbeløpParameter.grunnbeløp
-        val grunnbeløpMåned = grunnbeløpParameter.perMnd
-        val seksGangerGrunnbeløp = 6.toBigDecimal() * grunnbeløp
-        val seksGangerGrunnbeløpPerMåned = 6.toBigDecimal() * grunnbeløpMåned
+        val grunnbeløpMåned = grunnbeløp.divide(BigDecimal(12), 10, RoundingMode.HALF_UP)
+        val seksGangerGrunnbeløp = grunnbeløp.multiply(BigDecimal(6)).setScale(0, RoundingMode.HALF_UP)
+        val seksGangerGrunnbeløpPerMåned = grunnbeløpMåned.multiply(BigDecimal(6)).setScale(0, RoundingMode.HALF_UP)
         return GrunnbeløpDTO(
             periode = periode,
             grunnbeløp = grunnbeløp,

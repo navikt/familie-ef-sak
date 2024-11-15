@@ -32,20 +32,19 @@ fun søknad(
     aktivitet: Søknadsfelt<Aktivitet> = mockk(),
     situasjon: Søknadsfelt<Situasjon> = mockk(),
     stønadsstart: Søknadsfelt<Stønadsstart> = mockk(),
-) =
-    SøknadOvergangsstønad(
-        innsendingsdetaljer = innsendingsdetaljer,
-        personalia = personalia,
-        adresseopplysninger = adresseopplysninger,
-        sivilstandsdetaljer = sivilstandsdetaljer,
-        medlemskapsdetaljer = medlemskapsdetaljer,
-        bosituasjon = bosituasjon,
-        sivilstandsplaner = sivilstandsplaner,
-        barn = barn,
-        aktivitet = aktivitet,
-        situasjon = situasjon,
-        stønadsstart = stønadsstart,
-    )
+) = SøknadOvergangsstønad(
+    innsendingsdetaljer = innsendingsdetaljer,
+    personalia = personalia,
+    adresseopplysninger = adresseopplysninger,
+    sivilstandsdetaljer = sivilstandsdetaljer,
+    medlemskapsdetaljer = medlemskapsdetaljer,
+    bosituasjon = bosituasjon,
+    sivilstandsplaner = sivilstandsplaner,
+    barn = barn,
+    aktivitet = aktivitet,
+    situasjon = situasjon,
+    stønadsstart = stønadsstart,
+)
 
 fun søknadBarnTilBehandlingBarn(
     barn: Set<SøknadBarn>,

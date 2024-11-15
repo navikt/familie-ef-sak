@@ -1,10 +1,14 @@
 package no.nav.familie.ef.sak.oppgave
 
+import no.nav.familie.ef.sak.behandling.BehandlingRepository
+import no.nav.familie.ef.sak.behandlingsflyt.steg.BehandlerRolle
+import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.oppgave.dto.SaksbehandlerDto
 import no.nav.familie.ef.sak.oppgave.dto.SaksbehandlerRolle
+import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.kontrakter.felles.Tema
 import no.nav.familie.kontrakter.felles.oppgave.Oppgave
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
@@ -18,24 +22,32 @@ class TilordnetRessursService(
     private val oppgaveClient: OppgaveClient,
     private val oppgaveRepository: OppgaveRepository,
     private val featureToggleService: FeatureToggleService,
+    private val behandlingRepository: BehandlingRepository,
 ) {
     /**
-     * [SaksbehandlerRolle.OPPGAVE_FINNES_IKKE]: I de tilfellene hvor man manuelt oppretter en revurdering
-     * fra fagsakoversikten vil man øyeblikkelig bli redirectet inn i revurderingen. Da har ikke oppgavesystemet
-     * rukket å opprette en behandle-sak-oppgave enda. I disse tilfellene ønsker vi å sende med oppgave-finnes-ikke
-     * til frontend for å skjule visningen av ansvarlig saksbehandler frem til oppgavesystemet rekker å opprette
-     * behandle-sak-oppgaven. Man må kunne redigere frontend i dette tilfellet.
+     *  I tilfeller hvor saksbehandler manuelt oppretter en revurdering eller en førstegangsbehandling vil oppgaven
+     *  som returneres fra oppgavesystemet være null. Dette skjer fordi oppgavesystemet bruker litt tid av variabel
+     *  lengde på å opprette den tilhørende behandle-sak-oppgaven til den opprettede behandlingen.
+     *
+     * [SaksbehandlerRolle.OPPGAVE_FINNES_IKKE_SANNSYNLIGVIS_INNLOGGET_SAKSBEHANDLER]: Dersom null blir returnert og
+     * behandlingen befinner seg i steget REVURDERING_ÅRSAK, VILKÅR eller BEREGNE_YTELSE anser vi det som svært
+     * sannsynlig at det er den innloggede saksbehandleren som er ansvarlig for behandlingen - oppgaven har bare ikke
+     * rukket å bli opprettet enda. I dette tilfellet returnerer vi OPPGAVE_FINNES_IKKE_SANNSYNLIGVIS_INNLOGGET_SAKSBEHANDLER
+     * til frontend.
+     *
+     * [SaksbehandlerRolle.OPPGAVE_FINNES_IKKE]: Dersom null returneres og behandlingen ikke befinner seg i et av de nevnte
+     * stegene returnerer vi OPPGAVE_FINNES_IKKE til frontend.
      */
     fun tilordnetRessursErInnloggetSaksbehandler(
         behandlingId: UUID,
         oppgavetyper: Set<Oppgavetype> = setOf(Oppgavetype.BehandleSak, Oppgavetype.BehandleUnderkjentVedtak),
     ): Boolean {
         val oppgave = if (erUtviklerMedVeilderrolle()) null else hentIkkeFerdigstiltOppgaveForBehandling(behandlingId, oppgavetyper)
-        val rolle = utledSaksbehandlerRolle(oppgave)
+        val rolle = utledSaksbehandlerRolle(behandlingId, oppgave)
 
         return when (rolle) {
-            SaksbehandlerRolle.INNLOGGET_SAKSBEHANDLER, SaksbehandlerRolle.OPPGAVE_FINNES_IKKE -> true
-            SaksbehandlerRolle.ANNEN_SAKSBEHANDLER, SaksbehandlerRolle.UTVIKLER_MED_VEILDERROLLE, SaksbehandlerRolle.OPPGAVE_TILHØRER_IKKE_ENF, SaksbehandlerRolle.IKKE_SATT -> false
+            SaksbehandlerRolle.INNLOGGET_SAKSBEHANDLER, SaksbehandlerRolle.OPPGAVE_FINNES_IKKE, SaksbehandlerRolle.OPPGAVE_FINNES_IKKE_SANNSYNLIGVIS_INNLOGGET_SAKSBEHANDLER -> true
+            else -> false
         }
     }
 
@@ -46,6 +58,21 @@ class TilordnetRessursService(
         hentEFOppgaveSomIkkeErFerdigstilt(behandlingId, oppgavetyper)
             ?.let { oppgaveClient.finnOppgaveMedId(it.gsakOppgaveId) }
 
+    fun hentIkkeFerdigstiltOppgaveForBehandlingGittStegtype(
+        behandlingId: UUID,
+    ): Oppgave? {
+        val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
+        val oppgavetyper =
+            when (behandling.steg.tillattFor) {
+                BehandlerRolle.SAKSBEHANDLER -> setOf(Oppgavetype.BehandleSak, Oppgavetype.BehandleUnderkjentVedtak)
+                BehandlerRolle.BESLUTTER -> setOf(Oppgavetype.GodkjenneVedtak)
+                else -> emptySet()
+            }
+
+        return hentEFOppgaveSomIkkeErFerdigstilt(behandlingId, oppgavetyper)
+            ?.let { oppgaveClient.finnOppgaveMedId(it.gsakOppgaveId) }
+    }
+
     fun hentEFOppgaveSomIkkeErFerdigstilt(
         behandlingId: UUID,
         oppgavetyper: Set<Oppgavetype>,
@@ -55,25 +82,42 @@ class TilordnetRessursService(
             oppgavetyper,
         )
 
-    fun utledAnsvarligSaksbehandlerForOppgave(behandleSakOppgave: Oppgave?): SaksbehandlerDto {
-        val tilOrdnetRessurs = behandleSakOppgave?.tilordnetRessurs?.let { hentSaksbehandlerInfo(it) }
-        val rolle = utledSaksbehandlerRolle(behandleSakOppgave)
+    fun utledAnsvarligSaksbehandlerForOppgave(
+        behandlingId: UUID,
+        behandleSakOppgave: Oppgave?,
+    ): SaksbehandlerDto {
+        val rolle = utledSaksbehandlerRolle(behandlingId, behandleSakOppgave)
+
+        val tilordnetRessurs =
+            if (rolle == SaksbehandlerRolle.OPPGAVE_FINNES_IKKE_SANNSYNLIGVIS_INNLOGGET_SAKSBEHANDLER) {
+                hentSaksbehandlerInfo(SikkerhetContext.hentSaksbehandler())
+            } else {
+                behandleSakOppgave?.tilordnetRessurs?.let { hentSaksbehandlerInfo(it) }
+            }
 
         return SaksbehandlerDto(
-            etternavn = tilOrdnetRessurs?.etternavn ?: "",
-            fornavn = tilOrdnetRessurs?.fornavn ?: "",
+            etternavn = tilordnetRessurs?.etternavn ?: "",
+            fornavn = tilordnetRessurs?.fornavn ?: "",
             rolle = rolle,
         )
     }
 
     fun hentSaksbehandlerInfo(navIdent: String) = oppgaveClient.hentSaksbehandlerInfo(navIdent)
 
-    private fun utledSaksbehandlerRolle(oppgave: Oppgave?): SaksbehandlerRolle {
+    private fun utledSaksbehandlerRolle(
+        behandlingId: UUID,
+        oppgave: Oppgave?,
+    ): SaksbehandlerRolle {
         if (erUtviklerMedVeilderrolle()) {
             return SaksbehandlerRolle.UTVIKLER_MED_VEILDERROLLE
         }
 
         if (oppgave == null) {
+            val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
+
+            if (behandling.steg == StegType.REVURDERING_ÅRSAK || behandling.steg == StegType.VILKÅR || behandling.steg == StegType.BEREGNE_YTELSE) {
+                return SaksbehandlerRolle.OPPGAVE_FINNES_IKKE_SANNSYNLIGVIS_INNLOGGET_SAKSBEHANDLER
+            }
             return SaksbehandlerRolle.OPPGAVE_FINNES_IKKE
         }
 
@@ -89,6 +133,5 @@ class TilordnetRessursService(
         }
     }
 
-    private fun erUtviklerMedVeilderrolle(): Boolean =
-        featureToggleService.isEnabled(Toggle.UTVIKLER_MED_VEILEDERRROLLE)
+    private fun erUtviklerMedVeilderrolle(): Boolean = featureToggleService.isEnabled(Toggle.UTVIKLER_MED_VEILEDERRROLLE)
 }

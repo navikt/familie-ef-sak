@@ -50,8 +50,7 @@ internal class AktivitetMapperTest {
             utdanningstilbud = dokumentliste(),
         )
 
-    private fun dokumentliste() =
-        Dokumentasjon(harSendtInnTidligere = false, dokumenter = emptyList())
+    private fun dokumentliste() = Dokumentasjon(harSendtInnTidligere = false, dokumenter = emptyList())
 
     private fun aktivitet(): Aktivitet =
         Aktivitet(
@@ -66,8 +65,7 @@ internal class AktivitetMapperTest {
             erIArbeid = "JA",
         )
 
-    private fun aksjeselskap(): Set<Aksjeselskap> =
-        setOf(Aksjeselskap(navn = "navn", arbeidsmengde = 30))
+    private fun aksjeselskap(): Set<Aksjeselskap> = setOf(Aksjeselskap(navn = "navn", arbeidsmengde = 30))
 
     private fun virksomhet() =
         Virksomhet(

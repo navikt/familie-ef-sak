@@ -286,18 +286,6 @@
             "name" : "fødekommune",
             "type" : "String",
             "nullable" : true
-          },
-          "metadata" : {
-            "name" : "metadata",
-            "type" : "Object",
-            "fields" : {
-              "historisk" : {
-                "name" : "historisk",
-                "type" : "Boolean",
-                "nullable" : false
-              }
-            },
-            "nullable" : false
           }
         },
         "nullable" : false
@@ -343,7 +331,7 @@
           "gyldigTilOgMed" : {
             "name" : "gyldigTilOgMed",
             "type" : "LocalDate",
-            "nullable" : false
+            "nullable" : true
           },
           "motpartsPersonident" : {
             "name" : "motpartsPersonident",
@@ -1331,18 +1319,6 @@
             "name" : "fødekommune",
             "type" : "String",
             "nullable" : true
-          },
-          "metadata" : {
-            "name" : "metadata",
-            "type" : "Object",
-            "fields" : {
-              "historisk" : {
-                "name" : "historisk",
-                "type" : "Boolean",
-                "nullable" : false
-              }
-            },
-            "nullable" : false
           }
         },
         "nullable" : false
@@ -2136,18 +2112,6 @@
             "name" : "fødekommune",
             "type" : "String",
             "nullable" : true
-          },
-          "metadata" : {
-            "name" : "metadata",
-            "type" : "Object",
-            "fields" : {
-              "historisk" : {
-                "name" : "historisk",
-                "type" : "Boolean",
-                "nullable" : false
-              }
-            },
-            "nullable" : false
           }
         },
         "nullable" : false

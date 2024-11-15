@@ -16,7 +16,6 @@ import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.iverksett.IverksettService
-import no.nav.familie.ef.sak.journalføring.JournalpostClient
 import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
@@ -45,7 +44,6 @@ import no.nav.familie.kontrakter.ef.søknad.SøknadBarnetilsyn
 import no.nav.familie.kontrakter.ef.søknad.SøknadOvergangsstønad
 import no.nav.familie.kontrakter.ef.søknad.SøknadSkolepenger
 import no.nav.familie.kontrakter.ef.søknad.TestsøknadBuilder
-import no.nav.familie.kontrakter.felles.Fødselsnummer
 import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.ef.StønadType
@@ -79,7 +77,6 @@ class TestSaksbehandlingController(
     private val barnService: BarnService,
     private val taskService: TaskService,
     private val oppgaveService: OppgaveService,
-    private val journalpostClient: JournalpostClient,
     private val migreringService: MigreringService,
     private val vurderingService: VurderingService,
     private val vurderingStegService: VurderingStegService,
@@ -192,7 +189,7 @@ class TestSaksbehandlingController(
                     behandlingId = behandling.id,
                     oppgavetype = Oppgavetype.BehandleSak,
                     tilordnetNavIdent = SikkerhetContext.hentSaksbehandler(),
-                    beskrivelse = "Dummy-oppgave opprettet i ny løsning",
+                    beskrivelse = "Dummy-oppgave opprettet",
                 )
             taskService.save(
                 taskService.save(
@@ -281,8 +278,8 @@ class TestSaksbehandlingController(
         val barneListe: List<Barn> =
             søkerMedBarn.barn
                 .filter {
-                    it.value.fødsel
-                        .gjeldende()
+                    it.value.fødselsdato
+                        .first()
                         .erUnder18År()
                 }.map {
                     TestsøknadBuilder.Builder().defaultBarn(
@@ -294,7 +291,10 @@ class TestSaksbehandlingController(
                         harSkalHaSammeAdresse = true,
                         ikkeRegistrertPåSøkersAdresseBeskrivelse = "Fordi",
                         erBarnetFødt = true,
-                        fødselTermindato = Fødselsnummer(it.key).fødselsdato,
+                        fødselTermindato =
+                            it.value.fødselsdato
+                                .first()
+                                .fødselsdato ?: error("Fødselsdato kan ikke være null"),
                         annenForelder =
                             TestsøknadBuilder.Builder().defaultAnnenForelder(
                                 ikkeOppgittAnnenForelderBegrunnelse = null,

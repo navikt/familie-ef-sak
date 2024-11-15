@@ -35,7 +35,6 @@ internal class VedtakHistorikkBeregnerTest {
         val andreVedtak = lagVedtak(perioder = null, opphørFom = opphørFom)
 
         val vedtaksperioderPerBehandling = lagVedtaksperioderPerBehandling(listOf(førsteVedtak, andreVedtak))
-
         validerFørsteVedtakErUendret(vedtaksperioderPerBehandling)
         validerPeriode(
             vedtaksperioderPerBehandling,
@@ -187,8 +186,7 @@ internal class VedtakHistorikkBeregnerTest {
         assertThat(vedtaksperioderPerBehandling.getValue(behandlingId)).isEqualTo(vedtaksperioder)
     }
 
-    private fun Vedtak.vedtaksperioder(): List<Vedtakshistorikkperiode> =
-        this.perioder!!.perioder.map { it.tilHistorikk() }
+    private fun Vedtak.vedtaksperioder(): List<Vedtakshistorikkperiode> = this.perioder!!.perioder.map { it.tilHistorikk() }
 
     private fun lagVedtaksperioderPerBehandling(vedtak: List<Vedtak>): Map<UUID, List<Vedtakshistorikkperiode>> {
         var datoCount = 0L

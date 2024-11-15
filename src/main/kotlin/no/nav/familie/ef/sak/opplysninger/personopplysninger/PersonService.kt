@@ -30,17 +30,14 @@ class PersonService(
         return SøkerMedBarn(ident, søker, hentPersonForelderBarnRelasjon(barnIdentifikatorer))
     }
 
-    fun hentPersonForelderBarnRelasjon(barnIdentifikatorer: List<String>) =
-        pdlClient.hentPersonForelderBarnRelasjon(barnIdentifikatorer)
+    fun hentPersonForelderBarnRelasjon(identer: List<String>) = pdlClient.hentPersonForelderBarnRelasjon(identer)
 
     fun hentAndreForeldre(personIdenter: List<String>): Map<String, PdlAnnenForelder> = pdlClient.hentAndreForeldre(personIdenter)
 
     @Cacheable("personidenter")
-    fun hentPersonIdenter(ident: String): PdlIdenter =
-        pdlClient.hentPersonidenter(ident = ident)
+    fun hentPersonIdenter(ident: String): PdlIdenter = pdlClient.hentPersonidenter(ident = ident)
 
-    fun hentIdenterBolk(identer: List<String>): Map<String, PdlIdent> =
-        pdlClient.hentIdenterBolk(identer)
+    fun hentIdenterBolk(identer: List<String>): Map<String, PdlIdent> = pdlClient.hentIdenterBolk(identer)
 
     /**
      * PDL gjør ingen tilgangskontroll i bolkoppslag, så bruker av denne metode må ha gjort tilgangskontroll

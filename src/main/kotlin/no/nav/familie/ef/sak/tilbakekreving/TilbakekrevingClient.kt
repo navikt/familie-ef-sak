@@ -43,20 +43,19 @@ class TilbakekrevingClient(
     private fun kanBehandlingOpprettesManueltUri(
         stønadstype: StønadType,
         eksternFagsakId: Long,
-    ) =
-        UriComponentsBuilder
-            .fromUri(familieTilbakeUri)
-            .pathSegment(
-                "api",
-                "ytelsestype",
-                stønadstype.name,
-                "fagsak",
-                eksternFagsakId.toString(),
-                "kanBehandlingOpprettesManuelt",
-                "v1",
-            ).encode()
-            .build()
-            .toUri()
+    ) = UriComponentsBuilder
+        .fromUri(familieTilbakeUri)
+        .pathSegment(
+            "api",
+            "ytelsestype",
+            stønadstype.name,
+            "fagsak",
+            eksternFagsakId.toString(),
+            "kanBehandlingOpprettesManuelt",
+            "v1",
+        ).encode()
+        .build()
+        .toUri()
 
     private fun finnesÅpenBehandlingUri(eksternFagsakId: Long) =
         UriComponentsBuilder

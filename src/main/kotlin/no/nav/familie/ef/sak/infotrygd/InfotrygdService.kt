@@ -107,11 +107,10 @@ class InfotrygdService(
     private fun mapPerioder(
         perioder: List<InfotrygdPeriode>,
         sammenSlåttePerioder: List<InfotrygdPeriode>,
-    ) =
-        InfotrygdStønadPerioderDto(
-            perioder.filter { it.kode != InfotrygdEndringKode.ANNULERT },
-            sammenSlåttePerioder.map { it.tilSummertInfotrygdperiodeDto() },
-        )
+    ) = InfotrygdStønadPerioderDto(
+        perioder.filter { it.kode != InfotrygdEndringKode.ANNULERT },
+        sammenSlåttePerioder.map { it.tilSummertInfotrygdperiodeDto() },
+    )
 
     /**
      * ! Denne må brukes med alle identer for en person, bruk [hentPerioderFraReplika] hvis man skal hente på en ident

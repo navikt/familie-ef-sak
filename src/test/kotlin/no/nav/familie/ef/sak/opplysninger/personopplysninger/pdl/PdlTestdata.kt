@@ -65,7 +65,8 @@ object PdlTestdata {
     private val familierelasjon =
         listOf(ForelderBarnRelasjon("", Familierelasjonsrolle.BARN, Familierelasjonsrolle.FAR))
 
-    private val fødsel = listOf(Fødsel(1, LocalDate.now(), "", "", "", metadataGjeldende))
+    private val fødselsdato = listOf(Fødselsdato(1995, LocalDate.now()))
+    private val fødested = listOf(Fødested(null, null, null))
 
     private val opphold = listOf(Opphold(Oppholdstillatelse.MIDLERTIDIG, LocalDate.now(), LocalDate.now()))
 
@@ -107,7 +108,8 @@ object PdlTestdata {
                 dødsfall,
                 familierelasjon,
                 folkeregisteridentifikatorSøker,
-                fødsel,
+                fødselsdato,
+                fødested,
                 listOf(Folkeregisterpersonstatus("", "", metadataGjeldende)),
                 listOf(
                     Fullmakt(
@@ -183,7 +185,8 @@ object PdlTestdata {
                         ),
                         dødsfall,
                         familierelasjon,
-                        fødsel,
+                        fødselsdato,
+                        fødested,
                         navn,
                         listOf(Folkeregisterpersonstatus("bosatt", "", metadataGjeldende)),
                     ),
@@ -212,7 +215,8 @@ object PdlTestdata {
                         adressebeskyttelse,
                         bostedsadresse,
                         dødsfall,
-                        fødsel,
+                        fødselsdato,
+                        fødested,
                         folkeregisteridentifikatorAnnenForelder,
                         navn,
                     ),

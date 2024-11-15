@@ -295,8 +295,8 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    internal fun `hentMigreringInfo - periode eldre enn 3 år - kan gå videre til journalføring`() {
-        val stønadsmåned = YearMonth.now().minusYears(3).minusMonths(1)
+    internal fun `hentMigreringInfo - periode eldre enn 5 år - kan gå videre til journalføring`() {
+        val stønadsmåned = YearMonth.of(2018, 12)
         val periode =
             InfotrygdPeriodeTestUtil.lagInfotrygdPeriode(
                 stønadFom = stønadsmåned.atDay(1),
@@ -312,8 +312,7 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
         val migreringInfo = migreringService.hentMigreringInfo(fagsak.fagsakPersonId)
 
         assertThat(migreringInfo.kanMigreres).isFalse
-        assertThat(migreringInfo.kanGåVidereTilJournalføring).isTrue
-        assertThat(migreringInfo.årsak).contains("Kan ikke migrere når forrige utbetaling i infotrygd er mer enn 3 år tilbake")
+        assertThat(migreringInfo.årsak).contains("Kan ikke migrere når forrige utbetaling i infotrygd ")
     }
 
     @Test
@@ -400,8 +399,8 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
 
         val migreringInfo = migreringService.hentMigreringInfo(fagsak.fagsakPersonId)
 
-        assertThat(migreringInfo.kanMigreres).isFalse
-        assertThat(migreringInfo.årsak).contains("Finnes sak med annen personIdent for personen")
+        assertThat(migreringInfo.kanMigreres).isTrue
+        assertThat(migreringInfo.årsak).isNull()
     }
 
     @Test
@@ -534,7 +533,6 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
         val migreringInfo = migreringService.hentMigreringInfo(fagsak.fagsakPersonId, startDatoStønad)
 
         assertThat(migreringInfo.kanMigreres).isFalse
-        assertThat(migreringInfo.kanGåVidereTilJournalføring).isTrue
         assertThat(migreringInfo.årsak).contains("Har ikke noen perioder å migrere")
     }
 
@@ -558,14 +556,12 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
         val migreringInfo = migreringService.hentMigreringInfo(fagsak.fagsakPersonId, startDatoStønad)
 
         assertThat(migreringInfo.kanMigreres).isFalse
-        assertThat(migreringInfo.kanGåVidereTilJournalføring).isFalse
         assertThat(migreringInfo.årsak).contains("Har åpen sak. ")
     }
 
     @Nested
     inner class StateIEfSak {
-        private fun henlagtBehandling() =
-            behandling(fagsak, status = BehandlingStatus.FERDIGSTILT, resultat = BehandlingResultat.HENLAGT)
+        private fun henlagtBehandling() = behandling(fagsak, status = BehandlingStatus.FERDIGSTILT, resultat = BehandlingResultat.HENLAGT)
 
         @Test
         internal fun `har ikke fagsak, men fagsakPerson`() {

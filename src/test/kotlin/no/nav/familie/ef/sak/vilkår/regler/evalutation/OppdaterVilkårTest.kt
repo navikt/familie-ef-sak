@@ -52,7 +52,7 @@ internal class OppdaterVilkårTest {
                 søknadBarnId = null,
                 personIdent = "01472152579",
                 navn = null,
-                fødselTermindato = null,
+                fødselTermindato = LocalDate.now().minusYears(3),
             )
         val barnUtenSøknad = barn.copy(id = UUID.randomUUID())
         val metadata =
@@ -89,7 +89,7 @@ internal class OppdaterVilkårTest {
                 søknadBarnId = null,
                 personIdent = FnrGenerator.generer(LocalDate.now().minusYears(5)),
                 navn = null,
-                fødselTermindato = null,
+                fødselTermindato = LocalDate.now().minusYears(5),
             )
         val barnUtenSøknad =
             barn.copy(
@@ -133,7 +133,7 @@ internal class OppdaterVilkårTest {
                 søknadBarnId = null,
                 personIdent = "03441983106",
                 navn = null,
-                fødselTermindato = null,
+                fødselTermindato = LocalDate.now().minusYears(5),
             )
         val barnUtenSøknad = barn.copy(id = UUID.randomUUID())
         val metadata =
@@ -431,7 +431,7 @@ internal class OppdaterVilkårTest {
             )
         assertThat(catchThrowable { OppdaterVilkår.lagNyOppdatertVilkårsvurdering(vilkårsvurdering, oppdatering) })
             .hasMessage(
-                "Delvilkårsvurderinger savner svar på hovedregler - " +
+                "Delvilkårsvurderinger mangler svar på hovedregler - " +
                     "hovedregler=[KRAV_SIVILSTAND_UTEN_PÅKREVD_BEGRUNNELSE] delvilkår=[SIVILSTAND_UNNTAK]",
             )
     }
@@ -756,28 +756,26 @@ internal class OppdaterVilkårTest {
     private fun aleneomsorg(
         vilkårsresultat: Vilkårsresultat,
         barnId: UUID? = null,
-    ) =
-        Vilkårsvurdering(
-            behandlingId = UUID.randomUUID(),
-            resultat = vilkårsresultat,
-            type = VilkårType.ALENEOMSORG,
-            delvilkårsvurdering = DelvilkårsvurderingWrapper(emptyList()),
-            opphavsvilkår = null,
-            barnId = barnId,
-        )
+    ) = Vilkårsvurdering(
+        behandlingId = UUID.randomUUID(),
+        resultat = vilkårsresultat,
+        type = VilkårType.ALENEOMSORG,
+        delvilkårsvurdering = DelvilkårsvurderingWrapper(emptyList()),
+        opphavsvilkår = null,
+        barnId = barnId,
+    )
 
     private fun alderPåBarn(
         vilkårsresultat: Vilkårsresultat,
         barnId: UUID? = null,
-    ) =
-        Vilkårsvurdering(
-            behandlingId = UUID.randomUUID(),
-            resultat = vilkårsresultat,
-            type = VilkårType.ALDER_PÅ_BARN,
-            delvilkårsvurdering = DelvilkårsvurderingWrapper(emptyList()),
-            opphavsvilkår = null,
-            barnId = barnId,
-        )
+    ) = Vilkårsvurdering(
+        behandlingId = UUID.randomUUID(),
+        resultat = vilkårsresultat,
+        type = VilkårType.ALDER_PÅ_BARN,
+        delvilkårsvurdering = DelvilkårsvurderingWrapper(emptyList()),
+        opphavsvilkår = null,
+        barnId = barnId,
+    )
 
     private fun Vilkårsvurdering.delvilkår(regelId: RegelId) =
         this.delvilkårsvurdering.delvilkårsvurderinger.singleOrNull { it.hovedregel == regelId }
@@ -785,8 +783,7 @@ internal class OppdaterVilkårTest {
 
     private fun Vilkårsvurdering.førsteDelvilkår() = this.delvilkårsvurdering.delvilkårsvurderinger.first()
 
-    private fun delvilkårsvurderingDto(vararg vurderinger: VurderingDto) =
-        DelvilkårsvurderingDto(resultat = Vilkårsresultat.IKKE_AKTUELL, vurderinger = vurderinger.toList())
+    private fun delvilkårsvurderingDto(vararg vurderinger: VurderingDto) = DelvilkårsvurderingDto(resultat = Vilkårsresultat.IKKE_AKTUELL, vurderinger = vurderinger.toList())
 
     private fun validerOgOppdater(
         vilkårsvurdering: Vilkårsvurdering,

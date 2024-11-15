@@ -2,6 +2,7 @@ package no.nav.familie.ef.sak.vilkår
 
 import no.nav.familie.ef.sak.felles.domain.Sporbar
 import no.nav.familie.ef.sak.vilkår.regler.RegelId
+import no.nav.familie.ef.sak.vilkår.regler.RegelVersjon
 import no.nav.familie.ef.sak.vilkår.regler.SvarId
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.kontrakter.felles.ef.StønadType.BARNETILSYN
@@ -44,19 +45,22 @@ data class Vilkårsvurdering(
     /**
      * Brukes når man skal gjenbruke denne vilkårsvurderingen i en annan vilkårsvurdering
      */
-    fun opprettOpphavsvilkår(): Opphavsvilkår =
-        opphavsvilkår ?: Opphavsvilkår(behandlingId, sporbar.endret.endretTid)
+    fun opprettOpphavsvilkår(): Opphavsvilkår = opphavsvilkår ?: Opphavsvilkår(behandlingId, sporbar.endret.endretTid)
+
+    fun gjeldendeDelvilkårsvurderinger(): List<Delvilkårsvurdering> =
+        this.delvilkårsvurdering.delvilkårsvurderinger.filter {
+            it.hovedregel.regelVersjon == RegelVersjon.GJELDENDE
+        }
 }
 
 fun List<Vilkårsvurdering>.utledVurderinger(
     vilkårType: VilkårType,
     regelId: RegelId,
-) =
-    this
-        .filter { it.type == vilkårType }
-        .flatMap { it.delvilkårsvurdering.delvilkårsvurderinger }
-        .flatMap { it.vurderinger }
-        .filter { it.regelId == regelId }
+) = this
+    .filter { it.type == vilkårType }
+    .flatMap { it.delvilkårsvurdering.delvilkårsvurderinger }
+    .flatMap { it.vurderinger }
+    .filter { it.regelId == regelId }
 
 /**
  * Inneholder informasjon fra hvilken behandling dette vilkår ble gjenrukt fra

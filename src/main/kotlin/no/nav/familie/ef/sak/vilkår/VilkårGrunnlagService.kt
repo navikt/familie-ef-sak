@@ -21,7 +21,6 @@ import no.nav.familie.ef.sak.vilkår.dto.BarnepassDto
 import no.nav.familie.ef.sak.vilkår.dto.PersonaliaDto
 import no.nav.familie.ef.sak.vilkår.dto.VilkårGrunnlagDto
 import no.nav.familie.ef.sak.vilkår.dto.tilDto
-import no.nav.familie.kontrakter.felles.Fødselsnummer
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.springframework.stereotype.Service
 import java.time.LocalDate
@@ -83,7 +82,7 @@ class VilkårGrunnlagService(
                             ?.let { adresseMapper.tilAdresse(it) },
                     fødeland =
                         grunnlagsdata.søker.fødsel
-                            .gjeldende()
+                            .first()
                             .fødeland,
                 ),
             tidligereVedtaksperioder = grunnlagsdata.tidligereVedtaksperioder.tilDto(),
@@ -129,8 +128,7 @@ class VilkårGrunnlagService(
         return barnMedsamværMapper
             .slåSammenBarnMedSamvær(søknadsgrunnlag, barnMedSamværRegistergrunnlag, barnepass)
             .sortedByDescending {
-                it.registergrunnlag.fødselsnummer?.let { fødsesnummer -> Fødselsnummer(fødsesnummer).fødselsdato }
-                    ?: it.søknadsgrunnlag.fødselTermindato
+                it.registergrunnlag.fødselsdato ?: it.søknadsgrunnlag.fødselTermindato
             }
     }
 }

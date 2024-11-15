@@ -196,6 +196,5 @@ class RevurderingService(
         }
     }
 
-    private fun erSatsendring(revurderingInnhold: RevurderingDto) =
-        revurderingInnhold.behandlingsårsak == BehandlingÅrsak.SATSENDRING
+    private fun erSatsendring(revurderingInnhold: RevurderingDto) = revurderingInnhold.behandlingsårsak == BehandlingÅrsak.SATSENDRING
 }

@@ -7,7 +7,6 @@ import no.nav.familie.ef.sak.beregning.Grunnbeløpsperioder
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvisIkke
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
-import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -45,9 +44,6 @@ class ManuellGOmregningController(
         @PathVariable fagsakId: UUID,
     ) {
         tilgangService.validerHarForvalterrolle()
-        feilHvisIkke(featureToggleService.isEnabled(Toggle.G_BEREGNING_TILLAT_MANUELL_OPPRETTELSE_AV_G_TASK)) {
-            "Opprettelse av gomregningstask for fagsak ikke enablet"
-        }
         validerHarLøpendeStønadEtterSisteGrunnbeløpdato(fagsakId)
 
         val opprettTask = gOmregningTask.opprettTask(fagsakId)

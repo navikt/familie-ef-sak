@@ -156,12 +156,11 @@ class BehandlingsstatistikkTask(
     private fun utledBegrunnelseForInnvilgetVedtak(
         stønadType: StønadType,
         vedtak: Vedtak,
-    ) =
-        when (stønadType) {
-            OVERGANGSSTØNAD -> vedtak.periodeBegrunnelse
-            BARNETILSYN -> vedtak.barnetilsyn?.begrunnelse
-            SKOLEPENGER -> vedtak.skolepenger?.begrunnelse
-        }
+    ) = when (stønadType) {
+        OVERGANGSSTØNAD -> vedtak.periodeBegrunnelse
+        BARNETILSYN -> vedtak.barnetilsyn?.begrunnelse
+        SKOLEPENGER -> vedtak.skolepenger?.begrunnelse
+    }
 
     private fun finnSaksbehandler(
         hendelse: Hendelse,
@@ -237,7 +236,7 @@ class BehandlingsstatistikkTask(
                 hendelseTidspunkt = LocalDateTime.now(),
             )
 
-        fun opprettHenlagtTask(
+        fun opprettFerdigTask(
             behandlingId: UUID,
             hendelseTidspunkt: LocalDateTime,
             gjeldendeSaksbehandler: String,

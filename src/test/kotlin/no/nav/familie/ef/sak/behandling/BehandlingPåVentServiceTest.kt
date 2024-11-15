@@ -479,18 +479,17 @@ internal class BehandlingPåVentServiceTest {
     private fun settPåVentRequest(
         oppgaveId: Long,
         oppfølgingsoppgaver: List<OppgaveSubtype>,
-    ) =
-        SettPåVentRequest(
-            oppgaveId = oppgaveId,
-            saksbehandler = "ny saksbehandler",
-            prioritet = OppgavePrioritet.HOY,
-            frist = LocalDate.of(2002, Month.MARCH, 24).toString(),
-            mappe = 102,
-            beskrivelse = "Her er litt tekst fra saksbehandler",
-            oppgaveVersjon = 1,
-            oppfølgingsoppgaverMotLokalKontor = oppfølgingsoppgaver,
-            innstillingsoppgaveBeskjed = "",
-        )
+    ) = SettPåVentRequest(
+        oppgaveId = oppgaveId,
+        saksbehandler = "ny saksbehandler",
+        prioritet = OppgavePrioritet.HOY,
+        frist = LocalDate.of(2002, Month.MARCH, 24).toString(),
+        mappe = 102,
+        beskrivelse = "Her er litt tekst fra saksbehandler",
+        oppgaveVersjon = 1,
+        oppfølgingsoppgaverMotLokalKontor = oppfølgingsoppgaver,
+        innstillingsoppgaveBeskjed = "",
+    )
 
     private fun mockHentBehandling(
         status: BehandlingStatus,

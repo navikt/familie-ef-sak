@@ -100,7 +100,6 @@ class MigreringService(
                 return MigreringInfo(
                     kanMigreres = false,
                     e.årsak,
-                    kanGåVidereTilJournalføring = e.type.kanGåVidereTilJournalføring,
                 )
             }
         logger.info("Kan migrere fagsakPerson=$fagsakPersonId")
@@ -463,17 +462,15 @@ class MigreringService(
         fra: YearMonth,
         inntektsgrunnlag: Int,
         samordningsfradrag: Int,
-    ) =
-        listOf(
-            Inntekt(
-                årMånedFra = fra,
-                forventetInntekt = BigDecimal(inntektsgrunnlag),
-                samordningsfradrag = BigDecimal(samordningsfradrag),
-            ),
-        )
+    ) = listOf(
+        Inntekt(
+            årMånedFra = fra,
+            forventetInntekt = BigDecimal(inntektsgrunnlag),
+            samordningsfradrag = BigDecimal(samordningsfradrag),
+        ),
+    )
 
-    private fun erReellArbeidssøker(periode: SummertInfotrygdPeriodeDto): Boolean =
-        periode.aktivitet == InfotrygdAktivitetstype.TILMELDT_SOM_REELL_ARBEIDSSØKER
+    private fun erReellArbeidssøker(periode: SummertInfotrygdPeriodeDto): Boolean = periode.aktivitet == InfotrygdAktivitetstype.TILMELDT_SOM_REELL_ARBEIDSSØKER
 
     private fun vedtaksperioder(
         periode: Månedsperiode,

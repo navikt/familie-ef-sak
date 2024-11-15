@@ -2,7 +2,6 @@ package no.nav.familie.ef.sak.opplysninger.mapper
 
 import no.nav.familie.ef.sak.barn.BehandlingBarn
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.BarnMedIdent
-import no.nav.familie.kontrakter.felles.Fødselsnummer
 import java.time.LocalDate
 import kotlin.math.abs
 
@@ -48,7 +47,18 @@ object BarnMatcher {
         pdlBarnIkkeISøknad: Map<String, BarnMedIdent>,
         fødselTermindato: LocalDate,
     ): BarnMedIdent? {
-        val besteMatch = finnBesteMatchPåFødselsnummerForTermindato(pdlBarnIkkeISøknad.map { it.key }, fødselTermindato)
+        val besteMatch =
+            finnBesteMatchPåFødselsnummerForTermindato(
+                pdlBarnIkkeISøknad.map {
+                    BarnMedFødselsdatoDto(
+                        it.key,
+                        it.value.fødsel
+                            .first()
+                            .fødselsdato,
+                    )
+                },
+                fødselTermindato,
+            )?.barnIdent
         return pdlBarnIkkeISøknad[besteMatch]
     }
 }
@@ -60,20 +70,21 @@ data class MatchetBehandlingBarn(
 )
 
 fun finnBesteMatchPåFødselsnummerForTermindato(
-    fødselsnumre: List<String>,
+    barn: List<BarnMedFødselsdatoDto>,
     termindato: LocalDate,
-): String? {
+): BarnMedFødselsdatoDto? {
     val uke20 = termindato.minusWeeks(20)
     val uke44 = termindato.plusWeeks(4)
 
-    return fødselsnumre
+    return barn
         .filter {
-            val fødselsnummer = Fødselsnummer(it)
-            val fødselsdato = fødselsnummer.fødselsdato
-            fødselsdato.isBefore(uke44) and fødselsdato.isAfter(uke20)
-        }.minByOrNull {
-            val epochDayForFødsel = Fødselsnummer(it).fødselsdato.toEpochDay()
-            val epochDayTermindato = termindato.toEpochDay()
-            abs(epochDayForFødsel - epochDayTermindato)
+            it.fødselsdato != null && (it.fødselsdato.isBefore(uke44) and it.fødselsdato.isAfter(uke20))
+        }.minByOrNull { akuteltBarn ->
+            abs(akuteltBarn.fødselsdato!!.toEpochDay() - termindato.toEpochDay())
         }
 }
+
+data class BarnMedFødselsdatoDto(
+    val barnIdent: String,
+    val fødselsdato: LocalDate?,
+)

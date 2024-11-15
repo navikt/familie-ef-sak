@@ -61,26 +61,6 @@ internal class SimuleringControllerTest {
     }
 
     @Test
-    internal fun `simuleringsoppsummering skal være endret hvis etterbetaling har endret seg fra nedlagret simulering`() {
-        val lagretSimuleringoppsummering = lagSimuleringoppsummering()
-        val simuleringOppsummering = lagSimuleringoppsummering(etterbetaling = BigDecimal.ONE)
-
-        every { simuleringService.hentLagretSimmuleringsresultat(any()) } returns
-            BeriketSimuleringsresultat(
-                DetaljertSimuleringResultat(emptyList()),
-                lagretSimuleringoppsummering,
-            )
-        every { iverksettClient.simuler(any()) } returns
-            BeriketSimuleringsresultat(
-                DetaljertSimuleringResultat(emptyList()),
-                simuleringOppsummering,
-            )
-
-        val response: Ressurs<Boolean> = controller.erSimuleringsoppsummeringEndret(behandlingId)
-        assertThat(response.data).isTrue()
-    }
-
-    @Test
     internal fun `simuleringsoppsummering skal være endret hvis feilutbetaling har endret seg fra nedlagret simulering`() {
         val lagretSimuleringoppsummering = lagSimuleringoppsummering()
         val simuleringOppsummering = lagSimuleringoppsummering(feilutbetaling = BigDecimal.ONE)
@@ -164,17 +144,16 @@ internal class SimuleringControllerTest {
     private fun lagSimuleringoppsummering(
         etterbetaling: BigDecimal = BigDecimal.ZERO,
         feilutbetaling: BigDecimal = BigDecimal.ZERO,
-    ) =
-        Simuleringsoppsummering(
-            perioder = listOf(),
-            fomDatoNestePeriode = LocalDate.now(),
-            etterbetaling = etterbetaling,
-            feilutbetaling = feilutbetaling,
-            fom = LocalDate.now(),
-            tomDatoNestePeriode = LocalDate.now(),
-            forfallsdatoNestePeriode = LocalDate.now(),
-            tidSimuleringHentet = LocalDate.now(),
-            tomSisteUtbetaling = LocalDate.now(),
-            sumManuellePosteringer = BigDecimal.ZERO,
-        )
+    ) = Simuleringsoppsummering(
+        perioder = listOf(),
+        fomDatoNestePeriode = LocalDate.now(),
+        etterbetaling = etterbetaling,
+        feilutbetaling = feilutbetaling,
+        fom = LocalDate.now(),
+        tomDatoNestePeriode = LocalDate.now(),
+        forfallsdatoNestePeriode = LocalDate.now(),
+        tidSimuleringHentet = LocalDate.now(),
+        tomSisteUtbetaling = LocalDate.now(),
+        sumManuellePosteringer = BigDecimal.ZERO,
+    )
 }

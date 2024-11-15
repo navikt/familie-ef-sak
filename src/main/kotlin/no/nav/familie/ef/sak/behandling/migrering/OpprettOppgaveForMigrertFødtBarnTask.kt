@@ -3,12 +3,12 @@ package no.nav.familie.ef.sak.behandling.migrering
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
-import no.nav.familie.ef.sak.iverksett.oppgaveforbarn.Alder
+import no.nav.familie.ef.sak.iverksett.oppgaveforbarn.AktivitetspliktigAlder
 import no.nav.familie.ef.sak.iverksett.oppgaveforbarn.OpprettOppfølgingsoppgaveForBarnFyltÅrTask
 import no.nav.familie.ef.sak.iverksett.oppgaveforbarn.OpprettOppgavePayload
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.Fødsel
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.BarnMinimumDto
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Fødsel
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.kontrakter.felles.objectMapper
@@ -126,15 +126,15 @@ class OpprettOppgaveForMigrertFødtBarnTask(
     private fun datoOgAlder(
         fødselsdato: LocalDate,
         sisteUtbetalingsdato: LocalDate,
-    ): List<Pair<LocalDate, Alder>> {
+    ): List<Pair<LocalDate, AktivitetspliktigAlder>> {
         val datoOm1År = nesteVirkedagForDatoMinus1Uke(fødselsdato.plusYears(1))
         if (sisteUtbetalingsdato < datoOm1År) {
             logger.info("Dato for sisteUtbetalingsdato=$sisteUtbetalingsdato er før barnet fyller 1 år = $datoOm1År")
             return emptyList()
         }
         return listOf(
-            nesteVirkedagForDatoMinus1Uke(fødselsdato.plusMonths(6)) to Alder.SEKS_MND,
-            datoOm1År to Alder.ETT_ÅR,
+            nesteVirkedagForDatoMinus1Uke(fødselsdato.plusMonths(6)) to AktivitetspliktigAlder.SEKS_MND,
+            datoOm1År to AktivitetspliktigAlder.ETT_ÅR,
         ).filter { it.first > LocalDate.now() }
     }
 
@@ -179,5 +179,5 @@ data class OppgaveForBarn(
     val personIdent: String,
     val stønadType: StønadType,
     val aktivFra: LocalDate? = null,
-    val alder: Alder,
+    val alder: AktivitetspliktigAlder,
 )

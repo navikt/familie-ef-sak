@@ -128,8 +128,9 @@ internal class FørstegangsbehandlingControllerTest : OppslagSpringRunnerTest() 
         validator.invoke(response)
     }
 
-    private fun <T> responseOK(): (ResponseEntity<Ressurs<T>>) -> Unit = {
-        assertThat(it.statusCode).isEqualTo(HttpStatus.OK)
-        assertThat(it.body?.status).isEqualTo(Ressurs.Status.SUKSESS)
-    }
+    private fun <T> responseOK(): (ResponseEntity<Ressurs<T>>) -> Unit =
+        {
+            assertThat(it.statusCode).isEqualTo(HttpStatus.OK)
+            assertThat(it.body?.status).isEqualTo(Ressurs.Status.SUKSESS)
+        }
 }

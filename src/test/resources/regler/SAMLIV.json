@@ -12,7 +12,8 @@
           "begrunnelseType" : "PÅKREVD",
           "regelId" : "SLUTT_NODE"
         }
-      }
+      },
+      "versjon" : "GJELDENDE"
     },
     "LEVER_IKKE_I_EKTESKAPLIGNENDE_FORHOLD" : {
       "regelId" : "LEVER_IKKE_I_EKTESKAPLIGNENDE_FORHOLD",
@@ -25,7 +26,8 @@
           "begrunnelseType" : "PÅKREVD",
           "regelId" : "SLUTT_NODE"
         }
-      }
+      },
+      "versjon" : "GJELDENDE"
     }
   }
 }

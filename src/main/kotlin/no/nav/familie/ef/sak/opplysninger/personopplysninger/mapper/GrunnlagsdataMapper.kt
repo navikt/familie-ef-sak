@@ -5,10 +5,13 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.BarnMedIdent
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.Folkeregisteridentifikator
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.ForelderBarnRelasjon
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.FullmaktMedNavn
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.Fødsel
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.SivilstandMedNavn
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.Søker
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.TidligereVedtaksperioder
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.Sivilstandstype
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Fødested
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Fødselsdato
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.KjønnType
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlAnnenForelder
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlPersonForelderBarn
@@ -29,63 +32,64 @@ object GrunnlagsdataMapper {
     fun mapBarn(
         pdlPersonForelderBarn: PdlPersonForelderBarn,
         personIdent: String,
-    ) =
-        BarnMedIdent(
-            fødsel = pdlPersonForelderBarn.fødsel,
-            adressebeskyttelse = pdlPersonForelderBarn.adressebeskyttelse,
-            navn = pdlPersonForelderBarn.navn.gjeldende(),
-            bostedsadresse = pdlPersonForelderBarn.bostedsadresse,
-            dødsfall = pdlPersonForelderBarn.dødsfall,
-            deltBosted = pdlPersonForelderBarn.deltBosted,
-            forelderBarnRelasjon = pdlPersonForelderBarn.forelderBarnRelasjon.mapForelderBarnRelasjon(),
-            personIdent = personIdent,
-            folkeregisterpersonstatus = pdlPersonForelderBarn.folkeregisterpersonstatus,
-        )
+    ) = BarnMedIdent(
+        fødsel = mapFødsel(pdlPersonForelderBarn.fødselsdato.first(), pdlPersonForelderBarn.fødested.first()),
+        adressebeskyttelse = pdlPersonForelderBarn.adressebeskyttelse,
+        navn = pdlPersonForelderBarn.navn.gjeldende(),
+        bostedsadresse = pdlPersonForelderBarn.bostedsadresse,
+        dødsfall = pdlPersonForelderBarn.dødsfall,
+        deltBosted = pdlPersonForelderBarn.deltBosted,
+        forelderBarnRelasjon = pdlPersonForelderBarn.forelderBarnRelasjon.mapForelderBarnRelasjon(),
+        personIdent = personIdent,
+        folkeregisterpersonstatus = pdlPersonForelderBarn.folkeregisterpersonstatus,
+    )
 
     fun mapAnnenForelder(
         barneForeldre: Map<String, PdlAnnenForelder>,
         tidligereVedtaksperioderAnnenForelder: Map<String, TidligereVedtaksperioder>,
-    ) =
-        barneForeldre.map {
-            AnnenForelderMedIdent(
-                adressebeskyttelse = it.value.adressebeskyttelse,
-                personIdent = it.key,
-                fødsel = it.value.fødsel,
-                bostedsadresse = it.value.bostedsadresse,
-                dødsfall = it.value.dødsfall,
-                navn = it.value.navn.gjeldende(),
-                folkeregisteridentifikator = mapFolkeregisteridentifikator(it.value.folkeregisteridentifikator),
-                tidligereVedtaksperioder = tidligereVedtaksperioderAnnenForelder[it.key],
-            )
-        }
+    ) = barneForeldre.map {
+        AnnenForelderMedIdent(
+            adressebeskyttelse = it.value.adressebeskyttelse,
+            personIdent = it.key,
+            fødsel = mapFødsel(it.value.fødselsdato.first(), it.value.fødested.first()),
+            bostedsadresse = it.value.bostedsadresse,
+            dødsfall = it.value.dødsfall,
+            navn = it.value.navn.gjeldende(),
+            folkeregisteridentifikator = mapFolkeregisteridentifikator(it.value.folkeregisteridentifikator),
+            tidligereVedtaksperioder = tidligereVedtaksperioderAnnenForelder[it.key],
+        )
+    }
+
+    fun mapFødsel(
+        fødselsdato: Fødselsdato,
+        fødested: Fødested,
+    ): List<Fødsel> = listOf(Fødsel(fødselsdato.fødselsår, fødselsdato.fødselsdato, fødested.fødeland, fødested.fødested, fødested.fødekommune))
 
     fun mapSøker(
         pdlSøker: PdlSøker,
         andrePersoner: Map<String, PdlPersonKort>,
-    ) =
-        Søker(
-            sivilstand = mapSivivilstand(pdlSøker, andrePersoner),
-            adressebeskyttelse = pdlSøker.adressebeskyttelse.gjeldende(),
-            bostedsadresse = pdlSøker.bostedsadresse,
-            dødsfall = pdlSøker.dødsfall.gjeldende(),
-            forelderBarnRelasjon = pdlSøker.forelderBarnRelasjon.mapForelderBarnRelasjon(),
-            fullmakt = mapFullmakt(pdlSøker, andrePersoner),
-            fødsel = pdlSøker.fødsel,
-            folkeregisterpersonstatus = pdlSøker.folkeregisterpersonstatus,
-            innflyttingTilNorge = pdlSøker.innflyttingTilNorge,
-            kjønn = pdlSøker.kjønn.firstOrNull()?.kjønn ?: KjønnType.UKJENT,
-            kontaktadresse = pdlSøker.kontaktadresse,
-            navn = pdlSøker.navn.gjeldende(),
-            opphold = pdlSøker.opphold,
-            oppholdsadresse = pdlSøker.oppholdsadresse,
-            statsborgerskap = pdlSøker.statsborgerskap,
-            utflyttingFraNorge = pdlSøker.utflyttingFraNorge,
-            vergemaalEllerFremtidsfullmakt = mapVergemålEllerFremtidsfullmakt(pdlSøker, andrePersoner),
-            folkeregisteridentifikator = mapFolkeregisteridentifikator(pdlSøker.folkeregisteridentifikator),
-        )
+    ) = Søker(
+        sivilstand = mapSivivilstand(pdlSøker, andrePersoner),
+        adressebeskyttelse = pdlSøker.adressebeskyttelse.gjeldende(),
+        bostedsadresse = pdlSøker.bostedsadresse,
+        dødsfall = pdlSøker.dødsfall.gjeldende(),
+        forelderBarnRelasjon = pdlSøker.forelderBarnRelasjon.mapForelderBarnRelasjon(),
+        fullmakt = mapFullmakt(pdlSøker, andrePersoner),
+        fødsel = mapFødsel(pdlSøker.fødselsdato.first(), pdlSøker.fødested.first()),
+        folkeregisterpersonstatus = pdlSøker.folkeregisterpersonstatus,
+        innflyttingTilNorge = pdlSøker.innflyttingTilNorge,
+        kjønn = pdlSøker.kjønn.firstOrNull()?.kjønn ?: KjønnType.UKJENT,
+        kontaktadresse = pdlSøker.kontaktadresse,
+        navn = pdlSøker.navn.gjeldende(),
+        opphold = pdlSøker.opphold,
+        oppholdsadresse = pdlSøker.oppholdsadresse,
+        statsborgerskap = pdlSøker.statsborgerskap,
+        utflyttingFraNorge = pdlSøker.utflyttingFraNorge,
+        vergemaalEllerFremtidsfullmakt = mapVergemålEllerFremtidsfullmakt(pdlSøker, andrePersoner),
+        folkeregisteridentifikator = mapFolkeregisteridentifikator(pdlSøker.folkeregisteridentifikator),
+    )
 
-    private fun mapFolkeregisteridentifikator(list: List<FolkeregisteridentifikatorPdl>) =
-        list.map { Folkeregisteridentifikator(it.ident, it.status, it.metadata.historisk) }
+    private fun mapFolkeregisteridentifikator(list: List<FolkeregisteridentifikatorPdl>) = list.map { Folkeregisteridentifikator(it.ident, it.status, it.metadata.historisk) }
 
     private fun List<ForelderBarnRelasjonPdl>.mapForelderBarnRelasjon() =
         this.mapNotNull {
@@ -104,17 +108,16 @@ object GrunnlagsdataMapper {
     private fun mapVergemålEllerFremtidsfullmakt(
         pdlSøker: PdlSøker,
         andrePersoner: Map<String, PdlPersonKort>,
-    ) =
-        pdlSøker.vergemaalEllerFremtidsfullmakt.map { vergemaal ->
-            val personIdent = vergemaal.vergeEllerFullmektig.motpartsPersonident
-            personIdent
-                ?.let { andrePersoner[it] }
-                ?.navn
-                ?.gjeldende()
-                ?.let { Personnavn(etternavn = it.etternavn, fornavn = it.fornavn, mellomnavn = it.mellomnavn) }
-                ?.let { vergemaal.copy(vergeEllerFullmektig = vergemaal.vergeEllerFullmektig.copy(navn = it)) }
-                ?: vergemaal
-        }
+    ) = pdlSøker.vergemaalEllerFremtidsfullmakt.map { vergemaal ->
+        val personIdent = vergemaal.vergeEllerFullmektig.motpartsPersonident
+        personIdent
+            ?.let { andrePersoner[it] }
+            ?.navn
+            ?.gjeldende()
+            ?.let { Personnavn(etternavn = it.etternavn, fornavn = it.fornavn, mellomnavn = it.mellomnavn) }
+            ?.let { vergemaal.copy(vergeEllerFullmektig = vergemaal.vergeEllerFullmektig.copy(navn = it)) }
+            ?: vergemaal
+    }
 
     private fun mapSivivilstand(
         pdlSøker: PdlSøker,
@@ -137,7 +140,7 @@ object GrunnlagsdataMapper {
         pdlSøker: PdlSøker,
         andrePersoner: Map<String, PdlPersonKort>,
     ): List<FullmaktMedNavn> =
-        pdlSøker.fullmakt.map {
+        pdlSøker.fullmakt?.map {
             FullmaktMedNavn(
                 gyldigFraOgMed = it.gyldigFraOgMed,
                 gyldigTilOgMed = it.gyldigTilOgMed,
@@ -145,5 +148,5 @@ object GrunnlagsdataMapper {
                 navn = andrePersoner[it.motpartsPersonident]?.navn?.gjeldende()?.visningsnavn(),
                 områder = it.omraader,
             )
-        }
+        } ?: emptyList()
 }

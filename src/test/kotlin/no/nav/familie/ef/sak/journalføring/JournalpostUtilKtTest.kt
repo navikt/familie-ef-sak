@@ -236,15 +236,14 @@ internal class JournalpostUtilKtTest {
         dokumenter: List<DokumentInfo>,
         journalposttype: Journalposttype = Journalposttype.I,
         avsenderMottaker: AvsenderMottaker? = null,
-    ) =
-        Journalpost(
-            journalpostId = journalpostId,
-            journalposttype = journalposttype,
-            avsenderMottaker = avsenderMottaker,
-            journalstatus = Journalstatus.MOTTATT,
-            tema = "ENF",
-            behandlingstema = behandlingstema,
-            dokumenter = dokumenter,
-            tittel = "Tittel",
-        )
+    ) = Journalpost(
+        journalpostId = journalpostId,
+        journalposttype = journalposttype,
+        avsenderMottaker = avsenderMottaker,
+        journalstatus = Journalstatus.MOTTATT,
+        tema = "ENF",
+        behandlingstema = behandlingstema,
+        dokumenter = dokumenter,
+        tittel = "Tittel",
+    )
 }

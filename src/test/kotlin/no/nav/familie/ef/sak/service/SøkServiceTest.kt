@@ -6,12 +6,15 @@ import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.fagsak.FagsakPersonService
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.SøkService
-import no.nav.familie.ef.sak.fagsak.dto.PersonFraSøk
+import no.nav.familie.ef.sak.fagsak.dto.PersonPåAdresse
 import no.nav.familie.ef.sak.fagsak.dto.SøkeresultatPerson
 import no.nav.familie.ef.sak.infrastruktur.config.KodeverkServiceMock
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
+import no.nav.familie.ef.sak.no.nav.familie.ef.sak.vilkår.VilkårTestUtil.mockVilkårGrunnlagDto
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlSaksbehandlerClient
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerService
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.Sivilstandstype
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper.AdresseMapper
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Bostedsadresse
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.FolkeregisteridentifikatorFraSøk
@@ -23,6 +26,8 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PersonSøkTreff
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Vegadresse
 import no.nav.familie.ef.sak.testutil.PdlTestdataHelper.pdlSøker
 import no.nav.familie.ef.sak.testutil.PdlTestdataHelper.ukjentBostedsadresse
+import no.nav.familie.ef.sak.vilkår.VurderingService
+import no.nav.familie.ef.sak.vilkår.regler.HovedregelMetadata
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.BeforeEach
@@ -37,6 +42,8 @@ internal class SøkServiceTest {
     private val adresseMapper: AdresseMapper = AdresseMapper(KodeverkServiceMock().kodeverkService())
     private val behandlingService = mockk<BehandlingService>()
     private val fagsakPersonService = mockk<FagsakPersonService>()
+    private val vurderingService = mockk<VurderingService>()
+    private val personopplysningerService = mockk<PersonopplysningerService>()
     private val søkService =
         SøkService(
             fagsakPersonService,
@@ -45,13 +52,27 @@ internal class SøkServiceTest {
             pdlSaksbehandlerClient,
             adresseMapper,
             fagsakService,
+            vurderingService,
+            personopplysningerService,
         )
 
     @BeforeEach
     internal fun setUp() {
-        every {
-            behandlingService.hentAktivIdent(any())
-        } returns "ident"
+        every { behandlingService.hentAktivIdent(any()) } returns "ident"
+        every { vurderingService.hentGrunnlagOgMetadata(any()) } returns
+            Pair(
+                mockVilkårGrunnlagDto(),
+                HovedregelMetadata(
+                    null,
+                    Sivilstandstype.UGIFT,
+                    false,
+                    emptyList(),
+                    emptyList(),
+                    emptyList(),
+                    mockk(),
+                    mockk(),
+                ),
+            )
     }
 
     @Test
@@ -112,13 +133,16 @@ internal class SøkServiceTest {
         } returns pdlSøker(bostedsadresse = bostedsadresseFraPdl)
 
         val forventetResultat =
-            PersonFraSøk(
+            PersonPåAdresse(
                 personIdent = "123456789",
                 visningsadresse = "Adressenavn 23 A, 0000 Oslo",
                 "Fornavn Mellomnavn Etternavn",
+                fødselsdato = null,
+                erSøker = null,
+                erBarn = null,
             )
 
-        val person = SøkeresultatPerson(listOf(forventetResultat), 1, 1, 1)
+        val person = SøkeresultatPerson(listOf(forventetResultat))
         assertThat(søkService.søkEtterPersonerMedSammeAdressePåBehandling(UUID.randomUUID())).isEqualTo(person)
     }
 

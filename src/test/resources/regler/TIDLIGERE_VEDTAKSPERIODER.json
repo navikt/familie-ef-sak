@@ -12,7 +12,8 @@
           "begrunnelseType" : "UTEN",
           "regelId" : "SLUTT_NODE"
         }
-      }
+      },
+      "versjon" : "GJELDENDE"
     },
     "HAR_TIDLIGERE_ANDRE_STØNADER_SOM_HAR_BETYDNING" : {
       "regelId" : "HAR_TIDLIGERE_ANDRE_STØNADER_SOM_HAR_BETYDNING",
@@ -25,7 +26,8 @@
           "begrunnelseType" : "VALGFRI",
           "regelId" : "SLUTT_NODE"
         }
-      }
+      },
+      "versjon" : "GJELDENDE"
     }
   }
 }

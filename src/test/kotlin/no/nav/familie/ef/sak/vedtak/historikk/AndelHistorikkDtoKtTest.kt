@@ -35,10 +35,21 @@ internal class AndelHistorikkDtoKtTest {
         assertThat(andel.medOpphør().medEndring(EndringType.SPLITTET).erAktivVedtaksperiode()).isFalse
     }
 
+    @Test
+    internal fun `beregnetAntallMåneder skal returnere antall måneder mellom to datoer`() {
+        val andelMedGrunnlagDtoNyPeriode = andelMedGrunnlagDto().copy(periode = Månedsperiode(fom = YearMonth.now().minusMonths(3), tom = YearMonth.now()))
+        val beregnetAntallMåneder = andelMedGrunnlagDtoNyPeriode.beregnetAntallMåneder
+
+        val andelMedGrunnlagDtoNyPeriode2 = andelMedGrunnlagDto().copy(periode = Månedsperiode(fom = YearMonth.now(), tom = YearMonth.now()))
+        val beregnetAntallMåneder2 = andelMedGrunnlagDtoNyPeriode2.beregnetAntallMåneder
+
+        assertThat(beregnetAntallMåneder).isEqualTo(4)
+        assertThat(beregnetAntallMåneder2).isEqualTo(1)
+    }
+
     private fun AndelHistorikkDto.medOpphør() = this.copy(erOpphør = true)
 
-    private fun AndelHistorikkDto.medEndring(endringType: EndringType) =
-        this.copy(endring = HistorikkEndring(endringType, UUID.randomUUID(), LocalDateTime.now()))
+    private fun AndelHistorikkDto.medEndring(endringType: EndringType) = this.copy(endring = HistorikkEndring(endringType, UUID.randomUUID(), LocalDateTime.now()))
 
     val andel =
         AndelHistorikkDto(

@@ -133,8 +133,7 @@ class EksternBehandlingService(
         return KanOppretteRevurdering()
     }
 
-    private fun hentEFOppgaver(behandlingIder: List<UUID>) =
-        behandlingIder.mapNotNull { oppgaveService.finnSisteBehandleSakOppgaveForBehandling(it) }
+    private fun hentEFOppgaver(behandlingIder: List<UUID>) = behandlingIder.mapNotNull { oppgaveService.finnSisteBehandleSakOppgaveForBehandling(it) }
 
     private fun hentOppgaver(oppgaveIder: List<Long>) = oppgaveIder.map { oppgaveService.hentOppgave(it) }
 }

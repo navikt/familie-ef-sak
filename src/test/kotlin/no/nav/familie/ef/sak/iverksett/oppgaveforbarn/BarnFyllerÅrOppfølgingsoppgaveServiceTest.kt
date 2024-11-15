@@ -14,11 +14,18 @@ import no.nav.familie.ef.sak.oppgave.Oppgave
 import no.nav.familie.ef.sak.oppgave.OppgaveClient
 import no.nav.familie.ef.sak.oppgave.OppgaveRepository
 import no.nav.familie.ef.sak.oppgave.OppgaveService
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerIntegrasjonerClient
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.GrunnlagsdataDomene
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.GrunnlagsdataMedMetadata
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Familierelasjonsrolle
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.ForelderBarnRelasjon
+import no.nav.familie.ef.sak.repository.barnMedIdent
+import no.nav.familie.ef.sak.repository.behandling
+import no.nav.familie.ef.sak.repository.oppgave
 import no.nav.familie.ef.sak.testutil.PdlTestdataHelper
+import no.nav.familie.ef.sak.testutil.PdlTestdataHelper.fødsel
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.domene.Task
@@ -40,18 +47,24 @@ internal class BarnFyllerÅrOppfølgingsoppgaveServiceTest {
     private val oppgaveRepository = mockk<OppgaveRepository>()
     private val taskService = mockk<TaskService>()
     private val personopplysningerIntegrasjonerClient = mockk<PersonopplysningerIntegrasjonerClient>()
+    private val grunnlagsdataService = mockk<GrunnlagsdataService>()
+
     private val opprettOppgaveForBarnService =
         BarnFyllerÅrOppfølgingsoppgaveService(
             gjeldendeBarnRepository,
             oppgaveRepository,
             taskService,
             personService,
+            grunnlagsdataService,
         )
 
     private val oppgaveSlot = slot<Oppgave>()
     private val oppgaveMock = mockk<Oppgave>()
     private val eksterneIderSlot = slot<Set<UUID>>()
     private val taskSlot = slot<Task>()
+
+    private val grunnlagsDataMedMetadata = mockk<GrunnlagsdataMedMetadata>()
+    private val grunnlagsdataDomene = mockk<GrunnlagsdataDomene>()
 
     @BeforeEach
     fun init() {
@@ -76,6 +89,9 @@ internal class BarnFyllerÅrOppfølgingsoppgaveServiceTest {
         every { oppgaveRepository.findByTypeAndAlderIsNotNullAndBarnPersonIdenter(any(), any()) } returns emptyList()
         every { taskService.save(capture(taskSlot)) } returns mockk()
         every { personService.hentPersonForelderBarnRelasjon(any()) } returns emptyMap()
+        every { grunnlagsDataMedMetadata.grunnlagsdata } returns grunnlagsdataDomene
+        every { grunnlagsdataDomene.barn } returns listOf(barnMedIdent("04042495250", "fornavn etternavn"))
+        every { grunnlagsdataService.hentGrunnlagsdataForBehandlinger(any()) } answers { firstArg<Set<UUID>>().associateWith { grunnlagsDataMedMetadata } }
     }
 
     @AfterEach
@@ -86,7 +102,9 @@ internal class BarnFyllerÅrOppfølgingsoppgaveServiceTest {
     @Test
     fun `barn har blitt mer enn 6 mnd, forvent kall til beskrivelseBarnBlirSeksMnd`() {
         val fødselsdato = LocalDate.now().minusDays(183)
-        val barnTilUtplukkForOppgave = opprettBarn(fødselsnummer = FnrGenerator.generer(fødselsdato))
+        val fødselsnummer = FnrGenerator.generer()
+        val barnTilUtplukkForOppgave = opprettBarn(fødselsnummer = fødselsnummer)
+        every { grunnlagsdataDomene.barn } returns listOf(barnMedIdent(fødselsnummer, "Fornavn etternavn", fødsel(fødselsdato)))
         every {
             gjeldendeBarnRepository.finnBarnAvGjeldendeIverksatteBehandlinger(StønadType.OVERGANGSSTØNAD, any())
         } returns listOf(barnTilUtplukkForOppgave)
@@ -97,7 +115,9 @@ internal class BarnFyllerÅrOppfølgingsoppgaveServiceTest {
     @Test
     fun `barn har blitt mer enn ett år, forvent kall til beskrivelseBarnFyllerEttÅr`() {
         val fødselsdato = LocalDate.now().minusYears(1).minusDays(1)
-        val barnTilUtplukkForOppgave = opprettBarn(fødselsnummer = FnrGenerator.generer(fødselsdato))
+        val fødselsnummer = FnrGenerator.generer()
+        val barnTilUtplukkForOppgave = opprettBarn(fødselsnummer = fødselsnummer)
+        every { grunnlagsdataDomene.barn } returns listOf(barnMedIdent(fødselsnummer, "Fornavn etternavn", fødsel(fødselsdato)))
         every {
             gjeldendeBarnRepository.finnBarnAvGjeldendeIverksatteBehandlinger(StønadType.OVERGANGSSTØNAD, any())
         } returns listOf(barnTilUtplukkForOppgave)
@@ -109,7 +129,9 @@ internal class BarnFyllerÅrOppfølgingsoppgaveServiceTest {
     @Test
     fun `barn blir seks mnd om en uke, forvent at det ikke blir opprettet oppgave`() {
         val fødselsdato = LocalDate.now().minusDays(182).plusWeeks(1)
-        val barnTilUtplukkForOppgave = opprettBarn(fødselsnummer = FnrGenerator.generer(fødselsdato))
+        val fødselsnummer = FnrGenerator.generer()
+        val barnTilUtplukkForOppgave = opprettBarn(fødselsnummer = fødselsnummer)
+        every { grunnlagsdataDomene.barn } returns listOf(barnMedIdent(fødselsnummer, "Fornavn etternavn", fødsel(fødselsdato)))
         every {
             gjeldendeBarnRepository.finnBarnAvGjeldendeIverksatteBehandlinger(StønadType.OVERGANGSSTØNAD, any())
         } returns listOf(barnTilUtplukkForOppgave)
@@ -119,10 +141,10 @@ internal class BarnFyllerÅrOppfølgingsoppgaveServiceTest {
     }
 
     @Test
-    fun `5 av 13 barn har blitt 6 mnd, forvent at 7 oppgaver opprettes`() {
+    fun `5 av 13 barn har blitt 6 mnd, forvent at 5 oppgaver opprettes`() {
         val fødselsdatoer = (-5..7).asSequence().map { LocalDate.now().minusDays(182).plusDays(it.toLong()) }.toList()
         val opprettBarnForFødselsdatoer = fødselsdatoer.map { opprettBarn(fødselsnummer = FnrGenerator.generer(it)) }
-
+        every { grunnlagsdataDomene.barn } returns opprettBarnForFødselsdatoer.mapIndexed { i, it -> barnMedIdent(it.fødselsnummerBarn.toString(), "fornavn etternavn", fødsel(fødselsdatoer[i])) }
         every {
             gjeldendeBarnRepository.finnBarnAvGjeldendeIverksatteBehandlinger(StønadType.OVERGANGSSTØNAD, any())
         } returns opprettBarnForFødselsdatoer
@@ -139,6 +161,7 @@ internal class BarnFyllerÅrOppfølgingsoppgaveServiceTest {
         val termindato = LocalDate.now().minusYears(1)
         val fødselsnummerSøker = FnrGenerator.generer(1992)
         val fødselsnummerBarn = FnrGenerator.generer(termindato)
+        every { grunnlagsdataDomene.barn } returns listOf(barnMedIdent(fødselsnummerBarn, "Fornavn etternavn", fødsel(termindato)))
 
         every {
             gjeldendeBarnRepository.finnBarnAvGjeldendeIverksatteBehandlinger(StønadType.OVERGANGSSTØNAD, any())
@@ -156,7 +179,59 @@ internal class BarnFyllerÅrOppfølgingsoppgaveServiceTest {
                 Pair(
                     fødselsnummerSøker,
                     PdlTestdataHelper.pdlBarn(
+                        fødsel = PdlTestdataHelper.fødsel(fødselsdato = LocalDate.of(1992, 1, 1)),
+                        forelderBarnRelasjon =
+                            listOf(
+                                ForelderBarnRelasjon(
+                                    fødselsnummerBarn,
+                                    Familierelasjonsrolle.BARN,
+                                    Familierelasjonsrolle.MOR,
+                                ),
+                            ),
+                    ),
+                ),
+            )
+
+        every { personService.hentPersonForelderBarnRelasjon(listOf(fødselsnummerBarn)) } returns
+            mapOf(
+                Pair(
+                    fødselsnummerBarn,
+                    PdlTestdataHelper.pdlBarn(
                         fødsel = PdlTestdataHelper.fødsel(fødselsdato = termindato),
+                        forelderBarnRelasjon = listOf(),
+                    ),
+                ),
+            )
+
+        opprettOppgaveForBarnService.opprettTasksForAlleBarnSomHarFyltÅr()
+        val opprettOppgavePayload = objectMapper.readValue<OpprettOppgavePayload>(taskSlot.captured.payload)
+        assertThat(opprettOppgavePayload.alder).isEqualTo(AktivitetspliktigAlder.ETT_ÅR)
+    }
+
+    @Test
+    fun `et eldre barn i grunnlagsdata, forvent ingen opprettelser av oppgaver`() {
+        val termindato = LocalDate.now().minusYears(10)
+        val fødselsnummerSøker = FnrGenerator.generer(1992)
+        val fødselsnummerBarn = FnrGenerator.generer(termindato)
+        every { grunnlagsdataDomene.barn } returns listOf(barnMedIdent(fødselsnummerBarn, "Fornavn etternavn", fødsel(termindato)))
+
+        every {
+            gjeldendeBarnRepository.finnBarnAvGjeldendeIverksatteBehandlinger(StønadType.OVERGANGSSTØNAD, any())
+        } returns
+            listOf(
+                opprettBarn(
+                    fødselsnummer = fødselsnummerBarn,
+                    termindato = termindato,
+                    fødselsnummerSøker = fødselsnummerSøker,
+                ),
+            )
+
+        every { personService.hentPersonForelderBarnRelasjon(listOf(fødselsnummerSøker)) } returns
+            mapOf(
+                Pair(
+                    fødselsnummerSøker,
+                    PdlTestdataHelper.pdlBarn(
+                        fødsel = PdlTestdataHelper.fødsel(fødselsdato = LocalDate.of(1992, 1, 1)),
                         forelderBarnRelasjon =
                             listOf(
                                 ForelderBarnRelasjon(
@@ -170,17 +245,21 @@ internal class BarnFyllerÅrOppfølgingsoppgaveServiceTest {
             )
 
         opprettOppgaveForBarnService.opprettTasksForAlleBarnSomHarFyltÅr()
-        val opprettOppgavePayload = objectMapper.readValue<OpprettOppgavePayload>(taskSlot.captured.payload)
-        assertThat(opprettOppgavePayload.alder).isEqualTo(Alder.ETT_ÅR)
+        verify(exactly = 0) { taskService.save(any()) }
     }
 
     @Test
-    fun `to barn som fyller år på samme behandling, forvent at bare en oppgave er gjeldende`() {
+    fun `to barn som fyller år på samme behandling, forvent at bare en oppgave er gjeldende grunnlagsdatabarn`() {
         val termindato = LocalDate.now().minusYears(1).minusDays(5)
         val behandlingId = UUID.randomUUID()
-        val fødselsnummerSøker = FnrGenerator.generer(1992)
-        val fødselsnummerBarn = FnrGenerator.generer(termindato)
-        val fødselsnummerBarn2 = FnrGenerator.generer(termindato)
+        val fødselsnummerSøker = FnrGenerator.generer()
+        val fødselsnummerBarn = FnrGenerator.generer()
+        val fødselsnummerBarn2 = FnrGenerator.generer()
+        every { grunnlagsdataDomene.barn } returns
+            listOf(
+                barnMedIdent(fødselsnummerBarn, "Fornavn etternavn", fødsel(termindato)),
+                barnMedIdent(fødselsnummerBarn2, "Fornavn etternavn", fødsel(termindato)),
+            )
 
         every {
             gjeldendeBarnRepository.finnBarnAvGjeldendeIverksatteBehandlinger(StønadType.OVERGANGSSTØNAD, any())
@@ -188,19 +267,19 @@ internal class BarnFyllerÅrOppfølgingsoppgaveServiceTest {
             listOf(
                 opprettBarn(
                     behandlingId = behandlingId,
-                    fødselsnummer = null,
+                    fødselsnummer = fødselsnummerBarn,
                     termindato = termindato,
                     fødselsnummerSøker = fødselsnummerSøker,
                 ),
                 opprettBarn(
                     behandlingId = behandlingId,
-                    fødselsnummer = null,
+                    fødselsnummer = fødselsnummerBarn2,
                     termindato = termindato,
                     fødselsnummerSøker = fødselsnummerSøker,
                 ),
             )
 
-        every { personService.hentPersonForelderBarnRelasjon(any()) } returns
+        every { personService.hentPersonForelderBarnRelasjon(listOf(fødselsnummerSøker)) } returns
             mapOf(
                 Pair(
                     fødselsnummerSøker,
@@ -227,24 +306,137 @@ internal class BarnFyllerÅrOppfølgingsoppgaveServiceTest {
 
         verify(exactly = 1) { taskService.save(any()) }
         val opprettOppgavePayload = objectMapper.readValue<OpprettOppgavePayload>(taskSlot.captured.payload)
-        assertThat(opprettOppgavePayload.alder).isEqualTo(Alder.ETT_ÅR)
+        assertThat(opprettOppgavePayload.alder).isEqualTo(AktivitetspliktigAlder.ETT_ÅR)
+    }
+
+    @Test
+    fun `barn i rett aldre filtreres bort fordi det finnes oppgave fra før`() {
+        val termindato = LocalDate.now().minusYears(1).minusDays(5)
+        val behandlingId = UUID.randomUUID()
+        val fødselsnummerSøker = FnrGenerator.generer()
+        val fødselsnummerBarn = FnrGenerator.generer()
+
+        val oppgave = oppgave(behandling = behandling()).copy(barnPersonIdent = fødselsnummerBarn, alder = AktivitetspliktigAlder.ETT_ÅR)
+        every { oppgaveRepository.findByTypeAndAlderIsNotNullAndBarnPersonIdenter(any(), any()) } returns listOf(oppgave)
+
+        every { grunnlagsdataDomene.barn } returns
+            listOf(
+                barnMedIdent(fødselsnummerBarn, "Fornavn etternavn", fødsel(termindato)),
+            )
+
+        every {
+            gjeldendeBarnRepository.finnBarnAvGjeldendeIverksatteBehandlinger(StønadType.OVERGANGSSTØNAD, any())
+        } returns
+            listOf(
+                opprettBarn(
+                    behandlingId = behandlingId,
+                    fødselsnummer = fødselsnummerBarn,
+                    termindato = termindato,
+                    fødselsnummerSøker = fødselsnummerSøker,
+                ),
+            )
+
+        every { personService.hentPersonForelderBarnRelasjon(listOf(fødselsnummerSøker)) } returns
+            mapOf(
+                Pair(
+                    fødselsnummerSøker,
+                    PdlTestdataHelper.pdlBarn(
+                        fødsel = PdlTestdataHelper.fødsel(fødselsdato = termindato),
+                        forelderBarnRelasjon =
+                            listOf(
+                                ForelderBarnRelasjon(
+                                    fødselsnummerBarn,
+                                    Familierelasjonsrolle.BARN,
+                                    Familierelasjonsrolle.MOR,
+                                ),
+                            ),
+                    ),
+                ),
+            )
+
+        opprettOppgaveForBarnService.opprettTasksForAlleBarnSomHarFyltÅr()
+
+        verify(exactly = 0) { taskService.save(any()) }
+    }
+
+    @Test
+    fun `terminbarn som fyller år på behandling, forvent at det oppdateres med data fra pdl`() {
+        val termindato = LocalDate.now().minusYears(1).minusDays(5)
+        val behandlingId = UUID.randomUUID()
+        val fødselsnummerSøker = FnrGenerator.generer()
+        val fødselsnummerBarn = FnrGenerator.generer()
+
+        every {
+            gjeldendeBarnRepository.finnBarnAvGjeldendeIverksatteBehandlinger(StønadType.OVERGANGSSTØNAD, any())
+        } returns
+            listOf(
+                opprettBarn(
+                    behandlingId = behandlingId,
+                    fødselsnummer = null,
+                    termindato = termindato,
+                    fødselsnummerSøker = fødselsnummerSøker,
+                ),
+            )
+
+        every { personService.hentPersonForelderBarnRelasjon(listOf(fødselsnummerSøker)) } returns
+            mapOf(
+                Pair(
+                    fødselsnummerSøker,
+                    PdlTestdataHelper.pdlPerson(
+                        fødsel = PdlTestdataHelper.fødsel(fødselsdato = LocalDate.now().minusYears(30)),
+                        forelderBarnRelasjon =
+                            listOf(
+                                ForelderBarnRelasjon(
+                                    relatertPersonsIdent = fødselsnummerBarn,
+                                    relatertPersonsRolle = Familierelasjonsrolle.BARN,
+                                    minRolleForPerson = Familierelasjonsrolle.MOR,
+                                ),
+                            ),
+                    ),
+                ),
+            )
+
+        every { personService.hentPersonForelderBarnRelasjon(listOf(fødselsnummerBarn)) } returns
+            mapOf(
+                Pair(
+                    fødselsnummerBarn,
+                    PdlTestdataHelper.pdlPerson(
+                        fødsel = PdlTestdataHelper.fødsel(fødselsdato = termindato),
+                        forelderBarnRelasjon =
+                            listOf(
+                                ForelderBarnRelasjon(
+                                    relatertPersonsIdent = fødselsnummerSøker,
+                                    relatertPersonsRolle = Familierelasjonsrolle.MOR,
+                                    minRolleForPerson = Familierelasjonsrolle.BARN,
+                                ),
+                            ),
+                    ),
+                ),
+            )
+
+        opprettOppgaveForBarnService.opprettTasksForAlleBarnSomHarFyltÅr()
+
+        verify(exactly = 1) { taskService.save(any()) }
+        val opprettOppgavePayload = objectMapper.readValue<OpprettOppgavePayload>(taskSlot.captured.payload)
+        assertThat(opprettOppgavePayload.alder).isEqualTo(AktivitetspliktigAlder.ETT_ÅR)
     }
 
     @Test
     fun `to barn som fyller år på forskjellige behandlinger, forvent at to oppgaver er gjeldende`() {
         val fødselsdato = LocalDate.now().minusYears(1).minusDays(6)
-
-        val opprettBarnForFødselsdato =
+        val fødselsnummere = listOf(FnrGenerator.generer(), FnrGenerator.generer())
+        val opprettBarnForFødselsdatoer =
             listOf(
-                opprettBarn(behandlingId = UUID.randomUUID(), fødselsnummer = FnrGenerator.generer(fødselsdato)),
-                opprettBarn(behandlingId = UUID.randomUUID(), fødselsnummer = FnrGenerator.generer(fødselsdato)),
+                opprettBarn(behandlingId = UUID.randomUUID(), fødselsnummer = fødselsnummere[0]),
+                opprettBarn(behandlingId = UUID.randomUUID(), fødselsnummer = fødselsnummere[1]),
             )
         every {
             gjeldendeBarnRepository.finnBarnAvGjeldendeIverksatteBehandlinger(StønadType.OVERGANGSSTØNAD, any())
-        } returns opprettBarnForFødselsdato
+        } returns opprettBarnForFødselsdatoer
+        every { grunnlagsdataDomene.barn } returns fødselsnummere.mapIndexed { i, it -> barnMedIdent(it, "fornavn etternavn", fødsel(fødselsdato)) }
 
         val opprettBarnTilOppgave =
-            opprettBarnForFødselsdato.map { BarnTilOppgave(it.fødselsnummerBarn!!, it.behandlingId, 1, 1) }.toSet()
+            opprettBarnForFødselsdatoer.map { BarnTilOppgave(it.fødselsnummerBarn!!, it.behandlingId, 1, 1) }.toSet()
 
         opprettOppgaveForBarnService.opprettTasksForAlleBarnSomHarFyltÅr()
         verify(exactly = 2) { taskService.save(any()) }
@@ -253,12 +445,15 @@ internal class BarnFyllerÅrOppfølgingsoppgaveServiceTest {
     @Test
     fun `barn fra vanlige behandlinger og migrerte fagsaker blir med i listen over oppgaver`() {
         val fødselsnummerBarn = FnrGenerator.generer(LocalDate.now().minusYears(1).minusDays(2))
-        val fødselsdatoMigrert = LocalDate.now().minusDays(183)
-        val fødselsnummerBarnMigrert = FnrGenerator.generer(fødselsdatoMigrert)
-        val fødselsnummerSøker = FnrGenerator.generer(1992)
+        val fødselsnummerBarnMigrert = FnrGenerator.generer()
+        val fødselsnummerSøker = FnrGenerator.generer()
         val behandlingId = UUID.randomUUID()
         val migrertBehandlingId = UUID.randomUUID()
-
+        every { grunnlagsdataDomene.barn } returns
+            listOf(
+                barnMedIdent(fødselsnummerBarn, "Fornavn etternavn", fødsel(LocalDate.now().minusYears(1))),
+                barnMedIdent(fødselsnummerBarnMigrert, "Fornavn etternavn", fødsel(LocalDate.now().minusYears(1))),
+            )
         every {
             gjeldendeBarnRepository.finnBarnAvGjeldendeIverksatteBehandlinger(StønadType.OVERGANGSSTØNAD, any())
         } returns

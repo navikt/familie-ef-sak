@@ -190,43 +190,42 @@ fun VedtakDto.tilVedtak(
 private fun Sanksjonert.sanksjonertTilVedtak(
     behandlingId: UUID,
     stønadstype: StønadType,
-) =
-    when (stønadstype) {
-        StønadType.OVERGANGSSTØNAD -> {
-            val vedtaksperiode =
-                Vedtaksperiode(
-                    periode.tilPeriode(),
-                    AktivitetType.IKKE_AKTIVITETSPLIKT,
-                    VedtaksperiodeType.SANKSJON,
-                    this.sanksjonsårsak,
-                )
-            Vedtak(
-                behandlingId = behandlingId,
-                perioder = PeriodeWrapper(listOf(vedtaksperiode)),
-                internBegrunnelse = this.internBegrunnelse,
-                resultatType = ResultatType.SANKSJONERE,
-                saksbehandlerIdent = SikkerhetContext.hentSaksbehandlerEllerSystembruker(),
+) = when (stønadstype) {
+    StønadType.OVERGANGSSTØNAD -> {
+        val vedtaksperiode =
+            Vedtaksperiode(
+                periode.tilPeriode(),
+                AktivitetType.IKKE_AKTIVITETSPLIKT,
+                VedtaksperiodeType.SANKSJON,
+                this.sanksjonsårsak,
             )
-        }
-        StønadType.BARNETILSYN -> {
-            val vedtaksperiode =
-                Barnetilsynperiode(
-                    periode = periode.tilPeriode(),
-                    utgifter = 0,
-                    barn = emptyList(),
-                    sanksjonsårsak = this.sanksjonsårsak,
-                    periodetype = PeriodetypeBarnetilsyn.SANKSJON_1_MND,
-                )
-            Vedtak(
-                behandlingId = behandlingId,
-                barnetilsyn = BarnetilsynWrapper(listOf(vedtaksperiode), begrunnelse = null),
-                internBegrunnelse = this.internBegrunnelse,
-                resultatType = ResultatType.SANKSJONERE,
-                saksbehandlerIdent = SikkerhetContext.hentSaksbehandlerEllerSystembruker(),
-            )
-        }
-        StønadType.SKOLEPENGER -> error("Håndterer ikke sanksjon for skolepenger")
+        Vedtak(
+            behandlingId = behandlingId,
+            perioder = PeriodeWrapper(listOf(vedtaksperiode)),
+            internBegrunnelse = this.internBegrunnelse,
+            resultatType = ResultatType.SANKSJONERE,
+            saksbehandlerIdent = SikkerhetContext.hentSaksbehandlerEllerSystembruker(),
+        )
     }
+    StønadType.BARNETILSYN -> {
+        val vedtaksperiode =
+            Barnetilsynperiode(
+                periode = periode.tilPeriode(),
+                utgifter = 0,
+                barn = emptyList(),
+                sanksjonsårsak = this.sanksjonsårsak,
+                periodetype = PeriodetypeBarnetilsyn.SANKSJON_1_MND,
+            )
+        Vedtak(
+            behandlingId = behandlingId,
+            barnetilsyn = BarnetilsynWrapper(listOf(vedtaksperiode), begrunnelse = null),
+            internBegrunnelse = this.internBegrunnelse,
+            resultatType = ResultatType.SANKSJONERE,
+            saksbehandlerIdent = SikkerhetContext.hentSaksbehandlerEllerSystembruker(),
+        )
+    }
+    StønadType.SKOLEPENGER -> error("Håndterer ikke sanksjon for skolepenger")
+}
 
 fun Vedtak.tilVedtakDto(): VedtakDto =
     when (this.resultatType) {

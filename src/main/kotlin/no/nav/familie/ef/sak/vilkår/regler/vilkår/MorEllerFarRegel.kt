@@ -30,7 +30,7 @@ class MorEllerFarRegel :
             return super.initiereDelvilkårsvurdering(metadata, resultat, barnId)
         }
 
-        return hovedregler.map {
+        return gjeldendeHovedregler().map {
             if (it == RegelId.OMSORG_FOR_EGNE_ELLER_ADOPTERTE_BARN && erMorEllerFarForAlleBarn(metadata)) {
                 automatiskVurdertDelvilkår(RegelId.OMSORG_FOR_EGNE_ELLER_ADOPTERTE_BARN, SvarId.JA, "Bruker søker stønad for egne/adopterte barn.")
             } else {

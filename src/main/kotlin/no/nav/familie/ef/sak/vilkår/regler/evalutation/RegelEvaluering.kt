@@ -18,8 +18,7 @@ data class RegelResultat(
     val vilkår: Vilkårsresultat,
     val delvilkår: Map<RegelId, Vilkårsresultat>,
 ) {
-    fun resultatHovedregel(hovedregel: RegelId) =
-        delvilkår[hovedregel] ?: throw Feil("Savner resultat for regelId=$hovedregel vilkårType=$vilkårType")
+    fun resultatHovedregel(hovedregel: RegelId) = delvilkår[hovedregel] ?: throw Feil("Savner resultat for regelId=$hovedregel vilkårType=$vilkårType")
 }
 
 object RegelEvaluering {

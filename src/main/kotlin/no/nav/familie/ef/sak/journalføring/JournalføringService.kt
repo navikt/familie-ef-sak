@@ -225,6 +225,7 @@ class JournalføringService(
                 behandlingType = behandlingstype,
                 fagsakId = fagsak.id,
                 behandlingsårsak = utledBehandlingÅrsak(journalpost, ustrukturertDokumentasjonType),
+                kravMottatt = journalpost.datoMottatt?.toLocalDate(),
             )
         iverksettService.startBehandling(behandling, fagsak)
         if (journalpost.harStrukturertSøknad()) {
@@ -277,8 +278,7 @@ class JournalføringService(
         ustrukturertDokumentasjonType: UstrukturertDokumentasjonType,
     ): Boolean = ustrukturertDokumentasjonType.erEttersending()
 
-    private fun finnForrigeIverksatteEllerAvslåtteBehandling(fagsak: Fagsak) =
-        behandlingService.finnSisteIverksatteBehandlingMedEventuellAvslått(fagsak.id)
+    private fun finnForrigeIverksatteEllerAvslåtteBehandling(fagsak: Fagsak) = behandlingService.finnSisteIverksatteBehandlingMedEventuellAvslått(fagsak.id)
 
     private fun opprettBehandlingsstatistikkTask(
         behandlingId: UUID,

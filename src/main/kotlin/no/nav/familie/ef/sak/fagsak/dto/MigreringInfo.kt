@@ -8,7 +8,6 @@ import java.time.YearMonth
 data class MigreringInfo(
     val kanMigreres: Boolean,
     val årsak: String? = null,
-    val kanGåVidereTilJournalføring: Boolean = false,
     val stønadsperiode: Månedsperiode? = null,
     val inntektsgrunnlag: Int? = null,
     val samordningsfradrag: Int? = null,

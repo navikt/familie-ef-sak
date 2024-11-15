@@ -13,15 +13,15 @@ import org.junit.jupiter.api.Test
 
 internal class RegelValideringTest {
     @Test
-    fun `sender in en tom liste med svar - skal kaste exception`() {
+    fun `sender inn en tom liste med svar - skal kaste exception`() {
         val regel = VilkårsregelEnHovedregel()
 
         assertThat(
             Assertions.catchThrowable {
                 valider(regel, *emptyArray<VurderingDto>())
             },
-        ).hasMessage("Savner svar for en av delvilkåren for vilkår=ALENEOMSORG")
-            .isInstanceOf(Feil::class.java)
+        ).hasMessage("List is empty.")
+            .isInstanceOf(NoSuchElementException::class.java)
     }
 
     @Test
@@ -35,7 +35,7 @@ internal class RegelValideringTest {
                     VurderingDto(RegelId.KRAV_SIVILSTAND_PÅKREVD_BEGRUNNELSE),
                 )
             },
-        ).hasMessageStartingWith("Delvilkårsvurderinger savner svar på hovedregler")
+        ).hasMessageStartingWith("Delvilkårsvurderinger mangler svar på hovedregler")
             .isInstanceOf(Feil::class.java)
     }
 

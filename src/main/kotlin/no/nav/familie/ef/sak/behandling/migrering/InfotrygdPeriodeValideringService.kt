@@ -2,7 +2,6 @@ package no.nav.familie.ef.sak.behandling.migrering
 
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
-import no.nav.familie.ef.sak.felles.util.DatoUtil
 import no.nav.familie.ef.sak.infotrygd.InfotrygdService
 import no.nav.familie.ef.sak.infotrygd.InfotrygdStønadPerioderDto
 import no.nav.familie.ef.sak.infotrygd.SummertInfotrygdPeriodeDto
@@ -15,8 +14,10 @@ import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdSak
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdSakResultat
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdSakType
 import no.nav.familie.kontrakter.felles.ef.StønadType
+import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
+import java.time.LocalDate
 import java.time.YearMonth
 
 @Service
@@ -25,6 +26,9 @@ class InfotrygdPeriodeValideringService(
     private val behandlingService: BehandlingService,
     private val featureToggleService: FeatureToggleService,
 ) {
+    private val logger = LoggerFactory.getLogger(javaClass)
+    private val secureLogger = LoggerFactory.getLogger("secureLogger")
+
     fun validerKanOppretteBehandlingGittInfotrygdData(fagsak: Fagsak) {
         if (!behandlingService.finnesBehandlingForFagsak(fagsak.id)) {
             when (fagsak.stønadstype) {
@@ -59,16 +63,14 @@ class InfotrygdPeriodeValideringService(
         validerSakerIInfotrygd(fagsak.hentAktivIdent(), fagsak.stønadstype)
     }
 
-    private fun trengerMigrering(personIdent: String): Boolean {
-        try {
-            hentPeriodeForMigrering(personIdent, StønadType.OVERGANGSSTØNAD)
-        } catch (e: MigreringException) {
-            if (e.type.kanGåVidereTilJournalføring) {
-                return false
-            }
-        }
-        return true
-    }
+    private fun trengerMigrering(personIdent: String): Boolean =
+        gjeldendeInfotrygdOvergangsstønadPerioder(personIdent)
+            .any { it.harBeløp() && it.harNyerePerioder() }
+
+    private fun gjeldendeInfotrygdOvergangsstønadPerioder(personIdent: String) =
+        infotrygdService
+            .hentDtoPerioder(personIdent)
+            .overgangsstønad.summert
 
     fun hentPeriodeForMigrering(
         personIdent: String,
@@ -172,17 +174,15 @@ class InfotrygdPeriodeValideringService(
     private fun perioderErSammenhengendeMedSammeAktivitetOgMånedsbeløp(
         last: SummertInfotrygdPeriodeDto,
         periode: SummertInfotrygdPeriodeDto,
-    ) =
-        last.stønadsperiode påfølgesAv periode.stønadsperiode &&
-            sammeAktivitetEllerIkkeArbeidssøker(last, periode) &&
-            last.månedsbeløp == periode.månedsbeløp
+    ) = last.stønadsperiode påfølgesAv periode.stønadsperiode &&
+        sammeAktivitetEllerIkkeArbeidssøker(last, periode) &&
+        last.månedsbeløp == periode.månedsbeløp
 
     private fun sammeAktivitetEllerIkkeArbeidssøker(
         last: SummertInfotrygdPeriodeDto,
         periode: SummertInfotrygdPeriodeDto,
-    ) =
-        last.aktivitet == periode.aktivitet ||
-            (last.aktivitet != TILMELDT_SOM_REELL_ARBEIDSSØKER && periode.aktivitet != TILMELDT_SOM_REELL_ARBEIDSSØKER)
+    ) = last.aktivitet == periode.aktivitet ||
+        (last.aktivitet != TILMELDT_SOM_REELL_ARBEIDSSØKER && periode.aktivitet != TILMELDT_SOM_REELL_ARBEIDSSØKER)
 
     /**
      * Henter siste måneden for en periode bak i tiden
@@ -227,11 +227,11 @@ class InfotrygdPeriodeValideringService(
             )
         }
 
-        val årBakoverTillattVedMigrering = utledÅrBakoverTillattVedMigrering()
+        val datogrenseForMigrering = hentDatogrenseForMigrering()
 
-        if (dato.isBefore(DatoUtil.dagensDato().minusYears(årBakoverTillattVedMigrering))) {
+        if (dato.isBefore(datogrenseForMigrering)) {
             throw MigreringException(
-                "Kan ikke migrere når forrige utbetaling i infotrygd er mer enn $årBakoverTillattVedMigrering år tilbake i tid, dato=$dato",
+                "Kan ikke migrere når forrige utbetaling i infotrygd er før $datogrenseForMigrering, dato=$dato",
                 MigreringExceptionType.ELDRE_PERIODER,
             )
         }
@@ -253,11 +253,8 @@ class InfotrygdPeriodeValideringService(
         personIdent: String,
     ) {
         perioder.perioder.find { it.personIdent != personIdent }?.let {
-            throw MigreringException(
-                "Det finnes perioder som inneholder annet fnr=${it.personIdent}. " +
-                    "Disse vedtaken må endres til aktivt fnr i Infotrygd",
-                MigreringExceptionType.FLERE_IDENTER_VEDTAK,
-            )
+            logger.warn("Det finnes perioder med ulike fødselsnummer i infotrygd")
+            secureLogger.warn("Det finnes perioder med ulike fødselsnummer i infotrygd - fnrInfotrygd=${it.personIdent} fnrGjeldende=$personIdent ")
         }
     }
 
@@ -266,12 +263,8 @@ class InfotrygdPeriodeValideringService(
         personIdent: String,
     ) {
         sakerForOvergangsstønad.find { it.personIdent != personIdent }?.let {
-            throw MigreringException(
-                "Finnes sak med annen personIdent for personen. ${lagSakFeilinfo(it)} " +
-                    "personIdent=${it.personIdent}. " +
-                    "Disse sakene må oppdateres med aktivt fnr i Infotrygd",
-                MigreringExceptionType.FLERE_IDENTER,
-            )
+            logger.warn("Det finnes perioder med ulike fødselsnummer i infotrygd")
+            secureLogger.warn("Det finnes perioder med ulike fødselsnummer i infotrygd - fnrInfotrygd=${it.personIdent} fnrGjeldende=$personIdent ")
         }
     }
 
@@ -290,16 +283,21 @@ class InfotrygdPeriodeValideringService(
             }
     }
 
-    private fun utledÅrBakoverTillattVedMigrering(): Long {
+    private fun hentDatogrenseForMigrering(): LocalDate {
         if (featureToggleService.isEnabled(Toggle.TILLAT_MIGRERING_7_ÅR_TILBAKE)) {
-            return 7
-        } else if (featureToggleService.isEnabled(Toggle.TILLAT_MIGRERING_5_ÅR_TILBAKE)) {
-            return 5
+            return LocalDate.of(2016, 1, 1)
         }
-        return 3
+        return LocalDate.of(2019, 1, 1)
     }
 
     private fun lagSakFeilinfo(sak: InfotrygdSak): String =
         "saksblokk=${sak.saksblokk} saksnr=${sak.saksnr} " +
             "registrertDato=${sak.registrertDato} mottattDato=${sak.mottattDato}"
 }
+
+private fun SummertInfotrygdPeriodeDto.harNyerePerioder(): Boolean {
+    val antallÅrUtenGjeldendeInfotrygperioder: Long = 5
+    return this.stønadsperiode.tomDato > LocalDate.now().minusYears(antallÅrUtenGjeldendeInfotrygperioder)
+}
+
+private fun SummertInfotrygdPeriodeDto.harBeløp(): Boolean = this.månedsbeløp > 0

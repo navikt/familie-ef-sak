@@ -10,8 +10,10 @@ import no.nav.familie.ef.sak.vedtak.historikk.AndelHistorikkUtil.periodeTypeOver
 import no.nav.familie.ef.sak.vedtak.historikk.BehandlingHistorikkUtil.lagBehandlingHistorikkData
 import no.nav.familie.ef.sak.vedtak.historikk.VedtakHistorikkBeregner.lagVedtaksperioderPerBehandling
 import no.nav.familie.ef.sak.vilkår.regler.SvarId
+import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import java.time.LocalDateTime
+import java.time.temporal.ChronoUnit
 import java.util.UUID
 
 object AndelHistorikkBeregner {
@@ -234,18 +236,17 @@ object AndelHistorikkBeregner {
     private fun lagAndelerFraSanksjonerOgOpphør(
         vedtaksperioder: List<Vedtakshistorikkperiode>,
         tilkjentYtelse: TilkjentYtelse,
-    ) =
-        vedtaksperioder.filter { it is Sanksjonsperiode || it is Opphørsperiode }.map {
-            AndelTilkjentYtelse(
-                beløp = 0,
-                periode = it.periode,
-                "",
-                0,
-                0,
-                0,
-                tilkjentYtelse.behandlingId,
-            )
-        }
+    ) = vedtaksperioder.filter { it is Sanksjonsperiode || it is Opphørsperiode }.map {
+        AndelTilkjentYtelse(
+            beløp = 0,
+            periode = it.periode,
+            "",
+            0,
+            0,
+            0,
+            tilkjentYtelse.behandlingId,
+        )
+    }
 
     /**
      * Markerer endrede med riktig type endret
@@ -294,16 +295,15 @@ object AndelHistorikkBeregner {
         tilkjentYtelseMedVedtakstidspunkt: TilkjentYtelseMedVedtakstidspunkt,
         andel: AndelTilkjentYtelse,
         vedtaksperiode: Vedtakshistorikkperiode,
-    ) =
-        AndelHistorikkHolder(
-            behandlingId = tilkjentYtelseMedVedtakstidspunkt.tilkjentYtelse.behandlingId,
-            vedtakstidspunkt = tilkjentYtelseMedVedtakstidspunkt.vedtaksdata.vedtakstidspunkt,
-            saksbehandler = tilkjentYtelseMedVedtakstidspunkt.tilkjentYtelse.sporbar.opprettetAv,
-            andel = andel,
-            endring = null,
-            vedtaksperiode = vedtaksperiode,
-            kontrollert = tilkjentYtelseMedVedtakstidspunkt.kontrollertId,
-        )
+    ) = AndelHistorikkHolder(
+        behandlingId = tilkjentYtelseMedVedtakstidspunkt.tilkjentYtelse.behandlingId,
+        vedtakstidspunkt = tilkjentYtelseMedVedtakstidspunkt.vedtaksdata.vedtakstidspunkt,
+        saksbehandler = tilkjentYtelseMedVedtakstidspunkt.tilkjentYtelse.sporbar.opprettetAv,
+        andel = andel,
+        endring = null,
+        vedtaksperiode = vedtaksperiode,
+        kontrollert = tilkjentYtelseMedVedtakstidspunkt.kontrollertId,
+    )
 
     private fun AndelHistorikkHolder.finnEndringstype(
         nyAndel: AndelTilkjentYtelse,
@@ -372,12 +372,11 @@ object AndelHistorikkBeregner {
     private fun lagEndring(
         type: EndringType,
         tilkjentYtelseMedVedtakstidspunkt: TilkjentYtelseMedVedtakstidspunkt,
-    ) =
-        HistorikkEndring(
-            type = type,
-            behandlingId = tilkjentYtelseMedVedtakstidspunkt.tilkjentYtelse.behandlingId,
-            vedtakstidspunkt = tilkjentYtelseMedVedtakstidspunkt.vedtaksdata.vedtakstidspunkt,
-        )
+    ) = HistorikkEndring(
+        type = type,
+        behandlingId = tilkjentYtelseMedVedtakstidspunkt.tilkjentYtelse.behandlingId,
+        vedtakstidspunkt = tilkjentYtelseMedVedtakstidspunkt.vedtaksdata.vedtakstidspunkt,
+    )
 
     /**
      * Finner indeks for andelen etter [andel], hvis den ikke finnes returneres [historikk] sin size
@@ -418,8 +417,12 @@ object AndelHistorikkBeregner {
     private fun erAlleredeFjernetEllerKontrollert(
         historikk: AndelHistorikkHolder,
         tilkjentYtelse: TilkjentYtelse,
-    ) =
-        historikk.endring?.type == EndringType.FJERNET ||
-            historikk.endring?.type == EndringType.ERSTATTET ||
-            historikk.kontrollert == tilkjentYtelse.id
+    ) = historikk.endring?.type == EndringType.FJERNET ||
+        historikk.endring?.type == EndringType.ERSTATTET ||
+        historikk.kontrollert == tilkjentYtelse.id
+
+    fun regnUtAntallMåneder(periode: Månedsperiode): Int {
+        val beregnetAntallMåneder = periode.fom.until(periode.tom, ChronoUnit.MONTHS) + 1
+        return beregnetAntallMåneder.toInt()
+    }
 }

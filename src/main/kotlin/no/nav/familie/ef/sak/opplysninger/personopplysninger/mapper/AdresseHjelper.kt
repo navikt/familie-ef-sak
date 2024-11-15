@@ -51,5 +51,5 @@ object AdresseHjelper {
             (gjeldende.sluttdatoForKontrakt == null || gjeldende.sluttdatoForKontrakt >= dato)
     }
 
-    private fun BarnMedIdent.erOver18År(): Boolean = !fødsel.gjeldende().erUnder18År()
+    private fun BarnMedIdent.erOver18År(): Boolean = !fødsel.first().erUnder18År()
 }

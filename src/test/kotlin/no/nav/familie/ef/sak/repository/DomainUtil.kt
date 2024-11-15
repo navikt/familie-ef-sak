@@ -21,12 +21,12 @@ import no.nav.familie.ef.sak.felles.domain.SporbarUtils
 import no.nav.familie.ef.sak.felles.util.min
 import no.nav.familie.ef.sak.oppgave.Oppgave
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.BarnMedIdent
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.Fødsel
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.SivilstandMedNavn
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.Søker
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.Sivilstandstype
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Adressebeskyttelse
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.AdressebeskyttelseGradering
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Fødsel
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.KjønnType
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Metadata
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Navn
@@ -43,6 +43,7 @@ import no.nav.familie.ef.sak.vedtak.domain.KontantstøtteWrapper
 import no.nav.familie.ef.sak.vedtak.domain.PeriodeWrapper
 import no.nav.familie.ef.sak.vedtak.domain.PeriodetypeBarnetilsyn
 import no.nav.familie.ef.sak.vedtak.domain.SamordningsfradragType
+import no.nav.familie.ef.sak.vedtak.domain.SkolepengerWrapper
 import no.nav.familie.ef.sak.vedtak.domain.TilleggsstønadWrapper
 import no.nav.familie.ef.sak.vedtak.domain.Vedtak
 import no.nav.familie.ef.sak.vedtak.domain.Vedtaksperiode
@@ -56,6 +57,12 @@ import no.nav.familie.ef.sak.vilkår.Opphavsvilkår
 import no.nav.familie.ef.sak.vilkår.VilkårType
 import no.nav.familie.ef.sak.vilkår.Vilkårsresultat
 import no.nav.familie.ef.sak.vilkår.Vilkårsvurdering
+import no.nav.familie.ef.sak.vilkår.Vurdering
+import no.nav.familie.ef.sak.vilkår.dto.tilDto
+import no.nav.familie.ef.sak.vilkår.regler.HovedregelMetadata
+import no.nav.familie.ef.sak.vilkår.regler.Vilkårsregel
+import no.nav.familie.ef.sak.vilkår.regler.evalutation.RegelEvaluering.utledResultat
+import no.nav.familie.ef.sak.vilkår.regler.vilkårsreglerForStønad
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.ef.felles.Opplysningskilde
 import no.nav.familie.kontrakter.ef.felles.Revurderingsårsak
@@ -278,13 +285,12 @@ fun årsakRevurdering(
     opplysningskilde: Opplysningskilde = Opplysningskilde.MELDING_MODIA,
     årsak: Revurderingsårsak = Revurderingsårsak.ANNET,
     beskrivelse: String? = null,
-) =
-    ÅrsakRevurdering(
-        behandlingId = behandlingId,
-        opplysningskilde = opplysningskilde,
-        årsak = årsak,
-        beskrivelse = beskrivelse,
-    )
+) = ÅrsakRevurdering(
+    behandlingId = behandlingId,
+    opplysningskilde = opplysningskilde,
+    årsak = årsak,
+    beskrivelse = beskrivelse,
+)
 
 fun revurderingsinformasjon() =
     RevurderingsinformasjonDto(
@@ -330,6 +336,7 @@ fun vedtak(
     år: Int = 2021,
     inntekter: InntektWrapper = InntektWrapper(listOf(inntektsperiode(år = år))),
     perioder: PeriodeWrapper = PeriodeWrapper(listOf(vedtaksperiode(år = år))),
+    skolepenger: SkolepengerWrapper? = null,
     samordningsfradragType: SamordningsfradragType? = null,
 ): Vedtak =
     Vedtak(
@@ -340,6 +347,7 @@ fun vedtak(
         avslåBegrunnelse = null,
         perioder = perioder,
         inntekter = inntekter,
+        skolepenger = skolepenger,
         saksbehandlerIdent = "VL",
         opprettetAv = "VL",
         opprettetTid = LocalDateTime.now(),
@@ -391,8 +399,7 @@ fun inntektsperiode(
     samordningsfradrag: BigDecimal = BigDecimal.valueOf(500),
     dagsats: BigDecimal? = null,
     månedsinntekt: BigDecimal? = null,
-) =
-    Inntektsperiode(periode = Månedsperiode(startDato, sluttDato), dagsats = dagsats, månedsinntekt = månedsinntekt, inntekt = inntekt, samordningsfradrag = samordningsfradrag)
+) = Inntektsperiode(periode = Månedsperiode(startDato, sluttDato), dagsats = dagsats, månedsinntekt = månedsinntekt, inntekt = inntekt, samordningsfradrag = samordningsfradrag)
 
 fun vedtaksperiode(
     år: Int = 2021,
@@ -403,35 +410,32 @@ fun vedtaksperiode(
         if (vedtaksperiodeType == VedtaksperiodeType.SANKSJON) AktivitetType.IKKE_AKTIVITETSPLIKT else AktivitetType.BARN_UNDER_ETT_ÅR,
     sanksjonsårsak: Sanksjonsårsak? =
         if (vedtaksperiodeType == VedtaksperiodeType.SANKSJON) Sanksjonsårsak.SAGT_OPP_STILLING else null,
-) =
-    Vedtaksperiode(startDato, sluttDato, aktivitetstype, vedtaksperiodeType, sanksjonsårsak)
+) = Vedtaksperiode(startDato, sluttDato, aktivitetstype, vedtaksperiodeType, sanksjonsårsak)
 
 fun vedtaksperiodeDto(
     årMånedFra: LocalDate = LocalDate.of(2021, 1, 1),
     årMånedTil: LocalDate = LocalDate.of(2021, 12, 1),
     periodeType: VedtaksperiodeType = VedtaksperiodeType.HOVEDPERIODE,
     aktivitet: AktivitetType = AktivitetType.BARN_UNDER_ETT_ÅR,
-) =
-    vedtaksperiodeDto(
-        årMånedFra = YearMonth.from(årMånedFra),
-        årMånedTil = YearMonth.from(årMånedTil),
-        periodeType = periodeType,
-        aktivitet = aktivitet,
-    )
+) = vedtaksperiodeDto(
+    årMånedFra = YearMonth.from(årMånedFra),
+    årMånedTil = YearMonth.from(årMånedTil),
+    periodeType = periodeType,
+    aktivitet = aktivitet,
+)
 
 fun vedtaksperiodeDto(
     årMånedFra: YearMonth = YearMonth.of(2021, 1),
     årMånedTil: YearMonth = YearMonth.of(2021, 12),
     periodeType: VedtaksperiodeType = VedtaksperiodeType.HOVEDPERIODE,
     aktivitet: AktivitetType = AktivitetType.BARN_UNDER_ETT_ÅR,
-) =
-    VedtaksperiodeDto(
-        årMånedFra = årMånedFra,
-        årMånedTil = årMånedTil,
-        periode = Månedsperiode(årMånedFra, årMånedTil),
-        aktivitet = aktivitet,
-        periodeType = periodeType,
-    )
+) = VedtaksperiodeDto(
+    årMånedFra = årMånedFra,
+    årMånedTil = årMånedTil,
+    periode = Månedsperiode(årMånedFra, årMånedTil),
+    aktivitet = aktivitet,
+    periodeType = periodeType,
+)
 
 fun behandlingBarn(
     id: UUID = UUID.randomUUID(),
@@ -481,16 +485,15 @@ fun sivilstand(
     type: Sivilstandstype,
     gyldigFraOgMed: LocalDate = LocalDate.now(),
     metadata: Metadata = metadataGjeldende,
-) =
-    SivilstandMedNavn(
-        type = type,
-        gyldigFraOgMed = gyldigFraOgMed,
-        relatertVedSivilstand = null,
-        bekreftelsesdato = null,
-        dødsfall = null,
-        navn = null,
-        metadata = metadata,
-    )
+) = SivilstandMedNavn(
+    type = type,
+    gyldigFraOgMed = gyldigFraOgMed,
+    relatertVedSivilstand = null,
+    bekreftelsesdato = null,
+    dødsfall = null,
+    navn = null,
+    metadata = metadata,
+)
 
 fun søker(sivilstand: List<SivilstandMedNavn> = emptyList()): Søker =
     Søker(
@@ -513,3 +516,56 @@ fun søker(sivilstand: List<SivilstandMedNavn> = emptyList()): Søker =
         listOf(),
         listOf(),
     )
+
+/**
+ * Oppretter alle vilkårsvurderiger med alle delvilkår - både gjeldende og historiske
+ * */
+fun opprettAlleVilkårsvurderinger(
+    behandlingId: UUID,
+    metadata: HovedregelMetadata,
+    stønadstype: StønadType,
+): List<Vilkårsvurdering> =
+    vilkårsreglerForStønad(stønadstype).flatMap { vilkårsregel ->
+        if (vilkårsregel.vilkårType.gjelderFlereBarn() && metadata.barn.isNotEmpty()) {
+            metadata.barn.map { lagNyVilkårsvurdering(vilkårsregel, metadata, behandlingId, it.id) }
+        } else {
+            listOf(lagNyVilkårsvurdering(vilkårsregel, metadata, behandlingId))
+        }
+    }
+
+private fun lagNyVilkårsvurdering(
+    vilkårsregel: Vilkårsregel,
+    metadata: HovedregelMetadata,
+    behandlingId: UUID,
+    barnId: UUID? = null,
+): Vilkårsvurdering {
+    val delvilkårsvurdering = initierDelvilkårsvurderinger(vilkårsregel, metadata, barnId)
+    return Vilkårsvurdering(
+        behandlingId = behandlingId,
+        type = vilkårsregel.vilkårType,
+        barnId = barnId,
+        delvilkårsvurdering = DelvilkårsvurderingWrapper(delvilkårsvurdering),
+        resultat = utledResultat(vilkårsregel, delvilkårsvurdering.map { it.tilDto() }).vilkår,
+        opphavsvilkår = null,
+    )
+}
+
+private fun initierDelvilkårsvurderinger(
+    vilkårsregel: Vilkårsregel,
+    metadata: HovedregelMetadata,
+    barnId: UUID? = null,
+): List<Delvilkårsvurdering> =
+    when (vilkårsregel.vilkårType) {
+        VilkårType.ALENEOMSORG -> initierDelvilkårsvurderingForHovedregler(vilkårsregel)
+        else -> vilkårsregel.initiereDelvilkårsvurdering(metadata, barnId = barnId)
+    }
+
+private fun initierDelvilkårsvurderingForHovedregler(
+    vilkårsregel: Vilkårsregel,
+): List<Delvilkårsvurdering> =
+    vilkårsregel.hovedregler.map {
+        Delvilkårsvurdering(
+            Vilkårsresultat.IKKE_TATT_STILLING_TIL,
+            vurderinger = listOf(Vurdering(it)),
+        )
+    }

@@ -12,7 +12,8 @@
           "begrunnelseType" : "VALGFRI",
           "regelId" : "SLUTT_NODE"
         }
-      }
+      },
+      "versjon" : "HISTORISK"
     },
     "NÆRE_BOFORHOLD" : {
       "regelId" : "NÆRE_BOFORHOLD",
@@ -45,7 +46,8 @@
           "begrunnelseType" : "PÅKREVD",
           "regelId" : "SLUTT_NODE"
         }
-      }
+      },
+      "versjon" : "GJELDENDE"
     },
     "MER_AV_DAGLIG_OMSORG" : {
       "regelId" : "MER_AV_DAGLIG_OMSORG",
@@ -58,7 +60,8 @@
           "begrunnelseType" : "PÅKREVD",
           "regelId" : "SLUTT_NODE"
         }
-      }
+      },
+      "versjon" : "GJELDENDE"
     }
   }
 }

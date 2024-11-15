@@ -7,6 +7,8 @@ import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.fagsak.domain.FagsakPerson
 import no.nav.familie.ef.sak.infotrygd.InfotrygdService
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.ef.sak.klage.dto.KlagebehandlingerDto
 import no.nav.familie.ef.sak.klage.dto.OpprettKlageDto
 import no.nav.familie.ef.sak.klage.dto.ÅpneKlagerInfotrygdDto
@@ -14,6 +16,7 @@ import no.nav.familie.kontrakter.felles.klage.BehandlingEventType
 import no.nav.familie.kontrakter.felles.klage.BehandlingResultat
 import no.nav.familie.kontrakter.felles.klage.Fagsystem
 import no.nav.familie.kontrakter.felles.klage.KlagebehandlingDto
+import no.nav.familie.kontrakter.felles.klage.Klagebehandlingsårsak
 import no.nav.familie.kontrakter.felles.klage.OpprettKlagebehandlingRequest
 import no.nav.familie.kontrakter.felles.klage.Stønadstype
 import org.springframework.stereotype.Service
@@ -27,6 +30,7 @@ class KlageService(
     private val klageClient: KlageClient,
     private val infotrygdService: InfotrygdService,
     private val arbeidsfordelingService: ArbeidsfordelingService,
+    private val featureToggleService: FeatureToggleService,
 ) {
     fun hentBehandlinger(fagsakPersonId: UUID): KlagebehandlingerDto {
         val fagsaker = fagsakService.finnFagsakerForFagsakPersonId(fagsakPersonId)
@@ -53,39 +57,41 @@ class KlageService(
         )
     }
 
-    fun opprettKlage(
-        fagsakId: UUID,
+    fun validerOgOpprettKlage(
+        fagsak: Fagsak,
         opprettKlageDto: OpprettKlageDto,
     ) {
-        val klageMottatt = opprettKlageDto.mottattDato
-        brukerfeilHvis(klageMottatt.isAfter(LocalDate.now())) {
-            "Kan ikke opprette klage med krav mottatt frem i tid for fagsak=$fagsakId"
+        brukerfeilHvis(opprettKlageDto.mottattDato.isAfter(LocalDate.now())) {
+            "Kan ikke opprette klage med krav mottatt frem i tid for fagsak=${fagsak.id}"
         }
-        opprettKlage(fagsakService.hentFagsak(fagsakId), opprettKlageDto.mottattDato, opprettKlageDto.klageGjelderTilbakekreving)
-    }
-
-    fun opprettKlage(
-        fagsak: Fagsak,
-        klageMottatt: LocalDate,
-        klageGjelderTilbakekreving: Boolean,
-    ) {
+        brukerfeilHvis(!featureToggleService.isEnabled(Toggle.VELG_ÅRSAK_VED_KLAGE_OPPRETTELSE) && opprettKlageDto.behandlingsårsak != Klagebehandlingsårsak.ORDINÆR) {
+            "Du har valgt en årsak du ikke har tilgang til å velge. Vennligst meld i fra til brukerstøtte dersom du skal ha tilgang til valg av denne årsaken. Fagsak=${fagsak.id}"
+        }
         val aktivIdent = fagsak.hentAktivIdent()
         val enhetId = arbeidsfordelingService.hentNavEnhet(aktivIdent)?.enhetId
         brukerfeilHvis(enhetId == null) {
             "Finner ikke behandlende enhet for personen"
         }
-        klageClient.opprettKlage(
-            OpprettKlagebehandlingRequest(
-                ident = aktivIdent,
-                stønadstype = Stønadstype.fraEfStønadstype(fagsak.stønadstype),
-                eksternFagsakId = fagsak.eksternId.toString(),
-                fagsystem = Fagsystem.EF,
-                klageMottatt = klageMottatt,
-                behandlendeEnhet = enhetId,
-                klageGjelderTilbakekreving = klageGjelderTilbakekreving,
-            ),
-        )
+        opprettKlage(fagsak, opprettKlageDto, aktivIdent, enhetId)
     }
+
+    private fun opprettKlage(
+        fagsak: Fagsak,
+        opprettKlageDto: OpprettKlageDto,
+        aktivIdent: String,
+        enhetId: String,
+    ) = klageClient.opprettKlage(
+        OpprettKlagebehandlingRequest(
+            ident = aktivIdent,
+            stønadstype = Stønadstype.fraEfStønadstype(fagsak.stønadstype),
+            eksternFagsakId = fagsak.eksternId.toString(),
+            fagsystem = Fagsystem.EF,
+            klageMottatt = opprettKlageDto.mottattDato,
+            behandlendeEnhet = enhetId,
+            klageGjelderTilbakekreving = opprettKlageDto.klageGjelderTilbakekreving,
+            behandlingsårsak = opprettKlageDto.behandlingsårsak,
+        ),
+    )
 
     fun hentÅpneKlagerInfotrygd(fagsakPersonId: UUID): ÅpneKlagerInfotrygdDto {
         val fagsakPerson = fagsakPersonService.hentPerson(fagsakPersonId)

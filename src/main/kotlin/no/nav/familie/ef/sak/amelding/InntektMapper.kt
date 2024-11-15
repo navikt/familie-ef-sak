@@ -85,8 +85,7 @@ class InntektMapper(
     private fun hentMapping(
         type: InntektKodeverkType,
         verdi: String,
-    ) =
-        kodeverkService.hentInntekt()[type]?.get(verdi) ?: "$verdi (mangler verdi i kodeverk)"
+    ) = kodeverkService.hentInntekt()[type]?.get(verdi) ?: "$verdi (mangler verdi i kodeverk)"
 
     private fun mapInntektType(type: EksternInntektType): InntektType =
         when (type) {

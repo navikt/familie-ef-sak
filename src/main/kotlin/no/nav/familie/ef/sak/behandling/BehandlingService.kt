@@ -62,19 +62,16 @@ class BehandlingService(
             .takeIf { it.isNotEmpty() }
             ?.let { behandlingRepository.finnEksterneIder(it) } ?: emptySet()
 
-    fun finnSisteIverksatteBehandling(fagsakId: UUID) =
-        behandlingRepository.finnSisteIverksatteBehandling(fagsakId)
+    fun finnSisteIverksatteBehandling(fagsakId: UUID) = behandlingRepository.finnSisteIverksatteBehandling(fagsakId)
 
     fun hentUferdigeBehandlingerOpprettetFørDato(
         stønadtype: StønadType,
         opprettetFørDato: LocalDateTime = LocalDateTime.now().minusMonths(1),
     ): List<Behandling> = behandlingRepository.hentUferdigeBehandlingerOpprettetFørDato(stønadtype, opprettetFørDato)
 
-    fun finnesÅpenBehandling(fagsakId: UUID) =
-        behandlingRepository.existsByFagsakIdAndStatusIsNot(fagsakId, FERDIGSTILT)
+    fun finnesÅpenBehandling(fagsakId: UUID) = behandlingRepository.existsByFagsakIdAndStatusIsNot(fagsakId, FERDIGSTILT)
 
-    fun finnesBehandlingSomIkkeErFerdigstiltEllerSattPåVent(fagsakId: UUID) =
-        behandlingRepository.existsByFagsakIdAndStatusIsNotIn(fagsakId, listOf(FERDIGSTILT, SATT_PÅ_VENT))
+    fun finnesBehandlingSomIkkeErFerdigstiltEllerSattPåVent(fagsakId: UUID) = behandlingRepository.existsByFagsakIdAndStatusIsNotIn(fagsakId, listOf(FERDIGSTILT, SATT_PÅ_VENT))
 
     fun finnSisteIverksatteBehandlingMedEventuellAvslått(fagsakId: UUID): Behandling? =
         behandlingRepository.finnSisteIverksatteBehandling(fagsakId)
@@ -160,16 +157,14 @@ class BehandlingService(
 
     fun hentSaksbehandling(behandlingId: UUID): Saksbehandling = behandlingRepository.finnSaksbehandling(behandlingId)
 
-    fun hentSaksbehandling(eksternBehandlingId: Long): Saksbehandling =
-        behandlingRepository.finnSaksbehandling(eksternBehandlingId)
+    fun hentSaksbehandling(eksternBehandlingId: Long): Saksbehandling = behandlingRepository.finnSaksbehandling(eksternBehandlingId)
 
     fun hentBehandlingPåEksternId(eksternBehandlingId: Long): Behandling =
         behandlingRepository.finnMedEksternId(
             eksternBehandlingId,
         ) ?: error("Kan ikke finne behandling med eksternId=$eksternBehandlingId")
 
-    fun hentBehandlinger(behandlingIder: Set<UUID>): List<Behandling> =
-        behandlingRepository.findAllByIdOrThrow(behandlingIder) { it.id }
+    fun hentBehandlinger(behandlingIder: Set<UUID>): List<Behandling> = behandlingRepository.findAllByIdOrThrow(behandlingIder) { it.id }
 
     fun oppdaterStatusPåBehandling(
         behandlingId: UUID,
@@ -227,8 +222,7 @@ class BehandlingService(
         kravMottatt: LocalDate?,
     ): Behandling = behandlingRepository.update(hentBehandling(behandlingId).copy(kravMottatt = kravMottatt))
 
-    fun finnesBehandlingForFagsak(fagsakId: UUID) =
-        behandlingRepository.existsByFagsakId(fagsakId)
+    fun finnesBehandlingForFagsak(fagsakId: UUID) = behandlingRepository.existsByFagsakId(fagsakId)
 
     fun hentBehandlinger(fagsakId: UUID): List<Behandling> = behandlingRepository.findByFagsakId(fagsakId).sortertEtterVedtakstidspunkt()
 
@@ -269,13 +263,13 @@ class BehandlingService(
             utfall = StegUtfall.HENLAGT,
             metadata = henlagt,
         )
-        opprettStatistikkTask(henlagtBehandling)
+        opprettStatistikkTaskForHenlagtBehandling(henlagtBehandling)
         return behandlingRepository.update(henlagtBehandling)
     }
 
-    private fun opprettStatistikkTask(behandling: Behandling) {
+    private fun opprettStatistikkTaskForHenlagtBehandling(behandling: Behandling) {
         taskService.save(
-            BehandlingsstatistikkTask.opprettHenlagtTask(
+            BehandlingsstatistikkTask.opprettFerdigTask(
                 behandlingId = behandling.id,
                 hendelseTidspunkt = LocalDateTime.now(),
                 gjeldendeSaksbehandler = SikkerhetContext.hentSaksbehandler(),

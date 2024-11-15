@@ -68,14 +68,6 @@ class SøkController(
         return Ressurs.success(søkService.søkEtterPersonerMedSammeAdressePåBehandling(behandlingId))
     }
 
-    @GetMapping("fagsak/{fagsakId}/samme-adresse")
-    fun søkPersonerMedSammeAdressePåFagsak(
-        @PathVariable fagsakId: UUID,
-    ): Ressurs<SøkeresultatPerson> {
-        tilgangService.validerTilgangTilFagsak(fagsakId, AuditLoggerEvent.ACCESS)
-        return Ressurs.success(søkService.søkEtterPersonerMedSammeAdressePåFagsak(fagsakId))
-    }
-
     @GetMapping("fagsak-person/{fagsakPersonId}/samme-adresse")
     fun søkPersonerMedSammeAdressePåFagsakPerson(
         @PathVariable fagsakPersonId: UUID,
@@ -88,6 +80,5 @@ class SøkController(
         validerIdent(personIdentRequest.personIdent)
     }
 
-    private fun hentOgValiderAtIdentEksisterer(personIdentRequest: PersonIdentDto): PdlIdenter =
-        personService.hentPersonIdenter(personIdentRequest.personIdent)
+    private fun hentOgValiderAtIdentEksisterer(personIdentRequest: PersonIdentDto): PdlIdenter = personService.hentPersonIdenter(personIdentRequest.personIdent)
 }

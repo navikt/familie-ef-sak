@@ -5,9 +5,23 @@ import io.mockk.mockk
 import io.mockk.mockkObject
 import io.mockk.unmockkObject
 import io.mockk.verify
+import no.nav.familie.ef.sak.behandling.BehandlingRepository
+import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
+import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType.BEHANDLING_FERDIGSTILT
+import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType.BEREGNE_YTELSE
+import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType.BESLUTTE_VEDTAK
+import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType.FERDIGSTILLE_BEHANDLING
+import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType.LAG_SAKSBEHANDLINGSBLANKETT
+import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType.PUBLISER_VEDTAKSHENDELSE
+import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType.REVURDERING_ÅRSAK
+import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType.SEND_TIL_BESLUTTER
+import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType.VILKÅR
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.oppgave.dto.SaksbehandlerRolle
+import no.nav.familie.ef.sak.repository.behandling
+import no.nav.familie.ef.sak.repository.fagsak
+import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.kontrakter.felles.Tema
 import no.nav.familie.kontrakter.felles.oppgave.Oppgave
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
@@ -17,6 +31,8 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.EnumSource
 import java.util.UUID
 import no.nav.familie.ef.sak.oppgave.Oppgave as EFOppgave
 
@@ -24,9 +40,10 @@ internal class TilordnetRessursServiceTest {
     private val oppgaveClient: OppgaveClient = mockk()
     private val oppgaveRepository: OppgaveRepository = mockk()
     private val featureToggleService: FeatureToggleService = mockk()
+    private val behandlingRepository: BehandlingRepository = mockk()
 
     private val tilordnetRessursService: TilordnetRessursService =
-        TilordnetRessursService(oppgaveClient, oppgaveRepository, featureToggleService)
+        TilordnetRessursService(oppgaveClient, oppgaveRepository, featureToggleService, behandlingRepository)
 
     @BeforeEach
     fun setUp() {
@@ -96,14 +113,16 @@ internal class TilordnetRessursServiceTest {
             assertThat(erSaksbehandlerEllerNull).isFalse()
         }
 
-        @Test
-        internal fun `skal returnere true dersom returnert oppgave er null`() {
+        @ParameterizedTest
+        @EnumSource(value = StegType::class)
+        internal fun `skal returnere true dersom returnert oppgave er null`(behandlingSteg: StegType) {
             every {
                 oppgaveRepository.findByBehandlingIdAndErFerdigstiltIsFalseAndTypeIn(
                     any(),
                     oppgaveTyper,
                 )
             } answers { null }
+            every { behandlingRepository.findByIdOrThrow(any()) } returns behandling(steg = behandlingSteg)
 
             val erSaksbehandlerEllerNull =
                 tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandler(UUID.randomUUID())
@@ -170,11 +189,12 @@ internal class TilordnetRessursServiceTest {
 
             every { oppgaveClient.hentSaksbehandlerInfo("NAV1234") } returns saksbehandler
 
-            val saksbehandlerDto = tilordnetRessursService.utledAnsvarligSaksbehandlerForOppgave(oppgave)
+            val saksbehandlerDto = tilordnetRessursService.utledAnsvarligSaksbehandlerForOppgave(UUID.randomUUID(), oppgave)
 
             assertThat(saksbehandlerDto.fornavn).isEqualTo("Anakin")
             assertThat(saksbehandlerDto.etternavn).isEqualTo("Skywalker")
             assertThat(saksbehandlerDto.rolle).isEqualTo(SaksbehandlerRolle.INNLOGGET_SAKSBEHANDLER)
+            verify(exactly = 1) { oppgaveClient.hentSaksbehandlerInfo("NAV1234") }
         }
 
         @Test
@@ -184,18 +204,19 @@ internal class TilordnetRessursServiceTest {
 
             every { oppgaveClient.hentSaksbehandlerInfo("NAV2345") } returns saksbehandler
 
-            val saksbehandlerDto = tilordnetRessursService.utledAnsvarligSaksbehandlerForOppgave(oppgave)
+            val saksbehandlerDto = tilordnetRessursService.utledAnsvarligSaksbehandlerForOppgave(UUID.randomUUID(), oppgave)
 
             assertThat(saksbehandlerDto.fornavn).isEqualTo("Darth")
             assertThat(saksbehandlerDto.etternavn).isEqualTo("Vader")
             assertThat(saksbehandlerDto.rolle).isEqualTo(SaksbehandlerRolle.ANNEN_SAKSBEHANDLER)
+            verify(exactly = 1) { oppgaveClient.hentSaksbehandlerInfo("NAV2345") }
         }
 
         @Test
         internal fun `skal utlede at saksbehandlers rolle er IKKE SATT`() {
             val oppgave = Oppgave(tilordnetRessurs = null, tema = Tema.ENF)
 
-            val saksbehandlerDto = tilordnetRessursService.utledAnsvarligSaksbehandlerForOppgave(oppgave)
+            val saksbehandlerDto = tilordnetRessursService.utledAnsvarligSaksbehandlerForOppgave(UUID.randomUUID(), oppgave)
 
             assertThat(saksbehandlerDto.fornavn).isEqualTo("")
             assertThat(saksbehandlerDto.etternavn).isEqualTo("")
@@ -203,14 +224,41 @@ internal class TilordnetRessursServiceTest {
             verify(exactly = 0) { oppgaveClient.hentSaksbehandlerInfo(any()) }
         }
 
-        @Test
-        internal fun `skal utlede at saksbehandlers rolle er OPPGAVE FINNES IKKE`() {
-            val saksbehandlerDto = tilordnetRessursService.utledAnsvarligSaksbehandlerForOppgave(null)
+        @ParameterizedTest
+        @EnumSource(
+            value = StegType::class,
+            names = ["REVURDERING_ÅRSAK", "VILKÅR", "BEREGNE_YTELSE"],
+            mode = EnumSource.Mode.EXCLUDE,
+        )
+        internal fun `skal utlede at saksbehandlers rolle er OPPGAVE FINNES IKKE`(behandlingSteg: StegType) {
+            every { behandlingRepository.findByIdOrThrow(any()) } returns behandling(steg = behandlingSteg)
+
+            val saksbehandlerDto = tilordnetRessursService.utledAnsvarligSaksbehandlerForOppgave(UUID.randomUUID(), null)
 
             assertThat(saksbehandlerDto.fornavn).isEqualTo("")
             assertThat(saksbehandlerDto.etternavn).isEqualTo("")
             assertThat(saksbehandlerDto.rolle).isEqualTo(SaksbehandlerRolle.OPPGAVE_FINNES_IKKE)
             verify(exactly = 0) { oppgaveClient.hentSaksbehandlerInfo(any()) }
+        }
+
+        @ParameterizedTest
+        @EnumSource(
+            value = StegType::class,
+            names = ["REVURDERING_ÅRSAK", "VILKÅR", "BEREGNE_YTELSE"],
+            mode = EnumSource.Mode.INCLUDE,
+        )
+        internal fun `skal utlede at saksbehandlers rolle er OPPGAVE FINNES IKKE_SANNSYNLIGVIS_INNLOGGET_SAKSBEHANDLER`(behandlingSteg: StegType) {
+            val saksbehandler = saksbehandler(UUID.randomUUID(), "Skywalker", "Anakin", "NAV1234")
+
+            every { oppgaveClient.hentSaksbehandlerInfo("NAV1234") } returns saksbehandler
+            every { behandlingRepository.findByIdOrThrow(any()) } returns behandling(steg = behandlingSteg)
+
+            val saksbehandlerDto = tilordnetRessursService.utledAnsvarligSaksbehandlerForOppgave(UUID.randomUUID(), null)
+
+            assertThat(saksbehandlerDto.fornavn).isEqualTo("Anakin")
+            assertThat(saksbehandlerDto.etternavn).isEqualTo("Skywalker")
+            assertThat(saksbehandlerDto.rolle).isEqualTo(SaksbehandlerRolle.OPPGAVE_FINNES_IKKE_SANNSYNLIGVIS_INNLOGGET_SAKSBEHANDLER)
+            verify(exactly = 1) { oppgaveClient.hentSaksbehandlerInfo("NAV1234") }
         }
 
         @Test
@@ -221,7 +269,7 @@ internal class TilordnetRessursServiceTest {
             every { oppgaveClient.hentSaksbehandlerInfo("NAV1234") } returns saksbehandler
             every { featureToggleService.isEnabled(any()) } returns true
 
-            val saksbehandlerDto = tilordnetRessursService.utledAnsvarligSaksbehandlerForOppgave(oppgave)
+            val saksbehandlerDto = tilordnetRessursService.utledAnsvarligSaksbehandlerForOppgave(UUID.randomUUID(), oppgave)
 
             assertThat(saksbehandlerDto.fornavn).isEqualTo("Darth")
             assertThat(saksbehandlerDto.etternavn).isEqualTo("Vader")
@@ -235,7 +283,7 @@ internal class TilordnetRessursServiceTest {
 
             every { oppgaveClient.hentSaksbehandlerInfo("NAV2345") } returns saksbehandler
 
-            val saksbehandlerDto = tilordnetRessursService.utledAnsvarligSaksbehandlerForOppgave(oppgave)
+            val saksbehandlerDto = tilordnetRessursService.utledAnsvarligSaksbehandlerForOppgave(UUID.randomUUID(), oppgave)
 
             assertThat(saksbehandlerDto.fornavn).isEqualTo("Darth")
             assertThat(saksbehandlerDto.etternavn).isEqualTo("Vader")
@@ -251,8 +299,36 @@ internal class TilordnetRessursServiceTest {
         assertThat(ansvarligSaksbehandler).isEqualTo(saksbehandler)
     }
 
-    private fun efOppgave(behandlingId: UUID) =
-        EFOppgave(behandlingId = behandlingId, gsakOppgaveId = 1L, type = Oppgavetype.BehandleSak)
+    @Test
+    fun `skal utføre kall mot åpne oppgaver med riktig oppgavetype basert på stegtypen i behandlingen`() {
+        every { oppgaveRepository.findByBehandlingIdAndErFerdigstiltIsFalseAndTypeIn(any(), any()) } returns null
+        val behandlesakOppgavetyper = listOf(REVURDERING_ÅRSAK, VILKÅR, BEREGNE_YTELSE, SEND_TIL_BESLUTTER)
+        val godkjenneVedtakOppgavetyper = listOf(BESLUTTE_VEDTAK)
+        val ingenOppgavetyper = listOf(StegType.VENTE_PÅ_STATUS_FRA_IVERKSETT, LAG_SAKSBEHANDLINGSBLANKETT, FERDIGSTILLE_BEHANDLING, PUBLISER_VEDTAKSHENDELSE, BEHANDLING_FERDIGSTILT)
+
+        behandlesakOppgavetyper.forEach { steg ->
+            val behandlingId = UUID.randomUUID()
+            every { behandlingRepository.findByIdOrThrow(any()) } returns behandling(fagsak(), steg = steg)
+            tilordnetRessursService.hentIkkeFerdigstiltOppgaveForBehandlingGittStegtype(behandlingId)
+            verify { oppgaveRepository.findByBehandlingIdAndErFerdigstiltIsFalseAndTypeIn(behandlingId, setOf(Oppgavetype.BehandleSak, Oppgavetype.BehandleUnderkjentVedtak)) }
+        }
+
+        godkjenneVedtakOppgavetyper.forEach { steg ->
+            val behandlingId = UUID.randomUUID()
+            every { behandlingRepository.findByIdOrThrow(any()) } returns behandling(fagsak(), steg = steg)
+            tilordnetRessursService.hentIkkeFerdigstiltOppgaveForBehandlingGittStegtype(behandlingId)
+            verify { oppgaveRepository.findByBehandlingIdAndErFerdigstiltIsFalseAndTypeIn(behandlingId, setOf(Oppgavetype.GodkjenneVedtak)) }
+        }
+
+        ingenOppgavetyper.forEach { steg ->
+            val behandlingId = UUID.randomUUID()
+            every { behandlingRepository.findByIdOrThrow(any()) } returns behandling(fagsak(), steg = steg)
+            tilordnetRessursService.hentIkkeFerdigstiltOppgaveForBehandlingGittStegtype(behandlingId)
+            verify { oppgaveRepository.findByBehandlingIdAndErFerdigstiltIsFalseAndTypeIn(behandlingId, setOf()) }
+        }
+    }
+
+    private fun efOppgave(behandlingId: UUID) = EFOppgave(behandlingId = behandlingId, gsakOppgaveId = 1L, type = Oppgavetype.BehandleSak)
 
     private fun oppgave(oppgaveId: Long) = Oppgave(id = oppgaveId)
 

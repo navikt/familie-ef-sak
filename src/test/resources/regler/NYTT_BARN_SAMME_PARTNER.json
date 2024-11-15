@@ -12,7 +12,8 @@
           "begrunnelseType" : "VALGFRI",
           "regelId" : "SLUTT_NODE"
         }
-      }
+      },
+      "versjon" : "GJELDENDE"
     }
   }
 }

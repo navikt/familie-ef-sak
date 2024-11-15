@@ -85,20 +85,17 @@ class IverksettClient(
     fun sendStartmeldingKonsistensavstemming(
         request: KonsistensavstemmingDto,
         transaksjonId: UUID,
-    ) =
-        konsistensavstemming(request, sendStartmelding = true, sendAvsluttmelding = false, transaksjonId)
+    ) = konsistensavstemming(request, sendStartmelding = true, sendAvsluttmelding = false, transaksjonId)
 
     fun sendSluttmeldingKonsistensavstemming(
         request: KonsistensavstemmingDto,
         transaksjonId: UUID,
-    ) =
-        konsistensavstemming(request, sendStartmelding = false, sendAvsluttmelding = true, transaksjonId)
+    ) = konsistensavstemming(request, sendStartmelding = false, sendAvsluttmelding = true, transaksjonId)
 
     fun sendKonsistensavstemming(
         request: KonsistensavstemmingDto,
         transaksjonId: UUID,
-    ) =
-        konsistensavstemming(request, sendStartmelding = false, sendAvsluttmelding = false, transaksjonId)
+    ) = konsistensavstemming(request, sendStartmelding = false, sendAvsluttmelding = false, transaksjonId)
 
     private fun konsistensavstemming(
         request: KonsistensavstemmingDto,

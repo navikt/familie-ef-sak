@@ -17,16 +17,15 @@ fun lagTilkjentYtelse(
     type: TilkjentYtelseType = TilkjentYtelseType.FØRSTEGANGSBEHANDLING,
     startdato: LocalDate = andelerTilkjentYtelse.minOfOrNull { it.stønadFom } ?: LocalDate.now(),
     grunnbeløpsmåned: YearMonth = Grunnbeløpsperioder.nyesteGrunnbeløp.periode.fom,
-) =
-    TilkjentYtelse(
-        id = id,
-        behandlingId = behandlingId,
-        personident = personident,
-        type = type,
-        andelerTilkjentYtelse = andelerTilkjentYtelse,
-        startdato = startdato,
-        grunnbeløpsmåned = grunnbeløpsmåned,
-    )
+) = TilkjentYtelse(
+    id = id,
+    behandlingId = behandlingId,
+    personident = personident,
+    type = type,
+    andelerTilkjentYtelse = andelerTilkjentYtelse,
+    startdato = startdato,
+    grunnbeløpsmåned = grunnbeløpsmåned,
+)
 
 fun lagAndelTilkjentYtelse(
     beløp: Int,

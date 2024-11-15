@@ -45,8 +45,7 @@ data class Behandling(
 
     fun erDigitalSøknad(): Boolean = årsak == BehandlingÅrsak.SØKNAD
 
-    fun vedtakstidspunktEllerFeil(): LocalDateTime =
-        this.vedtakstidspunkt ?: error("Mangler vedtakstidspunkt for behandling=$id")
+    fun vedtakstidspunktEllerFeil(): LocalDateTime = this.vedtakstidspunkt ?: error("Mangler vedtakstidspunkt for behandling=$id")
 
     init {
         if (resultat == BehandlingResultat.HENLAGT) {
@@ -91,6 +90,5 @@ enum class BehandlingStatus {
             .lowercase()
             .replaceFirstChar { it.uppercase() }
 
-    fun behandlingErLåstForVidereRedigering(): Boolean =
-        setOf(FATTER_VEDTAK, IVERKSETTER_VEDTAK, FERDIGSTILT, SATT_PÅ_VENT).contains(this)
+    fun behandlingErLåstForVidereRedigering(): Boolean = setOf(FATTER_VEDTAK, IVERKSETTER_VEDTAK, FERDIGSTILT, SATT_PÅ_VENT).contains(this)
 }

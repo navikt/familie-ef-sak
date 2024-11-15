@@ -16,15 +16,13 @@ fun Personnavn.visningsnavn(): String =
         "$fornavn $mellomnavn $etternavn"
     }
 
-fun List<Navn>.gjeldende(): Navn = this.single()
+fun List<Navn>.gjeldende(): Navn = this.find { !it.metadata.historisk } ?: this.first()
 
 fun List<Bostedsadresse>.gjeldende(): Bostedsadresse? = this.find { !it.metadata.historisk }
 
 fun List<Oppholdsadresse>.gjeldende(): Oppholdsadresse? = this.find { !it.metadata.historisk }
 
 fun List<Sivilstand>.gjeldende(): Sivilstand = this.find { !it.metadata.historisk } ?: this.first()
-
-fun List<Fødsel>.gjeldende(): Fødsel = this.first()
 
 fun List<DeltBosted>.gjeldende(): DeltBosted? = this.find { !it.metadata.historisk }
 
@@ -39,8 +37,7 @@ fun List<FolkeregisteridentifikatorFraSøk>.gjeldende(): Folkeregisteridentifika
         .distinct()
         .single() // Distinkt luker vekk feilen med at samme person kan ha flere identiske identer som begge er i bruk
 
-fun List<Folkeregisteridentifikator>.gjeldende(): Folkeregisteridentifikator =
-    this.single { it.status == FolkeregisteridentifikatorStatus.I_BRUK && !it.metadata.historisk }
+fun List<Folkeregisteridentifikator>.gjeldende(): Folkeregisteridentifikator = this.single { it.status == FolkeregisteridentifikatorStatus.I_BRUK && !it.metadata.historisk }
 
 fun List<SivilstandMedNavn>.gjeldende(): SivilstandMedNavn = this.find { !it.metadata.historisk } ?: this.first()
 

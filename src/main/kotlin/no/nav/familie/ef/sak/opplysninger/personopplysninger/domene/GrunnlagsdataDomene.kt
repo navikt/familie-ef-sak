@@ -10,7 +10,6 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Dødsfall
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Familierelasjonsrolle
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.FolkeregisteridentifikatorStatus
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Folkeregisterpersonstatus
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Fødsel
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.InnflyttingTilNorge
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.KjønnType
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Kontaktadresse
@@ -146,7 +145,7 @@ data class SivilstandMedNavn(
 
 data class FullmaktMedNavn(
     val gyldigFraOgMed: LocalDate,
-    val gyldigTilOgMed: LocalDate,
+    val gyldigTilOgMed: LocalDate?,
     val motpartsPersonident: String,
     val navn: String?,
     val områder: List<String>?,

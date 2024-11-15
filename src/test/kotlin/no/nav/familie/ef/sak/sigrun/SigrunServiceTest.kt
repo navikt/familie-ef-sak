@@ -67,12 +67,11 @@ fun pensjonsgivendeInntektForSkatteordning(
     skatteordning: Skatteordning = Skatteordning.FASTLAND,
     lønnsinntekt: Int = 100_000,
     næringsinntekt: Int = 200_000,
-) =
-    PensjonsgivendeInntektForSkatteordning(
-        skatteordning,
-        LocalDate.now(),
-        lønnsinntekt,
-        null,
-        næringsinntekt,
-        50_000,
-    )
+) = PensjonsgivendeInntektForSkatteordning(
+    skatteordning,
+    LocalDate.now(),
+    lønnsinntekt,
+    null,
+    næringsinntekt,
+    50_000,
+)

@@ -12,7 +12,8 @@
           "begrunnelseType" : "PÅKREVD",
           "regelId" : "SLUTT_NODE"
         }
-      }
+      },
+      "versjon" : "GJELDENDE"
     },
     "DOKUMENTASJON_AV_UTGIFTER_UTDANNING" : {
       "regelId" : "DOKUMENTASJON_AV_UTGIFTER_UTDANNING",
@@ -25,7 +26,8 @@
           "begrunnelseType" : "PÅKREVD",
           "regelId" : "SLUTT_NODE"
         }
-      }
+      },
+      "versjon" : "GJELDENDE"
     }
   }
 }

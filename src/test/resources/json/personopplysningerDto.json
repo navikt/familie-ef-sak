@@ -44,8 +44,8 @@
     "erGjeldende" : false
   } ],
   "fullmakt" : [ {
-    "gyldigFraOgMed" : "2021-01-01",
-    "gyldigTilOgMed" : "2020-01-01",
+    "gyldigFraOgMed" : "2020-01-01",
+    "gyldigTilOgMed" : "2021-01-01",
     "motpartsPersonident" : "11111133333",
     "navn" : "11111133333 mellomnavn Etternavn",
     "områder" : [ ]

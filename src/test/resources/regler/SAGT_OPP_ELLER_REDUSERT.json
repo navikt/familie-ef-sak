@@ -12,7 +12,8 @@
           "begrunnelseType" : "VALGFRI",
           "regelId" : "SLUTT_NODE"
         }
-      }
+      },
+      "versjon" : "GJELDENDE"
     },
     "RIMELIG_GRUNN_SAGT_OPP" : {
       "regelId" : "RIMELIG_GRUNN_SAGT_OPP",
@@ -25,7 +26,8 @@
           "begrunnelseType" : "PÅKREVD",
           "regelId" : "SLUTT_NODE"
         }
-      }
+      },
+      "versjon" : "GJELDENDE"
     }
   }
 }

@@ -6,8 +6,12 @@ import no.nav.familie.ef.sak.infotrygd.PeriodeService
 import no.nav.familie.kontrakter.felles.Datoperiode
 import no.nav.familie.kontrakter.felles.ef.EksternPeriode
 import no.nav.familie.kontrakter.felles.ef.EksternPeriodeMedBeløp
+import no.nav.familie.kontrakter.felles.ef.EksternPeriodeMedStønadstype
+import no.nav.familie.kontrakter.felles.ef.EksternePerioderForStønadstyperRequest
+import no.nav.familie.kontrakter.felles.ef.EksternePerioderMedStønadstypeResponse
 import no.nav.familie.kontrakter.felles.ef.EksternePerioderRequest
 import no.nav.familie.kontrakter.felles.ef.EksternePerioderResponse
+import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 
@@ -23,6 +27,53 @@ class EksternStønadsperioderService(
         val perioderFraITogEF = ArenaPeriodeUtil.slåSammenPerioderFraEfOgInfotrygd(request, perioder)
         return EksternePerioderResponse(perioderFraITogEF)
     }
+
+    fun hentPerioderForYtelser(request: EksternePerioderForStønadstyperRequest): EksternePerioderMedStønadstypeResponse {
+        val periodeFraRequest = Datoperiode(fom = request.fomDato ?: LocalDate.MIN, tom = request.tomDato ?: LocalDate.MAX)
+        val stønadstyper =
+            if (request.stønadstyper.isEmpty()) {
+                listOf(StønadType.OVERGANGSSTØNAD, StønadType.BARNETILSYN, StønadType.SKOLEPENGER)
+            } else {
+                request.stønadstyper
+            }
+
+        val stønadPerioder =
+            stønadstyper.flatMap { stønadType ->
+                when (stønadType) {
+                    StønadType.OVERGANGSSTØNAD -> {
+                        periodeService
+                            .hentPerioderForOvergangsstønadFraEfOgInfotrygd(request.personIdent)
+                            .filtrerOverlappendePerioder(periodeFraRequest)
+                            .mapToEksternPeriode(StønadType.OVERGANGSSTØNAD)
+                    }
+                    StønadType.BARNETILSYN -> {
+                        periodeService
+                            .hentPerioderForBarnetilsynFraEfOgInfotrygd(request.personIdent)
+                            .filtrerOverlappendePerioder(periodeFraRequest)
+                            .mapToEksternPeriode(StønadType.BARNETILSYN)
+                    }
+                    StønadType.SKOLEPENGER -> {
+                        periodeService.hentPeriodeFraVedtakForSkolepenger(request.personIdent)
+                    }
+                }
+            }
+
+        return EksternePerioderMedStønadstypeResponse(request.personIdent, stønadPerioder)
+    }
+
+    private fun List<InternPeriode>.filtrerOverlappendePerioder(begrensetPeriode: Datoperiode): List<InternPeriode> =
+        this.filter { periode ->
+            Datoperiode(fom = periode.stønadFom, tom = periode.stønadTom).overlapper(begrensetPeriode)
+        }
+
+    private fun List<InternPeriode>.mapToEksternPeriode(stønadType: StønadType): List<EksternPeriodeMedStønadstype> =
+        this.map {
+            EksternPeriodeMedStønadstype(
+                it.stønadFom,
+                it.stønadTom,
+                stønadType,
+            )
+        }
 
     fun hentPerioderForOvergangsstønad(request: EksternePerioderRequest): List<EksternPeriode> =
         hentPerioderForOvergangsstønadMedBeløp(request).map {

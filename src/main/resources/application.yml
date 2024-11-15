@@ -80,6 +80,24 @@ no.nav.security.jwt:
           client-id: ${AZURE_APP_CLIENT_ID}
           client-secret: ${AZURE_APP_CLIENT_SECRET}
           client-auth-method: client_secret_basic
+      pdl-fullmakt:
+        resource-url: ${PDL_FULLMAKT_URL}
+        token-endpoint-url: ${AZUREAD_TOKEN_ENDPOINT_URL}
+        grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
+        scope: ${PDL_FULLMAKT_SCOPE}
+        authentication:
+          client-id: ${AZURE_APP_CLIENT_ID}
+          client-secret: ${AZURE_APP_CLIENT_SECRET}
+          client-auth-method: client_secret_basic
+      pdl-fullmakt-clientcredentials:
+        resource-url: ${PDL_FULLMAKT_URL}
+        token-endpoint-url: ${AZUREAD_TOKEN_ENDPOINT_URL}
+        grant-type: client_credentials
+        scope: ${PDL_FULLMAKT_SCOPE}
+        authentication:
+          client-id: ${AZURE_APP_CLIENT_ID}
+          client-secret: ${AZURE_APP_CLIENT_SECRET}
+          client-auth-method: client_secret_basic
       familie-tilbake-clientcredentials:
         resource-url: ${FAMILIE_TILBAKE_URL}
         token-endpoint-url: ${AZUREAD_TOKEN_ENDPOINT_URL}
@@ -181,6 +199,7 @@ no.nav.security.jwt:
           client-auth-method: client_secret_basic
 
 PDL_SCOPE: api://${DEPLOY_ENV}-fss.pdl.pdl-api/.default
+PDL_FULLMAKT_SCOPE: api://${DEPLOY_ENV}-fss.pdl.pdl-fullmakt/.default
 EF_IVERKSETT_SCOPE: api://${DEPLOY_ENV}-gcp.teamfamilie.familie-ef-iverksett/.default
 FAMILIE_TILBAKE_SCOPE: api://${DEPLOY_ENV}-gcp.teamfamilie.familie-tilbake/.default
 FAMILIE_KLAGE_SCOPE: api://${DEPLOY_ENV}-gcp.teamfamilie.familie-klage/.default
@@ -262,6 +281,7 @@ FAMILIE_KLAGE_URL: http://familie-klage
 FAMILIE_INTEGRASJONER_URL: https://familie-integrasjoner.${ON_PREM_URL_ENV}-fss-pub.nais.io
 INFOTRYGD_REPLIKA_API_URL: https://familie-ef-infotrygd.${ON_PREM_URL_ENV}-fss-pub.nais.io
 PDL_URL: https://pdl-api.${ON_PREM_URL_ENV}-fss-pub.nais.io
+PDL_FULLMAKT_URL: https://pdl-fullmakt.${ON_PREM_URL_ENV}-fss-pub.nais.io
 FAMILIE_EF_PROXY_URL: https://familie-ef-proxy.${ON_PREM_URL_ENV}-fss-pub.nais.io
 ARBEIDSSOKER_URL: http://veilarbregistrering.paw.svc.cluster.local
 HISTORISK_PENSJON_URL: http://historisk-pensjon.historisk

@@ -57,15 +57,14 @@ query($ident: ID!){
             relatertPersonsRolle
             minRolleForPerson
         }
-        foedsel {
+        foedselsdato {
             foedselsaar
             foedselsdato
+        }
+        foedested {
             foedeland
             foedested
             foedekommune
-            metadata {
-                historisk
-            }
         }
         folkeregisteridentifikator(historikk: true) {
             identifikasjonsnummer
@@ -80,13 +79,6 @@ query($ident: ID!){
             metadata {
                 historisk
             }
-        }
-        fullmakt(historikk: true) {
-            gyldigFraOgMed
-            gyldigTilOgMed
-            motpartsPersonident
-            motpartsRolle
-            omraader
         }
         kjoenn {
             kjoenn

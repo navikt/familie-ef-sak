@@ -1,0 +1,1 @@
+CREATE UNIQUE INDEX vilkaar_per_behandling_per_barn ON vilkarsvurdering (behandling_id, barn_id, type);

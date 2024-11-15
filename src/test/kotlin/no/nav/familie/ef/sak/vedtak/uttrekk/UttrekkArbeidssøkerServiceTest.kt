@@ -583,8 +583,7 @@ internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
         fra: YearMonth,
         til: YearMonth,
         aktivitetType: AktivitetType = AktivitetType.FORSØRGER_REELL_ARBEIDSSØKER,
-    ) =
-        VedtaksperiodeDto(fra, til, Månedsperiode(fra, til), aktivitetType, VedtaksperiodeType.PERIODE_FØR_FØDSEL)
+    ) = VedtaksperiodeDto(fra, til, Månedsperiode(fra, til), aktivitetType, VedtaksperiodeType.PERIODE_FØR_FØDSEL)
 
     private fun innvilg(
         fagsak: Fagsak,

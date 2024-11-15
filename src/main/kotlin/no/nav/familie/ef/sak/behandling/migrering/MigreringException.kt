@@ -8,9 +8,7 @@ class MigreringException(
     val type: MigreringExceptionType,
 ) : ApiFeil(årsak, HttpStatus.BAD_REQUEST)
 
-enum class MigreringExceptionType(
-    val kanGåVidereTilJournalføring: Boolean = false,
-) {
+enum class MigreringExceptionType {
     ÅPEN_SAK,
     FLERE_IDENTER,
     FLERE_AKTIVE_PERIODER,
@@ -19,12 +17,12 @@ enum class MigreringExceptionType(
     FEIL_STØNADSTYPE,
     FLERE_IDENTER_VEDTAK,
     ALLEREDE_MIGRERT,
-    MANGLER_PERIODER(kanGåVidereTilJournalføring = true),
-    MANGLER_PERIODER_MED_BELØP(kanGåVidereTilJournalføring = true),
+    MANGLER_PERIODER,
+    MANGLER_PERIODER_MED_BELØP,
     MANGLER_PERIODER_MED_BELØP_FREM_I_TIDEN,
     FEIL_FOM_DATO,
     FEIL_TOM_DATO,
-    ELDRE_PERIODER(kanGåVidereTilJournalføring = true),
+    ELDRE_PERIODER,
     SIMULERING_FEILUTBETALING,
     SIMULERING_ETTERBETALING,
     SIMULERING_DEBET_TREKK,

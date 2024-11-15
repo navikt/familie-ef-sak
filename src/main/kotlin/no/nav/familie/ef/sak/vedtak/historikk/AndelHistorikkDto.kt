@@ -45,8 +45,7 @@ data class AndelHistorikkDto(
  * AndelHistorikk kan inneholde andeler som er fjernet eller erstatte,
  * disse skal ikke tas med når man skal plukke ut alle aktive andelene
  */
-fun AndelHistorikkDto.erAktivVedtaksperiode() =
-    !erOpphør && (this.endring?.type == null || this.endring.type == EndringType.SPLITTET)
+fun AndelHistorikkDto.erAktivVedtaksperiode() = !erOpphør && (this.endring?.type == null || this.endring.type == EndringType.SPLITTET)
 
 data class AndelMedGrunnlagDto(
     val beløp: Int,
@@ -87,6 +86,9 @@ data class AndelMedGrunnlagDto(
     @Deprecated("Bruk periode!", ReplaceWith("periode.tomDato"))
     @get:JsonProperty
     val stønadTil: LocalDate get() = periode.tomDato
+
+    @get:JsonProperty
+    val beregnetAntallMåneder: Int get() = AndelHistorikkBeregner.regnUtAntallMåneder(periode)
 }
 
 data class HistorikkEndring(
