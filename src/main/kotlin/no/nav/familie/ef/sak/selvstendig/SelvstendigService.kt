@@ -44,7 +44,7 @@ class SelvstendigService(
                     mappeId = mappeIdForSelvstendigNæringsdrivende.toLong(),
                 )
             val oppgaverForSelvstendige = oppgaveService.hentOppgaver(finnOppgaveRequest)
-            secureLogger.info("Antall oppgaver for selvstendige med frist 15. desember ${oppgaverForSelvstendige.oppgaver.size}")
+            secureLogger.info("Antall oppgaver for selvstendige med frist 15. desember: ${oppgaverForSelvstendige.oppgaver.size}")
             secureLogger.info("Oppgave for selvstendig: ${oppgaverForSelvstendige.oppgaver.firstOrNull()}")
             if (oppgaverForSelvstendige.oppgaver.isEmpty() ||
                 oppgaverForSelvstendige.oppgaver
@@ -53,11 +53,13 @@ class SelvstendigService(
                     ?.any { it.gruppe == IdentGruppe.FOLKEREGISTERIDENT } == false
             ) {
                 secureLogger.info("fant ingen oppgaver for selvstendige med frist 15. desember")
+                return
             }
-            val førsteOppgave = oppgaverForSelvstendige.oppgaver.first()
+            val førsteOppgave = oppgaverForSelvstendige.oppgaver.firstOrNull()
+            secureLogger.info("Første oppgave: $førsteOppgave")
             val personIdent =
-                førsteOppgave.identer?.first { it.gruppe == IdentGruppe.FOLKEREGISTERIDENT }?.ident
-                    ?: førsteOppgave.personident ?: throw Exception("Fant ikke registrert ident på oppgave ${førsteOppgave.id}")
+                førsteOppgave?.identer?.firstOrNull { it.gruppe == IdentGruppe.FOLKEREGISTERIDENT }?.ident
+                    ?: førsteOppgave?.personident ?: throw Exception("Fant ikke registrert ident på oppgave ${førsteOppgave?.id}")
 
             secureLogger.info("Kontroller person med ident: $personIdent")
             val fagsaker = fagsakService.finnFagsaker(setOf(personIdent))
