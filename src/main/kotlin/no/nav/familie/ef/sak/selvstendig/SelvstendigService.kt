@@ -73,7 +73,7 @@ class SelvstendigService(
             val vedtaksperioderIÅr = vedtaksperioder?.filter { it.periode.overlapper(Månedsperiode(YearMonth.of(YearMonth.now().year, 1), YearMonth.of(YearMonth.now().year, 12))) }
             val antallMåneder = vedtaksperioderIÅr?.map { it.periode.kuttPeriodeTilGittÅr(YearMonth.now().minusYears(1).year) }?.sumOf { it.lengdeIHeleMåneder() }
 
-            //Beregn antall måneder
+            // Beregn antall måneder
             secureLogger.info("Antall måneder $antallMåneder med vedtak i ${YearMonth.now().year} for person $personIdent")
 
             val fagsakPersonId = fagsaker.filter { it.stønadstype == StønadType.OVERGANGSSTØNAD }.first().fagsakPersonId

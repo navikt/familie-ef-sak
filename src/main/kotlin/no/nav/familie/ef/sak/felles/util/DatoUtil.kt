@@ -2,7 +2,6 @@ package no.nav.familie.ef.sak.felles.util
 
 import no.nav.familie.ef.sak.felles.util.DatoFormat.DATE_FORMAT_NORSK
 import no.nav.familie.ef.sak.felles.util.DatoUtil.dagensDatoMedTid
-import no.nav.familie.ef.sak.vedtak.domain.Vedtaksperiode
 import no.nav.familie.kontrakter.felles.Månedsperiode
 import java.time.LocalDate
 import java.time.LocalDateTime
