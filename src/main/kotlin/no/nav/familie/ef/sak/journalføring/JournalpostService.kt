@@ -1,7 +1,9 @@
 package no.nav.familie.ef.sak.journalføring
 
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
+import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.journalføring.dto.DokumentVariantformat
+import no.nav.familie.ef.sak.journalføring.dto.OppdaterJournalpostMedDokumenterRequest
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.logger
 import no.nav.familie.ef.sak.vedlegg.VedleggRequest
 import no.nav.familie.kontrakter.ef.sak.DokumentBrevkode
@@ -13,6 +15,7 @@ import no.nav.familie.kontrakter.felles.BrukerIdType
 import no.nav.familie.kontrakter.felles.Tema
 import no.nav.familie.kontrakter.felles.dokarkiv.AvsenderMottaker
 import no.nav.familie.kontrakter.felles.dokarkiv.BulkOppdaterLogiskVedleggRequest
+import no.nav.familie.kontrakter.felles.dokarkiv.OppdaterJournalpostRequest
 import no.nav.familie.kontrakter.felles.journalpost.Bruker
 import no.nav.familie.kontrakter.felles.journalpost.Journalpost
 import no.nav.familie.kontrakter.felles.journalpost.JournalposterForBrukerRequest
@@ -99,6 +102,14 @@ class JournalpostService(
         saksbehandler = null,
     )
 
+    fun oppdaterDokumenterPåJournalpost(
+        journalpost: Journalpost,
+        request: OppdaterJournalpostMedDokumenterRequest,
+    ) {
+        oppdaterLogiskeVedlegg(journalpost, request.logiskeVedlegg)
+        oppdaterJournalpostMedDokumenttitler(journalpost, request.dokumenttitler)
+    }
+
     fun oppdaterOgFerdigstillJournalpost(
         journalpost: Journalpost,
         dokumenttitler: Map<String, String>?,
@@ -129,6 +140,7 @@ class JournalpostService(
         journalpost: Journalpost,
         logiskeVedlegg: Map<String, List<LogiskVedlegg>>?,
     ) {
+        // TODO: Fas ut kode som tilhører gammel løsning for journalføring
         // Skal ikke endre på logiske vedlegg dersom man journalfører fra gammel løsning. Gammel løsning sender ikke inn logiske vedlegg og vil derfor resultere i null her. Ny løsning vil sende inn tom liste.
         if (logiskeVedlegg == null) {
             return
@@ -166,10 +178,27 @@ class JournalpostService(
     ) {
         val oppdatertJournalpost =
             JournalføringHelper.lagOppdaterJournalpostRequest(journalpost, eksternFagsakId, dokumenttitler, nyAvsender)
+        oppdaterJournalpost(oppdatertJournalpost, journalpost.journalpostId, saksbehandler)
+    }
+
+    private fun oppdaterJournalpostMedDokumenttitler(
+        journalpost: Journalpost,
+        dokumenttitler: Map<String, String>,
+    ) {
+        val saksbehandler = SikkerhetContext.hentSaksbehandler()
+        val oppdatertJournalpost = JournalføringHelper.lagOppdaterJournalpostRequest(journalpost, dokumenttitler)
+        oppdaterJournalpost(oppdatertJournalpost, journalpost.journalpostId, saksbehandler)
+    }
+
+    private fun oppdaterJournalpost(
+        request: OppdaterJournalpostRequest,
+        journalpostId: String,
+        saksbehandler: String?,
+    ) {
         try {
-            journalpostClient.oppdaterJournalpost(oppdatertJournalpost, journalpost.journalpostId, saksbehandler)
+            journalpostClient.oppdaterJournalpost(request, journalpostId, saksbehandler)
         } catch (e: Exception) {
-            secureLogger.error("Kunne ikke oppdatere journalpost med id=${journalpost.journalpostId} og ny avsenderMottaker=${oppdatertJournalpost.avsenderMottaker} og gammel avsendermottaker=${journalpost.avsenderMottaker}")
+            secureLogger.error("Kunne ikke oppdatere journalpost med id=$journalpostId")
             throw e
         }
     }
