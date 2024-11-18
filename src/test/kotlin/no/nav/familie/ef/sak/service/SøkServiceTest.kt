@@ -6,13 +6,14 @@ import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.fagsak.FagsakPersonService
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.SøkService
-import no.nav.familie.ef.sak.fagsak.dto.PersonFraSøk
+import no.nav.familie.ef.sak.fagsak.dto.PersonPåAdresse
 import no.nav.familie.ef.sak.fagsak.dto.SøkeresultatPerson
 import no.nav.familie.ef.sak.infrastruktur.config.KodeverkServiceMock
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.vilkår.VilkårTestUtil.mockVilkårGrunnlagDto
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlSaksbehandlerClient
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.Sivilstandstype
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper.AdresseMapper
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Bostedsadresse
@@ -42,6 +43,7 @@ internal class SøkServiceTest {
     private val behandlingService = mockk<BehandlingService>()
     private val fagsakPersonService = mockk<FagsakPersonService>()
     private val vurderingService = mockk<VurderingService>()
+    private val personopplysningerService = mockk<PersonopplysningerService>()
     private val søkService =
         SøkService(
             fagsakPersonService,
@@ -51,6 +53,7 @@ internal class SøkServiceTest {
             adresseMapper,
             fagsakService,
             vurderingService,
+            personopplysningerService,
         )
 
     @BeforeEach
@@ -130,13 +133,13 @@ internal class SøkServiceTest {
         } returns pdlSøker(bostedsadresse = bostedsadresseFraPdl)
 
         val forventetResultat =
-            PersonFraSøk(
+            PersonPåAdresse(
                 personIdent = "123456789",
                 visningsadresse = "Adressenavn 23 A, 0000 Oslo",
                 "Fornavn Mellomnavn Etternavn",
                 fødselsdato = null,
-                erSøker = false,
-                erBarn = false,
+                erSøker = null,
+                erBarn = null,
             )
 
         val person = SøkeresultatPerson(listOf(forventetResultat))

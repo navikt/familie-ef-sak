@@ -72,9 +72,6 @@ spec:
         - application: bidrag-grunnlag-feature
           namespace: bidrag
           cluster: dev-gcp
-        - application: tiltakspenger-overgangsstonad
-          namespace: tpts
-          cluster: dev-gcp
         - application: tilleggsstonader-integrasjoner
           namespace: tilleggsstonader
     outbound:
