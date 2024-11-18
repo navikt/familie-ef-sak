@@ -98,7 +98,7 @@ class JournalpostController(
     @PostMapping("/{journalpostId}/oppdater-dokumenter")
     fun oppdaterDokumenter(
         @PathVariable journalpostId: String,
-        request: OppdaterJournalpostMedDokumenterRequest,
+        @RequestBody request: OppdaterJournalpostMedDokumenterRequest,
     ): Ressurs<String> {
         val (journalpost, personIdent) = finnJournalpostOgPersonIdent(journalpostId)
         tilgangService.validerTilgangTilPersonMedBarn(personIdent, AuditLoggerEvent.UPDATE)
