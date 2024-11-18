@@ -1,6 +1,7 @@
 package no.nav.familie.ef.sak.amelding
 
 import no.nav.familie.ef.sak.amelding.ekstern.AMeldingInntektClient
+import no.nav.familie.ef.sak.amelding.ekstern.InntektType
 import no.nav.familie.ef.sak.fagsak.FagsakPersonService
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import org.springframework.stereotype.Service
@@ -22,6 +23,16 @@ class InntektService(
         val aktivIdent = fagsakService.hentAktivIdent(fagsakId)
         val inntekt = aMeldingInntektClient.hentInntekt(aktivIdent, fom, tom)
         return inntektMapper.mapInntekt(inntekt)
+    }
+
+    fun hentÅrsinntekt(
+        personIdent: String,
+        årstallIFjor: Int,
+    ): Int {
+        val inntektListeResponse = aMeldingInntektClient.hentInntekt(personIdent, YearMonth.of(årstallIFjor, 1), YearMonth.of(årstallIFjor, 12))
+        val inntektListe = inntektListeResponse.arbeidsinntektMåned?.flatMap { it.arbeidsInntektInformasjon?.inntektListe ?: emptyList() }
+        val totalBeløp = inntektListe?.filter { it.inntektType != InntektType.YTELSE_FRA_OFFENTLIGE && it.beskrivelse != "feriepenger" }?.sumOf { it.beløp } ?: 0
+        return totalBeløp
     }
 
     fun genererAInntektUrl(fagsakPersonId: UUID): String {
