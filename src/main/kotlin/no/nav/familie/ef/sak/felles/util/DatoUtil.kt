@@ -2,6 +2,8 @@ package no.nav.familie.ef.sak.felles.util
 
 import no.nav.familie.ef.sak.felles.util.DatoFormat.DATE_FORMAT_NORSK
 import no.nav.familie.ef.sak.felles.util.DatoUtil.dagensDatoMedTid
+import no.nav.familie.ef.sak.vedtak.domain.Vedtaksperiode
+import no.nav.familie.kontrakter.felles.Månedsperiode
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
@@ -85,4 +87,18 @@ fun YearMonth.formaterYearMonthTilMånedÅr(): String {
             .build()
     val formatter = DateTimeFormatter.ofPattern("MMMM yyyy", locale)
     return yearMonth.format(formatter)
+}
+
+fun Månedsperiode.kuttPeriodeTilGittÅr(år: Int): Månedsperiode {
+    var fom = this.fom
+    if (fom < YearMonth.of(år, 1)) {
+        fom = YearMonth.of(år, 1)
+    }
+
+    var tom = this.tom
+    if (tom > YearMonth.of(år, 12)) {
+        tom = YearMonth.of(år, 12)
+    }
+
+    return Månedsperiode(fom, tom)
 }

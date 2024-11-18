@@ -2,6 +2,7 @@ package no.nav.familie.ef.sak.selvstendig
 
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.fagsak.FagsakService
+import no.nav.familie.ef.sak.felles.util.kuttPeriodeTilGittÅr
 import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.ef.sak.oppgave.OppgaveUtil
 import no.nav.familie.ef.sak.sigrun.SigrunService
@@ -68,9 +69,11 @@ class SelvstendigService(
 
             val vedtak = vedtakService.hentVedtak(behandlinger.first().id)
 
-            val perioder = vedtak.perioder?.perioder?.filter { !it.periodeType.midlertidigOpphørEllerSanksjon() }
-            val antallMåneder = perioder?.count { it.periode.overlapper(Månedsperiode(YearMonth.of(YearMonth.now().year, 1), YearMonth.of(YearMonth.now().year, 12))) }
+            val vedtaksperioder = vedtak.perioder?.perioder?.filter { !it.periodeType.midlertidigOpphørEllerSanksjon() }
+            val vedtaksperioderIÅr = vedtaksperioder?.filter { it.periode.overlapper(Månedsperiode(YearMonth.of(YearMonth.now().year, 1), YearMonth.of(YearMonth.now().year, 12))) }
+            val antallMåneder = vedtaksperioderIÅr?.map { it.periode.kuttPeriodeTilGittÅr(YearMonth.now().minusYears(1).year) }?.sumOf { it.lengdeIHeleMåneder() }
 
+            //Beregn antall måneder
             secureLogger.info("Antall måneder $antallMåneder med vedtak i ${YearMonth.now().year} for person $personIdent")
 
             val fagsakPersonId = fagsaker.filter { it.stønadstype == StønadType.OVERGANGSSTØNAD }.first().fagsakPersonId
