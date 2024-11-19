@@ -4,7 +4,7 @@ import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.fagsak.domain.FagsakPerson
 import no.nav.familie.ef.sak.fagsak.dto.FagsakForSøkeresultat
-import no.nav.familie.ef.sak.fagsak.dto.PersonFraSøk
+import no.nav.familie.ef.sak.fagsak.dto.PersonPåAdresse
 import no.nav.familie.ef.sak.fagsak.dto.Søkeresultat
 import no.nav.familie.ef.sak.fagsak.dto.SøkeresultatPerson
 import no.nav.familie.ef.sak.fagsak.dto.SøkeresultatUtenFagsak
@@ -15,11 +15,12 @@ import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlPersonSøkHjelper
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlSaksbehandlerClient
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerService
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.BarnDto
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.NavnDto
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper.AdresseMapper
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper.KjønnMapper
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlIdenter
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlPersonFraSøk
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.gjeldende
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.identer
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.visningsnavn
@@ -28,6 +29,7 @@ import no.nav.familie.ef.sak.vilkår.dto.VilkårGrunnlagDto
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
+import java.time.LocalDate
 import java.util.UUID
 
 @Service
@@ -39,6 +41,7 @@ class SøkService(
     private val adresseMapper: AdresseMapper,
     private val fagsakService: FagsakService,
     private val vurderingService: VurderingService,
+    private val personopplysningerService: PersonopplysningerService,
 ) {
     private val secureLogger = LoggerFactory.getLogger("secureLogger")
 
@@ -90,31 +93,48 @@ class SøkService(
         )
     }
 
-    // Denne trenger ikke en tilgangskontroll då den ikke returnerer noe fra behandlingen.
-    // Pdl gjører tilgangskontroll for søkPersoner
-    // Midlertidlig løsning med å hente søker fra PDL
-    // dette kan endres til å hente bosstedsadresse fra databasen når PDL-data blir lagret i databasen
-    fun søkEtterPersonerMedSammeAdressePåFagsak(fagsakId: UUID): SøkeresultatPerson {
-        val aktivIdent = fagsakService.hentAktivIdent(fagsakId)
-        return søkEtterPersonerMedSammeAdresse(aktivIdent)
-    }
-
     fun søkEtterPersonerMedSammeAdressePåFagsakPerson(fagsakPersonId: UUID): SøkeresultatPerson {
         val aktivIdent = fagsakPersonService.hentAktivIdent(fagsakPersonId)
-        return søkEtterPersonerMedSammeAdresse(aktivIdent)
+        val personopplysninger = personopplysningerService.hentPersonopplysningerFraRegister(aktivIdent)
+        val barnAvBruker = personopplysninger.barn.tilBarnAvBruker()
+        return søkEtterPersonerMedSammeAdresse(aktivIdent, barnAvBruker)
     }
 
     fun søkEtterPersonerMedSammeAdressePåBehandling(behandlingId: UUID): SøkeresultatPerson {
         val (grunnlag) = vurderingService.hentGrunnlagOgMetadata(behandlingId)
 
         val aktivIdent = behandlingService.hentAktivIdent(behandlingId)
-        return søkEtterPersonerMedSammeAdresse(aktivIdent, grunnlag)
+        return søkEtterPersonerMedSammeAdresse(aktivIdent, grunnlag.barnAvBruker())
     }
 
     private fun søkEtterPersonerMedSammeAdresse(
-        aktivIdent: String,
-        grunnlag: VilkårGrunnlagDto? = null,
+        brukersPersonIdent: String,
+        barnAvBruker: List<BarnAvBrukerDto>,
     ): SøkeresultatPerson {
+        val allePersonerPåAdresse: List<PersonPåAdresse> = hentAllePersonerPåAdresse(brukersPersonIdent)
+
+        val personerMedMetadata =
+            allePersonerPåAdresse.map { personPåAdresse ->
+                val barnetAvBruker = barnAvBruker.find { it.personIdent == personPåAdresse.personIdent }
+                personPåAdresse.copy(
+                    erSøker = if (personPåAdresse.personIdent == brukersPersonIdent) true else null,
+                    erBarn = if (barnetAvBruker != null) true else null,
+                    fødselsdato = barnetAvBruker?.fødselsdato,
+                )
+            }
+
+        return SøkeresultatPerson(
+            personer =
+                personerMedMetadata
+                    .sortedWith(
+                        compareByDescending<PersonPåAdresse> { it.erSøker }
+                            .thenByDescending { it.erBarn }
+                            .thenByDescending { it.fødselsdato },
+                    ),
+        )
+    }
+
+    private fun hentAllePersonerPåAdresse(aktivIdent: String): List<PersonPåAdresse> {
         val søker = personService.hentSøker(aktivIdent)
         val aktuelleBostedsadresser = søker.bostedsadresse.filterNot { it.metadata.historisk }
         val bostedsadresse = aktuelleBostedsadresser.singleOrNull()
@@ -136,17 +156,19 @@ class SøkService(
         }
 
         val personSøkResultat = pdlSaksbehandlerClient.søkPersonerMedSammeAdresse(søkeKriterier).hits
-
-        return SøkeresultatPerson(
-            personer =
-                personSøkResultat
-                    .map { tilPersonFraSøk(it.person, grunnlag) }
-                    .sortedWith(
-                        compareByDescending<PersonFraSøk> { it.erSøker }
-                            .thenByDescending { it.erBarn }
-                            .thenByDescending { it.fødselsdato },
-                    ),
-        )
+        return personSøkResultat.map {
+            PersonPåAdresse(
+                personIdent =
+                    it.person.folkeregisteridentifikator
+                        .gjeldende()
+                        .identifikasjonsnummer,
+                visningsadresse =
+                    it.person.bostedsadresse
+                        .gjeldende()
+                        ?.let { adresseMapper.tilAdresse(it).visningsadresse },
+                visningsnavn = NavnDto.fraNavn(it.person.navn.gjeldende()).visningsnavn,
+            )
+        }
     }
 
     fun søkPersonUtenFagsak(personIdent: String): SøkeresultatUtenFagsak =
@@ -157,24 +179,13 @@ class SøkService(
             )
         }
             ?: throw ApiFeil("Finner ingen personer for søket", HttpStatus.BAD_REQUEST)
-
-    private fun tilPersonFraSøk(
-        person: PdlPersonFraSøk,
-        grunnlag: VilkårGrunnlagDto?,
-    ): PersonFraSøk {
-        val gjeldendeBarn = grunnlag?.barnMedSamvær?.find { it.registergrunnlag.fødselsnummer == person.folkeregisteridentifikator.gjeldende().identifikasjonsnummer }
-        val erSøker = grunnlag?.personalia?.personIdent == person.folkeregisteridentifikator.gjeldende().identifikasjonsnummer
-        val erBarn = grunnlag?.barnMedSamvær?.any { it.registergrunnlag.fødselsnummer == person.folkeregisteridentifikator.gjeldende().identifikasjonsnummer }
-        return PersonFraSøk(
-            personIdent = person.folkeregisteridentifikator.gjeldende().identifikasjonsnummer,
-            visningsadresse =
-                person.bostedsadresse
-                    .gjeldende()
-                    ?.let { adresseMapper.tilAdresse(it).visningsadresse },
-            visningsnavn = NavnDto.fraNavn(person.navn.gjeldende()).visningsnavn,
-            fødselsdato = gjeldendeBarn?.registergrunnlag?.fødselsdato,
-            erSøker = erSøker,
-            erBarn = erBarn,
-        )
-    }
 }
+
+private fun List<BarnDto>.tilBarnAvBruker(): List<BarnAvBrukerDto> = this.map { BarnAvBrukerDto(it.personIdent, it.fødselsdato) }
+
+data class BarnAvBrukerDto(
+    val personIdent: String?,
+    val fødselsdato: LocalDate? = null,
+)
+
+private fun VilkårGrunnlagDto.barnAvBruker(): List<BarnAvBrukerDto> = this.barnMedSamvær.map { BarnAvBrukerDto(it.registergrunnlag.fødselsnummer, it.registergrunnlag.fødselsdato) }
