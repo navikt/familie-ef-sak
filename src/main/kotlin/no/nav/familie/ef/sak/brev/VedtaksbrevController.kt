@@ -3,6 +3,7 @@ package no.nav.familie.ef.sak.brev
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.familie.ef.sak.AuditLoggerEvent
 import no.nav.familie.ef.sak.behandling.BehandlingService
+import no.nav.familie.ef.sak.brev.dto.SignaturDto
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -42,6 +43,18 @@ class VedtaksbrevController(
         tilgangService.validerTilgangTilBehandling(saksbehandling, AuditLoggerEvent.UPDATE)
         tilgangService.validerHarSaksbehandlerrolle()
         return Ressurs.success(brevService.lagSaksbehandlerSanitybrev(saksbehandling, brevRequest, brevMal))
+    }
+
+    @GetMapping("/{behandlingId}/{brevmal}")
+    fun hentSaksbehandlerHTMLbrev(
+        @PathVariable behandlingId: UUID,
+        @PathVariable brevmal: String,
+        @RequestBody brevrequest: JsonNode,
+    ): Ressurs<String> {
+        val saksbehandling = behandlingService.hentSaksbehandling(behandlingId)
+        tilgangService.validerTilgangTilBehandling(saksbehandling, AuditLoggerEvent.UPDATE)
+        tilgangService.validerHarSaksbehandlerrolle()
+        return Ressurs.success(brevService.lagHtmlBrev(saksbehandlersignatur = SignaturDto("Ola Olsen", "Oslo", true), brevrequest = brevrequest, brevmal= brevmal))
     }
 
     @Deprecated("Slettes - bruk forhåndsvisBeslutterbrev")
