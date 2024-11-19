@@ -117,7 +117,7 @@ class VurderingController(
         return Ressurs.success(vurderingService.hentEllerOpprettVilkårsvurdering(request.behandlingId, request.vilkårId))
     }
 
-    @GetMapping("{behandlingId}/allegjenbrukbarevurderinger")
+    @GetMapping("{behandlingId}/alle-gjenbrukbare-vurderinger")
     fun hentAlleGjenbrukbareVilkårsvurderinger(
         @PathVariable behandlingId: UUID,
     ): Ressurs<List<VilkårsvurderingDto>> {
