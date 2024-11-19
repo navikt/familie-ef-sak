@@ -58,7 +58,7 @@ class VurderingService(
         erGjenbruk: Boolean = false,
     ): VilkårsvurderingDto? {
         val (_, metadata) = hentGrunnlagOgMetadata(behandlingId)
-        val vurderinger = hentEllerOpprettVurderinger(behandlingId, metadata)
+        val vurderinger = hentEllerOpprettVurderinger(behandlingId, metadata, erGjenbruk)
         val vilkårsvurdering = vurderinger.find { it.id == vilkårId }
         return vilkårsvurdering
     }
