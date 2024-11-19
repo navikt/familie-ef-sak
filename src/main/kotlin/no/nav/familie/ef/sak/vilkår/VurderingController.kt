@@ -108,10 +108,11 @@ class VurderingController(
     fun gjenbrukVilkår(
         @RequestBody request: GjenbrukEnkeltVilkårsvurderingDto,
     ): Ressurs<VilkårsvurderingDto?> {
-        tilgangService.validerTilgangTilBehandling(request.kopierBehandlingId, AuditLoggerEvent.ACCESS)
+        val behandlingForGjenbruk = gjenbrukVilkårService.finnBehandlingerForGjenbruk(request.behandlingId).first()
+        tilgangService.validerTilgangTilBehandling(behandlingForGjenbruk.id, AuditLoggerEvent.ACCESS)
         tilgangService.validerTilgangTilBehandling(request.behandlingId, AuditLoggerEvent.UPDATE)
         tilgangService.validerHarSaksbehandlerrolle()
-//        gjenbrukVilkårService.gjenbrukInngangsvilkårVurderinger(request.behandlingId, request.kopierBehandlingId)
+        //gjenbrukVilkårService.gjenbrukInngangsvilkårVurderinger(request.behandlingId, behandlingForGjenbruk.id)
         return Ressurs.success(vurderingService.hentEllerOpprettVilkårsvurdering(request.behandlingId, request.vilkårType))
     }
 }
