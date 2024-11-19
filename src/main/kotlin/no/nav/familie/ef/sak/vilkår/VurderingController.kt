@@ -112,7 +112,7 @@ class VurderingController(
         tilgangService.validerTilgangTilBehandling(behandlingForGjenbruk.id, AuditLoggerEvent.ACCESS)
         tilgangService.validerTilgangTilBehandling(request.behandlingId, AuditLoggerEvent.UPDATE)
         tilgangService.validerHarSaksbehandlerrolle()
-        //gjenbrukVilkårService.gjenbrukInngangsvilkårVurderinger(request.behandlingId, behandlingForGjenbruk.id)
+        // gjenbrukVilkårService.gjenbrukInngangsvilkårVurderinger(request.behandlingId, behandlingForGjenbruk.id)
         return Ressurs.success(vurderingService.hentEllerOpprettVilkårsvurdering(request.behandlingId, request.vilkårType))
     }
 }
