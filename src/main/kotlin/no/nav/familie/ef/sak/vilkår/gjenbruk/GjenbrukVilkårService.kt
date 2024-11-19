@@ -172,23 +172,6 @@ class GjenbrukVilkårService(
             }
     }
 
-    private fun lagEnkelInngangsvilkårVurderingForGjenbruk(
-        behandlingId: UUID,
-        nåværendeVurdering: Vilkårsvurdering,
-        tidligereVurdering: Vilkårsvurdering,
-    ) = tidligereVurdering.copy(
-        id = nåværendeVurdering.id,
-        behandlingId = behandlingId,
-        sporbar = nåværendeVurdering.sporbar,
-        barnId = nåværendeVurdering.barnId,
-        opphavsvilkår = tidligereVurdering.opprettOpphavsvilkår(),
-        delvilkårsvurdering =
-            tidligereVurdering.delvilkårsvurdering.copy(
-                delvilkårsvurderinger =
-                    tidligereVurdering.gjeldendeDelvilkårsvurderinger(),
-            ),
-    )
-
     private fun finnBarnPåBeggeBehandlinger(
         behandlingId: UUID,
         tidligereBehandlingId: UUID,
