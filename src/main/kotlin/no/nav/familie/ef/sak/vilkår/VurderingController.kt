@@ -105,11 +105,11 @@ class VurderingController(
     }
 
     @PostMapping("gjenbruk-enkelt-vilkår")
-    fun gjenbrukVilkår(
+    fun gjenbrukEnkeltVilkår(
         @RequestBody request: GjenbrukEnkeltVilkårsvurderingDto,
     ): Ressurs<VilkårsvurderingDto?> {
-        val behandlingForGjenbruk = gjenbrukVilkårService.finnBehandlingerForGjenbruk(request.behandlingId).first()
-        tilgangService.validerTilgangTilBehandling(behandlingForGjenbruk.id, AuditLoggerEvent.ACCESS)
+//        val behandlingForGjenbruk = gjenbrukVilkårService.finnBehandlingerForGjenbruk(request.behandlingId).first()
+//        tilgangService.validerTilgangTilBehandling(behandlingForGjenbruk.id, AuditLoggerEvent.ACCESS)
         tilgangService.validerTilgangTilBehandling(request.behandlingId, AuditLoggerEvent.UPDATE)
         tilgangService.validerHarSaksbehandlerrolle()
         // gjenbrukVilkårService.gjenbrukInngangsvilkårVurderinger(request.behandlingId, behandlingForGjenbruk.id)
