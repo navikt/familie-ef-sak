@@ -8,6 +8,7 @@ import no.nav.familie.ef.sak.vilkår.dto.OppdaterVilkårsvurderingDto
 import no.nav.familie.ef.sak.vilkår.dto.SvarPåVurderingerDto
 import no.nav.familie.ef.sak.vilkår.dto.VilkårDto
 import no.nav.familie.ef.sak.vilkår.dto.VilkårsvurderingDto
+import no.nav.familie.ef.sak.vilkår.dto.tilDto
 import no.nav.familie.ef.sak.vilkår.gjenbruk.GjenbrukVilkårService
 import no.nav.familie.ef.sak.vilkår.regler.Vilkårsregler
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -119,11 +120,11 @@ class VurderingController(
     @GetMapping("{behandlingId}/allegjenbrukbarevurderinger")
     fun hentAlleGjenbrukbareVilkårsvurderinger(
         @PathVariable behandlingId: UUID,
-    ): Ressurs<List<Vilkårsvurdering>> {
+    ): Ressurs<List<VilkårsvurderingDto>> {
         val behandlingForGjenbruk = gjenbrukVilkårService.finnBehandlingerForGjenbruk(behandlingId).first()
         tilgangService.validerTilgangTilBehandling(behandlingForGjenbruk.id, AuditLoggerEvent.ACCESS)
         tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.UPDATE)
         tilgangService.validerHarSaksbehandlerrolle()
-        return Ressurs.success(gjenbrukVilkårService.hentVilkårsvurderingerSomKanGjenbrukes(behandlingId, behandlingForGjenbruk.id))
+        return Ressurs.success(gjenbrukVilkårService.hentVilkårsvurderingerSomKanGjenbrukes(behandlingId, behandlingForGjenbruk.id).map { it.tilDto() })
     }
 }
