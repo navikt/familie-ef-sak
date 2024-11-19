@@ -105,7 +105,7 @@ class VurderingController(
     }
 
     @PostMapping("gjenbruk-enkelt-vilkår")
-    fun gjenbrukVilkår(
+    fun gjenbrukEnkeltVilkår(
         @RequestBody request: GjenbrukEnkeltVilkårsvurderingDto,
     ): Ressurs<VilkårsvurderingDto?> {
         val behandlingForGjenbruk = gjenbrukVilkårService.finnBehandlingerForGjenbruk(request.behandlingId).first()
