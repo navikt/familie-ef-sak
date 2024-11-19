@@ -99,20 +99,20 @@ class GjenbrukVilkårService(
         val erSammeStønadstype = erSammeStønadstype(behandlingSomSkalOppdateres, behandlingIdSomSkalGjenbrukeInngangsvilkår)
         val nåværendeVurdering =
             vilkårsvurderingRepository.findById(vilkårsVurderingId).get()
-        val barnForVurdering = forrigeBarnIdTilNåværendeBarnMap[nåværendeVurdering.barnId]
         val tidligereVurdering =
             hentVurderingerSomSkalGjenbrukes(
                 sivilstandErLik,
                 erSammeStønadstype,
                 behandlingIdSomSkalGjenbrukeInngangsvilkår,
                 forrigeBarnIdTilNåværendeBarnMap,
-            ).firstOrNull { it.type == nåværendeVurdering.type && it.barnId == barnForVurdering?.id } ?: error("Fant ingen tidligere vilkårsvurdering for vurderingId=$vilkårsVurderingId")
-        val vurderingSomSkalLagres =
-            lagEnkelInngangsvilkårVurderingForGjenbruk(
-                behandlingSomSkalOppdateres,
-                nåværendeVurdering,
-                tidligereVurdering,
             )
+        val vurderingSomSkalLagres =
+            lagInngangsvilkårVurderingerForGjenbruk(
+                behandlingSomSkalOppdateres,
+                listOf(nåværendeVurdering),
+                tidligereVurdering,
+                forrigeBarnIdTilNåværendeBarnMap,
+            ).first()
         secureLogger.info(
             "${SikkerhetContext.hentSaksbehandlerEllerSystembruker()} gjenbruker enkel vurdering fra behandling $behandlingIdSomSkalGjenbrukeInngangsvilkår " +
                 "for å oppdatere vurderinger på inngangsvilkår for behandling $behandlingSomSkalOppdateres",
