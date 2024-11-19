@@ -82,6 +82,60 @@ class GjenbrukVilkårService(
         vilkårsvurderingRepository.updateAll(vurderingerSomSkalLagres)
     }
 
+    @Transactional
+    fun gjenbrukInngangsvilkårVurdering(
+        behandlingSomSkalOppdateres: UUID,
+        vilkårsVurderingId: UUID,
+        behandlingIdSomSkalGjenbrukeInngangsvilkår: UUID,
+    ) {
+        validerBehandlingForGjenbruk(
+            behandlingSomSkalOppdateres,
+            behandlingIdSomSkalGjenbrukeInngangsvilkår,
+        )
+        val forrigeBarnIdTilNåværendeBarnMap =
+            finnBarnPåBeggeBehandlinger(behandlingSomSkalOppdateres, behandlingIdSomSkalGjenbrukeInngangsvilkår)
+        val sivilstandErLik =
+            erSivilstandUforandretSidenForrigeBehandling(behandlingSomSkalOppdateres, behandlingIdSomSkalGjenbrukeInngangsvilkår)
+        val erSammeStønadstype = erSammeStønadstype(behandlingSomSkalOppdateres, behandlingIdSomSkalGjenbrukeInngangsvilkår)
+        val nåværendeVurdering =
+            vilkårsvurderingRepository.findById(behandlingSomSkalOppdateres).get()
+        val tidligereVurdering =
+            hentVurderingerSomSkalGjenbrukes(
+                sivilstandErLik,
+                erSammeStønadstype,
+                behandlingIdSomSkalGjenbrukeInngangsvilkår,
+                forrigeBarnIdTilNåværendeBarnMap,
+            ).firstOrNull { it.type == nåværendeVurdering.type && it.barnId == nåværendeVurdering?.id } ?: error("Fant ingen tidligere vilkårsvurdering med id=$vilkårsVurderingId")
+        val vurderingSomSkalLagres =
+            lagEnkelInngangsvilkårVurderingForGjenbruk(
+                behandlingSomSkalOppdateres,
+                nåværendeVurdering,
+                tidligereVurdering,
+            )
+        secureLogger.info(
+            "${SikkerhetContext.hentSaksbehandlerEllerSystembruker()} gjenbruker enkel vurdering fra behandling $behandlingIdSomSkalGjenbrukeInngangsvilkår " +
+                "for å oppdatere vurderinger på inngangsvilkår for behandling $behandlingSomSkalOppdateres",
+        )
+        vilkårsvurderingRepository.update(vurderingSomSkalLagres)
+    }
+
+    fun hentVilkårsvurderingerSomKanGjenbrukes(
+        behandlingIdSomSkalGjenbrukeInngangsvilkår: UUID,
+        behandlingSomSkalOppdateres: UUID,
+    ): List<Vilkårsvurdering> {
+        val forrigeBarnIdTilNåværendeBarnMap =
+            finnBarnPåBeggeBehandlinger(behandlingSomSkalOppdateres, behandlingIdSomSkalGjenbrukeInngangsvilkår)
+        val sivilstandErLik =
+            erSivilstandUforandretSidenForrigeBehandling(behandlingSomSkalOppdateres, behandlingIdSomSkalGjenbrukeInngangsvilkår)
+        val erSammeStønadstype = erSammeStønadstype(behandlingSomSkalOppdateres, behandlingIdSomSkalGjenbrukeInngangsvilkår)
+        return hentVurderingerSomSkalGjenbrukes(
+            sivilstandErLik,
+            erSammeStønadstype,
+            behandlingIdSomSkalGjenbrukeInngangsvilkår,
+            forrigeBarnIdTilNåværendeBarnMap,
+        )
+    }
+
     private fun erSammeStønadstype(
         nåværendeBehandlingId: UUID,
         tidligereBehandlingId: UUID,
@@ -116,6 +170,23 @@ class GjenbrukVilkårService(
                 )
             }
     }
+
+    private fun lagEnkelInngangsvilkårVurderingForGjenbruk(
+        behandlingId: UUID,
+        nåværendeVurdering: Vilkårsvurdering,
+        tidligereVurdering: Vilkårsvurdering,
+    ) = tidligereVurdering.copy(
+        id = nåværendeVurdering.id,
+        behandlingId = behandlingId,
+        sporbar = nåværendeVurdering.sporbar,
+        barnId = nåværendeVurdering.barnId,
+        opphavsvilkår = tidligereVurdering.opprettOpphavsvilkår(),
+        delvilkårsvurdering =
+            tidligereVurdering.delvilkårsvurdering.copy(
+                delvilkårsvurderinger =
+                    tidligereVurdering.gjeldendeDelvilkårsvurderinger(),
+            ),
+    )
 
     private fun finnBarnPåBeggeBehandlinger(
         behandlingId: UUID,
