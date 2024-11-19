@@ -7,10 +7,10 @@ import org.springframework.stereotype.Service
 @Profile("!integrasjonstest")
 @Service
 class SelvstendigScheduler(
-    val selvstendigService: SelvstendigService,
+    val næringsinntektKontrollService: NæringsinntektKontrollService,
 ) {
-    @Scheduled(cron = "0 0/1 * * * *")
+    @Scheduled(cron = "0 0 0/1 * * *")
     fun inntektskontrollForSelvstendige() {
-        selvstendigService.hentOppgaver()
+        næringsinntektKontrollService.sjekkNæringsinntektMotForventetInntekt()
     }
 }
