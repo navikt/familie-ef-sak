@@ -54,12 +54,11 @@ class VurderingService(
     @Transactional
     fun hentEllerOpprettVilkårsvurdering(
         behandlingId: UUID,
-        vilkårId: UUID,
+        vilkårType: VilkårType,
     ): VilkårsvurderingDto? {
         val (_, metadata) = hentGrunnlagOgMetadata(behandlingId)
         val vurderinger = hentEllerOpprettVurderinger(behandlingId, metadata)
-        val vilkårsvurdering = vurderinger.find { it.id == vilkårId }
-//        val vurdering = hentEllerOpprettVurderinger(behandlingId, metadata)
+        val vilkårsvurdering = vurderinger.find { it.vilkårType == vilkårType }
         return vilkårsvurdering
     }
 

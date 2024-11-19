@@ -46,8 +46,8 @@ data class GjenbrukVilkårsvurderingerDto(
 data class GjenbrukEnkeltVilkårsvurderingDto(
     val behandlingId: UUID,
     val kopierBehandlingId: UUID,
-    val vilkårId: UUID,
-    val vilkårType: VilkårType?,
+    val vilkårType: VilkårType,
+    val vilkårId: UUID?,
 )
 
 data class DelvilkårsvurderingDto(
