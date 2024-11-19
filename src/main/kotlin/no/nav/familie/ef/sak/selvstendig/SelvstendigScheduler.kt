@@ -1,7 +1,8 @@
 package no.nav.familie.ef.sak.selvstendig
 
+import org.springframework.boot.context.event.ApplicationReadyEvent
 import org.springframework.context.annotation.Profile
-import org.springframework.scheduling.annotation.Scheduled
+import org.springframework.context.event.EventListener
 import org.springframework.stereotype.Service
 
 @Profile("!integrasjonstest")
@@ -9,7 +10,8 @@ import org.springframework.stereotype.Service
 class SelvstendigScheduler(
     val næringsinntektKontrollService: NæringsinntektKontrollService,
 ) {
-    @Scheduled(cron = "0 0 0/1 * * *")
+    // @Scheduled(cron = "0 0 0 * * ?")
+    @EventListener(ApplicationReadyEvent::class)
     fun inntektskontrollForSelvstendige() {
         næringsinntektKontrollService.sjekkNæringsinntektMotForventetInntekt()
     }

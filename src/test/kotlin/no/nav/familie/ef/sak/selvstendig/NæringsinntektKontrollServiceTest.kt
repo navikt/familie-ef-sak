@@ -51,7 +51,7 @@ internal class NæringsinntektKontrollServiceTest : OppslagSpringRunnerTest() {
     fun `sjekkNæringsinntektMotForventetInntekt`() {
         kjørSomLeader {
             næringsinntektKontrollService.sjekkNæringsinntektMotForventetInntekt()
-            //Legger til asserts her når metoden gjør noe annet enn å logge
+            // Legger til asserts her når metoden gjør noe annet enn å logge
         }
     }
 }
