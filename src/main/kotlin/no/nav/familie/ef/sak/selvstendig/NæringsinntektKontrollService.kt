@@ -33,7 +33,6 @@ class NæringsinntektKontrollService(
     val sigrunService: SigrunService,
     val inntektService: InntektService,
 ) {
-
     private val secureLogger = LoggerFactory.getLogger("secureLogger")
     private val årstallIFjor = YearMonth.now().minusYears(1).year
 
@@ -99,7 +98,6 @@ class NæringsinntektKontrollService(
                 oppgavetype = Oppgavetype.Fremlegg,
                 fristTomDato = LocalDate.of(YearMonth.now().year, 12, 15),
                 mappeId = mappeIdForSelvstendigNæringsdrivende.toLong(),
-
             )
         val oppgaverForSelvstendige = oppgaveService.hentOppgaver(finnOppgaveRequest)
         secureLogger.info("Antall oppgaver for selvstendige med frist 15. desember: ${oppgaverForSelvstendige.oppgaver.size}")
