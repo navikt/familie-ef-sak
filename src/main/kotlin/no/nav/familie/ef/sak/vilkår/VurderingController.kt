@@ -2,6 +2,7 @@ package no.nav.familie.ef.sak.vilkår
 
 import no.nav.familie.ef.sak.AuditLoggerEvent
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
+import no.nav.familie.ef.sak.vilkår.dto.GjenbrukEnkeltVilkårsvurderingDto
 import no.nav.familie.ef.sak.vilkår.dto.GjenbrukVilkårsvurderingerDto
 import no.nav.familie.ef.sak.vilkår.dto.OppdaterVilkårsvurderingDto
 import no.nav.familie.ef.sak.vilkår.dto.SvarPåVurderingerDto
@@ -101,5 +102,16 @@ class VurderingController(
         tilgangService.validerHarSaksbehandlerrolle()
         gjenbrukVilkårService.gjenbrukInngangsvilkårVurderinger(request.behandlingId, request.kopierBehandlingId)
         return Ressurs.success(vurderingService.hentEllerOpprettVurderinger(request.behandlingId))
+    }
+
+    @PostMapping("gjenbruk-enkelt-vilkår")
+    fun gjenbrukVilkår(
+        @RequestBody request: GjenbrukEnkeltVilkårsvurderingDto,
+    ): Ressurs<VilkårsvurderingDto?> {
+        tilgangService.validerTilgangTilBehandling(request.kopierBehandlingId, AuditLoggerEvent.ACCESS)
+        tilgangService.validerTilgangTilBehandling(request.behandlingId, AuditLoggerEvent.UPDATE)
+        tilgangService.validerHarSaksbehandlerrolle()
+//        gjenbrukVilkårService.gjenbrukInngangsvilkårVurderinger(request.behandlingId, request.kopierBehandlingId)
+        return Ressurs.success(vurderingService.hentEllerOpprettVilkårsvurdering(request.behandlingId, request.vilkårId))
     }
 }
