@@ -98,7 +98,7 @@ class GjenbrukVilkårService(
             erSivilstandUforandretSidenForrigeBehandling(behandlingSomSkalOppdateres, behandlingIdSomSkalGjenbrukeInngangsvilkår)
         val erSammeStønadstype = erSammeStønadstype(behandlingSomSkalOppdateres, behandlingIdSomSkalGjenbrukeInngangsvilkår)
         val nåværendeVurdering =
-            vilkårsvurderingRepository.findById(behandlingSomSkalOppdateres).get()
+            vilkårsvurderingRepository.findById(vilkårsVurderingId).get()
         val barnForVurdering = forrigeBarnIdTilNåværendeBarnMap[nåværendeVurdering.barnId]
         val tidligereVurdering =
             hentVurderingerSomSkalGjenbrukes(
