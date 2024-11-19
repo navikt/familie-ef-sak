@@ -99,13 +99,14 @@ class GjenbrukVilkårService(
         val erSammeStønadstype = erSammeStønadstype(behandlingSomSkalOppdateres, behandlingIdSomSkalGjenbrukeInngangsvilkår)
         val nåværendeVurdering =
             vilkårsvurderingRepository.findById(behandlingSomSkalOppdateres).get()
+        val barnForVurdering = forrigeBarnIdTilNåværendeBarnMap[nåværendeVurdering.barnId]
         val tidligereVurdering =
             hentVurderingerSomSkalGjenbrukes(
                 sivilstandErLik,
                 erSammeStønadstype,
                 behandlingIdSomSkalGjenbrukeInngangsvilkår,
                 forrigeBarnIdTilNåværendeBarnMap,
-            ).firstOrNull { it.type == nåværendeVurdering.type && it.barnId == nåværendeVurdering?.id } ?: error("Fant ingen tidligere vilkårsvurdering med id=$vilkårsVurderingId")
+            ).firstOrNull { it.type == nåværendeVurdering.type && it.barnId == barnForVurdering?.id } ?: error("Fant ingen tidligere vilkårsvurdering for vurderingId=$vilkårsVurderingId")
         val vurderingSomSkalLagres =
             lagEnkelInngangsvilkårVurderingForGjenbruk(
                 behandlingSomSkalOppdateres,
