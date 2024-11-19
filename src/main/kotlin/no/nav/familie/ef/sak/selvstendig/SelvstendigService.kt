@@ -23,6 +23,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.time.YearMonth
+import java.util.UUID
 
 @Service
 class SelvstendigService(
@@ -35,6 +36,7 @@ class SelvstendigService(
 ) {
     private val logger = LoggerFactory.getLogger(javaClass)
     private val secureLogger = LoggerFactory.getLogger("secureLogger")
+    private val årstallIFjor = YearMonth.now().minusYears(1).year
 
     fun hentOppgaver() {
         if (LeaderClient.isLeader() == true) {
@@ -48,22 +50,46 @@ class SelvstendigService(
             val fagsaker = fagsakService.finnFagsaker(setOf(personIdent))
             val fagsakId = fagsaker.filter { it.stønadstype == StønadType.OVERGANGSSTØNAD }.map { it.id }.firstOrNull() ?: throw Exception("Fant ikke OS behandling")
 
-            val årstallIFjor = YearMonth.now().minusYears(1).year
-            validerVedtakLengerEnn4MndForÅr(behandlingService.hentBehandlinger(fagsakId).first(), årstallIFjor)
 
-            if (validerHarLavNæringsinntekt(fagsaker, årstallIFjor)) return
+            val behandling = behandlingService.hentBehandlinger(fagsakId).first()
+            validerVedtakLengerEnn4MndForÅr(behandling)
 
-            val fjoråretsInntekt = inntektService.hentÅrsinntekt(personIdent, årstallIFjor)
-            secureLogger.info("Forrige års inntekt for person uten ytelse fra offentlig: $fjoråretsInntekt")
-            if (fjoråretsInntekt == 0) {
-                secureLogger.info("Kan håndteres")
+            val fagsakPersonId = fagsaker.filter { it.stønadstype == StønadType.OVERGANGSSTØNAD }.first().fagsakPersonId
+            val inntekt = sigrunService.hentInntektForAlleÅrMedInntekt(fagsakPersonId).filter { it.inntektsår == årstallIFjor }
+
+            val næringsinntekt = inntekt.sumOf { it.næring } + inntekt.sumOf { it.svalbard?.næring ?: 0 }
+            secureLogger.info("Inntekt for person $inntekt - næringsinntekt er beregnet til: $næringsinntekt")
+
+            if (næringsinntekt < 50_000) {
+                return
+            }
+
+            val fjoråretsPersoninntekt = inntektService.hentÅrsinntekt(personIdent, årstallIFjor)
+            secureLogger.info("Forrige års inntekt for person uten ytelse fra offentlig: $fjoråretsPersoninntekt")
+            if (fjoråretsPersoninntekt == 0) {
+                val forventetInntekt = forventetInntektSnitt(behandling.id)
+                secureLogger.info("Beregnet inntekt i snitt for år $årstallIFjor og behandlingId ${behandling.id} er: $forventetInntekt")
+                if (næringsinntekt > (forventetInntekt * 1.1)) {
+                    secureLogger.info("Har 10% høyere næringsinntekt for person: $personIdent (Næringsinntekt: $næringsinntekt - ForventetInntekt: $forventetInntekt)")
+                }
             }
         }
     }
 
+    private fun forventetInntektSnitt(behandlingId: UUID): Int {
+        val vedtak = vedtakService.hentVedtak(behandlingId)
+
+        val inntektsperioderIÅr = vedtak.inntekter?.inntekter?.filter { it.periode.overlapper(Månedsperiode(YearMonth.of(YearMonth.now().year, 1), YearMonth.of(YearMonth.now().year, 12))) }
+        val totalInntekt = inntektsperioderIÅr?.sumOf { it.totalinntekt() }
+
+        val antallPerioder = inntektsperioderIÅr?.size ?: throw RuntimeException("Fant ikke inntektsperiode på vedtak for år $årstallIFjor for behandling $behandlingId")
+        val forventetInntektSnitt = (totalInntekt?.toInt() ?: 1) / antallPerioder
+
+        return forventetInntektSnitt
+    }
+
     private fun validerHarLavNæringsinntekt(
         fagsaker: List<Fagsak>,
-        årstallIFjor: Int,
     ): Boolean {
         val fagsakPersonId = fagsaker.filter { it.stønadstype == StønadType.OVERGANGSSTØNAD }.first().fagsakPersonId
         val inntekt = sigrunService.hentInntektForAlleÅrMedInntekt(fagsakPersonId).filter { it.inntektsår == årstallIFjor }
@@ -106,14 +132,13 @@ class SelvstendigService(
 
     private fun validerVedtakLengerEnn4MndForÅr(
         behandling: Behandling,
-        år: Int,
     ): Boolean {
         val vedtak = vedtakService.hentVedtak(behandling.id)
 
         val vedtaksperioder = vedtak.perioder?.perioder?.filter { !it.periodeType.midlertidigOpphørEllerSanksjon() }
         val vedtaksperioderIÅr = vedtaksperioder?.filter { it.periode.overlapper(Månedsperiode(YearMonth.of(YearMonth.now().year, 1), YearMonth.of(YearMonth.now().year, 12))) }
 
-        val antallMåneder = vedtaksperioderIÅr?.map { it.periode.kuttPeriodeTilGittÅr(år) }?.sumOf { it.lengdeIHeleMåneder() } ?: 0
+        val antallMåneder = vedtaksperioderIÅr?.map { it.periode.kuttPeriodeTilGittÅr(årstallIFjor) }?.sumOf { it.lengdeIHeleMåneder() } ?: 0
 
         // Beregn antall måneder
         secureLogger.info("Antall måneder $antallMåneder med vedtak i ${YearMonth.now().year} for $behandling")
