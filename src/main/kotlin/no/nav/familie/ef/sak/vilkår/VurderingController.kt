@@ -114,7 +114,7 @@ class VurderingController(
         tilgangService.validerTilgangTilBehandling(request.behandlingId, AuditLoggerEvent.UPDATE)
         tilgangService.validerHarSaksbehandlerrolle()
         gjenbrukVilkårService.gjenbrukInngangsvilkårVurdering(request.behandlingId, request.vilkårId, behandlingForGjenbruk.id)
-        return Ressurs.success(vurderingService.hentEllerOpprettVilkårsvurdering(request.behandlingId, request.vilkårId, true))
+        return Ressurs.success(vurderingService.hentEllerOpprettVilkårsvurdering(request.behandlingId, request.vilkårId))
     }
 
     @GetMapping("{behandlingId}/alle-gjenbrukbare-vurderinger")

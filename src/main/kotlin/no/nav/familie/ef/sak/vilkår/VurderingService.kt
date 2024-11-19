@@ -55,10 +55,9 @@ class VurderingService(
     fun hentEllerOpprettVilkårsvurdering(
         behandlingId: UUID,
         vilkårId: UUID,
-        erGjenbruk: Boolean = false,
     ): VilkårsvurderingDto? {
         val (_, metadata) = hentGrunnlagOgMetadata(behandlingId)
-        val vurderinger = hentEllerOpprettVurderinger(behandlingId, metadata, erGjenbruk)
+        val vurderinger = hentEllerOpprettVurderinger(behandlingId, metadata)
         val vilkårsvurdering = vurderinger.find { it.id == vilkårId }
         return vilkårsvurdering
     }
@@ -151,20 +150,17 @@ class VurderingService(
     private fun hentEllerOpprettVurderinger(
         behandlingId: UUID,
         metadata: HovedregelMetadata,
-        erGjenbruk: Boolean = false,
-    ): List<VilkårsvurderingDto> = hentEllerOpprettVurderingerForVilkår(behandlingId, metadata, erGjenbruk).map(Vilkårsvurdering::tilDto)
+    ): List<VilkårsvurderingDto> = hentEllerOpprettVurderingerForVilkår(behandlingId, metadata).map(Vilkårsvurdering::tilDto)
 
     private fun hentEllerOpprettVurderingerForVilkår(
         behandlingId: UUID,
         metadata: HovedregelMetadata,
-        erGjenbruk: Boolean = false,
     ): List<Vilkårsvurdering> {
         val lagredeVilkårsvurderinger = vilkårsvurderingRepository.findByBehandlingId(behandlingId)
 
         return when {
             behandlingErLåstForVidereRedigeringForInnloggetSaksbehandler(behandlingId) -> lagredeVilkårsvurderinger
             lagredeVilkårsvurderinger.isEmpty() -> lagreNyeVilkårsvurderinger(behandlingId, metadata)
-            erGjenbruk -> lagreNyeVilkårsvurderinger(behandlingId, metadata)
             else -> lagredeVilkårsvurderinger
         }
     }
