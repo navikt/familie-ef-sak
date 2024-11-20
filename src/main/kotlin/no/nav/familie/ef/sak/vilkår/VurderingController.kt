@@ -2,8 +2,8 @@ package no.nav.familie.ef.sak.vilkår
 
 import no.nav.familie.ef.sak.AuditLoggerEvent
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
+import no.nav.familie.ef.sak.vilkår.dto.EnkeltVilkårForGjenbrukRequest
 import no.nav.familie.ef.sak.vilkår.dto.GjenbrukVilkårsvurderingerDto
-import no.nav.familie.ef.sak.vilkår.dto.HentEnkeltVilkårForGjenbrukRequest
 import no.nav.familie.ef.sak.vilkår.dto.OppdaterVilkårsvurderingDto
 import no.nav.familie.ef.sak.vilkår.dto.SvarPåVurderingerDto
 import no.nav.familie.ef.sak.vilkår.dto.VilkårDto
@@ -105,25 +105,15 @@ class VurderingController(
         return Ressurs.success(vurderingService.hentEllerOpprettVurderinger(request.behandlingId))
     }
 
-    @PostMapping("hent-gjenbruk-enkelt-vilkår")
-    fun hentGjenbrukEnkeltVilkår(
-        @RequestBody request: HentEnkeltVilkårForGjenbrukRequest,
+    @PostMapping("hent-enkelt-gjenbruk-vilkar")
+    fun hentEnkeltVilkårForGjenbruk(
+        @RequestBody request: EnkeltVilkårForGjenbrukRequest,
     ): Ressurs<VilkårsvurderingDto> {
         val behandlingForGjenbruk = gjenbrukVilkårService.finnBehandlingerForGjenbruk(request.behandlingId).first()
         tilgangService.validerTilgangTilBehandling(behandlingForGjenbruk.id, AuditLoggerEvent.ACCESS)
         tilgangService.validerTilgangTilBehandling(request.behandlingId, AuditLoggerEvent.UPDATE)
         tilgangService.validerHarSaksbehandlerrolle()
-        return Ressurs.success(gjenbrukVilkårService.hentEnkeltVilkårsvurderingSomKanGjenbrukes(request.behandlingId, behandlingForGjenbruk.id, request.vilkårId).tilDto())
-    }
-
-    @GetMapping("{behandlingId}/alle-gjenbrukbare-vurderinger")
-    fun hentAlleGjenbrukbareVilkårsvurderinger(
-        @PathVariable behandlingId: UUID,
-    ): Ressurs<List<VilkårsvurderingDto>> {
-        val behandlingForGjenbruk = gjenbrukVilkårService.finnBehandlingerForGjenbruk(behandlingId).first()
-        tilgangService.validerTilgangTilBehandling(behandlingForGjenbruk.id, AuditLoggerEvent.ACCESS)
-        tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.UPDATE)
-        tilgangService.validerHarSaksbehandlerrolle()
-        return Ressurs.success(gjenbrukVilkårService.hentVilkårsvurderingerSomKanGjenbrukes(behandlingId, behandlingForGjenbruk.id).map { it.tilDto() })
+        val vilkårsvurderingDtoForGjenbruk = gjenbrukVilkårService.hentEnkeltVilkårsvurderingSomKanGjenbrukes(request.behandlingId, behandlingForGjenbruk.id, request.vilkårId).tilDto()
+        return Ressurs.success(vilkårsvurderingDtoForGjenbruk)
     }
 }

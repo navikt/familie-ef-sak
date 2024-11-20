@@ -43,7 +43,7 @@ data class GjenbrukVilkårsvurderingerDto(
     val kopierBehandlingId: UUID,
 )
 
-data class HentEnkeltVilkårForGjenbrukRequest(
+data class EnkeltVilkårForGjenbrukRequest(
     val behandlingId: UUID,
     val vilkårId: UUID,
 )
