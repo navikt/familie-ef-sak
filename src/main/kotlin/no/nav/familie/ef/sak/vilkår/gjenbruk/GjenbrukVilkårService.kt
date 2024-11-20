@@ -83,8 +83,8 @@ class GjenbrukVilkårService(
     }
 
     fun hentVilkårsvurderingerSomKanGjenbrukes(
-        behandlingIdSomSkalGjenbrukeInngangsvilkår: UUID,
         behandlingSomSkalOppdateres: UUID,
+        behandlingIdSomSkalGjenbrukeInngangsvilkår: UUID,
     ): List<Vilkårsvurdering> {
         val forrigeBarnIdTilNåværendeBarnMap =
             finnBarnPåBeggeBehandlinger(behandlingSomSkalOppdateres, behandlingIdSomSkalGjenbrukeInngangsvilkår)
@@ -99,11 +99,11 @@ class GjenbrukVilkårService(
         )
     }
 
-    fun hentEnkeltVilkårsvurderingerSomKanGjenbrukes(
-        behandlingIdSomSkalGjenbrukeInngangsvilkår: UUID,
+    fun hentVilkårsvurderingSomKanGjenbrukes(
         behandlingSomSkalOppdateres: UUID,
+        behandlingIdSomSkalGjenbrukeInngangsvilkår: UUID,
         vilkårId: UUID,
-    ): Vilkårsvurdering {
+    ): List<Vilkårsvurdering> {
         val forrigeBarnIdTilNåværendeBarnMap =
             finnBarnPåBeggeBehandlinger(behandlingSomSkalOppdateres, behandlingIdSomSkalGjenbrukeInngangsvilkår)
         val sivilstandErLik =
@@ -114,7 +114,26 @@ class GjenbrukVilkårService(
             erSammeStønadstype,
             behandlingIdSomSkalGjenbrukeInngangsvilkår,
             forrigeBarnIdTilNåværendeBarnMap,
-        ).filter { it.id == vilkårId}.first()
+        )
+    }
+
+    fun hentEnkeltVilkårsvurderingSomKanGjenbrukes(
+        behandlingSomSkalOppdateres: UUID,
+        behandlingIdSomSkalGjenbrukeInngangsvilkår: UUID,
+        vilkårId: UUID,
+    ): List<Vilkårsvurdering> {
+        val forrigeBarnIdTilNåværendeBarnMap =
+            finnBarnPåBeggeBehandlinger(behandlingSomSkalOppdateres, behandlingIdSomSkalGjenbrukeInngangsvilkår)
+        val sivilstandErLik =
+            erSivilstandUforandretSidenForrigeBehandling(behandlingSomSkalOppdateres, behandlingIdSomSkalGjenbrukeInngangsvilkår)
+        val erSammeStønadstype = erSammeStønadstype(behandlingSomSkalOppdateres, behandlingIdSomSkalGjenbrukeInngangsvilkår)
+        return hentVurderingerSomSkalGjenbrukes(
+            sivilstandErLik,
+            erSammeStønadstype,
+            behandlingIdSomSkalGjenbrukeInngangsvilkår,
+            forrigeBarnIdTilNåværendeBarnMap,
+        ).filter { it.id == vilkårId }
+
     }
 
     private fun erSammeStønadstype(
