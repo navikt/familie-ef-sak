@@ -113,8 +113,7 @@ class VurderingController(
         tilgangService.validerTilgangTilBehandling(behandlingForGjenbruk.id, AuditLoggerEvent.ACCESS)
         tilgangService.validerTilgangTilBehandling(request.behandlingId, AuditLoggerEvent.UPDATE)
         tilgangService.validerHarSaksbehandlerrolle()
-        val forrigeBehandlingId = behandlingForGjenbruk.forrigeBehandlingId ?: error("forrigeBehandlingId er null")
-        return Ressurs.success(gjenbrukVilkårService.hentEnkeltVilkårsvurderingerSomKanGjenbrukes(request.behandlingId, forrigeBehandlingId, request.vilkårId).tilDto())
+        return Ressurs.success(gjenbrukVilkårService.hentEnkeltVilkårsvurderingerSomKanGjenbrukes(request.behandlingId, behandlingForGjenbruk.id, request.vilkårId).tilDto())
     }
 
     @GetMapping("{behandlingId}/alle-gjenbrukbare-vurderinger")
