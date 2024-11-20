@@ -99,6 +99,24 @@ class GjenbrukVilkårService(
         )
     }
 
+    fun hentEnkeltVilkårsvurderingerSomKanGjenbrukes(
+        behandlingIdSomSkalGjenbrukeInngangsvilkår: UUID,
+        behandlingSomSkalOppdateres: UUID,
+        vilkårId: UUID,
+    ): Vilkårsvurdering {
+        val forrigeBarnIdTilNåværendeBarnMap =
+            finnBarnPåBeggeBehandlinger(behandlingSomSkalOppdateres, behandlingIdSomSkalGjenbrukeInngangsvilkår)
+        val sivilstandErLik =
+            erSivilstandUforandretSidenForrigeBehandling(behandlingSomSkalOppdateres, behandlingIdSomSkalGjenbrukeInngangsvilkår)
+        val erSammeStønadstype = erSammeStønadstype(behandlingSomSkalOppdateres, behandlingIdSomSkalGjenbrukeInngangsvilkår)
+        return hentVurderingerSomSkalGjenbrukes(
+            sivilstandErLik,
+            erSammeStønadstype,
+            behandlingIdSomSkalGjenbrukeInngangsvilkår,
+            forrigeBarnIdTilNåværendeBarnMap,
+        ).filter { it.id == vilkårId}.first()
+    }
+
     private fun erSammeStønadstype(
         nåværendeBehandlingId: UUID,
         tidligereBehandlingId: UUID,

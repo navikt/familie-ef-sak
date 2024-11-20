@@ -108,10 +108,10 @@ class VurderingController(
     @PostMapping("hent-gjenbruk-enkelt-vilkår")
     fun hentGjenbrukEnkeltVilkår(
         @RequestBody request: HentEnkeltVilkårForGjenbrukRequest,
-    ): Ressurs<VilkårsvurderingDto?> {
+    ): Ressurs<VilkårsvurderingDto> {
         tilgangService.validerTilgangTilBehandling(request.behandlingId, AuditLoggerEvent.UPDATE)
         tilgangService.validerHarSaksbehandlerrolle()
-        return Ressurs.success(vurderingService.hentEllerOpprettVilkårsvurdering(request.behandlingId, request.vilkårId))
+        return Ressurs.success(gjenbrukVilkårService.hentEnkeltVilkårsvurderingerSomKanGjenbrukes(request.behandlingId, request.vilkårId, request.vilkårId).tilDto())
     }
 
     @GetMapping("{behandlingId}/alle-gjenbrukbare-vurderinger")
