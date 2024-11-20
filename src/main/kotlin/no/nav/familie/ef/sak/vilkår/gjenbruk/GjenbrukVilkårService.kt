@@ -82,44 +82,6 @@ class GjenbrukVilkårService(
         vilkårsvurderingRepository.updateAll(vurderingerSomSkalLagres)
     }
 
-    @Transactional
-    fun gjenbrukInngangsvilkårVurdering(
-        behandlingSomSkalOppdateres: UUID,
-        vilkårsVurderingId: UUID,
-        behandlingIdSomSkalGjenbrukeInngangsvilkår: UUID,
-    ) {
-        validerBehandlingForGjenbruk(
-            behandlingSomSkalOppdateres,
-            behandlingIdSomSkalGjenbrukeInngangsvilkår,
-        )
-        val forrigeBarnIdTilNåværendeBarnMap =
-            finnBarnPåBeggeBehandlinger(behandlingSomSkalOppdateres, behandlingIdSomSkalGjenbrukeInngangsvilkår)
-        val sivilstandErLik =
-            erSivilstandUforandretSidenForrigeBehandling(behandlingSomSkalOppdateres, behandlingIdSomSkalGjenbrukeInngangsvilkår)
-        val erSammeStønadstype = erSammeStønadstype(behandlingSomSkalOppdateres, behandlingIdSomSkalGjenbrukeInngangsvilkår)
-        val nåværendeVurdering =
-            vilkårsvurderingRepository.findById(vilkårsVurderingId).get()
-        val tidligereVurdering =
-            hentVurderingerSomSkalGjenbrukes(
-                sivilstandErLik,
-                erSammeStønadstype,
-                behandlingIdSomSkalGjenbrukeInngangsvilkår,
-                forrigeBarnIdTilNåværendeBarnMap,
-            )
-        val vurderingSomSkalLagres =
-            lagInngangsvilkårVurderingerForGjenbruk(
-                behandlingSomSkalOppdateres,
-                listOf(nåværendeVurdering),
-                tidligereVurdering,
-                forrigeBarnIdTilNåværendeBarnMap,
-            ).first()
-        secureLogger.info(
-            "${SikkerhetContext.hentSaksbehandlerEllerSystembruker()} gjenbruker enkel vurdering fra behandling $behandlingIdSomSkalGjenbrukeInngangsvilkår " +
-                "for å oppdatere vurderinger på inngangsvilkår for behandling $behandlingSomSkalOppdateres",
-        )
-        vilkårsvurderingRepository.update(vurderingSomSkalLagres)
-    }
-
     fun hentVilkårsvurderingerSomKanGjenbrukes(
         behandlingIdSomSkalGjenbrukeInngangsvilkår: UUID,
         behandlingSomSkalOppdateres: UUID,

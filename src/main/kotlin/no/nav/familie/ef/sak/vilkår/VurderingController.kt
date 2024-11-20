@@ -2,8 +2,8 @@ package no.nav.familie.ef.sak.vilkår
 
 import no.nav.familie.ef.sak.AuditLoggerEvent
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
-import no.nav.familie.ef.sak.vilkår.dto.GjenbrukEnkeltVilkårsvurderingDto
 import no.nav.familie.ef.sak.vilkår.dto.GjenbrukVilkårsvurderingerDto
+import no.nav.familie.ef.sak.vilkår.dto.HentEnkeltVilkårForGjenbrukRequest
 import no.nav.familie.ef.sak.vilkår.dto.OppdaterVilkårsvurderingDto
 import no.nav.familie.ef.sak.vilkår.dto.SvarPåVurderingerDto
 import no.nav.familie.ef.sak.vilkår.dto.VilkårDto
@@ -105,15 +105,12 @@ class VurderingController(
         return Ressurs.success(vurderingService.hentEllerOpprettVurderinger(request.behandlingId))
     }
 
-    @PostMapping("gjenbruk-enkelt-vilkår")
-    fun gjenbrukEnkeltVilkår(
-        @RequestBody request: GjenbrukEnkeltVilkårsvurderingDto,
+    @PostMapping("hent-gjenbruk-enkelt-vilkår")
+    fun hentGjenbrukEnkeltVilkår(
+        @RequestBody request: HentEnkeltVilkårForGjenbrukRequest,
     ): Ressurs<VilkårsvurderingDto?> {
-        val behandlingForGjenbruk = gjenbrukVilkårService.finnBehandlingerForGjenbruk(request.behandlingId).first()
-        tilgangService.validerTilgangTilBehandling(behandlingForGjenbruk.id, AuditLoggerEvent.ACCESS)
         tilgangService.validerTilgangTilBehandling(request.behandlingId, AuditLoggerEvent.UPDATE)
         tilgangService.validerHarSaksbehandlerrolle()
-        gjenbrukVilkårService.gjenbrukInngangsvilkårVurdering(request.behandlingId, request.vilkårId, behandlingForGjenbruk.id)
         return Ressurs.success(vurderingService.hentEllerOpprettVilkårsvurdering(request.behandlingId, request.vilkårId))
     }
 
