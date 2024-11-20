@@ -109,9 +109,12 @@ class VurderingController(
     fun hentGjenbrukEnkeltVilkår(
         @RequestBody request: HentEnkeltVilkårForGjenbrukRequest,
     ): Ressurs<VilkårsvurderingDto> {
+        val behandlingForGjenbruk = gjenbrukVilkårService.finnBehandlingerForGjenbruk(request.behandlingId).first()
+        tilgangService.validerTilgangTilBehandling(behandlingForGjenbruk.id, AuditLoggerEvent.ACCESS)
         tilgangService.validerTilgangTilBehandling(request.behandlingId, AuditLoggerEvent.UPDATE)
         tilgangService.validerHarSaksbehandlerrolle()
-        return Ressurs.success(gjenbrukVilkårService.hentEnkeltVilkårsvurderingerSomKanGjenbrukes(request.behandlingId, request.vilkårId, request.vilkårId).tilDto())
+        val forrigeBehandlingId = behandlingForGjenbruk.forrigeBehandlingId ?: error("forrigeBehandlingId er null")
+        return Ressurs.success(gjenbrukVilkårService.hentEnkeltVilkårsvurderingerSomKanGjenbrukes(request.behandlingId, forrigeBehandlingId, request.vilkårId).tilDto())
     }
 
     @GetMapping("{behandlingId}/alle-gjenbrukbare-vurderinger")
