@@ -1,23 +1,20 @@
 package no.nav.familie.ef.sak.selvstendig
 
 import org.springframework.boot.context.event.ApplicationReadyEvent
+import org.springframework.context.ApplicationListener
 import org.springframework.context.annotation.Profile
 import org.springframework.context.event.EventListener
-import org.springframework.stereotype.Service
+import org.springframework.stereotype.Component
 
 @Profile("!integrasjonstest")
-@Service
+@Component
 class SelvstendigScheduler(
     val næringsinntektKontrollService: NæringsinntektKontrollService,
-) {
-    // @Scheduled(cron = "0 0 0 * * ?")
-    @EventListener(ApplicationReadyEvent::class)
-    fun inntektskontrollForSelvstendige() {
+): ApplicationListener<ApplicationReadyEvent> {
+
+    // @Scheduled(cron = "0 0 0 * * ?") - blir en scheduler
+    override fun onApplicationEvent(event: ApplicationReadyEvent) {
+        println("TEST TEST TEST")
         næringsinntektKontrollService.sjekkNæringsinntektMotForventetInntekt()
     }
-}
-
-fun main() {
-    val test = 0 / 1
-    println(test)
 }
