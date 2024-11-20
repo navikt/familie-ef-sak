@@ -92,14 +92,23 @@ class GjenbrukVilkårService(
         val sivilstandErLik =
             erSivilstandUforandretSidenForrigeBehandling(behandlingSomSkalOppdateres, behandlingIdSomSkalGjenbrukeInngangsvilkår)
         val erSammeStønadstype = erSammeStønadstype(behandlingSomSkalOppdateres, behandlingIdSomSkalGjenbrukeInngangsvilkår)
-        val vurderinger =
+        val tidligereVurderinger =
             hentVurderingerSomSkalGjenbrukes(
                 sivilstandErLik,
                 erSammeStønadstype,
                 behandlingIdSomSkalGjenbrukeInngangsvilkår,
                 forrigeBarnIdTilNåværendeBarnMap,
             )
-        val forrigeVilkårsvurdering = vurderinger.filter { it.id == vilkårId }.first()
+        val nåværendeVurderinger =
+            vilkårsvurderingRepository.findByBehandlingId(behandlingSomSkalOppdateres)
+        val vurderingerSomSkalLagres =
+            lagInngangsvilkårVurderingerForGjenbruk(
+                behandlingSomSkalOppdateres,
+                nåværendeVurderinger,
+                tidligereVurderinger,
+                forrigeBarnIdTilNåværendeBarnMap,
+            )
+        val forrigeVilkårsvurdering = vurderingerSomSkalLagres.filter { it.id == vilkårId }.first()
         return forrigeVilkårsvurdering
     }
 
