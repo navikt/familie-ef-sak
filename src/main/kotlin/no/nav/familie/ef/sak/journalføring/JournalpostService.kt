@@ -1,6 +1,7 @@
 package no.nav.familie.ef.sak.journalføring
 
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
+import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.journalføring.dto.DokumentVariantformat
 import no.nav.familie.ef.sak.journalføring.dto.OppdaterJournalpostMedDokumenterRequest
@@ -106,8 +107,13 @@ class JournalpostService(
         journalpost: Journalpost,
         request: OppdaterJournalpostMedDokumenterRequest,
     ) {
-        oppdaterLogiskeVedlegg(journalpost, request.logiskeVedlegg)
-        oppdaterJournalpostMedDokumenttitler(journalpost, request.dokumenttitler)
+        validerDokumenterOgLogiskeVedlegg(request)
+        if (request.logiskeVedlegg !== null) {
+            oppdaterLogiskeVedlegg(journalpost, request.logiskeVedlegg)
+        }
+        if (request.dokumenttitler != null) {
+            oppdaterJournalpostMedDokumenttitler(journalpost, request.dokumenttitler)
+        }
     }
 
     fun oppdaterOgFerdigstillJournalpost(
@@ -157,6 +163,39 @@ class JournalpostService(
                     dokument.dokumentInfoId,
                     BulkOppdaterLogiskVedleggRequest(titler = logiskeVedleggForDokument.map { it.tittel }),
                 )
+            }
+        }
+    }
+
+    private fun validerDokumenterOgLogiskeVedlegg(request: OppdaterJournalpostMedDokumenterRequest) {
+        brukerfeilHvis(request.dokumenttitler == null && request.logiskeVedlegg == null) {
+            "Mangler både dokumenttittler og logiske vedlegg i forbindelse med oppdatering av dokumenter til journalpost"
+        }
+        if (request.dokumenttitler != null) {
+            brukerfeilHvis(request.dokumenttitler.containsValue("")) {
+                "Kan ikke endre dokumenttittel til tom streng"
+            }
+            brukerfeilHvis(request.dokumenttitler.keys.contains("")) {
+                "Mangler dokumentId på et eller flere dokumenter som skal endre tittel"
+            }
+        }
+        if (request.logiskeVedlegg != null) {
+            brukerfeilHvis(
+                request.logiskeVedlegg.values
+                    .flatten()
+                    .any { it.tittel == "" },
+            ) {
+                "Kan ikke endre et eller flere logiske vedlegg til tom streng"
+            }
+            brukerfeilHvis(request.logiskeVedlegg.keys.contains("")) {
+                "Mangler dokumentId på et eller flere logiske vedlegg"
+            }
+            brukerfeilHvis(
+                request.logiskeVedlegg.values
+                    .flatten()
+                    .any { it.logiskVedleggId == "" },
+            ) {
+                "Mangler id på et eller flere logiske vedlegg"
             }
         }
     }
