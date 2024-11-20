@@ -16,3 +16,8 @@ class SelvstendigScheduler(
         næringsinntektKontrollService.sjekkNæringsinntektMotForventetInntekt()
     }
 }
+
+fun main() {
+    val test = 0 / 1
+    println(test)
+}
