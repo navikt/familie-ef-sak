@@ -113,7 +113,7 @@ class VurderingController(
         tilgangService.validerTilgangTilBehandling(behandlingForGjenbruk.id, AuditLoggerEvent.ACCESS)
         tilgangService.validerTilgangTilBehandling(request.behandlingId, AuditLoggerEvent.UPDATE)
         tilgangService.validerHarSaksbehandlerrolle()
-        val vilkårsvurderingDtoForGjenbruk = gjenbrukVilkårService.hentEnkeltVilkårsvurderingSomKanGjenbrukes(request.behandlingId, behandlingForGjenbruk.id, request.vilkårId).tilDto()
+        val vilkårsvurderingDtoForGjenbruk = gjenbrukVilkårService.hentEnkelVilkårsvurderingForGjenbruk(request.behandlingId, behandlingForGjenbruk.id, request.vilkårId).tilDto()
         return Ressurs.success(vilkårsvurderingDtoForGjenbruk)
     }
 }

@@ -82,7 +82,7 @@ class GjenbrukVilkårService(
         vilkårsvurderingRepository.updateAll(vurderingerSomSkalLagres)
     }
 
-    fun hentEnkeltVilkårsvurderingSomKanGjenbrukes(
+    fun hentEnkelVilkårsvurderingForGjenbruk(
         behandlingSomSkalOppdateres: UUID,
         behandlingIdSomSkalGjenbrukeInngangsvilkår: UUID,
         vilkårId: UUID,
