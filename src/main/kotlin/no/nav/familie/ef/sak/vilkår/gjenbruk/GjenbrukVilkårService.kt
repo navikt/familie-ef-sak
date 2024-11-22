@@ -54,10 +54,11 @@ class GjenbrukVilkårService(
             behandlingSomSkalOppdateres,
             behandlingIdSomSkalGjenbrukeInngangsvilkår,
         )
-        val vilkårsVurderingerForGjenbruk = utledVilkårsvurderingerForGjenbrukData(
-            behandlingSomSkalOppdateres,
-            behandlingIdSomSkalGjenbrukeInngangsvilkår
-        )
+        val vilkårsVurderingerForGjenbruk =
+            utledVilkårsvurderingerForGjenbrukData(
+                behandlingSomSkalOppdateres,
+                behandlingIdSomSkalGjenbrukeInngangsvilkår,
+            )
         secureLogger.info(
             "${SikkerhetContext.hentSaksbehandlerEllerSystembruker()} gjenbruker vurderinger fra behandling $behandlingIdSomSkalGjenbrukeInngangsvilkår " +
                 "for å oppdatere vurderinger på inngangsvilkår for behandling $behandlingSomSkalOppdateres",
@@ -70,17 +71,18 @@ class GjenbrukVilkårService(
         behandlingIdSomSkalGjenbrukeInngangsvilkår: UUID,
         vilkårId: UUID,
     ): Vilkårsvurdering {
-        val vilkårsvurderingerForGjenbruk = utledVilkårsvurderingerForGjenbrukData(
-            behandlingSomSkalOppdateres,
-            behandlingIdSomSkalGjenbrukeInngangsvilkår
-        )
+        val vilkårsvurderingerForGjenbruk =
+            utledVilkårsvurderingerForGjenbrukData(
+                behandlingSomSkalOppdateres,
+                behandlingIdSomSkalGjenbrukeInngangsvilkår,
+            )
         val forrigeVilkårsvurdering = vilkårsvurderingerForGjenbruk.first { it.id == vilkårId }
         return forrigeVilkårsvurdering
     }
 
     private fun utledVilkårsvurderingerForGjenbrukData(
         behandlingSomSkalOppdateres: UUID,
-        behandlingIdSomSkalGjenbrukeInngangsvilkår: UUID
+        behandlingIdSomSkalGjenbrukeInngangsvilkår: UUID,
     ): List<Vilkårsvurdering> {
         val forrigeBarnIdTilNåværendeBarnMap =
             finnBarnPåBeggeBehandlinger(behandlingSomSkalOppdateres, behandlingIdSomSkalGjenbrukeInngangsvilkår)
@@ -99,11 +101,11 @@ class GjenbrukVilkårService(
             vilkårsvurderingRepository.findByBehandlingId(behandlingSomSkalOppdateres)
 
         return lagInngangsvilkårVurderingerForGjenbruk(
-                behandlingSomSkalOppdateres,
-                nåværendeVurderinger,
-                tidligereVurderinger,
-                forrigeBarnIdTilNåværendeBarnMap,
-            )
+            behandlingSomSkalOppdateres,
+            nåværendeVurderinger,
+            tidligereVurderinger,
+            forrigeBarnIdTilNåværendeBarnMap,
+        )
     }
 
     private fun erSammeStønadstype(
