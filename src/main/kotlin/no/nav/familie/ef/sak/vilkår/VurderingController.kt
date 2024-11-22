@@ -94,17 +94,6 @@ class VurderingController(
         return Ressurs.success(vurderingService.oppdaterGrunnlagsdataOgHentEllerOpprettVurderinger(behandlingId))
     }
 
-    @PostMapping("gjenbruk")
-    fun gjenbrukVilkår(
-        @RequestBody request: GjenbrukVilkårsvurderingerDto,
-    ): Ressurs<VilkårDto> {
-        tilgangService.validerTilgangTilBehandling(request.kopierBehandlingId, AuditLoggerEvent.ACCESS)
-        tilgangService.validerTilgangTilBehandling(request.behandlingId, AuditLoggerEvent.UPDATE)
-        tilgangService.validerHarSaksbehandlerrolle()
-        gjenbrukVilkårService.gjenbrukInngangsvilkårVurderinger(request.behandlingId, request.kopierBehandlingId)
-        return Ressurs.success(vurderingService.hentEllerOpprettVurderinger(request.behandlingId))
-    }
-
     @PostMapping("hent-enkelt-gjenbruk-vilkar")
     fun hentEnkeltVilkårForGjenbruk(
         @RequestBody request: EnkeltVilkårForGjenbrukRequest,
