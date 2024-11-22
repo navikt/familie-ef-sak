@@ -101,14 +101,14 @@ class GjenbrukVilkårService(
             )
         val nåværendeVurderinger =
             vilkårsvurderingRepository.findByBehandlingId(behandlingSomSkalOppdateres)
-        val vurderingerSomSkalLagres =
+        val vilkårsvurderingerForGjenbruk =
             lagInngangsvilkårVurderingerForGjenbruk(
                 behandlingSomSkalOppdateres,
                 nåværendeVurderinger,
                 tidligereVurderinger,
                 forrigeBarnIdTilNåværendeBarnMap,
             )
-        val forrigeVilkårsvurdering = vurderingerSomSkalLagres.filter { it.id == vilkårId }.first()
+        val forrigeVilkårsvurdering = vilkårsvurderingerForGjenbruk.filter { it.id == vilkårId }.first()
         return forrigeVilkårsvurdering
     }
 
