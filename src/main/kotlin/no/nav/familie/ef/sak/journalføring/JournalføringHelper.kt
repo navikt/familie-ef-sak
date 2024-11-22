@@ -128,5 +128,23 @@ object JournalføringHelper {
             },
     )
 
+    fun lagOppdaterJournalpostRequest(
+        journalpost: Journalpost,
+        dokumenttitler: Map<String, String>?,
+    ) = OppdaterJournalpostRequest(
+        dokumenter =
+            dokumenttitler?.let {
+                journalpost.dokumenter?.map { dokumentInfo ->
+                    DokumentInfo(
+                        dokumentInfoId = dokumentInfo.dokumentInfoId,
+                        tittel =
+                            dokumenttitler[dokumentInfo.dokumentInfoId]
+                                ?: dokumentInfo.tittel,
+                        brevkode = dokumentInfo.brevkode,
+                    )
+                }
+            },
+    )
+
     fun utledNesteBehandlingstype(behandlinger: List<Behandling>): BehandlingType = if (behandlinger.all { it.resultat == BehandlingResultat.HENLAGT }) BehandlingType.FØRSTEGANGSBEHANDLING else BehandlingType.REVURDERING
 }
