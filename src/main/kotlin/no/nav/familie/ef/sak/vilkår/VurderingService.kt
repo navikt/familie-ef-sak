@@ -52,17 +52,6 @@ class VurderingService(
     }
 
     @Transactional
-    fun hentEllerOpprettVilkårsvurdering(
-        behandlingId: UUID,
-        vilkårId: UUID,
-    ): VilkårsvurderingDto? {
-        val (_, metadata) = hentGrunnlagOgMetadata(behandlingId)
-        val vurderinger = hentEllerOpprettVurderinger(behandlingId, metadata)
-        val vilkårsvurdering = vurderinger.find { it.id == vilkårId }
-        return vilkårsvurdering
-    }
-
-    @Transactional
     fun hentOpprettEllerOppdaterVurderinger(behandlingId: UUID): VilkårDto {
         val behandling = behandlingService.hentSaksbehandling(behandlingId)
 
