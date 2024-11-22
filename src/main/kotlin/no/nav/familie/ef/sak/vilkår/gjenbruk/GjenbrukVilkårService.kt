@@ -54,22 +54,15 @@ class GjenbrukVilkårService(
             behandlingSomSkalOppdateres,
             behandlingIdSomSkalGjenbrukeInngangsvilkår,
         )
-        val vilkårsVurderingerForGjenbrukData = utledVilkårsvurderingerForGjenbrukData(
+        val vilkårsVurderingerForGjenbruk = utledVilkårsvurderingerForGjenbrukData(
             behandlingSomSkalOppdateres,
             behandlingIdSomSkalGjenbrukeInngangsvilkår
         )
-        val vurderingerSomSkalLagres =
-            lagInngangsvilkårVurderingerForGjenbruk(
-                behandlingSomSkalOppdateres,
-                vilkårsVurderingerForGjenbrukData.nåværendeVurderinger,
-                vilkårsVurderingerForGjenbrukData.tidligereVurderinger,
-                vilkårsVurderingerForGjenbrukData.forrigeBarnIdTilNåværendeBarnMap,
-            )
         secureLogger.info(
             "${SikkerhetContext.hentSaksbehandlerEllerSystembruker()} gjenbruker vurderinger fra behandling $behandlingIdSomSkalGjenbrukeInngangsvilkår " +
                 "for å oppdatere vurderinger på inngangsvilkår for behandling $behandlingSomSkalOppdateres",
         )
-        vilkårsvurderingRepository.updateAll(vurderingerSomSkalLagres)
+        vilkårsvurderingRepository.updateAll(vilkårsVurderingerForGjenbruk)
     }
 
     fun hentEnkelVilkårsvurderingForGjenbruk(
@@ -77,17 +70,10 @@ class GjenbrukVilkårService(
         behandlingIdSomSkalGjenbrukeInngangsvilkår: UUID,
         vilkårId: UUID,
     ): Vilkårsvurdering {
-        val vilkårsVurderingerForGjenbrukData = utledVilkårsvurderingerForGjenbrukData(
+        val vilkårsvurderingerForGjenbruk = utledVilkårsvurderingerForGjenbrukData(
             behandlingSomSkalOppdateres,
             behandlingIdSomSkalGjenbrukeInngangsvilkår
         )
-        val vilkårsvurderingerForGjenbruk =
-            lagInngangsvilkårVurderingerForGjenbruk(
-                behandlingSomSkalOppdateres,
-                vilkårsVurderingerForGjenbrukData.nåværendeVurderinger,
-                vilkårsVurderingerForGjenbrukData.tidligereVurderinger,
-                vilkårsVurderingerForGjenbrukData.forrigeBarnIdTilNåværendeBarnMap,
-            )
         val forrigeVilkårsvurdering = vilkårsvurderingerForGjenbruk.first { it.id == vilkårId }
         return forrigeVilkårsvurdering
     }
@@ -95,7 +81,7 @@ class GjenbrukVilkårService(
     private fun utledVilkårsvurderingerForGjenbrukData(
         behandlingSomSkalOppdateres: UUID,
         behandlingIdSomSkalGjenbrukeInngangsvilkår: UUID
-    ): VilkårsvurderingGjenbruksData {
+    ): List<Vilkårsvurdering> {
         val forrigeBarnIdTilNåværendeBarnMap =
             finnBarnPåBeggeBehandlinger(behandlingSomSkalOppdateres, behandlingIdSomSkalGjenbrukeInngangsvilkår)
         val sivilstandErLik =
@@ -112,13 +98,12 @@ class GjenbrukVilkårService(
         val nåværendeVurderinger =
             vilkårsvurderingRepository.findByBehandlingId(behandlingSomSkalOppdateres)
 
-        return VilkårsvurderingGjenbruksData(
-            forrigeBarnIdTilNåværendeBarnMap = forrigeBarnIdTilNåværendeBarnMap,
-            sivilstandErLik = sivilstandErLik,
-            erSammeStønadstype = erSammeStønadstype,
-            tidligereVurderinger = tidligereVurderinger,
-            nåværendeVurderinger = nåværendeVurderinger
-        )
+        return lagInngangsvilkårVurderingerForGjenbruk(
+                behandlingSomSkalOppdateres,
+                nåværendeVurderinger,
+                tidligereVurderinger,
+                forrigeBarnIdTilNåværendeBarnMap,
+            )
     }
 
     private fun erSammeStønadstype(
@@ -227,11 +212,3 @@ class GjenbrukVilkårService(
             else -> true
         }
 }
-
-private data class VilkårsvurderingGjenbruksData(
-    val forrigeBarnIdTilNåværendeBarnMap: Map<UUID, BehandlingBarn>,
-    val sivilstandErLik: Boolean,
-    val erSammeStønadstype: Boolean,
-    val tidligereVurderinger: List<Vilkårsvurdering>,
-    val nåværendeVurderinger: List<Vilkårsvurdering>
-)
