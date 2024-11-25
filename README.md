@@ -5,7 +5,8 @@ App for saksbehandling av stønadene for enslige forsørgere.
 http://localhost:8093/swagger-ui.html
 
 ## Bygging lokalt
-Appen kjører på JRE 11. Bygging gjøres ved å kjøre `mvn clean install`. 
+Appen kjører på JRE 11. Bygging gjøres ved å kjøre `mvn clean install`.
+
 
 ### Autentisering lokalt
 Dersom man vil gjøre autentiserte kall mot andre tjenester eller vil kjøre applikasjonen sammen med frontend, må man sette opp følgende miljø-variabler:
