@@ -12,6 +12,9 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.visningsnavn
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.ef.sak.vedtak.domain.AktivitetType
 import no.nav.familie.ef.sak.vedtak.domain.Vedtaksperiode
+import no.nav.familie.ef.sak.vilkår.VilkårType
+import no.nav.familie.ef.sak.vilkår.VurderingService
+import no.nav.familie.ef.sak.vilkår.regler.SvarId
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
@@ -26,6 +29,7 @@ class UttrekkArbeidssøkerService(
     private val fagsakService: FagsakService,
     private val personService: PersonService,
     private val arbeidssøkerClient: ArbeidssøkerClient,
+    private val vurderingService: VurderingService
 ) {
     fun forrigeMåned(): () -> YearMonth = { YearMonth.now().minusMonths(1) }
 
@@ -50,12 +54,14 @@ class UttrekkArbeidssøkerService(
     fun hentUttrekkArbeidssøkere(
         årMåned: YearMonth = forrigeMåned().invoke(),
         visKontrollerte: Boolean = false,
+        visEøsBorgere: Boolean = false,
     ): UttrekkArbeidssøkereDto {
         tilgangService.validerHarSaksbehandlerrolle()
         val arbeidssøkere = uttrekkArbeidssøkerRepository.findAllByÅrMånedAndRegistrertArbeidssøkerIsFalse(årMåned)
-        val filtrerteArbeidsssøkere = mapTilDtoOgFiltrer(arbeidssøkere)
+        val filtrerteArbeidsssøkereUtenEøs = filtrerArbeidsssøkereUtenEøs(arbeidssøkere)
+        val filtrerteArbeidsssøkere = mapTilDtoOgFiltrer(filtrerteArbeidsssøkereUtenEøs)
 
-        val totaltAntallUkontrollerte = arbeidssøkere.count { !it.kontrollert }
+        val totaltAntallUkontrollerte = filtrerteArbeidsssøkereUtenEøs.count { !it.kontrollert }
         val antallKontrollert = filtrerteArbeidsssøkere.count { it.kontrollert }
         val antallManglerKontrollUtenTilgang = totaltAntallUkontrollerte - (filtrerteArbeidsssøkere.size - antallKontrollert)
 
@@ -94,6 +100,23 @@ class UttrekkArbeidssøkerService(
         val arbeidssøkere =
             uttrekkArbeidssøkerRepository.hentVedtaksperioderForSisteFerdigstilteBehandlinger(startdato, sluttdato)
         return arbeidssøkere.filter { harPeriodeSomArbeidssøker(it, startdato, sluttdato) }
+    }
+
+    fun filtrerArbeidsssøkereUtenEøs(arbeidsssøkere: List<UttrekkArbeidssøkere>): MutableList<UttrekkArbeidssøkere> {
+        val filtrerteArbeidsssøkereUtenEøs = mutableListOf<UttrekkArbeidssøkere>()
+
+        arbeidsssøkere.forEach { arbeidsøker ->
+            val vurderinger = vurderingService.hentAlleVurderinger(arbeidsøker.vedtakId)
+            val oppholdVurdering = vurderinger.first { it.vilkårType == VilkårType.LOVLIG_OPPHOLD }
+            val harDelvilkårMedEøsSvar = oppholdVurdering.delvilkårsvurderinger.any { delvilkår ->
+                delvilkår.vurderinger.any { it.svar == SvarId.OPPHOLDER_SEG_I_ANNET_EØS_LAND }
+            }
+
+            if (!harDelvilkårMedEøsSvar) {
+                filtrerteArbeidsssøkereUtenEøs.add(arbeidsøker)
+            }
+        }
+        return filtrerteArbeidsssøkereUtenEøs
     }
 
     fun uttrekkFinnes(
@@ -161,18 +184,19 @@ class UttrekkArbeidssøkerService(
         sluttdato: LocalDate,
     ) = it.perioder.perioder.any {
         it.datoFra <= startdato &&
-            it.datoTil >= sluttdato &&
-            erArbeidssøker(it)
+                it.datoTil >= sluttdato &&
+                erArbeidssøker(it)
     }
 
     private fun erArbeidssøker(it: Vedtaksperiode) =
         (
-            it.aktivitet == AktivitetType.FORSØRGER_REELL_ARBEIDSSØKER ||
-                it.aktivitet == AktivitetType.FORLENGELSE_STØNAD_PÅVENTE_ARBEID_REELL_ARBEIDSSØKER
-        )
+                it.aktivitet == AktivitetType.FORSØRGER_REELL_ARBEIDSSØKER ||
+                        it.aktivitet == AktivitetType.FORLENGELSE_STØNAD_PÅVENTE_ARBEID_REELL_ARBEIDSSØKER
+                )
 
     private data class Persondata(
         val personIdent: String,
         val pdlPersonKort: PdlPersonKort,
     )
+
 }
