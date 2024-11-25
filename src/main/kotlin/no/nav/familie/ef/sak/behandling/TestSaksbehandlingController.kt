@@ -316,7 +316,6 @@ class TestSaksbehandlingController(
                                 hvordanPraktiseresSamværet = "Bytter litt på innimellom",
                                 nårFlyttetDereFraHverandre = LocalDate.of(2020, 12, 31),
                                 skalAnnenForelderHaSamvær = "jaMerEnnVanlig",
-                                spørsmålAvtaleOmDeltBosted = true,
                             ),
                         skalBoHosSøker = "jaMenSamarbeiderIkke",
                     )
