@@ -26,7 +26,7 @@ fun main(args: Array<String>) {
             "mock-inntekt",
             "mock-ereg",
             "mock-aareg",
-            "mock-brev",
+            // "mock-brev",
             "mock-dokument",
             "mock-tilbakekreving",
             "mock-klage",

@@ -54,16 +54,14 @@ class VedtaksbrevService(
 
         val saksbehandlersignatur = brevsignaturService.lagSignaturMedEnhet(saksbehandling)
 
-        val html = lagHtmlBrev(brevmal, brevrequest, saksbehandlersignatur)
-
-//        val fritestStruktur =
-//            brevClient.genererFritekst(
-//                brevmal = brevmal,
-//                saksbehandlerBrevrequest = brevrequest,
-//                saksbehandlersignatur = saksbehandlersignatur.navn,
-//                enhet = saksbehandlersignatur.enhet,
-//                skjulBeslutterSignatur = saksbehandlersignatur.skjulBeslutter,
-//            )
+        val html =
+            brevClient.genererHtml(
+                brevmal = brevmal,
+                saksbehandlerBrevrequest = brevrequest,
+                saksbehandlersignatur = saksbehandlersignatur.navn,
+                enhet = saksbehandlersignatur.enhet,
+                skjulBeslutterSignatur = saksbehandlersignatur.skjulBeslutter,
+            )
 
         lagreEllerOppdaterSaksbehandlerVedtaksbrev(
             behandlingId = saksbehandling.id,
@@ -77,17 +75,20 @@ class VedtaksbrevService(
     }
 
     fun lagHtmlBrev(
-        brevmal: String,
+        behandlingId: UUID,
         brevrequest: JsonNode,
-        saksbehandlersignatur: SignaturDto
     ): String {
+        val vedtaksbrev = brevRepository.findByIdOrThrow(behandlingId)
+
+        val brevmal = vedtaksbrev.brevmal
+
         val html =
             brevClient.genererHtml(
                 brevmal = brevmal,
                 saksbehandlerBrevrequest = brevrequest,
-                saksbehandlersignatur = saksbehandlersignatur.navn,
-                enhet = saksbehandlersignatur.enhet,
-                skjulBeslutterSignatur = saksbehandlersignatur.skjulBeslutter,
+                saksbehandlersignatur = "saksbehandlersignatur.navn",
+                enhet = "saksbehandlersignatur.enhet",
+                skjulBeslutterSignatur = true,
             )
         return html
     }

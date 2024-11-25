@@ -1,4 +1,3 @@
-version: '3.7'
 services:
 
   # SQL database
@@ -14,7 +13,8 @@ services:
       POSTGRES_DB: "familie-ef-sak"
 
   familie-brev:
-    image: "ghcr.io/navikt/familie-brev:latest"
+    image: "europe-north1-docker.pkg.dev/nais-management-233d/teamfamilie/familie-brev:latest"
+    platform: linux/amd64
     ports:
       - "8001:8001"
 
