@@ -11,7 +11,7 @@ import java.time.LocalDate
 
 @Service
 class FullmaktClient(
-    @Value("\${PDL_FULLMAKT_URL}")
+    @Value("\${REPR_API_URL}")
     private val fullmaktUrl: String,
     @Qualifier("azure")
     private val restOperations: RestOperations,

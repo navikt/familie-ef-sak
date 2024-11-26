@@ -92,7 +92,6 @@ spec:
           namespace: nom
         - application: repr-api
           namespace: repr
-          cluster: dev-gcp
       external:
         - host: api-gw-q1.oera.no
         - host: familie-oppdrag.dev-fss-pub.nais.io
