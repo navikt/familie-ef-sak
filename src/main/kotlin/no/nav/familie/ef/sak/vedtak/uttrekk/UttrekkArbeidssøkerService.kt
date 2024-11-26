@@ -29,7 +29,7 @@ class UttrekkArbeidssøkerService(
     private val fagsakService: FagsakService,
     private val personService: PersonService,
     private val arbeidssøkerClient: ArbeidssøkerClient,
-    private val vurderingService: VurderingService
+    private val vurderingService: VurderingService,
 ) {
     fun forrigeMåned(): () -> YearMonth = { YearMonth.now().minusMonths(1) }
 
@@ -101,9 +101,12 @@ class UttrekkArbeidssøkerService(
         return arbeidssøkere.filter { harPeriodeSomArbeidssøker(it, startdato, sluttdato) }
     }
 
-    fun hentArbeidsøkereUtenEllerMedEøsFilter(årMåned: YearMonth, visEøsBorgere: Boolean): List<UttrekkArbeidssøkere> {
+    fun hentArbeidsøkereUtenEllerMedEøsFilter(
+        årMåned: YearMonth,
+        visEøsBorgere: Boolean,
+    ): List<UttrekkArbeidssøkere> {
         val arbeidssøkere = uttrekkArbeidssøkerRepository.findAllByÅrMånedAndRegistrertArbeidssøkerIsFalse(årMåned)
-        return if(visEøsBorgere){
+        return if (visEøsBorgere) {
             arbeidssøkere
         } else {
             filtrerArbeidsssøkereUtenEøs(arbeidssøkere)
@@ -116,9 +119,10 @@ class UttrekkArbeidssøkerService(
         arbeidsssøkere.forEach { arbeidsøker ->
             val vurderinger = vurderingService.hentAlleVurderinger(arbeidsøker.vedtakId)
             val oppholdVurdering = vurderinger.first { it.vilkårType == VilkårType.LOVLIG_OPPHOLD }
-            val harDelvilkårMedEøsSvar = oppholdVurdering.delvilkårsvurderinger.any { delvilkår ->
-                delvilkår.vurderinger.any { it.svar == SvarId.OPPHOLDER_SEG_I_ANNET_EØS_LAND }
-            }
+            val harDelvilkårMedEøsSvar =
+                oppholdVurdering.delvilkårsvurderinger.any { delvilkår ->
+                    delvilkår.vurderinger.any { it.svar == SvarId.OPPHOLDER_SEG_I_ANNET_EØS_LAND }
+                }
 
             if (!harDelvilkårMedEøsSvar) {
                 filtrerteArbeidsssøkereUtenEøs.add(arbeidsøker)
@@ -192,19 +196,18 @@ class UttrekkArbeidssøkerService(
         sluttdato: LocalDate,
     ) = it.perioder.perioder.any {
         it.datoFra <= startdato &&
-                it.datoTil >= sluttdato &&
-                erArbeidssøker(it)
+            it.datoTil >= sluttdato &&
+            erArbeidssøker(it)
     }
 
     private fun erArbeidssøker(it: Vedtaksperiode) =
         (
-                it.aktivitet == AktivitetType.FORSØRGER_REELL_ARBEIDSSØKER ||
-                        it.aktivitet == AktivitetType.FORLENGELSE_STØNAD_PÅVENTE_ARBEID_REELL_ARBEIDSSØKER
-                )
+            it.aktivitet == AktivitetType.FORSØRGER_REELL_ARBEIDSSØKER ||
+                it.aktivitet == AktivitetType.FORLENGELSE_STØNAD_PÅVENTE_ARBEID_REELL_ARBEIDSSØKER
+        )
 
     private data class Persondata(
         val personIdent: String,
         val pdlPersonKort: PdlPersonKort,
     )
-
 }

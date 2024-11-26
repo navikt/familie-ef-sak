@@ -29,7 +29,11 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Adressebeskytte
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Metadata
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Navn
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlPersonKort
-import no.nav.familie.ef.sak.repository.*
+import no.nav.familie.ef.sak.repository.behandling
+import no.nav.familie.ef.sak.repository.fagsak
+import no.nav.familie.ef.sak.repository.fagsakpersoner
+import no.nav.familie.ef.sak.repository.saksbehandling
+import no.nav.familie.ef.sak.repository.vilkårsvurdering
 import no.nav.familie.ef.sak.vedtak.domain.AktivitetType
 import no.nav.familie.ef.sak.vedtak.domain.AktivitetType.BARNET_ER_SYKT
 import no.nav.familie.ef.sak.vedtak.domain.AktivitetType.FORLENGELSE_STØNAD_PÅVENTE_ARBEID_REELL_ARBEIDSSØKER
@@ -38,7 +42,12 @@ import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
 import no.nav.familie.ef.sak.vedtak.dto.InnvilgelseOvergangsstønad
 import no.nav.familie.ef.sak.vedtak.dto.VedtaksperiodeDto
 import no.nav.familie.ef.sak.vedtak.dto.tilDomene
-import no.nav.familie.ef.sak.vilkår.*
+import no.nav.familie.ef.sak.vilkår.Delvilkårsvurdering
+import no.nav.familie.ef.sak.vilkår.VilkårType
+import no.nav.familie.ef.sak.vilkår.Vilkårsresultat
+import no.nav.familie.ef.sak.vilkår.VilkårsvurderingRepository
+import no.nav.familie.ef.sak.vilkår.Vurdering
+import no.nav.familie.ef.sak.vilkår.VurderingService
 import no.nav.familie.ef.sak.vilkår.regler.RegelId
 import no.nav.familie.ef.sak.vilkår.regler.SvarId
 import no.nav.familie.kontrakter.felles.Månedsperiode
@@ -144,16 +153,22 @@ internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     internal fun `hentUttrekkArbeidssøkere - Filtrer vekk EØS-personer`() {
-
         val identer = listOf("1", "2", "3")
         identer.forEach {
             val fagsak = testoppsettService.lagreFagsak(fagsak(fagsakpersoner(setOf(it))))
             val behandling = behandlingRepository.insert(behandling(fagsak))
 
             if (it == "2") {
-                val vilkårsvurderingLovligOpphold = vilkårsvurdering(behandlingId = behandling.id, type = VilkårType.LOVLIG_OPPHOLD, delvilkårsvurdering = listOf(Delvilkårsvurdering(resultat = Vilkårsresultat.OPPFYLT, vurderinger = listOf(Vurdering(RegelId.BOR_OG_OPPHOLDER_SEG_I_NORGE, SvarId.NEI))),
-                    Delvilkårsvurdering(resultat = Vilkårsresultat.OPPFYLT, vurderinger = listOf(Vurdering(RegelId.OPPHOLD_UNNTAK, SvarId.OPPHOLDER_SEG_I_ANNET_EØS_LAND)))
-                ))
+                val vilkårsvurderingLovligOpphold =
+                    vilkårsvurdering(
+                        behandlingId = behandling.id,
+                        type = VilkårType.LOVLIG_OPPHOLD,
+                        delvilkårsvurdering =
+                            listOf(
+                                Delvilkårsvurdering(resultat = Vilkårsresultat.OPPFYLT, vurderinger = listOf(Vurdering(RegelId.BOR_OG_OPPHOLDER_SEG_I_NORGE, SvarId.NEI))),
+                                Delvilkårsvurdering(resultat = Vilkårsresultat.OPPFYLT, vurderinger = listOf(Vurdering(RegelId.OPPHOLD_UNNTAK, SvarId.OPPHOLDER_SEG_I_ANNET_EØS_LAND))),
+                            ),
+                    )
                 vilkårsvurderingRepository.insert(vilkårsvurderingLovligOpphold)
                 val vilkårsvurderingMedlemskap = vilkårsvurdering(behandlingId = behandling.id, type = VilkårType.FORUTGÅENDE_MEDLEMSKAP, delvilkårsvurdering = listOf(Delvilkårsvurdering(resultat = Vilkårsresultat.OPPFYLT, vurderinger = listOf(Vurdering(RegelId.SØKER_MEDLEM_I_FOLKETRYGDEN, SvarId.JA)))))
                 vilkårsvurderingRepository.insert(vilkårsvurderingMedlemskap)
