@@ -8,6 +8,7 @@ import no.nav.familie.ef.sak.vilkår.dto.OppdaterVilkårsvurderingDto
 import no.nav.familie.ef.sak.vilkår.dto.SvarPåVurderingerDto
 import no.nav.familie.ef.sak.vilkår.dto.VilkårDto
 import no.nav.familie.ef.sak.vilkår.dto.VilkårsvurderingDto
+import no.nav.familie.ef.sak.vilkår.dto.tilDto
 import no.nav.familie.ef.sak.vilkår.gjenbruk.GjenbrukVilkårService
 import no.nav.familie.ef.sak.vilkår.regler.Vilkårsregler
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -107,12 +108,21 @@ class VurderingController(
     @PostMapping("gjenbruk-enkelt-vilkår")
     fun gjenbrukEnkeltVilkår(
         @RequestBody request: EnkeltVilkårForGjenbrukRequest,
-    ): Ressurs<VilkårDto> {
+    ): Ressurs<VilkårsvurderingDto> {
         val behandlingForGjenbruk = gjenbrukVilkårService.finnBehandlingerForGjenbruk(request.behandlingId).first()
         tilgangService.validerTilgangTilBehandling(behandlingForGjenbruk.id, AuditLoggerEvent.ACCESS)
         tilgangService.validerTilgangTilBehandling(request.behandlingId, AuditLoggerEvent.UPDATE)
         tilgangService.validerHarSaksbehandlerrolle()
-        gjenbrukVilkårService.gjenbrukInngangsvilkårVurdering(request.behandlingId, request.vilkårId, behandlingForGjenbruk.id)
-        return Ressurs.success(vurderingService.hentEllerOpprettVurderinger(request.behandlingId))
+
+        val vilkårsVurderingForGjenbruk =
+            gjenbrukVilkårService
+                .utledVilkårsvurderingerForGjenbrukData(
+                    request.behandlingId,
+                    behandlingForGjenbruk.id,
+                ).first { it.id == request.vilkårId }
+
+        gjenbrukVilkårService.gjenbrukInngangsvilkårVurdering(vilkårsVurderingForGjenbruk)
+        val vilkårsvurderingDto = vilkårsVurderingForGjenbruk.tilDto()
+        return Ressurs.success(vilkårsvurderingDto)
     }
 }
