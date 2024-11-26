@@ -21,9 +21,8 @@ class FullmaktClient(
 
     fun hentFullmakt(ident: String): List<FullmaktResponse> {
         logger.info("Kaller PDL fullmakt")
-        val url = URI.create("$fullmaktUrl/api/internbruker/fullmaktsgiver")
-        val base64EncodedIdent = Base64.encodeBase64String(ident.toByteArray())
-        val fullmaktResponse = postForEntity<List<FullmaktResponse>>(url, FullmaktRequest(base64EncodedIdent))
+        val url = URI.create("$fullmaktUrl/api/internbruker/fullmakt/fullmaktsgiver")
+        val fullmaktResponse = postForEntity<List<FullmaktResponse>>(url, FullmaktRequest(ident))
         secureLogger.info("Fullmakt response: $fullmaktResponse")
         return fullmaktResponse
     }

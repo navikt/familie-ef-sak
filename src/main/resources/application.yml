@@ -281,7 +281,7 @@ FAMILIE_KLAGE_URL: http://familie-klage
 FAMILIE_INTEGRASJONER_URL: https://familie-integrasjoner.${ON_PREM_URL_ENV}-fss-pub.nais.io
 INFOTRYGD_REPLIKA_API_URL: https://familie-ef-infotrygd.${ON_PREM_URL_ENV}-fss-pub.nais.io
 PDL_URL: https://pdl-api.${ON_PREM_URL_ENV}-fss-pub.nais.io
-PDL_FULLMAKT_URL: https://pdl-fullmakt.${ON_PREM_URL_ENV}-fss-pub.nais.io
+PDL_FULLMAKT_URL: https://repr-api.intern.nav.no
 FAMILIE_EF_PROXY_URL: https://familie-ef-proxy.${ON_PREM_URL_ENV}-fss-pub.nais.io
 ARBEIDSSOKER_URL: http://veilarbregistrering.paw.svc.cluster.local
 HISTORISK_PENSJON_URL: http://historisk-pensjon.historisk
