@@ -199,7 +199,7 @@ no.nav.security.jwt:
           client-auth-method: client_secret_basic
 
 PDL_SCOPE: api://${DEPLOY_ENV}-fss.pdl.pdl-api/.default
-PDL_FULLMAKT_SCOPE: api://${DEPLOY_ENV}-fss.pdl.pdl-fullmakt/.default
+PDL_FULLMAKT_SCOPE: api://${DEPLOY_ENV}-gcp.repr.repr-api/.default
 EF_IVERKSETT_SCOPE: api://${DEPLOY_ENV}-gcp.teamfamilie.familie-ef-iverksett/.default
 FAMILIE_TILBAKE_SCOPE: api://${DEPLOY_ENV}-gcp.teamfamilie.familie-tilbake/.default
 FAMILIE_KLAGE_SCOPE: api://${DEPLOY_ENV}-gcp.teamfamilie.familie-klage/.default
