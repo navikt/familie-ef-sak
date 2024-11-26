@@ -57,11 +57,10 @@ class UttrekkArbeidssøkerService(
         visEøsBorgere: Boolean = false,
     ): UttrekkArbeidssøkereDto {
         tilgangService.validerHarSaksbehandlerrolle()
-        val arbeidssøkere = uttrekkArbeidssøkerRepository.findAllByÅrMånedAndRegistrertArbeidssøkerIsFalse(årMåned)
-        val filtrerteArbeidsssøkereUtenEøs = filtrerArbeidsssøkereUtenEøs(arbeidssøkere)
-        val filtrerteArbeidsssøkere = mapTilDtoOgFiltrer(filtrerteArbeidsssøkereUtenEøs)
+        val arbeidssøkere = hentArbeidsøkereUtenEllerMedEøsFilter(årMåned, visEøsBorgere)
+        val filtrerteArbeidsssøkere = mapTilDtoOgFiltrer(arbeidssøkere)
 
-        val totaltAntallUkontrollerte = filtrerteArbeidsssøkereUtenEøs.count { !it.kontrollert }
+        val totaltAntallUkontrollerte = arbeidssøkere.count { !it.kontrollert }
         val antallKontrollert = filtrerteArbeidsssøkere.count { it.kontrollert }
         val antallManglerKontrollUtenTilgang = totaltAntallUkontrollerte - (filtrerteArbeidsssøkere.size - antallKontrollert)
 
@@ -100,6 +99,15 @@ class UttrekkArbeidssøkerService(
         val arbeidssøkere =
             uttrekkArbeidssøkerRepository.hentVedtaksperioderForSisteFerdigstilteBehandlinger(startdato, sluttdato)
         return arbeidssøkere.filter { harPeriodeSomArbeidssøker(it, startdato, sluttdato) }
+    }
+
+    fun hentArbeidsøkereUtenEllerMedEøsFilter(årMåned: YearMonth, visEøsBorgere: Boolean): List<UttrekkArbeidssøkere> {
+        val arbeidssøkere = uttrekkArbeidssøkerRepository.findAllByÅrMånedAndRegistrertArbeidssøkerIsFalse(årMåned)
+        return if(visEøsBorgere){
+            arbeidssøkere
+        } else {
+            filtrerArbeidsssøkereUtenEøs(arbeidssøkere)
+        }
     }
 
     fun filtrerArbeidsssøkereUtenEøs(arbeidsssøkere: List<UttrekkArbeidssøkere>): MutableList<UttrekkArbeidssøkere> {

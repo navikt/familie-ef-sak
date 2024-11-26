@@ -427,6 +427,8 @@ internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
             identer.forEach {
                 val fagsak = testoppsettService.lagreFagsak(fagsak(fagsakpersoner(setOf(it.first))))
                 val behandling = behandlingRepository.insert(behandling(fagsak))
+                val vilkår = vilkårsvurdering(behandling.id)
+                vilkårsvurderingRepository.insert(vilkår)
                 val arbeidssøkere =
                     UttrekkArbeidssøkere(
                         fagsakId = fagsak.id,
@@ -592,6 +594,10 @@ internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
             listOf(Inntekt(februar2021, BigDecimal.ZERO, BigDecimal(10_000))),
         )
         ferdigstillBehandling(behandling2)
+        val vilkår = vilkårsvurdering(behandling.id)
+        vilkårsvurderingRepository.insert(vilkår)
+        val vilkår2 = vilkårsvurdering(behandling2.id)
+        vilkårsvurderingRepository.insert(vilkår2)
     }
 
     private fun opprettEkstraFagsak() {
@@ -612,6 +618,8 @@ internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
             listOf(Inntekt(februar2021, BigDecimal.ZERO, BigDecimal(15_000))),
         )
         ferdigstillBehandling(behandling)
+        val vilkår = vilkårsvurdering(behandling.id)
+        vilkårsvurderingRepository.insert(vilkår)
     }
 
     fun ferdigstillBehandling(behandling: Behandling) {
