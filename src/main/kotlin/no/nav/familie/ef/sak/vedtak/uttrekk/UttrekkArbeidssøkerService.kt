@@ -57,7 +57,7 @@ class UttrekkArbeidssøkerService(
         visEøsBorgere: Boolean = false,
     ): UttrekkArbeidssøkereDto {
         tilgangService.validerHarSaksbehandlerrolle()
-        val arbeidssøkere = hentArbeidsøkereUtenEllerMedEøsFilter(årMåned, visEøsBorgere)
+        val arbeidssøkere = hentArbeidsøkereMedEllerUtenEøsFilter(årMåned, visEøsBorgere)
         val filtrerteArbeidsssøkere = mapTilDtoOgFiltrer(arbeidssøkere)
 
         val totaltAntallUkontrollerte = arbeidssøkere.count { !it.kontrollert }
@@ -101,7 +101,7 @@ class UttrekkArbeidssøkerService(
         return arbeidssøkere.filter { harPeriodeSomArbeidssøker(it, startdato, sluttdato) }
     }
 
-    fun hentArbeidsøkereUtenEllerMedEøsFilter(
+    fun hentArbeidsøkereMedEllerUtenEøsFilter(
         årMåned: YearMonth,
         visEøsBorgere: Boolean,
     ): List<UttrekkArbeidssøkere> {
