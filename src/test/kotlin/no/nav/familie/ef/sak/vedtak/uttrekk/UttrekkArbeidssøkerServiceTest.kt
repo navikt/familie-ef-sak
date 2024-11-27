@@ -191,6 +191,9 @@ internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
         testWithSaksbehandlerContext {
             val uttrekk = service.hentUttrekkArbeidssøkere(mars2021)
             assertThat(uttrekk.arbeidssøkere.map { it.personIdent }).containsExactlyInAnyOrderElementsOf(expected)
+            val utrekkEøsBorgere = service.hentUttrekkArbeidssøkere(mars2021, visEøsBorgere = true)
+            assertThat(utrekkEøsBorgere.antallTotalt).isEqualTo(1)
+            assertThat(utrekkEøsBorgere.arbeidssøkere.first().personIdent).isEqualTo("2")
         }
     }
 

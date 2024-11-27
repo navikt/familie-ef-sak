@@ -107,28 +107,21 @@ class UttrekkArbeidssøkerService(
     ): List<UttrekkArbeidssøkere> {
         val arbeidssøkere = uttrekkArbeidssøkerRepository.findAllByÅrMånedAndRegistrertArbeidssøkerIsFalse(årMåned)
         return if (visEøsBorgere) {
-            arbeidssøkere
+            arbeidssøkere.filter { erArbeidsøkerBosattIEøsLand(it) }
         } else {
-            filtrerArbeidsssøkereUtenEøs(arbeidssøkere)
+            arbeidssøkere.filter { !erArbeidsøkerBosattIEøsLand(it) }
         }
     }
 
-    fun filtrerArbeidsssøkereUtenEøs(arbeidsssøkere: List<UttrekkArbeidssøkere>): MutableList<UttrekkArbeidssøkere> {
-        val filtrerteArbeidsssøkereUtenEøs = mutableListOf<UttrekkArbeidssøkere>()
-
-        arbeidsssøkere.forEach { arbeidsøker ->
-            val vurderinger = vurderingService.hentAlleVurderinger(arbeidsøker.vedtakId)
-            val oppholdVurdering = vurderinger.first { it.vilkårType == VilkårType.LOVLIG_OPPHOLD }
-            val harDelvilkårMedEøsSvar =
-                oppholdVurdering.delvilkårsvurderinger.any { delvilkår ->
-                    delvilkår.vurderinger.any { it.svar == SvarId.OPPHOLDER_SEG_I_ANNET_EØS_LAND }
-                }
-
-            if (!harDelvilkårMedEøsSvar) {
-                filtrerteArbeidsssøkereUtenEøs.add(arbeidsøker)
+    private fun erArbeidsøkerBosattIEøsLand(arbeidsøker: UttrekkArbeidssøkere): Boolean {
+        val vurderinger = vurderingService.hentAlleVurderinger(arbeidsøker.vedtakId)
+        val oppholdVurdering = vurderinger.first { it.vilkårType == VilkårType.LOVLIG_OPPHOLD }
+        val harDelvilkårMedEøsSvar =
+            oppholdVurdering.delvilkårsvurderinger.any { delvilkår ->
+                delvilkår.vurderinger.any { it.svar == SvarId.OPPHOLDER_SEG_I_ANNET_EØS_LAND }
             }
-        }
-        return filtrerteArbeidsssøkereUtenEøs
+
+        return harDelvilkårMedEøsSvar
     }
 
     fun uttrekkFinnes(
