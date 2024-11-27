@@ -110,18 +110,12 @@ class VurderingController(
         @RequestBody request: EnkeltVilkårForGjenbrukRequest,
     ): Ressurs<VilkårsvurderingDto> {
         val behandlingForGjenbruk = gjenbrukVilkårService.finnBehandlingerForGjenbruk(request.behandlingId).first()
+
         tilgangService.validerTilgangTilBehandling(behandlingForGjenbruk.id, AuditLoggerEvent.ACCESS)
         tilgangService.validerTilgangTilBehandling(request.behandlingId, AuditLoggerEvent.UPDATE)
         tilgangService.validerHarSaksbehandlerrolle()
 
-        val vilkårsVurderingForGjenbruk =
-            gjenbrukVilkårService
-                .utledVilkårsvurderingerForGjenbrukData(
-                    request.behandlingId,
-                    behandlingForGjenbruk.id,
-                ).first { it.id == request.vilkårId }
-
-        gjenbrukVilkårService.gjenbrukInngangsvilkårVurdering(vilkårsVurderingForGjenbruk)
+        val vilkårsVurderingForGjenbruk = gjenbrukVilkårService.gjenbrukInngangsvilkårVurdering(request.behandlingId, behandlingForGjenbruk.id, request.vilkårId)
         val vilkårsvurderingDto = vilkårsVurderingForGjenbruk.tilDto()
         return Ressurs.success(vilkårsvurderingDto)
     }

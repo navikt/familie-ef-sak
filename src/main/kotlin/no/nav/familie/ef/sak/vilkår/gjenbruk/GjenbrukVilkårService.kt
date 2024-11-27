@@ -50,10 +50,6 @@ class GjenbrukVilkårService(
         behandlingSomSkalOppdateres: UUID,
         behandlingIdSomSkalGjenbrukeInngangsvilkår: UUID,
     ) {
-        validerBehandlingForGjenbruk(
-            behandlingSomSkalOppdateres,
-            behandlingIdSomSkalGjenbrukeInngangsvilkår,
-        )
         val vilkårsVurderingerForGjenbruk =
             utledVilkårsvurderingerForGjenbrukData(
                 behandlingSomSkalOppdateres,
@@ -68,14 +64,20 @@ class GjenbrukVilkårService(
 
     @Transactional
     fun gjenbrukInngangsvilkårVurdering(
-        vilkårsVurderingForGjenbruk: Vilkårsvurdering,
+        behandlingId: UUID,
+        behandlingIdForGjenbruk: UUID,
+        vilkårId: UUID,
     ): Vilkårsvurdering {
-        secureLogger.info(
-            "${SikkerhetContext.hentSaksbehandlerEllerSystembruker()} gjenbruker vurdering for behandling ${vilkårsVurderingForGjenbruk.behandlingId}",
-        )
+        val vilkårsVurderingForGjenbruk =
+            utledVilkårsvurderingerForGjenbrukData(
+                behandlingId,
+                behandlingIdForGjenbruk,
+            ).first { it.id == vilkårId }
 
-        vilkårsvurderingRepository.update(vilkårsVurderingForGjenbruk)
-        return vilkårsVurderingForGjenbruk
+        "${SikkerhetContext.hentSaksbehandlerEllerSystembruker()} gjenbruker enkel vurdering fra behandling $behandlingIdForGjenbruk " +
+            "for å oppdatere vurderinger på inngangsvilkår for behandling $behandlingId"
+
+        return vilkårsvurderingRepository.update(vilkårsVurderingForGjenbruk)
     }
 
     fun utledVilkårsvurderingerForGjenbrukData(
