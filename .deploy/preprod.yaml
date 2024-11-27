@@ -90,9 +90,8 @@ spec:
           namespace: paw
         - application: skjermede-personer-pip
           namespace: nom
-        - application: pdl-fullmakt
-          namespace: pdl
-          cluster: dev-fss
+        - application: repr-api
+          namespace: repr
       external:
         - host: api-gw-q1.oera.no
         - host: familie-oppdrag.dev-fss-pub.nais.io
