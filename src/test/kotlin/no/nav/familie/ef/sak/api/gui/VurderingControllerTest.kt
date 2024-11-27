@@ -363,9 +363,7 @@ internal class VurderingControllerTest : OppslagSpringRunnerTest() {
             val vurderingNæreBoforhold = utledVurdering(aleneOmsorgVilkår, RegelId.NÆRE_BOFORHOLD)
             val vurderingDagligOmsorg = utledVurdering(aleneOmsorgVilkår, RegelId.MER_AV_DAGLIG_OMSORG)
 
-            assertThat(vurderingDeltBosted?.svar).isEqualTo(SvarId.NEI)
-            assertThat(vurderingDeltBosted?.begrunnelse).contains("Automatisk vurdert")
-            assertThat(vurderingDeltBosted?.begrunnelse).contains("Bruker har oppgitt at annen forelder er donor.")
+            assertThat(vurderingDeltBosted).isNull()
 
             assertThat(vurderingNæreBoforhold?.svar).isEqualTo(SvarId.NEI)
             assertThat(vurderingNæreBoforhold?.begrunnelse).contains("Automatisk vurdert")
@@ -515,7 +513,7 @@ internal class VurderingControllerTest : OppslagSpringRunnerTest() {
         regelId: RegelId,
     ) = vilkår
         ?.delvilkårsvurderinger
-        ?.first { it.vurderinger.first().regelId == regelId }
+        ?.firstOrNull { it.vurderinger.first().regelId == regelId }
         ?.vurderinger
         ?.first()
 }
