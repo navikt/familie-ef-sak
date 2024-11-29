@@ -227,6 +227,20 @@ internal class GjenbrukVilkårServiceTest {
         assertThat(vilkårsvurderingSlot.captured.resultat).isEqualTo(Vilkårsresultat.OPPFYLT)
     }
 
+
+    @Test
+    internal fun `ingen treff på vilkår skal returnere vilkårsvurdering lik null`() {
+        every { vilkårsvurderingRepository.findByBehandlingId(any()) } returns emptyList()
+        val vilkårsvurdering = gjenbrukEnkelVilkårsvurdering(nyBT.sivilstandsvilkår.id)
+        assertThat(vilkårsvurdering).isNull()
+    }
+
+    @Test
+    internal fun `når det finnes vilkår skal det ikke returneres null`() {
+        val vilkårsvurdering = gjenbrukEnkelVilkårsvurdering(nyBT.sivilstandsvilkår.id)
+        assertThat(vilkårsvurdering).isNotNull()
+    }
+
     private fun gjenbrukVilkår() {
         gjenbrukVilkårService.gjenbrukInngangsvilkårVurderinger(
             nyBT.behandling.id,
@@ -234,8 +248,8 @@ internal class GjenbrukVilkårServiceTest {
         )
     }
 
-    private fun gjenbrukEnkelVilkårsvurdering(vilkårId: UUID) {
-        gjenbrukVilkårService.gjenbrukInngangsvilkårVurdering(
+    private fun gjenbrukEnkelVilkårsvurdering(vilkårId: UUID): Vilkårsvurdering? {
+        return gjenbrukVilkårService.gjenbrukInngangsvilkårVurdering(
             nyBT.behandling.id,
             ferdigstiltOS.behandling.id,
             vilkårId,
