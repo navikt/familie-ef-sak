@@ -11,7 +11,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.3.5</version>
+        <version>3.4.0</version>
     </parent>
     <repositories>
         <repository>
@@ -31,14 +31,14 @@
         <java.version>21</java.version>
         <kotlin.version>2.0.21</kotlin.version>
         <kotlin-coroutines.version>1.9.0</kotlin-coroutines.version>
-        <springdoc.version>2.6.0</springdoc.version>
+        <springdoc.version>2.7.0</springdoc.version>
         <mockk.version>1.13.13</mockk.version>
-        <felles.version>3.20240913110742_adb42f8</felles.version>
-        <prosessering.version>2.20241011144712_deb1f2c</prosessering.version>
-        <token-validation-spring.version>5.0.10</token-validation-spring.version>
+        <felles.version>3.20241121151626_836e7ca</felles.version>
+        <prosessering.version>2.20241118095311_c66bd61</prosessering.version>
+        <token-validation-spring.version>5.0.11</token-validation-spring.version>
 
         <start-class>no.nav.familie.ef.sak.ApplicationKt</start-class>
-        <kontrakter.version>3.0_20241102131210_d65efd1</kontrakter.version>
+        <kontrakter.version>3.0_20241125092101_ae3c67e</kontrakter.version>
         <mikrofrontend.builder.version>20230704114948-74aa2e9</mikrofrontend.builder.version>
         <eksterne.kontrakter.bisys.version>2.0_20230214104704_706e9c0</eksterne.kontrakter.bisys.version>
         <cucumber.version>7.20.1</cucumber.version>
@@ -48,7 +48,7 @@
         <sonar.projectKey>${SONAR_PROJECTKEY}</sonar.projectKey>
         <sonar.organization>navit</sonar.organization>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
-        <nav.security.version>5.0.10</nav.security.version> <!-- Denne burde være samme versjon som i felles -->
+        <nav.security.version>5.0.11</nav.security.version> <!-- Denne burde være samme versjon som i felles -->
         <okhttp3.version>4.9.1</okhttp3.version> <!-- overskrever spring sin versjon, blir brukt av mock-oauth2-server -->
         <!--suppress UnresolvedMavenProperty -->
         <sonar.login>${SONAR_LOGIN}</sonar.login>
@@ -117,7 +117,7 @@
         <dependency>
             <groupId>org.flywaydb</groupId>
             <artifactId>flyway-database-postgresql</artifactId>
-            <version>10.21.0</version>
+            <version>11.0.0</version>
             <scope>runtime</scope>
         </dependency>
         <dependency>
@@ -249,7 +249,7 @@
         <dependency>
             <groupId>org.testcontainers</groupId>
             <artifactId>postgresql</artifactId>
-            <version>1.20.3</version>
+            <version>1.20.4</version>
             <scope>test</scope>
         </dependency>
         <dependency>

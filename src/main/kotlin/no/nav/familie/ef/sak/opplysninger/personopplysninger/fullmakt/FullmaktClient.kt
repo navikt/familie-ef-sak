@@ -2,7 +2,6 @@ package no.nav.familie.ef.sak.opplysninger.personopplysninger.fullmakt
 
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.logger
 import no.nav.familie.http.client.AbstractPingableRestClient
-import org.apache.hc.client5.http.utils.Base64
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
@@ -12,7 +11,7 @@ import java.time.LocalDate
 
 @Service
 class FullmaktClient(
-    @Value("\${PDL_FULLMAKT_URL}")
+    @Value("\${REPR_API_URL}")
     private val fullmaktUrl: String,
     @Qualifier("azure")
     private val restOperations: RestOperations,
@@ -21,9 +20,8 @@ class FullmaktClient(
 
     fun hentFullmakt(ident: String): List<FullmaktResponse> {
         logger.info("Kaller PDL fullmakt")
-        val url = URI.create("$fullmaktUrl/api/internbruker/fullmaktsgiver")
-        val base64EncodedIdent = Base64.encodeBase64String(ident.toByteArray())
-        val fullmaktResponse = postForEntity<List<FullmaktResponse>>(url, FullmaktRequest(base64EncodedIdent))
+        val url = URI.create("$fullmaktUrl/api/internbruker/fullmakt/fullmaktsgiver")
+        val fullmaktResponse = postForEntity<List<FullmaktResponse>>(url, FullmaktRequest(ident))
         secureLogger.info("Fullmakt response: $fullmaktResponse")
         return fullmaktResponse
     }

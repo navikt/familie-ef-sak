@@ -102,16 +102,6 @@ class AleneomsorgRegel :
                 resultat = Vilkårsresultat.AUTOMATISK_OPPFYLT,
                 listOf(
                     Vurdering(
-                        regelId = RegelId.SKRIFTLIG_AVTALE_OM_DELT_BOSTED,
-                        svar = SvarId.NEI,
-                        begrunnelse = begrunnelseTekst,
-                    ),
-                ),
-            ),
-            Delvilkårsvurdering(
-                resultat = Vilkårsresultat.AUTOMATISK_OPPFYLT,
-                listOf(
-                    Vurdering(
                         regelId = RegelId.NÆRE_BOFORHOLD,
                         svar = SvarId.NEI,
                         begrunnelse = begrunnelseTekst,

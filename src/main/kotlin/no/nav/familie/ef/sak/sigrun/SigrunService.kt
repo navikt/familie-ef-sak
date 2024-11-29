@@ -54,7 +54,9 @@ data class PensjonsgivendeInntektVisning(
     var næring: Int,
     var person: Int,
     val svalbard: SvalbardPensjonsgivendeInntekt? = null,
-)
+) {
+    fun totalNæringsinntekt() = næring + (svalbard?.næring ?: 0)
+}
 
 data class SvalbardPensjonsgivendeInntekt(
     val næring: Int,
