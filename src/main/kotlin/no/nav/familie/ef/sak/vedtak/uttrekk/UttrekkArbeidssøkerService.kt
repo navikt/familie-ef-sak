@@ -12,6 +12,9 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.visningsnavn
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.ef.sak.vedtak.domain.AktivitetType
 import no.nav.familie.ef.sak.vedtak.domain.Vedtaksperiode
+import no.nav.familie.ef.sak.vilkår.VilkårType
+import no.nav.familie.ef.sak.vilkår.VurderingService
+import no.nav.familie.ef.sak.vilkår.regler.SvarId
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
@@ -26,6 +29,7 @@ class UttrekkArbeidssøkerService(
     private val fagsakService: FagsakService,
     private val personService: PersonService,
     private val arbeidssøkerClient: ArbeidssøkerClient,
+    private val vurderingService: VurderingService,
 ) {
     fun forrigeMåned(): () -> YearMonth = { YearMonth.now().minusMonths(1) }
 
@@ -50,9 +54,10 @@ class UttrekkArbeidssøkerService(
     fun hentUttrekkArbeidssøkere(
         årMåned: YearMonth = forrigeMåned().invoke(),
         visKontrollerte: Boolean = false,
+        visEøsBorgere: Boolean = false,
     ): UttrekkArbeidssøkereDto {
         tilgangService.validerHarSaksbehandlerrolle()
-        val arbeidssøkere = uttrekkArbeidssøkerRepository.findAllByÅrMånedAndRegistrertArbeidssøkerIsFalse(årMåned)
+        val arbeidssøkere = hentArbeidsøkereMedEllerUtenEøsFilter(årMåned, visEøsBorgere)
         val filtrerteArbeidsssøkere = mapTilDtoOgFiltrer(arbeidssøkere)
 
         val totaltAntallUkontrollerte = arbeidssøkere.count { !it.kontrollert }
@@ -94,6 +99,29 @@ class UttrekkArbeidssøkerService(
         val arbeidssøkere =
             uttrekkArbeidssøkerRepository.hentVedtaksperioderForSisteFerdigstilteBehandlinger(startdato, sluttdato)
         return arbeidssøkere.filter { harPeriodeSomArbeidssøker(it, startdato, sluttdato) }
+    }
+
+    fun hentArbeidsøkereMedEllerUtenEøsFilter(
+        årMåned: YearMonth,
+        visEøsBorgere: Boolean,
+    ): List<UttrekkArbeidssøkere> {
+        val arbeidssøkere = uttrekkArbeidssøkerRepository.findAllByÅrMånedAndRegistrertArbeidssøkerIsFalse(årMåned)
+        return if (visEøsBorgere) {
+            arbeidssøkere.filter { erArbeidsøkerBosattIEøsLand(it) }
+        } else {
+            arbeidssøkere.filter { !erArbeidsøkerBosattIEøsLand(it) }
+        }
+    }
+
+    private fun erArbeidsøkerBosattIEøsLand(arbeidsøker: UttrekkArbeidssøkere): Boolean {
+        val vurderinger = vurderingService.hentAlleVurderinger(arbeidsøker.vedtakId)
+        val oppholdVurdering = vurderinger.first { it.vilkårType == VilkårType.LOVLIG_OPPHOLD }
+        val harDelvilkårMedEøsSvar =
+            oppholdVurdering.delvilkårsvurderinger.any { delvilkår ->
+                delvilkår.vurderinger.any { it.svar == SvarId.OPPHOLDER_SEG_I_ANNET_EØS_LAND }
+            }
+
+        return harDelvilkårMedEøsSvar
     }
 
     fun uttrekkFinnes(

@@ -33,6 +33,7 @@ import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.fagsakpersoner
 import no.nav.familie.ef.sak.repository.saksbehandling
+import no.nav.familie.ef.sak.repository.vilkårsvurdering
 import no.nav.familie.ef.sak.vedtak.domain.AktivitetType
 import no.nav.familie.ef.sak.vedtak.domain.AktivitetType.BARNET_ER_SYKT
 import no.nav.familie.ef.sak.vedtak.domain.AktivitetType.FORLENGELSE_STØNAD_PÅVENTE_ARBEID_REELL_ARBEIDSSØKER
@@ -41,6 +42,15 @@ import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
 import no.nav.familie.ef.sak.vedtak.dto.InnvilgelseOvergangsstønad
 import no.nav.familie.ef.sak.vedtak.dto.VedtaksperiodeDto
 import no.nav.familie.ef.sak.vedtak.dto.tilDomene
+import no.nav.familie.ef.sak.vilkår.Delvilkårsvurdering
+import no.nav.familie.ef.sak.vilkår.VilkårType
+import no.nav.familie.ef.sak.vilkår.Vilkårsresultat
+import no.nav.familie.ef.sak.vilkår.Vilkårsvurdering
+import no.nav.familie.ef.sak.vilkår.VilkårsvurderingRepository
+import no.nav.familie.ef.sak.vilkår.Vurdering
+import no.nav.familie.ef.sak.vilkår.VurderingService
+import no.nav.familie.ef.sak.vilkår.regler.RegelId
+import no.nav.familie.ef.sak.vilkår.regler.SvarId
 import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.internal.TaskService
@@ -80,6 +90,12 @@ internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
 
     @Autowired
     private lateinit var opprettUttrekkArbeidssøkerTask: OpprettUttrekkArbeidssøkerTask
+
+    @Autowired
+    private lateinit var vilkårsvurderingRepository: VilkårsvurderingRepository
+
+    @Autowired
+    private lateinit var vurderingService: VurderingService
 
     private lateinit var service: UttrekkArbeidssøkerService
     private val arbeidssøkerClient = mockk<ArbeidssøkerClient>()
@@ -130,10 +146,58 @@ internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
                 fagsakService,
                 personService,
                 arbeidssøkerClient,
+                vurderingService,
             )
         opprettUttrekkArbeidssøkerTask =
             OpprettUttrekkArbeidssøkerTask(service, fagsakService, taskService)
     }
+
+    @Test
+    internal fun `hentUttrekkArbeidssøkere - Filtrer vekk EØS-personer`() {
+        val identer = listOf("1", "2", "3")
+        identer.forEach {
+            val fagsak = testoppsettService.lagreFagsak(fagsak(fagsakpersoner(setOf(it))))
+            val behandling = behandlingRepository.insert(behandling(fagsak))
+
+            if (it == "2") {
+                val vilkårsvurderingLovligOpphold =
+                    leggTilDelvilkårEøsKnyttetBehandling(behandling)
+                vilkårsvurderingRepository.insert(vilkårsvurderingLovligOpphold)
+            } else {
+                val vilkår = vilkårsvurdering(behandling.id)
+                vilkårsvurderingRepository.insert(vilkår)
+            }
+
+            val arbeidssøkere =
+                UttrekkArbeidssøkere(
+                    fagsakId = fagsak.id,
+                    vedtakId = behandling.id,
+                    årMåned = mars2021,
+                    registrertArbeidssøker = false,
+                )
+            uttrekkArbeidssøkerRepository.insert(arbeidssøkere)
+        }
+
+        val expected = listOf("1", "3")
+        testWithSaksbehandlerContext {
+            val uttrekk = service.hentUttrekkArbeidssøkere(mars2021)
+            assertThat(uttrekk.arbeidssøkere.map { it.personIdent }).containsExactlyInAnyOrderElementsOf(expected)
+            val utrekkEøsBorgere = service.hentUttrekkArbeidssøkere(mars2021, visEøsBorgere = true)
+            assertThat(utrekkEøsBorgere.antallTotalt).isEqualTo(1)
+            assertThat(utrekkEøsBorgere.arbeidssøkere.first().personIdent).isEqualTo("2")
+        }
+    }
+
+    private fun leggTilDelvilkårEøsKnyttetBehandling(behandling: Behandling): Vilkårsvurdering =
+        vilkårsvurdering(
+            behandlingId = behandling.id,
+            type = VilkårType.LOVLIG_OPPHOLD,
+            delvilkårsvurdering =
+                listOf(
+                    Delvilkårsvurdering(resultat = Vilkårsresultat.OPPFYLT, vurderinger = listOf(Vurdering(RegelId.BOR_OG_OPPHOLDER_SEG_I_NORGE, SvarId.NEI))),
+                    Delvilkårsvurdering(resultat = Vilkårsresultat.OPPFYLT, vurderinger = listOf(Vurdering(RegelId.OPPHOLD_UNNTAK, SvarId.OPPHOLDER_SEG_I_ANNET_EØS_LAND))),
+                ),
+        )
 
     @Test
     internal fun `skal kjøre query uten problemer`() {
@@ -301,6 +365,7 @@ internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
                 mockFagsakService,
                 personService,
                 arbeidssøkerClient,
+                vurderingService,
             )
         val opprettUttrekkArbeidssøkerTask =
             OpprettUttrekkArbeidssøkerTask(uttrekkArbeidssøkerService, mockFagsakService, taskService)
@@ -382,6 +447,8 @@ internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
             identer.forEach {
                 val fagsak = testoppsettService.lagreFagsak(fagsak(fagsakpersoner(setOf(it.first))))
                 val behandling = behandlingRepository.insert(behandling(fagsak))
+                val vilkår = vilkårsvurdering(behandling.id)
+                vilkårsvurderingRepository.insert(vilkår)
                 val arbeidssøkere =
                     UttrekkArbeidssøkere(
                         fagsakId = fagsak.id,
@@ -547,6 +614,10 @@ internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
             listOf(Inntekt(februar2021, BigDecimal.ZERO, BigDecimal(10_000))),
         )
         ferdigstillBehandling(behandling2)
+        val vilkår = vilkårsvurdering(behandling.id)
+        vilkårsvurderingRepository.insert(vilkår)
+        val vilkår2 = vilkårsvurdering(behandling2.id)
+        vilkårsvurderingRepository.insert(vilkår2)
     }
 
     private fun opprettEkstraFagsak() {
@@ -567,6 +638,8 @@ internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
             listOf(Inntekt(februar2021, BigDecimal.ZERO, BigDecimal(15_000))),
         )
         ferdigstillBehandling(behandling)
+        val vilkår = vilkårsvurdering(behandling.id)
+        vilkårsvurderingRepository.insert(vilkår)
     }
 
     fun ferdigstillBehandling(behandling: Behandling) {
