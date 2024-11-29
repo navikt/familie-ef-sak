@@ -45,6 +45,7 @@ import no.nav.familie.ef.sak.vedtak.dto.tilDomene
 import no.nav.familie.ef.sak.vilkår.Delvilkårsvurdering
 import no.nav.familie.ef.sak.vilkår.VilkårType
 import no.nav.familie.ef.sak.vilkår.Vilkårsresultat
+import no.nav.familie.ef.sak.vilkår.Vilkårsvurdering
 import no.nav.familie.ef.sak.vilkår.VilkårsvurderingRepository
 import no.nav.familie.ef.sak.vilkår.Vurdering
 import no.nav.familie.ef.sak.vilkår.VurderingService
@@ -160,18 +161,8 @@ internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
 
             if (it == "2") {
                 val vilkårsvurderingLovligOpphold =
-                    vilkårsvurdering(
-                        behandlingId = behandling.id,
-                        type = VilkårType.LOVLIG_OPPHOLD,
-                        delvilkårsvurdering =
-                            listOf(
-                                Delvilkårsvurdering(resultat = Vilkårsresultat.OPPFYLT, vurderinger = listOf(Vurdering(RegelId.BOR_OG_OPPHOLDER_SEG_I_NORGE, SvarId.NEI))),
-                                Delvilkårsvurdering(resultat = Vilkårsresultat.OPPFYLT, vurderinger = listOf(Vurdering(RegelId.OPPHOLD_UNNTAK, SvarId.OPPHOLDER_SEG_I_ANNET_EØS_LAND))),
-                            ),
-                    )
+                    leggTilDelvilkårEøsKnyttetBehandling(behandling)
                 vilkårsvurderingRepository.insert(vilkårsvurderingLovligOpphold)
-                val vilkårsvurderingMedlemskap = vilkårsvurdering(behandlingId = behandling.id, type = VilkårType.FORUTGÅENDE_MEDLEMSKAP, delvilkårsvurdering = listOf(Delvilkårsvurdering(resultat = Vilkårsresultat.OPPFYLT, vurderinger = listOf(Vurdering(RegelId.SØKER_MEDLEM_I_FOLKETRYGDEN, SvarId.JA)))))
-                vilkårsvurderingRepository.insert(vilkårsvurderingMedlemskap)
             } else {
                 val vilkår = vilkårsvurdering(behandling.id)
                 vilkårsvurderingRepository.insert(vilkår)
@@ -196,6 +187,17 @@ internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
             assertThat(utrekkEøsBorgere.arbeidssøkere.first().personIdent).isEqualTo("2")
         }
     }
+
+    private fun leggTilDelvilkårEøsKnyttetBehandling(behandling: Behandling): Vilkårsvurdering =
+        vilkårsvurdering(
+            behandlingId = behandling.id,
+            type = VilkårType.LOVLIG_OPPHOLD,
+            delvilkårsvurdering =
+                listOf(
+                    Delvilkårsvurdering(resultat = Vilkårsresultat.OPPFYLT, vurderinger = listOf(Vurdering(RegelId.BOR_OG_OPPHOLDER_SEG_I_NORGE, SvarId.NEI))),
+                    Delvilkårsvurdering(resultat = Vilkårsresultat.OPPFYLT, vurderinger = listOf(Vurdering(RegelId.OPPHOLD_UNNTAK, SvarId.OPPHOLDER_SEG_I_ANNET_EØS_LAND))),
+                ),
+        )
 
     @Test
     internal fun `skal kjøre query uten problemer`() {
