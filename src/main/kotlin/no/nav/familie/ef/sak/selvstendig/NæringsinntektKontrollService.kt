@@ -121,8 +121,11 @@ class NæringsinntektKontrollService(
         fagsakId: UUID,
     ): Long {
         val andelshistorikk = andelsHistorikkService.hentHistorikk(fagsakId, null)
-        val fjoråretsInnvilgetAndelHistorikk = andelshistorikk.filter { it.vedtaksperiode.periode.overlapper(Månedsperiode(YearMonth.of(årstallIFjor, 1), YearMonth.of(årstallIFjor, 12))) && it.vedtaksperiode is VedtakshistorikkperiodeOvergangsstønad }
-        val antallMåneder = fjoråretsInnvilgetAndelHistorikk.map { it.vedtaksperiode.periode.snitt(månedsperiodeIFjor) }.sumOf { it?.lengdeIHeleMåneder() ?: 0 }
+        val fjoråretsInnvilgetAndelHistorikk = andelshistorikk.filter { it.vedtaksperiode.periode.overlapper(månedsperiodeIFjor) && it.vedtaksperiode is VedtakshistorikkperiodeOvergangsstønad }
+        secureLogger.info("fjoråretsInnvilgetAndelHistorikk: $fjoråretsInnvilgetAndelHistorikk")
+        val snittPerioder = fjoråretsInnvilgetAndelHistorikk.map { it.vedtaksperiode.periode.snitt(månedsperiodeIFjor) }
+        secureLogger.info("snittPerioder: $snittPerioder")
+        val antallMåneder = snittPerioder.sumOf { it?.lengdeIHeleMåneder() ?: 0 }
         // Beregn antall måneder
         secureLogger.info("Antall måneder $antallMåneder med vedtak i $årstallIFjor for fagsak: $fagsakId")
         return antallMåneder
