@@ -118,6 +118,6 @@ class VurderingController(
         val vilkårsVurderingForGjenbruk = gjenbrukVilkårService.gjenbrukInngangsvilkårVurdering(request.behandlingId, behandlingForGjenbruk.id, request.vilkårId)
         vilkårsVurderingForGjenbruk?.let {
             return Ressurs.success(it.tilDto())
-        } ?: return Ressurs.failure("Kunne ikke gjenbruke vilkårId ${request.vilkårId} fra behandlingId ${request.behandlingId}", frontendFeilmelding = "Kunne ikke gjenbruke vilkårId ${request.vilkårId} fra behandlingId ${request.behandlingId}")
+        } ?: return Ressurs.failure("Kunne ikke gjenbruke vilkårsvurdering vilkårId ${request.vilkårId} fra behandlingId ${request.behandlingId}", frontendFeilmelding = "Vilkårsvurdering for gjenbruk finnes ikke")
     }
 }
