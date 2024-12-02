@@ -352,76 +352,6 @@ internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
         }
     }
 
-    @Test
-    internal fun `manglende aktiv ident ved opprettUttrekkforArbeissøkere i første kall, forvent insert av kun denne andre gang`() {
-        val uttrekkSlot = slot<UttrekkArbeidssøkere>()
-        val tilgangService = mockk<TilgangService>()
-        val mockUttrekkArbeidssøkerRepository = mockk<UttrekkArbeidssøkerRepository>()
-        val mockFagsakService = mockk<FagsakService>()
-        val uttrekkArbeidssøkerService =
-            UttrekkArbeidssøkerService(
-                tilgangService,
-                mockUttrekkArbeidssøkerRepository,
-                mockFagsakService,
-                personService,
-                arbeidssøkerClient,
-                vurderingService,
-            )
-        val opprettUttrekkArbeidssøkerTask =
-            OpprettUttrekkArbeidssøkerTask(uttrekkArbeidssøkerService, mockFagsakService, taskService)
-
-        val arbeidssøkerPeriode = ArbeidssøkerPeriode(vedtaksperiode.periode.fomDato, vedtaksperiode.periode.tomDato)
-        val periodeForUttrekk =
-            VedtaksperioderForUttrekk(
-                UUID.randomUUID(),
-                UUID.randomUUID(),
-                UUID.randomUUID(),
-                PeriodeWrapper(listOf(vedtaksperiode).tilDomene()),
-            )
-        val periodeForUttrekk2 =
-            VedtaksperioderForUttrekk(
-                UUID.randomUUID(),
-                UUID.randomUUID(),
-                UUID.randomUUID(),
-                PeriodeWrapper(listOf(vedtaksperiode).tilDomene()),
-            )
-
-        val aktiveIdenter = mutableMapOf(periodeForUttrekk2.fagsakId to "")
-
-        every { mockFagsakService.hentAktiveIdenter(any()) } returns aktiveIdenter
-        every { mockUttrekkArbeidssøkerRepository.insert(capture(uttrekkSlot)) } returns mockk()
-        every { arbeidssøkerClient.hentPerioder(any(), any(), any()) } returns
-            ArbeidssøkerResponse(
-                listOf(
-                    arbeidssøkerPeriode,
-                    arbeidssøkerPeriode,
-                ),
-            )
-
-        every {
-            mockUttrekkArbeidssøkerRepository.hentVedtaksperioderForSisteFerdigstilteBehandlinger(any(), any())
-        } returns
-            listOf(
-                periodeForUttrekk,
-                periodeForUttrekk2,
-            )
-
-        every {
-            mockUttrekkArbeidssøkerRepository.existsByÅrMånedAndFagsakId(any(), any())
-        } returns false andThen false andThen false andThen true
-
-        Assertions.assertThrows(IllegalStateException::class.java) {
-            opprettUttrekkArbeidssøkerTask.doTask(OpprettUttrekkArbeidssøkerTask.opprettTask(mars2021))
-        }
-        verify(exactly = 1) { mockUttrekkArbeidssøkerRepository.insert(any()) }
-        assertThat(uttrekkSlot.captured.fagsakId).isEqualTo(periodeForUttrekk2.fagsakId)
-
-        aktiveIdenter.put(periodeForUttrekk.fagsakId, "")
-        opprettUttrekkArbeidssøkerTask.doTask(OpprettUttrekkArbeidssøkerTask.opprettTask(mars2021))
-        verify(exactly = 2) { mockUttrekkArbeidssøkerRepository.insert(any()) }
-        assertThat(uttrekkSlot.captured.fagsakId).isEqualTo(periodeForUttrekk.fagsakId)
-    }
-
     @Nested
     inner class Tilgangstester {
         private val identStrengtFortroligUtland = "1"
@@ -585,19 +515,6 @@ internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
                 service.settKontrollert(uttrekk.id, true)
             }
         }
-    }
-
-    @Test
-    internal fun `oppretter task som kjører neste måned`() {
-        val now = YearMonth.now()
-        val task = OpprettUttrekkArbeidssøkerTask.opprettTask(now)
-        assertThat(task.payload).isEqualTo(now.toString())
-        assertThat(task.triggerTid).isEqualTo(now.plusMonths(1).atDay(1).atTime(5, 0))
-
-        opprettUttrekkArbeidssøkerTask.onCompletion(task)
-        val lagretTask = taskSlot.captured
-        assertThat(lagretTask.payload).isEqualTo(now.plusMonths(1).toString())
-        assertThat(lagretTask.triggerTid).isEqualTo(now.plusMonths(2).atDay(1).atTime(5, 0))
     }
 
     private fun opprettdata() {

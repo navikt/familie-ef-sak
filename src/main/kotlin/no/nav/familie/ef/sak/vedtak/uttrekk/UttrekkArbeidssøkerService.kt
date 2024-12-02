@@ -9,6 +9,7 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Adressebeskytte
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlPersonKort
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.gjeldende
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.visningsnavn
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.secureLogger
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.ef.sak.vedtak.domain.AktivitetType
 import no.nav.familie.ef.sak.vedtak.domain.Vedtaksperiode
@@ -41,6 +42,7 @@ class UttrekkArbeidssøkerService(
         personIdent: String,
     ) {
         val registrertSomArbeidssøker = erRegistrertSomArbeidssøker(personIdent, årMåned)
+        secureLogger.info("Registrert som arbeidssøker: $registrertSomArbeidssøker - fagsakId: $fagsakId")
         uttrekkArbeidssøkerRepository.insert(
             UttrekkArbeidssøkere(
                 fagsakId = fagsakId,
@@ -134,6 +136,7 @@ class UttrekkArbeidssøkerService(
         årMåned: YearMonth,
     ): Boolean {
         val sisteIMåneden = årMåned.atEndOfMonth()
+        secureLogger.info("Henter arbeidssøkere")
         val perioder =
             arbeidssøkerClient
                 .hentPerioder(
@@ -141,6 +144,7 @@ class UttrekkArbeidssøkerService(
                     sisteIMåneden,
                     sisteIMåneden,
                 ).perioder
+        secureLogger.info("Fant antall perioder for arbeidssøkere: ${perioder.size}")
         return perioder.any { it.fraOgMedDato <= sisteIMåneden && (it.tilOgMedDato == null || it.tilOgMedDato >= sisteIMåneden) }
     }
 
