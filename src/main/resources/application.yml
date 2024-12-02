@@ -205,7 +205,7 @@ FAMILIE_TILBAKE_SCOPE: api://${DEPLOY_ENV}-gcp.teamfamilie.familie-tilbake/.defa
 FAMILIE_KLAGE_SCOPE: api://${DEPLOY_ENV}-gcp.teamfamilie.familie-klage/.default
 FAMILIE_EF_PROXY_SCOPE: api://${DEPLOY_ENV}-fss.teamfamilie.familie-ef-proxy/.default
 INFOTRYGD_REPLIKA_SCOPE: api://${DEPLOY_ENV}-fss.teamfamilie.familie-ef-infotrygd/.default
-ARBEIDSSOKER_SCOPE: api://${DEPLOY_ENV}-gcp.paw.veilarbregistrering/.default
+ARBEIDSSOKER_SCOPE: api://${DEPLOY_ENV}-gcp.paw.paw-arbeidssoekerregisteret-api-oppslag/.default
 FAMILIE_INTEGRASJONER_SCOPE: api://${DEPLOY_ENV}-fss.teamfamilie.familie-integrasjoner/.default
 HISTORISK_PENSJON_SCOPE: api://${DEPLOY_ENV}-gcp.historisk.historisk-pensjon/.default
 FAMILIE_KS_SAK_SCOPE: api://${DEPLOY_ENV}-gcp.teamfamilie.familie-ks-sak/.default
