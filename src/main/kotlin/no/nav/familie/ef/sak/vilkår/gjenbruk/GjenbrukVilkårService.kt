@@ -67,14 +67,17 @@ class GjenbrukVilkårService(
         behandlingId: UUID,
         behandlingIdForGjenbruk: UUID,
         vilkårId: UUID,
-    ): Vilkårsvurdering? = utledVilkårsvurderingerForGjenbrukData(
-        behandlingId,
-        behandlingIdForGjenbruk,
-    ).firstOrNull { it.id == vilkårId }?.let { vilkårsVurderingForGjenbruk ->
-        secureLogger.info("${SikkerhetContext.hentSaksbehandlerEllerSystembruker()} gjenbruker enkel vurdering fra behandling $behandlingIdForGjenbruk " +
-            "for å oppdatere vurderinger på inngangsvilkår for behandling $behandlingId")
-        vilkårsvurderingRepository.update(vilkårsVurderingForGjenbruk)
-    }
+    ): Vilkårsvurdering? =
+        utledVilkårsvurderingerForGjenbrukData(
+            behandlingId,
+            behandlingIdForGjenbruk,
+        ).firstOrNull { it.id == vilkårId }?.let { vilkårsVurderingForGjenbruk ->
+            secureLogger.info(
+                "${SikkerhetContext.hentSaksbehandlerEllerSystembruker()} gjenbruker enkel vurdering fra behandling $behandlingIdForGjenbruk " +
+                    "for å oppdatere vurderinger på inngangsvilkår for behandling $behandlingId",
+            )
+            vilkårsvurderingRepository.update(vilkårsVurderingForGjenbruk)
+        }
 
     fun utledVilkårsvurderingerForGjenbrukData(
         behandlingSomSkalOppdateres: UUID,
@@ -135,10 +138,10 @@ class GjenbrukVilkårService(
                     barnId = nåværendeVurdering.barnId,
                     opphavsvilkår = tidligereVurdering.opprettOpphavsvilkår(),
                     delvilkårsvurdering =
-                    tidligereVurdering.delvilkårsvurdering.copy(
-                        delvilkårsvurderinger =
-                        tidligereVurdering.gjeldendeDelvilkårsvurderinger(),
-                    ),
+                        tidligereVurdering.delvilkårsvurdering.copy(
+                            delvilkårsvurderinger =
+                                tidligereVurdering.gjeldendeDelvilkårsvurderinger(),
+                        ),
                 )
             }
     }

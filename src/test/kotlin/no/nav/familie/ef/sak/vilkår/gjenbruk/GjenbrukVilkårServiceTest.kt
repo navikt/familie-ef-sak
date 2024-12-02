@@ -227,7 +227,6 @@ internal class GjenbrukVilkårServiceTest {
         assertThat(vilkårsvurderingSlot.captured.resultat).isEqualTo(Vilkårsresultat.OPPFYLT)
     }
 
-
     @Test
     internal fun `ingen treff på vilkår skal returnere vilkårsvurdering lik null`() {
         every { vilkårsvurderingRepository.findByBehandlingId(any()) } returns emptyList()
@@ -248,13 +247,12 @@ internal class GjenbrukVilkårServiceTest {
         )
     }
 
-    private fun gjenbrukEnkelVilkårsvurdering(vilkårId: UUID): Vilkårsvurdering? {
-        return gjenbrukVilkårService.gjenbrukInngangsvilkårVurdering(
+    private fun gjenbrukEnkelVilkårsvurdering(vilkårId: UUID): Vilkårsvurdering? =
+        gjenbrukVilkårService.gjenbrukInngangsvilkårVurdering(
             nyBT.behandling.id,
             ferdigstiltOS.behandling.id,
             vilkårId,
         )
-    }
 
     private fun mockGrunnlagsdata(
         behandlingId: UUID,
