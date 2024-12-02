@@ -14,23 +14,21 @@ class ArbeidssøkerClient(
     @Value("\${ARBEIDSSOKER_URL}")
     private val uriGcp: URI,
     @Qualifier("azure") restOperations: RestOperations,
-) : AbstractRestClient(restOperations, "paw.arbeidssoker") {
+) : AbstractRestClient(restOperations, "arbeidssøker") {
     fun hentPerioder(
         personIdent: String,
         fraOgMed: LocalDate,
         tilOgMed: LocalDate? = null,
-    ): ArbeidssøkerResponse {
+    ): List<ArbeidssøkerPeriode> {
         val uriBuilder =
             UriComponentsBuilder
                 .fromUri(uriGcp)
-                .pathSegment("veilarbregistrering/api/arbeidssoker/perioder")
-                .queryParam("fraOgMed", fraOgMed)
-        tilOgMed?.let { uriBuilder.queryParam("tilOgMed", tilOgMed) }
+                .pathSegment("api/v1/veileder/arbeidssoekerperioder")
 
         return postForEntity(uriBuilder.build().toUri(), FnrArbeidssøker(personIdent))
     }
 }
 
 data class FnrArbeidssøker(
-    val fnr: String,
+    val identitetsnummer: String,
 )

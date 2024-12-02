@@ -143,9 +143,9 @@ class UttrekkArbeidssøkerService(
                     personIdent,
                     sisteIMåneden,
                     sisteIMåneden,
-                ).perioder
+                )
         secureLogger.info("Fant antall perioder for arbeidssøkere: ${perioder.size}")
-        return perioder.any { it.fraOgMedDato <= sisteIMåneden && (it.tilOgMedDato == null || it.tilOgMedDato >= sisteIMåneden) }
+        return perioder.any { it.startet.tidspunkt.toLocalDate() <= sisteIMåneden && (it.avsluttet == null || it.avsluttet.tidspunkt.toLocalDate() >= sisteIMåneden) }
     }
 
     /**

@@ -283,7 +283,7 @@ INFOTRYGD_REPLIKA_API_URL: https://familie-ef-infotrygd.${ON_PREM_URL_ENV}-fss-p
 PDL_URL: https://pdl-api.${ON_PREM_URL_ENV}-fss-pub.nais.io
 REPR_API_URL: http://repr-api.repr
 FAMILIE_EF_PROXY_URL: https://familie-ef-proxy.${ON_PREM_URL_ENV}-fss-pub.nais.io
-ARBEIDSSOKER_URL: http://veilarbregistrering.paw.svc.cluster.local
+ARBEIDSSOKER_URL: https://oppslag-arbeidssoekerregisteret.intern.nav.no
 HISTORISK_PENSJON_URL: http://historisk-pensjon.historisk
 FAMILIE_KS_SAK_URL: http://familie-ks-sak
 FRONTEND_OPPGAVE_URL: https://ensligmorellerfar.intern.nav.no/oppgavebenk

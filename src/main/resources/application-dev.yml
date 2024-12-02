@@ -5,6 +5,7 @@ DEPLOY_ENV: dev
 ON_PREM_URL_ENV: dev
 
 FRONTEND_OPPGAVE_URL: https://ensligmorellerfar.intern.dev.nav.no/oppgavebenk
+ARBEIDSSOKER_URL: https://oppslag-arbeidssoekerregisteret.intern.dev.nav.no
 
 G_OMREGNING_CRON_EXPRESSION: 0 0 * * * ?
 DEAKTIVER_MIKROFRONTEND_CRON_EXPRESSION: 0 30 14 * * ? #kl 14:30 hver dag

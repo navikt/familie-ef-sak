@@ -6,6 +6,8 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Profile
 import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.UUID
 
 @Profile("mock-arbeidssøker")
 @Configuration
@@ -15,7 +17,9 @@ internal class ArbeidssøkerConfiguration {
         val client: ArbeidssøkerClient = mockk()
 
         every { client.hentPerioder(any(), any(), any()) } answers {
-            ArbeidssøkerResponse(listOf(ArbeidssøkerPeriode(secondArg<LocalDate>().minusMonths(1), LocalDate.now().plusDays(1))))
+            val startTidspunkt = secondArg<LocalDate>().minusMonths(1)
+            val sluttTidspunkt = LocalDate.now().plusDays(1)
+            listOf(ArbeidssøkerPeriode(UUID.randomUUID(), LocalDateWrapper(LocalDateTime.from(startTidspunkt)), LocalDateWrapper(LocalDateTime.from(sluttTidspunkt))))
         }
 
         return client
