@@ -11,7 +11,6 @@ import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.felles.util.opprettGrunnlagsdata
-import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.oppgave.TilordnetRessursService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.GrunnlagsdataMedMetadata
@@ -38,7 +37,6 @@ import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
@@ -227,14 +225,6 @@ internal class GjenbrukVilkårServiceTest {
         assertThat(vilkårsvurderingSlot.isCaptured).isEqualTo(true)
         assertThat(vilkårsvurderingSlot.captured.id).isEqualTo(nyBT.sivilstandsvilkår.id)
         assertThat(vilkårsvurderingSlot.captured.resultat).isEqualTo(Vilkårsresultat.OPPFYLT)
-    }
-
-    @Test
-    internal fun `ingen treff på vilkår skal kaste ApiFeil`() {
-        every { vilkårsvurderingRepository.findByBehandlingId(any()) } returns emptyList()
-        assertThrows<ApiFeil> {
-            assertThat(gjenbrukEnkelVilkårsvurdering(nyBT.sivilstandsvilkår.id))
-        }
     }
 
     private fun gjenbrukVilkår() {

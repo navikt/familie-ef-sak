@@ -349,7 +349,7 @@ internal class VurderingServiceTest {
         val vilkårsvurderinger = lagVilkårsvurderinger(behandlingId, OPPFYLT)
         every { vilkårsvurderingRepository.findByBehandlingId(behandlingId) } returns vilkårsvurderinger
         val vurderinger = vurderingService.hentEllerOpprettVurderinger(behandlingId)
-        vurderinger.vurderinger.forEach() {
+        vurderinger.vurderinger.forEach {
             assertThat(it.kanGjenbrukes).isFalse()
         }
     }
