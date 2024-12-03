@@ -67,17 +67,18 @@ class GjenbrukVilkårService(
         behandlingId: UUID,
         behandlingIdForGjenbruk: UUID,
         vilkårId: UUID,
-    ): Vilkårsvurdering? =
-        utledVilkårsvurderingerForGjenbrukData(
+    ): Vilkårsvurdering {
+        val vilkårsVurderingForGjenbruk = utledVilkårsvurderingerForGjenbrukData(
             behandlingId,
             behandlingIdForGjenbruk,
-        ).firstOrNull { it.id == vilkårId }?.let { vilkårsVurderingForGjenbruk ->
-            secureLogger.info(
-                "${SikkerhetContext.hentSaksbehandlerEllerSystembruker()} gjenbruker enkel vurdering fra behandling $behandlingIdForGjenbruk " +
-                    "for å oppdatere vurderinger på inngangsvilkår for behandling $behandlingId",
-            )
-            vilkårsvurderingRepository.update(vilkårsVurderingForGjenbruk)
-        }
+        ).firstOrNull { it.id == vilkårId }
+        brukerfeilHvis(vilkårsVurderingForGjenbruk == null) { "Kunne ikke gjenbruke vilkårsvurdering vilkårId ${vilkårId} fra behandlingId ${behandlingId}" }
+        secureLogger.info(
+            "${SikkerhetContext.hentSaksbehandlerEllerSystembruker()} gjenbruker enkel vurdering fra behandling $behandlingIdForGjenbruk " +
+                "for å oppdatere vurderinger på inngangsvilkår for behandling $behandlingId",
+        )
+        return vilkårsvurderingRepository.update(vilkårsVurderingForGjenbruk)
+    }
 
     fun utledVilkårsvurderingerForGjenbrukData(
         behandlingSomSkalOppdateres: UUID,
@@ -138,10 +139,10 @@ class GjenbrukVilkårService(
                     barnId = nåværendeVurdering.barnId,
                     opphavsvilkår = tidligereVurdering.opprettOpphavsvilkår(),
                     delvilkårsvurdering =
-                        tidligereVurdering.delvilkårsvurdering.copy(
-                            delvilkårsvurderinger =
-                                tidligereVurdering.gjeldendeDelvilkårsvurderinger(),
-                        ),
+                    tidligereVurdering.delvilkårsvurdering.copy(
+                        delvilkårsvurderinger =
+                        tidligereVurdering.gjeldendeDelvilkårsvurderinger(),
+                    ),
                 )
             }
     }
