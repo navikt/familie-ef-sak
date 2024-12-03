@@ -141,10 +141,8 @@ class UttrekkArbeidssøkerService(
             arbeidssøkerClient
                 .hentPerioder(
                     personIdent,
-                    sisteIMåneden,
-                    sisteIMåneden,
                 )
-        secureLogger.info("Fant antall perioder for arbeidssøkere: ${perioder.size}")
+        secureLogger.info("Fant perioder for arbeidssøker med ident $personIdent med perioder: $perioder")
         return perioder.any { it.startet.tidspunkt.toLocalDate() <= sisteIMåneden && (it.avsluttet == null || it.avsluttet.tidspunkt.toLocalDate() >= sisteIMåneden) }
     }
 

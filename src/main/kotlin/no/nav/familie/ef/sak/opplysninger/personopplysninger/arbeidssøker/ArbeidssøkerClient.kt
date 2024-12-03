@@ -7,7 +7,6 @@ import org.springframework.stereotype.Service
 import org.springframework.web.client.RestOperations
 import org.springframework.web.util.UriComponentsBuilder
 import java.net.URI
-import java.time.LocalDate
 
 @Service
 class ArbeidssøkerClient(
@@ -17,8 +16,6 @@ class ArbeidssøkerClient(
 ) : AbstractRestClient(restOperations, "arbeidssøker") {
     fun hentPerioder(
         personIdent: String,
-        fraOgMed: LocalDate,
-        tilOgMed: LocalDate? = null,
     ): List<ArbeidssøkerPeriode> {
         val uriBuilder =
             UriComponentsBuilder
