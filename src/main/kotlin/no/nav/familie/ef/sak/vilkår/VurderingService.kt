@@ -94,6 +94,7 @@ class VurderingService(
                 behandlingId = behandling.id,
                 metadata = metadata.copy(erMigrering = true),
                 stønadstype = stønadstype,
+                kanGjenbrukes = false,
             ).map { it.copy(resultat = Vilkårsresultat.OPPFYLT) }
         vilkårsvurderingRepository.insertAll(nyeVilkårsvurderinger)
         nyeVilkårsvurderinger.forEach {
@@ -158,12 +159,15 @@ class VurderingService(
         behandlingId: UUID,
         metadata: HovedregelMetadata,
     ): List<Vilkårsvurdering> {
+        val harBehandlingForGjenbruk: Boolean = gjenbrukVilkårService.finnBehandlingerForGjenbruk(behandlingId).isNotEmpty()
+
         val stønadstype = fagsakService.hentFagsakForBehandling(behandlingId).stønadstype
         val nyeVilkårsvurderinger: List<Vilkårsvurdering> =
             opprettNyeVilkårsvurderinger(
                 behandlingId = behandlingId,
                 metadata = metadata,
                 stønadstype = stønadstype,
+                kanGjenbrukes = harBehandlingForGjenbruk,
             )
         return vilkårsvurderingRepository.insertAll(nyeVilkårsvurderinger)
     }

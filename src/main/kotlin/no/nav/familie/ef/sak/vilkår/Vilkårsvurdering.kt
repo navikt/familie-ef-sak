@@ -37,6 +37,7 @@ data class Vilkårsvurdering(
     val delvilkårsvurdering: DelvilkårsvurderingWrapper,
     @Embedded(onEmpty = Embedded.OnEmpty.USE_NULL, prefix = "opphavsvilkaar_")
     val opphavsvilkår: Opphavsvilkår?,
+    val kanGjenbrukes: Boolean = false,
 ) {
     init {
         require(resultat.erIkkeDelvilkårsresultat()) // Verdien AUTOMATISK_OPPFYLT er kun forbeholdt delvilkår

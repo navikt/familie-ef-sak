@@ -201,13 +201,14 @@ object OppdaterVilkår {
         behandlingId: UUID,
         metadata: HovedregelMetadata,
         stønadstype: StønadType,
+        kanGjenbrukes: Boolean = false,
     ): List<Vilkårsvurdering> =
         vilkårsreglerForStønad(stønadstype)
             .flatMap { vilkårsregel ->
                 if (vilkårsregel.vilkårType.gjelderFlereBarn() && metadata.barn.isNotEmpty()) {
-                    metadata.barn.map { lagNyVilkårsvurdering(vilkårsregel, metadata, behandlingId, it.id) }
+                    metadata.barn.map { lagNyVilkårsvurdering(vilkårsregel, metadata, behandlingId, it.id, kanGjenbrukes) }
                 } else {
-                    listOf(lagNyVilkårsvurdering(vilkårsregel, metadata, behandlingId))
+                    listOf(lagNyVilkårsvurdering(vilkårsregel, metadata, behandlingId, kanGjenbrukes = kanGjenbrukes))
                 }
             }
 
@@ -216,6 +217,7 @@ object OppdaterVilkår {
         behandlingId: UUID,
         barnId: UUID,
         stønadstype: StønadType,
+        kanGjenbrukes: Boolean = false,
     ): List<Vilkårsvurdering> =
         when (stønadstype) {
             OVERGANGSSTØNAD, SKOLEPENGER ->
@@ -225,13 +227,14 @@ object OppdaterVilkår {
                         metadata,
                         behandlingId,
                         barnId,
+                        kanGjenbrukes,
                     ),
                 )
 
             BARNETILSYN ->
                 listOf(
-                    lagNyVilkårsvurdering(AleneomsorgRegel(), metadata, behandlingId, barnId),
-                    lagNyVilkårsvurdering(AlderPåBarnRegel(), metadata, behandlingId, barnId),
+                    lagNyVilkårsvurdering(AleneomsorgRegel(), metadata, behandlingId, barnId, false),
+                    lagNyVilkårsvurdering(AlderPåBarnRegel(), metadata, behandlingId, barnId, false),
                 )
         }
 
@@ -240,6 +243,7 @@ object OppdaterVilkår {
         metadata: HovedregelMetadata,
         behandlingId: UUID,
         barnId: UUID? = null,
+        kanGjenbrukes: Boolean,
     ): Vilkårsvurdering {
         val delvilkårsvurdering = vilkårsregel.initiereDelvilkårsvurdering(metadata, barnId = barnId)
         return Vilkårsvurdering(
@@ -249,6 +253,7 @@ object OppdaterVilkår {
             delvilkårsvurdering = DelvilkårsvurderingWrapper(delvilkårsvurdering),
             resultat = utledResultat(vilkårsregel, delvilkårsvurdering.map { it.tilDto() }).vilkår,
             opphavsvilkår = null,
+            kanGjenbrukes = kanGjenbrukes,
         )
     }
 }
