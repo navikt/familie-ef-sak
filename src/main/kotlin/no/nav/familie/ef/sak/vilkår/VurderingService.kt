@@ -136,16 +136,29 @@ class VurderingService(
         return Pair(grunnlag, metadata)
     }
 
+    private fun vilkårKanGjenbrukes(
+        behandlingId: UUID,
+        vilkårsvurderingId: UUID,
+    ): Boolean {
+        val behandlingForGjenbruk =
+            gjenbrukVilkårService
+                .finnBehandlingerForGjenbruk(behandlingId)
+                .firstOrNull()
+
+        if (behandlingForGjenbruk == null) {
+            return false
+        }
+        return gjenbrukVilkårService
+            .utledVilkårsvurderingerForGjenbrukData(
+                behandlingId,
+                behandlingForGjenbruk.id,
+            ).any { it.id == vilkårsvurderingId }
+    }
+
     private fun hentEllerOpprettVurderinger(
         behandlingId: UUID,
         metadata: HovedregelMetadata,
-    ): List<VilkårsvurderingDto> {
-        val finnesBehandlingForGjenbruk = gjenbrukVilkårService.finnBehandlingerForGjenbruk(behandlingId).isNotEmpty()
-
-        val kanGjenbrukes = finnesBehandlingForGjenbruk
-
-        return hentEllerOpprettVurderingerForVilkår(behandlingId, metadata).map { it.tilDto(kanGjenbrukes) }
-    }
+    ): List<VilkårsvurderingDto> = hentEllerOpprettVurderingerForVilkår(behandlingId, metadata).map { it.tilDto(vilkårKanGjenbrukes(behandlingId, it.id)) }
 
     private fun hentEllerOpprettVurderingerForVilkår(
         behandlingId: UUID,
