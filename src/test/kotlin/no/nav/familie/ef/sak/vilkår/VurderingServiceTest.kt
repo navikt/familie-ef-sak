@@ -128,6 +128,7 @@ internal class VurderingServiceTest {
                 barnMedSamvær = barnMedSamvær,
             )
         every { tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandler(any()) } returns true
+        every { gjenbrukVilkårService.finnBehandlingerForGjenbruk(any()) } returns listOf(mockk())
     }
 
     private fun lagBarnetilsynBarn(barnId: UUID = UUID.randomUUID()) =

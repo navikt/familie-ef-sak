@@ -94,7 +94,6 @@ class VurderingService(
                 behandlingId = behandling.id,
                 metadata = metadata.copy(erMigrering = true),
                 stønadstype = stønadstype,
-                kanGjenbrukes = false,
             ).map { it.copy(resultat = Vilkårsresultat.OPPFYLT) }
         vilkårsvurderingRepository.insertAll(nyeVilkårsvurderinger)
         nyeVilkårsvurderinger.forEach {
@@ -140,7 +139,13 @@ class VurderingService(
     private fun hentEllerOpprettVurderinger(
         behandlingId: UUID,
         metadata: HovedregelMetadata,
-    ): List<VilkårsvurderingDto> = hentEllerOpprettVurderingerForVilkår(behandlingId, metadata).map(Vilkårsvurdering::tilDto)
+    ): List<VilkårsvurderingDto> {
+        val erIkkeBehandlingForGjenbruk = gjenbrukVilkårService.finnBehandlingerForGjenbruk(behandlingId).isEmpty()
+
+        val kanGjenbrukes = erIkkeBehandlingForGjenbruk
+
+        return hentEllerOpprettVurderingerForVilkår(behandlingId, metadata).map { it.tilDto(kanGjenbrukes) }
+    }
 
     private fun hentEllerOpprettVurderingerForVilkår(
         behandlingId: UUID,
@@ -159,15 +164,12 @@ class VurderingService(
         behandlingId: UUID,
         metadata: HovedregelMetadata,
     ): List<Vilkårsvurdering> {
-        val harBehandlingForGjenbruk: Boolean = gjenbrukVilkårService.finnBehandlingerForGjenbruk(behandlingId).isNotEmpty()
-
         val stønadstype = fagsakService.hentFagsakForBehandling(behandlingId).stønadstype
         val nyeVilkårsvurderinger: List<Vilkårsvurdering> =
             opprettNyeVilkårsvurderinger(
                 behandlingId = behandlingId,
                 metadata = metadata,
                 stønadstype = stønadstype,
-                kanGjenbrukes = harBehandlingForGjenbruk,
             )
         return vilkårsvurderingRepository.insertAll(nyeVilkårsvurderinger)
     }

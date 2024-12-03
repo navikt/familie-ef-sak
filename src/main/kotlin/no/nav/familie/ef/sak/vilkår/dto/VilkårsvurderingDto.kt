@@ -69,7 +69,7 @@ fun Vurdering.tilDto() = VurderingDto(this.regelId, this.svar, this.begrunnelse)
 
 fun Delvilkårsvurdering.tilDto() = DelvilkårsvurderingDto(this.resultat, this.vurderinger.map { it.tilDto() })
 
-fun Vilkårsvurdering.tilDto() =
+fun Vilkårsvurdering.tilDto(kanGjenbrukes: Boolean = false) =
     VilkårsvurderingDto(
         id = this.id,
         behandlingId = this.behandlingId,
@@ -83,7 +83,7 @@ fun Vilkårsvurdering.tilDto() =
                 .filter { it.resultat != Vilkårsresultat.IKKE_AKTUELL }
                 .map { it.tilDto() },
         opphavsvilkår = this.opphavsvilkår?.let { OpphavsvilkårDto(it.behandlingId, it.vurderingstidspunkt) },
-        kanGjenbrukes = this.kanGjenbrukes,
+        kanGjenbrukes = kanGjenbrukes,
     )
 
 fun DelvilkårsvurderingDto.svarTilDomene() = this.vurderinger.map { it.tilDomene() }
