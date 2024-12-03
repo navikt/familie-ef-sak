@@ -72,8 +72,7 @@ class GjenbrukVilkårService(
             utledVilkårsvurderingerForGjenbrukData(
                 behandlingId,
                 behandlingIdForGjenbruk,
-            ).firstOrNull { it.id == vilkårId }
-        brukerfeilHvis(vilkårsVurderingForGjenbruk == null) { "Vilkårsvurdering finnes ikke" }
+            ).first { it.id == vilkårId }
         secureLogger.info(
             "${SikkerhetContext.hentSaksbehandlerEllerSystembruker()} gjenbruker enkel vurdering fra behandling $behandlingIdForGjenbruk " +
                 "for å oppdatere vurderinger på inngangsvilkår for behandling $behandlingId",
