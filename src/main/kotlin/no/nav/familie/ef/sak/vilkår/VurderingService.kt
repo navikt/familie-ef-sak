@@ -140,9 +140,9 @@ class VurderingService(
         behandlingId: UUID,
         metadata: HovedregelMetadata,
     ): List<VilkårsvurderingDto> {
-        val erIkkeBehandlingForGjenbruk = gjenbrukVilkårService.finnBehandlingerForGjenbruk(behandlingId).isEmpty()
+        val finnesBehandlingForGjenbruk = gjenbrukVilkårService.finnBehandlingerForGjenbruk(behandlingId).isNotEmpty()
 
-        val kanGjenbrukes = erIkkeBehandlingForGjenbruk
+        val kanGjenbrukes = finnesBehandlingForGjenbruk
 
         return hentEllerOpprettVurderingerForVilkår(behandlingId, metadata).map { it.tilDto(kanGjenbrukes) }
     }
