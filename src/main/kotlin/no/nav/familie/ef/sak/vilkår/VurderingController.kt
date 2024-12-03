@@ -1,6 +1,7 @@
 package no.nav.familie.ef.sak.vilkår
 
 import no.nav.familie.ef.sak.AuditLoggerEvent
+import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.ef.sak.vilkår.dto.EnkeltVilkårForGjenbrukRequest
 import no.nav.familie.ef.sak.vilkår.dto.GjenbrukVilkårsvurderingerDto
@@ -15,6 +16,7 @@ import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.slf4j.LoggerFactory
+import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.GetMapping
@@ -118,6 +120,6 @@ class VurderingController(
         val vilkårsVurderingForGjenbruk = gjenbrukVilkårService.gjenbrukInngangsvilkårVurdering(request.behandlingId, behandlingForGjenbruk.id, request.vilkårId)
         vilkårsVurderingForGjenbruk?.let {
             return Ressurs.success(it.tilDto())
-        } ?: return Ressurs.failure("Kunne ikke gjenbruke vilkårsvurdering vilkårId ${request.vilkårId} fra behandlingId ${request.behandlingId}", frontendFeilmelding = "Vilkårsvurdering for gjenbruk finnes ikke")
+        } ?: throw ApiFeil("Kunne ikke gjenbruke vilkårsvurdering vilkårId ${request.vilkårId} fra behandlingId ${request.behandlingId}", HttpStatus.NOT_FOUND)
     }
 }
