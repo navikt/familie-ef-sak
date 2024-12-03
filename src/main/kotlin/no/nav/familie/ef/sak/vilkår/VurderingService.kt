@@ -145,14 +145,13 @@ class VurderingService(
                 .finnBehandlingerForGjenbruk(behandlingId)
                 .firstOrNull()
 
-        if (behandlingForGjenbruk == null) {
-            return false
-        }
-        return gjenbrukVilkårService
-            .utledVilkårsvurderingerForGjenbrukData(
-                behandlingId,
-                behandlingForGjenbruk.id,
-            ).any { it.id == vilkårsvurderingId }
+        return behandlingForGjenbruk?.let { behandlingForGjenbruk ->
+            gjenbrukVilkårService
+                .utledVilkårsvurderingerForGjenbrukData(
+                    behandlingId,
+                    behandlingForGjenbruk.id,
+                ).any { it.id == vilkårsvurderingId }
+        } ?: false
     }
 
     private fun hentEllerOpprettVurderinger(

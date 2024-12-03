@@ -9,6 +9,7 @@ import io.mockk.verify
 import no.nav.familie.ef.sak.barn.BarnService
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
+import no.nav.familie.ef.sak.behandling.dto.BehandlingDto
 import no.nav.familie.ef.sak.blankett.BlankettRepository
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.vilkår.VilkårTestUtil.mockVilkårGrunnlagDto
@@ -95,6 +96,7 @@ internal class VurderingServiceTest {
     private val barn = søknadBarnTilBehandlingBarn(søknad.barn)
     private val behandling = behandling(fagsak(), BehandlingStatus.OPPRETTET, årsak = BehandlingÅrsak.PAPIRSØKNAD)
     private val behandlingId = UUID.randomUUID()
+    private val behandlingDto = mockk<BehandlingDto>()
 
     @BeforeEach
     fun setUp() {
@@ -128,7 +130,9 @@ internal class VurderingServiceTest {
                 barnMedSamvær = barnMedSamvær,
             )
         every { tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandler(any()) } returns true
-        every { gjenbrukVilkårService.finnBehandlingerForGjenbruk(any()) } returns listOf(mockk())
+        every { gjenbrukVilkårService.finnBehandlingerForGjenbruk(any()) } returns listOf(behandlingDto)
+        every { gjenbrukVilkårService.utledVilkårsvurderingerForGjenbrukData(any(), any()) } returns listOf()
+        every { behandlingDto.id } returns behandlingId
     }
 
     private fun lagBarnetilsynBarn(barnId: UUID = UUID.randomUUID()) =
@@ -326,6 +330,28 @@ internal class VurderingServiceTest {
         every { vilkårsvurderingRepository.findByBehandlingId(behandlingId) } returns vilkårsvurderinger
         val erAlleVilkårOppfylt = vurderingService.erAlleVilkårOppfylt(behandlingId)
         assertThat(erAlleVilkårOppfylt).isTrue
+    }
+
+    @Test
+    internal fun `vilkår som kan gjenbrukes skal ha satt kanGjenbrukes-flagg lik true i DTOen`() {
+        val vilkårsvurderinger = lagVilkårsvurderinger(behandlingId, OPPFYLT)
+        every { vilkårsvurderingRepository.findByBehandlingId(behandlingId) } returns vilkårsvurderinger
+        every { gjenbrukVilkårService.utledVilkårsvurderingerForGjenbrukData(any(), any()) } returns listOf(vilkårsvurderinger.get(0))
+        val vurderinger = vurderingService.hentEllerOpprettVurderinger(behandlingId)
+        assertThat(vurderinger.vurderinger.get(0).kanGjenbrukes).isTrue()
+        for (i in 1 until vurderinger.vurderinger.size) {
+            assertThat(vurderinger.vurderinger.get(i).kanGjenbrukes).isFalse()
+        }
+    }
+
+    @Test
+    internal fun `ingen vilkår som ikke kan gjenbrukes skal ha satt kanGjenbrukes-flagg i DTOen`() {
+        val vilkårsvurderinger = lagVilkårsvurderinger(behandlingId, OPPFYLT)
+        every { vilkårsvurderingRepository.findByBehandlingId(behandlingId) } returns vilkårsvurderinger
+        val vurderinger = vurderingService.hentEllerOpprettVurderinger(behandlingId)
+        vurderinger.vurderinger.forEach() {
+            assertThat(it.kanGjenbrukes).isFalse()
+        }
     }
 
     @Test
