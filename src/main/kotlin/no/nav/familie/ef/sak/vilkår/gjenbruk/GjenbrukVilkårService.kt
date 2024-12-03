@@ -68,10 +68,11 @@ class GjenbrukVilkårService(
         behandlingIdForGjenbruk: UUID,
         vilkårId: UUID,
     ): Vilkårsvurdering {
-        val vilkårsVurderingForGjenbruk = utledVilkårsvurderingerForGjenbrukData(
-            behandlingId,
-            behandlingIdForGjenbruk,
-        ).firstOrNull { it.id == vilkårId }
+        val vilkårsVurderingForGjenbruk =
+            utledVilkårsvurderingerForGjenbrukData(
+                behandlingId,
+                behandlingIdForGjenbruk,
+            ).firstOrNull { it.id == vilkårId }
         brukerfeilHvis(vilkårsVurderingForGjenbruk == null) { "Vilkårsvurdering finnes ikke" }
         secureLogger.info(
             "${SikkerhetContext.hentSaksbehandlerEllerSystembruker()} gjenbruker enkel vurdering fra behandling $behandlingIdForGjenbruk " +
@@ -139,10 +140,10 @@ class GjenbrukVilkårService(
                     barnId = nåværendeVurdering.barnId,
                     opphavsvilkår = tidligereVurdering.opprettOpphavsvilkår(),
                     delvilkårsvurdering =
-                    tidligereVurdering.delvilkårsvurdering.copy(
-                        delvilkårsvurderinger =
-                        tidligereVurdering.gjeldendeDelvilkårsvurderinger(),
-                    ),
+                        tidligereVurdering.delvilkårsvurdering.copy(
+                            delvilkårsvurderinger =
+                                tidligereVurdering.gjeldendeDelvilkårsvurderinger(),
+                        ),
                 )
             }
     }
