@@ -11,6 +11,7 @@ import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.felles.util.opprettGrunnlagsdata
+import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.oppgave.TilordnetRessursService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.GrunnlagsdataMedMetadata
@@ -37,6 +38,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
@@ -228,16 +230,11 @@ internal class GjenbrukVilkårServiceTest {
     }
 
     @Test
-    internal fun `ingen treff på vilkår skal returnere vilkårsvurdering lik null`() {
+    internal fun `ingen treff på vilkår skal kaste ApiFeil`() {
         every { vilkårsvurderingRepository.findByBehandlingId(any()) } returns emptyList()
-        val vilkårsvurdering = gjenbrukEnkelVilkårsvurdering(nyBT.sivilstandsvilkår.id)
-        assertThat(vilkårsvurdering).isNull()
-    }
-
-    @Test
-    internal fun `når det finnes vilkår skal det ikke returneres null`() {
-        val vilkårsvurdering = gjenbrukEnkelVilkårsvurdering(nyBT.sivilstandsvilkår.id)
-        assertThat(vilkårsvurdering).isNotNull()
+        assertThrows<ApiFeil> {
+            assertThat(gjenbrukEnkelVilkårsvurdering(nyBT.sivilstandsvilkår.id))
+        }
     }
 
     private fun gjenbrukVilkår() {
@@ -247,7 +244,7 @@ internal class GjenbrukVilkårServiceTest {
         )
     }
 
-    private fun gjenbrukEnkelVilkårsvurdering(vilkårId: UUID): Vilkårsvurdering? =
+    private fun gjenbrukEnkelVilkårsvurdering(vilkårId: UUID): Vilkårsvurdering =
         gjenbrukVilkårService.gjenbrukInngangsvilkårVurdering(
             nyBT.behandling.id,
             ferdigstiltOS.behandling.id,
