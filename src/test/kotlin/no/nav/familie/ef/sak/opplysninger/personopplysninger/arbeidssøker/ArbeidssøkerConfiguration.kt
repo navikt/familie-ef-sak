@@ -16,7 +16,7 @@ internal class ArbeidssøkerConfiguration {
     fun arbeidssøkerClient(): ArbeidssøkerClient {
         val client: ArbeidssøkerClient = mockk()
 
-        every { client.hentPerioder(any(), any(), any()) } answers {
+        every { client.hentPerioder(any()) } answers {
             val startTidspunkt = secondArg<LocalDate>().minusMonths(1)
             val sluttTidspunkt = LocalDate.now().plusDays(1)
             listOf(ArbeidssøkerPeriode(UUID.randomUUID(), LocalDateWrapper(LocalDateTime.from(startTidspunkt)), LocalDateWrapper(LocalDateTime.from(sluttTidspunkt))))

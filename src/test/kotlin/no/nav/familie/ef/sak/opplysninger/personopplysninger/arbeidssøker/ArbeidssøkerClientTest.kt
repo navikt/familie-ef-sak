@@ -15,7 +15,6 @@ import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.web.client.RestOperations
 import java.net.URI
-import java.time.LocalDate
 
 class ArbeidssøkerClientTest {
     companion object {
@@ -54,7 +53,7 @@ class ArbeidssøkerClientTest {
             ),
         )
 
-        val response = arbeidssøkerClient.hentPerioder("01010199999", LocalDate.now())
+        val response = arbeidssøkerClient.hentPerioder("01010199999")
         assertThat(response).isNotNull
     }
 

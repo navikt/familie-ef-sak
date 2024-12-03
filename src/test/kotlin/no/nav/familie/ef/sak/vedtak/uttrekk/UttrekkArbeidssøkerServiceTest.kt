@@ -130,7 +130,7 @@ internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
     @BeforeEach
     internal fun setUp() {
         every { taskService.save(capture(taskSlot)) } answers { firstArg() }
-        every { arbeidssøkerClient.hentPerioder(any(), any(), any()) } returns listOf()
+        every { arbeidssøkerClient.hentPerioder(any()) } returns listOf()
         every { personService.hentPersonKortBolk(any()) } answers {
             firstArg<List<String>>().associateWith { lagPersonKort() }
         }
@@ -273,7 +273,7 @@ internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
                 ArbeidssøkerPeriode(startet = LocalDateWrapper(mars2021.atEndOfMonth().atStartOfDay()), avsluttet = LocalDateWrapper(mars2021.atEndOfMonth().atStartOfDay())),
                 ArbeidssøkerPeriode(startet = LocalDateWrapper(mars2021.atEndOfMonth().atStartOfDay()), avsluttet = LocalDateWrapper(mars2021.atEndOfMonth().plusDays(1).atStartOfDay())),
             ).forEach {
-                every { arbeidssøkerClient.hentPerioder(any(), any(), any()) } returns listOf(it)
+                every { arbeidssøkerClient.hentPerioder(any()) } returns listOf(it)
 
                 opprettdata()
 
@@ -294,7 +294,7 @@ internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
                 ArbeidssøkerPeriode(startet = LocalDateWrapper(mars2021.atDay(1).atStartOfDay()), avsluttet = LocalDateWrapper(mars2021.atEndOfMonth().minusDays(1).atStartOfDay())),
                 ArbeidssøkerPeriode(startet = LocalDateWrapper(mars2021.atEndOfMonth().plusDays(1).atStartOfDay()), avsluttet = LocalDateWrapper(mars2021.atEndOfMonth().plusMonths(1).atStartOfDay())),
             ).forEach {
-                every { arbeidssøkerClient.hentPerioder(any(), any(), any()) } returns listOf(it)
+                every { arbeidssøkerClient.hentPerioder(any()) } returns listOf(it)
 
                 opprettdata()
 
@@ -584,12 +584,6 @@ internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
                 inntektBegrunnelse = null,
             )
         beregnYtelseSteg.utførSteg(saksbehandling(fagsak, behandling), vedtak)
-    }
-
-    fun opprettBehandlinger() {
-        testoppsettService.lagreFagsak(fagsak)
-        behandlingRepository.insert(behandling)
-        behandlingRepository.insert(behandling2)
     }
 
     private fun lagPersonKort(gradering: AdressebeskyttelseGradering? = null) =
