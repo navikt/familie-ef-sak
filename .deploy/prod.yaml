@@ -78,7 +78,7 @@ spec:
           namespace: historisk
         - application: familie-ef-proxy
           cluster: prod-fss
-        - application: veilarbregistrering
+        - application: paw-arbeidssoekerregisteret-api-oppslag
           namespace: paw
         - application: skjermede-personer-pip
           namespace: nom
