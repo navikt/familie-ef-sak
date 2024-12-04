@@ -116,6 +116,6 @@ class VurderingController(
         tilgangService.validerHarSaksbehandlerrolle()
 
         val vilkårsVurderingForGjenbruk = gjenbrukVilkårService.gjenbrukInngangsvilkårVurdering(request.behandlingId, behandlingForGjenbruk.id, request.vilkårId)
-        return Ressurs.success(vilkårsVurderingForGjenbruk.tilDto())
+        return Ressurs.success(vilkårsVurderingForGjenbruk.tilDto(true))
     }
 }

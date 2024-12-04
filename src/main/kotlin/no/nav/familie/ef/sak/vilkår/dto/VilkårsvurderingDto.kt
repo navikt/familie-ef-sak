@@ -69,7 +69,7 @@ fun Vurdering.tilDto() = VurderingDto(this.regelId, this.svar, this.begrunnelse)
 
 fun Delvilkårsvurdering.tilDto() = DelvilkårsvurderingDto(this.resultat, this.vurderinger.map { it.tilDto() })
 
-fun Vilkårsvurdering.tilDto(kanGjenbrukes: Boolean = true) =
+fun Vilkårsvurdering.tilDto(kanGjenbrukes: Boolean = false) =
     VilkårsvurderingDto(
         id = this.id,
         behandlingId = this.behandlingId,
