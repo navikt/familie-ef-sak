@@ -370,7 +370,7 @@ internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
         val opprettUttrekkArbeidssøkerTask =
             OpprettUttrekkArbeidssøkerTask(uttrekkArbeidssøkerService, mockFagsakService, taskService)
 
-        val arbeidssøkerPeriode = ArbeidssøkerPeriode(startet = LocalDateWrapper(vedtaksperiode.periode.fomDato.atTime(23,59)), avsluttet = LocalDateWrapper(vedtaksperiode.periode.tomDato.atTime(23,59)))
+        val arbeidssøkerPeriode = ArbeidssøkerPeriode(startet = LocalDateWrapper(vedtaksperiode.periode.fomDato.atTime(23, 59)), avsluttet = LocalDateWrapper(vedtaksperiode.periode.tomDato.atTime(23, 59)))
         val periodeForUttrekk =
             VedtaksperioderForUttrekk(
                 UUID.randomUUID(),
@@ -392,14 +392,13 @@ internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
         every { mockUttrekkArbeidssøkerRepository.insert(capture(uttrekkSlot)) } returns mockk()
         every { arbeidssøkerClient.hentPerioder(any()) } returns listOf(arbeidssøkerPeriode, arbeidssøkerPeriode)
 
-
         every {
             mockUttrekkArbeidssøkerRepository.hentVedtaksperioderForSisteFerdigstilteBehandlinger(any(), any())
         } returns
-                listOf(
-                    periodeForUttrekk,
-                    periodeForUttrekk2,
-                )
+            listOf(
+                periodeForUttrekk,
+                periodeForUttrekk2,
+            )
 
         every {
             mockUttrekkArbeidssøkerRepository.existsByÅrMånedAndFagsakId(any(), any())
@@ -594,7 +593,6 @@ internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
         assertThat(lagretTask.payload).isEqualTo(now.plusMonths(1).toString())
         assertThat(lagretTask.triggerTid).isEqualTo(now.plusMonths(2).atDay(1).atTime(5, 0))
     }
-
 
     private fun opprettdata() {
         testoppsettService.lagreFagsak(fagsak)

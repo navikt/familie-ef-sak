@@ -136,7 +136,6 @@ class UttrekkArbeidssøkerService(
         årMåned: YearMonth,
     ): Boolean {
         val sisteIMåneden = årMåned.atEndOfMonth()
-        secureLogger.info("Henter arbeidssøkere")
         val perioder =
             arbeidssøkerClient
                 .hentPerioder(
