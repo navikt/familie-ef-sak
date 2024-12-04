@@ -37,6 +37,9 @@ class OpprettUttrekkArbeidssøkerTask(
         var feilede = 0
         var antallOk = 0
         uttrekk.forEach {
+            if (uttrekkArbeidssøkerService.uttrekkFinnes(årMåned, it.fagsakId)) {
+                return@forEach
+            }
             try {
                 uttrekkArbeidssøkerService.opprettUttrekkArbeidssøkere(
                     årMåned = årMåned,
@@ -59,6 +62,15 @@ class OpprettUttrekkArbeidssøkerTask(
         if (feilede > 0 && !EnvUtil.erIDev()) {
             error("Kunne ikke opprette $feilede av ${uttrekk.size} uttrekk")
         }
+    }
+
+    override fun onCompletion(task: Task) {
+        opprettTaskForNesteMåned(task)
+    }
+
+    fun opprettTaskForNesteMåned(task: Task) {
+        val årMåned = YearMonth.parse(task.payload)
+        taskService.save(opprettTask(årMåned.plusMonths(1)))
     }
 
     companion object {
