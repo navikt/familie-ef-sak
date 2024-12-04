@@ -95,6 +95,7 @@ internal class VurderingServiceTest {
             ).tilSøknadsverdier()
     private val barn = søknadBarnTilBehandlingBarn(søknad.barn)
     private val behandling = behandling(fagsak(), BehandlingStatus.OPPRETTET, årsak = BehandlingÅrsak.PAPIRSØKNAD)
+    private val behandlingLåst = behandling(fagsak(), BehandlingStatus.FERDIGSTILT, årsak = BehandlingÅrsak.PAPIRSØKNAD)
     private val behandlingId = UUID.randomUUID()
     private val behandlingDto = mockk<BehandlingDto>()
 
@@ -348,6 +349,18 @@ internal class VurderingServiceTest {
     internal fun `ingen vilkår som ikke kan gjenbrukes skal ha satt kanGjenbrukes-flagg i DTOen`() {
         val vilkårsvurderinger = lagVilkårsvurderinger(behandlingId, OPPFYLT)
         every { vilkårsvurderingRepository.findByBehandlingId(behandlingId) } returns vilkårsvurderinger
+        val vurderinger = vurderingService.hentEllerOpprettVurderinger(behandlingId)
+        vurderinger.vurderinger.forEach {
+            assertThat(it.kanGjenbrukes).isFalse()
+        }
+    }
+
+    @Test
+    internal fun `kanGjenbrukesFlagg skal uansett være false om behandlingen er låst`() {
+        val vilkårsvurderinger = lagVilkårsvurderinger(behandlingId, OPPFYLT)
+        every { vilkårsvurderingRepository.findByBehandlingId(behandlingId) } returns vilkårsvurderinger
+        every { gjenbrukVilkårService.utledVilkårsvurderingerForGjenbrukData(any(), any()) } returns listOf(vilkårsvurderinger.get(0))
+        every { behandlingService.hentBehandling(behandlingId) } returns behandlingLåst
         val vurderinger = vurderingService.hentEllerOpprettVurderinger(behandlingId)
         vurderinger.vurderinger.forEach {
             assertThat(it.kanGjenbrukes).isFalse()
