@@ -136,30 +136,33 @@ class VurderingService(
         return Pair(grunnlag, metadata)
     }
 
-    private fun vilkårKanGjenbrukes(
-        behandlingId: UUID,
-        vilkårsvurderingId: UUID,
-    ): Boolean {
+    private fun hentTilgjengeligeVilkårsvurderingerForGjenbruk(behandlingId: UUID): List<Vilkårsvurdering> {
+        if (behandlingErLåstForVidereRedigeringForInnloggetSaksbehandler(behandlingId)) {
+            return emptyList()
+        }
         val behandlingForGjenbruk =
             gjenbrukVilkårService
                 .finnBehandlingerForGjenbruk(behandlingId)
-                .firstOrNull()
-        if (behandlingErLåstForVidereRedigeringForInnloggetSaksbehandler(behandlingId)) {
-            return false
-        }
-        return behandlingForGjenbruk?.let { behandlingForGjenbruk ->
-            gjenbrukVilkårService
-                .utledVilkårsvurderingerForGjenbrukData(
-                    behandlingId,
-                    behandlingForGjenbruk.id,
-                ).any { it.id == vilkårsvurderingId }
-        } ?: false
+                .firstOrNull() ?: return emptyList()
+        return gjenbrukVilkårService
+            .utledVilkårsvurderingerForGjenbrukData(
+                behandlingId,
+                behandlingForGjenbruk.id,
+            )
     }
+
+    private fun vilkårKanGjenbrukes(
+        vilkårsvurderingId: UUID,
+        vilkårsvurderinger: List<Vilkårsvurdering>,
+    ): Boolean = vilkårsvurderinger.any { it.id == vilkårsvurderingId }
 
     private fun hentEllerOpprettVurderinger(
         behandlingId: UUID,
         metadata: HovedregelMetadata,
-    ): List<VilkårsvurderingDto> = hentEllerOpprettVurderingerForVilkår(behandlingId, metadata).map { it.tilDto(vilkårKanGjenbrukes(behandlingId, it.id)) }
+    ): List<VilkårsvurderingDto> {
+        val vilkårsvurderinger = hentTilgjengeligeVilkårsvurderingerForGjenbruk(behandlingId)
+        return hentEllerOpprettVurderingerForVilkår(behandlingId, metadata).map { it.tilDto(vilkårKanGjenbrukes(it.id, vilkårsvurderinger)) }
+    }
 
     private fun hentEllerOpprettVurderingerForVilkår(
         behandlingId: UUID,
