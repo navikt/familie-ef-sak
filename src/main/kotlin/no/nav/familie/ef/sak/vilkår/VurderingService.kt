@@ -152,7 +152,7 @@ class VurderingService(
             )
     }
 
-    private fun vilkårKanGjenbrukes(
+    fun vilkårKanGjenbrukes(
         vilkårsvurderingId: UUID,
         vilkårsvurderinger: List<Vilkårsvurdering>,
     ): Boolean = vilkårsvurderinger.any { it.id == vilkårsvurderingId }

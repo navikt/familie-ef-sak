@@ -52,7 +52,9 @@ class VurderingStegService(
                 vilkårsvurderingDto.delvilkårsvurderinger,
             )
         blankettRepository.deleteById(behandlingId)
-        val oppdatertVilkårsvurderingDto = vilkårsvurderingRepository.update(nyVilkårsvurdering).tilDto()
+        val vilkårsvurderingerTilgjengeligForGjenbruk = vurderingService.hentTilgjengeligeVilkårsvurderingerForGjenbruk(behandlingId)
+        val kanGjenbrukes = vurderingService.vilkårKanGjenbrukes(vilkårsvurdering.id, vilkårsvurderingerTilgjengeligForGjenbruk)
+        val oppdatertVilkårsvurderingDto = vilkårsvurderingRepository.update(nyVilkårsvurdering).tilDto(kanGjenbrukes)
         oppdaterStegOgKategoriPåBehandling(vilkårsvurdering.behandlingId)
         return oppdatertVilkårsvurderingDto
     }
