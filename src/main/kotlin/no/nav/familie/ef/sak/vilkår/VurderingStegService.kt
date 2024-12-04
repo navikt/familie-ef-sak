@@ -142,6 +142,9 @@ class VurderingStegService(
         val metadata = hentHovedregelMetadata(behandlingId)
         val nyeDelvilkår = hentVilkårsregel(vilkårsvurdering.type).initiereDelvilkårsvurdering(metadata)
         val delvilkårsvurdering = DelvilkårsvurderingWrapper(nyeDelvilkår)
+
+        val vilkårsvurderinger = vurderingService.hentTilgjengeligeVilkårsvurderingerForGjenbruk(behandlingId)
+        val kanGjenbrukes = vilkårsvurderinger.any { it.id == vilkårsvurdering.id }
         return vilkårsvurderingRepository
             .update(
                 vilkårsvurdering.copy(
@@ -149,7 +152,7 @@ class VurderingStegService(
                     delvilkårsvurdering = delvilkårsvurdering,
                     opphavsvilkår = null,
                 ),
-            ).tilDto()
+            ).tilDto(kanGjenbrukes)
     }
 
     private fun oppdaterVilkårsvurderingTilSkalIkkeVurderes(

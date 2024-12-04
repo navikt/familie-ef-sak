@@ -136,7 +136,7 @@ class VurderingService(
         return Pair(grunnlag, metadata)
     }
 
-    private fun hentTilgjengeligeVilkårsvurderingerForGjenbruk(behandlingId: UUID): List<Vilkårsvurdering> {
+    fun hentTilgjengeligeVilkårsvurderingerForGjenbruk(behandlingId: UUID): List<Vilkårsvurdering> {
         if (behandlingErLåstForVidereRedigeringForInnloggetSaksbehandler(behandlingId)) {
             return emptyList()
         }
@@ -144,6 +144,7 @@ class VurderingService(
             gjenbrukVilkårService
                 .finnBehandlingerForGjenbruk(behandlingId)
                 .firstOrNull() ?: return emptyList()
+
         return gjenbrukVilkårService
             .utledVilkårsvurderingerForGjenbrukData(
                 behandlingId,
