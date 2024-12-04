@@ -23,7 +23,7 @@ import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.arbeidssøker.ArbeidssøkerClient
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.arbeidssøker.ArbeidssøkerPeriode
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.arbeidssøker.ArbeidssøkerResponse
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.arbeidssøker.LocalDateWrapper
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Adressebeskyttelse
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.AdressebeskyttelseGradering
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Metadata
@@ -135,7 +135,7 @@ internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
     @BeforeEach
     internal fun setUp() {
         every { taskService.save(capture(taskSlot)) } answers { firstArg() }
-        every { arbeidssøkerClient.hentPerioder(any(), any(), any()) } returns ArbeidssøkerResponse(listOf())
+        every { arbeidssøkerClient.hentPerioder(any()) } returns listOf()
         every { personService.hentPersonKortBolk(any()) } answers {
             firstArg<List<String>>().associateWith { lagPersonKort() }
         }
@@ -274,11 +274,11 @@ internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
         @Test
         internal fun `hentUttrekkArbeidssøkere - er registrert som arbeidssøker hvis det finnes periode siste dagen i måneden`() {
             listOf(
-                ArbeidssøkerPeriode(mars2021.atDay(1), mars2021.atEndOfMonth()),
-                ArbeidssøkerPeriode(mars2021.atEndOfMonth(), mars2021.atEndOfMonth()),
-                ArbeidssøkerPeriode(mars2021.atEndOfMonth(), mars2021.atEndOfMonth().plusDays(1)),
+                ArbeidssøkerPeriode(startet = LocalDateWrapper(mars2021.atDay(1).atStartOfDay()), avsluttet = LocalDateWrapper(mars2021.atEndOfMonth().atStartOfDay())),
+                ArbeidssøkerPeriode(startet = LocalDateWrapper(mars2021.atEndOfMonth().atStartOfDay()), avsluttet = LocalDateWrapper(mars2021.atEndOfMonth().atStartOfDay())),
+                ArbeidssøkerPeriode(startet = LocalDateWrapper(mars2021.atEndOfMonth().atStartOfDay()), avsluttet = LocalDateWrapper(mars2021.atEndOfMonth().plusDays(1).atStartOfDay())),
             ).forEach {
-                every { arbeidssøkerClient.hentPerioder(any(), any(), any()) } returns ArbeidssøkerResponse(listOf(it))
+                every { arbeidssøkerClient.hentPerioder(any()) } returns listOf(it)
 
                 opprettdata()
 
@@ -296,10 +296,10 @@ internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
         @Test
         internal fun `hentUttrekkArbeidssøkere - er ikke registrert hvis det ikke finnes periode siste dagen i måneden`() {
             listOf(
-                ArbeidssøkerPeriode(mars2021.atDay(1), mars2021.atEndOfMonth().minusDays(1)),
-                ArbeidssøkerPeriode(mars2021.atEndOfMonth().plusDays(1), mars2021.atEndOfMonth().plusMonths(1)),
+                ArbeidssøkerPeriode(startet = LocalDateWrapper(mars2021.atDay(1).atStartOfDay()), avsluttet = LocalDateWrapper(mars2021.atEndOfMonth().minusDays(1).atStartOfDay())),
+                ArbeidssøkerPeriode(startet = LocalDateWrapper(mars2021.atEndOfMonth().plusDays(1).atStartOfDay()), avsluttet = LocalDateWrapper(mars2021.atEndOfMonth().plusMonths(1).atStartOfDay())),
             ).forEach {
-                every { arbeidssøkerClient.hentPerioder(any(), any(), any()) } returns ArbeidssøkerResponse(listOf(it))
+                every { arbeidssøkerClient.hentPerioder(any()) } returns listOf(it)
 
                 opprettdata()
 
@@ -370,7 +370,7 @@ internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
         val opprettUttrekkArbeidssøkerTask =
             OpprettUttrekkArbeidssøkerTask(uttrekkArbeidssøkerService, mockFagsakService, taskService)
 
-        val arbeidssøkerPeriode = ArbeidssøkerPeriode(vedtaksperiode.periode.fomDato, vedtaksperiode.periode.tomDato)
+        val arbeidssøkerPeriode = ArbeidssøkerPeriode(startet = LocalDateWrapper(vedtaksperiode.periode.fomDato.atTime(23, 59)), avsluttet = LocalDateWrapper(vedtaksperiode.periode.tomDato.atTime(23, 59)))
         val periodeForUttrekk =
             VedtaksperioderForUttrekk(
                 UUID.randomUUID(),
@@ -390,13 +390,7 @@ internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
 
         every { mockFagsakService.hentAktiveIdenter(any()) } returns aktiveIdenter
         every { mockUttrekkArbeidssøkerRepository.insert(capture(uttrekkSlot)) } returns mockk()
-        every { arbeidssøkerClient.hentPerioder(any(), any(), any()) } returns
-            ArbeidssøkerResponse(
-                listOf(
-                    arbeidssøkerPeriode,
-                    arbeidssøkerPeriode,
-                ),
-            )
+        every { arbeidssøkerClient.hentPerioder(any()) } returns listOf(arbeidssøkerPeriode, arbeidssøkerPeriode)
 
         every {
             mockUttrekkArbeidssøkerRepository.hentVedtaksperioderForSisteFerdigstilteBehandlinger(any(), any())
@@ -672,12 +666,6 @@ internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
                 inntektBegrunnelse = null,
             )
         beregnYtelseSteg.utførSteg(saksbehandling(fagsak, behandling), vedtak)
-    }
-
-    fun opprettBehandlinger() {
-        testoppsettService.lagreFagsak(fagsak)
-        behandlingRepository.insert(behandling)
-        behandlingRepository.insert(behandling2)
     }
 
     private fun lagPersonKort(gradering: AdressebeskyttelseGradering? = null) =

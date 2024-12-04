@@ -205,7 +205,7 @@ FAMILIE_TILBAKE_SCOPE: api://${DEPLOY_ENV}-gcp.teamfamilie.familie-tilbake/.defa
 FAMILIE_KLAGE_SCOPE: api://${DEPLOY_ENV}-gcp.teamfamilie.familie-klage/.default
 FAMILIE_EF_PROXY_SCOPE: api://${DEPLOY_ENV}-fss.teamfamilie.familie-ef-proxy/.default
 INFOTRYGD_REPLIKA_SCOPE: api://${DEPLOY_ENV}-fss.teamfamilie.familie-ef-infotrygd/.default
-ARBEIDSSOKER_SCOPE: api://${DEPLOY_ENV}-gcp.paw.veilarbregistrering/.default
+ARBEIDSSOKER_SCOPE: api://${DEPLOY_ENV}-gcp.paw.paw-arbeidssoekerregisteret-api-oppslag/.default
 FAMILIE_INTEGRASJONER_SCOPE: api://${DEPLOY_ENV}-fss.teamfamilie.familie-integrasjoner/.default
 HISTORISK_PENSJON_SCOPE: api://${DEPLOY_ENV}-gcp.historisk.historisk-pensjon/.default
 FAMILIE_KS_SAK_SCOPE: api://${DEPLOY_ENV}-gcp.teamfamilie.familie-ks-sak/.default
@@ -283,7 +283,7 @@ INFOTRYGD_REPLIKA_API_URL: https://familie-ef-infotrygd.${ON_PREM_URL_ENV}-fss-p
 PDL_URL: https://pdl-api.${ON_PREM_URL_ENV}-fss-pub.nais.io
 REPR_API_URL: http://repr-api.repr
 FAMILIE_EF_PROXY_URL: https://familie-ef-proxy.${ON_PREM_URL_ENV}-fss-pub.nais.io
-ARBEIDSSOKER_URL: http://veilarbregistrering.paw.svc.cluster.local
+ARBEIDSSOKER_URL: http://paw-arbeidssoekerregisteret-api-oppslag.paw
 HISTORISK_PENSJON_URL: http://historisk-pensjon.historisk
 FAMILIE_KS_SAK_URL: http://familie-ks-sak
 FRONTEND_OPPGAVE_URL: https://ensligmorellerfar.intern.nav.no/oppgavebenk
