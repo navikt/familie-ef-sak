@@ -169,6 +169,7 @@ class GjenbrukVilkårService(
             .findByBehandlingId(tidligereBehandlingId)
             .filter { it.type.erInngangsvilkår() }
             .filter { skalGjenbrukeVurdering(it, sivilstandErLik, erSammeStønadstype, barnPåBeggeBehandlinger) }
+            .filter { it.resultat != Vilkårsresultat.IKKE_TATT_STILLING_TIL }
 
     private fun erSivilstandUforandretSidenForrigeBehandling(
         behandlingId: UUID,
