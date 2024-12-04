@@ -144,7 +144,9 @@ class VurderingService(
             gjenbrukVilkårService
                 .finnBehandlingerForGjenbruk(behandlingId)
                 .firstOrNull()
-
+        if (behandlingErLåstForVidereRedigeringForInnloggetSaksbehandler(behandlingId)) {
+            return false
+        }
         return behandlingForGjenbruk?.let { behandlingForGjenbruk ->
             gjenbrukVilkårService
                 .utledVilkårsvurderingerForGjenbrukData(
