@@ -132,7 +132,7 @@ internal class VurderingServiceTest {
             )
         every { tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandler(any()) } returns true
         every { gjenbrukVilkårService.finnBehandlingerForGjenbruk(any()) } returns listOf(behandlingDto)
-        every { gjenbrukVilkårService.utledVilkårsvurderingerForGjenbrukData(any(), any()) } returns listOf()
+        every { gjenbrukVilkårService.utledGjenbrukbareVilkårsvurderinger(any(), any()) } returns listOf()
         every { behandlingDto.id } returns behandlingId
     }
 
@@ -337,7 +337,7 @@ internal class VurderingServiceTest {
     internal fun `vilkår som kan gjenbrukes skal ha satt kanGjenbrukes-flagg lik true i DTOen`() {
         val vilkårsvurderinger = lagVilkårsvurderinger(behandlingId, OPPFYLT)
         every { vilkårsvurderingRepository.findByBehandlingId(behandlingId) } returns vilkårsvurderinger
-        every { gjenbrukVilkårService.utledVilkårsvurderingerForGjenbrukData(any(), any()) } returns listOf(vilkårsvurderinger.get(0))
+        every { gjenbrukVilkårService.utledGjenbrukbareVilkårsvurderinger(any(), any()) } returns listOf(vilkårsvurderinger.get(0))
         val vurderinger = vurderingService.hentEllerOpprettVurderinger(behandlingId)
         assertThat(vurderinger.vurderinger.get(0).kanGjenbrukes).isTrue()
         for (i in 1 until vurderinger.vurderinger.size) {
@@ -359,7 +359,7 @@ internal class VurderingServiceTest {
     internal fun `kanGjenbrukesFlagg skal uansett være false om behandlingen er låst`() {
         val vilkårsvurderinger = lagVilkårsvurderinger(behandlingId, OPPFYLT)
         every { vilkårsvurderingRepository.findByBehandlingId(behandlingId) } returns vilkårsvurderinger
-        every { gjenbrukVilkårService.utledVilkårsvurderingerForGjenbrukData(any(), any()) } returns listOf(vilkårsvurderinger.get(0))
+        every { gjenbrukVilkårService.utledGjenbrukbareVilkårsvurderinger(any(), any()) } returns listOf(vilkårsvurderinger.get(0))
         every { behandlingService.hentBehandling(behandlingId) } returns behandlingLåst
         val vurderinger = vurderingService.hentEllerOpprettVurderinger(behandlingId)
         vurderinger.vurderinger.forEach {

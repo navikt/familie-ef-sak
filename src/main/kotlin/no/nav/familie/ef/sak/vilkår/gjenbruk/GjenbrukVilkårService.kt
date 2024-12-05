@@ -50,8 +50,12 @@ class GjenbrukVilkårService(
         behandlingSomSkalOppdateres: UUID,
         behandlingIdSomSkalGjenbrukeInngangsvilkår: UUID,
     ) {
+        validerBehandlingForGjenbruk(
+            behandlingSomSkalOppdateres,
+            behandlingIdSomSkalGjenbrukeInngangsvilkår,
+        )
         val vilkårsVurderingerForGjenbruk =
-            utledVilkårsvurderingerForGjenbrukData(
+            utledGjenbrukbareVilkårsvurderinger(
                 behandlingSomSkalOppdateres,
                 behandlingIdSomSkalGjenbrukeInngangsvilkår,
             )
@@ -68,8 +72,12 @@ class GjenbrukVilkårService(
         behandlingIdForGjenbruk: UUID,
         vilkårId: UUID,
     ): Vilkårsvurdering {
+        validerBehandlingForGjenbruk(
+            behandlingId,
+            behandlingIdForGjenbruk,
+        )
         val vilkårsVurderingForGjenbruk =
-            utledVilkårsvurderingerForGjenbrukData(
+            utledGjenbrukbareVilkårsvurderinger(
                 behandlingId,
                 behandlingIdForGjenbruk,
             ).first { it.id == vilkårId }
@@ -80,14 +88,10 @@ class GjenbrukVilkårService(
         return vilkårsvurderingRepository.update(vilkårsVurderingForGjenbruk)
     }
 
-    fun utledVilkårsvurderingerForGjenbrukData(
+    fun utledGjenbrukbareVilkårsvurderinger(
         behandlingSomSkalOppdateres: UUID,
         behandlingIdSomSkalGjenbrukeInngangsvilkår: UUID,
     ): List<Vilkårsvurdering> {
-        validerBehandlingForGjenbruk(
-            behandlingSomSkalOppdateres,
-            behandlingIdSomSkalGjenbrukeInngangsvilkår,
-        )
         val forrigeBarnIdTilNåværendeBarnMap =
             finnBarnPåBeggeBehandlinger(behandlingSomSkalOppdateres, behandlingIdSomSkalGjenbrukeInngangsvilkår)
         val sivilstandErLik =
