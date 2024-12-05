@@ -47,8 +47,8 @@ class VurderingService(
     @Transactional
     fun hentEllerOpprettVurderinger(behandlingId: UUID): VilkårDto {
         val (grunnlag, metadata) = hentGrunnlagOgMetadata(behandlingId)
-        val vurderinger = hentEllerOpprettVurderinger(behandlingId, metadata)
-        return VilkårDto(vurderinger = vurderinger, grunnlag = grunnlag)
+        val vilkårsvurderinger = hentEllerOpprettVurderinger(behandlingId, metadata)
+        return VilkårDto(vurderinger = vilkårsvurderinger, grunnlag = grunnlag)
     }
 
     @Transactional
@@ -139,7 +139,7 @@ class VurderingService(
     private fun hentEllerOpprettVurderinger(
         behandlingId: UUID,
         metadata: HovedregelMetadata,
-    ): List<VilkårsvurderingDto> = hentEllerOpprettVurderingerForVilkår(behandlingId, metadata).map(Vilkårsvurdering::tilDto)
+    ): List<VilkårsvurderingDto> = hentEllerOpprettVurderingerForVilkår(behandlingId, metadata).map { it.tilDto() }
 
     private fun hentEllerOpprettVurderingerForVilkår(
         behandlingId: UUID,

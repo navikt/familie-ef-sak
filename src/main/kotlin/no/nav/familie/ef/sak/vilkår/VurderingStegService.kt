@@ -142,6 +142,7 @@ class VurderingStegService(
         val metadata = hentHovedregelMetadata(behandlingId)
         val nyeDelvilkår = hentVilkårsregel(vilkårsvurdering.type).initiereDelvilkårsvurdering(metadata)
         val delvilkårsvurdering = DelvilkårsvurderingWrapper(nyeDelvilkår)
+
         return vilkårsvurderingRepository
             .update(
                 vilkårsvurdering.copy(
