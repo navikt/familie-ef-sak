@@ -116,6 +116,17 @@ class VurderingController(
         tilgangService.validerHarSaksbehandlerrolle()
 
         val vilkårsVurderingForGjenbruk = gjenbrukVilkårService.gjenbrukInngangsvilkårVurdering(request.behandlingId, behandlingForGjenbruk.id, request.vilkårId)
-        return Ressurs.success(vilkårsVurderingForGjenbruk.tilDto(kanGjenbrukes = true))
+        return Ressurs.success(vilkårsVurderingForGjenbruk.tilDto())
+    }
+
+    @GetMapping("{behandlingId}/gjenbrukbare-vilkår")
+    fun hentAlleGjenbrukbareVilkårsvurderinger(
+        @PathVariable behandlingId: UUID,
+    ): Ressurs<List<UUID>> {
+        val behandlingForGjenbruk = gjenbrukVilkårService.finnBehandlingerForGjenbruk(behandlingId).first()
+        tilgangService.validerTilgangTilBehandling(behandlingForGjenbruk.id, AuditLoggerEvent.ACCESS)
+        tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.UPDATE)
+        tilgangService.validerHarSaksbehandlerrolle()
+        return Ressurs.success(gjenbrukVilkårService.utledGjenbrukbareVilkårsvurderinger(behandlingId, behandlingForGjenbruk.id).map { it.id })
     }
 }

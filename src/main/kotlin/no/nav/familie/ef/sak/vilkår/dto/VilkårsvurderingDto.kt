@@ -20,7 +20,6 @@ data class VilkårsvurderingDto(
     val endretTid: LocalDateTime,
     val delvilkårsvurderinger: List<DelvilkårsvurderingDto> = emptyList(),
     val opphavsvilkår: OpphavsvilkårDto?,
-    val kanGjenbrukes: Boolean,
 )
 
 data class OpphavsvilkårDto(
@@ -69,7 +68,7 @@ fun Vurdering.tilDto() = VurderingDto(this.regelId, this.svar, this.begrunnelse)
 
 fun Delvilkårsvurdering.tilDto() = DelvilkårsvurderingDto(this.resultat, this.vurderinger.map { it.tilDto() })
 
-fun Vilkårsvurdering.tilDto(kanGjenbrukes: Boolean = false) =
+fun Vilkårsvurdering.tilDto() =
     VilkårsvurderingDto(
         id = this.id,
         behandlingId = this.behandlingId,
@@ -83,7 +82,6 @@ fun Vilkårsvurdering.tilDto(kanGjenbrukes: Boolean = false) =
                 .filter { it.resultat != Vilkårsresultat.IKKE_AKTUELL }
                 .map { it.tilDto() },
         opphavsvilkår = this.opphavsvilkår?.let { OpphavsvilkårDto(it.behandlingId, it.vurderingstidspunkt) },
-        kanGjenbrukes = kanGjenbrukes,
     )
 
 fun DelvilkårsvurderingDto.svarTilDomene() = this.vurderinger.map { it.tilDomene() }

@@ -334,40 +334,6 @@ internal class VurderingServiceTest {
     }
 
     @Test
-    internal fun `vilkår som kan gjenbrukes skal ha satt kanGjenbrukes-flagg lik true i DTOen`() {
-        val vilkårsvurderinger = lagVilkårsvurderinger(behandlingId, OPPFYLT)
-        every { vilkårsvurderingRepository.findByBehandlingId(behandlingId) } returns vilkårsvurderinger
-        every { gjenbrukVilkårService.utledGjenbrukbareVilkårsvurderinger(any(), any()) } returns listOf(vilkårsvurderinger.get(0))
-        val vurderinger = vurderingService.hentEllerOpprettVurderinger(behandlingId)
-        assertThat(vurderinger.vurderinger.get(0).kanGjenbrukes).isTrue()
-        for (i in 1 until vurderinger.vurderinger.size) {
-            assertThat(vurderinger.vurderinger.get(i).kanGjenbrukes).isFalse()
-        }
-    }
-
-    @Test
-    internal fun `ingen vilkår som ikke kan gjenbrukes skal ha satt kanGjenbrukes-flagg i DTOen`() {
-        val vilkårsvurderinger = lagVilkårsvurderinger(behandlingId, OPPFYLT)
-        every { vilkårsvurderingRepository.findByBehandlingId(behandlingId) } returns vilkårsvurderinger
-        val vurderinger = vurderingService.hentEllerOpprettVurderinger(behandlingId)
-        vurderinger.vurderinger.forEach {
-            assertThat(it.kanGjenbrukes).isFalse()
-        }
-    }
-
-    @Test
-    internal fun `kanGjenbrukesFlagg skal uansett være false om behandlingen er låst`() {
-        val vilkårsvurderinger = lagVilkårsvurderinger(behandlingId, OPPFYLT)
-        every { vilkårsvurderingRepository.findByBehandlingId(behandlingId) } returns vilkårsvurderinger
-        every { gjenbrukVilkårService.utledGjenbrukbareVilkårsvurderinger(any(), any()) } returns listOf(vilkårsvurderinger.get(0))
-        every { behandlingService.hentBehandling(behandlingId) } returns behandlingLåst
-        val vurderinger = vurderingService.hentEllerOpprettVurderinger(behandlingId)
-        vurderinger.vurderinger.forEach {
-            assertThat(it.kanGjenbrukes).isFalse()
-        }
-    }
-
-    @Test
     internal fun `Skal returnere ikke oppfylt hvis noen vurderinger er SKAL_IKKE_VURDERES`() {
         val vilkårsvurderinger = lagVilkårsvurderingerMedResultat()
         // Guard

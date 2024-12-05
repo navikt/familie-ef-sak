@@ -52,9 +52,7 @@ class VurderingStegService(
                 vilkårsvurderingDto.delvilkårsvurderinger,
             )
         blankettRepository.deleteById(behandlingId)
-        val vilkårsvurderingerTilgjengeligForGjenbruk = vurderingService.hentTilgjengeligeVilkårsvurderingerForGjenbruk(behandlingId)
-        val kanGjenbrukes = vurderingService.vilkårKanGjenbrukes(vilkårsvurdering.id, vilkårsvurderingerTilgjengeligForGjenbruk)
-        val oppdatertVilkårsvurderingDto = vilkårsvurderingRepository.update(nyVilkårsvurdering).tilDto(kanGjenbrukes)
+        val oppdatertVilkårsvurderingDto = vilkårsvurderingRepository.update(nyVilkårsvurdering).tilDto()
         oppdaterStegOgKategoriPåBehandling(vilkårsvurdering.behandlingId)
         return oppdatertVilkårsvurderingDto
     }
@@ -145,8 +143,6 @@ class VurderingStegService(
         val nyeDelvilkår = hentVilkårsregel(vilkårsvurdering.type).initiereDelvilkårsvurdering(metadata)
         val delvilkårsvurdering = DelvilkårsvurderingWrapper(nyeDelvilkår)
 
-        val vilkårsvurderinger = vurderingService.hentTilgjengeligeVilkårsvurderingerForGjenbruk(behandlingId)
-        val kanGjenbrukes = vilkårsvurderinger.any { it.id == vilkårsvurdering.id }
         return vilkårsvurderingRepository
             .update(
                 vilkårsvurdering.copy(
@@ -154,7 +150,7 @@ class VurderingStegService(
                     delvilkårsvurdering = delvilkårsvurdering,
                     opphavsvilkår = null,
                 ),
-            ).tilDto(kanGjenbrukes)
+            ).tilDto()
     }
 
     private fun oppdaterVilkårsvurderingTilSkalIkkeVurderes(
