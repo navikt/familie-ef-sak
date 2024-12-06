@@ -86,13 +86,12 @@ spec:
           cluster: dev-fss
         - application: historisk-pensjon
           namespace: historisk
-        - application: veilarbregistrering
+        - application: paw-arbeidssoekerregisteret-api-oppslag
           namespace: paw
         - application: skjermede-personer-pip
           namespace: nom
-        - application: pdl-fullmakt
-          namespace: pdl
-          cluster: dev-fss
+        - application: repr-api
+          namespace: repr
       external:
         - host: api-gw-q1.oera.no
         - host: familie-oppdrag.dev-fss-pub.nais.io

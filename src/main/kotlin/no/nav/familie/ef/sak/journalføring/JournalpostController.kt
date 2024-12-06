@@ -10,6 +10,7 @@ import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.ef.sak.journalføring.dto.JournalføringRequestV2
 import no.nav.familie.ef.sak.journalføring.dto.JournalføringResponse
 import no.nav.familie.ef.sak.journalføring.dto.JournalføringTilNyBehandlingRequest
+import no.nav.familie.ef.sak.journalføring.dto.OppdaterJournalpostMedDokumenterRequest
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.gjeldende
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.visningsnavn
@@ -91,6 +92,20 @@ class JournalpostController(
         } else {
             journalføringService.fullførJournalpostV2(journalføringRequest, journalpost)
         }
+        return Ressurs.success(journalpostId)
+    }
+
+    @PostMapping("/{journalpostId}/oppdater-dokumenter")
+    fun oppdaterDokumenter(
+        @PathVariable journalpostId: String,
+        @RequestBody request: OppdaterJournalpostMedDokumenterRequest,
+    ): Ressurs<String> {
+        val (journalpost, personIdent) = finnJournalpostOgPersonIdent(journalpostId)
+        tilgangService.validerTilgangTilPersonMedBarn(personIdent, AuditLoggerEvent.UPDATE)
+        tilgangService.validerHarSaksbehandlerrolle()
+
+        journalpostService.oppdaterDokumenterPåJournalpost(journalpost, request)
+
         return Ressurs.success(journalpostId)
     }
 

@@ -255,8 +255,6 @@ object SøknadsskjemaMapper {
     private fun tilDomene(samvær: KontraktSamvær?): Samvær? =
         samvær?.let {
             Samvær(
-                spørsmålAvtaleOmDeltBosted = it.spørsmålAvtaleOmDeltBosted?.verdi,
-                avtaleOmDeltBosted = tilDomene(it.avtaleOmDeltBosted?.verdi),
                 skalAnnenForelderHaSamvær = it.skalAnnenForelderHaSamvær?.svarId,
                 harDereSkriftligAvtaleOmSamvær = it.harDereSkriftligAvtaleOmSamvær?.svarId,
                 samværsavtale = tilDomene(it.samværsavtale?.verdi),

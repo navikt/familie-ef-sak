@@ -4,20 +4,25 @@ import io.mockk.Runs
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
+import io.mockk.mockkObject
+import io.mockk.unmockkObject
 import io.mockk.verify
 import no.nav.familie.ef.sak.infrastruktur.config.PdlClientConfig.Companion.lagPersonKort
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.infrastruktur.exception.ManglerTilgang
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
+import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.ef.sak.journalføring.dto.JournalføringRequestV2
 import no.nav.familie.ef.sak.journalføring.dto.Journalføringsaksjon
 import no.nav.familie.ef.sak.journalføring.dto.Journalføringsårsak
+import no.nav.familie.ef.sak.journalføring.dto.OppdaterJournalpostMedDokumenterRequest
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlIdent
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlIdenter
 import no.nav.familie.kontrakter.ef.sak.DokumentBrevkode
 import no.nav.familie.kontrakter.felles.BrukerIdType
+import no.nav.familie.kontrakter.felles.dokarkiv.OppdaterJournalpostResponse
 import no.nav.familie.kontrakter.felles.journalpost.AvsenderMottaker
 import no.nav.familie.kontrakter.felles.journalpost.AvsenderMottakerIdType
 import no.nav.familie.kontrakter.felles.journalpost.Bruker
@@ -27,6 +32,7 @@ import no.nav.familie.kontrakter.felles.journalpost.Dokumentvariantformat
 import no.nav.familie.kontrakter.felles.journalpost.Journalpost
 import no.nav.familie.kontrakter.felles.journalpost.Journalposttype
 import no.nav.familie.kontrakter.felles.journalpost.Journalstatus
+import no.nav.familie.kontrakter.felles.journalpost.LogiskVedlegg
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
@@ -39,10 +45,13 @@ import kotlin.test.assertFailsWith
 internal class JournalpostControllerTest {
     private val journalføringService = mockk<JournalføringService>()
     private val journalføringKlageService = mockk<JournalføringKlageService>()
-    private val journalpostService = mockk<JournalpostService>()
+    private val journalpostClient = mockk<JournalpostClient>()
     private val personService = mockk<PersonService>()
     private val tilgangService: TilgangService = mockk()
     private val featureToggleService: FeatureToggleService = mockk(relaxed = true)
+
+    private val journalpostService = JournalpostService(journalpostClient)
+
     private val journalpostController =
         JournalpostController(
             journalføringService,
@@ -268,6 +277,155 @@ internal class JournalpostControllerTest {
         }
     }
 
+    @Nested
+    inner class OppdaterDokumenterPåJournalpost {
+        @Test
+        internal fun `må enten endre på dokumenttittel eller logiske vedlegg`() {
+            every { journalpostService.hentJournalpost("1234") } returns journalpostMedFødselsnummer
+            every { tilgangService.validerHarSaksbehandlerrolle() } just Runs
+
+            val request = OppdaterJournalpostMedDokumenterRequest(null, null)
+
+            val response = assertThrows<ApiFeil> { journalpostController.oppdaterDokumenter(journalpostId, request) }
+
+            assertThat(response.message).isEqualTo("Mangler både dokumenttittler og logiske vedlegg i forbindelse med oppdatering av dokumenter til journalpost")
+        }
+
+        @Test
+        internal fun `skal ikke kunne endre dokumenttittel til tom streng`() {
+            every { journalpostService.hentJournalpost("1234") } returns journalpostMedFødselsnummer
+            every { tilgangService.validerHarSaksbehandlerrolle() } just Runs
+
+            val nyeTitler = mapOf("DokumentId" to "")
+            val request = OppdaterJournalpostMedDokumenterRequest(nyeTitler, null)
+
+            val response = assertThrows<ApiFeil> { journalpostController.oppdaterDokumenter(journalpostId, request) }
+
+            assertThat(response.message).isEqualTo("Kan ikke endre dokumenttittel til tom streng")
+        }
+
+        @Test
+        internal fun `id til endret dokument kan ikke være tom streng`() {
+            every { journalpostService.hentJournalpost("1234") } returns journalpostMedFødselsnummer
+            every { tilgangService.validerHarSaksbehandlerrolle() } just Runs
+
+            val nyeTitler = mapOf("" to "Dokumenttittel")
+            val request = OppdaterJournalpostMedDokumenterRequest(nyeTitler, null)
+
+            val response = assertThrows<ApiFeil> { journalpostController.oppdaterDokumenter(journalpostId, request) }
+
+            assertThat(response.message).isEqualTo("Mangler dokumentId på et eller flere dokumenter som skal endre tittel")
+        }
+
+        @Test
+        internal fun `dokumentId til endredde logiske vedlegg kan ikke være tom streng`() {
+            every { journalpostService.hentJournalpost("1234") } returns journalpostMedFødselsnummer
+            every { tilgangService.validerHarSaksbehandlerrolle() } just Runs
+
+            val nyeTitler = mapOf("DokumentId" to "Dokumenttittel")
+            val nyeLogiskeVedlegg = mapOf("" to listOf<LogiskVedlegg>())
+            val request = OppdaterJournalpostMedDokumenterRequest(nyeTitler, nyeLogiskeVedlegg)
+
+            val response = assertThrows<ApiFeil> { journalpostController.oppdaterDokumenter(journalpostId, request) }
+
+            assertThat(response.message).isEqualTo("Mangler dokumentId på et eller flere logiske vedlegg")
+        }
+
+        @Test
+        internal fun `id til endret logisk vedlegg kan ikke være tom streng`() {
+            every { journalpostService.hentJournalpost("1234") } returns journalpostMedFødselsnummer
+            every { tilgangService.validerHarSaksbehandlerrolle() } just Runs
+
+            val nyeTitler = mapOf("DokumentId" to "Dokumenttittel")
+            val nyeLogiskeVedlegg = mapOf("DokumentId" to listOf(LogiskVedlegg("id_1", "Tittel 1"), LogiskVedlegg("", "Tittel 2")))
+            val request = OppdaterJournalpostMedDokumenterRequest(nyeTitler, nyeLogiskeVedlegg)
+
+            val response = assertThrows<ApiFeil> { journalpostController.oppdaterDokumenter(journalpostId, request) }
+
+            assertThat(response.message).isEqualTo("Mangler id på et eller flere logiske vedlegg")
+        }
+
+        @Test
+        internal fun `kan ikke endre et logisk vedlegg til tom streng`() {
+            every { journalpostService.hentJournalpost("1234") } returns journalpostMedFødselsnummer
+            every { tilgangService.validerHarSaksbehandlerrolle() } just Runs
+
+            val nyeTitler = mapOf("DokumentId" to "Dokumenttittel")
+            val nyeLogiskeVedlegg = mapOf("DokumentId" to listOf(LogiskVedlegg("id_1", "Tittel 1"), LogiskVedlegg("id_2", "")))
+            val request = OppdaterJournalpostMedDokumenterRequest(nyeTitler, nyeLogiskeVedlegg)
+
+            val response = assertThrows<ApiFeil> { journalpostController.oppdaterDokumenter(journalpostId, request) }
+
+            assertThat(response.message).isEqualTo("Kan ikke endre et eller flere logiske vedlegg til tom streng")
+        }
+
+        @Test
+        internal fun `skal kunne oppdatere dokumenttittel på journalpost`() {
+            every { journalpostService.hentJournalpost("1234") } returns journalpostMedFødselsnummer
+            every { tilgangService.validerHarSaksbehandlerrolle() } just Runs
+            every { journalpostClient.oppdaterJournalpost(any(), any(), any()) } returns OppdaterJournalpostResponse()
+            mockkObject(SikkerhetContext)
+            every { SikkerhetContext.hentSaksbehandler() } returns "bob"
+
+            val nyeTitler = mapOf("DokumentId" to "Dokumenttittel")
+            val request = OppdaterJournalpostMedDokumenterRequest(nyeTitler, null)
+
+            val response = journalpostController.oppdaterDokumenter(journalpostId, request)
+
+            assertThat(response.data).isEqualTo(journalpostId)
+            verify(exactly = 0) { journalpostClient.oppdaterLogiskeVedlegg(any(), any()) }
+            verify(exactly = 1) { journalpostClient.oppdaterJournalpost(any(), any(), any()) }
+            unmockkObject(SikkerhetContext)
+        }
+
+        @Test
+        internal fun `skal kunne oppdatere logiske vedlegg til et dokument på journalpost`() {
+            every { journalpostService.hentJournalpost("1234") } returns journalpostMedEtDokument
+            every { tilgangService.validerHarSaksbehandlerrolle() } just Runs
+            every { journalpostClient.oppdaterLogiskeVedlegg(any(), any()) } returns ""
+
+            val nyeLogiskeVedlegg =
+                mapOf(
+                    "DokumentId" to
+                        listOf(
+                            LogiskVedlegg("id_1", "Tittel 1"),
+                            LogiskVedlegg("id_2", "Tittel 2"),
+                            LogiskVedlegg("id_3", "Tittel 3"),
+                        ),
+                )
+            val request = OppdaterJournalpostMedDokumenterRequest(null, nyeLogiskeVedlegg)
+
+            val response = journalpostController.oppdaterDokumenter(journalpostId, request)
+
+            assertThat(response.data).isEqualTo(journalpostId)
+            verify(exactly = 0) { journalpostClient.oppdaterJournalpost(any(), any(), any()) }
+            verify(exactly = 1) { journalpostClient.oppdaterLogiskeVedlegg(any(), any()) }
+            unmockkObject(SikkerhetContext)
+        }
+
+        @Test
+        internal fun `skal kunne oppdatere logiske vedlegg til flere dokument på journalpost`() {
+            every { journalpostService.hentJournalpost("1234") } returns journalpostMedFlereDokumenter
+            every { tilgangService.validerHarSaksbehandlerrolle() } just Runs
+            every { journalpostClient.oppdaterLogiskeVedlegg(any(), any()) } returns ""
+
+            val nyeLogiskeVedlegg =
+                mapOf(
+                    "DokumentId_1" to listOf(LogiskVedlegg("id_1", "Tittel 1")),
+                    "DokumentId_2" to listOf(LogiskVedlegg("id_2", "Tittel 2")),
+                    "DokumentId_3" to listOf(LogiskVedlegg("id_3", "Tittel 3")),
+                )
+            val request = OppdaterJournalpostMedDokumenterRequest(null, nyeLogiskeVedlegg)
+
+            val response = journalpostController.oppdaterDokumenter(journalpostId, request)
+
+            assertThat(response.data).isEqualTo(journalpostId)
+            verify(exactly = 0) { journalpostClient.oppdaterJournalpost(any(), any(), any()) }
+            verify(exactly = 3) { journalpostClient.oppdaterLogiskeVedlegg(any(), any()) }
+            unmockkObject(SikkerhetContext)
+        }
+    }
+
     private fun avsenderMottaker(erLikBruker: Boolean = true) =
         AvsenderMottaker(
             id = "1",
@@ -306,6 +464,9 @@ internal class JournalpostControllerTest {
 
     private val journalpostMedFødselsnummer =
         journalpostMedAktørId.copy(bruker = Bruker(type = BrukerIdType.FNR, id = personIdentFraPdl))
+    private val journalpostMedEtDokument =
+        journalpostMedAktørId.copy(dokumenter = listOf(DokumentInfo(dokumentInfoId = "DokumentId")), bruker = Bruker(type = BrukerIdType.FNR, id = personIdentFraPdl))
+    private val journalpostMedFlereDokumenter = journalpostMedEtDokument.copy(dokumenter = listOf(DokumentInfo(dokumentInfoId = "DokumentId_1"), DokumentInfo(dokumentInfoId = "DokumentId_2"), DokumentInfo(dokumentInfoId = "DokumentId_3")))
     private val journalpostUtenBruker = journalpostMedAktørId.copy(bruker = null)
     private val journalpostMedOrgnr =
         journalpostMedAktørId.copy(bruker = Bruker(type = BrukerIdType.ORGNR, id = "12345"))

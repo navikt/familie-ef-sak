@@ -1,0 +1,41 @@
+{
+  "arbeidsInntektMaaned": [
+    {
+      "aarMaaned": "2024-07",
+      "arbeidsInntektInformasjon": {
+        "inntektListe": [
+          {
+            "inntektType": "YTELSE_FRA_OFFENTLIGE",
+            "beloep": 7395,
+            "fordel": "kontantytelse",
+            "inntektskilde": "A-ordningen",
+            "inntektsperiodetype": "Maaned",
+            "inntektsstatus": "LoependeInnrapportert",
+            "leveringstidspunkt": "2024-06",
+            "utbetaltIMaaned": "2024-07",
+            "opplysningspliktig": {
+              "identifikator": "999888776",
+              "aktoerType": "ORGANISASJON"
+            },
+            "virksomhet": {
+              "identifikator": "999888776",
+              "aktoerType": "ORGANISASJON"
+            },
+            "inntektsmottaker": {
+              "identifikator": "11111111111",
+              "aktoerType": "NATURLIG_IDENT"
+            },
+            "inngaarIGrunnlagForTrekk": true,
+            "utloeserArbeidsgiveravgift": false,
+            "informasjonsstatus": "InngaarAlltid",
+            "beskrivelse": "overgangsstoenadTilEnsligMorEllerFarSomBegynteAaLoepe1April2014EllerSenere"
+          }
+        ]
+      }
+    }
+  ],
+  "ident": {
+    "identifikator": "11111111111",
+    "aktoerType": "NATURLIG_IDENT"
+  }
+}
