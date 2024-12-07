@@ -9,9 +9,13 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Adressebeskytte
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlPersonKort
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.gjeldende
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.visningsnavn
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.secureLogger
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.ef.sak.vedtak.domain.AktivitetType
 import no.nav.familie.ef.sak.vedtak.domain.Vedtaksperiode
+import no.nav.familie.ef.sak.vilkår.VilkårType
+import no.nav.familie.ef.sak.vilkår.VurderingService
+import no.nav.familie.ef.sak.vilkår.regler.SvarId
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
@@ -26,6 +30,7 @@ class UttrekkArbeidssøkerService(
     private val fagsakService: FagsakService,
     private val personService: PersonService,
     private val arbeidssøkerClient: ArbeidssøkerClient,
+    private val vurderingService: VurderingService,
 ) {
     fun forrigeMåned(): () -> YearMonth = { YearMonth.now().minusMonths(1) }
 
@@ -37,6 +42,7 @@ class UttrekkArbeidssøkerService(
         personIdent: String,
     ) {
         val registrertSomArbeidssøker = erRegistrertSomArbeidssøker(personIdent, årMåned)
+        secureLogger.info("Registrert som arbeidssøker: $registrertSomArbeidssøker - fagsakId: $fagsakId")
         uttrekkArbeidssøkerRepository.insert(
             UttrekkArbeidssøkere(
                 fagsakId = fagsakId,
@@ -50,9 +56,10 @@ class UttrekkArbeidssøkerService(
     fun hentUttrekkArbeidssøkere(
         årMåned: YearMonth = forrigeMåned().invoke(),
         visKontrollerte: Boolean = false,
+        visEøsBorgere: Boolean = false,
     ): UttrekkArbeidssøkereDto {
         tilgangService.validerHarSaksbehandlerrolle()
-        val arbeidssøkere = uttrekkArbeidssøkerRepository.findAllByÅrMånedAndRegistrertArbeidssøkerIsFalse(årMåned)
+        val arbeidssøkere = hentArbeidsøkereMedEllerUtenEøsFilter(årMåned, visEøsBorgere)
         val filtrerteArbeidsssøkere = mapTilDtoOgFiltrer(arbeidssøkere)
 
         val totaltAntallUkontrollerte = arbeidssøkere.count { !it.kontrollert }
@@ -96,6 +103,29 @@ class UttrekkArbeidssøkerService(
         return arbeidssøkere.filter { harPeriodeSomArbeidssøker(it, startdato, sluttdato) }
     }
 
+    fun hentArbeidsøkereMedEllerUtenEøsFilter(
+        årMåned: YearMonth,
+        visEøsBorgere: Boolean,
+    ): List<UttrekkArbeidssøkere> {
+        val arbeidssøkere = uttrekkArbeidssøkerRepository.findAllByÅrMånedAndRegistrertArbeidssøkerIsFalse(årMåned)
+        return if (visEøsBorgere) {
+            arbeidssøkere.filter { erArbeidsøkerBosattIEøsLand(it) }
+        } else {
+            arbeidssøkere.filter { !erArbeidsøkerBosattIEøsLand(it) }
+        }
+    }
+
+    private fun erArbeidsøkerBosattIEøsLand(arbeidsøker: UttrekkArbeidssøkere): Boolean {
+        val vurderinger = vurderingService.hentAlleVurderinger(arbeidsøker.vedtakId)
+        val oppholdVurdering = vurderinger.first { it.vilkårType == VilkårType.LOVLIG_OPPHOLD }
+        val harDelvilkårMedEøsSvar =
+            oppholdVurdering.delvilkårsvurderinger.any { delvilkår ->
+                delvilkår.vurderinger.any { it.svar == SvarId.OPPHOLDER_SEG_I_ANNET_EØS_LAND }
+            }
+
+        return harDelvilkårMedEøsSvar
+    }
+
     fun uttrekkFinnes(
         årMåned: YearMonth,
         fagsakId: UUID,
@@ -110,10 +140,9 @@ class UttrekkArbeidssøkerService(
             arbeidssøkerClient
                 .hentPerioder(
                     personIdent,
-                    sisteIMåneden,
-                    sisteIMåneden,
-                ).perioder
-        return perioder.any { it.fraOgMedDato <= sisteIMåneden && (it.tilOgMedDato == null || it.tilOgMedDato >= sisteIMåneden) }
+                )
+        secureLogger.info("Fant perioder for arbeidssøker med ident $personIdent med perioder: $perioder")
+        return perioder.any { it.startet.tidspunkt.toLocalDate() <= sisteIMåneden && (it.avsluttet == null || it.avsluttet.tidspunkt.toLocalDate() >= sisteIMåneden) }
     }
 
     /**
@@ -161,7 +190,7 @@ class UttrekkArbeidssøkerService(
         sluttdato: LocalDate,
     ) = it.perioder.perioder.any {
         it.datoFra <= startdato &&
-            it.datoTil >= sluttdato &&
+            it.datoTil > sluttdato &&
             erArbeidssøker(it)
     }
 
