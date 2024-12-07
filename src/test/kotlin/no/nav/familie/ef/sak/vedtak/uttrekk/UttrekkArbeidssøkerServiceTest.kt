@@ -114,8 +114,9 @@ internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
     private val januar2021 = YearMonth.of(2021, 1)
     private val februar2021 = YearMonth.of(2021, 2)
     private val mars2021 = YearMonth.of(2021, 3)
+    private val april2021 = YearMonth.of(2021, 4)
 
-    private val vedtaksperiode = opprettVedtaksperiode(januar2021, mars2021)
+    private val vedtaksperiode = opprettVedtaksperiode(januar2021, april2021)
     private val vedtaksperiode2 =
         opprettVedtaksperiode(
             februar2021,
@@ -125,7 +126,7 @@ internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
     private val vedtaksperiode3 =
         opprettVedtaksperiode(
             mars2021,
-            mars2021,
+            april2021,
             aktivitetType = FORLENGELSE_STØNAD_PÅVENTE_ARBEID_REELL_ARBEIDSSØKER,
         )
     private val navn = Navn("fornavn", "", "", Metadata(false))

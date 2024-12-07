@@ -190,7 +190,7 @@ class UttrekkArbeidssøkerService(
         sluttdato: LocalDate,
     ) = it.perioder.perioder.any {
         it.datoFra <= startdato &&
-            it.datoTil >= sluttdato &&
+            it.datoTil > sluttdato &&
             erArbeidssøker(it)
     }
 
