@@ -105,7 +105,7 @@ class VurderingController(
         return Ressurs.success(vurderingService.hentEllerOpprettVurderinger(request.behandlingId))
     }
 
-    @PostMapping("gjenbruk-enkelt-vilkår")
+    @PostMapping("gjenbruk-enkelt-vilkar")
     fun gjenbrukEnkeltVilkår(
         @RequestBody request: EnkeltVilkårForGjenbrukRequest,
     ): Ressurs<VilkårsvurderingDto> {
@@ -119,7 +119,7 @@ class VurderingController(
         return Ressurs.success(vilkårsVurderingForGjenbruk.tilDto())
     }
 
-    @GetMapping("{behandlingId}/gjenbrukbare-vilkår")
+    @GetMapping("{behandlingId}/gjenbrukbare-vilkar")
     fun hentAlleGjenbrukbareVilkårsvurderinger(
         @PathVariable behandlingId: UUID,
     ): Ressurs<List<UUID>> {
