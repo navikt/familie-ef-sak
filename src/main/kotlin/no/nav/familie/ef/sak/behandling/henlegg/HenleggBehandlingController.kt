@@ -1,9 +1,9 @@
 package no.nav.familie.ef.sak.behandling.henlegg
 import no.nav.familie.ef.sak.AuditLoggerEvent
 import no.nav.familie.ef.sak.behandling.BehandlingService
-import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.behandling.dto.BehandlingDto
 import no.nav.familie.ef.sak.behandling.dto.HenlagtDto
+import no.nav.familie.ef.sak.behandling.dto.HenlagtÅrsak
 import no.nav.familie.ef.sak.behandling.dto.tilDto
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
@@ -13,6 +13,7 @@ import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
+import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.internal.TaskService
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -40,15 +41,18 @@ class HenleggBehandlingController(
         @PathVariable behandlingId: UUID,
     ): Ressurs<ByteArray> {
         val saksbehandling = behandlingService.hentSaksbehandling(behandlingId)
-        val saksbehandlerSignatur = SikkerhetContext.hentSaksbehandlerNavn(strict = true)
         tilgangService.validerTilgangTilBehandling(saksbehandling, AuditLoggerEvent.ACCESS)
-        return ressurs(saksbehandling, saksbehandlerSignatur)
+        val saksbehandlerSignatur = SikkerhetContext.hentSaksbehandlerNavn(strict = true)
+        val personIdent = behandlingService.hentAktivIdent(behandlingId)
+        val stønadstype = saksbehandling.stønadstype
+        return ressurs(stønadstype, saksbehandlerSignatur, personIdent)
     }
 
     private fun ressurs(
-        saksbehandling: Saksbehandling,
+        stønadsType: StønadType,
         saksbehandlerSignatur: String,
-    ) = Ressurs.success(henleggService.genererHenleggBrev(saksbehandling, saksbehandlerSignatur))
+        personIdent: String,
+    ) = Ressurs.success(henleggService.genererHenleggBrev(stønadsType, saksbehandlerSignatur, personIdent))
 
     @PostMapping("{behandlingId}/henlegg")
     fun henleggBehandling(
@@ -57,9 +61,10 @@ class HenleggBehandlingController(
     ): Ressurs<BehandlingDto> {
         tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.UPDATE)
         tilgangService.validerHarSaksbehandlerrolle()
+        validerIkkeSendBrevPåFeilType(henlagt)
         val henlagtBehandling = henleggService.henleggBehandling(behandlingId, henlagt)
         val fagsak: Fagsak = fagsakService.hentFagsak(henlagtBehandling.fagsakId)
-        if (henlagt.sendHenlagtBrev) {
+        if (henlagt.skalSendeHenleggelsesbrev) {
             val saksbehandlerSignatur = SikkerhetContext.hentSaksbehandlerNavn(strict = true)
             val saksbehandlerIdent = SikkerhetContext.hentSaksbehandler()
             val task: Task =
@@ -69,6 +74,10 @@ class HenleggBehandlingController(
         }
 
         return Ressurs.success(henlagtBehandling.tilDto(fagsak.stønadstype))
+    }
+
+    private fun validerIkkeSendBrevPåFeilType(henlagt: HenlagtDto) {
+        feilHvis(henlagt.skalSendeHenleggelsesbrev && henlagt.årsak == HenlagtÅrsak.FEILREGISTRERT) { "Skal ikke sende brev hvis type er ulik trukket tilbake" }
     }
 
     @PostMapping("{behandlingId}/henlegg/behandling-uten-oppgave")

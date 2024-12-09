@@ -1,7 +1,6 @@
 package no.nav.familie.ef.sak.behandling.henlegg
 
 import no.nav.familie.ef.sak.behandling.BehandlingService
-import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.dto.HenlagtDto
 import no.nav.familie.ef.sak.brev.BrevClient
@@ -11,6 +10,7 @@ import no.nav.familie.ef.sak.brev.dto.Flettefelter
 import no.nav.familie.ef.sak.felles.util.norskFormat
 import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerService
+import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import org.springframework.stereotype.Service
@@ -71,15 +71,26 @@ class HenleggService(
     }
 
     fun genererHenleggBrev(
-        saksbehandling: Saksbehandling,
+        stønadstype: StønadType,
         saksbehandlerSignatur: String,
+        personIdent: String,
     ): ByteArray {
-        val personIdent = behandlingService.hentAktivIdent(saksbehandling.id)
         val visningsNavn = personopplysningerService.hentGjeldeneNavn(listOf(personIdent)).getValue(personIdent)
         val flettefelter = Flettefelter(navn = listOf(visningsNavn), fodselsnummer = listOf(personIdent))
-        val stonadstype = saksbehandling.stønadstype.toString().lowercase()
 
-        val henleggelsesbrev = Henleggelsesbrev(Delmaler(listOf(Stonadstype(Flettefelter2(listOf(stonadstype))))), flettefelter)
+        val henleggelsesbrev = Henleggelsesbrev(
+            Delmaler(
+                listOf(
+                    Stonadstype(
+                        Flettefelter2(
+                            listOf(stønadstype.toString()
+                            )
+                        )
+                    )
+                )
+            ),
+            flettefelter
+        )
 
         val html =
             brevClient
@@ -93,38 +104,21 @@ class HenleggService(
 
         return familieDokumentClient.genererPdfFraHtml(html)
     }
-    /*
-    export interface IAvansertDokumentVariabler {
-        flettefelter: Flettefelter;
-        delmaler: IDelmaler;
-        fritekstområder: IFritekstområder;
-        valgfelter: IValgfelter;
-        htmlfelter: IHtmlfelter;
-    }
-     */
 }
 
-data class Henleggelsesbrev(
+private data class Henleggelsesbrev(
     val delmaler: Delmaler,
     val flettefelter: Flettefelter,
 )
 
-data class Stonadstype(
+private data class Stonadstype(
     val flettefelter: Flettefelter2,
 )
 
-data class Delmaler(
+private data class Delmaler(
     val stonadstype: List<Stonadstype>,
 )
 
-data class Flettefelter2(
+private data class Flettefelter2(
     val stonadstype: List<String>,
 )
-
-fun main(args: Array<String>) {
-    val flettefelter = Flettefelter(navn = listOf("Mattis"), fodselsnummer = listOf("12345678901"))
-
-    val henleggelsesbrev = Henleggelsesbrev(Delmaler(listOf(Stonadstype(Flettefelter2(listOf("Barnetrygd"))))), flettefelter)
-
-    println("" + objectMapper.valueToTree(henleggelsesbrev))
-}
