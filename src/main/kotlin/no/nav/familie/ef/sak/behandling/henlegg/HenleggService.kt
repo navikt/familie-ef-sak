@@ -87,7 +87,7 @@ class HenleggService(
                     brevmal = "informasjonsbrevTrukketSoknad",
                     saksbehandlerBrevrequest = objectMapper.valueToTree(henleggelsesbrev),
                     saksbehandlersignatur = saksbehandlerSignatur,
-                    enhet = "Nav Arbeid og ytelser", // TODO sjekk med Miria @Endre
+                    enhet = "Nav Arbeid og ytelser",
                     skjulBeslutterSignatur = true,
                 ).replace(VedtaksbrevService.BESLUTTER_VEDTAKSDATO_PLACEHOLDER, LocalDate.now().norskFormat())
 

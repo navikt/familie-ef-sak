@@ -45,7 +45,7 @@ class SendTrukketSøknadHenleggelsesbrevTask(
                 eksternFagsakId = saksbehandling.eksternFagsakId,
                 stønadType = saksbehandling.stønadstype,
                 brevtype = FrittståendeBrevType.INFORMASJONSBREV_TRUKKET_SØKNAD,
-                tittel = "Brev søknad trukket og derfor henlagt", // TODO sjekk med Miria @Endre
+                tittel = "Informasjonsbrev - trukket søknad",
                 fil = henleggBrev,
                 journalførendeEnhet = journalførendeEnhet,
                 saksbehandlerIdent = saksbehandlerIdent,
@@ -75,6 +75,6 @@ class SendTrukketSøknadHenleggelsesbrevTask(
                 payload = objectMapper.writeValueAsString(HenleggTaskDto(behandlingId, saksbehandlerSignatur, saksbehandlerIdent)),
             )
 
-        const val TYPE = "SendHenleggelsesbrevOmTrukkedSøknadTask"
+        const val TYPE = "SendHenleggelsesbrevOmTrukketSøknadTask"
     }
 }
