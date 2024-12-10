@@ -75,22 +75,11 @@ class HenleggService(
         saksbehandlerSignatur: String,
         personIdent: String,
     ): ByteArray {
-        val visningsNavn = personopplysningerService.hentGjeldeneNavn(listOf(personIdent)).getValue(personIdent)
-        val flettefelter = Flettefelter(navn = listOf(visningsNavn), fodselsnummer = listOf(personIdent))
-
-        val henleggelsesbrev = Henleggelsesbrev(
-            Delmaler(
-                listOf(
-                    Stonadstype(
-                        Flettefelter2(
-                            listOf(stønadstype.toString()
-                            )
-                        )
-                    )
-                )
-            ),
-            flettefelter
-        )
+        val henleggelsesbrev =
+            Henleggelsesbrev(
+                lagDelmaler(stønadstype),
+                lagNavnOgIdentFlettefelt(personIdent),
+            )
 
         val html =
             brevClient
@@ -98,12 +87,31 @@ class HenleggService(
                     brevmal = "informasjonsbrevTrukketSoknad",
                     saksbehandlerBrevrequest = objectMapper.valueToTree(henleggelsesbrev),
                     saksbehandlersignatur = saksbehandlerSignatur,
-                    enhet = "Nav Arbeid og ytelser",
+                    enhet = "Nav Arbeid og ytelser", // TODO sjekk med Miria @Endre
                     skjulBeslutterSignatur = true,
                 ).replace(VedtaksbrevService.BESLUTTER_VEDTAKSDATO_PLACEHOLDER, LocalDate.now().norskFormat())
 
         return familieDokumentClient.genererPdfFraHtml(html)
     }
+
+    private fun lagNavnOgIdentFlettefelt(personIdent: String): Flettefelter {
+        val visningsNavn = personopplysningerService.hentGjeldeneNavn(listOf(personIdent)).getValue(personIdent)
+        val navnOgIdentFlettefelt = Flettefelter(navn = listOf(visningsNavn), fodselsnummer = listOf(personIdent))
+        return navnOgIdentFlettefelt
+    }
+
+    private fun lagDelmaler(stønadstype: StønadType) =
+        Delmaler(
+            listOf(
+                Delmal(
+                    DelmalFlettefelt(
+                        listOf(
+                            stønadstype.name.lowercase(),
+                        ),
+                    ),
+                ),
+            ),
+        )
 }
 
 private data class Henleggelsesbrev(
@@ -111,14 +119,14 @@ private data class Henleggelsesbrev(
     val flettefelter: Flettefelter,
 )
 
-private data class Stonadstype(
-    val flettefelter: Flettefelter2,
+private data class Delmal(
+    val flettefelter: DelmalFlettefelt,
 )
 
 private data class Delmaler(
-    val stonadstype: List<Stonadstype>,
+    val stonadstype: List<Delmal>,
 )
 
-private data class Flettefelter2(
+private data class DelmalFlettefelt(
     val stonadstype: List<String>,
 )

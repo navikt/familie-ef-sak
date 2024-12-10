@@ -3,6 +3,7 @@ package no.nav.familie.ef.sak.behandling.henlegg
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.familie.ef.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ef.sak.behandling.BehandlingService
+import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerService
 import no.nav.familie.kontrakter.ef.felles.FrittståendeBrevDto
@@ -31,21 +32,12 @@ class SendTrukketSøknadHenleggelsesbrevTask(
     private val personopplysningerService: PersonopplysningerService,
 ) : AsyncTaskStep {
     override fun doTask(task: Task) {
-        val payload = objectMapper.readValue<HenleggTaskDto>(task.payload)
-        val behandlingId = payload.behandlingId
-        val saksbehandlerSignatur = payload.saksbehandlerSignatur
-        val saksbehandlerIdent = payload.saksbehandlerIdent
-        val brukerIdent = behandlingService.hentAktivIdent(behandlingId)
-        val saksbehandling = behandlingService.hentSaksbehandling(behandlingId)
-        val genererHenleggBrev = henleggService.genererHenleggBrev(saksbehandling.stønadstype, saksbehandlerSignatur, brukerIdent)
-        val journalFørendeEnhet = arbeidsfordelingService.hentNavEnhetIdEllerBrukMaskinellEnhetHvisNull(brukerIdent)
-        val mottaker =
-            Brevmottaker(
-                ident = brukerIdent,
-                navn = personopplysningerService.hentGjeldeneNavn(listOf(brukerIdent)).getValue(brukerIdent),
-                mottakerRolle = Brevmottaker.MottakerRolle.BRUKER,
-                identType = Brevmottaker.IdentType.PERSONIDENT,
-            )
+        val henleggTaskDto = objectMapper.readValue<HenleggTaskDto>(task.payload)
+        val saksbehandlerSignatur = henleggTaskDto.saksbehandlerSignatur
+        val saksbehandlerIdent = henleggTaskDto.saksbehandlerIdent
+        val saksbehandling = behandlingService.hentSaksbehandling(henleggTaskDto.behandlingId)
+        val journalførendeEnhet = arbeidsfordelingService.hentNavEnhetIdEllerBrukMaskinellEnhetHvisNull(saksbehandling.ident)
+        val henleggBrev = henleggService.genererHenleggBrev(saksbehandling.stønadstype, saksbehandlerSignatur, saksbehandling.ident)
 
         val hennleggbrevDTO =
             FrittståendeBrevDto(
@@ -54,15 +46,23 @@ class SendTrukketSøknadHenleggelsesbrevTask(
                 stønadType = saksbehandling.stønadstype,
                 brevtype = FrittståendeBrevType.INFORMASJONSBREV_TRUKKET_SØKNAD,
                 tittel = "Brev søknad trukket og derfor henlagt", // TODO sjekk med Miria @Endre
-                fil = genererHenleggBrev,
-                journalførendeEnhet = journalFørendeEnhet,
+                fil = henleggBrev,
+                journalførendeEnhet = journalførendeEnhet,
                 saksbehandlerIdent = saksbehandlerIdent,
-                mottakere = listOf(mottaker),
+                mottakere = lagBrevMottaker(saksbehandling),
             )
-        iverksettClient.sendFrittståendeBrev(
-            frittståendeBrevDto = hennleggbrevDTO,
-        )
+        iverksettClient.sendFrittståendeBrev(frittståendeBrevDto = hennleggbrevDTO)
     }
+
+    private fun lagBrevMottaker(saksbehandling: Saksbehandling) =
+        listOf(
+            Brevmottaker(
+                ident = saksbehandling.ident,
+                navn = personopplysningerService.hentGjeldeneNavn(listOf(saksbehandling.ident)).getValue(saksbehandling.ident),
+                mottakerRolle = Brevmottaker.MottakerRolle.BRUKER,
+                identType = Brevmottaker.IdentType.PERSONIDENT,
+            ),
+        )
 
     companion object {
         fun opprettTask(
@@ -78,5 +78,3 @@ class SendTrukketSøknadHenleggelsesbrevTask(
         const val TYPE = "SendHenleggelsesbrevOmTrukkedSøknadTask"
     }
 }
-
-private fun String.toUUID(): UUID = UUID.fromString(this)

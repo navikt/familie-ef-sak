@@ -49,4 +49,9 @@ class HenleggBehandlingControllerTest {
         henleggBehandlingController.henleggBehandling(UUID.randomUUID(), HenlagtDto(HenlagtÅrsak.TRUKKET_TILBAKE, true))
         verify(exactly = 1) { taskService.save(any()) }
     }
+
+    @Test internal fun `Skal ikke lage send brev task hvis skalSendeHenleggelsesBrev er false`() {
+        henleggBehandlingController.henleggBehandling(UUID.randomUUID(), HenlagtDto(HenlagtÅrsak.TRUKKET_TILBAKE, false))
+        verify(exactly = 0) { taskService.save(any()) }
+    }
 }
