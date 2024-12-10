@@ -7,8 +7,9 @@ import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.ef.sak.oppgave.OppgaveUtil
 import no.nav.familie.ef.sak.sigrun.SigrunService
 import no.nav.familie.ef.sak.tilkjentytelse.AndelsHistorikkService
+import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
+import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.vedtak.VedtakService
-import no.nav.familie.ef.sak.vedtak.historikk.VedtakshistorikkperiodeOvergangsstønad
 import no.nav.familie.kontrakter.felles.Behandlingstema
 import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.kontrakter.felles.Tema
@@ -33,6 +34,7 @@ class NæringsinntektKontrollService(
     val sigrunService: SigrunService,
     val inntektService: InntektService,
     val andelsHistorikkService: AndelsHistorikkService,
+    val tilkjentYtelseService: TilkjentYtelseService,
 ) {
     private val secureLogger = LoggerFactory.getLogger("secureLogger")
     private val årstallIFjor = YearMonth.now().minusYears(1).year
@@ -47,21 +49,20 @@ class NæringsinntektKontrollService(
                 val personIdent =
                     oppgave.identer?.firstOrNull { it.gruppe == IdentGruppe.FOLKEREGISTERIDENT }?.ident
                         ?: oppgave.personident ?: throw Exception("Fant ikke registrert ident på oppgave ${oppgave.id}")
-
                 secureLogger.info("Kontrollerer person med ident: $personIdent")
 
                 val fagsakOS = fagsakService.finnFagsaker(setOf(personIdent)).firstOrNull { it.stønadstype == StønadType.OVERGANGSSTØNAD } ?: throw RuntimeException("Fant ikke fagsak for overgangsstønad for person: $personIdent")
-                // val behandlingIdsForFagsak = behandlingService.hentBehandlinger(fagsakOS.id).map { it.id }
+                val behandlingId = behandlingService.finnSisteIverksatteBehandling(fagsakOS.id)?.id ?: throw RuntimeException("Fant ingen gjeldende behandling for fagsakId: ${fagsakOS.id}")
+                val tilkjentYtelse = tilkjentYtelseService.hentForBehandling(behandlingId)
 
-                val antallMåneder = antallMånederMedVedtakForFjoråret(fagsakOS.id)
-
+                val antallMåneder = antallMånederMedVedtakForFjoråret(tilkjentYtelse)
                 val næringsinntekt = hentFjoråretsNæringsinntekt(fagsakOS.fagsakPersonId)
 
                 if (antallMåneder > 3 && næringsinntekt > INNTEKTSGRENSE_FOR_KONTROLL_AV_AKTIVITET) {
                     val fjoråretsPersoninntekt = inntektService.hentÅrsinntekt(personIdent, årstallIFjor)
                     secureLogger.info("Forrige års inntekt for person uten ytelse fra offentlig: $fjoråretsPersoninntekt")
                     if (fjoråretsPersoninntekt == 0) {
-                        val forventetInntekt = forventetInntektSnitt(fagsakOS.id)
+                        val forventetInntekt = forventetInntektSnitt(tilkjentYtelse)
                         // secureLogger.info("Beregnet inntekt i snitt for år $årstallIFjor og behandlingId ${behandling.id} er: $forventetInntekt")
                         if (næringsinntekt > (forventetInntekt * 1.1)) {
                             secureLogger.info("Har 10% høyere næringsinntekt for person: $personIdent (Næringsinntekt: $næringsinntekt - ForventetInntekt: $forventetInntekt)")
@@ -82,14 +83,20 @@ class NæringsinntektKontrollService(
         return næringsinntekt
     }
 
-    private fun forventetInntektSnitt(fagsakId: UUID): Int {
-        val andelshistorikk = andelsHistorikkService.hentHistorikk(fagsakId, null)
-        val fjoråretsInnvilgetAndelHistorikk = andelshistorikk.filter { it.vedtaksperiode.periode.overlapper(Månedsperiode(YearMonth.of(årstallIFjor, 1), YearMonth.of(årstallIFjor, 12))) && it.vedtaksperiode is VedtakshistorikkperiodeOvergangsstønad }
+    private fun forventetInntektSnitt(tilkjentYtelse: TilkjentYtelse): Int {
+        val antallMånederInntektList =
+            tilkjentYtelse.andelerTilkjentYtelse.map {
+                (
+                    it.periode
+                        .snitt(månedsperiodeIFjor)
+                        ?.lengdeIHeleMåneder()
+                        ?.toInt() ?: 0
+                ) to it.inntekt
+            }
 
-        val fjoråretsInntekter = fjoråretsInnvilgetAndelHistorikk.map { (it.vedtaksperiode as VedtakshistorikkperiodeOvergangsstønad).inntekt }
-
-        val snitt = fjoråretsInntekter.sumOf { it.totalinntekt().toInt() } / fjoråretsInntekter.size
-        return snitt
+        return antallMånederInntektList.sumOf { (inntekt, antallMåneder) ->
+            inntekt * (antallMåneder / 12)
+        }
     }
 
     private fun hentOppgaverForSelvstendigeTilInntektskontroll(): List<Oppgave> {
@@ -119,14 +126,12 @@ class NæringsinntektKontrollService(
     }
 
     private fun antallMånederMedVedtakForFjoråret(
-        fagsakId: UUID,
+        tilkjentYtelse: TilkjentYtelse,
     ): Long {
-        val andelshistorikk = andelsHistorikkService.hentHistorikk(fagsakId, null)
-        val fjoråretsInnvilgetAndelHistorikk = andelshistorikk.filter { it.vedtaksperiode.periode.overlapper(Månedsperiode(YearMonth.of(årstallIFjor, 1), YearMonth.of(årstallIFjor, 12))) && it.vedtaksperiode is VedtakshistorikkperiodeOvergangsstønad }
-        val antallMåneder = fjoråretsInnvilgetAndelHistorikk.map { it.vedtaksperiode.periode.snitt(månedsperiodeIFjor) }.sumOf { it?.lengdeIHeleMåneder() ?: 0 }
-        // Beregn antall måneder
-        secureLogger.info("Antall måneder $antallMåneder med vedtak i $årstallIFjor for fagsak: $fagsakId")
-        return antallMåneder
+
+        val perioder = tilkjentYtelse.andelerTilkjentYtelse.map { it.periode.snitt(månedsperiodeIFjor) }
+        val sum = perioder.sumOf { it?.lengdeIHeleMåneder() ?: 0 }
+        return sum
     }
 
     companion object {

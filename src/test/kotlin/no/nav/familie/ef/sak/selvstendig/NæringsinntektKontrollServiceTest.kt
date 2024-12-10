@@ -14,10 +14,14 @@ import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.vedtak
 import no.nav.familie.ef.sak.testutil.kjørSomLeader
+import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseRepository
+import no.nav.familie.ef.sak.tilkjentytelse.domain.AndelTilkjentYtelse
 import no.nav.familie.ef.sak.vedtak.VedtakRepository
 import no.nav.familie.ef.sak.vedtak.domain.InntektWrapper
 import no.nav.familie.ef.sak.vedtak.domain.PeriodeWrapper
 import no.nav.familie.ef.sak.vedtak.domain.Vedtaksperiode
+import no.nav.familie.ef.sak.økonomi.lagAndelTilkjentYtelse
+import no.nav.familie.ef.sak.økonomi.lagTilkjentYtelse
 import no.nav.familie.kontrakter.felles.Behandlingstema
 import no.nav.familie.kontrakter.felles.Tema
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveRequest
@@ -25,6 +29,7 @@ import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveResponseDto
 import no.nav.familie.kontrakter.felles.oppgave.IdentGruppe
 import no.nav.familie.kontrakter.felles.oppgave.OppgaveIdentV2
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -45,6 +50,9 @@ internal class NæringsinntektKontrollServiceTest : OppslagSpringRunnerTest() {
     @Autowired
     private lateinit var oppgaveClient: OppgaveClient
 
+    @Autowired
+    private lateinit var tilkjentYtelseRepository: TilkjentYtelseRepository
+
     private val personIdent = "11111111111"
     private val fagsakTilknyttetPersonIdent = fagsak(setOf(PersonIdent(personIdent)))
 
@@ -61,12 +69,24 @@ internal class NæringsinntektKontrollServiceTest : OppslagSpringRunnerTest() {
         every { oppgaveClient.hentOppgaver(finnOppgaveRequest) } returns FinnOppgaveResponseDto(1, listOf(lagEksternTestOppgave()))
         testoppsettService.lagreFagsak(fagsakTilknyttetPersonIdent)
 
-        for (i in 0..4) {
+        val behandlingIds = mutableListOf<UUID>()
+        for (i in 0..3) {
             val behandling = behandling(id = UUID.randomUUID(), fagsak = fagsakTilknyttetPersonIdent, status = BehandlingStatus.FERDIGSTILT, resultat = BehandlingResultat.INNVILGET)
-            behandlingRepository.insert(behandling)
-            val vedtak = vedtak(behandlingId = behandling.id, perioder = PeriodeWrapper(objectMapper.readValue<List<Vedtaksperiode>>(vedtaksperiodeJsonList[i])), inntekter = InntektWrapper(objectMapper.readValue<List<Inntektsperiode>>(inntektsperiodeJsonList[i])))
+            val behandlingId = behandlingRepository.insert(behandling).id
+            behandlingIds.add(behandlingId)
+            val vedtak = vedtak(behandlingId = behandlingId, perioder = PeriodeWrapper(objectMapper.readValue<List<Vedtaksperiode>>(vedtaksperiodeJsonList[i])), inntekter = InntektWrapper(objectMapper.readValue<List<Inntektsperiode>>(inntektsperiodeJsonList[i])))
             vedtakRepository.insert(vedtak)
         }
+
+        val andelerTilkjentYtelse = mutableListOf<AndelTilkjentYtelse>()
+
+        andelerTilkjentYtelse.add(lagAndelTilkjentYtelse(17517, LocalDate.of(2022, 9, 1), LocalDate.of(2023, 1, 31), personIdent, behandlingIds[0], 146000, 0, 3385))
+        andelerTilkjentYtelse.add(lagAndelTilkjentYtelse(19392, LocalDate.of(2023, 2, 1), LocalDate.of(2023, 4, 30), personIdent, behandlingIds[1], 96000, 0, 1510))
+        andelerTilkjentYtelse.add(lagAndelTilkjentYtelse(20865, LocalDate.of(2023, 5, 1), LocalDate.of(2023, 7, 31), personIdent, behandlingIds[1], 96000, 0, 1376))
+        andelerTilkjentYtelse.add(lagAndelTilkjentYtelse(21765, LocalDate.of(2023, 8, 1), LocalDate.of(2024, 4, 30), personIdent, behandlingIds[2], 72000, 0, 476))
+        andelerTilkjentYtelse.add(lagAndelTilkjentYtelse(22761, LocalDate.of(2024, 5, 1), LocalDate.of(2024, 7, 31), personIdent, behandlingIds[3], 75200, 0, 494))
+        val tilkjentYtelse = lagTilkjentYtelse(andelerTilkjentYtelse = andelerTilkjentYtelse, behandlingId = behandlingIds[3], personident = personIdent, startdato = LocalDate.of(2022, 9, 1), grunnbeløpsmåned = YearMonth.of(2024, 5))
+        tilkjentYtelseRepository.insert(tilkjentYtelse)
     }
 
     private fun lagEksternTestOppgave(tilordnetRessurs: String? = null): no.nav.familie.kontrakter.felles.oppgave.Oppgave =
@@ -76,25 +96,24 @@ internal class NæringsinntektKontrollServiceTest : OppslagSpringRunnerTest() {
     @Test
     fun `sjekkNæringsinntektMotForventetInntekt med flere behandlinger og vedtak`() {
         kjørSomLeader {
-            næringsinntektKontrollService.sjekkNæringsinntektMotForventetInntekt()
+            val fagsakIds = næringsinntektKontrollService.sjekkNæringsinntektMotForventetInntekt()
+            assertThat(fagsakIds.first()).isEqualTo(fagsakTilknyttetPersonIdent.id)
         }
     }
 }
 
 val vedtaksperiodeJsonList =
     listOf(
-        """[{"datoFra":"2022-02-01","datoTil":"2025-01-31","aktivitet":"FORSØRGER_I_ARBEID","periodeType":"HOVEDPERIODE"}]""",
-        """[{"datoFra":"2022-09-01","datoTil":"2025-04-30","aktivitet":"FORSØRGER_I_ARBEID","periodeType":"HOVEDPERIODE","sanksjonsårsak":null}]""",
-        """[{"datoFra":"2023-05-01","datoTil":"2025-04-30","aktivitet":"FORSØRGER_I_ARBEID","periodeType":"HOVEDPERIODE","sanksjonsårsak":null}]""",
-        """[{"datoFra":"2024-02-01","datoTil":"2025-04-30","aktivitet":"FORSØRGER_I_ARBEID","periodeType":"HOVEDPERIODE","sanksjonsårsak":null}]""",
-        """[{"datoFra":"2024-05-01","datoTil":"2025-04-30","aktivitet":"FORSØRGER_I_ARBEID","periodeType":"HOVEDPERIODE","sanksjonsårsak":null}]""",
+        """[{"datoFra":"2022-09-01","datoTil":"2023-07-31","aktivitet":"FORSØRGER_I_ARBEID","periodeType":"HOVEDPERIODE"}]""",
+        """[{"datoFra":"2023-02-01","datoTil":"2023-07-31","aktivitet":"FORSØRGER_I_ARBEID","periodeType":"HOVEDPERIODE","sanksjonsårsak":null}]""",
+        """[{"datoFra":"2023-08-01","datoTil":"2024-07-31","aktivitet":"FORLENGELSE_MIDLERTIDIG_SYKDOM","periodeType":"FORLENGELSE","sanksjonsårsak":null}]""",
+        """[{"datoFra":"2024-05-01","datoTil":"2024-07-31","aktivitet":"FORLENGELSE_MIDLERTIDIG_SYKDOM","periodeType":"FORLENGELSE","sanksjonsårsak":null}]""",
     )
 
 val inntektsperiodeJsonList =
     listOf(
-        """[{"startDato":"2022-02-01","sluttDato":"2022-02-28","inntekt":628000,"samordningsfradrag":0},{"startDato":"2022-03-01","sluttDato":"2022-03-31","inntekt":496000,"samordningsfradrag":0},{"startDato":"2022-04-01","sluttDato":"2022-04-30","inntekt":208000,"samordningsfradrag":0},{"startDato":"2022-05-01","sluttDato":"2022-05-31","inntekt":1739000,"samordningsfradrag":0},{"startDato":"2022-06-01","sluttDato":"+999999999-12-31","inntekt":692000,"samordningsfradrag":0}]""",
-        """[{"startDato":null,"sluttDato":null,"periode":{"fom":"2022-09","tom":"2022-09"},"inntekt":251000,"samordningsfradrag":0},{"startDato":null,"sluttDato":null,"periode":{"fom":"2022-10","tom":"2022-10"},"inntekt":133000,"samordningsfradrag":0},{"startDato":null,"sluttDato":null,"periode":{"fom":"2022-11","tom":"2022-11"},"inntekt":191000,"samordningsfradrag":0},{"startDato":null,"sluttDato":null,"periode":{"fom":"2022-12","tom":"2022-12"},"inntekt":133000,"samordningsfradrag":0},{"startDato":null,"sluttDato":null,"periode":{"fom":"2023-01","tom":"999999999-12"},"inntekt":400000,"samordningsfradrag":0}]""",
-        """[{"startDato":null,"sluttDato":null,"periode":{"fom":"2023-05","tom":"999999999-12"},"dagsats":0,"månedsinntekt":0,"inntekt":425600,"samordningsfradrag":0}]""",
-        """[{"startDato":null,"sluttDato":null,"periode":{"fom":"2024-02","tom":"999999999-12"},"dagsats":0,"månedsinntekt":0,"inntekt":500000,"samordningsfradrag":0}]""",
-        """[{"startDato":null,"sluttDato":null,"periode":{"fom":"2024-05","tom":"999999999-12"},"dagsats":0,"månedsinntekt":0,"inntekt":522700,"samordningsfradrag":0}]""",
+        """[{"startDato":"2022-09-01","sluttDato":"+999999999-12-31","inntekt":146000,"samordningsfradrag":0}]""",
+        """[{"startDato":null,"sluttDato":null,"periode":{"fom":"2023-02","tom":"999999999-12"},"dagsats":0,"månedsinntekt":0,"inntekt":96000,"samordningsfradrag":0}]""",
+        """[{"startDato":null,"sluttDato":null,"periode":{"fom":"2023-08","tom":"999999999-12"},"dagsats":0,"månedsinntekt":0,"inntekt":72000,"samordningsfradrag":0}]""",
+        """[{"startDato":null,"sluttDato":null,"periode":{"fom":"2024-05","tom":"999999999-12"},"dagsats":0,"månedsinntekt":0,"inntekt":75200,"samordningsfradrag":0}]""",
     )
