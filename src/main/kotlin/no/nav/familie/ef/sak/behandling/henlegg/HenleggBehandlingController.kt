@@ -12,8 +12,11 @@ import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerService
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.FullmaktDto
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.ef.StønadType
+import no.nav.familie.kontrakter.felles.oppgave.Oppgave
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.internal.TaskService
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -24,6 +27,20 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import java.util.UUID
+import no.nav.familie.ef.sak.felles.util.isEqualOrAfter
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.AdresseDto
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.BarnDto
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.Folkeregisterpersonstatus
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.InnflyttingDto
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.Kjønn
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.NavnDto
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.OppholdstillatelseDto
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.PersonopplysningerDto
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.SivilstandDto
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.UtflyttingDto
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.VergemålDto
+import no.nav.familie.ef.sak.vilkår.dto.StatsborgerskapDto
+import java.time.LocalDate
 
 @RestController
 @RequestMapping(path = ["/api/behandling"])
@@ -35,6 +52,7 @@ class HenleggBehandlingController(
     private val tilgangService: TilgangService,
     private val featureToggleService: FeatureToggleService,
     private val taskService: TaskService,
+    private val personopplysningerService: PersonopplysningerService,
 ) {
     @GetMapping("/{behandlingId}/henlegg/brev")
     fun genererHenleggBrev(
@@ -62,6 +80,7 @@ class HenleggBehandlingController(
         tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.UPDATE)
         tilgangService.validerHarSaksbehandlerrolle()
         validerIkkeSendBrevPåFeilType(henlagt)
+        validerIkkeSendBrevHvisVergemålEllerFullmakt(behandlingService.hentAktivIdent(behandlingId))
         val henlagtBehandling = henleggService.henleggBehandling(behandlingId, henlagt)
         val fagsak: Fagsak = fagsakService.hentFagsak(henlagtBehandling.fagsakId)
         if (henlagt.skalSendeHenleggelsesbrev) {
@@ -78,6 +97,18 @@ class HenleggBehandlingController(
 
     private fun validerIkkeSendBrevPåFeilType(henlagt: HenlagtDto) {
         feilHvis(henlagt.skalSendeHenleggelsesbrev && henlagt.årsak == HenlagtÅrsak.FEILREGISTRERT) { "Skal ikke sende brev hvis type er ulik trukket tilbake" }
+    }
+
+    private fun validerIkkeSendBrevHvisVergemålEllerFullmakt(
+        ident: String,
+    ) {
+        val personopplysninger = personopplysningerService.hentPersonopplysningerFraRegister(ident)
+        val harVerge = personopplysninger.vergemål.isNotEmpty()
+        val harFullmakt: Boolean = personopplysninger.fullmakt.filter{ it.gyldigTilOgMed == null || (it.gyldigTilOgMed.isEqualOrAfter(
+            LocalDate.now()))}.isNotEmpty()
+        feilHvis(harVerge || harFullmakt) {
+            "Skal ikke sende brev hvis person er tilknyttet vergemål eller fullmakt"
+        }
     }
 
     @PostMapping("{behandlingId}/henlegg/behandling-uten-oppgave")
