@@ -89,27 +89,27 @@ class GjenbrukVilkårService(
     }
 
     fun utledGjenbrukbareVilkårsvurderinger(
-        behandlingSomSkalOppdateres: UUID,
-        behandlingIdSomGjenbrukes: UUID,
+        behandlingId: UUID,
+        behandlingIdForGjenbruk: UUID,
     ): List<Vilkårsvurdering> {
         val forrigeBarnIdTilNåværendeBarnMap =
-            finnBarnPåBeggeBehandlinger(behandlingSomSkalOppdateres, behandlingIdSomGjenbrukes)
+            finnBarnPåBeggeBehandlinger(behandlingId, behandlingIdForGjenbruk)
         val sivilstandErLik =
-            erSivilstandUforandretSidenForrigeBehandling(behandlingSomSkalOppdateres, behandlingIdSomGjenbrukes)
+            erSivilstandUforandretSidenForrigeBehandling(behandlingId, behandlingIdForGjenbruk)
         val erSammeStønadstype =
-            erSammeStønadstype(behandlingSomSkalOppdateres, behandlingIdSomGjenbrukes)
+            erSammeStønadstype(behandlingId, behandlingIdForGjenbruk)
         val tidligereVurderinger =
             hentVurderingerSomSkalGjenbrukes(
                 sivilstandErLik,
                 erSammeStønadstype,
-                behandlingIdSomGjenbrukes,
+                behandlingIdForGjenbruk,
                 forrigeBarnIdTilNåværendeBarnMap,
             )
         val nåværendeVurderinger =
-            vilkårsvurderingRepository.findByBehandlingId(behandlingSomSkalOppdateres)
+            vilkårsvurderingRepository.findByBehandlingId(behandlingId)
 
         return lagInngangsvilkårVurderingerForGjenbruk(
-            behandlingSomSkalOppdateres,
+            behandlingId,
             nåværendeVurderinger,
             tidligereVurderinger,
             forrigeBarnIdTilNåværendeBarnMap,

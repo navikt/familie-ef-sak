@@ -227,6 +227,21 @@ internal class GjenbrukVilkårServiceTest {
         assertThat(vilkårsvurderingSlot.captured.resultat).isEqualTo(Vilkårsresultat.OPPFYLT)
     }
 
+    @Test
+    internal fun `utledGjenbrukbareVilkårsvurderinger skal returnere en liste med IDer`() {
+        val gjenbrukbareVilkårsvurderinger =
+            gjenbrukVilkårService.utledGjenbrukbareVilkårsvurderinger(
+                nyBT.behandling.id,
+                ferdigstiltOS.behandling.id,
+            )
+
+        val silvilstandIdForGjenbruk = nyBT.sivilstandsvilkår.id
+        assertThat(gjenbrukbareVilkårsvurderinger.map { it.id }).contains(
+            silvilstandIdForGjenbruk,
+        )
+        assertThat(gjenbrukbareVilkårsvurderinger).isNotEmpty()
+    }
+
     private fun gjenbrukVilkår() {
         gjenbrukVilkårService.gjenbrukInngangsvilkårVurderinger(
             nyBT.behandling.id,
