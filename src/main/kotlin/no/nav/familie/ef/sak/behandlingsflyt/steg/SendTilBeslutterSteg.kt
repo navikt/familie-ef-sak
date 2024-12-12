@@ -206,7 +206,7 @@ class SendTilBeslutterSteg(
                 val beslutterIdent = vedtak.opprettetAv.takeIf { NAVIDENT_REGEX.matches(it) }
                 val skalTilordneNavIdent =
                     beslutterIdent != SikkerhetContext.hentSaksbehandler() &&
-                        vedtak.endretTid.isAfter(LocalDateTime.now().minusMonths(1))
+                        vedtak.endretTid.isAfter(LocalDateTime.now().minusWeeks(3))
                 beslutterIdent.takeIf { skalTilordneNavIdent }
             }
 
