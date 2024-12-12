@@ -96,7 +96,7 @@ internal class NæringsinntektKontrollServiceTest : OppslagSpringRunnerTest() {
     @Test
     fun `sjekkNæringsinntektMotForventetInntekt med flere behandlinger og vedtak`() {
         kjørSomLeader {
-            val fagsakIds = næringsinntektKontrollService.sjekkNæringsinntektMotForventetInntekt()
+            val fagsakIds = næringsinntektKontrollService.finnFagsakerMedOver10ProsentHøyereNæringsinntektEnnForventet()
             assertThat(fagsakIds.first()).isEqualTo(fagsakTilknyttetPersonIdent.id)
         }
     }

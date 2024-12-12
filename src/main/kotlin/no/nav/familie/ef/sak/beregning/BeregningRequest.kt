@@ -17,12 +17,7 @@ data class Inntekt(
     val samordningsfradrag: BigDecimal?,
     val dagsats: BigDecimal? = null,
     val månedsinntekt: BigDecimal? = null,
-) {
-    fun totalinntekt(): BigDecimal =
-        (this.forventetInntekt ?: BigDecimal.ZERO) +
-            (this.dagsats ?: BigDecimal.ZERO).multiply(BeregningUtils.DAGSATS_ANTALL_DAGER) +
-            (this.månedsinntekt ?: BigDecimal.ZERO).multiply(BeregningUtils.ANTALL_MÅNEDER_ÅR)
-}
+)
 
 // TODO Dette er en domeneklasse og burde flyttes til Vedtak.kt.
 data class Inntektsperiode(

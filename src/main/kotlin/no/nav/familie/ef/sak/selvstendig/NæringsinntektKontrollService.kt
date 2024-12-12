@@ -40,7 +40,7 @@ class NæringsinntektKontrollService(
     private val årstallIFjor = YearMonth.now().minusYears(1).year
     private val månedsperiodeIFjor = Månedsperiode(YearMonth.of(årstallIFjor, 1), YearMonth.of(årstallIFjor, 12))
 
-    fun sjekkNæringsinntektMotForventetInntekt(): List<UUID> {
+    fun finnFagsakerMedOver10ProsentHøyereNæringsinntektEnnForventet(): List<UUID> {
         val fagsakIds = mutableListOf<UUID>()
         if (LeaderClient.isLeader() == true) {
             val oppgaver = hentOppgaverForSelvstendigeTilInntektskontroll()
@@ -51,12 +51,12 @@ class NæringsinntektKontrollService(
                         ?: oppgave.personident ?: throw Exception("Fant ikke registrert ident på oppgave ${oppgave.id}")
                 secureLogger.info("Kontrollerer person med ident: $personIdent")
 
-                val fagsakOS = fagsakService.finnFagsaker(setOf(personIdent)).firstOrNull { it.stønadstype == StønadType.OVERGANGSSTØNAD } ?: throw RuntimeException("Fant ikke fagsak for overgangsstønad for person: $personIdent")
-                val behandlingId = behandlingService.finnSisteIverksatteBehandling(fagsakOS.id)?.id ?: throw RuntimeException("Fant ingen gjeldende behandling for fagsakId: ${fagsakOS.id}")
+                val fagsakOvergangsstønad = fagsakService.finnFagsaker(setOf(personIdent)).firstOrNull { it.stønadstype == StønadType.OVERGANGSSTØNAD } ?: throw RuntimeException("Fant ikke fagsak for overgangsstønad for person: $personIdent")
+                val behandlingId = behandlingService.finnSisteIverksatteBehandling(fagsakOvergangsstønad.id)?.id ?: throw RuntimeException("Fant ingen gjeldende behandling for fagsakId: ${fagsakOvergangsstønad.id}")
                 val tilkjentYtelse = tilkjentYtelseService.hentForBehandling(behandlingId)
 
                 val antallMåneder = antallMånederMedVedtakForFjoråret(tilkjentYtelse)
-                val næringsinntekt = hentFjoråretsNæringsinntekt(fagsakOS.fagsakPersonId)
+                val næringsinntekt = hentFjoråretsNæringsinntekt(fagsakOvergangsstønad.fagsakPersonId)
 
                 if (antallMåneder > 3 && næringsinntekt > INNTEKTSGRENSE_FOR_KONTROLL_AV_AKTIVITET) {
                     val fjoråretsPersoninntekt = inntektService.hentÅrsinntekt(personIdent, årstallIFjor)
@@ -66,7 +66,7 @@ class NæringsinntektKontrollService(
                         // secureLogger.info("Beregnet inntekt i snitt for år $årstallIFjor og behandlingId ${behandling.id} er: $forventetInntekt")
                         if (næringsinntekt > (forventetInntekt * 1.1)) {
                             secureLogger.info("Har 10% høyere næringsinntekt for person: $personIdent (Næringsinntekt: $næringsinntekt - ForventetInntekt: $forventetInntekt)")
-                            fagsakIds.add(fagsakOS.id)
+                            fagsakIds.add(fagsakOvergangsstønad.id)
                         }
                     }
                 }
