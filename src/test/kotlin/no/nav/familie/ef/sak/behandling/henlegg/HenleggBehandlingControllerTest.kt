@@ -99,8 +99,8 @@ class HenleggBehandlingControllerTest {
         every { personopplysningerService.hentPersonopplysningerFraRegister(any()) } returns dto(
             fullmakt = listOf(
                 FullmaktDto(
-                    gyldigFraOgMed = LocalDate.of(LocalDate.now().year-1, LocalDate.now().month, LocalDate.now().dayOfMonth),
-                    gyldigTilOgMed = LocalDate.of(LocalDate.now().year-1, LocalDate.now().month, LocalDate.now().dayOfMonth),
+                    gyldigFraOgMed = LocalDate.now().minusDays(2),
+                    gyldigTilOgMed = LocalDate.now().minusDays(1),
                     navn = "123",
                     motpartsPersonident = "123",
                     områder = emptyList()
