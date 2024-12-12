@@ -309,7 +309,7 @@ internal class SendTilBeslutterStegTest {
     }
 
     @Test
-    internal fun `beslutter ident blir ikke med i opprett oppgave task hvis underkjent for over en mnd siden`() {
+    internal fun `beslutter ident blir ikke med i opprett oppgave task hvis underkjent for over tre uker siden`() {
         val beslutterIdent = "B123456"
         every { vedtakService.oppdaterSaksbehandler(any(), any()) } just Runs
         every { behandlingshistorikkService.finnSisteBehandlingshistorikk(any(), StegType.BESLUTTE_VEDTAK) } returns
@@ -319,13 +319,33 @@ internal class SendTilBeslutterStegTest {
                 utfall = StegUtfall.BESLUTTE_VEDTAK_UNDERKJENT,
                 opprettetAv = beslutterIdent,
                 opprettetAvNavn = "beslutterNavn",
-                endretTid = LocalDateTime.now().minusMonths(1).minusDays(1),
+                endretTid = LocalDateTime.now().minusWeeks(3).minusDays(1),
             )
 
         utførSteg()
 
         assertThat(taskSlot[0].type).isEqualTo(OpprettOppgaveTask.TYPE)
         assertThat(taskSlot[0].payload).doesNotContain(beslutterIdent)
+    }
+
+    @Test
+    internal fun `beslutter ident blir med i opprett oppgave task hvis underkjent for under tre uker siden`() {
+        val beslutterIdent = "B123456"
+        every { vedtakService.oppdaterSaksbehandler(any(), any()) } just Runs
+        every { behandlingshistorikkService.finnSisteBehandlingshistorikk(any(), StegType.BESLUTTE_VEDTAK) } returns
+            Behandlingshistorikk(
+                behandlingId = UUID.randomUUID(),
+                steg = StegType.BESLUTTE_VEDTAK,
+                utfall = StegUtfall.BESLUTTE_VEDTAK_UNDERKJENT,
+                opprettetAv = beslutterIdent,
+                opprettetAvNavn = "beslutterNavn",
+                endretTid = LocalDateTime.now().minusWeeks(3).plusDays(1),
+            )
+
+        utførSteg()
+
+        assertThat(taskSlot[0].type).isEqualTo(OpprettOppgaveTask.TYPE)
+        assertThat(taskSlot[0].payload).contains(beslutterIdent)
     }
 
     @Test
