@@ -75,9 +75,10 @@ class HenleggBehandlingControllerTest {
 
     @Test internal fun `Skal kaste feil hvis bruker har fullmakt`() {
         mocckHentPersonopplysningerMedFullmakt()
-        val exception = assertThrows<Feil> {
-            henleggBehandlingController.henleggBehandling(UUID.randomUUID(), HenlagtDto(HenlagtÅrsak.TRUKKET_TILBAKE, true))
-        }
+        val exception =
+            assertThrows<Feil> {
+                henleggBehandlingController.henleggBehandling(UUID.randomUUID(), HenlagtDto(HenlagtÅrsak.TRUKKET_TILBAKE, true))
+            }
         assertThat(exception.message).isEqualTo("Skal ikke sende brev hvis person er tilknyttet vergemål eller fullmakt")
     }
 
@@ -89,52 +90,59 @@ class HenleggBehandlingControllerTest {
 
     @Test internal fun `Skal kaste feil hvis bruker har Verge`() {
         mockkHentPersonopplysningerMedVergemål()
-        val exception = assertThrows<Feil> {
-            henleggBehandlingController.henleggBehandling(UUID.randomUUID(), HenlagtDto(HenlagtÅrsak.TRUKKET_TILBAKE, true))
-        }
+        val exception =
+            assertThrows<Feil> {
+                henleggBehandlingController.henleggBehandling(UUID.randomUUID(), HenlagtDto(HenlagtÅrsak.TRUKKET_TILBAKE, true))
+            }
         assertThat(exception.message).isEqualTo("Skal ikke sende brev hvis person er tilknyttet vergemål eller fullmakt")
     }
 
     private fun mocckHentPersonopplysningerMedFullmaktEttÅrSiden() {
-        every { personopplysningerService.hentPersonopplysningerFraRegister(any()) } returns dto(
-            fullmakt = listOf(
-                FullmaktDto(
-                    gyldigFraOgMed = LocalDate.now().minusDays(2),
-                    gyldigTilOgMed = LocalDate.now().minusDays(1),
-                    navn = "123",
-                    motpartsPersonident = "123",
-                    områder = emptyList()
-                )
+        every { personopplysningerService.hentPersonopplysningerFraRegister(any()) } returns
+            dto(
+                fullmakt =
+                    listOf(
+                        FullmaktDto(
+                            gyldigFraOgMed = LocalDate.now().minusDays(2),
+                            gyldigTilOgMed = LocalDate.now().minusDays(1),
+                            navn = "123",
+                            motpartsPersonident = "123",
+                            områder = emptyList(),
+                        ),
+                    ),
             )
-        )
     }
 
     private fun mocckHentPersonopplysningerMedFullmakt() {
-        every { personopplysningerService.hentPersonopplysningerFraRegister(any()) } returns dto(
-            fullmakt = listOf(
-                FullmaktDto(
-                    gyldigFraOgMed = LocalDate.now(),
-                    gyldigTilOgMed = null,
-                    navn = "123",
-                    motpartsPersonident = "123",
-                    områder = emptyList()
-                )
+        every { personopplysningerService.hentPersonopplysningerFraRegister(any()) } returns
+            dto(
+                fullmakt =
+                    listOf(
+                        FullmaktDto(
+                            gyldigFraOgMed = LocalDate.now(),
+                            gyldigTilOgMed = null,
+                            navn = "123",
+                            motpartsPersonident = "123",
+                            områder = emptyList(),
+                        ),
+                    ),
             )
-        )
     }
 
     private fun mockkHentPersonopplysningerMedVergemål() {
-        every { personopplysningerService.hentPersonopplysningerFraRegister(any()) } returns dto(
-            vergemål = listOf(
-                VergemålDto(
-                    embete = null,
-                    type = null,
-                    motpartsPersonident = null,
-                    navn = null,
-                    omfang = null
-                )
+        every { personopplysningerService.hentPersonopplysningerFraRegister(any()) } returns
+            dto(
+                vergemål =
+                    listOf(
+                        VergemålDto(
+                            embete = null,
+                            type = null,
+                            motpartsPersonident = null,
+                            navn = null,
+                            omfang = null,
+                        ),
+                    ),
             )
-        )
     }
 
     private fun dto(
