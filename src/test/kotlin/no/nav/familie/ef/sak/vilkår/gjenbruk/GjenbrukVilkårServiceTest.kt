@@ -96,6 +96,7 @@ internal class GjenbrukVilkårServiceTest {
     private val nyBehandlingOS = behandling(fagsak = fagsakOS, status = BehandlingStatus.OPPRETTET)
 
     private val vilkårsvurderingerSlot = slot<List<Vilkårsvurdering>>()
+    private val vilkårsvurderingSlot = slot<Vilkårsvurdering>()
 
     private val ferdigstiltOS =
         TestData(fagsakOS, ferdigstiltBehandlingOS, søknadOS, Vilkårsresultat.OPPFYLT)
@@ -107,6 +108,7 @@ internal class GjenbrukVilkårServiceTest {
     @BeforeEach
     internal fun setUp() {
         vilkårsvurderingerSlot.clear()
+        vilkårsvurderingSlot.clear()
         listOf(ferdigstiltOS, nyBT, nyOS).forEach {
             every { fagsakService.hentFagsakForBehandling(it.behandling.id) } returns it.fagsak
             every { fagsakService.hentFagsak(it.fagsak.id) } returns it.fagsak
@@ -129,6 +131,7 @@ internal class GjenbrukVilkårServiceTest {
             )
 
         every { vilkårsvurderingRepository.updateAll(capture(vilkårsvurderingerSlot)) } answers { firstArg() }
+        every { vilkårsvurderingRepository.update(capture(vilkårsvurderingSlot)) } answers { firstArg() }
         every { tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandler(any()) } returns true
     }
 
@@ -215,12 +218,43 @@ internal class GjenbrukVilkårServiceTest {
             .hasMessageContaining("kan ikke benyttes til gjenbruk av inngangsvilkår for behandling med id=")
     }
 
+    @Test
+    internal fun `skal gjenbruke enkel vilkårsvurdering -  silvilstand`() {
+        gjenbrukEnkelVilkårsvurdering(nyBT.sivilstandsvilkår.id)
+
+        assertThat(vilkårsvurderingSlot.isCaptured).isEqualTo(true)
+        assertThat(vilkårsvurderingSlot.captured.id).isEqualTo(nyBT.sivilstandsvilkår.id)
+        assertThat(vilkårsvurderingSlot.captured.resultat).isEqualTo(Vilkårsresultat.OPPFYLT)
+    }
+
+    @Test
+    internal fun `utledGjenbrukbareVilkårsvurderinger skal returnere en liste med IDer`() {
+        val gjenbrukbareVilkårsvurderinger =
+            gjenbrukVilkårService.utledGjenbrukbareVilkårsvurderinger(
+                nyBT.behandling.id,
+                ferdigstiltOS.behandling.id,
+            )
+
+        val silvilstandIdForGjenbruk = nyBT.sivilstandsvilkår.id
+        assertThat(gjenbrukbareVilkårsvurderinger.map { it.id }).contains(
+            silvilstandIdForGjenbruk,
+        )
+        assertThat(gjenbrukbareVilkårsvurderinger).isNotEmpty()
+    }
+
     private fun gjenbrukVilkår() {
         gjenbrukVilkårService.gjenbrukInngangsvilkårVurderinger(
             nyBT.behandling.id,
             ferdigstiltOS.behandling.id,
         )
     }
+
+    private fun gjenbrukEnkelVilkårsvurdering(vilkårId: UUID): Vilkårsvurdering =
+        gjenbrukVilkårService.gjenbrukInngangsvilkårVurdering(
+            nyBT.behandling.id,
+            ferdigstiltOS.behandling.id,
+            vilkårId,
+        )
 
     private fun mockGrunnlagsdata(
         behandlingId: UUID,
