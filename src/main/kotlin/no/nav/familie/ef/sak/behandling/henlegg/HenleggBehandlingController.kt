@@ -50,7 +50,7 @@ class HenleggBehandlingController(
 
     private fun henleggBrevRessurs(
         behandlingId: UUID,
-    ) = Ressurs.success(henleggService.genererHenleggelsesBrev(behandlingId))
+    ) = Ressurs.success(henleggService.genererHenleggelsesbrev(behandlingId))
 
     @PostMapping("{behandlingId}/henlegg")
     fun henleggBehandling(

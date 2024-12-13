@@ -71,7 +71,7 @@ class HenleggService(
         )
     }
 
-    fun genererHenleggelsesBrev(
+    fun genererHenleggelsesbrev(
         behandlingId: UUID,
     ): ByteArray {
         val saksbehandling = behandlingService.hentSaksbehandling(behandlingId)
