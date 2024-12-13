@@ -56,6 +56,7 @@ class NæringsinntektKontrollService(
                 val tilkjentYtelse = tilkjentYtelseService.hentForBehandling(behandlingId)
 
                 val antallMåneder = antallMånederMedVedtakForFjoråret(tilkjentYtelse)
+                secureLogger.info("$antallMåneder måneder med vedtak for fagsakId: ${fagsakOvergangsstønad.id} eksternFagsakId: ${fagsakOvergangsstønad.eksternId}")
                 val næringsinntekt = hentFjoråretsNæringsinntekt(fagsakOvergangsstønad.fagsakPersonId)
 
                 if (antallMåneder > 3 && næringsinntekt > INNTEKTSGRENSE_FOR_KONTROLL_AV_AKTIVITET) {
@@ -77,7 +78,6 @@ class NæringsinntektKontrollService(
 
     private fun hentFjoråretsNæringsinntekt(fagsakPersonId: UUID): Int {
         val inntekt = sigrunService.hentInntektForAlleÅrMedInntekt(fagsakPersonId).filter { it.inntektsår == årstallIFjor }
-
         val næringsinntekt = inntekt.sumOf { it.næring } + inntekt.sumOf { it.svalbard?.næring ?: 0 }
         secureLogger.info("Inntekt for person $inntekt - næringsinntekt er beregnet til: $næringsinntekt")
         return næringsinntekt
