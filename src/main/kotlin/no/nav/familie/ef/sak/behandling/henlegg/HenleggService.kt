@@ -8,6 +8,7 @@ import no.nav.familie.ef.sak.brev.FamilieDokumentClient
 import no.nav.familie.ef.sak.brev.VedtaksbrevService
 import no.nav.familie.ef.sak.brev.dto.Flettefelter
 import no.nav.familie.ef.sak.felles.util.norskFormat
+import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerService
 import no.nav.familie.kontrakter.felles.ef.StønadType
@@ -70,14 +71,16 @@ class HenleggService(
         )
     }
 
-    fun genererHenleggBrev(
-        stønadstype: StønadType,
-        saksbehandlerSignatur: String,
-        personIdent: String,
+    fun genererHenleggelsesBrev(
+        behandlingId: UUID
     ): ByteArray {
+        val saksbehandling = behandlingService.hentSaksbehandling(behandlingId)
+        val saksbehandlerSignatur = SikkerhetContext.hentSaksbehandlerNavn(strict = true)
+        val personIdent = behandlingService.hentAktivIdent(behandlingId)
+        val stønadstype = saksbehandling.stønadstype
         val henleggelsesbrev =
             Henleggelsesbrev(
-                lagDelmaler(stønadstype),
+                lagDemalMedFlettefeltForStønadstype(stønadstype),
                 lagNavnOgIdentFlettefelt(personIdent),
             )
 
@@ -100,7 +103,7 @@ class HenleggService(
         return navnOgIdentFlettefelt
     }
 
-    private fun lagDelmaler(stønadstype: StønadType) =
+    private fun lagDemalMedFlettefeltForStønadstype(stønadstype: StønadType) =
         Delmaler(
             listOf(
                 Delmal(

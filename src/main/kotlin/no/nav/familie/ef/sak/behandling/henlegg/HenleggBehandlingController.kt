@@ -40,23 +40,18 @@ class HenleggBehandlingController(
     private val taskService: TaskService,
     private val personopplysningerService: PersonopplysningerService,
 ) {
-    @GetMapping("/{behandlingId}/henlegg/brev")
+    @GetMapping("/{behandlingId}/henlegg/brev/forhandsvisning")
     fun genererHenleggBrev(
         @PathVariable behandlingId: UUID,
     ): Ressurs<ByteArray> {
         val saksbehandling = behandlingService.hentSaksbehandling(behandlingId)
         tilgangService.validerTilgangTilBehandling(saksbehandling, AuditLoggerEvent.ACCESS)
-        val saksbehandlerSignatur = SikkerhetContext.hentSaksbehandlerNavn(strict = true)
-        val personIdent = behandlingService.hentAktivIdent(behandlingId)
-        val stønadstype = saksbehandling.stønadstype
-        return ressurs(stønadstype, saksbehandlerSignatur, personIdent)
+        return henleggBrevRessurs(behandlingId)
     }
 
-    private fun ressurs(
-        stønadsType: StønadType,
-        saksbehandlerSignatur: String,
-        personIdent: String,
-    ) = Ressurs.success(henleggService.genererHenleggBrev(stønadsType, saksbehandlerSignatur, personIdent))
+    private fun henleggBrevRessurs(
+        behandlingId: UUID,
+    ) = Ressurs.success(henleggService.genererHenleggelsesBrev(behandlingId))
 
     @PostMapping("{behandlingId}/henlegg")
     fun henleggBehandling(
@@ -65,20 +60,24 @@ class HenleggBehandlingController(
     ): Ressurs<BehandlingDto> {
         tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.UPDATE)
         tilgangService.validerHarSaksbehandlerrolle()
-        validerIkkeSendBrevPåFeilType(henlagt)
-        validerIkkeSendBrevHvisVergemålEllerFullmakt(behandlingService.hentAktivIdent(behandlingId))
         val henlagtBehandling = henleggService.henleggBehandling(behandlingId, henlagt)
         val fagsak: Fagsak = fagsakService.hentFagsak(henlagtBehandling.fagsakId)
         if (henlagt.skalSendeHenleggelsesbrev) {
-            val saksbehandlerSignatur = SikkerhetContext.hentSaksbehandlerNavn(strict = true)
-            val saksbehandlerIdent = SikkerhetContext.hentSaksbehandler()
-            val task: Task =
-                SendTrukketSøknadHenleggelsesbrevTask.opprettTask(behandlingId, saksbehandlerSignatur, saksbehandlerIdent)
-
-            taskService.save(task)
+            sendHenleggelsesbrev(henlagt, behandlingId)
         }
 
         return Ressurs.success(henlagtBehandling.tilDto(fagsak.stønadstype))
+    }
+
+    private fun sendHenleggelsesbrev(henlagt: HenlagtDto, behandlingId: UUID) {
+        validerIkkeSendBrevPåFeilType(henlagt)
+        validerIkkeSendBrevHvisVergemålEllerFullmakt(behandlingService.hentAktivIdent(behandlingId))
+        val saksbehandlerSignatur = SikkerhetContext.hentSaksbehandlerNavn(strict = true)
+        val saksbehandlerIdent = SikkerhetContext.hentSaksbehandler()
+        val task: Task =
+            SendTrukketSøknadHenleggelsesbrevTask.opprettTask(behandlingId, saksbehandlerSignatur, saksbehandlerIdent)
+
+        taskService.save(task)
     }
 
     private fun validerIkkeSendBrevPåFeilType(henlagt: HenlagtDto) {

@@ -33,11 +33,10 @@ class SendTrukketSøknadHenleggelsesbrevTask(
 ) : AsyncTaskStep {
     override fun doTask(task: Task) {
         val henleggTaskDto = objectMapper.readValue<HenleggTaskDto>(task.payload)
-        val saksbehandlerSignatur = henleggTaskDto.saksbehandlerSignatur
         val saksbehandlerIdent = henleggTaskDto.saksbehandlerIdent
         val saksbehandling = behandlingService.hentSaksbehandling(henleggTaskDto.behandlingId)
         val journalførendeEnhet = arbeidsfordelingService.hentNavEnhetIdEllerBrukMaskinellEnhetHvisNull(saksbehandling.ident)
-        val henleggBrev = henleggService.genererHenleggBrev(saksbehandling.stønadstype, saksbehandlerSignatur, saksbehandling.ident)
+        val henleggBrev = henleggService.genererHenleggelsesBrev(behandlingId = henleggTaskDto.behandlingId,)
 
         val hennleggbrevDTO =
             FrittståendeBrevDto(
