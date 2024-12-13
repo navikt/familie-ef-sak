@@ -9,6 +9,7 @@ import io.mockk.verify
 import no.nav.familie.ef.sak.barn.BarnService
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
+import no.nav.familie.ef.sak.behandling.dto.BehandlingDto
 import no.nav.familie.ef.sak.blankett.BlankettRepository
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.vilkår.VilkårTestUtil.mockVilkårGrunnlagDto
@@ -94,7 +95,9 @@ internal class VurderingServiceTest {
             ).tilSøknadsverdier()
     private val barn = søknadBarnTilBehandlingBarn(søknad.barn)
     private val behandling = behandling(fagsak(), BehandlingStatus.OPPRETTET, årsak = BehandlingÅrsak.PAPIRSØKNAD)
+    private val behandlingLåst = behandling(fagsak(), BehandlingStatus.FERDIGSTILT, årsak = BehandlingÅrsak.PAPIRSØKNAD)
     private val behandlingId = UUID.randomUUID()
+    private val behandlingDto = mockk<BehandlingDto>()
 
     @BeforeEach
     fun setUp() {
@@ -128,6 +131,9 @@ internal class VurderingServiceTest {
                 barnMedSamvær = barnMedSamvær,
             )
         every { tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandler(any()) } returns true
+        every { gjenbrukVilkårService.finnBehandlingerForGjenbruk(any()) } returns listOf(behandlingDto)
+        every { gjenbrukVilkårService.utledGjenbrukbareVilkårsvurderinger(any(), any()) } returns listOf()
+        every { behandlingDto.id } returns behandlingId
     }
 
     private fun lagBarnetilsynBarn(barnId: UUID = UUID.randomUUID()) =
