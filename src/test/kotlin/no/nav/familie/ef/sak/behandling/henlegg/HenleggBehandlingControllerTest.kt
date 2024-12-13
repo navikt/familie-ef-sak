@@ -235,4 +235,3 @@ class HenleggBehandlingControllerTest : OppslagSpringRunnerTest() {
         vergemål = vergemål,
     )
 }
-

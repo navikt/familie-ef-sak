@@ -19,7 +19,7 @@ import java.util.UUID
 @Service
 @TaskStepBeskrivelse(
     taskStepType = SendTrukketSøknadHenleggelsesbrevTask.TYPE,
-    maxAntallFeil = 1,
+    maxAntallFeil = 3,
     settTilManuellOppfølgning = true,
     triggerTidVedFeilISekunder = 15 * 60L,
     beskrivelse = "Send henleggelsesbrev om trukket søknad",
@@ -36,7 +36,7 @@ class SendTrukketSøknadHenleggelsesbrevTask(
         val saksbehandlerIdent = henleggTaskDto.saksbehandlerIdent
         val saksbehandling = behandlingService.hentSaksbehandling(henleggTaskDto.behandlingId)
         val journalførendeEnhet = arbeidsfordelingService.hentNavEnhetIdEllerBrukMaskinellEnhetHvisNull(saksbehandling.ident)
-        val henleggBrev = henleggService.genererHenleggelsesBrev(behandlingId = henleggTaskDto.behandlingId,)
+        val henleggBrev = henleggService.genererHenleggelsesBrev(behandlingId = henleggTaskDto.behandlingId)
 
         val hennleggbrevDTO =
             FrittståendeBrevDto(

@@ -15,7 +15,6 @@ import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerService
 import no.nav.familie.kontrakter.felles.Ressurs
-import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.internal.TaskService
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -69,7 +68,10 @@ class HenleggBehandlingController(
         return Ressurs.success(henlagtBehandling.tilDto(fagsak.stønadstype))
     }
 
-    private fun sendHenleggelsesbrev(henlagt: HenlagtDto, behandlingId: UUID) {
+    private fun sendHenleggelsesbrev(
+        henlagt: HenlagtDto,
+        behandlingId: UUID,
+    ) {
         validerIkkeSendBrevPåFeilType(henlagt)
         validerIkkeSendBrevHvisVergemålEllerFullmakt(behandlingService.hentAktivIdent(behandlingId))
         val saksbehandlerSignatur = SikkerhetContext.hentSaksbehandlerNavn(strict = true)

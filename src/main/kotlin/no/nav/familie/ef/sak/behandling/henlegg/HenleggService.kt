@@ -72,7 +72,7 @@ class HenleggService(
     }
 
     fun genererHenleggelsesBrev(
-        behandlingId: UUID
+        behandlingId: UUID,
     ): ByteArray {
         val saksbehandling = behandlingService.hentSaksbehandling(behandlingId)
         val saksbehandlerSignatur = SikkerhetContext.hentSaksbehandlerNavn(strict = true)
