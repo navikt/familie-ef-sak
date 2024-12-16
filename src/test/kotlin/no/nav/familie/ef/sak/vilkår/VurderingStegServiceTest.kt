@@ -142,7 +142,7 @@ internal class VurderingStegServiceTest {
             )
         every { vilkårGrunnlagService.hentGrunnlag(any(), any(), any(), any()) } returns
             mockVilkårGrunnlagDto(sivilstand = sivilstand)
-
+        every { gjenbrukVilkårService.finnBehandlingerForGjenbruk(any()) } returns emptyList()
         justRun { behandlingshistorikkService.opprettHistorikkInnslag(any(), any(), any(), any()) }
 
         BrukerContextUtil.mockBrukerContext("saksbehandlernavn")
