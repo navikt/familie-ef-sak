@@ -44,7 +44,7 @@ class HenleggBehandlingControllerIntegrasjonsTest : OppslagSpringRunnerTest() {
     internal fun `Skal henlegge behandling`() {
         val fagsak = testoppsettService.lagreFagsak(fagsak(identer = setOf(PersonIdent("12345678901"))))
         val behandling = behandlingRepository.insert(behandling(fagsak, type = BehandlingType.FØRSTEGANGSBEHANDLING))
-        val respons = henlegg(behandling.id, HenlagtDto(årsak = HenlagtÅrsak.FEILREGISTRERT))
+        val respons = henlegg(behandling.id, HenlagtDto(årsak = HenlagtÅrsak.FEILREGISTRERT, saksbehandlerSignatur = ""))
 
         assertThat(respons.statusCode).isEqualTo(HttpStatus.OK)
         assertThat(respons.body?.data!!.resultat).isEqualTo(BehandlingResultat.HENLAGT)
@@ -55,7 +55,7 @@ class HenleggBehandlingControllerIntegrasjonsTest : OppslagSpringRunnerTest() {
     internal fun `Skal henlegge FØRSTEGANGSBEHANDLING`() {
         val fagsak = testoppsettService.lagreFagsak(fagsak(identer = setOf(PersonIdent("12345678901"))))
         val behandling = behandlingRepository.insert(behandling(fagsak, type = BehandlingType.FØRSTEGANGSBEHANDLING))
-        val respons = henlegg(behandling.id, HenlagtDto(årsak = HenlagtÅrsak.FEILREGISTRERT))
+        val respons = henlegg(behandling.id, HenlagtDto(årsak = HenlagtÅrsak.FEILREGISTRERT, saksbehandlerSignatur = ""))
 
         assertThat(respons.statusCode).isEqualTo(HttpStatus.OK)
         assertThat(respons.body?.data!!.resultat).isEqualTo(BehandlingResultat.HENLAGT)
