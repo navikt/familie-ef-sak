@@ -436,7 +436,7 @@ class OppgaveService(
             BehandleSak,
             BehandleUnderkjentVedtak,
             GodkjenneVedtak,
-            Fremlegg
+            Fremlegg,
             -> true
 
             InnhentDokumentasjon -> false

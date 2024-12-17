@@ -23,8 +23,10 @@ class NæringsinntektBrukernotifikasjonService(
 
     @Value("\$NAIS_APP_NAME")
     lateinit var applicationName: String
+
     @Value("\$NAIS_NAMESPACE")
     lateinit var namespace: String
+
     @Value("\$NAIS_CLUSTER")
     lateinit var cluster: String
 

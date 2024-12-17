@@ -112,7 +112,7 @@ class NæringsinntektKontrollService(
         personIdent: String,
     ) {
         if (tilkjentYtelseService.harLøpendeUtbetaling(behandlingId)) {
-            næringsinntektBrukernotifikasjonService.sendBeskjedTilBruker(personIdent, behandlingId, "Inntekt sjekket for $årstallIFjor. Meld inn dersom det er endringer i inntekt")
+            næringsinntektBrukernotifikasjonService.sendBeskjedTilBruker(personIdent, behandlingId, "Inntekt sjekket for $årstallIFjor. Meld inn dersom det er endringer i inntekt.")
         }
     }
 
@@ -147,7 +147,7 @@ class NæringsinntektKontrollService(
         personIdent: String,
         behandlingId: UUID,
     ) {
-        næringsinntektBrukernotifikasjonService.sendBeskjedTilBruker(personIdent, behandlingId, "Inntekt sjekket for ${YearMonth.now().year}. Meld inn dersom det er endringer i inntekt")
+        næringsinntektBrukernotifikasjonService.sendBeskjedTilBruker(personIdent, behandlingId, "I forbindelse med inntektskontroll for selvstendig næringsdrivende ber vi om at du sender inn regnskap.")
     }
 
     private fun skalKontrolleres(
@@ -177,8 +177,11 @@ class NæringsinntektKontrollService(
                 ) to it.inntekt
             }
 
+        val sumAntallMånederStønadIFjor = antallMånederInntektList.sumOf { it.first }
+        if (sumAntallMånederStønadIFjor == 0) return 0
+
         return antallMånederInntektList.sumOf { (inntekt, antallMåneder) ->
-            inntekt * (antallMåneder / 12)
+            inntekt * (antallMåneder / sumAntallMånederStønadIFjor)
         }
     }
 

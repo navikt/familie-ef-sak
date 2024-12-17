@@ -1,9 +1,8 @@
 package no.nav.familie.ef.sak.selvstendig
 
 import com.fasterxml.jackson.module.kotlin.readValue
-import io.mockk.Runs
+import io.mockk.CapturingSlot
 import io.mockk.every
-import io.mockk.just
 import io.mockk.slot
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
@@ -16,6 +15,10 @@ import no.nav.familie.ef.sak.oppgave.OppgaveClient
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.vedtak
+import no.nav.familie.ef.sak.sigrun.ekstern.PensjonsgivendeInntektForSkatteordning
+import no.nav.familie.ef.sak.sigrun.ekstern.PensjonsgivendeInntektResponse
+import no.nav.familie.ef.sak.sigrun.ekstern.SigrunClient
+import no.nav.familie.ef.sak.sigrun.ekstern.Skatteordning
 import no.nav.familie.ef.sak.testutil.kjørSomLeader
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseRepository
 import no.nav.familie.ef.sak.tilkjentytelse.domain.AndelTilkjentYtelse
@@ -33,6 +36,7 @@ import no.nav.familie.kontrakter.felles.oppgave.IdentGruppe
 import no.nav.familie.kontrakter.felles.oppgave.Oppgave
 import no.nav.familie.kontrakter.felles.oppgave.OppgaveIdentV2
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
+import no.nav.familie.kontrakter.felles.oppgave.OpprettOppgaveRequest
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -57,13 +61,23 @@ internal class NæringsinntektKontrollServiceTest : OppslagSpringRunnerTest() {
     @Autowired
     private lateinit var tilkjentYtelseRepository: TilkjentYtelseRepository
 
+    @Autowired
+    private lateinit var sigrunClient: SigrunClient
+
+    @Autowired
+    private lateinit var kafkaMeldingSlot: CapturingSlot<String>
+
     private val personIdent = "11111111111"
     private val fagsakTilknyttetPersonIdent = fagsak(setOf(PersonIdent(personIdent)))
 
-    val oppgaveSlot = slot<Oppgave>()
+    private val opprettOppgaveRequestSlot = slot<OpprettOppgaveRequest>()
+    private val oppdaterOppgaveSlot = slot<Oppgave>()
+    private val behandlingIds = mutableListOf<UUID>()
 
     @BeforeEach
     fun setup() {
+        kafkaMeldingSlot.clear()
+        behandlingIds.clear()
         val finnOppgaveRequest =
             FinnOppgaveRequest(
                 tema = Tema.ENF,
@@ -73,11 +87,11 @@ internal class NæringsinntektKontrollServiceTest : OppslagSpringRunnerTest() {
                 mappeId = 107,
             )
         every { oppgaveClient.hentOppgaver(finnOppgaveRequest) } returns FinnOppgaveResponseDto(1, listOf(lagEksternTestOppgave()))
-        every { oppgaveClient.oppdaterOppgave(capture(oppgaveSlot)) }
+        every { oppgaveClient.oppdaterOppgave(capture(oppdaterOppgaveSlot)) } returns 2
+        every { oppgaveClient.opprettOppgave(capture(opprettOppgaveRequestSlot)) } returns 1
 
         testoppsettService.lagreFagsak(fagsakTilknyttetPersonIdent)
 
-        val behandlingIds = mutableListOf<UUID>()
         for (i in 0..3) {
             val behandling = behandling(id = UUID.randomUUID(), fagsak = fagsakTilknyttetPersonIdent, status = BehandlingStatus.FERDIGSTILT, resultat = BehandlingResultat.INNVILGET)
             val behandlingId = behandlingRepository.insert(behandling).id
@@ -85,9 +99,85 @@ internal class NæringsinntektKontrollServiceTest : OppslagSpringRunnerTest() {
             val vedtak = vedtak(behandlingId = behandlingId, perioder = PeriodeWrapper(objectMapper.readValue<List<Vedtaksperiode>>(vedtaksperiodeJsonList[i])), inntekter = InntektWrapper(objectMapper.readValue<List<Inntektsperiode>>(inntektsperiodeJsonList[i])))
             vedtakRepository.insert(vedtak)
         }
+    }
 
+    private fun lagEksternTestOppgave(tilordnetRessurs: String? = null): Oppgave = Oppgave(id = 1, tilordnetRessurs = tilordnetRessurs, oppgavetype = Oppgavetype.Fremlegg.toString(), fristFerdigstillelse = LocalDate.of(YearMonth.now().year, 12, 15).toString(), mappeId = 107, identer = listOf(OppgaveIdentV2(personIdent, IdentGruppe.FOLKEREGISTERIDENT)))
+
+    @Test
+    fun `Bruker har 10 prosent endring i inntekt - virkelighetsnært eksempel med andeler`() {
+        val pensjonsgivendeInntektForSkatteordning = PensjonsgivendeInntektForSkatteordning(Skatteordning.FASTLAND, LocalDate.now(), 0, 0, 460_000, 0)
+        every { sigrunClient.hentPensjonsgivendeInntekt(any(), any()) } answers {
+            PensjonsgivendeInntektResponse(firstArg(), secondArg(), listOf(pensjonsgivendeInntektForSkatteordning))
+        }
+
+        lagreAndelerTilkjentYtelse()
+
+        kjørSomLeader {
+            val fagsakIds = næringsinntektKontrollService.kontrollerInntektForSelvstendigNæringsdrivende()
+            assertThat(fagsakIds.first()).isEqualTo(fagsakTilknyttetPersonIdent.id)
+            assertThat(opprettOppgaveRequestSlot.captured.oppgavetype).isEqualTo(Oppgavetype.Fremlegg)
+        }
+    }
+
+    @Test
+    fun `Bruker har under 10 prosent endring i inntekt - virkelighetsnært eksempel med andeler`() {
+        val pensjonsgivendeInntektForSkatteordning = PensjonsgivendeInntektForSkatteordning(Skatteordning.FASTLAND, LocalDate.now(), 0, 0, 90_000, 0)
+        every { sigrunClient.hentPensjonsgivendeInntekt(any(), any()) } answers {
+            PensjonsgivendeInntektResponse(firstArg(), secondArg(), listOf(pensjonsgivendeInntektForSkatteordning))
+        }
+
+        lagreAndelerTilkjentYtelse()
+
+        kjørSomLeader {
+            val fagsakIds = næringsinntektKontrollService.kontrollerInntektForSelvstendigNæringsdrivende()
+            assertThat(fagsakIds).isEmpty()
+            assertThat(kafkaMeldingSlot.isCaptured).isFalse
+            assertThat(oppdaterOppgaveSlot.isCaptured).isTrue
+        }
+    }
+
+    @Test
+    fun `Bruker har under 10 prosent endring i inntekt med løpende stønad - skal få beskjed`() {
+        val pensjonsgivendeInntektForSkatteordning = PensjonsgivendeInntektForSkatteordning(Skatteordning.FASTLAND, LocalDate.now(), 0, 0, 60_000, 0)
+        every { sigrunClient.hentPensjonsgivendeInntekt(any(), any()) } answers {
+            PensjonsgivendeInntektResponse(firstArg(), secondArg(), listOf(pensjonsgivendeInntektForSkatteordning))
+        }
+        val fom = LocalDate.of(YearMonth.now().year - 1, 1, 1)
+        val tom = LocalDate.of(YearMonth.now().year + 1, 6, 30)
+        val andelTilkjentYtelse = (lagAndelTilkjentYtelse(22761, fom, tom, personIdent, behandlingIds[3], 60_000, 0, 494))
+        val tilkjentYtelse = lagTilkjentYtelse(andelerTilkjentYtelse = listOf(andelTilkjentYtelse), behandlingId = behandlingIds[3], personident = personIdent, startdato = LocalDate.of(2022, 9, 1), grunnbeløpsmåned = YearMonth.of(2024, 5))
+        tilkjentYtelseRepository.insert(tilkjentYtelse)
+
+        kjørSomLeader {
+            val fagsakIds = næringsinntektKontrollService.kontrollerInntektForSelvstendigNæringsdrivende()
+            assertThat(fagsakIds).isEmpty()
+            assertThat(kafkaMeldingSlot.isCaptured).isTrue
+            assertThat(oppdaterOppgaveSlot.isCaptured).isTrue
+        }
+    }
+
+    @Test
+    fun `Bruker har innvilget overgangsstønad midt i fjoråret og forventet inntekt må beregnes riktig`() {
+        val pensjonsgivendeInntektForSkatteordning = PensjonsgivendeInntektForSkatteordning(Skatteordning.FASTLAND, LocalDate.now(), 0, 0, 100_000, 0)
+        every { sigrunClient.hentPensjonsgivendeInntekt(any(), any()) } answers {
+            PensjonsgivendeInntektResponse(firstArg(), secondArg(), listOf(pensjonsgivendeInntektForSkatteordning))
+        }
+        val fom = LocalDate.of(YearMonth.now().year - 1, 5, 1)
+        val tom = LocalDate.of(YearMonth.now().year + 1, 6, 30)
+        val andelTilkjentYtelse = (lagAndelTilkjentYtelse(22761, fom, tom, personIdent, behandlingIds[3], 100_000, 0, 494))
+        val tilkjentYtelse = lagTilkjentYtelse(andelerTilkjentYtelse = listOf(andelTilkjentYtelse), behandlingId = behandlingIds[3], personident = personIdent, startdato = LocalDate.of(2022, 9, 1), grunnbeløpsmåned = YearMonth.of(2024, 5))
+        tilkjentYtelseRepository.insert(tilkjentYtelse)
+
+        kjørSomLeader {
+            val fagsakIds = næringsinntektKontrollService.kontrollerInntektForSelvstendigNæringsdrivende()
+            assertThat(fagsakIds).isEmpty()
+            assertThat(kafkaMeldingSlot.isCaptured).isTrue
+            assertThat(oppdaterOppgaveSlot.isCaptured).isTrue
+        }
+    }
+
+    private fun lagreAndelerTilkjentYtelse() {
         val andelerTilkjentYtelse = mutableListOf<AndelTilkjentYtelse>()
-
         andelerTilkjentYtelse.add(lagAndelTilkjentYtelse(17517, LocalDate.of(2022, 9, 1), LocalDate.of(2023, 1, 31), personIdent, behandlingIds[0], 146000, 0, 3385))
         andelerTilkjentYtelse.add(lagAndelTilkjentYtelse(19392, LocalDate.of(2023, 2, 1), LocalDate.of(2023, 4, 30), personIdent, behandlingIds[1], 96000, 0, 1510))
         andelerTilkjentYtelse.add(lagAndelTilkjentYtelse(20865, LocalDate.of(2023, 5, 1), LocalDate.of(2023, 7, 31), personIdent, behandlingIds[1], 96000, 0, 1376))
@@ -97,15 +187,49 @@ internal class NæringsinntektKontrollServiceTest : OppslagSpringRunnerTest() {
         tilkjentYtelseRepository.insert(tilkjentYtelse)
     }
 
-    private fun lagEksternTestOppgave(tilordnetRessurs: String? = null): no.nav.familie.kontrakter.felles.oppgave.Oppgave =
-        no.nav.familie.kontrakter.felles.oppgave
-            .Oppgave(id = 1, tilordnetRessurs = tilordnetRessurs, oppgavetype = Oppgavetype.Fremlegg.toString(), fristFerdigstillelse = LocalDate.of(YearMonth.now().year, 12, 15).toString(), mappeId = 107, identer = listOf(OppgaveIdentV2(personIdent, IdentGruppe.FOLKEREGISTERIDENT)))
+    @Test
+    fun `Bruker har under 4 mnd med overgangsstønad for fjoråret, og skal dermed ikke kontrolleres`() {
+        val fom = LocalDate.of(YearMonth.now().year - 1, 5, 1)
+        val tom = LocalDate.of(YearMonth.now().year - 1, 6, 30)
+        val andelTilkjentYtelse = (lagAndelTilkjentYtelse(22761, fom, tom, personIdent, behandlingIds[3], 75200, 0, 494))
+        val tilkjentYtelse = lagTilkjentYtelse(andelerTilkjentYtelse = listOf(andelTilkjentYtelse), behandlingId = behandlingIds[3], personident = personIdent, startdato = LocalDate.of(2022, 9, 1), grunnbeløpsmåned = YearMonth.of(2024, 5))
+        tilkjentYtelseRepository.insert(tilkjentYtelse)
+
+        kjørSomLeader {
+            assertThat(kafkaMeldingSlot.isCaptured).isFalse()
+            næringsinntektKontrollService.kontrollerInntektForSelvstendigNæringsdrivende()
+        }
+    }
 
     @Test
-    fun `sjekkNæringsinntektMotForventetInntekt med flere behandlinger og vedtak`() {
+    fun `Bruker har under 4 mnd med overgangsstønad for dette året, og skal ikke ha fremleggsoppgave`() {
+        val fom = LocalDate.of(YearMonth.now().year, 5, 1)
+        val tom = LocalDate.of(YearMonth.now().year, 6, 30)
+        val andelTilkjentYtelse = (lagAndelTilkjentYtelse(22761, fom, tom, personIdent, behandlingIds[3], 75200, 0, 494))
+        val tilkjentYtelse = lagTilkjentYtelse(andelerTilkjentYtelse = listOf(andelTilkjentYtelse), behandlingId = behandlingIds[3], personident = personIdent, startdato = LocalDate.of(2022, 9, 1), grunnbeløpsmåned = YearMonth.of(2024, 5))
+        tilkjentYtelseRepository.insert(tilkjentYtelse)
+
         kjørSomLeader {
-            val fagsakIds = næringsinntektKontrollService.kontrollerInntektForSelvstendigNæringsdrivende()
-            assertThat(fagsakIds.first()).isEqualTo(fagsakTilknyttetPersonIdent.id)
+            næringsinntektKontrollService.kontrollerInntektForSelvstendigNæringsdrivende()
+            assertThat(opprettOppgaveRequestSlot.isCaptured).isFalse()
+        }
+    }
+
+    @Test
+    fun `Bruker oppfyller ikke aktivitetskravet og det skal dermed bes om regnskap med varsel til bruker`() {
+        val pensjonsgivendeInntektForSkatteordning = PensjonsgivendeInntektForSkatteordning(Skatteordning.FASTLAND, LocalDate.now(), 0, 0, 0, 0)
+        every { sigrunClient.hentPensjonsgivendeInntekt(any(), any()) } answers {
+            PensjonsgivendeInntektResponse(firstArg(), secondArg(), listOf(pensjonsgivendeInntektForSkatteordning))
+        }
+        val fom = LocalDate.of(YearMonth.now().year - 1, 5, 1)
+        val tom = LocalDate.of(YearMonth.now().year - 1, 9, 30)
+        val andelTilkjentYtelse = (lagAndelTilkjentYtelse(22761, fom, tom, personIdent, behandlingIds[3], 0, 0, 494))
+        val tilkjentYtelse = lagTilkjentYtelse(andelerTilkjentYtelse = listOf(andelTilkjentYtelse), behandlingId = behandlingIds[3], personident = personIdent, startdato = LocalDate.of(2022, 9, 1), grunnbeløpsmåned = YearMonth.of(2024, 5))
+        tilkjentYtelseRepository.insert(tilkjentYtelse)
+
+        kjørSomLeader {
+            næringsinntektKontrollService.kontrollerInntektForSelvstendigNæringsdrivende()
+            assertThat(kafkaMeldingSlot.captured).contains("regnskap")
         }
     }
 }
