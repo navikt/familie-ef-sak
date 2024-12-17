@@ -73,9 +73,9 @@ class HenleggService(
 
     fun genererHenleggelsesbrev(
         behandlingId: UUID,
+        saksbehandlerSignatur: String
     ): ByteArray {
         val saksbehandling = behandlingService.hentSaksbehandling(behandlingId)
-        val saksbehandlerSignatur = SikkerhetContext.hentSaksbehandlerNavn(strict = true)
         val personIdent = behandlingService.hentAktivIdent(behandlingId)
         val stønadstype = saksbehandling.stønadstype
         val henleggelsesbrev =
