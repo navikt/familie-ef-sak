@@ -58,18 +58,18 @@ class HenleggBehandlingControllerTest {
     @Test internal fun `Skal kaste feil hvis feilregistrert og send brev er true`() {
         val exception =
             assertThrows<Feil> {
-                henleggBehandlingController.henleggBehandling(UUID.randomUUID(), HenlagtDto(HenlagtÅrsak.FEILREGISTRERT, true, saksbehandlerSignatur = ""))
+                henleggBehandlingController.henleggBehandling(UUID.randomUUID(), HenlagtDto(HenlagtÅrsak.FEILREGISTRERT, true))
             }
         assertThat(exception.message).isEqualTo("Skal ikke sende brev hvis type er ulik trukket tilbake")
     }
 
     @Test internal fun `Skal lage send brev task hvis send brev er true og henlagårsak er trukket`() {
-        henleggBehandlingController.henleggBehandling(UUID.randomUUID(), HenlagtDto(HenlagtÅrsak.TRUKKET_TILBAKE, true, saksbehandlerSignatur = ""))
+        henleggBehandlingController.henleggBehandling(UUID.randomUUID(), HenlagtDto(HenlagtÅrsak.TRUKKET_TILBAKE, true))
         verify(exactly = 1) { taskService.save(any()) }
     }
 
     @Test internal fun `Skal ikke lage send brev task hvis skalSendeHenleggelsesBrev er false`() {
-        henleggBehandlingController.henleggBehandling(UUID.randomUUID(), HenlagtDto(HenlagtÅrsak.TRUKKET_TILBAKE, false, saksbehandlerSignatur = ""))
+        henleggBehandlingController.henleggBehandling(UUID.randomUUID(), HenlagtDto(HenlagtÅrsak.TRUKKET_TILBAKE, false))
         verify(exactly = 0) { taskService.save(any()) }
     }
 
@@ -77,14 +77,14 @@ class HenleggBehandlingControllerTest {
         mocckHentPersonopplysningerMedFullmakt()
         val exception =
             assertThrows<Feil> {
-                henleggBehandlingController.henleggBehandling(UUID.randomUUID(), HenlagtDto(HenlagtÅrsak.TRUKKET_TILBAKE, true, saksbehandlerSignatur = ""))
+                henleggBehandlingController.henleggBehandling(UUID.randomUUID(), HenlagtDto(HenlagtÅrsak.TRUKKET_TILBAKE, true))
             }
         assertThat(exception.message).isEqualTo("Skal ikke sende brev hvis person er tilknyttet vergemål eller fullmakt")
     }
 
     @Test internal fun `Skal ikke kaste feil hvis bruker har fullmakt som har utgått`() {
         mocckHentPersonopplysningerMedFullmaktEnDagSiden()
-        henleggBehandlingController.henleggBehandling(UUID.randomUUID(), HenlagtDto(årsak = HenlagtÅrsak.TRUKKET_TILBAKE, skalSendeHenleggelsesbrev = true, saksbehandlerSignatur = ""))
+        henleggBehandlingController.henleggBehandling(UUID.randomUUID(), HenlagtDto(årsak = HenlagtÅrsak.TRUKKET_TILBAKE, skalSendeHenleggelsesbrev = true))
         verify(exactly = 1) { taskService.save(any()) }
     }
 
@@ -92,7 +92,7 @@ class HenleggBehandlingControllerTest {
         mockkHentPersonopplysningerMedVergemål()
         val exception =
             assertThrows<Feil> {
-                henleggBehandlingController.henleggBehandling(UUID.randomUUID(), HenlagtDto(årsak = HenlagtÅrsak.TRUKKET_TILBAKE, skalSendeHenleggelsesbrev = true, saksbehandlerSignatur = ""))
+                henleggBehandlingController.henleggBehandling(UUID.randomUUID(), HenlagtDto(årsak = HenlagtÅrsak.TRUKKET_TILBAKE, skalSendeHenleggelsesbrev = true))
             }
         assertThat(exception.message).isEqualTo("Skal ikke sende brev hvis person er tilknyttet vergemål eller fullmakt")
     }

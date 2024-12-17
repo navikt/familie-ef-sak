@@ -129,7 +129,7 @@ internal class BehandlingServiceTest {
                 behandlingRepository.findByIdOrThrow(any())
             } returns behandling
 
-            behandlingService.henleggBehandling(behandling.id, HenlagtDto(henlagtÅrsak, saksbehandlerSignatur = ""), henleggTilhørendeOppgave)
+            behandlingService.henleggBehandling(behandling.id, HenlagtDto(henlagtÅrsak), henleggTilhørendeOppgave)
             assertThat(behandlingSlot.captured.status).isEqualTo(BehandlingStatus.FERDIGSTILT)
             assertThat(behandlingSlot.captured.resultat).isEqualTo(BehandlingResultat.HENLAGT)
             assertThat(behandlingSlot.captured.steg).isEqualTo(StegType.BEHANDLING_FERDIGSTILT)
@@ -175,7 +175,7 @@ internal class BehandlingServiceTest {
 
             val feil: ApiFeil =
                 assertThrows {
-                    behandlingService.henleggBehandling(behandling.id, HenlagtDto(henlagtÅrsak, saksbehandlerSignatur = ""))
+                    behandlingService.henleggBehandling(behandling.id, HenlagtDto(henlagtÅrsak))
                 }
 
             assertThat(feil.httpStatus).isEqualTo(HttpStatus.BAD_REQUEST)
@@ -226,7 +226,7 @@ internal class BehandlingServiceTest {
 
         val feil: ApiFeil =
             assertThrows {
-                behandlingService.henleggBehandling(behandling.id, HenlagtDto(FEILREGISTRERT, saksbehandlerSignatur = ""))
+                behandlingService.henleggBehandling(behandling.id, HenlagtDto(FEILREGISTRERT))
             }
 
         assertThat(feil.httpStatus).isEqualTo(HttpStatus.BAD_REQUEST)

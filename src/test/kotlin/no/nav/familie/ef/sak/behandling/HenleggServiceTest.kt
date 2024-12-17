@@ -31,7 +31,7 @@ class HenleggServiceTest {
     @Test
     fun `skal henlegge behandling og ferdigstille tilhørende oppgave`() {
         val behandlingId = UUID.randomUUID()
-        val henlagtDto = HenlagtDto(HenlagtÅrsak.FEILREGISTRERT, saksbehandlerSignatur = "")
+        val henlagtDto = HenlagtDto(HenlagtÅrsak.FEILREGISTRERT)
         val behandling = behandling(id = behandlingId)
         every {
             behandlingService.henleggBehandling(behandlingId, henlagtDto)
@@ -48,7 +48,7 @@ class HenleggServiceTest {
     @Test
     fun `skal henlegge behandling uten å ferdigstille tilhørende oppgave`() {
         val behandlingId = UUID.randomUUID()
-        val henlagtDto = HenlagtDto(HenlagtÅrsak.FEILREGISTRERT, saksbehandlerSignatur = "")
+        val henlagtDto = HenlagtDto(HenlagtÅrsak.FEILREGISTRERT)
         val behandling = behandling(id = behandlingId)
         every {
             behandlingService.henleggBehandling(behandlingId, henlagtDto, false)
