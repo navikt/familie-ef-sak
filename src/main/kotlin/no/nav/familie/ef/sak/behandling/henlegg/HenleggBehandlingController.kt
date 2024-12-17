@@ -51,7 +51,7 @@ class HenleggBehandlingController(
 
     private fun henleggBrevRessurs(
         behandlingId: UUID,
-        saksbehandlerSignatur: String
+        saksbehandlerSignatur: String,
     ) = Ressurs.success(henleggService.genererHenleggelsesbrev(behandlingId, saksbehandlerSignatur))
 
     @PostMapping("{behandlingId}/henlegg")
