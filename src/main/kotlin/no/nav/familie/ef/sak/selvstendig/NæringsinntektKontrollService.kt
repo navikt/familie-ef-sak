@@ -3,6 +3,7 @@ package no.nav.familie.ef.sak.selvstendig
 import no.nav.familie.ef.sak.amelding.InntektService
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.fagsak.FagsakService
+import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.ef.sak.oppgave.OppgaveUtil
 import no.nav.familie.ef.sak.sigrun.SigrunService
@@ -18,6 +19,7 @@ import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveRequest
 import no.nav.familie.kontrakter.felles.oppgave.IdentGruppe
 import no.nav.familie.kontrakter.felles.oppgave.Oppgave
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
+import no.nav.familie.kontrakter.felles.oppgave.StatusEnum
 import no.nav.familie.leader.LeaderClient
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -35,45 +37,126 @@ class NæringsinntektKontrollService(
     val inntektService: InntektService,
     val andelsHistorikkService: AndelsHistorikkService,
     val tilkjentYtelseService: TilkjentYtelseService,
+    val næringsinntektBrukernotifikasjonService: NæringsinntektBrukernotifikasjonService,
 ) {
     private val secureLogger = LoggerFactory.getLogger("secureLogger")
-    private val årstallIFjor = YearMonth.now().minusYears(1).year
-    private val månedsperiodeIFjor = Månedsperiode(YearMonth.of(årstallIFjor, 1), YearMonth.of(årstallIFjor, 12))
 
-    fun finnFagsakerMedOver10ProsentHøyereNæringsinntektEnnForventet(): List<UUID> {
+    private val årstallIFjor = YearMonth.now().year - 1
+
+    fun kontrollerInntektForSelvstendigNæringsdrivende(): List<UUID> {
+        if (LeaderClient.isLeader() == false) return emptyList()
+
         val fagsakIds = mutableListOf<UUID>()
-        if (LeaderClient.isLeader() == true) {
-            val oppgaver = hentOppgaverForSelvstendigeTilInntektskontroll()
+        val oppgaver = hentOppgaverForSelvstendigeTilInntektskontroll()
 
-            oppgaver.forEach { oppgave ->
-                val personIdent =
-                    oppgave.identer?.firstOrNull { it.gruppe == IdentGruppe.FOLKEREGISTERIDENT }?.ident
-                        ?: oppgave.personident ?: throw Exception("Fant ikke registrert ident på oppgave ${oppgave.id}")
-                secureLogger.info("Kontrollerer person med ident: $personIdent")
+        val næringsinntektDataForBeregningList = hentNæringsinntektDataForBeregning(oppgaver)
 
-                val fagsakOvergangsstønad = fagsakService.finnFagsaker(setOf(personIdent)).firstOrNull { it.stønadstype == StønadType.OVERGANGSSTØNAD } ?: throw RuntimeException("Fant ikke fagsak for overgangsstønad for person: $personIdent")
-                val behandlingId = behandlingService.finnSisteIverksatteBehandling(fagsakOvergangsstønad.id)?.id ?: throw RuntimeException("Fant ingen gjeldende behandling for fagsakId: ${fagsakOvergangsstønad.id}")
-                val tilkjentYtelse = tilkjentYtelseService.hentForBehandling(behandlingId)
-
-                val antallMåneder = antallMånederMedVedtakForFjoråret(tilkjentYtelse)
-                secureLogger.info("$antallMåneder måneder med vedtak for fagsakId: ${fagsakOvergangsstønad.id} eksternFagsakId: ${fagsakOvergangsstønad.eksternId}")
-                val næringsinntekt = hentFjoråretsNæringsinntekt(fagsakOvergangsstønad.fagsakPersonId)
-
-                if (antallMåneder > 3 && næringsinntekt > INNTEKTSGRENSE_FOR_KONTROLL_AV_AKTIVITET) {
-                    val fjoråretsPersoninntekt = inntektService.hentÅrsinntekt(personIdent, årstallIFjor)
-                    secureLogger.info("Forrige års inntekt for person uten ytelse fra offentlig: $fjoråretsPersoninntekt")
-                    if (fjoråretsPersoninntekt == 0) {
-                        val forventetInntekt = forventetInntektSnitt(tilkjentYtelse)
-                        // secureLogger.info("Beregnet inntekt i snitt for år $årstallIFjor og behandlingId ${behandling.id} er: $forventetInntekt")
-                        if (næringsinntekt > (forventetInntekt * 1.1)) {
-                            secureLogger.info("Har 10% høyere næringsinntekt for person: $personIdent (Næringsinntekt: $næringsinntekt - ForventetInntekt: $forventetInntekt)")
-                            fagsakIds.add(fagsakOvergangsstønad.id)
-                        }
+        næringsinntektDataForBeregningList.forEach {
+            if (skalKontrolleres(it.tilkjentYtelse, it.fagsak)) {
+                if (oppfyllerAktivitetsplikt(it.fjoråretsPersonInntekt, it.fjoråretsNæringsinntekt, it.fagsak)) {
+                    if (it.fjoråretsNæringsinntekt >= (it.forventetInntektIFjor * 1.1)) {
+                        secureLogger.info("Har 10% høyere næringsinntekt for person: ${it.personIdent} (Næringsinntekt: ${it.forventetInntektIFjor} - ForventetInntekt: ${it.forventetInntektIFjor})")
+                        fagsakIds.add(it.fagsak.id)
+                        giVarselOmNyVurderingAvInntekt(it.behandlingId, it.personIdent)
+                    } else {
+                        // Lag notat
+                        giBeskjedOmKontrollertInntektVedLøpendeOvergangsstønad(it.behandlingId, it.personIdent)
+                        val avsluttOppgaveMedOppdatertBeskrivelse = it.oppgave.copy(beskrivelse = it.oppgave.beskrivelse + "\nAutomatisk avsluttet oppgave: Ingen endring i inntekt.", status = StatusEnum.FERDIGSTILT)
+                        oppgaveService.oppdaterOppgave(avsluttOppgaveMedOppdatertBeskrivelse)
                     }
+                } else {
+                    beOmRegnskap(it.personIdent, it.behandlingId)
                 }
             }
+            opprettFremleggHvisOvergangsstønadMerEnn4MndIÅr(it.behandlingId, it.oppgave, it.tilkjentYtelse)
         }
+
         return fagsakIds
+    }
+
+    private fun hentNæringsinntektDataForBeregning(oppgaver: List<Oppgave>): List<NæringsinntektDataForBeregning> {
+        val næringsinntektDataForBeregningList =
+            oppgaver.map {
+                val personIdent =
+                    it.identer?.firstOrNull { it.gruppe == IdentGruppe.FOLKEREGISTERIDENT }?.ident
+                        ?: it.personident ?: throw Exception("Fant ikke registrert ident på oppgave ${it.id}")
+                val fagsakOvergangsstønad = fagsakService.finnFagsaker(setOf(personIdentForOppgave(it))).firstOrNull { it.stønadstype == StønadType.OVERGANGSSTØNAD } ?: throw RuntimeException("Fant ikke fagsak for overgangsstønad for person: ${personIdentForOppgave(it)}")
+                val behandlingId = behandlingService.finnSisteIverksatteBehandling(fagsakOvergangsstønad.id)?.id ?: throw RuntimeException("Fant ingen gjeldende behandling for fagsakId: ${fagsakOvergangsstønad.id}")
+                val tilkjentYtelse = tilkjentYtelseService.hentForBehandling(behandlingId)
+                val næringsinntektDataForBeregning =
+                    NæringsinntektDataForBeregning(
+                        oppgave = it,
+                        personIdent = personIdent,
+                        fagsak = fagsakOvergangsstønad,
+                        behandlingId = behandlingId,
+                        tilkjentYtelse = tilkjentYtelse,
+                        fjoråretsNæringsinntekt = hentFjoråretsNæringsinntekt(fagsakOvergangsstønad.fagsakPersonId),
+                        fjoråretsPersonInntekt = inntektService.hentÅrsinntekt(personIdent, årstallIFjor),
+                        forventetInntektIFjor = forventetInntektSnittIFjor(tilkjentYtelse),
+                    )
+                secureLogger.info("Næringsinntektsdata for beregning: $næringsinntektDataForBeregning")
+                næringsinntektDataForBeregning
+            }
+
+        return næringsinntektDataForBeregningList
+    }
+
+    private fun personIdentForOppgave(it: Oppgave) =
+        (
+            it.identer?.firstOrNull { it.gruppe == IdentGruppe.FOLKEREGISTERIDENT }?.ident
+                ?: it.personident ?: throw Exception("Fant ikke registrert ident på oppgave ${it.id}")
+        )
+
+    private fun giBeskjedOmKontrollertInntektVedLøpendeOvergangsstønad(
+        behandlingId: UUID,
+        personIdent: String,
+    ) {
+        if (tilkjentYtelseService.harLøpendeUtbetaling(behandlingId)) {
+            næringsinntektBrukernotifikasjonService.sendBeskjedTilBruker(personIdent, behandlingId, "Inntekt sjekket for $årstallIFjor. Meld inn dersom det er endringer i inntekt")
+        }
+    }
+
+    private fun giVarselOmNyVurderingAvInntekt(
+        behandlingId: UUID,
+        personIdent: String,
+    ) {
+        næringsinntektBrukernotifikasjonService.sendBeskjedTilBruker(personIdent, behandlingId, "Inntekt sjekket for $årstallIFjor. Det er oppdaget 10% endring i inntekt eller mer enn forventet inntekt.")
+    }
+
+    private fun opprettFremleggHvisOvergangsstønadMerEnn4MndIÅr(
+        behandlingId: UUID,
+        oppgave: Oppgave,
+        tilkjentYtelse: TilkjentYtelse,
+    ) {
+        val antallMåneder = antallMånederMedVedtakForÅr(tilkjentYtelse, YearMonth.now().year)
+        if (antallMåneder > 3) {
+            oppgaveService.opprettOppgave(behandlingId = behandlingId, oppgavetype = Oppgavetype.Fremlegg, fristFerdigstillelse = LocalDate.of(YearMonth.now().plusYears(1).year, 12, 15), mappeId = oppgave.mappeId)
+        }
+    }
+
+    private fun oppfyllerAktivitetsplikt(
+        fjoråretsPersonInntekt: Int,
+        fjoråretsNæringsinntekt: Int,
+        fagsakOvergangsstønad: Fagsak,
+    ): Boolean {
+        secureLogger.info("Forrige års inntekt for person uten ytelse fra offentlig: $fjoråretsPersonInntekt - næringsinntekt: $fjoråretsNæringsinntekt (Fagsak: ${fagsakOvergangsstønad.id})")
+        return fjoråretsNæringsinntekt > INNTEKTSGRENSE_NÆRING || (fjoråretsPersonInntekt + fjoråretsNæringsinntekt) > INNTEKTSGRENSE_PERSON_OG_NÆRING
+    }
+
+    private fun beOmRegnskap(
+        personIdent: String,
+        behandlingId: UUID,
+    ) {
+        næringsinntektBrukernotifikasjonService.sendBeskjedTilBruker(personIdent, behandlingId, "Inntekt sjekket for ${YearMonth.now().year}. Meld inn dersom det er endringer i inntekt")
+    }
+
+    private fun skalKontrolleres(
+        tilkjentYtelse: TilkjentYtelse,
+        fagsakOvergangsstønad: Fagsak,
+    ): Boolean {
+        val antallMåneder = antallMånederMedVedtakForÅr(tilkjentYtelse, årstallIFjor)
+        secureLogger.info("$antallMåneder måneder med vedtak for fagsakId: ${fagsakOvergangsstønad.id} eksternFagsakId: ${fagsakOvergangsstønad.eksternId}")
+        return antallMåneder > 3
     }
 
     private fun hentFjoråretsNæringsinntekt(fagsakPersonId: UUID): Int {
@@ -83,12 +166,12 @@ class NæringsinntektKontrollService(
         return næringsinntekt
     }
 
-    private fun forventetInntektSnitt(tilkjentYtelse: TilkjentYtelse): Int {
+    private fun forventetInntektSnittIFjor(tilkjentYtelse: TilkjentYtelse): Int {
         val antallMånederInntektList =
             tilkjentYtelse.andelerTilkjentYtelse.map {
                 (
                     it.periode
-                        .snitt(månedsperiodeIFjor)
+                        .snitt(Månedsperiode(YearMonth.of(årstallIFjor, 1), YearMonth.of(årstallIFjor, 12)))
                         ?.lengdeIHeleMåneder()
                         ?.toInt() ?: 0
                 ) to it.inntekt
@@ -125,15 +208,28 @@ class NæringsinntektKontrollService(
         return oppgaverForSelvstendige.oppgaver
     }
 
-    private fun antallMånederMedVedtakForFjoråret(
+    private fun antallMånederMedVedtakForÅr(
         tilkjentYtelse: TilkjentYtelse,
+        årstall: Int,
     ): Long {
-        val perioder = tilkjentYtelse.andelerTilkjentYtelse.map { it.periode.snitt(månedsperiodeIFjor) }
+        val perioder = tilkjentYtelse.andelerTilkjentYtelse.map { it.periode.snitt(Månedsperiode(YearMonth.of(årstall, 1), YearMonth.of(årstall, 12))) }
         val sum = perioder.sumOf { it?.lengdeIHeleMåneder() ?: 0 }
         return sum
     }
 
     companion object {
-        private const val INNTEKTSGRENSE_FOR_KONTROLL_AV_AKTIVITET = 50_000
+        private const val INNTEKTSGRENSE_NÆRING = 50_000
+        private const val INNTEKTSGRENSE_PERSON_OG_NÆRING = 190_000
     }
 }
+
+data class NæringsinntektDataForBeregning(
+    val oppgave: Oppgave,
+    val personIdent: String,
+    val fagsak: Fagsak,
+    val behandlingId: UUID,
+    val tilkjentYtelse: TilkjentYtelse,
+    val fjoråretsNæringsinntekt: Int,
+    val fjoråretsPersonInntekt: Int,
+    val forventetInntektIFjor: Int,
+)

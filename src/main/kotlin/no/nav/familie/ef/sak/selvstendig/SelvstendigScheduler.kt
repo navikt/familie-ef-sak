@@ -11,6 +11,6 @@ class SelvstendigScheduler(
 ) {
     @Scheduled(initialDelay = 60 * 1000L, fixedDelay = 365 * 24 * 60 * 60 * 1000L) // Kjører ved oppstart av app
     fun sjekkNæringsinntekt() {
-        næringsinntektKontrollService.finnFagsakerMedOver10ProsentHøyereNæringsinntektEnnForventet()
+        næringsinntektKontrollService.kontrollerInntektForSelvstendigNæringsdrivende()
     }
 }

@@ -1,7 +1,10 @@
 package no.nav.familie.ef.sak.selvstendig
 
 import com.fasterxml.jackson.module.kotlin.readValue
+import io.mockk.Runs
 import io.mockk.every
+import io.mockk.just
+import io.mockk.slot
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
 import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
@@ -27,6 +30,7 @@ import no.nav.familie.kontrakter.felles.Tema
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveRequest
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveResponseDto
 import no.nav.familie.kontrakter.felles.oppgave.IdentGruppe
+import no.nav.familie.kontrakter.felles.oppgave.Oppgave
 import no.nav.familie.kontrakter.felles.oppgave.OppgaveIdentV2
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import org.assertj.core.api.Assertions.assertThat
@@ -56,6 +60,8 @@ internal class NæringsinntektKontrollServiceTest : OppslagSpringRunnerTest() {
     private val personIdent = "11111111111"
     private val fagsakTilknyttetPersonIdent = fagsak(setOf(PersonIdent(personIdent)))
 
+    val oppgaveSlot = slot<Oppgave>()
+
     @BeforeEach
     fun setup() {
         val finnOppgaveRequest =
@@ -67,6 +73,8 @@ internal class NæringsinntektKontrollServiceTest : OppslagSpringRunnerTest() {
                 mappeId = 107,
             )
         every { oppgaveClient.hentOppgaver(finnOppgaveRequest) } returns FinnOppgaveResponseDto(1, listOf(lagEksternTestOppgave()))
+        every { oppgaveClient.oppdaterOppgave(capture(oppgaveSlot)) }
+
         testoppsettService.lagreFagsak(fagsakTilknyttetPersonIdent)
 
         val behandlingIds = mutableListOf<UUID>()
@@ -96,7 +104,7 @@ internal class NæringsinntektKontrollServiceTest : OppslagSpringRunnerTest() {
     @Test
     fun `sjekkNæringsinntektMotForventetInntekt med flere behandlinger og vedtak`() {
         kjørSomLeader {
-            val fagsakIds = næringsinntektKontrollService.finnFagsakerMedOver10ProsentHøyereNæringsinntektEnnForventet()
+            val fagsakIds = næringsinntektKontrollService.kontrollerInntektForSelvstendigNæringsdrivende()
             assertThat(fagsakIds.first()).isEqualTo(fagsakTilknyttetPersonIdent.id)
         }
     }
