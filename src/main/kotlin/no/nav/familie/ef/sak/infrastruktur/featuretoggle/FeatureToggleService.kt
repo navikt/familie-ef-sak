@@ -22,6 +22,10 @@ enum class Toggle(
     // Release
     OVERSENDE_BEGRUNNELSE_FOR_TILBAKEKREVING("familie-ef-sak.begrunnelse-for-tilbakekreving", "Release"),
     FRONTEND_ENDRE_DOKUMENTTITTEL("familie.ef.sak.frontend-endre-dokumenttittel", "Release"),
+    FRONTEND_VIS_MARKERE_GODKJENNE_OPPGAVE_MODAL(
+        "familie.ef.sak.vis-markere-godkjenne-vedtak-oppgave-modal",
+        "Release",
+    ),
 
     // Operational
     G_BEREGNING("familie.ef.sak.g-beregning", "Operational"),
