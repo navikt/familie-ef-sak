@@ -108,7 +108,7 @@ class HenleggService(
                 Delmal(
                     DelmalFlettefelt(
                         listOf(
-                            stønadstype.name.lowercase(),
+                            "stønad til " + stønadstype.name.lowercase(),
                         ),
                     ),
                 ),
