@@ -119,7 +119,7 @@ class HenleggService(
         when (stønadstype) {
             StønadType.BARNETILSYN -> "stønad til " + stønadstype.name.lowercase()
             StønadType.SKOLEPENGER -> "stønad til " + stønadstype.name.lowercase()
-            StønadType.OVERGANGSSTØNAD -> stønadstype.name.lowercase()
+            else -> stønadstype.name.lowercase()
         }
 }
 
