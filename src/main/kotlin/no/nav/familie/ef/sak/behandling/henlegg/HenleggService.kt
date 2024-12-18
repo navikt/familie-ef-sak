@@ -115,13 +115,12 @@ class HenleggService(
             ),
         )
 
-    private fun lagStringForDelmalFlettefelt(stønadstype: StønadType): String {
-        return when (stønadstype){
+    private fun lagStringForDelmalFlettefelt(stønadstype: StønadType): String =
+        when (stønadstype) {
             StønadType.BARNETILSYN -> "stønad til " + stønadstype.name.lowercase()
             StønadType.SKOLEPENGER -> "stønad til " + stønadstype.name.lowercase()
             StønadType.OVERGANGSSTØNAD -> stønadstype.name.lowercase()
         }
-    }
 }
 
 private data class Henleggelsesbrev(
@@ -140,4 +139,3 @@ private data class Delmaler(
 private data class DelmalFlettefelt(
     val stonadstype: List<String>,
 )
-
