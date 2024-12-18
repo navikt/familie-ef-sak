@@ -12,6 +12,7 @@ import no.nav.familie.ef.sak.beregning.Inntektsperiode
 import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
 import no.nav.familie.ef.sak.infrastruktur.config.ObjectMapperProvider.objectMapper
 import no.nav.familie.ef.sak.oppgave.OppgaveClient
+import no.nav.familie.ef.sak.oppgave.OppgaveRepository
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.vedtak
@@ -36,7 +37,6 @@ import no.nav.familie.kontrakter.felles.oppgave.IdentGruppe
 import no.nav.familie.kontrakter.felles.oppgave.Oppgave
 import no.nav.familie.kontrakter.felles.oppgave.OppgaveIdentV2
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
-import no.nav.familie.kontrakter.felles.oppgave.OpprettOppgaveRequest
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -67,10 +67,12 @@ internal class NæringsinntektKontrollServiceTest : OppslagSpringRunnerTest() {
     @Autowired
     private lateinit var kafkaMeldingSlot: CapturingSlot<String>
 
+    @Autowired
+    private lateinit var oppgaveRepository: OppgaveRepository
+
     private val personIdent = "11111111111"
     private val fagsakTilknyttetPersonIdent = fagsak(setOf(PersonIdent(personIdent)))
 
-    private val opprettOppgaveRequestSlot = slot<OpprettOppgaveRequest>()
     private val oppdaterOppgaveSlot = slot<Oppgave>()
     private val behandlingIds = mutableListOf<UUID>()
 
@@ -86,9 +88,9 @@ internal class NæringsinntektKontrollServiceTest : OppslagSpringRunnerTest() {
                 fristTomDato = LocalDate.of(YearMonth.now().year, 12, 15),
                 mappeId = 107,
             )
+
         every { oppgaveClient.hentOppgaver(finnOppgaveRequest) } returns FinnOppgaveResponseDto(1, listOf(lagEksternTestOppgave()))
         every { oppgaveClient.oppdaterOppgave(capture(oppdaterOppgaveSlot)) } returns 2
-        every { oppgaveClient.opprettOppgave(capture(opprettOppgaveRequestSlot)) } returns 1
 
         testoppsettService.lagreFagsak(fagsakTilknyttetPersonIdent)
 
@@ -115,7 +117,7 @@ internal class NæringsinntektKontrollServiceTest : OppslagSpringRunnerTest() {
         kjørSomLeader {
             val fagsakIds = næringsinntektKontrollService.kontrollerInntektForSelvstendigNæringsdrivende()
             assertThat(fagsakIds.first()).isEqualTo(fagsakTilknyttetPersonIdent.id)
-            assertThat(opprettOppgaveRequestSlot.captured.oppgavetype).isEqualTo(Oppgavetype.Fremlegg)
+            assertThat(oppgaveRepository.findByBehandlingIdAndType(behandlingIds.last(), Oppgavetype.Fremlegg)?.size).isEqualTo(1)
         }
     }
 
@@ -211,7 +213,7 @@ internal class NæringsinntektKontrollServiceTest : OppslagSpringRunnerTest() {
 
         kjørSomLeader {
             næringsinntektKontrollService.kontrollerInntektForSelvstendigNæringsdrivende()
-            assertThat(opprettOppgaveRequestSlot.isCaptured).isFalse()
+            assertThat(oppgaveRepository.findAll()).isEmpty()
         }
     }
 
