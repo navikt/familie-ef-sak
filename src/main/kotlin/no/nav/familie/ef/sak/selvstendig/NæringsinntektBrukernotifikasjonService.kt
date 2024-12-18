@@ -17,19 +17,15 @@ import java.util.UUID
 @Service
 class NæringsinntektBrukernotifikasjonService(
     private val kafkaTemplate: KafkaTemplate<String, String>,
-) {
     @Value("\${BRUKERNOTIFIKASJON_BESKJED_TOPIC}")
-    lateinit var topic: String
-
-    @Value("\$NAIS_APP_NAME")
-    lateinit var applicationName: String
-
-    @Value("\$NAIS_NAMESPACE")
-    lateinit var namespace: String
-
-    @Value("\$NAIS_CLUSTER")
-    lateinit var cluster: String
-
+    val topic: String,
+    @Value("\${NAIS_APP_NAME}")
+    val applicationName: String,
+    @Value("\${NAIS_NAMESPACE}")
+    val namespace: String,
+    @Value("\${NAIS_CLUSTER}")
+    val cluster: String,
+) {
     private val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
     fun sendBeskjedTilBruker(
