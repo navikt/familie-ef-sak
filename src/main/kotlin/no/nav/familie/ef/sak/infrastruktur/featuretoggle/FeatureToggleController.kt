@@ -27,6 +27,7 @@ class FeatureToggleController(
             Toggle.FRONTED_VIS_TILDEL_OPPGAVE_BEHANDLING,
             Toggle.VELG_ÅRSAK_VED_KLAGE_OPPRETTELSE,
             Toggle.FRONTEND_ENDRE_DOKUMENTTITTEL,
+            Toggle.FRONTEND_VIS_MARKERE_GODKJENNE_OPPGAVE_MODAL,
         )
 
     @GetMapping
