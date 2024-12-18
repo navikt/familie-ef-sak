@@ -23,7 +23,7 @@ class NæringsinntektBrukernotifikasjonService(
     val applicationName: String,
     @Value("\${NAIS_NAMESPACE}")
     val namespace: String,
-    @Value("\${NAIS_CLUSTER}")
+    @Value("\${NAIS_CLUSTER_NAME}")
     val cluster: String,
 ) {
     private val logger: Logger = LoggerFactory.getLogger(this::class.java)
