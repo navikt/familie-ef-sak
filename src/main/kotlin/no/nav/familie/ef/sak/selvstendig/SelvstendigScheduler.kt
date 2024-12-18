@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service
 class SelvstendigScheduler(
     val næringsinntektKontrollService: NæringsinntektKontrollService,
 ) {
-    @Scheduled(initialDelay = 60 * 1000L, fixedDelay = 365 * 24 * 60 * 60 * 1000L) // Kjører ved oppstart av app
+    //@Scheduled(initialDelay = 60 * 1000L, fixedDelay = 365 * 24 * 60 * 60 * 1000L) // Kjører ved oppstart av app
     fun sjekkNæringsinntekt() {
         næringsinntektKontrollService.kontrollerInntektForSelvstendigNæringsdrivende()
     }
