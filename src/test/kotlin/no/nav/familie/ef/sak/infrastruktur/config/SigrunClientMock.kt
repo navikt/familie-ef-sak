@@ -14,7 +14,6 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Primary
 import org.springframework.context.annotation.Profile
 import java.time.LocalDate
-import java.time.YearMonth
 
 @Configuration
 class SigrunClientMock {
@@ -38,12 +37,13 @@ class SigrunClientMock {
                 LocalDate.of(2022, 12, 31).toString(),
             )
 
-        val pensjonsgivendeInntektForSkatteordning = PensjonsgivendeInntektForSkatteordning(Skatteordning.FASTLAND, LocalDate.now(), 0, 0, 100_000, 0)
-        val pensjonsgivendeInntektResponse = PensjonsgivendeInntektResponse("01010199999", YearMonth.now().minusYears(1).year, listOf(pensjonsgivendeInntektForSkatteordning))
+        val pensjonsgivendeInntektForSkatteordning = PensjonsgivendeInntektForSkatteordning(Skatteordning.FASTLAND, LocalDate.now(), 0, 0, 700_000, 0)
 
         every { mockk.hentBeregnetSkatt(any(), any()) } returns beregnetSkattMockResponse
         every { mockk.hentSummertSkattegrunnlag(any(), any()) } returns summertSkattegrunnlagMockResponse
-        every { mockk.hentPensjonsgivendeInntekt(any(), any()) } returns pensjonsgivendeInntektResponse
+        every { mockk.hentPensjonsgivendeInntekt(any(), any()) } answers {
+            PensjonsgivendeInntektResponse(firstArg(), secondArg(), listOf(pensjonsgivendeInntektForSkatteordning))
+        }
 
         return mockk
     }

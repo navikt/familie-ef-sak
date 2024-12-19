@@ -26,6 +26,7 @@ enum class Toggle(
         "familie.ef.sak.vis-markere-godkjenne-vedtak-oppgave-modal",
         "Release",
     ),
+    KONTROLLER_NÆRINGSINNTEKT("familie.ef.sak.kontroller-naeringsinntekt"),
 
     // Operational
     G_BEREGNING("familie.ef.sak.g-beregning", "Operational"),

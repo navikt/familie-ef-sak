@@ -297,6 +297,7 @@ FINN_BEHANDLINGER_MED_GAMMEL_G_CRON_EXPRESSION: 0 0 8 1 * * #kl 08:00 den 1. hve
 DEAKTIVER_MIKROFRONTEND_CRON_EXPRESSION: 0 0 6 * * TUE #kl 06:00 hver tirsdag
 
 MIN_SIDE_TOPIC: min-side.aapen-microfrontend-v1
+BRUKERNOTIFIKASJON_BESKJED_TOPIC: min-side.aapen-brukernotifikasjon-beskjed-v1
 
 rolle:
   veileder: "31778fd8-3b71-4867-8db6-a81235fbe001"
