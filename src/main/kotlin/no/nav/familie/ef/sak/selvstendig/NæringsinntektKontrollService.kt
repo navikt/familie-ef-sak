@@ -58,6 +58,8 @@ class NæringsinntektKontrollService(
                         secureLogger.info("Har 10% høyere næringsinntekt for person: ${it.personIdent} (Næringsinntekt: ${it.forventetInntektIFjor} - ForventetInntekt: ${it.forventetInntektIFjor})")
                         fagsakIds.add(it.fagsak.id)
                         giVarselOmNyVurderingAvInntekt(it.behandlingId, it.personIdent)
+                        val oppgaveMedUtsattFrist = it.oppgave.copy(fristFerdigstillelse = LocalDate.of(YearMonth.now().year + 1, 1, 11).toString())
+                        oppgaveService.oppdaterOppgave(oppgaveMedUtsattFrist)
                     } else {
                         // Lag notat
                         giBeskjedOmKontrollertInntektVedLøpendeOvergangsstønad(it.behandlingId, it.personIdent)
