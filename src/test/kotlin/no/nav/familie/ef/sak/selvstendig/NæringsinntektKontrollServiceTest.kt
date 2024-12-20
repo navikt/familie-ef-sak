@@ -37,6 +37,7 @@ import no.nav.familie.kontrakter.felles.oppgave.IdentGruppe
 import no.nav.familie.kontrakter.felles.oppgave.Oppgave
 import no.nav.familie.kontrakter.felles.oppgave.OppgaveIdentV2
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
+import no.nav.familie.kontrakter.felles.oppgave.StatusEnum
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -115,8 +116,9 @@ internal class NæringsinntektKontrollServiceTest : OppslagSpringRunnerTest() {
         lagreAndelerTilkjentYtelse()
 
         kjørSomLeader {
-            val fagsakIds = næringsinntektKontrollService.kontrollerInntektForSelvstendigNæringsdrivende()
-            assertThat(fagsakIds.first()).isEqualTo(fagsakTilknyttetPersonIdent.id)
+            næringsinntektKontrollService.kontrollerInntektForSelvstendigNæringsdrivende(2023)
+            assertThat(kafkaMeldingSlot.isCaptured).isTrue
+            assertThat(oppdaterOppgaveSlot.captured.fristFerdigstillelse).isEqualTo(LocalDate.of(2025, 1, 11).toString())
             assertThat(oppgaveRepository.findByBehandlingIdAndType(behandlingIds.last(), Oppgavetype.Fremlegg)?.size).isEqualTo(1)
         }
     }
@@ -131,10 +133,8 @@ internal class NæringsinntektKontrollServiceTest : OppslagSpringRunnerTest() {
         lagreAndelerTilkjentYtelse()
 
         kjørSomLeader {
-            val fagsakIds = næringsinntektKontrollService.kontrollerInntektForSelvstendigNæringsdrivende()
-            assertThat(fagsakIds).isEmpty()
-            assertThat(kafkaMeldingSlot.isCaptured).isFalse
-            assertThat(oppdaterOppgaveSlot.isCaptured).isTrue
+            næringsinntektKontrollService.kontrollerInntektForSelvstendigNæringsdrivende(2023)
+            assertThat(oppdaterOppgaveSlot.captured.status).isEqualTo(StatusEnum.FERDIGSTILT)
         }
     }
 
@@ -151,8 +151,7 @@ internal class NæringsinntektKontrollServiceTest : OppslagSpringRunnerTest() {
         tilkjentYtelseRepository.insert(tilkjentYtelse)
 
         kjørSomLeader {
-            val fagsakIds = næringsinntektKontrollService.kontrollerInntektForSelvstendigNæringsdrivende()
-            assertThat(fagsakIds).isEmpty()
+            næringsinntektKontrollService.kontrollerInntektForSelvstendigNæringsdrivende(2023)
             assertThat(kafkaMeldingSlot.isCaptured).isTrue
             assertThat(oppdaterOppgaveSlot.isCaptured).isTrue
         }
@@ -171,8 +170,7 @@ internal class NæringsinntektKontrollServiceTest : OppslagSpringRunnerTest() {
         tilkjentYtelseRepository.insert(tilkjentYtelse)
 
         kjørSomLeader {
-            val fagsakIds = næringsinntektKontrollService.kontrollerInntektForSelvstendigNæringsdrivende()
-            assertThat(fagsakIds).isEmpty()
+            val fagsakIds = næringsinntektKontrollService.kontrollerInntektForSelvstendigNæringsdrivende(2023)
             assertThat(kafkaMeldingSlot.isCaptured).isTrue
             assertThat(oppdaterOppgaveSlot.isCaptured).isTrue
         }
@@ -199,7 +197,7 @@ internal class NæringsinntektKontrollServiceTest : OppslagSpringRunnerTest() {
 
         kjørSomLeader {
             assertThat(kafkaMeldingSlot.isCaptured).isFalse()
-            næringsinntektKontrollService.kontrollerInntektForSelvstendigNæringsdrivende()
+            næringsinntektKontrollService.kontrollerInntektForSelvstendigNæringsdrivende(2023)
         }
     }
 
@@ -212,7 +210,7 @@ internal class NæringsinntektKontrollServiceTest : OppslagSpringRunnerTest() {
         tilkjentYtelseRepository.insert(tilkjentYtelse)
 
         kjørSomLeader {
-            næringsinntektKontrollService.kontrollerInntektForSelvstendigNæringsdrivende()
+            næringsinntektKontrollService.kontrollerInntektForSelvstendigNæringsdrivende(2023)
             assertThat(oppgaveRepository.findAll()).isEmpty()
         }
     }
@@ -230,7 +228,7 @@ internal class NæringsinntektKontrollServiceTest : OppslagSpringRunnerTest() {
         tilkjentYtelseRepository.insert(tilkjentYtelse)
 
         kjørSomLeader {
-            næringsinntektKontrollService.kontrollerInntektForSelvstendigNæringsdrivende()
+            næringsinntektKontrollService.kontrollerInntektForSelvstendigNæringsdrivende(2023)
             assertThat(kafkaMeldingSlot.captured).contains("regnskap")
         }
     }
