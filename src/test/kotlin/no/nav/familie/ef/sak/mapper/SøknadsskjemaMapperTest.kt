@@ -19,12 +19,12 @@ internal class SøknadsskjemaMapperTest {
             Søknadsfelt(
                 "Stønadsstart",
                 Stønadsstart(
-                    null,
-                    null,
                     Søknadsfelt(
                         "Søker du stønad fra et bestemt tidspunkt",
                         false,
                     ),
+                    null,
+                    null,
                 ),
             )
         val kontraktsøknad = Testsøknad.søknadOvergangsstønad.copy(stønadsstart = stønadsstart)
