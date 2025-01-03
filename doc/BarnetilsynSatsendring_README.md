@@ -12,6 +12,9 @@ WHERE aty.stonad_tom >= '<år som satsendres>-01-01'
 AND gib.stonadstype = 'BARNETILSYN' 
 AND aty.belop IN (<gammel sats for 1 barn>, <gammel sats for 2 barn>, <gammel sats for 3 eller flere barn>);
 ```
+
+Gammel sats finnes i `satserForBarnetilsyn` i `BeregningBarnetilsynUtil.kt`.
+
 Det er verdt å merke seg at spørringen finner bare alle andeler med likt beløp som makssatser, og tar ikke hensyn til antall barn. 
 Dermed er det en sjanse for at det f.eks. gis match på en som treffer makssats for 1 barn, selv om det er en behandling med to barn.
 Spørringen egner seg derfor ikke til automatisering, og må forbedres dersom før den eventuelt brukes i en automatisert rutine.
@@ -25,13 +28,13 @@ Når tasken kjører så kaller den på en service som logger fagsakIds som skal 
 Det ble testet med egne ikke-vedtatte satser i preprod og lokalt.
 
 ## Gjennomføringsrutine
-Ta ut rapport med de som må satsjusteres. Det er brukere som treffer maks-sats på barnetilsyn i perioden med ny sats.
-Deploy versjon med nye og gjeldende satser slik at alle behandlinger som gjøres fra nå, blir riktig i perioder med nye satser. Best at det skjer rett etter pkt 1.
-Før vi deployer ny sats sjekker vi behandlinger som er i pipeline (ikke ennå besluttet) - dersom det er noen av disse som burde beregnes på nytt, må man følge opp disse sakene. Se SQL under.
+- Ta ut rapport med de som må satsjusteres. Det er brukere som treffer maks-sats på barnetilsyn i perioden med ny sats.
+- Sjekk om vi har behandlinger som er i pipeline (ikke ennå besluttet) - dersom det er noen av disse som burde beregnes på nytt, må man følge opp disse sakene. Se SQL under.
+- Deploy versjon med nye og gjeldende satser slik at alle behandlinger som gjøres fra nå, blir riktig i perioder med nye satser.
+
 Det kan potensielt bli feil dersom det lagres andre beløp på vedtak enn det saksbehandler har sett ved beregning. Feil i brev?
 
 Gjennomfør manuell revurdering type satsendring før utbetaling i januar, sammen med saksbehandlere.
-
 
 ```sql
 SELECT b.id, v.barnetilsyn, aty.* FROM fagsak f
@@ -42,7 +45,4 @@ JOIN vedtak v ON v.behandling_id = b.id
 WHERE stonadstype='BARNETILSYN' AND status != 'FERDIGSTILT';
 ```
 
-PS: Sjekk antall som treffer max-sats for januar neste år i oktober, slik at man eventuelt har tid til å implementere en automatisk revurdering med satsendring som årsak.
-
-PS: Sjekk gjerne veiviser (vilkår 6G), eksempel: "Dersom du tjener mer enn 711 720 kroner i året, har du ikke rett til stønaden."
-
+Se om `stonad_tom` er senere enn start på ny periode av maks-sats, og om noen av disse har `belop` som er høyere enn maks-sats.

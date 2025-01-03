@@ -19,6 +19,10 @@ object BeregningBarnetilsynUtil {
     private val eldreBarnetilsynsatser: List<MaxbeløpBarnetilsynSats> =
         listOf(
             MaxbeløpBarnetilsynSats(
+                Datoperiode(YearMonth.of(2024, 1), YearMonth.of(2024, 12)),
+                maxbeløp = mapOf(1 to 4650, 2 to 6066, 3 to 6875),
+            ),
+            MaxbeløpBarnetilsynSats(
                 Datoperiode(YearMonth.of(2023, 7), YearMonth.of(2023, 12)),
                 maxbeløp = mapOf(1 to 4480, 2 to 5844, 3 to 6623),
             ),
@@ -52,8 +56,8 @@ object BeregningBarnetilsynUtil {
     val satserForBarnetilsyn: List<MaxbeløpBarnetilsynSats> =
         listOf(
             MaxbeløpBarnetilsynSats(
-                Datoperiode(LocalDate.of(2024, 1, 1), LocalDate.MAX),
-                maxbeløp = mapOf(1 to 4650, 2 to 6066, 3 to 6875),
+                Datoperiode(LocalDate.of(2025, 1, 1), LocalDate.MAX),
+                maxbeløp = mapOf(1 to 4790, 2 to 6248, 3 to 7081),
             ),
         ) + eldreBarnetilsynsatser
 
