@@ -52,6 +52,8 @@ unleash:
 UNLEASH_SERVER_API_URL: http://localhost:4242/api
 UNLEASH_SERVER_API_TOKEN: token
 NAIS_APP_NAME: familie-ef-sak
+NAIS_NAMESPACE: teamfamilie
+NAIS_CLUSTER_NAME: local
 
 prosessering:
   fixedDelayString:

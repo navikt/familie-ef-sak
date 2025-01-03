@@ -77,7 +77,7 @@ class AngreSendTilBeslutterService(
         val saksbehandlerSendtTilBeslutter = totrinnskontrollService.hentSaksbehandlerSomSendteTilBeslutter(saksbehandling.id)
 
         brukerfeilHvis(saksbehandlerSendtTilBeslutter != innloggetSaksbehandler) {
-            "Kan kun angre send til beslutter dersom du er saksbehandler på vedtaket"
+            "Kan kun angre send til beslutter dersom du er saksbehandler på vedtaket: $saksbehandlerSendtTilBeslutter vs $innloggetSaksbehandler"
         }
 
         val efOppgave =
