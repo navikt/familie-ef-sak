@@ -71,66 +71,52 @@ internal class NæringsinntektKontrollServiceTest : OppslagSpringRunnerTest() {
     @Autowired
     private lateinit var oppgaveRepository: OppgaveRepository
 
-    private val personIdent = "11111111111"
-    private val fagsakTilknyttetPersonIdent = fagsak(setOf(PersonIdent(personIdent)))
-
+    private val personIdent = "1"
     private val oppdaterOppgaveSlot = slot<Oppgave>()
     private val behandlingIds = mutableListOf<UUID>()
+    private val finnOppgaveRequest =
+        FinnOppgaveRequest(
+            tema = Tema.ENF,
+            behandlingstema = Behandlingstema.Overgangsstønad,
+            oppgavetype = Oppgavetype.Fremlegg,
+            fristTomDato = LocalDate.of(YearMonth.now().year, 12, 15),
+            mappeId = 107,
+        )
 
     @BeforeEach
     fun setup() {
         kafkaMeldingSlot.clear()
         behandlingIds.clear()
-        val finnOppgaveRequest =
-            FinnOppgaveRequest(
-                tema = Tema.ENF,
-                behandlingstema = Behandlingstema.Overgangsstønad,
-                oppgavetype = Oppgavetype.Fremlegg,
-                fristTomDato = LocalDate.of(YearMonth.now().year, 12, 15),
-                mappeId = 107,
-            )
 
         every { oppgaveClient.hentOppgaver(finnOppgaveRequest) } returns FinnOppgaveResponseDto(1, listOf(lagEksternTestOppgave()))
         every { oppgaveClient.oppdaterOppgave(capture(oppdaterOppgaveSlot)) } returns 2
-
-        testoppsettService.lagreFagsak(fagsakTilknyttetPersonIdent)
-
-        for (i in 0..3) {
-            val behandling = behandling(id = UUID.randomUUID(), fagsak = fagsakTilknyttetPersonIdent, status = BehandlingStatus.FERDIGSTILT, resultat = BehandlingResultat.INNVILGET)
-            val behandlingId = behandlingRepository.insert(behandling).id
-            behandlingIds.add(behandlingId)
-            val vedtak = vedtak(behandlingId = behandlingId, perioder = PeriodeWrapper(objectMapper.readValue<List<Vedtaksperiode>>(vedtaksperiodeJsonList[i])), inntekter = InntektWrapper(objectMapper.readValue<List<Inntektsperiode>>(inntektsperiodeJsonList[i])))
-            vedtakRepository.insert(vedtak)
-        }
     }
 
-    private fun lagEksternTestOppgave(tilordnetRessurs: String? = null): Oppgave = Oppgave(id = 1, tilordnetRessurs = tilordnetRessurs, oppgavetype = Oppgavetype.Fremlegg.toString(), fristFerdigstillelse = LocalDate.of(YearMonth.now().year, 12, 15).toString(), mappeId = 107, identer = listOf(OppgaveIdentV2(personIdent, IdentGruppe.FOLKEREGISTERIDENT)))
+    private fun lagEksternTestOppgave(personIdent: String = "1"): Oppgave = Oppgave(id = 1, tilordnetRessurs = null, oppgavetype = Oppgavetype.Fremlegg.toString(), fristFerdigstillelse = LocalDate.of(YearMonth.now().year, 12, 15).toString(), mappeId = 107, identer = listOf(OppgaveIdentV2(personIdent, IdentGruppe.FOLKEREGISTERIDENT)))
 
     @Test
     fun `Bruker har 10 prosent endring i inntekt - virkelighetsnært eksempel med andeler`() {
-        val pensjonsgivendeInntektForSkatteordning = PensjonsgivendeInntektForSkatteordning(Skatteordning.FASTLAND, LocalDate.now(), 0, 0, 460_000, 0)
-        every { sigrunClient.hentPensjonsgivendeInntekt(any(), any()) } answers {
-            PensjonsgivendeInntektResponse(firstArg(), secondArg(), listOf(pensjonsgivendeInntektForSkatteordning))
-        }
-
-        lagreAndelerTilkjentYtelse()
+        every { oppgaveClient.hentOppgaver(finnOppgaveRequest) } returns FinnOppgaveResponseDto(1, listOf(lagEksternTestOppgave("2")))
+        lagreTestdataForPersonIdent("2") // Har høy inntekt i mock
+        lagreAndelerTilkjentYtelseForPersonIdent("2")
 
         kjørSomLeader {
-            næringsinntektKontrollService.kontrollerInntektForSelvstendigNæringsdrivende(2023)
+            næringsinntektKontrollService.kontrollerInntektForSelvstendigNæringsdrivende(LocalDate.now().year - 1)
             assertThat(kafkaMeldingSlot.isCaptured).isTrue
-            assertThat(oppdaterOppgaveSlot.captured.fristFerdigstillelse).isEqualTo(LocalDate.of(2025, 1, 11).toString())
+            assertThat(oppdaterOppgaveSlot.captured.fristFerdigstillelse).isEqualTo(LocalDate.of(LocalDate.now().year + 1, 1, 11).toString())
             assertThat(oppgaveRepository.findByBehandlingIdAndType(behandlingIds.last(), Oppgavetype.Fremlegg)?.size).isEqualTo(1)
         }
     }
 
     @Test
     fun `Bruker har under 10 prosent endring i inntekt - virkelighetsnært eksempel med andeler`() {
+        lagreTestdataForPersonIdent(personIdent)
         val pensjonsgivendeInntektForSkatteordning = PensjonsgivendeInntektForSkatteordning(Skatteordning.FASTLAND, LocalDate.now(), 0, 0, 90_000, 0)
         every { sigrunClient.hentPensjonsgivendeInntekt(any(), any()) } answers {
             PensjonsgivendeInntektResponse(firstArg(), secondArg(), listOf(pensjonsgivendeInntektForSkatteordning))
         }
 
-        lagreAndelerTilkjentYtelse()
+        lagreAndelerTilkjentYtelseForPersonIdent()
 
         kjørSomLeader {
             næringsinntektKontrollService.kontrollerInntektForSelvstendigNæringsdrivende(2023)
@@ -140,6 +126,7 @@ internal class NæringsinntektKontrollServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `Bruker har under 10 prosent endring i inntekt med løpende stønad - skal få beskjed`() {
+        lagreTestdataForPersonIdent(personIdent)
         val pensjonsgivendeInntektForSkatteordning = PensjonsgivendeInntektForSkatteordning(Skatteordning.FASTLAND, LocalDate.now(), 0, 0, 60_000, 0)
         every { sigrunClient.hentPensjonsgivendeInntekt(any(), any()) } answers {
             PensjonsgivendeInntektResponse(firstArg(), secondArg(), listOf(pensjonsgivendeInntektForSkatteordning))
@@ -159,6 +146,7 @@ internal class NæringsinntektKontrollServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `Bruker har innvilget overgangsstønad midt i fjoråret og forventet inntekt må beregnes riktig`() {
+        lagreTestdataForPersonIdent(personIdent)
         val pensjonsgivendeInntektForSkatteordning = PensjonsgivendeInntektForSkatteordning(Skatteordning.FASTLAND, LocalDate.now(), 0, 0, 100_000, 0)
         every { sigrunClient.hentPensjonsgivendeInntekt(any(), any()) } answers {
             PensjonsgivendeInntektResponse(firstArg(), secondArg(), listOf(pensjonsgivendeInntektForSkatteordning))
@@ -170,25 +158,15 @@ internal class NæringsinntektKontrollServiceTest : OppslagSpringRunnerTest() {
         tilkjentYtelseRepository.insert(tilkjentYtelse)
 
         kjørSomLeader {
-            val fagsakIds = næringsinntektKontrollService.kontrollerInntektForSelvstendigNæringsdrivende(2023)
+            næringsinntektKontrollService.kontrollerInntektForSelvstendigNæringsdrivende(2023)
             assertThat(kafkaMeldingSlot.isCaptured).isTrue
             assertThat(oppdaterOppgaveSlot.isCaptured).isTrue
         }
     }
 
-    private fun lagreAndelerTilkjentYtelse() {
-        val andelerTilkjentYtelse = mutableListOf<AndelTilkjentYtelse>()
-        andelerTilkjentYtelse.add(lagAndelTilkjentYtelse(17517, LocalDate.of(2022, 9, 1), LocalDate.of(2023, 1, 31), personIdent, behandlingIds[0], 146000, 0, 3385))
-        andelerTilkjentYtelse.add(lagAndelTilkjentYtelse(19392, LocalDate.of(2023, 2, 1), LocalDate.of(2023, 4, 30), personIdent, behandlingIds[1], 96000, 0, 1510))
-        andelerTilkjentYtelse.add(lagAndelTilkjentYtelse(20865, LocalDate.of(2023, 5, 1), LocalDate.of(2023, 7, 31), personIdent, behandlingIds[1], 96000, 0, 1376))
-        andelerTilkjentYtelse.add(lagAndelTilkjentYtelse(21765, LocalDate.of(2023, 8, 1), LocalDate.of(2024, 4, 30), personIdent, behandlingIds[2], 72000, 0, 476))
-        andelerTilkjentYtelse.add(lagAndelTilkjentYtelse(22761, LocalDate.of(2024, 5, 1), LocalDate.of(2024, 7, 31), personIdent, behandlingIds[3], 75200, 0, 494))
-        val tilkjentYtelse = lagTilkjentYtelse(andelerTilkjentYtelse = andelerTilkjentYtelse, behandlingId = behandlingIds[3], personident = personIdent, startdato = LocalDate.of(2022, 9, 1), grunnbeløpsmåned = YearMonth.of(2024, 5))
-        tilkjentYtelseRepository.insert(tilkjentYtelse)
-    }
-
     @Test
     fun `Bruker har under 4 mnd med overgangsstønad for fjoråret, og skal dermed ikke kontrolleres`() {
+        lagreTestdataForPersonIdent(personIdent)
         val fom = LocalDate.of(YearMonth.now().year - 1, 5, 1)
         val tom = LocalDate.of(YearMonth.now().year - 1, 6, 30)
         val andelTilkjentYtelse = (lagAndelTilkjentYtelse(22761, fom, tom, personIdent, behandlingIds[3], 75200, 0, 494))
@@ -203,6 +181,7 @@ internal class NæringsinntektKontrollServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `Bruker har under 4 mnd med overgangsstønad for dette året, og skal ikke ha fremleggsoppgave`() {
+        lagreTestdataForPersonIdent(personIdent)
         val fom = LocalDate.of(YearMonth.now().year, 5, 1)
         val tom = LocalDate.of(YearMonth.now().year, 6, 30)
         val andelTilkjentYtelse = (lagAndelTilkjentYtelse(22761, fom, tom, personIdent, behandlingIds[3], 75200, 0, 494))
@@ -217,6 +196,7 @@ internal class NæringsinntektKontrollServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `Bruker oppfyller ikke aktivitetskravet og det skal dermed bes om regnskap med varsel til bruker`() {
+        lagreTestdataForPersonIdent(personIdent)
         val pensjonsgivendeInntektForSkatteordning = PensjonsgivendeInntektForSkatteordning(Skatteordning.FASTLAND, LocalDate.now(), 0, 0, 0, 0)
         every { sigrunClient.hentPensjonsgivendeInntekt(any(), any()) } answers {
             PensjonsgivendeInntektResponse(firstArg(), secondArg(), listOf(pensjonsgivendeInntektForSkatteordning))
@@ -232,20 +212,44 @@ internal class NæringsinntektKontrollServiceTest : OppslagSpringRunnerTest() {
             assertThat(kafkaMeldingSlot.captured).contains("regnskap")
         }
     }
+
+    private fun lagreTestdataForPersonIdent(personIdent: String) {
+        val fagsakTilknyttetPersonIdent = fagsak(setOf(PersonIdent(personIdent)))
+        testoppsettService.lagreFagsak(fagsakTilknyttetPersonIdent)
+
+        for (i in 0..3) {
+            val behandling = behandling(id = UUID.randomUUID(), fagsak = fagsakTilknyttetPersonIdent, status = BehandlingStatus.FERDIGSTILT, resultat = BehandlingResultat.INNVILGET)
+            val behandlingId = behandlingRepository.insert(behandling).id
+            behandlingIds.add(behandlingId)
+            val vedtak = vedtak(behandlingId = behandlingId, perioder = PeriodeWrapper(objectMapper.readValue<List<Vedtaksperiode>>(vedtaksperiodeJsonList[i])), inntekter = InntektWrapper(objectMapper.readValue<List<Inntektsperiode>>(inntektsperiodeJsonList[i])))
+            vedtakRepository.insert(vedtak)
+        }
+    }
+
+    private fun lagreAndelerTilkjentYtelseForPersonIdent(personIdent: String = "1") {
+        val andelerTilkjentYtelse = mutableListOf<AndelTilkjentYtelse>()
+        andelerTilkjentYtelse.add(lagAndelTilkjentYtelse(17517, LocalDate.of(LocalDate.now().year - 3, 9, 1), LocalDate.of(LocalDate.now().year - 1, 1, 31), personIdent, behandlingIds[0], 146000, 0, 3385))
+        andelerTilkjentYtelse.add(lagAndelTilkjentYtelse(19392, LocalDate.of(LocalDate.now().year - 2, 2, 1), LocalDate.of(LocalDate.now().year - 1, 4, 30), personIdent, behandlingIds[1], 96000, 0, 1510))
+        andelerTilkjentYtelse.add(lagAndelTilkjentYtelse(20865, LocalDate.of(LocalDate.now().year - 2, 5, 1), LocalDate.of(LocalDate.now().year - 1, 7, 31), personIdent, behandlingIds[1], 96000, 0, 1376))
+        andelerTilkjentYtelse.add(lagAndelTilkjentYtelse(21765, LocalDate.of(LocalDate.now().year - 1, 8, 1), LocalDate.of(LocalDate.now().year, 4, 30), personIdent, behandlingIds[2], 72000, 0, 476))
+        andelerTilkjentYtelse.add(lagAndelTilkjentYtelse(22761, LocalDate.of(LocalDate.now().year, 5, 1), LocalDate.of(LocalDate.now().year, 7, 31), personIdent, behandlingIds[3], 75200, 0, 494))
+        val tilkjentYtelse = lagTilkjentYtelse(andelerTilkjentYtelse = andelerTilkjentYtelse, behandlingId = behandlingIds[3], personident = personIdent, startdato = LocalDate.of(LocalDate.now().year - 2, 9, 1), grunnbeløpsmåned = YearMonth.of(LocalDate.now().year, 5))
+        tilkjentYtelseRepository.insert(tilkjentYtelse)
+    }
 }
 
 val vedtaksperiodeJsonList =
     listOf(
-        """[{"datoFra":"2022-09-01","datoTil":"2023-07-31","aktivitet":"FORSØRGER_I_ARBEID","periodeType":"HOVEDPERIODE"}]""",
-        """[{"datoFra":"2023-02-01","datoTil":"2023-07-31","aktivitet":"FORSØRGER_I_ARBEID","periodeType":"HOVEDPERIODE","sanksjonsårsak":null}]""",
-        """[{"datoFra":"2023-08-01","datoTil":"2024-07-31","aktivitet":"FORLENGELSE_MIDLERTIDIG_SYKDOM","periodeType":"FORLENGELSE","sanksjonsårsak":null}]""",
-        """[{"datoFra":"2024-05-01","datoTil":"2024-07-31","aktivitet":"FORLENGELSE_MIDLERTIDIG_SYKDOM","periodeType":"FORLENGELSE","sanksjonsårsak":null}]""",
+        """[{"datoFra":"${LocalDate.now().year - 2}-09-01","datoTil":"${LocalDate.now().year - 1}-07-31","aktivitet":"FORSØRGER_I_ARBEID","periodeType":"HOVEDPERIODE"}]""",
+        """[{"datoFra":"${LocalDate.now().year - 1}-02-01","datoTil":"${LocalDate.now().year - 1}-07-31","aktivitet":"FORSØRGER_I_ARBEID","periodeType":"HOVEDPERIODE","sanksjonsårsak":null}]""",
+        """[{"datoFra":"${LocalDate.now().year - 1}-08-01","datoTil":"${LocalDate.now().year}-07-31","aktivitet":"FORLENGELSE_MIDLERTIDIG_SYKDOM","periodeType":"FORLENGELSE","sanksjonsårsak":null}]""",
+        """[{"datoFra":"${LocalDate.now().year}-05-01","datoTil":"${LocalDate.now().year}-07-31","aktivitet":"FORLENGELSE_MIDLERTIDIG_SYKDOM","periodeType":"FORLENGELSE","sanksjonsårsak":null}]""",
     )
 
 val inntektsperiodeJsonList =
     listOf(
-        """[{"startDato":"2022-09-01","sluttDato":"+999999999-12-31","inntekt":146000,"samordningsfradrag":0}]""",
-        """[{"startDato":null,"sluttDato":null,"periode":{"fom":"2023-02","tom":"999999999-12"},"dagsats":0,"månedsinntekt":0,"inntekt":96000,"samordningsfradrag":0}]""",
-        """[{"startDato":null,"sluttDato":null,"periode":{"fom":"2023-08","tom":"999999999-12"},"dagsats":0,"månedsinntekt":0,"inntekt":72000,"samordningsfradrag":0}]""",
-        """[{"startDato":null,"sluttDato":null,"periode":{"fom":"2024-05","tom":"999999999-12"},"dagsats":0,"månedsinntekt":0,"inntekt":75200,"samordningsfradrag":0}]""",
+        """[{"startDato":"${LocalDate.now().year - 2}-09-01","sluttDato":"+999999999-12-31","inntekt":146000,"samordningsfradrag":0}]""",
+        """[{"startDato":null,"sluttDato":null,"periode":{"fom":"${LocalDate.now().year - 1}-02","tom":"999999999-12"},"dagsats":0,"månedsinntekt":0,"inntekt":96000,"samordningsfradrag":0}]""",
+        """[{"startDato":null,"sluttDato":null,"periode":{"fom":"${LocalDate.now().year - 1}-08","tom":"999999999-12"},"dagsats":0,"månedsinntekt":0,"inntekt":72000,"samordningsfradrag":0}]""",
+        """[{"startDato":null,"sluttDato":null,"periode":{"fom":"${LocalDate.now().year - 1}-05","tom":"999999999-12"},"dagsats":0,"månedsinntekt":0,"inntekt":75200,"samordningsfradrag":0}]""",
     )
