@@ -32,13 +32,13 @@ class SendTrukketSøknadHenleggelsesbrevTask(
     private val personopplysningerService: PersonopplysningerService,
 ) : AsyncTaskStep {
     override fun doTask(task: Task) {
-        val henleggTaskDto = objectMapper.readValue<HenleggTaskDto>(task.payload)
-        val saksbehandlerIdent = henleggTaskDto.saksbehandlerIdent
-        val saksbehandling = behandlingService.hentSaksbehandling(henleggTaskDto.behandlingId)
+        val henleggelsesbrevDto = objectMapper.readValue<HenleggelsesbrevDto>(task.payload)
+        val saksbehandlerIdent = henleggelsesbrevDto.saksbehandlerIdent
+        val saksbehandling = behandlingService.hentSaksbehandling(henleggelsesbrevDto.behandlingId)
         val journalførendeEnhet = arbeidsfordelingService.hentNavEnhetIdEllerBrukMaskinellEnhetHvisNull(saksbehandling.ident)
-        val henleggBrev = henleggService.genererHenleggelsesbrev(behandlingId = henleggTaskDto.behandlingId, saksbehandlerSignatur = henleggTaskDto.saksbehandlerSignatur)
+        val henleggBrev = henleggService.genererHenleggelsesbrev(behandlingId = henleggelsesbrevDto.behandlingId, saksbehandlerSignatur = henleggelsesbrevDto.saksbehandlerSignatur)
 
-        val hennleggbrevDTO =
+        val hennleggbrevDto =
             FrittståendeBrevDto(
                 personIdent = saksbehandling.ident,
                 eksternFagsakId = saksbehandling.eksternFagsakId,
@@ -50,7 +50,7 @@ class SendTrukketSøknadHenleggelsesbrevTask(
                 saksbehandlerIdent = saksbehandlerIdent,
                 mottakere = lagBrevMottaker(saksbehandling),
             )
-        iverksettClient.sendFrittståendeBrev(frittståendeBrevDto = hennleggbrevDTO)
+        iverksettClient.sendFrittståendeBrev(frittståendeBrevDto = hennleggbrevDto)
     }
 
     private fun lagBrevMottaker(saksbehandling: Saksbehandling) =
@@ -71,7 +71,7 @@ class SendTrukketSøknadHenleggelsesbrevTask(
         ): Task =
             Task(
                 type = TYPE,
-                payload = objectMapper.writeValueAsString(HenleggTaskDto(behandlingId, saksbehandlerSignatur, saksbehandlerIdent)),
+                payload = objectMapper.writeValueAsString(HenleggelsesbrevDto(behandlingId, saksbehandlerSignatur, saksbehandlerIdent)),
             )
 
         const val TYPE = "SendHenleggelsesbrevOmTrukketSøknadTask"
