@@ -89,19 +89,21 @@ internal class NæringsinntektKontrollServiceTest : OppslagSpringRunnerTest() {
         behandlingIds.clear()
 
         every { oppgaveClient.hentOppgaver(finnOppgaveRequest) } returns FinnOppgaveResponseDto(1, listOf(lagEksternTestOppgave()))
-        every { oppgaveClient.oppdaterOppgave(capture(oppdaterOppgaveSlot)) } returns 2
+        every { oppgaveClient.oppdaterOppgave(capture(oppdaterOppgaveSlot)) } returns 9
+        every { oppgaveClient.finnOppgaveMedId(9) } returns lagEksternTestOppgave()
     }
 
-    private fun lagEksternTestOppgave(personIdent: String = "1"): Oppgave = Oppgave(id = 1, tilordnetRessurs = null, oppgavetype = Oppgavetype.Fremlegg.toString(), fristFerdigstillelse = LocalDate.of(YearMonth.now().year, 12, 15).toString(), mappeId = 107, identer = listOf(OppgaveIdentV2(personIdent, IdentGruppe.FOLKEREGISTERIDENT)))
+    private fun lagEksternTestOppgave(personIdent: String = "1"): Oppgave = Oppgave(id = 9, tilordnetRessurs = null, oppgavetype = Oppgavetype.Fremlegg.toString(), fristFerdigstillelse = LocalDate.of(YearMonth.now().year, 12, 15).toString(), mappeId = 107, identer = listOf(OppgaveIdentV2(personIdent, IdentGruppe.FOLKEREGISTERIDENT)))
 
     @Test
     fun `Bruker har 10 prosent endring i inntekt - virkelighetsnært eksempel med andeler`() {
         every { oppgaveClient.hentOppgaver(finnOppgaveRequest) } returns FinnOppgaveResponseDto(1, listOf(lagEksternTestOppgave("2")))
+        every { oppgaveClient.finnOppgaveMedId(9) } returns lagEksternTestOppgave("2")
         lagreTestdataForPersonIdent("2") // Har høy inntekt i mock
         lagreAndelerTilkjentYtelseForPersonIdent("2")
 
         kjørSomLeader {
-            næringsinntektKontrollService.kontrollerInntektForSelvstendigNæringsdrivende(LocalDate.now().year - 1)
+            næringsinntektKontrollService.kontrollerInntektForSelvstendigNæringsdrivende(LocalDate.now().year - 1, 9)
             assertThat(kafkaMeldingSlot.isCaptured).isTrue
             assertThat(oppdaterOppgaveSlot.captured.fristFerdigstillelse).isEqualTo(LocalDate.of(LocalDate.now().year + 1, 1, 11).toString())
             assertThat(oppgaveRepository.findByBehandlingIdAndType(behandlingIds.last(), Oppgavetype.Fremlegg)?.size).isEqualTo(1)
@@ -119,7 +121,7 @@ internal class NæringsinntektKontrollServiceTest : OppslagSpringRunnerTest() {
         lagreAndelerTilkjentYtelseForPersonIdent()
 
         kjørSomLeader {
-            næringsinntektKontrollService.kontrollerInntektForSelvstendigNæringsdrivende(2023)
+            næringsinntektKontrollService.kontrollerInntektForSelvstendigNæringsdrivende(2023, 9)
             assertThat(oppdaterOppgaveSlot.captured.status).isEqualTo(StatusEnum.FERDIGSTILT)
         }
     }
@@ -138,7 +140,7 @@ internal class NæringsinntektKontrollServiceTest : OppslagSpringRunnerTest() {
         tilkjentYtelseRepository.insert(tilkjentYtelse)
 
         kjørSomLeader {
-            næringsinntektKontrollService.kontrollerInntektForSelvstendigNæringsdrivende(2023)
+            næringsinntektKontrollService.kontrollerInntektForSelvstendigNæringsdrivende(2023, 9)
             assertThat(kafkaMeldingSlot.isCaptured).isTrue
             assertThat(oppdaterOppgaveSlot.isCaptured).isTrue
         }
@@ -158,7 +160,7 @@ internal class NæringsinntektKontrollServiceTest : OppslagSpringRunnerTest() {
         tilkjentYtelseRepository.insert(tilkjentYtelse)
 
         kjørSomLeader {
-            næringsinntektKontrollService.kontrollerInntektForSelvstendigNæringsdrivende(2023)
+            næringsinntektKontrollService.kontrollerInntektForSelvstendigNæringsdrivende(2023, 9)
             assertThat(kafkaMeldingSlot.isCaptured).isTrue
             assertThat(oppdaterOppgaveSlot.isCaptured).isTrue
         }
@@ -175,7 +177,7 @@ internal class NæringsinntektKontrollServiceTest : OppslagSpringRunnerTest() {
 
         kjørSomLeader {
             assertThat(kafkaMeldingSlot.isCaptured).isFalse()
-            næringsinntektKontrollService.kontrollerInntektForSelvstendigNæringsdrivende(2023)
+            næringsinntektKontrollService.kontrollerInntektForSelvstendigNæringsdrivende(2023, 9)
         }
     }
 
@@ -189,7 +191,7 @@ internal class NæringsinntektKontrollServiceTest : OppslagSpringRunnerTest() {
         tilkjentYtelseRepository.insert(tilkjentYtelse)
 
         kjørSomLeader {
-            næringsinntektKontrollService.kontrollerInntektForSelvstendigNæringsdrivende(2023)
+            næringsinntektKontrollService.kontrollerInntektForSelvstendigNæringsdrivende(2023, 9)
             assertThat(oppgaveRepository.findAll()).isEmpty()
         }
     }
@@ -208,7 +210,7 @@ internal class NæringsinntektKontrollServiceTest : OppslagSpringRunnerTest() {
         tilkjentYtelseRepository.insert(tilkjentYtelse)
 
         kjørSomLeader {
-            næringsinntektKontrollService.kontrollerInntektForSelvstendigNæringsdrivende(2023)
+            næringsinntektKontrollService.kontrollerInntektForSelvstendigNæringsdrivende(2023, 9)
             assertThat(kafkaMeldingSlot.captured).contains("regnskap")
         }
     }
@@ -236,20 +238,20 @@ internal class NæringsinntektKontrollServiceTest : OppslagSpringRunnerTest() {
         val tilkjentYtelse = lagTilkjentYtelse(andelerTilkjentYtelse = andelerTilkjentYtelse, behandlingId = behandlingIds[3], personident = personIdent, startdato = LocalDate.of(LocalDate.now().year - 2, 9, 1), grunnbeløpsmåned = YearMonth.of(LocalDate.now().year, 5))
         tilkjentYtelseRepository.insert(tilkjentYtelse)
     }
+
+    val vedtaksperiodeJsonList =
+        listOf(
+            """[{"datoFra":"${LocalDate.now().year - 2}-09-01","datoTil":"${LocalDate.now().year - 1}-07-31","aktivitet":"FORSØRGER_I_ARBEID","periodeType":"HOVEDPERIODE"}]""",
+            """[{"datoFra":"${LocalDate.now().year - 1}-02-01","datoTil":"${LocalDate.now().year - 1}-07-31","aktivitet":"FORSØRGER_I_ARBEID","periodeType":"HOVEDPERIODE","sanksjonsårsak":null}]""",
+            """[{"datoFra":"${LocalDate.now().year - 1}-08-01","datoTil":"${LocalDate.now().year}-07-31","aktivitet":"FORLENGELSE_MIDLERTIDIG_SYKDOM","periodeType":"FORLENGELSE","sanksjonsårsak":null}]""",
+            """[{"datoFra":"${LocalDate.now().year}-05-01","datoTil":"${LocalDate.now().year}-07-31","aktivitet":"FORLENGELSE_MIDLERTIDIG_SYKDOM","periodeType":"FORLENGELSE","sanksjonsårsak":null}]""",
+        )
+
+    val inntektsperiodeJsonList =
+        listOf(
+            """[{"startDato":"${LocalDate.now().year - 2}-09-01","sluttDato":"+999999999-12-31","inntekt":146000,"samordningsfradrag":0}]""",
+            """[{"startDato":null,"sluttDato":null,"periode":{"fom":"${LocalDate.now().year - 1}-02","tom":"999999999-12"},"dagsats":0,"månedsinntekt":0,"inntekt":96000,"samordningsfradrag":0}]""",
+            """[{"startDato":null,"sluttDato":null,"periode":{"fom":"${LocalDate.now().year - 1}-08","tom":"999999999-12"},"dagsats":0,"månedsinntekt":0,"inntekt":72000,"samordningsfradrag":0}]""",
+            """[{"startDato":null,"sluttDato":null,"periode":{"fom":"${LocalDate.now().year - 1}-05","tom":"999999999-12"},"dagsats":0,"månedsinntekt":0,"inntekt":75200,"samordningsfradrag":0}]""",
+        )
 }
-
-val vedtaksperiodeJsonList =
-    listOf(
-        """[{"datoFra":"${LocalDate.now().year - 2}-09-01","datoTil":"${LocalDate.now().year - 1}-07-31","aktivitet":"FORSØRGER_I_ARBEID","periodeType":"HOVEDPERIODE"}]""",
-        """[{"datoFra":"${LocalDate.now().year - 1}-02-01","datoTil":"${LocalDate.now().year - 1}-07-31","aktivitet":"FORSØRGER_I_ARBEID","periodeType":"HOVEDPERIODE","sanksjonsårsak":null}]""",
-        """[{"datoFra":"${LocalDate.now().year - 1}-08-01","datoTil":"${LocalDate.now().year}-07-31","aktivitet":"FORLENGELSE_MIDLERTIDIG_SYKDOM","periodeType":"FORLENGELSE","sanksjonsårsak":null}]""",
-        """[{"datoFra":"${LocalDate.now().year}-05-01","datoTil":"${LocalDate.now().year}-07-31","aktivitet":"FORLENGELSE_MIDLERTIDIG_SYKDOM","periodeType":"FORLENGELSE","sanksjonsårsak":null}]""",
-    )
-
-val inntektsperiodeJsonList =
-    listOf(
-        """[{"startDato":"${LocalDate.now().year - 2}-09-01","sluttDato":"+999999999-12-31","inntekt":146000,"samordningsfradrag":0}]""",
-        """[{"startDato":null,"sluttDato":null,"periode":{"fom":"${LocalDate.now().year - 1}-02","tom":"999999999-12"},"dagsats":0,"månedsinntekt":0,"inntekt":96000,"samordningsfradrag":0}]""",
-        """[{"startDato":null,"sluttDato":null,"periode":{"fom":"${LocalDate.now().year - 1}-08","tom":"999999999-12"},"dagsats":0,"månedsinntekt":0,"inntekt":72000,"samordningsfradrag":0}]""",
-        """[{"startDato":null,"sluttDato":null,"periode":{"fom":"${LocalDate.now().year - 1}-05","tom":"999999999-12"},"dagsats":0,"månedsinntekt":0,"inntekt":75200,"samordningsfradrag":0}]""",
-    )

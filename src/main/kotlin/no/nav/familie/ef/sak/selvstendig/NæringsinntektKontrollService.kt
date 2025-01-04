@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.selvstendig
 
+import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.ef.sak.oppgave.OppgaveUtil
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
@@ -11,6 +12,7 @@ import no.nav.familie.kontrakter.felles.oppgave.Oppgave
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.kontrakter.felles.oppgave.StatusEnum
 import no.nav.familie.leader.LeaderClient
+import no.nav.familie.prosessering.internal.TaskService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.LocalDate
@@ -23,36 +25,43 @@ class NæringsinntektKontrollService(
     val tilkjentYtelseService: TilkjentYtelseService,
     val næringsinntektDataForBeregningService: NæringsinntektDataForBeregningService,
     val næringsinntektBrukernotifikasjonService: NæringsinntektBrukernotifikasjonService,
+    val taskService: TaskService,
 ) {
     private val secureLogger = LoggerFactory.getLogger("secureLogger")
 
-    fun kontrollerInntektForSelvstendigNæringsdrivende(årstallIFjor: Int) {
-        if (LeaderClient.isLeader() == false) return
-
+    fun opprettTasksForSelvstendigeTilInntektskontroll() {
         val oppgaver = hentOppgaverForSelvstendigeTilInntektskontroll()
-
-        val næringsinntektDataForBeregningList = næringsinntektDataForBeregningService.hentNæringsinntektDataForBeregning(oppgaver, årstallIFjor)
-
-        næringsinntektDataForBeregningList.forEach {
-            if (it.skalKontrolleres()) {
-                if (it.oppfyllerAktivitetsplikt()) {
-                    if (it.har10ProsentØkningEllerMer()) {
-                        secureLogger.info("Har 10% høyere næringsinntekt for person: ${it.personIdent} (Næringsinntekt: ${it.forventetInntektIFjor} - ForventetInntekt: ${it.forventetInntektIFjor})")
-                        giVarselOmNyVurderingAvInntekt(it.behandlingId, it.personIdent, årstallIFjor)
-                        val oppgaveMedUtsattFrist = it.oppgave.copy(fristFerdigstillelse = LocalDate.of(årstallIFjor + 2, 1, 11).toString())
-                        oppgaveService.oppdaterOppgave(oppgaveMedUtsattFrist)
-                    } else {
-                        // Lag notat
-                        giBeskjedOmKontrollertInntektVedLøpendeOvergangsstønad(it.behandlingId, it.personIdent, årstallIFjor)
-                        val avsluttOppgaveMedOppdatertBeskrivelse = it.oppgave.copy(beskrivelse = it.oppgave.beskrivelse + "\nAutomatisk avsluttet oppgave: Ingen endring i inntekt.", status = StatusEnum.FERDIGSTILT)
-                        oppgaveService.oppdaterOppgave(avsluttOppgaveMedOppdatertBeskrivelse)
-                    }
-                } else {
-                    beOmRegnskap(it.personIdent, it.behandlingId)
-                }
-            }
-            opprettFremleggHvisOvergangsstønadMerEnn4MndIÅr(it)
+        oppgaver.forEach {
+            taskService.save(NæringsinntektKontrollForOppgaveTask.opprettTask(it.id ?: throw Feil("Feil i inntektskontroll for næringsdrivende: Oppgave må ha id for at den kan behandles")))
         }
+    }
+
+    fun kontrollerInntektForSelvstendigNæringsdrivende(
+        årstallIFjor: Int,
+        oppgaveId: Long,
+    ) {
+        if (LeaderClient.isLeader() == false) return
+        val oppgave = oppgaveService.hentOppgave(oppgaveId)
+        val næringsinntektDataForBeregning = næringsinntektDataForBeregningService.hentNæringsinntektDataForBeregning(oppgave, årstallIFjor)
+
+        if (næringsinntektDataForBeregning.skalKontrolleres()) {
+            if (næringsinntektDataForBeregning.oppfyllerAktivitetsplikt()) {
+                if (næringsinntektDataForBeregning.har10ProsentØkningEllerMer()) {
+                    secureLogger.info("Har 10% høyere næringsinntekt for person: ${næringsinntektDataForBeregning.personIdent} (Næringsinntekt: ${næringsinntektDataForBeregning.forventetInntektIFjor} - ForventetInntekt: ${næringsinntektDataForBeregning.forventetInntektIFjor})")
+                    giVarselOmNyVurderingAvInntekt(næringsinntektDataForBeregning.behandlingId, næringsinntektDataForBeregning.personIdent, årstallIFjor)
+                    val oppgaveMedUtsattFrist = næringsinntektDataForBeregning.oppgave.copy(fristFerdigstillelse = LocalDate.of(årstallIFjor + 2, 1, 11).toString())
+                    oppgaveService.oppdaterOppgave(oppgaveMedUtsattFrist)
+                } else {
+                    // Lag notat
+                    giBeskjedOmKontrollertInntektVedLøpendeOvergangsstønad(næringsinntektDataForBeregning.behandlingId, næringsinntektDataForBeregning.personIdent, årstallIFjor)
+                    val avsluttOppgaveMedOppdatertBeskrivelse = næringsinntektDataForBeregning.oppgave.copy(beskrivelse = næringsinntektDataForBeregning.oppgave.beskrivelse + "\nAutomatisk avsluttet oppgave: Ingen endring i inntekt.", status = StatusEnum.FERDIGSTILT)
+                    oppgaveService.oppdaterOppgave(avsluttOppgaveMedOppdatertBeskrivelse)
+                }
+            } else {
+                beOmRegnskap(næringsinntektDataForBeregning.personIdent, næringsinntektDataForBeregning.behandlingId)
+            }
+        }
+        opprettFremleggHvisOvergangsstønadMerEnn4MndIÅr(næringsinntektDataForBeregning)
     }
 
     private fun giBeskjedOmKontrollertInntektVedLøpendeOvergangsstønad(
