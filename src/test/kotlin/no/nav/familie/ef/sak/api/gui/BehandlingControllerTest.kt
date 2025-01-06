@@ -2,11 +2,7 @@ package no.nav.familie.ef.sak.api.gui
 
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
-import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
-import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.behandling.dto.BehandlingDto
-import no.nav.familie.ef.sak.behandling.dto.HenlagtDto
-import no.nav.familie.ef.sak.behandling.dto.HenlagtÅrsak
 import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
@@ -42,49 +38,10 @@ internal class BehandlingControllerTest : OppslagSpringRunnerTest() {
         assertThat(respons.body?.data).isNull()
     }
 
-    @Test
-    internal fun `Skal henlegge behandling`() {
-        val fagsak = testoppsettService.lagreFagsak(fagsak(identer = setOf(PersonIdent("12345678901"))))
-        val behandling = behandlingRepository.insert(behandling(fagsak, type = BehandlingType.FØRSTEGANGSBEHANDLING))
-        val respons = henlegg(behandling.id, HenlagtDto(årsak = HenlagtÅrsak.FEILREGISTRERT))
-
-        assertThat(respons.statusCode).isEqualTo(HttpStatus.OK)
-        assertThat(respons.body?.data!!.resultat).isEqualTo(BehandlingResultat.HENLAGT)
-        assertThat(respons.body?.data!!.henlagtÅrsak).isEqualTo(HenlagtÅrsak.FEILREGISTRERT)
-    }
-
-    @Test
-    internal fun `Skal henlegge FØRSTEGANGSBEHANDLING`() {
-        val fagsak = testoppsettService.lagreFagsak(fagsak(identer = setOf(PersonIdent("12345678901"))))
-        val behandling = behandlingRepository.insert(behandling(fagsak, type = BehandlingType.FØRSTEGANGSBEHANDLING))
-        val respons = henlegg(behandling.id, HenlagtDto(årsak = HenlagtÅrsak.FEILREGISTRERT))
-
-        assertThat(respons.statusCode).isEqualTo(HttpStatus.OK)
-        assertThat(respons.body?.data!!.resultat).isEqualTo(BehandlingResultat.HENLAGT)
-        assertThat(respons.body?.data!!.henlagtÅrsak).isEqualTo(HenlagtÅrsak.FEILREGISTRERT)
-    }
-
     private fun hentBehandling(id: UUID): ResponseEntity<Ressurs<BehandlingDto>> =
         restTemplate.exchange(
             localhost("/api/behandling/$id"),
             HttpMethod.GET,
             HttpEntity<Ressurs<BehandlingDto>>(headers),
-        )
-
-    private fun henleggBehandling(id: UUID): ResponseEntity<Ressurs<BehandlingDto>> =
-        restTemplate.exchange(
-            localhost("/api/behandling/$id/henlegg"),
-            HttpMethod.POST,
-            HttpEntity<Ressurs<BehandlingDto>>(headers),
-        )
-
-    private fun henlegg(
-        id: UUID,
-        henlagt: HenlagtDto,
-    ): ResponseEntity<Ressurs<BehandlingDto>> =
-        restTemplate.exchange<Ressurs<BehandlingDto>>(
-            localhost("/api/behandling/$id/henlegg"),
-            HttpMethod.POST,
-            HttpEntity(henlagt, headers),
         )
 }

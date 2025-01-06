@@ -26,35 +26,30 @@ class NæringsinntektDataForBeregningService(
     private val secureLogger = LoggerFactory.getLogger("secureLogger")
 
     fun hentNæringsinntektDataForBeregning(
-        oppgaver: List<Oppgave>,
+        oppgave: Oppgave,
         årstallIFjor: Int,
-    ): List<NæringsinntektDataForBeregning> {
-        val næringsinntektDataForBeregningList =
-            oppgaver.map {
-                val personIdent =
-                    it.identer?.firstOrNull { it.gruppe == IdentGruppe.FOLKEREGISTERIDENT }?.ident
-                        ?: it.personident ?: throw Exception("Fant ikke registrert ident på oppgave ${it.id}")
-                val fagsakOvergangsstønad = fagsakService.finnFagsaker(setOf(personIdentForOppgave(it))).firstOrNull { it.stønadstype == StønadType.OVERGANGSSTØNAD } ?: throw RuntimeException("Fant ikke fagsak for overgangsstønad for person: ${personIdentForOppgave(it)}")
-                val behandlingId = behandlingService.finnSisteIverksatteBehandling(fagsakOvergangsstønad.id)?.id ?: throw RuntimeException("Fant ingen gjeldende behandling for fagsakId: ${fagsakOvergangsstønad.id}")
-                val tilkjentYtelse = tilkjentYtelseService.hentForBehandling(behandlingId)
-                val næringsinntektDataForBeregning =
-                    NæringsinntektDataForBeregning(
-                        oppgave = it,
-                        personIdent = personIdent,
-                        fagsak = fagsakOvergangsstønad,
-                        behandlingId = behandlingId,
-                        tilkjentYtelse = tilkjentYtelse,
-                        fjoråretsNæringsinntekt = hentFjoråretsNæringsinntekt(fagsakOvergangsstønad.fagsakPersonId, årstallIFjor),
-                        fjoråretsPersonInntekt = inntektService.hentÅrsinntekt(personIdent, årstallIFjor),
-                        forventetInntektIFjor = forventetInntektSnittIFjor(tilkjentYtelse, årstallIFjor),
-                    )
-                secureLogger.info("Næringsinntektsdata for beregning: $næringsinntektDataForBeregning")
-                secureLogger.info("${næringsinntektDataForBeregning.antallMånederMedVedtakForÅr(årstallIFjor)} måneder med vedtak for fagsakId: ${fagsakOvergangsstønad.id} eksternFagsakId: ${fagsakOvergangsstønad.eksternId}")
-                secureLogger.info("Forrige års inntekt for person uten ytelse fra offentlig: ${næringsinntektDataForBeregning.fjoråretsPersonInntekt} - næringsinntekt: ${næringsinntektDataForBeregning.fjoråretsNæringsinntekt} (Fagsak: ${fagsakOvergangsstønad.id})")
-                næringsinntektDataForBeregning
-            }
-
-        return næringsinntektDataForBeregningList
+    ): NæringsinntektDataForBeregning {
+        val personIdent =
+            oppgave.identer?.firstOrNull { it.gruppe == IdentGruppe.FOLKEREGISTERIDENT }?.ident
+                ?: oppgave.personident ?: throw Exception("Fant ikke registrert ident på oppgave ${oppgave.id}")
+        val fagsakOvergangsstønad = fagsakService.finnFagsaker(setOf(personIdentForOppgave(oppgave))).firstOrNull { it.stønadstype == StønadType.OVERGANGSSTØNAD } ?: throw RuntimeException("Fant ikke fagsak for overgangsstønad for person: ${personIdentForOppgave(oppgave)}")
+        val behandlingId = behandlingService.finnSisteIverksatteBehandling(fagsakOvergangsstønad.id)?.id ?: throw RuntimeException("Fant ingen gjeldende behandling for fagsakId: ${fagsakOvergangsstønad.id}")
+        val tilkjentYtelse = tilkjentYtelseService.hentForBehandling(behandlingId)
+        val næringsinntektDataForBeregning =
+            NæringsinntektDataForBeregning(
+                oppgave = oppgave,
+                personIdent = personIdent,
+                fagsak = fagsakOvergangsstønad,
+                behandlingId = behandlingId,
+                tilkjentYtelse = tilkjentYtelse,
+                fjoråretsNæringsinntekt = hentFjoråretsNæringsinntekt(fagsakOvergangsstønad.fagsakPersonId, årstallIFjor),
+                fjoråretsPersonInntekt = inntektService.hentÅrsinntekt(personIdent, årstallIFjor),
+                forventetInntektIFjor = forventetInntektSnittIFjor(tilkjentYtelse, årstallIFjor),
+            )
+        secureLogger.info("Næringsinntektsdata for beregning: $næringsinntektDataForBeregning")
+        secureLogger.info("${næringsinntektDataForBeregning.antallMånederMedVedtakForÅr(årstallIFjor)} måneder med vedtak for fagsakId: ${fagsakOvergangsstønad.id} eksternFagsakId: ${fagsakOvergangsstønad.eksternId}")
+        secureLogger.info("Forrige års inntekt for person uten ytelse fra offentlig: ${næringsinntektDataForBeregning.fjoråretsPersonInntekt} - næringsinntekt: ${næringsinntektDataForBeregning.fjoråretsNæringsinntekt} (Fagsak: ${fagsakOvergangsstønad.id})")
+        return næringsinntektDataForBeregning
     }
 
     private fun personIdentForOppgave(it: Oppgave) =
