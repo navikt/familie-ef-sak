@@ -59,7 +59,11 @@ class OppgaverForOpprettelseService(
                 else -> null
             }
 
-        return if (kanOppretteOppgaveForInntektskontrollFremITid(tilkjentYtelse)) listOf(OppgaveForOpprettelseType.INNTEKTSKONTROLL_1_ÅR_FREM_I_TID) else emptyList()
+        return if (kanOppretteOppgaveForInntektskontrollFremITid(tilkjentYtelse)) {
+            listOf(OppgaveForOpprettelseType.INNTEKTSKONTROLL_1_ÅR_FREM_I_TID, OppgaveForOpprettelseType.INNTEKTSKONTROLL_SELVSTENDIG_NÆRINGSDRIVENDE)
+        } else {
+            listOf(OppgaveForOpprettelseType.INNTEKTSKONTROLL_SELVSTENDIG_NÆRINGSDRIVENDE)
+        }
     }
 
     private fun hentSisteTilkjentYtelse(fagsakId: UUID): TilkjentYtelse? {
