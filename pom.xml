@@ -50,6 +50,7 @@
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
         <nav.security.version>5.0.13</nav.security.version> <!-- Denne burde være samme versjon som i felles -->
         <okhttp3.version>4.9.1</okhttp3.version> <!-- overskrever spring sin versjon, blir brukt av mock-oauth2-server -->
+        <brukervarsel-builder.version>1.0.0</brukervarsel-builder.version>
         <!--suppress UnresolvedMavenProperty -->
         <sonar.login>${SONAR_LOGIN}</sonar.login>
     </properties>
@@ -196,6 +197,11 @@
             <groupId>no.nav.tms.mikrofrontend.selector</groupId>
             <artifactId>builder</artifactId>
             <version>${mikrofrontend.builder.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>no.nav.tms.varsel</groupId>
+            <artifactId>kotlin-builder</artifactId>
+            <version>${brukervarsel-builder.version}</version>
         </dependency>
         <dependency>
             <groupId>io.micrometer</groupId>
