@@ -5,6 +5,7 @@ import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import org.springframework.context.annotation.Profile
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 
 @Profile("!integrasjonstest")
 @Service
@@ -13,6 +14,7 @@ class NæringsinntektKontrollScheduler(
     val featureToggleService: FeatureToggleService,
 ) {
     @Scheduled(initialDelay = 60 * 1000L, fixedDelay = 365 * 24 * 60 * 60 * 1000L) // Kjører ved oppstart av app
+    @Transactional
     fun sjekkNæringsinntekt() {
         if (featureToggleService.isEnabled(Toggle.KONTROLLER_NÆRINGSINNTEKT)) {
             næringsinntektKontrollService.opprettTasksForSelvstendigeTilInntektskontroll()

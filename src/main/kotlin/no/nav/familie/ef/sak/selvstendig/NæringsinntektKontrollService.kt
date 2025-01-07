@@ -35,7 +35,10 @@ class NæringsinntektKontrollService(
     fun opprettTasksForSelvstendigeTilInntektskontroll() {
         val oppgaver = hentOppgaverForSelvstendigeTilInntektskontroll()
         oppgaver.forEach {
-            taskService.save(NæringsinntektKontrollForOppgaveTask.opprettTask(it.id ?: throw Feil("Feil i inntektskontroll for næringsdrivende: Oppgave må ha id for at den kan behandles")))
+            val næringsinntektKontrollTask = NæringsinntektKontrollForOppgaveTask.opprettTask(it.id ?: throw Feil("Feil i inntektskontroll for næringsdrivende: Oppgave må ha id for at den kan behandles"))
+            secureLogger.info("Lagrer ned næringsinntektKontrollTask: $næringsinntektKontrollTask")
+            val saved = taskService.save(næringsinntektKontrollTask)
+            secureLogger.info("Lagret task: $saved")
         }
     }
 
