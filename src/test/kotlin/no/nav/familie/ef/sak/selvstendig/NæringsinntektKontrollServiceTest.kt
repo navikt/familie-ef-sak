@@ -9,6 +9,7 @@ import no.nav.familie.ef.sak.behandling.BehandlingRepository
 import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.beregning.Inntektsperiode
+import no.nav.familie.ef.sak.brev.BrevClient
 import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
 import no.nav.familie.ef.sak.infrastruktur.config.ObjectMapperProvider.objectMapper
 import no.nav.familie.ef.sak.oppgave.OppgaveClient
@@ -71,6 +72,9 @@ internal class NæringsinntektKontrollServiceTest : OppslagSpringRunnerTest() {
     @Autowired
     private lateinit var oppgaveRepository: OppgaveRepository
 
+    @Autowired
+    private lateinit var brevClient: BrevClient
+
     private val personIdent = "1"
     private val oppdaterOppgaveSlot = slot<Oppgave>()
     private val behandlingIds = mutableListOf<UUID>()
@@ -91,6 +95,7 @@ internal class NæringsinntektKontrollServiceTest : OppslagSpringRunnerTest() {
         every { oppgaveClient.hentOppgaver(finnOppgaveRequest) } returns FinnOppgaveResponseDto(1, listOf(lagEksternTestOppgave()))
         every { oppgaveClient.oppdaterOppgave(capture(oppdaterOppgaveSlot)) } returns 9
         every { oppgaveClient.finnOppgaveMedId(9) } returns lagEksternTestOppgave()
+        every { brevClient.genererNæringsinntektUtenEndringNotat(any()) } returns ByteArray(0)
     }
 
     private fun lagEksternTestOppgave(personIdent: String = "1"): Oppgave = Oppgave(id = 9, tilordnetRessurs = null, oppgavetype = Oppgavetype.Fremlegg.toString(), fristFerdigstillelse = LocalDate.of(YearMonth.now().year, 12, 15).toString(), mappeId = 107, identer = listOf(OppgaveIdentV2(personIdent, IdentGruppe.FOLKEREGISTERIDENT)))

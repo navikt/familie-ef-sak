@@ -25,6 +25,7 @@ class NæringsinntektKontrollService(
     val tilkjentYtelseService: TilkjentYtelseService,
     val næringsinntektDataForBeregningService: NæringsinntektDataForBeregningService,
     val næringsinntektBrukernotifikasjonService: NæringsinntektBrukernotifikasjonService,
+    val næringsinntektNotatService: NæringsinntektNotatService,
     val taskService: TaskService,
 ) {
     private val secureLogger = LoggerFactory.getLogger("secureLogger")
@@ -52,10 +53,10 @@ class NæringsinntektKontrollService(
                     val oppgaveMedUtsattFrist = næringsinntektDataForBeregning.oppgave.copy(fristFerdigstillelse = LocalDate.of(årstallIFjor + 2, 1, 11).toString())
                     oppgaveService.oppdaterOppgave(oppgaveMedUtsattFrist)
                 } else {
-                    // Lag notat
                     giBeskjedOmKontrollertInntektVedLøpendeOvergangsstønad(næringsinntektDataForBeregning.behandlingId, næringsinntektDataForBeregning.personIdent, årstallIFjor)
                     val avsluttOppgaveMedOppdatertBeskrivelse = næringsinntektDataForBeregning.oppgave.copy(beskrivelse = næringsinntektDataForBeregning.oppgave.beskrivelse + "\nAutomatisk avsluttet oppgave: Ingen endring i inntekt.", status = StatusEnum.FERDIGSTILT)
                     oppgaveService.oppdaterOppgave(avsluttOppgaveMedOppdatertBeskrivelse)
+                    næringsinntektNotatService.lagNotat(næringsinntektDataForBeregning) // Må arkiveres / journalføres
                 }
             } else {
                 beOmRegnskap(næringsinntektDataForBeregning.personIdent, næringsinntektDataForBeregning.behandlingId)
