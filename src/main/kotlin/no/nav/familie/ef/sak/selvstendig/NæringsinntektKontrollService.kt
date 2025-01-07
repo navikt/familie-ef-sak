@@ -15,6 +15,7 @@ import no.nav.familie.leader.LeaderClient
 import no.nav.familie.prosessering.internal.TaskService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
@@ -30,6 +31,7 @@ class NæringsinntektKontrollService(
 ) {
     private val secureLogger = LoggerFactory.getLogger("secureLogger")
 
+    @Transactional
     fun opprettTasksForSelvstendigeTilInntektskontroll() {
         val oppgaver = hentOppgaverForSelvstendigeTilInntektskontroll()
         oppgaver.forEach {
