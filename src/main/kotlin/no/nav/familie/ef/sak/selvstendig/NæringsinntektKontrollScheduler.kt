@@ -14,7 +14,6 @@ class NæringsinntektKontrollScheduler(
     val featureToggleService: FeatureToggleService,
 ) {
     @Scheduled(initialDelay = 60 * 1000L, fixedDelay = 365 * 24 * 60 * 60 * 1000L) // Kjører ved oppstart av app
-    @Transactional
     fun sjekkNæringsinntekt() {
         if (featureToggleService.isEnabled(Toggle.KONTROLLER_NÆRINGSINNTEKT)) {
             næringsinntektKontrollService.opprettTasksForSelvstendigeTilInntektskontroll()
