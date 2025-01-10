@@ -156,6 +156,7 @@ class SendTilBeslutterSteg(
             oppgaverForOpprettelseService.opprettEllerErstatt(
                 saksbehandling.id,
                 data.oppgavetyperSomSkalOpprettes,
+                data.årForInntektskontrollSelvstendigNæringsdrivende,
             )
         }
     }

@@ -26,6 +26,7 @@ class OppgaverForOpprettelseService(
     fun opprettEllerErstatt(
         behandlingId: UUID,
         nyeOppgaver: List<OppgaveForOpprettelseType>,
+        årForInntektskontrollSelvstendigNæringsdrivende: Int? = null,
     ) {
         val oppgavetyperSomKanOpprettes = hentOppgavetyperSomKanOpprettes(behandlingId)
         if (oppgavetyperSomKanOpprettes.isEmpty()) {
@@ -36,8 +37,8 @@ class OppgaverForOpprettelseService(
             "behandlingId=$behandlingId prøver å opprette $nyeOppgaver $oppgavetyperSomKanOpprettes"
         }
         when (oppgaverForOpprettelseRepository.existsById(behandlingId)) {
-            true -> oppgaverForOpprettelseRepository.update(OppgaverForOpprettelse(behandlingId, nyeOppgaver))
-            false -> oppgaverForOpprettelseRepository.insert(OppgaverForOpprettelse(behandlingId, nyeOppgaver))
+            true -> oppgaverForOpprettelseRepository.update(OppgaverForOpprettelse(behandlingId, nyeOppgaver, årForInntektskontrollSelvstendigNæringsdrivende))
+            false -> oppgaverForOpprettelseRepository.insert(OppgaverForOpprettelse(behandlingId, nyeOppgaver, årForInntektskontrollSelvstendigNæringsdrivende))
         }
     }
 
@@ -59,6 +60,7 @@ class OppgaverForOpprettelseService(
                 else -> null
             }
 
+        // TODO: Validering på at det er selvstendig næringsdrivende
         return if (kanOppretteOppgaveForInntektskontrollFremITid(tilkjentYtelse)) {
             listOf(OppgaveForOpprettelseType.INNTEKTSKONTROLL_1_ÅR_FREM_I_TID, OppgaveForOpprettelseType.INNTEKTSKONTROLL_SELVSTENDIG_NÆRINGSDRIVENDE)
         } else {
