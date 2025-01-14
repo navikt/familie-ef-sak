@@ -48,6 +48,8 @@ class OppgaverForOpprettelseService(
     fun hentOppgaverForOpprettelseEllerNull(behandlingId: UUID): OppgaverForOpprettelse? = oppgaverForOpprettelseRepository.findByIdOrNull(behandlingId)
 
     fun hentOppgavetyperSomKanOpprettes(behandlingId: UUID): List<OppgaveForOpprettelseType> {
+        val toggleSkalViseOppgavetypeKontrollInntektAvSelvstendigNæringsdrivende = featureToggleService.isEnabled(Toggle.FRONTEND_VIS_MARKERE_GODKJENNE_OPPGAVE_MODAL)
+
         val saksbehandling = behandlingService.hentSaksbehandling(behandlingId)
         if (saksbehandling.stønadstype != StønadType.OVERGANGSSTØNAD) {
             return emptyList()
@@ -64,14 +66,12 @@ class OppgaverForOpprettelseService(
 
         val oppgavetyperSomKanOpprettes = mutableListOf<OppgaveForOpprettelseType>()
 
-        val toggleSkalViseOppgavetypeKontrollInntektAvSelvstendigNæringsdrivende = featureToggleService.isEnabled(Toggle.FRONTEND_VIS_MARKERE_GODKJENNE_OPPGAVE_MODAL)
+        if (kanOppretteOppgaveForInntektskontrollFremITid(tilkjentYtelse)) {
+            oppgavetyperSomKanOpprettes.add(OppgaveForOpprettelseType.INNTEKTSKONTROLL_1_ÅR_FREM_I_TID)
+        }
 
         if (toggleSkalViseOppgavetypeKontrollInntektAvSelvstendigNæringsdrivende) {
             oppgavetyperSomKanOpprettes.add(OppgaveForOpprettelseType.INNTEKTSKONTROLL_SELVSTENDIG_NÆRINGSDRIVENDE)
-        }
-
-        if (kanOppretteOppgaveForInntektskontrollFremITid(tilkjentYtelse)) {
-            oppgavetyperSomKanOpprettes.add(OppgaveForOpprettelseType.INNTEKTSKONTROLL_1_ÅR_FREM_I_TID)
         }
 
         return oppgavetyperSomKanOpprettes
