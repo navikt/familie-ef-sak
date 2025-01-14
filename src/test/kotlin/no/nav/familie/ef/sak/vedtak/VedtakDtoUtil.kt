@@ -58,6 +58,7 @@ object VedtakDtoUtil {
                 ),
             ),
             listOf(periodeMedBeløpDto()),
+            "kontantstøtteBegrunnelse",
             tilleggsstønadDto(),
         )
 

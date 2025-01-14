@@ -55,6 +55,7 @@ class KopierVedtakService(
             perioder = mapUtgiftsperioder(historikk, behandlingBarn),
             resultatType = ResultatType.INNVILGE,
             perioderKontantstøtte = mapPerioderKontantstøtte(historikk),
+            kontantstøtteBegrunnelse = "",
             tilleggsstønad = mapTilleggsstønadDto(historikk, forrigeBehandlingId),
             begrunnelse = "Satsendring barnetilsyn",
         )

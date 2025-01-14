@@ -152,6 +152,7 @@ internal class BeregningBarnetilsynControllerTest : OppslagSpringRunnerTest() {
                 begrunnelse = "",
                 perioder = listOf(utgiftsperiode),
                 perioderKontantstøtte = listOf(),
+                kontantstøtteBegrunnelse = null,
                 tilleggsstønad =
                     TilleggsstønadDto(
                         harTilleggsstønad = false,
@@ -224,6 +225,7 @@ internal class BeregningBarnetilsynControllerTest : OppslagSpringRunnerTest() {
                 begrunnelse = "",
                 perioder = listOf(utgiftsperiode),
                 perioderKontantstøtte = listOf(),
+                kontantstøtteBegrunnelse = null,
                 tilleggsstønad =
                     TilleggsstønadDto(
                         harTilleggsstønad = false,
