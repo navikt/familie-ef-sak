@@ -11,6 +11,8 @@ import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.felles.util.BehandlingOppsettUtil.iverksattFørstegangsbehandling
 import no.nav.familie.ef.sak.felles.util.BehandlingOppsettUtil.iverksattRevurdering
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.saksbehandling
@@ -34,9 +36,10 @@ internal class OppgaverForOpprettelseServiceTest {
     private val tilkjentYtelseService = mockk<TilkjentYtelseService>()
     private val behandlingService = mockk<BehandlingService>()
     private val vedtakService = mockk<VedtakService>()
+    private val featureToggleService = mockk<FeatureToggleService>()
 
     private var oppgaverForOpprettelseService =
-        spyk(OppgaverForOpprettelseService(oppgaverForOpprettelseRepository, behandlingService, tilkjentYtelseService, vedtakService))
+        spyk(OppgaverForOpprettelseService(oppgaverForOpprettelseRepository, behandlingService, tilkjentYtelseService, vedtakService, featureToggleService))
 
     private val behandling = behandling(fagsak = fagsak())
     private val behandlingId = behandling.id
@@ -51,6 +54,7 @@ internal class OppgaverForOpprettelseServiceTest {
         every { oppgaverForOpprettelseRepository.update(any()) } returns oppgaverForOpprettelse
         every { vedtak.resultatType } returns ResultatType.INNVILGE
         every { vedtakService.hentVedtak(any()) } returns vedtak
+        every { featureToggleService.isEnabled(Toggle.FRONTEND_VIS_MARKERE_GODKJENNE_OPPGAVE_MODAL) } returns true
     }
 
     @Test

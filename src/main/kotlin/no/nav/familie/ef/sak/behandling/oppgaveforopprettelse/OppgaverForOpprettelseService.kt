@@ -2,6 +2,8 @@ package no.nav.familie.ef.sak.behandling.oppgaveforopprettelse
 
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvisIkke
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.vedtak.VedtakService
@@ -21,6 +23,7 @@ class OppgaverForOpprettelseService(
     private val behandlingService: BehandlingService,
     private val tilkjentYtelseService: TilkjentYtelseService,
     private val vedtakService: VedtakService,
+    private val featureToggleService: FeatureToggleService,
 ) {
     @Transactional
     fun opprettEllerErstatt(
@@ -49,7 +52,6 @@ class OppgaverForOpprettelseService(
         if (saksbehandling.stønadstype != StønadType.OVERGANGSSTØNAD) {
             return emptyList()
         }
-
         val vedtak = vedtakService.hentVedtak(behandlingId)
         val tilkjentYtelse =
             when {
@@ -60,12 +62,19 @@ class OppgaverForOpprettelseService(
                 else -> null
             }
 
-        // TODO: Validering på at det er selvstendig næringsdrivende
-        return if (kanOppretteOppgaveForInntektskontrollFremITid(tilkjentYtelse)) {
-            listOf(OppgaveForOpprettelseType.INNTEKTSKONTROLL_1_ÅR_FREM_I_TID, OppgaveForOpprettelseType.INNTEKTSKONTROLL_SELVSTENDIG_NÆRINGSDRIVENDE)
-        } else {
-            listOf(OppgaveForOpprettelseType.INNTEKTSKONTROLL_SELVSTENDIG_NÆRINGSDRIVENDE)
+        val oppgavetyperSomKanOpprettes = mutableListOf<OppgaveForOpprettelseType>()
+
+        val toggleSkalViseOppgavetypeKontrollInntektAvSelvstendigNæringsdrivende = featureToggleService.isEnabled(Toggle.FRONTEND_VIS_MARKERE_GODKJENNE_OPPGAVE_MODAL)
+
+        if (toggleSkalViseOppgavetypeKontrollInntektAvSelvstendigNæringsdrivende) {
+            oppgavetyperSomKanOpprettes.add(OppgaveForOpprettelseType.INNTEKTSKONTROLL_SELVSTENDIG_NÆRINGSDRIVENDE)
         }
+
+        if (kanOppretteOppgaveForInntektskontrollFremITid(tilkjentYtelse)) {
+            oppgavetyperSomKanOpprettes.add(OppgaveForOpprettelseType.INNTEKTSKONTROLL_1_ÅR_FREM_I_TID)
+        }
+
+        return oppgavetyperSomKanOpprettes
     }
 
     private fun hentSisteTilkjentYtelse(fagsakId: UUID): TilkjentYtelse? {
