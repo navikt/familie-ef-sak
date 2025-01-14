@@ -85,7 +85,9 @@ data class InnvilgelseOvergangsstønad(
 data class Avslå(
     val avslåÅrsak: AvslagÅrsak?,
     val avslåBegrunnelse: String?,
-) : VedtakDto(ResultatType.AVSLÅ, "Avslag")
+) : VedtakDto(ResultatType.AVSLÅ, "Avslag") {
+    fun erGydlig(): Boolean = avslåÅrsak != AvslagÅrsak.KORTVARIG_AVBRUDD_JOBB && avslåÅrsak != AvslagÅrsak.MANGLENDE_OPPLYSNINGER
+}
 
 data class Opphør(
     val opphørFom: YearMonth,
