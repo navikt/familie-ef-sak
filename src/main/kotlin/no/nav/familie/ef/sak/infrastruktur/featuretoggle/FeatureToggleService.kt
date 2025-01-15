@@ -20,8 +20,7 @@ enum class Toggle(
     val beskrivelse: String? = null,
 ) {
     // Release
-    OVERSENDE_BEGRUNNELSE_FOR_TILBAKEKREVING("familie-ef-sak.begrunnelse-for-tilbakekreving", "Release"),
-    FRONTEND_ENDRE_DOKUMENTTITTEL("familie.ef.sak.frontend-endre-dokumenttittel", "Release"),
+    FRONTEND_KONVERTER_DELMALBLOKK_TIL_HTML_FELT("familie.ef.sak.konverter-delmalblokk-til-html-input", "Release"),
     FRONTEND_VIS_MARKERE_GODKJENNE_OPPGAVE_MODAL(
         "familie.ef.sak.vis-markere-godkjenne-vedtak-oppgave-modal",
         "Release",
@@ -40,11 +39,6 @@ enum class Toggle(
         "familie.ef.sak.frontend-automatisk-utfylle-vilkar",
         "Operational - kun preprod",
     ),
-    FRONTEND_TILBAKEKREVING_UNDER_4X_RETTSGEBYR(
-        "familie.ef.sak.frontend.tilbakekreving-under-4x-rettsgebyr",
-        "Release",
-    ),
-    FRONTEND_KONVERTER_DELMALBLOKK_TIL_HTML_FELT("familie.ef.sak.konverter-delmalblokk-til-html-input", "Release"),
     AUTOMATISKE_BREV_INNHENTING_AKTIVITETSPLIKT(
         "familie.ef.sak.automatiske-brev-innhenting-aktivitetsplikt",
         "Operational - sesongavhengig",
