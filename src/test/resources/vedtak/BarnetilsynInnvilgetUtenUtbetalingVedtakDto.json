@@ -19,6 +19,7 @@
       "beløp": 1000
     }
   ],
+  "kontantstøtteBegrunnelse":"test",
   "tilleggsstønad": {
     "harTilleggsstønad": true,
     "perioder": [

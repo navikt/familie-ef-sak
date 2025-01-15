@@ -47,19 +47,19 @@ object VedtakDtoUtil {
             SamordningsfradragType.GJENLEVENDEPENSJON,
         )
 
-    fun innvilgelseBarnetilsynDto(barnId: UUID = UUID.randomUUID()) =
+    fun innvilgelseBarnetilsynDto(barnId: UUID = UUID.randomUUID(), kontantstøtteBegrunnelse: String? = null) =
         InnvilgelseBarnetilsyn(
-            "begrunnelse",
-            listOf(
+            begrunnelse = "begrunnelse",
+            perioder = listOf(
                 barnetilsynperiodeDto(
                     fom = YearMonth.of(2021, 1),
                     tom = YearMonth.of(2021, 12),
                     barn = listOf(barnId),
                 ),
             ),
-            listOf(periodeMedBeløpDto()),
-            "kontantstøtteBegrunnelse",
-            tilleggsstønadDto(),
+            perioderKontantstøtte = listOf(periodeMedBeløpDto()),
+            kontantstøtteBegrunnelse = kontantstøtteBegrunnelse,
+            tilleggsstønad = tilleggsstønadDto(),
         )
 
     fun innvilgelseSkolepengerDto() =
