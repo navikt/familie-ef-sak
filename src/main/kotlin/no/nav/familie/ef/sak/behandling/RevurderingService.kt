@@ -169,6 +169,7 @@ class RevurderingService(
                     )
                 }
             }
+
             VilkårsbehandleNyeBarn.IKKE_VILKÅRSBEHANDLE -> emptyList()
             VilkårsbehandleNyeBarn.IKKE_VALGT -> emptyList()
         }
@@ -192,7 +193,7 @@ class RevurderingService(
         }
         if (revurderingInnhold.barnSomSkalFødes.isNotEmpty()) {
             feilHvis(fagsak.stønadstype == StønadType.BARNETILSYN) { "Kan ikke legge inn terminbarn for barnetilsyn" }
-            feilHvis(revurderingInnhold.behandlingsårsak != BehandlingÅrsak.PAPIRSØKNAD) { "Terminbarn på revurdering kan kun legges inn for papirsøknader" }
+            feilHvis(revurderingInnhold.behandlingsårsak != BehandlingÅrsak.PAPIRSØKNAD && revurderingInnhold.behandlingsårsak != BehandlingÅrsak.NYE_OPPLYSNINGER) { "Terminbarn på revurdering kan kun legges inn for papirsøknader og nye opplysninger" }
         }
     }
 

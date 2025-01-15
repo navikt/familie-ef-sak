@@ -5,7 +5,6 @@ import no.nav.familie.ef.sak.behandling.dto.RevurderingDto
 import no.nav.familie.ef.sak.behandling.dto.RevurderingsinformasjonDto
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
-import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.ef.sak.journalføring.dto.VilkårsbehandleNyeBarn
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
@@ -23,10 +22,9 @@ import java.util.UUID
 @RestController
 @RequestMapping(path = ["/api/revurdering"])
 @ProtectedWithClaims(issuer = "azuread")
-class RevurderingsController(
+class RevurderingController(
     private val revurderingService: RevurderingService,
     private val tilgangService: TilgangService,
-    private val featureToggleService: FeatureToggleService,
 ) {
     @PostMapping("{fagsakId}")
     fun startRevurdering(
