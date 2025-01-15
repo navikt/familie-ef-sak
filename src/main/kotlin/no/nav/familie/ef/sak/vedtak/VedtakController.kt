@@ -11,6 +11,7 @@ import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvisIkke
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.ef.sak.oppgave.TilordnetRessursService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.secureLogger
+import no.nav.familie.ef.sak.vedtak.dto.Avslå
 import no.nav.familie.ef.sak.vedtak.dto.BeslutteVedtakDto
 import no.nav.familie.ef.sak.vedtak.dto.InnvilgelseOvergangsstønad
 import no.nav.familie.ef.sak.vedtak.dto.SendTilBeslutterDto
@@ -136,6 +137,7 @@ class VedtakController(
         val behandling = behandlingService.hentSaksbehandling(behandlingId)
         tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.UPDATE)
         validerKanRedigereBehandling(behandling)
+        validerGyldigAvslagÅrsak(vedtak)
         validerAlleVilkårOppfyltDersomInvilgelse(vedtak, behandlingId)
         return Ressurs.success(stegService.håndterBeregnYtelseForStønad(behandling, vedtak).id)
     }
@@ -167,6 +169,12 @@ class VedtakController(
             "Behandlingen er låst og vedtaket kan derfor ikke lagres"
         }
         validerTilordnetRessurs(saksbehandling.id)
+    }
+
+    private fun validerGyldigAvslagÅrsak(vedtak: VedtakDto) {
+        if (vedtak is Avslå) {
+            brukerfeilHvis(!vedtak.erGydlig()) { "Ikke gyldig avslagsgrunn" }
+        }
     }
 
     private fun validerTilordnetRessurs(
