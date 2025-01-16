@@ -137,13 +137,19 @@ class OppgaveService(
         } catch (e: Exception) {
             if (finnerIkkeGyldigArbeidsfordeling(e)) {
                 oppgaveClient.opprettOppgave(opprettOppgave.copy(enhetsnummer = ENHET_NR_NAY))
-            } else {
+            }
+            else if (navIdentHarIkkeTilgangTilEnheten(e)) {
+                oppgaveClient.opprettOppgave(opprettOppgave.copy(tilordnetRessurs = null))
+            }
+            else {
                 throw e
             }
         }
     }
 
     private fun finnerIkkeGyldigArbeidsfordeling(e: Exception): Boolean = e.message?.contains("Fant ingen gyldig arbeidsfordeling for oppgaven") ?: false
+
+    private fun navIdentHarIkkeTilgangTilEnheten(e: Exception): Boolean = e.message?.contains("navIdent har ikke tilgang til enheten") ?: false
 
     private fun finnAktuellMappe(
         enhetsnummer: String?,
