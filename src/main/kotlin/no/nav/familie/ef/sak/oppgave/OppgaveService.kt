@@ -137,11 +137,9 @@ class OppgaveService(
         } catch (e: Exception) {
             if (finnerIkkeGyldigArbeidsfordeling(e)) {
                 oppgaveClient.opprettOppgave(opprettOppgave.copy(enhetsnummer = ENHET_NR_NAY))
-            }
-            else if (navIdentHarIkkeTilgangTilEnheten(e)) {
+            } else if (navIdentHarIkkeTilgangTilEnheten(e)) {
                 oppgaveClient.opprettOppgave(opprettOppgave.copy(tilordnetRessurs = null))
-            }
-            else {
+            } else {
                 throw e
             }
         }
