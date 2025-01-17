@@ -217,7 +217,7 @@ data class InntektWrapper(
 )
 
 data class TilleggsstønadWrapper(
-    val harTilleggsstønad: Boolean,
+    val harTilleggsstønad: Boolean?,
     val perioder: List<PeriodeMedBeløp>,
     val begrunnelse: String?,
 )

@@ -22,7 +22,7 @@ data class InnvilgelseBarnetilsyn(
 ) : VedtakDto(resultatType, _type)
 
 data class TilleggsstønadDto(
-    val harTilleggsstønad: Boolean,
+    val harTilleggsstønad: Boolean?,
     val perioder: List<PeriodeMedBeløpDto> = emptyList(),
     val begrunnelse: String?,
 )
