@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.opplysninger.personopplysninger.domene
 
+import no.nav.familie.ef.sak.kontantstøtte.KontantstøtteDatakilde
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataPeriodeHistorikkBarnetilsyn
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataPeriodeHistorikkOvergangsstønad
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.Sivilstandstype
@@ -23,6 +24,7 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.VergemaalEllerF
 import no.nav.familie.kontrakter.felles.medlemskap.Medlemskapsinfo
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.YearMonth
 
 /**
  * Endringer i denne filen burde godkjennes av 2 personer då denne er lagret som json i databasen og breaking changes kan være
@@ -67,9 +69,16 @@ data class GrunnlagsdataDomene(
     val tidligereVedtaksperioder: TidligereVedtaksperioder?,
     val harAvsluttetArbeidsforhold: Boolean?,
     val harKontantstøttePerioder: Boolean?,
+    val kontantstøttePerioder: List<KontantstøttePeriode>?,
 ) {
     fun tilPersonopplysninger() = Personopplysninger(søker = this.søker, annenForelder = this.annenForelder, barn = this.barn)
 }
+
+data class KontantstøttePeriode(
+    val fomMåned: YearMonth,
+    val tomMåned: YearMonth?,
+    val kilde: KontantstøtteDatakilde,
+)
 
 data class Personopplysninger(
     val søker: Søker,

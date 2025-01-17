@@ -10,7 +10,7 @@ class KontantstøtteService(
     val kontantstøtteClient: KontantstøtteClient,
     val personService: PersonService,
 ) {
-    fun finnesKontantstøtteUtbetalingerPåBruker(personIdent: String): HentUtbetalingsinfoKontantstøtteDto {
+    fun hentUtbetalingsinfoKontantstøtte(personIdent: String): HentUtbetalingsinfoKontantstøtteDto {
         val personIdenter = personService.hentPersonIdenter(personIdent).identer().toList()
         return kontantstøtteClient.hentUtbetalingsinfo(personIdenter).tilDto()
     }
@@ -19,15 +19,22 @@ class KontantstøtteService(
 fun HentUtbetalingsinfoKontantstøtte.tilDto(): HentUtbetalingsinfoKontantstøtteDto =
     HentUtbetalingsinfoKontantstøtteDto(
         this.ksSakPerioder.isNotEmpty() || this.infotrygdPerioder.isNotEmpty(),
-        this.ksSakPerioder.map { KsakPeriodeDto(it.fomMåned, it.tomMåned) },
+        this.ksSakPerioder.map { KsakPeriodeDto(it.fomMåned, it.tomMåned, KontantstøtteDatakilde.KONTANTSTØTTE) } +
+            this.infotrygdPerioder.map { KsakPeriodeDto(it.fomMåned, it.tomMåned, KontantstøtteDatakilde.INFOTRYGD) },
     )
-
-data class KsakPeriodeDto(
-    val fomMåned: YearMonth,
-    val tomMåned: YearMonth? = null,
-)
 
 data class HentUtbetalingsinfoKontantstøtteDto(
     val finnesUtbetaling: Boolean,
     val perioder: List<KsakPeriodeDto>,
 )
+
+data class KsakPeriodeDto(
+    val årMånedFra: YearMonth,
+    val årMånedTil: YearMonth? = null,
+    val kilde: KontantstøtteDatakilde,
+)
+
+enum class KontantstøtteDatakilde {
+    KONTANTSTØTTE,
+    INFOTRYGD,
+}

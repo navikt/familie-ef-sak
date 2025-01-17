@@ -46,5 +46,6 @@ object VilkårTestUtil {
         dokumentasjon = dokumentasjon,
         harAvsluttetArbeidsforhold = harAvsluttetArbeidsforhold,
         harKontantstøttePerioder = harKontantstøttePerioder,
+        kontantstøttePerioder = emptyList(),
     )
 }

@@ -30,6 +30,6 @@ class KontantstøtteController(
             tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.ACCESS)
         }
         val personIdent = behandlingService.hentAktivIdent(behandlingId)
-        return Ressurs.success(kontantstøtteService.finnesKontantstøtteUtbetalingerPåBruker(personIdent))
+        return Ressurs.success(kontantstøtteService.hentUtbetalingsinfoKontantstøtte(personIdent))
     }
 }

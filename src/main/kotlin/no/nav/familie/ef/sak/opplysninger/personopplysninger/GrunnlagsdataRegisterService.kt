@@ -4,6 +4,7 @@ import no.nav.familie.ef.sak.arbeidsforhold.ekstern.ArbeidsforholdService
 import no.nav.familie.ef.sak.felles.util.Timer.loggTid
 import no.nav.familie.ef.sak.kontantstøtte.KontantstøtteService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.GrunnlagsdataDomene
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.KontantstøttePeriode
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.Personopplysninger
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.TidligereVedtaksperioder
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.fullmakt.FullmaktService
@@ -40,7 +41,14 @@ class GrunnlagsdataRegisterService(
             arbeidsforholdService.finnesAvsluttetArbeidsforholdSisteAntallMåneder(
                 grunnlagsdataFraPdl.gjeldendeIdentForSøker(),
             )
-        val harKontantstøttePerioder = kontantstøtteService.finnesKontantstøtteUtbetalingerPåBruker(personIdent).finnesUtbetaling
+        val kontantstøttePerioder = kontantstøtteService.hentUtbetalingsinfoKontantstøtte(personIdent)
+        val harKontantstøttePerioder = kontantstøttePerioder.finnesUtbetaling
+        val kontantstøttePerioderDomene =
+            kontantstøttePerioder
+                .takeIf { harKontantstøttePerioder }
+                ?.let {
+                    it.perioder.map { periode -> KontantstøttePeriode(periode.årMånedFra, periode.årMånedTil, periode.kilde) }
+                }?.sortedByDescending { it.fomMåned }
 
         return GrunnlagsdataDomene(
             søker = mapSøker(grunnlagsdataFraPdl.søker, grunnlagsdataFraPdl.andrePersoner),
@@ -50,6 +58,7 @@ class GrunnlagsdataRegisterService(
             tidligereVedtaksperioder = tidligereVedtaksperioder,
             harAvsluttetArbeidsforhold = harAvsluttetArbeidsforhold,
             harKontantstøttePerioder = harKontantstøttePerioder,
+            kontantstøttePerioder = kontantstøttePerioderDomene,
         )
     }
 
