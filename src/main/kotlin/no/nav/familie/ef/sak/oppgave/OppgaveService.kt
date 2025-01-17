@@ -22,6 +22,7 @@ import no.nav.familie.kontrakter.felles.oppgave.OppgavePrioritet
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype.BehandleSak
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype.BehandleUnderkjentVedtak
+import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype.Fremlegg
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype.GodkjenneVedtak
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype.InnhentDokumentasjon
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype.VurderHenvendelse
@@ -440,7 +441,7 @@ class OppgaveService(
             BehandleUnderkjentVedtak,
             GodkjenneVedtak,
             -> true
-
+            Fremlegg -> false
             InnhentDokumentasjon -> false
             VurderHenvendelse -> false
             else -> error("Håndterer ikke behandlesAvApplikasjon for $oppgavetype")

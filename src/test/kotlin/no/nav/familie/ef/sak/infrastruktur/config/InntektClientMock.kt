@@ -24,7 +24,11 @@ class InntektClientMock {
 
         val mockResponseUtenArbeidsinntektJson = this::class.java.classLoader.getResource("inntekt/inntektMockUtenArbeidsinntekt.json")!!
         val mockResponseUtenArbeidsinntekt = objectMapper.readValue<HentInntektListeResponse>(mockResponseUtenArbeidsinntektJson)
-        every { mockk.hentInntekt("11111111111", any(), any()) } returns mockResponseUtenArbeidsinntekt
+        every { mockk.hentInntekt("1", any(), any()) } returns mockResponseUtenArbeidsinntekt
+
+        val mockResponseHøyArbeidsinntektJson = this::class.java.classLoader.getResource("inntekt/inntektMockMedHøyInntekt.json")!!
+        val mockResponseHøyArbeidsinntekt = objectMapper.readValue<HentInntektListeResponse>(mockResponseHøyArbeidsinntektJson)
+        every { mockk.hentInntekt("2", any(), any()) } returns mockResponseHøyArbeidsinntekt
 
         every { mockk.genererAInntektUrl(any()) } returns "https://ainntekt"
         return mockk
