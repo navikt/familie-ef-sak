@@ -2374,5 +2374,28 @@
     "name" : "harKontantstøttePerioder",
     "type" : "Boolean",
     "nullable" : true
+  },
+  "kontantstøttePerioder" : {
+    "name" : "kontantstøttePerioder",
+    "type" : "Collection",
+    "fields" : {
+      "fomMåned" : {
+        "name" : "fomMåned",
+        "type" : "YearMonth",
+        "nullable" : false
+      },
+      "tomMåned" : {
+        "name" : "tomMåned",
+        "type" : "YearMonth",
+        "nullable" : true
+      },
+      "kilde" : {
+        "name" : "kilde",
+        "type" : "Enum",
+        "values" : [ "KONTANTSTØTTE", "INFOTRYGD" ],
+        "nullable" : false
+      }
+    },
+    "nullable" : true
   }
 }
