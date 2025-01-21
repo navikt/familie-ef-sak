@@ -78,17 +78,18 @@ fun Simuleringsoppsummering.tilSimuleringsoppsummeringDto(): Simuleringsoppsumme
     val erUnder4rettsgebyr = rettsgebyr != null && feilutbetaling < BigDecimal(rettsgebyr * 4) && etterbetaling == BigDecimal.ZERO
 
     return SimuleringsoppsummeringDto(
-        perioder = this.perioder.map {
-            SimuleringsperiodeDto(
-                fom = it.fom,
-                tom = it.tom,
-                forfallsdato = it.forfallsdato,
-                nyttBeløp = it.nyttBeløp,
-                tidligereUtbetalt = it.tidligereUtbetalt,
-                resultat = it.resultat,
-                feilutbetaling = it.feilutbetaling,
-            )
-        },
+        perioder =
+            this.perioder.map {
+                SimuleringsperiodeDto(
+                    fom = it.fom,
+                    tom = it.tom,
+                    forfallsdato = it.forfallsdato,
+                    nyttBeløp = it.nyttBeløp,
+                    tidligereUtbetalt = it.tidligereUtbetalt,
+                    resultat = it.resultat,
+                    feilutbetaling = it.feilutbetaling,
+                )
+            },
         fomDatoNestePeriode = this.fomDatoNestePeriode,
         etterbetaling = this.etterbetaling,
         feilutbetaling = this.feilutbetaling,

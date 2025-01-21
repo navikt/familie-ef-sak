@@ -9,9 +9,7 @@ import org.junit.jupiter.api.Test
 import java.math.BigDecimal
 import java.time.LocalDate
 
-
 class SimuleringsoppsummeringDtoMappingTest {
-
     @Test
     fun `har gyldig rettsgebyr for gjeldene år (klager først etter 20 dager)`() {
         Assertions.assertThat(rettsgebyrForÅr[LocalDate.now().minusDays(20).year]).isNotNull()
@@ -52,21 +50,24 @@ class SimuleringsoppsummeringDtoMappingTest {
 
     @Test
     fun `skal mappe Simuleringsoppsummering med feilutbetaling under 4 rettsgebyr 2022 med etterbetaling`() {
-        val simuleringsoppsummering = lagSimuleringsoppsummering(
-            perioder = listOf(lagSimuleringsperiode(tom = LocalDate.of(2022, 1, 1), feilutbetaling = BigDecimal.valueOf(1000))),
-            etterbetaling = 1000,
-        )
+        val simuleringsoppsummering =
+            lagSimuleringsoppsummering(
+                perioder = listOf(lagSimuleringsperiode(tom = LocalDate.of(2022, 1, 1), feilutbetaling = BigDecimal.valueOf(1000))),
+                etterbetaling = 1000,
+            )
 
         val simuleringsoppsummeringDto = simuleringsoppsummering.tilSimuleringsoppsummeringDto()
         Assertions.assertThat(simuleringsoppsummeringDto.perioder).hasSize(1)
         Assertions.assertThat(simuleringsoppsummeringDto.visUnder4rettsgebyr).isFalse()
     }
+
     @Test
     fun `skal mappe Simuleringsoppsummering med feilutbetaling over 4 rettsgebyr 2022`() {
-        val simuleringsoppsummering = lagSimuleringsoppsummering(
-            perioder = listOf(lagSimuleringsperiode(tom = LocalDate.of(2022, 1, 1), feilutbetaling = BigDecimal.valueOf(1000))),
-            feilutbetaling = 10000,
-        )
+        val simuleringsoppsummering =
+            lagSimuleringsoppsummering(
+                perioder = listOf(lagSimuleringsperiode(tom = LocalDate.of(2022, 1, 1), feilutbetaling = BigDecimal.valueOf(1000))),
+                feilutbetaling = 10000,
+            )
 
         val simuleringsoppsummeringDto = simuleringsoppsummering.tilSimuleringsoppsummeringDto()
         Assertions.assertThat(simuleringsoppsummeringDto.perioder).hasSize(1)
@@ -75,12 +76,13 @@ class SimuleringsoppsummeringDtoMappingTest {
 
     @Test
     fun `skal mappe Simuleringsoppsummering og bruke siste periode med feilutbetaling selv om de er usortert`() {
-        val perioder = listOf(
-            lagSimuleringsperiode(tom = LocalDate.of(2021, 1, 1), feilutbetaling = BigDecimal.valueOf(1000)),
-            lagSimuleringsperiode(tom = LocalDate.of(2022, 1, 1), feilutbetaling = BigDecimal.valueOf(1000)),
-            lagSimuleringsperiode(tom = LocalDate.of(2023, 1, 1), feilutbetaling = BigDecimal.valueOf(0)),
-            lagSimuleringsperiode(tom = LocalDate.of(2021, 2, 1), feilutbetaling = BigDecimal.valueOf(1000)),
-        )
+        val perioder =
+            listOf(
+                lagSimuleringsperiode(tom = LocalDate.of(2021, 1, 1), feilutbetaling = BigDecimal.valueOf(1000)),
+                lagSimuleringsperiode(tom = LocalDate.of(2022, 1, 1), feilutbetaling = BigDecimal.valueOf(1000)),
+                lagSimuleringsperiode(tom = LocalDate.of(2023, 1, 1), feilutbetaling = BigDecimal.valueOf(0)),
+                lagSimuleringsperiode(tom = LocalDate.of(2021, 2, 1), feilutbetaling = BigDecimal.valueOf(1000)),
+            )
         val simuleringsoppsummering = lagSimuleringsoppsummering(perioder = perioder)
 
         val simuleringsoppsummeringDto = simuleringsoppsummering.tilSimuleringsoppsummeringDto()
@@ -92,7 +94,7 @@ class SimuleringsoppsummeringDtoMappingTest {
 
     private fun lagSimuleringsperiode(
         tom: LocalDate = LocalDate.of(2021, 1, 31),
-        feilutbetaling: BigDecimal = BigDecimal.valueOf(0)
+        feilutbetaling: BigDecimal = BigDecimal.valueOf(0),
     ) = Simuleringsperiode(
         fom = LocalDate.of(2021, 1, 1),
         tom = tom,
@@ -104,11 +106,12 @@ class SimuleringsoppsummeringDtoMappingTest {
     )
 
     private fun lagSimuleringsoppsummering(
-        perioder: List<Simuleringsperiode> = listOf(
-            lagSimuleringsperiode()
-        ),
+        perioder: List<Simuleringsperiode> =
+            listOf(
+                lagSimuleringsperiode(),
+            ),
         feilutbetaling: Long = 0,
-        etterbetaling: Long = 0
+        etterbetaling: Long = 0,
     ) = Simuleringsoppsummering(
         perioder = perioder,
         fomDatoNestePeriode = LocalDate.of(2021, 2, 1),
