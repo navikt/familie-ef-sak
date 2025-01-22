@@ -8,6 +8,7 @@ import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType
+import no.nav.familie.ef.sak.vedtak.dto.SendTilBeslutterDto
 import no.nav.familie.kontrakter.ef.felles.AvslagÅrsak
 import no.nav.familie.kontrakter.ef.iverksett.OppgaveForOpprettelseType
 import no.nav.familie.kontrakter.felles.ef.StønadType
@@ -28,9 +29,11 @@ class OppgaverForOpprettelseService(
     @Transactional
     fun opprettEllerErstatt(
         behandlingId: UUID,
-        nyeOppgaver: List<OppgaveForOpprettelseType>,
-        årForInntektskontrollSelvstendigNæringsdrivende: Int? = null,
+        data: SendTilBeslutterDto,
     ) {
+        val nyeOppgaver = data.oppgavetyperSomSkalOpprettes
+        val årForInntektskontrollSelvstendigNæringsdrivende = data.årForInntektskontrollSelvstendigNæringsdrivende
+
         val oppgavetyperSomKanOpprettes = hentOppgavetyperSomKanOpprettes(behandlingId)
         if (oppgavetyperSomKanOpprettes.isEmpty()) {
             oppgaverForOpprettelseRepository.deleteById(behandlingId)

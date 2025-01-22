@@ -20,6 +20,7 @@ import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.ef.sak.vedtak.domain.Vedtak
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType
+import no.nav.familie.ef.sak.vedtak.dto.SendTilBeslutterDto
 import no.nav.familie.ef.sak.økonomi.lagAndelTilkjentYtelse
 import no.nav.familie.ef.sak.økonomi.lagTilkjentYtelse
 import no.nav.familie.kontrakter.ef.felles.AvslagÅrsak
@@ -63,7 +64,7 @@ internal class OppgaverForOpprettelseServiceTest {
         every { oppgaverForOpprettelseRepository.existsById(any()) } returns true
         every { behandlingService.hentSaksbehandling(behandlingId) } returns saksbehandling
 
-        oppgaverForOpprettelseService.opprettEllerErstatt(behandlingId, listOf())
+        opprettTomListeForOppgavetyperSomSkalOpprettes(behandlingId)
 
         verify { oppgaverForOpprettelseRepository.deleteById(behandlingId) }
         verify(exactly = 0) { oppgaverForOpprettelseRepository.insert(any()) }
@@ -75,7 +76,7 @@ internal class OppgaverForOpprettelseServiceTest {
         every { oppgaverForOpprettelseService.hentOppgavetyperSomKanOpprettes(any()) } returns emptyList()
         every { oppgaverForOpprettelseRepository.existsById(any()) } returns false
 
-        oppgaverForOpprettelseService.opprettEllerErstatt(behandlingId, listOf())
+        opprettTomListeForOppgavetyperSomSkalOpprettes(behandlingId)
 
         verify { oppgaverForOpprettelseRepository.deleteById(any()) }
         verify(exactly = 0) { oppgaverForOpprettelseRepository.insert(any()) }
@@ -90,7 +91,7 @@ internal class OppgaverForOpprettelseServiceTest {
             )
         every { oppgaverForOpprettelseRepository.existsById(any()) } returns true
 
-        oppgaverForOpprettelseService.opprettEllerErstatt(behandlingId, listOf())
+        opprettTomListeForOppgavetyperSomSkalOpprettes(behandlingId)
 
         verify(exactly = 0) { oppgaverForOpprettelseRepository.deleteById(any()) }
         verify(exactly = 0) { oppgaverForOpprettelseRepository.insert(any()) }
@@ -105,7 +106,7 @@ internal class OppgaverForOpprettelseServiceTest {
             )
         every { oppgaverForOpprettelseRepository.existsById(any()) } returns false
 
-        oppgaverForOpprettelseService.opprettEllerErstatt(behandlingId, listOf())
+        opprettTomListeForOppgavetyperSomSkalOpprettes(behandlingId)
 
         verify(exactly = 0) { oppgaverForOpprettelseRepository.deleteById(any()) }
         verify { oppgaverForOpprettelseRepository.insert(any()) }
@@ -249,4 +250,13 @@ internal class OppgaverForOpprettelseServiceTest {
         val fagsak = fagsak(stønadstype = stønadType)
         return saksbehandling(fagsak, behandling)
     }
+
+    private fun opprettTomListeForOppgavetyperSomSkalOpprettes(behandlingId: UUID) =
+        oppgaverForOpprettelseService.opprettEllerErstatt(
+            behandlingId = behandlingId,
+            data =
+                SendTilBeslutterDto(
+                    emptyList(),
+                ),
+        )
 }

@@ -7,6 +7,7 @@ import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseRepository
 import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.ef.sak.vedtak.dto.InnvilgelseOvergangsstønad
+import no.nav.familie.ef.sak.vedtak.dto.SendTilBeslutterDto
 import no.nav.familie.ef.sak.økonomi.lagAndelTilkjentYtelse
 import no.nav.familie.ef.sak.økonomi.lagTilkjentYtelse
 import no.nav.familie.kontrakter.ef.iverksett.OppgaveForOpprettelseType
@@ -62,13 +63,22 @@ class OppgaverForOpprettelseServiceIntegrationTest : OppslagSpringRunnerTest() {
     }
 
     private fun opprettTomListe() {
-        oppgaverForOpprettelseService.opprettEllerErstatt(behandlingId, listOf())
+        oppgaverForOpprettelseService.opprettEllerErstatt(
+            behandlingId,
+            data =
+                SendTilBeslutterDto(
+                    emptyList(),
+                ),
+        )
     }
 
     private fun opprettInntektskontroll() {
         oppgaverForOpprettelseService.opprettEllerErstatt(
             behandlingId,
-            listOf(OppgaveForOpprettelseType.INNTEKTSKONTROLL_1_ÅR_FREM_I_TID),
+            data =
+                SendTilBeslutterDto(
+                    oppgavetyperSomSkalOpprettes = listOf(OppgaveForOpprettelseType.INNTEKTSKONTROLL_1_ÅR_FREM_I_TID),
+                ),
         )
     }
 
