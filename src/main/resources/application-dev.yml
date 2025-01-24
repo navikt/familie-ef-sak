@@ -24,3 +24,5 @@ KAFKA_BROKERS: hostname:1234
 KAFKA_KEYSTORE_PATH: kafkaKeystorePath
 KAFKA_CREDSTORE_PASSWORD: kafkaCredstorePassword
 KAFKA_TRUSTSTORE_PATH: kafkaTruststorePath
+
+FAMILIE_TILBAKE_URL: http://tilbakekreving-backend.tilbake

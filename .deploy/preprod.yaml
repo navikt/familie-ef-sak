@@ -76,7 +76,8 @@ spec:
           namespace: tilleggsstonader
     outbound:
       rules:
-        - application: familie-tilbake
+        - application: tilbakekreving-backend
+          namespace: tilbake
         - application: familie-klage
         - application: familie-brev
         - application: familie-ef-iverksett
