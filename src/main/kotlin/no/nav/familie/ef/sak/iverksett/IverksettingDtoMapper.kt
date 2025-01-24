@@ -319,7 +319,7 @@ class IverksettingDtoMapper(
             avslagÅrsak = vedtak.avslåÅrsak,
             oppgaverForOpprettelse =
                 oppgaverForOpprettelseService.hentOppgaverForOpprettelseEllerNull(vedtak.behandlingId)?.let {
-                    OppgaverForOpprettelseDto(oppgavetyper = it.oppgavetyper)
+                    OppgaverForOpprettelseDto(oppgavetyper = it.oppgavetyper, årForInntektskontrollSelvstendigNæringsdrivende = it.årForInntektskontrollSelvstendigNæringsdrivende)
                 } ?: OppgaverForOpprettelseDto(oppgavetyper = emptyList()),
             grunnbeløp = grunnbeløpFraTilkjentYtelse(tilkjentYtelse),
         )
