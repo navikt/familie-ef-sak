@@ -17,7 +17,7 @@ import java.util.UUID
 @Service
 class NæringsinntektBrukernotifikasjonService(
     private val kafkaTemplate: KafkaTemplate<String, String>,
-    @Value("\${BRUKERNOTIFIKASJON_BESKJED_TOPIC}")
+    @Value("\${BRUKERNOTIFIKASJON_VARSEL_TOPIC}")
     val topic: String,
     @Value("\${NAIS_APP_NAME}")
     val applicationName: String,
