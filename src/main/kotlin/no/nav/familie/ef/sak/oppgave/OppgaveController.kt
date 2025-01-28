@@ -71,6 +71,16 @@ class OppgaveController(
         return Ressurs.success(oppgaveRepons.tilDto())
     }
 
+    @PostMapping(
+        path = ["hent-fremleggsoppgaver"],
+    )
+    fun hentFremleggsoppgaver(
+        @RequestBody behandlingId: UUID,
+    ): Ressurs<OppgaveResponseDto> {
+        val oppgaveRepons = oppgaveService.hentFremleggsoppgaver(behandlingId)
+        return Ressurs.success(oppgaveRepons.tilDto())
+    }
+
     @PostMapping(path = ["/{gsakOppgaveId}/fordel"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun fordelOppgave(
         @PathVariable(name = "gsakOppgaveId") gsakOppgaveId: Long,

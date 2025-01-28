@@ -284,6 +284,20 @@ class OppgaveService(
 
     fun hentOppgaver(finnOppgaveRequest: FinnOppgaveRequest): FinnOppgaveResponseDto = oppgaveClient.hentOppgaver(finnOppgaveRequest)
 
+    fun hentFremleggsoppgaver(behandlingId: UUID): FinnOppgaveResponseDto {
+        val aktørId = fagsakService.hentAktivIdent(behandlingId)
+        val enhet = arbeidsfordelingService.hentNavEnhetId(aktørId, Fremlegg)
+        val request =
+            FinnOppgaveRequest(
+                tema = Tema.ENF,
+                oppgavetype = Fremlegg,
+                aktørId = aktørId,
+                enhet = enhet,
+            )
+
+        return oppgaveClient.hentOppgaver(request)
+    }
+
     private fun finnBehandlingstema(stønadstype: StønadType): Behandlingstema =
         when (stønadstype) {
             StønadType.OVERGANGSSTØNAD -> Behandlingstema.Overgangsstønad
