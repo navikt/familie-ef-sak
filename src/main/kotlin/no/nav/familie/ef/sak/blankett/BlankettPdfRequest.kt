@@ -24,7 +24,7 @@ data class BlankettPdfBehandling(
     val årsakRevurdering: ÅrsakRevurderingDto?,
     val tidligereVedtaksperioder: TidligereVedtaksperioderDto?,
     val harKontantstøttePerioder: Boolean?,
-    val kontantstøttePeridoer:  List<KontantstøttePeriode>
+    val kontantstøttePeridoer: List<KontantstøttePeriode>,
 )
 
 data class PersonopplysningerDto(
