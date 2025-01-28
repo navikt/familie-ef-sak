@@ -71,16 +71,12 @@ class OppgaveController(
         return Ressurs.success(oppgaveRepons.tilDto())
     }
 
-    @PostMapping(
-        path = ["/hent-fremleggsoppgaver"],
-        consumes = [MediaType.APPLICATION_JSON_VALUE],
-        produces = [MediaType.APPLICATION_JSON_VALUE],
-    )
+    @GetMapping("/hent-fremleggsoppgaver/{behandlingId}")
     fun hentFremleggsoppgaver(
-        @RequestBody behandlingId: UUID,
+        @PathVariable behandlingId: UUID,
     ): Ressurs<OppgaveResponseDto> {
-        val oppgaveRepons = oppgaveService.hentFremleggsoppgaver(behandlingId)
-        return Ressurs.success(oppgaveRepons.tilDto())
+        val oppgaveRespons = oppgaveService.hentFremleggsoppgaver(behandlingId)
+        return Ressurs.success(oppgaveRespons.tilDto())
     }
 
     @PostMapping(path = ["/{gsakOppgaveId}/fordel"], produces = [MediaType.APPLICATION_JSON_VALUE])
