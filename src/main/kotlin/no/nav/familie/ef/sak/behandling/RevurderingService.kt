@@ -68,18 +68,18 @@ class RevurderingService(
     }
 
     @Transactional
-    fun opprettRevurderingManuelt(revurderingInnhold: RevurderingDto): Behandling {
-        val fagsak = fagsakService.fagsakMedOppdatertPersonIdent(revurderingInnhold.fagsakId)
-        validerOpprettRevurdering(fagsak, revurderingInnhold)
+    fun opprettRevurderingManuelt(revurderingDto: RevurderingDto): Behandling {
+        val fagsak = fagsakService.fagsakMedOppdatertPersonIdent(revurderingDto.fagsakId)
+        validerOpprettRevurdering(fagsak, revurderingDto)
 
         val revurdering =
             behandlingService.opprettBehandling(
                 behandlingType = BehandlingType.REVURDERING,
-                fagsakId = revurderingInnhold.fagsakId,
+                fagsakId = revurderingDto.fagsakId,
                 status = BehandlingStatus.UTREDES,
                 stegType = StegType.BEREGNE_YTELSE,
-                behandlingsårsak = revurderingInnhold.behandlingsårsak,
-                kravMottatt = revurderingInnhold.kravMottatt,
+                behandlingsårsak = revurderingDto.behandlingsårsak,
+                kravMottatt = revurderingDto.kravMottatt,
             )
         val forrigeBehandlingId =
             behandlingService.finnSisteIverksatteBehandlingMedEventuellAvslått(fagsak.id)?.id
@@ -89,8 +89,8 @@ class RevurderingService(
         søknadService.kopierSøknad(forrigeBehandlingId, revurdering.id)
         val grunnlagsdata = grunnlagsdataService.opprettGrunnlagsdata(revurdering.id)
 
-        val terminbarn = revurderingInnhold.barnSomSkalFødes.map { it.tilBehandlingBarn(revurdering.id) }
-        val nyeBarnFraRegister = vilkårsbehandleNyeBarn(revurdering, revurderingInnhold.vilkårsbehandleNyeBarn)
+        val terminbarn = revurderingDto.barnSomSkalFødes.map { it.tilBehandlingBarn(revurdering.id) }
+        val nyeBarnFraRegister = vilkårsbehandleNyeBarn(revurdering, revurderingDto.vilkårsbehandleNyeBarn)
         barnService.opprettBarnForRevurdering(
             behandlingId = revurdering.id,
             forrigeBehandlingId = forrigeBehandlingId,
@@ -116,7 +116,7 @@ class RevurderingService(
         )
         taskService.save(BehandlingsstatistikkTask.opprettPåbegyntTask(behandlingId = revurdering.id))
 
-        if (erSatsendring(revurderingInnhold)) {
+        if (erSatsendring(revurderingDto)) {
             val vedtakDto =
                 kopierVedtakService.lagVedtakDtoBasertPåTidligereVedtaksperioder(
                     fagsakId = fagsak.id,
@@ -169,6 +169,7 @@ class RevurderingService(
                     )
                 }
             }
+
             VilkårsbehandleNyeBarn.IKKE_VILKÅRSBEHANDLE -> emptyList()
             VilkårsbehandleNyeBarn.IKKE_VALGT -> emptyList()
         }
@@ -176,25 +177,25 @@ class RevurderingService(
 
     private fun validerOpprettRevurdering(
         fagsak: Fagsak,
-        revurderingInnhold: RevurderingDto,
+        revurderingDto: RevurderingDto,
     ) {
         feilHvis(
             fagsak.stønadstype != StønadType.OVERGANGSSTØNAD &&
-                revurderingInnhold.behandlingsårsak == BehandlingÅrsak.G_OMREGNING,
+                revurderingDto.behandlingsårsak == BehandlingÅrsak.G_OMREGNING,
         ) {
             "Kan ikke opprette revurdering med årsak g-omregning for ${fagsak.stønadstype}"
         }
         feilHvis(
             fagsak.stønadstype != StønadType.BARNETILSYN &&
-                erSatsendring(revurderingInnhold),
+                erSatsendring(revurderingDto),
         ) {
             "Kan ikke opprette revurdering med årsak satsendring for ${fagsak.stønadstype}"
         }
-        if (revurderingInnhold.barnSomSkalFødes.isNotEmpty()) {
+        if (revurderingDto.barnSomSkalFødes.isNotEmpty()) {
             feilHvis(fagsak.stønadstype == StønadType.BARNETILSYN) { "Kan ikke legge inn terminbarn for barnetilsyn" }
-            feilHvis(revurderingInnhold.behandlingsårsak != BehandlingÅrsak.PAPIRSØKNAD) { "Terminbarn på revurdering kan kun legges inn for papirsøknader" }
+            feilHvis(revurderingDto.behandlingsårsak != BehandlingÅrsak.PAPIRSØKNAD && revurderingDto.behandlingsårsak != BehandlingÅrsak.NYE_OPPLYSNINGER) { "Terminbarn på revurdering kan kun legges inn for papirsøknader og nye opplysninger" }
         }
     }
 
-    private fun erSatsendring(revurderingInnhold: RevurderingDto) = revurderingInnhold.behandlingsårsak == BehandlingÅrsak.SATSENDRING
+    private fun erSatsendring(revurderingDto: RevurderingDto) = revurderingDto.behandlingsårsak == BehandlingÅrsak.SATSENDRING
 }
