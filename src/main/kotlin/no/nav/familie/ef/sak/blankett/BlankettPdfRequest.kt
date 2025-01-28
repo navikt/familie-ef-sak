@@ -1,6 +1,7 @@
 package no.nav.familie.ef.sak.blankett
 
 import no.nav.familie.ef.sak.behandling.dto.ÅrsakRevurderingDto
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.KontantstøttePeriode
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadDatoerDto
 import no.nav.familie.ef.sak.vedtak.dto.VedtakDto
 import no.nav.familie.ef.sak.vilkår.dto.TidligereVedtaksperioderDto
@@ -23,6 +24,7 @@ data class BlankettPdfBehandling(
     val årsakRevurdering: ÅrsakRevurderingDto?,
     val tidligereVedtaksperioder: TidligereVedtaksperioderDto?,
     val harKontantstøttePerioder: Boolean?,
+    val kontantstøttePeridoer:  List<KontantstøttePeriode>
 )
 
 data class PersonopplysningerDto(
