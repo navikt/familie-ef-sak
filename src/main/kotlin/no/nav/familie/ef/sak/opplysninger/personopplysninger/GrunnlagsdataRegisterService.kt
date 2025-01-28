@@ -2,6 +2,7 @@ package no.nav.familie.ef.sak.opplysninger.personopplysninger
 
 import no.nav.familie.ef.sak.arbeidsforhold.ekstern.ArbeidsforholdService
 import no.nav.familie.ef.sak.felles.util.Timer.loggTid
+import no.nav.familie.ef.sak.kontantstøtte.HentUtbetalingsinfoKontantstøtteDto
 import no.nav.familie.ef.sak.kontantstøtte.KontantstøtteService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.GrunnlagsdataDomene
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.KontantstøttePeriode
@@ -41,14 +42,10 @@ class GrunnlagsdataRegisterService(
             arbeidsforholdService.finnesAvsluttetArbeidsforholdSisteAntallMåneder(
                 grunnlagsdataFraPdl.gjeldendeIdentForSøker(),
             )
-        val kontantstøttePerioder = kontantstøtteService.hentUtbetalingsinfoKontantstøtte(personIdent)
-        val harKontantstøttePerioder = kontantstøttePerioder.finnesUtbetaling
+        val utbetalingsinfoKontantstøtteDto = kontantstøtteService.hentUtbetalingsinfoKontantstøtte(personIdent)
+        val harKontantstøttePerioder = utbetalingsinfoKontantstøtteDto.finnesUtbetaling
         val kontantstøttePerioderDomene =
-            kontantstøttePerioder
-                .takeIf { harKontantstøttePerioder }
-                ?.let {
-                    it.perioder.map { periode -> KontantstøttePeriode(periode.årMånedFra, periode.årMånedTil, periode.kilde) }
-                }?.sortedByDescending { it.fomMåned }
+            utledKontantstøtteperioderDomene(utbetalingsinfoKontantstøtteDto, harKontantstøttePerioder)
 
         return GrunnlagsdataDomene(
             søker = mapSøker(grunnlagsdataFraPdl.søker, grunnlagsdataFraPdl.andrePersoner),
@@ -61,6 +58,15 @@ class GrunnlagsdataRegisterService(
             kontantstøttePerioder = kontantstøttePerioderDomene,
         )
     }
+
+    private fun utledKontantstøtteperioderDomene(
+        kontantstøttePerioder: HentUtbetalingsinfoKontantstøtteDto,
+        harKontantstøttePerioder: Boolean,
+    ) = kontantstøttePerioder
+        .takeIf { harKontantstøttePerioder }
+        ?.let {
+            it.perioder.map { periode -> KontantstøttePeriode(periode.årMånedFra, periode.årMånedTil, periode.kilde) }
+        }?.sortedByDescending { it.fomMåned } ?: emptyList()
 
     fun hentPersonopplysninger(personIdent: String): Personopplysninger {
         val grunnlagsdataFraPdl = hentGrunnlagsdataFraPdl(personIdent, emptyList())

@@ -2396,6 +2396,6 @@
         "nullable" : false
       }
     },
-    "nullable" : true
+    "nullable" : false
   }
 }
