@@ -11,6 +11,8 @@ import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.felles.util.BehandlingOppsettUtil.iverksattFørstegangsbehandling
 import no.nav.familie.ef.sak.felles.util.BehandlingOppsettUtil.iverksattRevurdering
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.saksbehandling
@@ -18,6 +20,7 @@ import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.ef.sak.vedtak.domain.Vedtak
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType
+import no.nav.familie.ef.sak.vedtak.dto.SendTilBeslutterDto
 import no.nav.familie.ef.sak.økonomi.lagAndelTilkjentYtelse
 import no.nav.familie.ef.sak.økonomi.lagTilkjentYtelse
 import no.nav.familie.kontrakter.ef.felles.AvslagÅrsak
@@ -34,9 +37,10 @@ internal class OppgaverForOpprettelseServiceTest {
     private val tilkjentYtelseService = mockk<TilkjentYtelseService>()
     private val behandlingService = mockk<BehandlingService>()
     private val vedtakService = mockk<VedtakService>()
+    private val featureToggleService = mockk<FeatureToggleService>()
 
     private var oppgaverForOpprettelseService =
-        spyk(OppgaverForOpprettelseService(oppgaverForOpprettelseRepository, behandlingService, tilkjentYtelseService, vedtakService))
+        spyk(OppgaverForOpprettelseService(oppgaverForOpprettelseRepository, behandlingService, tilkjentYtelseService, vedtakService, featureToggleService))
 
     private val behandling = behandling(fagsak = fagsak())
     private val behandlingId = behandling.id
@@ -51,6 +55,7 @@ internal class OppgaverForOpprettelseServiceTest {
         every { oppgaverForOpprettelseRepository.update(any()) } returns oppgaverForOpprettelse
         every { vedtak.resultatType } returns ResultatType.INNVILGE
         every { vedtakService.hentVedtak(any()) } returns vedtak
+        every { featureToggleService.isEnabled(Toggle.FRONTEND_VIS_MARKERE_GODKJENNE_OPPGAVE_MODAL) } returns true
     }
 
     @Test
@@ -59,7 +64,7 @@ internal class OppgaverForOpprettelseServiceTest {
         every { oppgaverForOpprettelseRepository.existsById(any()) } returns true
         every { behandlingService.hentSaksbehandling(behandlingId) } returns saksbehandling
 
-        oppgaverForOpprettelseService.opprettEllerErstatt(behandlingId, listOf())
+        opprettTomListeForOppgavetyperSomSkalOpprettes(behandlingId)
 
         verify { oppgaverForOpprettelseRepository.deleteById(behandlingId) }
         verify(exactly = 0) { oppgaverForOpprettelseRepository.insert(any()) }
@@ -71,7 +76,7 @@ internal class OppgaverForOpprettelseServiceTest {
         every { oppgaverForOpprettelseService.hentOppgavetyperSomKanOpprettes(any()) } returns emptyList()
         every { oppgaverForOpprettelseRepository.existsById(any()) } returns false
 
-        oppgaverForOpprettelseService.opprettEllerErstatt(behandlingId, listOf())
+        opprettTomListeForOppgavetyperSomSkalOpprettes(behandlingId)
 
         verify { oppgaverForOpprettelseRepository.deleteById(any()) }
         verify(exactly = 0) { oppgaverForOpprettelseRepository.insert(any()) }
@@ -86,7 +91,7 @@ internal class OppgaverForOpprettelseServiceTest {
             )
         every { oppgaverForOpprettelseRepository.existsById(any()) } returns true
 
-        oppgaverForOpprettelseService.opprettEllerErstatt(behandlingId, listOf())
+        opprettTomListeForOppgavetyperSomSkalOpprettes(behandlingId)
 
         verify(exactly = 0) { oppgaverForOpprettelseRepository.deleteById(any()) }
         verify(exactly = 0) { oppgaverForOpprettelseRepository.insert(any()) }
@@ -101,7 +106,7 @@ internal class OppgaverForOpprettelseServiceTest {
             )
         every { oppgaverForOpprettelseRepository.existsById(any()) } returns false
 
-        oppgaverForOpprettelseService.opprettEllerErstatt(behandlingId, listOf())
+        opprettTomListeForOppgavetyperSomSkalOpprettes(behandlingId)
 
         verify(exactly = 0) { oppgaverForOpprettelseRepository.deleteById(any()) }
         verify { oppgaverForOpprettelseRepository.insert(any()) }
@@ -245,4 +250,13 @@ internal class OppgaverForOpprettelseServiceTest {
         val fagsak = fagsak(stønadstype = stønadType)
         return saksbehandling(fagsak, behandling)
     }
+
+    private fun opprettTomListeForOppgavetyperSomSkalOpprettes(behandlingId: UUID) =
+        oppgaverForOpprettelseService.opprettEllerErstatt(
+            behandlingId = behandlingId,
+            data =
+                SendTilBeslutterDto(
+                    emptyList(),
+                ),
+        )
 }
