@@ -72,7 +72,9 @@ class OppgaveController(
     }
 
     @PostMapping(
-        path = ["hent-fremleggsoppgaver"],
+        path = ["/hent-fremleggsoppgaver"],
+        consumes = [MediaType.APPLICATION_JSON_VALUE],
+        produces = [MediaType.APPLICATION_JSON_VALUE],
     )
     fun hentFremleggsoppgaver(
         @RequestBody behandlingId: UUID,
