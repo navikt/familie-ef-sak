@@ -17,8 +17,6 @@ import no.nav.familie.ef.sak.brev.domain.MottakerRolle
 import no.nav.familie.ef.sak.felles.util.DatoUtil
 import no.nav.familie.ef.sak.felles.util.Skoleår
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
-import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
-import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.opplysninger.mapper.BarnMatcher
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
@@ -106,7 +104,6 @@ class IverksettingDtoMapper(
     private val årsakRevurderingsRepository: ÅrsakRevurderingsRepository,
     private val oppgaverForOpprettelseService: OppgaverForOpprettelseService,
     private val behandlingRepository: BehandlingRepository,
-    private val featureToggleService: FeatureToggleService,
 ) {
     fun tilDto(
         saksbehandling: Saksbehandling,
@@ -237,7 +234,7 @@ class IverksettingDtoMapper(
             TilbakekrevingDto(
                 tilbakekrevingsvalg = mapTilbakekrevingsvalg(it.valg),
                 tilbakekrevingMedVarsel = mapTilbakekrevingMedVarsel(it, behandlingId),
-                begrunnelseForTilbakekreving = if (featureToggleService.isEnabled(Toggle.OVERSENDE_BEGRUNNELSE_FOR_TILBAKEKREVING)) tilbakekreving.begrunnelse else "",
+                begrunnelseForTilbakekreving = tilbakekreving.begrunnelse,
             )
         }
     }
@@ -322,7 +319,7 @@ class IverksettingDtoMapper(
             avslagÅrsak = vedtak.avslåÅrsak,
             oppgaverForOpprettelse =
                 oppgaverForOpprettelseService.hentOppgaverForOpprettelseEllerNull(vedtak.behandlingId)?.let {
-                    OppgaverForOpprettelseDto(oppgavetyper = it.oppgavetyper)
+                    OppgaverForOpprettelseDto(oppgavetyper = it.oppgavetyper, årForInntektskontrollSelvstendigNæringsdrivende = it.årForInntektskontrollSelvstendigNæringsdrivende)
                 } ?: OppgaverForOpprettelseDto(oppgavetyper = emptyList()),
             grunnbeløp = grunnbeløpFraTilkjentYtelse(tilkjentYtelse),
         )

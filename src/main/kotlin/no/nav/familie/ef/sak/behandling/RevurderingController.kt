@@ -5,7 +5,6 @@ import no.nav.familie.ef.sak.behandling.dto.RevurderingDto
 import no.nav.familie.ef.sak.behandling.dto.RevurderingsinformasjonDto
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
-import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.ef.sak.journalføring.dto.VilkårsbehandleNyeBarn
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
@@ -23,31 +22,30 @@ import java.util.UUID
 @RestController
 @RequestMapping(path = ["/api/revurdering"])
 @ProtectedWithClaims(issuer = "azuread")
-class RevurderingsController(
+class RevurderingController(
     private val revurderingService: RevurderingService,
     private val tilgangService: TilgangService,
-    private val featureToggleService: FeatureToggleService,
 ) {
     @PostMapping("{fagsakId}")
     fun startRevurdering(
-        @RequestBody revurderingInnhold: RevurderingDto,
+        @RequestBody revurderingDto: RevurderingDto,
     ): Ressurs<UUID> {
-        tilgangService.validerTilgangTilFagsak(revurderingInnhold.fagsakId, AuditLoggerEvent.CREATE)
+        tilgangService.validerTilgangTilFagsak(revurderingDto.fagsakId, AuditLoggerEvent.CREATE)
         tilgangService.validerHarSaksbehandlerrolle()
-        brukerfeilHvis(revurderingInnhold.behandlingsårsak == BehandlingÅrsak.SØKNAD) {
+        brukerfeilHvis(revurderingDto.behandlingsårsak == BehandlingÅrsak.SØKNAD) {
             "Systemet har ikke støtte for å revurdere med årsak “Søknad”. " +
                 "Vurder om behandlingen skal opprettes via en oppgave i oppgavebenken, " +
                 "eller med revurderingsårsak \"Nye opplysninger\". " +
                 "Hvis du trenger å \"flytte\" en søknad som er journalført mot infotrygd, kontakt superbrukere for flytting av journalpost"
         }
         feilHvis(
-            revurderingInnhold.behandlingsårsak == BehandlingÅrsak.G_OMREGNING &&
-                revurderingInnhold.vilkårsbehandleNyeBarn != VilkårsbehandleNyeBarn.IKKE_VILKÅRSBEHANDLE,
+            revurderingDto.behandlingsårsak == BehandlingÅrsak.G_OMREGNING &&
+                revurderingDto.vilkårsbehandleNyeBarn != VilkårsbehandleNyeBarn.IKKE_VILKÅRSBEHANDLE,
         ) {
             "Kan ikke behandle nye barn på revurdering med årsak G-omregning"
         }
 
-        val revurdering = revurderingService.opprettRevurderingManuelt(revurderingInnhold)
+        val revurdering = revurderingService.opprettRevurderingManuelt(revurderingDto)
         return Ressurs.success(revurdering.id)
     }
 

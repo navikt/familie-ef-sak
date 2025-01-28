@@ -25,7 +25,6 @@ import no.nav.familie.ef.sak.beregning.Grunnbeløpsperioder
 import no.nav.familie.ef.sak.brev.BrevmottakereRepository
 import no.nav.familie.ef.sak.brev.domain.MottakerRolle
 import no.nav.familie.ef.sak.felles.util.DatoUtil
-import no.nav.familie.ef.sak.felles.util.mockFeatureToggleService
 import no.nav.familie.ef.sak.felles.util.opprettGrunnlagsdata
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.opplysninger.mapper.BarnMatcher
@@ -124,7 +123,6 @@ internal class IverksettingDtoMapperTest {
     private val årsakRevurderingsRepository = mockk<ÅrsakRevurderingsRepository>()
     private val oppgaverForOpprettelseService = mockk<OppgaverForOpprettelseService>()
     private val behandlingRepository = mockk<BehandlingRepository>()
-    private val featureToggleService = mockFeatureToggleService()
 
     private val iverksettingDtoMapper =
         IverksettingDtoMapper(
@@ -141,7 +139,6 @@ internal class IverksettingDtoMapperTest {
             årsakRevurderingsRepository = årsakRevurderingsRepository,
             oppgaverForOpprettelseService = oppgaverForOpprettelseService,
             behandlingRepository = behandlingRepository,
-            featureToggleService = featureToggleService,
         )
 
     private val fagsak = fagsak(fagsakpersoner(setOf("1")))
