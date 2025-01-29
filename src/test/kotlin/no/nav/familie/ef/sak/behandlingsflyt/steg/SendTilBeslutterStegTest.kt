@@ -33,6 +33,7 @@ import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.mockBrukerContext
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.oppgave.Oppgave
+import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.ef.sak.oppgave.TilordnetRessursService
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
@@ -77,6 +78,7 @@ internal class SendTilBeslutterStegTest {
     private val oppgaverForOpprettelseService = mockk<OppgaverForOpprettelseService>(relaxed = true)
     private val behandlingshistorikkService = mockk<BehandlingshistorikkService>()
     private val tilordnetRessursService = mockk<TilordnetRessursService>()
+    private val oppgaveService = mockk<OppgaveService>()
     private val simuleringsoppsummering =
         Simuleringsoppsummering(
             perioder = listOf(),
@@ -105,6 +107,7 @@ internal class SendTilBeslutterStegTest {
             oppgaverForOpprettelseService,
             behandlingshistorikkService,
             tilordnetRessursService,
+            oppgaveService,
         )
     private val fagsak =
         fagsak(

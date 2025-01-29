@@ -22,7 +22,9 @@ import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvisIkke
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext.NAVIDENT_REGEX
+import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.ef.sak.oppgave.TilordnetRessursService
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.secureLogger
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.ef.sak.simulering.SimuleringService
 import no.nav.familie.ef.sak.tilbakekreving.TilbakekrevingService
@@ -55,6 +57,7 @@ class SendTilBeslutterSteg(
     private val oppgaverForOpprettelseService: OppgaverForOpprettelseService,
     private val behandlingshistorikkService: BehandlingshistorikkService,
     private val tilordnetRessursService: TilordnetRessursService,
+    private val oppgaveService: OppgaveService,
 ) : BehandlingSteg<SendTilBeslutterDto?> {
     override fun validerSteg(saksbehandling: Saksbehandling) {
         validerSaksbehandlingHarSammeStegtype(saksbehandling)
@@ -148,6 +151,15 @@ class SendTilBeslutterSteg(
 
         if (vedtakService.hentVedtak(saksbehandling.id).skalVedtakBesluttes()) {
             opprettGodkjennVedtakOppgave(saksbehandling)
+        }
+
+        val oppgaverSomSkalFerdigstilles = data?.fremleggsoppgaverSomSkalFerdigstilles
+        // Tester med first, skal egentlig gjøre det for alle valgte oppgaver
+        // TODO: Skal ikke ferdigstille, men lagre oppgaveider som skal ferdigstilles når vedtak godkjennes av beslutter.
+        if (oppgaverSomSkalFerdigstilles?.isNotEmpty() == true) {
+            val oppgave = oppgaverSomSkalFerdigstilles.first().let { oppgaveService.hentOppgave(it) }
+            secureLogger.info("Ferdigstiller oppgave ${oppgave.id}")
+            oppgave.id?.let { oppgaveService.ferdigstillOppgave(it) }
         }
 
         ferdigstillOppgave(saksbehandling)
