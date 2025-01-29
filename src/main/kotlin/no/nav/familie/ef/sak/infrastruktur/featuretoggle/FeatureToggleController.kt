@@ -26,6 +26,7 @@ class FeatureToggleController(
             Toggle.FRONTED_VIS_TILDEL_OPPGAVE_BEHANDLING,
             Toggle.VELG_ÅRSAK_VED_KLAGE_OPPRETTELSE,
             Toggle.FRONTEND_VIS_MARKERE_GODKJENNE_OPPGAVE_MODAL,
+            Toggle.VIS_SAMVÆRSKALKULATOR,
         )
 
     @GetMapping
