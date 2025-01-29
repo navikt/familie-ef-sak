@@ -3,6 +3,7 @@ package no.nav.familie.ef.sak.kontantstøtte
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.identer
 import org.springframework.stereotype.Service
+import java.time.LocalDate
 import java.time.YearMonth
 
 @Service
@@ -26,6 +27,7 @@ fun HentUtbetalingsinfoKontantstøtte.tilDto(): HentUtbetalingsinfoKontantstøtt
 data class HentUtbetalingsinfoKontantstøtteDto(
     val finnesUtbetaling: Boolean,
     val perioder: List<KsSakPeriodeDto>,
+    val hentetDato: LocalDate = LocalDate.now(),
 )
 
 data class KsSakPeriodeDto(

@@ -65,7 +65,7 @@ class GrunnlagsdataRegisterService(
     ) = kontantstøttePerioder
         .takeIf { harKontantstøttePerioder }
         ?.let {
-            it.perioder.map { periode -> KontantstøttePeriode(periode.årMånedFra, periode.årMånedTil, periode.kilde) }
+            it.perioder.map { periode -> KontantstøttePeriode(periode.årMånedFra, periode.årMånedTil, periode.kilde, kontantstøttePerioder.hentetDato) }
         }?.sortedByDescending { it.fomMåned } ?: emptyList()
 
     fun hentPersonopplysninger(personIdent: String): Personopplysninger {
