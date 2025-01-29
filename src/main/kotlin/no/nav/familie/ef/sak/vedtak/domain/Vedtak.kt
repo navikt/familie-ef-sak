@@ -217,7 +217,6 @@ data class InntektWrapper(
 )
 
 data class TilleggsstønadWrapper(
-    val harTilleggsstønad: Boolean?, // For historiske vedtak alltid null for nye vedtak
     val perioder: List<PeriodeMedBeløp>,
     val begrunnelse: String?,
 )
