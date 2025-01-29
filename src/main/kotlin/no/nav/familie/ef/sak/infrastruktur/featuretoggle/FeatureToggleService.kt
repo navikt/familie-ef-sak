@@ -60,6 +60,7 @@ enum class Toggle(
     UTVIKLER_MED_VEILEDERRROLLE("familie.ef.sak.utviklere-med-veilederrolle", "Permission"),
     HENLEGG_BEHANDLING_UTEN_OPPGAVE("familie.ef.sak.henlegg-behandling-uten-oppgave", "Permission"),
     VELG_ÅRSAK_VED_KLAGE_OPPRETTELSE("familie.ef.sak.klagebehandling-arsak", "Permission"),
+    VIS_SAMVÆRSKALKULATOR("familie.ef.sak.frontend-vis-samverskalkulator", "Permission"),
     ;
 
     companion object {
