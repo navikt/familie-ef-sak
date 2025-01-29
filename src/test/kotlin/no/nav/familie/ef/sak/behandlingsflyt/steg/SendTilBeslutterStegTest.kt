@@ -13,6 +13,7 @@ import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat.INNVILGET
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.behandling.oppgaveforopprettelse.OppgaverForOpprettelseService
+import no.nav.familie.ef.sak.behandling.oppgaverforferdigstilling.OppgaverForFerdigstillingService
 import no.nav.familie.ef.sak.behandling.ÅrsakRevurderingService
 import no.nav.familie.ef.sak.behandlingsflyt.task.BehandlingsstatistikkTask
 import no.nav.familie.ef.sak.behandlingsflyt.task.BehandlingsstatistikkTaskPayload
@@ -79,6 +80,8 @@ internal class SendTilBeslutterStegTest {
     private val behandlingshistorikkService = mockk<BehandlingshistorikkService>()
     private val tilordnetRessursService = mockk<TilordnetRessursService>()
     private val oppgaveService = mockk<OppgaveService>()
+    private val oppgaverForFerdigstillingService = mockk<OppgaverForFerdigstillingService>(relaxed = true)
+
     private val simuleringsoppsummering =
         Simuleringsoppsummering(
             perioder = listOf(),
@@ -108,6 +111,7 @@ internal class SendTilBeslutterStegTest {
             behandlingshistorikkService,
             tilordnetRessursService,
             oppgaveService,
+            oppgaverForFerdigstillingService,
         )
     private val fagsak =
         fagsak(

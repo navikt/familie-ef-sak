@@ -5,6 +5,7 @@ import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.behandling.oppgaveforopprettelse.OppgaverForOpprettelseService
+import no.nav.familie.ef.sak.behandling.oppgaverforferdigstilling.OppgaverForFerdigstillingService
 import no.nav.familie.ef.sak.behandling.ÅrsakRevurderingService
 import no.nav.familie.ef.sak.behandlingsflyt.task.BehandlingsstatistikkTask
 import no.nav.familie.ef.sak.behandlingsflyt.task.FerdigstillOppgaveTask
@@ -58,6 +59,7 @@ class SendTilBeslutterSteg(
     private val behandlingshistorikkService: BehandlingshistorikkService,
     private val tilordnetRessursService: TilordnetRessursService,
     private val oppgaveService: OppgaveService,
+    private val oppgaverForFerdigstillingService: OppgaverForFerdigstillingService,
 ) : BehandlingSteg<SendTilBeslutterDto?> {
     override fun validerSteg(saksbehandling: Saksbehandling) {
         validerSaksbehandlingHarSammeStegtype(saksbehandling)
@@ -165,6 +167,13 @@ class SendTilBeslutterSteg(
         ferdigstillOppgave(saksbehandling)
         opprettTaskForBehandlingsstatistikk(saksbehandling.id)
         if (data != null) {
+            if (data.fremleggsoppgaverSomSkalFerdigstilles.isNotEmpty()) {
+                oppgaverForFerdigstillingService.lagreOppgaveIderForFerdigstilling(
+                    saksbehandling.id,
+                    data.fremleggsoppgaverSomSkalFerdigstilles,
+                )
+            }
+
             oppgaverForOpprettelseService.opprettEllerErstatt(
                 saksbehandling.id,
                 data,
