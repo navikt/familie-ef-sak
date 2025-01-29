@@ -76,6 +76,7 @@ class OppgaveController(
         @PathVariable behandlingId: UUID,
     ): Ressurs<OppgaveResponseDto> {
         val oppgaveRespons = oppgaveService.hentFremleggsoppgaver(behandlingId)
+        secureLogger.info("Hent fremleggsoppgaver. behandlingId: $behandlingId, oppgaveRespons: $oppgaveRespons")
         return Ressurs.success(oppgaveRespons.tilDto())
     }
 

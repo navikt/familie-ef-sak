@@ -8,6 +8,7 @@ import io.mockk.runs
 import io.mockk.slot
 import io.mockk.verify
 import no.nav.familie.ef.sak.arbeidsfordeling.ArbeidsfordelingService
+import no.nav.familie.ef.sak.behandling.BehandlingRepository
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
@@ -20,6 +21,7 @@ import no.nav.familie.ef.sak.oppgave.Oppgave
 import no.nav.familie.ef.sak.oppgave.OppgaveRepository
 import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.ef.sak.oppgave.OppgaveSubtype
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.oppgave
@@ -60,6 +62,8 @@ internal class OppgaveServiceTest {
     private val fagsakService = mockk<FagsakService>()
     private val oppgaveRepository = mockk<OppgaveRepository>()
     private val cacheManager = ConcurrentMapCacheManager()
+    private val behandlingRepository = mockk<BehandlingRepository>()
+    private val personService = mockk<PersonService>()
 
     private val oppgaveService =
         OppgaveService(
@@ -68,6 +72,8 @@ internal class OppgaveServiceTest {
             oppgaveRepository,
             arbeidsfordelingService,
             cacheManager,
+            behandlingRepository,
+            personService,
         )
 
     @BeforeEach
