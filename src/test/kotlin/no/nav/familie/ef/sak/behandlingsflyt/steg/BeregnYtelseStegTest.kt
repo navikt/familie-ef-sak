@@ -2053,7 +2053,7 @@ internal class BeregnYtelseStegTest {
                 ),
             ),
         perioderKontantstøtte = emptyList(),
-        tilleggsstønad = TilleggsstønadDto( emptyList(), null),
+        tilleggsstønad = TilleggsstønadDto(emptyList(), null),
         begrunnelse = null,
     )
 

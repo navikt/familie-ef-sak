@@ -231,7 +231,7 @@ class MigreringService(
                     ),
                 ),
             perioderKontantstøtte = emptyList(),
-            tilleggsstønad = TilleggsstønadDto( begrunnelse = null),
+            tilleggsstønad = TilleggsstønadDto(begrunnelse = null),
         )
     }
 
