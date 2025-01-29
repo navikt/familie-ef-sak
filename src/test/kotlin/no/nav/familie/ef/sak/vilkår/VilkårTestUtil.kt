@@ -30,7 +30,6 @@ object VilkårTestUtil {
         adresseopplysninger: AdresseopplysningerDto = mockk(relaxed = true),
         dokumentasjon: DokumentasjonFraSøknadDto? = mockk(relaxed = true),
         harAvsluttetArbeidsforhold: Boolean = mockk(relaxed = true),
-        harKontantstøttePerioder: Boolean = mockk(relaxed = true),
     ) = VilkårGrunnlagDto(
         personalia = registergrunnlag,
         tidligereVedtaksperioder = tidligereVedtaksperioder,
@@ -45,7 +44,6 @@ object VilkårTestUtil {
         adresseopplysninger = adresseopplysninger,
         dokumentasjon = dokumentasjon,
         harAvsluttetArbeidsforhold = harAvsluttetArbeidsforhold,
-        harKontantstøttePerioder = harKontantstøttePerioder,
         kontantstøttePerioder = emptyList(),
     )
 }

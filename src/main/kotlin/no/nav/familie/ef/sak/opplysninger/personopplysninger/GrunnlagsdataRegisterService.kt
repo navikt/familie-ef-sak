@@ -43,9 +43,8 @@ class GrunnlagsdataRegisterService(
                 grunnlagsdataFraPdl.gjeldendeIdentForSøker(),
             )
         val utbetalingsinfoKontantstøtteDto = kontantstøtteService.hentUtbetalingsinfoKontantstøtte(personIdent)
-        val harKontantstøttePerioder = utbetalingsinfoKontantstøtteDto.finnesUtbetaling
         val kontantstøttePerioderDomene =
-            utledKontantstøtteperioderDomene(utbetalingsinfoKontantstøtteDto, harKontantstøttePerioder)
+            utledKontantstøtteperioderDomene(utbetalingsinfoKontantstøtteDto)
 
         return GrunnlagsdataDomene(
             søker = mapSøker(grunnlagsdataFraPdl.søker, grunnlagsdataFraPdl.andrePersoner),
@@ -54,16 +53,13 @@ class GrunnlagsdataRegisterService(
             barn = mapBarn(grunnlagsdataFraPdl.barn),
             tidligereVedtaksperioder = tidligereVedtaksperioder,
             harAvsluttetArbeidsforhold = harAvsluttetArbeidsforhold,
-            harKontantstøttePerioder = harKontantstøttePerioder,
             kontantstøttePerioder = kontantstøttePerioderDomene,
         )
     }
 
     private fun utledKontantstøtteperioderDomene(
         kontantstøttePerioder: HentUtbetalingsinfoKontantstøtteDto,
-        harKontantstøttePerioder: Boolean,
     ) = kontantstøttePerioder
-        .takeIf { harKontantstøttePerioder }
         ?.let {
             it.perioder.map { periode -> KontantstøttePeriode(periode.årMånedFra, periode.årMånedTil, periode.kilde, kontantstøttePerioder.hentetDato) }
         }?.sortedByDescending { it.fomMåned } ?: emptyList()

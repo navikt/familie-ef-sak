@@ -2370,11 +2370,6 @@
     "type" : "Boolean",
     "nullable" : true
   },
-  "harKontantstøttePerioder" : {
-    "name" : "harKontantstøttePerioder",
-    "type" : "Boolean",
-    "nullable" : true
-  },
   "kontantstøttePerioder" : {
     "name" : "kontantstøttePerioder",
     "type" : "Collection",
