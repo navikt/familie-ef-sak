@@ -5,7 +5,6 @@ import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import org.springframework.context.annotation.Profile
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
-import org.springframework.transaction.annotation.Transactional
 
 @Profile("!integrasjonstest")
 @Service
