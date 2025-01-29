@@ -191,7 +191,6 @@ internal class BeregnYtelseStegBarnetilsynIntegrationTest : OppslagSpringRunnerT
                 perioderKontantstøtte = listOf(),
                 tilleggsstønad =
                     TilleggsstønadDto(
-                        harTilleggsstønad = false,
                         perioder = listOf(),
                         begrunnelse = null,
                     ),

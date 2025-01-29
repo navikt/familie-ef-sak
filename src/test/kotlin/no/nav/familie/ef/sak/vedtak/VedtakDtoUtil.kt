@@ -118,7 +118,6 @@ object VedtakDtoUtil {
 
     fun tilleggsstønadDto() =
         TilleggsstønadDto(
-            true,
             listOf(periodeMedBeløpDto()),
             "begrunnelse tilleggstønad",
         )
