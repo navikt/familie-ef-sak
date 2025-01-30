@@ -3,6 +3,7 @@ package no.nav.familie.ef.sak.behandlingsflyt.steg
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
+import no.nav.familie.ef.sak.behandling.oppgaverforferdigstilling.OppgaverForFerdigstillingService
 import no.nav.familie.ef.sak.behandlingsflyt.task.BehandlingsstatistikkTask
 import no.nav.familie.ef.sak.behandlingsflyt.task.FerdigstillOppgaveTask
 import no.nav.familie.ef.sak.behandlingsflyt.task.OpprettOppgaveTask
@@ -13,6 +14,8 @@ import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvisIkke
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.iverksett.IverksettingDtoMapper
@@ -37,6 +40,8 @@ class BeslutteVedtakSteg(
     private val behandlingService: BehandlingService,
     private val vedtakService: VedtakService,
     private val vedtaksbrevService: VedtaksbrevService,
+    private val oppgaverForFerdigstillingService: OppgaverForFerdigstillingService,
+    private val featureToggleService: FeatureToggleService,
 ) : BehandlingSteg<BeslutteVedtakDto> {
     override fun validerSteg(saksbehandling: Saksbehandling) {
         brukerfeilHvis(saksbehandling.steg.kommerEtter(stegType())) {
@@ -63,6 +68,14 @@ class BeslutteVedtakSteg(
             validerGodkjentVedtak(data)
             vedtakService.oppdaterBeslutter(saksbehandling.id, beslutter)
             val iverksettDto = iverksettingDtoMapper.tilDto(saksbehandling, beslutter)
+
+            if (toggleKanFerdigstilleFremlegssoppgaver()) {
+                val oppgaverForFerdigstilling = oppgaverForFerdigstillingService.hentOppgaverForFerdigstillingEllerNull(saksbehandling.id)
+                oppgaverForFerdigstilling?.fremleggsoppgaveIderSomSkalFerdigstilles?.forEach { id ->
+                    oppgaveService.ferdigstillOppgave(id)
+                }
+            }
+
             oppdaterResultatPåBehandling(saksbehandling.id)
             opprettPollForStatusOppgave(saksbehandling.id)
             opprettTaskForBehandlingsstatistikk(saksbehandling.id, oppgaveId)
@@ -154,6 +167,8 @@ class BeslutteVedtakSteg(
     private fun opprettPollForStatusOppgave(behandlingId: UUID) {
         taskService.save(PollStatusFraIverksettTask.opprettTask(behandlingId))
     }
+
+    private fun toggleKanFerdigstilleFremlegssoppgaver(): Boolean = featureToggleService.isEnabled(Toggle.FRONTEND_VIS_MARKERE_GODKJENNE_OPPGAVE_MODAL)
 
     override fun stegType(): StegType = StegType.BESLUTTE_VEDTAK
 
