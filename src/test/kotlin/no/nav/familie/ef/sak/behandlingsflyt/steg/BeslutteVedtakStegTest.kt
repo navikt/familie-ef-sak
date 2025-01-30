@@ -12,9 +12,9 @@ import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
-import no.nav.familie.ef.sak.behandling.oppgaverforferdigstilling.OppgaverForFerdigstillingService
 import no.nav.familie.ef.sak.behandlingsflyt.task.BehandlingsstatistikkTask
 import no.nav.familie.ef.sak.behandlingsflyt.task.BehandlingsstatistikkTaskPayload
+import no.nav.familie.ef.sak.behandlingsflyt.task.FerdigstillFremleggsoppgaverTask
 import no.nav.familie.ef.sak.behandlingsflyt.task.FerdigstillOppgaveTask
 import no.nav.familie.ef.sak.behandlingsflyt.task.OpprettOppgaveTask
 import no.nav.familie.ef.sak.behandlingsflyt.task.PollStatusFraIverksettTask
@@ -25,7 +25,6 @@ import no.nav.familie.ef.sak.felles.domain.Fil
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.clearBrukerContext
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.mockBrukerContext
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
-import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.iverksett.IverksettingDtoMapper
 import no.nav.familie.ef.sak.oppgave.Oppgave
@@ -67,8 +66,6 @@ internal class BeslutteVedtakStegTest {
     private val vedtakService = mockk<VedtakService>()
     private val vedtaksbrevService = mockk<VedtaksbrevService>()
     private val behandlingService = mockk<BehandlingService>()
-    private val oppgaverForFerdigstillingService = mockk<OppgaverForFerdigstillingService>()
-    private val featureToggleService = mockk<FeatureToggleService>()
 
     private val beslutteVedtakSteg =
         BeslutteVedtakSteg(
@@ -81,8 +78,6 @@ internal class BeslutteVedtakStegTest {
             behandlingService = behandlingService,
             vedtakService = vedtakService,
             vedtaksbrevService = vedtaksbrevService,
-            oppgaverForFerdigstillingService = oppgaverForFerdigstillingService,
-            featureToggleService = featureToggleService
         )
 
     private val vedtakKreverBeslutter = VedtakErUtenBeslutter(false)
@@ -130,8 +125,6 @@ internal class BeslutteVedtakStegTest {
             behandling(fagsak, id = behandlingId, resultat = secondArg())
         }
         every { vedtaksbrevService.slettVedtaksbrev(any()) } just Runs
-        every { oppgaverForFerdigstillingService.hentOppgaverForFerdigstillingEllerNull(any()) } returns null
-        every { featureToggleService.isEnabled(any()) } returns false
     }
 
     @AfterEach
@@ -154,8 +147,9 @@ internal class BeslutteVedtakStegTest {
         assertThat(nesteSteg).isEqualTo(StegType.VENTE_PÅ_STATUS_FRA_IVERKSETT)
         assertThat(taskSlot[0].type).isEqualTo(FerdigstillOppgaveTask.TYPE)
         assertThat(taskSlot[1].type).isEqualTo(PollStatusFraIverksettTask.TYPE)
-        assertThat(taskSlot[2].type).isEqualTo(BehandlingsstatistikkTask.TYPE)
-        assertThat(objectMapper.readValue<BehandlingsstatistikkTaskPayload>(taskSlot[2].payload).hendelse)
+        assertThat(taskSlot[2].type).isEqualTo(FerdigstillFremleggsoppgaverTask.TYPE)
+        assertThat(taskSlot[3].type).isEqualTo(BehandlingsstatistikkTask.TYPE)
+        assertThat(objectMapper.readValue<BehandlingsstatistikkTaskPayload>(taskSlot[3].payload).hendelse)
             .isEqualTo(Hendelse.BESLUTTET)
         verify(exactly = 1) {
             behandlingService.oppdaterResultatPåBehandling(
