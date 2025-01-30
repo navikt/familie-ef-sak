@@ -7,6 +7,7 @@ import no.nav.familie.ef.sak.brev.VedtaksbrevService.Companion.BESLUTTER_VEDTAKS
 import no.nav.familie.ef.sak.brev.domain.FRITEKST
 import no.nav.familie.ef.sak.felles.util.medContentTypeJsonUTF8
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
+import no.nav.familie.ef.sak.selvstendig.NæringsinntektIngenEndringPdfRequest
 import no.nav.familie.http.client.AbstractPingableRestClient
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
@@ -58,6 +59,11 @@ class BrevClient(
     fun genererBlankett(blankettPdfRequest: BlankettPdfRequest): ByteArray {
         val pdfUrl = URI.create("$familieBrevUri/blankett/pdf")
         return postForEntity(pdfUrl, blankettPdfRequest, HttpHeaders().medContentTypeJsonUTF8())
+    }
+
+    fun genererNæringsinntektUtenEndringNotat(næringsinntektIngenEndringPdfRequest: NæringsinntektIngenEndringPdfRequest): ByteArray {
+        val url = URI.create("$familieBrevUri/naeringsinntekt-kontroll/pdf")
+        return postForEntity(url, næringsinntektIngenEndringPdfRequest, HttpHeaders().medContentTypeJsonUTF8())
     }
 
     companion object {

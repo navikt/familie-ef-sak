@@ -27,7 +27,7 @@ class NæringsinntektKontrollForOppgaveTask(
                 TYPE,
                 oppgaveId.toString(),
                 Properties().apply {
-                    this["oppgaveId"] = oppgaveId
+                    this["oppgaveId"] = oppgaveId.toString()
                 },
             )
     }
