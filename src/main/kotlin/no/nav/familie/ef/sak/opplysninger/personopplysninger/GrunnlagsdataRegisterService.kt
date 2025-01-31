@@ -53,6 +53,7 @@ class GrunnlagsdataRegisterService(
             barn = mapBarn(grunnlagsdataFraPdl.barn),
             tidligereVedtaksperioder = tidligereVedtaksperioder,
             harAvsluttetArbeidsforhold = harAvsluttetArbeidsforhold,
+            harKontantstøttePerioder = utbetalingsinfoKontantstøtteDto.finnesUtbetaling,
             kontantstøttePerioder = kontantstøttePerioder,
         )
     }

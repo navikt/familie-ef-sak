@@ -51,6 +51,7 @@ fun opprettGrunnlagsdata(
         ),
     ),
     false,
+    false,
     emptyList(),
 )
 
