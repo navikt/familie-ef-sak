@@ -316,6 +316,20 @@ class OppgaveService(
         return oppgaveClient.hentOppgaver(request)
     }
 
+    fun hentFerdigstilteOppgaver(oppgaverIder: List<Long>?): List<Oppgave> {
+        val oppgaver = mutableListOf<Oppgave>()
+
+        oppgaverIder?.forEach { oppgaveId ->
+            try {
+                oppgaver.add(oppgaveClient.finnOppgaveMedId(oppgaveId))
+            } catch (e: Exception) {
+                logger.error("Kunne ikke hente oppgave med id $oppgaveId", e)
+            }
+        }
+
+        return oppgaver
+    }
+
     private fun finnBehandlingstema(stønadstype: StønadType): Behandlingstema =
         when (stønadstype) {
             StønadType.OVERGANGSSTØNAD -> Behandlingstema.Overgangsstønad

@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.oppgave
 
+import no.nav.familie.ef.sak.behandling.oppgaverforferdigstilling.OppgaverForFerdigstillingService
 import no.nav.familie.ef.sak.felles.util.FnrUtil.validerOptionalIdent
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
@@ -41,6 +42,7 @@ class OppgaveController(
     private val tilgangService: TilgangService,
     private val personService: PersonService,
     private val tilordnetRessursService: TilordnetRessursService,
+    private val oppgaverForFerdigstillingService: OppgaverForFerdigstillingService,
 ) {
     private val logger = LoggerFactory.getLogger(javaClass)
     private val secureLogger = LoggerFactory.getLogger("secureLogger")
@@ -78,6 +80,18 @@ class OppgaveController(
         val oppgaveRespons = oppgaveService.hentFremleggsoppgaver(behandlingId)
         secureLogger.info("Hent fremleggsoppgaver. behandlingId: $behandlingId, oppgaveRespons: $oppgaveRespons")
         return Ressurs.success(oppgaveRespons.tilDto())
+    }
+
+    @GetMapping("/hent-ferdigstilte-fremleggsoppgaver/{behandlingId}")
+    fun hentFerdigstilteFremleggsoppgaver(
+        @PathVariable behandlingId: UUID,
+    ): Ressurs<OppgaveResponseDto> {
+        val oppgaverIder = oppgaverForFerdigstillingService.hentOppgaverForFerdigstillingEllerNull(behandlingId)?.fremleggsoppgaveIderSomSkalFerdigstilles
+        val oppgaver = oppgaveService.hentFerdigstilteOppgaver(oppgaverIder)
+        val oppgaveResponse = FinnOppgaveResponseDto(oppgaver.size.toLong(), oppgaver)
+
+        secureLogger.info("Hent ferdigstilte fremleggsoppgaver. behandlingId: $behandlingId, oppgaveResponsem: $oppgaveResponse")
+        return Ressurs.success(oppgaveResponse.tilDto())
     }
 
     @PostMapping(path = ["/{gsakOppgaveId}/fordel"], produces = [MediaType.APPLICATION_JSON_VALUE])
