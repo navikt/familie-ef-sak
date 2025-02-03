@@ -40,7 +40,7 @@ class VedtakDtoMapperTest {
         val vedtakJson = readFile("BarnetilsynInnvilgetUtenUtbetalingVedtakDto.json")
 
         val vedtak =
-            innvilgelseBarnetilsynDto(UUID.fromString("4ab497b2-a19c-4415-bf00-556ff8e9ce86"))
+            innvilgelseBarnetilsynDto(UUID.fromString("4ab497b2-a19c-4415-bf00-556ff8e9ce86"), kontantstøtteBegrunnelse = "test")
                 .copy(
                     resultatType = ResultatType.INNVILGE_UTEN_UTBETALING,
                     _type = "InnvilgelseBarnetilsynUtenUtbetaling",
