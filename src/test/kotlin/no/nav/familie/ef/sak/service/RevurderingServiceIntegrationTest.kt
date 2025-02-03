@@ -237,6 +237,7 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
                                 1000,
                             ),
                         ),
+                        null,
                     ),
                 fom = YearMonth.of(2024, 6),
                 tom = YearMonth.of(2025, 12),

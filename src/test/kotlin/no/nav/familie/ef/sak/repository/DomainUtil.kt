@@ -359,7 +359,7 @@ fun vedtakBarnetilsyn(
     barn: List<UUID>,
     resultatType: ResultatType = ResultatType.INNVILGE,
     beløp: Int = 1000,
-    kontantstøtteWrapper: KontantstøtteWrapper = KontantstøtteWrapper(emptyList()),
+    kontantstøtteWrapper: KontantstøtteWrapper = KontantstøtteWrapper(emptyList(), null),
     fom: YearMonth,
     tom: YearMonth,
 ) = Vedtak(
