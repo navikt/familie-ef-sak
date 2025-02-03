@@ -11,7 +11,6 @@ import no.nav.familie.ef.sak.infrastruktur.config.ObjectMapperProvider.objectMap
 import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerService
 import no.nav.familie.kontrakter.ef.felles.FrittståendeBrevDto
-import no.nav.familie.kontrakter.ef.felles.FrittståendeBrevType
 import no.nav.familie.kontrakter.ef.iverksett.Brevmottaker
 import org.springframework.stereotype.Service
 import java.time.LocalDate
@@ -34,7 +33,6 @@ class NæringsinntektKontrollBrev(
                 personIdent = saksbehandling.ident,
                 eksternFagsakId = saksbehandling.eksternFagsakId,
                 stønadType = saksbehandling.stønadstype,
-                brevtype = FrittståendeBrevType.INFORMASJONSBREV_TRUKKET_SØKNAD,
                 tittel = "Inntekt endret for selvstendig næringsdrivende",
                 fil = brevPdf,
                 journalførendeEnhet = journalførendeEnhet,
