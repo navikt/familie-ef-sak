@@ -50,25 +50,27 @@ class KopierVedtakService(
     ): VedtakDto {
         val fraDato = BeregningBarnetilsynUtil.satserForBarnetilsyn.maxOf { it.periode.fom }
         val historikk = vedtakHistorikkService.hentAktivHistorikk(fagsakId).fraDato(YearMonth.from(fraDato))
+        val forrigeVedtak = vedtakService.hentVedtak(forrigeBehandlingId)
 
         return InnvilgelseBarnetilsyn(
             perioder = mapUtgiftsperioder(historikk, behandlingBarn),
             resultatType = ResultatType.INNVILGE,
             perioderKontantstøtte = mapPerioderKontantstøtte(historikk),
-            tilleggsstønad = mapTilleggsstønadDto(historikk, forrigeBehandlingId),
+            kontantstøtteBegrunnelse = forrigeVedtak.kontantstøtte?.begrunnelse,
+            tilleggsstønad = mapTilleggsstønadDto(historikk, forrigeVedtak.tilleggsstønad?.begrunnelse),
             begrunnelse = "Satsendring barnetilsyn",
         )
     }
 
     private fun mapTilleggsstønadDto(
         historikk: List<AndelHistorikkDto>,
-        forrigeBehandlingId: UUID,
+        begrunnelse: String?,
     ): TilleggsstønadDto =
         TilleggsstønadDto(
             historikk.filter { it.andel.tilleggsstønad > 0 }.map {
                 PeriodeMedBeløpDto(periode = it.andel.periode, beløp = it.andel.tilleggsstønad)
             },
-            vedtakService.hentVedtak(forrigeBehandlingId).tilleggsstønad?.begrunnelse,
+            begrunnelse,
         )
 
     private fun mapPerioderKontantstøtte(historikk: List<AndelHistorikkDto>): List<PeriodeMedBeløpDto> =
