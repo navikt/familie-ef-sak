@@ -91,7 +91,7 @@ internal class LagreVedtakControllerTest : OppslagSpringRunnerTest() {
                         begrunnelse = "",
                     ),
                 kontantstøtte = KontantstøtteWrapper(emptyList(), null),
-                tilleggsstønad = TilleggsstønadWrapper(false, emptyList(), null),
+                tilleggsstønad = TilleggsstønadWrapper(emptyList(), null),
                 saksbehandlerIdent = "julenissen",
                 opprettetAv = "julenissen",
             )
@@ -154,7 +154,7 @@ internal class LagreVedtakControllerTest : OppslagSpringRunnerTest() {
                         ),
                         "",
                     ),
-                tilleggsstønad = TilleggsstønadWrapper(false, emptyList(), null),
+                tilleggsstønad = TilleggsstønadWrapper(emptyList(), null),
                 saksbehandlerIdent = "julenissen",
                 opprettetAv = "julenissen",
             )
@@ -218,7 +218,6 @@ internal class LagreVedtakControllerTest : OppslagSpringRunnerTest() {
 
     private fun tomTillegsstønad() =
         TilleggsstønadDto(
-            harTilleggsstønad = false,
             perioder = listOf(),
             begrunnelse = null,
         )

@@ -192,7 +192,6 @@ internal class BeregnYtelseStegBarnetilsynIntegrationTest : OppslagSpringRunnerT
                 kontantstøtteBegrunnelse = null,
                 tilleggsstønad =
                     TilleggsstønadDto(
-                        harTilleggsstønad = false,
                         perioder = listOf(),
                         begrunnelse = null,
                     ),

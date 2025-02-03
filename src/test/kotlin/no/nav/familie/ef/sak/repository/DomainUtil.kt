@@ -367,7 +367,7 @@ fun vedtakBarnetilsyn(
     resultatType = resultatType,
     barnetilsyn = BarnetilsynWrapper(listOf(barnetilsynperiode(barn = barn, beløp = beløp, fom = fom, tom = tom)), "begrunnelse"),
     kontantstøtte = kontantstøtteWrapper,
-    tilleggsstønad = TilleggsstønadWrapper(false, emptyList(), null),
+    tilleggsstønad = TilleggsstønadWrapper(emptyList(), null),
     saksbehandlerIdent = "VL",
     opprettetAv = "VL",
     opprettetTid = LocalDateTime.now(),
