@@ -90,7 +90,7 @@ internal class LagreVedtakControllerTest : OppslagSpringRunnerTest() {
                             ),
                         begrunnelse = "",
                     ),
-                kontantstøtte = KontantstøtteWrapper(emptyList()),
+                kontantstøtte = KontantstøtteWrapper(emptyList(), null),
                 tilleggsstønad = TilleggsstønadWrapper(emptyList(), null),
                 saksbehandlerIdent = "julenissen",
                 opprettetAv = "julenissen",
