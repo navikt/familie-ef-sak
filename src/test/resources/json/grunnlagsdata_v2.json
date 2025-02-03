@@ -2394,11 +2394,6 @@
         "type" : "Enum",
         "values" : [ "KONTANTSTØTTE", "INFOTRYGD" ],
         "nullable" : false
-      },
-      "hentetDato" : {
-        "name" : "hentetDato",
-        "type" : "LocalDate",
-        "nullable" : false
       }
     },
     "nullable" : false

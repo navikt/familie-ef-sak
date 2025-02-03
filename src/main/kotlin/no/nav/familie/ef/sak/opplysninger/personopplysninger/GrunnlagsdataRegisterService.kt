@@ -62,7 +62,7 @@ class GrunnlagsdataRegisterService(
         kontantstøttePerioder: HentUtbetalingsinfoKontantstøtteDto,
     ) = kontantstøttePerioder
         .perioder
-        .map { periode -> KontantstøttePeriode(periode.årMånedFra, periode.årMånedTil, periode.kilde, kontantstøttePerioder.hentetDato) }
+        .map { periode -> KontantstøttePeriode(periode.årMånedFra, periode.årMånedTil, periode.kilde) }
         .sortedByDescending { it.fomMåned }
 
     fun hentPersonopplysninger(personIdent: String): Personopplysninger {

@@ -78,7 +78,6 @@ data class KontantstøttePeriode(
     val fomMåned: YearMonth,
     val tomMåned: YearMonth?,
     val kilde: KontantstøtteDatakilde,
-    val hentetDato: LocalDate,
 )
 
 data class Personopplysninger(

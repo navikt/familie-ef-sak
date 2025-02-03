@@ -8,6 +8,7 @@ import no.nav.familie.ef.sak.vilkår.dto.TidligereVedtaksperioderDto
 import no.nav.familie.ef.sak.vilkår.dto.VilkårDto
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.felles.ef.StønadType
+import java.time.LocalDate
 
 data class BlankettPdfRequest(
     val behandling: BlankettPdfBehandling,
@@ -25,6 +26,7 @@ data class BlankettPdfBehandling(
     val tidligereVedtaksperioder: TidligereVedtaksperioderDto?,
     val harKontantstøttePerioder: Boolean?,
     val kontantstøttePerioderFraKs: List<KontantstøttePeriode>,
+    val registeropplysningerOpprettetDato: LocalDate,
 )
 
 data class PersonopplysningerDto(
