@@ -278,7 +278,7 @@ class StepDefinitions {
         }
         gittVedtak =
             VedtakDomeneParser.mapOgSettPeriodeMedBeløp(gittVedtak, dataTable) { vedtak, perioder ->
-                vedtak.copy(kontantstøtte = KontantstøtteWrapper(perioder))
+                vedtak.copy(kontantstøtte = KontantstøtteWrapper(perioder, null))
             }
     }
 

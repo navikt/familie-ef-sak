@@ -224,6 +224,7 @@ data class TilleggsstønadWrapper(
 
 data class KontantstøtteWrapper(
     val perioder: List<PeriodeMedBeløp>,
+    val begrunnelse: String?,
 )
 
 data class BarnetilsynWrapper(
