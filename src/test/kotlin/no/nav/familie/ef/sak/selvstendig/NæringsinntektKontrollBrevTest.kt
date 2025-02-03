@@ -51,7 +51,7 @@ class NæringsinntektKontrollBrevTest : OppslagSpringRunnerTest() {
             iverksettClient.sendFrittståendeBrev(capture(frittståendeBrevSlot))
         } just runs
 
-        every { pdlClient.hentPersonKortBolk(any()) } answers {
+        every { pdlClient.hentPersonKortBolk(listOf("01010199999")) } answers {
             firstArg<List<String>>().associate { it to lagPersonKort("Fornavn") }
         }
 
