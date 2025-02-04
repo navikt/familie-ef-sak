@@ -91,10 +91,6 @@ class PdlClientConfig {
             firstArg<List<String>>().associate { it to lagPersonKort(it) }
         }
 
-        every { pdlClient.hentPersonKortBolk(listOf("01010199999")) } answers {
-            firstArg<List<String>>().associate { it to lagPersonKort("Fornavn") }
-        }
-
         every { pdlClient.hentSøker(any()) } returns opprettPdlSøker()
 
         every { pdlClient.hentPersonForelderBarnRelasjon(any()) } returns barn()

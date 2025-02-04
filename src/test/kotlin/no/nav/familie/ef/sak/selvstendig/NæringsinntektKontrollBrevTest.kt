@@ -10,7 +10,6 @@ import no.nav.familie.ef.sak.beregning.Grunnbeløpsperioder
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
 import no.nav.familie.ef.sak.iverksett.IverksettClient
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlClient
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseRepository
@@ -82,7 +81,7 @@ class NæringsinntektKontrollBrevTest : OppslagSpringRunnerTest() {
         val forventetBrevMottaker =
             Brevmottaker(
                 ident = "VL",
-                navn = "Fornavn mellomnavn Etternavn",
+                navn = "01010199999 mellomnavn Etternavn",
                 mottakerRolle = Brevmottaker.MottakerRolle.BRUKER,
                 identType = Brevmottaker.IdentType.PERSONIDENT,
             )
