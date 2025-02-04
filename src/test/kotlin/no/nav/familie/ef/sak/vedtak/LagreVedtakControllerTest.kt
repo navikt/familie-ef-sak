@@ -66,6 +66,7 @@ internal class LagreVedtakControllerTest : OppslagSpringRunnerTest() {
                 begrunnelse = "",
                 perioder = listOf(utgiftsperiode),
                 perioderKontantstøtte = listOf(),
+                kontantstøtteBegrunnelse = null,
                 tilleggsstønad = tomTillegsstønad(),
             )
 
@@ -89,8 +90,8 @@ internal class LagreVedtakControllerTest : OppslagSpringRunnerTest() {
                             ),
                         begrunnelse = "",
                     ),
-                kontantstøtte = KontantstøtteWrapper(emptyList()),
-                tilleggsstønad = TilleggsstønadWrapper(false, emptyList(), null),
+                kontantstøtte = KontantstøtteWrapper(emptyList(), null),
+                tilleggsstønad = TilleggsstønadWrapper(emptyList(), null),
                 saksbehandlerIdent = "julenissen",
                 opprettetAv = "julenissen",
             )
@@ -118,6 +119,7 @@ internal class LagreVedtakControllerTest : OppslagSpringRunnerTest() {
                 begrunnelse = "",
                 perioder = listOf(utgiftsperiode),
                 perioderKontantstøtte = listOf(kontantstøttePeriode),
+                kontantstøtteBegrunnelse = "",
                 tilleggsstønad = tomTillegsstønad(),
                 _type = "InnvilgelseBarnetilsynUtenUtbetaling",
             )
@@ -150,8 +152,9 @@ internal class LagreVedtakControllerTest : OppslagSpringRunnerTest() {
                                 beløp = kontantstøttePeriode.beløp,
                             ),
                         ),
+                        "",
                     ),
-                tilleggsstønad = TilleggsstønadWrapper(false, emptyList(), null),
+                tilleggsstønad = TilleggsstønadWrapper(emptyList(), null),
                 saksbehandlerIdent = "julenissen",
                 opprettetAv = "julenissen",
             )
@@ -179,6 +182,7 @@ internal class LagreVedtakControllerTest : OppslagSpringRunnerTest() {
                 begrunnelse = "",
                 perioder = listOf(utgiftsperiode),
                 perioderKontantstøtte = listOf(kontantstøttePeriode),
+                kontantstøtteBegrunnelse = "",
                 tilleggsstønad = tomTillegsstønad(),
                 _type = "InnvilgelseBarnetilsynUtenUtbetaling",
             )
@@ -200,6 +204,7 @@ internal class LagreVedtakControllerTest : OppslagSpringRunnerTest() {
                 begrunnelse = "",
                 perioder = listOf(utgiftsperiode),
                 perioderKontantstøtte = listOf(kontantstøttePeriode),
+                kontantstøtteBegrunnelse = "",
                 tilleggsstønad = tomTillegsstønad(),
                 _type = "InnvilgelseBarnetilsyn",
             )
@@ -213,7 +218,6 @@ internal class LagreVedtakControllerTest : OppslagSpringRunnerTest() {
 
     private fun tomTillegsstønad() =
         TilleggsstønadDto(
-            harTilleggsstønad = false,
             perioder = listOf(),
             begrunnelse = null,
         )

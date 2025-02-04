@@ -75,8 +75,8 @@ object VedtakDomeneParser {
                 }
             vedtak.copy(
                 barnetilsyn = BarnetilsynWrapper(perioder, null),
-                kontantstøtte = KontantstøtteWrapper(emptyList()), // overskreves i egen "Gitt"
-                tilleggsstønad = TilleggsstønadWrapper(false, emptyList(), null),
+                kontantstøtte = KontantstøtteWrapper(emptyList(), null), // overskreves i egen "Gitt"
+                tilleggsstønad = TilleggsstønadWrapper(emptyList(), null),
             ) // overskreves i egen "Gitt"
         }
 

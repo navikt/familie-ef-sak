@@ -16,13 +16,13 @@ data class InnvilgelseBarnetilsyn(
     val begrunnelse: String?,
     val perioder: List<UtgiftsperiodeDto> = emptyList(),
     val perioderKontantstøtte: List<PeriodeMedBeløpDto>,
+    val kontantstøtteBegrunnelse: String?,
     val tilleggsstønad: TilleggsstønadDto,
     override val resultatType: ResultatType = ResultatType.INNVILGE,
     override val _type: String = "InnvilgelseBarnetilsyn",
 ) : VedtakDto(resultatType, _type)
 
 data class TilleggsstønadDto(
-    val harTilleggsstønad: Boolean,
     val perioder: List<PeriodeMedBeløpDto> = emptyList(),
     val begrunnelse: String?,
 )
@@ -97,9 +97,9 @@ fun Vedtak.mapInnvilgelseBarnetilsyn(resultatType: ResultatType = ResultatType.I
                 )
             },
         perioderKontantstøtte = this.kontantstøtte.perioder.map { it.tilDto() },
+        kontantstøtteBegrunnelse = this.kontantstøtte.begrunnelse,
         tilleggsstønad =
             TilleggsstønadDto(
-                harTilleggsstønad = this.tilleggsstønad.harTilleggsstønad,
                 perioder = this.tilleggsstønad.perioder.map { it.tilDto() },
                 begrunnelse = this.tilleggsstønad.begrunnelse,
             ),
