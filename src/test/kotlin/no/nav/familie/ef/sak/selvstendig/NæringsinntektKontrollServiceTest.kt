@@ -220,6 +220,11 @@ internal class NæringsinntektKontrollServiceTest : OppslagSpringRunnerTest() {
         }
     }
 
+    @Test
+    fun `Påminnelse om testing av selvstendig næringsdrivende (se favrokort NAV-24146)`() {
+        assertThat(LocalDate.now()).isBefore(LocalDate.of(2025, 10, 2))
+    }
+
     private fun lagreTestdataForPersonIdent(personIdent: String) {
         val fagsakTilknyttetPersonIdent = fagsak(setOf(PersonIdent(personIdent)))
         testoppsettService.lagreFagsak(fagsakTilknyttetPersonIdent)
