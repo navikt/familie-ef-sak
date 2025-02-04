@@ -217,13 +217,13 @@ data class InntektWrapper(
 )
 
 data class TilleggsstønadWrapper(
-    val harTilleggsstønad: Boolean,
     val perioder: List<PeriodeMedBeløp>,
     val begrunnelse: String?,
 )
 
 data class KontantstøtteWrapper(
     val perioder: List<PeriodeMedBeløp>,
+    val begrunnelse: String?,
 )
 
 data class BarnetilsynWrapper(
