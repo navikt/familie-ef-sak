@@ -58,7 +58,7 @@ class NæringsinntektKontrollService(
                     giVarselOmNyVurderingAvInntekt(næringsinntektDataForBeregning.behandlingId, næringsinntektDataForBeregning.personIdent, årstallIFjor)
                     val oppgaveMedUtsattFrist = næringsinntektDataForBeregning.oppgave.copy(fristFerdigstillelse = LocalDate.of(årstallIFjor + 2, 1, 11).toString())
                     oppgaveService.oppdaterOppgave(oppgaveMedUtsattFrist)
-                    næringsinntektKontrollBrev.sendBrev(næringsinntektDataForBeregning)
+                    næringsinntektKontrollBrev.sendBrev(næringsinntektDataForBeregning) // Vurderes om skal tas i bruk eller ikke høst 2025. Favro: NAV-24146
                 } else {
                     giBeskjedOmKontrollertInntektVedLøpendeOvergangsstønad(næringsinntektDataForBeregning.behandlingId, næringsinntektDataForBeregning.personIdent, årstallIFjor)
                     val avsluttOppgaveMedOppdatertBeskrivelse = næringsinntektDataForBeregning.oppgave.copy(beskrivelse = næringsinntektDataForBeregning.oppgave.beskrivelse + "\nAutomatisk avsluttet oppgave: Ingen endring i inntekt.", status = StatusEnum.FERDIGSTILT)
