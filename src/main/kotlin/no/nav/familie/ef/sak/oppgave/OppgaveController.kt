@@ -86,8 +86,9 @@ class OppgaveController(
     fun hentFerdigstilteFremleggsoppgaver(
         @PathVariable behandlingId: UUID,
     ): Ressurs<OppgaveResponseDto> {
-        val oppgaverIder = oppgaverForFerdigstillingService.hentOppgaverForFerdigstillingEllerNull(behandlingId)?.fremleggsoppgaveIderSomSkalFerdigstilles
-        val oppgaver = oppgaveService.hentFerdigstilteOppgaver(oppgaverIder)
+        val oppgaveIder = oppgaverForFerdigstillingService.hentOppgaverForFerdigstillingEllerNull(behandlingId)?.fremleggsoppgaveIderSomSkalFerdigstilles
+        secureLogger.info("Oppgave ider for behandlingId: $behandlingId, oppgaveIder: $oppgaveIder")
+        val oppgaver = oppgaveService.hentFerdigstilteOppgaver(oppgaveIder)
         val oppgaveResponse = FinnOppgaveResponseDto(oppgaver.size.toLong(), oppgaver)
 
         secureLogger.info("Hent ferdigstilte fremleggsoppgaver. behandlingId: $behandlingId, oppgaveResponsem: $oppgaveResponse")

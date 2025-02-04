@@ -316,18 +316,11 @@ class OppgaveService(
         return oppgaveClient.hentOppgaver(request)
     }
 
-    fun hentFerdigstilteOppgaver(oppgaverIder: List<Long>?): List<Oppgave> {
-        val oppgaver = mutableListOf<Oppgave>()
-
-        oppgaverIder?.forEach { oppgaveId ->
-            try {
-                oppgaver.add(oppgaveClient.finnOppgaveMedId(oppgaveId))
-            } catch (e: Exception) {
-                logger.error("Kunne ikke hente oppgave med id $oppgaveId", e)
-            }
+    fun hentFerdigstilteOppgaver(oppgaveIder: List<Long>?): List<Oppgave> {
+        if (oppgaveIder != null) {
+            return oppgaveIder.map { hentOppgave(it) }
         }
-
-        return oppgaver
+        return emptyList()
     }
 
     private fun finnBehandlingstema(stønadstype: StønadType): Behandlingstema =
