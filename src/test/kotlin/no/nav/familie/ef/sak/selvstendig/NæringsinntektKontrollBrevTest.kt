@@ -9,7 +9,6 @@ import no.nav.familie.ef.sak.behandling.BehandlingRepository
 import no.nav.familie.ef.sak.beregning.Grunnbeløpsperioder
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
-import no.nav.familie.ef.sak.infrastruktur.config.PdlClientConfig.Companion.lagPersonKort
 import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlClient
 import no.nav.familie.ef.sak.repository.behandling
@@ -40,9 +39,6 @@ class NæringsinntektKontrollBrevTest : OppslagSpringRunnerTest() {
     @Autowired
     private lateinit var iverksettClient: IverksettClient
 
-    @Autowired
-    private lateinit var pdlClient: PdlClient
-
     private val frittståendeBrevSlot = slot<FrittståendeBrevDto>()
 
     @Test
@@ -50,10 +46,6 @@ class NæringsinntektKontrollBrevTest : OppslagSpringRunnerTest() {
         every {
             iverksettClient.sendFrittståendeBrev(capture(frittståendeBrevSlot))
         } just runs
-
-        every { pdlClient.hentPersonKortBolk(listOf("01010199999")) } answers {
-            firstArg<List<String>>().associate { it to lagPersonKort("Fornavn") }
-        }
 
         val oppgave = lagTestOppgave()
         val personIdent = "01010199999"

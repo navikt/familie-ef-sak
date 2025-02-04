@@ -91,6 +91,10 @@ class PdlClientConfig {
             firstArg<List<String>>().associate { it to lagPersonKort(it) }
         }
 
+        every { pdlClient.hentPersonKortBolk(listOf("01010199999")) } answers {
+            firstArg<List<String>>().associate { it to lagPersonKort("Fornavn") }
+        }
+
         every { pdlClient.hentSøker(any()) } returns opprettPdlSøker()
 
         every { pdlClient.hentPersonForelderBarnRelasjon(any()) } returns barn()
@@ -159,7 +163,7 @@ class PdlClientConfig {
         const val ANNEN_FORELDER_FNR = "17097926735"
         const val FNR_PÅ_ADRESSE_SØK = "01012067050"
 
-        fun lagPersonKort(it: String) =
+        fun lagPersonKort(fornavn: String = "Fornavn") =
             PdlPersonKort(
                 listOf(
                     Adressebeskyttelse(
@@ -167,7 +171,7 @@ class PdlClientConfig {
                         metadata = metadataGjeldende,
                     ),
                 ),
-                listOf(lagNavn(fornavn = it)),
+                listOf(lagNavn(fornavn = fornavn)),
                 emptyList(),
             )
 
