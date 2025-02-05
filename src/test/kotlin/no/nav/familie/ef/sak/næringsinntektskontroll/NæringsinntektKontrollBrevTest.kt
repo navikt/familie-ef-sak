@@ -1,4 +1,4 @@
-package no.nav.familie.ef.sak.selvstendig
+package no.nav.familie.ef.sak.næringsinntektskontroll
 
 import io.mockk.every
 import io.mockk.just

@@ -1,4 +1,4 @@
-package no.nav.familie.ef.sak.selvstendig
+package no.nav.familie.ef.sak.næringsinntektskontroll
 
 data class NæringsinntektIngenEndringPdfRequest(
     val saksid: String,

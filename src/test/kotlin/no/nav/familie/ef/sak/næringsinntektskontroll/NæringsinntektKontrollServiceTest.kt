@@ -1,4 +1,4 @@
-package no.nav.familie.ef.sak.selvstendig
+package no.nav.familie.ef.sak.næringsinntektskontroll
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.mockk.CapturingSlot
@@ -50,6 +50,9 @@ import java.util.UUID
 internal class NæringsinntektKontrollServiceTest : OppslagSpringRunnerTest() {
     @Autowired
     private lateinit var næringsinntektKontrollService: NæringsinntektKontrollService
+
+    @Autowired
+    private lateinit var næringsinntektKontrollRepository: NæringsinntektKontrollRepository
 
     @Autowired
     private lateinit var behandlingRepository: BehandlingRepository
@@ -112,6 +115,7 @@ internal class NæringsinntektKontrollServiceTest : OppslagSpringRunnerTest() {
             assertThat(kafkaMeldingSlot.isCaptured).isTrue
             assertThat(oppdaterOppgaveSlot.captured.fristFerdigstillelse).isEqualTo(LocalDate.of(LocalDate.now().year + 1, 1, 11).toString())
             assertThat(oppgaveRepository.findByBehandlingIdAndType(behandlingIds.last(), Oppgavetype.Fremlegg)?.size).isEqualTo(1)
+            assertThat(næringsinntektKontrollRepository.findAll().first().utfall).isEqualTo(NæringsinntektKontrollUtfall.MINIMUM_TI_PROSENT_ENDRING_I_INNTEKT)
         }
     }
 
@@ -128,6 +132,7 @@ internal class NæringsinntektKontrollServiceTest : OppslagSpringRunnerTest() {
         kjørSomLeader {
             næringsinntektKontrollService.kontrollerInntektForSelvstendigNæringsdrivende(2023, 9)
             assertThat(oppdaterOppgaveSlot.captured.status).isEqualTo(StatusEnum.FERDIGSTILT)
+            assertThat(næringsinntektKontrollRepository.findAll().first().utfall).isEqualTo(NæringsinntektKontrollUtfall.UENDRET_INNTEKT)
         }
     }
 
@@ -148,6 +153,7 @@ internal class NæringsinntektKontrollServiceTest : OppslagSpringRunnerTest() {
             næringsinntektKontrollService.kontrollerInntektForSelvstendigNæringsdrivende(2023, 9)
             assertThat(kafkaMeldingSlot.isCaptured).isTrue
             assertThat(oppdaterOppgaveSlot.isCaptured).isTrue
+            assertThat(næringsinntektKontrollRepository.findAll().first().utfall).isEqualTo(NæringsinntektKontrollUtfall.MINIMUM_TI_PROSENT_ENDRING_I_INNTEKT)
         }
     }
 
@@ -158,8 +164,8 @@ internal class NæringsinntektKontrollServiceTest : OppslagSpringRunnerTest() {
         every { sigrunClient.hentPensjonsgivendeInntekt(any(), any()) } answers {
             PensjonsgivendeInntektResponse(firstArg(), secondArg(), listOf(pensjonsgivendeInntektForSkatteordning))
         }
-        val fom = LocalDate.of(YearMonth.now().year - 1, 5, 1)
-        val tom = LocalDate.of(YearMonth.now().year + 1, 6, 30)
+        val fom = LocalDate.of(2023, 5, 1)
+        val tom = LocalDate.of(2025, 6, 30)
         val andelTilkjentYtelse = (lagAndelTilkjentYtelse(22761, fom, tom, personIdent, behandlingIds[3], 100_000, 0, 494))
         val tilkjentYtelse = lagTilkjentYtelse(andelerTilkjentYtelse = listOf(andelTilkjentYtelse), behandlingId = behandlingIds[3], personident = personIdent, startdato = LocalDate.of(2022, 9, 1), grunnbeløpsmåned = YearMonth.of(2024, 5))
         tilkjentYtelseRepository.insert(tilkjentYtelse)
@@ -168,6 +174,7 @@ internal class NæringsinntektKontrollServiceTest : OppslagSpringRunnerTest() {
             næringsinntektKontrollService.kontrollerInntektForSelvstendigNæringsdrivende(2023, 9)
             assertThat(kafkaMeldingSlot.isCaptured).isTrue
             assertThat(oppdaterOppgaveSlot.isCaptured).isTrue
+            assertThat(næringsinntektKontrollRepository.findAll().first().utfall).isEqualTo(NæringsinntektKontrollUtfall.UENDRET_INNTEKT)
         }
     }
 
@@ -183,6 +190,7 @@ internal class NæringsinntektKontrollServiceTest : OppslagSpringRunnerTest() {
         kjørSomLeader {
             assertThat(kafkaMeldingSlot.isCaptured).isFalse()
             næringsinntektKontrollService.kontrollerInntektForSelvstendigNæringsdrivende(2023, 9)
+            assertThat(næringsinntektKontrollRepository.findAll().first().utfall).isEqualTo(NæringsinntektKontrollUtfall.KONTROLLERES_IKKE)
         }
     }
 
@@ -198,6 +206,7 @@ internal class NæringsinntektKontrollServiceTest : OppslagSpringRunnerTest() {
         kjørSomLeader {
             næringsinntektKontrollService.kontrollerInntektForSelvstendigNæringsdrivende(2023, 9)
             assertThat(oppgaveRepository.findAll()).isEmpty()
+            assertThat(næringsinntektKontrollRepository.findAll().first().utfall).isEqualTo(NæringsinntektKontrollUtfall.KONTROLLERES_IKKE)
         }
     }
 
@@ -217,6 +226,7 @@ internal class NæringsinntektKontrollServiceTest : OppslagSpringRunnerTest() {
         kjørSomLeader {
             næringsinntektKontrollService.kontrollerInntektForSelvstendigNæringsdrivende(2023, 9)
             assertThat(kafkaMeldingSlot.captured).contains("regnskap")
+            assertThat(næringsinntektKontrollRepository.findAll().first().utfall).isEqualTo(NæringsinntektKontrollUtfall.OPPFYLLER_IKKE_AKTIVITETSPLIKT)
         }
     }
 
