@@ -4,4 +4,4 @@ CREATE TABLE naeringsinntekt_kontroll(
     fagsak_id           UUID,
     kjoretidspunkt      TIMESTAMP(3),
     utfall              VARCHAR
-)
+);
