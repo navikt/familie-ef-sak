@@ -92,6 +92,7 @@ class VedtakHistorikkService(
             begrunnelse = null,
             perioder = perioder,
             perioderKontantstøtte = mapUtgifterBarnetilsyn(historikk, fra) { it.kontantstøtte },
+            kontantstøtteBegrunnelse = null,
             tilleggsstønad =
                 mapUtgifterBarnetilsyn(historikk, fra) { it.tilleggsstønad }.let {
                     TilleggsstønadDto(harTilleggsstønad = it.isNotEmpty(), it, null)

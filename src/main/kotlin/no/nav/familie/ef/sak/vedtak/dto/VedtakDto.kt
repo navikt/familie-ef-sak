@@ -144,7 +144,7 @@ fun VedtakDto.tilVedtak(
                         perioder = this.perioder.map { it.tilDomene() },
                         begrunnelse = this.begrunnelse,
                     ),
-                kontantstøtte = KontantstøtteWrapper(perioder = this.perioderKontantstøtte.map { it.tilDomene() }),
+                kontantstøtte = KontantstøtteWrapper(perioder = this.perioderKontantstøtte.map { it.tilDomene() }, begrunnelse = this.kontantstøtteBegrunnelse),
                 tilleggsstønad =
                     TilleggsstønadWrapper(
                         harTilleggsstønad = this.tilleggsstønad.harTilleggsstønad,
