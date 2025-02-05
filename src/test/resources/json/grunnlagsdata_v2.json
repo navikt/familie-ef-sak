@@ -2392,7 +2392,7 @@
       "kilde" : {
         "name" : "kilde",
         "type" : "Enum",
-        "values" : [ "KONTANTSTØTTE", "INFOTRYGD" ],
+        "values" : [ "KS_SAK", "INFOTRYGD" ],
         "nullable" : false
       }
     },
