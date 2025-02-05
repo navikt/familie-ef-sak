@@ -314,7 +314,6 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
         override fun convert(pGobject: PGobject): TilleggsstønadWrapper {
             val tilleggstønadVerdi: TilleggsstønadWrapper? = pGobject.value?.let { objectMapper.readValue(it) }
             return tilleggstønadVerdi ?: TilleggsstønadWrapper(
-                harTilleggsstønad = false,
                 perioder = emptyList(),
                 begrunnelse = null,
             )

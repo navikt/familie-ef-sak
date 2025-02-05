@@ -67,7 +67,6 @@ class KopierVedtakService(
         begrunnelse: String?,
     ): TilleggsstønadDto =
         TilleggsstønadDto(
-            historikk.any { it.andel.tilleggsstønad > 0 },
             historikk.filter { it.andel.tilleggsstønad > 0 }.map {
                 PeriodeMedBeløpDto(periode = it.andel.periode, beløp = it.andel.tilleggsstønad)
             },
