@@ -2054,7 +2054,7 @@ internal class BeregnYtelseStegTest {
             ),
         perioderKontantstøtte = emptyList(),
         kontantstøtteBegrunnelse = null,
-        tilleggsstønad = TilleggsstønadDto(true, emptyList(), null),
+        tilleggsstønad = TilleggsstønadDto(emptyList(), null),
         begrunnelse = null,
     )
 
@@ -2084,7 +2084,6 @@ internal class BeregnYtelseStegTest {
             kontantstøtteBegrunnelse = null,
             tilleggsstønad =
                 TilleggsstønadDto(
-                    true,
                     emptyList(),
                     null,
                 ),
