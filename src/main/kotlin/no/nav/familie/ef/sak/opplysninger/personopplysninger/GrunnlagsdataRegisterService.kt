@@ -2,8 +2,10 @@ package no.nav.familie.ef.sak.opplysninger.personopplysninger
 
 import no.nav.familie.ef.sak.arbeidsforhold.ekstern.ArbeidsforholdService
 import no.nav.familie.ef.sak.felles.util.Timer.loggTid
+import no.nav.familie.ef.sak.kontantstøtte.HentUtbetalingsinfoKontantstøtteDto
 import no.nav.familie.ef.sak.kontantstøtte.KontantstøtteService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.GrunnlagsdataDomene
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.KontantstøttePeriode
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.Personopplysninger
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.TidligereVedtaksperioder
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.fullmakt.FullmaktService
@@ -40,7 +42,9 @@ class GrunnlagsdataRegisterService(
             arbeidsforholdService.finnesAvsluttetArbeidsforholdSisteAntallMåneder(
                 grunnlagsdataFraPdl.gjeldendeIdentForSøker(),
             )
-        val harKontantstøttePerioder = kontantstøtteService.finnesKontantstøtteUtbetalingerPåBruker(personIdent).finnesUtbetaling
+        val utbetalingsinfoKontantstøtteDto = kontantstøtteService.hentUtbetalingsinfoKontantstøtte(personIdent)
+        val kontantstøttePerioder =
+            utledKontantstøtteperioder(utbetalingsinfoKontantstøtteDto)
 
         return GrunnlagsdataDomene(
             søker = mapSøker(grunnlagsdataFraPdl.søker, grunnlagsdataFraPdl.andrePersoner),
@@ -49,9 +53,17 @@ class GrunnlagsdataRegisterService(
             barn = mapBarn(grunnlagsdataFraPdl.barn),
             tidligereVedtaksperioder = tidligereVedtaksperioder,
             harAvsluttetArbeidsforhold = harAvsluttetArbeidsforhold,
-            harKontantstøttePerioder = harKontantstøttePerioder,
+            harKontantstøttePerioder = utbetalingsinfoKontantstøtteDto.finnesUtbetaling,
+            kontantstøttePerioder = kontantstøttePerioder,
         )
     }
+
+    private fun utledKontantstøtteperioder(
+        kontantstøttePerioder: HentUtbetalingsinfoKontantstøtteDto,
+    ) = kontantstøttePerioder
+        .perioder
+        .map { periode -> KontantstøttePeriode(periode.årMånedFra, periode.årMånedTil, periode.kilde) }
+        .sortedByDescending { it.fomMåned }
 
     fun hentPersonopplysninger(personIdent: String): Personopplysninger {
         val grunnlagsdataFraPdl = hentGrunnlagsdataFraPdl(personIdent, emptyList())
