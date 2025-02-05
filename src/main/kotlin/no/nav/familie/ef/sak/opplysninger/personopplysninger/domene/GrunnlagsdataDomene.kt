@@ -68,7 +68,7 @@ data class GrunnlagsdataDomene(
     val barn: List<BarnMedIdent>,
     val tidligereVedtaksperioder: TidligereVedtaksperioder?,
     val harAvsluttetArbeidsforhold: Boolean?,
-    val harKontantstøttePerioder: Boolean?,
+    val harKontantstøttePerioder: Boolean?, // gjelder historiske behandlinger
     val kontantstøttePerioder: List<KontantstøttePeriode> = emptyList(),
 ) {
     fun tilPersonopplysninger() = Personopplysninger(søker = this.søker, annenForelder = this.annenForelder, barn = this.barn)

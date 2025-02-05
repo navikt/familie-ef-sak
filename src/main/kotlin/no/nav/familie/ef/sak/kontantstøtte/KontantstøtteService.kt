@@ -19,12 +19,12 @@ class KontantstøtteService(
 fun HentUtbetalingsinfoKontantstøtte.tilDto(): HentUtbetalingsinfoKontantstøtteDto =
     HentUtbetalingsinfoKontantstøtteDto(
         this.ksSakPerioder.isNotEmpty() || this.infotrygdPerioder.isNotEmpty(),
-        this.ksSakPerioder.map { KsSakPeriodeDto(it.fomMåned, it.tomMåned, KontantstøtteDatakilde.KONTANTSTØTTE) } +
+        this.ksSakPerioder.map { KsSakPeriodeDto(it.fomMåned, it.tomMåned, KontantstøtteDatakilde.KS_SAK) } +
             this.infotrygdPerioder.map { KsSakPeriodeDto(it.fomMåned, it.tomMåned, KontantstøtteDatakilde.INFOTRYGD) },
     )
 
 data class HentUtbetalingsinfoKontantstøtteDto(
-    val finnesUtbetaling: Boolean,
+    val finnesUtbetaling: Boolean, // gjelder historiske behandlinger
     val perioder: List<KsSakPeriodeDto>,
 )
 
@@ -35,6 +35,6 @@ data class KsSakPeriodeDto(
 )
 
 enum class KontantstøtteDatakilde {
-    KONTANTSTØTTE,
+    KS_SAK,
     INFOTRYGD,
 }
