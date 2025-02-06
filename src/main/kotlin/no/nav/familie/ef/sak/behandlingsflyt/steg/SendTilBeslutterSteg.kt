@@ -157,11 +157,10 @@ class SendTilBeslutterSteg(
         ferdigstillOppgave(saksbehandling)
         opprettTaskForBehandlingsstatistikk(saksbehandling.id)
         if (data != null) {
-                oppgaverForFerdigstillingService.lagreOppgaveIderForFerdigstilling(
-                    saksbehandling.id,
-                    data.fremleggsoppgaveIderSomSkalFerdigstilles,
-                )
-
+            oppgaverForFerdigstillingService.lagreOppgaveIderForFerdigstilling(
+                saksbehandling.id,
+                data.fremleggsoppgaveIderSomSkalFerdigstilles,
+            )
 
             oppgaverForOpprettelseService.opprettEllerErstatt(
                 saksbehandling.id,
