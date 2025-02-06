@@ -154,24 +154,14 @@ class SendTilBeslutterSteg(
             opprettGodkjennVedtakOppgave(saksbehandling)
         }
 
-        // TODO: Skal ikke ferdigstille, men lagre oppgaveider som skal ferdigstilles når vedtak godkjennes av beslutter.
-//        val oppgaverSomSkalFerdigstilles = data?.fremleggsoppgaverSomSkalFerdigstilles
-        // Tester med first, skal egentlig gjøre det for alle valgte oppgaver
-//        if (oppgaverSomSkalFerdigstilles?.isNotEmpty() == true) {
-//            val oppgave = oppgaverSomSkalFerdigstilles.first().let { oppgaveService.hentOppgave(it) }
-//            secureLogger.info("Ferdigstiller oppgave ${oppgave.id}")
-//            oppgave.id?.let { oppgaveService.ferdigstillOppgave(it) }
-//        }
-
         ferdigstillOppgave(saksbehandling)
         opprettTaskForBehandlingsstatistikk(saksbehandling.id)
         if (data != null) {
-            if (data.fremleggsoppgaveIderSomSkalFerdigstilles.isNotEmpty()) {
                 oppgaverForFerdigstillingService.lagreOppgaveIderForFerdigstilling(
                     saksbehandling.id,
                     data.fremleggsoppgaveIderSomSkalFerdigstilles,
                 )
-            }
+
 
             oppgaverForOpprettelseService.opprettEllerErstatt(
                 saksbehandling.id,
