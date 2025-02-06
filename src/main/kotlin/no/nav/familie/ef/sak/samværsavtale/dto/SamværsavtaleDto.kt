@@ -1,0 +1,41 @@
+package no.nav.familie.ef.sak.samværsavtale.dto
+
+import no.nav.familie.ef.sak.samværsavtale.domain.Samværsavtale
+import no.nav.familie.ef.sak.samværsavtale.domain.Samværsuke
+import no.nav.familie.ef.sak.samværsavtale.domain.SamværsukeWrapper
+import java.util.UUID
+
+data class SamværsavtaleDto(
+    val behandlingId: UUID,
+    val behandlingBarnId: UUID,
+    val uker: List<Samværsuke>,
+) {
+    fun mapTilSamværsandelerPerDag() =
+        this.uker.flatMap {
+            listOf(
+                it.mandag.andeler,
+                it.tirsdag.andeler,
+                it.onsdag.andeler,
+                it.torsdag.andeler,
+                it.fredag.andeler,
+                it.lørdag.andeler,
+                it.søndag.andeler,
+            )
+        }
+
+    fun summerTilSamværsandelerVerdiPerDag() = mapTilSamværsandelerPerDag().map { dag -> dag.sumOf { it.verdi } }
+}
+
+fun Samværsavtale.tilDto() =
+    SamværsavtaleDto(
+        behandlingId = this.behandlingId,
+        behandlingBarnId = this.behandlingBarnId,
+        uker = this.uker.uker,
+    )
+
+fun SamværsavtaleDto.tilDomene() =
+    Samværsavtale(
+        behandlingId = this.behandlingId,
+        behandlingBarnId = this.behandlingBarnId,
+        uker = SamværsukeWrapper(uker = this.uker),
+    )
