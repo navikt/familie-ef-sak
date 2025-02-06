@@ -61,9 +61,10 @@ internal class PersonopplysningerServiceTest {
 
         val personService = PersonService(PdlClientConfig().pdlClient(), ConcurrentMapCacheManager())
         every { egenAnsattClient.egenAnsatt(any()) } returns true
-        every { kontantstøtteService.finnesKontantstøtteUtbetalingerPåBruker(any()) } returns
+        every { kontantstøtteService.hentUtbetalingsinfoKontantstøtte(any()) } returns
             HentUtbetalingsinfoKontantstøtteDto(
                 finnesUtbetaling = false,
+                emptyList(),
             )
         every { fullmaktService.hentFullmakt(any()) } returns listOf(Fullmakt(LocalDate.of(2020, 1, 1), LocalDate.of(2021, 1, 1), "11111133333", MotpartsRolle.FULLMEKTIG, listOf()))
         val grunnlagsdataRegisterService =

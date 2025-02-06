@@ -51,7 +51,8 @@ fun opprettGrunnlagsdata(
         ),
     ),
     false,
-    null,
+    false,
+    emptyList(),
 )
 
 fun opprettBarnMedIdent(

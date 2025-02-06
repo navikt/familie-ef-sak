@@ -98,6 +98,7 @@ class VilkårGrunnlagService(
             dokumentasjon = søknad?.dokumentasjon,
             harAvsluttetArbeidsforhold = grunnlagsdata.harAvsluttetArbeidsforhold,
             harKontantstøttePerioder = grunnlagsdata.harKontantstøttePerioder,
+            kontantstøttePerioder = grunnlagsdata.kontantstøttePerioder,
         )
     }
 
