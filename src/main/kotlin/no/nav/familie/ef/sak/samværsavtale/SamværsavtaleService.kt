@@ -33,7 +33,7 @@ class SamværsavtaleService(
         validerBehandling(behandling)
         validerRequest(request, behandlingBarn)
 
-        val lagretSamværsavtale = hentEllerNull(request.behandlingId, request.behandlingBarnId)
+        val lagretSamværsavtale = hentSamværsavtaleEllerNull(request.behandlingId, request.behandlingBarnId)
 
         return if (lagretSamværsavtale === null) {
             samværsavtaleRepository.insert(request.tilDomene())
@@ -52,7 +52,7 @@ class SamværsavtaleService(
         samværsavtaleRepository.deleteByBehandlingIdAndBehandlingBarnId(behandlingId, behandlingBarnId)
     }
 
-    private fun hentEllerNull(
+    private fun hentSamværsavtaleEllerNull(
         behandlingId: UUID,
         behandlingBarnId: UUID,
     ): Samværsavtale? = samværsavtaleRepository.findByBehandlingIdAndBehandlingBarnId(behandlingId, behandlingBarnId)

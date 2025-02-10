@@ -41,14 +41,14 @@ class KontantstøtteServiceTest {
 
     @Test
     fun `skal sjekke kontantstøttevedtak for person med kontantstøtte`() {
-        val finnesKontantstøtte = kontantstøtteService.finnesKontantstøtteUtbetalingerPåBruker(morIdent)
+        val finnesKontantstøtte = kontantstøtteService.hentUtbetalingsinfoKontantstøtte(morIdent)
         Assertions.assertThat(finnesKontantstøtte.finnesUtbetaling).isTrue()
         verify(exactly = 1) { kontantstøtteClientMock.hentUtbetalingsinfo(morsIdenter) }
     }
 
     @Test
     fun `skal sjekke kontantstøttevedtak for person uten kontantstøtte`() {
-        val finnesKontantstøtte = kontantstøtteService.finnesKontantstøtteUtbetalingerPåBruker(identUtenKs)
+        val finnesKontantstøtte = kontantstøtteService.hentUtbetalingsinfoKontantstøtte(identUtenKs)
         Assertions.assertThat(finnesKontantstøtte.finnesUtbetaling).isFalse()
         verify(exactly = 1) { kontantstøtteClientMock.hentUtbetalingsinfo(listOf(identUtenKs)) }
     }

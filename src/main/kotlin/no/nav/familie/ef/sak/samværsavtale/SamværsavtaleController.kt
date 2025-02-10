@@ -19,7 +19,7 @@ import java.util.UUID
 @RequestMapping(path = ["/api/samvaersavtale"])
 @ProtectedWithClaims(issuer = "azuread")
 class SamværsavtaleController(
-    val samværsavtaleService: SamværsavtaleService,
+    private val samværsavtaleService: SamværsavtaleService,
     private val tilgangService: TilgangService,
 ) {
     @GetMapping("{behandlingId}")
