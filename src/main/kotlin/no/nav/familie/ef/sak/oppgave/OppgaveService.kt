@@ -302,7 +302,7 @@ class OppgaveService(
                         .ident
                 }
 
-        secureLogger.info("hentFremleggsoppgaver - aktivIdent: $aktivIdent, aktørId: $aktørId")
+        secureLogger.info("hentFremleggsoppgaver -  aktørId: $aktørId")
 
         val enhet = aktørId?.let { arbeidsfordelingService.hentNavEnhetId(it, Fremlegg) }
         val request =
@@ -316,7 +316,7 @@ class OppgaveService(
         return oppgaveClient.hentOppgaver(request)
     }
 
-    fun hentFerdigstilteOppgaver(oppgaveIder: List<Long>?): List<Oppgave> {
+    fun hentOppgaverMedIder(oppgaveIder: List<Long>?): List<Oppgave> {
         if (oppgaveIder != null) {
             return oppgaveIder.map { hentOppgave(it) }
         }

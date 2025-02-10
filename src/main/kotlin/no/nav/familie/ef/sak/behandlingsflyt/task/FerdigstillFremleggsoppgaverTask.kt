@@ -4,6 +4,7 @@ import no.nav.familie.ef.sak.behandling.oppgaverforferdigstilling.OppgaverForFer
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.ef.sak.oppgave.OppgaveService
+import no.nav.familie.kontrakter.felles.oppgave.StatusEnum
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
@@ -30,7 +31,9 @@ class FerdigstillFremleggsoppgaverTask(
         if (toggleKanFerdigstilleFremlegssoppgaver()) {
             val oppgaverForFerdigstilling = oppgaverForFerdigstillingService.hentOppgaverForFerdigstillingEllerNull(behandlingId)
             oppgaverForFerdigstilling?.fremleggsoppgaveIderSomSkalFerdigstilles?.forEach { id ->
-                oppgaveService.ferdigstillOppgave(id)
+                if (!erOppgaveFerdigstiltEllerFeilregistrert(id)) {
+                    oppgaveService.ferdigstillOppgave(id)
+                }
             }
         }
     }
@@ -47,6 +50,11 @@ class FerdigstillFremleggsoppgaverTask(
             )
 
         const val TYPE = "ferdigstillFremleggsoppgaverTask"
+    }
+
+    private fun erOppgaveFerdigstiltEllerFeilregistrert(oppgaveId: Long): Boolean {
+        val oppgave = oppgaveService.hentOppgave(oppgaveId)
+        return oppgave.status == StatusEnum.FERDIGSTILT || oppgave.status == StatusEnum.FEILREGISTRERT
     }
 
     private fun toggleKanFerdigstilleFremlegssoppgaver(): Boolean = featureToggleService.isEnabled(Toggle.FRONTEND_VIS_MARKERE_GODKJENNE_OPPGAVE_MODAL)

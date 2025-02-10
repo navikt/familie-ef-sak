@@ -78,20 +78,18 @@ class OppgaveController(
         @PathVariable behandlingId: UUID,
     ): Ressurs<OppgaveResponseDto> {
         val oppgaveRespons = oppgaveService.hentFremleggsoppgaver(behandlingId)
-        secureLogger.info("Hent fremleggsoppgaver. behandlingId: $behandlingId, oppgaveRespons: $oppgaveRespons")
         return Ressurs.success(oppgaveRespons.tilDto())
     }
 
-    @GetMapping("/hent-ferdigstilte-fremleggsoppgaver/{behandlingId}")
-    fun hentFerdigstilteFremleggsoppgaver(
+    @GetMapping("/oppgaver-for-ferdigstilling/{behandlingId}")
+    fun hentOppgaverForFerdigstilling(
         @PathVariable behandlingId: UUID,
     ): Ressurs<OppgaveResponseDto> {
         val oppgaveIder = oppgaverForFerdigstillingService.hentOppgaverForFerdigstillingEllerNull(behandlingId)?.fremleggsoppgaveIderSomSkalFerdigstilles
         secureLogger.info("Oppgave ider for behandlingId: $behandlingId, oppgaveIder: $oppgaveIder")
-        val oppgaver = oppgaveService.hentFerdigstilteOppgaver(oppgaveIder)
+        val oppgaver = oppgaveService.hentOppgaverMedIder(oppgaveIder)
         val oppgaveResponse = FinnOppgaveResponseDto(oppgaver.size.toLong(), oppgaver)
 
-        secureLogger.info("Hent ferdigstilte fremleggsoppgaver. behandlingId: $behandlingId, oppgaveResponsem: $oppgaveResponse")
         return Ressurs.success(oppgaveResponse.tilDto())
     }
 
