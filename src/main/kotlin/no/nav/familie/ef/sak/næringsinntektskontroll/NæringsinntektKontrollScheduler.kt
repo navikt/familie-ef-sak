@@ -1,4 +1,4 @@
-package no.nav.familie.ef.sak.selvstendig
+package no.nav.familie.ef.sak.næringsinntektskontroll
 
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle

@@ -5,7 +5,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import no.nav.familie.ef.sak.minside.MinSideKafkaProducerService
-import no.nav.familie.ef.sak.selvstendig.NæringsinntektBrukernotifikasjonService
+import no.nav.familie.ef.sak.næringsinntektskontroll.NæringsinntektBrukernotifikasjonService
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Primary
