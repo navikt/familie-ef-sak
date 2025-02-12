@@ -1,4 +1,4 @@
-package no.nav.familie.ef.sak.selvstendig
+package no.nav.familie.ef.sak.næringsinntektskontroll
 
 import no.nav.familie.ef.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ef.sak.behandling.BehandlingService
