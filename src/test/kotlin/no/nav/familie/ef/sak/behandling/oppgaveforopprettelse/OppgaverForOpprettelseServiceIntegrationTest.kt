@@ -2,6 +2,7 @@ package no.nav.familie.ef.sak.behandling.oppgaveforopprettelse
 
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
+import no.nav.familie.ef.sak.behandling.oppfølgingsoppgave.OppfølgingsoppgaveService
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseRepository
@@ -28,7 +29,7 @@ class OppgaverForOpprettelseServiceIntegrationTest : OppslagSpringRunnerTest() {
     private lateinit var vedtakService: VedtakService
 
     @Autowired
-    private lateinit var oppgaverForOpprettelseService: OppgaverForOpprettelseService
+    private lateinit var oppfølgingsoppgaveService: OppfølgingsoppgaveService
 
     val fagsak = fagsak()
     val behandling = behandling(fagsak = fagsak)
@@ -48,7 +49,7 @@ class OppgaverForOpprettelseServiceIntegrationTest : OppslagSpringRunnerTest() {
         opprettTilkjentYtelse(1000)
         opprettInntektskontroll()
 
-        assertThat(oppgaverForOpprettelseService.hentOppgaverForOpprettelseEllerNull(behandlingId)?.oppgavetyper).containsExactly(
+        assertThat(oppfølgingsoppgaveService.hentOppgaverForOpprettelseEllerNull(behandlingId)?.oppgavetyper).containsExactly(
             OppgaveForOpprettelseType.INNTEKTSKONTROLL_1_ÅR_FREM_I_TID,
         )
     }
@@ -59,11 +60,11 @@ class OppgaverForOpprettelseServiceIntegrationTest : OppslagSpringRunnerTest() {
         opprettInntektskontroll()
         opprettTomListe()
 
-        assertThat(oppgaverForOpprettelseService.hentOppgaverForOpprettelseEllerNull(behandlingId)?.oppgavetyper).isEmpty()
+        assertThat(oppfølgingsoppgaveService.hentOppgaverForOpprettelseEllerNull(behandlingId)?.oppgavetyper).isEmpty()
     }
 
     private fun opprettTomListe() {
-        oppgaverForOpprettelseService.opprettEllerErstatt(
+        oppfølgingsoppgaveService.lagreOppgaverForOpprettelse(
             behandlingId,
             data =
                 SendTilBeslutterDto(
@@ -73,7 +74,7 @@ class OppgaverForOpprettelseServiceIntegrationTest : OppslagSpringRunnerTest() {
     }
 
     private fun opprettInntektskontroll() {
-        oppgaverForOpprettelseService.opprettEllerErstatt(
+        oppfølgingsoppgaveService.lagreOppgaverForOpprettelse(
             behandlingId,
             data =
                 SendTilBeslutterDto(

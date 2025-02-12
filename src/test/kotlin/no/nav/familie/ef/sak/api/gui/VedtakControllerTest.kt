@@ -7,7 +7,7 @@ import no.nav.familie.ef.sak.api.gui.VedtakControllerTest.Saksbehandler.SAKSBEHA
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
-import no.nav.familie.ef.sak.behandling.oppgaveforopprettelse.OppgaverForOpprettelseService
+import no.nav.familie.ef.sak.behandling.oppfølgingsoppgave.OppfølgingsoppgaveService
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.behandlingsflyt.task.FerdigstillOppgaveTask
 import no.nav.familie.ef.sak.behandlingsflyt.task.OpprettOppgaveTask
@@ -108,7 +108,7 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
     private lateinit var taskService: TaskService
 
     @Autowired
-    private lateinit var oppgaverForOpprettelseService: OppgaverForOpprettelseService
+    private lateinit var oppfølgingsoppgaveService: OppfølgingsoppgaveService
 
     private val fagsak = fagsak()
     private val behandling = behandling(fagsak)
@@ -351,7 +351,7 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
             ),
         )
 
-        assertThat(oppgaverForOpprettelseService.hentOppgaverForOpprettelseEllerNull(behandlingId)?.oppgavetyper)
+        assertThat(oppfølgingsoppgaveService.hentOppgaverForOpprettelseEllerNull(behandlingId)?.oppgavetyper)
             .containsExactly(OppgaveForOpprettelseType.INNTEKTSKONTROLL_1_ÅR_FREM_I_TID)
     }
 

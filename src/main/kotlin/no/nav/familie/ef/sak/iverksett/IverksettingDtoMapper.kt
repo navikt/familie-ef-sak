@@ -4,7 +4,7 @@ import no.nav.familie.ef.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ef.sak.barn.BarnService
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
 import no.nav.familie.ef.sak.behandling.Saksbehandling
-import no.nav.familie.ef.sak.behandling.oppgaveforopprettelse.OppgaverForOpprettelseService
+import no.nav.familie.ef.sak.behandling.oppfølgingsoppgave.OppfølgingsoppgaveService
 import no.nav.familie.ef.sak.behandling.ÅrsakRevurderingsRepository
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.behandlingshistorikk.BehandlingshistorikkService
@@ -102,8 +102,8 @@ class IverksettingDtoMapper(
     private val grunnlagsdataService: GrunnlagsdataService,
     private val brevmottakereRepository: BrevmottakereRepository,
     private val årsakRevurderingsRepository: ÅrsakRevurderingsRepository,
-    private val oppgaverForOpprettelseService: OppgaverForOpprettelseService,
     private val behandlingRepository: BehandlingRepository,
+    private val oppfølgingsoppgaveService: OppfølgingsoppgaveService,
 ) {
     fun tilDto(
         saksbehandling: Saksbehandling,
@@ -318,7 +318,7 @@ class IverksettingDtoMapper(
             brevmottakere = brevmottakere,
             avslagÅrsak = vedtak.avslåÅrsak,
             oppgaverForOpprettelse =
-                oppgaverForOpprettelseService.hentOppgaverForOpprettelseEllerNull(vedtak.behandlingId)?.let {
+                oppfølgingsoppgaveService.hentOppgaverForOpprettelseEllerNull(vedtak.behandlingId)?.let {
                     OppgaverForOpprettelseDto(oppgavetyper = it.oppgavetyper, årForInntektskontrollSelvstendigNæringsdrivende = it.årForInntektskontrollSelvstendigNæringsdrivende)
                 } ?: OppgaverForOpprettelseDto(oppgavetyper = emptyList()),
             grunnbeløp = grunnbeløpFraTilkjentYtelse(tilkjentYtelse),

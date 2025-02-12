@@ -8,7 +8,7 @@ import io.mockk.verifyAll
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
-import no.nav.familie.ef.sak.behandling.oppgaveforopprettelse.OppgaverForOpprettelseService
+import no.nav.familie.ef.sak.behandling.oppfølgingsoppgave.OppfølgingsoppgaveService
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegService
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.brev.MellomlagringBrevService
@@ -37,7 +37,7 @@ class NullstillVedtakServiceTest {
     private val tilbakekrevingService = mockk<TilbakekrevingService>(relaxed = true)
     private val mellomlagringBrevService = mockk<MellomlagringBrevService>(relaxed = true)
     private val vedtaksbrevService = mockk<VedtaksbrevService>(relaxed = true)
-    private val oppgaverForOpprettelseService = mockk<OppgaverForOpprettelseService>(relaxed = true)
+    private val oppfølgingsoppgaveService = mockk<OppfølgingsoppgaveService>(relaxed = true)
     private val tilordnetRessursService = mockk<TilordnetRessursService>(relaxed = true)
 
     private val nullstillVedtakService =
@@ -50,8 +50,8 @@ class NullstillVedtakServiceTest {
             tilbakekrevingService,
             mellomlagringBrevService,
             vedtaksbrevService,
-            oppgaverForOpprettelseService,
             tilordnetRessursService,
+            oppfølgingsoppgaveService,
         )
     private val behandlingId = UUID.randomUUID()
 
@@ -79,7 +79,7 @@ class NullstillVedtakServiceTest {
             vedtaksbrevService.slettVedtaksbrev(any())
             vedtakService.slettVedtakHvisFinnes(behandlingId)
             stegService.resetSteg(behandlingId, StegType.BEREGNE_YTELSE)
-            oppgaverForOpprettelseService.slettOppgaverForOpprettelse(any())
+            oppfølgingsoppgaveService.slettOppfølgingsoppgave(any())
         }
 
         Assertions.assertThat(saksbehandling.captured.id).isEqualTo(behandlingId)

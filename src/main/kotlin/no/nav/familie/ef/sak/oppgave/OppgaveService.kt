@@ -292,19 +292,17 @@ class OppgaveService(
     fun hentFremleggsoppgaver(behandlingId: UUID): FinnOppgaveResponseDto {
         val aktivIdent = behandlingRepository.finnAktivIdent(behandlingId)
         val aktørId =
-            aktivIdent
-                .takeUnless { it.isBlank() }
-                ?.let {
-                    personService
-                        .hentAktørIder(it)
-                        .identer
-                        .first()
-                        .ident
-                }
+            aktivIdent.let {
+                personService
+                    .hentAktørIder(it)
+                    .identer
+                    .first()
+                    .ident
+            }
 
         secureLogger.info("hentFremleggsoppgaver -  aktørId: $aktørId")
 
-        val enhet = aktørId?.let { arbeidsfordelingService.hentNavEnhetId(it, Fremlegg) }
+        val enhet = aktørId.let { arbeidsfordelingService.hentNavEnhetId(it, Fremlegg) }
         val request =
             FinnOppgaveRequest(
                 tema = Tema.ENF,

@@ -1,6 +1,6 @@
 package no.nav.familie.ef.sak.oppgave
 
-import no.nav.familie.ef.sak.behandling.oppgaverforferdigstilling.OppgaverForFerdigstillingService
+import no.nav.familie.ef.sak.behandling.oppfølgingsoppgave.OppfølgingsoppgaveService
 import no.nav.familie.ef.sak.felles.util.FnrUtil.validerOptionalIdent
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
@@ -42,7 +42,7 @@ class OppgaveController(
     private val tilgangService: TilgangService,
     private val personService: PersonService,
     private val tilordnetRessursService: TilordnetRessursService,
-    private val oppgaverForFerdigstillingService: OppgaverForFerdigstillingService,
+    private val oppfølgingsoppgaveService: OppfølgingsoppgaveService,
 ) {
     private val logger = LoggerFactory.getLogger(javaClass)
     private val secureLogger = LoggerFactory.getLogger("secureLogger")
@@ -73,7 +73,7 @@ class OppgaveController(
         return Ressurs.success(oppgaveRepons.tilDto())
     }
 
-    @GetMapping("/hent-fremleggsoppgaver/{behandlingId}")
+    @GetMapping("/fremleggsoppgaver/{behandlingId}")
     fun hentFremleggsoppgaver(
         @PathVariable behandlingId: UUID,
     ): Ressurs<OppgaveResponseDto> {
@@ -85,10 +85,11 @@ class OppgaveController(
     fun hentOppgaverForFerdigstilling(
         @PathVariable behandlingId: UUID,
     ): Ressurs<OppgaveResponseDto> {
-        val oppgaveIder = oppgaverForFerdigstillingService.hentOppgaverForFerdigstillingEllerNull(behandlingId)?.fremleggsoppgaveIderSomSkalFerdigstilles
+        val oppgaveIder = oppfølgingsoppgaveService.hentOppgaverForFerdigstillingEllerNull(behandlingId)?.fremleggsoppgaveIderSomSkalFerdigstilles
         secureLogger.info("Oppgave ider for behandlingId: $behandlingId, oppgaveIder: $oppgaveIder")
         val oppgaver = oppgaveService.hentOppgaverMedIder(oppgaveIder)
-        val oppgaveResponse = FinnOppgaveResponseDto(oppgaver.size.toLong(), oppgaver)
+        val antallTreffTotalt = oppgaver.size.toLong()
+        val oppgaveResponse = FinnOppgaveResponseDto(antallTreffTotalt, oppgaver)
 
         return Ressurs.success(oppgaveResponse.tilDto())
     }

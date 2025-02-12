@@ -9,6 +9,8 @@ import io.mockk.verify
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.behandling.domain.Behandling
+import no.nav.familie.ef.sak.behandling.oppfølgingsoppgave.OppfølgingsoppgaveService
+import no.nav.familie.ef.sak.behandling.oppgaverforferdigstilling.OppgaverForFerdigstillingRepository
 import no.nav.familie.ef.sak.felles.util.BehandlingOppsettUtil.iverksattFørstegangsbehandling
 import no.nav.familie.ef.sak.felles.util.BehandlingOppsettUtil.iverksattRevurdering
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
@@ -33,14 +35,25 @@ import java.time.LocalDate
 import java.util.UUID
 
 internal class OppgaverForOpprettelseServiceTest {
+//    private val oppfølgingsoppgaveService = mockk<OppfølgingsoppgaveService>()
     private val oppgaverForOpprettelseRepository = mockk<OppgaverForOpprettelseRepository>()
     private val tilkjentYtelseService = mockk<TilkjentYtelseService>()
     private val behandlingService = mockk<BehandlingService>()
     private val vedtakService = mockk<VedtakService>()
     private val featureToggleService = mockk<FeatureToggleService>()
+    private val oppgaverForFerdigstillingRepository = mockk<OppgaverForFerdigstillingRepository>()
 
-    private var oppgaverForOpprettelseService =
-        spyk(OppgaverForOpprettelseService(oppgaverForOpprettelseRepository, behandlingService, tilkjentYtelseService, vedtakService, featureToggleService))
+    private var oppfølgingsoppgaveService =
+        spyk(
+            OppfølgingsoppgaveService(
+                oppgaverForFerdigstillingRepository,
+                oppgaverForOpprettelseRepository,
+                behandlingService,
+                tilkjentYtelseService,
+                vedtakService,
+                featureToggleService,
+            ),
+        )
 
     private val behandling = behandling(fagsak = fagsak())
     private val behandlingId = behandling.id
@@ -60,7 +73,7 @@ internal class OppgaverForOpprettelseServiceTest {
 
     @Test
     fun `slett innslag når det ikke kan opprettes noen oppgaver og det finnes innslag fra før`() {
-        every { oppgaverForOpprettelseService.hentOppgavetyperSomKanOpprettes(any()) } returns emptyList()
+        every { oppfølgingsoppgaveService.hentOppgavetyperSomKanOpprettes(any()) } returns emptyList()
         every { oppgaverForOpprettelseRepository.existsById(any()) } returns true
         every { behandlingService.hentSaksbehandling(behandlingId) } returns saksbehandling
 
@@ -73,7 +86,7 @@ internal class OppgaverForOpprettelseServiceTest {
 
     @Test
     fun `ikke gjør noe når det ikke kan opprettes oppgaver og det ikke finnes innslag fra før`() {
-        every { oppgaverForOpprettelseService.hentOppgavetyperSomKanOpprettes(any()) } returns emptyList()
+        every { oppfølgingsoppgaveService.hentOppgavetyperSomKanOpprettes(any()) } returns emptyList()
         every { oppgaverForOpprettelseRepository.existsById(any()) } returns false
 
         opprettTomListeForOppgavetyperSomSkalOpprettes(behandlingId)
@@ -85,7 +98,7 @@ internal class OppgaverForOpprettelseServiceTest {
 
     @Test
     fun `oppdater innslag når det finnes innslag, og når man kan oppdatere oppgaver `() {
-        every { oppgaverForOpprettelseService.hentOppgavetyperSomKanOpprettes(any()) } returns
+        every { oppfølgingsoppgaveService.hentOppgavetyperSomKanOpprettes(any()) } returns
             listOf(
                 OppgaveForOpprettelseType.INNTEKTSKONTROLL_1_ÅR_FREM_I_TID,
             )
@@ -100,7 +113,7 @@ internal class OppgaverForOpprettelseServiceTest {
 
     @Test
     fun `lag innslag når det ikke finnes innslag, og når man kan oppdatere oppgaver`() {
-        every { oppgaverForOpprettelseService.hentOppgavetyperSomKanOpprettes(any()) } returns
+        every { oppfølgingsoppgaveService.hentOppgavetyperSomKanOpprettes(any()) } returns
             listOf(
                 OppgaveForOpprettelseType.INNTEKTSKONTROLL_1_ÅR_FREM_I_TID,
             )
@@ -118,7 +131,7 @@ internal class OppgaverForOpprettelseServiceTest {
         every { tilkjentYtelseService.hentForBehandlingEllerNull(any()) } returns tilkjentYtelse2årFremITid
         every { behandlingService.hentSaksbehandling(iverksattFørstegangsbehandling.id) } returns saksbehandling
 
-        val oppgaver = oppgaverForOpprettelseService.hentOppgavetyperSomKanOpprettes(iverksattFørstegangsbehandling.id)
+        val oppgaver = oppfølgingsoppgaveService.hentOppgavetyperSomKanOpprettes(iverksattFørstegangsbehandling.id)
 
         assertThat(oppgaver.contains(OppgaveForOpprettelseType.INNTEKTSKONTROLL_1_ÅR_FREM_I_TID)).isTrue
     }
@@ -127,7 +140,7 @@ internal class OppgaverForOpprettelseServiceTest {
     fun `skal kunne opprette oppgave hvis behandling er en revurdering`() {
         every { tilkjentYtelseService.hentForBehandlingEllerNull(any()) } returns tilkjentYtelse2årFremITid
         every { behandlingService.hentSaksbehandling(iverksattRevurdering.id) } returns saksbehandling
-        val oppgaver = oppgaverForOpprettelseService.hentOppgavetyperSomKanOpprettes(iverksattRevurdering.id)
+        val oppgaver = oppfølgingsoppgaveService.hentOppgavetyperSomKanOpprettes(iverksattRevurdering.id)
 
         assertThat(oppgaver.contains(OppgaveForOpprettelseType.INNTEKTSKONTROLL_1_ÅR_FREM_I_TID)).isTrue
     }
@@ -136,7 +149,7 @@ internal class OppgaverForOpprettelseServiceTest {
     fun `skal ikke kunne opprette oppgave hvis behandling er førstegangsbehandling, men andeler under 1 år frem i tid`() {
         every { tilkjentYtelseService.hentForBehandlingEllerNull(any()) } returns tilkjentYtelseUnder1årFremITid
         every { behandlingService.hentSaksbehandling(iverksattFørstegangsbehandling.id) } returns saksbehandling
-        val oppgaver = oppgaverForOpprettelseService.hentOppgavetyperSomKanOpprettes(iverksattFørstegangsbehandling.id)
+        val oppgaver = oppfølgingsoppgaveService.hentOppgavetyperSomKanOpprettes(iverksattFørstegangsbehandling.id)
 
         assertThat(oppgaver.contains(OppgaveForOpprettelseType.INNTEKTSKONTROLL_1_ÅR_FREM_I_TID)).isFalse
     }
@@ -146,7 +159,7 @@ internal class OppgaverForOpprettelseServiceTest {
         val saksbehandling = lagSaksbehandling(stønadType = StønadType.BARNETILSYN, behandling = behandling)
         every { tilkjentYtelseService.hentForBehandlingEllerNull(any()) } returns tilkjentYtelseUnder1årFremITid
         every { behandlingService.hentSaksbehandling(iverksattFørstegangsbehandling.id) } returns saksbehandling
-        val oppgaver = oppgaverForOpprettelseService.hentOppgavetyperSomKanOpprettes(iverksattFørstegangsbehandling.id)
+        val oppgaver = oppfølgingsoppgaveService.hentOppgavetyperSomKanOpprettes(iverksattFørstegangsbehandling.id)
 
         assertThat(oppgaver.contains(OppgaveForOpprettelseType.INNTEKTSKONTROLL_1_ÅR_FREM_I_TID)).isFalse
     }
@@ -160,7 +173,7 @@ internal class OppgaverForOpprettelseServiceTest {
         every { vedtak.resultatType } returns ResultatType.AVSLÅ
         every { behandlingService.finnSisteIverksatteBehandling(any()) } returns behandling
 
-        val oppgaver = oppgaverForOpprettelseService.hentOppgavetyperSomKanOpprettes(iverksattFørstegangsbehandling.id)
+        val oppgaver = oppfølgingsoppgaveService.hentOppgavetyperSomKanOpprettes(iverksattFørstegangsbehandling.id)
 
         assertThat(oppgaver.contains(OppgaveForOpprettelseType.INNTEKTSKONTROLL_1_ÅR_FREM_I_TID)).isFalse
     }
@@ -174,7 +187,7 @@ internal class OppgaverForOpprettelseServiceTest {
         every { vedtak.resultatType } returns ResultatType.AVSLÅ
         every { behandlingService.finnSisteIverksatteBehandling(any()) } returns behandling
 
-        val oppgaver = oppgaverForOpprettelseService.hentOppgavetyperSomKanOpprettes(iverksattFørstegangsbehandling.id)
+        val oppgaver = oppfølgingsoppgaveService.hentOppgavetyperSomKanOpprettes(iverksattFørstegangsbehandling.id)
         assertThat(oppgaver.contains(OppgaveForOpprettelseType.INNTEKTSKONTROLL_1_ÅR_FREM_I_TID)).isTrue()
     }
 
@@ -187,7 +200,7 @@ internal class OppgaverForOpprettelseServiceTest {
         every { vedtak.resultatType } returns ResultatType.AVSLÅ
         every { behandlingService.finnSisteIverksatteBehandling(any()) } returns behandling
 
-        val oppgaver = oppgaverForOpprettelseService.hentOppgavetyperSomKanOpprettes(iverksattFørstegangsbehandling.id)
+        val oppgaver = oppfølgingsoppgaveService.hentOppgavetyperSomKanOpprettes(iverksattFørstegangsbehandling.id)
         assertThat(oppgaver.contains(OppgaveForOpprettelseType.INNTEKTSKONTROLL_1_ÅR_FREM_I_TID)).isTrue()
     }
 
@@ -200,7 +213,7 @@ internal class OppgaverForOpprettelseServiceTest {
         every { vedtak.resultatType } returns ResultatType.AVSLÅ
         every { behandlingService.finnSisteIverksatteBehandling(any()) } returns behandling
 
-        val oppgaver = oppgaverForOpprettelseService.hentOppgavetyperSomKanOpprettes(iverksattFørstegangsbehandling.id)
+        val oppgaver = oppfølgingsoppgaveService.hentOppgavetyperSomKanOpprettes(iverksattFørstegangsbehandling.id)
         assertThat(oppgaver.contains(OppgaveForOpprettelseType.INNTEKTSKONTROLL_1_ÅR_FREM_I_TID)).isFalse()
     }
 
@@ -213,7 +226,7 @@ internal class OppgaverForOpprettelseServiceTest {
         every { vedtak.resultatType } returns ResultatType.AVSLÅ
         every { behandlingService.finnSisteIverksatteBehandling(any()) } returns behandling
 
-        oppgaverForOpprettelseService.hentOppgavetyperSomKanOpprettes(iverksattFørstegangsbehandling.id)
+        oppfølgingsoppgaveService.hentOppgavetyperSomKanOpprettes(iverksattFørstegangsbehandling.id)
         verify { behandlingService.finnSisteIverksatteBehandling(any()) }
     }
 
@@ -252,7 +265,7 @@ internal class OppgaverForOpprettelseServiceTest {
     }
 
     private fun opprettTomListeForOppgavetyperSomSkalOpprettes(behandlingId: UUID) =
-        oppgaverForOpprettelseService.opprettEllerErstatt(
+        oppfølgingsoppgaveService.lagreOppgaverForOpprettelse(
             behandlingId = behandlingId,
             data =
                 SendTilBeslutterDto(

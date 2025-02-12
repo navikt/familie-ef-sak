@@ -10,7 +10,7 @@ import no.nav.familie.ef.sak.barn.BarnService
 import no.nav.familie.ef.sak.barn.BehandlingBarn
 import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
-import no.nav.familie.ef.sak.behandling.oppgaveforopprettelse.OppgaverForOpprettelseService
+import no.nav.familie.ef.sak.behandling.oppfølgingsoppgave.OppfølgingsoppgaveService
 import no.nav.familie.ef.sak.beregning.Beløpsperiode
 import no.nav.familie.ef.sak.beregning.BeregningService
 import no.nav.familie.ef.sak.beregning.Inntekt
@@ -91,7 +91,7 @@ internal class BeregnYtelseStegTest {
     private val barnService = mockk<BarnService>(relaxed = true)
     private val fagsakService = mockk<FagsakService>(relaxed = true)
     private val validerOmregningService = mockk<ValiderOmregningService>(relaxed = true)
-    private val oppgaverForOpprettelseService = mockk<OppgaverForOpprettelseService>(relaxed = true)
+    private val oppfølgingsoppgaveService = mockk<OppfølgingsoppgaveService>(relaxed = true)
     private val featureToggleService = mockFeatureToggleService()
 
     private val steg =
@@ -107,8 +107,7 @@ internal class BeregnYtelseStegTest {
             barnService,
             fagsakService,
             validerOmregningService,
-            oppgaverForOpprettelseService,
-            featureToggleService,
+            oppfølgingsoppgaveService,
         )
 
     private val slot = slot<TilkjentYtelse>()
@@ -661,7 +660,7 @@ internal class BeregnYtelseStegTest {
 
             verify { tilbakekrevingService.slettTilbakekreving(any()) }
             verify { simuleringService.slettSimuleringForBehandling(any()) }
-            verify { oppgaverForOpprettelseService.slettOppgaverForOpprettelse(any()) }
+            verify { oppfølgingsoppgaveService.slettOppfølgingsoppgave(any()) }
         }
 
         @Test
@@ -1514,7 +1513,7 @@ internal class BeregnYtelseStegTest {
                 Opphør(opphørFom = YearMonth.from(fom), begrunnelse = "null"),
                 forrigeBehandlingId = UUID.randomUUID(),
             )
-            verify { oppgaverForOpprettelseService.slettOppgaverForOpprettelse(any()) }
+            verify { oppfølgingsoppgaveService.slettOppfølgingsoppgave(any()) }
         }
     }
 

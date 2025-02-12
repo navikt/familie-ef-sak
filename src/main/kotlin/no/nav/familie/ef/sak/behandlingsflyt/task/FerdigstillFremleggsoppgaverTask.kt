@@ -1,6 +1,6 @@
 package no.nav.familie.ef.sak.behandlingsflyt.task
 
-import no.nav.familie.ef.sak.behandling.oppgaverforferdigstilling.OppgaverForFerdigstillingService
+import no.nav.familie.ef.sak.behandling.oppfølgingsoppgave.OppfølgingsoppgaveService
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.ef.sak.oppgave.OppgaveService
@@ -21,15 +21,15 @@ import java.util.UUID
     beskrivelse = "Skal ferdigstille valgte fremleggsoppgaver når behandlingen er besluttet.",
 )
 class FerdigstillFremleggsoppgaverTask(
-    private val oppgaverForFerdigstillingService: OppgaverForFerdigstillingService,
     private val oppgaveService: OppgaveService,
     private val featureToggleService: FeatureToggleService,
+    private val oppfølgingsoppgaveService: OppfølgingsoppgaveService,
 ) : AsyncTaskStep {
     override fun doTask(task: Task) {
         val behandlingId = UUID.fromString(task.payload)
 
         if (toggleKanFerdigstilleFremlegssoppgaver()) {
-            val oppgaverForFerdigstilling = oppgaverForFerdigstillingService.hentOppgaverForFerdigstillingEllerNull(behandlingId)
+            val oppgaverForFerdigstilling = oppfølgingsoppgaveService.hentOppgaverForFerdigstillingEllerNull(behandlingId)
             oppgaverForFerdigstilling?.fremleggsoppgaveIderSomSkalFerdigstilles?.forEach { id ->
                 if (!erOppgaveFerdigstiltEllerFeilregistrert(id)) {
                     oppgaveService.ferdigstillOppgave(id)

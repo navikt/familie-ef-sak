@@ -1,7 +1,7 @@
 package no.nav.familie.ef.sak.vedtak
 
 import no.nav.familie.ef.sak.behandling.BehandlingService
-import no.nav.familie.ef.sak.behandling.oppgaveforopprettelse.OppgaverForOpprettelseService
+import no.nav.familie.ef.sak.behandling.oppfølgingsoppgave.OppfølgingsoppgaveService
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegService
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.brev.MellomlagringBrevService
@@ -25,8 +25,8 @@ class NullstillVedtakService(
     private val tilbakekrevingService: TilbakekrevingService,
     private val mellomlagringBrevService: MellomlagringBrevService,
     private val vedtaksbrevService: VedtaksbrevService,
-    private val oppgaverForOpprettelseService: OppgaverForOpprettelseService,
     private val tilordnetRessursService: TilordnetRessursService,
+    private val oppfølgingsoppgaveService: OppfølgingsoppgaveService,
 ) {
     @Transactional
     fun nullstillVedtak(behandlingId: UUID) {
@@ -48,6 +48,6 @@ class NullstillVedtakService(
         }
         vedtakService.slettVedtakHvisFinnes(behandlingId)
         vedtaksbrevService.slettVedtaksbrev(saksbehandling)
-        oppgaverForOpprettelseService.slettOppgaverForOpprettelse(behandlingId)
+        oppfølgingsoppgaveService.slettOppfølgingsoppgave(behandlingId)
     }
 }
