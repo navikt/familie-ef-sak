@@ -17,6 +17,7 @@ import no.nav.familie.ef.sak.infrastruktur.exception.feilHvisIkke
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.oppgave.TilordnetRessursService
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
+import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.ef.sak.vedtak.domain.VedtakErUtenBeslutter
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
@@ -31,6 +32,7 @@ class VedtaksbrevService(
     private val brevsignaturService: BrevsignaturService,
     private val familieDokumentClient: FamilieDokumentClient,
     private val tilordnetRessursService: TilordnetRessursService,
+    private val vedtakService: VedtakService,
 ) {
     fun hentBeslutterbrevEllerRekonstruerSaksbehandlerBrev(behandlingId: UUID): ByteArray {
         val vedtaksbrev = brevRepository.findByIdOrThrow(behandlingId)
@@ -51,8 +53,9 @@ class VedtaksbrevService(
         brevmal: String,
     ): ByteArray {
         validerRedigerbarBehandling(saksbehandling)
-
-        val saksbehandlersignatur = brevsignaturService.lagSignaturMedEnhet(saksbehandling)
+        val vedtak = vedtakService.hentVedtak(saksbehandling.id)
+        val vedtakErUtenBeslutter = vedtak.utledVedtakErUtenBeslutter()
+        val saksbehandlersignatur = brevsignaturService.lagSignaturMedEnhet(saksbehandling, vedtakErUtenBeslutter)
 
         val html =
             brevClient.genererHtml(
@@ -100,7 +103,9 @@ class VedtaksbrevService(
 
     fun forhåndsvisBeslutterBrev(saksbehandling: Saksbehandling): ByteArray {
         val vedtaksbrev = brevRepository.findByIdOrThrow(saksbehandling.id)
-        val signaturMedEnhet = brevsignaturService.lagSignaturMedEnhet(saksbehandling)
+        val vedtak = vedtakService.hentVedtak(saksbehandling.id)
+        val vedtakErUtenBeslutter = vedtak.utledVedtakErUtenBeslutter()
+        val signaturMedEnhet = brevsignaturService.lagSignaturMedEnhet(saksbehandling, vedtakErUtenBeslutter)
 
         feilHvis(vedtaksbrev.saksbehandlerHtml == null) {
             "Mangler saksbehandlerbrev"

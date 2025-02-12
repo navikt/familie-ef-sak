@@ -5,6 +5,7 @@ import no.nav.familie.ef.sak.brev.dto.SignaturDto
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerService
+import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.ef.sak.vedtak.domain.VedtakErUtenBeslutter
 import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG
 import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG_UTLAND
@@ -13,10 +14,12 @@ import org.springframework.stereotype.Service
 @Service
 class BrevsignaturService(
     val personopplysningerService: PersonopplysningerService,
+    val vedtakService: VedtakService,
 ) {
-    fun lagSignaturMedEnhet(saksbehandling: Saksbehandling): SignaturDto = lagSignaturDto(saksbehandling.ident)
-
-    fun lagSignaturMedEnhet(fagsak: Fagsak): SignaturDto = lagSignaturDto(fagsak.hentAktivIdent())
+    fun lagSignaturMedEnhet(
+        fagsak: Fagsak,
+        vedtakErUtenBeslutter: Boolean,
+    ): SignaturDto = lagSignaturDto(fagsak.hentAktivIdent(), vedtakErUtenBeslutter)
 
     fun lagSignaturMedEnhet(
         saksbehandling: Saksbehandling,
@@ -25,10 +28,13 @@ class BrevsignaturService(
         if (vedtakErUtenBeslutter.value) {
             return SignaturDto("", "", true)
         }
-        return lagSignaturMedEnhet(saksbehandling)
+        return lagSignaturDto(saksbehandling.ident, vedtakErUtenBeslutter.value)
     }
 
-    private fun lagSignaturDto(ident: String): SignaturDto {
+    private fun lagSignaturDto(
+        ident: String,
+        vedtakErUtenBeslutter: Boolean,
+    ): SignaturDto {
         val harStrengtFortroligAdresse: Boolean =
             personopplysningerService
                 .hentStrengesteAdressebeskyttelseForPersonMedRelasjoner(ident)
@@ -37,7 +43,7 @@ class BrevsignaturService(
         return if (harStrengtFortroligAdresse) {
             SignaturDto(NAV_ANONYM_NAVN, ENHET_VIKAFOSSEN, true)
         } else {
-            SignaturDto(SikkerhetContext.hentSaksbehandlerNavn(true), ENHET_NAY, false)
+            SignaturDto(SikkerhetContext.hentSaksbehandlerNavn(true), ENHET_NAY, vedtakErUtenBeslutter)
         }
     }
 

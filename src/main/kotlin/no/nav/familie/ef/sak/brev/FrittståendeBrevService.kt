@@ -37,7 +37,7 @@ class FrittståendeBrevService(
         brevrequest: JsonNode,
     ): ByteArray {
         val fagsak = fagsakService.hentFagsak(fagsakId)
-        val signatur = brevsignaturService.lagSignaturMedEnhet(fagsak)
+        val signatur = brevsignaturService.lagSignaturMedEnhet(fagsak, false)
 
         val html =
             brevClient

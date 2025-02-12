@@ -27,6 +27,8 @@ import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.ef.sak.repository.saksbehandling
+import no.nav.familie.ef.sak.repository.vedtak
+import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.ef.sak.vedtak.domain.VedtakErUtenBeslutter
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG
@@ -45,7 +47,8 @@ internal class VedtaksbrevServiceTest {
     private val brevClient = mockk<BrevClient>()
     private val vedtaksbrevRepository = mockk<VedtaksbrevRepository>()
     private val personopplysningerService = mockk<PersonopplysningerService>()
-    private val brevsignaturService = BrevsignaturService(personopplysningerService)
+    private val vedtakService: VedtakService = mockk<VedtakService>()
+    private val brevsignaturService = BrevsignaturService(personopplysningerService, vedtakService)
     private val familieDokumentClient = mockk<FamilieDokumentClient>()
     private val tilordnetRessursService = mockk<TilordnetRessursService>()
 
@@ -56,6 +59,7 @@ internal class VedtaksbrevServiceTest {
             brevsignaturService,
             familieDokumentClient,
             tilordnetRessursService,
+            vedtakService,
         )
 
     private val vedtakKreverBeslutter = VedtakErUtenBeslutter(false)
@@ -68,6 +72,7 @@ internal class VedtaksbrevServiceTest {
     fun setUp() {
         mockBrukerContext(beslutterNavn)
         every { personopplysningerService.hentStrengesteAdressebeskyttelseForPersonMedRelasjoner(any()) } returns UGRADERT
+        every { vedtakService.hentVedtak(any()) } returns vedtak(behandling.id)
     }
 
     @AfterEach
