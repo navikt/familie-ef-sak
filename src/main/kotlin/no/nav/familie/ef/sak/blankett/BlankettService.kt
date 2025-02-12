@@ -43,6 +43,8 @@ class BlankettService(
                     årsakRevurdering = årsakRevurderingService.hentÅrsakRevurdering(behandlingId)?.tilDto(),
                     tidligereVedtaksperioder = grunnlagsdata.tidligereVedtaksperioder.tilDto(),
                     harKontantstøttePerioder = grunnlagsdata.harKontantstøttePerioder,
+                    kontantstøttePerioderFraKs = grunnlagsdata.kontantstøttePerioder,
+                    registeropplysningerOpprettetDato = vilkårVurderinger.grunnlag.registeropplysningerOpprettetTid.toLocalDate(),
                 ),
                 lagPersonopplysningerDto(behandling),
                 vurderingService.hentEllerOpprettVurderinger(behandlingId),
