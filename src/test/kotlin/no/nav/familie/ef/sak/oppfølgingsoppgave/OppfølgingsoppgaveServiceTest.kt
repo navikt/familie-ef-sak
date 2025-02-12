@@ -1,4 +1,4 @@
-package no.nav.familie.ef.sak.behandling.oppgaveforopprettelse
+package no.nav.familie.ef.sak.no.nav.familie.ef.sak.oppfølgingsoppgave
 
 import io.mockk.every
 import io.mockk.just
@@ -9,6 +9,7 @@ import io.mockk.verify
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.behandling.domain.Behandling
+import no.nav.familie.ef.sak.behandling.oppgaveforopprettelse.OppgaverForOpprettelseRepository
 import no.nav.familie.ef.sak.behandling.oppgaverforferdigstilling.OppgaverForFerdigstillingRepository
 import no.nav.familie.ef.sak.felles.util.BehandlingOppsettUtil.iverksattFørstegangsbehandling
 import no.nav.familie.ef.sak.felles.util.BehandlingOppsettUtil.iverksattRevurdering
@@ -35,7 +36,7 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.util.UUID
 
-internal class OppgaverForOpprettelseServiceTest {
+internal class OppfølgingsoppgaveServiceTest {
     private val oppgaverForOpprettelseRepository = mockk<OppgaverForOpprettelseRepository>()
     private val tilkjentYtelseService = mockk<TilkjentYtelseService>()
     private val behandlingService = mockk<BehandlingService>()

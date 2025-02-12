@@ -1,4 +1,4 @@
-package no.nav.familie.ef.sak.behandling.oppgaveforopprettelse
+package no.nav.familie.ef.sak.no.nav.familie.ef.sak.oppfølgingsoppgave
 
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
@@ -18,7 +18,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
 
-class OppgaverForOpprettelseServiceIntegrationTest : OppslagSpringRunnerTest() {
+class OppfølgingsoppgaveServiceIntegrationTest : OppslagSpringRunnerTest() {
     @Autowired
     private lateinit var behandlingRepository: BehandlingRepository
 
