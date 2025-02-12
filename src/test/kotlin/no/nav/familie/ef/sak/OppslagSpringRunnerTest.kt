@@ -23,6 +23,7 @@ import no.nav.familie.ef.sak.fagsak.domain.FagsakPerson
 import no.nav.familie.ef.sak.felles.util.TokenUtil
 import no.nav.familie.ef.sak.infrastruktur.config.RolleConfig
 import no.nav.familie.ef.sak.iverksett.oppgaveterminbarn.TerminbarnOppgave
+import no.nav.familie.ef.sak.næringsinntektskontroll.NæringsinntektKontrollDomain
 import no.nav.familie.ef.sak.oppgave.Oppgave
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.Grunnlagsdata
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.Søknad
@@ -165,6 +166,7 @@ abstract class OppslagSpringRunnerTest {
             Task::class,
             Migreringsstatus::class,
             OppgaverForOpprettelse::class,
+            NæringsinntektKontrollDomain::class,
         ).forEach { jdbcAggregateOperations.deleteAll(it.java) }
     }
 
