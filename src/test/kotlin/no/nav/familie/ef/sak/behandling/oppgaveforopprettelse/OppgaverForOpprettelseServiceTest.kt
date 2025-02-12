@@ -9,12 +9,13 @@ import io.mockk.verify
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.behandling.domain.Behandling
-import no.nav.familie.ef.sak.behandling.oppfølgingsoppgave.OppfølgingsoppgaveService
 import no.nav.familie.ef.sak.behandling.oppgaverforferdigstilling.OppgaverForFerdigstillingRepository
 import no.nav.familie.ef.sak.felles.util.BehandlingOppsettUtil.iverksattFørstegangsbehandling
 import no.nav.familie.ef.sak.felles.util.BehandlingOppsettUtil.iverksattRevurdering
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
+import no.nav.familie.ef.sak.oppfølgingsoppgave.OppfølgingsoppgaveService
+import no.nav.familie.ef.sak.oppfølgingsoppgave.domain.OppgaverForOpprettelse
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.saksbehandling
@@ -35,7 +36,6 @@ import java.time.LocalDate
 import java.util.UUID
 
 internal class OppgaverForOpprettelseServiceTest {
-//    private val oppfølgingsoppgaveService = mockk<OppfølgingsoppgaveService>()
     private val oppgaverForOpprettelseRepository = mockk<OppgaverForOpprettelseRepository>()
     private val tilkjentYtelseService = mockk<TilkjentYtelseService>()
     private val behandlingService = mockk<BehandlingService>()
@@ -64,6 +64,7 @@ internal class OppgaverForOpprettelseServiceTest {
     @BeforeEach
     fun init() {
         every { oppgaverForOpprettelseRepository.deleteById(any()) } just runs
+        every { oppgaverForOpprettelseRepository.deleteByBehandlingId(any()) } just runs
         every { oppgaverForOpprettelseRepository.insert(any()) } returns oppgaverForOpprettelse
         every { oppgaverForOpprettelseRepository.update(any()) } returns oppgaverForOpprettelse
         every { vedtak.resultatType } returns ResultatType.INNVILGE
@@ -106,9 +107,8 @@ internal class OppgaverForOpprettelseServiceTest {
 
         opprettTomListeForOppgavetyperSomSkalOpprettes(behandlingId)
 
-        verify(exactly = 0) { oppgaverForOpprettelseRepository.deleteById(any()) }
-        verify(exactly = 0) { oppgaverForOpprettelseRepository.insert(any()) }
-        verify { oppgaverForOpprettelseRepository.update(any()) }
+        verify { oppgaverForOpprettelseRepository.deleteByBehandlingId(any()) }
+        verify { oppgaverForOpprettelseRepository.insert(any()) }
     }
 
     @Test

@@ -1,15 +1,15 @@
-package no.nav.familie.ef.sak.behandling.oppfølgingsoppgave
+package no.nav.familie.ef.sak.oppfølgingsoppgave
 
 import no.nav.familie.ef.sak.behandling.BehandlingService
-import no.nav.familie.ef.sak.behandling.oppgaveforopprettelse.OppgaverForOpprettelse
 import no.nav.familie.ef.sak.behandling.oppgaveforopprettelse.OppgaverForOpprettelseDto
 import no.nav.familie.ef.sak.behandling.oppgaveforopprettelse.OppgaverForOpprettelseRepository
-import no.nav.familie.ef.sak.behandling.oppgaverforferdigstilling.OppgaverForFerdigstilling
 import no.nav.familie.ef.sak.behandling.oppgaverforferdigstilling.OppgaverForFerdigstillingDto
 import no.nav.familie.ef.sak.behandling.oppgaverforferdigstilling.OppgaverForFerdigstillingRepository
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvisIkke
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
+import no.nav.familie.ef.sak.oppfølgingsoppgave.domain.OppgaverForFerdigstilling
+import no.nav.familie.ef.sak.oppfølgingsoppgave.domain.OppgaverForOpprettelse
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.vedtak.VedtakService
@@ -37,17 +37,12 @@ class OppfølgingsoppgaveService(
     fun lagreOppgaveIderForFerdigstilling(
         behandlingId: UUID,
         oppgaveIder: List<Long>,
-    ): OppgaverForFerdigstilling =
-        when (oppgaverForFerdigstillingRepository.existsById(behandlingId)) {
-            true ->
-                oppgaverForFerdigstillingRepository.update(
-                    OppgaverForFerdigstilling(behandlingId, oppgaveIder),
-                )
-            false ->
-                oppgaverForFerdigstillingRepository.insert(
-                    OppgaverForFerdigstilling(behandlingId, oppgaveIder),
-                )
-        }
+    ) {
+        oppgaverForFerdigstillingRepository.deleteByBehandlingId(behandlingId)
+        oppgaverForFerdigstillingRepository.insert(
+            OppgaverForFerdigstilling(behandlingId, oppgaveIder),
+        )
+    }
 
     @Transactional
     fun lagreOppgaverForOpprettelse(
@@ -65,10 +60,8 @@ class OppfølgingsoppgaveService(
         feilHvisIkke(oppgavetyperSomKanOpprettes.containsAll(nyeOppgaver)) {
             "behandlingId=$behandlingId prøver å opprette $nyeOppgaver $oppgavetyperSomKanOpprettes"
         }
-        when (oppgaverForOpprettelseRepository.existsById(behandlingId)) {
-            true -> oppgaverForOpprettelseRepository.update(OppgaverForOpprettelse(behandlingId, nyeOppgaver, årForInntektskontrollSelvstendigNæringsdrivende))
-            false -> oppgaverForOpprettelseRepository.insert(OppgaverForOpprettelse(behandlingId, nyeOppgaver, årForInntektskontrollSelvstendigNæringsdrivende))
-        }
+        oppgaverForOpprettelseRepository.deleteByBehandlingId(behandlingId)
+        oppgaverForOpprettelseRepository.insert(OppgaverForOpprettelse(behandlingId, nyeOppgaver, årForInntektskontrollSelvstendigNæringsdrivende))
     }
 
     fun hentOppgaverForOpprettelse(

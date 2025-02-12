@@ -1,4 +1,4 @@
-package no.nav.familie.ef.sak.behandling.oppfølgingsoppgave
+package no.nav.familie.ef.sak.oppfølgingsoppgave
 
 import no.nav.familie.ef.sak.behandling.oppgaveforopprettelse.OppgaverForOpprettelseDto
 import no.nav.familie.kontrakter.felles.Ressurs
