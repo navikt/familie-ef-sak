@@ -15,7 +15,7 @@ data class OppfølgingsoppgaveDto(
 )
 
 @RestController
-@RequestMapping("/api/oppfølgingsoppgave")
+@RequestMapping("/api/oppfolgingsoppgave")
 class OppfølgingsoppgaveController(
     private val oppfølgingsoppgaveService: OppfølgingsoppgaveService,
 ) {
