@@ -28,8 +28,7 @@ class SamværsavtaleController(
     ): Ressurs<List<SamværsavtaleDto>> {
         tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.ACCESS)
         tilgangService.validerHarSaksbehandlerrolle()
-        val samværsavtaler = samværsavtaleService.hentSamværsavtalerForBehandling(behandlingId)
-        return Ressurs.success(samværsavtaler.map { it.tilDto() })
+        return Ressurs.success(samværsavtaleService.hentSamværsavtalerForBehandling(behandlingId).tilDto())
     }
 
     @PostMapping
@@ -39,8 +38,7 @@ class SamværsavtaleController(
         tilgangService.validerTilgangTilBehandling(request.behandlingId, AuditLoggerEvent.UPDATE)
         tilgangService.validerHarSaksbehandlerrolle()
         samværsavtaleService.opprettEllerErstatt(request)
-        val samværsavtaler = samværsavtaleService.hentSamværsavtalerForBehandling(request.behandlingId)
-        return Ressurs.success(samværsavtaler.map { it.tilDto() })
+        return Ressurs.success(samværsavtaleService.hentSamværsavtalerForBehandling(request.behandlingId).tilDto())
     }
 
     @DeleteMapping("{behandlingId}/{behandlingBarnId}")
@@ -51,7 +49,6 @@ class SamværsavtaleController(
         tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.DELETE)
         tilgangService.validerHarSaksbehandlerrolle()
         samværsavtaleService.slettSamværsavtale(behandlingId, behandlingBarnId)
-        val samværsavtaler = samværsavtaleService.hentSamværsavtalerForBehandling(behandlingId)
-        return Ressurs.success(samværsavtaler.map { it.tilDto() })
+        return Ressurs.success(samværsavtaleService.hentSamværsavtalerForBehandling(behandlingId).tilDto())
     }
 }

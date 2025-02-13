@@ -39,3 +39,5 @@ fun SamværsavtaleDto.tilDomene() =
         behandlingBarnId = this.behandlingBarnId,
         uker = SamværsukeWrapper(uker = this.uker),
     )
+
+fun List<Samværsavtale>.tilDto() = this.map { it.tilDto() }
