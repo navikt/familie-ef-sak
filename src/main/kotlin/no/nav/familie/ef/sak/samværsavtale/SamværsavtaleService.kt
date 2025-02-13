@@ -10,6 +10,8 @@ import no.nav.familie.ef.sak.samværsavtale.domain.Samværsavtale
 import no.nav.familie.ef.sak.samværsavtale.domain.SamværsukeWrapper
 import no.nav.familie.ef.sak.samværsavtale.dto.SamværsavtaleDto
 import no.nav.familie.ef.sak.samværsavtale.dto.tilDomene
+import no.nav.familie.ef.sak.vilkår.VurderingService.Companion.byggBarnMapFraTidligereTilNyId
+import no.nav.familie.ef.sak.vilkår.regler.HovedregelMetadata
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
@@ -24,7 +26,7 @@ class SamværsavtaleService(
     fun hentSamværsavtalerForBehandling(behandlingId: UUID) = samværsavtaleRepository.findByBehandlingId(behandlingId)
 
     @Transactional
-    fun opprettEllerErstatt(request: SamværsavtaleDto): Samværsavtale {
+    fun opprettEllerErstattSamværsavtale(request: SamværsavtaleDto): Samværsavtale {
         val behandling = behandlingService.hentBehandling(request.behandlingId)
         val behandlingBarn = barnService.finnBarnPåBehandling(request.behandlingId)
 
@@ -50,6 +52,29 @@ class SamværsavtaleService(
         samværsavtaleRepository.deleteByBehandlingIdAndBehandlingBarnId(behandlingId, behandlingBarnId)
     }
 
+    @Transactional
+    fun kopierSamværsavtalerTilNyBehandling(
+        eksisterendeBehandlingId: UUID,
+        nyBehandlingId: UUID,
+        metadata: HovedregelMetadata,
+    ) {
+        val eksisterendeSamværsavtaler =
+            hentSamværsavtalerForBehandling(eksisterendeBehandlingId).associateBy { it.behandlingBarnId }
+        val barnPåForrigeBehandling = barnService.finnBarnPåBehandling(eksisterendeBehandlingId)
+        val barnIdMap = byggBarnMapFraTidligereTilNyId(barnPåForrigeBehandling, metadata.barn)
+
+        val nyeSamværsavtaler =
+            barnIdMap.mapNotNull {
+                eksisterendeSamværsavtaler.get(it.key)?.copy(
+                    id = UUID.randomUUID(),
+                    behandlingId = nyBehandlingId,
+                    behandlingBarnId = it.value.id,
+                )
+            }
+
+        samværsavtaleRepository.insertAll(nyeSamværsavtaler)
+    }
+
     private fun hentSamværsavtaleEllerNull(
         behandlingId: UUID,
         behandlingBarnId: UUID,
@@ -68,7 +93,11 @@ class SamværsavtaleService(
         request: SamværsavtaleDto,
         behandlingBarn: List<BehandlingBarn>,
     ) {
-        brukerfeilHvis(request.mapTilSamværsandelerPerDag().any { samværsandeler -> samværsandeler.size > samværsandeler.toSet().size }) {
+        brukerfeilHvis(
+            request
+                .mapTilSamværsandelerPerDag()
+                .any { samværsandeler -> samværsandeler.size > samværsandeler.toSet().size },
+        ) {
             "Kan ikke ha duplikate samværsandeler innenfor en og samme dag. BehandlingId=${request.behandlingId}"
         }
         brukerfeilHvis(request.summerTilSamværsandelerVerdiPerDag().any { it > 8 }) {

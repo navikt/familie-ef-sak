@@ -20,6 +20,7 @@ import no.nav.familie.ef.sak.journalføring.dto.VilkårsbehandleNyeBarn
 import no.nav.familie.ef.sak.oppgave.TilordnetRessursService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
+import no.nav.familie.ef.sak.samværsavtale.SamværsavtaleService
 import no.nav.familie.ef.sak.vedtak.KopierVedtakService
 import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.ef.sak.vilkår.VurderingService
@@ -45,6 +46,7 @@ class RevurderingService(
     private val vedtakService: VedtakService,
     private val nyeBarnService: NyeBarnService,
     private val tilordnetRessursService: TilordnetRessursService,
+    private val samværsavtaleService: SamværsavtaleService,
 ) {
     fun hentRevurderingsinformasjon(behandlingId: UUID): RevurderingsinformasjonDto = årsakRevurderingService.hentRevurderingsinformasjon(behandlingId)
 
@@ -104,6 +106,11 @@ class RevurderingService(
             nyBehandlingsId = revurdering.id,
             metadata = metadata,
             stønadType = fagsak.stønadstype,
+        )
+        samværsavtaleService.kopierSamværsavtalerTilNyBehandling(
+            eksisterendeBehandlingId = forrigeBehandlingId,
+            nyBehandlingId = revurdering.id,
+            metadata = metadata,
         )
         taskService.save(
             OpprettOppgaveForOpprettetBehandlingTask.opprettTask(
