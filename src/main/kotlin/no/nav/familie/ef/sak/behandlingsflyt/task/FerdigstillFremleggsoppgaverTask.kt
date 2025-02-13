@@ -15,9 +15,6 @@ import java.util.UUID
 @Service
 @TaskStepBeskrivelse(
     taskStepType = FerdigstillFremleggsoppgaverTask.TYPE,
-    maxAntallFeil = 50,
-    settTilManuellOppfølgning = true,
-    triggerTidVedFeilISekunder = 15 * 60L,
     beskrivelse = "Skal ferdigstille valgte fremleggsoppgaver når behandlingen er besluttet.",
 )
 class FerdigstillFremleggsoppgaverTask(
