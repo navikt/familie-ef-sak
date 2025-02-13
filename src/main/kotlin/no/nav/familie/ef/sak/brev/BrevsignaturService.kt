@@ -25,9 +25,6 @@ class BrevsignaturService(
         saksbehandling: Saksbehandling,
         vedtakErUtenBeslutter: VedtakErUtenBeslutter,
     ): SignaturDto {
-        if (vedtakErUtenBeslutter.value) {
-            return SignaturDto("", "", true)
-        }
         return lagSignaturDto(saksbehandling.ident, vedtakErUtenBeslutter.value)
     }
 
