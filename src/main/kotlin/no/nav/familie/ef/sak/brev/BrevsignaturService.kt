@@ -24,9 +24,7 @@ class BrevsignaturService(
     fun lagSignaturMedEnhet(
         saksbehandling: Saksbehandling,
         vedtakErUtenBeslutter: VedtakErUtenBeslutter,
-    ): SignaturDto {
-        return lagSignaturDto(saksbehandling.ident, vedtakErUtenBeslutter.value)
-    }
+    ): SignaturDto = lagSignaturDto(saksbehandling.ident, vedtakErUtenBeslutter.value)
 
     private fun lagSignaturDto(
         ident: String,

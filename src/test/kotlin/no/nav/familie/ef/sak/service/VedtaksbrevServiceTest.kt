@@ -81,7 +81,7 @@ internal class VedtaksbrevServiceTest {
     }
 
     @Test
-    internal fun `skal lage tom signatur hvis vedtak er uten beslutter`() {
+    internal fun `skal fortsatt sette saksbehandler og enhet hvis vedtakErUtenBeslutter er true`() {
         val vedtaksbrevSlot = slot<Vedtaksbrev>()
 
         val ident = "12345678910"
@@ -104,8 +104,8 @@ internal class VedtaksbrevServiceTest {
 
         assertThat(vedtaksbrevSlot.captured.saksbehandlersignatur).isNotNull
         assertThat(vedtaksbrevSlot.captured.beslutterident).isEqualTo(beslutterNavn)
-        assertThat(vedtaksbrevSlot.captured.besluttersignatur).isEqualTo("")
-        assertThat(vedtaksbrevSlot.captured.enhet).isEqualTo("")
+        assertThat(vedtaksbrevSlot.captured.besluttersignatur).isNotEmpty()
+        assertThat(vedtaksbrevSlot.captured.enhet).isNotEmpty()
         assertThat(vedtaksbrevSlot.captured.beslutterPdf).isNotNull
     }
 
