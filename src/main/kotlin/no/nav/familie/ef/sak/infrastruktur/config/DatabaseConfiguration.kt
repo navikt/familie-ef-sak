@@ -10,6 +10,7 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.Grunnlagsdat
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.Arbeidssituasjon
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.Dokumentasjon
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.GjelderDeg
+import no.nav.familie.ef.sak.samværsavtale.domain.SamværsukeWrapper
 import no.nav.familie.ef.sak.vedtak.domain.BarnetilsynWrapper
 import no.nav.familie.ef.sak.vedtak.domain.InntektWrapper
 import no.nav.familie.ef.sak.vedtak.domain.KontantstøtteWrapper
@@ -125,6 +126,9 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
                 BrevmottakereOrganisasjonerTilPGobjectConverter(),
                 PGobjectTilSkolepengerConverter(),
                 SkolepengerTilPGobjectConverter(),
+                PGobjectTilSamværsuker(),
+                SamværsukerTilPGobjectConverter(),
+                SamværsukerTilPGobjectConverter(),
             ),
         )
 
@@ -382,6 +386,20 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
             PGobject().apply {
                 type = "json"
                 value = objectMapper.writeValueAsString(mottakere)
+            }
+    }
+
+    @ReadingConverter
+    class PGobjectTilSamværsuker : Converter<PGobject, SamværsukeWrapper> {
+        override fun convert(pGobject: PGobject): SamværsukeWrapper = SamværsukeWrapper(pGobject.value?.let { objectMapper.readValue(it) } ?: emptyList())
+    }
+
+    @WritingConverter
+    class SamværsukerTilPGobjectConverter : Converter<SamværsukeWrapper, PGobject> {
+        override fun convert(samværsuker: SamværsukeWrapper): PGobject =
+            PGobject().apply {
+                type = "json"
+                value = objectMapper.writeValueAsString(samværsuker.uker)
             }
     }
 }
