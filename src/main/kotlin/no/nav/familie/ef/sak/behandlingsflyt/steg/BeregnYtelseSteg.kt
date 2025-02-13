@@ -4,7 +4,6 @@ import no.nav.familie.ef.sak.barn.BarnService
 import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType.FØRSTEGANGSBEHANDLING
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType.REVURDERING
-import no.nav.familie.ef.sak.behandling.oppgaveforopprettelse.OppgaverForOpprettelseService
 import no.nav.familie.ef.sak.beregning.BeregningService
 import no.nav.familie.ef.sak.beregning.ValiderOmregningService
 import no.nav.familie.ef.sak.beregning.barnetilsyn.BeløpsperiodeBarnetilsynDto
@@ -15,7 +14,7 @@ import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.felles.util.min
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
-import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
+import no.nav.familie.ef.sak.oppfølgingsoppgave.OppfølgingsoppgaveService
 import no.nav.familie.ef.sak.simulering.SimuleringService
 import no.nav.familie.ef.sak.tilbakekreving.TilbakekrevingService
 import no.nav.familie.ef.sak.tilkjentytelse.AndelsHistorikkService
@@ -64,8 +63,7 @@ class BeregnYtelseSteg(
     private val barnService: BarnService,
     private val fagsakService: FagsakService,
     private val validerOmregningService: ValiderOmregningService,
-    private val oppgaverForOpprettelseService: OppgaverForOpprettelseService,
-    private val featureToggleService: FeatureToggleService,
+    private val oppfølgingsoppgaveService: OppfølgingsoppgaveService,
 ) : BehandlingSteg<VedtakDto> {
     private val logger = LoggerFactory.getLogger(javaClass)
     private val midlertidigOpphørFeilmelding = "Kan ikke starte vedtaket med opphørsperiode for en førstegangsbehandling"
@@ -111,20 +109,20 @@ class BeregnYtelseSteg(
             }
 
             is Opphør -> {
-                oppgaverForOpprettelseService.slettOppgaverForOpprettelse(saksbehandling.id)
+                oppfølgingsoppgaveService.slettOppfølgingsoppgave(saksbehandling.id)
                 validerStartTidEtterSanksjon(data.opphørFom, saksbehandlingMedOppdatertIdent)
                 opprettTilkjentYtelseForOpphørtBehandling(saksbehandlingMedOppdatertIdent, data)
                 simuleringService.hentOgLagreSimuleringsresultat(saksbehandlingMedOppdatertIdent)
             }
 
             is Avslå -> {
-                oppgaverForOpprettelseService.slettOppgaverForOpprettelse(saksbehandling.id)
+                oppfølgingsoppgaveService.slettOppfølgingsoppgave(saksbehandling.id)
                 simuleringService.slettSimuleringForBehandling(saksbehandlingMedOppdatertIdent)
                 tilbakekrevingService.slettTilbakekreving(saksbehandlingMedOppdatertIdent.id)
             }
 
             is Sanksjonert -> {
-                oppgaverForOpprettelseService.slettOppgaverForOpprettelse(saksbehandling.id)
+                oppfølgingsoppgaveService.slettOppfølgingsoppgave(saksbehandling.id)
                 opprettTilkjentYtelseForSanksjonertBehandling(data, saksbehandlingMedOppdatertIdent)
             }
         }

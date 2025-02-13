@@ -48,6 +48,11 @@ spec:
         databases:
           - name: familie-ef-sak
             envVarPrefix: DB
+        flags:
+          - name: "cloudsql.enable_pgaudit"
+            value: "on"
+          - name: "pgaudit.log"
+            value: "write"
   accessPolicy:
     inbound:
       rules:
@@ -68,6 +73,8 @@ spec:
           namespace: tilleggsstonader
     outbound:
       rules:
+        - application: tilbakekreving-backend
+          namespace: tilbake
         - application: familie-tilbake
         - application: familie-klage
         - application: familie-brev

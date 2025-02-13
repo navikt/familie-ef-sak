@@ -18,7 +18,6 @@ import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
-import no.nav.familie.ef.sak.behandling.oppgaveforopprettelse.OppgaverForOpprettelseService
 import no.nav.familie.ef.sak.behandlingsflyt.steg.BeregnYtelseSteg
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.beregning.BeregningService
@@ -56,6 +55,7 @@ import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.iverksett.IverksettingDtoMapper
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.cucumber.domeneparser.SaksbehandlingDomeneParser
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.cucumber.domeneparser.sisteDagenIMånedenEllerDefault
+import no.nav.familie.ef.sak.oppfølgingsoppgave.OppfølgingsoppgaveService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
 import no.nav.familie.ef.sak.repository.behandling
@@ -129,7 +129,7 @@ class StepDefinitions {
     private val barnService = spyk(BarnService(barnRepository, mockk(), behandlingService))
     private val fagsakService = mockFagsakService()
     private val validerOmregningService = mockk<ValiderOmregningService>(relaxed = true)
-    private val oppgaverForOpprettelseService = mockk<OppgaverForOpprettelseService>(relaxed = true)
+    private val oppfølgingsoppgaveService = mockk<OppfølgingsoppgaveService>(relaxed = true)
 
     private val beregnYtelseSteg =
         BeregnYtelseSteg(
@@ -144,8 +144,7 @@ class StepDefinitions {
             barnService,
             fagsakService,
             validerOmregningService,
-            oppgaverForOpprettelseService,
-            featureToggleService,
+            oppfølgingsoppgaveService,
         )
 
     private val vedtakHistorikkService =
