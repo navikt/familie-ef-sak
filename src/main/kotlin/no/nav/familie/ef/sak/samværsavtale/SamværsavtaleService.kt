@@ -35,7 +35,7 @@ class SamværsavtaleService(
 
         val lagretSamværsavtale = hentSamværsavtaleEllerNull(request.behandlingId, request.behandlingBarnId)
 
-        return if (lagretSamværsavtale === null) {
+        return if (lagretSamværsavtale == null) {
             samværsavtaleRepository.insert(request.tilDomene())
         } else {
             samværsavtaleRepository.update(lagretSamværsavtale.copy(uker = SamværsukeWrapper(uker = request.uker)))
