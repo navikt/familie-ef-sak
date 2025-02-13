@@ -4,6 +4,7 @@ import no.nav.familie.ef.sak.felles.util.FnrUtil.validerOptionalIdent
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
+import no.nav.familie.ef.sak.oppfølgingsoppgave.OppfølgingsoppgaveService
 import no.nav.familie.ef.sak.oppgave.OppgaveUtil.ENHET_NR_EGEN_ANSATT
 import no.nav.familie.ef.sak.oppgave.OppgaveUtil.ENHET_NR_NAY
 import no.nav.familie.ef.sak.oppgave.dto.FinnOppgaveRequestDto
@@ -41,6 +42,7 @@ class OppgaveController(
     private val tilgangService: TilgangService,
     private val personService: PersonService,
     private val tilordnetRessursService: TilordnetRessursService,
+    private val oppfølgingsoppgaveService: OppfølgingsoppgaveService,
 ) {
     private val logger = LoggerFactory.getLogger(javaClass)
     private val secureLogger = LoggerFactory.getLogger("secureLogger")
@@ -69,6 +71,27 @@ class OppgaveController(
         secureLogger.info("AktoerId: $aktørId, Ident: ${finnOppgaveRequest.ident}")
         val oppgaveRepons = oppgaveService.hentOppgaver(finnOppgaveRequest.tilFinnOppgaveRequest(aktørId))
         return Ressurs.success(oppgaveRepons.tilDto())
+    }
+
+    @GetMapping("/fremleggsoppgaver/{behandlingId}")
+    fun hentFremleggsoppgaver(
+        @PathVariable behandlingId: UUID,
+    ): Ressurs<OppgaveResponseDto> {
+        val oppgaveRespons = oppgaveService.hentFremleggsoppgaver(behandlingId)
+        return Ressurs.success(oppgaveRespons.tilDto())
+    }
+
+    @GetMapping("/oppgaver-for-ferdigstilling/{behandlingId}")
+    fun hentOppgaverForFerdigstilling(
+        @PathVariable behandlingId: UUID,
+    ): Ressurs<OppgaveResponseDto> {
+        val oppgaveIder = oppfølgingsoppgaveService.hentOppgaverForFerdigstillingEllerNull(behandlingId)?.fremleggsoppgaveIderSomSkalFerdigstilles
+        secureLogger.info("Oppgave ider for behandlingId: $behandlingId, oppgaveIder: $oppgaveIder")
+        val oppgaver = oppgaveService.hentOppgaverMedIder(oppgaveIder)
+        val antallTreffTotalt = oppgaver.size.toLong()
+        val oppgaveResponse = FinnOppgaveResponseDto(antallTreffTotalt, oppgaver)
+
+        return Ressurs.success(oppgaveResponse.tilDto())
     }
 
     @PostMapping(path = ["/{gsakOppgaveId}/fordel"], produces = [MediaType.APPLICATION_JSON_VALUE])

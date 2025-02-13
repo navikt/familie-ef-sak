@@ -1,9 +1,15 @@
-package no.nav.familie.ef.sak.behandling.oppgaveforopprettelse
+package no.nav.familie.ef.sak.oppfølgingsoppgave
 
 import no.nav.familie.ef.sak.behandling.BehandlingService
+import no.nav.familie.ef.sak.behandling.oppgaveforopprettelse.OppgaverForOpprettelseDto
+import no.nav.familie.ef.sak.behandling.oppgaveforopprettelse.OppgaverForOpprettelseRepository
+import no.nav.familie.ef.sak.behandling.oppgaverforferdigstilling.OppgaverForFerdigstillingDto
+import no.nav.familie.ef.sak.behandling.oppgaverforferdigstilling.OppgaverForFerdigstillingRepository
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvisIkke
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
+import no.nav.familie.ef.sak.oppfølgingsoppgave.domain.OppgaverForFerdigstilling
+import no.nav.familie.ef.sak.oppfølgingsoppgave.domain.OppgaverForOpprettelse
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.vedtak.VedtakService
@@ -19,7 +25,8 @@ import java.time.LocalDate
 import java.util.UUID
 
 @Service
-class OppgaverForOpprettelseService(
+class OppfølgingsoppgaveService(
+    private val oppgaverForFerdigstillingRepository: OppgaverForFerdigstillingRepository,
     private val oppgaverForOpprettelseRepository: OppgaverForOpprettelseRepository,
     private val behandlingService: BehandlingService,
     private val tilkjentYtelseService: TilkjentYtelseService,
@@ -27,7 +34,18 @@ class OppgaverForOpprettelseService(
     private val featureToggleService: FeatureToggleService,
 ) {
     @Transactional
-    fun opprettEllerErstatt(
+    fun lagreOppgaveIderForFerdigstilling(
+        behandlingId: UUID,
+        oppgaveIder: List<Long>,
+    ) {
+        oppgaverForFerdigstillingRepository.deleteByBehandlingId(behandlingId)
+        oppgaverForFerdigstillingRepository.insert(
+            OppgaverForFerdigstilling(behandlingId, oppgaveIder),
+        )
+    }
+
+    @Transactional
+    fun lagreOppgaverForOpprettelse(
         behandlingId: UUID,
         data: SendTilBeslutterDto,
     ) {
@@ -42,13 +60,40 @@ class OppgaverForOpprettelseService(
         feilHvisIkke(oppgavetyperSomKanOpprettes.containsAll(nyeOppgaver)) {
             "behandlingId=$behandlingId prøver å opprette $nyeOppgaver $oppgavetyperSomKanOpprettes"
         }
-        when (oppgaverForOpprettelseRepository.existsById(behandlingId)) {
-            true -> oppgaverForOpprettelseRepository.update(OppgaverForOpprettelse(behandlingId, nyeOppgaver, årForInntektskontrollSelvstendigNæringsdrivende))
-            false -> oppgaverForOpprettelseRepository.insert(OppgaverForOpprettelse(behandlingId, nyeOppgaver, årForInntektskontrollSelvstendigNæringsdrivende))
-        }
+        oppgaverForOpprettelseRepository.deleteByBehandlingId(behandlingId)
+        oppgaverForOpprettelseRepository.insert(OppgaverForOpprettelse(behandlingId, nyeOppgaver, årForInntektskontrollSelvstendigNæringsdrivende))
     }
 
-    fun hentOppgaverForOpprettelseEllerNull(behandlingId: UUID): OppgaverForOpprettelse? = oppgaverForOpprettelseRepository.findByIdOrNull(behandlingId)
+    fun hentOppgaverForOpprettelse(
+        behandlingid: UUID,
+    ): OppgaverForOpprettelseDto {
+        val lagretFremleggsoppgave = hentOppgaverForOpprettelseEllerNull(behandlingid)
+        val oppgavetyperSomKanOpprettes = hentOppgavetyperSomKanOpprettes(behandlingid)
+
+        return (
+            OppgaverForOpprettelseDto(
+                oppgavetyperSomKanOpprettes = oppgavetyperSomKanOpprettes,
+                oppgavetyperSomSkalOpprettes =
+                    lagretFremleggsoppgave?.oppgavetyper
+                        ?: initialVerdierForOppgaverSomSkalOpprettes(behandlingid),
+            )
+        )
+    }
+
+    fun hentOppgaverForFerdigstilling(
+        behandlingid: UUID,
+    ): OppgaverForFerdigstillingDto {
+        val lagretFremleggsoppgaveIder = hentOppgaverForFerdigstillingEllerNull(behandlingid)
+
+        return(
+            OppgaverForFerdigstillingDto(
+                behandlingId = behandlingid,
+                oppgaveIder =
+                    lagretFremleggsoppgaveIder?.fremleggsoppgaveIderSomSkalFerdigstilles
+                        ?: emptyList(),
+            )
+        )
+    }
 
     fun hentOppgavetyperSomKanOpprettes(behandlingId: UUID): List<OppgaveForOpprettelseType> {
         val toggleSkalViseOppgavetypeKontrollInntektAvSelvstendigNæringsdrivende = featureToggleService.isEnabled(Toggle.FRONTEND_VIS_MARKERE_GODKJENNE_OPPGAVE_MODAL)
@@ -102,7 +147,12 @@ class OppgaverForOpprettelseService(
         return harUtbetalingEtterDetNesteÅret
     }
 
-    fun slettOppgaverForOpprettelse(behandlingId: UUID) {
+    fun slettOppfølgingsoppgave(behandlingId: UUID) {
         oppgaverForOpprettelseRepository.deleteById(behandlingId)
+        oppgaverForFerdigstillingRepository.deleteById(behandlingId)
     }
+
+    fun hentOppgaverForOpprettelseEllerNull(behandlingId: UUID): OppgaverForOpprettelse? = oppgaverForOpprettelseRepository.findByIdOrNull(behandlingId)
+
+    fun hentOppgaverForFerdigstillingEllerNull(behandlingId: UUID): OppgaverForFerdigstilling? = oppgaverForFerdigstillingRepository.findByIdOrNull(behandlingId)
 }
