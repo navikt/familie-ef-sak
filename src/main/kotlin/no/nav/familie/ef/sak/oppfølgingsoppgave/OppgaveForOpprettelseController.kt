@@ -1,5 +1,6 @@
-package no.nav.familie.ef.sak.behandling.oppgaveforopprettelse
+package no.nav.familie.ef.sak.oppfølgingsoppgave
 
+import no.nav.familie.ef.sak.behandling.oppgaveforopprettelse.OppgaverForOpprettelseDto
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.web.bind.annotation.GetMapping
@@ -11,22 +12,23 @@ import java.util.UUID
 @RestController
 @RequestMapping("/api/oppgaverforopprettelse")
 @ProtectedWithClaims(issuer = "azuread")
+@Deprecated("Brukes for bakoverkompatibilitet - Bruk OppfølgingsoppgaveController")
 class OppgaveForOpprettelseController(
-    private val oppgaverForOpprettelseService: OppgaverForOpprettelseService,
+    private val oppfølgingsoppgaveService: OppfølgingsoppgaveService,
 ) {
     @GetMapping("/{behandlingid}")
     fun hentOppgaverForOpprettelse(
         @PathVariable behandlingid: UUID,
     ): Ressurs<OppgaverForOpprettelseDto> {
-        val lagretFremleggsoppgave = oppgaverForOpprettelseService.hentOppgaverForOpprettelseEllerNull(behandlingid)
-        val oppgavetyperSomKanOpprettes = oppgaverForOpprettelseService.hentOppgavetyperSomKanOpprettes(behandlingid)
+        val lagretFremleggsoppgave = oppfølgingsoppgaveService.hentOppgaverForOpprettelseEllerNull(behandlingid)
+        val oppgavetyperSomKanOpprettes = oppfølgingsoppgaveService.hentOppgavetyperSomKanOpprettes(behandlingid)
 
         return Ressurs.success(
             OppgaverForOpprettelseDto(
                 oppgavetyperSomKanOpprettes = oppgavetyperSomKanOpprettes,
                 oppgavetyperSomSkalOpprettes =
                     lagretFremleggsoppgave?.oppgavetyper
-                        ?: oppgaverForOpprettelseService.initialVerdierForOppgaverSomSkalOpprettes(behandlingid),
+                        ?: oppfølgingsoppgaveService.initialVerdierForOppgaverSomSkalOpprettes(behandlingid),
             ),
         )
     }

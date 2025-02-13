@@ -9,7 +9,6 @@ import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.Behandlingsjournalpost
 import no.nav.familie.ef.sak.behandling.domain.ÅrsakRevurdering
 import no.nav.familie.ef.sak.behandling.migrering.Migreringsstatus
-import no.nav.familie.ef.sak.behandling.oppgaveforopprettelse.OppgaverForOpprettelse
 import no.nav.familie.ef.sak.behandlingshistorikk.domain.Behandlingshistorikk
 import no.nav.familie.ef.sak.blankett.Blankett
 import no.nav.familie.ef.sak.brev.domain.Brevmottakere
@@ -23,6 +22,8 @@ import no.nav.familie.ef.sak.fagsak.domain.FagsakPerson
 import no.nav.familie.ef.sak.felles.util.TokenUtil
 import no.nav.familie.ef.sak.infrastruktur.config.RolleConfig
 import no.nav.familie.ef.sak.iverksett.oppgaveterminbarn.TerminbarnOppgave
+import no.nav.familie.ef.sak.næringsinntektskontroll.NæringsinntektKontrollDomain
+import no.nav.familie.ef.sak.oppfølgingsoppgave.domain.OppgaverForOpprettelse
 import no.nav.familie.ef.sak.oppgave.Oppgave
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.Grunnlagsdata
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.Søknad
@@ -165,6 +166,7 @@ abstract class OppslagSpringRunnerTest {
             Task::class,
             Migreringsstatus::class,
             OppgaverForOpprettelse::class,
+            NæringsinntektKontrollDomain::class,
         ).forEach { jdbcAggregateOperations.deleteAll(it.java) }
     }
 

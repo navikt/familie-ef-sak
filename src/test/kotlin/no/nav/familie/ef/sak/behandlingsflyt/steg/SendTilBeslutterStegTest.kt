@@ -12,7 +12,6 @@ import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat.INNVILGET
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
-import no.nav.familie.ef.sak.behandling.oppgaveforopprettelse.OppgaverForOpprettelseService
 import no.nav.familie.ef.sak.behandling.ÅrsakRevurderingService
 import no.nav.familie.ef.sak.behandlingsflyt.task.BehandlingsstatistikkTask
 import no.nav.familie.ef.sak.behandlingsflyt.task.BehandlingsstatistikkTaskPayload
@@ -32,6 +31,7 @@ import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.clearBrukerContext
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.mockBrukerContext
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
+import no.nav.familie.ef.sak.oppfølgingsoppgave.OppfølgingsoppgaveService
 import no.nav.familie.ef.sak.oppgave.Oppgave
 import no.nav.familie.ef.sak.oppgave.TilordnetRessursService
 import no.nav.familie.ef.sak.repository.fagsak
@@ -74,9 +74,9 @@ internal class SendTilBeslutterStegTest {
     private val vurderingService = mockk<VurderingService>()
     private val validerOmregningService = mockk<ValiderOmregningService>(relaxed = true)
     private val årsakRevurderingService = mockk<ÅrsakRevurderingService>(relaxed = true)
-    private val oppgaverForOpprettelseService = mockk<OppgaverForOpprettelseService>(relaxed = true)
     private val behandlingshistorikkService = mockk<BehandlingshistorikkService>()
     private val tilordnetRessursService = mockk<TilordnetRessursService>()
+    private val oppfølgingsoppgaveService = mockk<OppfølgingsoppgaveService>(relaxed = true)
     private val simuleringsoppsummering =
         Simuleringsoppsummering(
             perioder = listOf(),
@@ -102,9 +102,9 @@ internal class SendTilBeslutterStegTest {
             vurderingService,
             validerOmregningService,
             årsakRevurderingService,
-            oppgaverForOpprettelseService,
             behandlingshistorikkService,
             tilordnetRessursService,
+            oppfølgingsoppgaveService,
         )
     private val fagsak =
         fagsak(
