@@ -61,6 +61,7 @@ internal class VurderingServiceTest {
     private val fagsakService = mockk<FagsakService>()
     private val gjenbrukVilkårService = mockk<GjenbrukVilkårService>()
     private val tilordnetRessursService = mockk<TilordnetRessursService>()
+    private val samværsavtaleService = mockk<SamværsavtaleService>()
     private val vurderingService =
         VurderingService(
             behandlingService = behandlingService,
@@ -72,6 +73,7 @@ internal class VurderingServiceTest {
             fagsakService = fagsakService,
             gjenbrukVilkårService = gjenbrukVilkårService,
             tilordnetRessursService = tilordnetRessursService,
+            samværsavtaleService = samværsavtaleService,
         )
     private val søknad =
         SøknadsskjemaMapper
