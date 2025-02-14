@@ -13,6 +13,7 @@ import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.iverksett.tilIverksettDto
+import no.nav.familie.ef.sak.vedtak.domain.VedtakErUtenBeslutter
 import no.nav.familie.kontrakter.ef.iverksett.Brevmottaker
 import no.nav.familie.kontrakter.felles.objectMapper
 import org.springframework.stereotype.Service
@@ -37,7 +38,7 @@ class FrittståendeBrevService(
         brevrequest: JsonNode,
     ): ByteArray {
         val fagsak = fagsakService.hentFagsak(fagsakId)
-        val signatur = brevsignaturService.lagSignaturMedEnhet(fagsak, false)
+        val signatur = brevsignaturService.lagSignaturMedEnhet(fagsak, VedtakErUtenBeslutter(true))
 
         val html =
             brevClient

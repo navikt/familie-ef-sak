@@ -18,17 +18,17 @@ class BrevsignaturService(
 ) {
     fun lagSignaturMedEnhet(
         fagsak: Fagsak,
-        vedtakErUtenBeslutter: Boolean,
+        vedtakErUtenBeslutter: VedtakErUtenBeslutter,
     ): SignaturDto = lagSignaturDto(fagsak.hentAktivIdent(), vedtakErUtenBeslutter)
 
     fun lagSignaturMedEnhet(
         saksbehandling: Saksbehandling,
         vedtakErUtenBeslutter: VedtakErUtenBeslutter,
-    ): SignaturDto = lagSignaturDto(saksbehandling.ident, vedtakErUtenBeslutter.value)
+    ): SignaturDto = lagSignaturDto(saksbehandling.ident, vedtakErUtenBeslutter)
 
     private fun lagSignaturDto(
         ident: String,
-        vedtakErUtenBeslutter: Boolean,
+        vedtakErUtenBeslutter: VedtakErUtenBeslutter,
     ): SignaturDto {
         val harStrengtFortroligAdresse: Boolean =
             personopplysningerService
@@ -38,7 +38,7 @@ class BrevsignaturService(
         return if (harStrengtFortroligAdresse) {
             SignaturDto(NAV_ANONYM_NAVN, ENHET_VIKAFOSSEN, true)
         } else {
-            SignaturDto(SikkerhetContext.hentSaksbehandlerNavn(true), ENHET_NAY, vedtakErUtenBeslutter)
+            SignaturDto(SikkerhetContext.hentSaksbehandlerNavn(true), ENHET_NAY, vedtakErUtenBeslutter.value)
         }
     }
 

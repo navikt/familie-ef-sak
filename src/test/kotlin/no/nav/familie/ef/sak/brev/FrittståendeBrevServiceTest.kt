@@ -149,7 +149,7 @@ internal class FrittståendeBrevServiceTest {
         every { fagsakService.hentFagsak(any()) } returns fagsak
         every { fagsakService.hentEksternId(any()) } returns Long.MAX_VALUE
         every { arbeidsfordelingService.hentNavEnhetIdEllerBrukMaskinellEnhetHvisNull(any()) } returns "123"
-        every { brevsignaturService.lagSignaturMedEnhet(any<Fagsak>(), false) } returns
+        every { brevsignaturService.lagSignaturMedEnhet(any<Fagsak>(), any()) } returns
             SignaturDto(
                 "Navn Navnesen",
                 "En enhet",
