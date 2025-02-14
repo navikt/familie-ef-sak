@@ -64,11 +64,11 @@ class SamværsavtaleService(
         val barnIdMap = byggBarnMapFraTidligereTilNyId(barnPåForrigeBehandling, metadata.barn)
 
         val nyeSamværsavtaler =
-            barnIdMap.mapNotNull {
-                eksisterendeSamværsavtaler.get(it.key)?.copy(
+            barnIdMap.mapNotNull { (forrigeBehandlingBarnId, nåværendeBehandlingBarn) ->
+                eksisterendeSamværsavtaler.get(forrigeBehandlingBarnId)?.copy(
                     id = UUID.randomUUID(),
                     behandlingId = nyBehandlingId,
-                    behandlingBarnId = it.value.id,
+                    behandlingBarnId = nåværendeBehandlingBarn.id,
                 )
             }
 

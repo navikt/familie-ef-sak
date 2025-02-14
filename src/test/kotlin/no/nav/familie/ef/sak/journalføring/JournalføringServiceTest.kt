@@ -429,6 +429,7 @@ internal class JournalføringServiceTest {
                 journalpost = ustrukturertJournalpost,
             )
             verify(exactly = 0) { vurderingService.kopierVurderingerTilNyBehandling(any(), any(), any(), any()) }
+            verify(exactly = 0) { samværsavtaleService.kopierSamværsavtalerTilNyBehandling(any(), any(), any()) }
         }
 
         @Test
@@ -521,6 +522,7 @@ internal class JournalføringServiceTest {
                 journalpost = ustrukturertJournalpost,
             )
             verify(exactly = 0) { vurderingService.kopierVurderingerTilNyBehandling(any(), any(), any(), any()) }
+            verify(exactly = 0) { samværsavtaleService.kopierSamværsavtalerTilNyBehandling(any(), any(), any()) }
         }
 
         @Test
