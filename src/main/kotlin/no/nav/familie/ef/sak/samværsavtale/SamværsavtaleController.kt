@@ -37,7 +37,7 @@ class SamværsavtaleController(
     ): Ressurs<List<SamværsavtaleDto>> {
         tilgangService.validerTilgangTilBehandling(request.behandlingId, AuditLoggerEvent.UPDATE)
         tilgangService.validerHarSaksbehandlerrolle()
-        samværsavtaleService.opprettEllerErstatt(request)
+        samværsavtaleService.opprettEllerErstattSamværsavtale(request)
         return Ressurs.success(samværsavtaleService.hentSamværsavtalerForBehandling(request.behandlingId).tilDto())
     }
 

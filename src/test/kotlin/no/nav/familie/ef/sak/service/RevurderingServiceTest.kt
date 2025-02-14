@@ -36,6 +36,7 @@ internal class RevurderingServiceTest {
             vedtakService = mockk(),
             nyeBarnService = mockk(),
             tilordnetRessursService = mockk(),
+            samværsavtaleService = mockk(),
         )
 
     @Test

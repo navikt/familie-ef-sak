@@ -27,6 +27,7 @@ import no.nav.familie.ef.sak.journalføring.dto.valider
 import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
+import no.nav.familie.ef.sak.samværsavtale.SamværsavtaleService
 import no.nav.familie.ef.sak.vilkår.VurderingService
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.ef.journalføring.AutomatiskJournalføringResponse
@@ -54,6 +55,7 @@ class JournalføringService(
     private val oppgaveService: OppgaveService,
     private val journalpostService: JournalpostService,
     private val infotrygdPeriodeValideringService: InfotrygdPeriodeValideringService,
+    private val samværsavtaleService: SamværsavtaleService,
 ) {
     private val logger = LoggerFactory.getLogger(javaClass)
 
@@ -269,6 +271,11 @@ class JournalføringService(
             nyBehandlingsId = behandling.id,
             metadata = metadata,
             stønadType = fagsak.stønadstype,
+        )
+        samværsavtaleService.kopierSamværsavtalerTilNyBehandling(
+            eksisterendeBehandlingId = forrigeBehandlingId,
+            nyBehandlingId = behandling.id,
+            metadata = metadata,
         )
         behandlingService.oppdaterStatusPåBehandling(behandling.id, BehandlingStatus.UTREDES)
         behandlingService.oppdaterStegPåBehandling(behandling.id, StegType.BEREGNE_YTELSE)
