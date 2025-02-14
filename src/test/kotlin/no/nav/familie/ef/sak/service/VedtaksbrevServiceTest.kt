@@ -81,7 +81,7 @@ internal class VedtaksbrevServiceTest {
     }
 
     @Test
-    internal fun `skal fortsatt sette saksbehandler og enhet hvis vedtakErUtenBeslutter er true`() {
+    internal fun `skal fortsatt sette besluttersignatur og enhet hvis vedtakErUtenBeslutter er true`() {
         val vedtaksbrevSlot = slot<Vedtaksbrev>()
 
         val ident = "12345678910"
