@@ -8,6 +8,7 @@ import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.brev.BrevClient
 import no.nav.familie.ef.sak.brev.BrevsignaturService
+import no.nav.familie.ef.sak.brev.BrevsignaturService.Companion.ENHET_NAY
 import no.nav.familie.ef.sak.brev.FamilieDokumentClient
 import no.nav.familie.ef.sak.brev.VedtaksbrevRepository
 import no.nav.familie.ef.sak.brev.VedtaksbrevService
@@ -104,8 +105,8 @@ internal class VedtaksbrevServiceTest {
 
         assertThat(vedtaksbrevSlot.captured.saksbehandlersignatur).isNotNull
         assertThat(vedtaksbrevSlot.captured.beslutterident).isEqualTo(beslutterNavn)
-        assertThat(vedtaksbrevSlot.captured.besluttersignatur).isNotEmpty()
-        assertThat(vedtaksbrevSlot.captured.enhet).isNotEmpty()
+        assertThat(vedtaksbrevSlot.captured.besluttersignatur).isEqualTo(beslutterNavn)
+        assertThat(vedtaksbrevSlot.captured.enhet).isEqualTo(ENHET_NAY)
         assertThat(vedtaksbrevSlot.captured.beslutterPdf).isNotNull
     }
 
