@@ -7,7 +7,6 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
-import java.util.UUID
 
 @RestController
 @RequestMapping(path = ["/api/revurdering"])
@@ -29,7 +28,6 @@ class AutomatiskRevurderingController(
             }
             list.add(AutomatiskRevurdering(personIdent, kanAutomatiskRevurderes))
         }
-
 
         return Ressurs.success(list)
     }
