@@ -1,4 +1,4 @@
-package no.nav.familie.ef.sak.behandling
+package no.nav.familie.ef.sak.behandling.revurdering
 
 import no.nav.familie.ef.sak.AuditLoggerEvent
 import no.nav.familie.ef.sak.behandling.dto.RevurderingDto
