@@ -6,7 +6,7 @@ import io.mockk.mockk
 import io.mockk.verify
 import no.nav.familie.ef.sak.behandling.dto.RevurderingsinformasjonDto
 import no.nav.familie.ef.sak.behandling.dto.ÅrsakRevurderingDto
-import no.nav.familie.ef.sak.behandling.ÅrsakRevurderingService
+import no.nav.familie.ef.sak.behandling.revurdering.ÅrsakRevurderingService
 import no.nav.familie.ef.sak.oppgave.TilordnetRessursService
 import no.nav.familie.ef.sak.repository.revurderingsinformasjon
 import no.nav.familie.ef.sak.repository.saksbehandling

@@ -3,7 +3,7 @@ package no.nav.familie.ef.sak.blankett
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.behandling.dto.tilDto
-import no.nav.familie.ef.sak.behandling.ÅrsakRevurderingService
+import no.nav.familie.ef.sak.behandling.revurdering.ÅrsakRevurderingService
 import no.nav.familie.ef.sak.brev.BrevClient
 import no.nav.familie.ef.sak.felles.domain.Fil
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
