@@ -215,7 +215,7 @@ class SendTilBeslutterSteg(
 
         val merker = beskrivelseMarkeringer.joinToString(", ").plus(". ")
 
-        return "${merker}${beskrivelse}"
+        return "${merker}$beskrivelse"
     }
 
     private fun utledBeslutterIdent(saksbehandling: Saksbehandling): String? =
