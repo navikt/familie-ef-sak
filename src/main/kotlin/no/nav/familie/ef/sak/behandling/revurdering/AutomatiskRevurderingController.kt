@@ -9,14 +9,14 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
-@RequestMapping(path = ["/api/revurdering"])
+@RequestMapping(path = ["/api/automatisk-revurdering"])
 @ProtectedWithClaims(issuer = "azuread")
 class AutomatiskRevurderingController(
     private val automatiskRevurderingService: AutomatiskRevurderingService,
 ) {
     private val secureLogger = LoggerFactory.getLogger("secureLogger")
 
-    @PostMapping("automatisk")
+    @PostMapping
     fun forsøkAutomatiskRevurdering(
         @RequestBody personIdenter: List<String>,
     ): Ressurs<List<AutomatiskRevurdering>> {
