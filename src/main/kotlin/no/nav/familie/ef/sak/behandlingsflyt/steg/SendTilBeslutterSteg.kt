@@ -194,8 +194,7 @@ class SendTilBeslutterSteg(
         saksbehandling: Saksbehandling,
         beskrivelseMarkeringer: List<String>? = null,
     ) {
-        val merker = beskrivelseMarkeringer?.joinToString(", ") { it }?.plus(". ")
-        val beskrivelse = "${merker}Sendt til godkjenning av ${SikkerhetContext.hentSaksbehandlerNavn(true)}."
+        val beskrivelse = lagBeskrivelseMedMerker(beskrivelseMarkeringer)
         taskService.save(
             OpprettOppgaveTask.opprettTask(
                 OpprettOppgaveTaskData(
@@ -206,6 +205,17 @@ class SendTilBeslutterSteg(
                 ),
             ),
         )
+    }
+
+    fun lagBeskrivelseMedMerker(beskrivelseMarkeringer: List<String>?): String {
+        val beskrivelse = "Sendt til godkjenning av ${SikkerhetContext.hentSaksbehandlerNavn(true)}."
+        if (beskrivelseMarkeringer.isNullOrEmpty()) {
+            return beskrivelse
+        }
+
+        val merker = beskrivelseMarkeringer.joinToString(", ").plus(". ")
+
+        return "${merker}${beskrivelse}"
     }
 
     private fun utledBeslutterIdent(saksbehandling: Saksbehandling): String? =
