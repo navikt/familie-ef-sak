@@ -8,13 +8,11 @@ import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.brev.BrevClient
 import no.nav.familie.ef.sak.brev.BrevsignaturService
-import no.nav.familie.ef.sak.brev.BrevsignaturService.Companion.ENHET_NAY
 import no.nav.familie.ef.sak.brev.FamilieDokumentClient
 import no.nav.familie.ef.sak.brev.VedtaksbrevRepository
 import no.nav.familie.ef.sak.brev.VedtaksbrevService
 import no.nav.familie.ef.sak.brev.VedtaksbrevService.Companion.BESLUTTER_SIGNATUR_PLACEHOLDER
 import no.nav.familie.ef.sak.brev.domain.Vedtaksbrev
-import no.nav.familie.ef.sak.brev.dto.SignaturDto
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
 import no.nav.familie.ef.sak.felles.domain.Fil
@@ -329,9 +327,4 @@ internal class VedtaksbrevServiceTest {
         )
         assertThat(vedtaksbrevSlot.captured.opprettetTid).isAfterOrEqualTo(now)
     }
-
-    private fun signaturDto(
-        navn: String,
-        enhet: String? = ENHET_NAY,
-    ) = SignaturDto(navn, ENHET_NAY, false)
 }

@@ -16,7 +16,7 @@ internal class BrevsignaturServiceTest {
     @Test
     fun `skal sende frittstående brev med NAV Vikafossen signatur dersom person har strengt fortrolig adresse`() {
         every { personopplysningerService.hentStrengesteAdressebeskyttelseForPersonMedRelasjoner(any()) } returns ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG
-        val signaturMedEnhet = brevsignaturService.lagSaksbehandlerSignatur("123", VedtakErUtenBeslutter(true))
+        val signaturMedEnhet = brevsignaturService.lagSaksbehandlerSignatur("123", VedtakErUtenBeslutter(false))
         Assertions.assertThat(signaturMedEnhet.enhet).isEqualTo(BrevsignaturService.ENHET_VIKAFOSSEN)
         Assertions.assertThat(signaturMedEnhet.navn).isEqualTo(BrevsignaturService.NAV_ANONYM_NAVN)
         Assertions.assertThat(signaturMedEnhet.skjulBeslutter).isTrue()
@@ -54,11 +54,16 @@ internal class BrevsignaturServiceTest {
 
     @Test
     fun `skal sende vedtaksbrev med NAV Vikafossen signatur dersom person har strengt fortrolig adresse`() {
+        val saksbehandlerNavn = "Ole Olsen"
+        BrukerContextUtil.mockBrukerContext(saksbehandlerNavn)
+
         every { personopplysningerService.hentStrengesteAdressebeskyttelseForPersonMedRelasjoner(any()) } returns ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG
         val signaturMedEnhet = brevsignaturService.lagBeslutterSignatur("123", VedtakErUtenBeslutter(false))
         Assertions.assertThat(signaturMedEnhet.enhet).isEqualTo(BrevsignaturService.ENHET_VIKAFOSSEN)
         Assertions.assertThat(signaturMedEnhet.navn).isEqualTo(BrevsignaturService.NAV_ANONYM_NAVN)
-        Assertions.assertThat(signaturMedEnhet.skjulBeslutter).isFalse()
+        Assertions.assertThat(signaturMedEnhet.skjulBeslutter).isTrue()
+
+        BrukerContextUtil.clearBrukerContext()
     }
 
     @Test
