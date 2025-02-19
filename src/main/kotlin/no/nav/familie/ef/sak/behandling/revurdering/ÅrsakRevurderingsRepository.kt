@@ -1,4 +1,4 @@
-package no.nav.familie.ef.sak.behandling
+package no.nav.familie.ef.sak.behandling.revurdering
 
 import no.nav.familie.ef.sak.behandling.domain.ÅrsakRevurdering
 import no.nav.familie.ef.sak.repository.InsertUpdateRepository

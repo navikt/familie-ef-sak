@@ -3,13 +3,15 @@ package no.nav.familie.ef.sak.blankett
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.behandling.dto.tilDto
-import no.nav.familie.ef.sak.behandling.ÅrsakRevurderingService
+import no.nav.familie.ef.sak.behandling.revurdering.ÅrsakRevurderingService
 import no.nav.familie.ef.sak.brev.BrevClient
 import no.nav.familie.ef.sak.felles.domain.Fil
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerService
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadDatoerDto
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
+import no.nav.familie.ef.sak.samværsavtale.SamværsavtaleService
+import no.nav.familie.ef.sak.samværsavtale.dto.tilDto
 import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.ef.sak.vedtak.dto.VedtakDto
 import no.nav.familie.ef.sak.vilkår.VurderingService
@@ -28,6 +30,7 @@ class BlankettService(
     private val vedtakService: VedtakService,
     private val årsakRevurderingService: ÅrsakRevurderingService,
     private val grunnlagsdataService: GrunnlagsdataService,
+    private val samværsavtaleService: SamværsavtaleService,
 ) {
     fun lagBlankett(behandlingId: UUID): ByteArray {
         val behandling = behandlingService.hentSaksbehandling(behandlingId)
@@ -51,6 +54,7 @@ class BlankettService(
                 hentVedtak(behandlingId),
                 lagSøknadsdatoer(behandlingId),
                 vilkårVurderinger.grunnlag.harAvsluttetArbeidsforhold,
+                samværsavtaleService.hentSamværsavtalerForBehandling(behandlingId).tilDto(),
             )
         val blankettPdfAsByteArray = brevClient.genererBlankett(blankettPdfRequest)
         oppdaterEllerOpprettBlankett(behandlingId, blankettPdfAsByteArray)

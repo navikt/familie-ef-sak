@@ -8,6 +8,7 @@ import io.mockk.slot
 import io.mockk.verify
 import no.nav.familie.ef.sak.infrastruktur.exception.ManglerTilgang
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
+import no.nav.familie.ef.sak.oppfølgingsoppgave.OppfølgingsoppgaveService
 import no.nav.familie.ef.sak.oppgave.OppgaveUtil.ENHET_NR_EGEN_ANSATT
 import no.nav.familie.ef.sak.oppgave.OppgaveUtil.ENHET_NR_NAY
 import no.nav.familie.ef.sak.oppgave.dto.FinnOppgaveRequestDto
@@ -30,9 +31,10 @@ internal class OppgaveControllerTest {
     private val oppgaveService: OppgaveService = mockk()
     private val personService: PersonService = mockk()
     private val tilordnetRessursService: TilordnetRessursService = mockk()
+    private val oppfølgingsoppgaveService: OppfølgingsoppgaveService = mockk()
 
     private val oppgaveController: OppgaveController =
-        OppgaveController(oppgaveService, tilgangService, personService, tilordnetRessursService)
+        OppgaveController(oppgaveService, tilgangService, personService, tilordnetRessursService, oppfølgingsoppgaveService)
 
     @Test
     internal fun `skal kaste feil hvis ident ikke er på gyldig format`() {

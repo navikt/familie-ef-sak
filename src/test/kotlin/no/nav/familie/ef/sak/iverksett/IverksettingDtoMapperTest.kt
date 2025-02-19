@@ -16,8 +16,7 @@ import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.behandling.domain.ÅrsakRevurdering
 import no.nav.familie.ef.sak.behandling.dto.HenlagtÅrsak
-import no.nav.familie.ef.sak.behandling.oppgaveforopprettelse.OppgaverForOpprettelseService
-import no.nav.familie.ef.sak.behandling.ÅrsakRevurderingsRepository
+import no.nav.familie.ef.sak.behandling.revurdering.ÅrsakRevurderingsRepository
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.behandlingshistorikk.BehandlingshistorikkService
 import no.nav.familie.ef.sak.behandlingshistorikk.domain.Behandlingshistorikk
@@ -27,6 +26,7 @@ import no.nav.familie.ef.sak.brev.domain.MottakerRolle
 import no.nav.familie.ef.sak.felles.util.DatoUtil
 import no.nav.familie.ef.sak.felles.util.opprettGrunnlagsdata
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
+import no.nav.familie.ef.sak.oppfølgingsoppgave.OppfølgingsoppgaveService
 import no.nav.familie.ef.sak.opplysninger.mapper.BarnMatcher
 import no.nav.familie.ef.sak.opplysninger.mapper.MatchetBehandlingBarn
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
@@ -121,7 +121,7 @@ internal class IverksettingDtoMapperTest {
     private val arbeidsfordelingService = mockk<ArbeidsfordelingService>(relaxed = true)
     private val barnMatcher = mockk<BarnMatcher>()
     private val årsakRevurderingsRepository = mockk<ÅrsakRevurderingsRepository>()
-    private val oppgaverForOpprettelseService = mockk<OppgaverForOpprettelseService>()
+    private val oppfølgingsoppgaveService = mockk<OppfølgingsoppgaveService>()
     private val behandlingRepository = mockk<BehandlingRepository>()
 
     private val iverksettingDtoMapper =
@@ -137,7 +137,7 @@ internal class IverksettingDtoMapperTest {
             vilkårsvurderingRepository = vilkårsvurderingRepository,
             brevmottakereRepository = brevmottakereRepository,
             årsakRevurderingsRepository = årsakRevurderingsRepository,
-            oppgaverForOpprettelseService = oppgaverForOpprettelseService,
+            oppfølgingsoppgaveService = oppfølgingsoppgaveService,
             behandlingRepository = behandlingRepository,
         )
 
@@ -166,7 +166,7 @@ internal class IverksettingDtoMapperTest {
                 årsak = Revurderingsårsak.ENDRING_INNTEKT,
                 beskrivelse = "beskrivelse",
             )
-        every { oppgaverForOpprettelseService.hentOppgaverForOpprettelseEllerNull(any()) } returns null
+        every { oppfølgingsoppgaveService.hentOppgaverForOpprettelseEllerNull(any()) } returns null
         every { behandlingRepository.findById(any()) } returns Optional.of(forrigeBehandling)
     }
 

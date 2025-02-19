@@ -31,6 +31,7 @@ import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.saksbehandling
 import no.nav.familie.ef.sak.repository.vilkårsvurdering
+import no.nav.familie.ef.sak.samværsavtale.SamværsavtaleService
 import no.nav.familie.ef.sak.testutil.søknadBarnTilBehandlingBarn
 import no.nav.familie.ef.sak.vilkår.dto.DelvilkårsvurderingDto
 import no.nav.familie.ef.sak.vilkår.dto.OppdaterVilkårsvurderingDto
@@ -72,6 +73,7 @@ internal class VurderingStegServiceTest {
     private val gjenbrukVilkårService = mockk<GjenbrukVilkårService>()
     private val behandlingshistorikkService = mockk<BehandlingshistorikkService>()
     private val tilordnetRessursService = mockk<TilordnetRessursService>()
+    private val samværsavtaleService = mockk<SamværsavtaleService>()
     private val vurderingService =
         VurderingService(
             behandlingService,
@@ -83,6 +85,7 @@ internal class VurderingStegServiceTest {
             fagsakService,
             gjenbrukVilkårService,
             tilordnetRessursService,
+            samværsavtaleService,
         )
     private val vurderingStegService =
         VurderingStegService(

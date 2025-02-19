@@ -4,6 +4,7 @@ import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandlingsflyt.task.BehandlingsstatistikkTask
+import no.nav.familie.ef.sak.behandlingsflyt.task.FerdigstillFremleggsoppgaverTask
 import no.nav.familie.ef.sak.behandlingsflyt.task.FerdigstillOppgaveTask
 import no.nav.familie.ef.sak.behandlingsflyt.task.OpprettOppgaveTask
 import no.nav.familie.ef.sak.behandlingsflyt.task.OpprettOppgaveTask.OpprettOppgaveTaskData
@@ -63,8 +64,10 @@ class BeslutteVedtakSteg(
             validerGodkjentVedtak(data)
             vedtakService.oppdaterBeslutter(saksbehandling.id, beslutter)
             val iverksettDto = iverksettingDtoMapper.tilDto(saksbehandling, beslutter)
+
             oppdaterResultatPåBehandling(saksbehandling.id)
             opprettPollForStatusOppgave(saksbehandling.id)
+            opprettTaskForFerdigstillFremleggsoppgaver(saksbehandling.id)
             opprettTaskForBehandlingsstatistikk(saksbehandling.id, oppgaveId)
             if (saksbehandling.skalIkkeSendeBrev) {
                 iverksettClient.iverksettUtenBrev(iverksettDto)
@@ -78,6 +81,14 @@ class BeslutteVedtakSteg(
             opprettBehandleUnderkjentVedtakOppgave(saksbehandling, saksbehandler)
             StegType.SEND_TIL_BESLUTTER
         }
+    }
+
+    private fun opprettTaskForFerdigstillFremleggsoppgaver(behandlingId: UUID) {
+        taskService.save(
+            FerdigstillFremleggsoppgaverTask.opprettTask(
+                behandlingId,
+            ),
+        )
     }
 
     private fun validerGodkjentVedtak(data: BeslutteVedtakDto) {

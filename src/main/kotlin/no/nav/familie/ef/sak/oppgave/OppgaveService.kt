@@ -1,6 +1,7 @@
 package no.nav.familie.ef.sak.oppgave
 
 import no.nav.familie.ef.sak.arbeidsfordeling.ArbeidsfordelingService
+import no.nav.familie.ef.sak.behandling.BehandlingRepository
 import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.infrastruktur.config.getValue
@@ -8,6 +9,8 @@ import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.oppgave.OppgaveUtil.ENHET_NR_NAY
 import no.nav.familie.ef.sak.oppgave.OppgaveUtil.lagOpprettOppgavebeskrivelse
 import no.nav.familie.ef.sak.oppgave.dto.UtdanningOppgaveDto
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.secureLogger
 import no.nav.familie.http.client.RessursException
 import no.nav.familie.kontrakter.felles.Behandlingstema
 import no.nav.familie.kontrakter.felles.Tema
@@ -43,6 +46,8 @@ class OppgaveService(
     private val oppgaveRepository: OppgaveRepository,
     private val arbeidsfordelingService: ArbeidsfordelingService,
     private val cacheManager: CacheManager,
+    private val behandlingRepository: BehandlingRepository,
+    private val personService: PersonService,
 ) {
     private val logger = LoggerFactory.getLogger(javaClass)
 
@@ -283,6 +288,38 @@ class OppgaveService(
     fun finnSisteOppgaveForBehandling(behandlingId: UUID): EfOppgave? = oppgaveRepository.findTopByBehandlingIdOrderBySporbarOpprettetTidDesc(behandlingId)
 
     fun hentOppgaver(finnOppgaveRequest: FinnOppgaveRequest): FinnOppgaveResponseDto = oppgaveClient.hentOppgaver(finnOppgaveRequest)
+
+    fun hentFremleggsoppgaver(behandlingId: UUID): FinnOppgaveResponseDto {
+        val aktivIdent = behandlingRepository.finnAktivIdent(behandlingId)
+        val aktørId =
+            aktivIdent.let {
+                personService
+                    .hentAktørIder(it)
+                    .identer
+                    .first()
+                    .ident
+            }
+
+        secureLogger.info("hentFremleggsoppgaver -  aktørId: $aktørId")
+
+        val enhet = aktørId.let { arbeidsfordelingService.hentNavEnhetId(it, Fremlegg) }
+        val request =
+            FinnOppgaveRequest(
+                tema = Tema.ENF,
+                oppgavetype = Fremlegg,
+                aktørId = aktørId,
+                enhet = enhet,
+            )
+
+        return oppgaveClient.hentOppgaver(request)
+    }
+
+    fun hentOppgaverMedIder(oppgaveIder: List<Long>?): List<Oppgave> {
+        if (oppgaveIder != null) {
+            return oppgaveIder.map { hentOppgave(it) }
+        }
+        return emptyList()
+    }
 
     private fun finnBehandlingstema(stønadstype: StønadType): Behandlingstema =
         when (stønadstype) {
