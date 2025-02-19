@@ -34,7 +34,6 @@ import no.nav.familie.ef.sak.repository.vedtak
 import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.ef.sak.vedtak.domain.VedtakErUtenBeslutter
 import no.nav.familie.kontrakter.felles.objectMapper
-import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING
 import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG
 import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING.UGRADERT
 import org.assertj.core.api.Assertions.assertThat
@@ -52,7 +51,7 @@ internal class VedtaksbrevServiceTest {
     private val vedtaksbrevRepository = mockk<VedtaksbrevRepository>()
     private val personopplysningerService = mockk<PersonopplysningerService>()
     private val vedtakService: VedtakService = mockk<VedtakService>()
-    private val brevsignaturService = mockk<BrevsignaturService>()
+    private val brevsignaturService = BrevsignaturService(personopplysningerService)
     private val familieDokumentClient = mockk<FamilieDokumentClient>()
     private val tilordnetRessursService = mockk<TilordnetRessursService>()
     private val fagsakService = mockk<FagsakService>()
@@ -87,7 +86,7 @@ internal class VedtaksbrevServiceTest {
     }
 
     @Test
-    internal fun `skal ikke sette navn på besluttersignatur dersom vedtak er uten beslutter`() {
+    internal fun `skal ikke sette navn eller enhet på besluttersignatur dersom vedtak er uten beslutter`() {
         val vedtaksbrevSlot = slot<Vedtaksbrev>()
 
         val ident = "12345678910"
@@ -110,8 +109,8 @@ internal class VedtaksbrevServiceTest {
 
         assertThat(vedtaksbrevSlot.captured.saksbehandlersignatur).isNotNull
         assertThat(vedtaksbrevSlot.captured.beslutterident).isEqualTo(beslutterNavn)
-        assertThat(vedtaksbrevSlot.captured.besluttersignatur).isEqualTo(beslutterNavn)
-        assertThat(vedtaksbrevSlot.captured.enhet).isEqualTo(ENHET_NAY)
+        assertThat(vedtaksbrevSlot.captured.besluttersignatur).isEqualTo("")
+        assertThat(vedtaksbrevSlot.captured.enhet).isEqualTo("")
         assertThat(vedtaksbrevSlot.captured.beslutterPdf).isNotNull
     }
 
@@ -297,7 +296,6 @@ internal class VedtaksbrevServiceTest {
         val html = "html"
 
         every { fagsakService.hentFagsak(any()) } returns fagsak
-        every { brevsignaturService.lagSaksbehandlerSignatur(any(), any()) } returns SignaturDto("Saksbehandler", ENHET_NAY, false)
         every { brevClient.genererHtml(any(), any(), any(), any(), any()) } returns html
         every { vedtaksbrevRepository.existsById(any()) } returns false
         every { vedtaksbrevRepository.insert(capture(vedtaksbrevSlot)) } returns vedtaksbrev
@@ -319,7 +317,6 @@ internal class VedtaksbrevServiceTest {
         every { fagsakService.hentFagsak(any()) } returns fagsak
         every { vedtaksbrevRepository.existsById(any()) } returns true
         every { vedtaksbrevRepository.update(capture(vedtaksbrevSlot)) } answers { firstArg() }
-        every { brevsignaturService.lagSaksbehandlerSignatur(any(), any()) } returns SignaturDto("Saksbehandler", ENHET_NAY, false)
         every { brevClient.genererHtml(any(), any(), any(), any(), any()) } returns "html"
         every { familieDokumentClient.genererPdfFraHtml(any()) } returns "123".toByteArray()
         every { tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandler(any()) } returns true
@@ -332,4 +329,9 @@ internal class VedtaksbrevServiceTest {
         )
         assertThat(vedtaksbrevSlot.captured.opprettetTid).isAfterOrEqualTo(now)
     }
+
+    private fun signaturDto(
+        navn: String,
+        enhet: String? = ENHET_NAY,
+    ) = SignaturDto(navn, ENHET_NAY, false)
 }

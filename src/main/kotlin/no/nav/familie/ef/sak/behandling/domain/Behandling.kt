@@ -77,7 +77,7 @@ enum class BehandlingResultat(
 enum class BehandlingStatus {
     OPPRETTET,
     UTREDES,
-    FATTER_VEDTAK    ,
+    FATTER_VEDTAK,
     IVERKSETTER_VEDTAK,
     FERDIGSTILT,
     SATT_PÅ_VENT,
