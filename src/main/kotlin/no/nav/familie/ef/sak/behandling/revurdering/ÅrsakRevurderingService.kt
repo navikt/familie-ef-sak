@@ -1,5 +1,7 @@
-package no.nav.familie.ef.sak.behandling
+package no.nav.familie.ef.sak.behandling.revurdering
 
+import no.nav.familie.ef.sak.behandling.BehandlingService
+import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.behandling.domain.ÅrsakRevurdering
 import no.nav.familie.ef.sak.behandling.dto.RevurderingsinformasjonDto

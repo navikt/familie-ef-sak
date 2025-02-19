@@ -14,6 +14,7 @@ import no.nav.familie.ef.sak.oppgave.TilordnetRessursService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.GrunnlagsdataEndring
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
+import no.nav.familie.ef.sak.samværsavtale.SamværsavtaleService
 import no.nav.familie.ef.sak.vilkår.dto.VilkårDto
 import no.nav.familie.ef.sak.vilkår.dto.VilkårGrunnlagDto
 import no.nav.familie.ef.sak.vilkår.dto.VilkårsvurderingDto
@@ -40,6 +41,7 @@ class VurderingService(
     private val fagsakService: FagsakService,
     private val gjenbrukVilkårService: GjenbrukVilkårService,
     private val tilordnetRessursService: TilordnetRessursService,
+    private val samværsavtaleService: SamværsavtaleService,
 ) {
     private val logger = LoggerFactory.getLogger(javaClass)
     private val secureLogger = LoggerFactory.getLogger("secureLogger")
@@ -112,6 +114,11 @@ class VurderingService(
             metadata = metadata,
             stønadType = fagsak.stønadstype,
         )
+        kopierSamværsavtalerTilNyBehandling(
+            eksisterendeBehandlingId = behandling.forrigeBehandlingId,
+            nyBehandlingId = behandling.id,
+            metadata = metadata,
+        )
     }
 
     fun hentGrunnlagOgMetadata(behandlingId: UUID): Pair<VilkårGrunnlagDto, HovedregelMetadata> {
@@ -134,6 +141,18 @@ class VurderingService(
                 behandling = behandling,
             )
         return Pair(grunnlag, metadata)
+    }
+
+    private fun kopierSamværsavtalerTilNyBehandling(
+        eksisterendeBehandlingId: UUID,
+        nyBehandlingId: UUID,
+        metadata: HovedregelMetadata,
+    ) {
+        samværsavtaleService.kopierSamværsavtalerTilNyBehandling(
+            eksisterendeBehandlingId = eksisterendeBehandlingId,
+            nyBehandlingId = nyBehandlingId,
+            metadata = metadata,
+        )
     }
 
     private fun hentEllerOpprettVurderinger(

@@ -12,7 +12,7 @@ import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat.INNVILGET
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
-import no.nav.familie.ef.sak.behandling.ÅrsakRevurderingService
+import no.nav.familie.ef.sak.behandling.revurdering.ÅrsakRevurderingService
 import no.nav.familie.ef.sak.behandlingsflyt.task.BehandlingsstatistikkTask
 import no.nav.familie.ef.sak.behandlingsflyt.task.BehandlingsstatistikkTaskPayload
 import no.nav.familie.ef.sak.behandlingsflyt.task.FerdigstillOppgaveTask
@@ -358,6 +358,20 @@ internal class SendTilBeslutterStegTest {
         assertThat(taskSlot[0].type).isEqualTo(OpprettOppgaveTask.TYPE)
         val tilordnetNavIdent = objectMapper.readValue<OpprettOppgaveTaskData>(taskSlot[0].payload).tilordnetNavIdent
         assertThat(tilordnetNavIdent).isNull()
+    }
+
+    @Test
+    internal fun `lagBeskrivelseMedMerker skal legge til merker før gammel beskrivelse`() {
+        val beskrivelseMarkeringer = listOf("EØS", "Selvstendig næringsdrivende")
+        val result = beslutteVedtakSteg.lagBeskrivelseMedMerker(beskrivelseMarkeringer)
+        assertThat(result).isEqualTo("EØS, Selvstendig næringsdrivende. Sendt til godkjenning av saksbehandlernavn.")
+    }
+
+    @Test
+    internal fun `lagBeskrivelseMedMerker skal kun lage teskt med sendt til godkjenning`() {
+        val beskrivelseMarkeringer = emptyList<String>()
+        val result = beslutteVedtakSteg.lagBeskrivelseMedMerker(beskrivelseMarkeringer)
+        assertThat(result).isEqualTo("Sendt til godkjenning av saksbehandlernavn.")
     }
 
     private fun verifiserVedtattBehandlingsstatistikkTask() {

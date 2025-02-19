@@ -4,7 +4,7 @@ import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
-import no.nav.familie.ef.sak.behandling.ÅrsakRevurderingService
+import no.nav.familie.ef.sak.behandling.revurdering.ÅrsakRevurderingService
 import no.nav.familie.ef.sak.behandlingsflyt.task.BehandlingsstatistikkTask
 import no.nav.familie.ef.sak.behandlingsflyt.task.FerdigstillOppgaveTask
 import no.nav.familie.ef.sak.behandlingsflyt.task.OpprettOppgaveTask
@@ -145,9 +145,10 @@ class SendTilBeslutterSteg(
     ) {
         behandlingService.oppdaterStatusPåBehandling(saksbehandling.id, BehandlingStatus.FATTER_VEDTAK)
         vedtakService.oppdaterSaksbehandler(saksbehandling.id, SikkerhetContext.hentSaksbehandler())
+        val beskrivelseMarkeringer = data?.beskrivelseMarkeringer
 
         if (vedtakService.hentVedtak(saksbehandling.id).skalVedtakBesluttes()) {
-            opprettGodkjennVedtakOppgave(saksbehandling)
+            opprettGodkjennVedtakOppgave(saksbehandling, beskrivelseMarkeringer)
         }
 
         ferdigstillOppgave(saksbehandling)
@@ -191,17 +192,30 @@ class SendTilBeslutterSteg(
 
     private fun opprettGodkjennVedtakOppgave(
         saksbehandling: Saksbehandling,
+        beskrivelseMarkeringer: List<String>? = null,
     ) {
+        val beskrivelse = lagBeskrivelseMedMerker(beskrivelseMarkeringer)
         taskService.save(
             OpprettOppgaveTask.opprettTask(
                 OpprettOppgaveTaskData(
                     behandlingId = saksbehandling.id,
                     oppgavetype = Oppgavetype.GodkjenneVedtak,
-                    beskrivelse = "Sendt til godkjenning av ${SikkerhetContext.hentSaksbehandlerNavn(true)}.",
+                    beskrivelse = beskrivelse,
                     tilordnetNavIdent = utledBeslutterIdent(saksbehandling),
                 ),
             ),
         )
+    }
+
+    fun lagBeskrivelseMedMerker(beskrivelseMarkeringer: List<String>?): String {
+        val beskrivelse = "Sendt til godkjenning av ${SikkerhetContext.hentSaksbehandlerNavn(true)}."
+        if (beskrivelseMarkeringer.isNullOrEmpty()) {
+            return beskrivelse
+        }
+
+        val merker = beskrivelseMarkeringer.joinToString(", ").plus(". ")
+
+        return "${merker}$beskrivelse"
     }
 
     private fun utledBeslutterIdent(saksbehandling: Saksbehandling): String? =

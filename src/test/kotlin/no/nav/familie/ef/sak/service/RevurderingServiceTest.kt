@@ -3,8 +3,8 @@ package no.nav.familie.ef.sak.no.nav.familie.ef.sak.service
 import io.mockk.MockKException
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.familie.ef.sak.behandling.RevurderingService
 import no.nav.familie.ef.sak.behandling.dto.RevurderingDto
+import no.nav.familie.ef.sak.behandling.revurdering.RevurderingService
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.journalføring.dto.BarnSomSkalFødes
@@ -36,6 +36,7 @@ internal class RevurderingServiceTest {
             vedtakService = mockk(),
             nyeBarnService = mockk(),
             tilordnetRessursService = mockk(),
+            samværsavtaleService = mockk(),
         )
 
     @Test
