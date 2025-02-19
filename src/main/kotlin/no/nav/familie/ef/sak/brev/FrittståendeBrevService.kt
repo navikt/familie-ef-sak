@@ -38,7 +38,7 @@ class FrittståendeBrevService(
         brevrequest: JsonNode,
     ): ByteArray {
         val fagsak = fagsakService.hentFagsak(fagsakId)
-        val signatur = brevsignaturService.lagSignaturMedEnhet(fagsak, VedtakErUtenBeslutter(true))
+        val signatur = brevsignaturService.lagSaksbehandlerSignatur(fagsak.hentAktivIdent(), VedtakErUtenBeslutter(true))
 
         val html =
             brevClient
@@ -47,7 +47,7 @@ class FrittståendeBrevService(
                     saksbehandlerBrevrequest = brevrequest,
                     saksbehandlersignatur = signatur.navn,
                     enhet = signatur.enhet,
-                    skjulBeslutterSignatur = true,
+                    skjulBeslutterSignatur = signatur.skjulBeslutter,
                 ).replace(VedtaksbrevService.BESLUTTER_VEDTAKSDATO_PLACEHOLDER, LocalDate.now().norskFormat())
 
         return familieDokumentClient.genererPdfFraHtml(html)
