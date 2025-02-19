@@ -12,7 +12,6 @@ import no.nav.familie.ef.sak.brev.domain.MottakerRolle
 import no.nav.familie.ef.sak.brev.dto.FrittståendeSanitybrevDto
 import no.nav.familie.ef.sak.brev.dto.SignaturDto
 import no.nav.familie.ef.sak.fagsak.FagsakService
-import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.iverksett.IverksettClient
@@ -149,7 +148,7 @@ internal class FrittståendeBrevServiceTest {
         every { fagsakService.hentFagsak(any()) } returns fagsak
         every { fagsakService.hentEksternId(any()) } returns Long.MAX_VALUE
         every { arbeidsfordelingService.hentNavEnhetIdEllerBrukMaskinellEnhetHvisNull(any()) } returns "123"
-        every { brevsignaturService.lagSignaturMedEnhet(any<Fagsak>(), any()) } returns
+        every { brevsignaturService.lagBeslutterSignatur("123", any()) } returns
             SignaturDto(
                 "Navn Navnesen",
                 "En enhet",

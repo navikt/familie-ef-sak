@@ -6,6 +6,7 @@ import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.brev.domain.Vedtaksbrev
 import no.nav.familie.ef.sak.brev.dto.SignaturDto
+import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.felles.domain.Fil
 import no.nav.familie.ef.sak.felles.domain.SporbarUtils
 import no.nav.familie.ef.sak.felles.util.norskFormat
@@ -33,6 +34,7 @@ class VedtaksbrevService(
     private val familieDokumentClient: FamilieDokumentClient,
     private val tilordnetRessursService: TilordnetRessursService,
     private val vedtakService: VedtakService,
+    private val fagsakService: FagsakService,
 ) {
     fun hentBeslutterbrevEllerRekonstruerSaksbehandlerBrev(behandlingId: UUID): ByteArray {
         val vedtaksbrev = brevRepository.findByIdOrThrow(behandlingId)
@@ -53,9 +55,10 @@ class VedtaksbrevService(
         brevmal: String,
     ): ByteArray {
         validerRedigerbarBehandling(saksbehandling)
+        val fagsak = fagsakService.hentFagsak(saksbehandling.fagsakId)
         val vedtak = vedtakService.hentVedtak(saksbehandling.id)
         val vedtakErUtenBeslutter = vedtak.utledVedtakErUtenBeslutter()
-        val saksbehandlersignatur = brevsignaturService.lagSignaturMedEnhet(saksbehandling, vedtakErUtenBeslutter)
+        val saksbehandlersignatur = brevsignaturService.lagSaksbehandlerSignatur(fagsak.hentAktivIdent(), vedtakErUtenBeslutter)
 
         val html =
             brevClient.genererHtml(
@@ -105,7 +108,7 @@ class VedtaksbrevService(
         val vedtaksbrev = brevRepository.findByIdOrThrow(saksbehandling.id)
         val vedtak = vedtakService.hentVedtak(saksbehandling.id)
         val vedtakErUtenBeslutter = vedtak.utledVedtakErUtenBeslutter()
-        val signaturMedEnhet = brevsignaturService.lagSignaturMedEnhet(saksbehandling, vedtakErUtenBeslutter)
+        val signaturMedEnhet = brevsignaturService.lagBeslutterSignatur(saksbehandling.ident, vedtakErUtenBeslutter)
 
         feilHvis(vedtaksbrev.saksbehandlerHtml == null) {
             "Mangler saksbehandlerbrev"
@@ -125,7 +128,7 @@ class VedtaksbrevService(
         val saksbehandlerHtml = hentSaksbehandlerHtml(vedtaksbrev, saksbehandling)
         val beslutterIdent = SikkerhetContext.hentSaksbehandler()
         validerKanLageBeslutterbrev(saksbehandling, vedtaksbrev, beslutterIdent, vedtakErUtenBeslutter)
-        val signaturMedEnhet = brevsignaturService.lagSignaturMedEnhet(saksbehandling, vedtakErUtenBeslutter)
+        val signaturMedEnhet = brevsignaturService.lagBeslutterSignatur(saksbehandling.ident, vedtakErUtenBeslutter)
         val beslutterPdf = lagBeslutterPdfMedSignatur(saksbehandlerHtml, signaturMedEnhet)
         val besluttervedtaksbrev =
             vedtaksbrev.copy(

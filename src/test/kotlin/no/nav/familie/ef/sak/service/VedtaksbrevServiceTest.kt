@@ -13,6 +13,7 @@ import no.nav.familie.ef.sak.brev.VedtaksbrevRepository
 import no.nav.familie.ef.sak.brev.VedtaksbrevService
 import no.nav.familie.ef.sak.brev.VedtaksbrevService.Companion.BESLUTTER_SIGNATUR_PLACEHOLDER
 import no.nav.familie.ef.sak.brev.domain.Vedtaksbrev
+import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
 import no.nav.familie.ef.sak.felles.domain.Fil
 import no.nav.familie.ef.sak.felles.domain.SporbarUtils
@@ -48,9 +49,10 @@ internal class VedtaksbrevServiceTest {
     private val vedtaksbrevRepository = mockk<VedtaksbrevRepository>()
     private val personopplysningerService = mockk<PersonopplysningerService>()
     private val vedtakService: VedtakService = mockk<VedtakService>()
-    private val brevsignaturService = BrevsignaturService(personopplysningerService, vedtakService)
+    private val brevsignaturService = BrevsignaturService(personopplysningerService)
     private val familieDokumentClient = mockk<FamilieDokumentClient>()
     private val tilordnetRessursService = mockk<TilordnetRessursService>()
+    private val fagsakService = mockk<FagsakService>()
 
     private val vedtaksbrevService =
         VedtaksbrevService(
@@ -60,6 +62,7 @@ internal class VedtaksbrevServiceTest {
             familieDokumentClient,
             tilordnetRessursService,
             vedtakService,
+            fagsakService,
         )
 
     private val vedtakKreverBeslutter = VedtakErUtenBeslutter(false)
@@ -81,7 +84,7 @@ internal class VedtaksbrevServiceTest {
     }
 
     @Test
-    internal fun `skal fortsatt sette besluttersignatur og enhet hvis vedtakErUtenBeslutter er true`() {
+    internal fun `skal ikke sette navn eller enhet på besluttersignatur dersom vedtak er uten beslutter`() {
         val vedtaksbrevSlot = slot<Vedtaksbrev>()
 
         val ident = "12345678910"
@@ -104,8 +107,8 @@ internal class VedtaksbrevServiceTest {
 
         assertThat(vedtaksbrevSlot.captured.saksbehandlersignatur).isNotNull
         assertThat(vedtaksbrevSlot.captured.beslutterident).isEqualTo(beslutterNavn)
-        assertThat(vedtaksbrevSlot.captured.besluttersignatur).isNotEmpty()
-        assertThat(vedtaksbrevSlot.captured.enhet).isNotEmpty()
+        assertThat(vedtaksbrevSlot.captured.besluttersignatur).isEqualTo("")
+        assertThat(vedtaksbrevSlot.captured.enhet).isEqualTo("")
         assertThat(vedtaksbrevSlot.captured.beslutterPdf).isNotNull
     }
 
@@ -290,6 +293,7 @@ internal class VedtaksbrevServiceTest {
 
         val html = "html"
 
+        every { fagsakService.hentFagsak(any()) } returns fagsak
         every { brevClient.genererHtml(any(), any(), any(), any(), any()) } returns html
         every { vedtaksbrevRepository.existsById(any()) } returns false
         every { vedtaksbrevRepository.insert(capture(vedtaksbrevSlot)) } returns vedtaksbrev
@@ -308,6 +312,7 @@ internal class VedtaksbrevServiceTest {
     @Test
     internal fun `skal oppdatere vedtaksbrev med nytt tidspunkt`() {
         val vedtaksbrevSlot = slot<Vedtaksbrev>()
+        every { fagsakService.hentFagsak(any()) } returns fagsak
         every { vedtaksbrevRepository.existsById(any()) } returns true
         every { vedtaksbrevRepository.update(capture(vedtaksbrevSlot)) } answers { firstArg() }
         every { brevClient.genererHtml(any(), any(), any(), any(), any()) } returns "html"
