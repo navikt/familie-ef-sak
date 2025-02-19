@@ -13,6 +13,7 @@ import no.nav.familie.ef.sak.brev.VedtaksbrevRepository
 import no.nav.familie.ef.sak.brev.VedtaksbrevService
 import no.nav.familie.ef.sak.brev.VedtaksbrevService.Companion.BESLUTTER_SIGNATUR_PLACEHOLDER
 import no.nav.familie.ef.sak.brev.domain.Vedtaksbrev
+import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
 import no.nav.familie.ef.sak.felles.domain.Fil
 import no.nav.familie.ef.sak.felles.domain.SporbarUtils
@@ -27,6 +28,8 @@ import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.ef.sak.repository.saksbehandling
+import no.nav.familie.ef.sak.repository.vedtak
+import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.ef.sak.vedtak.domain.VedtakErUtenBeslutter
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG
@@ -45,9 +48,11 @@ internal class VedtaksbrevServiceTest {
     private val brevClient = mockk<BrevClient>()
     private val vedtaksbrevRepository = mockk<VedtaksbrevRepository>()
     private val personopplysningerService = mockk<PersonopplysningerService>()
+    private val vedtakService: VedtakService = mockk<VedtakService>()
     private val brevsignaturService = BrevsignaturService(personopplysningerService)
     private val familieDokumentClient = mockk<FamilieDokumentClient>()
     private val tilordnetRessursService = mockk<TilordnetRessursService>()
+    private val fagsakService = mockk<FagsakService>()
 
     private val vedtaksbrevService =
         VedtaksbrevService(
@@ -56,6 +61,8 @@ internal class VedtaksbrevServiceTest {
             brevsignaturService,
             familieDokumentClient,
             tilordnetRessursService,
+            vedtakService,
+            fagsakService,
         )
 
     private val vedtakKreverBeslutter = VedtakErUtenBeslutter(false)
@@ -68,6 +75,7 @@ internal class VedtaksbrevServiceTest {
     fun setUp() {
         mockBrukerContext(beslutterNavn)
         every { personopplysningerService.hentStrengesteAdressebeskyttelseForPersonMedRelasjoner(any()) } returns UGRADERT
+        every { vedtakService.hentVedtak(any()) } returns vedtak(behandling.id)
     }
 
     @AfterEach
@@ -76,7 +84,7 @@ internal class VedtaksbrevServiceTest {
     }
 
     @Test
-    internal fun `skal lage tom signatur hvis vedtak er uten beslutter`() {
+    internal fun `skal ikke sette navn eller enhet på besluttersignatur dersom vedtak er uten beslutter`() {
         val vedtaksbrevSlot = slot<Vedtaksbrev>()
 
         val ident = "12345678910"
@@ -285,6 +293,7 @@ internal class VedtaksbrevServiceTest {
 
         val html = "html"
 
+        every { fagsakService.hentFagsak(any()) } returns fagsak
         every { brevClient.genererHtml(any(), any(), any(), any(), any()) } returns html
         every { vedtaksbrevRepository.existsById(any()) } returns false
         every { vedtaksbrevRepository.insert(capture(vedtaksbrevSlot)) } returns vedtaksbrev
@@ -303,6 +312,7 @@ internal class VedtaksbrevServiceTest {
     @Test
     internal fun `skal oppdatere vedtaksbrev med nytt tidspunkt`() {
         val vedtaksbrevSlot = slot<Vedtaksbrev>()
+        every { fagsakService.hentFagsak(any()) } returns fagsak
         every { vedtaksbrevRepository.existsById(any()) } returns true
         every { vedtaksbrevRepository.update(capture(vedtaksbrevSlot)) } answers { firstArg() }
         every { brevClient.genererHtml(any(), any(), any(), any(), any()) } returns "html"
