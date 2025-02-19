@@ -201,7 +201,7 @@ no.nav.security.jwt:
 PDL_SCOPE: api://${DEPLOY_ENV}-fss.pdl.pdl-api/.default
 REPR_API_SCOPE: api://${DEPLOY_ENV}-gcp.repr.repr-api/.default
 EF_IVERKSETT_SCOPE: api://${DEPLOY_ENV}-gcp.teamfamilie.familie-ef-iverksett/.default
-FAMILIE_TILBAKE_SCOPE: api://${DEPLOY_ENV}-gcp.teamfamilie.familie-tilbake/.default
+FAMILIE_TILBAKE_SCOPE: api://${DEPLOY_ENV}-gcp.tilbake.tilbakekreving-backend/.default
 FAMILIE_KLAGE_SCOPE: api://${DEPLOY_ENV}-gcp.teamfamilie.familie-klage/.default
 FAMILIE_EF_PROXY_SCOPE: api://${DEPLOY_ENV}-fss.teamfamilie.familie-ef-proxy/.default
 INFOTRYGD_REPLIKA_SCOPE: api://${DEPLOY_ENV}-fss.teamfamilie.familie-ef-infotrygd/.default
@@ -275,7 +275,7 @@ FAMILIE_EF_IVERKSETT_URL: http://familie-ef-iverksett
 FAMILIE_DOKUMENT_URL: http://familie-dokument
 
 
-FAMILIE_TILBAKE_URL: http://familie-tilbake
+FAMILIE_TILBAKE_URL: http://tilbakekreving-backend.tilbake
 FAMILIE_KLAGE_URL: http://familie-klage
 
 FAMILIE_INTEGRASJONER_URL: https://familie-integrasjoner.${ON_PREM_URL_ENV}-fss-pub.nais.io
