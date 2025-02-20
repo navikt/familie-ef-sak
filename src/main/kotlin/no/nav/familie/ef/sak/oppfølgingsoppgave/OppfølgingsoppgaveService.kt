@@ -75,7 +75,7 @@ class OppfølgingsoppgaveService(
                 oppgavetyperSomKanOpprettes = oppgavetyperSomKanOpprettes,
                 oppgavetyperSomSkalOpprettes =
                     lagretFremleggsoppgave?.oppgavetyper
-                        ?: initialVerdierForOppgaverSomSkalOpprettes(behandlingid),
+                        ?: emptyList(),
             )
         )
     }
@@ -131,8 +131,6 @@ class OppfølgingsoppgaveService(
             tilkjentYtelseService.hentForBehandlingEllerNull(sisteIverksatteBehandling.id)
         }
     }
-
-    fun initialVerdierForOppgaverSomSkalOpprettes(behandlingId: UUID) = hentOppgavetyperSomKanOpprettes(behandlingId)
 
     private fun kanOppretteOppgaveForInntektskontrollFremITid(
         tilkjentYtelse: TilkjentYtelse?,
