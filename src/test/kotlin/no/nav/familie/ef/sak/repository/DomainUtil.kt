@@ -30,6 +30,11 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Adressebeskytte
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.KjønnType
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Metadata
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Navn
+import no.nav.familie.ef.sak.samværsavtale.domain.Samværsandel
+import no.nav.familie.ef.sak.samværsavtale.domain.Samværsavtale
+import no.nav.familie.ef.sak.samværsavtale.domain.Samværsdag
+import no.nav.familie.ef.sak.samværsavtale.domain.Samværsuke
+import no.nav.familie.ef.sak.samværsavtale.domain.SamværsukeWrapper
 import no.nav.familie.ef.sak.testutil.PdlTestdataHelper.fødsel
 import no.nav.familie.ef.sak.testutil.PdlTestdataHelper.metadataGjeldende
 import no.nav.familie.ef.sak.tilkjentytelse.domain.AndelTilkjentYtelse
@@ -119,8 +124,8 @@ fun behandling(
         henlagtÅrsak = henlagtÅrsak,
         eksternId = eksternId,
         vedtakstidspunkt =
-            vedtakstidspunkt
-                ?: if (resultat != BehandlingResultat.IKKE_SATT) SporbarUtils.now() else null,
+        vedtakstidspunkt
+            ?: if (resultat != BehandlingResultat.IKKE_SATT) SporbarUtils.now() else null,
         kravMottatt = kravMottatt,
     )
 
@@ -244,6 +249,33 @@ fun Fagsak.tilFagsakDomain() =
         eksternId = eksternId,
         sporbar = sporbar,
     )
+
+fun samværsavtale(
+    id: UUID = UUID.randomUUID(),
+    behandlingId: UUID = UUID.randomUUID(),
+    behandlingBarnid: UUID = UUID.randomUUID(),
+    uker: List<Samværsuke> = emptyList(),
+) =
+    Samværsavtale(
+        id = id,
+        behandlingId = behandlingId,
+        behandlingBarnId = behandlingBarnid,
+        uker = SamværsukeWrapper(uker = uker)
+    )
+
+fun samværsuke(andeler: List<Samværsandel> = emptyList()) =
+    Samværsuke(
+        mandag = samværsdag(andeler = andeler),
+        tirsdag = samværsdag(andeler = andeler),
+        onsdag = samværsdag(andeler = andeler),
+        torsdag = samværsdag(andeler = andeler),
+        fredag = samværsdag(andeler = andeler),
+        lørdag = samværsdag(andeler = andeler),
+        søndag = samværsdag(andeler = andeler),
+    )
+
+fun samværsdag(andeler: List<Samværsandel> = emptyList()) =
+    Samværsdag(andeler = andeler)
 
 fun vilkårsvurdering(
     behandlingId: UUID,
@@ -468,15 +500,15 @@ fun barnMedIdent(
         forelderBarnRelasjon = emptyList(),
         fødsel = listOf(fødsel),
         navn =
-            Navn(
-                fornavn = navn.split(" ")[0],
-                mellomnavn = null,
-                etternavn = navn.split(" ")[1],
-                metadata =
-                    Metadata(
-                        historisk = false,
-                    ),
+        Navn(
+            fornavn = navn.split(" ")[0],
+            mellomnavn = null,
+            etternavn = navn.split(" ")[1],
+            metadata =
+            Metadata(
+                historisk = false,
             ),
+        ),
         personIdent = fnr,
         null,
     )
