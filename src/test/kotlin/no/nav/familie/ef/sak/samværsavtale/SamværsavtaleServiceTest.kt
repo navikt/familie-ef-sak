@@ -187,4 +187,22 @@ internal class SamværsavtaleServiceTest {
         }
     }
 
+    @Nested
+    inner class HentSamværsavtale {
+        @Test
+        internal fun `skal returnere null dersom samværsavtale ikke finnes fra før`() {
+            val behandlingId = UUID.randomUUID()
+            every { samværsavtaleRepository.findByBehandlingId(behandlingId) } returns emptyList()
+            val samværsavtaler = samværsavtaleService.hentSamværsavtalerForBehandling(behandlingId)
+            assertThat(samværsavtaler.isEmpty()).isTrue()
+        }
+
+        @Test
+        internal fun `skal returnere samværsavtale dersom samværsavtale finnes fra før`() {
+            val behandlingId = UUID.randomUUID()
+            every { samværsavtaleRepository.findByBehandlingId(behandlingId) } returns listOf(samværsavtale(), samværsavtale(), samværsavtale())
+            val samværsavtaler = samværsavtaleService.hentSamværsavtalerForBehandling(behandlingId)
+            assertThat(samværsavtaler.size).isEqualTo(3)
+        }
+    }
 }
