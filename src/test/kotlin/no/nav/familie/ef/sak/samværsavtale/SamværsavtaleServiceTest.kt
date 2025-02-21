@@ -2,6 +2,8 @@ package no.nav.familie.ef.sak.samværsavtale
 
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.slot
+import io.mockk.verify
 import no.nav.familie.ef.sak.barn.BarnService
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
@@ -9,16 +11,25 @@ import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus.FATTER_VEDTAK
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus.FERDIGSTILT
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus.IVERKSETTER_VEDTAK
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus.SATT_PÅ_VENT
+import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus.UTREDES
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.oppgave.TilordnetRessursService
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.behandlingBarn
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.samværsavtale
+import no.nav.familie.ef.sak.repository.samværsuke
+import no.nav.familie.ef.sak.samværsavtale.domain.Samværsandel.KVELD_NATT
+import no.nav.familie.ef.sak.samværsavtale.domain.Samværsandel.MORGEN
+import no.nav.familie.ef.sak.samværsavtale.domain.Samværsandel.BARNEHAGE_SKOLE
+import no.nav.familie.ef.sak.samværsavtale.domain.Samværsandel.ETTERMIDDAG
+import no.nav.familie.ef.sak.samværsavtale.domain.Samværsavtale
 import no.nav.familie.ef.sak.samværsavtale.dto.tilDto
+import no.nav.familie.ef.sak.vilkår.Vilkårsvurdering
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
@@ -41,24 +52,139 @@ internal class SamværsavtaleServiceTest {
         barnService = barnService,
     )
 
-    @ParameterizedTest
-    @EnumSource(
-        value = BehandlingStatus::class,
-        names = ["FATTER_VEDTAK", "IVERKSETTER_VEDTAK", "FERDIGSTILT", "SATT_PÅ_VENT"],
-        mode = EnumSource.Mode.INCLUDE,
-    )
-    internal fun `skal ikke kunne redigere samværsavtale dersom tilhørende behandling ikke er redigerbar`(behandlingStatus: BehandlingStatus) {
-        val behandlingId = UUID.randomUUID()
-        val samværsavtale = samværsavtale(behandlingId = behandlingId).tilDto()
+    @Nested
+    inner class OpprettEllerErstattSamværsavtale {
+        @ParameterizedTest
+        @EnumSource(
+            value = BehandlingStatus::class,
+            names = ["FATTER_VEDTAK", "IVERKSETTER_VEDTAK", "FERDIGSTILT", "SATT_PÅ_VENT"],
+            mode = EnumSource.Mode.INCLUDE,
+        )
+        internal fun `skal ikke kunne redigere samværsavtale dersom tilhørende behandling ikke er redigerbar`(behandlingStatus: BehandlingStatus) {
+            val behandlingId = UUID.randomUUID()
+            val samværsavtale = samværsavtale(behandlingId = behandlingId).tilDto()
 
-        every { behandlingService.hentBehandling(behandlingId) } returns behandling(status = behandlingStatus)
-        every { barnService.finnBarnPåBehandling(behandlingId) } returns listOf(behandlingBarn(behandlingId = behandlingId))
+            every { behandlingService.hentBehandling(behandlingId) } returns behandling(id = behandlingId, status = behandlingStatus)
+            every { barnService.finnBarnPåBehandling(behandlingId) } returns listOf(behandlingBarn(behandlingId = behandlingId))
 
-        val feil: ApiFeil = assertThrows { samværsavtaleService.opprettEllerErstattSamværsavtale(samværsavtale) }
+            val feil: ApiFeil = assertThrows { samværsavtaleService.opprettEllerErstattSamværsavtale(samværsavtale) }
 
-        assertThat(feil.message).isEqualTo("Behandlingen er låst for videre redigering")
-        assertThat(feil.httpStatus).isEqualTo(HttpStatus.BAD_REQUEST)
+            assertThat(feil.message).isEqualTo("Behandlingen er låst for videre redigering")
+            assertThat(feil.httpStatus).isEqualTo(HttpStatus.BAD_REQUEST)
+        }
+
+        @Test
+        internal fun `skal ikke kunne redigere samværsavtale dersom behandlingen tilhører en annen saksbehandler`() {
+            val behandlingId = UUID.randomUUID()
+            val samværsavtale = samværsavtale(behandlingId = behandlingId).tilDto()
+
+            every { behandlingService.hentBehandling(behandlingId) } returns behandling(id = behandlingId, status = UTREDES)
+            every { barnService.finnBarnPåBehandling(behandlingId) } returns listOf(behandlingBarn(behandlingId = behandlingId))
+            every { tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandler(behandlingId) } returns false
+
+            val feil: ApiFeil = assertThrows { samværsavtaleService.opprettEllerErstattSamværsavtale(samværsavtale) }
+
+            assertThat(feil.message).isEqualTo("Behandlingen eies av en annen saksbehandler")
+            assertThat(feil.httpStatus).isEqualTo(HttpStatus.BAD_REQUEST)
+        }
+
+        @Test
+        internal fun `skal ikke kunne opprette en samværsavtale uten noen uker`() {
+            val behandlingId = UUID.randomUUID()
+            val samværsavtale = samværsavtale(behandlingId = behandlingId).tilDto()
+
+            every { behandlingService.hentBehandling(behandlingId) } returns behandling(id = behandlingId, status = UTREDES)
+            every { barnService.finnBarnPåBehandling(behandlingId) } returns listOf(behandlingBarn(behandlingId = behandlingId))
+            every { tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandler(behandlingId) } returns true
+
+            val feil: ApiFeil = assertThrows { samværsavtaleService.opprettEllerErstattSamværsavtale(samværsavtale) }
+
+            assertThat(feil.message).isEqualTo("Kan ikke opprette en samværsavtale uten noen uker. BehandlingId=${behandlingId}")
+            assertThat(feil.httpStatus).isEqualTo(HttpStatus.BAD_REQUEST)
+        }
+
+        @Test
+        internal fun `skal ikke kunne opprette en samværsavtale med duplikate samværsandeler innenfor en og samme dag`() {
+            val behandlingId = UUID.randomUUID()
+            val samværsuke = samværsuke(andeler = listOf(MORGEN, MORGEN))
+            val samværsavtale = samværsavtale(behandlingId = behandlingId, uker = listOf(samværsuke)).tilDto()
+
+            every { behandlingService.hentBehandling(behandlingId) } returns behandling(id = behandlingId, status = UTREDES)
+            every { barnService.finnBarnPåBehandling(behandlingId) } returns listOf(behandlingBarn(behandlingId = behandlingId))
+            every { tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandler(behandlingId) } returns true
+
+            val feil: ApiFeil = assertThrows { samværsavtaleService.opprettEllerErstattSamværsavtale(samværsavtale) }
+
+            assertThat(feil.message).isEqualTo("Kan ikke ha duplikate samværsandeler innenfor en og samme dag. BehandlingId=${behandlingId}")
+            assertThat(feil.httpStatus).isEqualTo(HttpStatus.BAD_REQUEST)
+        }
+
+        @Test
+        internal fun `skal ikke kunne opprette en samværsavtale på et barn som ikke eksisterer på behandlingen`() {
+            val behandlingId = UUID.randomUUID()
+            val samværsuke = samværsuke(andeler = listOf(MORGEN, KVELD_NATT))
+            val samværsavtale = samværsavtale(behandlingId = behandlingId, uker = listOf(samværsuke)).tilDto()
+
+            every { behandlingService.hentBehandling(behandlingId) } returns behandling(id = behandlingId, status = UTREDES)
+            every { barnService.finnBarnPåBehandling(behandlingId) } returns listOf(behandlingBarn(behandlingId = behandlingId))
+            every { tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandler(behandlingId) } returns true
+
+            val feil: ApiFeil = assertThrows { samværsavtaleService.opprettEllerErstattSamværsavtale(samværsavtale) }
+
+            assertThat(feil.message).isEqualTo("Kan ikke opprette en samværsavtale for et barn som ikke eksisterer på behandlingen. BehandlingId=${behandlingId}")
+            assertThat(feil.httpStatus).isEqualTo(HttpStatus.BAD_REQUEST)
+        }
+
+        @Test
+        internal fun `skal opprette en ny samværsavtale dersom det ikke eksisterer en fra før`() {
+            val behandlingId = UUID.randomUUID()
+            val behandlingBarnId = UUID.randomUUID()
+            val samværsuke = samværsuke(andeler = listOf(MORGEN, KVELD_NATT))
+            val samværsavtale = samværsavtale(behandlingId = behandlingId, behandlingBarnid = behandlingBarnId, uker = listOf(samværsuke)).tilDto()
+            val lagretSamværsavtale = slot<Samværsavtale>()
+
+            every { behandlingService.hentBehandling(behandlingId) } returns behandling(id = behandlingId, status = UTREDES)
+            every { barnService.finnBarnPåBehandling(behandlingId) } returns listOf(behandlingBarn(id = behandlingBarnId, behandlingId = behandlingId))
+            every { tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandler(behandlingId) } returns true
+            every { samværsavtaleRepository.findByBehandlingIdAndBehandlingBarnId(behandlingId, behandlingBarnId) } returns null
+            every { samværsavtaleRepository.insert(capture(lagretSamværsavtale)) } answers { firstArg() }
+
+            samværsavtaleService.opprettEllerErstattSamværsavtale(samværsavtale)
+
+            verify (exactly = 1){ samværsavtaleRepository.insert(any()) }
+            verify (exactly = 0){ samværsavtaleRepository.update(any()) }
+            assertThat(lagretSamværsavtale.captured.behandlingId).isEqualTo(behandlingId)
+            assertThat(lagretSamværsavtale.captured.behandlingBarnId).isEqualTo(behandlingBarnId)
+            assertThat(lagretSamværsavtale.captured.uker.uker.size).isEqualTo(1)
+            assertThat(lagretSamværsavtale.captured.tilDto().mapTilSamværsandelerPerDag().size).isEqualTo(7)
+            assertThat(lagretSamværsavtale.captured.tilDto().summerTilSamværsandelerVerdiPerDag().sum()).isEqualTo(35)
+        }
+
+        @Test
+        internal fun `skal erstatte samværsavtale dersom det eksisterer en fra før`() {
+            val behandlingId = UUID.randomUUID()
+            val behandlingBarnId = UUID.randomUUID()
+            val samværsuke = samværsuke(andeler = listOf(BARNEHAGE_SKOLE, ETTERMIDDAG))
+            val samværsavtale = samværsavtale(behandlingId = behandlingId, behandlingBarnid = behandlingBarnId, uker = listOf(samværsuke)).tilDto()
+            val lagretSamværsavtaleId = UUID.randomUUID()
+            val lagretSamværsavtale = slot<Samværsavtale>()
+
+            every { behandlingService.hentBehandling(behandlingId) } returns behandling(id = behandlingId, status = UTREDES)
+            every { barnService.finnBarnPåBehandling(behandlingId) } returns listOf(behandlingBarn(id = behandlingBarnId, behandlingId = behandlingId))
+            every { tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandler(behandlingId) } returns true
+            every { samværsavtaleRepository.findByBehandlingIdAndBehandlingBarnId(behandlingId, behandlingBarnId) } returns samværsavtale(id = lagretSamværsavtaleId, behandlingId = behandlingId, behandlingBarnid = behandlingBarnId)
+            every { samværsavtaleRepository.update(capture(lagretSamværsavtale)) } answers { firstArg() }
+
+            samværsavtaleService.opprettEllerErstattSamværsavtale(samværsavtale)
+
+            verify (exactly = 0){ samværsavtaleRepository.insert(any()) }
+            verify (exactly = 1){ samværsavtaleRepository.update(any()) }
+            assertThat(lagretSamværsavtale.captured.behandlingId).isEqualTo(behandlingId)
+            assertThat(lagretSamværsavtale.captured.behandlingBarnId).isEqualTo(behandlingBarnId)
+            assertThat(lagretSamværsavtale.captured.uker.uker.size).isEqualTo(1)
+            assertThat(lagretSamværsavtale.captured.tilDto().mapTilSamværsandelerPerDag().size).isEqualTo(7)
+            assertThat(lagretSamværsavtale.captured.tilDto().summerTilSamværsandelerVerdiPerDag().sum()).isEqualTo(21)
+        }
     }
-
 
 }
