@@ -41,6 +41,8 @@ object OppgaveBeskrivelse {
                 - Vi trenger også opplysninger om brukeren har utgifter til skolepenger.
                 
             · En konklusjon som svarer på om utdanningen er nødvendig og hensiktsmessig for å få eller beholde arbeid.
-            
+
+        Hvis du har spørsmål om en konkret sak, kan du avtale et møte med en saksbehandler. Dette gjør du på Navet på siden for enslig mor eller far.
+        
         """.trimIndent()
 }
