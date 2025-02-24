@@ -18,7 +18,7 @@ internal class AutomatiskBrevInnhentingAktivitetspliktControllerTest : OppslagSp
     lateinit var taskService: TaskService
 
     @BeforeEach
-    fun setUp() {
+    internal fun setUp() {
         headers.setBearerAuth(lokalForvalterToken)
     }
 
