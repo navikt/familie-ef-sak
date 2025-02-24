@@ -16,6 +16,8 @@ object OppgaveBeskrivelse {
         
         Dere må sende oss vurderingen innen 14 dager. 
         
+        Hvis dere har spørsmål om en konkret sak, kan dere avtale et møte med en saksbehandler. Dette gjør dere på Navet på siden for enslig mor eller far.
+        
         Innstillingen må inneholde:
         
             · Opplysninger om tidligere utdanning og arbeidserfaring.
@@ -41,6 +43,6 @@ object OppgaveBeskrivelse {
                 - Vi trenger også opplysninger om brukeren har utgifter til skolepenger.
                 
             · En konklusjon som svarer på om utdanningen er nødvendig og hensiktsmessig for å få eller beholde arbeid.
-            
+
         """.trimIndent()
 }
