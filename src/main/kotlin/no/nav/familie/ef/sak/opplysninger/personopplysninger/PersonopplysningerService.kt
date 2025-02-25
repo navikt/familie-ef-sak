@@ -6,6 +6,7 @@ import no.nav.familie.ef.sak.infrastruktur.config.getValue
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.GrunnlagsdataMedMetadata
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.PersonopplysningerDto
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.egenansatt.EgenAnsattClient
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.endringer.EndringUtenDetaljer
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.endringer.EndringerIPersonopplysningerDto
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.endringer.UtledEndringerUtil.finnEndringer
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper.PersonopplysningerMapper
@@ -69,7 +70,9 @@ class PersonopplysningerService(
                 søkerIdenter,
             )
         val endringer = finnEndringer(tidligerePersonopplysninger, nyePersonopplysninger)
-        return EndringerIPersonopplysningerDto(LocalDateTime.now(), endringer)
+        val periodeEndringer = EndringUtenDetaljer(tidligereGrunnlagsdata.grunnlagsdata.tidligereVedtaksperioder?.sak != nyGrunnlagsdata.grunnlagsdata.tidligereVedtaksperioder?.sak)
+
+        return EndringerIPersonopplysningerDto(LocalDateTime.now(), endringer.copy(perioder = periodeEndringer))
     }
 
     @Cacheable("personopplysninger", cacheManager = "shortCache")

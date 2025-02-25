@@ -21,6 +21,7 @@ data class Endringer(
     val utflyttingFraNorge: EndringUtenDetaljer = Endring(),
     val oppholdstillatelse: EndringUtenDetaljer = Endring(),
     val vergemål: EndringUtenDetaljer = Endring(),
+    val perioder: EndringUtenDetaljer = Endring(),
 ) {
     val harEndringer =
         listOf(
@@ -37,6 +38,7 @@ data class Endringer(
             utflyttingFraNorge,
             oppholdstillatelse,
             vergemål,
+            perioder,
         ).any { it.harEndringer }
 
     fun felterMedEndringerString(): String =
@@ -53,6 +55,8 @@ data class Endringer(
             "utflyttingFraNorge=${utflyttingFraNorge.harEndringer}",
             "oppholdstillatelse=${oppholdstillatelse.harEndringer}",
             "vergemål=${vergemål.harEndringer}",
+            "perioder=${perioder.harEndringer}",
+
         ).joinToString(", ")
 }
 

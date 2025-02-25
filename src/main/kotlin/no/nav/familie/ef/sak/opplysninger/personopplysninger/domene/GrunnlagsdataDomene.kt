@@ -42,8 +42,11 @@ data class GrunnlagsdataMedMetadata(
                 GrunnlagsdataEndring.SIVILSTAND -> erSivilstandOppdatertForskjelligMed(tidligereGrunnlagsdata)
                 GrunnlagsdataEndring.ADRESSE_SØKER -> erAdresseForSøkerForskjelligMed(tidligereGrunnlagsdata)
                 GrunnlagsdataEndring.ADRESSE_ANNEN_FORELDER -> erAdresserForAnnenForelderForskjelligMed(tidligereGrunnlagsdata)
+                GrunnlagsdataEndring.PERIODER -> harPerioderEndretSeg(tidligereGrunnlagsdata)
             }
         }
+
+    private fun harPerioderEndretSeg(tidligereGrunnlagsdata: GrunnlagsdataMedMetadata): Boolean = tidligereGrunnlagsdata.grunnlagsdata.tidligereVedtaksperioder != this.grunnlagsdata.tidligereVedtaksperioder
 
     private fun erAdresseForSøkerForskjelligMed(tidligereGrunnlagsdata: GrunnlagsdataMedMetadata): Boolean = tidligereGrunnlagsdata.grunnlagsdata.søker.bostedsadresse != this.grunnlagsdata.søker.bostedsadresse
 
@@ -182,4 +185,5 @@ enum class GrunnlagsdataEndring {
     ADRESSE_ANNEN_FORELDER,
     ADRESSE_SØKER,
     SIVILSTAND,
+    PERIODER,
 }
