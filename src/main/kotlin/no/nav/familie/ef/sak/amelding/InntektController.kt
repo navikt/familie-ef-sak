@@ -38,6 +38,22 @@ class InntektController(
         return success(inntekt)
     }
 
+    @GetMapping("personident/{personident}")
+    fun hentInntektV2(
+        @PathVariable("personident") personident: String,
+        @RequestParam maanedFom: YearMonth?,
+        @RequestParam maanedTom: YearMonth?,
+    ): Ressurs<AMeldingInntektDto> {
+//        tilgangService.validerTilgangTilFagsak(fagsakId, AuditLoggerEvent.ACCESS)
+        val inntekt =
+            inntektService.hentInntektV2(
+                personident = personident,
+                fom = maanedFom ?: YearMonth.now().minusMonths(2),
+                tom = maanedTom ?: YearMonth.now(),
+            )
+        return success(inntekt)
+    }
+
     @GetMapping("fagsak/{fagsakId}/generer-url")
     fun genererAInntektUrlFagsak(
         @PathVariable("fagsakId") fagsakId: UUID,

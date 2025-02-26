@@ -25,6 +25,15 @@ class InntektService(
         return inntektMapper.mapInntekt(inntekt)
     }
 
+    fun hentInntektV2(
+        personident: String,
+        fom: YearMonth,
+        tom: YearMonth,
+    ): AMeldingInntektDto {
+        val inntekt = aMeldingInntektClient.hentInntektV2(personident, fom, tom)
+        return inntektMapper.mapInntekt(inntekt)
+    }
+
     fun hentÅrsinntekt(
         personIdent: String,
         årstallIFjor: Int,

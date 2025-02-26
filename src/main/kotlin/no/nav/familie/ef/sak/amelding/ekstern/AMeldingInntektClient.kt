@@ -28,6 +28,17 @@ class AMeldingInntektClient(
         .build()
         .toUri()
 
+    private fun lagInntektUriV2(
+        fom: YearMonth?,
+        tom: YearMonth?,
+    ) = UriComponentsBuilder
+        .fromUri(uri)
+        .pathSegment("api/inntektV2")
+        .queryParam("maanedFom", fom)
+        .queryParam("maanedTom", tom)
+        .build()
+        .toUri()
+
     private val genererUrlUri =
         UriComponentsBuilder
             .fromUri(uri)
@@ -46,6 +57,27 @@ class AMeldingInntektClient(
         fom: YearMonth,
         tom: YearMonth,
     ): HentInntektListeResponse = postForEntity(lagInntektUri(fom, tom), PersonIdent(personIdent))
+
+    data class Payload(
+        val personIdent: String,
+    )
+
+    fun hentInntektV2(
+        personIdent: String,
+        fom: YearMonth,
+        tom: YearMonth,
+    ): HentInntektListeResponse =
+        postForEntity(
+            uri =
+                lagInntektUriV2(
+                    fom = null,
+                    tom = null,
+                ),
+            payload =
+                Payload(
+                    personIdent = personIdent,
+                ),
+        )
 
     fun genererAInntektUrl(personIdent: String): String =
         postForEntity(
