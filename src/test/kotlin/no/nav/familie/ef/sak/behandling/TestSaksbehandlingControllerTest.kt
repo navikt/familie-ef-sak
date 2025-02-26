@@ -65,6 +65,7 @@ internal class TestSaksbehandlingControllerTest : OppslagSpringRunnerTest() {
     @ParameterizedTest
     @EnumSource(StønadType::class)
     internal fun `skal fylle ut vilkår automatisk`(stønadType: StønadType) {
+        println("skal fylle ut vilkår automatisk $stønadType")
         val fagsak = testoppsettService.lagreFagsak(fagsak(stønadstype = stønadType))
         val behandling = behandlingRepository.insert(behandling(fagsak))
 
@@ -86,6 +87,7 @@ internal class TestSaksbehandlingControllerTest : OppslagSpringRunnerTest() {
     @ParameterizedTest
     @EnumSource(StønadType::class)
     internal fun `skal kunne endre delvilkårsvurderinger på vilkår som inneholder historiske delvilkår`(stønadType: StønadType) {
+        println("skal kunne endre delvilkårsvurderinger på vilkår som inneholder historiske delvilkår $stønadType")
         val fagsak = testoppsettService.lagreFagsak(fagsak(stønadstype = stønadType))
         val behandling = behandlingRepository.insert(behandling(fagsak))
         grunnlagsdataService.opprettGrunnlagsdata(behandling.id)
@@ -137,6 +139,7 @@ internal class TestSaksbehandlingControllerTest : OppslagSpringRunnerTest() {
     @ParameterizedTest
     @EnumSource(StønadType::class)
     internal fun `skal gjenbruke vilkårsvurderinger fra tidligere behandling uten å ta med historiske delvilkår`(stønadType: StønadType) {
+        println("skal gjenbruke vilkårsvurderinger fra tidligere behandling uten å ta med historiske delvilkår $stønadType")
         val fagsak = testoppsettService.lagreFagsak(fagsak(stønadstype = stønadType))
 
         // Opprett behandlinger

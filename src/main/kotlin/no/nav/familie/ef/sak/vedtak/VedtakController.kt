@@ -66,7 +66,7 @@ class VedtakController(
         val behandling = behandlingService.hentSaksbehandling(behandlingId)
         tilgangService.validerTilgangTilBehandling(behandling, AuditLoggerEvent.UPDATE)
 
-        //validerTilordnetRessurs(behandlingId)
+        // validerTilordnetRessurs(behandlingId)
 
         val vedtakErUtenBeslutter = vedtakService.hentVedtak(behandlingId).utledVedtakErUtenBeslutter()
 
@@ -171,7 +171,7 @@ class VedtakController(
         brukerfeilHvis(saksbehandling.status.behandlingErLåstForVidereRedigering()) {
             "Behandlingen er låst og vedtaket kan derfor ikke lagres"
         }
-        //validerTilordnetRessurs(saksbehandling.id)
+        // validerTilordnetRessurs(saksbehandling.id)
     }
 
     private fun validerGyldigAvslagÅrsak(vedtak: VedtakDto) {

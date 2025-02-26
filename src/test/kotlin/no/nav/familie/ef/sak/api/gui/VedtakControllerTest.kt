@@ -129,12 +129,14 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
 
     @Test
     internal fun `totrinn er uaktuell når behandlingen ikke er klar for totrinn`() {
+        println("totrinn er uaktuell når behandlingen ikke er klar for totrinn")
         opprettBehandling(steg = StegType.VILKÅR)
         validerTotrinnskontrollUaktuelt(BESLUTTER)
     }
 
     @Test
     internal fun `skal sette behandling til fatter vedtak når man sendt til beslutter`() {
+        println("skal sette behandling til fatter vedtak når man sendt til beslutter")
         opprettBehandling()
 
         sendTilBeslutter(SAKSBEHANDLER)
@@ -143,6 +145,7 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
 
     @Test
     internal fun `skal kaste feil ved innvilgelse hvis vilkårsvurderinger mangler`() {
+        println("skal kaste feil ved innvilgelse hvis vilkårsvurderinger mangler")
         val behandlingId = opprettBehandling(vedtakResultatType = ResultatType.INNVILGE)
         lagVilkårsvurderinger(behandlingId, ikkeLag = 1)
         sendTilBeslutter(SAKSBEHANDLER) { response ->
@@ -153,6 +156,7 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
 
     @Test
     internal fun `skal kaste feil ved innvilgelse hvis en ikke er innvilget`() {
+        println("skal kaste feil ved innvilgelse hvis en ikke er innvilget")
         val behandlingId = opprettBehandling(vedtakResultatType = ResultatType.INNVILGE)
         lagVilkårsvurderinger(behandlingId, Vilkårsresultat.IKKE_OPPFYLT)
         sendTilBeslutter(SAKSBEHANDLER) { response ->
@@ -163,6 +167,7 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
 
     @Test
     internal fun `skal sette behandling til fatter vedtak når man sendt til beslutter ved innvilgelse`() {
+        println("skal sette behandling til fatter vedtak når man sendt til beslutter ved innvilgelse")
         val behandlingId = opprettBehandling(vedtakResultatType = ResultatType.INNVILGE)
         lagVilkårsvurderinger(behandlingId, Vilkårsresultat.OPPFYLT)
 
@@ -173,6 +178,7 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
 
     @Test
     internal fun `skal sette behandling til iverksett når man har godkjent totrinnskontroll`() {
+        println("skal sette behandling til iverksett når man har godkjent totrinnskontroll")
         val behandlingId = opprettBehandling()
 
         sendTilBeslutter(SAKSBEHANDLER)
@@ -183,6 +189,7 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
 
     @Test
     internal fun `hvis man underkjenner den så skal man få ut det som status`() {
+        println("hvis man underkjenner den så skal man få ut det som status")
         val behandlingId = opprettBehandling()
 
         sendTilBeslutter(SAKSBEHANDLER)
@@ -197,6 +204,7 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
 
     @Test
     internal fun `en annen beslutter enn den som sendte til beslutter må godkjenne behandlingen`() {
+        println("en annen beslutter enn den som sendte til beslutter må godkjenne behandlingen")
         val behandlingId = opprettBehandling(saksbehandler = BESLUTTER)
 
         sendTilBeslutter(BESLUTTER)
@@ -213,6 +221,7 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
 
     @Test
     internal fun `skal gi totrinnskontroll uaktuelt hvis totrinnskontrollen er godkjent`() {
+        println("skal gi totrinnskontroll uaktuelt hvis totrinnskontrollen er godkjent")
         val behandlingId = opprettBehandling()
 
         sendTilBeslutter(SAKSBEHANDLER)
@@ -226,6 +235,7 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
 
     @Test
     internal fun `hvis man underkjenner behandlingen må man sende den til beslutter på nytt og sen godkjenne den`() {
+        println("hvis man underkjenner behandlingen må man sende den til beslutter på nytt og sen godkjenne den")
         val behandlingId = opprettBehandling()
         sendTilBeslutter(SAKSBEHANDLER)
 
@@ -249,6 +259,7 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
 
     @Test
     internal fun `en annen beslutter enn den som sendte behandlingen til beslutter må godkjenne behandlingen`() {
+        println("en annen beslutter enn den som sendte behandlingen til beslutter må godkjenne behandlingen")
         val behandlingId = opprettBehandling(saksbehandler = BESLUTTER)
         sendTilBeslutter(BESLUTTER)
         validerTotrinnskontrollIkkeAutorisert(SAKSBEHANDLER)
@@ -263,6 +274,7 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
 
     @Test
     internal fun `kan ikke godkjenne totrinnskontroll når behandling utredes`() {
+        println("kan ikke godkjenne totrinnskontroll når behandling utredes")
         opprettBehandling()
         godkjennTotrinnskontroll(BESLUTTER) {
             assertThat(it.statusCode).isEqualTo(HttpStatus.BAD_REQUEST)
@@ -271,6 +283,7 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
 
     @Test
     internal fun `kan ikke sende til besluttning før behandling er i riktig steg`() {
+        println("kan ikke sende til besluttning før behandling er i riktig steg")
         opprettBehandling(steg = StegType.VILKÅR)
         godkjennTotrinnskontroll(BESLUTTER) {
             assertThat(it.statusCode).isEqualTo(HttpStatus.BAD_REQUEST)
@@ -279,6 +292,7 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
 
     @Test
     internal fun `kan ikke sende til besluttning som saksbehandler`() {
+        println("kan ikke sende til besluttning som saksbehandler")
         opprettBehandling(saksbehandler = BESLUTTER)
         sendTilBeslutter(BESLUTTER)
         godkjennTotrinnskontroll(SAKSBEHANDLER) {
@@ -288,6 +302,7 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
 
     @Test
     internal fun `skal automatisk utføre besluttesteg når en behandling avslås pga mindre inntektsendringer`() {
+        println("skal automatisk utføre besluttesteg når en behandling avslås pga mindre inntektsendringer")
         opprettBehandling(
             steg = StegType.SEND_TIL_BESLUTTER,
             vedtakResultatType = ResultatType.AVSLÅ,
@@ -305,6 +320,7 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
 
     @Test
     internal fun `skal automatisk utføre besluttesteg når en behandling avslås pga kortvarig avbrudd jobb`() {
+        println("skal automatisk utføre besluttesteg når en behandling avslås pga kortvarig avbrudd jobb")
         opprettBehandling(
             steg = StegType.SEND_TIL_BESLUTTER,
             vedtakResultatType = ResultatType.AVSLÅ,
@@ -322,6 +338,7 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
 
     @Test
     internal fun `skal lagre oppgaver som skal opprettes`() {
+        println("skal lagre oppgaver som skal opprettes")
         val lagAndelMedInntekt1ÅrFremITiden: (behandlingId: UUID) -> TilkjentYtelse = { behandlingId ->
             val andel =
                 lagAndelTilkjentYtelse(
@@ -369,6 +386,7 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
 
         @Test
         internal fun `skal feile hvis en annen saksbehandler prøver å angre send til beslutter`() {
+            println("skal feile hvis en annen saksbehandler prøver å angre send til beslutter")
             opprettBehandling(steg = StegType.SEND_TIL_BESLUTTER, status = BehandlingStatus.UTREDES)
             sendTilBeslutter(SAKSBEHANDLER)
             angreSendTilBeslutter(BESLUTTER, responseBadRequest())
@@ -376,6 +394,7 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
 
         @Test
         internal fun `skal feile hvis vedtak ikke er i steg BESLUTTE_VEDTAK`() {
+            println("skal feile hvis vedtak ikke er i steg BESLUTTE_VEDTAK")
             opprettBehandling(steg = StegType.SEND_TIL_BESLUTTER, status = BehandlingStatus.FATTER_VEDTAK)
             behandlingshistorikkService.opprettHistorikkInnslag(
                 Behandlingshistorikk(
@@ -390,6 +409,7 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
 
         @Test
         internal fun `skal feile hvis oppgave er plukket av noen andre`() {
+            println("skal feile hvis oppgave er plukket av noen andre")
             opprettBehandling(steg = StegType.SEND_TIL_BESLUTTER, status = BehandlingStatus.UTREDES)
             sendTilBeslutter(SAKSBEHANDLER)
             opprettOppgave(oppgaveType = Oppgavetype.GodkjenneVedtak, sakshandler = BESLUTTER)
@@ -398,6 +418,7 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
 
         @Test
         internal fun `skal kunne angre send til beslutter`() {
+            println("skal kunne angre send til beslutter")
             val behandlingId = opprettBehandling(steg = StegType.SEND_TIL_BESLUTTER, status = BehandlingStatus.UTREDES)
             opprettOppgave(oppgaveType = Oppgavetype.GodkjenneVedtak)
             sendTilBeslutter(SAKSBEHANDLER)
@@ -431,6 +452,7 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
 
         @Test
         internal fun `skal kunne angre send til beslutter når godkjenne vedtak-oppgaven er plukket av saksbehandler`() {
+            println("skal kunne angre send til beslutter når godkjenne vedtak-oppgaven er plukket av saksbehandler")
             opprettBehandling(steg = StegType.SEND_TIL_BESLUTTER, status = BehandlingStatus.UTREDES)
             sendTilBeslutter(SAKSBEHANDLER)
             opprettOppgave(oppgaveType = Oppgavetype.GodkjenneVedtak, sakshandler = SAKSBEHANDLER)
