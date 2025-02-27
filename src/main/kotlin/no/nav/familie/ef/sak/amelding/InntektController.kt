@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
@@ -40,7 +41,7 @@ class InntektController(
     }
 
     // TODO: Husk å endre retur type fra Any til det som gjelder.
-    @GetMapping("inntektv2/{fagsakid}")
+    @PostMapping("inntektv2/{fagsakid}")
     fun hentInntektV2(
         @PathVariable("fagsakid") fagsakId: UUID,
         @RequestParam maanedFom: YearMonth?,
