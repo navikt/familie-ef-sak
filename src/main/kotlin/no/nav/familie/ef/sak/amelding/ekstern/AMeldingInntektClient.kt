@@ -62,20 +62,21 @@ class AMeldingInntektClient(
         val personIdent: String,
     )
 
+    // TODO: Endre tilbake til persoIdent med camelCase og endre fra Any til resposne type.
     fun hentInntektV2(
-        personIdent: String,
+        personident: String,
         fom: YearMonth,
         tom: YearMonth,
-    ): HentInntektListeResponse =
+    ): Any =
         postForEntity(
             uri =
                 lagInntektUriV2(
-                    fom = null,
-                    tom = null,
+                    fom = fom,
+                    tom = tom,
                 ),
             payload =
                 Payload(
-                    personIdent = personIdent,
+                    personIdent = personident,
                 ),
         )
 

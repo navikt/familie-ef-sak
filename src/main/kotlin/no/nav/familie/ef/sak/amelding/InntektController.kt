@@ -5,6 +5,7 @@ import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.Ressurs.Companion.success
 import no.nav.security.token.support.core.api.ProtectedWithClaims
+import org.slf4j.LoggerFactory
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -38,19 +39,27 @@ class InntektController(
         return success(inntekt)
     }
 
+    // TODO: Husk å endre retur type fra Any til det som gjelder.
     @GetMapping("personident/{personident}")
     fun hentInntektV2(
         @PathVariable("personident") personident: String,
         @RequestParam maanedFom: YearMonth?,
         @RequestParam maanedTom: YearMonth?,
-    ): Ressurs<AMeldingInntektDto> {
-//        tilgangService.validerTilgangTilFagsak(fagsakId, AuditLoggerEvent.ACCESS)
+    ): Ressurs<Any> {
+        // TODO: Husk å validere tilgang for innhenting.
+        // tilgangService.validerTilgangTilFagsak(fagsakId, AuditLoggerEvent.ACCESS)
+
         val inntekt =
             inntektService.hentInntektV2(
                 personident = personident,
                 fom = maanedFom ?: YearMonth.now().minusMonths(2),
                 tom = maanedTom ?: YearMonth.now(),
             )
+
+        // TODO: Husk å fjern meg.
+        val logger = LoggerFactory.getLogger(::javaClass.name)
+        logger.info("FAMILIE-EF-SAK --- inntekt for personident med data: $inntekt")
+
         return success(inntekt)
     }
 

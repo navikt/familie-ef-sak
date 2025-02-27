@@ -25,13 +25,14 @@ class InntektService(
         return inntektMapper.mapInntekt(inntekt)
     }
 
+    // TODO: Husk å endre retur type fra Any til det som gjelder.
     fun hentInntektV2(
         personident: String,
         fom: YearMonth,
         tom: YearMonth,
-    ): AMeldingInntektDto {
+    ): Any {
         val inntekt = aMeldingInntektClient.hentInntektV2(personident, fom, tom)
-        return inntektMapper.mapInntekt(inntekt)
+        return inntekt
     }
 
     fun hentÅrsinntekt(
