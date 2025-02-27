@@ -41,7 +41,7 @@ class InntektController(
         return success(inntekt)
     }
 
-    data class Body (
+    data class Body(
         val maanedFom: YearMonth?,
         val maanedTom: YearMonth?,
     )
@@ -53,6 +53,9 @@ class InntektController(
         @RequestBody body: Body,
     ): Ressurs<Any> {
         tilgangService.validerTilgangTilFagsak(fagsakId, AuditLoggerEvent.ACCESS)
+        val logger = LoggerFactory.getLogger(::javaClass.name)
+        logger.info("FAMILIE-EF-SAK --- Henter inntekt for personident med body: $body")
+        logger.info("FAMILIE-EF-SAK --- fagsakid: $fagsakId")
         val inntekt =
             inntektService.hentInntektV2(
                 fagsakId = fagsakId,
@@ -61,7 +64,6 @@ class InntektController(
             )
 
         // TODO: Husk å fjern meg.
-        val logger = LoggerFactory.getLogger(::javaClass.name)
         logger.info("FAMILIE-EF-SAK --- inntekt for personident med data: $inntekt")
 
         return success(inntekt)
