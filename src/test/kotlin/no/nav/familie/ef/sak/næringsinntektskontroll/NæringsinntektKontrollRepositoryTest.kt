@@ -9,12 +9,12 @@ import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDateTime
 import java.util.UUID
 
-class NæringsinntektKontrollRepositoryTest : OppslagSpringRunnerTest() {
+internal class NæringsinntektKontrollRepositoryTest : OppslagSpringRunnerTest() {
     @Autowired
     private lateinit var næringsinntektKontrollRepository: NæringsinntektKontrollRepository
 
     @Test
-    fun testInsert() {
+    internal fun testInsert() {
         næringsinntektKontrollRepository.insert(NæringsinntektKontrollDomain(oppgaveId = 1, fagsakId = UUID.randomUUID(), kjøretidspunkt = LocalDateTime.now(), utfall = NæringsinntektKontrollUtfall.UENDRET_INNTEKT))
     }
 }

@@ -93,6 +93,9 @@ class SamværsavtaleService(
         request: SamværsavtaleDto,
         behandlingBarn: List<BehandlingBarn>,
     ) {
+        brukerfeilHvis(request.uker.isEmpty()) {
+            "Kan ikke opprette en samværsavtale uten noen uker. BehandlingId=${request.behandlingId}"
+        }
         brukerfeilHvis(
             request
                 .mapTilSamværsandelerPerDag()

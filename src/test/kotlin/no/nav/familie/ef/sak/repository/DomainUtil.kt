@@ -19,6 +19,7 @@ import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
 import no.nav.familie.ef.sak.felles.domain.Sporbar
 import no.nav.familie.ef.sak.felles.domain.SporbarUtils
 import no.nav.familie.ef.sak.felles.util.min
+import no.nav.familie.ef.sak.no.nav.familie.ef.sak.vilkår.VilkårTestUtil.mockVilkårGrunnlagDto
 import no.nav.familie.ef.sak.oppgave.Oppgave
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.BarnMedIdent
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.Fødsel
@@ -30,6 +31,12 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Adressebeskytte
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.KjønnType
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Metadata
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Navn
+import no.nav.familie.ef.sak.opplysninger.søknad.domain.Sivilstand
+import no.nav.familie.ef.sak.samværsavtale.domain.Samværsandel
+import no.nav.familie.ef.sak.samværsavtale.domain.Samværsavtale
+import no.nav.familie.ef.sak.samværsavtale.domain.Samværsdag
+import no.nav.familie.ef.sak.samværsavtale.domain.Samværsuke
+import no.nav.familie.ef.sak.samværsavtale.domain.SamværsukeWrapper
 import no.nav.familie.ef.sak.testutil.PdlTestdataHelper.fødsel
 import no.nav.familie.ef.sak.testutil.PdlTestdataHelper.metadataGjeldende
 import no.nav.familie.ef.sak.tilkjentytelse.domain.AndelTilkjentYtelse
@@ -59,6 +66,7 @@ import no.nav.familie.ef.sak.vilkår.Vilkårsresultat
 import no.nav.familie.ef.sak.vilkår.Vilkårsvurdering
 import no.nav.familie.ef.sak.vilkår.Vurdering
 import no.nav.familie.ef.sak.vilkår.dto.tilDto
+import no.nav.familie.ef.sak.vilkår.regler.BarnForelderLangAvstandTilSøker
 import no.nav.familie.ef.sak.vilkår.regler.HovedregelMetadata
 import no.nav.familie.ef.sak.vilkår.regler.Vilkårsregel
 import no.nav.familie.ef.sak.vilkår.regler.evalutation.RegelEvaluering.utledResultat
@@ -244,6 +252,31 @@ fun Fagsak.tilFagsakDomain() =
         eksternId = eksternId,
         sporbar = sporbar,
     )
+
+fun samværsavtale(
+    id: UUID = UUID.randomUUID(),
+    behandlingId: UUID = UUID.randomUUID(),
+    behandlingBarnid: UUID = UUID.randomUUID(),
+    uker: List<Samværsuke> = emptyList(),
+) = Samværsavtale(
+    id = id,
+    behandlingId = behandlingId,
+    behandlingBarnId = behandlingBarnid,
+    uker = SamværsukeWrapper(uker = uker),
+)
+
+fun samværsuke(andeler: List<Samværsandel> = emptyList()) =
+    Samværsuke(
+        mandag = samværsdag(andeler = andeler),
+        tirsdag = samværsdag(andeler = andeler),
+        onsdag = samværsdag(andeler = andeler),
+        torsdag = samværsdag(andeler = andeler),
+        fredag = samværsdag(andeler = andeler),
+        lørdag = samværsdag(andeler = andeler),
+        søndag = samværsdag(andeler = andeler),
+    )
+
+fun samværsdag(andeler: List<Samværsandel> = emptyList()) = Samværsdag(andeler = andeler)
 
 fun vilkårsvurdering(
     behandlingId: UUID,
@@ -480,6 +513,25 @@ fun barnMedIdent(
         personIdent = fnr,
         null,
     )
+
+fun hovedregelMetadata(
+    sivilstand: Sivilstand? = null,
+    sivilstandstype: Sivilstandstype = Sivilstandstype.SKILT,
+    erMigrering: Boolean = false,
+    barn: List<BehandlingBarn> = emptyList(),
+    søktOmBarnetilsyn: List<UUID> = emptyList(),
+    langAvstandTilSøker: List<BarnForelderLangAvstandTilSøker> = emptyList(),
+    behandling: Behandling = behandling(),
+) = HovedregelMetadata(
+    sivilstandSøknad = sivilstand,
+    sivilstandstype = sivilstandstype,
+    erMigrering = erMigrering,
+    barn = barn,
+    søktOmBarnetilsyn = søktOmBarnetilsyn,
+    langAvstandTilSøker = langAvstandTilSøker,
+    vilkårgrunnlagDto = mockVilkårGrunnlagDto(),
+    behandling = behandling,
+)
 
 fun sivilstand(
     type: Sivilstandstype,

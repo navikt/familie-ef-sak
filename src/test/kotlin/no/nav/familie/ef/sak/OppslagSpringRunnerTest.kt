@@ -28,6 +28,7 @@ import no.nav.familie.ef.sak.oppgave.Oppgave
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.Grunnlagsdata
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.Søknad
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.SøknadsskjemaOvergangsstønad
+import no.nav.familie.ef.sak.samværsavtale.domain.Samværsavtale
 import no.nav.familie.ef.sak.simulering.Simuleringsresultat
 import no.nav.familie.ef.sak.testutil.TestoppsettService
 import no.nav.familie.ef.sak.tilbakekreving.domain.Tilbakekreving
@@ -140,6 +141,7 @@ abstract class OppslagSpringRunnerTest {
             UttrekkArbeidssøkere::class,
             KonsistensavstemmingJobb::class,
             Simuleringsresultat::class,
+            Samværsavtale::class,
             BehandlingBarn::class,
             Søknad::class,
             SøknadsskjemaOvergangsstønad::class,
