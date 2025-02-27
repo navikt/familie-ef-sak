@@ -33,7 +33,7 @@ class AMeldingInntektClient(
         tom: YearMonth?,
     ) = UriComponentsBuilder
         .fromUri(uri)
-        .pathSegment("api/inntektV2")
+        .pathSegment("api/inntektv2")
         .queryParam("maanedFom", fom)
         .queryParam("maanedTom", tom)
         .build()
