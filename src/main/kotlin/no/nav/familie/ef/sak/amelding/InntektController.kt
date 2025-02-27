@@ -40,18 +40,16 @@ class InntektController(
     }
 
     // TODO: Husk å endre retur type fra Any til det som gjelder.
-    @GetMapping("personident/{personident}")
+    @GetMapping("inntektv2/{fagsakid}")
     fun hentInntektV2(
-        @PathVariable("personident") personident: String,
+        @PathVariable("fagsakid") fagsakId: UUID,
         @RequestParam maanedFom: YearMonth?,
         @RequestParam maanedTom: YearMonth?,
     ): Ressurs<Any> {
-        // TODO: Husk å validere tilgang for innhenting.
-        // tilgangService.validerTilgangTilFagsak(fagsakId, AuditLoggerEvent.ACCESS)
-
+        tilgangService.validerTilgangTilFagsak(fagsakId, AuditLoggerEvent.ACCESS)
         val inntekt =
             inntektService.hentInntektV2(
-                personident = personident,
+                fagsakId = fagsakId,
                 fom = maanedFom ?: YearMonth.now().minusMonths(2),
                 tom = maanedTom ?: YearMonth.now(),
             )

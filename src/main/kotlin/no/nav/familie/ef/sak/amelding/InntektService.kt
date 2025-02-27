@@ -27,11 +27,12 @@ class InntektService(
 
     // TODO: Husk å endre retur type fra Any til det som gjelder.
     fun hentInntektV2(
-        personident: String,
+        fagsakId: UUID,
         fom: YearMonth,
         tom: YearMonth,
     ): Any {
-        val inntekt = aMeldingInntektClient.hentInntektV2(personident, fom, tom)
+        val aktivIdent = fagsakService.hentAktivIdent(fagsakId)
+        val inntekt = aMeldingInntektClient.hentInntektV2(aktivIdent, fom, tom)
         return inntekt
     }
 
