@@ -10,6 +10,7 @@ import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
@@ -40,10 +41,35 @@ class InntektController(
         return success(inntekt)
     }
 
+    data class Body (
+        val maanedFom: YearMonth?,
+        val maanedTom: YearMonth?,
+    )
+
     // TODO: Husk å endre retur type fra Any til det som gjelder.
     @PostMapping("inntektv2/{fagsakid}")
     fun hentInntektV2(
         @PathVariable("fagsakid") fagsakId: UUID,
+        @RequestBody body: Body,
+    ): Ressurs<Any> {
+        tilgangService.validerTilgangTilFagsak(fagsakId, AuditLoggerEvent.ACCESS)
+        val inntekt =
+            inntektService.hentInntektV2(
+                fagsakId = fagsakId,
+                fom = body.maanedFom ?: YearMonth.now().minusMonths(2),
+                tom = body.maanedTom ?: YearMonth.now(),
+            )
+
+        // TODO: Husk å fjern meg.
+        val logger = LoggerFactory.getLogger(::javaClass.name)
+        logger.info("FAMILIE-EF-SAK --- inntekt for personident med data: $inntekt")
+
+        return success(inntekt)
+    }
+
+    @GetMapping("inntektv2-get/{fagsakid}")
+    fun getHentInntektV2(
+        @PathVariable("fagsakId") fagsakId: UUID,
         @RequestParam maanedFom: YearMonth?,
         @RequestParam maanedTom: YearMonth?,
     ): Ressurs<Any> {
@@ -57,7 +83,7 @@ class InntektController(
 
         // TODO: Husk å fjern meg.
         val logger = LoggerFactory.getLogger(::javaClass.name)
-        logger.info("FAMILIE-EF-SAK --- inntekt for personident med data: $inntekt")
+        logger.info("FAMILIE-EF-SAK - GET --- inntekt for personident med data: $inntekt")
 
         return success(inntekt)
     }

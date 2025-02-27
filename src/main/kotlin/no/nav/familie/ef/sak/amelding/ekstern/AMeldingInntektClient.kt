@@ -59,7 +59,7 @@ class AMeldingInntektClient(
     ): HentInntektListeResponse = postForEntity(lagInntektUri(fom, tom), PersonIdent(personIdent))
 
     data class Payload(
-        val personIdent: String,
+        val personident: String,
     )
 
     // TODO: Endre tilbake til persoIdent med camelCase og endre fra Any til resposne type.
@@ -76,7 +76,7 @@ class AMeldingInntektClient(
                 ),
             payload =
                 Payload(
-                    personIdent = personident,
+                    personident = personident,
                 ),
         )
 
