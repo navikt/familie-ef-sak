@@ -29,13 +29,13 @@ class AMeldingInntektClient(
         .toUri()
 
     private fun lagInntektUriV2(
-        fom: YearMonth?,
-        tom: YearMonth?,
+//        fom: YearMonth?,
+//        tom: YearMonth?,
     ) = UriComponentsBuilder
         .fromUri(uri)
         .pathSegment("api/inntektv2")
-        .queryParam("maanedFom", fom)
-        .queryParam("maanedTom", tom)
+//        .queryParam("maanedFom", fom)
+//        .queryParam("maanedTom", tom)
         .build()
         .toUri()
 
@@ -60,6 +60,8 @@ class AMeldingInntektClient(
 
     data class Payload(
         val personident: String,
+        val maanedFom: YearMonth,
+        val maanedTom: YearMonth,
     )
 
     // TODO: Endre tilbake til persoIdent med camelCase og endre fra Any til resposne type.
@@ -71,12 +73,14 @@ class AMeldingInntektClient(
         postForEntity(
             uri =
                 lagInntektUriV2(
-                    fom = fom,
-                    tom = tom,
+//                    fom = fom,
+//                    tom = tom,
                 ),
             payload =
                 Payload(
                     personident = personident,
+                    maanedFom = fom,
+                    maanedTom = tom,
                 ),
         )
 
