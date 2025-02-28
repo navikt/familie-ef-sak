@@ -54,38 +54,14 @@ class InntektController(
     ): Ressurs<Any> {
         tilgangService.validerTilgangTilFagsak(fagsakId, AuditLoggerEvent.ACCESS)
         val logger = LoggerFactory.getLogger(::javaClass.name)
-        logger.info("FAMILIE-EF-SAK --- Henter inntekt for personident med body: $body")
-        logger.info("FAMILIE-EF-SAK --- fagsakid: $fagsakId")
+        logger.info("FAMILIE-EF-SAK --- Henter inntekt for fagsakid: $fagsakId med body: $body")
+
         val inntekt =
             inntektService.hentInntektV2(
                 fagsakId = fagsakId,
                 fom = body.maanedFom ?: YearMonth.now().minusMonths(2),
                 tom = body.maanedTom ?: YearMonth.now(),
             )
-
-        // TODO: Husk å fjern meg.
-        logger.info("FAMILIE-EF-SAK --- inntekt for personident med data: $inntekt")
-
-        return success(inntekt)
-    }
-
-    @GetMapping("inntektv2-get/{fagsakid}")
-    fun getHentInntektV2(
-        @PathVariable("fagsakId") fagsakId: UUID,
-        @RequestParam maanedFom: YearMonth?,
-        @RequestParam maanedTom: YearMonth?,
-    ): Ressurs<Any> {
-        tilgangService.validerTilgangTilFagsak(fagsakId, AuditLoggerEvent.ACCESS)
-        val inntekt =
-            inntektService.hentInntektV2(
-                fagsakId = fagsakId,
-                fom = maanedFom ?: YearMonth.now().minusMonths(2),
-                tom = maanedTom ?: YearMonth.now(),
-            )
-
-        // TODO: Husk å fjern meg.
-        val logger = LoggerFactory.getLogger(::javaClass.name)
-        logger.info("FAMILIE-EF-SAK - GET --- inntekt for personident med data: $inntekt")
 
         return success(inntekt)
     }

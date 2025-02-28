@@ -31,9 +31,8 @@ class InntektService(
         fom: YearMonth,
         tom: YearMonth,
     ): Any {
-        // TODO: Vi harkoder en ident vi vet vi får response fra.
-        // val aktivIdent = fagsakService.hentAktivIdent(fagsakId)
-        val inntekt = aMeldingInntektClient.hentInntektV2("10108000398", fom, tom)
+        val aktivIdent = fagsakService.hentAktivIdent(fagsakId)
+        val inntekt = aMeldingInntektClient.hentInntektV2(aktivIdent, fom, tom)
         return inntekt
     }
 
