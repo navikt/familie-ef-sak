@@ -41,26 +41,21 @@ class InntektController(
         return success(inntekt)
     }
 
-    data class Body(
-        val maanedFom: YearMonth?,
-        val maanedTom: YearMonth?,
-    )
-
     // TODO: Husk å endre retur type fra Any til det som gjelder.
     @PostMapping("inntektv2/{fagsakid}")
     fun hentInntektV2(
         @PathVariable("fagsakid") fagsakId: UUID,
-        @RequestBody body: Body,
+        @RequestBody inntektV2RequestBody: InntektV2RequestBody,
     ): Ressurs<Any> {
         tilgangService.validerTilgangTilFagsak(fagsakId, AuditLoggerEvent.ACCESS)
         val logger = LoggerFactory.getLogger(::javaClass.name)
-        logger.info("FAMILIE-EF-SAK --- Henter inntekt for fagsakid: $fagsakId med body: $body")
+        logger.info("FAMILIE-EF-SAK --- Henter inntekt for fagsakid: $fagsakId med body: $inntektV2RequestBody")
 
         val inntekt =
             inntektService.hentInntektV2(
                 fagsakId = fagsakId,
-                fom = body.maanedFom ?: YearMonth.now().minusMonths(2),
-                tom = body.maanedTom ?: YearMonth.now(),
+                fom = inntektV2RequestBody.maanedFom ?: YearMonth.now().minusMonths(2),
+                tom = inntektV2RequestBody.maanedTom ?: YearMonth.now(),
             )
 
         return success(inntekt)
@@ -90,3 +85,8 @@ class InntektController(
         return success(inntektService.genererAInntektArbeidsforholdUrl(fagsakId))
     }
 }
+
+data class InntektV2RequestBody(
+    val maanedFom: YearMonth?,
+    val maanedTom: YearMonth?,
+)
