@@ -6,9 +6,9 @@ import no.nav.familie.ef.sak.infrastruktur.config.getValue
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.GrunnlagsdataMedMetadata
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.PersonopplysningerDto
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.egenansatt.EgenAnsattClient
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.endringer.EndringUtenDetaljer
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.endringer.EndringerIPersonopplysningerDto
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.endringer.UtledEndringerUtil.finnEndringer
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.endringer.UtledEndringerUtil.finnEndringerIPerioder
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.endringer.UtledEndringerUtil.finnEndringerIPersonopplysninger
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper.PersonopplysningerMapper
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.gjeldende
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.visningsnavn
@@ -69,20 +69,20 @@ class PersonopplysningerService(
                 egenAnsatt,
                 søkerIdenter,
             )
-        val endringer = finnEndringer(tidligerePersonopplysninger, nyePersonopplysninger)
-        val periodeEndringer = EndringUtenDetaljer(tidligereGrunnlagsdata.grunnlagsdata.tidligereVedtaksperioder?.sak != nyGrunnlagsdata.grunnlagsdata.tidligereVedtaksperioder?.sak)
+        val endringer = finnEndringerIPersonopplysninger(tidligerePersonopplysninger, nyePersonopplysninger)
+        val periodeEndringer = finnEndringerIPerioder(tidligereGrunnlagsdata, nyGrunnlagsdata)
 
         return EndringerIPersonopplysningerDto(LocalDateTime.now(), endringer.copy(perioder = periodeEndringer))
     }
 
     @Cacheable("personopplysninger", cacheManager = "shortCache")
     fun hentPersonopplysningerFraRegister(personIdent: String): PersonopplysningerDto {
-        val grunnlagsdata = grunnlagsdataService.hentPersonopplysninger(personIdent)
+        val personopplysningerGrunnlagsdataFraPdl = grunnlagsdataService.hentPersonopplysninger(personIdent)
         val egenAnsatt = egenAnsatt(personIdent)
         val identerFraPdl = personService.hentPersonIdenter(personIdent)
 
         return personopplysningerMapper.tilPersonopplysninger(
-            grunnlagsdata = grunnlagsdata,
+            personopplysninger = personopplysningerGrunnlagsdataFraPdl,
             grunnlagsdataOpprettet = LocalDateTime.now(),
             egenAnsatt = egenAnsatt,
             søkerIdenter = identerFraPdl,

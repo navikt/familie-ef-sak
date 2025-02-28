@@ -1,6 +1,7 @@
 package no.nav.familie.ef.sak.opplysninger.personopplysninger.endringer
 
 import no.nav.familie.ef.sak.felles.util.norskFormat
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.GrunnlagsdataMedMetadata
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.AnnenForelderMinimumDto
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.BarnDto
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.Folkeregisterpersonstatus
@@ -10,7 +11,7 @@ import java.time.LocalDate
 private typealias PersonendringDetaljerFn<T> = (T, T) -> EndringFelt?
 
 object UtledEndringerUtil {
-    fun finnEndringer(
+    fun finnEndringerIPersonopplysninger(
         tidligere: PersonopplysningerDto,
         nye: PersonopplysningerDto,
     ): Endringer =
@@ -33,6 +34,11 @@ object UtledEndringerUtil {
             oppholdstillatelse = utledEndringerUtenDetaljer(tidligere.oppholdstillatelse, nye.oppholdstillatelse),
             vergemål = utledEndringerUtenDetaljer(tidligere.vergemål, nye.vergemål),
         )
+
+    fun finnEndringerIPerioder(
+        tidligereGrunnlagsdata: GrunnlagsdataMedMetadata,
+        nyGrunnlagsdata: GrunnlagsdataMedMetadata,
+    ) = EndringUtenDetaljer(tidligereGrunnlagsdata.grunnlagsdata.tidligereVedtaksperioder?.sak != nyGrunnlagsdata.grunnlagsdata.tidligereVedtaksperioder?.sak)
 
     private fun <T> utledEndringerUtenDetaljer(
         tidligere: T,

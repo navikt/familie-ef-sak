@@ -56,7 +56,6 @@ data class Endringer(
             "oppholdstillatelse=${oppholdstillatelse.harEndringer}",
             "vergemål=${vergemål.harEndringer}",
             "perioder=${perioder.harEndringer}",
-
         ).joinToString(", ")
 }
 
