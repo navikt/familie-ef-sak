@@ -32,7 +32,12 @@ class InntektService(
         tom: YearMonth,
     ): Any {
         val aktivIdent = fagsakService.hentAktivIdent(fagsakId)
-        val inntekt = aMeldingInntektClient.hentInntektV2(aktivIdent, fom, tom)
+        val inntekt = aMeldingInntektClient.hentInntektV2(
+            personident = aktivIdent,
+            fom = fom,
+            tom = tom
+        )
+
         return inntekt
     }
 

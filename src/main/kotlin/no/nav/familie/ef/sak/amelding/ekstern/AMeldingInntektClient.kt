@@ -28,14 +28,9 @@ class AMeldingInntektClient(
         .build()
         .toUri()
 
-    private fun lagInntektUriV2(
-//        fom: YearMonth?,
-//        tom: YearMonth?,
-    ) = UriComponentsBuilder
+    private val inntektV2Uri = UriComponentsBuilder
         .fromUri(uri)
         .pathSegment("api/inntektv2")
-//        .queryParam("maanedFom", fom)
-//        .queryParam("maanedTom", tom)
         .build()
         .toUri()
 
@@ -45,6 +40,7 @@ class AMeldingInntektClient(
             .pathSegment("api/ainntekt/generer-url")
             .build()
             .toUri()
+
     private val genererUrlUriArbeidsforhold =
         UriComponentsBuilder
             .fromUri(uri)
@@ -58,26 +54,16 @@ class AMeldingInntektClient(
         tom: YearMonth,
     ): HentInntektListeResponse = postForEntity(lagInntektUri(fom, tom), PersonIdent(personIdent))
 
-    data class Payload(
-        val personident: String,
-        val maanedFom: YearMonth,
-        val maanedTom: YearMonth,
-    )
-
-    // TODO: Endre tilbake til persoIdent med camelCase og endre fra Any til resposne type.
+    // TODO: Endre fra Any til riktig response type.
     fun hentInntektV2(
         personident: String,
         fom: YearMonth,
         tom: YearMonth,
     ): Any =
         postForEntity(
-            uri =
-                lagInntektUriV2(
-//                    fom = fom,
-//                    tom = tom,
-                ),
+            uri = inntektV2Uri,
             payload =
-                Payload(
+                HentInntektV2Payload(
                     personident = personident,
                     maanedFom = fom,
                     maanedTom = tom,
@@ -102,3 +88,9 @@ class AMeldingInntektClient(
             },
         )
 }
+
+data class HentInntektV2Payload(
+    val personident: String,
+    val maanedFom: YearMonth,
+    val maanedTom: YearMonth,
+)
