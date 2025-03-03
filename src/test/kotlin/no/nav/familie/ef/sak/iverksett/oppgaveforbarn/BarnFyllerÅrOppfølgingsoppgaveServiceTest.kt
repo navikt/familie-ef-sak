@@ -141,8 +141,8 @@ internal class BarnFyllerÅrOppfølgingsoppgaveServiceTest {
     }
 
     @Test
-    fun `5 av 13 barn har blitt 6 mnd, forvent at 5 oppgaver opprettes`() {
-        val fødselsdatoer = (-5..7).asSequence().map { LocalDate.now().minusDays(182).plusDays(it.toLong()) }.toList()
+    fun `7 barn er innenfor cutoff etter at de ble 6 mnd, forvent 7 oppgaver opprettes`() {
+        val fødselsdatoer = (-20..20).asSequence().map { LocalDate.now().minusMonths(6).plusDays(it.toLong()) }.toList()
         val opprettBarnForFødselsdatoer = fødselsdatoer.map { opprettBarn(fødselsnummer = FnrGenerator.generer(it)) }
         every { grunnlagsdataDomene.barn } returns opprettBarnForFødselsdatoer.mapIndexed { i, it -> barnMedIdent(it.fødselsnummerBarn.toString(), "fornavn etternavn", fødsel(fødselsdatoer[i])) }
         every {
@@ -153,7 +153,7 @@ internal class BarnFyllerÅrOppfølgingsoppgaveServiceTest {
             opprettBarnForFødselsdatoer.map { BarnTilOppgave(it.fødselsnummerBarn!!, it.behandlingId, 1, 1) }.toSet()
 
         opprettOppgaveForBarnService.opprettTasksForAlleBarnSomHarFyltÅr()
-        verify(exactly = 5) { taskService.save(any()) }
+        verify(exactly = 7) { taskService.save(any()) }
     }
 
     @Test
@@ -435,8 +435,7 @@ internal class BarnFyllerÅrOppfølgingsoppgaveServiceTest {
         } returns opprettBarnForFødselsdatoer
         every { grunnlagsdataDomene.barn } returns fødselsnummere.mapIndexed { i, it -> barnMedIdent(it, "fornavn etternavn", fødsel(fødselsdato)) }
 
-        val opprettBarnTilOppgave =
-            opprettBarnForFødselsdatoer.map { BarnTilOppgave(it.fødselsnummerBarn!!, it.behandlingId, 1, 1) }.toSet()
+        opprettBarnForFødselsdatoer.map { BarnTilOppgave(it.fødselsnummerBarn!!, it.behandlingId, 1, 1) }.toSet()
 
         opprettOppgaveForBarnService.opprettTasksForAlleBarnSomHarFyltÅr()
         verify(exactly = 2) { taskService.save(any()) }
