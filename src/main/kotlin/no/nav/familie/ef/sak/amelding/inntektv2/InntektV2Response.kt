@@ -8,21 +8,21 @@ import java.time.YearMonth
 
 data class InntektV2Response(
     @JsonProperty("data")
-    val maanedsData: List<MaanedsData>
+    val maanedsData: List<MånedsInntekt>
 )
 
-data class MaanedsData(
+data class MånedsInntekt(
     val maaned: YearMonth,
     val opplysningspliktig: String,
     val underenhet: String,
     val norskident: String,
     val oppsummeringstidspunkt: OffsetDateTime,
-    val inntektListe: List<InntektV2>,
-    val forskuddstrekkListe: List<ForskuddstrekkV2>,
-    val avvikListe: List<AvvikV2>
+    val inntektListe: List<Inntekt>,
+    val forskuddstrekkListe: List<Forskuddstrekk>,
+    val avvikListe: List<Avvik>
 )
 
-data class InntektV2(
+data class Inntekt(
     val type: InntektType,
     val beloep: Double,
     val fordel: String,
@@ -32,23 +32,23 @@ data class InntektV2(
     val skatteOgAvgiftsregel: String,
     val opptjeningsperiodeFom: LocalDate,
     val opptjeningsperiodeTom: LocalDate,
-    val tilleggsinformasjon: TilleggsinformasjonV2?,
+    val tilleggsinformasjon: Tilleggsinformasjon?,
     val manuellVurdering: Boolean,
     val antall: Int?,
     val skattemessigBosattLand: String?,
     val opptjeningsland: String?
 )
 
-data class ForskuddstrekkV2(
+data class Forskuddstrekk(
     val beloep: Double,
     val beskrivelse: String?
 )
 
-data class AvvikV2(
+data class Avvik(
     val kode: String,
     val tekst: String?
 )
 
-data class TilleggsinformasjonV2(
+data class Tilleggsinformasjon(
     val type: String
 )

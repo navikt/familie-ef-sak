@@ -18,18 +18,7 @@ class AMeldingInntektClient(
     @Value("\${FAMILIE_EF_PROXY_URL}") private val uri: URI,
     @Qualifier("azure") restOperations: RestOperations,
 ) : AbstractRestClient(restOperations, "inntekt") {
-    private fun lagInntektUri(
-        fom: YearMonth,
-        tom: YearMonth,
-    ) = UriComponentsBuilder
-        .fromUri(uri)
-        .pathSegment("api/inntekt")
-        .queryParam("fom", fom)
-        .queryParam("tom", tom)
-        .build()
-        .toUri()
-
-    private val inntektV2Uri = UriComponentsBuilder
+    private val genererInntektUri = UriComponentsBuilder
         .fromUri(uri)
         .pathSegment("api/inntektv2")
         .build()
@@ -50,19 +39,12 @@ class AMeldingInntektClient(
             .toUri()
 
     fun hentInntekt(
-        personIdent: String,
-        fom: YearMonth,
-        tom: YearMonth,
-    ): HentInntektListeResponse = postForEntity(lagInntektUri(fom, tom), PersonIdent(personIdent))
-
-    // TODO: Endre fra Any til riktig response type.
-    fun hentInntektV2(
         personident: String,
         fom: YearMonth,
         tom: YearMonth,
     ): InntektV2Response =
         postForEntity(
-            uri = inntektV2Uri,
+            uri = genererInntektUri,
             payload =
                 HentInntektV2Payload(
                     personident = personident,

@@ -2,6 +2,7 @@ package no.nav.familie.ef.sak.amelding
 
 import no.nav.familie.ef.sak.amelding.ekstern.AMeldingInntektClient
 import no.nav.familie.ef.sak.amelding.ekstern.InntektType
+import no.nav.familie.ef.sak.amelding.inntektv2.MånedsInntekt
 import no.nav.familie.ef.sak.fagsak.FagsakPersonService
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import org.springframework.stereotype.Service
@@ -19,33 +20,23 @@ class InntektService(
         fagsakId: UUID,
         fom: YearMonth,
         tom: YearMonth,
-    ): AMeldingInntektDto {
+    ): List<MånedsInntekt> {
         val aktivIdent = fagsakService.hentAktivIdent(fagsakId)
-        val inntekt = aMeldingInntektClient.hentInntekt(aktivIdent, fom, tom)
-        return inntektMapper.mapInntekt(inntekt)
-    }
-
-    // TODO: Husk å endre retur type fra Any til det som gjelder.
-    fun hentInntektV2(
-        fagsakId: UUID,
-        fom: YearMonth,
-        tom: YearMonth,
-    ): Any {
-        val aktivIdent = fagsakService.hentAktivIdent(fagsakId)
-        val inntekt = aMeldingInntektClient.hentInntektV2(
+        val inntekt = aMeldingInntektClient.hentInntekt(
             personident = aktivIdent,
             fom = fom,
             tom = tom
         )
 
-        return inntekt
+        // TDDO: Kanskje kaste en feil her om det ikke går.
+        return inntekt.maanedsData
     }
 
     fun hentÅrsinntekt(
         personIdent: String,
         årstallIFjor: Int,
     ): Int {
-        val inntektV2Response = aMeldingInntektClient.hentInntektV2(personIdent, YearMonth.of(årstallIFjor, 1), YearMonth.of(årstallIFjor, 12))
+        val inntektV2Response = aMeldingInntektClient.hentInntekt(personIdent, YearMonth.of(årstallIFjor, 1), YearMonth.of(årstallIFjor, 12))
         val inntektsliste = inntektV2Response.maanedsData.flatMap { månedsdata -> månedsdata.inntektListe}
         val totalBeløp = inntektsliste.filter { it.type != InntektType.YTELSE_FRA_OFFENTLIGE && it.beskrivelse != "feriepenger" }.sumOf { it.beloep }.toInt()
 
