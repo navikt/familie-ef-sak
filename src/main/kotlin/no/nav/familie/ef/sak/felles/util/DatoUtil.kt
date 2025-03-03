@@ -59,17 +59,17 @@ fun LocalDate.harPåfølgendeMåned(påfølgende: LocalDate): Boolean = YearMont
 
 fun YearMonth.erPåfølgende(påfølgende: YearMonth): Boolean = this.plusMonths(1) == påfølgende
 
-fun LocalDate.er6MndEllerMer(): Boolean = this.plusDays(183) <= LocalDate.now()
+fun LocalDate.er6MndEllerMer(): Boolean = this.plusMonths(6) <= LocalDate.now()
 
 fun LocalDate.erEttÅrEllerMer(): Boolean = this.plusYears(1) <= LocalDate.now()
 
 fun LocalDate.er6MndEllerMerOgInnenforCutoff(numberOfDaysCutoff: Long): Boolean =
     this.er6MndEllerMer() &&
-        LocalDate.now() < this.plusDays(182).plusDays(numberOfDaysCutoff)
+        LocalDate.now() < this.plusMonths(6).plusDays(numberOfDaysCutoff)
 
 fun LocalDate.erEttÅrEllerMerOgInnenforCutoff(numberOfDaysCutoff: Long): Boolean =
     erEttÅrEllerMer() &&
-        LocalDate.now() <= this.plusYears(1).plusDays(numberOfDaysCutoff)
+        LocalDate.now() <= this.plusDays(numberOfDaysCutoff).plusYears(1)
 
 fun LocalDateTime.harGåttAntallTimer(timer: Int) = this.plusHours(timer.toLong()) < LocalDateTime.now()
 
