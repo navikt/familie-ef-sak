@@ -20,13 +20,13 @@ class AktivitetspliktigAlderTest {
 
     @Test
     fun `returner null dersom fødselsdato er mer enn ett år siden og utenfor cutoff`() {
-        val fødselsdato = LocalDate.now().minusYears(1).minusDays(8)
+        val fødselsdato = LocalDate.now().minusYears(1).minusDays(9)
         assertThat(AktivitetspliktigAlder.fromFødselsdato(fødselsdato)).isNull()
     }
 
     @Test
     fun `returner null dersom fødselsdato er mer enn 6 mnd siden og utenfor cutoff`() {
-        val fødselsdato = LocalDate.now().minusDays(183).minusDays(7)
+        val fødselsdato = LocalDate.now().minusMonths(6).minusDays(8)
         assertThat(AktivitetspliktigAlder.fromFødselsdato(fødselsdato)).isNull()
     }
 }
