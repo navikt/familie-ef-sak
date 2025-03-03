@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.amelding.ekstern
 
+import no.nav.familie.ef.sak.amelding.inntektv2.InntektV2Response
 import no.nav.familie.http.client.AbstractRestClient
 import no.nav.familie.kontrakter.felles.PersonIdent
 import org.springframework.beans.factory.annotation.Qualifier
@@ -59,7 +60,7 @@ class AMeldingInntektClient(
         personident: String,
         fom: YearMonth,
         tom: YearMonth,
-    ): Any =
+    ): InntektV2Response =
         postForEntity(
             uri = inntektV2Uri,
             payload =

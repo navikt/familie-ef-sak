@@ -1,6 +1,7 @@
 package no.nav.familie.ef.sak.amelding.inntektv2
 
 import com.fasterxml.jackson.annotation.JsonProperty
+import no.nav.familie.ef.sak.amelding.ekstern.InntektType
 import java.time.LocalDate
 import java.time.OffsetDateTime
 import java.time.YearMonth
@@ -22,7 +23,7 @@ data class MaanedsData(
 )
 
 data class InntektV2(
-    val type: String,
+    val type: InntektType,
     val beloep: Double,
     val fordel: String,
     val beskrivelse: String,
