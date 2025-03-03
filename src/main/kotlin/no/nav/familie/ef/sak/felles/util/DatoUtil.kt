@@ -65,7 +65,7 @@ fun LocalDate.erEttÅrEllerMer(): Boolean = this.plusYears(1) <= LocalDate.now()
 
 fun LocalDate.er6MndEllerMerOgInnenforCutoff(numberOfDaysCutoff: Long): Boolean =
     this.er6MndEllerMer() &&
-        LocalDate.now() < this.plusMonths(6).plusDays(numberOfDaysCutoff)
+        LocalDate.now() < this.plusDays(numberOfDaysCutoff).plusMonths(6)
 
 fun LocalDate.erEttÅrEllerMerOgInnenforCutoff(numberOfDaysCutoff: Long): Boolean =
     erEttÅrEllerMer() &&
