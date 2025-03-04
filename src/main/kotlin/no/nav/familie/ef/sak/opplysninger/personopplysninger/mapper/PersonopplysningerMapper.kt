@@ -35,13 +35,13 @@ class PersonopplysningerMapper(
     private val innflyttingUtflyttingMapper: InnflyttingUtflyttingMapper,
 ) {
     fun tilPersonopplysninger(
-        grunnlagsdata: Personopplysninger,
+        personopplysninger: Personopplysninger,
         grunnlagsdataOpprettet: LocalDateTime,
         egenAnsatt: Boolean,
         søkerIdenter: PdlIdenter,
     ): PersonopplysningerDto {
-        val søker = grunnlagsdata.søker
-        val annenForelderMap = grunnlagsdata.annenForelder.associateBy { it.personIdent }
+        val søker = personopplysninger.søker
+        val annenForelderMap = personopplysninger.annenForelder.associateBy { it.personIdent }
 
         val gjeldendePersonIdent = søkerIdenter.gjeldende().ident
         return PersonopplysningerDto(
@@ -84,7 +84,7 @@ class PersonopplysningerMapper(
                     }.sortedByDescending { it.gyldigFraOgMed },
             egenAnsatt = egenAnsatt,
             barn =
-                grunnlagsdata.barn
+                personopplysninger.barn
                     .map {
                         mapBarn(
                             it,
@@ -107,7 +107,7 @@ class PersonopplysningerMapper(
         søkerIdenter: PdlIdenter,
     ): PersonopplysningerDto =
         tilPersonopplysninger(
-            grunnlagsdata = grunnlagsdataMedMetadata.grunnlagsdata.tilPersonopplysninger(),
+            personopplysninger = grunnlagsdataMedMetadata.grunnlagsdata.tilPersonopplysninger(),
             grunnlagsdataOpprettet = grunnlagsdataMedMetadata.opprettetTidspunkt,
             egenAnsatt = egenAnsatt,
             søkerIdenter = søkerIdenter,
