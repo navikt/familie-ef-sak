@@ -2,6 +2,7 @@ package no.nav.familie.ef.sak.amelding
 
 import no.nav.familie.ef.sak.amelding.ekstern.AMeldingInntektClient
 import no.nav.familie.ef.sak.amelding.ekstern.InntektType
+import no.nav.familie.ef.sak.amelding.inntektv2.InntektTypeV2
 import no.nav.familie.ef.sak.amelding.inntektv2.MånedsInntekt
 import no.nav.familie.ef.sak.fagsak.FagsakPersonService
 import no.nav.familie.ef.sak.fagsak.FagsakService
@@ -28,7 +29,6 @@ class InntektService(
             tom = tom
         )
 
-        // TDDO: Kanskje kaste en feil her om det ikke går.
         return inntekt.maanedsData
     }
 
@@ -37,12 +37,8 @@ class InntektService(
         årstallIFjor: Int,
     ): Int {
         val inntektV2Response = aMeldingInntektClient.hentInntekt(personIdent, YearMonth.of(årstallIFjor, 1), YearMonth.of(årstallIFjor, 12))
-        val inntektsliste = inntektV2Response.maanedsData.flatMap { månedsdata -> månedsdata.inntektListe}
-        val totalBeløp = inntektsliste.filter { it.type != InntektType.YTELSE_FRA_OFFENTLIGE && it.beskrivelse != "feriepenger" }.sumOf { it.beloep }.toInt()
-
-        /*val inntektListeResponse = aMeldingInntektClient.hentInntekt(personIdent, YearMonth.of(årstallIFjor, 1), YearMonth.of(årstallIFjor, 12))
-        val inntektListe = inntektListeResponse.arbeidsinntektMåned?.flatMap { it.arbeidsInntektInformasjon?.inntektListe ?: emptyList() }
-        val totalBeløp = inntektListe?.filter { it.inntektType != InntektType.YTELSE_FRA_OFFENTLIGE && it.beskrivelse != "feriepenger" }?.sumOf { it.beløp } ?: 0 */
+        val inntektsliste = inntektV2Response.maanedsData.flatMap { månedsdata -> månedsdata.inntektListe }
+        val totalBeløp = inntektsliste.filter { it.type != InntektTypeV2.LØNNSINNTEKT && it.beskrivelse != "feriepenger" }.sumOf { it.beloep }.toInt()
 
         return totalBeløp
     }

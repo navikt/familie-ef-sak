@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.amelding
 
+import com.fasterxml.jackson.annotation.JsonProperty
 import java.time.LocalDate
 import java.time.YearMonth
 
@@ -41,6 +42,7 @@ data class InntektDto(
 )
 
 enum class InntektType {
+                       @JsonProperty("")
     LØNNSINNTEKT,
     NÆRINGSINNTEKT,
     PENSJON_ELLER_TRYGD,

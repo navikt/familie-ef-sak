@@ -11,7 +11,7 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Primary
 import org.springframework.context.annotation.Profile
 
-@Configuration
+/*@Configuration
 class InntektClientMock {
     @Profile("mock-inntekt")
     @Bean
@@ -33,4 +33,4 @@ class InntektClientMock {
         every { mockk.genererAInntektUrl(any()) } returns "https://ainntekt"
         return mockk
     }
-}
+}*/
