@@ -5,17 +5,24 @@ import java.time.LocalDate
 import java.time.OffsetDateTime
 import java.time.YearMonth
 
+data class InntektV2RequestBody(
+    val maanedFom: YearMonth?,
+    val maanedTom: YearMonth?,
+)
+
 data class InntektV2Response(
     @JsonProperty("data")
     val maanedsData: List<MånedsInntekt> = emptyList(),
 )
 
 data class MånedsInntekt(
-    val maaned: YearMonth,
+    @JsonProperty("maaned")
+    val måned: YearMonth,
     val opplysningspliktig: String,
     val underenhet: String,
     val norskident: String,
-    val oppsummeringstidspunkt: OffsetDateTime,
+    @JsonProperty("oppsummeringstidspunkt")
+    val oppsummeringsTidspunkt: OffsetDateTime,
     val inntektListe: List<Inntekt> = emptyList(),
     val forskuddstrekkListe: List<Forskuddstrekk> = emptyList(),
     val avvikListe: List<Avvik> = emptyList(),
@@ -23,11 +30,13 @@ data class MånedsInntekt(
 
 data class Inntekt(
     val type: InntektTypeV2,
-    val beloep: Double,
+    @JsonProperty("beloep")
+    val beløp: Double,
     val fordel: String,
     val beskrivelse: String,
     val inngaarIGrunnlagForTrekk: Boolean,
-    val utloeserArbeidsgiveravgift: Boolean,
+    @JsonProperty("utloeserArbeidsgiveravgift")
+    val utløserArbeidsgiveravgift: Boolean,
     val skatteOgAvgiftsregel: String?,
     val opptjeningsperiodeFom: LocalDate?,
     val opptjeningsperiodeTom: LocalDate?,
@@ -35,21 +44,22 @@ data class Inntekt(
     val manuellVurdering: Boolean,
     val antall: Int?,
     val skattemessigBosattLand: String?,
-    val opptjeningsland: String?
+    val opptjeningsland: String?,
 )
 
 data class Forskuddstrekk(
-    val beloep: Double,
-    val beskrivelse: String?
+    @JsonProperty("beloep")
+    val beløp: Double,
+    val beskrivelse: String?,
 )
 
 data class Avvik(
     val kode: String,
-    val tekst: String?
+    val tekst: String?,
 )
 
 data class Tilleggsinformasjon(
-    val type: String
+    val type: String,
 )
 
 // TODO: Husk å endre tilbake til normalt navn, samt fjerne bruken et at annet sted.
@@ -64,17 +74,13 @@ enum class InntektTypeV2 {
     PENSJON_ELLER_TRYGD,
 
     @JsonProperty("YtelseFraOffentlige")
-    YTELSE_FRA_OFFENTLIGE
+    YTELSE_FRA_OFFENTLIGE,
 }
 
-fun InntektV2Response.oppsummerInntektForÅr(år: Int): Double {
-    return this.maanedsData
-        .filter { it.maaned.year == år }
+fun InntektV2Response.oppsummerInntektForÅr(år: Int): Double =
+    this.maanedsData
+        .filter { it.måned.year == år }
         .flatMap { it.inntektListe }
-        .sumOf { it.beloep }
-}
+        .sumOf { it.beløp }
 
-fun List<Inntekt>.filterBasertPåInntektType(inntektType: InntektTypeV2): List<Inntekt> {
-    return this.filter { it.type == inntektType }
-}
-
+fun List<Inntekt>.filterBasertPåInntektType(inntektType: InntektTypeV2): List<Inntekt> = this.filter { it.type == inntektType }

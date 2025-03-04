@@ -23,12 +23,13 @@ class InntektServiceTest {
     private val fagsakPersonService: FagsakPersonService = mockk(relaxed = true)
     private val inntektMapper: InntektMapper = mockk(relaxed = true)
 
-    private val inntektService: InntektService = InntektService(
-        aMeldingInntektClient = aMeldingInntektClient,
-        fagsakService = fagsakService,
-        fagsakPersonService = fagsakPersonService,
-        inntektMapper = inntektMapper,
-    )
+    private val inntektService: InntektService =
+        InntektService(
+            aMeldingInntektClient = aMeldingInntektClient,
+            fagsakService = fagsakService,
+            fagsakPersonService = fagsakPersonService,
+            inntektMapper = inntektMapper,
+        )
 
     private val fagsakId = UUID.randomUUID()
     private val personIdent = "10108000398"
@@ -43,7 +44,7 @@ class InntektServiceTest {
             val forventetMåned = YearMonth.of(2020, 3)
             val forventetInntektType: InntektTypeV2 = InntektTypeV2.LØNNSINNTEKT
 
-            assertEquals(forventetMåned, inntektV2Response.maanedsData[0].maaned)
+            assertEquals(forventetMåned, inntektV2Response.maanedsData[0].måned)
             assertEquals(forventetInntektType, inntektV2Response.maanedsData[0].inntektListe[0].type)
         }
 
@@ -52,17 +53,19 @@ class InntektServiceTest {
             val inntektV2ResponseJson: String = lesRessurs("json/inntektv2/FlereInntektTyperInntektV2Response.json")
             val inntektV2Response = objectMapper.readValue<InntektV2Response>(inntektV2ResponseJson)
 
-            val forventeteInntektTyper = listOf(
-                InntektTypeV2.LØNNSINNTEKT,
-                InntektTypeV2.NAERINGSINNTEKT,
-                InntektTypeV2.YTELSE_FRA_OFFENTLIGE,
-                InntektTypeV2.PENSJON_ELLER_TRYGD
-            )
+            val forventeteInntektTyper =
+                listOf(
+                    InntektTypeV2.LØNNSINNTEKT,
+                    InntektTypeV2.NAERINGSINNTEKT,
+                    InntektTypeV2.YTELSE_FRA_OFFENTLIGE,
+                    InntektTypeV2.PENSJON_ELLER_TRYGD,
+                )
 
-            val faktiskeInntektTyper = inntektV2Response.maanedsData
-                .flatMap { it.inntektListe }
-                .map { it.type }
-                .distinct()
+            val faktiskeInntektTyper =
+                inntektV2Response.maanedsData
+                    .flatMap { it.inntektListe }
+                    .map { it.type }
+                    .distinct()
 
             assertEquals(forventeteInntektTyper.sorted(), faktiskeInntektTyper.sorted())
         }
@@ -70,7 +73,6 @@ class InntektServiceTest {
 
     @Nested
     inner class HentInntekt {
-
         @BeforeEach
         internal fun setUp() {
             every { fagsakService.hentAktivIdent(any()) } returns personIdent
@@ -82,22 +84,24 @@ class InntektServiceTest {
                 lesRessurs("json/inntektv2/År2020MedFullInntektOgFeriepengerInntektV2Reponse.json")
             val inntektV2Response = objectMapper.readValue<InntektV2Response>(inntektV2ResponseJson)
 
-            every { aMeldingInntektClient.hentInntekt(any(), any(), any()) } returns inntektV2Response
+            every { aMeldingInntektClient.hentInntektV2(any(), any(), any()) } returns inntektV2Response
 
             val forventetÅrsinntekt = 110000
 
-            val årsinntekt = inntektService.hentÅrsinntekt(
-                personIdent = personIdent,
-                årstallIFjor = 2020
-            )
+            val årsinntekt =
+                inntektService.hentÅrsinntektV2(
+                    personIdent = personIdent,
+                    årstallIFjor = 2020,
+                )
 
             assertEquals(forventetÅrsinntekt, årsinntekt)
         }
     }
 
     fun lesRessurs(name: String): String {
-        val resource = this::class.java.classLoader.getResource(name)
-            ?: throw IllegalArgumentException("Resource not found: $name")
+        val resource =
+            this::class.java.classLoader.getResource(name)
+                ?: throw IllegalArgumentException("Resource not found: $name")
         return resource.readText(StandardCharsets.UTF_8)
     }
 }

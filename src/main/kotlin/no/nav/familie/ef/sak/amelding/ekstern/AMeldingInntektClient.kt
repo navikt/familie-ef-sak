@@ -18,11 +18,23 @@ class AMeldingInntektClient(
     @Value("\${FAMILIE_EF_PROXY_URL}") private val uri: URI,
     @Qualifier("azure") restOperations: RestOperations,
 ) : AbstractRestClient(restOperations, "inntekt") {
-    private val genererInntektUri = UriComponentsBuilder
+    private fun lagInntektUri(
+        fom: YearMonth,
+        tom: YearMonth,
+    ) = UriComponentsBuilder
         .fromUri(uri)
-        .pathSegment("api/inntektv2")
+        .pathSegment("api/inntekt")
+        .queryParam("fom", fom)
+        .queryParam("tom", tom)
         .build()
         .toUri()
+
+    private val genererInntektV2Uri =
+        UriComponentsBuilder
+            .fromUri(uri)
+            .pathSegment("api/inntektv2")
+            .build()
+            .toUri()
 
     private val genererUrlUri =
         UriComponentsBuilder
@@ -39,12 +51,18 @@ class AMeldingInntektClient(
             .toUri()
 
     fun hentInntekt(
+        personIdent: String,
+        fom: YearMonth,
+        tom: YearMonth,
+    ): HentInntektListeResponse = postForEntity(lagInntektUri(fom, tom), PersonIdent(personIdent))
+
+    fun hentInntektV2(
         personident: String,
         fom: YearMonth,
         tom: YearMonth,
     ): InntektV2Response =
         postForEntity(
-            uri = genererInntektUri,
+            uri = genererInntektV2Uri,
             payload =
                 HentInntektV2Payload(
                     personident = personident,
