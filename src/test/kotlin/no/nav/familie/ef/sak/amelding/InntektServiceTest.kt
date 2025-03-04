@@ -12,10 +12,15 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import java.nio.charset.StandardCharsets
 import java.time.YearMonth
+import java.util.UUID
 import kotlin.test.assertEquals
 
 class InntektServiceTest {
     private val fagsakService: FagsakService = mockk(relaxed = true)
+    private val inntektService: InntektService = mockk(relaxed = true)
+
+    private val fagsakId = UUID.randomUUID()
+    private val personIdent = "10108000398"
 
     @Nested
     inner class ParseInntektV2Reponse {
@@ -59,15 +64,48 @@ class InntektServiceTest {
         internal fun setUp() {
             every { fagsakService.hentAktivIdent(any()) } returns personIdent
         }
+
+        @Test
+        internal fun `skal returnere flere inntektsmåneder med ulike opplysningspliktig nummer`() {
+            val inntektV2ResponseJson: String = lesRessurs("json/inntektv2/GenerellInntektV2Reponse.json")
+            val inntektV2Response = objectMapper.readValue<InntektV2Response>(inntektV2ResponseJson)
+
+            every { inntektService.hentInntekt(fagsakId, any(), any()) } returns inntektV2Response.maanedsData
+
+            val inntektMånedsData = inntektService.hentInntekt(
+                fagsakId,
+                YearMonth.of(2020, 1),
+                YearMonth.of(2020, 3)
+            )
+
+            val forventetMåneder = listOf(
+                YearMonth.of(2020, 1),
+                YearMonth.of(2020, 3)
+            )
+
+            val forventetOpplysningspliktig = listOf(
+                "974650991",
+                "990983666"
+            )
+
+            val faktiskeMåneder = inntektMånedsData
+                .filter { it.maaned in forventetMåneder }
+                .map { it.maaned }
+                .distinct()
+
+            val faktiskeOpplysningspliktig = inntektMånedsData
+                .filter { it.maaned in forventetMåneder && it.opplysningspliktig in forventetOpplysningspliktig }
+                .map { it.opplysningspliktig }
+                .distinct()
+
+            assertEquals(forventetMåneder.sorted(), faktiskeMåneder.sorted())
+            assertEquals(forventetOpplysningspliktig.sorted(), faktiskeOpplysningspliktig.sorted())
+        }
     }
 
     fun lesRessurs(name: String): String {
         val resource = this::class.java.classLoader.getResource(name)
             ?: throw IllegalArgumentException("Resource not found: $name")
         return resource.readText(StandardCharsets.UTF_8)
-    }
-
-    companion object {
-        const val personIdent = "10108000398"
     }
 }
