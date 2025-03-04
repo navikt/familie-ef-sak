@@ -18,16 +18,10 @@ class InntektServiceTest {
     private val fagsakService: FagsakService = mockk(relaxed = true)
 
     @Nested
-    inner class HentInntekt {
-
-        @BeforeEach
-        internal fun setUp() {
-            every { fagsakService.hentAktivIdent(any()) } returns personIdent
-        }
-
+    inner class ParseInntektV2Reponse {
         @Test
-        internal fun `parser inntektv2 response med riktig data struktur`() {
-            val inntektV2ResponseJson: String = lesRessurs("json/inntektv2/InntektV2Response.json")
+        internal fun `parser generell inntektv2 response med riktig data struktur`() {
+            val inntektV2ResponseJson: String = lesRessurs("json/inntektv2/GenerellInntektV2Reponse.json")
             val inntektV2Response = objectMapper.readValue<InntektV2Response>(inntektV2ResponseJson)
 
             val forventetMåned = YearMonth.of(2020, 3)
@@ -35,6 +29,35 @@ class InntektServiceTest {
 
             assertEquals(forventetMåned, inntektV2Response.maanedsData[0].maaned)
             assertEquals(forventetInntektType, inntektV2Response.maanedsData[0].inntektListe[0].type)
+        }
+
+        @Test
+        internal fun `parser inntektv2 response med forskjellige inntekt typer`() {
+            val inntektV2ResponseJson: String = lesRessurs("json/inntektv2/FlereInntektTyperInntektV2Response.json")
+            val inntektV2Response = objectMapper.readValue<InntektV2Response>(inntektV2ResponseJson)
+
+            val forventeteInntektTyper = listOf(
+                InntektTypeV2.LØNNSINNTEKT,
+                InntektTypeV2.NAERINGSINNTEKT,
+                InntektTypeV2.YTELSE_FRA_OFFENTLIGE,
+                InntektTypeV2.PENSJON_ELLER_TRYGD
+            )
+
+            val faktiskeInntektTyper = inntektV2Response.maanedsData
+                .flatMap { it.inntektListe }
+                .map { it.type }
+                .distinct()
+
+            assertEquals(forventeteInntektTyper.sorted(), faktiskeInntektTyper.sorted())
+        }
+    }
+
+    @Nested
+    inner class HentInntekt {
+
+        @BeforeEach
+        internal fun setUp() {
+            every { fagsakService.hentAktivIdent(any()) } returns personIdent
         }
     }
 

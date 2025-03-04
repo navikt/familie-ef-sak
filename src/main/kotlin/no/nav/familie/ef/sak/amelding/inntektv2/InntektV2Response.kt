@@ -60,9 +60,9 @@ enum class InntektTypeV2 {
     @JsonProperty("Naeringsinntekt")
     NAERINGSINNTEKT,
 
-    @JsonProperty("Pensjon_eller_trygd")
+    @JsonProperty("PensjonEllerTrygd")
     PENSJON_ELLER_TRYGD,
 
-    @JsonProperty("Ytelse_fra_offentlige")
+    @JsonProperty("YtelseFraOffentlige")
     YTELSE_FRA_OFFENTLIGE
 }
