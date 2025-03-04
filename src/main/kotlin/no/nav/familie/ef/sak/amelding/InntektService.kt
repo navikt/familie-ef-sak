@@ -36,9 +36,10 @@ class InntektService(
         personIdent: String,
         årstallIFjor: Int,
     ): Int {
-        val inntektV2Response = aMeldingInntektClient.hentInntekt(personIdent, YearMonth.of(årstallIFjor, 1), YearMonth.of(årstallIFjor, 12))
+        val inntektV2Response = aMeldingInntektClient.hentInntekt(personident = personIdent, fom = YearMonth.of(årstallIFjor, 1), tom = YearMonth.of(årstallIFjor, 12))
+
         val inntektsliste = inntektV2Response.maanedsData.flatMap { månedsdata -> månedsdata.inntektListe }
-        val totalBeløp = inntektsliste.filter { it.type != InntektTypeV2.LØNNSINNTEKT && it.beskrivelse != "feriepenger" }.sumOf { it.beloep }.toInt()
+        val totalBeløp = inntektsliste.filter { it.type != InntektTypeV2.YTELSE_FRA_OFFENTLIGE && it.beskrivelse != "feriepenger" }.sumOf { it.beloep }.toInt()
 
         return totalBeløp
     }
