@@ -289,7 +289,10 @@ class OppgaveService(
 
     fun hentOppgaver(finnOppgaveRequest: FinnOppgaveRequest): FinnOppgaveResponseDto = oppgaveClient.hentOppgaver(finnOppgaveRequest)
 
-    fun hentFremleggsoppgaver(behandlingId: UUID): FinnOppgaveResponseDto {
+    fun hentFremleggsoppgaver(
+        behandlingId: UUID,
+        behandlingstema: Behandlingstema?,
+    ): FinnOppgaveResponseDto {
         val aktivIdent = behandlingRepository.finnAktivIdent(behandlingId)
         val aktørId =
             aktivIdent.let {
@@ -306,6 +309,7 @@ class OppgaveService(
         val request =
             FinnOppgaveRequest(
                 tema = Tema.ENF,
+                behandlingstema = behandlingstema,
                 oppgavetype = Fremlegg,
                 aktørId = aktørId,
                 enhet = enhet,
