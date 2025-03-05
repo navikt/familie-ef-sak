@@ -42,7 +42,6 @@ data class InntektDto(
 )
 
 enum class InntektType {
-    @JsonProperty("")
     LØNNSINNTEKT,
     NÆRINGSINNTEKT,
     PENSJON_ELLER_TRYGD,
