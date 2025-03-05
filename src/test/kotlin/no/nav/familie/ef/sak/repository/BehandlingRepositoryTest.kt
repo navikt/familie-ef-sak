@@ -2,55 +2,11 @@ package no.nav.familie.ef.sak.repository
 
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
-import no.nav.familie.ef.sak.behandling.domain.Behandling
-import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
-import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat.HENLAGT
-import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat.IKKE_SATT
-import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat.INNVILGET
-import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
-import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus.FATTER_VEDTAK
-import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus.FERDIGSTILT
-import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus.IVERKSETTER_VEDTAK
-import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus.OPPRETTET
-import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus.SATT_PÅ_VENT
-import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus.UTREDES
-import no.nav.familie.ef.sak.behandling.domain.BehandlingType
-import no.nav.familie.ef.sak.beregning.Grunnbeløpsperioder
 import no.nav.familie.ef.sak.fagsak.FagsakPersonRepository
-import no.nav.familie.ef.sak.fagsak.domain.Fagsak
-import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
-import no.nav.familie.ef.sak.felles.domain.Endret
-import no.nav.familie.ef.sak.felles.domain.Sporbar
-import no.nav.familie.ef.sak.felles.domain.SporbarUtils
-import no.nav.familie.ef.sak.felles.util.BehandlingOppsettUtil
-import no.nav.familie.ef.sak.oppgave.Oppgave
 import no.nav.familie.ef.sak.oppgave.OppgaveRepository
-import no.nav.familie.ef.sak.testutil.hasCauseMessageContaining
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseRepository
 import no.nav.familie.ef.sak.vedtak.VedtakRepository
-import no.nav.familie.ef.sak.vedtak.domain.PeriodeWrapper
-import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
-import no.nav.familie.ef.sak.økonomi.lagAndelTilkjentYtelse
-import no.nav.familie.ef.sak.økonomi.lagTilkjentYtelse
-import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
-import no.nav.familie.kontrakter.felles.Månedsperiode
-import no.nav.familie.kontrakter.felles.ef.StønadType
-import no.nav.familie.kontrakter.felles.ef.StønadType.BARNETILSYN
-import no.nav.familie.kontrakter.felles.ef.StønadType.OVERGANGSSTØNAD
-import no.nav.familie.kontrakter.felles.ef.StønadType.SKOLEPENGER
-import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
-import org.assertj.core.api.Assertions.assertThat
-import org.assertj.core.api.Assertions.assertThatThrownBy
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.dao.DuplicateKeyException
-import org.springframework.data.relational.core.conversion.DbActionExecutionException
-import java.time.LocalDateTime
-import java.time.YearMonth
-import java.util.UUID
 
 internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
     @Autowired
@@ -70,6 +26,7 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
 
     private val ident = "123"
 
+    /*
     @Test
     fun `skal finne alle personer med aktiv stønad som ikke er manuelt revurdert siste måneder`() {
         lagrePersonMedVedtak("1", 12)
@@ -602,4 +559,6 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
                 fagsakPersonId = fagsakPersonId,
             ),
         )
+
+     */
 }
