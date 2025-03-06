@@ -7,8 +7,7 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.Grunnlagsdat
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.PersonopplysningerDto
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.egenansatt.EgenAnsattClient
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.endringer.EndringerIPersonopplysningerDto
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.endringer.UtledEndringerUtil.finnEndringerIPerioder
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.endringer.UtledEndringerUtil.finnEndringerIPersonopplysninger
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.endringer.UtledEndringerUtil.finnEndringer
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper.PersonopplysningerMapper
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.gjeldende
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.visningsnavn
@@ -69,10 +68,8 @@ class PersonopplysningerService(
                 egenAnsatt,
                 søkerIdenter,
             )
-        val endringer = finnEndringerIPersonopplysninger(tidligerePersonopplysninger, nyePersonopplysninger)
-        val periodeEndringer = finnEndringerIPerioder(tidligereGrunnlagsdata, nyGrunnlagsdata)
-
-        return EndringerIPersonopplysningerDto(LocalDateTime.now(), endringer.copy(perioder = periodeEndringer))
+        val alleEndringer = finnEndringer(tidligerePersonopplysninger = tidligerePersonopplysninger, nyePersonopplysninger = nyePersonopplysninger, behandling = behandling, tidligereGrunnlagsdata = tidligereGrunnlagsdata, nyGrunnlagsdata = nyGrunnlagsdata)
+        return EndringerIPersonopplysningerDto(LocalDateTime.now(), alleEndringer)
     }
 
     @Cacheable("personopplysninger", cacheManager = "shortCache")
