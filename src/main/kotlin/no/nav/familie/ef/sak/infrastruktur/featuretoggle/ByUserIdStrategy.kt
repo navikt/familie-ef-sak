@@ -13,7 +13,7 @@ class ByUserIdStrategy : Strategy {
     override fun isEnabled(
         map: MutableMap<String, String>,
         unleashContext: UnleashContext,
-    ) : Boolean {
+    ): Boolean {
         secureLogger.warn("ByUserIdStrategy called with unused context: $unleashContext")
         return isEnabled(map)
     }
