@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.amelding.ekstern
 
+import no.nav.familie.ef.sak.amelding.inntektv2.InntektV2Response
 import no.nav.familie.http.client.AbstractRestClient
 import no.nav.familie.kontrakter.felles.PersonIdent
 import org.springframework.beans.factory.annotation.Qualifier
@@ -28,12 +29,20 @@ class AMeldingInntektClient(
         .build()
         .toUri()
 
+    private val genererInntektV2Uri =
+        UriComponentsBuilder
+            .fromUri(uri)
+            .pathSegment("api/inntektv2")
+            .build()
+            .toUri()
+
     private val genererUrlUri =
         UriComponentsBuilder
             .fromUri(uri)
             .pathSegment("api/ainntekt/generer-url")
             .build()
             .toUri()
+
     private val genererUrlUriArbeidsforhold =
         UriComponentsBuilder
             .fromUri(uri)
@@ -46,6 +55,21 @@ class AMeldingInntektClient(
         fom: YearMonth,
         tom: YearMonth,
     ): HentInntektListeResponse = postForEntity(lagInntektUri(fom, tom), PersonIdent(personIdent))
+
+    fun hentInntektV2(
+        personident: String,
+        fom: YearMonth,
+        tom: YearMonth,
+    ): InntektV2Response =
+        postForEntity(
+            uri = genererInntektV2Uri,
+            payload =
+                HentInntektV2Payload(
+                    personident = personident,
+                    maanedFom = fom,
+                    maanedTom = tom,
+                ),
+        )
 
     fun genererAInntektUrl(personIdent: String): String =
         postForEntity(
@@ -65,3 +89,9 @@ class AMeldingInntektClient(
             },
         )
 }
+
+data class HentInntektV2Payload(
+    val personident: String,
+    val maanedFom: YearMonth,
+    val maanedTom: YearMonth,
+)

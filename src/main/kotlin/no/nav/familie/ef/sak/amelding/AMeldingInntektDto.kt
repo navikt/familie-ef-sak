@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.amelding
 
+import com.fasterxml.jackson.annotation.JsonProperty
 import java.time.LocalDate
 import java.time.YearMonth
 
