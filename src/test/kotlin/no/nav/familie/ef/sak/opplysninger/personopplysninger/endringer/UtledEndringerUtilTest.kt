@@ -25,8 +25,11 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.UtflyttingDto
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.VergemålDto
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.endringer.UtledEndringerUtil.finnEndringerIPerioder
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.endringer.UtledEndringerUtil.finnEndringerIPersonopplysninger
+import no.nav.familie.ef.sak.repository.fagsak
+import no.nav.familie.ef.sak.repository.saksbehandling
 import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
 import no.nav.familie.ef.sak.vilkår.dto.StatsborgerskapDto
+import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.kontrakter.felles.objectMapper
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
@@ -111,7 +114,7 @@ internal class UtledEndringerUtilTest {
             assertThat(endringer.harEndringer).isTrue
             assertThat(endringer.folkeregisterpersonstatus.harEndringer).isTrue
             assertThat(endringer.folkeregisterpersonstatus.detaljer!!.tidligere).isEqualTo("Mangler verdi")
-            assertThat(endringer.folkeregisterpersonstatus.detaljer.ny).isEqualTo("Bosatt")
+            assertThat(endringer.folkeregisterpersonstatus.detaljer!!.ny).isEqualTo("Bosatt")
             assertIngenAndreEndringer(endringer, "folkeregisterpersonstatus")
         }
 
@@ -125,7 +128,7 @@ internal class UtledEndringerUtilTest {
             assertThat(endringer.harEndringer).isTrue
             assertThat(endringer.folkeregisterpersonstatus.harEndringer).isTrue
             assertThat(endringer.folkeregisterpersonstatus.detaljer!!.tidligere).isEqualTo("Død")
-            assertThat(endringer.folkeregisterpersonstatus.detaljer.ny).isEqualTo("Bosatt")
+            assertThat(endringer.folkeregisterpersonstatus.detaljer!!.ny).isEqualTo("Bosatt")
         }
 
         @Test
@@ -159,7 +162,7 @@ internal class UtledEndringerUtilTest {
             assertThat(endringer.harEndringer).isTrue
             assertThat(endringer.fødselsdato.harEndringer).isTrue
             assertThat(endringer.fødselsdato.detaljer!!.tidligere).isEqualTo(tidligere.norskFormat())
-            assertThat(endringer.fødselsdato.detaljer.ny).isEqualTo(ny.norskFormat())
+            assertThat(endringer.fødselsdato.detaljer!!.ny).isEqualTo(ny.norskFormat())
             assertIngenAndreEndringer(endringer, "fødselsdato")
         }
 
@@ -171,7 +174,7 @@ internal class UtledEndringerUtilTest {
             assertThat(endringer.harEndringer).isTrue
             assertThat(endringer.dødsdato.harEndringer).isTrue
             assertThat(endringer.dødsdato.detaljer!!.tidligere).isEqualTo(tidligere.norskFormat())
-            assertThat(endringer.dødsdato.detaljer.ny).isEqualTo(ny.norskFormat())
+            assertThat(endringer.dødsdato.detaljer!!.ny).isEqualTo(ny.norskFormat())
             assertIngenAndreEndringer(endringer, "dødsdato")
         }
 
@@ -529,6 +532,38 @@ internal class UtledEndringerUtilTest {
         val endringerIPerioder = finnEndringerIPerioder(tidligereGrunnlagsdata = tidligereGrunnlagsdata, nyGrunnlagsdata = nyGrunnlagsdata)
 
         assertThat(endringerIPerioder.harEndringer).isFalse
+    }
+
+    @Test
+    internal fun `Finner endring i perioder hvis overgangsstønad`() {
+        val tidligereGrunnlagsdata = grunnlagsdataMedMetadata()
+        val nyGrunnlagsdata = GrunnlagsdataMedMetadata(opprettGrunnlagsdata(tidligereVedtaksperioder = tidligereVedtaksperioder()), LocalDateTime.now())
+        val alleEndringer =
+            UtledEndringerUtil.finnEndringer(
+                tidligereGrunnlagsdata = tidligereGrunnlagsdata,
+                nyGrunnlagsdata = nyGrunnlagsdata,
+                tidligerePersonopplysninger = dto(),
+                nyePersonopplysninger = dto(),
+                behandling = saksbehandling(),
+            )
+        assertThat(alleEndringer.harEndringer).isTrue()
+        assertThat(alleEndringer.perioder.harEndringer).isTrue()
+        assertIngenAndreEndringer(alleEndringer, "perioder")
+    }
+
+    @Test
+    internal fun `Finner ikke endring i perioder hvis ikke overgangsstønad`() {
+        val tidligereGrunnlagsdata = grunnlagsdataMedMetadata()
+        val nyGrunnlagsdata = GrunnlagsdataMedMetadata(opprettGrunnlagsdata(tidligereVedtaksperioder = tidligereVedtaksperioder()), LocalDateTime.now())
+        val alleEndringer =
+            UtledEndringerUtil.finnEndringer(
+                tidligereGrunnlagsdata = tidligereGrunnlagsdata,
+                nyGrunnlagsdata = nyGrunnlagsdata,
+                tidligerePersonopplysninger = dto(),
+                nyePersonopplysninger = dto(),
+                behandling = saksbehandling(fagsak = fagsak(stønadstype = StønadType.BARNETILSYN)),
+            )
+        assertThat(alleEndringer.harEndringer).isFalse()
     }
 
     private fun tidligereVedtaksperioder() =
