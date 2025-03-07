@@ -10,7 +10,7 @@ class ByEnvironmentStrategy : Strategy {
 
     override fun getName(): String = "byEnvironment"
 
-    override fun isEnabled(map: Map<String, String>): Boolean = isEnabled(map, UnleashContext.builder().build())
+    fun isEnabled(map: Map<String, String>): Boolean = isEnabled(map, UnleashContext.builder().build())
 
     override fun isEnabled(
         map: Map<String, String>,
