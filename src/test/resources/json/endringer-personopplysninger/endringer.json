@@ -114,5 +114,9 @@
     "harEndringer" : true,
     "detaljer" : null
   },
+  "perioder" : {
+    "harEndringer" : false,
+    "detaljer" : null
+  },
   "harEndringer" : true
 }

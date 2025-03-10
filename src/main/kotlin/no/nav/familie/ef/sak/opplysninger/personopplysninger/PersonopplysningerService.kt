@@ -68,18 +68,18 @@ class PersonopplysningerService(
                 egenAnsatt,
                 søkerIdenter,
             )
-        val endringer = finnEndringer(tidligerePersonopplysninger, nyePersonopplysninger)
-        return EndringerIPersonopplysningerDto(LocalDateTime.now(), endringer)
+        val alleEndringer = finnEndringer(tidligerePersonopplysninger = tidligerePersonopplysninger, nyePersonopplysninger = nyePersonopplysninger, behandling = behandling, tidligereGrunnlagsdata = tidligereGrunnlagsdata, nyGrunnlagsdata = nyGrunnlagsdata)
+        return EndringerIPersonopplysningerDto(LocalDateTime.now(), alleEndringer)
     }
 
     @Cacheable("personopplysninger", cacheManager = "shortCache")
     fun hentPersonopplysningerFraRegister(personIdent: String): PersonopplysningerDto {
-        val grunnlagsdata = grunnlagsdataService.hentPersonopplysninger(personIdent)
+        val personopplysningerGrunnlagsdataFraPdl = grunnlagsdataService.hentPersonopplysninger(personIdent)
         val egenAnsatt = egenAnsatt(personIdent)
         val identerFraPdl = personService.hentPersonIdenter(personIdent)
 
         return personopplysningerMapper.tilPersonopplysninger(
-            grunnlagsdata = grunnlagsdata,
+            personopplysninger = personopplysningerGrunnlagsdataFraPdl,
             grunnlagsdataOpprettet = LocalDateTime.now(),
             egenAnsatt = egenAnsatt,
             søkerIdenter = identerFraPdl,

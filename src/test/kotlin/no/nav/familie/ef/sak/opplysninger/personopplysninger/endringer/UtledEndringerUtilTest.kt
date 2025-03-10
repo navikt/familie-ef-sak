@@ -1,6 +1,11 @@
 package no.nav.familie.ef.sak.opplysninger.personopplysninger.endringer
 
 import no.nav.familie.ef.sak.felles.util.norskFormat
+import no.nav.familie.ef.sak.felles.util.opprettGrunnlagsdata
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataPeriodeHistorikkOvergangsstønad
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.GrunnlagsdataMedMetadata
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.TidligereInnvilgetVedtak
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.TidligereVedtaksperioder
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.AdresseDto
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.AdresseType
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.AnnenForelderMinimumDto
@@ -18,13 +23,19 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.SivilstandDto
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.Sivilstandstype
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.UtflyttingDto
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.VergemålDto
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.endringer.UtledEndringerUtil.finnEndringer
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.endringer.UtledEndringerUtil.finnEndringerIPerioder
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.endringer.UtledEndringerUtil.finnEndringerIPersonopplysninger
+import no.nav.familie.ef.sak.repository.fagsak
+import no.nav.familie.ef.sak.repository.saksbehandling
+import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
 import no.nav.familie.ef.sak.vilkår.dto.StatsborgerskapDto
+import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.kontrakter.felles.objectMapper
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
+import java.time.LocalDateTime
 import kotlin.reflect.full.memberProperties
 
 internal class UtledEndringerUtilTest {
@@ -78,7 +89,7 @@ internal class UtledEndringerUtilTest {
                 oppholdstillatelse = listOf(OppholdstillatelseDto(OppholdType.UKJENT, null, null)),
                 vergemål = listOf(VergemålDto(null, null, null, null, null)),
             )
-        val endringer = finnEndringer(tidligere, nye)
+        val endringer = finnEndringerIPersonopplysninger(tidligere, nye)
         val expected =
             this::class.java.classLoader
                 .getResource("json/endringer-personopplysninger/endringer.json")!!
@@ -90,7 +101,7 @@ internal class UtledEndringerUtilTest {
     inner class UlikeTyperAsserts {
         @Test
         internal fun `har ingen endringer`() {
-            val endringer = finnEndringer(dto(), dto())
+            val endringer = finnEndringerIPersonopplysninger(dto(), dto())
             assertThat(endringer.harEndringer).isFalse
 
             assertIngenAndreEndringer(endringer)
@@ -98,7 +109,7 @@ internal class UtledEndringerUtilTest {
 
         @Test
         internal fun `folkeregisterpersonstatus endret fra mangler verdi til annet verdi`() {
-            val endringer = finnEndringer(dto(status = null), dto(status = Folkeregisterpersonstatus.BOSATT))
+            val endringer = finnEndringerIPersonopplysninger(dto(status = null), dto(status = Folkeregisterpersonstatus.BOSATT))
 
             assertThat(endringer.harEndringer).isTrue
             assertThat(endringer.folkeregisterpersonstatus.harEndringer).isTrue
@@ -110,7 +121,7 @@ internal class UtledEndringerUtilTest {
         @Test
         internal fun `folkeregisterpersonstatus endret fra et verdi til annet verdi`() {
             val endringer =
-                finnEndringer(
+                finnEndringerIPersonopplysninger(
                     dto(status = Folkeregisterpersonstatus.DØD),
                     dto(status = Folkeregisterpersonstatus.BOSATT),
                 )
@@ -122,7 +133,7 @@ internal class UtledEndringerUtilTest {
 
         @Test
         internal fun `2 tomme lister`() {
-            val endringer = finnEndringer(dto(statsborgerskap = listOf()), dto(statsborgerskap = listOf()))
+            val endringer = finnEndringerIPersonopplysninger(dto(statsborgerskap = listOf()), dto(statsborgerskap = listOf()))
             assertThat(endringer.harEndringer).isFalse
             assertThat(endringer.statsborgerskap.harEndringer).isFalse
             assertIngenAndreEndringer(endringer)
@@ -131,7 +142,7 @@ internal class UtledEndringerUtilTest {
         @Test
         internal fun `2 lister med de liknende data`() {
             val endringer =
-                finnEndringer(
+                finnEndringerIPersonopplysninger(
                     dto(statsborgerskap = listOf(StatsborgerskapDto("land 1", null, null))),
                     dto(statsborgerskap = listOf(StatsborgerskapDto("land 1", null, null))),
                 )
@@ -147,7 +158,7 @@ internal class UtledEndringerUtilTest {
         internal fun fødselsdato() {
             val tidligere = LocalDate.now()
             val ny = LocalDate.now().minusDays(1)
-            val endringer = finnEndringer(dto(fødselsdato = tidligere), dto(fødselsdato = ny))
+            val endringer = finnEndringerIPersonopplysninger(dto(fødselsdato = tidligere), dto(fødselsdato = ny))
             assertThat(endringer.harEndringer).isTrue
             assertThat(endringer.fødselsdato.harEndringer).isTrue
             assertThat(endringer.fødselsdato.detaljer!!.tidligere).isEqualTo(tidligere.norskFormat())
@@ -159,7 +170,7 @@ internal class UtledEndringerUtilTest {
         internal fun dødsdato() {
             val tidligere = LocalDate.now()
             val ny = LocalDate.now().minusDays(1)
-            val endringer = finnEndringer(dto(dødsdato = tidligere), dto(dødsdato = ny))
+            val endringer = finnEndringerIPersonopplysninger(dto(dødsdato = tidligere), dto(dødsdato = ny))
             assertThat(endringer.harEndringer).isTrue
             assertThat(endringer.dødsdato.harEndringer).isTrue
             assertThat(endringer.dødsdato.detaljer!!.tidligere).isEqualTo(tidligere.norskFormat())
@@ -170,7 +181,7 @@ internal class UtledEndringerUtilTest {
         @Test
         internal fun statsborgerskap() {
             val endringer =
-                finnEndringer(
+                finnEndringerIPersonopplysninger(
                     dto(statsborgerskap = listOf(StatsborgerskapDto("land 1", null, null))),
                     dto(statsborgerskap = listOf(StatsborgerskapDto("land 2", null, null))),
                 )
@@ -182,7 +193,7 @@ internal class UtledEndringerUtilTest {
         @Test
         internal fun sivilstand() {
             val endringer =
-                finnEndringer(
+                finnEndringerIPersonopplysninger(
                     dto(sivilstand = listOf(SivilstandDto(Sivilstandstype.UGIFT, null, null, null, null, true))),
                     dto(sivilstand = listOf(SivilstandDto(Sivilstandstype.GIFT, null, null, null, null, true))),
                 )
@@ -194,7 +205,7 @@ internal class UtledEndringerUtilTest {
         @Test
         internal fun adresse() {
             val endringer =
-                finnEndringer(
+                finnEndringerIPersonopplysninger(
                     dto(adresse = listOf(AdresseDto("1", AdresseType.BOSTEDADRESSE, null, null, null, true))),
                     dto(adresse = listOf(AdresseDto("2", AdresseType.BOSTEDADRESSE, null, null, null, true))),
                 )
@@ -207,7 +218,7 @@ internal class UtledEndringerUtilTest {
         internal fun fullmakt() {
             val fullmaktDto = FullmaktDto(LocalDate.now(), LocalDate.now(), "1", null, emptyList())
             val endringer =
-                finnEndringer(
+                finnEndringerIPersonopplysninger(
                     dto(fullmakt = listOf(fullmaktDto)),
                     dto(fullmakt = listOf(fullmaktDto.copy(motpartsPersonident = "2"))),
                 )
@@ -219,7 +230,7 @@ internal class UtledEndringerUtilTest {
         @Test
         internal fun innflyttingTilNorge() {
             val endringer =
-                finnEndringer(
+                finnEndringerIPersonopplysninger(
                     dto(innflyttingTilNorge = listOf(InnflyttingDto(null, null, null))),
                     dto(innflyttingTilNorge = listOf(InnflyttingDto("", null, null))),
                 )
@@ -231,7 +242,7 @@ internal class UtledEndringerUtilTest {
         @Test
         internal fun utflyttingFraNorge() {
             val endringer =
-                finnEndringer(
+                finnEndringerIPersonopplysninger(
                     dto(utflyttingFraNorge = listOf(UtflyttingDto(null, null, null))),
                     dto(utflyttingFraNorge = listOf(UtflyttingDto("", null, null))),
                 )
@@ -243,7 +254,7 @@ internal class UtledEndringerUtilTest {
         @Test
         internal fun oppholdstillatelse() {
             val endringer =
-                finnEndringer(
+                finnEndringerIPersonopplysninger(
                     dto(oppholdstillatelse = listOf()),
                     dto(oppholdstillatelse = listOf(OppholdstillatelseDto(OppholdType.UKJENT, null, null))),
                 )
@@ -255,7 +266,7 @@ internal class UtledEndringerUtilTest {
         @Test
         internal fun vergemål() {
             val endringer =
-                finnEndringer(
+                finnEndringerIPersonopplysninger(
                     dto(vergemål = listOf()),
                     dto(vergemål = listOf(VergemålDto(null, null, null, null, null))),
                 )
@@ -271,7 +282,7 @@ internal class UtledEndringerUtilTest {
         internal fun `nytt barn`() {
             val barn = BarnDto(barnIdent, "", null, emptyList(), true, emptyList(), false, null, null)
             val endringer =
-                finnEndringer(
+                finnEndringerIPersonopplysninger(
                     dto(barn = listOf()),
                     dto(barn = listOf(barn)),
                 )
@@ -285,7 +296,7 @@ internal class UtledEndringerUtilTest {
         internal fun `fjernet barn`() {
             val barn = BarnDto("ident", "", null, emptyList(), true, emptyList(), false, null, null)
             val endringer =
-                finnEndringer(
+                finnEndringerIPersonopplysninger(
                     dto(barn = listOf(barn)),
                     dto(barn = listOf()),
                 )
@@ -306,7 +317,7 @@ internal class UtledEndringerUtilTest {
             val barn = BarnDto(barnIdent, "", null, emptyList(), true, emptyList(), false, null, null)
             val barn2 = BarnDto(barnIdent, "2", null, emptyList(), true, emptyList(), false, null, null)
             val endringer =
-                finnEndringer(
+                finnEndringerIPersonopplysninger(
                     dto(barn = listOf(barn)),
                     dto(barn = listOf(barn2)),
                 )
@@ -323,7 +334,7 @@ internal class UtledEndringerUtilTest {
             val barn = BarnDto(barnIdent, "", null, emptyList(), true, emptyList(), false, null, null)
             val barn2 = barn.copy(borHosSøker = false)
             val endringer =
-                finnEndringer(
+                finnEndringerIPersonopplysninger(
                     dto(barn = listOf(barn)),
                     dto(barn = listOf(barn2)),
                 )
@@ -346,7 +357,7 @@ internal class UtledEndringerUtilTest {
             val barn = BarnDto(barnIdent, "", annenForelder, emptyList(), true, emptyList(), false, null, null)
             val barn2 = barn.copy(dødsdato = dødsdato)
             val endringer =
-                finnEndringer(
+                finnEndringerIPersonopplysninger(
                     dto(barn = listOf(barn)),
                     dto(barn = listOf(barn2)),
                 )
@@ -378,7 +389,7 @@ internal class UtledEndringerUtilTest {
                     null,
                 )
             val endringer =
-                finnEndringer(
+                finnEndringerIPersonopplysninger(
                     dto(barn = listOf(barn)),
                     dto(barn = listOf(barn2)),
                 )
@@ -403,7 +414,7 @@ internal class UtledEndringerUtilTest {
             val barn = BarnDto("ident", "", annenForelder, emptyList(), true, emptyList(), false, null, null)
             val barn2 = barn.copy(annenForelder = annenForelder.copy(dødsdato = dødsdato))
             val endringer =
-                finnEndringer(
+                finnEndringerIPersonopplysninger(
                     dto(barn = listOf(barn)),
                     dto(barn = listOf(barn2)),
                 )
@@ -425,7 +436,7 @@ internal class UtledEndringerUtilTest {
             val barn = BarnDto(barnIdent, "", annenForelder, emptyList(), true, emptyList(), false, null, null)
             val barn2 = barn.copy(annenForelder = annenForelder.copy(bostedsadresse = "Adresse 2"))
             val endringer =
-                finnEndringer(
+                finnEndringerIPersonopplysninger(
                     dto(barn = listOf(barn)),
                     dto(barn = listOf(barn2)),
                 )
@@ -447,7 +458,7 @@ internal class UtledEndringerUtilTest {
             val barn = BarnDto(barnIdent, "", null, emptyList(), true, emptyList(), false, null, null)
             val barn2 = barn.copy(harDeltBostedNå = true)
             val endringer =
-                finnEndringer(
+                finnEndringerIPersonopplysninger(
                     dto(barn = listOf(barn)),
                     dto(barn = listOf(barn2)),
                 )
@@ -491,7 +502,7 @@ internal class UtledEndringerUtilTest {
                 )
             val barn2 = barn.copy(deltBosted = listOf(deltBostedGammel, deltBostedNy))
             val endringer =
-                finnEndringer(
+                finnEndringerIPersonopplysninger(
                     dto(barn = listOf(barn)),
                     dto(barn = listOf(barn2)),
                 )
@@ -504,6 +515,89 @@ internal class UtledEndringerUtilTest {
             assertThat(endringsdetaljer[0].ny).isEqualTo("")
             assertThat(endringsdetaljer[0].tidligere).isEqualTo("")
         }
+    }
+
+    @Test
+    internal fun `Finner endring i perioder hvis det er endringer`() {
+        val tidligereGrunnlagsdata = grunnlagsdataMedMetadata()
+        val nyGrunnlagsdata = GrunnlagsdataMedMetadata(opprettGrunnlagsdata(tidligereVedtaksperioder = tidligereVedtaksperioder()), LocalDateTime.now())
+        val endringerIPerioder = finnEndringerIPerioder(tidligereGrunnlagsdata = tidligereGrunnlagsdata, nyGrunnlagsdata = nyGrunnlagsdata)
+        assertThat(endringerIPerioder.harEndringer).isTrue()
+    }
+
+    @Test
+    internal fun `Finner ikke endring i perioder hvis det ikke er endringer`() {
+        val tidligereGrunnlagsdata = grunnlagsdataMedMetadata()
+        val nyGrunnlagsdata = grunnlagsdataMedMetadata()
+        val endringerIPerioder = finnEndringerIPerioder(tidligereGrunnlagsdata = tidligereGrunnlagsdata, nyGrunnlagsdata = nyGrunnlagsdata)
+
+        assertThat(endringerIPerioder.harEndringer).isFalse
+    }
+
+    @Test
+    internal fun `Finner endring i perioder hvis overgangsstønad`() {
+        val tidligereGrunnlagsdata = grunnlagsdataMedMetadata()
+        val nyGrunnlagsdata = GrunnlagsdataMedMetadata(opprettGrunnlagsdata(tidligereVedtaksperioder = tidligereVedtaksperioder()), LocalDateTime.now())
+        val alleEndringer =
+            UtledEndringerUtil.finnEndringer(
+                tidligereGrunnlagsdata = tidligereGrunnlagsdata,
+                nyGrunnlagsdata = nyGrunnlagsdata,
+                tidligerePersonopplysninger = dto(),
+                nyePersonopplysninger = dto(),
+                behandling = saksbehandling(),
+            )
+        assertThat(alleEndringer.harEndringer).isTrue()
+        assertThat(alleEndringer.perioder.harEndringer).isTrue()
+        assertIngenAndreEndringer(alleEndringer, "perioder")
+    }
+
+    @Test
+    internal fun `Finner ikke endring i perioder hvis ikke overgangsstønad`() {
+        val tidligereGrunnlagsdata = grunnlagsdataMedMetadata()
+        val nyGrunnlagsdata = GrunnlagsdataMedMetadata(opprettGrunnlagsdata(tidligereVedtaksperioder = tidligereVedtaksperioder()), LocalDateTime.now())
+        val alleEndringer =
+            UtledEndringerUtil.finnEndringer(
+                tidligereGrunnlagsdata = tidligereGrunnlagsdata,
+                nyGrunnlagsdata = nyGrunnlagsdata,
+                tidligerePersonopplysninger = dto(),
+                nyePersonopplysninger = dto(),
+                behandling = saksbehandling(fagsak = fagsak(stønadstype = StønadType.BARNETILSYN)),
+            )
+        assertThat(alleEndringer.harEndringer).isFalse()
+    }
+
+    private fun tidligereVedtaksperioder() =
+        TidligereVedtaksperioder(
+            infotrygd =
+                TidligereInnvilgetVedtak(
+                    harTidligereOvergangsstønad = false,
+                    harTidligereBarnetilsyn = true,
+                    harTidligereSkolepenger = false,
+                ),
+            sak =
+                TidligereInnvilgetVedtak(
+                    harTidligereOvergangsstønad = true,
+                    harTidligereBarnetilsyn = false,
+                    harTidligereSkolepenger = true,
+                    periodeHistorikkOvergangsstønad = listOf(grunnlagsdataPeriodeHistorikkOvergangsstønad()),
+                ),
+            historiskPensjon = false,
+        )
+
+    private fun grunnlagsdataPeriodeHistorikkOvergangsstønad() =
+        GrunnlagsdataPeriodeHistorikkOvergangsstønad(
+            periodeType = VedtaksperiodeType.PERIODE_FØR_FØDSEL,
+            fom = LocalDate.now(),
+            tom = LocalDate.now().plusMonths(1),
+            aktivitet = null,
+            beløp = 123,
+            inntekt = null,
+            samordningsfradrag = null,
+        )
+
+    private fun grunnlagsdataMedMetadata(): GrunnlagsdataMedMetadata {
+        val nyGrunnlagsdata = GrunnlagsdataMedMetadata(opprettGrunnlagsdata(), LocalDateTime.now())
+        return nyGrunnlagsdata
     }
 
     private fun assertNyPerson(
