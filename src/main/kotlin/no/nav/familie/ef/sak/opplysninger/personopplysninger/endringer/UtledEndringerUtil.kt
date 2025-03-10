@@ -1,16 +1,33 @@
 package no.nav.familie.ef.sak.opplysninger.personopplysninger.endringer
 
+import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.felles.util.norskFormat
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.GrunnlagsdataMedMetadata
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.AnnenForelderMinimumDto
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.BarnDto
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.Folkeregisterpersonstatus
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.PersonopplysningerDto
+import no.nav.familie.kontrakter.felles.ef.StønadType
 import java.time.LocalDate
 
 private typealias PersonendringDetaljerFn<T> = (T, T) -> EndringFelt?
 
 object UtledEndringerUtil {
+    fun finnEndringer(
+        tidligerePersonopplysninger: PersonopplysningerDto,
+        nyePersonopplysninger: PersonopplysningerDto,
+        behandling: Saksbehandling,
+        tidligereGrunnlagsdata: GrunnlagsdataMedMetadata,
+        nyGrunnlagsdata: GrunnlagsdataMedMetadata,
+    ): Endringer {
+        val endringer = finnEndringerIPersonopplysninger(tidligerePersonopplysninger, nyePersonopplysninger)
+        return if (behandling.stønadstype == StønadType.OVERGANGSSTØNAD) {
+            endringer.copy(perioder = finnEndringerIPerioder(tidligereGrunnlagsdata, nyGrunnlagsdata))
+        } else {
+            endringer
+        }
+    }
+
     fun finnEndringerIPersonopplysninger(
         tidligere: PersonopplysningerDto,
         nye: PersonopplysningerDto,
