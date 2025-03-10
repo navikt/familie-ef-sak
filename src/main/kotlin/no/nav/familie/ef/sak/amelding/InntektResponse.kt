@@ -63,6 +63,12 @@ data class InntektRequestBody(
     val månedTom: YearMonth?,
 )
 
+data class HentInntektPayload(
+    val personIdent: String,
+    val månedFom: YearMonth,
+    val månedTom: YearMonth,
+)
+
 enum class InntektType {
     @JsonProperty("Loennsinntekt")
     LØNNSINNTEKT,

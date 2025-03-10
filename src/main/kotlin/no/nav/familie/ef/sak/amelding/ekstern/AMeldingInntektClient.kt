@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.amelding.ekstern
 
+import no.nav.familie.ef.sak.amelding.HentInntektPayload
 import no.nav.familie.ef.sak.amelding.InntektResponse
 import no.nav.familie.http.client.AbstractRestClient
 import no.nav.familie.kontrakter.felles.PersonIdent
@@ -51,17 +52,17 @@ class AMeldingInntektClient(
             .toUri()
 
     fun hentInntekt(
-        personident: String,
-        fom: YearMonth,
-        tom: YearMonth,
+        personIdent: String,
+        månedFom: YearMonth,
+        månedTom: YearMonth,
     ): InntektResponse =
         postForEntity(
             uri = genererInntektV2Uri,
             payload =
-                HentInntektV2Payload(
-                    personident = personident,
-                    maanedFom = fom,
-                    maanedTom = tom,
+                HentInntektPayload(
+                    personIdent = personIdent,
+                    månedFom = månedFom,
+                    månedTom = månedTom,
                 ),
         )
 
@@ -83,9 +84,3 @@ class AMeldingInntektClient(
             },
         )
 }
-
-data class HentInntektV2Payload(
-    val personident: String,
-    val maanedFom: YearMonth,
-    val maanedTom: YearMonth,
-)
