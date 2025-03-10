@@ -34,7 +34,7 @@ class InntektController(
         )
 
         val inntekt =
-            inntektService.hentInntektV2(
+            inntektService.hentInntekt(
                 fagsakId = fagsakId,
                 fom = inntektRequestBody.månedFom ?: YearMonth.now().minusMonths(2),
                 tom = inntektRequestBody.månedTom ?: YearMonth.now(),

@@ -13,7 +13,7 @@ class InntektService(
     private val fagsakService: FagsakService,
     private val fagsakPersonService: FagsakPersonService,
 ) {
-    fun hentInntektV2(
+    fun hentInntekt(
         fagsakId: UUID,
         fom: YearMonth,
         tom: YearMonth,
