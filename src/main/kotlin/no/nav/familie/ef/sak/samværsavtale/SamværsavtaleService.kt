@@ -1,17 +1,29 @@
 package no.nav.familie.ef.sak.samværsavtale
 
+import no.nav.familie.ef.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ef.sak.barn.BarnService
 import no.nav.familie.ef.sak.barn.BehandlingBarn
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.Behandling
+import no.nav.familie.ef.sak.brev.BrevClient
+import no.nav.familie.ef.sak.brev.dto.FritekstBrevRequestDto
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
+import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
+import no.nav.familie.ef.sak.journalføring.JournalpostClient
 import no.nav.familie.ef.sak.oppgave.TilordnetRessursService
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerService
+import no.nav.familie.ef.sak.samværsavtale.SamværsavtaleHelper.lagAvsnittFritekstbrev
 import no.nav.familie.ef.sak.samværsavtale.domain.Samværsavtale
 import no.nav.familie.ef.sak.samværsavtale.domain.SamværsukeWrapper
+import no.nav.familie.ef.sak.samværsavtale.dto.JournalførSamværsavtaleRequest
 import no.nav.familie.ef.sak.samværsavtale.dto.SamværsavtaleDto
 import no.nav.familie.ef.sak.samværsavtale.dto.tilDomene
 import no.nav.familie.ef.sak.vilkår.VurderingService.Companion.byggBarnMapFraTidligereTilNyId
 import no.nav.familie.ef.sak.vilkår.regler.HovedregelMetadata
+import no.nav.familie.kontrakter.felles.dokarkiv.Dokumenttype
+import no.nav.familie.kontrakter.felles.dokarkiv.v2.ArkiverDokumentRequest
+import no.nav.familie.kontrakter.felles.dokarkiv.v2.Dokument
+import no.nav.familie.kontrakter.felles.dokarkiv.v2.Filtype
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
@@ -22,6 +34,10 @@ class SamværsavtaleService(
     val behandlingService: BehandlingService,
     val tilordnetRessursService: TilordnetRessursService,
     val barnService: BarnService,
+    val personopplysningerService: PersonopplysningerService,
+    val journalpostClient: JournalpostClient,
+    val brevClient: BrevClient,
+    val arbeidsfordelingService: ArbeidsfordelingService,
 ) {
     fun hentSamværsavtalerForBehandling(behandlingId: UUID) = samværsavtaleRepository.findByBehandlingId(behandlingId)
 
@@ -73,6 +89,50 @@ class SamværsavtaleService(
             }
 
         samværsavtaleRepository.insertAll(nyeSamværsavtaler)
+    }
+
+    fun journalførSamværsavtale(request: JournalførSamværsavtaleRequest): String {
+        val fritekstBrevRequest = lagFritekstBrevRequest(request)
+        val dokument = brevClient.genererFritekstBrev(fritekstBrevRequest)
+
+        val saksbehandler = SikkerhetContext.hentSaksbehandler()
+        val arkiverDokumentRequest = lagArkiverDokumentRequest(dokument, request.personIdent)
+        val respons = journalpostClient.arkiverDokument(arkiverDokumentRequest, saksbehandler)
+
+        return respons.journalpostId
+    }
+
+    private fun lagFritekstBrevRequest(request: JournalførSamværsavtaleRequest) =
+        FritekstBrevRequestDto(
+            overskrift = "Beregning av samvær",
+            personIdent = request.personIdent,
+            navn = personopplysningerService.hentGjeldeneNavn(listOf(request.personIdent)).getValue(request.personIdent),
+            avsnitt =
+                request.uker.mapIndexed { ukenummer, samværsuke ->
+                    lagAvsnittFritekstbrev(ukenummer, samværsuke)
+                },
+        )
+
+    private fun lagArkiverDokumentRequest(
+        pdf: ByteArray,
+        personIdent: String,
+    ): ArkiverDokumentRequest {
+        val dokument =
+            Dokument(
+                dokument = pdf,
+                filtype = Filtype.PDFA,
+                tittel = "Beregning av samvær",
+                dokumenttype = Dokumenttype.BEREGNET_SAMVÆR_NOTAT,
+            )
+        val journalførendeEnhet = arbeidsfordelingService.hentNavEnhetIdEllerBrukMaskinellEnhetHvisNull(personIdent)
+
+        return ArkiverDokumentRequest(
+            fnr = personIdent,
+            forsøkFerdigstill = true,
+            hoveddokumentvarianter = listOf(dokument),
+            vedleggsdokumenter = listOf(),
+            journalførendeEnhet = journalførendeEnhet,
+        )
     }
 
     private fun hentSamværsavtaleEllerNull(
