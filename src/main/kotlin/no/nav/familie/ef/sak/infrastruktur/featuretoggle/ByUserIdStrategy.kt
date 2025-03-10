@@ -19,7 +19,6 @@ class ByUserIdStrategy : Strategy {
     }
 
     fun isEnabled(map: MutableMap<String, String>): Boolean {
-
         secureLogger.warn("ByUserIdStrategy isEnabled map: $map")
 
         if (SikkerhetContext.erSystembruker()) {
