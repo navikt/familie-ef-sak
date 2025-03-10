@@ -4,8 +4,6 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ef.sak.amelding.ekstern.AMeldingInntektClient
-import no.nav.familie.ef.sak.amelding.inntektv2.InntektTypeV2
-import no.nav.familie.ef.sak.amelding.inntektv2.InntektV2Response
 import no.nav.familie.ef.sak.fagsak.FagsakPersonService
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.infrastruktur.config.ObjectMapperProvider.objectMapper
@@ -21,14 +19,12 @@ class InntektServiceTest {
     private val fagsakService: FagsakService = mockk(relaxed = true)
     private val aMeldingInntektClient: AMeldingInntektClient = mockk(relaxed = true)
     private val fagsakPersonService: FagsakPersonService = mockk(relaxed = true)
-    private val inntektMapper: InntektMapper = mockk(relaxed = true)
 
     private val inntektService: InntektService =
         InntektService(
             aMeldingInntektClient = aMeldingInntektClient,
             fagsakService = fagsakService,
             fagsakPersonService = fagsakPersonService,
-            inntektMapper = inntektMapper,
         )
 
     private val fagsakId = UUID.randomUUID()
@@ -38,31 +34,31 @@ class InntektServiceTest {
     inner class ParseInntektV2Reponse {
         @Test
         internal fun `parser generell inntektv2 response med riktig data struktur`() {
-            val inntektV2ResponseJson: String = lesRessurs("json/inntektv2/GenerellInntektV2Reponse.json")
-            val inntektV2Response = objectMapper.readValue<InntektV2Response>(inntektV2ResponseJson)
+            val inntektV2ResponseJson: String = lesRessurs("json/inntekt/InntektGenerellResponse.json")
+            val inntektResponse = objectMapper.readValue<InntektResponse>(inntektV2ResponseJson)
 
             val forventetMåned = YearMonth.of(2020, 3)
-            val forventetInntektType: InntektTypeV2 = InntektTypeV2.LØNNSINNTEKT
+            val forventetInntektType: InntektType = InntektType.LØNNSINNTEKT
 
-            assertEquals(forventetMåned, inntektV2Response.maanedsData[0].måned)
-            assertEquals(forventetInntektType, inntektV2Response.maanedsData[0].inntektListe[0].type)
+            assertEquals(forventetMåned, inntektResponse.månedsData[0].måned)
+            assertEquals(forventetInntektType, inntektResponse.månedsData[0].inntektListe[0].type)
         }
 
         @Test
         internal fun `parser inntektv2 response med forskjellige inntekt typer`() {
-            val inntektV2ResponseJson: String = lesRessurs("json/inntektv2/FlereInntektTyperInntektV2Response.json")
-            val inntektV2Response = objectMapper.readValue<InntektV2Response>(inntektV2ResponseJson)
+            val inntektV2ResponseJson: String = lesRessurs("json/inntekt/InntektFlereInntektTyperResponse.json")
+            val inntektResponse = objectMapper.readValue<InntektResponse>(inntektV2ResponseJson)
 
             val forventeteInntektTyper =
                 listOf(
-                    InntektTypeV2.LØNNSINNTEKT,
-                    InntektTypeV2.NAERINGSINNTEKT,
-                    InntektTypeV2.YTELSE_FRA_OFFENTLIGE,
-                    InntektTypeV2.PENSJON_ELLER_TRYGD,
+                    InntektType.LØNNSINNTEKT,
+                    InntektType.NAERINGSINNTEKT,
+                    InntektType.YTELSE_FRA_OFFENTLIGE,
+                    InntektType.PENSJON_ELLER_TRYGD,
                 )
 
             val faktiskeInntektTyper =
-                inntektV2Response.maanedsData
+                inntektResponse.månedsData
                     .flatMap { it.inntektListe }
                     .map { it.type }
                     .distinct()
@@ -81,15 +77,15 @@ class InntektServiceTest {
         @Test
         internal fun `skal hente årsinntekt og summere riktig`() {
             val inntektV2ResponseJson: String =
-                lesRessurs("json/inntektv2/År2020MedFullInntektOgFeriepengerInntektV2Reponse.json")
-            val inntektV2Response = objectMapper.readValue<InntektV2Response>(inntektV2ResponseJson)
+                lesRessurs("json/inntekt/InntektFulltÅrMedFeriePenger.json")
+            val inntektResponse = objectMapper.readValue<InntektResponse>(inntektV2ResponseJson)
 
-            every { aMeldingInntektClient.hentInntektV2(any(), any(), any()) } returns inntektV2Response
+            every { aMeldingInntektClient.hentInntekt(any(), any(), any()) } returns inntektResponse
 
             val forventetÅrsinntekt = 110000
 
             val årsinntekt =
-                inntektService.hentÅrsinntektV2(
+                inntektService.hentÅrsinntekt(
                     personIdent = personIdent,
                     årstallIFjor = 2020,
                 )

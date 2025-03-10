@@ -1,8 +1,6 @@
 package no.nav.familie.ef.sak.amelding
 
 import no.nav.familie.ef.sak.AuditLoggerEvent
-import no.nav.familie.ef.sak.amelding.inntektv2.InntektV2RequestBody
-import no.nav.familie.ef.sak.amelding.inntektv2.MånedsInntekt
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.Ressurs.Companion.success
@@ -13,7 +11,6 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import java.time.YearMonth
 import java.util.UUID
@@ -26,27 +23,11 @@ class InntektController(
     private val tilgangService: TilgangService,
     private val inntektService: InntektService,
 ) {
-    @GetMapping("fagsak/{fagsakId}")
-    fun hentInntekt(
-        @PathVariable("fagsakId") fagsakId: UUID,
-        @RequestParam fom: YearMonth?,
-        @RequestParam tom: YearMonth?,
-    ): Ressurs<AMeldingInntektDto> {
-        tilgangService.validerTilgangTilFagsak(fagsakId, AuditLoggerEvent.ACCESS)
-        val inntekt =
-            inntektService.hentInntekt(
-                fagsakId = fagsakId,
-                fom = fom ?: YearMonth.now().minusMonths(2),
-                tom = tom ?: YearMonth.now(),
-            )
-        return success(inntekt)
-    }
-
     @PostMapping("inntektv2/{fagsakid}")
-    fun hentInntektV2(
+    fun hentInntekt(
         @PathVariable("fagsakid") fagsakId: UUID,
-        @RequestBody inntektV2RequestBody: InntektV2RequestBody,
-    ): Ressurs<List<MånedsInntekt>> {
+        @RequestBody inntektRequestBody: InntektRequestBody,
+    ): Ressurs<List<InntektMåned>> {
         tilgangService.validerTilgangTilFagsak(
             fagsakId = fagsakId,
             event = AuditLoggerEvent.ACCESS,
@@ -55,8 +36,8 @@ class InntektController(
         val inntekt =
             inntektService.hentInntektV2(
                 fagsakId = fagsakId,
-                fom = inntektV2RequestBody.maanedFom ?: YearMonth.now().minusMonths(2),
-                tom = inntektV2RequestBody.maanedTom ?: YearMonth.now(),
+                fom = inntektRequestBody.månedFom ?: YearMonth.now().minusMonths(2),
+                tom = inntektRequestBody.månedTom ?: YearMonth.now(),
             )
 
         return success(inntekt)

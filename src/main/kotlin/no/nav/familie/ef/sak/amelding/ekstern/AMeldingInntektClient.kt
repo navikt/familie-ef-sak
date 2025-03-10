@@ -1,6 +1,6 @@
 package no.nav.familie.ef.sak.amelding.ekstern
 
-import no.nav.familie.ef.sak.amelding.inntektv2.InntektV2Response
+import no.nav.familie.ef.sak.amelding.InntektResponse
 import no.nav.familie.http.client.AbstractRestClient
 import no.nav.familie.kontrakter.felles.PersonIdent
 import org.springframework.beans.factory.annotation.Qualifier
@@ -51,16 +51,10 @@ class AMeldingInntektClient(
             .toUri()
 
     fun hentInntekt(
-        personIdent: String,
-        fom: YearMonth,
-        tom: YearMonth,
-    ): HentInntektListeResponse = postForEntity(lagInntektUri(fom, tom), PersonIdent(personIdent))
-
-    fun hentInntektV2(
         personident: String,
         fom: YearMonth,
         tom: YearMonth,
-    ): InntektV2Response =
+    ): InntektResponse =
         postForEntity(
             uri = genererInntektV2Uri,
             payload =
