@@ -1,7 +1,6 @@
 package no.nav.familie.ef.sak.amelding
 
 import no.nav.familie.ef.sak.amelding.ekstern.AMeldingInntektClient
-import no.nav.familie.ef.sak.amelding.ekstern.InntektType
 import no.nav.familie.ef.sak.fagsak.FagsakPersonService
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import org.springframework.stereotype.Service
@@ -13,25 +12,32 @@ class InntektService(
     private val aMeldingInntektClient: AMeldingInntektClient,
     private val fagsakService: FagsakService,
     private val fagsakPersonService: FagsakPersonService,
-    private val inntektMapper: InntektMapper,
 ) {
     fun hentInntekt(
         fagsakId: UUID,
         fom: YearMonth,
         tom: YearMonth,
-    ): AMeldingInntektDto {
+    ): List<InntektMåned> {
         val aktivIdent = fagsakService.hentAktivIdent(fagsakId)
-        val inntekt = aMeldingInntektClient.hentInntekt(aktivIdent, fom, tom)
-        return inntektMapper.mapInntekt(inntekt)
+        val inntekt =
+            aMeldingInntektClient.hentInntekt(
+                personIdent = aktivIdent,
+                månedFom = fom,
+                månedTom = tom,
+            )
+
+        return inntekt.månedsData
     }
 
     fun hentÅrsinntekt(
         personIdent: String,
         årstallIFjor: Int,
     ): Int {
-        val inntektListeResponse = aMeldingInntektClient.hentInntekt(personIdent, YearMonth.of(årstallIFjor, 1), YearMonth.of(årstallIFjor, 12))
-        val inntektListe = inntektListeResponse.arbeidsinntektMåned?.flatMap { it.arbeidsInntektInformasjon?.inntektListe ?: emptyList() }
-        val totalBeløp = inntektListe?.filter { it.inntektType != InntektType.YTELSE_FRA_OFFENTLIGE && it.beskrivelse != "feriepenger" }?.sumOf { it.beløp } ?: 0
+        val inntektV2Response = aMeldingInntektClient.hentInntekt(personIdent = personIdent, månedFom = YearMonth.of(årstallIFjor, 1), månedTom = YearMonth.of(årstallIFjor, 12))
+
+        val inntektsliste = inntektV2Response.månedsData.flatMap { månedsdata -> månedsdata.inntektListe }
+        val totalBeløp = inntektsliste.filter { it.type != InntektType.YTELSE_FRA_OFFENTLIGE && it.beskrivelse != "feriepenger" }.sumOf { it.beløp }.toInt()
+
         return totalBeløp
     }
 

@@ -1,0 +1,33 @@
+{
+  "data": [
+    {
+      "maaned": "2024-07",
+      "opplysningspliktig": "999888776",
+      "underenhet": "999888776",
+      "norskident": "11111111111",
+      "oppsummeringstidspunkt": "2024-06-01T00:00:00Z",
+      "inntektListe": [
+        {
+          "type": "YtelseFraOffentlige",
+          "beloep": 7395.0,
+          "fordel": "kontantytelse",
+          "beskrivelse": "overgangsstoenadTilEnsligMorEllerFarSomBegynteAaLoepe1April2014EllerSenere",
+          "inngaarIGrunnlagForTrekk": true,
+          "utloeserArbeidsgiveravgift": false,
+          "skatteOgAvgiftsregel": "InngaarAlltid",
+          "opptjeningsperiodeFom": null,
+          "opptjeningsperiodeTom": null,
+          "tilleggsinformasjon": {
+            "type": "Nettoloennsordning"
+          },
+          "manuellVurdering": false,
+          "antall": null,
+          "skattemessigBosattLand": null,
+          "opptjeningsland": null
+        }
+      ],
+      "forskuddstrekkListe": [],
+      "avvikListe": []
+    }
+  ]
+}

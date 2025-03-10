@@ -1,0 +1,140 @@
+{
+  "data": [
+    {
+      "maaned": "2024-09",
+      "opplysningspliktig": "928497704",
+      "underenhet": "805824352",
+      "norskident": "22068315089",
+      "oppsummeringstidspunkt": "2021-11-01T00:00:00Z",
+      "inntektListe": [
+        {
+          "type": "Loennsinntekt",
+          "beloep": 50000.0,
+          "fordel": "kontantytelse",
+          "beskrivelse": "fastloenn",
+          "inngaarIGrunnlagForTrekk": true,
+          "utloeserArbeidsgiveravgift": true,
+          "skatteOgAvgiftsregel": "InngaarAlltid",
+          "opptjeningsperiodeFom": "2021-09-01",
+          "opptjeningsperiodeTom": "2021-09-30",
+          "tilleggsinformasjon": {
+            "type": "NorskKontinentalsokkel"
+          },
+          "manuellVurdering": false,
+          "antall": null,
+          "skattemessigBosattLand": "NO",
+          "opptjeningsland": "NO"
+        }
+      ],
+      "forskuddstrekkListe": [],
+      "avvikListe": [
+        {
+          "kode": "Feil på innsendt a-melding.",
+          "tekst": "Feil på innsendt a-melding."
+        }
+      ]
+    },
+    {
+      "maaned": "2024-10",
+      "opplysningspliktig": "928497704",
+      "underenhet": "805824352",
+      "norskident": "22068315089",
+      "oppsummeringstidspunkt": "2021-11-01T00:00:00Z",
+      "inntektListe": [
+        {
+          "type": "Loennsinntekt",
+          "beloep": 50000.0,
+          "fordel": "kontantytelse",
+          "beskrivelse": "fastloenn",
+          "inngaarIGrunnlagForTrekk": true,
+          "utloeserArbeidsgiveravgift": true,
+          "skatteOgAvgiftsregel": "InngaarAlltid",
+          "opptjeningsperiodeFom": "2021-09-01",
+          "opptjeningsperiodeTom": "2021-09-30",
+          "tilleggsinformasjon": {
+            "type": "NorskKontinentalsokkel"
+          },
+          "manuellVurdering": false,
+          "antall": null,
+          "skattemessigBosattLand": "NO",
+          "opptjeningsland": "NO"
+        }
+      ],
+      "forskuddstrekkListe": [],
+      "avvikListe": [
+        {
+          "kode": "Feil på innsendt a-melding.",
+          "tekst": "Feil på innsendt a-melding."
+        }
+      ]
+    },
+    {
+      "maaned": "2024-11",
+      "opplysningspliktig": "928497704",
+      "underenhet": "805824352",
+      "norskident": "22068315089",
+      "oppsummeringstidspunkt": "2021-11-01T00:00:00Z",
+      "inntektListe": [
+        {
+          "type": "Loennsinntekt",
+          "beloep": 50000.0,
+          "fordel": "kontantytelse",
+          "beskrivelse": "fastloenn",
+          "inngaarIGrunnlagForTrekk": true,
+          "utloeserArbeidsgiveravgift": true,
+          "skatteOgAvgiftsregel": "InngaarAlltid",
+          "opptjeningsperiodeFom": "2021-09-01",
+          "opptjeningsperiodeTom": "2021-09-30",
+          "tilleggsinformasjon": {
+            "type": "NorskKontinentalsokkel"
+          },
+          "manuellVurdering": false,
+          "antall": null,
+          "skattemessigBosattLand": "NO",
+          "opptjeningsland": "NO"
+        }
+      ],
+      "forskuddstrekkListe": [],
+      "avvikListe": [
+        {
+          "kode": "Feil på innsendt a-melding.",
+          "tekst": "Feil på innsendt a-melding."
+        }
+      ]
+    },
+    {
+      "maaned": "2024-12",
+      "opplysningspliktig": "928497704",
+      "underenhet": "805824352",
+      "norskident": "22068315089",
+      "oppsummeringstidspunkt": "2021-11-01T00:00:00Z",
+      "inntektListe": [
+        {
+          "type": "Loennsinntekt",
+          "beloep": 50000.0,
+          "fordel": "kontantytelse",
+          "beskrivelse": "fastloenn",
+          "inngaarIGrunnlagForTrekk": true,
+          "utloeserArbeidsgiveravgift": true,
+          "skatteOgAvgiftsregel": "InngaarAlltid",
+          "opptjeningsperiodeFom": "2021-09-01",
+          "opptjeningsperiodeTom": "2021-09-30",
+          "tilleggsinformasjon": {
+            "type": "NorskKontinentalsokkel"
+          },
+          "manuellVurdering": false,
+          "antall": null,
+          "skattemessigBosattLand": "NO",
+          "opptjeningsland": "NO"
+        }
+      ],
+      "forskuddstrekkListe": [],
+      "avvikListe": [
+        {
+          "kode": "Feil på innsendt a-melding.",
+          "tekst": "Feil på innsendt a-melding."
+        }
+      ]
+    }
+  ]
+}
