@@ -104,7 +104,7 @@ class SamværsavtaleService(
 
     private fun lagFritekstBrevRequest(request: JournalførBeregnetSamværRequest) =
         FritekstBrevRequestDto(
-            overskrift = "Beregnet av samvær",
+            overskrift = "Beregnet samvær",
             personIdent = request.personIdent,
             navn = personopplysningerService.hentGjeldeneNavn(listOf(request.personIdent)).getValue(request.personIdent),
             avsnitt =
