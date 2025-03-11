@@ -6,7 +6,9 @@ import no.nav.familie.ef.sak.barn.BehandlingBarn
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.brev.BrevClient
+import no.nav.familie.ef.sak.brev.BrevsignaturService
 import no.nav.familie.ef.sak.brev.dto.FritekstBrevRequestDto
+import no.nav.familie.ef.sak.brev.dto.FritekstBrevRequestMedSignatur
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.journalføring.JournalpostClient
@@ -18,6 +20,7 @@ import no.nav.familie.ef.sak.samværsavtale.domain.SamværsukeWrapper
 import no.nav.familie.ef.sak.samværsavtale.dto.JournalførBeregnetSamværRequest
 import no.nav.familie.ef.sak.samværsavtale.dto.SamværsavtaleDto
 import no.nav.familie.ef.sak.samværsavtale.dto.tilDomene
+import no.nav.familie.ef.sak.vedtak.domain.VedtakErUtenBeslutter
 import no.nav.familie.ef.sak.vilkår.VurderingService.Companion.byggBarnMapFraTidligereTilNyId
 import no.nav.familie.ef.sak.vilkår.regler.HovedregelMetadata
 import no.nav.familie.kontrakter.felles.dokarkiv.Dokumenttype
@@ -38,6 +41,7 @@ class SamværsavtaleService(
     val journalpostClient: JournalpostClient,
     val brevClient: BrevClient,
     val arbeidsfordelingService: ArbeidsfordelingService,
+    val brevsignaturService: BrevsignaturService,
 ) {
     fun hentSamværsavtalerForBehandling(behandlingId: UUID) = samværsavtaleRepository.findByBehandlingId(behandlingId)
 
@@ -92,7 +96,7 @@ class SamværsavtaleService(
     }
 
     fun journalførBeregnetSamvær(request: JournalførBeregnetSamværRequest): String {
-        val fritekstBrevRequest = lagFritekstBrevRequest(request)
+        val fritekstBrevRequest = lagFritekstBrevRequestMedSignatur(request)
         val dokument = brevClient.genererFritekstBrev(fritekstBrevRequest)
 
         val saksbehandler = SikkerhetContext.hentSaksbehandler()
@@ -102,16 +106,20 @@ class SamværsavtaleService(
         return respons.journalpostId
     }
 
-    private fun lagFritekstBrevRequest(request: JournalførBeregnetSamværRequest) =
-        FritekstBrevRequestDto(
-            overskrift = "Beregnet samvær",
-            personIdent = request.personIdent,
-            navn = personopplysningerService.hentGjeldeneNavn(listOf(request.personIdent)).getValue(request.personIdent),
-            avsnitt =
-                request.uker.mapIndexed { ukeIndex, samværsuke ->
-                    lagAvsnittFritekstbrev(ukeIndex + 1, samværsuke)
-                },
-        )
+    private fun lagFritekstBrevRequestMedSignatur(request: JournalførBeregnetSamværRequest): FritekstBrevRequestMedSignatur {
+        val fritekstBrevRequest =
+            FritekstBrevRequestDto(
+                overskrift = "Beregnet samvær",
+                personIdent = request.personIdent,
+                navn = personopplysningerService.hentGjeldeneNavn(listOf(request.personIdent)).getValue(request.personIdent),
+                avsnitt =
+                    request.uker.mapIndexed { ukeIndex, samværsuke ->
+                        lagAvsnittFritekstbrev(ukeIndex + 1, samværsuke)
+                    },
+            )
+        val signatur = brevsignaturService.lagSaksbehandlerSignatur(request.personIdent, VedtakErUtenBeslutter(true))
+        return FritekstBrevRequestMedSignatur(brevFraSaksbehandler = fritekstBrevRequest, saksbehandlersignatur = signatur.navn, enhet = signatur.enhet)
+    }
 
     private fun lagArkiverDokumentRequest(
         pdf: ByteArray,
