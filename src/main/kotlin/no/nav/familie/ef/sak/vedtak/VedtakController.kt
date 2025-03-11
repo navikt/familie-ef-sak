@@ -19,6 +19,7 @@ import no.nav.familie.ef.sak.vedtak.dto.TotrinnskontrollStatusDto
 import no.nav.familie.ef.sak.vedtak.dto.VedtakDto
 import no.nav.familie.ef.sak.vedtak.historikk.VedtakHistorikkService
 import no.nav.familie.ef.sak.vilkår.VurderingService
+import no.nav.familie.kontrakter.felles.Fødselsnummer
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.security.token.support.core.api.ProtectedWithClaims

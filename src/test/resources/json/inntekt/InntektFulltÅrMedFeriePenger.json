@@ -79,7 +79,7 @@
           "type": "YtelseFraOffentlige",
           "beloep": 10000,
           "fordel": "kontantytelse",
-          "beskrivelse": "fastloenn",
+          "beskrivelse": "dagpengerVedArbeidsloeshet",
           "inngaarIGrunnlagForTrekk": true,
           "utloeserArbeidsgiveravgift": true
         }

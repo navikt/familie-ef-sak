@@ -34,11 +34,7 @@ class InntektService(
         årstallIFjor: Int,
     ): Int {
         val inntektV2Response = aMeldingInntektClient.hentInntekt(personIdent = personIdent, månedFom = YearMonth.of(årstallIFjor, 1), månedTom = YearMonth.of(årstallIFjor, 12))
-
-        val inntektsliste = inntektV2Response.inntektsmåneder.flatMap { månedsdata -> månedsdata.inntektListe }
-        val totalBeløp = inntektsliste.filter { it.type != InntektType.YTELSE_FRA_OFFENTLIGE && it.beskrivelse != "feriepenger" }.sumOf { it.beløp }.toInt()
-
-        return totalBeløp
+        return inntektV2Response.inntektsmåneder.summerTotalInntekt().toInt()
     }
 
     fun genererAInntektUrl(fagsakPersonId: UUID): String {

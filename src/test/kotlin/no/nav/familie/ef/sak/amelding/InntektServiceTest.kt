@@ -82,7 +82,7 @@ class InntektServiceTest {
 
             every { aMeldingInntektClient.hentInntekt(any(), any(), any()) } returns inntektResponse
 
-            val forventetÅrsinntekt = 110000
+            val forventetÅrsinntekt = 130000
 
             val årsinntekt =
                 inntektService.hentÅrsinntekt(
