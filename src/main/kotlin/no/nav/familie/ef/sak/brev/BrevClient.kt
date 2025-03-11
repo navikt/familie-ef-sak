@@ -68,7 +68,7 @@ class BrevClient(
     }
 
     fun genererFritekstBrev(request: FritekstBrevRequestDto): ByteArray {
-        val url = URI.create("$familieBrevUri/fritekst-brev")
+        val url = URI.create("$familieBrevUri/api/fritekst-brev")
         return postForEntity(url, request, HttpHeaders().medContentTypeJsonUTF8())
     }
 
