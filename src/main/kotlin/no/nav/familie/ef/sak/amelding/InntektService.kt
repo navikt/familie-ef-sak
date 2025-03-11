@@ -15,15 +15,15 @@ class InntektService(
 ) {
     fun hentInntekt(
         fagsakId: UUID,
-        fom: YearMonth,
-        tom: YearMonth,
+        månedFom: YearMonth,
+        månedTom: YearMonth,
     ): List<Inntektsmåned> {
         val aktivIdent = fagsakService.hentAktivIdent(fagsakId)
         val inntekt =
             aMeldingInntektClient.hentInntekt(
                 personIdent = aktivIdent,
-                månedFom = fom,
-                månedTom = tom,
+                månedFom = månedFom,
+                månedTom = månedTom,
             )
 
         return inntekt.inntektsmåneder
