@@ -15,7 +15,7 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerS
 import no.nav.familie.ef.sak.samværsavtale.SamværsavtaleHelper.lagAvsnittFritekstbrev
 import no.nav.familie.ef.sak.samværsavtale.domain.Samværsavtale
 import no.nav.familie.ef.sak.samværsavtale.domain.SamværsukeWrapper
-import no.nav.familie.ef.sak.samværsavtale.dto.JournalførSamværsavtaleRequest
+import no.nav.familie.ef.sak.samværsavtale.dto.JournalførBeregnetSamværRequest
 import no.nav.familie.ef.sak.samværsavtale.dto.SamværsavtaleDto
 import no.nav.familie.ef.sak.samværsavtale.dto.tilDomene
 import no.nav.familie.ef.sak.vilkår.VurderingService.Companion.byggBarnMapFraTidligereTilNyId
@@ -91,7 +91,7 @@ class SamværsavtaleService(
         samværsavtaleRepository.insertAll(nyeSamværsavtaler)
     }
 
-    fun journalførSamværsavtale(request: JournalførSamværsavtaleRequest): String {
+    fun journalførBeregnetSamvær(request: JournalførBeregnetSamværRequest): String {
         val fritekstBrevRequest = lagFritekstBrevRequest(request)
         val dokument = brevClient.genererFritekstBrev(fritekstBrevRequest)
 
@@ -102,15 +102,15 @@ class SamværsavtaleService(
         return respons.journalpostId
     }
 
-    private fun lagFritekstBrevRequest(request: JournalførSamværsavtaleRequest) =
+    private fun lagFritekstBrevRequest(request: JournalførBeregnetSamværRequest) =
         FritekstBrevRequestDto(
-            overskrift = "Beregning av samvær",
+            overskrift = "Beregnet av samvær",
             personIdent = request.personIdent,
             navn = personopplysningerService.hentGjeldeneNavn(listOf(request.personIdent)).getValue(request.personIdent),
             avsnitt =
-            request.uker.mapIndexed { ukeIndex, samværsuke ->
-                lagAvsnittFritekstbrev(ukeIndex + 1, samværsuke)
-            },
+                request.uker.mapIndexed { ukeIndex, samværsuke ->
+                    lagAvsnittFritekstbrev(ukeIndex + 1, samværsuke)
+                },
         )
 
     private fun lagArkiverDokumentRequest(
@@ -121,7 +121,7 @@ class SamværsavtaleService(
             Dokument(
                 dokument = pdf,
                 filtype = Filtype.PDFA,
-                tittel = "Beregning av samvær",
+                tittel = "Beregnet samvær",
                 dokumenttype = Dokumenttype.BEREGNET_SAMVÆR_NOTAT,
             )
         val journalførendeEnhet = arbeidsfordelingService.hentNavEnhetIdEllerBrukMaskinellEnhetHvisNull(personIdent)

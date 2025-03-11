@@ -1,15 +1,14 @@
 package no.nav.familie.ef.sak.samværsavtale
 
 import no.nav.familie.ef.sak.repository.samværsuke
+import no.nav.familie.ef.sak.samværsavtale.domain.Samværsandel.BARNEHAGE_SKOLE
+import no.nav.familie.ef.sak.samværsavtale.domain.Samværsandel.ETTERMIDDAG
 import no.nav.familie.ef.sak.samværsavtale.domain.Samværsandel.KVELD_NATT
 import no.nav.familie.ef.sak.samværsavtale.domain.Samværsandel.MORGEN
-import no.nav.familie.ef.sak.samværsavtale.domain.Samværsandel.ETTERMIDDAG
-import no.nav.familie.ef.sak.samværsavtale.domain.Samværsandel.BARNEHAGE_SKOLE
 import org.assertj.core.api.Assertions.assertThat
 import kotlin.test.Test
 
 internal class SamværsavtaleHelperTest {
-
     @Test
     internal fun `skal mappe fra samværsuke til avsnitt for fritekstbrev`() {
         val samværsuke1 = samværsuke(listOf())
@@ -38,7 +37,7 @@ internal class SamværsavtaleHelperTest {
                 |Fredag: -
                 |Lørdag: -
                 |Søndag: -
-        """.trimMargin()
+            """.trimMargin(),
         )
         assertThat(avsnitt2.innhold).isEqualTo(
             """Mandag: kveld/natt
@@ -48,7 +47,7 @@ internal class SamværsavtaleHelperTest {
                 |Fredag: kveld/natt
                 |Lørdag: kveld/natt
                 |Søndag: kveld/natt
-        """.trimMargin()
+            """.trimMargin(),
         )
         assertThat(avsnitt3.innhold).isEqualTo(
             """Mandag: kveld/natt, morgen
@@ -58,7 +57,7 @@ internal class SamværsavtaleHelperTest {
                 |Fredag: kveld/natt, morgen
                 |Lørdag: kveld/natt, morgen
                 |Søndag: kveld/natt, morgen
-        """.trimMargin()
+            """.trimMargin(),
         )
         assertThat(avsnitt4.innhold).isEqualTo(
             """Mandag: kveld/natt, morgen, barnehage/skole
@@ -68,7 +67,7 @@ internal class SamværsavtaleHelperTest {
                 |Fredag: kveld/natt, morgen, barnehage/skole
                 |Lørdag: kveld/natt, morgen, barnehage/skole
                 |Søndag: kveld/natt, morgen, barnehage/skole
-        """.trimMargin()
+            """.trimMargin(),
         )
         assertThat(avsnitt5.innhold).isEqualTo(
             """Mandag: kveld/natt, morgen, barnehage/skole, ettermiddag
@@ -78,7 +77,7 @@ internal class SamværsavtaleHelperTest {
                 |Fredag: kveld/natt, morgen, barnehage/skole, ettermiddag
                 |Lørdag: kveld/natt, morgen, barnehage/skole, ettermiddag
                 |Søndag: kveld/natt, morgen, barnehage/skole, ettermiddag
-        """.trimMargin()
+            """.trimMargin(),
         )
     }
 }

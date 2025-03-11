@@ -2,7 +2,7 @@ package no.nav.familie.ef.sak.samværsavtale
 
 import no.nav.familie.ef.sak.AuditLoggerEvent
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
-import no.nav.familie.ef.sak.samværsavtale.dto.JournalførSamværsavtaleRequest
+import no.nav.familie.ef.sak.samværsavtale.dto.JournalførBeregnetSamværRequest
 import no.nav.familie.ef.sak.samværsavtale.dto.SamværsavtaleDto
 import no.nav.familie.ef.sak.samværsavtale.dto.tilDto
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -43,12 +43,12 @@ class SamværsavtaleController(
     }
 
     @PostMapping("/journalfor")
-    fun journalførSamværsavtale(
-        @RequestBody request: JournalførSamværsavtaleRequest,
+    fun journalførBeregnetSamvær(
+        @RequestBody request: JournalførBeregnetSamværRequest,
     ): Ressurs<String> {
         tilgangService.validerTilgangTilPersonMedBarn(request.personIdent, AuditLoggerEvent.UPDATE)
         tilgangService.validerHarSaksbehandlerrolle()
-        return Ressurs.success(samværsavtaleService.journalførSamværsavtale(request))
+        return Ressurs.success(samværsavtaleService.journalførBeregnetSamvær(request))
     }
 
     @DeleteMapping("{behandlingId}/{behandlingBarnId}")
