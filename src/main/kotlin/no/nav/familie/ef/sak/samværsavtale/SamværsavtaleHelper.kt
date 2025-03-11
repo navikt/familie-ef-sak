@@ -17,8 +17,13 @@ object SamværsavtaleHelper {
     private fun lagAvsnittInnhold(uke: Samværsuke) =
         uke
             .tilSamværsandelerPerDag()
-            .mapIndexed { ukenummer, samværsandeler ->
-                "${indexTilDagMap.getValue(ukenummer)}: ${samværsandeler.tilVisningstekst()}."
+            .mapIndexed { dagIndex, samværsandeler ->
+                val ukedag = indexTilDagMap.getValue(dagIndex)
+                if (samværsandeler.isEmpty()) {
+                    "$ukedag: -"
+                } else {
+                    "$ukedag: ${samværsandeler.tilVisningstekst()}"
+                }
             }.joinToString(separator = "\n")
 
     private val indexTilDagMap =

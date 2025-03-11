@@ -108,9 +108,9 @@ class SamværsavtaleService(
             personIdent = request.personIdent,
             navn = personopplysningerService.hentGjeldeneNavn(listOf(request.personIdent)).getValue(request.personIdent),
             avsnitt =
-                request.uker.mapIndexed { ukenummer, samværsuke ->
-                    lagAvsnittFritekstbrev(ukenummer, samværsuke)
-                },
+            request.uker.mapIndexed { ukeIndex, samværsuke ->
+                lagAvsnittFritekstbrev(ukeIndex + 1, samværsuke)
+            },
         )
 
     private fun lagArkiverDokumentRequest(

@@ -6,12 +6,16 @@ import io.mockk.just
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
+import no.nav.familie.ef.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ef.sak.barn.BarnService
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus.UTREDES
+import no.nav.familie.ef.sak.brev.BrevClient
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
+import no.nav.familie.ef.sak.journalføring.JournalpostClient
 import no.nav.familie.ef.sak.oppgave.TilordnetRessursService
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerService
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.behandlingBarn
 import no.nav.familie.ef.sak.repository.hovedregelMetadata
@@ -38,6 +42,10 @@ internal class SamværsavtaleServiceTest {
     private val behandlingService: BehandlingService = mockk()
     private val tilordnetRessursService: TilordnetRessursService = mockk()
     private val barnService: BarnService = mockk()
+    private val personopplysningerService: PersonopplysningerService = mockk()
+    private val journalpostClient: JournalpostClient = mockk()
+    private val brevClient: BrevClient = mockk()
+    private val arbeidsfordelingService: ArbeidsfordelingService = mockk()
 
     private val samværsavtaleService: SamværsavtaleService =
         SamværsavtaleService(
@@ -45,6 +53,10 @@ internal class SamværsavtaleServiceTest {
             behandlingService = behandlingService,
             tilordnetRessursService = tilordnetRessursService,
             barnService = barnService,
+            personopplysningerService = personopplysningerService,
+            journalpostClient = journalpostClient,
+            brevClient = brevClient,
+            arbeidsfordelingService = arbeidsfordelingService,
         )
 
     @Nested
