@@ -26,7 +26,7 @@ class InntektService(
                 månedTom = tom,
             )
 
-        return inntekt.månedsData
+        return inntekt.inntektsMåneder
     }
 
     fun hentÅrsinntekt(
@@ -35,7 +35,7 @@ class InntektService(
     ): Int {
         val inntektV2Response = aMeldingInntektClient.hentInntekt(personIdent = personIdent, månedFom = YearMonth.of(årstallIFjor, 1), månedTom = YearMonth.of(årstallIFjor, 12))
 
-        val inntektsliste = inntektV2Response.månedsData.flatMap { månedsdata -> månedsdata.inntektListe }
+        val inntektsliste = inntektV2Response.inntektsMåneder.flatMap { månedsdata -> månedsdata.inntektListe }
         val totalBeløp = inntektsliste.filter { it.type != InntektType.YTELSE_FRA_OFFENTLIGE && it.beskrivelse != "feriepenger" }.sumOf { it.beløp }.toInt()
 
         return totalBeløp
