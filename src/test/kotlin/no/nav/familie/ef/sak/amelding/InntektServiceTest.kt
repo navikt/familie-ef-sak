@@ -77,7 +77,7 @@ class InntektServiceTest {
         @Test
         internal fun `skal hente årsinntekt og summere riktig`() {
             val inntektV2ResponseJson: String =
-                lesRessurs("json/inntekt/InntektFulltÅrMedFeriePenger.json")
+                lesRessurs("json/inntekt/InntektFulltÅrMedFeriepenger.json")
             val inntektResponse = objectMapper.readValue<InntektResponse>(inntektV2ResponseJson)
 
             every { aMeldingInntektClient.hentInntekt(any(), any(), any()) } returns inntektResponse
