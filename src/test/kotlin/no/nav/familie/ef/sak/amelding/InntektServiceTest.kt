@@ -40,8 +40,8 @@ class InntektServiceTest {
             val forventetMåned = YearMonth.of(2020, 3)
             val forventetInntektType: InntektType = InntektType.LØNNSINNTEKT
 
-            assertEquals(forventetMåned, inntektResponse.inntektsMåneder[0].måned)
-            assertEquals(forventetInntektType, inntektResponse.inntektsMåneder[0].inntektListe[0].type)
+            assertEquals(forventetMåned, inntektResponse.inntektsmåneder[0].måned)
+            assertEquals(forventetInntektType, inntektResponse.inntektsmåneder[0].inntektListe[0].type)
         }
 
         @Test
@@ -58,7 +58,7 @@ class InntektServiceTest {
                 )
 
             val faktiskeInntektTyper =
-                inntektResponse.inntektsMåneder
+                inntektResponse.inntektsmåneder
                     .flatMap { it.inntektListe }
                     .map { it.type }
                     .distinct()

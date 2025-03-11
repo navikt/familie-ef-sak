@@ -28,7 +28,7 @@ class InntektController(
     fun hentInntekt(
         @PathVariable("fagsakid") fagsakId: UUID,
         @RequestBody inntektRequestBody: InntektRequestBody,
-    ): Ressurs<List<InntektMåned>> {
+    ): Ressurs<List<Inntektsmåned>> {
         tilgangService.validerTilgangTilFagsak(
             fagsakId = fagsakId,
             event = AuditLoggerEvent.ACCESS,
