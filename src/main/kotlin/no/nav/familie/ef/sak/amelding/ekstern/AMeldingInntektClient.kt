@@ -1,5 +1,7 @@
 package no.nav.familie.ef.sak.amelding.ekstern
 
+import no.nav.familie.ef.sak.amelding.HentInntektPayload
+import no.nav.familie.ef.sak.amelding.InntektResponse
 import no.nav.familie.http.client.AbstractRestClient
 import no.nav.familie.kontrakter.felles.PersonIdent
 import org.springframework.beans.factory.annotation.Qualifier
@@ -28,12 +30,20 @@ class AMeldingInntektClient(
         .build()
         .toUri()
 
+    private val genererInntektV2Uri =
+        UriComponentsBuilder
+            .fromUri(uri)
+            .pathSegment("api/inntekt/v2")
+            .build()
+            .toUri()
+
     private val genererUrlUri =
         UriComponentsBuilder
             .fromUri(uri)
             .pathSegment("api/ainntekt/generer-url")
             .build()
             .toUri()
+
     private val genererUrlUriArbeidsforhold =
         UriComponentsBuilder
             .fromUri(uri)
@@ -43,9 +53,18 @@ class AMeldingInntektClient(
 
     fun hentInntekt(
         personIdent: String,
-        fom: YearMonth,
-        tom: YearMonth,
-    ): HentInntektListeResponse = postForEntity(lagInntektUri(fom, tom), PersonIdent(personIdent))
+        månedFom: YearMonth,
+        månedTom: YearMonth,
+    ): InntektResponse =
+        postForEntity(
+            uri = genererInntektV2Uri,
+            payload =
+                HentInntektPayload(
+                    personIdent = personIdent,
+                    månedFom = månedFom,
+                    månedTom = månedTom,
+                ),
+        )
 
     fun genererAInntektUrl(personIdent: String): String =
         postForEntity(
