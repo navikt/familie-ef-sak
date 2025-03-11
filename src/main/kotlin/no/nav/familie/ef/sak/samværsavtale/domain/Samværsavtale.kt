@@ -33,9 +33,10 @@ data class Samværsdag(
 
 enum class Samværsandel(
     val verdi: Int,
+    val visningsnavn: String,
 ) {
-    KVELD_NATT(4),
-    MORGEN(1),
-    BARNEHAGE_SKOLE(2),
-    ETTERMIDDAG(1),
+    KVELD_NATT(4, "kveld/natt"),
+    MORGEN(1, "morgen"),
+    BARNEHAGE_SKOLE(2, "barnehage/skole"),
+    ETTERMIDDAG(1, "ettermiddag"),
 }
