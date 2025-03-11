@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.samværsavtale.dto
 
+import no.nav.familie.ef.sak.samværsavtale.domain.Samværsandel
 import no.nav.familie.ef.sak.samværsavtale.domain.Samværsavtale
 import no.nav.familie.ef.sak.samværsavtale.domain.Samværsuke
 import no.nav.familie.ef.sak.samværsavtale.domain.SamværsukeWrapper
@@ -10,18 +11,7 @@ data class SamværsavtaleDto(
     val behandlingBarnId: UUID,
     val uker: List<Samværsuke>,
 ) {
-    fun mapTilSamværsandelerPerDag() =
-        this.uker.flatMap {
-            listOf(
-                it.mandag.andeler,
-                it.tirsdag.andeler,
-                it.onsdag.andeler,
-                it.torsdag.andeler,
-                it.fredag.andeler,
-                it.lørdag.andeler,
-                it.søndag.andeler,
-            )
-        }
+    fun mapTilSamværsandelerPerDag() = this.uker.flatMap { uke -> uke.tilSamværsandelerPerDag() }
 
     fun summerTilSamværsandelerVerdiPerDag() = mapTilSamværsandelerPerDag().map { dag -> dag.sumOf { it.verdi } }
 }
@@ -41,3 +31,16 @@ fun SamværsavtaleDto.tilDomene() =
     )
 
 fun List<Samværsavtale>.tilDto() = this.map { it.tilDto() }
+
+fun Samværsuke.tilSamværsandelerPerDag() =
+    listOf(
+        this.mandag.andeler,
+        this.tirsdag.andeler,
+        this.onsdag.andeler,
+        this.torsdag.andeler,
+        this.fredag.andeler,
+        this.lørdag.andeler,
+        this.søndag.andeler,
+    )
+
+fun List<Samværsandel>.tilVisningstekst() = this.joinToString { it.visningsnavn }

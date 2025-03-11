@@ -6,12 +6,17 @@ import io.mockk.just
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
+import no.nav.familie.ef.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ef.sak.barn.BarnService
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus.UTREDES
+import no.nav.familie.ef.sak.brev.BrevClient
+import no.nav.familie.ef.sak.felles.util.BrukerContextUtil
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
+import no.nav.familie.ef.sak.journalføring.JournalpostClient
 import no.nav.familie.ef.sak.oppgave.TilordnetRessursService
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerService
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.behandlingBarn
 import no.nav.familie.ef.sak.repository.hovedregelMetadata
@@ -22,8 +27,13 @@ import no.nav.familie.ef.sak.samværsavtale.domain.Samværsandel.ETTERMIDDAG
 import no.nav.familie.ef.sak.samværsavtale.domain.Samværsandel.KVELD_NATT
 import no.nav.familie.ef.sak.samværsavtale.domain.Samværsandel.MORGEN
 import no.nav.familie.ef.sak.samværsavtale.domain.Samværsavtale
+import no.nav.familie.ef.sak.samværsavtale.dto.JournalførBeregnetSamværRequest
 import no.nav.familie.ef.sak.samværsavtale.dto.tilDto
 import no.nav.familie.ef.sak.vilkår.regler.HovedregelMetadata
+import no.nav.familie.kontrakter.felles.dokarkiv.ArkiverDokumentResponse
+import no.nav.familie.kontrakter.felles.dokarkiv.Dokumenttype
+import no.nav.familie.kontrakter.felles.dokarkiv.v2.ArkiverDokumentRequest
+import no.nav.familie.kontrakter.felles.dokarkiv.v2.Filtype
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -38,6 +48,10 @@ internal class SamværsavtaleServiceTest {
     private val behandlingService: BehandlingService = mockk()
     private val tilordnetRessursService: TilordnetRessursService = mockk()
     private val barnService: BarnService = mockk()
+    private val personopplysningerService: PersonopplysningerService = mockk()
+    private val journalpostClient: JournalpostClient = mockk()
+    private val brevClient: BrevClient = mockk()
+    private val arbeidsfordelingService: ArbeidsfordelingService = mockk()
 
     private val samværsavtaleService: SamværsavtaleService =
         SamværsavtaleService(
@@ -45,6 +59,10 @@ internal class SamværsavtaleServiceTest {
             behandlingService = behandlingService,
             tilordnetRessursService = tilordnetRessursService,
             barnService = barnService,
+            personopplysningerService = personopplysningerService,
+            journalpostClient = journalpostClient,
+            brevClient = brevClient,
+            arbeidsfordelingService = arbeidsfordelingService,
         )
 
     @Nested
@@ -438,6 +456,38 @@ internal class SamværsavtaleServiceTest {
                     .summerTilSamværsandelerVerdiPerDag()
                     .sum(),
             ).isEqualTo(14)
+        }
+    }
+
+    @Nested
+    inner class Journalføring {
+        @Test
+        internal fun `skal journalføre beregnet samvær`() {
+            val arkivRequestSlot = slot<ArkiverDokumentRequest>()
+            val journalførRequest = JournalførBeregnetSamværRequest("123", listOf(samværsuke(listOf(KVELD_NATT, MORGEN, BARNEHAGE_SKOLE))))
+
+            BrukerContextUtil.mockBrukerContext()
+            every { brevClient.genererFritekstBrev(any()) } returns "1".toByteArray()
+            every { arbeidsfordelingService.hentNavEnhetIdEllerBrukMaskinellEnhetHvisNull("123") } returns "9999"
+            every { personopplysningerService.hentGjeldeneNavn(any()) } returns mapOf("123" to "")
+            every { journalpostClient.arkiverDokument(capture(arkivRequestSlot), any()) } returns ArkiverDokumentResponse("", true)
+
+            samværsavtaleService.journalførBeregnetSamvær(journalførRequest)
+
+            val arkivRequest = arkivRequestSlot.captured
+
+            assertThat(arkivRequest.fnr).isEqualTo("123")
+            assertThat(arkivRequest.hoveddokumentvarianter.size).isEqualTo(1)
+            assertThat(
+                arkivRequest.hoveddokumentvarianter
+                    .first()
+                    .dokument
+                    .toString(Charsets.UTF_8),
+            ).isEqualTo("1")
+            assertThat(arkivRequest.hoveddokumentvarianter.first().filtype).isEqualTo(Filtype.PDFA)
+            assertThat(arkivRequest.hoveddokumentvarianter.first().tittel).isEqualTo("Beregnet samvær")
+            assertThat(arkivRequest.hoveddokumentvarianter.first().dokumenttype).isEqualTo(Dokumenttype.BEREGNET_SAMVÆR_NOTAT)
+            assertThat(arkivRequest.journalførendeEnhet).isEqualTo("9999")
         }
     }
 }
