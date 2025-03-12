@@ -188,6 +188,9 @@ class SamværsavtaleService(
         brukerfeilHvis(request.notat.isEmpty()) {
             "Kan ikke journalføre samværsavtale uten notat"
         }
+        brukerfeilHvis(request.oppsumering.isEmpty()) {
+            "Kan ikke journalføre samværsavtale uten oppsumering"
+        }
 
     }
 }
