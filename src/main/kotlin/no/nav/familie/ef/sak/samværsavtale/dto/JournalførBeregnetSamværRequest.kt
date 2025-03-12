@@ -6,4 +6,5 @@ data class JournalførBeregnetSamværRequest(
     val personIdent: String,
     val uker: List<Samværsuke>,
     val notat: String,
+    val oppsumering: String,
 )

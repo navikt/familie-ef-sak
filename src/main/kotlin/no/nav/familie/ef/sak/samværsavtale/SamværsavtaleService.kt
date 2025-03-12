@@ -117,7 +117,7 @@ class SamværsavtaleService(
                 avsnitt =
                     request.uker.mapIndexed { ukeIndex, samværsuke ->
                         lagAvsnittFritekstbrev(ukeIndex + 1, samværsuke)
-                    } + Avsnitt(
+                    } + Avsnitt(deloverskrift = "Konklusjon", innhold = request.oppsumering) + Avsnitt(
                         deloverskrift = "Notat",
                         innhold = request.notat,
                     ),
