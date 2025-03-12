@@ -494,5 +494,39 @@ internal class SamværsavtaleServiceTest {
             assertThat(arkivRequest.hoveddokumentvarianter.first().dokumenttype).isEqualTo(Dokumenttype.BEREGNET_SAMVÆR_NOTAT)
             assertThat(arkivRequest.journalførendeEnhet).isEqualTo("4489")
         }
+
+        @Test
+        internal fun `Skal kaste feil hvis notat string er tom`() {
+            val arkivRequestSlot = slot<ArkiverDokumentRequest>()
+            val journalførRequestTomNotat = JournalførBeregnetSamværRequest("123", listOf(samværsuke(listOf(KVELD_NATT, MORGEN, BARNEHAGE_SKOLE))), "", "oppsumering")
+
+            BrukerContextUtil.mockBrukerContext()
+            every { brevClient.genererFritekstBrev(any()) } returns "1".toByteArray()
+            every { arbeidsfordelingService.hentNavEnhetIdEllerBrukMaskinellEnhetHvisNull("123") } returns "4489"
+            every { personopplysningerService.hentGjeldeneNavn(any()) } returns mapOf("123" to "")
+            every { brevsignaturService.lagSaksbehandlerSignatur(any(), any()) } returns SignaturDto(navn = "saksbehandler", enhet = "4489", skjulBeslutter = false)
+            every { journalpostClient.arkiverDokument(capture(arkivRequestSlot), any()) } returns ArkiverDokumentResponse("", true)
+
+            val feil = assertThrows<ApiFeil> { samværsavtaleService.journalførBeregnetSamvær(journalførRequestTomNotat) }
+
+            assertThat(feil.message).isEqualTo("Kan ikke journalføre samværsavtale uten notat")
+        }
+
+        @Test
+        internal fun `Skal kaste feil hvis oppsumering string er tom`() {
+            val arkivRequestSlot = slot<ArkiverDokumentRequest>()
+            val journalførRequestTomOppsumering = JournalførBeregnetSamværRequest("123", listOf(samværsuke(listOf(KVELD_NATT, MORGEN, BARNEHAGE_SKOLE))), "Notat", "")
+
+            BrukerContextUtil.mockBrukerContext()
+            every { brevClient.genererFritekstBrev(any()) } returns "1".toByteArray()
+            every { arbeidsfordelingService.hentNavEnhetIdEllerBrukMaskinellEnhetHvisNull("123") } returns "4489"
+            every { personopplysningerService.hentGjeldeneNavn(any()) } returns mapOf("123" to "")
+            every { brevsignaturService.lagSaksbehandlerSignatur(any(), any()) } returns SignaturDto(navn = "saksbehandler", enhet = "4489", skjulBeslutter = false)
+            every { journalpostClient.arkiverDokument(capture(arkivRequestSlot), any()) } returns ArkiverDokumentResponse("", true)
+
+            val feil = assertThrows<ApiFeil> { samværsavtaleService.journalførBeregnetSamvær(journalførRequestTomOppsumering) }
+
+            assertThat(feil.message).isEqualTo("Kan ikke journalføre samværsavtale uten oppsumering")
+        }
     }
 }
