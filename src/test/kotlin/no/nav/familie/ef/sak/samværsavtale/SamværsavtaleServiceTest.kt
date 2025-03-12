@@ -468,7 +468,7 @@ internal class SamværsavtaleServiceTest {
         @Test
         internal fun `skal journalføre beregnet samvær`() {
             val arkivRequestSlot = slot<ArkiverDokumentRequest>()
-            val journalførRequest = JournalførBeregnetSamværRequest("123", listOf(samværsuke(listOf(KVELD_NATT, MORGEN, BARNEHAGE_SKOLE))))
+            val journalførRequest = JournalførBeregnetSamværRequest("123", listOf(samværsuke(listOf(KVELD_NATT, MORGEN, BARNEHAGE_SKOLE))), "Oppsumering", "Notat")
 
             BrukerContextUtil.mockBrukerContext()
             every { brevClient.genererFritekstBrev(any()) } returns "1".toByteArray()
