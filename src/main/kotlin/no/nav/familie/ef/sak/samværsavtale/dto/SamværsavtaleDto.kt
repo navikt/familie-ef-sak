@@ -1,6 +1,5 @@
 package no.nav.familie.ef.sak.samværsavtale.dto
 
-import no.nav.familie.ef.sak.samværsavtale.domain.Samværsandel
 import no.nav.familie.ef.sak.samværsavtale.domain.Samværsavtale
 import no.nav.familie.ef.sak.samværsavtale.domain.Samværsuke
 import no.nav.familie.ef.sak.samværsavtale.domain.SamværsukeWrapper
@@ -42,5 +41,3 @@ fun Samværsuke.tilSamværsandelerPerDag() =
         this.lørdag.andeler,
         this.søndag.andeler,
     )
-
-fun List<Samværsandel>.tilVisningstekst() = this.joinToString { it.visningsnavn }
