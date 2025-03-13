@@ -117,7 +117,7 @@ class SamværsavtaleService(
                 avsnitt =
                     request.uker.mapIndexed { ukeIndex, samværsuke ->
                         lagAvsnittFritekstbrev(ukeIndex + 1, samværsuke)
-                    } + Avsnitt(deloverskrift = "Konklusjon", innhold = request.oppsumering) +
+                    } + Avsnitt(deloverskrift = "Konklusjon", innhold = request.oppsummering) +
                         Avsnitt(
                             deloverskrift = "Notat",
                             innhold = request.notat,
@@ -189,7 +189,7 @@ class SamværsavtaleService(
         brukerfeilHvis(request.notat.isEmpty()) {
             "Kan ikke journalføre samværsavtale uten notat"
         }
-        brukerfeilHvis(request.oppsumering.isEmpty()) {
+        brukerfeilHvis(request.oppsummering.isEmpty()) {
             "Kan ikke journalføre samværsavtale uten oppsumering"
         }
     }
