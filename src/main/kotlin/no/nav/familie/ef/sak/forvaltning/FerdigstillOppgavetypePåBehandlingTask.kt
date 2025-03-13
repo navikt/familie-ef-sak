@@ -42,7 +42,7 @@ class FerdigstillOppgavetypePåBehandlingTask(
                 // Setter oppgave til ferdigstilt i EF
                 oppgaveRepository.update(it.copy(erFerdigstilt = true))
                 // Ferdigstiller oppgave i Gosys
-                oppgaveService.ferdigstillOppgave(it.id.mostSignificantBits)
+                oppgaveService.ferdigstillOppgave(it.gsakOppgaveId)
             }
         }
     }
