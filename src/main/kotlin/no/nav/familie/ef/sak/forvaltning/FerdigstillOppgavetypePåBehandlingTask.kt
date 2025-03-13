@@ -19,8 +19,8 @@ import java.util.Properties
     beskrivelse = "Skal ferdigstille oppgave i EF-sak og Gosys hvis det er flere oppgaver av samme type på behandling",
 )
 class FerdigstillOppgavetypePåBehandlingTask(
-    private val oppgaveRepository: OppgaveRepository,
     private val oppgaveService: OppgaveService,
+    private val oppgaveRepository: OppgaveRepository,
 ) : AsyncTaskStep {
     private val logger = LoggerFactory.getLogger(javaClass)
 
@@ -30,7 +30,7 @@ class FerdigstillOppgavetypePåBehandlingTask(
 
         logger.info("Ferdigstiller oppgavetype $oppgavetype for behandling $behandlingId")
 
-        if (oppgavetype != Oppgavetype.BehandleSak && oppgavetype != Oppgavetype.GodkjenneVedtak) {
+        if (oppgavetype != Oppgavetype.BehandleSak || oppgavetype != Oppgavetype.GodkjenneVedtak) {
             throw IllegalArgumentException("Kan kun ferdigstille oppgavetype BehandleSak eller GodkjenneVedtak")
         }
 
@@ -40,8 +40,7 @@ class FerdigstillOppgavetypePåBehandlingTask(
             val sisteOppgave = efOppgaver.last()
             sisteOppgave.let {
                 // Setter oppgave til ferdigstilt i EF
-                oppgaveService.settEfOppgaveTilFerdig(it.behandlingId, it.type)
-
+                oppgaveRepository.update(it.copy(erFerdigstilt = true))
                 // Ferdigstiller oppgave i Gosys
                 oppgaveService.ferdigstillOppgave(it.id.mostSignificantBits)
             }
