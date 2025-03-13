@@ -1,8 +1,6 @@
 package no.nav.familie.ef.sak.samværsavtale
 
 import no.nav.familie.ef.sak.brev.dto.Avsnitt
-import no.nav.familie.ef.sak.samværsavtale.domain.Samværsandel
-import no.nav.familie.ef.sak.samværsavtale.domain.Samværsdag
 import no.nav.familie.ef.sak.samværsavtale.domain.Samværsuke
 import no.nav.familie.ef.sak.samværsavtale.dto.sumSamværDag
 import no.nav.familie.ef.sak.samværsavtale.dto.tilSamværsandelerPerDag
