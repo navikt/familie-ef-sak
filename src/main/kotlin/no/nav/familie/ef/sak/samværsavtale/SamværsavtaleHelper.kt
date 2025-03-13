@@ -1,10 +1,9 @@
 package no.nav.familie.ef.sak.samværsavtale
 
 import no.nav.familie.ef.sak.brev.dto.Avsnitt
+import no.nav.familie.ef.sak.samværsavtale.domain.Samværsandel
 import no.nav.familie.ef.sak.samværsavtale.domain.Samværsuke
-import no.nav.familie.ef.sak.samværsavtale.dto.sumSamværDag
 import no.nav.familie.ef.sak.samværsavtale.dto.tilSamværsandelerPerDag
-import no.nav.familie.ef.sak.samværsavtale.dto.tilVisningstekst
 
 object SamværsavtaleHelper {
     fun lagAvsnittFritekstbrev(
@@ -23,7 +22,7 @@ object SamværsavtaleHelper {
                 if (samværsandeler.isEmpty()) {
                     "$ukedag: -"
                 } else {
-                    "$ukedag(${samværsandeler.sumSamværDag()}) - ${samværsandeler.tilVisningstekst()}"
+                    "$ukedag(${utledSumSamcærsandelTekst(samværsandeler)}) - ${tilVisningstekst(samværsandeler)}"
                 }
             }.joinToString(separator = "\n")
 
@@ -37,4 +36,20 @@ object SamværsavtaleHelper {
             5 to "Lørdag",
             6 to "Søndag",
         )
+
+    private fun tilVisningstekst(samværsandeler: List<Samværsandel>): String =
+        when {
+            samværsandeler.isEmpty() -> ""
+            samværsandeler.size == 1 -> samværsandeler.first().visningsnavn
+            else -> samværsandeler.dropLast(1).joinToString { it.visningsnavn } + " og " + samværsandeler.last().visningsnavn
+        }
+
+    private fun utledSumSamcærsandelTekst(samværsandeler: List<Samværsandel>): String {
+        val sum = samværsandeler.sumOf { it.verdi }
+
+        return when {
+            sum % 8 == 0 -> (sum / 8).toString()
+            else -> "$sum/8"
+        }
+    }
 }

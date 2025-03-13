@@ -1,6 +1,5 @@
 package no.nav.familie.ef.sak.samværsavtale.dto
 
-import no.nav.familie.ef.sak.samværsavtale.domain.Samværsandel
 import no.nav.familie.ef.sak.samværsavtale.domain.Samværsavtale
 import no.nav.familie.ef.sak.samværsavtale.domain.Samværsuke
 import no.nav.familie.ef.sak.samværsavtale.domain.SamværsukeWrapper
@@ -42,14 +41,3 @@ fun Samværsuke.tilSamværsandelerPerDag() =
         this.lørdag.andeler,
         this.søndag.andeler,
     )
-
-fun List<Samværsandel>.tilVisningstekst() = this.joinToString { it.visningsnavn }
-
-fun List<Samværsandel>.sumSamværDag(): String {
-    val sum = this.sumOf { it.verdi }
-
-    return when {
-        sum % 8 == 0 -> (sum / 8).toString()
-        else -> "$sum/8"
-    }
-}

@@ -50,33 +50,33 @@ internal class SamværsavtaleHelperTest {
             """.trimMargin(),
         )
         assertThat(avsnitt3.innhold).isEqualTo(
-            """Mandag(5/8) - kveld/natt, morgen
-                |Tirsdag(5/8) - kveld/natt, morgen
-                |Onsdag(5/8) - kveld/natt, morgen
-                |Torsdag(5/8) - kveld/natt, morgen
-                |Fredag(5/8) - kveld/natt, morgen
-                |Lørdag(5/8) - kveld/natt, morgen
-                |Søndag(5/8) - kveld/natt, morgen
+            """Mandag(5/8) - kveld/natt og morgen
+                |Tirsdag(5/8) - kveld/natt og morgen
+                |Onsdag(5/8) - kveld/natt og morgen
+                |Torsdag(5/8) - kveld/natt og morgen
+                |Fredag(5/8) - kveld/natt og morgen
+                |Lørdag(5/8) - kveld/natt og morgen
+                |Søndag(5/8) - kveld/natt og morgen
             """.trimMargin(),
         )
         assertThat(avsnitt4.innhold).isEqualTo(
-            """Mandag(7/8) - kveld/natt, morgen, barnehage/skole
-                |Tirsdag(7/8) - kveld/natt, morgen, barnehage/skole
-                |Onsdag(7/8) - kveld/natt, morgen, barnehage/skole
-                |Torsdag(7/8) - kveld/natt, morgen, barnehage/skole
-                |Fredag(7/8) - kveld/natt, morgen, barnehage/skole
-                |Lørdag(7/8) - kveld/natt, morgen, barnehage/skole
-                |Søndag(7/8) - kveld/natt, morgen, barnehage/skole
+            """Mandag(7/8) - kveld/natt, morgen og barnehage/skole
+                |Tirsdag(7/8) - kveld/natt, morgen og barnehage/skole
+                |Onsdag(7/8) - kveld/natt, morgen og barnehage/skole
+                |Torsdag(7/8) - kveld/natt, morgen og barnehage/skole
+                |Fredag(7/8) - kveld/natt, morgen og barnehage/skole
+                |Lørdag(7/8) - kveld/natt, morgen og barnehage/skole
+                |Søndag(7/8) - kveld/natt, morgen og barnehage/skole
             """.trimMargin(),
         )
         assertThat(avsnitt5.innhold).isEqualTo(
-            """Mandag(1) - kveld/natt, morgen, barnehage/skole, ettermiddag
-                |Tirsdag(1) - kveld/natt, morgen, barnehage/skole, ettermiddag
-                |Onsdag(1) - kveld/natt, morgen, barnehage/skole, ettermiddag
-                |Torsdag(1) - kveld/natt, morgen, barnehage/skole, ettermiddag
-                |Fredag(1) - kveld/natt, morgen, barnehage/skole, ettermiddag
-                |Lørdag(1) - kveld/natt, morgen, barnehage/skole, ettermiddag
-                |Søndag(1) - kveld/natt, morgen, barnehage/skole, ettermiddag
+            """Mandag(1) - kveld/natt, morgen, barnehage/skole og ettermiddag
+                |Tirsdag(1) - kveld/natt, morgen, barnehage/skole og ettermiddag
+                |Onsdag(1) - kveld/natt, morgen, barnehage/skole og ettermiddag
+                |Torsdag(1) - kveld/natt, morgen, barnehage/skole og ettermiddag
+                |Fredag(1) - kveld/natt, morgen, barnehage/skole og ettermiddag
+                |Lørdag(1) - kveld/natt, morgen, barnehage/skole og ettermiddag
+                |Søndag(1) - kveld/natt, morgen, barnehage/skole og ettermiddag
             """.trimMargin(),
         )
     }
