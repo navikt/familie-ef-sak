@@ -40,43 +40,43 @@ internal class SamværsavtaleHelperTest {
             """.trimMargin(),
         )
         assertThat(avsnitt2.innhold).isEqualTo(
-            """Mandag: kveld/natt
-                |Tirsdag: kveld/natt
-                |Onsdag: kveld/natt
-                |Torsdag: kveld/natt
-                |Fredag: kveld/natt
-                |Lørdag: kveld/natt
-                |Søndag: kveld/natt
+            """Mandag(4/8) - kveld/natt
+                |Tirsdag(4/8) - kveld/natt
+                |Onsdag(4/8) - kveld/natt
+                |Torsdag(4/8) - kveld/natt
+                |Fredag(4/8) - kveld/natt
+                |Lørdag(4/8) - kveld/natt
+                |Søndag(4/8) - kveld/natt
             """.trimMargin(),
         )
         assertThat(avsnitt3.innhold).isEqualTo(
-            """Mandag: kveld/natt, morgen
-                |Tirsdag: kveld/natt, morgen
-                |Onsdag: kveld/natt, morgen
-                |Torsdag: kveld/natt, morgen
-                |Fredag: kveld/natt, morgen
-                |Lørdag: kveld/natt, morgen
-                |Søndag: kveld/natt, morgen
+            """Mandag(5/8) - kveld/natt, morgen
+                |Tirsdag(5/8) - kveld/natt, morgen
+                |Onsdag(5/8) - kveld/natt, morgen
+                |Torsdag(5/8) - kveld/natt, morgen
+                |Fredag(5/8) - kveld/natt, morgen
+                |Lørdag(5/8) - kveld/natt, morgen
+                |Søndag(5/8) - kveld/natt, morgen
             """.trimMargin(),
         )
         assertThat(avsnitt4.innhold).isEqualTo(
-            """Mandag: kveld/natt, morgen, barnehage/skole
-                |Tirsdag: kveld/natt, morgen, barnehage/skole
-                |Onsdag: kveld/natt, morgen, barnehage/skole
-                |Torsdag: kveld/natt, morgen, barnehage/skole
-                |Fredag: kveld/natt, morgen, barnehage/skole
-                |Lørdag: kveld/natt, morgen, barnehage/skole
-                |Søndag: kveld/natt, morgen, barnehage/skole
+            """Mandag(7/8) - kveld/natt, morgen, barnehage/skole
+                |Tirsdag(7/8) - kveld/natt, morgen, barnehage/skole
+                |Onsdag(7/8) - kveld/natt, morgen, barnehage/skole
+                |Torsdag(7/8) - kveld/natt, morgen, barnehage/skole
+                |Fredag(7/8) - kveld/natt, morgen, barnehage/skole
+                |Lørdag(7/8) - kveld/natt, morgen, barnehage/skole
+                |Søndag(7/8) - kveld/natt, morgen, barnehage/skole
             """.trimMargin(),
         )
         assertThat(avsnitt5.innhold).isEqualTo(
-            """Mandag: kveld/natt, morgen, barnehage/skole, ettermiddag
-                |Tirsdag: kveld/natt, morgen, barnehage/skole, ettermiddag
-                |Onsdag: kveld/natt, morgen, barnehage/skole, ettermiddag
-                |Torsdag: kveld/natt, morgen, barnehage/skole, ettermiddag
-                |Fredag: kveld/natt, morgen, barnehage/skole, ettermiddag
-                |Lørdag: kveld/natt, morgen, barnehage/skole, ettermiddag
-                |Søndag: kveld/natt, morgen, barnehage/skole, ettermiddag
+            """Mandag(1) - kveld/natt, morgen, barnehage/skole, ettermiddag
+                |Tirsdag(1) - kveld/natt, morgen, barnehage/skole, ettermiddag
+                |Onsdag(1) - kveld/natt, morgen, barnehage/skole, ettermiddag
+                |Torsdag(1) - kveld/natt, morgen, barnehage/skole, ettermiddag
+                |Fredag(1) - kveld/natt, morgen, barnehage/skole, ettermiddag
+                |Lørdag(1) - kveld/natt, morgen, barnehage/skole, ettermiddag
+                |Søndag(1) - kveld/natt, morgen, barnehage/skole, ettermiddag
             """.trimMargin(),
         )
     }

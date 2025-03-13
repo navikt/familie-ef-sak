@@ -23,7 +23,7 @@ object SamværsavtaleHelper {
                 if (samværsandeler.isEmpty()) {
                     "$ukedag: -"
                 } else {
-                    "$ukedag (${samværsandeler.sumSamværDag()}) - ${samværsandeler.tilVisningstekst()}"
+                    "$ukedag(${samværsandeler.sumSamværDag()}) - ${samværsandeler.tilVisningstekst()}"
                 }
             }.joinToString(separator = "\n")
 

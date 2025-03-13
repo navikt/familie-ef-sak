@@ -45,4 +45,11 @@ fun Samværsuke.tilSamværsandelerPerDag() =
 
 fun List<Samværsandel>.tilVisningstekst() = this.joinToString { it.visningsnavn }
 
-fun List<Samværsandel>.sumSamværDag() = this.sumOf { it.verdi }
+fun List<Samværsandel>.sumSamværDag(): String {
+    val sum = this.sumOf { it.verdi }
+
+    return when {
+        sum % 8 == 0 -> (sum / 8).toString()
+        else -> "$sum/8"
+    }
+}
