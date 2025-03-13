@@ -30,7 +30,7 @@ class FerdigstillOppgavetypePåBehandlingTask(
 
         logger.info("Ferdigstiller oppgavetype $oppgavetype for behandling $behandlingId")
 
-        if (oppgavetype != Oppgavetype.BehandleSak || oppgavetype != Oppgavetype.GodkjenneVedtak) {
+        if (oppgavetype != Oppgavetype.BehandleSak && oppgavetype != Oppgavetype.GodkjenneVedtak) {
             throw IllegalArgumentException("Kan kun ferdigstille oppgavetype BehandleSak eller GodkjenneVedtak")
         }
 
