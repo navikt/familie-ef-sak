@@ -124,7 +124,7 @@ class SamværsavtaleService(
                         ),
             )
         val signatur = brevsignaturService.lagSaksbehandlerSignatur(request.personIdent, VedtakErUtenBeslutter(true))
-        return FritekstBrevRequestMedSignatur(brevFraSaksbehandler = fritekstBrevRequest, saksbehandlersignatur = signatur.navn, enhet = signatur.enhet)
+        return FritekstBrevRequestMedSignatur(brevFraSaksbehandler = fritekstBrevRequest, saksbehandlersignatur = signatur.navn, enhet = signatur.enhet, erSamværsberegning = true)
     }
 
     private fun lagArkiverDokumentRequest(
