@@ -19,11 +19,7 @@ object SamværsavtaleHelper {
             .tilSamværsandelerPerDag()
             .mapIndexed { dagIndex, samværsandeler ->
                 val ukedag = indexTilDagMap.getValue(dagIndex)
-                if (samværsandeler.isEmpty()) {
-                    "$ukedag: -"
-                } else {
-                    "$ukedag(${utledSumSamcærsandelTekst(samværsandeler)}) - ${tilVisningstekst(samværsandeler)}"
-                }
+                "$ukedag ${utledSumSamværsandelTekst(samværsandeler)}${tilVisningstekst(samværsandeler)}"
             }.joinToString(separator = "\n")
 
     private val indexTilDagMap =
@@ -45,12 +41,13 @@ object SamværsavtaleHelper {
             else -> samværsandeler.dropLast(1).joinToString { it.visningsnavn } + " og " + samværsandeler.last().visningsnavn
         }
 
-    private fun utledSumSamcærsandelTekst(samværsandeler: List<Samværsandel>): String {
+    private fun utledSumSamværsandelTekst(samværsandeler: List<Samværsandel>): String {
         val sum = samværsandeler.sumOf { it.verdi }
 
         return when {
-            sum % 8 == 0 -> (sum / 8).toString()
-            else -> "$sum/8"
+            sum == 0 -> "(0)"
+            sum % 8 == 0 -> "(${sum/8}) - "
+            else -> "($sum/8) - "
         }
     }
 }
