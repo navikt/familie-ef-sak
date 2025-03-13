@@ -117,14 +117,14 @@ class SamværsavtaleService(
                 avsnitt =
                     request.uker.mapIndexed { ukeIndex, samværsuke ->
                         lagAvsnittFritekstbrev(ukeIndex + 1, samværsuke)
-                    } + Avsnitt(deloverskrift = "Konklusjon", innhold = request.oppsumering) +
+                    } + Avsnitt(deloverskrift = "Konklusjon", innhold = request.oppsummering) +
                         Avsnitt(
                             deloverskrift = "Notat",
                             innhold = request.notat,
                         ),
             )
         val signatur = brevsignaturService.lagSaksbehandlerSignatur(request.personIdent, VedtakErUtenBeslutter(true))
-        return FritekstBrevRequestMedSignatur(brevFraSaksbehandler = fritekstBrevRequest, saksbehandlersignatur = signatur.navn, enhet = signatur.enhet)
+        return FritekstBrevRequestMedSignatur(brevFraSaksbehandler = fritekstBrevRequest, saksbehandlersignatur = signatur.navn, enhet = signatur.enhet, erSamværsberegning = true)
     }
 
     private fun lagArkiverDokumentRequest(
@@ -189,7 +189,7 @@ class SamværsavtaleService(
         brukerfeilHvis(request.notat.isEmpty()) {
             "Kan ikke journalføre samværsavtale uten notat"
         }
-        brukerfeilHvis(request.oppsumering.isEmpty()) {
+        brukerfeilHvis(request.oppsummering.isEmpty()) {
             "Kan ikke journalføre samværsavtale uten oppsumering"
         }
     }

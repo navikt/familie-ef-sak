@@ -4,6 +4,7 @@ data class FritekstBrevRequestMedSignatur(
     val brevFraSaksbehandler: FritekstBrevRequestDto,
     val saksbehandlersignatur: String,
     val enhet: String,
+    val erSamværsberegning: Boolean = false,
 )
 
 data class FritekstBrevRequestDto(
