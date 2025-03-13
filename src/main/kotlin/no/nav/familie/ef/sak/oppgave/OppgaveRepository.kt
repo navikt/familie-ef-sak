@@ -38,6 +38,11 @@ interface OppgaveRepository :
         oppgavetype: Set<Oppgavetype>,
     ): Oppgave?
 
+    fun findAllByBehandlingIdAndErFerdigstiltIsFalseAndTypeIn(
+        behandlingId: UUID,
+        oppgavetype: Set<Oppgavetype>,
+    ): List<Oppgave>?
+
     fun findByBehandlingIdAndBarnPersonIdentAndAlder(
         behandlingId: UUID,
         barnPersonIdent: String,
