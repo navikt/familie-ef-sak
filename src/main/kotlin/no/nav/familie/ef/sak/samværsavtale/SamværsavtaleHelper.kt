@@ -46,7 +46,7 @@ object SamværsavtaleHelper {
 
         return when {
             sum == 0 -> "(0)"
-            sum % 8 == 0 -> "(${sum/8}) - "
+            sum % 8 == 0 -> "(${sum / 8}) - "
             else -> "($sum/8) - "
         }
     }
