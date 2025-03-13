@@ -466,7 +466,7 @@ internal class SamværsavtaleServiceTest {
     @Nested
     inner class Journalføring {
         @Test
-        internal fun `skal journalføre beregnet samvær`() {
+        internal fun `skal journalføre samværsberegning`() {
             val arkivRequestSlot = slot<ArkiverDokumentRequest>()
             val journalførRequest = JournalførBeregnetSamværRequest("123", listOf(samværsuke(listOf(KVELD_NATT, MORGEN, BARNEHAGE_SKOLE))), "Notat", "oppsumering")
 
@@ -490,7 +490,7 @@ internal class SamværsavtaleServiceTest {
                     .toString(Charsets.UTF_8),
             ).isEqualTo("1")
             assertThat(arkivRequest.hoveddokumentvarianter.first().filtype).isEqualTo(Filtype.PDFA)
-            assertThat(arkivRequest.hoveddokumentvarianter.first().tittel).isEqualTo("Beregnet samvær")
+            assertThat(arkivRequest.hoveddokumentvarianter.first().tittel).isEqualTo("Samværsberegning")
             assertThat(arkivRequest.hoveddokumentvarianter.first().dokumenttype).isEqualTo(Dokumenttype.BEREGNET_SAMVÆR_NOTAT)
             assertThat(arkivRequest.journalførendeEnhet).isEqualTo("4489")
         }

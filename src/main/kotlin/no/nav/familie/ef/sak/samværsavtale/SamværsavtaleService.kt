@@ -111,7 +111,7 @@ class SamværsavtaleService(
     private fun lagFritekstBrevRequestMedSignatur(request: JournalførBeregnetSamværRequest): FritekstBrevRequestMedSignatur {
         val fritekstBrevRequest =
             FritekstBrevRequestDto(
-                overskrift = "Beregnet samvær",
+                overskrift = "Samværsberegning",
                 personIdent = request.personIdent,
                 navn = personopplysningerService.hentGjeldeneNavn(listOf(request.personIdent)).getValue(request.personIdent),
                 avsnitt =
@@ -135,7 +135,7 @@ class SamværsavtaleService(
             Dokument(
                 dokument = pdf,
                 filtype = Filtype.PDFA,
-                tittel = "Beregnet samvær",
+                tittel = "Samværsberegning",
                 dokumenttype = Dokumenttype.BEREGNET_SAMVÆR_NOTAT,
             )
         val journalførendeEnhet = arbeidsfordelingService.hentNavEnhetIdEllerBrukMaskinellEnhetHvisNull(personIdent)
