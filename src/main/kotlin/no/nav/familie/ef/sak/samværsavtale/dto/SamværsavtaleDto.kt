@@ -44,3 +44,5 @@ fun Samværsuke.tilSamværsandelerPerDag() =
     )
 
 fun List<Samværsandel>.tilVisningstekst() = this.joinToString { it.visningsnavn }
+
+fun List<Samværsandel>.sumSamværDag() = this.sumOf { it.verdi }
