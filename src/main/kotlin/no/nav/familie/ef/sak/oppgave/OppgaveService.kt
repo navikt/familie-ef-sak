@@ -269,6 +269,11 @@ class OppgaveService(
         oppgaveClient.ferdigstillOppgave(gsakOppgaveId)
     }
 
+    fun finnAlleOppgaverPåBehandlingSomIkkeErFerdigstiltOgHarLikOppgavetype(
+        behandlingId: UUID,
+        oppgavetype: Oppgavetype,
+    ): List<no.nav.familie.ef.sak.oppgave.Oppgave>? = oppgaveRepository.findAllByBehandlingIdAndErFerdigstiltIsFalseAndTypeIn(behandlingId, setOf(oppgavetype))
+
     fun settEfOppgaveTilFerdig(
         behandlingId: UUID,
         oppgavetype: Oppgavetype,

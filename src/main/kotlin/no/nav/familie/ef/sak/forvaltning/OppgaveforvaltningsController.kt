@@ -2,13 +2,20 @@ package no.nav.familie.ef.sak.forvaltning
 
 import io.swagger.v3.oas.annotations.Operation
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
+import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.internal.TaskService
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import java.util.UUID
+
+data class ForvaltningFerdigstillRequest(
+    val behandlingId: UUID,
+    val oppgavetype: Oppgavetype,
+)
 
 @RestController
 @RequestMapping("/api/oppgave/forvaltning/")
@@ -41,6 +48,15 @@ class OppgaveforvaltningsController(
     ) {
         tilgangService.validerHarForvalterrolle()
         val task = GjennoprettOppgavePåBehandlingTask.opprettTask(behandlingId)
+        taskService.save(task)
+    }
+
+    @PostMapping("ferdigstill")
+    fun ferdigstillOppgavtypeForBehandling(
+        @RequestBody request: ForvaltningFerdigstillRequest,
+    ) {
+        tilgangService.validerHarForvalterrolle()
+        val task = FerdigstillOppgavetypePåBehandlingTask.opprettTask(request)
         taskService.save(task)
     }
 }
