@@ -41,6 +41,7 @@ object SamværsavtaleHelper {
         when {
             samværsandeler.isEmpty() -> ""
             samværsandeler.size == 1 -> samværsandeler.first().visningsnavn
+            samværsandeler.size == 4 -> "hele dagen"
             else -> samværsandeler.dropLast(1).joinToString { it.visningsnavn } + " og " + samværsandeler.last().visningsnavn
         }
 

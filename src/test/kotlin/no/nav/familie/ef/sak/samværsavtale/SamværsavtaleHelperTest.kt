@@ -70,13 +70,13 @@ internal class SamværsavtaleHelperTest {
             """.trimMargin(),
         )
         assertThat(avsnitt5.innhold).isEqualTo(
-            """Mandag(1) - kveld/natt, morgen, barnehage/skole og ettermiddag
-                |Tirsdag(1) - kveld/natt, morgen, barnehage/skole og ettermiddag
-                |Onsdag(1) - kveld/natt, morgen, barnehage/skole og ettermiddag
-                |Torsdag(1) - kveld/natt, morgen, barnehage/skole og ettermiddag
-                |Fredag(1) - kveld/natt, morgen, barnehage/skole og ettermiddag
-                |Lørdag(1) - kveld/natt, morgen, barnehage/skole og ettermiddag
-                |Søndag(1) - kveld/natt, morgen, barnehage/skole og ettermiddag
+            """Mandag(1) - hele dagen
+                |Tirsdag(1) - hele dagen
+                |Onsdag(1) - hele dagen
+                |Torsdag(1) - hele dagen
+                |Fredag(1) - hele dagen
+                |Lørdag(1) - hele dagen
+                |Søndag(1) - hele dagen
             """.trimMargin(),
         )
     }
