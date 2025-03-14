@@ -28,7 +28,6 @@ class FeatureToggleController(
             Toggle.FRONTEND_VIS_MARKERE_GODKJENNE_OPPGAVE_MODAL,
             Toggle.VIS_SAMVÆRSKALKULATOR,
             Toggle.VIS_AUTOMATISK_INNTEKTSENDRING,
-            Toggle.TEST_TOGGLE_MED_STRATEGI
         )
 
     @GetMapping

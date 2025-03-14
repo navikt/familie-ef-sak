@@ -9,12 +9,13 @@ class ByEnvironmentStrategy : Strategy {
     override fun isEnabled(
         map: MutableMap<String, String>,
         unleashContext: UnleashContext,
-    ): Boolean =
-        unleashContext.environment
-            .map { env -> map[MILJØ_KEY]?.split(',')?.contains(env) ?: false }
-            .orElse(false)
+    ): Boolean {
+        val miljø = unleashContext.environment.orElse(null)
 
-    companion object {
-        private const val MILJØ_KEY = "miljø"
+        return if (miljø != null) {
+            map[miljø]?.toBoolean() ?: false
+        } else {
+            false
+        }
     }
 }
