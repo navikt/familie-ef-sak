@@ -7,14 +7,25 @@ import no.nav.familie.prosessering.internal.TaskService
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import java.util.UUID
 
+enum class OppgavetypeSomKanFerdigstilles {
+    BehandleSak,
+    GodkjenneVedtak;
+
+    fun tilOppgavetype(): Oppgavetype {
+        return when (this) {
+            BehandleSak -> Oppgavetype.BehandleSak
+            GodkjenneVedtak -> Oppgavetype.GodkjenneVedtak
+        }
+    }
+}
+
 data class ForvaltningFerdigstillRequest(
     val behandlingId: UUID,
-    val oppgavetype: Oppgavetype,
+    val oppgavetype: OppgavetypeSomKanFerdigstilles,
 )
 
 @RestController
@@ -53,10 +64,11 @@ class OppgaveforvaltningsController(
 
     @PostMapping("ferdigstill")
     fun ferdigstillOppgavtypeForBehandling(
-        @RequestBody request: ForvaltningFerdigstillRequest,
+        @PathVariable behandlingId: UUID,
+        @PathVariable oppgavetype: OppgavetypeSomKanFerdigstilles,
     ) {
         tilgangService.validerHarForvalterrolle()
-        val task = FerdigstillOppgavetypePåBehandlingTask.opprettTask(request)
+        val task = FerdigstillOppgavetypePåBehandlingTask.opprettTask(ForvaltningFerdigstillRequest(behandlingId = behandlingId, oppgavetype = oppgavetype))
         taskService.save(task)
     }
 }
