@@ -62,7 +62,7 @@ class OppgaveforvaltningsController(
         taskService.save(task)
     }
 
-    @PostMapping("ferdigstill")
+    @PostMapping("ferdigstill/oppgavetype/{oppgavetype}/behandlingid/{behandlingId}")
     fun ferdigstillOppgavtypeForBehandling(
         @PathVariable behandlingId: UUID,
         @PathVariable oppgavetype: OppgavetypeSomKanFerdigstilles,
