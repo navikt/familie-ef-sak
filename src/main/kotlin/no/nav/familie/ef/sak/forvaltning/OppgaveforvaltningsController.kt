@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
+import java.time.LocalDateTime
 import java.util.UUID
 
 enum class OppgavetypeSomKanFerdigstilles {
@@ -26,6 +27,7 @@ enum class OppgavetypeSomKanFerdigstilles {
 data class ForvaltningFerdigstillRequest(
     val behandlingId: UUID,
     val oppgavetype: OppgavetypeSomKanFerdigstilles,
+    val opprettetTid: LocalDateTime = LocalDateTime.now()
 )
 
 @RestController
