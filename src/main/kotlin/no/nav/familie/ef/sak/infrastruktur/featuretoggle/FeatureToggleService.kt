@@ -66,12 +66,3 @@ enum class Toggle(
         fun byToggleId(toggleId: String): Toggle = toggles[toggleId] ?: error("Finner ikke toggle for $toggleId")
     }
 }
-
-internal fun Toggle.mapUnleashContextFields(): Map<String, String> =
-    when (this) {
-        Toggle.FRONTEND_VIS_MARKERE_GODKJENNE_OPPGAVE_MODAL -> mapOf(
-            UnleashContextFields.NAV_IDENT to SikkerhetContext.hentSaksbehandler()
-        )
-
-        else -> emptyMap()
-    }
