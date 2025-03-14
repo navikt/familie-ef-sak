@@ -24,8 +24,8 @@ import no.nav.familie.ef.sak.felles.domain.SporbarUtils
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
-import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggle
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.minside.AktiverMikrofrontendTask
 import no.nav.familie.ef.sak.oppgave.TilordnetRessursService
@@ -111,13 +111,13 @@ class BehandlingService(
         }
         feilHvis(
             behandlingsårsak == BehandlingÅrsak.G_OMREGNING &&
-                !featureToggleService.isEnabled(FeatureToggle.GBeregning),
+                !featureToggleService.isEnabled(Toggle.G_BEREGNING),
         ) {
             "Feature toggle for g-omregning er disabled"
         }
         feilHvis(
             behandlingsårsak == BehandlingÅrsak.KORRIGERING_UTEN_BREV &&
-                !featureToggleService.isEnabled(FeatureToggle.BehandlingKorrigering),
+                !featureToggleService.isEnabled(Toggle.BEHANDLING_KORRIGERING),
         ) {
             "Feature toggle for korrigering er ikke skrudd på for bruker"
         }

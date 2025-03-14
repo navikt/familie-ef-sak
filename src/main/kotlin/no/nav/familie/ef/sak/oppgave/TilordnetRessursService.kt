@@ -3,8 +3,8 @@ package no.nav.familie.ef.sak.oppgave
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
 import no.nav.familie.ef.sak.behandlingsflyt.steg.BehandlerRolle
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
-import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggle
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.oppgave.dto.SaksbehandlerDto
 import no.nav.familie.ef.sak.oppgave.dto.SaksbehandlerRolle
@@ -133,5 +133,5 @@ class TilordnetRessursService(
         }
     }
 
-    private fun erUtviklerMedVeilderrolle(): Boolean = featureToggleService.isEnabled(FeatureToggle.UtviklerMedVeilederrolle)
+    private fun erUtviklerMedVeilderrolle(): Boolean = featureToggleService.isEnabled(Toggle.UTVIKLER_MED_VEILEDERRROLLE)
 }

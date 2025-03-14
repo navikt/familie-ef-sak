@@ -2,8 +2,8 @@ package no.nav.familie.ef.sak.behandling.grunnbelop
 
 import no.nav.familie.ef.sak.beregning.Grunnbeløpsperioder.nyesteGrunnbeløpGyldigFraOgMed
 import no.nav.familie.ef.sak.fagsak.FagsakRepository
-import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggle
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Profile
@@ -23,7 +23,7 @@ class GOmregningTaskServiceScheduler(
 
     @Scheduled(cron = "\${G_OMREGNING_CRON_EXPRESSION}")
     fun opprettGOmregningTaskForBehandlingerMedUtdatertG() {
-        if (featureToggleService.isEnabled(FeatureToggle.GBeregningScheduler)) {
+        if (featureToggleService.isEnabled(Toggle.G_BEREGNING_SCHEDULER)) {
             gOmregningTaskService.opprettGOmregningTaskForBehandlingerMedUtdatertG()
         }
     }

@@ -3,8 +3,8 @@ package no.nav.familie.ef.sak.tilkjentytelse
 import no.nav.familie.ef.sak.barn.BarnService
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.fagsak.FagsakService
-import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggle
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.ef.sak.vedtak.historikk.AndelHistorikkBeregner
 import no.nav.familie.ef.sak.vedtak.historikk.AndelHistorikkDto
@@ -50,7 +50,7 @@ class AndelsHistorikkService(
             tilOgMedBehandlingId,
             aktivitetArbeid,
             HistorikkKonfigurasjon(
-                brukIkkeVedtatteSatser = featureToggleService.isEnabled(FeatureToggle.SatsendringBrukIkkeVedtattMaxsats),
+                brukIkkeVedtatteSatser = featureToggleService.isEnabled(Toggle.SATSENDRING_BRUK_IKKE_VEDTATT_MAXSATS),
             ),
         )
     }

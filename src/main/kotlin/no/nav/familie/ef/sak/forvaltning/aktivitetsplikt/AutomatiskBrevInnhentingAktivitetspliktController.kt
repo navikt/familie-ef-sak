@@ -1,8 +1,8 @@
 package no.nav.familie.ef.sak.forvaltning.aktivitetsplikt
 
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
-import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggle
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.prosessering.internal.TaskService
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -26,7 +26,7 @@ class AutomatiskBrevInnhentingAktivitetspliktController(
         @RequestBody aktivitetspliktRequest: AktivitetspliktRequest,
     ) {
         tilgangService.validerHarForvalterrolle()
-        feilHvis(!featureToggleService.isEnabled(FeatureToggle.AutomatiskeBrevInnhentingAktivitetsplikt) && aktivitetspliktRequest.liveRun) {
+        feilHvis(!featureToggleService.isEnabled(Toggle.AUTOMATISKE_BREV_INNHENTING_AKTIVITETSPLIKT) && aktivitetspliktRequest.liveRun) {
             "Toggle for automatiske brev for innhenting av aktiitetsplikt er ikke påskrudd"
         }
 

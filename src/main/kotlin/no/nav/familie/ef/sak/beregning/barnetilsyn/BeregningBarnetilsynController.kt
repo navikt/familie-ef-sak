@@ -1,8 +1,8 @@
 package no.nav.familie.ef.sak.beregning.barnetilsyn
 
 import no.nav.familie.ef.sak.AuditLoggerEvent
-import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggle
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.ef.sak.tilkjentytelse.tilBeløpsperiodeBarnetilsyn
@@ -49,7 +49,7 @@ class BeregningBarnetilsynController(
         val vedtak = vedtakService.hentVedtakDto(behandlingId)
 
         if (vedtak is InnvilgelseBarnetilsyn) {
-            val brukIkkeVedtatteSatser = featureToggleService.isEnabled(FeatureToggle.SatsendringBrukIkkeVedtattMaxsats)
+            val brukIkkeVedtatteSatser = featureToggleService.isEnabled(Toggle.SATSENDRING_BRUK_IKKE_VEDTATT_MAXSATS)
 
             return Ressurs.success(
                 tilkjentYtelseService.hentForBehandling(behandlingId).tilBeløpsperiodeBarnetilsyn(

@@ -1,7 +1,7 @@
 package no.nav.familie.ef.sak.behandlingsflyt.task
 
-import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggle
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.ef.sak.oppfølgingsoppgave.OppfølgingsoppgaveService
 import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.kontrakter.felles.oppgave.StatusEnum
@@ -54,5 +54,5 @@ class FerdigstillFremleggsoppgaverTask(
         return oppgave.status == StatusEnum.FERDIGSTILT || oppgave.status == StatusEnum.FEILREGISTRERT
     }
 
-    private fun toggleKanFerdigstilleFremlegssoppgaver(): Boolean = featureToggleService.isEnabled(FeatureToggle.FrontendVisMarkereGodkjenneOppgaveModal)
+    private fun toggleKanFerdigstilleFremlegssoppgaver(): Boolean = featureToggleService.isEnabled(Toggle.FRONTEND_VIS_MARKERE_GODKJENNE_OPPGAVE_MODAL)
 }

@@ -7,8 +7,8 @@ import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.fagsak.domain.FagsakPerson
 import no.nav.familie.ef.sak.infotrygd.InfotrygdService
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
-import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggle
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.ef.sak.klage.dto.KlagebehandlingerDto
 import no.nav.familie.ef.sak.klage.dto.OpprettKlageDto
 import no.nav.familie.ef.sak.klage.dto.ÅpneKlagerInfotrygdDto
@@ -64,7 +64,7 @@ class KlageService(
         brukerfeilHvis(opprettKlageDto.mottattDato.isAfter(LocalDate.now())) {
             "Kan ikke opprette klage med krav mottatt frem i tid for fagsak=${fagsak.id}"
         }
-        brukerfeilHvis(!featureToggleService.isEnabled(FeatureToggle.VelgÅrsakVedKlageOpprettelse) && opprettKlageDto.behandlingsårsak != Klagebehandlingsårsak.ORDINÆR) {
+        brukerfeilHvis(!featureToggleService.isEnabled(Toggle.VELG_ÅRSAK_VED_KLAGE_OPPRETTELSE) && opprettKlageDto.behandlingsårsak != Klagebehandlingsårsak.ORDINÆR) {
             "Du har valgt en årsak du ikke har tilgang til å velge. Vennligst meld i fra til brukerstøtte dersom du skal ha tilgang til valg av denne årsaken. Fagsak=${fagsak.id}"
         }
         val aktivIdent = fagsak.hentAktivIdent()
