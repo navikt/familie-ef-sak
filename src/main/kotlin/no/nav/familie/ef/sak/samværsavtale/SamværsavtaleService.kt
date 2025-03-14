@@ -10,6 +10,7 @@ import no.nav.familie.ef.sak.brev.BrevsignaturService
 import no.nav.familie.ef.sak.brev.dto.Avsnitt
 import no.nav.familie.ef.sak.brev.dto.FritekstBrevRequestDto
 import no.nav.familie.ef.sak.brev.dto.FritekstBrevRequestMedSignatur
+import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.journalføring.JournalpostClient
@@ -36,6 +37,7 @@ import java.util.UUID
 class SamværsavtaleService(
     val samværsavtaleRepository: SamværsavtaleRepository,
     val behandlingService: BehandlingService,
+    val fagsakService: FagsakService,
     val tilordnetRessursService: TilordnetRessursService,
     val barnService: BarnService,
     val personopplysningerService: PersonopplysningerService,
@@ -97,12 +99,14 @@ class SamværsavtaleService(
     }
 
     fun journalførBeregnetSamvær(request: JournalførBeregnetSamværRequest): String {
-        validerjournalføringRequest(request)
+        val eksternFagsakId = fagsakService.finnFagsaker(setOf(request.personIdent)).firstOrNull()?.eksternId
+        validerjournalføringRequest(request, eksternFagsakId)
+
         val fritekstBrevRequest = lagFritekstBrevRequestMedSignatur(request)
         val dokument = brevClient.genererFritekstBrev(fritekstBrevRequest)
 
         val saksbehandler = SikkerhetContext.hentSaksbehandler()
-        val arkiverDokumentRequest = lagArkiverDokumentRequest(dokument, request.personIdent)
+        val arkiverDokumentRequest = lagArkiverDokumentRequest(dokument, request.personIdent, eksternFagsakId)
         val respons = journalpostClient.arkiverDokument(arkiverDokumentRequest, saksbehandler)
 
         return respons.journalpostId
@@ -130,6 +134,7 @@ class SamværsavtaleService(
     private fun lagArkiverDokumentRequest(
         pdf: ByteArray,
         personIdent: String,
+        eksternFagsakId: Long?,
     ): ArkiverDokumentRequest {
         val dokument =
             Dokument(
@@ -146,6 +151,7 @@ class SamværsavtaleService(
             hoveddokumentvarianter = listOf(dokument),
             vedleggsdokumenter = listOf(),
             journalførendeEnhet = journalførendeEnhet,
+            fagsakId = eksternFagsakId.toString(),
         )
     }
 
@@ -185,12 +191,18 @@ class SamværsavtaleService(
         }
     }
 
-    private fun validerjournalføringRequest(request: JournalførBeregnetSamværRequest) {
+    private fun validerjournalføringRequest(
+        request: JournalførBeregnetSamværRequest,
+        eksternFagsakId: Long?,
+    ) {
         brukerfeilHvis(request.notat.isEmpty()) {
             "Kan ikke journalføre samværsavtale uten notat"
         }
         brukerfeilHvis(request.oppsummering.isEmpty()) {
             "Kan ikke journalføre samværsavtale uten oppsumering"
+        }
+        brukerfeilHvis(eksternFagsakId == null) {
+            "Kan ikke journalføre samværsavtale på person uten fagsak"
         }
     }
 }
