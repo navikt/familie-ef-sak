@@ -1,7 +1,5 @@
 package no.nav.familie.ef.sak.infrastruktur.featuretoggle
 
-import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
-import no.nav.familie.unleash.UnleashContextFields
 import org.springframework.stereotype.Service
 
 @Service
