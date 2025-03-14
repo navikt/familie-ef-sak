@@ -7,5 +7,5 @@ import org.springframework.context.annotation.Configuration
 @Configuration
 class CustomUnleashStrategies {
     @Bean
-    fun strategies(): List<Strategy> = listOf(ByUserIdStrategy(), ByEnvironmentStrategy())
+    fun strategies(): List<Strategy> = listOf(ByUserIdStrategy(), ByEnvironmentStrategy(), ByTargetingStrategy())
 }

@@ -7,10 +7,7 @@ import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 class ByUserIdStrategy : Strategy {
     override fun getName(): String = "userWithId"
 
-    override fun isEnabled(
-        map: MutableMap<String, String>,
-        unleashContext: UnleashContext,
-    ): Boolean {
+    override fun isEnabled(map: MutableMap<String, String>, unleashContext: UnleashContext): Boolean {
         if (SikkerhetContext.erSystembruker()) {
             return false
         }
