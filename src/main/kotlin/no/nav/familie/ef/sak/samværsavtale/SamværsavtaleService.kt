@@ -6,7 +6,10 @@ import no.nav.familie.ef.sak.barn.BehandlingBarn
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.brev.BrevClient
+import no.nav.familie.ef.sak.brev.BrevsignaturService
+import no.nav.familie.ef.sak.brev.dto.Avsnitt
 import no.nav.familie.ef.sak.brev.dto.FritekstBrevRequestDto
+import no.nav.familie.ef.sak.brev.dto.FritekstBrevRequestMedSignatur
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.journalføring.JournalpostClient
@@ -18,6 +21,7 @@ import no.nav.familie.ef.sak.samværsavtale.domain.SamværsukeWrapper
 import no.nav.familie.ef.sak.samværsavtale.dto.JournalførBeregnetSamværRequest
 import no.nav.familie.ef.sak.samværsavtale.dto.SamværsavtaleDto
 import no.nav.familie.ef.sak.samværsavtale.dto.tilDomene
+import no.nav.familie.ef.sak.vedtak.domain.VedtakErUtenBeslutter
 import no.nav.familie.ef.sak.vilkår.VurderingService.Companion.byggBarnMapFraTidligereTilNyId
 import no.nav.familie.ef.sak.vilkår.regler.HovedregelMetadata
 import no.nav.familie.kontrakter.felles.dokarkiv.Dokumenttype
@@ -38,6 +42,7 @@ class SamværsavtaleService(
     val journalpostClient: JournalpostClient,
     val brevClient: BrevClient,
     val arbeidsfordelingService: ArbeidsfordelingService,
+    val brevsignaturService: BrevsignaturService,
 ) {
     fun hentSamværsavtalerForBehandling(behandlingId: UUID) = samværsavtaleRepository.findByBehandlingId(behandlingId)
 
@@ -92,7 +97,8 @@ class SamværsavtaleService(
     }
 
     fun journalførBeregnetSamvær(request: JournalførBeregnetSamværRequest): String {
-        val fritekstBrevRequest = lagFritekstBrevRequest(request)
+        validerjournalføringRequest(request)
+        val fritekstBrevRequest = lagFritekstBrevRequestMedSignatur(request)
         val dokument = brevClient.genererFritekstBrev(fritekstBrevRequest)
 
         val saksbehandler = SikkerhetContext.hentSaksbehandler()
@@ -102,16 +108,24 @@ class SamværsavtaleService(
         return respons.journalpostId
     }
 
-    private fun lagFritekstBrevRequest(request: JournalførBeregnetSamværRequest) =
-        FritekstBrevRequestDto(
-            overskrift = "Beregnet samvær",
-            personIdent = request.personIdent,
-            navn = personopplysningerService.hentGjeldeneNavn(listOf(request.personIdent)).getValue(request.personIdent),
-            avsnitt =
-                request.uker.mapIndexed { ukeIndex, samværsuke ->
-                    lagAvsnittFritekstbrev(ukeIndex + 1, samværsuke)
-                },
-        )
+    private fun lagFritekstBrevRequestMedSignatur(request: JournalførBeregnetSamværRequest): FritekstBrevRequestMedSignatur {
+        val fritekstBrevRequest =
+            FritekstBrevRequestDto(
+                overskrift = "Samværsberegning",
+                personIdent = request.personIdent,
+                navn = personopplysningerService.hentGjeldeneNavn(listOf(request.personIdent)).getValue(request.personIdent),
+                avsnitt =
+                    request.uker.mapIndexed { ukeIndex, samværsuke ->
+                        lagAvsnittFritekstbrev(ukeIndex + 1, samværsuke)
+                    } + Avsnitt(deloverskrift = "Konklusjon", innhold = request.oppsummering) +
+                        Avsnitt(
+                            deloverskrift = "Notat",
+                            innhold = request.notat,
+                        ),
+            )
+        val signatur = brevsignaturService.lagSaksbehandlerSignatur(request.personIdent, VedtakErUtenBeslutter(true))
+        return FritekstBrevRequestMedSignatur(brevFraSaksbehandler = fritekstBrevRequest, saksbehandlersignatur = signatur.navn, enhet = signatur.enhet, erSamværsberegning = true)
+    }
 
     private fun lagArkiverDokumentRequest(
         pdf: ByteArray,
@@ -121,7 +135,7 @@ class SamværsavtaleService(
             Dokument(
                 dokument = pdf,
                 filtype = Filtype.PDFA,
-                tittel = "Beregnet samvær",
+                tittel = "Samværsberegning",
                 dokumenttype = Dokumenttype.BEREGNET_SAMVÆR_NOTAT,
             )
         val journalførendeEnhet = arbeidsfordelingService.hentNavEnhetIdEllerBrukMaskinellEnhetHvisNull(personIdent)
@@ -168,6 +182,15 @@ class SamværsavtaleService(
         }
         brukerfeilHvis(!behandlingBarn.map { it.id }.contains(request.behandlingBarnId)) {
             "Kan ikke opprette en samværsavtale for et barn som ikke eksisterer på behandlingen. BehandlingId=${request.behandlingId}"
+        }
+    }
+
+    private fun validerjournalføringRequest(request: JournalførBeregnetSamværRequest) {
+        brukerfeilHvis(request.notat.isEmpty()) {
+            "Kan ikke journalføre samværsavtale uten notat"
+        }
+        brukerfeilHvis(request.oppsummering.isEmpty()) {
+            "Kan ikke journalføre samværsavtale uten oppsumering"
         }
     }
 }

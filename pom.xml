@@ -34,11 +34,11 @@
         <springdoc.version>2.8.4</springdoc.version>
         <mockk.version>1.13.16</mockk.version>
         <felles.version>3.20250305123143_5e4f8ca</felles.version>
-        <prosessering.version>2.20250128112334_99d3496</prosessering.version>
+        <prosessering.version>2.20250311132904_6ee7728</prosessering.version>
         <token-validation-spring.version>5.0.16</token-validation-spring.version>
 
         <start-class>no.nav.familie.ef.sak.ApplicationKt</start-class>
-        <kontrakter.version>3.0_20250311122636_1d65715</kontrakter.version>
+        <kontrakter.version>3.0_20250312084645_ae52997</kontrakter.version>
         <mikrofrontend.builder.version>20230704114948-74aa2e9</mikrofrontend.builder.version>
         <eksterne.kontrakter.bisys.version>2.0_20230214104704_706e9c0</eksterne.kontrakter.bisys.version>
         <cucumber.version>7.20.1</cucumber.version>

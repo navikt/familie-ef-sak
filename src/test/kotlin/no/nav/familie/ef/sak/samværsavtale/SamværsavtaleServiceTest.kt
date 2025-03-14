@@ -12,6 +12,8 @@ import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus.UTREDES
 import no.nav.familie.ef.sak.brev.BrevClient
+import no.nav.familie.ef.sak.brev.BrevsignaturService
+import no.nav.familie.ef.sak.brev.dto.SignaturDto
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.journalføring.JournalpostClient
@@ -52,6 +54,7 @@ internal class SamværsavtaleServiceTest {
     private val journalpostClient: JournalpostClient = mockk()
     private val brevClient: BrevClient = mockk()
     private val arbeidsfordelingService: ArbeidsfordelingService = mockk()
+    private val brevsignaturService: BrevsignaturService = mockk()
 
     private val samværsavtaleService: SamværsavtaleService =
         SamværsavtaleService(
@@ -63,6 +66,7 @@ internal class SamværsavtaleServiceTest {
             journalpostClient = journalpostClient,
             brevClient = brevClient,
             arbeidsfordelingService = arbeidsfordelingService,
+            brevsignaturService = brevsignaturService,
         )
 
     @Nested
@@ -462,14 +466,15 @@ internal class SamværsavtaleServiceTest {
     @Nested
     inner class Journalføring {
         @Test
-        internal fun `skal journalføre beregnet samvær`() {
+        internal fun `skal journalføre samværsberegning`() {
             val arkivRequestSlot = slot<ArkiverDokumentRequest>()
-            val journalførRequest = JournalførBeregnetSamværRequest("123", listOf(samværsuke(listOf(KVELD_NATT, MORGEN, BARNEHAGE_SKOLE))))
+            val journalførRequest = JournalførBeregnetSamværRequest("123", listOf(samværsuke(listOf(KVELD_NATT, MORGEN, BARNEHAGE_SKOLE))), "Notat", "oppsumering")
 
             BrukerContextUtil.mockBrukerContext()
             every { brevClient.genererFritekstBrev(any()) } returns "1".toByteArray()
-            every { arbeidsfordelingService.hentNavEnhetIdEllerBrukMaskinellEnhetHvisNull("123") } returns "9999"
+            every { arbeidsfordelingService.hentNavEnhetIdEllerBrukMaskinellEnhetHvisNull("123") } returns "4489"
             every { personopplysningerService.hentGjeldeneNavn(any()) } returns mapOf("123" to "")
+            every { brevsignaturService.lagSaksbehandlerSignatur(any(), any()) } returns SignaturDto(navn = "saksbehandler", enhet = "4489", skjulBeslutter = false)
             every { journalpostClient.arkiverDokument(capture(arkivRequestSlot), any()) } returns ArkiverDokumentResponse("", true)
 
             samværsavtaleService.journalførBeregnetSamvær(journalførRequest)
@@ -485,9 +490,43 @@ internal class SamværsavtaleServiceTest {
                     .toString(Charsets.UTF_8),
             ).isEqualTo("1")
             assertThat(arkivRequest.hoveddokumentvarianter.first().filtype).isEqualTo(Filtype.PDFA)
-            assertThat(arkivRequest.hoveddokumentvarianter.first().tittel).isEqualTo("Beregnet samvær")
+            assertThat(arkivRequest.hoveddokumentvarianter.first().tittel).isEqualTo("Samværsberegning")
             assertThat(arkivRequest.hoveddokumentvarianter.first().dokumenttype).isEqualTo(Dokumenttype.BEREGNET_SAMVÆR_NOTAT)
-            assertThat(arkivRequest.journalførendeEnhet).isEqualTo("9999")
+            assertThat(arkivRequest.journalførendeEnhet).isEqualTo("4489")
+        }
+
+        @Test
+        internal fun `Skal kaste feil hvis notat string er tom`() {
+            val arkivRequestSlot = slot<ArkiverDokumentRequest>()
+            val journalførRequestTomNotat = JournalførBeregnetSamværRequest("123", listOf(samværsuke(listOf(KVELD_NATT, MORGEN, BARNEHAGE_SKOLE))), "", "oppsumering")
+
+            BrukerContextUtil.mockBrukerContext()
+            every { brevClient.genererFritekstBrev(any()) } returns "1".toByteArray()
+            every { arbeidsfordelingService.hentNavEnhetIdEllerBrukMaskinellEnhetHvisNull("123") } returns "4489"
+            every { personopplysningerService.hentGjeldeneNavn(any()) } returns mapOf("123" to "")
+            every { brevsignaturService.lagSaksbehandlerSignatur(any(), any()) } returns SignaturDto(navn = "saksbehandler", enhet = "4489", skjulBeslutter = false)
+            every { journalpostClient.arkiverDokument(capture(arkivRequestSlot), any()) } returns ArkiverDokumentResponse("", true)
+
+            val feil = assertThrows<ApiFeil> { samværsavtaleService.journalførBeregnetSamvær(journalførRequestTomNotat) }
+
+            assertThat(feil.message).isEqualTo("Kan ikke journalføre samværsavtale uten notat")
+        }
+
+        @Test
+        internal fun `Skal kaste feil hvis oppsumering string er tom`() {
+            val arkivRequestSlot = slot<ArkiverDokumentRequest>()
+            val journalførRequestTomOppsumering = JournalførBeregnetSamværRequest("123", listOf(samværsuke(listOf(KVELD_NATT, MORGEN, BARNEHAGE_SKOLE))), "Notat", "")
+
+            BrukerContextUtil.mockBrukerContext()
+            every { brevClient.genererFritekstBrev(any()) } returns "1".toByteArray()
+            every { arbeidsfordelingService.hentNavEnhetIdEllerBrukMaskinellEnhetHvisNull("123") } returns "4489"
+            every { personopplysningerService.hentGjeldeneNavn(any()) } returns mapOf("123" to "")
+            every { brevsignaturService.lagSaksbehandlerSignatur(any(), any()) } returns SignaturDto(navn = "saksbehandler", enhet = "4489", skjulBeslutter = false)
+            every { journalpostClient.arkiverDokument(capture(arkivRequestSlot), any()) } returns ArkiverDokumentResponse("", true)
+
+            val feil = assertThrows<ApiFeil> { samværsavtaleService.journalførBeregnetSamvær(journalførRequestTomOppsumering) }
+
+            assertThat(feil.message).isEqualTo("Kan ikke journalføre samværsavtale uten oppsumering")
         }
     }
 }

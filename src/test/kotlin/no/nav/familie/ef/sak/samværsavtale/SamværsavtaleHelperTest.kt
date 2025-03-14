@@ -30,53 +30,53 @@ internal class SamværsavtaleHelperTest {
         assertThat(avsnitt5.deloverskrift).isEqualTo("Uke 5")
 
         assertThat(avsnitt1.innhold).isEqualTo(
-            """Mandag: -
-                |Tirsdag: -
-                |Onsdag: -
-                |Torsdag: -
-                |Fredag: -
-                |Lørdag: -
-                |Søndag: -
+            """Mandag (0)
+                |Tirsdag (0)
+                |Onsdag (0)
+                |Torsdag (0)
+                |Fredag (0)
+                |Lørdag (0)
+                |Søndag (0)
             """.trimMargin(),
         )
         assertThat(avsnitt2.innhold).isEqualTo(
-            """Mandag: kveld/natt
-                |Tirsdag: kveld/natt
-                |Onsdag: kveld/natt
-                |Torsdag: kveld/natt
-                |Fredag: kveld/natt
-                |Lørdag: kveld/natt
-                |Søndag: kveld/natt
+            """Mandag (4/8) - kveld/natt
+                |Tirsdag (4/8) - kveld/natt
+                |Onsdag (4/8) - kveld/natt
+                |Torsdag (4/8) - kveld/natt
+                |Fredag (4/8) - kveld/natt
+                |Lørdag (4/8) - kveld/natt
+                |Søndag (4/8) - kveld/natt
             """.trimMargin(),
         )
         assertThat(avsnitt3.innhold).isEqualTo(
-            """Mandag: kveld/natt, morgen
-                |Tirsdag: kveld/natt, morgen
-                |Onsdag: kveld/natt, morgen
-                |Torsdag: kveld/natt, morgen
-                |Fredag: kveld/natt, morgen
-                |Lørdag: kveld/natt, morgen
-                |Søndag: kveld/natt, morgen
+            """Mandag (5/8) - kveld/natt og morgen
+                |Tirsdag (5/8) - kveld/natt og morgen
+                |Onsdag (5/8) - kveld/natt og morgen
+                |Torsdag (5/8) - kveld/natt og morgen
+                |Fredag (5/8) - kveld/natt og morgen
+                |Lørdag (5/8) - kveld/natt og morgen
+                |Søndag (5/8) - kveld/natt og morgen
             """.trimMargin(),
         )
         assertThat(avsnitt4.innhold).isEqualTo(
-            """Mandag: kveld/natt, morgen, barnehage/skole
-                |Tirsdag: kveld/natt, morgen, barnehage/skole
-                |Onsdag: kveld/natt, morgen, barnehage/skole
-                |Torsdag: kveld/natt, morgen, barnehage/skole
-                |Fredag: kveld/natt, morgen, barnehage/skole
-                |Lørdag: kveld/natt, morgen, barnehage/skole
-                |Søndag: kveld/natt, morgen, barnehage/skole
+            """Mandag (7/8) - kveld/natt, morgen og barnehage/skole
+                |Tirsdag (7/8) - kveld/natt, morgen og barnehage/skole
+                |Onsdag (7/8) - kveld/natt, morgen og barnehage/skole
+                |Torsdag (7/8) - kveld/natt, morgen og barnehage/skole
+                |Fredag (7/8) - kveld/natt, morgen og barnehage/skole
+                |Lørdag (7/8) - kveld/natt, morgen og barnehage/skole
+                |Søndag (7/8) - kveld/natt, morgen og barnehage/skole
             """.trimMargin(),
         )
         assertThat(avsnitt5.innhold).isEqualTo(
-            """Mandag: kveld/natt, morgen, barnehage/skole, ettermiddag
-                |Tirsdag: kveld/natt, morgen, barnehage/skole, ettermiddag
-                |Onsdag: kveld/natt, morgen, barnehage/skole, ettermiddag
-                |Torsdag: kveld/natt, morgen, barnehage/skole, ettermiddag
-                |Fredag: kveld/natt, morgen, barnehage/skole, ettermiddag
-                |Lørdag: kveld/natt, morgen, barnehage/skole, ettermiddag
-                |Søndag: kveld/natt, morgen, barnehage/skole, ettermiddag
+            """Mandag (1) - hele dagen
+                |Tirsdag (1) - hele dagen
+                |Onsdag (1) - hele dagen
+                |Torsdag (1) - hele dagen
+                |Fredag (1) - hele dagen
+                |Lørdag (1) - hele dagen
+                |Søndag (1) - hele dagen
             """.trimMargin(),
         )
     }
