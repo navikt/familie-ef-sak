@@ -7,11 +7,11 @@ import org.springframework.stereotype.Service
 class UnleashNextService(
     private val unleashService: UnleashService,
 ) {
-    fun isEnabled(featureToggle: FeatureToggle): Boolean {
-        val unleashContextFields = featureToggle.mapUnleashContextFields()
+    fun isEnabled(toggle: Toggle): Boolean {
+        val unleashContextFields = toggle.mapUnleashContextFields()
 
         return unleashService.isEnabled(
-            toggleId = featureToggle.toggleId,
+            toggleId = toggle.toggleId,
             properties = unleashContextFields,
         )
     }

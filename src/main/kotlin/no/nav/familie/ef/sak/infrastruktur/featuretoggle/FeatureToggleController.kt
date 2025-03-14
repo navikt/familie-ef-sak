@@ -16,18 +16,18 @@ class FeatureToggleController(
 ) {
     private val featureTogglesIBruk =
         setOf(
-            FeatureToggle.BehandlingKorrigering,
-            FeatureToggle.FrontendVisIkkePubliserteBrevmaler,
-            FeatureToggle.OpprettBehandlingFerdigstiltJournalpost,
-            FeatureToggle.FrontendAutomatiskUtfylleVilkar,
-            FeatureToggle.FrontendSatsendring,
-            FeatureToggle.FrontendKonverterDelmalblokkTilHtmlFelt,
-            FeatureToggle.HenleggBehandlingUtenOppgave,
-            FeatureToggle.FrontendVisTildelOppgaveBehandling,
-            FeatureToggle.VelgÅrsakVedKlageOpprettelse,
-            FeatureToggle.FrontendVisMarkereGodkjenneOppgaveModal,
-            FeatureToggle.VisSamværskalkulator,
-            FeatureToggle.VisAutomatiskInntektsendring,
+            Toggle.BEHANDLING_KORRIGERING,
+            Toggle.FRONTEND_VIS_IKKE_PUBLISERTE_BREVMALER,
+            Toggle.OPPRETT_BEHANDLING_FERDIGSTILT_JOURNALPOST,
+            Toggle.FRONTEND_AUTOMATISK_UTFYLLE_VILKÅR,
+            Toggle.FRONTEND_SATSENDRING,
+            Toggle.FRONTEND_KONVERTER_DELMALBLOKK_TIL_HTML_FELT,
+            Toggle.HENLEGG_BEHANDLING_UTEN_OPPGAVE,
+            Toggle.FRONTED_VIS_TILDEL_OPPGAVE_BEHANDLING,
+            Toggle.VELG_ÅRSAK_VED_KLAGE_OPPRETTELSE,
+            Toggle.FRONTEND_VIS_MARKERE_GODKJENNE_OPPGAVE_MODAL,
+            Toggle.VIS_SAMVÆRSKALKULATOR,
+            Toggle.VIS_AUTOMATISK_INNTEKTSENDRING,
         )
 
     @GetMapping
@@ -38,7 +38,7 @@ class FeatureToggleController(
         @PathVariable toggleId: String,
         @RequestParam("defaultverdi") defaultVerdi: Boolean? = false,
     ): Boolean {
-        val featureToggle = FeatureToggle.fraToggleId(toggleId)
-        return featureToggleService.isEnabled(featureToggle)
+        val toggle = Toggle.byToggleId(toggleId)
+        return featureToggleService.isEnabled(toggle)
     }
 }
