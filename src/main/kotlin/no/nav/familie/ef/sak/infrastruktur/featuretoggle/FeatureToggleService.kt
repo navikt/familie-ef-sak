@@ -1,5 +1,7 @@
 package no.nav.familie.ef.sak.infrastruktur.featuretoggle
 
+import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
+import no.nav.familie.unleash.UnleashContextFields
 import org.springframework.stereotype.Service
 
 @Service
@@ -67,5 +69,9 @@ enum class Toggle(
 
 internal fun Toggle.mapUnleashContextFields(): Map<String, String> =
     when (this) {
+        Toggle.FRONTEND_VIS_MARKERE_GODKJENNE_OPPGAVE_MODAL -> mapOf(
+            UnleashContextFields.NAV_IDENT to SikkerhetContext.hentSaksbehandler()
+        )
+
         else -> emptyMap()
     }
