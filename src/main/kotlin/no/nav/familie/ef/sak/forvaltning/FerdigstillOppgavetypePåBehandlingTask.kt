@@ -3,7 +3,6 @@ package no.nav.familie.ef.sak.forvaltning
 import no.nav.familie.ef.sak.oppgave.OppgaveRepository
 import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.kontrakter.felles.objectMapper
-import no.nav.familie.kontrakter.felles.oppgave.Oppgave
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.kontrakter.felles.oppgave.StatusEnum
 import no.nav.familie.prosessering.AsyncTaskStep

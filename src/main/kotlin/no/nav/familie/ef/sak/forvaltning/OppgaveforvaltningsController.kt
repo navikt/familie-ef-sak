@@ -14,20 +14,20 @@ import java.util.UUID
 
 enum class OppgavetypeSomKanFerdigstilles {
     BehandleSak,
-    GodkjenneVedtak;
+    GodkjenneVedtak,
+    ;
 
-    fun tilOppgavetype(): Oppgavetype {
-        return when (this) {
+    fun tilOppgavetype(): Oppgavetype =
+        when (this) {
             BehandleSak -> Oppgavetype.BehandleSak
             GodkjenneVedtak -> Oppgavetype.GodkjenneVedtak
         }
-    }
 }
 
 data class ForvaltningFerdigstillRequest(
     val behandlingId: UUID,
     val oppgavetype: OppgavetypeSomKanFerdigstilles,
-    val opprettetTid: LocalDateTime = LocalDateTime.now()
+    val opprettetTid: LocalDateTime = LocalDateTime.now(),
 )
 
 @RestController
