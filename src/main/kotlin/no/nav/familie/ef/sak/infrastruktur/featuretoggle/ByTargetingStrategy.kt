@@ -10,10 +10,10 @@ class ByTargetingStrategy : Strategy {
         map: MutableMap<String, String>,
         unleashContext: UnleashContext,
     ): Boolean {
-        val brukerId = unleashContext.userId.orElse(null)
+        val navIdent = unleashContext.userId.orElse(null)
 
-        return if (brukerId != null) {
-            map[brukerId]?.toBoolean() ?: false
+        return if (navIdent != null) {
+            map[navIdent]?.toBoolean() ?: false
         } else {
             false
         }
