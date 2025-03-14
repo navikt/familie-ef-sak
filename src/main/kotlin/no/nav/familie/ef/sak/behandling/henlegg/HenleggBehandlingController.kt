@@ -9,8 +9,8 @@ import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.felles.util.isEqualOrAfter
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggle
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
-import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerService
@@ -115,7 +115,7 @@ class HenleggBehandlingController(
     ): Ressurs<BehandlingDto> {
         tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.UPDATE)
         tilgangService.validerHarSaksbehandlerrolle()
-        feilHvis(!featureToggleService.isEnabled(toggle = Toggle.HENLEGG_BEHANDLING_UTEN_OPPGAVE)) {
+        feilHvis(!featureToggleService.isEnabled(FeatureToggle.HenleggBehandlingUtenOppgave)) {
             "Henleggelse av behandling uten å henlegge oppgave er ikke mulig - toggle ikke enablet for bruker"
         }
 

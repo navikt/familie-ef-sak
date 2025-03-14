@@ -4,7 +4,6 @@ import io.getunleash.UnleashContext
 import io.getunleash.strategy.Strategy
 
 class ByTargetingStrategy : Strategy {
-
     override fun getName() = "flexibleRollout"
 
     override fun isEnabled(
@@ -20,5 +19,4 @@ class ByTargetingStrategy : Strategy {
             false
         }
     }
-
 }

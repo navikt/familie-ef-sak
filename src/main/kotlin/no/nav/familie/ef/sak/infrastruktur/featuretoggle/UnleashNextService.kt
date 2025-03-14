@@ -12,7 +12,7 @@ class UnleashNextService(
 
         return unleashService.isEnabled(
             toggleId = featureToggle.toggleId,
-            properties = unleashContextFields
+            properties = unleashContextFields,
         )
     }
 }

@@ -17,8 +17,8 @@ import io.mockk.mockkObject
 import io.mockk.unmockkObject
 import no.nav.familie.ef.sak.infrastruktur.config.IntegrasjonerConfig
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggle
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
-import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.journalføring.JournalpostClient
 import no.nav.familie.ef.sak.journalføring.dto.DokumentVariantformat
@@ -82,7 +82,7 @@ internal class JournalpostClientTest {
         every {
             featureToggleService.isEnabled(any())
         } answers {
-            firstArg<Toggle>() != Toggle.UTVIKLER_MED_VEILEDERRROLLE
+            firstArg<FeatureToggle>() != FeatureToggle.UtviklerMedVeilederrolle
         }
         mockkObject(SikkerhetContext)
     }
