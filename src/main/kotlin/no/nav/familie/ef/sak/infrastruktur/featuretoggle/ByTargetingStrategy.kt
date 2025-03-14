@@ -13,8 +13,7 @@ class ByTargetingStrategy : Strategy {
         val brukerId = unleashContext.userId.orElse(null)
 
         return if (brukerId != null) {
-            val featureToggleVerdi = map[brukerId]
-            featureToggleVerdi?.toBoolean() ?: false
+            map[brukerId]?.toBoolean() ?: false
         } else {
             false
         }

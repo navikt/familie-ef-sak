@@ -56,6 +56,7 @@ enum class Toggle(
     VELG_ÅRSAK_VED_KLAGE_OPPRETTELSE("familie.ef.sak.klagebehandling-arsak", "Permission"),
     VIS_SAMVÆRSKALKULATOR("familie.ef.sak.frontend-vis-samverskalkulator", "Permission"),
     VIS_AUTOMATISK_INNTEKTSENDRING("familie.ef.sak.frontend-vis-automatisk-inntektsendring", "Permission"),
+    TEST_TOGGLE_MED_STRATEGI("familie-klage.test-toggle-med-strategi"),
     ;
 
     companion object {
