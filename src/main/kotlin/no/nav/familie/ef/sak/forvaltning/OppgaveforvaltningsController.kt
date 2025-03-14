@@ -64,6 +64,12 @@ class OppgaveforvaltningsController(
         taskService.save(task)
     }
 
+    @Operation(
+        description =
+            "Hvis en behandling har flere oppgaver av samme type som ikke er ferdigstilt kan vi bruke dette endepunktet for å ferdigstille en av oppgavene.",
+        summary =
+            "Ferdigstill BehandleSak- eller GodkjenneVedtak-oppgave i EF-sak og feilregistrer  oppgave i Gosys",
+    )
     @PostMapping("ferdigstill/oppgavetype/{oppgavetype}/behandlingid/{behandlingId}")
     fun ferdigstillOppgavtypeForBehandling(
         @PathVariable behandlingId: UUID,
