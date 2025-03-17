@@ -1,18 +1,12 @@
 package no.nav.familie.ef.sak.infrastruktur.featuretoggle
 
-import no.nav.familie.unleash.UnleashService
 import org.springframework.stereotype.Service
 
 @Service
 class FeatureToggleService(
-    val unleashService: UnleashService,
+    val unleashNextSerivce: UnleashNextService,
 ) {
-    fun isEnabled(toggle: Toggle): Boolean = unleashService.isEnabled(toggle.toggleId)
-
-    fun isEnabled(
-        toggle: Toggle,
-        defaultValue: Boolean,
-    ): Boolean = unleashService.isEnabled(toggle.toggleId, defaultValue)
+    fun isEnabled(toggle: Toggle): Boolean = unleashNextSerivce.isEnabled(toggle)
 }
 
 enum class Toggle(
