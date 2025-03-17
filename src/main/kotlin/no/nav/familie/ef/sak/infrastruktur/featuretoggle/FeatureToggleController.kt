@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RestController
 class FeatureToggleController(
     private val featureToggleService: FeatureToggleService,
 ) {
-    private val featureTogglesIBruk =
+    private val funksjonsbrytere =
         setOf(
             Toggle.BEHANDLING_KORRIGERING,
             Toggle.FRONTEND_VIS_IKKE_PUBLISERTE_BREVMALER,
@@ -29,7 +29,7 @@ class FeatureToggleController(
         )
 
     @GetMapping
-    fun sjekkAlle(): Map<String, Boolean> = featureTogglesIBruk.associate { it.toggleId to featureToggleService.isEnabled(it) }
+    fun sjekkAlle(): Map<String, Boolean> = funksjonsbrytere.associate { it.toggleId to featureToggleService.isEnabled(it) }
 
     @GetMapping("/{toggleId}")
     fun sjekkFunksjonsbryter(
@@ -37,6 +37,6 @@ class FeatureToggleController(
         @RequestParam("defaultverdi") defaultVerdi: Boolean? = false,
     ): Boolean {
         val toggle = Toggle.byToggleId(toggleId)
-        return featureToggleService.isEnabled(toggle)
+        return featureToggleService.isEnabled(toggle, defaultVerdi ?: false)
     }
 }
