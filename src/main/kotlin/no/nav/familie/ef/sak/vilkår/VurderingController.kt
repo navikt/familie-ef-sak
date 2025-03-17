@@ -103,7 +103,8 @@ class VurderingController(
         tilgangService.validerTilgangTilBehandling(request.behandlingId, AuditLoggerEvent.UPDATE)
         tilgangService.validerHarSaksbehandlerrolle()
 
-        val vilkårsVurderingForGjenbruk = gjenbrukVilkårService.gjenbrukInngangsvilkårVurdering(request.behandlingId, behandlingForGjenbruk.id, request.vilkårId)
+        val (_, metadata) = vurderingService.hentGrunnlagOgMetadata(request.behandlingId)
+        val vilkårsVurderingForGjenbruk = gjenbrukVilkårService.gjenbrukInngangsvilkårVurderingOgSamværsavtale(request.behandlingId, behandlingForGjenbruk.id, request.vilkårId, metadata.barn)
         return Ressurs.success(vilkårsVurderingForGjenbruk.tilDto())
     }
 

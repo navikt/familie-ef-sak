@@ -124,7 +124,7 @@ internal class GjenbrukVilkårServiceTest {
 
             every { barnService.finnBarnPåBehandling(it.behandling.id) } returns it.behandlingBarn
         }
-        every { behandlingService.hentBehandlingerForGjenbrukAvVilkår(fagsakPersonId) } returns
+        every { behandlingService.hentBehandlingerForGjenbrukAvVilkårOgSamværsavtaler(fagsakPersonId) } returns
             listOf(
                 ferdigstiltBehandlingOS,
                 nyBehandlingBT,
@@ -205,7 +205,7 @@ internal class GjenbrukVilkårServiceTest {
 
     @Test
     internal fun `skal kaste feil dersom dersom ingen behandlinger for gjenbruk eksisterer`() {
-        every { behandlingService.hentBehandlingerForGjenbrukAvVilkår(fagsakPersonId) } returns emptyList()
+        every { behandlingService.hentBehandlingerForGjenbrukAvVilkårOgSamværsavtaler(fagsakPersonId) } returns emptyList()
 
         assertThatThrownBy { gjenbrukVilkår() }
             .hasMessageContaining("Fant ingen tidligere behandlinger som kan benyttes til gjenbruk av inngangsvilkår for behandling med id=")
@@ -213,7 +213,7 @@ internal class GjenbrukVilkårServiceTest {
 
     @Test
     internal fun `skal kaste feil dersom dersom behandlinger for gjenbruk ikke inneholder tidligere behandling`() {
-        every { behandlingService.hentBehandlingerForGjenbrukAvVilkår(fagsakPersonId) } returns listOf(behandling(id = UUID.randomUUID()))
+        every { behandlingService.hentBehandlingerForGjenbrukAvVilkårOgSamværsavtaler(fagsakPersonId) } returns listOf(behandling(id = UUID.randomUUID()))
         assertThatThrownBy { gjenbrukVilkår() }
             .hasMessageContaining("kan ikke benyttes til gjenbruk av inngangsvilkår for behandling med id=")
     }
@@ -250,7 +250,7 @@ internal class GjenbrukVilkårServiceTest {
     }
 
     private fun gjenbrukEnkelVilkårsvurdering(vilkårId: UUID): Vilkårsvurdering =
-        gjenbrukVilkårService.gjenbrukInngangsvilkårVurdering(
+        gjenbrukVilkårService.gjenbrukInngangsvilkårVurderingOgSamværsavtale(
             nyBT.behandling.id,
             ferdigstiltOS.behandling.id,
             vilkårId,
