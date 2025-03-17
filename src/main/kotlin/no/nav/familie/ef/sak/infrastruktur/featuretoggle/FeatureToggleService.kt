@@ -4,9 +4,9 @@ import org.springframework.stereotype.Service
 
 @Service
 class FeatureToggleService(
-    val unleashNextSerivce: UnleashNextService,
+    val unleashNextService: UnleashNextService,
 ) {
-    fun isEnabled(toggle: Toggle): Boolean = unleashNextSerivce.isEnabled(toggle)
+    fun isEnabled(toggle: Toggle): Boolean = unleashNextService.isEnabled(toggle)
 }
 
 enum class Toggle(
