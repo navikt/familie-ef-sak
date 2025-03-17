@@ -143,7 +143,7 @@ internal class VilkårGrunnlagServiceTest {
         every { søknadService.hentSøknadsgrunnlag(behandlingId) } returns søknadOvergangsstønad
         every { fagsakService.hentFagsakForBehandling(behandlingId) } returns fagsak
         every { personopplysningerIntegrasjonerClient.hentMedlemskapsinfo(any()) } returns medlemskapsinfo
-        every { featureToggleService.isEnabled(any()) } returns false
+        every { featureToggleService.isEnabled(any(), any()) } returns false
         every { kodeverkService.hentLand("POL", any()) } returns "Polen"
         every { kodeverkService.hentLand("SWE", any()) } returns "Sverige"
     }
