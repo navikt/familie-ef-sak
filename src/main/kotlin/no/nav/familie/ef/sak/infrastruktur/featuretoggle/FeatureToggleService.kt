@@ -20,7 +20,6 @@ enum class Toggle(
     val beskrivelse: String? = null,
 ) {
     // Release
-    FRONTEND_KONVERTER_DELMALBLOKK_TIL_HTML_FELT("familie.ef.sak.konverter-delmalblokk-til-html-input", "Release"),
     FRONTEND_VIS_MARKERE_GODKJENNE_OPPGAVE_MODAL(
         "familie.ef.sak.vis-markere-godkjenne-vedtak-oppgave-modal",
         "Release",
@@ -60,7 +59,6 @@ enum class Toggle(
     UTVIKLER_MED_VEILEDERRROLLE("familie.ef.sak.utviklere-med-veilederrolle", "Permission"),
     HENLEGG_BEHANDLING_UTEN_OPPGAVE("familie.ef.sak.henlegg-behandling-uten-oppgave", "Permission"),
     VELG_ÅRSAK_VED_KLAGE_OPPRETTELSE("familie.ef.sak.klagebehandling-arsak", "Permission"),
-    VIS_SAMVÆRSKALKULATOR("familie.ef.sak.frontend-vis-samverskalkulator", "Permission"),
     VIS_AUTOMATISK_INNTEKTSENDRING("familie.ef.sak.frontend-vis-automatisk-inntektsendring", "Permission"),
     ;
 
