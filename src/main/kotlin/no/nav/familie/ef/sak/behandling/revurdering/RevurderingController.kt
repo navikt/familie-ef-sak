@@ -81,4 +81,14 @@ class RevurderingController(
         tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.ACCESS)
         return Ressurs.success(revurderingService.hentRevurderingsinformasjon(behandlingId))
     }
+
+    @PostMapping("behandleAutomatisk")
+    fun startTaskBla(
+        // TODO: IKKE SENDE INN personident
+        @RequestBody personident: String,
+    ): Ressurs<Boolean> {
+//        tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.ACCESS)
+        revurderingService.opprettAutomatiskInntektsendringTask(personident)
+        return Ressurs.success(true)
+    }
 }

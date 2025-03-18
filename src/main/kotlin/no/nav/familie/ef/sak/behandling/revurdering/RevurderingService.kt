@@ -28,6 +28,7 @@ import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.ef.sak.vilkår.VurderingService
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.felles.ef.StønadType
+import no.nav.familie.leader.LeaderClient
 import no.nav.familie.prosessering.internal.TaskService
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -140,6 +141,20 @@ class RevurderingService(
         }
 
         return revurdering
+    }
+
+    @Transactional
+    fun opprettAutomatiskInntektsendringTask(personident: String) {
+        if (LeaderClient.isLeader() == true) {
+//            val ukenummer = LocalDate.now().get(IsoFields.WEEK_OF_WEEK_BASED_YEAR)
+//            val year = LocalDate.now().year
+            val payload = personident
+            val finnesTask = taskService.finnTaskMedPayloadOgType(payload, BehandleAutomatiskInntektsendringTask.TYPE)
+            if (finnesTask == null) {
+                val task = BehandleAutomatiskInntektsendringTask.opprettTask(payload)
+                taskService.save(task)
+            }
+        }
     }
 
     private fun vilkårsbehandleNyeBarn(
