@@ -86,7 +86,14 @@ class GjenbrukVilkårService(
             ).first { it.id == vilkårSomSkalOppdateresId }
 
         if (vilkårsvurderingSomSkalOppdateres.type == VilkårType.ALENEOMSORG) {
-            vilkårsvurderingSomSkalOppdateres.barnId?.let { samværsavtaleService.gjenbrukSamværsavtale(behandlingSomSkalOppdateresId, behandlingForGjenbrukId, barnPåBehandlingSomSkalOppdateres, vilkårsvurderingSomSkalOppdateres) }
+            vilkårsvurderingSomSkalOppdateres.barnId?.let {
+                samværsavtaleService.gjenbrukSamværsavtale(
+                    behandlingSomSkalOppdateresId,
+                    behandlingForGjenbrukId,
+                    barnPåBehandlingSomSkalOppdateres,
+                    vilkårsvurderingSomSkalOppdateres
+                )
+            }
         }
 
         return gjenbrukInngangsvilkårVurdering(behandlingSomSkalOppdateresId, behandlingForGjenbrukId, vilkårsvurderingSomSkalOppdateres)

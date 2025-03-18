@@ -25,6 +25,7 @@ import no.nav.familie.ef.sak.repository.saksbehandling
 import no.nav.familie.ef.sak.repository.sivilstand
 import no.nav.familie.ef.sak.repository.søker
 import no.nav.familie.ef.sak.repository.vilkårsvurdering
+import no.nav.familie.ef.sak.samværsavtale.SamværsavtaleService
 import no.nav.familie.ef.sak.testutil.søknadBarnTilBehandlingBarn
 import no.nav.familie.ef.sak.vilkår.VilkårType
 import no.nav.familie.ef.sak.vilkår.Vilkårsresultat
@@ -48,6 +49,7 @@ internal class GjenbrukVilkårServiceTest {
     private val grunnlagsdataService = mockk<GrunnlagsdataService>()
     private val barnService = mockk<BarnService>()
     private val tilordnetRessursService = mockk<TilordnetRessursService>()
+    private val samværsavtaleService = mockk<SamværsavtaleService>()
     private val gjenbrukVilkårService =
         GjenbrukVilkårService(
             behandlingService = behandlingService,
@@ -56,6 +58,7 @@ internal class GjenbrukVilkårServiceTest {
             grunnlagsdataService = grunnlagsdataService,
             barnService = barnService,
             tilordnetRessursService = tilordnetRessursService,
+            samværsavtaleService = samværsavtaleService,
         )
 
     private val barn1 = FnrGenerator.generer(LocalDate.now())
@@ -254,6 +257,7 @@ internal class GjenbrukVilkårServiceTest {
             nyBT.behandling.id,
             ferdigstiltOS.behandling.id,
             vilkårId,
+            nyBT.behandlingBarnPåForrigeBehandling,
         )
 
     private fun mockGrunnlagsdata(
@@ -277,6 +281,7 @@ internal class GjenbrukVilkårServiceTest {
     ) {
         val saksbehandling: Saksbehandling = saksbehandling(fagsak, behandling)
         val behandlingBarn = søknadBarnTilBehandlingBarn(søknad.barn)
+        val behandlingBarnPåForrigeBehandling = behandlingBarn.map { it.copy(id = UUID.randomUUID()) }
 
         val sivilstandsvilkår: Vilkårsvurdering
         val aleneomsorgsvilkår: List<Vilkårsvurdering>
