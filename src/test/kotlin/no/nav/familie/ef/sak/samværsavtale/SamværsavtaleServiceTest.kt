@@ -444,7 +444,7 @@ internal class SamværsavtaleServiceTest {
                 listOf(barnPåBeggeBehandlingerMedSamværsavtale, barnPåEksisterendeBehandling, barnPåBeggeBehandlingerUtenSamværsavtale)
             every { samværsavtaleRepository.insertAll(capture(nyeSamværsavtaler)) } answers { firstArg() }
 
-            samværsavtaleService.gjenbrukSamværsavtaler(eksisterendeBehandlingId, nyBehandlingId, metadata)
+            samværsavtaleService.gjenbrukSamværsavtaler(nyBehandlingId, eksisterendeBehandlingId, metadata)
 
             verify(exactly = 1) { samværsavtaleRepository.insertAll(any()) }
             assertThat(nyeSamværsavtaler.captured.size).isEqualTo(1)

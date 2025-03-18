@@ -5,7 +5,6 @@ import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
@@ -14,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController
 class FeatureToggleController(
     private val featureToggleService: FeatureToggleService,
 ) {
-    private val funksjonsbrytere =
+    private val featureTogglesIBruk =
         setOf(
             Toggle.BEHANDLING_KORRIGERING,
             Toggle.FRONTEND_VIS_IKKE_PUBLISERTE_BREVMALER,
@@ -29,14 +28,13 @@ class FeatureToggleController(
         )
 
     @GetMapping
-    fun sjekkAlle(): Map<String, Boolean> = funksjonsbrytere.associate { it.toggleId to featureToggleService.isEnabled(it) }
+    fun sjekkAlle(): Map<String, Boolean> = featureTogglesIBruk.associate { it.toggleId to featureToggleService.isEnabled(it) }
 
     @GetMapping("/{toggleId}")
     fun sjekkFunksjonsbryter(
         @PathVariable toggleId: String,
-        @RequestParam("defaultverdi") defaultVerdi: Boolean? = false,
     ): Boolean {
         val toggle = Toggle.byToggleId(toggleId)
-        return featureToggleService.isEnabled(toggle, defaultVerdi ?: false)
+        return featureToggleService.isEnabled(toggle)
     }
 }
