@@ -116,7 +116,7 @@ internal class GrunnlagsdataServiceTest {
             )
         val behandlingId = behandling.id
 
-        every { featureToggleService.isEnabled(any(), any()) } returns true
+        every { featureToggleService.isEnabled(any()) } returns true
         every { grunnlagsdataRepository.findByIdOrNull(behandlingId) } returns null
         every { behandlingService.hentBehandling(behandlingId) } returns behandling
         assertThat(catchThrowable { service.hentGrunnlagsdata(behandlingId) })
