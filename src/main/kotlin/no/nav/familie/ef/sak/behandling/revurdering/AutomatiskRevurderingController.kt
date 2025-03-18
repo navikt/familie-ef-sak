@@ -35,5 +35,5 @@ class AutomatiskRevurderingController(
 
 data class AutomatiskRevurdering(
     val personIdent: String,
-    val automatiskRevurdert: Boolean,
+    val kanAutomatiskRevurderes: Boolean,
 )
