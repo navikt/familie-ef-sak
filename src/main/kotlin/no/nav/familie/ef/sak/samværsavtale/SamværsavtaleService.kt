@@ -239,10 +239,10 @@ class SamværsavtaleService(
     ) {
         val saksbehandling = behandlingService.hentSaksbehandling(behandlingSomSkalOppdateresId)
         brukerfeilHvis(saksbehandling.status.behandlingErLåstForVidereRedigering()) {
-            "Behandlingen er låst og vilkår kan ikke oppdateres på behandling med id=$behandlingSomSkalOppdateresId"
+            "Behandlingen er låst og samværsavtale kan ikke gjenbrukes på behandling med id=$behandlingSomSkalOppdateresId"
         }
         brukerfeilHvis(!tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandler(behandlingSomSkalOppdateresId)) {
-            "Behandling med id=$behandlingSomSkalOppdateresId eies av noen andre og vilkår kan derfor ikke oppdateres av deg"
+            "Behandling med id=$behandlingSomSkalOppdateresId eies av noen andre og samværsavtale kan derfor ikke oppdateres av deg"
         }
 
         val fagsak: Fagsak = fagsakService.hentFagsakForBehandling(behandlingSomSkalOppdateresId)
