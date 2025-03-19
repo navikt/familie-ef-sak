@@ -13,7 +13,7 @@ import java.net.URI
 class PersonHendelseClient(
     @Qualifier("azure") restOperations: RestOperations,
 ) : AbstractRestClient(restOperations, "familie.ef-personhendelse") {
-    private val uri: URI = URI("https://familie-ef-personhendelse.dev.intern.nav.no")
+    private val uri: URI = URI("https://familie-ef-personhendelse.intern.dev.nav.no")
 
     // TODO: Denne skal fjernes, kun for testing gjennom Swagger.
     fun opprettBehandleAutomatiskInntektsendringTask(personIdent: String): Boolean {
