@@ -127,15 +127,15 @@ internal class GjenbrukVilkårServiceTest {
             every { vilkårsvurderingRepository.findByBehandlingId(it.behandling.id) } returns listOf()
 
             every { vilkårsvurderingRepository.findByBehandlingId(it.behandling.id) } returns
-                    listOf(it.sivilstandsvilkår, it.aktivitetsvilkår) + it.aleneomsorgsvilkår
+                listOf(it.sivilstandsvilkår, it.aktivitetsvilkår) + it.aleneomsorgsvilkår
 
             every { barnService.finnBarnPåBehandling(it.behandling.id) } returns it.behandlingBarn
         }
         every { behandlingService.hentBehandlingerForGjenbrukAvVilkårOgSamværsavtaler(fagsakPersonId) } returns
-                listOf(
-                    ferdigstiltBehandlingOS,
-                    nyBehandlingBT,
-                )
+            listOf(
+                ferdigstiltBehandlingOS,
+                nyBehandlingBT,
+            )
 
         every { vilkårsvurderingRepository.updateAll(capture(vilkårsvurderingerSlot)) } answers { firstArg() }
         every { vilkårsvurderingRepository.update(capture(vilkårsvurderingSlot)) } answers { firstArg() }
@@ -204,7 +204,7 @@ internal class GjenbrukVilkårServiceTest {
     @Test
     internal fun `skal kaste feil dersom behandlingen er låst for videre redigering`() {
         every { behandlingService.hentSaksbehandling(nyBehandlingBT.id) } returns
-                nyBT.saksbehandling.copy(status = BehandlingStatus.IVERKSETTER_VEDTAK)
+            nyBT.saksbehandling.copy(status = BehandlingStatus.IVERKSETTER_VEDTAK)
 
         assertThatThrownBy { gjenbrukVilkår() }
             .hasMessageContaining("Behandlingen er låst og vilkår kan ikke oppdateres på behandling med id=")
@@ -301,7 +301,7 @@ internal class GjenbrukVilkårServiceTest {
                 barn = listOf(barnMedIdent(fnr = "123", navn = "fornavn etternavn")),
             )
         every { grunnlagsdataService.hentGrunnlagsdata(behandlingId) } returns
-                GrunnlagsdataMedMetadata(grunnlagsdata, LocalDateTime.now())
+            GrunnlagsdataMedMetadata(grunnlagsdata, LocalDateTime.now())
     }
 
     data class TestData(

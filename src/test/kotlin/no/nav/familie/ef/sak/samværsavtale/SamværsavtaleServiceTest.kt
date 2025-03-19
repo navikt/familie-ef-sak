@@ -35,7 +35,6 @@ import no.nav.familie.ef.sak.samværsavtale.domain.Samværsandel.KVELD_NATT
 import no.nav.familie.ef.sak.samværsavtale.domain.Samværsandel.MORGEN
 import no.nav.familie.ef.sak.samværsavtale.domain.Samværsavtale
 import no.nav.familie.ef.sak.samværsavtale.dto.JournalførBeregnetSamværRequest
-import no.nav.familie.ef.sak.samværsavtale.dto.SamværsavtaleDto
 import no.nav.familie.ef.sak.samværsavtale.dto.tilDto
 import no.nav.familie.ef.sak.vilkår.VilkårType
 import no.nav.familie.ef.sak.vilkår.regler.HovedregelMetadata
@@ -91,9 +90,9 @@ internal class SamværsavtaleServiceTest {
             val samværsavtale = samværsavtale(behandlingId = behandlingId).tilDto()
 
             every { behandlingService.hentBehandling(behandlingId) } returns
-                    behandling(id = behandlingId, status = behandlingStatus)
+                behandling(id = behandlingId, status = behandlingStatus)
             every { barnService.finnBarnPåBehandling(behandlingId) } returns
-                    listOf(behandlingBarn(behandlingId = behandlingId))
+                listOf(behandlingBarn(behandlingId = behandlingId))
 
             val feil: ApiFeil =
                 assertThrows {
@@ -110,9 +109,9 @@ internal class SamværsavtaleServiceTest {
             val samværsavtale = samværsavtale(behandlingId = behandlingId).tilDto()
 
             every { behandlingService.hentBehandling(behandlingId) } returns
-                    behandling(id = behandlingId, status = UTREDES)
+                behandling(id = behandlingId, status = UTREDES)
             every { barnService.finnBarnPåBehandling(behandlingId) } returns
-                    listOf(behandlingBarn(behandlingId = behandlingId))
+                listOf(behandlingBarn(behandlingId = behandlingId))
             every {
                 tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandler(behandlingId)
             } returns false
@@ -132,9 +131,9 @@ internal class SamværsavtaleServiceTest {
             val samværsavtale = samværsavtale(behandlingId = behandlingId).tilDto()
 
             every { behandlingService.hentBehandling(behandlingId) } returns
-                    behandling(id = behandlingId, status = UTREDES)
+                behandling(id = behandlingId, status = UTREDES)
             every { barnService.finnBarnPåBehandling(behandlingId) } returns
-                    listOf(behandlingBarn(behandlingId = behandlingId))
+                listOf(behandlingBarn(behandlingId = behandlingId))
             every {
                 tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandler(behandlingId)
             } returns true
@@ -159,9 +158,9 @@ internal class SamværsavtaleServiceTest {
                 ).tilDto()
 
             every { behandlingService.hentBehandling(behandlingId) } returns
-                    behandling(id = behandlingId, status = UTREDES)
+                behandling(id = behandlingId, status = UTREDES)
             every { barnService.finnBarnPåBehandling(behandlingId) } returns
-                    listOf(behandlingBarn(behandlingId = behandlingId))
+                listOf(behandlingBarn(behandlingId = behandlingId))
             every {
                 tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandler(behandlingId)
             } returns true
@@ -186,9 +185,9 @@ internal class SamværsavtaleServiceTest {
                 ).tilDto()
 
             every { behandlingService.hentBehandling(behandlingId) } returns
-                    behandling(id = behandlingId, status = UTREDES)
+                behandling(id = behandlingId, status = UTREDES)
             every { barnService.finnBarnPåBehandling(behandlingId) } returns
-                    listOf(behandlingBarn(behandlingId = behandlingId))
+                listOf(behandlingBarn(behandlingId = behandlingId))
             every {
                 tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandler(behandlingId)
             } returns true
@@ -216,9 +215,9 @@ internal class SamværsavtaleServiceTest {
             val lagretSamværsavtale = slot<Samværsavtale>()
 
             every { behandlingService.hentBehandling(behandlingId) } returns
-                    behandling(id = behandlingId, status = UTREDES)
+                behandling(id = behandlingId, status = UTREDES)
             every { barnService.finnBarnPåBehandling(behandlingId) } returns
-                    listOf(behandlingBarn(id = behandlingBarnId, behandlingId = behandlingId))
+                listOf(behandlingBarn(id = behandlingBarnId, behandlingId = behandlingId))
             every {
                 tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandler(behandlingId)
             } returns true
@@ -263,20 +262,20 @@ internal class SamværsavtaleServiceTest {
             val lagretSamværsavtale = slot<Samværsavtale>()
 
             every { behandlingService.hentBehandling(behandlingId) } returns
-                    behandling(id = behandlingId, status = UTREDES)
+                behandling(id = behandlingId, status = UTREDES)
             every { barnService.finnBarnPåBehandling(behandlingId) } returns
-                    listOf(behandlingBarn(id = behandlingBarnId, behandlingId = behandlingId))
+                listOf(behandlingBarn(id = behandlingBarnId, behandlingId = behandlingId))
             every {
                 tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandler(behandlingId)
             } returns true
             every {
                 samværsavtaleRepository.findByBehandlingIdAndBehandlingBarnId(behandlingId, behandlingBarnId)
             } returns
-                    samværsavtale(
-                        id = lagretSamværsavtaleId,
-                        behandlingId = behandlingId,
-                        behandlingBarnid = behandlingBarnId,
-                    )
+                samværsavtale(
+                    id = lagretSamværsavtaleId,
+                    behandlingId = behandlingId,
+                    behandlingBarnid = behandlingBarnId,
+                )
             every { samværsavtaleRepository.update(capture(lagretSamværsavtale)) } answers { firstArg() }
 
             samværsavtaleService.opprettEllerErstattSamværsavtale(samværsavtale)
@@ -315,7 +314,7 @@ internal class SamværsavtaleServiceTest {
         internal fun `skal returnere samværsavtale dersom samværsavtale finnes fra før`() {
             val behandlingId = UUID.randomUUID()
             every { samværsavtaleRepository.findByBehandlingId(behandlingId) } returns
-                    listOf(samværsavtale(), samværsavtale(), samværsavtale())
+                listOf(samværsavtale(), samværsavtale(), samværsavtale())
             val samværsavtaler = samværsavtaleService.hentSamværsavtalerForBehandling(behandlingId)
             assertThat(samværsavtaler.size).isEqualTo(3)
         }
@@ -334,7 +333,7 @@ internal class SamværsavtaleServiceTest {
             val behandlingBarnId = UUID.randomUUID()
 
             every { behandlingService.hentBehandling(behandlingId) } returns
-                    behandling(id = behandlingId, status = behandlingStatus)
+                behandling(id = behandlingId, status = behandlingStatus)
 
             val feil: ApiFeil =
                 assertThrows {
@@ -351,7 +350,7 @@ internal class SamværsavtaleServiceTest {
             val behandlingBarnId = UUID.randomUUID()
 
             every { behandlingService.hentBehandling(behandlingId) } returns
-                    behandling(id = behandlingId)
+                behandling(id = behandlingId)
             every {
                 tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandler(behandlingId)
             } returns false
@@ -373,7 +372,7 @@ internal class SamværsavtaleServiceTest {
             val behandlingBarnSlot = slot<UUID>()
 
             every { behandlingService.hentBehandling(behandlingId) } returns
-                    behandling(id = behandlingId)
+                behandling(id = behandlingId)
             every {
                 tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandler(behandlingId)
             } returns true
@@ -423,11 +422,11 @@ internal class SamværsavtaleServiceTest {
             val metadata: HovedregelMetadata =
                 hovedregelMetadata(
                     barn =
-                    listOf(
-                        barnPåBeggeBehandlingerMedSamværsavtale.copy(behandlingId = nyBehandlingId),
-                        barnPåNyBehandling,
-                        barnPåBeggeBehandlingerUtenSamværsavtale.copy(behandlingId = nyBehandlingId),
-                    ),
+                        listOf(
+                            barnPåBeggeBehandlingerMedSamværsavtale.copy(behandlingId = nyBehandlingId),
+                            barnPåNyBehandling,
+                            barnPåBeggeBehandlingerUtenSamværsavtale.copy(behandlingId = nyBehandlingId),
+                        ),
                 )
 
             val samværsavtaleBarnPåBeggeBehandlinger =
@@ -444,9 +443,9 @@ internal class SamværsavtaleServiceTest {
                 )
 
             every { samværsavtaleRepository.findByBehandlingId(eksisterendeBehandlingId) } returns
-                    listOf(samværsavtaleBarnPåBeggeBehandlinger, samværsavtaleBarnPåEksisterendeBehandling)
+                listOf(samværsavtaleBarnPåBeggeBehandlinger, samværsavtaleBarnPåEksisterendeBehandling)
             every { barnService.finnBarnPåBehandling(eksisterendeBehandlingId) } returns
-                    listOf(barnPåBeggeBehandlingerMedSamværsavtale, barnPåEksisterendeBehandling, barnPåBeggeBehandlingerUtenSamværsavtale)
+                listOf(barnPåBeggeBehandlingerMedSamværsavtale, barnPåEksisterendeBehandling, barnPåBeggeBehandlingerUtenSamværsavtale)
             every { samværsavtaleRepository.insertAll(capture(nyeSamværsavtaler)) } answers { firstArg() }
 
             samværsavtaleService.gjenbrukSamværsavtaler(nyBehandlingId, eksisterendeBehandlingId, metadata)
@@ -492,9 +491,7 @@ internal class SamværsavtaleServiceTest {
 
             assertThat(feil.message).isEqualTo("Behandlingen er låst og samværsavtale kan ikke gjenbrukes på behandling med id=${behandlingSomSkalOppdateres.id}")
             assertThat(feil.httpStatus).isEqualTo(HttpStatus.BAD_REQUEST)
-
         }
-
 
         @Test
         internal fun `skal ikke kunne gjenbruke samværsavtale på behandling som tilhører en annen saksbehandler`() {
@@ -640,8 +637,8 @@ internal class SamværsavtaleServiceTest {
             every { samværsavtaleRepository.findByBehandlingId(behandlingForGjenbruk.id) } returns listOf(samværsavtale(), samværsavtale(), samværsavtale(behandlingBarnid = barn2PåBehandlingForGjenbruk.id, uker = listOf(samværsuke(andeler = listOf(KVELD_NATT)), samværsuke(andeler = listOf(MORGEN, BARNEHAGE_SKOLE)))))
             every { behandlingService.hentBehandling(behandlingSomSkalOppdateres.id) } returns behandlingSomSkalOppdateres
             every { barnService.finnBarnPåBehandling(behandlingSomSkalOppdateres.id) } returns listOf(barn1PåBehandlingSomSkalOppdateres, barn2PåBehandlingSomSkalOppdateres)
-            every { samværsavtaleRepository.findByBehandlingIdAndBehandlingBarnId(behandlingSomSkalOppdateres.id, barn1PåBehandlingSomSkalOppdateres.id)} returns samværsavtale()
-            every {samværsavtaleRepository.findByBehandlingIdAndBehandlingBarnId(any(), any())} returns null
+            every { samværsavtaleRepository.findByBehandlingIdAndBehandlingBarnId(behandlingSomSkalOppdateres.id, barn1PåBehandlingSomSkalOppdateres.id) } returns samværsavtale()
+            every { samværsavtaleRepository.findByBehandlingIdAndBehandlingBarnId(any(), any()) } returns null
             every { samværsavtaleRepository.insert(capture(lagretSamværsavtale)) } answers { firstArg() }
 
             samværsavtaleService.gjenbrukSamværsavtale(behandlingSomSkalOppdateres.id, behandlingForGjenbruk.id, listOf(barn1PåBehandlingSomSkalOppdateres, barn2PåBehandlingSomSkalOppdateres), vilkårsVurderingSomSkalOppdateres)

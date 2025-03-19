@@ -63,7 +63,7 @@ class GjenbrukVilkårService(
             )
         secureLogger.info(
             "${SikkerhetContext.hentSaksbehandlerEllerSystembruker()} gjenbruker vurderinger fra behandling $behandlingForGjenbrukId " +
-                    "for å oppdatere vurderinger på inngangsvilkår for behandling $behandlingSomSkalOppdateresId",
+                "for å oppdatere vurderinger på inngangsvilkår for behandling $behandlingSomSkalOppdateresId",
         )
         vilkårsvurderingRepository.updateAll(vilkårsVurderingerForGjenbruk)
     }
@@ -91,7 +91,7 @@ class GjenbrukVilkårService(
                     behandlingSomSkalOppdateresId,
                     behandlingForGjenbrukId,
                     barnPåBehandlingSomSkalOppdateres,
-                    vilkårsvurderingSomSkalOppdateres
+                    vilkårsvurderingSomSkalOppdateres,
                 )
             }
         }
@@ -106,7 +106,7 @@ class GjenbrukVilkårService(
     ): Vilkårsvurdering {
         secureLogger.info(
             "${SikkerhetContext.hentSaksbehandlerEllerSystembruker()} gjenbruker enkel vurdering fra behandling $behandlingForGjenbrukId " +
-                    "for å oppdatere vurderinger på inngangsvilkår for behandling $behandlingSomSkalOppdateresId",
+                "for å oppdatere vurderinger på inngangsvilkår for behandling $behandlingSomSkalOppdateresId",
         )
         return vilkårsvurderingRepository.update(vilkårsvurderingSomSkalOppdateres)
     }
@@ -166,10 +166,10 @@ class GjenbrukVilkårService(
                     barnId = nåværendeVurdering.barnId,
                     opphavsvilkår = tidligereVurdering.opprettOpphavsvilkår(),
                     delvilkårsvurdering =
-                    tidligereVurdering.delvilkårsvurdering.copy(
-                        delvilkårsvurderinger =
-                        tidligereVurdering.gjeldendeDelvilkårsvurderinger(),
-                    ),
+                        tidligereVurdering.delvilkårsvurdering.copy(
+                            delvilkårsvurderinger =
+                                tidligereVurdering.gjeldendeDelvilkårsvurderinger(),
+                        ),
                 )
             }
     }
@@ -206,8 +206,8 @@ class GjenbrukVilkårService(
         val nåværendeGrunnlagsdata = grunnlagsdataService.hentGrunnlagsdata(behandlingId)
         return tidligereGrunnlagsdata.grunnlagsdata.søker.sivilstand
             .gjeldende() ==
-                nåværendeGrunnlagsdata.grunnlagsdata.søker.sivilstand
-                    .gjeldende()
+            nåværendeGrunnlagsdata.grunnlagsdata.søker.sivilstand
+                .gjeldende()
     }
 
     private fun validerBehandlingForGjenbruk(

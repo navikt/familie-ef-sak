@@ -121,7 +121,7 @@ class SamværsavtaleService(
                 behandlingId = behandlingSomSkalOppdateresId,
                 behandlingBarnId = vilkårsvurderingSomSkalOppdateres.barnId ?: error("Mangler behandlingBarnId for gjenbruk av samværsavtale"),
                 uker = samværsavtaleForGjenbruk?.uker?.uker ?: emptyList(),
-            )
+            ),
         )
     }
 
@@ -146,9 +146,9 @@ class SamværsavtaleService(
                 personIdent = request.personIdent,
                 navn = personopplysningerService.hentGjeldeneNavn(listOf(request.personIdent)).getValue(request.personIdent),
                 avsnitt =
-                request.uker.mapIndexed { ukeIndex, samværsuke ->
-                    lagAvsnittFritekstbrev(ukeIndex + 1, samværsuke)
-                } + Avsnitt(deloverskrift = "Oppsummering", innhold = request.oppsummering) +
+                    request.uker.mapIndexed { ukeIndex, samværsuke ->
+                        lagAvsnittFritekstbrev(ukeIndex + 1, samværsuke)
+                    } + Avsnitt(deloverskrift = "Oppsummering", innhold = request.oppsummering) +
                         Avsnitt(
                             deloverskrift = "Notat",
                             innhold = request.notat,
