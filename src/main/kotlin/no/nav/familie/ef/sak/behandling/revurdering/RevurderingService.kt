@@ -144,15 +144,19 @@ class RevurderingService(
     }
 
     @Transactional
-    fun opprettAutomatiskInntektsendringTask(personident: String) {
+    fun opprettAutomatiskInntektsendringTask(personIdenter: List<String>) {
         if (LeaderClient.isLeader() == true) {
 //            val ukenummer = LocalDate.now().get(IsoFields.WEEK_OF_WEEK_BASED_YEAR)
 //            val year = LocalDate.now().year
-            val payload = personident
-            val finnesTask = taskService.finnTaskMedPayloadOgType(payload, BehandleAutomatiskInntektsendringTask.TYPE)
-            if (finnesTask == null) {
-                val task = BehandleAutomatiskInntektsendringTask.opprettTask(payload)
-                taskService.save(task)
+
+            personIdenter.forEach { personIdent ->
+                val payload = personIdent
+                val finnesTask = taskService.finnTaskMedPayloadOgType(payload, BehandleAutomatiskInntektsendringTask.TYPE)
+
+                if (finnesTask == null) {
+                    val task = BehandleAutomatiskInntektsendringTask.opprettTask(payload)
+                    taskService.save(task)
+                }
             }
         }
     }

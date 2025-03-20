@@ -103,7 +103,7 @@ class OppgaveforvaltningsController(
     fun manuellOpprettelseAvBehandleAutomatiskInntektsendringTask(
         @RequestBody manuellOpprettelseAvBehandleAutomatiskInntektsendringTaskRequestBody: ManuellOpprettelseAvBehandleAutomatiskInntektsendringTaskRequestBody,
     ) {
-        revurderingService.opprettAutomatiskInntektsendringTask(personident = manuellOpprettelseAvBehandleAutomatiskInntektsendringTaskRequestBody.personIdent)
+        revurderingService.opprettAutomatiskInntektsendringTask(personIdenter = listOf(manuellOpprettelseAvBehandleAutomatiskInntektsendringTaskRequestBody.personIdent))
     }
 }
 

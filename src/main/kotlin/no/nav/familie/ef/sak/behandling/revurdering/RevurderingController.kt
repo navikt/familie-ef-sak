@@ -84,10 +84,10 @@ class RevurderingController(
 
     @PostMapping("behandleAutomatisk")
     fun opprettAutomatiskInntektsendringsTask(
-        @RequestBody personident: String,
+        @RequestBody personIdenter: List<String>,
     ): Ressurs<Boolean> {
 //        tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.ACCESS)
-        revurderingService.opprettAutomatiskInntektsendringTask(personident)
+        revurderingService.opprettAutomatiskInntektsendringTask(personIdenter)
         return Ressurs.success(true)
     }
 }
