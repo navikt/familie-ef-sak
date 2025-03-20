@@ -55,13 +55,12 @@ class SamværsavtaleService(
     @Transactional
     fun opprettEllerErstattSamværsavtale(
         request: SamværsavtaleDto,
-        erGjenbruk: Boolean = false,
     ): Samværsavtale {
         val behandling = behandlingService.hentBehandling(request.behandlingId)
         val behandlingBarn = barnService.finnBarnPåBehandling(request.behandlingId)
 
         validerBehandling(behandling)
-        validerRequest(request, behandlingBarn, erGjenbruk)
+        validerRequest(request, behandlingBarn)
 
         val lagretSamværsavtale = hentSamværsavtaleEllerNull(request.behandlingId, request.behandlingBarnId)
 
@@ -118,16 +117,16 @@ class SamværsavtaleService(
         val barnIdMap = byggBarnMapFraTidligereTilNyId(barnPåForrigeBehandling, barnPåBehandlingSomSkalOppdateres)
         val barnPåBehandlingForGjenbrukId = barnIdMap.entries.find { it.value.id == vilkårsvurderingSomSkalOppdateres.barnId }?.key ?: error("Fant ikke barn på tidligere vilkårsvurdering")
         val samværsavtaleForGjenbruk = hentSamværsavtalerForBehandling(behandlingForGjenbrukId).find { it.behandlingBarnId == barnPåBehandlingForGjenbrukId }
-
-        opprettEllerErstattSamværsavtale(
-            request =
-                SamværsavtaleDto(
-                    behandlingId = behandlingSomSkalOppdateresId,
-                    behandlingBarnId = vilkårsvurderingSomSkalOppdateres.barnId ?: error("Mangler behandlingBarnId for gjenbruk av samværsavtale"),
-                    uker = samværsavtaleForGjenbruk?.uker?.uker ?: emptyList(),
-                ),
-            erGjenbruk = true,
-        )
+        if (samværsavtaleForGjenbruk != null) {
+            opprettEllerErstattSamværsavtale(
+                request =
+                    SamværsavtaleDto(
+                        behandlingId = behandlingSomSkalOppdateresId,
+                        behandlingBarnId = vilkårsvurderingSomSkalOppdateres.barnId ?: error("Mangler behandlingBarnId for gjenbruk av samværsavtale"),
+                        uker = samværsavtaleForGjenbruk.uker.uker,
+                    ),
+            )
+        }
     }
 
     fun journalførBeregnetSamvær(request: JournalførBeregnetSamværRequest): String {
@@ -204,9 +203,8 @@ class SamværsavtaleService(
     private fun validerRequest(
         request: SamværsavtaleDto,
         behandlingBarn: List<BehandlingBarn>,
-        erGjenbruk: Boolean,
     ) {
-        brukerfeilHvis(request.uker.isEmpty() && !erGjenbruk) {
+        brukerfeilHvis(request.uker.isEmpty()) {
             "Kan ikke opprette en samværsavtale uten noen uker. BehandlingId=${request.behandlingId}"
         }
         brukerfeilHvis(
