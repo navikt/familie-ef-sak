@@ -126,7 +126,7 @@ internal class SamværsavtaleServiceTest {
         }
 
         @Test
-        internal fun `skal ikke kunne opprette en samværsavtale uten noen uker`() {
+        internal fun `skal ikke kunne opprette en samværsavtale uten noen uker dersom det ikke er gjenbruk`() {
             val behandlingId = UUID.randomUUID()
             val samværsavtale = samværsavtale(behandlingId = behandlingId).tilDto()
 
@@ -144,6 +144,28 @@ internal class SamværsavtaleServiceTest {
                 }
 
             assertThat(feil.message).isEqualTo("Kan ikke opprette en samværsavtale uten noen uker. BehandlingId=$behandlingId")
+            assertThat(feil.httpStatus).isEqualTo(HttpStatus.BAD_REQUEST)
+        }
+
+        @Test
+        internal fun `skal kunne gjenbruke en samværsavtale uten noen uker`() {
+            val behandlingId = UUID.randomUUID()
+            val samværsavtale = samværsavtale(behandlingId = behandlingId).tilDto()
+
+            every { behandlingService.hentBehandling(behandlingId) } returns
+                    behandling(id = behandlingId, status = UTREDES)
+            every { barnService.finnBarnPåBehandling(behandlingId) } returns
+                    listOf(behandlingBarn(behandlingId = behandlingId))
+            every {
+                tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandler(behandlingId)
+            } returns true
+
+            val feil: ApiFeil =
+                assertThrows {
+                    samværsavtaleService.opprettEllerErstattSamværsavtale(samværsavtale, true)
+                }
+
+            assertThat(feil.message).isEqualTo("Kan ikke opprette en samværsavtale for et barn som ikke eksisterer på behandlingen. BehandlingId=$behandlingId")
             assertThat(feil.httpStatus).isEqualTo(HttpStatus.BAD_REQUEST)
         }
 

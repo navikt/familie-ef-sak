@@ -53,12 +53,12 @@ class SamværsavtaleService(
     fun hentSamværsavtalerForBehandling(behandlingId: UUID) = samværsavtaleRepository.findByBehandlingId(behandlingId)
 
     @Transactional
-    fun opprettEllerErstattSamværsavtale(request: SamværsavtaleDto): Samværsavtale {
+    fun opprettEllerErstattSamværsavtale(request: SamværsavtaleDto, erGjenbruk: Boolean = false): Samværsavtale {
         val behandling = behandlingService.hentBehandling(request.behandlingId)
         val behandlingBarn = barnService.finnBarnPåBehandling(request.behandlingId)
 
         validerBehandling(behandling)
-        validerRequest(request, behandlingBarn)
+        validerRequest(request, behandlingBarn, erGjenbruk)
 
         val lagretSamværsavtale = hentSamværsavtaleEllerNull(request.behandlingId, request.behandlingBarnId)
 
@@ -117,11 +117,12 @@ class SamværsavtaleService(
         val samværsavtaleForGjenbruk = hentSamværsavtalerForBehandling(behandlingForGjenbrukId).find { it.behandlingBarnId == barnPåBehandlingForGjenbrukId }
 
         opprettEllerErstattSamværsavtale(
-            SamværsavtaleDto(
+            request = SamværsavtaleDto(
                 behandlingId = behandlingSomSkalOppdateresId,
                 behandlingBarnId = vilkårsvurderingSomSkalOppdateres.barnId ?: error("Mangler behandlingBarnId for gjenbruk av samværsavtale"),
                 uker = samværsavtaleForGjenbruk?.uker?.uker ?: emptyList(),
             ),
+            erGjenbruk = true,
         )
     }
 
@@ -146,9 +147,9 @@ class SamværsavtaleService(
                 personIdent = request.personIdent,
                 navn = personopplysningerService.hentGjeldeneNavn(listOf(request.personIdent)).getValue(request.personIdent),
                 avsnitt =
-                    request.uker.mapIndexed { ukeIndex, samværsuke ->
-                        lagAvsnittFritekstbrev(ukeIndex + 1, samværsuke)
-                    } + Avsnitt(deloverskrift = "Oppsummering", innhold = request.oppsummering) +
+                request.uker.mapIndexed { ukeIndex, samværsuke ->
+                    lagAvsnittFritekstbrev(ukeIndex + 1, samværsuke)
+                } + Avsnitt(deloverskrift = "Oppsummering", innhold = request.oppsummering) +
                         Avsnitt(
                             deloverskrift = "Notat",
                             innhold = request.notat,
@@ -199,8 +200,9 @@ class SamværsavtaleService(
     private fun validerRequest(
         request: SamværsavtaleDto,
         behandlingBarn: List<BehandlingBarn>,
+        erGjenbruk: Boolean,
     ) {
-        brukerfeilHvis(request.uker.isEmpty()) {
+        brukerfeilHvis(request.uker.isEmpty() && !erGjenbruk) {
             "Kan ikke opprette en samværsavtale uten noen uker. BehandlingId=${request.behandlingId}"
         }
         brukerfeilHvis(
