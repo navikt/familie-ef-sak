@@ -75,6 +75,7 @@ class SøkService(
         fagsaker: List<Fagsak>,
     ): Søkeresultat {
         val person = personService.hentSøker(gjeldendePersonIdent)
+        secureLogger.info("Person-debug: $person")
 
         return Søkeresultat(
             personIdent = gjeldendePersonIdent,
