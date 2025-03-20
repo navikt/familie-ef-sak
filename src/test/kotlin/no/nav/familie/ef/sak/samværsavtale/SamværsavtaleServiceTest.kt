@@ -616,6 +616,30 @@ internal class SamværsavtaleServiceTest {
         }
 
         @Test
+        internal fun `skal slette eksisterende samværsavtale dersom samværsavtalen man gjenbruker fra ikke eksisterer`() {
+            val fagsakForBehandlingSomSkalOppdateres = fagsak()
+            val behandlingSomSkalOppdateres = behandling(fagsak = fagsakForBehandlingSomSkalOppdateres)
+            val behandlingForGjenbruk = behandling()
+            val barnPåBehandlingSomSkalOppdateres = behandlingBarn(behandlingId = behandlingSomSkalOppdateres.id, personIdent = "1")
+            val vilkårsVurderingSomSkalOppdateres = vilkårsvurdering(behandlingId = behandlingSomSkalOppdateres.id, type = VilkårType.ALENEOMSORG, barnId = barnPåBehandlingSomSkalOppdateres.id)
+
+            every { behandlingService.hentSaksbehandling(behandlingSomSkalOppdateres.id) } returns saksbehandling(behandling = behandlingSomSkalOppdateres)
+            every {
+                tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandler(behandlingSomSkalOppdateres.id)
+            } returns true
+            every { fagsakService.hentFagsakForBehandling(behandlingSomSkalOppdateres.id) } returns fagsakForBehandlingSomSkalOppdateres
+            every { behandlingService.hentBehandlingerForGjenbrukAvVilkårOgSamværsavtaler(fagsakForBehandlingSomSkalOppdateres.fagsakPersonId) } returns listOf(behandlingForGjenbruk)
+            every { barnService.finnBarnPåBehandling(behandlingSomSkalOppdateres.id) } returns listOf(barnPåBehandlingSomSkalOppdateres)
+            every { barnService.finnBarnPåBehandling(behandlingForGjenbruk.id) } returns listOf(barnPåBehandlingSomSkalOppdateres)
+            every { samværsavtaleRepository.findByBehandlingId(any()) } returns emptyList()
+            every { samværsavtaleRepository.deleteByBehandlingIdAndBehandlingBarnId(any(), any()) } just Runs
+
+            samværsavtaleService.gjenbrukSamværsavtale(behandlingSomSkalOppdateres.id, behandlingForGjenbruk.id, listOf(barnPåBehandlingSomSkalOppdateres), vilkårsVurderingSomSkalOppdateres)
+
+            verify (exactly = 1) { samværsavtaleRepository.deleteByBehandlingIdAndBehandlingBarnId(behandlingSomSkalOppdateres.id, barnPåBehandlingSomSkalOppdateres.id) }
+        }
+
+        @Test
         internal fun `skal gjenbruke riktig samværsavtale fra forrige gjenbrukbare behandling`() {
             val fagsakForBehandlingSomSkalOppdateres = fagsak()
             val behandlingSomSkalOppdateres = behandling(fagsak = fagsakForBehandlingSomSkalOppdateres)
