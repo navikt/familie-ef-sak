@@ -636,7 +636,9 @@ internal class SamværsavtaleServiceTest {
 
             samværsavtaleService.gjenbrukSamværsavtale(behandlingSomSkalOppdateres.id, behandlingForGjenbruk.id, listOf(barnPåBehandlingSomSkalOppdateres), vilkårsVurderingSomSkalOppdateres)
 
-            verify (exactly = 1) { samværsavtaleRepository.deleteByBehandlingIdAndBehandlingBarnId(behandlingSomSkalOppdateres.id, barnPåBehandlingSomSkalOppdateres.id) }
+            verify(exactly = 1) { samværsavtaleRepository.deleteByBehandlingIdAndBehandlingBarnId(behandlingSomSkalOppdateres.id, barnPåBehandlingSomSkalOppdateres.id) }
+            verify(exactly = 0) { samværsavtaleRepository.insert(any()) }
+            verify(exactly = 0) { samværsavtaleRepository.update(any()) }
         }
 
         @Test
