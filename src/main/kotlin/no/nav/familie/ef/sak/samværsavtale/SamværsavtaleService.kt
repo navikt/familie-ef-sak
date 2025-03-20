@@ -53,7 +53,10 @@ class SamværsavtaleService(
     fun hentSamværsavtalerForBehandling(behandlingId: UUID) = samværsavtaleRepository.findByBehandlingId(behandlingId)
 
     @Transactional
-    fun opprettEllerErstattSamværsavtale(request: SamværsavtaleDto, erGjenbruk: Boolean = false): Samværsavtale {
+    fun opprettEllerErstattSamværsavtale(
+        request: SamværsavtaleDto,
+        erGjenbruk: Boolean = false,
+    ): Samværsavtale {
         val behandling = behandlingService.hentBehandling(request.behandlingId)
         val behandlingBarn = barnService.finnBarnPåBehandling(request.behandlingId)
 
@@ -117,11 +120,12 @@ class SamværsavtaleService(
         val samværsavtaleForGjenbruk = hentSamværsavtalerForBehandling(behandlingForGjenbrukId).find { it.behandlingBarnId == barnPåBehandlingForGjenbrukId }
 
         opprettEllerErstattSamværsavtale(
-            request = SamværsavtaleDto(
-                behandlingId = behandlingSomSkalOppdateresId,
-                behandlingBarnId = vilkårsvurderingSomSkalOppdateres.barnId ?: error("Mangler behandlingBarnId for gjenbruk av samværsavtale"),
-                uker = samværsavtaleForGjenbruk?.uker?.uker ?: emptyList(),
-            ),
+            request =
+                SamværsavtaleDto(
+                    behandlingId = behandlingSomSkalOppdateresId,
+                    behandlingBarnId = vilkårsvurderingSomSkalOppdateres.barnId ?: error("Mangler behandlingBarnId for gjenbruk av samværsavtale"),
+                    uker = samværsavtaleForGjenbruk?.uker?.uker ?: emptyList(),
+                ),
             erGjenbruk = true,
         )
     }
@@ -147,9 +151,9 @@ class SamværsavtaleService(
                 personIdent = request.personIdent,
                 navn = personopplysningerService.hentGjeldeneNavn(listOf(request.personIdent)).getValue(request.personIdent),
                 avsnitt =
-                request.uker.mapIndexed { ukeIndex, samværsuke ->
-                    lagAvsnittFritekstbrev(ukeIndex + 1, samværsuke)
-                } + Avsnitt(deloverskrift = "Oppsummering", innhold = request.oppsummering) +
+                    request.uker.mapIndexed { ukeIndex, samværsuke ->
+                        lagAvsnittFritekstbrev(ukeIndex + 1, samværsuke)
+                    } + Avsnitt(deloverskrift = "Oppsummering", innhold = request.oppsummering) +
                         Avsnitt(
                             deloverskrift = "Notat",
                             innhold = request.notat,

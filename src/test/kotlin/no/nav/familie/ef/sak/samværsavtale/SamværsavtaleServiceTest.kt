@@ -153,9 +153,9 @@ internal class SamværsavtaleServiceTest {
             val samværsavtale = samværsavtale(behandlingId = behandlingId).tilDto()
 
             every { behandlingService.hentBehandling(behandlingId) } returns
-                    behandling(id = behandlingId, status = UTREDES)
+                behandling(id = behandlingId, status = UTREDES)
             every { barnService.finnBarnPåBehandling(behandlingId) } returns
-                    listOf(behandlingBarn(behandlingId = behandlingId))
+                listOf(behandlingBarn(behandlingId = behandlingId))
             every {
                 tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandler(behandlingId)
             } returns true

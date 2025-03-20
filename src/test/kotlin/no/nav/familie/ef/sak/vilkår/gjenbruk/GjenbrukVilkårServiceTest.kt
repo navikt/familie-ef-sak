@@ -35,6 +35,7 @@ import no.nav.familie.ef.sak.vilkår.VilkårType
 import no.nav.familie.ef.sak.vilkår.Vilkårsresultat
 import no.nav.familie.ef.sak.vilkår.Vilkårsvurdering
 import no.nav.familie.ef.sak.vilkår.VilkårsvurderingRepository
+import no.nav.familie.ef.sak.vilkår.dto.GjenbruktVilkårResponse
 import no.nav.familie.kontrakter.ef.søknad.TestsøknadBuilder
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.util.FnrGenerator
@@ -130,6 +131,8 @@ internal class GjenbrukVilkårServiceTest {
                 listOf(it.sivilstandsvilkår, it.aktivitetsvilkår) + it.aleneomsorgsvilkår
 
             every { barnService.finnBarnPåBehandling(it.behandling.id) } returns it.behandlingBarn
+
+            every { samværsavtaleService.hentSamværsavtalerForBehandling(any()) } returns emptyList()
         }
         every { behandlingService.hentBehandlingerForGjenbrukAvVilkårOgSamværsavtaler(fagsakPersonId) } returns
             listOf(
@@ -283,7 +286,7 @@ internal class GjenbrukVilkårServiceTest {
         )
     }
 
-    private fun gjenbrukEnkelVilkårsvurdering(vilkårId: UUID): Vilkårsvurdering =
+    private fun gjenbrukEnkelVilkårsvurdering(vilkårId: UUID): GjenbruktVilkårResponse =
         gjenbrukVilkårService.gjenbrukInngangsvilkårVurderingOgSamværsavtale(
             nyBT.behandling.id,
             ferdigstiltOS.behandling.id,

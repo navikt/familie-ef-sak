@@ -3,6 +3,7 @@ package no.nav.familie.ef.sak.vilkår
 import no.nav.familie.ef.sak.AuditLoggerEvent
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.ef.sak.vilkår.dto.EnkeltVilkårForGjenbrukRequest
+import no.nav.familie.ef.sak.vilkår.dto.GjenbruktVilkårResponseDto
 import no.nav.familie.ef.sak.vilkår.dto.OppdaterVilkårsvurderingDto
 import no.nav.familie.ef.sak.vilkår.dto.SvarPåVurderingerDto
 import no.nav.familie.ef.sak.vilkår.dto.VilkårDto
@@ -96,7 +97,7 @@ class VurderingController(
     @PostMapping("gjenbruk-enkelt-vilkar")
     fun gjenbrukEnkeltVilkår(
         @RequestBody request: EnkeltVilkårForGjenbrukRequest,
-    ): Ressurs<VilkårsvurderingDto> {
+    ): Ressurs<GjenbruktVilkårResponseDto> {
         val behandlingForGjenbruk = gjenbrukVilkårService.finnBehandlingerForGjenbruk(request.behandlingId).first()
 
         tilgangService.validerTilgangTilBehandling(behandlingForGjenbruk.id, AuditLoggerEvent.ACCESS)
@@ -104,8 +105,8 @@ class VurderingController(
         tilgangService.validerHarSaksbehandlerrolle()
 
         val (_, metadata) = vurderingService.hentGrunnlagOgMetadata(request.behandlingId)
-        val vilkårsVurderingForGjenbruk = gjenbrukVilkårService.gjenbrukInngangsvilkårVurderingOgSamværsavtale(request.behandlingId, behandlingForGjenbruk.id, request.vilkårId, metadata.barn)
-        return Ressurs.success(vilkårsVurderingForGjenbruk.tilDto())
+        val gjenbruktVilkårResponse = gjenbrukVilkårService.gjenbrukInngangsvilkårVurderingOgSamværsavtale(request.behandlingId, behandlingForGjenbruk.id, request.vilkårId, metadata.barn)
+        return Ressurs.success(gjenbruktVilkårResponse.tilDto())
     }
 
     @GetMapping("{behandlingId}/gjenbrukbare-vilkar")

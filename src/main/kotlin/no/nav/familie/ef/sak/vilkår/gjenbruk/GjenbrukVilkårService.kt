@@ -19,6 +19,7 @@ import no.nav.familie.ef.sak.vilkår.VilkårType
 import no.nav.familie.ef.sak.vilkår.Vilkårsresultat
 import no.nav.familie.ef.sak.vilkår.Vilkårsvurdering
 import no.nav.familie.ef.sak.vilkår.VilkårsvurderingRepository
+import no.nav.familie.ef.sak.vilkår.dto.GjenbruktVilkårResponse
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -74,7 +75,7 @@ class GjenbrukVilkårService(
         behandlingForGjenbrukId: UUID,
         vilkårSomSkalOppdateresId: UUID,
         barnPåBehandlingSomSkalOppdateres: List<BehandlingBarn>,
-    ): Vilkårsvurdering {
+    ): GjenbruktVilkårResponse {
         validerBehandlingForGjenbruk(
             behandlingSomSkalOppdateresId,
             behandlingForGjenbrukId,
@@ -96,7 +97,10 @@ class GjenbrukVilkårService(
             }
         }
 
-        return gjenbrukInngangsvilkårVurdering(behandlingSomSkalOppdateresId, behandlingForGjenbrukId, vilkårsvurderingSomSkalOppdateres)
+        val samværsavtaler = samværsavtaleService.hentSamværsavtalerForBehandling(behandlingSomSkalOppdateresId)
+        val gjenbruktVilkårsvurdering = gjenbrukInngangsvilkårVurdering(behandlingSomSkalOppdateresId, behandlingForGjenbrukId, vilkårsvurderingSomSkalOppdateres)
+
+        return GjenbruktVilkårResponse(gjenbruktVilkårsvurdering, samværsavtaler)
     }
 
     private fun gjenbrukInngangsvilkårVurdering(
