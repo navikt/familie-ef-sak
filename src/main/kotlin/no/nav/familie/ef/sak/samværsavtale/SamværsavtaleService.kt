@@ -113,13 +113,13 @@ class SamværsavtaleService(
     ) {
         validerBehandlingerForGjenbruk(behandlingSomSkalOppdateresId, behandlingForGjenbrukId)
         validerVilkårsvurderingForGjenbruk(vilkårsvurderingSomSkalOppdateres)
-        val barnPåForrigeBehandling = barnService.finnBarnPåBehandling(behandlingForGjenbrukId)
-        val barnIdMap = byggBarnMapFraTidligereTilNyId(barnPåForrigeBehandling, barnPåBehandlingSomSkalOppdateres)
-        val barnPåBehandlingForGjenbrukId = barnIdMap.entries.find { it.value.id == vilkårsvurderingSomSkalOppdateres.barnId }?.key ?: error("Fant ikke barn på tidligere vilkårsvurdering")
-        val samværsavtaleForGjenbruk = hentSamværsavtalerForBehandling(behandlingForGjenbrukId).find { it.behandlingBarnId == barnPåBehandlingForGjenbrukId }
+        val barnPåBehandlingForGjenbruk = barnService.finnBarnPåBehandling(behandlingForGjenbrukId)
+        val barnIdMap = byggBarnMapFraTidligereTilNyId(barnPåBehandlingForGjenbruk, barnPåBehandlingSomSkalOppdateres)
+        val tilsvarendeBarnPåBehandlingForGjenbruk = barnIdMap.entries.find { it.value.id == vilkårsvurderingSomSkalOppdateres.barnId }?.key ?: error("Fant ikke barn på tidligere vilkårsvurdering")
+        val samværsavtaleForGjenbruk = hentSamværsavtalerForBehandling(behandlingForGjenbrukId).find { it.behandlingBarnId == tilsvarendeBarnPåBehandlingForGjenbruk }
 
         if (samværsavtaleForGjenbruk == null) {
-            samværsavtaleRepository.deleteByBehandlingIdAndBehandlingBarnId(behandlingSomSkalOppdateresId, barnPåBehandlingForGjenbrukId)
+            samværsavtaleRepository.deleteByBehandlingIdAndBehandlingBarnId(behandlingSomSkalOppdateresId, vilkårsvurderingSomSkalOppdateres.barnId ?: error("Fant ikke barn på tidligere vilkårsvurdering"))
         } else {
             opprettEllerErstattSamværsavtale(
                 request =
