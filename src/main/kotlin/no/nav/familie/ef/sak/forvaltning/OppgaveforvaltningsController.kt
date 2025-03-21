@@ -7,14 +7,27 @@ import no.nav.familie.prosessering.internal.TaskService
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
+import java.time.LocalDateTime
 import java.util.UUID
+
+enum class OppgavetypeSomKanFerdigstilles {
+    BehandleSak,
+    GodkjenneVedtak,
+    ;
+
+    fun tilOppgavetype(): Oppgavetype =
+        when (this) {
+            BehandleSak -> Oppgavetype.BehandleSak
+            GodkjenneVedtak -> Oppgavetype.GodkjenneVedtak
+        }
+}
 
 data class ForvaltningFerdigstillRequest(
     val behandlingId: UUID,
-    val oppgavetype: Oppgavetype,
+    val oppgavetype: OppgavetypeSomKanFerdigstilles,
+    val opprettetTid: LocalDateTime = LocalDateTime.now(),
 )
 
 @RestController
@@ -51,12 +64,19 @@ class OppgaveforvaltningsController(
         taskService.save(task)
     }
 
-    @PostMapping("ferdigstill")
+    @Operation(
+        description =
+            "Hvis en behandling har flere oppgaver av samme type som ikke er ferdigstilt kan vi bruke dette endepunktet for å ferdigstille en av oppgavene.",
+        summary =
+            "Ferdigstill BehandleSak- eller GodkjenneVedtak-oppgave i EF-sak og feilregistrer  oppgave i Gosys",
+    )
+    @PostMapping("ferdigstill/oppgavetype/{oppgavetype}/behandlingid/{behandlingId}")
     fun ferdigstillOppgavtypeForBehandling(
-        @RequestBody request: ForvaltningFerdigstillRequest,
+        @PathVariable behandlingId: UUID,
+        @PathVariable oppgavetype: OppgavetypeSomKanFerdigstilles,
     ) {
         tilgangService.validerHarForvalterrolle()
-        val task = FerdigstillOppgavetypePåBehandlingTask.opprettTask(request)
+        val task = FerdigstillOppgavetypePåBehandlingTask.opprettTask(ForvaltningFerdigstillRequest(behandlingId = behandlingId, oppgavetype = oppgavetype))
         taskService.save(task)
     }
 }

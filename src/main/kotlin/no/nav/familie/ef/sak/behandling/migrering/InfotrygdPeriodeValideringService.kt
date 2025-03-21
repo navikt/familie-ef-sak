@@ -296,7 +296,7 @@ class InfotrygdPeriodeValideringService(
 }
 
 private fun SummertInfotrygdPeriodeDto.harNyerePerioder(): Boolean {
-    val antallÅrUtenGjeldendeInfotrygperioder: Long = 5
+    val antallÅrUtenGjeldendeInfotrygperioder: Long = 4
     return this.stønadsperiode.tomDato > LocalDate.now().minusYears(antallÅrUtenGjeldendeInfotrygperioder)
 }
 
