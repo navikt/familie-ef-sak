@@ -1,7 +1,6 @@
 package no.nav.familie.ef.sak.forvaltning
 
 import io.swagger.v3.oas.annotations.Operation
-import no.nav.familie.ef.sak.behandling.revurdering.RevurderingService
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.internal.TaskService
@@ -37,8 +36,6 @@ data class ForvaltningFerdigstillRequest(
 class OppgaveforvaltningsController(
     private val taskService: TaskService,
     private val tilgangService: TilgangService,
-    private val personHendelseClient: PersonHendelseClient,
-    private val revurderingService: RevurderingService,
 ) {
     @PostMapping("behandling/{behandlingId}")
     fun loggOppgavemetadataFor(
