@@ -19,6 +19,7 @@ enum class Toggle(
         "Release",
     ),
     KONTROLLER_NÆRINGSINNTEKT("familie.ef.sak.kontroller-naeringsinntekt"),
+    BEHANDLE_AUTOMATISK_INNTEKTSENDRING("familie.ef.sak-behandle-automatisk-inntektsendring-task", "Release"),
 
     // Operational
     G_BEREGNING("familie.ef.sak.g-beregning", "Operational"),

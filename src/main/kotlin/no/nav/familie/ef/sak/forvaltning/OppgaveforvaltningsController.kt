@@ -8,7 +8,6 @@ import no.nav.familie.prosessering.internal.TaskService
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import java.time.LocalDateTime
@@ -83,31 +82,4 @@ class OppgaveforvaltningsController(
         val task = FerdigstillOppgavetypePåBehandlingTask.opprettTask(ForvaltningFerdigstillRequest(behandlingId = behandlingId, oppgavetype = oppgavetype))
         taskService.save(task)
     }
-
-    // TODO: Denne skal fjernes, kun for testing gjennom Swagger.
-    @Operation(
-        description = "Test kall som får ef-personhendelse til å begynne å lage BehandleAutomatiskInntektsendringTasker for identer i pre-prod.",
-        summary = "Personhendelse kaller på EF-sak, henter identer, sjekker identer og returener identer for generering av BehandleAutomatiskInntektsendringTasker i ef-sak.",
-    )
-    @PostMapping("/manuellOpprettelseAvBehandleAutomatiskInntektsendringTasker")
-    fun manuellOpprettelseAvBehandleAutomatiskInntektsendringTasker() {
-        personHendelseClient.opprettBehandleAutomatiskInntektsendringTasker()
-    }
-
-    // TODO: Denne skal fjernes, kun for testing gjennom Swagger.
-    @Operation(
-        description = "Test kall som sender med en ident, der hensikten er å teste om personhendelse klarer å lage en BehandleAutomatiskInntektsendringTask for en gitt personIdent.",
-        summary = "Tar inn en personIdent og får personHendelse til å manuelt opprette en BehandleAutomatiskInntektsendringTask for gitt personIdent.",
-    )
-    @PostMapping("/manuellOpprettelseAvBehandleAutomatiskInntektsendringTask")
-    fun manuellOpprettelseAvBehandleAutomatiskInntektsendringTask(
-        @RequestBody manuellOpprettelseAvBehandleAutomatiskInntektsendringTaskRequestBody: ManuellOpprettelseAvBehandleAutomatiskInntektsendringTaskRequestBody,
-    ) {
-        revurderingService.opprettAutomatiskInntektsendringTask(personIdenter = listOf(manuellOpprettelseAvBehandleAutomatiskInntektsendringTaskRequestBody.personIdent))
-    }
 }
-
-// TODO: Denne skal fjernes, kun for testing gjennom Swagger.
-data class ManuellOpprettelseAvBehandleAutomatiskInntektsendringTaskRequestBody(
-    val personIdent: String,
-)
