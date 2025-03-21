@@ -238,6 +238,7 @@ class VedtakController(
         for (personIdent in personIdentToBehandlingIds.keys) {
             val behandlingId = personIdentToBehandlingIds[personIdent]
             val forventetInntektForBehandling = behandlingIdToForventetInntektMap[behandlingId]
+            secureLogger.info("PersonIdent: $personIdent ForventetInntektForBehandling: $forventetInntektForBehandling")
             if (forventetInntektForBehandling == null) {
                 secureLogger.warn("Fant ikke behandling $behandlingId knyttet til ident $personIdent - får ikke vurdert inntekt")
             } else {

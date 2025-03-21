@@ -81,4 +81,11 @@ class RevurderingController(
         tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.ACCESS)
         return Ressurs.success(revurderingService.hentRevurderingsinformasjon(behandlingId))
     }
+
+    @PostMapping("opprett-automatisk")
+    fun opprettAutomatiskInntektsendringsTask(
+        @RequestBody personIdenter: List<String>,
+    ) {
+        revurderingService.opprettAutomatiskInntektsendringTask(personIdenter)
+    }
 }
