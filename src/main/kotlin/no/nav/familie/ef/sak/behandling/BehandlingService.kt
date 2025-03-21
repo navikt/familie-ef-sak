@@ -81,9 +81,9 @@ class BehandlingService(
 
     fun hentBehandlingsjournalposter(behandlingId: UUID): List<Behandlingsjournalpost> = behandlingsjournalpostRepository.findAllByBehandlingId(behandlingId)
 
-    fun hentBehandlingerForGjenbrukAvVilkår(fagsakPersonId: UUID): List<Behandling> =
+    fun hentBehandlingerForGjenbrukAvVilkårOgSamværsavtaler(fagsakPersonId: UUID): List<Behandling> =
         behandlingRepository
-            .finnBehandlingerForGjenbrukAvVilkår(fagsakPersonId)
+            .finnBehandlingerForGjenbrukAvVilkårOgSamværsavtaler(fagsakPersonId)
             .sortertEtterVedtakstidspunktEllerEndretTid()
             .reversed()
 

@@ -14,10 +14,12 @@ import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.oppgave.TilordnetRessursService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.gjeldende
+import no.nav.familie.ef.sak.samværsavtale.SamværsavtaleService
 import no.nav.familie.ef.sak.vilkår.VilkårType
 import no.nav.familie.ef.sak.vilkår.Vilkårsresultat
 import no.nav.familie.ef.sak.vilkår.Vilkårsvurdering
 import no.nav.familie.ef.sak.vilkår.VilkårsvurderingRepository
+import no.nav.familie.ef.sak.vilkår.dto.GjenbruktVilkårResponse
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -31,13 +33,14 @@ class GjenbrukVilkårService(
     private val grunnlagsdataService: GrunnlagsdataService,
     private val barnService: BarnService,
     private val tilordnetRessursService: TilordnetRessursService,
+    private val samværsavtaleService: SamværsavtaleService,
 ) {
     private val secureLogger = LoggerFactory.getLogger("secureLogger")
 
     fun finnBehandlingerForGjenbruk(behandlingId: UUID): List<BehandlingDto> {
         val fagsak: Fagsak = fagsakService.hentFagsakForBehandling(behandlingId)
         val behandlingerForGjenbruk: List<Behandling> =
-            behandlingService.hentBehandlingerForGjenbrukAvVilkår(fagsak.fagsakPersonId)
+            behandlingService.hentBehandlingerForGjenbrukAvVilkårOgSamværsavtaler(fagsak.fagsakPersonId)
         val fagsaker: Map<UUID, Fagsak> =
             behandlingerForGjenbruk.map { it.fagsakId }.distinct().associateWith { fagsakService.hentFagsak(it) }
         return behandlingerForGjenbruk
@@ -47,69 +50,93 @@ class GjenbrukVilkårService(
 
     @Transactional
     fun gjenbrukInngangsvilkårVurderinger(
-        behandlingSomSkalOppdateres: UUID,
-        behandlingIdSomSkalGjenbrukeInngangsvilkår: UUID,
+        behandlingSomSkalOppdateresId: UUID,
+        behandlingForGjenbrukId: UUID,
     ) {
         validerBehandlingForGjenbruk(
-            behandlingSomSkalOppdateres,
-            behandlingIdSomSkalGjenbrukeInngangsvilkår,
+            behandlingSomSkalOppdateresId,
+            behandlingForGjenbrukId,
         )
         val vilkårsVurderingerForGjenbruk =
             utledGjenbrukbareVilkårsvurderinger(
-                behandlingSomSkalOppdateres,
-                behandlingIdSomSkalGjenbrukeInngangsvilkår,
+                behandlingSomSkalOppdateresId,
+                behandlingForGjenbrukId,
             )
         secureLogger.info(
-            "${SikkerhetContext.hentSaksbehandlerEllerSystembruker()} gjenbruker vurderinger fra behandling $behandlingIdSomSkalGjenbrukeInngangsvilkår " +
-                "for å oppdatere vurderinger på inngangsvilkår for behandling $behandlingSomSkalOppdateres",
+            "${SikkerhetContext.hentSaksbehandlerEllerSystembruker()} gjenbruker vurderinger fra behandling $behandlingForGjenbrukId " +
+                "for å oppdatere vurderinger på inngangsvilkår for behandling $behandlingSomSkalOppdateresId",
         )
         vilkårsvurderingRepository.updateAll(vilkårsVurderingerForGjenbruk)
     }
 
     @Transactional
-    fun gjenbrukInngangsvilkårVurdering(
-        behandlingId: UUID,
-        behandlingIdForGjenbruk: UUID,
-        vilkårId: UUID,
-    ): Vilkårsvurdering {
+    fun gjenbrukInngangsvilkårVurderingOgSamværsavtale(
+        behandlingSomSkalOppdateresId: UUID,
+        behandlingForGjenbrukId: UUID,
+        vilkårSomSkalOppdateresId: UUID,
+        barnPåBehandlingSomSkalOppdateres: List<BehandlingBarn>,
+    ): GjenbruktVilkårResponse {
         validerBehandlingForGjenbruk(
-            behandlingId,
-            behandlingIdForGjenbruk,
+            behandlingSomSkalOppdateresId,
+            behandlingForGjenbrukId,
         )
-        val vilkårsVurderingForGjenbruk =
+        val vilkårsvurderingSomSkalOppdateres =
             utledGjenbrukbareVilkårsvurderinger(
-                behandlingId,
-                behandlingIdForGjenbruk,
-            ).first { it.id == vilkårId }
+                behandlingSomSkalOppdateresId,
+                behandlingForGjenbrukId,
+            ).first { it.id == vilkårSomSkalOppdateresId }
+
+        if (vilkårsvurderingSomSkalOppdateres.type == VilkårType.ALENEOMSORG) {
+            vilkårsvurderingSomSkalOppdateres.barnId?.let {
+                samværsavtaleService.gjenbrukSamværsavtale(
+                    behandlingSomSkalOppdateresId,
+                    behandlingForGjenbrukId,
+                    barnPåBehandlingSomSkalOppdateres,
+                    vilkårsvurderingSomSkalOppdateres,
+                )
+            }
+        }
+
+        val samværsavtaler = samværsavtaleService.hentSamværsavtalerForBehandling(behandlingSomSkalOppdateresId)
+        val gjenbruktVilkårsvurdering = gjenbrukInngangsvilkårVurdering(behandlingSomSkalOppdateresId, behandlingForGjenbrukId, vilkårsvurderingSomSkalOppdateres)
+
+        return GjenbruktVilkårResponse(gjenbruktVilkårsvurdering, samværsavtaler)
+    }
+
+    private fun gjenbrukInngangsvilkårVurdering(
+        behandlingSomSkalOppdateresId: UUID,
+        behandlingForGjenbrukId: UUID,
+        vilkårsvurderingSomSkalOppdateres: Vilkårsvurdering,
+    ): Vilkårsvurdering {
         secureLogger.info(
-            "${SikkerhetContext.hentSaksbehandlerEllerSystembruker()} gjenbruker enkel vurdering fra behandling $behandlingIdForGjenbruk " +
-                "for å oppdatere vurderinger på inngangsvilkår for behandling $behandlingId",
+            "${SikkerhetContext.hentSaksbehandlerEllerSystembruker()} gjenbruker enkel vurdering fra behandling $behandlingForGjenbrukId " +
+                "for å oppdatere vurderinger på inngangsvilkår for behandling $behandlingSomSkalOppdateresId",
         )
-        return vilkårsvurderingRepository.update(vilkårsVurderingForGjenbruk)
+        return vilkårsvurderingRepository.update(vilkårsvurderingSomSkalOppdateres)
     }
 
     fun utledGjenbrukbareVilkårsvurderinger(
-        behandlingId: UUID,
-        behandlingIdForGjenbruk: UUID,
+        behandlingSomSkalOppdateresId: UUID,
+        behandlingForGjenbrukId: UUID,
     ): List<Vilkårsvurdering> {
         val forrigeBarnIdTilNåværendeBarnMap =
-            finnBarnPåBeggeBehandlinger(behandlingId, behandlingIdForGjenbruk)
+            finnBarnPåBeggeBehandlinger(behandlingSomSkalOppdateresId, behandlingForGjenbrukId)
         val sivilstandErLik =
-            erSivilstandUforandretSidenForrigeBehandling(behandlingId, behandlingIdForGjenbruk)
+            erSivilstandUforandretSidenForrigeBehandling(behandlingSomSkalOppdateresId, behandlingForGjenbrukId)
         val erSammeStønadstype =
-            erSammeStønadstype(behandlingId, behandlingIdForGjenbruk)
+            erSammeStønadstype(behandlingSomSkalOppdateresId, behandlingForGjenbrukId)
         val tidligereVurderinger =
             hentVurderingerSomSkalGjenbrukes(
                 sivilstandErLik,
                 erSammeStønadstype,
-                behandlingIdForGjenbruk,
+                behandlingForGjenbrukId,
                 forrigeBarnIdTilNåværendeBarnMap,
             )
         val nåværendeVurderinger =
-            vilkårsvurderingRepository.findByBehandlingId(behandlingId)
+            vilkårsvurderingRepository.findByBehandlingId(behandlingSomSkalOppdateresId)
 
         return lagInngangsvilkårVurderingerForGjenbruk(
-            behandlingId,
+            behandlingSomSkalOppdateresId,
             nåværendeVurderinger,
             tidligereVurderinger,
             forrigeBarnIdTilNåværendeBarnMap,
@@ -201,7 +228,7 @@ class GjenbrukVilkårService(
 
         val fagsak: Fagsak = fagsakService.hentFagsakForBehandling(behandlingId)
         val behandlingerForGjenbruk: List<Behandling> =
-            behandlingService.hentBehandlingerForGjenbrukAvVilkår(fagsak.fagsakPersonId)
+            behandlingService.hentBehandlingerForGjenbrukAvVilkårOgSamværsavtaler(fagsak.fagsakPersonId)
 
         if (behandlingerForGjenbruk.isEmpty()) {
             throw Feil("Fant ingen tidligere behandlinger som kan benyttes til gjenbruk av inngangsvilkår for behandling med id=$behandlingId")

@@ -21,7 +21,7 @@ import java.time.LocalDate
 
 internal class RevurderingServiceTest {
     val fagsakService = mockk<FagsakService>()
-    val revurderingService: RevurderingService =
+    private val revurderingService: RevurderingService =
         RevurderingService(
             søknadService = mockk(),
             behandlingService = mockk(),
@@ -36,7 +36,6 @@ internal class RevurderingServiceTest {
             vedtakService = mockk(),
             nyeBarnService = mockk(),
             tilordnetRessursService = mockk(),
-            samværsavtaleService = mockk(),
         )
 
     @Test
