@@ -1,6 +1,5 @@
 package no.nav.familie.ef.sak.behandling.revurdering
 
-import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.slf4j.LoggerFactory
 import org.springframework.web.bind.annotation.PostMapping
@@ -13,13 +12,14 @@ import org.springframework.web.bind.annotation.RestController
 @ProtectedWithClaims(issuer = "azuread")
 class AutomatiskRevurderingController(
     private val automatiskRevurderingService: AutomatiskRevurderingService,
+    private val revurderingService: RevurderingService,
 ) {
     private val secureLogger = LoggerFactory.getLogger("secureLogger")
 
     @PostMapping
     fun forsøkAutomatiskRevurdering(
         @RequestBody personIdenter: List<String>,
-    ): Ressurs<List<AutomatiskRevurdering>> {
+    ) {
         val list = mutableListOf<AutomatiskRevurdering>()
         personIdenter.forEach { personIdent ->
             val kanAutomatiskRevurderes = automatiskRevurderingService.kanAutomatiskRevurderes(personIdent)
@@ -29,7 +29,13 @@ class AutomatiskRevurderingController(
             list.add(AutomatiskRevurdering(personIdent, kanAutomatiskRevurderes))
         }
 
-        return Ressurs.success(list)
+        val automatiskeRevurderingPersonIdenter = list.map { it.personIdent }
+
+        if (automatiskeRevurderingPersonIdenter.isEmpty()) {
+            return
+        }
+
+        revurderingService.opprettAutomatiskInntektsendringTask(automatiskeRevurderingPersonIdenter)
     }
 }
 
