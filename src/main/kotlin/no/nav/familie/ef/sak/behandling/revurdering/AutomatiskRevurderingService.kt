@@ -24,7 +24,14 @@ class AutomatiskRevurderingService(
     private val secureLogger = LoggerFactory.getLogger("secureLogger")
 
     fun kanAutomatiskRevurderes(personIdent: String): Boolean {
-        val fagsak = fagsakService.finnFagsak(setOf(personIdent), StønadType.OVERGANGSSTØNAD) ?: return false
+        // TODO: Looging som skal fjernes, kun her for debug.
+        val fagsak = fagsakService.finnFagsak(setOf(personIdent), StønadType.OVERGANGSSTØNAD)
+
+        if (fagsak == null) {
+            secureLogger.error("Kunne ikke finne fagsag for personIdent=$personIdent.")
+            return false
+        }
+
         logger.info("Sjekker om fagsak ${fagsak.id} automatisk revurderes")
         val inntektForAlleÅr = sigrunService.hentInntektForAlleÅrMedInntekt(fagsak.fagsakPersonId)
 

@@ -17,6 +17,7 @@ import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlIdent
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.identer
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.secureLogger
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.springframework.stereotype.Service
@@ -81,7 +82,42 @@ class FagsakService(
     fun finnFagsak(
         personIdenter: Set<String>,
         stønadstype: StønadType,
-    ): Fagsak? = fagsakRepository.findBySøkerIdent(personIdenter, stønadstype)?.tilFagsakMedPerson()
+    ): Fagsak? {
+        val gjeldeneIdent = personIdenter.firstOrNull()
+
+        if (gjeldeneIdent != null) {
+            secureLogger.info("Forsøker å finne fagsak for personIdent=$gjeldeneIdent med stønadstype: $stønadstype")
+
+            val fagsak = fagsakRepository.findBySøkerIdent(personIdenter = personIdenter, stønadstype = stønadstype)
+
+            if (fagsak != null) {
+                secureLogger.info("Fant fagsak for gjeldene: $gjeldeneIdent med fagsakid: ${fagsak.id}.")
+                val fagsakIdenter = fagsakPersonService.hentIdenter(fagsak.fagsakPersonId)
+
+                secureLogger.info("Fagsak identer funnet for fagsak: ${fagsak.id} har en størrelse på: ${fagsakIdenter.size}.")
+                fagsakIdenter.forEach { ident ->
+                    secureLogger.info("Fant ident for ${fagsak.id} der ident er: $ident.")
+                }
+
+                return Fagsak(
+                    id = fagsak.id,
+                    fagsakPersonId = fagsak.fagsakPersonId,
+                    personIdenter = fagsakIdenter,
+                    eksternId = fagsak.eksternId,
+                    stønadstype = stønadstype,
+                    migrert = fagsak.migrert,
+                    sporbar = fagsak.sporbar,
+                )
+
+            } else {
+                secureLogger.error("Fagsak forsøkt hentet med gjeldene ident: $gjeldeneIdent er null.")
+                return null
+            }
+        } else {
+            secureLogger.error("Gjeldene ident sendt med er null.")
+            return null
+        }
+    }
 
     fun finnFagsaker(personIdenter: Set<String>): List<Fagsak> = fagsakRepository.findBySøkerIdent(personIdenter).map { it.tilFagsakMedPerson() }
 
