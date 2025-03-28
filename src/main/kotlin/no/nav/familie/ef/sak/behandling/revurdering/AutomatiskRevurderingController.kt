@@ -20,6 +20,12 @@ class AutomatiskRevurderingController(
     fun forsøkAutomatiskRevurdering(
         @RequestBody personIdenter: List<String>,
     ) {
+        if (personIdenter.isEmpty()) {
+            secureLogger.warn("Listen med person identer er tom.")
+        } else {
+            secureLogger.info("Størrelsen på listen motatt er: ${personIdenter.size}. Første ident i listen er: ${personIdenter.first()}.")
+        }
+
         val list = mutableListOf<AutomatiskRevurdering>()
         personIdenter.forEach { personIdent ->
             val kanAutomatiskRevurderes = automatiskRevurderingService.kanAutomatiskRevurderes(personIdent)
