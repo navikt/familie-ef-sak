@@ -1,9 +1,13 @@
 package no.nav.familie.ef.sak.vilkår.gjenbruk
 
+import io.mockk.Runs
 import io.mockk.every
+import io.mockk.just
 import io.mockk.mockk
 import io.mockk.slot
+import io.mockk.verify
 import no.nav.familie.ef.sak.barn.BarnService
+import no.nav.familie.ef.sak.barn.BehandlingBarn
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.behandling.domain.Behandling
@@ -25,11 +29,13 @@ import no.nav.familie.ef.sak.repository.saksbehandling
 import no.nav.familie.ef.sak.repository.sivilstand
 import no.nav.familie.ef.sak.repository.søker
 import no.nav.familie.ef.sak.repository.vilkårsvurdering
+import no.nav.familie.ef.sak.samværsavtale.SamværsavtaleService
 import no.nav.familie.ef.sak.testutil.søknadBarnTilBehandlingBarn
 import no.nav.familie.ef.sak.vilkår.VilkårType
 import no.nav.familie.ef.sak.vilkår.Vilkårsresultat
 import no.nav.familie.ef.sak.vilkår.Vilkårsvurdering
 import no.nav.familie.ef.sak.vilkår.VilkårsvurderingRepository
+import no.nav.familie.ef.sak.vilkår.dto.GjenbruktVilkårResponse
 import no.nav.familie.kontrakter.ef.søknad.TestsøknadBuilder
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.util.FnrGenerator
@@ -48,6 +54,7 @@ internal class GjenbrukVilkårServiceTest {
     private val grunnlagsdataService = mockk<GrunnlagsdataService>()
     private val barnService = mockk<BarnService>()
     private val tilordnetRessursService = mockk<TilordnetRessursService>()
+    private val samværsavtaleService = mockk<SamværsavtaleService>()
     private val gjenbrukVilkårService =
         GjenbrukVilkårService(
             behandlingService = behandlingService,
@@ -56,6 +63,7 @@ internal class GjenbrukVilkårServiceTest {
             grunnlagsdataService = grunnlagsdataService,
             barnService = barnService,
             tilordnetRessursService = tilordnetRessursService,
+            samværsavtaleService = samværsavtaleService,
         )
 
     private val barn1 = FnrGenerator.generer(LocalDate.now())
@@ -123,8 +131,10 @@ internal class GjenbrukVilkårServiceTest {
                 listOf(it.sivilstandsvilkår, it.aktivitetsvilkår) + it.aleneomsorgsvilkår
 
             every { barnService.finnBarnPåBehandling(it.behandling.id) } returns it.behandlingBarn
+
+            every { samværsavtaleService.hentSamværsavtalerForBehandling(any()) } returns emptyList()
         }
-        every { behandlingService.hentBehandlingerForGjenbrukAvVilkår(fagsakPersonId) } returns
+        every { behandlingService.hentBehandlingerForGjenbrukAvVilkårOgSamværsavtaler(fagsakPersonId) } returns
             listOf(
                 ferdigstiltBehandlingOS,
                 nyBehandlingBT,
@@ -177,7 +187,7 @@ internal class GjenbrukVilkårServiceTest {
     }
 
     @Test
-    internal fun `gjennbruk vilkår for barn 2 som finnes på begge behandlinger`() {
+    internal fun `gjenbruk vilkår for barn 2 som finnes på begge behandlinger`() {
         gjenbrukVilkår()
 
         val oppdatertAleneomsorg = vilkårsvurderingerSlot.captured.single { it.type == VilkårType.ALENEOMSORG }
@@ -205,7 +215,7 @@ internal class GjenbrukVilkårServiceTest {
 
     @Test
     internal fun `skal kaste feil dersom dersom ingen behandlinger for gjenbruk eksisterer`() {
-        every { behandlingService.hentBehandlingerForGjenbrukAvVilkår(fagsakPersonId) } returns emptyList()
+        every { behandlingService.hentBehandlingerForGjenbrukAvVilkårOgSamværsavtaler(fagsakPersonId) } returns emptyList()
 
         assertThatThrownBy { gjenbrukVilkår() }
             .hasMessageContaining("Fant ingen tidligere behandlinger som kan benyttes til gjenbruk av inngangsvilkår for behandling med id=")
@@ -213,18 +223,45 @@ internal class GjenbrukVilkårServiceTest {
 
     @Test
     internal fun `skal kaste feil dersom dersom behandlinger for gjenbruk ikke inneholder tidligere behandling`() {
-        every { behandlingService.hentBehandlingerForGjenbrukAvVilkår(fagsakPersonId) } returns listOf(behandling(id = UUID.randomUUID()))
+        every { behandlingService.hentBehandlingerForGjenbrukAvVilkårOgSamværsavtaler(fagsakPersonId) } returns listOf(behandling(id = UUID.randomUUID()))
         assertThatThrownBy { gjenbrukVilkår() }
             .hasMessageContaining("kan ikke benyttes til gjenbruk av inngangsvilkår for behandling med id=")
     }
 
     @Test
-    internal fun `skal gjenbruke enkel vilkårsvurdering -  silvilstand`() {
+    internal fun `skal gjenbruke enkel vilkårsvurdering - silvilstand`() {
         gjenbrukEnkelVilkårsvurdering(nyBT.sivilstandsvilkår.id)
 
         assertThat(vilkårsvurderingSlot.isCaptured).isEqualTo(true)
         assertThat(vilkårsvurderingSlot.captured.id).isEqualTo(nyBT.sivilstandsvilkår.id)
         assertThat(vilkårsvurderingSlot.captured.resultat).isEqualTo(Vilkårsresultat.OPPFYLT)
+        verify(exactly = 0) { samværsavtaleService.gjenbrukSamværsavtale(any(), any(), any(), any()) }
+    }
+
+    @Test
+    internal fun `skal gjenbruke enkel vilkårsvurdering og samværsavtale - aleneomsorg`() {
+        val behandlingSomSkalOppdateresSlot = slot<UUID>()
+        val behandlingForGjenbrukSlot = slot<UUID>()
+        val barnPåBehandlingSomSkalOppdateresSlot = slot<List<BehandlingBarn>>()
+        val vilkårsvurderingSomSkalOppdateresSlot = slot<Vilkårsvurdering>()
+
+        every { samværsavtaleService.gjenbrukSamværsavtale(capture(behandlingSomSkalOppdateresSlot), capture(behandlingForGjenbrukSlot), capture(barnPåBehandlingSomSkalOppdateresSlot), capture(vilkårsvurderingSomSkalOppdateresSlot)) } just Runs
+        gjenbrukEnkelVilkårsvurdering(nyBT.aleneomsorgsvilkår.first().id)
+
+        assertThat(vilkårsvurderingSlot.isCaptured).isEqualTo(true)
+        assertThat(vilkårsvurderingSlot.captured.id).isEqualTo(nyBT.aleneomsorgsvilkår.first().id)
+        assertThat(vilkårsvurderingSlot.captured.resultat).isEqualTo(Vilkårsresultat.OPPFYLT)
+
+        verify(exactly = 1) { samværsavtaleService.gjenbrukSamværsavtale(any(), any(), any(), any()) }
+
+        assertThat(behandlingSomSkalOppdateresSlot.captured).isEqualTo(nyBT.behandling.id)
+        assertThat(behandlingForGjenbrukSlot.captured).isEqualTo(ferdigstiltBehandlingOS.id)
+        assertThat(barnPåBehandlingSomSkalOppdateresSlot.captured.size).isEqualTo(2)
+        assertThat(barnPåBehandlingSomSkalOppdateresSlot.captured.first().behandlingId).isEqualTo(nyBT.behandling.id)
+        assertThat(barnPåBehandlingSomSkalOppdateresSlot.captured.first().navn).isEqualTo("Barn Nummer To")
+        assertThat(barnPåBehandlingSomSkalOppdateresSlot.captured.last().behandlingId).isEqualTo(nyBT.behandling.id)
+        assertThat(barnPåBehandlingSomSkalOppdateresSlot.captured.last().navn).isEqualTo("Barn Nummer Tre")
+        assertThat(vilkårsvurderingSomSkalOppdateresSlot.captured.id).isEqualTo(nyBT.aleneomsorgsvilkår.first().id)
     }
 
     @Test
@@ -249,11 +286,12 @@ internal class GjenbrukVilkårServiceTest {
         )
     }
 
-    private fun gjenbrukEnkelVilkårsvurdering(vilkårId: UUID): Vilkårsvurdering =
-        gjenbrukVilkårService.gjenbrukInngangsvilkårVurdering(
+    private fun gjenbrukEnkelVilkårsvurdering(vilkårId: UUID): GjenbruktVilkårResponse =
+        gjenbrukVilkårService.gjenbrukInngangsvilkårVurderingOgSamværsavtale(
             nyBT.behandling.id,
             ferdigstiltOS.behandling.id,
             vilkårId,
+            nyBT.behandlingBarn,
         )
 
     private fun mockGrunnlagsdata(
@@ -276,7 +314,7 @@ internal class GjenbrukVilkårServiceTest {
         val vilkårsresultat: Vilkårsresultat,
     ) {
         val saksbehandling: Saksbehandling = saksbehandling(fagsak, behandling)
-        val behandlingBarn = søknadBarnTilBehandlingBarn(søknad.barn)
+        val behandlingBarn = søknadBarnTilBehandlingBarn(søknad.barn, behandling.id)
 
         val sivilstandsvilkår: Vilkårsvurdering
         val aleneomsorgsvilkår: List<Vilkårsvurdering>

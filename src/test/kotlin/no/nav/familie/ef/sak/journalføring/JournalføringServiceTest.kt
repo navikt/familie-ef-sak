@@ -101,7 +101,6 @@ internal class JournalføringServiceTest {
             barnService = barnService,
             journalpostService = journalpostService,
             infotrygdPeriodeValideringService = infotrygdPeriodeValideringService,
-            samværsavtaleService = samværsavtaleService,
         )
 
     private val fagsakEksternId = 12345L
@@ -428,8 +427,7 @@ internal class JournalføringServiceTest {
                 vilkårsbehandleNyeBarn = VilkårsbehandleNyeBarn.IKKE_VALGT,
                 journalpost = ustrukturertJournalpost,
             )
-            verify(exactly = 0) { vurderingService.kopierVurderingerTilNyBehandling(any(), any(), any(), any()) }
-            verify(exactly = 0) { samværsavtaleService.kopierSamværsavtalerTilNyBehandling(any(), any(), any()) }
+            verify(exactly = 0) { vurderingService.kopierVurderingerOgSamværsavtalerTilNyBehandling(any(), any(), any(), any()) }
         }
 
         @Test
@@ -521,8 +519,7 @@ internal class JournalføringServiceTest {
                 vilkårsbehandleNyeBarn = VilkårsbehandleNyeBarn.IKKE_VALGT,
                 journalpost = ustrukturertJournalpost,
             )
-            verify(exactly = 0) { vurderingService.kopierVurderingerTilNyBehandling(any(), any(), any(), any()) }
-            verify(exactly = 0) { samværsavtaleService.kopierSamværsavtalerTilNyBehandling(any(), any(), any()) }
+            verify(exactly = 0) { vurderingService.kopierVurderingerOgSamværsavtalerTilNyBehandling(any(), any(), any(), any()) }
         }
 
         @Test
@@ -531,8 +528,7 @@ internal class JournalføringServiceTest {
             val forrigeAvslåtteBehandling = behandling()
             mockSisteIverksatteBehandlinger(forrigeAvslåtteBehandling)
 
-            justRun { vurderingService.kopierVurderingerTilNyBehandling(forrigeAvslåtteBehandling.id, behandlingId, any(), any()) }
-            justRun { samværsavtaleService.kopierSamværsavtalerTilNyBehandling(forrigeAvslåtteBehandling.id, behandlingId, any()) }
+            justRun { vurderingService.kopierVurderingerOgSamværsavtalerTilNyBehandling(behandlingId, forrigeAvslåtteBehandling.id, any(), any()) }
             every { infotrygdPeriodeValideringService.validerKanOppretteBehandlingGittInfotrygdData(any()) } just Runs
             every { vurderingService.hentGrunnlagOgMetadata(behandlingId) } returns
                 Pair(
@@ -556,15 +552,10 @@ internal class JournalføringServiceTest {
                 journalpost = ustrukturertJournalpost,
             )
             verify(exactly = 1) {
-                vurderingService.kopierVurderingerTilNyBehandling(
-                    forrigeAvslåtteBehandling.id,
+                vurderingService.kopierVurderingerOgSamværsavtalerTilNyBehandling(
                     behandlingId,
-                    any(),
-                    any(),
-                )
-                samværsavtaleService.kopierSamværsavtalerTilNyBehandling(
                     forrigeAvslåtteBehandling.id,
-                    behandlingId,
+                    any(),
                     any(),
                 )
                 behandlingService.oppdaterStatusPåBehandling(behandlingId, BehandlingStatus.UTREDES)
@@ -586,10 +577,7 @@ internal class JournalføringServiceTest {
             every { behandlingService.hentBehandlinger(fagsakId) } returns listOf(forrigeBehandling)
 
             justRun {
-                vurderingService.kopierVurderingerTilNyBehandling(forrigeBehandlingId, behandlingId, any(), any())
-            }
-            justRun {
-                samværsavtaleService.kopierSamværsavtalerTilNyBehandling(forrigeBehandlingId, behandlingId, any())
+                vurderingService.kopierVurderingerOgSamværsavtalerTilNyBehandling(behandlingId, forrigeBehandlingId, any(), any())
             }
             every { infotrygdPeriodeValideringService.validerKanOppretteBehandlingGittInfotrygdData(any()) } just Runs
             every { vurderingService.hentGrunnlagOgMetadata(behandlingId) } returns
@@ -614,8 +602,7 @@ internal class JournalføringServiceTest {
             )
             verifyOrder {
                 barnService.opprettBarnPåBehandlingMedSøknadsdata(any(), any(), any(), any(), any(), any(), any())
-                vurderingService.kopierVurderingerTilNyBehandling(forrigeBehandlingId, behandlingId, any(), any())
-                samværsavtaleService.kopierSamværsavtalerTilNyBehandling(forrigeBehandlingId, behandlingId, any())
+                vurderingService.kopierVurderingerOgSamværsavtalerTilNyBehandling(behandlingId, forrigeBehandlingId, any(), any())
                 behandlingService.oppdaterStatusPåBehandling(behandlingId, BehandlingStatus.UTREDES)
                 behandlingService.oppdaterStegPåBehandling(behandlingId, StegType.BEREGNE_YTELSE)
             }

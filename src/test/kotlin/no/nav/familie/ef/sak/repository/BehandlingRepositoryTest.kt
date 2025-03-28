@@ -496,7 +496,7 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
         val førstegangsbehandlingBT = lagreBehandling(UUID.randomUUID(), UTREDES, IKKE_SATT, fagsakBT)
 
         val behandlingerForGjenbruk: List<Behandling> =
-            behandlingRepository.finnBehandlingerForGjenbrukAvVilkår(fagsakBT.fagsakPersonId)
+            behandlingRepository.finnBehandlingerForGjenbrukAvVilkårOgSamværsavtaler(fagsakBT.fagsakPersonId)
 
         assertThat(behandlingerForGjenbruk).containsExactlyInAnyOrder(førstegangsbehandlingOS, førstegangsbehandlingBT)
     }
@@ -518,7 +518,7 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
         val revurderingUnderArbeidSP = lagreBehandling(UUID.randomUUID(), UTREDES, IKKE_SATT, fagsakSP)
 
         val behandlingerForGjenbruk: List<Behandling> =
-            behandlingRepository.finnBehandlingerForGjenbrukAvVilkår(fagsakSP.fagsakPersonId)
+            behandlingRepository.finnBehandlingerForGjenbrukAvVilkårOgSamværsavtaler(fagsakSP.fagsakPersonId)
 
         assertThat(behandlingerForGjenbruk).containsExactlyInAnyOrder(
             førstegangsbehandlingOS,
