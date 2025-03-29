@@ -34,7 +34,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
 import java.util.UUID
 
-internal class      TestSaksbehandlingControllerTest : OppslagSpringRunnerTest() {
+internal class TestSaksbehandlingControllerTest : OppslagSpringRunnerTest() {
     @Autowired
     private lateinit var behandlingRepository: BehandlingRepository
 

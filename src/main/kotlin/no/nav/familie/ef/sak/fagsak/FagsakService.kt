@@ -108,7 +108,6 @@ class FagsakService(
                     migrert = fagsak.migrert,
                     sporbar = fagsak.sporbar,
                 )
-
             } else {
                 secureLogger.error("Fagsak forsøkt hentet med gjeldene ident: $gjeldeneIdent er null.")
                 return null
