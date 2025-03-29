@@ -3,11 +3,13 @@ package no.nav.familie.ef.sak.behandling.revurdering
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
+import no.nav.familie.ef.sak.behandling.dto.RevurderingDto
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.infrastruktur.config.ObjectMapperProvider.objectMapper
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
+import no.nav.familie.ef.sak.journalføring.dto.VilkårsbehandleNyeBarn
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.prosessering.AsyncTaskStep
@@ -15,6 +17,7 @@ import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import java.time.LocalDate
 import java.util.Properties
 
 @Service
@@ -23,10 +26,11 @@ import java.util.Properties
     beskrivelse = "Skal automatisk opprette en ny behandling ved automatisk inntektsendring",
 )
 class BehandleAutomatiskInntektsendringTask(
-    private val behandlingService: BehandlingService,
+    private val revurderingService: RevurderingService,
     private val fagsakService: FagsakService,
     private val featureToggleService: FeatureToggleService,
 ) : AsyncTaskStep {
+    private val logger = LoggerFactory.getLogger(javaClass)
     private val secureLogger = LoggerFactory.getLogger("secureLogger")
 
     override fun doTask(task: Task) {
@@ -45,11 +49,15 @@ class BehandleAutomatiskInntektsendringTask(
             if (fagsak != null) {
                 loggInfoOpprett(personIdent, fagsak)
 
-                behandlingService.opprettBehandling(
-                    behandlingType = BehandlingType.REVURDERING,
-                    fagsakId = fagsak.id,
-                    behandlingsårsak = BehandlingÅrsak.AUTOMATISK_INNTEKTSENDRING,
+                val behandlingId = revurderingService.opprettRevurderingManuelt(
+                    RevurderingDto(
+                        fagsakId = fagsak.id,
+                        behandlingsårsak = BehandlingÅrsak.AUTOMATISK_INNTEKTSENDRING,
+                        kravMottatt = LocalDate.now(),
+                        vilkårsbehandleNyeBarn = VilkårsbehandleNyeBarn.VILKÅRSBEHANDLE,
+                    )
                 )
+                logger.info("Opprettet behandling for automatisk inntektsendring: $behandlingId")
             } else {
                 secureLogger.error("Finner ikke fagsak for personIdent=$personIdent på stønadstype=${StønadType.OVERGANGSSTØNAD} under automatisk inntektsendring")
             }
