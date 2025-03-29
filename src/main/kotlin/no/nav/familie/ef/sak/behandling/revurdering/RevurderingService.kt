@@ -128,7 +128,9 @@ class RevurderingService(
                 ),
             ),
         )
-        taskService.save(BehandlingsstatistikkTask.opprettPåbegyntTask(behandlingId = revurdering.id))
+        if (revurderingDto.behandlingsårsak != BehandlingÅrsak.AUTOMATISK_INNTEKTSENDRING) {
+            taskService.save(BehandlingsstatistikkTask.opprettPåbegyntTask(behandlingId = revurdering.id))
+        }
 
         if (erSatsendring(revurderingDto)) {
             val vedtakDto =
