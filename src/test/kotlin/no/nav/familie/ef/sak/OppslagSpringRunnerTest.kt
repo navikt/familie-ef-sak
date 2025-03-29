@@ -26,6 +26,7 @@ import no.nav.familie.ef.sak.næringsinntektskontroll.NæringsinntektKontrollDom
 import no.nav.familie.ef.sak.oppfølgingsoppgave.domain.OppgaverForOpprettelse
 import no.nav.familie.ef.sak.oppgave.Oppgave
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.Grunnlagsdata
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.inntekt.GrunnlagsdataInntekt
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.Søknad
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.SøknadsskjemaOvergangsstønad
 import no.nav.familie.ef.sak.samværsavtale.domain.Samværsavtale
@@ -158,6 +159,7 @@ abstract class OppslagSpringRunnerTest {
             BrevmottakereFrittståendeBrev::class,
             Behandlingsjournalpost::class,
             Grunnlagsdata::class,
+            GrunnlagsdataInntekt::class,
             Tilbakekreving::class,
             ÅrsakRevurdering::class,
             Behandling::class,

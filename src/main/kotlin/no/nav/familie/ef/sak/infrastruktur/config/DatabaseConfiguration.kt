@@ -1,6 +1,7 @@
 package no.nav.familie.ef.sak.infrastruktur.config
 
 import com.fasterxml.jackson.module.kotlin.readValue
+import no.nav.familie.ef.sak.amelding.InntektResponse
 import no.nav.familie.ef.sak.brev.domain.OrganisasjonerWrapper
 import no.nav.familie.ef.sak.brev.domain.PersonerWrapper
 import no.nav.familie.ef.sak.felles.domain.Endret
@@ -129,6 +130,8 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
                 PGobjectTilSamværsuker(),
                 SamværsukerTilPGobjectConverter(),
                 SamværsukerTilPGobjectConverter(),
+                GrunnlagsdataInntektTilPGobjectConverter(),
+                PGobjectTilGrunnlagsdataInntekt(),
             ),
         )
 
@@ -222,6 +225,20 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
     @ReadingConverter
     class PGobjectTilGrunnlagsdata : Converter<PGobject, GrunnlagsdataDomene> {
         override fun convert(pGobject: PGobject): GrunnlagsdataDomene = objectMapper.readValue(pGobject.value!!)
+    }
+
+    @WritingConverter
+    class GrunnlagsdataInntektTilPGobjectConverter : Converter<InntektResponse, PGobject> {
+        override fun convert(data: InntektResponse): PGobject =
+            PGobject().apply {
+                type = "json"
+                value = objectMapper.writeValueAsString(data)
+            }
+    }
+
+    @ReadingConverter
+    class PGobjectTilGrunnlagsdataInntekt : Converter<PGobject, InntektResponse> {
+        override fun convert(pGobject: PGobject): InntektResponse = objectMapper.readValue(pGobject.value!!)
     }
 
     @WritingConverter
