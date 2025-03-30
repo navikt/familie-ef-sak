@@ -3,14 +3,23 @@ package no.nav.familie.ef.sak.behandling.revurdering
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
+import no.nav.familie.ef.sak.behandling.domain.ÅrsakRevurdering
 import no.nav.familie.ef.sak.behandling.dto.RevurderingDto
+import no.nav.familie.ef.sak.behandling.dto.tilDomene
+import no.nav.familie.ef.sak.beregning.tilInntekt
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.infrastruktur.config.ObjectMapperProvider.objectMapper
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.ef.sak.journalføring.dto.VilkårsbehandleNyeBarn
+import no.nav.familie.ef.sak.vedtak.VedtakService
+import no.nav.familie.ef.sak.vedtak.domain.PeriodeWrapper
+import no.nav.familie.ef.sak.vedtak.dto.InnvilgelseOvergangsstønad
+import no.nav.familie.ef.sak.vedtak.dto.fraDomene
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
+import no.nav.familie.kontrakter.ef.felles.Opplysningskilde
+import no.nav.familie.kontrakter.ef.felles.Revurderingsårsak
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
@@ -28,6 +37,9 @@ import java.util.Properties
 class BehandleAutomatiskInntektsendringTask(
     private val revurderingService: RevurderingService,
     private val fagsakService: FagsakService,
+    private val behandlingService: BehandlingService,
+    private val vedtakService: VedtakService,
+    private val årsakRevurderingsRepository: ÅrsakRevurderingsRepository,
     private val featureToggleService: FeatureToggleService,
 ) : AsyncTaskStep {
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -42,14 +54,13 @@ class BehandleAutomatiskInntektsendringTask(
                 personIdenter = setOf(personIdent),
                 stønadstype = StønadType.OVERGANGSSTØNAD,
             )
-
         loggInfoOpprett(personIdent, fagsak)
 
         if (toggle) {
             if (fagsak != null) {
                 loggInfoOpprett(personIdent, fagsak)
 
-                val behandlingId = revurderingService.opprettRevurderingManuelt(
+                val behandling = revurderingService.opprettRevurderingManuelt(
                     RevurderingDto(
                         fagsakId = fagsak.id,
                         behandlingsårsak = BehandlingÅrsak.AUTOMATISK_INNTEKTSENDRING,
@@ -57,7 +68,21 @@ class BehandleAutomatiskInntektsendringTask(
                         vilkårsbehandleNyeBarn = VilkårsbehandleNyeBarn.VILKÅRSBEHANDLE,
                     )
                 )
-                logger.info("Opprettet behandling for automatisk inntektsendring: $behandlingId")
+
+                val forrigeBehandling = behandling.forrigeBehandlingId?.let { behandlingService.hentBehandling(it) } ?: throw IllegalStateException("Burde vært en forrigeBehandlingId etter automatisk revurdering for behandlingId: ${behandling.id}")
+                val forrigeVedtak = vedtakService.hentVedtak(forrigeBehandling.id)
+                val innvilgelseOvergangsstønad = InnvilgelseOvergangsstønad(
+                    periodeBegrunnelse = forrigeVedtak.periodeBegrunnelse,
+                    inntektBegrunnelse = forrigeVedtak.inntektBegrunnelse,
+                    perioder = forrigeVedtak.perioder?.perioder?.fraDomene() ?: emptyList(),
+                    inntekter = forrigeVedtak.inntekter?.inntekter?.tilInntekt() ?: emptyList(),
+                    samordningsfradragType = forrigeVedtak.samordningsfradragType,
+                )
+
+                årsakRevurderingsRepository.insert(ÅrsakRevurdering(behandlingId = behandling.id, opplysningskilde = Opplysningskilde.OPPLYSNINGER_INTERNE_KONTROLLER, Revurderingsårsak.ENDRING_INNTEKT, "Delautomatisk inntektsendring"))
+                vedtakService.lagreVedtak(vedtakDto = innvilgelseOvergangsstønad, behandlingId = behandling.id, stønadstype = StønadType.OVERGANGSSTØNAD)
+
+                logger.info("Opprettet behandling for automatisk inntektsendring: ${behandling.id}")
             } else {
                 secureLogger.error("Finner ikke fagsak for personIdent=$personIdent på stønadstype=${StønadType.OVERGANGSSTØNAD} under automatisk inntektsendring")
             }
