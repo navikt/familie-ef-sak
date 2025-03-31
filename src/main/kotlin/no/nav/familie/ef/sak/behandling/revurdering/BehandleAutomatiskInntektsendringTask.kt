@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.behandling.revurdering
 
+import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.fagsak.FagsakService
@@ -15,11 +16,6 @@ import no.nav.familie.prosessering.domene.Task
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.util.Properties
-
-data class PayloadBehandleAutomatiskInntektsendringTask(
-    val personIdent: String,
-    val ukeÅr: String,
-)
 
 @Service
 @TaskStepBeskrivelse(
@@ -37,7 +33,7 @@ class BehandleAutomatiskInntektsendringTask(
     override fun doTask(task: Task) {
         val toggle = featureToggleService.isEnabled(Toggle.BEHANDLE_AUTOMATISK_INNTEKTSENDRING)
 
-        val personIdent = task.payload
+        val personIdent = objectMapper.readValue<PayloadBehandleAutomatiskInntektsendringTask>(task.payload).personIdent
         val fagsak =
             fagsakService.finnFagsak(
                 personIdenter = setOf(personIdent),
@@ -88,3 +84,8 @@ class BehandleAutomatiskInntektsendringTask(
         secureLogger.info("Kan opprette behandling med $personIdent stønadstype=${StønadType.OVERGANGSSTØNAD} faksakId ${fagsak?.id}")
     }
 }
+
+data class PayloadBehandleAutomatiskInntektsendringTask(
+    val personIdent: String,
+    val ukeÅr: String,
+)
