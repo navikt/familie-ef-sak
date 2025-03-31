@@ -209,6 +209,12 @@ class VurderingService(
 
         vilkårsvurderingRepository.insertAll(kopiAvVurderinger.values.toList() + nyeBarnVurderinger)
 
+        samværsavtaleService.gjenbrukSamværsavtaler(
+            behandlingSomSkalOppdateresId = behandlingSomSkalOppdateresId,
+            behandlingForGjenbrukId = behandlingForGjenbrukId,
+            metadata = metadata,
+        )
+
         if (behandlingService.hentBehandling(behandlingSomSkalOppdateresId).årsak != BehandlingÅrsak.G_OMREGNING) {
             val behandlingSomErGrunnlagForGjenbrukAvInngangsvilkårOgSamværsavtaler =
                 finnBehandlingForGjenbrukAvInngangsvilkårOgSamværsavtaler(
@@ -223,7 +229,7 @@ class VurderingService(
                 )
                 samværsavtaleService.gjenbrukSamværsavtaler(
                     behandlingSomSkalOppdateresId = behandlingSomSkalOppdateresId,
-                    behandlingForGjenbrukId = behandlingForGjenbrukId,
+                    behandlingForGjenbrukId = it.id,
                     metadata = metadata,
                 )
             }
