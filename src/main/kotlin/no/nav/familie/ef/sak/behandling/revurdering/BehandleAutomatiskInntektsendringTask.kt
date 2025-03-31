@@ -86,6 +86,8 @@ class BehandleAutomatiskInntektsendringTask(
             } else {
                 secureLogger.error("Finner ikke fagsak for personIdent=$personIdent på stønadstype=${StønadType.OVERGANGSSTØNAD} under automatisk inntektsendring")
             }
+        } else {
+            logger.info("Toggle for automatisering av inntekt er AV. Ville opprettet revurdering for fagsak=${fagsak?.id} med en forventetInntekt på X og revurdert fra dato: Y")
         }
     }
 
