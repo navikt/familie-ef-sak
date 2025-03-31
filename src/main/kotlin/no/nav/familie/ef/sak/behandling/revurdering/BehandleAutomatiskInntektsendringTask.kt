@@ -39,11 +39,9 @@ class BehandleAutomatiskInntektsendringTask(
                 stønadstype = StønadType.OVERGANGSSTØNAD,
             )
 
-        loggInfoOpprett(personIdent, fagsak)
-
         if (toggle) {
             if (fagsak != null) {
-                loggInfoOpprett(personIdent, fagsak)
+                loggInfoOpprett(personIdent = personIdent, fagsak = fagsak)
 
                 behandlingService.opprettBehandling(
                     behandlingType = BehandlingType.REVURDERING,
