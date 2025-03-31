@@ -96,7 +96,7 @@ object DokumentasjonMapper {
             barnMedSærligeBehov = situasjon?.barnMedSærligeBehov?.tilDto(),
             arbeidskontrakt = situasjon?.arbeidskontrakt?.tilDto(),
             lærlingkontrakt = situasjon?.lærlingkontrakt?.tilDto(),
-            utdanningstilbud = situasjon?.utdanningstilbud?.tilDto(),
+            utdanningstilbud = utdanningDokumentasjon?.tilDto() ?: situasjon?.utdanningstilbud?.tilDto(),
             reduksjonAvArbeidsforhold = situasjon?.reduksjonAvArbeidsforholdDokumentasjon?.tilDto(),
             oppsigelse = situasjon?.oppsigelseDokumentasjon?.tilDto(),
             utdanningsutgifter = utdanningsutgifter?.tilDto(),
