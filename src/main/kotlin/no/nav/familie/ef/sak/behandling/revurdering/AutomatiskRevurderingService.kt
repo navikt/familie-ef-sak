@@ -71,7 +71,7 @@ class AutomatiskRevurderingService(
         personIdent: String,
         behandlingId: UUID,
     ) {
-        val inntektResponse = aMeldingInntektClient.hentInntekt(personIdent, YearMonth.now().minusMonths(6), YearMonth.now())
+        val inntektResponse = aMeldingInntektClient.hentInntekt(personIdent = personIdent, månedFom = YearMonth.now().minusMonths(6), månedTom = YearMonth.now())
         grunnlagsdataInntektRepository.insert(GrunnlagsdataInntekt(behandlingId, inntektResponse))
     }
 }
