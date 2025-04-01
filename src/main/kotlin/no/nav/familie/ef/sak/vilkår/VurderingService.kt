@@ -191,6 +191,20 @@ class VurderingService(
         metadata: HovedregelMetadata,
         stønadType: StønadType,
     ) {
+        kopierVilkårsvurderinger(behandlingSomSkalOppdateresId, behandlingForGjenbrukId, metadata, stønadType)
+        kopierSamværsavtaler(behandlingSomSkalOppdateresId, behandlingForGjenbrukId, metadata)
+
+        if (behandlingService.hentBehandling(behandlingSomSkalOppdateresId).årsak != BehandlingÅrsak.G_OMREGNING) {
+            gjenbrukVilkårsvurderingerOgSamværsavtaler(behandlingSomSkalOppdateresId, behandlingForGjenbrukId, metadata)
+        }
+    }
+
+    private fun kopierVilkårsvurderinger(
+        behandlingSomSkalOppdateresId: UUID,
+        behandlingForGjenbrukId: UUID,
+        metadata: HovedregelMetadata,
+        stønadType: StønadType,
+    ) {
         val tidligereVurderinger =
             vilkårsvurderingRepository.findByBehandlingId(behandlingForGjenbrukId).associateBy { it.id }
         val barnPåForrigeBehandling = barnService.finnBarnPåBehandling(behandlingForGjenbrukId)
@@ -208,32 +222,38 @@ class VurderingService(
         val nyeBarnVurderinger = opprettVurderingerForNyeBarn(kopiAvVurderinger, metadata, stønadType)
 
         vilkårsvurderingRepository.insertAll(kopiAvVurderinger.values.toList() + nyeBarnVurderinger)
+    }
 
+    private fun gjenbrukVilkårsvurderingerOgSamværsavtaler(
+        behandlingSomSkalOppdateresId: UUID,
+        behandlingForGjenbrukId: UUID,
+        metadata: HovedregelMetadata,
+    ) {
+        val behandlingSomErGrunnlagForGjenbrukAvInngangsvilkårOgSamværsavtaler =
+            finnBehandlingForGjenbrukAvInngangsvilkårOgSamværsavtaler(
+                alleredeGjenbruktBehandlingId = behandlingForGjenbrukId,
+                behandlingId = behandlingSomSkalOppdateresId,
+            )
+        behandlingSomErGrunnlagForGjenbrukAvInngangsvilkårOgSamværsavtaler?.let {
+            logger.info("Gjenbruker inngangsvilkår og samværsavtaler fra behandling=$it til ny behandling=$behandlingSomSkalOppdateresId")
+            gjenbrukVilkårService.gjenbrukInngangsvilkårVurderinger(
+                behandlingSomSkalOppdateresId = behandlingSomSkalOppdateresId,
+                behandlingForGjenbrukId = it.id,
+            )
+            kopierSamværsavtaler(behandlingSomSkalOppdateresId, it.id, metadata)
+        }
+    }
+
+    private fun kopierSamværsavtaler(
+        behandlingSomSkalOppdateresId: UUID,
+        behandlingForGjenbrukId: UUID,
+        metadata: HovedregelMetadata,
+    ) {
         samværsavtaleService.gjenbrukSamværsavtaler(
             behandlingSomSkalOppdateresId = behandlingSomSkalOppdateresId,
             behandlingForGjenbrukId = behandlingForGjenbrukId,
             metadata = metadata,
         )
-
-        if (behandlingService.hentBehandling(behandlingSomSkalOppdateresId).årsak != BehandlingÅrsak.G_OMREGNING) {
-            val behandlingSomErGrunnlagForGjenbrukAvInngangsvilkårOgSamværsavtaler =
-                finnBehandlingForGjenbrukAvInngangsvilkårOgSamværsavtaler(
-                    alleredeGjenbruktBehandlingId = behandlingForGjenbrukId,
-                    behandlingId = behandlingSomSkalOppdateresId,
-                )
-            behandlingSomErGrunnlagForGjenbrukAvInngangsvilkårOgSamværsavtaler?.let {
-                logger.info("Gjenbruker inngangsvilkår fra behandling=$it til ny behandling=$behandlingSomSkalOppdateresId")
-                gjenbrukVilkårService.gjenbrukInngangsvilkårVurderinger(
-                    behandlingSomSkalOppdateresId = behandlingSomSkalOppdateresId,
-                    behandlingForGjenbrukId = it.id,
-                )
-                samværsavtaleService.gjenbrukSamværsavtaler(
-                    behandlingSomSkalOppdateresId = behandlingSomSkalOppdateresId,
-                    behandlingForGjenbrukId = it.id,
-                    metadata = metadata,
-                )
-            }
-        }
     }
 
     private fun finnBehandlingForGjenbrukAvInngangsvilkårOgSamværsavtaler(
