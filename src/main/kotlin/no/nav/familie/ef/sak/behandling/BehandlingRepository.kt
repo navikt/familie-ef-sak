@@ -136,7 +136,7 @@ interface BehandlingRepository :
          AND b.arsak != 'MIGRERING'
     """,
     )
-    fun finnBehandlingerForGjenbrukAvVilkår(fagsakPersonId: UUID): List<Behandling>
+    fun finnBehandlingerForGjenbrukAvVilkårOgSamværsavtaler(fagsakPersonId: UUID): List<Behandling>
 
     fun existsByFagsakIdAndStatusIsNot(
         fagsakId: UUID,

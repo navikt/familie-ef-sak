@@ -10,12 +10,12 @@ import org.springframework.context.annotation.Primary
 import org.springframework.context.annotation.Profile
 
 @Configuration
-@Profile("mock-brev")
 class BrevClientMock {
+    @Profile("mock-brev")
     @Bean
     @Primary
     fun brevClient(): BrevClient {
-        val brevClient: BrevClient = mockk()
+        val brevClient = mockk<BrevClient>()
         every { brevClient.genererHtml(any(), any(), any(), any(), any()) } returns "<h1>Hei $BESLUTTER_SIGNATUR_PLACEHOLDER</h1>"
         val dummyPdf =
             this::class.java.classLoader
