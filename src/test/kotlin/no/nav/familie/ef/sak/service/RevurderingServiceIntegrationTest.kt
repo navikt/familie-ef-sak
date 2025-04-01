@@ -421,7 +421,7 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
         behandling: Behandling,
         fagsakBarnetilsyn: Fagsak,
     ) {
-        vedtakService.lagreVedtak(vedtak.tilVedtakDto(), behandling.id, StønadType.BARNETILSYN)
+        vedtakService.lagreVedtak(vedtak.tilVedtakDto(), behandling.id, fagsak.stønadstype)
 
         beregnYtelseSteg.utførSteg(saksbehandling(fagsakBarnetilsyn, behandling), vedtak.tilVedtakDto())
         behandlingRepository.update(
