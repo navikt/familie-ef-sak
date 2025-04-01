@@ -17,9 +17,10 @@ class AutomatiskRevurderingController(
     fun forsøkAutomatiskRevurdering(
         @RequestBody personIdenter: List<String>,
     ) {
-        val identerForAutomatiskRevurdering = personIdenter.filter { personIdent ->
-            automatiskRevurderingService.kanAutomatiskRevurderes(personIdent)
-        }
+        val identerForAutomatiskRevurdering =
+            personIdenter.filter { personIdent ->
+                automatiskRevurderingService.kanAutomatiskRevurderes(personIdent)
+            }
 
         if (identerForAutomatiskRevurdering.isNotEmpty()) {
             revurderingService.opprettAutomatiskInntektsendringTask(identerForAutomatiskRevurdering)
