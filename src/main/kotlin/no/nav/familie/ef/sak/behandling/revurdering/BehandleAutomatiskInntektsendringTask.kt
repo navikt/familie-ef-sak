@@ -4,7 +4,6 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.fagsak.FagsakService
-import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.infrastruktur.config.ObjectMapperProvider.objectMapper
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
@@ -39,11 +38,9 @@ class BehandleAutomatiskInntektsendringTask(
                 stønadstype = StønadType.OVERGANGSSTØNAD,
             )
 
-        loggInfoOpprett(personIdent, fagsak)
-
         if (toggle) {
             if (fagsak != null) {
-                loggInfoOpprett(personIdent, fagsak)
+                secureLogger.info("Kan opprette behandling med $personIdent stønadstype=${StønadType.OVERGANGSSTØNAD} faksakId ${fagsak.id}")
 
                 behandlingService.opprettBehandling(
                     behandlingType = BehandlingType.REVURDERING,
@@ -71,13 +68,6 @@ class BehandleAutomatiskInntektsendringTask(
                     },
             )
         }
-    }
-
-    fun loggInfoOpprett(
-        personIdent: String,
-        fagsak: Fagsak?,
-    ) {
-        secureLogger.info("Kan opprette behandling med $personIdent stønadstype=${StønadType.OVERGANGSSTØNAD} faksakId ${fagsak?.id}")
     }
 }
 
