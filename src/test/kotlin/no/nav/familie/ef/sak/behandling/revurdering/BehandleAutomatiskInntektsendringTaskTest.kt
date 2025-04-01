@@ -97,19 +97,12 @@ class BehandleAutomatiskInntektsendringTaskTest : OppslagSpringRunnerTest() {
         assertThat(årsakTilRevurdering.beskrivelse).isNullOrEmpty()
 
         val vedtak = vedtakService.hentVedtak(automatiskInntektsendringBehandling.id)
-        assertThat(
-            vedtak.perioder
-                ?.perioder
-                ?.first()
-                ?.periode
-                ?.fom,
-        ).isEqualTo(YearMonth.of(2021, 1)) // Revurderes fra
-        assertThat(
-            vedtak.inntekter
-                ?.inntekter
-                ?.first()
-                ?.inntekt
-                ?.toInt(),
-        ).isEqualTo(100000)
+
+        val vedtaksperioder = vedtak.perioder?.perioder
+        val førsteFom = vedtaksperioder?.first()?.periode?.fom
+        assertThat(førsteFom).isEqualTo(YearMonth.of(2021, 1)) // Revurderes fra
+
+        val inntektsperioder = vedtak.inntekter?.inntekter
+        assertThat(inntektsperioder?.first()?.inntekt?.toInt()).isEqualTo(100000)
     }
 }

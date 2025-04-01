@@ -5,9 +5,12 @@ import io.mockk.mockk
 import no.nav.familie.ef.sak.barn.BarnRepository
 import no.nav.familie.ef.sak.barn.BehandlingBarn
 import no.nav.familie.ef.sak.behandling.domain.Behandling
+import no.nav.familie.ef.sak.fagsak.FagsakRepository
+import no.nav.familie.ef.sak.infrastruktur.config.PdlClientConfig
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.vilkår.VilkårTestUtil
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.Sivilstandstype
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.Sivilstand
+import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.ef.sak.repository.vilkårsvurdering
 import no.nav.familie.ef.sak.vilkår.Delvilkårsvurdering
 import no.nav.familie.ef.sak.vilkår.VilkårType
@@ -16,6 +19,9 @@ import no.nav.familie.ef.sak.vilkår.VilkårsvurderingRepository
 import no.nav.familie.ef.sak.vilkår.regler.HovedregelMetadata
 import no.nav.familie.ef.sak.vilkår.regler.vilkår.AleneomsorgRegel
 import no.nav.familie.ef.sak.vilkår.regler.vilkår.SivilstandRegel
+import no.nav.familie.kontrakter.ef.søknad.Barn
+import no.nav.familie.kontrakter.ef.søknad.TestsøknadBuilder
+import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Service
@@ -32,16 +38,32 @@ class VilkårHelperService {
     @Autowired
     private lateinit var søknadHelperService: SøknadHelperService
 
+    @Autowired
+    private lateinit var fagsakRepository: FagsakRepository
+
     fun opprettVilkår(
         behandling: Behandling,
+        barn: List<Barn> =
+            listOf(
+                TestsøknadBuilder.Builder().defaultBarn("Barn Barnesen", PdlClientConfig.BARN_FNR),
+                TestsøknadBuilder.Builder().defaultBarn("Barn2 Barnesen", PdlClientConfig.BARN2_FNR),
+            ),
     ) {
+        val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)
+
+        val sivilstand =
+            when (fagsak.stønadstype) {
+                StønadType.OVERGANGSSTØNAD,
+                StønadType.SKOLEPENGER,
+                -> søknadHelperService.lagreSøknad(behandling, barn).sivilstand
+                StønadType.BARNETILSYN -> søknadHelperService.lagreSøknadForBarnetilsyn(behandling, barn).sivilstand
+            }
+
         val barn = barnRepository.findByBehandlingId(behandling.id)
-        val sivilstand = søknadHelperService.lagreSøknad(behandling).sivilstand
         val delvilkårsvurdering =
             lagSivilstandDelvilkår(sivilstand)
 
-        val delvilkårsvurderingAleneomsorg =
-            lagDelvilkårsvurderingAleneomsorg(barn, sivilstand, behandling)
+        val delvilkårsvurderingAleneomsorg = lagDelvilkårsvurderingAleneomsorg(barn, sivilstand, behandling)
         lagreVilkår(behandling, delvilkårsvurdering, barn, delvilkårsvurderingAleneomsorg)
     }
 
