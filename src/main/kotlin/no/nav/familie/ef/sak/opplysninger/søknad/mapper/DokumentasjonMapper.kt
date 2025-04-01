@@ -23,6 +23,7 @@ object DokumentasjonMapper {
             situasjon = null,
             barnetilsynDokumentasjon = søknadsskjema.dokumentasjon,
             utdanningsutgifter = null,
+            utdanningDokumentasjon = null,
             adresseopplysninger = søknadsskjema.adresseopplysninger,
         )
 
@@ -35,6 +36,7 @@ object DokumentasjonMapper {
             situasjon = søknadsskjema.situasjon,
             barnetilsynDokumentasjon = null,
             utdanningsutgifter = null,
+            utdanningDokumentasjon = null,
             adresseopplysninger = søknadsskjema.adresseopplysninger,
         )
 
@@ -47,6 +49,7 @@ object DokumentasjonMapper {
             situasjon = null,
             barnetilsynDokumentasjon = null,
             utdanningsutgifter = søknadsskjema.utdanningsutgifter,
+            utdanningDokumentasjon = søknadsskjema.utdanningDokumentasjon,
             adresseopplysninger = søknadsskjema.adresseopplysninger,
         )
 
@@ -58,6 +61,7 @@ object DokumentasjonMapper {
         situasjon: Situasjon?,
         barnetilsynDokumentasjon: BarnetilsynDokumentasjon?,
         utdanningsutgifter: Dokumentasjon?,
+        utdanningDokumentasjon: Dokumentasjon?,
         adresseopplysninger: Adresseopplysninger?,
     ): DokumentasjonFraSøknadDto =
         DokumentasjonFraSøknadDto(
@@ -92,7 +96,7 @@ object DokumentasjonMapper {
             barnMedSærligeBehov = situasjon?.barnMedSærligeBehov?.tilDto(),
             arbeidskontrakt = situasjon?.arbeidskontrakt?.tilDto(),
             lærlingkontrakt = situasjon?.lærlingkontrakt?.tilDto(),
-            utdanningstilbud = situasjon?.utdanningstilbud?.tilDto(),
+            utdanningstilbud = utdanningDokumentasjon?.tilDto() ?: situasjon?.utdanningstilbud?.tilDto(),
             reduksjonAvArbeidsforhold = situasjon?.reduksjonAvArbeidsforholdDokumentasjon?.tilDto(),
             oppsigelse = situasjon?.oppsigelseDokumentasjon?.tilDto(),
             utdanningsutgifter = utdanningsutgifter?.tilDto(),

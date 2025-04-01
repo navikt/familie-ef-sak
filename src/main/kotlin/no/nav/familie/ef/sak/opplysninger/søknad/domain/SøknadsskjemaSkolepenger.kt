@@ -33,6 +33,8 @@ data class SøknadsskjemaSkolepenger(
     @Embedded(onEmpty = Embedded.OnEmpty.USE_NULL, prefix = "aktivitet_under_utdanning_")
     val utdanning: UnderUtdanning,
     val utdanningsutgifter: Dokumentasjon? = null,
+    @MappedCollection(idColumn = "utdanning_dokumentasjon")
+    val utdanningDokumentasjon: Dokumentasjon? = null,
     @MappedCollection(idColumn = "soknadsskjema_id")
     val tidligereUtdanninger: Set<TidligereUtdanning> = emptySet(),
     @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY, prefix = "adresseopplysninger_")
