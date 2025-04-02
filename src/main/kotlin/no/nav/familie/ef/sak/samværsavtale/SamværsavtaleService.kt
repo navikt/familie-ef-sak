@@ -11,6 +11,8 @@ import no.nav.familie.ef.sak.brev.dto.Avsnitt
 import no.nav.familie.ef.sak.brev.dto.FritekstBrevRequestDto
 import no.nav.familie.ef.sak.brev.dto.FritekstBrevRequestMedSignatur
 import no.nav.familie.ef.sak.fagsak.FagsakService
+import no.nav.familie.ef.sak.fagsak.domain.Fagsak
+import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.journalføring.JournalpostClient
@@ -23,6 +25,8 @@ import no.nav.familie.ef.sak.samværsavtale.dto.JournalførBeregnetSamværReques
 import no.nav.familie.ef.sak.samværsavtale.dto.SamværsavtaleDto
 import no.nav.familie.ef.sak.samværsavtale.dto.tilDomene
 import no.nav.familie.ef.sak.vedtak.domain.VedtakErUtenBeslutter
+import no.nav.familie.ef.sak.vilkår.VilkårType
+import no.nav.familie.ef.sak.vilkår.Vilkårsvurdering
 import no.nav.familie.ef.sak.vilkår.VurderingService.Companion.byggBarnMapFraTidligereTilNyId
 import no.nav.familie.ef.sak.vilkår.regler.HovedregelMetadata
 import no.nav.familie.kontrakter.felles.dokarkiv.Dokumenttype
@@ -49,7 +53,9 @@ class SamværsavtaleService(
     fun hentSamværsavtalerForBehandling(behandlingId: UUID) = samværsavtaleRepository.findByBehandlingId(behandlingId)
 
     @Transactional
-    fun opprettEllerErstattSamværsavtale(request: SamværsavtaleDto): Samværsavtale {
+    fun opprettEllerErstattSamværsavtale(
+        request: SamværsavtaleDto,
+    ): Samværsavtale {
         val behandling = behandlingService.hentBehandling(request.behandlingId)
         val behandlingBarn = barnService.finnBarnPåBehandling(request.behandlingId)
 
@@ -76,26 +82,54 @@ class SamværsavtaleService(
     }
 
     @Transactional
-    fun kopierSamværsavtalerTilNyBehandling(
-        eksisterendeBehandlingId: UUID,
-        nyBehandlingId: UUID,
+    fun gjenbrukSamværsavtaler(
+        behandlingSomSkalOppdateresId: UUID,
+        behandlingForGjenbrukId: UUID,
         metadata: HovedregelMetadata,
     ) {
-        val eksisterendeSamværsavtaler =
-            hentSamværsavtalerForBehandling(eksisterendeBehandlingId).associateBy { it.behandlingBarnId }
-        val barnPåForrigeBehandling = barnService.finnBarnPåBehandling(eksisterendeBehandlingId)
+        val samværsavtalerForGjenbruk =
+            hentSamværsavtalerForBehandling(behandlingForGjenbrukId).associateBy { it.behandlingBarnId }
+        val barnPåForrigeBehandling = barnService.finnBarnPåBehandling(behandlingForGjenbrukId)
         val barnIdMap = byggBarnMapFraTidligereTilNyId(barnPåForrigeBehandling, metadata.barn)
 
         val nyeSamværsavtaler =
             barnIdMap.mapNotNull { (forrigeBehandlingBarnId, nåværendeBehandlingBarn) ->
-                eksisterendeSamværsavtaler.get(forrigeBehandlingBarnId)?.copy(
+                samværsavtalerForGjenbruk.get(forrigeBehandlingBarnId)?.copy(
                     id = UUID.randomUUID(),
-                    behandlingId = nyBehandlingId,
+                    behandlingId = behandlingSomSkalOppdateresId,
                     behandlingBarnId = nåværendeBehandlingBarn.id,
                 )
             }
 
         samværsavtaleRepository.insertAll(nyeSamværsavtaler)
+    }
+
+    @Transactional
+    fun gjenbrukSamværsavtale(
+        behandlingSomSkalOppdateresId: UUID,
+        behandlingForGjenbrukId: UUID,
+        barnPåBehandlingSomSkalOppdateres: List<BehandlingBarn>,
+        vilkårsvurderingSomSkalOppdateres: Vilkårsvurdering,
+    ) {
+        validerBehandlingerForGjenbruk(behandlingSomSkalOppdateresId, behandlingForGjenbrukId)
+        validerVilkårsvurderingForGjenbruk(vilkårsvurderingSomSkalOppdateres)
+        val barnPåBehandlingForGjenbruk = barnService.finnBarnPåBehandling(behandlingForGjenbrukId)
+        val barnIdMap = byggBarnMapFraTidligereTilNyId(barnPåBehandlingForGjenbruk, barnPåBehandlingSomSkalOppdateres)
+        val tilsvarendeBarnPåBehandlingForGjenbruk = barnIdMap.entries.find { it.value.id == vilkårsvurderingSomSkalOppdateres.barnId }?.key ?: error("Fant ikke barn på tidligere vilkårsvurdering")
+        val samværsavtaleForGjenbruk = hentSamværsavtalerForBehandling(behandlingForGjenbrukId).find { it.behandlingBarnId == tilsvarendeBarnPåBehandlingForGjenbruk }
+
+        if (samværsavtaleForGjenbruk == null) {
+            samværsavtaleRepository.deleteByBehandlingIdAndBehandlingBarnId(behandlingSomSkalOppdateresId, vilkårsvurderingSomSkalOppdateres.barnId ?: error("Fant ikke barn på tidligere vilkårsvurdering"))
+        } else {
+            opprettEllerErstattSamværsavtale(
+                request =
+                    SamværsavtaleDto(
+                        behandlingId = behandlingSomSkalOppdateresId,
+                        behandlingBarnId = vilkårsvurderingSomSkalOppdateres.barnId ?: error("Mangler behandlingBarnId for gjenbruk av samværsavtale"),
+                        uker = samværsavtaleForGjenbruk.uker.uker,
+                    ),
+            )
+        }
     }
 
     fun journalførBeregnetSamvær(request: JournalførBeregnetSamværRequest): String {
@@ -203,6 +237,39 @@ class SamværsavtaleService(
         }
         brukerfeilHvis(eksternFagsakId == null) {
             "Kan ikke journalføre samværsavtale på person uten fagsak"
+        }
+    }
+
+    private fun validerBehandlingerForGjenbruk(
+        behandlingSomSkalOppdateresId: UUID,
+        behandlingForGjenbrukId: UUID,
+    ) {
+        val saksbehandling = behandlingService.hentSaksbehandling(behandlingSomSkalOppdateresId)
+        brukerfeilHvis(saksbehandling.status.behandlingErLåstForVidereRedigering()) {
+            "Behandlingen er låst og samværsavtale kan ikke gjenbrukes på behandling med id=$behandlingSomSkalOppdateresId"
+        }
+        brukerfeilHvis(!tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandler(behandlingSomSkalOppdateresId)) {
+            "Behandling med id=$behandlingSomSkalOppdateresId eies av noen andre og samværsavtale kan derfor ikke oppdateres av deg"
+        }
+
+        val fagsak: Fagsak = fagsakService.hentFagsakForBehandling(behandlingSomSkalOppdateresId)
+        val behandlingerForGjenbruk: List<Behandling> =
+            behandlingService.hentBehandlingerForGjenbrukAvVilkårOgSamværsavtaler(fagsak.fagsakPersonId)
+
+        if (behandlingerForGjenbruk.isEmpty()) {
+            throw Feil("Fant ingen tidligere behandlinger som kan benyttes til gjenbruk av samværsavtale for behandling med id=$behandlingSomSkalOppdateresId")
+        }
+        if (!behandlingerForGjenbruk.map { it.id }.contains(behandlingForGjenbrukId)) {
+            throw Feil("Behandling med id=$behandlingForGjenbrukId kan ikke benyttes til gjenbruk av samværsavtale for behandling med id=$behandlingSomSkalOppdateresId")
+        }
+    }
+
+    private fun validerVilkårsvurderingForGjenbruk(vilkårsvurdering: Vilkårsvurdering) {
+        if (vilkårsvurdering.type !== VilkårType.ALENEOMSORG) {
+            throw Feil("Kan ikke gjenbruke samværsavtale for et vilkår som ikke er av type ALENEOMSROG. behandlingId=${vilkårsvurdering.behandlingId}")
+        }
+        if (vilkårsvurdering.barnId == null) {
+            throw Feil("Kan ikke gjenbruke samværsavtale for et vilkår som ikke har et barn. behandlingId=${vilkårsvurdering.behandlingId}")
         }
     }
 }
