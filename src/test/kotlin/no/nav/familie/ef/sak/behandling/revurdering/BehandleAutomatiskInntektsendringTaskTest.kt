@@ -1,10 +1,12 @@
 package no.nav.familie.ef.sak.no.nav.familie.ef.sak.behandling.revurdering
 
+import io.mockk.mockk
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
+import no.nav.familie.ef.sak.behandling.revurdering.AutomatiskRevurderingService
 import no.nav.familie.ef.sak.behandling.revurdering.BehandleAutomatiskInntektsendringTask
 import no.nav.familie.ef.sak.behandling.revurdering.PayloadBehandleAutomatiskInntektsendringTask
 import no.nav.familie.ef.sak.behandling.revurdering.RevurderingService
@@ -52,6 +54,9 @@ class BehandleAutomatiskInntektsendringTaskTest : OppslagSpringRunnerTest() {
     private lateinit var årsakRevurderingsRepository: ÅrsakRevurderingsRepository
 
     @Autowired
+    private lateinit var automatiskRevurderingService: AutomatiskRevurderingService
+
+    @Autowired
     private lateinit var vilkårHelperService: VilkårHelperService
 
     @Autowired
@@ -72,6 +77,7 @@ class BehandleAutomatiskInntektsendringTaskTest : OppslagSpringRunnerTest() {
                 behandlingService = behandlingService,
                 vedtakService = vedtakService,
                 årsakRevurderingsRepository = årsakRevurderingsRepository,
+                automatiskRevurderingService = automatiskRevurderingService,
                 featureToggleService = featureToggleService,
             )
     }
