@@ -25,6 +25,7 @@ class BehandleAutomatiskInntektsendringTask(
     private val behandlingService: BehandlingService,
     private val fagsakService: FagsakService,
     private val featureToggleService: FeatureToggleService,
+    private val automatiskRevurderingService: AutomatiskRevurderingService,
 ) : AsyncTaskStep {
     private val secureLogger = LoggerFactory.getLogger("secureLogger")
 
@@ -42,11 +43,14 @@ class BehandleAutomatiskInntektsendringTask(
             if (fagsak != null) {
                 secureLogger.info("Kan opprette behandling med $personIdent stønadstype=${StønadType.OVERGANGSSTØNAD} faksakId ${fagsak.id}")
 
-                behandlingService.opprettBehandling(
-                    behandlingType = BehandlingType.REVURDERING,
-                    fagsakId = fagsak.id,
-                    behandlingsårsak = BehandlingÅrsak.AUTOMATISK_INNTEKTSENDRING,
-                )
+                val behandling =
+                    behandlingService.opprettBehandling(
+                        behandlingType = BehandlingType.REVURDERING,
+                        fagsakId = fagsak.id,
+                        behandlingsårsak = BehandlingÅrsak.AUTOMATISK_INNTEKTSENDRING,
+                    )
+
+                automatiskRevurderingService.lagreInntektResponse(personIdent, behandling.id)
             } else {
                 secureLogger.error("Finner ikke fagsak for personIdent=$personIdent på stønadstype=${StønadType.OVERGANGSSTØNAD} under automatisk inntektsendring")
             }
