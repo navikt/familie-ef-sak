@@ -37,6 +37,7 @@ class BehandleAutomatiskInntektsendringTask(
     private val behandlingService: BehandlingService,
     private val vedtakService: VedtakService,
     private val årsakRevurderingsRepository: ÅrsakRevurderingsRepository,
+    private val automatiskRevurderingService: AutomatiskRevurderingService,
     private val featureToggleService: FeatureToggleService,
 ) : AsyncTaskStep {
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -80,7 +81,7 @@ class BehandleAutomatiskInntektsendringTask(
 
                 årsakRevurderingsRepository.insert(ÅrsakRevurdering(behandlingId = behandling.id, opplysningskilde = Opplysningskilde.OPPLYSNINGER_INTERNE_KONTROLLER, årsak = Revurderingsårsak.ENDRING_INNTEKT, beskrivelse = null))
                 vedtakService.lagreVedtak(vedtakDto = innvilgelseOvergangsstønad, behandlingId = behandling.id, stønadstype = StønadType.OVERGANGSSTØNAD)
-
+                automatiskRevurderingService.lagreInntektResponse(personIdent, behandling.id)
                 logger.info("Opprettet behandling for automatisk inntektsendring: ${behandling.id}")
             } else {
                 secureLogger.error("Finner ikke fagsak for personIdent=$personIdent på stønadstype=${StønadType.OVERGANGSSTØNAD} under automatisk inntektsendring")
