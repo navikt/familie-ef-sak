@@ -121,6 +121,7 @@ object SøknadsskjemaMapper {
                     kontraktsøknad.utdanning.verdi.tidligereUtdanninger
                         ?.verdi,
                 ),
+            utdanningDokumentasjon = tilDomene(kontraktsøknad.dokumentasjon.utdanningDokumentasjon?.verdi),
             adresseopplysninger = tilDomene(kontraktsøknad.personalia, kontraktsøknad.adresseopplysninger),
         )
 

@@ -17,6 +17,7 @@ import no.nav.familie.ef.sak.brev.dto.SignaturDto
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
+import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.journalføring.JournalpostClient
 import no.nav.familie.ef.sak.oppgave.TilordnetRessursService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerService
@@ -24,8 +25,10 @@ import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.behandlingBarn
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.hovedregelMetadata
+import no.nav.familie.ef.sak.repository.saksbehandling
 import no.nav.familie.ef.sak.repository.samværsavtale
 import no.nav.familie.ef.sak.repository.samværsuke
+import no.nav.familie.ef.sak.repository.vilkårsvurdering
 import no.nav.familie.ef.sak.samværsavtale.domain.Samværsandel.BARNEHAGE_SKOLE
 import no.nav.familie.ef.sak.samværsavtale.domain.Samværsandel.ETTERMIDDAG
 import no.nav.familie.ef.sak.samværsavtale.domain.Samværsandel.KVELD_NATT
@@ -33,6 +36,7 @@ import no.nav.familie.ef.sak.samværsavtale.domain.Samværsandel.MORGEN
 import no.nav.familie.ef.sak.samværsavtale.domain.Samværsavtale
 import no.nav.familie.ef.sak.samværsavtale.dto.JournalførBeregnetSamværRequest
 import no.nav.familie.ef.sak.samværsavtale.dto.tilDto
+import no.nav.familie.ef.sak.vilkår.VilkårType
 import no.nav.familie.ef.sak.vilkår.regler.HovedregelMetadata
 import no.nav.familie.kontrakter.felles.dokarkiv.ArkiverDokumentResponse
 import no.nav.familie.kontrakter.felles.dokarkiv.Dokumenttype
@@ -385,7 +389,7 @@ internal class SamværsavtaleServiceTest {
     }
 
     @Nested
-    inner class KopierSamværsavtale {
+    inner class Gjenbruk {
         @Test
         internal fun `skal kopiere over riktige samværsavtaler fra forrige behandling dersom de eksisterer`() {
             val eksisterendeBehandlingId = UUID.randomUUID()
@@ -444,7 +448,7 @@ internal class SamværsavtaleServiceTest {
                 listOf(barnPåBeggeBehandlingerMedSamværsavtale, barnPåEksisterendeBehandling, barnPåBeggeBehandlingerUtenSamværsavtale)
             every { samværsavtaleRepository.insertAll(capture(nyeSamværsavtaler)) } answers { firstArg() }
 
-            samværsavtaleService.kopierSamværsavtalerTilNyBehandling(eksisterendeBehandlingId, nyBehandlingId, metadata)
+            samværsavtaleService.gjenbrukSamværsavtaler(nyBehandlingId, eksisterendeBehandlingId, metadata)
 
             verify(exactly = 1) { samværsavtaleRepository.insertAll(any()) }
             assertThat(nyeSamværsavtaler.captured.size).isEqualTo(1)
@@ -464,6 +468,224 @@ internal class SamværsavtaleServiceTest {
                     .summerTilSamværsandelerVerdiPerDag()
                     .sum(),
             ).isEqualTo(14)
+        }
+
+        @ParameterizedTest
+        @EnumSource(
+            value = BehandlingStatus::class,
+            names = ["FATTER_VEDTAK", "IVERKSETTER_VEDTAK", "FERDIGSTILT", "SATT_PÅ_VENT"],
+            mode = EnumSource.Mode.INCLUDE,
+        )
+        internal fun `skal ikke kunne gjenbruke samværsavtale på behandling som ikke er redigerbar`(status: BehandlingStatus) {
+            val behandlingSomSkalOppdateres = behandling(status = status)
+            val behandlingForGjenbruk = behandling()
+            val barnPåBehandlingSomSkalOppdateres = behandlingBarn(behandlingId = behandlingSomSkalOppdateres.id, personIdent = "1")
+            val vilkårsVurderingSomSkalOppdateres = vilkårsvurdering(behandlingId = behandlingSomSkalOppdateres.id, type = VilkårType.ALENEOMSORG, barnId = barnPåBehandlingSomSkalOppdateres.id)
+
+            every { behandlingService.hentSaksbehandling(behandlingSomSkalOppdateres.id) } returns saksbehandling(behandling = behandlingSomSkalOppdateres)
+
+            val feil: ApiFeil =
+                assertThrows {
+                    samværsavtaleService.gjenbrukSamværsavtale(behandlingSomSkalOppdateres.id, behandlingForGjenbruk.id, listOf(barnPåBehandlingSomSkalOppdateres), vilkårsVurderingSomSkalOppdateres)
+                }
+
+            assertThat(feil.message).isEqualTo("Behandlingen er låst og samværsavtale kan ikke gjenbrukes på behandling med id=${behandlingSomSkalOppdateres.id}")
+            assertThat(feil.httpStatus).isEqualTo(HttpStatus.BAD_REQUEST)
+        }
+
+        @Test
+        internal fun `skal ikke kunne gjenbruke samværsavtale på behandling som tilhører en annen saksbehandler`() {
+            val behandlingSomSkalOppdateres = behandling()
+            val behandlingForGjenbruk = behandling()
+            val barnPåBehandlingSomSkalOppdateres = behandlingBarn(behandlingId = behandlingSomSkalOppdateres.id, personIdent = "1")
+            val vilkårsVurderingSomSkalOppdateres = vilkårsvurdering(behandlingId = behandlingSomSkalOppdateres.id, type = VilkårType.ALENEOMSORG, barnId = barnPåBehandlingSomSkalOppdateres.id)
+
+            every { behandlingService.hentSaksbehandling(behandlingSomSkalOppdateres.id) } returns saksbehandling(behandling = behandlingSomSkalOppdateres)
+            every {
+                tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandler(behandlingSomSkalOppdateres.id)
+            } returns false
+
+            val feil: ApiFeil =
+                assertThrows {
+                    samværsavtaleService.gjenbrukSamværsavtale(behandlingSomSkalOppdateres.id, behandlingForGjenbruk.id, listOf(barnPåBehandlingSomSkalOppdateres), vilkårsVurderingSomSkalOppdateres)
+                }
+
+            assertThat(feil.message).isEqualTo("Behandling med id=${behandlingSomSkalOppdateres.id} eies av noen andre og samværsavtale kan derfor ikke oppdateres av deg")
+            assertThat(feil.httpStatus).isEqualTo(HttpStatus.BAD_REQUEST)
+        }
+
+        @Test
+        internal fun `skal ikke kunne gjenbruke samværsavtale på behandling som ikke har noen tidligere gjenbrukbare behandlinger`() {
+            val fagsakForBehandlingSomSkalOppdateres = fagsak()
+            val behandlingSomSkalOppdateres = behandling(fagsak = fagsakForBehandlingSomSkalOppdateres)
+            val behandlingForGjenbruk = behandling()
+            val barnPåBehandlingSomSkalOppdateres = behandlingBarn(behandlingId = behandlingSomSkalOppdateres.id, personIdent = "1")
+            val vilkårsVurderingSomSkalOppdateres = vilkårsvurdering(behandlingId = behandlingSomSkalOppdateres.id, type = VilkårType.ALENEOMSORG, barnId = barnPåBehandlingSomSkalOppdateres.id)
+
+            every { behandlingService.hentSaksbehandling(behandlingSomSkalOppdateres.id) } returns saksbehandling(behandling = behandlingSomSkalOppdateres)
+            every {
+                tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandler(behandlingSomSkalOppdateres.id)
+            } returns true
+            every { fagsakService.hentFagsakForBehandling(behandlingSomSkalOppdateres.id) } returns fagsakForBehandlingSomSkalOppdateres
+            every { behandlingService.hentBehandlingerForGjenbrukAvVilkårOgSamværsavtaler(fagsakForBehandlingSomSkalOppdateres.fagsakPersonId) } returns emptyList()
+
+            val feil: Feil =
+                assertThrows {
+                    samværsavtaleService.gjenbrukSamværsavtale(behandlingSomSkalOppdateres.id, behandlingForGjenbruk.id, listOf(barnPåBehandlingSomSkalOppdateres), vilkårsVurderingSomSkalOppdateres)
+                }
+
+            assertThat(feil.message).isEqualTo("Fant ingen tidligere behandlinger som kan benyttes til gjenbruk av samværsavtale for behandling med id=${behandlingSomSkalOppdateres.id}")
+            assertThat(feil.httpStatus).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR)
+        }
+
+        @Test
+        internal fun `skal ikke kunne gjenbruke samværsavtale hvis behandling for gjenbruk ikke er gjenbrukbar`() {
+            val fagsakForBehandlingSomSkalOppdateres = fagsak()
+            val behandlingSomSkalOppdateres = behandling(fagsak = fagsakForBehandlingSomSkalOppdateres)
+            val behandlingForGjenbruk = behandling()
+            val barnPåBehandlingSomSkalOppdateres = behandlingBarn(behandlingId = behandlingSomSkalOppdateres.id, personIdent = "1")
+            val vilkårsVurderingSomSkalOppdateres = vilkårsvurdering(behandlingId = behandlingSomSkalOppdateres.id, type = VilkårType.ALENEOMSORG, barnId = barnPåBehandlingSomSkalOppdateres.id)
+
+            every { behandlingService.hentSaksbehandling(behandlingSomSkalOppdateres.id) } returns saksbehandling(behandling = behandlingSomSkalOppdateres)
+            every {
+                tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandler(behandlingSomSkalOppdateres.id)
+            } returns true
+            every { fagsakService.hentFagsakForBehandling(behandlingSomSkalOppdateres.id) } returns fagsakForBehandlingSomSkalOppdateres
+            every { behandlingService.hentBehandlingerForGjenbrukAvVilkårOgSamværsavtaler(fagsakForBehandlingSomSkalOppdateres.fagsakPersonId) } returns listOf(behandling())
+
+            val feil: Feil =
+                assertThrows {
+                    samværsavtaleService.gjenbrukSamværsavtale(behandlingSomSkalOppdateres.id, behandlingForGjenbruk.id, listOf(barnPåBehandlingSomSkalOppdateres), vilkårsVurderingSomSkalOppdateres)
+                }
+
+            assertThat(feil.message).isEqualTo("Behandling med id=${behandlingForGjenbruk.id} kan ikke benyttes til gjenbruk av samværsavtale for behandling med id=${behandlingSomSkalOppdateres.id}")
+            assertThat(feil.httpStatus).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR)
+        }
+
+        @ParameterizedTest
+        @EnumSource(
+            value = VilkårType::class,
+            names = ["ALENEOMSORG"],
+            mode = EnumSource.Mode.EXCLUDE,
+        )
+        internal fun `skal ikke kunne gjenbruke samværsavtale for et vilkår som ikke er av type ALENEOMSORG`(vilkårType: VilkårType) {
+            val fagsakForBehandlingSomSkalOppdateres = fagsak()
+            val behandlingSomSkalOppdateres = behandling(fagsak = fagsakForBehandlingSomSkalOppdateres)
+            val behandlingForGjenbruk = behandling()
+            val barnPåBehandlingSomSkalOppdateres = behandlingBarn(behandlingId = behandlingSomSkalOppdateres.id, personIdent = "1")
+            val vilkårsVurderingSomSkalOppdateres = vilkårsvurdering(behandlingId = behandlingSomSkalOppdateres.id, type = vilkårType, barnId = barnPåBehandlingSomSkalOppdateres.id)
+
+            every { behandlingService.hentSaksbehandling(behandlingSomSkalOppdateres.id) } returns saksbehandling(behandling = behandlingSomSkalOppdateres)
+            every {
+                tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandler(behandlingSomSkalOppdateres.id)
+            } returns true
+            every { fagsakService.hentFagsakForBehandling(behandlingSomSkalOppdateres.id) } returns fagsakForBehandlingSomSkalOppdateres
+            every { behandlingService.hentBehandlingerForGjenbrukAvVilkårOgSamværsavtaler(fagsakForBehandlingSomSkalOppdateres.fagsakPersonId) } returns listOf(behandlingForGjenbruk)
+
+            val feil: Feil =
+                assertThrows {
+                    samværsavtaleService.gjenbrukSamværsavtale(behandlingSomSkalOppdateres.id, behandlingForGjenbruk.id, listOf(barnPåBehandlingSomSkalOppdateres), vilkårsVurderingSomSkalOppdateres)
+                }
+
+            assertThat(feil.message).isEqualTo("Kan ikke gjenbruke samværsavtale for et vilkår som ikke er av type ALENEOMSROG. behandlingId=${vilkårsVurderingSomSkalOppdateres.behandlingId}")
+            assertThat(feil.httpStatus).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR)
+        }
+
+        @Test
+        internal fun `skal ikke kunne gjenbruke samværsavtale for et vilkår uten tilhørende barn`() {
+            val fagsakForBehandlingSomSkalOppdateres = fagsak()
+            val behandlingSomSkalOppdateres = behandling(fagsak = fagsakForBehandlingSomSkalOppdateres)
+            val behandlingForGjenbruk = behandling()
+            val barnPåBehandlingSomSkalOppdateres = behandlingBarn(behandlingId = behandlingSomSkalOppdateres.id, personIdent = "1")
+            val vilkårsVurderingSomSkalOppdateres = vilkårsvurdering(behandlingId = behandlingSomSkalOppdateres.id, type = VilkårType.ALENEOMSORG, barnId = null)
+
+            every { behandlingService.hentSaksbehandling(behandlingSomSkalOppdateres.id) } returns saksbehandling(behandling = behandlingSomSkalOppdateres)
+            every {
+                tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandler(behandlingSomSkalOppdateres.id)
+            } returns true
+            every { fagsakService.hentFagsakForBehandling(behandlingSomSkalOppdateres.id) } returns fagsakForBehandlingSomSkalOppdateres
+            every { behandlingService.hentBehandlingerForGjenbrukAvVilkårOgSamværsavtaler(fagsakForBehandlingSomSkalOppdateres.fagsakPersonId) } returns listOf(behandlingForGjenbruk)
+
+            val feil: Feil =
+                assertThrows {
+                    samværsavtaleService.gjenbrukSamværsavtale(behandlingSomSkalOppdateres.id, behandlingForGjenbruk.id, listOf(barnPåBehandlingSomSkalOppdateres), vilkårsVurderingSomSkalOppdateres)
+                }
+
+            assertThat(feil.message).isEqualTo("Kan ikke gjenbruke samværsavtale for et vilkår som ikke har et barn. behandlingId=${vilkårsVurderingSomSkalOppdateres.behandlingId}")
+            assertThat(feil.httpStatus).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR)
+        }
+
+        @Test
+        internal fun `skal slette eksisterende samværsavtale dersom samværsavtalen man gjenbruker fra ikke eksisterer`() {
+            val fagsakForBehandlingSomSkalOppdateres = fagsak()
+            val behandlingSomSkalOppdateres = behandling(fagsak = fagsakForBehandlingSomSkalOppdateres)
+            val behandlingForGjenbruk = behandling()
+            val barnPåBehandlingSomSkalOppdateres = behandlingBarn(behandlingId = behandlingSomSkalOppdateres.id, personIdent = "1")
+            val vilkårsVurderingSomSkalOppdateres = vilkårsvurdering(behandlingId = behandlingSomSkalOppdateres.id, type = VilkårType.ALENEOMSORG, barnId = barnPåBehandlingSomSkalOppdateres.id)
+
+            every { behandlingService.hentSaksbehandling(behandlingSomSkalOppdateres.id) } returns saksbehandling(behandling = behandlingSomSkalOppdateres)
+            every {
+                tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandler(behandlingSomSkalOppdateres.id)
+            } returns true
+            every { fagsakService.hentFagsakForBehandling(behandlingSomSkalOppdateres.id) } returns fagsakForBehandlingSomSkalOppdateres
+            every { behandlingService.hentBehandlingerForGjenbrukAvVilkårOgSamværsavtaler(fagsakForBehandlingSomSkalOppdateres.fagsakPersonId) } returns listOf(behandlingForGjenbruk)
+            every { barnService.finnBarnPåBehandling(behandlingSomSkalOppdateres.id) } returns listOf(barnPåBehandlingSomSkalOppdateres)
+            every { barnService.finnBarnPåBehandling(behandlingForGjenbruk.id) } returns listOf(barnPåBehandlingSomSkalOppdateres)
+            every { samværsavtaleRepository.findByBehandlingId(any()) } returns emptyList()
+            every { samværsavtaleRepository.deleteByBehandlingIdAndBehandlingBarnId(any(), any()) } just Runs
+
+            samværsavtaleService.gjenbrukSamværsavtale(behandlingSomSkalOppdateres.id, behandlingForGjenbruk.id, listOf(barnPåBehandlingSomSkalOppdateres), vilkårsVurderingSomSkalOppdateres)
+
+            verify(exactly = 1) { samværsavtaleRepository.deleteByBehandlingIdAndBehandlingBarnId(behandlingSomSkalOppdateres.id, vilkårsVurderingSomSkalOppdateres.barnId!!) }
+            verify(exactly = 0) { samværsavtaleRepository.insert(any()) }
+            verify(exactly = 0) { samværsavtaleRepository.update(any()) }
+        }
+
+        @Test
+        internal fun `skal gjenbruke riktig samværsavtale fra forrige gjenbrukbare behandling`() {
+            val fagsakForBehandlingSomSkalOppdateres = fagsak()
+            val behandlingSomSkalOppdateres = behandling(fagsak = fagsakForBehandlingSomSkalOppdateres)
+            val behandlingForGjenbruk = behandling()
+            val barn1PåBehandlingSomSkalOppdateres = behandlingBarn(behandlingId = behandlingSomSkalOppdateres.id, personIdent = "1")
+            val barn2PåBehandlingSomSkalOppdateres = behandlingBarn(behandlingId = behandlingSomSkalOppdateres.id, personIdent = "2")
+            val barn1PåBehandlingForGjenbruk = behandlingBarn(behandlingId = behandlingForGjenbruk.id, personIdent = "3")
+            val barn2PåBehandlingForGjenbruk = behandlingBarn(behandlingId = behandlingForGjenbruk.id, personIdent = "1")
+            val vilkårsVurderingSomSkalOppdateres = vilkårsvurdering(behandlingId = behandlingSomSkalOppdateres.id, type = VilkårType.ALENEOMSORG, barnId = barn1PåBehandlingSomSkalOppdateres.id)
+            val lagretSamværsavtale = slot<Samværsavtale>()
+
+            every { behandlingService.hentSaksbehandling(behandlingSomSkalOppdateres.id) } returns saksbehandling(behandling = behandlingSomSkalOppdateres)
+            every {
+                tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandler(behandlingSomSkalOppdateres.id)
+            } returns true
+            every { fagsakService.hentFagsakForBehandling(behandlingSomSkalOppdateres.id) } returns fagsakForBehandlingSomSkalOppdateres
+            every { behandlingService.hentBehandlingerForGjenbrukAvVilkårOgSamværsavtaler(fagsakForBehandlingSomSkalOppdateres.fagsakPersonId) } returns listOf(behandlingForGjenbruk)
+            every { barnService.finnBarnPåBehandling(behandlingForGjenbruk.id) } returns listOf(barn1PåBehandlingForGjenbruk, barn2PåBehandlingForGjenbruk)
+            every { samværsavtaleRepository.findByBehandlingId(behandlingForGjenbruk.id) } returns listOf(samværsavtale(), samværsavtale(), samværsavtale(behandlingBarnid = barn2PåBehandlingForGjenbruk.id, uker = listOf(samværsuke(andeler = listOf(KVELD_NATT)), samværsuke(andeler = listOf(MORGEN, BARNEHAGE_SKOLE)))))
+            every { behandlingService.hentBehandling(behandlingSomSkalOppdateres.id) } returns behandlingSomSkalOppdateres
+            every { barnService.finnBarnPåBehandling(behandlingSomSkalOppdateres.id) } returns listOf(barn1PåBehandlingSomSkalOppdateres, barn2PåBehandlingSomSkalOppdateres)
+            every { samværsavtaleRepository.findByBehandlingIdAndBehandlingBarnId(behandlingSomSkalOppdateres.id, barn1PåBehandlingSomSkalOppdateres.id) } returns samværsavtale()
+            every { samværsavtaleRepository.findByBehandlingIdAndBehandlingBarnId(any(), any()) } returns null
+            every { samværsavtaleRepository.insert(capture(lagretSamværsavtale)) } answers { firstArg() }
+
+            samværsavtaleService.gjenbrukSamværsavtale(behandlingSomSkalOppdateres.id, behandlingForGjenbruk.id, listOf(barn1PåBehandlingSomSkalOppdateres, barn2PåBehandlingSomSkalOppdateres), vilkårsVurderingSomSkalOppdateres)
+
+            verify(exactly = 1) { samværsavtaleRepository.insert(any()) }
+            verify(exactly = 0) { samværsavtaleRepository.update(any()) }
+            assertThat(lagretSamværsavtale.captured.behandlingId).isEqualTo(behandlingSomSkalOppdateres.id)
+            assertThat(lagretSamværsavtale.captured.behandlingBarnId).isEqualTo(barn1PåBehandlingSomSkalOppdateres.id)
+            assertThat(lagretSamværsavtale.captured.uker.uker.size).isEqualTo(2)
+            assertThat(
+                lagretSamværsavtale.captured
+                    .tilDto()
+                    .mapTilSamværsandelerPerDag()
+                    .size,
+            ).isEqualTo(14)
+            assertThat(
+                lagretSamværsavtale.captured
+                    .tilDto()
+                    .summerTilSamværsandelerVerdiPerDag()
+                    .sum(),
+            ).isEqualTo(49)
         }
     }
 
