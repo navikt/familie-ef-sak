@@ -6,7 +6,6 @@ import no.nav.familie.ef.sak.behandling.domain.ÅrsakRevurdering
 import no.nav.familie.ef.sak.behandling.dto.RevurderingDto
 import no.nav.familie.ef.sak.beregning.tilInntekt
 import no.nav.familie.ef.sak.fagsak.FagsakService
-import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.infrastruktur.config.ObjectMapperProvider.objectMapper
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
@@ -56,7 +55,6 @@ class BehandleAutomatiskInntektsendringTask(
 
         if (toggle) {
             if (fagsak != null) {
-
                 val behandling =
                     revurderingService.opprettRevurderingManuelt(
                         RevurderingDto(
