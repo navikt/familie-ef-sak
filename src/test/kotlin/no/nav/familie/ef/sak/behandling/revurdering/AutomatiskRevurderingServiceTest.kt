@@ -17,7 +17,7 @@ import org.junit.jupiter.api.Test
 class AutomatiskRevurderingServiceTest {
     val behandlingServiceMock = mockk<BehandlingService>(relaxed = true)
     val oppgaveServiceMock = mockk<OppgaveService>(relaxed = true)
-    val automatiskRevurderingService = AutomatiskRevurderingService(mockk(relaxed = true), mockk(relaxed = true), behandlingServiceMock, oppgaveServiceMock)
+    val automatiskRevurderingService = AutomatiskRevurderingService(mockk(relaxed = true), mockk(relaxed = true), behandlingServiceMock, oppgaveServiceMock, mockk(relaxed = true), mockk(relaxed = true))
 
     @Test
     fun `Kan automatisk revurderes`() {
