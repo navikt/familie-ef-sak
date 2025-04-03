@@ -97,7 +97,7 @@ class BehandleAutomatiskInntektsendringTaskTest : OppslagSpringRunnerTest() {
         assertThat(behandlingerForFagsak).hasSize(2)
         val automatiskInntektsendringBehandling = behandlingerForFagsak.first { it.årsak == BehandlingÅrsak.AUTOMATISK_INNTEKTSENDRING }
         val årsakTilRevurdering = årsakRevurderingsRepository.findByIdOrThrow(automatiskInntektsendringBehandling.id)
-        assertThat(årsakTilRevurdering.opplysningskilde).isEqualTo(Opplysningskilde.OPPLYSNINGER_INTERNE_KONTROLLER) // Endres til Automatisk opprettet behandling
+        assertThat(årsakTilRevurdering.opplysningskilde).isEqualTo(Opplysningskilde.AUTOMATISK_OPPRETTET_BEHANDLING)
         assertThat(årsakTilRevurdering.årsak).isEqualTo(Revurderingsårsak.ENDRING_INNTEKT)
         assertThat(årsakTilRevurdering.beskrivelse).isNullOrEmpty()
 
