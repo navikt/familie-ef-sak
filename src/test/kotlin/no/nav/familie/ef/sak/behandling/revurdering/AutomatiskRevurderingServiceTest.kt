@@ -74,10 +74,10 @@ class AutomatiskRevurderingServiceTest {
 
     @Test
     fun `skal finne første måned med 10 prosent endring i inntekt`() {
-        val inntekterFørsteTreMåneder = inntektsmåneder(YearMonth.now().minusMonths(12), listOf(inntekt(1000.0))).take(3)
-        val inntekterMånedFireTilSeks = inntektsmåneder(YearMonth.now().minusMonths(9), listOf(inntekt(1050.0))).take(3)
-        val inntekterSyvTilNi = inntektsmåneder(YearMonth.now().minusMonths(6), listOf(inntekt(1400.0))).take(3)
-        val inntekterSisteTreMåneder = inntektsmåneder(YearMonth.now().minusMonths(3), listOf(inntekt(2000.0))).take(3)
+        val inntekterFørsteTreMåneder = inntektsmåneder(YearMonth.now().minusMonths(12), inntektListe = listOf(inntekt(1000.0))).take(3)
+        val inntekterMånedFireTilSeks = inntektsmåneder(YearMonth.now().minusMonths(9), inntektListe = listOf(inntekt(1050.0))).take(3)
+        val inntekterSyvTilNi = inntektsmåneder(YearMonth.now().minusMonths(6), inntektListe = listOf(inntekt(1400.0))).take(3)
+        val inntekterSisteTreMåneder = inntektsmåneder(YearMonth.now().minusMonths(3), inntektListe = listOf(inntekt(2000.0))).take(3)
 
         val inntekter = inntekterFørsteTreMåneder + inntekterMånedFireTilSeks + inntekterSyvTilNi + inntekterSisteTreMåneder
         val inntektResponse = InntektResponse(inntekter)
