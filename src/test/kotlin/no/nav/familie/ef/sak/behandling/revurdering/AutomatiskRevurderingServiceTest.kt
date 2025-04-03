@@ -71,4 +71,21 @@ class AutomatiskRevurderingServiceTest {
         assertThat(totalInntektFor6MånederTilbake).isEqualTo(18000)
         assertThat(totalInntektFor1MånedTilbake).isEqualTo(3000)
     }
+
+    @Test
+    fun `skal finne første måned med 10 prosent endring i inntekt`() {
+        val inntekterFørsteTreMåneder = inntektsmåneder(YearMonth.now().minusMonths(12), listOf(inntekt(1000.0))).take(3)
+        val inntekterMånedFireTilSeks = inntektsmåneder(YearMonth.now().minusMonths(9), listOf(inntekt(1050.0))).take(3)
+        val inntekterSyvTilNi = inntektsmåneder(YearMonth.now().minusMonths(6), listOf(inntekt(1400.0))).take(3)
+        val inntekterSisteTreMåneder = inntektsmåneder(YearMonth.now().minusMonths(3), listOf(inntekt(2000.0))).take(3)
+
+        val inntekter = inntekterFørsteTreMåneder + inntekterMånedFireTilSeks + inntekterSyvTilNi + inntekterSisteTreMåneder
+        val inntektResponse = InntektResponse(inntekter)
+
+        val månedOgInntektMed10ProsentØkning = inntektResponse.førsteMånedOgInntektMed10ProsentØkning()
+
+        assertThat(månedOgInntektMed10ProsentØkning).isNotNull
+        assertThat(månedOgInntektMed10ProsentØkning?.first).isEqualTo(YearMonth.now().minusMonths(6))
+        assertThat(månedOgInntektMed10ProsentØkning?.second).isEqualTo(1400.0)
+    }
 }

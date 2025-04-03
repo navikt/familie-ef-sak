@@ -105,7 +105,7 @@ class BehandleAutomatiskInntektsendringTask(
             førstePeriode?.copy(
                 datoFra =
                     inntektResponse
-                        .førsteMånedMed10ProsentØkning()
+                        .førsteMånedOgInntektMed10ProsentØkning()
                         ?.first
                         ?.atDay(1)
                         ?.plusMonths(1) ?: førstePeriode.datoFra,
@@ -123,7 +123,7 @@ class BehandleAutomatiskInntektsendringTask(
         forrigeVedtak: Vedtak,
         inntektResponse: InntektResponse,
     ): List<Inntektsperiode> {
-        val forventetInntekt = inntektResponse.forventetInntektMånedsinntekt()
+        val forventetInntekt = inntektResponse.forventetMånedsinntekt()
         val inntekterMinimum3MndTilbake = forrigeVedtak.inntekter?.inntekter?.filter { it.periode.fomDato <= YearMonth.now().minusMonths(3).atDay(1) } ?: emptyList()
         val nyesteInntektsperiode = inntekterMinimum3MndTilbake.maxBy { it.periode.fomDato }
         val oppdatertInntektsperiode = nyesteInntektsperiode.copy(inntekt = BigDecimal(forventetInntekt))
