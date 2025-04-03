@@ -101,7 +101,15 @@ class BehandleAutomatiskInntektsendringTask(
         inntektResponse: InntektResponse,
     ): List<Vedtaksperiode> {
         val førstePeriode = forrigeVedtak.perioder?.perioder?.first()
-        val førstePeriodeMedRevurderesFraDato = førstePeriode?.copy(datoFra = inntektResponse.førsteMånedMed10ProsentØkning()?.first?.atDay(1)?.plusMonths(1) ?: førstePeriode.datoFra) as Vedtaksperiode
+        val førstePeriodeMedRevurderesFraDato =
+            førstePeriode?.copy(
+                datoFra =
+                    inntektResponse
+                        .førsteMånedMed10ProsentØkning()
+                        ?.first
+                        ?.atDay(1)
+                        ?.plusMonths(1) ?: førstePeriode.datoFra,
+            ) as Vedtaksperiode
         val perioder =
             if (forrigeVedtak.perioder.perioder.size > 1) {
                 listOf(førstePeriodeMedRevurderesFraDato) + forrigeVedtak.perioder.perioder.subList(1, forrigeVedtak.perioder.perioder.size)
@@ -111,12 +119,18 @@ class BehandleAutomatiskInntektsendringTask(
         return perioder
     }
 
-    private fun oppdaterInntektMedNyBeregnetForventetInntekt(forrigeVedtak: Vedtak, inntektResponse: InntektResponse): List<Inntektsperiode> {
+    private fun oppdaterInntektMedNyBeregnetForventetInntekt(
+        forrigeVedtak: Vedtak,
+        inntektResponse: InntektResponse,
+    ): List<Inntektsperiode> {
         val forventetInntekt = inntektResponse.forventetInntektMånedsinntekt()
         val inntekterMinimum3MndTilbake = forrigeVedtak.inntekter?.inntekter?.filter { it.periode.fomDato <= YearMonth.now().minusMonths(3).atDay(1) } ?: emptyList()
         val nyesteInntektsperiode = inntekterMinimum3MndTilbake.maxBy { it.periode.fomDato }
         val oppdatertInntektsperiode = nyesteInntektsperiode.copy(inntekt = BigDecimal(forventetInntekt))
-        return forrigeVedtak.inntekter?.inntekter?.minus(nyesteInntektsperiode)?.plus(oppdatertInntektsperiode) ?: emptyList()
+        return forrigeVedtak.inntekter
+            ?.inntekter
+            ?.minus(nyesteInntektsperiode)
+            ?.plus(oppdatertInntektsperiode) ?: emptyList()
     }
 
     companion object {

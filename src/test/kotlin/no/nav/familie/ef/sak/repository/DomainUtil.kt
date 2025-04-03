@@ -410,7 +410,6 @@ fun vedtak(
         samordningsfradragType = null,
     )
 
-
 fun vedtakBarnetilsyn(
     behandlingId: UUID,
     barn: List<UUID>,
@@ -609,22 +608,29 @@ fun opprettAlleVilkårsvurderinger(
         }
     }
 
-fun inntektsmåneder(fraOgMedMåned: YearMonth, inntektListe: List<Inntekt> = emptyList()): List<Inntektsmåned> =
+fun inntektsmåneder(
+    fraOgMedMåned: YearMonth,
+    tilOgMedMåned: YearMonth = YearMonth.now(),
+    inntektListe: List<Inntekt> = emptyList(),
+): List<Inntektsmåned> =
     generateSequence(fraOgMedMåned) { it.plusMonths(1) }
-        .takeWhile { it.isBefore(YearMonth.now()) }.map { inntektsmåned(it, inntektListe) }.toList()
+        .takeWhile { it.isBefore(tilOgMedMåned) }
+        .map { inntektsmåned(it, inntektListe) }
+        .toList()
 
-
-fun inntektsmåned(måned: YearMonth, inntektListe: List<Inntekt> = emptyList()) =
-    Inntektsmåned(
-        måned = måned,
-        opplysningspliktig = "",
-        underenhet = "",
-        norskident = "",
-        oppsummeringstidspunkt = OffsetDateTime.now(),
-        inntektListe = inntektListe,
-        forskuddstrekkListe = emptyList(),
-        avvikListe = emptyList()
-    )
+fun inntektsmåned(
+    måned: YearMonth,
+    inntektListe: List<Inntekt> = emptyList(),
+) = Inntektsmåned(
+    måned = måned,
+    opplysningspliktig = "",
+    underenhet = "",
+    norskident = "",
+    oppsummeringstidspunkt = OffsetDateTime.now(),
+    inntektListe = inntektListe,
+    forskuddstrekkListe = emptyList(),
+    avvikListe = emptyList(),
+)
 
 fun inntekt(beløp: Double) =
     Inntekt(

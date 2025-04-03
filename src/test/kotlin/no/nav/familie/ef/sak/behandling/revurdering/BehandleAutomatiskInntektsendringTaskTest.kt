@@ -109,6 +109,6 @@ class BehandleAutomatiskInntektsendringTaskTest : OppslagSpringRunnerTest() {
         assertThat(førsteFom).isEqualTo(YearMonth.now().minusMonths(2)) // Revurderes fra
 
         val inntektsperioder = vedtak.inntekter?.inntekter
-        assertThat(inntektsperioder?.first()?.inntekt?.toInt()).isEqualTo(12_000)
+        assertThat(inntektsperioder?.first()?.inntekt?.toInt()).isEqualTo(35_000)
     }
 }

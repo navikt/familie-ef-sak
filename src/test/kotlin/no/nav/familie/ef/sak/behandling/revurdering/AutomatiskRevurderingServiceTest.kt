@@ -60,7 +60,7 @@ class AutomatiskRevurderingServiceTest {
     fun `skal kunne beregne totalinntekt fra og med x antall måneder tilbake i tid`() {
         val fraOgMedMåned = YearMonth.now().minusYears(1)
         val inntekterPerMåned = listOf(inntekt(1000.0), inntekt(1000.0), inntekt(1000.0))
-        val inntektsmåneder = inntektsmåneder(fraOgMedMåned, inntekterPerMåned)
+        val inntektsmåneder = inntektsmåneder(fraOgMedMåned = fraOgMedMåned, inntektListe = inntekterPerMåned)
         val inntektResponse = InntektResponse(inntektsmåneder)
 
         val totalInntektFor12MånederTilbake = inntektResponse.totalInntektFraÅrMåned(fraOgMedMåned)
