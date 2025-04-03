@@ -90,7 +90,8 @@ class RevurderingService(
         val forrigeBehandlingId =
             behandlingService.finnSisteIverksatteBehandlingMedEventuellAvslått(fagsak.id)?.id
                 ?: error("Revurdering må ha eksisterende iverksatt behandling")
-        val saksbehandler = SikkerhetContext.hentSaksbehandler()
+
+        val saksbehandler = SikkerhetContext.hentSaksbehandlerEllerSystembruker()
 
         søknadService.kopierSøknad(forrigeBehandlingId, revurdering.id)
         val grunnlagsdata = grunnlagsdataService.opprettGrunnlagsdata(revurdering.id)
@@ -120,7 +121,9 @@ class RevurderingService(
                 ),
             ),
         )
-        taskService.save(BehandlingsstatistikkTask.opprettPåbegyntTask(behandlingId = revurdering.id))
+        if (revurderingDto.behandlingsårsak != BehandlingÅrsak.AUTOMATISK_INNTEKTSENDRING) {
+            taskService.save(BehandlingsstatistikkTask.opprettPåbegyntTask(behandlingId = revurdering.id))
+        }
 
         if (erSatsendring(revurderingDto)) {
             val vedtakDto =
