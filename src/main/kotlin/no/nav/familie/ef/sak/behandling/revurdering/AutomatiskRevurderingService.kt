@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.behandling.revurdering
 
+import no.nav.familie.ef.sak.amelding.InntektResponse
 import no.nav.familie.ef.sak.amelding.ekstern.AMeldingInntektClient
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.fagsak.FagsakService
@@ -70,8 +71,8 @@ class AutomatiskRevurderingService(
     fun lagreInntektResponse(
         personIdent: String,
         behandlingId: UUID,
-    ) {
-        val inntektResponse = aMeldingInntektClient.hentInntekt(personIdent = personIdent, månedFom = YearMonth.now().minusMonths(6), månedTom = YearMonth.now())
-        grunnlagsdataInntektRepository.insert(GrunnlagsdataInntekt(behandlingId, inntektResponse))
+    ): InntektResponse {
+        val inntektResponse = aMeldingInntektClient.hentInntekt(personIdent = personIdent, månedFom = YearMonth.now().minusYears(1), månedTom = YearMonth.now())
+        return grunnlagsdataInntektRepository.insert(GrunnlagsdataInntekt(behandlingId, inntektResponse)).inntektsdata
     }
 }

@@ -24,6 +24,7 @@ import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.ef.felles.Opplysningskilde
 import no.nav.familie.kontrakter.ef.felles.Revurderingsårsak
+import no.nav.familie.kontrakter.felles.Månedsperiode
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -61,7 +62,7 @@ class BehandleAutomatiskInntektsendringTaskTest : OppslagSpringRunnerTest() {
     @Autowired
     private lateinit var vedtakHelperService: VedtakHelperService
 
-    private val personIdent = "123456789012"
+    private val personIdent = "3"
     private val fagsak = fagsak(identer = fagsakpersoner(setOf(personIdent)))
 
     private lateinit var behandleAutomatiskInntektsendringTask: BehandleAutomatiskInntektsendringTask
@@ -86,9 +87,9 @@ class BehandleAutomatiskInntektsendringTaskTest : OppslagSpringRunnerTest() {
         val behandling = behandling(fagsak, resultat = BehandlingResultat.INNVILGET, status = BehandlingStatus.UTREDES)
         behandlingRepository.insert(behandling)
         vilkårHelperService.opprettVilkår(behandling)
-        vedtakHelperService.ferdigstillVedtak(vedtak(behandlingId = behandling.id), behandling, fagsak)
+        vedtakHelperService.ferdigstillVedtak(vedtak(behandlingId = behandling.id, månedsperiode = Månedsperiode(YearMonth.now().minusMonths(4), YearMonth.now())), behandling, fagsak)
 
-        val payload = PayloadBehandleAutomatiskInntektsendringTask("123456789012", "2025-15")
+        val payload = PayloadBehandleAutomatiskInntektsendringTask(personIdent, "2025-15")
         val test = BehandleAutomatiskInntektsendringTask.opprettTask(objectMapper.writeValueAsString(payload))
 
         behandleAutomatiskInntektsendringTask.doTask(test)
@@ -105,9 +106,9 @@ class BehandleAutomatiskInntektsendringTaskTest : OppslagSpringRunnerTest() {
 
         val vedtaksperioder = vedtak.perioder?.perioder
         val førsteFom = vedtaksperioder?.first()?.periode?.fom
-        assertThat(førsteFom).isEqualTo(YearMonth.of(2021, 1)) // Revurderes fra
+        assertThat(førsteFom).isEqualTo(YearMonth.now().minusMonths(2)) // Revurderes fra
 
         val inntektsperioder = vedtak.inntekter?.inntekter
-        assertThat(inntektsperioder?.first()?.inntekt?.toInt()).isEqualTo(100000)
+        assertThat(inntektsperioder?.first()?.inntekt?.toInt()).isEqualTo(12_000)
     }
 }

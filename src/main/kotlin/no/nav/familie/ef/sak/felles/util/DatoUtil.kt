@@ -86,3 +86,5 @@ fun YearMonth.formaterYearMonthTilMånedÅr(): String {
     val formatter = DateTimeFormatter.ofPattern("MMMM yyyy", locale)
     return yearMonth.format(formatter)
 }
+
+fun YearMonth.isEqualOrAfter(other: YearMonth) = this == other || this.isAfter(other)
