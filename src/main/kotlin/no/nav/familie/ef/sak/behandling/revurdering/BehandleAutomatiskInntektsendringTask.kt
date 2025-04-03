@@ -52,11 +52,10 @@ class BehandleAutomatiskInntektsendringTask(
                 personIdenter = setOf(personIdent),
                 stønadstype = StønadType.OVERGANGSSTØNAD,
             )
-        loggInfoOpprett(personIdent, fagsak)
+        secureLogger.info("Kan opprette behandling med $personIdent stønadstype=${StønadType.OVERGANGSSTØNAD} faksakId ${fagsak?.id}")
 
         if (toggle) {
             if (fagsak != null) {
-                loggInfoOpprett(personIdent, fagsak)
 
                 val behandling =
                     revurderingService.opprettRevurderingManuelt(
@@ -106,13 +105,6 @@ class BehandleAutomatiskInntektsendringTask(
                     },
             )
         }
-    }
-
-    fun loggInfoOpprett(
-        personIdent: String,
-        fagsak: Fagsak?,
-    ) {
-        secureLogger.info("Kan opprette behandling med $personIdent stønadstype=${StønadType.OVERGANGSSTØNAD} faksakId ${fagsak?.id}")
     }
 }
 
