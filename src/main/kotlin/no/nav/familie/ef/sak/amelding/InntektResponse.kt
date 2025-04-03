@@ -17,21 +17,25 @@ data class InntektResponse(
             .sumOf { it.beløp }
             .toInt()
 
-    fun mapInntektForMåned() = inntektsmåneder.associate { it.måned to it.totalInntekt() }
-
-    fun førsteMånedMed10ProsentØkning() =
-        mapInntektForMåned()
+    fun førsteMånedOgInntektMed10ProsentØkning() =
+        inntektsmåneder
+            .associate { it.måned to it.totalInntekt() }
             .entries
             .zipWithNext()
             .firstOrNull { it.first.value * 1.1 <= it.second.value }
             ?.second
             ?.toPair()
 
-    fun forventetInntektMånedsinntekt() = if (harInntektForTreMånederTilbake) totalInntektFraÅrMåned(inntektsmåneder.last().måned.minusMonths(2)) / 3 else throw IllegalStateException("Mangler inntektsinformasjon for de tre siste måneder")
+    fun forventetMånedsinntekt() =
+        if (harTreForrigeInntektsmåneder) {
+            totalInntektFraÅrMåned(inntektsmåneder.last().måned.minusMonths(2)) / 3
+        } else {
+            throw IllegalStateException("Mangler inntektsinformasjon for de tre siste måneder")
+        }
 
-    fun forventetÅrsinntekt() = forventetInntektMånedsinntekt() * 12
+    fun forventetÅrsinntekt() = forventetMånedsinntekt() * 12
 
-    val harInntektForTreMånederTilbake = inntektsmåneder.filter { it.måned.isEqualOrAfter(YearMonth.now().minusMonths(3)) }.size == 3
+    val harTreForrigeInntektsmåneder = inntektsmåneder.filter { it.måned.isEqualOrAfter(YearMonth.now().minusMonths(3)) }.size == 3
 }
 
 data class Inntektsmåned(
