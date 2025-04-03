@@ -76,7 +76,7 @@ class BehandleAutomatiskInntektsendringTask(
                         samordningsfradragType = forrigeVedtak.samordningsfradragType,
                     )
 
-                årsakRevurderingsRepository.insert(ÅrsakRevurdering(behandlingId = behandling.id, opplysningskilde = Opplysningskilde.OPPLYSNINGER_INTERNE_KONTROLLER, årsak = Revurderingsårsak.ENDRING_INNTEKT, beskrivelse = null))
+                årsakRevurderingsRepository.insert(ÅrsakRevurdering(behandlingId = behandling.id, opplysningskilde = Opplysningskilde.AUTOMATISK_OPPRETTET_BEHANDLING, årsak = Revurderingsårsak.ENDRING_INNTEKT, beskrivelse = null))
                 vedtakService.lagreVedtak(vedtakDto = innvilgelseOvergangsstønad, behandlingId = behandling.id, stønadstype = StønadType.OVERGANGSSTØNAD)
                 automatiskRevurderingService.lagreInntektResponse(personIdent, behandling.id)
                 logger.info("Opprettet behandling for automatisk inntektsendring: ${behandling.id}")
