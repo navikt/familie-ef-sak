@@ -1,6 +1,7 @@
 package no.nav.familie.ef.sak.amelding
 
 import com.fasterxml.jackson.annotation.JsonProperty
+import no.nav.familie.ef.sak.felles.util.isEqualOrAfter
 import java.time.LocalDate
 import java.time.OffsetDateTime
 import java.time.YearMonth
@@ -8,7 +9,34 @@ import java.time.YearMonth
 data class InntektResponse(
     @JsonProperty("data")
     val inntektsmåneder: List<Inntektsmåned> = emptyList(),
-)
+) {
+    fun totalInntektFraÅrMåned(årMåned: YearMonth): Int =
+        inntektsmåneder
+            .filter { it.måned.isEqualOrAfter(årMåned) }
+            .flatMap { it.inntektListe }
+            .sumOf { it.beløp }
+            .toInt()
+
+    fun førsteMånedOgInntektMed10ProsentØkning() =
+        inntektsmåneder
+            .associate { it.måned to it.totalInntekt() }
+            .entries
+            .zipWithNext()
+            .firstOrNull { it.first.value * 1.1 <= it.second.value }
+            ?.second
+            ?.toPair()
+
+    fun forventetMånedsinntekt() =
+        if (harTreForrigeInntektsmåneder) {
+            totalInntektFraÅrMåned(inntektsmåneder.last().måned.minusMonths(2)) / 3
+        } else {
+            throw IllegalStateException("Mangler inntektsinformasjon for de tre siste måneder")
+        }
+
+    fun forventetÅrsinntekt() = forventetMånedsinntekt() * 12
+
+    val harTreForrigeInntektsmåneder = inntektsmåneder.filter { it.måned.isEqualOrAfter(YearMonth.now().minusMonths(3)) }.size == 3
+}
 
 data class Inntektsmåned(
     @JsonProperty("maaned")
@@ -20,7 +48,9 @@ data class Inntektsmåned(
     val inntektListe: List<Inntekt> = emptyList(),
     val forskuddstrekkListe: List<Forskuddstrekk> = emptyList(),
     val avvikListe: List<Avvik> = emptyList(),
-)
+) {
+    fun totalInntekt() = inntektListe.sumOf { it.beløp }
+}
 
 data class Inntekt(
     val type: InntektType,

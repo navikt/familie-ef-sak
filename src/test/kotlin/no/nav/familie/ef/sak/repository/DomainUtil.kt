@@ -1,5 +1,8 @@
 package no.nav.familie.ef.sak.repository
 
+import no.nav.familie.ef.sak.amelding.Inntekt
+import no.nav.familie.ef.sak.amelding.InntektType
+import no.nav.familie.ef.sak.amelding.Inntektsmåned
 import no.nav.familie.ef.sak.barn.BehandlingBarn
 import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.behandling.domain.Behandling
@@ -81,6 +84,7 @@ import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.OffsetDateTime
 import java.time.YearMonth
 import java.util.UUID
 
@@ -387,6 +391,25 @@ fun vedtak(
         samordningsfradragType = samordningsfradragType,
     )
 
+fun vedtak(
+    behandlingId: UUID,
+    månedsperiode: Månedsperiode,
+): Vedtak =
+    Vedtak(
+        behandlingId = behandlingId,
+        resultatType = ResultatType.INNVILGE,
+        periodeBegrunnelse = "OK",
+        inntektBegrunnelse = "OK",
+        avslåBegrunnelse = null,
+        perioder = PeriodeWrapper(listOf(vedtaksperiode(startDato = månedsperiode.fomDato, sluttDato = månedsperiode.tomDato))),
+        inntekter = InntektWrapper(listOf(inntektsperiode(startDato = månedsperiode.fomDato, sluttDato = månedsperiode.tomDato))),
+        skolepenger = null,
+        saksbehandlerIdent = "VL",
+        opprettetAv = "VL",
+        opprettetTid = LocalDateTime.now(),
+        samordningsfradragType = null,
+    )
+
 fun vedtakBarnetilsyn(
     behandlingId: UUID,
     barn: List<UUID>,
@@ -584,6 +607,48 @@ fun opprettAlleVilkårsvurderinger(
             listOf(lagNyVilkårsvurdering(vilkårsregel, metadata, behandlingId))
         }
     }
+
+fun inntektsmåneder(
+    fraOgMedMåned: YearMonth,
+    tilOgMedMåned: YearMonth = YearMonth.now(),
+    inntektListe: List<Inntekt> = emptyList(),
+): List<Inntektsmåned> =
+    generateSequence(fraOgMedMåned) { it.plusMonths(1) }
+        .takeWhile { it.isBefore(tilOgMedMåned) }
+        .map { inntektsmåned(it, inntektListe) }
+        .toList()
+
+fun inntektsmåned(
+    måned: YearMonth,
+    inntektListe: List<Inntekt> = emptyList(),
+) = Inntektsmåned(
+    måned = måned,
+    opplysningspliktig = "",
+    underenhet = "",
+    norskident = "",
+    oppsummeringstidspunkt = OffsetDateTime.now(),
+    inntektListe = inntektListe,
+    forskuddstrekkListe = emptyList(),
+    avvikListe = emptyList(),
+)
+
+fun inntekt(beløp: Double) =
+    Inntekt(
+        type = InntektType.LØNNSINNTEKT,
+        beløp = beløp,
+        fordel = "",
+        beskrivelse = "",
+        inngårIGrunnlagForTrekk = true,
+        utløserArbeidsgiveravgift = true,
+        skatteOgAvgiftsregel = null,
+        opptjeningsperiodeFom = null,
+        opptjeningsperiodeTom = null,
+        tilleggsinformasjon = null,
+        manuellVurdering = true,
+        antall = null,
+        skattemessigBosattLand = null,
+        opptjeningsland = null,
+    )
 
 private fun lagNyVilkårsvurdering(
     vilkårsregel: Vilkårsregel,

@@ -6,10 +6,13 @@ import io.mockk.mockk
 import no.nav.familie.ef.sak.amelding.InntektResponse
 import no.nav.familie.ef.sak.amelding.ekstern.AMeldingInntektClient
 import no.nav.familie.ef.sak.infrastruktur.config.ObjectMapperProvider.objectMapper
+import no.nav.familie.ef.sak.repository.inntekt
+import no.nav.familie.ef.sak.repository.inntektsmåneder
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Primary
 import org.springframework.context.annotation.Profile
+import java.time.YearMonth
 
 @Configuration
 class InntektClientMock {
@@ -29,6 +32,12 @@ class InntektClientMock {
         val mockResponseHøyArbeidsinntektJson = this::class.java.classLoader.getResource("json/inntekt/InntektMockMedHøyInntekt.json")!!
         val mockResponseHøyArbeidsinntekt = objectMapper.readValue<InntektResponse>(mockResponseHøyArbeidsinntektJson)
         every { mockk.hentInntekt("2", any(), any()) } returns mockResponseHøyArbeidsinntekt
+
+        val inntekterPerMånedLavInntekt = listOf(inntekt(2000.0), inntekt(10000.0))
+        val inntektsmånederLavInntekt = inntektsmåneder(fraOgMedMåned = YearMonth.now().minusMonths(12), tilOgMedMåned = YearMonth.now().minusMonths(4), inntektListe = inntekterPerMånedLavInntekt)
+        val inntekterPerMånedHøyInntekt = listOf(inntekt(25000.0), inntekt(10000.0))
+        val inntektsmånederHøyInntekt = inntektsmåneder(fraOgMedMåned = YearMonth.now().minusMonths(3), inntektListe = inntekterPerMånedHøyInntekt)
+        every { mockk.hentInntekt("3", any(), any()) } returns InntektResponse(inntektsmånederLavInntekt + inntektsmånederHøyInntekt)
 
         every { mockk.genererAInntektUrl(any()) } returns "https://ainntekt"
         return mockk
