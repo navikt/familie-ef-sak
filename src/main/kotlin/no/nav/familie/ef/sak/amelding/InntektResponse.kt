@@ -35,9 +35,7 @@ data class InntektResponse(
 
     fun forventetÅrsinntekt() = forventetMånedsinntekt() * 12
 
-    fun revurderesFraDato() =
-        førsteMånedOgInntektMed10ProsentØkning()?.first
-
+    fun revurderesFraDato() = førsteMånedOgInntektMed10ProsentØkning()?.first
 
     val harTreForrigeInntektsmåneder = inntektsmåneder.filter { it.måned.isEqualOrAfter(YearMonth.now().minusMonths(3)) }.size == 3
 }

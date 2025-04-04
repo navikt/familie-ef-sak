@@ -78,7 +78,5 @@ class AutomatiskRevurderingService(
 
     fun hentInntektResponse(
         personIdent: String,
-    ): InntektResponse {
-        return aMeldingInntektClient.hentInntekt(personIdent = personIdent, månedFom = YearMonth.now().minusYears(1), månedTom = YearMonth.now())
-    }
+    ): InntektResponse = aMeldingInntektClient.hentInntekt(personIdent = personIdent, månedFom = YearMonth.now().minusYears(1), månedTom = YearMonth.now())
 }
