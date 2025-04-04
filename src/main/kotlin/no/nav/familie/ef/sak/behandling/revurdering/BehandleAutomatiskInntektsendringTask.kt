@@ -57,7 +57,7 @@ class BehandleAutomatiskInntektsendringTask(
                 personIdenter = setOf(personIdent),
                 stønadstype = StønadType.OVERGANGSSTØNAD,
             )
-        secureLogger.info("Kan opprette behandling med $personIdent stønadstype=${StønadType.OVERGANGSSTØNAD} faksakId ${fagsak?.id}")
+        secureLogger.info("Kan opprette automatisk inntektsendringsbehandling med $personIdent stønadstype=${StønadType.OVERGANGSSTØNAD} faksakId ${fagsak?.id}")
 
         if (toggle) {
             if (fagsak != null) {
