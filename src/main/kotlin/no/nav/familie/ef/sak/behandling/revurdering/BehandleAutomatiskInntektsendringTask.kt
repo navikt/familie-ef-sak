@@ -93,6 +93,8 @@ class BehandleAutomatiskInntektsendringTask(
             }
         } else {
             val inntektResponse = automatiskRevurderingService.hentInntektResponse(personIdent)
+            val inntektPrMåned = inntektResponse.inntektsmåneder.map { LogInntekt(it.måned, it.totalInntekt()) }
+            secureLogger.info("Månedlig inntekt for fagsak eksternId=${fagsak?.eksternId} : $inntektPrMåned")
             val forventetInntekt = inntektResponse.forventetMånedsinntekt()
             logger.info("Toggle for automatisering av inntekt er AV. Ville opprettet revurdering for fagsak eksternId=${fagsak?.eksternId} med en forventetInntekt på $forventetInntekt og revurdert fra dato: ${inntektResponse.revurderesFraDato()}")
         }
@@ -156,4 +158,9 @@ class BehandleAutomatiskInntektsendringTask(
 data class PayloadBehandleAutomatiskInntektsendringTask(
     val personIdent: String,
     val ukeÅr: String,
+)
+
+data class LogInntekt(
+    val årMåned: YearMonth,
+    val inntekt: Double,
 )
