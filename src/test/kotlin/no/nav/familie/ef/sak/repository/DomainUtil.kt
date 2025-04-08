@@ -632,23 +632,26 @@ fun inntektsmåned(
     avvikListe = emptyList(),
 )
 
-fun inntekt(beløp: Double, inntektType: InntektType = InntektType.LØNNSINNTEKT, beskrivelse: String = "fastloenn") =
-    Inntekt(
-        type = inntektType,
-        beløp = beløp,
-        fordel = "",
-        beskrivelse = beskrivelse,
-        inngårIGrunnlagForTrekk = true,
-        utløserArbeidsgiveravgift = true,
-        skatteOgAvgiftsregel = null,
-        opptjeningsperiodeFom = null,
-        opptjeningsperiodeTom = null,
-        tilleggsinformasjon = null,
-        manuellVurdering = true,
-        antall = null,
-        skattemessigBosattLand = null,
-        opptjeningsland = null,
-    )
+fun inntekt(
+    beløp: Double,
+    inntektType: InntektType = InntektType.LØNNSINNTEKT,
+    beskrivelse: String = "fastloenn",
+) = Inntekt(
+    type = inntektType,
+    beløp = beløp,
+    fordel = "",
+    beskrivelse = beskrivelse,
+    inngårIGrunnlagForTrekk = true,
+    utløserArbeidsgiveravgift = true,
+    skatteOgAvgiftsregel = null,
+    opptjeningsperiodeFom = null,
+    opptjeningsperiodeTom = null,
+    tilleggsinformasjon = null,
+    manuellVurdering = true,
+    antall = null,
+    skattemessigBosattLand = null,
+    opptjeningsland = null,
+)
 
 private fun lagNyVilkårsvurdering(
     vilkårsregel: Vilkårsregel,

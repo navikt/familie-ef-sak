@@ -12,7 +12,7 @@ data class InntektResponse(
 ) {
     fun totalInntektFraÅrMåned(årMåned: YearMonth): Int =
         inntektsmåneder
-            .filter { it.måned.isEqualOrAfter(årMåned) && it.måned.isBefore(YearMonth.now())}
+            .filter { it.måned.isEqualOrAfter(årMåned) && it.måned.isBefore(YearMonth.now()) }
             .flatMap { it.inntektListe }
             .sumOf { it.beløp }
             .toInt()
@@ -30,13 +30,13 @@ data class InntektResponse(
         inntektsmåneder.filter { inntektsmåned ->
             inntektsmåned.inntektListe.all {
                 it.type != InntektType.YTELSE_FRA_OFFENTLIGE &&
-                        it.beskrivelse != "overgangsstoenadTilEnsligMorEllerFarSomBegynteAaLoepe1April2014EllerSenere"
+                    it.beskrivelse != "overgangsstoenadTilEnsligMorEllerFarSomBegynteAaLoepe1April2014EllerSenere"
             }
         }
 
     fun forventetMånedsinntekt() =
         if (harTreForrigeInntektsmåneder) {
-            totalInntektFraÅrMåned(YearMonth.now().minusMonths(3))/3
+            totalInntektFraÅrMåned(YearMonth.now().minusMonths(3)) / 3
         } else {
             throw IllegalStateException("Mangler inntektsinformasjon for de tre siste måneder")
         }
@@ -45,10 +45,12 @@ data class InntektResponse(
 
     fun revurderesFraDato() = førsteMånedOgInntektMed10ProsentØkning()?.first
 
-    val harTreForrigeInntektsmåneder = inntektsmåneder
-        .filter { it.måned.isEqualOrAfter(YearMonth.now().minusMonths(3)) && it.måned.isBefore(YearMonth.now()) }
-        .map { it.måned }
-        .distinct().size == 3
+    val harTreForrigeInntektsmåneder =
+        inntektsmåneder
+            .filter { it.måned.isEqualOrAfter(YearMonth.now().minusMonths(3)) && it.måned.isBefore(YearMonth.now()) }
+            .map { it.måned }
+            .distinct()
+            .size == 3
 }
 
 data class Inntektsmåned(

@@ -104,6 +104,5 @@ class AutomatiskRevurderingServiceTest {
 
         assertThat(inntekterUtenOvergangsstønad.size).isEqualTo(8)
         assertThat(forventetInntekt).isEqualTo(6000)
-
     }
 }
