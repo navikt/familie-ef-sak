@@ -11,7 +11,7 @@ data class InntektResponse(
     val inntektsmåneder: List<Inntektsmåned> = emptyList(),
 ) {
     fun totalInntektFraÅrMåned(årMåned: YearMonth): Int =
-        inntektsmåneder
+        inntektsmånederUtenEfYtelser()
             .filter { it.måned.isEqualOrAfter(årMåned) && it.måned.isBefore(YearMonth.now()) }
             .flatMap { it.inntektListe }
             .sumOf { it.beløp }
@@ -26,7 +26,7 @@ data class InntektResponse(
             ?.second
             ?.toPair()
 
-    fun inntektsmånderUtenEfOvergangstonad(): List<Inntektsmåned> =
+    fun inntektsmånederUtenEfYtelser(): List<Inntektsmåned> =
         inntektsmåneder.filter { inntektsmåned ->
             inntektsmåned.inntektListe.all {
                 it.type != InntektType.YTELSE_FRA_OFFENTLIGE &&
@@ -48,8 +48,7 @@ data class InntektResponse(
     val harTreForrigeInntektsmåneder =
         inntektsmåneder
             .filter { it.måned.isEqualOrAfter(YearMonth.now().minusMonths(3)) && it.måned.isBefore(YearMonth.now()) }
-            .map { it.måned }
-            .distinct()
+            .distinctBy { it.måned }
             .size == 3
 }
 

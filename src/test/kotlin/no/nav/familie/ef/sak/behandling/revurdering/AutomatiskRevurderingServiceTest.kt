@@ -92,17 +92,18 @@ class AutomatiskRevurderingServiceTest {
 
     @Test
     fun `skal fjerne ef overgangstønad og beregne forventet inntekt hvor den filtrerer bort ugyldige måneder`() {
-        val inntekterSisteTreMånederOvergangsstønad = inntektsmåneder(YearMonth.now().minusMonths(3), YearMonth.now().plusMonths(1), inntektListe = listOf(inntekt(5000.0, InntektType.YTELSE_FRA_OFFENTLIGE, "overgangsstoenadTilEnsligMorEllerFarSomBegynteAaLoepe1April2014EllerSenere")))
+        val inntekterSisteTreMånederOvergangsstønad = inntektsmåneder(YearMonth.now().minusMonths(3), YearMonth.now().plusMonths(1), inntektListe = listOf(inntekt(16000.0, InntektType.YTELSE_FRA_OFFENTLIGE, "overgangsstoenadTilEnsligMorEllerFarSomBegynteAaLoepe1April2014EllerSenere")))
         val inntekterSisteTreMånederFastlønn = inntektsmåneder(YearMonth.now().minusMonths(3), YearMonth.now().plusMonths(1), inntektListe = listOf(inntekt(5000.0)))
         val inntekterSisteTreMånederFastlønn2 = inntektsmåneder(YearMonth.now().minusMonths(3), YearMonth.now().plusMonths(1), inntektListe = listOf(inntekt(1000.0)))
+        val inntekterFraSeksMånederTilTreMånederSidenFastlønn = inntektsmåneder(YearMonth.now().minusMonths(6), inntektListe = listOf(inntekt(1400.0))).take(3)
 
-        val inntekter = inntekterSisteTreMånederOvergangsstønad + inntekterSisteTreMånederFastlønn + inntekterSisteTreMånederFastlønn2
+        val inntekter = inntekterSisteTreMånederOvergangsstønad + inntekterSisteTreMånederFastlønn + inntekterSisteTreMånederFastlønn2 + inntekterFraSeksMånederTilTreMånederSidenFastlønn
         val inntektResponse = InntektResponse(inntekter)
 
-        val inntekterUtenOvergangsstønad = inntektResponse.inntektsmånderUtenEfOvergangstonad()
-        val forventetInntekt = InntektResponse(inntekterUtenOvergangsstønad).forventetMånedsinntekt()
+        val inntekterUtenOvergangsstønad = inntektResponse.inntektsmånederUtenEfYtelser()
+        val forventetInntekt = inntektResponse.forventetMånedsinntekt()
 
-        assertThat(inntekterUtenOvergangsstønad.size).isEqualTo(8)
+        assertThat(inntekterUtenOvergangsstønad.size).isEqualTo(11)
         assertThat(forventetInntekt).isEqualTo(6000)
     }
 }
