@@ -632,12 +632,12 @@ fun inntektsmåned(
     avvikListe = emptyList(),
 )
 
-fun inntekt(beløp: Double) =
+fun inntekt(beløp: Double, inntektType: InntektType = InntektType.LØNNSINNTEKT, beskrivelse: String = "fastloenn") =
     Inntekt(
-        type = InntektType.LØNNSINNTEKT,
+        type = inntektType,
         beløp = beløp,
         fordel = "",
-        beskrivelse = "",
+        beskrivelse = beskrivelse,
         inngårIGrunnlagForTrekk = true,
         utløserArbeidsgiveravgift = true,
         skatteOgAvgiftsregel = null,
