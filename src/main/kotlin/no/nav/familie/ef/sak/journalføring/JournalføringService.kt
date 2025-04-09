@@ -14,7 +14,6 @@ import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvisIkke
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
-import no.nav.familie.ef.sak.iverksett.IverksettService
 import no.nav.familie.ef.sak.journalføring.JournalføringHelper.utledNyAvsender
 import no.nav.familie.ef.sak.journalføring.JournalføringHelper.validerGyldigAvsender
 import no.nav.familie.ef.sak.journalføring.JournalføringHelper.validerJournalføringNyBehandling
@@ -48,7 +47,6 @@ class JournalføringService(
     private val fagsakService: FagsakService,
     private val vurderingService: VurderingService,
     private val grunnlagsdataService: GrunnlagsdataService,
-    private val iverksettService: IverksettService,
     private val taskService: TaskService,
     private val barnService: BarnService,
     private val oppgaveService: OppgaveService,
@@ -227,7 +225,6 @@ class JournalføringService(
                 behandlingsårsak = utledBehandlingÅrsak(journalpost, ustrukturertDokumentasjonType),
                 kravMottatt = journalpost.datoMottatt?.toLocalDate(),
             )
-        iverksettService.startBehandling(behandling, fagsak)
         if (journalpost.harStrukturertSøknad()) {
             settSøknadPåBehandling(journalpost, fagsak, behandling.id)
         }

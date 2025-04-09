@@ -23,7 +23,6 @@ import no.nav.familie.ef.sak.behandlingsflyt.task.OpprettOppgaveForOpprettetBeha
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
-import no.nav.familie.ef.sak.iverksett.IverksettService
 import no.nav.familie.ef.sak.journalføring.dto.BarnSomSkalFødes
 import no.nav.familie.ef.sak.journalføring.dto.JournalføringRequestV2
 import no.nav.familie.ef.sak.journalføring.dto.JournalføringTilNyBehandlingRequest
@@ -38,7 +37,6 @@ import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.fagsakpersoner
-import no.nav.familie.ef.sak.samværsavtale.SamværsavtaleService
 import no.nav.familie.ef.sak.vilkår.VurderingService
 import no.nav.familie.ef.sak.vilkår.regler.HovedregelMetadata
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak.NYE_OPPLYSNINGER
@@ -83,10 +81,8 @@ internal class JournalføringServiceTest {
     private val vurderingService = mockk<VurderingService>()
     private val taskService = mockk<TaskService>()
     private val barnService = mockk<BarnService>()
-    private val iverksettService = mockk<IverksettService>(relaxed = true)
     private val journalpostService = JournalpostService(journalpostClient = journalpostClient)
     private val infotrygdPeriodeValideringService = mockk<InfotrygdPeriodeValideringService>()
-    private val samværsavtaleService = mockk<SamværsavtaleService>()
 
     private val journalføringService =
         JournalføringService(
@@ -95,7 +91,6 @@ internal class JournalføringServiceTest {
             fagsakService = fagsakService,
             vurderingService = vurderingService,
             grunnlagsdataService = mockk(relaxed = true),
-            iverksettService = iverksettService,
             oppgaveService = oppgaveService,
             taskService = taskService,
             barnService = barnService,
@@ -254,7 +249,6 @@ internal class JournalføringServiceTest {
         assertThat(slotJournalpost.captured.dokumenter).hasSize(4)
         assertThat(slotOpprettedeTasks).isEmpty()
         verify(exactly = 0) { søknadService.lagreSøknadForOvergangsstønad(any(), any(), any(), any()) }
-        verify(exactly = 0) { iverksettService.startBehandling(any(), any()) }
         verify(exactly = 1) { journalpostClient.ferdigstillJournalpost(any(), any(), any()) }
         verify(exactly = 1) { oppgaveService.ferdigstillOppgave(oppgaveId.toLong()) }
     }
@@ -681,7 +675,6 @@ internal class JournalføringServiceTest {
                 )
             verify { journalpostClient.oppdaterJournalpost(any(), journalpostId, null) }
             verify { journalpostClient.ferdigstillJournalpost(journalpostId, journalførendeEnhet, null) }
-            verify { iverksettService.startBehandling(any(), fagsak) }
             verify { søknadService.lagreSøknadForOvergangsstønad(any(), any(), any(), any()) }
             verify {
                 behandlingService.opprettBehandling(
