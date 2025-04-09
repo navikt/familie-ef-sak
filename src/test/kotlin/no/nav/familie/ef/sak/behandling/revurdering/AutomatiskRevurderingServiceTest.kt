@@ -3,6 +3,7 @@ package no.nav.familie.ef.sak.behandling.revurdering
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ef.sak.amelding.InntektResponse
+import no.nav.familie.ef.sak.amelding.InntektType
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.ef.sak.repository.inntekt
@@ -87,5 +88,22 @@ class AutomatiskRevurderingServiceTest {
         assertThat(månedOgInntektMed10ProsentØkning).isNotNull
         assertThat(månedOgInntektMed10ProsentØkning?.first).isEqualTo(YearMonth.now().minusMonths(6))
         assertThat(månedOgInntektMed10ProsentØkning?.second).isEqualTo(1400.0)
+    }
+
+    @Test
+    fun `skal fjerne ef overgangstønad og beregne forventet inntekt hvor den filtrerer bort ugyldige måneder`() {
+        val inntekterSisteTreMånederOvergangsstønad = inntektsmåneder(YearMonth.now().minusMonths(3), YearMonth.now().plusMonths(1), inntektListe = listOf(inntekt(16000.0, InntektType.YTELSE_FRA_OFFENTLIGE, "overgangsstoenadTilEnsligMorEllerFarSomBegynteAaLoepe1April2014EllerSenere")))
+        val inntekterSisteTreMånederFastlønn = inntektsmåneder(YearMonth.now().minusMonths(3), YearMonth.now().plusMonths(1), inntektListe = listOf(inntekt(5000.0)))
+        val inntekterSisteTreMånederFastlønn2 = inntektsmåneder(YearMonth.now().minusMonths(3), YearMonth.now().plusMonths(1), inntektListe = listOf(inntekt(1000.0)))
+        val inntekterFraSeksMånederTilTreMånederSidenFastlønn = inntektsmåneder(YearMonth.now().minusMonths(6), inntektListe = listOf(inntekt(1400.0))).take(3)
+
+        val inntekter = inntekterSisteTreMånederOvergangsstønad + inntekterSisteTreMånederFastlønn + inntekterSisteTreMånederFastlønn2 + inntekterFraSeksMånederTilTreMånederSidenFastlønn
+        val inntektResponse = InntektResponse(inntekter)
+
+        val inntekterUtenOvergangsstønad = inntektResponse.inntektsmånederUtenEfYtelser()
+        val forventetInntekt = inntektResponse.forventetMånedsinntekt()
+
+        assertThat(inntekterUtenOvergangsstønad.size).isEqualTo(11)
+        assertThat(forventetInntekt).isEqualTo(6000)
     }
 }
