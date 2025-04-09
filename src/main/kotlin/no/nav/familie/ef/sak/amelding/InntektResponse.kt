@@ -18,7 +18,7 @@ data class InntektResponse(
             .toInt()
 
     fun førsteMånedOgInntektMed10ProsentØkning() =
-        inntektsmåneder
+        inntektsmånederUtenEfYtelser()
             .associate { it.måned to it.totalInntekt() }
             .entries
             .zipWithNext()
@@ -127,3 +127,11 @@ enum class InntektType {
 }
 
 fun List<Inntektsmåned>.summerTotalInntekt(): Double = this.flatMap { it.inntektListe }.sumOf { it.beløp }
+
+fun List<Inntektsmåned>.summerTotalInntektUtenEfYtelse(): Double =
+    this
+        .flatMap { it.inntektListe }
+        .filter {
+            it.type != InntektType.YTELSE_FRA_OFFENTLIGE &&
+                it.beskrivelse != "overgangsstoenadTilEnsligMorEllerFarSomBegynteAaLoepe1April2014EllerSenere"
+        }.sumOf { it.beløp }

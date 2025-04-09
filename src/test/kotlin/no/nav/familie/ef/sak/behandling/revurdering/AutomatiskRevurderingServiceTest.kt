@@ -4,6 +4,7 @@ import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ef.sak.amelding.InntektResponse
 import no.nav.familie.ef.sak.amelding.InntektType
+import no.nav.familie.ef.sak.amelding.summerTotalInntektUtenEfYtelse
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.ef.sak.repository.inntekt
@@ -103,6 +104,7 @@ class AutomatiskRevurderingServiceTest {
         val inntekterUtenOvergangsstønad = inntektResponse.inntektsmånederUtenEfYtelser()
         val forventetInntekt = inntektResponse.forventetMånedsinntekt()
 
+        assertThat(inntektResponse.inntektsmåneder.summerTotalInntektUtenEfYtelse()).isEqualTo(28200.0)
         assertThat(inntekterUtenOvergangsstønad.size).isEqualTo(11)
         assertThat(forventetInntekt).isEqualTo(6000)
     }
