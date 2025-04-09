@@ -31,7 +31,8 @@ data class InntektResponse(
             inntektsmåned.inntektListe.all {
                 it.type != InntektType.YTELSE_FRA_OFFENTLIGE &&
                     it.beskrivelse != "overgangsstoenadTilEnsligMorEllerFarSomBegynteAaLoepe1April2014EllerSenere"
-            } && inntektsmåned.måned.isBefore(YearMonth.now())
+            } &&
+                inntektsmåned.måned.isBefore(YearMonth.now())
         }
 
     fun forventetMånedsinntekt() =
