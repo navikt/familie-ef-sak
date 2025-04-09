@@ -31,7 +31,7 @@ data class InntektResponse(
             inntektsmåned.inntektListe.all {
                 it.type != InntektType.YTELSE_FRA_OFFENTLIGE &&
                     it.beskrivelse != "overgangsstoenadTilEnsligMorEllerFarSomBegynteAaLoepe1April2014EllerSenere"
-            }
+            } && inntektsmåned.måned.isBefore(YearMonth.now())
         }
 
     fun forventetMånedsinntekt() =
@@ -127,11 +127,3 @@ enum class InntektType {
 }
 
 fun List<Inntektsmåned>.summerTotalInntekt(): Double = this.flatMap { it.inntektListe }.sumOf { it.beløp }
-
-fun List<Inntektsmåned>.summerTotalInntektUtenEfYtelse(): Double =
-    this
-        .flatMap { it.inntektListe }
-        .filter {
-            it.type != InntektType.YTELSE_FRA_OFFENTLIGE &&
-                it.beskrivelse != "overgangsstoenadTilEnsligMorEllerFarSomBegynteAaLoepe1April2014EllerSenere"
-        }.sumOf { it.beløp }
