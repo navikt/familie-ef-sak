@@ -6,7 +6,6 @@ import no.nav.familie.http.client.AbstractPingableRestClient
 import no.nav.familie.http.client.MultipartBuilder
 import no.nav.familie.kontrakter.ef.felles.FrittståendeBrevDto
 import no.nav.familie.kontrakter.ef.felles.PeriodiskAktivitetspliktBrevDto
-import no.nav.familie.kontrakter.ef.infotrygd.OpprettStartBehandlingHendelseDto
 import no.nav.familie.kontrakter.ef.iverksett.BehandlingsstatistikkDto
 import no.nav.familie.kontrakter.ef.iverksett.IverksettDto
 import no.nav.familie.kontrakter.ef.iverksett.IverksettStatus
@@ -44,10 +43,6 @@ class IverksettClient(
             simuleringRequest,
             HttpHeaders().medContentTypeJsonUTF8(),
         ).data!!
-    }
-
-    fun startBehandling(request: OpprettStartBehandlingHendelseDto) {
-        postForEntity<Any>(URI.create("$familieEfIverksettUri/api/start-behandling"), request)
     }
 
     fun sendBehandlingsstatistikk(request: BehandlingsstatistikkDto) {
