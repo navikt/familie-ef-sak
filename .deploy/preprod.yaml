@@ -51,6 +51,7 @@ spec:
   accessPolicy:
     inbound:
       rules:
+        - application: familie-ef-autentisering
         - application: familie-ef-sak-frontend
         - application: familie-prosessering
         - application: familie-ef-personhendelse

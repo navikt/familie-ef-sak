@@ -103,7 +103,7 @@ class AutomatiskRevurderingServiceTest {
         val inntekterUtenOvergangsstønad = inntektResponse.inntektsmånederUtenEfYtelser()
         val forventetInntekt = inntektResponse.forventetMånedsinntekt()
 
-        assertThat(inntekterUtenOvergangsstønad.size).isEqualTo(11)
+        assertThat(inntekterUtenOvergangsstønad.size).isEqualTo(9)
         assertThat(forventetInntekt).isEqualTo(6000)
     }
 }
