@@ -9,20 +9,24 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
+data class AutentiseringRequest(
+    val behandlerRolle: BehandlerRolle,
+)
+
 @RestController
 @RequestMapping("/api/autentisering")
 @ProtectedWithClaims(issuer = "azuread")
+@Profile("!prod")
 class FamilieAutentiseringTestController(
     private val tilgangService: TilgangService,
 ) {
     @PostMapping
     @RequestMapping("test-token-validering")
     @ProtectedWithClaims(issuer = "azuread")
-    @Profile("!prod")
     fun testRolleValidering(
-        @RequestBody behandlerRolle: BehandlerRolle,
+        @RequestBody request: AutentiseringRequest,
     ): String {
-        tilgangService.validerTilgangTilRolle(behandlerRolle)
+        tilgangService.validerTilgangTilRolle(request.behandlerRolle)
         return "ok"
     }
 }
