@@ -22,15 +22,18 @@ import no.nav.familie.ef.sak.journalføring.dto.VilkårsbehandleNyeBarn
 import no.nav.familie.ef.sak.oppgave.TilordnetRessursService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
-import no.nav.familie.ef.sak.samværsavtale.SamværsavtaleService
 import no.nav.familie.ef.sak.vedtak.KopierVedtakService
 import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.ef.sak.vilkår.VurderingService
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.felles.ef.StønadType
+import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.leader.LeaderClient
 import no.nav.familie.prosessering.internal.TaskService
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.time.LocalDate
+import java.time.temporal.IsoFields
 import java.util.UUID
 
 @Service
@@ -48,7 +51,6 @@ class RevurderingService(
     private val vedtakService: VedtakService,
     private val nyeBarnService: NyeBarnService,
     private val tilordnetRessursService: TilordnetRessursService,
-    private val samværsavtaleService: SamværsavtaleService,
 ) {
     fun hentRevurderingsinformasjon(behandlingId: UUID): RevurderingsinformasjonDto = årsakRevurderingService.hentRevurderingsinformasjon(behandlingId)
 
@@ -88,7 +90,8 @@ class RevurderingService(
         val forrigeBehandlingId =
             behandlingService.finnSisteIverksatteBehandlingMedEventuellAvslått(fagsak.id)?.id
                 ?: error("Revurdering må ha eksisterende iverksatt behandling")
-        val saksbehandler = SikkerhetContext.hentSaksbehandler()
+
+        val saksbehandler = SikkerhetContext.hentSaksbehandlerEllerSystembruker()
 
         søknadService.kopierSøknad(forrigeBehandlingId, revurdering.id)
         val grunnlagsdata = grunnlagsdataService.opprettGrunnlagsdata(revurdering.id)
@@ -103,16 +106,11 @@ class RevurderingService(
             stønadstype = fagsak.stønadstype,
         )
         val (_, metadata) = vurderingService.hentGrunnlagOgMetadata(revurdering.id)
-        vurderingService.kopierVurderingerTilNyBehandling(
-            eksisterendeBehandlingId = forrigeBehandlingId,
-            nyBehandlingsId = revurdering.id,
+        vurderingService.kopierVurderingerOgSamværsavtalerTilNyBehandling(
+            behandlingSomSkalOppdateresId = revurdering.id,
+            behandlingForGjenbrukId = forrigeBehandlingId,
             metadata = metadata,
             stønadType = fagsak.stønadstype,
-        )
-        samværsavtaleService.kopierSamværsavtalerTilNyBehandling(
-            eksisterendeBehandlingId = forrigeBehandlingId,
-            nyBehandlingId = revurdering.id,
-            metadata = metadata,
         )
         taskService.save(
             OpprettOppgaveForOpprettetBehandlingTask.opprettTask(
@@ -123,7 +121,9 @@ class RevurderingService(
                 ),
             ),
         )
-        taskService.save(BehandlingsstatistikkTask.opprettPåbegyntTask(behandlingId = revurdering.id))
+        if (revurderingDto.behandlingsårsak != BehandlingÅrsak.AUTOMATISK_INNTEKTSENDRING) {
+            taskService.save(BehandlingsstatistikkTask.opprettPåbegyntTask(behandlingId = revurdering.id))
+        }
 
         if (erSatsendring(revurderingDto)) {
             val vedtakDto =
@@ -140,6 +140,26 @@ class RevurderingService(
         }
 
         return revurdering
+    }
+
+    @Transactional
+    fun opprettAutomatiskInntektsendringTask(personIdenter: List<String>) {
+        if (LeaderClient.isLeader() != true) {
+            return
+        }
+
+        val ukeÅr = LocalDate.now().let { "${it.get(IsoFields.WEEK_OF_WEEK_BASED_YEAR)}-${it.year}" }
+
+        personIdenter.forEach { personIdent ->
+
+            val payload = objectMapper.writeValueAsString(PayloadBehandleAutomatiskInntektsendringTask(personIdent = personIdent, ukeÅr = ukeÅr))
+            val finnesTask = taskService.finnTaskMedPayloadOgType(payload, BehandleAutomatiskInntektsendringTask.TYPE)
+
+            if (finnesTask == null) {
+                val task = BehandleAutomatiskInntektsendringTask.opprettTask(payload)
+                taskService.save(task)
+            }
+        }
     }
 
     private fun vilkårsbehandleNyeBarn(

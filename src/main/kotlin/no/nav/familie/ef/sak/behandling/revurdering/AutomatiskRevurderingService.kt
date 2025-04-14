@@ -1,8 +1,12 @@
 package no.nav.familie.ef.sak.behandling.revurdering
 
+import no.nav.familie.ef.sak.amelding.InntektResponse
+import no.nav.familie.ef.sak.amelding.ekstern.AMeldingInntektClient
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.oppgave.OppgaveService
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.inntekt.GrunnlagsdataInntekt
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.inntekt.GrunnlagsdataInntektRepository
 import no.nav.familie.ef.sak.sigrun.SigrunService
 import no.nav.familie.ef.sak.sigrun.harNæringsinntekt
 import no.nav.familie.kontrakter.felles.Tema
@@ -12,6 +16,8 @@ import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.kontrakter.felles.oppgave.StatusEnum
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import java.time.YearMonth
+import java.util.UUID
 
 @Service
 class AutomatiskRevurderingService(
@@ -19,6 +25,8 @@ class AutomatiskRevurderingService(
     private val fagsakService: FagsakService,
     private val behandlingService: BehandlingService,
     private val oppgaveService: OppgaveService,
+    private val aMeldingInntektClient: AMeldingInntektClient,
+    private val grunnlagsdataInntektRepository: GrunnlagsdataInntektRepository,
 ) {
     private val logger = LoggerFactory.getLogger(javaClass)
     private val secureLogger = LoggerFactory.getLogger("secureLogger")
@@ -59,4 +67,16 @@ class AutomatiskRevurderingService(
 
         return true
     }
+
+    fun lagreInntektResponse(
+        personIdent: String,
+        behandlingId: UUID,
+    ): InntektResponse {
+        val inntektResponse = aMeldingInntektClient.hentInntekt(personIdent = personIdent, månedFom = YearMonth.now().minusYears(1), månedTom = YearMonth.now())
+        return grunnlagsdataInntektRepository.insert(GrunnlagsdataInntekt(behandlingId, inntektResponse)).inntektsdata
+    }
+
+    fun hentInntektResponse(
+        personIdent: String,
+    ): InntektResponse = aMeldingInntektClient.hentInntekt(personIdent = personIdent, månedFom = YearMonth.now().minusYears(1), månedTom = YearMonth.now())
 }

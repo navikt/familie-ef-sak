@@ -200,7 +200,7 @@ class BehandlingsstatistikkTask(
                 behandlingId = behandlingId,
                 hendelse = Hendelse.PÅBEGYNT,
                 hendelseTidspunkt = LocalDateTime.now(),
-                gjeldendeSaksbehandler = SikkerhetContext.hentSaksbehandler(),
+                gjeldendeSaksbehandler = SikkerhetContext.hentSaksbehandlerEllerSystembruker(),
             )
 
         fun opprettVenterTask(behandlingId: UUID): Task =
