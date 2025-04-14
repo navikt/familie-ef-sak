@@ -1,7 +1,6 @@
-package no.nav.familie.ef.sak
+package no.nav.familie.ef.sak.auntetisering
 
 import no.nav.familie.ef.sak.behandlingsflyt.steg.BehandlerRolle
-import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.context.annotation.Profile
 import org.springframework.web.bind.annotation.PostMapping
@@ -13,7 +12,7 @@ import org.springframework.web.bind.annotation.RestController
 @RequestMapping("/api/autentisering")
 @ProtectedWithClaims(issuer = "azuread")
 class FamilieAutentiseringTestController(
-    private val tilgangService: TilgangService,
+    private val familieAutentiseringTestService: FamilieAutentiseringTestService,
 ) {
     @PostMapping
     @RequestMapping("test-token-validering")
@@ -22,7 +21,7 @@ class FamilieAutentiseringTestController(
     fun testRolleValidering(
         @RequestBody behandlerRolle: BehandlerRolle,
     ): String {
-        tilgangService.validerTilgangTilRolle(behandlerRolle)
+        familieAutentiseringTestService.testRolleValideringMotToken(behandlerRolle)
         return "ok"
     }
 }
