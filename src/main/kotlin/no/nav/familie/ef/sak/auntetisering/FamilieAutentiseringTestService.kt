@@ -12,7 +12,8 @@ class FamilieAutentiseringTestService(
 ) {
     private val secureLogger = LoggerFactory.getLogger("secureLogger")
 
-    fun testRolleValideringMotToken(behandlerRolle: BehandlerRolle) {
+    fun testRolleValideringMotToken(behandlerRolle: BehandlerRolle, header: String?) {
+        secureLogger.info("Header motatt fra familie-ef-autentisering: $header")
         secureLogger.info("Mottok kall fra familie-ef-autentisering med rolle: $behandlerRolle")
         val claims = SpringTokenValidationContextHolder().getTokenValidationContext().getClaims("azuread")
         secureLogger.info("Claims er: $claims")
