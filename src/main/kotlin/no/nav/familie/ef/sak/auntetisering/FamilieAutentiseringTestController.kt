@@ -11,13 +11,12 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 @RequestMapping("/api/autentisering")
 @ProtectedWithClaims(issuer = "azuread")
+@Profile("!prod")
 class FamilieAutentiseringTestController(
     private val familieAutentiseringTestService: FamilieAutentiseringTestService,
 ) {
     @PostMapping
     @RequestMapping("test-token-validering")
-    @ProtectedWithClaims(issuer = "azuread")
-    @Profile("!prod")
     fun testRolleValidering(
         @RequestBody behandlerRolle: BehandlerRolle,
     ): String {
