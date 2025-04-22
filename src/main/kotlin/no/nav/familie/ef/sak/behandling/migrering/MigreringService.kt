@@ -29,7 +29,6 @@ import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvisIkke
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.ef.sak.iverksett.IverksettClient
-import no.nav.familie.ef.sak.iverksett.IverksettService
 import no.nav.familie.ef.sak.iverksett.IverksettingDtoMapper
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.GrunnlagsdataMedMetadata
@@ -70,7 +69,6 @@ class MigreringService(
     private val fagsakService: FagsakService,
     private val fagsakPersonService: FagsakPersonService,
     private val behandlingService: BehandlingService,
-    private val iverksettService: IverksettService,
     private val iverksettClient: IverksettClient,
     private val grunnlagsdataService: GrunnlagsdataService,
     private val vurderingService: VurderingService,
@@ -295,7 +293,6 @@ class MigreringService(
             "Migrerer fagsakPerson=${fagsak.fagsakPersonId} fagsak=${fagsak.id} behandling=${behandling.id} " +
                 "fra=${periode.fomDato} til=${periode.tomDato}",
         )
-        iverksettService.startBehandling(behandling, fagsak)
 
         val grunnlagsdata = grunnlagsdataService.opprettGrunnlagsdata(behandling.id)
         vurderingService.opprettVilkårForMigrering(behandling)

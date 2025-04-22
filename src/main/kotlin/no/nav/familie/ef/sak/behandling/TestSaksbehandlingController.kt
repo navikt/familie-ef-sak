@@ -15,7 +15,6 @@ import no.nav.familie.ef.sak.behandlingshistorikk.domain.Behandlingshistorikk
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
-import no.nav.familie.ef.sak.iverksett.IverksettService
 import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
@@ -69,7 +68,6 @@ import java.util.UUID
 class TestSaksbehandlingController(
     private val fagsakService: FagsakService,
     private val behandlingshistorikkService: BehandlingshistorikkService,
-    private val iverksettService: IverksettService,
     private val behandlingService: BehandlingService,
     private val søknadService: SøknadService,
     private val personService: PersonService,
@@ -169,7 +167,6 @@ class TestSaksbehandlingController(
             }
 
         if (!behandling.erMigrering()) {
-            iverksettService.startBehandling(behandling, fagsak)
             val grunnlagsdata =
                 grunnlagsdataService.opprettGrunnlagsdata(behandling.id) // opprettGrunnlagsdata håndteres i migreringservice
             barnService.opprettBarnPåBehandlingMedSøknadsdata(
