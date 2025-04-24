@@ -28,7 +28,6 @@ class SamværsavtaleController(
         @PathVariable behandlingId: UUID,
     ): Ressurs<List<SamværsavtaleDto>> {
         tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.ACCESS)
-        tilgangService.validerHarSaksbehandlerrolle()
         return Ressurs.success(samværsavtaleService.hentSamværsavtalerForBehandling(behandlingId).tilDto())
     }
 
