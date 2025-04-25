@@ -36,6 +36,13 @@ class BrevsignaturService(
         return SignaturDto(SikkerhetContext.hentSaksbehandlerNavn(true), signaturEnhet, vedtakErUtenBeslutter.value)
     }
 
+    fun lagSaksbehandlerSignatur(
+        personIdent: String,
+        vedtakErUtenBeslutter: VedtakErUtenBeslutter,
+        saksbehandlerNavn: String,
+        saksbehandlerIdent: String
+    ) = SignaturDto(saksbehandlerNavn, utledSignaturEnhet(saksbehandlerIdent), vedtakErUtenBeslutter.value)
+
     fun lagBeslutterSignatur(
         personIdent: String,
         vedtakErUtenBeslutter: VedtakErUtenBeslutter,

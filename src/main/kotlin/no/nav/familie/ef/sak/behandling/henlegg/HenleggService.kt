@@ -8,6 +8,7 @@ import no.nav.familie.ef.sak.brev.BrevsignaturService
 import no.nav.familie.ef.sak.brev.FamilieDokumentClient
 import no.nav.familie.ef.sak.brev.VedtaksbrevService
 import no.nav.familie.ef.sak.brev.dto.Flettefelter
+import no.nav.familie.ef.sak.brev.dto.SignaturDto
 import no.nav.familie.ef.sak.felles.util.norskFormat
 import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerService
@@ -75,6 +76,8 @@ class HenleggService(
 
     fun genererHenleggelsesbrev(
         behandlingId: UUID,
+        saksbehandlerNavn: String? = null,
+        saksbehandlerIdent: String? = null,
     ): ByteArray {
         val saksbehandling = behandlingService.hentSaksbehandling(behandlingId)
         val personIdent = behandlingService.hentAktivIdent(behandlingId)
@@ -84,7 +87,7 @@ class HenleggService(
                 lagDemalMedFlettefeltForStønadstype(stønadstype),
                 lagNavnOgIdentFlettefelt(personIdent),
             )
-        val signatur = brevsignaturService.lagSaksbehandlerSignatur(personIdent, VedtakErUtenBeslutter(true))
+        val signatur = utledSignatur(saksbehandlerNavn, saksbehandlerIdent, personIdent)
 
         val html =
             brevClient
@@ -98,6 +101,17 @@ class HenleggService(
 
         return familieDokumentClient.genererPdfFraHtml(html)
     }
+
+    private fun utledSignatur(
+        saksbehandlerNavn: String?,
+        saksbehandlerIdent: String?,
+        personIdent: String
+    ) = if (saksbehandlerNavn == null || saksbehandlerIdent == null) {
+        brevsignaturService.lagSaksbehandlerSignatur(personIdent, VedtakErUtenBeslutter(true))
+    } else {
+        brevsignaturService.lagSaksbehandlerSignatur(personIdent, VedtakErUtenBeslutter(true), saksbehandlerNavn, saksbehandlerIdent)
+    }
+
 
     private fun lagNavnOgIdentFlettefelt(personIdent: String): Flettefelter {
         val visningsNavn = personopplysningerService.hentGjeldeneNavn(listOf(personIdent)).getValue(personIdent)
