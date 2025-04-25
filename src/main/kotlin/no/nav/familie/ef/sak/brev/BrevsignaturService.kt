@@ -40,8 +40,8 @@ class BrevsignaturService(
         personIdent: String,
         vedtakErUtenBeslutter: VedtakErUtenBeslutter,
         saksbehandlerNavn: String,
-        saksbehandlerIdent: String
-    ) = SignaturDto(saksbehandlerNavn, utledSignaturEnhet(saksbehandlerIdent), vedtakErUtenBeslutter.value)
+        saksbehandlerIdent: String,
+    ) = SignaturDto(saksbehandlerNavn, utledSignaturEnhet(hentSaksbehandlerInfo(saksbehandlerIdent).enhetsnavn), vedtakErUtenBeslutter.value)
 
     fun lagBeslutterSignatur(
         personIdent: String,
