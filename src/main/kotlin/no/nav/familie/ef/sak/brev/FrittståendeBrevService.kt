@@ -90,7 +90,7 @@ class FrittståendeBrevService(
                     brevmal = "innhentingOpplysningerAktivitetEtterUtdanning",
                     saksbehandlerBrevrequest = objectMapper.valueToTree(brevRequest),
                     saksbehandlersignatur = "",
-                    enhet = "Nav Arbeid og ytelser",
+                    enhet = "Nav arbeid og ytelser",
                     skjulBeslutterSignatur = true,
                 ).replace(VedtaksbrevService.BESLUTTER_VEDTAKSDATO_PLACEHOLDER, LocalDate.now().norskFormat())
 

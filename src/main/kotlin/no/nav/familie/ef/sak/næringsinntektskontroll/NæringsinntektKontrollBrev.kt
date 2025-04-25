@@ -56,7 +56,7 @@ class NæringsinntektKontrollBrev(
                     brevmal = "varselbrevInntekt",
                     saksbehandlersignatur = "Vedtaksløsningen",
                     saksbehandlerBrevrequest = objectMapper.valueToTree(varselbrevEndretInntekt),
-                    enhet = "NAV Arbeid og ytelser",
+                    enhet = "Nav arbeid og ytelser",
                     skjulBeslutterSignatur = true,
                 ).replace(VedtaksbrevService.BESLUTTER_VEDTAKSDATO_PLACEHOLDER, LocalDate.now().norskFormat())
         return familieDokumentClient.genererPdfFraHtml(html)

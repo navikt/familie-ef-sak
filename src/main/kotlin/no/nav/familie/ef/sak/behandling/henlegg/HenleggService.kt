@@ -4,12 +4,14 @@ import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.dto.HenlagtDto
 import no.nav.familie.ef.sak.brev.BrevClient
+import no.nav.familie.ef.sak.brev.BrevsignaturService
 import no.nav.familie.ef.sak.brev.FamilieDokumentClient
 import no.nav.familie.ef.sak.brev.VedtaksbrevService
 import no.nav.familie.ef.sak.brev.dto.Flettefelter
 import no.nav.familie.ef.sak.felles.util.norskFormat
 import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerService
+import no.nav.familie.ef.sak.vedtak.domain.VedtakErUtenBeslutter
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
@@ -25,6 +27,7 @@ class HenleggService(
     private val brevClient: BrevClient,
     private val familieDokumentClient: FamilieDokumentClient,
     private val personopplysningerService: PersonopplysningerService,
+    private val brevsignaturService: BrevsignaturService,
 ) {
     @Transactional
     fun henleggBehandling(
@@ -72,7 +75,6 @@ class HenleggService(
 
     fun genererHenleggelsesbrev(
         behandlingId: UUID,
-        saksbehandlerSignatur: String,
     ): ByteArray {
         val saksbehandling = behandlingService.hentSaksbehandling(behandlingId)
         val personIdent = behandlingService.hentAktivIdent(behandlingId)
@@ -82,15 +84,16 @@ class HenleggService(
                 lagDemalMedFlettefeltForStønadstype(stønadstype),
                 lagNavnOgIdentFlettefelt(personIdent),
             )
+        val signatur = brevsignaturService.lagSaksbehandlerSignatur(personIdent, VedtakErUtenBeslutter(true))
 
         val html =
             brevClient
                 .genererHtml(
                     brevmal = "informasjonsbrevTrukketSoknad",
                     saksbehandlerBrevrequest = objectMapper.valueToTree(henleggelsesbrev),
-                    saksbehandlersignatur = saksbehandlerSignatur,
-                    enhet = "Nav Arbeid og ytelser",
-                    skjulBeslutterSignatur = true,
+                    saksbehandlersignatur = signatur.navn,
+                    enhet = signatur.enhet,
+                    skjulBeslutterSignatur = signatur.skjulBeslutter,
                 ).replace(VedtaksbrevService.BESLUTTER_VEDTAKSDATO_PLACEHOLDER, LocalDate.now().norskFormat())
 
         return familieDokumentClient.genererPdfFraHtml(html)
