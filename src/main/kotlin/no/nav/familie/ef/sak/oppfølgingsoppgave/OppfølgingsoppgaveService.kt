@@ -71,7 +71,7 @@ class OppfølgingsoppgaveService(
     fun lagreAutomatiskBrev(
         behandlingId: UUID,
         automatiskBrev: List<String>,
-    ){
+    ) {
         automatiskBrevRepository.deleteByBehandlingId(behandlingId)
         automatiskBrevRepository.insert(AutomatiskBrev(behandlingId, automatiskBrev))
     }
