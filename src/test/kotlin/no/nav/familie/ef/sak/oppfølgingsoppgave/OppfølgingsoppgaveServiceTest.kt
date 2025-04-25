@@ -16,6 +16,7 @@ import no.nav.familie.ef.sak.felles.util.BehandlingOppsettUtil.iverksattRevurder
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.ef.sak.oppfølgingsoppgave.OppfølgingsoppgaveService
+import no.nav.familie.ef.sak.oppfølgingsoppgave.automatiskBrev.AutomatiskBrevRepository
 import no.nav.familie.ef.sak.oppfølgingsoppgave.domain.OppgaverForOpprettelse
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
@@ -43,12 +44,14 @@ internal class OppfølgingsoppgaveServiceTest {
     private val vedtakService = mockk<VedtakService>()
     private val featureToggleService = mockk<FeatureToggleService>()
     private val oppgaverForFerdigstillingRepository = mockk<OppgaverForFerdigstillingRepository>()
+    private val automatiskBrevRepository = mockk<AutomatiskBrevRepository>()
 
     private var oppfølgingsoppgaveService =
         spyk(
             OppfølgingsoppgaveService(
                 oppgaverForFerdigstillingRepository,
                 oppgaverForOpprettelseRepository,
+                automatiskBrevRepository,
                 behandlingService,
                 tilkjentYtelseService,
                 vedtakService,
