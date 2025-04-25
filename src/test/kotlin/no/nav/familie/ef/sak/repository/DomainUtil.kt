@@ -410,6 +410,25 @@ fun vedtak(
         samordningsfradragType = null,
     )
 
+fun vedtak(
+    behandlingId: UUID,
+    månedsperioder: List<Månedsperiode>,
+): Vedtak =
+    Vedtak(
+        behandlingId = behandlingId,
+        resultatType = ResultatType.INNVILGE,
+        periodeBegrunnelse = "OK",
+        inntektBegrunnelse = "OK",
+        avslåBegrunnelse = null,
+        perioder = PeriodeWrapper(månedsperioder.map { vedtaksperiode(startDato = it.fomDato, sluttDato = it.tomDato) }),
+        inntekter = InntektWrapper(månedsperioder.map { inntektsperiode(startDato = it.fomDato, sluttDato = it.tomDato) }),
+        skolepenger = null,
+        saksbehandlerIdent = "VL",
+        opprettetAv = "VL",
+        opprettetTid = LocalDateTime.now(),
+        samordningsfradragType = null,
+    )
+
 fun vedtakBarnetilsyn(
     behandlingId: UUID,
     barn: List<UUID>,
