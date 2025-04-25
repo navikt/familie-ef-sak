@@ -7,4 +7,5 @@ data class SendTilBeslutterDto(
     val årForInntektskontrollSelvstendigNæringsdrivende: Int? = null,
     val fremleggsoppgaveIderSomSkalFerdigstilles: List<Long> = emptyList(),
     val beskrivelseMarkeringer: List<String> = emptyList(),
+    val automatiskBrev: List<String> = emptyList(),
 )

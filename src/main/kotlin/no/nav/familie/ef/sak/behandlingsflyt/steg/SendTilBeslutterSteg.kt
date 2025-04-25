@@ -163,6 +163,11 @@ class SendTilBeslutterSteg(
                 saksbehandling.id,
                 data,
             )
+
+            oppfølgingsoppgaveService.lagreAutomatiskBrev(
+                saksbehandling.id,
+                data.automatiskBrev,
+            )
         }
     }
 

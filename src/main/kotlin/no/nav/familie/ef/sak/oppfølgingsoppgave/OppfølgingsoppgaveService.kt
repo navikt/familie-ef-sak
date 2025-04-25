@@ -8,6 +8,8 @@ import no.nav.familie.ef.sak.behandling.oppgaverforferdigstilling.OppgaverForFer
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvisIkke
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
+import no.nav.familie.ef.sak.oppfølgingsoppgave.automatiskBrev.AutomatiskBrevRepository
+import no.nav.familie.ef.sak.oppfølgingsoppgave.domain.AutomatiskBrev
 import no.nav.familie.ef.sak.oppfølgingsoppgave.domain.OppgaverForFerdigstilling
 import no.nav.familie.ef.sak.oppfølgingsoppgave.domain.OppgaverForOpprettelse
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
@@ -28,6 +30,7 @@ import java.util.UUID
 class OppfølgingsoppgaveService(
     private val oppgaverForFerdigstillingRepository: OppgaverForFerdigstillingRepository,
     private val oppgaverForOpprettelseRepository: OppgaverForOpprettelseRepository,
+    private val automatiskBrevRepository: AutomatiskBrevRepository,
     private val behandlingService: BehandlingService,
     private val tilkjentYtelseService: TilkjentYtelseService,
     private val vedtakService: VedtakService,
@@ -62,6 +65,15 @@ class OppfølgingsoppgaveService(
         }
         oppgaverForOpprettelseRepository.deleteByBehandlingId(behandlingId)
         oppgaverForOpprettelseRepository.insert(OppgaverForOpprettelse(behandlingId, nyeOppgaver, årForInntektskontrollSelvstendigNæringsdrivende))
+    }
+
+    @Transactional
+    fun lagreAutomatiskBrev(
+        behandlingId: UUID,
+        automatiskBrev: List<String>,
+    ){
+        automatiskBrevRepository.deleteByBehandlingId(behandlingId)
+        automatiskBrevRepository.insert(AutomatiskBrev(behandlingId, automatiskBrev))
     }
 
     fun hentOppgaverForOpprettelse(
