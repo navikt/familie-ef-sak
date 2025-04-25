@@ -69,7 +69,7 @@ class AutomatiskRevurderingService(
 
         val sisteIverksatteBehandlingId = behandlingService.finnSisteIverksatteBehandling(fagsak.id)?.id
         if (sisteIverksatteBehandlingId == null) {
-            logger.info("Fant ikke siste iverksatte behandling for fagsakId: ${fagsak.id}")
+            logger.error("Fant ikke siste iverksatte behandling for fagsakId: ${fagsak.id}")
             return false
         }
 
