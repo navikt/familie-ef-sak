@@ -8,5 +8,5 @@ import java.util.UUID
 class AutomatiskBrev(
     @Id
     val behandlingId: UUID,
-    val brev: List<String>,
+    val brevSomSkalSendes: List<String>,
 )

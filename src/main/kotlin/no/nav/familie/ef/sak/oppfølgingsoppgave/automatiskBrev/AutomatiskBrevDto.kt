@@ -4,5 +4,5 @@ import java.util.UUID
 
 data class AutomatiskBrevDto(
     val behandlingId: UUID,
-    val brev: List<String>,
+    val brevSomSkalSendes: List<String>,
 )
