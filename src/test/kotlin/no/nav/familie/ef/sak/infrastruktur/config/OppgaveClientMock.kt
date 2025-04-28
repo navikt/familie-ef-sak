@@ -184,6 +184,7 @@ class OppgaveClientMock {
                 fornavn = fornavn,
                 etternavn = etternavn,
                 enhet = "4405",
+                enhetsnavn = "Enheten"
             )
         }
 
