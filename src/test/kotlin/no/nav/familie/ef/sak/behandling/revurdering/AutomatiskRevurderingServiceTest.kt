@@ -8,6 +8,12 @@ import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.ef.sak.repository.inntekt
 import no.nav.familie.ef.sak.repository.inntektsmåneder
+import no.nav.familie.ef.sak.repository.inntektsperiode
+import no.nav.familie.ef.sak.repository.vedtak
+import no.nav.familie.ef.sak.repository.vedtaksperiode
+import no.nav.familie.ef.sak.vedtak.VedtakService
+import no.nav.familie.ef.sak.vedtak.domain.InntektWrapper
+import no.nav.familie.ef.sak.vedtak.domain.PeriodeWrapper
 import no.nav.familie.kontrakter.felles.Tema
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveResponseDto
 import no.nav.familie.kontrakter.felles.oppgave.IdentGruppe
@@ -18,26 +24,35 @@ import no.nav.familie.kontrakter.felles.oppgave.StatusEnum
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.time.YearMonth
+import java.util.UUID
 
 class AutomatiskRevurderingServiceTest {
     val behandlingServiceMock = mockk<BehandlingService>(relaxed = true)
     val oppgaveServiceMock = mockk<OppgaveService>(relaxed = true)
-    val automatiskRevurderingService = AutomatiskRevurderingService(mockk(relaxed = true), mockk(relaxed = true), behandlingServiceMock, oppgaveServiceMock, mockk(relaxed = true), mockk(relaxed = true))
+    val vedtakServiceMock = mockk<VedtakService>(relaxed = true)
+    val automatiskRevurderingService = AutomatiskRevurderingService(mockk(relaxed = true), mockk(relaxed = true), behandlingServiceMock, oppgaveServiceMock, mockk(relaxed = true), mockk(relaxed = true), vedtakServiceMock)
 
     @Test
-    fun `Kan automatisk revurderes`() {
+    fun `person med behandling som kan automatisk revurderes`() {
+        val vedtakMed1Periode =
+            vedtak(
+                behandlingId = UUID.randomUUID(),
+                perioder = PeriodeWrapper(listOf(vedtaksperiode(2025))),
+                inntekter = InntektWrapper(listOf(inntektsperiode(2025))),
+            )
+        every { vedtakServiceMock.hentVedtak(any()) } returns vedtakMed1Periode
         assertThat(automatiskRevurderingService.kanAutomatiskRevurderes("1")).isTrue()
     }
 
     @Test
-    fun `Kan ikke automatisk revurderes som følge av åpen behandling`() {
+    fun `kan ikke automatisk revurderes som følge av åpen behandling`() {
         every { behandlingServiceMock.finnesÅpenBehandling(any()) } returns true
 
         assertThat(automatiskRevurderingService.kanAutomatiskRevurderes("1")).isFalse()
     }
 
     @Test
-    fun `Kan ikke automatisk revurderes som følge av at behandle sak oppgave finnes`() {
+    fun `kan ikke automatisk revurderes som følge av at behandle sak oppgave finnes`() {
         every { oppgaveServiceMock.hentOppgaver(any()) } returns
             FinnOppgaveResponseDto(
                 1,
@@ -105,5 +120,14 @@ class AutomatiskRevurderingServiceTest {
 
         assertThat(inntekterUtenOvergangsstønad.size).isEqualTo(9)
         assertThat(forventetInntekt).isEqualTo(6000)
+    }
+
+    @Test
+    fun `beregn forventetMånedsinntekt`() {
+        val inntekterSisteTreMåneder = inntektsmåneder(YearMonth.now().minusMonths(3), inntektListe = listOf(inntekt(2000.0))).take(3)
+
+        val inntektResponse = InntektResponse(inntekterSisteTreMåneder)
+
+        assertThat(inntektResponse.forventetMånedsinntekt()).isEqualTo(2000)
     }
 }
