@@ -8,6 +8,7 @@ import no.nav.familie.ef.sak.behandling.oppgaverforferdigstilling.OppgaverForFer
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvisIkke
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
+import no.nav.familie.ef.sak.oppfølgingsoppgave.automatiskBrev.AutomatiskBrevDto
 import no.nav.familie.ef.sak.oppfølgingsoppgave.automatiskBrev.AutomatiskBrevRepository
 import no.nav.familie.ef.sak.oppfølgingsoppgave.domain.AutomatiskBrev
 import no.nav.familie.ef.sak.oppfølgingsoppgave.domain.OppgaverForFerdigstilling
@@ -137,6 +138,17 @@ class OppfølgingsoppgaveService(
         return oppgavetyperSomKanOpprettes
     }
 
+    fun hentAutomatiskBrev(
+        behandlingId: UUID,
+    ): AutomatiskBrevDto {
+        val automatiskBrev = hentAutomatiskBrevEllerNull(behandlingId)
+
+        return AutomatiskBrevDto(
+            behandlingId = behandlingId,
+            brevSomSkalSendes = automatiskBrev?.brevSomSkalSendes ?: emptyList(),
+        )
+    }
+
     private fun hentSisteTilkjentYtelse(fagsakId: UUID): TilkjentYtelse? {
         val sisteIverksatteBehandling = behandlingService.finnSisteIverksatteBehandling(fagsakId)
         return sisteIverksatteBehandling?.let {
@@ -165,4 +177,6 @@ class OppfølgingsoppgaveService(
     fun hentOppgaverForOpprettelseEllerNull(behandlingId: UUID): OppgaverForOpprettelse? = oppgaverForOpprettelseRepository.findByIdOrNull(behandlingId)
 
     fun hentOppgaverForFerdigstillingEllerNull(behandlingId: UUID): OppgaverForFerdigstilling? = oppgaverForFerdigstillingRepository.findByIdOrNull(behandlingId)
+
+    fun hentAutomatiskBrevEllerNull(behandlingId: UUID): AutomatiskBrev? = automatiskBrevRepository.findByIdOrNull(behandlingId)
 }
