@@ -84,7 +84,7 @@ class BehandleAutomatiskInntektsendringTaskTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `behandling automatisk inntektsendring`() {
-        val behandling = behandling(fagsak, resultat = BehandlingResultat.INNVILGET, status = BehandlingStatus.UTREDES)
+        val behandling = behandling(fagsak, resultat = BehandlingResultat.IKKE_SATT, status = BehandlingStatus.UTREDES)
         behandlingRepository.insert(behandling)
         vilkårHelperService.opprettVilkår(behandling)
         vedtakHelperService.ferdigstillVedtak(vedtak(behandlingId = behandling.id, månedsperiode = Månedsperiode(YearMonth.now().minusMonths(4), YearMonth.now())), behandling, fagsak)
@@ -98,17 +98,17 @@ class BehandleAutomatiskInntektsendringTaskTest : OppslagSpringRunnerTest() {
         assertThat(behandlingerForFagsak).hasSize(2)
         val automatiskInntektsendringBehandling = behandlingerForFagsak.first { it.årsak == BehandlingÅrsak.AUTOMATISK_INNTEKTSENDRING }
         val årsakTilRevurdering = årsakRevurderingsRepository.findByIdOrThrow(automatiskInntektsendringBehandling.id)
+
         assertThat(årsakTilRevurdering.opplysningskilde).isEqualTo(Opplysningskilde.AUTOMATISK_OPPRETTET_BEHANDLING)
         assertThat(årsakTilRevurdering.årsak).isEqualTo(Revurderingsårsak.ENDRING_INNTEKT)
         assertThat(årsakTilRevurdering.beskrivelse).isNullOrEmpty()
 
         val vedtak = vedtakService.hentVedtak(automatiskInntektsendringBehandling.id)
-
         val vedtaksperioder = vedtak.perioder?.perioder
         val førsteFom = vedtaksperioder?.first()?.periode?.fom
-        assertThat(førsteFom).isEqualTo(YearMonth.now().minusMonths(2)) // Revurderes fra
-
         val inntektsperioder = vedtak.inntekter?.inntekter
+
+        assertThat(førsteFom).isEqualTo(YearMonth.now().minusMonths(2)) // Revurderes fra
         assertThat(inntektsperioder?.first()?.inntekt?.toInt()).isEqualTo(35_000)
     }
 }
