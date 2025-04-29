@@ -2,16 +2,14 @@ package no.nav.familie.ef.sak.næringsinntektskontroll
 
 import no.nav.familie.ef.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ef.sak.behandling.BehandlingService
-import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.brev.BrevClient
 import no.nav.familie.ef.sak.brev.FamilieDokumentClient
+import no.nav.familie.ef.sak.brev.FrittståendeBrevService
 import no.nav.familie.ef.sak.brev.VedtaksbrevService
 import no.nav.familie.ef.sak.felles.util.norskFormat
 import no.nav.familie.ef.sak.infrastruktur.config.ObjectMapperProvider.objectMapper
 import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerService
-import no.nav.familie.kontrakter.ef.felles.FrittståendeBrevDto
-import no.nav.familie.kontrakter.ef.iverksett.Brevmottaker
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 
@@ -23,22 +21,21 @@ class NæringsinntektKontrollBrev(
     val brevClient: BrevClient,
     val familieDokumentClient: FamilieDokumentClient,
     val iverksettClient: IverksettClient,
+    val frittståendeBrevService: FrittståendeBrevService,
 ) {
     fun sendBrev(næringsinntektDataForBeregning: NæringsinntektDataForBeregning) {
         val saksbehandling = behandlingService.hentSaksbehandling(næringsinntektDataForBeregning.behandlingId)
-        val journalførendeEnhet = arbeidsfordelingService.hentNavEnhetIdEllerBrukMaskinellEnhetHvisNull(saksbehandling.ident)
         val brevPdf = genererVarselbrevInntekt(næringsinntektDataForBeregning)
+
+        val tittel = "Inntekt endret for selvstendig næringsdrivende"
+
         val varselbrevInntektDto =
-            FrittståendeBrevDto(
-                personIdent = saksbehandling.ident,
-                eksternFagsakId = saksbehandling.eksternFagsakId,
-                stønadType = saksbehandling.stønadstype,
-                tittel = "Inntekt endret for selvstendig næringsdrivende",
-                fil = brevPdf,
-                journalførendeEnhet = journalførendeEnhet,
-                saksbehandlerIdent = "VL",
-                mottakere = lagBrevMottaker(saksbehandling),
+            frittståendeBrevService.lagFrittståendeBrevDto(
+                saksbehandling,
+                tittel,
+                brevPdf,
             )
+
         iverksettClient.sendFrittståendeBrev(frittståendeBrevDto = varselbrevInntektDto)
     }
 
@@ -70,16 +67,6 @@ class NæringsinntektKontrollBrev(
         val navnOgIdentFlettefelt = Flettefelter(navn = listOf(visningsNavn), fodselsnummer = listOf(personIdent), forventetInntekt = listOf(forventetInntekt))
         return navnOgIdentFlettefelt
     }
-
-    private fun lagBrevMottaker(saksbehandling: Saksbehandling) =
-        listOf(
-            Brevmottaker(
-                ident = "VL",
-                navn = personopplysningerService.hentGjeldeneNavn(listOf(saksbehandling.ident)).getValue(saksbehandling.ident),
-                mottakerRolle = Brevmottaker.MottakerRolle.BRUKER,
-                identType = Brevmottaker.IdentType.PERSONIDENT,
-            ),
-        )
 }
 
 data class VarselbrevEndretInntekt(

@@ -2,6 +2,7 @@ package no.nav.familie.ef.sak.brev
 
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.familie.ef.sak.arbeidsfordeling.ArbeidsfordelingService
+import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.brev.domain.BrevmottakerOrganisasjon
 import no.nav.familie.ef.sak.brev.domain.BrevmottakerPerson
 import no.nav.familie.ef.sak.brev.dto.Flettefelter
@@ -13,7 +14,9 @@ import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.iverksett.tilIverksettDto
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerService
 import no.nav.familie.ef.sak.vedtak.domain.VedtakErUtenBeslutter
+import no.nav.familie.kontrakter.ef.felles.FrittståendeBrevDto
 import no.nav.familie.kontrakter.ef.iverksett.Brevmottaker
 import no.nav.familie.kontrakter.felles.objectMapper
 import org.springframework.stereotype.Service
@@ -31,6 +34,7 @@ class FrittståendeBrevService(
     private val mellomlagringBrevService: MellomlagringBrevService,
     private val familieDokumentClient: FamilieDokumentClient,
     private val brevmottakereService: BrevmottakereService,
+    private val personopplysningerService: PersonopplysningerService,
 ) {
     fun lagFrittståendeSanitybrev(
         fagsakId: UUID,
@@ -96,6 +100,42 @@ class FrittståendeBrevService(
 
         return familieDokumentClient.genererPdfFraHtml(html)
     }
+
+    // TODO: Bør dette ligge et annet sted?
+    fun lagFrittståendeBrevDto(
+        saksbehandling: Saksbehandling,
+        tittel: String,
+        fil: ByteArray,
+    ): FrittståendeBrevDto {
+        val journalførendeEnhet = arbeidsfordelingService.hentNavEnhetIdEllerBrukMaskinellEnhetHvisNull(saksbehandling.ident)
+        val mottakere = lagBrevMottaker(saksbehandling)
+
+        val brevDto =
+            FrittståendeBrevDto(
+                personIdent = saksbehandling.ident,
+                eksternFagsakId = saksbehandling.eksternFagsakId,
+                stønadType = saksbehandling.stønadstype,
+                tittel = tittel,
+                fil = fil,
+                journalførendeEnhet = journalførendeEnhet,
+                saksbehandlerIdent = "VL",
+                mottakere = mottakere,
+            )
+
+        return brevDto
+    }
+
+    fun lagBrevMottaker(
+        saksbehandling: Saksbehandling,
+        skalHaSaksbehandlerIdent: Boolean = false,
+    ) = listOf(
+        Brevmottaker(
+            ident = if (skalHaSaksbehandlerIdent) saksbehandling.ident else "VL",
+            navn = personopplysningerService.hentGjeldeneNavn(listOf(saksbehandling.ident)).getValue(saksbehandling.ident),
+            mottakerRolle = Brevmottaker.MottakerRolle.BRUKER,
+            identType = Brevmottaker.IdentType.PERSONIDENT,
+        ),
+    )
 
     private fun mapMottakere(mottakere: BrevmottakereDto): List<Brevmottaker> {
         val personer = mottakere.personer.map(BrevmottakerPerson::tilIverksettDto)

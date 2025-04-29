@@ -5,9 +5,16 @@ import no.nav.familie.ef.sak.behandling.oppgaveforopprettelse.OppgaverForOpprett
 import no.nav.familie.ef.sak.behandling.oppgaveforopprettelse.OppgaverForOpprettelseRepository
 import no.nav.familie.ef.sak.behandling.oppgaverforferdigstilling.OppgaverForFerdigstillingDto
 import no.nav.familie.ef.sak.behandling.oppgaverforferdigstilling.OppgaverForFerdigstillingRepository
+import no.nav.familie.ef.sak.brev.BrevClient
+import no.nav.familie.ef.sak.brev.FamilieDokumentClient
+import no.nav.familie.ef.sak.brev.FrittståendeBrevService
+import no.nav.familie.ef.sak.brev.VedtaksbrevService
+import no.nav.familie.ef.sak.felles.util.norskFormat
+import no.nav.familie.ef.sak.infrastruktur.config.ObjectMapperProvider.objectMapper
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvisIkke
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
+import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.oppfølgingsoppgave.automatiskBrev.AutomatiskBrevDto
 import no.nav.familie.ef.sak.oppfølgingsoppgave.automatiskBrev.AutomatiskBrevRepository
 import no.nav.familie.ef.sak.oppfølgingsoppgave.domain.AutomatiskBrev
@@ -21,6 +28,7 @@ import no.nav.familie.ef.sak.vedtak.dto.SendTilBeslutterDto
 import no.nav.familie.kontrakter.ef.felles.AvslagÅrsak
 import no.nav.familie.kontrakter.ef.iverksett.OppgaveForOpprettelseType
 import no.nav.familie.kontrakter.felles.ef.StønadType
+import no.nav.familie.leader.LeaderClient
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -36,6 +44,10 @@ class OppfølgingsoppgaveService(
     private val tilkjentYtelseService: TilkjentYtelseService,
     private val vedtakService: VedtakService,
     private val featureToggleService: FeatureToggleService,
+    private val iverksettClient: IverksettClient,
+    private val familieDokumentClient: FamilieDokumentClient,
+    private val brevClient: BrevClient,
+    private val frittståendeBrevService: FrittståendeBrevService,
 ) {
     @Transactional
     fun lagreOppgaveIderForFerdigstilling(
@@ -149,6 +161,37 @@ class OppfølgingsoppgaveService(
         )
     }
 
+    fun sendAutomatiskBrev(
+        behandlingId: UUID,
+    ) {
+        if (LeaderClient.isLeader() == false) return // Er denne nødvendig?
+
+        val automatiskBrev = hentAutomatiskBrevEllerNull(behandlingId)
+        val saksbehandling = behandlingService.hentSaksbehandling(behandlingId)
+
+        if (automatiskBrev != null) {
+            automatiskBrev.brevSomSkalSendes.forEach {
+                val html =
+                    brevClient
+                        .genererHtml(
+                            brevmal = brevtittelTilBrevmal(it),
+                            saksbehandlersignatur = "Vedtaksløsningen",
+                            saksbehandlerBrevrequest = objectMapper.valueToTree(""),
+                            enhet = "NAV Arbeid og ytelser",
+                            skjulBeslutterSignatur = true,
+                        ).replace(VedtaksbrevService.BESLUTTER_VEDTAKSDATO_PLACEHOLDER, LocalDate.now().norskFormat())
+
+                val fil = familieDokumentClient.genererPdfFraHtml(html)
+
+                val brevDto = frittståendeBrevService.lagFrittståendeBrevDto(saksbehandling, it, fil)
+
+                iverksettClient.sendFrittståendeBrev(frittståendeBrevDto = brevDto)
+            }
+
+            automatiskBrevRepository.deleteByBehandlingId(behandlingId)
+        }
+    }
+
     private fun hentSisteTilkjentYtelse(fagsakId: UUID): TilkjentYtelse? {
         val sisteIverksatteBehandling = behandlingService.finnSisteIverksatteBehandling(fagsakId)
         return sisteIverksatteBehandling?.let {
@@ -172,6 +215,13 @@ class OppfølgingsoppgaveService(
     fun slettOppfølgingsoppgave(behandlingId: UUID) {
         oppgaverForOpprettelseRepository.deleteById(behandlingId)
         oppgaverForFerdigstillingRepository.deleteById(behandlingId)
+    }
+
+    private fun brevtittelTilBrevmal(brevtittel: String): String { // TODO: utbedre type
+        return when (brevtittel) {
+            "Varsel om aktivitetsplikt" -> "varselAktivitetsplikt"
+            else -> brevtittel
+        }
     }
 
     fun hentOppgaverForOpprettelseEllerNull(behandlingId: UUID): OppgaverForOpprettelse? = oppgaverForOpprettelseRepository.findByIdOrNull(behandlingId)
