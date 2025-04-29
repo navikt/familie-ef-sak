@@ -176,7 +176,7 @@ class OppfølgingsoppgaveService(
                         .genererHtml(
                             brevmal = brevtittelTilBrevmal(it),
                             saksbehandlersignatur = "Vedtaksløsningen",
-                            saksbehandlerBrevrequest = objectMapper.valueToTree(""),
+                            saksbehandlerBrevrequest = objectMapper.valueToTree(BrevRequest(Flettefelter(navn = listOf(it)))),
                             enhet = "NAV Arbeid og ytelser",
                             skjulBeslutterSignatur = true,
                         ).replace(VedtaksbrevService.BESLUTTER_VEDTAKSDATO_PLACEHOLDER, LocalDate.now().norskFormat())
@@ -230,3 +230,13 @@ class OppfølgingsoppgaveService(
 
     fun hentAutomatiskBrevEllerNull(behandlingId: UUID): AutomatiskBrev? = automatiskBrevRepository.findByIdOrNull(behandlingId)
 }
+
+data class BrevRequest(
+    val flettefelter: Flettefelter,
+)
+
+data class Flettefelter(
+    val navn: List<String>? = emptyList(),
+    val fodselsnummer: List<String>? = emptyList(),
+    val forventetInntekt: List<Int>? = emptyList(),
+)
