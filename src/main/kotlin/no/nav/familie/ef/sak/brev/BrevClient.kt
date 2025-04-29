@@ -5,7 +5,7 @@ import no.nav.familie.ef.sak.blankett.BlankettPdfRequest
 import no.nav.familie.ef.sak.brev.VedtaksbrevService.Companion.BESLUTTER_SIGNATUR_PLACEHOLDER
 import no.nav.familie.ef.sak.brev.VedtaksbrevService.Companion.BESLUTTER_VEDTAKSDATO_PLACEHOLDER
 import no.nav.familie.ef.sak.brev.domain.FRITEKST
-import no.nav.familie.ef.sak.brev.dto.FritekstBrevRequestMedSignatur
+import no.nav.familie.ef.sak.brev.dto.FritekstBrevMedSignaturRequest
 import no.nav.familie.ef.sak.felles.util.medContentTypeJsonUTF8
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.næringsinntektskontroll.NæringsinntektIngenEndringPdfRequest
@@ -67,7 +67,7 @@ class BrevClient(
         return postForEntity(url, næringsinntektIngenEndringPdfRequest, HttpHeaders().medContentTypeJsonUTF8())
     }
 
-    fun genererFritekstBrev(request: FritekstBrevRequestMedSignatur): ByteArray {
+    fun genererFritekstBrev(request: FritekstBrevMedSignaturRequest): ByteArray {
         val url = URI.create("$familieBrevUri/api/fritekst-brev")
         return postForEntity(url, request, HttpHeaders().medContentTypeJsonUTF8())
     }

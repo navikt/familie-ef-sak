@@ -55,6 +55,7 @@ class BlankettService(
                 lagSøknadsdatoer(behandlingId),
                 vilkårVurderinger.grunnlag.harAvsluttetArbeidsforhold,
                 samværsavtaleService.hentSamværsavtalerForBehandling(behandlingId).tilDto(),
+                samværsavtaleService.hentSamværsavtalerForBehandling(behandlingId).mapIndexed{ukeInde}
             )
         val blankettPdfAsByteArray = brevClient.genererBlankett(blankettPdfRequest)
         oppdaterEllerOpprettBlankett(behandlingId, blankettPdfAsByteArray)
