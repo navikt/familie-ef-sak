@@ -169,6 +169,7 @@ class OppfølgingsoppgaveService(
 
         val automatiskBrev = hentAutomatiskBrevEllerNull(behandlingId)
         val saksbehandling = behandlingService.hentSaksbehandling(behandlingId)
+        val personIdent = behandlingService.hentAktivIdent(behandlingId)
 
         if (automatiskBrev != null) {
             automatiskBrev.brevSomSkalSendes.forEach {
@@ -179,7 +180,7 @@ class OppfølgingsoppgaveService(
                         .genererHtml(
                             brevmal = brevmal,
                             saksbehandlersignatur = "Vedtaksløsningen",
-                            saksbehandlerBrevrequest = objectMapper.valueToTree(BrevRequest(Flettefelter(navn = listOf(it)))),
+                            saksbehandlerBrevrequest = objectMapper.valueToTree(BrevRequest(Flettefelter(navn = listOf(it), fodselsnummer = listOf(personIdent)))),
                             enhet = "NAV Arbeid og ytelser",
                             skjulBeslutterSignatur = true,
                         ).replace(VedtaksbrevService.BESLUTTER_VEDTAKSDATO_PLACEHOLDER, LocalDate.now().norskFormat())
