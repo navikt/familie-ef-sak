@@ -36,12 +36,7 @@ class SendTrukketSøknadHenleggelsesbrevTask(
         val saksbehandlerIdent = henleggelsesbrevDto.saksbehandlerIdent
         val saksbehandling = behandlingService.hentSaksbehandling(henleggelsesbrevDto.behandlingId)
         val journalførendeEnhet = arbeidsfordelingService.hentNavEnhetIdEllerBrukMaskinellEnhetHvisNull(saksbehandling.ident)
-        val henleggBrev =
-            henleggService.genererHenleggelsesbrev(
-                behandlingId = henleggelsesbrevDto.behandlingId,
-                saksbehandlerNavn = henleggelsesbrevDto.saksbehandlerSignatur,
-                saksbehandlerIdent = saksbehandlerIdent,
-            )
+        val henleggBrev = henleggService.genererHenleggelsesbrev(behandlingId = henleggelsesbrevDto.behandlingId, saksbehandlerSignatur = henleggelsesbrevDto.saksbehandlerSignatur)
 
         val hennleggbrevDto =
             FrittståendeBrevDto(
