@@ -45,8 +45,14 @@ class HenleggBehandlingController(
     ): Ressurs<ByteArray> {
         val saksbehandling = behandlingService.hentSaksbehandling(behandlingId)
         tilgangService.validerTilgangTilBehandling(saksbehandling, AuditLoggerEvent.ACCESS)
-        return Ressurs.success(henleggService.genererHenleggelsesbrev(behandlingId))
+        val saksbehandlerSignatur = SikkerhetContext.hentSaksbehandlerNavn(strict = true)
+        return henleggBrevRessurs(behandlingId, saksbehandlerSignatur)
     }
+
+    private fun henleggBrevRessurs(
+        behandlingId: UUID,
+        saksbehandlerSignatur: String,
+    ) = Ressurs.success(henleggService.genererHenleggelsesbrev(behandlingId, saksbehandlerSignatur))
 
     @PostMapping("{behandlingId}/henlegg")
     fun henleggBehandling(
