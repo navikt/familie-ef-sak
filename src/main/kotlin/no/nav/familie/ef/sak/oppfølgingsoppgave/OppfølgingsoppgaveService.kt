@@ -20,6 +20,7 @@ import no.nav.familie.ef.sak.oppfølgingsoppgave.automatiskBrev.AutomatiskBrevRe
 import no.nav.familie.ef.sak.oppfølgingsoppgave.domain.AutomatiskBrev
 import no.nav.familie.ef.sak.oppfølgingsoppgave.domain.OppgaverForFerdigstilling
 import no.nav.familie.ef.sak.oppfølgingsoppgave.domain.OppgaverForOpprettelse
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.secureLogger
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.vedtak.VedtakService
@@ -171,10 +172,12 @@ class OppfølgingsoppgaveService(
 
         if (automatiskBrev != null) {
             automatiskBrev.brevSomSkalSendes.forEach {
+                val brevmal = brevtittelTilBrevmal(it)
+
                 val html =
                     brevClient
                         .genererHtml(
-                            brevmal = brevtittelTilBrevmal(it),
+                            brevmal = brevmal,
                             saksbehandlersignatur = "Vedtaksløsningen",
                             saksbehandlerBrevrequest = objectMapper.valueToTree(BrevRequest(Flettefelter(navn = listOf(it)))),
                             enhet = "NAV Arbeid og ytelser",
@@ -185,6 +188,8 @@ class OppfølgingsoppgaveService(
 
                 val brevDto = frittståendeBrevService.lagFrittståendeBrevDto(saksbehandling, it, fil)
 
+                secureLogger.info("Sender automatisk brev: $brevmal til mottaker: ${brevDto.mottakere}")
+                secureLogger.info("---- html ----: $html")
                 iverksettClient.sendFrittståendeBrev(frittståendeBrevDto = brevDto)
             }
 
