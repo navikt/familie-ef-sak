@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.no.nav.familie.ef.sak.behandling.revurdering
 
+import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
 import no.nav.familie.ef.sak.behandling.BehandlingService
@@ -10,6 +11,8 @@ import no.nav.familie.ef.sak.behandling.revurdering.BehandleAutomatiskInntektsen
 import no.nav.familie.ef.sak.behandling.revurdering.PayloadBehandleAutomatiskInntektsendringTask
 import no.nav.familie.ef.sak.behandling.revurdering.RevurderingService
 import no.nav.familie.ef.sak.behandling.revurdering.ÅrsakRevurderingsRepository
+import no.nav.familie.ef.sak.behandlingsflyt.task.OpprettOppgaveForOpprettetBehandlingTask
+import no.nav.familie.ef.sak.behandlingsflyt.task.OpprettOppgaveForOpprettetBehandlingTask.OpprettOppgaveTaskData
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.infrastruktur.config.ObjectMapperProvider.objectMapper
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
@@ -25,6 +28,7 @@ import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.ef.felles.Opplysningskilde
 import no.nav.familie.kontrakter.ef.felles.Revurderingsårsak
 import no.nav.familie.kontrakter.felles.Månedsperiode
+import no.nav.familie.prosessering.internal.TaskService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -61,6 +65,9 @@ class BehandleAutomatiskInntektsendringTaskTest : OppslagSpringRunnerTest() {
 
     @Autowired
     private lateinit var vedtakHelperService: VedtakHelperService
+
+    @Autowired
+    private lateinit var taskService: TaskService
 
     private val personIdent = "3"
     private val fagsak = fagsak(identer = fagsakpersoner(setOf(personIdent)))
@@ -110,5 +117,10 @@ class BehandleAutomatiskInntektsendringTaskTest : OppslagSpringRunnerTest() {
 
         assertThat(førsteFom).isEqualTo(YearMonth.now().minusMonths(2)) // Revurderes fra
         assertThat(inntektsperioder?.first()?.inntekt?.toInt()).isEqualTo(35_000)
+
+        val opprettOppgaveTask = taskService.findAll().first { it.type == OpprettOppgaveForOpprettetBehandlingTask.TYPE }
+        val data = objectMapper.readValue<OpprettOppgaveTaskData>(opprettOppgaveTask.payload)
+        assertThat(data.mappeId).isEqualTo(63)
+        assertThat(data.beskrivelse).isEqualTo("Automatisk opprettet revurdering som følge av inntektskontroll")
     }
 }
