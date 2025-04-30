@@ -112,16 +112,18 @@ class RevurderingService(
             metadata = metadata,
             stønadType = fagsak.stønadstype,
         )
+        val erAutomatiskRevurdering = revurderingDto.behandlingsårsak == BehandlingÅrsak.AUTOMATISK_INNTEKTSENDRING
         taskService.save(
             OpprettOppgaveForOpprettetBehandlingTask.opprettTask(
                 OpprettOppgaveForOpprettetBehandlingTask.OpprettOppgaveTaskData(
                     behandlingId = revurdering.id,
                     saksbehandler = saksbehandler,
-                    beskrivelse = "Revurdering i ny løsning",
+                    beskrivelse = if (erAutomatiskRevurdering) "Automatisk opprettet revurdering som følge av inntektskontroll" else "Revurdering i ny løsning",
+                    mappeId = if (erAutomatiskRevurdering) GOSYS_MAPPE_ID_INNTEKTSKONTROLL else null,
                 ),
             ),
         )
-        if (revurderingDto.behandlingsårsak != BehandlingÅrsak.AUTOMATISK_INNTEKTSENDRING) {
+        if (!erAutomatiskRevurdering) {
             taskService.save(BehandlingsstatistikkTask.opprettPåbegyntTask(behandlingId = revurdering.id))
         }
 
@@ -227,4 +229,8 @@ class RevurderingService(
     }
 
     private fun erSatsendring(revurderingDto: RevurderingDto) = revurderingDto.behandlingsårsak == BehandlingÅrsak.SATSENDRING
+
+    companion object {
+        const val GOSYS_MAPPE_ID_INNTEKTSKONTROLL = 63L
+    }
 }
