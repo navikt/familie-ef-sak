@@ -74,8 +74,7 @@ data class SimuleringsperiodeDto(
 fun Simuleringsoppsummering.tilSimuleringsoppsummeringDto(): SimuleringsoppsummeringDto {
     val sistefeilutbetalingsperiode = this.perioder.sortedBy { it.tom }.lastOrNull { it.feilutbetaling > BigDecimal.ZERO }
     val år = sistefeilutbetalingsperiode?.tom?.year
-    val rettsgebyr = rettsgebyrForÅr[år]
-    val erUnder4rettsgebyr = rettsgebyr != null && feilutbetaling < BigDecimal(rettsgebyr * 4) && etterbetaling == BigDecimal.ZERO
+    val fireRettsgebyr = rettsgebyrForÅr[år]?.let { it * 4 }
 
     return SimuleringsoppsummeringDto(
         perioder =
@@ -94,8 +93,8 @@ fun Simuleringsoppsummering.tilSimuleringsoppsummeringDto(): Simuleringsoppsumme
         etterbetaling = this.etterbetaling,
         feilutbetaling = this.feilutbetaling,
         feilutbetalingsår = år,
-        fireRettsgebyr = rettsgebyr?.let { it * 4 },
-        visUnder4rettsgebyr = erUnder4rettsgebyr,
+        fireRettsgebyr = fireRettsgebyr,
+        visUnder4rettsgebyr = erUnder4Rettsgebyr(fireRettsgebyr),
         fom = this.fom,
         tomDatoNestePeriode = this.tomDatoNestePeriode,
         forfallsdatoNestePeriode = this.forfallsdatoNestePeriode,
@@ -105,3 +104,5 @@ fun Simuleringsoppsummering.tilSimuleringsoppsummeringDto(): Simuleringsoppsumme
         sumKreditorPosteringer = this.sumKreditorPosteringer,
     )
 }
+
+fun Simuleringsoppsummering.erUnder4Rettsgebyr(fireRettsgebyr: Int?) = fireRettsgebyr != null && feilutbetaling < BigDecimal(fireRettsgebyr) && etterbetaling.toInt() == 0
