@@ -2,7 +2,7 @@ package no.nav.familie.ef.sak.brev
 
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.familie.ef.sak.brev.BrevsignaturService.Companion.ENHET_NAY
+import no.nav.familie.ef.sak.brev.BrevsignaturService.Companion.NAV_ENHET_NAY
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil
 import no.nav.familie.ef.sak.oppgave.OppgaveClient
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerService
@@ -23,7 +23,7 @@ internal class BrevsignaturServiceTest {
     fun `skal sende frittstående brev med NAV Vikafossen signatur dersom person har strengt fortrolig adresse`() {
         every { personopplysningerService.hentStrengesteAdressebeskyttelseForPersonMedRelasjoner(any()) } returns ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG
         val signaturMedEnhet = brevsignaturService.lagSaksbehandlerSignatur("123", VedtakErUtenBeslutter(false))
-        Assertions.assertThat(signaturMedEnhet.enhet).isEqualTo(BrevsignaturService.ENHET_VIKAFOSSEN)
+        Assertions.assertThat(signaturMedEnhet.enhet).isEqualTo(BrevsignaturService.NAV_ENHET_VIKAFOSSEN)
         Assertions.assertThat(signaturMedEnhet.navn).isEqualTo(BrevsignaturService.NAV_ANONYM_NAVN)
         Assertions.assertThat(signaturMedEnhet.skjulBeslutter).isTrue()
     }
@@ -59,7 +59,7 @@ internal class BrevsignaturServiceTest {
 
         val signaturMedEnhet = brevsignaturService.lagSaksbehandlerSignatur("123", VedtakErUtenBeslutter(false))
 
-        Assertions.assertThat(signaturMedEnhet.enhet).isEqualTo(ENHET_NAY)
+        Assertions.assertThat(signaturMedEnhet.enhet).isEqualTo(NAV_ENHET_NAY)
         Assertions.assertThat(signaturMedEnhet.navn).isEqualTo(saksbehandlerNavn)
         Assertions.assertThat(signaturMedEnhet.skjulBeslutter).isFalse()
 
@@ -96,7 +96,7 @@ internal class BrevsignaturServiceTest {
 
         val signaturMedEnhet = brevsignaturService.lagBeslutterSignatur("123", VedtakErUtenBeslutter(false))
 
-        Assertions.assertThat(signaturMedEnhet.enhet).isEqualTo(BrevsignaturService.ENHET_VIKAFOSSEN)
+        Assertions.assertThat(signaturMedEnhet.enhet).isEqualTo(BrevsignaturService.NAV_ENHET_VIKAFOSSEN)
         Assertions.assertThat(signaturMedEnhet.navn).isEqualTo(BrevsignaturService.NAV_ANONYM_NAVN)
         Assertions.assertThat(signaturMedEnhet.skjulBeslutter).isTrue()
 

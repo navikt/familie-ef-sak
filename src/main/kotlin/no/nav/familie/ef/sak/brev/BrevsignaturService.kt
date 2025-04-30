@@ -27,7 +27,7 @@ class BrevsignaturService(
                 .let { it == STRENGT_FORTROLIG || it == STRENGT_FORTROLIG_UTLAND }
 
         if (harStrengtFortroligAdresse) {
-            return SignaturDto(NAV_ANONYM_NAVN, ENHET_VIKAFOSSEN, true)
+            return SignaturDto(NAV_ANONYM_NAVN, NAV_ENHET_VIKAFOSSEN, true)
         }
 
         val saksbehandler = hentSaksbehandlerInfo(SikkerhetContext.hentSaksbehandler())
@@ -53,7 +53,7 @@ class BrevsignaturService(
                 .let { it == STRENGT_FORTROLIG || it == STRENGT_FORTROLIG_UTLAND }
 
         if (harStrengtFortroligAdresse) {
-            return SignaturDto(NAV_ANONYM_NAVN, ENHET_VIKAFOSSEN, true)
+            return SignaturDto(NAV_ANONYM_NAVN, NAV_ENHET_VIKAFOSSEN, true)
         }
 
         val saksbehandler = hentSaksbehandlerInfo(SikkerhetContext.hentSaksbehandler())
@@ -75,12 +75,12 @@ class BrevsignaturService(
 
     private fun loggAdvarselOgReturnerEnhetsnavn(enhetsnavn: String): String {
         logger.warn("En saksbehandler med enhet $enhetsnavn har signert et brev. Vurder om vi må legge til dette enhetsnavnet for korrekt visning i brevsignaturen.")
-        return ENHET_NAY
+        return NAV_ENHET_NAY
     }
 
     companion object {
         val NAV_ANONYM_NAVN = "Nav anonym"
-        val ENHET_VIKAFOSSEN = "Nav Vikafossen"
-        val ENHET_NAY = "Nav arbeid og ytelser"
+        val NAV_ENHET_VIKAFOSSEN = "Nav Vikafossen"
+        val NAV_ENHET_NAY = "Nav arbeid og ytelser"
     }
 }

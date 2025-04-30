@@ -301,7 +301,7 @@ internal class VedtaksbrevServiceTest {
         val html = "html"
 
         every { fagsakService.hentFagsak(any()) } returns fagsak
-        every { brevClient.genererHtml(any(), any(), any(), any(), any()) } returns html
+        every { brevClient.genererHtml(any(), any(), any(), any(), any(), any()) } returns html
         every { vedtaksbrevRepository.existsById(any()) } returns false
         every { vedtaksbrevRepository.insert(capture(vedtaksbrevSlot)) } returns vedtaksbrev
         every { familieDokumentClient.genererPdfFraHtml(any()) } returns "123".toByteArray()
@@ -323,7 +323,7 @@ internal class VedtaksbrevServiceTest {
         every { fagsakService.hentFagsak(any()) } returns fagsak
         every { vedtaksbrevRepository.existsById(any()) } returns true
         every { vedtaksbrevRepository.update(capture(vedtaksbrevSlot)) } answers { firstArg() }
-        every { brevClient.genererHtml(any(), any(), any(), any(), any()) } returns "html"
+        every { brevClient.genererHtml(any(), any(), any(), any(), any(), any()) } returns "html"
         every { familieDokumentClient.genererPdfFraHtml(any()) } returns "123".toByteArray()
         every { tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandler(any()) } returns true
         every { oppgaveClient.hentSaksbehandlerInfo(any()) } returns saksbehandler()
