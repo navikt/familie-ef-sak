@@ -179,7 +179,6 @@ internal class BeslutteVedtakStegTest {
         assertThat(taskSlot[1].type).isEqualTo(OpprettOppgaveTask.TYPE)
         assertThat(deserializedPayload.oppgavetype).isEqualTo(Oppgavetype.BehandleUnderkjentVedtak)
     }
-
     @Test
     internal fun `skal ikke sende brev hvis årsaken er korrigering uten brev`() {
         utførTotrinnskontroll(true, opprettSaksbehandling(BehandlingÅrsak.KORRIGERING_UTEN_BREV))
