@@ -4,6 +4,8 @@ import no.nav.familie.ef.sak.amelding.InntektResponse
 import no.nav.familie.ef.sak.amelding.ekstern.AMeldingInntektClient
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.fagsak.FagsakService
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.inntekt.GrunnlagsdataInntekt
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.inntekt.GrunnlagsdataInntektRepository
@@ -29,6 +31,7 @@ class AutomatiskRevurderingService(
     private val aMeldingInntektClient: AMeldingInntektClient,
     private val grunnlagsdataInntektRepository: GrunnlagsdataInntektRepository,
     private val vedtakService: VedtakService,
+    private val featureToggleService: FeatureToggleService,
 ) {
     private val logger = LoggerFactory.getLogger(javaClass)
     private val secureLogger = LoggerFactory.getLogger("secureLogger")
@@ -36,7 +39,13 @@ class AutomatiskRevurderingService(
     fun kanAutomatiskRevurderes(personIdent: String): Boolean {
         val fagsak = fagsakService.finnFagsak(setOf(personIdent), StønadType.OVERGANGSSTØNAD) ?: return false
         logger.info("Sjekker om fagsak ${fagsak.id} automatisk revurderes")
-        val inntektForAlleÅr = sigrunService.hentInntektForAlleÅrMedInntekt(fagsak.fagsakPersonId)
+
+        val inntektForAlleÅr =
+            if (featureToggleService.isEnabled(Toggle.BEHANDLE_AUTOMATISK_INNTEKTSENDRING)) {
+                sigrunService.hentInntektForAlleÅrMedInntekt(fagsak.fagsakPersonId)
+            } else {
+                listOf()
+            }
 
         if (inntektForAlleÅr.harNæringsinntekt()) {
             logger.info("Har næringsinntekt for fagsak ${fagsak.id}")
