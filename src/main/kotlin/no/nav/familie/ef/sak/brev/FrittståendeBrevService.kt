@@ -108,7 +108,7 @@ class FrittståendeBrevService(
         fil: ByteArray,
     ): FrittståendeBrevDto {
         val journalførendeEnhet = arbeidsfordelingService.hentNavEnhetIdEllerBrukMaskinellEnhetHvisNull(saksbehandling.ident)
-        val mottakere = lagBrevMottaker(saksbehandling)
+        val mottakere = lagBrevMottaker(saksbehandling, skalHaSaksbehandlerIdent = true)
 
         val brevDto =
             FrittståendeBrevDto(
