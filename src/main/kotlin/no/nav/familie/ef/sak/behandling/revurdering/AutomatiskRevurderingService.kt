@@ -44,7 +44,7 @@ class AutomatiskRevurderingService(
             if (featureToggleService.isEnabled(Toggle.BEHANDLE_AUTOMATISK_INNTEKTSENDRING)) {
                 sigrunService.hentInntektForAlleÅrMedInntekt(fagsak.fagsakPersonId)
             } else {
-                listOf()
+                emptyList()
             }
 
         if (inntektForAlleÅr.harNæringsinntekt()) {
