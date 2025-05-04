@@ -127,10 +127,10 @@ class BehandleAutomatiskInntektsendringTask(
         forrigeVedtak: Vedtak,
         inntektResponse: InntektResponse,
     ): List<Inntektsperiode> {
-        val forventetInntekt = inntektResponse.forventetMånedsinntekt()
+        val forventetÅrsinntekt = inntektResponse.forventetMånedsinntekt() * 12
         val inntekterMinimum3MndTilbake = forrigeVedtak.inntekter?.inntekter?.filter { it.periode.fomDato <= YearMonth.now().minusMonths(3).atDay(1) } ?: emptyList()
         val nyesteInntektsperiode = inntekterMinimum3MndTilbake.maxBy { it.periode.fomDato }
-        val oppdatertInntektsperiode = nyesteInntektsperiode.copy(inntekt = BigDecimal(forventetInntekt))
+        val oppdatertInntektsperiode = nyesteInntektsperiode.copy(inntekt = BigDecimal(forventetÅrsinntekt))
         return forrigeVedtak.inntekter
             ?.inntekter
             ?.minus(nyesteInntektsperiode)
