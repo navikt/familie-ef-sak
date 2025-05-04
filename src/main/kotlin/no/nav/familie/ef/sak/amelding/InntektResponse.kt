@@ -34,7 +34,7 @@ data class InntektResponse(
             } &&
                 inntektsmåned.måned.isBefore(YearMonth.now()) &&
                 inntektsmåned.måned.isEqualOrAfter(minimumsdato)
-        }
+        }.sortedBy { it.måned }
 
     fun forventetMånedsinntekt() =
         if (harTreForrigeInntektsmåneder) {
