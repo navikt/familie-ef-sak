@@ -146,9 +146,6 @@ class RevurderingService(
 
     @Transactional
     fun opprettAutomatiskInntektsendringTask(personIdenter: List<String>) {
-        if (LeaderClient.isLeader() != true) {
-            return
-        }
 
         val ukeÅr = LocalDate.now().let { "${it.get(IsoFields.WEEK_OF_WEEK_BASED_YEAR)}-${it.year}" }
 
