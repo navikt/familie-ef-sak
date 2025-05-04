@@ -27,14 +27,15 @@ data class InntektResponse(
             ?.toPair()
 
     fun inntektsmånederUtenEfYtelser(minimumsdato: YearMonth): List<Inntektsmåned> =
-        inntektsmåneder.filter { inntektsmåned ->
-            inntektsmåned.inntektListe.all {
-                it.type != InntektType.YTELSE_FRA_OFFENTLIGE &&
-                    it.beskrivelse != "overgangsstoenadTilEnsligMorEllerFarSomBegynteAaLoepe1April2014EllerSenere"
-            } &&
-                inntektsmåned.måned.isBefore(YearMonth.now()) &&
-                inntektsmåned.måned.isEqualOrAfter(minimumsdato)
-        }.sortedBy { it.måned }
+        inntektsmåneder
+            .filter { inntektsmåned ->
+                inntektsmåned.inntektListe.all {
+                    it.type != InntektType.YTELSE_FRA_OFFENTLIGE &&
+                        it.beskrivelse != "overgangsstoenadTilEnsligMorEllerFarSomBegynteAaLoepe1April2014EllerSenere"
+                } &&
+                    inntektsmåned.måned.isBefore(YearMonth.now()) &&
+                    inntektsmåned.måned.isEqualOrAfter(minimumsdato)
+            }.sortedBy { it.måned }
 
     fun forventetMånedsinntekt() =
         if (harTreForrigeInntektsmåneder) {
