@@ -116,7 +116,7 @@ class BehandleAutomatiskInntektsendringTaskTest : OppslagSpringRunnerTest() {
         val inntektsperioder = vedtak.inntekter?.inntekter
 
         // Har ikke mocket inntekt-response, revurderes fra-dato blir derfor satt lik som fradato i forrige behandling
-        assertThat(førsteFom).isEqualTo(YearMonth.of(2025,1))
+        assertThat(førsteFom).isEqualTo(YearMonth.of(2025, 1))
         assertThat(inntektsperioder?.first()?.inntekt?.toInt()).isEqualTo(420_000)
 
         val opprettOppgaveTask = taskService.findAll().first { it.type == OpprettOppgaveForOpprettetBehandlingTask.TYPE }
