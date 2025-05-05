@@ -10,6 +10,7 @@ import no.nav.familie.ef.sak.behandling.dto.HenlagtDto
 import no.nav.familie.ef.sak.behandling.dto.HenlagtÅrsak
 import no.nav.familie.ef.sak.behandling.henlegg.HenleggService
 import no.nav.familie.ef.sak.brev.BrevClient
+import no.nav.familie.ef.sak.brev.BrevsignaturService
 import no.nav.familie.ef.sak.brev.FamilieDokumentClient
 import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerService
@@ -26,7 +27,8 @@ class HenleggServiceTest {
     private val brevClient: BrevClient = mockk()
     private val familieDokumentClient: FamilieDokumentClient = mockk()
     private val personopplysningerService: PersonopplysningerService = mockk()
-    private val henleggService = HenleggService(behandlingService, oppgaveService, brevClient, familieDokumentClient, personopplysningerService)
+    private val brevsignaturService: BrevsignaturService = mockk()
+    private val henleggService = HenleggService(behandlingService, oppgaveService, brevClient, familieDokumentClient, personopplysningerService, brevsignaturService)
 
     @Test
     fun `skal henlegge behandling og ferdigstille tilhørende oppgave`() {

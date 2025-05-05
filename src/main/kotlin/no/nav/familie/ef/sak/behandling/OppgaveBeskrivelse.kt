@@ -12,7 +12,7 @@ object OppgaveBeskrivelse {
         Dere må gjøre vurderingen etter retningslinjene til folketrygdloven § 15-6 første ledd bokstav c og § 5 i Forskrift om stønad til enslig mor eller far.
         
         Dere må skrive vurderingen i et notat i Gosys med tittelen «Innstilling utdanning». 
-        Når notatet er ferdigstilt, sender dere en Gosys-oppgave med tema «Enslig forsørger» til NAV Arbeid og ytelser 4489.
+        Når notatet er ferdigstilt, sender dere en Gosys-oppgave med tema «Enslig forsørger» til Nav arbeid og ytelser 4489.
         
         Dere må sende oss vurderingen innen 14 dager. 
         

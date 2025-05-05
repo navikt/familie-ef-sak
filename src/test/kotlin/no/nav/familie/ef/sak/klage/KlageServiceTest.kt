@@ -6,7 +6,7 @@ import io.mockk.mockk
 import io.mockk.slot
 import no.nav.familie.ef.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ef.sak.arbeidsfordeling.Arbeidsfordelingsenhet
-import no.nav.familie.ef.sak.brev.BrevsignaturService.Companion.ENHET_NAY
+import no.nav.familie.ef.sak.brev.BrevsignaturService.Companion.NAV_ENHET_NAY
 import no.nav.familie.ef.sak.fagsak.FagsakPersonService
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Fagsaker
@@ -86,7 +86,7 @@ internal class KlageServiceTest {
         every { fagsakService.hentFagsak(fagsak.id) } returns fagsak
         every { fagsakService.hentAktivIdent(saksbehandling.fagsakId) } returns personIdent
         every { fagsakPersonService.hentPerson(any()) } returns fagsakPerson
-        every { arbeidsfordelingService.hentNavEnhet(any()) } returns Arbeidsfordelingsenhet(ENHET_NAY, "enhet")
+        every { arbeidsfordelingService.hentNavEnhet(any()) } returns Arbeidsfordelingsenhet(NAV_ENHET_NAY, "enhet")
         every { featureToggleService.isEnabled(any()) } returns true
 
         justRun { klageClient.opprettKlage(capture(opprettKlageSlot)) }
@@ -105,7 +105,7 @@ internal class KlageServiceTest {
             assertThat(request.fagsystem).isEqualTo(Fagsystem.EF)
             assertThat(request.stønadstype).isEqualTo(Stønadstype.OVERGANGSSTØNAD)
             assertThat(request.klageMottatt).isEqualTo(LocalDate.now())
-            assertThat(request.behandlendeEnhet).isEqualTo(ENHET_NAY)
+            assertThat(request.behandlendeEnhet).isEqualTo(NAV_ENHET_NAY)
             assertThat(request.klageGjelderTilbakekreving).isEqualTo(true)
         }
     }
