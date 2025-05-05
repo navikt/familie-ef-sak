@@ -28,7 +28,9 @@ import no.nav.familie.ef.sak.vilkår.VurderingService
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.leader.LeaderClient
 import no.nav.familie.prosessering.internal.TaskService
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
@@ -51,6 +53,8 @@ class RevurderingService(
     private val nyeBarnService: NyeBarnService,
     private val tilordnetRessursService: TilordnetRessursService,
 ) {
+    private val logger = LoggerFactory.getLogger(javaClass)
+
     fun hentRevurderingsinformasjon(behandlingId: UUID): RevurderingsinformasjonDto = årsakRevurderingService.hentRevurderingsinformasjon(behandlingId)
 
     fun lagreRevurderingsinformasjon(
@@ -145,6 +149,9 @@ class RevurderingService(
 
     @Transactional
     fun opprettAutomatiskInntektsendringTask(personIdenter: List<String>) {
+        if (LeaderClient.isLeader() != true) {
+            logger.info("Fant ingen leader ved oppretting av automatisk inntektsendring task")
+        }
         val ukeÅr = LocalDate.now().let { "${it.get(IsoFields.WEEK_OF_WEEK_BASED_YEAR)}-${it.year}" }
 
         personIdenter.forEach { personIdent ->
