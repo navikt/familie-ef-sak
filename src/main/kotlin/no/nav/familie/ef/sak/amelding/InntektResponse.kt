@@ -11,14 +11,14 @@ data class InntektResponse(
     val inntektsmåneder: List<Inntektsmåned> = emptyList(),
 ) {
     fun totalInntektFraÅrMåned(årMåned: YearMonth): Int =
-        inntektsmånederUtenEfYtelser()
+        inntektsmånederUtenEfYtelser(årMåned)
             .filter { it.måned.isEqualOrAfter(årMåned) && it.måned.isBefore(YearMonth.now()) }
             .flatMap { it.inntektListe }
             .sumOf { it.beløp }
             .toInt()
 
-    fun førsteMånedOgInntektMed10ProsentØkning() =
-        inntektsmånederUtenEfYtelser()
+    fun førsteMånedOgInntektMed10ProsentØkning(minimumsdato: YearMonth) =
+        inntektsmånederUtenEfYtelser(minimumsdato)
             .associate { it.måned to it.totalInntekt() }
             .entries
             .zipWithNext()
@@ -26,14 +26,16 @@ data class InntektResponse(
             ?.second
             ?.toPair()
 
-    fun inntektsmånederUtenEfYtelser(): List<Inntektsmåned> =
-        inntektsmåneder.filter { inntektsmåned ->
-            inntektsmåned.inntektListe.all {
-                it.type != InntektType.YTELSE_FRA_OFFENTLIGE &&
-                    it.beskrivelse != "overgangsstoenadTilEnsligMorEllerFarSomBegynteAaLoepe1April2014EllerSenere"
-            } &&
-                inntektsmåned.måned.isBefore(YearMonth.now())
-        }
+    fun inntektsmånederUtenEfYtelser(minimumsdato: YearMonth): List<Inntektsmåned> =
+        inntektsmåneder
+            .filter { inntektsmåned ->
+                inntektsmåned.inntektListe.all {
+                    it.type != InntektType.YTELSE_FRA_OFFENTLIGE &&
+                        it.beskrivelse != "overgangsstoenadTilEnsligMorEllerFarSomBegynteAaLoepe1April2014EllerSenere"
+                } &&
+                    inntektsmåned.måned.isBefore(YearMonth.now()) &&
+                    inntektsmåned.måned.isEqualOrAfter(minimumsdato)
+            }.sortedBy { it.måned }
 
     fun forventetMånedsinntekt() =
         if (harTreForrigeInntektsmåneder) {
@@ -44,7 +46,7 @@ data class InntektResponse(
 
     fun forventetÅrsinntekt() = forventetMånedsinntekt() * 12
 
-    fun revurderesFraDato() = førsteMånedOgInntektMed10ProsentØkning()?.first
+    fun revurderesFraDato(minimumsdato: YearMonth) = førsteMånedOgInntektMed10ProsentØkning(minimumsdato)?.first
 
     val harTreForrigeInntektsmåneder =
         inntektsmåneder
