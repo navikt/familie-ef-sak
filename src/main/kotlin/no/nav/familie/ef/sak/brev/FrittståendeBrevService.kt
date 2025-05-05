@@ -3,6 +3,7 @@ package no.nav.familie.ef.sak.brev
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.familie.ef.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ef.sak.behandling.Saksbehandling
+import no.nav.familie.ef.sak.brev.BrevsignaturService.Companion.NAV_ENHET_NAY
 import no.nav.familie.ef.sak.brev.domain.BrevmottakerOrganisasjon
 import no.nav.familie.ef.sak.brev.domain.BrevmottakerPerson
 import no.nav.familie.ef.sak.brev.dto.Flettefelter
@@ -50,6 +51,7 @@ class FrittståendeBrevService(
                     brevmal = brevmal,
                     saksbehandlerBrevrequest = brevrequest,
                     saksbehandlersignatur = signatur.navn,
+                    saksbehandlerEnhet = signatur.enhet,
                     enhet = signatur.enhet,
                     skjulBeslutterSignatur = signatur.skjulBeslutter,
                 ).replace(VedtaksbrevService.BESLUTTER_VEDTAKSDATO_PLACEHOLDER, LocalDate.now().norskFormat())
@@ -94,7 +96,8 @@ class FrittståendeBrevService(
                     brevmal = "innhentingOpplysningerAktivitetEtterUtdanning",
                     saksbehandlerBrevrequest = objectMapper.valueToTree(brevRequest),
                     saksbehandlersignatur = "",
-                    enhet = "Nav Arbeid og ytelser",
+                    saksbehandlerEnhet = NAV_ENHET_NAY,
+                    enhet = NAV_ENHET_NAY,
                     skjulBeslutterSignatur = true,
                 ).replace(VedtaksbrevService.BESLUTTER_VEDTAKSDATO_PLACEHOLDER, LocalDate.now().norskFormat())
 

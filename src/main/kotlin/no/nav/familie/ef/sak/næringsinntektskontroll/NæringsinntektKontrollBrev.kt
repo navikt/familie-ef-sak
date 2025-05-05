@@ -3,6 +3,7 @@ package no.nav.familie.ef.sak.næringsinntektskontroll
 import no.nav.familie.ef.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.brev.BrevClient
+import no.nav.familie.ef.sak.brev.BrevsignaturService.Companion.NAV_ENHET_NAY
 import no.nav.familie.ef.sak.brev.FamilieDokumentClient
 import no.nav.familie.ef.sak.brev.FrittståendeBrevService
 import no.nav.familie.ef.sak.brev.VedtaksbrevService
@@ -53,7 +54,8 @@ class NæringsinntektKontrollBrev(
                     brevmal = "varselbrevInntekt",
                     saksbehandlersignatur = "Vedtaksløsningen",
                     saksbehandlerBrevrequest = objectMapper.valueToTree(varselbrevEndretInntekt),
-                    enhet = "NAV Arbeid og ytelser",
+                    saksbehandlerEnhet = NAV_ENHET_NAY,
+                    enhet = NAV_ENHET_NAY,
                     skjulBeslutterSignatur = true,
                 ).replace(VedtaksbrevService.BESLUTTER_VEDTAKSDATO_PLACEHOLDER, LocalDate.now().norskFormat())
         return familieDokumentClient.genererPdfFraHtml(html)
