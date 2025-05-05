@@ -81,6 +81,7 @@ import no.nav.familie.kontrakter.ef.iverksett.BehandlingKategori
 import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
+import no.nav.familie.kontrakter.felles.saksbehandler.Saksbehandler
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -671,6 +672,16 @@ fun inntekt(
     skattemessigBosattLand = null,
     opptjeningsland = null,
 )
+
+fun saksbehandler(enhetsnavn: String = "NAV ARBEID OG YTELSER SKIEN") =
+    Saksbehandler(
+        azureId = UUID.randomUUID(),
+        navIdent = "NAV123",
+        fornavn = "Darth",
+        etternavn = "Vader",
+        enhet = "4489",
+        enhetsnavn = enhetsnavn,
+    )
 
 private fun lagNyVilkårsvurdering(
     vilkårsregel: Vilkårsregel,
