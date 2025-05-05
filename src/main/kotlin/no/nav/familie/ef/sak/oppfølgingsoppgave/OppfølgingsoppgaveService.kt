@@ -181,8 +181,9 @@ class OppfølgingsoppgaveService(
                             brevmal = brevmal,
                             saksbehandlersignatur = "Vedtaksløsningen",
                             saksbehandlerBrevrequest = objectMapper.valueToTree(BrevRequest(Flettefelter(navn = listOf(it), fodselsnummer = listOf(personIdent)))),
-                            enhet = "NAV Arbeid og ytelser",
+                            enhet = "Nav arbeid og ytelser",
                             skjulBeslutterSignatur = true,
+                            saksbehandlerEnhet =  "Nav arbeid og ytelser",
                         ).replace(VedtaksbrevService.BESLUTTER_VEDTAKSDATO_PLACEHOLDER, LocalDate.now().norskFormat())
 
                 val fil = familieDokumentClient.genererPdfFraHtml(html)
