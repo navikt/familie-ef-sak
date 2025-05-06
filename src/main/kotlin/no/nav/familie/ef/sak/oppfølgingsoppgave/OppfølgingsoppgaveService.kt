@@ -6,7 +6,9 @@ import no.nav.familie.ef.sak.behandling.oppgaveforopprettelse.OppgaverForOpprett
 import no.nav.familie.ef.sak.behandling.oppgaverforferdigstilling.OppgaverForFerdigstillingDto
 import no.nav.familie.ef.sak.behandling.oppgaverforferdigstilling.OppgaverForFerdigstillingRepository
 import no.nav.familie.ef.sak.brev.BrevClient
+import no.nav.familie.ef.sak.brev.BrevRequest
 import no.nav.familie.ef.sak.brev.FamilieDokumentClient
+import no.nav.familie.ef.sak.brev.Flettefelter
 import no.nav.familie.ef.sak.brev.FrittståendeBrevService
 import no.nav.familie.ef.sak.brev.VedtaksbrevService
 import no.nav.familie.ef.sak.felles.util.norskFormat
@@ -170,11 +172,10 @@ class OppfølgingsoppgaveService(
         val saksbehandling = behandlingService.hentSaksbehandling(behandlingId)
         val personIdent = behandlingService.hentAktivIdent(behandlingId)
 
-        secureLogger.info("---- sendAutomatiskBrev ----: $behandlingId") // TODO: Skal fjernes
         if (automatiskBrev != null) {
             automatiskBrev.brevSomSkalSendes.forEach {
                 val brevmal = brevtittelTilBrevmal(it)
-                secureLogger.info("---- automatiskBrev ----: $brevmal")
+
                 val html =
                     brevClient
                         .genererHtml(
@@ -190,8 +191,6 @@ class OppfølgingsoppgaveService(
 
                 val brevDto = frittståendeBrevService.lagFrittståendeBrevDto(saksbehandling, it, fil)
 
-                secureLogger.info("Sender automatisk brev: $brevmal til mottaker: ${brevDto.mottakere}")
-                secureLogger.info("---- html ----: $html")
                 iverksettClient.sendFrittståendeBrev(frittståendeBrevDto = brevDto)
             }
 
@@ -224,7 +223,7 @@ class OppfølgingsoppgaveService(
         oppgaverForFerdigstillingRepository.deleteById(behandlingId)
     }
 
-    private fun brevtittelTilBrevmal(brevtittel: String): String { // TODO: utbedre type
+    private fun brevtittelTilBrevmal(brevtittel: String): String {
         return when (brevtittel) {
             "Varsel om aktivitetsplikt" -> "varselAktivitetsplikt"
             else -> brevtittel
@@ -237,13 +236,3 @@ class OppfølgingsoppgaveService(
 
     fun hentAutomatiskBrevEllerNull(behandlingId: UUID): AutomatiskBrev? = automatiskBrevRepository.findByIdOrNull(behandlingId)
 }
-
-data class BrevRequest(
-    val flettefelter: Flettefelter,
-)
-
-data class Flettefelter(
-    val navn: List<String>? = emptyList(),
-    val fodselsnummer: List<String>? = emptyList(),
-    val forventetInntekt: List<Int>? = emptyList(),
-)

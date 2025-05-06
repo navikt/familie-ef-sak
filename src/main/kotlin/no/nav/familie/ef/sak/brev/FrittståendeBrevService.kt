@@ -6,9 +6,7 @@ import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.brev.BrevsignaturService.Companion.NAV_ENHET_NAY
 import no.nav.familie.ef.sak.brev.domain.BrevmottakerOrganisasjon
 import no.nav.familie.ef.sak.brev.domain.BrevmottakerPerson
-import no.nav.familie.ef.sak.brev.dto.Flettefelter
 import no.nav.familie.ef.sak.brev.dto.FrittståendeSanitybrevDto
-import no.nav.familie.ef.sak.brev.dto.SanityBrevRequestInnhentingAktivitetsplikt
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.felles.util.norskFormat
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
@@ -88,7 +86,7 @@ class FrittståendeBrevService(
         visningsnavn: String,
         personIdent: String,
     ): ByteArray {
-        val brevRequest = SanityBrevRequestInnhentingAktivitetsplikt(flettefelter = Flettefelter(navn = listOf(visningsnavn), fodselsnummer = listOf(personIdent)))
+        val brevRequest = BrevRequest(flettefelter = Flettefelter(navn = listOf(visningsnavn), fodselsnummer = listOf(personIdent)))
 
         val html =
             brevClient
@@ -104,7 +102,6 @@ class FrittståendeBrevService(
         return familieDokumentClient.genererPdfFraHtml(html)
     }
 
-    // TODO: Bør dette ligge et annet sted?
     fun lagFrittståendeBrevDto(
         saksbehandling: Saksbehandling,
         tittel: String,

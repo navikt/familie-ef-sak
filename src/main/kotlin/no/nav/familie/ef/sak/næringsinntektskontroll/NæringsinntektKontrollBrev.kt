@@ -3,8 +3,10 @@ package no.nav.familie.ef.sak.næringsinntektskontroll
 import no.nav.familie.ef.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.brev.BrevClient
+import no.nav.familie.ef.sak.brev.BrevRequest
 import no.nav.familie.ef.sak.brev.BrevsignaturService.Companion.NAV_ENHET_NAY
 import no.nav.familie.ef.sak.brev.FamilieDokumentClient
+import no.nav.familie.ef.sak.brev.Flettefelter
 import no.nav.familie.ef.sak.brev.FrittståendeBrevService
 import no.nav.familie.ef.sak.brev.VedtaksbrevService
 import no.nav.familie.ef.sak.felles.util.norskFormat
@@ -44,7 +46,7 @@ class NæringsinntektKontrollBrev(
         næringsinntektDataForBeregning: NæringsinntektDataForBeregning,
     ): ByteArray {
         val varselbrevEndretInntekt =
-            VarselbrevEndretInntekt(
+            BrevRequest(
                 lagFlettefelt(næringsinntektDataForBeregning.personIdent, næringsinntektDataForBeregning.forventetInntektIFjor),
             )
 
@@ -70,13 +72,3 @@ class NæringsinntektKontrollBrev(
         return navnOgIdentFlettefelt
     }
 }
-
-data class VarselbrevEndretInntekt(
-    val flettefelter: Flettefelter,
-)
-
-data class Flettefelter(
-    val navn: List<String>,
-    val fodselsnummer: List<String>,
-    val forventetInntekt: List<Int>,
-)
