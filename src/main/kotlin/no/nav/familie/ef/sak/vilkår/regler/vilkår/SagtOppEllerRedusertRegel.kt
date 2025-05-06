@@ -5,6 +5,8 @@ import no.nav.familie.ef.sak.vilkår.regler.NesteRegel
 import no.nav.familie.ef.sak.vilkår.regler.RegelId
 import no.nav.familie.ef.sak.vilkår.regler.RegelSteg
 import no.nav.familie.ef.sak.vilkår.regler.SluttSvarRegel
+import no.nav.familie.ef.sak.vilkår.regler.SvarId
+import no.nav.familie.ef.sak.vilkår.regler.SvarRegel
 import no.nav.familie.ef.sak.vilkår.regler.Vilkårsregel
 import no.nav.familie.ef.sak.vilkår.regler.jaNeiSvarRegel
 import no.nav.familie.ef.sak.vilkår.regler.regelIder
@@ -28,10 +30,17 @@ class SagtOppEllerRedusertRegel :
         private val SAGT_OPP_ELLER_REDUSERT =
             RegelSteg(
                 regelId = RegelId.SAGT_OPP_ELLER_REDUSERT,
-                jaNeiSvarRegel(
+                jaNeiIkkeRelevantSagtOppSvarRegel(
                     hvisJa = NesteRegel(RIMELIG_GRUNN_SAGT_OPP.regelId),
                     hvisNei = SluttSvarRegel.OPPFYLT_MED_VALGFRI_BEGRUNNELSE,
+                    hvisIkkeRelevant = SluttSvarRegel.OPPFYLT_MED_VALGFRI_BEGRUNNELSE,
                 ),
             )
+
+        fun jaNeiIkkeRelevantSagtOppSvarRegel(
+            hvisJa: SvarRegel = SluttSvarRegel.OPPFYLT,
+            hvisNei: SvarRegel = SluttSvarRegel.OPPFYLT_MED_VALGFRI_BEGRUNNELSE,
+            hvisIkkeRelevant: SvarRegel = SluttSvarRegel.OPPFYLT_MED_VALGFRI_BEGRUNNELSE,
+        ): Map<SvarId, SvarRegel> = mapOf(SvarId.JA to hvisJa, SvarId.NEI to hvisNei, SvarId.IKKE_RELEVANT to hvisIkkeRelevant)
     }
 }
