@@ -165,7 +165,6 @@ class OppfølgingsoppgaveService(
     fun sendAutomatiskBrev(
         behandlingId: UUID,
     ) {
-        if (LeaderClient.isLeader() == false) return // Er denne nødvendig?
 
         val automatiskBrev = hentAutomatiskBrevEllerNull(behandlingId)
         val saksbehandling = behandlingService.hentSaksbehandling(behandlingId)
