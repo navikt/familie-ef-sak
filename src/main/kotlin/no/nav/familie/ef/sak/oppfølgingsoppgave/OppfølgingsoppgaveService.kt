@@ -171,10 +171,11 @@ class OppfølgingsoppgaveService(
         val saksbehandling = behandlingService.hentSaksbehandling(behandlingId)
         val personIdent = behandlingService.hentAktivIdent(behandlingId)
 
+        secureLogger.info("---- sendAutomatiskBrev ----: $behandlingId") // TODO: Skal fjernes
         if (automatiskBrev != null) {
             automatiskBrev.brevSomSkalSendes.forEach {
                 val brevmal = brevtittelTilBrevmal(it)
-
+                secureLogger.info("---- automatiskBrev ----: $brevmal")
                 val html =
                     brevClient
                         .genererHtml(
