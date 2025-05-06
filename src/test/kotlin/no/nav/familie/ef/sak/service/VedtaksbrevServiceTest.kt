@@ -22,11 +22,13 @@ import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.mockBrukerContext
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
+import no.nav.familie.ef.sak.oppgave.OppgaveClient
 import no.nav.familie.ef.sak.oppgave.TilordnetRessursService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerService
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
+import no.nav.familie.ef.sak.repository.saksbehandler
 import no.nav.familie.ef.sak.repository.saksbehandling
 import no.nav.familie.ef.sak.repository.vedtak
 import no.nav.familie.ef.sak.vedtak.VedtakService
@@ -49,7 +51,8 @@ internal class VedtaksbrevServiceTest {
     private val vedtaksbrevRepository = mockk<VedtaksbrevRepository>()
     private val personopplysningerService = mockk<PersonopplysningerService>()
     private val vedtakService: VedtakService = mockk<VedtakService>()
-    private val brevsignaturService = BrevsignaturService(personopplysningerService)
+    private val oppgaveClient: OppgaveClient = mockk<OppgaveClient>()
+    private val brevsignaturService = BrevsignaturService(personopplysningerService, oppgaveClient)
     private val familieDokumentClient = mockk<FamilieDokumentClient>()
     private val tilordnetRessursService = mockk<TilordnetRessursService>()
     private val fagsakService = mockk<FagsakService>()
@@ -96,6 +99,7 @@ internal class VedtaksbrevServiceTest {
         every { vedtaksbrevRepository.update(capture(vedtaksbrevSlot)) } returns vedtaksbrev
         every { vedtaksbrevRepository.findByIdOrThrow(any()) } returns vedtaksbrev
         every { familieDokumentClient.genererPdfFraHtml(any()) } returns "123".toByteArray()
+        every { oppgaveClient.hentSaksbehandlerInfo(any()) } returns saksbehandler()
 
         vedtaksbrevService.lagEndeligBeslutterbrev(
             saksbehandling(
@@ -188,7 +192,8 @@ internal class VedtaksbrevServiceTest {
         val brevSlot = slot<Vedtaksbrev>()
         every { vedtaksbrevRepository.update(capture(brevSlot)) } returns mockk()
         every { familieDokumentClient.genererPdfFraHtml(any()) } returns "brev".toByteArray()
-        // Når
+        every { oppgaveClient.hentSaksbehandlerInfo(any()) } returns saksbehandler()
+
         vedtaksbrevService.lagEndeligBeslutterbrev(
             saksbehandling(fagsak, behandlingForBeslutter),
             vedtakKreverBeslutter,
@@ -254,6 +259,7 @@ internal class VedtaksbrevServiceTest {
     @Test
     fun `skal kaste feil hvis saksbehandlerHtml ikke inneholder placeholder for besluttersignatur`() {
         every { vedtaksbrevRepository.findByIdOrThrow(any()) } returns vedtaksbrev.copy(saksbehandlerHtml = "html uten placeholder")
+        every { oppgaveClient.hentSaksbehandlerInfo(any()) } returns saksbehandler()
 
         val feilmelding =
             assertThrows<Feil> {
@@ -281,6 +287,7 @@ internal class VedtaksbrevServiceTest {
         } returns vedtaksbrev.copy(saksbehandlerHtml = "html med placeholder $BESLUTTER_SIGNATUR_PLACEHOLDER og en liten avslutning")
         every { vedtaksbrevRepository.update(any()) } returns vedtaksbrev
         every { familieDokumentClient.genererPdfFraHtml(capture(htmlSlot)) } returns "123".toByteArray()
+        every { oppgaveClient.hentSaksbehandlerInfo(any()) } returns saksbehandler()
 
         vedtaksbrevService.forhåndsvisBeslutterBrev(saksbehandling(fagsak, behandlingForBeslutter))
 
@@ -294,11 +301,12 @@ internal class VedtaksbrevServiceTest {
         val html = "html"
 
         every { fagsakService.hentFagsak(any()) } returns fagsak
-        every { brevClient.genererHtml(any(), any(), any(), any(), any()) } returns html
+        every { brevClient.genererHtml(any(), any(), any(), any(), any(), any()) } returns html
         every { vedtaksbrevRepository.existsById(any()) } returns false
         every { vedtaksbrevRepository.insert(capture(vedtaksbrevSlot)) } returns vedtaksbrev
         every { familieDokumentClient.genererPdfFraHtml(any()) } returns "123".toByteArray()
         every { tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandler(any()) } returns true
+        every { oppgaveClient.hentSaksbehandlerInfo(any()) } returns saksbehandler()
 
         vedtaksbrevService.lagSaksbehandlerSanitybrev(
             saksbehandling(fagsak, behandling),
@@ -315,9 +323,10 @@ internal class VedtaksbrevServiceTest {
         every { fagsakService.hentFagsak(any()) } returns fagsak
         every { vedtaksbrevRepository.existsById(any()) } returns true
         every { vedtaksbrevRepository.update(capture(vedtaksbrevSlot)) } answers { firstArg() }
-        every { brevClient.genererHtml(any(), any(), any(), any(), any()) } returns "html"
+        every { brevClient.genererHtml(any(), any(), any(), any(), any(), any()) } returns "html"
         every { familieDokumentClient.genererPdfFraHtml(any()) } returns "123".toByteArray()
         every { tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandler(any()) } returns true
+        every { oppgaveClient.hentSaksbehandlerInfo(any()) } returns saksbehandler()
 
         val now = SporbarUtils.now()
         vedtaksbrevService.lagSaksbehandlerSanitybrev(
