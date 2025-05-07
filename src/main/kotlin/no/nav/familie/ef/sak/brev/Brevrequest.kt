@@ -5,7 +5,7 @@ data class BrevRequest(
 )
 
 data class Flettefelter(
-    val navn: List<String>? = emptyList(),
+    val navnPerson: List<String>? = emptyList(),
     val fodselsnummer: List<String>? = emptyList(),
     val forventetInntekt: List<Int>? = emptyList(),
 )

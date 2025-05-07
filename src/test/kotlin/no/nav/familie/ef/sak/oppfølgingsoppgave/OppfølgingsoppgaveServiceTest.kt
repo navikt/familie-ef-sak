@@ -12,6 +12,7 @@ import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.oppgaveforopprettelse.OppgaverForOpprettelseRepository
 import no.nav.familie.ef.sak.behandling.oppgaverforferdigstilling.OppgaverForFerdigstillingRepository
 import no.nav.familie.ef.sak.brev.BrevClient
+import no.nav.familie.ef.sak.brev.BrevmottakereService
 import no.nav.familie.ef.sak.brev.FamilieDokumentClient
 import no.nav.familie.ef.sak.brev.FrittståendeBrevService
 import no.nav.familie.ef.sak.felles.util.BehandlingOppsettUtil.iverksattFørstegangsbehandling
@@ -22,6 +23,7 @@ import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.oppfølgingsoppgave.OppfølgingsoppgaveService
 import no.nav.familie.ef.sak.oppfølgingsoppgave.automatiskBrev.AutomatiskBrevRepository
 import no.nav.familie.ef.sak.oppfølgingsoppgave.domain.OppgaverForOpprettelse
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerService
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.saksbehandling
@@ -53,6 +55,8 @@ internal class OppfølgingsoppgaveServiceTest {
     private val familieDokumentClient = mockk<FamilieDokumentClient>()
     private val brevClient = mockk<BrevClient>()
     private val frittståendeBrevService = mockk<FrittståendeBrevService>()
+    private val personopplysningerService = mockk<PersonopplysningerService>()
+    private val brevmottakereService = mockk<BrevmottakereService>()
 
     private var oppfølgingsoppgaveService =
         spyk(
@@ -68,6 +72,8 @@ internal class OppfølgingsoppgaveServiceTest {
                 familieDokumentClient,
                 brevClient,
                 frittståendeBrevService,
+                personopplysningerService,
+                brevmottakereService,
             ),
         )
 

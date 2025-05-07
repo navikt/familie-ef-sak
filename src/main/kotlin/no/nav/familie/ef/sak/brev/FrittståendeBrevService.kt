@@ -86,7 +86,7 @@ class FrittståendeBrevService(
         visningsnavn: String,
         personIdent: String,
     ): ByteArray {
-        val brevRequest = BrevRequest(flettefelter = Flettefelter(navn = listOf(visningsnavn), fodselsnummer = listOf(personIdent)))
+        val brevRequest = BrevRequest(flettefelter = Flettefelter(navnPerson = listOf(visningsnavn), fodselsnummer = listOf(personIdent)))
 
         val html =
             brevClient
@@ -106,9 +106,16 @@ class FrittståendeBrevService(
         saksbehandling: Saksbehandling,
         tittel: String,
         fil: ByteArray,
+        brevmottakere: BrevmottakereDto? = null,
     ): FrittståendeBrevDto {
         val journalførendeEnhet = arbeidsfordelingService.hentNavEnhetIdEllerBrukMaskinellEnhetHvisNull(saksbehandling.ident)
-        val mottakere = lagBrevMottaker(saksbehandling, skalHaSaksbehandlerIdent = true)
+
+        val mottakere: List<Brevmottaker> =
+            if (brevmottakere != null) {
+                validerOgMapBrevmottakere(brevmottakere)
+            } else {
+                lagBrevMottaker(saksbehandling, skalHaSaksbehandlerIdent = true)
+            }
 
         val brevDto =
             FrittståendeBrevDto(

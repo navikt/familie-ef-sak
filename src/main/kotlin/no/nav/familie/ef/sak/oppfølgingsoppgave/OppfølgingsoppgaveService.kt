@@ -7,6 +7,8 @@ import no.nav.familie.ef.sak.behandling.oppgaverforferdigstilling.OppgaverForFer
 import no.nav.familie.ef.sak.behandling.oppgaverforferdigstilling.OppgaverForFerdigstillingRepository
 import no.nav.familie.ef.sak.brev.BrevClient
 import no.nav.familie.ef.sak.brev.BrevRequest
+import no.nav.familie.ef.sak.brev.Brevmal
+import no.nav.familie.ef.sak.brev.BrevmottakereService
 import no.nav.familie.ef.sak.brev.FamilieDokumentClient
 import no.nav.familie.ef.sak.brev.Flettefelter
 import no.nav.familie.ef.sak.brev.FrittståendeBrevService
@@ -22,6 +24,7 @@ import no.nav.familie.ef.sak.oppfølgingsoppgave.automatiskBrev.AutomatiskBrevRe
 import no.nav.familie.ef.sak.oppfølgingsoppgave.domain.AutomatiskBrev
 import no.nav.familie.ef.sak.oppfølgingsoppgave.domain.OppgaverForFerdigstilling
 import no.nav.familie.ef.sak.oppfølgingsoppgave.domain.OppgaverForOpprettelse
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerService
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.vedtak.VedtakService
@@ -49,6 +52,8 @@ class OppfølgingsoppgaveService(
     private val familieDokumentClient: FamilieDokumentClient,
     private val brevClient: BrevClient,
     private val frittståendeBrevService: FrittståendeBrevService,
+    private val personopplysningerService: PersonopplysningerService,
+    private val brevmottakereService: BrevmottakereService,
 ) {
     @Transactional
     fun lagreOppgaveIderForFerdigstilling(
@@ -168,6 +173,8 @@ class OppfølgingsoppgaveService(
         val automatiskBrev = hentAutomatiskBrevEllerNull(behandlingId)
         val saksbehandling = behandlingService.hentSaksbehandling(behandlingId)
         val personIdent = behandlingService.hentAktivIdent(behandlingId)
+        val personNavn = personopplysningerService.hentGjeldeneNavn(listOf(personIdent)).getValue(personIdent)
+        val brevmottakere = brevmottakereService.hentBrevmottakere(behandlingId)
 
         if (automatiskBrev != null) {
             automatiskBrev.brevSomSkalSendes.forEach {
@@ -176,9 +183,9 @@ class OppfølgingsoppgaveService(
                 val html =
                     brevClient
                         .genererHtml(
-                            brevmal = brevmal,
+                            brevmal = brevmal.apiNavn,
                             saksbehandlersignatur = "Vedtaksløsningen",
-                            saksbehandlerBrevrequest = objectMapper.valueToTree(BrevRequest(Flettefelter(navn = listOf(it), fodselsnummer = listOf(personIdent)))),
+                            saksbehandlerBrevrequest = objectMapper.valueToTree(BrevRequest(Flettefelter(navnPerson = listOf(personNavn), fodselsnummer = listOf(personIdent)))),
                             enhet = "Nav arbeid og ytelser",
                             skjulBeslutterSignatur = true,
                             saksbehandlerEnhet = "Nav arbeid og ytelser",
@@ -186,7 +193,7 @@ class OppfølgingsoppgaveService(
 
                 val fil = familieDokumentClient.genererPdfFraHtml(html)
 
-                val brevDto = frittståendeBrevService.lagFrittståendeBrevDto(saksbehandling, it, fil)
+                val brevDto = frittståendeBrevService.lagFrittståendeBrevDto(saksbehandling, it, fil, brevmottakere = brevmottakere)
 
                 iverksettClient.sendFrittståendeBrev(frittståendeBrevDto = brevDto)
             }
@@ -220,11 +227,7 @@ class OppfølgingsoppgaveService(
         oppgaverForFerdigstillingRepository.deleteById(behandlingId)
     }
 
-    private fun brevtittelTilBrevmal(brevtittel: String): String =
-        when (brevtittel) {
-            "Varsel om aktivitetsplikt" -> "varselAktivitetsplikt"
-            else -> brevtittel
-        }
+    fun brevtittelTilBrevmal(brevtittel: String): Brevmal = Brevmal.entries.find { it.visningsnavn == brevtittel } ?: Brevmal.UKJENT
 
     fun hentOppgaverForOpprettelseEllerNull(behandlingId: UUID): OppgaverForOpprettelse? = oppgaverForOpprettelseRepository.findByIdOrNull(behandlingId)
 
