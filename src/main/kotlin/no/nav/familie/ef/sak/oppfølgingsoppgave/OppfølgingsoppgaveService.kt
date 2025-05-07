@@ -22,7 +22,6 @@ import no.nav.familie.ef.sak.oppfølgingsoppgave.automatiskBrev.AutomatiskBrevRe
 import no.nav.familie.ef.sak.oppfølgingsoppgave.domain.AutomatiskBrev
 import no.nav.familie.ef.sak.oppfølgingsoppgave.domain.OppgaverForFerdigstilling
 import no.nav.familie.ef.sak.oppfølgingsoppgave.domain.OppgaverForOpprettelse
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.secureLogger
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.vedtak.VedtakService
@@ -31,7 +30,6 @@ import no.nav.familie.ef.sak.vedtak.dto.SendTilBeslutterDto
 import no.nav.familie.kontrakter.ef.felles.AvslagÅrsak
 import no.nav.familie.kontrakter.ef.iverksett.OppgaveForOpprettelseType
 import no.nav.familie.kontrakter.felles.ef.StønadType
-import no.nav.familie.leader.LeaderClient
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -167,7 +165,6 @@ class OppfølgingsoppgaveService(
     fun sendAutomatiskBrev(
         behandlingId: UUID,
     ) {
-
         val automatiskBrev = hentAutomatiskBrevEllerNull(behandlingId)
         val saksbehandling = behandlingService.hentSaksbehandling(behandlingId)
         val personIdent = behandlingService.hentAktivIdent(behandlingId)
@@ -184,7 +181,7 @@ class OppfølgingsoppgaveService(
                             saksbehandlerBrevrequest = objectMapper.valueToTree(BrevRequest(Flettefelter(navn = listOf(it), fodselsnummer = listOf(personIdent)))),
                             enhet = "Nav arbeid og ytelser",
                             skjulBeslutterSignatur = true,
-                            saksbehandlerEnhet =  "Nav arbeid og ytelser",
+                            saksbehandlerEnhet = "Nav arbeid og ytelser",
                         ).replace(VedtaksbrevService.BESLUTTER_VEDTAKSDATO_PLACEHOLDER, LocalDate.now().norskFormat())
 
                 val fil = familieDokumentClient.genererPdfFraHtml(html)
@@ -223,12 +220,11 @@ class OppfølgingsoppgaveService(
         oppgaverForFerdigstillingRepository.deleteById(behandlingId)
     }
 
-    private fun brevtittelTilBrevmal(brevtittel: String): String {
-        return when (brevtittel) {
+    private fun brevtittelTilBrevmal(brevtittel: String): String =
+        when (brevtittel) {
             "Varsel om aktivitetsplikt" -> "varselAktivitetsplikt"
             else -> brevtittel
         }
-    }
 
     fun hentOppgaverForOpprettelseEllerNull(behandlingId: UUID): OppgaverForOpprettelse? = oppgaverForOpprettelseRepository.findByIdOrNull(behandlingId)
 
