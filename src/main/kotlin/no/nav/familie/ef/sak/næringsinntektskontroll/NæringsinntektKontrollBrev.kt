@@ -68,7 +68,7 @@ class NæringsinntektKontrollBrev(
         forventetInntekt: Int,
     ): Flettefelter {
         val visningsNavn = personopplysningerService.hentGjeldeneNavn(listOf(personIdent)).getValue(personIdent)
-        val navnOgIdentFlettefelt = Flettefelter(navnPerson = listOf(visningsNavn), fodselsnummer = listOf(personIdent), forventetInntekt = listOf(forventetInntekt))
+        val navnOgIdentFlettefelt = Flettefelter(navn = listOf(visningsNavn), fodselsnummer = listOf(personIdent), forventetInntekt = listOf(forventetInntekt))
         return navnOgIdentFlettefelt
     }
 }

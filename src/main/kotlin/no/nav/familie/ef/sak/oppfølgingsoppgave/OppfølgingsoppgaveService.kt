@@ -185,7 +185,7 @@ class OppfølgingsoppgaveService(
                         .genererHtml(
                             brevmal = brevmal.apiNavn,
                             saksbehandlersignatur = "Vedtaksløsningen",
-                            saksbehandlerBrevrequest = objectMapper.valueToTree(BrevRequest(Flettefelter(navnPerson = listOf(personNavn), fodselsnummer = listOf(personIdent)))),
+                            saksbehandlerBrevrequest = objectMapper.valueToTree(BrevRequest(Flettefelter(navn = listOf(personNavn), fodselsnummer = listOf(personIdent)))),
                             enhet = "Nav arbeid og ytelser",
                             skjulBeslutterSignatur = true,
                             saksbehandlerEnhet = "Nav arbeid og ytelser",

@@ -86,7 +86,7 @@ class FrittståendeBrevService(
         visningsnavn: String,
         personIdent: String,
     ): ByteArray {
-        val brevRequest = BrevRequest(flettefelter = Flettefelter(navnPerson = listOf(visningsnavn), fodselsnummer = listOf(personIdent)))
+        val brevRequest = BrevRequest(flettefelter = Flettefelter(navn = listOf(visningsnavn), fodselsnummer = listOf(personIdent)))
 
         val html =
             brevClient

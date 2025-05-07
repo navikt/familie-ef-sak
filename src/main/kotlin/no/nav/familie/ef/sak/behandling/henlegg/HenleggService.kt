@@ -114,7 +114,7 @@ class HenleggService(
 
     private fun lagNavnOgIdentFlettefelt(personIdent: String): Flettefelter {
         val visningsNavn = personopplysningerService.hentGjeldeneNavn(listOf(personIdent)).getValue(personIdent)
-        val navnOgIdentFlettefelt = Flettefelter(navnPerson = listOf(visningsNavn), fodselsnummer = listOf(personIdent))
+        val navnOgIdentFlettefelt = Flettefelter(navn = listOf(visningsNavn), fodselsnummer = listOf(personIdent))
         return navnOgIdentFlettefelt
     }
 
