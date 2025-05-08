@@ -5,11 +5,26 @@ import no.nav.familie.ef.sak.behandling.oppgaveforopprettelse.OppgaverForOpprett
 import no.nav.familie.ef.sak.behandling.oppgaveforopprettelse.OppgaverForOpprettelseRepository
 import no.nav.familie.ef.sak.behandling.oppgaverforferdigstilling.OppgaverForFerdigstillingDto
 import no.nav.familie.ef.sak.behandling.oppgaverforferdigstilling.OppgaverForFerdigstillingRepository
+import no.nav.familie.ef.sak.brev.BrevClient
+import no.nav.familie.ef.sak.brev.BrevRequest
+import no.nav.familie.ef.sak.brev.Brevmal
+import no.nav.familie.ef.sak.brev.BrevmottakereService
+import no.nav.familie.ef.sak.brev.FamilieDokumentClient
+import no.nav.familie.ef.sak.brev.Flettefelter
+import no.nav.familie.ef.sak.brev.FrittståendeBrevService
+import no.nav.familie.ef.sak.brev.VedtaksbrevService
+import no.nav.familie.ef.sak.felles.util.norskFormat
+import no.nav.familie.ef.sak.infrastruktur.config.ObjectMapperProvider.objectMapper
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvisIkke
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
+import no.nav.familie.ef.sak.iverksett.IverksettClient
+import no.nav.familie.ef.sak.oppfølgingsoppgave.automatiskBrev.AutomatiskBrevDto
+import no.nav.familie.ef.sak.oppfølgingsoppgave.automatiskBrev.AutomatiskBrevRepository
+import no.nav.familie.ef.sak.oppfølgingsoppgave.domain.AutomatiskBrev
 import no.nav.familie.ef.sak.oppfølgingsoppgave.domain.OppgaverForFerdigstilling
 import no.nav.familie.ef.sak.oppfølgingsoppgave.domain.OppgaverForOpprettelse
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerService
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.vedtak.VedtakService
@@ -28,10 +43,17 @@ import java.util.UUID
 class OppfølgingsoppgaveService(
     private val oppgaverForFerdigstillingRepository: OppgaverForFerdigstillingRepository,
     private val oppgaverForOpprettelseRepository: OppgaverForOpprettelseRepository,
+    private val automatiskBrevRepository: AutomatiskBrevRepository,
     private val behandlingService: BehandlingService,
     private val tilkjentYtelseService: TilkjentYtelseService,
     private val vedtakService: VedtakService,
     private val featureToggleService: FeatureToggleService,
+    private val iverksettClient: IverksettClient,
+    private val familieDokumentClient: FamilieDokumentClient,
+    private val brevClient: BrevClient,
+    private val frittståendeBrevService: FrittståendeBrevService,
+    private val personopplysningerService: PersonopplysningerService,
+    private val brevmottakereService: BrevmottakereService,
 ) {
     @Transactional
     fun lagreOppgaveIderForFerdigstilling(
@@ -62,6 +84,15 @@ class OppfølgingsoppgaveService(
         }
         oppgaverForOpprettelseRepository.deleteByBehandlingId(behandlingId)
         oppgaverForOpprettelseRepository.insert(OppgaverForOpprettelse(behandlingId, nyeOppgaver, årForInntektskontrollSelvstendigNæringsdrivende))
+    }
+
+    @Transactional
+    fun lagreAutomatiskBrev(
+        behandlingId: UUID,
+        automatiskBrev: List<Brevmal>,
+    ) {
+        automatiskBrevRepository.deleteByBehandlingId(behandlingId)
+        automatiskBrevRepository.insert(AutomatiskBrev(behandlingId, automatiskBrev))
     }
 
     fun hentOppgaverForOpprettelse(
@@ -125,6 +156,50 @@ class OppfølgingsoppgaveService(
         return oppgavetyperSomKanOpprettes
     }
 
+    fun hentAutomatiskBrev(
+        behandlingId: UUID,
+    ): AutomatiskBrevDto {
+        val automatiskBrev = hentAutomatiskBrevEllerNull(behandlingId)
+
+        return AutomatiskBrevDto(
+            behandlingId = behandlingId,
+            brevSomSkalSendes = automatiskBrev?.brevSomSkalSendes ?: emptyList(),
+        )
+    }
+
+    fun sendAutomatiskBrev(
+        behandlingId: UUID,
+    ) {
+        val automatiskBrev = hentAutomatiskBrevEllerNull(behandlingId)
+        val saksbehandling = behandlingService.hentSaksbehandling(behandlingId)
+        val personIdent = behandlingService.hentAktivIdent(behandlingId)
+        val personNavn = personopplysningerService.hentGjeldeneNavn(listOf(personIdent)).getValue(personIdent)
+        val brevmottakere = brevmottakereService.hentBrevmottakere(behandlingId)
+
+        if (automatiskBrev != null) {
+            automatiskBrev.brevSomSkalSendes.forEach {
+                val html =
+                    brevClient
+                        .genererHtml(
+                            brevmal = it.apiNavn,
+                            saksbehandlersignatur = "Vedtaksløsningen",
+                            saksbehandlerBrevrequest = objectMapper.valueToTree(BrevRequest(Flettefelter(navn = listOf(personNavn), fodselsnummer = listOf(personIdent)))),
+                            enhet = "Nav arbeid og ytelser",
+                            skjulBeslutterSignatur = true,
+                            saksbehandlerEnhet = "Nav arbeid og ytelser",
+                        ).replace(VedtaksbrevService.BESLUTTER_VEDTAKSDATO_PLACEHOLDER, LocalDate.now().norskFormat())
+
+                val fil = familieDokumentClient.genererPdfFraHtml(html)
+
+                val brevDto = frittståendeBrevService.lagFrittståendeBrevDto(saksbehandling, it.tittel, fil, brevmottakere = brevmottakere)
+
+                iverksettClient.sendFrittståendeBrev(frittståendeBrevDto = brevDto)
+            }
+
+            automatiskBrevRepository.deleteByBehandlingId(behandlingId)
+        }
+    }
+
     private fun hentSisteTilkjentYtelse(fagsakId: UUID): TilkjentYtelse? {
         val sisteIverksatteBehandling = behandlingService.finnSisteIverksatteBehandling(fagsakId)
         return sisteIverksatteBehandling?.let {
@@ -153,4 +228,6 @@ class OppfølgingsoppgaveService(
     fun hentOppgaverForOpprettelseEllerNull(behandlingId: UUID): OppgaverForOpprettelse? = oppgaverForOpprettelseRepository.findByIdOrNull(behandlingId)
 
     fun hentOppgaverForFerdigstillingEllerNull(behandlingId: UUID): OppgaverForFerdigstilling? = oppgaverForFerdigstillingRepository.findByIdOrNull(behandlingId)
+
+    fun hentAutomatiskBrevEllerNull(behandlingId: UUID): AutomatiskBrev? = automatiskBrevRepository.findByIdOrNull(behandlingId)
 }

@@ -18,6 +18,7 @@ import no.nav.familie.ef.sak.behandlingsflyt.task.FerdigstillFremleggsoppgaverTa
 import no.nav.familie.ef.sak.behandlingsflyt.task.FerdigstillOppgaveTask
 import no.nav.familie.ef.sak.behandlingsflyt.task.OpprettOppgaveTask
 import no.nav.familie.ef.sak.behandlingsflyt.task.PollStatusFraIverksettTask
+import no.nav.familie.ef.sak.behandlingsflyt.task.SendAutomatiskBrevTask
 import no.nav.familie.ef.sak.brev.VedtaksbrevService
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
@@ -148,8 +149,9 @@ internal class BeslutteVedtakStegTest {
         assertThat(taskSlot[0].type).isEqualTo(FerdigstillOppgaveTask.TYPE)
         assertThat(taskSlot[1].type).isEqualTo(PollStatusFraIverksettTask.TYPE)
         assertThat(taskSlot[2].type).isEqualTo(FerdigstillFremleggsoppgaverTask.TYPE)
-        assertThat(taskSlot[3].type).isEqualTo(BehandlingsstatistikkTask.TYPE)
-        assertThat(objectMapper.readValue<BehandlingsstatistikkTaskPayload>(taskSlot[3].payload).hendelse)
+        assertThat(taskSlot[3].type).isEqualTo(SendAutomatiskBrevTask.TYPE)
+        assertThat(taskSlot[4].type).isEqualTo(BehandlingsstatistikkTask.TYPE)
+        assertThat(objectMapper.readValue<BehandlingsstatistikkTaskPayload>(taskSlot[4].payload).hendelse)
             .isEqualTo(Hendelse.BESLUTTET)
         verify(exactly = 1) {
             behandlingService.oppdaterResultatPåBehandling(
