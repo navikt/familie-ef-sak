@@ -33,14 +33,14 @@ class SagtOppEllerRedusertRegel :
                 jaNeiIkkeRelevantSagtOppSvarRegel(
                     hvisJa = NesteRegel(RIMELIG_GRUNN_SAGT_OPP.regelId),
                     hvisNei = SluttSvarRegel.OPPFYLT_MED_VALGFRI_BEGRUNNELSE,
-                    hvisIkkeRelevant = SluttSvarRegel.OPPFYLT_MED_VALGFRI_BEGRUNNELSE,
+                    hvisIkkeRelevantIkkeFørstegangssøknad = SluttSvarRegel.OPPFYLT_MED_VALGFRI_BEGRUNNELSE,
                 ),
             )
 
         fun jaNeiIkkeRelevantSagtOppSvarRegel(
             hvisJa: SvarRegel = SluttSvarRegel.OPPFYLT,
             hvisNei: SvarRegel = SluttSvarRegel.OPPFYLT_MED_VALGFRI_BEGRUNNELSE,
-            hvisIkkeRelevant: SvarRegel = SluttSvarRegel.OPPFYLT_MED_VALGFRI_BEGRUNNELSE,
-        ): Map<SvarId, SvarRegel> = mapOf(SvarId.JA to hvisJa, SvarId.NEI to hvisNei, SvarId.IKKE_RELEVANT to hvisIkkeRelevant)
+            hvisIkkeRelevantIkkeFørstegangssøknad: SvarRegel = SluttSvarRegel.OPPFYLT,
+        ): Map<SvarId, SvarRegel> = mapOf(SvarId.JA to hvisJa, SvarId.NEI to hvisNei, SvarId.IKKE_RELEVANT_IKKE_FØRSTEGANGSSØKNAD to hvisIkkeRelevantIkkeFørstegangssøknad)
     }
 }

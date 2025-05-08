@@ -47,5 +47,5 @@ enum class SvarId {
     BRUKER_MOTTAR_IKKE_OVERGANGSSTØNAD,
 
     // Sagt opp arbeidsforhold
-    IKKE_RELEVANT,
+    IKKE_RELEVANT_IKKE_FØRSTEGANGSSØKNAD,
 }
