@@ -178,7 +178,6 @@ class OppfølgingsoppgaveService(
 
         if (automatiskBrev != null) {
             automatiskBrev.brevSomSkalSendes.forEach {
-
                 val html =
                     brevClient
                         .genererHtml(
