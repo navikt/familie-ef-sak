@@ -30,7 +30,7 @@ class AutomatiskRevurderingServiceTest {
     val behandlingServiceMock = mockk<BehandlingService>(relaxed = true)
     val oppgaveServiceMock = mockk<OppgaveService>(relaxed = true)
     val vedtakServiceMock = mockk<VedtakService>(relaxed = true)
-    val automatiskRevurderingService = AutomatiskRevurderingService(mockk(relaxed = true), mockk(relaxed = true), behandlingServiceMock, oppgaveServiceMock, mockk(relaxed = true), mockk(relaxed = true), vedtakServiceMock)
+    val automatiskRevurderingService = AutomatiskRevurderingService(mockk(relaxed = true), mockk(relaxed = true), behandlingServiceMock, oppgaveServiceMock, mockk(relaxed = true), mockk(relaxed = true), vedtakServiceMock, mockk(relaxed = true))
 
     @Test
     fun `person med behandling som kan automatisk revurderes`() {
@@ -98,7 +98,7 @@ class AutomatiskRevurderingServiceTest {
         val inntekter = inntekterFørsteTreMåneder + inntekterMånedFireTilSeks + inntekterSyvTilNi + inntekterSisteTreMåneder
         val inntektResponse = InntektResponse(inntekter)
 
-        val månedOgInntektMed10ProsentØkning = inntektResponse.førsteMånedOgInntektMed10ProsentØkning()
+        val månedOgInntektMed10ProsentØkning = inntektResponse.førsteMånedOgInntektMed10ProsentØkning(YearMonth.now().minusMonths(9))
 
         assertThat(månedOgInntektMed10ProsentØkning).isNotNull
         assertThat(månedOgInntektMed10ProsentØkning?.first).isEqualTo(YearMonth.now().minusMonths(6))
@@ -115,7 +115,7 @@ class AutomatiskRevurderingServiceTest {
         val inntekter = inntekterSisteTreMånederOvergangsstønad + inntekterSisteTreMånederFastlønn + inntekterSisteTreMånederFastlønn2 + inntekterFraSeksMånederTilTreMånederSidenFastlønn
         val inntektResponse = InntektResponse(inntekter)
 
-        val inntekterUtenOvergangsstønad = inntektResponse.inntektsmånederUtenEfYtelser()
+        val inntekterUtenOvergangsstønad = inntektResponse.inntektsmånederUtenEfYtelser(YearMonth.now().minusMonths(6))
         val forventetInntekt = inntektResponse.forventetMånedsinntekt()
 
         assertThat(inntekterUtenOvergangsstønad.size).isEqualTo(9)

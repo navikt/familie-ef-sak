@@ -17,6 +17,7 @@ class FeatureToggleController(
         setOf(
             Toggle.BEHANDLING_KORRIGERING,
             Toggle.FRONTEND_VIS_IKKE_PUBLISERTE_BREVMALER,
+            Toggle.FRONTEND_KOPIER_KNAPP_ERROR_ALERT,
             Toggle.OPPRETT_BEHANDLING_FERDIGSTILT_JOURNALPOST,
             Toggle.FRONTEND_AUTOMATISK_UTFYLLE_VILKÅR,
             Toggle.FRONTEND_SATSENDRING,

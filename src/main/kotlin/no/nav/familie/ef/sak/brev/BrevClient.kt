@@ -2,6 +2,7 @@ package no.nav.familie.ef.sak.brev
 
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.familie.ef.sak.blankett.BlankettPdfRequest
+import no.nav.familie.ef.sak.brev.VedtaksbrevService.Companion.BESLUTTER_ENHET_PLACEHOLDER
 import no.nav.familie.ef.sak.brev.VedtaksbrevService.Companion.BESLUTTER_SIGNATUR_PLACEHOLDER
 import no.nav.familie.ef.sak.brev.VedtaksbrevService.Companion.BESLUTTER_VEDTAKSDATO_PLACEHOLDER
 import no.nav.familie.ef.sak.brev.domain.FRITEKST
@@ -30,10 +31,12 @@ class BrevClient(
         operations.optionsForAllow(pingUri)
     }
 
+    // TODO: Fjern enhet
     fun genererHtml(
         brevmal: String,
         saksbehandlerBrevrequest: JsonNode,
         saksbehandlersignatur: String,
+        saksbehandlerEnhet: String?,
         enhet: String?,
         skjulBeslutterSignatur: Boolean,
     ): String {
@@ -48,7 +51,9 @@ class BrevClient(
             BrevRequestMedSignaturer(
                 brevFraSaksbehandler = saksbehandlerBrevrequest,
                 saksbehandlersignatur = saksbehandlersignatur,
+                saksbehandlerEnhet = saksbehandlerEnhet,
                 besluttersignatur = BESLUTTER_SIGNATUR_PLACEHOLDER,
+                beslutterEnhet = BESLUTTER_ENHET_PLACEHOLDER,
                 enhet = enhet,
                 skjulBeslutterSignatur = skjulBeslutterSignatur,
                 datoPlaceholder = BESLUTTER_VEDTAKSDATO_PLACEHOLDER,
@@ -80,7 +85,9 @@ class BrevClient(
 data class BrevRequestMedSignaturer(
     val brevFraSaksbehandler: JsonNode,
     val saksbehandlersignatur: String,
+    val saksbehandlerEnhet: String?,
     val besluttersignatur: String?,
+    val beslutterEnhet: String?,
     val enhet: String?,
     val skjulBeslutterSignatur: Boolean,
     val datoPlaceholder: String,

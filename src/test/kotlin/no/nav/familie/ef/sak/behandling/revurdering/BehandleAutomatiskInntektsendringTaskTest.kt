@@ -115,8 +115,9 @@ class BehandleAutomatiskInntektsendringTaskTest : OppslagSpringRunnerTest() {
         val førsteFom = vedtaksperioder?.first()?.periode?.fom
         val inntektsperioder = vedtak.inntekter?.inntekter
 
-        assertThat(førsteFom).isEqualTo(YearMonth.now().minusMonths(2)) // Revurderes fra
-        assertThat(inntektsperioder?.first()?.inntekt?.toInt()).isEqualTo(35_000)
+        // Har ikke mocket inntekt-response, revurderes fra-dato blir derfor satt lik som fradato i forrige behandling
+        assertThat(førsteFom).isEqualTo(YearMonth.of(2025, 1))
+        assertThat(inntektsperioder?.first()?.inntekt?.toInt()).isEqualTo(420_000)
 
         val opprettOppgaveTask = taskService.findAll().first { it.type == OpprettOppgaveForOpprettetBehandlingTask.TYPE }
         val data = objectMapper.readValue<OpprettOppgaveTaskData>(opprettOppgaveTask.payload)
