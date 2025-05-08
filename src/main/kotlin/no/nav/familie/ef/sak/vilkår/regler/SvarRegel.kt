@@ -63,12 +63,6 @@ class SluttSvarRegel private constructor(
                 resultat = Resultat.IKKE_OPPFYLT,
                 begrunnelseType = BegrunnelseType.VALGFRI,
             )
-
-        val OPPFYLT_UTEN_BEGRUNNELSE =
-            SluttSvarRegel(
-                resultat = Resultat.OPPFYLT,
-                begrunnelseType = BegrunnelseType.UTEN,
-            )
     }
 }
 
