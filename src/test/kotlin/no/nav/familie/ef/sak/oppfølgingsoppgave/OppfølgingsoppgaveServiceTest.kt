@@ -11,12 +11,19 @@ import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.oppgaveforopprettelse.OppgaverForOpprettelseRepository
 import no.nav.familie.ef.sak.behandling.oppgaverforferdigstilling.OppgaverForFerdigstillingRepository
+import no.nav.familie.ef.sak.brev.BrevClient
+import no.nav.familie.ef.sak.brev.BrevmottakereService
+import no.nav.familie.ef.sak.brev.FamilieDokumentClient
+import no.nav.familie.ef.sak.brev.FrittståendeBrevService
 import no.nav.familie.ef.sak.felles.util.BehandlingOppsettUtil.iverksattFørstegangsbehandling
 import no.nav.familie.ef.sak.felles.util.BehandlingOppsettUtil.iverksattRevurdering
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
+import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.oppfølgingsoppgave.OppfølgingsoppgaveService
+import no.nav.familie.ef.sak.oppfølgingsoppgave.automatiskBrev.AutomatiskBrevRepository
 import no.nav.familie.ef.sak.oppfølgingsoppgave.domain.OppgaverForOpprettelse
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerService
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.saksbehandling
@@ -43,16 +50,30 @@ internal class OppfølgingsoppgaveServiceTest {
     private val vedtakService = mockk<VedtakService>()
     private val featureToggleService = mockk<FeatureToggleService>()
     private val oppgaverForFerdigstillingRepository = mockk<OppgaverForFerdigstillingRepository>()
+    private val automatiskBrevRepository = mockk<AutomatiskBrevRepository>()
+    private val iverksettClient = mockk<IverksettClient>()
+    private val familieDokumentClient = mockk<FamilieDokumentClient>()
+    private val brevClient = mockk<BrevClient>()
+    private val frittståendeBrevService = mockk<FrittståendeBrevService>()
+    private val personopplysningerService = mockk<PersonopplysningerService>()
+    private val brevmottakereService = mockk<BrevmottakereService>()
 
     private var oppfølgingsoppgaveService =
         spyk(
             OppfølgingsoppgaveService(
                 oppgaverForFerdigstillingRepository,
                 oppgaverForOpprettelseRepository,
+                automatiskBrevRepository,
                 behandlingService,
                 tilkjentYtelseService,
                 vedtakService,
                 featureToggleService,
+                iverksettClient,
+                familieDokumentClient,
+                brevClient,
+                frittståendeBrevService,
+                personopplysningerService,
+                brevmottakereService,
             ),
         )
 

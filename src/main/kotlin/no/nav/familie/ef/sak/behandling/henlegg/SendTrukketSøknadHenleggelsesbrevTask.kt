@@ -3,12 +3,10 @@ package no.nav.familie.ef.sak.behandling.henlegg
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.familie.ef.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ef.sak.behandling.BehandlingService
-import no.nav.familie.ef.sak.behandling.Saksbehandling
+import no.nav.familie.ef.sak.brev.FrittståendeBrevService
 import no.nav.familie.ef.sak.iverksett.IverksettClient
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerService
 import no.nav.familie.kontrakter.ef.felles.FrittståendeBrevDto
 import no.nav.familie.kontrakter.ef.felles.FrittståendeBrevType
-import no.nav.familie.kontrakter.ef.iverksett.Brevmottaker
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
@@ -29,7 +27,7 @@ class SendTrukketSøknadHenleggelsesbrevTask(
     private val henleggService: HenleggService,
     private val iverksettClient: IverksettClient,
     private val arbeidsfordelingService: ArbeidsfordelingService,
-    private val personopplysningerService: PersonopplysningerService,
+    private val frittståendeBrevService: FrittståendeBrevService,
 ) : AsyncTaskStep {
     override fun doTask(task: Task) {
         val henleggelsesbrevDto = objectMapper.readValue<HenleggelsesbrevDto>(task.payload)
@@ -43,6 +41,8 @@ class SendTrukketSøknadHenleggelsesbrevTask(
                 saksbehandlerIdent = saksbehandlerIdent,
             )
 
+        val mottakere = frittståendeBrevService.lagBrevMottaker(saksbehandling = saksbehandling, skalHaSaksbehandlerIdent = true)
+
         val hennleggbrevDto =
             FrittståendeBrevDto(
                 personIdent = saksbehandling.ident,
@@ -53,20 +53,10 @@ class SendTrukketSøknadHenleggelsesbrevTask(
                 fil = henleggBrev,
                 journalførendeEnhet = journalførendeEnhet,
                 saksbehandlerIdent = saksbehandlerIdent,
-                mottakere = lagBrevMottaker(saksbehandling),
+                mottakere = mottakere,
             )
         iverksettClient.sendFrittståendeBrev(frittståendeBrevDto = hennleggbrevDto)
     }
-
-    private fun lagBrevMottaker(saksbehandling: Saksbehandling) =
-        listOf(
-            Brevmottaker(
-                ident = saksbehandling.ident,
-                navn = personopplysningerService.hentGjeldeneNavn(listOf(saksbehandling.ident)).getValue(saksbehandling.ident),
-                mottakerRolle = Brevmottaker.MottakerRolle.BRUKER,
-                identType = Brevmottaker.IdentType.PERSONIDENT,
-            ),
-        )
 
     companion object {
         fun opprettTask(

@@ -6,8 +6,8 @@ import no.nav.familie.ef.sak.behandling.dto.HenlagtDto
 import no.nav.familie.ef.sak.brev.BrevClient
 import no.nav.familie.ef.sak.brev.BrevsignaturService
 import no.nav.familie.ef.sak.brev.FamilieDokumentClient
+import no.nav.familie.ef.sak.brev.Flettefelter
 import no.nav.familie.ef.sak.brev.VedtaksbrevService
-import no.nav.familie.ef.sak.brev.dto.Flettefelter
 import no.nav.familie.ef.sak.felles.util.norskFormat
 import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerService
