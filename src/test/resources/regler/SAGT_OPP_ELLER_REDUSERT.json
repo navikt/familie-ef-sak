@@ -13,7 +13,7 @@
           "regelId" : "SLUTT_NODE"
         },
         "IKKE_RELEVANT_IKKE_FØRSTEGANGSSØKNAD" : {
-          "begrunnelseType" : "VALGFRI",
+          "begrunnelseType" : "UTEN",
           "regelId" : "SLUTT_NODE"
         }
       },
