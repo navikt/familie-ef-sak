@@ -98,6 +98,14 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
     }
 
     @Test
+    fun `skal finne alle personer med aktiv stønad uten krav til tid siden forrige innvilgelse - brukes i preprod for testing`() {
+        val fagsak = lagrePersonMedVedtak("2", 0)
+        val resultat = behandlingRepository.finnPersonerMedAktivStonadIkkeRevurdertSisteMåneder(antallMåneder = 0)
+        assertThat(resultat.size).isEqualTo(1)
+        assertThat(resultat).containsAll(listOf("2"))
+    }
+
+    @Test
     fun `skal finne ferdigstilte behandlinger med utdatert G-beløp som må behandles manuelt`() {
         lagrePersonMedVedtak("2", 3)
         val resultat = behandlingRepository.finnFerdigstilteBehandlingerMedUtdatertGBelopSomMåBehandlesManuelt(Grunnbeløpsperioder.nyesteGrunnbeløp.periode.fomDato)
