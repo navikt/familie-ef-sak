@@ -89,7 +89,7 @@ class OppfølgingsoppgaveService(
     @Transactional
     fun lagreAutomatiskBrev(
         behandlingId: UUID,
-        automatiskBrev: List<String>,
+        automatiskBrev: List<Brevmal>,
     ) {
         automatiskBrevRepository.deleteByBehandlingId(behandlingId)
         automatiskBrevRepository.insert(AutomatiskBrev(behandlingId, automatiskBrev))
@@ -178,12 +178,11 @@ class OppfølgingsoppgaveService(
 
         if (automatiskBrev != null) {
             automatiskBrev.brevSomSkalSendes.forEach {
-                val brevmal = brevtittelTilBrevmal(it)
 
                 val html =
                     brevClient
                         .genererHtml(
-                            brevmal = brevmal.apiNavn,
+                            brevmal = it.apiNavn,
                             saksbehandlersignatur = "Vedtaksløsningen",
                             saksbehandlerBrevrequest = objectMapper.valueToTree(BrevRequest(Flettefelter(navn = listOf(personNavn), fodselsnummer = listOf(personIdent)))),
                             enhet = "Nav arbeid og ytelser",
@@ -193,7 +192,7 @@ class OppfølgingsoppgaveService(
 
                 val fil = familieDokumentClient.genererPdfFraHtml(html)
 
-                val brevDto = frittståendeBrevService.lagFrittståendeBrevDto(saksbehandling, it, fil, brevmottakere = brevmottakere)
+                val brevDto = frittståendeBrevService.lagFrittståendeBrevDto(saksbehandling, it.tittel, fil, brevmottakere = brevmottakere)
 
                 iverksettClient.sendFrittståendeBrev(frittståendeBrevDto = brevDto)
             }
@@ -226,8 +225,6 @@ class OppfølgingsoppgaveService(
         oppgaverForOpprettelseRepository.deleteById(behandlingId)
         oppgaverForFerdigstillingRepository.deleteById(behandlingId)
     }
-
-    fun brevtittelTilBrevmal(brevtittel: String): Brevmal = Brevmal.entries.find { it.visningsnavn == brevtittel } ?: Brevmal.UKJENT
 
     fun hentOppgaverForOpprettelseEllerNull(behandlingId: UUID): OppgaverForOpprettelse? = oppgaverForOpprettelseRepository.findByIdOrNull(behandlingId)
 
