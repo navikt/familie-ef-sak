@@ -38,6 +38,8 @@ data class Inntektsperiode(
             (this.dagsats ?: BigDecimal.ZERO).multiply(BeregningUtils.DAGSATS_ANTALL_DAGER) +
             (this.månedsinntekt ?: BigDecimal.ZERO).multiply(BeregningUtils.ANTALL_MÅNEDER_ÅR)
 
+    fun avledForventetMånedsinntekt(): Int = totalinntekt().toInt() / 12
+
     /**
      * Dersom den eksisterende årsinntekten er g-omregnet til nærmeste 100,
      * så skal vi ikke nedjustere denne til nærmeste 1000
