@@ -20,6 +20,7 @@ import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.fagsakpersoner
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
+import no.nav.familie.ef.sak.repository.inntektsperiode
 import no.nav.familie.ef.sak.repository.lagInntektResponseFraMånedsinntekter
 import no.nav.familie.ef.sak.repository.lagInntektResponseFraMånedsinntekterFraDouble
 import no.nav.familie.ef.sak.repository.vedtak
@@ -154,7 +155,7 @@ class BehandleAutomatiskInntektsendringTaskTest : OppslagSpringRunnerTest() {
         // Vedtak fra August 2024 -> Juli 2027
         // Inntektsperioder: August 54 534, September 39129
         // Beregnet ny forventet inntekt: 43796
-        val innmeldtMånedsinntekt = listOf(54534.36, 39129.14, 36361.58, 37609.86, 41796.68, 43213.59, 44122.90, 44052.95, 43213.59)
+        val innmeldtMånedsinntekt = listOf(54534.36, 39129.14, 36361.58, 37609.86, 41796.68, 43213.59, 44122.90, 44052.95, 43213.59) // Inntekt 43213.59 er 10% over forventet inntekt, altså 4 mnd siden.
         val vedtakTom = YearMonth.now().plusMonths(11)
 
         val forventetInntektIVedtak =
@@ -171,6 +172,17 @@ class BehandleAutomatiskInntektsendringTaskTest : OppslagSpringRunnerTest() {
         assertThat(oppdatertVedtakMedNyePerioder.first().periode.tom).isEqualTo(vedtakTom)
 
         val oppdatertInntekt = behandleAutomatiskInntektsendringTask.oppdaterInntektMedNyBeregnetForventetInntekt(vedtak, inntektResponse, oppdatertVedtakMedNyePerioder.first().periode.fom)
-        assertThat(oppdatertInntekt.size).isEqualTo(3)
+        assertThat(oppdatertInntekt.size).isEqualTo(4)
+
+        val gjennomsnittSiste3Mnd = (44122.90 + 44052.95 + 43213.59) / 3
+
+        val forventedeInntektsperioderINyttVedtak = listOf(
+            inntektsperiode(Månedsperiode(YearMonth.now().minusMonths(3), YearMonth.now().minusMonths(3)), BigDecimal(44122)),
+            inntektsperiode(Månedsperiode(YearMonth.now().minusMonths(2), YearMonth.now().minusMonths(2)), BigDecimal(44052)),
+            inntektsperiode(Månedsperiode(YearMonth.now().minusMonths(1), YearMonth.now().minusMonths(1)), BigDecimal(43213)),
+            inntektsperiode(Månedsperiode(YearMonth.now(), vedtakTom), BigDecimal(gjennomsnittSiste3Mnd.toInt())),
+        )
+
+        assertThat(forventedeInntektsperioderINyttVedtak).isEqualTo(oppdatertInntekt)
     }
 }

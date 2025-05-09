@@ -9,6 +9,7 @@ import no.nav.familie.ef.sak.beregning.Inntektsperiode
 import no.nav.familie.ef.sak.beregning.tilInntekt
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
+import no.nav.familie.ef.sak.felles.util.isEqualOrBefore
 import no.nav.familie.ef.sak.infrastruktur.config.ObjectMapperProvider.objectMapper
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
@@ -159,7 +160,7 @@ class BehandleAutomatiskInntektsendringTask(
         if (revurderesFra.isBefore(YearMonth.now())) {
             val inntektsperioder =
                 generateSequence(revurderesFra) { it.plusMonths(1) }
-                    .takeWhile { it.isBefore(YearMonth.now().minusMonths(1)) }
+                    .takeWhile { it.isEqualOrBefore(YearMonth.now().minusMonths(1)) }
                     .map {
                         Inntektsperiode(
                             periode = Månedsperiode(it, it),
