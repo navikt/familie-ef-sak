@@ -6,6 +6,7 @@ import no.nav.familie.ef.sak.vilkår.dto.VurderingDto
 import no.nav.familie.ef.sak.vilkår.regler.RegelId
 import no.nav.familie.ef.sak.vilkår.regler.SvarId
 import no.nav.familie.ef.sak.vilkår.regler.vilkår.AlderPåBarnRegel
+import no.nav.familie.ef.sak.vilkår.regler.vilkår.SagtOppEllerRedusertRegel
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
@@ -51,6 +52,27 @@ internal class RegelEvalueringTest {
         assertThat(regelResultat.delvilkår.keys.first()).isEqualTo(RegelId.HAR_ALDER_LAVERE_ENN_GRENSEVERDI)
         assertThat(regelResultat.delvilkår.values.size).isEqualTo(1)
         assertThat(regelResultat.delvilkår.values.first()).isEqualTo(Vilkårsresultat.OPPFYLT)
+    }
+
+    @Test
+    fun `utledVilkårResultat - utledResultat skal gi OPPFYLT når delvilkår er OK`() {
+        val vurderingDto = VurderingDto(RegelId.SAGT_OPP_ELLER_REDUSERT, SvarId.JA, null)
+        val vurderingDto2 = VurderingDto(RegelId.RIMELIG_GRUNN_SAGT_OPP, SvarId.NEI, "Begrunnelse")
+
+        val delvilkår = DelvilkårsvurderingDto(Vilkårsresultat.IKKE_TATT_STILLING_TIL, listOf(vurderingDto, vurderingDto2))
+
+        val regelResultat = RegelEvaluering.utledResultat(SagtOppEllerRedusertRegel(), listOf(delvilkår))
+
+        assertThat(regelResultat.vilkår).isEqualTo(Vilkårsresultat.IKKE_OPPFYLT)
+
+        val vurderingDtoOK = VurderingDto(RegelId.SAGT_OPP_ELLER_REDUSERT, SvarId.IKKE_RELEVANT_IKKE_FØRSTEGANGSSØKNAD, null)
+        val vurderingDtoURelevant = VurderingDto(RegelId.RIMELIG_GRUNN_SAGT_OPP, SvarId.NEI, "Begrunnelse")
+
+        val delvilkårOK = DelvilkårsvurderingDto(Vilkårsresultat.IKKE_TATT_STILLING_TIL, listOf(vurderingDtoOK, vurderingDtoURelevant))
+
+        val regelResultat2 = RegelEvaluering.utledResultat(SagtOppEllerRedusertRegel(), listOf(delvilkårOK))
+
+        assertThat(regelResultat2.vilkår).isEqualTo(Vilkårsresultat.OPPFYLT)
     }
 
     @Test
