@@ -21,6 +21,7 @@ import no.nav.familie.ef.sak.vedtak.historikk.VedtakHistorikkService
 import no.nav.familie.ef.sak.vilkår.VurderingService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
+import no.nav.familie.leader.Environment
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
@@ -55,6 +56,7 @@ class VedtakController(
     private val nullstillVedtakService: NullstillVedtakService,
     private val angreSendTilBeslutterService: AngreSendTilBeslutterService,
     private val tilordnetRessursService: TilordnetRessursService,
+    private val environment: org.springframework.core.env.Environment,
 ) {
     private val logger = LoggerFactory.getLogger(javaClass)
 
@@ -218,7 +220,12 @@ class VedtakController(
     @ProtectedWithClaims(issuer = "azuread", claimMap = ["roles=access_as_application"]) // Familie-ef-personhendelse bruker denne
     fun hentPersonerMedAktivStonadIkkeManueltRevurdertSisteToMåneder(
         @RequestParam antallMaaneder: Int = 3,
-    ): Ressurs<List<String>> = Ressurs.success(behandlingRepository.finnPersonerMedAktivStonadIkkeRevurdertSisteMåneder(antallMåneder = antallMaaneder))
+    ): Ressurs<List<String>> =
+        if (environment.activeProfiles.contains("prod")) {
+            Ressurs.success(behandlingRepository.finnPersonerMedAktivStonadIkkeRevurdertSisteMåneder(antallMåneder = antallMaaneder))
+        } else {
+            Ressurs.success(behandlingRepository.finnPersonerMedAktivStonadIkkeRevurdertSisteMåneder(antallMåneder = 0))
+        }
 
     @PostMapping("/gjeldendeIverksatteBehandlingerMedInntekt")
     @ProtectedWithClaims(issuer = "azuread", claimMap = ["roles=access_as_application"]) // Familie-ef-personhendelse bruker denne

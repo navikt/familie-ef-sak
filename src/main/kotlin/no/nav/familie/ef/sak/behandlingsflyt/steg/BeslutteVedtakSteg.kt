@@ -9,6 +9,7 @@ import no.nav.familie.ef.sak.behandlingsflyt.task.FerdigstillOppgaveTask
 import no.nav.familie.ef.sak.behandlingsflyt.task.OpprettOppgaveTask
 import no.nav.familie.ef.sak.behandlingsflyt.task.OpprettOppgaveTask.OpprettOppgaveTaskData
 import no.nav.familie.ef.sak.behandlingsflyt.task.PollStatusFraIverksettTask
+import no.nav.familie.ef.sak.behandlingsflyt.task.SendAutomatiskBrevTask
 import no.nav.familie.ef.sak.brev.VedtaksbrevService
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
@@ -68,7 +69,9 @@ class BeslutteVedtakSteg(
             oppdaterResultatPåBehandling(saksbehandling.id)
             opprettPollForStatusOppgave(saksbehandling.id)
             opprettTaskForFerdigstillFremleggsoppgaver(saksbehandling.id)
+            opprettTaskSendAutomatiskBrev(saksbehandling.id)
             opprettTaskForBehandlingsstatistikk(saksbehandling.id, oppgaveId)
+
             if (saksbehandling.skalIkkeSendeBrev) {
                 iverksettClient.iverksettUtenBrev(iverksettDto)
             } else {
@@ -87,6 +90,16 @@ class BeslutteVedtakSteg(
         taskService.save(
             FerdigstillFremleggsoppgaverTask.opprettTask(
                 behandlingId,
+            ),
+        )
+    }
+
+    private fun opprettTaskSendAutomatiskBrev(
+        behandlingId: UUID,
+    ) {
+        taskService.save(
+            SendAutomatiskBrevTask.opprettTask(
+                behandlingId = behandlingId,
             ),
         )
     }
