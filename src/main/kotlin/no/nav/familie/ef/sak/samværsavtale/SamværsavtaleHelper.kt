@@ -1,10 +1,10 @@
 package no.nav.familie.ef.sak.samværsavtale
 
+import no.nav.familie.ef.sak.blankett.BeregnetSamvær
 import no.nav.familie.ef.sak.brev.dto.Avsnitt
 import no.nav.familie.ef.sak.samværsavtale.domain.Samværsandel
 import no.nav.familie.ef.sak.samværsavtale.domain.Samværsavtale
 import no.nav.familie.ef.sak.samværsavtale.domain.Samværsuke
-import no.nav.familie.ef.sak.samværsavtale.dto.BeregnetSamvær
 import no.nav.familie.ef.sak.samværsavtale.dto.tilDto
 import no.nav.familie.ef.sak.samværsavtale.dto.tilSamværsandelerPerDag
 import java.math.BigDecimal
