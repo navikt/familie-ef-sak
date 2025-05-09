@@ -1,6 +1,6 @@
 package no.nav.familie.ef.sak.brev.dto
 
-data class FritekstBrevRequestMedSignatur(
+data class FritekstBrevMedSignaturRequest(
     val brevFraSaksbehandler: FritekstBrevRequestDto,
     val saksbehandlersignatur: String,
     val enhet: String,
