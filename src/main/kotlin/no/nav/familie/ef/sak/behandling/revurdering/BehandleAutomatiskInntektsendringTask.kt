@@ -117,14 +117,10 @@ class BehandleAutomatiskInntektsendringTask(
         val behandling = behandlingService.finnSisteIverksatteBehandlingMedEventuellAvslått(fagsak.id)
         if (behandling != null) {
             val forrigeVedtak = vedtakService.hentVedtak(behandling.id)
-            forrigeVedtak
-                .perioder
-                ?.perioder
-                ?.firstOrNull()
-                ?.periode
-                ?.fom ?: YearMonth.now()
-
-            logger.info("Toggle for automatisering av inntekt er AV. Ville opprettet revurdering for fagsak eksternId=${fagsak.eksternId} med en forventetInntekt på $forventetInntekt og revurdert fra dato: ${inntektResponse.revurderesFraDato(forrigeVedtak)}")
+            val perioder = oppdaterFørsteVedtaksperiodeMedRevurderesFraDato(forrigeVedtak, inntektResponse)
+            val inntektsperioder = oppdaterInntektMedNyBeregnetForventetInntekt(forrigeVedtak, inntektResponse, perioder.first().periode.fom)
+            logger.info("Ville opprettet inntektsperioder for fagsak eksternId: ${fagsak.eksternId} - nye inntektsperioder: " + inntektsperioder)
+            logger.info("Ville opprettet følgende vedtaksperioder for fagsak eksternId: ${fagsak.eksternId} - nye vedtaksperioder: $perioder med ny forventet månedsinntekt: $forventetInntekt")
         } else {
             logger.info("Fant ikke siste iverksatte behandling for fagsakId: ${fagsak.id}")
         }
