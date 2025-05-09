@@ -176,12 +176,13 @@ class BehandleAutomatiskInntektsendringTaskTest : OppslagSpringRunnerTest() {
 
         val gjennomsnittSiste3Mnd = (44122.90 + 44052.95 + 43213.59) / 3
 
-        val forventedeInntektsperioderINyttVedtak = listOf(
-            inntektsperiode(Månedsperiode(YearMonth.now().minusMonths(3), YearMonth.now().minusMonths(3)), BigDecimal(44122)),
-            inntektsperiode(Månedsperiode(YearMonth.now().minusMonths(2), YearMonth.now().minusMonths(2)), BigDecimal(44052)),
-            inntektsperiode(Månedsperiode(YearMonth.now().minusMonths(1), YearMonth.now().minusMonths(1)), BigDecimal(43213)),
-            inntektsperiode(Månedsperiode(YearMonth.now(), vedtakTom), BigDecimal(gjennomsnittSiste3Mnd.toInt())),
-        )
+        val forventedeInntektsperioderINyttVedtak =
+            listOf(
+                inntektsperiode(Månedsperiode(YearMonth.now().minusMonths(3), YearMonth.now().minusMonths(3)), BigDecimal(44122)),
+                inntektsperiode(Månedsperiode(YearMonth.now().minusMonths(2), YearMonth.now().minusMonths(2)), BigDecimal(44052)),
+                inntektsperiode(Månedsperiode(YearMonth.now().minusMonths(1), YearMonth.now().minusMonths(1)), BigDecimal(43213)),
+                inntektsperiode(Månedsperiode(YearMonth.now(), vedtakTom), BigDecimal(gjennomsnittSiste3Mnd.toInt())),
+            )
 
         assertThat(forventedeInntektsperioderINyttVedtak).isEqualTo(oppdatertInntekt)
     }
