@@ -2,6 +2,7 @@ package no.nav.familie.ef.sak.ekstern
 
 import no.nav.familie.ef.sak.AuditLoggerEvent
 import no.nav.familie.ef.sak.ekstern.stønadsperiode.EksternStønadsperioderService
+import no.nav.familie.ef.sak.infotrygd.EfInternPerioderMedAktivitet
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.PersonIdent
@@ -106,4 +107,38 @@ class EksternStønadsperioderController(
             secureLogger.error("Kunne ikke hente perioder for $request", e)
             Ressurs.failure("Henting av perioder for overgangsstønad feilet", error = e)
         }
+
+    /**
+     * Brukes av arbeidsoppfølging TODO: implementer
+     */
+    @PostMapping("perioder-aktivitet")
+    fun hentPerioderForYtelserMedAktivitet(
+        @RequestBody request: EksternePerioderForStønadstyperRequest,
+    ): Ressurs<EfInternPerioderMedAktivitet?> =
+        try {
+            Ressurs.success(eksternStønadsperioderService.hentPerioderForYtelserMedAktivitet(request))
+        } catch (e: Exception) {
+            secureLogger.error("Kunne ikke hente perioder for $request", e)
+            Ressurs.failure("Henting av perioder for overgangsstønad feilet", error = e)
+        }
+//  Når vi iverksetter overgangsstønad til arbeidsoppfølging, så sender vi melding til kafka.:
+//    VedtakOvergangsstønadArbeidsoppfølging(
+//    vedtakId = iverksett.behandling.eksternId, // NOPE
+//    personIdent = iverksett.søker.personIdent, // TRENGER De denne?
+//    barn = iverksett.søker.barn.map { Barn(it.personIdent, it.termindato) }, // NØDVENDIG? grunnlagsdatabarn kan være annerledes, men ikke noe om hvilket barn som utløser
+//    stønadstype = Stønadstype.valueOf(iverksett.fagsak.stønadstype.name), // NØDVENDIG? UTVIDE SENERE?
+//    vedtaksresultat = Vedtaksresultat.valueOf(iverksett.vedtak.vedtaksresultat.name), NOPE
+//    periode = mapToVedtaksperioder(iverksett.vedtak),
+
+//    public final val barn: kotlin.collections.List<no.nav.familie.eksterne.kontrakter.arbeidsoppfolging.Barn> /* compiled code */
+//
+//    public final val periode: kotlin.collections.List<no.nav.familie.eksterne.kontrakter.arbeidsoppfolging.Periode> /* compiled code */
+//
+//    public final val personIdent: kotlin.String /* compiled code */
+//
+//    public final val stønadstype: no.nav.familie.eksterne.kontrakter.arbeidsoppfolging.Stønadstype /* compiled code */
+//
+//    public final val vedtakId: kotlin.Long /* compiled code */
+//
+//    public final val vedtaksresultat: no.nav.familie.eksterne.kontrakter.arbeidsoppfolging.Vedtaksresultat /* compiled code */
 }

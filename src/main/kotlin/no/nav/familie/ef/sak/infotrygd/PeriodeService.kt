@@ -9,7 +9,10 @@ import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.ef.sak.tilkjentytelse.domain.AndelTilkjentYtelse
 import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.vedtak.VedtakService
+import no.nav.familie.ef.sak.vedtak.domain.Vedtak
+import no.nav.familie.ef.sak.vedtak.domain.Vedtaksperiode
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPeriode
+import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.kontrakter.felles.ef.Datakilde
 import no.nav.familie.kontrakter.felles.ef.EksternPeriodeMedStønadstype
 import no.nav.familie.kontrakter.felles.ef.StønadType
@@ -102,13 +105,64 @@ class PeriodeService(
                 EfInternPerioder(startdato, internperioder)
             }
 
+    // TODO gjør denne private og kall ny metode som slår sammen med infotrygdperioder
+    fun hentPerioderFraEfMedAktivitet(
+        personIdenter: Set<String>,
+        stønadstype: StønadType,
+    ): EfInternPerioderMedAktivitet? =
+        fagsakService
+            .finnFagsak(personIdenter, stønadstype)
+            ?.let { behandlingService.finnSisteIverksatteBehandling(it.id) }
+            ?.let { behandling ->
+                val tilkjentYtelse = tilkjentYtelseService.hentForBehandling(behandling.id)
+                val internperioder = tilInternPeriodeMedAktivitet(tilkjentYtelse)
+                val startdato = tilkjentYtelse.startdato
+                EfInternPerioderMedAktivitet(startdato, internperioder)
+            }
+
     private fun tilInternPeriode(tilkjentYtelse: TilkjentYtelse) =
         tilkjentYtelse.andelerTilkjentYtelse
             .map(AndelTilkjentYtelse::tilInternPeriode)
             // trenger å sortere de revers pga filtrerOgSorterPerioderFraInfotrygd gjør det,
             // då vi ønsker de sortert på siste hendelsen først
             .sortedWith(compareBy<InternPeriode> { it.stønadFom }.reversed())
+
+    private fun tilInternPeriodeMedAktivitet(tilkjentYtelse: TilkjentYtelse): List<InternPeriodeMedAktivitet> {
+
+        // TODO mattis - mulig vi må sortede denne også
+        return tilkjentYtelse.andelerTilkjentYtelse.map { andel -> lagInternPeriodeMedAktivitet(andel) }
+    }
+
+    private fun lagInternPeriodeMedAktivitet(andel: AndelTilkjentYtelse): InternPeriodeMedAktivitet {
+
+        val vedtak : Vedtak = vedtakService.hentVedtak(andel.kildeBehandlingId)
+        val vedtaksperioder : List<Vedtaksperiode> = vedtak.perioder?.perioder?.filter { it.periodeType != no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType.MIDLERTIDIG_OPPHØR } ?: emptyList()
+
+        // TODO TEST!!!
+        val vedtaksperiodeSomMatcherMedAndel = vedtaksperioder.find {
+            andel.periode.overlapper(it.månedsPeriode())
+        }
+
+        return InternPeriodeMedAktivitet(
+            personIdent = andel.personIdent,
+            inntektsreduksjon = andel.inntektsreduksjon,
+            samordningsfradrag = andel.samordningsfradrag,
+            utgifterBarnetilsyn = 0, // andel.utgifterBarnetilsyn TODO
+            månedsbeløp = andel.beløp,
+            engangsbeløp = andel.beløp,
+            stønadFom = andel.stønadFom,
+            stønadTom = andel.stønadTom,
+            opphørsdato = null,
+            datakilde = Datakilde.EF,
+            aktivitet = vedtaksperiodeSomMatcherMedAndel?.aktivitet,
+            periodeType = vedtaksperiodeSomMatcherMedAndel?.periodeType,
+        )
+    }
 }
+
+private fun Vedtaksperiode.månedsPeriode() =
+    Månedsperiode(datoFra, datoTil)
+
 
 private fun AndelTilkjentYtelse.tilInternPeriode(): InternPeriode =
     InternPeriode(
@@ -123,6 +177,12 @@ private fun AndelTilkjentYtelse.tilInternPeriode(): InternPeriode =
         opphørsdato = null,
         datakilde = Datakilde.EF,
     )
+
+private fun Vedtaksperiode.getPeriode(): Månedsperiode {
+    return Månedsperiode(this.datoFra, datoTil)
+}
+
+
 
 fun InfotrygdPeriode.tilInternPeriode(): InternPeriode =
     InternPeriode(
