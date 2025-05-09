@@ -8,8 +8,8 @@ import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.brev.BrevClient
 import no.nav.familie.ef.sak.brev.BrevsignaturService
 import no.nav.familie.ef.sak.brev.dto.Avsnitt
-import no.nav.familie.ef.sak.brev.dto.FritekstBrevRequestDto
 import no.nav.familie.ef.sak.brev.dto.FritekstBrevMedSignaturRequest
+import no.nav.familie.ef.sak.brev.dto.FritekstBrevRequestDto
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
@@ -18,7 +18,7 @@ import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.journalføring.JournalpostClient
 import no.nav.familie.ef.sak.oppgave.TilordnetRessursService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerService
-import no.nav.familie.ef.sak.samværsavtale.SamværsavtaleHelper.lagAvsnittFritekstbrev
+import no.nav.familie.ef.sak.samværsavtale.SamværsavtaleHelper.lagAvsnitt
 import no.nav.familie.ef.sak.samværsavtale.domain.Samværsavtale
 import no.nav.familie.ef.sak.samværsavtale.domain.SamværsukeWrapper
 import no.nav.familie.ef.sak.samværsavtale.dto.JournalførBeregnetSamværRequest
@@ -154,7 +154,7 @@ class SamværsavtaleService(
                 navn = personopplysningerService.hentGjeldeneNavn(listOf(request.personIdent)).getValue(request.personIdent),
                 avsnitt =
                     request.uker.mapIndexed { ukeIndex, samværsuke ->
-                        lagAvsnittFritekstbrev(ukeIndex + 1, samværsuke)
+                        lagAvsnitt(ukeIndex + 1, samværsuke)
                     } + Avsnitt(deloverskrift = "Oppsummering", innhold = request.oppsummering) +
                         Avsnitt(
                             deloverskrift = "Notat",
