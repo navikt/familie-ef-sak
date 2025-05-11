@@ -1,6 +1,7 @@
 package no.nav.familie.ef.sak.blankett
 
 import no.nav.familie.ef.sak.behandling.dto.ÅrsakRevurderingDto
+import no.nav.familie.ef.sak.brev.dto.Avsnitt
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.KontantstøttePeriode
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadDatoerDto
 import no.nav.familie.ef.sak.samværsavtale.dto.SamværsavtaleDto
@@ -10,6 +11,7 @@ import no.nav.familie.ef.sak.vilkår.dto.VilkårDto
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import java.time.LocalDate
+import java.util.UUID
 
 data class BlankettPdfRequest(
     val behandling: BlankettPdfBehandling,
@@ -19,6 +21,7 @@ data class BlankettPdfRequest(
     val søknadsdatoer: SøknadDatoerDto?,
     val harAvsluttetArbeidsforhold: Boolean?,
     val samværsavtaler: List<SamværsavtaleDto>,
+    val beregnetSamvær: List<BeregnetSamvær>,
 )
 
 data class BlankettPdfBehandling(
@@ -34,4 +37,10 @@ data class BlankettPdfBehandling(
 data class PersonopplysningerDto(
     val navn: String,
     val personIdent: String,
+)
+
+data class BeregnetSamvær(
+    val behandlingBarnId: UUID,
+    val uker: List<Avsnitt>,
+    val oppsummering: String,
 )
