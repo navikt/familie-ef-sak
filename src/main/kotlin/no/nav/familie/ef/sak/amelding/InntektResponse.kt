@@ -2,7 +2,6 @@ package no.nav.familie.ef.sak.amelding
 
 import com.fasterxml.jackson.annotation.JsonProperty
 import no.nav.familie.ef.sak.felles.util.isEqualOrAfter
-import no.nav.familie.ef.sak.felles.util.isEqualOrBefore
 import no.nav.familie.ef.sak.vedtak.domain.Vedtak
 import java.time.LocalDate
 import java.time.OffsetDateTime
@@ -21,12 +20,12 @@ data class InntektResponse(
 
     fun totalInntektForÅrMåned(årMåned: YearMonth): Int =
         inntektsmånederUtenEfYtelser(årMåned)
-            .filter { it.måned.isEqualOrAfter(årMåned) && it.måned.isEqualOrBefore(årMåned) }
+            .filter { it.måned == årMåned }
             .flatMap { it.inntektListe }
             .sumOf { it.beløp }
             .toInt()
 
-    fun førsteMånedOgInntektMed10ProsentØkning(forrigeVedtak: Vedtak): YearMonth {
+    fun førsteMånedMed10ProsentInntektsøkning(forrigeVedtak: Vedtak): YearMonth {
         val innmeldtInntektList =
             inntektsmånederUtenEfYtelser(
                 forrigeVedtak.perioder
@@ -67,7 +66,7 @@ data class InntektResponse(
 
     fun forventetÅrsinntekt() = forventetMånedsinntekt() * 12
 
-    fun revurderesFraDato(forrigeVedtak: Vedtak) = førsteMånedOgInntektMed10ProsentØkning(forrigeVedtak)
+    fun revurderesFraDato(forrigeVedtak: Vedtak) = førsteMånedMed10ProsentInntektsøkning(forrigeVedtak)
 
     val harTreForrigeInntektsmåneder =
         inntektsmåneder

@@ -135,7 +135,7 @@ class BehandleAutomatiskInntektsendringTask(
             førstePeriode?.copy(
                 datoFra =
                     inntektResponse
-                        .førsteMånedOgInntektMed10ProsentØkning(forrigeVedtak)
+                        .førsteMånedMed10ProsentInntektsøkning(forrigeVedtak)
                         .atDay(1)
                         ?.plusMonths(1) ?: førstePeriode.datoFra,
             ) as Vedtaksperiode
@@ -155,12 +155,12 @@ class BehandleAutomatiskInntektsendringTask(
     ): List<Inntektsperiode> {
         if (revurderesFra.isBefore(YearMonth.now())) {
             val inntektsperioder =
-                generateSequence(revurderesFra) { it.plusMonths(1) }
-                    .takeWhile { it.isEqualOrBefore(YearMonth.now().minusMonths(1)) }
-                    .map {
+                generateSequence(revurderesFra) { måned -> måned.plusMonths(1) }
+                    .takeWhile { måned -> måned.isEqualOrBefore(YearMonth.now().minusMonths(1)) }
+                    .map { måned ->
                         Inntektsperiode(
-                            periode = Månedsperiode(it, it),
-                            månedsinntekt = BigDecimal(inntektResponse.totalInntektForÅrMåned(it)),
+                            periode = Månedsperiode(måned),
+                            månedsinntekt = BigDecimal(inntektResponse.totalInntektForÅrMåned(måned)),
                             inntekt = BigDecimal(0),
                             samordningsfradrag = BigDecimal(0),
                         )
