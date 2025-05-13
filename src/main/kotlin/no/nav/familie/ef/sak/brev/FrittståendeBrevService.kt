@@ -50,7 +50,6 @@ class FrittståendeBrevService(
                     saksbehandlerBrevrequest = brevrequest,
                     saksbehandlersignatur = signatur.navn,
                     saksbehandlerEnhet = signatur.enhet,
-                    enhet = signatur.enhet,
                     skjulBeslutterSignatur = signatur.skjulBeslutter,
                 ).replace(VedtaksbrevService.BESLUTTER_VEDTAKSDATO_PLACEHOLDER, LocalDate.now().norskFormat())
 
@@ -95,7 +94,6 @@ class FrittståendeBrevService(
                     saksbehandlerBrevrequest = objectMapper.valueToTree(brevRequest),
                     saksbehandlersignatur = "",
                     saksbehandlerEnhet = NAV_ENHET_NAY,
-                    enhet = NAV_ENHET_NAY,
                     skjulBeslutterSignatur = true,
                 ).replace(VedtaksbrevService.BESLUTTER_VEDTAKSDATO_PLACEHOLDER, LocalDate.now().norskFormat())
 

@@ -184,7 +184,6 @@ class OppfølgingsoppgaveService(
                             brevmal = it.apiNavn,
                             saksbehandlersignatur = "Vedtaksløsningen",
                             saksbehandlerBrevrequest = objectMapper.valueToTree(BrevRequest(Flettefelter(navn = listOf(personNavn), fodselsnummer = listOf(personIdent)))),
-                            enhet = "Nav arbeid og ytelser",
                             skjulBeslutterSignatur = true,
                             saksbehandlerEnhet = "Nav arbeid og ytelser",
                         ).replace(VedtaksbrevService.BESLUTTER_VEDTAKSDATO_PLACEHOLDER, LocalDate.now().norskFormat())
