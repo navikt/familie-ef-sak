@@ -106,6 +106,7 @@ class VurderingController(
 
         val (_, metadata) = vurderingService.hentGrunnlagOgMetadata(request.behandlingId)
         val gjenbruktVilkårResponse = gjenbrukVilkårService.gjenbrukInngangsvilkårVurderingOgSamværsavtale(request.behandlingId, behandlingForGjenbruk.id, request.vilkårId, metadata.barn)
+        vurderingStegService.oppdaterStegOgKategoriPåBehandling(request.behandlingId)
         return Ressurs.success(gjenbruktVilkårResponse.tilDto())
     }
 

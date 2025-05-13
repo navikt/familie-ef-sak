@@ -87,7 +87,7 @@ class VurderingStegService(
         return oppdatertVilkår
     }
 
-    private fun oppdaterStegOgKategoriPåBehandling(behandlingId: UUID) {
+    fun oppdaterStegOgKategoriPåBehandling(behandlingId: UUID) {
         val saksbehandling = behandlingService.hentSaksbehandling(behandlingId)
         val lagredeVilkårsvurderinger = vilkårsvurderingRepository.findByBehandlingId(behandlingId)
 
@@ -104,7 +104,7 @@ class VurderingStegService(
                 if (it.key.gjelderFlereBarn()) {
                     utledResultatForVilkårSomGjelderFlereBarn(it.value)
                 } else {
-                    it.value.single().resultat
+                    it.value.first().resultat
                 }
             }
 
