@@ -104,7 +104,7 @@ class VurderingStegService(
                 if (it.key.gjelderFlereBarn()) {
                     utledResultatForVilkårSomGjelderFlereBarn(it.value)
                 } else {
-                    it.value.first().resultat
+                    it.value.single().resultat
                 }
             }
 
