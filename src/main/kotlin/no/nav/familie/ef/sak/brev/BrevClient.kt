@@ -31,13 +31,11 @@ class BrevClient(
         operations.optionsForAllow(pingUri)
     }
 
-    // TODO: Fjern enhet
     fun genererHtml(
         brevmal: String,
         saksbehandlerBrevrequest: JsonNode,
         saksbehandlersignatur: String,
         saksbehandlerEnhet: String?,
-        enhet: String?,
         skjulBeslutterSignatur: Boolean,
     ): String {
         feilHvis(brevmal === FRITEKST) {
@@ -54,7 +52,6 @@ class BrevClient(
                 saksbehandlerEnhet = saksbehandlerEnhet,
                 besluttersignatur = BESLUTTER_SIGNATUR_PLACEHOLDER,
                 beslutterEnhet = BESLUTTER_ENHET_PLACEHOLDER,
-                enhet = enhet,
                 skjulBeslutterSignatur = skjulBeslutterSignatur,
                 datoPlaceholder = BESLUTTER_VEDTAKSDATO_PLACEHOLDER,
             ),
@@ -88,7 +85,6 @@ data class BrevRequestMedSignaturer(
     val saksbehandlerEnhet: String?,
     val besluttersignatur: String?,
     val beslutterEnhet: String?,
-    val enhet: String?,
     val skjulBeslutterSignatur: Boolean,
     val datoPlaceholder: String,
 )
