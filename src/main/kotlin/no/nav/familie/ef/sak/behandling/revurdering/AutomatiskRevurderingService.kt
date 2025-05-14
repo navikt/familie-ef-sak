@@ -83,7 +83,7 @@ class AutomatiskRevurderingService(
         }
 
         val vedtak = vedtakService.hentVedtak(sisteIverksatteBehandlingId)
-        if (vedtak.perioder?.perioder?.size != 1 && vedtak.inntekter?.inntekter?.size != 1) { // Denne valideringen kan fjernes når logikken for å sette revurderes fra-dato er forbedret
+        if (vedtak.perioder?.perioder?.size != 1) { // Denne valideringen kan fjernes når logikken for å sette revurderes fra-dato er forbedret
             logger.info("behandlingId: $sisteIverksatteBehandlingId har flere vedtaksperioder og kan derfor ikke automatisk revurderes")
             return false
         }
