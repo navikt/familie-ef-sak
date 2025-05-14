@@ -123,9 +123,7 @@ class PeriodeService(
             ?.let { behandlingService.finnSisteIverksatteBehandling(it.id) }
             ?.let { behandling ->
                 val tilkjentYtelse = tilkjentYtelseService.hentForBehandling(behandling.id)
-                // val internperioder =
                 tilArbeidsoppfølgingsPeriode(tilkjentYtelse)
-                // LøpendePerioderMedAktivitetOgBehandlingsbarn(internperioder)
             } ?: emptyList()
 
     private fun tilInternPeriode(tilkjentYtelse: TilkjentYtelse) =
