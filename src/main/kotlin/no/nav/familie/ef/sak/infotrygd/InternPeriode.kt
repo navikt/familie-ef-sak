@@ -19,30 +19,23 @@ data class EfInternPerioder(
     val internperioder: List<InternPeriode>,
 )
 
-/**
- * Holder for å sette startdato fra tilkjent ytelse sammen med internperioder
- */
-data class EfInternPerioderMedAktivitet(
-    val startdato: LocalDate,
-    val internperioder: List<InternPeriodeMedAktivitet>,
+data class LøpendeOvergangsstønadPerioderMedAktivitetOgBehandlingsbarn(
+    val personIdent: Set<String>,
+    val internperioder: List<ArbeidsoppfølgingsPeriodeMedAktivitetOgBarn>,
 )
 
-/**
- * Brukes for å mappe interne ef-perioder og infotrygd perioder til ett felles format
- */
-data class InternPeriodeMedAktivitet(
-    val personIdent: String,
-    val inntektsreduksjon: Int,
-    val samordningsfradrag: Int,
-    val utgifterBarnetilsyn: Int,
-    val månedsbeløp: Int,
-    val engangsbeløp: Int,
-    val stønadFom: LocalDate,
-    val stønadTom: LocalDate,
-    val opphørsdato: LocalDate?,
-    val datakilde: Datakilde,
+data class ArbeidsoppfølgingsPeriodeMedAktivitetOgBarn(
+    val stønadFraOgMed: LocalDate,
+    val stønadTilOgMed: LocalDate,
     val aktivitet: AktivitetType?,
     val periodeType: VedtaksperiodeType?,
+    val barn: List<BehandlingsbarnMedOppfyltAleneomsorg>,
+    val behandlingId: Long,
+)
+
+data class BehandlingsbarnMedOppfyltAleneomsorg(
+    val personIdent: String?,
+    val fødselTermindato: LocalDate?,
 )
 
 /**

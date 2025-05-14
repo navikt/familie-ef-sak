@@ -1,9 +1,10 @@
 package no.nav.familie.ef.sak.ekstern.stønadsperiode
 
 import no.nav.familie.ef.sak.ekstern.stønadsperiode.util.ArenaPeriodeUtil
-import no.nav.familie.ef.sak.infotrygd.EfInternPerioderMedAktivitet
 import no.nav.familie.ef.sak.infotrygd.InternPeriode
+import no.nav.familie.ef.sak.infotrygd.LøpendeOvergangsstønadPerioderMedAktivitetOgBehandlingsbarn
 import no.nav.familie.ef.sak.infotrygd.PeriodeService
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
 import no.nav.familie.kontrakter.felles.Datoperiode
 import no.nav.familie.kontrakter.felles.ef.EksternPeriode
 import no.nav.familie.kontrakter.felles.ef.EksternPeriodeMedBeløp
@@ -19,6 +20,7 @@ import java.time.LocalDate
 @Service
 class EksternStønadsperioderService(
     private val periodeService: PeriodeService,
+    private val personService: PersonService,
 ) {
     /**
      * Brukes av arena: OBS: fom/tom-dato begrenses til DAGENS dato dersom det ikke er satt!
@@ -114,10 +116,15 @@ class EksternStønadsperioderService(
             }
     }
 
-    fun hentPerioderForYtelserMedAktivitet(request: EksternePerioderForStønadstyperRequest): EfInternPerioderMedAktivitet? {
-        return periodeService.hentPerioderFraEfMedAktivitet(
-            personIdenter = setOf(request.personIdent),
-           stønadstype =  StønadType.OVERGANGSSTØNAD,
-        )
+    fun hentPerioderForOSMedAktivitet(personIdent: String): LøpendeOvergangsstønadPerioderMedAktivitetOgBehandlingsbarn {
+        val personIdenter: Set<String> = hentIdenterFraPdl(personIdent)
+        val perioderMedAktivitetOgBehandlingsbarn = periodeService.hentLøpendeOvergangsstønadPerioderMedAktivitetOgBehandlingsbarn(personIdenter = personIdenter)
+        return LøpendeOvergangsstønadPerioderMedAktivitetOgBehandlingsbarn(setOf(personIdent) ,perioderMedAktivitetOgBehandlingsbarn)
     }
+
+    private fun hentIdenterFraPdl(personIdent: String): Set<String> = personService
+        .hentPersonIdenter(personIdent)
+        .identer
+        .map { it.ident }
+        .toSet()
 }

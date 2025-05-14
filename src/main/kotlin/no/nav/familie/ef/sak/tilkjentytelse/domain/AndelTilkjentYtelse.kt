@@ -1,6 +1,5 @@
 package no.nav.familie.ef.sak.tilkjentytelse.domain
 
-import no.nav.familie.ef.sak.vedtak.domain.Vedtaksperiode
 import no.nav.familie.kontrakter.felles.Månedsperiode
 import org.springframework.data.relational.core.mapping.Column
 import java.time.LocalDate

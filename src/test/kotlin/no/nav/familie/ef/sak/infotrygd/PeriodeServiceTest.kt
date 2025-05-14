@@ -2,6 +2,7 @@ package no.nav.familie.ef.sak.infotrygd
 
 import io.mockk.every
 import io.mockk.mockk
+import no.nav.familie.ef.sak.barn.BarnService
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.fagsak.FagsakService
@@ -15,6 +16,7 @@ import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.ef.sak.tilkjentytelse.domain.AndelTilkjentYtelse
 import no.nav.familie.ef.sak.vedtak.VedtakService
+import no.nav.familie.ef.sak.vilkår.VilkårsvurderingRepository
 import no.nav.familie.ef.sak.økonomi.lagAndelTilkjentYtelse
 import no.nav.familie.ef.sak.økonomi.lagTilkjentYtelse
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPeriode
@@ -34,6 +36,8 @@ internal class PeriodeServiceTest {
     private val tilkjentYtelseService = mockk<TilkjentYtelseService>()
     private val replikaClient = mockk<InfotrygdReplikaClient>()
     private val vedtakService = mockk<VedtakService>()
+    private val vilkårsvurderingRepository = mockk<VilkårsvurderingRepository>()
+    private val barnService = mockk<BarnService>()
 
     private val service =
         PeriodeService(
@@ -43,6 +47,8 @@ internal class PeriodeServiceTest {
             tilkjentYtelseService = tilkjentYtelseService,
             infotrygdService = InfotrygdService(replikaClient, personService),
             vedtakService = vedtakService,
+            vilkårsvurderingRepository = vilkårsvurderingRepository,
+            barnService = barnService,
         )
 
     private val personIdent = "123"

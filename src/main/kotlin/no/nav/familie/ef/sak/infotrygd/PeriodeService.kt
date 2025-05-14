@@ -1,5 +1,7 @@
 package no.nav.familie.ef.sak.infotrygd
 
+import no.nav.familie.ef.sak.barn.BarnService
+import no.nav.familie.ef.sak.barn.BehandlingBarn
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.infotrygd.InternPeriodeUtil.slåSammenPerioder
@@ -11,12 +13,18 @@ import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.ef.sak.vedtak.domain.Vedtak
 import no.nav.familie.ef.sak.vedtak.domain.Vedtaksperiode
+import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
+import no.nav.familie.ef.sak.vilkår.VilkårType
+import no.nav.familie.ef.sak.vilkår.Vilkårsresultat
+import no.nav.familie.ef.sak.vilkår.VilkårsvurderingRepository
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPeriode
 import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.kontrakter.felles.ef.Datakilde
 import no.nav.familie.kontrakter.felles.ef.EksternPeriodeMedStønadstype
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.springframework.stereotype.Component
+import java.time.LocalDate
+import java.util.UUID
 
 @Component
 class PeriodeService(
@@ -26,6 +34,8 @@ class PeriodeService(
     private val tilkjentYtelseService: TilkjentYtelseService,
     private val infotrygdService: InfotrygdService,
     private val vedtakService: VedtakService,
+    private val vilkårsvurderingRepository: VilkårsvurderingRepository,
+    private val barnService: BarnService,
 ) {
     fun hentPerioderFraEfOgInfotrygd(personIdent: String): InternePerioder {
         val personIdenter = personService.hentPersonIdenter(personIdent).identer()
@@ -105,20 +115,18 @@ class PeriodeService(
                 EfInternPerioder(startdato, internperioder)
             }
 
-    // TODO gjør denne private og kall ny metode som slår sammen med infotrygdperioder
-    fun hentPerioderFraEfMedAktivitet(
+    fun hentLøpendeOvergangsstønadPerioderMedAktivitetOgBehandlingsbarn(
         personIdenter: Set<String>,
-        stønadstype: StønadType,
-    ): EfInternPerioderMedAktivitet? =
+    ): List<ArbeidsoppfølgingsPeriodeMedAktivitetOgBarn> =
         fagsakService
-            .finnFagsak(personIdenter, stønadstype)
+            .finnFagsak(personIdenter, StønadType.OVERGANGSSTØNAD)
             ?.let { behandlingService.finnSisteIverksatteBehandling(it.id) }
             ?.let { behandling ->
                 val tilkjentYtelse = tilkjentYtelseService.hentForBehandling(behandling.id)
-                val internperioder = tilInternPeriodeMedAktivitet(tilkjentYtelse)
-                val startdato = tilkjentYtelse.startdato
-                EfInternPerioderMedAktivitet(startdato, internperioder)
-            }
+                // val internperioder =
+                tilArbeidsoppfølgingsPeriode(tilkjentYtelse)
+                // LøpendePerioderMedAktivitetOgBehandlingsbarn(internperioder)
+            } ?: emptyList()
 
     private fun tilInternPeriode(tilkjentYtelse: TilkjentYtelse) =
         tilkjentYtelse.andelerTilkjentYtelse
@@ -127,42 +135,61 @@ class PeriodeService(
             // då vi ønsker de sortert på siste hendelsen først
             .sortedWith(compareBy<InternPeriode> { it.stønadFom }.reversed())
 
-    private fun tilInternPeriodeMedAktivitet(tilkjentYtelse: TilkjentYtelse): List<InternPeriodeMedAktivitet> {
+    private fun tilArbeidsoppfølgingsPeriode(tilkjentYtelse: TilkjentYtelse): List<ArbeidsoppfølgingsPeriodeMedAktivitetOgBarn> =
+        tilkjentYtelse.andelerTilkjentYtelse
+            .filter { erAktuelPeriodeForOppfølging(andel = it) }
+            .mapNotNull { andel -> lagInternPeriodeMedAktivitet(andel) }
+            .sortedBy { it.stønadFraOgMed }
 
-        // TODO mattis - mulig vi må sortede denne også
-        return tilkjentYtelse.andelerTilkjentYtelse.map { andel -> lagInternPeriodeMedAktivitet(andel) }
+    private fun lagInternPeriodeMedAktivitet(andel: AndelTilkjentYtelse): ArbeidsoppfølgingsPeriodeMedAktivitetOgBarn? {
+        return if (erAktuelPeriodeForOppfølging(andel)) {
+            val vedtaksperiodeSomMatcherAndel =
+                finnVedtaksperiodeforAndel(andel)
+            val barn = finnBehandlingsbarnMedOppfyltAleneomsorgvilkår(andel.kildeBehandlingId)
+
+            val behandling = behandlingService.hentBehandling(behandlingId = andel.kildeBehandlingId)
+
+            return ArbeidsoppfølgingsPeriodeMedAktivitetOgBarn(
+                behandlingId = behandling.eksternId,
+                stønadFraOgMed = andel.stønadFom,
+                stønadTilOgMed = andel.stønadTom,
+                aktivitet = vedtaksperiodeSomMatcherAndel?.aktivitet,
+                periodeType = vedtaksperiodeSomMatcherAndel?.periodeType,
+                barn = barn.map { BehandlingsbarnMedOppfyltAleneomsorg(personIdent = it.personIdent, fødselTermindato = it.fødselTermindato) },
+            )
+        } else {
+            null
+        }
     }
 
-    private fun lagInternPeriodeMedAktivitet(andel: AndelTilkjentYtelse): InternPeriodeMedAktivitet {
+    // Vil sjekke om perioden er omslutter nåværende måned eller senere
+    private fun erAktuelPeriodeForOppfølging(andel: AndelTilkjentYtelse): Boolean = LocalDate.now().month in andel.stønadFom.month..andel.stønadTom.month || andel.stønadTom.month > LocalDate.now().month
 
-        val vedtak : Vedtak = vedtakService.hentVedtak(andel.kildeBehandlingId)
-        val vedtaksperioder : List<Vedtaksperiode> = vedtak.perioder?.perioder?.filter { it.periodeType != no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType.MIDLERTIDIG_OPPHØR } ?: emptyList()
+    private fun finnVedtaksperiodeforAndel(andel: AndelTilkjentYtelse): Vedtaksperiode? {
+        val vedtak: Vedtak = vedtakService.hentVedtak(andel.kildeBehandlingId)
 
-        // TODO TEST!!!
-        val vedtaksperiodeSomMatcherMedAndel = vedtaksperioder.find {
-            andel.periode.overlapper(it.månedsPeriode())
-        }
+        val vedtaksperioder: List<Vedtaksperiode> = vedtak.perioder?.perioder?.filter { it.periodeType != VedtaksperiodeType.MIDLERTIDIG_OPPHØR } ?: emptyList()
 
-        return InternPeriodeMedAktivitet(
-            personIdent = andel.personIdent,
-            inntektsreduksjon = andel.inntektsreduksjon,
-            samordningsfradrag = andel.samordningsfradrag,
-            utgifterBarnetilsyn = 0, // andel.utgifterBarnetilsyn TODO
-            månedsbeløp = andel.beløp,
-            engangsbeløp = andel.beløp,
-            stønadFom = andel.stønadFom,
-            stønadTom = andel.stønadTom,
-            opphørsdato = null,
-            datakilde = Datakilde.EF,
-            aktivitet = vedtaksperiodeSomMatcherMedAndel?.aktivitet,
-            periodeType = vedtaksperiodeSomMatcherMedAndel?.periodeType,
-        )
+        val vedtaksperiodeSomMatcherMedAndel =
+            vedtaksperioder.find {
+                andel.periode.overlapper(it.månedsPeriode())
+            }
+        return vedtaksperiodeSomMatcherMedAndel
+    }
+
+    private fun finnBehandlingsbarnMedOppfyltAleneomsorgvilkår(behandlingsId: UUID): List<BehandlingBarn> {
+        val vilkårsvurderinger =
+            vilkårsvurderingRepository.findByTypeAndBehandlingIdIn(VilkårType.ALENEOMSORG, listOf(behandlingsId))
+        val barnMedAleneomsorg =
+            vilkårsvurderinger.filter { it.resultat == Vilkårsresultat.OPPFYLT }.mapNotNull { vilkårsvurdering ->
+                vilkårsvurdering.barnId
+            }
+        val barn = barnService.hentBehandlingBarnForBarnIder(barnMedAleneomsorg)
+        return barn
     }
 }
 
-private fun Vedtaksperiode.månedsPeriode() =
-    Månedsperiode(datoFra, datoTil)
-
+private fun Vedtaksperiode.månedsPeriode() = Månedsperiode(datoFra, datoTil)
 
 private fun AndelTilkjentYtelse.tilInternPeriode(): InternPeriode =
     InternPeriode(
@@ -177,12 +204,6 @@ private fun AndelTilkjentYtelse.tilInternPeriode(): InternPeriode =
         opphørsdato = null,
         datakilde = Datakilde.EF,
     )
-
-private fun Vedtaksperiode.getPeriode(): Månedsperiode {
-    return Månedsperiode(this.datoFra, datoTil)
-}
-
-
 
 fun InfotrygdPeriode.tilInternPeriode(): InternPeriode =
     InternPeriode(
