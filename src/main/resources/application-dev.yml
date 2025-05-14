@@ -27,3 +27,5 @@ KAFKA_TRUSTSTORE_PATH: kafkaTruststorePath
 
 FAMILIE_TILBAKE_URL: http://tilbakekreving-backend.tilbake
 FAMILIE_TILBAKE_SCOPE: api://dev-gcp.tilbake.tilbakekreving-backend/.default
+
+INNTEKT_URL: https://ikomp-q2.intern.dev.nav.no

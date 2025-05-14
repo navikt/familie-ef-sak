@@ -17,6 +17,7 @@ import java.time.YearMonth
 @Component
 class AMeldingInntektClient(
     @Value("\${FAMILIE_EF_PROXY_URL}") private val uri: URI,
+    @Value("\${INNTEKT_URL}") private val inntektUri: URI,
     @Qualifier("azure") restOperations: RestOperations,
 ) : AbstractRestClient(restOperations, "inntekt") {
     private fun lagInntektUri(
@@ -32,7 +33,7 @@ class AMeldingInntektClient(
 
     private val genererInntektV2Uri =
         UriComponentsBuilder
-            .fromUri(uri)
+            .fromUri(inntektUri)
             .pathSegment("api/inntekt/v2")
             .build()
             .toUri()
