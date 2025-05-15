@@ -6,6 +6,8 @@ import no.nav.familie.ef.sak.barn.BarnService
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.ekstern.stønadsperiode.EksternStønadsperioderService
 import no.nav.familie.ef.sak.fagsak.FagsakService
+import no.nav.familie.ef.sak.infotrygd.ArbeidsoppfølgingsPeriodeMedAktivitetOgBarn
+import no.nav.familie.ef.sak.infotrygd.BehandlingsbarnMedOppfyltAleneomsorg
 import no.nav.familie.ef.sak.infotrygd.InfotrygdReplikaClient
 import no.nav.familie.ef.sak.infotrygd.InfotrygdService
 import no.nav.familie.ef.sak.infotrygd.PeriodeService
@@ -18,11 +20,13 @@ import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.vedtak
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.ef.sak.vedtak.VedtakService
+import no.nav.familie.ef.sak.vedtak.domain.AktivitetType
 import no.nav.familie.ef.sak.vedtak.domain.DelårsperiodeSkoleårSkolepenger
 import no.nav.familie.ef.sak.vedtak.domain.SkolepengerStudietype
 import no.nav.familie.ef.sak.vedtak.domain.SkolepengerUtgift
 import no.nav.familie.ef.sak.vedtak.domain.SkolepengerWrapper
 import no.nav.familie.ef.sak.vedtak.domain.SkoleårsperiodeSkolepenger
+import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
 import no.nav.familie.ef.sak.vilkår.VilkårsvurderingRepository
 import no.nav.familie.ef.sak.økonomi.lagAndelTilkjentYtelse
 import no.nav.familie.ef.sak.økonomi.lagTilkjentYtelse
@@ -50,6 +54,7 @@ internal class EksternStønadsperioderServiceTest {
     private val vedtakService = mockk<VedtakService>()
     private val vilkårsvurderingRepository = mockk<VilkårsvurderingRepository>()
     private val barnService = mockk<BarnService>()
+    private val periodeServiceMock = mockk<PeriodeService>()
     private val periodeService =
         PeriodeService(
             personService,
@@ -63,6 +68,8 @@ internal class EksternStønadsperioderServiceTest {
         )
 
     private val service = EksternStønadsperioderService(periodeService = periodeService, personService = personService)
+    private val serviceMedPeriodeserviceMock = EksternStønadsperioderService(periodeService = periodeServiceMock, personService = personService)
+
 
     private val ident = "01234567890"
 
@@ -187,6 +194,95 @@ internal class EksternStønadsperioderServiceTest {
         assertThat(perioder.last().tomDato).isEqualTo(of(2024, 6, 30))
         assertThat(perioder.last().stønadstype).isEqualTo(StønadType.SKOLEPENGER)
     }
+
+    @Test
+    internal fun `skal slå sammen like perioder arbeidsoppfølging`() {
+
+        mockPdl()
+        val barn1 = BehandlingsbarnMedOppfyltAleneomsorg(null, now())
+        val barn2 = BehandlingsbarnMedOppfyltAleneomsorg("9876543210", now().minusYears(2))
+        val periode1 = lagArbeidsoppfølgingsperiode(barn1, barn2)
+        val periode2= periode1.copy(stønadFraOgMed = now().plusMonths(1), stønadTilOgMed = now().plusMonths(2))
+        every { periodeServiceMock.hentLøpendeOvergangsstønadPerioderMedAktivitetOgBehandlingsbarn(setOf(ident)) } returns listOf(periode1, periode2)
+
+        val hentPerioderForOSMedAktivitet = serviceMedPeriodeserviceMock.hentPerioderForOSMedAktivitet(ident)
+
+        assertThat(hentPerioderForOSMedAktivitet.internperioder).hasSize(1)
+    }
+
+    @Test
+    internal fun `skal ikke slå sammen periodermed ulik aktivitet`() {
+
+        mockPdl()
+        val barn1 = BehandlingsbarnMedOppfyltAleneomsorg(null, now())
+        val barn2 = BehandlingsbarnMedOppfyltAleneomsorg("9876543210", now().minusYears(2))
+        val periode1 = lagArbeidsoppfølgingsperiode(barn1, barn2)
+        val periode2= periode1.copy(stønadFraOgMed = now().plusMonths(1), stønadTilOgMed = now().plusMonths(2), aktivitet = AktivitetType.UTVIDELSE_FORSØRGER_I_UTDANNING)
+        every { periodeServiceMock.hentLøpendeOvergangsstønadPerioderMedAktivitetOgBehandlingsbarn(setOf(ident)) } returns listOf(periode1, periode2)
+
+        val hentPerioderForOSMedAktivitet = serviceMedPeriodeserviceMock.hentPerioderForOSMedAktivitet(ident)
+
+        assertThat(hentPerioderForOSMedAktivitet.internperioder).hasSize(2)
+    }
+
+    @Test
+    internal fun `skal ikke slå sammen perioder med ulike barn`() {
+
+        mockPdl()
+        val barn1 = BehandlingsbarnMedOppfyltAleneomsorg(null, now())
+        val barn2 = BehandlingsbarnMedOppfyltAleneomsorg("9876543210", now().minusYears(2))
+        val periode1 = lagArbeidsoppfølgingsperiode(barn1, barn2)
+        val periode2= periode1.copy(stønadFraOgMed = now().plusMonths(1), stønadTilOgMed = now().plusMonths(2), barn = listOf(barn2))
+        every { periodeServiceMock.hentLøpendeOvergangsstønadPerioderMedAktivitetOgBehandlingsbarn(setOf(ident)) } returns listOf(periode1, periode2)
+
+        val hentPerioderForOSMedAktivitet = serviceMedPeriodeserviceMock.hentPerioderForOSMedAktivitet(ident)
+
+        assertThat(hentPerioderForOSMedAktivitet.internperioder).hasSize(2)
+        val enesteBarn = hentPerioderForOSMedAktivitet.internperioder.find { it.stønadFraOgMed === periode2.stønadFraOgMed }?.barn?.single()
+        assertThat(enesteBarn).isEqualTo(barn2)
+    }
+
+    @Test
+    internal fun `skal ikke slå sammen perioder med når ett av barne har fått personIdent`() {
+        mockPdl()
+        val barn1 = BehandlingsbarnMedOppfyltAleneomsorg(null, now())
+        val barn2 = BehandlingsbarnMedOppfyltAleneomsorg("9876543210", now().minusYears(2))
+        val periode1 = lagArbeidsoppfølgingsperiode(barn1, barn2)
+        val periode2= periode1.copy(stønadFraOgMed = now().plusMonths(1), stønadTilOgMed = now().plusMonths(2), barn = listOf(barn1.copy(personIdent = "nyIdentHer"), barn2))
+        every { periodeServiceMock.hentLøpendeOvergangsstønadPerioderMedAktivitetOgBehandlingsbarn(setOf(ident)) } returns listOf(periode1, periode2)
+
+        val hentPerioderForOSMedAktivitet = serviceMedPeriodeserviceMock.hentPerioderForOSMedAktivitet(ident)
+
+        assertThat(hentPerioderForOSMedAktivitet.internperioder).hasSize(2)
+    }
+
+
+    @Test
+    internal fun `skal ikke slå sammen perioder med når periode har forskjellig behandling`() {
+        mockPdl()
+        val barn1 = BehandlingsbarnMedOppfyltAleneomsorg(null, now())
+        val barn2 = BehandlingsbarnMedOppfyltAleneomsorg("9876543210", now().minusYears(2))
+        val periode1 = lagArbeidsoppfølgingsperiode(barn1, barn2)
+        val periode2= periode1.copy(stønadFraOgMed = now().plusMonths(1), stønadTilOgMed = now().plusMonths(2), behandlingId = 1234L)
+        every { periodeServiceMock.hentLøpendeOvergangsstønadPerioderMedAktivitetOgBehandlingsbarn(setOf(ident)) } returns listOf(periode1, periode2)
+
+        val hentPerioderForOSMedAktivitet = serviceMedPeriodeserviceMock.hentPerioderForOSMedAktivitet(ident)
+
+        assertThat(hentPerioderForOSMedAktivitet.internperioder).hasSize(2)
+    }
+
+
+    private fun lagArbeidsoppfølgingsperiode(
+        barn1: BehandlingsbarnMedOppfyltAleneomsorg,
+        barn2: BehandlingsbarnMedOppfyltAleneomsorg
+    ): ArbeidsoppfølgingsPeriodeMedAktivitetOgBarn = ArbeidsoppfølgingsPeriodeMedAktivitetOgBarn(
+        stønadFraOgMed = now(),
+        stønadTilOgMed = now(),
+        aktivitet = AktivitetType.FORSØRGER_I_ARBEID,
+        periodeType = VedtaksperiodeType.HOVEDPERIODE,
+        barn = listOf(barn1, barn2),
+        behandlingId = behandlingOvergangsstønad.eksternId,
+    )
 
     private fun mockInfotrygd(
         stønadFom: LocalDate,

@@ -22,8 +22,9 @@ import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.kontrakter.felles.ef.Datakilde
 import no.nav.familie.kontrakter.felles.ef.EksternPeriodeMedStønadstype
 import no.nav.familie.kontrakter.felles.ef.StønadType
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
-import java.time.LocalDate
+import java.time.YearMonth
 import java.util.UUID
 
 @Component
@@ -37,6 +38,8 @@ class PeriodeService(
     private val vilkårsvurderingRepository: VilkårsvurderingRepository,
     private val barnService: BarnService,
 ) {
+    private val logger = LoggerFactory.getLogger(javaClass)
+
     fun hentPerioderFraEfOgInfotrygd(personIdent: String): InternePerioder {
         val personIdenter = personService.hentPersonIdenter(personIdent).identer()
         val perioderFraReplika = infotrygdService.hentSammenslåttePerioderSomInternPerioder(personIdenter)
@@ -135,42 +138,43 @@ class PeriodeService(
 
     private fun tilArbeidsoppfølgingsPeriode(tilkjentYtelse: TilkjentYtelse): List<ArbeidsoppfølgingsPeriodeMedAktivitetOgBarn> =
         tilkjentYtelse.andelerTilkjentYtelse
-            .filter { erAktuelPeriodeForOppfølging(andel = it) }
-            .mapNotNull { andel -> lagInternPeriodeMedAktivitet(andel) }
-            .sortedBy { it.stønadFraOgMed }
+            .filter { it.harPeriodeSomLøperNåEllerIFramtid() }
+            .mapNotNull { andel ->
+                val andelsVedtak = finnVedtaksperiodeforAndel(andel)
+                when (andelsVedtak) {
+                    null ->
+                        null.also {
+                            logger.warn("Fant ikke vedtaksperiode for andel ${andel.periode} med behandlingId ${andel.kildeBehandlingId}")
+                        } // TODO - kaste feil?
+                    else -> lagInternPeriodeMedAktivitet(andel, andelsVedtak)
+                }
+            }.sortedBy { it.stønadFraOgMed }
 
-    private fun lagInternPeriodeMedAktivitet(andel: AndelTilkjentYtelse): ArbeidsoppfølgingsPeriodeMedAktivitetOgBarn? {
-        return if (erAktuelPeriodeForOppfølging(andel)) {
-            val vedtaksperiodeSomMatcherAndel =
-                finnVedtaksperiodeforAndel(andel)
-            val barn = finnBehandlingsbarnMedOppfyltAleneomsorgvilkår(andel.kildeBehandlingId)
+    private fun lagInternPeriodeMedAktivitet(
+        andel: AndelTilkjentYtelse,
+        andelsVedtak: Vedtaksperiode,
+    ): ArbeidsoppfølgingsPeriodeMedAktivitetOgBarn? {
+        val behandlingsbarn = finnBehandlingsbarnMedOppfyltAleneomsorgvilkår(andel.kildeBehandlingId)
+        val behandling = behandlingService.hentBehandling(behandlingId = andel.kildeBehandlingId)
 
-            val behandling = behandlingService.hentBehandling(behandlingId = andel.kildeBehandlingId)
-
-            return ArbeidsoppfølgingsPeriodeMedAktivitetOgBarn(
-                behandlingId = behandling.eksternId,
-                stønadFraOgMed = andel.stønadFom,
-                stønadTilOgMed = andel.stønadTom,
-                aktivitet = vedtaksperiodeSomMatcherAndel?.aktivitet,
-                periodeType = vedtaksperiodeSomMatcherAndel?.periodeType,
-                barn = barn.map { BehandlingsbarnMedOppfyltAleneomsorg(personIdent = it.personIdent, fødselTermindato = it.fødselTermindato) },
-            )
-        } else {
-            null
-        }
+        return ArbeidsoppfølgingsPeriodeMedAktivitetOgBarn(
+            behandlingId = behandling.eksternId,
+            stønadFraOgMed = andel.stønadFom,
+            stønadTilOgMed = andel.stønadTom,
+            aktivitet = andelsVedtak.aktivitet,
+            periodeType = andelsVedtak.periodeType,
+            barn = behandlingsbarn.map { BehandlingsbarnMedOppfyltAleneomsorg(personIdent = it.personIdent, fødselTermindato = it.fødselTermindato) },
+        )
     }
 
-    // Vil sjekke om perioden er omslutter nåværende måned eller senere
-    private fun erAktuelPeriodeForOppfølging(andel: AndelTilkjentYtelse): Boolean = LocalDate.now().month in andel.stønadFom.month..andel.stønadTom.month || andel.stønadTom.month > LocalDate.now().month
-
-    private fun finnVedtaksperiodeforAndel(andel: AndelTilkjentYtelse): Vedtaksperiode? {
+    fun finnVedtaksperiodeforAndel(andel: AndelTilkjentYtelse): Vedtaksperiode? {
         val vedtak: Vedtak = vedtakService.hentVedtak(andel.kildeBehandlingId)
 
         val vedtaksperioder: List<Vedtaksperiode> = vedtak.perioder?.perioder?.filter { it.periodeType != VedtaksperiodeType.MIDLERTIDIG_OPPHØR } ?: emptyList()
 
         val vedtaksperiodeSomMatcherMedAndel =
-            vedtaksperioder.find {
-                andel.periode.overlapper(it.månedsPeriode())
+            vedtaksperioder.find { vedtaksperiode ->
+                vedtaksperiode.månedsPeriode().inneholder(andel.periode)
             }
         return vedtaksperiodeSomMatcherMedAndel
     }
@@ -185,6 +189,12 @@ class PeriodeService(
         val barn = barnService.hentBehandlingBarnForBarnIder(barnMedAleneomsorg)
         return barn
     }
+}
+
+fun AndelTilkjentYtelse.harPeriodeSomLøperNåEllerIFramtid(): Boolean {
+    val nå = Månedsperiode(YearMonth.now())
+    val periode = Månedsperiode(this.stønadFom, this.stønadTom)
+    return nå.overlapper(periode) || periode.tom > nå.tom
 }
 
 private fun Vedtaksperiode.månedsPeriode() = Månedsperiode(datoFra, datoTil)

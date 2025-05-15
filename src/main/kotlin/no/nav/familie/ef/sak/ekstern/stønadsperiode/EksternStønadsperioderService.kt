@@ -1,11 +1,13 @@
 package no.nav.familie.ef.sak.ekstern.stønadsperiode
 
 import no.nav.familie.ef.sak.ekstern.stønadsperiode.util.ArenaPeriodeUtil
+import no.nav.familie.ef.sak.infotrygd.ArbeidsoppfølgingsPeriodeMedAktivitetOgBarn
 import no.nav.familie.ef.sak.infotrygd.InternPeriode
 import no.nav.familie.ef.sak.infotrygd.LøpendeOvergangsstønadPerioderMedAktivitetOgBehandlingsbarn
 import no.nav.familie.ef.sak.infotrygd.PeriodeService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
 import no.nav.familie.kontrakter.felles.Datoperiode
+import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.kontrakter.felles.ef.EksternPeriode
 import no.nav.familie.kontrakter.felles.ef.EksternPeriodeMedBeløp
 import no.nav.familie.kontrakter.felles.ef.EksternPeriodeMedStønadstype
@@ -117,14 +119,48 @@ class EksternStønadsperioderService(
     }
 
     fun hentPerioderForOSMedAktivitet(personIdent: String): LøpendeOvergangsstønadPerioderMedAktivitetOgBehandlingsbarn {
-        val personIdenter: Set<String> = hentIdenterFraPdl(personIdent)
+        val personIdenter: Set<String> = hentIdenterFraPdl(personIdent) // TODO diskuter om dette er lurt. Kan sjekke kun personIdent.
         val perioderMedAktivitetOgBehandlingsbarn = periodeService.hentLøpendeOvergangsstønadPerioderMedAktivitetOgBehandlingsbarn(personIdenter = personIdenter)
-        return LøpendeOvergangsstønadPerioderMedAktivitetOgBehandlingsbarn(setOf(personIdent) ,perioderMedAktivitetOgBehandlingsbarn)
+        return LøpendeOvergangsstønadPerioderMedAktivitetOgBehandlingsbarn(setOf(personIdent), perioderMedAktivitetOgBehandlingsbarn.slåSammenSammenhengendePerioder())
     }
 
-    private fun hentIdenterFraPdl(personIdent: String): Set<String> = personService
-        .hentPersonIdenter(personIdent)
-        .identer
-        .map { it.ident }
-        .toSet()
+    private fun hentIdenterFraPdl(personIdent: String): Set<String> =
+        personService
+            .hentPersonIdenter(personIdent)
+            .identer
+            .map { it.ident }
+            .toSet()
+
+    private fun List<ArbeidsoppfølgingsPeriodeMedAktivitetOgBarn>.slåSammenSammenhengendePerioder(): List<ArbeidsoppfølgingsPeriodeMedAktivitetOgBarn> {
+        val sortertPåDatoListe = this.sortedBy { it.stønadFraOgMed }
+        return sortertPåDatoListe.fold(mutableListOf()) { returliste, dennePerioden ->
+            when (skalSlåSammenArbeidsoppfølgingsperiodeMedDennePerioden(returliste, dennePerioden)) {
+                true -> returliste.utvidSistePeriodeMed(dennePerioden)
+                false -> returliste.add(dennePerioden)
+            }
+            returliste
+        }
+    }
+
+    private fun MutableList<ArbeidsoppfølgingsPeriodeMedAktivitetOgBarn>.utvidSistePeriodeMed(dennePerioden: ArbeidsoppfølgingsPeriodeMedAktivitetOgBarn) {
+        val sammenslått = this.last().copy(stønadTilOgMed = dennePerioden.stønadTilOgMed)
+        this.byttUtSisteMed(sammenslått)
+    }
+
+    private fun skalSlåSammenArbeidsoppfølgingsperiodeMedDennePerioden(
+        liste: List<ArbeidsoppfølgingsPeriodeMedAktivitetOgBarn>,
+        denne: ArbeidsoppfølgingsPeriodeMedAktivitetOgBarn,
+    ): Boolean {
+        val forrige = liste.lastOrNull()
+        return forrige != null && (forrige.månedsPeriode() påfølgesAv denne.månedsPeriode() && forrige.aktivitet === denne.aktivitet && forrige.periodeType === denne.periodeType && forrige.barn === denne.barn && forrige.behandlingId == denne.behandlingId)
+    }
+
+
+    private fun <E> MutableList<E>.byttUtSisteMed(ny: E) {
+        this.removeLast()
+        this.add(ny)
+    }
+
 }
+
+private fun ArbeidsoppfølgingsPeriodeMedAktivitetOgBarn.månedsPeriode(): Månedsperiode = Månedsperiode(this.stønadFraOgMed, this.stønadTilOgMed)

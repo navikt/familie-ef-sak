@@ -110,10 +110,10 @@ class EksternStønadsperioderController(
         }
 
     @Operation(
-        description = "Retur inneholder aktivitet og barn med aleneomsorg som er oppfylt. " +
+        description =
+            "Retur inneholder aktivitet og barn med aleneomsorg som er oppfylt. " +
                 "NB! Inneholder Behandlingsbarn (slik barn ble presentert på det tidspunktet den gjeldende behandlingen for periode ble utført), " +
-                "ikke nødvendigvis oppdatert med barn fra PDL slik disse data ser ut i dag. " ,
-
+                "ikke nødvendigvis oppdatert med barn fra PDL slik disse data ser ut i dag. ",
         summary = "Returnerer overgangsstønadperiode som gjelder nå og perioder fram til opphør.",
     )
     @PostMapping("perioder-aktivitet")
@@ -127,5 +127,8 @@ class EksternStønadsperioderController(
             Ressurs.failure("Henting av perioder for overgangsstønad feilet", error = e)
         }
 }
+
 // TODO flytt til kontrakter
-data class PersonIdentRequest(val personIdent: String)
+data class PersonIdentRequest(
+    val personIdent: String,
+)

@@ -27,8 +27,8 @@ data class LøpendeOvergangsstønadPerioderMedAktivitetOgBehandlingsbarn(
 data class ArbeidsoppfølgingsPeriodeMedAktivitetOgBarn(
     val stønadFraOgMed: LocalDate,
     val stønadTilOgMed: LocalDate,
-    val aktivitet: AktivitetType?,
-    val periodeType: VedtaksperiodeType?,
+    val aktivitet: AktivitetType,
+    val periodeType: VedtaksperiodeType,
     val barn: List<BehandlingsbarnMedOppfyltAleneomsorg>,
     val behandlingId: Long,
 )
