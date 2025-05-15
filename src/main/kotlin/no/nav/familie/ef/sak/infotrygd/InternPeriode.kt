@@ -31,6 +31,7 @@ data class ArbeidsoppfølgingsPeriodeMedAktivitetOgBarn(
     val periodeType: VedtaksperiodeType,
     val barn: List<BehandlingsbarnMedOppfyltAleneomsorg>,
     val behandlingId: Long,
+    val harAktivitetsplikt: Boolean,
 )
 
 data class BehandlingsbarnMedOppfyltAleneomsorg(

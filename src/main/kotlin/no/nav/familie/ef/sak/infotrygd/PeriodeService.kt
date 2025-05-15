@@ -11,6 +11,7 @@ import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.ef.sak.tilkjentytelse.domain.AndelTilkjentYtelse
 import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.vedtak.VedtakService
+import no.nav.familie.ef.sak.vedtak.domain.AktivitetType
 import no.nav.familie.ef.sak.vedtak.domain.Vedtak
 import no.nav.familie.ef.sak.vedtak.domain.Vedtaksperiode
 import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
@@ -164,7 +165,29 @@ class PeriodeService(
             aktivitet = andelsVedtak.aktivitet,
             periodeType = andelsVedtak.periodeType,
             barn = behandlingsbarn.map { BehandlingsbarnMedOppfyltAleneomsorg(personIdent = it.personIdent, fødselTermindato = it.fødselTermindato) },
+            harAktivitetsplikt = harAktivitetsplikt(
+                aktivitet = andelsVedtak.aktivitet,
+                periodetype = andelsVedtak.periodeType,
+            ),
         )
+    }
+
+    private fun harAktivitetsplikt(aktivitet: AktivitetType, periodetype: VedtaksperiodeType): Boolean {
+
+        if (periodetype === VedtaksperiodeType.HOVEDPERIODE || periodetype === VedtaksperiodeType.NY_PERIODE_FOR_NYTT_BARN) {
+            return aktivitet === AktivitetType.FORSØRGER_I_ARBEID ||
+                aktivitet === AktivitetType.FORSØRGER_REELL_ARBEIDSSØKER ||
+                aktivitet === AktivitetType.FORSØRGER_I_UTDANNING ||
+                aktivitet === AktivitetType.FORSØRGER_ETABLERER_VIRKSOMHET
+        }
+
+        if (periodetype === VedtaksperiodeType.UTVIDELSE)
+            return aktivitet === AktivitetType.UTVIDELSE_FORSØRGER_I_UTDANNING
+
+        if (periodetype === VedtaksperiodeType.FORLENGELSE)
+            return aktivitet === AktivitetType.FORLENGELSE_STØNAD_UT_SKOLEÅRET
+
+        return false
     }
 
     fun finnVedtaksperiodeforAndel(andel: AndelTilkjentYtelse): Vedtaksperiode? {

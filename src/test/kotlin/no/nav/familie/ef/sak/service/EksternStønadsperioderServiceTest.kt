@@ -282,6 +282,7 @@ internal class EksternStønadsperioderServiceTest {
         periodeType = VedtaksperiodeType.HOVEDPERIODE,
         barn = listOf(barn1, barn2),
         behandlingId = behandlingOvergangsstønad.eksternId,
+        harAktivitetsplikt = true,
     )
 
     private fun mockInfotrygd(
