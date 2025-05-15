@@ -35,6 +35,7 @@ import no.nav.familie.ef.sak.vilkår.VilkårType
 import no.nav.familie.ef.sak.vilkår.Vilkårsresultat
 import no.nav.familie.ef.sak.vilkår.Vilkårsvurdering
 import no.nav.familie.ef.sak.vilkår.VilkårsvurderingRepository
+import no.nav.familie.ef.sak.vilkår.VurderingStegService
 import no.nav.familie.ef.sak.vilkår.dto.GjenbruktVilkårResponse
 import no.nav.familie.kontrakter.ef.søknad.TestsøknadBuilder
 import no.nav.familie.kontrakter.felles.ef.StønadType
@@ -55,6 +56,7 @@ internal class GjenbrukVilkårServiceTest {
     private val barnService = mockk<BarnService>()
     private val tilordnetRessursService = mockk<TilordnetRessursService>()
     private val samværsavtaleService = mockk<SamværsavtaleService>()
+    private val vurderingStegService = mockk<VurderingStegService>()
     private val gjenbrukVilkårService =
         GjenbrukVilkårService(
             behandlingService = behandlingService,
@@ -64,6 +66,7 @@ internal class GjenbrukVilkårServiceTest {
             barnService = barnService,
             tilordnetRessursService = tilordnetRessursService,
             samværsavtaleService = samværsavtaleService,
+            vurderingStegService = vurderingStegService,
         )
 
     private val barn1 = FnrGenerator.generer(LocalDate.now())
@@ -230,12 +233,14 @@ internal class GjenbrukVilkårServiceTest {
 
     @Test
     internal fun `skal gjenbruke enkel vilkårsvurdering - silvilstand`() {
+        every { vurderingStegService.oppdaterStegOgKategoriPåBehandling(nyBT.behandling.id) } just Runs
         gjenbrukEnkelVilkårsvurdering(nyBT.sivilstandsvilkår.id)
 
         assertThat(vilkårsvurderingSlot.isCaptured).isEqualTo(true)
         assertThat(vilkårsvurderingSlot.captured.id).isEqualTo(nyBT.sivilstandsvilkår.id)
         assertThat(vilkårsvurderingSlot.captured.resultat).isEqualTo(Vilkårsresultat.OPPFYLT)
         verify(exactly = 0) { samværsavtaleService.gjenbrukSamværsavtale(any(), any(), any(), any()) }
+        verify(exactly = 1) { vurderingStegService.oppdaterStegOgKategoriPåBehandling(nyBT.behandling.id) }
     }
 
     @Test
@@ -245,6 +250,7 @@ internal class GjenbrukVilkårServiceTest {
         val barnPåBehandlingSomSkalOppdateresSlot = slot<List<BehandlingBarn>>()
         val vilkårsvurderingSomSkalOppdateresSlot = slot<Vilkårsvurdering>()
 
+        every { vurderingStegService.oppdaterStegOgKategoriPåBehandling(nyBT.behandling.id) } just Runs
         every { samværsavtaleService.gjenbrukSamværsavtale(capture(behandlingSomSkalOppdateresSlot), capture(behandlingForGjenbrukSlot), capture(barnPåBehandlingSomSkalOppdateresSlot), capture(vilkårsvurderingSomSkalOppdateresSlot)) } just Runs
         gjenbrukEnkelVilkårsvurdering(nyBT.aleneomsorgsvilkår.first().id)
 
@@ -253,6 +259,7 @@ internal class GjenbrukVilkårServiceTest {
         assertThat(vilkårsvurderingSlot.captured.resultat).isEqualTo(Vilkårsresultat.OPPFYLT)
 
         verify(exactly = 1) { samværsavtaleService.gjenbrukSamværsavtale(any(), any(), any(), any()) }
+        verify(exactly = 1) { vurderingStegService.oppdaterStegOgKategoriPåBehandling(nyBT.behandling.id) }
 
         assertThat(behandlingSomSkalOppdateresSlot.captured).isEqualTo(nyBT.behandling.id)
         assertThat(behandlingForGjenbrukSlot.captured).isEqualTo(ferdigstiltBehandlingOS.id)
