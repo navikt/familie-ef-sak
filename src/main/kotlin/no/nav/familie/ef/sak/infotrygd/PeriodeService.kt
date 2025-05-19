@@ -23,7 +23,6 @@ import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.kontrakter.felles.ef.Datakilde
 import no.nav.familie.kontrakter.felles.ef.EksternPeriodeMedStønadstype
 import no.nav.familie.kontrakter.felles.ef.StønadType
-import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import java.time.YearMonth
 import java.util.UUID
@@ -39,7 +38,6 @@ class PeriodeService(
     private val vilkårsvurderingRepository: VilkårsvurderingRepository,
     private val barnService: BarnService,
 ) {
-    private val logger = LoggerFactory.getLogger(javaClass)
 
     fun hentPerioderFraEfOgInfotrygd(personIdent: String): InternePerioder {
         val personIdenter = personService.hentPersonIdenter(personIdent).identer()
@@ -120,14 +118,14 @@ class PeriodeService(
             }
 
     fun hentLøpendeOvergangsstønadPerioderMedAktivitetOgBehandlingsbarn(
-        personIdenter: Set<String>,
-    ): List<ArbeidsoppfølgingsPeriodeMedAktivitetOgBarn> =
+        personIdent: String,
+    ): List<PeriodeMedAktivitetOgBarn> =
         fagsakService
-            .finnFagsak(personIdenter, StønadType.OVERGANGSSTØNAD)
+            .finnFagsak(setOf(personIdent), StønadType.OVERGANGSSTØNAD)
             ?.let { behandlingService.finnSisteIverksatteBehandling(it.id) }
             ?.let { behandling ->
-                val tilkjentYtelse = tilkjentYtelseService.hentForBehandling(behandling.id)
-                tilArbeidsoppfølgingsPeriode(tilkjentYtelse)
+                val andelerTilkjentYtelse = tilkjentYtelseService.hentForBehandling(behandling.id).andelerTilkjentYtelse
+                tilArbeidsoppfølgingsPeriode(andelerTilkjentYtelse)
             } ?: emptyList()
 
     private fun tilInternPeriode(tilkjentYtelse: TilkjentYtelse) =
@@ -137,43 +135,44 @@ class PeriodeService(
             // då vi ønsker de sortert på siste hendelsen først
             .sortedWith(compareBy<InternPeriode> { it.stønadFom }.reversed())
 
-    private fun tilArbeidsoppfølgingsPeriode(tilkjentYtelse: TilkjentYtelse): List<ArbeidsoppfølgingsPeriodeMedAktivitetOgBarn> =
-        tilkjentYtelse.andelerTilkjentYtelse
+    private fun tilArbeidsoppfølgingsPeriode(andelerTilkjentYtelse: List<AndelTilkjentYtelse>): List<PeriodeMedAktivitetOgBarn> {
+        return andelerTilkjentYtelse
             .filter { it.harPeriodeSomLøperNåEllerIFramtid() }
             .mapNotNull { andel ->
                 val andelsVedtak = finnVedtaksperiodeforAndel(andel)
                 when (andelsVedtak) {
-                    null ->
-                        null.also {
-                            logger.warn("Fant ikke vedtaksperiode for andel ${andel.periode} med behandlingId ${andel.kildeBehandlingId}")
-                        } // TODO - kaste feil?
-                    else -> lagInternPeriodeMedAktivitet(andel, andelsVedtak)
+                    null -> throw IllegalStateException("Fant ikke vedtaksperiode for andel ${andel.periode} med behandlingId ${andel.kildeBehandlingId}")
+                    else -> lagOvergangsstønadperiodeMedAktivitet(andel, andelsVedtak)
                 }
             }.sortedBy { it.stønadFraOgMed }
+    }
 
-    private fun lagInternPeriodeMedAktivitet(
+    private fun lagOvergangsstønadperiodeMedAktivitet(
         andel: AndelTilkjentYtelse,
         andelsVedtak: Vedtaksperiode,
-    ): ArbeidsoppfølgingsPeriodeMedAktivitetOgBarn? {
+    ): PeriodeMedAktivitetOgBarn? {
         val behandlingsbarn = finnBehandlingsbarnMedOppfyltAleneomsorgvilkår(andel.kildeBehandlingId)
         val behandling = behandlingService.hentBehandling(behandlingId = andel.kildeBehandlingId)
 
-        return ArbeidsoppfølgingsPeriodeMedAktivitetOgBarn(
+        return PeriodeMedAktivitetOgBarn(
             behandlingId = behandling.eksternId,
             stønadFraOgMed = andel.stønadFom,
             stønadTilOgMed = andel.stønadTom,
             aktivitet = andelsVedtak.aktivitet,
             periodeType = andelsVedtak.periodeType,
             barn = behandlingsbarn.map { BehandlingsbarnMedOppfyltAleneomsorg(personIdent = it.personIdent, fødselTermindato = it.fødselTermindato) },
-            harAktivitetsplikt = harAktivitetsplikt(
-                aktivitet = andelsVedtak.aktivitet,
-                periodetype = andelsVedtak.periodeType,
-            ),
+            harAktivitetsplikt =
+                harAktivitetsplikt(
+                    aktivitet = andelsVedtak.aktivitet,
+                    periodetype = andelsVedtak.periodeType,
+                ),
         )
     }
 
-    private fun harAktivitetsplikt(aktivitet: AktivitetType, periodetype: VedtaksperiodeType): Boolean {
-
+    private fun harAktivitetsplikt(
+        aktivitet: AktivitetType,
+        periodetype: VedtaksperiodeType,
+    ): Boolean {
         if (periodetype === VedtaksperiodeType.HOVEDPERIODE || periodetype === VedtaksperiodeType.NY_PERIODE_FOR_NYTT_BARN) {
             return aktivitet === AktivitetType.FORSØRGER_I_ARBEID ||
                 aktivitet === AktivitetType.FORSØRGER_REELL_ARBEIDSSØKER ||
@@ -181,25 +180,27 @@ class PeriodeService(
                 aktivitet === AktivitetType.FORSØRGER_ETABLERER_VIRKSOMHET
         }
 
-        if (periodetype === VedtaksperiodeType.UTVIDELSE)
+        if (periodetype === VedtaksperiodeType.UTVIDELSE) {
             return aktivitet === AktivitetType.UTVIDELSE_FORSØRGER_I_UTDANNING
+        }
 
-        if (periodetype === VedtaksperiodeType.FORLENGELSE)
+        if (periodetype === VedtaksperiodeType.FORLENGELSE) {
             return aktivitet === AktivitetType.FORLENGELSE_STØNAD_UT_SKOLEÅRET
+        }
 
         return false
     }
 
     fun finnVedtaksperiodeforAndel(andel: AndelTilkjentYtelse): Vedtaksperiode? {
-        val vedtak: Vedtak = vedtakService.hentVedtak(andel.kildeBehandlingId)
+        val vedtaksperioder: List<Vedtaksperiode> = finnVedtaksperioder(andel.kildeBehandlingId)
+        return vedtaksperioder.find { vedtaksperiode ->
+            vedtaksperiode.månedsPeriode().inneholder(andel.periode)
+        }
+    }
 
-        val vedtaksperioder: List<Vedtaksperiode> = vedtak.perioder?.perioder?.filter { it.periodeType != VedtaksperiodeType.MIDLERTIDIG_OPPHØR } ?: emptyList()
-
-        val vedtaksperiodeSomMatcherMedAndel =
-            vedtaksperioder.find { vedtaksperiode ->
-                vedtaksperiode.månedsPeriode().inneholder(andel.periode)
-            }
-        return vedtaksperiodeSomMatcherMedAndel
+    private fun finnVedtaksperioder(behandlingId: UUID): List<Vedtaksperiode> {
+        val vedtak: Vedtak = vedtakService.hentVedtak(behandlingId)
+        return vedtak.perioder?.perioder?.filter { it.periodeType != VedtaksperiodeType.MIDLERTIDIG_OPPHØR } ?: emptyList()
     }
 
     private fun finnBehandlingsbarnMedOppfyltAleneomsorgvilkår(behandlingsId: UUID): List<BehandlingBarn> {
@@ -209,8 +210,7 @@ class PeriodeService(
             vilkårsvurderinger.filter { it.resultat == Vilkårsresultat.OPPFYLT }.mapNotNull { vilkårsvurdering ->
                 vilkårsvurdering.barnId
             }
-        val barn = barnService.hentBehandlingBarnForBarnIder(barnMedAleneomsorg)
-        return barn
+        return barnService.hentBehandlingBarnForBarnIder(barnMedAleneomsorg)
     }
 }
 

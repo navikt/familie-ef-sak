@@ -110,7 +110,7 @@ internal class PeriodeServiceTest {
         mockFinnBarn(barnMedAleneomsorgOppfylt.id, barnMedAleneomsorgOppfylt)
         mockHentBehandling()
 
-        val perioder = service.hentLøpendeOvergangsstønadPerioderMedAktivitetOgBehandlingsbarn(setOf(personIdent))
+        val perioder = service.hentLøpendeOvergangsstønadPerioderMedAktivitetOgBehandlingsbarn(personIdent)
 
         val førstePeriode = perioder.first()
         val framtidsPeriode = perioder.last()

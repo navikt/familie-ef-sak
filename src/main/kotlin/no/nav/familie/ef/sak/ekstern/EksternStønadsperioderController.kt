@@ -3,7 +3,7 @@ package no.nav.familie.ef.sak.ekstern
 import io.swagger.v3.oas.annotations.Operation
 import no.nav.familie.ef.sak.AuditLoggerEvent
 import no.nav.familie.ef.sak.ekstern.stønadsperiode.EksternStønadsperioderService
-import no.nav.familie.ef.sak.infotrygd.LøpendeOvergangsstønadPerioderMedAktivitetOgBehandlingsbarn
+import no.nav.familie.ef.sak.infotrygd.LøpendeOvergangsstønadAktivitetsperioder
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.PersonIdent
@@ -111,24 +111,24 @@ class EksternStønadsperioderController(
 
     @Operation(
         description =
-            "Retur inneholder aktivitet og barn med aleneomsorg som er oppfylt. " +
-                "NB! Inneholder Behandlingsbarn (slik barn ble presentert på det tidspunktet den gjeldende behandlingen for periode ble utført), " +
-                "ikke nødvendigvis oppdatert med barn fra PDL slik disse data ser ut i dag. ",
-        summary = "Returnerer overgangsstønadperiode som gjelder nå og perioder fram til opphør.",
+            """ Retur inneholder aktivitet og barn med aleneomsorg som er oppfylt. 
+            NB! Inneholder Behandlingsbarn (slik barn ble presentert på det tidspunktet den gjeldende behandlingen for periode ble utført), 
+            ikke nødvendigvis oppdatert med barn fra PDL slik disse data ser ut i dag. 
+            NB! Vi henter ikke identer fra pdl før vi sjekker om vi har fagsak for personIdent. 
+            Dersom person har fått ny ident i PDL og man bruker denne i API vil man ikke få treff. """,
+        summary = "Returnerer overgangsstønadperiode som gjelder nå og perioder framover.",
     )
     @PostMapping("perioder-aktivitet")
     fun hentLøpendeOgFremtidigeOSPerioderMedAktivitetOgBehandlingsbarn(
         @RequestBody request: PersonIdentRequest,
-    ): Ressurs<LøpendeOvergangsstønadPerioderMedAktivitetOgBehandlingsbarn> =
-        try {
-            Ressurs.success(eksternStønadsperioderService.hentPerioderForOSMedAktivitet(request.personIdent))
-        } catch (e: Exception) {
-            secureLogger.error("Kunne ikke hente perioder for ${request.personIdent}", e)
-            Ressurs.failure("Henting av perioder for overgangsstønad feilet", error = e)
+    ): Ressurs<LøpendeOvergangsstønadAktivitetsperioder> {
+            if (!SikkerhetContext.erMaskinTilMaskinToken()) {
+                tilgangService.validerTilgangTilPerson(request.personIdent, AuditLoggerEvent.ACCESS)
+            }
+           return Ressurs.success(eksternStønadsperioderService.hentOvergangsstønadperioderMedAktivitet(request.personIdent))
         }
 }
 
-// TODO flytt til kontrakter
 data class PersonIdentRequest(
     val personIdent: String,
 )

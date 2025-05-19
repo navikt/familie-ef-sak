@@ -19,12 +19,12 @@ data class EfInternPerioder(
     val internperioder: List<InternPeriode>,
 )
 
-data class LøpendeOvergangsstønadPerioderMedAktivitetOgBehandlingsbarn(
+data class LøpendeOvergangsstønadAktivitetsperioder(
     val personIdent: Set<String>,
-    val internperioder: List<ArbeidsoppfølgingsPeriodeMedAktivitetOgBarn>,
+    val perioder: List<PeriodeMedAktivitetOgBarn>,
 )
 
-data class ArbeidsoppfølgingsPeriodeMedAktivitetOgBarn(
+data class PeriodeMedAktivitetOgBarn(
     val stønadFraOgMed: LocalDate,
     val stønadTilOgMed: LocalDate,
     val aktivitet: AktivitetType,
