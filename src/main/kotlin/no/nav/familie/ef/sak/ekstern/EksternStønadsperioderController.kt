@@ -122,11 +122,11 @@ class EksternStønadsperioderController(
     fun hentLøpendeOgFremtidigeOSPerioderMedAktivitetOgBehandlingsbarn(
         @RequestBody request: PersonIdentRequest,
     ): Ressurs<LøpendeOvergangsstønadAktivitetsperioder> {
-            if (!SikkerhetContext.erMaskinTilMaskinToken()) {
-                tilgangService.validerTilgangTilPerson(request.personIdent, AuditLoggerEvent.ACCESS)
-            }
-           return Ressurs.success(eksternStønadsperioderService.hentOvergangsstønadperioderMedAktivitet(request.personIdent))
+        if (!SikkerhetContext.erMaskinTilMaskinToken()) {
+            tilgangService.validerTilgangTilPerson(request.personIdent, AuditLoggerEvent.ACCESS)
         }
+        return Ressurs.success(eksternStønadsperioderService.hentOvergangsstønadperioderMedAktivitet(request.personIdent))
+    }
 }
 
 data class PersonIdentRequest(

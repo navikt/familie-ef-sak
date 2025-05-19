@@ -38,7 +38,6 @@ class PeriodeService(
     private val vilkårsvurderingRepository: VilkårsvurderingRepository,
     private val barnService: BarnService,
 ) {
-
     fun hentPerioderFraEfOgInfotrygd(personIdent: String): InternePerioder {
         val personIdenter = personService.hentPersonIdenter(personIdent).identer()
         val perioderFraReplika = infotrygdService.hentSammenslåttePerioderSomInternPerioder(personIdenter)
@@ -135,8 +134,8 @@ class PeriodeService(
             // då vi ønsker de sortert på siste hendelsen først
             .sortedWith(compareBy<InternPeriode> { it.stønadFom }.reversed())
 
-    private fun tilArbeidsoppfølgingsPeriode(andelerTilkjentYtelse: List<AndelTilkjentYtelse>): List<PeriodeMedAktivitetOgBarn> {
-        return andelerTilkjentYtelse
+    private fun tilArbeidsoppfølgingsPeriode(andelerTilkjentYtelse: List<AndelTilkjentYtelse>): List<PeriodeMedAktivitetOgBarn> =
+        andelerTilkjentYtelse
             .filter { it.harPeriodeSomLøperNåEllerIFramtid() }
             .mapNotNull { andel ->
                 val andelsVedtak = finnVedtaksperiodeforAndel(andel)
@@ -145,7 +144,6 @@ class PeriodeService(
                     else -> lagOvergangsstønadperiodeMedAktivitet(andel, andelsVedtak)
                 }
             }.sortedBy { it.stønadFraOgMed }
-    }
 
     private fun lagOvergangsstønadperiodeMedAktivitet(
         andel: AndelTilkjentYtelse,

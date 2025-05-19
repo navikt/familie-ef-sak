@@ -118,5 +118,4 @@ class EksternStønadsperioderService(
         val perioderMedAktivitet = periodeService.hentLøpendeOvergangsstønadPerioderMedAktivitetOgBehandlingsbarn(personIdent = personIdent)
         return LøpendeOvergangsstønadAktivitetsperioder(setOf(personIdent), perioderMedAktivitet)
     }
-
 }
