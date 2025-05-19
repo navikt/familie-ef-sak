@@ -4,7 +4,6 @@ import no.nav.familie.ef.sak.behandling.dto.ÅrsakRevurderingDto
 import no.nav.familie.ef.sak.brev.dto.Avsnitt
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.KontantstøttePeriode
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadDatoerDto
-import no.nav.familie.ef.sak.samværsavtale.dto.SamværsavtaleDto
 import no.nav.familie.ef.sak.vedtak.dto.VedtakDto
 import no.nav.familie.ef.sak.vilkår.dto.TidligereVedtaksperioderDto
 import no.nav.familie.ef.sak.vilkår.dto.VilkårDto
@@ -20,7 +19,6 @@ data class BlankettPdfRequest(
     val vedtak: VedtakDto,
     val søknadsdatoer: SøknadDatoerDto?,
     val harAvsluttetArbeidsforhold: Boolean?,
-    val samværsavtaler: List<SamværsavtaleDto>,
     val beregnetSamvær: List<BeregnetSamvær>,
 )
 
