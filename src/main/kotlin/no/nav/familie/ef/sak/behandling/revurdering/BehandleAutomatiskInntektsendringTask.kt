@@ -9,6 +9,7 @@ import no.nav.familie.ef.sak.beregning.Inntektsperiode
 import no.nav.familie.ef.sak.beregning.tilInntekt
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
+import no.nav.familie.ef.sak.felles.util.isEqualOrBefore
 import no.nav.familie.ef.sak.infrastruktur.config.ObjectMapperProvider.objectMapper
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
@@ -21,6 +22,7 @@ import no.nav.familie.ef.sak.vedtak.dto.fraDomene
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.ef.felles.Opplysningskilde
 import no.nav.familie.kontrakter.ef.felles.Revurderingsårsak
+import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
@@ -89,7 +91,7 @@ class BehandleAutomatiskInntektsendringTask(
         val forrigeVedtak = vedtakService.hentVedtak(forrigeBehandling.id)
 
         val perioder = oppdaterFørsteVedtaksperiodeMedRevurderesFraDato(forrigeVedtak, inntektResponse)
-        val inntektsperioder = oppdaterInntektMedNyBeregnetForventetInntekt(forrigeVedtak, inntektResponse)
+        val inntektsperioder = oppdaterInntektMedNyBeregnetForventetInntekt(forrigeVedtak, inntektResponse, perioder.first().periode.fom)
         val innvilgelseOvergangsstønad =
             InnvilgelseOvergangsstønad(
                 periodeBegrunnelse = forrigeVedtak.periodeBegrunnelse,
@@ -113,24 +115,18 @@ class BehandleAutomatiskInntektsendringTask(
         secureLogger.info("Månedlig inntekt for fagsak eksternId=${fagsak.eksternId} : $inntektPrMåned")
         val forventetInntekt = inntektResponse.forventetMånedsinntekt()
         val behandling = behandlingService.finnSisteIverksatteBehandlingMedEventuellAvslått(fagsak.id)
-        val startdatoForrigeVedtak =
-            if (behandling != null) {
-                vedtakService
-                    .hentVedtak(behandling.id)
-                    .perioder
-                    ?.perioder
-                    ?.firstOrNull()
-                    ?.periode
-                    ?.fom ?: YearMonth.now()
-            } else {
-                logger.info("Fant ikke siste iverksatte behandling for fagsakId: ${fagsak.id}")
-                YearMonth.now()
-            }
-
-        logger.info("Toggle for automatisering av inntekt er AV. Ville opprettet revurdering for fagsak eksternId=${fagsak.eksternId} med en forventetInntekt på $forventetInntekt og revurdert fra dato: ${inntektResponse.revurderesFraDato(startdatoForrigeVedtak)}")
+        if (behandling != null) {
+            val forrigeVedtak = vedtakService.hentVedtak(behandling.id)
+            val perioder = oppdaterFørsteVedtaksperiodeMedRevurderesFraDato(forrigeVedtak, inntektResponse)
+            val inntektsperioder = oppdaterInntektMedNyBeregnetForventetInntekt(forrigeVedtak, inntektResponse, perioder.first().periode.fom)
+            logger.info("Ville opprettet inntektsperioder for fagsak eksternId: ${fagsak.eksternId} - nye inntektsperioder: " + inntektsperioder)
+            logger.info("Ville opprettet følgende vedtaksperioder for fagsak eksternId: ${fagsak.eksternId} - nye vedtaksperioder: $perioder med ny forventet månedsinntekt: $forventetInntekt")
+        } else {
+            logger.info("Fant ikke siste iverksatte behandling for fagsakId: ${fagsak.id}")
+        }
     }
 
-    private fun oppdaterFørsteVedtaksperiodeMedRevurderesFraDato(
+    fun oppdaterFørsteVedtaksperiodeMedRevurderesFraDato(
         forrigeVedtak: Vedtak,
         inntektResponse: InntektResponse,
     ): List<Vedtaksperiode> {
@@ -139,9 +135,8 @@ class BehandleAutomatiskInntektsendringTask(
             førstePeriode?.copy(
                 datoFra =
                     inntektResponse
-                        .førsteMånedOgInntektMed10ProsentØkning(førstePeriode.periode.fom)
-                        ?.first
-                        ?.atDay(1)
+                        .førsteMånedMed10ProsentInntektsøkning(forrigeVedtak)
+                        .atDay(1)
                         ?.plusMonths(1) ?: førstePeriode.datoFra,
             ) as Vedtaksperiode
         val perioder =
@@ -153,10 +148,33 @@ class BehandleAutomatiskInntektsendringTask(
         return perioder
     }
 
-    private fun oppdaterInntektMedNyBeregnetForventetInntekt(
+    fun oppdaterInntektMedNyBeregnetForventetInntekt(
         forrigeVedtak: Vedtak,
         inntektResponse: InntektResponse,
+        revurderesFra: YearMonth,
     ): List<Inntektsperiode> {
+        if (revurderesFra.isBefore(YearMonth.now())) {
+            val inntektsperioder =
+                generateSequence(revurderesFra) { måned -> måned.plusMonths(1) }
+                    .takeWhile { måned -> måned.isEqualOrBefore(YearMonth.now().minusMonths(1)) }
+                    .map { måned ->
+                        Inntektsperiode(
+                            periode = Månedsperiode(måned),
+                            månedsinntekt = BigDecimal(inntektResponse.totalInntektForÅrMåned(måned)),
+                            inntekt = BigDecimal(0),
+                            samordningsfradrag = BigDecimal(0),
+                        )
+                    }.toList()
+            val inntektsperiodeFremover =
+                Inntektsperiode(
+                    periode = Månedsperiode(YearMonth.now(), forrigeVedtak.perioder?.perioder?.maxOf { it.periode.tom } ?: throw IllegalStateException("Mangler vedtaksperioder")),
+                    månedsinntekt = BigDecimal(inntektResponse.forventetMånedsinntekt()),
+                    inntekt = BigDecimal(0),
+                    samordningsfradrag = BigDecimal(0),
+                )
+            return inntektsperioder + listOf(inntektsperiodeFremover)
+        }
+
         val forventetÅrsinntekt = inntektResponse.forventetMånedsinntekt() * 12
         val inntekterMinimum3MndTilbake = forrigeVedtak.inntekter?.inntekter?.filter { it.periode.fomDato <= YearMonth.now().minusMonths(3).atDay(1) } ?: emptyList()
         val nyesteInntektsperiode = inntekterMinimum3MndTilbake.maxBy { it.periode.fomDato }
