@@ -11,6 +11,10 @@
         "NEI" : {
           "begrunnelseType" : "VALGFRI",
           "regelId" : "SLUTT_NODE"
+        },
+        "IKKE_RELEVANT_IKKE_FØRSTEGANGSSØKNAD" : {
+          "begrunnelseType" : "UTEN",
+          "regelId" : "SLUTT_NODE"
         }
       },
       "versjon" : "GJELDENDE"
