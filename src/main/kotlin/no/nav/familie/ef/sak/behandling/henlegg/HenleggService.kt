@@ -95,7 +95,6 @@ class HenleggService(
                     saksbehandlerBrevrequest = objectMapper.valueToTree(henleggelsesbrev),
                     saksbehandlersignatur = signatur.navn,
                     saksbehandlerEnhet = signatur.enhet,
-                    enhet = signatur.enhet,
                     skjulBeslutterSignatur = signatur.skjulBeslutter,
                 ).replace(VedtaksbrevService.BESLUTTER_VEDTAKSDATO_PLACEHOLDER, LocalDate.now().norskFormat())
 

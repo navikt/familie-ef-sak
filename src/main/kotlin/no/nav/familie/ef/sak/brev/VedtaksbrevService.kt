@@ -66,7 +66,6 @@ class VedtaksbrevService(
                 saksbehandlerBrevrequest = brevrequest,
                 saksbehandlersignatur = signatur.navn,
                 saksbehandlerEnhet = signatur.enhet,
-                enhet = signatur.enhet,
                 skjulBeslutterSignatur = signatur.skjulBeslutter,
             )
 

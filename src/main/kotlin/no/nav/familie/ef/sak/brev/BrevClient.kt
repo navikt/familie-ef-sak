@@ -6,7 +6,7 @@ import no.nav.familie.ef.sak.brev.VedtaksbrevService.Companion.BESLUTTER_ENHET_P
 import no.nav.familie.ef.sak.brev.VedtaksbrevService.Companion.BESLUTTER_SIGNATUR_PLACEHOLDER
 import no.nav.familie.ef.sak.brev.VedtaksbrevService.Companion.BESLUTTER_VEDTAKSDATO_PLACEHOLDER
 import no.nav.familie.ef.sak.brev.domain.FRITEKST
-import no.nav.familie.ef.sak.brev.dto.FritekstBrevRequestMedSignatur
+import no.nav.familie.ef.sak.brev.dto.FritekstBrevMedSignaturRequest
 import no.nav.familie.ef.sak.felles.util.medContentTypeJsonUTF8
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.næringsinntektskontroll.NæringsinntektIngenEndringPdfRequest
@@ -31,13 +31,11 @@ class BrevClient(
         operations.optionsForAllow(pingUri)
     }
 
-    // TODO: Fjern enhet
     fun genererHtml(
         brevmal: String,
         saksbehandlerBrevrequest: JsonNode,
         saksbehandlersignatur: String,
         saksbehandlerEnhet: String?,
-        enhet: String?,
         skjulBeslutterSignatur: Boolean,
     ): String {
         feilHvis(brevmal === FRITEKST) {
@@ -54,7 +52,6 @@ class BrevClient(
                 saksbehandlerEnhet = saksbehandlerEnhet,
                 besluttersignatur = BESLUTTER_SIGNATUR_PLACEHOLDER,
                 beslutterEnhet = BESLUTTER_ENHET_PLACEHOLDER,
-                enhet = enhet,
                 skjulBeslutterSignatur = skjulBeslutterSignatur,
                 datoPlaceholder = BESLUTTER_VEDTAKSDATO_PLACEHOLDER,
             ),
@@ -72,7 +69,7 @@ class BrevClient(
         return postForEntity(url, næringsinntektIngenEndringPdfRequest, HttpHeaders().medContentTypeJsonUTF8())
     }
 
-    fun genererFritekstBrev(request: FritekstBrevRequestMedSignatur): ByteArray {
+    fun genererFritekstBrev(request: FritekstBrevMedSignaturRequest): ByteArray {
         val url = URI.create("$familieBrevUri/api/fritekst-brev")
         return postForEntity(url, request, HttpHeaders().medContentTypeJsonUTF8())
     }
@@ -88,7 +85,6 @@ data class BrevRequestMedSignaturer(
     val saksbehandlerEnhet: String?,
     val besluttersignatur: String?,
     val beslutterEnhet: String?,
-    val enhet: String?,
     val skjulBeslutterSignatur: Boolean,
     val datoPlaceholder: String,
 )
