@@ -15,11 +15,11 @@ import no.nav.familie.ef.sak.oppgave.TilordnetRessursService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.gjeldende
 import no.nav.familie.ef.sak.samværsavtale.SamværsavtaleService
+import no.nav.familie.ef.sak.vilkår.BehandlingStegOppdaterer
 import no.nav.familie.ef.sak.vilkår.VilkårType
 import no.nav.familie.ef.sak.vilkår.Vilkårsresultat
 import no.nav.familie.ef.sak.vilkår.Vilkårsvurdering
 import no.nav.familie.ef.sak.vilkår.VilkårsvurderingRepository
-import no.nav.familie.ef.sak.vilkår.VurderingStegService
 import no.nav.familie.ef.sak.vilkår.dto.GjenbruktVilkårResponse
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -35,7 +35,7 @@ class GjenbrukVilkårService(
     private val barnService: BarnService,
     private val tilordnetRessursService: TilordnetRessursService,
     private val samværsavtaleService: SamværsavtaleService,
-    private val vurderingStegService: VurderingStegService,
+    private val behandlingStegOppdaterer: BehandlingStegOppdaterer,
 ) {
     private val secureLogger = LoggerFactory.getLogger("secureLogger")
 
@@ -102,7 +102,7 @@ class GjenbrukVilkårService(
         val samværsavtaler = samværsavtaleService.hentSamværsavtalerForBehandling(behandlingSomSkalOppdateresId)
         val gjenbruktVilkårsvurdering = gjenbrukInngangsvilkårVurdering(behandlingSomSkalOppdateresId, behandlingForGjenbrukId, vilkårsvurderingSomSkalOppdateres)
 
-        vurderingStegService.oppdaterStegOgKategoriPåBehandling(behandlingSomSkalOppdateresId)
+        behandlingStegOppdaterer.oppdaterStegOgKategoriPåBehandling(behandlingSomSkalOppdateresId)
 
         return GjenbruktVilkårResponse(gjenbruktVilkårsvurdering, samværsavtaler)
     }

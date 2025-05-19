@@ -1,13 +1,6 @@
 package no.nav.familie.ef.sak.vilkår
 
 import no.nav.familie.ef.sak.behandling.BehandlingService
-import no.nav.familie.ef.sak.behandling.Saksbehandling
-import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
-import no.nav.familie.ef.sak.behandlingsflyt.steg.StegService
-import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
-import no.nav.familie.ef.sak.behandlingsflyt.task.BehandlingsstatistikkTask
-import no.nav.familie.ef.sak.behandlingshistorikk.BehandlingshistorikkService
-import no.nav.familie.ef.sak.behandlingshistorikk.domain.StegUtfall
 import no.nav.familie.ef.sak.blankett.BlankettRepository
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
@@ -18,10 +11,7 @@ import no.nav.familie.ef.sak.vilkår.dto.SvarPåVurderingerDto
 import no.nav.familie.ef.sak.vilkår.dto.VilkårsvurderingDto
 import no.nav.familie.ef.sak.vilkår.dto.tilDto
 import no.nav.familie.ef.sak.vilkår.regler.evalutation.OppdaterVilkår
-import no.nav.familie.ef.sak.vilkår.regler.evalutation.OppdaterVilkår.utledBehandlingKategori
-import no.nav.familie.ef.sak.vilkår.regler.evalutation.OppdaterVilkår.utledResultatForVilkårSomGjelderFlereBarn
 import no.nav.familie.ef.sak.vilkår.regler.hentVilkårsregel
-import no.nav.familie.prosessering.internal.TaskService
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -32,11 +22,9 @@ class VurderingStegService(
     private val behandlingService: BehandlingService,
     private val vurderingService: VurderingService,
     private val vilkårsvurderingRepository: VilkårsvurderingRepository,
-    private val stegService: StegService,
-    private val taskService: TaskService,
     private val blankettRepository: BlankettRepository,
-    private val behandlingshistorikkService: BehandlingshistorikkService,
     private val tilordnetRessursService: TilordnetRessursService,
+    private val behandlingStegOppdaterer: BehandlingStegOppdaterer,
 ) {
     @Transactional
     fun oppdaterVilkår(vilkårsvurderingDto: SvarPåVurderingerDto): VilkårsvurderingDto {
@@ -53,7 +41,7 @@ class VurderingStegService(
             )
         blankettRepository.deleteById(behandlingId)
         val oppdatertVilkårsvurderingDto = vilkårsvurderingRepository.update(nyVilkårsvurdering).tilDto()
-        oppdaterStegOgKategoriPåBehandling(vilkårsvurdering.behandlingId)
+        behandlingStegOppdaterer.oppdaterStegOgKategoriPåBehandling(vilkårsvurdering.behandlingId)
         return oppdatertVilkårsvurderingDto
     }
 
@@ -68,7 +56,7 @@ class VurderingStegService(
         blankettRepository.deleteById(behandlingId)
 
         val nullstillVilkårMedNyeHovedregler = nullstillVilkårMedNyeHovedregler(behandlingId, vilkårsvurdering)
-        oppdaterStegOgKategoriPåBehandling(behandlingId)
+        behandlingStegOppdaterer.oppdaterStegOgKategoriPåBehandling(behandlingId)
         return nullstillVilkårMedNyeHovedregler
     }
 
@@ -83,56 +71,8 @@ class VurderingStegService(
         blankettRepository.deleteById(behandlingId)
 
         val oppdatertVilkår = oppdaterVilkårsvurderingTilSkalIkkeVurderes(behandlingId, vilkårsvurdering)
-        oppdaterStegOgKategoriPåBehandling(behandlingId)
+        behandlingStegOppdaterer.oppdaterStegOgKategoriPåBehandling(behandlingId)
         return oppdatertVilkår
-    }
-
-    fun oppdaterStegOgKategoriPåBehandling(behandlingId: UUID) {
-        val saksbehandling = behandlingService.hentSaksbehandling(behandlingId)
-        val lagredeVilkårsvurderinger = vilkårsvurderingRepository.findByBehandlingId(behandlingId)
-
-        oppdaterStegPåBehandling(saksbehandling, lagredeVilkårsvurderinger)
-        oppdaterKategoriPåBehandling(saksbehandling, lagredeVilkårsvurderinger)
-    }
-
-    private fun oppdaterStegPåBehandling(
-        saksbehandling: Saksbehandling,
-        vilkårsvurderinger: List<Vilkårsvurdering>,
-    ) {
-        val vilkårsresultat =
-            vilkårsvurderinger.groupBy { it.type }.map {
-                if (it.key.gjelderFlereBarn()) {
-                    utledResultatForVilkårSomGjelderFlereBarn(it.value)
-                } else {
-                    it.value.single().resultat
-                }
-            }
-
-        if (saksbehandling.steg == StegType.VILKÅR && OppdaterVilkår.erAlleVilkårTattStillingTil(vilkårsresultat)) {
-            stegService.håndterVilkår(saksbehandling).id
-        } else if (saksbehandling.steg != StegType.VILKÅR && vilkårsresultat.any { it == Vilkårsresultat.IKKE_TATT_STILLING_TIL }) {
-            stegService.resetSteg(saksbehandling.id, StegType.VILKÅR)
-        } else if (saksbehandling.harStatusOpprettet) {
-            behandlingService.oppdaterStatusPåBehandling(saksbehandling.id, BehandlingStatus.UTREDES)
-            behandlingshistorikkService.opprettHistorikkInnslag(behandlingId = saksbehandling.id, stegtype = StegType.VILKÅR, utfall = StegUtfall.UTREDNING_PÅBEGYNT, metadata = null)
-            opprettBehandlingsstatistikkTask(saksbehandling)
-        }
-    }
-
-    private fun oppdaterKategoriPåBehandling(
-        saksbehandling: Saksbehandling,
-        vilkårsvurderinger: List<Vilkårsvurdering>,
-    ) {
-        val lagretKategori = saksbehandling.kategori
-        val utledetKategori = utledBehandlingKategori(vilkårsvurderinger)
-
-        if (lagretKategori != utledetKategori) {
-            behandlingService.oppdaterKategoriPåBehandling(saksbehandling.id, utledetKategori)
-        }
-    }
-
-    private fun opprettBehandlingsstatistikkTask(saksbehandling: Saksbehandling) {
-        taskService.save(BehandlingsstatistikkTask.opprettPåbegyntTask(behandlingId = saksbehandling.id))
     }
 
     private fun nullstillVilkårMedNyeHovedregler(
