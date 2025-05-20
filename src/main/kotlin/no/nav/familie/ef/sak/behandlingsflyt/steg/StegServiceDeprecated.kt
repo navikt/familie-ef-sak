@@ -14,7 +14,6 @@ import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType.FERDIGSTILLE_BEHANDLI
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType.PUBLISER_VEDTAKSHENDELSE
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType.REVURDERING_ÅRSAK
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType.SEND_TIL_BESLUTTER
-import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType.VENTE_PÅ_STATUS_FRA_IVERKSETT
 import no.nav.familie.ef.sak.behandlingshistorikk.BehandlingshistorikkService
 import no.nav.familie.ef.sak.behandlingshistorikk.domain.Behandlingshistorikk
 import no.nav.familie.ef.sak.infrastruktur.config.RolleConfig
@@ -85,13 +84,6 @@ class StegServiceDeprecated(
         val saksbehandling = behandlingService.hentSaksbehandling(behandlingId)
 
         return håndterSteg(saksbehandling, årsakRevurderingSteg, data)
-    }
-
-    @Transactional
-    fun håndterPollStatusFraIverksett(saksbehandling: Saksbehandling): Behandling {
-        val behandlingSteg: VentePåStatusFraIverksett = hentBehandlingSteg(VENTE_PÅ_STATUS_FRA_IVERKSETT)
-
-        return håndterSteg(saksbehandling, behandlingSteg, null)
     }
 
     @Transactional
