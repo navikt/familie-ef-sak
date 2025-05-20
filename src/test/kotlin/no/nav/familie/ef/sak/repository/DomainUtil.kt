@@ -530,7 +530,7 @@ fun inntektsperiode(
     sluttDato: LocalDate = LocalDate.of(år, 12, 1),
     inntekt: BigDecimal = BigDecimal.valueOf(100000),
     samordningsfradrag: BigDecimal = BigDecimal.valueOf(500),
-    dagsats: BigDecimal? = null,
+    dagsats: BigDecimal? = BigDecimal.valueOf(0),
     månedsinntekt: BigDecimal? = null,
 ) = Inntektsperiode(periode = Månedsperiode(startDato, sluttDato), dagsats = dagsats, månedsinntekt = månedsinntekt, inntekt = inntekt, samordningsfradrag = samordningsfradrag)
 

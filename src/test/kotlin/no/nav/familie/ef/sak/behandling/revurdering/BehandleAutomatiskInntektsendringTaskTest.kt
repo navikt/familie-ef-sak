@@ -190,7 +190,7 @@ class BehandleAutomatiskInntektsendringTaskTest : OppslagSpringRunnerTest() {
                 inntektsperiode(Månedsperiode(YearMonth.now(), vedtakTom), BigDecimal(gjennomsnittSiste3Mnd.toInt())),
             )
 
-        assertThat(forventedeInntektsperioderINyttVedtak).isEqualTo(oppdatertInntekt)
+        assertThat(oppdatertInntekt).isEqualTo(forventedeInntektsperioderINyttVedtak)
     }
 
     @Test

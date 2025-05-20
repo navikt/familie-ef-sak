@@ -166,6 +166,7 @@ class BehandleAutomatiskInntektsendringTask(
                             periode = Månedsperiode(måned),
                             månedsinntekt = BigDecimal(inntektResponse.totalInntektForÅrMåned(måned)),
                             inntekt = BigDecimal(0),
+                            dagsats = BigDecimal(0),
                             samordningsfradrag = BigDecimal(0),
                         )
                     }.toList()
@@ -175,6 +176,7 @@ class BehandleAutomatiskInntektsendringTask(
                     periode = Månedsperiode(YearMonth.now(), forrigeVedtak.perioder?.perioder?.maxOf { it.periode.tom } ?: throw IllegalStateException("Mangler vedtaksperioder")),
                     månedsinntekt = BigDecimal(inntektResponse.forventetMånedsinntekt()),
                     inntekt = BigDecimal(0),
+                    dagsats = BigDecimal(0),
                     samordningsfradrag = BigDecimal(0),
                 )
             logger.info("inntektsperiodeFremover: $inntektsperiodeFremover")
