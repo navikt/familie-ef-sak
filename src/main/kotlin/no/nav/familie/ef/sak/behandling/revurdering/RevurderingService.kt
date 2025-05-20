@@ -9,8 +9,9 @@ import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.behandling.dto.RevurderingDto
 import no.nav.familie.ef.sak.behandling.dto.RevurderingsinformasjonDto
-import no.nav.familie.ef.sak.behandlingsflyt.steg.StegServiceDeprecated
+import no.nav.familie.ef.sak.behandlingsflyt.steg.StegService
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
+import no.nav.familie.ef.sak.behandlingsflyt.steg.ÅrsakRevurderingSteg
 import no.nav.familie.ef.sak.behandlingsflyt.task.BehandlingsstatistikkTask
 import no.nav.familie.ef.sak.behandlingsflyt.task.OpprettOppgaveForOpprettetBehandlingTask
 import no.nav.familie.ef.sak.fagsak.FagsakService
@@ -47,7 +48,8 @@ class RevurderingService(
     private val barnService: BarnService,
     private val fagsakService: FagsakService,
     private val årsakRevurderingService: ÅrsakRevurderingService,
-    private val stegServiceDeprecated: StegServiceDeprecated,
+    private val årsakRevurderingSteg: ÅrsakRevurderingSteg,
+    private val stegService: StegService,
     private val kopierVedtakService: KopierVedtakService,
     private val vedtakService: VedtakService,
     private val nyeBarnService: NyeBarnService,
@@ -61,7 +63,10 @@ class RevurderingService(
         behandlingId: UUID,
         revurderingsinformasjonDto: RevurderingsinformasjonDto,
     ): RevurderingsinformasjonDto {
-        stegServiceDeprecated.håndterÅrsakRevurdering(behandlingId, revurderingsinformasjonDto)
+        val saksbehandling = behandlingService.hentSaksbehandling(behandlingId)
+
+        stegService.håndterSteg(saksbehandling, årsakRevurderingSteg, revurderingsinformasjonDto)
+
         return hentRevurderingsinformasjon(behandlingId)
     }
 
