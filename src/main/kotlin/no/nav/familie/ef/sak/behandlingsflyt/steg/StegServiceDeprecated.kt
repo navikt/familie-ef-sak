@@ -85,26 +85,6 @@ class StegServiceDeprecated(
     }
 
     @Transactional
-    fun resetSteg(
-        behandlingId: UUID,
-        steg: StegType,
-    ) {
-        val behandling = behandlingService.hentBehandling(behandlingId)
-        if (behandling.status != BehandlingStatus.UTREDES) {
-            error("Kan ikke endre steg når status=${behandling.status} behandling=$behandlingId")
-        }
-        if (steg.kommerEtter(behandling.steg)) {
-            error(
-                "Kan ikke sette behandling til steg=$steg når behandling allerede " +
-                    "er på ${behandling.steg} behandling=$behandlingId",
-            )
-        }
-
-        validerAtStegKanResettes(behandling, steg)
-        behandlingService.oppdaterStegPåBehandling(behandlingId, steg)
-    }
-
-    @Transactional
     fun angreSendTilBeslutter(behandlingId: UUID) {
         val saksbehandling = behandlingService.hentSaksbehandling(behandlingId)
         val beslutter = vedtakService.hentVedtak(behandlingId).beslutterIdent
@@ -123,22 +103,6 @@ class StegServiceDeprecated(
 
         behandlingService.oppdaterStegPåBehandling(behandlingId, SEND_TIL_BESLUTTER)
         behandlingService.oppdaterStatusPåBehandling(behandlingId, BehandlingStatus.UTREDES)
-    }
-
-    private fun validerAtStegKanResettes(
-        behandling: Behandling,
-        steg: StegType,
-    ) {
-        val harTilgangTilSteg = SikkerhetContext.harTilgangTilGittRolle(rolleConfig, behandling.steg.tillattFor)
-        val harTilgangTilNesteSteg = SikkerhetContext.harTilgangTilGittRolle(rolleConfig, steg.tillattFor)
-        if (!harTilgangTilSteg || !harTilgangTilNesteSteg) {
-            val saksbehandler = SikkerhetContext.hentSaksbehandlerEllerSystembruker()
-            error(
-                "$saksbehandler kan ikke endre" +
-                    " fra steg=${behandling.steg.displayName()} til steg=${steg.displayName()}" +
-                    " pga manglende rolle på behandling=$behandling.id",
-            )
-        }
     }
 
     // Generelle stegmetoder
