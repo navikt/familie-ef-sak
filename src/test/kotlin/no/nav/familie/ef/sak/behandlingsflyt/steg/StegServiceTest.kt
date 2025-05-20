@@ -2,15 +2,21 @@ package no.nav.familie.ef.sak.no.nav.familie.ef.sak.behandlingsflyt.steg
 
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
+import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
+import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus.IVERKSETTER_VEDTAK
 import no.nav.familie.ef.sak.behandlingsflyt.steg.BeregnYtelseSteg
+import no.nav.familie.ef.sak.behandlingsflyt.steg.BeslutteVedtakSteg
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegService
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
+import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType.VENTE_PÅ_STATUS_FRA_IVERKSETT
 import no.nav.familie.ef.sak.behandlingsflyt.steg.VilkårSteg
 import no.nav.familie.ef.sak.behandlingshistorikk.BehandlingshistorikkRepository
 import no.nav.familie.ef.sak.beregning.Inntekt
 import no.nav.familie.ef.sak.fagsak.FagsakRepository
+import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil
+import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.fagsakpersoner
@@ -19,6 +25,7 @@ import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.ef.sak.vedtak.domain.AktivitetType
 import no.nav.familie.ef.sak.vedtak.domain.SamordningsfradragType
 import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
+import no.nav.familie.ef.sak.vedtak.dto.BeslutteVedtakDto
 import no.nav.familie.ef.sak.vedtak.dto.InnvilgelseOvergangsstønad
 import no.nav.familie.ef.sak.vedtak.dto.VedtaksperiodeDto
 import no.nav.familie.kontrakter.felles.Månedsperiode
@@ -51,6 +58,9 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
 
     @Autowired
     lateinit var beregnYtelseSteg: BeregnYtelseSteg
+
+    @Autowired
+    lateinit var beslutteVedtakSteg: BeslutteVedtakSteg
 
     @AfterEach
     internal fun tearDown() {
@@ -125,5 +135,24 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
 
         assertThat(behandlingshistorikkRepository.findByBehandlingIdOrderByEndretTidDesc(behandling.id).first().steg)
             .isEqualTo(StegType.BEREGNE_YTELSE)
+    }
+
+    @Test
+    internal fun `skal feile hvis behandling iverksettes og man prøver godkjenne saksbehandling`() {
+        val fagsak = testoppsettService.lagreFagsak(fagsak())
+        val behandling = behandlingSomIverksettes(fagsak)
+        vedtakService.lagreVedtak(InnvilgelseOvergangsstønad("", ""), behandling.id, fagsak.stønadstype)
+        BrukerContextUtil.mockBrukerContext("navIdent")
+        val beslutteVedtakDto = BeslutteVedtakDto(true, "")
+        val feil =
+            assertThrows<ApiFeil> {
+                stegService.håndterSteg(saksbehandling(fagsak, behandling), beslutteVedtakSteg, beslutteVedtakDto)
+            }
+        assertThat(feil.message).isEqualTo("Behandlingen er allerede besluttet. Status på behandling er 'Iverksetter vedtak'")
+    }
+
+    private fun behandlingSomIverksettes(fagsak: Fagsak): Behandling {
+        val nyBehandling = behandling(fagsak, IVERKSETTER_VEDTAK, VENTE_PÅ_STATUS_FRA_IVERKSETT)
+        return behandlingRepository.insert(nyBehandling)
     }
 }

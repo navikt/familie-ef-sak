@@ -12,6 +12,8 @@ import no.nav.familie.ef.sak.infrastruktur.config.RolleConfig
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.vedtak.VedtakService
+import no.nav.familie.ef.sak.vedtak.dto.BeslutteVedtakDto
+import no.nav.familie.ef.sak.vedtak.dto.SendTilBeslutterDto
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -27,6 +29,19 @@ class StegService(
 ) {
     private val logger: Logger = LoggerFactory.getLogger(this::class.java)
     private val secureLogger = LoggerFactory.getLogger("secureLogger")
+
+    @Transactional
+    fun håndterFerdigstilleVedtakUtenBeslutter(
+        saksbehandling: Saksbehandling,
+        sendTilBeslutterSteg: SendTilBeslutterSteg,
+        beslutteVedtakSteg: BeslutteVedtakSteg,
+        sendTilBeslutter: SendTilBeslutterDto?,
+    ): Behandling {
+        håndterSteg(saksbehandling, sendTilBeslutterSteg, sendTilBeslutter)
+        val oppdatertBehandling = behandlingService.hentSaksbehandling(saksbehandling.id)
+        val godkjentBesluttetVedtak = BeslutteVedtakDto(godkjent = true)
+        return håndterSteg(oppdatertBehandling, beslutteVedtakSteg, godkjentBesluttetVedtak)
+    }
 
     @Transactional
     fun resetSteg(

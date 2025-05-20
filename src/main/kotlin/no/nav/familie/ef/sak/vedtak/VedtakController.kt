@@ -5,8 +5,9 @@ import no.nav.familie.ef.sak.behandling.BehandlingRepository
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.behandlingsflyt.steg.BeregnYtelseSteg
+import no.nav.familie.ef.sak.behandlingsflyt.steg.BeslutteVedtakSteg
+import no.nav.familie.ef.sak.behandlingsflyt.steg.SendTilBeslutterSteg
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegService
-import no.nav.familie.ef.sak.behandlingsflyt.steg.StegServiceDeprecated
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvisIkke
@@ -46,8 +47,9 @@ import java.util.UUID
 @ProtectedWithClaims(issuer = "azuread")
 @Validated
 class VedtakController(
-    private val stegServiceDeprecated: StegServiceDeprecated,
     private val beregnYtelseSteg: BeregnYtelseSteg,
+    private val sendTilBeslutterSteg: SendTilBeslutterSteg,
+    private val beslutteVedtakSteg: BeslutteVedtakSteg,
     private val stegService: StegService,
     private val behandlingService: BehandlingService,
     private val totrinnskontrollService: TotrinnskontrollService,
@@ -76,9 +78,9 @@ class VedtakController(
         val vedtakErUtenBeslutter = vedtakService.hentVedtak(behandlingId).utledVedtakErUtenBeslutter()
 
         return if (vedtakErUtenBeslutter.value) {
-            Ressurs.success(stegServiceDeprecated.håndterFerdigstilleVedtakUtenBeslutter(behandling, sendTilBeslutter).id)
+            Ressurs.success(stegService.håndterFerdigstilleVedtakUtenBeslutter(behandling, sendTilBeslutterSteg, beslutteVedtakSteg, sendTilBeslutter).id)
         } else {
-            Ressurs.success(stegServiceDeprecated.håndterSendTilBeslutter(behandling, sendTilBeslutter).id)
+            Ressurs.success(stegService.håndterSteg(behandling, sendTilBeslutterSteg, sendTilBeslutter).id)
         }
     }
 
@@ -105,7 +107,7 @@ class VedtakController(
         if (!request.godkjent && request.begrunnelse.isNullOrBlank()) {
             throw ApiFeil("Mangler begrunnelse", HttpStatus.BAD_REQUEST)
         }
-        return Ressurs.success(stegServiceDeprecated.håndterBeslutteVedtak(behandling, request).id)
+        return Ressurs.success(stegService.håndterSteg(behandling, beslutteVedtakSteg, request).id)
     }
 
     @GetMapping("{behandlingId}/totrinnskontroll")

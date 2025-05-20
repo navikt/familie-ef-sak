@@ -57,17 +57,6 @@ class StegServiceDeprecated(
     }
 
     @Transactional
-    fun håndterFerdigstilleVedtakUtenBeslutter(
-        saksbehandling: Saksbehandling,
-        sendTilBeslutter: SendTilBeslutterDto?,
-    ): Behandling {
-        håndterSendTilBeslutter(saksbehandling, sendTilBeslutter)
-        val oppdatertBehandling = behandlingService.hentSaksbehandling(saksbehandling.id)
-        val godkjentBesluttetVedtak = BeslutteVedtakDto(godkjent = true)
-        return håndterBeslutteVedtak(oppdatertBehandling, godkjentBesluttetVedtak)
-    }
-
-    @Transactional
     fun håndterSendTilBeslutter(
         saksbehandling: Saksbehandling,
         sendTilBeslutter: SendTilBeslutterDto?,
