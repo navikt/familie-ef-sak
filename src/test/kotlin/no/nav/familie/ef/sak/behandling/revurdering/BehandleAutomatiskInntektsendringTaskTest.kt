@@ -2,10 +2,7 @@ package no.nav.familie.ef.sak.no.nav.familie.ef.sak.behandling.revurdering
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.mockk.every
-import io.mockk.mockk
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
-import no.nav.familie.ef.sak.amelding.InntektResponse
-import no.nav.familie.ef.sak.amelding.ekstern.AMeldingInntektClient
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
@@ -226,8 +223,20 @@ class BehandleAutomatiskInntektsendringTaskTest : OppslagSpringRunnerTest() {
         val revurdering = behandlingService.hentBehandlinger(fagsak.id).last()
         val oppdatertVedtak = vedtakService.hentVedtak(revurdering.id)
 
-        assertThat(oppdatertVedtak.perioder?.perioder?.first()?.periode?.fom).isEqualTo(YearMonth.now().minusMonths(3))
-        assertThat(oppdatertVedtak.perioder?.perioder?.first()?.periode?.tom).isEqualTo(vedtakTom)
+        assertThat(
+            oppdatertVedtak.perioder
+                ?.perioder
+                ?.first()
+                ?.periode
+                ?.fom,
+        ).isEqualTo(YearMonth.now().minusMonths(3))
+        assertThat(
+            oppdatertVedtak.perioder
+                ?.perioder
+                ?.first()
+                ?.periode
+                ?.tom,
+        ).isEqualTo(vedtakTom)
 
         val oppdatertInntekt = oppdatertVedtak.inntekter?.inntekter ?: emptyList()
         assertThat(oppdatertInntekt.size).isEqualTo(4)
@@ -243,8 +252,5 @@ class BehandleAutomatiskInntektsendringTaskTest : OppslagSpringRunnerTest() {
             )
 
         assertThat(oppdatertInntekt).isEqualTo(forventedeInntektsperioderINyttVedtak)
-
     }
-
-
 }
