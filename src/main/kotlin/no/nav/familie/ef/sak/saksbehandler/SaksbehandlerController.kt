@@ -18,7 +18,7 @@ class SaksbehandlerController(
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
-    @GetMapping("/behandler-informasjon")
+    @GetMapping("/saksbehandler-informasjon")
     fun hentSaksbehandlerInformasjon(): Ressurs<Saksbehandler> {
         val navIdent = SikkerhetContext.hentSaksbehandler()
         logger.info("Henter saksbehandler informasjon for: $navIdent")
