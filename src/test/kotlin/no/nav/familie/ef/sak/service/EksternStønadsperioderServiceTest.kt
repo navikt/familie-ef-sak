@@ -2,6 +2,7 @@ package no.nav.familie.ef.sak.service
 
 import io.mockk.every
 import io.mockk.mockk
+import no.nav.familie.ef.sak.barn.BarnService
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.ekstern.stønadsperiode.EksternStønadsperioderService
 import no.nav.familie.ef.sak.fagsak.FagsakService
@@ -22,6 +23,7 @@ import no.nav.familie.ef.sak.vedtak.domain.SkolepengerStudietype
 import no.nav.familie.ef.sak.vedtak.domain.SkolepengerUtgift
 import no.nav.familie.ef.sak.vedtak.domain.SkolepengerWrapper
 import no.nav.familie.ef.sak.vedtak.domain.SkoleårsperiodeSkolepenger
+import no.nav.familie.ef.sak.vilkår.VilkårsvurderingRepository
 import no.nav.familie.ef.sak.økonomi.lagAndelTilkjentYtelse
 import no.nav.familie.ef.sak.økonomi.lagTilkjentYtelse
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPeriodeResponse
@@ -46,6 +48,8 @@ internal class EksternStønadsperioderServiceTest {
     private val tilkjentYtelseService = mockk<TilkjentYtelseService>()
     private val fagsakService = mockk<FagsakService>()
     private val vedtakService = mockk<VedtakService>()
+    private val vilkårsvurderingRepository = mockk<VilkårsvurderingRepository>()
+    private val barnService = mockk<BarnService>()
     private val periodeService =
         PeriodeService(
             personService,
@@ -54,6 +58,8 @@ internal class EksternStønadsperioderServiceTest {
             tilkjentYtelseService,
             InfotrygdService(infotrygdReplikaClient, personService),
             vedtakService,
+            vilkårsvurderingRepository = vilkårsvurderingRepository,
+            barnService = barnService,
         )
 
     private val service = EksternStønadsperioderService(periodeService = periodeService)

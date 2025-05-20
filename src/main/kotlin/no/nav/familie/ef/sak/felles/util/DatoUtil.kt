@@ -87,4 +87,6 @@ fun YearMonth.formaterYearMonthTilMånedÅr(): String {
     return yearMonth.format(formatter)
 }
 
-fun YearMonth.isEqualOrAfter(other: YearMonth) = this == other || this.isAfter(other)
+fun YearMonth.isEqualOrAfter(other: YearMonth?) = other == null || this == other || this.isAfter(other)
+
+fun YearMonth.isEqualOrBefore(other: YearMonth) = this == other || this.isBefore(other)

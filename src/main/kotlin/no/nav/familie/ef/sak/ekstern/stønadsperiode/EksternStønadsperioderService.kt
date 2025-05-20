@@ -2,6 +2,7 @@ package no.nav.familie.ef.sak.ekstern.stønadsperiode
 
 import no.nav.familie.ef.sak.ekstern.stønadsperiode.util.ArenaPeriodeUtil
 import no.nav.familie.ef.sak.infotrygd.InternPeriode
+import no.nav.familie.ef.sak.infotrygd.LøpendeOvergangsstønadAktivitetsperioder
 import no.nav.familie.ef.sak.infotrygd.PeriodeService
 import no.nav.familie.kontrakter.felles.Datoperiode
 import no.nav.familie.kontrakter.felles.ef.EksternPeriode
@@ -111,5 +112,10 @@ class EksternStønadsperioderService(
             .filter { periode ->
                 Datoperiode(fom = periode.stønadFom, tom = periode.stønadTom).overlapper(begrensetPeriode)
             }
+    }
+
+    fun hentOvergangsstønadperioderMedAktivitet(personIdent: String): LøpendeOvergangsstønadAktivitetsperioder {
+        val perioderMedAktivitet = periodeService.hentLøpendeOvergangsstønadPerioderMedAktivitetOgBehandlingsbarn(personIdent = personIdent)
+        return LøpendeOvergangsstønadAktivitetsperioder(setOf(personIdent), perioderMedAktivitet)
     }
 }
