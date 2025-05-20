@@ -10,7 +10,6 @@ import no.nav.familie.ef.sak.behandling.dto.RevurderingsinformasjonDto
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType.BEHANDLING_FERDIGSTILT
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType.BEREGNE_YTELSE
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType.BESLUTTE_VEDTAK
-import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType.FERDIGSTILLE_BEHANDLING
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType.REVURDERING_ÅRSAK
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType.SEND_TIL_BESLUTTER
 import no.nav.familie.ef.sak.behandlingshistorikk.BehandlingshistorikkService
@@ -83,13 +82,6 @@ class StegServiceDeprecated(
         val saksbehandling = behandlingService.hentSaksbehandling(behandlingId)
 
         return håndterSteg(saksbehandling, årsakRevurderingSteg, data)
-    }
-
-    @Transactional
-    fun håndterFerdigstillBehandling(saksbehandling: Saksbehandling): Behandling {
-        val behandlingSteg: FerdigstillBehandlingSteg = hentBehandlingSteg(FERDIGSTILLE_BEHANDLING)
-
-        return håndterSteg(saksbehandling, behandlingSteg, null)
     }
 
     @Transactional
