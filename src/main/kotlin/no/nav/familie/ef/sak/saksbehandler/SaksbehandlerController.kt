@@ -20,10 +20,14 @@ class SaksbehandlerController(
 
     @GetMapping("/behandler-informasjon")
     fun hentSaksbehandlerInformasjon(
-        @RequestBody navIdent: String
+        @RequestBody requestBody: HentSaksbehandlerInformasjonRequestBody
     ): Ressurs<Saksbehandler> {
-        logger.info("Henter saksbehandler informasjon for: $navIdent")
-        val saksbehandler = oppgaveClient.hentSaksbehandlerInfo(navIdent)
+        logger.info("Henter saksbehandler informasjon for: $requestBody.navIdent")
+        val saksbehandler = oppgaveClient.hentSaksbehandlerInfo(requestBody.navIdent)
         return Ressurs.success(saksbehandler)
     }
 }
+
+data class HentSaksbehandlerInformasjonRequestBody(
+    val navIdent: String,
+)
