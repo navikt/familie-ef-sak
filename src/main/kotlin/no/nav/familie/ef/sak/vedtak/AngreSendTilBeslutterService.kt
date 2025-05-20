@@ -2,7 +2,7 @@ package no.nav.familie.ef.sak.vedtak
 
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.Saksbehandling
-import no.nav.familie.ef.sak.behandlingsflyt.steg.StegService
+import no.nav.familie.ef.sak.behandlingsflyt.steg.StegServiceDeprecated
 import no.nav.familie.ef.sak.behandlingsflyt.task.FerdigstillOppgaveTask
 import no.nav.familie.ef.sak.behandlingsflyt.task.OpprettOppgaveTask
 import no.nav.familie.ef.sak.behandlingshistorikk.BehandlingshistorikkService
@@ -24,7 +24,7 @@ class AngreSendTilBeslutterService(
     private val behandlingService: BehandlingService,
     private val behandlingshistorikkService: BehandlingshistorikkService,
     private val taskService: TaskService,
-    private val stegService: StegService,
+    private val stegServiceDeprecated: StegServiceDeprecated,
     private val totrinnskontrollService: TotrinnskontrollService,
 ) {
     @Transactional
@@ -43,7 +43,7 @@ class AngreSendTilBeslutterService(
         ferdigstillGodkjenneVedtakOppgave(saksbehandling)
         opprettBehandleSakOppgave(saksbehandling)
 
-        stegService.angreSendTilBeslutter(behandlingId)
+        stegServiceDeprecated.angreSendTilBeslutter(behandlingId)
     }
 
     private fun opprettBehandleSakOppgave(saksbehandling: Saksbehandling) {

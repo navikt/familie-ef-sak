@@ -11,7 +11,7 @@ import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.dto.RevurderingDto
 import no.nav.familie.ef.sak.behandling.migrering.MigreringService
 import no.nav.familie.ef.sak.behandling.revurdering.RevurderingService
-import no.nav.familie.ef.sak.behandlingsflyt.steg.StegService
+import no.nav.familie.ef.sak.behandlingsflyt.steg.StegServiceDeprecated
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.behandlingsflyt.task.FerdigstillBehandlingTask
 import no.nav.familie.ef.sak.behandlingsflyt.task.LagSaksbehandlingsblankettTask
@@ -126,7 +126,7 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
     private lateinit var vilkårsvurderingRepository: VilkårsvurderingRepository
 
     @Autowired
-    private lateinit var stegService: StegService
+    private lateinit var stegServiceDeprecated: StegServiceDeprecated
 
     @Autowired
     private lateinit var oppgaveRepository: OppgaveRepository
@@ -865,14 +865,14 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
         val brevrequest = objectMapper.readTree("123")
         opprettOppgave(saksbehandling.id)
         testWithBrukerContext(preferredUsername = "Z999999", groups = listOf(rolleConfig.saksbehandlerRolle)) {
-            stegService.håndterÅrsakRevurdering(saksbehandling.id, revurderingsinformasjon())
-            stegService.håndterBeregnYtelseForStønad(saksbehandling, innvilget)
+            stegServiceDeprecated.håndterÅrsakRevurdering(saksbehandling.id, revurderingsinformasjon())
+            stegServiceDeprecated.håndterBeregnYtelseForStønad(saksbehandling, innvilget)
             tilbakekrevingService.lagreTilbakekreving(
                 TilbakekrevingDto(Tilbakekrevingsvalg.AVVENT, begrunnelse = ""),
                 saksbehandling.id,
             )
             vedtaksbrevService.lagSaksbehandlerSanitybrev(saksbehandling, brevrequest, "brevMal")
-            stegService.håndterSendTilBeslutter(behandlingService.hentSaksbehandling(saksbehandling.id), null)
+            stegServiceDeprecated.håndterSendTilBeslutter(behandlingService.hentSaksbehandling(saksbehandling.id), null)
         }
     }
 
@@ -889,7 +889,7 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
     private fun godkjennTotrinnskontroll(saksbehandling: Saksbehandling) {
         testWithBrukerContext(preferredUsername = "Beslutter", groups = listOf(rolleConfig.beslutterRolle)) {
             vedtaksbrevService.forhåndsvisBeslutterBrev(saksbehandling)
-            stegService.håndterBeslutteVedtak(
+            stegServiceDeprecated.håndterBeslutteVedtak(
                 behandlingService.hentSaksbehandling(saksbehandling.id),
                 BeslutteVedtakDto(true),
             )

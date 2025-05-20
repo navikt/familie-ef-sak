@@ -1,6 +1,6 @@
 package no.nav.familie.ef.sak.behandlingsflyt.task
 
-import no.nav.familie.ef.sak.behandlingsflyt.steg.StegService
+import no.nav.familie.ef.sak.behandlingsflyt.steg.StegServiceDeprecated
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
@@ -14,10 +14,10 @@ import java.util.UUID
     beskrivelse = "Sender hendelse om vedtak",
 )
 class PubliserVedtakshendelseTask(
-    private val stegService: StegService,
+    private val stegServiceDeprecated: StegServiceDeprecated,
 ) : AsyncTaskStep {
     override fun doTask(task: Task) {
-        stegService.publiserVedtakshendelse(UUID.fromString(task.payload))
+        stegServiceDeprecated.publiserVedtakshendelse(UUID.fromString(task.payload))
     }
 
     companion object {

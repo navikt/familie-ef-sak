@@ -4,7 +4,7 @@ import no.nav.familie.ef.sak.AuditLoggerEvent
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.Saksbehandling
-import no.nav.familie.ef.sak.behandlingsflyt.steg.StegService
+import no.nav.familie.ef.sak.behandlingsflyt.steg.StegServiceDeprecated
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvisIkke
@@ -21,7 +21,6 @@ import no.nav.familie.ef.sak.vedtak.historikk.VedtakHistorikkService
 import no.nav.familie.ef.sak.vilkår.VurderingService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
-import no.nav.familie.leader.Environment
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
@@ -45,7 +44,7 @@ import java.util.UUID
 @ProtectedWithClaims(issuer = "azuread")
 @Validated
 class VedtakController(
-    private val stegService: StegService,
+    private val stegServiceDeprecated: StegServiceDeprecated,
     private val behandlingService: BehandlingService,
     private val totrinnskontrollService: TotrinnskontrollService,
     private val tilgangService: TilgangService,
@@ -73,9 +72,9 @@ class VedtakController(
         val vedtakErUtenBeslutter = vedtakService.hentVedtak(behandlingId).utledVedtakErUtenBeslutter()
 
         return if (vedtakErUtenBeslutter.value) {
-            Ressurs.success(stegService.håndterFerdigstilleVedtakUtenBeslutter(behandling, sendTilBeslutter).id)
+            Ressurs.success(stegServiceDeprecated.håndterFerdigstilleVedtakUtenBeslutter(behandling, sendTilBeslutter).id)
         } else {
-            Ressurs.success(stegService.håndterSendTilBeslutter(behandling, sendTilBeslutter).id)
+            Ressurs.success(stegServiceDeprecated.håndterSendTilBeslutter(behandling, sendTilBeslutter).id)
         }
     }
 
@@ -102,7 +101,7 @@ class VedtakController(
         if (!request.godkjent && request.begrunnelse.isNullOrBlank()) {
             throw ApiFeil("Mangler begrunnelse", HttpStatus.BAD_REQUEST)
         }
-        return Ressurs.success(stegService.håndterBeslutteVedtak(behandling, request).id)
+        return Ressurs.success(stegServiceDeprecated.håndterBeslutteVedtak(behandling, request).id)
     }
 
     @GetMapping("{behandlingId}/totrinnskontroll")
@@ -141,7 +140,7 @@ class VedtakController(
         validerKanRedigereBehandling(behandling)
         validerGyldigAvslagÅrsak(vedtak)
         validerAlleVilkårOppfyltDersomInvilgelse(vedtak, behandlingId)
-        return Ressurs.success(stegService.håndterBeregnYtelseForStønad(behandling, vedtak).id)
+        return Ressurs.success(stegServiceDeprecated.håndterBeregnYtelseForStønad(behandling, vedtak).id)
     }
 
     @DeleteMapping("/{behandlingId}")

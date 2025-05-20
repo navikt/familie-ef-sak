@@ -2,7 +2,7 @@ package no.nav.familie.ef.sak.behandlingsflyt.task
 
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.Saksbehandling
-import no.nav.familie.ef.sak.behandlingsflyt.steg.StegService
+import no.nav.familie.ef.sak.behandlingsflyt.steg.StegServiceDeprecated
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
@@ -19,13 +19,13 @@ import java.util.UUID
     beskrivelse = "Ferdigstill behandling.",
 )
 class FerdigstillBehandlingTask(
-    private val stegService: StegService,
+    private val stegServiceDeprecated: StegServiceDeprecated,
     private val behandlingService: BehandlingService,
 ) : AsyncTaskStep {
     override fun doTask(task: Task) {
         val behandlingId = UUID.fromString(task.payload)
         val behandling = behandlingService.hentSaksbehandling(behandlingId)
-        stegService.håndterFerdigstillBehandling(behandling)
+        stegServiceDeprecated.håndterFerdigstillBehandling(behandling)
     }
 
     companion object {

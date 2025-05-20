@@ -8,7 +8,7 @@ import io.mockk.verifyAll
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
-import no.nav.familie.ef.sak.behandlingsflyt.steg.StegService
+import no.nav.familie.ef.sak.behandlingsflyt.steg.StegServiceDeprecated
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.brev.MellomlagringBrevService
 import no.nav.familie.ef.sak.brev.VedtaksbrevService
@@ -30,7 +30,7 @@ import java.util.UUID
 class NullstillVedtakServiceTest {
     private val vedtakService = mockk<VedtakService>(relaxed = true)
 
-    private val stegService = mockk<StegService>(relaxed = true)
+    private val stegServiceDeprecated = mockk<StegServiceDeprecated>(relaxed = true)
     private val behandlingService = mockk<BehandlingService>()
     private val simuleringService = mockk<SimuleringService>(relaxed = true)
     private val tilkjentYtelseService = mockk<TilkjentYtelseService>(relaxed = true)
@@ -43,7 +43,7 @@ class NullstillVedtakServiceTest {
     private val nullstillVedtakService =
         NullstillVedtakService(
             vedtakService,
-            stegService,
+            stegServiceDeprecated,
             behandlingService,
             simuleringService,
             tilkjentYtelseService,
@@ -78,7 +78,7 @@ class NullstillVedtakServiceTest {
             tilbakekrevingService.slettTilbakekreving(behandlingId)
             vedtaksbrevService.slettVedtaksbrev(any())
             vedtakService.slettVedtakHvisFinnes(behandlingId)
-            stegService.resetSteg(behandlingId, StegType.BEREGNE_YTELSE)
+            stegServiceDeprecated.resetSteg(behandlingId, StegType.BEREGNE_YTELSE)
             oppfølgingsoppgaveService.slettOppfølgingsoppgave(any())
         }
 
@@ -94,7 +94,7 @@ class NullstillVedtakServiceTest {
             )
         nullstillVedtakService.nullstillVedtak(behandlingId)
         verify(exactly = 0) {
-            stegService.resetSteg(any(), any())
+            stegServiceDeprecated.resetSteg(any(), any())
         }
         verify {
             vedtakService.slettVedtakHvisFinnes(behandlingId)

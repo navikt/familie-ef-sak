@@ -30,7 +30,7 @@ internal class RevurderingServiceTest {
             taskService = mockk(),
             barnService = mockk(),
             fagsakService = fagsakService,
-            stegService = mockk(),
+            stegServiceDeprecated = mockk(),
             årsakRevurderingService = mockk(),
             kopierVedtakService = mockk(),
             vedtakService = mockk(),

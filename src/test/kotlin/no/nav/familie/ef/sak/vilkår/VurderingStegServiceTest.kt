@@ -13,6 +13,7 @@ import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegService
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
+import no.nav.familie.ef.sak.behandlingsflyt.steg.VilkårSteg
 import no.nav.familie.ef.sak.behandlingshistorikk.BehandlingshistorikkService
 import no.nav.familie.ef.sak.behandlingshistorikk.domain.StegUtfall
 import no.nav.familie.ef.sak.blankett.BlankettRepository
@@ -66,6 +67,7 @@ internal class VurderingStegServiceTest {
     private val personopplysningerIntegrasjonerClient = mockk<PersonopplysningerIntegrasjonerClient>()
     private val blankettRepository = mockk<BlankettRepository>()
     private val vilkårGrunnlagService = mockk<VilkårGrunnlagService>()
+    private val vilkårSteg = mockk<VilkårSteg>()
     private val stegService = mockk<StegService>()
     private val taskService = mockk<TaskService>()
     private val grunnlagsdataService = mockk<GrunnlagsdataService>()
@@ -92,8 +94,9 @@ internal class VurderingStegServiceTest {
             behandlingService = behandlingService,
             vurderingService = vurderingService,
             vilkårsvurderingRepository = vilkårsvurderingRepository,
-            blankettRepository = blankettRepository,
+            vilkårSteg = vilkårSteg,
             stegService = stegService,
+            blankettRepository = blankettRepository,
             taskService = taskService,
             behandlingshistorikkService = behandlingshistorikkService,
             tilordnetRessursService = tilordnetRessursService,

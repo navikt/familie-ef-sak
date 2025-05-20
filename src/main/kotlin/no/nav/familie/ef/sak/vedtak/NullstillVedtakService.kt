@@ -1,7 +1,7 @@
 package no.nav.familie.ef.sak.vedtak
 
 import no.nav.familie.ef.sak.behandling.BehandlingService
-import no.nav.familie.ef.sak.behandlingsflyt.steg.StegService
+import no.nav.familie.ef.sak.behandlingsflyt.steg.StegServiceDeprecated
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.brev.MellomlagringBrevService
 import no.nav.familie.ef.sak.brev.VedtaksbrevService
@@ -18,7 +18,7 @@ import java.util.UUID
 @Service
 class NullstillVedtakService(
     private val vedtakService: VedtakService,
-    private val stegService: StegService,
+    private val stegServiceDeprecated: StegServiceDeprecated,
     private val behandlingService: BehandlingService,
     private val simuleringService: SimuleringService,
     private val tilkjentYtelseService: TilkjentYtelseService,
@@ -44,7 +44,7 @@ class NullstillVedtakService(
         tilkjentYtelseService.slettTilkjentYtelseForBehandling(behandlingId)
         tilbakekrevingService.slettTilbakekreving(behandlingId)
         if (saksbehandling.steg.kommerEtter(StegType.BEREGNE_YTELSE)) {
-            stegService.resetSteg(behandlingId, StegType.BEREGNE_YTELSE)
+            stegServiceDeprecated.resetSteg(behandlingId, StegType.BEREGNE_YTELSE)
         }
         vedtakService.slettVedtakHvisFinnes(behandlingId)
         vedtaksbrevService.slettVedtaksbrev(saksbehandling)
