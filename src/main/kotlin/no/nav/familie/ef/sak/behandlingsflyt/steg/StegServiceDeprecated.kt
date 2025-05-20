@@ -5,7 +5,6 @@ import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.behandling.domain.Behandling
-import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.dto.RevurderingsinformasjonDto
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType.BEHANDLING_FERDIGSTILT
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType.BEREGNE_YTELSE
@@ -23,7 +22,6 @@ import no.nav.familie.ef.sak.vedtak.dto.SendTilBeslutterDto
 import no.nav.familie.ef.sak.vedtak.dto.VedtakDto
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
@@ -82,27 +80,6 @@ class StegServiceDeprecated(
         val saksbehandling = behandlingService.hentSaksbehandling(behandlingId)
 
         return håndterSteg(saksbehandling, årsakRevurderingSteg, data)
-    }
-
-    @Transactional
-    fun angreSendTilBeslutter(behandlingId: UUID) {
-        val saksbehandling = behandlingService.hentSaksbehandling(behandlingId)
-        val beslutter = vedtakService.hentVedtak(behandlingId).beslutterIdent
-
-        feilHvis(saksbehandling.steg != BESLUTTE_VEDTAK, httpStatus = HttpStatus.BAD_REQUEST) {
-            if (saksbehandling.steg.kommerEtter(BESLUTTE_VEDTAK)) {
-                "Kan ikke angre send til beslutter da vedtaket er godkjent av $beslutter"
-            } else {
-                "Kan ikke angre send til beslutter når behandling er i steg ${saksbehandling.steg}"
-            }
-        }
-
-        feilHvis(saksbehandling.status != BehandlingStatus.FATTER_VEDTAK, httpStatus = HttpStatus.BAD_REQUEST) {
-            "Kan ikke angre send til beslutter når behandlingen har status ${saksbehandling.status}"
-        }
-
-        behandlingService.oppdaterStegPåBehandling(behandlingId, SEND_TIL_BESLUTTER)
-        behandlingService.oppdaterStatusPåBehandling(behandlingId, BehandlingStatus.UTREDES)
     }
 
     // Generelle stegmetoder
