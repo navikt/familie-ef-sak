@@ -530,14 +530,14 @@ fun inntektsperiode(
     sluttDato: LocalDate = LocalDate.of(år, 12, 1),
     inntekt: BigDecimal = BigDecimal.valueOf(100000),
     samordningsfradrag: BigDecimal = BigDecimal.valueOf(500),
-    dagsats: BigDecimal? = null,
+    dagsats: BigDecimal? = BigDecimal.valueOf(0),
     månedsinntekt: BigDecimal? = null,
 ) = Inntektsperiode(periode = Månedsperiode(startDato, sluttDato), dagsats = dagsats, månedsinntekt = månedsinntekt, inntekt = inntekt, samordningsfradrag = samordningsfradrag)
 
 fun inntektsperiode(
     månedsperiode: Månedsperiode,
     månedsinntekt: BigDecimal? = null,
-) = Inntektsperiode(periode = månedsperiode, månedsinntekt = månedsinntekt, inntekt = 0.toBigDecimal(), samordningsfradrag = 0.toBigDecimal())
+) = Inntektsperiode(periode = månedsperiode, månedsinntekt = månedsinntekt, dagsats = 0.toBigDecimal(), inntekt = 0.toBigDecimal(), samordningsfradrag = 0.toBigDecimal())
 
 fun vedtaksperiode(
     år: Int = 2021,
