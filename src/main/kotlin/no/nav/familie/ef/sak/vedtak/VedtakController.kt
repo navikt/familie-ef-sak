@@ -4,6 +4,8 @@ import no.nav.familie.ef.sak.AuditLoggerEvent
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.Saksbehandling
+import no.nav.familie.ef.sak.behandlingsflyt.steg.BeregnYtelseSteg
+import no.nav.familie.ef.sak.behandlingsflyt.steg.StegService
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegServiceDeprecated
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
@@ -45,6 +47,8 @@ import java.util.UUID
 @Validated
 class VedtakController(
     private val stegServiceDeprecated: StegServiceDeprecated,
+    private val beregnYtelseSteg: BeregnYtelseSteg,
+    private val stegService: StegService,
     private val behandlingService: BehandlingService,
     private val totrinnskontrollService: TotrinnskontrollService,
     private val tilgangService: TilgangService,
@@ -140,7 +144,7 @@ class VedtakController(
         validerKanRedigereBehandling(behandling)
         validerGyldigAvslagÅrsak(vedtak)
         validerAlleVilkårOppfyltDersomInvilgelse(vedtak, behandlingId)
-        return Ressurs.success(stegServiceDeprecated.håndterBeregnYtelseForStønad(behandling, vedtak).id)
+        return Ressurs.success(stegService.håndterSteg(behandling, beregnYtelseSteg, vedtak).id)
     }
 
     @DeleteMapping("/{behandlingId}")

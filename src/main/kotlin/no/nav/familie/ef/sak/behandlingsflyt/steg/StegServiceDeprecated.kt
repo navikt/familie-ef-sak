@@ -48,12 +48,6 @@ class StegServiceDeprecated(
     private val stegFeiletMetrics: Map<StegType, Counter> = initStegMetrikker("feil")
 
     @Transactional
-    fun håndterVilkår(saksbehandling: Saksbehandling): Behandling {
-        val behandlingSteg: VilkårSteg = hentBehandlingSteg(StegType.VILKÅR)
-        return håndterSteg(saksbehandling, behandlingSteg, null)
-    }
-
-    @Transactional
     fun håndterBeregnYtelseForStønad(
         saksbehandling: Saksbehandling,
         vedtak: VedtakDto,
