@@ -537,7 +537,7 @@ fun inntektsperiode(
 fun inntektsperiode(
     månedsperiode: Månedsperiode,
     månedsinntekt: BigDecimal? = null,
-) = Inntektsperiode(periode = månedsperiode, månedsinntekt = månedsinntekt, inntekt = 0.toBigDecimal(), samordningsfradrag = 0.toBigDecimal())
+) = Inntektsperiode(periode = månedsperiode, månedsinntekt = månedsinntekt, dagsats = BigDecimal.ZERO, inntekt = BigDecimal.ZERO, samordningsfradrag = BigDecimal.ZERO)
 
 fun vedtaksperiode(
     år: Int = 2021,

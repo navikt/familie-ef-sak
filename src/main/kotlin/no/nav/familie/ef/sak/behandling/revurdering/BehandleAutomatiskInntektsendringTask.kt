@@ -131,6 +131,7 @@ class BehandleAutomatiskInntektsendringTask(
         inntektResponse: InntektResponse,
     ): List<Vedtaksperiode> {
         val førstePeriode = forrigeVedtak.perioder?.perioder?.first()
+        logger.info("første periode: $førstePeriode")
         val førstePeriodeMedRevurderesFraDato =
             førstePeriode?.copy(
                 datoFra =
@@ -139,12 +140,14 @@ class BehandleAutomatiskInntektsendringTask(
                         .atDay(1)
                         ?.plusMonths(1) ?: førstePeriode.datoFra,
             ) as Vedtaksperiode
+        logger.info("første periode med revurderes fra dato: $førstePeriodeMedRevurderesFraDato")
         val perioder =
             if (forrigeVedtak.perioder.perioder.size > 1) {
                 listOf(førstePeriodeMedRevurderesFraDato) + forrigeVedtak.perioder.perioder.subList(1, forrigeVedtak.perioder.perioder.size)
             } else {
                 listOf(førstePeriodeMedRevurderesFraDato)
             }
+        logger.info("perioder: $perioder")
         return perioder
     }
 
@@ -153,6 +156,7 @@ class BehandleAutomatiskInntektsendringTask(
         inntektResponse: InntektResponse,
         revurderesFra: YearMonth,
     ): List<Inntektsperiode> {
+        logger.info("Er revurderes fra bakover i tid: ${revurderesFra.isBefore(YearMonth.now())}")
         if (revurderesFra.isBefore(YearMonth.now())) {
             val inntektsperioder =
                 generateSequence(revurderesFra) { måned -> måned.plusMonths(1) }
@@ -165,6 +169,7 @@ class BehandleAutomatiskInntektsendringTask(
                             samordningsfradrag = BigDecimal(0),
                         )
                     }.toList()
+            logger.info("inntektsperioder: $inntektsperioder")
             val inntektsperiodeFremover =
                 Inntektsperiode(
                     periode = Månedsperiode(YearMonth.now(), forrigeVedtak.perioder?.perioder?.maxOf { it.periode.tom } ?: throw IllegalStateException("Mangler vedtaksperioder")),
@@ -172,6 +177,7 @@ class BehandleAutomatiskInntektsendringTask(
                     inntekt = BigDecimal(0),
                     samordningsfradrag = BigDecimal(0),
                 )
+            logger.info("inntektsperiodeFremover: $inntektsperiodeFremover")
             return inntektsperioder + listOf(inntektsperiodeFremover)
         }
 
