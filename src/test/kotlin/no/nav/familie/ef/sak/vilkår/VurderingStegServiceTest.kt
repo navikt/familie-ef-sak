@@ -1,9 +1,9 @@
 package no.nav.familie.ef.sak.vilkår
 
 import io.mockk.CapturingSlot
+import io.mockk.Runs
 import io.mockk.every
 import io.mockk.just
-import io.mockk.justRun
 import io.mockk.mockk
 import io.mockk.runs
 import io.mockk.slot
@@ -11,11 +11,6 @@ import io.mockk.verify
 import no.nav.familie.ef.sak.barn.BarnService
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
-import no.nav.familie.ef.sak.behandlingsflyt.steg.StegService
-import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
-import no.nav.familie.ef.sak.behandlingsflyt.steg.VilkårSteg
-import no.nav.familie.ef.sak.behandlingshistorikk.BehandlingshistorikkService
-import no.nav.familie.ef.sak.behandlingshistorikk.domain.StegUtfall
 import no.nav.familie.ef.sak.blankett.BlankettRepository
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil
@@ -49,7 +44,6 @@ import no.nav.familie.ef.sak.vilkår.regler.vilkårsreglerForStønad
 import no.nav.familie.kontrakter.ef.søknad.TestsøknadBuilder
 import no.nav.familie.kontrakter.felles.ef.StønadType.OVERGANGSSTØNAD
 import no.nav.familie.kontrakter.felles.medlemskap.Medlemskapsinfo
-import no.nav.familie.prosessering.internal.TaskService
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.catchThrowable
 import org.junit.jupiter.api.AfterEach
@@ -67,15 +61,12 @@ internal class VurderingStegServiceTest {
     private val personopplysningerIntegrasjonerClient = mockk<PersonopplysningerIntegrasjonerClient>()
     private val blankettRepository = mockk<BlankettRepository>()
     private val vilkårGrunnlagService = mockk<VilkårGrunnlagService>()
-    private val vilkårSteg = mockk<VilkårSteg>()
-    private val stegService = mockk<StegService>()
-    private val taskService = mockk<TaskService>()
     private val grunnlagsdataService = mockk<GrunnlagsdataService>()
     private val fagsakService = mockk<FagsakService>()
     private val gjenbrukVilkårService = mockk<GjenbrukVilkårService>()
-    private val behandlingshistorikkService = mockk<BehandlingshistorikkService>()
     private val tilordnetRessursService = mockk<TilordnetRessursService>()
     private val samværsavtaleService = mockk<SamværsavtaleService>()
+    private val behandlingStegOppdaterer = mockk<BehandlingStegOppdaterer>()
     private val vurderingService =
         VurderingService(
             behandlingService,
@@ -94,12 +85,9 @@ internal class VurderingStegServiceTest {
             behandlingService = behandlingService,
             vurderingService = vurderingService,
             vilkårsvurderingRepository = vilkårsvurderingRepository,
-            vilkårSteg = vilkårSteg,
-            stegService = stegService,
             blankettRepository = blankettRepository,
-            taskService = taskService,
-            behandlingshistorikkService = behandlingshistorikkService,
             tilordnetRessursService = tilordnetRessursService,
+            behandlingStegOppdaterer = behandlingStegOppdaterer,
         )
     private val søknad =
         SøknadsskjemaMapper
@@ -127,9 +115,9 @@ internal class VurderingStegServiceTest {
         every { behandlingService.oppdaterStatusPåBehandling(any(), any()) } returns behandling
         every { behandlingService.oppdaterKategoriPåBehandling(any(), any()) } returns behandling
         every { søknadService.hentSøknadsgrunnlag(any()) }.returns(søknad)
+        every { behandlingStegOppdaterer.oppdaterStegOgKategoriPåBehandling(behandlingId) } just Runs
         every { blankettRepository.deleteById(any()) } just runs
         every { fagsakService.hentFagsakForBehandling(any()) } returns fagsak(stønadstype = OVERGANGSSTØNAD)
-        every { taskService.save(any()) } answers { firstArg() }
         every { personopplysningerIntegrasjonerClient.hentMedlemskapsinfo(any()) }
             .returns(
                 Medlemskapsinfo(
@@ -149,7 +137,6 @@ internal class VurderingStegServiceTest {
         every { vilkårGrunnlagService.hentGrunnlag(any(), any(), any(), any()) } returns
             mockVilkårGrunnlagDto(sivilstand = sivilstand)
         every { gjenbrukVilkårService.finnBehandlingerForGjenbruk(any()) } returns emptyList()
-        justRun { behandlingshistorikkService.opprettHistorikkInnslag(any(), any(), any(), any()) }
 
         BrukerContextUtil.mockBrukerContext("saksbehandlernavn")
     }
@@ -310,10 +297,7 @@ internal class VurderingStegServiceTest {
             ),
         )
 
-        verify(exactly = 1) { behandlingService.oppdaterStatusPåBehandling(any(), BehandlingStatus.UTREDES) }
-        verify(exactly = 1) {
-            behandlingshistorikkService.opprettHistorikkInnslag(any(), StegType.VILKÅR, StegUtfall.UTREDNING_PÅBEGYNT, metadata = null)
-        }
+        verify(exactly = 1) { behandlingStegOppdaterer.oppdaterStegOgKategoriPåBehandling(behandlingId) }
     }
 
     @Test
@@ -347,10 +331,7 @@ internal class VurderingStegServiceTest {
             ),
         )
 
-        verify(exactly = 0) { behandlingService.oppdaterStatusPåBehandling(any(), BehandlingStatus.UTREDES) }
-        verify(exactly = 0) {
-            behandlingshistorikkService.opprettHistorikkInnslag(any(), StegType.VILKÅR, StegUtfall.UTREDNING_PÅBEGYNT, metadata = null)
-        }
+        verify(exactly = 1) { behandlingStegOppdaterer.oppdaterStegOgKategoriPåBehandling(behandlingId) }
     }
 
     @Test

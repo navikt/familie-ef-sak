@@ -681,12 +681,13 @@ fun opprettAlleVilkårsvurderinger(
     behandlingId: UUID,
     metadata: HovedregelMetadata,
     stønadstype: StønadType,
+    resultat: Vilkårsresultat? = null,
 ): List<Vilkårsvurdering> =
     vilkårsreglerForStønad(stønadstype).flatMap { vilkårsregel ->
         if (vilkårsregel.vilkårType.gjelderFlereBarn() && metadata.barn.isNotEmpty()) {
-            metadata.barn.map { lagNyVilkårsvurdering(vilkårsregel, metadata, behandlingId, it.id) }
+            metadata.barn.map { lagNyVilkårsvurdering(vilkårsregel, metadata, behandlingId, it.id, resultat) }
         } else {
-            listOf(lagNyVilkårsvurdering(vilkårsregel, metadata, behandlingId))
+            listOf(lagNyVilkårsvurdering(vilkårsregel, metadata, behandlingId, resultat = resultat))
         }
     }
 
@@ -784,6 +785,7 @@ private fun lagNyVilkårsvurdering(
     metadata: HovedregelMetadata,
     behandlingId: UUID,
     barnId: UUID? = null,
+    resultat: Vilkårsresultat? = null,
 ): Vilkårsvurdering {
     val delvilkårsvurdering = initierDelvilkårsvurderinger(vilkårsregel, metadata, barnId)
     return Vilkårsvurdering(
@@ -791,7 +793,7 @@ private fun lagNyVilkårsvurdering(
         type = vilkårsregel.vilkårType,
         barnId = barnId,
         delvilkårsvurdering = DelvilkårsvurderingWrapper(delvilkårsvurdering),
-        resultat = utledResultat(vilkårsregel, delvilkårsvurdering.map { it.tilDto() }).vilkår,
+        resultat = resultat ?: utledResultat(vilkårsregel, delvilkårsvurdering.map { it.tilDto() }).vilkår,
         opphavsvilkår = null,
     )
 }
