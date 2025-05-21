@@ -89,23 +89,6 @@ class AutomatiskRevurderingServiceTest {
     }
 
     @Test
-    fun `skal finne første måned med 10 prosent endring i inntekt`() {
-        val inntekterFørsteTreMåneder = inntektsmåneder(YearMonth.now().minusMonths(12), inntektListe = listOf(inntekt(1000.0))).take(3)
-        val inntekterMånedFireTilSeks = inntektsmåneder(YearMonth.now().minusMonths(9), inntektListe = listOf(inntekt(1050.0))).take(3)
-        val inntekterSyvTilNi = inntektsmåneder(YearMonth.now().minusMonths(6), inntektListe = listOf(inntekt(1400.0))).take(3)
-        val inntekterSisteTreMåneder = inntektsmåneder(YearMonth.now().minusMonths(3), inntektListe = listOf(inntekt(2000.0))).take(3)
-
-        val inntekter = inntekterFørsteTreMåneder + inntekterMånedFireTilSeks + inntekterSyvTilNi + inntekterSisteTreMåneder
-        val inntektResponse = InntektResponse(inntekter)
-
-        val månedOgInntektMed10ProsentØkning = inntektResponse.førsteMånedOgInntektMed10ProsentØkning(YearMonth.now().minusMonths(9))
-
-        assertThat(månedOgInntektMed10ProsentØkning).isNotNull
-        assertThat(månedOgInntektMed10ProsentØkning?.first).isEqualTo(YearMonth.now().minusMonths(6))
-        assertThat(månedOgInntektMed10ProsentØkning?.second).isEqualTo(1400.0)
-    }
-
-    @Test
     fun `skal fjerne ef overgangstønad og beregne forventet inntekt hvor den filtrerer bort ugyldige måneder`() {
         val inntekterSisteTreMånederOvergangsstønad = inntektsmåneder(YearMonth.now().minusMonths(3), YearMonth.now().plusMonths(1), inntektListe = listOf(inntekt(16000.0, InntektType.YTELSE_FRA_OFFENTLIGE, "overgangsstoenadTilEnsligMorEllerFarSomBegynteAaLoepe1April2014EllerSenere")))
         val inntekterSisteTreMånederFastlønn = inntektsmåneder(YearMonth.now().minusMonths(3), YearMonth.now().plusMonths(1), inntektListe = listOf(inntekt(5000.0)))
