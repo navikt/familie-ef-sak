@@ -11,8 +11,12 @@ import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.dto.RevurderingDto
 import no.nav.familie.ef.sak.behandling.migrering.MigreringService
 import no.nav.familie.ef.sak.behandling.revurdering.RevurderingService
+import no.nav.familie.ef.sak.behandlingsflyt.steg.BeregnYtelseSteg
+import no.nav.familie.ef.sak.behandlingsflyt.steg.BeslutteVedtakSteg
+import no.nav.familie.ef.sak.behandlingsflyt.steg.SendTilBeslutterSteg
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegService
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
+import no.nav.familie.ef.sak.behandlingsflyt.steg.ÅrsakRevurderingSteg
 import no.nav.familie.ef.sak.behandlingsflyt.task.FerdigstillBehandlingTask
 import no.nav.familie.ef.sak.behandlingsflyt.task.LagSaksbehandlingsblankettTask
 import no.nav.familie.ef.sak.behandlingsflyt.task.PollStatusFraIverksettTask
@@ -124,6 +128,18 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
 
     @Autowired
     private lateinit var vilkårsvurderingRepository: VilkårsvurderingRepository
+
+    @Autowired
+    private lateinit var beregnYtelseSteg: BeregnYtelseSteg
+
+    @Autowired
+    private lateinit var sendTilBeslutterSteg: SendTilBeslutterSteg
+
+    @Autowired
+    private lateinit var beslutteVedtakSteg: BeslutteVedtakSteg
+
+    @Autowired
+    private lateinit var årsakRevurderingSteg: ÅrsakRevurderingSteg
 
     @Autowired
     private lateinit var stegService: StegService
@@ -865,14 +881,14 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
         val brevrequest = objectMapper.readTree("123")
         opprettOppgave(saksbehandling.id)
         testWithBrukerContext(preferredUsername = "Z999999", groups = listOf(rolleConfig.saksbehandlerRolle)) {
-            stegService.håndterÅrsakRevurdering(saksbehandling.id, revurderingsinformasjon())
-            stegService.håndterBeregnYtelseForStønad(saksbehandling, innvilget)
+            stegService.håndterSteg(saksbehandling, årsakRevurderingSteg, revurderingsinformasjon())
+            stegService.håndterSteg(saksbehandling, beregnYtelseSteg, innvilget)
             tilbakekrevingService.lagreTilbakekreving(
                 TilbakekrevingDto(Tilbakekrevingsvalg.AVVENT, begrunnelse = ""),
                 saksbehandling.id,
             )
             vedtaksbrevService.lagSaksbehandlerSanitybrev(saksbehandling, brevrequest, "brevMal")
-            stegService.håndterSendTilBeslutter(behandlingService.hentSaksbehandling(saksbehandling.id), null)
+            stegService.håndterSteg(behandlingService.hentSaksbehandling(saksbehandling.id), sendTilBeslutterSteg, null)
         }
     }
 
@@ -889,10 +905,7 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
     private fun godkjennTotrinnskontroll(saksbehandling: Saksbehandling) {
         testWithBrukerContext(preferredUsername = "Beslutter", groups = listOf(rolleConfig.beslutterRolle)) {
             vedtaksbrevService.forhåndsvisBeslutterBrev(saksbehandling)
-            stegService.håndterBeslutteVedtak(
-                behandlingService.hentSaksbehandling(saksbehandling.id),
-                BeslutteVedtakDto(true),
-            )
+            stegService.håndterSteg(behandlingService.hentSaksbehandling(saksbehandling.id), beslutteVedtakSteg, BeslutteVedtakDto(true))
         }
     }
 
