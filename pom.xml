@@ -29,26 +29,26 @@
         <sha1/>
         <changelist>-SNAPSHOT</changelist>
         <java.version>21</java.version>
-        <kotlin.version>2.1.20</kotlin.version>
+        <kotlin.version>2.1.21</kotlin.version>
         <kotlin-coroutines.version>1.10.2</kotlin-coroutines.version>
-        <springdoc.version>2.8.6</springdoc.version>
-        <mockk.version>1.14.0</mockk.version>
-        <felles.version>3.20250422130733_4d831f9</felles.version>
-        <prosessering.version>2.20250409144459_df36248</prosessering.version>
-        <token-validation-spring.version>5.0.25</token-validation-spring.version>
+        <springdoc.version>2.8.8</springdoc.version>
+        <mockk.version>1.14.2</mockk.version>
+        <felles.version>3.20250505101905_835431d</felles.version>
+        <prosessering.version>2.20250512065737_a9c3191</prosessering.version>
+        <token-validation-spring.version>5.0.27</token-validation-spring.version>
 
         <start-class>no.nav.familie.ef.sak.ApplicationKt</start-class>
-        <kontrakter.version>3.0_20250508110054_895136e</kontrakter.version>
+        <kontrakter.version>3.0_20250513140227_11db730</kontrakter.version>
         <mikrofrontend.builder.version>20230704114948-74aa2e9</mikrofrontend.builder.version>
         <eksterne.kontrakter.bisys.version>2.0_20250422132745_dfaa902</eksterne.kontrakter.bisys.version>
-        <cucumber.version>7.22.1</cucumber.version>
+        <cucumber.version>7.22.2</cucumber.version>
 
 
         <!--suppress UnresolvedMavenProperty  Ligger som secret i github-->
         <sonar.projectKey>${SONAR_PROJECTKEY}</sonar.projectKey>
         <sonar.organization>navit</sonar.organization>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
-        <nav.security.version>5.0.25</nav.security.version> <!-- Denne burde være samme versjon som i felles -->
+        <nav.security.version>5.0.27</nav.security.version> <!-- Denne burde være samme versjon som i felles -->
         <okhttp3.version>4.9.1</okhttp3.version> <!-- overskrever spring sin versjon, blir brukt av mock-oauth2-server -->
         <brukervarsel-builder.version>2.1.1</brukervarsel-builder.version>
         <!--suppress UnresolvedMavenProperty -->
@@ -118,7 +118,7 @@
         <dependency>
             <groupId>org.flywaydb</groupId>
             <artifactId>flyway-database-postgresql</artifactId>
-            <version>11.8.0</version>
+            <version>11.8.2</version>
             <scope>runtime</scope>
         </dependency>
         <dependency>
