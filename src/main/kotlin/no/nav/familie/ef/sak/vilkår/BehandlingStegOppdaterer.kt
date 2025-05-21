@@ -13,10 +13,10 @@ import no.nav.familie.ef.sak.vilkår.regler.evalutation.OppdaterVilkår
 import no.nav.familie.ef.sak.vilkår.regler.evalutation.OppdaterVilkår.utledBehandlingKategori
 import no.nav.familie.ef.sak.vilkår.regler.evalutation.OppdaterVilkår.utledResultatForVilkårSomGjelderFlereBarn
 import no.nav.familie.prosessering.internal.TaskService
-import org.springframework.stereotype.Component
+import org.springframework.stereotype.Service
 import java.util.UUID
 
-@Component
+@Service
 class BehandlingStegOppdaterer(
     private val behandlingService: BehandlingService,
     private val vilkårsvurderingRepository: VilkårsvurderingRepository,
