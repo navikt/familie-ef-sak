@@ -5,6 +5,7 @@ import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegService
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
+import no.nav.familie.ef.sak.behandlingsflyt.steg.VilkårSteg
 import no.nav.familie.ef.sak.behandlingsflyt.task.BehandlingsstatistikkTask
 import no.nav.familie.ef.sak.behandlingshistorikk.BehandlingshistorikkService
 import no.nav.familie.ef.sak.behandlingshistorikk.domain.StegUtfall
@@ -19,6 +20,7 @@ import java.util.UUID
 class BehandlingStegOppdaterer(
     private val behandlingService: BehandlingService,
     private val vilkårsvurderingRepository: VilkårsvurderingRepository,
+    private val vilkårSteg: VilkårSteg,
     private val stegService: StegService,
     private val behandlingshistorikkService: BehandlingshistorikkService,
     private val taskService: TaskService,
@@ -45,7 +47,7 @@ class BehandlingStegOppdaterer(
             }
 
         if (saksbehandling.steg == StegType.VILKÅR && OppdaterVilkår.erAlleVilkårTattStillingTil(vilkårsresultat)) {
-            stegService.håndterVilkår(saksbehandling).id
+            stegService.håndterSteg(saksbehandling, vilkårSteg, null).id
         } else if (saksbehandling.steg != StegType.VILKÅR && vilkårsresultat.any { it == Vilkårsresultat.IKKE_TATT_STILLING_TIL }) {
             stegService.resetSteg(saksbehandling.id, StegType.VILKÅR)
         } else if (saksbehandling.harStatusOpprettet) {

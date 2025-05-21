@@ -9,6 +9,7 @@ import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegService
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
+import no.nav.familie.ef.sak.behandlingsflyt.steg.VilkårSteg
 import no.nav.familie.ef.sak.behandlingshistorikk.BehandlingshistorikkService
 import no.nav.familie.ef.sak.behandlingshistorikk.domain.StegUtfall
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.vilkår.VilkårTestUtil.mockVilkårGrunnlagDto
@@ -35,6 +36,7 @@ internal class BehandlingStegOppdatererTest {
     val stegService: StegService = mockk<StegService>()
     val behandlingshistorikkService: BehandlingshistorikkService = mockk<BehandlingshistorikkService>()
     val taskService: TaskService = mockk<TaskService>()
+    val vilkårSteg: VilkårSteg = mockk<VilkårSteg>()
 
     val behandlingStegOppdaterer =
         BehandlingStegOppdaterer(
@@ -43,6 +45,7 @@ internal class BehandlingStegOppdatererTest {
             stegService = stegService,
             behandlingshistorikkService = behandlingshistorikkService,
             taskService = taskService,
+            vilkårSteg = vilkårSteg,
         )
 
     private val fagsak = fagsak()
@@ -70,12 +73,12 @@ internal class BehandlingStegOppdatererTest {
         val vilkårsvurderinger = initiererVilkårsvurderinger(behandling.id, Vilkårsresultat.OPPFYLT)
 
         every { behandlingService.hentSaksbehandling(behandling.id) } returns saksbehandling
-        every { stegService.håndterVilkår(saksbehandling) } returns behandling
+        every { stegService.håndterSteg(saksbehandling, vilkårSteg, null) } returns behandling
         every { vilkårsvurderingRepository.findByBehandlingId(behandling.id) } returns vilkårsvurderinger
 
         behandlingStegOppdaterer.oppdaterStegOgKategoriPåBehandling(behandling.id)
 
-        verify(exactly = 1) { stegService.håndterVilkår(any()) }
+        verify(exactly = 1) { stegService.håndterSteg(saksbehandling, vilkårSteg, null) }
     }
 
     @Test
@@ -117,7 +120,7 @@ internal class BehandlingStegOppdatererTest {
 
         behandlingStegOppdaterer.oppdaterStegOgKategoriPåBehandling(behandling.id)
 
-        verify(exactly = 0) { stegService.håndterVilkår(any()) }
+        verify(exactly = 0) { stegService.håndterSteg(any(), any<VilkårSteg>(), any()) }
         verify(exactly = 0) { stegService.resetSteg(any(), any()) }
         verify(exactly = 0) { behandlingService.oppdaterStatusPåBehandling(any(), any()) }
         verify(exactly = 0) { behandlingshistorikkService.opprettHistorikkInnslag(any(), any(), any(), any()) }
@@ -131,7 +134,7 @@ internal class BehandlingStegOppdatererTest {
 
         every { behandlingService.hentSaksbehandling(behandling.id) } returns saksbehandlingEøs
         every { behandlingService.oppdaterKategoriPåBehandling(saksbehandlingEøs.id, BehandlingKategori.NASJONAL) } returns behandling
-        every { stegService.håndterVilkår(saksbehandlingEøs) } returns behandling
+        every { stegService.håndterSteg(saksbehandlingEøs, vilkårSteg, null) } returns behandling
         every { vilkårsvurderingRepository.findByBehandlingId(behandling.id) } returns vilkårsvurderinger
 
         behandlingStegOppdaterer.oppdaterStegOgKategoriPåBehandling(behandling.id)
@@ -145,7 +148,7 @@ internal class BehandlingStegOppdatererTest {
         val saksbehandlingNasjonal = saksbehandling.copy(kategori = BehandlingKategori.NASJONAL)
 
         every { behandlingService.hentSaksbehandling(behandling.id) } returns saksbehandlingNasjonal
-        every { stegService.håndterVilkår(saksbehandlingNasjonal) } returns behandling
+        every { stegService.håndterSteg(saksbehandlingNasjonal, vilkårSteg, null) } returns behandling
         every { vilkårsvurderingRepository.findByBehandlingId(behandling.id) } returns vilkårsvurderinger
 
         behandlingStegOppdaterer.oppdaterStegOgKategoriPåBehandling(behandling.id)
