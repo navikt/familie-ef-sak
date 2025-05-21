@@ -217,7 +217,6 @@ class BehandleAutomatiskInntektsendringTaskTest : OppslagSpringRunnerTest() {
         assertThat(oppdatertInntekt).isEqualTo(forventedeInntektsperioderINyttVedtak)
     }
 
-
     @Test
     fun `to eksisterende inntektsperioder - sett revurderes fra måneden etter 10 prosent endring`() {
         // Vedtak fra August 2024 -> Juli 2027
@@ -254,5 +253,4 @@ class BehandleAutomatiskInntektsendringTaskTest : OppslagSpringRunnerTest() {
 
         assertThat(forventedeInntektsperioderINyttVedtak).isEqualTo(oppdatertInntekt)
     }
-
 }
