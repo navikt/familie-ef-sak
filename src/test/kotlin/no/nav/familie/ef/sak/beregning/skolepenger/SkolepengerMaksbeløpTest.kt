@@ -91,8 +91,16 @@ internal class SkolepengerMaksbeløpTest {
     }
 
     @Test
-    internal fun `finnes beløp for hvert år`() {
-        IntRange(2019, 2025).forEach {
+    internal fun `det skal finnes makssats for hvert år - makssats må oppdateres innen juni`() {
+        val sisteRegistrerteÅr = SkolepengerMaksbeløp.hentSisteÅrRegistrertMaksbeløpHøyskole()
+        val åretsÅrEllerFjoråret =
+            if (sisteRegistrerteÅr == Year.now() || YearMonth.now().month.value >= 6) {
+                Year.now()
+            } else {
+                Year.now().minusYears(1)
+            }
+
+        IntRange(2019, åretsÅrEllerFjoråret.value).forEach {
             maksbeløpForÅr(HØGSKOLE_UNIVERSITET, Year.of(it))
             maksbeløpForÅr(VIDEREGÅENDE, Year.of(it))
         }
