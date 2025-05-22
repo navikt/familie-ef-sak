@@ -101,8 +101,8 @@ internal class SkolepengerMaksbeløpTest {
             }
 
         IntRange(2019, åretsÅrEllerFjoråret.value).forEach {
-            maksbeløpForÅr(HØGSKOLE_UNIVERSITET, Year.of(it))
-            maksbeløpForÅr(VIDEREGÅENDE, Year.of(it))
+            assertThat(maksbeløpForÅr(HØGSKOLE_UNIVERSITET, Year.of(it))).withFailMessage(feilmeldingForManglendeMakssats)
+            assertThat(maksbeløpForÅr(VIDEREGÅENDE, Year.of(it))).withFailMessage(feilmeldingForManglendeMakssats)
         }
     }
 
@@ -130,7 +130,7 @@ internal class SkolepengerMaksbeløpTest {
             val ifjor = Year.now().minusYears(1)
             assertThat(sisteRegistrerteÅr).isGreaterThanOrEqualTo(ifjor)
         } else {
-            assertThat(sisteRegistrerteÅr).isEqualTo(Year.now()).withFailMessage("Makssats for skolepenger burde være vedtatt for år ${Year.now()} - legg denne inn i SkolepengerMaksbeløp.kt og i ef-sak-frontend (skoleår.ts)")
+            assertThat(sisteRegistrerteÅr).isEqualTo(Year.now()).withFailMessage(feilmeldingForManglendeMakssats)
         }
     }
 
@@ -172,4 +172,6 @@ internal class SkolepengerMaksbeløpTest {
         studietype: SkolepengerStudietype,
         skoleår: Year,
     ): Int = maksbeløp(studietype, Skoleår(skoleår))
+
+    private val feilmeldingForManglendeMakssats = "Makssatser for skolepenger burde være vedtatt for år ${Year.now()} - legg disse inn i SkolepengerMaksbeløp.kt og i ef-sak-frontend"
 }
