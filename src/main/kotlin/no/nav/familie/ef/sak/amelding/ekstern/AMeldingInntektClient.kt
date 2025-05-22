@@ -2,8 +2,11 @@ package no.nav.familie.ef.sak.amelding.ekstern
 
 import no.nav.familie.ef.sak.amelding.HentInntektPayload
 import no.nav.familie.ef.sak.amelding.InntektResponse
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.logger
+import no.nav.familie.ef.sak.texas.Texas
 import no.nav.familie.http.client.AbstractRestClient
 import no.nav.familie.kontrakter.felles.PersonIdent
+import no.nav.familie.kontrakter.felles.objectMapper
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpHeaders
@@ -16,7 +19,7 @@ import java.time.YearMonth
 
 @Component
 class AMeldingInntektClient(
-    @Value("\${FAMILIE_EF_PROXY_URL}") private val uri: URI,
+    @Value("\${INNTEKT_URL}") private val uri: URI,
     @Qualifier("azure") restOperations: RestOperations,
 ) : AbstractRestClient(restOperations, "inntekt") {
     private fun lagInntektUri(
@@ -29,6 +32,13 @@ class AMeldingInntektClient(
         .queryParam("tom", tom)
         .build()
         .toUri()
+
+    private val genererInntektV2NyIngress =
+        UriComponentsBuilder
+            .fromUri(uri)
+            .pathSegment("/rest/v2/inntekt")
+            .build()
+            .toUri()
 
     private val genererInntektV2Uri =
         UriComponentsBuilder
@@ -50,6 +60,60 @@ class AMeldingInntektClient(
             .pathSegment("api/ainntekt/generer-url-arbeidsforhold")
             .build()
             .toUri()
+
+    fun hentInntektNyIngress(
+        personIdent: String,
+        månedFom: YearMonth,
+        månedTom: YearMonth,
+    ): Map<String, Any> {
+        logger.info("--- Henter inntekt")
+
+        val request =
+            genererInntektRequest(
+                personIdent = personIdent,
+                månedFom = månedFom,
+                månedTom = månedTom,
+            )
+
+        logger.info("--- request $request")
+
+        val payload = objectMapper.writeValueAsString(request)
+
+        val entity =
+            postForEntity<Map<String, Any>>(
+                uri = genererInntektV2NyIngress,
+                payload = payload,
+                httpHeaders =
+                    headers(
+                        token = token(),
+                    ),
+            )
+
+        logger.info("--- entity $entity")
+
+        return entity
+    }
+
+    private fun token(): String = Texas().genererToken()
+
+    private fun headers(token: String): HttpHeaders =
+        HttpHeaders().apply {
+            setBearerAuth(token)
+            contentType = MediaType.APPLICATION_JSON
+            accept = listOf(MediaType.APPLICATION_JSON)
+        }
+
+    private fun genererInntektRequest(
+        personIdent: String,
+        månedFom: YearMonth,
+        månedTom: YearMonth,
+    ) = mapOf(
+        "personident" to personIdent,
+        "filter" to "StoenadEnsligMorEllerFarA-inntekt",
+        "formaal" to "StoenadEnsligMorEllerFar",
+        "maanedFom" to månedFom,
+        "maanedTom" to månedTom,
+    )
 
     fun hentInntekt(
         personIdent: String,

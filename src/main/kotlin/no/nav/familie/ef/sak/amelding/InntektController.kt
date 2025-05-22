@@ -39,6 +39,22 @@ class InntektController(
         return success(inntekt)
     }
 
+    @PostMapping("inntektv2nyingress/{fagsakid}")
+    @ProtectedWithClaims(issuer = "azuread", claimMap = ["roles=access_as_application"])
+    fun hentInntektNyIngress(
+        @PathVariable("fagsakid") fagsakId: UUID,
+        @RequestBody inntektRequestBody: InntektRequestBody,
+    ): Ressurs<Map<String, Any>> {
+        val inntekt =
+            inntektService.hentInntektNyIngress(
+                fagsakId = fagsakId,
+                månedFom = inntektRequestBody.månedFom ?: YearMonth.now().minusMonths(2),
+                månedTom = inntektRequestBody.månedTom ?: YearMonth.now(),
+            )
+
+        return success(inntekt)
+    }
+
     @GetMapping("fagsak/{fagsakId}/generer-url")
     fun genererAInntektUrlFagsak(
         @PathVariable("fagsakId") fagsakId: UUID,

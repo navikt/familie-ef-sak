@@ -29,6 +29,22 @@ class InntektService(
         return inntekt.inntektsmåneder
     }
 
+    fun hentInntektNyIngress(
+        fagsakId: UUID,
+        månedFom: YearMonth,
+        månedTom: YearMonth,
+    ): Map<String, Any> {
+        val aktivIdent = fagsakService.hentAktivIdent(fagsakId)
+        val inntekt =
+            aMeldingInntektClient.hentInntektNyIngress(
+                personIdent = aktivIdent,
+                månedFom = månedFom,
+                månedTom = månedTom,
+            )
+
+        return inntekt
+    }
+
     fun hentÅrsinntekt(
         personIdent: String,
         årstallIFjor: Int,

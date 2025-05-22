@@ -5,6 +5,8 @@ metadata:
   namespace: teamfamilie
   labels:
     team: teamfamilie
+  annotations:
+    texas.nais.io/enabled: "true"
 
 spec:
   image: {{ image }}
