@@ -101,13 +101,13 @@ class SamværsavtaleService(
                 )
             }
 
-        nyeSamværsavtaler.forEach {
-            val lagretSamværsavtale = hentSamværsavtaleEllerNull(it.behandlingId, it.behandlingBarnId)
+        nyeSamværsavtaler.forEach { nySamværsavtale ->
+            val lagretSamværsavtale = hentSamværsavtaleEllerNull(nySamværsavtale.behandlingId, nySamværsavtale.behandlingBarnId)
 
             if (lagretSamværsavtale == null) {
-                samværsavtaleRepository.insert(it)
+                samværsavtaleRepository.insert(nySamværsavtale)
             } else {
-                samværsavtaleRepository.update(it)
+                samværsavtaleRepository.update(lagretSamværsavtale.copy(uker = nySamværsavtale.uker))
             }
         }
     }
