@@ -24,7 +24,6 @@ class InntektController(
     private val inntektService: InntektService,
 ) {
     @PostMapping("inntektv2/{fagsakid}")
-    @ProtectedWithClaims(issuer = "azuread", claimMap = ["roles=access_as_application"])
     fun hentInntekt(
         @PathVariable("fagsakid") fagsakId: UUID,
         @RequestBody inntektRequestBody: InntektRequestBody,
@@ -40,7 +39,6 @@ class InntektController(
     }
 
     @PostMapping("inntektv2nyingress/{fagsakid}")
-    @ProtectedWithClaims(issuer = "azuread", claimMap = ["roles=access_as_application"])
     fun hentInntektNyIngress(
         @PathVariable("fagsakid") fagsakId: UUID,
         @RequestBody inntektRequestBody: InntektRequestBody,
