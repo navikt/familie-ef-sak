@@ -36,7 +36,7 @@ class AMeldingInntektClient(
     private val genererInntektV2NyIngress =
         UriComponentsBuilder
             .fromUri(uri)
-            .pathSegment("/rest/v2/inntekt")
+            .pathSegment("rest/v2/inntekt")
             .build()
             .toUri()
 
