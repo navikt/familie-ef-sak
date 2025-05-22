@@ -132,4 +132,12 @@ spec:
   leaderElection: true
   kafka:
     pool: nav-prod
+  observability:
+    logging:
+      destinations:
+        - id: loki
+        - id: elastic
+    autoInstrumentation:
+      enabled: true
+      runtime: java
 
