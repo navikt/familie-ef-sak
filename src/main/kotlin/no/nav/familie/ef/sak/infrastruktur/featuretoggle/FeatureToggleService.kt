@@ -14,10 +14,6 @@ enum class Toggle(
     val beskrivelse: String? = null,
 ) {
     // Release
-    FRONTEND_VIS_MARKERE_GODKJENNE_OPPGAVE_MODAL(
-        "familie.ef.sak.vis-markere-godkjenne-vedtak-oppgave-modal",
-        "Release",
-    ),
     KONTROLLER_NÆRINGSINNTEKT("familie.ef.sak.kontroller-naeringsinntekt"),
     BEHANDLE_AUTOMATISK_INNTEKTSENDRING("familie.ef.sak-behandle-automatisk-inntektsendring-task", "Release"),
     FRONTEND_KOPIER_KNAPP_ERROR_ALERT("familie.ef.sak.frontend-alert-error-med-copy-button", "Release"),

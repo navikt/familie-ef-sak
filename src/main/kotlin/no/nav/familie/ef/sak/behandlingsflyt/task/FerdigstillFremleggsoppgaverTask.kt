@@ -1,7 +1,5 @@
 package no.nav.familie.ef.sak.behandlingsflyt.task
 
-import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
-import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.ef.sak.oppfølgingsoppgave.OppfølgingsoppgaveService
 import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.kontrakter.felles.oppgave.StatusEnum
@@ -19,18 +17,15 @@ import java.util.UUID
 )
 class FerdigstillFremleggsoppgaverTask(
     private val oppgaveService: OppgaveService,
-    private val featureToggleService: FeatureToggleService,
     private val oppfølgingsoppgaveService: OppfølgingsoppgaveService,
 ) : AsyncTaskStep {
     override fun doTask(task: Task) {
         val behandlingId = UUID.fromString(task.payload)
 
-        if (toggleKanFerdigstilleFremlegssoppgaver()) {
-            val oppgaverForFerdigstilling = oppfølgingsoppgaveService.hentOppgaverForFerdigstillingEllerNull(behandlingId)
-            oppgaverForFerdigstilling?.fremleggsoppgaveIderSomSkalFerdigstilles?.forEach { id ->
-                if (!erOppgaveFerdigstiltEllerFeilregistrert(id)) {
-                    oppgaveService.ferdigstillOppgave(id)
-                }
+        val oppgaverForFerdigstilling = oppfølgingsoppgaveService.hentOppgaverForFerdigstillingEllerNull(behandlingId)
+        oppgaverForFerdigstilling?.fremleggsoppgaveIderSomSkalFerdigstilles?.forEach { id ->
+            if (!erOppgaveFerdigstiltEllerFeilregistrert(id)) {
+                oppgaveService.ferdigstillOppgave(id)
             }
         }
     }
@@ -53,6 +48,4 @@ class FerdigstillFremleggsoppgaverTask(
         val oppgave = oppgaveService.hentOppgave(oppgaveId)
         return oppgave.status == StatusEnum.FERDIGSTILT || oppgave.status == StatusEnum.FEILREGISTRERT
     }
-
-    private fun toggleKanFerdigstilleFremlegssoppgaver(): Boolean = featureToggleService.isEnabled(Toggle.FRONTEND_VIS_MARKERE_GODKJENNE_OPPGAVE_MODAL)
 }
