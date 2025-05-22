@@ -1,11 +1,16 @@
-package no.nav.familie.ef.sak.behandlingsflyt.steg
+package no.nav.familie.ef.sak.no.nav.familie.ef.sak.behandlingsflyt.steg
 
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus.IVERKSETTER_VEDTAK
+import no.nav.familie.ef.sak.behandlingsflyt.steg.BeregnYtelseSteg
+import no.nav.familie.ef.sak.behandlingsflyt.steg.BeslutteVedtakSteg
+import no.nav.familie.ef.sak.behandlingsflyt.steg.StegService
+import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType.VENTE_PÅ_STATUS_FRA_IVERKSETT
+import no.nav.familie.ef.sak.behandlingsflyt.steg.VilkårSteg
 import no.nav.familie.ef.sak.behandlingshistorikk.BehandlingshistorikkRepository
 import no.nav.familie.ef.sak.beregning.Inntekt
 import no.nav.familie.ef.sak.fagsak.FagsakRepository
@@ -49,6 +54,15 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
     @Autowired
     lateinit var vedtakService: VedtakService
 
+    @Autowired
+    lateinit var vilkårSteg: VilkårSteg
+
+    @Autowired
+    lateinit var beregnYtelseSteg: BeregnYtelseSteg
+
+    @Autowired
+    lateinit var beslutteVedtakSteg: BeslutteVedtakSteg
+
     @AfterEach
     internal fun tearDown() {
         BrukerContextUtil.clearBrukerContext()
@@ -59,7 +73,27 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
         val fagsak = testoppsettService.lagreFagsak(fagsak())
         val behandling = behandling(fagsak, status = BehandlingStatus.UTREDES)
         behandlingRepository.insert(behandling)
-        stegService.håndterVilkår(saksbehandling(fagsak, behandling))
+        stegService.håndterSteg(saksbehandling(fagsak, behandling), vilkårSteg, null)
+    }
+
+    @Test
+    internal fun `skal feile håndtering av ny søknad hvis en behandling er ferdigstilt`() {
+        val fagsak = testoppsettService.lagreFagsak(fagsak())
+        val behandling = behandlingRepository.insert(behandling(fagsak, steg = StegType.BEHANDLING_FERDIGSTILT))
+
+        assertThrows<IllegalStateException> {
+            stegService.håndterSteg(saksbehandling(fagsak, behandling), vilkårSteg, null)
+        }
+    }
+
+    @Test
+    internal fun `skal feile håndtering av ny søknad hvis en behandling er sendt til beslutter`() {
+        val fagsak = testoppsettService.lagreFagsak(fagsak())
+        val behandling = behandlingRepository.insert(behandling(fagsak, steg = StegType.BESLUTTE_VEDTAK))
+
+        assertThrows<IllegalStateException> {
+            stegService.håndterSteg(saksbehandling(fagsak, behandling), vilkårSteg, null)
+        }
     }
 
     @Test
@@ -88,16 +122,16 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
                 forventetInntekt = BigDecimal(12345),
                 samordningsfradrag = BigDecimal(2),
             )
-        stegService.håndterBeregnYtelseForStønad(
+        stegService.håndterSteg(
             saksbehandling(fagsak, behandling),
-            vedtak =
-                InnvilgelseOvergangsstønad(
-                    periodeBegrunnelse = "ok",
-                    inntektBegrunnelse = "okok",
-                    perioder = listOf(vedtaksperiode),
-                    inntekter = listOf(inntek),
-                    samordningsfradragType = SamordningsfradragType.UFØRETRYGD,
-                ),
+            beregnYtelseSteg,
+            InnvilgelseOvergangsstønad(
+                periodeBegrunnelse = "ok",
+                inntektBegrunnelse = "okok",
+                perioder = listOf(vedtaksperiode),
+                inntekter = listOf(inntek),
+                samordningsfradragType = SamordningsfradragType.UFØRETRYGD,
+            ),
         )
 
         assertThat(behandlingshistorikkRepository.findByBehandlingIdOrderByEndretTidDesc(behandling.id).first().steg)
@@ -105,13 +139,22 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    internal fun `skal feile håndtering av ny søknad hvis en behandling er ferdigstilt`() {
+    internal fun `skal feile hvis behandling iverksettes og man prøver godkjenne saksbehandling`() {
         val fagsak = testoppsettService.lagreFagsak(fagsak())
-        val behandling = behandlingRepository.insert(behandling(fagsak, steg = StegType.BEHANDLING_FERDIGSTILT))
+        val behandling = behandlingSomIverksettes(fagsak)
+        vedtakService.lagreVedtak(InnvilgelseOvergangsstønad("", ""), behandling.id, fagsak.stønadstype)
+        BrukerContextUtil.mockBrukerContext("navIdent")
+        val beslutteVedtakDto = BeslutteVedtakDto(true, "")
+        val feil =
+            assertThrows<ApiFeil> {
+                stegService.håndterSteg(saksbehandling(fagsak, behandling), beslutteVedtakSteg, beslutteVedtakDto)
+            }
+        assertThat(feil.message).isEqualTo("Behandlingen er allerede besluttet. Status på behandling er 'Iverksetter vedtak'")
+    }
 
-        assertThrows<IllegalStateException> {
-            stegService.håndterVilkår(saksbehandling(fagsak, behandling))
-        }
+    private fun behandlingSomIverksettes(fagsak: Fagsak): Behandling {
+        val nyBehandling = behandling(fagsak, IVERKSETTER_VEDTAK, VENTE_PÅ_STATUS_FRA_IVERKSETT)
+        return behandlingRepository.insert(nyBehandling)
     }
 
     @Test
@@ -161,34 +204,5 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
 
         stegService.resetSteg(behandling.id, steg = StegType.VILKÅR)
         assertThat(behandlingRepository.findByIdOrThrow(behandling.id).steg).isEqualTo(StegType.VILKÅR)
-    }
-
-    @Test
-    internal fun `skal feile håndtering av ny søknad hvis en behandling er sendt til beslutter`() {
-        val fagsak = testoppsettService.lagreFagsak(fagsak())
-        val behandling = behandlingRepository.insert(behandling(fagsak, steg = StegType.BESLUTTE_VEDTAK))
-
-        assertThrows<IllegalStateException> {
-            stegService.håndterVilkår(saksbehandling(fagsak, behandling))
-        }
-    }
-
-    @Test
-    internal fun `skal feile hvis behandling iverksettes og man prøver godkjenne saksbehandling`() {
-        val fagsak = testoppsettService.lagreFagsak(fagsak())
-        val behandling = behandlingSomIverksettes(fagsak)
-        vedtakService.lagreVedtak(InnvilgelseOvergangsstønad("", ""), behandling.id, fagsak.stønadstype)
-        BrukerContextUtil.mockBrukerContext("navIdent")
-        val beslutteVedtakDto = BeslutteVedtakDto(true, "")
-        val feil =
-            assertThrows<ApiFeil> {
-                stegService.håndterBeslutteVedtak(saksbehandling(fagsak, behandling), beslutteVedtakDto)
-            }
-        assertThat(feil.message).isEqualTo("Behandlingen er allerede besluttet. Status på behandling er 'Iverksetter vedtak'")
-    }
-
-    private fun behandlingSomIverksettes(fagsak: Fagsak): Behandling {
-        val nyBehandling = behandling(fagsak, IVERKSETTER_VEDTAK, VENTE_PÅ_STATUS_FRA_IVERKSETT)
-        return behandlingRepository.insert(nyBehandling)
     }
 }
