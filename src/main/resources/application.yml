@@ -298,7 +298,7 @@ HISTORISK_PENSJON_URL: http://historisk-pensjon.historisk
 FAMILIE_KS_SAK_URL: http://familie-ks-sak
 FRONTEND_OPPGAVE_URL: https://ensligmorellerfar.intern.nav.no/oppgavebenk
 SKJERMEDE_PERSONER_URL: http://skjermede-personer-pip.nom
-INNTEKT_URL: https://ikomp.${ON_PREM_URL_ENV}-fss-pub.nais.io
+INNTEKT_URL: https://ikomp-q2.${ON_PREM_URL_ENV}-fss-pub.nais.io
 
 GYLDIGE_SERVICE_BRUKERE: srvArena
 
