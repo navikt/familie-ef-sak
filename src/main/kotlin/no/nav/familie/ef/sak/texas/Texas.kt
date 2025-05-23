@@ -35,19 +35,16 @@ class Texas {
 
     private fun sendPostRequest(
         urlStr: String,
-        jsonBody: Any,
+        jsonBody: String,
     ): String {
         val url = URI(urlStr).toURL()
         val connection = url.openConnection() as HttpURLConnection
         connection.requestMethod = "POST"
         connection.doOutput = true
         connection.setRequestProperty("Content-Type", "application/json")
-
-        val json = objectMapper.writeValueAsString(jsonBody)
-
         connection.outputStream.use { outputStream ->
             OutputStreamWriter(outputStream).use { writer ->
-                writer.write(json)
+                writer.write(jsonBody)
                 writer.flush()
             }
         }
