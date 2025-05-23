@@ -77,7 +77,7 @@ class AMeldingInntektClient(
 
         logger.info("--- request $request")
 
-        val payload = objectMapper.writeValueAsString(request)
+        val payload = request
 
         val entity =
             postForEntity<Map<String, Any>>(
