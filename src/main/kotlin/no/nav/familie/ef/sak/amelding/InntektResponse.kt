@@ -1,6 +1,7 @@
 package no.nav.familie.ef.sak.amelding
 
 import com.fasterxml.jackson.annotation.JsonProperty
+import no.nav.familie.ef.sak.beregning.Grunnbeløpsperioder.finnGrunnbeløp
 import no.nav.familie.ef.sak.felles.util.isEqualOrAfter
 import no.nav.familie.ef.sak.vedtak.domain.Vedtak
 import java.time.LocalDate
@@ -43,7 +44,7 @@ data class InntektResponse(
                         ?.avledForventetMånedsinntekt() ?: throw IllegalStateException("Fant ikke forventet inntekt for måned ${innmeldtInntekt.måned} i vedtaket for behandling ${forrigeVedtak.behandlingId}")
                 )
             }
-        return innmeldtInntektTilForventetInntektMap.filter { it.key.totalInntekt().toInt() > (it.value * 1.1) }.firstNotNullOf { it.key.måned }
+        return innmeldtInntektTilForventetInntektMap.filter { it.key.totalInntekt().toInt() > (it.value * 1.1) && it.key.totalInntekt() > finnGrunnbeløp(it.key.måned).perMnd.toInt() / 2 }.firstNotNullOf { it.key.måned }
     }
 
     fun inntektsmånederUtenEfYtelser(minimumsdato: YearMonth? = null): List<Inntektsmåned> =
