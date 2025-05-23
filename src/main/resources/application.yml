@@ -219,6 +219,7 @@ FAMILIE_INTEGRASJONER_SCOPE: api://${DEPLOY_ENV}-fss.teamfamilie.familie-integra
 HISTORISK_PENSJON_SCOPE: api://${DEPLOY_ENV}-gcp.historisk.historisk-pensjon/.default
 FAMILIE_KS_SAK_SCOPE: api://${DEPLOY_ENV}-gcp.teamfamilie.familie-ks-sak/.default
 SKJERMEDE_PERSONER_SCOPE: api://${DEPLOY_ENV}-gcp.nom.skjermede-personer-pip/.default
+INNTEKT_SCOPE: api://${DEPLOY_ENV}-fss.team-inntekt.ikomp/.default
 
 spring:
   mvc:
