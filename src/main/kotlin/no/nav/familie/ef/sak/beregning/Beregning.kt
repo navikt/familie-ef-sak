@@ -78,9 +78,9 @@ object Grunnbeløpsperioder {
             ),
             Grunnbeløp(
                 periode = Månedsperiode("2024-05" to "2025-04"),
-                grunnbeløp = 127_000.toBigDecimal(),
-                perMnd = 10_583.toBigDecimal(),
-                gjennomsnittPerÅr = 125_000.toBigDecimal(),
+                grunnbeløp = 124_028.toBigDecimal(),
+                perMnd = 10_336.toBigDecimal(),
+                gjennomsnittPerÅr = 122_225.toBigDecimal(),
             ),
             Grunnbeløp(
                 periode = Månedsperiode("2023-05" to "2024-04"),
