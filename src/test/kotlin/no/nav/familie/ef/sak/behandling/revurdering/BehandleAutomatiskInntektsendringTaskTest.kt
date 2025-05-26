@@ -253,4 +253,37 @@ class BehandleAutomatiskInntektsendringTaskTest : OppslagSpringRunnerTest() {
 
         assertThat(forventedeInntektsperioderINyttVedtak).isEqualTo(oppdatertInntekt)
     }
+
+    @Test
+    fun `ignorer månedsinntekt som tilsvarer under en halv g i årsinntekt`() {
+        val innmeldtMånedsinntekt = listOf(0, 3400, 8000, 10_000, 10_000, 12_000) // 8000 er første måned med over 1/2 G i inntekt
+        val vedtakTom = YearMonth.now().plusMonths(11)
+
+        val forventetInntektIVedtak =
+            mapOf(
+                (YearMonth.now().minusMonths(innmeldtMånedsinntekt.size.toLong()) to 0),
+            )
+        val vedtak = vedtak(forventetInntektIVedtak, vedtakTom)
+        val inntektResponse = lagInntektResponseFraMånedsinntekter(innmeldtMånedsinntekt)
+
+        val oppdatertVedtakMedNyePerioder = behandleAutomatiskInntektsendringTask.oppdaterFørsteVedtaksperiodeMedRevurderesFraDato(vedtak, inntektResponse)
+
+        assertThat(oppdatertVedtakMedNyePerioder.first().periode.fom).isEqualTo(YearMonth.now().minusMonths(3))
+        assertThat(oppdatertVedtakMedNyePerioder.first().periode.tom).isEqualTo(vedtakTom)
+
+        val oppdatertInntekt = behandleAutomatiskInntektsendringTask.oppdaterInntektMedNyBeregnetForventetInntekt(vedtak, inntektResponse, oppdatertVedtakMedNyePerioder.first().periode.fom)
+        assertThat(oppdatertInntekt.size).isEqualTo(4)
+
+        val gjennomsnittSiste3Mnd = (10_000 + 10_000 + 12_000) / 3
+
+        val forventedeInntektsperioderINyttVedtak =
+            listOf(
+                inntektsperiode(Månedsperiode(YearMonth.now().minusMonths(3), YearMonth.now().minusMonths(3)), BigDecimal(10_000)),
+                inntektsperiode(Månedsperiode(YearMonth.now().minusMonths(2), YearMonth.now().minusMonths(2)), BigDecimal(10_000)),
+                inntektsperiode(Månedsperiode(YearMonth.now().minusMonths(1), YearMonth.now().minusMonths(1)), BigDecimal(12_000)),
+                inntektsperiode(Månedsperiode(YearMonth.now(), vedtakTom), BigDecimal(gjennomsnittSiste3Mnd)),
+            )
+
+        assertThat(oppdatertInntekt).isEqualTo(forventedeInntektsperioderINyttVedtak)
+    }
 }
