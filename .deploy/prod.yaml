@@ -69,6 +69,9 @@ spec:
         - application: bidrag-grunnlag
           namespace: bidrag
           cluster: prod-gcp
+        - application: veilarbportefolje
+          namespace: obo
+          cluster: dev-gcp
         - application: tilleggsstonader-integrasjoner
           namespace: tilleggsstonader
     outbound:
@@ -129,4 +132,12 @@ spec:
   leaderElection: true
   kafka:
     pool: nav-prod
+  observability:
+    logging:
+      destinations:
+        - id: loki
+        - id: elastic
+    autoInstrumentation:
+      enabled: true
+      runtime: java
 

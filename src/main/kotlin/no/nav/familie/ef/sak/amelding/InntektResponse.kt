@@ -2,6 +2,7 @@ package no.nav.familie.ef.sak.amelding
 
 import com.fasterxml.jackson.annotation.JsonProperty
 import no.nav.familie.ef.sak.felles.util.isEqualOrAfter
+import no.nav.familie.ef.sak.vedtak.domain.Vedtak
 import java.time.LocalDate
 import java.time.OffsetDateTime
 import java.time.YearMonth
@@ -11,29 +12,50 @@ data class InntektResponse(
     val inntektsmåneder: List<Inntektsmåned> = emptyList(),
 ) {
     fun totalInntektFraÅrMåned(årMåned: YearMonth): Int =
-        inntektsmånederUtenEfYtelser()
+        inntektsmånederUtenEfYtelser(årMåned)
             .filter { it.måned.isEqualOrAfter(årMåned) && it.måned.isBefore(YearMonth.now()) }
             .flatMap { it.inntektListe }
             .sumOf { it.beløp }
             .toInt()
 
-    fun førsteMånedOgInntektMed10ProsentØkning() =
-        inntektsmånederUtenEfYtelser()
-            .associate { it.måned to it.totalInntekt() }
-            .entries
-            .zipWithNext()
-            .firstOrNull { it.first.value * 1.1 <= it.second.value }
-            ?.second
-            ?.toPair()
+    fun totalInntektForÅrMåned(årMåned: YearMonth): Int =
+        inntektsmånederUtenEfYtelser(årMåned)
+            .filter { it.måned == årMåned }
+            .flatMap { it.inntektListe }
+            .sumOf { it.beløp }
+            .toInt()
 
-    fun inntektsmånederUtenEfYtelser(): List<Inntektsmåned> =
-        inntektsmåneder.filter { inntektsmåned ->
-            inntektsmåned.inntektListe.all {
-                it.type != InntektType.YTELSE_FRA_OFFENTLIGE &&
-                    it.beskrivelse != "overgangsstoenadTilEnsligMorEllerFarSomBegynteAaLoepe1April2014EllerSenere"
-            } &&
-                inntektsmåned.måned.isBefore(YearMonth.now())
-        }
+    fun førsteMånedMed10ProsentInntektsøkning(forrigeVedtak: Vedtak): YearMonth {
+        val innmeldtInntektList =
+            inntektsmånederUtenEfYtelser(
+                forrigeVedtak.perioder
+                    ?.perioder
+                    ?.minBy { it.periode.fom }
+                    ?.periode
+                    ?.fom,
+            )
+        val innmeldtInntektTilForventetInntektMap =
+            innmeldtInntektList.associate { innmeldtInntekt ->
+                innmeldtInntekt to (
+                    forrigeVedtak.inntekter
+                        ?.inntekter
+                        ?.first { it.periode.inneholder(innmeldtInntekt.måned) }
+                        ?.avledForventetMånedsinntekt() ?: throw IllegalStateException("Fant ikke forventet inntekt for måned ${innmeldtInntekt.måned} i vedtaket for behandling ${forrigeVedtak.behandlingId}")
+                )
+            }
+        return innmeldtInntektTilForventetInntektMap.filter { it.key.totalInntekt().toInt() > (it.value * 1.1) }.firstNotNullOf { it.key.måned }
+    }
+
+    fun inntektsmånederUtenEfYtelser(minimumsdato: YearMonth? = null): List<Inntektsmåned> =
+        inntektsmåneder
+            .filter { inntektsmåned ->
+                inntektsmåned.inntektListe.all {
+                    it.type != InntektType.YTELSE_FRA_OFFENTLIGE &&
+                        it.beskrivelse != "overgangsstoenadTilEnsligMorEllerFarSomBegynteAaLoepe1April2014EllerSenere"
+                } &&
+                    inntektsmåned.måned.isBefore(YearMonth.now()) &&
+                    inntektsmåned.måned.isEqualOrAfter(minimumsdato)
+            }.sortedBy { it.måned }
 
     fun forventetMånedsinntekt() =
         if (harTreForrigeInntektsmåneder) {
@@ -44,7 +66,7 @@ data class InntektResponse(
 
     fun forventetÅrsinntekt() = forventetMånedsinntekt() * 12
 
-    fun revurderesFraDato() = førsteMånedOgInntektMed10ProsentØkning()?.first
+    fun revurderesFraDato(forrigeVedtak: Vedtak) = førsteMånedMed10ProsentInntektsøkning(forrigeVedtak)
 
     val harTreForrigeInntektsmåneder =
         inntektsmåneder

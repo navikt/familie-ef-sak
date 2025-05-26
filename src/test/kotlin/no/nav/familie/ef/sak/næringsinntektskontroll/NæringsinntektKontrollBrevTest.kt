@@ -80,7 +80,7 @@ class NæringsinntektKontrollBrevTest : OppslagSpringRunnerTest() {
     ): FrittståendeBrevDto {
         val forventetBrevMottaker =
             Brevmottaker(
-                ident = "VL",
+                ident = "01010199999",
                 navn = "01010199999 mellomnavn Etternavn",
                 mottakerRolle = Brevmottaker.MottakerRolle.BRUKER,
                 identType = Brevmottaker.IdentType.PERSONIDENT,

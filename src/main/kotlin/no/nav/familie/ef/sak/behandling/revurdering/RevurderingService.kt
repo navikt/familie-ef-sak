@@ -11,6 +11,7 @@ import no.nav.familie.ef.sak.behandling.dto.RevurderingDto
 import no.nav.familie.ef.sak.behandling.dto.RevurderingsinformasjonDto
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegService
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
+import no.nav.familie.ef.sak.behandlingsflyt.steg.ÅrsakRevurderingSteg
 import no.nav.familie.ef.sak.behandlingsflyt.task.BehandlingsstatistikkTask
 import no.nav.familie.ef.sak.behandlingsflyt.task.OpprettOppgaveForOpprettetBehandlingTask
 import no.nav.familie.ef.sak.fagsak.FagsakService
@@ -30,6 +31,7 @@ import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.leader.LeaderClient
 import no.nav.familie.prosessering.internal.TaskService
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
@@ -46,19 +48,25 @@ class RevurderingService(
     private val barnService: BarnService,
     private val fagsakService: FagsakService,
     private val årsakRevurderingService: ÅrsakRevurderingService,
+    private val årsakRevurderingSteg: ÅrsakRevurderingSteg,
     private val stegService: StegService,
     private val kopierVedtakService: KopierVedtakService,
     private val vedtakService: VedtakService,
     private val nyeBarnService: NyeBarnService,
     private val tilordnetRessursService: TilordnetRessursService,
 ) {
+    private val logger = LoggerFactory.getLogger(javaClass)
+
     fun hentRevurderingsinformasjon(behandlingId: UUID): RevurderingsinformasjonDto = årsakRevurderingService.hentRevurderingsinformasjon(behandlingId)
 
     fun lagreRevurderingsinformasjon(
         behandlingId: UUID,
         revurderingsinformasjonDto: RevurderingsinformasjonDto,
     ): RevurderingsinformasjonDto {
-        stegService.håndterÅrsakRevurdering(behandlingId, revurderingsinformasjonDto)
+        val saksbehandling = behandlingService.hentSaksbehandling(behandlingId)
+
+        stegService.håndterSteg(saksbehandling, årsakRevurderingSteg, revurderingsinformasjonDto)
+
         return hentRevurderingsinformasjon(behandlingId)
     }
 
@@ -112,16 +120,18 @@ class RevurderingService(
             metadata = metadata,
             stønadType = fagsak.stønadstype,
         )
+        val erAutomatiskRevurdering = revurderingDto.behandlingsårsak == BehandlingÅrsak.AUTOMATISK_INNTEKTSENDRING
         taskService.save(
             OpprettOppgaveForOpprettetBehandlingTask.opprettTask(
                 OpprettOppgaveForOpprettetBehandlingTask.OpprettOppgaveTaskData(
                     behandlingId = revurdering.id,
                     saksbehandler = saksbehandler,
-                    beskrivelse = "Revurdering i ny løsning",
+                    beskrivelse = if (erAutomatiskRevurdering) "Automatisk opprettet revurdering som følge av inntektskontroll" else "Revurdering i ny løsning",
+                    mappeId = if (erAutomatiskRevurdering) GOSYS_MAPPE_ID_INNTEKTSKONTROLL else null,
                 ),
             ),
         )
-        if (revurderingDto.behandlingsårsak != BehandlingÅrsak.AUTOMATISK_INNTEKTSENDRING) {
+        if (!erAutomatiskRevurdering) {
             taskService.save(BehandlingsstatistikkTask.opprettPåbegyntTask(behandlingId = revurdering.id))
         }
 
@@ -145,9 +155,8 @@ class RevurderingService(
     @Transactional
     fun opprettAutomatiskInntektsendringTask(personIdenter: List<String>) {
         if (LeaderClient.isLeader() != true) {
-            return
+            logger.info("Fant ingen leader ved oppretting av automatisk inntektsendring task")
         }
-
         val ukeÅr = LocalDate.now().let { "${it.get(IsoFields.WEEK_OF_WEEK_BASED_YEAR)}-${it.year}" }
 
         personIdenter.forEach { personIdent ->
@@ -227,4 +236,8 @@ class RevurderingService(
     }
 
     private fun erSatsendring(revurderingDto: RevurderingDto) = revurderingDto.behandlingsårsak == BehandlingÅrsak.SATSENDRING
+
+    companion object {
+        const val GOSYS_MAPPE_ID_INNTEKTSKONTROLL = 63L
+    }
 }

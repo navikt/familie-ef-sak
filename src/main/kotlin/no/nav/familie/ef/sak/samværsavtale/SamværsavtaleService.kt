@@ -8,8 +8,8 @@ import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.brev.BrevClient
 import no.nav.familie.ef.sak.brev.BrevsignaturService
 import no.nav.familie.ef.sak.brev.dto.Avsnitt
+import no.nav.familie.ef.sak.brev.dto.FritekstBrevMedSignaturRequest
 import no.nav.familie.ef.sak.brev.dto.FritekstBrevRequestDto
-import no.nav.familie.ef.sak.brev.dto.FritekstBrevRequestMedSignatur
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
@@ -18,7 +18,7 @@ import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.journalføring.JournalpostClient
 import no.nav.familie.ef.sak.oppgave.TilordnetRessursService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerService
-import no.nav.familie.ef.sak.samværsavtale.SamværsavtaleHelper.lagAvsnittFritekstbrev
+import no.nav.familie.ef.sak.samværsavtale.SamværsavtaleHelper.lagAvsnitt
 import no.nav.familie.ef.sak.samværsavtale.domain.Samværsavtale
 import no.nav.familie.ef.sak.samværsavtale.domain.SamværsukeWrapper
 import no.nav.familie.ef.sak.samværsavtale.dto.JournalførBeregnetSamværRequest
@@ -101,7 +101,15 @@ class SamværsavtaleService(
                 )
             }
 
-        samværsavtaleRepository.insertAll(nyeSamværsavtaler)
+        nyeSamværsavtaler.forEach { nySamværsavtale ->
+            val lagretSamværsavtale = hentSamværsavtaleEllerNull(nySamværsavtale.behandlingId, nySamværsavtale.behandlingBarnId)
+
+            if (lagretSamværsavtale == null) {
+                samværsavtaleRepository.insert(nySamværsavtale)
+            } else {
+                samværsavtaleRepository.update(lagretSamværsavtale.copy(uker = nySamværsavtale.uker))
+            }
+        }
     }
 
     @Transactional
@@ -136,7 +144,7 @@ class SamværsavtaleService(
         val eksternFagsakId = fagsakService.finnFagsaker(setOf(request.personIdent)).firstOrNull()?.eksternId
         validerjournalføringRequest(request, eksternFagsakId)
 
-        val fritekstBrevRequest = lagFritekstBrevRequestMedSignatur(request)
+        val fritekstBrevRequest = lagFritekstBrevMedSignaturRequest(request)
         val dokument = brevClient.genererFritekstBrev(fritekstBrevRequest)
 
         val saksbehandler = SikkerhetContext.hentSaksbehandler()
@@ -146,7 +154,7 @@ class SamværsavtaleService(
         return respons.journalpostId
     }
 
-    private fun lagFritekstBrevRequestMedSignatur(request: JournalførBeregnetSamværRequest): FritekstBrevRequestMedSignatur {
+    private fun lagFritekstBrevMedSignaturRequest(request: JournalførBeregnetSamværRequest): FritekstBrevMedSignaturRequest {
         val fritekstBrevRequest =
             FritekstBrevRequestDto(
                 overskrift = "Samværsberegning",
@@ -154,7 +162,7 @@ class SamværsavtaleService(
                 navn = personopplysningerService.hentGjeldeneNavn(listOf(request.personIdent)).getValue(request.personIdent),
                 avsnitt =
                     request.uker.mapIndexed { ukeIndex, samværsuke ->
-                        lagAvsnittFritekstbrev(ukeIndex + 1, samværsuke)
+                        lagAvsnitt(ukeIndex + 1, samværsuke)
                     } + Avsnitt(deloverskrift = "Oppsummering", innhold = request.oppsummering) +
                         Avsnitt(
                             deloverskrift = "Notat",
@@ -162,7 +170,7 @@ class SamværsavtaleService(
                         ),
             )
         val signatur = brevsignaturService.lagSaksbehandlerSignatur(request.personIdent, VedtakErUtenBeslutter(true))
-        return FritekstBrevRequestMedSignatur(brevFraSaksbehandler = fritekstBrevRequest, saksbehandlersignatur = signatur.navn, enhet = signatur.enhet, erSamværsberegning = true)
+        return FritekstBrevMedSignaturRequest(brevFraSaksbehandler = fritekstBrevRequest, saksbehandlersignatur = signatur.navn, enhet = signatur.enhet, erSamværsberegning = true)
     }
 
     private fun lagArkiverDokumentRequest(

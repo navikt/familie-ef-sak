@@ -70,6 +70,9 @@ spec:
         - application: bidrag-grunnlag
           namespace: bidrag
           cluster: dev-gcp
+        - application: veilarbportefolje
+          namespace: obo
+          cluster: dev-gcp
         - application: bidrag-grunnlag-feature
           namespace: bidrag
           cluster: dev-gcp
@@ -132,3 +135,11 @@ spec:
   leaderElection: true
   kafka:
     pool: nav-dev
+  observability:
+    logging:
+      destinations:
+        - id: loki
+        - id: elastic
+    autoInstrumentation:
+      enabled: true
+      runtime: java

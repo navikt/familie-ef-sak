@@ -2,10 +2,11 @@ package no.nav.familie.ef.sak.brev
 
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.familie.ef.sak.blankett.BlankettPdfRequest
+import no.nav.familie.ef.sak.brev.VedtaksbrevService.Companion.BESLUTTER_ENHET_PLACEHOLDER
 import no.nav.familie.ef.sak.brev.VedtaksbrevService.Companion.BESLUTTER_SIGNATUR_PLACEHOLDER
 import no.nav.familie.ef.sak.brev.VedtaksbrevService.Companion.BESLUTTER_VEDTAKSDATO_PLACEHOLDER
 import no.nav.familie.ef.sak.brev.domain.FRITEKST
-import no.nav.familie.ef.sak.brev.dto.FritekstBrevRequestMedSignatur
+import no.nav.familie.ef.sak.brev.dto.FritekstBrevMedSignaturRequest
 import no.nav.familie.ef.sak.felles.util.medContentTypeJsonUTF8
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.næringsinntektskontroll.NæringsinntektIngenEndringPdfRequest
@@ -34,7 +35,7 @@ class BrevClient(
         brevmal: String,
         saksbehandlerBrevrequest: JsonNode,
         saksbehandlersignatur: String,
-        enhet: String?,
+        saksbehandlerEnhet: String?,
         skjulBeslutterSignatur: Boolean,
     ): String {
         feilHvis(brevmal === FRITEKST) {
@@ -48,8 +49,9 @@ class BrevClient(
             BrevRequestMedSignaturer(
                 brevFraSaksbehandler = saksbehandlerBrevrequest,
                 saksbehandlersignatur = saksbehandlersignatur,
+                saksbehandlerEnhet = saksbehandlerEnhet,
                 besluttersignatur = BESLUTTER_SIGNATUR_PLACEHOLDER,
-                enhet = enhet,
+                beslutterEnhet = BESLUTTER_ENHET_PLACEHOLDER,
                 skjulBeslutterSignatur = skjulBeslutterSignatur,
                 datoPlaceholder = BESLUTTER_VEDTAKSDATO_PLACEHOLDER,
             ),
@@ -67,7 +69,7 @@ class BrevClient(
         return postForEntity(url, næringsinntektIngenEndringPdfRequest, HttpHeaders().medContentTypeJsonUTF8())
     }
 
-    fun genererFritekstBrev(request: FritekstBrevRequestMedSignatur): ByteArray {
+    fun genererFritekstBrev(request: FritekstBrevMedSignaturRequest): ByteArray {
         val url = URI.create("$familieBrevUri/api/fritekst-brev")
         return postForEntity(url, request, HttpHeaders().medContentTypeJsonUTF8())
     }
@@ -80,8 +82,9 @@ class BrevClient(
 data class BrevRequestMedSignaturer(
     val brevFraSaksbehandler: JsonNode,
     val saksbehandlersignatur: String,
+    val saksbehandlerEnhet: String?,
     val besluttersignatur: String?,
-    val enhet: String?,
+    val beslutterEnhet: String?,
     val skjulBeslutterSignatur: Boolean,
     val datoPlaceholder: String,
 )

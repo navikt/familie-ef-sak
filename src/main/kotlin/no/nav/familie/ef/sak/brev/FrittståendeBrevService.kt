@@ -2,18 +2,20 @@ package no.nav.familie.ef.sak.brev
 
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.familie.ef.sak.arbeidsfordeling.ArbeidsfordelingService
+import no.nav.familie.ef.sak.behandling.Saksbehandling
+import no.nav.familie.ef.sak.brev.BrevsignaturService.Companion.NAV_ENHET_NAY
 import no.nav.familie.ef.sak.brev.domain.BrevmottakerOrganisasjon
 import no.nav.familie.ef.sak.brev.domain.BrevmottakerPerson
-import no.nav.familie.ef.sak.brev.dto.Flettefelter
 import no.nav.familie.ef.sak.brev.dto.FrittståendeSanitybrevDto
-import no.nav.familie.ef.sak.brev.dto.SanityBrevRequestInnhentingAktivitetsplikt
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.felles.util.norskFormat
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.iverksett.tilIverksettDto
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerService
 import no.nav.familie.ef.sak.vedtak.domain.VedtakErUtenBeslutter
+import no.nav.familie.kontrakter.ef.felles.FrittståendeBrevDto
 import no.nav.familie.kontrakter.ef.iverksett.Brevmottaker
 import no.nav.familie.kontrakter.felles.objectMapper
 import org.springframework.stereotype.Service
@@ -31,6 +33,7 @@ class FrittståendeBrevService(
     private val mellomlagringBrevService: MellomlagringBrevService,
     private val familieDokumentClient: FamilieDokumentClient,
     private val brevmottakereService: BrevmottakereService,
+    private val personopplysningerService: PersonopplysningerService,
 ) {
     fun lagFrittståendeSanitybrev(
         fagsakId: UUID,
@@ -46,7 +49,7 @@ class FrittståendeBrevService(
                     brevmal = brevmal,
                     saksbehandlerBrevrequest = brevrequest,
                     saksbehandlersignatur = signatur.navn,
-                    enhet = signatur.enhet,
+                    saksbehandlerEnhet = signatur.enhet,
                     skjulBeslutterSignatur = signatur.skjulBeslutter,
                 ).replace(VedtaksbrevService.BESLUTTER_VEDTAKSDATO_PLACEHOLDER, LocalDate.now().norskFormat())
 
@@ -82,7 +85,7 @@ class FrittståendeBrevService(
         visningsnavn: String,
         personIdent: String,
     ): ByteArray {
-        val brevRequest = SanityBrevRequestInnhentingAktivitetsplikt(flettefelter = Flettefelter(navn = listOf(visningsnavn), fodselsnummer = listOf(personIdent)))
+        val brevRequest = BrevRequest(flettefelter = Flettefelter(navn = listOf(visningsnavn), fodselsnummer = listOf(personIdent)))
 
         val html =
             brevClient
@@ -90,12 +93,54 @@ class FrittståendeBrevService(
                     brevmal = "innhentingOpplysningerAktivitetEtterUtdanning",
                     saksbehandlerBrevrequest = objectMapper.valueToTree(brevRequest),
                     saksbehandlersignatur = "",
-                    enhet = "Nav Arbeid og ytelser",
+                    saksbehandlerEnhet = NAV_ENHET_NAY,
                     skjulBeslutterSignatur = true,
                 ).replace(VedtaksbrevService.BESLUTTER_VEDTAKSDATO_PLACEHOLDER, LocalDate.now().norskFormat())
 
         return familieDokumentClient.genererPdfFraHtml(html)
     }
+
+    fun lagFrittståendeBrevDto(
+        saksbehandling: Saksbehandling,
+        tittel: String,
+        fil: ByteArray,
+        brevmottakere: BrevmottakereDto? = null,
+    ): FrittståendeBrevDto {
+        val journalførendeEnhet = arbeidsfordelingService.hentNavEnhetIdEllerBrukMaskinellEnhetHvisNull(saksbehandling.ident)
+
+        val mottakere: List<Brevmottaker> =
+            if (brevmottakere != null) {
+                validerOgMapBrevmottakere(brevmottakere)
+            } else {
+                lagBrevMottaker(saksbehandling, skalHaSaksbehandlerIdent = true)
+            }
+
+        val brevDto =
+            FrittståendeBrevDto(
+                personIdent = saksbehandling.ident,
+                eksternFagsakId = saksbehandling.eksternFagsakId,
+                stønadType = saksbehandling.stønadstype,
+                tittel = tittel,
+                fil = fil,
+                journalførendeEnhet = journalførendeEnhet,
+                saksbehandlerIdent = "VL",
+                mottakere = mottakere,
+            )
+
+        return brevDto
+    }
+
+    fun lagBrevMottaker(
+        saksbehandling: Saksbehandling,
+        skalHaSaksbehandlerIdent: Boolean = false,
+    ) = listOf(
+        Brevmottaker(
+            ident = if (skalHaSaksbehandlerIdent) saksbehandling.ident else "VL",
+            navn = personopplysningerService.hentGjeldeneNavn(listOf(saksbehandling.ident)).getValue(saksbehandling.ident),
+            mottakerRolle = Brevmottaker.MottakerRolle.BRUKER,
+            identType = Brevmottaker.IdentType.PERSONIDENT,
+        ),
+    )
 
     private fun mapMottakere(mottakere: BrevmottakereDto): List<Brevmottaker> {
         val personer = mottakere.personer.map(BrevmottakerPerson::tilIverksettDto)

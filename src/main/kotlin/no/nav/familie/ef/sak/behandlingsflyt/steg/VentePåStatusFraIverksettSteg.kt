@@ -9,7 +9,7 @@ import no.nav.familie.prosessering.internal.TaskService
 import org.springframework.stereotype.Service
 
 @Service
-class VentePåStatusFraIverksett(
+class VentePåStatusFraIverksettSteg(
     private val iverksettClient: IverksettClient,
     private val taskService: TaskService,
 ) : BehandlingSteg<Void?> {

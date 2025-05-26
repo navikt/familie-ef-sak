@@ -343,12 +343,13 @@ internal class TilordnetRessursServiceTest {
         etternavn = etternavn,
         fornavn = fornavn,
         navIdent = navIdent,
+        enhetsnavn = "Enheten som saksbehandler tilhører",
     )
 
     companion object {
         private val oppgaveTyper = setOf(Oppgavetype.BehandleSak, Oppgavetype.BehandleUnderkjentVedtak)
         private val oppgaveTyperMedGodkjenneVedtak = oppgaveTyper + Oppgavetype.GodkjenneVedtak
 
-        private val saksbehandler = Saksbehandler(UUID.randomUUID(), "Z999999", "Darth", "Vader", "4405")
+        private val saksbehandler = Saksbehandler(UUID.randomUUID(), "Z999999", "Darth", "Vader", "4405", enhetsnavn = "Enheten som saksbehandler tilhører")
     }
 }

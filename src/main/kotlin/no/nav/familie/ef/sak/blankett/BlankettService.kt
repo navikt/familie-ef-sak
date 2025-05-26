@@ -10,8 +10,8 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataServic
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerService
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadDatoerDto
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
+import no.nav.familie.ef.sak.samværsavtale.SamværsavtaleHelper.lagBeregnetSamvær
 import no.nav.familie.ef.sak.samværsavtale.SamværsavtaleService
-import no.nav.familie.ef.sak.samværsavtale.dto.tilDto
 import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.ef.sak.vedtak.dto.VedtakDto
 import no.nav.familie.ef.sak.vilkår.VurderingService
@@ -54,7 +54,7 @@ class BlankettService(
                 hentVedtak(behandlingId),
                 lagSøknadsdatoer(behandlingId),
                 vilkårVurderinger.grunnlag.harAvsluttetArbeidsforhold,
-                samværsavtaleService.hentSamværsavtalerForBehandling(behandlingId).tilDto(),
+                samværsavtaleService.hentSamværsavtalerForBehandling(behandlingId).map { lagBeregnetSamvær(it) },
             )
         val blankettPdfAsByteArray = brevClient.genererBlankett(blankettPdfRequest)
         oppdaterEllerOpprettBlankett(behandlingId, blankettPdfAsByteArray)

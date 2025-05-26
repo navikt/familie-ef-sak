@@ -1,6 +1,7 @@
 package no.nav.familie.ef.sak.repository
 
 import no.nav.familie.ef.sak.amelding.Inntekt
+import no.nav.familie.ef.sak.amelding.InntektResponse
 import no.nav.familie.ef.sak.amelding.InntektType
 import no.nav.familie.ef.sak.amelding.Inntektsmåned
 import no.nav.familie.ef.sak.barn.BehandlingBarn
@@ -81,6 +82,7 @@ import no.nav.familie.kontrakter.ef.iverksett.BehandlingKategori
 import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
+import no.nav.familie.kontrakter.felles.saksbehandler.Saksbehandler
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -410,6 +412,81 @@ fun vedtak(
         samordningsfradragType = null,
     )
 
+fun vedtak(
+    behandlingId: UUID,
+    månedsperioder: List<Månedsperiode>,
+): Vedtak =
+    Vedtak(
+        behandlingId = behandlingId,
+        resultatType = ResultatType.INNVILGE,
+        periodeBegrunnelse = "OK",
+        inntektBegrunnelse = "OK",
+        avslåBegrunnelse = null,
+        perioder = PeriodeWrapper(månedsperioder.map { vedtaksperiode(startDato = it.fomDato, sluttDato = it.tomDato) }),
+        inntekter = InntektWrapper(månedsperioder.map { inntektsperiode(startDato = it.fomDato, sluttDato = it.tomDato) }),
+        skolepenger = null,
+        saksbehandlerIdent = "VL",
+        opprettetAv = "VL",
+        opprettetTid = LocalDateTime.now(),
+        samordningsfradragType = null,
+    )
+
+fun vedtak(
+    inntektMånedTilBeløpMap: Map<YearMonth, Int>,
+    vedtakTom: YearMonth = YearMonth.now().plusMonths(12),
+): Vedtak {
+    val sisteMåned = inntektMånedTilBeløpMap.keys.maxOrNull()
+
+    val inntektsperioder =
+        inntektMånedTilBeløpMap.map { (måned, beløp) ->
+            val sluttDato =
+                if (måned == sisteMåned) {
+                    vedtakTom.atEndOfMonth()
+                } else {
+                    måned.atEndOfMonth()
+                }
+
+            inntektsperiode(
+                startDato = måned.atDay(1),
+                sluttDato = sluttDato,
+                månedsinntekt = BigDecimal.valueOf(beløp.toDouble()),
+                inntekt = 0.toBigDecimal(),
+            )
+        }
+
+    return vedtak(InntektWrapper(inntektsperioder))
+}
+
+fun vedtak(
+    inntekter: InntektWrapper,
+): Vedtak =
+    Vedtak(
+        behandlingId = UUID.randomUUID(),
+        resultatType = ResultatType.INNVILGE,
+        periodeBegrunnelse = "OK",
+        inntektBegrunnelse = "OK",
+        avslåBegrunnelse = null,
+        perioder =
+            PeriodeWrapper(
+                listOf(
+                    vedtaksperiode(
+                        startDato =
+                            inntekter.inntekter
+                                .minBy { it.periode.fom }
+                                .periode.fomDato,
+                        sluttDato =
+                            inntekter.inntekter
+                                .maxBy { it.periode.tom }
+                                .periode.tomDato,
+                    ),
+                ),
+            ),
+        inntekter = inntekter,
+        saksbehandlerIdent = "VL",
+        opprettetAv = "VL",
+        opprettetTid = LocalDateTime.now(),
+    )
+
 fun vedtakBarnetilsyn(
     behandlingId: UUID,
     barn: List<UUID>,
@@ -453,9 +530,14 @@ fun inntektsperiode(
     sluttDato: LocalDate = LocalDate.of(år, 12, 1),
     inntekt: BigDecimal = BigDecimal.valueOf(100000),
     samordningsfradrag: BigDecimal = BigDecimal.valueOf(500),
-    dagsats: BigDecimal? = null,
+    dagsats: BigDecimal? = BigDecimal.valueOf(0),
     månedsinntekt: BigDecimal? = null,
 ) = Inntektsperiode(periode = Månedsperiode(startDato, sluttDato), dagsats = dagsats, månedsinntekt = månedsinntekt, inntekt = inntekt, samordningsfradrag = samordningsfradrag)
+
+fun inntektsperiode(
+    månedsperiode: Månedsperiode,
+    månedsinntekt: BigDecimal? = null,
+) = Inntektsperiode(periode = månedsperiode, månedsinntekt = månedsinntekt, dagsats = 0.toBigDecimal(), inntekt = 0.toBigDecimal(), samordningsfradrag = 0.toBigDecimal())
 
 fun vedtaksperiode(
     år: Int = 2021,
@@ -599,12 +681,13 @@ fun opprettAlleVilkårsvurderinger(
     behandlingId: UUID,
     metadata: HovedregelMetadata,
     stønadstype: StønadType,
+    resultat: Vilkårsresultat? = null,
 ): List<Vilkårsvurdering> =
     vilkårsreglerForStønad(stønadstype).flatMap { vilkårsregel ->
         if (vilkårsregel.vilkårType.gjelderFlereBarn() && metadata.barn.isNotEmpty()) {
-            metadata.barn.map { lagNyVilkårsvurdering(vilkårsregel, metadata, behandlingId, it.id) }
+            metadata.barn.map { lagNyVilkårsvurdering(vilkårsregel, metadata, behandlingId, it.id, resultat) }
         } else {
-            listOf(lagNyVilkårsvurdering(vilkårsregel, metadata, behandlingId))
+            listOf(lagNyVilkårsvurdering(vilkårsregel, metadata, behandlingId, resultat = resultat))
         }
     }
 
@@ -618,16 +701,50 @@ fun inntektsmåneder(
         .map { inntektsmåned(it, inntektListe) }
         .toList()
 
+fun inntektsmåneder(
+    fraOgMedMåned: YearMonth,
+    tilOgMedMåned: YearMonth = YearMonth.now(),
+    inntektListe: List<Inntekt> = emptyList(),
+    inntektsøkning: Månedsperiode,
+): List<Inntektsmåned> =
+    generateSequence(fraOgMedMåned) { it.plusMonths(1) }
+        .takeWhile { it.isBefore(tilOgMedMåned) }
+        .map {
+            if (inntektsøkning.inneholder(it)) {
+                inntektsmåned(it, inntektListe, true)
+            } else {
+                inntektsmåned(it, inntektListe)
+            }
+        }.toList()
+
+fun lagInntektResponseFraMånedsinntekterFraDouble(månedsinntekter: List<Double>): InntektResponse =
+    InntektResponse(
+        månedsinntekter
+            .reversed()
+            .mapIndexed { index, inntektsbeløp ->
+                val dato = YearMonth.now().minusMonths(index.toLong() + 1)
+                inntektsmåned(dato, listOf(inntekt(inntektsbeløp)))
+            },
+    )
+
+fun lagInntektResponseFraMånedsinntekter(månedsinntekter: List<Int>): InntektResponse = lagInntektResponseFraMånedsinntekterFraDouble(månedsinntekter.map { it.toDouble() })
+
 fun inntektsmåned(
     måned: YearMonth,
     inntektListe: List<Inntekt> = emptyList(),
+    øktInntekt: Boolean = false,
 ) = Inntektsmåned(
     måned = måned,
     opplysningspliktig = "",
     underenhet = "",
     norskident = "",
     oppsummeringstidspunkt = OffsetDateTime.now(),
-    inntektListe = inntektListe,
+    inntektListe =
+        if (øktInntekt) {
+            inntektListe.map { it.copy(beløp = it.beløp * 1.15) }
+        } else {
+            inntektListe
+        },
     forskuddstrekkListe = emptyList(),
     avvikListe = emptyList(),
 )
@@ -653,11 +770,22 @@ fun inntekt(
     opptjeningsland = null,
 )
 
+fun saksbehandler(enhetsnavn: String = "NAV ARBEID OG YTELSER SKIEN") =
+    Saksbehandler(
+        azureId = UUID.randomUUID(),
+        navIdent = "NAV123",
+        fornavn = "Darth",
+        etternavn = "Vader",
+        enhet = "4489",
+        enhetsnavn = enhetsnavn,
+    )
+
 private fun lagNyVilkårsvurdering(
     vilkårsregel: Vilkårsregel,
     metadata: HovedregelMetadata,
     behandlingId: UUID,
     barnId: UUID? = null,
+    resultat: Vilkårsresultat? = null,
 ): Vilkårsvurdering {
     val delvilkårsvurdering = initierDelvilkårsvurderinger(vilkårsregel, metadata, barnId)
     return Vilkårsvurdering(
@@ -665,7 +793,7 @@ private fun lagNyVilkårsvurdering(
         type = vilkårsregel.vilkårType,
         barnId = barnId,
         delvilkårsvurdering = DelvilkårsvurderingWrapper(delvilkårsvurdering),
-        resultat = utledResultat(vilkårsregel, delvilkårsvurdering.map { it.tilDto() }).vilkår,
+        resultat = resultat ?: utledResultat(vilkårsregel, delvilkårsvurdering.map { it.tilDto() }).vilkår,
         opphavsvilkår = null,
     )
 }

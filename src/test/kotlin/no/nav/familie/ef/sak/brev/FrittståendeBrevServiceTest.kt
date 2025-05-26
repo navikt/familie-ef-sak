@@ -16,6 +16,7 @@ import no.nav.familie.ef.sak.felles.util.BrukerContextUtil
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.iverksett.tilIverksettDto
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerService
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.fagsakpersoner
 import org.assertj.core.api.Assertions.assertThat
@@ -36,6 +37,7 @@ internal class FrittståendeBrevServiceTest {
     private val mellomlagringBrevService = mockk<MellomlagringBrevService>()
     private val familieDokumentClient = mockk<FamilieDokumentClient>()
     private val brevmottakereService = mockk<BrevmottakereService>()
+    private val personopplysningerService = mockk<PersonopplysningerService>()
 
     private val frittståendeBrevService =
         FrittståendeBrevService(
@@ -47,6 +49,7 @@ internal class FrittståendeBrevServiceTest {
             mellomlagringBrevService,
             familieDokumentClient,
             brevmottakereService,
+            personopplysningerService,
         )
     private val fagsak = fagsak(fagsakpersoner(identer = setOf("01010172272")))
 

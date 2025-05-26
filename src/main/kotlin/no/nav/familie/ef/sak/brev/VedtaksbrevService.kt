@@ -58,22 +58,22 @@ class VedtaksbrevService(
         val fagsak = fagsakService.hentFagsak(saksbehandling.fagsakId)
         val vedtak = vedtakService.hentVedtak(saksbehandling.id)
         val vedtakErUtenBeslutter = vedtak.utledVedtakErUtenBeslutter()
-        val saksbehandlersignatur = brevsignaturService.lagSaksbehandlerSignatur(fagsak.hentAktivIdent(), vedtakErUtenBeslutter)
+        val signatur = brevsignaturService.lagSaksbehandlerSignatur(fagsak.hentAktivIdent(), vedtakErUtenBeslutter)
 
         val html =
             brevClient.genererHtml(
                 brevmal = brevmal,
                 saksbehandlerBrevrequest = brevrequest,
-                saksbehandlersignatur = saksbehandlersignatur.navn,
-                enhet = saksbehandlersignatur.enhet,
-                skjulBeslutterSignatur = saksbehandlersignatur.skjulBeslutter,
+                saksbehandlersignatur = signatur.navn,
+                saksbehandlerEnhet = signatur.enhet,
+                skjulBeslutterSignatur = signatur.skjulBeslutter,
             )
 
         lagreEllerOppdaterSaksbehandlerVedtaksbrev(
             behandlingId = saksbehandling.id,
             brevmal = brevmal,
-            saksbehandlersignatur = saksbehandlersignatur.navn,
-            enhet = saksbehandlersignatur.enhet,
+            saksbehandlersignatur = signatur.navn,
+            saksbehandlerEnhet = signatur.enhet,
             saksbehandlerHtml = html,
         )
 
@@ -84,7 +84,7 @@ class VedtaksbrevService(
         behandlingId: UUID,
         brevmal: String,
         saksbehandlersignatur: String,
-        enhet: String,
+        saksbehandlerEnhet: String,
         saksbehandlerHtml: String,
     ): Vedtaksbrev {
         val vedtaksbrev =
@@ -93,7 +93,7 @@ class VedtaksbrevService(
                 saksbehandlerHtml = saksbehandlerHtml,
                 brevmal = brevmal,
                 saksbehandlersignatur = saksbehandlersignatur,
-                enhet = enhet,
+                enhet = saksbehandlerEnhet,
                 saksbehandlerident = SikkerhetContext.hentSaksbehandler(),
                 opprettetTid = SporbarUtils.now(),
             )
@@ -108,7 +108,7 @@ class VedtaksbrevService(
         val vedtaksbrev = brevRepository.findByIdOrThrow(saksbehandling.id)
         val vedtak = vedtakService.hentVedtak(saksbehandling.id)
         val vedtakErUtenBeslutter = vedtak.utledVedtakErUtenBeslutter()
-        val signaturMedEnhet = brevsignaturService.lagBeslutterSignatur(saksbehandling.ident, vedtakErUtenBeslutter)
+        val signatur = brevsignaturService.lagBeslutterSignatur(saksbehandling.ident, vedtakErUtenBeslutter)
 
         feilHvis(vedtaksbrev.saksbehandlerHtml == null) {
             "Mangler saksbehandlerbrev"
@@ -116,7 +116,7 @@ class VedtaksbrevService(
 
         return lagBeslutterPdfMedSignatur(
             vedtaksbrev.saksbehandlerHtml,
-            signaturMedEnhet,
+            signatur,
         ).bytes
     }
 
@@ -128,12 +128,12 @@ class VedtaksbrevService(
         val saksbehandlerHtml = hentSaksbehandlerHtml(vedtaksbrev, saksbehandling)
         val beslutterIdent = SikkerhetContext.hentSaksbehandler()
         validerKanLageBeslutterbrev(saksbehandling, vedtaksbrev, beslutterIdent, vedtakErUtenBeslutter)
-        val signaturMedEnhet = brevsignaturService.lagBeslutterSignatur(saksbehandling.ident, vedtakErUtenBeslutter)
-        val beslutterPdf = lagBeslutterPdfMedSignatur(saksbehandlerHtml, signaturMedEnhet)
+        val signatur = brevsignaturService.lagBeslutterSignatur(saksbehandling.ident, vedtakErUtenBeslutter)
+        val beslutterPdf = lagBeslutterPdfMedSignatur(saksbehandlerHtml, signatur)
         val besluttervedtaksbrev =
             vedtaksbrev.copy(
-                besluttersignatur = signaturMedEnhet.navn,
-                enhet = signaturMedEnhet.enhet,
+                besluttersignatur = signatur.navn,
+                enhet = signatur.enhet,
                 beslutterident = beslutterIdent,
                 beslutterPdf = beslutterPdf,
                 besluttetTid = LocalDateTime.now(),
@@ -181,14 +181,14 @@ class VedtaksbrevService(
         signaturMedEnhet: SignaturDto,
     ): Fil {
         val htmlMedBeslutterSignatur =
-            settInnBeslutterSignaturIHtml(
+            settInnBeslutterVerdierIHtml(
                 html = saksbehandlerHtml,
                 signaturMedEnhet = signaturMedEnhet,
             )
         return Fil(familieDokumentClient.genererPdfFraHtml(htmlMedBeslutterSignatur))
     }
 
-    private fun settInnBeslutterSignaturIHtml(
+    private fun settInnBeslutterVerdierIHtml(
         html: String,
         signaturMedEnhet: SignaturDto,
     ): String {
@@ -197,8 +197,10 @@ class VedtaksbrevService(
         }
 
         val beslutterSignatur = if (signaturMedEnhet.skjulBeslutter) "" else signaturMedEnhet.navn
+
         return html
             .replace(BESLUTTER_SIGNATUR_PLACEHOLDER, beslutterSignatur)
+            .replace(BESLUTTER_ENHET_PLACEHOLDER, signaturMedEnhet.enhet)
             .replace(BESLUTTER_VEDTAKSDATO_PLACEHOLDER, LocalDate.now().norskFormat())
     }
 
@@ -232,6 +234,7 @@ class VedtaksbrevService(
 
     companion object {
         const val BESLUTTER_SIGNATUR_PLACEHOLDER = "BESLUTTER_SIGNATUR"
+        const val BESLUTTER_ENHET_PLACEHOLDER = "BESLUTTER_ENHET"
         const val BESLUTTER_VEDTAKSDATO_PLACEHOLDER = "BESLUTTER_VEDTAKSDATO"
     }
 }

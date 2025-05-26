@@ -9,15 +9,18 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.inntekt.Grunnlagsda
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.inntekt.GrunnlagsdataInntektRepository
 import no.nav.familie.ef.sak.sigrun.SigrunService
 import no.nav.familie.ef.sak.sigrun.harNæringsinntekt
+import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.kontrakter.felles.Tema
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveRequest
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.kontrakter.felles.oppgave.StatusEnum
 import org.slf4j.LoggerFactory
+import org.springframework.core.env.Environment
 import org.springframework.stereotype.Service
 import java.time.YearMonth
 import java.util.UUID
+import kotlin.collections.contains
 
 @Service
 class AutomatiskRevurderingService(
@@ -27,6 +30,8 @@ class AutomatiskRevurderingService(
     private val oppgaveService: OppgaveService,
     private val aMeldingInntektClient: AMeldingInntektClient,
     private val grunnlagsdataInntektRepository: GrunnlagsdataInntektRepository,
+    private val vedtakService: VedtakService,
+    private val environment: Environment,
 ) {
     private val logger = LoggerFactory.getLogger(javaClass)
     private val secureLogger = LoggerFactory.getLogger("secureLogger")
@@ -34,7 +39,13 @@ class AutomatiskRevurderingService(
     fun kanAutomatiskRevurderes(personIdent: String): Boolean {
         val fagsak = fagsakService.finnFagsak(setOf(personIdent), StønadType.OVERGANGSSTØNAD) ?: return false
         logger.info("Sjekker om fagsak ${fagsak.id} automatisk revurderes")
-        val inntektForAlleÅr = sigrunService.hentInntektForAlleÅrMedInntekt(fagsak.fagsakPersonId)
+
+        val inntektForAlleÅr =
+            if (environment.activeProfiles.contains("prod")) {
+                sigrunService.hentInntektForAlleÅrMedInntekt(fagsak.fagsakPersonId)
+            } else {
+                emptyList()
+            }
 
         if (inntektForAlleÅr.harNæringsinntekt()) {
             logger.info("Har næringsinntekt for fagsak ${fagsak.id}")
@@ -62,6 +73,18 @@ class AutomatiskRevurderingService(
 
         if (harBehandleSakEllerJournalføringsoppgave) {
             logger.info("harBehandleSakEllerJournalføringsoppgave $oppgaverForPerson")
+            return false
+        }
+
+        val sisteIverksatteBehandlingId = behandlingService.finnSisteIverksatteBehandling(fagsak.id)?.id
+        if (sisteIverksatteBehandlingId == null) {
+            logger.error("Fant ikke siste iverksatte behandling for fagsakId: ${fagsak.id}")
+            return false
+        }
+
+        val vedtak = vedtakService.hentVedtak(sisteIverksatteBehandlingId)
+        if (vedtak.perioder?.perioder?.size != 1) { // Denne valideringen kan fjernes når logikken for å sette revurderes fra-dato er forbedret
+            logger.info("behandlingId: $sisteIverksatteBehandlingId har flere vedtaksperioder og kan derfor ikke automatisk revurderes")
             return false
         }
 
