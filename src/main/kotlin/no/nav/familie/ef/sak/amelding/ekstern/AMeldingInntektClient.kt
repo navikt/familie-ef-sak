@@ -75,6 +75,12 @@ class AMeldingInntektClient(
                 månedTom = månedTom,
             )
 
+        val headers =
+            HttpHeaders().apply {
+                contentType = MediaType.APPLICATION_JSON
+                accept = listOf(MediaType.APPLICATION_JSON)
+            }
+
         logger.info("--- request $request")
 
         val payload = request
@@ -83,10 +89,7 @@ class AMeldingInntektClient(
             postForEntity<Map<String, Any>>(
                 uri = genererInntektV2NyIngress,
                 payload = payload,
-                httpHeaders =
-                    headers(
-                        token = token(),
-                    ),
+                httpHeaders = headers,
             )
 
         logger.info("--- entity $entity")
