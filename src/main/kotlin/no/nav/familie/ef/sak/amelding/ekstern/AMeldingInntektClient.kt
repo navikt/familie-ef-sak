@@ -3,6 +3,7 @@ package no.nav.familie.ef.sak.amelding.ekstern
 import no.nav.familie.ef.sak.amelding.HentInntektPayload
 import no.nav.familie.ef.sak.amelding.InntektResponse
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.logger
+import no.nav.familie.ef.sak.texas.Texas
 import no.nav.familie.http.client.AbstractRestClient
 import no.nav.familie.kontrakter.felles.PersonIdent
 import org.springframework.beans.factory.annotation.Qualifier
@@ -76,14 +77,14 @@ class AMeldingInntektClient(
         logger.info("--- request $request")
 
         val payload = request
-        val token = genererToken()
+//        val token = genererToken()
         val entity =
             postForEntity<Map<String, Any>>(
                 uri = genererInntektV2NyIngress,
                 payload = payload,
                 httpHeaders =
                     headers(
-                        token = token.toString(),
+                        token = token(),
                     ),
             )
 
@@ -128,7 +129,7 @@ class AMeldingInntektClient(
         return res as Unit
     }
 
-//    private fun token(): String = Texas().genererToken()
+    private fun token(): String = Texas().genererToken()
 
     private fun headers(token: String): HttpHeaders =
         HttpHeaders().apply {
