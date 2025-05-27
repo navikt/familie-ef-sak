@@ -76,14 +76,14 @@ class AMeldingInntektClient(
         logger.info("--- request $request")
 
         val payload = request
-
+        val token = genererToken()
         val entity =
             postForEntity<Map<String, Any>>(
                 uri = genererInntektV2NyIngress,
                 payload = payload,
                 httpHeaders =
                     headers(
-                        token = genererToken(),
+                        token = token.toString(),
                     ),
             )
 
@@ -94,9 +94,9 @@ class AMeldingInntektClient(
 
     private val tokenEndpoint = System.getenv("NAIS_TOKEN_ENDPOINT")
 
-    private fun genererToken(): String {
+    private fun genererToken() {
         logger.info("--- generer token")
-        val uri = URI(tokenEndpoint)
+        val uri = URI.create(tokenEndpoint)
 
         val payload =
             mapOf(
@@ -117,15 +117,15 @@ class AMeldingInntektClient(
         logger.info("--- headers $headers")
 
         val res =
-            postForEntity<String>( // TODO: Sett korrekt type
+            postForEntity<Any>( // TODO: Sett korrekt type
                 uri = uri,
                 payload = payload,
                 httpHeaders = headers,
             )
 
         logger.info("--- res $res")
-
-        return res
+//
+        return res as Unit
     }
 
 //    private fun token(): String = Texas().genererToken()
