@@ -2,6 +2,7 @@ package no.nav.familie.ef.sak.amelding.ekstern
 
 import no.nav.familie.ef.sak.amelding.HentInntektPayload
 import no.nav.familie.ef.sak.amelding.InntektResponse
+import no.nav.familie.ef.sak.infrastruktur.config.ObjectMapperProvider
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.logger
 import no.nav.familie.ef.sak.texas.Texas
 import no.nav.familie.http.client.AbstractRestClient
@@ -77,14 +78,14 @@ class AMeldingInntektClient(
         logger.info("--- request $request")
 
         val payload = request
-//        val token = genererToken()
+        val token = genererToken()
         val entity =
             postForEntity<Map<String, Any>>(
                 uri = genererInntektV2NyIngress,
                 payload = payload,
                 httpHeaders =
                     headers(
-                        token = token(),
+                        token = token.toString(),
                     ),
             )
 
@@ -105,7 +106,7 @@ class AMeldingInntektClient(
                 "target" to "api://dev-gcp.teamfamilie.familie-ef-sak/.default",
             )
 
-//        val body = ObjectMapperProvider.objectMapper.writeValueAsString(obj)
+        val body = ObjectMapperProvider.objectMapper.writeValueAsString(payload)
 
         val headers =
             HttpHeaders().apply {
@@ -115,17 +116,17 @@ class AMeldingInntektClient(
 
         logger.info("--- uri $uri")
         logger.info("--- payload $payload")
+        logger.info("--- body $body")
         logger.info("--- headers $headers")
 
         val res =
             postForEntity<Any>( // TODO: Sett korrekt type
                 uri = uri,
-                payload = payload,
+                payload = body,
                 httpHeaders = headers,
             )
 
         logger.info("--- res $res")
-//
         return res as Unit
     }
 
