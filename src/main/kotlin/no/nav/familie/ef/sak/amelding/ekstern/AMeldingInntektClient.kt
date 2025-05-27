@@ -85,7 +85,7 @@ class AMeldingInntektClient(
                 payload = payload,
                 httpHeaders =
                     headers(
-                        token = token.toString(),
+                        token = token(),
                     ),
             )
 
