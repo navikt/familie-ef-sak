@@ -31,7 +31,7 @@ internal class AutomatiskBrevInnhentingAktivitetspliktServiceTest {
         every { oppgaveService.finnMapper(any<String>()) } returns listOf(MappeDto(1, "64 Utdanning", "4489"))
     }
 
-    val gjeldendeFrist = "2024-05-17"
+    val gjeldendeFrist = "2025-05-17"
 
     @Test
     fun `Skal opprette tasks for oppgaver`() {
