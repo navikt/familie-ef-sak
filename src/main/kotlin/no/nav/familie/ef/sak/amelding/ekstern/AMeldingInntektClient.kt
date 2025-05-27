@@ -97,6 +97,7 @@ class AMeldingInntektClient(
     private val tokenEndpoint = System.getenv("NAIS_TOKEN_ENDPOINT")
 
     private fun genererToken(): String {
+        logger.info("--- generer token")
         val uri = URI(tokenEndpoint)
 
         val obj =
@@ -113,12 +114,18 @@ class AMeldingInntektClient(
                 accept = listOf(MediaType.APPLICATION_JSON)
             }
 
+        logger.info("--- uri $uri")
+        logger.info("--- body $body")
+        logger.info("--- headers $headers")
+
         val res =
             postForEntity<String>( // TODO: Sett korrekt type
                 uri = uri,
                 payload = body,
                 httpHeaders = headers,
             )
+
+        logger.info("--- res $res")
 
         return res
     }
