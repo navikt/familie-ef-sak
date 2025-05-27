@@ -2,8 +2,8 @@ package no.nav.familie.ef.sak.amelding.ekstern
 
 import no.nav.familie.ef.sak.amelding.HentInntektPayload
 import no.nav.familie.ef.sak.amelding.InntektResponse
+import no.nav.familie.ef.sak.infrastruktur.config.ObjectMapperProvider
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.logger
-import no.nav.familie.ef.sak.texas.Texas
 import no.nav.familie.http.client.AbstractRestClient
 import no.nav.familie.kontrakter.felles.PersonIdent
 import no.nav.familie.kontrakter.felles.objectMapper
@@ -85,7 +85,7 @@ class AMeldingInntektClient(
                 payload = payload,
                 httpHeaders =
                     headers(
-                        token = token(),
+                        token = genererToken(),
                     ),
             )
 
@@ -94,7 +94,36 @@ class AMeldingInntektClient(
         return entity
     }
 
-    private fun token(): String = Texas().genererToken()
+    private val tokenEndpoint = System.getenv("NAIS_TOKEN_ENDPOINT")
+
+    private fun genererToken(): String {
+        val uri = URI(tokenEndpoint)
+
+        val obj =
+            mapOf(
+                "identity_provider" to "azuread",
+                "target" to "api://dev-gcp.teamfamilie.familie-ef-sak/.default",
+            )
+
+        val body = ObjectMapperProvider.objectMapper.writeValueAsString(obj)
+
+        val headers =
+            HttpHeaders().apply {
+                contentType = MediaType.APPLICATION_JSON
+                accept = listOf(MediaType.APPLICATION_JSON)
+            }
+
+        val res =
+            postForEntity<String>( // TODO: Sett korrekt type
+                uri = uri,
+                payload = body,
+                httpHeaders = headers,
+            )
+
+        return res
+    }
+
+//    private fun token(): String = Texas().genererToken()
 
     private fun headers(token: String): HttpHeaders =
         HttpHeaders().apply {
