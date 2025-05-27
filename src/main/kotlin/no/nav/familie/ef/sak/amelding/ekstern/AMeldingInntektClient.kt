@@ -2,11 +2,9 @@ package no.nav.familie.ef.sak.amelding.ekstern
 
 import no.nav.familie.ef.sak.amelding.HentInntektPayload
 import no.nav.familie.ef.sak.amelding.InntektResponse
-import no.nav.familie.ef.sak.infrastruktur.config.ObjectMapperProvider
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.logger
 import no.nav.familie.http.client.AbstractRestClient
 import no.nav.familie.kontrakter.felles.PersonIdent
-import no.nav.familie.kontrakter.felles.objectMapper
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpHeaders
@@ -100,13 +98,13 @@ class AMeldingInntektClient(
         logger.info("--- generer token")
         val uri = URI(tokenEndpoint)
 
-        val obj =
+        val payload =
             mapOf(
                 "identity_provider" to "azuread",
                 "target" to "api://dev-gcp.teamfamilie.familie-ef-sak/.default",
             )
 
-        val body = ObjectMapperProvider.objectMapper.writeValueAsString(obj)
+//        val body = ObjectMapperProvider.objectMapper.writeValueAsString(obj)
 
         val headers =
             HttpHeaders().apply {
@@ -115,13 +113,13 @@ class AMeldingInntektClient(
             }
 
         logger.info("--- uri $uri")
-        logger.info("--- body $body")
+        logger.info("--- payload $payload")
         logger.info("--- headers $headers")
 
         val res =
             postForEntity<String>( // TODO: Sett korrekt type
                 uri = uri,
-                payload = body,
+                payload = payload,
                 httpHeaders = headers,
             )
 
