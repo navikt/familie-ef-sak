@@ -20,7 +20,7 @@ class AutomatiskBrevInnhentingAktivitetspliktService(
 ) {
     val logger: Logger = LoggerFactory.getLogger(javaClass)
 
-    val oppgaveAktivitetspliktFrist = LocalDate.parse("2024-05-17")
+    val oppgaveAktivitetspliktFrist = LocalDate.parse("2025-05-17")
 
     @Transactional
     fun opprettTasks(
