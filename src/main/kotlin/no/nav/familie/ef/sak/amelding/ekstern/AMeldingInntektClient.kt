@@ -84,7 +84,7 @@ class AMeldingInntektClient(
         logger.info("--- request $request")
 
         val payload = request
-        val token = genererToken()
+//        val token = genererToken()
         val entity =
             postForEntity<Map<String, Any>>(
                 uri = genererInntektV2NyIngress,
