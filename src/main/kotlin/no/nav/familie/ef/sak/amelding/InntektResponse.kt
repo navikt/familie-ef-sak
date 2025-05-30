@@ -27,14 +27,7 @@ data class InntektResponse(
             .toInt()
 
     fun førsteMånedMed10ProsentInntektsøkning(forrigeVedtak: Vedtak): YearMonth {
-        val innmeldtInntektList =
-            inntektsmånederUtenEfYtelser(
-                forrigeVedtak.perioder
-                    ?.perioder
-                    ?.minBy { it.periode.fom }
-                    ?.periode
-                    ?.fom,
-            )
+        val innmeldtInntektList = inntektsmånederUtenEfYtelser(minimumsdato(forrigeVedtak))
         val innmeldtInntektTilForventetInntektMap =
             innmeldtInntektList.associate { innmeldtInntekt ->
                 innmeldtInntekt to (
@@ -68,6 +61,15 @@ data class InntektResponse(
     fun forventetÅrsinntekt() = forventetMånedsinntekt() * 12
 
     fun revurderesFraDato(forrigeVedtak: Vedtak) = førsteMånedMed10ProsentInntektsøkning(forrigeVedtak)
+
+    fun minimumsdato(forrigeVedtak: Vedtak): YearMonth {
+        val vedtaksperioderForrigeVedtak = forrigeVedtak.perioder ?: throw IllegalStateException("Skulle hatt vedtaksperiode ved automatisk beregning av behandling ${forrigeVedtak.behandlingId}")
+        val startdatoForrigeVedtak =
+            vedtaksperioderForrigeVedtak.perioder
+                .minBy { it.periode.fom }
+                .periode.fom
+        return if (startdatoForrigeVedtak.isBefore(YearMonth.now().minusYears(1))) YearMonth.now().minusYears(1) else startdatoForrigeVedtak
+    }
 
     val harTreForrigeInntektsmåneder =
         inntektsmåneder

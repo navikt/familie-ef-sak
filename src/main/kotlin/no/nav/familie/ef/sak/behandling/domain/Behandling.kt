@@ -41,6 +41,8 @@ data class Behandling(
 
     fun erMigrering(): Boolean = årsak == BehandlingÅrsak.MIGRERING
 
+    fun erGOmregning(): Boolean = årsak == BehandlingÅrsak.G_OMREGNING
+
     fun erAvsluttet(): Boolean = status == BehandlingStatus.FERDIGSTILT
 
     fun erDigitalSøknad(): Boolean = årsak == BehandlingÅrsak.SØKNAD
