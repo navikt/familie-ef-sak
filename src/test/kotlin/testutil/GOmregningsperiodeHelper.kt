@@ -53,3 +53,27 @@ fun mockTestMedGrunnbeløpFra2023(test: () -> Unit) {
 
     mockTestMedGrunnbeløpFra(grunnbeløp2023, test)
 }
+
+fun mockTestMedGrunnbeløpFra2024(test: () -> Unit) {
+    val grunnbeløp2024 =
+        Grunnbeløp(
+            periode = Månedsperiode("2024-05" to "2025-04"),
+            grunnbeløp = 124_028.toBigDecimal(),
+            perMnd = 10_336.toBigDecimal(),
+            gjennomsnittPerÅr = 122_225.toBigDecimal(),
+        )
+
+    mockTestMedGrunnbeløpFra(grunnbeløp2024, test)
+}
+
+fun mockTestMedGrunnbeløpFra2025(test: () -> Unit) {
+    val grunnbeløp2025 =
+        Grunnbeløp(
+            periode = Månedsperiode(YearMonth.now().minusMonths(3), YearMonth.now().plusMonths(9)),
+            grunnbeløp = 130_160.toBigDecimal(),
+            perMnd = 10_847.toBigDecimal(),
+            gjennomsnittPerÅr = 128_116.toBigDecimal(),
+        )
+
+    mockTestMedGrunnbeløpFra(grunnbeløp2025, test)
+}
