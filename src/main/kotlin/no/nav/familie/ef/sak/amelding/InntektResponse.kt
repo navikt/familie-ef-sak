@@ -68,7 +68,8 @@ data class InntektResponse(
             vedtaksperioderForrigeVedtak.perioder
                 .minBy { it.periode.fom }
                 .periode.fom
-        return if (startdatoForrigeVedtak.isBefore(YearMonth.now().minusYears(1))) YearMonth.now().minusYears(1) else startdatoForrigeVedtak
+        val erEldreEnnEttÅr = startdatoForrigeVedtak.isBefore(YearMonth.now().minusYears(1))
+        return if (erEldreEnnEttÅr) YearMonth.now().minusYears(1) else startdatoForrigeVedtak
     }
 
     val harTreForrigeInntektsmåneder =

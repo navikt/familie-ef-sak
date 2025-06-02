@@ -111,15 +111,16 @@ class GOmregningTestUtil {
             ).isEqualTo(2) // skal være splittet
             // Sjekk andel etter ny g omregningsdato
             val andelTilkjentYtelseOmregnet = finnAndelEtterNyGDato(iverksettDto)!!
-            assertThat(andelTilkjentYtelseOmregnet.inntekt).isEqualTo(289600) // justert med F
+            val justertForventetInntekt = 289600
+            assertThat(andelTilkjentYtelseOmregnet.inntekt).isEqualTo(justertForventetInntekt)
             assertThat(andelTilkjentYtelseOmregnet.beløp).isEqualTo(15986)
             // Sjekk inntektsperiode etter ny G omregning
             val inntektsperiodeEtterGomregning = finnInntektsperiodeEtterNyGDato(iverksettDto.behandling.behandlingId, 2025)
 
             assertThat(inntektsperiodeEtterGomregning.dagsats?.toInt()).isEqualTo(0)
             assertThat(inntektsperiodeEtterGomregning.månedsinntekt?.toInt()).isEqualTo(0)
-            assertThat(inntektsperiodeEtterGomregning.inntekt.toInt()).isEqualTo(289600)
-            assertThat(inntektsperiodeEtterGomregning.totalinntekt().toInt()).isEqualTo(289600)
+            assertThat(inntektsperiodeEtterGomregning.inntekt.toInt()).isEqualTo(justertForventetInntekt)
+            assertThat(inntektsperiodeEtterGomregning.totalinntekt().toInt()).isEqualTo(justertForventetInntekt)
         }
     }
 
