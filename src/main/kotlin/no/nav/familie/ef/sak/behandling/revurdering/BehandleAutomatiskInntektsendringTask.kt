@@ -15,6 +15,7 @@ import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.ef.sak.journalføring.dto.VilkårsbehandleNyeBarn
 import no.nav.familie.ef.sak.vedtak.VedtakService
+import no.nav.familie.ef.sak.vedtak.domain.InntektWrapper
 import no.nav.familie.ef.sak.vedtak.domain.Vedtak
 import no.nav.familie.ef.sak.vedtak.domain.Vedtaksperiode
 import no.nav.familie.ef.sak.vedtak.dto.InnvilgelseOvergangsstønad
@@ -88,7 +89,15 @@ class BehandleAutomatiskInntektsendringTask(
             )
         val inntektResponse = automatiskRevurderingService.lagreInntektResponse(personIdent, behandling.id)
         val forrigeBehandling = behandling.forrigeBehandlingId?.let { behandlingService.hentBehandling(it) } ?: throw IllegalStateException("Burde vært en forrigeBehandlingId etter automatisk revurdering for behandlingId: ${behandling.id}")
-        val forrigeVedtak = vedtakService.hentVedtak(forrigeBehandling.id)
+
+        val forrigeVedtak =
+            if (forrigeBehandling.erGOmregning()) {
+                val vedtakFørGOmregning = vedtakService.hentVedtak(forrigeBehandling.forrigeBehandlingId ?: throw IllegalStateException("Finner ikke forrigeBehandlingId for behandlingId som er en G-omregning: ${forrigeBehandling.id}"))
+                val gOmregningVedtak = vedtakService.hentVedtak(forrigeBehandling.id)
+                sammenslåVedtak(vedtakFørGOmregning, gOmregningVedtak)
+            } else {
+                vedtakService.hentVedtak(forrigeBehandling.id)
+            }
 
         val perioder = oppdaterFørsteVedtaksperiodeMedRevurderesFraDato(forrigeVedtak, inntektResponse)
         val inntektsperioder = oppdaterInntektMedNyBeregnetForventetInntekt(forrigeVedtak, inntektResponse, perioder.first().periode.fom)
@@ -104,6 +113,37 @@ class BehandleAutomatiskInntektsendringTask(
         årsakRevurderingsRepository.insert(ÅrsakRevurdering(behandlingId = behandling.id, opplysningskilde = Opplysningskilde.AUTOMATISK_OPPRETTET_BEHANDLING, årsak = Revurderingsårsak.ENDRING_INNTEKT, beskrivelse = null))
         vedtakService.lagreVedtak(vedtakDto = innvilgelseOvergangsstønad, behandlingId = behandling.id, stønadstype = StønadType.OVERGANGSSTØNAD)
         logger.info("Opprettet behandling for automatisk inntektsendring: ${behandling.id}")
+    }
+
+    private fun sammenslåVedtak(
+        vedtak1: Vedtak,
+        vedtak2: Vedtak,
+    ): Vedtak {
+        val inntekter1 =
+            vedtak1.inntekter?.inntekter
+                ?: throw IllegalStateException("Fant ikke inntektsperioder for behandlingId: ${vedtak1.behandlingId}")
+
+        val inntekter2 = vedtak2.inntekter?.inntekter ?: emptyList()
+
+        val justerteInntekter1 =
+            inntekter1.mapNotNull { v1 ->
+                val overlappende = inntekter2.firstOrNull { v2 -> v1.periode.overlapper(v2.periode) }
+
+                if (overlappende != null) {
+                    val nyPeriode = Månedsperiode(v1.periode.fom, overlappende.periode.fom.minusMonths(1))
+                    if (nyPeriode.fom <= nyPeriode.tom) {
+                        v1.copy(periode = nyPeriode)
+                    } else {
+                        throw IllegalStateException("Feil ved avkorting av periode. Ugyldig start- og sluttdato for periode: $nyPeriode i behandlingId: ${vedtak1.behandlingId}")
+                    }
+                } else {
+                    v1
+                }
+            }
+
+        val sammenslått = justerteInntekter1 + inntekter2
+
+        return vedtak1.copy(inntekter = InntektWrapper(sammenslått))
     }
 
     private fun logAutomatiskRevurderingForInntektsendring(
