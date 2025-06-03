@@ -37,12 +37,13 @@ class BlankettService(
 
     fun lagBlankett(behandlingId: UUID): ByteArray {
         logger.info("Start - lag saksbehandlingsblankett for behandlingId=$behandlingId")
-
         val behandling = behandlingService.hentSaksbehandling(behandlingId)
+        logger.info("Start hent vilkårsvurderinger for behandlingId=$behandlingId")
         val vilkårVurderinger = vurderingService.hentEllerOpprettVurderinger(behandlingId)
+        logger.info("Ferdig med å hente vilkårsvurderinger for behandlingId=$behandlingId")
         val registergrunnlagData = grunnlagsdataService.hentGrunnlagsdata(behandlingId)
+        logger.info("Hentet registergrunnlagData for behandlingId=$behandlingId")
         val grunnlagsdata = registergrunnlagData.grunnlagsdata
-
         logger.info("Ferdig med å hente data til blankett for behandlingId=$behandlingId")
 
         val blankettPdfRequest =
