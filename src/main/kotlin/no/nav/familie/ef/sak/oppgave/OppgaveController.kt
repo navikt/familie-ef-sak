@@ -82,6 +82,14 @@ class OppgaveController(
         return Ressurs.success(oppgaveRespons.tilDto())
     }
 
+    @GetMapping("/flereoppgaver/{behandlingId}")
+    fun hentFlereoppgaver(
+        @PathVariable behandlingId: UUID,
+    ): Ressurs<OppgaveResponseDto> {
+        val oppgaveRespons = oppgaveService.hentFlereoppgaver(behandlingId)
+        return Ressurs.success(oppgaveRespons.tilDto())
+    }
+
     @GetMapping("/oppgaver-for-ferdigstilling/{behandlingId}")
     fun hentOppgaverForFerdigstilling(
         @PathVariable behandlingId: UUID,

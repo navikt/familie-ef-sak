@@ -65,6 +65,7 @@ class VedtakController(
 ) {
     private val logger = LoggerFactory.getLogger(javaClass)
 
+    // would save several oppgave i request, not only one, but only number of oppgaver? or extra info?
     @PostMapping("/{behandlingId}/send-til-beslutter")
     fun sendTilBeslutter(
         @PathVariable behandlingId: UUID,

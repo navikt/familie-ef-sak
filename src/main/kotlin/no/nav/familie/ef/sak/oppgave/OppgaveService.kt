@@ -323,6 +323,40 @@ class OppgaveService(
         return oppgaveClient.hentOppgaver(request)
     }
 
+    fun hentFlereoppgaver(
+        behandlingId: UUID
+    ): FinnOppgaveResponseDto {
+        val aktivIdent = behandlingRepository.finnAktivIdent(behandlingId)
+        val aktørId =
+            aktivIdent.let {
+                personService
+                    .hentAktørIder(it)
+                    .identer
+                    .first()
+                    .ident
+            }
+
+        secureLogger.info("hent flere oppgaver -  aktørId: $aktørId")
+
+        val oppgaverForBeslutter = OppgaveTypeForBeslutter.values().flatMap { type ->
+            val enhet = arbeidsfordelingService.hentNavEnhet(aktørId)?.enhetId
+            val request = FinnOppgaveRequest(
+                tema = Tema.ENF,
+                oppgavetype = type.besluttOppgaveType,
+                aktørId = aktørId,
+                enhet = enhet,
+            )
+
+            val response = oppgaveClient.hentOppgaver(request)
+            response.oppgaver ?: emptyList()
+        }
+
+        return FinnOppgaveResponseDto(
+            antallTreffTotalt = oppgaverForBeslutter.size.toLong(),
+            oppgaver = oppgaverForBeslutter
+        )
+    }
+
     fun hentOppgaverMedIder(oppgaveIder: List<Long>?): List<Oppgave> {
         if (oppgaveIder != null) {
             return oppgaveIder.map { hentOppgave(it) }
