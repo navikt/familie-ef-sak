@@ -156,7 +156,14 @@ class BehandleAutomatiskInntektsendringTask(
         val forventetInntekt = inntektResponse.forventetMånedsinntekt()
         val behandling = behandlingService.finnSisteIverksatteBehandlingMedEventuellAvslått(fagsak.id)
         if (behandling != null) {
-            val forrigeVedtak = vedtakService.hentVedtak(behandling.id)
+            val forrigeVedtak =
+                if (behandling.erGOmregning()) {
+                    val vedtakFørGOmregning = vedtakService.hentVedtak(behandling.forrigeBehandlingId ?: throw IllegalStateException("Finner ikke forrigeBehandlingId for behandlingId som er en G-omregning: ${behandling.id}"))
+                    val gOmregningVedtak = vedtakService.hentVedtak(behandling.id)
+                    sammenslåVedtak(vedtakFørGOmregning, gOmregningVedtak)
+                } else {
+                    vedtakService.hentVedtak(behandling.id)
+                }
             val perioder = oppdaterFørsteVedtaksperiodeMedRevurderesFraDato(forrigeVedtak, inntektResponse)
             val inntektsperioder = oppdaterInntektMedNyBeregnetForventetInntekt(forrigeVedtak, inntektResponse, perioder.first().periode.fom)
             logger.info("Ville opprettet inntektsperioder for fagsak eksternId: ${fagsak.eksternId} - nye inntektsperioder: " + inntektsperioder)
