@@ -58,7 +58,7 @@ class BlankettService(
                     registeropplysningerOpprettetDato = vilkårVurderinger.grunnlag.registeropplysningerOpprettetTid.toLocalDate(),
                 ),
                 lagPersonopplysningerDto(behandling),
-                vurderingService.hentEllerOpprettVurderinger(behandlingId),
+                vilkårVurderinger,
                 hentVedtak(behandlingId),
                 lagSøknadsdatoer(behandlingId),
                 vilkårVurderinger.grunnlag.harAvsluttetArbeidsforhold,
