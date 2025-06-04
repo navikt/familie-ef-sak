@@ -369,6 +369,32 @@ fun tilkjentYtelse(
     )
 }
 
+fun tilkjentYtelse(
+    behandlingId: UUID,
+    inntektsperiode: Inntektsperiode,
+): TilkjentYtelse {
+    val andeler =
+        listOf(
+            AndelTilkjentYtelse(
+                beløp = 11_000,
+                stønadFom = inntektsperiode.periode.fomDato,
+                stønadTom = inntektsperiode.periode.tomDato,
+                personIdent = "321",
+                inntektsreduksjon = 8396,
+                inntekt = inntektsperiode.inntekt.toInt(),
+                samordningsfradrag = 0,
+                kildeBehandlingId = behandlingId,
+            ),
+        )
+    return TilkjentYtelse(
+        behandlingId = behandlingId,
+        personident = "321",
+        startdato = inntektsperiode.periode.fomDato,
+        andelerTilkjentYtelse = andeler,
+        grunnbeløpsmåned = YearMonth.of(YearMonth.now().minusYears(1).year, 5),
+    )
+}
+
 fun vedtak(
     behandlingId: UUID,
     resultatType: ResultatType = ResultatType.INNVILGE,
@@ -459,9 +485,10 @@ fun vedtak(
 
 fun vedtak(
     inntekter: InntektWrapper,
+    behandlingId: UUID = UUID.randomUUID(),
 ): Vedtak =
     Vedtak(
-        behandlingId = UUID.randomUUID(),
+        behandlingId = behandlingId,
         resultatType = ResultatType.INNVILGE,
         periodeBegrunnelse = "OK",
         inntektBegrunnelse = "OK",
@@ -524,12 +551,29 @@ fun barnetilsynperiode(
     aktivitet = aktivitetstype,
 )
 
+fun lagInntekt(
+    dagsats: Int,
+    månedsinntekt: Int,
+    inntekt: Int,
+    år: Int,
+): Inntektsperiode {
+    val inntektPeriode =
+        inntektsperiode(
+            år = år,
+            dagsats = dagsats.toBigDecimal(),
+            månedsinntekt = månedsinntekt.toBigDecimal(),
+            inntekt = inntekt.toBigDecimal(),
+            samordningsfradrag = BigDecimal.ZERO,
+        )
+    return inntektPeriode
+}
+
 fun inntektsperiode(
     år: Int = 2021,
     startDato: LocalDate = LocalDate.of(år, 1, 1),
     sluttDato: LocalDate = LocalDate.of(år, 12, 1),
     inntekt: BigDecimal = BigDecimal.valueOf(100000),
-    samordningsfradrag: BigDecimal = BigDecimal.valueOf(500),
+    samordningsfradrag: BigDecimal = BigDecimal.valueOf(0),
     dagsats: BigDecimal? = BigDecimal.valueOf(0),
     månedsinntekt: BigDecimal? = null,
 ) = Inntektsperiode(periode = Månedsperiode(startDato, sluttDato), dagsats = dagsats, månedsinntekt = månedsinntekt, inntekt = inntekt, samordningsfradrag = samordningsfradrag)
