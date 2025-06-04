@@ -97,6 +97,9 @@ spec:
           namespace: nom
         - application: repr-api
           namespace: repr
+        - application: ikomp-q2
+          namespace: team-inntekt
+          cluster: dev-fss
       external:
         - host: api-gw-q1.oera.no
         - host: familie-oppdrag.dev-fss-pub.nais.io
@@ -104,6 +107,7 @@ spec:
         - host: familie-ef-infotrygd.dev-fss-pub.nais.io
         - host: familie-ef-proxy.dev-fss-pub.nais.io
         - host: teamfamilie-unleash-api.nav.cloud.nais.io
+        - host: ikomp-q2.dev-fss-pub.nais.io
   azure:
     application:
       enabled: true

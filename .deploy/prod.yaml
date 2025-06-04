@@ -94,6 +94,9 @@ spec:
           namespace: nom
         - application: repr-api
           namespace: repr
+        - application: ikomp
+          namespace: team-inntekt
+          cluster: prod-fss
       external:
         - host: api-gw.oera.no
         - host: familie-oppdrag.prod-fss-pub.nais.io
@@ -101,6 +104,7 @@ spec:
         - host: familie-ef-infotrygd.prod-fss-pub.nais.io
         - host: familie-ef-proxy.prod-fss-pub.nais.io
         - host: teamfamilie-unleash-api.nav.cloud.nais.io
+        - host: ikomp.prod-fss-pub.nais.io
   azure:
     application:
       enabled: true
