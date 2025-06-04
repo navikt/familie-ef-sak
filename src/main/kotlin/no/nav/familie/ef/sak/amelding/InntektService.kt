@@ -1,6 +1,7 @@
 package no.nav.familie.ef.sak.amelding
 
 import no.nav.familie.ef.sak.amelding.ekstern.AMeldingInntektClient
+import no.nav.familie.ef.sak.amelding.ekstern.ArbeidOgInntektClient
 import no.nav.familie.ef.sak.fagsak.FagsakPersonService
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import org.springframework.stereotype.Service
@@ -10,6 +11,7 @@ import java.util.UUID
 @Service
 class InntektService(
     private val aMeldingInntektClient: AMeldingInntektClient,
+    private val arbeidOgInntektClient: ArbeidOgInntektClient,
     private val fagsakService: FagsakService,
     private val fagsakPersonService: FagsakPersonService,
 ) {
@@ -39,16 +41,16 @@ class InntektService(
 
     fun genererAInntektUrl(fagsakPersonId: UUID): String {
         val personIdent = fagsakPersonService.hentAktivIdent(fagsakPersonId)
-        return aMeldingInntektClient.genererAInntektUrl(personIdent)
+        return arbeidOgInntektClient.genererAInntektUrl(personIdent)
     }
 
     fun genererAInntektArbeidsforholdUrl(fagsakId: UUID): String {
         val personIdent = fagsakService.hentAktivIdent(fagsakId)
-        return aMeldingInntektClient.genererAInntektArbeidsforholdUrl(personIdent)
+        return arbeidOgInntektClient.genererAInntektArbeidsforholdUrl(personIdent)
     }
 
     fun genererAInntektUrlFagsak(fagsakId: UUID): String {
         val personIdent = fagsakService.hentAktivIdent(fagsakId)
-        return aMeldingInntektClient.genererAInntektUrl(personIdent)
+        return arbeidOgInntektClient.genererAInntektUrl(personIdent)
     }
 }

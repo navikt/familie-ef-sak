@@ -29,3 +29,4 @@ prosessering:
   enabled: false
 
 API_SCOPE: test
+FAMILIE_EF_PROXY_URL: https://ainntekt

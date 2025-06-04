@@ -2,7 +2,6 @@ package no.nav.familie.ef.sak.amelding.ekstern
 
 import no.nav.familie.ef.sak.amelding.InntektResponse
 import no.nav.familie.http.client.AbstractRestClient
-import no.nav.familie.kontrakter.felles.PersonIdent
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpHeaders
@@ -22,20 +21,6 @@ class AMeldingInntektClient(
         UriComponentsBuilder
             .fromUri(uri)
             .pathSegment("rest/v2/inntekt")
-            .build()
-            .toUri()
-
-    private val genererUrlUri =
-        UriComponentsBuilder
-            .fromUri(uri)
-            .pathSegment("api/ainntekt/generer-url")
-            .build()
-            .toUri()
-
-    private val genererUrlUriArbeidsforhold =
-        UriComponentsBuilder
-            .fromUri(uri)
-            .pathSegment("api/ainntekt/generer-url-arbeidsforhold")
             .build()
             .toUri()
 
@@ -63,24 +48,6 @@ class AMeldingInntektClient(
             httpHeaders = headers,
         )
     }
-
-    fun genererAInntektUrl(personIdent: String): String =
-        postForEntity(
-            genererUrlUri,
-            PersonIdent(personIdent),
-            HttpHeaders().apply {
-                accept = listOf(MediaType.TEXT_PLAIN)
-            },
-        )
-
-    fun genererAInntektArbeidsforholdUrl(personIdent: String): String =
-        postForEntity(
-            genererUrlUriArbeidsforhold,
-            PersonIdent(personIdent),
-            HttpHeaders().apply {
-                accept = listOf(MediaType.TEXT_PLAIN)
-            },
-        )
 
     private fun genererInntektRequest(
         personIdent: String,
