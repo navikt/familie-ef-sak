@@ -97,9 +97,6 @@ spec:
           namespace: nom
         - application: repr-api
           namespace: repr
-        - application: ikomp-q2
-          namespace: team-inntekt
-          cluster: dev-fss
       external:
         - host: api-gw-q1.oera.no
         - host: familie-oppdrag.dev-fss-pub.nais.io
