@@ -23,7 +23,7 @@ class InntektController(
     private val tilgangService: TilgangService,
     private val inntektService: InntektService,
 ) {
-    //    @ProtectedWithClaims(issuer = "azuread", claimMap = ["roles=access_as_application"]) // Fjerner midlertidig for å teste manuelle kall
+    @ProtectedWithClaims(issuer = "azuread", claimMap = ["roles=access_as_application"])
     @PostMapping("inntektv2/{fagsakid}")
     fun hentInntekt(
         @PathVariable("fagsakid") fagsakId: UUID,
