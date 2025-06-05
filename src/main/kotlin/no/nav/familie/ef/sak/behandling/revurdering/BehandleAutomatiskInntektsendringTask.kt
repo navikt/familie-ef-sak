@@ -107,7 +107,7 @@ class BehandleAutomatiskInntektsendringTask(
         val innvilgelseOvergangsstønad =
             InnvilgelseOvergangsstønad(
                 periodeBegrunnelse = "Overgangsstønaden endres fra måneden etter minst 10 prosent økning i inntekt.",
-                inntektBegrunnelse = lagInntektsperiodeTekst(inntektsperioder, inntektResponse),
+                inntektBegrunnelse = lagInntektsperiodeTekst(inntektsperioder, inntektResponse, forrigeVedtak),
                 perioder = perioder.fraDomene(),
                 inntekter = inntektsperioder.tilInntekt(),
                 samordningsfradragType = forrigeVedtak.samordningsfradragType,
@@ -240,24 +240,27 @@ class BehandleAutomatiskInntektsendringTask(
     private fun lagInntektsperiodeTekst(
         inntektsperioder: List<Inntektsperiode>,
         inntektResponse: InntektResponse,
+        forrigeVedtak: Vedtak,
     ): String {
-        val forventetInntekt = inntektsperioder.maxBy { it.periode.fom }
-
-        val forventetInntektFraMåned = forventetInntekt.periode.fom
-        val forventetMånedsinntekt = forventetInntekt.avledForventetMånedsinntekt()
-        val tiProsentOpp = forventetMånedsinntekt * 1.1
-        val tiProsentNed = forventetMånedsinntekt * 0.9
 
         val førsteMånedMed10ProsentEndring =
             inntektsperioder
                 .minBy { it.periode.fom }
                 .periode.fom
                 .minusMonths(1)
+
+        val forrigeForventetInntektsperiode = forrigeVedtak.inntekter?.inntekter?.first { it.periode.inneholder(førsteMånedMed10ProsentEndring) } ?: throw IllegalStateException("Fant ikke tidligere forventet inntekt for måned: $førsteMånedMed10ProsentEndring")
+        val forrigeForventetÅrsinntekt = forrigeForventetInntektsperiode.totalinntekt().toInt()
+        val tiProsentOpp = forrigeForventetÅrsinntekt / 12 * 1.1
+        val tiProsentNed = forrigeForventetÅrsinntekt / 12 * 0.9
         val beløpFørsteMåned10ProsentEndring = inntektResponse.totalInntektForÅrMåned(førsteMånedMed10ProsentEndring)
+
+        val forventetInntekt = inntektsperioder.maxBy { it.periode.fom }
+        val forventetInntektFraMåned = forventetInntekt.periode.fom
 
         val tekst =
             """
-            Forventet årsinntekt fra ${forventetInntektFraMåned.tilNorskFormat()}: ${forventetMånedsinntekt.tilNorskFormat()} kroner.
+            Forventet årsinntekt fra ${førsteMånedMed10ProsentEndring.tilNorskFormat()}: ${forrigeForventetÅrsinntekt.tilNorskFormat()} kroner.
             - 10 % opp: ${tiProsentOpp.toInt().tilNorskFormat()} kroner per måned.
             - 10 % ned: ${tiProsentNed.toInt().tilNorskFormat()} kroner per måned.
             
