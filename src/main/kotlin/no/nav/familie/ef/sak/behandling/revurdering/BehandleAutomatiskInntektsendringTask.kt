@@ -242,7 +242,6 @@ class BehandleAutomatiskInntektsendringTask(
         inntektResponse: InntektResponse,
         forrigeVedtak: Vedtak,
     ): String {
-
         val førsteMånedMed10ProsentEndring =
             inntektsperioder
                 .minBy { it.periode.fom }

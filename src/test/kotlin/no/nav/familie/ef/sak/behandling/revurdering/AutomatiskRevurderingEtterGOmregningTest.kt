@@ -194,12 +194,12 @@ class AutomatiskRevurderingEtterGOmregningTest : OppslagSpringRunnerTest() {
 
     val forventetInntektsbegrunnelse =
         """
-            Forventet årsinntekt fra februar 2025: 288 000 kroner.
-            - 10 % opp: 26 400 kroner per måned.
-            - 10 % ned: 21 600 kroner per måned.
-            
-            Inntekten i februar 2025 er 28 000 kroner. Inntekten har økt minst 10 prosent denne måneden. Stønaden beregnes på nytt fra måneden etter.
-               
-            Fra og med juni 2025 er stønaden beregnet ut ifra gjennomsnittlig inntekt i mars, april og mai.
+        Forventet årsinntekt fra februar 2025: 288 000 kroner.
+        - 10 % opp: 26 400 kroner per måned.
+        - 10 % ned: 21 600 kroner per måned.
+        
+        Inntekten i februar 2025 er 28 000 kroner. Inntekten har økt minst 10 prosent denne måneden. Stønaden beregnes på nytt fra måneden etter.
+           
+        Fra og med juni 2025 er stønaden beregnet ut ifra gjennomsnittlig inntekt i mars, april og mai.
         """.trimIndent()
 }
