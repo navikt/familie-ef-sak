@@ -4,6 +4,7 @@ import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.brev.VedtaksbrevRepository
 import no.nav.familie.ef.sak.felles.domain.Fil
+import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.iverksett.IverksettingDtoMapper
@@ -34,12 +35,26 @@ class StegOppryddingsController(
         val saksbehandling = behandlingService.hentSaksbehandling(behandlingId)
 
         val vedtaksbrev = brevRepository.findByIdOrThrow(behandlingId)
+
+        val beslutterident = vedtaksbrev.beslutterident
+
+        feilHvis(beslutterident == null) {
+            "Behandlingen har ikke beslutterident. BehandlingId: $behandlingId"
+        }
+
         val iverksettDto =
             iverksettingDtoMapper.tilDto(
                 saksbehandling = saksbehandling,
-                beslutter = vedtaksbrev.beslutterident!!,
+                beslutter = beslutterident,
             )
-        iverksettClient.iverksett(iverksettDto = iverksettDto, fil = Fil(bytes = vedtaksbrev.beslutterPdf!!.bytes))
+
+        val beslutterPdf = vedtaksbrev.beslutterPdf
+
+        feilHvis(beslutterPdf == null) {
+            "Behandlingen har ikke beslutterPdf. BehandlingId: $behandlingId"
+        }
+
+        iverksettClient.iverksett(iverksettDto = iverksettDto, fil = Fil(bytes = beslutterPdf.bytes))
         behandlingService.oppdaterStegPåBehandling(behandlingId = saksbehandling.id, steg = StegType.VENTE_PÅ_STATUS_FRA_IVERKSETT)
     }
 }
