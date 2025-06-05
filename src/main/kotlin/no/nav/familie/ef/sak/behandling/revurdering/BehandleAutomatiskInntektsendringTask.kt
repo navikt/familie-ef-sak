@@ -31,8 +31,11 @@ import no.nav.familie.prosessering.domene.Task
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
+import java.text.NumberFormat
 import java.time.LocalDate
 import java.time.YearMonth
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 import java.util.Properties
 import java.util.UUID
 
@@ -103,8 +106,8 @@ class BehandleAutomatiskInntektsendringTask(
         val inntektsperioder = oppdaterInntektMedNyBeregnetForventetInntekt(forrigeVedtak, inntektResponse, perioder.first().periode.fom)
         val innvilgelseOvergangsstønad =
             InnvilgelseOvergangsstønad(
-                periodeBegrunnelse = forrigeVedtak.periodeBegrunnelse,
-                inntektBegrunnelse = forrigeVedtak.inntektBegrunnelse,
+                periodeBegrunnelse = "Overgangsstønaden endres fra måneden etter minst 10 prosent økning i inntekt.",
+                inntektBegrunnelse = lagInntektsperiodeTekst(inntektsperioder, inntektResponse, forrigeVedtak),
                 perioder = perioder.fraDomene(),
                 inntekter = inntektsperioder.tilInntekt(),
                 samordningsfradragType = forrigeVedtak.samordningsfradragType,
@@ -232,6 +235,55 @@ class BehandleAutomatiskInntektsendringTask(
             ?.inntekter
             ?.minus(nyesteInntektsperiode)
             ?.plus(oppdatertInntektsperiode) ?: emptyList()
+    }
+
+    private fun lagInntektsperiodeTekst(
+        inntektsperioder: List<Inntektsperiode>,
+        inntektResponse: InntektResponse,
+        forrigeVedtak: Vedtak,
+    ): String {
+        val førsteMånedMed10ProsentEndring =
+            inntektsperioder
+                .minBy { it.periode.fom }
+                .periode.fom
+                .minusMonths(1)
+
+        val forrigeForventetInntektsperiode = forrigeVedtak.inntekter?.inntekter?.first { it.periode.inneholder(førsteMånedMed10ProsentEndring) } ?: throw IllegalStateException("Fant ikke tidligere forventet inntekt for måned: $førsteMånedMed10ProsentEndring")
+        val forrigeForventetÅrsinntekt = forrigeForventetInntektsperiode.totalinntekt().toInt()
+        val tiProsentOpp = forrigeForventetÅrsinntekt / 12 * 1.1
+        val tiProsentNed = forrigeForventetÅrsinntekt / 12 * 0.9
+        val beløpFørsteMåned10ProsentEndring = inntektResponse.totalInntektForÅrMåned(førsteMånedMed10ProsentEndring)
+
+        val forventetInntekt = inntektsperioder.maxBy { it.periode.fom }
+        val forventetInntektFraMåned = forventetInntekt.periode.fom
+
+        val tekst =
+            """
+            Forventet årsinntekt fra ${førsteMånedMed10ProsentEndring.tilNorskFormat()}: ${forrigeForventetÅrsinntekt.tilNorskFormat()} kroner.
+            - 10 % opp: ${tiProsentOpp.toInt().tilNorskFormat()} kroner per måned.
+            - 10 % ned: ${tiProsentNed.toInt().tilNorskFormat()} kroner per måned.
+            
+            Inntekten i ${førsteMånedMed10ProsentEndring.tilNorskFormat()} er ${beløpFørsteMåned10ProsentEndring.tilNorskFormat()} kroner. Inntekten har økt minst 10 prosent denne måneden. Stønaden beregnes på nytt fra måneden etter.
+               
+            Fra og med ${forventetInntektFraMåned.tilNorskFormat()} er stønaden beregnet ut ifra gjennomsnittlig inntekt i ${forventetInntektFraMåned.minusMonths(3).månedTilNorskFormat()}, ${forventetInntektFraMåned.minusMonths(2).månedTilNorskFormat()} og ${forventetInntektFraMåned.minusMonths(1).månedTilNorskFormat()}.
+            """.trimIndent()
+
+        return tekst
+    }
+
+    fun YearMonth.tilNorskFormat(): String {
+        val formatter = DateTimeFormatter.ofPattern("MMMM yyyy", Locale.forLanguageTag("no-NO"))
+        return this.format(formatter)
+    }
+
+    fun YearMonth.månedTilNorskFormat(): String {
+        val formatter = DateTimeFormatter.ofPattern("MMMM", Locale.forLanguageTag("no-NO"))
+        return this.format(formatter)
+    }
+
+    fun Int.tilNorskFormat(): String {
+        val formatter = NumberFormat.getInstance(Locale.forLanguageTag("no-NO"))
+        return formatter.format(this)
     }
 
     companion object {
