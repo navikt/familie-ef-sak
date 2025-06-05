@@ -159,7 +159,7 @@ class RevurderingService(
         }
         val ukeÅr = LocalDate.now().let { "${it.get(IsoFields.WEEK_OF_WEEK_BASED_YEAR)}-${it.year}" }
 
-        personIdenter.forEach { personIdent ->
+        personIdenter.take(10).forEach { personIdent ->
 
             val payload = objectMapper.writeValueAsString(PayloadBehandleAutomatiskInntektsendringTask(personIdent = personIdent, ukeÅr = ukeÅr))
             val finnesTask = taskService.finnTaskMedPayloadOgType(payload, BehandleAutomatiskInntektsendringTask.TYPE)
