@@ -177,7 +177,8 @@ class AutomatiskRevurderingEtterGOmregningTest : OppslagSpringRunnerTest() {
 
         val oppdatertInntekt = oppdatertVedtak.inntekter?.inntekter ?: emptyList()
         assertThat(oppdatertInntekt.size).isEqualTo(4)
-
+        assertThat(oppdatertVedtak.periodeBegrunnelse).isEqualTo("Overgangsstønaden endres fra måneden etter minst 10 prosent økning i inntekt.")
+        assertThat(oppdatertVedtak.inntektBegrunnelse?.replace('\u00A0', ' ')).isEqualTo(forventetInntektsbegrunnelse) // Replace non-breaking space -> space
         val gjennomsnittSiste3Mnd = (28_000 + 30_000 + 30_000) / 3
 
         val forventedeInntektsperioderINyttVedtak =
@@ -190,4 +191,15 @@ class AutomatiskRevurderingEtterGOmregningTest : OppslagSpringRunnerTest() {
 
         assertThat(oppdatertInntekt).isEqualTo(forventedeInntektsperioderINyttVedtak)
     }
+
+    val forventetInntektsbegrunnelse =
+        """
+        Forventet årsinntekt fra juni 2025: 29 333 kroner.
+        - 10 % opp: 32 266 kroner per måned.
+        - 10 % ned: 26 399 kroner per måned.
+        
+        Inntekten i februar 2025 er 28 000 kroner. Inntekten har økt minst 10 prosent denne måneden. Stønaden beregnes på nytt fra måneden etter.
+           
+        Fra og med juni 2025 er stønaden beregnet ut ifra gjennomsnittlig inntekt i mars, april og mai.
+        """.trimIndent()
 }
