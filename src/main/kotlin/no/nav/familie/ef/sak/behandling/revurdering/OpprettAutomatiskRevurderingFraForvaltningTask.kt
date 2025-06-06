@@ -14,7 +14,7 @@ import kotlin.collections.set
 @Service
 @TaskStepBeskrivelse(
     taskStepType = OpprettAutomatiskRevurderingFraForvaltningTask.TYPE,
-    beskrivelse = "Skal automatisk opprette en ny behandling ved automatisk inntektsendring",
+    beskrivelse = "Automatisk revurdering av inntekt - Brukes av endepunktet revurder-personer-med-inntektsendringer-automatisk i forvaltning i personhendelse",
 )
 class OpprettAutomatiskRevurderingFraForvaltningTask(
     private val featureToggleService: FeatureToggleService,
