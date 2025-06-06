@@ -20,6 +20,7 @@ import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.journalføring.dto.VilkårsbehandleNyeBarn
+import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.ef.sak.oppgave.TilordnetRessursService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
@@ -54,6 +55,7 @@ class RevurderingService(
     private val vedtakService: VedtakService,
     private val nyeBarnService: NyeBarnService,
     private val tilordnetRessursService: TilordnetRessursService,
+    private val oppgaveService: OppgaveService,
 ) {
     private val logger = LoggerFactory.getLogger(javaClass)
 
@@ -129,7 +131,7 @@ class RevurderingService(
                     behandlingId = revurdering.id,
                     saksbehandler = saksbehandler,
                     beskrivelse = if (erAutomatiskRevurdering) "Automatisk opprettet revurdering som følge av inntektskontroll" else "Revurdering i ny løsning",
-                    mappeId = if (erAutomatiskRevurdering) GOSYS_MAPPE_ID_INNTEKTSKONTROLL else null,
+                    mappeId = if (erAutomatiskRevurdering) oppgaveService.finnMappeGittMappenavn(mappeNavn = "63 Innte", personIdent = fagsak.hentAktivIdent()) else null,
                 ),
             ),
         )

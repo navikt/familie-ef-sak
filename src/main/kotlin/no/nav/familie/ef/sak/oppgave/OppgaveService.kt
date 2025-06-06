@@ -496,4 +496,17 @@ class OppgaveService(
     private fun List<no.nav.familie.ef.sak.oppgave.Oppgave>?.oppgaveSistEndret(): no.nav.familie.ef.sak.oppgave.Oppgave? = this?.sortedBy { it.sistEndret() }?.last()
 
     private fun no.nav.familie.ef.sak.oppgave.Oppgave.sistEndret(): LocalDateTime = this.sporbar.endret.endretTid
+
+    fun finnMappeGittMappenavn(
+        mappeNavn: String,
+        personIdent: String,
+    ): Long? {
+        val enhetsnummer =
+            arbeidsfordelingService.hentNavEnhetId(personIdent, BehandleSak)
+                ?: ENHET_NR_NAY // Hvis vi ikke finner enhet, så bruker vi NAY som fallback
+
+        val mapperResponse = oppgaveClient.finnMapper(enhetsnummer, 1000)
+        val mappe = mapperResponse.mapper.find { it.navn.contains(mappeNavn) }
+        return mappe?.id?.toLong()
+    }
 }
