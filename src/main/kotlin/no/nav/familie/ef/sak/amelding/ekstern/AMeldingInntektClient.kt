@@ -1,11 +1,10 @@
 package no.nav.familie.ef.sak.amelding.ekstern
 
+import no.nav.familie.ef.sak.amelding.HentInntektPayload
 import no.nav.familie.ef.sak.amelding.InntektResponse
 import no.nav.familie.http.client.AbstractRestClient
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.http.HttpHeaders
-import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
 import org.springframework.web.client.RestOperations
 import org.springframework.web.util.UriComponentsBuilder
@@ -14,13 +13,24 @@ import java.time.YearMonth
 
 @Component
 class AMeldingInntektClient(
-    @Value("\${INNTEKT_URL}") private val uri: URI,
+    @Value("\${FAMILIE_EF_PROXY_URL}") private val uri: URI,
     @Qualifier("azure") restOperations: RestOperations,
 ) : AbstractRestClient(restOperations, "inntekt") {
+    private fun lagInntektUri(
+        fom: YearMonth,
+        tom: YearMonth,
+    ) = UriComponentsBuilder
+        .fromUri(uri)
+        .pathSegment("api/inntekt")
+        .queryParam("fom", fom)
+        .queryParam("tom", tom)
+        .build()
+        .toUri()
+
     private val genererInntektV2Uri =
         UriComponentsBuilder
             .fromUri(uri)
-            .pathSegment("rest/v2/inntekt")
+            .pathSegment("api/inntekt/v2")
             .build()
             .toUri()
 
@@ -28,36 +38,14 @@ class AMeldingInntektClient(
         personIdent: String,
         månedFom: YearMonth,
         månedTom: YearMonth,
-    ): InntektResponse {
-        val payload =
-            genererInntektRequest(
-                personIdent = personIdent,
-                månedFom = månedFom,
-                månedTom = månedTom,
-            )
-
-        val headers =
-            HttpHeaders().apply {
-                contentType = MediaType.APPLICATION_JSON
-                accept = listOf(MediaType.APPLICATION_JSON)
-            }
-
-        return postForEntity(
+    ): InntektResponse =
+        postForEntity(
             uri = genererInntektV2Uri,
-            payload = payload,
-            httpHeaders = headers,
+            payload =
+                HentInntektPayload(
+                    personIdent = personIdent,
+                    månedFom = månedFom,
+                    månedTom = månedTom,
+                ),
         )
-    }
-
-    private fun genererInntektRequest(
-        personIdent: String,
-        månedFom: YearMonth,
-        månedTom: YearMonth,
-    ) = mapOf(
-        "personident" to personIdent,
-        "filter" to "StoenadEnsligMorEllerFarA-inntekt",
-        "formaal" to "StoenadEnsligMorEllerFar",
-        "maanedFom" to månedFom,
-        "maanedTom" to månedTom,
-    )
 }
