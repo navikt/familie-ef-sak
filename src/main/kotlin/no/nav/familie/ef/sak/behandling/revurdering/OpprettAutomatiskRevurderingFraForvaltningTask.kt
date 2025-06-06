@@ -16,7 +16,6 @@ import kotlin.collections.set
     beskrivelse = "Automatisk revurdering av inntekt - Brukes av endepunktet revurder-personer-med-inntektsendringer-automatisk i forvaltning i personhendelse",
 )
 class OpprettAutomatiskRevurderingFraForvaltningTask(
-    private val featureToggleService: FeatureToggleService,
     private val automatiskRevurderingService: AutomatiskRevurderingService,
     private val revurderingService: RevurderingService,
 ) : AsyncTaskStep {
