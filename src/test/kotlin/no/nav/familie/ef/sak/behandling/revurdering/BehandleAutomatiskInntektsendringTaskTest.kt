@@ -130,7 +130,7 @@ class BehandleAutomatiskInntektsendringTaskTest : OppslagSpringRunnerTest() {
 
         val opprettOppgaveTask = taskService.findAll().first { it.type == OpprettOppgaveForOpprettetBehandlingTask.TYPE }
         val data = objectMapper.readValue<OpprettOppgaveTaskData>(opprettOppgaveTask.payload)
-        assertThat(data.mappeId).isEqualTo(63)
+        assertThat(data.mappeId).isNull() //Blir satt på senere tidspunkt
         assertThat(data.beskrivelse).isEqualTo("Automatisk opprettet revurdering som følge av inntektskontroll")
     }
 

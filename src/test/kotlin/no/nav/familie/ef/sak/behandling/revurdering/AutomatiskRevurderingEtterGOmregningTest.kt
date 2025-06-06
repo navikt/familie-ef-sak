@@ -12,14 +12,10 @@ import no.nav.familie.ef.sak.behandling.revurdering.BehandleAutomatiskInntektsen
 import no.nav.familie.ef.sak.behandling.revurdering.PayloadBehandleAutomatiskInntektsendringTask
 import no.nav.familie.ef.sak.behandling.revurdering.RevurderingService
 import no.nav.familie.ef.sak.behandling.revurdering.ÅrsakRevurderingsRepository
-import no.nav.familie.ef.sak.behandlingsflyt.steg.StegService
-import no.nav.familie.ef.sak.behandlingsflyt.steg.VentePåStatusFraIverksettSteg
-import no.nav.familie.ef.sak.fagsak.FagsakRepository
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.felles.util.YEAR_MONTH_MAX
 import no.nav.familie.ef.sak.infrastruktur.config.InntektClientMock
 import no.nav.familie.ef.sak.infrastruktur.config.ObjectMapperProvider.objectMapper
-import no.nav.familie.ef.sak.infrastruktur.config.RolleConfig
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.ef.sak.repository.behandling
@@ -30,11 +26,9 @@ import no.nav.familie.ef.sak.repository.lagInntektResponseFraMånedsinntekter
 import no.nav.familie.ef.sak.repository.vedtak
 import no.nav.familie.ef.sak.testutil.VedtakHelperService
 import no.nav.familie.ef.sak.testutil.VilkårHelperService
-import no.nav.familie.ef.sak.vedtak.VedtakRepository
 import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.ef.sak.vilkår.VilkårsvurderingRepository
 import no.nav.familie.kontrakter.felles.Månedsperiode
-import no.nav.familie.prosessering.internal.TaskService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -46,9 +40,6 @@ import java.util.UUID
 class AutomatiskRevurderingEtterGOmregningTest : OppslagSpringRunnerTest() {
     @Autowired
     private lateinit var oppgaveService: OppgaveService
-
-    @Autowired
-    private lateinit var fagsakRepository: FagsakRepository
 
     @Autowired
     private lateinit var behandlingRepository: BehandlingRepository
@@ -69,9 +60,6 @@ class AutomatiskRevurderingEtterGOmregningTest : OppslagSpringRunnerTest() {
     private lateinit var vedtakService: VedtakService
 
     @Autowired
-    private lateinit var vedtakRepository: VedtakRepository
-
-    @Autowired
     private lateinit var årsakRevurderingsRepository: ÅrsakRevurderingsRepository
 
     @Autowired
@@ -90,19 +78,7 @@ class AutomatiskRevurderingEtterGOmregningTest : OppslagSpringRunnerTest() {
     lateinit var barnRepository: BarnRepository
 
     @Autowired
-    private lateinit var rolleConfig: RolleConfig
-
-    @Autowired
     private lateinit var inntektClientMock: InntektClientMock
-
-    @Autowired
-    private lateinit var taskService: TaskService
-
-    @Autowired
-    private lateinit var ventePåStatusFraIverksettSteg: VentePåStatusFraIverksettSteg
-
-    @Autowired
-    private lateinit var stegService: StegService
 
     @Autowired
     private lateinit var gOmregningTestUtil: GOmregningTestUtil
@@ -158,8 +134,6 @@ class AutomatiskRevurderingEtterGOmregningTest : OppslagSpringRunnerTest() {
         val inntektResponse = lagInntektResponseFraMånedsinntekter(innmeldtMånedsinntekt)
 
         every { inntektClientMock.inntektClient().hentInntekt("321", any(), any()) } returns inntektResponse
-
-        every { oppgaveService.finnMappeGittMappenavn(any(), any()) } returns 63L
 
         behandleAutomatiskInntektsendringTask.doTask(opprettetTask)
 
