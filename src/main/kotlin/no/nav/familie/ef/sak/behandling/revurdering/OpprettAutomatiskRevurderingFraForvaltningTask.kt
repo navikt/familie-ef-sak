@@ -45,10 +45,6 @@ class OpprettAutomatiskRevurderingFraForvaltningTask(
             Task(
                 type = TYPE,
                 payload = objectMapper.writeValueAsString(personIdenter),
-                properties =
-                    Properties().apply {
-                        this["personIdenter"] = personIdenter
-                    },
             )
     }
 }
