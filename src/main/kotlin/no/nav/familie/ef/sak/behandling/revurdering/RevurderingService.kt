@@ -121,10 +121,7 @@ class RevurderingService(
         val erAutomatiskRevurdering = revurderingDto.behandlingsårsak == BehandlingÅrsak.AUTOMATISK_INNTEKTSENDRING
 
         val saksbehandler =
-            when (erAutomatiskRevurdering) {
-                true -> "S135150" // HARDKODER midlertidig saksbehandler for automatisk inntektsendring
-                false -> SikkerhetContext.hentSaksbehandlerEllerSystembruker()
-            }
+            finnSaksbehandlerForRevurdering(erAutomatiskRevurdering)
 
         taskService.save(
             OpprettOppgaveForOpprettetBehandlingTask.opprettTask(
@@ -156,6 +153,12 @@ class RevurderingService(
 
         return revurdering
     }
+
+    fun finnSaksbehandlerForRevurdering(erAutomatiskRevurdering: Boolean): String =
+        when (erAutomatiskRevurdering) {
+            true -> "S135150" // HARDKODER midlertidig saksbehandler for automatisk inntektsendring
+            false -> SikkerhetContext.hentSaksbehandlerEllerSystembruker()
+        }
 
     @Transactional
     fun opprettAutomatiskInntektsendringTask(personIdenter: List<String>) {
