@@ -21,6 +21,7 @@ import no.nav.familie.ef.sak.infrastruktur.config.InntektClientMock
 import no.nav.familie.ef.sak.infrastruktur.config.ObjectMapperProvider.objectMapper
 import no.nav.familie.ef.sak.infrastruktur.config.RolleConfig
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
+import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.fagsakpersoner
@@ -43,6 +44,9 @@ import java.time.YearMonth
 import java.util.UUID
 
 class AutomatiskRevurderingEtterGOmregningTest : OppslagSpringRunnerTest() {
+    @Autowired
+    private lateinit var oppgaveService: OppgaveService
+
     @Autowired
     private lateinit var fagsakRepository: FagsakRepository
 
@@ -154,6 +158,8 @@ class AutomatiskRevurderingEtterGOmregningTest : OppslagSpringRunnerTest() {
         val inntektResponse = lagInntektResponseFraMånedsinntekter(innmeldtMånedsinntekt)
 
         every { inntektClientMock.inntektClient().hentInntekt("321", any(), any()) } returns inntektResponse
+
+        every { oppgaveService.finnMappeGittMappenavn(any(), any()) } returns 63L
 
         behandleAutomatiskInntektsendringTask.doTask(opprettetTask)
 

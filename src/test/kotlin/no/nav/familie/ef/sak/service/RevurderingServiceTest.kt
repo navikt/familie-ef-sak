@@ -35,13 +35,14 @@ internal class RevurderingServiceTest {
             taskService = mockk(),
             barnService = mockk(),
             fagsakService = fagsakService,
+            årsakRevurderingService = mockk(),
             årsakRevurderingSteg = mockk(),
             stegService = mockk(),
-            årsakRevurderingService = mockk(),
             kopierVedtakService = mockk(),
             vedtakService = mockk(),
             nyeBarnService = mockk(),
             tilordnetRessursService = mockk(),
+            oppgaveService = mockk(),
         )
 
     @BeforeEach
