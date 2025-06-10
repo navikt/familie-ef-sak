@@ -15,6 +15,7 @@ import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.ef.sak.journalføring.dto.VilkårsbehandleNyeBarn
 import no.nav.familie.ef.sak.vedtak.VedtakService
+import no.nav.familie.ef.sak.vedtak.domain.InntektWrapper
 import no.nav.familie.ef.sak.vedtak.domain.Vedtak
 import no.nav.familie.ef.sak.vedtak.domain.Vedtaksperiode
 import no.nav.familie.ef.sak.vedtak.dto.InnvilgelseOvergangsstønad
@@ -30,8 +31,11 @@ import no.nav.familie.prosessering.domene.Task
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
+import java.text.NumberFormat
 import java.time.LocalDate
 import java.time.YearMonth
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 import java.util.Properties
 import java.util.UUID
 
@@ -88,14 +92,22 @@ class BehandleAutomatiskInntektsendringTask(
             )
         val inntektResponse = automatiskRevurderingService.lagreInntektResponse(personIdent, behandling.id)
         val forrigeBehandling = behandling.forrigeBehandlingId?.let { behandlingService.hentBehandling(it) } ?: throw IllegalStateException("Burde vært en forrigeBehandlingId etter automatisk revurdering for behandlingId: ${behandling.id}")
-        val forrigeVedtak = vedtakService.hentVedtak(forrigeBehandling.id)
+
+        val forrigeVedtak =
+            if (forrigeBehandling.erGOmregning()) {
+                val vedtakFørGOmregning = vedtakService.hentVedtak(forrigeBehandling.forrigeBehandlingId ?: throw IllegalStateException("Finner ikke forrigeBehandlingId for behandlingId som er en G-omregning: ${forrigeBehandling.id}"))
+                val gOmregningVedtak = vedtakService.hentVedtak(forrigeBehandling.id)
+                sammenslåVedtak(vedtakFørGOmregning, gOmregningVedtak)
+            } else {
+                vedtakService.hentVedtak(forrigeBehandling.id)
+            }
 
         val perioder = oppdaterFørsteVedtaksperiodeMedRevurderesFraDato(forrigeVedtak, inntektResponse)
         val inntektsperioder = oppdaterInntektMedNyBeregnetForventetInntekt(forrigeVedtak, inntektResponse, perioder.first().periode.fom)
         val innvilgelseOvergangsstønad =
             InnvilgelseOvergangsstønad(
-                periodeBegrunnelse = forrigeVedtak.periodeBegrunnelse,
-                inntektBegrunnelse = forrigeVedtak.inntektBegrunnelse,
+                periodeBegrunnelse = "Overgangsstønaden endres fra måneden etter minst 10 prosent økning i inntekt.",
+                inntektBegrunnelse = lagInntektsperiodeTekst(inntektsperioder, inntektResponse, forrigeVedtak),
                 perioder = perioder.fraDomene(),
                 inntekter = inntektsperioder.tilInntekt(),
                 samordningsfradragType = forrigeVedtak.samordningsfradragType,
@@ -104,6 +116,37 @@ class BehandleAutomatiskInntektsendringTask(
         årsakRevurderingsRepository.insert(ÅrsakRevurdering(behandlingId = behandling.id, opplysningskilde = Opplysningskilde.AUTOMATISK_OPPRETTET_BEHANDLING, årsak = Revurderingsårsak.ENDRING_INNTEKT, beskrivelse = null))
         vedtakService.lagreVedtak(vedtakDto = innvilgelseOvergangsstønad, behandlingId = behandling.id, stønadstype = StønadType.OVERGANGSSTØNAD)
         logger.info("Opprettet behandling for automatisk inntektsendring: ${behandling.id}")
+    }
+
+    private fun sammenslåVedtak(
+        vedtak1: Vedtak,
+        vedtak2: Vedtak,
+    ): Vedtak {
+        val inntekter1 =
+            vedtak1.inntekter?.inntekter
+                ?: throw IllegalStateException("Fant ikke inntektsperioder for behandlingId: ${vedtak1.behandlingId}")
+
+        val inntekter2 = vedtak2.inntekter?.inntekter ?: emptyList()
+
+        val justerteInntekter1 =
+            inntekter1.mapNotNull { v1 ->
+                val overlappende = inntekter2.firstOrNull { v2 -> v1.periode.overlapper(v2.periode) }
+
+                if (overlappende != null) {
+                    val nyPeriode = Månedsperiode(v1.periode.fom, overlappende.periode.fom.minusMonths(1))
+                    if (nyPeriode.fom <= nyPeriode.tom) {
+                        v1.copy(periode = nyPeriode)
+                    } else {
+                        throw IllegalStateException("Feil ved avkorting av periode. Ugyldig start- og sluttdato for periode: $nyPeriode i behandlingId: ${vedtak1.behandlingId}")
+                    }
+                } else {
+                    v1
+                }
+            }
+
+        val sammenslått = justerteInntekter1 + inntekter2
+
+        return vedtak1.copy(inntekter = InntektWrapper(sammenslått))
     }
 
     private fun logAutomatiskRevurderingForInntektsendring(
@@ -116,7 +159,14 @@ class BehandleAutomatiskInntektsendringTask(
         val forventetInntekt = inntektResponse.forventetMånedsinntekt()
         val behandling = behandlingService.finnSisteIverksatteBehandlingMedEventuellAvslått(fagsak.id)
         if (behandling != null) {
-            val forrigeVedtak = vedtakService.hentVedtak(behandling.id)
+            val forrigeVedtak =
+                if (behandling.erGOmregning()) {
+                    val vedtakFørGOmregning = vedtakService.hentVedtak(behandling.forrigeBehandlingId ?: throw IllegalStateException("Finner ikke forrigeBehandlingId for behandlingId som er en G-omregning: ${behandling.id}"))
+                    val gOmregningVedtak = vedtakService.hentVedtak(behandling.id)
+                    sammenslåVedtak(vedtakFørGOmregning, gOmregningVedtak)
+                } else {
+                    vedtakService.hentVedtak(behandling.id)
+                }
             val perioder = oppdaterFørsteVedtaksperiodeMedRevurderesFraDato(forrigeVedtak, inntektResponse)
             val inntektsperioder = oppdaterInntektMedNyBeregnetForventetInntekt(forrigeVedtak, inntektResponse, perioder.first().periode.fom)
             logger.info("Ville opprettet inntektsperioder for fagsak eksternId: ${fagsak.eksternId} - nye inntektsperioder: " + inntektsperioder)
@@ -185,6 +235,55 @@ class BehandleAutomatiskInntektsendringTask(
             ?.inntekter
             ?.minus(nyesteInntektsperiode)
             ?.plus(oppdatertInntektsperiode) ?: emptyList()
+    }
+
+    private fun lagInntektsperiodeTekst(
+        inntektsperioder: List<Inntektsperiode>,
+        inntektResponse: InntektResponse,
+        forrigeVedtak: Vedtak,
+    ): String {
+        val førsteMånedMed10ProsentEndring =
+            inntektsperioder
+                .minBy { it.periode.fom }
+                .periode.fom
+                .minusMonths(1)
+
+        val forrigeForventetInntektsperiode = forrigeVedtak.inntekter?.inntekter?.first { it.periode.inneholder(førsteMånedMed10ProsentEndring) } ?: throw IllegalStateException("Fant ikke tidligere forventet inntekt for måned: $førsteMånedMed10ProsentEndring")
+        val forrigeForventetÅrsinntekt = forrigeForventetInntektsperiode.totalinntekt().toInt()
+        val tiProsentOpp = forrigeForventetÅrsinntekt / 12 * 1.1
+        val tiProsentNed = forrigeForventetÅrsinntekt / 12 * 0.9
+        val beløpFørsteMåned10ProsentEndring = inntektResponse.totalInntektForÅrMåned(førsteMånedMed10ProsentEndring)
+
+        val forventetInntekt = inntektsperioder.maxBy { it.periode.fom }
+        val forventetInntektFraMåned = forventetInntekt.periode.fom
+
+        val tekst =
+            """
+            Forventet årsinntekt fra ${førsteMånedMed10ProsentEndring.tilNorskFormat()}: ${forrigeForventetÅrsinntekt.tilNorskFormat()} kroner.
+            - 10 % opp: ${tiProsentOpp.toInt().tilNorskFormat()} kroner per måned.
+            - 10 % ned: ${tiProsentNed.toInt().tilNorskFormat()} kroner per måned.
+            
+            Inntekten i ${førsteMånedMed10ProsentEndring.tilNorskFormat()} er ${beløpFørsteMåned10ProsentEndring.tilNorskFormat()} kroner. Inntekten har økt minst 10 prosent denne måneden. Stønaden beregnes på nytt fra måneden etter.
+               
+            Fra og med ${forventetInntektFraMåned.tilNorskFormat()} er stønaden beregnet ut ifra gjennomsnittlig inntekt i ${forventetInntektFraMåned.minusMonths(3).månedTilNorskFormat()}, ${forventetInntektFraMåned.minusMonths(2).månedTilNorskFormat()} og ${forventetInntektFraMåned.minusMonths(1).månedTilNorskFormat()}.
+            """.trimIndent()
+
+        return tekst
+    }
+
+    fun YearMonth.tilNorskFormat(): String {
+        val formatter = DateTimeFormatter.ofPattern("MMMM yyyy", Locale.forLanguageTag("no-NO"))
+        return this.format(formatter)
+    }
+
+    fun YearMonth.månedTilNorskFormat(): String {
+        val formatter = DateTimeFormatter.ofPattern("MMMM", Locale.forLanguageTag("no-NO"))
+        return this.format(formatter)
+    }
+
+    fun Int.tilNorskFormat(): String {
+        val formatter = NumberFormat.getInstance(Locale.forLanguageTag("no-NO"))
+        return formatter.format(this)
     }
 
     companion object {

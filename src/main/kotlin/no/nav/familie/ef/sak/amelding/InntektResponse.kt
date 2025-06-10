@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty
 import no.nav.familie.ef.sak.beregning.Grunnbeløpsperioder.finnGrunnbeløp
 import no.nav.familie.ef.sak.felles.util.isEqualOrAfter
 import no.nav.familie.ef.sak.vedtak.domain.Vedtak
+import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.time.OffsetDateTime
 import java.time.YearMonth
@@ -27,14 +28,7 @@ data class InntektResponse(
             .toInt()
 
     fun førsteMånedMed10ProsentInntektsøkning(forrigeVedtak: Vedtak): YearMonth {
-        val innmeldtInntektList =
-            inntektsmånederUtenEfYtelser(
-                forrigeVedtak.perioder
-                    ?.perioder
-                    ?.minBy { it.periode.fom }
-                    ?.periode
-                    ?.fom,
-            )
+        val innmeldtInntektList = inntektsmånederUtenEfYtelser(minimumsdato(forrigeVedtak))
         val innmeldtInntektTilForventetInntektMap =
             innmeldtInntektList.associate { innmeldtInntekt ->
                 innmeldtInntekt to (
@@ -44,6 +38,7 @@ data class InntektResponse(
                         ?.avledForventetMånedsinntekt() ?: throw IllegalStateException("Fant ikke forventet inntekt for måned ${innmeldtInntekt.måned} i vedtaket for behandling ${forrigeVedtak.behandlingId}")
                 )
             }
+        secureLogger.info("innmeldtInntektTilForventetInntektMap: " + innmeldtInntektTilForventetInntektMap)
         return innmeldtInntektTilForventetInntektMap.filter { it.key.totalInntekt().toInt() > (it.value * 1.1) && it.key.totalInntekt() > finnGrunnbeløp(it.key.måned).perMnd.toInt() / 2 }.firstNotNullOf { it.key.måned }
     }
 
@@ -69,11 +64,25 @@ data class InntektResponse(
 
     fun revurderesFraDato(forrigeVedtak: Vedtak) = førsteMånedMed10ProsentInntektsøkning(forrigeVedtak)
 
+    fun minimumsdato(forrigeVedtak: Vedtak): YearMonth {
+        val vedtaksperioderForrigeVedtak = forrigeVedtak.perioder ?: throw IllegalStateException("Skulle hatt vedtaksperiode ved automatisk beregning av behandling ${forrigeVedtak.behandlingId}")
+        val startdatoForrigeVedtak =
+            vedtaksperioderForrigeVedtak.perioder
+                .minBy { it.periode.fom }
+                .periode.fom
+        val erEldreEnnEttÅr = startdatoForrigeVedtak.isBefore(YearMonth.now().minusYears(1))
+        return if (erEldreEnnEttÅr) YearMonth.now().minusYears(1) else startdatoForrigeVedtak
+    }
+
     val harTreForrigeInntektsmåneder =
         inntektsmåneder
             .filter { it.måned.isEqualOrAfter(YearMonth.now().minusMonths(3)) && it.måned.isBefore(YearMonth.now()) }
             .distinctBy { it.måned }
             .size == 3
+
+    companion object {
+        private val secureLogger = LoggerFactory.getLogger("secureLogger")
+    }
 }
 
 data class Inntektsmåned(
