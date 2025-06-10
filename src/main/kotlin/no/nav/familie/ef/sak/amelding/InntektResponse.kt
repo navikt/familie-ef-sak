@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty
 import no.nav.familie.ef.sak.beregning.Grunnbeløpsperioder.finnGrunnbeløp
 import no.nav.familie.ef.sak.felles.util.isEqualOrAfter
 import no.nav.familie.ef.sak.vedtak.domain.Vedtak
+import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.time.OffsetDateTime
 import java.time.YearMonth
@@ -37,6 +38,7 @@ data class InntektResponse(
                         ?.avledForventetMånedsinntekt() ?: throw IllegalStateException("Fant ikke forventet inntekt for måned ${innmeldtInntekt.måned} i vedtaket for behandling ${forrigeVedtak.behandlingId}")
                 )
             }
+        secureLogger.info("innmeldtInntektTilForventetInntektMap: " + innmeldtInntektTilForventetInntektMap)
         return innmeldtInntektTilForventetInntektMap.filter { it.key.totalInntekt().toInt() > (it.value * 1.1) && it.key.totalInntekt() > finnGrunnbeløp(it.key.måned).perMnd.toInt() / 2 }.firstNotNullOf { it.key.måned }
     }
 
@@ -77,6 +79,10 @@ data class InntektResponse(
             .filter { it.måned.isEqualOrAfter(YearMonth.now().minusMonths(3)) && it.måned.isBefore(YearMonth.now()) }
             .distinctBy { it.måned }
             .size == 3
+
+    companion object {
+        private val secureLogger = LoggerFactory.getLogger("secureLogger")
+    }
 }
 
 data class Inntektsmåned(
