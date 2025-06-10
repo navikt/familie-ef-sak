@@ -39,7 +39,6 @@ import java.time.format.DateTimeFormatter
 import java.util.Locale
 import java.util.Properties
 import java.util.UUID
-import kotlin.math.floor
 
 @Service
 @TaskStepBeskrivelse(

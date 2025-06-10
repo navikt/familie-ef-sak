@@ -73,7 +73,7 @@ object BeregningUtils {
 
     data class TiProsentOppOgNed(
         val opp: Int,
-        val ned: Int
+        val ned: Int,
     )
 
     private fun beregnAvkortning(
