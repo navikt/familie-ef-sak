@@ -71,7 +71,7 @@ spec:
           cluster: prod-gcp
         - application: veilarbportefolje
           namespace: obo
-          cluster: dev-gcp
+          cluster: prod-gcp
         - application: tilleggsstonader-integrasjoner
           namespace: tilleggsstonader
     outbound:
