@@ -125,7 +125,7 @@ class OppfølgingsoppgaveService(
 
     fun hentOppgavetyperSomKanOpprettesForOvergangsstønad(behandlingId: UUID): List<OppgaveForOpprettelseType> {
         val saksbehandling = behandlingService.hentSaksbehandling(behandlingId)
-        if (saksbehandling.stønadstype != StønadType.OVERGANGSSTØNAD) {
+        if (saksbehandling.stønadstype == StønadType.SKOLEPENGER) {
             return emptyList()
         }
         val vedtak = vedtakService.hentVedtak(behandlingId)
