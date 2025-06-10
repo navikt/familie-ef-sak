@@ -111,13 +111,13 @@ class OppfølgingsoppgaveService(
     fun hentOppgaverForFerdigstilling(
         behandlingid: UUID,
     ): OppgaverForFerdigstillingDto {
-        val lagretFremleggsoppgaveIder = hentOppgaverForFerdigstillingEllerNull(behandlingid)
+        val lagretOppgaveIder = hentOppgaverForFerdigstillingEllerNull(behandlingid)
 
         return(
             OppgaverForFerdigstillingDto(
                 behandlingId = behandlingid,
                 oppgaveIder =
-                    lagretFremleggsoppgaveIder?.fremleggsoppgaveIderSomSkalFerdigstilles
+                    lagretOppgaveIder?.flereOppgaveIderSomSkalFerdigstilles
                         ?: emptyList(),
             )
         )

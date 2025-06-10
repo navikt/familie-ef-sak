@@ -94,7 +94,7 @@ class OppgaveController(
     fun hentOppgaverForFerdigstilling(
         @PathVariable behandlingId: UUID,
     ): Ressurs<OppgaveResponseDto> {
-        val oppgaveIder = oppfølgingsoppgaveService.hentOppgaverForFerdigstillingEllerNull(behandlingId)?.fremleggsoppgaveIderSomSkalFerdigstilles
+        val oppgaveIder = oppfølgingsoppgaveService.hentOppgaverForFerdigstillingEllerNull(behandlingId)?.flereOppgaveIderSomSkalFerdigstilles
         secureLogger.info("Oppgave ider for behandlingId: $behandlingId, oppgaveIder: $oppgaveIder")
         val oppgaver = oppgaveService.hentOppgaverMedIder(oppgaveIder)
         val antallTreffTotalt = oppgaver.size.toLong()

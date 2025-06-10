@@ -23,7 +23,7 @@ class FerdigstillFremleggsoppgaverTask(
         val behandlingId = UUID.fromString(task.payload)
 
         val oppgaverForFerdigstilling = oppfølgingsoppgaveService.hentOppgaverForFerdigstillingEllerNull(behandlingId)
-        oppgaverForFerdigstilling?.fremleggsoppgaveIderSomSkalFerdigstilles?.forEach { id ->
+        oppgaverForFerdigstilling?.flereOppgaveIderSomSkalFerdigstilles?.forEach { id ->
             if (!erOppgaveFerdigstiltEllerFeilregistrert(id)) {
                 oppgaveService.ferdigstillOppgave(id)
             }

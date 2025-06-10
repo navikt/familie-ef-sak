@@ -8,5 +8,5 @@ import java.util.UUID
 data class OppgaverForFerdigstilling(
     @Id
     val behandlingId: UUID,
-    val fremleggsoppgaveIderSomSkalFerdigstilles: List<Long>,
+    val flereOppgaveIderSomSkalFerdigstilles: List<Long>,
 )
