@@ -58,12 +58,23 @@ object BeregningUtils {
         }
     }
 
-    private fun beregnTotalinntekt(inntektsperiode: Inntektsperiode): BigDecimal {
+    fun beregnTotalinntekt(inntektsperiode: Inntektsperiode): BigDecimal {
         val totalInntekt = inntektsperiode.totalinntekt()
         val skalRundeNedBasertPåInntektsperiodensVerdier = inntektsperiode.skalRundeAvTilNærmeste1000()
 
         return if (skalRundeNedBasertPåInntektsperiodensVerdier) BigDecimal(rundNedTilNærmeste1000(totalInntekt)) else totalInntekt
     }
+
+    fun beregn10ProsentOppOgNedIMånedsinntektFraÅrsinntekt(inntektsperiode: Inntektsperiode): TiProsentOppOgNed {
+        val årsinntekt = beregnTotalinntekt(inntektsperiode)
+        val månedInntekt10ProsentOppOgNed = TiProsentOppOgNed(((årsinntekt.toDouble() / 12) * 1.1).toInt(), ((årsinntekt.toDouble() / 12) * 0.9).toInt())
+        return månedInntekt10ProsentOppOgNed
+    }
+
+    data class TiProsentOppOgNed(
+        val opp: Int,
+        val ned: Int
+    )
 
     private fun beregnAvkortning(
         grunnbeløp: BigDecimal,
