@@ -395,7 +395,7 @@ internal class SamværsavtaleServiceTest {
             val eksisterendeBehandlingId = UUID.randomUUID()
             val nyBehandlingId = UUID.randomUUID()
 
-            val nyeSamværsavtaler = slot<List<Samværsavtale>>()
+            val nyeSamværsavtaler = slot<Samværsavtale>()
 
             val barnPåBeggeBehandlingerMedSamværsavtale =
                 behandlingBarn(
@@ -446,24 +446,23 @@ internal class SamværsavtaleServiceTest {
                 listOf(samværsavtaleBarnPåBeggeBehandlinger, samværsavtaleBarnPåEksisterendeBehandling)
             every { barnService.finnBarnPåBehandling(eksisterendeBehandlingId) } returns
                 listOf(barnPåBeggeBehandlingerMedSamværsavtale, barnPåEksisterendeBehandling, barnPåBeggeBehandlingerUtenSamværsavtale)
-            every { samværsavtaleRepository.insertAll(capture(nyeSamværsavtaler)) } answers { firstArg() }
+            every { samværsavtaleRepository.findByBehandlingIdAndBehandlingBarnId(nyBehandlingId, barnPåBeggeBehandlingerMedSamværsavtale.id) } returns null
+            every { samværsavtaleRepository.insert(capture(nyeSamværsavtaler)) } answers { firstArg() }
 
             samværsavtaleService.gjenbrukSamværsavtaler(nyBehandlingId, eksisterendeBehandlingId, metadata)
 
-            verify(exactly = 1) { samværsavtaleRepository.insertAll(any()) }
-            assertThat(nyeSamværsavtaler.captured.size).isEqualTo(1)
-            assertThat(nyeSamværsavtaler.captured.first().behandlingId).isEqualTo(nyBehandlingId)
-            assertThat(nyeSamværsavtaler.captured.first().behandlingBarnId).isEqualTo(barnPåBeggeBehandlingerMedSamværsavtale.id)
+            verify(exactly = 1) { samværsavtaleRepository.insert(any()) }
+            verify(exactly = 0) { samværsavtaleRepository.update(any()) }
+            assertThat(nyeSamværsavtaler.captured.behandlingId).isEqualTo(nyBehandlingId)
+            assertThat(nyeSamværsavtaler.captured.behandlingBarnId).isEqualTo(barnPåBeggeBehandlingerMedSamværsavtale.id)
             assertThat(
                 nyeSamværsavtaler.captured
-                    .first()
                     .tilDto()
                     .mapTilSamværsandelerPerDag()
                     .size,
             ).isEqualTo(7)
             assertThat(
                 nyeSamværsavtaler.captured
-                    .first()
                     .tilDto()
                     .summerTilSamværsandelerVerdiPerDag()
                     .sum(),

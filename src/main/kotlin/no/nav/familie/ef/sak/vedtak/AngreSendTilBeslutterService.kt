@@ -2,13 +2,16 @@ package no.nav.familie.ef.sak.vedtak
 
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.Saksbehandling
-import no.nav.familie.ef.sak.behandlingsflyt.steg.StegService
+import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
+import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType.BESLUTTE_VEDTAK
+import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType.SEND_TIL_BESLUTTER
 import no.nav.familie.ef.sak.behandlingsflyt.task.FerdigstillOppgaveTask
 import no.nav.familie.ef.sak.behandlingsflyt.task.OpprettOppgaveTask
 import no.nav.familie.ef.sak.behandlingshistorikk.BehandlingshistorikkService
 import no.nav.familie.ef.sak.behandlingshistorikk.domain.StegUtfall
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
+import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
@@ -22,14 +25,15 @@ import java.util.UUID
 class AngreSendTilBeslutterService(
     private val oppgaveService: OppgaveService,
     private val behandlingService: BehandlingService,
+    private val vedtakService: VedtakService,
     private val behandlingshistorikkService: BehandlingshistorikkService,
     private val taskService: TaskService,
-    private val stegService: StegService,
     private val totrinnskontrollService: TotrinnskontrollService,
 ) {
     @Transactional
     fun angreSendTilBeslutter(behandlingId: UUID) {
         val saksbehandling = behandlingService.hentSaksbehandling(behandlingId)
+        val beslutter = vedtakService.hentVedtak(behandlingId).beslutterIdent
 
         validerKanAngreSendTilBeslutter(saksbehandling)
 
@@ -43,7 +47,10 @@ class AngreSendTilBeslutterService(
         ferdigstillGodkjenneVedtakOppgave(saksbehandling)
         opprettBehandleSakOppgave(saksbehandling)
 
-        stegService.angreSendTilBeslutter(behandlingId)
+        validerBehandlingStegOgStatus(saksbehandling, beslutter)
+
+        behandlingService.oppdaterStegPåBehandling(behandlingId, SEND_TIL_BESLUTTER)
+        behandlingService.oppdaterStatusPåBehandling(behandlingId, BehandlingStatus.UTREDES)
     }
 
     private fun opprettBehandleSakOppgave(saksbehandling: Saksbehandling) {
@@ -92,6 +99,23 @@ class AngreSendTilBeslutterService(
             tilordnetRessurs != null && tilordnetRessurs != innloggetSaksbehandler
         brukerfeilHvis(oppgaveErTilordnetEnAnnenSaksbehandler) {
             "Kan ikke angre send til beslutter når oppgave er plukket av $tilordnetRessurs"
+        }
+    }
+
+    private fun validerBehandlingStegOgStatus(
+        saksbehandling: Saksbehandling,
+        beslutter: String?,
+    ) {
+        feilHvis(saksbehandling.steg != BESLUTTE_VEDTAK, httpStatus = HttpStatus.BAD_REQUEST) {
+            if (saksbehandling.steg.kommerEtter(BESLUTTE_VEDTAK)) {
+                "Kan ikke angre send til beslutter da vedtaket er godkjent av $beslutter"
+            } else {
+                "Kan ikke angre send til beslutter når behandling er i steg ${saksbehandling.steg}"
+            }
+        }
+
+        feilHvis(saksbehandling.status != BehandlingStatus.FATTER_VEDTAK, httpStatus = HttpStatus.BAD_REQUEST) {
+            "Kan ikke angre send til beslutter når behandlingen har status ${saksbehandling.status}"
         }
     }
 }

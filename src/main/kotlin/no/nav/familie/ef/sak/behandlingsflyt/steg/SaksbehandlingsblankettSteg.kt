@@ -43,6 +43,7 @@ class SaksbehandlingsblankettSteg(
                     "behandling er migrering eller maskinell g-omregning",
             )
         } else {
+            logger.info("Lag blankett for behandling=${saksbehandling.id}")
             val blankettPdf = blankettService.lagBlankett(saksbehandling.id)
             logger.info("Journalfører blankett for behandling=${saksbehandling.id}")
             journalførSaksbehandlingsblankett(saksbehandling, blankettPdf)

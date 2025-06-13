@@ -395,5 +395,16 @@ internal class BeregningUtilsTest {
             val resultat = BeregningUtils.beregnStønadForInntekt(inntektsperiodeMedÅrsinntekt).single()
             assertThat(resultat.beregningsgrunnlag?.inntekt).isEqualTo((500_500.toBigDecimal()))
         }
+
+        @Test
+        internal fun `Skal beregne måneds inntekt fra årsinntekt`() {
+            val årsinntekt = 437_000.toBigDecimal()
+            val inntektsperiodeMedÅrsinntekt = inntektsperiode.copy(inntekt = årsinntekt)
+
+            val resultat = BeregningUtils.beregn10ProsentOppOgNedIMånedsinntektFraÅrsinntekt(inntektsperiodeMedÅrsinntekt)
+
+            assertThat(resultat.opp).isEqualTo(40058)
+            assertThat(resultat.ned).isEqualTo(32775)
+        }
     }
 }

@@ -13,11 +13,11 @@ import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
-internal class VentePåStatusFraIverksettTest {
+internal class VentePåStatusFraIverksettStegTest {
     private val iverksettClient = mockk<IverksettClient>()
     private val taskService = mockk<TaskService>()
 
-    private val steg = VentePåStatusFraIverksett(iverksettClient, taskService)
+    private val steg = VentePåStatusFraIverksettSteg(iverksettClient, taskService)
 
     @BeforeEach
     internal fun setUp() {

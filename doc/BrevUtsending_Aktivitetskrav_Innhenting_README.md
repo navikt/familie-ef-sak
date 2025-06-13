@@ -23,6 +23,11 @@ Velg `true` om du ønsker å lagre ned tasks for generering og utsending av brev
 I tillegg er man nødt til å [gå inn i unleash og aktivere feature toggle for automatisk brevinnhenting av aktivitetsplikt for prod miljøet.](https://teamfamilie-unleash-web.iap.nav.cloud.nais.io/projects/default/features/familie.ef.sak.automatiske-brev-innhenting-aktivitetsplikt)
 
 ### Teknisk
+
+Før man iverksetter automatisk utsending må man huske å manuelt oppdatere enkelte datoer i koden: 
+1. `oppgaveAktivitetspliktFrist` i `AutomatiskBrevInnhentingAktivitetspliktService` i `familie-ef-sak`
+2. `FRIST_OPPFØLGINGSOPPGAVE` og `FRIST_OPPRINNELIG_OPPGAVE` i `OppdaterAktivitetspliktInnhentingOppgaveTask` i `familie-ef-iverksett`
+
 Ved `liveRun` satt til `true` ved innsending av `POST-request` vil følgende skje:
 1. Det gjøres et søk etter oppgaver med frist satt til `17.05`, tema `ENF` og mappe `64 Utdanning` uten en tilordnet ressurs
 2. Deretter lagres det ned en task av typen`SendAktivitetspliktBrevTilIverksettTask` med ansvar for å generere brev og 
