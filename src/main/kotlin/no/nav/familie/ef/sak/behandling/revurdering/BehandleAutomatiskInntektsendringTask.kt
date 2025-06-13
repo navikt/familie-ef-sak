@@ -5,6 +5,7 @@ import no.nav.familie.ef.sak.amelding.InntektResponse
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.ÅrsakRevurdering
 import no.nav.familie.ef.sak.behandling.dto.RevurderingDto
+import no.nav.familie.ef.sak.beregning.BeregningUtils
 import no.nav.familie.ef.sak.beregning.Inntektsperiode
 import no.nav.familie.ef.sak.beregning.tilInntekt
 import no.nav.familie.ef.sak.fagsak.FagsakService
@@ -249,9 +250,8 @@ class BehandleAutomatiskInntektsendringTask(
                 .minusMonths(1)
 
         val forrigeForventetInntektsperiode = forrigeVedtak.inntekter?.inntekter?.first { it.periode.inneholder(førsteMånedMed10ProsentEndring) } ?: throw IllegalStateException("Fant ikke tidligere forventet inntekt for måned: $førsteMånedMed10ProsentEndring")
-        val forrigeForventetÅrsinntekt = forrigeForventetInntektsperiode.totalinntekt().toInt()
-        val tiProsentOpp = forrigeForventetÅrsinntekt / 12 * 1.1
-        val tiProsentNed = forrigeForventetÅrsinntekt / 12 * 0.9
+        val forrigeForventetÅrsinntekt = BeregningUtils.beregnTotalinntekt(forrigeForventetInntektsperiode).toInt()
+        val tiProsentOppOgNed = BeregningUtils.beregn10ProsentOppOgNedIMånedsinntektFraÅrsinntekt(forrigeForventetInntektsperiode)
         val beløpFørsteMåned10ProsentEndring = inntektResponse.totalInntektForÅrMåned(førsteMånedMed10ProsentEndring)
 
         val forventetInntekt = inntektsperioder.maxBy { it.periode.fom }
@@ -260,8 +260,8 @@ class BehandleAutomatiskInntektsendringTask(
         val tekst =
             """
             Forventet årsinntekt fra ${førsteMånedMed10ProsentEndring.tilNorskFormat()}: ${forrigeForventetÅrsinntekt.tilNorskFormat()} kroner.
-            - 10 % opp: ${tiProsentOpp.toInt().tilNorskFormat()} kroner per måned.
-            - 10 % ned: ${tiProsentNed.toInt().tilNorskFormat()} kroner per måned.
+            - 10 % opp: ${tiProsentOppOgNed.opp.tilNorskFormat()} kroner per måned.
+            - 10 % ned: ${tiProsentOppOgNed.ned.tilNorskFormat()} kroner per måned.
             
             Inntekten i ${førsteMånedMed10ProsentEndring.tilNorskFormat()} er ${beløpFørsteMåned10ProsentEndring.tilNorskFormat()} kroner. Inntekten har økt minst 10 prosent denne måneden. Stønaden beregnes på nytt fra måneden etter.
                
