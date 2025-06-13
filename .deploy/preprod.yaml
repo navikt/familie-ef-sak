@@ -104,6 +104,7 @@ spec:
         - host: familie-ef-infotrygd.dev-fss-pub.nais.io
         - host: familie-ef-proxy.dev-fss-pub.nais.io
         - host: teamfamilie-unleash-api.nav.cloud.nais.io
+        - host: ikomp-q2.dev-fss-pub.nais.io
   azure:
     application:
       enabled: true

@@ -39,7 +39,6 @@ class InntektClientMock {
         val inntektsmånederHøyInntekt = inntektsmåneder(fraOgMedMåned = YearMonth.now().minusMonths(3), inntektListe = inntekterPerMånedHøyInntekt)
         every { mockk.hentInntekt("3", any(), any()) } returns InntektResponse(inntektsmånederLavInntekt + inntektsmånederHøyInntekt)
 
-        every { mockk.genererAInntektUrl(any()) } returns "https://ainntekt"
         return mockk
     }
 }
