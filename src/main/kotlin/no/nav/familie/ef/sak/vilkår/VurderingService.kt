@@ -117,6 +117,7 @@ class VurderingService(
     }
 
     fun hentGrunnlagOgMetadata(behandlingId: UUID): Pair<VilkårGrunnlagDto, HovedregelMetadata> {
+        logger.info("Henter grunnlag og metadata for behandlingId=$behandlingId")
         val søknad = søknadService.hentSøknadsgrunnlag(behandlingId)
         val personIdent = behandlingService.hentAktivIdent(behandlingId)
         val barn = barnService.finnBarnPåBehandling(behandlingId)
@@ -124,7 +125,7 @@ class VurderingService(
         val søktOmBarnetilsyn =
             grunnlag.barnMedSamvær.filter { it.barnepass?.skalHaBarnepass == true }.map { it.barnId }
         val behandling = behandlingService.hentBehandling(behandlingId)
-
+        logger.info("Ferdig med å hente grunnlag og metadata for behandlingId=$behandlingId")
         val metadata =
             HovedregelMetadata(
                 sivilstandstype = grunnlag.sivilstand.registergrunnlag.type,

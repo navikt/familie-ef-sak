@@ -11,6 +11,7 @@ import no.nav.familie.ef.sak.behandling.dto.RevurderingDto
 import no.nav.familie.ef.sak.behandling.dto.RevurderingsinformasjonDto
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegService
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
+import no.nav.familie.ef.sak.behandlingsflyt.steg.ÅrsakRevurderingSteg
 import no.nav.familie.ef.sak.behandlingsflyt.task.BehandlingsstatistikkTask
 import no.nav.familie.ef.sak.behandlingsflyt.task.OpprettOppgaveForOpprettetBehandlingTask
 import no.nav.familie.ef.sak.fagsak.FagsakService
@@ -19,6 +20,7 @@ import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.journalføring.dto.VilkårsbehandleNyeBarn
+import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.ef.sak.oppgave.TilordnetRessursService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
@@ -47,11 +49,13 @@ class RevurderingService(
     private val barnService: BarnService,
     private val fagsakService: FagsakService,
     private val årsakRevurderingService: ÅrsakRevurderingService,
+    private val årsakRevurderingSteg: ÅrsakRevurderingSteg,
     private val stegService: StegService,
     private val kopierVedtakService: KopierVedtakService,
     private val vedtakService: VedtakService,
     private val nyeBarnService: NyeBarnService,
     private val tilordnetRessursService: TilordnetRessursService,
+    private val oppgaveService: OppgaveService,
 ) {
     private val logger = LoggerFactory.getLogger(javaClass)
 
@@ -61,7 +65,10 @@ class RevurderingService(
         behandlingId: UUID,
         revurderingsinformasjonDto: RevurderingsinformasjonDto,
     ): RevurderingsinformasjonDto {
-        stegService.håndterÅrsakRevurdering(behandlingId, revurderingsinformasjonDto)
+        val saksbehandling = behandlingService.hentSaksbehandling(behandlingId)
+
+        stegService.håndterSteg(saksbehandling, årsakRevurderingSteg, revurderingsinformasjonDto)
+
         return hentRevurderingsinformasjon(behandlingId)
     }
 
@@ -94,8 +101,6 @@ class RevurderingService(
             behandlingService.finnSisteIverksatteBehandlingMedEventuellAvslått(fagsak.id)?.id
                 ?: error("Revurdering må ha eksisterende iverksatt behandling")
 
-        val saksbehandler = SikkerhetContext.hentSaksbehandlerEllerSystembruker()
-
         søknadService.kopierSøknad(forrigeBehandlingId, revurdering.id)
         val grunnlagsdata = grunnlagsdataService.opprettGrunnlagsdata(revurdering.id)
 
@@ -116,13 +121,17 @@ class RevurderingService(
             stønadType = fagsak.stønadstype,
         )
         val erAutomatiskRevurdering = revurderingDto.behandlingsårsak == BehandlingÅrsak.AUTOMATISK_INNTEKTSENDRING
+
+        val saksbehandler =
+            finnSaksbehandlerForRevurdering(erAutomatiskRevurdering)
+
         taskService.save(
             OpprettOppgaveForOpprettetBehandlingTask.opprettTask(
                 OpprettOppgaveForOpprettetBehandlingTask.OpprettOppgaveTaskData(
                     behandlingId = revurdering.id,
                     saksbehandler = saksbehandler,
                     beskrivelse = if (erAutomatiskRevurdering) "Automatisk opprettet revurdering som følge av inntektskontroll" else "Revurdering i ny løsning",
-                    mappeId = if (erAutomatiskRevurdering) GOSYS_MAPPE_ID_INNTEKTSKONTROLL else null,
+                    mappeId = if (erAutomatiskRevurdering) oppgaveService.finnMappeGittMappenavn(mappeNavn = "63 Innte", personIdent = fagsak.hentAktivIdent()) else null,
                 ),
             ),
         )
@@ -147,6 +156,12 @@ class RevurderingService(
         return revurdering
     }
 
+    fun finnSaksbehandlerForRevurdering(erAutomatiskRevurdering: Boolean): String =
+        when (erAutomatiskRevurdering) {
+            true -> "S135150" // HARDKODER midlertidig saksbehandler for automatisk inntektsendring
+            false -> SikkerhetContext.hentSaksbehandlerEllerSystembruker()
+        }
+
     @Transactional
     fun opprettAutomatiskInntektsendringTask(personIdenter: List<String>) {
         if (LeaderClient.isLeader() != true) {
@@ -154,7 +169,7 @@ class RevurderingService(
         }
         val ukeÅr = LocalDate.now().let { "${it.get(IsoFields.WEEK_OF_WEEK_BASED_YEAR)}-${it.year}" }
 
-        personIdenter.forEach { personIdent ->
+        personIdenter.take(10).forEach { personIdent ->
 
             val payload = objectMapper.writeValueAsString(PayloadBehandleAutomatiskInntektsendringTask(personIdent = personIdent, ukeÅr = ukeÅr))
             val finnesTask = taskService.finnTaskMedPayloadOgType(payload, BehandleAutomatiskInntektsendringTask.TYPE)

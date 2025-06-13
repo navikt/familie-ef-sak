@@ -4,6 +4,7 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ef.sak.amelding.ekstern.AMeldingInntektClient
+import no.nav.familie.ef.sak.amelding.ekstern.ArbeidOgInntektClient
 import no.nav.familie.ef.sak.fagsak.FagsakPersonService
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.infrastruktur.config.ObjectMapperProvider.objectMapper
@@ -17,12 +18,14 @@ import kotlin.test.assertEquals
 
 class InntektServiceTest {
     private val fagsakService: FagsakService = mockk(relaxed = true)
+    private val arbeidOgInntektClient: ArbeidOgInntektClient = mockk(relaxed = true)
     private val aMeldingInntektClient: AMeldingInntektClient = mockk(relaxed = true)
     private val fagsakPersonService: FagsakPersonService = mockk(relaxed = true)
 
     private val inntektService: InntektService =
         InntektService(
             aMeldingInntektClient = aMeldingInntektClient,
+            arbeidOgInntektClient = arbeidOgInntektClient,
             fagsakService = fagsakService,
             fagsakPersonService = fagsakPersonService,
         )

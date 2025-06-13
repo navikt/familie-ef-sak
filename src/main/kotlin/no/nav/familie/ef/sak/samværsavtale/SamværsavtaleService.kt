@@ -101,7 +101,15 @@ class SamværsavtaleService(
                 )
             }
 
-        samværsavtaleRepository.insertAll(nyeSamværsavtaler)
+        nyeSamværsavtaler.forEach { nySamværsavtale ->
+            val lagretSamværsavtale = hentSamværsavtaleEllerNull(nySamværsavtale.behandlingId, nySamværsavtale.behandlingBarnId)
+
+            if (lagretSamværsavtale == null) {
+                samværsavtaleRepository.insert(nySamværsavtale)
+            } else {
+                samværsavtaleRepository.update(lagretSamværsavtale.copy(uker = nySamværsavtale.uker))
+            }
+        }
     }
 
     @Transactional

@@ -197,6 +197,24 @@ no.nav.security.jwt:
           client-id: ${AZURE_APP_CLIENT_ID}
           client-secret: ${AZURE_APP_CLIENT_SECRET}
           client-auth-method: client_secret_basic
+      inntektskomponenten:
+        resource-url: ${INNTEKT_URL}
+        token-endpoint-url: ${AZUREAD_TOKEN_ENDPOINT_URL}
+        grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
+        scope: ${INNTEKT_SCOPE}
+        authentication:
+          client-id: ${AZURE_APP_CLIENT_ID}
+          client-secret: ${AZURE_APP_CLIENT_SECRET}
+          client-auth-method: client_secret_basic
+      inntektskomponenten-clientcredentials:
+        resource-url: ${INNTEKT_URL}
+        token-endpoint-url: ${AZUREAD_TOKEN_ENDPOINT_URL}
+        grant-type: client_credentials
+        scope: ${INNTEKT_SCOPE}
+        authentication:
+          client-id: ${AZURE_APP_CLIENT_ID}
+          client-secret: ${AZURE_APP_CLIENT_SECRET}
+          client-auth-method: client_secret_basic
 
 PDL_SCOPE: api://${DEPLOY_ENV}-fss.pdl.pdl-api/.default
 REPR_API_SCOPE: api://${DEPLOY_ENV}-gcp.repr.repr-api/.default
@@ -210,6 +228,7 @@ FAMILIE_INTEGRASJONER_SCOPE: api://${DEPLOY_ENV}-fss.teamfamilie.familie-integra
 HISTORISK_PENSJON_SCOPE: api://${DEPLOY_ENV}-gcp.historisk.historisk-pensjon/.default
 FAMILIE_KS_SAK_SCOPE: api://${DEPLOY_ENV}-gcp.teamfamilie.familie-ks-sak/.default
 SKJERMEDE_PERSONER_SCOPE: api://${DEPLOY_ENV}-gcp.nom.skjermede-personer-pip/.default
+INNTEKT_SCOPE: api://prod-fss.team-inntekt.ikomp/.default
 
 spring:
   mvc:
@@ -288,10 +307,11 @@ HISTORISK_PENSJON_URL: http://historisk-pensjon.historisk
 FAMILIE_KS_SAK_URL: http://familie-ks-sak
 FRONTEND_OPPGAVE_URL: https://ensligmorellerfar.intern.nav.no/oppgavebenk
 SKJERMEDE_PERSONER_URL: http://skjermede-personer-pip.nom
+INNTEKT_URL: https://ikomp.prod-fss-pub.nais.io
 
 GYLDIGE_SERVICE_BRUKERE: srvArena
 
-G_OMREGNING_CRON_EXPRESSION: 0 0 15 * * TUE
+G_OMREGNING_CRON_EXPRESSION: 0 30 15 * * TUE
 FINN_BEHANDLINGER_UTEN_OPPGAVE_CRON_EXPRESSION: 0 0 8 * * MON #kl 08:00 hver mandag
 FINN_BEHANDLINGER_MED_GAMMEL_G_CRON_EXPRESSION: 0 0 8 1 * * #kl 08:00 den 1. hver måned
 DEAKTIVER_MIKROFRONTEND_CRON_EXPRESSION: 0 0 6 * * TUE #kl 06:00 hver tirsdag
