@@ -98,10 +98,10 @@ class AutomatiskRevurderingServiceTest {
         val inntekter = inntekterSisteTreMånederOvergangsstønad + inntekterSisteTreMånederFastlønn + inntekterSisteTreMånederFastlønn2 + inntekterFraSeksMånederTilTreMånederSidenFastlønn
         val inntektResponse = InntektResponse(inntekter)
 
-        val inntekterUtenOvergangsstønad = inntektResponse.inntektsmånederUtenEfYtelser(YearMonth.now().minusMonths(6))
+        val inntekterUtenOvergangsstønad = inntektResponse.inntektsmånederFraOgMedÅrMåned(YearMonth.now().minusMonths(6))
         val forventetInntekt = inntektResponse.forventetMånedsinntekt()
 
-        assertThat(inntekterUtenOvergangsstønad.size).isEqualTo(9)
+        assertThat(inntekterUtenOvergangsstønad.size).isEqualTo(12)
         assertThat(forventetInntekt).isEqualTo(6000)
     }
 
