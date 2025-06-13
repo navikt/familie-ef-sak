@@ -170,21 +170,23 @@ class PeriodeService(
             AktivitetType.FORSØRGER_REELL_ARBEIDSSØKER,
             AktivitetType.FORSØRGER_ETABLERER_VIRKSOMHET,
             AktivitetType.UTVIDELSE_FORSØRGER_I_UTDANNING,
-            AktivitetType.FORLENGELSE_STØNAD_UT_SKOLEÅRET -> true
-            AktivitetType.MIGRERING ,
-            AktivitetType.IKKE_AKTIVITETSPLIKT ,
-            AktivitetType.BARN_UNDER_ETT_ÅR ,
-            AktivitetType.BARNET_SÆRLIG_TILSYNSKREVENDE ,
-            AktivitetType.FORSØRGER_MANGLER_TILSYNSORDNING ,
-            AktivitetType.FORSØRGER_ER_SYK ,
-            AktivitetType.BARNET_ER_SYKT ,
-            AktivitetType.UTVIDELSE_BARNET_SÆRLIG_TILSYNSKREVENDE ,
-            AktivitetType.FORLENGELSE_MIDLERTIDIG_SYKDOM ,
-            AktivitetType.FORLENGELSE_STØNAD_PÅVENTE_ARBEID ,
-            AktivitetType.FORLENGELSE_STØNAD_PÅVENTE_ARBEID_REELL_ARBEIDSSØKER ,
-            AktivitetType.FORLENGELSE_STØNAD_PÅVENTE_OPPSTART_KVALIFISERINGSPROGRAM ,
-            AktivitetType.FORLENGELSE_STØNAD_PÅVENTE_TILSYNSORDNING ,
-            AktivitetType.FORLENGELSE_STØNAD_PÅVENTE_UTDANNING -> false
+            AktivitetType.FORLENGELSE_STØNAD_UT_SKOLEÅRET,
+            -> true
+            AktivitetType.MIGRERING,
+            AktivitetType.IKKE_AKTIVITETSPLIKT,
+            AktivitetType.BARN_UNDER_ETT_ÅR,
+            AktivitetType.BARNET_SÆRLIG_TILSYNSKREVENDE,
+            AktivitetType.FORSØRGER_MANGLER_TILSYNSORDNING,
+            AktivitetType.FORSØRGER_ER_SYK,
+            AktivitetType.BARNET_ER_SYKT,
+            AktivitetType.UTVIDELSE_BARNET_SÆRLIG_TILSYNSKREVENDE,
+            AktivitetType.FORLENGELSE_MIDLERTIDIG_SYKDOM,
+            AktivitetType.FORLENGELSE_STØNAD_PÅVENTE_ARBEID,
+            AktivitetType.FORLENGELSE_STØNAD_PÅVENTE_ARBEID_REELL_ARBEIDSSØKER,
+            AktivitetType.FORLENGELSE_STØNAD_PÅVENTE_OPPSTART_KVALIFISERINGSPROGRAM,
+            AktivitetType.FORLENGELSE_STØNAD_PÅVENTE_TILSYNSORDNING,
+            AktivitetType.FORLENGELSE_STØNAD_PÅVENTE_UTDANNING,
+            -> false
         }
 
     fun finnVedtaksperiodeforAndel(andel: AndelTilkjentYtelse): Vedtaksperiode? {
