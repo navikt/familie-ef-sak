@@ -165,25 +165,25 @@ class PeriodeService(
 
     private fun AktivitetType.harAktivitetsplikt(): Boolean =
         when (this) {
-            AktivitetType.FORSØRGER_I_ARBEID -> true
-            AktivitetType.FORSØRGER_I_UTDANNING -> true
-            AktivitetType.FORSØRGER_REELL_ARBEIDSSØKER -> true
-            AktivitetType.FORSØRGER_ETABLERER_VIRKSOMHET -> true
-            AktivitetType.UTVIDELSE_FORSØRGER_I_UTDANNING -> true
+            AktivitetType.FORSØRGER_I_ARBEID,
+            AktivitetType.FORSØRGER_I_UTDANNING,
+            AktivitetType.FORSØRGER_REELL_ARBEIDSSØKER,
+            AktivitetType.FORSØRGER_ETABLERER_VIRKSOMHET,
+            AktivitetType.UTVIDELSE_FORSØRGER_I_UTDANNING,
             AktivitetType.FORLENGELSE_STØNAD_UT_SKOLEÅRET -> true
-            AktivitetType.MIGRERING -> false
-            AktivitetType.IKKE_AKTIVITETSPLIKT -> false
-            AktivitetType.BARN_UNDER_ETT_ÅR -> false
-            AktivitetType.BARNET_SÆRLIG_TILSYNSKREVENDE -> false
-            AktivitetType.FORSØRGER_MANGLER_TILSYNSORDNING -> false
-            AktivitetType.FORSØRGER_ER_SYK -> false
-            AktivitetType.BARNET_ER_SYKT -> false
-            AktivitetType.UTVIDELSE_BARNET_SÆRLIG_TILSYNSKREVENDE -> false
-            AktivitetType.FORLENGELSE_MIDLERTIDIG_SYKDOM -> false
-            AktivitetType.FORLENGELSE_STØNAD_PÅVENTE_ARBEID -> false
-            AktivitetType.FORLENGELSE_STØNAD_PÅVENTE_ARBEID_REELL_ARBEIDSSØKER -> false
-            AktivitetType.FORLENGELSE_STØNAD_PÅVENTE_OPPSTART_KVALIFISERINGSPROGRAM -> false
-            AktivitetType.FORLENGELSE_STØNAD_PÅVENTE_TILSYNSORDNING -> false
+            AktivitetType.MIGRERING ,
+            AktivitetType.IKKE_AKTIVITETSPLIKT ,
+            AktivitetType.BARN_UNDER_ETT_ÅR ,
+            AktivitetType.BARNET_SÆRLIG_TILSYNSKREVENDE ,
+            AktivitetType.FORSØRGER_MANGLER_TILSYNSORDNING ,
+            AktivitetType.FORSØRGER_ER_SYK ,
+            AktivitetType.BARNET_ER_SYKT ,
+            AktivitetType.UTVIDELSE_BARNET_SÆRLIG_TILSYNSKREVENDE ,
+            AktivitetType.FORLENGELSE_MIDLERTIDIG_SYKDOM ,
+            AktivitetType.FORLENGELSE_STØNAD_PÅVENTE_ARBEID ,
+            AktivitetType.FORLENGELSE_STØNAD_PÅVENTE_ARBEID_REELL_ARBEIDSSØKER ,
+            AktivitetType.FORLENGELSE_STØNAD_PÅVENTE_OPPSTART_KVALIFISERINGSPROGRAM ,
+            AktivitetType.FORLENGELSE_STØNAD_PÅVENTE_TILSYNSORDNING ,
             AktivitetType.FORLENGELSE_STØNAD_PÅVENTE_UTDANNING -> false
         }
 
