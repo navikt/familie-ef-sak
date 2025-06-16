@@ -120,7 +120,6 @@ spec:
           - id: "ea930b6b-9397-44d9-b9e6-f4cf527a632a" # 0000-GA-Fortrolig_Adresse
           - id: "dbe4ad45-320b-4e9a-aaa1-73cca4ee124d" # 0000-GA-Egne_ansatte
           - id: "928636f4-fd0d-4149-978e-a6fb68bb19de" # prosessering.rolle - (0000-GA-STDAPPS)
-          - id: "c62e908a-cf20-4ad0-b7b3-3ff6ca4bf38b" # teamfamilie-forvaltning
           - id: "59865891-62a0-4fe3-b282-2e38210d1fbb" # teamfamilie-ef-forvaltning
         extra:
           - "NAVident"
