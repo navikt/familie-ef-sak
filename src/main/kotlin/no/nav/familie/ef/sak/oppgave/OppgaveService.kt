@@ -294,9 +294,8 @@ class OppgaveService(
 
     fun hentOppgaver(finnOppgaveRequest: FinnOppgaveRequest): FinnOppgaveResponseDto = oppgaveClient.hentOppgaver(finnOppgaveRequest)
 
-    fun hentFremleggsoppgaver(
+    fun hentOppgaverForAutomatiskFerdigstilling(
         behandlingId: UUID,
-        behandlingstema: Behandlingstema?,
     ): FinnOppgaveResponseDto {
         val aktivIdent = behandlingRepository.finnAktivIdent(behandlingId)
         val aktørId =
@@ -308,19 +307,27 @@ class OppgaveService(
                     .ident
             }
 
-        secureLogger.info("hentFremleggsoppgaver -  aktørId: $aktørId")
+        secureLogger.info("hent flere oppgaver -  aktørId: $aktørId")
 
-        val enhet = aktørId.let { arbeidsfordelingService.hentNavEnhetId(it, Fremlegg) }
-        val request =
-            FinnOppgaveRequest(
-                tema = Tema.ENF,
-                behandlingstema = behandlingstema,
-                oppgavetype = Fremlegg,
-                aktørId = aktørId,
-                enhet = enhet,
-            )
+        val oppgaverForAutomatiskFerdigstilling =
+            OppgaverForAutomatiskFerdigstilling.values().flatMap { type ->
+                val enhet = arbeidsfordelingService.hentNavEnhet(aktørId)?.enhetId
+                val request =
+                    FinnOppgaveRequest(
+                        tema = Tema.ENF,
+                        oppgavetype = type.besluttOppgaveType,
+                        aktørId = aktørId,
+                        enhet = enhet,
+                    )
 
-        return oppgaveClient.hentOppgaver(request)
+                val response = oppgaveClient.hentOppgaver(request)
+                response.oppgaver ?: emptyList()
+            }
+
+        return FinnOppgaveResponseDto(
+            antallTreffTotalt = oppgaverForAutomatiskFerdigstilling.size.toLong(),
+            oppgaver = oppgaverForAutomatiskFerdigstilling,
+        )
     }
 
     fun hentOppgaverMedIder(oppgaveIder: List<Long>?): List<Oppgave> {

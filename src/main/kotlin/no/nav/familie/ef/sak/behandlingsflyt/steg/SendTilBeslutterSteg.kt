@@ -156,7 +156,7 @@ class SendTilBeslutterSteg(
         if (data != null) {
             oppfølgingsoppgaveService.lagreOppgaveIderForFerdigstilling(
                 saksbehandling.id,
-                data.fremleggsoppgaveIderSomSkalFerdigstilles,
+                data.oppgaverIderSomSkalFerdigstilles,
             )
 
             oppfølgingsoppgaveService.lagreOppgaverForOpprettelse(

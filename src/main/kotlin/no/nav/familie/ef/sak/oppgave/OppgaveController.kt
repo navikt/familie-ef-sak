@@ -14,7 +14,6 @@ import no.nav.familie.ef.sak.oppgave.dto.OppgaveResponseDto
 import no.nav.familie.ef.sak.oppgave.dto.SaksbehandlerDto
 import no.nav.familie.ef.sak.oppgave.dto.UtdanningOppgaveDto
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
-import no.nav.familie.kontrakter.felles.Behandlingstema
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveResponseDto
 import no.nav.familie.kontrakter.felles.oppgave.MappeDto
@@ -74,11 +73,11 @@ class OppgaveController(
         return Ressurs.success(oppgaveRepons.tilDto())
     }
 
-    @GetMapping("/fremleggsoppgaver/{behandlingId}")
-    fun hentFremleggsoppgaver(
+    @GetMapping("/oppgaver-for-automatisk-ferdigstilling/{behandlingId}")
+    fun hentOppgaverForAutomatiskFerdigstilling(
         @PathVariable behandlingId: UUID,
     ): Ressurs<OppgaveResponseDto> {
-        val oppgaveRespons = oppgaveService.hentFremleggsoppgaver(behandlingId, Behandlingstema.Overgangsstønad)
+        val oppgaveRespons = oppgaveService.hentOppgaverForAutomatiskFerdigstilling(behandlingId)
         return Ressurs.success(oppgaveRespons.tilDto())
     }
 
