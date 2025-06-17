@@ -6,6 +6,7 @@ import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.ÅrsakRevurdering
 import no.nav.familie.ef.sak.behandling.dto.RevurderingDto
 import no.nav.familie.ef.sak.beregning.BeregningUtils
+import no.nav.familie.ef.sak.beregning.Grunnbeløpsperioder
 import no.nav.familie.ef.sak.beregning.Inntektsperiode
 import no.nav.familie.ef.sak.beregning.tilInntekt
 import no.nav.familie.ef.sak.fagsak.FagsakService
@@ -107,8 +108,8 @@ class BehandleAutomatiskInntektsendringTask(
         val inntektsperioder = oppdaterInntektMedNyBeregnetForventetInntekt(forrigeVedtak, inntektResponse, perioder.first().periode.fom)
         val innvilgelseOvergangsstønad =
             InnvilgelseOvergangsstønad(
-                periodeBegrunnelse = "Overgangsstønaden endres fra måneden etter minst 10 prosent økning i inntekt.",
-                inntektBegrunnelse = lagInntektsperiodeTekst(inntektsperioder, inntektResponse, forrigeVedtak),
+                periodeBegrunnelse = "Behandlingen er opprettet automatisk fordi inntekten har økt. Overgangsstønaden endres fra måneden etter at inntekten har økt minst 10 prosent.",
+                inntektBegrunnelse = lagInntektsperiodeTekst(inntektsperioder, inntektResponse, forrigeVedtak, forrigeBehandling.erGOmregning()),
                 perioder = perioder.fraDomene(),
                 inntekter = inntektsperioder.tilInntekt(),
                 samordningsfradragType = forrigeVedtak.samordningsfradragType,
@@ -242,6 +243,7 @@ class BehandleAutomatiskInntektsendringTask(
         inntektsperioder: List<Inntektsperiode>,
         inntektResponse: InntektResponse,
         forrigeVedtak: Vedtak,
+        forrigeBehandlingGOmregning: Boolean,
     ): String {
         val førsteMånedMed10ProsentEndring =
             inntektsperioder
@@ -252,6 +254,11 @@ class BehandleAutomatiskInntektsendringTask(
         val forrigeForventetInntektsperiode = forrigeVedtak.inntekter?.inntekter?.first { it.periode.inneholder(førsteMånedMed10ProsentEndring) } ?: throw IllegalStateException("Fant ikke tidligere forventet inntekt for måned: $førsteMånedMed10ProsentEndring")
         val forrigeForventetÅrsinntekt = BeregningUtils.beregnTotalinntekt(forrigeForventetInntektsperiode).toInt()
         val tiProsentOppOgNed = BeregningUtils.beregn10ProsentOppOgNedIMånedsinntektFraÅrsinntekt(forrigeForventetInntektsperiode)
+
+        val sisteInntektsPeriode = forrigeVedtak.inntekter.inntekter.last()
+        val forrigeForventetÅrsinntektG = BeregningUtils.beregnTotalinntekt(sisteInntektsPeriode).toInt()
+        val tiProsentOppOgNedG = BeregningUtils.beregn10ProsentOppOgNedIMånedsinntektFraÅrsinntekt(sisteInntektsPeriode)
+
         val beløpFørsteMåned10ProsentEndring = inntektResponse.totalInntektForÅrMåned(førsteMånedMed10ProsentEndring)
 
         val forventetInntekt = inntektsperioder.maxBy { it.periode.fom }
@@ -262,10 +269,12 @@ class BehandleAutomatiskInntektsendringTask(
             Forventet årsinntekt fra ${førsteMånedMed10ProsentEndring.tilNorskFormat()}: ${forrigeForventetÅrsinntekt.tilNorskFormat()} kroner.
             - 10 % opp: ${tiProsentOppOgNed.opp.tilNorskFormat()} kroner per måned.
             - 10 % ned: ${tiProsentOppOgNed.ned.tilNorskFormat()} kroner per måned.
+            ${tekstTypeForGOmregningOppOgNed(forrigeBehandlingGOmregning, forrigeForventetÅrsinntektG, tiProsentOppOgNedG)}
+            Inntekten i ${førsteMånedMed10ProsentEndring.tilNorskFormat()} er ${beløpFørsteMåned10ProsentEndring.tilNorskFormat()} kroner. Inntekten har økt minst 10 prosent denne måneden og alle månedene etter dette. Stønaden beregnes på nytt fra måneden etter 10 prosent økning.
             
-            Inntekten i ${førsteMånedMed10ProsentEndring.tilNorskFormat()} er ${beløpFørsteMåned10ProsentEndring.tilNorskFormat()} kroner. Inntekten har økt minst 10 prosent denne måneden. Stønaden beregnes på nytt fra måneden etter.
-               
-            Fra og med ${forventetInntektFraMåned.tilNorskFormat()} er stønaden beregnet ut ifra gjennomsnittlig inntekt i ${forventetInntektFraMåned.minusMonths(3).månedTilNorskFormat()}, ${forventetInntektFraMåned.minusMonths(2).månedTilNorskFormat()} og ${forventetInntektFraMåned.minusMonths(1).månedTilNorskFormat()}.
+            Har lagt til grunn faktisk inntekt bakover i tid. Fra og med ${forventetInntektFraMåned.tilNorskFormat()} er stønaden beregnet ut ifra gjennomsnittlig inntekt for ${forventetInntektFraMåned.minusMonths(3).månedTilNorskFormat()}, ${forventetInntektFraMåned.minusMonths(2).månedTilNorskFormat()} og ${forventetInntektFraMåned.minusMonths(1).månedTilNorskFormat()}.
+            
+            A-inntekt er lagret.
             """.trimIndent()
 
         return tekst
@@ -284,6 +293,22 @@ class BehandleAutomatiskInntektsendringTask(
     fun Int.tilNorskFormat(): String {
         val formatter = NumberFormat.getInstance(Locale.forLanguageTag("no-NO"))
         return formatter.format(this)
+    }
+
+    fun tekstTypeForGOmregningOppOgNed(
+        forrigeBehandlingGOmregning: Boolean,
+        forrigeForventetÅrsinntektG: Int,
+        tiProsentOppOgNedG: BeregningUtils.TiProsentOppOgNed,
+    ): String {
+        if (forrigeBehandlingGOmregning) {
+            return """
+            Forventet årsinntekt fra ${Grunnbeløpsperioder.nyesteGrunnbeløpGyldigFraOgMed.tilNorskFormat()}: ${forrigeForventetÅrsinntektG.tilNorskFormat()} kroner.
+            - 10 % opp: ${tiProsentOppOgNedG.opp.tilNorskFormat()} kroner per måned.
+            - 10 % ned: ${tiProsentOppOgNedG.ned.tilNorskFormat()} kroner per måned.
+            """
+        } else {
+            return """"""
+        }
     }
 
     companion object {

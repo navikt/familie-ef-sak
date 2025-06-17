@@ -69,7 +69,7 @@ fun mockTestMedGrunnbeløpFra2024(test: () -> Unit) {
 fun mockTestMedGrunnbeløpFra2025(test: () -> Unit) {
     val grunnbeløp2025 =
         Grunnbeløp(
-            periode = Månedsperiode(YearMonth.now().minusMonths(3), YearMonth.now().plusMonths(9)),
+            periode = Månedsperiode(YearMonth.parse("2025-05"), YearMonth.from(LocalDate.MAX)),
             grunnbeløp = 130_160.toBigDecimal(),
             perMnd = 10_847.toBigDecimal(),
             gjennomsnittPerÅr = 128_116.toBigDecimal(),
