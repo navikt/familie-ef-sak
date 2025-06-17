@@ -14,7 +14,6 @@ import no.nav.familie.ef.sak.oppgave.dto.OppgaveResponseDto
 import no.nav.familie.ef.sak.oppgave.dto.SaksbehandlerDto
 import no.nav.familie.ef.sak.oppgave.dto.UtdanningOppgaveDto
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
-import no.nav.familie.kontrakter.felles.Behandlingstema
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveResponseDto
 import no.nav.familie.kontrakter.felles.oppgave.MappeDto
