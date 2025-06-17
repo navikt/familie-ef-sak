@@ -7,7 +7,9 @@ enum class OppgaveSubtype {
     INNSTILLING_VEDRØRENDE_UTDANNING,
 }
 
-enum class OppgaveTypeForBeslutter (val besluttOppgaveType: Oppgavetype) {
+enum class OppgaveTypeForBeslutter(
+    val besluttOppgaveType: Oppgavetype,
+) {
     Fremlegg(Oppgavetype.Fremlegg),
     VurderHenvendelse(Oppgavetype.VurderHenvendelse),
     VurderKonsekvensForYtelse(Oppgavetype.VurderKonsekvensForYtelse),
