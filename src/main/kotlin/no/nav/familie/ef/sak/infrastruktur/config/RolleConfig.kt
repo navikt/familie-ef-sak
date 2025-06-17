@@ -17,6 +17,6 @@ class RolleConfig(
     val kode7: String,
     @Value("\${rolle.egenAnsatt}")
     val egenAnsatt: String,
-    @Value("\${rolle.forvalter}")
+    @Value("\${rolle.forvalterEF}")
     val forvalter: String,
 )
