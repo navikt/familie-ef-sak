@@ -771,7 +771,7 @@ fun lagInntektResponseFraMånedsinntekterFraDouble(månedsinntekter: List<Double
         padded.reversed().mapIndexed { index, inntektsbeløp ->
             val dato = YearMonth.now().minusMonths(index.toLong() + 1)
             inntektsmåned(dato, listOf(inntekt(inntektsbeløp)))
-        }
+        },
     )
 }
 
