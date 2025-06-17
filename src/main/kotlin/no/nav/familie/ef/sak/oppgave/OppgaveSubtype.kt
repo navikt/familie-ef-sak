@@ -7,7 +7,7 @@ enum class OppgaveSubtype {
     INNSTILLING_VEDRØRENDE_UTDANNING,
 }
 
-enum class OppgaveTypeForBeslutter(
+enum class OppgaverForAutomatiskFerdigstilling(
     val besluttOppgaveType: Oppgavetype,
 ) {
     Fremlegg(Oppgavetype.Fremlegg),

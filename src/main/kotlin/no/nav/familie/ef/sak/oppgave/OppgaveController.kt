@@ -74,19 +74,11 @@ class OppgaveController(
         return Ressurs.success(oppgaveRepons.tilDto())
     }
 
-    @GetMapping("/fremleggsoppgaver/{behandlingId}")
-    fun hentFremleggsoppgaver(
+    @GetMapping("/oppgaver-for-automatisk-ferdigstilling/{behandlingId}")
+    fun hentOppgaverForAutomatiskFerdigstilling(
         @PathVariable behandlingId: UUID,
     ): Ressurs<OppgaveResponseDto> {
-        val oppgaveRespons = oppgaveService.hentFremleggsoppgaver(behandlingId, Behandlingstema.Overgangsstønad)
-        return Ressurs.success(oppgaveRespons.tilDto())
-    }
-
-    @GetMapping("/flereoppgaver/{behandlingId}")
-    fun hentFlereoppgaver(
-        @PathVariable behandlingId: UUID,
-    ): Ressurs<OppgaveResponseDto> {
-        val oppgaveRespons = oppgaveService.hentFlereoppgaver(behandlingId)
+        val oppgaveRespons = oppgaveService.hentOppgaverForAutomatiskFerdigstilling(behandlingId)
         return Ressurs.success(oppgaveRespons.tilDto())
     }
 

@@ -294,36 +294,7 @@ class OppgaveService(
 
     fun hentOppgaver(finnOppgaveRequest: FinnOppgaveRequest): FinnOppgaveResponseDto = oppgaveClient.hentOppgaver(finnOppgaveRequest)
 
-    fun hentFremleggsoppgaver(
-        behandlingId: UUID,
-        behandlingstema: Behandlingstema?,
-    ): FinnOppgaveResponseDto {
-        val aktivIdent = behandlingRepository.finnAktivIdent(behandlingId)
-        val aktørId =
-            aktivIdent.let {
-                personService
-                    .hentAktørIder(it)
-                    .identer
-                    .first()
-                    .ident
-            }
-
-        secureLogger.info("hentFremleggsoppgaver -  aktørId: $aktørId")
-
-        val enhet = aktørId.let { arbeidsfordelingService.hentNavEnhetId(it, Fremlegg) }
-        val request =
-            FinnOppgaveRequest(
-                tema = Tema.ENF,
-                behandlingstema = behandlingstema,
-                oppgavetype = Fremlegg,
-                aktørId = aktørId,
-                enhet = enhet,
-            )
-
-        return oppgaveClient.hentOppgaver(request)
-    }
-
-    fun hentFlereoppgaver(
+    fun hentOppgaverForAutomatiskFerdigstilling(
         behandlingId: UUID,
     ): FinnOppgaveResponseDto {
         val aktivIdent = behandlingRepository.finnAktivIdent(behandlingId)
@@ -338,8 +309,8 @@ class OppgaveService(
 
         secureLogger.info("hent flere oppgaver -  aktørId: $aktørId")
 
-        val oppgaverForBeslutter =
-            OppgaveTypeForBeslutter.values().flatMap { type ->
+        val oppgaverForAutomatiskFerdigstilling =
+            OppgaverForAutomatiskFerdigstilling.values().flatMap { type ->
                 val enhet = arbeidsfordelingService.hentNavEnhet(aktørId)?.enhetId
                 val request =
                     FinnOppgaveRequest(
@@ -354,8 +325,8 @@ class OppgaveService(
             }
 
         return FinnOppgaveResponseDto(
-            antallTreffTotalt = oppgaverForBeslutter.size.toLong(),
-            oppgaver = oppgaverForBeslutter,
+            antallTreffTotalt = oppgaverForAutomatiskFerdigstilling.size.toLong(),
+            oppgaver = oppgaverForAutomatiskFerdigstilling,
         )
     }
 

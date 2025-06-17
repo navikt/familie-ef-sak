@@ -45,13 +45,11 @@ import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.assertj.core.api.Assertions.assertThat
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
 import java.time.YearMonth
 import java.util.UUID
 
-@Profile("integrasjonstest")
 @Service
 class GOmregningTestUtil {
     @Autowired
