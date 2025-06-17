@@ -159,35 +159,35 @@ class PeriodeService(
             aktivitet = andelsVedtak.aktivitet,
             periodeType = andelsVedtak.periodeType,
             barn = behandlingsbarn.map { BehandlingsbarnMedOppfyltAleneomsorg(personIdent = it.personIdent, fødselTermindato = it.fødselTermindato) },
-            harAktivitetsplikt =
-                harAktivitetsplikt(
-                    aktivitet = andelsVedtak.aktivitet,
-                    periodetype = andelsVedtak.periodeType,
-                ),
+            harAktivitetsplikt = andelsVedtak.aktivitet.harAktivitetsplikt(),
         )
     }
 
-    private fun harAktivitetsplikt(
-        aktivitet: AktivitetType,
-        periodetype: VedtaksperiodeType,
-    ): Boolean {
-        if (periodetype === VedtaksperiodeType.HOVEDPERIODE || periodetype === VedtaksperiodeType.NY_PERIODE_FOR_NYTT_BARN) {
-            return aktivitet === AktivitetType.FORSØRGER_I_ARBEID ||
-                aktivitet === AktivitetType.FORSØRGER_REELL_ARBEIDSSØKER ||
-                aktivitet === AktivitetType.FORSØRGER_I_UTDANNING ||
-                aktivitet === AktivitetType.FORSØRGER_ETABLERER_VIRKSOMHET
+    private fun AktivitetType.harAktivitetsplikt(): Boolean =
+        when (this) {
+            AktivitetType.FORSØRGER_I_ARBEID,
+            AktivitetType.FORSØRGER_I_UTDANNING,
+            AktivitetType.FORSØRGER_REELL_ARBEIDSSØKER,
+            AktivitetType.FORSØRGER_ETABLERER_VIRKSOMHET,
+            AktivitetType.UTVIDELSE_FORSØRGER_I_UTDANNING,
+            AktivitetType.FORLENGELSE_STØNAD_UT_SKOLEÅRET,
+            -> true
+            AktivitetType.MIGRERING,
+            AktivitetType.IKKE_AKTIVITETSPLIKT,
+            AktivitetType.BARN_UNDER_ETT_ÅR,
+            AktivitetType.BARNET_SÆRLIG_TILSYNSKREVENDE,
+            AktivitetType.FORSØRGER_MANGLER_TILSYNSORDNING,
+            AktivitetType.FORSØRGER_ER_SYK,
+            AktivitetType.BARNET_ER_SYKT,
+            AktivitetType.UTVIDELSE_BARNET_SÆRLIG_TILSYNSKREVENDE,
+            AktivitetType.FORLENGELSE_MIDLERTIDIG_SYKDOM,
+            AktivitetType.FORLENGELSE_STØNAD_PÅVENTE_ARBEID,
+            AktivitetType.FORLENGELSE_STØNAD_PÅVENTE_ARBEID_REELL_ARBEIDSSØKER,
+            AktivitetType.FORLENGELSE_STØNAD_PÅVENTE_OPPSTART_KVALIFISERINGSPROGRAM,
+            AktivitetType.FORLENGELSE_STØNAD_PÅVENTE_TILSYNSORDNING,
+            AktivitetType.FORLENGELSE_STØNAD_PÅVENTE_UTDANNING,
+            -> false
         }
-
-        if (periodetype === VedtaksperiodeType.UTVIDELSE) {
-            return aktivitet === AktivitetType.UTVIDELSE_FORSØRGER_I_UTDANNING
-        }
-
-        if (periodetype === VedtaksperiodeType.FORLENGELSE) {
-            return aktivitet === AktivitetType.FORLENGELSE_STØNAD_UT_SKOLEÅRET
-        }
-
-        return false
-    }
 
     fun finnVedtaksperiodeforAndel(andel: AndelTilkjentYtelse): Vedtaksperiode? {
         val vedtaksperioder: List<Vedtaksperiode> = finnVedtaksperioder(andel.kildeBehandlingId)
