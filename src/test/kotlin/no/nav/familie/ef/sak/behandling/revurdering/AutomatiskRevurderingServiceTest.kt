@@ -60,7 +60,7 @@ class AutomatiskRevurderingServiceTest {
                     Oppgave(
                         id = 1,
                         aktoerId = "1",
-                        identer = listOf(OppgaveIdentV2("11111111111", IdentGruppe.FOLKEREGISTERIDENT)),
+                        identer = listOf(OppgaveIdentV2("14510161344", IdentGruppe.FOLKEREGISTERIDENT)),
                         tema = Tema.ENF,
                         oppgavetype = Oppgavetype.BehandleSak.toString(),
                         status = StatusEnum.AAPNET,

@@ -260,7 +260,7 @@ class OppgaveClientMock {
         Oppgave(
             id = oppgaveId,
             aktoerId = "1234",
-            identer = listOf(OppgaveIdentV2("11111111111", IdentGruppe.FOLKEREGISTERIDENT)),
+            identer = listOf(OppgaveIdentV2("14510161344", IdentGruppe.FOLKEREGISTERIDENT)),
             journalpostId = journalpostId,
             tildeltEnhetsnr = "4489",
             tilordnetRessurs = tilordnetRessurs,
