@@ -266,6 +266,8 @@ class BehandleAutomatiskInntektsendringTask(
 
         val tekst =
             """
+            Periode som er kontrollert: ${inntektResponse.inntektsmåneder.minBy { it.måned }.måned.tilNorskFormat()} til ${inntektResponse.inntektsmåneder.maxBy { it.måned }.måned.tilNorskFormat()}.
+            
             Forventet årsinntekt fra ${førsteMånedMed10ProsentEndring.tilNorskFormat()}: ${forrigeForventetÅrsinntekt.tilNorskFormat()} kroner.
             - 10 % opp: ${tiProsentOppOgNed.opp.tilNorskFormat()} kroner per måned.
             - 10 % ned: ${tiProsentOppOgNed.ned.tilNorskFormat()} kroner per måned.
@@ -278,11 +280,6 @@ class BehandleAutomatiskInntektsendringTask(
             """.trimIndent()
 
         return tekst
-    }
-
-    fun YearMonth.tilNorskFormat(): String {
-        val formatter = DateTimeFormatter.ofPattern("MMMM yyyy", Locale.forLanguageTag("no-NO"))
-        return this.format(formatter)
     }
 
     fun YearMonth.månedTilNorskFormat(): String {
@@ -338,3 +335,8 @@ data class LogInntekt(
     val årMåned: YearMonth,
     val inntekt: Double,
 )
+
+fun YearMonth.tilNorskFormat(): String {
+    val formatter = DateTimeFormatter.ofPattern("MMMM yyyy", Locale.forLanguageTag("no-NO"))
+    return this.format(formatter)
+}

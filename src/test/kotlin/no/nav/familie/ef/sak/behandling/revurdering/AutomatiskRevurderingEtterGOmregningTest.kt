@@ -10,6 +10,7 @@ import no.nav.familie.ef.sak.behandling.revurdering.AutomatiskRevurderingService
 import no.nav.familie.ef.sak.behandling.revurdering.BehandleAutomatiskInntektsendringTask
 import no.nav.familie.ef.sak.behandling.revurdering.PayloadBehandleAutomatiskInntektsendringTask
 import no.nav.familie.ef.sak.behandling.revurdering.RevurderingService
+import no.nav.familie.ef.sak.behandling.revurdering.tilNorskFormat
 import no.nav.familie.ef.sak.behandling.revurdering.ÅrsakRevurderingsRepository
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.felles.util.YEAR_MONTH_MAX
@@ -160,6 +161,9 @@ class AutomatiskRevurderingEtterGOmregningTest : OppslagSpringRunnerTest() {
 
     val forventetInntektsbegrunnelse =
         """
+        Periode som er kontrollert: ${YearMonth.now().minusMonths(12).tilNorskFormat()} til ${
+            YearMonth.now().minusMonths(1).tilNorskFormat()}.
+        
         Forventet årsinntekt fra februar 2025: 276 000 kroner.
         - 10 % opp: 25 300 kroner per måned.
         - 10 % ned: 20 700 kroner per måned.
