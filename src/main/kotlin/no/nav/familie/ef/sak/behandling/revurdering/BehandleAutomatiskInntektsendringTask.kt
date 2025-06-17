@@ -255,9 +255,9 @@ class BehandleAutomatiskInntektsendringTask(
         val forrigeForventetÅrsinntekt = BeregningUtils.beregnTotalinntekt(forrigeForventetInntektsperiode).toInt()
         val tiProsentOppOgNed = BeregningUtils.beregn10ProsentOppOgNedIMånedsinntektFraÅrsinntekt(forrigeForventetInntektsperiode)
 
-        val sisteInntektsPeriode = forrigeVedtak.inntekter.inntekter.last()
-        val forrigeForventetÅrsinntektG = BeregningUtils.beregnTotalinntekt(sisteInntektsPeriode).toInt()
-        val tiProsentOppOgNedG = BeregningUtils.beregn10ProsentOppOgNedIMånedsinntektFraÅrsinntekt(sisteInntektsPeriode)
+        val sisteInntektsperiode = forrigeVedtak.inntekter.inntekter.last()
+        val forrigeForventetÅrsinntektG = BeregningUtils.beregnTotalinntekt(sisteInntektsperiode).toInt()
+        val tiProsentOppOgNedG = BeregningUtils.beregn10ProsentOppOgNedIMånedsinntektFraÅrsinntekt(sisteInntektsperiode)
 
         val beløpFørsteMåned10ProsentEndring = inntektResponse.totalInntektForÅrMåned(førsteMånedMed10ProsentEndring)
 
