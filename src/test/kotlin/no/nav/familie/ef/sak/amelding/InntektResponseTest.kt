@@ -38,7 +38,7 @@ class InntektResponseTest {
     }
 
     @Test
-    fun `TODO`() {
+    fun `returner false hvis det finnes en inntektperiode som er høyere enn 5.5G`() {
         val inntektV2ResponseJson: String = lesRessurs("json/inntekt/InntektLønnsinntektMedOvergangsstønadOgSykepenger.json")
         val inntektV2ResponseJsonModifisert = inntektV2ResponseJson.replace("57500.0", "100").replace("2025-05", YearMonth.now().minusMonths(1).toString()).replace("2025-04", YearMonth.now().minusMonths(2).toString())
         val inntektV2ResponseJsonModifisertForHøyInntekt = inntektV2ResponseJson.replace("57500.0", "99999").replace("2025-05", YearMonth.now().minusMonths(1).toString()).replace("2025-04", YearMonth.now().minusMonths(2).toString())
