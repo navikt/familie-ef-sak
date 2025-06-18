@@ -84,6 +84,9 @@ data class InntektResponse(
             .distinctBy { it.måned }
             .size == 3
 
+    val harInntektOverSisteTreMåneder =
+        inntektsmåneder.any { totalInntektForÅrMåned(it.måned) * 12 > finnGrunnbeløp(it.måned).grunnbeløp.toInt() * 5.5 }
+
     companion object {
         private val secureLogger = LoggerFactory.getLogger("secureLogger")
     }
