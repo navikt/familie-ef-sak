@@ -84,7 +84,7 @@ data class InntektResponse(
             .distinctBy { it.måned }
             .size == 3
 
-    val harInntektOverSisteTreMåneder =
+    val finnesHøyMånedsinntektSomIkkeGirOvergangsstønad =
         inntektsmåneder.any { totalInntektForÅrMåned(it.måned) * 12 > finnGrunnbeløp(it.måned).grunnbeløp.toInt() * 5.5 }
 
     companion object {

@@ -58,7 +58,7 @@ class AutomatiskRevurderingService(
             return false
         }
 
-        if (aMeldingInntektClient.hentInntekt(personIdent, YearMonth.now().minusMonths(3), YearMonth.now()).harInntektOverSisteTreMåneder) {
+        if (aMeldingInntektClient.hentInntekt(personIdent, YearMonth.now().minusMonths(3), YearMonth.now()).finnesHøyMånedsinntektSomIkkeGirOvergangsstønad) {
             logger.info("Har inntekt over 5.5G for fagsak ${fagsak.id}")
             return false
         }

@@ -38,7 +38,7 @@ class InntektResponseTest {
     }
 
     @Test
-    fun `returner false hvis det finnes en inntektperiode som er høyere enn fem og en halv G`() {
+    fun `returner false hvis det finnes en måned med total inntekt som gir årsinntekt som er høyere enn fem og en halv G`() {
         val inntektV2ResponseJson: String = lesRessurs("json/inntekt/InntektLønnsinntektMedOvergangsstønadOgSykepenger.json")
         val inntektV2ResponseJsonModifisert = inntektV2ResponseJson.replace("57500.0", "100").replace("2025-05", YearMonth.now().minusMonths(1).toString()).replace("2025-04", YearMonth.now().minusMonths(2).toString())
         val inntektV2ResponseJsonModifisertForHøyInntekt = inntektV2ResponseJson.replace("57500.0", "99999").replace("2025-05", YearMonth.now().minusMonths(1).toString()).replace("2025-04", YearMonth.now().minusMonths(2).toString())
@@ -46,8 +46,8 @@ class InntektResponseTest {
         val inntektResponse = objectMapper.readValue<InntektResponse>(inntektV2ResponseJsonModifisert)
         val inntektResponseForHøyInntekt = objectMapper.readValue<InntektResponse>(inntektV2ResponseJsonModifisertForHøyInntekt)
 
-        val lavInntekt = inntektResponse.harInntektOverSisteTreMåneder
-        val forHøyInntekt = inntektResponseForHøyInntekt.harInntektOverSisteTreMåneder
+        val lavInntekt = inntektResponse.finnesHøyMånedsinntektSomIkkeGirOvergangsstønad
+        val forHøyInntekt = inntektResponseForHøyInntekt.finnesHøyMånedsinntektSomIkkeGirOvergangsstønad
 
         assertThat(lavInntekt).isFalse()
         assertThat(forHøyInntekt).isTrue()
