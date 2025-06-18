@@ -5,12 +5,12 @@ import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.barn.BarnRepository
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
 import no.nav.familie.ef.sak.behandling.BehandlingService
-import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.revurdering.AutomatiskRevurderingService
 import no.nav.familie.ef.sak.behandling.revurdering.BehandleAutomatiskInntektsendringTask
 import no.nav.familie.ef.sak.behandling.revurdering.PayloadBehandleAutomatiskInntektsendringTask
 import no.nav.familie.ef.sak.behandling.revurdering.RevurderingService
+import no.nav.familie.ef.sak.behandling.revurdering.tilNorskFormat
 import no.nav.familie.ef.sak.behandling.revurdering.ÅrsakRevurderingsRepository
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.felles.util.YEAR_MONTH_MAX
@@ -23,7 +23,6 @@ import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.fagsakpersoner
 import no.nav.familie.ef.sak.repository.inntektsperiode
 import no.nav.familie.ef.sak.repository.lagInntektResponseFraMånedsinntekter
-import no.nav.familie.ef.sak.repository.vedtak
 import no.nav.familie.ef.sak.testutil.VedtakHelperService
 import no.nav.familie.ef.sak.testutil.VilkårHelperService
 import no.nav.familie.ef.sak.vedtak.VedtakService
@@ -114,20 +113,8 @@ class AutomatiskRevurderingEtterGOmregningTest : OppslagSpringRunnerTest() {
         behandlingRepository.update(gOmregningBehandling.copy(status = BehandlingStatus.FERDIGSTILT))
 
         val personIdent = "321"
-        val behandling = behandling(fagsak, resultat = BehandlingResultat.IKKE_SATT, status = BehandlingStatus.UTREDES)
-
-        behandlingRepository.insert(behandling)
-        vilkårHelperService.opprettVilkår(behandling)
 
         val innmeldtMånedsinntekt = listOf(20_000, 24_000, 24_000, 28_000, 28_000, 30_000, 30_000)
-        val vedtakTom = YearMonth.now().plusMonths(11)
-
-        val forventetInntektIVedtak =
-            mapOf(
-                (YearMonth.now().minusMonths(innmeldtMånedsinntekt.size.toLong()) to 24_000),
-            )
-        val vedtak = vedtak(forventetInntektIVedtak, vedtakTom)
-        vedtakHelperService.ferdigstillVedtak(vedtak, behandling, fagsak)
 
         val payload = PayloadBehandleAutomatiskInntektsendringTask(personIdent, "2025-20")
         val opprettetTask = BehandleAutomatiskInntektsendringTask.opprettTask(objectMapper.writeValueAsString(payload))
@@ -153,11 +140,11 @@ class AutomatiskRevurderingEtterGOmregningTest : OppslagSpringRunnerTest() {
                 ?.first()
                 ?.periode
                 ?.tom,
-        ).isEqualTo(vedtakTom)
+        ).isEqualTo(YearMonth.of(2025, 12))
 
         val oppdatertInntekt = oppdatertVedtak.inntekter?.inntekter ?: emptyList()
         assertThat(oppdatertInntekt.size).isEqualTo(4)
-        assertThat(oppdatertVedtak.periodeBegrunnelse).isEqualTo("Overgangsstønaden endres fra måneden etter minst 10 prosent økning i inntekt.")
+        assertThat(oppdatertVedtak.periodeBegrunnelse).isEqualTo("Behandlingen er opprettet automatisk fordi inntekten har økt. Overgangsstønaden endres fra måneden etter at inntekten har økt minst 10 prosent.")
         assertThat(oppdatertVedtak.inntektBegrunnelse?.replace('\u00A0', ' ')).isEqualTo(forventetInntektsbegrunnelse) // Replace non-breaking space -> space
         val gjennomsnittSiste3Mnd = (28_000 + 30_000 + 30_000) / 3
 
@@ -174,12 +161,21 @@ class AutomatiskRevurderingEtterGOmregningTest : OppslagSpringRunnerTest() {
 
     val forventetInntektsbegrunnelse =
         """
-        Forventet årsinntekt fra februar 2025: 288 000 kroner.
-        - 10 % opp: 26 400 kroner per måned.
-        - 10 % ned: 21 600 kroner per måned.
+        Periode som er kontrollert: ${YearMonth.now().minusMonths(12).tilNorskFormat()} til ${
+            YearMonth.now().minusMonths(1).tilNorskFormat()}.
         
-        Inntekten i februar 2025 er 28 000 kroner. Inntekten har økt minst 10 prosent denne måneden. Stønaden beregnes på nytt fra måneden etter.
-           
-        Fra og med juni 2025 er stønaden beregnet ut ifra gjennomsnittlig inntekt i mars, april og mai.
+        Forventet årsinntekt fra februar 2025: 276 000 kroner.
+        - 10 % opp: 25 300 kroner per måned.
+        - 10 % ned: 20 700 kroner per måned.
+        
+        Forventet årsinntekt fra mai 2025: 289 600 kroner.
+        - 10 % opp: 26 546 kroner per måned.
+        - 10 % ned: 21 720 kroner per måned.
+        
+        Inntekten i februar 2025 er 28 000 kroner. Inntekten har økt minst 10 prosent denne måneden og alle månedene etter dette. Stønaden beregnes på nytt fra måneden etter 10 prosent økning.
+        
+        Har lagt til grunn faktisk inntekt bakover i tid. Fra og med juni 2025 er stønaden beregnet ut ifra gjennomsnittlig inntekt for mars, april og mai.
+        
+        A-inntekt er lagret.
         """.trimIndent()
 }

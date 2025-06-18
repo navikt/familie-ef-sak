@@ -761,15 +761,19 @@ fun inntektsmåneder(
             }
         }.toList()
 
-fun lagInntektResponseFraMånedsinntekterFraDouble(månedsinntekter: List<Double>): InntektResponse =
-    InntektResponse(
-        månedsinntekter
-            .reversed()
-            .mapIndexed { index, inntektsbeløp ->
-                val dato = YearMonth.now().minusMonths(index.toLong() + 1)
-                inntektsmåned(dato, listOf(inntekt(inntektsbeløp)))
-            },
+fun lagInntektResponseFraMånedsinntekterFraDouble(månedsinntekter: List<Double>): InntektResponse {
+    require(månedsinntekter.size <= 12) { "Maks 12 inntekter kan sendes inn" }
+
+    val firstValue = månedsinntekter.firstOrNull() ?: 0.0
+    val padded = List(12 - månedsinntekter.size) { firstValue } + månedsinntekter
+
+    return InntektResponse(
+        padded.reversed().mapIndexed { index, inntektsbeløp ->
+            val dato = YearMonth.now().minusMonths(index.toLong() + 1)
+            inntektsmåned(dato, listOf(inntekt(inntektsbeløp)))
+        },
     )
+}
 
 fun lagInntektResponseFraMånedsinntekter(månedsinntekter: List<Int>): InntektResponse = lagInntektResponseFraMånedsinntekterFraDouble(månedsinntekter.map { it.toDouble() })
 
