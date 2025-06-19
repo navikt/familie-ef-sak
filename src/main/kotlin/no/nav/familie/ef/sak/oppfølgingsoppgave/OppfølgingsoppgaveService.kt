@@ -13,6 +13,7 @@ import no.nav.familie.ef.sak.brev.FamilieDokumentClient
 import no.nav.familie.ef.sak.brev.Flettefelter
 import no.nav.familie.ef.sak.brev.FrittståendeBrevService
 import no.nav.familie.ef.sak.brev.VedtaksbrevService
+import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.felles.util.norskFormat
 import no.nav.familie.ef.sak.infrastruktur.config.ObjectMapperProvider.objectMapper
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvisIkke
@@ -51,6 +52,7 @@ class OppfølgingsoppgaveService(
     private val frittståendeBrevService: FrittståendeBrevService,
     private val personopplysningerService: PersonopplysningerService,
     private val brevmottakereService: BrevmottakereService,
+    private val fagsakService: FagsakService,
 ) {
     @Transactional
     fun lagreOppgaveIderForFerdigstilling(
@@ -123,11 +125,13 @@ class OppfølgingsoppgaveService(
         )
     }
 
+    // vi skal hente overgangsstonadi, og vil sjekke årslogikk, så saksbehandler kan bestemme å opprette oppgave.
     fun hentOppgavetyperSomKanOpprettesForOvergangsstønad(behandlingId: UUID): List<OppgaveForOpprettelseType> {
         val saksbehandling = behandlingService.hentSaksbehandling(behandlingId)
         if (saksbehandling.stønadstype == StønadType.SKOLEPENGER) {
             return emptyList()
         }
+        val sjekkOvergangsstønadmedBarnetilsyn = sjekkOppgavetyperSomKanOpprettesForBeslutter(saksbehandling.ident)
         val vedtak = vedtakService.hentVedtak(behandlingId)
         val tilkjentYtelse =
             when {
@@ -135,9 +139,12 @@ class OppfølgingsoppgaveService(
                     hentSisteTilkjentYtelse(saksbehandling.fagsakId)
                 vedtak.resultatType == ResultatType.INNVILGE ->
                     tilkjentYtelseService.hentForBehandlingEllerNull(behandlingId)
+                saksbehandling.stønadstype == StønadType.BARNETILSYN && sjekkOvergangsstønadmedBarnetilsyn != null ->
+                    sjekkOvergangsstønadmedBarnetilsyn?.let { tilkjentYtelseService.hentForBehandlingEllerNull(it) }
                 else -> null
             }
 
+        System.out.println("********************** barnetilsyn med fagsakid $sjekkOvergangsstønadmedBarnetilsyn")
         val oppgavetyperSomKanOpprettes = mutableListOf<OppgaveForOpprettelseType>()
         if (kanOppretteOppgaveForInntektskontrollFremITid(tilkjentYtelse)) {
             oppgavetyperSomKanOpprettes.add(OppgaveForOpprettelseType.INNTEKTSKONTROLL_1_ÅR_FREM_I_TID)
@@ -196,6 +203,21 @@ class OppfølgingsoppgaveService(
         return sisteIverksatteBehandling?.let {
             tilkjentYtelseService.hentForBehandlingEllerNull(sisteIverksatteBehandling.id)
         }
+    }
+
+    private fun sjekkOppgavetyperSomKanOpprettesForBeslutter(ident: String): UUID? {
+        System.out.println("***************************** comes here : OppgavetyperSomKanOpprettes for $ident")
+        val fagsak =
+            fagsakService.finnFagsak(
+                personIdenter = setOf(ident),
+                stønadstype = StønadType.OVERGANGSSTØNAD,
+            )
+
+        if (fagsak != null) {
+            return fagsak.id
+        }
+
+        return null
     }
 
     private fun kanOppretteOppgaveForInntektskontrollFremITid(
