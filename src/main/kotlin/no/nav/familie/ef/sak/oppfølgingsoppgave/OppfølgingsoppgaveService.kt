@@ -24,6 +24,7 @@ import no.nav.familie.ef.sak.oppfølgingsoppgave.domain.AutomatiskBrev
 import no.nav.familie.ef.sak.oppfølgingsoppgave.domain.OppgaverForFerdigstilling
 import no.nav.familie.ef.sak.oppfølgingsoppgave.domain.OppgaverForOpprettelse
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerService
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.logger
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.vedtak.VedtakService
@@ -132,7 +133,7 @@ class OppfølgingsoppgaveService(
             return emptyList()
         }
         val sjekkOvergangsstønadmedBarnetilsyn = sjekkOppgavetyperSomKanOpprettesForBeslutter(saksbehandling.ident, saksbehandling.stønadstype)
-        System.out.println("what is comming from nr 2 $sjekkOvergangsstønadmedBarnetilsyn, ${saksbehandling.stønadstype.name}")
+        logger.info("***************************** what is comming from nr 2 : " + "${sjekkOvergangsstønadmedBarnetilsyn}")
         val vedtak = vedtakService.hentVedtak(behandlingId)
         val tilkjentYtelse =
             when {
@@ -145,7 +146,7 @@ class OppfølgingsoppgaveService(
                 else -> null
             }
 
-        System.out.println("********************** barnetilsyn med fagsakid $sjekkOvergangsstønadmedBarnetilsyn")
+        logger.info("***************************** what is comming from nr 3 : " + "${sjekkOvergangsstønadmedBarnetilsyn}")
         val oppgavetyperSomKanOpprettes = mutableListOf<OppgaveForOpprettelseType>()
         if (kanOppretteOppgaveForInntektskontrollFremITid(tilkjentYtelse)) {
             oppgavetyperSomKanOpprettes.add(OppgaveForOpprettelseType.INNTEKTSKONTROLL_1_ÅR_FREM_I_TID)
@@ -207,7 +208,7 @@ class OppfølgingsoppgaveService(
     }
 
     private fun sjekkOppgavetyperSomKanOpprettesForBeslutter(ident: String, stønadType: StønadType): UUID? {
-        System.out.println("***************************** comes here : OppgavetyperSomKanOpprettes for $ident")
+        logger.info("***************************** comes here : OppgavetyperSomKanOpprettes for: " + "${ident}")
         if ( stønadType == StønadType.BARNETILSYN ) {
             val fagsak =
                 fagsakService.finnFagsak(
