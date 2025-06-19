@@ -131,7 +131,8 @@ class OppfølgingsoppgaveService(
         if (saksbehandling.stønadstype == StønadType.SKOLEPENGER) {
             return emptyList()
         }
-        val sjekkOvergangsstønadmedBarnetilsyn = sjekkOppgavetyperSomKanOpprettesForBeslutter(saksbehandling.ident)
+        val sjekkOvergangsstønadmedBarnetilsyn = sjekkOppgavetyperSomKanOpprettesForBeslutter(saksbehandling.ident, saksbehandling.stønadstype)
+        System.out.println("what is comming from nr 2 $sjekkOvergangsstønadmedBarnetilsyn, ${saksbehandling.stønadstype.name}")
         val vedtak = vedtakService.hentVedtak(behandlingId)
         val tilkjentYtelse =
             when {
@@ -205,16 +206,18 @@ class OppfølgingsoppgaveService(
         }
     }
 
-    private fun sjekkOppgavetyperSomKanOpprettesForBeslutter(ident: String): UUID? {
+    private fun sjekkOppgavetyperSomKanOpprettesForBeslutter(ident: String, stønadType: StønadType): UUID? {
         System.out.println("***************************** comes here : OppgavetyperSomKanOpprettes for $ident")
-        val fagsak =
-            fagsakService.finnFagsak(
-                personIdenter = setOf(ident),
-                stønadstype = StønadType.OVERGANGSSTØNAD,
-            )
+        if ( stønadType == StønadType.BARNETILSYN ) {
+            val fagsak =
+                fagsakService.finnFagsak(
+                    personIdenter = setOf(ident),
+                    stønadstype = StønadType.OVERGANGSSTØNAD,
+                )
 
-        if (fagsak != null) {
-            return fagsak.id
+            if (fagsak != null) {
+                return fagsak.id
+            }
         }
 
         return null
