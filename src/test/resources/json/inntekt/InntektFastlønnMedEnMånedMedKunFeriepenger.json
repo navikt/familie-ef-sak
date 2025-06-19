@@ -60,7 +60,7 @@
       "inntektListe": [
         {
           "type": "Loennsinntekt",
-          "beloep": 10000,
+          "beloep": 14000,
           "fordel": "kontantytelse",
           "beskrivelse": "fastloenn",
           "inngaarIGrunnlagForTrekk": true,
@@ -94,14 +94,6 @@
       "inntektListe": [
         {
           "type": "Loennsinntekt",
-          "beloep": 11000,
-          "fordel": "kontantytelse",
-          "beskrivelse": "fastloenn",
-          "inngaarIGrunnlagForTrekk": true,
-          "utloeserArbeidsgiveravgift": true
-        },
-        {
-          "type": "Loennsinntekt",
           "beloep": 13000,
           "fordel": "kontantytelse",
           "beskrivelse": "feriepenger",
@@ -119,7 +111,7 @@
       ]
     },
     {
-      "maaned": "2025-06",
+      "maaned": "2020-06",
       "opplysningspliktig": "999999998",
       "underenhet": "999999997",
       "norskident": "01010199999",
