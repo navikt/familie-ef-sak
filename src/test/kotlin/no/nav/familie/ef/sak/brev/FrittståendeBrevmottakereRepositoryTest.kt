@@ -58,7 +58,7 @@ internal class FrittståendeBrevmottakereRepositoryTest : OppslagSpringRunnerTes
                             BrevmottakerOrganisasjon(
                                 organisasjonsnummer = "12345678",
                                 navnHosOrganisasjon = "Advokat",
-                                MottakerRolle.FULLMAKT,
+                                MottakerRolle.FULLMEKTIG,
                             ),
                         ),
                     ),
