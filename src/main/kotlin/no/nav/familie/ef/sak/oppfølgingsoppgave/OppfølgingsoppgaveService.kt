@@ -217,7 +217,7 @@ class OppfølgingsoppgaveService(
                 )
 
             if (fagsak != null) {
-                return fagsak.id
+                return fagsak.fagsakPersonId
             }
         }
 
