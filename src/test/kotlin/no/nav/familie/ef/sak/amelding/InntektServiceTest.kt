@@ -31,7 +31,7 @@ class InntektServiceTest {
         )
 
     private val fagsakId = UUID.randomUUID()
-    private val personIdent = "10108000398"
+    private val personIdent = "01010199999"
 
     @Nested
     inner class ParseInntektV2Reponse {
@@ -85,15 +85,13 @@ class InntektServiceTest {
 
             every { aMeldingInntektClient.hentInntekt(any(), any(), any()) } returns inntektResponse
 
-            val forventetÅrsinntekt = 130000
-
             val årsinntekt =
                 inntektService.hentÅrsinntekt(
                     personIdent = personIdent,
                     årstallIFjor = 2020,
                 )
 
-            assertEquals(forventetÅrsinntekt, årsinntekt)
+            assertEquals(130056, årsinntekt)
         }
     }
 

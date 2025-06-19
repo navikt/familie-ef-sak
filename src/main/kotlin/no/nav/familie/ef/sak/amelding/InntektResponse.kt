@@ -21,11 +21,34 @@ data class InntektResponse(
             .sumOf { it.beløp }
             .toInt()
 
+    fun totalInntektFraÅrMånedUtenFeriepenger(fraOgMedÅrMåned: YearMonth): Int =
+        inntektsmånederFraOgMedÅrMåned(fraOgMedÅrMåned)
+            .filter { it.måned.isEqualOrAfter(fraOgMedÅrMåned) && it.måned.isBefore(YearMonth.now()) }
+            .flatMap { it.inntektListe }
+            .filter { it.beskrivelse != "overgangsstoenadTilEnsligMorEllerFarSomBegynteAaLoepe1April2014EllerSenere" && it.beskrivelse != "barnepensjon" && !it.beskrivelse.contains("ferie", true) }
+            .sumOf { it.beløp }
+            .toInt()
+
+    fun antallMånederUtenFeriepenger(fraOgMedÅrMåned: YearMonth): Int =
+        inntektsmånederFraOgMedÅrMåned(fraOgMedÅrMåned)
+            .filter { it.måned.isEqualOrAfter(fraOgMedÅrMåned) && it.måned.isBefore(YearMonth.now()) }
+            .filterNot { it.inntektListe.all { it.beskrivelse.contains("ferie", true) || it.beskrivelse.contains("overgangsstoenadTilEnsligMorEllerFarSomBegynteAaLoepe1April2014EllerSenere", true) } }
+            .groupBy { it.måned }
+            .count()
+
     fun totalInntektForÅrMåned(årMåned: YearMonth): Int =
         inntektsmånederFraOgMedÅrMåned(årMåned)
             .filter { it.måned == årMåned }
             .flatMap { it.inntektListe }
             .filter { it.beskrivelse != "overgangsstoenadTilEnsligMorEllerFarSomBegynteAaLoepe1April2014EllerSenere" && it.beskrivelse != "barnepensjon" }
+            .sumOf { it.beløp }
+            .toInt()
+
+    fun totalInntektForÅrMånedUtenFeriepenger(årMåned: YearMonth): Int =
+        inntektsmånederFraOgMedÅrMåned(årMåned)
+            .filter { it.måned == årMåned }
+            .flatMap { it.inntektListe }
+            .filter { it.beskrivelse != "overgangsstoenadTilEnsligMorEllerFarSomBegynteAaLoepe1April2014EllerSenere" && it.beskrivelse != "barnepensjon" && !it.beskrivelse.contains("ferie", true) }
             .sumOf { it.beløp }
             .toInt()
 
@@ -44,7 +67,7 @@ data class InntektResponse(
             }.map {
                 SummertInntekt(
                     it.måned,
-                    totalInntektForÅrMåned(it.måned),
+                    totalInntektForÅrMånedUtenFeriepenger(it.måned),
                     forrigeVedtak.inntekter
                         ?.inntekter
                         ?.first { vedtak -> vedtak.periode.inneholder(it.måned) }
@@ -71,12 +94,30 @@ data class InntektResponse(
                     inntektsmåned.måned.isEqualOrAfter(fraOgMedÅrMåned)
             }.sortedBy { it.måned }
 
-    fun forventetMånedsinntekt() =
-        if (harTreForrigeInntektsmåneder) {
-            totalInntektFraÅrMåned(YearMonth.now().minusMonths(3)) / 3
-        } else {
+    fun forventetMånedsinntekt(): Int {
+        if (!harTreForrigeInntektsmåneder) {
             throw IllegalStateException("Mangler inntektsinformasjon for de tre siste måneder")
         }
+
+        val treSisteMåneder = YearMonth.now().minusMonths(3)
+        val fireSisteMåneder = YearMonth.now().minusMonths(4)
+
+        val skalBrukeTreSisteMånederSomIkkeHarFeriepenger = finnesMånedMedKunFeriepenger(treSisteMåneder)
+
+        val totalInntekt =
+            if (skalBrukeTreSisteMånederSomIkkeHarFeriepenger) {
+                totalInntektFraÅrMånedUtenFeriepenger(fireSisteMåneder)
+            } else {
+                totalInntektFraÅrMånedUtenFeriepenger(treSisteMåneder)
+            }
+
+        return totalInntekt / 3
+    }
+
+    private fun finnesMånedMedKunFeriepenger(fraOgMedÅrMåned: YearMonth): Boolean {
+        if (antallMånederUtenFeriepenger(fraOgMedÅrMåned) <= 1) throw NotImplementedError("Håndterer ikke inntekt hvor det finnes flere måneder med kun feriepenger")
+        return antallMånederUtenFeriepenger(fraOgMedÅrMåned) == 2
+    }
 
     val harTreForrigeInntektsmåneder =
         inntektsmåneder
