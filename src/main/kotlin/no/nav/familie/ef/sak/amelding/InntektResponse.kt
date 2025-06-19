@@ -94,16 +94,25 @@ data class InntektResponse(
                     inntektsmåned.måned.isEqualOrAfter(fraOgMedÅrMåned)
             }.sortedBy { it.måned }
 
-    fun forventetMånedsinntekt() =
-        if (harTreForrigeInntektsmåneder) {
-            if (finnesMånedMedKunFeriepenger(YearMonth.now().minusMonths(3))) {
-                totalInntektFraÅrMånedUtenFeriepenger(YearMonth.now().minusMonths(4)) / 3
-            } else {
-                totalInntektFraÅrMånedUtenFeriepenger(YearMonth.now().minusMonths(3)) / 3
-            }
-        } else {
+    fun forventetMånedsinntekt(): Int {
+        if (!harTreForrigeInntektsmåneder) {
             throw IllegalStateException("Mangler inntektsinformasjon for de tre siste måneder")
         }
+
+        val treSisteMåneder = YearMonth.now().minusMonths(3)
+        val fireSisteMåneder = YearMonth.now().minusMonths(4)
+
+        val skalBrukeTreSisteMånederSomIkkeHarFeriepenger = finnesMånedMedKunFeriepenger(treSisteMåneder)
+
+        val totalInntekt =
+            if (skalBrukeTreSisteMånederSomIkkeHarFeriepenger) {
+                totalInntektFraÅrMånedUtenFeriepenger(fireSisteMåneder)
+            } else {
+                totalInntektFraÅrMånedUtenFeriepenger(treSisteMåneder)
+            }
+
+        return totalInntekt / 3
+    }
 
     private fun finnesMånedMedKunFeriepenger(fraOgMedÅrMåned: YearMonth): Boolean {
         if (antallMånederUtenFeriepenger(fraOgMedÅrMåned) <= 1) throw NotImplementedError("Håndterer ikke inntekt hvor det finnes flere måneder med kun feriepenger")
