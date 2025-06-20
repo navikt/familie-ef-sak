@@ -129,14 +129,12 @@ class OppfølgingsoppgaveService(
         )
     }
 
-    // vi skal hente overgangsstonadi, og vil sjekke årslogikk, så saksbehandler kan bestemme å opprette oppgave.
     fun hentOppgavetyperSomKanOpprettesForOvergangsstønad(behandlingId: UUID): List<OppgaveForOpprettelseType> {
         val saksbehandling = behandlingService.hentSaksbehandling(behandlingId)
         if (saksbehandling.stønadstype == StønadType.SKOLEPENGER) {
             return emptyList()
         }
         val sjekkOvergangsstønadmedBarnetilsyn = sjekkOppgavetyperSomKanOpprettesForBeslutter(saksbehandling.ident, saksbehandling.stønadstype)
-        logger.info("***************************** return behandlingsID for overgangsstonad : " + "$sjekkOvergangsstønadmedBarnetilsyn")
         val vedtak = vedtakService.hentVedtak(behandlingId)
         val tilkjentYtelse =
             when {
@@ -151,11 +149,10 @@ class OppfølgingsoppgaveService(
                 }
                 else -> null
             }
-        logger.info("***************************** da henter kjentYtelse for opprettes  : " + "$tilkjentYtelse")
+
         val oppgavetyperSomKanOpprettes = mutableListOf<OppgaveForOpprettelseType>()
         if (kanOppretteOppgaveForInntektskontrollFremITid(tilkjentYtelse)) {
             oppgavetyperSomKanOpprettes.add(OppgaveForOpprettelseType.INNTEKTSKONTROLL_1_ÅR_FREM_I_TID)
-            logger.info("***************************** og legge det i oppgavetyper med data" + "$oppgavetyperSomKanOpprettes")
         }
 
         oppgavetyperSomKanOpprettes.add(OppgaveForOpprettelseType.INNTEKTSKONTROLL_SELVSTENDIG_NÆRINGSDRIVENDE)
@@ -225,7 +222,6 @@ class OppfølgingsoppgaveService(
                 )
 
             if (fagsak != null) {
-                logger.info("***************************** vi returnerer fagsak_id her for videresjekk : " + "$fagsak.id")
                 val behandling = behandlingRepository.findByFagsakIdAndStatus(fagsak.id, status = BehandlingStatus.UTREDES)
                 return behandling.firstOrNull()?.id
             }
