@@ -151,7 +151,7 @@
       "inntektListe": [
         {
           "type": "Loennsinntekt",
-          "beloep": 10000,
+          "beloep": 12000,
           "fordel": "kontantytelse",
           "beskrivelse": "fastloenn",
           "inngaarIGrunnlagForTrekk": true,

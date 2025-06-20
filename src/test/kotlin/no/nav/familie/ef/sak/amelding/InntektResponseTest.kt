@@ -67,6 +67,7 @@ class InntektResponseTest {
 
         val inntektResponse = objectMapper.readValue<InntektResponse>(inntektV2ResponseJsonModifisert)
         assertThat(inntektResponse.forventetMånedsinntekt()).isEqualTo(10333)
+        assertThat(inntektResponse.harMånedMedBareFeriepenger(YearMonth.now().minusMonths(4))).isFalse
     }
 
     @Test
@@ -74,13 +75,12 @@ class InntektResponseTest {
         val inntektV2ResponseJson: String = lesRessurs("json/inntekt/InntektFastlønnMedEnMånedMedKunFeriepenger.json")
         val inntektV2ResponseJsonModifisert =
             inntektV2ResponseJson
-                .replace("2020-04", YearMonth.now().minusMonths(4).toString())
                 .replace("2020-05", YearMonth.now().minusMonths(3).toString())
                 .replace("2020-06", YearMonth.now().minusMonths(2).toString()) // Feriepenger som ignoreres
                 .replace("2020-07", YearMonth.now().minusMonths(1).toString())
 
         val inntektResponse = objectMapper.readValue<InntektResponse>(inntektV2ResponseJsonModifisert)
-        assertThat(inntektResponse.forventetMånedsinntekt()).isEqualTo(11333)
+        assertThat(inntektResponse.harMånedMedBareFeriepenger(YearMonth.now().minusMonths(4))).isTrue
     }
 
     fun lesRessurs(name: String): String {
