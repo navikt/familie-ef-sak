@@ -499,6 +499,7 @@ fun PeriodeMedBeløp.tilPeriodeMedBeløpDto(): PeriodeMedBeløpDto =
 fun MottakerRolle.tilIverksettDto(): Brevmottaker.MottakerRolle =
     when (this) {
         MottakerRolle.FULLMAKT -> Brevmottaker.MottakerRolle.FULLMEKTIG
+        MottakerRolle.FULLMEKTIG -> Brevmottaker.MottakerRolle.FULLMEKTIG
         MottakerRolle.VERGE -> Brevmottaker.MottakerRolle.VERGE
         MottakerRolle.BRUKER -> Brevmottaker.MottakerRolle.BRUKER
     }

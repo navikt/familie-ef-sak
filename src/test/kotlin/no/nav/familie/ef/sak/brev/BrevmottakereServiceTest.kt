@@ -5,7 +5,7 @@ import io.mockk.mockk
 import no.nav.familie.ef.sak.brev.domain.BrevmottakerOrganisasjon
 import no.nav.familie.ef.sak.brev.domain.BrevmottakerPerson
 import no.nav.familie.ef.sak.brev.domain.MottakerRolle.BRUKER
-import no.nav.familie.ef.sak.brev.domain.MottakerRolle.FULLMAKT
+import no.nav.familie.ef.sak.brev.domain.MottakerRolle.FULLMEKTIG
 import no.nav.familie.ef.sak.brev.domain.MottakerRolle.VERGE
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.oppgave.TilordnetRessursService
@@ -131,12 +131,12 @@ internal class BrevmottakereServiceTest {
                         BrevmottakerOrganisasjon(
                             organisasjonsnummer = "123",
                             navnHosOrganisasjon = "n",
-                            mottakerRolle = FULLMAKT,
+                            mottakerRolle = FULLMEKTIG,
                         ),
                         BrevmottakerOrganisasjon(
                             organisasjonsnummer = "123",
                             navnHosOrganisasjon = "n",
-                            mottakerRolle = FULLMAKT,
+                            mottakerRolle = FULLMEKTIG,
                         ),
                     ),
             )
@@ -177,12 +177,12 @@ internal class BrevmottakereServiceTest {
                     BrevmottakerOrganisasjon(
                         "C",
                         "C",
-                        FULLMAKT,
+                        FULLMEKTIG,
                     ),
                     BrevmottakerOrganisasjon(
                         "D",
                         "D",
-                        FULLMAKT,
+                        FULLMEKTIG,
                     ),
                 ),
         )

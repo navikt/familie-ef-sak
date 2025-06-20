@@ -80,7 +80,7 @@ internal class FrittståendeBrevServiceTest {
 
     @Nested
     inner class Mottakere {
-        private val organisasjon = BrevmottakerOrganisasjon("org1", "navn", MottakerRolle.FULLMAKT)
+        private val organisasjon = BrevmottakerOrganisasjon("org1", "navn", MottakerRolle.FULLMEKTIG)
         private val person = BrevmottakerPerson("ident", "navn", MottakerRolle.BRUKER)
 
         @Test
