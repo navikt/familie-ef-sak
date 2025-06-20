@@ -25,7 +25,7 @@ data class InntektResponse(
         inntektsmånederFraOgMedÅrMåned(fraOgMedÅrMåned)
             .filter { it.måned.isEqualOrAfter(fraOgMedÅrMåned) && it.måned.isBefore(YearMonth.now()) }
             .flatMap { it.inntektListe }
-            .filter { it.beskrivelse != "overgangsstoenadTilEnsligMorEllerFarSomBegynteAaLoepe1April2014EllerSenere" && it.beskrivelse != "barnepensjon" && !it.beskrivelse.contains("ferie", true) }
+            .filter { it.beskrivelse != "overgangsstoenadTilEnsligMorEllerFarSomBegynteAaLoepe1April2014EllerSenere" && it.beskrivelse != "barnepensjon" && !it.beskrivelse.contains("ferie", true) && it.beskrivelse != "helligdagstillegg" }
             .sumOf { it.beløp }
             .toInt()
 
@@ -35,6 +35,8 @@ data class InntektResponse(
             .filterNot { it.inntektListe.all { it.beskrivelse.contains("ferie", true) || it.beskrivelse.contains("overgangsstoenadTilEnsligMorEllerFarSomBegynteAaLoepe1April2014EllerSenere", true) } }
             .groupBy { it.måned }
             .count()
+
+    fun harMånedMedBareFeriepenger(fraOgMedÅrMåned: YearMonth): Boolean = antallMånederUtenFeriepenger(fraOgMedÅrMåned) < 3
 
     fun totalInntektForÅrMåned(årMåned: YearMonth): Int =
         inntektsmånederFraOgMedÅrMåned(årMåned)
@@ -98,25 +100,8 @@ data class InntektResponse(
         if (!harTreForrigeInntektsmåneder) {
             throw IllegalStateException("Mangler inntektsinformasjon for de tre siste måneder")
         }
-
         val treSisteMåneder = YearMonth.now().minusMonths(3)
-        val fireSisteMåneder = YearMonth.now().minusMonths(4)
-
-        val skalBrukeTreSisteMånederSomIkkeHarFeriepenger = finnesMånedMedKunFeriepenger(treSisteMåneder)
-
-        val totalInntekt =
-            if (skalBrukeTreSisteMånederSomIkkeHarFeriepenger) {
-                totalInntektFraÅrMånedUtenFeriepenger(fireSisteMåneder)
-            } else {
-                totalInntektFraÅrMånedUtenFeriepenger(treSisteMåneder)
-            }
-
-        return totalInntekt / 3
-    }
-
-    private fun finnesMånedMedKunFeriepenger(fraOgMedÅrMåned: YearMonth): Boolean {
-        if (antallMånederUtenFeriepenger(fraOgMedÅrMåned) <= 1) throw NotImplementedError("Håndterer ikke inntekt hvor det finnes flere måneder med kun feriepenger")
-        return antallMånederUtenFeriepenger(fraOgMedÅrMåned) == 2
+        return totalInntektFraÅrMånedUtenFeriepenger(treSisteMåneder) / 3
     }
 
     val harTreForrigeInntektsmåneder =

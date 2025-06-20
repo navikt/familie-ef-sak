@@ -58,7 +58,8 @@ class AutomatiskRevurderingService(
             return false
         }
 
-        if (aMeldingInntektClient.hentInntekt(personIdent, YearMonth.now().minusMonths(3), YearMonth.now()).finnesHøyMånedsinntektSomIkkeGirOvergangsstønad) {
+        val inntektSisteTreMåneder = aMeldingInntektClient.hentInntekt(personIdent, YearMonth.now().minusMonths(3), YearMonth.now())
+        if (inntektSisteTreMåneder.finnesHøyMånedsinntektSomIkkeGirOvergangsstønad) {
             logger.info("Har inntekt over 5.5G for fagsak ${fagsak.id}")
             return false
         }
@@ -90,6 +91,11 @@ class AutomatiskRevurderingService(
         val vedtak = vedtakService.hentVedtak(sisteIverksatteBehandlingId)
         if (vedtak.perioder?.perioder?.size != 1) { // Denne valideringen kan fjernes når logikken for å sette revurderes fra-dato er forbedret
             logger.info("behandlingId: $sisteIverksatteBehandlingId har flere vedtaksperioder og kan derfor ikke automatisk revurderes")
+            return false
+        }
+
+        if (inntektSisteTreMåneder.harMånedMedBareFeriepenger(YearMonth.now().minusMonths(3))) {
+            logger.info("Bruker har en måned med bare feriepenger, og skal dermed ikke automatisk revurderes. BehandlingId: $sisteIverksatteBehandlingId")
             return false
         }
 
