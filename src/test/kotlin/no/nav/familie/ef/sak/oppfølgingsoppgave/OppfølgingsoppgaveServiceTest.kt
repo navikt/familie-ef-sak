@@ -6,6 +6,7 @@ import io.mockk.mockk
 import io.mockk.runs
 import io.mockk.spyk
 import io.mockk.verify
+import no.nav.familie.ef.sak.behandling.BehandlingRepository
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.behandling.domain.Behandling
@@ -56,6 +57,7 @@ internal class OppfølgingsoppgaveServiceTest {
     private val personopplysningerService = mockk<PersonopplysningerService>()
     private val brevmottakereService = mockk<BrevmottakereService>()
     private val fagsakService = mockk<FagsakService>()
+    private val behandlingRepository = mockk<BehandlingRepository>()
 
     private var oppfølgingsoppgaveService =
         spyk(
@@ -73,6 +75,7 @@ internal class OppfølgingsoppgaveServiceTest {
                 personopplysningerService,
                 brevmottakereService,
                 fagsakService,
+                behandlingRepository,
             ),
         )
 

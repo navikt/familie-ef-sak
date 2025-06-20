@@ -1,6 +1,8 @@
 package no.nav.familie.ef.sak.oppfølgingsoppgave
 
+import no.nav.familie.ef.sak.behandling.BehandlingRepository
 import no.nav.familie.ef.sak.behandling.BehandlingService
+import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.oppgaveforopprettelse.OppgaverForOpprettelseDto
 import no.nav.familie.ef.sak.behandling.oppgaveforopprettelse.OppgaverForOpprettelseRepository
 import no.nav.familie.ef.sak.behandling.oppgaverforferdigstilling.OppgaverForFerdigstillingDto
@@ -54,6 +56,7 @@ class OppfølgingsoppgaveService(
     private val personopplysningerService: PersonopplysningerService,
     private val brevmottakereService: BrevmottakereService,
     private val fagsakService: FagsakService,
+    private val behandlingRepository: BehandlingRepository,
 ) {
     @Transactional
     fun lagreOppgaveIderForFerdigstilling(
@@ -133,7 +136,7 @@ class OppfølgingsoppgaveService(
             return emptyList()
         }
         val sjekkOvergangsstønadmedBarnetilsyn = sjekkOppgavetyperSomKanOpprettesForBeslutter(saksbehandling.ident, saksbehandling.stønadstype)
-        logger.info("***************************** what is comming from nr 2 : " + "${sjekkOvergangsstønadmedBarnetilsyn}")
+        logger.info("***************************** return behandlingsID for overgangsstonad : " + "$sjekkOvergangsstønadmedBarnetilsyn")
         val vedtak = vedtakService.hentVedtak(behandlingId)
         val tilkjentYtelse =
             when {
@@ -145,8 +148,7 @@ class OppfølgingsoppgaveService(
                     sjekkOvergangsstønadmedBarnetilsyn?.let { tilkjentYtelseService.hentForBehandlingEllerNull(it) }
                 else -> null
             }
-
-        logger.info("***************************** what is comming from nr 3 : " + "${sjekkOvergangsstønadmedBarnetilsyn}")
+        logger.info("***************************** da henter kjentYtelse for opprettes  : " + "$tilkjentYtelse")
         val oppgavetyperSomKanOpprettes = mutableListOf<OppgaveForOpprettelseType>()
         if (kanOppretteOppgaveForInntektskontrollFremITid(tilkjentYtelse)) {
             oppgavetyperSomKanOpprettes.add(OppgaveForOpprettelseType.INNTEKTSKONTROLL_1_ÅR_FREM_I_TID)
@@ -207,9 +209,11 @@ class OppfølgingsoppgaveService(
         }
     }
 
-    private fun sjekkOppgavetyperSomKanOpprettesForBeslutter(ident: String, stønadType: StønadType): UUID? {
-        logger.info("***************************** comes here : OppgavetyperSomKanOpprettes for: " + "${ident}")
-        if ( stønadType == StønadType.BARNETILSYN ) {
+    private fun sjekkOppgavetyperSomKanOpprettesForBeslutter(
+        ident: String,
+        stønadType: StønadType,
+    ): UUID? {
+        if (stønadType == StønadType.BARNETILSYN) {
             val fagsak =
                 fagsakService.finnFagsak(
                     personIdenter = setOf(ident),
@@ -217,7 +221,9 @@ class OppfølgingsoppgaveService(
                 )
 
             if (fagsak != null) {
-                return fagsak.fagsakPersonId
+                logger.info("***************************** vi returnerer fagsak_id her for videresjekk : " + "$fagsak.id")
+                val behandling = behandlingRepository.findByFagsakIdAndStatus(fagsak.id, status = BehandlingStatus.UTREDES)
+                return behandling.firstOrNull()?.id
             }
         }
 
