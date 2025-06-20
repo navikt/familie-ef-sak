@@ -141,18 +141,13 @@ class OppfølgingsoppgaveService(
         val tilkjentYtelse =
             when {
                 vedtak.resultatType == ResultatType.AVSLÅ && vedtak.avslåÅrsak == AvslagÅrsak.MINDRE_INNTEKTSENDRINGER ->
-                {
-                    logger.info("***************************** first ytelse ")
                     hentSisteTilkjentYtelse(saksbehandling.fagsakId)
-                }
                 vedtak.resultatType == ResultatType.INNVILGE -> {
-                    logger.info("************************ second ytelse ")
-                    tilkjentYtelseService.hentForBehandlingEllerNull(behandlingId)
-                }
-                saksbehandling.stønadstype == StønadType.BARNETILSYN && sjekkOvergangsstønadmedBarnetilsyn != null ->
-                {
-                    logger.info("************************ third ytelse ")
-                    sjekkOvergangsstønadmedBarnetilsyn?.let { tilkjentYtelseService.hentForBehandlingEllerNull(it) }
+                    if (saksbehandling.stønadstype == StønadType.BARNETILSYN && sjekkOvergangsstønadmedBarnetilsyn != null) {
+                        sjekkOvergangsstønadmedBarnetilsyn?.let { tilkjentYtelseService.hentForBehandlingEllerNull(it) }
+                    } else {
+                        tilkjentYtelseService.hentForBehandlingEllerNull(behandlingId)
+                    }
                 }
                 else -> null
             }
