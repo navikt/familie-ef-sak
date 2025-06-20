@@ -70,6 +70,7 @@ class VedtakController(
         @PathVariable behandlingId: UUID,
         @RequestBody sendTilBeslutter: SendTilBeslutterDto?,
     ): Ressurs<UUID> {
+        // det skal sjekkes med barnetilsyn
         val behandling = behandlingService.hentSaksbehandling(behandlingId)
         tilgangService.validerTilgangTilBehandling(behandling, AuditLoggerEvent.UPDATE)
 
