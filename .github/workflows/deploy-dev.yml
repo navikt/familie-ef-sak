@@ -11,7 +11,7 @@ permissions:
 
 jobs:
   build:
-    name: Build, push and deploy to dev-gcp
+    name: Build and push docker image
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # ratchet:actions/checkout@v4
@@ -36,7 +36,7 @@ jobs:
     outputs:
       image: ${{ steps.docker-push.outputs.image }}
   deploy:
-    name: Deploy to GCP
+    name: Deploy to dev
     needs: build
     runs-on: ubuntu-latest
     steps:
