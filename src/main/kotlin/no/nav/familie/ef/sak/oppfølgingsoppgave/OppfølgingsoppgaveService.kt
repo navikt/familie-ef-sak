@@ -203,14 +203,7 @@ class OppfølgingsoppgaveService(
         }
     }
 
-    private fun hentSisteTilkjentYtelse(fagsakId: UUID): TilkjentYtelse? {
-        val sisteIverksatteBehandling = behandlingService.finnSisteIverksatteBehandling(fagsakId)
-        return sisteIverksatteBehandling?.let {
-            tilkjentYtelseService.hentForBehandlingEllerNull(sisteIverksatteBehandling.id)
-        }
-    }
-
-    private fun sjekkOppgavetyperSomKanOpprettesForBeslutter(
+    fun sjekkOppgavetyperSomKanOpprettesForBeslutter(
         ident: String,
         stønadType: StønadType,
     ): UUID? {
@@ -228,6 +221,13 @@ class OppfølgingsoppgaveService(
         }
 
         return null
+    }
+
+    private fun hentSisteTilkjentYtelse(fagsakId: UUID): TilkjentYtelse? {
+        val sisteIverksatteBehandling = behandlingService.finnSisteIverksatteBehandling(fagsakId)
+        return sisteIverksatteBehandling?.let {
+            tilkjentYtelseService.hentForBehandlingEllerNull(sisteIverksatteBehandling.id)
+        }
     }
 
     private fun kanOppretteOppgaveForInntektskontrollFremITid(

@@ -32,6 +32,7 @@ import no.nav.familie.ef.sak.vedtak.dto.ResultatType.INNVILGE
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType.INNVILGE_UTEN_UTBETALING
 import no.nav.familie.ef.sak.vedtak.dto.SendTilBeslutterDto
 import no.nav.familie.ef.sak.vilkår.VurderingService
+import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.internal.TaskService
 import org.springframework.http.HttpStatus
@@ -151,6 +152,12 @@ class SendTilBeslutterSteg(
             opprettGodkjennVedtakOppgave(saksbehandling, beskrivelseMarkeringer)
         }
 
+        if (data != null) {
+            if (data.oppgavetyperSomSkalOpprettes != null && saksbehandling.stønadstype == StønadType.BARNETILSYN) {
+                opprettGodkjennVedtakOppgaveMedIdent(saksbehandling, beskrivelseMarkeringer)
+            }
+        }
+
         ferdigstillOppgave(saksbehandling)
         opprettTaskForBehandlingsstatistikk(saksbehandling.id)
         if (data != null) {
@@ -204,6 +211,24 @@ class SendTilBeslutterSteg(
             OpprettOppgaveTask.opprettTask(
                 OpprettOppgaveTaskData(
                     behandlingId = saksbehandling.id,
+                    oppgavetype = Oppgavetype.GodkjenneVedtak,
+                    beskrivelse = beskrivelse,
+                    tilordnetNavIdent = utledBeslutterIdent(saksbehandling),
+                ),
+            ),
+        )
+    }
+
+    private fun opprettGodkjennVedtakOppgaveMedIdent(
+        saksbehandling: Saksbehandling,
+        beskrivelseMarkeringer: List<String>? = null,
+    ) {
+        val beskrivelse = lagBeskrivelseMedMerker(beskrivelseMarkeringer)
+        val behandlingsId = oppfølgingsoppgaveService.sjekkOppgavetyperSomKanOpprettesForBeslutter(saksbehandling.id.toString(), saksbehandling.stønadstype)
+        taskService.save(
+            OpprettOppgaveTask.opprettTask(
+                OpprettOppgaveTaskData(
+                    behandlingId = if (behandlingsId == null) saksbehandling.id else behandlingsId,
                     oppgavetype = Oppgavetype.GodkjenneVedtak,
                     beskrivelse = beskrivelse,
                     tilordnetNavIdent = utledBeslutterIdent(saksbehandling),
