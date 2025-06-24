@@ -82,7 +82,7 @@ jobs:
         env:
           CLUSTER: prod-gcp
           RESOURCE: .deploy/prod.yaml
-          IMAGE: ${{ needs.build.outputs.image }}
+          IMAGE: ${{ steps.build.outputs.image }}
       - name: Post deploy failures to Slack
         if: failure()
         run: |
