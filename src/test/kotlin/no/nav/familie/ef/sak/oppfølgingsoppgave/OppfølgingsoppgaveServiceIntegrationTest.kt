@@ -5,6 +5,7 @@ import no.nav.familie.ef.sak.behandling.BehandlingRepository
 import no.nav.familie.ef.sak.oppfølgingsoppgave.OppfølgingsoppgaveService
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
+import no.nav.familie.ef.sak.repository.saksbehandling
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseRepository
 import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.ef.sak.vedtak.dto.InnvilgelseOvergangsstønad
@@ -33,6 +34,7 @@ class OppfølgingsoppgaveServiceIntegrationTest : OppslagSpringRunnerTest() {
 
     val fagsak = fagsak()
     val behandling = behandling(fagsak = fagsak)
+    val saksbehandling = saksbehandling(fagsak = fagsak)
     val behandlingId = behandling.id
 
     val vedtakRequest = InnvilgelseOvergangsstønad("", "")
@@ -65,7 +67,7 @@ class OppfølgingsoppgaveServiceIntegrationTest : OppslagSpringRunnerTest() {
 
     private fun opprettTomListe() {
         oppfølgingsoppgaveService.lagreOppgaverForOpprettelse(
-            behandlingId,
+            saksbehandling,
             data =
                 SendTilBeslutterDto(
                     emptyList(),
@@ -75,7 +77,7 @@ class OppfølgingsoppgaveServiceIntegrationTest : OppslagSpringRunnerTest() {
 
     private fun opprettInntektskontroll() {
         oppfølgingsoppgaveService.lagreOppgaverForOpprettelse(
-            behandlingId,
+            saksbehandling,
             data =
                 SendTilBeslutterDto(
                     oppgavetyperSomSkalOpprettes = listOf(OppgaveForOpprettelseType.INNTEKTSKONTROLL_1_ÅR_FREM_I_TID),

@@ -2,6 +2,7 @@ package no.nav.familie.ef.sak.oppfølgingsoppgave
 
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
 import no.nav.familie.ef.sak.behandling.BehandlingService
+import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.oppgaveforopprettelse.OppgaverForOpprettelseDto
 import no.nav.familie.ef.sak.behandling.oppgaveforopprettelse.OppgaverForOpprettelseRepository
@@ -71,22 +72,28 @@ class OppfølgingsoppgaveService(
 
     @Transactional
     fun lagreOppgaverForOpprettelse(
-        behandlingId: UUID,
+        saksbehandling: Saksbehandling,
         data: SendTilBeslutterDto,
     ) {
         val nyeOppgaver = data.oppgavetyperSomSkalOpprettes
         val årForInntektskontrollSelvstendigNæringsdrivende = data.årForInntektskontrollSelvstendigNæringsdrivende
 
-        val oppgavetyperSomKanOpprettes = hentOppgavetyperSomKanOpprettesForOvergangsstønad(behandlingId)
+        val oppgavetyperSomKanOpprettes = hentOppgavetyperSomKanOpprettesForOvergangsstønad(saksbehandling.id)
         if (oppgavetyperSomKanOpprettes.isEmpty()) {
-            oppgaverForOpprettelseRepository.deleteById(behandlingId)
+            oppgaverForOpprettelseRepository.deleteById(saksbehandling.id)
             return
         }
         feilHvisIkke(oppgavetyperSomKanOpprettes.containsAll(nyeOppgaver)) {
-            "behandlingId=$behandlingId prøver å opprette $nyeOppgaver $oppgavetyperSomKanOpprettes"
+            "behandlingId=${saksbehandling.id} prøver å opprette $nyeOppgaver $oppgavetyperSomKanOpprettes"
         }
-        oppgaverForOpprettelseRepository.deleteByBehandlingId(behandlingId)
-        oppgaverForOpprettelseRepository.insert(OppgaverForOpprettelse(behandlingId, nyeOppgaver, årForInntektskontrollSelvstendigNæringsdrivende))
+        oppgaverForOpprettelseRepository.deleteByBehandlingId(saksbehandling.id)
+        if (oppgavetyperSomKanOpprettes.contains(OppgaveForOpprettelseType.INNTEKTSKONTROLL_1_ÅR_FREM_I_TID)) {
+            if (saksbehandling.stønadstype.equals(StønadType.BARNETILSYN)) {
+                val behandlingsId = sjekkOppgavetyperSomKanOpprettesForBeslutter(saksbehandling.ident, saksbehandling.stønadstype)
+                behandlingsId?.let { OppgaverForOpprettelse(it, listOf(OppgaveForOpprettelseType.INNTEKTSKONTROLL_1_ÅR_FREM_I_TID), årForInntektskontrollSelvstendigNæringsdrivende) }?.let { oppgaverForOpprettelseRepository.insert(it) }
+            }
+        }
+        oppgaverForOpprettelseRepository.insert(OppgaverForOpprettelse(saksbehandling.id, nyeOppgaver, årForInntektskontrollSelvstendigNæringsdrivende))
     }
 
     @Transactional
@@ -134,6 +141,7 @@ class OppfølgingsoppgaveService(
         if (saksbehandling.stønadstype == StønadType.SKOLEPENGER) {
             return emptyList()
         }
+        // den logikk skal returnere data når det er barnetilsyn, ikke andre stoønadsType
         val sjekkOvergangsstønadmedBarnetilsyn = sjekkOppgavetyperSomKanOpprettesForBeslutter(saksbehandling.ident, saksbehandling.stønadstype)
         val vedtak = vedtakService.hentVedtak(behandlingId)
         val tilkjentYtelse =

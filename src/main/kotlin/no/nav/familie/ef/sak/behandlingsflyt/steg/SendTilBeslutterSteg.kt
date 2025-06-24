@@ -152,12 +152,6 @@ class SendTilBeslutterSteg(
             opprettGodkjennVedtakOppgave(saksbehandling, beskrivelseMarkeringer)
         }
 
-        if (data != null) {
-            if (data.oppgavetyperSomSkalOpprettes != null && saksbehandling.stønadstype == StønadType.BARNETILSYN) {
-                opprettGodkjennVedtakOppgaveMedIdent(saksbehandling, beskrivelseMarkeringer)
-            }
-        }
-
         ferdigstillOppgave(saksbehandling)
         opprettTaskForBehandlingsstatistikk(saksbehandling.id)
         if (data != null) {
@@ -165,9 +159,9 @@ class SendTilBeslutterSteg(
                 saksbehandling.id,
                 data.oppgaverIderSomSkalFerdigstilles,
             )
-
+            // ser ut som vi oppretter data her first og vises etter godkjenning
             oppfølgingsoppgaveService.lagreOppgaverForOpprettelse(
-                saksbehandling.id,
+                saksbehandling,
                 data,
             )
 
@@ -211,24 +205,6 @@ class SendTilBeslutterSteg(
             OpprettOppgaveTask.opprettTask(
                 OpprettOppgaveTaskData(
                     behandlingId = saksbehandling.id,
-                    oppgavetype = Oppgavetype.GodkjenneVedtak,
-                    beskrivelse = beskrivelse,
-                    tilordnetNavIdent = utledBeslutterIdent(saksbehandling),
-                ),
-            ),
-        )
-    }
-
-    private fun opprettGodkjennVedtakOppgaveMedIdent(
-        saksbehandling: Saksbehandling,
-        beskrivelseMarkeringer: List<String>? = null,
-    ) {
-        val beskrivelse = lagBeskrivelseMedMerker(beskrivelseMarkeringer)
-        val behandlingsId = oppfølgingsoppgaveService.sjekkOppgavetyperSomKanOpprettesForBeslutter(saksbehandling.id.toString(), saksbehandling.stønadstype)
-        taskService.save(
-            OpprettOppgaveTask.opprettTask(
-                OpprettOppgaveTaskData(
-                    behandlingId = if (behandlingsId == null) saksbehandling.id else behandlingsId,
                     oppgavetype = Oppgavetype.GodkjenneVedtak,
                     beskrivelse = beskrivelse,
                     tilordnetNavIdent = utledBeslutterIdent(saksbehandling),
