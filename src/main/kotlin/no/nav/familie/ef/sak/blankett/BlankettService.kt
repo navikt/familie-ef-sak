@@ -39,7 +39,7 @@ class BlankettService(
         logger.info("Start - lag saksbehandlingsblankett for behandlingId=$behandlingId")
         val behandling = behandlingService.hentSaksbehandling(behandlingId)
         logger.info("Start hent vilkårsvurderinger for behandlingId=$behandlingId")
-        //dette er potensielt problem, skal sjekke i annen sak
+        //dette er potensielt problem, skal sjekke i annen sak, med riktig pipeline yaml
         val vilkårVurderinger = vurderingService.hentEllerOpprettVurderinger(behandlingId)
         logger.info("Ferdig med å hente vilkårsvurderinger for behandlingId=$behandlingId")
         val registergrunnlagData = grunnlagsdataService.hentGrunnlagsdata(behandlingId)
