@@ -14,7 +14,7 @@ permissions:
 
 jobs:
   build:
-    name: Build, push and deploy to dev-gcp and prod-gcp
+    name: Build and push docker-image
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # ratchet:actions/checkout@v4
@@ -45,7 +45,7 @@ jobs:
     outputs:
       image: ${{ steps.docker-push.outputs.image }}
   deploy-dev:
-    name: Deploy to GCP
+    name: Deploy to dev
     needs: build
     runs-on: ubuntu-latest
     steps:
@@ -70,7 +70,7 @@ jobs:
           java-version: '21'
           cache: 'maven'
       - name: Run Maven tests
-        run: mvn -B --no-transfer-progress test --settings .m2/maven-settings.xml
+        run: mvn -B --no-transfer-progress test -DskipCompile --settings .m2/maven-settings.xml
   deploy-prod:
     name: Deploy til prod-gcp
     needs: [deploy-dev, test]

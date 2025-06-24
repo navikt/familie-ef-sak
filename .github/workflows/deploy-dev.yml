@@ -60,4 +60,4 @@ jobs:
           java-version: '21'
           cache: 'maven'
       - name: Run Maven tests
-        run: mvn -B --no-transfer-progress test --settings .m2/maven-settings.xml
+        run: mvn -B --no-transfer-progress test -DskipCompile --settings .m2/maven-settings.xml
