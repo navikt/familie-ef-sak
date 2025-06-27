@@ -106,7 +106,7 @@ class BehandlingController(
         @RequestBody oppdaterStatusDto: OppdaterStatusDto,
     ): Ressurs<UUID> {
         tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.UPDATE)
-        tilgangService.validerHarSaksbehandlerrolle()
+        tilgangService.validerHarForvalterrolle()
         feilHvis(!featureToggleService.isEnabled(toggle = Toggle.OPPDATER_BEHANDLINGSTATUS)) {
             "Manuell oppdatering av behandlingstatus er ikke mulig fordi toggle ikke er enablet for bruker"
         }
