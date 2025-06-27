@@ -2,9 +2,13 @@ package no.nav.familie.ef.sak.behandling
 
 import no.nav.familie.ef.sak.AuditLoggerEvent
 import no.nav.familie.ef.sak.behandling.dto.BehandlingDto
+import no.nav.familie.ef.sak.behandling.dto.OppdaterStatusDto
 import no.nav.familie.ef.sak.behandling.dto.SettPåVentRequest
 import no.nav.familie.ef.sak.behandling.dto.TaAvVentStatusDto
 import no.nav.familie.ef.sak.behandling.dto.tilDto
+import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.ef.sak.vilkår.gjenbruk.GjenbrukVilkårService
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -26,6 +30,7 @@ class BehandlingController(
     private val behandlingPåVentService: BehandlingPåVentService,
     private val tilgangService: TilgangService,
     private val gjenbrukVilkårService: GjenbrukVilkårService,
+    private val featureToggleService: FeatureToggleService,
 ) {
     @GetMapping("{behandlingId}")
     fun hentBehandling(
@@ -93,5 +98,19 @@ class BehandlingController(
         tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.UPDATE)
         tilgangService.validerHarSaksbehandlerrolle()
         return Ressurs.success(gjenbrukVilkårService.finnBehandlingerForGjenbruk(behandlingId))
+    }
+
+    @PostMapping("{behandlingId}/oppdater-status")
+    fun oppdaterStatus(
+        @PathVariable behandlingId: UUID,
+        @RequestBody oppdaterStatusDto: OppdaterStatusDto,
+    ): Ressurs<UUID> {
+        tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.UPDATE)
+        tilgangService.validerHarForvalterrolle()
+        feilHvis(!featureToggleService.isEnabled(toggle = Toggle.OPPDATER_BEHANDLINGSTATUS)) {
+            "Manuell oppdatering av behandlingstatus er ikke mulig fordi toggle ikke er enablet for bruker"
+        }
+        behandlingService.oppdaterStatusPåBehandling(behandlingId, oppdaterStatusDto.status)
+        return Ressurs.success(behandlingId)
     }
 }
