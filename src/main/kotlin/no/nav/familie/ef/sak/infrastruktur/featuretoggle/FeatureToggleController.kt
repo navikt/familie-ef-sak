@@ -26,6 +26,7 @@ class FeatureToggleController(
             Toggle.VELG_ÅRSAK_VED_KLAGE_OPPRETTELSE,
             Toggle.VIS_AUTOMATISK_INNTEKTSENDRING,
             Toggle.BEHANDLE_AUTOMATISK_INNTEKTSENDRING,
+            Toggle.OPPDATER_BEHANDLINGSTATUS,
         )
 
     @GetMapping

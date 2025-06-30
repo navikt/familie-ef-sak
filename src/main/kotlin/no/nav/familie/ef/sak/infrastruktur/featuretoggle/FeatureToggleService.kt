@@ -50,6 +50,7 @@ enum class Toggle(
     TILLAT_MIGRERING_7_ÅR_TILBAKE("familie.ef.sak.tillat-migrering-7-ar-tilbake", "Permission"),
     UTVIKLER_MED_VEILEDERRROLLE("familie.ef.sak.utviklere-med-veilederrolle", "Permission"),
     HENLEGG_BEHANDLING_UTEN_OPPGAVE("familie.ef.sak.henlegg-behandling-uten-oppgave", "Permission"),
+    OPPDATER_BEHANDLINGSTATUS("familie.ef.sak.oppdater-status-pa-behandling"),
     VELG_ÅRSAK_VED_KLAGE_OPPRETTELSE("familie.ef.sak.klagebehandling-arsak", "Permission"),
     VIS_AUTOMATISK_INNTEKTSENDRING("familie.ef.sak.frontend-vis-automatisk-inntektsendring", "Permission"),
     ;
