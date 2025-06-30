@@ -43,6 +43,7 @@ class OppgaveClientMock {
                 oppgave8,
                 oppgave9,
                 oppgave10,
+                oppgave11,
                 tilbakekreving1,
                 oppgavePapirsøknad,
                 oppgaveEttersending,
@@ -210,6 +211,8 @@ class OppgaveClientMock {
         lagOppgave(24686L, Oppgavetype.BehandleSak, tilordnetRessurs = "julenissen", behandlesAvApplikasjon = "familie-ef-sak", ytelsestema = Tema.BAR)
     private val oppgave10 =
         lagOppgave(24687L, Oppgavetype.BehandleSak, tilordnetRessurs = "julenissen", behandlesAvApplikasjon = "familie-ef-sak", status = StatusEnum.FEILREGISTRERT)
+    private val oppgave11 =
+        lagOppgave(24688L, Oppgavetype.GodkjenneVedtak, "BESLUTTER", behandlesAvApplikasjon = "familie-ef-sak")
     private val oppgavePapirsøknad =
         lagOppgave(
             5L,
