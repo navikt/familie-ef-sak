@@ -241,7 +241,7 @@ class BehandleAutomatiskInntektsendringTask(
             ?.plus(oppdatertInntektsperiode) ?: emptyList()
     }
 
-    fun slåSammenPerioderMedLikInntekt(perioder: List<Inntektsperiode>): List<Inntektsperiode> {
+    private fun slåSammenPerioderMedLikInntekt(perioder: List<Inntektsperiode>): List<Inntektsperiode> {
         if (perioder.isEmpty()) return emptyList()
         val sorted = perioder.sortedBy { it.periode.fom }
         val sammenslåttInntektsperioder = mutableListOf<Inntektsperiode>()
