@@ -226,7 +226,9 @@ class BehandleAutomatiskInntektsendringTask(
                     dagsats = BigDecimal(0),
                     samordningsfradrag = BigDecimal(0),
                 )
-            return inntektsperioder + listOf(inntektsperiodeFremover)
+            val sammenslåttInntektsperioder = slåSammenPerioderMedLikInntekt(inntektsperioder)
+
+            return sammenslåttInntektsperioder + listOf(inntektsperiodeFremover)
         }
 
         val forventetÅrsinntekt = inntektResponse.forventetMånedsinntekt() * 12
@@ -237,6 +239,34 @@ class BehandleAutomatiskInntektsendringTask(
             ?.inntekter
             ?.minus(nyesteInntektsperiode)
             ?.plus(oppdatertInntektsperiode) ?: emptyList()
+    }
+
+    private fun slåSammenPerioderMedLikInntekt(perioder: List<Inntektsperiode>): List<Inntektsperiode> {
+        if (perioder.isEmpty()) return emptyList()
+        val sorted = perioder.sortedBy { it.periode.fom }
+        val sammenslåttInntektsperioder = mutableListOf<Inntektsperiode>()
+        var inntektsperiode = sorted.first()
+
+        for (nesteInntektsperiode in sorted.drop(1)) {
+            val periodeTom = inntektsperiode.periode.tom
+            val nestePeriodeFom = nesteInntektsperiode.periode.fom
+
+            val skalSlåSammenPerioder =
+                inntektsperiode.månedsinntekt == nesteInntektsperiode.månedsinntekt &&
+                    inntektsperiode.inntekt == nesteInntektsperiode.inntekt &&
+                    inntektsperiode.dagsats == nesteInntektsperiode.dagsats &&
+                    inntektsperiode.samordningsfradrag == nesteInntektsperiode.samordningsfradrag &&
+                    periodeTom.plusMonths(1) == nestePeriodeFom
+
+            if (skalSlåSammenPerioder) {
+                inntektsperiode = inntektsperiode.copy(periode = Månedsperiode(inntektsperiode.periode.fom, nesteInntektsperiode.periode.tom))
+            } else {
+                sammenslåttInntektsperioder.add(inntektsperiode)
+                inntektsperiode = nesteInntektsperiode
+            }
+        }
+        sammenslåttInntektsperioder.add(inntektsperiode)
+        return sammenslåttInntektsperioder
     }
 
     private fun lagInntektsperiodeTekst(
