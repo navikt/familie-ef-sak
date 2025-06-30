@@ -197,7 +197,7 @@ class IverksettingDtoMapper(
         }
     }
 
-    private fun validerGrunnbeløpsmåned(tilkjentYtelse: TilkjentYtelse) {
+    fun validerGrunnbeløpsmåned(tilkjentYtelse: TilkjentYtelse) {
         val gMånedTilkjentYtelse = tilkjentYtelse.grunnbeløpsmåned
         val feilmelding =
             "Kan ikke iverksette med utdatert grunnbeløp gyldig fra $gMånedTilkjentYtelse. Denne behandlingen må beregnes og simuleres på nytt"

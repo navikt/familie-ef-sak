@@ -34,6 +34,8 @@ import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.saksbehandling
 import no.nav.familie.ef.sak.repository.vedtak
+import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
+import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.vedtak.TotrinnskontrollService
 import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.ef.sak.vedtak.domain.VedtakErUtenBeslutter
@@ -54,6 +56,7 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import java.time.LocalDate
 import java.util.Properties
 import java.util.UUID
 
@@ -67,6 +70,7 @@ internal class BeslutteVedtakStegTest {
     private val vedtakService = mockk<VedtakService>()
     private val vedtaksbrevService = mockk<VedtaksbrevService>()
     private val behandlingService = mockk<BehandlingService>()
+    private val tilkjentYtelseService = mockk<TilkjentYtelseService>()
 
     private val beslutteVedtakSteg =
         BeslutteVedtakSteg(
@@ -79,6 +83,7 @@ internal class BeslutteVedtakStegTest {
             behandlingService = behandlingService,
             vedtakService = vedtakService,
             vedtaksbrevService = vedtaksbrevService,
+            tilkjentYtelseService = tilkjentYtelseService,
         )
 
     private val vedtakKreverBeslutter = VedtakErUtenBeslutter(false)
@@ -142,6 +147,8 @@ internal class BeslutteVedtakStegTest {
                 vedtakKreverBeslutter,
             )
         } returns Fil("123".toByteArray())
+        every { tilkjentYtelseService.hentForBehandling(any()) } returns dummyTilkjentYtelse
+        every { iverksettingDtoMapper.validerGrunnbeløpsmåned(any()) } just Runs
 
         val nesteSteg = utførTotrinnskontroll(godkjent = true)
 
@@ -182,6 +189,9 @@ internal class BeslutteVedtakStegTest {
 
     @Test
     internal fun `skal ikke sende brev hvis årsaken er korrigering uten brev`() {
+        every { tilkjentYtelseService.hentForBehandling(any()) } returns dummyTilkjentYtelse
+        every { iverksettingDtoMapper.validerGrunnbeløpsmåned(any()) } just Runs
+
         utførTotrinnskontroll(true, opprettSaksbehandling(BehandlingÅrsak.KORRIGERING_UTEN_BREV))
 
         verify(exactly = 0) { iverksett.iverksett(any(), any()) }
@@ -190,6 +200,9 @@ internal class BeslutteVedtakStegTest {
 
     @Test
     internal fun `skal ikke sende brev hvis årsaken er iverksette KA vedtak`() {
+        every { tilkjentYtelseService.hentForBehandling(any()) } returns dummyTilkjentYtelse
+        every { iverksettingDtoMapper.validerGrunnbeløpsmåned(any()) } just Runs
+
         utførTotrinnskontroll(true, opprettSaksbehandling(BehandlingÅrsak.IVERKSETTE_KA_VEDTAK))
 
         verify(exactly = 0) { iverksett.iverksett(any(), any()) }
@@ -198,6 +211,9 @@ internal class BeslutteVedtakStegTest {
 
     @Test
     internal fun `skal ikke sende brev hvis årsaken er g-omregning`() {
+        every { tilkjentYtelseService.hentForBehandling(any()) } returns dummyTilkjentYtelse
+        every { iverksettingDtoMapper.validerGrunnbeløpsmåned(any()) } just Runs
+
         utførTotrinnskontroll(true, opprettSaksbehandling(BehandlingÅrsak.G_OMREGNING))
 
         verify(exactly = 0) { iverksett.iverksett(any(), any()) }
@@ -285,4 +301,6 @@ internal class BeslutteVedtakStegTest {
                 kategori = BehandlingKategori.NASJONAL,
             ),
         )
+
+    private val dummyTilkjentYtelse = TilkjentYtelse(behandlingId = behandlingId, personident = "1", andelerTilkjentYtelse = emptyList(), startdato = LocalDate.now())
 }
