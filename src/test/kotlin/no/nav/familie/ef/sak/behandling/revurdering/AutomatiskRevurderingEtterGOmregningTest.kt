@@ -24,8 +24,6 @@ import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.fagsakpersoner
 import no.nav.familie.ef.sak.repository.inntektsperiode
 import no.nav.familie.ef.sak.repository.lagInntektResponseFraMånedsinntekter
-import no.nav.familie.ef.sak.testutil.VedtakHelperService
-import no.nav.familie.ef.sak.testutil.VilkårHelperService
 import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.ef.sak.vilkår.VilkårsvurderingRepository
 import no.nav.familie.kontrakter.felles.Månedsperiode
@@ -152,7 +150,8 @@ class AutomatiskRevurderingEtterGOmregningTest : OppslagSpringRunnerTest() {
 
         assertThat(oppdatertInntekt).isEqualTo(forventedeInntektsperioderINyttVedtak)
     }
-    //juni, mai, april, mars, februar
+
+    // juni, mai, april, mars, februar
     val forventetInntektsbegrunnelse =
         """
         Periode som er kontrollert: ${YearMonth.now().minusMonths(12).tilNorskFormat()} til ${

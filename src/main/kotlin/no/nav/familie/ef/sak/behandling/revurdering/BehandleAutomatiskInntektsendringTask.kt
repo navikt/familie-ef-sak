@@ -313,8 +313,6 @@ class BehandleAutomatiskInntektsendringTask(
         return tekst
     }
 
-
-
     fun Int.tilNorskFormat(): String {
         val formatter = NumberFormat.getInstance(Locale.forLanguageTag("no-NO"))
         return formatter.format(this)
