@@ -27,6 +27,7 @@ import no.nav.familie.ef.sak.oppfølgingsoppgave.domain.AutomatiskBrev
 import no.nav.familie.ef.sak.oppfølgingsoppgave.domain.OppgaverForFerdigstilling
 import no.nav.familie.ef.sak.oppfølgingsoppgave.domain.OppgaverForOpprettelse
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerService
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.logger
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.secureLogger
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
@@ -78,6 +79,8 @@ class OppfølgingsoppgaveService(
         val nyeOppgaver = data.oppgavetyperSomSkalOpprettes
         val årForInntektskontrollSelvstendigNæringsdrivende = data.årForInntektskontrollSelvstendigNæringsdrivende
 
+        logger.info("** vi kaller hentOppgavetyperSomKanOpprettesForOvergangsstønad for å lagre oppgaverForOpprettelse")
+
         val oppgavetyperSomKanOpprettes = hentOppgavetyperSomKanOpprettesForOvergangsstønad(saksbehandling.id)
         if (oppgavetyperSomKanOpprettes.isEmpty()) {
             oppgaverForOpprettelseRepository.deleteById(saksbehandling.id)
@@ -110,7 +113,7 @@ class OppfølgingsoppgaveService(
     ): OppgaverForOpprettelseDto {
         val lagretFremleggsoppgave = hentOppgaverForOpprettelseEllerNull(behandlingid)
         val oppgavetyperSomKanOpprettes = hentOppgavetyperSomKanOpprettesForOvergangsstønad(behandlingid)
-
+        logger.info("bygg oppgaver for opprettelse dto herfra for frontend")
         return (
             OppgaverForOpprettelseDto(
                 oppgavetyperSomKanOpprettes = oppgavetyperSomKanOpprettes,
@@ -164,7 +167,7 @@ class OppfølgingsoppgaveService(
         }
 
         oppgavetyperSomKanOpprettes.add(OppgaveForOpprettelseType.INNTEKTSKONTROLL_SELVSTENDIG_NÆRINGSDRIVENDE)
-        secureLogger.info("*** når det er : " + saksbehandling.stønadstype + ", vi sjekker oppgaver : " + oppgavetyperSomKanOpprettes)
+        logger.info("*** når det er : " + saksbehandling.stønadstype + ", vi sjekker oppgaver : " + oppgavetyperSomKanOpprettes)
 
         return oppgavetyperSomKanOpprettes
     }
