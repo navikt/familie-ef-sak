@@ -158,7 +158,7 @@ class SendTilBeslutterSteg(
                 saksbehandling.id,
                 data.oppgaverIderSomSkalFerdigstilles,
             )
-            // ser ut som vi oppretter data her first og vises etter godkjenning
+
             oppfølgingsoppgaveService.lagreOppgaverForOpprettelse(
                 saksbehandling,
                 data,

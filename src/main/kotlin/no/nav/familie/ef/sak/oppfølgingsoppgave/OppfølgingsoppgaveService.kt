@@ -143,7 +143,6 @@ class OppfølgingsoppgaveService(
         if (saksbehandling.stønadstype == StønadType.SKOLEPENGER) {
             return emptyList()
         }
-        // den logikk skal returnere data når det er barnetilsyn, ikke andre stoønadsType
         val sjekkOvergangsstønadmedBarnetilsyn = sjekkOppgavetyperSomKanOpprettesForBeslutter(saksbehandling.ident, saksbehandling.stønadstype)
         val vedtak = vedtakService.hentVedtak(behandlingId)
         val tilkjentYtelse =
@@ -166,7 +165,6 @@ class OppfølgingsoppgaveService(
         }
 
         oppgavetyperSomKanOpprettes.add(OppgaveForOpprettelseType.INNTEKTSKONTROLL_SELVSTENDIG_NÆRINGSDRIVENDE)
-        logger.info("*** når det er : " + saksbehandling.stønadstype + ", vi sjekker oppgaver : " + oppgavetyperSomKanOpprettes)
 
         return oppgavetyperSomKanOpprettes
     }
