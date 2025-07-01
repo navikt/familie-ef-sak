@@ -27,6 +27,7 @@ import no.nav.familie.ef.sak.vedtak.dto.ResultatType
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.internal.TaskService
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
 
 @Service
@@ -51,6 +52,7 @@ class BeslutteVedtakSteg(
         }
     }
 
+    @Transactional
     override fun utførOgReturnerNesteSteg(
         saksbehandling: Saksbehandling,
         data: BeslutteVedtakDto,
