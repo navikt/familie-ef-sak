@@ -14,6 +14,7 @@ import no.nav.familie.ef.sak.behandling.revurdering.tilNorskFormat
 import no.nav.familie.ef.sak.behandling.revurdering.ÅrsakRevurderingsRepository
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.felles.util.YEAR_MONTH_MAX
+import no.nav.familie.ef.sak.felles.util.månedTilNorskFormat
 import no.nav.familie.ef.sak.infrastruktur.config.InntektClientMock
 import no.nav.familie.ef.sak.infrastruktur.config.ObjectMapperProvider.objectMapper
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
@@ -23,8 +24,6 @@ import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.fagsakpersoner
 import no.nav.familie.ef.sak.repository.inntektsperiode
 import no.nav.familie.ef.sak.repository.lagInntektResponseFraMånedsinntekter
-import no.nav.familie.ef.sak.testutil.VedtakHelperService
-import no.nav.familie.ef.sak.testutil.VilkårHelperService
 import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.ef.sak.vilkår.VilkårsvurderingRepository
 import no.nav.familie.kontrakter.felles.Månedsperiode
@@ -63,12 +62,6 @@ class AutomatiskRevurderingEtterGOmregningTest : OppslagSpringRunnerTest() {
 
     @Autowired
     private lateinit var automatiskRevurderingService: AutomatiskRevurderingService
-
-    @Autowired
-    private lateinit var vilkårHelperService: VilkårHelperService
-
-    @Autowired
-    private lateinit var vedtakHelperService: VedtakHelperService
 
     @Autowired
     lateinit var vilkårsvurderingRepository: VilkårsvurderingRepository
@@ -143,7 +136,7 @@ class AutomatiskRevurderingEtterGOmregningTest : OppslagSpringRunnerTest() {
         ).isEqualTo(YearMonth.of(2025, 12))
 
         val oppdatertInntekt = oppdatertVedtak.inntekter?.inntekter ?: emptyList()
-        assertThat(oppdatertInntekt.size).isEqualTo(4)
+        assertThat(oppdatertInntekt.size).isEqualTo(3)
         assertThat(oppdatertVedtak.periodeBegrunnelse).isEqualTo("Behandlingen er opprettet automatisk fordi inntekten har økt. Overgangsstønaden endres fra måneden etter at inntekten har økt minst 10 prosent.")
         assertThat(oppdatertVedtak.inntektBegrunnelse?.replace('\u00A0', ' ')).isEqualTo(forventetInntektsbegrunnelse) // Replace non-breaking space -> space
         val gjennomsnittSiste3Mnd = (28_000 + 30_000 + 30_000) / 3
@@ -151,30 +144,30 @@ class AutomatiskRevurderingEtterGOmregningTest : OppslagSpringRunnerTest() {
         val forventedeInntektsperioderINyttVedtak =
             listOf(
                 inntektsperiode(Månedsperiode(YearMonth.now().minusMonths(3), YearMonth.now().minusMonths(3)), BigDecimal(28_000)),
-                inntektsperiode(Månedsperiode(YearMonth.now().minusMonths(2), YearMonth.now().minusMonths(2)), BigDecimal(30_000)),
-                inntektsperiode(Månedsperiode(YearMonth.now().minusMonths(1), YearMonth.now().minusMonths(1)), BigDecimal(30_000)),
+                inntektsperiode(Månedsperiode(YearMonth.now().minusMonths(2), YearMonth.now().minusMonths(1)), BigDecimal(30_000)),
                 inntektsperiode(Månedsperiode(YearMonth.now(), YEAR_MONTH_MAX), BigDecimal(gjennomsnittSiste3Mnd)),
             )
 
         assertThat(oppdatertInntekt).isEqualTo(forventedeInntektsperioderINyttVedtak)
     }
 
+    // juni, mai, april, mars, februar
     val forventetInntektsbegrunnelse =
         """
         Periode som er kontrollert: ${YearMonth.now().minusMonths(12).tilNorskFormat()} til ${
             YearMonth.now().minusMonths(1).tilNorskFormat()}.
         
-        Forventet årsinntekt fra februar 2025: 276 000 kroner.
+        Forventet årsinntekt fra ${YearMonth.now().minusMonths(4).tilNorskFormat()}: 276 000 kroner.
         - 10 % opp: 25 300 kroner per måned.
         - 10 % ned: 20 700 kroner per måned.
         
-        Forventet årsinntekt fra mai 2025: 289 600 kroner.
+        Forventet årsinntekt fra ${YearMonth.of(YearMonth.now().year, 5).tilNorskFormat()}: 289 600 kroner.
         - 10 % opp: 26 546 kroner per måned.
         - 10 % ned: 21 720 kroner per måned.
         
-        Inntekten i februar 2025 er 28 000 kroner. Inntekten har økt minst 10 prosent denne måneden og alle månedene etter dette. Stønaden beregnes på nytt fra måneden etter 10 prosent økning.
+        Inntekten i ${YearMonth.now().minusMonths(4).tilNorskFormat()} er 28 000 kroner. Inntekten har økt minst 10 prosent denne måneden og alle månedene etter dette. Stønaden beregnes på nytt fra måneden etter 10 prosent økning.
         
-        Har lagt til grunn faktisk inntekt bakover i tid. Fra og med juni 2025 er stønaden beregnet ut ifra gjennomsnittlig inntekt for mars, april og mai.
+        Har lagt til grunn faktisk inntekt bakover i tid. Fra og med ${YearMonth.now().tilNorskFormat()} er stønaden beregnet ut ifra gjennomsnittlig inntekt for ${YearMonth.now().minusMonths(3).månedTilNorskFormat()}, ${YearMonth.now().minusMonths(2).månedTilNorskFormat()} og ${YearMonth.now().minusMonths(1).månedTilNorskFormat()}.
         
         A-inntekt er lagret.
         """.trimIndent()

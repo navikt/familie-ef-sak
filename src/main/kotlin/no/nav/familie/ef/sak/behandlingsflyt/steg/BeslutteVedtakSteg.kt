@@ -19,6 +19,7 @@ import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.iverksett.IverksettingDtoMapper
 import no.nav.familie.ef.sak.oppgave.OppgaveService
+import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.ef.sak.vedtak.TotrinnskontrollService
 import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.ef.sak.vedtak.dto.BeslutteVedtakDto
@@ -26,6 +27,7 @@ import no.nav.familie.ef.sak.vedtak.dto.ResultatType
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.internal.TaskService
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
 
 @Service
@@ -39,6 +41,7 @@ class BeslutteVedtakSteg(
     private val behandlingService: BehandlingService,
     private val vedtakService: VedtakService,
     private val vedtaksbrevService: VedtaksbrevService,
+    private val tilkjentYtelseService: TilkjentYtelseService,
 ) : BehandlingSteg<BeslutteVedtakDto> {
     override fun validerSteg(saksbehandling: Saksbehandling) {
         brukerfeilHvis(saksbehandling.steg.kommerEtter(stegType())) {
@@ -49,6 +52,7 @@ class BeslutteVedtakSteg(
         }
     }
 
+    @Transactional
     override fun utførOgReturnerNesteSteg(
         saksbehandling: Saksbehandling,
         data: BeslutteVedtakDto,
@@ -56,13 +60,13 @@ class BeslutteVedtakSteg(
         fagsakService.fagsakMedOppdatertPersonIdent(saksbehandling.fagsakId)
         val vedtak = vedtakService.hentVedtak(saksbehandling.id)
         val vedtakErUtenBeslutter = vedtak.utledVedtakErUtenBeslutter()
-        val saksbehandler =
-            totrinnskontrollService.lagreTotrinnskontrollOgReturnerBehandler(saksbehandling, data, vedtakErUtenBeslutter)
         val beslutter = SikkerhetContext.hentSaksbehandler()
-        val oppgaveId = ferdigstillOppgave(saksbehandling)
 
         return if (data.godkjent) {
             validerGodkjentVedtak(data)
+            validerTilkjentYtelse(saksbehandling)
+            val oppgaveId = ferdigstillOppgave(saksbehandling)
+            totrinnskontrollService.lagreTotrinnskontrollOgReturnerBehandler(saksbehandling, data, vedtakErUtenBeslutter)
             vedtakService.oppdaterBeslutter(saksbehandling.id, beslutter)
             val iverksettDto = iverksettingDtoMapper.tilDto(saksbehandling, beslutter)
 
@@ -81,9 +85,19 @@ class BeslutteVedtakSteg(
             StegType.VENTE_PÅ_STATUS_FRA_IVERKSETT
         } else {
             validerUnderkjentVedtak(data)
+            ferdigstillOppgave(saksbehandling)
+            val saksbehandler =
+                totrinnskontrollService.lagreTotrinnskontrollOgReturnerBehandler(saksbehandling, data, vedtakErUtenBeslutter)
             opprettBehandleUnderkjentVedtakOppgave(saksbehandling, saksbehandler)
             StegType.SEND_TIL_BESLUTTER
         }
+    }
+
+    private fun validerTilkjentYtelse(saksbehandling: Saksbehandling) {
+        val vedtak = vedtakService.hentVedtak(saksbehandling.id)
+        val tilkjentYtelse =
+            if (vedtak.resultatType != ResultatType.AVSLÅ) tilkjentYtelseService.hentForBehandling(saksbehandling.id) else null
+        if (tilkjentYtelse != null && vedtak.resultatType != ResultatType.OPPHØRT) iverksettingDtoMapper.validerGrunnbeløpsmåned(tilkjentYtelse)
     }
 
     private fun opprettTaskForFerdigstillFremleggsoppgaver(behandlingId: UUID) {
@@ -137,6 +151,7 @@ class BeslutteVedtakSteg(
                     behandlingId,
                     BehandlingResultat.INNVILGET,
                 )
+
             ResultatType.OPPHØRT -> behandlingService.oppdaterResultatPåBehandling(behandlingId, BehandlingResultat.OPPHØRT)
             ResultatType.AVSLÅ -> behandlingService.oppdaterResultatPåBehandling(behandlingId, BehandlingResultat.AVSLÅTT)
             ResultatType.SANKSJONERE -> behandlingService.oppdaterResultatPåBehandling(behandlingId, BehandlingResultat.INNVILGET)

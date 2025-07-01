@@ -75,6 +75,11 @@ fun LocalDateTime.harGåttAntallTimer(timer: Int) = this.plusHours(timer.toLong(
 
 fun dagensDatoMedTidNorskFormat(): String = dagensDatoMedTid().format(DatoFormat.GOSYS_DATE_TIME)
 
+fun YearMonth.månedTilNorskFormat(): String {
+    val formatter = DateTimeFormatter.ofPattern("MMMM", Locale.forLanguageTag("no-NO"))
+    return this.format(formatter)
+}
+
 fun YearMonth.formaterYearMonthTilMånedÅr(): String {
     val yearMonth = YearMonth.parse(this.toString())
     val locale =

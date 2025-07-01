@@ -164,9 +164,9 @@ internal class NæringsinntektKontrollServiceTest : OppslagSpringRunnerTest() {
         every { sigrunClient.hentPensjonsgivendeInntekt(any(), any()) } answers {
             PensjonsgivendeInntektResponse(firstArg(), secondArg(), listOf(pensjonsgivendeInntektForSkatteordning))
         }
-        val fom = LocalDate.of(2023, 5, 1)
-        val tom = LocalDate.of(2025, 6, 30)
-        val andelTilkjentYtelse = (lagAndelTilkjentYtelse(22761, fom, tom, personIdent, behandlingIds[3], 100_000, 0, 494))
+        val toÅrTilbakeITid = YearMonth.of(LocalDate.now().year - 2, LocalDate.now().month).atDay(1)
+        val sluttenAvNesteMåned = YearMonth.now().plusMonths(1).atEndOfMonth()
+        val andelTilkjentYtelse = (lagAndelTilkjentYtelse(22761, toÅrTilbakeITid, sluttenAvNesteMåned, personIdent, behandlingIds[3], 100_000, 0, 494))
         val tilkjentYtelse = lagTilkjentYtelse(andelerTilkjentYtelse = listOf(andelTilkjentYtelse), behandlingId = behandlingIds[3], personident = personIdent, startdato = LocalDate.of(2022, 9, 1), grunnbeløpsmåned = YearMonth.of(2024, 5))
         tilkjentYtelseRepository.insert(tilkjentYtelse)
 
