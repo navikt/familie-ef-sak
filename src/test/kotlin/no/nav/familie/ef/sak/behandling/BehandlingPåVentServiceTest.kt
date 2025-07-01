@@ -93,7 +93,9 @@ internal class BehandlingPåVentServiceTest {
             )
         }
         every { tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandler(any()) } returns true
-        every { oppgaveService.hentOppgaveSomIkkeErFerdigstilt(any(),any()) } returns no.nav.familie.ef.sak.oppgave.Oppgave(behandlingId = UUID.randomUUID(), gsakOppgaveId = 123, type = Oppgavetype.BehandleSak)
+        every { oppgaveService.hentOppgaveSomIkkeErFerdigstilt(any(), any()) } returns
+            no.nav.familie.ef.sak.oppgave
+                .Oppgave(behandlingId = UUID.randomUUID(), gsakOppgaveId = 123, type = Oppgavetype.BehandleSak)
     }
 
     @AfterEach
