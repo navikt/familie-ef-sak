@@ -80,8 +80,6 @@ class OppfølgingsoppgaveService(
         val nyeOppgaver = data.oppgavetyperSomSkalOpprettes
         val årForInntektskontrollSelvstendigNæringsdrivende = data.årForInntektskontrollSelvstendigNæringsdrivende
 
-        logger.info("** vi kaller hentOppgavetyperSomKanOpprettesForOvergangsstønad for å lagre oppgaverForOpprettelse")
-
         val oppgavetyperSomKanOpprettes = hentOppgavetyperSomKanOpprettesForOvergangsstønad(saksbehandling.id)
         if (oppgavetyperSomKanOpprettes.isEmpty()) {
             oppgaverForOpprettelseRepository.deleteById(saksbehandling.id)
@@ -91,10 +89,10 @@ class OppfølgingsoppgaveService(
             "behandlingId=${saksbehandling.id} prøver å opprette $nyeOppgaver $oppgavetyperSomKanOpprettes"
         }
         oppgaverForOpprettelseRepository.deleteByBehandlingId(saksbehandling.id)
-        if (oppgavetyperSomKanOpprettes.contains(OppgaveForOpprettelseType.INNTEKTSKONTROLL_1_ÅR_FREM_I_TID)) {
+        if (nyeOppgaver.contains(OppgaveForOpprettelseType.INNTEKTSKONTROLL_1_ÅR_FREM_I_TID)) {
             if (saksbehandling.stønadstype.equals(StønadType.BARNETILSYN)) {
-                val behandlingsId = sjekkOppgavetyperSomKanOpprettesForBeslutter(saksbehandling.ident, saksbehandling.stønadstype)
-                behandlingsId?.let { OppgaverForOpprettelse(it, listOf(OppgaveForOpprettelseType.INNTEKTSKONTROLL_1_ÅR_FREM_I_TID), årForInntektskontrollSelvstendigNæringsdrivende) }?.let { oppgaverForOpprettelseRepository.insert(it) }
+                oppgaverForOpprettelseRepository.insert(OppgaverForOpprettelse(saksbehandling.id, nyeOppgaver, årForInntektskontrollSelvstendigNæringsdrivende))
+                return
             }
         }
         oppgaverForOpprettelseRepository.insert(OppgaverForOpprettelse(saksbehandling.id, nyeOppgaver, årForInntektskontrollSelvstendigNæringsdrivende))
