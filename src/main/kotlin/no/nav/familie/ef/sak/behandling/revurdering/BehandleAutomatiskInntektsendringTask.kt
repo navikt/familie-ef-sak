@@ -12,6 +12,7 @@ import no.nav.familie.ef.sak.beregning.tilInntekt
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.felles.util.isEqualOrBefore
+import no.nav.familie.ef.sak.felles.util.månedTilNorskFormat
 import no.nav.familie.ef.sak.infrastruktur.config.ObjectMapperProvider.objectMapper
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
@@ -312,10 +313,7 @@ class BehandleAutomatiskInntektsendringTask(
         return tekst
     }
 
-    fun YearMonth.månedTilNorskFormat(): String {
-        val formatter = DateTimeFormatter.ofPattern("MMMM", Locale.forLanguageTag("no-NO"))
-        return this.format(formatter)
-    }
+
 
     fun Int.tilNorskFormat(): String {
         val formatter = NumberFormat.getInstance(Locale.forLanguageTag("no-NO"))
