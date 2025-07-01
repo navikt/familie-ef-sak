@@ -226,6 +226,14 @@ class BehandlingPåVentService(
         brukerfeilHvis(!tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandler(behandling.id)) {
             "Behandlingen har en ny eier og kan derfor ikke settes på vent av deg"
         }
+
+        val saksbehandling = behandlingService.hentSaksbehandling(behandling.id)
+
+        oppgaveService.hentOppgaveSomIkkeErFerdigstilt(
+            oppgavetype = Oppgavetype.BehandleSak,
+            saksbehandling = saksbehandling,
+        )
+            ?: throw ApiFeil(feil = "Systemet har ikke rukket å opprette behandle sak oppgave enda. Prøv igjen om litt.", httpStatus = HttpStatus.INTERNAL_SERVER_ERROR)
     }
 
     private fun validerKanOppretteVurderHenvendelseOppgave(
