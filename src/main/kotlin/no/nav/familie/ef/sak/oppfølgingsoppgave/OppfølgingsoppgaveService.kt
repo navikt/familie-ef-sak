@@ -165,6 +165,7 @@ class OppfølgingsoppgaveService(
 
         oppgavetyperSomKanOpprettes.add(OppgaveForOpprettelseType.INNTEKTSKONTROLL_SELVSTENDIG_NÆRINGSDRIVENDE)
         secureLogger.info("*** når det er : " + saksbehandling.stønadstype + ", vi sjekker oppgaver : " + oppgavetyperSomKanOpprettes)
+
         return oppgavetyperSomKanOpprettes
     }
 
