@@ -27,6 +27,7 @@ import no.nav.familie.ef.sak.oppfølgingsoppgave.domain.AutomatiskBrev
 import no.nav.familie.ef.sak.oppfølgingsoppgave.domain.OppgaverForFerdigstilling
 import no.nav.familie.ef.sak.oppfølgingsoppgave.domain.OppgaverForOpprettelse
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerService
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.secureLogger
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.vedtak.VedtakService
@@ -163,7 +164,7 @@ class OppfølgingsoppgaveService(
         }
 
         oppgavetyperSomKanOpprettes.add(OppgaveForOpprettelseType.INNTEKTSKONTROLL_SELVSTENDIG_NÆRINGSDRIVENDE)
-
+        secureLogger.info("*** når det er : " + saksbehandling.stønadstype + ", vi sjekker oppgaver : " + oppgavetyperSomKanOpprettes)
         return oppgavetyperSomKanOpprettes
     }
 
