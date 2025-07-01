@@ -143,7 +143,7 @@ class AutomatiskRevurderingEtterGOmregningTest : OppslagSpringRunnerTest() {
         ).isEqualTo(YearMonth.of(2025, 12))
 
         val oppdatertInntekt = oppdatertVedtak.inntekter?.inntekter ?: emptyList()
-        assertThat(oppdatertInntekt.size).isEqualTo(4)
+        assertThat(oppdatertInntekt.size).isEqualTo(3)
         assertThat(oppdatertVedtak.periodeBegrunnelse).isEqualTo("Behandlingen er opprettet automatisk fordi inntekten har økt. Overgangsstønaden endres fra måneden etter at inntekten har økt minst 10 prosent.")
         assertThat(oppdatertVedtak.inntektBegrunnelse?.replace('\u00A0', ' ')).isEqualTo(forventetInntektsbegrunnelse) // Replace non-breaking space -> space
         val gjennomsnittSiste3Mnd = (28_000 + 30_000 + 30_000) / 3
@@ -151,8 +151,7 @@ class AutomatiskRevurderingEtterGOmregningTest : OppslagSpringRunnerTest() {
         val forventedeInntektsperioderINyttVedtak =
             listOf(
                 inntektsperiode(Månedsperiode(YearMonth.now().minusMonths(3), YearMonth.now().minusMonths(3)), BigDecimal(28_000)),
-                inntektsperiode(Månedsperiode(YearMonth.now().minusMonths(2), YearMonth.now().minusMonths(2)), BigDecimal(30_000)),
-                inntektsperiode(Månedsperiode(YearMonth.now().minusMonths(1), YearMonth.now().minusMonths(1)), BigDecimal(30_000)),
+                inntektsperiode(Månedsperiode(YearMonth.now().minusMonths(2), YearMonth.now().minusMonths(1)), BigDecimal(30_000)),
                 inntektsperiode(Månedsperiode(YearMonth.now(), YEAR_MONTH_MAX), BigDecimal(gjennomsnittSiste3Mnd)),
             )
 

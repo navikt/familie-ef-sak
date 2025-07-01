@@ -65,6 +65,7 @@ import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import java.time.LocalDate
+import java.time.YearMonth
 import java.util.UUID
 
 internal class VedtakControllerTest : OppslagSpringRunnerTest() {
@@ -436,6 +437,32 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
             opprettOppgave(oppgaveType = Oppgavetype.GodkjenneVedtak, sakshandler = SAKSBEHANDLER)
             angreSendTilBeslutter(SAKSBEHANDLER, responseOK())
         }
+    }
+
+    @Test
+    internal fun `Skal kaste feil dersom vedtaket er beregnet med foreldet g-beløp`() {
+        val tilkjentYtelseGammelG: (behandlingId: UUID) -> TilkjentYtelse = { behandlingId ->
+            val andel =
+                lagAndelTilkjentYtelse(
+                    beløp = 100,
+                    fraOgMed = LocalDate.now(),
+                    tilOgMed = LocalDate.now().plusYears(2),
+                    kildeBehandlingId = behandlingId,
+                )
+            lagTilkjentYtelse(behandlingId = behandlingId, andelerTilkjentYtelse = listOf(andel), grunnbeløpsmåned = YearMonth.of(2025, 4))
+        }
+        val behandlingId = opprettBehandling(steg = StegType.SEND_TIL_BESLUTTER, status = BehandlingStatus.UTREDES, vedtakResultatType = ResultatType.INNVILGE, tilkjentYtelse = tilkjentYtelseGammelG)
+        lagVilkårsvurderinger(behandlingId, Vilkårsresultat.OPPFYLT)
+        sendTilBeslutter(SAKSBEHANDLER)
+        byttEierPåLagretOppgave(behandlingId, 24681L, 24688L)
+        godkjennTotrinnskontroll(BESLUTTER) { response ->
+            assertThat(response.body?.frontendFeilmelding)
+                .isEqualTo("Kan ikke iverksette med utdatert grunnbeløp gyldig fra 2025-04. Denne behandlingen må beregnes og simuleres på nytt")
+            assertThat(response.statusCode).isEqualTo(HttpStatus.BAD_REQUEST)
+        }
+
+        val lagretBehandling = behandlingService.hentBehandling(behandlingId)
+        assertThat(lagretBehandling.status).isEqualTo(BehandlingStatus.FATTER_VEDTAK)
     }
 
     private fun opprettBehandling(
