@@ -27,8 +27,6 @@ import no.nav.familie.ef.sak.oppfølgingsoppgave.domain.AutomatiskBrev
 import no.nav.familie.ef.sak.oppfølgingsoppgave.domain.OppgaverForFerdigstilling
 import no.nav.familie.ef.sak.oppfølgingsoppgave.domain.OppgaverForOpprettelse
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerService
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.logger
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.secureLogger
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.vedtak.VedtakService
@@ -37,6 +35,7 @@ import no.nav.familie.ef.sak.vedtak.dto.SendTilBeslutterDto
 import no.nav.familie.kontrakter.ef.felles.AvslagÅrsak
 import no.nav.familie.kontrakter.ef.iverksett.OppgaveForOpprettelseType
 import no.nav.familie.kontrakter.felles.ef.StønadType
+import org.slf4j.LoggerFactory
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -60,6 +59,8 @@ class OppfølgingsoppgaveService(
     private val fagsakService: FagsakService,
     private val behandlingRepository: BehandlingRepository,
 ) {
+    private val logger = LoggerFactory.getLogger(javaClass)
+
     @Transactional
     fun lagreOppgaveIderForFerdigstilling(
         behandlingId: UUID,
