@@ -226,6 +226,8 @@ class BehandlingPåVentService(
         brukerfeilHvis(!tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandler(behandling.id)) {
             "Behandlingen har en ny eier og kan derfor ikke settes på vent av deg"
         }
+
+        validerHarBehandleSakOppgave(behandling)
     }
 
     private fun validerKanOppretteVurderHenvendelseOppgave(
@@ -305,6 +307,29 @@ class BehandlingPåVentService(
             TaAvVentStatusDto(TaAvVentStatus.OK)
         } else {
             TaAvVentStatusDto(TaAvVentStatus.MÅ_NULSTILLE_VEDTAK, sisteIverksatte.id)
+        }
+    }
+
+    private fun validerHarBehandleSakOppgave(behandling: Behandling) {
+        val saksbehandling = behandlingService.hentSaksbehandling(behandling.id)
+
+        val harIkkeBehandleSakOppgave =
+            oppgaveService.hentOppgaveSomIkkeErFerdigstilt(
+                oppgavetype = Oppgavetype.BehandleSak,
+                saksbehandling = saksbehandling,
+            ) == null
+
+        val harIkkeBehandleUnderkjentVedtakOppgave =
+            oppgaveService.hentOppgaveSomIkkeErFerdigstilt(
+                oppgavetype = Oppgavetype.BehandleUnderkjentVedtak,
+                saksbehandling = saksbehandling,
+            ) == null
+
+        if (harIkkeBehandleSakOppgave && harIkkeBehandleUnderkjentVedtakOppgave) {
+            throw ApiFeil(
+                feil = "Systemet har ikke rukket å opprette behandle sak oppgave enda. Prøv igjen om litt.",
+                httpStatus = HttpStatus.INTERNAL_SERVER_ERROR,
+            )
         }
     }
 }
