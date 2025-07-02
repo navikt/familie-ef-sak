@@ -313,21 +313,19 @@ class BehandlingPåVentService(
     private fun validerHarBehandleSakOppgave(behandling: Behandling) {
         val saksbehandling = behandlingService.hentSaksbehandling(behandling.id)
 
-        val harBehandleSakOppgave =
+        val harIkkeBehandleSakOppgave =
             oppgaveService.hentOppgaveSomIkkeErFerdigstilt(
                 oppgavetype = Oppgavetype.BehandleSak,
                 saksbehandling = saksbehandling,
-            ) != null
+            ) == null
 
-        val harBehandleUnderkjentVedtakOppgave =
+        val harIkkeBehandleUnderkjentVedtakOppgave =
             oppgaveService.hentOppgaveSomIkkeErFerdigstilt(
                 oppgavetype = Oppgavetype.BehandleUnderkjentVedtak,
                 saksbehandling = saksbehandling,
-            ) != null
+            ) == null
 
-        if (harBehandleSakOppgave || harBehandleUnderkjentVedtakOppgave) {
-            // OK
-        } else {
+        if (harIkkeBehandleSakOppgave && harIkkeBehandleUnderkjentVedtakOppgave) {
             throw ApiFeil(
                 feil = "Systemet har ikke rukket å opprette behandle sak oppgave enda. Prøv igjen om litt.",
                 httpStatus = HttpStatus.INTERNAL_SERVER_ERROR,
