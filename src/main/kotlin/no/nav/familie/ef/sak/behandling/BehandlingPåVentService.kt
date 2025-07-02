@@ -227,13 +227,7 @@ class BehandlingPåVentService(
             "Behandlingen har en ny eier og kan derfor ikke settes på vent av deg"
         }
 
-        val saksbehandling = behandlingService.hentSaksbehandling(behandling.id)
-
-        oppgaveService.hentOppgaveSomIkkeErFerdigstilt(
-            oppgavetype = Oppgavetype.BehandleSak,
-            saksbehandling = saksbehandling,
-        )
-            ?: throw ApiFeil(feil = "Systemet har ikke rukket å opprette behandle sak oppgave enda. Prøv igjen om litt.", httpStatus = HttpStatus.INTERNAL_SERVER_ERROR)
+        validerHarBehandleSakOppgave(behandling)
     }
 
     private fun validerKanOppretteVurderHenvendelseOppgave(
@@ -313,6 +307,31 @@ class BehandlingPåVentService(
             TaAvVentStatusDto(TaAvVentStatus.OK)
         } else {
             TaAvVentStatusDto(TaAvVentStatus.MÅ_NULSTILLE_VEDTAK, sisteIverksatte.id)
+        }
+    }
+
+    private fun validerHarBehandleSakOppgave(behandling: Behandling) {
+        val saksbehandling = behandlingService.hentSaksbehandling(behandling.id)
+
+        val harBehandleSakOppgave =
+            oppgaveService.hentOppgaveSomIkkeErFerdigstilt(
+                oppgavetype = Oppgavetype.BehandleSak,
+                saksbehandling = saksbehandling,
+            ) != null
+
+        val harBehandleUnderkjentVedtakOppgave =
+            oppgaveService.hentOppgaveSomIkkeErFerdigstilt(
+                oppgavetype = Oppgavetype.BehandleUnderkjentVedtak,
+                saksbehandling = saksbehandling,
+            ) != null
+
+        if (harBehandleSakOppgave || harBehandleUnderkjentVedtakOppgave) {
+            // OK
+        } else {
+            throw ApiFeil(
+                feil = "Systemet har ikke rukket å opprette behandle sak oppgave enda. Prøv igjen om litt.",
+                httpStatus = HttpStatus.INTERNAL_SERVER_ERROR,
+            )
         }
     }
 }
