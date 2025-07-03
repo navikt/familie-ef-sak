@@ -16,6 +16,7 @@ import no.nav.familie.ef.sak.brev.FamilieDokumentClient
 import no.nav.familie.ef.sak.brev.Flettefelter
 import no.nav.familie.ef.sak.brev.FrittståendeBrevService
 import no.nav.familie.ef.sak.brev.VedtaksbrevService
+import no.nav.familie.ef.sak.ekstern.stønadsperiode.EksternStønadsperioderService
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.felles.util.norskFormat
 import no.nav.familie.ef.sak.infrastruktur.config.ObjectMapperProvider.objectMapper
@@ -55,6 +56,7 @@ class OppfølgingsoppgaveService(
     private val brevClient: BrevClient,
     private val frittståendeBrevService: FrittståendeBrevService,
     private val personopplysningerService: PersonopplysningerService,
+    private val eksternStønadsperioderService: EksternStønadsperioderService,
     private val brevmottakereService: BrevmottakereService,
     private val fagsakService: FagsakService,
     private val behandlingRepository: BehandlingRepository,
@@ -144,6 +146,8 @@ class OppfølgingsoppgaveService(
             return emptyList()
         }
         val sjekkOvergangsstønadmedBarnetilsyn = sjekkOppgavetyperSomKanOpprettesForBeslutter(saksbehandling.ident, saksbehandling.stønadstype)
+        val sjekkLøpendeOvergangsstønad = eksternStønadsperioderService.hentOvergangsstønadperioderMedAktivitet(saksbehandling.ident)
+
         val vedtak = vedtakService.hentVedtak(behandlingId)
         val tilkjentYtelse =
             when {
@@ -161,6 +165,10 @@ class OppfølgingsoppgaveService(
 
         val oppgavetyperSomKanOpprettes = mutableListOf<OppgaveForOpprettelseType>()
         if (kanOppretteOppgaveForInntektskontrollFremITid(tilkjentYtelse)) {
+            oppgavetyperSomKanOpprettes.add(OppgaveForOpprettelseType.INNTEKTSKONTROLL_1_ÅR_FREM_I_TID)
+        }
+        // viser det hvis vi har en løpende overgangsstønad og vil behandle barnetilsyn
+        if (sjekkLøpendeOvergangsstønad.perioder.isNotEmpty() && saksbehandling.stønadstype == StønadType.BARNETILSYN) {
             oppgavetyperSomKanOpprettes.add(OppgaveForOpprettelseType.INNTEKTSKONTROLL_1_ÅR_FREM_I_TID)
         }
 
