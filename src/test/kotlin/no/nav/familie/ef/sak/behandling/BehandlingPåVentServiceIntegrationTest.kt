@@ -8,6 +8,7 @@ import no.nav.familie.ef.sak.behandling.dto.RevurderingDto
 import no.nav.familie.ef.sak.behandling.dto.SettPåVentRequest
 import no.nav.familie.ef.sak.behandling.dto.TaAvVentStatus
 import no.nav.familie.ef.sak.behandling.revurdering.RevurderingService
+import no.nav.familie.ef.sak.behandlingsflyt.task.OpprettOppgaveForOpprettetBehandlingTask
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.clearBrukerContext
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.mockBrukerContext
 import no.nav.familie.ef.sak.journalføring.dto.VilkårsbehandleNyeBarn
@@ -22,6 +23,7 @@ import no.nav.familie.ef.sak.vilkår.Vilkårsvurdering
 import no.nav.familie.ef.sak.vilkår.VilkårsvurderingRepository
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.felles.oppgave.OppgavePrioritet
+import no.nav.familie.prosessering.internal.TaskService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -47,6 +49,12 @@ internal class BehandlingPåVentServiceIntegrationTest : OppslagSpringRunnerTest
     @Autowired
     lateinit var vilkårsvurderingRepository: VilkårsvurderingRepository
 
+    @Autowired
+    lateinit var taskService: TaskService
+
+    @Autowired
+    private lateinit var opprettOppgaveForOpprettetBehandlingTask: OpprettOppgaveForOpprettetBehandlingTask
+
     val fagsak = fagsak()
     val behandling = behandling(fagsak).ferdigstill()
     val saksbehandling = saksbehandling(fagsak, behandling)
@@ -68,8 +76,10 @@ internal class BehandlingPåVentServiceIntegrationTest : OppslagSpringRunnerTest
 
     @Test
     internal fun `revurdering med behandling på vent skal peke til førstegangsbehandling`() {
-        val settPåVentRequest = settPåVentRequest(1, emptyList())
+        val settPåVentRequest = settPåVentRequest(2, emptyList())
         val behandling2 = opprettRevurdering()
+        val task = taskService.findAll().first { it.type == OpprettOppgaveForOpprettetBehandlingTask.TYPE }
+        opprettOppgaveForOpprettetBehandlingTask.doTask(task)
         behandlingPåVentService.settPåVent(behandling2.id, settPåVentRequest)
         val behandling3 = opprettRevurdering()
 
@@ -83,8 +93,11 @@ internal class BehandlingPåVentServiceIntegrationTest : OppslagSpringRunnerTest
 
     @Test
     internal fun `behandling2 settes på vent og det gjøres et vedtak på behandling3 i mellomtiden`() {
-        val settPåVentRequest = settPåVentRequest(1, emptyList())
+        val settPåVentRequest = settPåVentRequest(2, emptyList())
         val behandling2 = opprettRevurdering()
+        val task = taskService.findAll().first { it.type == OpprettOppgaveForOpprettetBehandlingTask.TYPE }
+        opprettOppgaveForOpprettetBehandlingTask.doTask(task)
+
         behandlingPåVentService.settPåVent(behandling2.id, settPåVentRequest)
         val behandling3 = opprettRevurdering()
 
