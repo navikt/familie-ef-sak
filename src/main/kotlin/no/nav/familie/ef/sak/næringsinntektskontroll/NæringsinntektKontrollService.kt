@@ -66,6 +66,7 @@ class NæringsinntektKontrollService(
                     val avsluttOppgaveMedOppdatertBeskrivelse = næringsinntektDataForBeregning.oppgave.copy(beskrivelse = næringsinntektDataForBeregning.oppgave.beskrivelse + "\nAutomatisk avsluttet oppgave: Ingen endring i inntekt.", status = StatusEnum.FERDIGSTILT)
                     oppgaveService.oppdaterOppgave(avsluttOppgaveMedOppdatertBeskrivelse)
                     næringsinntektNotatService.lagNotat(næringsinntektDataForBeregning) // Må arkiveres / journalføres
+                    // Journalfør notat
                     næringsinntektKontrollRepository.insert(NæringsinntektKontrollDomain(oppgaveId = oppgaveId, fagsakId = næringsinntektDataForBeregning.fagsak.id, utfall = NæringsinntektKontrollUtfall.UENDRET_INNTEKT))
                 }
             } else {
