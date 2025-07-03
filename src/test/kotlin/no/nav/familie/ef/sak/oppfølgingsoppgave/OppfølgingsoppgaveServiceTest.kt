@@ -238,7 +238,7 @@ internal class OppfølgingsoppgaveServiceTest {
 //        val oppgaver = oppfølgingsoppgaveService.hentOppgavetyperSomKanOpprettesForOvergangsstønad(iverksattFørstegangsbehandling.id)
 //        assertThat(oppgaver.contains(OppgaveForOpprettelseType.INNTEKTSKONTROLL_1_ÅR_FREM_I_TID)).isFalse()
 //    }
-
+// skal fikse test senere
 //    @Test
 //    fun `siste iverksatte behandling hentes for avslag`() {
 //        val saksbehandling = lagSaksbehandling(behandling = behandling)
