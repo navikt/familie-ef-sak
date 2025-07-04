@@ -82,20 +82,27 @@ class AutomatiskRevurderingService(
             return false
         }
 
-        val sisteIverksatteBehandlingId = behandlingService.finnSisteIverksatteBehandling(fagsak.id)?.id
-        if (sisteIverksatteBehandlingId == null) {
+        val sisteIverksatteBehandling = behandlingService.finnSisteIverksatteBehandling(fagsak.id)
+        if (sisteIverksatteBehandling == null) {
             logger.error("Fant ikke siste iverksatte behandling for fagsakId: ${fagsak.id}")
             return false
         }
+        if (sisteIverksatteBehandling.erGOmregning() && sisteIverksatteBehandling.forrigeBehandlingId != null) {
+            val vedtak = vedtakService.hentVedtak(sisteIverksatteBehandling.forrigeBehandlingId)
+            if (vedtak.perioder?.perioder?.size != 1) { // Denne valideringen kan fjernes når logikken for å sette revurderes fra-dato er forbedret
+                logger.info("behandlingId: $sisteIverksatteBehandling er G-omregning og forrigeBehandling med id ${sisteIverksatteBehandling.forrigeBehandlingId} har flere vedtaksperioder og kan derfor ikke automatisk revurderes")
+                return false
+            }
+        }
 
-        val vedtak = vedtakService.hentVedtak(sisteIverksatteBehandlingId)
+        val vedtak = vedtakService.hentVedtak(sisteIverksatteBehandling.id)
         if (vedtak.perioder?.perioder?.size != 1) { // Denne valideringen kan fjernes når logikken for å sette revurderes fra-dato er forbedret
-            logger.info("behandlingId: $sisteIverksatteBehandlingId har flere vedtaksperioder og kan derfor ikke automatisk revurderes")
+            logger.info("behandlingId: $sisteIverksatteBehandling har flere vedtaksperioder og kan derfor ikke automatisk revurderes")
             return false
         }
 
         if (inntektSisteTreMåneder.harMånedMedBareFeriepenger(YearMonth.now().minusMonths(3))) {
-            logger.info("Bruker har en måned med bare feriepenger, og skal dermed ikke automatisk revurderes. BehandlingId: $sisteIverksatteBehandlingId")
+            logger.info("Bruker har en måned med bare feriepenger, og skal dermed ikke automatisk revurderes. BehandlingId: $sisteIverksatteBehandling")
             return false
         }
 
