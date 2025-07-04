@@ -2,10 +2,14 @@ package no.nav.familie.ef.sak.behandling.revurdering
 
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.verify
 import no.nav.familie.ef.sak.amelding.InntektResponse
 import no.nav.familie.ef.sak.amelding.InntektType
 import no.nav.familie.ef.sak.behandling.BehandlingService
+import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
+import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.oppgave.OppgaveService
+import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.inntekt
 import no.nav.familie.ef.sak.repository.inntektsmåneder
 import no.nav.familie.ef.sak.repository.inntektsperiode
@@ -14,6 +18,7 @@ import no.nav.familie.ef.sak.repository.vedtaksperiode
 import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.ef.sak.vedtak.domain.InntektWrapper
 import no.nav.familie.ef.sak.vedtak.domain.PeriodeWrapper
+import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.felles.Tema
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveResponseDto
 import no.nav.familie.kontrakter.felles.oppgave.IdentGruppe
@@ -23,6 +28,8 @@ import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.kontrakter.felles.oppgave.StatusEnum
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import org.mockito.Mockito.verify
+import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
 
@@ -70,6 +77,24 @@ class AutomatiskRevurderingServiceTest {
             )
 
         assertThat(automatiskRevurderingService.kanAutomatiskRevurderes("1")).isFalse()
+    }
+
+    @Test
+    fun `kan ikke automatisk revurderes som følge av at gjeldende behandling er en g-omregning hvor forrige behandling har flere vedtaksperioder`() {
+        val forrigeBehandlingId = UUID.randomUUID()
+        every { behandlingServiceMock.finnSisteIverksatteBehandling(any()) } returns behandling(status = BehandlingStatus.FERDIGSTILT, resultat = BehandlingResultat.INNVILGET, forrigeBehandlingId = forrigeBehandlingId, årsak = BehandlingÅrsak.G_OMREGNING)
+
+        val vedtakMedToPerioder =
+            vedtak(
+                behandlingId = forrigeBehandlingId,
+                perioder = PeriodeWrapper(listOf(vedtaksperiode(YearMonth.now().year), vedtaksperiode(YearMonth.now().minusYears(1).year))),
+                inntekter = InntektWrapper(listOf(inntektsperiode(2025))),
+            )
+        every { vedtakServiceMock.hentVedtak(forrigeBehandlingId) } returns vedtakMedToPerioder
+
+        assertThat(automatiskRevurderingService.kanAutomatiskRevurderes("1")).isFalse()
+
+        verify(exactly = 1) { vedtakServiceMock.hentVedtak(forrigeBehandlingId) }
     }
 
     @Test
