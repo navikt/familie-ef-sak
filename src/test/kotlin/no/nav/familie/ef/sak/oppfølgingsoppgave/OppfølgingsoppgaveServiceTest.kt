@@ -18,6 +18,9 @@ import no.nav.familie.ef.sak.brev.FamilieDokumentClient
 import no.nav.familie.ef.sak.brev.FrittståendeBrevService
 import no.nav.familie.ef.sak.ekstern.stønadsperiode.EksternStønadsperioderService
 import no.nav.familie.ef.sak.fagsak.FagsakService
+import no.nav.familie.ef.sak.felles.util.BehandlingOppsettUtil.iverksattFørstegangsbehandling
+import no.nav.familie.ef.sak.felles.util.BehandlingOppsettUtil.iverksattRevurdering
+import no.nav.familie.ef.sak.infotrygd.LøpendeOvergangsstønadAktivitetsperioder
 import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.oppfølgingsoppgave.OppfølgingsoppgaveService
 import no.nav.familie.ef.sak.oppfølgingsoppgave.automatiskBrev.AutomatiskBrevRepository
@@ -33,8 +36,10 @@ import no.nav.familie.ef.sak.vedtak.dto.ResultatType
 import no.nav.familie.ef.sak.vedtak.dto.SendTilBeslutterDto
 import no.nav.familie.ef.sak.økonomi.lagAndelTilkjentYtelse
 import no.nav.familie.ef.sak.økonomi.lagTilkjentYtelse
+import no.nav.familie.kontrakter.ef.felles.AvslagÅrsak
 import no.nav.familie.kontrakter.ef.iverksett.OppgaveForOpprettelseType
 import no.nav.familie.kontrakter.felles.ef.StønadType
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -148,109 +153,145 @@ internal class OppfølgingsoppgaveServiceTest {
         verify(exactly = 0) { oppgaverForOpprettelseRepository.update(any()) }
     }
 
-//    @Test
-//    fun `skal kunne opprette oppgave hvis behandling er førstegangsbehandling`() {
-//        every { tilkjentYtelseService.hentForBehandlingEllerNull(any()) } returns tilkjentYtelse2årFremITid
-//        every { behandlingService.hentSaksbehandling(iverksattFørstegangsbehandling.id) } returns saksbehandling
-//
-//        val oppgaver = oppfølgingsoppgaveService.hentOppgavetyperSomKanOpprettesForOvergangsstønad(iverksattFørstegangsbehandling.id)
-//
-//        assertThat(oppgaver.contains(OppgaveForOpprettelseType.INNTEKTSKONTROLL_1_ÅR_FREM_I_TID)).isTrue
-//    }
+    @Test
+    fun `skal kunne opprette oppgave hvis behandling er førstegangsbehandling`() {
+        every { tilkjentYtelseService.hentForBehandlingEllerNull(any()) } returns tilkjentYtelse2årFremITid
+        every { behandlingService.hentSaksbehandling(iverksattFørstegangsbehandling.id) } returns saksbehandling
+        every { eksternStønadsperioderService.hentOvergangsstønadperioderMedAktivitet(any()) } returns
+                LøpendeOvergangsstønadAktivitetsperioder(
+                    personIdent = emptySet(),
+                    perioder = emptyList()
+                )
+        val oppgaver = oppfølgingsoppgaveService.hentOppgavetyperSomKanOpprettesForOvergangsstønad(iverksattFørstegangsbehandling.id)
+        assertThat(oppgaver.contains(OppgaveForOpprettelseType.INNTEKTSKONTROLL_1_ÅR_FREM_I_TID)).isTrue
+    }
 
-//    @Test
-//    fun `skal kunne opprette oppgave hvis behandling er en revurdering`() {
-//        every { tilkjentYtelseService.hentForBehandlingEllerNull(any()) } returns tilkjentYtelse2årFremITid
-//        every { behandlingService.hentSaksbehandling(iverksattRevurdering.id) } returns saksbehandling
-//        val oppgaver = oppfølgingsoppgaveService.hentOppgavetyperSomKanOpprettesForOvergangsstønad(iverksattRevurdering.id)
-//
-//        assertThat(oppgaver.contains(OppgaveForOpprettelseType.INNTEKTSKONTROLL_1_ÅR_FREM_I_TID)).isTrue
-//    }
+    @Test
+    fun `skal kunne opprette oppgave hvis behandling er en revurdering`() {
+        every { tilkjentYtelseService.hentForBehandlingEllerNull(any()) } returns tilkjentYtelse2årFremITid
+        every { behandlingService.hentSaksbehandling(iverksattRevurdering.id) } returns saksbehandling
+        every { eksternStønadsperioderService.hentOvergangsstønadperioderMedAktivitet(any()) } returns
+                LøpendeOvergangsstønadAktivitetsperioder(
+                    personIdent = emptySet(),
+                    perioder = emptyList()
+                )
+        val oppgaver = oppfølgingsoppgaveService.hentOppgavetyperSomKanOpprettesForOvergangsstønad(iverksattRevurdering.id)
+        assertThat(oppgaver.contains(OppgaveForOpprettelseType.INNTEKTSKONTROLL_1_ÅR_FREM_I_TID)).isTrue
+    }
 
-//    @Test
-//    fun `skal ikke kunne opprette oppgave hvis behandling er førstegangsbehandling, men andeler under 1 år frem i tid`() {
-//        every { tilkjentYtelseService.hentForBehandlingEllerNull(any()) } returns tilkjentYtelseUnder1årFremITid
-//        every { behandlingService.hentSaksbehandling(iverksattFørstegangsbehandling.id) } returns saksbehandling
-//        val oppgaver = oppfølgingsoppgaveService.hentOppgavetyperSomKanOpprettesForOvergangsstønad(iverksattFørstegangsbehandling.id)
-//
-//        assertThat(oppgaver.contains(OppgaveForOpprettelseType.INNTEKTSKONTROLL_1_ÅR_FREM_I_TID)).isFalse
-//    }
+    @Test
+    fun `skal ikke kunne opprette oppgave hvis behandling er førstegangsbehandling, men andeler under 1 år frem i tid`() {
+        every { tilkjentYtelseService.hentForBehandlingEllerNull(any()) } returns tilkjentYtelseUnder1årFremITid
+        every { behandlingService.hentSaksbehandling(iverksattFørstegangsbehandling.id) } returns saksbehandling
+        every { eksternStønadsperioderService.hentOvergangsstønadperioderMedAktivitet(any()) } returns
+                LøpendeOvergangsstønadAktivitetsperioder(
+                    personIdent = emptySet(),
+                    perioder = emptyList()
+                )
+        val oppgaver = oppfølgingsoppgaveService.hentOppgavetyperSomKanOpprettesForOvergangsstønad(iverksattFørstegangsbehandling.id)
+        assertThat(oppgaver.contains(OppgaveForOpprettelseType.INNTEKTSKONTROLL_1_ÅR_FREM_I_TID)).isFalse
+    }
 
-//    @Test
-//    fun `skal ikke kunne opprette fremleggsoppgave hvis stønadstype ikke er overgangsstønad`() {
-//        val saksbehandling = lagSaksbehandling(stønadType = StønadType.BARNETILSYN, behandling = behandling)
-//        every { tilkjentYtelseService.hentForBehandlingEllerNull(any()) } returns tilkjentYtelseUnder1årFremITid
-//        every { behandlingService.hentSaksbehandling(iverksattFørstegangsbehandling.id) } returns saksbehandling
-//        val oppgaver = oppfølgingsoppgaveService.hentOppgavetyperSomKanOpprettesForOvergangsstønad(iverksattFørstegangsbehandling.id)
-//
-//        assertThat(oppgaver.contains(OppgaveForOpprettelseType.INNTEKTSKONTROLL_1_ÅR_FREM_I_TID)).isFalse
-//    }
+    @Test
+    fun `skal ikke kunne opprette fremleggsoppgave hvis stønadstype er skolepenger`() {
+        val saksbehandling = lagSaksbehandling(stønadType = StønadType.SKOLEPENGER, behandling = behandling)
+        every { tilkjentYtelseService.hentForBehandlingEllerNull(any()) } returns tilkjentYtelseUnder1årFremITid
+        every { behandlingService.hentSaksbehandling(iverksattFørstegangsbehandling.id) } returns saksbehandling
+        every { eksternStønadsperioderService.hentOvergangsstønadperioderMedAktivitet(any()) } returns
+                LøpendeOvergangsstønadAktivitetsperioder(
+                    personIdent = emptySet(),
+                    perioder = emptyList()
+                )
+        val oppgaver = oppfølgingsoppgaveService.hentOppgavetyperSomKanOpprettesForOvergangsstønad(iverksattFørstegangsbehandling.id)
+        assertThat(oppgaver.contains(OppgaveForOpprettelseType.INNTEKTSKONTROLL_1_ÅR_FREM_I_TID)).isFalse
+    }
 
-//    @Test
-//    fun `ikke oppgaveopprettelse for avslått overgangsstønad med tilkjente ytelser under 1 år frem i tid`() {
-//        val saksbehandling = lagSaksbehandling(behandling = behandling)
-//        every { tilkjentYtelseService.hentForBehandlingEllerNull(any()) } returns tilkjentYtelseUnder1årFremITid
-//        every { behandlingService.hentSaksbehandling(iverksattFørstegangsbehandling.id) } returns saksbehandling
-//        every { vedtak.avslåÅrsak } returns AvslagÅrsak.MINDRE_INNTEKTSENDRINGER
-//        every { vedtak.resultatType } returns ResultatType.AVSLÅ
-//        every { behandlingService.finnSisteIverksatteBehandling(any()) } returns behandling
-//
-//        val oppgaver = oppfølgingsoppgaveService.hentOppgavetyperSomKanOpprettesForOvergangsstønad(iverksattFørstegangsbehandling.id)
-//
-//        assertThat(oppgaver.contains(OppgaveForOpprettelseType.INNTEKTSKONTROLL_1_ÅR_FREM_I_TID)).isFalse
-//    }
+    @Test
+    fun `ikke oppgaveopprettelse for avslått overgangsstønad med tilkjente ytelser under 1 år frem i tid`() {
+        val saksbehandling = lagSaksbehandling(behandling = behandling)
+        every { tilkjentYtelseService.hentForBehandlingEllerNull(any()) } returns tilkjentYtelseUnder1årFremITid
+        every { behandlingService.hentSaksbehandling(iverksattFørstegangsbehandling.id) } returns saksbehandling
+        every { vedtak.avslåÅrsak } returns AvslagÅrsak.MINDRE_INNTEKTSENDRINGER
+        every { vedtak.resultatType } returns ResultatType.AVSLÅ
+        every { behandlingService.finnSisteIverksatteBehandling(any()) } returns behandling
+        every { eksternStønadsperioderService.hentOvergangsstønadperioderMedAktivitet(any()) } returns
+                LøpendeOvergangsstønadAktivitetsperioder(
+                    personIdent = emptySet(),
+                    perioder = emptyList()
+                )
+        val oppgaver = oppfølgingsoppgaveService.hentOppgavetyperSomKanOpprettesForOvergangsstønad(iverksattFørstegangsbehandling.id)
 
-//    @Test
-//    fun `oppgaveopprettelse for avslått overgangsstønad med tilkjente ytelser over 1 år frem i tid`() {
-//        val saksbehandling = lagSaksbehandling(behandling = behandling)
-//        every { tilkjentYtelseService.hentForBehandlingEllerNull(any()) } returns tilkjentYtelse2årFremITid
-//        every { behandlingService.hentSaksbehandling(iverksattFørstegangsbehandling.id) } returns saksbehandling
-//        every { vedtak.avslåÅrsak } returns AvslagÅrsak.MINDRE_INNTEKTSENDRINGER
-//        every { vedtak.resultatType } returns ResultatType.AVSLÅ
-//        every { behandlingService.finnSisteIverksatteBehandling(any()) } returns behandling
-//
-//        val oppgaver = oppfølgingsoppgaveService.hentOppgavetyperSomKanOpprettesForOvergangsstønad(iverksattFørstegangsbehandling.id)
-//        assertThat(oppgaver.contains(OppgaveForOpprettelseType.INNTEKTSKONTROLL_1_ÅR_FREM_I_TID)).isTrue()
-//    }
+        assertThat(oppgaver.contains(OppgaveForOpprettelseType.INNTEKTSKONTROLL_1_ÅR_FREM_I_TID)).isFalse
+    }
 
-//    @Test
-//    fun `oppgaveopprettelse for avslått overgangsstønad med ytelser frem i tid og avslagsårsak inntektsendringer`() {
-//        val saksbehandling = lagSaksbehandling(behandling = behandling)
-//        every { tilkjentYtelseService.hentForBehandlingEllerNull(any()) } returns tilkjentYtelse2årFremITid
-//        every { behandlingService.hentSaksbehandling(iverksattFørstegangsbehandling.id) } returns saksbehandling
-//        every { vedtak.avslåÅrsak } returns AvslagÅrsak.MINDRE_INNTEKTSENDRINGER
-//        every { vedtak.resultatType } returns ResultatType.AVSLÅ
-//        every { behandlingService.finnSisteIverksatteBehandling(any()) } returns behandling
-//
-//        val oppgaver = oppfølgingsoppgaveService.hentOppgavetyperSomKanOpprettesForOvergangsstønad(iverksattFørstegangsbehandling.id)
-//        assertThat(oppgaver.contains(OppgaveForOpprettelseType.INNTEKTSKONTROLL_1_ÅR_FREM_I_TID)).isTrue()
-//    }
+    @Test
+    fun `oppgaveopprettelse for avslått overgangsstønad med tilkjente ytelser over 1 år frem i tid`() {
+        val saksbehandling = lagSaksbehandling(behandling = behandling)
+        every { tilkjentYtelseService.hentForBehandlingEllerNull(any()) } returns tilkjentYtelse2årFremITid
+        every { behandlingService.hentSaksbehandling(iverksattFørstegangsbehandling.id) } returns saksbehandling
+        every { vedtak.avslåÅrsak } returns AvslagÅrsak.MINDRE_INNTEKTSENDRINGER
+        every { vedtak.resultatType } returns ResultatType.AVSLÅ
+        every { behandlingService.finnSisteIverksatteBehandling(any()) } returns behandling
+        every { eksternStønadsperioderService.hentOvergangsstønadperioderMedAktivitet(any()) } returns
+                LøpendeOvergangsstønadAktivitetsperioder(
+                    personIdent = emptySet(),
+                    perioder = emptyList()
+                )
+        val oppgaver = oppfølgingsoppgaveService.hentOppgavetyperSomKanOpprettesForOvergangsstønad(iverksattFørstegangsbehandling.id)
+        assertThat(oppgaver.contains(OppgaveForOpprettelseType.INNTEKTSKONTROLL_1_ÅR_FREM_I_TID)).isTrue()
+    }
 
-//    @Test
-//    fun `ikke oppgaveopprettelse for avslått overgangsstønad med avslagsårsak ulik inntektsendring`() {
-//        val saksbehandling = lagSaksbehandling(behandling = behandling)
-//        every { tilkjentYtelseService.hentForBehandlingEllerNull(any()) } returns tilkjentYtelse2årFremITid
-//        every { behandlingService.hentSaksbehandling(iverksattFørstegangsbehandling.id) } returns saksbehandling
-//        every { vedtak.avslåÅrsak } returns AvslagÅrsak.KORTVARIG_AVBRUDD_JOBB
-//        every { vedtak.resultatType } returns ResultatType.AVSLÅ
-//        every { behandlingService.finnSisteIverksatteBehandling(any()) } returns behandling
-//
-//        val oppgaver = oppfølgingsoppgaveService.hentOppgavetyperSomKanOpprettesForOvergangsstønad(iverksattFørstegangsbehandling.id)
-//        assertThat(oppgaver.contains(OppgaveForOpprettelseType.INNTEKTSKONTROLL_1_ÅR_FREM_I_TID)).isFalse()
-//    }
-// skal fikse test senere
-//    @Test
-//    fun `siste iverksatte behandling hentes for avslag`() {
-//        val saksbehandling = lagSaksbehandling(behandling = behandling)
-//        every { tilkjentYtelseService.hentForBehandlingEllerNull(any()) } returns tilkjentYtelse2årFremITid
-//        every { behandlingService.hentSaksbehandling(iverksattFørstegangsbehandling.id) } returns saksbehandling
-//        every { vedtak.avslåÅrsak } returns AvslagÅrsak.MINDRE_INNTEKTSENDRINGER
-//        every { vedtak.resultatType } returns ResultatType.AVSLÅ
-//        every { behandlingService.finnSisteIverksatteBehandling(any()) } returns behandling
-//
-//        oppfølgingsoppgaveService.hentOppgavetyperSomKanOpprettesForOvergangsstønad(iverksattFørstegangsbehandling.id)
-//        verify { behandlingService.finnSisteIverksatteBehandling(any()) }
-//    }
+    @Test
+    fun `oppgaveopprettelse for avslått overgangsstønad med ytelser frem i tid og avslagsårsak inntektsendringer`() {
+        val saksbehandling = lagSaksbehandling(behandling = behandling)
+        every { tilkjentYtelseService.hentForBehandlingEllerNull(any()) } returns tilkjentYtelse2årFremITid
+        every { behandlingService.hentSaksbehandling(iverksattFørstegangsbehandling.id) } returns saksbehandling
+        every { vedtak.avslåÅrsak } returns AvslagÅrsak.MINDRE_INNTEKTSENDRINGER
+        every { vedtak.resultatType } returns ResultatType.AVSLÅ
+        every { behandlingService.finnSisteIverksatteBehandling(any()) } returns behandling
+        every { eksternStønadsperioderService.hentOvergangsstønadperioderMedAktivitet(any()) } returns
+                LøpendeOvergangsstønadAktivitetsperioder(
+                    personIdent = emptySet(),
+                    perioder = emptyList()
+                )
+        val oppgaver = oppfølgingsoppgaveService.hentOppgavetyperSomKanOpprettesForOvergangsstønad(iverksattFørstegangsbehandling.id)
+        assertThat(oppgaver.contains(OppgaveForOpprettelseType.INNTEKTSKONTROLL_1_ÅR_FREM_I_TID)).isTrue()
+    }
+
+    @Test
+    fun `ikke oppgaveopprettelse for avslått overgangsstønad med avslagsårsak ulik inntektsendring`() {
+        val saksbehandling = lagSaksbehandling(behandling = behandling)
+        every { tilkjentYtelseService.hentForBehandlingEllerNull(any()) } returns tilkjentYtelse2årFremITid
+        every { behandlingService.hentSaksbehandling(iverksattFørstegangsbehandling.id) } returns saksbehandling
+        every { vedtak.avslåÅrsak } returns AvslagÅrsak.KORTVARIG_AVBRUDD_JOBB
+        every { vedtak.resultatType } returns ResultatType.AVSLÅ
+        every { behandlingService.finnSisteIverksatteBehandling(any()) } returns behandling
+        every { eksternStønadsperioderService.hentOvergangsstønadperioderMedAktivitet(any()) } returns
+                LøpendeOvergangsstønadAktivitetsperioder(
+                    personIdent = emptySet(),
+                    perioder = emptyList()
+                )
+
+        val oppgaver = oppfølgingsoppgaveService.hentOppgavetyperSomKanOpprettesForOvergangsstønad(iverksattFørstegangsbehandling.id)
+        assertThat(oppgaver.contains(OppgaveForOpprettelseType.INNTEKTSKONTROLL_1_ÅR_FREM_I_TID)).isFalse()
+    }
+
+    @Test
+    fun `siste iverksatte behandling hentes for avslag`() {
+        val saksbehandling = lagSaksbehandling(behandling = behandling)
+        every { tilkjentYtelseService.hentForBehandlingEllerNull(any()) } returns tilkjentYtelse2årFremITid
+        every { behandlingService.hentSaksbehandling(iverksattFørstegangsbehandling.id) } returns saksbehandling
+        every { vedtak.avslåÅrsak } returns AvslagÅrsak.MINDRE_INNTEKTSENDRINGER
+        every { vedtak.resultatType } returns ResultatType.AVSLÅ
+        every { behandlingService.finnSisteIverksatteBehandling(any()) } returns behandling
+        every { eksternStønadsperioderService.hentOvergangsstønadperioderMedAktivitet(any()) } returns
+                LøpendeOvergangsstønadAktivitetsperioder(
+                    personIdent = emptySet(),
+                    perioder = emptyList()
+                )
+        oppfølgingsoppgaveService.hentOppgavetyperSomKanOpprettesForOvergangsstønad(iverksattFørstegangsbehandling.id)
+        verify { behandlingService.finnSisteIverksatteBehandling(any()) }
+    }
 
     private val tilkjentYtelse2årFremITid =
         lagTilkjentYtelse(
