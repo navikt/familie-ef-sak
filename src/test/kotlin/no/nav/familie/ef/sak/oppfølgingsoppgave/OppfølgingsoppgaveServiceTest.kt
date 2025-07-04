@@ -158,10 +158,10 @@ internal class OppfølgingsoppgaveServiceTest {
         every { tilkjentYtelseService.hentForBehandlingEllerNull(any()) } returns tilkjentYtelse2årFremITid
         every { behandlingService.hentSaksbehandling(iverksattFørstegangsbehandling.id) } returns saksbehandling
         every { eksternStønadsperioderService.hentOvergangsstønadperioderMedAktivitet(any()) } returns
-                LøpendeOvergangsstønadAktivitetsperioder(
-                    personIdent = emptySet(),
-                    perioder = emptyList()
-                )
+            LøpendeOvergangsstønadAktivitetsperioder(
+                personIdent = emptySet(),
+                perioder = emptyList(),
+            )
         val oppgaver = oppfølgingsoppgaveService.hentOppgavetyperSomKanOpprettesForOvergangsstønad(iverksattFørstegangsbehandling.id)
         assertThat(oppgaver.contains(OppgaveForOpprettelseType.INNTEKTSKONTROLL_1_ÅR_FREM_I_TID)).isTrue
     }
@@ -171,10 +171,10 @@ internal class OppfølgingsoppgaveServiceTest {
         every { tilkjentYtelseService.hentForBehandlingEllerNull(any()) } returns tilkjentYtelse2årFremITid
         every { behandlingService.hentSaksbehandling(iverksattRevurdering.id) } returns saksbehandling
         every { eksternStønadsperioderService.hentOvergangsstønadperioderMedAktivitet(any()) } returns
-                LøpendeOvergangsstønadAktivitetsperioder(
-                    personIdent = emptySet(),
-                    perioder = emptyList()
-                )
+            LøpendeOvergangsstønadAktivitetsperioder(
+                personIdent = emptySet(),
+                perioder = emptyList(),
+            )
         val oppgaver = oppfølgingsoppgaveService.hentOppgavetyperSomKanOpprettesForOvergangsstønad(iverksattRevurdering.id)
         assertThat(oppgaver.contains(OppgaveForOpprettelseType.INNTEKTSKONTROLL_1_ÅR_FREM_I_TID)).isTrue
     }
@@ -184,10 +184,10 @@ internal class OppfølgingsoppgaveServiceTest {
         every { tilkjentYtelseService.hentForBehandlingEllerNull(any()) } returns tilkjentYtelseUnder1årFremITid
         every { behandlingService.hentSaksbehandling(iverksattFørstegangsbehandling.id) } returns saksbehandling
         every { eksternStønadsperioderService.hentOvergangsstønadperioderMedAktivitet(any()) } returns
-                LøpendeOvergangsstønadAktivitetsperioder(
-                    personIdent = emptySet(),
-                    perioder = emptyList()
-                )
+            LøpendeOvergangsstønadAktivitetsperioder(
+                personIdent = emptySet(),
+                perioder = emptyList(),
+            )
         val oppgaver = oppfølgingsoppgaveService.hentOppgavetyperSomKanOpprettesForOvergangsstønad(iverksattFørstegangsbehandling.id)
         assertThat(oppgaver.contains(OppgaveForOpprettelseType.INNTEKTSKONTROLL_1_ÅR_FREM_I_TID)).isFalse
     }
@@ -198,10 +198,10 @@ internal class OppfølgingsoppgaveServiceTest {
         every { tilkjentYtelseService.hentForBehandlingEllerNull(any()) } returns tilkjentYtelseUnder1årFremITid
         every { behandlingService.hentSaksbehandling(iverksattFørstegangsbehandling.id) } returns saksbehandling
         every { eksternStønadsperioderService.hentOvergangsstønadperioderMedAktivitet(any()) } returns
-                LøpendeOvergangsstønadAktivitetsperioder(
-                    personIdent = emptySet(),
-                    perioder = emptyList()
-                )
+            LøpendeOvergangsstønadAktivitetsperioder(
+                personIdent = emptySet(),
+                perioder = emptyList(),
+            )
         val oppgaver = oppfølgingsoppgaveService.hentOppgavetyperSomKanOpprettesForOvergangsstønad(iverksattFørstegangsbehandling.id)
         assertThat(oppgaver.contains(OppgaveForOpprettelseType.INNTEKTSKONTROLL_1_ÅR_FREM_I_TID)).isFalse
     }
@@ -215,10 +215,10 @@ internal class OppfølgingsoppgaveServiceTest {
         every { vedtak.resultatType } returns ResultatType.AVSLÅ
         every { behandlingService.finnSisteIverksatteBehandling(any()) } returns behandling
         every { eksternStønadsperioderService.hentOvergangsstønadperioderMedAktivitet(any()) } returns
-                LøpendeOvergangsstønadAktivitetsperioder(
-                    personIdent = emptySet(),
-                    perioder = emptyList()
-                )
+            LøpendeOvergangsstønadAktivitetsperioder(
+                personIdent = emptySet(),
+                perioder = emptyList(),
+            )
         val oppgaver = oppfølgingsoppgaveService.hentOppgavetyperSomKanOpprettesForOvergangsstønad(iverksattFørstegangsbehandling.id)
 
         assertThat(oppgaver.contains(OppgaveForOpprettelseType.INNTEKTSKONTROLL_1_ÅR_FREM_I_TID)).isFalse
@@ -233,10 +233,10 @@ internal class OppfølgingsoppgaveServiceTest {
         every { vedtak.resultatType } returns ResultatType.AVSLÅ
         every { behandlingService.finnSisteIverksatteBehandling(any()) } returns behandling
         every { eksternStønadsperioderService.hentOvergangsstønadperioderMedAktivitet(any()) } returns
-                LøpendeOvergangsstønadAktivitetsperioder(
-                    personIdent = emptySet(),
-                    perioder = emptyList()
-                )
+            LøpendeOvergangsstønadAktivitetsperioder(
+                personIdent = emptySet(),
+                perioder = emptyList(),
+            )
         val oppgaver = oppfølgingsoppgaveService.hentOppgavetyperSomKanOpprettesForOvergangsstønad(iverksattFørstegangsbehandling.id)
         assertThat(oppgaver.contains(OppgaveForOpprettelseType.INNTEKTSKONTROLL_1_ÅR_FREM_I_TID)).isTrue()
     }
@@ -250,10 +250,10 @@ internal class OppfølgingsoppgaveServiceTest {
         every { vedtak.resultatType } returns ResultatType.AVSLÅ
         every { behandlingService.finnSisteIverksatteBehandling(any()) } returns behandling
         every { eksternStønadsperioderService.hentOvergangsstønadperioderMedAktivitet(any()) } returns
-                LøpendeOvergangsstønadAktivitetsperioder(
-                    personIdent = emptySet(),
-                    perioder = emptyList()
-                )
+            LøpendeOvergangsstønadAktivitetsperioder(
+                personIdent = emptySet(),
+                perioder = emptyList(),
+            )
         val oppgaver = oppfølgingsoppgaveService.hentOppgavetyperSomKanOpprettesForOvergangsstønad(iverksattFørstegangsbehandling.id)
         assertThat(oppgaver.contains(OppgaveForOpprettelseType.INNTEKTSKONTROLL_1_ÅR_FREM_I_TID)).isTrue()
     }
@@ -267,10 +267,10 @@ internal class OppfølgingsoppgaveServiceTest {
         every { vedtak.resultatType } returns ResultatType.AVSLÅ
         every { behandlingService.finnSisteIverksatteBehandling(any()) } returns behandling
         every { eksternStønadsperioderService.hentOvergangsstønadperioderMedAktivitet(any()) } returns
-                LøpendeOvergangsstønadAktivitetsperioder(
-                    personIdent = emptySet(),
-                    perioder = emptyList()
-                )
+            LøpendeOvergangsstønadAktivitetsperioder(
+                personIdent = emptySet(),
+                perioder = emptyList(),
+            )
 
         val oppgaver = oppfølgingsoppgaveService.hentOppgavetyperSomKanOpprettesForOvergangsstønad(iverksattFørstegangsbehandling.id)
         assertThat(oppgaver.contains(OppgaveForOpprettelseType.INNTEKTSKONTROLL_1_ÅR_FREM_I_TID)).isFalse()
@@ -285,10 +285,10 @@ internal class OppfølgingsoppgaveServiceTest {
         every { vedtak.resultatType } returns ResultatType.AVSLÅ
         every { behandlingService.finnSisteIverksatteBehandling(any()) } returns behandling
         every { eksternStønadsperioderService.hentOvergangsstønadperioderMedAktivitet(any()) } returns
-                LøpendeOvergangsstønadAktivitetsperioder(
-                    personIdent = emptySet(),
-                    perioder = emptyList()
-                )
+            LøpendeOvergangsstønadAktivitetsperioder(
+                personIdent = emptySet(),
+                perioder = emptyList(),
+            )
         oppfølgingsoppgaveService.hentOppgavetyperSomKanOpprettesForOvergangsstønad(iverksattFørstegangsbehandling.id)
         verify { behandlingService.finnSisteIverksatteBehandling(any()) }
     }

@@ -3,7 +3,6 @@ package no.nav.familie.ef.sak.oppfølgingsoppgave
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.Saksbehandling
-import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.oppgaveforopprettelse.OppgaverForOpprettelseDto
 import no.nav.familie.ef.sak.behandling.oppgaveforopprettelse.OppgaverForOpprettelseRepository
 import no.nav.familie.ef.sak.behandling.oppgaverforferdigstilling.OppgaverForFerdigstillingDto
@@ -169,7 +168,11 @@ class OppfølgingsoppgaveService(
         }
 
         if (sjekkLøpendeOvergangsstønad.perioder.isNotEmpty() && saksbehandling.stønadstype == StønadType.BARNETILSYN && oppgavetyperSomKanOpprettes.isEmpty()) {
-            oppgavetyperSomKanOpprettes.add(OppgaveForOpprettelseType.INNTEKTSKONTROLL_1_ÅR_FREM_I_TID)
+            val refTilkjentYtelse = sjekkOvergangsstønadmedBarnetilsyn?.let { tilkjentYtelseService.hentForBehandlingEllerNull(it) }
+
+            if (kanOppretteOppgaveForInntektskontrollFremITid(refTilkjentYtelse)) {
+                oppgavetyperSomKanOpprettes.add(OppgaveForOpprettelseType.INNTEKTSKONTROLL_1_ÅR_FREM_I_TID)
+            }
         }
 
         oppgavetyperSomKanOpprettes.add(OppgaveForOpprettelseType.INNTEKTSKONTROLL_SELVSTENDIG_NÆRINGSDRIVENDE)
@@ -232,7 +235,8 @@ class OppfølgingsoppgaveService(
                 )
 
             if (fagsak != null) {
-                val behandling = behandlingRepository.findByFagsakIdAndStatus(fagsak.id, status = BehandlingStatus.UTREDES)
+//                val behandling = behandlingRepository.findByFagsakIdAndStatus(fagsak.id, status = BehandlingStatus.UTREDES)
+                val behandling = behandlingRepository.findByFagsakId(fagsak.id)
                 return behandling.firstOrNull()?.id
             }
         }
