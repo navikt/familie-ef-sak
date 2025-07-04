@@ -168,8 +168,8 @@ class OppfølgingsoppgaveService(
         }
 
         if (sjekkLøpendeOvergangsstønad.perioder.isNotEmpty() && saksbehandling.stønadstype == StønadType.BARNETILSYN && oppgavetyperSomKanOpprettes.isEmpty()) {
+            // should work
             val refTilkjentYtelse = sjekkOvergangsstønadmedBarnetilsyn?.let { tilkjentYtelseService.hentForBehandlingEllerNull(it) }
-
             if (kanOppretteOppgaveForInntektskontrollFremITid(refTilkjentYtelse)) {
                 oppgavetyperSomKanOpprettes.add(OppgaveForOpprettelseType.INNTEKTSKONTROLL_1_ÅR_FREM_I_TID)
             }
