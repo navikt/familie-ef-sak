@@ -146,7 +146,7 @@ class OppfølgingsoppgaveService(
         }
         val sjekkOvergangsstønadmedBarnetilsyn = sjekkOppgavetyperSomKanOpprettesForBeslutter(saksbehandling.ident, saksbehandling.stønadstype)
         val sjekkLøpendeOvergangsstønad = eksternStønadsperioderService.hentOvergangsstønadperioderMedAktivitet(saksbehandling.ident)
-
+        logger.info(" *** det skal bli siste overgangsstonad behandlingsid via barnetilsyn : $sjekkOvergangsstønadmedBarnetilsyn")
         val vedtak = vedtakService.hentVedtak(behandlingId)
         val tilkjentYtelse =
             when {
@@ -168,9 +168,11 @@ class OppfølgingsoppgaveService(
         }
 
         if (sjekkLøpendeOvergangsstønad.perioder.isNotEmpty() && saksbehandling.stønadstype == StønadType.BARNETILSYN && oppgavetyperSomKanOpprettes.isEmpty()) {
-            // should work
+            logger.info(" *** det skal komme frem til hit")
             val refTilkjentYtelse = sjekkOvergangsstønadmedBarnetilsyn?.let { tilkjentYtelseService.hentForBehandlingEllerNull(it) }
+            logger.info(" *** Hva kommer i $refTilkjentYtelse")
             if (kanOppretteOppgaveForInntektskontrollFremITid(refTilkjentYtelse)) {
+                logger.info(" *** forventet å vente på 0 verdi, da kommer ikke.")
                 oppgavetyperSomKanOpprettes.add(OppgaveForOpprettelseType.INNTEKTSKONTROLL_1_ÅR_FREM_I_TID)
             }
         }
