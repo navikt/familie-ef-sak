@@ -147,8 +147,7 @@ class OppfølgingsoppgaveService(
         }
         val sjekkOvergangsstønadmedBarnetilsyn = sjekkOppgavetyperSomKanOpprettesForBeslutter(saksbehandling.ident, saksbehandling.stønadstype)
         val sjekkLøpendeOvergangsstønad = eksternStønadsperioderService.hentOvergangsstønadperioderMedAktivitet(saksbehandling.ident)
-        logger.info(" *** det skal bli siste overgangsstonad behandlingsid via barnetilsyn : $sjekkOvergangsstønadmedBarnetilsyn")
-        secureLogger.info(" *** det skal bli siste overgangsstonad behandlingsid via barnetilsyn : $sjekkOvergangsstønadmedBarnetilsyn")
+
         val vedtak = vedtakService.hentVedtak(behandlingId)
         val tilkjentYtelse =
             when {
@@ -170,14 +169,8 @@ class OppfølgingsoppgaveService(
         }
 
         if (sjekkLøpendeOvergangsstønad.perioder.isNotEmpty() && saksbehandling.stønadstype == StønadType.BARNETILSYN && oppgavetyperSomKanOpprettes.isEmpty()) {
-            logger.info(" *** det skal komme frem til hit")
-            secureLogger.info(" *** det skal komme frem til hit")
             val refTilkjentYtelse = sjekkOvergangsstønadmedBarnetilsyn?.let { tilkjentYtelseService.hentForBehandlingEllerNull(it) }
-            logger.info(" *** Hva kommer i $refTilkjentYtelse")
-            secureLogger.info(" *** Hva kommer i $refTilkjentYtelse")
             if (kanOppretteOppgaveForInntektskontrollFremITid(refTilkjentYtelse)) {
-                secureLogger.info("*** forventet å vente på 0 verdi, da kommer ikke.")
-                logger.info(" *** forventet å vente på 0 verdi, da kommer ikke.")
                 oppgavetyperSomKanOpprettes.add(OppgaveForOpprettelseType.INNTEKTSKONTROLL_1_ÅR_FREM_I_TID)
             }
         }
@@ -242,9 +235,8 @@ class OppfølgingsoppgaveService(
                 )
 
             if (fagsak != null) {
-//                val behandling = behandlingRepository.findByFagsakIdAndStatus(fagsak.id, status = BehandlingStatus.UTREDES)
-                val behandling = behandlingRepository.findByFagsakId(fagsak.id)
-                return behandling.firstOrNull()?.id
+                val behandlingId = behandlingRepository.finnSisteBehandlingForOppgaveKanOpprettes(fagsak.id)
+                return behandlingId
             }
         }
 
