@@ -168,7 +168,10 @@ class OppfølgingsoppgaveService(
             oppgavetyperSomKanOpprettes.add(OppgaveForOpprettelseType.INNTEKTSKONTROLL_1_ÅR_FREM_I_TID)
         }
 
-        if (sjekkLøpendeOvergangsstønad.perioder.isNotEmpty() && saksbehandling.stønadstype == StønadType.BARNETILSYN && oppgavetyperSomKanOpprettes.isEmpty()) {
+        if (sjekkLøpendeOvergangsstønad.perioder.isNotEmpty() &&
+            saksbehandling.stønadstype == StønadType.BARNETILSYN &&
+            oppgavetyperSomKanOpprettes.isEmpty() &&
+            vedtak.resultatType != ResultatType.AVSLÅ) {
             val refTilkjentYtelse = sjekkOvergangsstønadmedBarnetilsyn?.let { tilkjentYtelseService.hentForBehandlingEllerNull(it) }
             if (kanOppretteOppgaveForInntektskontrollFremITid(refTilkjentYtelse)) {
                 oppgavetyperSomKanOpprettes.add(OppgaveForOpprettelseType.INNTEKTSKONTROLL_1_ÅR_FREM_I_TID)
