@@ -168,6 +168,7 @@ class OppfølgingsoppgaveService(
             oppgavetyperSomKanOpprettes.add(OppgaveForOpprettelseType.INNTEKTSKONTROLL_1_ÅR_FREM_I_TID)
         }
 
+        // sjekk vedtak
         if (sjekkLøpendeOvergangsstønad.perioder.isNotEmpty() &&
             saksbehandling.stønadstype == StønadType.BARNETILSYN &&
             oppgavetyperSomKanOpprettes.isEmpty() &&
