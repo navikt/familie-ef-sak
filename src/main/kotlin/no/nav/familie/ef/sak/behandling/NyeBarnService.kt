@@ -46,6 +46,7 @@ class NyeBarnService(
 
         for (fagsak in fagsaker) {
             val barnSidenGjeldendeBehandling = finnKobledeBarnSidenGjeldendeBehandling(fagsak.id, false)
+            logger.info(barnSidenGjeldendeBehandling.kobledeBarn.joinToString("\n") { "Koblet barn: ${it.barn?.personIdent} - ${it.behandlingBarn.personIdent}" })
             val nyeBarn = filtrerNyeBarn(barnSidenGjeldendeBehandling)
             opprettOppfølgningsoppgaveForBarn(fagsak, nyeBarn)
 
@@ -56,6 +57,7 @@ class NyeBarnService(
             )
             nyttBarnList.addAll(finnForTidligtFødteBarn(barnSidenGjeldendeBehandling, fagsak.stønadstype))
             nyttBarnList.addAll(finnForSentFødteBarn(barnSidenGjeldendeBehandling, fagsak.stønadstype))
+            logger.info(nyttBarnList.joinToString("\n") { "Nytt barn liste: ${it.personIdent} - ${it.årsak}" })
         }
         return NyeBarnDto(nyttBarnList)
     }
