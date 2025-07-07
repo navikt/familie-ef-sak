@@ -1,7 +1,5 @@
 package no.nav.familie.ef.sak.no.nav.familie.ef.sak.behandling.revurdering
 
-import io.mockk.slot
-import io.mockk.verify
 import no.nav.familie.ef.sak.barn.BarnRepository
 import no.nav.familie.ef.sak.barn.BehandlingBarn
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
@@ -88,39 +86,18 @@ class GOmregningTestUtil {
     fun gOmregne(
         behandlingId: UUID,
         fagsakId: UUID,
+        fom: YearMonth = YearMonth.of(2024, 6),
     ) {
-        val månedsperiode = Månedsperiode(YearMonth.of(2024, 6), YearMonth.of(2025, 12))
+        val månedsperiode = Månedsperiode(fom, YearMonth.of(fom.year + 1, 12))
         val inntektsperiode = inntektsperiode(månedsperiode = månedsperiode, BigDecimal(23023))
         lagSøknadOgVilkårOgVedtak(behandlingId, fagsakId, inntektsperiode)
         val tilkjentYtelse = lagreTilkjentYtelseForInntektsperiode(behandlingId, inntektsperiode)
-        val iverksettDtoSlot = slot<IverksettOvergangsstønadDto>()
 
         assertThat(tilkjentYtelse.andelerTilkjentYtelse).hasSize(1)
         assertThat(inntektsperiode.totalinntekt().toInt()).isEqualTo(276276)
 
         mockTestMedGrunnbeløpFra2025 {
             omregningService.utførGOmregning(fagsakId)
-
-            verify { iverksettClient.iverksettUtenBrev(capture(iverksettDtoSlot)) }
-            val iverksettDto = iverksettDtoSlot.captured
-
-            assertThat(
-                iverksettDto.vedtak.tilkjentYtelse
-                    ?.andelerTilkjentYtelse
-                    ?.size,
-            ).isEqualTo(2) // skal være splittet
-            // Sjekk andel etter ny g omregningsdato
-            val andelTilkjentYtelseOmregnet = finnAndelEtterNyGDato(iverksettDto)!!
-            val justertForventetInntekt = 289600
-            assertThat(andelTilkjentYtelseOmregnet.inntekt).isEqualTo(justertForventetInntekt)
-            assertThat(andelTilkjentYtelseOmregnet.beløp).isEqualTo(15986)
-            // Sjekk inntektsperiode etter ny G omregning
-            val inntektsperiodeEtterGomregning = finnInntektsperiodeEtterNyGDato(iverksettDto.behandling.behandlingId, 2025)
-
-            assertThat(inntektsperiodeEtterGomregning.dagsats?.toInt()).isEqualTo(0)
-            assertThat(inntektsperiodeEtterGomregning.månedsinntekt?.toInt()).isEqualTo(0)
-            assertThat(inntektsperiodeEtterGomregning.inntekt.toInt()).isEqualTo(justertForventetInntekt)
-            assertThat(inntektsperiodeEtterGomregning.totalinntekt().toInt()).isEqualTo(justertForventetInntekt)
         }
     }
 

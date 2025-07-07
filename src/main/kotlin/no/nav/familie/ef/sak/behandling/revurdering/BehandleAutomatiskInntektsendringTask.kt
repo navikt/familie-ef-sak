@@ -138,12 +138,13 @@ class BehandleAutomatiskInntektsendringTask(
                 if (overlappende != null) {
                     if (v1.periode.fom == overlappende.periode.fom) {
                         overlappende
-                    }
-                    val nyPeriode = Månedsperiode(v1.periode.fom, overlappende.periode.fom.minusMonths(1))
-                    if (nyPeriode.fom <= nyPeriode.tom) {
-                        v1.copy(periode = nyPeriode)
                     } else {
-                        throw IllegalStateException("Feil ved avkorting av periode. Ugyldig start- og sluttdato for periode: $nyPeriode i behandlingId: ${vedtakFørGOmregning.behandlingId}")
+                        val nyPeriode = Månedsperiode(v1.periode.fom, overlappende.periode.fom.minusMonths(1))
+                        if (nyPeriode.fom <= nyPeriode.tom) {
+                            v1.copy(periode = nyPeriode)
+                        } else {
+                            throw IllegalStateException("Feil ved avkorting av periode. Ugyldig start- og sluttdato for periode: $nyPeriode i behandlingId: ${vedtakFørGOmregning.behandlingId}")
+                        }
                     }
                 } else {
                     v1
