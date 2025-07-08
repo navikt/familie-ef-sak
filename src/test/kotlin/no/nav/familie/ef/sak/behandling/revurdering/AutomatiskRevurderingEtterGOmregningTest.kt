@@ -151,6 +151,44 @@ class AutomatiskRevurderingEtterGOmregningTest : OppslagSpringRunnerTest() {
         assertThat(oppdatertInntekt).isEqualTo(forventedeInntektsperioderINyttVedtak)
     }
 
+    @Test
+    fun `Siste behandling er g-omregning og vedtaksperiode før g-omregning har samme fom-dato som g-omregning`() {
+        gOmregningTestUtil.gOmregne(behandlingId, fagsakId, YearMonth.of(YearMonth.now().year, 5))
+
+        val gOmregningBehandling = behandlingRepository.findByFagsakId(fagsakId).last()
+        behandlingRepository.update(gOmregningBehandling.copy(status = BehandlingStatus.FERDIGSTILT))
+
+        val personIdent = "321"
+
+        val innmeldtMånedsinntekt = listOf(20_000, 24_000, 24_000, 28_000, 28_000, 30_000, 30_000)
+
+        val payload = PayloadBehandleAutomatiskInntektsendringTask(personIdent, "2025-20")
+        val opprettetTask = BehandleAutomatiskInntektsendringTask.opprettTask(objectMapper.writeValueAsString(payload))
+        val inntektResponse = lagInntektResponseFraMånedsinntekter(innmeldtMånedsinntekt)
+
+        every { inntektClientMock.inntektClient().hentInntekt("321", any(), any()) } returns inntektResponse
+
+        behandleAutomatiskInntektsendringTask.doTask(opprettetTask)
+
+        val revurdering = behandlingService.hentBehandlinger(fagsak.id).last()
+        val oppdatertVedtak = vedtakService.hentVedtak(revurdering.id)
+
+        assertThat(
+            oppdatertVedtak.perioder
+                ?.perioder
+                ?.first()
+                ?.periode
+                ?.fom,
+        ).isEqualTo(YearMonth.of(YearMonth.now().year, 6))
+        assertThat(
+            oppdatertVedtak.perioder
+                ?.perioder
+                ?.first()
+                ?.periode
+                ?.tom,
+        ).isEqualTo(YearMonth.of(YearMonth.now().year + 1, 12))
+    }
+
     // juni, mai, april, mars, februar
     val forventetInntektsbegrunnelse =
         """
