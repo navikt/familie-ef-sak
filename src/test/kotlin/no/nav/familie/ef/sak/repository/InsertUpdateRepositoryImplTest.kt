@@ -26,14 +26,14 @@ internal class InsertUpdateRepositoryImplTest : OppslagSpringRunnerTest() {
                 @Suppress("DEPRECATION")
                 fagsakRepository.save(fagsakDomain())
             },
-        ).isInstanceOf(DbActionExecutionException::class.java)
+        ).isInstanceOf(UnsupportedOperationException::class.java)
 
         assertThat(
             catchThrowable {
                 @Suppress("DEPRECATION")
                 fagsakRepository.saveAll(listOf(fagsakDomain(), fagsakDomain()))
             },
-        ).isInstanceOf(DbActionExecutionException::class.java)
+        ).isInstanceOf(UnsupportedOperationException::class.java)
     }
 
     @Test
