@@ -9,12 +9,8 @@ import org.springframework.data.repository.NoRepositoryBean
 @NoRepositoryBean
 interface RepositoryInterface<T, ID> : CrudRepository<T, ID> {
     @Deprecated("Støttes ikke, bruk insert/update")
-    override fun <S : T> save(entity: S): S {
-        error("Not implemented - Use InsertUpdateRepository - insert/update")
-    }
+    override fun <S : T> save(entity: S): S = throw UnsupportedOperationException("save() er deaktivert – bruk insert/update i stedet.")
 
     @Deprecated("Støttes ikke, bruk insertAll/updateAll")
-    override fun <S : T> saveAll(entities: Iterable<S>): Iterable<S> {
-        error("Not implemented - Use InsertUpdateRepository - insertAll/updateAll")
-    }
+    override fun <S : T> saveAll(entities: Iterable<S>): Iterable<S> = throw UnsupportedOperationException("saveAll() er deaktivert – bruk insertAll/updateAll i stedet.")
 }
