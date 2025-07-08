@@ -35,7 +35,6 @@ import no.nav.familie.ef.sak.vedtak.dto.SendTilBeslutterDto
 import no.nav.familie.kontrakter.ef.felles.AvslagÅrsak
 import no.nav.familie.kontrakter.ef.iverksett.OppgaveForOpprettelseType
 import no.nav.familie.kontrakter.felles.ef.StønadType
-import org.slf4j.LoggerFactory
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -60,9 +59,6 @@ class OppfølgingsoppgaveService(
     private val fagsakService: FagsakService,
     private val behandlingRepository: BehandlingRepository,
 ) {
-    private val logger = LoggerFactory.getLogger(javaClass)
-    private val secureLogger = LoggerFactory.getLogger("secureLogger")
-
     @Transactional
     fun lagreOppgaveIderForFerdigstilling(
         behandlingId: UUID,
@@ -114,7 +110,6 @@ class OppfølgingsoppgaveService(
     ): OppgaverForOpprettelseDto {
         val lagretFremleggsoppgave = hentOppgaverForOpprettelseEllerNull(behandlingid)
         val oppgavetyperSomKanOpprettes = hentOppgavetyperSomKanOpprettesForOvergangsstønad(behandlingid)
-        logger.info("bygg oppgaver for opprettelse dto herfra for frontend")
         return (
             OppgaverForOpprettelseDto(
                 oppgavetyperSomKanOpprettes = oppgavetyperSomKanOpprettes,
@@ -168,11 +163,11 @@ class OppfølgingsoppgaveService(
             oppgavetyperSomKanOpprettes.add(OppgaveForOpprettelseType.INNTEKTSKONTROLL_1_ÅR_FREM_I_TID)
         }
 
-        // sjekk vedtak
         if (sjekkLøpendeOvergangsstønad.perioder.isNotEmpty() &&
             saksbehandling.stønadstype == StønadType.BARNETILSYN &&
             oppgavetyperSomKanOpprettes.isEmpty() &&
-            vedtak.resultatType != ResultatType.AVSLÅ) {
+            vedtak.resultatType != ResultatType.AVSLÅ
+        ) {
             val refTilkjentYtelse = sjekkOvergangsstønadmedBarnetilsyn?.let { tilkjentYtelseService.hentForBehandlingEllerNull(it) }
             if (kanOppretteOppgaveForInntektskontrollFremITid(refTilkjentYtelse)) {
                 oppgavetyperSomKanOpprettes.add(OppgaveForOpprettelseType.INNTEKTSKONTROLL_1_ÅR_FREM_I_TID)
