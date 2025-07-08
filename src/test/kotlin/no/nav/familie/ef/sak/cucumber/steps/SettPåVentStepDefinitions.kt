@@ -143,6 +143,9 @@ class SettPåVentStepDefinitions {
         every { behandlingService.hentSaksbehandling(behandling.id) } returns saksbehandling
         every { behandlingService.oppdaterStatusPåBehandling(any(), any()) } returns behandling
         every { oppgaveService.hentOppgave(any()) } returns eksisterendeOppgave
+        every { oppgaveService.hentOppgaveSomIkkeErFerdigstilt(any(), any()) } returns
+            no.nav.familie.ef.sak.oppgave
+                .Oppgave(behandlingId = UUID.randomUUID(), gsakOppgaveId = 123, type = Oppgavetype.BehandleSak)
         every { behandlingshistorikkService.opprettHistorikkInnslag(any(), any(), any(), any()) } just Runs
         every { oppgaveService.oppdaterOppgave(capture(oppgaveSlot)) } just Runs
         every { taskService.save(capture(taskSlot)) } answers { firstArg() }

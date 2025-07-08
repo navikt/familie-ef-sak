@@ -6,6 +6,7 @@ import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.ef.sak.oppgave.OppgaveSubtype
 import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.oppgave.OppgavePrioritet
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
@@ -43,6 +44,7 @@ class OpprettOppgaveTask(
     override fun doTask(task: Task) {
         val data = objectMapper.readValue<OpprettOppgaveTaskData>(task.payload)
         val oppgavetype = data.oppgavetype
+        val prioritet = if (data.beskrivelse?.contains("Kontrollsak") == true) OppgavePrioritet.HOY else OppgavePrioritet.NORM
 
         if (oppgavetype == Oppgavetype.BehandleSak) {
             val behandling = behandlingService.hentBehandling(data.behandlingId)
@@ -64,6 +66,7 @@ class OpprettOppgaveTask(
                 vurderHenvendelseOppgaveSubtype = data.vurderHenvendelseOppgaveSubtype,
                 tilordnetNavIdent = data.tilordnetNavIdent,
                 beskrivelse = data.beskrivelse,
+                prioritet = prioritet,
             )
 
         task.metadata.setProperty("oppgaveId", oppgaveId.toString())

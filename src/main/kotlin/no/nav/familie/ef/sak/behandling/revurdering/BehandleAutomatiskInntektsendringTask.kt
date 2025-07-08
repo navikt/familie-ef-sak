@@ -122,34 +122,38 @@ class BehandleAutomatiskInntektsendringTask(
     }
 
     private fun sammenslåVedtak(
-        vedtak1: Vedtak,
-        vedtak2: Vedtak,
+        vedtakFørGOmregning: Vedtak,
+        gOmregningVedtak: Vedtak,
     ): Vedtak {
-        val inntekter1 =
-            vedtak1.inntekter?.inntekter
-                ?: throw IllegalStateException("Fant ikke inntektsperioder for behandlingId: ${vedtak1.behandlingId}")
+        val inntektsperioderFraVedtakFørGOmregning =
+            vedtakFørGOmregning.inntekter?.inntekter
+                ?: throw IllegalStateException("Fant ikke inntektsperioder for behandlingId: ${vedtakFørGOmregning.behandlingId}")
 
-        val inntekter2 = vedtak2.inntekter?.inntekter ?: emptyList()
+        val inntektsperioderFraGOmregning = gOmregningVedtak.inntekter?.inntekter ?: emptyList()
 
-        val justerteInntekter1 =
-            inntekter1.mapNotNull { v1 ->
-                val overlappende = inntekter2.firstOrNull { v2 -> v1.periode.overlapper(v2.periode) }
+        val justerteInntektsperioderFørGOmregning =
+            inntektsperioderFraVedtakFørGOmregning.map { v1 ->
+                val overlappende = inntektsperioderFraGOmregning.firstOrNull { v2 -> v1.periode.overlapper(v2.periode) }
 
                 if (overlappende != null) {
-                    val nyPeriode = Månedsperiode(v1.periode.fom, overlappende.periode.fom.minusMonths(1))
-                    if (nyPeriode.fom <= nyPeriode.tom) {
-                        v1.copy(periode = nyPeriode)
+                    if (v1.periode.fom == overlappende.periode.fom) {
+                        overlappende
                     } else {
-                        throw IllegalStateException("Feil ved avkorting av periode. Ugyldig start- og sluttdato for periode: $nyPeriode i behandlingId: ${vedtak1.behandlingId}")
+                        val nyPeriode = Månedsperiode(v1.periode.fom, overlappende.periode.fom.minusMonths(1))
+                        if (nyPeriode.fom <= nyPeriode.tom) {
+                            v1.copy(periode = nyPeriode)
+                        } else {
+                            throw IllegalStateException("Feil ved avkorting av periode. Ugyldig start- og sluttdato for periode: $nyPeriode i behandlingId: ${vedtakFørGOmregning.behandlingId}")
+                        }
                     }
                 } else {
                     v1
                 }
             }
 
-        val sammenslått = justerteInntekter1 + inntekter2
+        val sammenslått = justerteInntektsperioderFørGOmregning + inntektsperioderFraGOmregning
 
-        return vedtak1.copy(inntekter = InntektWrapper(sammenslått))
+        return vedtakFørGOmregning.copy(inntekter = InntektWrapper(sammenslått))
     }
 
     private fun logAutomatiskRevurderingForInntektsendring(
@@ -162,13 +166,14 @@ class BehandleAutomatiskInntektsendringTask(
         val forventetInntekt = inntektResponse.forventetMånedsinntekt()
         val behandling = behandlingService.finnSisteIverksatteBehandlingMedEventuellAvslått(fagsak.id)
         if (behandling != null) {
+            val forrigeBehandling = behandling.forrigeBehandlingId?.let { behandlingService.hentBehandling(it) } ?: throw IllegalStateException("Burde vært en forrigeBehandlingId etter automatisk revurdering for behandlingId: ${behandling.id}")
             val forrigeVedtak =
-                if (behandling.erGOmregning()) {
-                    val vedtakFørGOmregning = vedtakService.hentVedtak(behandling.forrigeBehandlingId ?: throw IllegalStateException("Finner ikke forrigeBehandlingId for behandlingId som er en G-omregning: ${behandling.id}"))
-                    val gOmregningVedtak = vedtakService.hentVedtak(behandling.id)
+                if (forrigeBehandling.erGOmregning()) {
+                    val vedtakFørGOmregning = vedtakService.hentVedtak(forrigeBehandling.forrigeBehandlingId ?: throw IllegalStateException("Finner ikke forrigeBehandlingId for behandlingId som er en G-omregning: ${forrigeBehandling.id}"))
+                    val gOmregningVedtak = vedtakService.hentVedtak(forrigeBehandling.id)
                     sammenslåVedtak(vedtakFørGOmregning, gOmregningVedtak)
                 } else {
-                    vedtakService.hentVedtak(behandling.id)
+                    vedtakService.hentVedtak(forrigeBehandling.id)
                 }
             val perioder = oppdaterFørsteVedtaksperiodeMedRevurderesFraDato(forrigeVedtak, inntektResponse)
             val inntektsperioder = oppdaterInntektMedNyBeregnetForventetInntekt(forrigeVedtak, inntektResponse, perioder.first().periode.fom)
