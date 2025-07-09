@@ -125,6 +125,7 @@ class NyeBarnServiceTest {
     fun `finnNyeEllerUtenforTerminFødteBarn med tvillinger i PDL av terminbarn, men bare ett i behandlingen, forvent ett nytt barn`() {
         val terminDato = YearMonth.now().atEndOfMonth()
         val fødselsdato = YearMonth.now().atDay(15)
+        println({ "Termin dato: $terminDato - Fødselsdato: $fødselsdato" })
         val fnrForTerminbarn = FnrGenerator.generer(fødselsdato)
         val fnrForTvillingbarn = FnrGenerator.generer(fødselsdato)
         val pdlBarn =
@@ -133,13 +134,14 @@ class NyeBarnServiceTest {
                 fnrForTerminbarn to pdlBarn(fødsel = fødsel(fødselsdato = fødselsdato)),
                 fnrForTvillingbarn to pdlBarn(fødsel = fødsel(fødselsdato = fødselsdato)),
             )
+        println("PDL barn: $pdlBarn")
         every { personService.hentPersonMedBarn(any()) } returns søkerMedBarn(pdlBarn)
         every { barnService.finnBarnPåBehandling(any()) } returns
             listOf(
                 behandlingBarn(fnrForEksisterendeBarn),
                 behandlingBarn(fødselTermindato = terminDato),
             )
-
+        println({ "Søker med barn ${søkerMedBarn(pdlBarn)}" })
         val barn = nyeBarnService.finnNyeEllerUtenforTerminFødteBarn(PersonIdent("fnr til søker")).nyeBarn
         assertThat(barn).hasSize(1)
         assertThat(barn.single().årsak).isEqualTo(NyttBarnÅrsak.BARN_FINNES_IKKE_PÅ_BEHANDLING)
