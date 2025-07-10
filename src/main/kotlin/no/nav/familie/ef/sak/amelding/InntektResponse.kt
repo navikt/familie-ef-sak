@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonProperty
 import no.nav.familie.ef.sak.beregning.Grunnbeløpsperioder.finnGrunnbeløp
 import no.nav.familie.ef.sak.felles.util.isEqualOrAfter
 import no.nav.familie.ef.sak.vedtak.domain.Vedtak
-import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.time.OffsetDateTime
 import java.time.YearMonth
@@ -17,22 +16,22 @@ data class InntektResponse(
         inntektsmånederFraOgMedÅrMåned(årMåned)
             .filter { it.måned.isEqualOrAfter(årMåned) && it.måned.isBefore(YearMonth.now()) }
             .flatMap { it.inntektListe }
-            .filter { it.beskrivelse != "overgangsstoenadTilEnsligMorEllerFarSomBegynteAaLoepe1April2014EllerSenere" && it.beskrivelse != "barnepensjon" }
+            .filterNot { ignorerteYtelserOgUtbetalinger.contains(it.beskrivelse) }
             .sumOf { it.beløp }
             .toInt()
 
-    fun totalInntektFraÅrMånedUtenFeriepenger(fraOgMedÅrMåned: YearMonth): Int =
+    fun totalInntektFraÅrMånedUtenFeriepengerOgHelligdagstillegg(fraOgMedÅrMåned: YearMonth): Int =
         inntektsmånederFraOgMedÅrMåned(fraOgMedÅrMåned)
             .filter { it.måned.isEqualOrAfter(fraOgMedÅrMåned) && it.måned.isBefore(YearMonth.now()) }
             .flatMap { it.inntektListe }
-            .filter { it.beskrivelse != "overgangsstoenadTilEnsligMorEllerFarSomBegynteAaLoepe1April2014EllerSenere" && it.beskrivelse != "barnepensjon" && !it.beskrivelse.contains("ferie", true) && it.beskrivelse != "helligdagstillegg" }
+            .filterNot { ignorerteYtelserOgUtbetalinger.contains(it.beskrivelse) || it.beskrivelse.contains("ferie", true) || it.beskrivelse == "helligdagstillegg" }
             .sumOf { it.beløp }
             .toInt()
 
     fun antallMånederUtenFeriepenger(fraOgMedÅrMåned: YearMonth): Int =
         inntektsmånederFraOgMedÅrMåned(fraOgMedÅrMåned)
             .filter { it.måned.isEqualOrAfter(fraOgMedÅrMåned) && it.måned.isBefore(YearMonth.now()) }
-            .filterNot { it.inntektListe.all { it.beskrivelse.contains("ferie", true) || it.beskrivelse.contains("overgangsstoenadTilEnsligMorEllerFarSomBegynteAaLoepe1April2014EllerSenere", true) } }
+            .filterNot { it.inntektListe.all { it.beskrivelse.contains("ferie", true) || ignorerteYtelserOgUtbetalinger.contains(it.beskrivelse) } }
             .groupBy { it.måned }
             .count()
 
@@ -42,7 +41,7 @@ data class InntektResponse(
         inntektsmånederFraOgMedÅrMåned(årMåned)
             .filter { it.måned == årMåned }
             .flatMap { it.inntektListe }
-            .filter { it.beskrivelse != "overgangsstoenadTilEnsligMorEllerFarSomBegynteAaLoepe1April2014EllerSenere" && it.beskrivelse != "barnepensjon" }
+            .filterNot { ignorerteYtelserOgUtbetalinger.contains(it.beskrivelse) }
             .sumOf { it.beløp }
             .toInt()
 
@@ -50,7 +49,7 @@ data class InntektResponse(
         inntektsmånederFraOgMedÅrMåned(årMåned)
             .filter { it.måned == årMåned }
             .flatMap { it.inntektListe }
-            .filter { it.beskrivelse != "overgangsstoenadTilEnsligMorEllerFarSomBegynteAaLoepe1April2014EllerSenere" && it.beskrivelse != "barnepensjon" && !it.beskrivelse.contains("ferie", true) }
+            .filterNot { ignorerteYtelserOgUtbetalinger.contains(it.beskrivelse) || it.beskrivelse.contains("ferie", true) }
             .sumOf { it.beløp }
             .toInt()
 
@@ -101,7 +100,7 @@ data class InntektResponse(
             throw IllegalStateException("Mangler inntektsinformasjon for de tre siste måneder")
         }
         val treSisteMåneder = YearMonth.now().minusMonths(3)
-        return totalInntektFraÅrMånedUtenFeriepenger(treSisteMåneder) / 3
+        return totalInntektFraÅrMånedUtenFeriepengerOgHelligdagstillegg(treSisteMåneder) / 3
     }
 
     val harTreForrigeInntektsmåneder =
@@ -114,7 +113,7 @@ data class InntektResponse(
         inntektsmåneder.any { totalInntektForÅrMåned(it.måned) * 12 > finnGrunnbeløp(it.måned).grunnbeløp.toInt() * 5.5 }
 
     companion object {
-        private val secureLogger = LoggerFactory.getLogger("secureLogger")
+        private val ignorerteYtelserOgUtbetalinger = listOf("overgangsstoenadTilEnsligMorEllerFarSomBegynteAaLoepe1April2014EllerSenere", "barnepensjon", "introduksjonsstoenad")
     }
 }
 
