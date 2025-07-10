@@ -69,7 +69,7 @@ object BeregningUtils {
         val årsinntekt = beregnTotalinntekt(inntektsperiode)
         if (inntektsperiode.inntekt == ZERO) {
             val grunnbeløp = Grunnbeløpsperioder.nyesteGrunnbeløp.perMnd
-            return TiProsentOppOgNed(grunnbeløp.toInt() / (2) , 0)
+            return TiProsentOppOgNed(grunnbeløp.toInt() / (2), 0)
         }
         val månedInntekt10ProsentOppOgNed = TiProsentOppOgNed(((årsinntekt.toDouble() / 12) * 1.1).toInt(), ((årsinntekt.toDouble() / 12) * 0.9).toInt())
         return månedInntekt10ProsentOppOgNed

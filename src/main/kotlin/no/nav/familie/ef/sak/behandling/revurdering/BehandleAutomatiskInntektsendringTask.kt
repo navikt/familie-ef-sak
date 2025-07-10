@@ -300,16 +300,16 @@ class BehandleAutomatiskInntektsendringTask(
         val forventetInntekt = inntektsperioder.maxBy { it.periode.fom }
         val forventetInntektFraMåned = forventetInntekt.periode.fom
 
-        if(forrigeForventetÅrsinntekt == 0){
+        if (forrigeForventetÅrsinntekt == 0) {
             return """
-            Forventet årsinntekt fra ${førsteMånedMed10ProsentEndring.tilNorskFormat()}: ${forrigeForventetÅrsinntekt.tilNorskFormat()} kroner.
-                -MånedsInntekten tilsvarer 1/2 G i året eller over: ${tiProsentOppOgNed.opp.tilNorskFormat()} kroner
-            
-            Mottar uredusert stønad.
-            
-            Inntekten i ${førsteMånedMed10ProsentEndring.tilNorskFormat()} er ${beløpFørsteMåned10ProsentEndring.tilNorskFormat()} kroner. Har inntekt over 1/2 G på  ${Grunnbeløpsperioder.finnGrunnbeløp(førsteMånedMed10ProsentEndring).perMnd.toInt() / 2} kroner denne måneden og alle månedene etter dette.
-            Stønaden beregnes på nytt fra måneden etter inntekten oversteg ${Grunnbeløpsperioder.finnGrunnbeløp(førsteMånedMed10ProsentEndring).perMnd.toInt() / 2} kroner.
-            """.trimIndent()
+                Forventet årsinntekt fra ${førsteMånedMed10ProsentEndring.tilNorskFormat()}: ${forrigeForventetÅrsinntekt.tilNorskFormat()} kroner.
+                    -MånedsInntekten tilsvarer 1/2 G i året eller over: ${tiProsentOppOgNed.opp.tilNorskFormat()} kroner
+                
+                Mottar uredusert stønad.
+                
+                Inntekten i ${førsteMånedMed10ProsentEndring.tilNorskFormat()} er ${beløpFørsteMåned10ProsentEndring.tilNorskFormat()} kroner. Har inntekt over 1/2 G på  ${Grunnbeløpsperioder.finnGrunnbeløp(førsteMånedMed10ProsentEndring).perMnd.toInt() / 2} kroner denne måneden og alle månedene etter dette.
+                Stønaden beregnes på nytt fra måneden etter inntekten oversteg ${Grunnbeløpsperioder.finnGrunnbeløp(førsteMånedMed10ProsentEndring).perMnd.toInt() / 2} kroner.
+                """.trimIndent()
         }
 
         val tekst =

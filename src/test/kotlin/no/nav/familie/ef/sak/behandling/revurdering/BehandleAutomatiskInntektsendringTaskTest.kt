@@ -11,13 +11,11 @@ import no.nav.familie.ef.sak.behandling.revurdering.AutomatiskRevurderingService
 import no.nav.familie.ef.sak.behandling.revurdering.BehandleAutomatiskInntektsendringTask
 import no.nav.familie.ef.sak.behandling.revurdering.PayloadBehandleAutomatiskInntektsendringTask
 import no.nav.familie.ef.sak.behandling.revurdering.RevurderingService
-import no.nav.familie.ef.sak.behandling.revurdering.tilNorskFormat
 import no.nav.familie.ef.sak.behandling.revurdering.ÅrsakRevurderingsRepository
 import no.nav.familie.ef.sak.behandlingsflyt.task.OpprettOppgaveForOpprettetBehandlingTask
 import no.nav.familie.ef.sak.behandlingsflyt.task.OpprettOppgaveForOpprettetBehandlingTask.OpprettOppgaveTaskData
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.felles.util.YEAR_MONTH_MAX
-import no.nav.familie.ef.sak.felles.util.månedTilNorskFormat
 import no.nav.familie.ef.sak.infrastruktur.config.InntektClientMock
 import no.nav.familie.ef.sak.infrastruktur.config.ObjectMapperProvider.objectMapper
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
@@ -324,15 +322,15 @@ class BehandleAutomatiskInntektsendringTaskTest : OppslagSpringRunnerTest() {
     val forventetInntektsbegrunnelse =
         """
         Periode som er kontrollert: juli 2024 til juni 2025.
-  
+        
         Forventet årsinntekt fra mars 2025: 144 000 kroner.
         - 10 % opp: 5 423 kroner per måned.
         - 10 % ned: 0 kroner per måned.
-  
+        
         Inntekten i mars 2025 er 16 000 kroner. Inntekten har økt minst 10 prosent denne måneden og alle månedene etter dette. Stønaden beregnes på nytt fra måneden etter 10 prosent økning.
-  
+        
         Har lagt til grunn faktisk inntekt bakover i tid. Fra og med juli 2025 er stønaden beregnet ut ifra gjennomsnittlig inntekt for april, mai og juni.
-  
+        
         A-inntekt er lagret.
         """.trimIndent()
 
@@ -340,9 +338,9 @@ class BehandleAutomatiskInntektsendringTaskTest : OppslagSpringRunnerTest() {
         """
         Forventet årsinntekt fra desember 2024: 0 kroner.
             -MånedsInntekten tilsvarer 1/2 G i året eller over: 5 423 kroner
-   
+        
         Mottar uredusert stønad.
-   
+        
         Inntekten i desember 2024 er 12 000 kroner. Har inntekt over 1/2 G på  5168 kroner denne måneden og alle månedene etter dette.
         Stønaden beregnes på nytt fra måneden etter inntekten oversteg 5168 kroner.
         """.trimIndent()
