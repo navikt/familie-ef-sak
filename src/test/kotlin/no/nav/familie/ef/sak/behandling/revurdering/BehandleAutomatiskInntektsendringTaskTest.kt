@@ -11,11 +11,13 @@ import no.nav.familie.ef.sak.behandling.revurdering.AutomatiskRevurderingService
 import no.nav.familie.ef.sak.behandling.revurdering.BehandleAutomatiskInntektsendringTask
 import no.nav.familie.ef.sak.behandling.revurdering.PayloadBehandleAutomatiskInntektsendringTask
 import no.nav.familie.ef.sak.behandling.revurdering.RevurderingService
+import no.nav.familie.ef.sak.behandling.revurdering.tilNorskFormat
 import no.nav.familie.ef.sak.behandling.revurdering.ÅrsakRevurderingsRepository
 import no.nav.familie.ef.sak.behandlingsflyt.task.OpprettOppgaveForOpprettetBehandlingTask
 import no.nav.familie.ef.sak.behandlingsflyt.task.OpprettOppgaveForOpprettetBehandlingTask.OpprettOppgaveTaskData
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.felles.util.YEAR_MONTH_MAX
+import no.nav.familie.ef.sak.felles.util.månedTilNorskFormat
 import no.nav.familie.ef.sak.infrastruktur.config.InntektClientMock
 import no.nav.familie.ef.sak.infrastruktur.config.ObjectMapperProvider.objectMapper
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
@@ -203,6 +205,7 @@ class BehandleAutomatiskInntektsendringTaskTest : OppslagSpringRunnerTest() {
 
         val oppdatertInntekt = oppdatertVedtak.inntekter?.inntekter ?: emptyList()
         assertThat(oppdatertInntekt.size).isEqualTo(3)
+        assertThat(oppdatertVedtak.inntektBegrunnelse?.replace('\u00A0', ' ')).isEqualTo(forventetInntektsbegrunnelse)
 
         val gjennomsnittSiste3Mnd = (24_000 + 24_000 + 16_000) / 3
 
@@ -284,4 +287,63 @@ class BehandleAutomatiskInntektsendringTaskTest : OppslagSpringRunnerTest() {
 
         assertThat(oppdatertInntekt).isEqualTo(forventedeInntektsperioderINyttVedtak)
     }
+
+    @Test
+    fun `Skal få riktig begrunnelse for vedtak hvor forventet inntekt var 0 for forrige vedtak`() {
+        val personIdent = "4"
+        val fagsak = fagsak(identer = fagsakpersoner(setOf(personIdent)))
+        val behandling = behandling(fagsak, resultat = BehandlingResultat.IKKE_SATT, status = BehandlingStatus.UTREDES)
+        testoppsettService.lagreFagsak(fagsak)
+        behandlingRepository.insert(behandling)
+        vilkårHelperService.opprettVilkår(behandling)
+
+        val innmeldtMånedsinntekt = listOf(12_000, 12_000, 12_000, 16_000, 16_000, 24_000, 24_000)
+        val vedtakTom = YearMonth.now().plusMonths(11)
+
+        val forventetInntektIVedtak =
+            mapOf(
+                (YearMonth.now().minusMonths(innmeldtMånedsinntekt.size.toLong()) to 0),
+            )
+        val vedtak = vedtak(forventetInntektIVedtak, vedtakTom)
+        vedtakHelperService.ferdigstillVedtak(vedtak, behandling, fagsak)
+
+        val payload = PayloadBehandleAutomatiskInntektsendringTask(personIdent, "2025-15")
+        val opprettetTask = BehandleAutomatiskInntektsendringTask.opprettTask(objectMapper.writeValueAsString(payload))
+        val inntektResponse = lagInntektResponseFraMånedsinntekter(innmeldtMånedsinntekt)
+
+        every { inntektClientMock.inntektClient().hentInntekt("4", any(), any()) } returns inntektResponse
+
+        behandleAutomatiskInntektsendringTask.doTask(opprettetTask)
+
+        val revurdering = behandlingService.hentBehandlinger(fagsak.id).last()
+        val oppdatertVedtak = vedtakService.hentVedtak(revurdering.id)
+
+        assertThat(oppdatertVedtak.inntektBegrunnelse?.replace('\u00A0', ' ')).isEqualTo(forventetInntektsbegrunnelseForrigeVedtak0ForventetInntekt)
+    }
+
+    val forventetInntektsbegrunnelse =
+        """
+        Periode som er kontrollert: juli 2024 til juni 2025.
+  
+        Forventet årsinntekt fra mars 2025: 144 000 kroner.
+        - 10 % opp: 5 423 kroner per måned.
+        - 10 % ned: 0 kroner per måned.
+  
+        Inntekten i mars 2025 er 16 000 kroner. Inntekten har økt minst 10 prosent denne måneden og alle månedene etter dette. Stønaden beregnes på nytt fra måneden etter 10 prosent økning.
+  
+        Har lagt til grunn faktisk inntekt bakover i tid. Fra og med juli 2025 er stønaden beregnet ut ifra gjennomsnittlig inntekt for april, mai og juni.
+  
+        A-inntekt er lagret.
+        """.trimIndent()
+
+    val forventetInntektsbegrunnelseForrigeVedtak0ForventetInntekt =
+        """
+        Forventet årsinntekt fra desember 2024: 0 kroner.
+            -MånedsInntekten tilsvarer 1/2 G i året eller over: 5 423 kroner
+   
+        Mottar uredusert stønad.
+   
+        Inntekten i desember 2024 er 12 000 kroner. Har inntekt over 1/2 G på  5168 kroner denne måneden og alle månedene etter dette.
+        Stønaden beregnes på nytt fra måneden etter inntekten oversteg 5168 kroner.
+        """.trimIndent()
 }
