@@ -324,8 +324,8 @@ class BehandleAutomatiskInntektsendringTaskTest : OppslagSpringRunnerTest() {
         Periode som er kontrollert: juli 2024 til juni 2025.
         
         Forventet årsinntekt fra mars 2025: 144 000 kroner.
-        - 10 % opp: 5 423 kroner per måned.
-        - 10 % ned: 0 kroner per måned.
+        - 10 % opp: 13 200 kroner per måned.
+        - 10 % ned: 10 800 kroner per måned.
         
         Inntekten i mars 2025 er 16 000 kroner. Inntekten har økt minst 10 prosent denne måneden og alle månedene etter dette. Stønaden beregnes på nytt fra måneden etter 10 prosent økning.
         
@@ -341,7 +341,7 @@ class BehandleAutomatiskInntektsendringTaskTest : OppslagSpringRunnerTest() {
         
         Mottar uredusert stønad.
         
-        Inntekten i desember 2024 er 12 000 kroner. Har inntekt over 1/2 G på  5168 kroner denne måneden og alle månedene etter dette.
-        Stønaden beregnes på nytt fra måneden etter inntekten oversteg 5168 kroner.
+        Inntekten i desember 2024 er 12 000 kroner. Har inntekt over 1/2 G på  5 168 kroner denne måneden og alle månedene etter dette.
+        Stønaden beregnes på nytt fra måneden etter inntekten oversteg 5 168 kroner.
         """.trimIndent()
 }
