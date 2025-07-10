@@ -67,6 +67,10 @@ object BeregningUtils {
 
     fun beregn10ProsentOppOgNedIMånedsinntektFraÅrsinntekt(inntektsperiode: Inntektsperiode): TiProsentOppOgNed {
         val årsinntekt = beregnTotalinntekt(inntektsperiode)
+        if (årsinntekt == ZERO) {
+            val grunnbeløp = Grunnbeløpsperioder.finnGrunnbeløp(inntektsperiode.periode.fom)
+            return TiProsentOppOgNed(grunnbeløp.grunnbeløp.toInt() / 2, 0)
+        }
         val månedInntekt10ProsentOppOgNed = TiProsentOppOgNed(((årsinntekt.toDouble() / 12) * 1.1).toInt(), ((årsinntekt.toDouble() / 12) * 0.9).toInt())
         return månedInntekt10ProsentOppOgNed
     }
