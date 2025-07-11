@@ -138,7 +138,7 @@ class AutomatiskRevurderingEtterGOmregningTest : OppslagSpringRunnerTest() {
         val oppdatertInntekt = oppdatertVedtak.inntekter?.inntekter ?: emptyList()
         assertThat(oppdatertInntekt.size).isEqualTo(3)
         assertThat(oppdatertVedtak.periodeBegrunnelse).isEqualTo("Behandlingen er opprettet automatisk fordi inntekten har økt. Overgangsstønaden endres fra måneden etter at inntekten har økt minst 10 prosent.")
-        assertThat(oppdatertVedtak.inntektBegrunnelse?.replace('\u00A0', ' ')).isEqualTo(forventetInntektsbegrunnelse) // Replace non-breaking space -> space
+        assertThat(oppdatertVedtak.inntektBegrunnelse?.replace('\u00A0', ' ')).isEqualTo(forventetInntektsbegrunnelseMedGOmregning) // Replace non-breaking space -> space
         val gjennomsnittSiste3Mnd = (28_000 + 30_000 + 30_000) / 3
 
         val forventedeInntektsperioderINyttVedtak =
@@ -190,7 +190,7 @@ class AutomatiskRevurderingEtterGOmregningTest : OppslagSpringRunnerTest() {
     }
 
     // juni, mai, april, mars, februar
-    val forventetInntektsbegrunnelse =
+    val forventetInntektsbegrunnelseMedGOmregning =
         """
         Periode som er kontrollert: ${YearMonth.now().minusMonths(12).tilNorskFormat()} til ${
             YearMonth.now().minusMonths(1).tilNorskFormat()}.
