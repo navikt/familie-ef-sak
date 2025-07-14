@@ -166,7 +166,7 @@ class OppfølgingsoppgaveService(
         if (sjekkLøpendeOvergangsstønad.perioder.isNotEmpty() &&
             saksbehandling.stønadstype == StønadType.BARNETILSYN &&
             oppgavetyperSomKanOpprettes.isEmpty() &&
-            vedtak.resultatType != ResultatType.AVSLÅ
+            vedtak.resultatType == ResultatType.INNVILGE
         ) {
             val refTilkjentYtelse = sjekkOvergangsstønadmedBarnetilsyn?.let { tilkjentYtelseService.hentForBehandlingEllerNull(it) }
             if (kanOppretteOppgaveForInntektskontrollFremITid(refTilkjentYtelse)) {
