@@ -20,6 +20,7 @@ class BrevsignaturService(
     fun lagSaksbehandlerSignatur(
         personIdent: String,
         vedtakErUtenBeslutter: VedtakErUtenBeslutter,
+        saksbehandlerIdent: String? = null,
     ): SignaturDto {
         val harStrengtFortroligAdresse: Boolean =
             personopplysningerService
@@ -30,7 +31,7 @@ class BrevsignaturService(
             return SignaturDto(NAV_ANONYM_NAVN, NAV_ENHET_VIKAFOSSEN, true)
         }
 
-        val saksbehandler = hentSaksbehandlerInfo(SikkerhetContext.hentSaksbehandler())
+        val saksbehandler = hentSaksbehandlerInfo(saksbehandlerIdent ?: SikkerhetContext.hentSaksbehandler())
         val signaturEnhet = utledSignaturEnhet(saksbehandler.enhetsnavn)
 
         return SignaturDto(SikkerhetContext.hentSaksbehandlerNavn(true), signaturEnhet, vedtakErUtenBeslutter.value)

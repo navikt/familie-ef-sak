@@ -1,5 +1,7 @@
 package no.nav.familie.ef.sak.behandlingsflyt.task
 
+import com.fasterxml.jackson.module.kotlin.readValue
+import no.nav.familie.ef.sak.infrastruktur.config.ObjectMapperProvider.objectMapper
 import no.nav.familie.ef.sak.oppfølgingsoppgave.OppfølgingsoppgaveService
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
@@ -17,21 +19,27 @@ class SendAutomatiskBrevTask(
     private val oppfølgingsoppgaveService: OppfølgingsoppgaveService,
 ) : AsyncTaskStep {
     override fun doTask(task: Task) {
-        val behandlingId = UUID.fromString(task.payload)
-        oppfølgingsoppgaveService.sendAutomatiskBrev(behandlingId)
+        val sendAutomatiskBrevTaskPayload = objectMapper.readValue<SendAutomatiskBrevTaskPayload>(task.payload)
+        oppfølgingsoppgaveService.sendAutomatiskBrev(sendAutomatiskBrevTaskPayload.behandlingId, sendAutomatiskBrevTaskPayload.saksbehandlerIdent)
     }
 
     companion object {
-        fun opprettTask(behandlingId: UUID): Task =
+        fun opprettTask(sendAutomatiskBrevTaskPayload: SendAutomatiskBrevTaskPayload): Task =
             Task(
                 type = TYPE,
-                payload = behandlingId.toString(),
+                payload = objectMapper.writeValueAsString(sendAutomatiskBrevTaskPayload),
                 properties =
                     Properties().apply {
-                        this["behandlingId"] = behandlingId.toString()
+                        this["behandlingId"] = sendAutomatiskBrevTaskPayload.behandlingId.toString()
+                        this["saksbehandlerIdent"] = sendAutomatiskBrevTaskPayload.saksbehandlerIdent
                     },
             )
 
         const val TYPE = "sendAutomatiskBrevTask"
     }
 }
+
+data class SendAutomatiskBrevTaskPayload(
+    val behandlingId: UUID,
+    val saksbehandlerIdent: String,
+)

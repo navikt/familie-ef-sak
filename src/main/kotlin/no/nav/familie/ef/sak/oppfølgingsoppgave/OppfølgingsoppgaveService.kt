@@ -166,6 +166,7 @@ class OppfølgingsoppgaveService(
 
     fun sendAutomatiskBrev(
         behandlingId: UUID,
+        saksbehandlerIdent: String,
     ) {
         val automatiskBrev = hentAutomatiskBrevEllerNull(behandlingId)
         val saksbehandling = behandlingService.hentSaksbehandling(behandlingId)
@@ -173,7 +174,7 @@ class OppfølgingsoppgaveService(
         val personIdent = behandlingService.hentAktivIdent(behandlingId)
         val personNavn = personopplysningerService.hentGjeldeneNavn(listOf(personIdent)).getValue(personIdent)
         val brevmottakere = brevmottakereService.hentBrevmottakere(behandlingId)
-        val signatur = brevsignaturService.lagSaksbehandlerSignatur(fagsak.hentAktivIdent(), VedtakErUtenBeslutter(true))
+        val signatur = brevsignaturService.lagSaksbehandlerSignatur(fagsak.hentAktivIdent(), VedtakErUtenBeslutter(true), saksbehandlerIdent)
 
         if (automatiskBrev != null) {
             automatiskBrev.brevSomSkalSendes.forEach {
