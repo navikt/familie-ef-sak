@@ -234,15 +234,15 @@ internal class IverksettingDtoMapperTest {
         assertAlleFelter(iverksettDto as IverksettOvergangsstønadDto, behandlingId)
     }
 
-//    @Test
-//    internal fun `map barnetilsyn til IverksettDto - sjekk alle felter`() {
-//        val behandlingId = mockReturnerObjekterMedAlleFelterFylt()
-//
-//        val saksbehandling = saksbehandling(stønadType = StønadType.BARNETILSYN)
-//        val iverksettDto = iverksettingDtoMapper.tilDto(saksbehandling, "beslutter")
-//
-//        assertAlleFelter(iverksettDto as IverksettBarnetilsynDto, behandlingId)
-//    }
+    @Test
+    internal fun `map barnetilsyn til IverksettDto - sjekk alle felter`() {
+        val behandlingId = mockReturnerObjekterMedAlleFelterFylt()
+
+        val saksbehandling = saksbehandling(stønadType = StønadType.BARNETILSYN)
+        val iverksettDto = iverksettingDtoMapper.tilDto(saksbehandling, "beslutter")
+
+        assertAlleFelter(iverksettDto as IverksettBarnetilsynDto, behandlingId)
+    }
 
     @Test
     internal fun `map skolepenger til IverksettDto - sjekk alle felter`() {
