@@ -33,11 +33,12 @@ class BrevsignaturService(
 
         val saksbehandler = hentSaksbehandlerInfo(saksbehandlerIdent ?: SikkerhetContext.hentSaksbehandler())
         val signaturEnhet = utledSignaturEnhet(saksbehandler.enhetsnavn)
-        val saksbehandlerNavn = if (saksbehandlerIdent != null) {
-            saksbehandler.fornavn + " " + saksbehandler.etternavn
-        } else {
-            SikkerhetContext.hentSaksbehandlerNavn(true)
-        }
+        val saksbehandlerNavn =
+            if (saksbehandlerIdent != null) {
+                saksbehandler.fornavn + " " + saksbehandler.etternavn
+            } else {
+                SikkerhetContext.hentSaksbehandlerNavn(true)
+            }
         return SignaturDto(saksbehandlerNavn, signaturEnhet, vedtakErUtenBeslutter.value)
     }
 
