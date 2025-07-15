@@ -33,8 +33,12 @@ class BrevsignaturService(
 
         val saksbehandler = hentSaksbehandlerInfo(saksbehandlerIdent ?: SikkerhetContext.hentSaksbehandler())
         val signaturEnhet = utledSignaturEnhet(saksbehandler.enhetsnavn)
-
-        return SignaturDto(SikkerhetContext.hentSaksbehandlerNavn(true), signaturEnhet, vedtakErUtenBeslutter.value)
+        val saksbehandlerNavn = if (saksbehandlerIdent != null) {
+            saksbehandler.fornavn + " " + saksbehandler.etternavn
+        } else {
+            SikkerhetContext.hentSaksbehandlerNavn(true)
+        }
+        return SignaturDto(saksbehandlerNavn, signaturEnhet, vedtakErUtenBeslutter.value)
     }
 
     fun lagSaksbehandlerSignatur(
