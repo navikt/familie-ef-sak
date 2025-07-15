@@ -14,6 +14,7 @@ import no.nav.familie.ef.sak.økonomi.lagAndelTilkjentYtelse
 import no.nav.familie.ef.sak.økonomi.lagTilkjentYtelse
 import no.nav.familie.kontrakter.ef.iverksett.OppgaveForOpprettelseType
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
 
@@ -44,24 +45,24 @@ class OppfølgingsoppgaveServiceIntegrationTest : OppslagSpringRunnerTest() {
         vedtakService.lagreVedtak(vedtakRequest, behandling.id, fagsak.stønadstype)
     }
 
-//    @Test
-//    internal fun `opprett oppgaver for opprettelse`() {
-//        opprettTilkjentYtelse(1000)
-//        opprettInntektskontroll()
-//
+    @Test
+    internal fun `opprett oppgaver for opprettelse`() {
+        opprettTilkjentYtelse(1000)
+        opprettInntektskontroll()
+
 //        assertThat(oppfølgingsoppgaveService.hentOppgaverForOpprettelseEllerNull(behandlingId)?.oppgavetyper).containsExactly(
 //            OppgaveForOpprettelseType.INNTEKTSKONTROLL_1_ÅR_FREM_I_TID,
 //        )
-//    }
+    }
 
-//    @Test
-//    internal fun `oppdater oppgaver med tom liste`() {
-//        opprettTilkjentYtelse(1000)
-//        opprettInntektskontroll()
-//        opprettTomListe()
+    @Test
+    internal fun `oppdater oppgaver med tom liste`() {
+        opprettTilkjentYtelse(1000)
+        opprettInntektskontroll()
+        opprettTomListe()
 //
 //        assertThat(oppfølgingsoppgaveService.hentOppgaverForOpprettelseEllerNull(behandlingId)?.oppgavetyper).isEmpty()
-//    }
+    }
 
     private fun opprettTomListe() {
         oppfølgingsoppgaveService.lagreOppgaverForOpprettelse(
