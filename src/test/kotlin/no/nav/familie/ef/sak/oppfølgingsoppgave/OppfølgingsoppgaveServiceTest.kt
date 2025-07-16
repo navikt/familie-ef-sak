@@ -6,6 +6,7 @@ import io.mockk.mockk
 import io.mockk.runs
 import io.mockk.spyk
 import io.mockk.verify
+import no.nav.familie.ef.sak.behandling.BehandlingRepository
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.behandling.domain.Behandling
@@ -16,9 +17,11 @@ import no.nav.familie.ef.sak.brev.BrevmottakereService
 import no.nav.familie.ef.sak.brev.BrevsignaturService
 import no.nav.familie.ef.sak.brev.FamilieDokumentClient
 import no.nav.familie.ef.sak.brev.FrittståendeBrevService
+import no.nav.familie.ef.sak.ekstern.stønadsperiode.EksternStønadsperioderService
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.felles.util.BehandlingOppsettUtil.iverksattFørstegangsbehandling
 import no.nav.familie.ef.sak.felles.util.BehandlingOppsettUtil.iverksattRevurdering
+import no.nav.familie.ef.sak.infotrygd.LøpendeOvergangsstønadAktivitetsperioder
 import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.oppfølgingsoppgave.OppfølgingsoppgaveService
 import no.nav.familie.ef.sak.oppfølgingsoppgave.automatiskBrev.AutomatiskBrevRepository
@@ -55,8 +58,10 @@ internal class OppfølgingsoppgaveServiceTest {
     private val brevClient = mockk<BrevClient>()
     private val frittståendeBrevService = mockk<FrittståendeBrevService>()
     private val personopplysningerService = mockk<PersonopplysningerService>()
+    private val eksternStønadsperioderService = mockk<EksternStønadsperioderService>()
     private val brevmottakereService = mockk<BrevmottakereService>()
     private val fagsakService = mockk<FagsakService>()
+    private val behandlingRepository = mockk<BehandlingRepository>()
     private val brevsignaturService = mockk<BrevsignaturService>()
 
     private var oppfølgingsoppgaveService =
@@ -73,9 +78,11 @@ internal class OppfølgingsoppgaveServiceTest {
                 brevClient,
                 frittståendeBrevService,
                 personopplysningerService,
+                eksternStønadsperioderService,
                 brevmottakereService,
                 brevsignaturService,
                 fagsakService,
+                behandlingRepository,
             ),
         )
 
@@ -153,7 +160,11 @@ internal class OppfølgingsoppgaveServiceTest {
     fun `skal kunne opprette oppgave hvis behandling er førstegangsbehandling`() {
         every { tilkjentYtelseService.hentForBehandlingEllerNull(any()) } returns tilkjentYtelse2årFremITid
         every { behandlingService.hentSaksbehandling(iverksattFørstegangsbehandling.id) } returns saksbehandling
-
+        every { eksternStønadsperioderService.hentOvergangsstønadperioderMedAktivitet(any()) } returns
+            LøpendeOvergangsstønadAktivitetsperioder(
+                personIdent = emptySet(),
+                perioder = emptyList(),
+            )
         val oppgaver = oppfølgingsoppgaveService.hentOppgavetyperSomKanOpprettesForOvergangsstønad(iverksattFørstegangsbehandling.id)
 
         assertThat(oppgaver.contains(OppgaveForOpprettelseType.INNTEKTSKONTROLL_1_ÅR_FREM_I_TID)).isTrue
@@ -163,6 +174,11 @@ internal class OppfølgingsoppgaveServiceTest {
     fun `skal kunne opprette oppgave hvis behandling er en revurdering`() {
         every { tilkjentYtelseService.hentForBehandlingEllerNull(any()) } returns tilkjentYtelse2årFremITid
         every { behandlingService.hentSaksbehandling(iverksattRevurdering.id) } returns saksbehandling
+        every { eksternStønadsperioderService.hentOvergangsstønadperioderMedAktivitet(any()) } returns
+            LøpendeOvergangsstønadAktivitetsperioder(
+                personIdent = emptySet(),
+                perioder = emptyList(),
+            )
         val oppgaver = oppfølgingsoppgaveService.hentOppgavetyperSomKanOpprettesForOvergangsstønad(iverksattRevurdering.id)
 
         assertThat(oppgaver.contains(OppgaveForOpprettelseType.INNTEKTSKONTROLL_1_ÅR_FREM_I_TID)).isTrue
@@ -172,18 +188,27 @@ internal class OppfølgingsoppgaveServiceTest {
     fun `skal ikke kunne opprette oppgave hvis behandling er førstegangsbehandling, men andeler under 1 år frem i tid`() {
         every { tilkjentYtelseService.hentForBehandlingEllerNull(any()) } returns tilkjentYtelseUnder1årFremITid
         every { behandlingService.hentSaksbehandling(iverksattFørstegangsbehandling.id) } returns saksbehandling
+        every { eksternStønadsperioderService.hentOvergangsstønadperioderMedAktivitet(any()) } returns
+            LøpendeOvergangsstønadAktivitetsperioder(
+                personIdent = emptySet(),
+                perioder = emptyList(),
+            )
         val oppgaver = oppfølgingsoppgaveService.hentOppgavetyperSomKanOpprettesForOvergangsstønad(iverksattFørstegangsbehandling.id)
 
         assertThat(oppgaver.contains(OppgaveForOpprettelseType.INNTEKTSKONTROLL_1_ÅR_FREM_I_TID)).isFalse
     }
 
     @Test
-    fun `skal ikke kunne opprette fremleggsoppgave hvis stønadstype ikke er overgangsstønad`() {
-        val saksbehandling = lagSaksbehandling(stønadType = StønadType.BARNETILSYN, behandling = behandling)
+    fun `skal ikke kunne opprette fremleggsoppgave hvis stønadstype er skolepenger`() {
+        val saksbehandling = lagSaksbehandling(stønadType = StønadType.SKOLEPENGER, behandling = behandling)
         every { tilkjentYtelseService.hentForBehandlingEllerNull(any()) } returns tilkjentYtelseUnder1årFremITid
         every { behandlingService.hentSaksbehandling(iverksattFørstegangsbehandling.id) } returns saksbehandling
+        every { eksternStønadsperioderService.hentOvergangsstønadperioderMedAktivitet(any()) } returns
+            LøpendeOvergangsstønadAktivitetsperioder(
+                personIdent = emptySet(),
+                perioder = emptyList(),
+            )
         val oppgaver = oppfølgingsoppgaveService.hentOppgavetyperSomKanOpprettesForOvergangsstønad(iverksattFørstegangsbehandling.id)
-
         assertThat(oppgaver.contains(OppgaveForOpprettelseType.INNTEKTSKONTROLL_1_ÅR_FREM_I_TID)).isFalse
     }
 
@@ -195,7 +220,11 @@ internal class OppfølgingsoppgaveServiceTest {
         every { vedtak.avslåÅrsak } returns AvslagÅrsak.MINDRE_INNTEKTSENDRINGER
         every { vedtak.resultatType } returns ResultatType.AVSLÅ
         every { behandlingService.finnSisteIverksatteBehandling(any()) } returns behandling
-
+        every { eksternStønadsperioderService.hentOvergangsstønadperioderMedAktivitet(any()) } returns
+            LøpendeOvergangsstønadAktivitetsperioder(
+                personIdent = emptySet(),
+                perioder = emptyList(),
+            )
         val oppgaver = oppfølgingsoppgaveService.hentOppgavetyperSomKanOpprettesForOvergangsstønad(iverksattFørstegangsbehandling.id)
 
         assertThat(oppgaver.contains(OppgaveForOpprettelseType.INNTEKTSKONTROLL_1_ÅR_FREM_I_TID)).isFalse
@@ -209,7 +238,11 @@ internal class OppfølgingsoppgaveServiceTest {
         every { vedtak.avslåÅrsak } returns AvslagÅrsak.MINDRE_INNTEKTSENDRINGER
         every { vedtak.resultatType } returns ResultatType.AVSLÅ
         every { behandlingService.finnSisteIverksatteBehandling(any()) } returns behandling
-
+        every { eksternStønadsperioderService.hentOvergangsstønadperioderMedAktivitet(any()) } returns
+            LøpendeOvergangsstønadAktivitetsperioder(
+                personIdent = emptySet(),
+                perioder = emptyList(),
+            )
         val oppgaver = oppfølgingsoppgaveService.hentOppgavetyperSomKanOpprettesForOvergangsstønad(iverksattFørstegangsbehandling.id)
         assertThat(oppgaver.contains(OppgaveForOpprettelseType.INNTEKTSKONTROLL_1_ÅR_FREM_I_TID)).isTrue()
     }
@@ -222,7 +255,11 @@ internal class OppfølgingsoppgaveServiceTest {
         every { vedtak.avslåÅrsak } returns AvslagÅrsak.MINDRE_INNTEKTSENDRINGER
         every { vedtak.resultatType } returns ResultatType.AVSLÅ
         every { behandlingService.finnSisteIverksatteBehandling(any()) } returns behandling
-
+        every { eksternStønadsperioderService.hentOvergangsstønadperioderMedAktivitet(any()) } returns
+            LøpendeOvergangsstønadAktivitetsperioder(
+                personIdent = emptySet(),
+                perioder = emptyList(),
+            )
         val oppgaver = oppfølgingsoppgaveService.hentOppgavetyperSomKanOpprettesForOvergangsstønad(iverksattFørstegangsbehandling.id)
         assertThat(oppgaver.contains(OppgaveForOpprettelseType.INNTEKTSKONTROLL_1_ÅR_FREM_I_TID)).isTrue()
     }
@@ -235,6 +272,11 @@ internal class OppfølgingsoppgaveServiceTest {
         every { vedtak.avslåÅrsak } returns AvslagÅrsak.KORTVARIG_AVBRUDD_JOBB
         every { vedtak.resultatType } returns ResultatType.AVSLÅ
         every { behandlingService.finnSisteIverksatteBehandling(any()) } returns behandling
+        every { eksternStønadsperioderService.hentOvergangsstønadperioderMedAktivitet(any()) } returns
+            LøpendeOvergangsstønadAktivitetsperioder(
+                personIdent = emptySet(),
+                perioder = emptyList(),
+            )
 
         val oppgaver = oppfølgingsoppgaveService.hentOppgavetyperSomKanOpprettesForOvergangsstønad(iverksattFørstegangsbehandling.id)
         assertThat(oppgaver.contains(OppgaveForOpprettelseType.INNTEKTSKONTROLL_1_ÅR_FREM_I_TID)).isFalse()
@@ -248,7 +290,11 @@ internal class OppfølgingsoppgaveServiceTest {
         every { vedtak.avslåÅrsak } returns AvslagÅrsak.MINDRE_INNTEKTSENDRINGER
         every { vedtak.resultatType } returns ResultatType.AVSLÅ
         every { behandlingService.finnSisteIverksatteBehandling(any()) } returns behandling
-
+        every { eksternStønadsperioderService.hentOvergangsstønadperioderMedAktivitet(any()) } returns
+            LøpendeOvergangsstønadAktivitetsperioder(
+                personIdent = emptySet(),
+                perioder = emptyList(),
+            )
         oppfølgingsoppgaveService.hentOppgavetyperSomKanOpprettesForOvergangsstønad(iverksattFørstegangsbehandling.id)
         verify { behandlingService.finnSisteIverksatteBehandling(any()) }
     }
@@ -289,7 +335,7 @@ internal class OppfølgingsoppgaveServiceTest {
 
     private fun opprettTomListeForOppgavetyperSomSkalOpprettes(behandlingId: UUID) =
         oppfølgingsoppgaveService.lagreOppgaverForOpprettelse(
-            behandlingId = behandlingId,
+            saksbehandling,
             data =
                 SendTilBeslutterDto(
                     emptyList(),

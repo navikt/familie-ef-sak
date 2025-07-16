@@ -348,6 +348,10 @@ class IverksettingDtoMapper(
             kontantstøtte = mapPerioderMedBeløp(vedtak.kontantstøtte?.perioder),
             tilleggsstønad = mapPerioderMedBeløp(vedtak.tilleggsstønad?.perioder),
             avslagÅrsak = vedtak.avslåÅrsak,
+            oppgaverForOpprettelse =
+                oppfølgingsoppgaveService.hentOppgaverForOpprettelseEllerNull(vedtak.behandlingId)?.let {
+                    OppgaverForOpprettelseDto(oppgavetyper = it.oppgavetyper, årForInntektskontrollSelvstendigNæringsdrivende = it.årForInntektskontrollSelvstendigNæringsdrivende)
+                } ?: OppgaverForOpprettelseDto(oppgavetyper = emptyList()),
         )
 
     @Improvement("Opphørårsak må utledes ved revurdering")
