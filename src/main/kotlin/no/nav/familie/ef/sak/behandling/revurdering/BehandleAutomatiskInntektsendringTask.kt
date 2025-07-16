@@ -300,6 +300,8 @@ class BehandleAutomatiskInntektsendringTask(
         val forventetInntekt = inntektsperioder.maxBy { it.periode.fom }
         val forventetInntektFraMåned = forventetInntekt.periode.fom
 
+        val forrigeForventetInnntektsperiodeFraOgMed = if (forrigeForventetInntektsperiode.periode.fom.isBefore(YearMonth.now().minusYears(1))) YearMonth.now().minusYears(1) else forrigeForventetInntektsperiode.periode.fom
+
         if (forrigeForventetÅrsinntekt == 0) {
             return """
                 Forventet årsinntekt fra ${førsteMånedMed10ProsentEndring.tilNorskFormat()}: ${forrigeForventetÅrsinntekt.tilNorskFormat()} kroner.
@@ -314,7 +316,7 @@ class BehandleAutomatiskInntektsendringTask(
 
         val tekst =
             """
-            Periode som er kontrollert: ${inntektResponse.inntektsmåneder.minBy { it.måned }.måned.tilNorskFormat()} til ${inntektResponse.inntektsmåneder.maxBy { it.måned }.måned.tilNorskFormat()}.
+            Periode som er kontrollert: ${forrigeForventetInnntektsperiodeFraOgMed.tilNorskFormat()} til ${inntektResponse.inntektsmåneder.maxBy { it.måned }.måned.tilNorskFormat()}.
             
             Forventet årsinntekt fra ${førsteMånedMed10ProsentEndring.tilNorskFormat()}: ${forrigeForventetÅrsinntekt.tilNorskFormat()} kroner.
             - 10 % opp: ${tiProsentOppOgNed.opp.tilNorskFormat()} kroner per måned.
