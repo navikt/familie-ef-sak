@@ -14,6 +14,7 @@ import no.nav.familie.ef.sak.behandling.oppgaveforopprettelse.OppgaverForOpprett
 import no.nav.familie.ef.sak.behandling.oppgaverforferdigstilling.OppgaverForFerdigstillingRepository
 import no.nav.familie.ef.sak.brev.BrevClient
 import no.nav.familie.ef.sak.brev.BrevmottakereService
+import no.nav.familie.ef.sak.brev.BrevsignaturService
 import no.nav.familie.ef.sak.brev.FamilieDokumentClient
 import no.nav.familie.ef.sak.brev.FrittståendeBrevService
 import no.nav.familie.ef.sak.ekstern.stønadsperiode.EksternStønadsperioderService
@@ -61,6 +62,7 @@ internal class OppfølgingsoppgaveServiceTest {
     private val brevmottakereService = mockk<BrevmottakereService>()
     private val fagsakService = mockk<FagsakService>()
     private val behandlingRepository = mockk<BehandlingRepository>()
+    private val brevsignaturService = mockk<BrevsignaturService>()
 
     private var oppfølgingsoppgaveService =
         spyk(
@@ -78,6 +80,7 @@ internal class OppfølgingsoppgaveServiceTest {
                 personopplysningerService,
                 eksternStønadsperioderService,
                 brevmottakereService,
+                brevsignaturService,
                 fagsakService,
                 behandlingRepository,
             ),
@@ -163,6 +166,7 @@ internal class OppfølgingsoppgaveServiceTest {
                 perioder = emptyList(),
             )
         val oppgaver = oppfølgingsoppgaveService.hentOppgavetyperSomKanOpprettesForOvergangsstønad(iverksattFørstegangsbehandling.id)
+
         assertThat(oppgaver.contains(OppgaveForOpprettelseType.INNTEKTSKONTROLL_1_ÅR_FREM_I_TID)).isTrue
     }
 
@@ -176,6 +180,7 @@ internal class OppfølgingsoppgaveServiceTest {
                 perioder = emptyList(),
             )
         val oppgaver = oppfølgingsoppgaveService.hentOppgavetyperSomKanOpprettesForOvergangsstønad(iverksattRevurdering.id)
+
         assertThat(oppgaver.contains(OppgaveForOpprettelseType.INNTEKTSKONTROLL_1_ÅR_FREM_I_TID)).isTrue
     }
 
@@ -189,6 +194,7 @@ internal class OppfølgingsoppgaveServiceTest {
                 perioder = emptyList(),
             )
         val oppgaver = oppfølgingsoppgaveService.hentOppgavetyperSomKanOpprettesForOvergangsstønad(iverksattFørstegangsbehandling.id)
+
         assertThat(oppgaver.contains(OppgaveForOpprettelseType.INNTEKTSKONTROLL_1_ÅR_FREM_I_TID)).isFalse
     }
 

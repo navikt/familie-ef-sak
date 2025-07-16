@@ -11,6 +11,7 @@ import no.nav.familie.ef.sak.brev.BrevClient
 import no.nav.familie.ef.sak.brev.BrevRequest
 import no.nav.familie.ef.sak.brev.Brevmal
 import no.nav.familie.ef.sak.brev.BrevmottakereService
+import no.nav.familie.ef.sak.brev.BrevsignaturService
 import no.nav.familie.ef.sak.brev.FamilieDokumentClient
 import no.nav.familie.ef.sak.brev.Flettefelter
 import no.nav.familie.ef.sak.brev.FrittståendeBrevService
@@ -30,6 +31,7 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerS
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.vedtak.VedtakService
+import no.nav.familie.ef.sak.vedtak.domain.VedtakErUtenBeslutter
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType
 import no.nav.familie.ef.sak.vedtak.dto.SendTilBeslutterDto
 import no.nav.familie.kontrakter.ef.felles.AvslagÅrsak
@@ -56,6 +58,7 @@ class OppfølgingsoppgaveService(
     private val personopplysningerService: PersonopplysningerService,
     private val eksternStønadsperioderService: EksternStønadsperioderService,
     private val brevmottakereService: BrevmottakereService,
+    private val brevsignaturService: BrevsignaturService,
     private val fagsakService: FagsakService,
     private val behandlingRepository: BehandlingRepository,
 ) {
@@ -110,6 +113,7 @@ class OppfølgingsoppgaveService(
     ): OppgaverForOpprettelseDto {
         val lagretFremleggsoppgave = hentOppgaverForOpprettelseEllerNull(behandlingid)
         val oppgavetyperSomKanOpprettes = hentOppgavetyperSomKanOpprettesForOvergangsstønad(behandlingid)
+
         return (
             OppgaverForOpprettelseDto(
                 oppgavetyperSomKanOpprettes = oppgavetyperSomKanOpprettes,
@@ -192,12 +196,15 @@ class OppfølgingsoppgaveService(
 
     fun sendAutomatiskBrev(
         behandlingId: UUID,
+        saksbehandlerIdent: String,
     ) {
         val automatiskBrev = hentAutomatiskBrevEllerNull(behandlingId)
         val saksbehandling = behandlingService.hentSaksbehandling(behandlingId)
+        val fagsak = fagsakService.hentFagsak(saksbehandling.fagsakId)
         val personIdent = behandlingService.hentAktivIdent(behandlingId)
         val personNavn = personopplysningerService.hentGjeldeneNavn(listOf(personIdent)).getValue(personIdent)
         val brevmottakere = brevmottakereService.hentBrevmottakere(behandlingId)
+        val signatur = brevsignaturService.lagSaksbehandlerSignatur(fagsak.hentAktivIdent(), VedtakErUtenBeslutter(true), saksbehandlerIdent)
 
         if (automatiskBrev != null) {
             automatiskBrev.brevSomSkalSendes.forEach {
@@ -205,10 +212,10 @@ class OppfølgingsoppgaveService(
                     brevClient
                         .genererHtml(
                             brevmal = it.apiNavn,
-                            saksbehandlersignatur = "Vedtaksløsningen",
+                            saksbehandlersignatur = signatur.navn,
                             saksbehandlerBrevrequest = objectMapper.valueToTree(BrevRequest(Flettefelter(navn = listOf(personNavn), fodselsnummer = listOf(personIdent)))),
-                            skjulBeslutterSignatur = true,
-                            saksbehandlerEnhet = "Nav arbeid og ytelser",
+                            skjulBeslutterSignatur = signatur.skjulBeslutter,
+                            saksbehandlerEnhet = signatur.enhet,
                         ).replace(VedtaksbrevService.BESLUTTER_VEDTAKSDATO_PLACEHOLDER, LocalDate.now().norskFormat())
 
                 val fil = familieDokumentClient.genererPdfFraHtml(html)

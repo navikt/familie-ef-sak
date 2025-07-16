@@ -10,6 +10,7 @@ import no.nav.familie.ef.sak.behandlingsflyt.task.OpprettOppgaveTask
 import no.nav.familie.ef.sak.behandlingsflyt.task.OpprettOppgaveTask.OpprettOppgaveTaskData
 import no.nav.familie.ef.sak.behandlingsflyt.task.PollStatusFraIverksettTask
 import no.nav.familie.ef.sak.behandlingsflyt.task.SendAutomatiskBrevTask
+import no.nav.familie.ef.sak.behandlingsflyt.task.SendAutomatiskBrevTaskPayload
 import no.nav.familie.ef.sak.brev.VedtaksbrevService
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
@@ -66,14 +67,14 @@ class BeslutteVedtakSteg(
             validerGodkjentVedtak(data)
             validerTilkjentYtelse(saksbehandling)
             val oppgaveId = ferdigstillOppgave(saksbehandling)
-            totrinnskontrollService.lagreTotrinnskontrollOgReturnerBehandler(saksbehandling, data, vedtakErUtenBeslutter)
+            val saksbehandlerIdent = totrinnskontrollService.lagreTotrinnskontrollOgReturnerBehandler(saksbehandling, data, vedtakErUtenBeslutter)
             vedtakService.oppdaterBeslutter(saksbehandling.id, beslutter)
             val iverksettDto = iverksettingDtoMapper.tilDto(saksbehandling, beslutter)
 
             oppdaterResultatPåBehandling(saksbehandling.id)
             opprettPollForStatusOppgave(saksbehandling.id)
             opprettTaskForFerdigstillFremleggsoppgaver(saksbehandling.id)
-            opprettTaskSendAutomatiskBrev(saksbehandling.id)
+            opprettTaskSendAutomatiskBrev(saksbehandling.id, saksbehandlerIdent)
             opprettTaskForBehandlingsstatistikk(saksbehandling.id, oppgaveId)
 
             if (saksbehandling.skalIkkeSendeBrev) {
@@ -110,10 +111,14 @@ class BeslutteVedtakSteg(
 
     private fun opprettTaskSendAutomatiskBrev(
         behandlingId: UUID,
+        saksbehandlerIdent: String,
     ) {
         taskService.save(
             SendAutomatiskBrevTask.opprettTask(
-                behandlingId = behandlingId,
+                SendAutomatiskBrevTaskPayload(
+                    behandlingId = behandlingId,
+                    saksbehandlerIdent = saksbehandlerIdent,
+                ),
             ),
         )
     }
