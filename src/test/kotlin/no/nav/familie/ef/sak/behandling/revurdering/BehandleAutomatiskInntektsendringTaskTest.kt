@@ -325,7 +325,7 @@ class BehandleAutomatiskInntektsendringTaskTest : OppslagSpringRunnerTest() {
         """
         Periode som er kontrollert: ${YearMonth.now().minusMonths(6).tilNorskFormat()} til ${YearMonth.now().minusMonths(1).tilNorskFormat()}.
         
-        Forventet årsinntekt fra mars 2025: 144 000 kroner.
+        Forventet årsinntekt i mars 2025: 144 000 kroner.
         - 10 % opp: 13 200 kroner per måned.
         - 10 % ned: 10 800 kroner per måned.
         
@@ -338,7 +338,7 @@ class BehandleAutomatiskInntektsendringTaskTest : OppslagSpringRunnerTest() {
 
     val forventetInntektsbegrunnelseForrigeVedtak0ForventetInntekt =
         """
-        Forventet årsinntekt fra desember 2024: 0 kroner.
+        Forventet årsinntekt i desember 2024: 0 kroner.
             - Månedsinntekten tilsvarer 1/2 G i året eller over: 5 423 kroner
         
         Mottar uredusert stønad.
