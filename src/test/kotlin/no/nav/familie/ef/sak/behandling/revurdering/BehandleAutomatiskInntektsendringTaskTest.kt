@@ -11,6 +11,7 @@ import no.nav.familie.ef.sak.behandling.revurdering.AutomatiskRevurderingService
 import no.nav.familie.ef.sak.behandling.revurdering.BehandleAutomatiskInntektsendringTask
 import no.nav.familie.ef.sak.behandling.revurdering.PayloadBehandleAutomatiskInntektsendringTask
 import no.nav.familie.ef.sak.behandling.revurdering.RevurderingService
+import no.nav.familie.ef.sak.behandling.revurdering.tilNorskFormat
 import no.nav.familie.ef.sak.behandling.revurdering.ÅrsakRevurderingsRepository
 import no.nav.familie.ef.sak.behandlingsflyt.task.OpprettOppgaveForOpprettetBehandlingTask
 import no.nav.familie.ef.sak.behandlingsflyt.task.OpprettOppgaveForOpprettetBehandlingTask.OpprettOppgaveTaskData
@@ -165,12 +166,13 @@ class BehandleAutomatiskInntektsendringTaskTest : OppslagSpringRunnerTest() {
         behandlingRepository.insert(behandling)
         vilkårHelperService.opprettVilkår(behandling)
 
-        val innmeldtMånedsinntekt = listOf(12_000, 12_000, 12_000, 16_000, 16_000, 24_000, 24_000)
+        val innmeldtMånedsinntekt = listOf(11_000, 12_000, 12_000, 16_000, 16_000, 24_000, 24_000)
         val vedtakTom = YearMonth.now().plusMonths(11)
 
         val forventetInntektIVedtak =
             mapOf(
-                (YearMonth.now().minusMonths(innmeldtMånedsinntekt.size.toLong()) to 12000),
+                (YearMonth.now().minusMonths(innmeldtMånedsinntekt.size.toLong()) to 11_000),
+                (YearMonth.now().minusMonths(innmeldtMånedsinntekt.size.toLong() - 1) to 12000),
             )
         val vedtak = vedtak(forventetInntektIVedtak, vedtakTom)
         vedtakHelperService.ferdigstillVedtak(vedtak, behandling, fagsak)
@@ -321,7 +323,7 @@ class BehandleAutomatiskInntektsendringTaskTest : OppslagSpringRunnerTest() {
 
     val forventetInntektsbegrunnelse =
         """
-        Periode som er kontrollert: juli 2024 til juni 2025.
+        Periode som er kontrollert: ${YearMonth.now().minusMonths(6).tilNorskFormat()} til ${YearMonth.now().minusMonths(1).tilNorskFormat()}.
         
         Forventet årsinntekt fra mars 2025: 144 000 kroner.
         - 10 % opp: 13 200 kroner per måned.
