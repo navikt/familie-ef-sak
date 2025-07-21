@@ -302,7 +302,7 @@ class BehandleAutomatiskInntektsendringTask(
 
         if (forrigeForventetÅrsinntekt == 0) {
             return """
-                Forventet årsinntekt fra ${førsteMånedMed10ProsentEndring.tilNorskFormat()}: ${forrigeForventetÅrsinntekt.tilNorskFormat()} kroner.
+                Forventet årsinntekt i ${førsteMånedMed10ProsentEndring.tilNorskFormat()}: ${forrigeForventetÅrsinntekt.tilNorskFormat()} kroner.
                     - Månedsinntekten tilsvarer 1/2 G i året eller over: ${(Grunnbeløpsperioder.nyesteGrunnbeløp.perMnd.toInt() / 2).tilNorskFormat()} kroner
                 
                 Mottar uredusert stønad.
@@ -316,7 +316,7 @@ class BehandleAutomatiskInntektsendringTask(
             """
             Periode som er kontrollert: ${inntektResponse.inntektsmåneder.minBy { it.måned }.måned.tilNorskFormat()} til ${inntektResponse.inntektsmåneder.maxBy { it.måned }.måned.tilNorskFormat()}.
             
-            Forventet årsinntekt fra ${førsteMånedMed10ProsentEndring.tilNorskFormat()}: ${forrigeForventetÅrsinntekt.tilNorskFormat()} kroner.
+            Forventet årsinntekt i ${førsteMånedMed10ProsentEndring.tilNorskFormat()}: ${forrigeForventetÅrsinntekt.tilNorskFormat()} kroner.
             - 10 % opp: ${tiProsentOppOgNed.opp.tilNorskFormat()} kroner per måned.
             - 10 % ned: ${tiProsentOppOgNed.ned.tilNorskFormat()} kroner per måned.
             ${tekstTypeForGOmregningOppOgNed(forrigeBehandlingGOmregning, forrigeForventetÅrsinntektG, tiProsentOppOgNedG)}

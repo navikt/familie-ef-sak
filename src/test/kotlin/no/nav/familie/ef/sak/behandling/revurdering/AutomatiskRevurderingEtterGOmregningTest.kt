@@ -195,7 +195,7 @@ class AutomatiskRevurderingEtterGOmregningTest : OppslagSpringRunnerTest() {
         Periode som er kontrollert: ${YearMonth.now().minusMonths(12).tilNorskFormat()} til ${
             YearMonth.now().minusMonths(1).tilNorskFormat()}.
         
-        Forventet årsinntekt fra ${YearMonth.now().minusMonths(4).tilNorskFormat()}: 276 000 kroner.
+        Forventet årsinntekt i ${YearMonth.now().minusMonths(4).tilNorskFormat()}: 276 000 kroner.
         - 10 % opp: 25 300 kroner per måned.
         - 10 % ned: 20 700 kroner per måned.
         
