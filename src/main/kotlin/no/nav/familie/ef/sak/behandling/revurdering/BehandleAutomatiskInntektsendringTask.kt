@@ -305,12 +305,12 @@ class BehandleAutomatiskInntektsendringTask(
         if (forrigeForventetÅrsinntekt == 0) {
             return """
                 Forventet årsinntekt i ${førsteMånedMed10ProsentEndring.tilNorskFormat()}: ${forrigeForventetÅrsinntekt.tilNorskFormat()} kroner.
-                    - Månedsinntekten tilsvarer 1/2 G i året eller over: ${(Grunnbeløpsperioder.nyesteGrunnbeløp.perMnd.toInt() / 2).tilNorskFormat()} kroner
+                    - Månedsinntekt 1/2 G: ${(Grunnbeløpsperioder.nyesteGrunnbeløp.perMnd.toInt() / 2).tilNorskFormat()} kroner
                 
                 Mottar uredusert stønad.
                 
-                Inntekten i ${førsteMånedMed10ProsentEndring.tilNorskFormat()} er ${beløpFørsteMåned10ProsentEndring.tilNorskFormat()} kroner. Har inntekt over 1/2 G på ${(Grunnbeløpsperioder.finnGrunnbeløp(førsteMånedMed10ProsentEndring).perMnd.toInt() / 2).tilNorskFormat()} kroner denne måneden og alle månedene etter dette.
-                Stønaden beregnes på nytt fra måneden etter inntekten oversteg ${(Grunnbeløpsperioder.finnGrunnbeløp(førsteMånedMed10ProsentEndring).perMnd.toInt() / 2).tilNorskFormat()} kroner.
+                Inntekten i ${førsteMånedMed10ProsentEndring.tilNorskFormat()} er ${beløpFørsteMåned10ProsentEndring.tilNorskFormat()} kroner. Bruker har inntekt over 1/2 G denne måneden og alle månedene etter dette.
+                Stønaden beregnes på nytt fra måneden etter inntekten oversteg 1/2 G.
                 """.trimIndent()
         }
 

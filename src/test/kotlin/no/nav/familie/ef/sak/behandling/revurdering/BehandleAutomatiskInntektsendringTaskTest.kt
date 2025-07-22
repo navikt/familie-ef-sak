@@ -339,11 +339,11 @@ class BehandleAutomatiskInntektsendringTaskTest : OppslagSpringRunnerTest() {
     val forventetInntektsbegrunnelseForrigeVedtak0ForventetInntekt =
         """
         Forventet årsinntekt i desember 2024: 0 kroner.
-            - Månedsinntekten tilsvarer 1/2 G i året eller over: 5 423 kroner
+            - Månedsinntekt 1/2 G: 5 423 kroner
         
         Mottar uredusert stønad.
         
-        Inntekten i desember 2024 er 12 000 kroner. Har inntekt over 1/2 G på 5 168 kroner denne måneden og alle månedene etter dette.
-        Stønaden beregnes på nytt fra måneden etter inntekten oversteg 5 168 kroner.
+        Inntekten i desember 2024 er 12 000 kroner. Bruker har inntekt over 1/2 G denne måneden og alle månedene etter dette.
+        Stønaden beregnes på nytt fra måneden etter inntekten oversteg 1/2 G.
         """.trimIndent()
 }
