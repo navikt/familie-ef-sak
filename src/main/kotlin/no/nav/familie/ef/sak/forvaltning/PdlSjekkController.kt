@@ -73,7 +73,7 @@ class PdlSjekkController(
         secureLogger.info("Søker har ${barn.size} barn og ${andreForeldre.size} andre foreldre")
 
         andreForeldre.forEach { (id, forelder) ->
-            secureLogger.info("Annen forelder: $id - ${forelder.navn} gleldende? ")
+            secureLogger.info("Annen forelder: $id - ${forelder.navn}  ")
             forelder.folkeregisteridentifikator.forEach { pid ->
                 secureLogger.info("Annen forelder-ident status: ${pid.status}, historisk = ${pid.metadata.historisk}")
             }
