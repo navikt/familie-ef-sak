@@ -135,6 +135,18 @@ internal class TidligereVedtaksperioderServiceTest {
     }
 
     @Test
+    internal fun `Hvis en person ikke har folkeregisteridentifikatos skal vi ikke prøve å hente ut tidligere vedtak`() {
+        val tidligereVedtaksperioder = service.hentTidligereVedtaksperioder(emptyList())
+        assertThat(tidligereVedtaksperioder.sak).isNull()
+        assertThat(tidligereVedtaksperioder.historiskPensjon).isNull()
+        assertThat(tidligereVedtaksperioder.infotrygd.harTidligereOvergangsstønad).isFalse()
+        verify(exactly = 0) { fagsakPersonService.finnPerson(any()) }
+        verify(exactly = 0) { fagsakService.finnFagsakerForFagsakPersonId(any()) }
+        verify(exactly = 0) { behandlingService.finnSisteIverksatteBehandling(any()) }
+        verify(exactly = 0) { tilkjentYtelseService.hentForBehandling(any()) }
+    }
+
+    @Test
     internal fun `Skal filtrere bort opphør`() {
         val andel2 = andel.copy(erOpphør = true)
         every { andelsHistorikkService.hentHistorikk(fagsaker.overgangsstønad!!.id, null) } returns
@@ -326,7 +338,7 @@ internal class TidligereVedtaksperioderServiceTest {
                 GrunnlagsdataPeriodeHistorikkOvergangsstønad(
                     fom = LocalDate.of(2022, 5, 1),
                     tom = LocalDate.of(2022, 9, 30),
-                    periodeType = VedtaksperiodeType.SANKSJON,
+                    periodeType = SANKSJON,
                     aktivitet = AktivitetType.FORSØRGER_I_ARBEID,
                     beløp = 5555,
                     inntekt = 5555,
@@ -335,7 +347,7 @@ internal class TidligereVedtaksperioderServiceTest {
                 GrunnlagsdataPeriodeHistorikkOvergangsstønad(
                     fom = LocalDate.of(2024, 2, 1),
                     tom = LocalDate.of(2024, 3, 31),
-                    periodeType = VedtaksperiodeType.SANKSJON,
+                    periodeType = SANKSJON,
                     aktivitet = AktivitetType.FORSØRGER_I_ARBEID,
                     beløp = 4444,
                     inntekt = 4444,
@@ -344,7 +356,7 @@ internal class TidligereVedtaksperioderServiceTest {
                 GrunnlagsdataPeriodeHistorikkOvergangsstønad(
                     fom = LocalDate.of(2023, 3, 1),
                     tom = LocalDate.of(2023, 7, 31),
-                    periodeType = VedtaksperiodeType.SANKSJON,
+                    periodeType = SANKSJON,
                     aktivitet = AktivitetType.FORSØRGER_I_ARBEID,
                     beløp = 3333,
                     inntekt = 3333,

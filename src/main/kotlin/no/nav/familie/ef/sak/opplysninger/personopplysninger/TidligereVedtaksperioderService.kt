@@ -33,7 +33,7 @@ class TidligereVedtaksperioderService(
      * @param folkeregisteridentifikatorer for 1 person
      */
     fun hentTidligereVedtaksperioder(folkeregisteridentifikatorer: List<Folkeregisteridentifikator>): TidligereVedtaksperioder {
-        return if(folkeregisteridentifikatorer.isNotEmpty() && folkeregisteridentifikatorer.any { it.metadata.historisk == false }){
+        return if (folkeregisteridentifikatorer.isNotEmpty() && folkeregisteridentifikatorer.any { it.metadata.historisk == false }) {
             val aktivIdent = folkeregisteridentifikatorer.gjeldende().ident
             val alleIdenter = folkeregisteridentifikatorer.map { it.ident }.toSet()
             val tidligereInnvilgetVedtak =
@@ -43,7 +43,7 @@ class TidligereVedtaksperioderService(
                 sak = hentTidligereInnvilgedeVedtakEf(alleIdenter),
                 historiskPensjon = historiskPensjonService.hentHistoriskPensjon(aktivIdent, alleIdenter).harPensjonsdata(),
             )
-        } else{
+        } else {
             // Ikke hent tidligere vedtaksperioder for personer uten folkeregisteridentifikatorer (f.eks. andre foreldre med NPID hentet fra relasjon til barn)
             TidligereVedtaksperioder(infotrygd = TidligereInnvilgetVedtak(false, false, false))
         }
