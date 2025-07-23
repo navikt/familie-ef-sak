@@ -223,7 +223,7 @@ class VedtakController(
 
     @GetMapping("/personerMedAktivStonadIkkeManueltRevurdertSisteMaaneder")
     @ProtectedWithClaims(issuer = "azuread", claimMap = ["roles=access_as_application"]) // Familie-ef-personhendelse bruker denne
-    fun hentPersonerMedAktivStonadIkkeManueltRevurdertSisteToMåneder(
+    fun hentPersonerMedAktivStonadIkkeManueltRevurdertSisteMåneder(
         @RequestParam antallMaaneder: Int = 3,
     ): Ressurs<List<String>> =
         if (environment.activeProfiles.contains("prod")) {
