@@ -33,15 +33,20 @@ class TidligereVedtaksperioderService(
      * @param folkeregisteridentifikatorer for 1 person
      */
     fun hentTidligereVedtaksperioder(folkeregisteridentifikatorer: List<Folkeregisteridentifikator>): TidligereVedtaksperioder {
-        val aktivIdent = folkeregisteridentifikatorer.gjeldende().ident
-        val alleIdenter = folkeregisteridentifikatorer.map { it.ident }.toSet()
-        val tidligereInnvilgetVedtak =
-            mapTidligereInnvilgetVedtak(infotrygdService.hentPerioderFraReplika(alleIdenter))
-        return TidligereVedtaksperioder(
-            infotrygd = tidligereInnvilgetVedtak,
-            sak = hentTidligereInnvilgedeVedtakEf(alleIdenter),
-            historiskPensjon = historiskPensjonService.hentHistoriskPensjon(aktivIdent, alleIdenter).harPensjonsdata(),
-        )
+        return if(folkeregisteridentifikatorer.isNotEmpty() && folkeregisteridentifikatorer.any { it.metadata.historisk == false }){
+            val aktivIdent = folkeregisteridentifikatorer.gjeldende().ident
+            val alleIdenter = folkeregisteridentifikatorer.map { it.ident }.toSet()
+            val tidligereInnvilgetVedtak =
+                mapTidligereInnvilgetVedtak(infotrygdService.hentPerioderFraReplika(alleIdenter))
+            return TidligereVedtaksperioder(
+                infotrygd = tidligereInnvilgetVedtak,
+                sak = hentTidligereInnvilgedeVedtakEf(alleIdenter),
+                historiskPensjon = historiskPensjonService.hentHistoriskPensjon(aktivIdent, alleIdenter).harPensjonsdata(),
+            )
+        } else{
+            // Ikke hent tidligere vedtaksperioder for personer uten folkeregisteridentifikatorer (f.eks. andre foreldre med NPID hentet fra relasjon til barn)
+            TidligereVedtaksperioder(infotrygd = TidligereInnvilgetVedtak(false, false, false))
+        }
     }
 
     private fun mapTidligereInnvilgetVedtak(periodeResponse: InfotrygdPeriodeResponse) =
