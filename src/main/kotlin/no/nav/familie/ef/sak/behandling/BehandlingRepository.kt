@@ -177,8 +177,12 @@ interface BehandlingRepository :
         """
         SELECT DISTINCT pi.ident 
         FROM gjeldende_iverksatte_behandlinger gib 
+            JOIN behandling b on gib.id = b.id
+            LEFT JOIN behandling forrige_behandling on b.forrige_behandling_id=forrige_behandling.id
             JOIN person_ident pi ON gib.fagsak_person_id=pi.fagsak_person_id
-        WHERE gib.stonadstype=:stønadstype AND (vedtakstidspunkt < ('now'::timestamp - make_interval(months := :antallMåneder)) OR arsak IN ('MIGRERING', 'G_OMREGNING'))
+        WHERE gib.stonadstype=:stønadstype 
+            AND (gib.vedtakstidspunkt < ('now'::timestamp - make_interval(months := :antallMåneder)) 
+                OR (b.arsak IN ('MIGRERING', 'G_OMREGNING') AND forrige_behandling.vedtakstidspunkt < ('now'::timestamp - make_interval(months := :antallMåneder))))
         AND EXISTS(SELECT 1 FROM andel_tilkjent_ytelse aty
                                JOIN tilkjent_ytelse ty ON aty.tilkjent_ytelse = ty.id
              WHERE ty.id = aty.tilkjent_ytelse

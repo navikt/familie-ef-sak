@@ -17,8 +17,10 @@ import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus.UTREDES
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.beregning.Grunnbeløpsperioder
 import no.nav.familie.ef.sak.fagsak.FagsakPersonRepository
+import no.nav.familie.ef.sak.fagsak.FagsakRepository
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
+import no.nav.familie.ef.sak.fagsak.domain.tilFagsakMedPerson
 import no.nav.familie.ef.sak.felles.domain.Endret
 import no.nav.familie.ef.sak.felles.domain.Sporbar
 import no.nav.familie.ef.sak.felles.domain.SporbarUtils
@@ -54,6 +56,9 @@ import java.util.UUID
 
 internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
     @Autowired
+    private lateinit var fagsakRepository: FagsakRepository
+
+    @Autowired
     private lateinit var behandlingRepository: BehandlingRepository
 
     @Autowired
@@ -72,14 +77,28 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `skal finne alle personer med aktiv stønad som ikke er manuelt revurdert siste måneder`() {
+        val behandling = testoppsettService.lagreFagsakOgBehandlingForPersonIdent("3", LocalDateTime.now().minusMonths(5))
+
         lagrePersonMedVedtak("1", 12)
         lagrePersonMedVedtak("2", 3)
-        lagrePersonMedVedtak("3", 3, behandlingÅrsak = BehandlingÅrsak.G_OMREGNING) // Skal ikke ta hensyn til forrige revurderingsdato ved g-omregning
+        lagrePersonMedVedtak("3", 3, behandlingÅrsak = BehandlingÅrsak.G_OMREGNING, forrigeBehandlingId = behandling.id)
         lagrePersonMedVedtak("4", 3, YearMonth.now().minusMonths(1)) // Gammelt vedtak
 
         val resultat = behandlingRepository.finnPersonerMedAktivStonadIkkeRevurdertSisteMåneder(antallMåneder = 4)
         assertThat(resultat.size).isEqualTo(2)
         assertThat(resultat).containsAll(listOf("1", "3"))
+    }
+
+    @Test
+    fun `skal finne alle personer med aktiv stønad som ikke er manuelt revurdert siste måneder - filtrer ut person med behandling før g-omregning som nylig er vedtatt`() {
+        val behandling = testoppsettService.lagreFagsakOgBehandlingForPersonIdent("3", LocalDateTime.now().minusMonths(3))
+
+        lagrePersonMedVedtak("2", 3)
+        lagrePersonMedVedtak("3", 3, behandlingÅrsak = BehandlingÅrsak.G_OMREGNING, forrigeBehandlingId = behandling.id)
+
+        val resultat = behandlingRepository.finnPersonerMedAktivStonadIkkeRevurdertSisteMåneder(antallMåneder = 3)
+        assertThat(resultat.size).isEqualTo(1)
+        assertThat(resultat).containsAll(listOf("2"))
     }
 
     @Test
@@ -118,11 +137,19 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
         antallMånederSidenForrigeRevurdering: Long,
         stønadTom: YearMonth = YearMonth.now().plusMonths(2),
         behandlingÅrsak: BehandlingÅrsak = BehandlingÅrsak.NYE_OPPLYSNINGER,
+        forrigeBehandlingId: UUID? = null,
     ): Fagsak {
         val stønadsperiode = Månedsperiode(YearMonth.now().minusMonths(antallMånederSidenForrigeRevurdering), stønadTom)
         val person1 = fagsakPerson(identer = setOf(PersonIdent(personIdent)))
-        fagsakPersonRepository.insert(person1)
-        val fagsak = testoppsettService.lagreFagsak(fagsak(person = person1))
+        val fagsak =
+            if (fagsakPersonRepository.findByIdent(listOf(personIdent)) == null) {
+                fagsakPersonRepository.insert(person1)
+                testoppsettService.lagreFagsak(fagsak(person = person1))
+            } else {
+                fagsakRepository.findBySøkerIdent(setOf(personIdent), OVERGANGSSTØNAD)?.tilFagsakMedPerson(setOf(PersonIdent(personIdent)))
+                    ?: throw IllegalStateException("Burde funnet fagsak for personident $personIdent")
+            }
+
         val behandling =
             behandling(
                 fagsak,
@@ -130,6 +157,7 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
                 vedtakstidspunkt = stønadsperiode.fomDato.atStartOfDay(),
                 årsak = behandlingÅrsak,
                 status = FERDIGSTILT,
+                forrigeBehandlingId = forrigeBehandlingId,
             )
         val vedtaksperiodeList =
             listOf(
