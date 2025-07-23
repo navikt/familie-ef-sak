@@ -300,23 +300,25 @@ class BehandleAutomatiskInntektsendringTask(
         val forventetInntekt = inntektsperioder.maxBy { it.periode.fom }
         val forventetInntektFraMåned = forventetInntekt.periode.fom
 
+        val forrigeForventetInnntektsperiodeFraOgMed = if (forrigeForventetInntektsperiode.periode.fom.isBefore(YearMonth.now().minusYears(1))) YearMonth.now().minusYears(1) else forrigeForventetInntektsperiode.periode.fom
+
         if (forrigeForventetÅrsinntekt == 0) {
             return """
-                Forventet årsinntekt fra ${førsteMånedMed10ProsentEndring.tilNorskFormat()}: ${forrigeForventetÅrsinntekt.tilNorskFormat()} kroner.
-                    - Månedsinntekten tilsvarer 1/2 G i året eller over: ${(Grunnbeløpsperioder.nyesteGrunnbeløp.perMnd.toInt() / 2).tilNorskFormat()} kroner
+                Forventet årsinntekt i ${førsteMånedMed10ProsentEndring.tilNorskFormat()}: ${forrigeForventetÅrsinntekt.tilNorskFormat()} kroner.
+                    - Månedsinntekt 1/2 G: ${(Grunnbeløpsperioder.nyesteGrunnbeløp.perMnd.toInt() / 2).tilNorskFormat()} kroner
                 
                 Mottar uredusert stønad.
                 
-                Inntekten i ${førsteMånedMed10ProsentEndring.tilNorskFormat()} er ${beløpFørsteMåned10ProsentEndring.tilNorskFormat()} kroner. Har inntekt over 1/2 G på ${(Grunnbeløpsperioder.finnGrunnbeløp(førsteMånedMed10ProsentEndring).perMnd.toInt() / 2).tilNorskFormat()} kroner denne måneden og alle månedene etter dette.
-                Stønaden beregnes på nytt fra måneden etter inntekten oversteg ${(Grunnbeløpsperioder.finnGrunnbeløp(førsteMånedMed10ProsentEndring).perMnd.toInt() / 2).tilNorskFormat()} kroner.
+                Inntekten i ${førsteMånedMed10ProsentEndring.tilNorskFormat()} er ${beløpFørsteMåned10ProsentEndring.tilNorskFormat()} kroner. Bruker har inntekt over 1/2 G denne måneden og alle månedene etter dette.
+                Stønaden beregnes på nytt fra måneden etter inntekten oversteg 1/2 G.
                 """.trimIndent()
         }
 
         val tekst =
             """
-            Periode som er kontrollert: ${inntektResponse.inntektsmåneder.minBy { it.måned }.måned.tilNorskFormat()} til ${inntektResponse.inntektsmåneder.maxBy { it.måned }.måned.tilNorskFormat()}.
+            Periode som er kontrollert: ${forrigeForventetInnntektsperiodeFraOgMed.tilNorskFormat()} til ${inntektResponse.inntektsmåneder.maxBy { it.måned }.måned.tilNorskFormat()}.
             
-            Forventet årsinntekt fra ${førsteMånedMed10ProsentEndring.tilNorskFormat()}: ${forrigeForventetÅrsinntekt.tilNorskFormat()} kroner.
+            Forventet årsinntekt i ${førsteMånedMed10ProsentEndring.tilNorskFormat()}: ${forrigeForventetÅrsinntekt.tilNorskFormat()} kroner.
             - 10 % opp: ${tiProsentOppOgNed.opp.tilNorskFormat()} kroner per måned.
             - 10 % ned: ${tiProsentOppOgNed.ned.tilNorskFormat()} kroner per måned.
             ${tekstTypeForGOmregningOppOgNed(forrigeBehandlingGOmregning, forrigeForventetÅrsinntektG, tiProsentOppOgNedG)}
