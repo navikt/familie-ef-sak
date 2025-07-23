@@ -135,7 +135,7 @@ internal class TidligereVedtaksperioderServiceTest {
     }
 
     @Test
-    internal fun `Hvis en person ikke har folkeregisteridentifikatos skal vi ikke prøve å hente ut tidligere vedtak`() {
+    internal fun `Hvis en person ikke har folkeregisteridentifikator skal vi ikke prøve å hente ut tidligere vedtak`() {
         val tidligereVedtaksperioder = service.hentTidligereVedtaksperioder(emptyList())
         assertThat(tidligereVedtaksperioder.sak).isNull()
         assertThat(tidligereVedtaksperioder.historiskPensjon).isNull()
