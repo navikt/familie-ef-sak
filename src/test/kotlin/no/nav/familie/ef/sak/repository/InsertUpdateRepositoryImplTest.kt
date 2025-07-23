@@ -100,7 +100,8 @@ internal class InsertUpdateRepositoryImplTest : OppslagSpringRunnerTest() {
                     identer =
                         person.identer
                             .map { it.copy(ident = nyPersonIdent) }
-                            .toSet() + PersonIdent(annenIdent),
+                            .toSet() +
+                            PersonIdent(annenIdent),
                 ),
             )
         val oppdatertSøkerIdent = oppdatertPerson.identer.first { it.ident == nyPersonIdent }

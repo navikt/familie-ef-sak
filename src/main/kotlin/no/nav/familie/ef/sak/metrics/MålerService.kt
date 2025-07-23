@@ -48,7 +48,8 @@ class MålerService(
                         "ytelse",
                         it.stonadstype.name,
                         "maned",
-                        it.dato.year.toString() + "-" +
+                        it.dato.year.toString() +
+                            "-" +
                             it.dato.monthValue
                                 .toString()
                                 .padStart(2, '0'),
@@ -66,7 +67,8 @@ class MålerService(
                         "ytelse",
                         it.stonadstype.name,
                         "maned",
-                        it.dato.year.toString() + "-" +
+                        it.dato.year.toString() +
+                            "-" +
                             it.dato.monthValue
                                 .toString()
                                 .padStart(2, '0'),
