@@ -102,7 +102,7 @@ class AutomatiskRevurderingEtterGOmregningTest : OppslagSpringRunnerTest() {
     fun `Full kjøring - siste behandling er g-omregning`() {
         gOmregningTestUtil.gOmregne(behandlingId, fagsakId)
 
-        val gOmregningBehandling = behandlingRepository.findByFagsakId(fagsakId).last()
+        val gOmregningBehandling = behandlingRepository.findByFagsakId(fagsakId).first { it.erGOmregning() }
         behandlingRepository.update(gOmregningBehandling.copy(status = BehandlingStatus.FERDIGSTILT))
 
         val personIdent = "321"
@@ -155,7 +155,7 @@ class AutomatiskRevurderingEtterGOmregningTest : OppslagSpringRunnerTest() {
     fun `Siste behandling er g-omregning og vedtaksperiode før g-omregning har samme fom-dato som g-omregning`() {
         gOmregningTestUtil.gOmregne(behandlingId, fagsakId, YearMonth.of(YearMonth.now().year, 5))
 
-        val gOmregningBehandling = behandlingRepository.findByFagsakId(fagsakId).last()
+        val gOmregningBehandling = behandlingRepository.findByFagsakId(fagsakId).first { it.erGOmregning() }
         behandlingRepository.update(gOmregningBehandling.copy(status = BehandlingStatus.FERDIGSTILT))
 
         val personIdent = "321"
