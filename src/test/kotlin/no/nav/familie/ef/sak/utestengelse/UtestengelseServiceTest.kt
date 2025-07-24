@@ -1,6 +1,7 @@
 package no.nav.familie.ef.sak.utestengelse
 
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
+import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.clearBrukerContext
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.testWithBrukerContext
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext.SYSTEM_FORKORTELSE
 import no.nav.familie.ef.sak.repository.fagsakPerson
@@ -76,13 +77,17 @@ internal class UtestengelseServiceTest : OppslagSpringRunnerTest() {
     inner class SlettUtestengelse {
         @Test
         internal fun `markerer utestengelse som slettet`() {
-            utestengelseRepository.insert(utestengelse)
+            clearBrukerContext()
+            val utestengelseSomSlettes =
+                Utestengelse(fagsakPersonId = fagsakPerson.id, fom = periode.fomDato, tom = periode.tomDato)
+
+            utestengelseRepository.insert(utestengelseSomSlettes)
 
             testWithBrukerContext("saksbehandler") {
-                utestengelseService.slettUtestengelse(utestengelse.fagsakPersonId, utestengelse.id)
+                utestengelseService.slettUtestengelse(utestengelseSomSlettes.fagsakPersonId, utestengelseSomSlettes.id)
             }
 
-            val oppdatertUtestengelse = utestengelseRepository.findByIdOrThrow(utestengelse.id)
+            val oppdatertUtestengelse = utestengelseRepository.findByIdOrThrow(utestengelseSomSlettes.id)
             assertThat(oppdatertUtestengelse.slettet).isTrue
             assertThat(oppdatertUtestengelse.sporbar.opprettetAv).isEqualTo(SYSTEM_FORKORTELSE)
             assertThat(oppdatertUtestengelse.sporbar.endret.endretAv).isEqualTo("saksbehandler")

@@ -309,8 +309,10 @@ data class Vegadresse(
         yKoordinat2: Float,
     ): Float =
         sqrt(
-            (xKoordinat1 - xKoordinat2) * (xKoordinat1 - xKoordinat2) +
-                (yKoordinat1 - yKoordinat2) * (yKoordinat1 - yKoordinat2),
+            (xKoordinat1 - xKoordinat2) *
+                (xKoordinat1 - xKoordinat2) +
+                (yKoordinat1 - yKoordinat2) *
+                (yKoordinat1 - yKoordinat2),
         )
 
     fun erSammeVegadresse(other: Vegadresse): Boolean = påkrevdeFelterErLike(this, other) && likeadresserNullOgTomIgnorert(other, this)

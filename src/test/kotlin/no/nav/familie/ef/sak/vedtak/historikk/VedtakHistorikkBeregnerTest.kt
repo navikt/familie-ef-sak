@@ -112,7 +112,8 @@ internal class VedtakHistorikkBeregnerTest {
                 førstePeriode
                     .copy(datoTil = LocalDate.of(2021, 1, 31))
                     .tilHistorikk(),
-            ) + andreVedtak.vedtaksperioder(),
+            ) +
+                andreVedtak.vedtaksperioder(),
         )
     }
 

@@ -86,6 +86,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.repository.findByIdOrNull
 import java.math.BigDecimal
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.LinkedList
 import java.util.Queue
@@ -981,7 +982,7 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
                         .findAll()
                         .filter { it.status == Status.KLAR_TIL_PLUKK || it.status == Status.UBEHANDLET }
                         .single { it.type == type }
-                taskWorker.markerPlukket(task.id)
+                taskService.save(task.copy(status = Status.PLUKKET))
                 taskWorker.doActualWork(task.id)
             } catch (e: Exception) {
                 throw RuntimeException("Feilet håntering av $type", e)

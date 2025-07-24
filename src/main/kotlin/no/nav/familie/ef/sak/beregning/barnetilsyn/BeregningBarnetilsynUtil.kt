@@ -59,7 +59,8 @@ object BeregningBarnetilsynUtil {
                 Datoperiode(LocalDate.of(2025, 1, 1), LocalDate.MAX),
                 maxbeløp = mapOf(1 to 4790, 2 to 6248, 3 to 7081),
             ),
-        ) + eldreBarnetilsynsatser
+        ) +
+            eldreBarnetilsynsatser
 
     val ikkeGjeldendeSatserForBarnetilsyn: List<MaxbeløpBarnetilsynSats> =
         listOf(
@@ -67,7 +68,8 @@ object BeregningBarnetilsynUtil {
                 Datoperiode(LocalDate.of(2023, 7, 1), LocalDate.MAX),
                 maxbeløp = mapOf(1 to 4480, 2 to 5844, 3 to 6623),
             ),
-        ) + eldreBarnetilsynsatser
+        ) +
+            eldreBarnetilsynsatser
 
     fun lagBeløpsPeriodeBarnetilsyn(
         utgiftsperiode: UtgiftsMåned,

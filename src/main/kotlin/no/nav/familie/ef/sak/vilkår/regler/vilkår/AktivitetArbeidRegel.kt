@@ -22,7 +22,8 @@ class AktivitetArbeidRegel :
                 SvarId.HAR_FORBIGÅENDE_SYKDOM,
             ).associateWith {
                 SluttSvarRegel.OPPFYLT_MED_PÅKREVD_BEGRUNNELSE
-            } + mapOf(SvarId.NEI to SluttSvarRegel.IKKE_OPPFYLT_MED_PÅKREVD_BEGRUNNELSE)
+            } +
+                mapOf(SvarId.NEI to SluttSvarRegel.IKKE_OPPFYLT_MED_PÅKREVD_BEGRUNNELSE)
         private val ER_I_ARBEID_ELLER_SYK =
             RegelSteg(
                 regelId = RegelId.ER_I_ARBEID_ELLER_FORBIGÅENDE_SYKDOM,
