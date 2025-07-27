@@ -11,7 +11,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.5.3</version>
+        <version>3.5.4</version>
     </parent>
     <repositories>
         <repository>
@@ -35,12 +35,12 @@
         <mockk.version>1.14.5</mockk.version>
         <felles.version>3.20250616113100_41d23f2</felles.version>
         <prosessering.version>2.20250721105118_e067b92</prosessering.version>
-        <token-validation-spring.version>5.0.30</token-validation-spring.version>
+        <token-validation-spring.version>5.0.33</token-validation-spring.version>
 
         <start-class>no.nav.familie.ef.sak.ApplicationKt</start-class>
-        <kontrakter.version>3.0_20250703092737_0055ff4</kontrakter.version>
+        <kontrakter.version>3.0_20250724145643_3e1e3e4</kontrakter.version>
         <mikrofrontend.builder.version>20230704114948-74aa2e9</mikrofrontend.builder.version>
-        <eksterne.kontrakter.bisys.version>2.0_20250702091822_699ca50</eksterne.kontrakter.bisys.version>
+        <eksterne.kontrakter.bisys.version>2.0_20250721082943_403d667</eksterne.kontrakter.bisys.version>
         <cucumber.version>7.26.0</cucumber.version>
 
 
@@ -48,7 +48,7 @@
         <sonar.projectKey>${SONAR_PROJECTKEY}</sonar.projectKey>
         <sonar.organization>navit</sonar.organization>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
-        <nav.security.version>5.0.30</nav.security.version> <!-- Denne burde være samme versjon som i felles -->
+        <nav.security.version>5.0.33</nav.security.version> <!-- Denne burde være samme versjon som i felles -->
         <okhttp3.version>4.9.1</okhttp3.version> <!-- overskrever spring sin versjon, blir brukt av mock-oauth2-server -->
         <brukervarsel-builder.version>2.1.1</brukervarsel-builder.version>
         <!--suppress UnresolvedMavenProperty -->
@@ -59,7 +59,7 @@
             <dependency>
                 <groupId>org.junit</groupId>
                 <artifactId>junit-bom</artifactId>
-                <version>5.13.3</version> <!-- Denne inkluderer junit-platform 1.13.3 som kreves av cucumber 7.26, kan muligens fjernes når spring bumper til junit versjon 1.13.3 -->
+                <version>5.13.4</version> <!-- Denne inkluderer junit-platform 1.13.3 som kreves av cucumber 7.26, kan muligens fjernes når spring bumper til junit versjon 1.13.3 -->
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -129,7 +129,7 @@
         <dependency>
             <groupId>org.flywaydb</groupId>
             <artifactId>flyway-database-postgresql</artifactId>
-            <version>11.10.3</version>
+            <version>11.10.4</version>
             <scope>runtime</scope>
         </dependency>
         <dependency>
@@ -285,7 +285,7 @@
         <dependency>
             <groupId>org.junit.platform</groupId>
             <artifactId>junit-platform-suite</artifactId>
-            <version>1.13.3</version>
+            <version>1.13.4</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -381,7 +381,7 @@
                     <dependency>
                         <groupId>com.pinterest.ktlint</groupId>
                         <artifactId>ktlint-cli</artifactId>
-                        <version>1.7.0</version>
+                        <version>1.7.1</version>
                     </dependency>
                     <!-- additional 3rd party ruleset(s) can be specified here -->
                 </dependencies>
