@@ -241,8 +241,8 @@ class OppfølgingsoppgaveService(
                 )
 
             if (fagsak != null) {
-                val behandlingId = behandlingRepository.finnSisteBehandlingForOppgaveKanOpprettes(fagsak.id)
-                return behandlingId
+                val nullableBehandlingId = behandlingRepository.finnSisteBehandlingForOppgaveKanOpprettes(fagsak.id)
+                return nullableBehandlingId
             }
         }
 
