@@ -149,7 +149,7 @@ interface BehandlingRepository :
             LIMIT 1
     """,
     )
-    fun finnSisteBehandlingForOppgaveKanOpprettes(fagsakId: UUID): UUID
+    fun finnSisteBehandlingForOppgaveKanOpprettes(fagsakId: UUID): UUID?
 
     fun existsByFagsakIdAndStatusIsNot(
         fagsakId: UUID,
