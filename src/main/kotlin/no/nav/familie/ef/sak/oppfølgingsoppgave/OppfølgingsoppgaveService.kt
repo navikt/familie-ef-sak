@@ -3,6 +3,7 @@ package no.nav.familie.ef.sak.oppfølgingsoppgave
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.Saksbehandling
+import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.oppgaveforopprettelse.OppgaverForOpprettelseDto
 import no.nav.familie.ef.sak.behandling.oppgaveforopprettelse.OppgaverForOpprettelseRepository
 import no.nav.familie.ef.sak.behandling.oppgaverforferdigstilling.OppgaverForFerdigstillingDto
@@ -241,8 +242,23 @@ class OppfølgingsoppgaveService(
                 )
 
             if (fagsak != null) {
-                val nullableBehandlingId = behandlingRepository.finnSisteBehandlingForOppgaveKanOpprettes(fagsak.id)
-                return nullableBehandlingId
+                // TODO: Gjøre annerledes
+                val finnesBehandlingerForOvergangsstønad =
+                    behandlingRepository.existsByFagsakIdAndStatusIsNotIn(
+                        fagsak.id,
+                        listOf(
+                            BehandlingStatus.UTREDES,
+                            BehandlingStatus.SATT_PÅ_VENT,
+                            BehandlingStatus.FATTER_VEDTAK,
+                            BehandlingStatus.FERDIGSTILT,
+                            BehandlingStatus.OPPRETTET,
+                        ),
+                    )
+
+                if (finnesBehandlingerForOvergangsstønad) {
+                    val behandlingId = behandlingRepository.finnSisteBehandlingForOppgaveKanOpprettes(fagsak.id)
+                    return behandlingId
+                }
             }
         }
 
