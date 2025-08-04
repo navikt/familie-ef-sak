@@ -91,12 +91,6 @@ class OppfølgingsoppgaveService(
             "behandlingId=${saksbehandling.id} prøver å opprette $nyeOppgaver $oppgavetyperSomKanOpprettes"
         }
         oppgaverForOpprettelseRepository.deleteByBehandlingId(saksbehandling.id)
-        if (nyeOppgaver.contains(OppgaveForOpprettelseType.INNTEKTSKONTROLL_1_ÅR_FREM_I_TID)) {
-            if (saksbehandling.stønadstype.equals(StønadType.BARNETILSYN)) {
-                oppgaverForOpprettelseRepository.insert(OppgaverForOpprettelse(saksbehandling.id, nyeOppgaver, årForInntektskontrollSelvstendigNæringsdrivende))
-                return
-            }
-        }
         oppgaverForOpprettelseRepository.insert(OppgaverForOpprettelse(saksbehandling.id, nyeOppgaver, årForInntektskontrollSelvstendigNæringsdrivende))
     }
 
