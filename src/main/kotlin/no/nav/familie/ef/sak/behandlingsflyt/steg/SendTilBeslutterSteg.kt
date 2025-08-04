@@ -36,6 +36,7 @@ import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.internal.TaskService
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import java.math.BigDecimal
 import java.time.LocalDateTime
 import java.util.UUID
@@ -139,20 +140,11 @@ class SendTilBeslutterSteg(
             resultatType == ResultatType.HENLEGGE
     }
 
+    @Transactional
     override fun utførSteg(
         saksbehandling: Saksbehandling,
         data: SendTilBeslutterDto?,
     ) {
-        behandlingService.oppdaterStatusPåBehandling(saksbehandling.id, BehandlingStatus.FATTER_VEDTAK)
-        vedtakService.oppdaterSaksbehandler(saksbehandling.id, SikkerhetContext.hentSaksbehandler())
-        val beskrivelseMarkeringer = data?.beskrivelseMarkeringer
-
-        if (vedtakService.hentVedtak(saksbehandling.id).skalVedtakBesluttes()) {
-            opprettGodkjennVedtakOppgave(saksbehandling, beskrivelseMarkeringer)
-        }
-
-        ferdigstillOppgave(saksbehandling)
-        opprettTaskForBehandlingsstatistikk(saksbehandling.id)
         if (data != null) {
             oppfølgingsoppgaveService.lagreOppgaveIderForFerdigstilling(
                 saksbehandling.id,
@@ -169,6 +161,17 @@ class SendTilBeslutterSteg(
                 data.automatiskBrev,
             )
         }
+
+        behandlingService.oppdaterStatusPåBehandling(saksbehandling.id, BehandlingStatus.FATTER_VEDTAK)
+        vedtakService.oppdaterSaksbehandler(saksbehandling.id, SikkerhetContext.hentSaksbehandler())
+        val beskrivelseMarkeringer = data?.beskrivelseMarkeringer
+
+        if (vedtakService.hentVedtak(saksbehandling.id).skalVedtakBesluttes()) {
+            opprettGodkjennVedtakOppgave(saksbehandling, beskrivelseMarkeringer)
+        }
+
+        ferdigstillOppgave(saksbehandling)
+        opprettTaskForBehandlingsstatistikk(saksbehandling.id)
     }
 
     private fun opprettTaskForBehandlingsstatistikk(behandlingId: UUID) = taskService.save(BehandlingsstatistikkTask.opprettVedtattTask(behandlingId = behandlingId))
