@@ -305,7 +305,7 @@ internal class OppgaveServiceTest {
         every {
             oppgaveRepository.findByBehandlingIdAndTypeAndErFerdigstiltIsFalse(any(), any())
         } returns null
-        oppgaveService.ferdigstillOppgaveHvisOppgaveFinnes(BEHANDLING_ID, BehandleSak)
+        oppgaveService.ferdigstillOppgaveForBehandlingIdOgOppgavetype(BEHANDLING_ID, BehandleSak)
     }
 
     @Test
@@ -317,7 +317,7 @@ internal class OppgaveServiceTest {
         val slot = slot<Long>()
         every { oppgaveClient.ferdigstillOppgave(capture(slot)) } just runs
 
-        oppgaveService.ferdigstillOppgaveHvisOppgaveFinnes(BEHANDLING_ID, BehandleSak)
+        oppgaveService.ferdigstillOppgaveForBehandlingIdOgOppgavetype(BEHANDLING_ID, BehandleSak)
         assertThat(slot.captured).isEqualTo(GSAK_OPPGAVE_ID)
     }
 
@@ -444,7 +444,7 @@ internal class OppgaveServiceTest {
         internal fun `skal ignorere feil fra ferdigstillOppgave hvis den er feilregistrert og vi skal ignorere feilregistrert`() {
             every { oppgaveClient.ferdigstillOppgave(any()) } throws feilregistrertException
 
-            oppgaveService.ferdigstillOppgaveHvisOppgaveFinnes(UUID.randomUUID(), BehandleSak, true)
+            oppgaveService.ferdigstillOppgaveForBehandlingIdOgOppgavetype(UUID.randomUUID(), BehandleSak, true)
 
             verify(exactly = 1) { oppgaveRepository.update(any()) }
         }
@@ -454,7 +454,7 @@ internal class OppgaveServiceTest {
             every { oppgaveClient.ferdigstillOppgave(any()) } throws feilregistrertException
 
             assertThatThrownBy {
-                oppgaveService.ferdigstillOppgaveHvisOppgaveFinnes(UUID.randomUUID(), BehandleSak, false)
+                oppgaveService.ferdigstillOppgaveForBehandlingIdOgOppgavetype(UUID.randomUUID(), BehandleSak, false)
             }.isInstanceOf(RessursException::class.java)
 
             verify(exactly = 0) { oppgaveRepository.update(any()) }
@@ -465,7 +465,7 @@ internal class OppgaveServiceTest {
             every { oppgaveClient.ferdigstillOppgave(any()) } throws annenException
 
             assertThatThrownBy {
-                oppgaveService.ferdigstillOppgaveHvisOppgaveFinnes(UUID.randomUUID(), BehandleSak, true)
+                oppgaveService.ferdigstillOppgaveForBehandlingIdOgOppgavetype(UUID.randomUUID(), BehandleSak, true)
             }.isInstanceOf(RessursException::class.java)
 
             verify(exactly = 0) { oppgaveRepository.update(any()) }
