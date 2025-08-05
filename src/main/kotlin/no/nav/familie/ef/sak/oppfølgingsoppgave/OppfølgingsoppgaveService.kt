@@ -76,22 +76,22 @@ class OppfølgingsoppgaveService(
 
     @Transactional
     fun lagreOppgaverForOpprettelse(
-        saksbehandling: Saksbehandling,
+        behandlingId: UUID,
         data: SendTilBeslutterDto,
     ) {
         val nyeOppgaver = data.oppgavetyperSomSkalOpprettes
         val årForInntektskontrollSelvstendigNæringsdrivende = data.årForInntektskontrollSelvstendigNæringsdrivende
 
-        val oppgavetyperSomKanOpprettes = hentOppgavetyperSomKanOpprettesForOvergangsstønad(saksbehandling.id)
+        val oppgavetyperSomKanOpprettes = hentOppgavetyperSomKanOpprettesForOvergangsstønad(behandlingId)
         if (oppgavetyperSomKanOpprettes.isEmpty()) {
-            oppgaverForOpprettelseRepository.deleteById(saksbehandling.id)
+            oppgaverForOpprettelseRepository.deleteById(behandlingId)
             return
         }
         feilHvisIkke(oppgavetyperSomKanOpprettes.containsAll(nyeOppgaver)) {
-            "behandlingId=${saksbehandling.id} prøver å opprette $nyeOppgaver $oppgavetyperSomKanOpprettes"
+            "behandlingId=$behandlingId prøver å opprette $nyeOppgaver $oppgavetyperSomKanOpprettes"
         }
-        oppgaverForOpprettelseRepository.deleteByBehandlingId(saksbehandling.id)
-        oppgaverForOpprettelseRepository.insert(OppgaverForOpprettelse(saksbehandling.id, nyeOppgaver, årForInntektskontrollSelvstendigNæringsdrivende))
+        oppgaverForOpprettelseRepository.deleteByBehandlingId(behandlingId)
+        oppgaverForOpprettelseRepository.insert(OppgaverForOpprettelse(behandlingId, nyeOppgaver, årForInntektskontrollSelvstendigNæringsdrivende))
     }
 
     @Transactional
