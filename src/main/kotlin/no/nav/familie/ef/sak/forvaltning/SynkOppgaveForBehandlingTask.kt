@@ -46,7 +46,7 @@ class SynkOppgaveForBehandlingTask(
         fun opprettTask(behandlingId: UUID): Task =
             Task(
                 TYPE,
-                objectMapper.writeValueAsString(behandlingId),
+                behandlingId.toString(),
                 Properties(),
             )
     }
