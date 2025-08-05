@@ -385,3 +385,8 @@ fun YearMonth.tilNorskFormat(): String {
     val formatter = DateTimeFormatter.ofPattern("MMMM yyyy", Locale.forLanguageTag("no-NO"))
     return this.format(formatter)
 }
+
+fun YearMonth.tilNorskFormatUtenÅr(): String {
+    val formatter = DateTimeFormatter.ofPattern("MMMM", Locale.forLanguageTag("no-NO"))
+    return this.format(formatter)
+}

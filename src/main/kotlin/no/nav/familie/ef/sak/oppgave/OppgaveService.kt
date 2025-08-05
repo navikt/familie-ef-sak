@@ -237,7 +237,7 @@ class OppgaveService(
      * Den burde kun settes til true for lukking av oppgaver koblet til henleggelse
      * Oppgaver skal ikke være lukket når denne kalles, då det er ef-sak som burde lukke oppgaver som vi har opprettet
      */
-    fun ferdigstillOppgaveHvisOppgaveFinnes(
+    fun ferdigstillOppgaveForBehandlingIdOgOppgavetype(
         behandlingId: UUID,
         oppgavetype: Oppgavetype,
         ignorerFeilregistrert: Boolean = false,
@@ -245,6 +245,15 @@ class OppgaveService(
         val oppgave = oppgaveRepository.findByBehandlingIdAndTypeAndErFerdigstiltIsFalse(behandlingId, oppgavetype)
         oppgave?.let {
             ferdigstillOppgaveOgSettEfOppgaveTilFerdig(oppgave, ignorerFeilregistrert)
+        }
+    }
+
+    fun ferdigstillOppgaverForBehandlingId(
+        behandlingId: UUID,
+    ) {
+        val oppgaver = oppgaveRepository.findByBehandlingIdAndErFerdigstiltIsFalse(behandlingId)
+        oppgaver?.forEach {
+            ferdigstillOppgaveOgSettEfOppgaveTilFerdig(it, true)
         }
     }
 
@@ -261,8 +270,8 @@ class OppgaveService(
                 throw e
             }
         }
-        oppgave.erFerdigstilt = true
-        oppgaveRepository.update(oppgave)
+
+        oppgaveRepository.update(oppgave.copy(erFerdigstilt = true))
     }
 
     fun ferdigstillOppgave(gsakOppgaveId: Long) {
