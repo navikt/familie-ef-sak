@@ -40,8 +40,6 @@ data class ForvaltningFerdigstillRequest(
 class OppgaveforvaltningsController(
     private val taskService: TaskService,
     private val tilgangService: TilgangService,
-    private val oppgaveService: OppgaveService,
-    private val behandlingService: BehandlingService,
 ) {
     @PostMapping("behandling/{behandlingId}")
     fun loggOppgavemetadataFor(
@@ -90,24 +88,13 @@ class OppgaveforvaltningsController(
         description = "Synk oppgave med behandling",
         summary = "Synk oppgave med behandling",
     )
-    @PostMapping("synkroniser")
+    @PostMapping("synkroniser/{behandlingId}")
     fun synkroniserOppgaveMedBehandling(
         @PathVariable behandlingId: UUID,
     ) {
         tilgangService.validerHarForvalterrolle()
         tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.UPDATE)
-        val behandling = behandlingService.hentBehandling(behandlingId)
-
-        val oppgavetype =
-            if (behandling.status == BehandlingStatus.UTREDES) {
-                Oppgavetype.BehandleSak
-            } else if (behandling.status == BehandlingStatus.FATTER_VEDTAK) {
-                Oppgavetype.GodkjenneVedtak
-            } else {
-                throw NotImplementedError("Støtter ikke synkronisering av behandlingstatus ${behandling.status}")
-            }
-
-        oppgaveService.ferdigstillOppgaverForBehandlingId(behandlingId)
-        oppgaveService.opprettOppgave(behandlingId, oppgavetype)
+        val task = SynkOppgaveForBehandlingTask.opprettTask(behandlingId)
+        taskService.save(task)
     }
 }
