@@ -335,7 +335,7 @@ internal class OppfølgingsoppgaveServiceTest {
 
     private fun opprettTomListeForOppgavetyperSomSkalOpprettes(behandlingId: UUID) =
         oppfølgingsoppgaveService.lagreOppgaverForOpprettelse(
-            saksbehandling,
+            behandlingId = behandlingId,
             data =
                 SendTilBeslutterDto(
                     emptyList(),

@@ -152,7 +152,7 @@ class SendTilBeslutterSteg(
             )
 
             oppfølgingsoppgaveService.lagreOppgaverForOpprettelse(
-                saksbehandling,
+                saksbehandling.id,
                 data,
             )
 

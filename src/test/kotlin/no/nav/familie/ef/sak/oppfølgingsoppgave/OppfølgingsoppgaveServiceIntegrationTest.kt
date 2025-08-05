@@ -2,6 +2,8 @@ package no.nav.familie.ef.sak.no.nav.familie.ef.sak.oppfølgingsoppgave
 
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
+import no.nav.familie.ef.sak.behandling.Saksbehandling
+import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.oppfølgingsoppgave.OppfølgingsoppgaveService
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
@@ -13,9 +15,9 @@ import no.nav.familie.ef.sak.vedtak.dto.SendTilBeslutterDto
 import no.nav.familie.ef.sak.økonomi.lagAndelTilkjentYtelse
 import no.nav.familie.ef.sak.økonomi.lagTilkjentYtelse
 import no.nav.familie.kontrakter.ef.iverksett.OppgaveForOpprettelseType
+import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
@@ -35,7 +37,7 @@ class OppfølgingsoppgaveServiceIntegrationTest : OppslagSpringRunnerTest() {
 
     val fagsak = fagsak()
     val behandling = behandling(fagsak = fagsak)
-    val saksbehandling = saksbehandling(fagsak = fagsak)
+    val saksbehandling = lagSaksbehandling(behandling = behandling)
     val behandlingId = behandling.id
 
     val vedtakRequest = InnvilgelseOvergangsstønad("", "")
@@ -47,7 +49,6 @@ class OppfølgingsoppgaveServiceIntegrationTest : OppslagSpringRunnerTest() {
         vedtakService.lagreVedtak(vedtakRequest, behandling.id, fagsak.stønadstype)
     }
 
-    @Disabled("Testen er ustabil på grunn av komplekse join-betingelser i Saksbehandling. Har liten betydning for forretningslogikken.")
     @Test
     internal fun `opprett oppgaver for opprettelse`() {
         opprettTilkjentYtelse(1000)
@@ -58,7 +59,6 @@ class OppfølgingsoppgaveServiceIntegrationTest : OppslagSpringRunnerTest() {
         )
     }
 
-    @Disabled("Testen er ustabil på grunn av komplekse join-betingelser i Saksbehandling. Har liten betydning for forretningslogikken.")
     @Test
     internal fun `oppdater oppgaver med tom liste`() {
         opprettTilkjentYtelse(1000)
@@ -70,7 +70,7 @@ class OppfølgingsoppgaveServiceIntegrationTest : OppslagSpringRunnerTest() {
 
     private fun opprettTomListe() {
         oppfølgingsoppgaveService.lagreOppgaverForOpprettelse(
-            saksbehandling,
+            behandlingId,
             data =
                 SendTilBeslutterDto(
                     emptyList(),
@@ -80,7 +80,7 @@ class OppfølgingsoppgaveServiceIntegrationTest : OppslagSpringRunnerTest() {
 
     private fun opprettInntektskontroll() {
         oppfølgingsoppgaveService.lagreOppgaverForOpprettelse(
-            saksbehandling,
+            behandlingId,
             data =
                 SendTilBeslutterDto(
                     oppgavetyperSomSkalOpprettes = listOf(OppgaveForOpprettelseType.INNTEKTSKONTROLL_1_ÅR_FREM_I_TID),
@@ -102,5 +102,13 @@ class OppfølgingsoppgaveServiceIntegrationTest : OppslagSpringRunnerTest() {
                 andelerTilkjentYtelse = listOf(andel),
             ),
         )
+    }
+
+    private fun lagSaksbehandling(
+        stønadType: StønadType = StønadType.OVERGANGSSTØNAD,
+        behandling: Behandling,
+    ): Saksbehandling {
+        val fagsak = fagsak(stønadstype = stønadType)
+        return saksbehandling(fagsak, behandling)
     }
 }
