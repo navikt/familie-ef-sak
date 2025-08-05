@@ -1,7 +1,11 @@
 package no.nav.familie.ef.sak.forvaltning
 
 import io.swagger.v3.oas.annotations.Operation
+import no.nav.familie.ef.sak.AuditLoggerEvent
+import no.nav.familie.ef.sak.behandling.BehandlingService
+import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
+import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.internal.TaskService
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -36,6 +40,8 @@ data class ForvaltningFerdigstillRequest(
 class OppgaveforvaltningsController(
     private val taskService: TaskService,
     private val tilgangService: TilgangService,
+    private val oppgaveService: OppgaveService,
+    private val behandlingService: BehandlingService,
 ) {
     @PostMapping("behandling/{behandlingId}")
     fun loggOppgavemetadataFor(
@@ -78,5 +84,30 @@ class OppgaveforvaltningsController(
         tilgangService.validerHarForvalterrolle()
         val task = FerdigstillOppgavetypePåBehandlingTask.opprettTask(ForvaltningFerdigstillRequest(behandlingId = behandlingId, oppgavetype = oppgavetype))
         taskService.save(task)
+    }
+
+    @Operation(
+        description = "Synk oppgave med behandling",
+        summary = "Synk oppgave med behandling",
+    )
+    @PostMapping("synkroniser")
+    fun synkroniserOppgaveMedBehandling(
+        @PathVariable behandlingId: UUID,
+    ) {
+        tilgangService.validerHarForvalterrolle()
+        tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.UPDATE)
+        val behandling = behandlingService.hentBehandling(behandlingId)
+
+        val oppgavetype =
+            if (behandling.status == BehandlingStatus.UTREDES) {
+                Oppgavetype.BehandleSak
+            } else if (behandling.status == BehandlingStatus.FATTER_VEDTAK) {
+                Oppgavetype.GodkjenneVedtak
+            } else {
+                throw NotImplementedError("Støtter ikke synkronisering av behandlingstatus ${behandling.status}")
+            }
+
+        oppgaveService.ferdigstillOppgaverForBehandlingId(behandlingId)
+        oppgaveService.opprettOppgave(behandlingId, oppgavetype)
     }
 }

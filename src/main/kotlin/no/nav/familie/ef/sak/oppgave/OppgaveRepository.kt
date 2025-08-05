@@ -17,6 +17,10 @@ interface OppgaveRepository :
         oppgavetype: Oppgavetype,
     ): Oppgave?
 
+    fun findByBehandlingIdAndErFerdigstiltIsFalse(
+        behandlingId: UUID,
+    ): List<Oppgave>?
+
     fun findByBehandlingIdAndTypeAndOppgaveSubtype(
         behandlingId: UUID,
         oppgavetype: Oppgavetype,

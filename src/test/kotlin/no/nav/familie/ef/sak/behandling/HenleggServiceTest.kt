@@ -38,13 +38,13 @@ class HenleggServiceTest {
         every {
             behandlingService.henleggBehandling(behandlingId, henlagtDto)
         } returns behandling.copy(resultat = BehandlingResultat.HENLAGT)
-        every { oppgaveService.ferdigstillOppgaveHvisOppgaveFinnes(any(), any(), any()) } just Runs
+        every { oppgaveService.ferdigstillOppgaveForBehandlingIdOgOppgavetype(any(), any(), any()) } just Runs
 
         val henalgtBehandling = henleggService.henleggBehandling(behandlingId, henlagtDto)
 
         assertThat(henalgtBehandling.resultat).isEqualTo(BehandlingResultat.HENLAGT)
-        verify(exactly = 1) { oppgaveService.ferdigstillOppgaveHvisOppgaveFinnes(any(), Oppgavetype.BehandleSak, any()) }
-        verify(exactly = 1) { oppgaveService.ferdigstillOppgaveHvisOppgaveFinnes(any(), Oppgavetype.BehandleUnderkjentVedtak, any()) }
+        verify(exactly = 1) { oppgaveService.ferdigstillOppgaveForBehandlingIdOgOppgavetype(any(), Oppgavetype.BehandleSak, any()) }
+        verify(exactly = 1) { oppgaveService.ferdigstillOppgaveForBehandlingIdOgOppgavetype(any(), Oppgavetype.BehandleUnderkjentVedtak, any()) }
     }
 
     @Test
