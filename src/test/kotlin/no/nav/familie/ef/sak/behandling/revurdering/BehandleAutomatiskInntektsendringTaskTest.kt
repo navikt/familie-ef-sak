@@ -12,6 +12,7 @@ import no.nav.familie.ef.sak.behandling.revurdering.BehandleAutomatiskInntektsen
 import no.nav.familie.ef.sak.behandling.revurdering.PayloadBehandleAutomatiskInntektsendringTask
 import no.nav.familie.ef.sak.behandling.revurdering.RevurderingService
 import no.nav.familie.ef.sak.behandling.revurdering.tilNorskFormat
+import no.nav.familie.ef.sak.behandling.revurdering.tilNorskFormatUtenÅr
 import no.nav.familie.ef.sak.behandling.revurdering.ÅrsakRevurderingsRepository
 import no.nav.familie.ef.sak.behandlingsflyt.task.OpprettOppgaveForOpprettetBehandlingTask
 import no.nav.familie.ef.sak.behandlingsflyt.task.OpprettOppgaveForOpprettetBehandlingTask.OpprettOppgaveTaskData
@@ -323,27 +324,27 @@ class BehandleAutomatiskInntektsendringTaskTest : OppslagSpringRunnerTest() {
 
     val forventetInntektsbegrunnelse =
         """
-        Periode som er kontrollert: februar 2025 til juli 2025.
+        Periode som er kontrollert: ${YearMonth.now().minusMonths(6).tilNorskFormat()} til ${YearMonth.now().minusMonths(1).tilNorskFormat()}.
         
-        Forventet årsinntekt i april 2025: 144 000 kroner.
+        Forventet årsinntekt i ${YearMonth.now().minusMonths(4).tilNorskFormat()}: 144 000 kroner.
         - 10 % opp: 13 200 kroner per måned.
         - 10 % ned: 10 800 kroner per måned.
         
-        Inntekten i april 2025 er 16 000 kroner. Inntekten har økt minst 10 prosent denne måneden og alle månedene etter dette. Stønaden beregnes på nytt fra måneden etter 10 prosent økning.
+        Inntekten i ${YearMonth.now().minusMonths(4).tilNorskFormat()} er 16 000 kroner. Inntekten har økt minst 10 prosent denne måneden og alle månedene etter dette. Stønaden beregnes på nytt fra måneden etter 10 prosent økning.
         
-        Har lagt til grunn faktisk inntekt bakover i tid. Fra og med august 2025 er stønaden beregnet ut ifra gjennomsnittlig inntekt for mai, juni og juli.
+        Har lagt til grunn faktisk inntekt bakover i tid. Fra og med ${YearMonth.now().tilNorskFormat()} er stønaden beregnet ut ifra gjennomsnittlig inntekt for ${YearMonth.now().minusMonths(3).tilNorskFormatUtenÅr()}, ${YearMonth.now().minusMonths(2).tilNorskFormatUtenÅr()} og ${YearMonth.now().minusMonths(1).tilNorskFormatUtenÅr()}.
         
         A-inntekt er lagret.
         """.trimIndent()
 
     val forventetInntektsbegrunnelseForrigeVedtak0ForventetInntekt =
         """
-        Forventet årsinntekt i januar 2025: 0 kroner.
+        Forventet årsinntekt i ${YearMonth.now().minusMonths(7).tilNorskFormat()}: 0 kroner.
             - Månedsinntekt 1/2 G: 5 423 kroner
         
         Mottar uredusert stønad.
         
-        Inntekten i januar 2025 er 12 000 kroner. Bruker har inntekt over 1/2 G denne måneden og alle månedene etter dette.
+        Inntekten i ${YearMonth.now().minusMonths(7).tilNorskFormat()} er 12 000 kroner. Bruker har inntekt over 1/2 G denne måneden og alle månedene etter dette.
         Stønaden beregnes på nytt fra måneden etter inntekten oversteg 1/2 G.
         """.trimIndent()
 }
