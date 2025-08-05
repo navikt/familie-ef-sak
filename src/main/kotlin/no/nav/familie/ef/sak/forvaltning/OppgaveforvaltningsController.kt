@@ -2,10 +2,7 @@ package no.nav.familie.ef.sak.forvaltning
 
 import io.swagger.v3.oas.annotations.Operation
 import no.nav.familie.ef.sak.AuditLoggerEvent
-import no.nav.familie.ef.sak.behandling.BehandlingService
-import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
-import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.internal.TaskService
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -42,6 +39,12 @@ class OppgaveforvaltningsController(
     private val tilgangService: TilgangService,
 ) {
     @PostMapping("behandling/{behandlingId}")
+    @Operation(
+        description =
+            "Lager en task som logger oppgaver gitt behandlingsid - bruk call-id for å se logginnslag (securelogs).",
+        summary =
+            "Logg oppgavemetadata for en behandling",
+    )
     fun loggOppgavemetadataFor(
         @PathVariable behandlingId: UUID,
     ) {
