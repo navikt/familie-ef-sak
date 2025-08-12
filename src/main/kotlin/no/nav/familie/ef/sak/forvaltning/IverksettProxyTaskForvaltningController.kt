@@ -33,9 +33,9 @@ class IverksettProxyTaskForvaltningController(
     )
     fun restartIverksettTask(
         @PathVariable taskId: Long,
-    ) {
+    ) : String {
         tilgangService.validerHarForvalterrolle()
         val url = URI.create("$familieEfIverksettUri/api/forvaltning/task/restart/$taskId")
-        postForEntity<Any>(url, "")
+        return postForEntity<String>(url, "")
     }
 }
