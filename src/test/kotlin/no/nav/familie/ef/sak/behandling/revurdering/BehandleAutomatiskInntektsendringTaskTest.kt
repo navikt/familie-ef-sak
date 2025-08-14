@@ -25,6 +25,8 @@ import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.fagsakpersoner
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
+import no.nav.familie.ef.sak.repository.inntekt
+import no.nav.familie.ef.sak.repository.inntektsmåned
 import no.nav.familie.ef.sak.repository.inntektsperiode
 import no.nav.familie.ef.sak.repository.lagInntektResponseFraMånedsinntekter
 import no.nav.familie.ef.sak.repository.lagInntektResponseFraMånedsinntekterFraDouble
@@ -321,6 +323,57 @@ class BehandleAutomatiskInntektsendringTaskTest : OppslagSpringRunnerTest() {
 
         assertThat(oppdatertVedtak.inntektBegrunnelse?.replace('\u00A0', ' ')).isEqualTo(forventetInntektsbegrunnelseForrigeVedtak0ForventetInntekt)
     }
+
+    @Test
+    fun `Skal få riktig inntektsbegrunnelse for vedtak hvor bruker har hatt utbetaling av feriepenger siste 3 måneder`() {
+        val personIdent = "4"
+        val fagsak = fagsak(identer = fagsakpersoner(setOf(personIdent)))
+        val behandling = behandling(fagsak, resultat = BehandlingResultat.IKKE_SATT, status = BehandlingStatus.UTREDES)
+        testoppsettService.lagreFagsak(fagsak)
+        behandlingRepository.insert(behandling)
+        vilkårHelperService.opprettVilkår(behandling)
+
+        val innmeldtMånedsinntekt = listOf(12_000, 12_000, 12_000, 16_000, 16_000, 24_000, 24_000)
+        val vedtakTom = YearMonth.now().plusMonths(11)
+
+        val forventetInntektIVedtak =
+            mapOf(
+                (YearMonth.now().minusMonths(innmeldtMånedsinntekt.size.toLong()) to 11_000),
+                (YearMonth.now().minusMonths(innmeldtMånedsinntekt.size.toLong() - 1) to 12000),
+            )
+        val vedtak = vedtak(forventetInntektIVedtak, vedtakTom)
+        vedtakHelperService.ferdigstillVedtak(vedtak, behandling, fagsak)
+
+        val payload = PayloadBehandleAutomatiskInntektsendringTask(personIdent, "2025-15")
+        val opprettetTask = BehandleAutomatiskInntektsendringTask.opprettTask(objectMapper.writeValueAsString(payload))
+        val inntektResponse = lagInntektResponseFraMånedsinntekter(innmeldtMånedsinntekt)
+        val inntektResponseMedFeriepenger = inntektResponse.copy(inntektsmåneder = inntektResponse.inntektsmåneder + inntektsmåned(YearMonth.now().minusMonths(2), inntektListe = listOf(inntekt(beløp = 5000.0, beskrivelse = "feriepenger"))))
+        every { inntektClientMock.inntektClient().hentInntekt("4", any(), any()) } returns inntektResponseMedFeriepenger
+
+        behandleAutomatiskInntektsendringTask.doTask(opprettetTask)
+
+        val revurdering = behandlingService.hentBehandlinger(fagsak.id).last()
+        val oppdatertVedtak = vedtakService.hentVedtak(revurdering.id)
+
+        assertThat(oppdatertVedtak.inntektBegrunnelse?.replace('\u00A0', ' ')).isEqualTo(forventetInntektsbegrunnelseMedFeriepenger)
+    }
+
+
+    val forventetInntektsbegrunnelseMedFeriepenger =
+        """
+        Periode som er kontrollert: ${YearMonth.now().minusMonths(6).tilNorskFormat()} til ${YearMonth.now().minusMonths(1).tilNorskFormat()}.
+        
+        Forventet årsinntekt i ${YearMonth.now().minusMonths(4).tilNorskFormat()}: 144 000 kroner.
+        - 10 % opp: 13 200 kroner per måned.
+        - 10 % ned: 10 800 kroner per måned.
+        
+        Inntekten i ${YearMonth.now().minusMonths(4).tilNorskFormat()} er 16 000 kroner. Inntekten har økt minst 10 prosent denne måneden og alle månedene etter dette. Stønaden beregnes på nytt fra måneden etter 10 prosent økning.
+        
+        Har lagt til grunn faktisk inntekt bakover i tid. Fra og med ${YearMonth.now().tilNorskFormat()} er stønaden beregnet ut ifra gjennomsnittlig inntekt for ${YearMonth.now().minusMonths(3).tilNorskFormatUtenÅr()}, ${YearMonth.now().minusMonths(2).tilNorskFormatUtenÅr()} og ${YearMonth.now().minusMonths(1).tilNorskFormatUtenÅr()}.
+        Bruker har fått utbetalt feriepenger i løpet av siste tre måneder, dette ignoreres i beregningen av forventet inntekt.
+        
+        A-inntekt er lagret.
+        """.trimIndent()
 
     val forventetInntektsbegrunnelse =
         """
