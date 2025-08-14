@@ -45,6 +45,8 @@ class IverksettProxyTaskForvaltningController(
         return postForEntity
     }
 
-    data class KopiertTaskResponse (val fraTaskId: Long, val tilNyTaskId: Long)
-
+    data class KopiertTaskResponse(
+        val fraTaskId: Long,
+        val tilNyTaskId: Long,
+    )
 }
