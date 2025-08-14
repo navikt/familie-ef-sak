@@ -37,6 +37,11 @@ data class InntektResponse(
 
     fun harMånedMedBareFeriepenger(fraOgMedÅrMåned: YearMonth): Boolean = antallMånederUtenFeriepenger(fraOgMedÅrMåned) < 3
 
+    fun finnesFeriepengerFraOgMedÅrMåned(fraOgMedÅrMåned: YearMonth): Boolean =
+        inntektsmånederFraOgMedÅrMåned(fraOgMedÅrMåned)
+            .filter { it.måned.isEqualOrAfter(fraOgMedÅrMåned) && it.måned.isBefore(YearMonth.now()) }
+            .any { it.inntektListe.any { it.beskrivelse.contains("ferie", true) } }
+
     fun totalInntektForÅrMåned(årMåned: YearMonth): Int =
         inntektsmånederFraOgMedÅrMåned(årMåned)
             .filter { it.måned == årMåned }

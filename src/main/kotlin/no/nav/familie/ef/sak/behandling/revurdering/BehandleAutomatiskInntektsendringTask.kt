@@ -297,6 +297,16 @@ class BehandleAutomatiskInntektsendringTask(
 
         val beløpFørsteMåned10ProsentEndring = inntektResponse.totalInntektForÅrMåned(førsteMånedMed10ProsentEndring)
 
+        // har feriepenger siste 3 mnd -> generer en tekst hvis ikke, få tom tekst. Append tekst alltid.
+        val harFeriepenger = inntektResponse.finnesFeriepengerFraOgMedÅrMåned(YearMonth.now().minusMonths(3))
+
+        val finnesFeriepengerTekst =
+            if (harFeriepenger) {
+                "Bruker har fått utbetalt feriepenger i løpet av siste tre måneder, dette ignoreres i beregningen av forventet inntekt.\n"
+            } else {
+                ""
+            }
+
         val forventetInntekt = inntektsperioder.maxBy { it.periode.fom }
         val forventetInntektFraMåned = forventetInntekt.periode.fom
 
@@ -311,7 +321,8 @@ class BehandleAutomatiskInntektsendringTask(
                 
                 Inntekten i ${førsteMånedMed10ProsentEndring.tilNorskFormat()} er ${beløpFørsteMåned10ProsentEndring.tilNorskFormat()} kroner. Bruker har inntekt over 1/2 G denne måneden og alle månedene etter dette.
                 Stønaden beregnes på nytt fra måneden etter inntekten oversteg 1/2 G.
-                """.trimIndent()
+                $finnesFeriepengerTekst
+                """.trimIndent().trimEnd()
         }
 
         val tekst =
@@ -325,7 +336,7 @@ class BehandleAutomatiskInntektsendringTask(
             Inntekten i ${førsteMånedMed10ProsentEndring.tilNorskFormat()} er ${beløpFørsteMåned10ProsentEndring.tilNorskFormat()} kroner. Inntekten har økt minst 10 prosent denne måneden og alle månedene etter dette. Stønaden beregnes på nytt fra måneden etter 10 prosent økning.
             
             Har lagt til grunn faktisk inntekt bakover i tid. Fra og med ${forventetInntektFraMåned.tilNorskFormat()} er stønaden beregnet ut ifra gjennomsnittlig inntekt for ${forventetInntektFraMåned.minusMonths(3).månedTilNorskFormat()}, ${forventetInntektFraMåned.minusMonths(2).månedTilNorskFormat()} og ${forventetInntektFraMåned.minusMonths(1).månedTilNorskFormat()}.
-            
+            $finnesFeriepengerTekst
             A-inntekt er lagret.
             """.trimIndent()
 
