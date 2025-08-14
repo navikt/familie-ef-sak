@@ -24,7 +24,6 @@ class IverksettProxyTaskForvaltningController(
     @Qualifier("azure")
     private val restOperations: RestOperations,
 ) : AbstractRestClient(restOperations, "familie.ef.iverksett.forvaltning") {
-
     private val logger = LoggerFactory.getLogger(javaClass)
 
     @PostMapping("taskid/{taskId}")
@@ -37,7 +36,7 @@ class IverksettProxyTaskForvaltningController(
     )
     fun restartIverksettTask(
         @PathVariable taskId: Long,
-    ) : KopiertTaskResponse {
+    ): KopiertTaskResponse {
         tilgangService.validerHarForvalterrolle()
         val url = URI.create("$familieEfIverksettUri/api/forvaltning/task/restart/$taskId")
         val postForEntity = postForEntity<KopiertTaskResponse>(uri = url, payload = "")
@@ -45,6 +44,8 @@ class IverksettProxyTaskForvaltningController(
         return postForEntity
     }
 
-    data class KopiertTaskResponse (val fra: Long, val til: Long)
-
+    data class KopiertTaskResponse(
+        val fra: Long,
+        val til: Long,
+    )
 }
