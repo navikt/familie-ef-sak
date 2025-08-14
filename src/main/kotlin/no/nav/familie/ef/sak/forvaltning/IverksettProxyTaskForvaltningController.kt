@@ -40,12 +40,10 @@ class IverksettProxyTaskForvaltningController(
         tilgangService.validerHarForvalterrolle()
         val url = URI.create("$familieEfIverksettUri/api/forvaltning/task/restart/$taskId")
         val postForEntity = postForEntity<KopiertTaskResponse>(uri = url, payload = "")
-        logger.info("Kopiert task med id ${postForEntity.fra} -> ${postForEntity.til}")
+        logger.info("Kopiert task med id ${postForEntity.fraTaskId} -> ${postForEntity.tilNyTaskId}")
         return postForEntity
     }
 
-    data class KopiertTaskResponse(
-        val fra: Long,
-        val til: Long,
-    )
+    data class KopiertTaskResponse (val fraTaskId: Long, val tilNyTaskId: Long)
+
 }
