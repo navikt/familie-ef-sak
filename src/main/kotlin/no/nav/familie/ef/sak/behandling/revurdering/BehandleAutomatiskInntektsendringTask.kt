@@ -300,11 +300,12 @@ class BehandleAutomatiskInntektsendringTask(
         // har feriepenger siste 3 mnd -> generer en tekst hvis ikke, få tom tekst. Append tekst alltid.
         val harFeriepenger = inntektResponse.finnesFeriepengerFraOgMedÅrMåned(YearMonth.now().minusMonths(3))
 
-        val finnesFeriepengerTekst = if (harFeriepenger) {
-            "Bruker har fått utbetalt feriepenger i løpet av siste tre måneder, dette ignoreres i beregningen av forventet inntekt.\n"
-        } else {
-            ""
-        }
+        val finnesFeriepengerTekst =
+            if (harFeriepenger) {
+                "Bruker har fått utbetalt feriepenger i løpet av siste tre måneder, dette ignoreres i beregningen av forventet inntekt.\n"
+            } else {
+                ""
+            }
 
         val forventetInntekt = inntektsperioder.maxBy { it.periode.fom }
         val forventetInntektFraMåned = forventetInntekt.periode.fom

@@ -42,8 +42,6 @@ data class InntektResponse(
             .filter { it.måned.isEqualOrAfter(fraOgMedÅrMåned) && it.måned.isBefore(YearMonth.now()) }
             .any { it.inntektListe.any { it.beskrivelse.contains("ferie", true) } }
 
-
-
     fun totalInntektForÅrMåned(årMåned: YearMonth): Int =
         inntektsmånederFraOgMedÅrMåned(årMåned)
             .filter { it.måned == årMåned }

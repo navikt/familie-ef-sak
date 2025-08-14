@@ -358,7 +358,6 @@ class BehandleAutomatiskInntektsendringTaskTest : OppslagSpringRunnerTest() {
         assertThat(oppdatertVedtak.inntektBegrunnelse?.replace('\u00A0', ' ')).isEqualTo(forventetInntektsbegrunnelseMedFeriepenger)
     }
 
-
     val forventetInntektsbegrunnelseMedFeriepenger =
         """
         Periode som er kontrollert: ${YearMonth.now().minusMonths(6).tilNorskFormat()} til ${YearMonth.now().minusMonths(1).tilNorskFormat()}.
