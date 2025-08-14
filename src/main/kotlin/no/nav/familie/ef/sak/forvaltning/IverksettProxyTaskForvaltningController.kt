@@ -3,8 +3,8 @@ package no.nav.familie.ef.sak.forvaltning
 import io.swagger.v3.oas.annotations.Operation
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.http.client.AbstractRestClient
-import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.web.bind.annotation.PathVariable
@@ -24,6 +24,9 @@ class IverksettProxyTaskForvaltningController(
     @Qualifier("azure")
     private val restOperations: RestOperations,
 ) : AbstractRestClient(restOperations, "familie.ef.iverksett.forvaltning") {
+
+    private val logger = LoggerFactory.getLogger(javaClass)
+
     @PostMapping("taskid/{taskId}")
     @Operation(
         description =
@@ -34,9 +37,14 @@ class IverksettProxyTaskForvaltningController(
     )
     fun restartIverksettTask(
         @PathVariable taskId: Long,
-    ) : String {
+    ) : KopiertTaskResponse {
         tilgangService.validerHarForvalterrolle()
         val url = URI.create("$familieEfIverksettUri/api/forvaltning/task/restart/$taskId")
-        return postForEntity<Ressurs<String>>(uri = url, payload = "").data!!
+        val postForEntity = postForEntity<KopiertTaskResponse>(uri = url, payload = "")
+        logger.info("Kopiert task med id ${postForEntity.fra} -> ${postForEntity.til}")
+        return postForEntity
     }
+
+    data class KopiertTaskResponse (val fra: Long, val til: Long)
+
 }
