@@ -15,7 +15,7 @@ import org.springframework.web.client.RestOperations
 import java.net.URI
 
 @RestController
-@RequestMapping("/api/forvaltning/iverksett/")
+@RequestMapping("/api/forvaltning/iverksett/task/")
 @ProtectedWithClaims(issuer = "azuread")
 class IverksettProxyTaskForvaltningController(
     private val tilgangService: TilgangService,
@@ -26,7 +26,7 @@ class IverksettProxyTaskForvaltningController(
 ) : AbstractRestClient(restOperations, "familie.ef.iverksett.forvaltning") {
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    @PostMapping("taskid/{taskId}")
+    @PostMapping("kopier/taskid/{taskId}")
     @Operation(
         description =
             "Kopierer task i iverksett med id angitt taskId. Tasken i iverksett må ha status MANUELL_OPPFØLGING. Tasken som kopieres kan ikke re-kjøres da payload etter kopiering kun vil inneholde LocalDateTime. Denne må avvikshåndteres manuelt. " +
@@ -39,7 +39,7 @@ class IverksettProxyTaskForvaltningController(
         @PathVariable taskId: Long,
     ): KopiertTaskResponse {
         tilgangService.validerHarForvalterrolle()
-        val url = URI.create("$familieEfIverksettUri/api/forvaltning/iverksett/task/kopier/taskid/$taskId")
+        val url = URI.create("$familieEfIverksettUri/api/forvaltning/task/restart/$taskId")
         val postForEntity = postForEntity<KopiertTaskResponse>(uri = url, payload = "")
         logger.info("Kopiert task med id ${postForEntity.fraTaskId} -> ${postForEntity.tilNyTaskId}")
         return postForEntity
