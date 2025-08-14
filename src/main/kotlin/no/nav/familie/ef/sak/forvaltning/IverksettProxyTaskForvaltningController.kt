@@ -29,16 +29,17 @@ class IverksettProxyTaskForvaltningController(
     @PostMapping("taskid/{taskId}")
     @Operation(
         description =
-            "Kopierer task i iverksett med id angitt taskId. Tasken i iverksett må ha status MANUELL_OPPFØLGING.",
+            "Kopierer task i iverksett med id angitt taskId. Tasken i iverksett må ha status MANUELL_OPPFØLGING. Tasken som kopieres kan ikke re-kjøres da payload etter kopiering kun vil inneholde LocalDateTime. Denne må avvikshåndteres manuelt. " +
+                "Tasken som kopieres vil ha samme metadata som tasken som kopieres",
         summary =
             "NB! Dette gjelder task i Iverksett, ikke i ef-sak. " +
-                "Brukes for å opprette en task-kopi uten plukket-antall",
+                "Brukes for å opprette en task-kopi",
     )
     fun restartIverksettTask(
         @PathVariable taskId: Long,
     ): KopiertTaskResponse {
         tilgangService.validerHarForvalterrolle()
-        val url = URI.create("$familieEfIverksettUri/api/forvaltning/task/restart/$taskId")
+        val url = URI.create("$familieEfIverksettUri/api/forvaltning/iverksett/task/kopier/taskid/$taskId")
         val postForEntity = postForEntity<KopiertTaskResponse>(uri = url, payload = "")
         logger.info("Kopiert task med id ${postForEntity.fraTaskId} -> ${postForEntity.tilNyTaskId}")
         return postForEntity
