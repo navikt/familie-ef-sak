@@ -33,14 +33,14 @@
         <kotlin-coroutines.version>1.10.2</kotlin-coroutines.version>
         <springdoc.version>2.8.9</springdoc.version>
         <mockk.version>1.14.5</mockk.version>
-        <felles.version>3.20250616113100_41d23f2</felles.version>
-        <prosessering.version>2.20250728105838_1f618e2</prosessering.version>
+        <felles.version>3.20250804101327_a0f5fad</felles.version>
+        <prosessering.version>2.20250804113739_6d49ef6</prosessering.version>
         <token-validation-spring.version>5.0.34</token-validation-spring.version>
 
         <start-class>no.nav.familie.ef.sak.ApplicationKt</start-class>
-        <kontrakter.version>3.0_20250730094742_b263f30</kontrakter.version>
+        <kontrakter.version>3.0_20250805142725_8942276</kontrakter.version>
         <mikrofrontend.builder.version>20230704114948-74aa2e9</mikrofrontend.builder.version>
-        <eksterne.kontrakter.bisys.version>2.0_20250730094950_2d4dd59</eksterne.kontrakter.bisys.version>
+        <eksterne.kontrakter.bisys.version>2.0_20250804093222_2bf44ca</eksterne.kontrakter.bisys.version>
         <cucumber.version>7.27.0</cucumber.version>
 
 
@@ -129,7 +129,7 @@
         <dependency>
             <groupId>org.flywaydb</groupId>
             <artifactId>flyway-database-postgresql</artifactId>
-            <version>11.10.5</version>
+            <version>11.11.0</version>
             <scope>runtime</scope>
         </dependency>
         <dependency>

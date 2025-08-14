@@ -236,18 +236,8 @@ class OppfølgingsoppgaveService(
                 )
 
             if (fagsak != null) {
-                // TODO: Gjøre annerledes
                 val finnesBehandlingerForOvergangsstønad =
-                    behandlingRepository.existsByFagsakIdAndStatusIsNotIn(
-                        fagsak.id,
-                        listOf(
-                            BehandlingStatus.UTREDES,
-                            BehandlingStatus.SATT_PÅ_VENT,
-                            BehandlingStatus.FATTER_VEDTAK,
-                            BehandlingStatus.FERDIGSTILT,
-                            BehandlingStatus.OPPRETTET,
-                        ),
-                    )
+                    behandlingRepository.existsByFagsakId(fagsak.id)
 
                 if (finnesBehandlingerForOvergangsstønad) {
                     val behandlingId = behandlingRepository.finnSisteBehandlingForOppgaveKanOpprettes(fagsak.id)
