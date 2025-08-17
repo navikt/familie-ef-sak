@@ -37,13 +37,8 @@ class SigrunClientMock {
                 LocalDate.of(2022, 12, 31).toString(),
             )
 
-        val pensjonsgivendeInntektForSkatteordning = PensjonsgivendeInntektForSkatteordning(Skatteordning.FASTLAND, LocalDate.now(), 0, 0, 700_000, 0)
-
         every { mockk.hentBeregnetSkatt(any(), any()) } returns beregnetSkattMockResponse
         every { mockk.hentSummertSkattegrunnlag(any(), any()) } returns summertSkattegrunnlagMockResponse
-        every { mockk.hentPensjonsgivendeInntekt(any(), any()) } answers {
-            PensjonsgivendeInntektResponse(firstArg(), secondArg(), listOf(pensjonsgivendeInntektForSkatteordning))
-        }
 
         return mockk
     }

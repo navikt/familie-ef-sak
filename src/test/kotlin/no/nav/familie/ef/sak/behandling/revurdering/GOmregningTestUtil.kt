@@ -87,14 +87,15 @@ class GOmregningTestUtil {
         behandlingId: UUID,
         fagsakId: UUID,
         fom: YearMonth = YearMonth.of(2024, 6),
+        beløp: Int = 23023,
     ) {
         val månedsperiode = Månedsperiode(fom, YearMonth.of(fom.year + 1, 12))
-        val inntektsperiode = inntektsperiode(månedsperiode = månedsperiode, BigDecimal(23023))
+        val inntektsperiode = inntektsperiode(månedsperiode = månedsperiode, BigDecimal(beløp))
         lagSøknadOgVilkårOgVedtak(behandlingId, fagsakId, inntektsperiode)
         val tilkjentYtelse = lagreTilkjentYtelseForInntektsperiode(behandlingId, inntektsperiode)
 
         assertThat(tilkjentYtelse.andelerTilkjentYtelse).hasSize(1)
-        assertThat(inntektsperiode.totalinntekt().toInt()).isEqualTo(276276)
+        assertThat(inntektsperiode.totalinntekt().toInt()).isEqualTo(beløp * 12)
 
         mockTestMedGrunnbeløpFra2025 {
             omregningService.utførGOmregning(fagsakId)

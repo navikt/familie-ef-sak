@@ -33,12 +33,6 @@ class InntektClientMock {
         val mockResponseHøyArbeidsinntekt = objectMapper.readValue<InntektResponse>(mockResponseHøyArbeidsinntektJson)
         every { mockk.hentInntekt("2", any(), any()) } returns mockResponseHøyArbeidsinntekt
 
-        val inntekterPerMånedLavInntekt = listOf(inntekt(2000.0), inntekt(10000.0))
-        val inntektsmånederLavInntekt = inntektsmåneder(fraOgMedMåned = YearMonth.now().minusMonths(12), tilOgMedMåned = YearMonth.now().minusMonths(4), inntektListe = inntekterPerMånedLavInntekt)
-        val inntekterPerMånedHøyInntekt = listOf(inntekt(25000.0), inntekt(10000.0))
-        val inntektsmånederHøyInntekt = inntektsmåneder(fraOgMedMåned = YearMonth.now().minusMonths(3), inntektListe = inntekterPerMånedHøyInntekt)
-        every { mockk.hentInntekt("3", any(), any()) } returns InntektResponse(inntektsmånederLavInntekt + inntektsmånederHøyInntekt)
-
         return mockk
     }
 }

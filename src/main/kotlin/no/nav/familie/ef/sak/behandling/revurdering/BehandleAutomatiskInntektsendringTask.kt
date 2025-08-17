@@ -287,9 +287,10 @@ class BehandleAutomatiskInntektsendringTask(
                 .periode.fom
                 .minusMonths(1)
 
-        val forrigeForventetInntektsperiode = forrigeVedtak.inntekter?.inntekter?.first { it.periode.inneholder(førsteMånedMed10ProsentEndring) } ?: throw IllegalStateException("Fant ikke tidligere forventet inntekt for måned: $førsteMånedMed10ProsentEndring")
-        val forrigeForventetÅrsinntekt = BeregningUtils.beregnTotalinntekt(forrigeForventetInntektsperiode).toInt()
-        val tiProsentOppOgNed = BeregningUtils.beregn10ProsentOppOgNedIMånedsinntektFraÅrsinntekt(forrigeForventetInntektsperiode)
+        val forrigeForventetInntektsperiode = forrigeVedtak.inntekter?.inntekter?.first() ?: throw IllegalStateException("Fant ikke tidligere forventet inntekt for måned: $førsteMånedMed10ProsentEndring")
+        val periodeForFørsteMånedMed10ProsentEndring = forrigeVedtak.inntekter.inntekter.first { it.periode.inneholder(førsteMånedMed10ProsentEndring) }
+        val forrigeForventetÅrsinntekt = BeregningUtils.beregnTotalinntekt(periodeForFørsteMånedMed10ProsentEndring).toInt()
+        val tiProsentOppOgNed = BeregningUtils.beregn10ProsentOppOgNedIMånedsinntektFraÅrsinntekt(periodeForFørsteMånedMed10ProsentEndring)
 
         val sisteInntektsperiode = forrigeVedtak.inntekter.inntekter.last()
         val forrigeForventetÅrsinntektG = BeregningUtils.beregnTotalinntekt(sisteInntektsperiode).toInt()
@@ -302,7 +303,7 @@ class BehandleAutomatiskInntektsendringTask(
 
         val finnesFeriepengerTekst =
             if (harFeriepenger) {
-                "Bruker har fått utbetalt feriepenger i løpet av siste tre måneder, dette ignoreres i beregningen av forventet inntekt.\n"
+                " Bruker har fått utbetalt feriepenger i løpet av siste tre måneder. Disse er ikke tatt med i beregningen av forventet inntekt."
             } else {
                 ""
             }
@@ -320,23 +321,22 @@ class BehandleAutomatiskInntektsendringTask(
                 Mottar uredusert stønad.
                 
                 Inntekten i ${førsteMånedMed10ProsentEndring.tilNorskFormat()} er ${beløpFørsteMåned10ProsentEndring.tilNorskFormat()} kroner. Bruker har inntekt over 1/2 G denne måneden og alle månedene etter dette.
-                Stønaden beregnes på nytt fra måneden etter inntekten oversteg 1/2 G.
-                $finnesFeriepengerTekst
+                Stønaden beregnes på nytt fra måneden etter inntekten oversteg 1/2 G. $finnesFeriepengerTekst
                 """.trimIndent().trimEnd()
         }
 
         val tekst =
             """
-            Periode som er kontrollert: ${forrigeForventetInnntektsperiodeFraOgMed.tilNorskFormat()} til ${inntektResponse.inntektsmåneder.maxBy { it.måned }.måned.tilNorskFormat()}.
+            Periode som er kontrollert: ${forrigeForventetInnntektsperiodeFraOgMed.tilNorskFormat()} til ${YearMonth.now().minusMonths(1).tilNorskFormat()}.
             
             Forventet årsinntekt i ${førsteMånedMed10ProsentEndring.tilNorskFormat()}: ${forrigeForventetÅrsinntekt.tilNorskFormat()} kroner.
             - 10 % opp: ${tiProsentOppOgNed.opp.tilNorskFormat()} kroner per måned.
             - 10 % ned: ${tiProsentOppOgNed.ned.tilNorskFormat()} kroner per måned.
-            ${tekstTypeForGOmregningOppOgNed(forrigeBehandlingGOmregning, forrigeForventetÅrsinntektG, tiProsentOppOgNedG)}
+            ${tekstTypeForGOmregningOppOgNed(forrigeBehandlingGOmregning, forrigeForventetÅrsinntektG, tiProsentOppOgNedG, førsteMånedMed10ProsentEndring)}
             Inntekten i ${førsteMånedMed10ProsentEndring.tilNorskFormat()} er ${beløpFørsteMåned10ProsentEndring.tilNorskFormat()} kroner. Inntekten har økt minst 10 prosent denne måneden og alle månedene etter dette. Stønaden beregnes på nytt fra måneden etter 10 prosent økning.
             
-            Har lagt til grunn faktisk inntekt bakover i tid. Fra og med ${forventetInntektFraMåned.tilNorskFormat()} er stønaden beregnet ut ifra gjennomsnittlig inntekt for ${forventetInntektFraMåned.minusMonths(3).månedTilNorskFormat()}, ${forventetInntektFraMåned.minusMonths(2).månedTilNorskFormat()} og ${forventetInntektFraMåned.minusMonths(1).månedTilNorskFormat()}.
-            $finnesFeriepengerTekst
+            Har lagt til grunn faktisk inntekt bakover i tid. Fra og med ${forventetInntektFraMåned.tilNorskFormat()} er stønaden beregnet ut ifra gjennomsnittlig inntekt for ${forventetInntektFraMåned.minusMonths(3).månedTilNorskFormat()}, ${forventetInntektFraMåned.minusMonths(2).månedTilNorskFormat()} og ${forventetInntektFraMåned.minusMonths(1).månedTilNorskFormat()}.$finnesFeriepengerTekst
+            
             A-inntekt er lagret.
             """.trimIndent()
 
@@ -352,8 +352,9 @@ class BehandleAutomatiskInntektsendringTask(
         forrigeBehandlingGOmregning: Boolean,
         forrigeForventetÅrsinntektG: Int,
         tiProsentOppOgNedG: BeregningUtils.TiProsentOppOgNed,
+        førsteMånedMed10ProsentEndring: YearMonth,
     ): String {
-        if (forrigeBehandlingGOmregning) {
+        if (forrigeBehandlingGOmregning && førsteMånedMed10ProsentEndring != Grunnbeløpsperioder.nyesteGrunnbeløp.periode.fom) {
             return """
             Forventet årsinntekt fra ${Grunnbeløpsperioder.nyesteGrunnbeløpGyldigFraOgMed.tilNorskFormat()}: ${forrigeForventetÅrsinntektG.tilNorskFormat()} kroner.
             - 10 % opp: ${tiProsentOppOgNedG.opp.tilNorskFormat()} kroner per måned.

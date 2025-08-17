@@ -1,7 +1,9 @@
 package no.nav.familie.ef.sak.no.nav.familie.ef.sak.behandling.revurdering
 
+import com.fasterxml.jackson.module.kotlin.readValue
 import io.mockk.every
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
+import no.nav.familie.ef.sak.amelding.InntektResponse
 import no.nav.familie.ef.sak.barn.BarnRepository
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
 import no.nav.familie.ef.sak.behandling.BehandlingService
@@ -12,18 +14,19 @@ import no.nav.familie.ef.sak.behandling.revurdering.PayloadBehandleAutomatiskInn
 import no.nav.familie.ef.sak.behandling.revurdering.RevurderingService
 import no.nav.familie.ef.sak.behandling.revurdering.tilNorskFormat
 import no.nav.familie.ef.sak.behandling.revurdering.ÅrsakRevurderingsRepository
+import no.nav.familie.ef.sak.beregning.Grunnbeløpsperioder
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.felles.util.YEAR_MONTH_MAX
 import no.nav.familie.ef.sak.felles.util.månedTilNorskFormat
 import no.nav.familie.ef.sak.infrastruktur.config.InntektClientMock
 import no.nav.familie.ef.sak.infrastruktur.config.ObjectMapperProvider.objectMapper
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
-import no.nav.familie.ef.sak.oppgave.OppgaveService
-import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.fagsakpersoner
 import no.nav.familie.ef.sak.repository.inntektsperiode
 import no.nav.familie.ef.sak.repository.lagInntektResponseFraMånedsinntekter
+import no.nav.familie.ef.sak.testutil.JsonFilUtil.Companion.lesFil
+import no.nav.familie.ef.sak.testutil.JsonFilUtil.Companion.oppdaterMåneder
 import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.ef.sak.vilkår.VilkårsvurderingRepository
 import no.nav.familie.kontrakter.felles.Månedsperiode
@@ -34,11 +37,9 @@ import org.springframework.beans.factory.annotation.Autowired
 import java.math.BigDecimal
 import java.time.YearMonth
 import java.util.UUID
+import kotlin.text.replace
 
 class AutomatiskRevurderingEtterGOmregningTest : OppslagSpringRunnerTest() {
-    @Autowired
-    private lateinit var oppgaveService: OppgaveService
-
     @Autowired
     private lateinit var behandlingRepository: BehandlingRepository
 
@@ -188,6 +189,69 @@ class AutomatiskRevurderingEtterGOmregningTest : OppslagSpringRunnerTest() {
                 ?.tom,
         ).isEqualTo(YearMonth.of(YearMonth.now().year + 1, 12))
     }
+
+    val førstegangsbehandlingFom =
+        Grunnbeløpsperioder.nyesteGrunnbeløp.periode.fom
+            .minusMonths(2)
+
+    @Test
+    fun `Inntektsendring samme måned som g-omregning`() {
+        gOmregningTestUtil.gOmregne(behandlingId, fagsakId, førstegangsbehandlingFom, 5168)
+
+        val gOmregningBehandling = behandlingRepository.findByFagsakId(fagsakId).first { it.erGOmregning() }
+        behandlingRepository.update(gOmregningBehandling.copy(status = BehandlingStatus.FERDIGSTILT))
+
+        val personIdent = "321"
+
+        val mockResponseJson =
+            oppdaterMåneder(
+                lesFil("json/inntekt/InntektResponseØktInntektSamtidigMedGOmregning.json"),
+            )
+
+        val mockResponse = objectMapper.readValue<InntektResponse>(mockResponseJson)
+        every { inntektClientMock.inntektClient().hentInntekt(any(), any(), any()) } returns mockResponse
+
+        val payload = PayloadBehandleAutomatiskInntektsendringTask(personIdent, "2025-20")
+        val opprettetTask = BehandleAutomatiskInntektsendringTask.opprettTask(objectMapper.writeValueAsString(payload))
+
+        behandleAutomatiskInntektsendringTask.doTask(opprettetTask)
+
+        val revurdering = behandlingService.hentBehandlinger(fagsak.id).last()
+        val oppdatertVedtak = vedtakService.hentVedtak(revurdering.id)
+
+        assertThat(
+            oppdatertVedtak.perioder
+                ?.perioder
+                ?.first()
+                ?.periode
+                ?.fom,
+        ).isEqualTo(YearMonth.of(YearMonth.now().year, 6))
+        assertThat(
+            oppdatertVedtak.perioder
+                ?.perioder
+                ?.first()
+                ?.periode
+                ?.tom,
+        ).isEqualTo(YearMonth.of(YearMonth.now().year + 1, 12))
+
+        assertThat(oppdatertVedtak.inntektBegrunnelse?.replace('\u00A0', ' ')).isEqualTo(forventetInntektsbegrunnelseMedGOmregningSamtidigMedInntektsøkning) // Replace non-breaking space -> space
+    }
+
+    val forventetInntektsbegrunnelseMedGOmregningSamtidigMedInntektsøkning =
+        """
+        Periode som er kontrollert: ${førstegangsbehandlingFom.tilNorskFormat()} til ${
+            YearMonth.now().minusMonths(1).tilNorskFormat()}.
+        
+        Forventet årsinntekt i ${YearMonth.now().minusMonths(3).tilNorskFormat()}: 65 000 kroner.
+        - 10 % opp: 5 958 kroner per måned.
+        - 10 % ned: 4 875 kroner per måned.
+        
+        Inntekten i ${YearMonth.now().minusMonths(3).tilNorskFormat()} er 9 329 kroner. Inntekten har økt minst 10 prosent denne måneden og alle månedene etter dette. Stønaden beregnes på nytt fra måneden etter 10 prosent økning.
+        
+        Har lagt til grunn faktisk inntekt bakover i tid. Fra og med ${YearMonth.now().tilNorskFormat()} er stønaden beregnet ut ifra gjennomsnittlig inntekt for ${YearMonth.now().minusMonths(3).månedTilNorskFormat()}, ${YearMonth.now().minusMonths(2).månedTilNorskFormat()} og ${YearMonth.now().minusMonths(1).månedTilNorskFormat()}. Bruker har fått utbetalt feriepenger i løpet av siste tre måneder. Disse er ikke tatt med i beregningen av forventet inntekt.
+        
+        A-inntekt er lagret.
+        """.trimIndent()
 
     // juni, mai, april, mars, februar
     val forventetInntektsbegrunnelseMedGOmregning =
