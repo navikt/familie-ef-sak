@@ -572,7 +572,7 @@ fun inntektsperiode(
     år: Int = 2021,
     startDato: LocalDate = LocalDate.of(år, 1, 1),
     sluttDato: LocalDate = LocalDate.of(år, 12, 1),
-    inntekt: BigDecimal = BigDecimal.valueOf(100000),
+    inntekt: BigDecimal = BigDecimal.valueOf(100_000),
     samordningsfradrag: BigDecimal = BigDecimal.valueOf(0),
     dagsats: BigDecimal? = BigDecimal.valueOf(0),
     månedsinntekt: BigDecimal? = null,

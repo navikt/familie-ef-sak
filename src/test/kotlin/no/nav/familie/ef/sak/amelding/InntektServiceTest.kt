@@ -8,6 +8,7 @@ import no.nav.familie.ef.sak.amelding.ekstern.ArbeidOgInntektClient
 import no.nav.familie.ef.sak.fagsak.FagsakPersonService
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.infrastruktur.config.ObjectMapperProvider.objectMapper
+import no.nav.familie.ef.sak.testutil.JsonFilUtil.Companion.lesFil
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -37,7 +38,7 @@ class InntektServiceTest {
     inner class ParseInntektV2Reponse {
         @Test
         internal fun `parser generell inntektv2 response med riktig data struktur`() {
-            val inntektV2ResponseJson: String = lesRessurs("json/inntekt/InntektGenerellResponse.json")
+            val inntektV2ResponseJson: String = lesFil("json/inntekt/InntektGenerellResponse.json")
             val inntektResponse = objectMapper.readValue<InntektResponse>(inntektV2ResponseJson)
 
             val forventetMåned = YearMonth.of(2020, 3)
@@ -49,7 +50,7 @@ class InntektServiceTest {
 
         @Test
         internal fun `parser inntektv2 response med forskjellige inntekt typer`() {
-            val inntektV2ResponseJson: String = lesRessurs("json/inntekt/InntektFlereInntektTyperResponse.json")
+            val inntektV2ResponseJson: String = lesFil("json/inntekt/InntektFlereInntektTyperResponse.json")
             val inntektResponse = objectMapper.readValue<InntektResponse>(inntektV2ResponseJson)
 
             val forventeteInntektTyper =
@@ -80,7 +81,7 @@ class InntektServiceTest {
         @Test
         internal fun `skal hente årsinntekt og summere riktig`() {
             val inntektV2ResponseJson: String =
-                lesRessurs("json/inntekt/InntektFulltÅrMedFeriepenger.json")
+                lesFil("json/inntekt/InntektFulltÅrMedFeriepenger.json")
             val inntektResponse = objectMapper.readValue<InntektResponse>(inntektV2ResponseJson)
 
             every { aMeldingInntektClient.hentInntekt(any(), any(), any()) } returns inntektResponse
@@ -93,12 +94,5 @@ class InntektServiceTest {
 
             assertEquals(130056, årsinntekt)
         }
-    }
-
-    fun lesRessurs(name: String): String {
-        val resource =
-            this::class.java.classLoader.getResource(name)
-                ?: throw IllegalArgumentException("Resource not found: $name")
-        return resource.readText(StandardCharsets.UTF_8)
     }
 }
