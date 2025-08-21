@@ -6,6 +6,7 @@ import no.nav.familie.ef.sak.infrastruktur.config.ObjectMapperProvider.objectMap
 import no.nav.familie.ef.sak.repository.inntektsperiode
 import no.nav.familie.ef.sak.repository.vedtak
 import no.nav.familie.ef.sak.testutil.JsonFilUtil.Companion.lesFil
+import no.nav.familie.ef.sak.testutil.JsonFilUtil.Companion.oppdaterMåneder
 import no.nav.familie.ef.sak.vedtak.domain.InntektWrapper
 import no.nav.familie.kontrakter.felles.Månedsperiode
 import org.assertj.core.api.Assertions.assertThat
@@ -18,7 +19,7 @@ class InntektResponseTest {
     @Test
     fun `finn førsteMånedMed10ProsentInntektsøkning`() {
         val inntektV2ResponseJson: String = lesFil("json/inntekt/InntektLønnsinntektMedOvergangsstønadOgSykepenger.json")
-        val inntektV2ResponseJsonModifisert = inntektV2ResponseJson.replace("2025-05", YearMonth.now().minusMonths(1).toString()).replace("2025-04", YearMonth.now().minusMonths(2).toString())
+        val inntektV2ResponseJsonModifisert = oppdaterMåneder(inntektV2ResponseJson, 2)
         val inntektResponse = objectMapper.readValue<InntektResponse>(inntektV2ResponseJsonModifisert)
 
         val vedtak = vedtak(InntektWrapper(listOf(inntektsperiode(Månedsperiode(YearMonth.now().minusMonths(6), YearMonth.now().plusMonths(1)), BigDecimal.valueOf(57500)))))
@@ -32,7 +33,7 @@ class InntektResponseTest {
     @Test
     fun `finn førsteMånedMed10ProsentInntektsøkning - ignorer månedsinntekt tilsvarende årsinntekt på en halv g`() {
         val inntektV2ResponseJson: String = lesFil("json/inntekt/InntektLønnsinntektMedOvergangsstønadOgSykepenger.json")
-        val inntektV2ResponseJsonModifisert = inntektV2ResponseJson.replace("2025-05", YearMonth.now().minusMonths(1).toString()).replace("2025-04", YearMonth.now().minusMonths(2).toString())
+        val inntektV2ResponseJsonModifisert = oppdaterMåneder(inntektV2ResponseJson, 2)
         val inntektResponse = objectMapper.readValue<InntektResponse>(inntektV2ResponseJsonModifisert)
 
         val vedtak = vedtak(InntektWrapper(listOf(inntektsperiode(Månedsperiode(YearMonth.now().minusMonths(6), YearMonth.now().plusMonths(1)), BigDecimal.valueOf(0)))))
@@ -43,9 +44,8 @@ class InntektResponseTest {
     @Test
     fun `returner false hvis det finnes en måned med total inntekt som gir årsinntekt som er høyere enn fem og en halv G`() {
         val inntektV2ResponseJson: String = lesFil("json/inntekt/InntektLønnsinntektMedOvergangsstønadOgSykepenger.json")
-        val inntektV2ResponseJsonModifisert = inntektV2ResponseJson.replace("57500.0", "100").replace("2025-05", YearMonth.now().minusMonths(1).toString()).replace("2025-04", YearMonth.now().minusMonths(2).toString())
-        val inntektV2ResponseJsonModifisertForHøyInntekt = inntektV2ResponseJson.replace("57500.0", "99999").replace("2025-05", YearMonth.now().minusMonths(1).toString()).replace("2025-04", YearMonth.now().minusMonths(2).toString())
-
+        val inntektV2ResponseJsonModifisert = oppdaterMåneder(inntektV2ResponseJson, 2).replace("57500.0", "100")
+        val inntektV2ResponseJsonModifisertForHøyInntekt = oppdaterMåneder(inntektV2ResponseJson, 2).replace("57500.0", "99999")
         val inntektResponse = objectMapper.readValue<InntektResponse>(inntektV2ResponseJsonModifisert)
         val inntektResponseForHøyInntekt = objectMapper.readValue<InntektResponse>(inntektV2ResponseJsonModifisertForHøyInntekt)
 
@@ -59,27 +59,19 @@ class InntektResponseTest {
     @Test
     fun `beregn forventet inntekt med feriepenger - vanlig case med fastlønn hvor feriepenger og trekk i lønn for ferie skal ignoreres`() {
         val inntektV2ResponseJson: String = lesFil("json/inntekt/InntektFulltÅrMedFeriepenger.json")
-        val inntektV2ResponseJsonModifisert =
-            inntektV2ResponseJson
-                .replace("2020-05", YearMonth.now().minusMonths(3).toString())
-                .replace("2020-06", YearMonth.now().minusMonths(2).toString())
-                .replace("2020-07", YearMonth.now().minusMonths(1).toString())
+        val inntektV2ResponseJsonModifisert = oppdaterMåneder(inntektV2ResponseJson)
 
         val inntektResponse = objectMapper.readValue<InntektResponse>(inntektV2ResponseJsonModifisert)
-        assertThat(inntektResponse.forventetMånedsinntekt()).isEqualTo(10333)
-        assertThat(inntektResponse.harMånedMedBareFeriepenger(YearMonth.now().minusMonths(4))).isFalse
+        assertThat(inntektResponse.forventetMånedsinntekt()).isEqualTo(10000)
+        assertThat(inntektResponse.harMånedMedBareFeriepenger(YearMonth.now().minusMonths(3))).isFalse
     }
 
     @Test
     fun `beregn forventet inntekt - ikke ta med måned hvor det er kun feriepenger registrert`() {
         val inntektV2ResponseJson: String = lesFil("json/inntekt/InntektFastlønnMedEnMånedMedKunFeriepenger.json")
-        val inntektV2ResponseJsonModifisert =
-            inntektV2ResponseJson
-                .replace("2020-05", YearMonth.now().minusMonths(3).toString())
-                .replace("2020-06", YearMonth.now().minusMonths(2).toString()) // Feriepenger som ignoreres
-                .replace("2020-07", YearMonth.now().minusMonths(1).toString())
+        val inntektV2ResponseJsonModifisert = oppdaterMåneder(inntektV2ResponseJson)
 
         val inntektResponse = objectMapper.readValue<InntektResponse>(inntektV2ResponseJsonModifisert)
-        assertThat(inntektResponse.harMånedMedBareFeriepenger(YearMonth.now().minusMonths(4))).isTrue
+        assertThat(inntektResponse.harMånedMedBareFeriepenger(YearMonth.now().minusMonths(3))).isTrue
     }
 }
