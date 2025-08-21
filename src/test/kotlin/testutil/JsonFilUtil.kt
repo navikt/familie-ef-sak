@@ -31,7 +31,7 @@ class JsonFilUtil {
 
             // 2) Forankre på største (nyeste) måned i malen
             val maxInTemplate = months.maxOrNull()!!
-            val delta = ChronoUnit.MONTHS.between(maxInTemplate, YearMonth.now())
+            val delta = ChronoUnit.MONTHS.between(maxInTemplate, YearMonth.now().minusMonths(1))
 
             if (delta == 0L) return json // allerede "i rute"
 
