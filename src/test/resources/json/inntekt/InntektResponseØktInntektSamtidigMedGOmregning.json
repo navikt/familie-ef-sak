@@ -371,38 +371,6 @@
         }
       ],
       "avvikListe": []
-    },
-    {
-      "maaned": "2025-08",
-      "opplysningspliktig": "999999998",
-      "underenhet": "999999997",
-      "norskident": "01010199999",
-      "oppsummeringstidspunkt": "2025-08-06T12:13:06.267Z",
-      "inntektListe": [
-        {
-          "type": "Loennsinntekt",
-          "beloep": 8773.27,
-          "fordel": "kontantytelse",
-          "beskrivelse": "timeloenn",
-          "inngaarIGrunnlagForTrekk": true,
-          "utloeserArbeidsgiveravgift": true,
-          "skatteOgAvgiftsregel": null,
-          "opptjeningsperiodeFom": null,
-          "opptjeningsperiodeTom": null,
-          "tilleggsinformasjon": null,
-          "manuellVurdering": false,
-          "antall": 37,
-          "skattemessigBosattLand": null,
-          "opptjeningsland": null
-        }
-      ],
-      "forskuddstrekkListe": [
-        {
-          "beloep": -789.0,
-          "beskrivelse": "ordinaert"
-        }
-      ],
-      "avvikListe": []
     }
   ]
 }
