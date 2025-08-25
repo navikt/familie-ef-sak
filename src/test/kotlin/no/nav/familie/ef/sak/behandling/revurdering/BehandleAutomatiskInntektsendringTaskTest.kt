@@ -3,6 +3,7 @@ package no.nav.familie.ef.sak.no.nav.familie.ef.sak.behandling.revurdering
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.mockk.every
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
+import no.nav.familie.ef.sak.amelding.InntektResponse
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
@@ -27,6 +28,7 @@ import no.nav.familie.ef.sak.repository.fagsakpersoner
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.ef.sak.repository.inntekt
 import no.nav.familie.ef.sak.repository.inntektsmåned
+import no.nav.familie.ef.sak.repository.inntektsmåneder
 import no.nav.familie.ef.sak.repository.inntektsperiode
 import no.nav.familie.ef.sak.repository.lagInntektResponseFraMånedsinntekter
 import no.nav.familie.ef.sak.repository.lagInntektResponseFraMånedsinntekterFraDouble
@@ -105,15 +107,21 @@ class BehandleAutomatiskInntektsendringTaskTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `behandling automatisk inntektsendring`() {
+        val inntekterPerMånedLavInntekt = listOf(inntekt(2000.0), inntekt(10000.0))
+        val inntektsmånederLavInntekt = inntektsmåneder(fraOgMedMåned = YearMonth.now().minusMonths(12), tilOgMedMåned = YearMonth.now().minusMonths(4), inntektListe = inntekterPerMånedLavInntekt)
+        val inntekterPerMånedHøyInntekt = listOf(inntekt(25000.0), inntekt(10000.0))
+        val inntektsmånederHøyInntekt = inntektsmåneder(fraOgMedMåned = YearMonth.now().minusMonths(3), inntektListe = inntekterPerMånedHøyInntekt)
+        every { inntektClientMock.inntektClient().hentInntekt(any(), any(), any()) } returns InntektResponse(inntektsmånederLavInntekt + inntektsmånederHøyInntekt)
+
         val behandling = behandling(fagsak, resultat = BehandlingResultat.IKKE_SATT, status = BehandlingStatus.UTREDES)
         behandlingRepository.insert(behandling)
         vilkårHelperService.opprettVilkår(behandling)
         vedtakHelperService.ferdigstillVedtak(vedtak(behandlingId = behandling.id, månedsperiode = Månedsperiode(YearMonth.now().minusMonths(4), YearMonth.now())), behandling, fagsak)
 
         val payload = PayloadBehandleAutomatiskInntektsendringTask(personIdent, "2025-15")
-        val test = BehandleAutomatiskInntektsendringTask.opprettTask(objectMapper.writeValueAsString(payload))
-
-        behandleAutomatiskInntektsendringTask.doTask(test)
+        val task = BehandleAutomatiskInntektsendringTask.opprettTask(objectMapper.writeValueAsString(payload))
+        val lagretBehandleAutomatiskInntektsendringTask = taskService.save(task)
+        behandleAutomatiskInntektsendringTask.doTask(lagretBehandleAutomatiskInntektsendringTask)
 
         val behandlingerForFagsak = behandlingRepository.findByFagsakId(fagsakId = fagsak.id)
         assertThat(behandlingerForFagsak).hasSize(2)
@@ -360,7 +368,7 @@ class BehandleAutomatiskInntektsendringTaskTest : OppslagSpringRunnerTest() {
 
     val forventetInntektsbegrunnelseMedFeriepenger =
         """
-        Periode som er kontrollert: ${YearMonth.now().minusMonths(6).tilNorskFormat()} til ${YearMonth.now().minusMonths(1).tilNorskFormat()}.
+        Periode som er kontrollert: ${YearMonth.now().minusMonths(7).tilNorskFormat()} til ${YearMonth.now().minusMonths(1).tilNorskFormat()}.
         
         Forventet årsinntekt i ${YearMonth.now().minusMonths(4).tilNorskFormat()}: 144 000 kroner.
         - 10 % opp: 13 200 kroner per måned.
@@ -368,15 +376,14 @@ class BehandleAutomatiskInntektsendringTaskTest : OppslagSpringRunnerTest() {
         
         Inntekten i ${YearMonth.now().minusMonths(4).tilNorskFormat()} er 16 000 kroner. Inntekten har økt minst 10 prosent denne måneden og alle månedene etter dette. Stønaden beregnes på nytt fra måneden etter 10 prosent økning.
         
-        Har lagt til grunn faktisk inntekt bakover i tid. Fra og med ${YearMonth.now().tilNorskFormat()} er stønaden beregnet ut ifra gjennomsnittlig inntekt for ${YearMonth.now().minusMonths(3).tilNorskFormatUtenÅr()}, ${YearMonth.now().minusMonths(2).tilNorskFormatUtenÅr()} og ${YearMonth.now().minusMonths(1).tilNorskFormatUtenÅr()}.
-        Bruker har fått utbetalt feriepenger i løpet av siste tre måneder, dette ignoreres i beregningen av forventet inntekt.
+        Har lagt til grunn faktisk inntekt bakover i tid. Fra og med ${YearMonth.now().tilNorskFormat()} er stønaden beregnet ut ifra gjennomsnittlig inntekt for ${YearMonth.now().minusMonths(3).tilNorskFormatUtenÅr()}, ${YearMonth.now().minusMonths(2).tilNorskFormatUtenÅr()} og ${YearMonth.now().minusMonths(1).tilNorskFormatUtenÅr()}. Bruker har fått utbetalt feriepenger i løpet av siste tre måneder. Disse er ikke tatt med i beregningen av forventet inntekt.
         
         A-inntekt er lagret.
         """.trimIndent()
 
     val forventetInntektsbegrunnelse =
         """
-        Periode som er kontrollert: ${YearMonth.now().minusMonths(6).tilNorskFormat()} til ${YearMonth.now().minusMonths(1).tilNorskFormat()}.
+        Periode som er kontrollert: ${YearMonth.now().minusMonths(7).tilNorskFormat()} til ${YearMonth.now().minusMonths(1).tilNorskFormat()}.
         
         Forventet årsinntekt i ${YearMonth.now().minusMonths(4).tilNorskFormat()}: 144 000 kroner.
         - 10 % opp: 13 200 kroner per måned.
