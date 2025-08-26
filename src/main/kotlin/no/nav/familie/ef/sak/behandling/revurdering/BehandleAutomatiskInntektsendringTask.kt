@@ -208,10 +208,10 @@ class BehandleAutomatiskInntektsendringTask(
         inntektResponse: InntektResponse,
         revurderesFra: YearMonth,
     ): List<Inntektsperiode> {
-        if (revurderesFra.isBefore(YearMonth.now())) {
+        if (revurderesFra.isEqualOrBefore(YearMonth.now())) {
             val inntektsperioder =
                 generateSequence(revurderesFra) { måned -> måned.plusMonths(1) }
-                    .takeWhile { måned -> måned.isEqualOrBefore(YearMonth.now().minusMonths(1)) }
+                    .takeWhile { måned -> måned.isEqualOrBefore(YearMonth.now()) }
                     .map { måned ->
                         Inntektsperiode(
                             periode = Månedsperiode(måned),
@@ -221,9 +221,15 @@ class BehandleAutomatiskInntektsendringTask(
                             samordningsfradrag = BigDecimal(0),
                         )
                     }.toList()
+
+            val forventetInntektFraOgMedMåned = if (inntektResponse.skalMedberegneInntektFraInneværendeMåned()) {
+                YearMonth.now().plusMonths(1)
+            } else {
+                YearMonth.now()
+            }
             val inntektsperiodeFremover =
                 Inntektsperiode(
-                    periode = Månedsperiode(YearMonth.now(), forrigeVedtak.perioder?.perioder?.maxOf { it.periode.tom } ?: throw IllegalStateException("Mangler vedtaksperioder")),
+                    periode = Månedsperiode(forventetInntektFraOgMedMåned, forrigeVedtak.perioder?.perioder?.maxOf { it.periode.tom } ?: throw IllegalStateException("Mangler vedtaksperioder")),
                     månedsinntekt = BigDecimal(inntektResponse.forventetMånedsinntekt()),
                     inntekt = BigDecimal(0),
                     dagsats = BigDecimal(0),

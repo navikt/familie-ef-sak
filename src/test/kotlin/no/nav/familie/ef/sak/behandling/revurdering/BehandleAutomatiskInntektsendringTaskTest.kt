@@ -30,6 +30,7 @@ import no.nav.familie.ef.sak.repository.inntekt
 import no.nav.familie.ef.sak.repository.inntektsmåned
 import no.nav.familie.ef.sak.repository.inntektsmåneder
 import no.nav.familie.ef.sak.repository.inntektsperiode
+import no.nav.familie.ef.sak.repository.lagInntekt
 import no.nav.familie.ef.sak.repository.lagInntektResponseFraMånedsinntekter
 import no.nav.familie.ef.sak.repository.lagInntektResponseFraMånedsinntekterFraDouble
 import no.nav.familie.ef.sak.repository.vedtak
@@ -167,6 +168,35 @@ class BehandleAutomatiskInntektsendringTaskTest : OppslagSpringRunnerTest() {
         assertThat(oppdatertInntekt.first().periode.fom).isEqualTo(YearMonth.now().minusMonths(2))
         assertThat(oppdatertInntekt.first().månedsinntekt).isEqualTo(BigDecimal(15_000))
     }
+
+    @Test
+    fun `Bruk inneværende måned hvis finnes`() {
+        val innmeldtMånedsinntekt = listOf(10_000, 10_500, 15_000, 15_000, 15_000)
+        val vedtakTom = YearMonth.now().plusMonths(11)
+
+        val forventetInntektIVedtak =
+            mapOf(
+                (YearMonth.now().minusMonths(innmeldtMånedsinntekt.size.toLong()) to 10_000),
+            )
+        val vedtak = vedtak(forventetInntektIVedtak, vedtakTom)
+        val inntektResponse = lagInntektResponseFraMånedsinntekter(innmeldtMånedsinntekt)
+
+        val inntektsmånederMedInneværendeMåned = inntektResponse.inntektsmåneder + listOf(inntektsmåned(måned = YearMonth.now(), inntektListe = listOf(inntekt(beløp = 16_000.0))))
+        val inntektResponseMedInneværendeMåned = InntektResponse(inntektsmånederMedInneværendeMåned)
+
+        val oppdatertVedtakMedNyePerioder = behandleAutomatiskInntektsendringTask.oppdaterFørsteVedtaksperiodeMedRevurderesFraDato(vedtak, inntektResponseMedInneværendeMåned)
+
+        assertThat(oppdatertVedtakMedNyePerioder.first().periode.fom).isEqualTo(YearMonth.now().minusMonths(2))
+        assertThat(oppdatertVedtakMedNyePerioder.first().periode.tom).isEqualTo(vedtakTom)
+
+        val oppdatertInntekt = behandleAutomatiskInntektsendringTask.oppdaterInntektMedNyBeregnetForventetInntekt(vedtak, inntektResponseMedInneværendeMåned, oppdatertVedtakMedNyePerioder.first().periode.fom)
+        assertThat(oppdatertInntekt.first().periode.fom).isEqualTo(YearMonth.now().minusMonths(2))
+        assertThat(oppdatertInntekt.first().månedsinntekt).isEqualTo(BigDecimal(15_000))
+
+        assertThat(oppdatertInntekt.last().periode.fom).isEqualTo(YearMonth.now().plusMonths(1)) // Forventet inntekt
+        assertThat(oppdatertInntekt.last().månedsinntekt).isEqualTo(BigDecimal(15_333))
+    }
+
 
     @Test
     fun `en inntektsperiode med flere endringer i inntekt etter 10 prosent økning`() {
