@@ -263,7 +263,7 @@ class AutomatiskRevurderingEtterGOmregningTest : OppslagSpringRunnerTest() {
         - 10 % opp: 25 300 kroner per måned.
         - 10 % ned: 20 700 kroner per måned.
         
-        Forventet årsinntekt fra ${YearMonth.of(YearMonth.now().year, 5).tilNorskFormat()}: 289 600 kroner.
+        Forventet årsinntekt fra ${YearMonth.of(YearMonth.now().year, 5).tilNorskFormat()}: 289 600 kroner (G-omregning).
         - 10 % opp: 26 546 kroner per måned.
         - 10 % ned: 21 720 kroner per måned.
         

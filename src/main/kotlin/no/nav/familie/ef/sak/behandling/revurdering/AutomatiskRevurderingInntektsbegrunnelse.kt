@@ -8,13 +8,13 @@ import java.time.YearMonth
 import java.util.Locale
 
 data class FlettefelterForInntektsbegrunnelse(
-    val forrigeForventetInnntektsperiodeFraOgMed: YearMonth,
+    val kontrollperiodeFraOgMed: YearMonth,
     val kontrollperiodeTilOgMed: YearMonth = YearMonth.now().minusMonths(1),
     val førsteMånedMed10ProsentEndring: YearMonth,
-    val beløpFørsteMåned10ProsentEndring: Int,
-    val forrigeForventetÅrsinntekt: Int,
-    val tiProsentOppOgNed: TiProsentOppOgNed,
-    val forventetInntektFraMåned: YearMonth,
+    val månedsinntektFørsteMåned10ProsentEndring: Int,
+    val forventetÅrsinntektNår10ProsentEndring: Int,
+    val tiProsentOppOgNedFraForventetÅrsinntekt: TiProsentOppOgNed,
+    val nyForventetInntektFraOgMedDato: YearMonth,
     val harFeriepenger: Boolean,
     val inntektsberegningGOmregning: InntektsberegningGOmregning,
 ) {
@@ -27,15 +27,15 @@ data class FlettefelterForInntektsbegrunnelse(
 
     val genererInntektsbegrunnelse =
         """
-        Periode som er kontrollert: ${forrigeForventetInnntektsperiodeFraOgMed.tilNorskFormat()} til ${kontrollperiodeTilOgMed.tilNorskFormat()}.
+        Periode som er kontrollert: ${kontrollperiodeFraOgMed.tilNorskFormat()} til ${kontrollperiodeTilOgMed.tilNorskFormat()}.
         
-        Forventet årsinntekt i ${førsteMånedMed10ProsentEndring.tilNorskFormat()}: ${forrigeForventetÅrsinntekt.tilNorskFormat()} kroner.
-        - 10 % opp: ${tiProsentOppOgNed.opp.tilNorskFormat()} kroner per måned.
-        - 10 % ned: ${tiProsentOppOgNed.ned.tilNorskFormat()} kroner per måned.
+        Forventet årsinntekt i ${førsteMånedMed10ProsentEndring.tilNorskFormat()}: ${forventetÅrsinntektNår10ProsentEndring.tilNorskFormat()} kroner.
+        - 10 % opp: ${tiProsentOppOgNedFraForventetÅrsinntekt.opp.tilNorskFormat()} kroner per måned.
+        - 10 % ned: ${tiProsentOppOgNedFraForventetÅrsinntekt.ned.tilNorskFormat()} kroner per måned.
         ${tekstTypeForGOmregningOppOgNed(inntektsberegningGOmregning.erForrigeBehandlingGOmregning, inntektsberegningGOmregning.forrigeForventetÅrsinntektG, inntektsberegningGOmregning.tiProsentOppOgNed, førsteMånedMed10ProsentEndring)}
-        Inntekten i ${førsteMånedMed10ProsentEndring.tilNorskFormat()} er ${beløpFørsteMåned10ProsentEndring.tilNorskFormat()} kroner. Inntekten har økt minst 10 prosent denne måneden og alle månedene etter dette. Stønaden beregnes på nytt fra måneden etter 10 prosent økning.
+        Inntekten i ${førsteMånedMed10ProsentEndring.tilNorskFormat()} er ${månedsinntektFørsteMåned10ProsentEndring.tilNorskFormat()} kroner. Inntekten har økt minst 10 prosent denne måneden og alle månedene etter dette. Stønaden beregnes på nytt fra måneden etter 10 prosent økning.
         
-        Har lagt til grunn faktisk inntekt bakover i tid. Fra og med ${forventetInntektFraMåned.tilNorskFormat()} er stønaden beregnet ut ifra gjennomsnittlig inntekt for ${forventetInntektFraMåned.minusMonths(3).månedTilNorskFormat()}, ${forventetInntektFraMåned.minusMonths(2).månedTilNorskFormat()} og ${forventetInntektFraMåned.minusMonths(1).månedTilNorskFormat()}.$feriepengerTekst
+        Har lagt til grunn faktisk inntekt bakover i tid. Fra og med ${nyForventetInntektFraOgMedDato.tilNorskFormat()} er stønaden beregnet ut ifra gjennomsnittlig inntekt for ${nyForventetInntektFraOgMedDato.minusMonths(3).månedTilNorskFormat()}, ${nyForventetInntektFraOgMedDato.minusMonths(2).månedTilNorskFormat()} og ${nyForventetInntektFraOgMedDato.minusMonths(1).månedTilNorskFormat()}.$feriepengerTekst
         
         A-inntekt er lagret.
         """.trimIndent()
@@ -47,10 +47,10 @@ data class InntektsberegningGOmregning(
     val tiProsentOppOgNed: TiProsentOppOgNed,
 )
 
-data class FlettefelterForInntektsbegrunnelseForNullVedtak(
+data class FlettefelterForInntektsbegrunnelseForInntektUnderHalvG(
     val førsteMånedMed10ProsentEndring: YearMonth,
-    val forrigeForventetÅrsinntekt: Int,
-    val beløpFørsteMåned10ProsentEndring: Int,
+    val forventetÅrsinntektNår10ProsentEndring: Int,
+    val månedsinntektFørsteMåned10ProsentEndring: Int,
     val harFeriepenger: Boolean,
 ) {
     val feriepengerTekst =
@@ -62,12 +62,12 @@ data class FlettefelterForInntektsbegrunnelseForNullVedtak(
 
     val genererInntektsbegrunnelse =
         """
-        Forventet årsinntekt i ${førsteMånedMed10ProsentEndring.tilNorskFormat()}: ${forrigeForventetÅrsinntekt.tilNorskFormat()} kroner.
+        Forventet årsinntekt i ${førsteMånedMed10ProsentEndring.tilNorskFormat()}: ${forventetÅrsinntektNår10ProsentEndring.tilNorskFormat()} kroner.
             - Månedsinntekt 1/2 G: ${(Grunnbeløpsperioder.nyesteGrunnbeløp.perMnd.toInt() / 2).tilNorskFormat()} kroner
         
         Mottar uredusert stønad.
         
-        Inntekten i ${førsteMånedMed10ProsentEndring.tilNorskFormat()} er ${beløpFørsteMåned10ProsentEndring.tilNorskFormat()} kroner. Bruker har inntekt over 1/2 G denne måneden og alle månedene etter dette.
+        Inntekten i ${førsteMånedMed10ProsentEndring.tilNorskFormat()} er ${månedsinntektFørsteMåned10ProsentEndring.tilNorskFormat()} kroner. Bruker har inntekt over 1/2 G denne måneden og alle månedene etter dette.
         Stønaden beregnes på nytt fra måneden etter inntekten oversteg 1/2 G. $feriepengerTekst
         """.trimIndent().trimEnd()
 }
@@ -79,13 +79,13 @@ fun Int.tilNorskFormat(): String {
 
 fun tekstTypeForGOmregningOppOgNed(
     forrigeBehandlingGOmregning: Boolean,
-    forrigeForventetÅrsinntektG: Int,
+    forventetÅrsinntektEtterG: Int,
     tiProsentOppOgNedG: TiProsentOppOgNed,
     førsteMånedMed10ProsentEndring: YearMonth,
 ): String =
     if (forrigeBehandlingGOmregning && førsteMånedMed10ProsentEndring != Grunnbeløpsperioder.nyesteGrunnbeløp.periode.fom) {
         """
-        Forventet årsinntekt fra ${Grunnbeløpsperioder.nyesteGrunnbeløpGyldigFraOgMed.tilNorskFormat()}: ${forrigeForventetÅrsinntektG.tilNorskFormat()} kroner.
+        Forventet årsinntekt fra ${Grunnbeløpsperioder.nyesteGrunnbeløpGyldigFraOgMed.tilNorskFormat()}: ${forventetÅrsinntektEtterG.tilNorskFormat()} kroner (G-omregning).
         - 10 % opp: ${tiProsentOppOgNedG.opp.tilNorskFormat()} kroner per måned.
         - 10 % ned: ${tiProsentOppOgNedG.ned.tilNorskFormat()} kroner per måned.
         """

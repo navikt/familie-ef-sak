@@ -298,22 +298,22 @@ class BehandleAutomatiskInntektsendringTask(
         val forventetInntekt = inntektsperioder.maxBy { it.periode.fom }
 
         if (forrigeForventetÅrsinntekt == 0) {
-            return FlettefelterForInntektsbegrunnelseForNullVedtak(
+            return FlettefelterForInntektsbegrunnelseForInntektUnderHalvG(
                 førsteMånedMed10ProsentEndring = førsteMånedMed10ProsentEndring,
-                forrigeForventetÅrsinntekt = forrigeForventetÅrsinntekt,
-                beløpFørsteMåned10ProsentEndring = beløpFørsteMåned10ProsentEndring,
+                forventetÅrsinntektNår10ProsentEndring = forrigeForventetÅrsinntekt,
+                månedsinntektFørsteMåned10ProsentEndring = beløpFørsteMåned10ProsentEndring,
                 harFeriepenger = inntektResponse.finnesFeriepengerFraOgMedÅrMåned(YearMonth.now().minusMonths(3)),
             ).genererInntektsbegrunnelse
         }
 
         return FlettefelterForInntektsbegrunnelse(
-            forrigeForventetInnntektsperiodeFraOgMed = if (forrigeForventetInntektsperiode.periode.fom.isBefore(YearMonth.now().minusYears(1))) YearMonth.now().minusYears(1) else forrigeForventetInntektsperiode.periode.fom,
+            kontrollperiodeFraOgMed = if (forrigeForventetInntektsperiode.periode.fom.isBefore(YearMonth.now().minusYears(1))) YearMonth.now().minusYears(1) else forrigeForventetInntektsperiode.periode.fom,
             kontrollperiodeTilOgMed = YearMonth.now().minusMonths(1),
             førsteMånedMed10ProsentEndring = førsteMånedMed10ProsentEndring,
-            beløpFørsteMåned10ProsentEndring = inntektResponse.totalInntektForÅrMåned(førsteMånedMed10ProsentEndring),
-            forrigeForventetÅrsinntekt = forrigeForventetÅrsinntekt,
-            tiProsentOppOgNed = tiProsentOppOgNed,
-            forventetInntektFraMåned = forventetInntekt.periode.fom,
+            månedsinntektFørsteMåned10ProsentEndring = inntektResponse.totalInntektForÅrMåned(førsteMånedMed10ProsentEndring),
+            forventetÅrsinntektNår10ProsentEndring = forrigeForventetÅrsinntekt,
+            tiProsentOppOgNedFraForventetÅrsinntekt = tiProsentOppOgNed,
+            nyForventetInntektFraOgMedDato = forventetInntekt.periode.fom,
             harFeriepenger = inntektResponse.finnesFeriepengerFraOgMedÅrMåned(YearMonth.now().minusMonths(3)),
             inntektsberegningGOmregning =
                 InntektsberegningGOmregning(
