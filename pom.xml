@@ -11,7 +11,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.5.4</version>
+        <version>3.5.5</version>
     </parent>
     <repositories>
         <repository>
@@ -29,19 +29,19 @@
         <sha1/>
         <changelist>-SNAPSHOT</changelist>
         <java.version>21</java.version>
-        <kotlin.version>2.2.0</kotlin.version>
+        <kotlin.version>2.2.10</kotlin.version>
         <kotlin-coroutines.version>1.10.2</kotlin-coroutines.version>
-        <springdoc.version>2.8.9</springdoc.version>
+        <springdoc.version>2.8.11</springdoc.version>
         <mockk.version>1.14.5</mockk.version>
         <felles.version>3.20250804101327_a0f5fad</felles.version>
-        <prosessering.version>2.20250804113739_6d49ef6</prosessering.version>
+        <prosessering.version>2.20250818131235_94bcc1a</prosessering.version>
         <token-validation-spring.version>5.0.34</token-validation-spring.version>
 
         <start-class>no.nav.familie.ef.sak.ApplicationKt</start-class>
-        <kontrakter.version>3.0_20250805142725_8942276</kontrakter.version>
+        <kontrakter.version>3.0_20250822084705_acb7066</kontrakter.version>
         <mikrofrontend.builder.version>20230704114948-74aa2e9</mikrofrontend.builder.version>
-        <eksterne.kontrakter.bisys.version>2.0_20250804093222_2bf44ca</eksterne.kontrakter.bisys.version>
-        <cucumber.version>7.27.0</cucumber.version>
+        <eksterne.kontrakter.bisys.version>2.0_20250819081736_d4884f9</eksterne.kontrakter.bisys.version>
+        <cucumber.version>7.27.2</cucumber.version>
 
 
         <!--suppress UnresolvedMavenProperty  Ligger som secret i github-->
@@ -129,7 +129,7 @@
         <dependency>
             <groupId>org.flywaydb</groupId>
             <artifactId>flyway-database-postgresql</artifactId>
-            <version>11.11.0</version>
+            <version>11.11.2</version>
             <scope>runtime</scope>
         </dependency>
         <dependency>
