@@ -17,6 +17,7 @@ enum class Toggle(
     KONTROLLER_NÆRINGSINNTEKT("familie.ef.sak.kontroller-naeringsinntekt"),
     BEHANDLE_AUTOMATISK_INNTEKTSENDRING("familie.ef.sak-behandle-automatisk-inntektsendring-task", "Release"),
     FRONTEND_KOPIER_KNAPP_ERROR_ALERT("familie.ef.sak.frontend-alert-error-med-copy-button", "Release"),
+    FRONTEND_VIS_BEREGNINGSSKEJMA("familie.ef.sak.frontend-vis-beregningsskjema", "Release"),
 
     // Operational
     G_BEREGNING("familie.ef.sak.g-beregning", "Operational"),
