@@ -14,17 +14,19 @@ data class InntektResponse(
     @JsonProperty("data")
     val inntektsmåneder: List<Inntektsmåned> = emptyList(),
 ) {
+    private val cutoffYearMonth = if (skalMedberegneInntektFraInneværendeMåned()) YearMonth.now() else YearMonth.now().minusMonths(1)
+
     fun totalInntektFraÅrMåned(årMåned: YearMonth): Int =
         inntektsmånederFraOgMedÅrMåned(årMåned)
-            .filter { it.måned.isEqualOrAfter(årMåned) && it.måned.isBefore(YearMonth.now()) }
+            .filter { it.måned.isEqualOrAfter(årMåned) && it.måned.isEqualOrBefore(cutoffYearMonth) }
             .flatMap { it.inntektListe }
             .filterNot { ignorerteYtelserOgUtbetalinger.contains(it.beskrivelse) }
             .sumOf { it.beløp }
             .toInt()
 
-    fun totalInntektForMånedsperiodeUtenFeriepengerOgHelligdagstillegg(månedsperiode: Månedsperiode): Int =
-        inntektsmånederFraOgMedÅrMåned(månedsperiode.fom)
-            .filter { it.måned.isEqualOrAfter(månedsperiode.fom) && it.måned.isEqualOrBefore(månedsperiode.tom) }
+    fun totalInntektForMånedsperiodeUtenFeriepengerOgHelligdagstillegg(fraOgMedÅrMåned: YearMonth): Int =
+        inntektsmånederFraOgMedÅrMåned(fraOgMedÅrMåned)
+            .filter { it.måned.isEqualOrAfter(fraOgMedÅrMåned) && it.måned.isEqualOrBefore(cutoffYearMonth) }
             .flatMap { it.inntektListe }
             .filterNot { ignorerteYtelserOgUtbetalinger.contains(it.beskrivelse) || it.beskrivelse.contains("ferie", true) || it.beskrivelse == "helligdagstillegg" }
             .sumOf { it.beløp }
@@ -32,7 +34,7 @@ data class InntektResponse(
 
     fun antallMånederUtenFeriepenger(fraOgMedÅrMåned: YearMonth): Int =
         inntektsmånederFraOgMedÅrMåned(fraOgMedÅrMåned)
-            .filter { it.måned.isEqualOrAfter(fraOgMedÅrMåned) && it.måned.isBefore(YearMonth.now()) }
+            .filter { it.måned.isEqualOrAfter(fraOgMedÅrMåned) && it.måned.isEqualOrBefore(cutoffYearMonth) }
             .filterNot { it.inntektListe.all { it.beskrivelse.contains("ferie", true) || ignorerteYtelserOgUtbetalinger.contains(it.beskrivelse) } }
             .groupBy { it.måned }
             .count()
@@ -40,12 +42,14 @@ data class InntektResponse(
     fun harMånedMedBareFeriepenger(fraOgMedÅrMåned: YearMonth): Boolean = antallMånederUtenFeriepenger(fraOgMedÅrMåned) < 3
 
     fun skalMedberegneInntektFraInneværendeMåned() =
-        inntektsmånederFraOgMedÅrMåned(YearMonth.now().minusMonths(3)
-        ).any { it.måned == YearMonth.now() }
+        inntektsmåneder
+            .any { inntektsmåned ->
+                inntektsmåned.måned.equals(YearMonth.now())
+            }
 
     fun finnesFeriepengerFraOgMedÅrMåned(fraOgMedÅrMåned: YearMonth): Boolean =
         inntektsmånederFraOgMedÅrMåned(fraOgMedÅrMåned)
-            .filter { it.måned.isEqualOrAfter(fraOgMedÅrMåned) && it.måned.isBefore(YearMonth.now()) }
+            .filter { it.måned.isEqualOrAfter(fraOgMedÅrMåned) && it.måned.isEqualOrBefore(cutoffYearMonth) }
             .any { it.inntektListe.any { it.beskrivelse.contains("ferie", true) } }
 
     fun totalInntektForÅrMåned(årMåned: YearMonth): Int =
@@ -68,7 +72,7 @@ data class InntektResponse(
         inntektsmåneder
             .sortedBy { it.måned }
             .filter {
-                it.måned.isBefore(YearMonth.now()) &&
+                it.måned.isEqualOrBefore(cutoffYearMonth) &&
                     it.måned.isEqualOrAfter(
                         forrigeVedtak.perioder
                             ?.perioder
@@ -102,7 +106,7 @@ data class InntektResponse(
     fun inntektsmånederFraOgMedÅrMåned(fraOgMedÅrMåned: YearMonth? = null): List<Inntektsmåned> =
         inntektsmåneder
             .filter { inntektsmåned ->
-                inntektsmåned.måned.isEqualOrBefore(YearMonth.now()) &&
+                inntektsmåned.måned.isEqualOrBefore(cutoffYearMonth) &&
                     inntektsmåned.måned.isEqualOrAfter(fraOgMedÅrMåned)
             }.sortedBy { it.måned }
 
@@ -111,12 +115,7 @@ data class InntektResponse(
             throw IllegalStateException("Mangler inntektsinformasjon for de tre siste måneder")
         }
 
-        val treSisteMånederPeriode = if (this.skalMedberegneInntektFraInneværendeMåned()) {
-            Månedsperiode(YearMonth.now().minusMonths(2), YearMonth.now())
-        } else {
-            Månedsperiode(YearMonth.now().minusMonths(3), YearMonth.now().minusMonths(1))
-        }
-        return totalInntektForMånedsperiodeUtenFeriepengerOgHelligdagstillegg(treSisteMånederPeriode) / 3
+        return totalInntektForMånedsperiodeUtenFeriepengerOgHelligdagstillegg(cutoffYearMonth.minusMonths(2)) / 3
     }
 
     val harTreForrigeInntektsmåneder =
