@@ -27,7 +27,7 @@ class FeatureToggleController(
             Toggle.VIS_AUTOMATISK_INNTEKTSENDRING,
             Toggle.BEHANDLE_AUTOMATISK_INNTEKTSENDRING,
             Toggle.OPPDATER_BEHANDLINGSTATUS,
-            Toggle.FRONTEND_VIS_BEREGNINGSSKEJMA,
+            Toggle.FRONTEND_VIS_BEREGNINGSSKJEMA,
         )
 
     @GetMapping
