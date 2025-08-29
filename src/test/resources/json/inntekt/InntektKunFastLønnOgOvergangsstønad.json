@@ -1,0 +1,170 @@
+{
+  "data": [
+    {
+      "maaned": "2020-05",
+      "opplysningspliktig": "990983666",
+      "underenhet": "990983666",
+      "norskident": "01010199999",
+      "oppsummeringstidspunkt": "2025-03-03T08:32:35.622Z",
+      "inntektListe": [
+        {
+          "type": "Loennsinntekt",
+          "beloep": 10000,
+          "fordel": "kontantytelse",
+          "beskrivelse": "fastloenn",
+          "inngaarIGrunnlagForTrekk": true,
+          "utloeserArbeidsgiveravgift": true
+        }
+      ]
+    },
+    {
+      "maaned": "2020-05",
+      "opplysningspliktig": "999999998",
+      "underenhet": "999999997",
+      "norskident": "01010199999",
+      "oppsummeringstidspunkt": "2025-06-02T16:29:21.794Z",
+      "inntektListe": [
+        {
+          "type": "YtelseFraOffentlige",
+          "beloep": 4056.0,
+          "fordel": "kontantytelse",
+          "beskrivelse": "overgangsstoenadTilEnsligMorEllerFarSomBegynteAaLoepe1April2014EllerSenere",
+          "inngaarIGrunnlagForTrekk": true,
+          "utloeserArbeidsgiveravgift": false,
+          "skatteOgAvgiftsregel": null,
+          "opptjeningsperiodeFom": null,
+          "opptjeningsperiodeTom": null,
+          "tilleggsinformasjon": null,
+          "manuellVurdering": false,
+          "antall": null,
+          "skattemessigBosattLand": null,
+          "opptjeningsland": null
+        }
+      ],
+      "forskuddstrekkListe": [
+        {
+          "beloep": -1095.0,
+          "beskrivelse": "ordinaert"
+        }
+      ],
+      "avvikListe": []
+    },
+    {
+      "maaned": "2020-06",
+      "opplysningspliktig": "990983666",
+      "underenhet": "990983666",
+      "norskident": "01010199999",
+      "oppsummeringstidspunkt": "2025-03-03T08:32:35.622Z",
+      "inntektListe": [
+        {
+          "type": "Loennsinntekt",
+          "beloep": 12000,
+          "fordel": "kontantytelse",
+          "beskrivelse": "fastloenn",
+          "inngaarIGrunnlagForTrekk": true,
+          "utloeserArbeidsgiveravgift": true
+        }
+      ]
+    },
+    {
+      "maaned": "2020-06",
+      "opplysningspliktig": "999999998",
+      "underenhet": "999999997",
+      "norskident": "01010199999",
+      "oppsummeringstidspunkt": "2025-06-02T16:29:21.794Z",
+      "inntektListe": [
+        {
+          "type": "YtelseFraOffentlige",
+          "beloep": 4056.0,
+          "fordel": "kontantytelse",
+          "beskrivelse": "overgangsstoenadTilEnsligMorEllerFarSomBegynteAaLoepe1April2014EllerSenere",
+          "inngaarIGrunnlagForTrekk": true,
+          "utloeserArbeidsgiveravgift": false,
+          "skatteOgAvgiftsregel": null,
+          "opptjeningsperiodeFom": null,
+          "opptjeningsperiodeTom": null,
+          "tilleggsinformasjon": null,
+          "manuellVurdering": false,
+          "antall": null,
+          "skattemessigBosattLand": null,
+          "opptjeningsland": null
+        }
+      ],
+      "forskuddstrekkListe": [
+        {
+          "beloep": -1095.0,
+          "beskrivelse": "ordinaert"
+        }
+      ],
+      "avvikListe": []
+    },
+    {
+      "maaned": "2020-07",
+      "opplysningspliktig": "990983666",
+      "underenhet": "990983666",
+      "norskident": "01010199999",
+      "oppsummeringstidspunkt": "2025-03-03T08:32:35.622Z",
+      "inntektListe": [
+        {
+          "type": "Loennsinntekt",
+          "beloep": 13000,
+          "fordel": "kontantytelse",
+          "beskrivelse": "fastloenn",
+          "inngaarIGrunnlagForTrekk": true,
+          "utloeserArbeidsgiveravgift": true
+        }
+      ]
+    },
+    {
+      "maaned": "2020-07",
+      "opplysningspliktig": "999999998",
+      "underenhet": "999999997",
+      "norskident": "01010199999",
+      "oppsummeringstidspunkt": "2025-06-02T16:29:21.794Z",
+      "inntektListe": [
+        {
+          "type": "YtelseFraOffentlige",
+          "beloep": 4056.0,
+          "fordel": "kontantytelse",
+          "beskrivelse": "overgangsstoenadTilEnsligMorEllerFarSomBegynteAaLoepe1April2014EllerSenere",
+          "inngaarIGrunnlagForTrekk": true,
+          "utloeserArbeidsgiveravgift": false,
+          "skatteOgAvgiftsregel": null,
+          "opptjeningsperiodeFom": null,
+          "opptjeningsperiodeTom": null,
+          "tilleggsinformasjon": null,
+          "manuellVurdering": false,
+          "antall": null,
+          "skattemessigBosattLand": null,
+          "opptjeningsland": null
+        }
+      ],
+      "forskuddstrekkListe": [
+        {
+          "beloep": -1095.0,
+          "beskrivelse": "ordinaert"
+        }
+      ],
+      "avvikListe": []
+    },
+    {
+      "maaned": "2020-08",
+      "opplysningspliktig": "990983666",
+      "underenhet": "990983666",
+      "norskident": "01010199999",
+      "oppsummeringstidspunkt": "2025-03-03T08:32:35.622Z",
+      "inntektListe": [
+        {
+          "type": "Loennsinntekt",
+          "beloep": 12000,
+          "fordel": "kontantytelse",
+          "beskrivelse": "fastloenn",
+          "inngaarIGrunnlagForTrekk": true,
+          "utloeserArbeidsgiveravgift": true
+        }
+      ]
+    }
+  ]
+}
+]
+}

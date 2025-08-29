@@ -5,10 +5,10 @@ import no.nav.familie.ef.sak.beregning.Grunnbeløpsperioder.finnGrunnbeløp
 import no.nav.familie.ef.sak.felles.util.isEqualOrAfter
 import no.nav.familie.ef.sak.felles.util.isEqualOrBefore
 import no.nav.familie.ef.sak.vedtak.domain.Vedtak
-import no.nav.familie.kontrakter.felles.Månedsperiode
 import java.time.LocalDate
 import java.time.OffsetDateTime
 import java.time.YearMonth
+import kotlin.math.abs
 
 data class InntektResponse(
     @JsonProperty("data")
@@ -16,9 +16,12 @@ data class InntektResponse(
 ) {
     private val cutoffYearMonth = if (skalMedberegneInntektFraInneværendeMåned()) YearMonth.now() else YearMonth.now().minusMonths(1)
 
-    fun totalInntektFraÅrMåned(årMåned: YearMonth): Int =
-        inntektsmånederFraOgMedÅrMåned(årMåned)
-            .filter { it.måned.isEqualOrAfter(årMåned) && it.måned.isEqualOrBefore(cutoffYearMonth) }
+    fun totalInntektFraÅrMåned(
+        årMåned: YearMonth,
+        tilÅrMåned: YearMonth? = null,
+    ): Int =
+        inntektsmånederFraOgMedÅrMåned(årMåned, tilÅrMåned)
+            .filter { it.måned.isEqualOrAfter(årMåned) && it.måned.isEqualOrBefore(tilÅrMåned ?: cutoffYearMonth) }
             .flatMap { it.inntektListe }
             .filterNot { ignorerteYtelserOgUtbetalinger.contains(it.beskrivelse) }
             .sumOf { it.beløp }
@@ -45,12 +48,31 @@ data class InntektResponse(
         inntektsmåneder
             .any { inntektsmåned ->
                 inntektsmåned.måned.equals(YearMonth.now())
-            }
+            } &&
+            harIkkeAndreNavYtelser(YearMonth.now().minusMonths(3)) &&
+            ikkeForStortAvvikMellomInneværendemånedOgForrigeMånedBeløp() &&
+            harKunEnArbeidsgiver(YearMonth.now().minusMonths(3))
 
     fun finnesFeriepengerFraOgMedÅrMåned(fraOgMedÅrMåned: YearMonth): Boolean =
         inntektsmånederFraOgMedÅrMåned(fraOgMedÅrMåned)
             .filter { it.måned.isEqualOrAfter(fraOgMedÅrMåned) && it.måned.isEqualOrBefore(cutoffYearMonth) }
             .any { it.inntektListe.any { it.beskrivelse.contains("ferie", true) } }
+
+    fun harIkkeAndreNavYtelser(fraogMedÅr: YearMonth): Boolean = inntektsmånederFraOgMedÅrMåned(fraogMedÅr, YearMonth.now()).none { it.inntektListe.any { it.type == InntektType.YTELSE_FRA_OFFENTLIGE && !it.beskrivelse.equals("overgangsstoenadTilEnsligMorEllerFarSomBegynteAaLoepe1April2014EllerSenere") } }
+
+    fun ikkeForStortAvvikMellomInneværendemånedOgForrigeMånedBeløp(): Boolean {
+        val snittInntekt = totalInntektFraÅrMåned(YearMonth.now().minusMonths(1), YearMonth.now().minusMonths(1))
+        val inneværendeMånedsInntekt = totalInntektFraÅrMåned(YearMonth.now(), YearMonth.now())
+        return abs(snittInntekt - inneværendeMånedsInntekt) < 3000
+    }
+
+    fun harKunEnArbeidsgiver(fraOgMedÅr: YearMonth): Boolean =
+        inntektsmånederFraOgMedÅrMåned(fraOgMedÅr, YearMonth.now())
+            .filter { it.måned.isEqualOrAfter(fraOgMedÅr) }
+            .map { Pair(it.underenhet, it.inntektListe) }
+            .filterNot { it.second.any { it.beskrivelse.equals("overgangsstoenadTilEnsligMorEllerFarSomBegynteAaLoepe1April2014EllerSenere") } }
+            .groupBy { it.first }
+            .size <= 1
 
     fun totalInntektForÅrMåned(årMåned: YearMonth): Int =
         inntektsmånederFraOgMedÅrMåned(årMåned)
@@ -103,10 +125,13 @@ data class InntektResponse(
             }?.let { summertInntektList[it].årMåned } ?: throw IllegalStateException("Burde funnet måned med 10% inntekt for behandling: ${forrigeVedtak.behandlingId}")
     }
 
-    fun inntektsmånederFraOgMedÅrMåned(fraOgMedÅrMåned: YearMonth? = null): List<Inntektsmåned> =
+    fun inntektsmånederFraOgMedÅrMåned(
+        fraOgMedÅrMåned: YearMonth? = null,
+        tilOgMedÅrMåned: YearMonth? = null,
+    ): List<Inntektsmåned> =
         inntektsmåneder
             .filter { inntektsmåned ->
-                inntektsmåned.måned.isEqualOrBefore(cutoffYearMonth) &&
+                inntektsmåned.måned.isEqualOrBefore(tilOgMedÅrMåned ?: cutoffYearMonth) &&
                     inntektsmåned.måned.isEqualOrAfter(fraOgMedÅrMåned)
             }.sortedBy { it.måned }
 
