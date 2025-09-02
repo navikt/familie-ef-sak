@@ -761,6 +761,23 @@ fun inntektsmåneder(
             }
         }.toList()
 
+fun lagInntektResponseForMånedsperiode(
+    månedsinntekt: Int,
+    månedsperiode: Månedsperiode,
+): InntektResponse =
+    InntektResponse(
+        månedsperiode.måneder().map { inntektsmåned(it, listOf(inntekt(månedsinntekt.toDouble()))) },
+    )
+
+fun lagInntektResponseForMånedsperiodeMedFeriepengerForrigeMåned(
+    månedsinntekt: Int,
+    månedsperiode: Månedsperiode,
+): InntektResponse =
+    InntektResponse(
+        månedsperiode.måneder().map { inntektsmåned(it, listOf(inntekt(månedsinntekt.toDouble()))) } +
+            inntektsmåned(YearMonth.now().minusMonths(1), listOf(inntekt(5000.0, InntektType.LØNNSINNTEKT, beskrivelse = "feriepenger"))),
+    )
+
 fun lagInntektResponseFraMånedsinntekterFraDouble(månedsinntekter: List<Double>): InntektResponse {
     require(månedsinntekter.size <= 12) { "Maks 12 inntekter kan sendes inn" }
 
@@ -775,7 +792,10 @@ fun lagInntektResponseFraMånedsinntekterFraDouble(månedsinntekter: List<Double
     )
 }
 
-fun lagInntektResponseFraMånedsinntekter(månedsinntekter: List<Int>): InntektResponse = lagInntektResponseFraMånedsinntekterFraDouble(månedsinntekter.map { it.toDouble() })
+fun lagInntektResponseFraMånedsinntekter(
+    månedsinntekter: List<Int>,
+    startMåned: YearMonth? = null,
+): InntektResponse = lagInntektResponseFraMånedsinntekterFraDouble(månedsinntekter.map { it.toDouble() })
 
 fun inntektsmåned(
     måned: YearMonth,
@@ -865,3 +885,10 @@ private fun initierDelvilkårsvurderingForHovedregler(
             vurderinger = listOf(Vurdering(it)),
         )
     }
+
+fun Månedsperiode.måneder(): List<YearMonth> = this.fom.rangeTo(this.tom)
+
+operator fun YearMonth.rangeTo(other: YearMonth): List<YearMonth> =
+    generateSequence(this) { current ->
+        if (current.isBefore(other)) current.plusMonths(1) else null
+    }.toList()
