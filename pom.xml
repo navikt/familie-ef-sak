@@ -34,13 +34,13 @@
         <springdoc.version>2.8.11</springdoc.version>
         <mockk.version>1.14.5</mockk.version>
         <felles.version>3.20250804101327_a0f5fad</felles.version>
-        <prosessering.version>2.20250818131235_94bcc1a</prosessering.version>
-        <token-validation-spring.version>5.0.34</token-validation-spring.version>
+        <prosessering.version>2.20250825143618_c0302c9</prosessering.version>
+        <token-validation-spring.version>5.0.35</token-validation-spring.version>
 
         <start-class>no.nav.familie.ef.sak.ApplicationKt</start-class>
-        <kontrakter.version>3.0_20250822084705_acb7066</kontrakter.version>
+        <kontrakter.version>3.0_20250828110046_0cd2211</kontrakter.version>
         <mikrofrontend.builder.version>20230704114948-74aa2e9</mikrofrontend.builder.version>
-        <eksterne.kontrakter.bisys.version>2.0_20250819081736_d4884f9</eksterne.kontrakter.bisys.version>
+        <eksterne.kontrakter.bisys.version>2.0_20250826113118_c8aa66d</eksterne.kontrakter.bisys.version>
         <cucumber.version>7.27.2</cucumber.version>
 
 
@@ -48,7 +48,7 @@
         <sonar.projectKey>${SONAR_PROJECTKEY}</sonar.projectKey>
         <sonar.organization>navit</sonar.organization>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
-        <nav.security.version>5.0.34</nav.security.version> <!-- Denne burde være samme versjon som i felles -->
+        <nav.security.version>5.0.35</nav.security.version> <!-- Denne burde være samme versjon som i felles -->
         <okhttp3.version>4.9.1</okhttp3.version> <!-- overskrever spring sin versjon, blir brukt av mock-oauth2-server -->
         <brukervarsel-builder.version>2.1.1</brukervarsel-builder.version>
         <!--suppress UnresolvedMavenProperty -->
@@ -300,7 +300,7 @@
                 <plugin>
                     <groupId>org.sonarsource.scanner.maven</groupId>
                     <artifactId>sonar-maven-plugin</artifactId>
-                    <version>5.1.0.4751</version>
+                    <version>5.2.0.4988</version>
                 </plugin>
             </plugins>
         </pluginManagement>
@@ -336,7 +336,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>3.5.2</version>
+                <version>3.5.3</version>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
