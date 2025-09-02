@@ -7,8 +7,8 @@ import java.time.LocalDate
 
 class AktivitetspliktigAlderTest {
     @Test
-    fun `barn regnes som 6 mnd gammelt når fødselsdato er mer enn 182 dager siden`() {
-        val fødselsdato = LocalDate.now().minusDays(183)
+    fun `barn regnes som 6 mnd gammelt når fødselsdato er 6 mnd siden og innenfor cutoff`() {
+        val fødselsdato = LocalDate.now().minusMonths(6).minusDays(1)
         assertThat(AktivitetspliktigAlder.fromFødselsdato(fødselsdato)).isEqualTo(AktivitetspliktigAlder.SEKS_MND)
     }
 
