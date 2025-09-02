@@ -101,7 +101,7 @@ internal class BarnFyllerÅrOppfølgingsoppgaveServiceTest {
 
     @Test
     fun `barn har blitt mer enn 6 mnd, forvent kall til beskrivelseBarnBlirSeksMnd`() {
-        val fødselsdato = LocalDate.now().minusDays(183)
+        val fødselsdato = LocalDate.now().minusMonths(6)
         val fødselsnummer = FnrGenerator.generer()
         val barnTilUtplukkForOppgave = opprettBarn(fødselsnummer = fødselsnummer)
         every { grunnlagsdataDomene.barn } returns listOf(barnMedIdent(fødselsnummer, "Fornavn etternavn", fødsel(fødselsdato)))
