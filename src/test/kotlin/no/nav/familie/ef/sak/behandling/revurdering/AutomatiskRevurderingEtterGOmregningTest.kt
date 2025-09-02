@@ -40,7 +40,6 @@ import java.util.UUID
 import kotlin.text.replace
 
 class AutomatiskRevurderingEtterGOmregningTest : OppslagSpringRunnerTest() {
-
     @Autowired
     private lateinit var revurderingService: RevurderingService
 
