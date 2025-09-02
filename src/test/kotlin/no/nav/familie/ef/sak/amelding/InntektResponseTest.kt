@@ -109,7 +109,7 @@ class InntektResponseTest {
 
     @Test
     fun `Sjekk at hvis kun arbeidsgiver harKunEnArbeidsgiver gir true og false hvis flere`() {
-        val inntektV2ResponseJson: String = lesFil("json/inntekt/InntektFastlønnToArbeidsGivere.json")
+        val inntektV2ResponseJson: String = lesFil("json/inntekt/InntektFastlønnToArbeidsgivere.json")
         val inntektV2ResponseJsonModifisert = oppdaterMåneder(inntektV2ResponseJson, 6, true)
 
         val inntektResponse = objectMapper.readValue<InntektResponse>(inntektV2ResponseJsonModifisert)
