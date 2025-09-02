@@ -101,14 +101,14 @@ class AutomatiskRevurderingEtterGOmregningTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `Full kjøring - siste behandling er g-omregning`() {
-        gOmregningTestUtil.gOmregne(behandlingId, fagsakId)
+        gOmregningTestUtil.gOmregne(behandlingId, fagsakId) // 23023 * 12 = 276 000
 
         val gOmregningBehandling = behandlingRepository.findByFagsakId(fagsakId).first { it.erGOmregning() }
         behandlingRepository.update(gOmregningBehandling.copy(status = BehandlingStatus.FERDIGSTILT))
 
         val personIdent = "321"
 
-        val innmeldtMånedsinntekt = listOf(20_000, 24_000, 24_000, 28_000, 28_000, 30_000, 30_000)
+        val innmeldtMånedsinntekt = listOf(20_000, 24_000, 24_000, 28_000, 28_000, 28_000, 30_000, 30_000)
 
         val payload = PayloadBehandleAutomatiskInntektsendringTask(personIdent, "2025-20")
         val opprettetTask = BehandleAutomatiskInntektsendringTask.opprettTask(objectMapper.writeValueAsString(payload))
@@ -127,7 +127,7 @@ class AutomatiskRevurderingEtterGOmregningTest : OppslagSpringRunnerTest() {
                 ?.first()
                 ?.periode
                 ?.fom,
-        ).isEqualTo(YearMonth.now().minusMonths(3))
+        ).isEqualTo(YearMonth.now().minusMonths(4))
         assertThat(
             oppdatertVedtak.perioder
                 ?.perioder
@@ -144,7 +144,7 @@ class AutomatiskRevurderingEtterGOmregningTest : OppslagSpringRunnerTest() {
 
         val forventedeInntektsperioderINyttVedtak =
             listOf(
-                inntektsperiode(Månedsperiode(YearMonth.now().minusMonths(3), YearMonth.now().minusMonths(3)), BigDecimal(28_000)),
+                inntektsperiode(Månedsperiode(YearMonth.now().minusMonths(4), YearMonth.now().minusMonths(3)), BigDecimal(28_000)),
                 inntektsperiode(Månedsperiode(YearMonth.now().minusMonths(2), YearMonth.now().minusMonths(1)), BigDecimal(30_000)),
                 inntektsperiode(Månedsperiode(YearMonth.now(), YEAR_MONTH_MAX), BigDecimal(gjennomsnittSiste3Mnd)),
             )
@@ -242,24 +242,23 @@ class AutomatiskRevurderingEtterGOmregningTest : OppslagSpringRunnerTest() {
         Periode som er kontrollert: ${førstegangsbehandlingFom.tilNorskFormat()} til ${
             YearMonth.now().minusMonths(1).tilNorskFormat()}.
         
-        Forventet årsinntekt i ${YearMonth.now().minusMonths(3).tilNorskFormat()}: 65 000 kroner.
+        Forventet årsinntekt i ${YearMonth.of(YearMonth.now().year, 5).tilNorskFormat()}: 65 000 kroner.
         - 10 % opp: 5 958 kroner per måned.
         - 10 % ned: 4 875 kroner per måned.
         
-        Inntekten i ${YearMonth.now().minusMonths(3).tilNorskFormat()} er 9 329 kroner. Inntekten har økt minst 10 prosent denne måneden og alle månedene etter dette. Stønaden beregnes på nytt fra måneden etter 10 prosent økning.
+        Inntekten i ${YearMonth.of(YearMonth.now().year, 5).tilNorskFormat()} er 11 682 kroner. Inntekten har økt minst 10 prosent denne måneden og alle månedene etter dette. Stønaden beregnes på nytt fra måneden etter 10 prosent økning.
         
         Har lagt til grunn faktisk inntekt bakover i tid. Fra og med ${YearMonth.now().tilNorskFormat()} er stønaden beregnet ut ifra gjennomsnittlig inntekt for ${YearMonth.now().minusMonths(3).månedTilNorskFormat()}, ${YearMonth.now().minusMonths(2).månedTilNorskFormat()} og ${YearMonth.now().minusMonths(1).månedTilNorskFormat()}. Bruker har fått utbetalt feriepenger i løpet av siste tre måneder. Disse er ikke tatt med i beregningen av forventet inntekt.
         
         A-inntekt er lagret.
         """.trimIndent()
 
-    // juni, mai, april, mars, februar
     val forventetInntektsbegrunnelseMedGOmregning =
         """
         Periode som er kontrollert: ${YearMonth.now().minusMonths(12).tilNorskFormat()} til ${
             YearMonth.now().minusMonths(1).tilNorskFormat()}.
         
-        Forventet årsinntekt i ${YearMonth.now().minusMonths(4).tilNorskFormat()}: 276 000 kroner.
+        Forventet årsinntekt i ${YearMonth.of(YearMonth.now().year, 4).tilNorskFormat()}: 276 000 kroner.
         - 10 % opp: 25 300 kroner per måned.
         - 10 % ned: 20 700 kroner per måned.
         
@@ -267,7 +266,7 @@ class AutomatiskRevurderingEtterGOmregningTest : OppslagSpringRunnerTest() {
         - 10 % opp: 26 546 kroner per måned.
         - 10 % ned: 21 720 kroner per måned.
         
-        Inntekten i ${YearMonth.now().minusMonths(4).tilNorskFormat()} er 28 000 kroner. Inntekten har økt minst 10 prosent denne måneden og alle månedene etter dette. Stønaden beregnes på nytt fra måneden etter 10 prosent økning.
+        Inntekten i ${YearMonth.of(YearMonth.now().year, 4).tilNorskFormat()} er 28 000 kroner. Inntekten har økt minst 10 prosent denne måneden og alle månedene etter dette. Stønaden beregnes på nytt fra måneden etter 10 prosent økning.
         
         Har lagt til grunn faktisk inntekt bakover i tid. Fra og med ${YearMonth.now().tilNorskFormat()} er stønaden beregnet ut ifra gjennomsnittlig inntekt for ${YearMonth.now().minusMonths(3).månedTilNorskFormat()}, ${YearMonth.now().minusMonths(2).månedTilNorskFormat()} og ${YearMonth.now().minusMonths(1).månedTilNorskFormat()}.
         

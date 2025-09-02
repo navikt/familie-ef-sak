@@ -9,7 +9,7 @@
       "inntektListe": [
         {
           "type": "Loennsinntekt",
-          "beloep": 9740.99,
+          "beloep": 5000.99,
           "fordel": "kontantytelse",
           "beskrivelse": "timeloenn",
           "inngaarIGrunnlagForTrekk": true,
@@ -73,7 +73,7 @@
       "inntektListe": [
         {
           "type": "Loennsinntekt",
-          "beloep": 682.62,
+          "beloep": 11682.62,
           "fordel": "kontantytelse",
           "beskrivelse": "timeloenn",
           "inngaarIGrunnlagForTrekk": true,
@@ -116,22 +116,6 @@
           "tilleggsinformasjon": {
             "type": "Etterbetalingsperiode"
           },
-          "manuellVurdering": false,
-          "antall": null,
-          "skattemessigBosattLand": null,
-          "opptjeningsland": null
-        },
-        {
-          "type": "YtelseFraOffentlige",
-          "beloep": 23255.0,
-          "fordel": "kontantytelse",
-          "beskrivelse": "overgangsstoenadTilEnsligMorEllerFarSomBegynteAaLoepe1April2014EllerSenere",
-          "inngaarIGrunnlagForTrekk": true,
-          "utloeserArbeidsgiveravgift": false,
-          "skatteOgAvgiftsregel": null,
-          "opptjeningsperiodeFom": null,
-          "opptjeningsperiodeTom": null,
-          "tilleggsinformasjon": null,
           "manuellVurdering": false,
           "antall": null,
           "skattemessigBosattLand": null,
