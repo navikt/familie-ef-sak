@@ -29,6 +29,7 @@ data class Beregningsgrunnlag(
     val avkortningPerMåned: BigDecimal,
     val fullOvergangsStønadPerMåned: BigDecimal? = null,
     val grunnbeløp: BigDecimal? = null,
+    val månedsinntekt: BigDecimal? = null,
 )
 
 data class Grunnbeløp(
