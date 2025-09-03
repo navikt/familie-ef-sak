@@ -1,0 +1,247 @@
+{
+  "data": [
+    {
+      "maaned": "2025-06",
+      "opplysningspliktig": "999999910",
+      "underenhet": "999999929",
+      "norskident": "01010199999",
+      "oppsummeringstidspunkt": "2025-08-29T09:10:32.048Z",
+      "inntektListe": [
+        {
+          "type": "Loennsinntekt",
+          "beloep": 9000.0,
+          "fordel": "kontantytelse",
+          "beskrivelse": "fastloenn",
+          "inngaarIGrunnlagForTrekk": true,
+          "utloeserArbeidsgiveravgift": true,
+          "skatteOgAvgiftsregel": null,
+          "opptjeningsperiodeFom": null,
+          "opptjeningsperiodeTom": null,
+          "tilleggsinformasjon": null,
+          "manuellVurdering": false,
+          "antall": null,
+          "skattemessigBosattLand": null,
+          "opptjeningsland": null
+        }
+      ],
+      "forskuddstrekkListe": [],
+      "avvikListe": []
+    },
+    {
+      "maaned": "2025-05",
+      "opplysningspliktig": "999999910",
+      "underenhet": "999999929",
+      "norskident": "01010199999",
+      "oppsummeringstidspunkt": "2025-08-29T09:10:32.048Z",
+      "inntektListe": [
+        {
+          "type": "Loennsinntekt",
+          "beloep": 9000.0,
+          "fordel": "kontantytelse",
+          "beskrivelse": "fastloenn",
+          "inngaarIGrunnlagForTrekk": true,
+          "utloeserArbeidsgiveravgift": true,
+          "skatteOgAvgiftsregel": null,
+          "opptjeningsperiodeFom": null,
+          "opptjeningsperiodeTom": null,
+          "tilleggsinformasjon": null,
+          "manuellVurdering": false,
+          "antall": null,
+          "skattemessigBosattLand": null,
+          "opptjeningsland": null
+        }
+      ],
+      "forskuddstrekkListe": [],
+      "avvikListe": []
+    },
+    {
+      "maaned": "2025-06",
+      "opplysningspliktig": "999999910",
+      "underenhet": "999999888",
+      "norskident": "01010199999",
+      "oppsummeringstidspunkt": "2025-08-29T09:10:32.048Z",
+      "inntektListe": [
+        {
+          "type": "Loennsinntekt",
+          "beloep": 10000.0,
+          "fordel": "kontantytelse",
+          "beskrivelse": "fastloenn",
+          "inngaarIGrunnlagForTrekk": true,
+          "utloeserArbeidsgiveravgift": true,
+          "skatteOgAvgiftsregel": null,
+          "opptjeningsperiodeFom": null,
+          "opptjeningsperiodeTom": null,
+          "tilleggsinformasjon": null,
+          "manuellVurdering": false,
+          "antall": null,
+          "skattemessigBosattLand": null,
+          "opptjeningsland": null
+        }
+      ],
+      "forskuddstrekkListe": [],
+      "avvikListe": []
+    },
+    {
+      "maaned": "2025-07",
+      "opplysningspliktig": "999999910",
+      "underenhet": "999999929",
+      "norskident": "01010199999",
+      "oppsummeringstidspunkt": "2025-08-29T09:10:32.048Z",
+      "inntektListe": [
+        {
+          "type": "Loennsinntekt",
+          "beloep": 9000.0,
+          "fordel": "kontantytelse",
+          "beskrivelse": "fastloenn",
+          "inngaarIGrunnlagForTrekk": true,
+          "utloeserArbeidsgiveravgift": true,
+          "skatteOgAvgiftsregel": null,
+          "opptjeningsperiodeFom": null,
+          "opptjeningsperiodeTom": null,
+          "tilleggsinformasjon": null,
+          "manuellVurdering": false,
+          "antall": null,
+          "skattemessigBosattLand": null,
+          "opptjeningsland": null
+        }
+      ],
+      "forskuddstrekkListe": [],
+      "avvikListe": []
+    },
+    {
+      "maaned": "2025-05",
+      "opplysningspliktig": "999999910",
+      "underenhet": "999999888",
+      "norskident": "01010199999",
+      "oppsummeringstidspunkt": "2025-08-29T09:10:32.048Z",
+      "inntektListe": [
+        {
+          "type": "Loennsinntekt",
+          "beloep": 10000.0,
+          "fordel": "kontantytelse",
+          "beskrivelse": "fastloenn",
+          "inngaarIGrunnlagForTrekk": true,
+          "utloeserArbeidsgiveravgift": true,
+          "skatteOgAvgiftsregel": null,
+          "opptjeningsperiodeFom": null,
+          "opptjeningsperiodeTom": null,
+          "tilleggsinformasjon": null,
+          "manuellVurdering": false,
+          "antall": null,
+          "skattemessigBosattLand": null,
+          "opptjeningsland": null
+        }
+      ],
+      "forskuddstrekkListe": [],
+      "avvikListe": []
+    },
+    {
+      "maaned": "2025-04",
+      "opplysningspliktig": "999999910",
+      "underenhet": "999999888",
+      "norskident": "01010199999",
+      "oppsummeringstidspunkt": "2025-08-29T09:10:32.048Z",
+      "inntektListe": [
+        {
+          "type": "Loennsinntekt",
+          "beloep": 10000.0,
+          "fordel": "kontantytelse",
+          "beskrivelse": "fastloenn",
+          "inngaarIGrunnlagForTrekk": true,
+          "utloeserArbeidsgiveravgift": true,
+          "skatteOgAvgiftsregel": null,
+          "opptjeningsperiodeFom": null,
+          "opptjeningsperiodeTom": null,
+          "tilleggsinformasjon": null,
+          "manuellVurdering": false,
+          "antall": null,
+          "skattemessigBosattLand": null,
+          "opptjeningsland": null
+        }
+      ],
+      "forskuddstrekkListe": [],
+      "avvikListe": []
+    },
+    {
+      "maaned": "2025-07",
+      "opplysningspliktig": "999999910",
+      "underenhet": "999999888",
+      "norskident": "01010199999",
+      "oppsummeringstidspunkt": "2025-08-29T09:10:32.048Z",
+      "inntektListe": [
+        {
+          "type": "Loennsinntekt",
+          "beloep": 10000.0,
+          "fordel": "kontantytelse",
+          "beskrivelse": "fastloenn",
+          "inngaarIGrunnlagForTrekk": true,
+          "utloeserArbeidsgiveravgift": true,
+          "skatteOgAvgiftsregel": null,
+          "opptjeningsperiodeFom": null,
+          "opptjeningsperiodeTom": null,
+          "tilleggsinformasjon": null,
+          "manuellVurdering": false,
+          "antall": null,
+          "skattemessigBosattLand": null,
+          "opptjeningsland": null
+        }
+      ],
+      "forskuddstrekkListe": [],
+      "avvikListe": []
+    },
+    {
+      "maaned": "2025-08",
+      "opplysningspliktig": "999999910",
+      "underenhet": "999999929",
+      "norskident": "01010199999",
+      "oppsummeringstidspunkt": "2025-08-29T09:10:32.048Z",
+      "inntektListe": [
+        {
+          "type": "Loennsinntekt",
+          "beloep": 9000.0,
+          "fordel": "kontantytelse",
+          "beskrivelse": "fastloenn",
+          "inngaarIGrunnlagForTrekk": true,
+          "utloeserArbeidsgiveravgift": true,
+          "skatteOgAvgiftsregel": null,
+          "opptjeningsperiodeFom": null,
+          "opptjeningsperiodeTom": null,
+          "tilleggsinformasjon": null,
+          "manuellVurdering": false,
+          "antall": null,
+          "skattemessigBosattLand": null,
+          "opptjeningsland": null
+        }
+      ],
+      "forskuddstrekkListe": [],
+      "avvikListe": []
+    },
+    {
+      "maaned": "2025-08",
+      "opplysningspliktig": "999999910",
+      "underenhet": "999999888",
+      "norskident": "01010199999",
+      "oppsummeringstidspunkt": "2025-08-29T09:10:32.048Z",
+      "inntektListe": [
+        {
+          "type": "Loennsinntekt",
+          "beloep": 10000.0,
+          "fordel": "kontantytelse",
+          "beskrivelse": "fastloenn",
+          "inngaarIGrunnlagForTrekk": true,
+          "utloeserArbeidsgiveravgift": true,
+          "skatteOgAvgiftsregel": null,
+          "opptjeningsperiodeFom": null,
+          "opptjeningsperiodeTom": null,
+          "tilleggsinformasjon": null,
+          "manuellVurdering": false,
+          "antall": null,
+          "skattemessigBosattLand": null,
+          "opptjeningsland": null
+        }
+      ],
+      "forskuddstrekkListe": [],
+      "avvikListe": []
+    }
+  ]
+}
