@@ -20,6 +20,7 @@ class JsonFilUtil {
         fun oppdaterMåneder(
             json: String,
             windowMonths: Long = 6,
+            skalHaMedInneværendeMåned: Boolean = false,
         ): String {
             // 1) Finn alle YearMonth-forekomster i JSON-tekstfelter
             val months = mutableListOf<YearMonth>()
@@ -30,8 +31,15 @@ class JsonFilUtil {
             if (months.isEmpty()) return json
 
             // 2) Forankre på største (nyeste) måned i malen
+            val startMåned =
+                if (skalHaMedInneværendeMåned) {
+                    YearMonth.now()
+                } else {
+                    YearMonth.now().minusMonths(1)
+                }
+
             val maxInTemplate = months.maxOrNull()!!
-            val delta = ChronoUnit.MONTHS.between(maxInTemplate, YearMonth.now().minusMonths(1))
+            val delta = ChronoUnit.MONTHS.between(maxInTemplate, startMåned)
 
             if (delta == 0L) return json // allerede "i rute"
 
