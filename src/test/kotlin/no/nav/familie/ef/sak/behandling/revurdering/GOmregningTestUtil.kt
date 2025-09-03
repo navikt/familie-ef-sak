@@ -54,9 +54,6 @@ class GOmregningTestUtil {
     private lateinit var barnRepository: BarnRepository
 
     @Autowired
-    private lateinit var fagsakRepository: FagsakRepository
-
-    @Autowired
     private lateinit var behandlingRepository: BehandlingRepository
 
     @Autowired
@@ -67,9 +64,6 @@ class GOmregningTestUtil {
 
     @Autowired
     private lateinit var vilkårsvurderingRepository: VilkårsvurderingRepository
-
-    @Autowired
-    private lateinit var iverksettClient: IverksettClient
 
     @Autowired
     lateinit var grunnlagsdataService: GrunnlagsdataService
@@ -86,7 +80,9 @@ class GOmregningTestUtil {
     fun gOmregne(
         behandlingId: UUID,
         fagsakId: UUID,
-        fom: YearMonth = YearMonth.of(2024, 6),
+        fom: YearMonth =
+            Grunnbeløpsperioder.forrigeGrunnbeløp.periode.fom
+                .plusMonths(1),
         beløp: Int = 23023,
     ) {
         val månedsperiode = Månedsperiode(fom, YearMonth.of(fom.year + 1, 12))
@@ -100,6 +96,9 @@ class GOmregningTestUtil {
         mockTestMedGrunnbeløpFra2025 {
             omregningService.utførGOmregning(fagsakId)
         }
+
+        val gOmregningBehandling = behandlingRepository.findByFagsakId(fagsakId).first { it.erGOmregning() }
+        behandlingRepository.update(gOmregningBehandling.copy(status = BehandlingStatus.FERDIGSTILT))
     }
 
     fun lagSøknadOgVilkårOgVedtak(
