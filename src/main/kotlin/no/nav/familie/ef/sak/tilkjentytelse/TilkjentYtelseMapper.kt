@@ -38,6 +38,7 @@ fun TilkjentYtelse.tilBeløpsperiode(
     inntekter: List<Inntekt>?,
 ): List<Beløpsperiode> =
     this.andelerTilkjentYtelse.filter { andel -> andel.periode.fomDato >= startDato }.mapIndexed { index, andel ->
+        val månedsinntekt = inntekter?.getOrNull(index)?.månedsinntekt ?: BigDecimal.ZERO
         Beløpsperiode(
             beløp = andel.beløp.toBigDecimal(),
             periode = andel.periode,
@@ -47,7 +48,7 @@ fun TilkjentYtelse.tilBeløpsperiode(
                     samordningsfradrag = andel.samordningsfradrag.toBigDecimal(),
                     samordningsfradragType = this.samordningsfradragType,
                     avkortningPerMåned = andel.inntektsreduksjon.toBigDecimal(),
-                    månedsinntekt = inntekter?.get(index)?.månedsinntekt ?: BigDecimal.ZERO,
+                    månedsinntekt = månedsinntekt,
                 ),
             beløpFørSamordning = andel.beløp.plus(andel.samordningsfradrag).toBigDecimal(),
         )
