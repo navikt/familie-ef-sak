@@ -62,7 +62,12 @@ class BeregningController(
                 ?.minByOrNull { it.datoFra }
                 ?.datoFra
                 ?: error("Fant ingen startdato for vedtak på behandling med id=$behandlingId")
-        return Ressurs.success(tilkjentYtelseService.hentForBehandling(behandlingId).tilBeløpsperiode(startDatoForVedtak))
+
+        val hentForBehandling = tilkjentYtelseService.hentForBehandling(behandlingId)
+        val vedtak = vedtakService.hentVedtak(behandlingId)
+        val inntekter = vedtak.inntekter?.inntekter?.tilInntekt()
+
+        return Ressurs.success(hentForBehandling.tilBeløpsperiode(startDatoForVedtak, inntekter))
     }
 
     @GetMapping("/grunnbelopForPerioder")

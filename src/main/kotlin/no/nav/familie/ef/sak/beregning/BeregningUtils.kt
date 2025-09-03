@@ -53,7 +53,6 @@ object BeregningUtils {
                         fullOvergangsStønadPerMåned = fullOvergangsStønadPerMåned,
                         inntekt = totalInntekt,
                         grunnbeløp = it.beløp,
-                        månedsinntekt = inntektsperiode.månedsinntekt,
                     ),
             )
         }

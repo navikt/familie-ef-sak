@@ -2,6 +2,7 @@ package no.nav.familie.ef.sak.tilkjentytelse
 
 import no.nav.familie.ef.sak.beregning.Beløpsperiode
 import no.nav.familie.ef.sak.beregning.Beregningsgrunnlag
+import no.nav.familie.ef.sak.beregning.Inntekt
 import no.nav.familie.ef.sak.beregning.barnetilsyn.BeløpsperiodeBarnetilsynDto
 import no.nav.familie.ef.sak.beregning.barnetilsyn.BeregningBarnetilsynUtil
 import no.nav.familie.ef.sak.beregning.barnetilsyn.roundUp
@@ -12,6 +13,7 @@ import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.vedtak.dto.InnvilgelseBarnetilsyn
 import no.nav.familie.kontrakter.ef.iverksett.TilkjentYtelseMedMetadata
 import no.nav.familie.kontrakter.felles.ef.StønadType
+import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.YearMonth
 
@@ -31,8 +33,8 @@ fun AndelTilkjentYtelse.tilDto(): AndelTilkjentYtelseDto =
         samordningsfradrag = this.samordningsfradrag,
     )
 
-fun TilkjentYtelse.tilBeløpsperiode(startDato: LocalDate): List<Beløpsperiode> =
-    this.andelerTilkjentYtelse.filter { andel -> andel.periode.fomDato >= startDato }.map { andel ->
+fun TilkjentYtelse.tilBeløpsperiode(startDato: LocalDate, inntekter: List<Inntekt>?): List<Beløpsperiode> =
+    this.andelerTilkjentYtelse.filter { andel -> andel.periode.fomDato >= startDato }.mapIndexed { index, andel ->
         Beløpsperiode(
             beløp = andel.beløp.toBigDecimal(),
             periode = andel.periode,
@@ -42,6 +44,7 @@ fun TilkjentYtelse.tilBeløpsperiode(startDato: LocalDate): List<Beløpsperiode>
                     samordningsfradrag = andel.samordningsfradrag.toBigDecimal(),
                     samordningsfradragType = this.samordningsfradragType,
                     avkortningPerMåned = andel.inntektsreduksjon.toBigDecimal(),
+                    månedsinntekt = inntekter?.get(index)?.månedsinntekt ?: BigDecimal.ZERO,
                 ),
             beløpFørSamordning = andel.beløp.plus(andel.samordningsfradrag).toBigDecimal(),
         )
