@@ -1,13 +1,9 @@
 package no.nav.familie.ef.sak.no.nav.familie.ef.sak.behandling.revurdering
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import io.mockk.every
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
-import no.nav.familie.ef.sak.amelding.InntektResponse
 import no.nav.familie.ef.sak.barn.BarnRepository
-import no.nav.familie.ef.sak.behandling.BehandlingRepository
 import no.nav.familie.ef.sak.behandling.BehandlingService
-import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.revurdering.AutomatiskRevurderingService
 import no.nav.familie.ef.sak.behandling.revurdering.BehandleAutomatiskInntektsendringTask
 import no.nav.familie.ef.sak.behandling.revurdering.PayloadBehandleAutomatiskInntektsendringTask
@@ -99,13 +95,13 @@ class AutomatiskRevurderingEtterGOmregningTest : OppslagSpringRunnerTest() {
     fun `Test inntektsbegrunnelse ved endring i inntekt før forrige g-omregning`() {
         gOmregningTestUtil.gOmregne(behandlingId, fagsakId)
 
-        val månedsperiodeMedHøyInntekt = Månedsperiode(Grunnbeløpsperioder.nyesteGrunnbeløpGyldigFraOgMed.minusMonths(1), YearMonth.now().minusMonths(1))
+        val månedsperiode = Månedsperiode(Grunnbeløpsperioder.nyesteGrunnbeløpGyldigFraOgMed.minusMonths(1), YearMonth.now().minusMonths(1))
 
         val payload = PayloadBehandleAutomatiskInntektsendringTask(personIdent, "2025-20")
         val opprettetTask = BehandleAutomatiskInntektsendringTask.opprettTask(objectMapper.writeValueAsString(payload))
-        val inntektResponse = lagInntektResponseForMånedsperiode(28_000, månedsperiodeMedHøyInntekt)
+        val inntektResponseMedHøyInntekt = lagInntektResponseForMånedsperiode(28_000, månedsperiode)
 
-        every { inntektClientMock.inntektClient().hentInntekt(personIdent, any(), any()) } returns inntektResponse
+        every { inntektClientMock.inntektClient().hentInntekt(personIdent, any(), any()) } returns inntektResponseMedHøyInntekt
 
         behandleAutomatiskInntektsendringTask.doTask(opprettetTask)
 
