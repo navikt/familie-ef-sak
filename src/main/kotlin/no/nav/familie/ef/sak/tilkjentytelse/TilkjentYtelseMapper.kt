@@ -33,7 +33,10 @@ fun AndelTilkjentYtelse.tilDto(): AndelTilkjentYtelseDto =
         samordningsfradrag = this.samordningsfradrag,
     )
 
-fun TilkjentYtelse.tilBeløpsperiode(startDato: LocalDate, inntekter: List<Inntekt>?): List<Beløpsperiode> =
+fun TilkjentYtelse.tilBeløpsperiode(
+    startDato: LocalDate,
+    inntekter: List<Inntekt>?,
+): List<Beløpsperiode> =
     this.andelerTilkjentYtelse.filter { andel -> andel.periode.fomDato >= startDato }.mapIndexed { index, andel ->
         Beløpsperiode(
             beløp = andel.beløp.toBigDecimal(),
