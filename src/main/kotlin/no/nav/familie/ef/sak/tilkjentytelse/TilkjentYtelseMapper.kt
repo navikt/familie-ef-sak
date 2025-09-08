@@ -1,27 +1,20 @@
 package no.nav.familie.ef.sak.tilkjentytelse
 
-import no.nav.familie.ef.sak.amelding.InntektService
 import no.nav.familie.ef.sak.beregning.Beløpsperiode
 import no.nav.familie.ef.sak.beregning.Beregningsgrunnlag
 import no.nav.familie.ef.sak.beregning.Inntekt
-import no.nav.familie.ef.sak.beregning.Inntektsperiode
 import no.nav.familie.ef.sak.beregning.barnetilsyn.BeløpsperiodeBarnetilsynDto
 import no.nav.familie.ef.sak.beregning.barnetilsyn.BeregningBarnetilsynUtil
 import no.nav.familie.ef.sak.beregning.barnetilsyn.roundUp
 import no.nav.familie.ef.sak.beregning.barnetilsyn.tilBeløpsperioderPerUtgiftsmåned
-import no.nav.familie.ef.sak.beregning.tilInntektsperioder
-import no.nav.familie.ef.sak.felles.util.isEqualOrAfter
-import no.nav.familie.ef.sak.felles.util.isEqualOrBefore
 import no.nav.familie.ef.sak.iverksett.tilIverksettDto
 import no.nav.familie.ef.sak.tilkjentytelse.domain.AndelTilkjentYtelse
 import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.vedtak.dto.InnvilgelseBarnetilsyn
 import no.nav.familie.kontrakter.ef.iverksett.TilkjentYtelseMedMetadata
 import no.nav.familie.kontrakter.felles.ef.StønadType
-import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.YearMonth
-import kotlin.text.compareTo
 
 fun TilkjentYtelse.tilDto(): TilkjentYtelseDto =
     TilkjentYtelseDto(
