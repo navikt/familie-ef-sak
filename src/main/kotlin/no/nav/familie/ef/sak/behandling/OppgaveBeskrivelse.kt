@@ -16,7 +16,7 @@ object OppgaveBeskrivelse {
         
         Dere må sende oss vurderingen innen 14 dager. 
         
-        Hvis dere har spørsmål om en konkret sak, kan dere avtale et møte med en saksbehandler. Dette gjør dere på Navet på siden for enslig mor eller far.
+        Hvis dere har spørsmål om en konkret sak, kan dere avtale et drop-in-møte med en saksbehandler. Dette gjør dere på Navet på siden for enslig mor eller far.
         
         Innstillingen må inneholde:
         
