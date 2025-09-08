@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
+import java.math.BigDecimal
 import java.util.UUID
 
 @RestController
@@ -66,8 +67,17 @@ class BeregningController(
         val hentForBehandling = tilkjentYtelseService.hentForBehandling(behandlingId)
         val vedtak = vedtakService.hentVedtak(behandlingId)
         val inntekter = vedtak.inntekter?.inntekter?.tilInntekt()
+        var skalBrukeMånedsinntekt: Boolean
+        if (
+            inntekter?.all { it.dagsats == BigDecimal.ZERO } == true &&
+            inntekter.all { (it.forventetInntekt == BigDecimal.ZERO) }
+        ) {
+            skalBrukeMånedsinntekt = true
+        } else {
+            skalBrukeMånedsinntekt = false
+        }
 
-        return Ressurs.success(hentForBehandling.tilBeløpsperiode(startDatoForVedtak, inntekter))
+        return Ressurs.success(hentForBehandling.tilBeløpsperiode(startDatoForVedtak, inntekter, skalBrukeMånedsinntekt))
     }
 
     @GetMapping("/grunnbelopForPerioder")

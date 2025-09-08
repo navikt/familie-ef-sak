@@ -1,12 +1,17 @@
 package no.nav.familie.ef.sak.tilkjentytelse
 
+import no.nav.familie.ef.sak.amelding.InntektService
 import no.nav.familie.ef.sak.beregning.Beløpsperiode
 import no.nav.familie.ef.sak.beregning.Beregningsgrunnlag
 import no.nav.familie.ef.sak.beregning.Inntekt
+import no.nav.familie.ef.sak.beregning.Inntektsperiode
 import no.nav.familie.ef.sak.beregning.barnetilsyn.BeløpsperiodeBarnetilsynDto
 import no.nav.familie.ef.sak.beregning.barnetilsyn.BeregningBarnetilsynUtil
 import no.nav.familie.ef.sak.beregning.barnetilsyn.roundUp
 import no.nav.familie.ef.sak.beregning.barnetilsyn.tilBeløpsperioderPerUtgiftsmåned
+import no.nav.familie.ef.sak.beregning.tilInntektsperioder
+import no.nav.familie.ef.sak.felles.util.isEqualOrAfter
+import no.nav.familie.ef.sak.felles.util.isEqualOrBefore
 import no.nav.familie.ef.sak.iverksett.tilIverksettDto
 import no.nav.familie.ef.sak.tilkjentytelse.domain.AndelTilkjentYtelse
 import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
@@ -16,6 +21,7 @@ import no.nav.familie.kontrakter.felles.ef.StønadType
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.YearMonth
+import kotlin.text.compareTo
 
 fun TilkjentYtelse.tilDto(): TilkjentYtelseDto =
     TilkjentYtelseDto(
@@ -36,9 +42,18 @@ fun AndelTilkjentYtelse.tilDto(): AndelTilkjentYtelseDto =
 fun TilkjentYtelse.tilBeløpsperiode(
     startDato: LocalDate,
     inntekter: List<Inntekt>?,
+    skalBrukeMånedsinntekt: Boolean,
 ): List<Beløpsperiode> =
-    this.andelerTilkjentYtelse.filter { andel -> andel.periode.fomDato >= startDato }.mapIndexed { index, andel ->
-        val månedsinntekt = inntekter?.getOrNull(index)?.månedsinntekt ?: BigDecimal.ZERO
+    this.andelerTilkjentYtelse.filter { andel -> andel.periode.fomDato >= startDato }.map { andel ->
+        val inntekt = inntekter?.sortedBy { it.årMånedFra }?.lastOrNull { it.årMånedFra <= andel.periode.fom }
+        val månedsinntekt =
+            if (
+                skalBrukeMånedsinntekt
+            ) {
+                inntekt?.månedsinntekt
+            } else {
+                null
+            }
         Beløpsperiode(
             beløp = andel.beløp.toBigDecimal(),
             periode = andel.periode,
