@@ -59,14 +59,15 @@ class ArbeidsavklaringspengerClientTest {
                         .withStatus(HttpStatus.OK.value())
                         .withHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.mimeType)
                         .withBody(arbeidsavklaringspengerResponse),
-                )
+                ),
         )
 
-        val request = ArbeidsavklaringspengerRequest(
-            LocalDate.now().minusYears(1),
-            LocalDate.now().plusYears(1),
-            "",
-        )
+        val request =
+            ArbeidsavklaringspengerRequest(
+                LocalDate.now().minusYears(1),
+                LocalDate.now().plusYears(1),
+                "",
+            )
 
         val response = arbeidsavklaringspengerClient.hentPerioder(request)
 

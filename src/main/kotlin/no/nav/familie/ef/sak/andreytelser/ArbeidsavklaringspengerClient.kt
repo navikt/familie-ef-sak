@@ -21,7 +21,6 @@ class ArbeidsavklaringspengerClient(
             .toUri()
 
     fun hentPerioder(
-        request: ArbeidsavklaringspengerRequest
+        request: ArbeidsavklaringspengerRequest,
     ) = postForEntity<ArbeidsavklaringspengerResponse>(uriPerioder, request)
-
 }
