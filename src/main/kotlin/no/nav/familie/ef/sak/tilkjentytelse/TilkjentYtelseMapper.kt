@@ -7,12 +7,15 @@ import no.nav.familie.ef.sak.beregning.barnetilsyn.BeløpsperiodeBarnetilsynDto
 import no.nav.familie.ef.sak.beregning.barnetilsyn.BeregningBarnetilsynUtil
 import no.nav.familie.ef.sak.beregning.barnetilsyn.roundUp
 import no.nav.familie.ef.sak.beregning.barnetilsyn.tilBeløpsperioderPerUtgiftsmåned
+import no.nav.familie.ef.sak.beregning.tilInntekt
 import no.nav.familie.ef.sak.iverksett.tilIverksettDto
 import no.nav.familie.ef.sak.tilkjentytelse.domain.AndelTilkjentYtelse
 import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
+import no.nav.familie.ef.sak.vedtak.domain.Vedtak
 import no.nav.familie.ef.sak.vedtak.dto.InnvilgelseBarnetilsyn
 import no.nav.familie.kontrakter.ef.iverksett.TilkjentYtelseMedMetadata
 import no.nav.familie.kontrakter.felles.ef.StønadType
+import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.YearMonth
 
@@ -33,20 +36,26 @@ fun AndelTilkjentYtelse.tilDto(): AndelTilkjentYtelseDto =
     )
 
 fun TilkjentYtelse.tilBeløpsperiode(
-    startDato: LocalDate,
-    inntekter: List<Inntekt>?,
-    skalBrukeMånedsinntekt: Boolean,
-): List<Beløpsperiode> =
-    this.andelerTilkjentYtelse.filter { andel -> andel.periode.fomDato >= startDato }.map { andel ->
-        val inntekt = inntekter?.sortedBy { it.årMånedFra }?.lastOrNull { it.årMånedFra <= andel.periode.fom }
-        val månedsinntekt =
-            if (
-                skalBrukeMånedsinntekt
-            ) {
-                inntekt?.månedsinntekt
-            } else {
-                null
-            }
+    vedtak: Vedtak,
+): List<Beløpsperiode> {
+    val startDatoForVedtak =
+        vedtak.perioder
+            ?.perioder
+            ?.minByOrNull { it.datoFra }
+            ?.datoFra
+            ?: error("Fant ingen startdato for vedtak på behandling med id=$behandlingId")
+
+    val inntekter = vedtak.inntekter?.inntekter?.tilInntekt() ?: emptyList()
+
+    val skalBrukeMånedsinntekt =
+        inntekter.isNotEmpty() &&
+                inntekter.all { it.dagsats == BigDecimal.ZERO } &&
+                inntekter.all { (it.forventetInntekt == BigDecimal.ZERO) }
+
+    return this.andelerTilkjentYtelse.filter { andel -> andel.periode.fomDato >= startDatoForVedtak }.map { andel ->
+        val inntekt = inntekter.sortedBy { it.årMånedFra }.lastOrNull { it.årMånedFra <= andel.periode.fom }
+        val månedsinntekt = if (skalBrukeMånedsinntekt) inntekt?.månedsinntekt else null
+
         Beløpsperiode(
             beløp = andel.beløp.toBigDecimal(),
             periode = andel.periode,
@@ -61,6 +70,7 @@ fun TilkjentYtelse.tilBeløpsperiode(
             beløpFørSamordning = andel.beløp.plus(andel.samordningsfradrag).toBigDecimal(),
         )
     }
+}
 
 fun TilkjentYtelse.tilBeløpsperiodeBarnetilsyn(
     vedtak: InnvilgelseBarnetilsyn,

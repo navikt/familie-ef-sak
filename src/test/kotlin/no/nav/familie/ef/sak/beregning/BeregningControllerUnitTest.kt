@@ -29,9 +29,8 @@ internal class BeregningControllerUnitTest {
 
     val beregningController =
         BeregningController(
-            beregningService = BeregningService(),
+            beregningService = BeregningService(tilkjentytelseService),
             tilgangService = mockk(relaxed = true),
-            tilkjentYtelseService = tilkjentytelseService,
             vedtakService = vedtakService,
         )
 

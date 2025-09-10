@@ -1,15 +1,21 @@
 package no.nav.familie.ef.sak.beregning
 
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
+import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
+import no.nav.familie.ef.sak.tilkjentytelse.tilBeløpsperiode
+import no.nav.familie.ef.sak.vedtak.domain.Vedtak
 import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.kontrakter.felles.erSammenhengende
 import no.nav.familie.kontrakter.felles.harOverlappende
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
 import java.math.RoundingMode
+import java.util.UUID
 
 @Service
-class BeregningService {
+class BeregningService(
+    val tilkjentYtelseService: TilkjentYtelseService
+) {
     fun beregnYtelse(
         vedtaksperioder: List<Månedsperiode>,
         inntektsperioder: List<Inntektsperiode>,
@@ -76,7 +82,7 @@ class BeregningService {
 
         brukerfeilHvis(
             inntektsperioder.map { it.periode }.harOverlappende() ||
-                !inntektsperioder.map { it.periode }.erSammenhengende(),
+                    !inntektsperioder.map { it.periode }.erSammenhengende(),
         ) { "Inntektsperioder $inntektsperioder overlapper eller er ikke sammenhengde" }
     }
 
@@ -98,4 +104,9 @@ class BeregningService {
     }
 
     fun listeMedGrunnbeløpTilDTO(grunnbeløp: List<Grunnbeløp>): List<GrunnbeløpDTO> = grunnbeløp.map { grunnbeløpsperiodeDTO(it) }
+
+    fun hentBeregnedeBeløpsperioderForBehandling(
+        vedtak: Vedtak,
+        behandlingId: UUID
+    ) = tilkjentYtelseService.hentForBehandling(behandlingId).tilBeløpsperiode(vedtak)
 }

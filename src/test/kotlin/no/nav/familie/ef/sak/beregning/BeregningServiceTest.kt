@@ -1,6 +1,8 @@
 package no.nav.familie.ef.sak.beregning
 
+import io.mockk.mockk
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
+import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.kontrakter.felles.Månedsperiode
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions
@@ -11,7 +13,8 @@ import java.math.RoundingMode
 import java.time.LocalDate
 
 internal class BeregningServiceTest {
-    private val beregningService = BeregningService()
+    private val tilkjentYtelseService = mockk<TilkjentYtelseService>()
+    private val beregningService = BeregningService(tilkjentYtelseService = tilkjentYtelseService)
 
     @Test
     internal fun `skal beregne full ytelse når det ikke foreligger inntekt`() {
@@ -431,5 +434,10 @@ internal class BeregningServiceTest {
         val korrektSeksGangerGrunnbeløpPerMåned = 62014.toBigDecimal()
 
         Assertions.assertEquals(korrektSeksGangerGrunnbeløpPerMåned, grunnbeløpsperiodeDTO.seksGangerGrunnbeløpPerMåned)
+    }
+
+    @Test
+    fun `skal returnere beregnede beløpsperioder for behandling`() {
+        TODO("Skriv test")
     }
 }

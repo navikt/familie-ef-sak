@@ -5,7 +5,6 @@ import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
-import no.nav.familie.ef.sak.tilkjentytelse.tilBeløpsperiode
 import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType
 import no.nav.familie.ef.sak.vedtak.dto.tilPerioder
@@ -22,7 +21,6 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
-import java.math.BigDecimal
 import java.util.UUID
 
 @RestController
@@ -31,7 +29,6 @@ import java.util.UUID
 @Validated
 class BeregningController(
     private val beregningService: BeregningService,
-    private val tilkjentYtelseService: TilkjentYtelseService,
     private val tilgangService: TilgangService,
     private val vedtakService: VedtakService,
 ) {
@@ -53,31 +50,11 @@ class BeregningController(
         @PathVariable behandlingId: UUID,
     ): Ressurs<List<Beløpsperiode>> {
         tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.UPDATE)
-        val vedtakForBehandling = vedtakService.hentVedtakHvisEksisterer(behandlingId) ?: throw ApiFeil("Vedtak for behandling=$behandlingId finnes ikke", HttpStatus.BAD_REQUEST)
-        if (vedtakForBehandling.resultatType === ResultatType.OPPHØRT) {
+        val vedtak = vedtakService.hentVedtakHvisEksisterer(behandlingId) ?: throw ApiFeil("Vedtak for behandling=$behandlingId finnes ikke", HttpStatus.BAD_REQUEST)
+        if (vedtak.resultatType === ResultatType.OPPHØRT) {
             throw Feil("Kan ikke vise fremtidige beløpsperioder for opphørt vedtak med id=$behandlingId")
         }
-        val startDatoForVedtak =
-            vedtakForBehandling.perioder
-                ?.perioder
-                ?.minByOrNull { it.datoFra }
-                ?.datoFra
-                ?: error("Fant ingen startdato for vedtak på behandling med id=$behandlingId")
-
-        val hentForBehandling = tilkjentYtelseService.hentForBehandling(behandlingId)
-        val vedtak = vedtakService.hentVedtak(behandlingId)
-        val inntekter = vedtak.inntekter?.inntekter?.tilInntekt()
-        var skalBrukeMånedsinntekt: Boolean
-        if (
-            inntekter?.all { it.dagsats == BigDecimal.ZERO } == true &&
-            inntekter.all { (it.forventetInntekt == BigDecimal.ZERO) }
-        ) {
-            skalBrukeMånedsinntekt = true
-        } else {
-            skalBrukeMånedsinntekt = false
-        }
-
-        return Ressurs.success(hentForBehandling.tilBeløpsperiode(startDatoForVedtak, inntekter, skalBrukeMånedsinntekt))
+        return Ressurs.success(beregningService.hentBeregnedeBeløpsperioderForBehandling(vedtak, behandlingId))
     }
 
     @GetMapping("/grunnbelopForPerioder")
