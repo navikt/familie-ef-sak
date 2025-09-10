@@ -78,6 +78,8 @@ spec:
           namespace: tilleggsstonader
     outbound:
       rules:
+        - application: api-intern
+          namespace: aap
         - application: tilbakekreving-backend
           namespace: tilbake
         - application: familie-tilbake
