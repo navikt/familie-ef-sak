@@ -49,8 +49,8 @@ fun TilkjentYtelse.tilBeløpsperiode(
 
     val skalBrukeMånedsinntekt =
         inntekter.isNotEmpty() &&
-                inntekter.all { it.dagsats == BigDecimal.ZERO } &&
-                inntekter.all { (it.forventetInntekt == BigDecimal.ZERO) }
+            inntekter.all { it.dagsats == BigDecimal.ZERO } &&
+            inntekter.all { (it.forventetInntekt == BigDecimal.ZERO) }
 
     return this.andelerTilkjentYtelse.filter { andel -> andel.periode.fomDato >= startDatoForVedtak }.map { andel ->
         val inntekt = inntekter.sortedBy { it.årMånedFra }.lastOrNull { it.årMånedFra <= andel.periode.fom }

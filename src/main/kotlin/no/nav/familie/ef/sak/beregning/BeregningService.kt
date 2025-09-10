@@ -14,7 +14,7 @@ import java.util.UUID
 
 @Service
 class BeregningService(
-    val tilkjentYtelseService: TilkjentYtelseService
+    val tilkjentYtelseService: TilkjentYtelseService,
 ) {
     fun beregnYtelse(
         vedtaksperioder: List<Månedsperiode>,
@@ -82,7 +82,7 @@ class BeregningService(
 
         brukerfeilHvis(
             inntektsperioder.map { it.periode }.harOverlappende() ||
-                    !inntektsperioder.map { it.periode }.erSammenhengende(),
+                !inntektsperioder.map { it.periode }.erSammenhengende(),
         ) { "Inntektsperioder $inntektsperioder overlapper eller er ikke sammenhengde" }
     }
 
@@ -107,6 +107,6 @@ class BeregningService(
 
     fun hentBeregnedeBeløpsperioderForBehandling(
         vedtak: Vedtak,
-        behandlingId: UUID
+        behandlingId: UUID,
     ) = tilkjentYtelseService.hentForBehandling(behandlingId).tilBeløpsperiode(vedtak)
 }
