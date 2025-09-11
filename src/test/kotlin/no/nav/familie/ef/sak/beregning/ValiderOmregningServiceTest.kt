@@ -14,6 +14,7 @@ import no.nav.familie.ef.sak.repository.saksbehandling
 import no.nav.familie.ef.sak.repository.vedtak
 import no.nav.familie.ef.sak.testutil.mockTestMedGrunnbeløpFra2022
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseRepository
+import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.ef.sak.vedtak.domain.AktivitetType
 import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
@@ -34,7 +35,8 @@ import java.util.UUID
 class ValiderOmregningServiceTest {
     val vedtakService = mockk<VedtakService>()
     val tilkjentYtelseRepository = mockk<TilkjentYtelseRepository>()
-    val beregningService = BeregningService()
+    val tilkjentYtelseService = mockk<TilkjentYtelseService>()
+    val beregningService = BeregningService(tilkjentYtelseService)
     val vedtakHistorikkService = mockk<VedtakHistorikkService>()
     val validerOmregningService =
         ValiderOmregningService(
