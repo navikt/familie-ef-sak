@@ -1,8 +1,15 @@
 package no.nav.familie.ef.sak.beregning
 
+import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
+import no.nav.familie.ef.sak.repository.inntektsperiode
+import no.nav.familie.ef.sak.repository.tilkjentYtelse
+import no.nav.familie.ef.sak.repository.vedtak
+import no.nav.familie.ef.sak.repository.vedtaksperiode
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
+import no.nav.familie.ef.sak.vedtak.domain.InntektWrapper
+import no.nav.familie.ef.sak.vedtak.domain.PeriodeWrapper
 import no.nav.familie.kontrakter.felles.Månedsperiode
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions
@@ -11,6 +18,7 @@ import org.junit.jupiter.api.assertThrows
 import java.math.BigDecimal
 import java.math.RoundingMode
 import java.time.LocalDate
+import java.util.UUID
 
 internal class BeregningServiceTest {
     private val tilkjentYtelseService = mockk<TilkjentYtelseService>()
@@ -437,7 +445,105 @@ internal class BeregningServiceTest {
     }
 
     @Test
-    fun `skal returnere beregnede beløpsperioder for behandling`() {
-        TODO("Skriv test")
+    fun `skal ikke returnere månedsinntekt i beregningsgrunnlaget hvis årsinntekt er brukt`() {
+        val behandlingId = UUID.randomUUID()
+        val fomDato = LocalDate.parse("2022-01-01")
+        val tomDato = LocalDate.parse("2022-12-31")
+        val vedtaksperiodeWrapper = PeriodeWrapper(listOf(vedtaksperiode(startDato = fomDato, sluttDato = tomDato)))
+        val inntektWrapper =
+            InntektWrapper(
+                listOf(
+                    inntektsperiode(
+                        startDato = fomDato,
+                        sluttDato = tomDato,
+                        inntekt = BigDecimal(277100),
+                        månedsinntekt = BigDecimal(1000),
+                    ),
+                ),
+            )
+        val vedtak =
+            vedtak(
+                behandlingId = behandlingId,
+                år = 2022,
+                inntekter = inntektWrapper,
+                perioder = vedtaksperiodeWrapper,
+            )
+
+        every { tilkjentYtelseService.hentForBehandling(behandlingId) } returns
+            tilkjentYtelse(
+                behandlingId = behandlingId,
+                personIdent = "12345678901",
+                stønadsår = 2022,
+                startdato = fomDato,
+            )
+
+        val resultat = beregningService.hentBeregnedeBeløpsperioderForBehandling(vedtak, behandlingId)
+
+        assertThat(resultat.size).isEqualTo(1)
+        assertThat(resultat.first().beløp).isEqualTo(11554.toBigDecimal())
+        assertThat(resultat.first().beløpFørSamordning).isEqualTo(11554.toBigDecimal())
+        assertThat(resultat.first().beregningsgrunnlag).isEqualTo(
+            Beregningsgrunnlag(
+                inntekt = BigDecimal(277100),
+                samordningsfradrag = BigDecimal.ZERO,
+                samordningsfradragType = null,
+                avkortningPerMåned = BigDecimal(8396),
+                månedsinntekt = null,
+            ),
+        )
+        assertThat(resultat.first().periode).isEqualTo(Månedsperiode(fomDato, tomDato))
+    }
+
+    @Test
+    fun `skal returnere månedsinntekt i beregningsgrunnlaget hvis dagsats og årinntekt er 0`() {
+        val behandlingId = UUID.randomUUID()
+        val fomDato = LocalDate.parse("2022-01-01")
+        val tomDato = LocalDate.parse("2022-12-31")
+        val vedtaksperiodeWrapper = PeriodeWrapper(listOf(vedtaksperiode(startDato = fomDato, sluttDato = tomDato)))
+        val inntektWrapper =
+            InntektWrapper(
+                listOf(
+                    inntektsperiode(
+                        år = 2022,
+                        startDato = fomDato,
+                        sluttDato = tomDato,
+                        inntekt = BigDecimal(0),
+                        dagsats = BigDecimal(0),
+                        månedsinntekt = BigDecimal(10000),
+                    ),
+                ),
+            )
+        val vedtak =
+            vedtak(
+                behandlingId = behandlingId,
+                år = 2022,
+                inntekter = inntektWrapper,
+                perioder = vedtaksperiodeWrapper,
+            )
+
+        every { tilkjentYtelseService.hentForBehandling(behandlingId) } returns
+            tilkjentYtelse(
+                behandlingId = behandlingId,
+                personIdent = "12345678901",
+                stønadsår = 2022,
+                startdato = fomDato,
+                inntekt = 120000,
+            )
+
+        val resultat = beregningService.hentBeregnedeBeløpsperioderForBehandling(vedtak, behandlingId)
+
+        assertThat(resultat.size).isEqualTo(1)
+        assertThat(resultat.first().beløp).isEqualTo(11554.toBigDecimal())
+        assertThat(resultat.first().beløpFørSamordning).isEqualTo(11554.toBigDecimal())
+        assertThat(resultat.first().beregningsgrunnlag).isEqualTo(
+            Beregningsgrunnlag(
+                inntekt = BigDecimal(120000),
+                samordningsfradrag = BigDecimal.ZERO,
+                samordningsfradragType = null,
+                avkortningPerMåned = BigDecimal(8396),
+                månedsinntekt = BigDecimal(10000),
+            ),
+        )
+        assertThat(resultat.first().periode).isEqualTo(Månedsperiode(fomDato, tomDato))
     }
 }
