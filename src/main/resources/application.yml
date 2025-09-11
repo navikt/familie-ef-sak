@@ -215,6 +215,15 @@ no.nav.security.jwt:
           client-id: ${AZURE_APP_CLIENT_ID}
           client-secret: ${AZURE_APP_CLIENT_SECRET}
           client-auth-method: client_secret_basic
+      aap-client_credentials:
+        resource-url: ${ARBEIDSAVKLARINGSPENGER_URL}
+        token-endpoint-url: ${AZUREAD_TOKEN_ENDPOINT_URL}
+        grant-type: client_credentials
+        scope: ${ARBEIDSAVKLARINGSPENGER_SCOPE}
+        authentication:
+          client-id: ${AZURE_APP_CLIENT_ID}
+          client-secret: ${AZURE_APP_CLIENT_SECRET}
+          client-auth-method: client_secret_basic
 
 PDL_SCOPE: api://${DEPLOY_ENV}-fss.pdl.pdl-api/.default
 REPR_API_SCOPE: api://${DEPLOY_ENV}-gcp.repr.repr-api/.default
@@ -229,6 +238,7 @@ HISTORISK_PENSJON_SCOPE: api://${DEPLOY_ENV}-gcp.historisk.historisk-pensjon/.de
 FAMILIE_KS_SAK_SCOPE: api://${DEPLOY_ENV}-gcp.teamfamilie.familie-ks-sak/.default
 SKJERMEDE_PERSONER_SCOPE: api://${DEPLOY_ENV}-gcp.nom.skjermede-personer-pip/.default
 INNTEKT_SCOPE: api://prod-fss.team-inntekt.ikomp/.default
+ARBEIDSAVKLARINGSPENGER_SCOPE: api://${CLIENT_ENV}-gcp.aap.api-intern/.default
 
 spring:
   mvc:
