@@ -231,7 +231,7 @@ class BarnMedSamværMapper(
             visningsadresse = visningsadresse(pdlAnnenForelder),
             tidligereVedtaksperioder = pdlAnnenForelder.tidligereVedtaksperioder?.tilDto(),
             avstandTilSøker = langAvstandTilSøker(søkerAdresse, pdlAnnenForelder.bostedsadresse.gjeldende()),
-            erKopiertFraAnnetBarn = false // TODO
+            erKopiertFraAnnetBarn = false, // TODO
         )
 
     private fun visningsadresse(pdlAnnenForelder: AnnenForelderMedIdent): String? =
