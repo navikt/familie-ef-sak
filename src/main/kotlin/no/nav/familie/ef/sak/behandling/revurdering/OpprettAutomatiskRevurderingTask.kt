@@ -12,10 +12,10 @@ import kotlin.collections.set
 
 @Service
 @TaskStepBeskrivelse(
-    taskStepType = OpprettAutomatiskRevurderingFraForvaltningTask.TYPE,
-    beskrivelse = "Automatisk revurdering av inntekt - Brukes av endepunktet revurder-personer-med-inntektsendringer-automatisk i forvaltning i personhendelse",
+    taskStepType = OpprettAutomatiskRevurderingTask.TYPE,
+    beskrivelse = "Automatisk revurdering av inntekt - Brukes i månedlig kjøring av inntektskontroll",
 )
-class OpprettAutomatiskRevurderingFraForvaltningTask(
+class OpprettAutomatiskRevurderingTask(
     private val automatiskRevurderingService: AutomatiskRevurderingService,
     private val revurderingService: RevurderingService,
 ) : AsyncTaskStep {
@@ -23,7 +23,7 @@ class OpprettAutomatiskRevurderingFraForvaltningTask(
     private val secureLogger = LoggerFactory.getLogger("secureLogger")
 
     override fun doTask(task: Task) {
-        val personIdenter = objectMapper.readValue<PayloadOpprettAutomatiskRevurderingFraForvaltningTask>(task.payload).personIdenter
+        val personIdenter = objectMapper.readValue<PayloadOpprettAutomatiskRevurderingTask>(task.payload).personIdenter
         val identerForAutomatiskRevurdering =
             personIdenter.filter { personIdent ->
                 automatiskRevurderingService.kanAutomatiskRevurderes(personIdent)
@@ -37,9 +37,9 @@ class OpprettAutomatiskRevurderingFraForvaltningTask(
     }
 
     companion object {
-        const val TYPE = "opprettAutomatiskRevurderingFraForvaltningTask"
+        const val TYPE = "opprettAutomatiskRevurderingTask"
 
-        fun opprettTask(payload: PayloadOpprettAutomatiskRevurderingFraForvaltningTask): Task =
+        fun opprettTask(payload: PayloadOpprettAutomatiskRevurderingTask): Task =
             Task(
                 type = TYPE,
                 payload = objectMapper.writeValueAsString(payload),
@@ -47,7 +47,7 @@ class OpprettAutomatiskRevurderingFraForvaltningTask(
     }
 }
 
-data class PayloadOpprettAutomatiskRevurderingFraForvaltningTask(
+data class PayloadOpprettAutomatiskRevurderingTask(
     val personIdenter: List<String>,
     val yearMonth: YearMonth,
 )
