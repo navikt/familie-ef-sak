@@ -26,6 +26,7 @@ import no.nav.familie.ef.sak.vilkår.dto.LangAvstandTilSøker
 import no.nav.familie.ef.sak.vilkår.dto.tilDto
 import org.springframework.stereotype.Service
 import java.time.LocalDate
+import kotlin.Boolean
 
 @Service
 class BarnMedSamværMapper(
@@ -204,6 +205,7 @@ class BarnMedSamværMapper(
             land = annenForelder.land,
             visningsadresse = null,
             avstandTilSøker = AvstandTilSøkerDto(avstand = null, langAvstandTilSøker = LangAvstandTilSøker.UKJENT),
+            erKopiertFraAnnetBarn = annenForelder.erKopiertFraAnnetBarn,
         )
 
     private fun tilAnnenForelderDto(
@@ -229,6 +231,7 @@ class BarnMedSamværMapper(
             visningsadresse = visningsadresse(pdlAnnenForelder),
             tidligereVedtaksperioder = pdlAnnenForelder.tidligereVedtaksperioder?.tilDto(),
             avstandTilSøker = langAvstandTilSøker(søkerAdresse, pdlAnnenForelder.bostedsadresse.gjeldende()),
+            erKopiertFraAnnetBarn = false // TODO
         )
 
     private fun visningsadresse(pdlAnnenForelder: AnnenForelderMedIdent): String? =
