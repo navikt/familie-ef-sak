@@ -279,6 +279,7 @@ object SøknadsskjemaMapper {
                 bosattNorge = annenForelder.bosattNorge?.verdi,
                 land = annenForelder.land?.verdi,
                 person = tilDomene(annenForelder.person?.verdi),
+                erKopiertFraAnnetBarn = annenForelder.erKopiertFraAnnetBarn,
             )
         }
 

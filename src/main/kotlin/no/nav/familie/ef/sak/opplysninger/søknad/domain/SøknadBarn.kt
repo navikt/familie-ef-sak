@@ -54,6 +54,7 @@ data class AnnenForelder(
     val land: String? = null,
     @Embedded(onEmpty = Embedded.OnEmpty.USE_NULL)
     override val person: PersonMinimum? = null,
+    val erKopiertFraAnnetBarn: Boolean? = null,
 ) : IAnnenForelder
 
 @Table("soknad_barnepassordning")
