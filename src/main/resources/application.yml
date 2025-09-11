@@ -308,6 +308,7 @@ FAMILIE_KS_SAK_URL: http://familie-ks-sak
 FRONTEND_OPPGAVE_URL: https://ensligmorellerfar.intern.nav.no/oppgavebenk
 SKJERMEDE_PERSONER_URL: http://skjermede-personer-pip.nom
 INNTEKT_URL: https://ikomp.prod-fss-pub.nais.io
+ARBEIDSAVKLARINGSPENGER_URL: http://api-intern.aap
 
 GYLDIGE_SERVICE_BRUKERE: srvArena
 
