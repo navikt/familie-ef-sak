@@ -238,7 +238,7 @@ HISTORISK_PENSJON_SCOPE: api://${DEPLOY_ENV}-gcp.historisk.historisk-pensjon/.de
 FAMILIE_KS_SAK_SCOPE: api://${DEPLOY_ENV}-gcp.teamfamilie.familie-ks-sak/.default
 SKJERMEDE_PERSONER_SCOPE: api://${DEPLOY_ENV}-gcp.nom.skjermede-personer-pip/.default
 INNTEKT_SCOPE: api://prod-fss.team-inntekt.ikomp/.default
-ARBEIDSAVKLARINGSPENGER_SCOPE: api://${CLIENT_ENV}-gcp.aap.api-intern/.default
+ARBEIDSAVKLARINGSPENGER_SCOPE: api://${DEPLOY_ENV}-gcp.aap.api-intern/.default
 
 spring:
   mvc:
