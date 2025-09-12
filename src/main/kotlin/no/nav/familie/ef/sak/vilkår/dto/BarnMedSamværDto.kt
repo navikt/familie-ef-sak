@@ -68,7 +68,7 @@ data class AnnenForelderDto(
     val dødsfall: LocalDate? = null,
     val tidligereVedtaksperioder: TidligereVedtaksperioderDto? = null,
     val avstandTilSøker: AvstandTilSøkerDto,
-    val erKopiertFraAnnetBarn: Boolean? = false,
+    val erKopiertFraAnnetBarn: Boolean?,
 )
 
 data class BarnepassDto(
