@@ -161,6 +161,7 @@ internal class VurderingServiceTest {
                         null,
                         null,
                         AvstandTilSøkerDto(null, LangAvstandTilSøker.UKJENT),
+                        erKopiertFraAnnetBarn = null,
                     ),
                     null,
                     null,
