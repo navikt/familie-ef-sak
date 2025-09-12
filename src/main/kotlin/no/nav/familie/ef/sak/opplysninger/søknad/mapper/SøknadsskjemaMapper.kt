@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.opplysninger.søknad.mapper
 
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.secureLogger
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.Adresseopplysninger
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.Aksjeselskap
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.Aktivitet
@@ -274,6 +275,7 @@ object SøknadsskjemaMapper {
 
     private fun tilDomene(annenForelder: KontraktAnnenForelder?): AnnenForelder? =
         annenForelder?.let {
+            secureLogger.info("Barn annen forelder --- $annenForelder")
             AnnenForelder(
                 ikkeOppgittAnnenForelderBegrunnelse = annenForelder.ikkeOppgittAnnenForelderBegrunnelse?.verdi,
                 bosattNorge = annenForelder.bosattNorge?.verdi,
