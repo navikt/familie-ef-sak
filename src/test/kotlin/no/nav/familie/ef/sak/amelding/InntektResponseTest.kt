@@ -1,19 +1,27 @@
 package no.nav.familie.ef.sak.no.nav.familie.ef.sak.amelding
 
 import com.fasterxml.jackson.module.kotlin.readValue
+import io.mockk.every
 import no.nav.familie.ef.sak.amelding.InntektResponse
+import no.nav.familie.ef.sak.behandling.revurdering.BehandleAutomatiskInntektsendringTask
+import no.nav.familie.ef.sak.behandling.revurdering.PayloadBehandleAutomatiskInntektsendringTask
 import no.nav.familie.ef.sak.infrastruktur.config.ObjectMapperProvider.objectMapper
 import no.nav.familie.ef.sak.repository.inntektsperiode
+import no.nav.familie.ef.sak.repository.lagInntektResponseFraMånedsinntekter
 import no.nav.familie.ef.sak.repository.vedtak
 import no.nav.familie.ef.sak.testutil.JsonFilUtil.Companion.lesFil
 import no.nav.familie.ef.sak.testutil.JsonFilUtil.Companion.oppdaterMåneder
 import no.nav.familie.ef.sak.vedtak.domain.InntektWrapper
 import no.nav.familie.kontrakter.felles.Månedsperiode
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.math.BigDecimal
 import java.time.YearMonth
+import java.util.UUID
+import kotlin.test.assertEquals
 
 class InntektResponseTest {
     @Test
@@ -54,25 +62,6 @@ class InntektResponseTest {
 
         assertThat(lavInntekt).isFalse()
         assertThat(forHøyInntekt).isTrue()
-    }
-
-    @Test
-    fun `beregn forventet inntekt med feriepenger - vanlig case med fastlønn hvor feriepenger og trekk i lønn for ferie skal ignoreres`() {
-        val inntektV2ResponseJson: String = lesFil("json/inntekt/InntektFulltÅrMedFeriepenger.json")
-        val inntektV2ResponseJsonModifisert = oppdaterMåneder(inntektV2ResponseJson)
-
-        val inntektResponse = objectMapper.readValue<InntektResponse>(inntektV2ResponseJsonModifisert)
-        assertThat(inntektResponse.forventetMånedsinntekt()).isEqualTo(10000)
-        assertThat(inntektResponse.harMånedMedBareFeriepenger(YearMonth.now().minusMonths(3))).isFalse
-    }
-
-    @Test
-    fun `beregn forventet inntekt - ikke ta med måned hvor det er kun feriepenger registrert`() {
-        val inntektV2ResponseJson: String = lesFil("json/inntekt/InntektFastlønnMedEnMånedMedKunFeriepenger.json")
-        val inntektV2ResponseJsonModifisert = oppdaterMåneder(inntektV2ResponseJson)
-
-        val inntektResponse = objectMapper.readValue<InntektResponse>(inntektV2ResponseJsonModifisert)
-        assertThat(inntektResponse.harMånedMedBareFeriepenger(YearMonth.now().minusMonths(3))).isTrue
     }
 
     @Test
@@ -120,5 +109,39 @@ class InntektResponseTest {
 
         val inntektResponseMedAnnenYtelse = objectMapper.readValue<InntektResponse>(inntektV2ResponseJsonModifisertMedAnnenYtelse)
         assertThat(inntektResponseMedAnnenYtelse.harKunEnArbeidsgiver(YearMonth.now().minusMonths(3))).isTrue
+    }
+
+    @Nested
+    inner class ForventetInntekt {
+        @Test
+        fun `beregn forventet inntekt med feriepenger - vanlig case med fastlønn hvor feriepenger og trekk i lønn for ferie skal ignoreres`() {
+            val inntektV2ResponseJson: String = lesFil("json/inntekt/InntektFulltÅrMedFeriepenger.json")
+            val inntektV2ResponseJsonModifisert = oppdaterMåneder(inntektV2ResponseJson)
+
+            val inntektResponse = objectMapper.readValue<InntektResponse>(inntektV2ResponseJsonModifisert)
+            val månedsperiode = Månedsperiode(YearMonth.now().minusMonths(10), YearMonth.now().plusMonths(10))
+            assertThat(inntektResponse.forventetMånedsinntekt(vedtak(UUID.randomUUID(), månedsperiode))).isEqualTo(10000)
+            assertThat(inntektResponse.harMånedMedBareFeriepenger(YearMonth.now().minusMonths(3))).isFalse
+        }
+
+        @Test
+        fun `beregn forventet inntekt - ikke ta med måned hvor det er kun feriepenger registrert`() {
+            val inntektV2ResponseJson: String = lesFil("json/inntekt/InntektFastlønnMedEnMånedMedKunFeriepenger.json")
+            val inntektV2ResponseJsonModifisert = oppdaterMåneder(inntektV2ResponseJson)
+
+            val inntektResponse = objectMapper.readValue<InntektResponse>(inntektV2ResponseJsonModifisert)
+            assertThat(inntektResponse.harMånedMedBareFeriepenger(YearMonth.now().minusMonths(3))).isTrue
+        }
+
+        @Test
+        fun `beregn forventet inntekt hvor inntekt har økt siste 3 måneder - ikke ta med første måned med økning i beregning`() {
+            val innmeldtMånedsinntekt = listOf(20_000, 28_000, 29_000, 30_000)
+            val inntektResponse = lagInntektResponseFraMånedsinntekter(innmeldtMånedsinntekt)
+
+            val vedtak = vedtak(InntektWrapper(listOf(inntektsperiode(Månedsperiode(YearMonth.now().minusMonths(6), YearMonth.now().plusMonths(1)), BigDecimal.valueOf(20_000)))))
+
+            val forventetInntekt = inntektResponse.forventetMånedsinntekt(vedtak)
+            assertThat(forventetInntekt).isEqualTo(29_500)
+        }
     }
 }

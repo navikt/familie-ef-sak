@@ -160,7 +160,6 @@ class BehandleAutomatiskInntektsendringTask(
         val inntektResponse = automatiskRevurderingService.hentInntektResponse(personIdent)
         val inntektPrMåned = inntektResponse.inntektsmåneder.map { LogInntekt(it.måned, it.totalInntekt()) }
         secureLogger.info("Månedlig inntekt for fagsak eksternId=${fagsak.eksternId} : $inntektPrMåned")
-        val forventetInntekt = inntektResponse.forventetMånedsinntekt()
         val behandling = behandlingService.finnSisteIverksatteBehandlingMedEventuellAvslått(fagsak.id)
         if (behandling != null) {
             val forrigeBehandling = behandling.forrigeBehandlingId?.let { behandlingService.hentBehandling(it) } ?: throw IllegalStateException("Burde vært en forrigeBehandlingId etter automatisk revurdering for behandlingId: ${behandling.id}")
@@ -172,6 +171,7 @@ class BehandleAutomatiskInntektsendringTask(
                 } else {
                     vedtakService.hentVedtak(forrigeBehandling.id)
                 }
+            val forventetInntekt = inntektResponse.forventetMånedsinntekt(forrigeVedtak)
             val perioder = oppdaterFørsteVedtaksperiodeMedRevurderesFraDato(forrigeVedtak, inntektResponse)
             val inntektsperioder = oppdaterInntektMedNyBeregnetForventetInntekt(forrigeVedtak, inntektResponse, perioder.first().periode.fom)
             logger.info("Ville opprettet inntektsperioder for fagsak eksternId: ${fagsak.eksternId} - nye inntektsperioder: " + inntektsperioder)
@@ -232,7 +232,7 @@ class BehandleAutomatiskInntektsendringTask(
             val inntektsperiodeFremover =
                 Inntektsperiode(
                     periode = Månedsperiode(cutoffPeriode.tom.plusMonths(1), forrigeVedtak.perioder?.perioder?.maxOf { it.periode.tom } ?: throw IllegalStateException("Mangler vedtaksperioder")),
-                    månedsinntekt = BigDecimal(inntektResponse.forventetMånedsinntekt()),
+                    månedsinntekt = BigDecimal(inntektResponse.forventetMånedsinntekt(forrigeVedtak)),
                     inntekt = BigDecimal(0),
                     dagsats = BigDecimal(0),
                     samordningsfradrag = BigDecimal(0),
@@ -242,7 +242,7 @@ class BehandleAutomatiskInntektsendringTask(
             return sammenslåttInntektsperioder + listOf(inntektsperiodeFremover)
         }
 
-        val forventetÅrsinntekt = inntektResponse.forventetMånedsinntekt() * 12
+        val forventetÅrsinntekt = inntektResponse.forventetMånedsinntekt(forrigeVedtak) * 12
         val inntekterMinimum3MndTilbake = forrigeVedtak.inntekter?.inntekter?.filter { it.periode.fomDato <= YearMonth.now().minusMonths(3).atDay(1) } ?: emptyList()
         val nyesteInntektsperiode = inntekterMinimum3MndTilbake.maxBy { it.periode.fomDato }
         val oppdatertInntektsperiode = nyesteInntektsperiode.copy(inntekt = BigDecimal(forventetÅrsinntekt))
