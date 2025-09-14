@@ -21,7 +21,7 @@ import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.fagsakpersoner
 import no.nav.familie.ef.sak.repository.inntektsperiode
 import no.nav.familie.ef.sak.repository.lagInntektResponseForMånedsperiode
-import no.nav.familie.ef.sak.repository.lagInntektResponseForMånedsperiodeMedFeriepengerForrigeMåned
+import no.nav.familie.ef.sak.repository.lagInntektResponseForMånedsperiodeMedGittLønnsbeskrivelseForrigeMåned
 import no.nav.familie.ef.sak.repository.lagInntektResponseFraMånedsinntekter
 import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.ef.sak.vilkår.VilkårsvurderingRepository
@@ -153,7 +153,7 @@ class AutomatiskRevurderingEtterGOmregningTest : OppslagSpringRunnerTest() {
         gOmregningTestUtil.gOmregne(behandlingId, fagsakId, førstegangsbehandlingFom, 5168)
 
         val månedsperiodeMedHøyInntektFraSammeMånedSomGOmregning = Månedsperiode(Grunnbeløpsperioder.nyesteGrunnbeløpGyldigFraOgMed, YearMonth.now().minusMonths(1))
-        val inntektResponse = lagInntektResponseForMånedsperiodeMedFeriepengerForrigeMåned(25_000, månedsperiodeMedHøyInntektFraSammeMånedSomGOmregning)
+        val inntektResponse = lagInntektResponseForMånedsperiodeMedGittLønnsbeskrivelseForrigeMåned(25_000, månedsperiodeMedHøyInntektFraSammeMånedSomGOmregning)
 
         every { inntektClientMock.inntektClient().hentInntekt(any(), any(), any()) } returns inntektResponse
 

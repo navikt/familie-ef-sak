@@ -89,6 +89,7 @@ import java.time.LocalDateTime
 import java.time.OffsetDateTime
 import java.time.YearMonth
 import java.util.UUID
+import kotlin.text.toDouble
 
 fun oppgave(
     behandling: Behandling,
@@ -769,14 +770,30 @@ fun lagInntektResponseForMånedsperiode(
         månedsperiode.måneder().map { inntektsmåned(it, listOf(inntekt(månedsinntekt.toDouble()))) },
     )
 
-fun lagInntektResponseForMånedsperiodeMedFeriepengerForrigeMåned(
+fun lagInntektResponseForMånedsperiodeMedGittLønnsbeskrivelseForrigeMåned(
     månedsinntekt: Int,
     månedsperiode: Månedsperiode,
+    beskrivelse: String = "feriepenger",
+    beløp: Int = 5000,
 ): InntektResponse =
     InntektResponse(
         månedsperiode.måneder().map { inntektsmåned(it, listOf(inntekt(månedsinntekt.toDouble()))) } +
-            inntektsmåned(YearMonth.now().minusMonths(1), listOf(inntekt(5000.0, InntektType.LØNNSINNTEKT, beskrivelse = "feriepenger"))),
+            inntektsmåned(YearMonth.now().minusMonths(1), listOf(inntekt(beløp.toDouble(), InntektType.LØNNSINNTEKT, beskrivelse = beskrivelse))),
     )
+
+fun lagInntektResponseForMånedsperiodeMedGittLønnsbeskrivelseForMåneder(
+    månedsinntekt: Int,
+    månedsperiode: Månedsperiode,
+    beskrivelse: String = "feriepenger",
+    beløp: Int = 5000,
+    måneder: List<YearMonth>,
+): InntektResponse {
+    val inntektsmånederMedGittLønnsbeskrivelse = måneder.map { inntektsmåned(it, listOf(inntekt(beløp.toDouble(), InntektType.LØNNSINNTEKT, beskrivelse = beskrivelse))) }
+    return InntektResponse(
+        månedsperiode.måneder().map { inntektsmåned(it, listOf(inntekt(månedsinntekt.toDouble()))) } + inntektsmånederMedGittLønnsbeskrivelse
+    )
+}
+
 
 fun lagInntektResponseFraMånedsinntekterFraDouble(månedsinntekter: List<Double>): InntektResponse {
     require(månedsinntekter.size <= 12) { "Maks 12 inntekter kan sendes inn" }

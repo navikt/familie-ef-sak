@@ -1,12 +1,12 @@
 package no.nav.familie.ef.sak.no.nav.familie.ef.sak.amelding
 
 import com.fasterxml.jackson.module.kotlin.readValue
-import io.mockk.every
 import no.nav.familie.ef.sak.amelding.InntektResponse
-import no.nav.familie.ef.sak.behandling.revurdering.BehandleAutomatiskInntektsendringTask
-import no.nav.familie.ef.sak.behandling.revurdering.PayloadBehandleAutomatiskInntektsendringTask
+import no.nav.familie.ef.sak.beregning.Grunnbeløpsperioder
 import no.nav.familie.ef.sak.infrastruktur.config.ObjectMapperProvider.objectMapper
 import no.nav.familie.ef.sak.repository.inntektsperiode
+import no.nav.familie.ef.sak.repository.lagInntektResponseForMånedsperiodeMedGittLønnsbeskrivelseForMåneder
+import no.nav.familie.ef.sak.repository.lagInntektResponseForMånedsperiodeMedGittLønnsbeskrivelseForrigeMåned
 import no.nav.familie.ef.sak.repository.lagInntektResponseFraMånedsinntekter
 import no.nav.familie.ef.sak.repository.vedtak
 import no.nav.familie.ef.sak.testutil.JsonFilUtil.Companion.lesFil
@@ -14,14 +14,12 @@ import no.nav.familie.ef.sak.testutil.JsonFilUtil.Companion.oppdaterMåneder
 import no.nav.familie.ef.sak.vedtak.domain.InntektWrapper
 import no.nav.familie.kontrakter.felles.Månedsperiode
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.math.BigDecimal
 import java.time.YearMonth
 import java.util.UUID
-import kotlin.test.assertEquals
 
 class InntektResponseTest {
     @Test
@@ -142,6 +140,27 @@ class InntektResponseTest {
 
             val forventetInntekt = inntektResponse.forventetMånedsinntekt(vedtak)
             assertThat(forventetInntekt).isEqualTo(29_500)
+        }
+
+        @Test
+        fun `beregn forventet inntekt hvor styrehonorar skal ignoreres`() {
+            val månedsperiode = Månedsperiode(YearMonth.now().minusMonths(10), YearMonth.now().plusMonths(1))
+            val inntektResponse = lagInntektResponseForMånedsperiodeMedGittLønnsbeskrivelseForrigeMåned(28_000, månedsperiode, "styrehonorarOgGodtgjoerelseVerv", 3_000)
+            val vedtak = vedtak(InntektWrapper(listOf(inntektsperiode(månedsperiode, BigDecimal.valueOf(20_000)))))
+
+            val forventetInntekt = inntektResponse.forventetMånedsinntekt(vedtak)
+            assertThat(forventetInntekt).isEqualTo(28_000)
+        }
+
+        @Test
+        fun `beregn forventet inntekt - ta med bonus grunnet hyppige utbetalinger som til sammen blir over 5000`() {
+            val månedsperiode = Månedsperiode(YearMonth.now().minusMonths(10), YearMonth.now().plusMonths(1))
+            val månederMedStyrehonorar = listOf(YearMonth.now().minusMonths(1), YearMonth.now().minusMonths(5), YearMonth.now().minusMonths(11))
+            val inntektResponse = lagInntektResponseForMånedsperiodeMedGittLønnsbeskrivelseForMåneder(28_000, månedsperiode, "styrehonorarOgGodtgjoerelseVerv", 3_000, månederMedStyrehonorar)
+            val vedtak = vedtak(InntektWrapper(listOf(inntektsperiode(månedsperiode, BigDecimal.valueOf(20_000)))))
+
+            val forventetInntekt = inntektResponse.forventetMånedsinntekt(vedtak)
+            assertThat(forventetInntekt).isEqualTo(29_000)
         }
     }
 }

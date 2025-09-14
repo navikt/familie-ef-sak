@@ -32,7 +32,7 @@ data class InntektResponse(
         inntektsmånederFraOgMedÅrMåned(fraOgMedÅrMåned)
             .filter { it.måned.isEqualOrAfter(fraOgMedÅrMåned) && it.måned.isEqualOrBefore(cutoffYearMonth) }
             .flatMap { it.inntektListe }
-            .filterNot { ignorerteYtelserOgUtbetalinger.contains(it.beskrivelse) || it.beskrivelse.contains("ferie", true) || it.beskrivelse == "helligdagstillegg" }
+            .filterNot { lønnsbeskrivelseListAvUtbetalingerSomSkalIgnoreresVedBeregningAvFeriepenger().contains(it.beskrivelse) || it.beskrivelse.contains("ferie", true) }
             .sumOf { it.beløp }
             .toInt()
 
@@ -150,6 +150,20 @@ data class InntektResponse(
         }
 
         return totalInntektForMånedsperiodeUtenFeriepengerOgHelligdagstillegg(cutoffYearMonth.minusMonths(2)) / 3
+    }
+
+    fun lønnsbeskrivelseListAvUtbetalingerSomSkalIgnoreresVedBeregningAvFeriepenger(): List<String> {
+        val styrehonorar = inntektsmåneder.flatMap { it.inntektListe }.filter { it.beskrivelse == "styrehonorarOgGodtgjoerelseVerv" }
+        val bonus = inntektsmåneder.flatMap { it.inntektListe }.filter { it.beskrivelse == "bonus" }
+        val ignorerUtbetalinger = mutableListOf("helligdagstillegg")
+        if (styrehonorar.count() < 3 && styrehonorar.sumOf { it.beløp } < 5000) {
+            ignorerUtbetalinger.add("styrehonorarOgGodtgjoerelseVerv")
+        }
+        if (bonus.count() < 3 && bonus.sumOf { it.beløp } < 5000) {
+            ignorerUtbetalinger.add("bonus")
+        }
+
+        return ignorerUtbetalinger + ignorerteYtelserOgUtbetalinger
     }
 
     val harTreForrigeInntektsmåneder =
