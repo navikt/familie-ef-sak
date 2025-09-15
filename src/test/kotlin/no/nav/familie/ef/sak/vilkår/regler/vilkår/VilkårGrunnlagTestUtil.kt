@@ -86,6 +86,7 @@ fun barnMedSamværDto(
                 null,
                 null,
                 AvstandTilSøkerDto(null, LangAvstandTilSøker.UKJENT),
+                erKopiertFraAnnetBarn = null,
             ),
             null,
             null,
