@@ -790,10 +790,9 @@ fun lagInntektResponseForMånedsperiodeMedGittLønnsbeskrivelseForMåneder(
 ): InntektResponse {
     val inntektsmånederMedGittLønnsbeskrivelse = måneder.map { inntektsmåned(it, listOf(inntekt(beløp.toDouble(), InntektType.LØNNSINNTEKT, beskrivelse = beskrivelse))) }
     return InntektResponse(
-        månedsperiode.måneder().map { inntektsmåned(it, listOf(inntekt(månedsinntekt.toDouble()))) } + inntektsmånederMedGittLønnsbeskrivelse
+        månedsperiode.måneder().map { inntektsmåned(it, listOf(inntekt(månedsinntekt.toDouble()))) } + inntektsmånederMedGittLønnsbeskrivelse,
     )
 }
-
 
 fun lagInntektResponseFraMånedsinntekterFraDouble(månedsinntekter: List<Double>): InntektResponse {
     require(månedsinntekter.size <= 12) { "Maks 12 inntekter kan sendes inn" }
