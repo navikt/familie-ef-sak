@@ -151,16 +151,5 @@ class InntektResponseTest {
             val forventetInntekt = inntektResponse.forventetMånedsinntekt(vedtak)
             assertThat(forventetInntekt).isEqualTo(28_000)
         }
-
-        @Test
-        fun `beregn forventet inntekt - ta med bonus grunnet hyppige utbetalinger som til sammen blir over 5000`() {
-            val månedsperiode = Månedsperiode(YearMonth.now().minusMonths(10), YearMonth.now().plusMonths(1))
-            val månederMedStyrehonorar = listOf(YearMonth.now().minusMonths(1), YearMonth.now().minusMonths(5), YearMonth.now().minusMonths(11))
-            val inntektResponse = lagInntektResponseForMånedsperiodeMedGittLønnsbeskrivelseForMåneder(28_000, månedsperiode, "styrehonorarOgGodtgjoerelseVerv", 3_000, månederMedStyrehonorar)
-            val vedtak = vedtak(InntektWrapper(listOf(inntektsperiode(månedsperiode, BigDecimal.valueOf(20_000)))))
-
-            val forventetInntekt = inntektResponse.forventetMånedsinntekt(vedtak)
-            assertThat(forventetInntekt).isEqualTo(29_000)
-        }
     }
 }

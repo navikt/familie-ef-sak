@@ -149,6 +149,30 @@ class AutomatiskRevurderingEtterGOmregningTest : OppslagSpringRunnerTest() {
     }
 
     @Test
+    fun `Siste behandling er g-omregning og revurderes fradato er etter g-omregning`() {
+        gOmregningTestUtil.gOmregne(behandlingId, fagsakId, YearMonth.of(YearMonth.now().year, 5))
+
+        val innmeldtMånedsinntekt = listOf(20_000, 20_000, 20_000, 20_000, 28_000, 30_000, 30_000)
+
+        val payload = PayloadBehandleAutomatiskInntektsendringTask(personIdent, "2025-20")
+        val opprettetTask = BehandleAutomatiskInntektsendringTask.opprettTask(objectMapper.writeValueAsString(payload))
+        val inntektResponse = lagInntektResponseFraMånedsinntekter(innmeldtMånedsinntekt)
+
+        every { inntektClientMock.inntektClient().hentInntekt(personIdent, any(), any()) } returns inntektResponse
+
+        behandleAutomatiskInntektsendringTask.doTask(opprettetTask)
+
+        val revurdering = behandlingService.hentBehandlinger(fagsak.id).last()
+        val oppdatertVedtak = vedtakService.hentVedtak(revurdering.id)
+
+        val førstePeriodeIOppdatertVedtak = oppdatertVedtak.perioder?.perioder?.first()
+        assertThat(førstePeriodeIOppdatertVedtak?.periode?.fom).isEqualTo(YearMonth.of(YearMonth.now().year, 7))
+        assertThat(førstePeriodeIOppdatertVedtak?.periode?.tom).isEqualTo(YearMonth.of(YearMonth.now().year + 1, 12))
+
+        assertThat(oppdatertVedtak.inntektBegrunnelse?.contains("(G-omregning)")).isFalse
+    }
+
+    @Test
     fun `Inntektsendring samme måned som g-omregning`() {
         gOmregningTestUtil.gOmregne(behandlingId, fagsakId, førstegangsbehandlingFom, 5168)
 

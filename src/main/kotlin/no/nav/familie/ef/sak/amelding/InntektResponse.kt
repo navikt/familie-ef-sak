@@ -154,13 +154,10 @@ data class InntektResponse(
 
     fun lønnsbeskrivelseListAvUtbetalingerSomSkalIgnoreresVedBeregningAvFeriepenger(): List<String> {
         val styrehonorar = inntektsmåneder.flatMap { it.inntektListe }.filter { it.beskrivelse == "styrehonorarOgGodtgjoerelseVerv" }
-        val bonus = inntektsmåneder.flatMap { it.inntektListe }.filter { it.beskrivelse == "bonus" }
+
         val ignorerUtbetalinger = mutableListOf("helligdagstillegg")
         if (styrehonorar.count() < 3 && styrehonorar.sumOf { it.beløp } < 5000) {
             ignorerUtbetalinger.add("styrehonorarOgGodtgjoerelseVerv")
-        }
-        if (bonus.count() < 3 && bonus.sumOf { it.beløp } < 5000) {
-            ignorerUtbetalinger.add("bonus")
         }
 
         return ignorerUtbetalinger + ignorerteYtelserOgUtbetalinger
@@ -176,7 +173,7 @@ data class InntektResponse(
         inntektsmåneder.any { totalInntektForÅrMåned(it.måned) * 12 > finnGrunnbeløp(it.måned).grunnbeløp.toInt() * 5.5 }
 
     companion object {
-        private val ignorerteYtelserOgUtbetalinger = listOf("overgangsstoenadTilEnsligMorEllerFarSomBegynteAaLoepe1April2014EllerSenere", "barnepensjon", "introduksjonsstoenad")
+        private val ignorerteYtelserOgUtbetalinger = listOf("overgangsstoenadTilEnsligMorEllerFarSomBegynteAaLoepe1April2014EllerSenere", "barnepensjon", "introduksjonsstoenad", "styrehonorarOgGodtgjoerelseVerv")
     }
 }
 
