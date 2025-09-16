@@ -21,7 +21,7 @@ import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.fagsakpersoner
 import no.nav.familie.ef.sak.repository.inntektsperiode
 import no.nav.familie.ef.sak.repository.lagInntektResponseForMånedsperiode
-import no.nav.familie.ef.sak.repository.lagInntektResponseForMånedsperiodeMedFeriepengerForrigeMåned
+import no.nav.familie.ef.sak.repository.lagInntektResponseForMånedsperiodeMedGittLønnsbeskrivelseForrigeMåned
 import no.nav.familie.ef.sak.repository.lagInntektResponseFraMånedsinntekter
 import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.ef.sak.vilkår.VilkårsvurderingRepository
@@ -149,11 +149,35 @@ class AutomatiskRevurderingEtterGOmregningTest : OppslagSpringRunnerTest() {
     }
 
     @Test
+    fun `Siste behandling er g-omregning og revurderes fradato er etter g-omregning`() {
+        gOmregningTestUtil.gOmregne(behandlingId, fagsakId, YearMonth.of(YearMonth.now().year, 5))
+
+        val innmeldtMånedsinntekt = listOf(20_000, 20_000, 20_000, 20_000, 28_000, 30_000, 30_000)
+
+        val payload = PayloadBehandleAutomatiskInntektsendringTask(personIdent, "2025-20")
+        val opprettetTask = BehandleAutomatiskInntektsendringTask.opprettTask(objectMapper.writeValueAsString(payload))
+        val inntektResponse = lagInntektResponseFraMånedsinntekter(innmeldtMånedsinntekt)
+
+        every { inntektClientMock.inntektClient().hentInntekt(personIdent, any(), any()) } returns inntektResponse
+
+        behandleAutomatiskInntektsendringTask.doTask(opprettetTask)
+
+        val revurdering = behandlingService.hentBehandlinger(fagsak.id).last()
+        val oppdatertVedtak = vedtakService.hentVedtak(revurdering.id)
+
+        val førstePeriodeIOppdatertVedtak = oppdatertVedtak.perioder?.perioder?.first()
+        assertThat(førstePeriodeIOppdatertVedtak?.periode?.fom).isEqualTo(YearMonth.of(YearMonth.now().year, 7))
+        assertThat(førstePeriodeIOppdatertVedtak?.periode?.tom).isEqualTo(YearMonth.of(YearMonth.now().year + 1, 12))
+
+        assertThat(oppdatertVedtak.inntektBegrunnelse?.contains("(G-omregning)")).isFalse
+    }
+
+    @Test
     fun `Inntektsendring samme måned som g-omregning`() {
         gOmregningTestUtil.gOmregne(behandlingId, fagsakId, førstegangsbehandlingFom, 5168)
 
         val månedsperiodeMedHøyInntektFraSammeMånedSomGOmregning = Månedsperiode(Grunnbeløpsperioder.nyesteGrunnbeløpGyldigFraOgMed, YearMonth.now().minusMonths(1))
-        val inntektResponse = lagInntektResponseForMånedsperiodeMedFeriepengerForrigeMåned(25_000, månedsperiodeMedHøyInntektFraSammeMånedSomGOmregning)
+        val inntektResponse = lagInntektResponseForMånedsperiodeMedGittLønnsbeskrivelseForrigeMåned(25_000, månedsperiodeMedHøyInntektFraSammeMånedSomGOmregning)
 
         every { inntektClientMock.inntektClient().hentInntekt(any(), any(), any()) } returns inntektResponse
 
