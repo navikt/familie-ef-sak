@@ -229,17 +229,23 @@ class BehandleAutomatiskInntektsendringTask(
                         )
                     }.toList()
 
-            val inntektsperiodeFremover =
-                Inntektsperiode(
-                    periode = Månedsperiode(cutoffPeriode.tom.plusMonths(1), forrigeVedtak.perioder?.perioder?.maxOf { it.periode.tom } ?: throw IllegalStateException("Mangler vedtaksperioder")),
-                    månedsinntekt = BigDecimal(inntektResponse.forventetMånedsinntekt(forrigeVedtak)),
-                    inntekt = BigDecimal(0),
-                    dagsats = BigDecimal(0),
-                    samordningsfradrag = BigDecimal(0),
-                )
-            val sammenslåttInntektsperioder = slåSammenPerioderMedLikInntekt(inntektsperioder)
+            if (forrigeVedtak.perioder
+                    ?.perioder
+                    ?.maxOf { it.periode.tom }
+                    ?.isAfter(cutoffPeriode.tom) == true
+            ) {
+                val inntektsperiodeFremover =
+                    Inntektsperiode(
+                        periode = Månedsperiode(cutoffPeriode.tom.plusMonths(1), forrigeVedtak.perioder?.perioder?.maxOf { it.periode.tom } ?: throw IllegalStateException("Mangler vedtaksperioder")),
+                        månedsinntekt = BigDecimal(inntektResponse.forventetMånedsinntekt(forrigeVedtak)),
+                        inntekt = BigDecimal(0),
+                        dagsats = BigDecimal(0),
+                        samordningsfradrag = BigDecimal(0),
+                    )
 
-            return sammenslåttInntektsperioder + listOf(inntektsperiodeFremover)
+                return slåSammenPerioderMedLikInntekt(inntektsperioder) + listOf(inntektsperiodeFremover)
+            }
+            return slåSammenPerioderMedLikInntekt(inntektsperioder)
         }
 
         val forventetÅrsinntekt = inntektResponse.forventetMånedsinntekt(forrigeVedtak) * 12
