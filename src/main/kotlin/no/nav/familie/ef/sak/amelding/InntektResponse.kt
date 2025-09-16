@@ -8,6 +8,7 @@ import no.nav.familie.ef.sak.vedtak.domain.Vedtak
 import java.time.LocalDate
 import java.time.OffsetDateTime
 import java.time.YearMonth
+import java.time.temporal.ChronoUnit
 import kotlin.math.abs
 
 data class InntektResponse(
@@ -135,9 +136,17 @@ data class InntektResponse(
                     inntektsmåned.måned.isEqualOrAfter(fraOgMedÅrMåned)
             }.sortedBy { it.måned }
 
-    fun forventetMånedsinntekt(): Int {
+    fun forventetMånedsinntekt(forrigeVedtak: Vedtak): Int {
         if (!harTreForrigeInntektsmåneder) {
             throw IllegalStateException("Mangler inntektsinformasjon for de tre siste måneder")
+        }
+
+        val harInntektsøkningSisteTreMåneder = førsteMånedMed10ProsentInntektsøkning(forrigeVedtak).isEqualOrAfter(cutoffYearMonth.minusMonths(2))
+        if (harInntektsøkningSisteTreMåneder) {
+            val førsteMånedMedØkning = førsteMånedMed10ProsentInntektsøkning(forrigeVedtak)
+            val diff = ChronoUnit.MONTHS.between(førsteMånedMedØkning, cutoffYearMonth)
+            val revurderesFraDato = førsteMånedMedØkning.plusMonths(1)
+            return totalInntektForMånedsperiodeUtenFeriepengerOgHelligdagstillegg(revurderesFraDato) / diff.toInt()
         }
 
         return totalInntektForMånedsperiodeUtenFeriepengerOgHelligdagstillegg(cutoffYearMonth.minusMonths(2)) / 3
