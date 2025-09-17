@@ -119,7 +119,7 @@ class BehandleAutomatiskInntektsendringTaskTest : OppslagSpringRunnerTest() {
         vilkårHelperService.opprettVilkår(behandling)
         vedtakHelperService.ferdigstillVedtak(vedtak(behandlingId = behandling.id, månedsperiode = Månedsperiode(YearMonth.now().minusMonths(4), YearMonth.now())), behandling, fagsak)
 
-        val payload = PayloadBehandleAutomatiskInntektsendringTask(personIdent, YearMonth.of(2025, 5))
+        val payload = PayloadBehandleAutomatiskInntektsendringTask(personIdent, YearMonth.of(2025, 4))
         val task = BehandleAutomatiskInntektsendringTask.opprettTask(objectMapper.writeValueAsString(payload))
         val lagretBehandleAutomatiskInntektsendringTask = taskService.save(task)
         behandleAutomatiskInntektsendringTask.doTask(lagretBehandleAutomatiskInntektsendringTask)
