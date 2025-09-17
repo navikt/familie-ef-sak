@@ -36,6 +36,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
+import java.time.YearMonth
 import java.time.temporal.IsoFields
 import java.util.UUID
 
@@ -167,11 +168,10 @@ class RevurderingService(
         if (LeaderClient.isLeader() != true) {
             logger.info("Fant ingen leader ved oppretting av automatisk inntektsendring task")
         }
-        val ukeÅr = LocalDate.now().let { "${it.get(IsoFields.WEEK_OF_WEEK_BASED_YEAR)}-${it.year}" }
 
         personIdenter.take(10).forEach { personIdent ->
 
-            val payload = objectMapper.writeValueAsString(PayloadBehandleAutomatiskInntektsendringTask(personIdent = personIdent, ukeÅr = ukeÅr))
+            val payload = objectMapper.writeValueAsString(PayloadBehandleAutomatiskInntektsendringTask(personIdent = personIdent, årMåned = YearMonth.now()))
             val finnesTask = taskService.finnTaskMedPayloadOgType(payload, BehandleAutomatiskInntektsendringTask.TYPE)
 
             if (finnesTask == null) {
