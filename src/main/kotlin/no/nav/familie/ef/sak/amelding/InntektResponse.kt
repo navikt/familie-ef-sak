@@ -8,11 +8,7 @@ import no.nav.familie.ef.sak.vedtak.domain.Vedtak
 import java.time.LocalDate
 import java.time.OffsetDateTime
 import java.time.YearMonth
-import kotlin.compareTo
 import kotlin.math.abs
-import kotlin.text.compareTo
-import kotlin.text.toInt
-import kotlin.times
 
 data class InntektResponse(
     @JsonProperty("data")
