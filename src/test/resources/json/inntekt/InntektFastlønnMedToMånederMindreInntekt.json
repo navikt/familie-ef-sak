@@ -1,0 +1,245 @@
+{
+  "data": [
+    {
+      "maaned": "2025-02",
+      "opplysningspliktig": "999999999",
+      "underenhet": "999999999",
+      "norskident": "01010199999",
+      "oppsummeringstidspunkt": "2025-05-14T12:59:10.747Z",
+      "inntektListe": [
+        {
+          "type": "Loennsinntekt",
+          "beloep": 366.0,
+          "fordel": "naturalytelse",
+          "beskrivelse": "elektroniskKommunikasjon",
+          "inngaarIGrunnlagForTrekk": true,
+          "utloeserArbeidsgiveravgift": true,
+          "skatteOgAvgiftsregel": null,
+          "opptjeningsperiodeFom": "2025-05-01",
+          "opptjeningsperiodeTom": "2025-05-28",
+          "tilleggsinformasjon": null,
+          "manuellVurdering": false,
+          "antall": null,
+          "skattemessigBosattLand": null,
+          "opptjeningsland": null
+        },
+        {
+          "type": "Loennsinntekt",
+          "beloep": 57500.0,
+          "fordel": "kontantytelse",
+          "beskrivelse": "fastloenn",
+          "inngaarIGrunnlagForTrekk": true,
+          "utloeserArbeidsgiveravgift": true,
+          "skatteOgAvgiftsregel": null,
+          "opptjeningsperiodeFom": "2025-05-01",
+          "opptjeningsperiodeTom": "2025-05-28",
+          "tilleggsinformasjon": null,
+          "manuellVurdering": false,
+          "antall": null,
+          "skattemessigBosattLand": null,
+          "opptjeningsland": null
+        }
+      ],
+      "forskuddstrekkListe": [
+        {
+          "beloep": -15623.0,
+          "beskrivelse": "ordinaert"
+        }
+      ],
+      "avvikListe": []
+    },
+    {
+      "maaned": "2025-03",
+      "opplysningspliktig": "999999999",
+      "underenhet": "999999999",
+      "norskident": "01010199999",
+      "oppsummeringstidspunkt": "2025-05-14T12:59:10.747Z",
+      "inntektListe": [
+        {
+          "type": "Loennsinntekt",
+          "beloep": 366.0,
+          "fordel": "naturalytelse",
+          "beskrivelse": "elektroniskKommunikasjon",
+          "inngaarIGrunnlagForTrekk": true,
+          "utloeserArbeidsgiveravgift": true,
+          "skatteOgAvgiftsregel": null,
+          "opptjeningsperiodeFom": "2025-05-01",
+          "opptjeningsperiodeTom": "2025-05-28",
+          "tilleggsinformasjon": null,
+          "manuellVurdering": false,
+          "antall": null,
+          "skattemessigBosattLand": null,
+          "opptjeningsland": null
+        },
+        {
+          "type": "Loennsinntekt",
+          "beloep": 50000.0,
+          "fordel": "kontantytelse",
+          "beskrivelse": "fastloenn",
+          "inngaarIGrunnlagForTrekk": true,
+          "utloeserArbeidsgiveravgift": true,
+          "skatteOgAvgiftsregel": null,
+          "opptjeningsperiodeFom": "2025-05-01",
+          "opptjeningsperiodeTom": "2025-05-28",
+          "tilleggsinformasjon": null,
+          "manuellVurdering": false,
+          "antall": null,
+          "skattemessigBosattLand": null,
+          "opptjeningsland": null
+        }
+      ],
+      "forskuddstrekkListe": [
+        {
+          "beloep": -15623.0,
+          "beskrivelse": "ordinaert"
+        }
+      ],
+      "avvikListe": []
+    },
+    {
+      "maaned": "2025-04",
+      "opplysningspliktig": "999999999",
+      "underenhet": "999999999",
+      "norskident": "01010199999",
+      "oppsummeringstidspunkt": "2025-05-14T12:59:10.747Z",
+      "inntektListe": [
+        {
+          "type": "Loennsinntekt",
+          "beloep": 366.0,
+          "fordel": "naturalytelse",
+          "beskrivelse": "elektroniskKommunikasjon",
+          "inngaarIGrunnlagForTrekk": true,
+          "utloeserArbeidsgiveravgift": true,
+          "skatteOgAvgiftsregel": null,
+          "opptjeningsperiodeFom": "2025-05-01",
+          "opptjeningsperiodeTom": "2025-05-28",
+          "tilleggsinformasjon": null,
+          "manuellVurdering": false,
+          "antall": null,
+          "skattemessigBosattLand": null,
+          "opptjeningsland": null
+        },
+        {
+          "type": "Loennsinntekt",
+          "beloep": 57500.0,
+          "fordel": "kontantytelse",
+          "beskrivelse": "fastloenn",
+          "inngaarIGrunnlagForTrekk": true,
+          "utloeserArbeidsgiveravgift": true,
+          "skatteOgAvgiftsregel": null,
+          "opptjeningsperiodeFom": "2025-05-01",
+          "opptjeningsperiodeTom": "2025-05-28",
+          "tilleggsinformasjon": null,
+          "manuellVurdering": false,
+          "antall": null,
+          "skattemessigBosattLand": null,
+          "opptjeningsland": null
+        }
+      ],
+      "forskuddstrekkListe": [
+        {
+          "beloep": -15623.0,
+          "beskrivelse": "ordinaert"
+        }
+      ],
+      "avvikListe": []
+    },
+    {
+      "maaned": "2025-05",
+      "opplysningspliktig": "999999999",
+      "underenhet": "999999999",
+      "norskident": "01010199999",
+      "oppsummeringstidspunkt": "2025-05-14T12:59:10.747Z",
+      "inntektListe": [
+        {
+          "type": "Loennsinntekt",
+          "beloep": 366.0,
+          "fordel": "naturalytelse",
+          "beskrivelse": "elektroniskKommunikasjon",
+          "inngaarIGrunnlagForTrekk": true,
+          "utloeserArbeidsgiveravgift": true,
+          "skatteOgAvgiftsregel": null,
+          "opptjeningsperiodeFom": "2025-05-01",
+          "opptjeningsperiodeTom": "2025-05-28",
+          "tilleggsinformasjon": null,
+          "manuellVurdering": false,
+          "antall": null,
+          "skattemessigBosattLand": null,
+          "opptjeningsland": null
+        },
+        {
+          "type": "Loennsinntekt",
+          "beloep": 57500.0,
+          "fordel": "kontantytelse",
+          "beskrivelse": "fastloenn",
+          "inngaarIGrunnlagForTrekk": true,
+          "utloeserArbeidsgiveravgift": true,
+          "skatteOgAvgiftsregel": null,
+          "opptjeningsperiodeFom": "2025-05-01",
+          "opptjeningsperiodeTom": "2025-05-28",
+          "tilleggsinformasjon": null,
+          "manuellVurdering": false,
+          "antall": null,
+          "skattemessigBosattLand": null,
+          "opptjeningsland": null
+        }
+      ],
+      "forskuddstrekkListe": [
+        {
+          "beloep": -15623.0,
+          "beskrivelse": "ordinaert"
+        }
+      ],
+      "avvikListe": []
+    },
+    {
+      "maaned": "2025-06",
+      "opplysningspliktig": "999999999",
+      "underenhet": "999999999",
+      "norskident": "01010199999",
+      "oppsummeringstidspunkt": "2025-05-14T12:59:10.747Z",
+      "inntektListe": [
+        {
+          "type": "Loennsinntekt",
+          "beloep": 366.0,
+          "fordel": "naturalytelse",
+          "beskrivelse": "elektroniskKommunikasjon",
+          "inngaarIGrunnlagForTrekk": true,
+          "utloeserArbeidsgiveravgift": true,
+          "skatteOgAvgiftsregel": null,
+          "opptjeningsperiodeFom": "2025-05-01",
+          "opptjeningsperiodeTom": "2025-05-28",
+          "tilleggsinformasjon": null,
+          "manuellVurdering": false,
+          "antall": null,
+          "skattemessigBosattLand": null,
+          "opptjeningsland": null
+        },
+        {
+          "type": "Loennsinntekt",
+          "beloep": 50000.0,
+          "fordel": "kontantytelse",
+          "beskrivelse": "fastloenn",
+          "inngaarIGrunnlagForTrekk": true,
+          "utloeserArbeidsgiveravgift": true,
+          "skatteOgAvgiftsregel": null,
+          "opptjeningsperiodeFom": "2025-05-01",
+          "opptjeningsperiodeTom": "2025-05-28",
+          "tilleggsinformasjon": null,
+          "manuellVurdering": false,
+          "antall": null,
+          "skattemessigBosattLand": null,
+          "opptjeningsland": null
+        }
+      ],
+      "forskuddstrekkListe": [
+        {
+          "beloep": -15623.0,
+          "beskrivelse": "ordinaert"
+        }
+      ],
+      "avvikListe": []
+    }
+  ],
+  "harTreForrigeInntektsmåneder": true
+}
