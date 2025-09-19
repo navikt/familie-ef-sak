@@ -8,7 +8,11 @@ import no.nav.familie.ef.sak.vedtak.domain.Vedtak
 import java.time.LocalDate
 import java.time.OffsetDateTime
 import java.time.YearMonth
+import kotlin.compareTo
 import kotlin.math.abs
+import kotlin.text.compareTo
+import kotlin.text.toInt
+import kotlin.times
 
 data class InntektResponse(
     @JsonProperty("data")
@@ -119,9 +123,9 @@ data class InntektResponse(
         return summertInntektList.indices
             .asSequence()
             .firstOrNull { i ->
-                summertInntektList.drop(i).all {
-                    it.innmeldtInntekt >= it.forventetInntekt * 1.1 && it.innmeldtInntekt > finnGrunnbeløp(it.årMåned).perMnd.toInt() / 2
-                }
+                val dropped = summertInntektList.drop(i)
+                dropped.take(2).all { it.innmeldtInntekt >= it.forventetInntekt * 1.1 } &&
+                    dropped.all { it.innmeldtInntekt > finnGrunnbeløp(it.årMåned).perMnd.toInt() / 2 && it.innmeldtInntekt >= it.forventetInntekt }
             }?.let { summertInntektList[it].årMåned } ?: throw IllegalStateException("Burde funnet måned med 10% inntekt for behandling: ${forrigeVedtak.behandlingId}")
     }
 
