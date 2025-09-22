@@ -2,6 +2,7 @@ package no.nav.familie.ef.sak.behandling.revurdering
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.familie.ef.sak.amelding.InntektResponse
+import no.nav.familie.ef.sak.arbeidsforhold.ekstern.ArbeidsforholdClient
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.ÅrsakRevurdering
 import no.nav.familie.ef.sak.behandling.dto.RevurderingDto
@@ -52,6 +53,7 @@ class BehandleAutomatiskInntektsendringTask(
     private val årsakRevurderingsRepository: ÅrsakRevurderingsRepository,
     private val automatiskRevurderingService: AutomatiskRevurderingService,
     private val featureToggleService: FeatureToggleService,
+    private val arbeidsforholdClient: ArbeidsforholdClient
 ) : AsyncTaskStep {
     private val logger = LoggerFactory.getLogger(javaClass)
     private val secureLogger = LoggerFactory.getLogger("secureLogger")
@@ -116,6 +118,9 @@ class BehandleAutomatiskInntektsendringTask(
         årsakRevurderingsRepository.insert(ÅrsakRevurdering(behandlingId = behandling.id, opplysningskilde = Opplysningskilde.AUTOMATISK_OPPRETTET_BEHANDLING, årsak = Revurderingsårsak.ENDRING_INNTEKT, beskrivelse = null))
         vedtakService.lagreVedtak(vedtakDto = innvilgelseOvergangsstønad, behandlingId = behandling.id, stønadstype = StønadType.OVERGANGSSTØNAD)
         logger.info("Opprettet behandling for automatisk inntektsendring: ${behandling.id}")
+
+        val localDateTest = LocalDate.of(perioder.first().periode.fom.year, perioder.first().periode.fom.month, 1)
+        secureLogger.info("PersonIdent = $personIdent AAREG = ${arbeidsforholdClient.hentArbeidsforhold(personIdent, localDateTest)}")
     }
 
     private fun sammenslåVedtak(

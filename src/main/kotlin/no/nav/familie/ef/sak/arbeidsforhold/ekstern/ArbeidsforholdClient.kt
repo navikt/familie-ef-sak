@@ -13,7 +13,7 @@ import java.time.LocalDate
 
 @Component
 class ArbeidsforholdClient(
-    @Value("\${FAMILIE_INTEGRASJONER_URL}") private val uri: URI,
+    @Value("\${AAREG_URL}") private val uri: URI,
     @Qualifier("azure") restOperations: RestOperations,
 ) : AbstractRestClient(restOperations, "arbeidsforhold") {
     private fun lagArbeidsforholdUri() =
