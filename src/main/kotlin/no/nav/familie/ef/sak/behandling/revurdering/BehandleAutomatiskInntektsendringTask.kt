@@ -53,7 +53,7 @@ class BehandleAutomatiskInntektsendringTask(
     private val årsakRevurderingsRepository: ÅrsakRevurderingsRepository,
     private val automatiskRevurderingService: AutomatiskRevurderingService,
     private val featureToggleService: FeatureToggleService,
-    private val arbeidsforholdClient: ArbeidsforholdClient
+    private val arbeidsforholdClient: ArbeidsforholdClient,
 ) : AsyncTaskStep {
     private val logger = LoggerFactory.getLogger(javaClass)
     private val secureLogger = LoggerFactory.getLogger("secureLogger")
@@ -119,7 +119,16 @@ class BehandleAutomatiskInntektsendringTask(
         vedtakService.lagreVedtak(vedtakDto = innvilgelseOvergangsstønad, behandlingId = behandling.id, stønadstype = StønadType.OVERGANGSSTØNAD)
         logger.info("Opprettet behandling for automatisk inntektsendring: ${behandling.id}")
 
-        val localDateTest = LocalDate.of(perioder.first().periode.fom.year, perioder.first().periode.fom.month, 1)
+        val localDateTest =
+            LocalDate.of(
+                perioder
+                    .first()
+                    .periode.fom.year,
+                perioder
+                    .first()
+                    .periode.fom.month,
+                1,
+            )
         secureLogger.info("PersonIdent = $personIdent AAREG = ${arbeidsforholdClient.hentArbeidsforhold(personIdent, localDateTest)}")
     }
 
