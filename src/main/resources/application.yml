@@ -248,7 +248,7 @@ FAMILIE_KS_SAK_SCOPE: api://${DEPLOY_ENV}-gcp.teamfamilie.familie-ks-sak/.defaul
 SKJERMEDE_PERSONER_SCOPE: api://${DEPLOY_ENV}-gcp.nom.skjermede-personer-pip/.default
 INNTEKT_SCOPE: api://prod-fss.team-inntekt.ikomp/.default
 ARBEIDSAVKLARINGSPENGER_SCOPE: api://${DEPLOY_ENV}-gcp.aap.api-intern/.default
-AAREG_SCOPE: api://dev-fss.team-aareg.aareg-services/.default
+AAREG_SCOPE: api://dev-fss.arbeidsforhold.aareg-services-nais/.default
 
 spring:
   mvc:
