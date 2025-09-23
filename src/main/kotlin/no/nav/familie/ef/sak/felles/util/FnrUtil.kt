@@ -22,7 +22,7 @@ object FnrUtil {
         }
 
         brukerfeilHvis(erNpid(personIdent)) {
-            "Ident er en NPID har ingen data i PDL" // TODO: Annen feilmelding
+            "Ident er en NPID og har ingen data i PDL"
         }
     }
 
