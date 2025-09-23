@@ -22,7 +22,7 @@ object FnrUtil {
         }
 
         brukerfeilHvis(erNpid(personIdent)) {
-            "Ident er en NPID og har ingen data i PDL"
+            "Navs personidentifikator(NPID) er ikke et gyldig fødselsnummer"
         }
     }
 
