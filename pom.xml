@@ -11,7 +11,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.5.5</version>
+        <version>3.5.6</version>
     </parent>
     <repositories>
         <repository>
@@ -33,14 +33,14 @@
         <kotlin-coroutines.version>1.10.2</kotlin-coroutines.version>
         <springdoc.version>2.8.13</springdoc.version>
         <mockk.version>1.14.5</mockk.version>
-        <felles.version>3.20250909155158_81fc464</felles.version>
-        <prosessering.version>2.20250908124930_1c1ba6c</prosessering.version>
-        <token-validation-spring.version>5.0.36</token-validation-spring.version>
+        <felles.version>3.20250915092837_153983f</felles.version>
+        <prosessering.version>2.20250915083819_745c62b</prosessering.version>
+        <token-validation-spring.version>5.0.37</token-validation-spring.version>
 
         <start-class>no.nav.familie.ef.sak.ApplicationKt</start-class>
         <kontrakter.version>3.0_20250916123655_5035eb9</kontrakter.version>
         <mikrofrontend.builder.version>20230704114948-74aa2e9</mikrofrontend.builder.version>
-        <eksterne.kontrakter.bisys.version>2.0_20250826113118_c8aa66d</eksterne.kontrakter.bisys.version>
+        <eksterne.kontrakter.bisys.version>2.0_20250915155846_3e7ecd7</eksterne.kontrakter.bisys.version>
         <cucumber.version>7.28.2</cucumber.version>
 
 
@@ -48,7 +48,7 @@
         <sonar.projectKey>${SONAR_PROJECTKEY}</sonar.projectKey>
         <sonar.organization>navit</sonar.organization>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
-        <nav.security.version>5.0.36</nav.security.version> <!-- Denne burde være samme versjon som i felles -->
+        <nav.security.version>5.0.37</nav.security.version> <!-- Denne burde være samme versjon som i felles -->
         <okhttp3.version>4.9.1</okhttp3.version> <!-- overskrever spring sin versjon, blir brukt av mock-oauth2-server -->
         <brukervarsel-builder.version>2.1.1</brukervarsel-builder.version>
         <!--suppress UnresolvedMavenProperty -->
