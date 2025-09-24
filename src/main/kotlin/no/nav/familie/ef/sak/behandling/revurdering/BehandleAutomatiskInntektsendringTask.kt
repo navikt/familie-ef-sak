@@ -119,19 +119,7 @@ class BehandleAutomatiskInntektsendringTask(
         vedtakService.lagreVedtak(vedtakDto = innvilgelseOvergangsstønad, behandlingId = behandling.id, stønadstype = StønadType.OVERGANGSSTØNAD)
         logger.info("Opprettet behandling for automatisk inntektsendring: ${behandling.id}")
 
-        /*val localDateTest =
-            LocalDate.of(
-                perioder
-                    .first()
-                    .periode.fom.year,
-                perioder
-                    .first()
-                    .periode.fom.month,
-                1,
-            )
-         */
-        val localDateTest = LocalDate.now().minusMonths(3)
-        secureLogger.info("PersonIdent = $personIdent AAREG = ${arbeidsforholdClient.hentArbeidsforhold(personIdent, localDateTest)}")
+        secureLogger.info("PersonIdent = $personIdent AAREG = ${arbeidsforholdClient.hentArbeidsforhold(personIdent)}")
     }
 
     private fun sammenslåVedtak(

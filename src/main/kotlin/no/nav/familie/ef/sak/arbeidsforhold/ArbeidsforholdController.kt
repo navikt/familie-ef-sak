@@ -26,12 +26,9 @@ class ArbeidsforholdController(
     @GetMapping("fagsak/{fagsakId}")
     fun hentArbeidsforhold(
         @PathVariable("fagsakId") fagsakId: UUID,
-        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
-        @RequestParam
-        ansettelsesperiodeFom: LocalDate,
     ): Ressurs<List<ArbeidsforholdDto>> {
         tilgangService.validerTilgangTilFagsak(fagsakId, AuditLoggerEvent.ACCESS)
-        val arbeidsforhold = arbeidsforholdService.hentArbeidsforhold(fagsakId, ansettelsesperiodeFom).tilDto()
+        val arbeidsforhold = arbeidsforholdService.hentArbeidsforhold(fagsakId).tilDto()
         return Ressurs.success(arbeidsforhold)
     }
 }
