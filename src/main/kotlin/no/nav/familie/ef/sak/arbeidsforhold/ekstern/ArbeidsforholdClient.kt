@@ -19,7 +19,7 @@ class ArbeidsforholdClient(
     private fun lagArbeidsforholdUri() =
         UriComponentsBuilder
             .fromUri(uri)
-            .pathSegment("api/aareg/arbeidsforhold")
+            .pathSegment("api/v2/arbeidstaker/arbeidsforhold")
             .build()
             .toUri()
 
