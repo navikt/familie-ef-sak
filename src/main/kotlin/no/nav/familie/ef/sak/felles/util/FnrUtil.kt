@@ -1,6 +1,7 @@
 package no.nav.familie.ef.sak.felles.util
 
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
+import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import org.springframework.http.HttpStatus
 
 object FnrUtil {
@@ -19,5 +20,19 @@ object FnrUtil {
         if (!FNR_REGEX.matches(personIdent)) {
             throw ApiFeil("Ugyldig personident. Det kan kun inneholde tall", HttpStatus.BAD_REQUEST)
         }
+
+        brukerfeilHvis(erNpid(personIdent)) {
+            "Navs personidentifikator(NPID) er ikke et gyldig fødselsnummer"
+        }
+    }
+
+    fun erNpid(personIdent: String): Boolean {
+        if (personIdent.length != 11) return false
+
+        val måned = personIdent.substring(2, 4).toInt()
+        val syntetiskNpid = måned > 60 && måned <= 72
+        val npid = måned > 20 && måned <= 32
+
+        return (syntetiskNpid || npid)
     }
 }

@@ -125,7 +125,7 @@ class BehandleAutomatiskInntektsendringTaskTest : OppslagSpringRunnerTest() {
         vilkårHelperService.opprettVilkår(behandling)
         vedtakHelperService.ferdigstillVedtak(vedtak(behandlingId = behandling.id, månedsperiode = Månedsperiode(YearMonth.now().minusMonths(4), YearMonth.now())), behandling, fagsak)
 
-        val payload = PayloadBehandleAutomatiskInntektsendringTask(personIdent, "2025-15")
+        val payload = PayloadBehandleAutomatiskInntektsendringTask(personIdent, YearMonth.of(2025, 4))
         val task = BehandleAutomatiskInntektsendringTask.opprettTask(objectMapper.writeValueAsString(payload))
         val lagretBehandleAutomatiskInntektsendringTask = taskService.save(task)
         behandleAutomatiskInntektsendringTask.doTask(lagretBehandleAutomatiskInntektsendringTask)
@@ -223,7 +223,7 @@ class BehandleAutomatiskInntektsendringTaskTest : OppslagSpringRunnerTest() {
         val vedtak = vedtak(forventetInntektIVedtak, vedtakTom)
         vedtakHelperService.ferdigstillVedtak(vedtak, behandling, fagsak)
 
-        val payload = PayloadBehandleAutomatiskInntektsendringTask(personIdent, "2025-15")
+        val payload = PayloadBehandleAutomatiskInntektsendringTask(personIdent, YearMonth.of(2025, 4))
         val opprettetTask = BehandleAutomatiskInntektsendringTask.opprettTask(objectMapper.writeValueAsString(payload))
         val inntektResponse = lagInntektResponseFraMånedsinntekter(innmeldtMånedsinntekt)
         val inntektsmånederMedInneværendeMåned = inntektResponse.inntektsmåneder + listOf(inntektsmåned(måned = YearMonth.now(), inntektListe = listOf(inntekt(beløp = 25000.0))))
@@ -271,7 +271,7 @@ class BehandleAutomatiskInntektsendringTaskTest : OppslagSpringRunnerTest() {
         val vedtak = vedtak(forventetInntektIVedtak, vedtakTom)
         vedtakHelperService.ferdigstillVedtak(vedtak, behandling, fagsak)
 
-        val payload = PayloadBehandleAutomatiskInntektsendringTask(personIdent, "2025-15")
+        val payload = PayloadBehandleAutomatiskInntektsendringTask(personIdent, YearMonth.of(2025, 4))
         val opprettetTask = BehandleAutomatiskInntektsendringTask.opprettTask(objectMapper.writeValueAsString(payload))
         val inntektResponse = lagInntektResponseFraMånedsinntekter(innmeldtMånedsinntekt)
 
@@ -401,7 +401,7 @@ class BehandleAutomatiskInntektsendringTaskTest : OppslagSpringRunnerTest() {
         val vedtak = vedtak(forventetInntektIVedtak, vedtakTom)
         vedtakHelperService.ferdigstillVedtak(vedtak, behandling, fagsak)
 
-        val payload = PayloadBehandleAutomatiskInntektsendringTask(personIdent, "2025-15")
+        val payload = PayloadBehandleAutomatiskInntektsendringTask(personIdent, YearMonth.of(2025, 4))
         val opprettetTask = BehandleAutomatiskInntektsendringTask.opprettTask(objectMapper.writeValueAsString(payload))
         val inntektResponse = lagInntektResponseFraMånedsinntekter(innmeldtMånedsinntekt)
 
@@ -435,7 +435,7 @@ class BehandleAutomatiskInntektsendringTaskTest : OppslagSpringRunnerTest() {
         val vedtak = vedtak(forventetInntektIVedtak, vedtakTom)
         vedtakHelperService.ferdigstillVedtak(vedtak, behandling, fagsak)
 
-        val payload = PayloadBehandleAutomatiskInntektsendringTask(personIdent, "2025-15")
+        val payload = PayloadBehandleAutomatiskInntektsendringTask(personIdent, YearMonth.of(2025, 4))
         val opprettetTask = BehandleAutomatiskInntektsendringTask.opprettTask(objectMapper.writeValueAsString(payload))
         val inntektResponse = lagInntektResponseFraMånedsinntekter(innmeldtMånedsinntekt)
         val inntektResponseMedFeriepenger = inntektResponse.copy(inntektsmåneder = inntektResponse.inntektsmåneder + inntektsmåned(YearMonth.now().minusMonths(2), inntektListe = listOf(inntekt(beløp = 5000.0, beskrivelse = "feriepenger"))))
