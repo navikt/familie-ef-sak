@@ -59,14 +59,14 @@ class ArbeidsforholdClientTest {
             ),
         )
 
-        val response = arbeidsforholdClient.hentArbeidsforhold("15046713637", LocalDate.of(2020, 11, 19))
+        val response = arbeidsforholdClient.hentArbeidsforhold("15046713637")
         Assertions.assertThat(response).isNotNull
         Assertions.assertThat(response.data).isNotNull
         Assertions.assertThat(response.data?.size).isEqualTo(1)
     }
 
     private val queryMappingForHentOrganisasjon: MappingBuilder =
-        WireMock.post(WireMock.urlPathEqualTo("/api/aareg/arbeidsforhold"))
+        WireMock.get(WireMock.urlPathEqualTo("/api/v2/arbeidstaker/arbeidsforhold"))
 
     val aaregIntegrasjonerResponse =
         """

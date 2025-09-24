@@ -34,7 +34,7 @@ internal class ArbeidsforholdControllerTest : OppslagSpringRunnerTest() {
     internal fun `skal hente arbeidsforhold med ansettelsesperiodeFom i query param`() {
         val arbeidsforhold = hentArbeidsforhold(fagsak.id)
         assertThat(arbeidsforhold.body!!.getDataOrThrow()).isNotNull
-        verify { arbeidsforholdClient.hentArbeidsforhold("1", LocalDate.of(2021, 1, 1)) }
+        verify { arbeidsforholdClient.hentArbeidsforhold("1") }
     }
 
     private fun hentArbeidsforhold(fagsakId: UUID): ResponseEntity<Ressurs<List<ArbeidsforholdDto>>> =

@@ -5,6 +5,8 @@ import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.arbeidsforhold.Arbeidsforhold
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.http.HttpHeaders
+import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
 import org.springframework.web.client.RestOperations
 import org.springframework.web.util.UriComponentsBuilder
@@ -25,11 +27,13 @@ class ArbeidsforholdClient(
 
     fun hentArbeidsforhold(
         personIdent: String,
-        ansettelsesperiodeFom: LocalDate,
-    ): Ressurs<List<Arbeidsforhold>> = postForEntity(lagArbeidsforholdUri(), ArbeidsforholdRequest(personIdent, ansettelsesperiodeFom))
-}
+    ): Ressurs<List<Arbeidsforhold>> {
+        val responseHeaders = HttpHeaders()
+        responseHeaders["Nav-Personident"] = personIdent
 
-class ArbeidsforholdRequest(
-    val personIdent: String,
-    val ansettelsesperiodeFom: LocalDate,
-)
+        return getForEntity(
+            uri = lagArbeidsforholdUri(),
+            httpHeaders = responseHeaders,
+        )
+    }
+}

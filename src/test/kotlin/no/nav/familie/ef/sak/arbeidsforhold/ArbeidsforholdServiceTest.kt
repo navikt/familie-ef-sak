@@ -19,7 +19,7 @@ class ArbeidsforholdServiceTest {
 
     @BeforeEach
     fun setup() {
-        every { arbeidsforholdClient.hentArbeidsforhold(any(), any()) } returns
+        every { arbeidsforholdClient.hentArbeidsforhold(any()) } returns
             Ressurs.success(
                 listOf(
                     Arbeidsforhold(
@@ -34,7 +34,7 @@ class ArbeidsforholdServiceTest {
 
     @Test
     fun `finnes avsluttet arbeidsforhold siste 6 mnd`() {
-        every { arbeidsforholdClient.hentArbeidsforhold(any(), any()) } returns
+        every { arbeidsforholdClient.hentArbeidsforhold(any()) } returns
             Ressurs.success(
                 listOf(
                     Arbeidsforhold(
@@ -51,7 +51,7 @@ class ArbeidsforholdServiceTest {
 
     @Test
     fun `finnes ikke avsluttet arbeidsforhold siste 6 mnd`() {
-        every { arbeidsforholdClient.hentArbeidsforhold(any(), any()) } returns
+        every { arbeidsforholdClient.hentArbeidsforhold(any()) } returns
             Ressurs.success(
                 listOf(
                     Arbeidsforhold(

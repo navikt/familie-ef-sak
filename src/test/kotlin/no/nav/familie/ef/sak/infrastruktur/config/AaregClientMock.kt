@@ -34,7 +34,7 @@ class AaregClientMock {
                     arbeidsavtaler = listOf(Arbeidsavtaler()),
                 ),
             )
-        every { mockk.hentArbeidsforhold(any(), any()) } returns Ressurs.success(mockResponse)
+        every { mockk.hentArbeidsforhold(any()) } returns Ressurs.success(mockResponse)
         return mockk
     }
 }

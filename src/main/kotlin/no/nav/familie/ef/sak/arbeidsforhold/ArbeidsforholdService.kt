@@ -15,10 +15,9 @@ class ArbeidsforholdService(
 ) {
     fun hentArbeidsforhold(
         fagsakId: UUID,
-        ansettelsesperiodeFom: LocalDate,
     ): List<Arbeidsforhold> {
         val aktivIdent = fagsakService.hentAktivIdent(fagsakId)
-        val arbeidsforholdResponse = arbeidsforholdClient.hentArbeidsforhold(aktivIdent, ansettelsesperiodeFom)
+        val arbeidsforholdResponse = arbeidsforholdClient.hentArbeidsforhold(aktivIdent)
         return arbeidsforholdResponse.data ?: emptyList()
     }
 
@@ -27,7 +26,7 @@ class ArbeidsforholdService(
         antallMåneder: Long = 6,
     ): Boolean {
         val ansettelsesdato = LocalDate.now().minusMonths(antallMåneder)
-        val arbeidsforhold = arbeidsforholdClient.hentArbeidsforhold(aktivIdent, ansettelsesdato).data
+        val arbeidsforhold = arbeidsforholdClient.hentArbeidsforhold(aktivIdent).data
 
         return arbeidsforhold?.any {
             it.ansettelsesperiode
