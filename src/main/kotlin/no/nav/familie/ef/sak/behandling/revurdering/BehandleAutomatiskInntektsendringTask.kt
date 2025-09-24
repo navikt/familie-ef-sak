@@ -368,7 +368,7 @@ class BehandleAutomatiskInntektsendringTask(
 
 data class PayloadBehandleAutomatiskInntektsendringTask(
     val personIdent: String,
-    val ukeÅr: String,
+    val årMåned: YearMonth,
 )
 
 data class LogInntekt(
