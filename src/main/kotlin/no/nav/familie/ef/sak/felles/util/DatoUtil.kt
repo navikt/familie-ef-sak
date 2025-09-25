@@ -13,6 +13,7 @@ object DatoFormat {
     val YEAR_MONTH_FORMAT_NORSK = DateTimeFormatter.ofPattern("MM.yyyy")
     val DATE_FORMAT_NORSK = DateTimeFormatter.ofPattern("dd.MM.yyyy")
     val GOSYS_DATE_TIME = DateTimeFormatter.ofPattern("dd.MM.yyyy' 'HH:mm")
+    val AAREG_DATE_TIME = DateTimeFormatter.ofPattern("yyyy-MM-dd")
 }
 
 object DatoUtil {
