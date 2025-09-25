@@ -7,7 +7,6 @@ import no.nav.familie.ef.sak.arbeidsforhold.ekstern.ArbeidsforholdService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.arbeidsforhold.Ansettelsesperiode
 import no.nav.familie.kontrakter.felles.arbeidsforhold.Arbeidsforhold
-import no.nav.familie.kontrakter.felles.arbeidsforhold.Periode
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -20,14 +19,14 @@ class ArbeidsforholdServiceTest {
     @BeforeEach
     fun setup() {
         every { arbeidsforholdClient.hentArbeidsforhold(any()) } returns
-            Ressurs.success(
-                listOf(
-                    Arbeidsforhold(
-                        ansettelsesperiode =
-                            Ansettelsesperiode(
-                                Periode(LocalDate.now().minusYears(2), null),
-                            ),
-                    ),
+            listOf(
+                Arbeidsforhold(
+                    id = "123",
+                    ansettelsesperiode =
+                        Ansettelsesperiode(
+                            LocalDate.now().minusYears(2).toString(),
+                            null,
+                        ),
                 ),
             )
     }
@@ -35,14 +34,14 @@ class ArbeidsforholdServiceTest {
     @Test
     fun `finnes avsluttet arbeidsforhold siste 6 mnd`() {
         every { arbeidsforholdClient.hentArbeidsforhold(any()) } returns
-            Ressurs.success(
-                listOf(
-                    Arbeidsforhold(
-                        ansettelsesperiode =
-                            Ansettelsesperiode(
-                                Periode(LocalDate.now().minusYears(2), LocalDate.now()),
-                            ),
-                    ),
+            listOf(
+                Arbeidsforhold(
+                    id = "123",
+                    ansettelsesperiode =
+                        Ansettelsesperiode(
+                            LocalDate.now().minusYears(2).toString(),
+                            LocalDate.now().toString(),
+                        ),
                 ),
             )
         val finnesAvsluttetArbeidsforhold = arbeidsforholdService.finnesAvsluttetArbeidsforholdSisteAntallMåneder("1")
@@ -52,14 +51,14 @@ class ArbeidsforholdServiceTest {
     @Test
     fun `finnes ikke avsluttet arbeidsforhold siste 6 mnd`() {
         every { arbeidsforholdClient.hentArbeidsforhold(any()) } returns
-            Ressurs.success(
-                listOf(
-                    Arbeidsforhold(
-                        ansettelsesperiode =
-                            Ansettelsesperiode(
-                                Periode(LocalDate.now().minusYears(2), null),
-                            ),
-                    ),
+            listOf(
+                Arbeidsforhold(
+                    id = "123",
+                    ansettelsesperiode =
+                        Ansettelsesperiode(
+                            LocalDate.now().minusYears(2).toString(),
+                            null,
+                        ),
                 ),
             )
         val finnesAvsluttetArbeidsforhold = arbeidsforholdService.finnesAvsluttetArbeidsforholdSisteAntallMåneder("1")

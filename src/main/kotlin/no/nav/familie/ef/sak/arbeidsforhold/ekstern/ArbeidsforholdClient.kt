@@ -27,7 +27,7 @@ class ArbeidsforholdClient(
 
     fun hentArbeidsforhold(
         personIdent: String,
-    ): Ressurs<List<Arbeidsforhold>> {
+    ): List<Arbeidsforhold> {
         val responseHeaders = HttpHeaders()
         responseHeaders["Nav-Personident"] = personIdent
 
