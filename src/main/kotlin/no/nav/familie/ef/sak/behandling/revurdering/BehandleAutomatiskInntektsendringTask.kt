@@ -118,8 +118,6 @@ class BehandleAutomatiskInntektsendringTask(
         årsakRevurderingsRepository.insert(ÅrsakRevurdering(behandlingId = behandling.id, opplysningskilde = Opplysningskilde.AUTOMATISK_OPPRETTET_BEHANDLING, årsak = Revurderingsårsak.ENDRING_INNTEKT, beskrivelse = null))
         vedtakService.lagreVedtak(vedtakDto = innvilgelseOvergangsstønad, behandlingId = behandling.id, stønadstype = StønadType.OVERGANGSSTØNAD)
         logger.info("Opprettet behandling for automatisk inntektsendring: ${behandling.id}")
-
-        secureLogger.info("PersonIdent = $personIdent AAREG = ${arbeidsforholdClient.hentArbeidsforhold(personIdent)}")
     }
 
     private fun sammenslåVedtak(
