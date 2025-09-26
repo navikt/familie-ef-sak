@@ -15,11 +15,10 @@ class ArbeidsforholdService(
 ) {
     fun hentArbeidsforhold(
         fagsakId: UUID,
-        ansettelsesperiodeFom: LocalDate,
     ): List<Arbeidsforhold> {
         val aktivIdent = fagsakService.hentAktivIdent(fagsakId)
-        val arbeidsforholdResponse = arbeidsforholdClient.hentArbeidsforhold(aktivIdent, ansettelsesperiodeFom)
-        return arbeidsforholdResponse.data ?: emptyList()
+        val arbeidsforholdResponse = arbeidsforholdClient.hentArbeidsforhold(aktivIdent)
+        return arbeidsforholdResponse
     }
 
     fun finnesAvsluttetArbeidsforholdSisteAntallMåneder(
@@ -27,17 +26,13 @@ class ArbeidsforholdService(
         antallMåneder: Long = 6,
     ): Boolean {
         val ansettelsesdato = LocalDate.now().minusMonths(antallMåneder)
-        val arbeidsforhold = arbeidsforholdClient.hentArbeidsforhold(aktivIdent, ansettelsesdato).data
+        val arbeidsforhold = arbeidsforholdClient.hentArbeidsforhold(aktivIdent)
 
         return arbeidsforhold?.any {
-            it.ansettelsesperiode
-                ?.periode
-                ?.fom
-                ?.isEqualOrBefore(ansettelsesdato) == true &&
-                it.ansettelsesperiode
-                    ?.periode
-                    ?.tom
-                    ?.isEqualOrAfter(ansettelsesdato) == true
+            val startdato = it.ansettelsesperiode?.startdato?.let { dato -> LocalDate.parse(dato) }
+            val sluttdato = it.ansettelsesperiode?.sluttdato?.let { dato -> LocalDate.parse(dato) }
+            startdato?.isEqualOrBefore(ansettelsesdato) == true &&
+                sluttdato?.isEqualOrAfter(ansettelsesdato) == true
         } == true
     }
 }
