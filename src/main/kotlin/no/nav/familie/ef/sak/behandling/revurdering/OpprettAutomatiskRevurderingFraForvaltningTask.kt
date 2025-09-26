@@ -49,5 +49,5 @@ class OpprettAutomatiskRevurderingFraForvaltningTask(
 
 data class PayloadOpprettAutomatiskRevurderingFraForvaltningTask(
     val personIdenter: List<String>,
-    val yearMonth: YearMonth,
+    val årMåned: YearMonth,
 )
