@@ -2,6 +2,7 @@ package no.nav.familie.ef.sak.behandling.revurdering
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.familie.ef.sak.amelding.InntektResponse
+import no.nav.familie.ef.sak.arbeidsforhold.ekstern.ArbeidsforholdClient
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.ÅrsakRevurdering
 import no.nav.familie.ef.sak.behandling.dto.RevurderingDto
@@ -52,6 +53,7 @@ class BehandleAutomatiskInntektsendringTask(
     private val årsakRevurderingsRepository: ÅrsakRevurderingsRepository,
     private val automatiskRevurderingService: AutomatiskRevurderingService,
     private val featureToggleService: FeatureToggleService,
+    private val arbeidsforholdClient: ArbeidsforholdClient,
 ) : AsyncTaskStep {
     private val logger = LoggerFactory.getLogger(javaClass)
     private val secureLogger = LoggerFactory.getLogger("secureLogger")
