@@ -93,7 +93,6 @@ class AutomatiskRevurderingEtterGOmregningTest : OppslagSpringRunnerTest() {
                 årsakRevurderingsRepository = årsakRevurderingsRepository,
                 automatiskRevurderingService = automatiskRevurderingService,
                 featureToggleService = featureToggleService,
-                arbeidsforholdClient = arbeidsforholdClient,
             )
     }
 

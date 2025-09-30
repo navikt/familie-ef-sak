@@ -6,6 +6,7 @@ import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.amelding.InntektResponse
 import no.nav.familie.ef.sak.arbeidsforhold.ArbeidsforholdClientTest.Companion.arbeidsforholdClient
 import no.nav.familie.ef.sak.arbeidsforhold.ekstern.ArbeidsforholdClient
+import no.nav.familie.ef.sak.arbeidsforhold.ekstern.ArbeidsforholdService
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
@@ -51,7 +52,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import java.math.BigDecimal
 import java.time.YearMonth
 
-class BehandleAutomatiskInntektsendringTaskTest : OppslagSpringRunnerTest() {
+class BehandleAutomatiskInntektsendringTaskTest() : OppslagSpringRunnerTest() {
     @Autowired
     private lateinit var behandlingRepository: BehandlingRepository
 
@@ -88,9 +89,6 @@ class BehandleAutomatiskInntektsendringTaskTest : OppslagSpringRunnerTest() {
     @Autowired
     private lateinit var inntektClientMock: InntektClientMock
 
-    @Autowired
-    private lateinit var arbeidsforholdClient: ArbeidsforholdClient
-
     private val personIdent = "3"
     private val fagsak = fagsak(identer = fagsakpersoner(setOf(personIdent)))
 
@@ -108,7 +106,6 @@ class BehandleAutomatiskInntektsendringTaskTest : OppslagSpringRunnerTest() {
                 årsakRevurderingsRepository = årsakRevurderingsRepository,
                 automatiskRevurderingService = automatiskRevurderingService,
                 featureToggleService = featureToggleService,
-                arbeidsforholdClient = arbeidsforholdClient,
             )
     }
 

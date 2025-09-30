@@ -53,7 +53,6 @@ class BehandleAutomatiskInntektsendringTask(
     private val årsakRevurderingsRepository: ÅrsakRevurderingsRepository,
     private val automatiskRevurderingService: AutomatiskRevurderingService,
     private val featureToggleService: FeatureToggleService,
-    private val arbeidsforholdClient: ArbeidsforholdClient,
 ) : AsyncTaskStep {
     private val logger = LoggerFactory.getLogger(javaClass)
     private val secureLogger = LoggerFactory.getLogger("secureLogger")
