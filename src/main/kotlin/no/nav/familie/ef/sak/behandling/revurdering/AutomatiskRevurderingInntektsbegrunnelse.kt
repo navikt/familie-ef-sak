@@ -83,7 +83,7 @@ fun tekstTypeForGOmregningOppOgNed(
     tiProsentOppOgNedG: TiProsentOppOgNed,
     førsteMånedMed10ProsentEndring: YearMonth,
 ): String =
-    if (forrigeBehandlingGOmregning && førsteMånedMed10ProsentEndring != Grunnbeløpsperioder.nyesteGrunnbeløp.periode.fom) {
+    if (forrigeBehandlingGOmregning && førsteMånedMed10ProsentEndring.isBefore(Grunnbeløpsperioder.nyesteGrunnbeløp.periode.fom)) {
         """
         Forventet årsinntekt fra ${Grunnbeløpsperioder.nyesteGrunnbeløpGyldigFraOgMed.tilNorskFormat()}: ${forventetÅrsinntektEtterG.tilNorskFormat()} kroner (G-omregning).
         - 10 % opp: ${tiProsentOppOgNedG.opp.tilNorskFormat()} kroner per måned.

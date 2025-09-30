@@ -769,13 +769,15 @@ fun lagInntektResponseForMånedsperiode(
         månedsperiode.måneder().map { inntektsmåned(it, listOf(inntekt(månedsinntekt.toDouble()))) },
     )
 
-fun lagInntektResponseForMånedsperiodeMedFeriepengerForrigeMåned(
+fun lagInntektResponseForMånedsperiodeMedGittLønnsbeskrivelseForrigeMåned(
     månedsinntekt: Int,
     månedsperiode: Månedsperiode,
+    beskrivelse: String = "feriepenger",
+    beløp: Int = 5000,
 ): InntektResponse =
     InntektResponse(
         månedsperiode.måneder().map { inntektsmåned(it, listOf(inntekt(månedsinntekt.toDouble()))) } +
-            inntektsmåned(YearMonth.now().minusMonths(1), listOf(inntekt(5000.0, InntektType.LØNNSINNTEKT, beskrivelse = "feriepenger"))),
+            inntektsmåned(YearMonth.now().minusMonths(1), listOf(inntekt(beløp.toDouble(), InntektType.LØNNSINNTEKT, beskrivelse = beskrivelse))),
     )
 
 fun lagInntektResponseFraMånedsinntekterFraDouble(månedsinntekter: List<Double>): InntektResponse {
