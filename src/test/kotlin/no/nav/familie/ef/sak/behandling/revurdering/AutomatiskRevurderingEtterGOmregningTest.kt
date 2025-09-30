@@ -2,6 +2,8 @@ package no.nav.familie.ef.sak.no.nav.familie.ef.sak.behandling.revurdering
 
 import io.mockk.every
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
+import no.nav.familie.ef.sak.arbeidsforhold.ArbeidsforholdClientTest.Companion.arbeidsforholdClient
+import no.nav.familie.ef.sak.arbeidsforhold.ekstern.ArbeidsforholdClient
 import no.nav.familie.ef.sak.barn.BarnRepository
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.revurdering.AutomatiskRevurderingService
@@ -69,6 +71,9 @@ class AutomatiskRevurderingEtterGOmregningTest : OppslagSpringRunnerTest() {
     @Autowired
     private lateinit var gOmregningTestUtil: GOmregningTestUtil
 
+    @Autowired
+    private lateinit var arbeidsforholdClient: ArbeidsforholdClient
+
     val fagsakId = UUID.fromString("3549f9e2-ddd1-467d-82be-bfdb6c7f07e1")
     val behandlingId = UUID.fromString("39c7dc82-adc1-43db-a6f9-64b8e4352ff6")
 
@@ -88,6 +93,7 @@ class AutomatiskRevurderingEtterGOmregningTest : OppslagSpringRunnerTest() {
                 årsakRevurderingsRepository = årsakRevurderingsRepository,
                 automatiskRevurderingService = automatiskRevurderingService,
                 featureToggleService = featureToggleService,
+                arbeidsforholdClient = arbeidsforholdClient,
             )
     }
 
@@ -97,7 +103,7 @@ class AutomatiskRevurderingEtterGOmregningTest : OppslagSpringRunnerTest() {
 
         val månedsperiode = Månedsperiode(Grunnbeløpsperioder.nyesteGrunnbeløpGyldigFraOgMed.minusMonths(1), YearMonth.now().minusMonths(1))
 
-        val payload = PayloadBehandleAutomatiskInntektsendringTask(personIdent, "2025-20")
+        val payload = PayloadBehandleAutomatiskInntektsendringTask(personIdent, YearMonth.of(2025, 5))
         val opprettetTask = BehandleAutomatiskInntektsendringTask.opprettTask(objectMapper.writeValueAsString(payload))
         val inntektResponseMedHøyInntekt = lagInntektResponseForMånedsperiode(28_000, månedsperiode)
 
@@ -132,7 +138,7 @@ class AutomatiskRevurderingEtterGOmregningTest : OppslagSpringRunnerTest() {
 
         val innmeldtMånedsinntekt = listOf(20_000, 24_000, 24_000, 28_000, 28_000, 30_000, 30_000)
 
-        val payload = PayloadBehandleAutomatiskInntektsendringTask(personIdent, "2025-20")
+        val payload = PayloadBehandleAutomatiskInntektsendringTask(personIdent, YearMonth.of(2025, 5))
         val opprettetTask = BehandleAutomatiskInntektsendringTask.opprettTask(objectMapper.writeValueAsString(payload))
         val inntektResponse = lagInntektResponseFraMånedsinntekter(innmeldtMånedsinntekt)
 
@@ -157,7 +163,7 @@ class AutomatiskRevurderingEtterGOmregningTest : OppslagSpringRunnerTest() {
 
         every { inntektClientMock.inntektClient().hentInntekt(any(), any(), any()) } returns inntektResponse
 
-        val payload = PayloadBehandleAutomatiskInntektsendringTask(personIdent, "2025-20")
+        val payload = PayloadBehandleAutomatiskInntektsendringTask(personIdent, YearMonth.of(2025, 5))
         val opprettetTask = BehandleAutomatiskInntektsendringTask.opprettTask(objectMapper.writeValueAsString(payload))
 
         behandleAutomatiskInntektsendringTask.doTask(opprettetTask)

@@ -59,66 +59,144 @@ class ArbeidsforholdClientTest {
             ),
         )
 
-        val response = arbeidsforholdClient.hentArbeidsforhold("15046713637", LocalDate.of(2020, 11, 19))
+        val response = arbeidsforholdClient.hentArbeidsforhold("15046713637")
         Assertions.assertThat(response).isNotNull
-        Assertions.assertThat(response.data).isNotNull
-        Assertions.assertThat(response.data?.size).isEqualTo(1)
+        Assertions.assertThat(response).isNotNull
+        Assertions.assertThat(response.size).isEqualTo(1)
     }
 
     private val queryMappingForHentOrganisasjon: MappingBuilder =
-        WireMock.post(WireMock.urlPathEqualTo("/api/aareg/arbeidsforhold"))
+        WireMock.get(WireMock.urlPathEqualTo("/api/v2/arbeidstaker/arbeidsforhold"))
 
     val aaregIntegrasjonerResponse =
         """
-        {
-            "data": [
+         [
+          {
+            "id": "V911050676R16054L0001",
+            "type": {
+              "kode": "ordinaertArbeidsforhold",
+              "beskrivelse": "Ordinært arbeidsforhold"
+            },
+            "arbeidstaker": {
+              "identer": [
                 {
-                    "navArbeidsforholdId": 3065622,
-                    "arbeidsforholdId": "1",
-                    "arbeidstaker": {
-                        "type": "Person",
-                        "offentligIdent": "15046713637",
-                        "aktoerId": "2267345319785"
-                    },
-                    "arbeidsgiver": {
-                        "type": "Organisasjon",
-                        "organisasjonsnummer": "972674818",
-                        "offentligIdent": null
-                    },
-                    "type": "ordinaertArbeidsforhold",
-                    "ansettelsesperiode": {
-                        "periode": {
-                            "fom": "2001-03-23",
-                            "tom": null
-                        },
-                        "bruksperiode": {
-                            "fom": "2021-03-23",
-                            "tom": null
-                        }
-                    },
-                    "arbeidsavtaler": [
-                        {
-                            "arbeidstidsordning": "ikkeSkift",
-                            "yrke": "2521106",
-                            "stillingsprosent": 100.0,
-                            "antallTimerPrUke": 37.5,
-                            "beregnetAntallTimerPrUke": 37.5,
-                            "bruksperiode": {
-                                "fom": "2021-03-23",
-                                "tom": null
-                            },
-                            "gyldighetsperiode": {
-                                "fom": "2001-03-01",
-                                "tom": null
-                            }
-                        }
-                    ]
+                  "type": "AKTORID",
+                  "ident": "2175141353812",
+                  "gjeldende": true
+                },
+                {
+                  "type": "FOLKEREGISTERIDENT",
+                  "ident": "30063000562",
+                  "gjeldende": true
                 }
+              ]
+            },
+            "arbeidssted": {
+              "type": "Underenhet",
+              "identer": [
+                {
+                  "type": "ORGANISASJONSNUMMER",
+                  "ident": "910825518"
+                }
+              ]
+            },
+            "opplysningspliktig": {
+              "type": "Hovedenhet",
+              "identer": [
+                {
+                  "type": "ORGANISASJONSNUMMER",
+                  "ident": "810825472"
+                }
+              ]
+            },
+            "ansettelsesperiode": {
+              "startdato": "2014-01-01"
+            },
+            "ansettelsesdetaljer": [
+              {
+                "type": "Ordinaer",
+                "arbeidstidsordning": {
+                  "kode": "ikkeSkift",
+                  "beskrivelse": "Ikke skift"
+                },
+                "ansettelsesform": {
+                  "kode": "fast",
+                  "beskrivelse": "Fast ansettelse"
+                },
+                "yrke": {
+                  "kode": "1231119",
+                  "beskrivelse": "KONTORLEDER"
+                },
+                "antallTimerPrUke": 37.5,
+                "avtaltStillingsprosent": 100,
+                "sisteStillingsprosentendring": "2014-01-01",
+                "sisteLoennsendring": "2014-01-01",
+                "rapporteringsmaaneder": {
+                  "fra": "2019-11",
+                  "til": null
+                }
+              },
+              {
+                "type": "Ordinaer",
+                "arbeidstidsordning": {
+                  "kode": "ikkeSkift",
+                  "beskrivelse": "Ikke skift"
+                },
+                "ansettelsesform": {
+                  "kode": "fast",
+                  "beskrivelse": "Fast ansettelse"
+                },
+                "yrke": {
+                  "kode": "1231119",
+                  "beskrivelse": "KONTORLEDER"
+                },
+                "antallTimerPrUke": 37.5,
+                "avtaltStillingsprosent": 100,
+                "sisteStillingsprosentendring": "2016-01-01",
+                "sisteLoennsendring": "2016-01-01",
+                "rapporteringsmaaneder": {
+                  "fra": "2016-01",
+                  "til": "2019-10"
+                }
+              }
             ],
-            "status": "SUKSESS",
-            "melding": "Innhenting av data var vellykket",
-            "frontendFeilmelding": null,
-            "stacktrace": null
-        }
+            "permisjoner": [
+              {
+                "id": "68796",
+                "type": {
+                  "kode": "permisjonMedForeldrepenger",
+                  "beskrivelse": "Permisjon med foreldrepenger"
+                },
+                "startdato": "2021-01-29",
+                "prosent": 50
+              }
+            ],
+            "permitteringer": [
+              {
+                "id": "54232",
+                "type": {
+                  "kode": "permittering",
+                  "beskrivelse": "Permittering"
+                },
+                "startdato": "2020-10-30",
+                "prosent": 50
+              }
+            ],
+            "rapporteringsordning": {
+              "kode": "a-ordningen",
+              "beskrivelse": "Rapportert via a-ordningen (2015-d.d.)"
+            },
+            "navArbeidsforholdId": 12345,
+            "navVersjon": 5,
+            "navUuid": "28199f29-29e3-42fc-8784-049772bc72fe",
+            "opprettet": "2020-05-28T08:52:01.793",
+            "sistBekreftet": "2020-09-15T08:19:53",
+            "sistEndret": "2020-07-03T14:13:00",
+            "bruksperiode": {
+              "fom": "2020-07-03T14:06:00.286",
+              "tom": null
+            }
+          }
+        ]
         """.trimIndent()
 }

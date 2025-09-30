@@ -37,7 +37,7 @@ spec:
   gcp:
     sqlInstances:
       - type: POSTGRES_14 # IF This is changed, all data will be lost. Read on nais.io how to upgrade
-        tier: db-f1-micro
+        tier: db-g1-small
         diskAutoresize: true
         cascadingDelete: false
         highAvailability: false
@@ -107,6 +107,7 @@ spec:
         - host: familie-ef-proxy.dev-fss-pub.nais.io
         - host: teamfamilie-unleash-api.nav.cloud.nais.io
         - host: ikomp-q2.dev-fss-pub.nais.io
+        - host: aareg-services.dev-fss-pub.nais.io
   azure:
     application:
       enabled: true

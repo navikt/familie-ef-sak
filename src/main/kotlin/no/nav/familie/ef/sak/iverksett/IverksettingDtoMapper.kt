@@ -506,6 +506,7 @@ fun MottakerRolle.tilIverksettDto(): Brevmottaker.MottakerRolle =
         MottakerRolle.FULLMEKTIG -> Brevmottaker.MottakerRolle.FULLMEKTIG
         MottakerRolle.VERGE -> Brevmottaker.MottakerRolle.VERGE
         MottakerRolle.BRUKER -> Brevmottaker.MottakerRolle.BRUKER
+        MottakerRolle.MOTTAKER -> Brevmottaker.MottakerRolle.MOTTAKER
     }
 
 private fun grunnbeløpFraTilkjentYtelse(tilkjentYtelse: TilkjentYtelse?) =
