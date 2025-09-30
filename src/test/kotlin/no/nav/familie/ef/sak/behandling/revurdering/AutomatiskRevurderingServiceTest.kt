@@ -20,6 +20,7 @@ import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.ef.sak.vedtak.domain.InntektWrapper
 import no.nav.familie.ef.sak.vedtak.domain.PeriodeWrapper
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
+import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.kontrakter.felles.Tema
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveResponseDto
 import no.nav.familie.kontrakter.felles.oppgave.IdentGruppe
@@ -137,26 +138,28 @@ class AutomatiskRevurderingServiceTest {
     @Test
     fun `skal fjerne ef overgangstønad og beregne forventet inntekt hvor den filtrerer bort ugyldige måneder`() {
         val inntekterSisteTreMånederOvergangsstønad = inntektsmåneder(YearMonth.now().minusMonths(3), YearMonth.now().plusMonths(1), inntektListe = listOf(inntekt(16000.0, InntektType.YTELSE_FRA_OFFENTLIGE, "overgangsstoenadTilEnsligMorEllerFarSomBegynteAaLoepe1April2014EllerSenere")))
-        val inntekterSisteTreMånederFastlønn = inntektsmåneder(YearMonth.now().minusMonths(3), YearMonth.now().plusMonths(1), inntektListe = listOf(inntekt(5000.0)))
-        val inntekterSisteTreMånederFastlønn2 = inntektsmåneder(YearMonth.now().minusMonths(3), YearMonth.now().plusMonths(1), inntektListe = listOf(inntekt(1000.0)))
+        val inntekterSisteTreMånederFastlønn = inntektsmåneder(YearMonth.now().minusMonths(3), YearMonth.now().plusMonths(1), inntektListe = listOf(inntekt(15000.0)))
+        val inntekterSisteTreMånederFastlønn2 = inntektsmåneder(YearMonth.now().minusMonths(3), YearMonth.now().plusMonths(1), inntektListe = listOf(inntekt(10000.0)))
         val inntekterFraSeksMånederTilTreMånederSidenFastlønn = inntektsmåneder(YearMonth.now().minusMonths(6), inntektListe = listOf(inntekt(1400.0))).take(3)
 
         val inntekter = inntekterSisteTreMånederOvergangsstønad + inntekterSisteTreMånederFastlønn + inntekterSisteTreMånederFastlønn2 + inntekterFraSeksMånederTilTreMånederSidenFastlønn
         val inntektResponse = InntektResponse(inntekter)
 
         val inntekterUtenOvergangsstønad = inntektResponse.inntektsmånederFraOgMedÅrMåned(YearMonth.now().minusMonths(6))
-        val forventetInntekt = inntektResponse.forventetMånedsinntekt()
+        val forrigeVedtak = vedtak(UUID.randomUUID(), Månedsperiode(YearMonth.now().minusMonths(10), YearMonth.now().plusMonths(10)))
+        val forventetInntekt = inntektResponse.forventetMånedsinntekt(forrigeVedtak)
 
         assertThat(inntekterUtenOvergangsstønad.size).isEqualTo(15)
-        assertThat(forventetInntekt).isEqualTo(6000)
+        assertThat(forventetInntekt).isEqualTo(25_000)
     }
 
     @Test
     fun `beregn forventetMånedsinntekt`() {
-        val inntekterSisteTreMåneder = inntektsmåneder(YearMonth.now().minusMonths(3), inntektListe = listOf(inntekt(2000.0))).take(3)
+        val inntekterSisteTreMåneder = inntektsmåneder(YearMonth.now().minusMonths(3), inntektListe = listOf(inntekt(20000.0))).take(3)
 
         val inntektResponse = InntektResponse(inntekterSisteTreMåneder)
 
-        assertThat(inntektResponse.forventetMånedsinntekt()).isEqualTo(2000)
+        val forrigeVedtak = vedtak(UUID.randomUUID(), Månedsperiode(YearMonth.now().minusMonths(10), YearMonth.now().plusMonths(10)))
+        assertThat(inntektResponse.forventetMånedsinntekt(forrigeVedtak)).isEqualTo(20000)
     }
 }
