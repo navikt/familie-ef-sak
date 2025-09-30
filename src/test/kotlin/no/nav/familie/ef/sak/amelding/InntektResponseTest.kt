@@ -39,12 +39,23 @@ class InntektResponseTest {
     @Test
     fun `finn førsteMånedMed10ProsentInntektsøkning - ignorer månedsinntekt tilsvarende årsinntekt på en halv g`() {
         val inntektV2ResponseJson: String = lesFil("json/inntekt/InntektLønnsinntektMedOvergangsstønadOgSykepenger.json")
-        val inntektV2ResponseJsonModifisert = oppdaterMåneder(inntektV2ResponseJson, 2)
+        val inntektV2ResponseJsonModifisert = oppdaterMåneder(inntektV2ResponseJson, 6)
         val inntektResponse = objectMapper.readValue<InntektResponse>(inntektV2ResponseJsonModifisert)
 
         val vedtak = vedtak(InntektWrapper(listOf(inntektsperiode(Månedsperiode(YearMonth.now().minusMonths(6), YearMonth.now().plusMonths(1)), BigDecimal.valueOf(0)))))
         val inntektUtenOvergangsstønad = inntektResponse.førsteMånedMed10ProsentInntektsøkning(vedtak)
         assertThat(inntektUtenOvergangsstønad).isEqualTo(YearMonth.now().minusMonths(1))
+    }
+
+    @Test
+    fun `finn førsteMånedMed10ProsentInntektsøkning - bruk første måned hvor det er 10 prosent endring i gjeldende måned og påfølgende og resten må være større er lik forventet inntekt`() {
+        val inntektV2ResponseJson: String = lesFil("json/inntekt/InntektFastlønnMedToMånederMindreInntekt.json")
+        val inntektV2ResponseJsonModifisert = oppdaterMåneder(inntektV2ResponseJson, 6)
+        val inntektResponse = objectMapper.readValue<InntektResponse>(inntektV2ResponseJsonModifisert)
+
+        val vedtak = vedtak(InntektWrapper(listOf(inntektsperiode(Månedsperiode(YearMonth.now().minusMonths(6), YearMonth.now().plusMonths(1)), BigDecimal.valueOf(50000)))))
+        val inntektUtenOvergangsstønad = inntektResponse.førsteMånedMed10ProsentInntektsøkning(vedtak)
+        assertThat(inntektUtenOvergangsstønad).isEqualTo(YearMonth.now().minusMonths(3))
     }
 
     @Test
