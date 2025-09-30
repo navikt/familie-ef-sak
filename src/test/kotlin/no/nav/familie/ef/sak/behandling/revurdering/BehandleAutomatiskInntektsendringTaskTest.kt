@@ -52,7 +52,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import java.math.BigDecimal
 import java.time.YearMonth
 
-class BehandleAutomatiskInntektsendringTaskTest() : OppslagSpringRunnerTest() {
+class BehandleAutomatiskInntektsendringTaskTest : OppslagSpringRunnerTest() {
     @Autowired
     private lateinit var behandlingRepository: BehandlingRepository
 

@@ -33,7 +33,7 @@ class AutomatiskRevurderingService(
     private val grunnlagsdataInntektRepository: GrunnlagsdataInntektRepository,
     private val vedtakService: VedtakService,
     private val environment: Environment,
-    private val arbeidsforholdService: ArbeidsforholdService
+    private val arbeidsforholdService: ArbeidsforholdService,
 ) {
     private val logger = LoggerFactory.getLogger(javaClass)
     private val secureLogger = LoggerFactory.getLogger("secureLogger")
@@ -60,8 +60,8 @@ class AutomatiskRevurderingService(
             return false
         }
 
-        if ( arbeidsforholdService.finnesAvsluttetArbeidsforholdSisteAntallMåneder(personIdent,4)){
-            logger.info("Finnes arbeidsforhold for fagsak ${fagsak.id}")
+        if (arbeidsforholdService.finnesAvsluttetArbeidsforholdSisteAntallMåneder(personIdent, 4)) {
+            logger.info("Finnes avsluttet arbeidsforhold siste fire måneder for fagsak ${fagsak.id}")
             return false
         }
 
