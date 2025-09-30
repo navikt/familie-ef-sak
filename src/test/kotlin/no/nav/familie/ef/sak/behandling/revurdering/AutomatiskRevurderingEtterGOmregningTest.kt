@@ -2,7 +2,6 @@ package no.nav.familie.ef.sak.no.nav.familie.ef.sak.behandling.revurdering
 
 import io.mockk.every
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
-import no.nav.familie.ef.sak.arbeidsforhold.ArbeidsforholdClientTest.Companion.arbeidsforholdClient
 import no.nav.familie.ef.sak.arbeidsforhold.ekstern.ArbeidsforholdClient
 import no.nav.familie.ef.sak.barn.BarnRepository
 import no.nav.familie.ef.sak.behandling.BehandlingService
@@ -160,7 +159,7 @@ class AutomatiskRevurderingEtterGOmregningTest : OppslagSpringRunnerTest() {
 
         val innmeldtMånedsinntekt = listOf(20_000, 20_000, 20_000, 20_000, 28_000, 30_000, 30_000)
 
-        val payload = PayloadBehandleAutomatiskInntektsendringTask(personIdent, "2025-20")
+        val payload = PayloadBehandleAutomatiskInntektsendringTask(personIdent, YearMonth.now())
         val opprettetTask = BehandleAutomatiskInntektsendringTask.opprettTask(objectMapper.writeValueAsString(payload))
         val inntektResponse = lagInntektResponseFraMånedsinntekter(innmeldtMånedsinntekt)
 
