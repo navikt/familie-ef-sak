@@ -2,6 +2,7 @@ package no.nav.familie.ef.sak.behandling.revurdering
 
 import no.nav.familie.ef.sak.amelding.InntektResponse
 import no.nav.familie.ef.sak.amelding.ekstern.AMeldingInntektClient
+import no.nav.familie.ef.sak.arbeidsforhold.ekstern.ArbeidsforholdService
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.oppgave.OppgaveService
@@ -32,6 +33,7 @@ class AutomatiskRevurderingService(
     private val grunnlagsdataInntektRepository: GrunnlagsdataInntektRepository,
     private val vedtakService: VedtakService,
     private val environment: Environment,
+    private val arbeidsforholdService: ArbeidsforholdService,
 ) {
     private val logger = LoggerFactory.getLogger(javaClass)
     private val secureLogger = LoggerFactory.getLogger("secureLogger")
@@ -55,6 +57,11 @@ class AutomatiskRevurderingService(
 
         if (behandlingService.finnesÅpenBehandling(fagsak.id)) {
             logger.info("Finnes åpen behandling for fagsak ${fagsak.id}")
+            return false
+        }
+
+        if (arbeidsforholdService.finnesAvsluttetArbeidsforholdSisteAntallMåneder(personIdent, 4)) {
+            logger.info("Finnes avsluttet arbeidsforhold siste fire måneder for fagsak ${fagsak.id}")
             return false
         }
 

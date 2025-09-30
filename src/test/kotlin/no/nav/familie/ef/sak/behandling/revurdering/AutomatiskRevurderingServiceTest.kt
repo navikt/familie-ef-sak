@@ -5,6 +5,7 @@ import io.mockk.mockk
 import io.mockk.verify
 import no.nav.familie.ef.sak.amelding.InntektResponse
 import no.nav.familie.ef.sak.amelding.InntektType
+import no.nav.familie.ef.sak.arbeidsforhold.ekstern.ArbeidsforholdService
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
@@ -29,7 +30,6 @@ import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.kontrakter.felles.oppgave.StatusEnum
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import org.mockito.Mockito.verify
 import java.time.YearMonth
 import java.util.UUID
 
@@ -37,7 +37,8 @@ class AutomatiskRevurderingServiceTest {
     val behandlingServiceMock = mockk<BehandlingService>(relaxed = true)
     val oppgaveServiceMock = mockk<OppgaveService>(relaxed = true)
     val vedtakServiceMock = mockk<VedtakService>(relaxed = true)
-    val automatiskRevurderingService = AutomatiskRevurderingService(mockk(relaxed = true), mockk(relaxed = true), behandlingServiceMock, oppgaveServiceMock, mockk(relaxed = true), mockk(relaxed = true), vedtakServiceMock, mockk(relaxed = true))
+    val arbeidsforholdServiceMock = mockk<ArbeidsforholdService>(relaxed = true)
+    val automatiskRevurderingService = AutomatiskRevurderingService(mockk(relaxed = true), mockk(relaxed = true), behandlingServiceMock, oppgaveServiceMock, mockk(relaxed = true), mockk(relaxed = true), vedtakServiceMock, mockk(relaxed = true), arbeidsforholdServiceMock)
 
     @Test
     fun `person med behandling som kan automatisk revurderes`() {
@@ -53,7 +54,28 @@ class AutomatiskRevurderingServiceTest {
 
     @Test
     fun `kan ikke automatisk revurderes som følge av åpen behandling`() {
+        val vedtakMed1Periode =
+            vedtak(
+                behandlingId = UUID.randomUUID(),
+                perioder = PeriodeWrapper(listOf(vedtaksperiode(2025))),
+                inntekter = InntektWrapper(listOf(inntektsperiode(2025))),
+            )
+        every { vedtakServiceMock.hentVedtak(any()) } returns vedtakMed1Periode
         every { behandlingServiceMock.finnesÅpenBehandling(any()) } returns true
+
+        assertThat(automatiskRevurderingService.kanAutomatiskRevurderes("1")).isFalse()
+    }
+
+    @Test
+    fun `kan ikke automatisk revurderes som følge av avsluttet arbeidsforhold siste fire måneder`() {
+        val vedtakMed1Periode =
+            vedtak(
+                behandlingId = UUID.randomUUID(),
+                perioder = PeriodeWrapper(listOf(vedtaksperiode(2025))),
+                inntekter = InntektWrapper(listOf(inntektsperiode(2025))),
+            )
+        every { vedtakServiceMock.hentVedtak(any()) } returns vedtakMed1Periode
+        every { arbeidsforholdServiceMock.finnesAvsluttetArbeidsforholdSisteAntallMåneder(any(), 4) } returns true
 
         assertThat(automatiskRevurderingService.kanAutomatiskRevurderes("1")).isFalse()
     }
