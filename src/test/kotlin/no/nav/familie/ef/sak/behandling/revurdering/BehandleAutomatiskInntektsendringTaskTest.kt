@@ -4,9 +4,6 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import io.mockk.every
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.amelding.InntektResponse
-import no.nav.familie.ef.sak.arbeidsforhold.ArbeidsforholdClientTest.Companion.arbeidsforholdClient
-import no.nav.familie.ef.sak.arbeidsforhold.ekstern.ArbeidsforholdClient
-import no.nav.familie.ef.sak.arbeidsforhold.ekstern.ArbeidsforholdService
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
