@@ -34,14 +34,14 @@
         <springdoc.version>2.8.13</springdoc.version>
         <mockk.version>1.14.5</mockk.version>
         <felles.version>3.20250915092837_153983f</felles.version>
-        <prosessering.version>2.20250915083819_745c62b</prosessering.version>
+        <prosessering.version>2.20250922094930_4bb329c</prosessering.version>
         <token-validation-spring.version>5.0.37</token-validation-spring.version>
 
         <start-class>no.nav.familie.ef.sak.ApplicationKt</start-class>
-        <kontrakter.version>3.0_20250925121624_a7fbe95</kontrakter.version>
+        <kontrakter.version>3.0_20250926084423_43c9cbe</kontrakter.version>
         <mikrofrontend.builder.version>20230704114948-74aa2e9</mikrofrontend.builder.version>
-        <eksterne.kontrakter.bisys.version>2.0_20250915155846_3e7ecd7</eksterne.kontrakter.bisys.version>
-        <cucumber.version>7.28.2</cucumber.version>
+        <eksterne.kontrakter.bisys.version>2.0_20250922093519_c7288d4</eksterne.kontrakter.bisys.version>
+        <cucumber.version>7.29.0</cucumber.version>
 
 
         <!--suppress UnresolvedMavenProperty  Ligger som secret i github-->
@@ -129,7 +129,7 @@
         <dependency>
             <groupId>org.flywaydb</groupId>
             <artifactId>flyway-database-postgresql</artifactId>
-            <version>11.12.0</version>
+            <version>11.13.2</version>
             <scope>runtime</scope>
         </dependency>
         <dependency>
