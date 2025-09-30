@@ -140,13 +140,17 @@ data class InntektResponse(
         if (!harTreForrigeInntektsmåneder) {
             throw IllegalStateException("Mangler inntektsinformasjon for de tre siste måneder")
         }
-        val harInntektsøkningSisteTreMåneder = førsteMånedMed10ProsentInntektsøkning(forrigeVedtak).isEqualOrAfter(cutoffYearMonth.minusMonths(2))
+
+        val førsteMånedMed10ProsentInntektsøkning = førsteMånedMed10ProsentInntektsøkning(forrigeVedtak)
+        val harInntektsøkningSisteTreMåneder = førsteMånedMed10ProsentInntektsøkning.isEqualOrAfter(cutoffYearMonth.minusMonths(2))
+
         if (harInntektsøkningSisteTreMåneder) {
-            val førsteMånedMedØkning = førsteMånedMed10ProsentInntektsøkning(forrigeVedtak)
-            val diff = ChronoUnit.MONTHS.between(førsteMånedMedØkning, cutoffYearMonth)
+            val førsteMånedMedØkning = førsteMånedMed10ProsentInntektsøkning
+            val diffMåneder = ChronoUnit.MONTHS.between(førsteMånedMedØkning, cutoffYearMonth)
             val revurderesFraDato = førsteMånedMedØkning.plusMonths(1)
-            return totalInntektForMånedsperiodeUtenFeriepengerOgHelligdagstillegg(revurderesFraDato) / diff.toInt()
+            return totalInntektForMånedsperiodeUtenFeriepengerOgHelligdagstillegg(revurderesFraDato) / diffMåneder.toInt()
         }
+
         return totalInntektForMånedsperiodeUtenFeriepengerOgHelligdagstillegg(cutoffYearMonth.minusMonths(2)) / 3
     }
 
