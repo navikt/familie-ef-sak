@@ -8,6 +8,7 @@ import no.nav.familie.ef.sak.vedtak.domain.Vedtak
 import java.time.LocalDate
 import java.time.OffsetDateTime
 import java.time.YearMonth
+import java.time.temporal.ChronoUnit
 import kotlin.math.abs
 
 data class InntektResponse(
@@ -31,7 +32,7 @@ data class InntektResponse(
         inntektsmånederFraOgMedÅrMåned(fraOgMedÅrMåned)
             .filter { it.måned.isEqualOrAfter(fraOgMedÅrMåned) && it.måned.isEqualOrBefore(cutoffYearMonth) }
             .flatMap { it.inntektListe }
-            .filterNot { ignorerteYtelserOgUtbetalinger.contains(it.beskrivelse) || it.beskrivelse.contains("ferie", true) || it.beskrivelse == "helligdagstillegg" }
+            .filterNot { lønnsbeskrivelseListAvUtbetalingerSomSkalIgnoreresVedBeregningAvFeriepenger().contains(it.beskrivelse) || it.beskrivelse.contains("ferie", true) }
             .sumOf { it.beløp }
             .toInt()
 
@@ -135,12 +136,33 @@ data class InntektResponse(
                     inntektsmåned.måned.isEqualOrAfter(fraOgMedÅrMåned)
             }.sortedBy { it.måned }
 
-    fun forventetMånedsinntekt(): Int {
+    fun forventetMånedsinntekt(forrigeVedtak: Vedtak): Int {
         if (!harTreForrigeInntektsmåneder) {
             throw IllegalStateException("Mangler inntektsinformasjon for de tre siste måneder")
         }
 
+        val førsteMånedMed10ProsentInntektsøkning = førsteMånedMed10ProsentInntektsøkning(forrigeVedtak)
+        val harInntektsøkningSisteTreMåneder = førsteMånedMed10ProsentInntektsøkning.isEqualOrAfter(cutoffYearMonth.minusMonths(2))
+
+        if (harInntektsøkningSisteTreMåneder) {
+            val førsteMånedMedØkning = førsteMånedMed10ProsentInntektsøkning
+            val diffMåneder = ChronoUnit.MONTHS.between(førsteMånedMedØkning, cutoffYearMonth)
+            val revurderesFraDato = førsteMånedMedØkning.plusMonths(1)
+            return totalInntektForMånedsperiodeUtenFeriepengerOgHelligdagstillegg(revurderesFraDato) / diffMåneder.toInt()
+        }
+
         return totalInntektForMånedsperiodeUtenFeriepengerOgHelligdagstillegg(cutoffYearMonth.minusMonths(2)) / 3
+    }
+
+    fun lønnsbeskrivelseListAvUtbetalingerSomSkalIgnoreresVedBeregningAvFeriepenger(): List<String> {
+        val styrehonorar = inntektsmåneder.flatMap { it.inntektListe }.filter { it.beskrivelse == "styrehonorarOgGodtgjoerelseVerv" }
+
+        val ignorerUtbetalinger = mutableListOf("helligdagstillegg")
+        if (styrehonorar.count() < 3 && styrehonorar.sumOf { it.beløp } < 5000) {
+            ignorerUtbetalinger.add("styrehonorarOgGodtgjoerelseVerv")
+        }
+
+        return ignorerUtbetalinger + ignorerteYtelserOgUtbetalinger
     }
 
     val harTreForrigeInntektsmåneder =
@@ -153,7 +175,7 @@ data class InntektResponse(
         inntektsmåneder.any { totalInntektForÅrMåned(it.måned) * 12 > finnGrunnbeløp(it.måned).grunnbeløp.toInt() * 5.5 }
 
     companion object {
-        private val ignorerteYtelserOgUtbetalinger = listOf("overgangsstoenadTilEnsligMorEllerFarSomBegynteAaLoepe1April2014EllerSenere", "barnepensjon", "introduksjonsstoenad")
+        private val ignorerteYtelserOgUtbetalinger = listOf("overgangsstoenadTilEnsligMorEllerFarSomBegynteAaLoepe1April2014EllerSenere", "barnepensjon", "introduksjonsstoenad", "styrehonorarOgGodtgjoerelseVerv")
     }
 }
 

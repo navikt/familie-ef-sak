@@ -5,6 +5,7 @@ import io.mockk.mockk
 import io.mockk.verify
 import no.nav.familie.ef.sak.amelding.InntektResponse
 import no.nav.familie.ef.sak.amelding.InntektType
+import no.nav.familie.ef.sak.arbeidsforhold.ekstern.ArbeidsforholdService
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
@@ -19,6 +20,7 @@ import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.ef.sak.vedtak.domain.InntektWrapper
 import no.nav.familie.ef.sak.vedtak.domain.PeriodeWrapper
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
+import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.kontrakter.felles.Tema
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveResponseDto
 import no.nav.familie.kontrakter.felles.oppgave.IdentGruppe
@@ -28,7 +30,6 @@ import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.kontrakter.felles.oppgave.StatusEnum
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import org.mockito.Mockito.verify
 import java.time.YearMonth
 import java.util.UUID
 
@@ -36,7 +37,8 @@ class AutomatiskRevurderingServiceTest {
     val behandlingServiceMock = mockk<BehandlingService>(relaxed = true)
     val oppgaveServiceMock = mockk<OppgaveService>(relaxed = true)
     val vedtakServiceMock = mockk<VedtakService>(relaxed = true)
-    val automatiskRevurderingService = AutomatiskRevurderingService(mockk(relaxed = true), mockk(relaxed = true), behandlingServiceMock, oppgaveServiceMock, mockk(relaxed = true), mockk(relaxed = true), vedtakServiceMock, mockk(relaxed = true))
+    val arbeidsforholdServiceMock = mockk<ArbeidsforholdService>(relaxed = true)
+    val automatiskRevurderingService = AutomatiskRevurderingService(mockk(relaxed = true), mockk(relaxed = true), behandlingServiceMock, oppgaveServiceMock, mockk(relaxed = true), mockk(relaxed = true), vedtakServiceMock, mockk(relaxed = true), arbeidsforholdServiceMock)
 
     @Test
     fun `person med behandling som kan automatisk revurderes`() {
@@ -52,7 +54,28 @@ class AutomatiskRevurderingServiceTest {
 
     @Test
     fun `kan ikke automatisk revurderes som følge av åpen behandling`() {
+        val vedtakMed1Periode =
+            vedtak(
+                behandlingId = UUID.randomUUID(),
+                perioder = PeriodeWrapper(listOf(vedtaksperiode(2025))),
+                inntekter = InntektWrapper(listOf(inntektsperiode(2025))),
+            )
+        every { vedtakServiceMock.hentVedtak(any()) } returns vedtakMed1Periode
         every { behandlingServiceMock.finnesÅpenBehandling(any()) } returns true
+
+        assertThat(automatiskRevurderingService.kanAutomatiskRevurderes("1")).isFalse()
+    }
+
+    @Test
+    fun `kan ikke automatisk revurderes som følge av avsluttet arbeidsforhold siste fire måneder`() {
+        val vedtakMed1Periode =
+            vedtak(
+                behandlingId = UUID.randomUUID(),
+                perioder = PeriodeWrapper(listOf(vedtaksperiode(2025))),
+                inntekter = InntektWrapper(listOf(inntektsperiode(2025))),
+            )
+        every { vedtakServiceMock.hentVedtak(any()) } returns vedtakMed1Periode
+        every { arbeidsforholdServiceMock.finnesAvsluttetArbeidsforholdSisteAntallMåneder(any(), 4) } returns true
 
         assertThat(automatiskRevurderingService.kanAutomatiskRevurderes("1")).isFalse()
     }
@@ -115,26 +138,28 @@ class AutomatiskRevurderingServiceTest {
     @Test
     fun `skal fjerne ef overgangstønad og beregne forventet inntekt hvor den filtrerer bort ugyldige måneder`() {
         val inntekterSisteTreMånederOvergangsstønad = inntektsmåneder(YearMonth.now().minusMonths(3), YearMonth.now().plusMonths(1), inntektListe = listOf(inntekt(16000.0, InntektType.YTELSE_FRA_OFFENTLIGE, "overgangsstoenadTilEnsligMorEllerFarSomBegynteAaLoepe1April2014EllerSenere")))
-        val inntekterSisteTreMånederFastlønn = inntektsmåneder(YearMonth.now().minusMonths(3), YearMonth.now().plusMonths(1), inntektListe = listOf(inntekt(5000.0)))
-        val inntekterSisteTreMånederFastlønn2 = inntektsmåneder(YearMonth.now().minusMonths(3), YearMonth.now().plusMonths(1), inntektListe = listOf(inntekt(1000.0)))
+        val inntekterSisteTreMånederFastlønn = inntektsmåneder(YearMonth.now().minusMonths(3), YearMonth.now().plusMonths(1), inntektListe = listOf(inntekt(15000.0)))
+        val inntekterSisteTreMånederFastlønn2 = inntektsmåneder(YearMonth.now().minusMonths(3), YearMonth.now().plusMonths(1), inntektListe = listOf(inntekt(10000.0)))
         val inntekterFraSeksMånederTilTreMånederSidenFastlønn = inntektsmåneder(YearMonth.now().minusMonths(6), inntektListe = listOf(inntekt(1400.0))).take(3)
 
         val inntekter = inntekterSisteTreMånederOvergangsstønad + inntekterSisteTreMånederFastlønn + inntekterSisteTreMånederFastlønn2 + inntekterFraSeksMånederTilTreMånederSidenFastlønn
         val inntektResponse = InntektResponse(inntekter)
 
         val inntekterUtenOvergangsstønad = inntektResponse.inntektsmånederFraOgMedÅrMåned(YearMonth.now().minusMonths(6))
-        val forventetInntekt = inntektResponse.forventetMånedsinntekt()
+        val forrigeVedtak = vedtak(UUID.randomUUID(), Månedsperiode(YearMonth.now().minusMonths(10), YearMonth.now().plusMonths(10)))
+        val forventetInntekt = inntektResponse.forventetMånedsinntekt(forrigeVedtak)
 
         assertThat(inntekterUtenOvergangsstønad.size).isEqualTo(15)
-        assertThat(forventetInntekt).isEqualTo(6000)
+        assertThat(forventetInntekt).isEqualTo(25_000)
     }
 
     @Test
     fun `beregn forventetMånedsinntekt`() {
-        val inntekterSisteTreMåneder = inntektsmåneder(YearMonth.now().minusMonths(3), inntektListe = listOf(inntekt(2000.0))).take(3)
+        val inntekterSisteTreMåneder = inntektsmåneder(YearMonth.now().minusMonths(3), inntektListe = listOf(inntekt(20000.0))).take(3)
 
         val inntektResponse = InntektResponse(inntekterSisteTreMåneder)
 
-        assertThat(inntektResponse.forventetMånedsinntekt()).isEqualTo(2000)
+        val forrigeVedtak = vedtak(UUID.randomUUID(), Månedsperiode(YearMonth.now().minusMonths(10), YearMonth.now().plusMonths(10)))
+        assertThat(inntektResponse.forventetMånedsinntekt(forrigeVedtak)).isEqualTo(20000)
     }
 }
