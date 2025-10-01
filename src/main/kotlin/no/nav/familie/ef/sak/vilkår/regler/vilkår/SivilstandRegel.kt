@@ -28,7 +28,6 @@ class SivilstandRegel :
                 SAMLIVSBRUDD_LIKESTILT_MED_SEPARASJON,
                 SAMSVAR_DATO_SEPARASJON_OG_FRAFLYTTING,
                 UNNTAK,
-                UNNTAK_GAMLE_VALG,
             ),
         hovedregler =
             regelIder(
@@ -68,8 +67,8 @@ class SivilstandRegel :
         sivilstandSøknad: Sivilstand?,
     ) = when {
         sivilstandstype.erUgiftEllerUoppgitt() &&
-                sivilstandSøknad != null &&
-                (sivilstandSøknad.erUformeltGiftEllerSkilt()) ->
+            sivilstandSøknad != null &&
+            (sivilstandSøknad.erUformeltGiftEllerSkilt()) ->
             KRAV_SIVILSTAND_PÅKREVD_BEGRUNNELSE
 
         sivilstandstype.erUgiftEllerUoppgitt() -> KRAV_SIVILSTAND_UTEN_PÅKREVD_BEGRUNNELSE
@@ -86,7 +85,6 @@ class SivilstandRegel :
     }.regelId
 
     companion object {
-
         private fun påkrevdBegrunnelse(regelId: RegelId) =
             RegelSteg(
                 regelId = regelId,
@@ -123,18 +121,6 @@ class SivilstandRegel :
         private val UNNTAK =
             RegelSteg(
                 regelId = RegelId.SIVILSTAND_UNNTAK,
-                svarMapping =
-                    mapOf(
-                        SvarId.GJENLEVENDE_SEPARERT_FØR_DØDSFALL to SluttSvarRegel.OPPFYLT_MED_PÅKREVD_BEGRUNNELSE,
-                        SvarId.GJENLEVENDE_IKKE_RETT_TIL_YTELSER to SluttSvarRegel.OPPFYLT_MED_PÅKREVD_BEGRUNNELSE,
-                        SvarId.GJENLEVENDE_OVERTAR_OMSORG to SluttSvarRegel.OPPFYLT_MED_PÅKREVD_BEGRUNNELSE,
-                        SvarId.NEI to SluttSvarRegel.IKKE_OPPFYLT_MED_PÅKREVD_BEGRUNNELSE,
-                    ),
-            )
-
-        private val UNNTAK_GAMLE_VALG =
-            RegelSteg(
-                regelId = RegelId.SIVILSTAND_UNNTAK_GAMLE_VALG,
                 svarMapping =
                     mapOf(
                         SvarId.GJENLEVENDE_IKKE_RETT_TIL_YTELSER to SluttSvarRegel.OPPFYLT_MED_PÅKREVD_BEGRUNNELSE,

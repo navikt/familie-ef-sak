@@ -35,7 +35,6 @@ enum class RegelId(
     KRAV_SIVILSTAND_PÅKREVD_BEGRUNNELSE("Er krav til sivilstand oppfylt?"),
     KRAV_SIVILSTAND_UTEN_PÅKREVD_BEGRUNNELSE("Er krav til sivilstand oppfylt?"),
     SIVILSTAND_UNNTAK("Er unntak fra hovedregelen oppfylt?"),
-    SIVILSTAND_UNNTAK_GAMLE_VALG("Er unntak fra hovedregelen oppfylt?", RegelVersjon.HISTORISK),
 
     // Nytt barn samme partner
     HAR_FÅTT_ELLER_VENTER_NYTT_BARN_MED_SAMME_PARTNER("Bor og oppholder bruker og barna seg i Norge?"),
