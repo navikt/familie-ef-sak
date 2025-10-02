@@ -145,7 +145,7 @@ interface BehandlingRepository :
                      JOIN behandling b ON f.id = b.fagsak_id
                      JOIN person_ident pi ON f.fagsak_person_id=pi.fagsak_person_id
             WHERE b.fagsak_id = :fagsakId
-            ORDER BY b.vedtakstidspunkt desc
+            ORDER BY b.opprettet_tid desc
             LIMIT 1
     """,
     )
