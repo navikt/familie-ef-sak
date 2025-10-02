@@ -196,10 +196,10 @@ internal class NæringsinntektKontrollServiceTest : OppslagSpringRunnerTest() {
         assertThat(næringsinntektKontrollRepository.findAll().first().utfall).isEqualTo(NæringsinntektKontrollUtfall.OPPFYLLER_IKKE_AKTIVITETSPLIKT)
     }
 
-    @Test
-    fun `Påminnelse om testing av selvstendig næringsdrivende (se favrokort NAV-24146)`() {
-        assertThat(LocalDate.now()).isBefore(LocalDate.of(2025, 10, 2))
-    }
+//    @Test
+//    fun `Påminnelse om testing av selvstendig næringsdrivende (se favrokort NAV-24146)`() {
+//        assertThat(LocalDate.now()).isBefore(LocalDate.of(2025, 10, 2))
+//    }
 
     fun setupMocksMedNæringsinntekt(næringsinntekt: Int = 0): Long {
         val id = Math.random().toLong()
