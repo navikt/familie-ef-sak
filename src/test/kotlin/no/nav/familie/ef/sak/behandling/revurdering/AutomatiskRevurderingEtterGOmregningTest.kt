@@ -71,9 +71,6 @@ class AutomatiskRevurderingEtterGOmregningTest : OppslagSpringRunnerTest() {
     @Autowired
     private lateinit var gOmregningTestUtil: GOmregningTestUtil
 
-    @Autowired
-    private lateinit var arbeidsforholdClient: ArbeidsforholdClient
-
     val fagsakId = UUID.fromString("3549f9e2-ddd1-467d-82be-bfdb6c7f07e1")
     val behandlingId = UUID.fromString("39c7dc82-adc1-43db-a6f9-64b8e4352ff6")
 
@@ -135,13 +132,13 @@ class AutomatiskRevurderingEtterGOmregningTest : OppslagSpringRunnerTest() {
     fun `Siste behandling er g-omregning og vedtaksperiode før g-omregning har samme fom-dato som g-omregning`() {
         gOmregningTestUtil.gOmregne(behandlingId, fagsakId, YearMonth.of(YearMonth.now().year, 5))
 
-        val innmeldtMånedsinntekt = listOf(20_000, 24_000, 24_000, 28_000, 28_000, 30_000, 30_000)
-
         val payload = PayloadBehandleAutomatiskInntektsendringTask(personIdent, YearMonth.of(2025, 5))
         val opprettetTask = BehandleAutomatiskInntektsendringTask.opprettTask(objectMapper.writeValueAsString(payload))
-        val inntektResponse = lagInntektResponseFraMånedsinntekter(innmeldtMånedsinntekt)
+        val månedsperiodeMedHøyInntektFraSammeMånedSomGOmregning = Månedsperiode(Grunnbeløpsperioder.nyesteGrunnbeløpGyldigFraOgMed, YearMonth.now().minusMonths(1))
 
-        every { inntektClientMock.inntektClient().hentInntekt(personIdent, any(), any()) } returns inntektResponse
+        val inntektResponseMedHøyInntekt = lagInntektResponseForMånedsperiode(28_000, månedsperiodeMedHøyInntektFraSammeMånedSomGOmregning)
+
+        every { inntektClientMock.inntektClient().hentInntekt(personIdent, any(), any()) } returns inntektResponseMedHøyInntekt
 
         behandleAutomatiskInntektsendringTask.doTask(opprettetTask)
 
