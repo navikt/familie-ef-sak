@@ -146,7 +146,7 @@ class AutomatiskRevurderingEtterGOmregningTest : OppslagSpringRunnerTest() {
         val oppdatertVedtak = vedtakService.hentVedtak(revurdering.id)
 
         val førstePeriodeIOppdatertVedtak = oppdatertVedtak.perioder?.perioder?.first()
-        assertThat(førstePeriodeIOppdatertVedtak?.periode?.fom).isEqualTo(YearMonth.of(YearMonth.now().year, 7))
+        assertThat(førstePeriodeIOppdatertVedtak?.periode?.fom).isEqualTo(YearMonth.of(YearMonth.now().year, 6))
         assertThat(førstePeriodeIOppdatertVedtak?.periode?.tom).isEqualTo(YearMonth.of(YearMonth.now().year + 1, 12))
     }
 
