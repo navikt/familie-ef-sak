@@ -2,6 +2,7 @@ package no.nav.familie.ef.sak.oppfølgingsoppgave
 
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
 import no.nav.familie.ef.sak.behandling.BehandlingService
+import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus.FERDIGSTILT
 import no.nav.familie.ef.sak.behandling.oppgaveforopprettelse.OppgaverForOpprettelseDto
 import no.nav.familie.ef.sak.behandling.oppgaveforopprettelse.OppgaverForOpprettelseRepository
 import no.nav.familie.ef.sak.behandling.oppgaverforferdigstilling.OppgaverForFerdigstillingDto
@@ -139,8 +140,7 @@ class OppfølgingsoppgaveService(
             return emptyList()
         }
 
-        val sisteOvergangsstønadBehandlingId = finnSisteOvergangsstønadBehandlingIdForBarnetilsyn(saksbehandling.ident, saksbehandling.stønadstype)
-        val sjekkLøpendeOvergangsstønad = eksternStønadsperioderService.hentOvergangsstønadperioderMedAktivitet(saksbehandling.ident)
+        val løpendeOvergangsstønad = eksternStønadsperioderService.hentOvergangsstønadperioderMedAktivitet(saksbehandling.ident)
 
         val vedtak = vedtakService.hentVedtak(behandlingId)
         val tilkjentYtelse =
@@ -148,30 +148,23 @@ class OppfølgingsoppgaveService(
                 vedtak.resultatType == ResultatType.AVSLÅ && vedtak.avslåÅrsak == AvslagÅrsak.MINDRE_INNTEKTSENDRINGER ->
                     hentSisteTilkjentYtelse(saksbehandling.fagsakId)
                 vedtak.resultatType == ResultatType.INNVILGE -> {
-                    if (saksbehandling.stønadstype == StønadType.BARNETILSYN && sisteOvergangsstønadBehandlingId != null) {
-                        sisteOvergangsstønadBehandlingId.let { tilkjentYtelseService.hentForBehandlingEllerNull(it) }
-                    } else {
-                        tilkjentYtelseService.hentForBehandlingEllerNull(behandlingId)
-                    }
+                    tilkjentYtelseService.hentForBehandlingEllerNull(behandlingId)
                 }
                 else -> null
             }
 
-        val oppgavetyperSomKanOpprettes = mutableListOf<OppgaveForOpprettelseType>()
-        if (kanOppretteOppgaveForInntektskontrollFremITid(tilkjentYtelse)) {
-            oppgavetyperSomKanOpprettes.add(OppgaveForOpprettelseType.INNTEKTSKONTROLL_1_ÅR_FREM_I_TID)
-        }
-
-        if (sjekkLøpendeOvergangsstønad.perioder.isNotEmpty() &&
-            saksbehandling.stønadstype == StønadType.BARNETILSYN &&
-            oppgavetyperSomKanOpprettes.isEmpty() &&
-            vedtak.resultatType == ResultatType.INNVILGE
-        ) {
-            val refTilkjentYtelse = sisteOvergangsstønadBehandlingId?.let { tilkjentYtelseService.hentForBehandlingEllerNull(it) }
-
-            if (kanOppretteOppgaveForInntektskontrollFremITid(refTilkjentYtelse)) {
-                oppgavetyperSomKanOpprettes.add(OppgaveForOpprettelseType.INNTEKTSKONTROLL_1_ÅR_FREM_I_TID)
+        // TODO: Burde også sjekke at denne har beløp utbetaling større enn 0
+        val harOvergangsstønadVedtaksperiodeSomLøperEttÅrFremITid =
+            løpendeOvergangsstønad.perioder.any {
+                it.stønadTilOgMed.isAfter(LocalDate.now().plusYears(1))
             }
+
+        val erBarnetilsynOgHarLøpendeOvergangsstønad = saksbehandling.stønadstype == StønadType.BARNETILSYN && harOvergangsstønadVedtaksperiodeSomLøperEttÅrFremITid
+
+        val oppgavetyperSomKanOpprettes = mutableListOf<OppgaveForOpprettelseType>()
+
+        if (kanOppretteOppgaveForInntektskontrollFremITid(tilkjentYtelse) || erBarnetilsynOgHarLøpendeOvergangsstønad) {
+            oppgavetyperSomKanOpprettes.add(OppgaveForOpprettelseType.INNTEKTSKONTROLL_1_ÅR_FREM_I_TID)
         }
 
         oppgavetyperSomKanOpprettes.add(OppgaveForOpprettelseType.INNTEKTSKONTROLL_SELVSTENDIG_NÆRINGSDRIVENDE)
