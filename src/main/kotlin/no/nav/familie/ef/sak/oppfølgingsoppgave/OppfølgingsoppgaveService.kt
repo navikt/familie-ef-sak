@@ -2,7 +2,6 @@ package no.nav.familie.ef.sak.oppfølgingsoppgave
 
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
 import no.nav.familie.ef.sak.behandling.BehandlingService
-import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus.FERDIGSTILT
 import no.nav.familie.ef.sak.behandling.oppgaveforopprettelse.OppgaverForOpprettelseDto
 import no.nav.familie.ef.sak.behandling.oppgaveforopprettelse.OppgaverForOpprettelseRepository
 import no.nav.familie.ef.sak.behandling.oppgaverforferdigstilling.OppgaverForFerdigstillingDto
@@ -153,17 +152,17 @@ class OppfølgingsoppgaveService(
                 else -> null
             }
 
-        // TODO: Burde også sjekke at denne har beløp utbetaling større enn 0
         val harOvergangsstønadVedtaksperiodeSomLøperEttÅrFremITid =
             løpendeOvergangsstønad.perioder.any {
                 it.stønadTilOgMed.isAfter(LocalDate.now().plusYears(1))
             }
 
+        val erOvergangsstønadOgHarUtbetalingEtterDetNesteÅret = saksbehandling.stønadstype == StønadType.OVERGANGSSTØNAD && harUtbetalingEtterDetNesteÅret(tilkjentYtelse)
         val erBarnetilsynOgHarLøpendeOvergangsstønad = saksbehandling.stønadstype == StønadType.BARNETILSYN && harOvergangsstønadVedtaksperiodeSomLøperEttÅrFremITid
 
         val oppgavetyperSomKanOpprettes = mutableListOf<OppgaveForOpprettelseType>()
 
-        if (kanOppretteOppgaveForInntektskontrollFremITid(tilkjentYtelse) || erBarnetilsynOgHarLøpendeOvergangsstønad) {
+        if (erOvergangsstønadOgHarUtbetalingEtterDetNesteÅret || erBarnetilsynOgHarLøpendeOvergangsstønad) {
             oppgavetyperSomKanOpprettes.add(OppgaveForOpprettelseType.INNTEKTSKONTROLL_1_ÅR_FREM_I_TID)
         }
 
@@ -218,31 +217,6 @@ class OppfølgingsoppgaveService(
         }
     }
 
-    fun finnSisteOvergangsstønadBehandlingIdForBarnetilsyn(
-        ident: String,
-        stønadType: StønadType,
-    ): UUID? {
-        if (stønadType == StønadType.BARNETILSYN) {
-            val fagsak =
-                fagsakService.finnFagsak(
-                    personIdenter = setOf(ident),
-                    stønadstype = StønadType.OVERGANGSSTØNAD,
-                )
-
-            if (fagsak != null) {
-                val finnesBehandlingerForOvergangsstønad =
-                    behandlingRepository.existsByFagsakId(fagsak.id)
-
-                if (finnesBehandlingerForOvergangsstønad) {
-                    val behandlingId = behandlingRepository.finnSisteBehandlingForOppgaveKanOpprettes(fagsak.id)
-                    return behandlingId
-                }
-            }
-        }
-
-        return null
-    }
-
     private fun hentSisteTilkjentYtelse(fagsakId: UUID): TilkjentYtelse? {
         val sisteIverksatteBehandling = behandlingService.finnSisteIverksatteBehandling(fagsakId)
         return sisteIverksatteBehandling?.let {
@@ -250,7 +224,7 @@ class OppfølgingsoppgaveService(
         }
     }
 
-    private fun kanOppretteOppgaveForInntektskontrollFremITid(
+    private fun harUtbetalingEtterDetNesteÅret(
         tilkjentYtelse: TilkjentYtelse?,
     ): Boolean {
         if (tilkjentYtelse == null) return false
