@@ -35,4 +35,17 @@ class ArbeidsforholdService(
                 sluttdato?.isEqualOrAfter(ansettelsesdato) == true
         } == true
     }
+
+    fun finnesNyttArbeidsforholdSisteAntallMåneder(
+        aktivIdent: String,
+        antallMåneder: Long = 4,
+    ): Boolean {
+        val ansettelsesdato = LocalDate.now().minusMonths(antallMåneder)
+        val arbeidsforhold = arbeidsforholdClient.hentArbeidsforhold(aktivIdent)
+
+        return arbeidsforhold.any {
+            val startdato = it.ansettelsesperiode?.startdato?.let { dato -> LocalDate.parse(dato) }
+            startdato?.isEqualOrAfter(ansettelsesdato) == true
+        }
+    }
 }
