@@ -1,6 +1,5 @@
-package no.nav.familie.ef.sak.arbeidsforhold.ekstern
+package no.nav.familie.ef.sak.arbeidsforhold
 
-import no.nav.familie.ef.sak.arbeidsforhold.LoggArbeidsforholdForPersonTask
 import no.nav.familie.prosessering.internal.TaskService
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.validation.annotation.Validated
