@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController
 @RequestMapping(path = ["/api/arbeidsforhold"])
 @ProtectedWithClaims(issuer = "azuread")
 @Validated
-class ArbeidsforholdController(
+class ArbeidsforholdForvaltningsController(
     private val taskService: TaskService,
 ) {
     @PostMapping("LoggArbeidsforholdForPerson")
