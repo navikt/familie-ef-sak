@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController
 class ArbeidsforholdForvaltningsController(
     private val taskService: TaskService,
 ) {
-    @PostMapping("LoggArbeidsforholdForPerson")
+    @PostMapping("logg-arbeidsforhold-for-person")
     @Operation(
         description =
             "Lager en task som logger arbeidsforhold for person - gitt personIdent",
