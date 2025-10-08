@@ -28,12 +28,12 @@ class ArbeidsforholdService(
         val ansettelsesdato = LocalDate.now().minusMonths(antallMåneder)
         val arbeidsforhold = arbeidsforholdClient.hentArbeidsforhold(aktivIdent)
 
-        return arbeidsforhold?.any {
+        return arbeidsforhold.any {
             val startdato = it.ansettelsesperiode?.startdato?.let { dato -> LocalDate.parse(dato) }
             val sluttdato = it.ansettelsesperiode?.sluttdato?.let { dato -> LocalDate.parse(dato) }
             startdato?.isEqualOrBefore(ansettelsesdato) == true &&
                 sluttdato?.isEqualOrAfter(ansettelsesdato) == true
-        } == true
+        }
     }
 
     fun finnesNyttArbeidsforholdSisteAntallMåneder(
