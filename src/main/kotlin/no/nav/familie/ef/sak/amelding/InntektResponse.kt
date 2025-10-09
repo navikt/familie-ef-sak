@@ -103,14 +103,15 @@ data class InntektResponse(
                             ?.periode
                             ?.fom,
                     )
-            }.map {
+            }.groupBy { it.måned }
+            .map {
                 SummertInntekt(
-                    it.måned,
-                    totalInntektForÅrMånedUtenFeriepenger(it.måned),
+                    it.key,
+                    totalInntektForÅrMånedUtenFeriepenger(it.key),
                     forrigeVedtak.inntekter
                         ?.inntekter
-                        ?.first { vedtak -> vedtak.periode.inneholder(it.måned) }
-                        ?.avledForventetMånedsinntekt() ?: throw IllegalStateException("Burde hatt forventet inntekt for årMåned: ${it.måned} for vedtak: $forrigeVedtak"),
+                        ?.first { vedtak -> vedtak.periode.inneholder(it.key) }
+                        ?.avledForventetMånedsinntekt() ?: throw IllegalStateException("Burde hatt forventet inntekt for årMåned: ${it.key} for vedtak: $forrigeVedtak"),
                 )
             }
 
