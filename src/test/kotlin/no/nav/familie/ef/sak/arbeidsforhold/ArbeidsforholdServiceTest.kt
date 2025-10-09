@@ -4,7 +4,6 @@ import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ef.sak.arbeidsforhold.ekstern.ArbeidsforholdClient
 import no.nav.familie.ef.sak.arbeidsforhold.ekstern.ArbeidsforholdService
-import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.arbeidsforhold.Ansettelsesperiode
 import no.nav.familie.kontrakter.felles.arbeidsforhold.Arbeidsforhold
 import org.assertj.core.api.Assertions.assertThat
@@ -14,7 +13,7 @@ import java.time.LocalDate
 
 class ArbeidsforholdServiceTest {
     val arbeidsforholdClient: ArbeidsforholdClient = mockk()
-    val arbeidsforholdService = ArbeidsforholdService(mockk(), arbeidsforholdClient)
+    val arbeidsforholdService = ArbeidsforholdService(arbeidsforholdClient)
 
     @BeforeEach
     fun setup() {
