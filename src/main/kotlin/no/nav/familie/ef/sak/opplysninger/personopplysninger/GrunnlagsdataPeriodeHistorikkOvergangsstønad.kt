@@ -13,7 +13,7 @@ data class GrunnlagsdataPeriodeHistorikkOvergangsstønad(
     val beløp: Int,
     val inntekt: Int?,
     val samordningsfradrag: Int?,
-    val behandlingsårsak: BehandlingÅrsak,
+    val behandlingsårsak: BehandlingÅrsak?,
 )
 
 data class GrunnlagsdataPeriodeHistorikkBarnetilsyn(

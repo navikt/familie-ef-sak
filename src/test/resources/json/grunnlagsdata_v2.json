@@ -1453,7 +1453,7 @@
                     "name" : "behandlingsårsak",
                     "type" : "Enum",
                     "values" : [ "KLAGE", "NYE_OPPLYSNINGER", "SANKSJON_1_MND", "SØKNAD", "MIGRERING", "G_OMREGNING", "IVERKSETTE_KA_VEDTAK", "KORRIGERING_UTEN_BREV", "PAPIRSØKNAD", "SATSENDRING", "MANUELT_OPPRETTET", "AUTOMATISK_INNTEKTSENDRING" ],
-                    "nullable" : false
+                    "nullable" : true
                   }
                 },
                 "nullable" : false
@@ -1542,7 +1542,7 @@
                     "name" : "behandlingsårsak",
                     "type" : "Enum",
                     "values" : [ "KLAGE", "NYE_OPPLYSNINGER", "SANKSJON_1_MND", "SØKNAD", "MIGRERING", "G_OMREGNING", "IVERKSETTE_KA_VEDTAK", "KORRIGERING_UTEN_BREV", "PAPIRSØKNAD", "SATSENDRING", "MANUELT_OPPRETTET", "AUTOMATISK_INNTEKTSENDRING" ],
-                    "nullable" : false
+                    "nullable" : true
                   }
                 },
                 "nullable" : false
@@ -2267,7 +2267,7 @@
                 "name" : "behandlingsårsak",
                 "type" : "Enum",
                 "values" : [ "KLAGE", "NYE_OPPLYSNINGER", "SANKSJON_1_MND", "SØKNAD", "MIGRERING", "G_OMREGNING", "IVERKSETTE_KA_VEDTAK", "KORRIGERING_UTEN_BREV", "PAPIRSØKNAD", "SATSENDRING", "MANUELT_OPPRETTET", "AUTOMATISK_INNTEKTSENDRING" ],
-                "nullable" : false
+                "nullable" : true
               }
             },
             "nullable" : false
@@ -2356,7 +2356,7 @@
                 "name" : "behandlingsårsak",
                 "type" : "Enum",
                 "values" : [ "KLAGE", "NYE_OPPLYSNINGER", "SANKSJON_1_MND", "SØKNAD", "MIGRERING", "G_OMREGNING", "IVERKSETTE_KA_VEDTAK", "KORRIGERING_UTEN_BREV", "PAPIRSØKNAD", "SATSENDRING", "MANUELT_OPPRETTET", "AUTOMATISK_INNTEKTSENDRING" ],
-                "nullable" : false
+                "nullable" : true
               }
             },
             "nullable" : false
