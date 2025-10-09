@@ -7,6 +7,7 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.TidligereVed
 import no.nav.familie.ef.sak.vedtak.domain.AktivitetType
 import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
 import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType.SANKSJON
+import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.felles.Månedsperiode
 import java.time.LocalDate
 
@@ -35,6 +36,7 @@ data class GrunnlagsdataPeriodeHistorikkDto(
     val tom: LocalDate,
     val antallMåneder: Long,
     val antallMånederUtenBeløp: Long = 0,
+    val behandlingsårsaker: List<BehandlingÅrsak>,
 )
 
 data class SistePeriodeMedOvergangsstønadDto(
@@ -146,6 +148,7 @@ private fun GrunnlagsdataPeriodeHistorikkOvergangsstønad.tilDto() =
         tom = this.tom,
         antallMåneder = månederMedBeløp(periodeType, beløp, fom, tom),
         antallMånederUtenBeløp = månederUtenBeløp(periodeType, beløp, fom, tom),
+        behandlingsårsaker = listOf(behandlingsårsak),
     )
 
 private fun GrunnlagsdataPeriodeHistorikkBarnetilsyn.tilDto(grunnlagsdataPeriodeHistorikkOvergangsstønad: List<GrunnlagsdataPeriodeHistorikkOvergangsstønad>) =
@@ -217,6 +220,7 @@ private fun slåSammenPeriodeHistorikkDto(
     tom = denne.tom,
     antallMåneder = forrige.antallMåneder + denne.antallMåneder,
     antallMånederUtenBeløp = forrige.antallMånederUtenBeløp + denne.antallMånederUtenBeløp,
+    behandlingsårsaker = (forrige.behandlingsårsaker + denne.behandlingsårsaker).distinct(),
 )
 
 private fun GrunnlagsdataPeriodeHistorikkDto.periode(): Månedsperiode = Månedsperiode(this.fom, this.tom)

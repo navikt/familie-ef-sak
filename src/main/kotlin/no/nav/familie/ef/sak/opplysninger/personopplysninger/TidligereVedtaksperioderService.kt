@@ -16,6 +16,7 @@ import no.nav.familie.ef.sak.tilkjentytelse.AndelsHistorikkService
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.ef.sak.vedtak.historikk.AndelHistorikkDto
 import no.nav.familie.ef.sak.vedtak.historikk.EndringType
+import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPeriodeResponse
 import org.springframework.stereotype.Service
 
@@ -92,6 +93,7 @@ class TidligereVedtaksperioderService(
                     beløp = it.andel.beløp,
                     inntekt = it.andel.inntekt,
                     samordningsfradrag = it.andel.samordningsfradrag,
+                    behandlingsårsak = it.behandlingÅrsak,
                 )
             }
 

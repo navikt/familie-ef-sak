@@ -343,6 +343,7 @@ internal class TidligereVedtaksperioderServiceTest {
                     beløp = 5555,
                     inntekt = 5555,
                     samordningsfradrag = 5555,
+                    behandlingsårsak = BehandlingÅrsak.NYE_OPPLYSNINGER,
                 ),
                 GrunnlagsdataPeriodeHistorikkOvergangsstønad(
                     fom = LocalDate.of(2024, 2, 1),
@@ -352,6 +353,7 @@ internal class TidligereVedtaksperioderServiceTest {
                     beløp = 4444,
                     inntekt = 4444,
                     samordningsfradrag = 4444,
+                    behandlingsårsak = BehandlingÅrsak.NYE_OPPLYSNINGER,
                 ),
                 GrunnlagsdataPeriodeHistorikkOvergangsstønad(
                     fom = LocalDate.of(2023, 3, 1),
@@ -361,6 +363,7 @@ internal class TidligereVedtaksperioderServiceTest {
                     beløp = 3333,
                     inntekt = 3333,
                     samordningsfradrag = 3333,
+                    behandlingsårsak = BehandlingÅrsak.NYE_OPPLYSNINGER,
                 ),
             )
 
@@ -381,7 +384,16 @@ internal class TidligereVedtaksperioderServiceTest {
         aktivitet: AktivitetType = AktivitetType.FORSØRGER_I_ARBEID,
         inntekt: Int? = null,
         samordningsfradrag: Int? = null,
-    ) = GrunnlagsdataPeriodeHistorikkOvergangsstønad(periodeType = periodeType, fom = fom, tom = tom, aktivitet, beløp, inntekt, samordningsfradrag)
+    ) = GrunnlagsdataPeriodeHistorikkOvergangsstønad(
+        periodeType = periodeType,
+        fom = fom,
+        tom = tom,
+        aktivitet = aktivitet,
+        beløp = beløp,
+        inntekt = inntekt,
+        samordningsfradrag = samordningsfradrag,
+        behandlingsårsak = BehandlingÅrsak.NYE_OPPLYSNINGER,
+    )
 
     private fun mockTidligereVedtakEfSak(harAndeler: Boolean = false) {
         every { fagsakPersonService.finnPerson(any()) } returns fagsakPerson

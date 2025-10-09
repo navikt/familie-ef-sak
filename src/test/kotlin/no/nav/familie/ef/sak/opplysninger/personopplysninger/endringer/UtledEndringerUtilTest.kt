@@ -29,6 +29,7 @@ import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.saksbehandling
 import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
 import no.nav.familie.ef.sak.vilkår.dto.StatsborgerskapDto
+import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.kontrakter.felles.objectMapper
 import org.assertj.core.api.Assertions.assertThat
@@ -593,6 +594,7 @@ internal class UtledEndringerUtilTest {
             beløp = 123,
             inntekt = null,
             samordningsfradrag = null,
+            behandlingsårsak = BehandlingÅrsak.NYE_OPPLYSNINGER,
         )
 
     private fun grunnlagsdataMedMetadata(): GrunnlagsdataMedMetadata {
