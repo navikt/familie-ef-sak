@@ -23,7 +23,7 @@ class LoggArbeidsforholdForPersonTask(
         secureLogger.info("Logg arbeidsforhold for person $personIdent")
         val arbeidsforhold = arbeidsforholdClient.hentArbeidsforhold(personIdent)
         arbeidsforhold.forEach { arbeidsforhold ->
-            secureLogger.info("Arbeidsforhold or person $personIdent: $arbeidsforhold")
+            secureLogger.info("Arbeidsforhold for person $personIdent: $arbeidsforhold")
         }
     }
 
