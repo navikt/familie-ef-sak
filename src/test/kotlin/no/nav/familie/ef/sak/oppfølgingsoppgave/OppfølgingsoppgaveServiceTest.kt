@@ -104,7 +104,7 @@ internal class OppfølgingsoppgaveServiceTest {
 
     @Test
     fun `slett innslag når det ikke kan opprettes noen oppgaver og det finnes innslag fra før`() {
-        every { oppfølgingsoppgaveService.hentOppgavetyperSomKanOpprettesForOvergangsstønad(any()) } returns emptyList()
+        every { oppfølgingsoppgaveService.hentOppgavetyperSomKanOpprettes(any()) } returns emptyList()
         every { oppgaverForOpprettelseRepository.existsById(any()) } returns true
         every { behandlingService.hentSaksbehandling(behandlingId) } returns saksbehandling
 
@@ -117,7 +117,7 @@ internal class OppfølgingsoppgaveServiceTest {
 
     @Test
     fun `ikke gjør noe når det ikke kan opprettes oppgaver og det ikke finnes innslag fra før`() {
-        every { oppfølgingsoppgaveService.hentOppgavetyperSomKanOpprettesForOvergangsstønad(any()) } returns emptyList()
+        every { oppfølgingsoppgaveService.hentOppgavetyperSomKanOpprettes(any()) } returns emptyList()
         every { oppgaverForOpprettelseRepository.existsById(any()) } returns false
 
         opprettTomListeForOppgavetyperSomSkalOpprettes(behandlingId)
@@ -129,7 +129,7 @@ internal class OppfølgingsoppgaveServiceTest {
 
     @Test
     fun `oppdater innslag når det finnes innslag, og når man kan oppdatere oppgaver `() {
-        every { oppfølgingsoppgaveService.hentOppgavetyperSomKanOpprettesForOvergangsstønad(any()) } returns
+        every { oppfølgingsoppgaveService.hentOppgavetyperSomKanOpprettes(any()) } returns
             listOf(
                 OppgaveForOpprettelseType.INNTEKTSKONTROLL_1_ÅR_FREM_I_TID,
             )
@@ -143,7 +143,7 @@ internal class OppfølgingsoppgaveServiceTest {
 
     @Test
     fun `lag innslag når det ikke finnes innslag, og når man kan oppdatere oppgaver`() {
-        every { oppfølgingsoppgaveService.hentOppgavetyperSomKanOpprettesForOvergangsstønad(any()) } returns
+        every { oppfølgingsoppgaveService.hentOppgavetyperSomKanOpprettes(any()) } returns
             listOf(
                 OppgaveForOpprettelseType.INNTEKTSKONTROLL_1_ÅR_FREM_I_TID,
             )
@@ -165,7 +165,7 @@ internal class OppfølgingsoppgaveServiceTest {
                 personIdent = emptySet(),
                 perioder = emptyList(),
             )
-        val oppgaver = oppfølgingsoppgaveService.hentOppgavetyperSomKanOpprettesForOvergangsstønad(iverksattFørstegangsbehandling.id)
+        val oppgaver = oppfølgingsoppgaveService.hentOppgavetyperSomKanOpprettes(iverksattFørstegangsbehandling.id)
 
         assertThat(oppgaver.contains(OppgaveForOpprettelseType.INNTEKTSKONTROLL_1_ÅR_FREM_I_TID)).isTrue
     }
@@ -179,7 +179,7 @@ internal class OppfølgingsoppgaveServiceTest {
                 personIdent = emptySet(),
                 perioder = emptyList(),
             )
-        val oppgaver = oppfølgingsoppgaveService.hentOppgavetyperSomKanOpprettesForOvergangsstønad(iverksattRevurdering.id)
+        val oppgaver = oppfølgingsoppgaveService.hentOppgavetyperSomKanOpprettes(iverksattRevurdering.id)
 
         assertThat(oppgaver.contains(OppgaveForOpprettelseType.INNTEKTSKONTROLL_1_ÅR_FREM_I_TID)).isTrue
     }
@@ -193,7 +193,7 @@ internal class OppfølgingsoppgaveServiceTest {
                 personIdent = emptySet(),
                 perioder = emptyList(),
             )
-        val oppgaver = oppfølgingsoppgaveService.hentOppgavetyperSomKanOpprettesForOvergangsstønad(iverksattFørstegangsbehandling.id)
+        val oppgaver = oppfølgingsoppgaveService.hentOppgavetyperSomKanOpprettes(iverksattFørstegangsbehandling.id)
 
         assertThat(oppgaver.contains(OppgaveForOpprettelseType.INNTEKTSKONTROLL_1_ÅR_FREM_I_TID)).isFalse
     }
@@ -208,7 +208,7 @@ internal class OppfølgingsoppgaveServiceTest {
                 personIdent = emptySet(),
                 perioder = emptyList(),
             )
-        val oppgaver = oppfølgingsoppgaveService.hentOppgavetyperSomKanOpprettesForOvergangsstønad(iverksattFørstegangsbehandling.id)
+        val oppgaver = oppfølgingsoppgaveService.hentOppgavetyperSomKanOpprettes(iverksattFørstegangsbehandling.id)
         assertThat(oppgaver.contains(OppgaveForOpprettelseType.INNTEKTSKONTROLL_1_ÅR_FREM_I_TID)).isFalse
     }
 
@@ -225,7 +225,7 @@ internal class OppfølgingsoppgaveServiceTest {
                 personIdent = emptySet(),
                 perioder = emptyList(),
             )
-        val oppgaver = oppfølgingsoppgaveService.hentOppgavetyperSomKanOpprettesForOvergangsstønad(iverksattFørstegangsbehandling.id)
+        val oppgaver = oppfølgingsoppgaveService.hentOppgavetyperSomKanOpprettes(iverksattFørstegangsbehandling.id)
 
         assertThat(oppgaver.contains(OppgaveForOpprettelseType.INNTEKTSKONTROLL_1_ÅR_FREM_I_TID)).isFalse
     }
@@ -243,7 +243,7 @@ internal class OppfølgingsoppgaveServiceTest {
                 personIdent = emptySet(),
                 perioder = emptyList(),
             )
-        val oppgaver = oppfølgingsoppgaveService.hentOppgavetyperSomKanOpprettesForOvergangsstønad(iverksattFørstegangsbehandling.id)
+        val oppgaver = oppfølgingsoppgaveService.hentOppgavetyperSomKanOpprettes(iverksattFørstegangsbehandling.id)
         assertThat(oppgaver.contains(OppgaveForOpprettelseType.INNTEKTSKONTROLL_1_ÅR_FREM_I_TID)).isTrue()
     }
 
@@ -260,7 +260,7 @@ internal class OppfølgingsoppgaveServiceTest {
                 personIdent = emptySet(),
                 perioder = emptyList(),
             )
-        val oppgaver = oppfølgingsoppgaveService.hentOppgavetyperSomKanOpprettesForOvergangsstønad(iverksattFørstegangsbehandling.id)
+        val oppgaver = oppfølgingsoppgaveService.hentOppgavetyperSomKanOpprettes(iverksattFørstegangsbehandling.id)
         assertThat(oppgaver.contains(OppgaveForOpprettelseType.INNTEKTSKONTROLL_1_ÅR_FREM_I_TID)).isTrue()
     }
 
@@ -278,7 +278,7 @@ internal class OppfølgingsoppgaveServiceTest {
                 perioder = emptyList(),
             )
 
-        val oppgaver = oppfølgingsoppgaveService.hentOppgavetyperSomKanOpprettesForOvergangsstønad(iverksattFørstegangsbehandling.id)
+        val oppgaver = oppfølgingsoppgaveService.hentOppgavetyperSomKanOpprettes(iverksattFørstegangsbehandling.id)
         assertThat(oppgaver.contains(OppgaveForOpprettelseType.INNTEKTSKONTROLL_1_ÅR_FREM_I_TID)).isFalse()
     }
 
@@ -295,7 +295,7 @@ internal class OppfølgingsoppgaveServiceTest {
                 personIdent = emptySet(),
                 perioder = emptyList(),
             )
-        oppfølgingsoppgaveService.hentOppgavetyperSomKanOpprettesForOvergangsstønad(iverksattFørstegangsbehandling.id)
+        oppfølgingsoppgaveService.hentOppgavetyperSomKanOpprettes(iverksattFørstegangsbehandling.id)
         verify { behandlingService.finnSisteIverksatteBehandling(any()) }
     }
 
