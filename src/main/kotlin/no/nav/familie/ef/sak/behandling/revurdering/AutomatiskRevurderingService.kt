@@ -65,6 +65,11 @@ class AutomatiskRevurderingService(
             return false
         }
 
+        if (arbeidsforholdService.finnesNyttArbeidsforholdSisteAntallMåneder(personIdent, 4)) {
+            logger.info("Finnes nytt arbeidsforhold siste fire måneder for fagsak ${fagsak.id}")
+            return false
+        }
+
         val inntektSisteTreMåneder = aMeldingInntektClient.hentInntekt(personIdent, YearMonth.now().minusMonths(3), YearMonth.now())
         if (inntektSisteTreMåneder.finnesHøyMånedsinntektSomIkkeGirOvergangsstønad) {
             logger.info("Har inntekt over 5.5G for fagsak ${fagsak.id}")
