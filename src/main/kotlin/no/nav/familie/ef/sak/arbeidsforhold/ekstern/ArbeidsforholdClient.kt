@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.arbeidsforhold.ekstern
 
+import no.nav.familie.ef.sak.arbeidsforhold.ekstern.ArbeidsforholdClient.ArbeidsforholdStatus.Companion.somQueryParameters
 import no.nav.familie.http.client.AbstractRestClient
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.arbeidsforhold.Arbeidsforhold
@@ -22,6 +23,7 @@ class ArbeidsforholdClient(
         UriComponentsBuilder
             .fromUri(uri)
             .pathSegment("api/v2/arbeidstaker/arbeidsforhold")
+            .queryParam("arbeidsforholdstatus", somQueryParameters())
             .build()
             .toUri()
 
@@ -35,5 +37,16 @@ class ArbeidsforholdClient(
             uri = lagArbeidsforholdUri(),
             httpHeaders = responseHeaders,
         )
+    }
+
+    internal enum class ArbeidsforholdStatus {
+        AKTIV,
+        AVSLUTTET,
+        FREMTIDIG,
+        ;
+
+        companion object {
+            internal fun somQueryParameters() = ArbeidsforholdStatus.values().joinToString(",")
+        }
     }
 }
