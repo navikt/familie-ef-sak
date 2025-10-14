@@ -29,7 +29,7 @@ class FeatureToggleController(
             Toggle.OPPDATER_BEHANDLINGSTATUS,
             Toggle.FRONTEND_VIS_BEREGNINGSSKJEMA,
             Toggle.VIS_ANDRE_YTELSER,
-            Toggle.MIGRERING_BARNETILSYN
+            Toggle.MIGRERING_BARNETILSYN,
         )
 
     @GetMapping
