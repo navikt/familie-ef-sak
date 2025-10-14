@@ -41,7 +41,7 @@ spec:
         diskAutoresize: true
         cascadingDelete: false
         highAvailability: false
-        pointInTimeRecovery: true
+        pointInTimeRecovery: false # TODO: Satt til false for migreringsverktøy, sett tilbake til true.
         maintenance:
           day: 7
           hour: 23
