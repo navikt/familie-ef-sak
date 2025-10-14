@@ -1,6 +1,5 @@
 package no.nav.familie.ef.sak.database
 
-import org.springframework.boot.test.util.TestPropertyValues
 import org.springframework.context.ApplicationContextInitializer
 import org.springframework.context.ConfigurableApplicationContext
 import org.testcontainers.containers.PostgreSQLContainer
@@ -8,18 +7,12 @@ import org.testcontainers.containers.PostgreSQLContainer
 class DbContainerInitializer : ApplicationContextInitializer<ConfigurableApplicationContext> {
     override fun initialize(applicationContext: ConfigurableApplicationContext) {
         postgres.start()
-        TestPropertyValues
-            .of(
-                "spring.datasource.url=${postgres.jdbcUrl}",
-                "spring.datasource.username=${postgres.username}",
-                "spring.datasource.password=${postgres.password}",
-            ).applyTo(applicationContext.environment)
     }
 
     companion object {
         // Lazy because we only want it to be initialized when accessed
         private val postgres: KPostgreSQLContainer by lazy {
-            KPostgreSQLContainer("postgres:14.6")
+            KPostgreSQLContainer("postgres:17.6")
                 .withDatabaseName("ef-sak")
                 .withUsername("postgres")
                 .withPassword("test")

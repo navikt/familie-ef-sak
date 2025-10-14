@@ -1,6 +1,20 @@
 server:
   port: 9093
 
+spring:
+  datasource:
+    driver-class-name: org.testcontainers.jdbc.ContainerDatabaseDriver
+    url: jdbc:tc:postgresql:17:///testdb
+    username: test
+    password: test
+    hikari:
+      maximum-pool-size: 3
+      connection-test-query: "select 1"
+      max-lifetime: 900000
+      minimum-idle: 1
+      data-source-properties:
+        sslmode: disable
+
 no.nav.security.jwt:
   issuer:
     tokenx:
