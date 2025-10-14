@@ -14,6 +14,8 @@ import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.felles.util.min
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.ef.sak.oppfølgingsoppgave.OppfølgingsoppgaveService
 import no.nav.familie.ef.sak.simulering.SimuleringService
 import no.nav.familie.ef.sak.tilbakekreving.TilbakekrevingService
@@ -64,6 +66,7 @@ class BeregnYtelseSteg(
     private val fagsakService: FagsakService,
     private val validerOmregningService: ValiderOmregningService,
     private val oppfølgingsoppgaveService: OppfølgingsoppgaveService,
+    private val featureToggleService: FeatureToggleService,
 ) : BehandlingSteg<VedtakDto> {
     private val logger = LoggerFactory.getLogger(javaClass)
     private val midlertidigOpphørFeilmelding = "Kan ikke starte vedtaket med opphørsperiode for en førstegangsbehandling"
@@ -349,7 +352,10 @@ class BeregnYtelseSteg(
         saksbehandling: Saksbehandling,
         vedtak: Opphør,
     ) {
-        brukerfeilHvis(saksbehandling.type != REVURDERING) { "Kan kun opphøre ved revurdering" }
+        if (!featureToggleService.isEnabled(toggle = Toggle.FRONTEND_VIS_BEREGNINGSSKJEMA)) {
+            brukerfeilHvis(saksbehandling.type != REVURDERING) { "Kan kun opphøre ved revurdering" }
+        }
+
         val opphørsdato = vedtak.opphørFom.atDay(1)
         val forrigeTilkjenteYtelse = hentForrigeTilkjenteYtelse(saksbehandling)
         val nyeAndeler = andelerForOpphør(forrigeTilkjenteYtelse, opphørsdato)

@@ -145,6 +145,7 @@ class StepDefinitions {
             fagsakService,
             validerOmregningService,
             oppfølgingsoppgaveService,
+            featureToggleService,
         )
 
     private val vedtakHistorikkService =

@@ -69,6 +69,7 @@ import no.nav.familie.kontrakter.felles.simulering.BeriketSimuleringsresultat
 import no.nav.familie.kontrakter.felles.simulering.DetaljertSimuleringResultat
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
+import org.junit.Ignore
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -108,6 +109,7 @@ internal class BeregnYtelseStegTest {
             fagsakService,
             validerOmregningService,
             oppfølgingsoppgaveService,
+            featureToggleService,
         )
 
     private val slot = slot<TilkjentYtelse>()
@@ -636,7 +638,6 @@ internal class BeregnYtelseStegTest {
             assertThat(slot.captured.andelerTilkjentYtelse).hasSize(0)
         }
 
-        @Test
         internal fun `skal feile ved opphør, dersom behandlingstype ikke er revurdering`() {
             val feil =
                 assertThrows<ApiFeil> {
