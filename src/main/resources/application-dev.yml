@@ -3,7 +3,6 @@ spring:
 
   datasource:
     url: ${DB_JDBC_URL}
-    driver-class-name: org.postgresql.Driver
 
 DEPLOY_ENV: dev
 ON_PREM_URL_ENV: dev
