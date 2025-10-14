@@ -3,6 +3,8 @@ spring:
 
   datasource:
     url: ${DB_JDBC_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
 
 DEPLOY_ENV: dev
 ON_PREM_URL_ENV: dev
