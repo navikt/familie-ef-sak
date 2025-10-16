@@ -38,7 +38,7 @@
         <token-validation-spring.version>5.0.37</token-validation-spring.version>
 
         <start-class>no.nav.familie.ef.sak.ApplicationKt</start-class>
-        <kontrakter.version>3.0_20251010090545_ece0054</kontrakter.version>
+        <kontrakter.version>3.0_20251014110344_098474d</kontrakter.version>
         <mikrofrontend.builder.version>20230704114948-74aa2e9</mikrofrontend.builder.version>
         <eksterne.kontrakter.bisys.version>2.0_20250929124738_f28327d</eksterne.kontrakter.bisys.version>
         <cucumber.version>7.30.0</cucumber.version>
