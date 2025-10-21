@@ -1,9 +1,7 @@
 package no.nav.familie.ef.sak.opplysninger.personopplysninger.medl
 
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.logger
 import no.nav.familie.http.client.AbstractRestClient
-import no.nav.familie.kontrakter.felles.PersonIdent
-import no.nav.familie.kontrakter.felles.Ressurs
-import no.nav.familie.kontrakter.felles.medlemskap.Medlemskapsinfo
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
@@ -33,6 +31,7 @@ class MedlClient(
         tilOgMed: LocalDate? = null,
         inkluderSporingsinfo: Boolean? = null,
     ): List<Medlemskapsunntak> {
+        logger.info("Hent medlemskapsunntak")
         val requestBody =
             PeriodeSoekRequest(
                 personident = personident,
@@ -43,9 +42,11 @@ class MedlClient(
                 tilOgMed = tilOgMed,
                 inkluderSporingsinfo = inkluderSporingsinfo,
             )
-        val response = postForEntity<List<Medlemskapsunntak>>(soekUri, requestBody)
-
-        return response
+        val medlemskapsunntakList = postForEntity<List<Medlemskapsunntak>>(soekUri, requestBody)
+        if (medlemskapsunntakList.isNotEmpty()) {
+            secureLogger.info("Hentet medlemskapsunntak. Antall: ${medlemskapsunntakList.size} - Første: ${medlemskapsunntakList.first()}")
+        }
+        return medlemskapsunntakList
     }
 }
 
