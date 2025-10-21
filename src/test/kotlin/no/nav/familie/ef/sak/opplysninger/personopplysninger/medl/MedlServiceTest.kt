@@ -80,7 +80,8 @@ class MedlemskapServiceTest {
     }
 }
 
-val medlResponse = """
+val medlResponse =
+    """
     [
       {
         "unntakId": 3365198,
@@ -243,4 +244,4 @@ val medlResponse = """
         "grunnlag": "FTL_2-5"
       }
     ]
-""".trimIndent()
+    """.trimIndent()
