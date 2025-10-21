@@ -31,7 +31,6 @@ class MedlClient(
         tilOgMed: LocalDate? = null,
         inkluderSporingsinfo: Boolean? = null,
     ): List<Medlemskapsunntak> {
-        logger.info("Hent medlemskapsunntak")
         val requestBody =
             PeriodeSoekRequest(
                 personident = personident,
@@ -43,9 +42,6 @@ class MedlClient(
                 inkluderSporingsinfo = inkluderSporingsinfo,
             )
         val medlemskapsunntakList = postForEntity<List<Medlemskapsunntak>>(soekUri, requestBody)
-        if (medlemskapsunntakList.isNotEmpty()) {
-            secureLogger.info("Hentet medlemskapsunntak. Antall: ${medlemskapsunntakList.size} - Første: ${medlemskapsunntakList.first()}")
-        }
         return medlemskapsunntakList
     }
 }

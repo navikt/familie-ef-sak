@@ -9,7 +9,6 @@ import org.springframework.stereotype.Service
 class FullmaktService(
     val fullmaktClient: FullmaktClient,
 ) {
-    private val secureLogger = LoggerFactory.getLogger("secureLogger")
 
     fun hentFullmakt(ident: String): List<Fullmakt> {
         val fullmaktResponse = fullmaktClient.hentFullmakt(ident)
