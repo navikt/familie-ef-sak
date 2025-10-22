@@ -41,7 +41,7 @@ spec:
         diskAutoresize: true
         cascadingDelete: false
         highAvailability: true
-        pointInTimeRecovery: false # TODO: Settes tilbake til: true
+        pointInTimeRecovery: true
         maintenance:
           day: 7
           hour: 23
