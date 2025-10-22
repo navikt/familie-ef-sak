@@ -29,7 +29,6 @@ class MedlClient(
         ekskluderKilder: List<String>? = null,
         fraOgMed: LocalDate? = null,
         tilOgMed: LocalDate? = null,
-        inkluderSporingsinfo: Boolean? = null,
     ): List<Medlemskapsunntak> {
         val requestBody =
             PeriodeSoekRequest(
@@ -39,7 +38,6 @@ class MedlClient(
                 ekskluderKilder = ekskluderKilder,
                 fraOgMed = fraOgMed,
                 tilOgMed = tilOgMed,
-                inkluderSporingsinfo = inkluderSporingsinfo,
             )
         val medlemskapsunntakList = postForEntity<List<Medlemskapsunntak>>(soekUri, requestBody)
         return medlemskapsunntakList
@@ -53,7 +51,6 @@ data class PeriodeSoekRequest(
     val ekskluderKilder: List<String>? = null,
     val fraOgMed: LocalDate? = null,
     val tilOgMed: LocalDate? = null,
-    val inkluderSporingsinfo: Boolean? = null,
 )
 
 data class Medlemskapsunntak(
