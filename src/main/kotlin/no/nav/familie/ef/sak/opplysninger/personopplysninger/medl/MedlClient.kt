@@ -1,6 +1,5 @@
 package no.nav.familie.ef.sak.opplysninger.personopplysninger.medl
 
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.logger
 import no.nav.familie.http.client.AbstractRestClient
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
