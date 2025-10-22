@@ -22,8 +22,8 @@ spec:
     enabled: true
     path: /internal/prometheus
   replicas:
-    min: 0 # TODO: Settes tilbake til: 2
-    max: 0 # TODO: Settes tilbake til: 4
+    min: 2
+    max: 4
   tokenx:
     enabled: true
   resources:
