@@ -63,4 +63,38 @@ class ArbeidsforholdServiceTest {
         val finnesAvsluttetArbeidsforhold = arbeidsforholdService.finnesAvsluttetArbeidsforholdSisteAntallMåneder("1")
         assertThat(finnesAvsluttetArbeidsforhold).isFalse
     }
+
+    @Test
+    fun `finnes nytt arbeidsforhold siste 4 mnd`() {
+        every { arbeidsforholdClient.hentArbeidsforhold(any()) } returns
+            listOf(
+                Arbeidsforhold(
+                    id = "123",
+                    ansettelsesperiode =
+                        Ansettelsesperiode(
+                            LocalDate.now().minusMonths(2).toString(),
+                            null,
+                        ),
+                ),
+            )
+        val finnesNyttArbeidsforhold = arbeidsforholdService.finnesNyttArbeidsforholdSisteAntallMåneder("1")
+        assertThat(finnesNyttArbeidsforhold).isTrue
+    }
+
+    @Test
+    fun `finnes ikke nytt arbeidsforhold siste 4 mnd`() {
+        every { arbeidsforholdClient.hentArbeidsforhold(any()) } returns
+            listOf(
+                Arbeidsforhold(
+                    id = "123",
+                    ansettelsesperiode =
+                        Ansettelsesperiode(
+                            LocalDate.now().minusMonths(8).toString(),
+                            null,
+                        ),
+                ),
+            )
+        val finnesNyttArbeidsforhold = arbeidsforholdService.finnesNyttArbeidsforholdSisteAntallMåneder("1")
+        assertThat(finnesNyttArbeidsforhold).isFalse
+    }
 }
