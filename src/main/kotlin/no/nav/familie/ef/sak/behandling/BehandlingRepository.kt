@@ -138,19 +138,6 @@ interface BehandlingRepository :
     )
     fun finnBehandlingerForGjenbrukAvVilkårOgSamværsavtaler(fagsakPersonId: UUID): List<Behandling>
 
-    @Query(
-        """
-            SELECT b.id
-            FROM fagsak f
-                     JOIN behandling b ON f.id = b.fagsak_id
-                     JOIN person_ident pi ON f.fagsak_person_id=pi.fagsak_person_id
-            WHERE b.fagsak_id = :fagsakId
-            ORDER BY b.vedtakstidspunkt desc
-            LIMIT 1
-    """,
-    )
-    fun finnSisteBehandlingForOppgaveKanOpprettes(fagsakId: UUID): UUID
-
     fun existsByFagsakIdAndStatusIsNot(
         fagsakId: UUID,
         behandlingStatus: BehandlingStatus,
