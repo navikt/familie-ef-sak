@@ -19,10 +19,8 @@ class FullmaktClient(
     override val pingUri: URI = URI.create(fullmaktUrl)
 
     fun hentFullmakt(ident: String): List<FullmaktResponse> {
-        logger.info("Kaller PDL fullmakt")
         val url = URI.create("$fullmaktUrl/api/internbruker/fullmakt/fullmaktsgiver")
         val fullmaktResponse = postForEntity<List<FullmaktResponse>>(url, FullmaktRequest(ident))
-        secureLogger.info("Fullmakt response: $fullmaktResponse")
         return fullmaktResponse
     }
 }

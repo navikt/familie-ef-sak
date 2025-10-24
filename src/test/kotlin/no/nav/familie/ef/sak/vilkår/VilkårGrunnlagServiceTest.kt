@@ -21,6 +21,8 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerI
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.TidligereVedtaksperioderService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.Grunnlagsdata
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.fullmakt.FullmaktService
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.medl.MedlClient
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.medl.MedlService
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.tilSøknadsverdier
 import no.nav.familie.ef.sak.opplysninger.søknad.mapper.SøknadsskjemaMapper
@@ -52,15 +54,16 @@ internal class VilkårGrunnlagServiceTest {
     private val tilordnetRessursService = mockk<TilordnetRessursService>(relaxed = true)
     private val kontantstøtteService = mockk<KontantstøtteService>(relaxed = true)
     private val fullmaktService = mockk<FullmaktService>(relaxed = true)
+    private val medlService = mockk<MedlService>(relaxed = true)
 
     private val grunnlagsdataRegisterService =
         GrunnlagsdataRegisterService(
             personService,
-            personopplysningerIntegrasjonerClient,
             tidligereVedtaksperioderService,
             arbeidsforholdService,
             kontantstøtteService,
             fullmaktService,
+            medlService,
         )
 
     private val fagsakService = mockk<FagsakService>()

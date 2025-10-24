@@ -12,6 +12,8 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.fullmakt.FullmaktSe
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper.GrunnlagsdataMapper.mapAnnenForelder
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper.GrunnlagsdataMapper.mapBarn
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper.GrunnlagsdataMapper.mapSøker
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.medl.MedlClient
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.medl.MedlService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Familierelasjonsrolle
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlAnnenForelder
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlPersonForelderBarn
@@ -23,18 +25,18 @@ import org.springframework.stereotype.Service
 @Service
 class GrunnlagsdataRegisterService(
     private val personService: PersonService,
-    private val personopplysningerIntegrasjonerClient: PersonopplysningerIntegrasjonerClient,
     private val tidligereVedtaksperioderService: TidligereVedtaksperioderService,
     private val arbeidsforholdService: ArbeidsforholdService,
     private val kontantstøtteService: KontantstøtteService,
     private val fullmaktService: FullmaktService,
+    private val medlService: MedlService,
 ) {
     fun hentGrunnlagsdataFraRegister(
         personIdent: String,
         barneforeldreFraSøknad: List<String>,
     ): GrunnlagsdataDomene {
         val grunnlagsdataFraPdl = hentGrunnlagsdataFraPdl(personIdent, emptyList())
-        val medlUnntak = personopplysningerIntegrasjonerClient.hentMedlemskapsinfo(personIdent)
+        val medlUnntak = medlService.hentMedlemskapsunntak(personIdent)
         val tidligereVedtaksperioder =
             tidligereVedtaksperioderService.hentTidligereVedtaksperioder(grunnlagsdataFraPdl.søker.folkeregisteridentifikator)
         val tidligereVedtaksperioderAnnenForelder = hentTidligereVedtaksperioderAnnenForelder(grunnlagsdataFraPdl.barneForeldre)
