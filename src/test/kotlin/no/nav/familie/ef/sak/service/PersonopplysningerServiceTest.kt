@@ -70,11 +70,11 @@ internal class PersonopplysningerServiceTest {
         val grunnlagsdataRegisterService =
             GrunnlagsdataRegisterService(
                 personService,
-                personopplysningerIntegrasjonerClient,
                 tidligereVedtaksperioderService,
                 arbeidsforholdService,
                 kontantstøtteService,
                 fullmaktService,
+                mockk(relaxed = true),
             )
 
         grunnlagsdataService =
