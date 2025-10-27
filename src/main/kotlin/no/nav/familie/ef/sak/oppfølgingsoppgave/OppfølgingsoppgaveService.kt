@@ -139,7 +139,7 @@ class OppfølgingsoppgaveService(
             return emptyList()
         }
 
-        val andelhistorikk = andelsHistorikkService.hentHistorikk(saksbehandling.fagsakId, behandlingId).reversed()
+        val andelhistorikk = andelsHistorikkService.hentHistorikk(saksbehandling.fagsakId, null).reversed()
 
         val vedtak = vedtakService.hentVedtak(behandlingId)
         val tilkjentYtelse =
