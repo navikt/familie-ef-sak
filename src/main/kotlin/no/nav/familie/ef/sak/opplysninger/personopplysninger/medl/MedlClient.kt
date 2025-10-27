@@ -38,9 +38,8 @@ class MedlClient(
                 fraOgMed = fraOgMed,
                 tilOgMed = tilOgMed,
             )
-        val medlemskapsunntakList = postForEntity<List<Medlemskapsunntak>>(soekUri, requestBody)
-        secureLogger.info("MedlResponse: $medlemskapsunntakList") // Fjernes etter å ha verifisert at det går fint i prod
-        return medlemskapsunntakList
+
+        return postForEntity<List<Medlemskapsunntak>>(soekUri, requestBody)
     }
 }
 
