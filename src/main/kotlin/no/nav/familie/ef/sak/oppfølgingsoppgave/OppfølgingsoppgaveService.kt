@@ -27,6 +27,7 @@ import no.nav.familie.ef.sak.oppfølgingsoppgave.domain.AutomatiskBrev
 import no.nav.familie.ef.sak.oppfølgingsoppgave.domain.OppgaverForFerdigstilling
 import no.nav.familie.ef.sak.oppfølgingsoppgave.domain.OppgaverForOpprettelse
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerService
+import no.nav.familie.ef.sak.tilkjentytelse.AndelsHistorikkService
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.vedtak.VedtakService
@@ -55,11 +56,10 @@ class OppfølgingsoppgaveService(
     private val brevClient: BrevClient,
     private val frittståendeBrevService: FrittståendeBrevService,
     private val personopplysningerService: PersonopplysningerService,
-    private val eksternStønadsperioderService: EksternStønadsperioderService,
     private val brevmottakereService: BrevmottakereService,
     private val brevsignaturService: BrevsignaturService,
     private val fagsakService: FagsakService,
-    private val behandlingRepository: BehandlingRepository,
+    private val andelsHistorikkService: AndelsHistorikkService,
 ) {
     @Transactional
     fun lagreOppgaveIderForFerdigstilling(
@@ -139,7 +139,7 @@ class OppfølgingsoppgaveService(
             return emptyList()
         }
 
-        val løpendeOvergangsstønad = eksternStønadsperioderService.hentOvergangsstønadperioderMedAktivitet(saksbehandling.ident)
+        val andelhistorikk = andelsHistorikkService.hentHistorikk(saksbehandling.fagsakId, behandlingId).reversed()
 
         val vedtak = vedtakService.hentVedtak(behandlingId)
         val tilkjentYtelse =
@@ -153,8 +153,9 @@ class OppfølgingsoppgaveService(
             }
 
         val harOvergangsstønadVedtaksperiodeSomLøperEttÅrFremITidMedUtbetaling =
-            løpendeOvergangsstønad.perioder.any {
-                it.stønadTilOgMed.isAfter(LocalDate.now().plusYears(1)) && it.beløp > 0
+            andelhistorikk.any {
+                it.andel.periode.tomDato
+                    .isAfter(LocalDate.now().plusYears(1)) && it.andel.beløp > 0
             }
 
         val erOvergangsstønadOgHarUtbetalingEtterDetNesteÅret = saksbehandling.stønadstype == StønadType.OVERGANGSSTØNAD && harUtbetalingEtterDetNesteÅret(tilkjentYtelse)

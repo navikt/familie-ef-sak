@@ -160,7 +160,6 @@ class PeriodeService(
             periodeType = andelsVedtak.periodeType,
             barn = behandlingsbarn.map { BehandlingsbarnMedOppfyltAleneomsorg(personIdent = it.personIdent, fødselTermindato = it.fødselTermindato) },
             harAktivitetsplikt = andelsVedtak.aktivitet.harAktivitetsplikt(),
-            beløp = andel.beløp,
         )
     }
 
