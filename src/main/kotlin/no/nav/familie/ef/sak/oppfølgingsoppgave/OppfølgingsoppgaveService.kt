@@ -152,13 +152,13 @@ class OppfølgingsoppgaveService(
                 else -> null
             }
 
-        val harOvergangsstønadVedtaksperiodeSomLøperEttÅrFremITid =
+        val harOvergangsstønadVedtaksperiodeSomLøperEttÅrFremITidMedUtbetaling =
             løpendeOvergangsstønad.perioder.any {
-                it.stønadTilOgMed.isAfter(LocalDate.now().plusYears(1))
+                it.stønadTilOgMed.isAfter(LocalDate.now().plusYears(1)) && it.beløp > 0
             }
 
         val erOvergangsstønadOgHarUtbetalingEtterDetNesteÅret = saksbehandling.stønadstype == StønadType.OVERGANGSSTØNAD && harUtbetalingEtterDetNesteÅret(tilkjentYtelse)
-        val erBarnetilsynOgHarLøpendeOvergangsstønad = saksbehandling.stønadstype == StønadType.BARNETILSYN && harOvergangsstønadVedtaksperiodeSomLøperEttÅrFremITid
+        val erBarnetilsynOgHarLøpendeOvergangsstønad = saksbehandling.stønadstype == StønadType.BARNETILSYN && harOvergangsstønadVedtaksperiodeSomLøperEttÅrFremITidMedUtbetaling
 
         val oppgavetyperSomKanOpprettes = mutableListOf<OppgaveForOpprettelseType>()
 

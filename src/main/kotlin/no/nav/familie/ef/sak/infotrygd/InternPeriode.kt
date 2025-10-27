@@ -32,6 +32,7 @@ data class PeriodeMedAktivitetOgBarn(
     val barn: List<BehandlingsbarnMedOppfyltAleneomsorg>,
     val behandlingId: Long,
     val harAktivitetsplikt: Boolean,
+    val beløp: Int,
 )
 
 data class BehandlingsbarnMedOppfyltAleneomsorg(
