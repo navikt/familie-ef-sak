@@ -1,6 +1,5 @@
 package no.nav.familie.ef.sak.oppfølgingsoppgave
 
-import no.nav.familie.ef.sak.behandling.BehandlingRepository
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.oppgaveforopprettelse.OppgaverForOpprettelseDto
 import no.nav.familie.ef.sak.behandling.oppgaveforopprettelse.OppgaverForOpprettelseRepository
@@ -15,7 +14,6 @@ import no.nav.familie.ef.sak.brev.FamilieDokumentClient
 import no.nav.familie.ef.sak.brev.Flettefelter
 import no.nav.familie.ef.sak.brev.FrittståendeBrevService
 import no.nav.familie.ef.sak.brev.VedtaksbrevService
-import no.nav.familie.ef.sak.ekstern.stønadsperiode.EksternStønadsperioderService
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.felles.util.norskFormat
 import no.nav.familie.ef.sak.infrastruktur.config.ObjectMapperProvider.objectMapper
@@ -42,7 +40,6 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
 import java.util.UUID
-import kotlin.compareTo
 
 @Service
 class OppfølgingsoppgaveService(
@@ -257,13 +254,13 @@ class OppfølgingsoppgaveService(
 
         if (fagsakId == null) return false
 
-        val andelhistorikk = andelsHistorikkService.hentHistorikk(fagsakId, null).reversed()
+        val andelshistorikkSortertNyest = andelsHistorikkService.hentHistorikk(fagsakId, null).reversed()
 
+        val førsteAndel = andelshistorikkSortertNyest.firstOrNull()
         val harOvergangsstønadVedtaksperiodeSomLøperEttÅrFremITidMedUtbetaling =
-            andelhistorikk.firstOrNull {
-                it.andel.periode.tomDato
-                    .isAfter(LocalDate.now().plusYears(1)) && it.andel.beløp > 0
-            } != null
+            førsteAndel != null &&
+                    førsteAndel.andel.periode.tomDato.isAfter(LocalDate.now().plusYears(1)) &&
+                    førsteAndel.andel.beløp > 0
 
         return harOvergangsstønadVedtaksperiodeSomLøperEttÅrFremITidMedUtbetaling
     }
