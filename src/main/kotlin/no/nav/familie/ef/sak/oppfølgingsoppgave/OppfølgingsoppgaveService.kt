@@ -248,7 +248,7 @@ class OppfølgingsoppgaveService(
 
     fun hentAutomatiskBrevEllerNull(behandlingId: UUID): AutomatiskBrev? = automatiskBrevRepository.findByIdOrNull(behandlingId)
 
-    fun sjekkOmDetFinnesLøpendeOvergangsstønadMedUtbetaling(behandlingId: UUID ): Boolean {
+    fun sjekkOmDetFinnesLøpendeOvergangsstønadMedUtbetaling(behandlingId: UUID): Boolean {
         val personIdent = behandlingService.hentAktivIdent(behandlingId)
 
         val fagsakId =
