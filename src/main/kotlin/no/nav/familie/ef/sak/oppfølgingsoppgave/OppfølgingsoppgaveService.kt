@@ -42,6 +42,7 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
 import java.util.UUID
+import kotlin.compareTo
 
 @Service
 class OppfølgingsoppgaveService(
@@ -259,10 +260,10 @@ class OppfølgingsoppgaveService(
         val andelhistorikk = andelsHistorikkService.hentHistorikk(fagsakId, null).reversed()
 
         val harOvergangsstønadVedtaksperiodeSomLøperEttÅrFremITidMedUtbetaling =
-            andelhistorikk.any {
+            andelhistorikk.firstOrNull {
                 it.andel.periode.tomDato
                     .isAfter(LocalDate.now().plusYears(1)) && it.andel.beløp > 0
-            }
+            } != null
 
         return harOvergangsstønadVedtaksperiodeSomLøperEttÅrFremITidMedUtbetaling
     }
