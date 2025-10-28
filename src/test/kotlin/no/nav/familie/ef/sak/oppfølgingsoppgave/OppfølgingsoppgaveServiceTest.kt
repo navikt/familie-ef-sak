@@ -91,6 +91,8 @@ internal class OppfølgingsoppgaveServiceTest {
     private val oppgaverForOpprettelse = OppgaverForOpprettelse(behandlingId, emptyList())
     private val saksbehandling = lagSaksbehandling(stønadType = StønadType.OVERGANGSSTØNAD, behandling = behandling)
     private val vedtak = mockk<Vedtak>()
+    private val personident = "12345678901"
+    private val fagsak = fagsak()
 
     @BeforeEach
     fun init() {
@@ -101,6 +103,8 @@ internal class OppfølgingsoppgaveServiceTest {
         every { vedtak.resultatType } returns ResultatType.INNVILGE
         every { vedtakService.hentVedtak(any()) } returns vedtak
         every { andelsHistorikkService.hentHistorikk(any(), any()) } returns emptyList()
+        every { behandlingService.hentAktivIdent(any()) } returns personident
+        every { fagsakService.finnFagsak(setOf(personident), StønadType.OVERGANGSSTØNAD)?.id } returns fagsak.id
     }
 
     @Test

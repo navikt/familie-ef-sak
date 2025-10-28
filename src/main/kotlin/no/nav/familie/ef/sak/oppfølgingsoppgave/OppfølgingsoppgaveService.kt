@@ -134,12 +134,17 @@ class OppfølgingsoppgaveService(
 
     fun hentOppgavetyperSomKanOpprettes(behandlingId: UUID): List<OppgaveForOpprettelseType> {
         val saksbehandling = behandlingService.hentSaksbehandling(behandlingId)
+        var harOvergangsstønadVedtaksperiodeSomLøperEttÅrFremITidMedUtbetaling = false
 
         if (saksbehandling.stønadstype == StønadType.SKOLEPENGER) {
             return emptyList()
         }
 
-        val andelhistorikk = andelsHistorikkService.hentHistorikk(saksbehandling.fagsakId, null).reversed()
+        if (saksbehandling.stønadstype == StønadType.BARNETILSYN) {
+            sjekkOmDetFinnesLøpendeOvergangsstønadMedUtbetaling(behandlingId).let {
+                harOvergangsstønadVedtaksperiodeSomLøperEttÅrFremITidMedUtbetaling = it
+            }
+        }
 
         val vedtak = vedtakService.hentVedtak(behandlingId)
         val tilkjentYtelse =
@@ -150,12 +155,6 @@ class OppfølgingsoppgaveService(
                     tilkjentYtelseService.hentForBehandlingEllerNull(behandlingId)
                 }
                 else -> null
-            }
-
-        val harOvergangsstønadVedtaksperiodeSomLøperEttÅrFremITidMedUtbetaling =
-            andelhistorikk.any {
-                it.andel.periode.tomDato
-                    .isAfter(LocalDate.now().plusYears(1)) && it.andel.beløp > 0
             }
 
         val erOvergangsstønadOgHarUtbetalingEtterDetNesteÅret = saksbehandling.stønadstype == StønadType.OVERGANGSSTØNAD && harUtbetalingEtterDetNesteÅret(tilkjentYtelse)
@@ -248,4 +247,23 @@ class OppfølgingsoppgaveService(
     fun hentOppgaverForFerdigstillingEllerNull(behandlingId: UUID): OppgaverForFerdigstilling? = oppgaverForFerdigstillingRepository.findByIdOrNull(behandlingId)
 
     fun hentAutomatiskBrevEllerNull(behandlingId: UUID): AutomatiskBrev? = automatiskBrevRepository.findByIdOrNull(behandlingId)
+
+    fun sjekkOmDetFinnesLøpendeOvergangsstønadMedUtbetaling(behandlingId: UUID ): Boolean {
+        val personIdent = behandlingService.hentAktivIdent(behandlingId)
+
+        val fagsakId =
+            fagsakService.finnFagsak(setOf(personIdent), StønadType.OVERGANGSSTØNAD) ?.id
+
+        if (fagsakId == null) return false
+
+        val andelhistorikk = andelsHistorikkService.hentHistorikk(fagsakId, null).reversed()
+
+        val harOvergangsstønadVedtaksperiodeSomLøperEttÅrFremITidMedUtbetaling =
+            andelhistorikk.any {
+                it.andel.periode.tomDato
+                    .isAfter(LocalDate.now().plusYears(1)) && it.andel.beløp > 0
+            }
+
+        return harOvergangsstønadVedtaksperiodeSomLøperEttÅrFremITidMedUtbetaling
+    }
 }
