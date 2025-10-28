@@ -259,8 +259,9 @@ class OppfølgingsoppgaveService(
         val førsteAndel = andelshistorikkSortertNyest.firstOrNull()
         val harOvergangsstønadVedtaksperiodeSomLøperEttÅrFremITidMedUtbetaling =
             førsteAndel != null &&
-                    førsteAndel.andel.periode.tomDato.isAfter(LocalDate.now().plusYears(1)) &&
-                    førsteAndel.andel.beløp > 0
+                førsteAndel.andel.periode.tomDato
+                    .isAfter(LocalDate.now().plusYears(1)) &&
+                førsteAndel.andel.beløp > 0
 
         return harOvergangsstønadVedtaksperiodeSomLøperEttÅrFremITidMedUtbetaling
     }
