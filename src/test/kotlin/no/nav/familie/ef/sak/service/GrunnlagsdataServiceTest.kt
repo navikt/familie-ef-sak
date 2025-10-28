@@ -20,7 +20,6 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.TidligereVedtaksper
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.TidligereInnvilgetVedtak
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.TidligereVedtaksperioder
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.fullmakt.FullmaktService
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.medl.MedlClient
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.medl.MedlService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Fullmakt
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Metadata
@@ -97,8 +96,6 @@ internal class GrunnlagsdataServiceTest {
     @BeforeEach
     internal fun setUp() {
         every { søknadService.hentOvergangsstønad(any()) } returns søknad
-        every { personopplysningerIntegrasjonerClient.hentMedlemskapsinfo(any()) } returns
-            Medlemskapsinfo("", emptyList(), emptyList(), emptyList())
         every { fullmaktService.hentFullmakt(any()) } returns
             listOf(
                 Fullmakt(
