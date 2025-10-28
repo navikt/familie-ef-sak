@@ -45,8 +45,6 @@ class PersonopplysningerIntegrasjonerClient(
             },
         )
 
-    fun hentMedlemskapsinfo(ident: String): Medlemskapsinfo = postForEntity<Ressurs<Medlemskapsinfo>>(integrasjonerConfig.medlemskapUri, PersonIdent(ident)).data!!
-
     fun hentNavEnhetForPersonMedRelasjoner(ident: String): List<Arbeidsfordelingsenhet> {
         val uri = integrasjonerConfig.arbeidsfordelingMedRelasjonerUri
         return hentArbeidsfordelingEnhet(uri, ident)

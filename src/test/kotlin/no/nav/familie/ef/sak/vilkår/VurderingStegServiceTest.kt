@@ -58,7 +58,6 @@ internal class VurderingStegServiceTest {
     private val søknadService = mockk<SøknadService>()
     private val vilkårsvurderingRepository = mockk<VilkårsvurderingRepository>()
     private val barnService = mockk<BarnService>()
-    private val personopplysningerIntegrasjonerClient = mockk<PersonopplysningerIntegrasjonerClient>()
     private val blankettRepository = mockk<BlankettRepository>()
     private val vilkårGrunnlagService = mockk<VilkårGrunnlagService>()
     private val grunnlagsdataService = mockk<GrunnlagsdataService>()
@@ -118,15 +117,6 @@ internal class VurderingStegServiceTest {
         every { behandlingStegOppdaterer.oppdaterStegOgKategoriPåBehandling(behandlingId) } just Runs
         every { blankettRepository.deleteById(any()) } just runs
         every { fagsakService.hentFagsakForBehandling(any()) } returns fagsak(stønadstype = OVERGANGSSTØNAD)
-        every { personopplysningerIntegrasjonerClient.hentMedlemskapsinfo(any()) }
-            .returns(
-                Medlemskapsinfo(
-                    personIdent = søknad.fødselsnummer,
-                    gyldigePerioder = emptyList(),
-                    uavklartePerioder = emptyList(),
-                    avvistePerioder = emptyList(),
-                ),
-            )
         every { vilkårsvurderingRepository.insertAll(any()) } answers { firstArg() }
         every { tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandler(any()) } returns true
         val sivilstand =
