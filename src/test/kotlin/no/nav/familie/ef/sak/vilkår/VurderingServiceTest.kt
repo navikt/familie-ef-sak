@@ -53,7 +53,6 @@ internal class VurderingServiceTest {
     private val behandlingService = mockk<BehandlingService>()
     private val søknadService = mockk<SøknadService>()
     private val vilkårsvurderingRepository = mockk<VilkårsvurderingRepository>()
-    private val personopplysningerIntegrasjonerClient = mockk<PersonopplysningerIntegrasjonerClient>()
     private val blankettRepository = mockk<BlankettRepository>()
     private val barnService = mockk<BarnService>()
     private val vilkårGrunnlagService = mockk<VilkårGrunnlagService>()
@@ -98,7 +97,6 @@ internal class VurderingServiceTest {
             ).tilSøknadsverdier()
     private val barn = søknadBarnTilBehandlingBarn(søknad.barn)
     private val behandling = behandling(fagsak(), BehandlingStatus.OPPRETTET, årsak = BehandlingÅrsak.PAPIRSØKNAD)
-    private val behandlingLåst = behandling(fagsak(), BehandlingStatus.FERDIGSTILT, årsak = BehandlingÅrsak.PAPIRSØKNAD)
     private val behandlingId = UUID.randomUUID()
     private val behandlingDto = mockk<BehandlingDto>()
 
@@ -108,15 +106,6 @@ internal class VurderingServiceTest {
         every { behandlingService.hentBehandling(behandlingId) } returns behandling
         every { søknadService.hentSøknadsgrunnlag(any()) }.returns(søknad)
         every { blankettRepository.deleteById(any()) } just runs
-        every { personopplysningerIntegrasjonerClient.hentMedlemskapsinfo(any()) }
-            .returns(
-                Medlemskapsinfo(
-                    personIdent = søknad.fødselsnummer,
-                    gyldigePerioder = emptyList(),
-                    uavklartePerioder = emptyList(),
-                    avvistePerioder = emptyList(),
-                ),
-            )
         every { vilkårsvurderingRepository.insertAll(any()) } answers { firstArg() }
         every { barnService.finnBarnPåBehandling(behandlingId) } returns barn
         every { fagsakService.hentFagsakForBehandling(behandlingId) } returns fagsak(stønadstype = OVERGANGSSTØNAD)
