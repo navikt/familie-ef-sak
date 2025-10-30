@@ -30,6 +30,7 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerS
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.saksbehandling
+import no.nav.familie.ef.sak.tilkjentytelse.AndelsHistorikkService
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.ef.sak.vedtak.domain.Vedtak
@@ -61,8 +62,8 @@ internal class OppfølgingsoppgaveServiceTest {
     private val eksternStønadsperioderService = mockk<EksternStønadsperioderService>()
     private val brevmottakereService = mockk<BrevmottakereService>()
     private val fagsakService = mockk<FagsakService>()
-    private val behandlingRepository = mockk<BehandlingRepository>()
     private val brevsignaturService = mockk<BrevsignaturService>()
+    private val andelsHistorikkService = mockk<AndelsHistorikkService>()
 
     private var oppfølgingsoppgaveService =
         spyk(
@@ -78,11 +79,10 @@ internal class OppfølgingsoppgaveServiceTest {
                 brevClient,
                 frittståendeBrevService,
                 personopplysningerService,
-                eksternStønadsperioderService,
                 brevmottakereService,
                 brevsignaturService,
                 fagsakService,
-                behandlingRepository,
+                andelsHistorikkService,
             ),
         )
 
@@ -91,6 +91,8 @@ internal class OppfølgingsoppgaveServiceTest {
     private val oppgaverForOpprettelse = OppgaverForOpprettelse(behandlingId, emptyList())
     private val saksbehandling = lagSaksbehandling(stønadType = StønadType.OVERGANGSSTØNAD, behandling = behandling)
     private val vedtak = mockk<Vedtak>()
+    private val personident = "12345678901"
+    private val fagsak = fagsak()
 
     @BeforeEach
     fun init() {
@@ -100,6 +102,9 @@ internal class OppfølgingsoppgaveServiceTest {
         every { oppgaverForOpprettelseRepository.update(any()) } returns oppgaverForOpprettelse
         every { vedtak.resultatType } returns ResultatType.INNVILGE
         every { vedtakService.hentVedtak(any()) } returns vedtak
+        every { andelsHistorikkService.hentHistorikk(any(), any()) } returns emptyList()
+        every { behandlingService.hentAktivIdent(any()) } returns personident
+        every { fagsakService.finnFagsak(setOf(personident), StønadType.OVERGANGSSTØNAD)?.id } returns fagsak.id
     }
 
     @Test
