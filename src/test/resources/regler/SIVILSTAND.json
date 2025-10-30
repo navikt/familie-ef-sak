@@ -72,6 +72,10 @@
           "begrunnelseType" : "PÅKREVD",
           "regelId" : "SLUTT_NODE"
         },
+        "FØDSEL_ETTER_ANNEN_FORELDERS_DØDSFALL" : {
+          "begrunnelseType" : "PÅKREVD",
+          "regelId" : "SLUTT_NODE"
+        },
         "NEI" : {
           "begrunnelseType" : "PÅKREVD",
           "regelId" : "SLUTT_NODE"
