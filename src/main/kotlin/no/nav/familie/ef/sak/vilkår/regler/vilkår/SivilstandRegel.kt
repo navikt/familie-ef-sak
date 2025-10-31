@@ -126,6 +126,7 @@ class SivilstandRegel :
                         SvarId.GJENLEVENDE_IKKE_RETT_TIL_YTELSER to SluttSvarRegel.OPPFYLT_MED_PÅKREVD_BEGRUNNELSE,
                         SvarId.GJENLEVENDE_OVERTAR_OMSORG to SluttSvarRegel.OPPFYLT_MED_PÅKREVD_BEGRUNNELSE,
                         SvarId.GJENLEVENDE_SEPARERT_FØR_DØDSFALL to SluttSvarRegel.OPPFYLT_MED_PÅKREVD_BEGRUNNELSE,
+                        SvarId.FØDSEL_ETTER_ANNEN_FORELDERS_DØDSFALL to SluttSvarRegel.OPPFYLT_MED_PÅKREVD_BEGRUNNELSE,
                         SvarId.NEI to SluttSvarRegel.IKKE_OPPFYLT_MED_PÅKREVD_BEGRUNNELSE,
                     ),
             )
