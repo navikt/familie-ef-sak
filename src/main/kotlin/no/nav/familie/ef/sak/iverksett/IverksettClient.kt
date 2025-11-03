@@ -12,6 +12,7 @@ import no.nav.familie.kontrakter.ef.iverksett.IverksettStatus
 import no.nav.familie.kontrakter.ef.iverksett.KonsistensavstemmingDto
 import no.nav.familie.kontrakter.ef.iverksett.SimuleringDto
 import no.nav.familie.kontrakter.felles.Ressurs
+import no.nav.familie.kontrakter.felles.getDataOrThrow
 import no.nav.familie.kontrakter.felles.simulering.BeriketSimuleringsresultat
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
@@ -117,8 +118,8 @@ class IverksettClient(
         postForEntity<Unit>(URI.create("$familieEfIverksettUri/api/brev/frittstaende/innhenting-aktivitetsplikt"), periodiskAktivitetspliktBrevDto)
     }
 
-    fun timeoutTest(sekunder: Long): Ressurs<String> {
+    fun timeoutTest(sekunder: Long): String {
         val testUri = URI.create("$familieEfIverksettUri/api/konsistensavstemming/timeout-test?sekunder=$sekunder")
-        return getForEntity<Ressurs<String>>(testUri)
+        return getForEntity(testUri, HttpHeaders().medContentTypeJsonUTF8())
     }
 }
