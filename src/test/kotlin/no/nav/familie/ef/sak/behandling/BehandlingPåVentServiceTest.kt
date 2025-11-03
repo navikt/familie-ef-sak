@@ -21,6 +21,7 @@ import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
+import no.nav.familie.ef.sak.oppgave.OppgaveClient
 import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.ef.sak.oppgave.OppgaveSubtype
 import no.nav.familie.ef.sak.oppgave.TilordnetRessursService
@@ -34,6 +35,7 @@ import no.nav.familie.kontrakter.felles.oppgave.MappeDto
 import no.nav.familie.kontrakter.felles.oppgave.Oppgave
 import no.nav.familie.kontrakter.felles.oppgave.OppgavePrioritet
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
+import no.nav.familie.kontrakter.felles.saksbehandler.Saksbehandler
 import no.nav.familie.prosessering.internal.TaskService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
@@ -52,6 +54,7 @@ internal class BehandlingPåVentServiceTest {
     private val nullstillVedtakService = mockk<NullstillVedtakService>(relaxed = true)
     private val behandlingshistorikkService = mockk<BehandlingshistorikkService>(relaxed = true)
     private val oppgaveService = mockk<OppgaveService>()
+    private val oppgaveClient = mockk<OppgaveClient>()
     private val tilordnetRessursService: TilordnetRessursService = mockk<TilordnetRessursService>(relaxed = true)
 
     private val featureToggleService = mockk<FeatureToggleService>()
@@ -63,6 +66,7 @@ internal class BehandlingPåVentServiceTest {
             taskService,
             nullstillVedtakService,
             oppgaveService,
+            oppgaveClient,
             tilordnetRessursService,
         )
     val fagsak = fagsak()
@@ -92,6 +96,7 @@ internal class BehandlingPåVentServiceTest {
                 ),
             )
         }
+        every { oppgaveClient.hentSaksbehandlerInfo(any()) } returns Saksbehandler(UUID.randomUUID(), "12345678912", "bob", "fjell", "4489", "NAV ARBEID OG YTELSER SKIEN")
         every { tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandler(any()) } returns true
         every { oppgaveService.hentOppgaveSomIkkeErFerdigstilt(any(), any()) } returns
             no.nav.familie.ef.sak.oppgave
