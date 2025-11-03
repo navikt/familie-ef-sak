@@ -279,7 +279,7 @@ class BehandlingPåVentService(
         val oppgave = tilordnetRessursService.hentIkkeFerdigstiltOppgaveForBehandling(behandlingId)
         val oppgaveId = oppgave?.id
         if (oppgaveId != null) {
-            oppgaveService.fordelOppgave(oppgaveId, SikkerhetContext.hentSaksbehandler(), oppgave.versjon)
+            oppgaveService.fordelOppgave(oppgaveId, SikkerhetContext.hentSaksbehandler(), oppgave.versjon, SikkerhetContext.hentSaksbehandler())
         } else {
             logger.warn("Finner ingen oppgave å oppdatere")
         }

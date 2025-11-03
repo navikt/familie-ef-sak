@@ -75,6 +75,7 @@ class OppgaveClient(
         oppgaveId: Long,
         saksbehandler: String?,
         versjon: Int? = null,
+        innloggetSaksbehandler: String? = null,
     ): Long {
         var uri = URI.create("$oppgaveUri/$oppgaveId/fordel")
 
@@ -92,6 +93,15 @@ class OppgaveClient(
                 UriComponentsBuilder
                     .fromUri(uri)
                     .queryParam("versjon", versjon)
+                    .build()
+                    .toUri()
+        }
+
+        if (innloggetSaksbehandler != null) {
+            uri =
+                UriComponentsBuilder
+                    .fromUri(uri)
+                    .queryParam("innloggetSaksbehandler", innloggetSaksbehandler)
                     .build()
                     .toUri()
         }
