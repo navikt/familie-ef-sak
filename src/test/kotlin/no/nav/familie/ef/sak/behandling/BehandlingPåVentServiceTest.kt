@@ -54,7 +54,6 @@ internal class BehandlingPåVentServiceTest {
     private val nullstillVedtakService = mockk<NullstillVedtakService>(relaxed = true)
     private val behandlingshistorikkService = mockk<BehandlingshistorikkService>(relaxed = true)
     private val oppgaveService = mockk<OppgaveService>()
-    private val oppgaveClient = mockk<OppgaveClient>()
     private val tilordnetRessursService: TilordnetRessursService = mockk<TilordnetRessursService>(relaxed = true)
 
     private val featureToggleService = mockk<FeatureToggleService>()
@@ -66,7 +65,6 @@ internal class BehandlingPåVentServiceTest {
             taskService,
             nullstillVedtakService,
             oppgaveService,
-            oppgaveClient,
             tilordnetRessursService,
         )
     val fagsak = fagsak()
@@ -96,7 +94,7 @@ internal class BehandlingPåVentServiceTest {
                 ),
             )
         }
-        every { oppgaveClient.hentSaksbehandlerInfo(any()) } returns Saksbehandler(UUID.randomUUID(), "12345678912", "bob", "fjell", "4489", "NAV ARBEID OG YTELSER SKIEN")
+        every { oppgaveService.hentSaksbehandler(any()) } returns Saksbehandler(UUID.randomUUID(), "12345678912", "bob", "fjell", "4489", "NAV ARBEID OG YTELSER SKIEN")
         every { tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandler(any()) } returns true
         every { oppgaveService.hentOppgaveSomIkkeErFerdigstilt(any(), any()) } returns
             no.nav.familie.ef.sak.oppgave

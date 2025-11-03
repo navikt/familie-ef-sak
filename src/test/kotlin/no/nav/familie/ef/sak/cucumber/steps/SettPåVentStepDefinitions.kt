@@ -56,7 +56,6 @@ class SettPåVentStepDefinitions {
     val taskService = mockk<TaskService>()
     val nullstillVedtakService = mockk<NullstillVedtakService>()
     val oppgaveService = mockk<OppgaveService>()
-    val oppgaveClient = mockk<OppgaveClient>()
     val tilordnetRessursService = mockk<TilordnetRessursService>()
 
     val påVentService =
@@ -66,7 +65,6 @@ class SettPåVentStepDefinitions {
             taskService,
             nullstillVedtakService,
             oppgaveService,
-            oppgaveClient,
             tilordnetRessursService,
         )
 
@@ -144,7 +142,7 @@ class SettPåVentStepDefinitions {
 
         every { SikkerhetContext.hentSaksbehandler() } returns "bob"
         every { behandlingService.hentBehandling(behandling.id) } returns behandling
-        every { oppgaveClient.hentSaksbehandlerInfo(any()) } returns Saksbehandler(UUID.randomUUID(), "", "", "", "", "")
+        every { oppgaveService.hentSaksbehandler(any()) } returns Saksbehandler(UUID.randomUUID(), "12345678912", "bob", "fjell", "4489", "NAV ARBEID OG YTELSER SKIEN")
         every { behandlingService.hentSaksbehandling(behandling.id) } returns saksbehandling
         every { behandlingService.oppdaterStatusPåBehandling(any(), any()) } returns behandling
         every { oppgaveService.hentOppgave(any()) } returns eksisterendeOppgave

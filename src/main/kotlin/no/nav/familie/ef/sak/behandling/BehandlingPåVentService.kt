@@ -42,7 +42,6 @@ class BehandlingPåVentService(
     private val taskService: TaskService,
     private val nullstillVedtakService: NullstillVedtakService,
     private val oppgaveService: OppgaveService,
-    private val oppgaveClient: OppgaveClient,
     private val tilordnetRessursService: TilordnetRessursService,
 ) {
     val logger: Logger = LoggerFactory.getLogger(javaClass)
@@ -74,8 +73,7 @@ class BehandlingPåVentService(
     private fun oppdaterVerdierPåOppgave(settPåVentRequest: SettPåVentRequest) {
         val oppgave = oppgaveService.hentOppgave(settPåVentRequest.oppgaveId)
 
-        val enhetsnr = oppgaveClient.hentSaksbehandlerInfo(settPåVentRequest.saksbehandler).enhet
-        logger.info("Oppgave med ID: ${oppgave.id} satt på vent og endretAvEnhetsnr: $enhetsnr ")
+        val enhetsnr = oppgaveService.hentSaksbehandler(settPåVentRequest.saksbehandler).enhet
 
         val beskrivelse = utledOppgavebeskrivelse(oppgave, settPåVentRequest)
 
