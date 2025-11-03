@@ -17,6 +17,7 @@ import no.nav.familie.kontrakter.felles.simulering.BeriketSimuleringsresultat
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpHeaders
+import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
 import org.springframework.web.client.RestOperations
 import org.springframework.web.util.UriComponentsBuilder
@@ -120,6 +121,9 @@ class IverksettClient(
 
     fun timeoutTest(sekunder: Long): String {
         val testUri = URI.create("$familieEfIverksettUri/api/konsistensavstemming/timeout-test?sekunder=$sekunder")
-        return getForEntity(testUri, HttpHeaders().medContentTypeJsonUTF8())
+        val headers = HttpHeaders().apply {
+            accept = listOf(MediaType.TEXT_PLAIN)
+        }
+        return getForEntity<String>(testUri, headers)
     }
 }
