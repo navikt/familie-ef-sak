@@ -116,4 +116,9 @@ class IverksettClient(
     fun håndterUtsendingAvAktivitetspliktBrev(periodiskAktivitetspliktBrevDto: PeriodiskAktivitetspliktBrevDto) {
         postForEntity<Unit>(URI.create("$familieEfIverksettUri/api/brev/frittstaende/innhenting-aktivitetsplikt"), periodiskAktivitetspliktBrevDto)
     }
+
+    fun timeoutTest(sekunder: Long): String {
+        val testUri = URI.create("$familieEfIverksettUri/api/konsistensavstemming/timeout-test?sekunder=$sekunder")
+        return getForEntity<String>(testUri)
+    }
 }

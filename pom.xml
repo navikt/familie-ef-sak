@@ -5,7 +5,6 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>no.nav</groupId>
-    <packaging>jar</packaging>
     <artifactId>familie-ef-sak</artifactId>
     <version>${revision}${sha1}${changelist}</version>
     <parent>
