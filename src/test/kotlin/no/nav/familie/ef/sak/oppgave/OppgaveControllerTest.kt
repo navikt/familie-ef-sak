@@ -4,9 +4,11 @@ import io.mockk.Runs
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
+import io.mockk.mockkObject
 import io.mockk.slot
 import io.mockk.verify
 import no.nav.familie.ef.sak.infrastruktur.exception.ManglerTilgang
+import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.ef.sak.oppfølgingsoppgave.OppfølgingsoppgaveService
 import no.nav.familie.ef.sak.oppgave.OppgaveUtil.ENHET_NR_EGEN_ANSATT
@@ -66,20 +68,26 @@ internal class OppgaveControllerTest {
 
     @Test
     internal fun `skal sende med versjon i request `() {
+        mockkObject(SikkerhetContext)
+        every { SikkerhetContext.hentSaksbehandler() } returns ""
+
         val versjonSlot = slot<Int>()
         val oppgaveIdSlot = slot<Long>()
         tilgangOgRolleJustRuns()
-        every { oppgaveService.fordelOppgave(capture(oppgaveIdSlot), any(), capture(versjonSlot)) } returns 123
+        every { oppgaveService.fordelOppgave(capture(oppgaveIdSlot), any(), capture(versjonSlot), any()) } returns 123
         oppgaveController.fordelOppgave(123, "saksbehandler", 1)
         assertThat(versjonSlot.captured).isEqualTo(1)
     }
 
     @Test
     internal fun `skal ikke feile hvis versjon er null `() {
+        mockkObject(SikkerhetContext)
+        every { SikkerhetContext.hentSaksbehandler() } returns ""
+
         val versjonSlot = slot<Int>()
         val oppgaveIdSlot = slot<Long>()
         tilgangOgRolleJustRuns()
-        every { oppgaveService.fordelOppgave(capture(oppgaveIdSlot), any()) } returns 123
+        every { oppgaveService.fordelOppgave(capture(oppgaveIdSlot), any(), innloggetSaksbehandler = any()) } returns 123
         oppgaveController.fordelOppgave(123, "saksbehandler", versjon = null)
     }
 
