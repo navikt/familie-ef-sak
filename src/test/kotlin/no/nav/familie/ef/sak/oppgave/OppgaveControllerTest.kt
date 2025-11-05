@@ -6,6 +6,7 @@ import io.mockk.just
 import io.mockk.mockk
 import io.mockk.mockkObject
 import io.mockk.slot
+import io.mockk.unmockkObject
 import io.mockk.verify
 import no.nav.familie.ef.sak.infrastruktur.exception.ManglerTilgang
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
@@ -77,6 +78,8 @@ internal class OppgaveControllerTest {
         every { oppgaveService.fordelOppgave(capture(oppgaveIdSlot), any(), capture(versjonSlot), any()) } returns 123
         oppgaveController.fordelOppgave(123, "saksbehandler", 1)
         assertThat(versjonSlot.captured).isEqualTo(1)
+
+        unmockkObject(SikkerhetContext)
     }
 
     @Test
@@ -89,6 +92,8 @@ internal class OppgaveControllerTest {
         tilgangOgRolleJustRuns()
         every { oppgaveService.fordelOppgave(capture(oppgaveIdSlot), any(), innloggetSaksbehandler = any()) } returns 123
         oppgaveController.fordelOppgave(123, "saksbehandler", versjon = null)
+
+        unmockkObject(SikkerhetContext)
     }
 
     @Test
