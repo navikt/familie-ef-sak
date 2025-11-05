@@ -121,9 +121,10 @@ class IverksettClient(
 
     fun timeoutTest(sekunder: Long): String {
         val testUri = URI.create("$familieEfIverksettUri/api/konsistensavstemming/timeout-test?sekunder=$sekunder")
-        val headers = HttpHeaders().apply {
-            accept = listOf(MediaType.TEXT_PLAIN)
-        }
+        val headers =
+            HttpHeaders().apply {
+                accept = listOf(MediaType.TEXT_PLAIN)
+            }
         return getForEntity<String>(testUri, headers)
     }
 }

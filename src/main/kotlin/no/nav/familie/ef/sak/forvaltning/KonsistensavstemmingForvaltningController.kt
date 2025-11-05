@@ -47,8 +47,6 @@ class KonsistensavstemmingForvaltningController(
 
     @GetMapping("test-timeout")
     fun timeoutTest(
-        @RequestParam(name= "sekunder") sekunder: Long,
-    ): String {
-        return iverksettClient.timeoutTest(sekunder)
-    }
+        @RequestParam(name = "sekunder") sekunder: Long,
+    ): String = iverksettClient.timeoutTest(sekunder)
 }
