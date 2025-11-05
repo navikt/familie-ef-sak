@@ -393,7 +393,7 @@ internal class BehandlingPåVentServiceTest {
             }
             verify(exactly = 0) { nullstillVedtakService.nullstillVedtak(any()) }
             verify(exactly = 0) { behandlingService.oppdaterForrigeBehandlingId(any(), any()) }
-            verify { oppgaveService.fordelOppgave(oppgaveId, "bob", any()) }
+            verify { oppgaveService.fordelOppgave(oppgaveId, "bob", any(), any()) }
         }
 
         @Test
@@ -426,14 +426,14 @@ internal class BehandlingPåVentServiceTest {
                 behandlingService.oppdaterStatusPåBehandling(behandlingId, BehandlingStatus.UTREDES)
                 behandlingService.oppdaterForrigeBehandlingId(behandlingId, tidligereIverksattBehandling.id)
                 nullstillVedtakService.nullstillVedtak(behandlingId)
-                oppgaveService.fordelOppgave(oppgaveId, "bob", any())
+                oppgaveService.fordelOppgave(oppgaveId, "bob", any(), any())
             }
         }
 
         private fun mockSettSaksbehandlerPåOppgave(oppgaveId: Long) {
             val oppgave = oppgave(oppgaveId)
             every { tilordnetRessursService.hentIkkeFerdigstiltOppgaveForBehandling(behandlingId) } returns oppgave
-            every { oppgaveService.fordelOppgave(any(), any(), any()) } returns oppgaveId
+            every { oppgaveService.fordelOppgave(any(), any(), any(), any()) } returns oppgaveId
         }
     }
 
