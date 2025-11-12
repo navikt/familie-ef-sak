@@ -17,6 +17,7 @@ import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
+import no.nav.familie.ef.sak.oppgave.OppgaveClient
 import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.ef.sak.oppgave.OppgaveSubtype
 import no.nav.familie.ef.sak.oppgave.TilordnetRessursService
@@ -72,6 +73,8 @@ class BehandlingPåVentService(
     private fun oppdaterVerdierPåOppgave(settPåVentRequest: SettPåVentRequest) {
         val oppgave = oppgaveService.hentOppgave(settPåVentRequest.oppgaveId)
 
+        val enhetsnr = oppgaveService.hentSaksbehandler(settPåVentRequest.saksbehandler).enhet
+
         val beskrivelse = utledOppgavebeskrivelse(oppgave, settPåVentRequest)
 
         oppgaveService.oppdaterOppgave(
@@ -83,6 +86,7 @@ class BehandlingPåVentService(
                 mappeId = settPåVentRequest.mappe,
                 beskrivelse = beskrivelse,
                 versjon = settPåVentRequest.oppgaveVersjon,
+                endretAvEnhetsnr = enhetsnr,
             ),
         )
     }
@@ -275,7 +279,7 @@ class BehandlingPåVentService(
         val oppgave = tilordnetRessursService.hentIkkeFerdigstiltOppgaveForBehandling(behandlingId)
         val oppgaveId = oppgave?.id
         if (oppgaveId != null) {
-            oppgaveService.fordelOppgave(oppgaveId, SikkerhetContext.hentSaksbehandler(), oppgave.versjon)
+            oppgaveService.fordelOppgave(oppgaveId, SikkerhetContext.hentSaksbehandler(), oppgave.versjon, SikkerhetContext.hentSaksbehandler())
         } else {
             logger.warn("Finner ingen oppgave å oppdatere")
         }
