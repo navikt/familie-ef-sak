@@ -27,6 +27,7 @@ import no.nav.familie.ef.sak.cucumber.domeneparser.parseValgfriString
 import no.nav.familie.ef.sak.felles.util.DatoUtil
 import no.nav.familie.ef.sak.felles.util.mockFeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
+import no.nav.familie.ef.sak.oppgave.OppgaveClient
 import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.ef.sak.oppgave.OppgaveSubtype
 import no.nav.familie.ef.sak.oppgave.TilordnetRessursService
@@ -37,6 +38,7 @@ import no.nav.familie.kontrakter.felles.oppgave.MappeDto
 import no.nav.familie.kontrakter.felles.oppgave.Oppgave
 import no.nav.familie.kontrakter.felles.oppgave.OppgavePrioritet
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
+import no.nav.familie.kontrakter.felles.saksbehandler.Saksbehandler
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.internal.TaskService
 import org.assertj.core.api.Assertions.assertThat
@@ -140,6 +142,7 @@ class SettPåVentStepDefinitions {
 
         every { SikkerhetContext.hentSaksbehandler() } returns "bob"
         every { behandlingService.hentBehandling(behandling.id) } returns behandling
+        every { oppgaveService.hentSaksbehandler(any()) } returns Saksbehandler(UUID.randomUUID(), "12345678912", "bob", "fjell", "4489", "NAV ARBEID OG YTELSER SKIEN")
         every { behandlingService.hentSaksbehandling(behandling.id) } returns saksbehandling
         every { behandlingService.oppdaterStatusPåBehandling(any(), any()) } returns behandling
         every { oppgaveService.hentOppgave(any()) } returns eksisterendeOppgave
