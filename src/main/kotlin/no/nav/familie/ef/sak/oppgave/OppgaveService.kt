@@ -197,7 +197,7 @@ class OppgaveService(
         gsakOppgaveId: Long,
         saksbehandler: String,
         versjon: Int? = null,
-        innloggetSaksbehandler: String? = null,
+        endretAvSaksbehandler: String? = null,
     ): Long {
         val oppgave = hentOppgave(gsakOppgaveId)
 
@@ -208,7 +208,7 @@ class OppgaveService(
                 gsakOppgaveId,
                 saksbehandler,
                 versjon,
-                innloggetSaksbehandler,
+                endretAvSaksbehandler,
             )
         }
     }
