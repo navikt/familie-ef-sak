@@ -73,7 +73,7 @@ class BehandlingPåVentService(
     private fun oppdaterVerdierPåOppgave(settPåVentRequest: SettPåVentRequest) {
         val oppgave = oppgaveService.hentOppgave(settPåVentRequest.oppgaveId)
 
-        val enhetsnr = oppgaveService.hentSaksbehandler(settPåVentRequest.saksbehandler).enhet
+        val endretAvEnhetsnr = oppgaveService.hentSaksbehandler(SikkerhetContext.hentSaksbehandler()).enhet
 
         val beskrivelse = utledOppgavebeskrivelse(oppgave, settPåVentRequest)
 
@@ -86,7 +86,7 @@ class BehandlingPåVentService(
                 mappeId = settPåVentRequest.mappe,
                 beskrivelse = beskrivelse,
                 versjon = settPåVentRequest.oppgaveVersjon,
-                endretAvEnhetsnr = enhetsnr,
+                endretAvEnhetsnr = endretAvEnhetsnr,
             ),
         )
     }
