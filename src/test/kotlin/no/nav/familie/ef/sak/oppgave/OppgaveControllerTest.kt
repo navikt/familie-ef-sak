@@ -90,7 +90,7 @@ internal class OppgaveControllerTest {
         val versjonSlot = slot<Int>()
         val oppgaveIdSlot = slot<Long>()
         tilgangOgRolleJustRuns()
-        every { oppgaveService.fordelOppgave(capture(oppgaveIdSlot), any(), innloggetSaksbehandler = any()) } returns 123
+        every { oppgaveService.fordelOppgave(capture(oppgaveIdSlot), any(), endretAvSaksbehandler = any()) } returns 123
         oppgaveController.fordelOppgave(123, "saksbehandler", versjon = null)
 
         unmockkObject(SikkerhetContext)
