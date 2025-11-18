@@ -121,13 +121,17 @@ class TestSaksbehandlingController(
         SluttSvarRegel.OPPFYLT_MED_PÅKREVD_BEGRUNNELSE,
         SluttSvarRegel.OPPFYLT_MED_VALGFRI_BEGRUNNELSE,
         SluttSvarRegel.OPPFYLT,
-        ->
+        -> {
             delvilkår(
                 delvilkår.hovedregel(),
                 svarId,
                 if (svarRegel == SluttSvarRegel.OPPFYLT_MED_PÅKREVD_BEGRUNNELSE) "begrunnelse" else null,
             )
-        else -> null
+        }
+
+        else -> {
+            null
+        }
     }
 
     private fun delvilkår(

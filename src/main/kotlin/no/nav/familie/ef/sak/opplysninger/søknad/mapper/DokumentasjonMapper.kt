@@ -73,10 +73,8 @@ object DokumentasjonMapper {
             uformeltSeparertEllerSkilt = sivilstand.erUformeltSeparertEllerSkiltDokumentasjon?.tilDto(),
             separasjonsbekreftelse = sivilstand.separasjonsbekreftelse?.tilDto(),
             samlivsbrudd = sivilstand.samlivsbruddsdokumentasjon?.tilDto(),
-            /**
-             * Dokumentasjonsbehov som er knyttet til barn blir satt likt for alle barna fra søknaden.
-             * Henter derfor bare ut for ett barn dersom det eksisterer
-             */
+            // Dokumentasjonsbehov som er knyttet til barn blir satt likt for alle barna fra søknaden.
+            // Henter derfor bare ut for ett barn dersom det eksisterer
             avtaleOmDeltBosted = barn.firstNotNullOfOrNull { it.samvær?.avtaleOmDeltBosted }?.tilDto(),
             samværsavtale = barn.firstNotNullOfOrNull { it.samvær?.samværsavtale }?.tilDto(),
             skalBarnetBoHosSøkerMenAnnenForelderSamarbeiderIkke =

@@ -45,7 +45,10 @@ class VedtaksbrevService(
                 }
                 familieDokumentClient.genererPdfFraHtml(vedtaksbrev.saksbehandlerHtml)
             }
-            else -> vedtaksbrev.beslutterPdf.bytes
+
+            else -> {
+                vedtaksbrev.beslutterPdf.bytes
+            }
         }
     }
 

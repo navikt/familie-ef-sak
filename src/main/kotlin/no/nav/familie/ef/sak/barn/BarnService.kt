@@ -43,8 +43,11 @@ class BarnService(
     ) {
         val barnPåBehandlingen: List<BehandlingBarn> =
             when (stønadstype) {
-                StønadType.BARNETILSYN -> barnForBarnetilsyn(barnSomSkalFødes, behandlingId, grunnlagsdataBarn)
-                StønadType.OVERGANGSSTØNAD, StønadType.SKOLEPENGER ->
+                StønadType.BARNETILSYN -> {
+                    barnForBarnetilsyn(barnSomSkalFødes, behandlingId, grunnlagsdataBarn)
+                }
+
+                StønadType.OVERGANGSSTØNAD, StønadType.SKOLEPENGER -> {
                     kobleBarnForOvergangsstønadOgSkolepenger(
                         fagsakId,
                         behandlingId,
@@ -53,6 +56,7 @@ class BarnService(
                         barnSomSkalFødes,
                         vilkårsbehandleNyeBarn,
                     )
+                }
             }
         barnRepository.insertAll(barnPåBehandlingen)
     }
@@ -94,19 +98,23 @@ class BarnService(
             "Kan ikke legge til terminbarn med ustrukturertDokumentasjonType=$ustrukturertDokumentasjonType"
         }
         return when (ustrukturertDokumentasjonType) {
-            UstrukturertDokumentasjonType.PAPIRSØKNAD ->
+            UstrukturertDokumentasjonType.PAPIRSØKNAD -> {
                 kobleBarnSomSkalFødesPlusAlleRegisterbarn(
                     behandlingId,
                     barnSomSkalFødes,
                     grunnlagsdataBarn,
                 )
-            UstrukturertDokumentasjonType.ETTERSENDING ->
+            }
+
+            UstrukturertDokumentasjonType.ETTERSENDING -> {
                 barnForEttersending(
                     fagsakId,
                     behandlingId,
                     vilkårsbehandleNyeBarn,
                     grunnlagsdataBarn,
                 )
+            }
+
             UstrukturertDokumentasjonType.IKKE_VALGT -> {
                 val kobledeBarn =
                     kobleBehandlingBarnOgRegisterBarnTilBehandlingBarn(
@@ -134,14 +142,17 @@ class BarnService(
             VilkårsbehandleNyeBarn.VILKÅRSBEHANDLE -> {
                 vilkårsbehandleBarnForEttersending(behandlingId, barnFraForrigeBehandling, grunnlagsdataBarn)
             }
+
             VilkårsbehandleNyeBarn.IKKE_VILKÅRSBEHANDLE -> {
                 feilHvis(barnFraForrigeBehandling.isNotEmpty()) {
                     "Må behandle nye barn hvis det finnes barn på forrige behandling fagsak=$fagsakId"
                 }
                 return emptyList()
             }
-            VilkårsbehandleNyeBarn.IKKE_VALGT ->
+
+            VilkårsbehandleNyeBarn.IKKE_VALGT -> {
                 throw Feil("Må ha valgt om man skal vilkårsbehandle nye barn når man ettersender på ny behandling")
+            }
         }
     }
 

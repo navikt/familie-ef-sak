@@ -144,12 +144,17 @@ class OppfølgingsoppgaveService(
         val vedtak = vedtakService.hentVedtak(behandlingId)
         val tilkjentYtelse =
             when {
-                vedtak.resultatType == ResultatType.AVSLÅ && vedtak.avslåÅrsak == AvslagÅrsak.MINDRE_INNTEKTSENDRINGER ->
+                vedtak.resultatType == ResultatType.AVSLÅ && vedtak.avslåÅrsak == AvslagÅrsak.MINDRE_INNTEKTSENDRINGER -> {
                     hentSisteTilkjentYtelse(saksbehandling.fagsakId)
+                }
+
                 vedtak.resultatType == ResultatType.INNVILGE -> {
                     tilkjentYtelseService.hentForBehandlingEllerNull(behandlingId)
                 }
-                else -> null
+
+                else -> {
+                    null
+                }
             }
 
         val harOvergangsstønadVedtaksperiodeSomLøperEttÅrFremITid =
