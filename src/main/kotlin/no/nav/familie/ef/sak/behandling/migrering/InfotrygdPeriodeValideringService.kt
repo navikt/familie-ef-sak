@@ -32,13 +32,16 @@ class InfotrygdPeriodeValideringService(
     fun validerKanOppretteBehandlingGittInfotrygdData(fagsak: Fagsak) {
         if (!behandlingService.finnesBehandlingForFagsak(fagsak.id)) {
             when (fagsak.stønadstype) {
-                StønadType.OVERGANGSSTØNAD ->
+                StønadType.OVERGANGSSTØNAD -> {
                     validerKanOppretteBehandlingUtenÅMigrereOvergangsstønad(
                         fagsak.hentAktivIdent(),
                         fagsak.stønadstype,
                     )
-                StønadType.BARNETILSYN, StønadType.SKOLEPENGER ->
+                }
+
+                StønadType.BARNETILSYN, StønadType.SKOLEPENGER -> {
                     validerHarIkkeÅpenSakIInfotrygd(fagsak)
+                }
             }
         }
     }

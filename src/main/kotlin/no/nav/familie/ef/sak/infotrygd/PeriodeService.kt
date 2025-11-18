@@ -172,6 +172,7 @@ class PeriodeService(
             AktivitetType.UTVIDELSE_FORSØRGER_I_UTDANNING,
             AktivitetType.FORLENGELSE_STØNAD_UT_SKOLEÅRET,
             -> true
+
             AktivitetType.MIGRERING,
             AktivitetType.IKKE_AKTIVITETSPLIKT,
             AktivitetType.BARN_UNDER_ETT_ÅR,

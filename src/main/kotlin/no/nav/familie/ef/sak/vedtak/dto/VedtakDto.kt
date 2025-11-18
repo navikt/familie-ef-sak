@@ -55,10 +55,16 @@ enum class Sanksjonsårsak {
 fun ResultatType.tilVedtaksresultat(): Vedtaksresultat =
     when (this) {
         ResultatType.INNVILGE -> Vedtaksresultat.INNVILGET
-        ResultatType.INNVILGE_UTEN_UTBETALING -> Vedtaksresultat.INNVILGET // TODO: Må kanskje være litt smart her???
+
+        ResultatType.INNVILGE_UTEN_UTBETALING -> Vedtaksresultat.INNVILGET
+
+        // TODO: Må kanskje være litt smart her???
         ResultatType.HENLEGGE -> error("Vedtaksresultat kan ikke være henlegge")
+
         ResultatType.AVSLÅ -> Vedtaksresultat.AVSLÅTT
+
         ResultatType.OPPHØRT -> Vedtaksresultat.OPPHØRT
+
         ResultatType.SANKSJONERE -> Vedtaksresultat.INNVILGET
     }
 
@@ -116,7 +122,7 @@ fun VedtakDto.tilVedtak(
     stønadstype: StønadType,
 ): Vedtak =
     when (this) {
-        is Avslå ->
+        is Avslå -> {
             Vedtak(
                 behandlingId = behandlingId,
                 avslåÅrsak = this.avslåÅrsak,
@@ -124,7 +130,9 @@ fun VedtakDto.tilVedtak(
                 resultatType = this.resultatType,
                 saksbehandlerIdent = SikkerhetContext.hentSaksbehandlerEllerSystembruker(),
             )
-        is InnvilgelseOvergangsstønad ->
+        }
+
+        is InnvilgelseOvergangsstønad -> {
             Vedtak(
                 behandlingId = behandlingId,
                 periodeBegrunnelse = this.periodeBegrunnelse,
@@ -135,7 +143,9 @@ fun VedtakDto.tilVedtak(
                 samordningsfradragType = this.samordningsfradragType,
                 saksbehandlerIdent = SikkerhetContext.hentSaksbehandlerEllerSystembruker(),
             )
-        is InnvilgelseBarnetilsyn ->
+        }
+
+        is InnvilgelseBarnetilsyn -> {
             Vedtak(
                 resultatType = this.resultatType,
                 behandlingId = behandlingId,
@@ -152,7 +162,9 @@ fun VedtakDto.tilVedtak(
                     ),
                 saksbehandlerIdent = SikkerhetContext.hentSaksbehandlerEllerSystembruker(),
             )
-        is InnvilgelseSkolepenger ->
+        }
+
+        is InnvilgelseSkolepenger -> {
             Vedtak(
                 resultatType = this.resultatType,
                 behandlingId = behandlingId,
@@ -166,7 +178,9 @@ fun VedtakDto.tilVedtak(
                     ),
                 saksbehandlerIdent = SikkerhetContext.hentSaksbehandlerEllerSystembruker(),
             )
-        is OpphørSkolepenger ->
+        }
+
+        is OpphørSkolepenger -> {
             Vedtak(
                 resultatType = this.resultatType,
                 behandlingId = behandlingId,
@@ -177,7 +191,9 @@ fun VedtakDto.tilVedtak(
                     ),
                 saksbehandlerIdent = SikkerhetContext.hentSaksbehandlerEllerSystembruker(),
             )
-        is Opphør ->
+        }
+
+        is Opphør -> {
             Vedtak(
                 behandlingId = behandlingId,
                 avslåBegrunnelse = begrunnelse,
@@ -185,7 +201,11 @@ fun VedtakDto.tilVedtak(
                 opphørFom = opphørFom,
                 saksbehandlerIdent = SikkerhetContext.hentSaksbehandlerEllerSystembruker(),
             )
-        is Sanksjonert -> sanksjonertTilVedtak(behandlingId, stønadstype)
+        }
+
+        is Sanksjonert -> {
+            sanksjonertTilVedtak(behandlingId, stønadstype)
+        }
     }
 
 private fun Sanksjonert.sanksjonertTilVedtak(
@@ -208,6 +228,7 @@ private fun Sanksjonert.sanksjonertTilVedtak(
             saksbehandlerIdent = SikkerhetContext.hentSaksbehandlerEllerSystembruker(),
         )
     }
+
     StønadType.BARNETILSYN -> {
         val vedtaksperiode =
             Barnetilsynperiode(
@@ -225,7 +246,10 @@ private fun Sanksjonert.sanksjonertTilVedtak(
             saksbehandlerIdent = SikkerhetContext.hentSaksbehandlerEllerSystembruker(),
         )
     }
-    StønadType.SKOLEPENGER -> error("Håndterer ikke sanksjon for skolepenger")
+
+    StønadType.SKOLEPENGER -> {
+        error("Håndterer ikke sanksjon for skolepenger")
+    }
 }
 
 fun Vedtak.tilVedtakDto(): VedtakDto =
@@ -238,11 +262,14 @@ fun Vedtak.tilVedtakDto(): VedtakDto =
                 else -> error("Kan ikke mappe innvilget vedtak for vedtak=${this.behandlingId}")
             }
         }
-        ResultatType.AVSLÅ ->
+
+        ResultatType.AVSLÅ -> {
             Avslå(
                 avslåBegrunnelse = this.avslåBegrunnelse,
                 avslåÅrsak = this.avslåÅrsak,
             )
+        }
+
         ResultatType.OPPHØRT -> {
             if (this.skolepenger != null) {
                 mapOpphørSkolepenger()
@@ -253,6 +280,7 @@ fun Vedtak.tilVedtakDto(): VedtakDto =
                 )
             }
         }
+
         ResultatType.SANKSJONERE -> {
             val periode: VedtaksperiodeMedSanksjonsårsak =
                 perioder?.perioder?.single()
@@ -264,7 +292,10 @@ fun Vedtak.tilVedtakDto(): VedtakDto =
                 internBegrunnelse = this.internBegrunnelse ?: error("Sanksjon mangler intern begrunnelse."),
             )
         }
-        else -> throw Feil("Kan ikke sette vedtaksresultat som $this - ikke implementert")
+
+        else -> {
+            throw Feil("Kan ikke sette vedtaksresultat som $this - ikke implementert")
+        }
     }
 
 private fun VedtaksperiodeMedSanksjonsårsak.fraDomeneForSanksjon(): SanksjonertPeriodeDto =

@@ -508,9 +508,13 @@ class OppgaveService(
             BehandleUnderkjentVedtak,
             GodkjenneVedtak,
             -> true
+
             Fremlegg -> false
+
             InnhentDokumentasjon -> false
+
             VurderHenvendelse -> false
+
             else -> error("Håndterer ikke behandlesAvApplikasjon for $oppgavetype")
         }
 

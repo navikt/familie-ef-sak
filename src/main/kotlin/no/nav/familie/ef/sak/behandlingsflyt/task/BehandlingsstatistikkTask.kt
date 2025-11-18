@@ -136,18 +136,34 @@ class BehandlingsstatistikkTask(
             return saksbehandling.henlagtÅrsak?.name ?: error("Mangler henlagtårsak for henlagt behandling")
         }
         return when (hendelse) {
-            Hendelse.PÅBEGYNT, Hendelse.MOTTATT, Hendelse.VENTER -> null
+            Hendelse.PÅBEGYNT, Hendelse.MOTTATT, Hendelse.VENTER -> {
+                null
+            }
+
             Hendelse.VEDTATT, Hendelse.BESLUTTET, Hendelse.HENLAGT, Hendelse.FERDIG -> {
                 return when (vedtak?.resultatType) {
-                    ResultatType.INNVILGE, ResultatType.INNVILGE_UTEN_UTBETALING ->
+                    ResultatType.INNVILGE, ResultatType.INNVILGE_UTEN_UTBETALING -> {
                         utledBegrunnelseForInnvilgetVedtak(
                             saksbehandling.stønadstype,
                             vedtak,
                         )
-                    ResultatType.AVSLÅ, ResultatType.OPPHØRT -> vedtak.avslåBegrunnelse
-                    ResultatType.HENLEGGE -> error("ResultatType henlegge er ikke i bruk for vedtak")
-                    ResultatType.SANKSJONERE -> vedtak.internBegrunnelse
-                    null -> error("Mangler vedtak")
+                    }
+
+                    ResultatType.AVSLÅ, ResultatType.OPPHØRT -> {
+                        vedtak.avslåBegrunnelse
+                    }
+
+                    ResultatType.HENLEGGE -> {
+                        error("ResultatType henlegge er ikke i bruk for vedtak")
+                    }
+
+                    ResultatType.SANKSJONERE -> {
+                        vedtak.internBegrunnelse
+                    }
+
+                    null -> {
+                        error("Mangler vedtak")
+                    }
                 }
             }
         }
@@ -168,10 +184,13 @@ class BehandlingsstatistikkTask(
         gjeldendeSaksbehandler: String?,
     ): String =
         when (hendelse) {
-            Hendelse.MOTTATT, Hendelse.PÅBEGYNT, Hendelse.VENTER, Hendelse.HENLAGT ->
+            Hendelse.MOTTATT, Hendelse.PÅBEGYNT, Hendelse.VENTER, Hendelse.HENLAGT -> {
                 gjeldendeSaksbehandler ?: error("Mangler saksbehandler for hendelse")
-            Hendelse.VEDTATT, Hendelse.BESLUTTET, Hendelse.FERDIG ->
+            }
+
+            Hendelse.VEDTATT, Hendelse.BESLUTTET, Hendelse.FERDIG -> {
                 vedtak?.saksbehandlerIdent ?: gjeldendeSaksbehandler ?: error("Mangler saksbehandler på vedtaket")
+            }
         }
 
     private fun finnHenvendelsestidspunkt(saksbehandling: Saksbehandling): LocalDateTime =

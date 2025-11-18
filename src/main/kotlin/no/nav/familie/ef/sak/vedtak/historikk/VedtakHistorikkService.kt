@@ -169,10 +169,7 @@ class VedtakHistorikkService(
                 )
             }
 
-    private infix fun BigDecimal?.nullOrEquals(other: BigDecimal?) =
-        this == null &&
-            other == null ||
-            (this !== null && other != null && this.compareTo(other) == 0)
+    private infix fun BigDecimal?.nullOrEquals(other: BigDecimal?) = (this == null && other == null) || (this !== null && other != null && this.compareTo(other) == 0)
 
     private fun mapUtgifterBarnetilsyn(
         historikk: List<AndelHistorikkDto>,

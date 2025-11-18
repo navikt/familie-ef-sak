@@ -29,9 +29,7 @@ class OpprettOppgaveTask(
 ) : AsyncTaskStep {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
-    /**
-     * Då payload er unik per task type, så settes unik inn
-     */
+    // Då payload er unik per task type, så settes unik inn
     data class OpprettOppgaveTaskData(
         val behandlingId: UUID,
         val oppgavetype: Oppgavetype,
@@ -49,10 +47,9 @@ class OpprettOppgaveTask(
         if (oppgavetype == Oppgavetype.BehandleSak) {
             val behandling = behandlingService.hentBehandling(data.behandlingId)
 
-            /**
-             * Nødvendig sjekk for å unngå å lage en behandle sak oppgave som aldri ferdigstilles dersom
-             * SB sender til beslutter rett etter angring og oppgave ikke er opprettet enda.
-             */
+            // Nødvendig sjekk for å unngå å lage en behandle sak oppgave som aldri ferdigstilles dersom
+            // SB sender til beslutter rett etter angring og oppgave ikke er opprettet enda.
+
             if (behandling.status.behandlingErLåstForVidereRedigering()) {
                 logger.info("Opprettet ikke oppgave med oppgavetype = $oppgavetype fordi status = ${behandling.status}")
                 return

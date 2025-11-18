@@ -38,7 +38,7 @@ private val alleVilkårsregler = StønadType.values().map { vilkårsreglerForSt�
 
 fun vilkårsreglerForStønad(stønadstype: StønadType): List<Vilkårsregel> =
     when (stønadstype) {
-        OVERGANGSSTØNAD ->
+        OVERGANGSSTØNAD -> {
             listOf(
                 ForutgåendeMedlemskapRegel(),
                 OppholdINorgeRegel(),
@@ -51,7 +51,9 @@ fun vilkårsreglerForStønad(stønadstype: StønadType): List<Vilkårsregel> =
                 SagtOppEllerRedusertRegel(),
                 TidligareVedtaksperioderRegel(),
             )
-        BARNETILSYN ->
+        }
+
+        BARNETILSYN -> {
             listOf(
                 ForutgåendeMedlemskapRegel(),
                 OppholdINorgeRegel(),
@@ -65,8 +67,9 @@ fun vilkårsreglerForStønad(stønadstype: StønadType): List<Vilkårsregel> =
                 AlderPåBarnRegel(),
                 DokumentasjonTilsynsutgifterRegel(),
             )
+        }
 
-        SKOLEPENGER ->
+        SKOLEPENGER -> {
             listOf(
                 ForutgåendeMedlemskapRegel(),
                 OppholdINorgeRegel(),
@@ -79,6 +82,7 @@ fun vilkårsreglerForStønad(stønadstype: StønadType): List<Vilkårsregel> =
                 DokumentasjonAvUtdanningRegel(),
                 UtdanningErHensiktsmessigRegel(),
             )
+        }
     }
 
 fun hentVilkårsregel(vilkårType: VilkårType): Vilkårsregel =
