@@ -231,13 +231,18 @@ class StepDefinitions {
         validerOgSettStønadstype(stønadstype)
         gittVedtak =
             when (stønadstype) {
-                StønadType.OVERGANGSSTØNAD -> VedtakDomeneParser.mapVedtakOvergangsstønad(dataTable)
+                StønadType.OVERGANGSSTØNAD -> {
+                    VedtakDomeneParser.mapVedtakOvergangsstønad(dataTable)
+                }
+
                 StønadType.BARNETILSYN -> {
                     behandlingIdsToAktivitetArbeid.putAll(VedtakDomeneParser.mapAktivitetForBarnetilsyn(dataTable))
                     VedtakDomeneParser.mapVedtakForBarnetilsyn(dataTable)
                 }
 
-                StønadType.SKOLEPENGER -> VedtakDomeneParser.mapVedtakForSkolepenger(dataTable)
+                StønadType.SKOLEPENGER -> {
+                    VedtakDomeneParser.mapVedtakForSkolepenger(dataTable)
+                }
             }
     }
 
@@ -493,7 +498,9 @@ class StepDefinitions {
                 assertThat(dataTable.asMaps()).hasSize(perioder.size)
             }
 
-            else -> error("Støtter ikke ${vedtak.javaClass.simpleName}")
+            else -> {
+                error("Støtter ikke ${vedtak.javaClass.simpleName}")
+            }
         }
     }
 

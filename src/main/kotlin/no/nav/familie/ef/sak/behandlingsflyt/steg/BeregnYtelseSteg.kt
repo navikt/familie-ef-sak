@@ -297,7 +297,7 @@ class BeregnYtelseSteg(
         data: VedtakDto,
     ) {
         when (saksbehandling.stønadstype) {
-            StønadType.OVERGANGSSTØNAD ->
+            StønadType.OVERGANGSSTØNAD -> {
                 validerGyldigeVedtakstyper(
                     saksbehandling.stønadstype,
                     data,
@@ -306,8 +306,9 @@ class BeregnYtelseSteg(
                     Opphør::class,
                     Sanksjonert::class,
                 )
+            }
 
-            StønadType.BARNETILSYN ->
+            StønadType.BARNETILSYN -> {
                 validerGyldigeVedtakstyper(
                     saksbehandling.stønadstype,
                     data,
@@ -316,8 +317,9 @@ class BeregnYtelseSteg(
                     Opphør::class,
                     Sanksjonert::class,
                 )
+            }
 
-            StønadType.SKOLEPENGER ->
+            StønadType.SKOLEPENGER -> {
                 validerGyldigeVedtakstyper(
                     saksbehandling.stønadstype,
                     data,
@@ -325,6 +327,7 @@ class BeregnYtelseSteg(
                     Avslå::class,
                     OpphørSkolepenger::class,
                 )
+            }
         }
     }
 
@@ -392,13 +395,17 @@ class BeregnYtelseSteg(
 
         val (nyeAndeler, startdato) =
             when (saksbehandling.type) {
-                FØRSTEGANGSBEHANDLING -> andelerTilkjentYtelse to startdatoForFørstegangsbehandling(andelerTilkjentYtelse)
-                REVURDERING ->
+                FØRSTEGANGSBEHANDLING -> {
+                    andelerTilkjentYtelse to startdatoForFørstegangsbehandling(andelerTilkjentYtelse)
+                }
+
+                REVURDERING -> {
                     nyeAndelerForRevurderingAvOvergangsstønadMedStartdato(
                         saksbehandling,
                         vedtak,
                         andelerTilkjentYtelse,
                     )
+                }
             }
 
         tilkjentYtelseService.opprettTilkjentYtelse(
@@ -424,13 +431,17 @@ class BeregnYtelseSteg(
 
         val (nyeAndeler, startdato) =
             when (saksbehandling.type) {
-                FØRSTEGANGSBEHANDLING -> andelerTilkjentYtelse to startdatoForFørstegangsbehandling(andelerTilkjentYtelse)
-                REVURDERING ->
+                FØRSTEGANGSBEHANDLING -> {
+                    andelerTilkjentYtelse to startdatoForFørstegangsbehandling(andelerTilkjentYtelse)
+                }
+
+                REVURDERING -> {
                     nyeAndelerForRevurderingAvBarnetilsynMedStartdato(
                         saksbehandling,
                         vedtak,
                         andelerTilkjentYtelse,
                     )
+                }
             }
 
         tilkjentYtelseService.opprettTilkjentYtelse(
@@ -455,7 +466,10 @@ class BeregnYtelseSteg(
         validerSkolepenger(saksbehandling, vedtak, andelerTilkjentYtelse, forrigeTilkjentYtelse)
         val (nyeAndeler, startdato) =
             when (saksbehandling.type) {
-                FØRSTEGANGSBEHANDLING -> andelerTilkjentYtelse to startdatoForFørstegangsbehandling(andelerTilkjentYtelse)
+                FØRSTEGANGSBEHANDLING -> {
+                    andelerTilkjentYtelse to startdatoForFørstegangsbehandling(andelerTilkjentYtelse)
+                }
+
                 // Burde kanskje summere tidligere forbrukt fra andeler, per skoleår
                 REVURDERING -> {
                     val startdatoNyeAndeler = andelerTilkjentYtelse.minOfOrNull { it.stønadFom }

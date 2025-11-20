@@ -47,10 +47,23 @@ private fun EksternPeriode.omsluttesAv(annen: EksternPeriode): Boolean = this.ti
 private fun MutableList<EksternPeriode>.fjernDuplikatOgSplittOverlappendePeriode(gjeldende: EksternPeriode): MutableList<EksternPeriode> {
     val forrige = this.removeLastOrNull()
     when {
-        forrige == null -> this.add(gjeldende)
-        gjeldende.omsluttesAv(forrige) -> this.add(forrige)
-        forrige.omsluttesAv(gjeldende) -> this.add(gjeldende)
-        gjeldende.fomDato >= forrige.fomDato -> this.add(forrige) // I praksis omsluttes denne av forrige og tidligere perioder
+        forrige == null -> {
+            this.add(gjeldende)
+        }
+
+        gjeldende.omsluttesAv(forrige) -> {
+            this.add(forrige)
+        }
+
+        forrige.omsluttesAv(gjeldende) -> {
+            this.add(gjeldende)
+        }
+
+        gjeldende.fomDato >= forrige.fomDato -> {
+            this.add(forrige)
+        }
+
+        // I praksis omsluttes denne av forrige og tidligere perioder
         gjeldende.tomDato >= forrige.fomDato -> {
             this.add(forrige.copy(fomDato = maxOf(forrige.fomDato, gjeldende.fomDato)))
             this.add(
