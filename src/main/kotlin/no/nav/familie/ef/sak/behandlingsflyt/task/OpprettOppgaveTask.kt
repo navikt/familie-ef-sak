@@ -37,12 +37,13 @@ class OpprettOppgaveTask(
         val tilordnetNavIdent: String? = null,
         val beskrivelse: String? = null,
         val unik: LocalDateTime? = LocalDateTime.now(),
+        val erHøyPrioritet: Boolean? = null
     )
 
     override fun doTask(task: Task) {
         val data = objectMapper.readValue<OpprettOppgaveTaskData>(task.payload)
         val oppgavetype = data.oppgavetype
-        val prioritet = if (data.beskrivelse?.contains("Kontrollsak") == true) OppgavePrioritet.HOY else OppgavePrioritet.NORM
+        val prioritet = if ((data.beskrivelse?.contains("Kontrollsak") == true) || data.erHøyPrioritet == true) OppgavePrioritet.HOY else OppgavePrioritet.NORM
 
         if (oppgavetype == Oppgavetype.BehandleSak) {
             val behandling = behandlingService.hentBehandling(data.behandlingId)

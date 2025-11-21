@@ -165,9 +165,10 @@ class SendTilBeslutterSteg(
         behandlingService.oppdaterStatusPåBehandling(saksbehandling.id, BehandlingStatus.FATTER_VEDTAK)
         vedtakService.oppdaterSaksbehandler(saksbehandling.id, SikkerhetContext.hentSaksbehandler())
         val beskrivelseMarkeringer = data?.beskrivelseMarkeringer
+        val prioritering = data?.høyprioritet
 
         if (vedtakService.hentVedtak(saksbehandling.id).skalVedtakBesluttes()) {
-            opprettGodkjennVedtakOppgave(saksbehandling, beskrivelseMarkeringer)
+            opprettGodkjennVedtakOppgave(saksbehandling, beskrivelseMarkeringer, prioritering)
         }
 
         ferdigstillOppgave(saksbehandling)
@@ -201,6 +202,7 @@ class SendTilBeslutterSteg(
     private fun opprettGodkjennVedtakOppgave(
         saksbehandling: Saksbehandling,
         beskrivelseMarkeringer: List<String>? = null,
+        prioritet: Boolean? = false,
     ) {
         val beskrivelse = lagBeskrivelseMedMerker(beskrivelseMarkeringer)
         taskService.save(
@@ -210,6 +212,7 @@ class SendTilBeslutterSteg(
                     oppgavetype = Oppgavetype.GodkjenneVedtak,
                     beskrivelse = beskrivelse,
                     tilordnetNavIdent = utledBeslutterIdent(saksbehandling),
+                    erHøyPrioritet = prioritet,
                 ),
             ),
         )
