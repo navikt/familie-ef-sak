@@ -69,7 +69,10 @@ internal class RegistergrunnlagTest {
                 val qualifiedName = classifier.qualifiedName!!
                 val nullable = parameter.type.isMarkedNullable
                 when {
-                    classifier in endClasses -> ObjectInfo(name, simpleName, nullable = nullable)
+                    classifier in endClasses -> {
+                        ObjectInfo(name, simpleName, nullable = nullable)
+                    }
+
                     classifier.isSubclassOf(Collection::class) -> {
                         val arguments = parameter.type.arguments
                         if (arguments.size != 1) {
@@ -83,11 +86,18 @@ internal class RegistergrunnlagTest {
                             )
                         ObjectInfo(name, "Collection", classInfo, nullable = nullable)
                     }
-                    classifier.isSubclassOf(Enum::class) ->
+
+                    classifier.isSubclassOf(Enum::class) -> {
                         ObjectInfo(name, "Enum", null, classifier.java.enumConstants.map { it.toString() }, nullable)
-                    qualifiedName.startsWith("java.") || qualifiedName.startsWith("kotlin.") ->
+                    }
+
+                    qualifiedName.startsWith("java.") || qualifiedName.startsWith("kotlin.") -> {
                         error("$className - Class is not defined: $qualifiedName")
-                    else -> ObjectInfo(name, "Object", getClassInfo(classifier), nullable = nullable)
+                    }
+
+                    else -> {
+                        ObjectInfo(name, "Object", getClassInfo(classifier), nullable = nullable)
+                    }
                 }
             }.associateBy { it.name }
     }

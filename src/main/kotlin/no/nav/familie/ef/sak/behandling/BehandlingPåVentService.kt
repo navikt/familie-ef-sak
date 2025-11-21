@@ -72,6 +72,8 @@ class BehandlingPåVentService(
     private fun oppdaterVerdierPåOppgave(settPåVentRequest: SettPåVentRequest) {
         val oppgave = oppgaveService.hentOppgave(settPåVentRequest.oppgaveId)
 
+        val endretAvEnhetsnr = oppgaveService.hentSaksbehandler(SikkerhetContext.hentSaksbehandler()).enhet
+
         val beskrivelse = utledOppgavebeskrivelse(oppgave, settPåVentRequest)
 
         oppgaveService.oppdaterOppgave(
@@ -83,6 +85,7 @@ class BehandlingPåVentService(
                 mappeId = settPåVentRequest.mappe,
                 beskrivelse = beskrivelse,
                 versjon = settPåVentRequest.oppgaveVersjon,
+                endretAvEnhetsnr = endretAvEnhetsnr,
             ),
         )
     }
@@ -255,11 +258,13 @@ class BehandlingPåVentService(
         opprettHistorikkInnslag(behandling, StegUtfall.TATT_AV_VENT)
         when (kanTaAvVent.status) {
             TaAvVentStatus.OK -> {}
-            TaAvVentStatus.ANNEN_BEHANDLING_MÅ_FERDIGSTILLES ->
+
+            TaAvVentStatus.ANNEN_BEHANDLING_MÅ_FERDIGSTILLES -> {
                 throw ApiFeil(
                     "Annen behandling må ferdigstilles før denne kan aktiveres på nytt",
                     HttpStatus.BAD_REQUEST,
                 )
+            }
 
             TaAvVentStatus.MÅ_NULSTILLE_VEDTAK -> {
                 val nyForrigeBehandlingId = kanTaAvVent.nyForrigeBehandlingId ?: error("Mangler nyForrigeBehandlingId")
@@ -275,7 +280,7 @@ class BehandlingPåVentService(
         val oppgave = tilordnetRessursService.hentIkkeFerdigstiltOppgaveForBehandling(behandlingId)
         val oppgaveId = oppgave?.id
         if (oppgaveId != null) {
-            oppgaveService.fordelOppgave(oppgaveId, SikkerhetContext.hentSaksbehandler(), oppgave.versjon)
+            oppgaveService.fordelOppgave(oppgaveId, SikkerhetContext.hentSaksbehandler(), oppgave.versjon, SikkerhetContext.hentSaksbehandler())
         } else {
             logger.warn("Finner ingen oppgave å oppdatere")
         }

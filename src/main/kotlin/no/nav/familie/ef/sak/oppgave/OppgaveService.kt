@@ -30,6 +30,7 @@ import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype.GodkjenneVedtak
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype.InnhentDokumentasjon
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype.VurderHenvendelse
 import no.nav.familie.kontrakter.felles.oppgave.OpprettOppgaveRequest
+import no.nav.familie.kontrakter.felles.saksbehandler.Saksbehandler
 import org.slf4j.LoggerFactory
 import org.springframework.cache.CacheManager
 import org.springframework.stereotype.Service
@@ -104,6 +105,8 @@ class OppgaveService(
     fun oppdaterOppgave(oppgave: Oppgave) {
         oppgaveClient.oppdaterOppgave(oppgave)
     }
+
+    fun hentSaksbehandler(navIdent: String): Saksbehandler = oppgaveClient.hentSaksbehandlerInfo(navIdent)
 
     /**
      * I de tilfeller en service ønsker å ansvare selv for lagring til [OppgaveRepository]
@@ -194,6 +197,7 @@ class OppgaveService(
         gsakOppgaveId: Long,
         saksbehandler: String,
         versjon: Int? = null,
+        endretAvSaksbehandler: String? = null,
     ): Long {
         val oppgave = hentOppgave(gsakOppgaveId)
 
@@ -204,6 +208,7 @@ class OppgaveService(
                 gsakOppgaveId,
                 saksbehandler,
                 versjon,
+                endretAvSaksbehandler,
             )
         }
     }
@@ -503,9 +508,13 @@ class OppgaveService(
             BehandleUnderkjentVedtak,
             GodkjenneVedtak,
             -> true
+
             Fremlegg -> false
+
             InnhentDokumentasjon -> false
+
             VurderHenvendelse -> false
+
             else -> error("Håndterer ikke behandlesAvApplikasjon for $oppgavetype")
         }
 

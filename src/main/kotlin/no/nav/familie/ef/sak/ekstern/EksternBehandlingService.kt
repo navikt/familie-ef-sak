@@ -67,9 +67,13 @@ class EksternBehandlingService(
         val fagsak = fagsakService.hentFagsakPåEksternId(eksternFagsakId)
         val resultat = utledKanOppretteRevurdering(fagsak)
         return when (resultat) {
-            is KanOppretteRevurdering -> KanOppretteRevurderingResponse(true, null)
-            is KanIkkeOppretteRevurdering ->
+            is KanOppretteRevurdering -> {
+                KanOppretteRevurderingResponse(true, null)
+            }
+
+            is KanIkkeOppretteRevurdering -> {
                 KanOppretteRevurderingResponse(false, resultat.årsak.kanIkkeOppretteRevurderingÅrsak)
+            }
         }
     }
 
@@ -98,9 +102,13 @@ class EksternBehandlingService(
 
         val resultat = utledKanOppretteRevurdering(fagsak)
         return when (resultat) {
-            is KanOppretteRevurdering -> opprettRevurdering(fagsak)
-            is KanIkkeOppretteRevurdering ->
+            is KanOppretteRevurdering -> {
+                opprettRevurdering(fagsak)
+            }
+
+            is KanIkkeOppretteRevurdering -> {
                 OpprettRevurderingResponse(IkkeOpprettet(resultat.årsak.ikkeOpprettetÅrsak))
+            }
         }
     }
 

@@ -34,11 +34,13 @@ class BrevmottakereService(
             )
 
         return when (brevmottakereRepository.existsById(behandlingId)) {
-            true ->
+            true -> {
                 brevmottakereRepository.update(brevmottakere)
+            }
 
-            false ->
+            false -> {
                 brevmottakereRepository.insert(brevmottakere)
+            }
         }.behandlingId
     }
 

@@ -151,16 +151,28 @@ class BeslutteVedtakSteg(
     private fun oppdaterResultatPåBehandling(behandlingId: UUID) {
         val resultat = vedtakService.hentVedtaksresultat(behandlingId)
         when (resultat) {
-            ResultatType.INNVILGE, ResultatType.INNVILGE_UTEN_UTBETALING ->
+            ResultatType.INNVILGE, ResultatType.INNVILGE_UTEN_UTBETALING -> {
                 behandlingService.oppdaterResultatPåBehandling(
                     behandlingId,
                     BehandlingResultat.INNVILGET,
                 )
+            }
 
-            ResultatType.OPPHØRT -> behandlingService.oppdaterResultatPåBehandling(behandlingId, BehandlingResultat.OPPHØRT)
-            ResultatType.AVSLÅ -> behandlingService.oppdaterResultatPåBehandling(behandlingId, BehandlingResultat.AVSLÅTT)
-            ResultatType.SANKSJONERE -> behandlingService.oppdaterResultatPåBehandling(behandlingId, BehandlingResultat.INNVILGET)
-            ResultatType.HENLEGGE -> error("Støtter ikke resultattypen=$resultat for behandling=$behandlingId")
+            ResultatType.OPPHØRT -> {
+                behandlingService.oppdaterResultatPåBehandling(behandlingId, BehandlingResultat.OPPHØRT)
+            }
+
+            ResultatType.AVSLÅ -> {
+                behandlingService.oppdaterResultatPåBehandling(behandlingId, BehandlingResultat.AVSLÅTT)
+            }
+
+            ResultatType.SANKSJONERE -> {
+                behandlingService.oppdaterResultatPåBehandling(behandlingId, BehandlingResultat.INNVILGET)
+            }
+
+            ResultatType.HENLEGGE -> {
+                error("Støtter ikke resultattypen=$resultat for behandling=$behandlingId")
+            }
         }
     }
 

@@ -68,20 +68,37 @@ class SivilstandRegel :
     ) = when {
         sivilstandstype.erUgiftEllerUoppgitt() &&
             sivilstandSøknad != null &&
-            (sivilstandSøknad.erUformeltGiftEllerSkilt()) ->
+            (sivilstandSøknad.erUformeltGiftEllerSkilt()) -> {
             KRAV_SIVILSTAND_PÅKREVD_BEGRUNNELSE
+        }
 
-        sivilstandstype.erUgiftEllerUoppgitt() -> KRAV_SIVILSTAND_UTEN_PÅKREVD_BEGRUNNELSE
+        sivilstandstype.erUgiftEllerUoppgitt() -> {
+            KRAV_SIVILSTAND_UTEN_PÅKREVD_BEGRUNNELSE
+        }
 
-        sivilstandstype.erGift() && sivilstandSøknad != null && sivilstandSøknad.søktOmSkilsmisseSeparasjon == true ->
+        sivilstandstype.erGift() && sivilstandSøknad != null && sivilstandSøknad.søktOmSkilsmisseSeparasjon == true -> {
             SAMLIVSBRUDD_LIKESTILT_MED_SEPARASJON
+        }
 
-        sivilstandstype.erGift() -> KRAV_SIVILSTAND_PÅKREVD_BEGRUNNELSE
+        sivilstandstype.erGift() -> {
+            KRAV_SIVILSTAND_PÅKREVD_BEGRUNNELSE
+        }
 
-        sivilstandstype.erSeparert() -> SAMSVAR_DATO_SEPARASJON_OG_FRAFLYTTING
-        sivilstandstype.erSkilt() -> KRAV_SIVILSTAND_UTEN_PÅKREVD_BEGRUNNELSE
-        sivilstandstype.erEnkeEllerEnkemann() -> UNNTAK
-        else -> throw Feil("Finner ikke matchende sivilstand for $sivilstandstype")
+        sivilstandstype.erSeparert() -> {
+            SAMSVAR_DATO_SEPARASJON_OG_FRAFLYTTING
+        }
+
+        sivilstandstype.erSkilt() -> {
+            KRAV_SIVILSTAND_UTEN_PÅKREVD_BEGRUNNELSE
+        }
+
+        sivilstandstype.erEnkeEllerEnkemann() -> {
+            UNNTAK
+        }
+
+        else -> {
+            throw Feil("Finner ikke matchende sivilstand for $sivilstandstype")
+        }
     }.regelId
 
     companion object {
@@ -126,6 +143,7 @@ class SivilstandRegel :
                         SvarId.GJENLEVENDE_IKKE_RETT_TIL_YTELSER to SluttSvarRegel.OPPFYLT_MED_PÅKREVD_BEGRUNNELSE,
                         SvarId.GJENLEVENDE_OVERTAR_OMSORG to SluttSvarRegel.OPPFYLT_MED_PÅKREVD_BEGRUNNELSE,
                         SvarId.GJENLEVENDE_SEPARERT_FØR_DØDSFALL to SluttSvarRegel.OPPFYLT_MED_PÅKREVD_BEGRUNNELSE,
+                        SvarId.FØDSEL_ETTER_ANNEN_FORELDERS_DØDSFALL to SluttSvarRegel.OPPFYLT_MED_PÅKREVD_BEGRUNNELSE,
                         SvarId.NEI to SluttSvarRegel.IKKE_OPPFYLT_MED_PÅKREVD_BEGRUNNELSE,
                     ),
             )

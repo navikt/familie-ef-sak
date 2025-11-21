@@ -42,14 +42,29 @@ object RegelEvaluering {
 
     fun utledVilkårResultat(delvilkårResultat: Map<RegelId, Vilkårsresultat>): Vilkårsresultat =
         when {
-            delvilkårResultat.values.all { it == Vilkårsresultat.AUTOMATISK_OPPFYLT } -> Vilkårsresultat.AUTOMATISK_OPPFYLT
-            delvilkårResultat.values.all { it == Vilkårsresultat.OPPFYLT || it == Vilkårsresultat.AUTOMATISK_OPPFYLT } -> Vilkårsresultat.OPPFYLT
-            delvilkårResultat.values.all { it == Vilkårsresultat.OPPFYLT || it == Vilkårsresultat.IKKE_OPPFYLT || it == Vilkårsresultat.AUTOMATISK_OPPFYLT } ->
+            delvilkårResultat.values.all { it == Vilkårsresultat.AUTOMATISK_OPPFYLT } -> {
+                Vilkårsresultat.AUTOMATISK_OPPFYLT
+            }
+
+            delvilkårResultat.values.all { it == Vilkårsresultat.OPPFYLT || it == Vilkårsresultat.AUTOMATISK_OPPFYLT } -> {
+                Vilkårsresultat.OPPFYLT
+            }
+
+            delvilkårResultat.values.all { it == Vilkårsresultat.OPPFYLT || it == Vilkårsresultat.IKKE_OPPFYLT || it == Vilkårsresultat.AUTOMATISK_OPPFYLT } -> {
                 Vilkårsresultat.IKKE_OPPFYLT
-            delvilkårResultat.values.any { it == Vilkårsresultat.SKAL_IKKE_VURDERES } -> Vilkårsresultat.SKAL_IKKE_VURDERES
-            delvilkårResultat.values.any { it == Vilkårsresultat.IKKE_TATT_STILLING_TIL } ->
+            }
+
+            delvilkårResultat.values.any { it == Vilkårsresultat.SKAL_IKKE_VURDERES } -> {
+                Vilkårsresultat.SKAL_IKKE_VURDERES
+            }
+
+            delvilkårResultat.values.any { it == Vilkårsresultat.IKKE_TATT_STILLING_TIL } -> {
                 Vilkårsresultat.IKKE_TATT_STILLING_TIL
-            else -> error("Håndterer ikke situasjonen med resultat=${delvilkårResultat.values}")
+            }
+
+            else -> {
+                error("Håndterer ikke situasjonen med resultat=${delvilkårResultat.values}")
+            }
         }
 
     /**

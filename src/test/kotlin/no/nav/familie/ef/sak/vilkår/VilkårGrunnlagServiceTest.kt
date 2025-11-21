@@ -21,6 +21,8 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerI
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.TidligereVedtaksperioderService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.Grunnlagsdata
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.fullmakt.FullmaktService
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.medl.MedlClient
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.medl.MedlService
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.tilSøknadsverdier
 import no.nav.familie.ef.sak.opplysninger.søknad.mapper.SøknadsskjemaMapper
@@ -41,7 +43,6 @@ import java.time.LocalDate
 internal class VilkårGrunnlagServiceTest {
     private val grunnlagsdataRepository = mockk<GrunnlagsdataRepository>()
     private val personService = PersonService(PdlClientConfig().pdlClient(), ConcurrentMapCacheManager())
-    private val personopplysningerIntegrasjonerClient = mockk<PersonopplysningerIntegrasjonerClient>()
     private val søknadService = mockk<SøknadService>()
     private val featureToggleService = mockk<FeatureToggleService>()
     private val kodeverkService = mockk<KodeverkService>(relaxed = true)
@@ -52,15 +53,16 @@ internal class VilkårGrunnlagServiceTest {
     private val tilordnetRessursService = mockk<TilordnetRessursService>(relaxed = true)
     private val kontantstøtteService = mockk<KontantstøtteService>(relaxed = true)
     private val fullmaktService = mockk<FullmaktService>(relaxed = true)
+    private val medlService = mockk<MedlService>(relaxed = true)
 
     private val grunnlagsdataRegisterService =
         GrunnlagsdataRegisterService(
             personService,
-            personopplysningerIntegrasjonerClient,
             tidligereVedtaksperioderService,
             arbeidsforholdService,
             kontantstøtteService,
             fullmaktService,
+            medlService,
         )
 
     private val fagsakService = mockk<FagsakService>()
@@ -135,14 +137,12 @@ internal class VilkårGrunnlagServiceTest {
             .tilSøknadsverdier()
     private val barn = søknadBarnTilBehandlingBarn(søknadOvergangsstønad.barn)
     private val barnBarnetilsyn = søknadBarnTilBehandlingBarn(søknadBarnetilsyn.barn)
-    private val medlemskapsinfo = Medlemskapsinfo(søknadOvergangsstønad.fødselsnummer, emptyList(), emptyList(), emptyList())
     private val fagsak = fagsak(identer = setOf(PersonIdent(søknadOvergangsstønad.fødselsnummer)))
 
     @BeforeEach
     internal fun setUp() {
         every { søknadService.hentSøknadsgrunnlag(behandlingId) } returns søknadOvergangsstønad
         every { fagsakService.hentFagsakForBehandling(behandlingId) } returns fagsak
-        every { personopplysningerIntegrasjonerClient.hentMedlemskapsinfo(any()) } returns medlemskapsinfo
         every { featureToggleService.isEnabled(any()) } returns false
         every { kodeverkService.hentLand("POL", any()) } returns "Polen"
         every { kodeverkService.hentLand("SWE", any()) } returns "Sverige"

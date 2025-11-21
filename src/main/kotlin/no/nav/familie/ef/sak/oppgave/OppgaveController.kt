@@ -104,7 +104,8 @@ class OppgaveController(
         if (!tilgangService.validerSaksbehandler(saksbehandler)) {
             throw ApiFeil("Kunne ikke validere saksbehandler : $saksbehandler", HttpStatus.BAD_REQUEST)
         }
-        return Ressurs.success(oppgaveService.fordelOppgave(gsakOppgaveId, saksbehandler, versjon))
+        val endretAvSaksbehandler = SikkerhetContext.hentSaksbehandler()
+        return Ressurs.success(oppgaveService.fordelOppgave(gsakOppgaveId, saksbehandler, versjon, endretAvSaksbehandler))
     }
 
     @PostMapping(path = ["/{gsakOppgaveId}/tilbakestill"], produces = [MediaType.APPLICATION_JSON_VALUE])

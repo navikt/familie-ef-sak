@@ -69,8 +69,14 @@ class JsonFilUtil {
                         // ikke en yyyy-MM tekstverdi; ignorer
                     }
                 }
-                node.isArray -> node.forEach { collectYearMonths(it, out) }
-                node.isObject -> node.fields().forEachRemaining { (_, v) -> collectYearMonths(v, out) }
+
+                node.isArray -> {
+                    node.forEach { collectYearMonths(it, out) }
+                }
+
+                node.isObject -> {
+                    node.fields().forEachRemaining { (_, v) -> collectYearMonths(v, out) }
+                }
             }
         }
     }

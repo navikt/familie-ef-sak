@@ -106,13 +106,6 @@ class IntegrasjonerConfig(
             .build()
             .toUri()
 
-    val medlemskapUri: URI =
-        UriComponentsBuilder
-            .fromUri(integrasjonUri)
-            .pathSegment(PATH_MEDLEMSKAP)
-            .build()
-            .toUri()
-
     val navKontorUri: URI =
         UriComponentsBuilder
             .fromUri(integrasjonUri)
@@ -142,7 +135,6 @@ class IntegrasjonerConfig(
         private const val PATH_OPPGAVE = "api/oppgave"
         private const val PATH_JOURNALPOST = "api/journalpost"
         private const val PATH_DOKARKIV = "api/arkiv"
-        private const val PATH_MEDLEMSKAP = "api/medlemskap/v3"
         private const val PATH_NAV_KONTOR = "api/arbeidsfordeling/nav-kontor/ENF"
         private const val PATH_ARBEIDSFORDELING_OPPFØLGING = "api/arbeidsfordeling/oppfolging/ENF"
         private const val PATH_SAKSBEHANDLER = "api/saksbehandler"

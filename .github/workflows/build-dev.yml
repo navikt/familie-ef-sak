@@ -53,4 +53,3 @@ jobs:
           SONAR_PROJECTKEY: ${{ secrets.SONAR_PROJECTKEY }}
           SONAR_LOGIN: ${{ secrets.SONAR_LOGIN }}
         run: mvn verify --settings .m2/maven-settings.xml --file pom.xml
-        #run: mvn verify sonar:sonar --settings .m2/maven-settings.xml --file pom.xml

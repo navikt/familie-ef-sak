@@ -116,8 +116,6 @@ class FamilieIntegrasjonerMock(
                 .willReturn(okJson(objectMapper.writeValueAsString(oppdatertJournalpostResponse))),
             post(urlMatching("${integrasjonerConfig.dokarkivUri.path}.*"))
                 .willReturn(okJson(objectMapper.writeValueAsString(arkiverDokumentResponse))),
-            post(urlPathEqualTo(integrasjonerConfig.medlemskapUri.path))
-                .willReturn(okJson(objectMapper.writeValueAsString(medl))),
             post(urlEqualTo(integrasjonerConfig.navKontorUri.path))
                 .willReturn(okJson(objectMapper.writeValueAsString(navKontorEnhet))),
             post(urlEqualTo(integrasjonerConfig.adressebeskyttelse.path))

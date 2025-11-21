@@ -100,6 +100,10 @@ spec:
           namespace: nom
         - application: repr-api
           namespace: repr
+        - application: medlemskap-medl-api
+          namespace: team-rocket
+        - application: logging
+          namespace: nais-system
       external:
         - host: api-gw-q1.oera.no
         - host: familie-oppdrag.dev-fss-pub.nais.io
