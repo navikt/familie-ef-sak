@@ -81,13 +81,13 @@ internal class VedtakServiceTest : OppslagSpringRunnerTest() {
                 emptyList(),
             )
 
-        /** Skal ikke gjøre noe når den ikke er opprettet **/
+        // Skal ikke gjøre noe når den ikke er opprettet
         vedtakService.slettVedtakHvisFinnes(behandling.id)
 
-        /** Opprett */
+        // Opprett
         vedtakService.lagreVedtak(vedtakRequest, behandling.id, fagsak.stønadstype)
 
-        /** Verifiser opprettet */
+        // Verifiser opprettet
         val vedtakLagret = vedtakRepository.findByIdOrNull(behandling.id)
         assertThat(vedtakLagret?.resultatType).isEqualTo(ResultatType.INNVILGE)
         assertThat(vedtakLagret?.periodeBegrunnelse).isEqualTo(tomBegrunnelse)

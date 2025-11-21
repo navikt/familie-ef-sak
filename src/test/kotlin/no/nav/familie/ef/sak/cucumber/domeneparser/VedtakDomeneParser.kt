@@ -64,14 +64,19 @@ object VedtakDomeneParser {
         mapVedtak(dataTable) { vedtak, rader ->
             val perioder =
                 when (vedtak.resultatType) {
-                    ResultatType.INNVILGE -> mapPerioderForBarnetilsyn(vedtak.resultatType, rader)
+                    ResultatType.INNVILGE -> {
+                        mapPerioderForBarnetilsyn(vedtak.resultatType, rader)
+                    }
+
                     ResultatType.SANKSJONERE -> {
                         val perioderForBarnetilsyn = mapPerioderForBarnetilsyn(vedtak.resultatType, rader)
                         validerSanksjon(perioderForBarnetilsyn)
                         perioderForBarnetilsyn
                     }
 
-                    else -> emptyList()
+                    else -> {
+                        emptyList()
+                    }
                 }
             vedtak.copy(
                 barnetilsyn = BarnetilsynWrapper(perioder, null),
@@ -106,7 +111,9 @@ object VedtakDomeneParser {
                 when (vedtak.resultatType) {
                     ResultatType.OPPHØRT,
                     ResultatType.INNVILGE,
-                    -> mapPerioderForSkolepenger(rader)
+                    -> {
+                        mapPerioderForSkolepenger(rader)
+                    }
 
                     ResultatType.SANKSJONERE -> {
                         val perioderForBarnetilsyn = mapPerioderForSkolepenger(rader)
@@ -114,7 +121,9 @@ object VedtakDomeneParser {
                         perioderForBarnetilsyn
                     }
 
-                    else -> emptyList()
+                    else -> {
+                        emptyList()
+                    }
                 }
             vedtak.copy(skolepenger = SkolepengerWrapper(perioder, null))
         }

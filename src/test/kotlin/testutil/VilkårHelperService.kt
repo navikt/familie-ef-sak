@@ -56,6 +56,7 @@ class VilkårHelperService {
                 StønadType.OVERGANGSSTØNAD,
                 StønadType.SKOLEPENGER,
                 -> søknadHelperService.lagreSøknad(behandling, barn).sivilstand
+
                 StønadType.BARNETILSYN -> søknadHelperService.lagreSøknadForBarnetilsyn(behandling, barn).sivilstand
             }
 

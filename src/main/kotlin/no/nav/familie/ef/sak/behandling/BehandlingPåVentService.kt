@@ -17,7 +17,6 @@ import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
-import no.nav.familie.ef.sak.oppgave.OppgaveClient
 import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.ef.sak.oppgave.OppgaveSubtype
 import no.nav.familie.ef.sak.oppgave.TilordnetRessursService
@@ -73,7 +72,7 @@ class BehandlingPåVentService(
     private fun oppdaterVerdierPåOppgave(settPåVentRequest: SettPåVentRequest) {
         val oppgave = oppgaveService.hentOppgave(settPåVentRequest.oppgaveId)
 
-        val enhetsnr = oppgaveService.hentSaksbehandler(settPåVentRequest.saksbehandler).enhet
+        val endretAvEnhetsnr = oppgaveService.hentSaksbehandler(SikkerhetContext.hentSaksbehandler()).enhet
 
         val beskrivelse = utledOppgavebeskrivelse(oppgave, settPåVentRequest)
 
@@ -86,7 +85,7 @@ class BehandlingPåVentService(
                 mappeId = settPåVentRequest.mappe,
                 beskrivelse = beskrivelse,
                 versjon = settPåVentRequest.oppgaveVersjon,
-                endretAvEnhetsnr = enhetsnr,
+                endretAvEnhetsnr = endretAvEnhetsnr,
             ),
         )
     }
@@ -259,11 +258,13 @@ class BehandlingPåVentService(
         opprettHistorikkInnslag(behandling, StegUtfall.TATT_AV_VENT)
         when (kanTaAvVent.status) {
             TaAvVentStatus.OK -> {}
-            TaAvVentStatus.ANNEN_BEHANDLING_MÅ_FERDIGSTILLES ->
+
+            TaAvVentStatus.ANNEN_BEHANDLING_MÅ_FERDIGSTILLES -> {
                 throw ApiFeil(
                     "Annen behandling må ferdigstilles før denne kan aktiveres på nytt",
                     HttpStatus.BAD_REQUEST,
                 )
+            }
 
             TaAvVentStatus.MÅ_NULSTILLE_VEDTAK -> {
                 val nyForrigeBehandlingId = kanTaAvVent.nyForrigeBehandlingId ?: error("Mangler nyForrigeBehandlingId")

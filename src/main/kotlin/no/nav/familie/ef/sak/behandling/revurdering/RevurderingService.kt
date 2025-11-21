@@ -159,7 +159,9 @@ class RevurderingService(
 
     fun finnSaksbehandlerForRevurdering(erAutomatiskRevurdering: Boolean): String =
         when (erAutomatiskRevurdering) {
-            true -> "S135150" // HARDKODER midlertidig saksbehandler for automatisk inntektsendring
+            true -> "S135150"
+
+            // HARDKODER midlertidig saksbehandler for automatisk inntektsendring
             false -> SikkerhetContext.hentSaksbehandlerEllerSystembruker()
         }
 
@@ -218,8 +220,13 @@ class RevurderingService(
                 }
             }
 
-            VilkårsbehandleNyeBarn.IKKE_VILKÅRSBEHANDLE -> emptyList()
-            VilkårsbehandleNyeBarn.IKKE_VALGT -> emptyList()
+            VilkårsbehandleNyeBarn.IKKE_VILKÅRSBEHANDLE -> {
+                emptyList()
+            }
+
+            VilkårsbehandleNyeBarn.IKKE_VALGT -> {
+                emptyList()
+            }
         }
     }
 

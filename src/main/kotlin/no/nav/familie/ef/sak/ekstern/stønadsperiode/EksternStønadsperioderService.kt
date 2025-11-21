@@ -47,12 +47,14 @@ class EksternStønadsperioderService(
                             .filtrerOverlappendePerioder(periodeFraRequest)
                             .mapToEksternPeriode(StønadType.OVERGANGSSTØNAD)
                     }
+
                     StønadType.BARNETILSYN -> {
                         periodeService
                             .hentPerioderForBarnetilsynFraEfOgInfotrygd(request.personIdent)
                             .filtrerOverlappendePerioder(periodeFraRequest)
                             .mapToEksternPeriode(StønadType.BARNETILSYN)
                     }
+
                     StønadType.SKOLEPENGER -> {
                         periodeService.hentPeriodeFraVedtakForSkolepenger(request.personIdent)
                     }

@@ -160,12 +160,17 @@ class TotrinnskontrollService(
                     ),
                 )
             }
-            ANGRE_SEND_TIL_BESLUTTER -> TotrinnskontrollStatusDto(UAKTUELT)
-            else ->
+
+            ANGRE_SEND_TIL_BESLUTTER -> {
+                TotrinnskontrollStatusDto(UAKTUELT)
+            }
+
+            else -> {
                 error(
                     "Skal ikke kunne være annen status enn UNDERKJENT når " +
                         "behandligStatus!=${BehandlingStatus.FATTER_VEDTAK}",
                 )
+            }
         }
     }
 

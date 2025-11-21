@@ -98,17 +98,20 @@ class AdresseMapper(
     ): String? {
         val adresse =
             when (kontaktadresse.type) {
-                KontaktadresseType.INNLAND ->
+                KontaktadresseType.INNLAND -> {
                     when {
                         kontaktadresse.vegadresse != null -> tilFormatertAdresse(kontaktadresse.vegadresse, gjeldendeDato)
                         kontaktadresse.postboksadresse != null -> tilFormatertAdresse(kontaktadresse.postboksadresse, gjeldendeDato)
                         else -> kontaktadresse.postadresseIFrittFormat?.let { tilFormatertAdresse(it, gjeldendeDato) }
                     }
-                KontaktadresseType.UTLAND ->
+                }
+
+                KontaktadresseType.UTLAND -> {
                     when {
                         kontaktadresse.utenlandskAdresse != null -> tilFormatertAdresse(kontaktadresse.utenlandskAdresse, gjeldendeDato)
                         else -> kontaktadresse.utenlandskAdresseIFrittFormat?.let { tilFormatertAdresse(it, gjeldendeDato) }
                     }
+                }
             }
         return join(coAdresse(kontaktadresse.coAdressenavn), adresse)
     }

@@ -149,6 +149,7 @@ object VedtakHistorikkBeregner {
                 val førsteFomDato = nyePerioder.first().periode.fom
                 avkortTidligerePerioder(acc.lastOrNull(), førsteFomDato) + nyePerioder
             }
+
             is InnvilgelseBarnetilsyn -> {
                 val perioder =
                     (perioderFraBeløp(vedtak, data, konfigurasjon) + sanksjonsperioder(vedtak))
@@ -156,14 +157,17 @@ object VedtakHistorikkBeregner {
                 val førsteFomDato = perioder.first().periode.fom
                 avkortTidligerePerioder(acc.lastOrNull(), førsteFomDato) + perioder
             }
+
             is Sanksjonert -> {
                 splitOppPerioderSomErSanksjonert(acc, vedtak)
             }
+
             is Opphør -> {
                 val opphørFom = vedtak.opphørFom
                 val avkortedePerioder = avkortTidligerePerioder(acc.lastOrNull(), opphørFom)
                 avkortedePerioder + Opphørsperiode(Månedsperiode(opphørFom))
             }
+
             else -> {
                 logger.error("Håndterer ikke ${vedtak::class.java.simpleName} behandling=${data.behandlingId}")
                 emptyList()
@@ -175,13 +179,18 @@ object VedtakHistorikkBeregner {
         val inntekter = inntektsperioder(vedtak)
         return vedtak.perioder.flatMap {
             when (it.periodeType) {
-                VedtaksperiodeType.SANKSJON ->
+                VedtaksperiodeType.SANKSJON -> {
                     listOf(Sanksjonsperiode(it.periode, it.sanksjonsårsak ?: error("Mangler sanksjonsårsak")))
+                }
+
                 VedtaksperiodeType.MIDLERTIDIG_OPPHØR -> {
                     val inntekt = Inntekt(it.periode.fom, BigDecimal.ZERO, BigDecimal.ZERO)
                     listOf(VedtakshistorikkperiodeOvergangsstønad(it.periode, it.aktivitet, it.periodeType, inntekt))
                 }
-                else -> splittOppVedtaksperioderOgInntekter(inntekter, it)
+
+                else -> {
+                    splittOppVedtaksperioderOgInntekter(inntekter, it)
+                }
             }
         }
     }
