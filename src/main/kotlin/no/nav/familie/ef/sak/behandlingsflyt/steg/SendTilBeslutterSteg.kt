@@ -23,6 +23,7 @@ import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext.NAVIDENT_REGEX
 import no.nav.familie.ef.sak.oppfølgingsoppgave.OppfølgingsoppgaveService
 import no.nav.familie.ef.sak.oppgave.TilordnetRessursService
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.secureLogger
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.ef.sak.simulering.SimuleringService
 import no.nav.familie.ef.sak.tilbakekreving.TilbakekrevingService
@@ -166,6 +167,7 @@ class SendTilBeslutterSteg(
         vedtakService.oppdaterSaksbehandler(saksbehandling.id, SikkerhetContext.hentSaksbehandler())
         val beskrivelseMarkeringer = data?.beskrivelseMarkeringer
         val prioritering = data?.høyprioritet
+        secureLogger.info("data: $data")
 
         if (vedtakService.hentVedtak(saksbehandling.id).skalVedtakBesluttes()) {
             opprettGodkjennVedtakOppgave(saksbehandling, beskrivelseMarkeringer, prioritering)
