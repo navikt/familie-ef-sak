@@ -166,11 +166,11 @@ class SendTilBeslutterSteg(
         behandlingService.oppdaterStatusPåBehandling(saksbehandling.id, BehandlingStatus.FATTER_VEDTAK)
         vedtakService.oppdaterSaksbehandler(saksbehandling.id, SikkerhetContext.hentSaksbehandler())
         val beskrivelseMarkeringer = data?.beskrivelseMarkeringer
-        val prioritering = data?.høyprioritet
+        val erHøyPrioritet = data?.erHøyPrioritet
         secureLogger.info("data: $data")
 
         if (vedtakService.hentVedtak(saksbehandling.id).skalVedtakBesluttes()) {
-            opprettGodkjennVedtakOppgave(saksbehandling, beskrivelseMarkeringer, prioritering)
+            opprettGodkjennVedtakOppgave(saksbehandling, beskrivelseMarkeringer, erHøyPrioritet)
         }
 
         ferdigstillOppgave(saksbehandling)

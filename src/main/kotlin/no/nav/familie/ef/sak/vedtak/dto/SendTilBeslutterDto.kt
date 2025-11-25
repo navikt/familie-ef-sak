@@ -9,5 +9,5 @@ data class SendTilBeslutterDto(
     val oppgaverIderSomSkalFerdigstilles: List<Long> = emptyList(),
     val beskrivelseMarkeringer: List<String> = emptyList(),
     val automatiskBrev: List<Brevmal> = emptyList(),
-    val høyprioritet: Boolean? = false,
+    val erHøyPrioritet: Boolean? = false,
 )
