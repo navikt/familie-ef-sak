@@ -37,7 +37,7 @@ class OpprettOppgaveTask(
         val tilordnetNavIdent: String? = null,
         val beskrivelse: String? = null,
         val unik: LocalDateTime? = LocalDateTime.now(),
-        val erHøyPrioritet: Boolean? = null
+        val erHøyPrioritet: Boolean? = null,
     )
 
     override fun doTask(task: Task) {
