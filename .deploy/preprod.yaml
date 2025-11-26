@@ -81,7 +81,6 @@ spec:
           namespace: tilleggsstonader
         - application: etterlatte-prosessering
           namespace: etterlatte
-          cluster: dev-gcp
     outbound:
       rules:
         - application: api-intern
