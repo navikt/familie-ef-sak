@@ -55,6 +55,7 @@ spec:
         - application: familie-ef-autentisering
         - application: familie-ef-sak-frontend
         - application: familie-prosessering
+        - application: etterlatte-prosessering
         - application: familie-ef-personhendelse
         - application: familie-prosessering-lokal
         - application: familie-ef-sak-frontend-lokal
