@@ -102,6 +102,8 @@ spec:
           namespace: team-rocket
         - application: logging
           namespace: nais-system
+        - application: etterlatte-prosessering
+          namespace: etterlatte
       external:
         - host: api-gw.oera.no
         - host: familie-oppdrag.prod-fss-pub.nais.io
