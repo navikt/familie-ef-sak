@@ -79,6 +79,8 @@ spec:
           cluster: dev-gcp
         - application: tilleggsstonader-integrasjoner
           namespace: tilleggsstonader
+        - application: etterlatte-prosessering
+          namespace: etterlatte
     outbound:
       rules:
         - application: api-intern
