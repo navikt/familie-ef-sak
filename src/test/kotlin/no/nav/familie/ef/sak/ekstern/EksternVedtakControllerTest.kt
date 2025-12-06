@@ -17,7 +17,7 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.web.client.exchange
+import org.springframework.boot.resttestclient.exchange
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpMethod
 import org.springframework.http.ResponseEntity
@@ -49,7 +49,7 @@ internal class EksternVedtakControllerTest : OppslagSpringRunnerTest() {
 
         behandlingRepository.insertAll(listOf(førstegangsbehandling))
 
-        val vedtakResponse = hentVedtak(fagsak.eksternId).body.data!!
+        val vedtakResponse = hentVedtak(fagsak.eksternId).body?.data!!
 
         assertThat(vedtakResponse).hasSize(2)
         assertThat(vedtakResponse.map { it.fagsystemType })

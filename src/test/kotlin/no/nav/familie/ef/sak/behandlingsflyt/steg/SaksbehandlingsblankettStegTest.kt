@@ -31,6 +31,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.web.client.HttpClientErrorException
 
@@ -128,7 +129,7 @@ internal class SaksbehandlingsblankettStegTest {
         } throws
             RessursException(
                 Ressurs.failure(),
-                HttpClientErrorException.create(null, HttpStatus.CONFLICT, null, null, null, null),
+                HttpClientErrorException.create(HttpStatus.CONFLICT, "status=${HttpStatus.CONFLICT}", HttpHeaders(), null, null),
                 HttpStatus.CONFLICT,
             )
 
@@ -174,7 +175,7 @@ internal class SaksbehandlingsblankettStegTest {
         } throws
             RessursException(
                 Ressurs.failure(),
-                HttpClientErrorException.create(null, HttpStatus.BAD_REQUEST, null, null, null, null),
+                HttpClientErrorException.create(HttpStatus.BAD_REQUEST, "status=${HttpStatus.BAD_REQUEST}", HttpHeaders(), null, null),
                 HttpStatus.BAD_REQUEST,
             )
 

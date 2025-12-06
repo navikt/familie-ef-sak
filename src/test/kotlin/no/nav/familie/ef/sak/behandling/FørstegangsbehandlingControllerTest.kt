@@ -20,7 +20,7 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.web.client.exchange
+import org.springframework.boot.resttestclient.exchange
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
@@ -110,7 +110,7 @@ internal class FørstegangsbehandlingControllerTest : OppslagSpringRunnerTest() 
             ),
         ) { response ->
             assertThat(response.statusCode).isEqualTo(HttpStatus.BAD_REQUEST)
-            assertThat(response.body.frontendFeilmelding).contains("Kan ikke opprette en førstegangsbehandling når siste behandling")
+            assertThat(response.body?.frontendFeilmelding).contains("Kan ikke opprette en førstegangsbehandling når siste behandling")
         }
     }
 

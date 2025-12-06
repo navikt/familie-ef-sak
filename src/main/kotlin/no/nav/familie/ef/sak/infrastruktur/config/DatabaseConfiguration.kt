@@ -1,6 +1,7 @@
 package no.nav.familie.ef.sak.infrastruktur.config
 
 import com.fasterxml.jackson.module.kotlin.readValue
+import jakarta.annotation.Nullable
 import no.nav.familie.ef.sak.amelding.InntektResponse
 import no.nav.familie.ef.sak.brev.domain.OrganisasjonerWrapper
 import no.nav.familie.ef.sak.brev.domain.PersonerWrapper
@@ -28,7 +29,7 @@ import no.nav.familie.prosessering.StringTilPropertiesWrapperConverter
 import org.apache.commons.lang3.StringUtils
 import org.postgresql.util.PGobject
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.boot.autoconfigure.flyway.FlywayConfigurationCustomizer
+import org.springframework.boot.flyway.autoconfigure.FlywayConfigurationCustomizer
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.core.convert.converter.Converter
@@ -196,7 +197,8 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
     }
 
     @ReadingConverter
-    class PGobjectTilJsonWrapperConverter : Converter<PGobject, JsonWrapper?> {
+    class PGobjectTilJsonWrapperConverter : Converter<PGobject, JsonWrapper> {
+        @Nullable
         override fun convert(pGobject: PGobject): JsonWrapper? = pGobject.value?.let { JsonWrapper(it) }
     }
 
@@ -361,7 +363,8 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
     }
 
     @ReadingConverter
-    class PGobjectTilBeriketSimuleringsresultat : Converter<PGobject, BeriketSimuleringsresultat?> {
+    class PGobjectTilBeriketSimuleringsresultat : Converter<PGobject, BeriketSimuleringsresultat> {
+        @Nullable
         override fun convert(pGobject: PGobject): BeriketSimuleringsresultat? = pGobject.value?.let { objectMapper.readValue(it) }
     }
 
