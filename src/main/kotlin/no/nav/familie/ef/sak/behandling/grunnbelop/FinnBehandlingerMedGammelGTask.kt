@@ -3,11 +3,11 @@ package no.nav.familie.ef.sak.behandling.grunnbelop
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
 import no.nav.familie.ef.sak.beregning.Grunnbeløpsperioder
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
+import no.nav.familie.ef.sak.infrastruktur.logg.Logg
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
-import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.util.UUID
@@ -21,7 +21,7 @@ class FinnBehandlingerMedGammelGTask(
     val behandlingRepository: BehandlingRepository,
     val tilkjentYtelseService: TilkjentYtelseService,
 ) : AsyncTaskStep {
-    private val logger = LoggerFactory.getLogger(javaClass)
+    private val logger = Logg.getLogger(this::class)
 
     private val uaktuelleBehandlinger = listOf("4d4de67b-f87b-4b6b-8524-aa92b3ebb870")
 

@@ -1,11 +1,11 @@
 package no.nav.familie.ef.sak.forvaltning
 
+import no.nav.familie.ef.sak.infrastruktur.logg.Logg
 import no.nav.familie.ef.sak.oppgave.TilordnetRessursService
 import no.nav.familie.kontrakter.felles.oppgave.Oppgave
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
-import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.util.Properties
 import java.util.UUID
@@ -20,8 +20,7 @@ import java.util.UUID
 class LoggOppgaveMetadataTask(
     private val tilordnetRessursService: TilordnetRessursService,
 ) : AsyncTaskStep {
-    private val logger = LoggerFactory.getLogger(javaClass)
-    private val secureLogger = LoggerFactory.getLogger("secureLogger")
+    private val logger = Logg.getLogger(this::class)
 
     override fun doTask(task: Task) {
         logger.info("Henter oppgave for behandling ${task.payload}")
@@ -29,7 +28,7 @@ class LoggOppgaveMetadataTask(
 
         when (oppgave) {
             null -> logger.info("Fant ikke oppgave for behandling ${task.payload}")
-            else -> secureLogger.info("Oppgave hentet for behandling ${task.payload}: ${oppgave.toLogString()}")
+            else -> logger.info("Oppgave hentet for behandling ${task.payload}: ${oppgave.toLogString()}")
         }
     }
 

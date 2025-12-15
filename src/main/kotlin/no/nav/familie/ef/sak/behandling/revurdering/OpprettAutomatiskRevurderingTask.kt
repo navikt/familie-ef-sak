@@ -2,10 +2,10 @@ package no.nav.familie.ef.sak.behandling.revurdering
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.familie.ef.sak.infrastruktur.config.ObjectMapperProvider.objectMapper
+import no.nav.familie.ef.sak.infrastruktur.logg.Logg
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
-import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.YearMonth
 import kotlin.collections.set
@@ -19,8 +19,7 @@ class OpprettAutomatiskRevurderingTask(
     private val automatiskRevurderingService: AutomatiskRevurderingService,
     private val revurderingService: RevurderingService,
 ) : AsyncTaskStep {
-    private val logger = LoggerFactory.getLogger(javaClass)
-    private val secureLogger = LoggerFactory.getLogger("secureLogger")
+    private val logger = Logg.getLogger(this::class)
 
     override fun doTask(task: Task) {
         val personIdenter = objectMapper.readValue<PayloadOpprettAutomatiskRevurderingTask>(task.payload).personIdenter
@@ -29,7 +28,7 @@ class OpprettAutomatiskRevurderingTask(
                 automatiskRevurderingService.kanAutomatiskRevurderes(personIdent)
             }
 
-        secureLogger.info("Kan revurdere personIdenter: $identerForAutomatiskRevurdering - oppretter task for disse")
+        logger.info("Kan revurdere personIdenter: $identerForAutomatiskRevurdering - oppretter task for disse")
 
         if (identerForAutomatiskRevurdering.isNotEmpty()) {
             revurderingService.opprettAutomatiskInntektsendringTask(identerForAutomatiskRevurdering)

@@ -3,6 +3,7 @@ package no.nav.familie.ef.sak.næringsinntektskontroll
 import no.nav.familie.ef.sak.amelding.InntektService
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.fagsak.FagsakService
+import no.nav.familie.ef.sak.infrastruktur.logg.Logg
 import no.nav.familie.ef.sak.sigrun.SigrunService
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
@@ -10,7 +11,6 @@ import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.kontrakter.felles.oppgave.IdentGruppe
 import no.nav.familie.kontrakter.felles.oppgave.Oppgave
-import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.YearMonth
 import java.util.UUID
@@ -23,7 +23,7 @@ class NæringsinntektDataForBeregningService(
     val inntektService: InntektService,
     val sigrunService: SigrunService,
 ) {
-    private val secureLogger = LoggerFactory.getLogger("secureLogger")
+    private val logger = Logg.getLogger(this::class)
 
     fun hentNæringsinntektDataForBeregning(
         oppgave: Oppgave,
@@ -46,9 +46,9 @@ class NæringsinntektDataForBeregningService(
                 fjoråretsPersonInntekt = inntektService.hentÅrsinntekt(personIdent, årstallIFjor),
                 forventetInntektIFjor = forventetInntektSnittIFjor(tilkjentYtelse, årstallIFjor),
             )
-        secureLogger.info("Næringsinntektsdata for beregning: $næringsinntektDataForBeregning")
-        secureLogger.info("${næringsinntektDataForBeregning.antallMånederMedVedtakForÅr(årstallIFjor)} måneder med vedtak for fagsakId: ${fagsakOvergangsstønad.id} eksternFagsakId: ${fagsakOvergangsstønad.eksternId}")
-        secureLogger.info("Forrige års inntekt for person uten ytelse fra offentlig: ${næringsinntektDataForBeregning.fjoråretsPersonInntekt} - næringsinntekt: ${næringsinntektDataForBeregning.fjoråretsNæringsinntekt} (Fagsak: ${fagsakOvergangsstønad.id})")
+        logger.info("Næringsinntektsdata for beregning: $næringsinntektDataForBeregning")
+        logger.info("${næringsinntektDataForBeregning.antallMånederMedVedtakForÅr(årstallIFjor)} måneder med vedtak for fagsakId: ${fagsakOvergangsstønad.id} eksternFagsakId: ${fagsakOvergangsstønad.eksternId}")
+        logger.info("Forrige års inntekt for person uten ytelse fra offentlig: ${næringsinntektDataForBeregning.fjoråretsPersonInntekt} - næringsinntekt: ${næringsinntektDataForBeregning.fjoråretsNæringsinntekt} (Fagsak: ${fagsakOvergangsstønad.id})")
         return næringsinntektDataForBeregning
     }
 
@@ -64,7 +64,7 @@ class NæringsinntektDataForBeregningService(
     ): Int {
         val inntekt = sigrunService.hentInntektForAlleÅrMedInntekt(fagsakPersonId).filter { it.inntektsår == årstallIFjor }
         val næringsinntekt = inntekt.sumOf { it.næring } + inntekt.sumOf { it.svalbard?.næring ?: 0 }
-        secureLogger.info("Inntekt for person $inntekt - næringsinntekt er beregnet til: $næringsinntekt")
+        logger.info("Inntekt for person $inntekt - næringsinntekt er beregnet til: $næringsinntekt")
         return næringsinntekt
     }
 

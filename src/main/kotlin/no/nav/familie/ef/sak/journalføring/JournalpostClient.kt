@@ -6,6 +6,7 @@ import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
+import no.nav.familie.ef.sak.infrastruktur.logg.Logg
 import no.nav.familie.ef.sak.journalføring.dto.DokumentVariantformat
 import no.nav.familie.http.client.AbstractPingableRestClient
 import no.nav.familie.http.client.RessursException
@@ -38,6 +39,8 @@ class JournalpostClient(
     integrasjonerConfig: IntegrasjonerConfig,
     private val featureToggleService: FeatureToggleService,
 ) : AbstractPingableRestClient(restOperations, "journalpost") {
+    private val logger = Logg.getLogger(this::class)
+
     override val pingUri: URI = integrasjonerConfig.pingUri
     private val journalpostURI: URI = integrasjonerConfig.journalPostUri
     private val dokarkivUri: URI = integrasjonerConfig.dokarkivUri
@@ -176,7 +179,7 @@ class JournalpostClient(
             }
 
         if (ressurs.status != Ressurs.Status.SUKSESS) {
-            secureLogger.error(" Feil ved oppdatering av journalpost=$journalpostId - mottok: $ressurs")
+            logger.error(" Feil ved oppdatering av journalpost=$journalpostId - mottok: $ressurs")
             error("Feil ved oppdatering av journalpost=$journalpostId")
         }
     }

@@ -7,12 +7,11 @@ import no.nav.familie.ef.sak.beregning.Grunnbeløpsperioder
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvisIkke
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
+import no.nav.familie.ef.sak.infrastruktur.logg.Logg
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
@@ -30,7 +29,7 @@ class ManuellGOmregningController(
     private val tilkjentYtelseService: TilkjentYtelseService,
     private val tilgangService: TilgangService,
 ) {
-    val logger: Logger = LoggerFactory.getLogger(javaClass)
+    val logger = Logg.getLogger(this::class)
 
     @PostMapping(path = ["startjobb"])
     fun opprettGOmregningTasksForBehandlingerMedGammeltGBelop(): Ressurs<Int> {

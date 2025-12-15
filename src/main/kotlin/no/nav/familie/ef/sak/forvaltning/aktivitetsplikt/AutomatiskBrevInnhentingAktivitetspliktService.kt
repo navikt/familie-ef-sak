@@ -1,13 +1,12 @@
 package no.nav.familie.ef.sak.forvaltning.aktivitetsplikt
 
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
+import no.nav.familie.ef.sak.infrastruktur.logg.Logg
 import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.ef.sak.oppgave.OppgaveUtil
 import no.nav.familie.kontrakter.felles.Tema
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveRequest
 import no.nav.familie.prosessering.internal.TaskService
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
@@ -18,7 +17,7 @@ class AutomatiskBrevInnhentingAktivitetspliktService(
     private val taskService: TaskService,
     private val oppgaveService: OppgaveService,
 ) {
-    val logger: Logger = LoggerFactory.getLogger(javaClass)
+    val logger = Logg.getLogger(this::class)
 
     val oppgaveAktivitetspliktFrist = LocalDate.parse("2025-05-17")
 

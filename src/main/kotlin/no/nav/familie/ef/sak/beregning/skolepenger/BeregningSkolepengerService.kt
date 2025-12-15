@@ -9,7 +9,7 @@ import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvisIkke
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvisIkke
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.secureLogger
+import no.nav.familie.ef.sak.infrastruktur.logg.Logg
 import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.ef.sak.vedtak.dto.SkolepengerUtgiftDto
 import no.nav.familie.ef.sak.vedtak.dto.SkoleårsperiodeSkolepengerDto
@@ -27,6 +27,8 @@ class BeregningSkolepengerService(
     private val behandlingService: BehandlingService,
     private val vedtakService: VedtakService,
 ) {
+    private val logger = Logg.getLogger(this::class)
+
     fun beregnYtelse(
         utgiftsperioder: List<SkoleårsperiodeSkolepengerDto>,
         behandlingId: UUID,
@@ -208,7 +210,7 @@ class BeregningSkolepengerService(
                 return
             }
         }
-        secureLogger.warn("Finner ikke noe som er endret mellom forrigePerioder=$forrigePerioder og nyePerioder=$perioder")
+        logger.warn("Finner ikke noe som er endret mellom forrigePerioder=$forrigePerioder og nyePerioder=$perioder")
         throw ApiFeil("Periodene er uendrede, finner ikke noe å opphøre", HttpStatus.BAD_REQUEST)
     }
 

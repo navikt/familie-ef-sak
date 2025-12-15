@@ -3,9 +3,9 @@ package no.nav.familie.ef.sak.metrics
 import io.micrometer.core.instrument.Metrics
 import io.micrometer.core.instrument.MultiGauge
 import io.micrometer.core.instrument.Tags
+import no.nav.familie.ef.sak.infrastruktur.logg.Logg
 import no.nav.familie.ef.sak.metrics.domain.MålerRepository
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
-import org.slf4j.LoggerFactory
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
 import java.time.YearMonth
@@ -23,7 +23,7 @@ class MålerService(
     private val antallMigreringerGauge = Metrics.gauge("AntallMigreringer", AtomicInteger()) ?: error("Forventer not null")
     private val antallSanksjonerGauge = Metrics.gauge("AntallSanksjoner", AtomicInteger()) ?: error("Forventer not null")
 
-    private val logger = LoggerFactory.getLogger(this::class.java)
+    private val logger = Logg.getLogger(this::class)
 
     @Scheduled(initialDelay = 60 * 1000L, fixedDelay = OPPDATERINGSFREKVENS)
     fun antallMigreringer() {

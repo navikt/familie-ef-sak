@@ -1,6 +1,7 @@
 package no.nav.familie.ef.sak.opplysninger.søknad
 
 import no.nav.familie.ef.sak.felles.domain.Sporbar
+import no.nav.familie.ef.sak.infrastruktur.logg.Logg
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.Søknad
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.SøknadMapper
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.SøknadType
@@ -14,7 +15,6 @@ import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.kontrakter.ef.søknad.SøknadBarnetilsyn
 import no.nav.familie.kontrakter.ef.søknad.SøknadOvergangsstønad
 import no.nav.familie.kontrakter.ef.søknad.SøknadSkolepenger
-import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDateTime
@@ -27,7 +27,7 @@ class SøknadService(
     private val søknadSkolepengerRepository: SøknadSkolepengerRepository,
     private val søknadBarnetilsynRepository: SøknadBarnetilsynRepository,
 ) {
-    private val logger = LoggerFactory.getLogger(javaClass)
+    private val logger = Logg.getLogger(this::class)
 
     fun hentSøknadsgrunnlag(behandlingId: UUID): Søknadsverdier? {
         val søknad = hentSøknad(behandlingId) ?: return null

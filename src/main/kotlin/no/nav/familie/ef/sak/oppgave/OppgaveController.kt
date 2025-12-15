@@ -2,6 +2,7 @@ package no.nav.familie.ef.sak.oppgave
 
 import no.nav.familie.ef.sak.felles.util.FnrUtil.validerOptionalIdent
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
+import no.nav.familie.ef.sak.infrastruktur.logg.Logg
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.ef.sak.oppfølgingsoppgave.OppfølgingsoppgaveService
@@ -19,7 +20,6 @@ import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveResponseDto
 import no.nav.familie.kontrakter.felles.oppgave.MappeDto
 import no.nav.familie.kontrakter.felles.oppgave.Oppgave
 import no.nav.security.token.support.core.api.ProtectedWithClaims
-import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.validation.annotation.Validated
@@ -44,8 +44,7 @@ class OppgaveController(
     private val tilordnetRessursService: TilordnetRessursService,
     private val oppfølgingsoppgaveService: OppfølgingsoppgaveService,
 ) {
-    private val logger = LoggerFactory.getLogger(javaClass)
-    private val secureLogger = LoggerFactory.getLogger("secureLogger")
+    private val logger = Logg.getLogger(this::class)
 
     @PostMapping(
         path = ["/soek"],
@@ -68,7 +67,7 @@ class OppgaveController(
                         .ident
                 }
 
-        secureLogger.info("AktoerId: $aktørId, Ident: ${finnOppgaveRequest.ident}")
+        logger.info("AktoerId: $aktørId, Ident: ${finnOppgaveRequest.ident}")
         val oppgaveRepons = oppgaveService.hentOppgaver(finnOppgaveRequest.tilFinnOppgaveRequest(aktørId))
         return Ressurs.success(oppgaveRepons.tilDto())
     }
@@ -86,7 +85,7 @@ class OppgaveController(
         @PathVariable behandlingId: UUID,
     ): Ressurs<OppgaveResponseDto> {
         val oppgaveIder = oppfølgingsoppgaveService.hentOppgaverForFerdigstillingEllerNull(behandlingId)?.fremleggsoppgaveIderSomSkalFerdigstilles
-        secureLogger.info("Oppgave ider for behandlingId: $behandlingId, oppgaveIder: $oppgaveIder")
+        logger.info("Oppgave ider for behandlingId: $behandlingId, oppgaveIder: $oppgaveIder")
         val oppgaver = oppgaveService.hentOppgaverMedIder(oppgaveIder)
         val antallTreffTotalt = oppgaver.size.toLong()
         val oppgaveResponse = FinnOppgaveResponseDto(antallTreffTotalt, oppgaver)

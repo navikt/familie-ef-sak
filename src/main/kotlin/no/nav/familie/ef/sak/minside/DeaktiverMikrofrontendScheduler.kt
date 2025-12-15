@@ -1,9 +1,9 @@
 package no.nav.familie.ef.sak.minside
 
 import no.nav.familie.ef.sak.fagsak.FagsakPersonService
+import no.nav.familie.ef.sak.infrastruktur.logg.Logg
 import no.nav.familie.leader.LeaderClient
 import no.nav.familie.prosessering.internal.TaskService
-import org.slf4j.LoggerFactory
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -13,7 +13,7 @@ class DeaktiverMikrofrontendScheduler(
     val taskService: TaskService,
     val fagsakPersonService: FagsakPersonService,
 ) {
-    private val logger = LoggerFactory.getLogger(javaClass)
+    private val logger = Logg.getLogger(this::class)
 
     @Scheduled(cron = "\${DEAKTIVER_MIKROFRONTEND_CRON_EXPRESSION}")
     @Transactional

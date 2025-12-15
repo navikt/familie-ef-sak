@@ -1,9 +1,9 @@
 package no.nav.familie.ef.sak.infrastruktur.exception
 
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
+import no.nav.familie.ef.sak.infrastruktur.logg.Logg
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.exceptions.JwtTokenMissingException
-import org.slf4j.LoggerFactory
 import org.springframework.core.NestedExceptionUtils
 import org.springframework.http.HttpStatus
 import org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR
@@ -18,8 +18,7 @@ import java.util.concurrent.TimeoutException
 class ApiExceptionHandler(
     val featureToggleService: FeatureToggleService,
 ) {
-    private val logger = LoggerFactory.getLogger(ApiExceptionHandler::class.java)
-    private val secureLogger = LoggerFactory.getLogger("secureLogger")
+    private val logger = Logg.getLogger(this::class)
 
     @ExceptionHandler(Throwable::class)
     fun handleThrowable(throwable: Throwable): ResponseEntity<Ressurs<Nothing>> {
@@ -27,12 +26,12 @@ class ApiExceptionHandler(
 
         val mostSpecificCause = throwable.getMostSpecificCause()
         if (mostSpecificCause is SocketTimeoutException || mostSpecificCause is TimeoutException) {
-            secureLogger.warn("Timeout feil: ${mostSpecificCause.message}, $metodeSomFeiler ${rootCause(throwable)}", throwable)
+            logger.warn("Timeout feil: ${mostSpecificCause.message}, $metodeSomFeiler ${rootCause(throwable)}", throwable)
             logger.warn("Timeout feil: $metodeSomFeiler ${rootCause(throwable)} ")
             return ResponseEntity.status(INTERNAL_SERVER_ERROR).body(lagTimeoutfeilRessurs())
         }
 
-        secureLogger.error("Uventet feil: $metodeSomFeiler ${rootCause(throwable)}", throwable)
+        logger.error("Uventet feil: $metodeSomFeiler ${rootCause(throwable)}", throwable)
         logger.error("Uventet feil: $metodeSomFeiler ${rootCause(throwable)} ")
 
         return ResponseEntity
@@ -60,7 +59,7 @@ class ApiExceptionHandler(
     @ExceptionHandler(ApiFeil::class)
     fun handleThrowable(feil: ApiFeil): ResponseEntity<Ressurs<Nothing>> {
         val metodeSomFeiler = finnMetodeSomFeiler(feil)
-        secureLogger.info("En håndtert feil har oppstått(${feil.httpStatus}): ${feil.feil}", feil)
+        logger.info("En håndtert feil har oppstått(${feil.httpStatus}): ${feil.feil}", feil)
         logger.info(
             "En håndtert feil har oppstått(${feil.httpStatus}) metode=$metodeSomFeiler exception=${
                 rootCause(
@@ -79,7 +78,7 @@ class ApiExceptionHandler(
     @ExceptionHandler(Feil::class)
     fun handleThrowable(feil: Feil): ResponseEntity<Ressurs<Nothing>> {
         val metodeSomFeiler = finnMetodeSomFeiler(feil)
-        secureLogger.error("En håndtert feil har oppstått(${feil.httpStatus}): ${feil.frontendFeilmelding}", feil)
+        logger.error("En håndtert feil har oppstått(${feil.httpStatus}): ${feil.frontendFeilmelding}", feil)
         logger.error(
             "En håndtert feil har oppstått(${feil.httpStatus}) metode=$metodeSomFeiler exception=${
                 rootCause(
@@ -107,7 +106,7 @@ class ApiExceptionHandler(
 
     @ExceptionHandler(ManglerTilgang::class)
     fun handleThrowable(manglerTilgang: ManglerTilgang): ResponseEntity<Ressurs<Nothing>> {
-        secureLogger.warn("En håndtert tilgangsfeil har oppstått - ${manglerTilgang.melding}", manglerTilgang)
+        logger.warn("En håndtert tilgangsfeil har oppstått - ${manglerTilgang.melding}", manglerTilgang)
         logger.warn("En håndtert tilgangsfeil har oppstått")
         return ResponseEntity
             .status(HttpStatus.FORBIDDEN)
@@ -124,7 +123,7 @@ class ApiExceptionHandler(
 
     @ExceptionHandler(IntegrasjonException::class)
     fun handleThrowable(feil: IntegrasjonException): ResponseEntity<Ressurs<Nothing>> {
-        secureLogger.error("Feil mot integrasjonsclienten har oppstått: uri={} data={}", feil.uri, feil.data, feil)
+        logger.error("Feil mot integrasjonsclienten har oppstått: uri={} data={}", feil.uri, feil.data, feil)
         logger.error("Feil mot integrasjonsclienten har oppstått exception=${rootCause(feil)}")
         return ResponseEntity
             .status(INTERNAL_SERVER_ERROR)

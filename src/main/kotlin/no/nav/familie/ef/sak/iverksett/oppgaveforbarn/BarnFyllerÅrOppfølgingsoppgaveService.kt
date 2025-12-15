@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.iverksett.oppgaveforbarn
 
+import no.nav.familie.ef.sak.infrastruktur.logg.Logg
 import no.nav.familie.ef.sak.oppgave.Oppgave
 import no.nav.familie.ef.sak.oppgave.OppgaveRepository
 import no.nav.familie.ef.sak.opplysninger.mapper.BarnMedFødselsdatoDto
@@ -11,7 +12,6 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Familierelasjon
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.internal.TaskService
-import org.slf4j.LoggerFactory
 import org.springframework.dao.DuplicateKeyException
 import org.springframework.data.relational.core.conversion.DbActionExecutionException
 import org.springframework.stereotype.Service
@@ -26,8 +26,7 @@ class BarnFyllerÅrOppfølgingsoppgaveService(
     private val personService: PersonService,
     private val grunnlagsdataService: GrunnlagsdataService,
 ) {
-    private val logger = LoggerFactory.getLogger(javaClass)
-    private val secureLogger = LoggerFactory.getLogger("secureLogger")
+    private val logger = Logg.getLogger(this::class)
 
     @Transactional
     fun opprettTasksForAlleBarnSomHarFyltÅr(dryRun: Boolean = false) {
@@ -45,7 +44,7 @@ class BarnFyllerÅrOppfølgingsoppgaveService(
             opprettOppgaveTasksForBarn(behandlingMedBarnIAktivitetspliktigAlder)
         } else {
             behandlingMedBarnIAktivitetspliktigAlder.forEach {
-                secureLogger.info(
+                logger.info(
                     "Ville opprettet oppgave for barn med fødselsnummer: " +
                         "${it.fødselsnummer} med alder ${it.aktivitetspliktigAlder}",
                 )
@@ -111,7 +110,7 @@ class BarnFyllerÅrOppfølgingsoppgaveService(
     ): LocalDate? {
         val grunnlagsdataBarn = grunnlagsdata.grunnlagsdata.barn.firstOrNull { it.personIdent == barn.fødselsnummerBarn }
         if (grunnlagsdataBarn == null) {
-            secureLogger.warn("Fant ikke barn i grunnlagsdata for behandling ${barn.behandlingId} og fødselsnummer ${barn.fødselsnummerBarn}")
+            logger.warn("Fant ikke barn i grunnlagsdata for behandling ${barn.behandlingId} og fødselsnummer ${barn.fødselsnummerBarn}")
             return null
         }
         return grunnlagsdataBarn.fødsel.first().fødselsdato

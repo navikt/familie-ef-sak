@@ -6,9 +6,8 @@ import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.behandlingsflyt.task.BehandlingsstatistikkTask
 import no.nav.familie.ef.sak.behandlingsflyt.task.PubliserVedtakshendelseTask
+import no.nav.familie.ef.sak.infrastruktur.logg.Logg
 import no.nav.familie.prosessering.internal.TaskService
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
 @Service
@@ -16,7 +15,7 @@ class FerdigstillBehandlingSteg(
     private val behandlingService: BehandlingService,
     private val taskService: TaskService,
 ) : BehandlingSteg<Void?> {
-    private val logger: Logger = LoggerFactory.getLogger(this::class.java)
+    private val logger = Logg.getLogger(this::class)
 
     override fun utførSteg(
         saksbehandling: Saksbehandling,

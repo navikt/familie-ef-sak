@@ -1,9 +1,9 @@
 package no.nav.familie.ef.sak.forvaltning.uttrekk
 
+import no.nav.familie.ef.sak.infrastruktur.logg.Logg
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.ef.sak.vedtak.historikk.VedtakHistorikkService
 import no.nav.security.token.support.core.api.ProtectedWithClaims
-import org.slf4j.LoggerFactory
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Controller
@@ -24,8 +24,7 @@ class AndelshistorikkUttrekkController(
     val vedtakHistorikkService: VedtakHistorikkService,
     private val tilgangService: TilgangService,
 ) {
-    private val logger = LoggerFactory.getLogger(javaClass)
-    private val secureLogger = LoggerFactory.getLogger("secureLogger")
+    private val logger = Logg.getLogger(this::class)
 
     @GetMapping("/manglertilsyn")
     fun hentDataManglerTilsyn2022(): ResponseEntity<String> {
@@ -50,7 +49,7 @@ class AndelshistorikkUttrekkController(
                             it.beløpForManglendeTilsynSomErAvsluttet(),
                             it.tidligsteFom(),
                         )
-                    secureLogger.info("Snittutregning-manglertilsyn: $resultatPerFagsak ")
+                    logger.info("Snittutregning-manglertilsyn: $resultatPerFagsak ")
                     resultatPerFagsak
                 }
 

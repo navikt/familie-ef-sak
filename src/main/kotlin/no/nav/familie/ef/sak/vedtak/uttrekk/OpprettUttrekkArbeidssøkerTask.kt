@@ -3,11 +3,11 @@ package no.nav.familie.ef.sak.vedtak.uttrekk
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.felles.util.DatoFormat.DATE_FORMAT_ISO_YEAR_MONTH
 import no.nav.familie.ef.sak.felles.util.EnvUtil
+import no.nav.familie.ef.sak.infrastruktur.logg.Logg
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.internal.TaskService
-import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.YearMonth
 
@@ -26,8 +26,7 @@ class OpprettUttrekkArbeidssøkerTask(
     private val fagsakService: FagsakService,
     private val taskService: TaskService,
 ) : AsyncTaskStep {
-    private val secureLogger = LoggerFactory.getLogger("secureLogger")
-    private val logger = LoggerFactory.getLogger(javaClass)
+    private val logger = Logg.getLogger(this::class)
 
     override fun doTask(task: Task) {
         val årMåned = YearMonth.parse(task.payload)
@@ -53,7 +52,7 @@ class OpprettUttrekkArbeidssøkerTask(
             } catch (ex: Exception) {
                 val errorMelding = "Sjekk av utrekkArbeidssøker feiler fagsak=${it.fagsakId} behandling=${it.behandlingId}"
                 logger.warn(errorMelding)
-                secureLogger.warn("$errorMelding - ${ex.message}", ex)
+                logger.warn("$errorMelding - ${ex.message}", ex)
                 ++feilede
             }
         }

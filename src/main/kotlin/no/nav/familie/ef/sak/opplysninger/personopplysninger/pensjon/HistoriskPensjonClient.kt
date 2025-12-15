@@ -1,7 +1,7 @@
 package no.nav.familie.ef.sak.opplysninger.personopplysninger.pensjon
 
+import no.nav.familie.ef.sak.infrastruktur.logg.Logg
 import no.nav.familie.http.client.AbstractRestClient
-import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
@@ -15,7 +15,7 @@ class HistoriskPensjonClient(
     private val historiskPensjonUri: URI,
     @Qualifier("azure") restOperations: RestOperations,
 ) : AbstractRestClient(restOperations, "pensjon") {
-    private val logger = LoggerFactory.getLogger(javaClass)
+    private val logger = Logg.getLogger(this::class)
 
     private fun lagHarPensjonUri() =
         UriComponentsBuilder
@@ -41,7 +41,7 @@ class HistoriskPensjonClient(
                 val skalLoggeSisteForsøk = teller == (antallForsøk - 1)
                 if (skalLoggeSisteForsøk) {
                     logger.error("Kunne ikke kalle historisk pensjon for uthenting")
-                    secureLogger.error("Kunne ikke kalle historisk pensjon for uthenting", e)
+                    logger.error("Kunne ikke kalle historisk pensjon for uthenting", e)
                 }
             }
         }

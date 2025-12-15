@@ -8,6 +8,7 @@ import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
+import no.nav.familie.ef.sak.infrastruktur.logg.Logg
 import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.ef.sak.oppgave.OppgaveUtil
@@ -22,8 +23,6 @@ import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.PropertiesWrapper
 import no.nav.familie.prosessering.domene.Task
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.Year
 import java.util.Properties
@@ -45,7 +44,7 @@ class SendAktivitetspliktBrevTilIverksettTask(
     private val iverksettClient: IverksettClient,
     private val arbeidsfordelingService: ArbeidsfordelingService,
 ) : AsyncTaskStep {
-    val logger: Logger = LoggerFactory.getLogger(this::class.java)
+    val logger = Logg.getLogger(this::class)
 
     override fun doTask(task: Task) {
         val payload = objectMapper.readValue<AutomatiskBrevAktivitetspliktPayload>(task.payload)

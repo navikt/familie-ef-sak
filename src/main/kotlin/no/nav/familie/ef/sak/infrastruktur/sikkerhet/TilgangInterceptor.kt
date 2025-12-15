@@ -5,7 +5,7 @@ import jakarta.servlet.http.HttpServletResponse
 import no.nav.familie.ef.sak.behandlingsflyt.steg.BehandlerRolle
 import no.nav.familie.ef.sak.infrastruktur.config.RolleConfig
 import no.nav.familie.ef.sak.infrastruktur.exception.ManglerTilgang
-import org.slf4j.LoggerFactory
+import no.nav.familie.ef.sak.infrastruktur.logg.Logg
 import org.springframework.stereotype.Component
 import org.springframework.web.servlet.AsyncHandlerInterceptor
 
@@ -29,6 +29,6 @@ class TilgangInterceptor(
         }
 
     companion object {
-        private val logger = LoggerFactory.getLogger(this::class.java)
+        private val logger = Logg.getLogger(this::class)
     }
 }

@@ -11,9 +11,9 @@ import no.nav.familie.ef.sak.behandlingsflyt.steg.StegService
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvisIkke
+import no.nav.familie.ef.sak.infrastruktur.logg.Logg
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.ef.sak.oppgave.TilordnetRessursService
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.secureLogger
 import no.nav.familie.ef.sak.vedtak.dto.Avslå
 import no.nav.familie.ef.sak.vedtak.dto.BeslutteVedtakDto
 import no.nav.familie.ef.sak.vedtak.dto.InnvilgelseOvergangsstønad
@@ -25,7 +25,6 @@ import no.nav.familie.ef.sak.vilkår.VurderingService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.security.token.support.core.api.ProtectedWithClaims
-import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
@@ -63,7 +62,7 @@ class VedtakController(
     private val tilordnetRessursService: TilordnetRessursService,
     private val environment: org.springframework.core.env.Environment,
 ) {
-    private val logger = LoggerFactory.getLogger(javaClass)
+    private val logger = Logg.getLogger(this::class)
 
     @PostMapping("/{behandlingId}/send-til-beslutter")
     fun sendTilBeslutter(
@@ -250,9 +249,9 @@ class VedtakController(
         for (personIdent in personIdentToBehandlingIds.keys) {
             val behandlingId = personIdentToBehandlingIds[personIdent]
             val forventetInntektForBehandling = behandlingIdToForventetInntektMap[behandlingId]
-            secureLogger.info("PersonIdent: $personIdent ForventetInntektForBehandling: $forventetInntektForBehandling")
+            logger.info("PersonIdent: $personIdent ForventetInntektForBehandling: $forventetInntektForBehandling")
             if (forventetInntektForBehandling == null) {
-                secureLogger.warn("Fant ikke behandling $behandlingId knyttet til ident $personIdent - får ikke vurdert inntekt")
+                logger.warn("Fant ikke behandling $behandlingId knyttet til ident $personIdent - får ikke vurdert inntekt")
             } else {
                 personIdentMedForventetInntektList.add(PersonIdentMedForventetInntekt(personIdent, forventetInntektForBehandling))
             }

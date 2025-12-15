@@ -2,12 +2,12 @@ package no.nav.familie.ef.sak.avstemming
 
 import no.nav.familie.ef.sak.behandlingsflyt.task.KonsistensavstemmingPayload
 import no.nav.familie.ef.sak.behandlingsflyt.task.KonsistensavstemmingTask
+import no.nav.familie.ef.sak.infrastruktur.logg.Logg
 import no.nav.familie.ef.sak.repository.InsertUpdateRepository
 import no.nav.familie.ef.sak.repository.RepositoryInterface
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.prosessering.internal.TaskService
 import no.nav.familie.prosessering.util.isOptimisticLocking
-import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Profile
 import org.springframework.data.annotation.Id
 import org.springframework.data.annotation.Version
@@ -23,7 +23,7 @@ import kotlin.random.Random
 class KonsistensavstemmingScheduler(
     private val konsistensavstemmingService: KonsistensavstemmingService,
 ) {
-    private val logger = LoggerFactory.getLogger(javaClass)
+    private val logger = Logg.getLogger(this::class)
 
     @Scheduled(cron = "0 0 0/12 * * *")
     fun opprettTasks() {
@@ -45,7 +45,7 @@ class KonsistensavstemmingService(
     private val repository: KonsistensavstemmingJobbRepository,
     private val taskService: TaskService,
 ) {
-    private val logger = LoggerFactory.getLogger(javaClass)
+    private val logger = Logg.getLogger(KonsistensavstemmingService::class)
 
     @Transactional
     fun opprettTasks() {

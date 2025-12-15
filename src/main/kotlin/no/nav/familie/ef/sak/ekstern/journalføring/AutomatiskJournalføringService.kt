@@ -10,6 +10,7 @@ import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.infotrygd.InfotrygdService
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvisIkke
+import no.nav.familie.ef.sak.infrastruktur.logg.Logg
 import no.nav.familie.ef.sak.journalføring.JournalføringHelper.utledNesteBehandlingstype
 import no.nav.familie.ef.sak.journalføring.JournalføringService
 import no.nav.familie.ef.sak.journalføring.JournalpostService
@@ -22,7 +23,6 @@ import no.nav.familie.kontrakter.felles.journalpost.Bruker
 import no.nav.familie.kontrakter.felles.journalpost.Journalpost
 import no.nav.familie.kontrakter.felles.journalpost.Journalstatus
 import no.nav.familie.kontrakter.felles.oppgave.OppgavePrioritet
-import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -36,7 +36,7 @@ class AutomatiskJournalføringService(
     private val infotrygdService: InfotrygdService,
     private val behandlingService: BehandlingService,
 ) {
-    private val secureLogger = LoggerFactory.getLogger("secureLogger")
+    private val logger = Logg.getLogger(this::class)
 
     @Transactional
     fun automatiskJournalførTilBehandling(
@@ -88,10 +88,10 @@ class AutomatiskJournalføringService(
         fagsak: Fagsak?,
     ): Boolean =
         if (!harÅpenBehandling(behandlinger)) {
-            secureLogger.info("Kan automatisk journalføre for fagsak: ${fagsak?.id}")
+            logger.info("Kan automatisk journalføre for fagsak: ${fagsak?.id}")
             true
         } else {
-            secureLogger.info("Kan ikke automatisk journalføre for fagsak: ${fagsak?.id}")
+            logger.info("Kan ikke automatisk journalføre for fagsak: ${fagsak?.id}")
             false
         }
 
