@@ -59,7 +59,7 @@ class SimuleringService(
         feilHvis(saksbehandling.status.behandlingErLåstForVidereRedigering()) {
             "Kan ikke slette simulering for behandling=$behandlingId då den er låst"
         }
-        logger.info("Sletter simulering for behandling=$behandlingId")
+        logger.vanligInfo("Sletter simulering for behandling=$behandlingId")
         simuleringsresultatRepository.deleteById(behandlingId)
         tilbakekrevingOppryddingService.slettTilbakekrevingsvalg(behandlingId)
     }

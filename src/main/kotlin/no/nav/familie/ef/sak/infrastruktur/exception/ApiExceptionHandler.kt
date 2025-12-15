@@ -27,12 +27,12 @@ class ApiExceptionHandler(
         val mostSpecificCause = throwable.getMostSpecificCause()
         if (mostSpecificCause is SocketTimeoutException || mostSpecificCause is TimeoutException) {
             logger.warn("Timeout feil: ${mostSpecificCause.message}, $metodeSomFeiler ${rootCause(throwable)}", throwable)
-            logger.warn("Timeout feil: $metodeSomFeiler ${rootCause(throwable)} ")
+            logger.vanligWarn("Timeout feil: $metodeSomFeiler ${rootCause(throwable)} ")
             return ResponseEntity.status(INTERNAL_SERVER_ERROR).body(lagTimeoutfeilRessurs())
         }
 
         logger.error("Uventet feil: $metodeSomFeiler ${rootCause(throwable)}", throwable)
-        logger.error("Uventet feil: $metodeSomFeiler ${rootCause(throwable)} ")
+        logger.vanligError("Uventet feil: $metodeSomFeiler ${rootCause(throwable)} ")
 
         return ResponseEntity
             .status(INTERNAL_SERVER_ERROR)
@@ -60,7 +60,7 @@ class ApiExceptionHandler(
     fun handleThrowable(feil: ApiFeil): ResponseEntity<Ressurs<Nothing>> {
         val metodeSomFeiler = finnMetodeSomFeiler(feil)
         logger.info("En håndtert feil har oppstått(${feil.httpStatus}): ${feil.feil}", feil)
-        logger.info(
+        logger.vanligInfo(
             "En håndtert feil har oppstått(${feil.httpStatus}) metode=$metodeSomFeiler exception=${
                 rootCause(
                     feil,
@@ -79,7 +79,7 @@ class ApiExceptionHandler(
     fun handleThrowable(feil: Feil): ResponseEntity<Ressurs<Nothing>> {
         val metodeSomFeiler = finnMetodeSomFeiler(feil)
         logger.error("En håndtert feil har oppstått(${feil.httpStatus}): ${feil.frontendFeilmelding}", feil)
-        logger.error(
+        logger.vanligError(
             "En håndtert feil har oppstått(${feil.httpStatus}) metode=$metodeSomFeiler exception=${
                 rootCause(
                     feil,
@@ -107,7 +107,7 @@ class ApiExceptionHandler(
     @ExceptionHandler(ManglerTilgang::class)
     fun handleThrowable(manglerTilgang: ManglerTilgang): ResponseEntity<Ressurs<Nothing>> {
         logger.warn("En håndtert tilgangsfeil har oppstått - ${manglerTilgang.melding}", manglerTilgang)
-        logger.warn("En håndtert tilgangsfeil har oppstått")
+        logger.vanligWarn("En håndtert tilgangsfeil har oppstått")
         return ResponseEntity
             .status(HttpStatus.FORBIDDEN)
             .body(
@@ -124,7 +124,7 @@ class ApiExceptionHandler(
     @ExceptionHandler(IntegrasjonException::class)
     fun handleThrowable(feil: IntegrasjonException): ResponseEntity<Ressurs<Nothing>> {
         logger.error("Feil mot integrasjonsclienten har oppstått: uri={} data={}", feil.uri, feil.data, feil)
-        logger.error("Feil mot integrasjonsclienten har oppstått exception=${rootCause(feil)}")
+        logger.vanligError("Feil mot integrasjonsclienten har oppstått exception=${rootCause(feil)}")
         return ResponseEntity
             .status(INTERNAL_SERVER_ERROR)
             .body(Ressurs.failure(frontendFeilmelding = feil.message))

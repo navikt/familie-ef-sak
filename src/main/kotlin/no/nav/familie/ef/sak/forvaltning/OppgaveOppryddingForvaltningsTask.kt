@@ -56,10 +56,10 @@ class OppgaveOppryddingForvaltningsTask(
             oppgaver.oppgaver.forEach { oppgave ->
                 val oppgaveId = oppgave.id
                 if (oppgaveId == null) {
-                    logger.error("Kan ikke ferdigstille oppgave - mangler ID")
+                    logger.vanligError("Kan ikke ferdigstille oppgave - mangler ID")
                     logger.info("Kan ikke ferdigstille oppgave pga manglende ID: $oppgave")
                 } else if (oppgave.oppgavetype != Oppgavetype.Fremlegg.value) {
-                    logger.error("Kan ikke ferdigstille oppgave - feil type")
+                    logger.vanligError("Kan ikke ferdigstille oppgave - feil type")
                     logger.info("Kan ikke ferdigstille oppgave pga feil oppgavetype: $oppgave")
                 } else {
                     logger.info("Ferdigstiller oppgave $oppgaveId")

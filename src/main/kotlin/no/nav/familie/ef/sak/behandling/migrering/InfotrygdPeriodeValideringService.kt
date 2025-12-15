@@ -255,7 +255,7 @@ class InfotrygdPeriodeValideringService(
         personIdent: String,
     ) {
         perioder.perioder.find { it.personIdent != personIdent }?.let {
-            logger.warn("Det finnes perioder med ulike fødselsnummer i infotrygd")
+            logger.vanligWarn("Det finnes perioder med ulike fødselsnummer i infotrygd")
             logger.warn("Det finnes perioder med ulike fødselsnummer i infotrygd - fnrInfotrygd=${it.personIdent} fnrGjeldende=$personIdent ")
         }
     }
@@ -265,7 +265,7 @@ class InfotrygdPeriodeValideringService(
         personIdent: String,
     ) {
         sakerForOvergangsstønad.find { it.personIdent != personIdent }?.let {
-            logger.warn("Det finnes perioder med ulike fødselsnummer i infotrygd")
+            logger.vanligWarn("Det finnes perioder med ulike fødselsnummer i infotrygd")
             logger.warn("Det finnes perioder med ulike fødselsnummer i infotrygd - fnrInfotrygd=${it.personIdent} fnrGjeldende=$personIdent ")
         }
     }

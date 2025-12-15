@@ -115,7 +115,7 @@ class BehandleAutomatiskInntektsendringTask(
 
         årsakRevurderingsRepository.insert(ÅrsakRevurdering(behandlingId = behandling.id, opplysningskilde = Opplysningskilde.AUTOMATISK_OPPRETTET_BEHANDLING, årsak = Revurderingsårsak.ENDRING_INNTEKT, beskrivelse = null))
         vedtakService.lagreVedtak(vedtakDto = innvilgelseOvergangsstønad, behandlingId = behandling.id, stønadstype = StønadType.OVERGANGSSTØNAD)
-        logger.info("Opprettet behandling for automatisk inntektsendring: ${behandling.id}")
+        logger.vanligInfo("Opprettet behandling for automatisk inntektsendring: ${behandling.id}")
     }
 
     private fun sammenslåVedtak(
@@ -174,10 +174,10 @@ class BehandleAutomatiskInntektsendringTask(
             val forventetInntekt = inntektResponse.forventetMånedsinntekt(forrigeVedtak)
             val perioder = oppdaterFørsteVedtaksperiodeMedRevurderesFraDato(forrigeVedtak, inntektResponse)
             val inntektsperioder = oppdaterInntektMedNyBeregnetForventetInntekt(forrigeVedtak, inntektResponse, perioder.first().periode.fom)
-            logger.info("Ville opprettet inntektsperioder for fagsak eksternId: ${fagsak.eksternId} - nye inntektsperioder: " + inntektsperioder)
-            logger.info("Ville opprettet følgende vedtaksperioder for fagsak eksternId: ${fagsak.eksternId} - nye vedtaksperioder: $perioder med ny forventet månedsinntekt: $forventetInntekt")
+            logger.vanligInfo("Ville opprettet inntektsperioder for fagsak eksternId: ${fagsak.eksternId} - nye inntektsperioder: " + inntektsperioder)
+            logger.vanligInfo("Ville opprettet følgende vedtaksperioder for fagsak eksternId: ${fagsak.eksternId} - nye vedtaksperioder: $perioder med ny forventet månedsinntekt: $forventetInntekt")
         } else {
-            logger.info("Fant ikke siste iverksatte behandling for fagsakId: ${fagsak.id}")
+            logger.vanligInfo("Fant ikke siste iverksatte behandling for fagsakId: ${fagsak.id}")
         }
     }
 

@@ -123,7 +123,7 @@ class EksternBehandlingService(
             val behandling = revurderingService.opprettRevurderingManuelt(revurdering)
             OpprettRevurderingResponse(Opprettet(behandling.eksternId.toString()))
         } catch (e: Exception) {
-            logger.error("Feilet opprettelse av revurdering for fagsak=${fagsak.id}, se secure logg for detaljer")
+            logger.vanligError("Feilet opprettelse av revurdering for fagsak=${fagsak.id}, se secure logg for detaljer")
             logger.error("Feilet opprettelse av revurdering for fagsak=${fagsak.id}", e)
             OpprettRevurderingResponse(IkkeOpprettet(IkkeOpprettetÅrsak.FEIL, e.message))
         }

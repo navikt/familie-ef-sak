@@ -49,7 +49,7 @@ class AutomatiskRevurderingService(
             }
 
         if (inntektForAlleÅr.harNæringsinntekt()) {
-            logger.info("Har næringsinntekt for fagsak ${fagsak.id}")
+            logger.vanligInfo("Har næringsinntekt for fagsak ${fagsak.id}")
             logger.info("Har næringsinntekt for fagsak ${fagsak.id} - InntektResponse: $inntektForAlleÅr")
             return false
         }

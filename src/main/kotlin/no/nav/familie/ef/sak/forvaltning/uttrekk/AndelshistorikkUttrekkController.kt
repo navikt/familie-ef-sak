@@ -59,7 +59,7 @@ class AndelshistorikkUttrekkController(
 
         val uttrekkResultat =
             "Uttrekk unntatt aktivitet: mangler tilsyn. Total: ${alleSomManglerTilsynForÅr.size}. Snitt mnd: $snittAntMnd, Snitt beløp pr mnd: $snittBeløp "
-        logger.info(uttrekkResultat)
+        logger.vanligInfo(uttrekkResultat)
         return ResponseEntity.ok(uttrekkResultat)
     }
 }

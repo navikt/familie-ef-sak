@@ -170,9 +170,9 @@ class OppgaveService(
                     }?.id
                     ?.toLong()
             mappeIdForGodkjenneVedtak?.let {
-                logger.info("Legger oppgave i Godkjenne vedtak-mappe")
+                logger.vanligInfo("Legger oppgave i Godkjenne vedtak-mappe")
             } ?: run {
-                logger.error("Fant ikke mappe for godkjenne vedtak: 70 Godkjenne vedtak for enhetsnummer=$enhetsnummer")
+                logger.vanligError("Fant ikke mappe for godkjenne vedtak: 70 Godkjenne vedtak for enhetsnummer=$enhetsnummer")
             }
             return mappeIdForGodkjenneVedtak
         }
@@ -269,7 +269,7 @@ class OppgaveService(
             ferdigstillOppgave(oppgave.gsakOppgaveId)
         } catch (e: RessursException) {
             if (ignorerFeilregistrert && e.ressurs.melding.contains("Oppgave har status feilregistrert")) {
-                logger.warn("Ignorerer ferdigstill av oppgave=${oppgave.gsakOppgaveId} som har status feilregistrert")
+                logger.vanligWarn("Ignorerer ferdigstill av oppgave=${oppgave.gsakOppgaveId} som har status feilregistrert")
             } else {
                 throw e
             }
@@ -384,14 +384,14 @@ class OppgaveService(
 
     fun finnMapper(enhet: String): List<MappeDto> =
         cacheManager.getValue("oppgave-mappe", enhet) {
-            logger.info("Henter mapper på nytt")
+            logger.vanligInfo("Henter mapper på nytt")
             val mappeRespons =
                 oppgaveClient.finnMapper(
                     enhetsnummer = enhet,
                     limit = 1000,
                 )
             if (mappeRespons.antallTreffTotalt > mappeRespons.mapper.size) {
-                logger.error(
+                logger.vanligError(
                     "Det finnes flere mapper (${mappeRespons.antallTreffTotalt}) " +
                         "enn vi har hentet ut (${mappeRespons.mapper.size}). Sjekk limit. ",
                 )
@@ -465,7 +465,7 @@ class OppgaveService(
                     ),
             )
 
-        logger.info("Hentet oppgaver:  ${behandleSakOppgaver.antallTreffTotalt}, ${behandleUnderkjent.antallTreffTotalt}, ${godkjenne.antallTreffTotalt}")
+        logger.vanligInfo("Hentet oppgaver:  ${behandleSakOppgaver.antallTreffTotalt}, ${behandleUnderkjent.antallTreffTotalt}, ${godkjenne.antallTreffTotalt}")
 
         feilHvis(behandleSakOppgaver.antallTreffTotalt >= limit) { "For mange behandleSakOppgaver - limit truffet: + $limit " }
         feilHvis(behandleUnderkjent.antallTreffTotalt >= limit) { "For mange behandleUnderkjent - limit truffet: + $limit " }

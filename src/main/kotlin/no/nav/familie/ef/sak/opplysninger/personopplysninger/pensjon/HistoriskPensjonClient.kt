@@ -40,7 +40,7 @@ class HistoriskPensjonClient(
             } catch (e: Exception) {
                 val skalLoggeSisteForsøk = teller == (antallForsøk - 1)
                 if (skalLoggeSisteForsøk) {
-                    logger.error("Kunne ikke kalle historisk pensjon for uthenting")
+                    logger.vanligError("Kunne ikke kalle historisk pensjon for uthenting")
                     logger.error("Kunne ikke kalle historisk pensjon for uthenting", e)
                 }
             }

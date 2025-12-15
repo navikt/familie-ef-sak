@@ -23,11 +23,11 @@ class LoggOppgaveMetadataTask(
     private val logger = Logg.getLogger(this::class)
 
     override fun doTask(task: Task) {
-        logger.info("Henter oppgave for behandling ${task.payload}")
+        logger.vanligInfo("Henter oppgave for behandling ${task.payload}")
         val oppgave = tilordnetRessursService.hentIkkeFerdigstiltOppgaveForBehandling(UUID.fromString(task.payload))
 
         when (oppgave) {
-            null -> logger.info("Fant ikke oppgave for behandling ${task.payload}")
+            null -> logger.vanligInfo("Fant ikke oppgave for behandling ${task.payload}")
             else -> logger.info("Oppgave hentet for behandling ${task.payload}: ${oppgave.toLogString()}")
         }
     }

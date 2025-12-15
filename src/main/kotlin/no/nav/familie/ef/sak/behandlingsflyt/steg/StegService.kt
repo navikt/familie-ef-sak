@@ -179,7 +179,7 @@ class StegService(
         val rolleForSteg: BehandlerRolle = utledRolleForSteg(stegType, saksbehandling)
         val harTilgangTilSteg = SikkerhetContext.harTilgangTilGittRolle(rolleConfig, rolleForSteg)
 
-        logger.info("Starter håndtering av $stegType på behandling ${saksbehandling.id}")
+        logger.vanligInfo("Starter håndtering av $stegType på behandling ${saksbehandling.id}")
         logger.info(
             "Starter håndtering av $stegType på behandling " +
                 "${saksbehandling.id} med saksbehandler=[$saksbehandlerIdent]",

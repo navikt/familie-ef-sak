@@ -146,7 +146,7 @@ class OppgaveController(
         val oppgave = tilordnetRessursService.hentIkkeFerdigstiltOppgaveForBehandling(behandlingId)
         val saksbehandlerIdentIOppgaveSystemet = oppgave?.tilordnetRessurs
         if (oppgave != null && saksbehandlerIdentIOppgaveSystemet != saksbehandlerIdent) {
-            logger.info(
+            logger.vanligInfo(
                 "(Eier av behandling/oppgave) " +
                     "Saksbehandler $saksbehandlerIdent er inne i behandling=$behandlingId " +
                     "mens oppgaven=${oppgave.id} er tilordnet $saksbehandlerIdentIOppgaveSystemet " +

@@ -92,7 +92,7 @@ class MigreringService(
                 val fagsakPerson = fagsakPersonService.hentPerson(fagsakPersonId)
                 hentGjeldendePeriodeOgValiderState(fagsakPerson, StønadType.OVERGANGSSTØNAD, kjøremåned)
             } catch (e: MigreringException) {
-                logger.info("Kan ikke migrere fagsakPerson=$fagsakPersonId årsak=${e.type}")
+                logger.vanligInfo("Kan ikke migrere fagsakPerson=$fagsakPersonId årsak=${e.type}")
                 logger.info("Kan ikke migrere fagsakPerson=$fagsakPersonId - ${e.årsak}")
                 return MigreringInfo(
                     kanMigreres = false,
@@ -135,7 +135,7 @@ class MigreringService(
                 ignorerFeilISimulering = request.ignorerFeilISimulering,
             )
         } catch (e: MigreringException) {
-            logger.warn("Kan ikke migrere fagsakPerson=$fagsakPersonId årsak=${e.type}")
+            logger.vanligWarn("Kan ikke migrere fagsakPerson=$fagsakPersonId årsak=${e.type}")
             logger.warn("Kan ikke migrere fagsakPerson=$fagsakPersonId - ${e.årsak}")
             throw ApiFeil(e.årsak, HttpStatus.BAD_REQUEST)
         }
@@ -159,7 +159,7 @@ class MigreringService(
                 ignorerFeilISimulering = request.ignorerFeilISimulering,
             )
         } catch (e: MigreringException) {
-            logger.warn("Kan ikke migrere fagsakPerson=$fagsakPersonId årsak=${e.type}")
+            logger.vanligWarn("Kan ikke migrere fagsakPerson=$fagsakPersonId årsak=${e.type}")
             logger.warn("Kan ikke migrere fagsakPerson=$fagsakPersonId - ${e.årsak}")
             throw ApiFeil(e.årsak, HttpStatus.BAD_REQUEST)
         }
@@ -403,7 +403,7 @@ class MigreringService(
                 "sistePeriodenTom=$overførtNyLøsningOpphørsdato " +
                 "sisteSummertePeriodeTom=${sisteSummertePerioden.stønadsperiode.tom} " +
                 "opphørsmåned=$opphørsmåned"
-        logger.warn(logMessage)
+        logger.vanligWarn(logMessage)
         val periodeInformasjon =
             perioder.perioder
                 .sortedWith(compareBy<InfotrygdPeriode>({ it.stønadId }, { it.vedtakId }, { it.stønadFom }).reversed())
