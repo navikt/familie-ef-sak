@@ -16,21 +16,13 @@ AND aty.belop IN (<gammel sats for 1 barn>, <gammel sats for 2 barn>, <gammel sa
 Gammel sats finnes i `satserForBarnetilsyn` i `BeregningBarnetilsynUtil.kt`.
 
 Det er verdt å merke seg at spørringen finner bare alle andeler med likt beløp som makssatser, og tar ikke hensyn til antall barn. 
-Dermed er det en sjanse for at det f.eks. gis match på en som treffer makssats for 1 barn, selv om det er en behandling med to barn.
-Spørringen egner seg derfor ikke til automatisering, og må forbedres dersom før den eventuelt brukes i en automatisert rutine.
-
-Det er laget en scheduler `BarnetilsynSatsendringScheduler` som oppretter task av type `barnetilsynSatsendring` hvis den ikke finnes fra før. 
-Scheduleren er ikke skrudd på nå, kommenter inn @Scheduled-annotasjonen i `BarnetilsynSatsendringScheduler`
-Når tasken kjører så kaller den på en service som logger fagsakIds som skal satsendres. Tasken kan rekjøres fra prosessering ved behov.
-(Potensiell forbedring: Legg til knapp i prosessering som kaller endepunkt i ef-sak som logger satsendringskandidatene.)
-
-## Ikke-vedtatte satser
-Det ble testet med egne ikke-vedtatte satser i preprod og lokalt.
+Derfor må det dobbeltsjekkes av både utviklere og funksjonelle at de faktisk skal satsendres.
 
 ## Gjennomføringsrutine
 - Ta ut rapport med de som må satsjusteres. Det er brukere som treffer maks-sats på barnetilsyn i perioden med ny sats.
 - Sjekk om vi har behandlinger som er i pipeline (ikke ennå besluttet) - dersom det er noen av disse som burde beregnes på nytt, må man følge opp disse sakene. Se SQL under.
-- Deploy versjon med nye og gjeldende satser slik at alle behandlinger som gjøres fra nå, blir riktig i perioder med nye satser.
+- Deploy versjon med nye satser til dev for testing sammen med funksjonelle.
+- Dersom testingen gikk bra kan nye satser deployes til prod slik at alle behandlinger som gjøres fra nå, blir riktig i perioder med nye satser.
 
 Det kan potensielt bli feil dersom det lagres andre beløp på vedtak enn det saksbehandler har sett ved beregning. Feil i brev?
 
