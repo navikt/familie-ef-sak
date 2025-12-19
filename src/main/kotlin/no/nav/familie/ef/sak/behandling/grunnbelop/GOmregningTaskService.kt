@@ -4,8 +4,7 @@ import no.nav.familie.ef.sak.beregning.Grunnbeløpsperioder.nyesteGrunnbeløpGyl
 import no.nav.familie.ef.sak.fagsak.FagsakRepository
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
+import no.nav.familie.ef.sak.infrastruktur.logg.Logg
 import org.springframework.context.annotation.Profile
 import org.springframework.dao.DuplicateKeyException
 import org.springframework.data.relational.core.conversion.DbActionExecutionException
@@ -19,7 +18,7 @@ class GOmregningTaskServiceScheduler(
     private val gOmregningTaskService: GOmregningTaskService,
     private val featureToggleService: FeatureToggleService,
 ) {
-    val logger: Logger = LoggerFactory.getLogger(javaClass)
+    val logger = Logg.getLogger(this::class)
 
     @Scheduled(cron = "\${G_OMREGNING_CRON_EXPRESSION}")
     fun opprettGOmregningTaskForBehandlingerMedUtdatertG() {
@@ -35,7 +34,7 @@ class GOmregningTaskService(
     private val gOmregningTask: GOmregningTask,
     private val featureToggleService: FeatureToggleService,
 ) {
-    val logger: Logger = LoggerFactory.getLogger(javaClass)
+    val logger = Logg.getLogger(javaClass.kotlin)
 
     fun opprettGOmregningTaskForBehandlingerMedUtdatertG(): Int {
         logger.info("Starter opprettelse av tasker for G-omregning.")

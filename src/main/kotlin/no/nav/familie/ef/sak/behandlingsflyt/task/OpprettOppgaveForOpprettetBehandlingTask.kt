@@ -3,6 +3,7 @@ package no.nav.familie.ef.sak.behandlingsflyt.task
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
+import no.nav.familie.ef.sak.infrastruktur.logg.Logg
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.kontrakter.felles.objectMapper
@@ -12,7 +13,6 @@ import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.internal.TaskService
-import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
 import java.util.Properties
@@ -29,7 +29,7 @@ class OpprettOppgaveForOpprettetBehandlingTask(
     private val oppgaveService: OppgaveService,
     private val taskService: TaskService,
 ) : AsyncTaskStep {
-    private val logger = LoggerFactory.getLogger(javaClass)
+    private val logger = Logg.getLogger(this::class)
 
     data class OpprettOppgaveTaskData(
         val behandlingId: UUID,

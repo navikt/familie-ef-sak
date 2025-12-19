@@ -1,10 +1,10 @@
 package no.nav.familie.ef.sak.forvaltning
 
 import io.swagger.v3.oas.annotations.Operation
+import no.nav.familie.ef.sak.infrastruktur.logg.Logg
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.http.client.AbstractRestClient
 import no.nav.security.token.support.core.api.ProtectedWithClaims
-import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.web.bind.annotation.PathVariable
@@ -24,7 +24,7 @@ class IverksettProxyTaskForvaltningController(
     @Qualifier("azure")
     private val restOperations: RestOperations,
 ) : AbstractRestClient(restOperations, "familie.ef.iverksett.forvaltning") {
-    private val logger = LoggerFactory.getLogger(javaClass)
+    private val logger = Logg.getLogger(this::class)
 
     @PostMapping("kopier/taskid/{taskId}")
     @Operation(

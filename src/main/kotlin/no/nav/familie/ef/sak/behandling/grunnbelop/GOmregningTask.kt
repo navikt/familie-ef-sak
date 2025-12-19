@@ -3,6 +3,7 @@ package no.nav.familie.ef.sak.behandling.grunnbelop
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.familie.ef.sak.beregning.Grunnbeløpsperioder
 import no.nav.familie.ef.sak.beregning.OmregningService
+import no.nav.familie.ef.sak.infrastruktur.logg.Logg
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.log.IdUtils
 import no.nav.familie.log.mdc.MDCConstants
@@ -11,8 +12,6 @@ import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.PropertiesWrapper
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.internal.TaskService
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
@@ -32,7 +31,7 @@ class GOmregningTask(
     private val omregningService: OmregningService,
     private val taskService: TaskService,
 ) : AsyncTaskStep {
-    val logger: Logger = LoggerFactory.getLogger(this::class.java)
+    val logger = Logg.getLogger(this::class)
 
     override fun doTask(task: Task) {
         val fagsakId = objectMapper.readValue<GOmregningPayload>(task.payload).fagsakId

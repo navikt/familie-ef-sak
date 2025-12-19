@@ -6,6 +6,7 @@ import no.nav.familie.ef.sak.behandling.dto.tilDto
 import no.nav.familie.ef.sak.behandling.revurdering.ÅrsakRevurderingService
 import no.nav.familie.ef.sak.brev.BrevClient
 import no.nav.familie.ef.sak.felles.domain.Fil
+import no.nav.familie.ef.sak.infrastruktur.logg.Logg
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerService
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadDatoerDto
@@ -16,7 +17,6 @@ import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.ef.sak.vedtak.dto.VedtakDto
 import no.nav.familie.ef.sak.vilkår.VurderingService
 import no.nav.familie.ef.sak.vilkår.dto.tilDto
-import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.util.UUID
 
@@ -33,7 +33,7 @@ class BlankettService(
     private val grunnlagsdataService: GrunnlagsdataService,
     private val samværsavtaleService: SamværsavtaleService,
 ) {
-    private val logger = LoggerFactory.getLogger(javaClass)
+    private val logger = Logg.getLogger(this::class)
 
     fun lagBlankett(behandlingId: UUID): ByteArray {
         logger.info("Start - lag saksbehandlingsblankett for behandlingId=$behandlingId")

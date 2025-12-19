@@ -5,11 +5,11 @@ import no.nav.familie.ef.sak.behandlingsflyt.steg.BehandlerRolle
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
+import no.nav.familie.ef.sak.infrastruktur.logg.Logg
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.oppgave.TilordnetRessursService
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.secureLogger
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.ef.sak.tilbakekreving.TilbakekrevingOppryddingService
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
@@ -18,7 +18,6 @@ import no.nav.familie.http.client.RessursException
 import no.nav.familie.kontrakter.ef.iverksett.SimuleringDto
 import no.nav.familie.kontrakter.felles.simulering.BeriketSimuleringsresultat
 import no.nav.familie.kontrakter.felles.simulering.Simuleringsoppsummering
-import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -34,7 +33,7 @@ class SimuleringService(
     private val tilordnetRessursService: TilordnetRessursService,
     private val tilbakekrevingOppryddingService: TilbakekrevingOppryddingService,
 ) {
-    private val logger = LoggerFactory.getLogger(javaClass)
+    private val logger = Logg.getLogger(this::class)
 
     @Transactional
     fun simuler(saksbehandling: Saksbehandling): Simuleringsoppsummering {
@@ -60,7 +59,7 @@ class SimuleringService(
         feilHvis(saksbehandling.status.behandlingErLåstForVidereRedigering()) {
             "Kan ikke slette simulering for behandling=$behandlingId då den er låst"
         }
-        logger.info("Sletter simulering for behandling=$behandlingId")
+        logger.vanligInfo("Sletter simulering for behandling=$behandlingId")
         simuleringsresultatRepository.deleteById(behandlingId)
         tilbakekrevingOppryddingService.slettTilbakekrevingsvalg(behandlingId)
     }
@@ -89,7 +88,7 @@ class SimuleringService(
         val nySimuleringoppsummering = simulerMedTilkjentYtelse(saksbehandling).oppsummering
         val harUlikFeilutbetaling = lagretSimuleringsoppsummering.feilutbetaling != nySimuleringoppsummering.feilutbetaling
         if (harUlikFeilutbetaling) {
-            secureLogger.warn(
+            logger.warn(
                 "Behandling med ulikt simuleringsresultat i beslutter-steget. BehandlingId: ${saksbehandling.id} \n" +
                     "lagretSimuleringsoppsummering: $lagretSimuleringsoppsummering \n" +
                     "nySimuleringoppsummering: $nySimuleringoppsummering",

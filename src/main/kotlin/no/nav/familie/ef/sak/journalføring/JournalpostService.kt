@@ -2,10 +2,10 @@ package no.nav.familie.ef.sak.journalføring
 
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
+import no.nav.familie.ef.sak.infrastruktur.logg.Logg
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.journalføring.dto.DokumentVariantformat
 import no.nav.familie.ef.sak.journalføring.dto.OppdaterJournalpostMedDokumenterRequest
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.logger
 import no.nav.familie.ef.sak.vedlegg.VedleggRequest
 import no.nav.familie.kontrakter.ef.sak.DokumentBrevkode
 import no.nav.familie.kontrakter.ef.søknad.SøknadBarnetilsyn
@@ -23,14 +23,13 @@ import no.nav.familie.kontrakter.felles.journalpost.JournalposterForBrukerReques
 import no.nav.familie.kontrakter.felles.journalpost.Journalposttype
 import no.nav.familie.kontrakter.felles.journalpost.Journalstatus
 import no.nav.familie.kontrakter.felles.journalpost.LogiskVedlegg
-import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
 @Service
 class JournalpostService(
     private val journalpostClient: JournalpostClient,
 ) {
-    private val secureLogger = LoggerFactory.getLogger("secureLogger")
+    private val logger = Logg.getLogger(this::class)
 
     fun hentJournalpost(journalpostId: String): Journalpost = journalpostClient.hentJournalpost(journalpostId)
 
@@ -237,7 +236,7 @@ class JournalpostService(
         try {
             journalpostClient.oppdaterJournalpost(request, journalpostId, saksbehandler)
         } catch (e: Exception) {
-            secureLogger.error("Kunne ikke oppdatere journalpost med id=$journalpostId")
+            logger.error("Kunne ikke oppdatere journalpost med id=$journalpostId")
             throw e
         }
     }

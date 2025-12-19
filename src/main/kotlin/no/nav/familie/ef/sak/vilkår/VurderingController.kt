@@ -1,6 +1,7 @@
 package no.nav.familie.ef.sak.vilkår
 
 import no.nav.familie.ef.sak.AuditLoggerEvent
+import no.nav.familie.ef.sak.infrastruktur.logg.Logg
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.ef.sak.vilkår.dto.EnkeltVilkårForGjenbrukRequest
 import no.nav.familie.ef.sak.vilkår.dto.GjenbruktVilkårResponseDto
@@ -14,7 +15,6 @@ import no.nav.familie.ef.sak.vilkår.regler.Vilkårsregler
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.security.token.support.core.api.ProtectedWithClaims
-import org.slf4j.LoggerFactory
 import org.springframework.http.MediaType
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.GetMapping
@@ -35,7 +35,7 @@ class VurderingController(
     private val tilgangService: TilgangService,
     private val gjenbrukVilkårService: GjenbrukVilkårService,
 ) {
-    private val secureLogger = LoggerFactory.getLogger("secureLogger")
+    private val logger = Logg.getLogger(this::class)
 
     @GetMapping("regler")
     fun hentRegler(): Ressurs<Vilkårsregler> = Ressurs.success(Vilkårsregler.ALLE_VILKÅRSREGLER)
@@ -50,7 +50,7 @@ class VurderingController(
             return Ressurs.success(vurderingStegService.oppdaterVilkår(vilkårsvurdering))
         } catch (e: Exception) {
             val delvilkårJson = objectMapper.writeValueAsString(vilkårsvurdering.delvilkårsvurderinger)
-            secureLogger.warn(
+            logger.warn(
                 "id=${vilkårsvurdering.id}" +
                     " behandlingId=${vilkårsvurdering.behandlingId}" +
                     " svar=$delvilkårJson",

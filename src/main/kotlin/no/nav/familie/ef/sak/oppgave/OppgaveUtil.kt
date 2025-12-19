@@ -1,14 +1,14 @@
 package no.nav.familie.ef.sak.oppgave
 
 import no.nav.familie.ef.sak.felles.util.dagensDatoMedTidNorskFormat
+import no.nav.familie.ef.sak.infrastruktur.logg.Logg
 import no.nav.familie.kontrakter.felles.oppgave.IdentGruppe
 import no.nav.familie.kontrakter.felles.oppgave.Oppgave
-import org.slf4j.LoggerFactory
 import java.time.OffsetDateTime
 import java.time.temporal.ChronoUnit
 
 object OppgaveUtil {
-    private val logger = LoggerFactory.getLogger(javaClass)
+    private val logger = Logg.getLogger(this::class)
 
     val ENHET_NR_NAY = "4489"
     val ENHET_NR_EGEN_ANSATT = "4483"

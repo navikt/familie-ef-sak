@@ -1,12 +1,12 @@
 package no.nav.familie.ef.sak.avstemming
 
+import no.nav.familie.ef.sak.infrastruktur.logg.Logg
 import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.kontrakter.ef.iverksett.AndelTilkjentYtelseDto
 import no.nav.familie.kontrakter.ef.iverksett.KonsistensavstemmingDto
 import no.nav.familie.kontrakter.ef.iverksett.KonsistensavstemmingTilkjentYtelseDto
 import no.nav.familie.kontrakter.felles.ef.StønadType
-import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
 import java.util.UUID
@@ -16,7 +16,7 @@ class AvstemmingService(
     private val iverksettClient: IverksettClient,
     private val tilkjentYtelseService: TilkjentYtelseService,
 ) {
-    private val logger = LoggerFactory.getLogger(javaClass)
+    private val logger = Logg.getLogger(this::class)
 
     fun konsistensavstemOppdrag(
         stønadstype: StønadType,

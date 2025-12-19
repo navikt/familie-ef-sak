@@ -6,6 +6,7 @@ import no.nav.familie.ef.sak.behandling.revurdering.RevurderingService
 import no.nav.familie.ef.sak.fagsak.FagsakPersonService
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
+import no.nav.familie.ef.sak.infrastruktur.logg.Logg
 import no.nav.familie.ef.sak.journalføring.dto.VilkårsbehandleNyeBarn
 import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
@@ -18,7 +19,6 @@ import no.nav.familie.kontrakter.felles.klage.KanIkkeOppretteRevurderingÅrsak
 import no.nav.familie.kontrakter.felles.klage.KanOppretteRevurderingResponse
 import no.nav.familie.kontrakter.felles.klage.OpprettRevurderingResponse
 import no.nav.familie.kontrakter.felles.klage.Opprettet
-import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
@@ -34,8 +34,7 @@ class EksternBehandlingService(
     private val revurderingService: RevurderingService,
     private val oppgaveService: OppgaveService,
 ) {
-    private val logger = LoggerFactory.getLogger(javaClass)
-    private val secureLogger = LoggerFactory.getLogger("secureLogger")
+    private val logger = Logg.getLogger(this::class)
 
     fun harLøpendeStønad(personidenter: Set<String>): Boolean {
         val behandlingIDer = hentAlleBehandlingIDer(personidenter)
@@ -124,8 +123,8 @@ class EksternBehandlingService(
             val behandling = revurderingService.opprettRevurderingManuelt(revurdering)
             OpprettRevurderingResponse(Opprettet(behandling.eksternId.toString()))
         } catch (e: Exception) {
-            logger.error("Feilet opprettelse av revurdering for fagsak=${fagsak.id}, se secure logg for detaljer")
-            secureLogger.error("Feilet opprettelse av revurdering for fagsak=${fagsak.id}", e)
+            logger.vanligError("Feilet opprettelse av revurdering for fagsak=${fagsak.id}, se secure logg for detaljer")
+            logger.error("Feilet opprettelse av revurdering for fagsak=${fagsak.id}", e)
             OpprettRevurderingResponse(IkkeOpprettet(IkkeOpprettetÅrsak.FEIL, e.message))
         }
 

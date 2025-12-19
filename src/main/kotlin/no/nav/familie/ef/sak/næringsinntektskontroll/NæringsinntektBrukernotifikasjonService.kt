@@ -1,14 +1,12 @@
 package no.nav.familie.ef.sak.næringsinntektskontroll
 
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.secureLogger
+import no.nav.familie.ef.sak.infrastruktur.logg.Logg
 import no.nav.tms.varsel.action.Produsent
 import no.nav.tms.varsel.action.Sensitivitet
 import no.nav.tms.varsel.action.Tekst
 import no.nav.tms.varsel.action.Varseltype
 import no.nav.tms.varsel.builder.VarselActionBuilder
 import org.apache.kafka.clients.producer.ProducerRecord
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.stereotype.Service
@@ -26,7 +24,7 @@ class NæringsinntektBrukernotifikasjonService(
     @Value("\${NAIS_CLUSTER_NAME}")
     val cluster: String,
 ) {
-    private val logger: Logger = LoggerFactory.getLogger(this::class.java)
+    private val logger = Logg.getLogger(this::class)
 
     fun sendBeskjedTilBruker(
         personIdent: String,
@@ -49,14 +47,14 @@ class NæringsinntektBrukernotifikasjonService(
                 produsent = Produsent(cluster, namespace, applicationName)
             }
 
-        secureLogger.info("Sender til Kafka topic: {}: {}", topic, opprettVarsel)
+        logger.info("Sender til Kafka topic: {}: {}", topic, opprettVarsel)
         runCatching {
             val producerRecord = ProducerRecord(topic, generertVarselId, opprettVarsel)
             kafkaTemplate.send(producerRecord).get()
         }.onFailure {
             val errorMessage = "Kunne ikke sende brukernotifikasjon til topic: $topic. Se secure logs for mer informasjon."
             logger.error(errorMessage)
-            secureLogger.error("Kunne ikke sende brukernotifikasjon til topic: {}", topic, it)
+            logger.error("Kunne ikke sende brukernotifikasjon til topic: {}", topic, it)
             throw RuntimeException(errorMessage)
         }
     }

@@ -3,6 +3,7 @@ package no.nav.familie.ef.sak.opplysninger.personopplysninger
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.infrastruktur.config.getValue
+import no.nav.familie.ef.sak.infrastruktur.logg.Logg
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.GrunnlagsdataMedMetadata
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.PersonopplysningerDto
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.egenansatt.EgenAnsattClient
@@ -13,7 +14,6 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.gjeldende
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.visningsnavn
 import no.nav.familie.kontrakter.felles.navkontor.NavKontorEnhet
 import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING
-import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.cache.CacheManager
 import org.springframework.cache.annotation.Cacheable
@@ -32,7 +32,7 @@ class PersonopplysningerService(
     @Qualifier("shortCache")
     private val cacheManager: CacheManager,
 ) {
-    private val logger = LoggerFactory.getLogger(this::class.java)
+    private val logger = Logg.getLogger(this::class)
 
     fun hentPersonopplysningerForBehandling(behandlingId: UUID): PersonopplysningerDto {
         val personIdent = behandlingService.hentAktivIdent(behandlingId)

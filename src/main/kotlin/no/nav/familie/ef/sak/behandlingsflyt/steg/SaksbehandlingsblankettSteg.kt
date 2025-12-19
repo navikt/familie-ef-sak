@@ -7,6 +7,7 @@ import no.nav.familie.ef.sak.behandlingsflyt.task.FerdigstillBehandlingTask
 import no.nav.familie.ef.sak.blankett.BlankettHelper.lagArkiverBlankettRequestMotNyLøsning
 import no.nav.familie.ef.sak.blankett.BlankettService
 import no.nav.familie.ef.sak.fagsak.FagsakService
+import no.nav.familie.ef.sak.infrastruktur.logg.Logg
 import no.nav.familie.ef.sak.journalføring.JournalpostClient
 import no.nav.familie.ef.sak.vedtak.TotrinnskontrollService
 import no.nav.familie.http.client.RessursException
@@ -17,7 +18,6 @@ import no.nav.familie.kontrakter.felles.journalpost.Bruker
 import no.nav.familie.kontrakter.felles.journalpost.JournalposterForBrukerRequest
 import no.nav.familie.kontrakter.felles.journalpost.Journalposttype
 import no.nav.familie.prosessering.internal.TaskService
-import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.web.client.HttpClientErrorException
 
@@ -31,7 +31,7 @@ class SaksbehandlingsblankettSteg(
     private val behandlingService: BehandlingService,
     private val fagsakService: FagsakService,
 ) : BehandlingSteg<Void?> {
-    private val logger = LoggerFactory.getLogger(javaClass)
+    private val logger = Logg.getLogger(this::class)
 
     override fun utførSteg(
         saksbehandling: Saksbehandling,

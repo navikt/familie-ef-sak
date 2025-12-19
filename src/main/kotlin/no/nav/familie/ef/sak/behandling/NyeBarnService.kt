@@ -6,6 +6,7 @@ import no.nav.familie.ef.sak.behandling.migrering.OpprettOppgaveForMigrertFødtB
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
+import no.nav.familie.ef.sak.infrastruktur.logg.Logg
 import no.nav.familie.ef.sak.opplysninger.mapper.BarnMatcher
 import no.nav.familie.ef.sak.opplysninger.mapper.MatchetBehandlingBarn
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
@@ -20,8 +21,6 @@ import no.nav.familie.kontrakter.ef.personhendelse.NyttBarnÅrsak
 import no.nav.familie.kontrakter.felles.PersonIdent
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.prosessering.internal.TaskService
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import org.springframework.dao.DuplicateKeyException
 import org.springframework.data.relational.core.conversion.DbActionExecutionException
 import org.springframework.stereotype.Service
@@ -36,7 +35,7 @@ class NyeBarnService(
     private val barnService: BarnService,
     private val taskService: TaskService,
 ) {
-    private val logger: Logger = LoggerFactory.getLogger(javaClass)
+    private val logger = Logg.getLogger(this::class)
 
     fun finnNyeEllerUtenforTerminFødteBarn(personIdent: PersonIdent): NyeBarnDto {
         val personIdenter = personService.hentPersonIdenter(personIdent.ident).identer()

@@ -10,6 +10,7 @@ import no.nav.familie.ef.sak.behandlingsflyt.steg.BeregnYtelseSteg
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.behandlingsflyt.task.PollStatusFraIverksettTask
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
+import no.nav.familie.ef.sak.infrastruktur.logg.Logg
 import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.iverksett.IverksettingDtoMapper
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
@@ -23,7 +24,6 @@ import no.nav.familie.ef.sak.vilkår.VurderingService
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.prosessering.internal.TaskService
-import org.slf4j.LoggerFactory
 import org.slf4j.MarkerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Propagation
@@ -46,7 +46,7 @@ class OmregningService(
     private val søknadService: SøknadService,
     private val barnService: BarnService,
 ) {
-    private val logger = LoggerFactory.getLogger(javaClass)
+    private val logger = Logg.getLogger(this::class)
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     fun utførGOmregning(fagsakId: UUID) {
@@ -63,18 +63,12 @@ class OmregningService(
                 YearMonth.from(Grunnbeløpsperioder.nyesteGrunnbeløpGyldigFraOgMed),
             )
         if (innvilgelseOvergangsstønad.perioder.any { it.periodeType == VedtaksperiodeType.SANKSJON }) {
-            logger.warn(
-                MarkerFactory.getMarker("G-Omregning - Manuell"),
-                "Fagsak med id $fagsakId har sanksjon og må manuelt behandles",
-            )
+            logger.warn("G-Omregning - Manuell: Fagsak med id $fagsakId har sanksjon og må manuelt behandles")
             return null
         }
 
         if (innvilgelseOvergangsstønad.inntekter.any { (it.samordningsfradrag ?: BigDecimal.ZERO) > BigDecimal.ZERO }) {
-            logger.warn(
-                MarkerFactory.getMarker("G-Omregning - Manuell"),
-                "Fagsak med id $fagsakId har samordningsfradrag og må behandles manuelt.",
-            )
+            logger.warn("G-Omregning - Manuell: Fagsak med id $fagsakId har samordningsfradrag og må behandles manuelt.")
             return null
         }
         return innvilgelseOvergangsstønad

@@ -1,6 +1,7 @@
 package no.nav.familie.ef.sak.forvaltning
 
 import no.nav.familie.ef.sak.fagsak.FagsakService
+import no.nav.familie.ef.sak.infrastruktur.logg.Logg
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerService
@@ -11,7 +12,6 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlSøker
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.identer
 import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING
 import no.nav.security.token.support.core.api.ProtectedWithClaims
-import org.slf4j.LoggerFactory
 import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
@@ -27,7 +27,7 @@ class PdlSjekkController(
     private val tilgangService: TilgangService,
     private val personopplysningerService: PersonopplysningerService,
 ) {
-    private val secureLogger = LoggerFactory.getLogger("secureLogger")
+    private val logger = Logg.getLogger(this::class)
 
     @PostMapping
     fun sjekkIdenter(
@@ -42,12 +42,12 @@ class PdlSjekkController(
                     if (fagsaker.isNotEmpty()) {
                         fagsaker.forEach {
                             val behandlinger = fagsakService.fagsakTilDto(it).behandlinger
-                            secureLogger.info("Fagsak=${it.id} har ${behandlinger.size} behandlinger")
+                            logger.info("Fagsak=${it.id} har ${behandlinger.size} behandlinger")
                         }
                     }
                     fagsaker.isNotEmpty()
                 }.count { it }
-        secureLogger.info("$count personer funnet")
+        logger.info("$count personer funnet")
         return count
     }
 
@@ -70,12 +70,12 @@ class PdlSjekkController(
                 personIdent = ident,
             )
 
-        secureLogger.info("Søker har ${barn.size} barn og ${andreForeldre.size} andre foreldre")
+        logger.info("Søker har ${barn.size} barn og ${andreForeldre.size} andre foreldre")
 
         andreForeldre.forEach { (id, forelder) ->
-            secureLogger.info("Annen forelder: $id - ${forelder.navn}  ")
+            logger.info("Annen forelder: $id - ${forelder.navn}  ")
             forelder.folkeregisteridentifikator.forEach { pid ->
-                secureLogger.info("Annen forelder-ident status: ${pid.status}, historisk = ${pid.metadata.historisk}")
+                logger.info("Annen forelder-ident status: ${pid.status}, historisk = ${pid.metadata.historisk}")
             }
         }
 

@@ -26,6 +26,7 @@ import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
+import no.nav.familie.ef.sak.infrastruktur.logg.Logg
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.minside.AktiverMikrofrontendTask
 import no.nav.familie.ef.sak.oppgave.TilordnetRessursService
@@ -36,7 +37,6 @@ import no.nav.familie.kontrakter.ef.iverksett.BehandlingKategori
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.kontrakter.felles.journalpost.Journalposttype
 import no.nav.familie.prosessering.internal.TaskService
-import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -53,7 +53,7 @@ class BehandlingService(
     private val featureToggleService: FeatureToggleService,
     private val tilordnetRessursService: TilordnetRessursService,
 ) {
-    private val secureLogger = LoggerFactory.getLogger("secureLogger")
+    private val logger = Logg.getLogger(this::class)
 
     fun hentAktivIdent(behandlingId: UUID): String = behandlingRepository.finnAktivIdent(behandlingId)
 
@@ -171,7 +171,7 @@ class BehandlingService(
         status: BehandlingStatus,
     ): Behandling {
         val behandling = hentBehandling(behandlingId)
-        secureLogger.info(
+        logger.info(
             "${SikkerhetContext.hentSaksbehandlerEllerSystembruker()} endrer status på behandling $behandlingId " +
                 "fra ${behandling.status} til $status",
         )
@@ -183,7 +183,7 @@ class BehandlingService(
         kategori: BehandlingKategori,
     ): Behandling {
         val behandling = hentBehandling(behandlingId)
-        secureLogger.info(
+        logger.info(
             "${SikkerhetContext.hentSaksbehandlerEllerSystembruker()} endrer kategori på behandling $behandlingId " +
                 "fra ${behandling.kategori} til $kategori",
         )
@@ -198,7 +198,7 @@ class BehandlingService(
         feilHvis(behandling.status.behandlingErLåstForVidereRedigering()) {
             "Kan ikke endre forrigeBehandlingId når behandlingen er låst"
         }
-        secureLogger.info(
+        logger.info(
             "${SikkerhetContext.hentSaksbehandlerEllerSystembruker()} endrer forrigeBehandlingId på behandling $behandlingId " +
                 "fra ${behandling.forrigeBehandlingId} til $forrigeBehandlingId",
         )
@@ -210,7 +210,7 @@ class BehandlingService(
         steg: StegType,
     ): Behandling {
         val behandling = hentBehandling(behandlingId)
-        secureLogger.info(
+        logger.info(
             "${SikkerhetContext.hentSaksbehandlerEllerSystembruker()} endrer steg på behandling $behandlingId " +
                 "fra ${behandling.steg} til $steg",
         )

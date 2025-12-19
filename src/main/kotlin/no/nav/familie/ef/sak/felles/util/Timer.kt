@@ -1,9 +1,10 @@
 package no.nav.familie.ef.sak.felles.util
 
+import no.nav.familie.ef.sak.infrastruktur.logg.Logg
 import org.slf4j.LoggerFactory
 
 object Timer {
-    private val logger = LoggerFactory.getLogger(javaClass)
+    private val logger = Logg.getLogger(this::class)
 
     fun <T> loggTid(
         metadata: String = "",

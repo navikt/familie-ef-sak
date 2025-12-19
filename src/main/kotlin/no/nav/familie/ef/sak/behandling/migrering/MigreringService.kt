@@ -28,6 +28,7 @@ import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvisIkke
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
+import no.nav.familie.ef.sak.infrastruktur.logg.Logg
 import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.iverksett.IverksettingDtoMapper
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
@@ -54,7 +55,6 @@ import no.nav.familie.kontrakter.felles.simulering.BeriketSimuleringsresultat
 import no.nav.familie.kontrakter.felles.simulering.BetalingType
 import no.nav.familie.kontrakter.felles.simulering.PosteringType
 import no.nav.familie.prosessering.internal.TaskService
-import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Propagation
@@ -81,8 +81,7 @@ class MigreringService(
     private val infotrygdPeriodeValideringService: InfotrygdPeriodeValideringService,
     private val barnRepository: BarnRepository,
 ) {
-    private val logger = LoggerFactory.getLogger(javaClass)
-    private val secureLogger = LoggerFactory.getLogger("secureLogger")
+    private val logger = Logg.getLogger(this::class)
 
     fun hentMigreringInfo(
         fagsakPersonId: UUID,
@@ -93,8 +92,8 @@ class MigreringService(
                 val fagsakPerson = fagsakPersonService.hentPerson(fagsakPersonId)
                 hentGjeldendePeriodeOgValiderState(fagsakPerson, StønadType.OVERGANGSSTØNAD, kjøremåned)
             } catch (e: MigreringException) {
-                logger.info("Kan ikke migrere fagsakPerson=$fagsakPersonId årsak=${e.type}")
-                secureLogger.info("Kan ikke migrere fagsakPerson=$fagsakPersonId - ${e.årsak}")
+                logger.vanligInfo("Kan ikke migrere fagsakPerson=$fagsakPersonId årsak=${e.type}")
+                logger.info("Kan ikke migrere fagsakPerson=$fagsakPersonId - ${e.årsak}")
                 return MigreringInfo(
                     kanMigreres = false,
                     e.årsak,
@@ -136,8 +135,8 @@ class MigreringService(
                 ignorerFeilISimulering = request.ignorerFeilISimulering,
             )
         } catch (e: MigreringException) {
-            logger.warn("Kan ikke migrere fagsakPerson=$fagsakPersonId årsak=${e.type}")
-            secureLogger.warn("Kan ikke migrere fagsakPerson=$fagsakPersonId - ${e.årsak}")
+            logger.vanligWarn("Kan ikke migrere fagsakPerson=$fagsakPersonId årsak=${e.type}")
+            logger.warn("Kan ikke migrere fagsakPerson=$fagsakPersonId - ${e.årsak}")
             throw ApiFeil(e.årsak, HttpStatus.BAD_REQUEST)
         }
     }
@@ -160,8 +159,8 @@ class MigreringService(
                 ignorerFeilISimulering = request.ignorerFeilISimulering,
             )
         } catch (e: MigreringException) {
-            logger.warn("Kan ikke migrere fagsakPerson=$fagsakPersonId årsak=${e.type}")
-            secureLogger.warn("Kan ikke migrere fagsakPerson=$fagsakPersonId - ${e.årsak}")
+            logger.vanligWarn("Kan ikke migrere fagsakPerson=$fagsakPersonId årsak=${e.type}")
+            logger.warn("Kan ikke migrere fagsakPerson=$fagsakPersonId - ${e.årsak}")
             throw ApiFeil(e.årsak, HttpStatus.BAD_REQUEST)
         }
     }
@@ -178,7 +177,7 @@ class MigreringService(
         val fagsak = fagsakService.hentEllerOpprettFagsak(personIdent, stønadType)
         val periode = hentGjeldendePeriodeOgValiderState(fagsakPerson, stønadType, kjøremåned)
         if (kunAktivStønad && YearMonth.now() > periode.stønadsperiode.tom) {
-            secureLogger.info("Har ikke aktiv stønad $periode")
+            logger.info("Har ikke aktiv stønad $periode")
             throw MigreringException(
                 "Har ikke aktiv stønad (${periode.stønadsperiode.tom})",
                 MigreringExceptionType.INGEN_AKTIV_STØNAD,
@@ -404,7 +403,7 @@ class MigreringService(
                 "sistePeriodenTom=$overførtNyLøsningOpphørsdato " +
                 "sisteSummertePeriodeTom=${sisteSummertePerioden.stønadsperiode.tom} " +
                 "opphørsmåned=$opphørsmåned"
-        logger.warn(logMessage)
+        logger.vanligWarn(logMessage)
         val periodeInformasjon =
             perioder.perioder
                 .sortedWith(compareBy<InfotrygdPeriode>({ it.stønadId }, { it.vedtakId }, { it.stønadFom }).reversed())
@@ -412,7 +411,7 @@ class MigreringService(
                     "InfotrygdPeriode(stønadId=${it.stønadId}, vedtakId=${it.vedtakId}, kode=${it.kode}, " +
                         "stønadFom=${it.stønadFom}, stønadTom=${it.stønadTom}, opphørsdato=${it.opphørsdato})"
                 }
-        secureLogger.info("$logMessage $periodeInformasjon")
+        logger.info("$logMessage $periodeInformasjon")
     }
 
     private fun hentGjeldendePeriodeOgValiderState(

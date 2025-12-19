@@ -1,6 +1,7 @@
 package no.nav.familie.ef.sak.forvaltning
 
 import com.fasterxml.jackson.module.kotlin.readValue
+import no.nav.familie.ef.sak.infrastruktur.logg.Logg
 import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.ef.sak.oppgave.OppgaveUtil
 import no.nav.familie.kontrakter.felles.Tema
@@ -10,7 +11,6 @@ import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
-import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.util.Properties
@@ -25,8 +25,7 @@ import java.util.Properties
 class OppgaveOppryddingForvaltningsTask(
     private val oppgaveService: OppgaveService,
 ) : AsyncTaskStep {
-    private val logger = LoggerFactory.getLogger(javaClass)
-    private val secureLogger = LoggerFactory.getLogger("secureLogger")
+    private val logger = Logg.getLogger(this::class)
 
     final val mappenavnProd = "41 Revurdering"
     final val mappenavnDev = "41 - Revurdering"
@@ -57,13 +56,13 @@ class OppgaveOppryddingForvaltningsTask(
             oppgaver.oppgaver.forEach { oppgave ->
                 val oppgaveId = oppgave.id
                 if (oppgaveId == null) {
-                    logger.error("Kan ikke ferdigstille oppgave - mangler ID")
-                    secureLogger.info("Kan ikke ferdigstille oppgave pga manglende ID: $oppgave")
+                    logger.vanligError("Kan ikke ferdigstille oppgave - mangler ID")
+                    logger.info("Kan ikke ferdigstille oppgave pga manglende ID: $oppgave")
                 } else if (oppgave.oppgavetype != Oppgavetype.Fremlegg.value) {
-                    logger.error("Kan ikke ferdigstille oppgave - feil type")
-                    secureLogger.info("Kan ikke ferdigstille oppgave pga feil oppgavetype: $oppgave")
+                    logger.vanligError("Kan ikke ferdigstille oppgave - feil type")
+                    logger.info("Kan ikke ferdigstille oppgave pga feil oppgavetype: $oppgave")
                 } else {
-                    secureLogger.info("Ferdigstiller oppgave $oppgaveId")
+                    logger.info("Ferdigstiller oppgave $oppgaveId")
                     oppgaveService.ferdigstillOppgave(oppgaveId)
                 }
             }

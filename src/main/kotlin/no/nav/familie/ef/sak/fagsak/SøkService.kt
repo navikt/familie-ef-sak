@@ -12,6 +12,7 @@ import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
+import no.nav.familie.ef.sak.infrastruktur.logg.Logg
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlPersonSøkHjelper
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlSaksbehandlerClient
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
@@ -26,7 +27,6 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.identer
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.visningsnavn
 import no.nav.familie.ef.sak.vilkår.VurderingService
 import no.nav.familie.ef.sak.vilkår.dto.VilkårGrunnlagDto
-import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import java.time.LocalDate
@@ -43,7 +43,7 @@ class SøkService(
     private val vurderingService: VurderingService,
     private val personopplysningerService: PersonopplysningerService,
 ) {
-    private val secureLogger = LoggerFactory.getLogger("secureLogger")
+    private val logger = Logg.getLogger(this::class)
 
     fun søkPersonForEksternFagsak(eksternFagsakId: Long): Søkeresultat {
         val fagsak =
@@ -148,7 +148,7 @@ class SøkService(
 
         val søkeKriterier = PdlPersonSøkHjelper.lagPdlPersonSøkKriterier(bostedsadresse)
         if (søkeKriterier.isEmpty()) {
-            secureLogger.error("Får ikke laget søkekriterer for $aktivIdent med bostedsadresse=$bostedsadresse")
+            logger.error("Får ikke laget søkekriterer for $aktivIdent med bostedsadresse=$bostedsadresse")
             throw Feil(
                 message = "Får ikke laget søkekriterer for bostedsadresse",
                 frontendFeilmelding = "Klarer ikke av å lage søkekriterer for bostedsadressen til person",

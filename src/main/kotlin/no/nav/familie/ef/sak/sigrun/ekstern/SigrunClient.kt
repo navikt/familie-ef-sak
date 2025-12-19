@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.sigrun.ekstern
 
+import no.nav.familie.ef.sak.infrastruktur.logg.Logg
 import no.nav.familie.http.client.AbstractRestClient
 import no.nav.familie.kontrakter.felles.PersonIdent
 import org.springframework.beans.factory.annotation.Qualifier
@@ -14,6 +15,8 @@ class SigrunClient(
     @Value("\${FAMILIE_EF_PROXY_URL}") private val uri: URI,
     @Qualifier("azure") restOperations: RestOperations,
 ) : AbstractRestClient(restOperations, "sigrun") {
+    private val logger = Logg.getLogger(this::class)
+
     fun hentPensjonsgivendeInntekt(
         fødselsnummer: String,
         inntektsår: Int,
@@ -27,7 +30,7 @@ class SigrunClient(
                 .toUri()
 
         val response = postForEntity<PensjonsgivendeInntektResponse>(uri, PersonIdent(fødselsnummer))
-        secureLogger.info("Pensjonsgivende inntekt for inntektsår $inntektsår: $response") // Fjernes når det er litt mer kjennskap til dataene
+        logger.info("Pensjonsgivende inntekt for inntektsår $inntektsår: $response") // Fjernes når det er litt mer kjennskap til dataene
         return response
     }
 
@@ -44,7 +47,7 @@ class SigrunClient(
                 .toUri()
 
         val response = postForEntity<SummertSkattegrunnlag>(uri, PersonIdent(fødselsnummer))
-        secureLogger.info("Summert skattegrunnlag for inntektsår $inntektsår: $response") // Fjernes når det er litt mer kjennskap til dataene
+        logger.info("Summert skattegrunnlag for inntektsår $inntektsår: $response") // Fjernes når det er litt mer kjennskap til dataene
         return response
     }
 
@@ -61,7 +64,7 @@ class SigrunClient(
                 .toUri()
 
         val response = postForEntity<List<BeregnetSkatt>>(uri, PersonIdent(fødselsnummer))
-        secureLogger.info("Beregnet skattegrunnlag for inntektsår $inntektsår: $response") // Fjernes når det er litt mer kjennskap til dataene
+        logger.info("Beregnet skattegrunnlag for inntektsår $inntektsår: $response") // Fjernes når det er litt mer kjennskap til dataene
         return response
     }
 }

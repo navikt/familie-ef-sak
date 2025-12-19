@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.forvaltning
 
+import no.nav.familie.ef.sak.infrastruktur.logg.Logg
 import no.nav.familie.ef.sak.oppgave.OppgaveRepository
 import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.kontrakter.felles.objectMapper
@@ -8,7 +9,6 @@ import no.nav.familie.kontrakter.felles.oppgave.StatusEnum
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
-import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.util.Properties
 
@@ -23,7 +23,7 @@ class FerdigstillOppgavetypePåBehandlingTask(
     private val oppgaveService: OppgaveService,
     private val oppgaveRepository: OppgaveRepository,
 ) : AsyncTaskStep {
-    private val logger = LoggerFactory.getLogger(javaClass)
+    private val logger = Logg.getLogger(this::class)
 
     override fun doTask(task: Task) {
         val payload = objectMapper.readValue(task.payload, ForvaltningFerdigstillRequest::class.java)

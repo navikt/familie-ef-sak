@@ -5,11 +5,11 @@ import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.felles.util.harGåttAntallTimer
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
+import no.nav.familie.ef.sak.infrastruktur.logg.Logg
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.Grunnlagsdata
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.GrunnlagsdataMedMetadata
-import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
 import java.util.UUID
@@ -20,7 +20,7 @@ class EndringerIPersonOpplysningerService(
     private val grunnlagsdataService: GrunnlagsdataService,
     private val personopplysningerService: PersonopplysningerService,
 ) {
-    private val logger = LoggerFactory.getLogger(javaClass)
+    private val logger = Logg.getLogger(this::class)
 
     fun hentEndringerPersonopplysninger(behandlingId: UUID): EndringerIPersonopplysningerDto {
         val behandling = behandlingService.hentSaksbehandling(behandlingId)

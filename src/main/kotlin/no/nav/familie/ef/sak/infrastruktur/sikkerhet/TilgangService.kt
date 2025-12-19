@@ -14,13 +14,13 @@ import no.nav.familie.ef.sak.infrastruktur.config.RolleConfig
 import no.nav.familie.ef.sak.infrastruktur.config.getValue
 import no.nav.familie.ef.sak.infrastruktur.exception.ManglerTilgang
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvisIkke
+import no.nav.familie.ef.sak.infrastruktur.logg.Logg
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext.hentGrupperFraToken
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerIntegrasjonerClient
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Adressebeskyttelse
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.AdressebeskyttelseGradering.FORTROLIG
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.AdressebeskyttelseGradering.STRENGT_FORTROLIG
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.secureLogger
 import org.springframework.cache.CacheManager
 import org.springframework.stereotype.Service
 import java.util.UUID
@@ -35,6 +35,8 @@ class TilgangService(
     private val cacheManager: CacheManager,
     private val auditLogger: AuditLogger,
 ) {
+    private val logger = Logg.getLogger(this::class)
+
     /**
      * Kun ved tilgangskontroll for enskild person, ellers bruk [validerTilgangTilPersonMedBarn]
      */
@@ -45,7 +47,7 @@ class TilgangService(
         val tilgang = personopplysningerIntegrasjonerClient.sjekkTilgangTilPerson(personIdent)
         auditLogger.log(Sporingsdata(event, personIdent, tilgang))
         if (!tilgang.harTilgang) {
-            secureLogger.warn(
+            logger.warn(
                 "Saksbehandler ${SikkerhetContext.hentSaksbehandlerEllerSystembruker()} " +
                     "har ikke tilgang til $personIdent",
             )
@@ -65,7 +67,7 @@ class TilgangService(
         val tilgang = harTilgangTilPersonMedRelasjoner(personIdent)
         auditLogger.log(Sporingsdata(event, personIdent, tilgang))
         if (!tilgang.harTilgang) {
-            secureLogger.warn(
+            logger.warn(
                 "Saksbehandler ${SikkerhetContext.hentSaksbehandlerEllerSystembruker()} " +
                     "har ikke tilgang til $personIdent eller dets barn",
             )

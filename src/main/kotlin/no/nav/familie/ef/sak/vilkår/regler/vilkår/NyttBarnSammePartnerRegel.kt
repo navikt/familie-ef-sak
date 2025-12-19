@@ -2,6 +2,7 @@ package no.nav.familie.ef.sak.vilkår.regler.vilkår
 
 import com.fasterxml.jackson.annotation.JsonIgnore
 import no.nav.familie.ef.sak.behandling.domain.Behandling
+import no.nav.familie.ef.sak.infrastruktur.logg.Logg
 import no.nav.familie.ef.sak.vilkår.Delvilkårsvurdering
 import no.nav.familie.ef.sak.vilkår.VilkårType
 import no.nav.familie.ef.sak.vilkår.Vilkårsresultat
@@ -16,7 +17,6 @@ import no.nav.familie.ef.sak.vilkår.regler.Vilkårsregel
 import no.nav.familie.ef.sak.vilkår.regler.jaNeiSvarRegel
 import no.nav.familie.ef.sak.vilkår.regler.regelIder
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
-import org.slf4j.LoggerFactory
 import java.util.UUID
 
 class NyttBarnSammePartnerRegel :
@@ -26,7 +26,7 @@ class NyttBarnSammePartnerRegel :
         hovedregler = regelIder(HAR_FÅTT_ELLER_VENTER_NYTT_BARN_MED_SAMME_PARTNER),
     ) {
     @JsonIgnore
-    private val logger = LoggerFactory.getLogger(javaClass)
+    private val logger = Logg.getLogger(this::class)
 
     override fun initiereDelvilkårsvurdering(
         metadata: HovedregelMetadata,

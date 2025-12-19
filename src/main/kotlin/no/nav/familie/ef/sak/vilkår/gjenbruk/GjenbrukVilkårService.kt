@@ -10,6 +10,7 @@ import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
+import no.nav.familie.ef.sak.infrastruktur.logg.Logg
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.oppgave.TilordnetRessursService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
@@ -21,7 +22,6 @@ import no.nav.familie.ef.sak.vilkår.Vilkårsresultat
 import no.nav.familie.ef.sak.vilkår.Vilkårsvurdering
 import no.nav.familie.ef.sak.vilkår.VilkårsvurderingRepository
 import no.nav.familie.ef.sak.vilkår.dto.GjenbruktVilkårResponse
-import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
@@ -37,7 +37,7 @@ class GjenbrukVilkårService(
     private val samværsavtaleService: SamværsavtaleService,
     private val behandlingStegOppdaterer: BehandlingStegOppdaterer,
 ) {
-    private val secureLogger = LoggerFactory.getLogger("secureLogger")
+    private val logger = Logg.getLogger(this::class)
 
     fun finnBehandlingerForGjenbruk(behandlingId: UUID): List<BehandlingDto> {
         val fagsak: Fagsak = fagsakService.hentFagsakForBehandling(behandlingId)
@@ -64,7 +64,7 @@ class GjenbrukVilkårService(
                 behandlingSomSkalOppdateresId,
                 behandlingForGjenbrukId,
             )
-        secureLogger.info(
+        logger.info(
             "${SikkerhetContext.hentSaksbehandlerEllerSystembruker()} gjenbruker vurderinger fra behandling $behandlingForGjenbrukId " +
                 "for å oppdatere vurderinger på inngangsvilkår for behandling $behandlingSomSkalOppdateresId",
         )
@@ -112,7 +112,7 @@ class GjenbrukVilkårService(
         behandlingForGjenbrukId: UUID,
         vilkårsvurderingSomSkalOppdateres: Vilkårsvurdering,
     ): Vilkårsvurdering {
-        secureLogger.info(
+        logger.info(
             "${SikkerhetContext.hentSaksbehandlerEllerSystembruker()} gjenbruker enkel vurdering fra behandling $behandlingForGjenbrukId " +
                 "for å oppdatere vurderinger på inngangsvilkår for behandling $behandlingSomSkalOppdateresId",
         )

@@ -2,10 +2,10 @@ package no.nav.familie.ef.sak.minside
 
 import no.nav.familie.ef.sak.fagsak.FagsakPersonService
 import no.nav.familie.ef.sak.fagsak.domain.FagsakPerson
+import no.nav.familie.ef.sak.infrastruktur.logg.Logg
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
-import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.util.UUID
 
@@ -18,7 +18,7 @@ class AktiverMikrofrontendNyttFødselsnummerTask(
     val minSideKafkaProducerService: MinSideKafkaProducerService,
     val fagsakPersonService: FagsakPersonService,
 ) : AsyncTaskStep {
-    private val logger = LoggerFactory.getLogger(this::class.java)
+    private val logger = Logg.getLogger(this::class)
 
     override fun doTask(task: Task) {
         logger.info("Starter task for aktivering av bruker med nytt fødselsnummer for mikrofrontend")

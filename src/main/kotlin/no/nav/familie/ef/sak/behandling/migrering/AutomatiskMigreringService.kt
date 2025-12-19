@@ -1,14 +1,12 @@
 package no.nav.familie.ef.sak.behandling.migrering
 
 import no.nav.familie.ef.sak.infotrygd.InfotrygdReplikaClient
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.secureLogger
+import no.nav.familie.ef.sak.infrastruktur.logg.Logg
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.log.IdUtils
 import no.nav.familie.log.mdc.MDCConstants
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.internal.TaskService
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
@@ -20,7 +18,7 @@ class AutomatiskMigreringService(
     private val infotrygdReplikaClient: InfotrygdReplikaClient,
     private val taskService: TaskService,
 ) {
-    private val logger: Logger = LoggerFactory.getLogger(javaClass)
+    private val logger = Logg.getLogger(this::class)
 
     @Transactional
     fun migrerAutomatisk(antall: Int) {
@@ -56,16 +54,16 @@ class AutomatiskMigreringService(
     fun migrerPersonAutomatisk(personIdent: String) {
         val migreringStatus = migreringsstatusRepository.findByIdOrThrow(personIdent)
         if (migreringStatus.status == MigreringResultat.OK) {
-            secureLogger.info("Allerede migrert")
+            logger.info("Allerede migrert")
             return
         }
         try {
-            secureLogger.info("Automatisk migrering av ident=$personIdent")
+            logger.info("Automatisk migrering av ident=$personIdent")
             migreringService.migrerOvergangsstønadAutomatisk(personIdent)
             migreringsstatusRepository.update(migreringStatus.copy(status = MigreringResultat.OK, årsak = null))
-            secureLogger.info("Automatisk migrering av ident=$personIdent utført=OK")
+            logger.info("Automatisk migrering av ident=$personIdent utført=OK")
         } catch (e: MigreringException) {
-            secureLogger.warn("Kan ikke migrere ident=$personIdent årsak=${e.type} msg=${e.årsak}")
+            logger.warn("Kan ikke migrere ident=$personIdent årsak=${e.type} msg=${e.årsak}")
             migreringsstatusRepository.update(migreringStatus.copy(status = MigreringResultat.FEILET, årsak = e.type))
         }
     }

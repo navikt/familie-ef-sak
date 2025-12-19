@@ -5,6 +5,7 @@ import no.nav.familie.ef.sak.amelding.ekstern.AMeldingInntektClient
 import no.nav.familie.ef.sak.arbeidsforhold.ekstern.ArbeidsforholdService
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.fagsak.FagsakService
+import no.nav.familie.ef.sak.infrastruktur.logg.Logg
 import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.inntekt.GrunnlagsdataInntekt
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.inntekt.GrunnlagsdataInntektRepository
@@ -16,7 +17,6 @@ import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveRequest
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.kontrakter.felles.oppgave.StatusEnum
-import org.slf4j.LoggerFactory
 import org.springframework.core.env.Environment
 import org.springframework.stereotype.Service
 import java.time.YearMonth
@@ -35,8 +35,7 @@ class AutomatiskRevurderingService(
     private val environment: Environment,
     private val arbeidsforholdService: ArbeidsforholdService,
 ) {
-    private val logger = LoggerFactory.getLogger(javaClass)
-    private val secureLogger = LoggerFactory.getLogger("secureLogger")
+    private val logger = Logg.getLogger(this::class)
 
     fun kanAutomatiskRevurderes(personIdent: String): Boolean {
         val fagsak = fagsakService.finnFagsak(setOf(personIdent), StønadType.OVERGANGSSTØNAD) ?: return false
@@ -50,8 +49,8 @@ class AutomatiskRevurderingService(
             }
 
         if (inntektForAlleÅr.harNæringsinntekt()) {
-            logger.info("Har næringsinntekt for fagsak ${fagsak.id}")
-            secureLogger.info("Har næringsinntekt for fagsak ${fagsak.id} - InntektResponse: $inntektForAlleÅr")
+            logger.vanligInfo("Har næringsinntekt for fagsak ${fagsak.id}")
+            logger.info("Har næringsinntekt for fagsak ${fagsak.id} - InntektResponse: $inntektForAlleÅr")
             return false
         }
 

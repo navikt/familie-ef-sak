@@ -1,6 +1,7 @@
 package no.nav.familie.ef.sak.næringsinntektskontroll
 
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
+import no.nav.familie.ef.sak.infrastruktur.logg.Logg
 import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.ef.sak.oppgave.OppgaveUtil
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
@@ -13,7 +14,6 @@ import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.kontrakter.felles.oppgave.StatusEnum
 import no.nav.familie.leader.LeaderClient
 import no.nav.familie.prosessering.internal.TaskService
-import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
@@ -31,16 +31,16 @@ class NæringsinntektKontrollService(
     val næringsinntektKontrollBrev: NæringsinntektKontrollBrev,
     val taskService: TaskService,
 ) {
-    private val secureLogger = LoggerFactory.getLogger("secureLogger")
+    private val logger = Logg.getLogger(this::class)
 
     @Transactional
     fun opprettTasksForSelvstendigeTilInntektskontroll() {
         val oppgaver = hentOppgaverForSelvstendigeTilInntektskontroll()
         oppgaver.forEach {
             val næringsinntektKontrollTask = NæringsinntektKontrollForOppgaveTask.opprettTask(it.id ?: throw Feil("Feil i inntektskontroll for næringsdrivende: Oppgave må ha id for at den kan behandles"))
-            secureLogger.info("Lagrer ned næringsinntektKontrollTask: $næringsinntektKontrollTask")
+            logger.info("Lagrer ned næringsinntektKontrollTask: $næringsinntektKontrollTask")
             val saved = taskService.save(næringsinntektKontrollTask)
-            secureLogger.info("Lagret task: $saved")
+            logger.info("Lagret task: $saved")
         }
     }
 
@@ -55,7 +55,7 @@ class NæringsinntektKontrollService(
         if (næringsinntektDataForBeregning.skalKontrolleres()) {
             if (næringsinntektDataForBeregning.oppfyllerAktivitetsplikt()) {
                 if (næringsinntektDataForBeregning.har10ProsentØkningEllerMer()) {
-                    secureLogger.info("Har 10% høyere næringsinntekt for person: ${næringsinntektDataForBeregning.personIdent} (Næringsinntekt: ${næringsinntektDataForBeregning.forventetInntektIFjor} - ForventetInntekt: ${næringsinntektDataForBeregning.forventetInntektIFjor})")
+                    logger.info("Har 10% høyere næringsinntekt for person: ${næringsinntektDataForBeregning.personIdent} (Næringsinntekt: ${næringsinntektDataForBeregning.forventetInntektIFjor} - ForventetInntekt: ${næringsinntektDataForBeregning.forventetInntektIFjor})")
                     giVarselOmNyVurderingAvInntekt(næringsinntektDataForBeregning.behandlingId, næringsinntektDataForBeregning.personIdent, årstallIFjor)
                     val oppgaveMedUtsattFrist = næringsinntektDataForBeregning.oppgave.copy(fristFerdigstillelse = LocalDate.of(årstallIFjor + 2, 1, 11).toString())
                     oppgaveService.oppdaterOppgave(oppgaveMedUtsattFrist)
@@ -115,7 +115,7 @@ class NæringsinntektKontrollService(
 
     private fun hentOppgaverForSelvstendigeTilInntektskontroll(): List<Oppgave> {
         val mappeIdForSelvstendigNæringsdrivende = oppgaveService.finnMapper(OppgaveUtil.ENHET_NR_NAY).single { it.navn == "61 Selvstendig næringsdrivende" }.id
-        secureLogger.info("MappeId for selvstendige: $mappeIdForSelvstendigNæringsdrivende")
+        logger.info("MappeId for selvstendige: $mappeIdForSelvstendigNæringsdrivende")
         val finnOppgaveRequest =
             FinnOppgaveRequest(
                 tema = Tema.ENF,
@@ -125,7 +125,7 @@ class NæringsinntektKontrollService(
                 mappeId = mappeIdForSelvstendigNæringsdrivende.toLong(),
             )
         val oppgaverForSelvstendige = oppgaveService.hentOppgaver(finnOppgaveRequest)
-        secureLogger.info("Antall oppgaver for selvstendige med frist 15. desember: ${oppgaverForSelvstendige.oppgaver.size}")
+        logger.info("Antall oppgaver for selvstendige med frist 15. desember: ${oppgaverForSelvstendige.oppgaver.size}")
 
         if (oppgaverForSelvstendige.oppgaver.isEmpty() ||
             oppgaverForSelvstendige.oppgaver
@@ -133,7 +133,7 @@ class NæringsinntektKontrollService(
                 .identer
                 ?.any { it.gruppe == IdentGruppe.FOLKEREGISTERIDENT } == false
         ) {
-            secureLogger.info("Fant ingen oppgaver for selvstendige med frist 15. desember")
+            logger.info("Fant ingen oppgaver for selvstendige med frist 15. desember")
             return emptyList()
         }
         return oppgaverForSelvstendige.oppgaver

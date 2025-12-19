@@ -1,11 +1,11 @@
 package no.nav.familie.ef.sak.iverksett.oppgaveterminbarn
 
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
+import no.nav.familie.ef.sak.infrastruktur.logg.Logg
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.internal.TaskService
-import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -20,7 +20,7 @@ class ForberedOppgaverTerminbarnTask(
     val forberedOppgaverTerminbarnService: ForberedOppgaverTerminbarnService,
     val featureToggleService: FeatureToggleService,
 ) : AsyncTaskStep {
-    private val logger = LoggerFactory.getLogger(javaClass)
+    private val logger = Logg.getLogger(this::class)
 
     override fun doTask(task: Task) {
         logger.info("Starter forbereding av oppgaver for ufødte terminbarn")

@@ -13,6 +13,7 @@ import no.nav.familie.ef.sak.behandlingsflyt.task.OpprettOppgaveForOpprettetBeha
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvisIkke
+import no.nav.familie.ef.sak.infrastruktur.logg.Logg
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.journalføring.JournalføringHelper.utledNyAvsender
 import no.nav.familie.ef.sak.journalføring.JournalføringHelper.validerGyldigAvsender
@@ -35,7 +36,6 @@ import no.nav.familie.kontrakter.felles.journalpost.Journalstatus
 import no.nav.familie.kontrakter.felles.oppgave.OppgavePrioritet
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.internal.TaskService
-import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
@@ -53,7 +53,7 @@ class JournalføringService(
     private val journalpostService: JournalpostService,
     private val infotrygdPeriodeValideringService: InfotrygdPeriodeValideringService,
 ) {
-    private val logger = LoggerFactory.getLogger(javaClass)
+    private val logger = Logg.getLogger(this::class)
 
     @Transactional
     fun fullførJournalpostV2(

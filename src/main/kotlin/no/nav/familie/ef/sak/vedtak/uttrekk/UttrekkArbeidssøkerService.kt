@@ -2,6 +2,7 @@ package no.nav.familie.ef.sak.vedtak.uttrekk
 
 import no.nav.familie.ef.sak.AuditLoggerEvent
 import no.nav.familie.ef.sak.fagsak.FagsakService
+import no.nav.familie.ef.sak.infrastruktur.logg.Logg
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.arbeidssøker.ArbeidssøkerClient
@@ -9,7 +10,6 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Adressebeskytte
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlPersonKort
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.gjeldende
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.visningsnavn
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.secureLogger
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.ef.sak.vedtak.domain.AktivitetType
 import no.nav.familie.ef.sak.vedtak.domain.Vedtaksperiode
@@ -32,6 +32,8 @@ class UttrekkArbeidssøkerService(
     private val arbeidssøkerClient: ArbeidssøkerClient,
     private val vurderingService: VurderingService,
 ) {
+    private val logger = Logg.getLogger(this::class)
+
     fun forrigeMåned(): () -> YearMonth = { YearMonth.now().minusMonths(1) }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
@@ -42,7 +44,7 @@ class UttrekkArbeidssøkerService(
         personIdent: String,
     ) {
         val registrertSomArbeidssøker = erRegistrertSomArbeidssøker(personIdent, årMåned)
-        secureLogger.info("Registrert som arbeidssøker: $registrertSomArbeidssøker - fagsakId: $fagsakId")
+        logger.info("Registrert som arbeidssøker: $registrertSomArbeidssøker - fagsakId: $fagsakId")
         uttrekkArbeidssøkerRepository.insert(
             UttrekkArbeidssøkere(
                 fagsakId = fagsakId,
@@ -141,7 +143,7 @@ class UttrekkArbeidssøkerService(
                 .hentPerioder(
                     personIdent,
                 )
-        secureLogger.info("Fant perioder for arbeidssøker med ident $personIdent med perioder: $perioder")
+        logger.info("Fant perioder for arbeidssøker med ident $personIdent med perioder: $perioder")
         return perioder.any { it.startet.tidspunkt.toLocalDate() <= sisteIMåneden && (it.avsluttet == null || it.avsluttet.tidspunkt.toLocalDate() >= sisteIMåneden) }
     }
 

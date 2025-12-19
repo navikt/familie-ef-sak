@@ -15,6 +15,7 @@ import no.nav.familie.ef.sak.felles.util.isEqualOrBefore
 import no.nav.familie.ef.sak.infrastruktur.config.ObjectMapperProvider.objectMapper
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
+import no.nav.familie.ef.sak.infrastruktur.logg.Logg
 import no.nav.familie.ef.sak.journalføring.dto.VilkårsbehandleNyeBarn
 import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.ef.sak.vedtak.domain.InntektWrapper
@@ -30,7 +31,6 @@ import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
-import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -54,8 +54,7 @@ class BehandleAutomatiskInntektsendringTask(
     private val automatiskRevurderingService: AutomatiskRevurderingService,
     private val featureToggleService: FeatureToggleService,
 ) : AsyncTaskStep {
-    private val logger = LoggerFactory.getLogger(javaClass)
-    private val secureLogger = LoggerFactory.getLogger("secureLogger")
+    private val logger = Logg.getLogger(this::class)
 
     override fun doTask(task: Task) {
         val toggle = featureToggleService.isEnabled(Toggle.BEHANDLE_AUTOMATISK_INNTEKTSENDRING)
@@ -69,7 +68,7 @@ class BehandleAutomatiskInntektsendringTask(
         if (fagsak == null) {
             throw IllegalStateException("Finner ikke fagsak for personIdent=$personIdent på stønadstype=${StønadType.OVERGANGSSTØNAD} under automatisk inntektsendring")
         }
-        secureLogger.info("Kan opprette automatisk inntektsendringsbehandling med $personIdent stønadstype=${StønadType.OVERGANGSSTØNAD} faksakId ${fagsak.id}")
+        logger.info("Kan opprette automatisk inntektsendringsbehandling med $personIdent stønadstype=${StønadType.OVERGANGSSTØNAD} faksakId ${fagsak.id}")
 
         if (toggle) {
             opprettAutomatiskRevurderingForInntektsendring(fagsak.id, personIdent)
@@ -116,7 +115,7 @@ class BehandleAutomatiskInntektsendringTask(
 
         årsakRevurderingsRepository.insert(ÅrsakRevurdering(behandlingId = behandling.id, opplysningskilde = Opplysningskilde.AUTOMATISK_OPPRETTET_BEHANDLING, årsak = Revurderingsårsak.ENDRING_INNTEKT, beskrivelse = null))
         vedtakService.lagreVedtak(vedtakDto = innvilgelseOvergangsstønad, behandlingId = behandling.id, stønadstype = StønadType.OVERGANGSSTØNAD)
-        logger.info("Opprettet behandling for automatisk inntektsendring: ${behandling.id}")
+        logger.vanligInfo("Opprettet behandling for automatisk inntektsendring: ${behandling.id}")
     }
 
     private fun sammenslåVedtak(
@@ -160,7 +159,7 @@ class BehandleAutomatiskInntektsendringTask(
     ) {
         val inntektResponse = automatiskRevurderingService.hentInntektResponse(personIdent)
         val inntektPrMåned = inntektResponse.inntektsmåneder.map { LogInntekt(it.måned, it.totalInntekt()) }
-        secureLogger.info("Månedlig inntekt for fagsak eksternId=${fagsak.eksternId} : $inntektPrMåned")
+        logger.info("Månedlig inntekt for fagsak eksternId=${fagsak.eksternId} : $inntektPrMåned")
         val behandling = behandlingService.finnSisteIverksatteBehandlingMedEventuellAvslått(fagsak.id)
         if (behandling != null) {
             val forrigeBehandling = behandling.forrigeBehandlingId?.let { behandlingService.hentBehandling(it) } ?: throw IllegalStateException("Burde vært en forrigeBehandlingId etter automatisk revurdering for behandlingId: ${behandling.id}")
@@ -175,10 +174,10 @@ class BehandleAutomatiskInntektsendringTask(
             val forventetInntekt = inntektResponse.forventetMånedsinntekt(forrigeVedtak)
             val perioder = oppdaterFørsteVedtaksperiodeMedRevurderesFraDato(forrigeVedtak, inntektResponse)
             val inntektsperioder = oppdaterInntektMedNyBeregnetForventetInntekt(forrigeVedtak, inntektResponse, perioder.first().periode.fom)
-            logger.info("Ville opprettet inntektsperioder for fagsak eksternId: ${fagsak.eksternId} - nye inntektsperioder: " + inntektsperioder)
-            logger.info("Ville opprettet følgende vedtaksperioder for fagsak eksternId: ${fagsak.eksternId} - nye vedtaksperioder: $perioder med ny forventet månedsinntekt: $forventetInntekt")
+            logger.vanligInfo("Ville opprettet inntektsperioder for fagsak eksternId: ${fagsak.eksternId} - nye inntektsperioder: " + inntektsperioder)
+            logger.vanligInfo("Ville opprettet følgende vedtaksperioder for fagsak eksternId: ${fagsak.eksternId} - nye vedtaksperioder: $perioder med ny forventet månedsinntekt: $forventetInntekt")
         } else {
-            logger.info("Fant ikke siste iverksatte behandling for fagsakId: ${fagsak.id}")
+            logger.vanligInfo("Fant ikke siste iverksatte behandling for fagsakId: ${fagsak.id}")
         }
     }
 

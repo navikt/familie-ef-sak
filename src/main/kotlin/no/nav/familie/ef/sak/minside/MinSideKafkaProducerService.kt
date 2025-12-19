@@ -1,11 +1,10 @@
 package no.nav.familie.ef.sak.minside
 
+import no.nav.familie.ef.sak.infrastruktur.logg.Logg
 import no.nav.familie.log.IdUtils
 import no.nav.familie.log.mdc.MDCConstants
 import no.nav.tms.microfrontend.MicrofrontendMessageBuilder
 import no.nav.tms.microfrontend.Sensitivitet
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import org.slf4j.MDC
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.kafka.core.KafkaTemplate
@@ -17,7 +16,7 @@ class MinSideKafkaProducerService(
 ) {
     @Value("\${MIN_SIDE_TOPIC}")
     lateinit var topic: String
-    private val logger: Logger = LoggerFactory.getLogger(this::class.java)
+    private val logger = Logg.getLogger(this::class)
 
     fun aktiver(personIdent: String) {
         val melding =

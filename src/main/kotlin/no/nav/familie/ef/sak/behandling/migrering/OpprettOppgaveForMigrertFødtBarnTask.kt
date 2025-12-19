@@ -3,6 +3,7 @@ package no.nav.familie.ef.sak.behandling.migrering
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
+import no.nav.familie.ef.sak.infrastruktur.logg.Logg
 import no.nav.familie.ef.sak.iverksett.oppgaveforbarn.AktivitetspliktigAlder
 import no.nav.familie.ef.sak.iverksett.oppgaveforbarn.OpprettOppfølgingsoppgaveForBarnFyltÅrTask
 import no.nav.familie.ef.sak.iverksett.oppgaveforbarn.OpprettOppgavePayload
@@ -17,8 +18,6 @@ import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.internal.TaskService
 import no.nav.familie.util.VirkedagerProvider.nesteVirkedag
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.util.UUID
@@ -37,7 +36,7 @@ class OpprettOppgaveForMigrertFødtBarnTask(
     private val grunnlagsdataService: GrunnlagsdataService,
     private val taskService: TaskService,
 ) : AsyncTaskStep {
-    private val logger: Logger = LoggerFactory.getLogger(javaClass)
+    private val logger = Logg.getLogger(this::class)
 
     override fun doTask(task: Task) {
         val data = objectMapper.readValue<OpprettOppgaveForMigrertFødtBarnTaskData>(task.payload)

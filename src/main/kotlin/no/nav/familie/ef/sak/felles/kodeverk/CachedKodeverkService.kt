@@ -1,8 +1,8 @@
 package no.nav.familie.ef.sak.felles.kodeverk
 
+import no.nav.familie.ef.sak.infrastruktur.logg.Logg
 import no.nav.familie.kontrakter.felles.kodeverk.InntektKodeverkDto
 import no.nav.familie.kontrakter.felles.kodeverk.KodeverkDto
-import org.slf4j.LoggerFactory
 import org.springframework.boot.context.event.ApplicationReadyEvent
 import org.springframework.cache.annotation.CacheConfig
 import org.springframework.cache.annotation.Cacheable
@@ -32,7 +32,7 @@ class CachedKodeverkService(
 class KodeverkInitializer(
     private val cachedKodeverkService: CachedKodeverkService,
 ) : ApplicationListener<ApplicationReadyEvent> {
-    private val logger = LoggerFactory.getLogger(this::class.java)
+    private val logger = Logg.getLogger(this::class)
 
     @Scheduled(cron = "0 0 2 * * *")
     fun syncKodeverk() {

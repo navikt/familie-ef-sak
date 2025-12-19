@@ -1,7 +1,7 @@
 package no.nav.familie.ef.sak.arbeidsforhold
 
 import no.nav.familie.ef.sak.arbeidsforhold.ekstern.ArbeidsforholdClient
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.secureLogger
+import no.nav.familie.ef.sak.infrastruktur.logg.Logg
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
@@ -18,12 +18,14 @@ import java.util.Properties
 class LoggArbeidsforholdForPersonTask(
     private val arbeidsforholdClient: ArbeidsforholdClient,
 ) : AsyncTaskStep {
+    private val logger = Logg.getLogger(this::class)
+
     override fun doTask(task: Task) {
         val personIdent = task.payload
-        secureLogger.info("Logg arbeidsforhold for person $personIdent")
+        logger.info("Logg arbeidsforhold for person $personIdent")
         val arbeidsforhold = arbeidsforholdClient.hentArbeidsforhold(personIdent)
         arbeidsforhold.forEach { arbeidsforhold ->
-            secureLogger.info("Arbeidsforhold for person $personIdent: $arbeidsforhold")
+            logger.info("Arbeidsforhold for person $personIdent: $arbeidsforhold")
         }
     }
 
