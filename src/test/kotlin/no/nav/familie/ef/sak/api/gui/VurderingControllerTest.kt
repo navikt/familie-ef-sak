@@ -407,7 +407,7 @@ internal class VurderingControllerTest : OppslagSpringRunnerTest() {
         restTemplate.exchange(
             localhost("/api/vurdering/${behandling.id}/vilkar"),
             HttpMethod.GET,
-            HttpEntity<Any>(headers),
+            HttpEntity<Ressurs<String>>(headers),
         )
 
     private fun opprettBehandlingMedGrunnlagsdata(søknad: SøknadOvergangsstønad): Behandling {

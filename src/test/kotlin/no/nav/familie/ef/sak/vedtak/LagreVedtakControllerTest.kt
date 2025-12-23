@@ -38,6 +38,7 @@ import org.springframework.http.HttpEntity
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.web.client.exchange
 import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
@@ -206,7 +207,6 @@ internal class LagreVedtakControllerTest : OppslagSpringRunnerTest() {
                 perioderKontantstøtte = listOf(kontantstøttePeriode),
                 kontantstøtteBegrunnelse = "",
                 tilleggsstønad = tomTillegsstønad(),
-                _type = "InnvilgelseBarnetilsyn",
             )
 
         val respons: ResponseEntity<Ressurs<UUID>> = fullførVedtak(behandling.id, vedtakDto)
@@ -281,14 +281,14 @@ internal class LagreVedtakControllerTest : OppslagSpringRunnerTest() {
         id: UUID,
         vedtakDto: VedtakDto,
     ): ResponseEntity<Ressurs<UUID>> =
-        restTemplate.exchange(
+        restOperations.exchange(
             localhost("/api/vedtak/$id/lagre-vedtak"),
             HttpMethod.POST,
             HttpEntity(vedtakDto, headers),
         )
 
     private fun hentVedtak(id: UUID): ResponseEntity<Ressurs<InnvilgelseBarnetilsyn?>> =
-        restTemplate.exchange(
+        restOperations.exchange(
             localhost("/api/vedtak/$id"),
             HttpMethod.GET,
             HttpEntity<Ressurs<InnvilgelseBarnetilsyn?>>(headers),

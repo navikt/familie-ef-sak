@@ -20,8 +20,10 @@ import no.nav.familie.kontrakter.ef.personhendelse.NyttBarnÅrsak
 import no.nav.familie.kontrakter.felles.PersonIdent
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.prosessering.internal.TaskService
+import org.postgresql.util.PSQLException
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.dao.DataAccessException
 import org.springframework.dao.DuplicateKeyException
 import org.springframework.data.relational.core.conversion.DbActionExecutionException
 import org.springframework.stereotype.Service
@@ -68,7 +70,7 @@ class NyeBarnService(
         if (fagsak.migrert) {
             try {
                 taskService.save(OpprettOppgaveForMigrertFødtBarnTask.opprettOppgave(fagsak, nyeBarn))
-            } catch (e: DbActionExecutionException) {
+            } catch (e: DataAccessException) {
                 if (e.cause is DuplicateKeyException) {
                     logger.warn("DuplicateKeyException ved opprettelse av task, den er sannsynligvis allerede opprettet")
                     return

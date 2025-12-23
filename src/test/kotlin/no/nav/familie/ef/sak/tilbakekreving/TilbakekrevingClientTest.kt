@@ -13,6 +13,7 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.springframework.boot.restclient.RestTemplateBuilder
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter
 import org.springframework.web.client.RestOperations
 import org.springframework.web.util.UriUtils
 import java.net.URI
@@ -43,7 +44,11 @@ internal class TilbakekrevingClientTest {
     }
 
     companion object {
-        private val restOperations: RestOperations = RestTemplateBuilder().build()
+        private val restOperations: RestOperations =
+            RestTemplateBuilder()
+                .additionalMessageConverters(
+                    MappingJackson2HttpMessageConverter(objectMapper),
+                ).build()
         lateinit var client: TilbakekrevingClient
         lateinit var wiremockServerItem: WireMockServer
 

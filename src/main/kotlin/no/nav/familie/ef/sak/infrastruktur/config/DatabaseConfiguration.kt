@@ -43,6 +43,8 @@ import org.springframework.data.jdbc.repository.config.EnableJdbcRepositories
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcOperations
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import org.springframework.jdbc.datasource.DataSourceTransactionManager
+import org.springframework.jdbc.support.SQLErrorCodeSQLExceptionTranslator
+import org.springframework.jdbc.support.SQLExceptionTranslator
 import org.springframework.transaction.PlatformTransactionManager
 import java.sql.Date
 import java.time.LocalDate
@@ -65,6 +67,9 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
         AuditorAware {
             Optional.of(Endret())
         }
+
+    @Bean
+    fun jdbcExceptionTranslator(dataSource: DataSource): SQLExceptionTranslator = SQLErrorCodeSQLExceptionTranslator(dataSource)
 
     @Bean
     fun verifyIgnoreIfProd(
@@ -144,7 +149,7 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
 
     @WritingConverter
     class DokumentTilStringConverter : Converter<Dokumentasjon, String> {
-        override fun convert(dokumentasjon: Dokumentasjon): String? = objectMapper.writeValueAsString(dokumentasjon)
+        override fun convert(dokumentasjon: Dokumentasjon): String = objectMapper.writeValueAsString(dokumentasjon)
     }
 
     @ReadingConverter
@@ -198,8 +203,9 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
 
     @ReadingConverter
     class PGobjectTilJsonWrapperConverter : Converter<PGobject, JsonWrapper> {
-        @Nullable
-        override fun convert(pGobject: PGobject): JsonWrapper? = pGobject.value?.let { JsonWrapper(it) }
+        override fun convert(pGobject: PGobject): JsonWrapper =
+            pGobject.value?.let { JsonWrapper(it) }
+                ?: throw IllegalArgumentException("PGobject.value kan ikke være null")
     }
 
     @WritingConverter
@@ -364,8 +370,7 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
 
     @ReadingConverter
     class PGobjectTilBeriketSimuleringsresultat : Converter<PGobject, BeriketSimuleringsresultat> {
-        @Nullable
-        override fun convert(pGobject: PGobject): BeriketSimuleringsresultat? = pGobject.value?.let { objectMapper.readValue(it) }
+        override fun convert(pGobject: PGobject): BeriketSimuleringsresultat = pGobject.value?.let { objectMapper.readValue(it) } ?: throw IllegalArgumentException("Beriket simuleringsresultat er null: ${pGobject.value}")
     }
 
     @WritingConverter
@@ -379,7 +384,7 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
 
     @ReadingConverter
     class PGobjectTilBrevmottakerPersoner : Converter<PGobject, PersonerWrapper> {
-        override fun convert(pGobject: PGobject): PersonerWrapper? = pGobject.value?.let { objectMapper.readValue(it) }
+        override fun convert(pGobject: PGobject): PersonerWrapper = pGobject.value?.let { objectMapper.readValue(it) } ?: throw IllegalArgumentException("PersonerWrapper er null: ${pGobject.value}")
     }
 
     @WritingConverter
@@ -393,7 +398,7 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
 
     @ReadingConverter
     class PGobjectTilBrevmottakerOrganisasjoner : Converter<PGobject, OrganisasjonerWrapper> {
-        override fun convert(pGobject: PGobject): OrganisasjonerWrapper? = pGobject.value?.let { objectMapper.readValue(it) }
+        override fun convert(pGobject: PGobject): OrganisasjonerWrapper = pGobject.value?.let { objectMapper.readValue(it) } ?: throw IllegalArgumentException("OrganisasjonerWrapper er null: ${pGobject.value}")
     }
 
     @WritingConverter

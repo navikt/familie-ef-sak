@@ -12,6 +12,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.resttestclient.exchange
+import org.springframework.core.ParameterizedTypeReference
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
@@ -36,6 +37,7 @@ internal class PeriodeControllerTest : OppslagSpringRunnerTest() {
                 localhost("/api/perioder/fagsak/${fagsak.id}/historikk"),
                 HttpMethod.GET,
                 HttpEntity(null, headers),
+                object : ParameterizedTypeReference<Ressurs<List<AndelHistorikkDto>>>() {},
             )
         assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
         assertThat(response.body?.status).isEqualTo(Ressurs.Status.SUKSESS)

@@ -100,18 +100,16 @@ fun <K : Any, T> CacheManager.getNullable(
     valueLoader: () -> T?,
 ): T? {
     val cacheInstance = getCacheOrThrow(cache)
-    val cachedValue = cacheInstance.get(key)
-
-    return if (cachedValue != null) {
+    val wrapper = cacheInstance.get(key)
+    if (wrapper != null) {
         @Suppress("UNCHECKED_CAST")
-        cachedValue.get() as? T
-    } else {
-        val loadedValue = valueLoader()
-        if (loadedValue != null) {
-            cacheInstance.put(key, loadedValue)
-        }
-        loadedValue
+        return wrapper.get() as? T
     }
+
+    val loaded = valueLoader()
+    cacheInstance.put(key, loaded)
+
+    return loaded
 }
 
 fun CacheManager.getCacheOrThrow(cache: String) = this.getCache(cache) ?: error("Finner ikke cache=$cache")

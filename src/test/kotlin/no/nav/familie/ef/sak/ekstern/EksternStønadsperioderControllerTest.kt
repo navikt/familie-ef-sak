@@ -13,6 +13,7 @@ import org.springframework.http.HttpEntity
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.web.client.exchange
 
 internal class EksternStønadsperioderControllerTest : OppslagSpringRunnerTest() {
     @Test
@@ -135,7 +136,7 @@ internal class EksternStønadsperioderControllerTest : OppslagSpringRunnerTest()
         lazyMessage: (ResponseEntity<Ressurs<T>>) -> Unit,
     ) {
         val response: ResponseEntity<Ressurs<T>> =
-            restTemplate.exchange(
+            restOperations.exchange(
                 localhost(url),
                 HttpMethod.POST,
                 HttpEntity(request, headers),

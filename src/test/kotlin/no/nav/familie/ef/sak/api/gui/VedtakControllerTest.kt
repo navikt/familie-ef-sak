@@ -64,6 +64,7 @@ import org.springframework.http.HttpEntity
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.web.client.exchange
 import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID

@@ -20,6 +20,7 @@ import no.nav.familie.ef.sak.database.DbContainerInitializer
 import no.nav.familie.ef.sak.fagsak.domain.FagsakDomain
 import no.nav.familie.ef.sak.fagsak.domain.FagsakPerson
 import no.nav.familie.ef.sak.felles.util.TokenUtil
+import no.nav.familie.ef.sak.infrastruktur.config.ObjectMapperProvider.objectMapper
 import no.nav.familie.ef.sak.infrastruktur.config.RolleConfig
 import no.nav.familie.ef.sak.iverksett.oppgaveterminbarn.TerminbarnOppgave
 import no.nav.familie.ef.sak.næringsinntektskontroll.NæringsinntektKontrollDomain
@@ -46,13 +47,16 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
+import org.springframework.boot.restclient.RestTemplateBuilder
 import org.springframework.boot.resttestclient.TestRestTemplate
+import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureTestRestTemplate
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.web.server.LocalServerPort
 import org.springframework.cache.CacheManager
 import org.springframework.context.ApplicationContext
 import org.springframework.data.jdbc.core.JdbcAggregateOperations
 import org.springframework.http.HttpHeaders
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.junit.jupiter.SpringExtension
@@ -86,11 +90,20 @@ import org.springframework.web.client.RestOperations
     "mock-medl",
 )
 @EnableMockOAuth2Server
+@AutoConfigureTestRestTemplate
 abstract class OppslagSpringRunnerTest {
     protected final val listAppender = initLoggingEventListAppender()
     protected var loggingEvents: MutableList<ILoggingEvent> = listAppender.list
-    protected val restTemplate = TestRestTemplate()
     protected val headers = HttpHeaders()
+
+    @Autowired
+    protected lateinit var restTemplate: TestRestTemplate
+
+    protected val restOperations: RestOperations =
+        RestTemplateBuilder()
+            .additionalMessageConverters(
+                MappingJackson2HttpMessageConverter(objectMapper),
+            ).build()
 
     @Autowired
     private lateinit var jdbcAggregateOperations: JdbcAggregateOperations
