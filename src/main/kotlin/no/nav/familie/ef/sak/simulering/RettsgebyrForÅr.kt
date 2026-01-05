@@ -8,4 +8,5 @@ val rettsgebyrForÅr =
         2023 to 1243,
         2024 to 1277,
         2025 to 1314,
+        2026 to 1345,
     )
