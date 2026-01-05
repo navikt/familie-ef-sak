@@ -15,7 +15,6 @@ enum class Toggle(
 ) {
     // Release
     KONTROLLER_NÆRINGSINNTEKT("familie.ef.sak.kontroller-naeringsinntekt"),
-    BEHANDLE_AUTOMATISK_INNTEKTSENDRING("familie.ef.sak-behandle-automatisk-inntektsendring-task", "Release"),
     FRONTEND_KOPIER_KNAPP_ERROR_ALERT("familie.ef.sak.frontend-alert-error-med-copy-button", "Release"),
     FRONTEND_VIS_BEREGNINGSSKJEMA("familie.ef.sak.frontend-vis-beregningsskjema", "Release"),
     VIS_ANDRE_YTELSER("familie.ef.sak.vis-andre-ytelser", "Release"),
@@ -54,7 +53,6 @@ enum class Toggle(
     HENLEGG_BEHANDLING_UTEN_OPPGAVE("familie.ef.sak.henlegg-behandling-uten-oppgave", "Permission"),
     OPPDATER_BEHANDLINGSTATUS("familie.ef.sak.oppdater-status-pa-behandling"),
     VELG_ÅRSAK_VED_KLAGE_OPPRETTELSE("familie.ef.sak.klagebehandling-arsak", "Permission"),
-    VIS_AUTOMATISK_INNTEKTSENDRING("familie.ef.sak.frontend-vis-automatisk-inntektsendring", "Permission"),
     ;
 
     companion object {

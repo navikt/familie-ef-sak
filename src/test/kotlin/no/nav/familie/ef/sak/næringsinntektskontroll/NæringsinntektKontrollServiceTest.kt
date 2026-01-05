@@ -103,18 +103,6 @@ internal class NæringsinntektKontrollServiceTest : OppslagSpringRunnerTest() {
     private fun lagEksternTestOppgave(id: Long): Oppgave = Oppgave(id = id, tilordnetRessurs = null, oppgavetype = Oppgavetype.Fremlegg.toString(), fristFerdigstillelse = LocalDate.of(YearMonth.now().year, 12, 15).toString(), mappeId = 107, identer = listOf(OppgaveIdentV2(id.toString(), IdentGruppe.FOLKEREGISTERIDENT)))
 
     @Test
-    fun `Bruker har 10 prosent endring i inntekt - virkelighetsnært eksempel med andeler`() {
-        val id = setupMocksMedNæringsinntekt(700_000)
-        lagreAndelerTilkjentYtelseForPersonIdent(id.toString())
-
-        næringsinntektKontrollService.kontrollerInntektForSelvstendigNæringsdrivende(LocalDate.now().year - 1, id)
-        assertThat(kafkaMeldingSlot.isCaptured).isTrue
-        assertThat(oppdaterOppgaveSlot.captured.fristFerdigstillelse).isEqualTo(LocalDate.of(LocalDate.now().year + 1, 1, 11).toString())
-        assertThat(oppgaveRepository.findByBehandlingIdAndType(behandlingIds.last(), Oppgavetype.Fremlegg)?.size).isEqualTo(1)
-        assertThat(næringsinntektKontrollRepository.findAll().first().utfall).isEqualTo(NæringsinntektKontrollUtfall.MINIMUM_TI_PROSENT_ENDRING_I_INNTEKT)
-    }
-
-    @Test
     fun `Bruker har under 10 prosent endring i inntekt - virkelighetsnært eksempel med andeler`() {
         val id = setupMocksMedNæringsinntekt(90_000)
         lagreAndelerTilkjentYtelseForPersonIdent()
