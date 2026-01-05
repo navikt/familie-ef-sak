@@ -165,24 +165,6 @@ class RevurderingService(
             false -> SikkerhetContext.hentSaksbehandlerEllerSystembruker()
         }
 
-    @Transactional
-    fun opprettAutomatiskInntektsendringTask(personIdenter: List<String>) {
-        if (LeaderClient.isLeader() != true) {
-            logger.info("Fant ingen leader ved oppretting av automatisk inntektsendring task")
-        }
-
-        personIdenter.take(10).forEach { personIdent ->
-
-            val payload = objectMapper.writeValueAsString(PayloadBehandleAutomatiskInntektsendringTask(personIdent = personIdent, årMåned = YearMonth.now()))
-            val finnesTask = taskService.finnTaskMedPayloadOgType(payload, BehandleAutomatiskInntektsendringTask.TYPE)
-
-            if (finnesTask == null) {
-                val task = BehandleAutomatiskInntektsendringTask.opprettTask(payload)
-                taskService.save(task)
-            }
-        }
-    }
-
     private fun vilkårsbehandleNyeBarn(
         revurdering: Behandling,
         vilkårsbehandleNyeBarn: VilkårsbehandleNyeBarn,
@@ -253,8 +235,4 @@ class RevurderingService(
     }
 
     private fun erSatsendring(revurderingDto: RevurderingDto) = revurderingDto.behandlingsårsak == BehandlingÅrsak.SATSENDRING
-
-    companion object {
-        const val GOSYS_MAPPE_ID_INNTEKTSKONTROLL = 63L
-    }
 }
