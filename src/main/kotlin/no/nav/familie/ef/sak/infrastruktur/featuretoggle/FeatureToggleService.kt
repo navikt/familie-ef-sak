@@ -17,7 +17,7 @@ enum class Toggle(
     FRONTEND_KOPIER_KNAPP_ERROR_ALERT("familie.ef.sak.frontend-alert-error-med-copy-button", "Release"),
     FRONTEND_VIS_BEREGNINGSSKJEMA("familie.ef.sak.frontend-vis-beregningsskjema", "Release"),
     VIS_ANDRE_YTELSER("familie.ef.sak.vis-andre-ytelser", "Release"),
-    BRUK_ENDRET_AV_SAKSBEHANDLER_MOT_OPPGAVE("familie.ef.sak.bruk_endret_av_saksbehandler_mot_oppgave","Release",
+    STOP_BRUK_ENDRET_AV_SAKSBEHANDLER_MOT_OPPGAVE("familie.ef.sak.stopp-bruk-av-endret-av-saksbehandler-mot-oppgave","Release",
     ),
     // Operational
     G_BEREGNING("familie.ef.sak.g-beregning", "Operational"),

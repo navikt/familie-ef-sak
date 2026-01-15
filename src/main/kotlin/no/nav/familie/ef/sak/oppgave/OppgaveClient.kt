@@ -97,7 +97,7 @@ class OppgaveClient(
                     .toUri()
         }
 
-        val brukEndretAvSaksbehandler = featureToggleService.isEnabled(Toggle.BRUK_ENDRET_AV_SAKSBEHANDLER_MOT_OPPGAVE)
+        val brukEndretAvSaksbehandler = featureToggleService.isEnabled(Toggle.STOP_BRUK_ENDRET_AV_SAKSBEHANDLER_MOT_OPPGAVE).not()
         if (endretAvSaksbehandler != null && brukEndretAvSaksbehandler) {
             uri =
                 UriComponentsBuilder
