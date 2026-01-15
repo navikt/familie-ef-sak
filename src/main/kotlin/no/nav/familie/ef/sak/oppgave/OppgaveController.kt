@@ -105,6 +105,10 @@ class OppgaveController(
             throw ApiFeil("Kunne ikke validere saksbehandler : $saksbehandler", HttpStatus.BAD_REQUEST)
         }
         val endretAvSaksbehandler = SikkerhetContext.hentSaksbehandler()
+        secureLogger.info(
+            "Fordeler oppgave med gsakOppgaveId=$gsakOppgaveId til saksbehandler=$saksbehandler " +
+                "versjon=$versjon, endretAvSaksbehandler=$endretAvSaksbehandler",
+        )
         return Ressurs.success(oppgaveService.fordelOppgave(gsakOppgaveId, saksbehandler, versjon, endretAvSaksbehandler))
     }
 

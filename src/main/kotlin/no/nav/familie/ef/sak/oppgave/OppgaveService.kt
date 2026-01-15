@@ -200,7 +200,7 @@ class OppgaveService(
         endretAvSaksbehandler: String? = null,
     ): Long {
         val oppgave = hentOppgave(gsakOppgaveId)
-
+        secureLogger.info("Fordeler oppgave=$gsakOppgaveId som er tilordnet=${oppgave.tilordnetRessurs} til saksbehandler=$saksbehandler")
         return if (oppgave.tilordnetRessurs == saksbehandler) {
             gsakOppgaveId
         } else {
@@ -286,7 +286,7 @@ class OppgaveService(
     fun finnAlleOppgaverPåBehandlingSomIkkeErFerdigstiltOgHarLikOppgavetype(
         behandlingId: UUID,
         oppgavetype: Oppgavetype,
-    ): List<no.nav.familie.ef.sak.oppgave.Oppgave>? = oppgaveRepository.findAllByBehandlingIdAndErFerdigstiltIsFalseAndTypeIn(behandlingId, setOf(oppgavetype))
+    ): List<EfOppgave>? = oppgaveRepository.findAllByBehandlingIdAndErFerdigstiltIsFalseAndTypeIn(behandlingId, setOf(oppgavetype))
 
     fun settEfOppgaveTilFerdig(
         behandlingId: UUID,
@@ -324,7 +324,7 @@ class OppgaveService(
         secureLogger.info("hent flere oppgaver -  aktørId: $aktørId")
 
         val oppgaverForAutomatiskFerdigstilling =
-            OppgaverForAutomatiskFerdigstilling.values().flatMap { type ->
+            OppgaverForAutomatiskFerdigstilling.entries.flatMap { type ->
                 val enhet = arbeidsfordelingService.hentNavEnhet(aktørId)?.enhetId
                 val request =
                     FinnOppgaveRequest(
@@ -335,7 +335,7 @@ class OppgaveService(
                     )
 
                 val response = oppgaveClient.hentOppgaver(request)
-                response.oppgaver ?: emptyList()
+                response.oppgaver
             }
 
         return FinnOppgaveResponseDto(
@@ -402,7 +402,7 @@ class OppgaveService(
 
     private fun fristBasertPåKlokkeslett(gjeldendeTid: LocalDateTime): LocalDate {
         return if (gjeldendeTid.hour >= 12) {
-            return gjeldendeTid.plusDays(2).toLocalDate()
+            gjeldendeTid.plusDays(2).toLocalDate()
         } else {
             gjeldendeTid.plusDays(1).toLocalDate()
         }
@@ -518,9 +518,9 @@ class OppgaveService(
             else -> error("Håndterer ikke behandlesAvApplikasjon for $oppgavetype")
         }
 
-    private fun List<no.nav.familie.ef.sak.oppgave.Oppgave>?.oppgaveSistEndret(): no.nav.familie.ef.sak.oppgave.Oppgave? = this?.sortedBy { it.sistEndret() }?.last()
+    private fun List<EfOppgave>?.oppgaveSistEndret(): EfOppgave? = this?.sortedBy { it.sistEndret() }?.last()
 
-    private fun no.nav.familie.ef.sak.oppgave.Oppgave.sistEndret(): LocalDateTime = this.sporbar.endret.endretTid
+    private fun EfOppgave.sistEndret(): LocalDateTime = this.sporbar.endret.endretTid
 
     fun finnMappeGittMappenavn(
         mappeNavn: String,

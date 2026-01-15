@@ -17,7 +17,8 @@ enum class Toggle(
     FRONTEND_KOPIER_KNAPP_ERROR_ALERT("familie.ef.sak.frontend-alert-error-med-copy-button", "Release"),
     FRONTEND_VIS_BEREGNINGSSKJEMA("familie.ef.sak.frontend-vis-beregningsskjema", "Release"),
     VIS_ANDRE_YTELSER("familie.ef.sak.vis-andre-ytelser", "Release"),
-
+    BRUK_ENDRET_AV_SAKSBEHANDLER_MOT_OPPGAVE("familie.ef.sak.bruk_endret_av_saksbehandler_mot_oppgave","Release",
+    ),
     // Operational
     G_BEREGNING("familie.ef.sak.g-beregning", "Operational"),
     G_BEREGNING_SCHEDULER("familie.ef.sak.g-beregning-scheduler", "Operational"),
@@ -55,7 +56,7 @@ enum class Toggle(
     ;
 
     companion object {
-        private val toggles: Map<String, Toggle> = values().associateBy { it.name }
+        private val toggles: Map<String, Toggle> = entries.associateBy { it.name }
 
         fun byToggleId(toggleId: String): Toggle = toggles[toggleId] ?: error("Finner ikke toggle for $toggleId")
     }
