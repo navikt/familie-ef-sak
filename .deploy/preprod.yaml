@@ -32,8 +32,6 @@ spec:
     requests:
       memory: 512Mi
       cpu: 50m
-  secureLogs:
-    enabled: true
   gcp:
     sqlInstances:
       - name: familie-ef-sak-17
