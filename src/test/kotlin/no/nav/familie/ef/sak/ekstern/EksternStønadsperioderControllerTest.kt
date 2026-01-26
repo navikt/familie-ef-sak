@@ -8,11 +8,13 @@ import no.nav.familie.kontrakter.felles.ef.EksternePerioderRequest
 import no.nav.familie.kontrakter.felles.ef.EksternePerioderResponse
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import org.springframework.boot.resttestclient.exchange
+import org.junit.jupiter.api.assertThrows
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.web.client.HttpClientErrorException
+import org.springframework.web.client.HttpServerErrorException
 import org.springframework.web.client.exchange
 
 internal class EksternStønadsperioderControllerTest : OppslagSpringRunnerTest() {
@@ -86,10 +88,16 @@ internal class EksternStønadsperioderControllerTest : OppslagSpringRunnerTest()
     internal fun `full overgangsstønad - on-behalf-of token har ikke tilgang til person`() {
         headers.setBearerAuth(onBehalfOfToken("d21e00a4-969d-4b28-8782-dc818abfae65"))
 
-        utførKallOgVerifiser<EksternePerioderResponse>("/api/ekstern/perioder/full-overgangsstonad", PersonIdent("ikkeTilgang")) { response ->
-            assertThat(response.statusCode).isEqualTo(HttpStatus.FORBIDDEN)
-            assertThat(response.body?.status).isEqualTo(Ressurs.Status.IKKE_TILGANG)
-        }
+        val exception =
+            assertThrows<HttpClientErrorException.Forbidden> {
+                restOperations.exchange<EksternePerioderResponse>(
+                    localhost("/api/ekstern/perioder/full-overgangsstonad"),
+                    HttpMethod.POST,
+                    HttpEntity(PersonIdent("ikkeTilgang"), headers),
+                )
+            }
+        assertThat(exception.statusCode).isEqualTo(HttpStatus.FORBIDDEN)
+        assertThat(exception.message).contains(Ressurs.Status.IKKE_TILGANG.toString())
     }
 
     @Test
@@ -124,10 +132,15 @@ internal class EksternStønadsperioderControllerTest : OppslagSpringRunnerTest()
     internal fun `perioder overganggstønad med beløp - skal feile når man savner access_as_application`() {
         headers.setBearerAuth(clientToken("familie-ef-proxy", false))
 
-        utførKallOgVerifiser<EksternePerioderMedBeløpResponse>("/api/ekstern/perioder/overgangsstonad/med-belop") { response ->
-            assertThat(response.statusCode).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR)
-            assertThat(response.body?.status).isEqualTo(Ressurs.Status.FEILET)
-        }
+        val exception =
+            assertThrows<HttpServerErrorException.InternalServerError> {
+                restOperations.exchange<EksternePerioderMedBeløpResponse>(
+                    localhost("/api/ekstern/perioder/overgangsstonad/med-belop"),
+                    HttpMethod.POST,
+                    HttpEntity(PersonIdent("ikkeTilgang"), headers),
+                )
+            }
+        assertThat(exception.message).contains(Ressurs.Status.FEILET.toString())
     }
 
     private fun <T> utførKallOgVerifiser(

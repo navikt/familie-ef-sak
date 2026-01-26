@@ -7,6 +7,7 @@ import no.nav.familie.http.client.RetryOAuth2HttpClient
 import no.nav.familie.http.config.RestTemplateAzure
 import no.nav.familie.http.interceptor.ConsumerIdClientInterceptor
 import no.nav.familie.http.interceptor.MdcValuesPropagatingClientInterceptor
+import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.log.NavSystemtype
 import no.nav.familie.log.filter.LogFilter
 import no.nav.familie.log.filter.RequestTimeFilter
@@ -75,13 +76,11 @@ class ApplicationConfig {
      */
     @Bean
     @Primary
-    fun restTemplateBuilder(objectMapper: ObjectMapper): RestTemplateBuilder {
-        val jackson2HttpMessageConverter = MappingJackson2HttpMessageConverter(objectMapper)
-        return RestTemplateBuilder()
+    fun restTemplateBuilder(objectMapper: ObjectMapper): RestTemplateBuilder =
+        RestTemplateBuilder()
             .connectTimeout(Duration.of(2, ChronoUnit.SECONDS))
             .readTimeout(Duration.of(30, ChronoUnit.SECONDS))
-            .additionalMessageConverters(listOf(jackson2HttpMessageConverter) + RestTemplate().messageConverters)
-    }
+            .additionalMessageConverters(listOf(MappingJackson2HttpMessageConverter(no.nav.familie.kontrakter.felles.objectMapper)) + RestTemplate().messageConverters)
 
     @Bean("utenAuth")
     fun restTemplate(
@@ -89,6 +88,7 @@ class ApplicationConfig {
         consumerIdClientInterceptor: ConsumerIdClientInterceptor,
     ): RestOperations =
         restTemplateBuilder
+            .additionalMessageConverters(listOf(MappingJackson2HttpMessageConverter(objectMapper)) + RestTemplate().messageConverters)
             .additionalInterceptors(
                 consumerIdClientInterceptor,
                 MdcValuesPropagatingClientInterceptor(),
@@ -107,6 +107,7 @@ class ApplicationConfig {
                 RestTemplateBuilder()
                     .connectTimeout(Duration.of(2, ChronoUnit.SECONDS))
                     .readTimeout(Duration.of(2, ChronoUnit.SECONDS))
+                    .additionalMessageConverters(listOf(MappingJackson2HttpMessageConverter(objectMapper)) + RestTemplate().messageConverters)
                     .build(),
             ),
         )
