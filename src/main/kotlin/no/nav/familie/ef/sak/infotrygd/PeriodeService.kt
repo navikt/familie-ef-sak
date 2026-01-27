@@ -5,6 +5,7 @@ import no.nav.familie.ef.sak.barn.BehandlingBarn
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.infotrygd.InternPeriodeUtil.slåSammenPerioder
+import no.nav.familie.ef.sak.infrastruktur.exception.PdlNotFoundException
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.identer
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
@@ -23,6 +24,7 @@ import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.kontrakter.felles.ef.Datakilde
 import no.nav.familie.kontrakter.felles.ef.EksternPeriodeMedStønadstype
 import no.nav.familie.kontrakter.felles.ef.StønadType
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import java.time.YearMonth
 import java.util.UUID
@@ -38,8 +40,10 @@ class PeriodeService(
     private val vilkårsvurderingRepository: VilkårsvurderingRepository,
     private val barnService: BarnService,
 ) {
+    private val logger = LoggerFactory.getLogger(javaClass)
+
     fun hentPerioderFraEfOgInfotrygd(personIdent: String): InternePerioder {
-        val personIdenter = personService.hentPersonIdenter(personIdent).identer()
+        val personIdenter = hentPersonIdenterEllerNull(personIdent) ?: return TOMME_PERIODER
         val perioderFraReplika = infotrygdService.hentSammenslåttePerioderSomInternPerioder(personIdenter)
 
         return InternePerioder(
@@ -62,7 +66,7 @@ class PeriodeService(
     }
 
     fun hentPerioderForOvergangsstønadFraEfOgInfotrygd(personIdent: String): List<InternPeriode> {
-        val personIdenter = personService.hentPersonIdenter(personIdent).identer()
+        val personIdenter = hentPersonIdenterEllerNull(personIdent) ?: return emptyList()
         val perioderFraReplika =
             infotrygdService.hentSammenslåttePerioderSomInternPerioder(personIdenter).overgangsstønad
         val perioderFraEf = hentPerioderFraEf(personIdenter, StønadType.OVERGANGSSTØNAD)
@@ -71,7 +75,7 @@ class PeriodeService(
     }
 
     fun hentPerioderForBarnetilsynFraEfOgInfotrygd(personIdent: String): List<InternPeriode> {
-        val personIdenter = personService.hentPersonIdenter(personIdent).identer()
+        val personIdenter = hentPersonIdenterEllerNull(personIdent) ?: return emptyList()
         val perioderFraReplika =
             infotrygdService.hentSammenslåttePerioderSomInternPerioder(personIdenter).barnetilsyn
         val perioderFraEf = hentPerioderFraEf(personIdenter, StønadType.BARNETILSYN)
@@ -80,7 +84,7 @@ class PeriodeService(
     }
 
     fun hentPeriodeFraVedtakForSkolepenger(personIdent: String): List<EksternPeriodeMedStønadstype> {
-        val personIdenter = personService.hentPersonIdenter(personIdent).identer()
+        val personIdenter = hentPersonIdenterEllerNull(personIdent) ?: return emptyList()
         val skoleårsperioder =
             fagsakService
                 .finnFagsak(personIdenter, StønadType.SKOLEPENGER)
@@ -101,6 +105,14 @@ class PeriodeService(
 
         return skoleårsperioderList
     }
+
+    private fun hentPersonIdenterEllerNull(personIdent: String): Set<String>? =
+        try {
+            personService.hentPersonIdenter(personIdent).identer()
+        } catch (e: PdlNotFoundException) {
+            logger.warn("Fant ikke identer i PDL, returnerer tomme perioder", e)
+            null
+        }
 
     private fun hentPerioderFraEf(
         personIdenter: Set<String>,
@@ -200,6 +212,15 @@ class PeriodeService(
     private fun finnVedtaksperioder(behandlingId: UUID): List<Vedtaksperiode> {
         val vedtak: Vedtak = vedtakService.hentVedtak(behandlingId)
         return vedtak.perioder?.perioder?.filter { it.periodeType != VedtaksperiodeType.MIDLERTIDIG_OPPHØR } ?: emptyList()
+    }
+
+    companion object {
+        private val TOMME_PERIODER =
+            InternePerioder(
+                overgangsstønad = emptyList(),
+                barnetilsyn = emptyList(),
+                skolepenger = emptyList(),
+            )
     }
 
     private fun finnBehandlingsbarnMedOppfyltAleneomsorgvilkår(behandlingsId: UUID): List<BehandlingBarn> {
