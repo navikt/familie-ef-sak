@@ -73,6 +73,8 @@ internal class BehandlingPåVentServiceTest {
     val saksbehandling = saksbehandling(fagsak, behandling)
     val behandlingId = behandling.id
 
+    val informereLokalkontorOSTekst = "Bruker har søkt om overgangsstønad. Vurder oppfølging og eventuelt refusjonskrav"
+
     @BeforeEach
     internal fun setUp() {
         mockkObject(SikkerhetContext)
@@ -203,7 +205,7 @@ internal class BehandlingPåVentServiceTest {
                         assertThat(it.type).isEqualTo(OpprettOppgaveTask.TYPE)
                         assertThat(it.payload).contains(behandlingId.toString())
                         assertThat(it.payload).contains(Oppgavetype.VurderHenvendelse.name)
-                        assertThat(it.payload).contains("Bruker har søkt om overgangsstønad. Vurder oppfølging.")
+                        assertThat(it.payload).contains(informereLokalkontorOSTekst)
                     },
                 )
             }
@@ -231,7 +233,7 @@ internal class BehandlingPåVentServiceTest {
                         assertThat(it.type).isEqualTo(OpprettOppgaveTask.TYPE)
                         assertThat(it.payload).contains(behandlingId.toString())
                         assertThat(it.payload).contains(Oppgavetype.VurderHenvendelse.name)
-                        assertThat(it.payload).contains("Bruker har søkt om overgangsstønad. Vurder oppfølging.")
+                        assertThat(it.payload).contains(informereLokalkontorOSTekst)
                     },
                 )
             }
