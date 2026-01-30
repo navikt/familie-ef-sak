@@ -349,7 +349,7 @@ Oppgave endret frist fra 2023-03-18 til 2023-03-19
       | Tasktype           | opprettOppgave                                       |
       | BehandlingId       | a7947fc8-e39d-4cbc-960c-73ef39a9b59d                 |
       | Oppgavetype        | VurderHenvendelse                                    |
-      | Oppgavebeskrivelse | Bruker har søkt om overgangsstønad. Vurder oppfølging. |
+      | Oppgavebeskrivelse | Bruker har søkt om overgangsstønad. Vurder oppfølging og eventuelt refusjonskrav. |
 
   Scenario: Sett på vent med en oppfølgingsoppgave som automatisk skal opprettes - be om innstilling om utdanning
 
