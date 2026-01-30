@@ -16,6 +16,7 @@ import no.nav.familie.ef.sak.behandlingshistorikk.domain.StegUtfall
 import no.nav.familie.ef.sak.brev.VedtaksbrevService
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.clearBrukerContext
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.mockBrukerContext
+import no.nav.familie.ef.sak.infrastruktur.config.ObjectMapperProvider
 import no.nav.familie.ef.sak.infrastruktur.config.RolleConfig
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.oppfølgingsoppgave.OppfølgingsoppgaveService
@@ -58,12 +59,13 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.resttestclient.exchange
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.exchange
 import java.time.LocalDate
 import java.time.YearMonth
@@ -147,20 +149,26 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
     internal fun `skal kaste feil ved innvilgelse hvis vilkårsvurderinger mangler`() {
         val behandlingId = opprettBehandling(vedtakResultatType = ResultatType.INNVILGE)
         lagVilkårsvurderinger(behandlingId, ikkeLag = 1)
-        sendTilBeslutter(SAKSBEHANDLER) { response ->
-            assertThat(response.body?.frontendFeilmelding)
-                .isEqualTo("Kan ikke innvilge hvis ikke alle vilkår er oppfylt for behandlingId: $behandlingId")
-        }
+
+        val exception =
+            assertThrows<HttpClientErrorException.BadRequest> {
+                sendTilBeslutter(SAKSBEHANDLER)
+            }
+        val ressurs = ObjectMapperProvider.objectMapper.readValue(exception.responseBodyAsString, Ressurs::class.java)
+        assertThat(ressurs.frontendFeilmelding).isEqualTo("Kan ikke innvilge hvis ikke alle vilkår er oppfylt for behandlingId: $behandlingId")
     }
 
     @Test
     internal fun `skal kaste feil ved innvilgelse hvis en ikke er innvilget`() {
         val behandlingId = opprettBehandling(vedtakResultatType = ResultatType.INNVILGE)
         lagVilkårsvurderinger(behandlingId, Vilkårsresultat.IKKE_OPPFYLT)
-        sendTilBeslutter(SAKSBEHANDLER) { response ->
-            assertThat(response.body?.frontendFeilmelding)
-                .isEqualTo("Kan ikke innvilge hvis ikke alle vilkår er oppfylt for behandlingId: $behandlingId")
-        }
+
+        val exception =
+            assertThrows<HttpClientErrorException.BadRequest> {
+                sendTilBeslutter(SAKSBEHANDLER)
+            }
+        val ressurs = ObjectMapperProvider.objectMapper.readValue(exception.responseBodyAsString, Ressurs::class.java)
+        assertThat(ressurs.frontendFeilmelding).isEqualTo("Kan ikke innvilge hvis ikke alle vilkår er oppfylt for behandlingId: $behandlingId")
     }
 
     @Test
@@ -206,8 +214,12 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
         validerTotrinnskontrollIkkeAutorisert(BESLUTTER)
         validerTotrinnskontrollKanFatteVedtak(BESLUTTER_2)
 
-        godkjennTotrinnskontroll(SAKSBEHANDLER, responseBadRequest())
-        godkjennTotrinnskontroll(BESLUTTER, responseBadRequest())
+        assertThrows<HttpClientErrorException.BadRequest> {
+            godkjennTotrinnskontroll(SAKSBEHANDLER)
+        }
+        assertThrows<HttpClientErrorException.BadRequest> {
+            godkjennTotrinnskontroll(BESLUTTER, responseBadRequest())
+        }
 
         byttEierPåLagretOppgave(behandlingId, 24682L, 24685L)
         godkjennTotrinnskontroll(BESLUTTER_2)
@@ -257,7 +269,9 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
         validerTotrinnskontrollIkkeAutorisert(BESLUTTER)
         validerTotrinnskontrollKanFatteVedtak(BESLUTTER_2)
 
-        godkjennTotrinnskontroll(BESLUTTER, responseBadRequest())
+        assertThrows<HttpClientErrorException.BadRequest> {
+            godkjennTotrinnskontroll(BESLUTTER)
+        }
 
         byttEierPåLagretOppgave(behandlingId, 24682L, 24685L)
         godkjennTotrinnskontroll(BESLUTTER_2)
@@ -266,25 +280,31 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
     @Test
     internal fun `kan ikke godkjenne totrinnskontroll når behandling utredes`() {
         opprettBehandling()
-        godkjennTotrinnskontroll(BESLUTTER) {
-            assertThat(it.statusCode).isEqualTo(HttpStatus.BAD_REQUEST)
-        }
+        val exception =
+            assertThrows<HttpClientErrorException.BadRequest> {
+                godkjennTotrinnskontroll(BESLUTTER)
+            }
+        assertThat(exception.statusCode).isEqualTo(HttpStatus.BAD_REQUEST)
     }
 
     @Test
     internal fun `kan ikke sende til besluttning før behandling er i riktig steg`() {
         opprettBehandling(steg = StegType.VILKÅR)
-        godkjennTotrinnskontroll(BESLUTTER) {
-            assertThat(it.statusCode).isEqualTo(HttpStatus.BAD_REQUEST)
-        }
+
+        val exception =
+            assertThrows<HttpClientErrorException.BadRequest> {
+                godkjennTotrinnskontroll(BESLUTTER)
+            }
+        assertThat(exception.statusCode).isEqualTo(HttpStatus.BAD_REQUEST)
     }
 
     @Test
     internal fun `kan ikke sende til besluttning som saksbehandler`() {
         opprettBehandling(saksbehandler = BESLUTTER)
         sendTilBeslutter(BESLUTTER)
-        godkjennTotrinnskontroll(SAKSBEHANDLER) {
-            assertThat(it.statusCode).isEqualTo(HttpStatus.BAD_REQUEST)
+
+        assertThrows<HttpClientErrorException.BadRequest> {
+            godkjennTotrinnskontroll(SAKSBEHANDLER)
         }
     }
 
@@ -373,7 +393,9 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
         internal fun `skal feile hvis en annen saksbehandler prøver å angre send til beslutter`() {
             opprettBehandling(steg = StegType.SEND_TIL_BESLUTTER, status = BehandlingStatus.UTREDES)
             sendTilBeslutter(SAKSBEHANDLER)
-            angreSendTilBeslutter(BESLUTTER, responseBadRequest())
+            assertThrows<HttpClientErrorException.BadRequest> {
+                angreSendTilBeslutter(BESLUTTER)
+            }
         }
 
         @Test
@@ -387,7 +409,10 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
                 ),
             )
             opprettOppgave(oppgaveType = Oppgavetype.GodkjenneVedtak, sakshandler = BESLUTTER)
-            angreSendTilBeslutter(SAKSBEHANDLER, responseBadRequest())
+
+            assertThrows<HttpClientErrorException.BadRequest> {
+                angreSendTilBeslutter(SAKSBEHANDLER)
+            }
         }
 
         @Test
@@ -395,7 +420,9 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
             opprettBehandling(steg = StegType.SEND_TIL_BESLUTTER, status = BehandlingStatus.UTREDES)
             sendTilBeslutter(SAKSBEHANDLER)
             opprettOppgave(oppgaveType = Oppgavetype.GodkjenneVedtak, sakshandler = BESLUTTER)
-            angreSendTilBeslutter(SAKSBEHANDLER, responseBadRequest())
+            assertThrows<HttpClientErrorException.BadRequest> {
+                angreSendTilBeslutter(SAKSBEHANDLER)
+            }
         }
 
         @Test
@@ -456,11 +483,13 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
         lagVilkårsvurderinger(behandlingId, Vilkårsresultat.OPPFYLT)
         sendTilBeslutter(SAKSBEHANDLER)
         byttEierPåLagretOppgave(behandlingId, 24681L, 24688L)
-        godkjennTotrinnskontroll(BESLUTTER) { response ->
-            assertThat(response.body?.frontendFeilmelding)
-                .isEqualTo("Kan ikke iverksette med utdatert grunnbeløp gyldig fra 2025-04. Denne behandlingen må beregnes og simuleres på nytt")
-            assertThat(response.statusCode).isEqualTo(HttpStatus.BAD_REQUEST)
-        }
+
+        val exception =
+            assertThrows<HttpClientErrorException.BadRequest> {
+                godkjennTotrinnskontroll(BESLUTTER)
+            }
+        val ressurs = ObjectMapperProvider.objectMapper.readValue(exception.responseBodyAsString, Ressurs::class.java)
+        assertThat(ressurs.frontendFeilmelding).isEqualTo("Kan ikke iverksette med utdatert grunnbeløp gyldig fra 2025-04. Denne behandlingen må beregnes og simuleres på nytt")
 
         val lagretBehandling = behandlingService.hentBehandling(behandlingId)
         assertThat(lagretBehandling.status).isEqualTo(BehandlingStatus.FATTER_VEDTAK)
@@ -612,6 +641,21 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
     }
 
     private fun beslutteVedtak(
+        saksbehandler: Saksbehandler,
+        beslutteVedtak: BeslutteVedtakDto,
+        validator: (ResponseEntity<Ressurs<UUID>>) -> Unit,
+    ) {
+        headers.setBearerAuth(token(saksbehandler))
+        val response =
+            restTemplate.exchange<Ressurs<UUID>>(
+                localhost("/api/vedtak/${behandling.id}/beslutte-vedtak"),
+                HttpMethod.POST,
+                HttpEntity(beslutteVedtak, headers),
+            )
+        validator.invoke(response)
+    }
+
+    private fun beslutteVedtakForventFeil(
         saksbehandler: Saksbehandler,
         beslutteVedtak: BeslutteVedtakDto,
         validator: (ResponseEntity<Ressurs<UUID>>) -> Unit,

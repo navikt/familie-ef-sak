@@ -240,14 +240,14 @@ internal class BeregningBarnetilsynControllerTest : OppslagSpringRunnerTest() {
         id: UUID,
         vedtakDto: VedtakDto,
     ): ResponseEntity<Ressurs<UUID>> =
-        restTemplate.exchange(
+        testRestTemplate.exchange(
             localhost("/api/vedtak/$id/lagre-vedtak"),
             HttpMethod.POST,
             HttpEntity(vedtakDto, headers),
         )
 
     private fun hentBeløpsperioderForBehandling(id: UUID): ResponseEntity<Ressurs<List<BeløpsperiodeBarnetilsynDto>>> =
-        restTemplate.exchange(
+        testRestTemplate.exchange(
             localhost("/api/beregning/barnetilsyn/$id"),
             HttpMethod.GET,
             HttpEntity<Ressurs<List<BeløpsperiodeBarnetilsynDto>>>(headers),

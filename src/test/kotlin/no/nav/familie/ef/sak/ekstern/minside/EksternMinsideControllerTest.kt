@@ -15,12 +15,15 @@ import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.resttestclient.exchange
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.web.client.HttpServerErrorException
+import org.springframework.web.client.exchange
 import java.time.LocalDate
 
 class EksternMinsideControllerTest : OppslagSpringRunnerTest() {
@@ -95,7 +98,7 @@ class EksternMinsideControllerTest : OppslagSpringRunnerTest() {
     }
 
     private fun hentMineStønadsperioder(): ResponseEntity<Ressurs<MineStønaderDto>> =
-        restTemplate.exchange(
+        testRestTemplate.exchange(
             localhost("/api/ekstern/minside/stonadsperioder"),
             HttpMethod.GET,
             HttpEntity<Ressurs<MineStønaderDto>>(headers),

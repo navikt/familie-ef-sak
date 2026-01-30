@@ -63,7 +63,7 @@ internal class ApiExceptionHandlerTest : OppslagSpringRunnerTest() {
     }
 
     private fun gjørKallSomKaster(feil: TestExceptionType) =
-        restTemplate.exchange<Ressurs<String>>(
+        testRestTemplate.exchange<Ressurs<String>>(
             localhost("/api/testfeil/$feil"),
             HttpMethod.GET,
             HttpEntity<Ressurs<String>>(headers),

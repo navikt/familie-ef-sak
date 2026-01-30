@@ -3,16 +3,11 @@ package no.nav.familie.ef.sak.vedtak.dto
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonTypeInfo
-import com.fasterxml.jackson.core.JsonGenerator
 import com.fasterxml.jackson.core.JsonParser
 import com.fasterxml.jackson.databind.DeserializationContext
 import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.JsonSerializer
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.databind.SerializerProvider
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer
-import com.fasterxml.jackson.databind.jsontype.TypeSerializer
-import com.fasterxml.jackson.databind.ser.std.StdSerializer
 import no.nav.familie.ef.sak.beregning.Inntekt
 import no.nav.familie.ef.sak.beregning.tilInntekt
 import no.nav.familie.ef.sak.beregning.tilInntektsperioder
@@ -75,45 +70,6 @@ fun ResultatType.tilVedtaksresultat(): Vedtaksresultat =
         ResultatType.SANKSJONERE -> Vedtaksresultat.INNVILGET
     }
 
-@JsonTypeInfo(
-    use = JsonTypeInfo.Id.NAME,
-    include = JsonTypeInfo.As.PROPERTY,
-    property = "_type",
-)
-@JsonSubTypes(
-    JsonSubTypes.Type(
-        value = Avslå::class,
-        name = "Avslag",
-    ),
-    JsonSubTypes.Type(
-        value = InnvilgelseOvergangsstønad::class,
-        name = "InnvilgelseOvergangsstønad",
-    ),
-    JsonSubTypes.Type(
-        value = InnvilgelseBarnetilsyn::class,
-        name = "InnvilgelseBarnetilsyn",
-    ),
-    JsonSubTypes.Type(
-        value = InnvilgelseBarnetilsyn::class,
-        name = "InnvilgelseBarnetilsynUtenUtbetaling",
-    ),
-    JsonSubTypes.Type(
-        value = InnvilgelseSkolepenger::class,
-        name = "InnvilgelseSkolepenger",
-    ),
-    JsonSubTypes.Type(
-        value = Opphør::class,
-        name = "Opphør",
-    ),
-    JsonSubTypes.Type(
-        value = OpphørSkolepenger::class,
-        name = "OpphørSkolepenger",
-    ),
-    JsonSubTypes.Type(
-        value = Sanksjonert::class,
-        name = "Sanksjonering",
-    ),
-)
 sealed class VedtakDto(
     open val resultatType: ResultatType,
     open val _type: String,

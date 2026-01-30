@@ -28,7 +28,7 @@ internal class BehandlingControllerTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    internal fun `Skal returnere 200 OK med status IKKE_TILGANG dersom man ikke har tilgang til brukeren`() {
+    internal fun `Skal returnere 403 FORBIDDEN med status IKKE_TILGANG dersom man ikke har tilgang til brukeren`() {
         val fagsak = testoppsettService.lagreFagsak(fagsak(identer = setOf(PersonIdent("ikkeTilgang"))))
         val behandling = behandlingRepository.insert(behandling(fagsak))
         val respons = hentBehandling(behandling.id)
@@ -39,7 +39,7 @@ internal class BehandlingControllerTest : OppslagSpringRunnerTest() {
     }
 
     private fun hentBehandling(id: UUID): ResponseEntity<Ressurs<BehandlingDto>> =
-        restTemplate.exchange(
+        testRestTemplate.exchange(
             localhost("/api/behandling/$id"),
             HttpMethod.GET,
             HttpEntity<Ressurs<BehandlingDto>>(headers),

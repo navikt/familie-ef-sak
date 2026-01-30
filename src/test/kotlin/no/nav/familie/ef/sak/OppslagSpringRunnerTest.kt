@@ -43,6 +43,7 @@ import no.nav.familie.prosessering.domene.TaskLogg
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import no.nav.security.token.support.spring.test.EnableMockOAuth2Server
 import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
@@ -60,6 +61,7 @@ import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import org.springframework.web.client.RestOperations
+import org.springframework.web.client.RestTemplate
 
 @ExtendWith(SpringExtension::class)
 @ContextConfiguration(initializers = [DbContainerInitializer::class])
@@ -95,14 +97,16 @@ abstract class OppslagSpringRunnerTest {
     protected var loggingEvents: MutableList<ILoggingEvent> = listAppender.list
     protected val headers = HttpHeaders()
 
-    @Autowired
-    protected lateinit var restTemplate: TestRestTemplate
-
+    protected val jackson2HttpMessageConverter = MappingJackson2HttpMessageConverter(objectMapper)
     protected val restOperations: RestOperations =
         RestTemplateBuilder()
-            .additionalMessageConverters(
-                MappingJackson2HttpMessageConverter(objectMapper),
-            ).build()
+            .additionalMessageConverters(listOf(jackson2HttpMessageConverter) + RestTemplate().messageConverters)
+            .build()
+
+    protected val restTemplate = RestTemplateBuilder().additionalMessageConverters(listOf(jackson2HttpMessageConverter) + RestTemplate().messageConverters).build()
+
+    @Autowired
+    protected lateinit var testRestTemplate: TestRestTemplate
 
     @Autowired
     private lateinit var jdbcAggregateOperations: JdbcAggregateOperations

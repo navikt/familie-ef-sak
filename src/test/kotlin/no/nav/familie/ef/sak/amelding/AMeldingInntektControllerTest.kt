@@ -29,7 +29,7 @@ internal class AMeldingInntektControllerTest : OppslagSpringRunnerTest() {
     }
 
     private fun kallGenererUrl(): ResponseEntity<Ressurs<String>> =
-        restTemplate.exchange(
+        testRestTemplate.exchange(
             localhost("/api/inntekt/fagsak/${fagsak.id}/generer-url"),
             HttpMethod.GET,
             HttpEntity<Ressurs<String>>(headers),

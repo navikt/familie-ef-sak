@@ -32,8 +32,6 @@ class VedtakDtoMapperTest {
         assertErLik(vedtak, vedtakJson)
     }
 
-    /*
-    TODO: Er det riktig å håndtere BarnetilsynInnvilgetUtenUtbetaling som egen type når det ikke har egen klasse?
     @Test
     fun `deserialiser og serialiser innvilget barnetilsyn uten utbetaling vedtak dto`() {
         val vedtakJson = readFile("BarnetilsynInnvilgetUtenUtbetalingVedtakDto.json")
@@ -46,7 +44,6 @@ class VedtakDtoMapperTest {
                 )
         assertErLik(vedtak, vedtakJson)
     }
-     */
 
     @Test
     fun `deserialiser og serialiser innvilget skolepenger vedtak dto`() {

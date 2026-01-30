@@ -70,12 +70,9 @@ class NyeBarnService(
         if (fagsak.migrert) {
             try {
                 taskService.save(OpprettOppgaveForMigrertFødtBarnTask.opprettOppgave(fagsak, nyeBarn))
-            } catch (e: DataAccessException) {
-                if (e.cause is DuplicateKeyException) {
-                    logger.warn("DuplicateKeyException ved opprettelse av task, den er sannsynligvis allerede opprettet")
-                    return
-                }
-                throw e
+            } catch (e: DuplicateKeyException) {
+                logger.warn("DuplicateKeyException ved opprettelse av task, den er sannsynligvis allerede opprettet")
+                return
             }
         }
     }

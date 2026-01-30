@@ -6,6 +6,7 @@ import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
+import no.nav.familie.ef.sak.infrastruktur.config.ObjectMapperProvider
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadDatoerDto
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
 import no.nav.familie.ef.sak.repository.behandling
@@ -14,16 +15,21 @@ import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.ef.søknad.SøknadMedVedlegg
 import no.nav.familie.kontrakter.ef.søknad.Testsøknad
 import no.nav.familie.kontrakter.felles.Ressurs
+import no.nav.familie.kontrakter.felles.Ressurs.Status
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.assertj.core.api.Assertions
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.resttestclient.exchange
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.web.client.HttpClientErrorException
+import org.springframework.web.client.exchange
 import java.util.UUID
 
 internal class SøknadControllerTest : OppslagSpringRunnerTest() {
@@ -50,9 +56,9 @@ internal class SøknadControllerTest : OppslagSpringRunnerTest() {
         val behandling = behandlingRepository.insert(behandling(fagsak))
         val respons = hentSøknadData(behandling.id)
 
-        Assertions.assertThat(respons.statusCode).isEqualTo(HttpStatus.FORBIDDEN)
-        Assertions.assertThat(respons.body?.status).isEqualTo(Ressurs.Status.IKKE_TILGANG)
-        Assertions.assertThat(respons.body?.data).isNull()
+        assertThat(respons.statusCode).isEqualTo(HttpStatus.FORBIDDEN)
+        assertThat(respons.body?.status).isEqualTo(Ressurs.Status.IKKE_TILGANG)
+        assertThat(respons.body?.data).isNull()
     }
 
     @Test
@@ -74,14 +80,14 @@ internal class SøknadControllerTest : OppslagSpringRunnerTest() {
         val søknadSkjema = søknadService.hentOvergangsstønad(behandling.id)!!
         val respons: ResponseEntity<Ressurs<SøknadDatoerDto>> = hentSøknadData(behandling.id)
 
-        Assertions.assertThat(respons.statusCode).isEqualTo(HttpStatus.OK)
-        Assertions.assertThat(respons.body?.status).isEqualTo(Ressurs.Status.SUKSESS)
-        Assertions.assertThat(respons.body?.data?.søkerStønadFra).isEqualTo(søknadSkjema.søkerFra)
-        Assertions.assertThat(respons.body?.data?.søknadsdato).isEqualTo(søknadSkjema.datoMottatt)
+        assertThat(respons.statusCode).isEqualTo(HttpStatus.OK)
+        assertThat(respons.body?.status).isEqualTo(Ressurs.Status.SUKSESS)
+        assertThat(respons.body?.data?.søkerStønadFra).isEqualTo(søknadSkjema.søkerFra)
+        assertThat(respons.body?.data?.søknadsdato).isEqualTo(søknadSkjema.datoMottatt)
     }
 
     private fun hentSøknadData(behandlingId: UUID): ResponseEntity<Ressurs<SøknadDatoerDto>> =
-        restTemplate.exchange(
+        testRestTemplate.exchange(
             localhost("/api/soknad/$behandlingId/datoer"),
             HttpMethod.GET,
             HttpEntity<Ressurs<SøknadDatoerDto>>(headers),

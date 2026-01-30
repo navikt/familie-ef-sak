@@ -1,6 +1,6 @@
 package no.nav.familie.ef.sak.infrastruktur.config
 
-import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.ef.sak.infrastruktur.config.ObjectMapperProvider.objectMapper
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
