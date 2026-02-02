@@ -48,11 +48,11 @@ class IverksettClient(
     }
 
     fun sendBehandlingsstatistikk(request: BehandlingsstatistikkDto) {
-        postForEntity<Any>(URI.create("$familieEfIverksettUri/api/statistikk/behandlingsstatistikk"), request)
+        postForEntity<Void>(URI.create("$familieEfIverksettUri/api/statistikk/behandlingsstatistikk"), request)
     }
 
     fun publiserVedtakshendelse(behandlingId: UUID) {
-        postForEntity<Any>(URI.create("$familieEfIverksettUri/api/iverksett/vedtakshendelse/$behandlingId"), "")
+        postForEntity<Void>(URI.create("$familieEfIverksettUri/api/iverksett/vedtakshendelse/$behandlingId"), "")
     }
 
     fun iverksett(
