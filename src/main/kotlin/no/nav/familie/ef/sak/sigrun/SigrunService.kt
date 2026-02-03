@@ -28,6 +28,12 @@ class SigrunService(
 
         return pensjonsgivendeInntektList.subList(0, førsteÅretMedInntektIndex)
     }
+
+    // TODO: Fjern
+    fun hentInntektForÅr(fagsakPersonId: UUID, inntektsår: Int): PensjonsgivendeInntektVisning {
+        val aktivIdent = fagsakPersonService.hentAktivIdent(fagsakPersonId)
+        return sigrunClient.hentPensjonsgivendeInntekt(aktivIdent, inntektsår).mapTilPensjonsgivendeInntektVisning(inntektsår)
+    }
 }
 
 private fun PensjonsgivendeInntektResponse.mapTilPensjonsgivendeInntektVisning(inntektsår: Int): PensjonsgivendeInntektVisning {

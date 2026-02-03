@@ -25,4 +25,15 @@ class SigrunController(
         val inntektSisteTreÅr = sigrunService.hentInntektForAlleÅrMedInntekt(fagsakPersonId)
         return Ressurs.success(inntektSisteTreÅr)
     }
+
+    // TODO: Fjern
+    @GetMapping("fagsak-person/{fagsakPersonId}/aar/{inntektsaar}")
+    fun hentPensjonsgivendeInntektForÅr(
+        @PathVariable fagsakPersonId: UUID,
+        @PathVariable inntektsaar: Int,
+    ): Ressurs<PensjonsgivendeInntektVisning> {
+        tilgangService.validerTilgangTilFagsakPerson(fagsakPersonId, AuditLoggerEvent.ACCESS)
+        val inntekt = sigrunService.hentInntektForÅr(fagsakPersonId, inntektsaar)
+        return Ressurs.success(inntekt)
+    }
 }
