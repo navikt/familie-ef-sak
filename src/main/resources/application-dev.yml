@@ -38,3 +38,6 @@ FAMILIE_TILBAKE_SCOPE: api://dev-gcp.tilbake.tilbakekreving-backend/.default
 
 INNTEKT_URL: https://ikomp-q2.dev-fss-pub.nais.io
 INNTEKT_SCOPE: api://dev-fss.team-inntekt.ikomp-q2/.default
+
+SIGRUN_URL: https://sigrun-q2.dev-fss-pub.nais.io
+SIGRUN_SCOPE: api://dev-fss.team-inntekt.sigrun-q2/.default

@@ -2,6 +2,25 @@ package no.nav.familie.ef.sak.sigrun.ekstern
 
 import java.time.LocalDate
 
+data class PensjonsgivendeInntektRequest(
+    val norskPersonidentifikator: String,
+    val inntektsaar: Int,
+    val rettighetspakke: String = "navEnsligForsoerger",
+)
+
+data class SummertSkattegrunnlagRequest(
+    val personidentifikator: String,
+    val inntektsaar: Int,
+    val inntektsfilter: String = "SummertSkattegrunnlagEnsligForsorger",
+)
+
+// TODO: DEtte trengs kanskje ikke
+data class BeregnetSkattRequest(
+    val personidentifikator: String,
+    val inntektsaar: Int, // TODO: Sett JSON property på denne
+    val filter: String = "BeregnetSkattPensjonsgivendeInntekt",
+)
+
 data class PensjonsgivendeInntektResponse(
     val norskPersonidentifikator: String?, // Kan bli null dersom person ikke finnes
     val inntektsaar: Int?,

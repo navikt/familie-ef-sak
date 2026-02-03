@@ -30,6 +30,7 @@ FAMILIE_BLANKETT_API_URL: http://localhost:8033
 #FAMILIE_EF_IVERKSETT_URL: http://localhost:8094 # Fordi iverksett og klage er på samme url/port lokalt så må vi kommentere ut den av de vi ikke vil kjøre opp mot lokalt
 FAMILIE_EF_PROXY_URL: http://localhost:8002
 FAMILIE_DOKUMENT_URL: http://localhost:8082
+SIGRUN_URL: http://localhost:8002
 FAMILIE_KLAGE_URL: http://localhost:8094
 FAMILIE_KS_SAK_URL: http://localhost:8083
 
