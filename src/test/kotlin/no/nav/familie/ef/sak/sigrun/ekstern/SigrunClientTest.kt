@@ -49,7 +49,7 @@ class SigrunClientTest {
     fun `hent pensjonsgivende inntekt fra sigrun og map til objekt`() {
         wiremockServerItem.stubFor(
             WireMock
-                .post(urlEqualTo("/api/v1/pensjonsgivendeinntektforfolketrygden"))
+                .post(urlEqualTo("/api/sigrun/pensjonsgivendeinntekt?inntektsaar=2022"))
                 .willReturn(
                     WireMock
                         .aResponse()
@@ -59,8 +59,7 @@ class SigrunClientTest {
                 ),
         )
         val pensjonsgivendeInntektResponse = sigrunClient.hentPensjonsgivendeInntekt("09528731462", 2022)
-        assertThat(pensjonsgivendeInntektResponse).isNotNull
-        assertThat(pensjonsgivendeInntektResponse!!.inntektsaar).isEqualTo(2022)
+        assertThat(pensjonsgivendeInntektResponse.inntektsaar).isEqualTo(2022)
         assertThat(pensjonsgivendeInntektResponse.norskPersonidentifikator).isEqualTo("09528731462")
         assertThat(pensjonsgivendeInntektResponse.pensjonsgivendeInntekt?.size).isEqualTo(2)
         assertThat(pensjonsgivendeInntektResponse.pensjonsgivendeInntekt?.first()?.skatteordning).isEqualTo(Skatteordning.FASTLAND)
@@ -74,25 +73,10 @@ class SigrunClientTest {
     }
 
     @Test
-    fun `hent pensjonsgivende inntekt returnerer null ved 404`() {
-        wiremockServerItem.stubFor(
-            WireMock
-                .post(urlEqualTo("/api/v1/pensjonsgivendeinntektforfolketrygden"))
-                .willReturn(
-                    WireMock
-                        .aResponse()
-                        .withStatus(HttpStatus.NOT_FOUND.value()),
-                ),
-        )
-        val pensjonsgivendeInntektResponse = sigrunClient.hentPensjonsgivendeInntekt("09528731462", 2022)
-        assertThat(pensjonsgivendeInntektResponse).isNull()
-    }
-
-    @Test
     fun `hent beregnetskatt fra sigrun og map til objekt`() {
         wiremockServerItem.stubFor(
             WireMock
-                .post(urlEqualTo("/api/beregnetskatt"))
+                .post(urlEqualTo("/api/sigrun/beregnetskatt?inntektsaar=2022"))
                 .willReturn(
                     WireMock
                         .aResponse()
@@ -111,7 +95,7 @@ class SigrunClientTest {
     fun `hent beregnetskatt fra sigrun og map til objekt med skatteoppgjørsdato`() {
         wiremockServerItem.stubFor(
             WireMock
-                .post(urlEqualTo("/api/beregnetskatt"))
+                .post(urlEqualTo("/api/sigrun/beregnetskatt?inntektsaar=2022"))
                 .willReturn(
                     WireMock
                         .aResponse()
@@ -127,25 +111,10 @@ class SigrunClientTest {
     }
 
     @Test
-    fun `hent beregnetskatt returnerer tom liste ved 404`() {
-        wiremockServerItem.stubFor(
-            WireMock
-                .post(urlEqualTo("/api/beregnetskatt"))
-                .willReturn(
-                    WireMock
-                        .aResponse()
-                        .withStatus(HttpStatus.NOT_FOUND.value()),
-                ),
-        )
-        val beregnetSkatt = sigrunClient.hentBeregnetSkatt("123", 2022)
-        assertThat(beregnetSkatt).isEmpty()
-    }
-
-    @Test
     fun `hent summertskattegrunnlag fra sigrun og map til objekt`() {
         wiremockServerItem.stubFor(
             WireMock
-                .post(urlEqualTo("/api/v2/summertskattegrunnlag"))
+                .post(urlEqualTo("/api/sigrun/summertskattegrunnlag?inntektsaar=2018"))
                 .willReturn(
                     WireMock
                         .aResponse()
@@ -155,27 +124,11 @@ class SigrunClientTest {
                 ),
         )
         val summertSkattegrunnlag = sigrunClient.hentSummertSkattegrunnlag("123", 2018)
-        assertThat(summertSkattegrunnlag).isNotNull
-        assertThat(summertSkattegrunnlag!!.grunnlag.size).isEqualTo(4)
+        assertThat(summertSkattegrunnlag.grunnlag.size).isEqualTo(4)
         assertThat(summertSkattegrunnlag.skatteoppgjoersdato).isEqualTo("2018-10-04")
         assertThat(summertSkattegrunnlag.svalbardGrunnlag.size).isEqualTo(4)
         assertThat(summertSkattegrunnlag.svalbardGrunnlag.first().tekniskNavn).isEqualTo("samledePaaloepteRenter")
         assertThat(summertSkattegrunnlag.svalbardGrunnlag.first().beloep).isEqualTo(779981)
-    }
-
-    @Test
-    fun `hent summertskattegrunnlag returnerer null ved 404`() {
-        wiremockServerItem.stubFor(
-            WireMock
-                .post(urlEqualTo("/api/v2/summertskattegrunnlag"))
-                .willReturn(
-                    WireMock
-                        .aResponse()
-                        .withStatus(HttpStatus.NOT_FOUND.value()),
-                ),
-        )
-        val summertSkattegrunnlag = sigrunClient.hentSummertSkattegrunnlag("123", 2018)
-        assertThat(summertSkattegrunnlag).isNull()
     }
 
     private val pensjonsgivendeInntektResponseJson =

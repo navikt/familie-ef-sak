@@ -22,8 +22,7 @@ class SigrunService(
 
         val pensjonsgivendeInntektList =
             inntektsår.map {
-                sigrunClient.hentPensjonsgivendeInntekt(aktivIdent, it)?.mapTilPensjonsgivendeInntektVisning(it)
-                    ?: PensjonsgivendeInntektVisning(inntektsår = it, næring = 0, person = 0)
+                sigrunClient.hentPensjonsgivendeInntekt(aktivIdent, it).mapTilPensjonsgivendeInntektVisning(it)
             }
         val førsteÅretMedInntektIndex = pensjonsgivendeInntektList.indexOfLast { it.totalInntektOverNull() } + 1
 

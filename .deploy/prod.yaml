@@ -108,7 +108,6 @@ spec:
         - host: familie-ef-proxy.prod-fss-pub.nais.io
         - host: teamfamilie-unleash-api.nav.cloud.nais.io
         - host: ikomp.prod-fss-pub.nais.io
-        - host: sigrun.prod-fss-pub.nais.io
   azure:
     application:
       enabled: true

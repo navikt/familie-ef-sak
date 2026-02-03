@@ -1,80 +1,51 @@
 package no.nav.familie.ef.sak.sigrun.ekstern
 
 import no.nav.familie.http.client.AbstractRestClient
+import no.nav.familie.kontrakter.felles.PersonIdent
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Component
-import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.RestOperations
 import org.springframework.web.util.UriComponentsBuilder
 import java.net.URI
 
 @Component
 class SigrunClient(
-    @Value("\${SIGRUN_URL}") private val uri: URI,
+    @Value("\${FAMILIE_EF_PROXY_URL}") private val uri: URI,
     @Qualifier("azure") restOperations: RestOperations,
 ) : AbstractRestClient(restOperations, "sigrun") {
     fun hentPensjonsgivendeInntekt(
         fødselsnummer: String,
         inntektsår: Int,
-    ): PensjonsgivendeInntektResponse? {
+    ): PensjonsgivendeInntektResponse {
         val uri =
             UriComponentsBuilder
                 .fromUri(uri)
-                .pathSegment("api/v1/pensjonsgivendeinntektforfolketrygden")
+                .pathSegment("api/sigrun/pensjonsgivendeinntekt")
+                .queryParam("inntektsaar", inntektsår.toString())
                 .build()
                 .toUri()
 
-        val request =
-            PensjonsgivendeInntektRequest(
-                norskPersonidentifikator = fødselsnummer,
-                inntektsaar = inntektsår,
-            )
-
-        return try {
-            val response = postForEntity<PensjonsgivendeInntektResponse>(uri, request)
-            secureLogger.info("Pensjonsgivende inntekt for inntektsår $inntektsår: $response")
-            response
-        } catch (e: HttpClientErrorException) {
-            if (e.statusCode == HttpStatus.NOT_FOUND) {
-                secureLogger.info("Fant ikke pensjonsgivende inntekt for inntektsår $inntektsår (404)")
-                null
-            } else {
-                throw e
-            }
-        }
+        val response = postForEntity<PensjonsgivendeInntektResponse>(uri, PersonIdent(fødselsnummer))
+        secureLogger.info("Pensjonsgivende inntekt for inntektsår $inntektsår: $response") // Fjernes når det er litt mer kjennskap til dataene
+        return response
     }
 
     fun hentSummertSkattegrunnlag(
         fødselsnummer: String,
         inntektsår: Int,
-    ): SummertSkattegrunnlag? {
+    ): SummertSkattegrunnlag {
         val uri =
             UriComponentsBuilder
                 .fromUri(uri)
-                .pathSegment("api/v2/summertskattegrunnlag")
+                .pathSegment("api/sigrun/summertskattegrunnlag")
+                .queryParam("inntektsaar", inntektsår.toString())
                 .build()
                 .toUri()
 
-        val request =
-            SummertSkattegrunnlagRequest(
-                personidentifikator = fødselsnummer,
-                inntektsaar = inntektsår,
-            )
-
-        return try {
-            val response = postForEntity<SummertSkattegrunnlag>(uri, request)
-            secureLogger.info("Summert skattegrunnlag for inntektsår $inntektsår: $response")
-            response
-        } catch (e: HttpClientErrorException) {
-            if (e.statusCode == HttpStatus.NOT_FOUND) {
-                secureLogger.info("Fant ikke summert skattegrunnlag for inntektsår $inntektsår (404)")
-                null
-            } else {
-                throw e
-            }
-        }
+        val response = postForEntity<SummertSkattegrunnlag>(uri, PersonIdent(fødselsnummer))
+        secureLogger.info("Summert skattegrunnlag for inntektsår $inntektsår: $response") // Fjernes når det er litt mer kjennskap til dataene
+        return response
     }
 
     fun hentBeregnetSkatt(
@@ -84,27 +55,13 @@ class SigrunClient(
         val uri =
             UriComponentsBuilder
                 .fromUri(uri)
-                .pathSegment("api/beregnetskatt")
+                .pathSegment("api/sigrun/beregnetskatt")
+                .queryParam("inntektsaar", inntektsår)
                 .build()
                 .toUri()
 
-        val request =
-            BeregnetSkattRequest(
-                personidentifikator = fødselsnummer,
-                inntektsaar = inntektsår,
-            )
-
-        return try {
-            val response = postForEntity<List<BeregnetSkatt>>(uri, request)
-            secureLogger.info("Beregnet skattegrunnlag for inntektsår $inntektsår: $response")
-            response
-        } catch (e: HttpClientErrorException) {
-            if (e.statusCode == HttpStatus.NOT_FOUND) {
-                secureLogger.info("Fant ikke beregnet skatt for inntektsår $inntektsår (404)")
-                emptyList()
-            } else {
-                throw e
-            }
-        }
+        val response = postForEntity<List<BeregnetSkatt>>(uri, PersonIdent(fødselsnummer))
+        secureLogger.info("Beregnet skattegrunnlag for inntektsår $inntektsår: $response") // Fjernes når det er litt mer kjennskap til dataene
+        return response
     }
 }
