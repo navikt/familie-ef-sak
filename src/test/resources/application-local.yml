@@ -32,6 +32,7 @@ FAMILIE_EF_PROXY_URL: http://localhost:8002
 FAMILIE_DOKUMENT_URL: http://localhost:8082
 FAMILIE_KLAGE_URL: http://localhost:8094
 FAMILIE_KS_SAK_URL: http://localhost:8083
+SIGRUN_URL: http://localhost:8002
 
 AZURE_APP_TENANT_ID: navq.onmicrosoft.com
 FAMILIE_INTEGRASJONER_SCOPE: api://${AZURE_APP_CLIENT_ID}/.default

@@ -2,6 +2,12 @@ package no.nav.familie.ef.sak.sigrun.ekstern
 
 import java.time.LocalDate
 
+data class PensjonsgivendeInntektRequest(
+    val personident: String,
+    val inntektsaar: String,
+    val rettighetspakke: String = "navEnsligForsoerger",
+)
+
 data class PensjonsgivendeInntektResponse(
     val norskPersonidentifikator: String?, // Kan bli null dersom person ikke finnes
     val inntektsaar: Int?,

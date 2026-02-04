@@ -49,7 +49,7 @@ class SigrunClientTest {
     fun `hent pensjonsgivende inntekt fra sigrun og map til objekt`() {
         wiremockServerItem.stubFor(
             WireMock
-                .post(urlEqualTo("/api/sigrun/pensjonsgivendeinntekt?inntektsaar=2022"))
+                .post(urlEqualTo("/v1/pensjonsgivendeinntektforfolketrygden"))
                 .willReturn(
                     WireMock
                         .aResponse()
@@ -70,65 +70,6 @@ class SigrunClientTest {
         assertThat(pensjonsgivendeInntektResponse.pensjonsgivendeInntekt?.first()?.datoForFastsetting).isEqualTo(LocalDate.of(2023, 9, 27))
         assertThat(pensjonsgivendeInntektResponse.pensjonsgivendeInntekt?.last()?.skatteordning).isEqualTo(Skatteordning.SVALBARD)
         assertThat(pensjonsgivendeInntektResponse.pensjonsgivendeInntekt?.last()?.pensjonsgivendeInntektAvLoennsinntekt).isEqualTo(492160)
-    }
-
-    @Test
-    fun `hent beregnetskatt fra sigrun og map til objekt`() {
-        wiremockServerItem.stubFor(
-            WireMock
-                .post(urlEqualTo("/api/sigrun/beregnetskatt?inntektsaar=2022"))
-                .willReturn(
-                    WireMock
-                        .aResponse()
-                        .withStatus(HttpStatus.OK.value())
-                        .withHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.mimeType)
-                        .withBody(beregnetSkattRessursResponseJson),
-                ),
-        )
-        val beregnetSkatt = sigrunClient.hentBeregnetSkatt("123", 2022)
-        assertThat(beregnetSkatt.size).isEqualTo(7)
-        assertThat(beregnetSkatt.first().verdi).isEqualTo("814952")
-        assertThat(beregnetSkatt.first().tekniskNavn).isEqualTo("personinntektFiskeFangstFamiliebarnehage")
-    }
-
-    @Test
-    fun `hent beregnetskatt fra sigrun og map til objekt med skatteoppgjørsdato`() {
-        wiremockServerItem.stubFor(
-            WireMock
-                .post(urlEqualTo("/api/sigrun/beregnetskatt?inntektsaar=2022"))
-                .willReturn(
-                    WireMock
-                        .aResponse()
-                        .withStatus(HttpStatus.OK.value())
-                        .withHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.mimeType)
-                        .withBody(beregnetSkattMedOppgjørsdatoJson),
-                ),
-        )
-        val beregnetSkatt = sigrunClient.hentBeregnetSkatt("123", 2022)
-        assertThat(beregnetSkatt.size).isEqualTo(2)
-        assertThat(beregnetSkatt.last().verdi).isEqualTo("200000")
-        assertThat(beregnetSkatt.last().tekniskNavn).isEqualTo("personinntektNaering")
-    }
-
-    @Test
-    fun `hent summertskattegrunnlag fra sigrun og map til objekt`() {
-        wiremockServerItem.stubFor(
-            WireMock
-                .post(urlEqualTo("/api/sigrun/summertskattegrunnlag?inntektsaar=2018"))
-                .willReturn(
-                    WireMock
-                        .aResponse()
-                        .withStatus(HttpStatus.OK.value())
-                        .withHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.mimeType)
-                        .withBody(summertSkattegrunnlagJson),
-                ),
-        )
-        val summertSkattegrunnlag = sigrunClient.hentSummertSkattegrunnlag("123", 2018)
-        assertThat(summertSkattegrunnlag.grunnlag.size).isEqualTo(4)
-        assertThat(summertSkattegrunnlag.skatteoppgjoersdato).isEqualTo("2018-10-04")
-        assertThat(summertSkattegrunnlag.svalbardGrunnlag.size).isEqualTo(4)
-        assertThat(summertSkattegrunnlag.svalbardGrunnlag.first().tekniskNavn).isEqualTo("samledePaaloepteRenter")
-        assertThat(summertSkattegrunnlag.svalbardGrunnlag.first().beloep).isEqualTo(779981)
     }
 
     private val pensjonsgivendeInntektResponseJson =
@@ -156,93 +97,4 @@ class SigrunClientTest {
           ]
         }
         """.trimIndent()
-
-    private val beregnetSkattMedOppgjørsdatoJson =
-        """
-        [
-          {
-            "tekniskNavn": "skatteoppgjoersdato",
-            "verdi": "2022-05-01"
-          },
-          {
-            "tekniskNavn": "personinntektNaering",
-            "verdi": "200000"
-          }
-        ]
-        """.trimIndent()
-
-    private val beregnetSkattRessursResponseJson = """
-        [
-          {
-            "tekniskNavn": "personinntektFiskeFangstFamiliebarnehage",
-            "verdi": "814952"
-          },
-          {
-            "tekniskNavn": "personinntektNaering",
-            "verdi": "785896"
-          },
-          {
-            "tekniskNavn": "personinntektBarePensjonsdel",
-            "verdi": "844157"
-          },
-          {
-            "tekniskNavn": "svalbardLoennLoennstrekkordningen",
-            "verdi": "874869"
-          },
-          {
-            "tekniskNavn": "personinntektLoenn",
-            "verdi": "746315"
-          },
-          {
-            "tekniskNavn": "svalbardPersoninntektNaering",
-            "verdi": "696009"
-          },
-          {
-            "tekniskNavn": "skatteoppgjoersdato",
-            "verdi": "2017-08-09"
-          }
-        ]
-    """
-
-    private val summertSkattegrunnlagJson = """
-        {
-          "grunnlag": [
-            {
-              "tekniskNavn": "samledePaaloepteRenter",
-              "beloep": 779981
-            },
-            {
-              "tekniskNavn": "andreFradragsberettigedeKostnader",
-              "beloep": 59981
-            },
-            {
-              "tekniskNavn": "samletSkattepliktigOverskuddAvUtleieAvFritidseiendom",
-              "beloep": 1609981
-            },
-            {
-              "tekniskNavn": "skattepliktigAvkastningEllerKundeutbytte",
-              "beloep": 1749981
-            }
-          ],
-          "skatteoppgjoersdato": "2018-10-04",
-          "svalbardGrunnlag": [
-            {
-              "tekniskNavn": "samledePaaloepteRenter",
-              "beloep": 779981
-            },
-            {
-              "tekniskNavn": "samletAndelAvInntektIBoligselskapEllerBoligsameie",
-              "beloep": 849981
-            },
-            {
-              "tekniskNavn": "loennsinntektMedTrygdeavgiftspliktOmfattetAvLoennstrekkordningen",
-              "beloep": 1779981
-            },
-            {
-              "tekniskNavn": "skattepliktigAvkastningEllerKundeutbytte",
-              "beloep": 1749981
-            }
-          ]
-        }
-        """
 }

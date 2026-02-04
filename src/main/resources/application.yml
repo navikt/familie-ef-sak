@@ -242,6 +242,15 @@ no.nav.security.jwt:
           client-id: ${AZURE_APP_CLIENT_ID}
           client-secret: ${AZURE_APP_CLIENT_SECRET}
           client-auth-method: client_secret_basic
+      sigrun-clientcredentials:
+        resource-url: ${SIGRUN_URL}
+        token-endpoint-url: ${AZUREAD_TOKEN_ENDPOINT_URL}
+        grant-type: client_credentials
+        scope: ${SIGRUN_SCOPE}
+        authentication:
+          client-id: ${AZURE_APP_CLIENT_ID}
+          client-secret: ${AZURE_APP_CLIENT_SECRET}
+          client-auth-method: client_secret_basic
 
 PDL_SCOPE: api://${DEPLOY_ENV}-fss.pdl.pdl-api/.default
 REPR_API_SCOPE: api://${DEPLOY_ENV}-gcp.repr.repr-api/.default
@@ -259,6 +268,7 @@ INNTEKT_SCOPE: api://prod-fss.team-inntekt.ikomp/.default
 ARBEIDSAVKLARINGSPENGER_SCOPE: api://${DEPLOY_ENV}-gcp.aap.api-intern/.default
 AAREG_SCOPE: api://${DEPLOY_ENV}-fss.arbeidsforhold.aareg-services-nais/.default
 MEDL_SCOPE: api://${DEPLOY_ENV}-gcp.team-rocket.medlemskap-medl-api/.default
+SIGRUN_SCOPE: api://${DEPLOY_ENV}.team-inntekt.sigrun/.default
 
 spring:
   mvc:
@@ -339,6 +349,7 @@ INNTEKT_URL: https://ikomp.prod-fss-pub.nais.io
 ARBEIDSAVKLARINGSPENGER_URL: http://api-intern.aap
 AAREG_URL: https://aareg-services.${ON_PREM_URL_ENV}-fss-pub.nais.io
 MEDL_URL: http://medlemskap-medl-api.team-rocket
+SIGRUN_URL: https://sigrun.${ON_PREM_URL_ENV}-fss-pub.nais.io
 
 GYLDIGE_SERVICE_BRUKERE: srvArena
 
