@@ -424,7 +424,7 @@ internal class BarnServiceTest {
         internal fun `skal legge til terminbarn og andre terminbarn for papirsøknader`() {
             val termindato = LocalDate.of(2021, 4, 16)
             val fnr = FnrGenerator.generer(termindato)
-            val fnr2 = FnrGenerator.generer(termindato)
+            val fnr2 = FnrGenerator.generer(termindato.plusMonths(6))
             val barnMedIdent = barnMedIdent(fnr, "Terminbarn A").copy(fødsel = listOf(fødsel(termindato)))
             val barnMedIdent2 = barnMedIdent(fnr2, "Barn D")
 
