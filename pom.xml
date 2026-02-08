@@ -11,7 +11,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.5.7</version>
+        <version>4.0.2</version>
     </parent>
     <repositories>
         <repository>
@@ -29,26 +29,26 @@
         <sha1/>
         <changelist>-SNAPSHOT</changelist>
         <java.version>21</java.version>
-        <kotlin.version>2.2.21</kotlin.version>
+        <kotlin.version>2.3.0</kotlin.version>
         <flyway.version>11.15.0</flyway.version>
-        <springdoc.version>2.8.14</springdoc.version>
-        <mockk.version>1.14.6</mockk.version>
+        <springdoc.version>3.0.1</springdoc.version>
+        <mockk.version>1.14.9</mockk.version>
         <felles.version>3.20251105152539_b03ed80</felles.version>
         <prosessering.version>2.20251110093725_10552cd</prosessering.version>
-        <token-validation-spring.version>5.0.39</token-validation-spring.version>
+        <token-validation-spring.version>6.0.2</token-validation-spring.version>
 
         <start-class>no.nav.familie.ef.sak.ApplicationKt</start-class>
         <kontrakter.version>3.0_20251112142340_c5baa9c</kontrakter.version>
         <mikrofrontend.builder.version>20230704114948-74aa2e9</mikrofrontend.builder.version>
         <eksterne.kontrakter.bisys.version>2.0_20251111094125_cdf5bf2</eksterne.kontrakter.bisys.version>
-        <cucumber.version>7.31.0</cucumber.version>
+        <cucumber.version>7.34.2</cucumber.version>
 
 
         <!--suppress UnresolvedMavenProperty  Ligger som secret i github-->
         <sonar.projectKey>${SONAR_PROJECTKEY}</sonar.projectKey>
         <sonar.organization>navit</sonar.organization>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
-        <nav.security.version>5.0.39</nav.security.version> <!-- Denne burde være samme versjon som i felles -->
+        <nav.security.version>6.0.2</nav.security.version> <!-- Denne burde være samme versjon som i felles -->
         <okhttp3.version>4.9.1</okhttp3.version> <!-- overskrever spring sin versjon, blir brukt av mock-oauth2-server -->
         <brukervarsel-builder.version>2.1.1</brukervarsel-builder.version>
         <!--suppress UnresolvedMavenProperty -->
@@ -59,7 +59,7 @@
             <dependency>
                 <groupId>org.junit</groupId>
                 <artifactId>junit-bom</artifactId>
-                <version>6.0.1</version> <!-- Denne inkluderer junit-platform 1.13.3 som kreves av cucumber 7.26, kan muligens fjernes når spring bumper til junit versjon 1.13.3 -->
+                <version>6.0.2</version> <!-- Denne inkluderer junit-platform 1.13.3 som kreves av cucumber 7.26, kan muligens fjernes når spring bumper til junit versjon 1.13.3 -->
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -71,7 +71,7 @@
         <dependency>
             <groupId>org.apache.httpcomponents.client5</groupId>
             <artifactId>httpclient5</artifactId>
-            <version>5.5</version>
+            <version>5.6</version>
         </dependency>
         <dependency>
             <groupId>org.jetbrains.kotlin</groupId>
@@ -265,7 +265,7 @@
         <dependency>
             <groupId>org.testcontainers</groupId>
             <artifactId>postgresql</artifactId>
-            <version>1.21.3</version>
+            <version>1.21.4</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -284,7 +284,7 @@
         <dependency>
             <groupId>org.junit.platform</groupId>
             <artifactId>junit-platform-suite</artifactId>
-            <version>6.0.1</version>
+            <version>6.0.2</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -299,7 +299,7 @@
                 <plugin>
                     <groupId>org.sonarsource.scanner.maven</groupId>
                     <artifactId>sonar-maven-plugin</artifactId>
-                    <version>5.3.0.6276</version>
+                    <version>5.5.0.6356</version>
                 </plugin>
             </plugins>
         </pluginManagement>
