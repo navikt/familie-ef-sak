@@ -111,24 +111,6 @@ internal class InsertUpdateRepositoryImplTest : OppslagSpringRunnerTest() {
         assertThat(originalSøkerIdent.sporbar.opprettetTid).isEqualTo(oppdatertSøkerIdent.sporbar.opprettetTid)
     }
 
-    /* //TODO hva ønsker vi å gjøre her? Ny oppførsel gjør at det ikke lenger kaster feil, men inserter hvis ikke finnes
-    @Test
-    internal fun `skal kaste exception hvis man oppdaterer entiteter som ikke finnes`() {
-        assertThat(
-            catchThrowable {
-                val t = fagsakDomain()
-                fagsakRepository.update(t)
-            },
-        ).isInstanceOf(IncorrectUpdateSemanticsDataAccessException::class.java)
-
-        assertThat(
-            catchThrowable {
-                fagsakRepository.updateAll(listOf(fagsakDomain(), fagsakDomain()))
-            },
-        ).isInstanceOf(IncorrectUpdateSemanticsDataAccessException::class.java)
-    }
-     */
-
     @Test
     internal fun `insert skal være transactional`() {
         fagsakPersonRepository.insert(FagsakPerson(identer = setOf(PersonIdent("1"))))
