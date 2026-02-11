@@ -98,7 +98,19 @@ fun <K : Any, T> CacheManager.getNullable(
     cache: String,
     key: K,
     valueLoader: () -> T?,
-): T? = (getCacheOrThrow(cache)).get(key, valueLoader)
+): T? {
+    val cacheInstance = getCacheOrThrow(cache)
+    val wrapper = cacheInstance.get(key)
+    if (wrapper != null) {
+        @Suppress("UNCHECKED_CAST")
+        return wrapper.get() as? T
+    }
+
+    val loaded = valueLoader()
+    cacheInstance.put(key, loaded)
+
+    return loaded
+}
 
 fun CacheManager.getCacheOrThrow(cache: String) = this.getCache(cache) ?: error("Finner ikke cache=$cache")
 
@@ -106,7 +118,7 @@ fun CacheManager.getCacheOrThrow(cache: String) = this.getCache(cache) ?: error(
  * Henter tidligere cachet verdier, og henter ucachet verdier med [valueLoader]
  */
 @Suppress("UNCHECKED_CAST", "NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS")
-fun <T, R> CacheManager.getCachedOrLoad(
+fun <T : Any, R> CacheManager.getCachedOrLoad(
     cacheName: String,
     values: List<T>,
     valueLoader: (List<T>) -> Map<T, R>,

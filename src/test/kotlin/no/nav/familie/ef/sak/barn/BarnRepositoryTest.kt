@@ -10,6 +10,7 @@ import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
+import org.postgresql.util.PSQLException
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.dao.DataIntegrityViolationException
 import java.time.LocalDate
@@ -51,8 +52,8 @@ class BarnRepositoryTest : OppslagSpringRunnerTest() {
         val cause =
             assertThatThrownBy {
                 barnRepository.insert(lagBarn(behandling, personIdent = personIdent))
-            }.cause
-        cause.isInstanceOf(DataIntegrityViolationException::class.java)
+            }.cause()
+        cause.isInstanceOf(PSQLException::class.java)
         cause.hasMessageContaining("duplicate key value violates unique constraint")
     }
 
@@ -91,9 +92,9 @@ class BarnRepositoryTest : OppslagSpringRunnerTest() {
         val cause =
             assertThatThrownBy {
                 barnRepository.insert(nyttBarn)
-            }.cause
+            }.cause()
 
-        cause.isInstanceOf(DataIntegrityViolationException::class.java)
+        cause.isInstanceOf(PSQLException::class.java)
         cause.hasMessageContaining("violates check constraint \"behandling_barn_ident_fodsel_termindato_check\"")
     }
 

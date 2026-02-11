@@ -6,10 +6,10 @@ spring:
     console:
       enabled: true
   datasource:
-    username: ${DATASOURCE_USERNAME}
-    password: ${DATASOURCE_PASSWORD}
-    url: ${DATASOURCE_URL}
-    driver-class-name: org.postgresql.Driver
+    driver-class-name: org.testcontainers.jdbc.ContainerDatabaseDriver
+    url: jdbc:tc:postgresql:15://localhost/testdb
+    username: test
+    password: test
 
 no.nav.security.jwt:
   issuer:

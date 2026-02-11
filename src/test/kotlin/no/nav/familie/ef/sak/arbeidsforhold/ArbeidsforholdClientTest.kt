@@ -11,7 +11,7 @@ import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.springframework.boot.web.client.RestTemplateBuilder
+import org.springframework.boot.restclient.RestTemplateBuilder
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.web.client.RestOperations
@@ -60,7 +60,6 @@ class ArbeidsforholdClientTest {
         )
 
         val response = arbeidsforholdClient.hentArbeidsforhold("15046713637")
-        Assertions.assertThat(response).isNotNull
         Assertions.assertThat(response).isNotNull
         Assertions.assertThat(response.size).isEqualTo(1)
     }

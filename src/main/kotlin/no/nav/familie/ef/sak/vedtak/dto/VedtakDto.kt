@@ -1,6 +1,8 @@
 package no.nav.familie.ef.sak.vedtak.dto
 
 import com.fasterxml.jackson.annotation.JsonIgnore
+import com.fasterxml.jackson.annotation.JsonSubTypes
+import com.fasterxml.jackson.annotation.JsonTypeInfo
 import com.fasterxml.jackson.core.JsonParser
 import com.fasterxml.jackson.databind.DeserializationContext
 import com.fasterxml.jackson.databind.JsonNode
@@ -68,9 +70,6 @@ fun ResultatType.tilVedtaksresultat(): Vedtaksresultat =
         ResultatType.SANKSJONERE -> Vedtaksresultat.INNVILGET
     }
 
-/*@JsonTypeInfo(use = JsonTypeInfo.Id.NAME,
-              include = JsonTypeInfo.As.PROPERTY,
-              property = "_type")*/
 sealed class VedtakDto(
     open val resultatType: ResultatType,
     open val _type: String,
@@ -351,7 +350,7 @@ private class VedtakDtoDeserializer : StdDeserializer<VedtakDto>(VedtakDto::clas
             ResultatType.AVSLÅ -> mapper.treeToValue(node, Avslå::class.java)
             ResultatType.OPPHØRT -> mapper.treeToValue(node, Opphør::class.java)
             ResultatType.SANKSJONERE -> mapper.treeToValue(node, Sanksjonert::class.java)
-            else -> throw Feil("Kunde ikke deserialisera vedtakdto")
+            else -> throw Feil("Kunne ikke deserialisere VedtakDto")
         }
     }
 }

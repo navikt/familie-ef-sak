@@ -28,6 +28,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.dao.DuplicateKeyException
 import org.springframework.transaction.UnexpectedRollbackException
 import java.time.LocalDate
 
@@ -69,7 +70,7 @@ class BarnFyllerÅrIntegrationTest : OppslagSpringRunnerTest() {
         assertThat(opprettOppgavePayload.barnPersonIdent).isEqualTo(barnPersonIdent)
 
         assertThatThrownBy { barnFyllerÅrOppfølgingsoppgaveService.opprettTasksForAlleBarnSomHarFyltÅr() }
-            .isInstanceOf(UnexpectedRollbackException::class.java)
+            .isInstanceOf(DuplicateKeyException::class.java)
 
         val tasksEtterAndreKjøring = taskService.findAll().toList()
         assertThat(tasksEtterAndreKjøring.size).isEqualTo(1)

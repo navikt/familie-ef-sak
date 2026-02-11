@@ -8,7 +8,7 @@ import no.nav.familie.kontrakter.felles.getDataOrThrow
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.springframework.boot.test.web.client.exchange
+import org.springframework.boot.resttestclient.exchange
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpMethod
 import org.springframework.http.ResponseEntity
@@ -29,7 +29,7 @@ internal class AMeldingInntektControllerTest : OppslagSpringRunnerTest() {
     }
 
     private fun kallGenererUrl(): ResponseEntity<Ressurs<String>> =
-        restTemplate.exchange(
+        testRestTemplate.exchange(
             localhost("/api/inntekt/fagsak/${fagsak.id}/generer-url"),
             HttpMethod.GET,
             HttpEntity<Ressurs<String>>(headers),

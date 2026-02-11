@@ -284,6 +284,7 @@ spring:
       connection-test-query: "select 1"
       max-lifetime: 900000
       minimum-idle: 1
+
   kafka:
     bootstrap-servers: ${KAFKA_BROKERS}
     properties:

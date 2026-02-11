@@ -47,9 +47,10 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import org.postgresql.util.PSQLException
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.dao.DuplicateKeyException
-import org.springframework.data.relational.core.conversion.DbActionExecutionException
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.UUID
@@ -186,7 +187,7 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
     fun `skal ikke være mulig å legge inn en behandling med referanse til en behandling som ikke eksisterer`() {
         val fagsak = testoppsettService.lagreFagsak(fagsak())
         assertThatThrownBy { behandlingRepository.insert(behandling(fagsak, forrigeBehandlingId = UUID.randomUUID())) }
-            .isInstanceOf(DbActionExecutionException::class.java)
+            .isInstanceOf(DataIntegrityViolationException::class.java)
     }
 
     @Test
@@ -465,8 +466,8 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
                 val cause =
                     assertThatThrownBy {
                         behandlingRepository.insert(behandling(fagsak, status = status))
-                    }.cause
-                cause.isInstanceOf(DuplicateKeyException::class.java)
+                    }.cause()
+                cause.isInstanceOf(PSQLException::class.java)
                 cause.hasMessageContaining("duplicate key value violates unique constraint \"idx_behandlinger_i_arbeid\"")
             }
         }
@@ -491,8 +492,8 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
             val cause =
                 assertThatThrownBy {
                     behandlingRepository.update(påVent.copy(status = UTREDES))
-                }.cause
-            cause.isInstanceOf(DuplicateKeyException::class.java)
+                }.cause()
+            cause.isInstanceOf(PSQLException::class.java)
             cause.hasMessageContaining("duplicate key value violates unique constraint \"idx_behandlinger_i_arbeid\"")
         }
 

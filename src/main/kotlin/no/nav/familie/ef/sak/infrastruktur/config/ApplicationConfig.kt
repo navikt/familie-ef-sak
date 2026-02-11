@@ -20,7 +20,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.SpringBootConfiguration
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan
-import org.springframework.boot.web.client.RestTemplateBuilder
+import org.springframework.boot.restclient.RestTemplateBuilder
 import org.springframework.boot.web.servlet.FilterRegistrationBean
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.ComponentScan
@@ -57,35 +57,29 @@ class ApplicationConfig {
     fun objectMapper() = ObjectMapperProvider.objectMapper
 
     @Bean
-    fun logFilter(): FilterRegistrationBean<LogFilter> {
-        logger.info("Registering LogFilter filter")
-        val filterRegistration = FilterRegistrationBean<LogFilter>()
-        filterRegistration.filter = LogFilter(systemtype = NavSystemtype.NAV_SAKSBEHANDLINGSSYSTEM)
-        filterRegistration.order = 1
-        return filterRegistration
-    }
+    fun logFilter(): FilterRegistrationBean<LogFilter> =
+        FilterRegistrationBean(LogFilter(systemtype = NavSystemtype.NAV_SAKSBEHANDLINGSSYSTEM)).apply {
+            logger.info("Registering LogFilter filter")
+            order = 1
+        }
 
     @Bean
-    fun requestTimeFilter(): FilterRegistrationBean<RequestTimeFilter> {
-        logger.info("Registering RequestTimeFilter filter")
-        val filterRegistration = FilterRegistrationBean<RequestTimeFilter>()
-        filterRegistration.filter = RequestTimeFilter()
-        filterRegistration.order = 2
-        return filterRegistration
-    }
+    fun requestTimeFilter(): FilterRegistrationBean<RequestTimeFilter> =
+        FilterRegistrationBean(RequestTimeFilter()).apply {
+            logger.info("Registering RequestTimeFilter filter")
+            order = 2
+        }
 
     /**
      * Overskrever felles sin som bruker proxy, som ikke skal brukes på gcp
      */
     @Bean
     @Primary
-    fun restTemplateBuilder(objectMapper: ObjectMapper): RestTemplateBuilder {
-        val jackson2HttpMessageConverter = MappingJackson2HttpMessageConverter(objectMapper)
-        return RestTemplateBuilder()
+    fun restTemplateBuilder(objectMapper: ObjectMapper): RestTemplateBuilder =
+        RestTemplateBuilder()
             .connectTimeout(Duration.of(2, ChronoUnit.SECONDS))
             .readTimeout(Duration.of(30, ChronoUnit.SECONDS))
-            .additionalMessageConverters(listOf(jackson2HttpMessageConverter) + RestTemplate().messageConverters)
-    }
+            .additionalMessageConverters(listOf(MappingJackson2HttpMessageConverter(ObjectMapperProvider.objectMapper)) + RestTemplate().messageConverters)
 
     @Bean("utenAuth")
     fun restTemplate(
@@ -93,6 +87,7 @@ class ApplicationConfig {
         consumerIdClientInterceptor: ConsumerIdClientInterceptor,
     ): RestOperations =
         restTemplateBuilder
+            .additionalMessageConverters(listOf(MappingJackson2HttpMessageConverter(ObjectMapperProvider.objectMapper)) + RestTemplate().messageConverters)
             .additionalInterceptors(
                 consumerIdClientInterceptor,
                 MdcValuesPropagatingClientInterceptor(),
@@ -111,6 +106,7 @@ class ApplicationConfig {
                 RestTemplateBuilder()
                     .connectTimeout(Duration.of(2, ChronoUnit.SECONDS))
                     .readTimeout(Duration.of(2, ChronoUnit.SECONDS))
+                    .additionalMessageConverters(listOf(MappingJackson2HttpMessageConverter(ObjectMapperProvider.objectMapper)) + RestTemplate().messageConverters)
                     .build(),
             ),
         )
