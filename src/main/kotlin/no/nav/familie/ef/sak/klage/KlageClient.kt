@@ -34,7 +34,7 @@ class KlageClient(
             ).build()
             .toUri()
 
-    fun opprettKlage(opprettKlagebehandlingRequest: OpprettKlagebehandlingRequest): Unit = postForEntity(opprettKlage, opprettKlagebehandlingRequest)
+    fun opprettKlage(opprettKlagebehandlingRequest: OpprettKlagebehandlingRequest): Any = postForEntity(opprettKlage, opprettKlagebehandlingRequest)
 
     fun hentKlagebehandlinger(eksternIder: Set<Long>): Map<Long, List<KlagebehandlingDto>> {
         val uri =
