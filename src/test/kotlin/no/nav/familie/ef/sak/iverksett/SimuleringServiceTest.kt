@@ -1,6 +1,5 @@
 package no.nav.familie.ef.sak.iverksett
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import io.mockk.Runs
 import io.mockk.every
 import io.mockk.just
@@ -11,6 +10,7 @@ import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.fagsak.FagsakService
+import no.nav.familie.ef.sak.infrastruktur.config.readValue
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.ef.sak.oppgave.TilordnetRessursService
 import no.nav.familie.ef.sak.repository.behandling
@@ -26,7 +26,7 @@ import no.nav.familie.ef.sak.tilbakekreving.TilbakekrevingOppryddingService
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.kontrakter.ef.iverksett.SimuleringDto
 import no.nav.familie.kontrakter.felles.ef.StønadType
-import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.jsonMapper
 import no.nav.familie.kontrakter.felles.simulering.BeriketSimuleringsresultat
 import no.nav.familie.kontrakter.felles.simulering.DetaljertSimuleringResultat
 import no.nav.familie.kontrakter.felles.simulering.Simuleringsoppsummering
@@ -151,7 +151,7 @@ internal class SimuleringServiceTest {
 
         val tilkjentYtelse = tilkjentYtelse(behandlingId = behandling.id, personIdent = personIdent)
 
-        val beriketSimuleringsresultat = objectMapper.readValue<BeriketSimuleringsresultat>(readFile("simuleringsresultat_beriket.json"))
+        val beriketSimuleringsresultat = jsonMapper.readValue<BeriketSimuleringsresultat>(readFile("simuleringsresultat_beriket.json"))
         every { iverksettClient.simuler(any()) } returns
             beriketSimuleringsresultat
 

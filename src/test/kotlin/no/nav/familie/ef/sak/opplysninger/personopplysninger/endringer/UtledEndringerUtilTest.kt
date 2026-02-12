@@ -30,7 +30,7 @@ import no.nav.familie.ef.sak.repository.saksbehandling
 import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
 import no.nav.familie.ef.sak.vilkår.dto.StatsborgerskapDto
 import no.nav.familie.kontrakter.felles.ef.StønadType
-import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.jsonMapper
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -94,7 +94,7 @@ internal class UtledEndringerUtilTest {
             this::class.java.classLoader
                 .getResource("json/endringer-personopplysninger/endringer.json")!!
                 .readText()
-        assertThat(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(endringer)).isEqualTo(expected)
+        assertThat(jsonMapper.writerWithDefaultPrettyPrinter().writeValueAsString(endringer)).isEqualTo(expected)
     }
 
     @Nested

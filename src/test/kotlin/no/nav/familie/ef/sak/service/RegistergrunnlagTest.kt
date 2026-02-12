@@ -2,7 +2,7 @@ package no.nav.familie.ef.sak.service
 
 import com.fasterxml.jackson.annotation.JsonInclude
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.GrunnlagsdataDomene
-import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.jsonMapper
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -14,9 +14,10 @@ import kotlin.reflect.full.isSubclassOf
 
 internal class RegistergrunnlagTest {
     private val om =
-        objectMapper
-            .copy()
-            .setSerializationInclusion(JsonInclude.Include.NON_NULL)
+        jsonMapper
+            .rebuild()
+            .changeDefaultPropertyInclusion { JsonInclude.Value.construct(JsonInclude.Include.NON_NULL, JsonInclude.Include.USE_DEFAULTS) }
+            .build()
             .writerWithDefaultPrettyPrinter()
 
     /**

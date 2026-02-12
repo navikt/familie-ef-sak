@@ -1,7 +1,6 @@
 package no.nav.familie.ef.sak.behandlingsflyt.task
 
-import com.fasterxml.jackson.module.kotlin.readValue
-import no.nav.familie.ef.sak.infrastruktur.config.ObjectMapperProvider.objectMapper
+import no.nav.familie.ef.sak.infrastruktur.config.ObjectMapperProvider.jsonMapper
 import no.nav.familie.ef.sak.oppfølgingsoppgave.OppfølgingsoppgaveService
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
@@ -19,7 +18,7 @@ class SendAutomatiskBrevTask(
     private val oppfølgingsoppgaveService: OppfølgingsoppgaveService,
 ) : AsyncTaskStep {
     override fun doTask(task: Task) {
-        val sendAutomatiskBrevTaskPayload = objectMapper.readValue<SendAutomatiskBrevTaskPayload>(task.payload)
+        val sendAutomatiskBrevTaskPayload = jsonMapper.readerFor(SendAutomatiskBrevTaskPayload::class.java).readValue<SendAutomatiskBrevTaskPayload>(task.payload)
         oppfølgingsoppgaveService.sendAutomatiskBrev(sendAutomatiskBrevTaskPayload.behandlingId, sendAutomatiskBrevTaskPayload.saksbehandlerIdent)
     }
 
@@ -27,7 +26,7 @@ class SendAutomatiskBrevTask(
         fun opprettTask(sendAutomatiskBrevTaskPayload: SendAutomatiskBrevTaskPayload): Task =
             Task(
                 type = TYPE,
-                payload = objectMapper.writeValueAsString(sendAutomatiskBrevTaskPayload),
+                payload = jsonMapper.writeValueAsString(sendAutomatiskBrevTaskPayload),
                 properties =
                     Properties().apply {
                         this["behandlingId"] = sendAutomatiskBrevTaskPayload.behandlingId.toString()

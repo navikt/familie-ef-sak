@@ -30,15 +30,14 @@
         <changelist>-SNAPSHOT</changelist>
         <java.version>21</java.version>
         <kotlin.version>2.2.21</kotlin.version>
-        <flyway.version>11.15.0</flyway.version>
         <springdoc.version>3.0.1</springdoc.version>
         <mockk.version>1.14.6</mockk.version>
-        <felles.version>4.20251203153147_ca40cc5</felles.version>
+        <felles.version>4.20260205114838_3a4c3dc</felles.version>
         <prosessering.version>2.20251110093725_10552cd</prosessering.version>
         <token-validation-spring.version>5.0.39</token-validation-spring.version>
 
         <start-class>no.nav.familie.ef.sak.ApplicationKt</start-class>
-        <kontrakter.version>3.0_20251112142340_c5baa9c</kontrakter.version>
+        <kontrakter.version>4.0_20260204122732_558ee1d</kontrakter.version>
         <mikrofrontend.builder.version>20230704114948-74aa2e9</mikrofrontend.builder.version>
         <eksterne.kontrakter.bisys.version>2.0_20251111094125_cdf5bf2</eksterne.kontrakter.bisys.version>
         <cucumber.version>7.31.0</cucumber.version>
@@ -156,6 +155,10 @@
             <artifactId>jackson-module-kotlin</artifactId>
         </dependency>
         <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-annotations</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.springdoc</groupId>
             <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
             <version>${springdoc.version}</version>
@@ -191,7 +194,7 @@
         </dependency>
         <dependency>
             <groupId>no.nav.familie.felles</groupId>
-            <artifactId>http-client</artifactId>
+            <artifactId>rest-klient</artifactId>
             <version>${felles.version}</version>
         </dependency>
         <dependency>

@@ -1,11 +1,11 @@
 package no.nav.familie.ef.sak.infrastruktur.config
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ef.sak.amelding.InntektResponse
 import no.nav.familie.ef.sak.amelding.ekstern.AMeldingInntektClient
-import no.nav.familie.ef.sak.infrastruktur.config.ObjectMapperProvider.objectMapper
+import no.nav.familie.ef.sak.infrastruktur.config.ObjectMapperProvider.jsonMapper
+import no.nav.familie.ef.sak.infrastruktur.config.readValue
 import no.nav.familie.ef.sak.repository.inntekt
 import no.nav.familie.ef.sak.repository.inntektsmåneder
 import org.springframework.context.annotation.Bean
@@ -22,15 +22,15 @@ class InntektClientMock {
     fun inntektClient(): AMeldingInntektClient {
         val mockk = mockk<AMeldingInntektClient>()
         val mockResponseJson = this::class.java.classLoader.getResource("json/inntekt/InntektMock.json")!!
-        val mockResponse = objectMapper.readValue<InntektResponse>(mockResponseJson)
+        val mockResponse = jsonMapper.readValue<InntektResponse>(mockResponseJson)
         every { mockk.hentInntekt(any(), any(), any()) } returns mockResponse
 
         val mockResponseUtenArbeidsinntektJson = this::class.java.classLoader.getResource("json/inntekt/InntektMockUtenArbeidsinntekt.json")!!
-        val mockResponseUtenArbeidsinntekt = objectMapper.readValue<InntektResponse>(mockResponseUtenArbeidsinntektJson)
+        val mockResponseUtenArbeidsinntekt = jsonMapper.readValue<InntektResponse>(mockResponseUtenArbeidsinntektJson)
         every { mockk.hentInntekt("1", any(), any()) } returns mockResponseUtenArbeidsinntekt
 
         val mockResponseHøyArbeidsinntektJson = this::class.java.classLoader.getResource("json/inntekt/InntektMockMedHøyInntekt.json")!!
-        val mockResponseHøyArbeidsinntekt = objectMapper.readValue<InntektResponse>(mockResponseHøyArbeidsinntektJson)
+        val mockResponseHøyArbeidsinntekt = jsonMapper.readValue<InntektResponse>(mockResponseHøyArbeidsinntektJson)
         every { mockk.hentInntekt("2", any(), any()) } returns mockResponseHøyArbeidsinntekt
 
         return mockk

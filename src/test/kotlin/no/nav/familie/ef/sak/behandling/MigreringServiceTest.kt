@@ -70,7 +70,7 @@ import no.nav.familie.kontrakter.ef.iverksett.IverksettStatus
 import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.kontrakter.felles.ef.StønadType.BARNETILSYN
 import no.nav.familie.kontrakter.felles.ef.StønadType.OVERGANGSSTØNAD
-import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.jsonMapper
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.domene.Status
 import no.nav.familie.prosessering.error.TaskExceptionUtenStackTrace
@@ -879,7 +879,7 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
                 perioder = listOf(vedtaksperiode),
                 inntekter = listOf(inntekt),
             )
-        val brevrequest = objectMapper.readTree("123")
+        val brevrequest = jsonMapper.readTree("123")
         opprettOppgave(saksbehandling.id)
         testWithBrukerContext(preferredUsername = "Z999999", groups = listOf(rolleConfig.saksbehandlerRolle)) {
             stegService.håndterSteg(saksbehandling, årsakRevurderingSteg, revurderingsinformasjon())

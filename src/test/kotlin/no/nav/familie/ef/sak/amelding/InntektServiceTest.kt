@@ -1,13 +1,13 @@
 package no.nav.familie.ef.sak.amelding
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ef.sak.amelding.ekstern.AMeldingInntektClient
 import no.nav.familie.ef.sak.amelding.ekstern.ArbeidOgInntektClient
 import no.nav.familie.ef.sak.fagsak.FagsakPersonService
 import no.nav.familie.ef.sak.fagsak.FagsakService
-import no.nav.familie.ef.sak.infrastruktur.config.ObjectMapperProvider.objectMapper
+import no.nav.familie.ef.sak.infrastruktur.config.ObjectMapperProvider.jsonMapper
+import no.nav.familie.ef.sak.infrastruktur.config.readValue
 import no.nav.familie.ef.sak.testutil.JsonFilUtil.Companion.lesFil
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
@@ -39,7 +39,7 @@ class InntektServiceTest {
         @Test
         internal fun `parser generell inntektv2 response med riktig data struktur`() {
             val inntektV2ResponseJson: String = lesFil("json/inntekt/InntektGenerellResponse.json")
-            val inntektResponse = objectMapper.readValue<InntektResponse>(inntektV2ResponseJson)
+            val inntektResponse = jsonMapper.readValue<InntektResponse>(inntektV2ResponseJson)
 
             val forventetMåned = YearMonth.of(2020, 3)
             val forventetInntektType: InntektType = InntektType.LØNNSINNTEKT
@@ -51,7 +51,7 @@ class InntektServiceTest {
         @Test
         internal fun `parser inntektv2 response med forskjellige inntekt typer`() {
             val inntektV2ResponseJson: String = lesFil("json/inntekt/InntektFlereInntektTyperResponse.json")
-            val inntektResponse = objectMapper.readValue<InntektResponse>(inntektV2ResponseJson)
+            val inntektResponse = jsonMapper.readValue<InntektResponse>(inntektV2ResponseJson)
 
             val forventeteInntektTyper =
                 listOf(
@@ -82,7 +82,7 @@ class InntektServiceTest {
         internal fun `skal hente årsinntekt og summere riktig`() {
             val inntektV2ResponseJson: String =
                 lesFil("json/inntekt/InntektFulltÅrMedFeriepenger.json")
-            val inntektResponse = objectMapper.readValue<InntektResponse>(inntektV2ResponseJson)
+            val inntektResponse = jsonMapper.readValue<InntektResponse>(inntektV2ResponseJson)
 
             every { aMeldingInntektClient.hentInntekt(any(), any(), any()) } returns inntektResponse
 

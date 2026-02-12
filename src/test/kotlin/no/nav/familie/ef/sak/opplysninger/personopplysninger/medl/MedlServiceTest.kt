@@ -1,9 +1,9 @@
 package no.nav.familie.ef.sak.no.nav.familie.ef.sak.opplysninger.personopplysninger.medl
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.familie.ef.sak.infrastruktur.config.ObjectMapperProvider.objectMapper
+import no.nav.familie.ef.sak.infrastruktur.config.ObjectMapperProvider.jsonMapper
+import no.nav.familie.ef.sak.infrastruktur.config.readValue
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.medl.MedlClient
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.medl.MedlService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.medl.Medlemskapsunntak
@@ -39,7 +39,7 @@ class MedlemskapServiceTest {
     @Test
     fun `skal gruppere perioder ved treff`() {
         every { medlClient.hentMedlemskapsUnntak(any()) }
-            .returns(objectMapper.readValue<List<Medlemskapsunntak>>(medlResponse))
+            .returns(jsonMapper.readValue<List<Medlemskapsunntak>>(medlResponse))
         val respons = medlemskapService.hentMedlemskapsunntak(TEST_IDENT)
 
         assertThat(respons).isNotNull
@@ -56,7 +56,7 @@ class MedlemskapServiceTest {
     @Test
     fun `periodeInfo har påkrevde felter`() {
         every { medlClient.hentMedlemskapsUnntak(any()) }
-            .returns(objectMapper.readValue<List<Medlemskapsunntak>>(medlResponse))
+            .returns(jsonMapper.readValue<List<Medlemskapsunntak>>(medlResponse))
         val respons = medlemskapService.hentMedlemskapsunntak(TEST_IDENT)
 
         assertThat(respons).isNotNull

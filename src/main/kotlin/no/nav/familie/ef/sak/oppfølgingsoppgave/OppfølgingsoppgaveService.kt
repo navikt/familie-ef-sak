@@ -16,7 +16,7 @@ import no.nav.familie.ef.sak.brev.FrittståendeBrevService
 import no.nav.familie.ef.sak.brev.VedtaksbrevService
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.felles.util.norskFormat
-import no.nav.familie.ef.sak.infrastruktur.config.ObjectMapperProvider.objectMapper
+import no.nav.familie.ef.sak.infrastruktur.config.ObjectMapperProvider.jsonMapper
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvisIkke
 import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.oppfølgingsoppgave.automatiskBrev.AutomatiskBrevDto
@@ -204,7 +204,7 @@ class OppfølgingsoppgaveService(
                         .genererHtml(
                             brevmal = it.apiNavn,
                             saksbehandlersignatur = signatur.navn,
-                            saksbehandlerBrevrequest = objectMapper.valueToTree(BrevRequest(Flettefelter(navn = listOf(personNavn), fodselsnummer = listOf(personIdent)))),
+                            saksbehandlerBrevrequest = jsonMapper.valueToTree(BrevRequest(Flettefelter(navn = listOf(personNavn), fodselsnummer = listOf(personIdent)))),
                             skjulBeslutterSignatur = signatur.skjulBeslutter,
                             saksbehandlerEnhet = signatur.enhet,
                         ).replace(VedtaksbrevService.BESLUTTER_VEDTAKSDATO_PLACEHOLDER, LocalDate.now().norskFormat())

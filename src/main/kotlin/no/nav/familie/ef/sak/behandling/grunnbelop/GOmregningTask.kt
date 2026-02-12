@@ -1,9 +1,9 @@
 package no.nav.familie.ef.sak.behandling.grunnbelop
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.familie.ef.sak.beregning.Grunnbeløpsperioder
 import no.nav.familie.ef.sak.beregning.OmregningService
-import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.ef.sak.infrastruktur.config.readValue
+import no.nav.familie.kontrakter.felles.jsonMapper
 import no.nav.familie.log.IdUtils
 import no.nav.familie.log.mdc.MDCConstants
 import no.nav.familie.prosessering.AsyncTaskStep
@@ -35,13 +35,13 @@ class GOmregningTask(
     val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
     override fun doTask(task: Task) {
-        val fagsakId = objectMapper.readValue<GOmregningPayload>(task.payload).fagsakId
+        val fagsakId = jsonMapper.readValue<GOmregningPayload>(task.payload).fagsakId
         omregningService.utførGOmregning(fagsakId)
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     fun opprettTask(fagsakId: UUID): Boolean {
-        val payload = objectMapper.writeValueAsString(GOmregningPayload(fagsakId, Grunnbeløpsperioder.nyesteGrunnbeløpGyldigFraOgMed))
+        val payload = jsonMapper.writeValueAsString(GOmregningPayload(fagsakId, Grunnbeløpsperioder.nyesteGrunnbeløpGyldigFraOgMed))
         val eksisterendeTask = taskService.finnTaskMedPayloadOgType(payload, TYPE)
 
         if (eksisterendeTask != null) {

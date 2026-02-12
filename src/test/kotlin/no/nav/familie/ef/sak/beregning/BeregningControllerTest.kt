@@ -122,7 +122,7 @@ class BeregningControllerTest : OppslagSpringRunnerTest() {
             assertThrows<HttpClientErrorException.BadRequest> {
                 fullførVedtak(behandling.id, vedtakDto)
             }
-        val ressurs = ObjectMapperProvider.objectMapper.readValue(exception.responseBodyAsString, Ressurs::class.java)
+        val ressurs = ObjectMapperProvider.jsonMapper.readValue(exception.responseBodyAsString, Ressurs::class.java)
         assertThat(ressurs.status).isEqualTo(Ressurs.Status.FUNKSJONELL_FEIL)
         assertThat(ressurs.frontendFeilmelding).isEqualTo("Kan ikke fullføre en behandling med resultat innvilget hvis ikke alle vilkår er oppfylt")
     }
@@ -169,7 +169,7 @@ class BeregningControllerTest : OppslagSpringRunnerTest() {
             assertThrows<HttpClientErrorException.BadRequest> {
                 hentBeløpsperioderForBehandling(behandling.id)
             }
-        val ressurs = ObjectMapperProvider.objectMapper.readValue(exception.responseBodyAsString, Ressurs::class.java)
+        val ressurs = ObjectMapperProvider.jsonMapper.readValue(exception.responseBodyAsString, Ressurs::class.java)
         assertThat(ressurs.status).isEqualTo(Ressurs.Status.FUNKSJONELL_FEIL)
     }
 

@@ -1,7 +1,7 @@
 package no.nav.familie.ef.sak.vedtak
 
-import com.fasterxml.jackson.module.kotlin.readValue
-import no.nav.familie.ef.sak.infrastruktur.config.ObjectMapperProvider.objectMapper
+import no.nav.familie.ef.sak.infrastruktur.config.ObjectMapperProvider.jsonMapper
+import no.nav.familie.ef.sak.infrastruktur.config.readValue
 import no.nav.familie.ef.sak.vedtak.VedtakDtoUtil.avslagDto
 import no.nav.familie.ef.sak.vedtak.VedtakDtoUtil.innvilgelseBarnetilsynDto
 import no.nav.familie.ef.sak.vedtak.VedtakDtoUtil.innvilgelseOvergangsstønadDto
@@ -89,9 +89,9 @@ class VedtakDtoMapperTest {
         vedtakDto: VedtakDto,
         vedtakJson: String,
     ) {
-        val serialisertVedtak = objectMapper.writeValueAsString(vedtakDto)
-        assertThat(objectMapper.readValue<VedtakDto>(serialisertVedtak)).isEqualTo(objectMapper.readValue<VedtakDto>(vedtakJson))
-        assertThat(objectMapper.readValue<VedtakDto>(vedtakJson)).isEqualTo(vedtakDto)
+        val serialisertVedtak = jsonMapper.writeValueAsString(vedtakDto)
+        assertThat(jsonMapper.readValue<VedtakDto>(serialisertVedtak)).isEqualTo(jsonMapper.readValue<VedtakDto>(vedtakJson))
+        assertThat(jsonMapper.readValue<VedtakDto>(vedtakJson)).isEqualTo(vedtakDto)
     }
 
     private fun readFile(filnavn: String): String = this::class.java.getResource("/vedtak/$filnavn")!!.readText()

@@ -1,16 +1,14 @@
 package no.nav.familie.ef.sak.infrastruktur.config
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.module.kotlin.KotlinModule
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext.harRolle
-import no.nav.familie.http.client.RetryOAuth2HttpClient
-import no.nav.familie.http.config.RestTemplateAzure
-import no.nav.familie.http.interceptor.ConsumerIdClientInterceptor
-import no.nav.familie.http.interceptor.MdcValuesPropagatingClientInterceptor
 import no.nav.familie.log.NavSystemtype
 import no.nav.familie.log.filter.LogFilter
 import no.nav.familie.log.filter.RequestTimeFilter
 import no.nav.familie.prosessering.config.ProsesseringInfoProvider
+import no.nav.familie.restklient.client.RetryOAuth2HttpClient
+import no.nav.familie.restklient.config.RestTemplateAzure
+import no.nav.familie.restklient.interceptor.ConsumerIdClientInterceptor
+import no.nav.familie.restklient.interceptor.MdcValuesPropagatingClientInterceptor
 import no.nav.security.token.support.client.core.http.OAuth2HttpClient
 import no.nav.security.token.support.client.core.oauth2.OAuth2AccessTokenResponse
 import no.nav.security.token.support.client.spring.oauth2.EnableOAuth2Client
@@ -26,11 +24,12 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.ComponentScan
 import org.springframework.context.annotation.Import
 import org.springframework.context.annotation.Primary
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter
+import org.springframework.http.converter.json.JacksonJsonHttpMessageConverter
 import org.springframework.scheduling.annotation.EnableScheduling
 import org.springframework.web.client.RestClient
 import org.springframework.web.client.RestOperations
 import org.springframework.web.client.RestTemplate
+import tools.jackson.databind.json.JsonMapper
 import java.time.Duration
 import java.time.temporal.ChronoUnit
 
@@ -50,11 +49,8 @@ class ApplicationConfig {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     @Bean
-    fun kotlinModule(): KotlinModule = KotlinModule.Builder().build()
-
-    @Bean
     @Primary
-    fun objectMapper() = ObjectMapperProvider.objectMapper
+    fun jsonMapper(): JsonMapper = ObjectMapperProvider.jsonMapper
 
     @Bean
     fun logFilter(): FilterRegistrationBean<LogFilter> =
@@ -75,11 +71,11 @@ class ApplicationConfig {
      */
     @Bean
     @Primary
-    fun restTemplateBuilder(objectMapper: ObjectMapper): RestTemplateBuilder =
+    fun restTemplateBuilder(jsonMapper: JsonMapper): RestTemplateBuilder =
         RestTemplateBuilder()
             .connectTimeout(Duration.of(2, ChronoUnit.SECONDS))
             .readTimeout(Duration.of(30, ChronoUnit.SECONDS))
-            .additionalMessageConverters(listOf(MappingJackson2HttpMessageConverter(ObjectMapperProvider.objectMapper)) + RestTemplate().messageConverters)
+            .additionalMessageConverters(listOf(JacksonJsonHttpMessageConverter(ObjectMapperProvider.jsonMapper)) + RestTemplate().messageConverters)
 
     @Bean("utenAuth")
     fun restTemplate(
@@ -87,14 +83,14 @@ class ApplicationConfig {
         consumerIdClientInterceptor: ConsumerIdClientInterceptor,
     ): RestOperations =
         restTemplateBuilder
-            .additionalMessageConverters(listOf(MappingJackson2HttpMessageConverter(ObjectMapperProvider.objectMapper)) + RestTemplate().messageConverters)
+            .additionalMessageConverters(listOf(JacksonJsonHttpMessageConverter(ObjectMapperProvider.jsonMapper)) + RestTemplate().messageConverters)
             .additionalInterceptors(
                 consumerIdClientInterceptor,
                 MdcValuesPropagatingClientInterceptor(),
             ).build()
 
     /**
-     * Overskrever OAuth2HttpClient som settes opp i token-support som ikke kan få med objectMapper fra felles
+     * Overskrever OAuth2HttpClient som settes opp i token-support som ikke kan få med jsonMapper fra felles
      * pga .setVisibility(PropertyAccessor.SETTER, JsonAutoDetect.Visibility.NONE)
      * og [OAuth2AccessTokenResponse] som burde settes med setters, då feltnavn heter noe annet enn feltet i json
      */
@@ -106,7 +102,7 @@ class ApplicationConfig {
                 RestTemplateBuilder()
                     .connectTimeout(Duration.of(2, ChronoUnit.SECONDS))
                     .readTimeout(Duration.of(2, ChronoUnit.SECONDS))
-                    .additionalMessageConverters(listOf(MappingJackson2HttpMessageConverter(ObjectMapperProvider.objectMapper)) + RestTemplate().messageConverters)
+                    .additionalMessageConverters(listOf(JacksonJsonHttpMessageConverter(ObjectMapperProvider.jsonMapper)) + RestTemplate().messageConverters)
                     .build(),
             ),
         )

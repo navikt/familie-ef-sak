@@ -51,7 +51,7 @@ import no.nav.familie.kontrakter.ef.iverksett.OppgaveForOpprettelseType
 import no.nav.familie.kontrakter.ef.søknad.Testsøknad
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.ef.StønadType.OVERGANGSSTØNAD
-import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.jsonMapper
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.internal.TaskService
 import org.assertj.core.api.Assertions.assertThat
@@ -154,7 +154,7 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
             assertThrows<HttpClientErrorException.BadRequest> {
                 sendTilBeslutter(SAKSBEHANDLER)
             }
-        val ressurs = ObjectMapperProvider.objectMapper.readValue(exception.responseBodyAsString, Ressurs::class.java)
+        val ressurs = ObjectMapperProvider.jsonMapper.readValue(exception.responseBodyAsString, Ressurs::class.java)
         assertThat(ressurs.frontendFeilmelding).isEqualTo("Kan ikke innvilge hvis ikke alle vilkår er oppfylt for behandlingId: $behandlingId")
     }
 
@@ -167,7 +167,7 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
             assertThrows<HttpClientErrorException.BadRequest> {
                 sendTilBeslutter(SAKSBEHANDLER)
             }
-        val ressurs = ObjectMapperProvider.objectMapper.readValue(exception.responseBodyAsString, Ressurs::class.java)
+        val ressurs = ObjectMapperProvider.jsonMapper.readValue(exception.responseBodyAsString, Ressurs::class.java)
         assertThat(ressurs.frontendFeilmelding).isEqualTo("Kan ikke innvilge hvis ikke alle vilkår er oppfylt for behandlingId: $behandlingId")
     }
 
@@ -488,7 +488,7 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
             assertThrows<HttpClientErrorException.BadRequest> {
                 godkjennTotrinnskontroll(BESLUTTER)
             }
-        val ressurs = ObjectMapperProvider.objectMapper.readValue(exception.responseBodyAsString, Ressurs::class.java)
+        val ressurs = ObjectMapperProvider.jsonMapper.readValue(exception.responseBodyAsString, Ressurs::class.java)
         assertThat(ressurs.frontendFeilmelding).isEqualTo("Kan ikke iverksette med utdatert grunnbeløp gyldig fra 2025-04. Denne behandlingen må beregnes og simuleres på nytt")
 
         val lagretBehandling = behandlingService.hentBehandling(behandlingId)
@@ -728,7 +728,7 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
     }
 
     private fun lagSaksbehandlerBrev(saksbehandlerSignatur: String) {
-        val brevRequest = objectMapper.readTree("123")
+        val brevRequest = jsonMapper.readTree("123")
         mockBrukerContext(saksbehandlerSignatur)
         val saksbehandling = behandlingService.hentSaksbehandling(saksbehandling.id)
         vedtaksbrevService.lagSaksbehandlerSanitybrev(saksbehandling, brevRequest, "brevMal")

@@ -12,7 +12,7 @@ import no.nav.familie.ef.sak.vilkår.dto.tilDto
 import no.nav.familie.ef.sak.vilkår.gjenbruk.GjenbrukVilkårService
 import no.nav.familie.ef.sak.vilkår.regler.Vilkårsregler
 import no.nav.familie.kontrakter.felles.Ressurs
-import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.jsonMapper
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.slf4j.LoggerFactory
 import org.springframework.http.MediaType
@@ -49,7 +49,7 @@ class VurderingController(
         try {
             return Ressurs.success(vurderingStegService.oppdaterVilkår(vilkårsvurdering))
         } catch (e: Exception) {
-            val delvilkårJson = objectMapper.writeValueAsString(vilkårsvurdering.delvilkårsvurderinger)
+            val delvilkårJson = jsonMapper.writeValueAsString(vilkårsvurdering.delvilkårsvurderinger)
             secureLogger.warn(
                 "id=${vilkårsvurdering.id}" +
                     " behandlingId=${vilkårsvurdering.behandlingId}" +

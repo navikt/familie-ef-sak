@@ -1,6 +1,5 @@
 package no.nav.familie.ef.sak.iverksett
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
@@ -25,6 +24,7 @@ import no.nav.familie.ef.sak.brev.BrevmottakereRepository
 import no.nav.familie.ef.sak.brev.domain.MottakerRolle
 import no.nav.familie.ef.sak.felles.util.DatoUtil
 import no.nav.familie.ef.sak.felles.util.opprettGrunnlagsdata
+import no.nav.familie.ef.sak.infrastruktur.config.readValue
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.oppfølgingsoppgave.OppfølgingsoppgaveService
 import no.nav.familie.ef.sak.opplysninger.mapper.BarnMatcher
@@ -83,7 +83,7 @@ import no.nav.familie.kontrakter.ef.iverksett.VedtaksperiodeOvergangsstønadDto
 import no.nav.familie.kontrakter.ef.iverksett.VilkårsvurderingDto
 import no.nav.familie.kontrakter.ef.iverksett.ÅrsakRevurderingDto
 import no.nav.familie.kontrakter.felles.ef.StønadType
-import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.jsonMapper
 import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING
 import no.nav.familie.kontrakter.felles.simulering.Simuleringsoppsummering
 import org.assertj.core.api.Assertions.assertThat
@@ -533,7 +533,7 @@ internal class IverksettingDtoMapperTest {
         every { arbeidsfordelingService.hentNavEnhetIdEllerBrukMaskinellEnhetHvisNull(any()) } returns "4489"
         val behandlingId = UUID.fromString("73144d90-d238-41d2-833b-fc719dae23cb")
 
-        val behandlingBarn = objectMapper.readValue<BehandlingBarn>(behandlingBarnJson)
+        val behandlingBarn = jsonMapper.readValue<BehandlingBarn>(behandlingBarnJson)
         every { barnService.finnBarnPåBehandling(any()) } returns listOf(behandlingBarn)
         every { barnMatcher.kobleBehandlingBarnOgRegisterBarn(any(), any()) } returns
             listOf(
@@ -545,18 +545,18 @@ internal class IverksettingDtoMapperTest {
             )
         every { vilkårsvurderingRepository.findByBehandlingId(any()) } returns
             listOf(
-                objectMapper.readValue(
+                jsonMapper.readValue(
                     vilkårsvurderingJson,
                 ),
             )
-        every { vedtakService.hentVedtak(any()) } returns objectMapper.readValue(vedtakJson)
-        every { brevmottakereRepository.findByIdOrNull(any()) } returns objectMapper.readValue(brevmottakereJson)
-        every { tilbakekrevingService.hentTilbakekreving(any()) } returns objectMapper.readValue(tilbakekrevingJson)
+        every { vedtakService.hentVedtak(any()) } returns jsonMapper.readValue(vedtakJson)
+        every { brevmottakereRepository.findByIdOrNull(any()) } returns jsonMapper.readValue(brevmottakereJson)
+        every { tilbakekrevingService.hentTilbakekreving(any()) } returns jsonMapper.readValue(tilbakekrevingJson)
         every { simuleringService.hentLagretSimuleringsoppsummering(any()) } returns
-            objectMapper.readValue(
+            jsonMapper.readValue(
                 simuleringsoppsummeringJson,
             )
-        every { tilkjentYtelseService.hentForBehandling(any()) } returns objectMapper.readValue(tilkjentYtelseJson)
+        every { tilkjentYtelseService.hentForBehandling(any()) } returns jsonMapper.readValue(tilkjentYtelseJson)
         return behandlingId
     }
 

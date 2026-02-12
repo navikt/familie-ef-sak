@@ -1,6 +1,5 @@
 package no.nav.familie.ef.sak.infrastruktur.config
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import jakarta.annotation.Nullable
 import no.nav.familie.ef.sak.amelding.InntektResponse
 import no.nav.familie.ef.sak.brev.domain.OrganisasjonerWrapper
@@ -8,6 +7,7 @@ import no.nav.familie.ef.sak.brev.domain.PersonerWrapper
 import no.nav.familie.ef.sak.felles.domain.Endret
 import no.nav.familie.ef.sak.felles.domain.Fil
 import no.nav.familie.ef.sak.felles.domain.JsonWrapper
+import no.nav.familie.ef.sak.infrastruktur.config.readValue
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.GrunnlagsdataDomene
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.Arbeidssituasjon
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.Dokumentasjon
@@ -20,7 +20,7 @@ import no.nav.familie.ef.sak.vedtak.domain.PeriodeWrapper
 import no.nav.familie.ef.sak.vedtak.domain.SkolepengerWrapper
 import no.nav.familie.ef.sak.vedtak.domain.TilleggsstønadWrapper
 import no.nav.familie.ef.sak.vilkår.DelvilkårsvurderingWrapper
-import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.jsonMapper
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
 import no.nav.familie.kontrakter.felles.simulering.BeriketSimuleringsresultat
 import no.nav.familie.kontrakter.felles.simulering.DetaljertSimuleringResultat
@@ -139,22 +139,22 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
 
     @WritingConverter
     class UtbetalingsoppdragTilStringConverter : Converter<Utbetalingsoppdrag, String> {
-        override fun convert(utbetalingsoppdrag: Utbetalingsoppdrag): String = objectMapper.writeValueAsString(utbetalingsoppdrag)
+        override fun convert(utbetalingsoppdrag: Utbetalingsoppdrag): String = jsonMapper.writeValueAsString(utbetalingsoppdrag)
     }
 
     @ReadingConverter
     class StringTilUtbetalingsoppdragConverter : Converter<String, Utbetalingsoppdrag> {
-        override fun convert(string: String): Utbetalingsoppdrag = objectMapper.readValue(string, Utbetalingsoppdrag::class.java)
+        override fun convert(string: String): Utbetalingsoppdrag = jsonMapper.readValue(string, Utbetalingsoppdrag::class.java)
     }
 
     @WritingConverter
     class DokumentTilStringConverter : Converter<Dokumentasjon, String> {
-        override fun convert(dokumentasjon: Dokumentasjon): String = objectMapper.writeValueAsString(dokumentasjon)
+        override fun convert(dokumentasjon: Dokumentasjon): String = jsonMapper.writeValueAsString(dokumentasjon)
     }
 
     @ReadingConverter
     class StringTilDokumentConverter : Converter<String, Dokumentasjon> {
-        override fun convert(s: String): Dokumentasjon = objectMapper.readValue(s, Dokumentasjon::class.java)
+        override fun convert(s: String): Dokumentasjon = jsonMapper.readValue(s, Dokumentasjon::class.java)
     }
 
     @WritingConverter
@@ -169,7 +169,7 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
 
     @ReadingConverter
     class PGobjectTilDelvilkårConverter : Converter<PGobject, DelvilkårsvurderingWrapper> {
-        override fun convert(pGobject: PGobject): DelvilkårsvurderingWrapper = DelvilkårsvurderingWrapper(pGobject.value?.let { objectMapper.readValue(it) } ?: emptyList())
+        override fun convert(pGobject: PGobject): DelvilkårsvurderingWrapper = DelvilkårsvurderingWrapper(pGobject.value?.let { jsonMapper.readValue(it) } ?: emptyList())
     }
 
     @WritingConverter
@@ -177,7 +177,7 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
         override fun convert(delvilkårsvurdering: DelvilkårsvurderingWrapper): PGobject =
             PGobject().apply {
                 type = "json"
-                value = objectMapper.writeValueAsString(delvilkårsvurdering.delvilkårsvurderinger)
+                value = jsonMapper.writeValueAsString(delvilkårsvurdering.delvilkårsvurderinger)
             }
     }
 
@@ -222,13 +222,13 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
         override fun convert(data: GrunnlagsdataDomene): PGobject =
             PGobject().apply {
                 type = "json"
-                value = objectMapper.writeValueAsString(data)
+                value = jsonMapper.writeValueAsString(data)
             }
     }
 
     @ReadingConverter
     class PGobjectTilGrunnlagsdata : Converter<PGobject, GrunnlagsdataDomene> {
-        override fun convert(pGobject: PGobject): GrunnlagsdataDomene = objectMapper.readValue(pGobject.value!!)
+        override fun convert(pGobject: PGobject): GrunnlagsdataDomene = jsonMapper.readValue(pGobject.value!!)
     }
 
     @WritingConverter
@@ -236,13 +236,13 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
         override fun convert(data: InntektResponse): PGobject =
             PGobject().apply {
                 type = "json"
-                value = objectMapper.writeValueAsString(data)
+                value = jsonMapper.writeValueAsString(data)
             }
     }
 
     @ReadingConverter
     class PGobjectTilGrunnlagsdataInntekt : Converter<PGobject, InntektResponse> {
-        override fun convert(pGobject: PGobject): InntektResponse = objectMapper.readValue(pGobject.value!!)
+        override fun convert(pGobject: PGobject): InntektResponse = jsonMapper.readValue(pGobject.value!!)
     }
 
     @WritingConverter
@@ -257,7 +257,7 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
 
     @ReadingConverter
     class PGobjectTilVedtaksperioder : Converter<PGobject, PeriodeWrapper> {
-        override fun convert(pGobject: PGobject): PeriodeWrapper = PeriodeWrapper(pGobject.value?.let { objectMapper.readValue(it) } ?: emptyList())
+        override fun convert(pGobject: PGobject): PeriodeWrapper = PeriodeWrapper(pGobject.value?.let { jsonMapper.readValue(it) } ?: emptyList())
     }
 
     @WritingConverter
@@ -265,13 +265,13 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
         override fun convert(perioder: PeriodeWrapper): PGobject =
             PGobject().apply {
                 type = "json"
-                value = objectMapper.writeValueAsString(perioder.perioder)
+                value = jsonMapper.writeValueAsString(perioder.perioder)
             }
     }
 
     @ReadingConverter
     class PGobjectTilInntektsperiode : Converter<PGobject, InntektWrapper> {
-        override fun convert(pGobject: PGobject): InntektWrapper = InntektWrapper(pGobject.value?.let { objectMapper.readValue(it) } ?: emptyList())
+        override fun convert(pGobject: PGobject): InntektWrapper = InntektWrapper(pGobject.value?.let { jsonMapper.readValue(it) } ?: emptyList())
     }
 
     @WritingConverter
@@ -279,14 +279,14 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
         override fun convert(inntekter: InntektWrapper): PGobject =
             PGobject().apply {
                 type = "json"
-                value = objectMapper.writeValueAsString(inntekter.inntekter)
+                value = jsonMapper.writeValueAsString(inntekter.inntekter)
             }
     }
 
     @ReadingConverter
     class PGobjectTilBarnetilsynConverter : Converter<PGobject, BarnetilsynWrapper> {
         override fun convert(pGobject: PGobject): BarnetilsynWrapper {
-            val barnetilsynVerdi: BarnetilsynWrapper? = pGobject.value?.let { objectMapper.readValue(it) }
+            val barnetilsynVerdi: BarnetilsynWrapper? = pGobject.value?.let { jsonMapper.readValue(it) }
             return barnetilsynVerdi ?: BarnetilsynWrapper(perioder = emptyList(), begrunnelse = null)
         }
     }
@@ -296,14 +296,14 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
         override fun convert(barnetilsyn: BarnetilsynWrapper): PGobject =
             PGobject().apply {
                 type = "json"
-                value = objectMapper.writeValueAsString(barnetilsyn)
+                value = jsonMapper.writeValueAsString(barnetilsyn)
             }
     }
 
     @ReadingConverter
     class PGobjectTilSkolepengerConverter : Converter<PGobject, SkolepengerWrapper> {
         override fun convert(pGobject: PGobject): SkolepengerWrapper {
-            val eksisterendeVerdi: SkolepengerWrapper? = pGobject.value?.let { objectMapper.readValue(it) }
+            val eksisterendeVerdi: SkolepengerWrapper? = pGobject.value?.let { jsonMapper.readValue(it) }
             return eksisterendeVerdi ?: SkolepengerWrapper(skoleårsperioder = emptyList(), begrunnelse = null)
         }
     }
@@ -313,14 +313,14 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
         override fun convert(barnetilsyn: SkolepengerWrapper): PGobject =
             PGobject().apply {
                 type = "json"
-                value = objectMapper.writeValueAsString(barnetilsyn)
+                value = jsonMapper.writeValueAsString(barnetilsyn)
             }
     }
 
     @ReadingConverter
     class PGobjectTilKontantstøtteConverter : Converter<PGobject, KontantstøtteWrapper> {
         override fun convert(pGobject: PGobject): KontantstøtteWrapper {
-            val kontantstøtteVerdi: KontantstøtteWrapper? = pGobject.value?.let { objectMapper.readValue(it) }
+            val kontantstøtteVerdi: KontantstøtteWrapper? = pGobject.value?.let { jsonMapper.readValue(it) }
             return kontantstøtteVerdi ?: KontantstøtteWrapper(perioder = emptyList(), begrunnelse = null)
         }
     }
@@ -330,14 +330,14 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
         override fun convert(kontantstøtte: KontantstøtteWrapper): PGobject =
             PGobject().apply {
                 type = "json"
-                value = objectMapper.writeValueAsString(kontantstøtte)
+                value = jsonMapper.writeValueAsString(kontantstøtte)
             }
     }
 
     @ReadingConverter
     class PGobjectTilTilleggsstønadConverter : Converter<PGobject, TilleggsstønadWrapper> {
         override fun convert(pGobject: PGobject): TilleggsstønadWrapper {
-            val tilleggstønadVerdi: TilleggsstønadWrapper? = pGobject.value?.let { objectMapper.readValue(it) }
+            val tilleggstønadVerdi: TilleggsstønadWrapper? = pGobject.value?.let { jsonMapper.readValue(it) }
             return tilleggstønadVerdi ?: TilleggsstønadWrapper(
                 perioder = emptyList(),
                 begrunnelse = null,
@@ -350,13 +350,13 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
         override fun convert(tilleggsstønad: TilleggsstønadWrapper): PGobject =
             PGobject().apply {
                 type = "json"
-                value = objectMapper.writeValueAsString(tilleggsstønad)
+                value = jsonMapper.writeValueAsString(tilleggsstønad)
             }
     }
 
     @ReadingConverter
     class PGobjectTilDetaljertSimuleringResultat : Converter<PGobject, DetaljertSimuleringResultat> {
-        override fun convert(pGobject: PGobject): DetaljertSimuleringResultat = DetaljertSimuleringResultat(pGobject.value?.let { objectMapper.readValue(it) } ?: emptyList())
+        override fun convert(pGobject: PGobject): DetaljertSimuleringResultat = DetaljertSimuleringResultat(pGobject.value?.let { jsonMapper.readValue(it) } ?: emptyList())
     }
 
     @WritingConverter
@@ -364,13 +364,13 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
         override fun convert(simuleringsresultat: DetaljertSimuleringResultat): PGobject =
             PGobject().apply {
                 type = "json"
-                value = objectMapper.writeValueAsString(simuleringsresultat.simuleringMottaker)
+                value = jsonMapper.writeValueAsString(simuleringsresultat.simuleringMottaker)
             }
     }
 
     @ReadingConverter
     class PGobjectTilBeriketSimuleringsresultat : Converter<PGobject, BeriketSimuleringsresultat> {
-        override fun convert(pGobject: PGobject): BeriketSimuleringsresultat = pGobject.value?.let { objectMapper.readValue(it) } ?: throw IllegalArgumentException("Beriket simuleringsresultat er null: ${pGobject.value}")
+        override fun convert(pGobject: PGobject): BeriketSimuleringsresultat = pGobject.value?.let { jsonMapper.readValue(it) } ?: throw IllegalArgumentException("Beriket simuleringsresultat er null: ${pGobject.value}")
     }
 
     @WritingConverter
@@ -378,13 +378,13 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
         override fun convert(simuleringsresultat: BeriketSimuleringsresultat): PGobject =
             PGobject().apply {
                 type = "json"
-                value = objectMapper.writeValueAsString(simuleringsresultat)
+                value = jsonMapper.writeValueAsString(simuleringsresultat)
             }
     }
 
     @ReadingConverter
     class PGobjectTilBrevmottakerPersoner : Converter<PGobject, PersonerWrapper> {
-        override fun convert(pGobject: PGobject): PersonerWrapper = pGobject.value?.let { objectMapper.readValue(it) } ?: throw IllegalArgumentException("PersonerWrapper er null: ${pGobject.value}")
+        override fun convert(pGobject: PGobject): PersonerWrapper = pGobject.value?.let { jsonMapper.readValue(it) } ?: throw IllegalArgumentException("PersonerWrapper er null: ${pGobject.value}")
     }
 
     @WritingConverter
@@ -392,13 +392,13 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
         override fun convert(mottakere: PersonerWrapper): PGobject =
             PGobject().apply {
                 type = "json"
-                value = objectMapper.writeValueAsString(mottakere)
+                value = jsonMapper.writeValueAsString(mottakere)
             }
     }
 
     @ReadingConverter
     class PGobjectTilBrevmottakerOrganisasjoner : Converter<PGobject, OrganisasjonerWrapper> {
-        override fun convert(pGobject: PGobject): OrganisasjonerWrapper = pGobject.value?.let { objectMapper.readValue(it) } ?: throw IllegalArgumentException("OrganisasjonerWrapper er null: ${pGobject.value}")
+        override fun convert(pGobject: PGobject): OrganisasjonerWrapper = pGobject.value?.let { jsonMapper.readValue(it) } ?: throw IllegalArgumentException("OrganisasjonerWrapper er null: ${pGobject.value}")
     }
 
     @WritingConverter
@@ -406,13 +406,13 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
         override fun convert(mottakere: OrganisasjonerWrapper): PGobject =
             PGobject().apply {
                 type = "json"
-                value = objectMapper.writeValueAsString(mottakere)
+                value = jsonMapper.writeValueAsString(mottakere)
             }
     }
 
     @ReadingConverter
     class PGobjectTilSamværsuker : Converter<PGobject, SamværsukeWrapper> {
-        override fun convert(pGobject: PGobject): SamværsukeWrapper = SamværsukeWrapper(pGobject.value?.let { objectMapper.readValue(it) } ?: emptyList())
+        override fun convert(pGobject: PGobject): SamværsukeWrapper = SamværsukeWrapper(pGobject.value?.let { jsonMapper.readValue(it) } ?: emptyList())
     }
 
     @WritingConverter
@@ -420,7 +420,7 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
         override fun convert(samværsuker: SamværsukeWrapper): PGobject =
             PGobject().apply {
                 type = "json"
-                value = objectMapper.writeValueAsString(samværsuker.uker)
+                value = jsonMapper.writeValueAsString(samværsuker.uker)
             }
     }
 }

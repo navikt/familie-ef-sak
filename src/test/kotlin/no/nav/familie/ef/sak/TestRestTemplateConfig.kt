@@ -5,7 +5,7 @@ import org.springframework.boot.restclient.RestTemplateBuilder
 import org.springframework.boot.resttestclient.TestRestTemplate
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter
+import org.springframework.http.converter.json.JacksonJsonHttpMessageConverter
 
 @TestConfiguration
 class TestRestTemplateConfig {
@@ -16,7 +16,7 @@ class TestRestTemplateConfig {
         val restTemplateBuilder =
             builder
                 .additionalMessageConverters(
-                    MappingJackson2HttpMessageConverter(ObjectMapperProvider.objectMapper),
+                    JacksonJsonHttpMessageConverter(ObjectMapperProvider.jsonMapper),
                 )
         return TestRestTemplate(restTemplateBuilder)
     }

@@ -1,13 +1,13 @@
 package no.nav.familie.ef.sak.behandling.henlegg
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.familie.ef.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.brev.FrittståendeBrevService
+import no.nav.familie.ef.sak.infrastruktur.config.readValue
 import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.kontrakter.ef.felles.FrittståendeBrevDto
 import no.nav.familie.kontrakter.ef.felles.FrittståendeBrevType
-import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.jsonMapper
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
@@ -30,7 +30,7 @@ class SendTrukketSøknadHenleggelsesbrevTask(
     private val frittståendeBrevService: FrittståendeBrevService,
 ) : AsyncTaskStep {
     override fun doTask(task: Task) {
-        val henleggelsesbrevDto = objectMapper.readValue<HenleggelsesbrevDto>(task.payload)
+        val henleggelsesbrevDto = jsonMapper.readValue<HenleggelsesbrevDto>(task.payload)
         val saksbehandlerIdent = henleggelsesbrevDto.saksbehandlerIdent
         val saksbehandling = behandlingService.hentSaksbehandling(henleggelsesbrevDto.behandlingId)
         val journalførendeEnhet = arbeidsfordelingService.hentNavEnhetIdEllerBrukMaskinellEnhetHvisNull(saksbehandling.ident)
@@ -66,7 +66,7 @@ class SendTrukketSøknadHenleggelsesbrevTask(
         ): Task =
             Task(
                 type = TYPE,
-                payload = objectMapper.writeValueAsString(HenleggelsesbrevDto(behandlingId, saksbehandlerSignatur, saksbehandlerIdent)),
+                payload = jsonMapper.writeValueAsString(HenleggelsesbrevDto(behandlingId, saksbehandlerSignatur, saksbehandlerIdent)),
             )
 
         const val TYPE = "SendHenleggelsesbrevOmTrukketSøknadTask"

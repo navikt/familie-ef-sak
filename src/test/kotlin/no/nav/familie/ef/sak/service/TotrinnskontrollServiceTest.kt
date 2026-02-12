@@ -22,7 +22,7 @@ import no.nav.familie.ef.sak.vedtak.domain.VedtakErUtenBeslutter
 import no.nav.familie.ef.sak.vedtak.dto.BeslutteVedtakDto
 import no.nav.familie.ef.sak.vedtak.dto.TotrinnkontrollStatus
 import no.nav.familie.ef.sak.vedtak.dto.ÅrsakUnderkjent
-import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.jsonMapper
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.catchThrowable
 import org.junit.jupiter.api.BeforeEach
@@ -245,7 +245,7 @@ internal class TotrinnskontrollServiceTest {
         opprettetAv = opprettetAv,
         metadata =
             beslutt?.let {
-                JsonWrapper(objectMapper.writeValueAsString(it))
+                JsonWrapper(jsonMapper.writeValueAsString(it))
             },
     )
 
