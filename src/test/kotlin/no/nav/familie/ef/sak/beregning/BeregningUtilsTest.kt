@@ -406,5 +406,16 @@ internal class BeregningUtilsTest {
             assertThat(resultat.opp).isEqualTo(40058)
             assertThat(resultat.ned).isEqualTo(32775)
         }
+
+        @Test
+        internal fun `skal beregne totalinntekt med månedsinntekt 21468 og årsinntekt 60000`() {
+            val månedsinntekt = 21_468.toBigDecimal()
+            val årsinntekt = 60_000.toBigDecimal()
+            val inntektsperiodeMedMånedOgÅrsinntekt = inntektsperiode.copy(månedsinntekt = månedsinntekt, inntekt = årsinntekt)
+
+            val resultat = BeregningUtils.beregnTotalinntekt(inntektsperiodeMedMånedOgÅrsinntekt)
+
+            assertThat(resultat).isEqualTo(317_000.toBigDecimal())
+        }
     }
 }
