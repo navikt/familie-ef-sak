@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.beregning
 
+import com.fasterxml.jackson.annotation.JsonProperty
 import no.nav.familie.ef.sak.vedtak.dto.VedtaksperiodeDto
 import no.nav.familie.kontrakter.felles.Månedsperiode
 import java.math.BigDecimal
@@ -27,6 +28,7 @@ data class Inntekt(
             samordningsfradrag = samordningsfradrag ?: BigDecimal.ZERO,
         )
 
+    @get:JsonProperty
     val totalinntekt: BigDecimal
         get() = BeregningUtils.beregnTotalinntekt(tilInntektsperiode())
 }
