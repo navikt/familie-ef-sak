@@ -4,15 +4,11 @@ import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ef.sak.amelding.InntektResponse
 import no.nav.familie.ef.sak.amelding.ekstern.AMeldingInntektClient
-import no.nav.familie.ef.sak.infrastruktur.config.ObjectMapperProvider.jsonMapper
-import no.nav.familie.ef.sak.infrastruktur.config.readValue
-import no.nav.familie.ef.sak.repository.inntekt
-import no.nav.familie.ef.sak.repository.inntektsmåneder
+import no.nav.familie.ef.sak.infrastruktur.config.JsonMapperProvider.jsonMapper
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Primary
 import org.springframework.context.annotation.Profile
-import java.time.YearMonth
 
 @Configuration
 class InntektClientMock {

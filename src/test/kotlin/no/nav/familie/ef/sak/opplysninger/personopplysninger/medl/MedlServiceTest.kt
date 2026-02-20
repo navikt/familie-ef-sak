@@ -2,7 +2,7 @@ package no.nav.familie.ef.sak.no.nav.familie.ef.sak.opplysninger.personopplysnin
 
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.familie.ef.sak.infrastruktur.config.ObjectMapperProvider.jsonMapper
+import no.nav.familie.ef.sak.infrastruktur.config.JsonMapperProvider.jsonMapper
 import no.nav.familie.ef.sak.infrastruktur.config.readValue
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.medl.MedlClient
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.medl.MedlService

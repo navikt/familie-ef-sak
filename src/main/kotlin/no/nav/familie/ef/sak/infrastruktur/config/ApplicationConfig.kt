@@ -50,7 +50,7 @@ class ApplicationConfig {
 
     @Bean
     @Primary
-    fun jsonMapper(): JsonMapper = ObjectMapperProvider.jsonMapper
+    fun jsonMapper(): JsonMapper = JsonMapperProvider.jsonMapper
 
     @Bean
     fun logFilter(): FilterRegistrationBean<LogFilter> =
@@ -75,7 +75,7 @@ class ApplicationConfig {
         RestTemplateBuilder()
             .connectTimeout(Duration.of(2, ChronoUnit.SECONDS))
             .readTimeout(Duration.of(30, ChronoUnit.SECONDS))
-            .additionalMessageConverters(listOf(JacksonJsonHttpMessageConverter(ObjectMapperProvider.jsonMapper)) + RestTemplate().messageConverters)
+            .additionalMessageConverters(listOf(JacksonJsonHttpMessageConverter(JsonMapperProvider.jsonMapper)) + RestTemplate().messageConverters)
 
     @Bean("utenAuth")
     fun restTemplate(
@@ -83,7 +83,7 @@ class ApplicationConfig {
         consumerIdClientInterceptor: ConsumerIdClientInterceptor,
     ): RestOperations =
         restTemplateBuilder
-            .additionalMessageConverters(listOf(JacksonJsonHttpMessageConverter(ObjectMapperProvider.jsonMapper)) + RestTemplate().messageConverters)
+            .additionalMessageConverters(listOf(JacksonJsonHttpMessageConverter(JsonMapperProvider.jsonMapper)) + RestTemplate().messageConverters)
             .additionalInterceptors(
                 consumerIdClientInterceptor,
                 MdcValuesPropagatingClientInterceptor(),

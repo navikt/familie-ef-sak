@@ -1,6 +1,6 @@
 package no.nav.familie.ef.sak.no.nav.familie.ef.sak
 
-import no.nav.familie.ef.sak.infrastruktur.config.ObjectMapperProvider
+import no.nav.familie.ef.sak.infrastruktur.config.JsonMapperProvider
 import org.springframework.boot.restclient.RestTemplateBuilder
 import org.springframework.boot.resttestclient.TestRestTemplate
 import org.springframework.boot.test.context.TestConfiguration
@@ -16,7 +16,7 @@ class TestRestTemplateConfig {
         val restTemplateBuilder =
             builder
                 .additionalMessageConverters(
-                    JacksonJsonHttpMessageConverter(ObjectMapperProvider.jsonMapper),
+                    JacksonJsonHttpMessageConverter(JsonMapperProvider.jsonMapper),
                 )
         return TestRestTemplate(restTemplateBuilder)
     }

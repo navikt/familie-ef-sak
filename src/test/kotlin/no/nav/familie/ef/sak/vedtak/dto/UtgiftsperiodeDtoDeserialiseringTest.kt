@@ -1,6 +1,6 @@
 package no.nav.familie.ef.sak.vedtak.dto
 
-import no.nav.familie.ef.sak.infrastruktur.config.ObjectMapperProvider.jsonMapper
+import no.nav.familie.ef.sak.infrastruktur.config.JsonMapperProvider.jsonMapper
 import no.nav.familie.ef.sak.infrastruktur.config.readValue
 import no.nav.familie.ef.sak.vedtak.domain.PeriodetypeBarnetilsyn
 import org.assertj.core.api.Assertions.assertThat

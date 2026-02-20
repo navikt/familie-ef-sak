@@ -16,7 +16,7 @@ import no.nav.familie.ef.sak.behandlingshistorikk.domain.StegUtfall
 import no.nav.familie.ef.sak.brev.VedtaksbrevService
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.clearBrukerContext
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.mockBrukerContext
-import no.nav.familie.ef.sak.infrastruktur.config.ObjectMapperProvider
+import no.nav.familie.ef.sak.infrastruktur.config.JsonMapperProvider
 import no.nav.familie.ef.sak.infrastruktur.config.RolleConfig
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.oppfølgingsoppgave.OppfølgingsoppgaveService
@@ -154,7 +154,7 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
             assertThrows<HttpClientErrorException.BadRequest> {
                 sendTilBeslutter(SAKSBEHANDLER)
             }
-        val ressurs = ObjectMapperProvider.jsonMapper.readValue(exception.responseBodyAsString, Ressurs::class.java)
+        val ressurs = JsonMapperProvider.jsonMapper.readValue(exception.responseBodyAsString, Ressurs::class.java)
         assertThat(ressurs.frontendFeilmelding).isEqualTo("Kan ikke innvilge hvis ikke alle vilkår er oppfylt for behandlingId: $behandlingId")
     }
 
@@ -167,7 +167,7 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
             assertThrows<HttpClientErrorException.BadRequest> {
                 sendTilBeslutter(SAKSBEHANDLER)
             }
-        val ressurs = ObjectMapperProvider.jsonMapper.readValue(exception.responseBodyAsString, Ressurs::class.java)
+        val ressurs = JsonMapperProvider.jsonMapper.readValue(exception.responseBodyAsString, Ressurs::class.java)
         assertThat(ressurs.frontendFeilmelding).isEqualTo("Kan ikke innvilge hvis ikke alle vilkår er oppfylt for behandlingId: $behandlingId")
     }
 
@@ -488,7 +488,7 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
             assertThrows<HttpClientErrorException.BadRequest> {
                 godkjennTotrinnskontroll(BESLUTTER)
             }
-        val ressurs = ObjectMapperProvider.jsonMapper.readValue(exception.responseBodyAsString, Ressurs::class.java)
+        val ressurs = JsonMapperProvider.jsonMapper.readValue(exception.responseBodyAsString, Ressurs::class.java)
         assertThat(ressurs.frontendFeilmelding).isEqualTo("Kan ikke iverksette med utdatert grunnbeløp gyldig fra 2025-04. Denne behandlingen må beregnes og simuleres på nytt")
 
         val lagretBehandling = behandlingService.hentBehandling(behandlingId)

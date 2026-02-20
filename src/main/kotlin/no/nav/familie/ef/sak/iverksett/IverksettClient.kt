@@ -2,6 +2,7 @@ package no.nav.familie.ef.sak.iverksett
 
 import no.nav.familie.ef.sak.felles.domain.Fil
 import no.nav.familie.ef.sak.felles.util.medContentTypeJsonUTF8
+import no.nav.familie.ef.sak.infrastruktur.config.JsonMapperProvider
 import no.nav.familie.kontrakter.ef.felles.FrittståendeBrevDto
 import no.nav.familie.kontrakter.ef.felles.PeriodiskAktivitetspliktBrevDto
 import no.nav.familie.kontrakter.ef.iverksett.BehandlingsstatistikkDto
@@ -65,6 +66,9 @@ class IverksettClient(
                 .withByteArray("fil", "vedtak", fil.bytes)
                 .build()
         val headers = HttpHeaders().apply { this.add("Content-Type", "multipart/form-data") }
+        secureLogger.info("Sender $iverksettDto til iverksett")
+        secureLogger.info("jsonMapper serialiserer iverksettDto slik: ${JsonMapperProvider.jsonMapper.writeValueAsString(request)}")
+
         postForEntity<Any>(url, request, headers)
     }
 

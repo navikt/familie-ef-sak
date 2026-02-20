@@ -47,7 +47,7 @@ import no.nav.familie.ef.sak.cucumber.domeneparser.parseÅrMåned
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.felles.util.DatoFormat.YEAR_MONTH_FORMAT_NORSK
 import no.nav.familie.ef.sak.felles.util.mockFeatureToggleService
-import no.nav.familie.ef.sak.infrastruktur.config.ObjectMapperProvider
+import no.nav.familie.ef.sak.infrastruktur.config.JsonMapperProvider
 import no.nav.familie.ef.sak.infrastruktur.config.readValue
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvisIkke
@@ -397,7 +397,7 @@ class StepDefinitions {
         } returns behandling.copy(status = BehandlingStatus.IVERKSETTER_VEDTAK)
 
         val expectedIverksettDto: IverksettOvergangsstønadDto =
-            ObjectMapperProvider.jsonMapper.readValue(readFile("expectedIverksettDto.json"))
+            JsonMapperProvider.jsonMapper.readValue(readFile("expectedIverksettDto.json"))
 
         every { iverksettingDtoMapper.tilDtoMaskineltBehandlet(any()) } returns expectedIverksettDto
     }

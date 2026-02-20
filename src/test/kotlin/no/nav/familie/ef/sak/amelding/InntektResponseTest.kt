@@ -1,7 +1,7 @@
 package no.nav.familie.ef.sak.no.nav.familie.ef.sak.amelding
 
 import no.nav.familie.ef.sak.amelding.InntektResponse
-import no.nav.familie.ef.sak.infrastruktur.config.ObjectMapperProvider.jsonMapper
+import no.nav.familie.ef.sak.infrastruktur.config.JsonMapperProvider.jsonMapper
 import no.nav.familie.ef.sak.infrastruktur.config.readValue
 import no.nav.familie.ef.sak.repository.inntektsperiode
 import no.nav.familie.ef.sak.repository.lagInntektResponseForMånedsperiodeMedGittLønnsbeskrivelseForrigeMåned
