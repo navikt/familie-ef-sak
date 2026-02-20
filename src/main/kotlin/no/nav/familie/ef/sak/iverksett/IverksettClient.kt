@@ -67,7 +67,6 @@ class IverksettClient(
                 .build()
         val headers = HttpHeaders().apply { this.add("Content-Type", "multipart/form-data") }
         secureLogger.info("Sender $iverksettDto til iverksett")
-        secureLogger.info("jsonMapper serialiserer iverksettDto slik: ${JsonMapperProvider.jsonMapper.writeValueAsString(request)}")
 
         postForEntity<Any>(url, request, headers)
     }
