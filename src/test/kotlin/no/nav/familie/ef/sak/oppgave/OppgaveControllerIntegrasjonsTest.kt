@@ -18,7 +18,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.web.client.exchange
+import org.springframework.boot.resttestclient.exchange
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpMethod
 import org.springframework.http.ResponseEntity
@@ -218,14 +218,14 @@ internal class OppgaveControllerIntegrasjonsTest : OppslagSpringRunnerTest() {
     }
 
     private fun søkOppgave(personIdent: String): ResponseEntity<Ressurs<OppgaveResponseDto>> =
-        restTemplate.exchange(
+        testRestTemplate.exchange(
             localhost("/api/oppgave/soek"),
             HttpMethod.POST,
             HttpEntity(FinnOppgaveRequestDto(ident = personIdent), headers),
         )
 
     private fun hentAnsvarligSaksbehandler(behandlingId: UUID): ResponseEntity<Ressurs<SaksbehandlerDto>> =
-        restTemplate.exchange(
+        testRestTemplate.exchange(
             localhost("/api/oppgave/$behandlingId/ansvarlig-saksbehandler"),
             HttpMethod.GET,
             HttpEntity<Ressurs<SaksbehandlerDto>>(headers),

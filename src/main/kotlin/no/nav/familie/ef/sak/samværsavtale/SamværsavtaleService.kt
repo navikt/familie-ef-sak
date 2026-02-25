@@ -142,7 +142,7 @@ class SamværsavtaleService(
 
     fun journalførBeregnetSamvær(request: JournalførBeregnetSamværRequest): String {
         val eksternFagsakId = fagsakService.finnFagsaker(setOf(request.personIdent)).firstOrNull()?.eksternId
-        validerjournalføringRequest(request, eksternFagsakId)
+        validerJournalføringRequest(request, eksternFagsakId)
 
         val fritekstBrevRequest = lagFritekstBrevMedSignaturRequest(request)
         val dokument = brevClient.genererFritekstBrev(fritekstBrevRequest)
@@ -234,7 +234,7 @@ class SamværsavtaleService(
         }
     }
 
-    private fun validerjournalføringRequest(
+    private fun validerJournalføringRequest(
         request: JournalførBeregnetSamværRequest,
         eksternFagsakId: Long?,
     ) {

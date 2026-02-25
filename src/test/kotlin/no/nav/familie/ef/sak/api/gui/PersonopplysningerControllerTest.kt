@@ -4,10 +4,10 @@ import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.felles.dto.PersonIdentDto
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.PersonopplysningerDto
 import no.nav.familie.kontrakter.felles.Ressurs
-import org.assertj.core.api.Assertions
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.springframework.boot.test.web.client.exchange
+import org.springframework.boot.resttestclient.exchange
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
@@ -23,15 +23,15 @@ internal class PersonopplysningerControllerTest : OppslagSpringRunnerTest() {
     internal fun `Skal returnere 200 OK med status IKKE_TILGANG dersom man ikke har tilgang til brukeren`() {
         val respons: ResponseEntity<Ressurs<PersonopplysningerDto>> = hentPersonopplysninger()
 
-        Assertions.assertThat(respons.statusCode).isEqualTo(HttpStatus.FORBIDDEN)
-        Assertions.assertThat(respons.body?.status).isEqualTo(Ressurs.Status.IKKE_TILGANG)
-        Assertions.assertThat(respons.body?.data).isNull()
+        assertThat(respons.statusCode).isEqualTo(HttpStatus.FORBIDDEN)
+        assertThat(respons.body?.status).isEqualTo(Ressurs.Status.IKKE_TILGANG)
+        assertThat(respons.body?.data).isNull()
     }
 
     private fun hentPersonopplysninger(): ResponseEntity<Ressurs<PersonopplysningerDto>> {
         val personopplysningerRequest = PersonIdentDto("ikkeTilgang")
 
-        return restTemplate.exchange(
+        return testRestTemplate.exchange(
             localhost("/api/personopplysninger/nav-kontor"),
             HttpMethod.POST,
             HttpEntity(personopplysningerRequest, headers),

@@ -9,6 +9,7 @@ import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.testWithBrukerContext
+import no.nav.familie.ef.sak.infrastruktur.config.ObjectMapperProvider
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
 import no.nav.familie.ef.sak.repository.behandling
@@ -31,15 +32,19 @@ import no.nav.familie.kontrakter.ef.søknad.SøknadMedVedlegg
 import no.nav.familie.kontrakter.ef.søknad.Testsøknad
 import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.kontrakter.felles.Ressurs
+import no.nav.familie.kontrakter.felles.ef.EksternePerioderResponse
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.web.client.exchange
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.web.client.HttpClientErrorException
+import org.springframework.web.client.HttpServerErrorException
+import org.springframework.web.client.exchange
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.YearMonth
@@ -113,10 +118,13 @@ class BeregningControllerTest : OppslagSpringRunnerTest() {
             vilkårsvurderingService.hentEllerOpprettVurderinger(behandlingId = behandling.id) // ingen ok.
         }
 
-        val respons: ResponseEntity<Ressurs<UUID>> = fullførVedtak(behandling.id, vedtakDto)
-
-        assertThat(respons.body?.frontendFeilmelding)
-            .isEqualTo("Kan ikke fullføre en behandling med resultat innvilget hvis ikke alle vilkår er oppfylt")
+        val exception =
+            assertThrows<HttpClientErrorException.BadRequest> {
+                fullførVedtak(behandling.id, vedtakDto)
+            }
+        val ressurs = ObjectMapperProvider.objectMapper.readValue(exception.responseBodyAsString, Ressurs::class.java)
+        assertThat(ressurs.status).isEqualTo(Ressurs.Status.FUNKSJONELL_FEIL)
+        assertThat(ressurs.frontendFeilmelding).isEqualTo("Kan ikke fullføre en behandling med resultat innvilget hvis ikke alle vilkår er oppfylt")
     }
 
     @Test
@@ -157,10 +165,12 @@ class BeregningControllerTest : OppslagSpringRunnerTest() {
                 ),
             )
 
-        val feiletVedtak: ResponseEntity<Ressurs<List<Beløpsperiode>>> =
-            hentBeløpsperioderForBehandling(behandling.id)
-        assertThat(feiletVedtak.statusCode).isEqualTo(HttpStatus.BAD_REQUEST)
-        assertThat(feiletVedtak.body?.status).isEqualTo(Ressurs.Status.FUNKSJONELL_FEIL)
+        val exception =
+            assertThrows<HttpClientErrorException.BadRequest> {
+                hentBeløpsperioderForBehandling(behandling.id)
+            }
+        val ressurs = ObjectMapperProvider.objectMapper.readValue(exception.responseBodyAsString, Ressurs::class.java)
+        assertThat(ressurs.status).isEqualTo(Ressurs.Status.FUNKSJONELL_FEIL)
     }
 
     private fun lagFagsakOgBehandling(
