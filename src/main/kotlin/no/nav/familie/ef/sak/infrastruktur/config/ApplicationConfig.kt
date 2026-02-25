@@ -7,6 +7,7 @@ import no.nav.familie.log.filter.RequestTimeFilter
 import no.nav.familie.prosessering.config.ProsesseringInfoProvider
 import no.nav.familie.restklient.client.RetryOAuth2HttpClient
 import no.nav.familie.restklient.config.RestTemplateAzure
+import no.nav.familie.restklient.interceptor.BearerTokenClientInterceptor
 import no.nav.familie.restklient.interceptor.ConsumerIdClientInterceptor
 import no.nav.familie.restklient.interceptor.MdcValuesPropagatingClientInterceptor
 import no.nav.security.token.support.client.core.http.OAuth2HttpClient
@@ -86,6 +87,20 @@ class ApplicationConfig {
             .additionalMessageConverters(listOf(JacksonJsonHttpMessageConverter(JsonMapperProvider.jsonMapper)) + RestTemplate().messageConverters)
             .additionalInterceptors(
                 consumerIdClientInterceptor,
+                MdcValuesPropagatingClientInterceptor(),
+            ).build()
+
+    @Bean("azure")
+    fun restTemplateAzure(
+        restTemplateBuilder: RestTemplateBuilder,
+        consumerIdClientInterceptor: ConsumerIdClientInterceptor,
+        bearerTokenClientInterceptor: BearerTokenClientInterceptor,
+    ): RestOperations =
+        restTemplateBuilder
+            .additionalMessageConverters(listOf(JacksonJsonHttpMessageConverter(JsonMapperProvider.jsonMapper)) + RestTemplate().messageConverters)
+            .additionalInterceptors(
+                consumerIdClientInterceptor,
+                bearerTokenClientInterceptor,
                 MdcValuesPropagatingClientInterceptor(),
             ).build()
 
