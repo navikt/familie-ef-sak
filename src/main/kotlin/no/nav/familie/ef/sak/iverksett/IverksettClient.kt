@@ -2,7 +2,6 @@ package no.nav.familie.ef.sak.iverksett
 
 import no.nav.familie.ef.sak.felles.domain.Fil
 import no.nav.familie.ef.sak.felles.util.medContentTypeJsonUTF8
-import no.nav.familie.ef.sak.infrastruktur.config.JsonMapperProvider
 import no.nav.familie.kontrakter.ef.felles.FrittståendeBrevDto
 import no.nav.familie.kontrakter.ef.felles.PeriodiskAktivitetspliktBrevDto
 import no.nav.familie.kontrakter.ef.iverksett.BehandlingsstatistikkDto
@@ -15,12 +14,9 @@ import no.nav.familie.kontrakter.felles.simulering.BeriketSimuleringsresultat
 import no.nav.familie.restklient.client.AbstractPingableRestClient
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.core.io.ByteArrayResource
-import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
-import org.springframework.util.LinkedMultiValueMap
 import org.springframework.web.client.RestOperations
 import org.springframework.web.util.UriComponentsBuilder
 import java.net.URI
@@ -62,22 +58,9 @@ class IverksettClient(
         fil: Fil,
     ) {
         val url = URI.create("$familieEfIverksettUri/api/iverksett")
-        val jsonData = JsonMapperProvider.jsonMapper.writeValueAsString(iverksettDto)
-        val jsonHeaders = HttpHeaders().apply { set(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE) }
-        val multipartRequest =
-            LinkedMultiValueMap<String, Any>().apply {
-                add("data", HttpEntity(jsonData, jsonHeaders))
-                add(
-                    "fil",
-                    object : ByteArrayResource(fil.bytes) {
-                        override fun getFilename(): String = "vedtak"
-                    },
-                )
-            }
-        val headers = HttpHeaders().apply { this.add("Content-Type", "multipart/form-data") }
-        secureLogger.info("Sender iverksettDto serialisert som JSON: $jsonData")
-
-        postForEntity<Any>(url, multipartRequest, headers)
+        val request = IverksettMedBrevRequest(iverksettDto, fil.bytes)
+        secureLogger.info("Sender iverksettDto: $iverksettDto")
+        postForEntity<Any>(url, request)
     }
 
     fun iverksettUtenBrev(iverksettDto: IverksettDto) {

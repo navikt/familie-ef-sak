@@ -98,8 +98,8 @@ class ApplicationConfig {
         restTemplateBuilder: RestTemplateBuilder,
         consumerIdClientInterceptor: ConsumerIdClientInterceptor,
         bearerTokenClientInterceptor: BearerTokenClientInterceptor,
-    ): RestOperations {
-        return restTemplateBuilder
+    ): RestOperations =
+        restTemplateBuilder
             .additionalMessageConverters(listOf(JacksonJsonHttpMessageConverter(JsonMapperProvider.jsonMapper)) + RestTemplate().messageConverters)
             .additionalInterceptors(
                 consumerIdClientInterceptor,
@@ -107,7 +107,6 @@ class ApplicationConfig {
                 MdcValuesPropagatingClientInterceptor(),
                 requestBodyLoggingInterceptor(),
             ).build()
-    }
 
     private fun requestBodyLoggingInterceptor(): ClientHttpRequestInterceptor =
         ClientHttpRequestInterceptor { request, body, execution ->
