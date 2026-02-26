@@ -8,8 +8,8 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlResponse
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PersonSøk
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PersonSøkResultat
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.SøkeKriterier
-import no.nav.familie.http.client.AbstractRestClient
 import no.nav.familie.kontrakter.felles.Tema
+import no.nav.familie.restklient.client.AbstractRestClient
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.http.HttpHeaders
 import org.springframework.stereotype.Service

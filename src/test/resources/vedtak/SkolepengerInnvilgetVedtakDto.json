@@ -4,14 +4,14 @@
     {
       "perioder": [{
         "studietype": "HØGSKOLE_UNIVERSITET",
-        "årMånedFra": "2021-01",
-        "årMånedTil": "2021-12",
+        "årMånedFra": "2021-08",
+        "årMånedTil": "2022-06",
         "studiebelastning": 50
       }],
       "utgiftsperioder": [
         {
           "id": "c076a0b9-0eb9-4a1b-bdcb-d75ebc40570d",
-          "årMånedFra": "2021-01",
+          "årMånedFra": "2021-08",
           "utgifter": 500,
           "stønad": 500
         }

@@ -1,7 +1,7 @@
 package no.nav.familie.ef.sak.behandling.migrering
 
-import com.fasterxml.jackson.module.kotlin.readValue
-import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.ef.sak.infrastruktur.config.readValue
+import no.nav.familie.kontrakter.felles.jsonMapper
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
@@ -30,7 +30,7 @@ class AutomatiskMigreringTask(
     private val automatiskMigreringService: AutomatiskMigreringService,
 ) : AsyncTaskStep {
     override fun doTask(task: Task) {
-        val personIdent = objectMapper.readValue<AutomatiskMigreringTaskData>(task.payload).personIdent
+        val personIdent = jsonMapper.readValue<AutomatiskMigreringTaskData>(task.payload).personIdent
         automatiskMigreringService.migrerPersonAutomatisk(personIdent)
     }
 
@@ -40,7 +40,7 @@ class AutomatiskMigreringTask(
         fun opprettTask(ident: String): Task =
             Task(
                 TYPE,
-                objectMapper.writeValueAsString(AutomatiskMigreringTaskData(ident)),
+                jsonMapper.writeValueAsString(AutomatiskMigreringTaskData(ident)),
                 Properties().apply {
                     this["personIdent"] = ident
                 },

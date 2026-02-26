@@ -8,7 +8,7 @@ import no.nav.familie.ef.sak.behandlingshistorikk.domain.tilHendelseshistorikkDt
 import no.nav.familie.ef.sak.behandlingshistorikk.dto.Hendelse
 import no.nav.familie.ef.sak.behandlingshistorikk.dto.HendelseshistorikkDto
 import no.nav.familie.ef.sak.felles.domain.JsonWrapper
-import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.jsonMapper
 import org.springframework.stereotype.Service
 import java.util.UUID
 
@@ -61,7 +61,7 @@ class BehandlingshistorikkService(
                 utfall = utfall,
                 metadata =
                     metadata?.let {
-                        JsonWrapper(objectMapper.writeValueAsString(it))
+                        JsonWrapper(jsonMapper.writeValueAsString(it))
                     },
             ),
         )

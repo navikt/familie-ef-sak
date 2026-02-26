@@ -1,7 +1,7 @@
 package no.nav.familie.ef.sak.testutil
 
-import com.fasterxml.jackson.databind.JsonNode
-import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.jsonMapper
+import tools.jackson.databind.JsonNode
 import java.nio.charset.StandardCharsets
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
@@ -24,7 +24,7 @@ class JsonFilUtil {
         ): String {
             // 1) Finn alle YearMonth-forekomster i JSON-tekstfelter
             val months = mutableListOf<YearMonth>()
-            runCatching { objectMapper.readTree(json) }
+            runCatching { jsonMapper.readTree(json) }
                 .onSuccess { collectYearMonths(it, months) }
                 .onFailure { return json } // hvis ikke gyldig JSON, gjør ingenting
 
@@ -75,7 +75,7 @@ class JsonFilUtil {
                 }
 
                 node.isObject -> {
-                    node.fields().forEachRemaining { (_, v) -> collectYearMonths(v, out) }
+                    node.properties().forEach { entry -> collectYearMonths(entry.value, out) }
                 }
             }
         }

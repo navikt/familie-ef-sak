@@ -1,8 +1,8 @@
 package no.nav.familie.ef.sak.behandlingsflyt.task
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.familie.ef.sak.behandling.migrering.MigreringService
-import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.ef.sak.infrastruktur.config.readValue
+import no.nav.familie.kontrakter.felles.jsonMapper
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
@@ -29,7 +29,7 @@ class SjekkMigrertStatusIInfotrygdTask(
     private val migreringService: MigreringService,
 ) : AsyncTaskStep {
     override fun doTask(task: Task) {
-        val (behandlingId, opphørsmåned) = objectMapper.readValue<SjekkMigrertStatusIInfotrygdData>(task.payload)
+        val (behandlingId, opphørsmåned) = jsonMapper.readValue<SjekkMigrertStatusIInfotrygdData>(task.payload)
 
         if (!migreringService.erOpphørtIInfotrygd(behandlingId, opphørsmåned)) {
             throw TaskExceptionUtenStackTrace("Er ikke opphørt i infotrygd")
@@ -44,7 +44,7 @@ class SjekkMigrertStatusIInfotrygdTask(
         ): Task =
             Task(
                 type = TYPE,
-                payload = objectMapper.writeValueAsString(SjekkMigrertStatusIInfotrygdData(behandlingId, opphørsmåned)),
+                payload = jsonMapper.writeValueAsString(SjekkMigrertStatusIInfotrygdData(behandlingId, opphørsmåned)),
                 properties =
                     Properties().apply {
                         this["behandlingId"] = behandlingId.toString()

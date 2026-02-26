@@ -1,9 +1,9 @@
 package no.nav.familie.ef.sak.minside
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.familie.ef.sak.fagsak.FagsakPersonService
 import no.nav.familie.ef.sak.fagsak.domain.FagsakPerson
-import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.ef.sak.infrastruktur.config.readValue
+import no.nav.familie.kontrakter.felles.jsonMapper
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
@@ -25,7 +25,7 @@ class AktiverMikrofrontendTask(
 
     override fun doTask(task: Task) {
         logger.info("Starter task for aktivering av bruker for mikrofrontend")
-        val (fagsakId, fagsakPersonId) = objectMapper.readValue<AktiverMikrofrontendDto>(task.payload)
+        val (fagsakId, fagsakPersonId) = jsonMapper.readValue<AktiverMikrofrontendDto>(task.payload)
         val fagsakPerson =
             utledFagsakPerson(fagsakPersonId, fagsakId)
         if (fagsakPerson.harAktivertMikrofrontend) {
@@ -50,13 +50,13 @@ class AktiverMikrofrontendTask(
         fun opprettTask(fagsakPerson: FagsakPerson): Task =
             Task(
                 type = TYPE,
-                payload = objectMapper.writeValueAsString(AktiverMikrofrontendDto(fagsakPersonId = fagsakPerson.id)),
+                payload = jsonMapper.writeValueAsString(AktiverMikrofrontendDto(fagsakPersonId = fagsakPerson.id)),
             )
 
         fun opprettTaskMedFagsakId(fagsakId: UUID): Task =
             Task(
                 type = TYPE,
-                payload = objectMapper.writeValueAsString(AktiverMikrofrontendDto(fagsakId = fagsakId)),
+                payload = jsonMapper.writeValueAsString(AktiverMikrofrontendDto(fagsakId = fagsakId)),
             )
 
         const val TYPE = "aktiverMikrofrontendTask"

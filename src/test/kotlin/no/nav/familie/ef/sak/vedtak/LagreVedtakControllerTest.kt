@@ -9,7 +9,7 @@ import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
-import no.nav.familie.ef.sak.infrastruktur.config.ObjectMapperProvider.objectMapper
+import no.nav.familie.ef.sak.infrastruktur.config.JsonMapperProvider.jsonMapper
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.behandlingBarn
 import no.nav.familie.ef.sak.repository.fagsak
@@ -39,7 +39,7 @@ import org.springframework.http.HttpEntity
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter
+import org.springframework.http.converter.json.JacksonJsonHttpMessageConverter
 import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
@@ -57,10 +57,10 @@ internal class LagreVedtakControllerTest : OppslagSpringRunnerTest() {
     @BeforeEach
     fun setUp() {
         headers.setBearerAuth(lokalTestToken)
-        val converter = MappingJackson2HttpMessageConverter(objectMapper)
+        val converter = JacksonJsonHttpMessageConverter(jsonMapper)
 
         val converters = testRestTemplate.restTemplate.messageConverters
-        converters.removeIf { it is MappingJackson2HttpMessageConverter }
+        converters.removeIf { it is JacksonJsonHttpMessageConverter }
         converters.add(0, converter)
     }
 

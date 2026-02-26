@@ -3,11 +3,6 @@ package no.nav.familie.ef.sak.vedtak.dto
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonTypeInfo
-import com.fasterxml.jackson.core.JsonParser
-import com.fasterxml.jackson.databind.DeserializationContext
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.databind.deser.std.StdDeserializer
 import no.nav.familie.ef.sak.beregning.Inntekt
 import no.nav.familie.ef.sak.beregning.tilInntekt
 import no.nav.familie.ef.sak.beregning.tilInntektsperioder
@@ -33,6 +28,10 @@ import no.nav.familie.kontrakter.ef.felles.Vedtaksresultat
 import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.kontrakter.felles.annotasjoner.Improvement
 import no.nav.familie.kontrakter.felles.ef.StønadType
+import tools.jackson.core.JsonParser
+import tools.jackson.databind.DeserializationContext
+import tools.jackson.databind.JsonNode
+import tools.jackson.databind.deser.std.StdDeserializer
 import java.time.YearMonth
 import java.util.UUID
 
@@ -321,41 +320,40 @@ fun Vedtak.mapInnvilgelseOvergangsstønad(): InnvilgelseOvergangsstønad {
 private class VedtakDtoDeserializer : StdDeserializer<VedtakDto>(VedtakDto::class.java) {
     override fun deserialize(
         p: JsonParser,
-        ctxt: DeserializationContext?,
+        ctxt: DeserializationContext,
     ): VedtakDto {
-        val mapper = p.codec as ObjectMapper
-        val node: JsonNode = mapper.readTree(p)
+        val node: JsonNode = ctxt.readTree(p)
 
         // før vi har tatt i bruk @JsonTypeInfo så brukes denne for å mappe InnvilgelseBarnetilsyn
         if (node.get("_type") != null && node.get("_type").textValue() == "InnvilgelseBarnetilsyn") {
-            return mapper.treeToValue(node, InnvilgelseBarnetilsyn::class.java)
+            return ctxt.readTreeAsValue(node, InnvilgelseBarnetilsyn::class.java)
         }
 
         if (node.get("_type") != null && node.get("_type").textValue() == "InnvilgelseSkolepenger") {
-            return mapper.treeToValue(node, InnvilgelseSkolepenger::class.java)
+            return ctxt.readTreeAsValue(node, InnvilgelseSkolepenger::class.java)
         }
 
         if (node.get("_type") != null && node.get("_type").textValue() == "OpphørSkolepenger") {
-            return mapper.treeToValue(node, OpphørSkolepenger::class.java)
+            return ctxt.readTreeAsValue(node, OpphørSkolepenger::class.java)
         }
 
         if (node.get("_type") != null && node.get("_type").textValue() == "InnvilgelseBarnetilsynUtenUtbetaling") {
-            return mapper
-                .treeToValue(node, InnvilgelseBarnetilsyn::class.java)
+            return ctxt
+                .readTreeAsValue(node, InnvilgelseBarnetilsyn::class.java)
                 .copy(resultatType = ResultatType.INNVILGE_UTEN_UTBETALING)
         }
 
         return when (ResultatType.valueOf(node.get("resultatType").asText())) {
-            ResultatType.INNVILGE -> mapper.treeToValue(node, InnvilgelseOvergangsstønad::class.java)
-            ResultatType.AVSLÅ -> mapper.treeToValue(node, Avslå::class.java)
-            ResultatType.OPPHØRT -> mapper.treeToValue(node, Opphør::class.java)
-            ResultatType.SANKSJONERE -> mapper.treeToValue(node, Sanksjonert::class.java)
+            ResultatType.INNVILGE -> ctxt.readTreeAsValue(node, InnvilgelseOvergangsstønad::class.java)
+            ResultatType.AVSLÅ -> ctxt.readTreeAsValue(node, Avslå::class.java)
+            ResultatType.OPPHØRT -> ctxt.readTreeAsValue(node, Opphør::class.java)
+            ResultatType.SANKSJONERE -> ctxt.readTreeAsValue(node, Sanksjonert::class.java)
             else -> throw Feil("Kunne ikke deserialisere VedtakDto")
         }
     }
 }
 
-class VedtakDtoModule : com.fasterxml.jackson.databind.module.SimpleModule() {
+class VedtakDtoModule : tools.jackson.databind.module.SimpleModule() {
     init {
         addDeserializer(VedtakDto::class.java, VedtakDtoDeserializer())
     }

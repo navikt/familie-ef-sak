@@ -10,7 +10,7 @@ import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.infrastruktur.exception.PdlNotFoundException
 import no.nav.familie.ef.sak.infrastruktur.exception.PdlRequestException
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlClient
-import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.jsonMapper
 import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterAll
@@ -21,7 +21,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
 import org.springframework.boot.restclient.RestTemplateBuilder
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter
+import org.springframework.http.converter.json.JacksonJsonHttpMessageConverter
 import org.springframework.web.client.RestOperations
 import java.net.URI
 import java.time.LocalDate
@@ -31,7 +31,7 @@ class PdlClientTest {
         private val restOperations: RestOperations =
             RestTemplateBuilder()
                 .additionalMessageConverters(
-                    MappingJackson2HttpMessageConverter(objectMapper),
+                    JacksonJsonHttpMessageConverter(jsonMapper),
                 ).build()
         lateinit var pdlClient: PdlClient
         lateinit var wiremockServerItem: WireMockServer

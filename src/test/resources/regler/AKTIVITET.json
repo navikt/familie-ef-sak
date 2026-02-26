@@ -1,5 +1,4 @@
 {
-  "vilkårType" : "AKTIVITET",
   "regler" : {
     "FYLLER_BRUKER_AKTIVITETSPLIKT" : {
       "regelId" : "FYLLER_BRUKER_AKTIVITETSPLIKT",
@@ -15,5 +14,6 @@
       },
       "versjon" : "GJELDENDE"
     }
-  }
+  },
+  "vilkårType" : "AKTIVITET"
 }

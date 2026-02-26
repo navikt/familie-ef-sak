@@ -1,6 +1,5 @@
 package no.nav.familie.ef.sak.iverksett.oppgaveforbarn
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
@@ -10,6 +9,7 @@ import io.mockk.verify
 import no.nav.familie.ef.sak.arbeidsfordeling.Arbeidsfordelingsenhet
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
 import no.nav.familie.ef.sak.behandling.dto.EksternId
+import no.nav.familie.ef.sak.infrastruktur.config.readValue
 import no.nav.familie.ef.sak.oppgave.Oppgave
 import no.nav.familie.ef.sak.oppgave.OppgaveClient
 import no.nav.familie.ef.sak.oppgave.OppgaveRepository
@@ -27,7 +27,7 @@ import no.nav.familie.ef.sak.repository.oppgave
 import no.nav.familie.ef.sak.testutil.PdlTestdataHelper
 import no.nav.familie.ef.sak.testutil.PdlTestdataHelper.fødsel
 import no.nav.familie.kontrakter.felles.ef.StønadType
-import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.jsonMapper
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.internal.TaskService
 import no.nav.familie.util.FnrGenerator
@@ -204,7 +204,7 @@ internal class BarnFyllerÅrOppfølgingsoppgaveServiceTest {
             )
 
         opprettOppgaveForBarnService.opprettTasksForAlleBarnSomHarFyltÅr()
-        val opprettOppgavePayload = objectMapper.readValue<OpprettOppgavePayload>(taskSlot.captured.payload)
+        val opprettOppgavePayload = jsonMapper.readValue<OpprettOppgavePayload>(taskSlot.captured.payload)
         assertThat(opprettOppgavePayload.alder).isEqualTo(AktivitetspliktigAlder.ETT_ÅR)
     }
 
@@ -305,7 +305,7 @@ internal class BarnFyllerÅrOppfølgingsoppgaveServiceTest {
         opprettOppgaveForBarnService.opprettTasksForAlleBarnSomHarFyltÅr()
 
         verify(exactly = 1) { taskService.save(any()) }
-        val opprettOppgavePayload = objectMapper.readValue<OpprettOppgavePayload>(taskSlot.captured.payload)
+        val opprettOppgavePayload = jsonMapper.readValue<OpprettOppgavePayload>(taskSlot.captured.payload)
         assertThat(opprettOppgavePayload.alder).isEqualTo(AktivitetspliktigAlder.ETT_ÅR)
     }
 
@@ -417,7 +417,7 @@ internal class BarnFyllerÅrOppfølgingsoppgaveServiceTest {
         opprettOppgaveForBarnService.opprettTasksForAlleBarnSomHarFyltÅr()
 
         verify(exactly = 1) { taskService.save(any()) }
-        val opprettOppgavePayload = objectMapper.readValue<OpprettOppgavePayload>(taskSlot.captured.payload)
+        val opprettOppgavePayload = jsonMapper.readValue<OpprettOppgavePayload>(taskSlot.captured.payload)
         assertThat(opprettOppgavePayload.alder).isEqualTo(AktivitetspliktigAlder.ETT_ÅR)
     }
 

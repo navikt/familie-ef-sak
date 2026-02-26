@@ -1,11 +1,11 @@
 package no.nav.familie.ef.sak.behandlingsflyt.task
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
+import no.nav.familie.ef.sak.infrastruktur.config.readValue
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.oppgave.OppgaveService
-import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.jsonMapper
 import no.nav.familie.kontrakter.felles.oppgave.OppgavePrioritet
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.AsyncTaskStep
@@ -41,7 +41,7 @@ class OpprettOppgaveForOpprettetBehandlingTask(
     )
 
     override fun doTask(task: Task) {
-        val data = objectMapper.readValue<OpprettOppgaveTaskData>(task.payload)
+        val data = jsonMapper.readValue<OpprettOppgaveTaskData>(task.payload)
         val behandlingId = data.behandlingId
         val oppgaveId = opprettOppgave(data, task)
 
@@ -84,7 +84,7 @@ class OpprettOppgaveForOpprettetBehandlingTask(
         fun opprettTask(data: OpprettOppgaveTaskData): Task =
             Task(
                 type = TYPE,
-                payload = objectMapper.writeValueAsString(data),
+                payload = jsonMapper.writeValueAsString(data),
                 properties =
                     Properties().apply {
                         this["saksbehandler"] = data.saksbehandler

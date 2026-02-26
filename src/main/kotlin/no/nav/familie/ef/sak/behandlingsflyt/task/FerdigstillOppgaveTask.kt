@@ -1,9 +1,9 @@
 package no.nav.familie.ef.sak.behandlingsflyt.task
 
-import com.fasterxml.jackson.module.kotlin.readValue
+import no.nav.familie.ef.sak.infrastruktur.config.readValue
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.oppgave.OppgaveService
-import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.jsonMapper
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
@@ -32,7 +32,7 @@ class FerdigstillOppgaveTask(
     )
 
     override fun doTask(task: Task) {
-        val data = objectMapper.readValue<FerdigstillOppgaveTaskData>(task.payload)
+        val data = jsonMapper.readValue<FerdigstillOppgaveTaskData>(task.payload)
         oppgaveService.ferdigstillBehandleOppgave(
             behandlingId = data.behandlingId,
             oppgavetype = data.oppgavetype,
@@ -48,7 +48,7 @@ class FerdigstillOppgaveTask(
         ): Task =
             Task(
                 type = TYPE,
-                payload = objectMapper.writeValueAsString(FerdigstillOppgaveTaskData(behandlingId, oppgavetype)),
+                payload = jsonMapper.writeValueAsString(FerdigstillOppgaveTaskData(behandlingId, oppgavetype)),
                 properties =
                     Properties().apply {
                         this["saksbehandler"] = SikkerhetContext.hentSaksbehandlerEllerSystembruker()

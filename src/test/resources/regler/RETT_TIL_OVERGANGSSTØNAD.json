@@ -1,5 +1,4 @@
 {
-  "vilkårType" : "RETT_TIL_OVERGANGSSTØNAD",
   "regler" : {
     "RETT_TIL_OVERGANGSSTØNAD" : {
       "regelId" : "RETT_TIL_OVERGANGSSTØNAD",
@@ -15,5 +14,6 @@
       },
       "versjon" : "GJELDENDE"
     }
-  }
+  },
+  "vilkårType" : "RETT_TIL_OVERGANGSSTØNAD"
 }
