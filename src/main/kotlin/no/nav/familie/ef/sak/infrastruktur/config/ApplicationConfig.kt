@@ -99,12 +99,8 @@ class ApplicationConfig {
         consumerIdClientInterceptor: ConsumerIdClientInterceptor,
         bearerTokenClientInterceptor: BearerTokenClientInterceptor,
     ): RestOperations {
-        val jacksonConverter = JacksonJsonHttpMessageConverter(JsonMapperProvider.jsonMapper)
-        val formConverter = FormHttpMessageConverter()
-        formConverter.addPartConverter(jacksonConverter)
-
         return restTemplateBuilder
-            .additionalMessageConverters(listOf(formConverter, jacksonConverter) + RestTemplate().messageConverters)
+            .additionalMessageConverters(listOf(JacksonJsonHttpMessageConverter(JsonMapperProvider.jsonMapper)) + RestTemplate().messageConverters)
             .additionalInterceptors(
                 consumerIdClientInterceptor,
                 bearerTokenClientInterceptor,
