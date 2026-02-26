@@ -93,28 +93,6 @@ class ApplicationConfig {
                 MdcValuesPropagatingClientInterceptor(),
             ).build()
 
-    @Bean("azure")
-    fun restTemplateAzure(
-        restTemplateBuilder: RestTemplateBuilder,
-        consumerIdClientInterceptor: ConsumerIdClientInterceptor,
-        bearerTokenClientInterceptor: BearerTokenClientInterceptor,
-    ): RestOperations =
-        restTemplateBuilder
-            .additionalMessageConverters(listOf(JacksonJsonHttpMessageConverter(JsonMapperProvider.jsonMapper)) + RestTemplate().messageConverters)
-            .additionalInterceptors(
-                consumerIdClientInterceptor,
-                bearerTokenClientInterceptor,
-                MdcValuesPropagatingClientInterceptor(),
-                requestBodyLoggingInterceptor(),
-            ).build()
-
-    private fun requestBodyLoggingInterceptor(): ClientHttpRequestInterceptor =
-        ClientHttpRequestInterceptor { request, body, execution ->
-            secureLogger.info("=== Request til ${request.uri} ===")
-            secureLogger.info("=== Request body: ${String(body, Charsets.UTF_8)} ===")
-            execution.execute(request, body)
-        }
-
     /**
      * Overskrever OAuth2HttpClient som settes opp i token-support som ikke kan få med jsonMapper fra felles
      * pga .setVisibility(PropertyAccessor.SETTER, JsonAutoDetect.Visibility.NONE)
