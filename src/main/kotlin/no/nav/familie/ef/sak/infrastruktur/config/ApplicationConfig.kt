@@ -25,9 +25,10 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.ComponentScan
 import org.springframework.context.annotation.Import
 import org.springframework.context.annotation.Primary
+import org.springframework.http.client.ClientHttpRequestInterceptor
+import org.springframework.http.converter.FormHttpMessageConverter
 import org.springframework.http.converter.json.JacksonJsonHttpMessageConverter
 import org.springframework.scheduling.annotation.EnableScheduling
-import org.springframework.http.client.ClientHttpRequestInterceptor
 import org.springframework.web.client.RestClient
 import org.springframework.web.client.RestOperations
 import org.springframework.web.client.RestTemplate
@@ -97,15 +98,20 @@ class ApplicationConfig {
         restTemplateBuilder: RestTemplateBuilder,
         consumerIdClientInterceptor: ConsumerIdClientInterceptor,
         bearerTokenClientInterceptor: BearerTokenClientInterceptor,
-    ): RestOperations =
-        restTemplateBuilder
-            .additionalMessageConverters(listOf(JacksonJsonHttpMessageConverter(JsonMapperProvider.jsonMapper)) + RestTemplate().messageConverters)
+    ): RestOperations {
+        val jacksonConverter = JacksonJsonHttpMessageConverter(JsonMapperProvider.jsonMapper)
+        val formConverter = FormHttpMessageConverter()
+        formConverter.addPartConverter(jacksonConverter)
+
+        return restTemplateBuilder
+            .additionalMessageConverters(listOf(formConverter, jacksonConverter) + RestTemplate().messageConverters)
             .additionalInterceptors(
                 consumerIdClientInterceptor,
                 bearerTokenClientInterceptor,
                 MdcValuesPropagatingClientInterceptor(),
                 requestBodyLoggingInterceptor(),
             ).build()
+    }
 
     private fun requestBodyLoggingInterceptor(): ClientHttpRequestInterceptor =
         ClientHttpRequestInterceptor { request, body, execution ->
