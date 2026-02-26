@@ -13,12 +13,14 @@ import no.nav.familie.kontrakter.ef.iverksett.SimuleringDto
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.simulering.BeriketSimuleringsresultat
 import no.nav.familie.restklient.client.AbstractPingableRestClient
-import no.nav.familie.restklient.client.MultipartBuilder
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.core.io.ByteArrayResource
+import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
+import org.springframework.util.LinkedMultiValueMap
 import org.springframework.web.client.RestOperations
 import org.springframework.web.util.UriComponentsBuilder
 import java.net.URI
@@ -60,16 +62,22 @@ class IverksettClient(
         fil: Fil,
     ) {
         val url = URI.create("$familieEfIverksettUri/api/iverksett")
-        val request =
-            MultipartBuilder()
-                .withJson("data", iverksettDto)
-                .withByteArray("fil", "vedtak", fil.bytes)
-                .build()
+        val jsonData = JsonMapperProvider.jsonMapper.writeValueAsString(iverksettDto)
+        val jsonHeaders = HttpHeaders().apply { set(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE) }
+        val multipartRequest =
+            LinkedMultiValueMap<String, Any>().apply {
+                add("data", HttpEntity(jsonData, jsonHeaders))
+                add(
+                    "fil",
+                    object : ByteArrayResource(fil.bytes) {
+                        override fun getFilename(): String = "vedtak"
+                    },
+                )
+            }
         val headers = HttpHeaders().apply { this.add("Content-Type", "multipart/form-data") }
-        val serialisertJson = JsonMapperProvider.jsonMapper.writeValueAsString(iverksettDto)
-        secureLogger.info("Sender iverksettDto serialisert som JSON: $serialisertJson")
+        secureLogger.info("Sender iverksettDto serialisert som JSON: $jsonData")
 
-        postForEntity<Any>(url, request, headers)
+        postForEntity<Any>(url, multipartRequest, headers)
     }
 
     fun iverksettUtenBrev(iverksettDto: IverksettDto) {
