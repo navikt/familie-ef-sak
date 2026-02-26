@@ -27,6 +27,7 @@ import org.springframework.context.annotation.Import
 import org.springframework.context.annotation.Primary
 import org.springframework.http.converter.json.JacksonJsonHttpMessageConverter
 import org.springframework.scheduling.annotation.EnableScheduling
+import org.springframework.http.client.ClientHttpRequestInterceptor
 import org.springframework.web.client.RestClient
 import org.springframework.web.client.RestOperations
 import org.springframework.web.client.RestTemplate
@@ -48,6 +49,7 @@ import java.time.temporal.ChronoUnit
 @EnableScheduling
 class ApplicationConfig {
     private val logger = LoggerFactory.getLogger(this::class.java)
+    private val secureLogger = LoggerFactory.getLogger("secureLogger")
 
     @Bean
     @Primary
@@ -102,7 +104,15 @@ class ApplicationConfig {
                 consumerIdClientInterceptor,
                 bearerTokenClientInterceptor,
                 MdcValuesPropagatingClientInterceptor(),
+                requestBodyLoggingInterceptor(),
             ).build()
+
+    private fun requestBodyLoggingInterceptor(): ClientHttpRequestInterceptor =
+        ClientHttpRequestInterceptor { request, body, execution ->
+            secureLogger.info("=== Request til ${request.uri} ===")
+            secureLogger.info("=== Request body: ${String(body, Charsets.UTF_8)} ===")
+            execution.execute(request, body)
+        }
 
     /**
      * Overskrever OAuth2HttpClient som settes opp i token-support som ikke kan få med jsonMapper fra felles
