@@ -93,7 +93,7 @@ spec:
           cluster: dev-fss
         - application: historisk-pensjon
           namespace: historisk
-        - application: paw-arbeidssoekerregisteret-api-oppslag
+        - application: paw-arbeidssoekerregisteret-api-oppslag-v2
           namespace: paw
         - application: skjermede-personer-pip
           namespace: nom

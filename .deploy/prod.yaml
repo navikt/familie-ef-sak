@@ -90,7 +90,7 @@ spec:
           namespace: historisk
         - application: familie-ef-proxy
           cluster: prod-fss
-        - application: paw-arbeidssoekerregisteret-api-oppslag
+        - application: paw-arbeidssoekerregisteret-api-oppslag-v2
           namespace: paw
         - application: skjermede-personer-pip
           namespace: nom
