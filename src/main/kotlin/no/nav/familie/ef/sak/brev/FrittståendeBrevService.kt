@@ -1,6 +1,5 @@
 package no.nav.familie.ef.sak.brev
 
-import com.fasterxml.jackson.databind.JsonNode
 import no.nav.familie.ef.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.brev.BrevsignaturService.Companion.NAV_ENHET_NAY
@@ -17,8 +16,9 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerS
 import no.nav.familie.ef.sak.vedtak.domain.VedtakErUtenBeslutter
 import no.nav.familie.kontrakter.ef.felles.FrittståendeBrevDto
 import no.nav.familie.kontrakter.ef.iverksett.Brevmottaker
-import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.jsonMapper
 import org.springframework.stereotype.Service
+import tools.jackson.databind.JsonNode
 import java.time.LocalDate
 import java.util.UUID
 import no.nav.familie.kontrakter.ef.felles.FrittståendeBrevDto as FrittståendeBrevDtoIverksetting
@@ -91,7 +91,7 @@ class FrittståendeBrevService(
             brevClient
                 .genererHtml(
                     brevmal = "innhentingOpplysningerAktivitetEtterUtdanning",
-                    saksbehandlerBrevrequest = objectMapper.valueToTree(brevRequest),
+                    saksbehandlerBrevrequest = jsonMapper.valueToTree(brevRequest),
                     saksbehandlersignatur = "",
                     saksbehandlerEnhet = NAV_ENHET_NAY,
                     skjulBeslutterSignatur = true,

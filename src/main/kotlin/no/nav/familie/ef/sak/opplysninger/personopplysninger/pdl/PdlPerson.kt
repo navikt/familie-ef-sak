@@ -166,7 +166,7 @@ data class PdlAnnenForelder(
 ) : PdlPerson
 
 data class Metadata(
-    val historisk: Boolean,
+    val historisk: Boolean = false,
 )
 
 data class DeltBosted(

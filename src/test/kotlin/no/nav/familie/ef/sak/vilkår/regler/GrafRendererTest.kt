@@ -14,8 +14,8 @@ import org.junit.jupiter.api.Test
 
 @Disabled
 internal class GrafRendererTest {
-    private val objectMapper =
-        no.nav.familie.kontrakter.felles.objectMapper
+    private val jsonMapper =
+        no.nav.familie.kontrakter.felles.jsonMapper
             .writerWithDefaultPrettyPrinter()
 
     @Test
@@ -29,7 +29,7 @@ internal class GrafRendererTest {
                 )
             }
         println(
-            objectMapper.writeValueAsString(
+            jsonMapper.writeValueAsString(
                 mapOf(
                     "name" to "vilkår",
                     "children" to vilkårsregler.toList(),
@@ -85,7 +85,7 @@ internal class GrafRendererTest {
                 )
             }
         println(
-            objectMapper.writeValueAsString(
+            jsonMapper.writeValueAsString(
                 mapOf(
                     "name" to "vilkår",
                     "children" to sivilstandregler.toList(),

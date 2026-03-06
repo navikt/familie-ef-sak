@@ -1,6 +1,5 @@
 package no.nav.familie.ef.sak.brev
 
-import com.fasterxml.jackson.databind.JsonNode
 import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
@@ -22,6 +21,7 @@ import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.ef.sak.vedtak.domain.VedtakErUtenBeslutter
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
+import tools.jackson.databind.JsonNode
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID

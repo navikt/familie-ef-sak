@@ -2,8 +2,6 @@ package no.nav.familie.ef.sak.iverksett
 
 import no.nav.familie.ef.sak.felles.domain.Fil
 import no.nav.familie.ef.sak.felles.util.medContentTypeJsonUTF8
-import no.nav.familie.http.client.AbstractPingableRestClient
-import no.nav.familie.http.client.MultipartBuilder
 import no.nav.familie.kontrakter.ef.felles.FrittståendeBrevDto
 import no.nav.familie.kontrakter.ef.felles.PeriodiskAktivitetspliktBrevDto
 import no.nav.familie.kontrakter.ef.iverksett.BehandlingsstatistikkDto
@@ -13,6 +11,7 @@ import no.nav.familie.kontrakter.ef.iverksett.KonsistensavstemmingDto
 import no.nav.familie.kontrakter.ef.iverksett.SimuleringDto
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.simulering.BeriketSimuleringsresultat
+import no.nav.familie.restklient.client.AbstractPingableRestClient
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpHeaders
@@ -59,13 +58,9 @@ class IverksettClient(
         fil: Fil,
     ) {
         val url = URI.create("$familieEfIverksettUri/api/iverksett")
-        val request =
-            MultipartBuilder()
-                .withJson("data", iverksettDto)
-                .withByteArray("fil", "vedtak", fil.bytes)
-                .build()
-        val headers = HttpHeaders().apply { this.add("Content-Type", "multipart/form-data") }
-        postForEntity<Any>(url, request, headers)
+        val request = IverksettMedBrevRequest(iverksettDto, fil.bytes)
+        secureLogger.info("Sender iverksettDto: $iverksettDto")
+        postForEntity<Any>(url, request)
     }
 
     fun iverksettUtenBrev(iverksettDto: IverksettDto) {
