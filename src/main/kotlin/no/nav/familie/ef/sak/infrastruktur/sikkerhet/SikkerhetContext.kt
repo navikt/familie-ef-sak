@@ -14,6 +14,8 @@ object SikkerhetContext {
     private const val SYSTEM_NAVN = "System"
     const val SYSTEM_FORKORTELSE = "VL"
     private const val NAV_GROUPS_HEADER = "Nav-Groups"
+    private const val NAV_IDENT_HEADER = "Nav-Ident"
+    private const val NAV_USER_NAME_HEADER = "Nav-User-Name"
 
     val NAVIDENT_REGEX = """^[a-zA-Z]\d{6}$""".toRegex()
 
@@ -55,26 +57,57 @@ object SikkerhetContext {
         return result
     }
 
-    fun hentSaksbehandlerEllerSystembruker() =
-        Result
-            .runCatching { SpringTokenValidationContextHolder().getTokenValidationContext() }
-            .fold(
-                onSuccess = {
-                    it.getClaims("azuread")?.get("NAVident")?.toString() ?: SYSTEM_FORKORTELSE
-                },
-                onFailure = { SYSTEM_FORKORTELSE },
-            )
+    fun hentSaksbehandlerEllerSystembruker(): String {
+        val navIdentFraHeader = hentNavIdentFraHeader()
+        if (navIdentFraHeader != null) {
+            secureLogger.info("[DEBUG] hentSaksbehandlerEllerSystembruker fra header: $navIdentFraHeader")
+            return navIdentFraHeader
+        }
 
-    fun hentSaksbehandlerNavn(strict: Boolean = false): String =
-        Result
-            .runCatching { SpringTokenValidationContextHolder().getTokenValidationContext() }
-            .fold(
-                onSuccess = {
-                    it.getClaims("azuread")?.get("name")?.toString()
-                        ?: if (strict) error("Finner ikke navn i azuread token") else SYSTEM_NAVN
-                },
-                onFailure = { if (strict) error("Finner ikke navn på innlogget bruker") else SYSTEM_NAVN },
-            )
+        return try {
+            val claims = SpringTokenValidationContextHolder().getTokenValidationContext().getClaims("azuread")
+            val navIdent = claims?.get("NAVident")?.toString()
+            secureLogger.info("[DEBUG] hentSaksbehandlerEllerSystembruker fra token: $navIdent")
+            navIdent ?: SYSTEM_FORKORTELSE
+        } catch (e: Exception) {
+            secureLogger.info("[DEBUG] hentSaksbehandlerEllerSystembruker exception: ${e.message}")
+            SYSTEM_FORKORTELSE
+        }
+    }
+
+    private fun hentNavIdentFraHeader(): String? =
+        try {
+            val requestAttributes = RequestContextHolder.getRequestAttributes() as? ServletRequestAttributes
+            val header = requestAttributes?.request?.getHeader(NAV_IDENT_HEADER)
+            secureLogger.info("[DEBUG] hentNavIdentFraHeader: $header")
+            header
+        } catch (e: Exception) {
+            secureLogger.info("[DEBUG] hentNavIdentFraHeader exception: ${e.message}")
+            null
+        }
+
+    fun hentSaksbehandlerNavn(strict: Boolean = false): String {
+        val navnFraHeader = hentNavnFraHeader()
+        if (navnFraHeader != null) {
+            return navnFraHeader
+        }
+
+        return try {
+            val claims = SpringTokenValidationContextHolder().getTokenValidationContext().getClaims("azuread")
+            claims?.get("name")?.toString()
+                ?: if (strict) error("Finner ikke navn i azuread token") else SYSTEM_NAVN
+        } catch (e: Exception) {
+            if (strict) error("Finner ikke navn på innlogget bruker") else SYSTEM_NAVN
+        }
+    }
+
+    private fun hentNavnFraHeader(): String? =
+        try {
+            val requestAttributes = RequestContextHolder.getRequestAttributes() as? ServletRequestAttributes
+            requestAttributes?.request?.getHeader(NAV_USER_NAME_HEADER)
+        } catch (e: Exception) {
+            null
+        }
 
     fun hentGrupperFraToken(): Set<String> {
         val grupperFraHeader = hentGrupperFraHeader()
@@ -82,16 +115,15 @@ object SikkerhetContext {
             return grupperFraHeader
         }
 
-        return Result
-            .runCatching { SpringTokenValidationContextHolder().getTokenValidationContext() }
-            .fold(
-                onSuccess = {
-                    @Suppress("UNCHECKED_CAST")
-                    val groups = it.getClaims("azuread")?.get("groups") as List<String>?
-                    groups?.toSet() ?: emptySet()
-                },
-                onFailure = { emptySet() },
-            )
+        return try {
+            val claims = SpringTokenValidationContextHolder().getTokenValidationContext().getClaims("azuread")
+
+            @Suppress("UNCHECKED_CAST")
+            val groups = claims?.get("groups") as List<String>?
+            groups?.toSet() ?: emptySet()
+        } catch (e: Exception) {
+            emptySet()
+        }
     }
 
     private fun hentGrupperFraHeader(): Set<String> =
@@ -99,12 +131,18 @@ object SikkerhetContext {
             .runCatching {
                 val requestAttributes = RequestContextHolder.getRequestAttributes() as? ServletRequestAttributes
                 val header = requestAttributes?.request?.getHeader(NAV_GROUPS_HEADER)
+                secureLogger.info("[DEBUG] hentGrupperFraHeader raw: $header")
                 if (header != null) {
-                    objectMapper.readValue<List<String>>(header).toSet()
+                    val groups = objectMapper.readValue<List<String>>(header).toSet()
+                    secureLogger.info("[DEBUG] hentGrupperFraHeader parsed: ${groups.size} grupper")
+                    groups
                 } else {
                     emptySet()
                 }
-            }.getOrElse { emptySet() }
+            }.getOrElse {
+                secureLogger.info("[DEBUG] hentGrupperFraHeader exception: ${it.message}")
+                emptySet()
+            }
 
     fun harTilgangTilGittRolle(
         rolleConfig: RolleConfig,
