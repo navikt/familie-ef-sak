@@ -123,8 +123,8 @@ spec:
           - id: "19dcbfde-4cdb-4c64-a1ea-ac9802b03339" # 0000-GA-Enslig-Forsorger-Veileder
           - id: "d21e00a4-969d-4b28-8782-dc818abfae65" # 0000-GA-Barnetrygd # Brukes for å hente perioder til utvidet barnetrygd
           - id: "9449c153-5a1e-44a7-84c6-7cc7a8867233" # 0000-GA-Barnetrygd-Beslutter # Brukes for å hente perioder til utvidet barnetrygd
-          - id: "5ef775f2-61f8-4283-bf3d-8d03f428aa14" # 0000-GA-Strengt_Fortrolig_Adresse
-          - id: "ea930b6b-9397-44d9-b9e6-f4cf527a632a" # 0000-GA-Fortrolig_Adresse
+          - id: "a1b518e2-3947-478d-8929-e5d685c47cac" # 0000-GA-Strengt_Fortrolig_Adresse
+          - id: "2e1dc582-f762-4510-a660-88bf68fb7128" # 0000-GA-Fortrolig_Adresse
           - id: "dbe4ad45-320b-4e9a-aaa1-73cca4ee124d" # 0000-GA-Egne_ansatte
           - id: "928636f4-fd0d-4149-978e-a6fb68bb19de" # prosessering.rolle - (0000-GA-STDAPPS)
           - id: "59865891-62a0-4fe3-b282-2e38210d1fbb" # teamfamilie-ef-forvaltning
