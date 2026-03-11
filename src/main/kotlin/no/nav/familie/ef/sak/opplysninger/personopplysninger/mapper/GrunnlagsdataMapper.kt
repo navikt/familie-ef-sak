@@ -51,12 +51,7 @@ object GrunnlagsdataMapper {
         AnnenForelderMedIdent(
             adressebeskyttelse = it.value.adressebeskyttelse,
             personIdent = it.key,
-            fødsel =
-                if (it.value.fødselsdato.isNotEmpty()) {
-                    mapFødsel(it.value.fødselsdato.first(), it.value.fødested.first())
-                } else {
-                    emptyList()
-                },
+            fødsel = mapFødsel(it.value.fødselsdato.firstOrNull(), it.value.fødested.firstOrNull()),
             bostedsadresse = it.value.bostedsadresse,
             dødsfall = it.value.dødsfall,
             navn = it.value.navn.gjeldende(),
@@ -66,9 +61,9 @@ object GrunnlagsdataMapper {
     }
 
     fun mapFødsel(
-        fødselsdato: Fødselsdato,
-        fødested: Fødested,
-    ): List<Fødsel> = listOf(Fødsel(fødselsdato.fødselsår, fødselsdato.fødselsdato, fødested.fødeland, fødested.fødested, fødested.fødekommune))
+        fødselsdato: Fødselsdato?,
+        fødested: Fødested?,
+    ): List<Fødsel> = listOf(Fødsel(fødselsdato?.fødselsår, fødselsdato?.fødselsdato, fødested?.fødeland, fødested?.fødested, fødested?.fødekommune))
 
     fun mapSøker(
         pdlSøker: PdlSøker,
