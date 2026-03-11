@@ -52,7 +52,7 @@ object GrunnlagsdataMapper {
             adressebeskyttelse = it.value.adressebeskyttelse,
             personIdent = it.key,
             fødsel =
-                if (it.value.fødselsdato.isNotEmpty()) {
+                if (it.value.fødselsdato.isNotEmpty() && it.value.fødested.isNotEmpty()) {
                     mapFødsel(it.value.fødselsdato.first(), it.value.fødested.first())
                 } else {
                     emptyList()
