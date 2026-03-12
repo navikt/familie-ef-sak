@@ -34,7 +34,7 @@ import no.nav.familie.kontrakter.ef.iverksett.BehandlingsstatistikkDto
 import no.nav.familie.kontrakter.ef.iverksett.Hendelse
 import no.nav.familie.kontrakter.ef.iverksett.ÅrsakRevurderingDto
 import no.nav.familie.kontrakter.felles.ef.StønadType
-import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.jsonMapper
 import no.nav.familie.kontrakter.felles.oppgave.Oppgave
 import no.nav.familie.prosessering.domene.Task
 import org.assertj.core.api.Assertions.assertThat
@@ -145,7 +145,7 @@ internal class BehandlingsstatistikkTaskTest {
         val task =
             Task(
                 type = "behandlingsstatistikkTask",
-                payload = objectMapper.writeValueAsString(payload),
+                payload = jsonMapper.writeValueAsString(payload),
             )
 
         behandlingsstatistikkTask.doTask(task)
@@ -178,7 +178,7 @@ internal class BehandlingsstatistikkTaskTest {
         val task =
             Task(
                 type = "behandlingsstatistikkTask",
-                payload = objectMapper.writeValueAsString(payload),
+                payload = jsonMapper.writeValueAsString(payload),
             )
 
         behandlingsstatistikkTask.doTask(task)
@@ -206,7 +206,7 @@ internal class BehandlingsstatistikkTaskTest {
         val task =
             Task(
                 type = "behandlingsstatistikkTask",
-                payload = objectMapper.writeValueAsString(payload),
+                payload = jsonMapper.writeValueAsString(payload),
             )
 
         behandlingsstatistikkTask.doTask(task)
@@ -241,7 +241,7 @@ internal class BehandlingsstatistikkTaskTest {
         val task =
             Task(
                 type = "behandlingsstatistikkTask",
-                payload = objectMapper.writeValueAsString(payload),
+                payload = jsonMapper.writeValueAsString(payload),
             )
 
         behandlingsstatistikkTask.doTask(task)

@@ -49,7 +49,7 @@ data class UtgiftsperiodeDto(
             årMånedTil ?: error("periode eller årMånedTil må ha verdi"),
         ),
     val barn: List<UUID>,
-    val utgifter: Int,
+    val utgifter: Int = 0,
     val sanksjonsårsak: Sanksjonsårsak?,
     val periodetype: PeriodetypeBarnetilsyn,
     val aktivitetstype: AktivitetstypeBarnetilsyn?,

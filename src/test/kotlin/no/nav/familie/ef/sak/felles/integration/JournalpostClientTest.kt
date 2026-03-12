@@ -32,7 +32,7 @@ import no.nav.familie.kontrakter.felles.dokarkiv.v2.ArkiverDokumentRequest
 import no.nav.familie.kontrakter.felles.journalpost.Bruker
 import no.nav.familie.kontrakter.felles.journalpost.JournalposterForBrukerRequest
 import no.nav.familie.kontrakter.felles.journalpost.Journalposttype
-import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.jsonMapper
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
@@ -42,7 +42,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.boot.restclient.RestTemplateBuilder
 import org.springframework.http.HttpStatus
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter
+import org.springframework.http.converter.json.JacksonJsonHttpMessageConverter
 import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.RestOperations
 import java.net.URI
@@ -53,7 +53,7 @@ internal class JournalpostClientTest {
         private val restOperations: RestOperations =
             RestTemplateBuilder()
                 .additionalMessageConverters(
-                    MappingJackson2HttpMessageConverter(objectMapper),
+                    JacksonJsonHttpMessageConverter(jsonMapper),
                 ).build()
         lateinit var journalpostClient: JournalpostClient
         lateinit var wiremockServerItem: WireMockServer
@@ -99,7 +99,7 @@ internal class JournalpostClientTest {
         wiremockServerItem.stubFor(
             get(urlPathMatching("${integrasjonerConfig.journalPostUri.path}/hentdokument/([0-9]*)/([0-9]*)"))
                 .withQueryParam("variantFormat", equalTo("ARKIV"))
-                .willReturn(okJson(objectMapper.writeValueAsString(Ressurs.success(vedlegg)))),
+                .willReturn(okJson(jsonMapper.writeValueAsString(Ressurs.success(vedlegg)))),
         )
         val response = journalpostClient.hentDokument("123", "123", DokumentVariantformat.ARKIV)
 
@@ -110,7 +110,7 @@ internal class JournalpostClientTest {
     @Test
     fun `skal hente ut og parse søknad om overgangsstønad`() {
         val vedlegg =
-            objectMapper.writeValueAsString(Ressurs.success(objectMapper.writeValueAsBytes(Testsøknad.søknadOvergangsstønad)))
+            jsonMapper.writeValueAsString(Ressurs.success(jsonMapper.writeValueAsBytes(Testsøknad.søknadOvergangsstønad)))
         wiremockServerItem.stubFor(
             get(urlPathMatching("${integrasjonerConfig.journalPostUri.path}/hentdokument/([0-9]*)/([0-9]*)"))
                 .withQueryParam("variantFormat", equalTo("ORIGINAL"))
@@ -126,7 +126,7 @@ internal class JournalpostClientTest {
     @Test
     fun `skal hente ut og parse søknad om barnetilsyn`() {
         val vedlegg =
-            objectMapper.writeValueAsString(Ressurs.success(objectMapper.writeValueAsBytes(Testsøknad.søknadBarnetilsyn)))
+            jsonMapper.writeValueAsString(Ressurs.success(jsonMapper.writeValueAsBytes(Testsøknad.søknadBarnetilsyn)))
         wiremockServerItem.stubFor(
             get(urlPathMatching("${integrasjonerConfig.journalPostUri.path}/hentdokument/([0-9]*)/([0-9]*)"))
                 .withQueryParam("variantFormat", equalTo("ORIGINAL"))
@@ -141,7 +141,7 @@ internal class JournalpostClientTest {
     @Test
     fun `skal hente ut og parse søknad om skolepenger`() {
         val vedlegg =
-            objectMapper.writeValueAsString(Ressurs.success(objectMapper.writeValueAsBytes(Testsøknad.søknadSkolepenger)))
+            jsonMapper.writeValueAsString(Ressurs.success(jsonMapper.writeValueAsBytes(Testsøknad.søknadSkolepenger)))
         wiremockServerItem.stubFor(
             get(urlPathMatching("${integrasjonerConfig.journalPostUri.path}/hentdokument/([0-9]*)/([0-9]*)"))
                 .withQueryParam("variantFormat", equalTo("ORIGINAL"))
@@ -160,7 +160,7 @@ internal class JournalpostClientTest {
         wiremockServerItem.stubFor(
             get(urlPathMatching("${integrasjonerConfig.journalPostUri.path}/hentdokument/([0-9]*)/([0-9]*)"))
                 .withQueryParam("variantFormat", equalTo("ARKIV"))
-                .willReturn(okJson(objectMapper.writeValueAsString(Ressurs.success(vedlegg)))),
+                .willReturn(okJson(jsonMapper.writeValueAsString(Ressurs.success(vedlegg)))),
         )
         assertThrows<HttpClientErrorException> {
             journalpostClient.hentDokument("123", "abc", DokumentVariantformat.ARKIV)
@@ -173,7 +173,7 @@ internal class JournalpostClientTest {
         val response = Ressurs.success(ArkiverDokumentResponse("1", true))
         wiremockServerItem.stubFor(
             post(anyUrl())
-                .willReturn(okJson(objectMapper.writeValueAsString(response))),
+                .willReturn(okJson(jsonMapper.writeValueAsString(response))),
         )
         journalpostClient.arkiverDokument(ArkiverDokumentRequest("123", true, emptyList(), emptyList()), saksbehandler)
 
@@ -209,7 +209,7 @@ internal class JournalpostClientTest {
 
         wiremockServerItem.stubFor(
             put("${integrasjonerConfig.dokarkivUri.path}/dokument/$dokumentInfoId/logiskVedlegg")
-                .willReturn(okJson(objectMapper.writeValueAsString(Ressurs.success(dokumentInfoId)))),
+                .willReturn(okJson(jsonMapper.writeValueAsString(Ressurs.success(dokumentInfoId)))),
         )
 
         val response = journalpostClient.oppdaterLogiskeVedlegg(dokumentInfoId, request)

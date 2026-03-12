@@ -1,11 +1,11 @@
 package no.nav.familie.ef.sak.forvaltning.aktivitetsplikt
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.familie.ef.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.brev.FrittståendeBrevService
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
+import no.nav.familie.ef.sak.infrastruktur.config.readValue
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.iverksett.IverksettClient
@@ -14,7 +14,7 @@ import no.nav.familie.ef.sak.oppgave.OppgaveUtil
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerService
 import no.nav.familie.kontrakter.ef.felles.PeriodiskAktivitetspliktBrevDto
 import no.nav.familie.kontrakter.felles.ef.StønadType
-import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.jsonMapper
 import no.nav.familie.kontrakter.felles.oppgave.Oppgave
 import no.nav.familie.log.IdUtils
 import no.nav.familie.log.mdc.MDCConstants
@@ -48,7 +48,7 @@ class SendAktivitetspliktBrevTilIverksettTask(
     val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
     override fun doTask(task: Task) {
-        val payload = objectMapper.readValue<AutomatiskBrevAktivitetspliktPayload>(task.payload)
+        val payload = jsonMapper.readValue<AutomatiskBrevAktivitetspliktPayload>(task.payload)
         val oppgave = oppgaveService.hentOppgave(payload.oppgaveId)
         val ident = OppgaveUtil.finnPersonidentForOppgave(oppgave) ?: throw Feil("Fant ikke ident for oppgave=${oppgave.id}")
         val fagsaker = fagsakService.finnFagsaker(setOf(ident))
@@ -122,7 +122,7 @@ class SendAktivitetspliktBrevTilIverksettTask(
             oppgaveId: Long,
             gjeldendeÅr: Year,
         ): String =
-            objectMapper.writeValueAsString(
+            jsonMapper.writeValueAsString(
                 AutomatiskBrevAktivitetspliktPayload(oppgaveId, gjeldendeÅr),
             )
 

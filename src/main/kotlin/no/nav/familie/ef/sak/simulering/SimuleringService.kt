@@ -14,10 +14,10 @@ import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.ef.sak.tilbakekreving.TilbakekrevingOppryddingService
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.ef.sak.tilkjentytelse.tilTilkjentYtelseMedMetaData
-import no.nav.familie.http.client.RessursException
 import no.nav.familie.kontrakter.ef.iverksett.SimuleringDto
 import no.nav.familie.kontrakter.felles.simulering.BeriketSimuleringsresultat
 import no.nav.familie.kontrakter.felles.simulering.Simuleringsoppsummering
+import no.nav.familie.restklient.client.RessursException
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service

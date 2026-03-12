@@ -5,7 +5,7 @@ import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import no.nav.familie.kontrakter.felles.Ressurs.Companion.success
 import no.nav.familie.kontrakter.felles.ef.StønadType
-import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.jsonMapper
 import no.nav.familie.kontrakter.felles.tilbakekreving.KanBehandlingOpprettesManueltRespons
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterAll
@@ -13,7 +13,7 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.springframework.boot.restclient.RestTemplateBuilder
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter
+import org.springframework.http.converter.json.JacksonJsonHttpMessageConverter
 import org.springframework.web.client.RestOperations
 import org.springframework.web.util.UriUtils
 import java.net.URI
@@ -29,7 +29,7 @@ internal class TilbakekrevingClientTest {
     internal fun `skal håndtere Ø i url`() {
         val encodedStønadstype = UriUtils.encodePath(StønadType.OVERGANGSSTØNAD.name, Charset.forName("UTF-8"))
         val eksternFagsakId = 1L
-        val jsonResponse = objectMapper.writeValueAsString(success(KanBehandlingOpprettesManueltRespons(true, "")))
+        val jsonResponse = jsonMapper.writeValueAsString(success(KanBehandlingOpprettesManueltRespons(true, "")))
         val url =
             "/api/ytelsestype/$encodedStønadstype/fagsak/$eksternFagsakId/kanBehandlingOpprettesManuelt/v1"
         wiremockServerItem.stubFor(
@@ -47,7 +47,7 @@ internal class TilbakekrevingClientTest {
         private val restOperations: RestOperations =
             RestTemplateBuilder()
                 .additionalMessageConverters(
-                    MappingJackson2HttpMessageConverter(objectMapper),
+                    JacksonJsonHttpMessageConverter(jsonMapper),
                 ).build()
         lateinit var client: TilbakekrevingClient
         lateinit var wiremockServerItem: WireMockServer

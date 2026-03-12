@@ -1,5 +1,4 @@
 {
-  "vilkårType" : "TIDLIGERE_VEDTAKSPERIODER",
   "regler" : {
     "HAR_TIDLIGERE_MOTTATT_OVERGANSSTØNAD" : {
       "regelId" : "HAR_TIDLIGERE_MOTTATT_OVERGANSSTØNAD",
@@ -29,5 +28,6 @@
       },
       "versjon" : "GJELDENDE"
     }
-  }
+  },
+  "vilkårType" : "TIDLIGERE_VEDTAKSPERIODER"
 }

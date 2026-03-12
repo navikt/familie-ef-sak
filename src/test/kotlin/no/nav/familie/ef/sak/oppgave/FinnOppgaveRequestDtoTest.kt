@@ -2,7 +2,7 @@ package no.nav.familie.ef.sak.oppgave
 
 import no.nav.familie.ef.sak.oppgave.dto.FinnOppgaveRequestDto
 import no.nav.familie.kontrakter.felles.Behandlingstema
-import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.jsonMapper
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
@@ -28,7 +28,7 @@ internal class FinnOppgaveRequestDtoTest {
         eksternInput["fristTom"] = LocalDate.of(2020, 1, 2).toString()
 
         val finnOppgaveRequestDto =
-            objectMapper.readValue(objectMapper.writeValueAsString(eksternInput), FinnOppgaveRequestDto::class.java)
+            jsonMapper.readValue(jsonMapper.writeValueAsString(eksternInput), FinnOppgaveRequestDto::class.java)
         val finnOppgaveRequest = finnOppgaveRequestDto.tilFinnOppgaveRequest()
 
         Assertions.assertThat(finnOppgaveRequest.behandlingstema).isEqualTo(Behandlingstema.Overgangsstønad)
