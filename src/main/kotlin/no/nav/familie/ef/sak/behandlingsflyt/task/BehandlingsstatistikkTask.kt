@@ -119,12 +119,11 @@ class BehandlingsstatistikkTask(
     private fun finnSisteOppgaveForBehandlingen(
         behandlingId: UUID,
         oppgaveId: Long?,
-    ): Oppgave? {
-        return when (oppgaveId) {
+    ): Oppgave? =
+        when (oppgaveId) {
             null -> oppgaveService.finnBehandlingsoppgaveSistEndretIEFSak(behandlingId)
             else -> oppgaveService.hentOppgave(oppgaveId)
         }
-    }
 
     private fun Hendelse.erBesluttetEllerFerdig() = this.name == Hendelse.BESLUTTET.name || this.name == Hendelse.FERDIG.name
 
