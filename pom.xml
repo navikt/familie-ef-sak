@@ -34,7 +34,7 @@
         <mockk.version>1.14.6</mockk.version>
         <felles.version>4.20260217152944_7094de0</felles.version>
         <prosessering.version>2.20251110093725_10552cd</prosessering.version>
-        <token-validation-spring.version>5.0.39</token-validation-spring.version>
+        <token-validation-spring.version>6.0.1</token-validation-spring.version>
 
         <start-class>no.nav.familie.ef.sak.ApplicationKt</start-class>
         <kontrakter.version>4.0_20260217104427_430ef0f</kontrakter.version>
