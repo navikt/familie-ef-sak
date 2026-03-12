@@ -75,12 +75,26 @@ object SikkerhetContext {
         }
     }
 
+    private fun erKallFraBetroddKilde(): Boolean =
+        try {
+            erMaskinTilMaskinToken() && (kallKommerFraFamilieEfMottak() || kallKommerFraKlage())
+        } catch (e: Exception) {
+            false
+        }
+
     private fun hentNavIdentFraHeader(): String? =
         try {
             val requestAttributes = RequestContextHolder.getRequestAttributes() as? ServletRequestAttributes
             val header = requestAttributes?.request?.getHeader(NAV_IDENT_HEADER)
-            secureLogger.info("[DEBUG] hentNavIdentFraHeader: $header")
-            header
+            if (!header.isNullOrBlank() && NAVIDENT_REGEX.matches(header) && erKallFraBetroddKilde()) {
+                secureLogger.info("[DEBUG] hentNavIdentFraHeader (validert): $header")
+                header
+            } else {
+                if (!header.isNullOrBlank()) {
+                    secureLogger.info("[DEBUG] hentNavIdentFraHeader ignorerer header (ugyldig/ikke betrodd): $header")
+                }
+                null
+            }
         } catch (e: Exception) {
             secureLogger.info("[DEBUG] hentNavIdentFraHeader exception: ${e.message}")
             null
@@ -129,6 +143,7 @@ object SikkerhetContext {
     private fun hentGrupperFraHeader(): Set<String> =
         Result
             .runCatching {
+                if (!erKallFraBetroddKilde()) return@runCatching emptySet()
                 val requestAttributes = RequestContextHolder.getRequestAttributes() as? ServletRequestAttributes
                 val header = requestAttributes?.request?.getHeader(NAV_GROUPS_HEADER)
                 secureLogger.info("[DEBUG] hentGrupperFraHeader raw: $header")
