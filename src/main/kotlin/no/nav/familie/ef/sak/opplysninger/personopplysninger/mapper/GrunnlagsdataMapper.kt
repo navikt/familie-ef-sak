@@ -51,7 +51,12 @@ object GrunnlagsdataMapper {
         AnnenForelderMedIdent(
             adressebeskyttelse = it.value.adressebeskyttelse,
             personIdent = it.key,
-            fødsel = mapFødsel(it.value.fødselsdato.first(), it.value.fødested.first()),
+            fødsel =
+                if (it.value.fødselsdato.isNotEmpty()) {
+                    mapFødsel(it.value.fødselsdato.first(), it.value.fødested.first())
+                } else {
+                    emptyList()
+                },
             bostedsadresse = it.value.bostedsadresse,
             dødsfall = it.value.dødsfall,
             navn = it.value.navn.gjeldende(),
