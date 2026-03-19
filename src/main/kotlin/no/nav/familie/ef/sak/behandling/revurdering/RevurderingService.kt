@@ -23,6 +23,7 @@ import no.nav.familie.ef.sak.journalføring.dto.VilkårsbehandleNyeBarn
 import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.ef.sak.oppgave.TilordnetRessursService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.secureLogger
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
 import no.nav.familie.ef.sak.vedtak.KopierVedtakService
 import no.nav.familie.ef.sak.vedtak.VedtakService
@@ -98,6 +99,7 @@ class RevurderingService(
                 behandlingsårsak = revurderingDto.behandlingsårsak,
                 kravMottatt = revurderingDto.kravMottatt,
             )
+        secureLogger.info("Revurdering med behandlingId ${revurdering.id} opprettet")
         val forrigeBehandlingId =
             behandlingService.finnSisteIverksatteBehandlingMedEventuellAvslått(fagsak.id)?.id
                 ?: error("Revurdering må ha eksisterende iverksatt behandling")
@@ -125,7 +127,7 @@ class RevurderingService(
 
         val saksbehandler =
             finnSaksbehandlerForRevurdering(erAutomatiskRevurdering)
-
+        secureLogger.info("Skal lagre OpprettOppgaveForOpprettetBehandlingTask for behandling ${revurdering.id}")
         taskService.save(
             OpprettOppgaveForOpprettetBehandlingTask.opprettTask(
                 OpprettOppgaveForOpprettetBehandlingTask.OpprettOppgaveTaskData(
@@ -136,8 +138,10 @@ class RevurderingService(
                 ),
             ),
         )
+        secureLogger.info("Lagret OpprettOppgaveForOpprettetBehandlingTask for behandling ${revurdering.id}")
         if (!erAutomatiskRevurdering) {
             taskService.save(BehandlingsstatistikkTask.opprettPåbegyntTask(behandlingId = revurdering.id))
+            secureLogger.info("Lagret opprettPåbegyntTask for behandlingsstatistikk for behandling ${revurdering.id}")
         }
 
         if (erSatsendring(revurderingDto)) {
