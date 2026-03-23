@@ -70,7 +70,7 @@ class SendAktivitetspliktBrevTilIverksettTask(
                 personIdent = ident,
                 eksternFagsakId = fagsak.eksternId,
                 journalførendeEnhet = journalFørendeEnhet,
-                gjeldendeÅr = payload.gjeldendeÅr,
+                år = payload.år,
                 stønadType = fagsak.stønadstype,
             ),
         )
@@ -132,5 +132,5 @@ class SendAktivitetspliktBrevTilIverksettTask(
 
 data class AutomatiskBrevAktivitetspliktPayload(
     val oppgaveId: Long,
-    val gjeldendeÅr: Year,
+    val år: Year,
 )
