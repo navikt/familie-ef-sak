@@ -16,12 +16,12 @@ import no.nav.familie.ef.sak.felles.domain.SporbarUtils
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.kontrakter.felles.Ressurs
-import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.jsonMapper
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.web.client.exchange
+import org.springframework.boot.resttestclient.exchange
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
@@ -42,7 +42,7 @@ internal class BehandlingshistorikkControllerTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    internal fun `Skal returnere 200 OK med status IKKE_TILGANG dersom man ikke har tilgang til brukeren`() {
+    internal fun `Skal returnere 403 FORBIDDEN med status IKKE_TILGANG dersom man ikke har tilgang til brukeren`() {
         val fagsak = testoppsettService.lagreFagsak(fagsak(identer = setOf(PersonIdent("ikkeTilgang"))))
         val behandling = behandlingRepository.insert(behandling(fagsak))
         val respons = hentHistorikk(behandling.id)
@@ -151,7 +151,7 @@ internal class BehandlingshistorikkControllerTest : OppslagSpringRunnerTest() {
         val behandling = behandlingRepository.insert(behandling(fagsak))
 
         val jsonMap = mapOf("key" to "value")
-        val metadata = JsonWrapper(objectMapper.writeValueAsString(jsonMap))
+        val metadata = JsonWrapper(jsonMapper.writeValueAsString(jsonMap))
         behandlingshistorikkRepository.insert(
             Behandlingshistorikk(
                 behandlingId = behandling.id,
@@ -189,7 +189,7 @@ internal class BehandlingshistorikkControllerTest : OppslagSpringRunnerTest() {
     }
 
     private fun hentHistorikk(id: UUID): ResponseEntity<Ressurs<List<HendelseshistorikkDto>>> =
-        restTemplate.exchange(
+        testRestTemplate.exchange(
             localhost("/api/behandlingshistorikk/$id"),
             HttpMethod.GET,
             HttpEntity<Ressurs<List<BehandlingshistorikkDto>>>(headers),

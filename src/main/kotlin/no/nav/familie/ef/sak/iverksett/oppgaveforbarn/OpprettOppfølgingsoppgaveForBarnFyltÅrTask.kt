@@ -1,10 +1,10 @@
 package no.nav.familie.ef.sak.iverksett.oppgaveforbarn
 
-import com.fasterxml.jackson.module.kotlin.readValue
+import no.nav.familie.ef.sak.infrastruktur.config.readValue
 import no.nav.familie.ef.sak.oppgave.Oppgave
 import no.nav.familie.ef.sak.oppgave.OppgaveRepository
 import no.nav.familie.ef.sak.oppgave.OppgaveService
-import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.jsonMapper
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.log.IdUtils
 import no.nav.familie.log.mdc.MDCConstants
@@ -25,7 +25,7 @@ class OpprettOppfølgingsoppgaveForBarnFyltÅrTask(
     private val oppgaveService: OppgaveService,
 ) : AsyncTaskStep {
     override fun doTask(task: Task) {
-        val opprettOppgavePayload = objectMapper.readValue<OpprettOppgavePayload>(task.payload)
+        val opprettOppgavePayload = jsonMapper.readValue<OpprettOppgavePayload>(task.payload)
         val opprettetOppgaveId =
             oppgaveService.opprettOppgaveUtenÅLagreIRepository(
                 opprettOppgavePayload.behandlingId,
@@ -49,7 +49,7 @@ class OpprettOppfølgingsoppgaveForBarnFyltÅrTask(
         const val TYPE = "opprettOppfølgingsoppgaveForBarnFyltÅrTask"
 
         fun opprettTask(opprettOppgavePayload: OpprettOppgavePayload): Task =
-            Task(TYPE, objectMapper.writeValueAsString(opprettOppgavePayload)).apply {
+            Task(TYPE, jsonMapper.writeValueAsString(opprettOppgavePayload)).apply {
                 this.metadata[MDCConstants.MDC_CALL_ID] = IdUtils.generateId()
             }
     }

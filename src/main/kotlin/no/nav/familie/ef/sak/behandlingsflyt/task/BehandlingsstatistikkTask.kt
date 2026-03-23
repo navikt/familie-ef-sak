@@ -1,13 +1,12 @@
 package no.nav.familie.ef.sak.behandlingsflyt.task
 
-import com.fasterxml.jackson.module.kotlin.readValue
-import no.nav.familie.ef.sak.arbeidsfordeling.ArbeidsfordelingService.Companion.MASKINELL_JOURNALFOERENDE_ENHET
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType.FØRSTEGANGSBEHANDLING
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType.REVURDERING
 import no.nav.familie.ef.sak.behandling.revurdering.ÅrsakRevurderingService
+import no.nav.familie.ef.sak.infrastruktur.config.readValue
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.oppgave.OppgaveService
@@ -26,7 +25,7 @@ import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.kontrakter.felles.ef.StønadType.BARNETILSYN
 import no.nav.familie.kontrakter.felles.ef.StønadType.OVERGANGSSTØNAD
 import no.nav.familie.kontrakter.felles.ef.StønadType.SKOLEPENGER
-import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.jsonMapper
 import no.nav.familie.kontrakter.felles.oppgave.Oppgave
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
@@ -56,7 +55,7 @@ class BehandlingsstatistikkTask(
 
     override fun doTask(task: Task) {
         val (behandlingId, hendelse, hendelseTidspunkt, gjeldendeSaksbehandler, oppgaveId, behandlingMetode) =
-            objectMapper.readValue<BehandlingsstatistikkTaskPayload>(task.payload)
+            jsonMapper.readValue<BehandlingsstatistikkTaskPayload>(task.payload)
 
         val saksbehandling = behandlingService.hentSaksbehandling(behandlingId)
         val årsakRevurdering = årsakRevurderingService.hentÅrsakRevurdering(behandlingId)
@@ -94,8 +93,8 @@ class BehandlingsstatistikkTask(
                 hendelse = hendelse,
                 behandlingResultat = saksbehandling.resultat.name,
                 resultatBegrunnelse = resultatBegrunnelse,
-                opprettetEnhet = sisteOppgaveForBehandling?.opprettetAvEnhetsnr ?: MASKINELL_JOURNALFOERENDE_ENHET,
-                ansvarligEnhet = sisteOppgaveForBehandling?.tildeltEnhetsnr ?: MASKINELL_JOURNALFOERENDE_ENHET,
+                opprettetEnhet = sisteOppgaveForBehandling?.opprettetAvEnhetsnr ?: FELLES_ENHET,
+                ansvarligEnhet = sisteOppgaveForBehandling?.tildeltEnhetsnr ?: FELLES_ENHET,
                 strengtFortroligAdresse = søker.adressebeskyttelse?.erStrengtFortrolig() ?: false,
                 stønadstype = saksbehandling.stønadstype,
                 behandlingstype = BehandlingType.valueOf(saksbehandling.type.name),
@@ -119,11 +118,11 @@ class BehandlingsstatistikkTask(
     private fun finnSisteOppgaveForBehandlingen(
         behandlingId: UUID,
         oppgaveId: Long?,
-    ): Oppgave? {
-        val gsakOppgaveId = oppgaveId ?: oppgaveService.finnSisteOppgaveForBehandling(behandlingId)?.gsakOppgaveId
-
-        return gsakOppgaveId?.let { oppgaveService.hentOppgave(it) }
-    }
+    ): Oppgave? =
+        when (oppgaveId) {
+            null -> oppgaveService.finnBehandlingsoppgaveSistEndretIEFSak(behandlingId)
+            else -> oppgaveService.hentOppgave(oppgaveId)
+        }
 
     private fun Hendelse.erBesluttetEllerFerdig() = this.name == Hendelse.BESLUTTET.name || this.name == Hendelse.FERDIG.name
 
@@ -278,7 +277,7 @@ class BehandlingsstatistikkTask(
             Task(
                 type = TYPE,
                 payload =
-                    objectMapper.writeValueAsString(
+                    jsonMapper.writeValueAsString(
                         BehandlingsstatistikkTaskPayload(
                             behandlingId,
                             hendelse,
@@ -299,6 +298,7 @@ class BehandlingsstatistikkTask(
             )
 
         const val TYPE = "behandlingsstatistikkTask"
+        const val FELLES_ENHET = "4489"
     }
 }
 
