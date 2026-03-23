@@ -516,7 +516,7 @@ class OppgaveService(
             else -> error("Håndterer ikke behandlesAvApplikasjon for $oppgavetype")
         }
 
-    private fun List<no.nav.familie.ef.sak.oppgave.Oppgave>?.oppgaveSistEndret(): no.nav.familie.ef.sak.oppgave.Oppgave? = this?.sortedBy { it.sistEndret() }?.last()
+    private fun List<no.nav.familie.ef.sak.oppgave.Oppgave>?.oppgaveSistEndret(): no.nav.familie.ef.sak.oppgave.Oppgave? = this?.sortedBy { it.sistEndret() }?.lastOrNull()
 
     private fun no.nav.familie.ef.sak.oppgave.Oppgave.sistEndret(): LocalDateTime = this.sporbar.endret.endretTid
 
