@@ -1,6 +1,5 @@
 package no.nav.familie.ef.sak.behandlingshistorikk.domain
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
@@ -8,8 +7,9 @@ import no.nav.familie.ef.sak.behandlingshistorikk.dto.BehandlingshistorikkDto
 import no.nav.familie.ef.sak.behandlingshistorikk.dto.Hendelse
 import no.nav.familie.ef.sak.behandlingshistorikk.dto.HendelseshistorikkDto
 import no.nav.familie.ef.sak.felles.domain.JsonWrapper
+import no.nav.familie.ef.sak.infrastruktur.config.readValue
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
-import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.jsonMapper
 import org.springframework.data.annotation.Id
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
@@ -89,7 +89,7 @@ fun mapFraBeslutteTilHendelse(utfall: StegUtfall?): Hendelse =
         else -> Hendelse.UKJENT
     }
 
-fun JsonWrapper?.tilJson(): Map<String, Any>? = this?.json?.let { objectMapper.readValue(it) }
+fun JsonWrapper?.tilJson(): Map<String, Any>? = this?.json?.let { jsonMapper.readValue(it) }
 
 enum class StegUtfall {
     UTREDNING_PÅBEGYNT,

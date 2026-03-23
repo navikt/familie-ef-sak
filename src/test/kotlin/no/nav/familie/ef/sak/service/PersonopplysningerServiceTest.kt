@@ -24,7 +24,7 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper.Statsborgers
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Fullmakt
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.MotpartsRolle
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
-import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.jsonMapper
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -106,7 +106,7 @@ internal class PersonopplysningerServiceTest {
     @Test
     internal fun `mapper grunnlagsdata til PersonopplysningerDto`() {
         val søker = personopplysningerService.hentPersonopplysningerFraRegister("01010172272")
-        assertThat(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(søker))
+        assertThat(jsonMapper.writerWithDefaultPrettyPrinter().writeValueAsString(søker))
             .isEqualToIgnoringWhitespace(readFile("/json/personopplysningerDto.json"))
     }
 

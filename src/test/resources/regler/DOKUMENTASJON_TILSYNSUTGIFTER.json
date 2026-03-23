@@ -1,5 +1,4 @@
 {
-  "vilkårType" : "DOKUMENTASJON_TILSYNSUTGIFTER",
   "regler" : {
     "HAR_DOKUMENTERTE_TILSYNSUTGIFTER" : {
       "regelId" : "HAR_DOKUMENTERTE_TILSYNSUTGIFTER",
@@ -15,5 +14,6 @@
       },
       "versjon" : "GJELDENDE"
     }
-  }
+  },
+  "vilkårType" : "DOKUMENTASJON_TILSYNSUTGIFTER"
 }

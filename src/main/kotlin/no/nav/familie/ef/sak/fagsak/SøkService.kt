@@ -76,21 +76,26 @@ class SøkService(
     ): Søkeresultat {
         val person = personService.hentSøker(gjeldendePersonIdent)
 
-        return Søkeresultat(
-            personIdent = gjeldendePersonIdent,
-            kjønn = KjønnMapper.tilKjønn(person.kjønn.first().kjønn),
-            visningsnavn = NavnDto.fraNavn(person.navn.gjeldende()).visningsnavn,
-            fagsakPersonId = fagsakPerson?.id,
-            fagsaker =
-                fagsaker.map {
-                    FagsakForSøkeresultat(
-                        fagsakId = it.id,
-                        stønadstype = it.stønadstype,
-                        erLøpende = fagsakService.erLøpende(it),
-                        erMigrert = it.migrert,
-                    )
-                },
-        )
+        try {
+            return Søkeresultat(
+                personIdent = gjeldendePersonIdent,
+                kjønn = KjønnMapper.tilKjønn(person.kjønn.first().kjønn),
+                visningsnavn = NavnDto.fraNavn(person.navn.gjeldende()).visningsnavn,
+                fagsakPersonId = fagsakPerson?.id,
+                fagsaker =
+                    fagsaker.map {
+                        FagsakForSøkeresultat(
+                            fagsakId = it.id,
+                            stønadstype = it.stønadstype,
+                            erLøpende = fagsakService.erLøpende(it),
+                            erMigrert = it.migrert,
+                        )
+                    },
+            )
+        } catch (e: Exception) {
+            secureLogger.warn("Klarte ikke å mappe person fra pdl i søkeresultat. Kjønn:${person.kjønn} Visningsnavn: ${person.navn.gjeldende()} Gjeldende: $gjeldendePersonIdent FagsakpersonId: ${fagsakPerson?.id}")
+            throw e
+        }
     }
 
     fun søkEtterPersonerMedSammeAdressePåFagsakPerson(fagsakPersonId: UUID): SøkeresultatPerson {

@@ -1,12 +1,12 @@
 package no.nav.familie.ef.sak.infrastruktur.config
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
+import no.nav.familie.ef.sak.infrastruktur.config.readValue
 import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.kontrakter.ef.iverksett.IverksettStatus
-import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.jsonMapper
 import no.nav.familie.kontrakter.felles.simulering.BeriketSimuleringsresultat
 import no.nav.familie.kontrakter.felles.simulering.DetaljertSimuleringResultat
 import no.nav.familie.kontrakter.felles.simulering.Simuleringsoppsummering
@@ -29,7 +29,7 @@ class IverksettClientMock {
 
     companion object {
         private val simuleringsresultat =
-            objectMapper.readValue<BeriketSimuleringsresultat>(
+            jsonMapper.readValue<BeriketSimuleringsresultat>(
                 this::class.java.getResource("/json/simuleringsresultat_beriket.json")!!.readText(),
             )
 

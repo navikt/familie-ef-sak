@@ -12,7 +12,7 @@ class EksternBehandlingIdGenerator(
     override fun onBeforeConvert(behandling: Behandling): Behandling {
         if (behandling.eksternId == 0L) {
             val id =
-                jdbcTemplate.queryForObject<Long>("SELECT nextval('behandling_ekstern_id_seq')")
+                jdbcTemplate.queryForObject<Long>("SELECT nextval('behandling_ekstern_id_seq')") ?: throw IllegalStateException("Sekvens behandling_ekstern_id_seq returnerte null, det skal ikke kunne skje.")
             return behandling.copy(eksternId = id)
         }
         return behandling

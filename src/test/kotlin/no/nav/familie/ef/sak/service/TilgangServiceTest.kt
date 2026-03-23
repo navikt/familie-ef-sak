@@ -34,7 +34,7 @@ import org.springframework.cache.concurrent.ConcurrentMapCacheManager
 import kotlin.test.assertFailsWith
 
 internal class TilgangServiceTest {
-    private val personopplysningerIntegrajsonerClient = mockk<PersonopplysningerIntegrasjonerClient>()
+    private val personopplysningerIntegrasjonerClient = mockk<PersonopplysningerIntegrasjonerClient>()
     private val behandlingService = mockk<BehandlingService>()
     private val fagsakService = mockk<FagsakService>()
     private val fagsakPersonService = mockk<FagsakPersonService>()
@@ -44,7 +44,7 @@ internal class TilgangServiceTest {
     private val rolleConfig = RolleConfig("", "", "", kode6 = kode6Gruppe, kode7 = kode7Gruppe, "", "")
     private val tilgangService =
         TilgangService(
-            personopplysningerIntegrasjonerClient = personopplysningerIntegrajsonerClient,
+            personopplysningerIntegrasjonerClient = personopplysningerIntegrasjonerClient,
             behandlingService = behandlingService,
             fagsakService = fagsakService,
             fagsakPersonService = fagsakPersonService,
@@ -74,7 +74,7 @@ internal class TilgangServiceTest {
 
     @Test
     internal fun `skal kaste ManglerTilgang dersom saksbehandler ikke har tilgang til person eller dets barn`() {
-        every { personopplysningerIntegrajsonerClient.sjekkTilgangTilPersonMedRelasjoner(any()) } returns Tilgang(false)
+        every { personopplysningerIntegrasjonerClient.sjekkTilgangTilPersonMedRelasjoner(any()) } returns Tilgang(false)
 
         assertFailsWith<ManglerTilgang> {
             tilgangService.validerTilgangTilPersonMedBarn(mocketPersonIdent, AuditLoggerEvent.ACCESS)
@@ -83,7 +83,7 @@ internal class TilgangServiceTest {
 
     @Test
     internal fun `skal ikke feile når saksbehandler har tilgang til person og dets barn`() {
-        every { personopplysningerIntegrajsonerClient.sjekkTilgangTilPersonMedRelasjoner(any()) } returns Tilgang(true)
+        every { personopplysningerIntegrasjonerClient.sjekkTilgangTilPersonMedRelasjoner(any()) } returns Tilgang(true)
 
         tilgangService.validerTilgangTilPersonMedBarn(mocketPersonIdent, AuditLoggerEvent.ACCESS)
     }
@@ -91,7 +91,7 @@ internal class TilgangServiceTest {
     @Test
     internal fun `skal kaste ManglerTilgang dersom saksbehandler ikke har tilgang til behandling`() {
         val tilgangsfeilNavAnsatt = Tilgang(false, "NAV-ansatt")
-        every { personopplysningerIntegrajsonerClient.sjekkTilgangTilPersonMedRelasjoner(any()) } returns tilgangsfeilNavAnsatt
+        every { personopplysningerIntegrasjonerClient.sjekkTilgangTilPersonMedRelasjoner(any()) } returns tilgangsfeilNavAnsatt
 
         val feil =
             assertFailsWith<ManglerTilgang> {
@@ -107,26 +107,26 @@ internal class TilgangServiceTest {
 
     @Test
     internal fun `skal ikke feile når saksbehandler har tilgang til behandling`() {
-        every { personopplysningerIntegrajsonerClient.sjekkTilgangTilPersonMedRelasjoner(any()) } returns Tilgang(true)
+        every { personopplysningerIntegrasjonerClient.sjekkTilgangTilPersonMedRelasjoner(any()) } returns Tilgang(true)
 
         tilgangService.validerTilgangTilBehandling(behandling.id, AuditLoggerEvent.ACCESS)
     }
 
     @Test
     internal fun `validerTilgangTilPersonMedBarn - hvis samme saksbehandler kaller skal den ha cachet`() {
-        every { personopplysningerIntegrajsonerClient.sjekkTilgangTilPersonMedRelasjoner(any()) } returns Tilgang(true)
+        every { personopplysningerIntegrasjonerClient.sjekkTilgangTilPersonMedRelasjoner(any()) } returns Tilgang(true)
 
         mockBrukerContext("A")
         tilgangService.validerTilgangTilPersonMedBarn(olaIdent, AuditLoggerEvent.ACCESS)
         tilgangService.validerTilgangTilPersonMedBarn(olaIdent, AuditLoggerEvent.ACCESS)
         verify(exactly = 1) {
-            personopplysningerIntegrajsonerClient.sjekkTilgangTilPersonMedRelasjoner(any())
+            personopplysningerIntegrasjonerClient.sjekkTilgangTilPersonMedRelasjoner(any())
         }
     }
 
     @Test
     internal fun `validerTilgangTilPersonMedBarn - hvis to ulike saksbehandler kaller skal den sjekke tilgang på nytt`() {
-        every { personopplysningerIntegrajsonerClient.sjekkTilgangTilPersonMedRelasjoner(any()) } returns Tilgang(true)
+        every { personopplysningerIntegrasjonerClient.sjekkTilgangTilPersonMedRelasjoner(any()) } returns Tilgang(true)
 
         mockBrukerContext("A")
         tilgangService.validerTilgangTilPersonMedBarn(olaIdent, AuditLoggerEvent.ACCESS)
@@ -134,13 +134,13 @@ internal class TilgangServiceTest {
         tilgangService.validerTilgangTilPersonMedBarn(olaIdent, AuditLoggerEvent.ACCESS)
 
         verify(exactly = 2) {
-            personopplysningerIntegrajsonerClient.sjekkTilgangTilPersonMedRelasjoner(any())
+            personopplysningerIntegrasjonerClient.sjekkTilgangTilPersonMedRelasjoner(any())
         }
     }
 
     @Test
     internal fun `validerTilgangTilBehandling - hvis samme saksbehandler kaller skal den ha cachet`() {
-        every { personopplysningerIntegrajsonerClient.sjekkTilgangTilPersonMedRelasjoner(any()) } returns Tilgang(true)
+        every { personopplysningerIntegrasjonerClient.sjekkTilgangTilPersonMedRelasjoner(any()) } returns Tilgang(true)
 
         mockBrukerContext("A")
 
@@ -149,13 +149,13 @@ internal class TilgangServiceTest {
 
         verify(exactly = 1) {
             behandlingService.hentAktivIdent(behandling.id)
-            personopplysningerIntegrajsonerClient.sjekkTilgangTilPersonMedRelasjoner(any())
+            personopplysningerIntegrasjonerClient.sjekkTilgangTilPersonMedRelasjoner(any())
         }
     }
 
     @Test
     internal fun `validerTilgangTilBehandling - hvis to ulike saksbehandler kaller skal den sjekke tilgang på nytt`() {
-        every { personopplysningerIntegrajsonerClient.sjekkTilgangTilPersonMedRelasjoner(any()) } returns Tilgang(true)
+        every { personopplysningerIntegrasjonerClient.sjekkTilgangTilPersonMedRelasjoner(any()) } returns Tilgang(true)
 
         mockBrukerContext("A")
         tilgangService.validerTilgangTilBehandling(behandling.id, AuditLoggerEvent.ACCESS)
@@ -163,13 +163,13 @@ internal class TilgangServiceTest {
         tilgangService.validerTilgangTilBehandling(behandling.id, AuditLoggerEvent.ACCESS)
 
         verify(exactly = 2) {
-            personopplysningerIntegrajsonerClient.sjekkTilgangTilPersonMedRelasjoner(any())
+            personopplysningerIntegrasjonerClient.sjekkTilgangTilPersonMedRelasjoner(any())
         }
     }
 
     @Test
     internal fun `validerTilgangTilFagsakPerson - hvis to ulike saksbehandler kaller skal den sjekke tilgang på nytt`() {
-        every { personopplysningerIntegrajsonerClient.sjekkTilgangTilPersonMedRelasjoner(any()) } returns Tilgang(true)
+        every { personopplysningerIntegrasjonerClient.sjekkTilgangTilPersonMedRelasjoner(any()) } returns Tilgang(true)
 
         mockBrukerContext("A")
         tilgangService.validerTilgangTilFagsakPerson(fagsak.fagsakPersonId, AuditLoggerEvent.ACCESS)
@@ -177,7 +177,7 @@ internal class TilgangServiceTest {
         tilgangService.validerTilgangTilFagsakPerson(fagsak.fagsakPersonId, AuditLoggerEvent.ACCESS)
 
         verify(exactly = 2) {
-            personopplysningerIntegrajsonerClient.sjekkTilgangTilPersonMedRelasjoner(any())
+            personopplysningerIntegrasjonerClient.sjekkTilgangTilPersonMedRelasjoner(any())
         }
     }
 
@@ -219,7 +219,7 @@ internal class TilgangServiceTest {
 
     @Test
     internal fun `validerTilgangTilEksternFagsak `() {
-        every { personopplysningerIntegrajsonerClient.sjekkTilgangTilPersonMedRelasjoner(any()) } returns Tilgang(true)
+        every { personopplysningerIntegrasjonerClient.sjekkTilgangTilPersonMedRelasjoner(any()) } returns Tilgang(true)
         every { fagsakService.hentFagsakDtoPåEksternId(any()) } returns fagsak.tilDto(emptyList(), true)
 
         tilgangService.validerTilgangTilEksternFagsak(fagsak.eksternId, AuditLoggerEvent.ACCESS)
