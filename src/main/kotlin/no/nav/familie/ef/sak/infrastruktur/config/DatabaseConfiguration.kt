@@ -32,14 +32,24 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.flyway.autoconfigure.FlywayConfigurationCustomizer
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.context.annotation.Lazy
 import org.springframework.core.convert.converter.Converter
 import org.springframework.core.env.Environment
 import org.springframework.data.convert.ReadingConverter
 import org.springframework.data.convert.WritingConverter
 import org.springframework.data.domain.AuditorAware
+import org.springframework.data.jdbc.core.convert.DefaultJdbcTypeFactory
+import org.springframework.data.jdbc.core.convert.JdbcConverter
+import org.springframework.data.jdbc.core.convert.JdbcCustomConversions
+import org.springframework.data.jdbc.core.convert.MappingJdbcConverter
+import org.springframework.data.jdbc.core.convert.RelationResolver
+import org.springframework.data.jdbc.core.dialect.JdbcDialect
+import org.springframework.data.jdbc.core.mapping.JdbcMappingContext
 import org.springframework.data.jdbc.repository.config.AbstractJdbcConfiguration
 import org.springframework.data.jdbc.repository.config.EnableJdbcAuditing
 import org.springframework.data.jdbc.repository.config.EnableJdbcRepositories
+import org.springframework.data.relational.core.mapping.RelationalPersistentProperty
+import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcOperations
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import org.springframework.jdbc.datasource.DataSourceTransactionManager
@@ -70,6 +80,34 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
 
     @Bean
     fun jdbcExceptionTranslator(dataSource: DataSource): SQLExceptionTranslator = SQLErrorCodeSQLExceptionTranslator(dataSource)
+
+    /**
+     * Overskriver jdbcConverter for å fikse SQL-type-mapping for YearMonth-felter.
+     * I Spring Data JDBC 4.0.2+ ble JdbcColumnTypes oppdatert med eksplisitt mapping
+     * YearMonth → String (VARCHAR), men vi lagrer YearMonth som DATE-kolonner i PostgreSQL.
+     * Ved å returnere java.sql.Date for YearMonth-egenskaper sikrer vi at korrekt SQL-type
+     * (DATE) brukes for både null og ikke-null verdier.
+     */
+    @Bean
+    override fun jdbcConverter(
+        mappingContext: JdbcMappingContext,
+        operations: NamedParameterJdbcOperations,
+        @Lazy relationResolver: RelationResolver,
+        conversions: JdbcCustomConversions,
+        dialect: JdbcDialect,
+    ): JdbcConverter {
+        val jdbcTypeFactory = DefaultJdbcTypeFactory(operations.jdbcOperations, JdbcDialect.getArraySupport(dialect))
+        val converter =
+            object : MappingJdbcConverter(mappingContext, relationResolver, conversions, jdbcTypeFactory) {
+                override fun getColumnType(property: RelationalPersistentProperty): Class<*> =
+                    if (property.type == YearMonth::class.java) Date::class.java
+                    else super.getColumnType(property)
+            }
+        if (operations.jdbcOperations is JdbcTemplate) {
+            converter.setExceptionTranslator((operations.jdbcOperations as JdbcTemplate).exceptionTranslator)
+        }
+        return converter
+    }
 
     @Bean
     fun verifyIgnoreIfProd(
