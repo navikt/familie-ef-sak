@@ -1,6 +1,5 @@
 package no.nav.familie.ef.sak.behandlingsflyt.steg
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import io.mockk.Runs
 import io.mockk.every
 import io.mockk.just
@@ -29,6 +28,7 @@ import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.clearBrukerContext
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.mockBrukerContext
+import no.nav.familie.ef.sak.infrastruktur.config.readValue
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.oppfølgingsoppgave.OppfølgingsoppgaveService
@@ -47,7 +47,7 @@ import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.ef.iverksett.BehandlingKategori
 import no.nav.familie.kontrakter.ef.iverksett.Hendelse
 import no.nav.familie.kontrakter.felles.ef.StønadType
-import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.jsonMapper
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.kontrakter.felles.simulering.Simuleringsoppsummering
 import no.nav.familie.prosessering.domene.Task
@@ -356,7 +356,7 @@ internal class SendTilBeslutterStegTest {
         utførSteg()
 
         assertThat(taskSlot[0].type).isEqualTo(OpprettOppgaveTask.TYPE)
-        val tilordnetNavIdent = objectMapper.readValue<OpprettOppgaveTaskData>(taskSlot[0].payload).tilordnetNavIdent
+        val tilordnetNavIdent = jsonMapper.readValue<OpprettOppgaveTaskData>(taskSlot[0].payload).tilordnetNavIdent
         assertThat(tilordnetNavIdent).isNull()
     }
 
@@ -376,7 +376,7 @@ internal class SendTilBeslutterStegTest {
 
     private fun verifiserVedtattBehandlingsstatistikkTask() {
         assertThat(taskSlot[2].type).isEqualTo(BehandlingsstatistikkTask.TYPE)
-        assertThat(objectMapper.readValue<BehandlingsstatistikkTaskPayload>(taskSlot[2].payload).hendelse)
+        assertThat(jsonMapper.readValue<BehandlingsstatistikkTaskPayload>(taskSlot[2].payload).hendelse)
             .isEqualTo(Hendelse.VEDTATT)
     }
 
@@ -390,11 +390,11 @@ internal class SendTilBeslutterStegTest {
         verify { behandlingService.oppdaterStatusPåBehandling(behandling.id, BehandlingStatus.FATTER_VEDTAK) }
 
         assertThat(taskSlot[0].type).isEqualTo(OpprettOppgaveTask.TYPE)
-        assertThat(objectMapper.readValue<OpprettOppgaveTaskData>(taskSlot[0].payload).oppgavetype)
+        assertThat(jsonMapper.readValue<OpprettOppgaveTaskData>(taskSlot[0].payload).oppgavetype)
             .isEqualTo(Oppgavetype.GodkjenneVedtak)
 
         assertThat(taskSlot[1].type).isEqualTo(FerdigstillOppgaveTask.TYPE)
-        assertThat(objectMapper.readValue<FerdigstillOppgaveTaskData>(taskSlot[1].payload).oppgavetype)
+        assertThat(jsonMapper.readValue<FerdigstillOppgaveTaskData>(taskSlot[1].payload).oppgavetype)
             .isEqualTo(oppgavetype)
     }
 

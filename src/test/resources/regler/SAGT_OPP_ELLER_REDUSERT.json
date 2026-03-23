@@ -1,5 +1,4 @@
 {
-  "vilkårType" : "SAGT_OPP_ELLER_REDUSERT",
   "regler" : {
     "SAGT_OPP_ELLER_REDUSERT" : {
       "regelId" : "SAGT_OPP_ELLER_REDUSERT",
@@ -33,5 +32,6 @@
       },
       "versjon" : "GJELDENDE"
     }
-  }
+  },
+  "vilkårType" : "SAGT_OPP_ELLER_REDUSERT"
 }

@@ -1,6 +1,5 @@
 package no.nav.familie.ef.sak.behandling.migrering
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
@@ -8,6 +7,7 @@ import io.mockk.verify
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.felles.util.opprettBarnMedIdent
 import no.nav.familie.ef.sak.felles.util.opprettGrunnlagsdata
+import no.nav.familie.ef.sak.infrastruktur.config.readValue
 import no.nav.familie.ef.sak.iverksett.oppgaveforbarn.OpprettOppgavePayload
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.Fødsel
@@ -19,7 +19,7 @@ import no.nav.familie.ef.sak.repository.fagsakpersoner
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.ef.sak.økonomi.lagAndelTilkjentYtelse
 import no.nav.familie.ef.sak.økonomi.lagTilkjentYtelse
-import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.jsonMapper
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.internal.TaskService
 import org.assertj.core.api.Assertions.assertThat
@@ -89,13 +89,13 @@ internal class OpprettOppgaveForMigrertFødtBarnTaskTest {
 
         assertThat(
             tasks.single {
-                objectMapper.readValue<OpprettOppgavePayload>(it.payload).aktivFra in
+                jsonMapper.readValue<OpprettOppgavePayload>(it.payload).aktivFra in
                     halvtÅr.minusWeeks(1)..halvtÅr.plusWeeks(2)
             },
         )
         assertThat(
             tasks.single {
-                objectMapper.readValue<OpprettOppgavePayload>(it.payload).aktivFra in
+                jsonMapper.readValue<OpprettOppgavePayload>(it.payload).aktivFra in
                     etÅr.minusWeeks(1)..etÅr.plusWeeks(2)
             },
         )

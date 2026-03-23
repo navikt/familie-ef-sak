@@ -8,7 +8,7 @@ import no.nav.familie.kontrakter.felles.ef.EksternePerioderRequest
 import no.nav.familie.kontrakter.felles.ef.EksternePerioderResponse
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import org.springframework.boot.test.web.client.exchange
+import org.springframework.boot.resttestclient.exchange
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
@@ -92,7 +92,7 @@ internal class EksternStønadsperioderControllerTest : OppslagSpringRunnerTest()
     }
 
     @Test
-    internal fun `perioder overganggstønad - kaller med access_as_application`() {
+    internal fun `perioder overgangsstønad - kaller med access_as_application`() {
         headers.setBearerAuth(clientToken("familie-ef-proxy", true))
         utførKallOgVerifiser<EksternePerioderResponse>("/api/ekstern/perioder/overgangsstonad") { response ->
             assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
@@ -101,7 +101,7 @@ internal class EksternStønadsperioderControllerTest : OppslagSpringRunnerTest()
     }
 
     @Test
-    internal fun `perioder overganggstønad - skal feile når man savner access_as_application`() {
+    internal fun `perioder overgangsstønad - skal feile når man savner access_as_application`() {
         headers.setBearerAuth(clientToken("familie-ef-proxy", false))
 
         utførKallOgVerifiser<EksternePerioderResponse>("/api/ekstern/perioder/overgangsstonad") { response ->
@@ -111,7 +111,7 @@ internal class EksternStønadsperioderControllerTest : OppslagSpringRunnerTest()
     }
 
     @Test
-    internal fun `perioder overganggstønad med beløp - kaller med access_as_application`() {
+    internal fun `perioder overgangsstønad med beløp - kaller med access_as_application`() {
         headers.setBearerAuth(clientToken("familie-ef-proxy", true))
         utførKallOgVerifiser<EksternePerioderMedBeløpResponse>("/api/ekstern/perioder/overgangsstonad/med-belop") { response ->
             assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
@@ -135,7 +135,7 @@ internal class EksternStønadsperioderControllerTest : OppslagSpringRunnerTest()
         lazyMessage: (ResponseEntity<Ressurs<T>>) -> Unit,
     ) {
         val response: ResponseEntity<Ressurs<T>> =
-            restTemplate.exchange(
+            testRestTemplate.exchange(
                 localhost(url),
                 HttpMethod.POST,
                 HttpEntity(request, headers),

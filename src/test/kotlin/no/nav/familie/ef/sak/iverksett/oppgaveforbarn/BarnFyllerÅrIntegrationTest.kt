@@ -1,6 +1,5 @@
 package no.nav.familie.ef.sak.no.nav.familie.ef.sak.iverksett.oppgaveforbarn
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.barn.BarnRepository
 import no.nav.familie.ef.sak.barn.BehandlingBarn
@@ -8,6 +7,7 @@ import no.nav.familie.ef.sak.behandling.BehandlingRepository
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
+import no.nav.familie.ef.sak.infrastruktur.config.readValue
 import no.nav.familie.ef.sak.iverksett.oppgaveforbarn.AktivitetspliktigAlder
 import no.nav.familie.ef.sak.iverksett.oppgaveforbarn.BarnFyllerÅrOppfølgingsoppgaveService
 import no.nav.familie.ef.sak.iverksett.oppgaveforbarn.OpprettOppgavePayload
@@ -21,13 +21,14 @@ import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.vedtak.VedtakRepository
 import no.nav.familie.ef.sak.økonomi.lagAndelTilkjentYtelse
 import no.nav.familie.ef.sak.økonomi.lagTilkjentYtelse
-import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.jsonMapper
 import no.nav.familie.prosessering.internal.TaskService
 import no.nav.familie.util.FnrGenerator
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.dao.DuplicateKeyException
 import org.springframework.transaction.UnexpectedRollbackException
 import java.time.LocalDate
 
@@ -64,12 +65,12 @@ class BarnFyllerÅrIntegrationTest : OppslagSpringRunnerTest() {
         val tasks = taskService.findAll().toList()
         assertThat(tasks.size).isEqualTo(1)
 
-        val opprettOppgavePayload = objectMapper.readValue<OpprettOppgavePayload>(tasks.first().payload)
+        val opprettOppgavePayload = jsonMapper.readValue<OpprettOppgavePayload>(tasks.first().payload)
         assertThat(opprettOppgavePayload.alder).isEqualTo(AktivitetspliktigAlder.SEKS_MND)
         assertThat(opprettOppgavePayload.barnPersonIdent).isEqualTo(barnPersonIdent)
 
         assertThatThrownBy { barnFyllerÅrOppfølgingsoppgaveService.opprettTasksForAlleBarnSomHarFyltÅr() }
-            .isInstanceOf(UnexpectedRollbackException::class.java)
+            .isInstanceOf(DuplicateKeyException::class.java)
 
         val tasksEtterAndreKjøring = taskService.findAll().toList()
         assertThat(tasksEtterAndreKjøring.size).isEqualTo(1)

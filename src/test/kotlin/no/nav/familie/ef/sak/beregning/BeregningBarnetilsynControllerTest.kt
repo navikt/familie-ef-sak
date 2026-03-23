@@ -35,7 +35,7 @@ import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.web.client.exchange
+import org.springframework.boot.resttestclient.exchange
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpMethod
 import org.springframework.http.ResponseEntity
@@ -240,14 +240,14 @@ internal class BeregningBarnetilsynControllerTest : OppslagSpringRunnerTest() {
         id: UUID,
         vedtakDto: VedtakDto,
     ): ResponseEntity<Ressurs<UUID>> =
-        restTemplate.exchange(
+        testRestTemplate.exchange(
             localhost("/api/vedtak/$id/lagre-vedtak"),
             HttpMethod.POST,
             HttpEntity(vedtakDto, headers),
         )
 
     private fun hentBeløpsperioderForBehandling(id: UUID): ResponseEntity<Ressurs<List<BeløpsperiodeBarnetilsynDto>>> =
-        restTemplate.exchange(
+        testRestTemplate.exchange(
             localhost("/api/beregning/barnetilsyn/$id"),
             HttpMethod.GET,
             HttpEntity<Ressurs<List<BeløpsperiodeBarnetilsynDto>>>(headers),
