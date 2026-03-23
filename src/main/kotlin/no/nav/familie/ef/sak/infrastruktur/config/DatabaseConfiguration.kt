@@ -50,6 +50,8 @@ import org.springframework.data.jdbc.repository.config.EnableJdbcAuditing
 import org.springframework.data.jdbc.repository.config.EnableJdbcRepositories
 import org.springframework.data.relational.core.mapping.RelationalPersistentProperty
 import org.springframework.jdbc.core.JdbcTemplate
+import java.sql.JDBCType
+import java.sql.SQLType
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcOperations
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import org.springframework.jdbc.datasource.DataSourceTransactionManager
@@ -85,8 +87,8 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
      * Overskriver jdbcConverter for å fikse SQL-type-mapping for YearMonth-felter.
      * I Spring Data JDBC 4.0.2+ ble JdbcColumnTypes oppdatert med eksplisitt mapping
      * YearMonth → String (VARCHAR), men vi lagrer YearMonth som DATE-kolonner i PostgreSQL.
-     * Ved å returnere java.sql.Date for YearMonth-egenskaper sikrer vi at korrekt SQL-type
-     * (DATE) brukes for både null og ikke-null verdier.
+     * Ved å returnere JDBCType.DATE for YearMonth-egenskaper sikrer vi at korrekt SQL-type
+     * brukes for både null og ikke-null verdier.
      */
     @Bean
     override fun jdbcConverter(
@@ -99,9 +101,9 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
         val jdbcTypeFactory = DefaultJdbcTypeFactory(operations.jdbcOperations, JdbcDialect.getArraySupport(dialect))
         val converter =
             object : MappingJdbcConverter(mappingContext, relationResolver, conversions, jdbcTypeFactory) {
-                override fun getColumnType(property: RelationalPersistentProperty): Class<*> =
-                    if (property.type == YearMonth::class.java) Date::class.java
-                    else super.getColumnType(property)
+                override fun getTargetSqlType(property: RelationalPersistentProperty): SQLType =
+                    if (property.type == YearMonth::class.java) JDBCType.DATE
+                    else super.getTargetSqlType(property)
             }
         if (operations.jdbcOperations is JdbcTemplate) {
             converter.setExceptionTranslator((operations.jdbcOperations as JdbcTemplate).exceptionTranslator)
