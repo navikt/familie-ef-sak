@@ -1,11 +1,11 @@
 package no.nav.familie.ef.sak.infotrygd
 
-import no.nav.familie.http.client.AbstractPingableRestClient
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdFinnesResponse
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPeriodeRequest
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPeriodeResponse
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdSakResponse
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdSøkRequest
+import no.nav.familie.restklient.client.AbstractPingableRestClient
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
@@ -41,13 +41,6 @@ class InfotrygdReplikaClient(
             .build()
             .toUri()
 
-    private val åpnesakerUri: URI =
-        UriComponentsBuilder
-            .fromUri(infotrygdReplikaUri)
-            .pathSegment("api/saker/hentrapport")
-            .build()
-            .toUri()
-
     private val eksistererUri: URI =
         UriComponentsBuilder
             .fromUri(infotrygdReplikaUri)
@@ -68,12 +61,6 @@ class InfotrygdReplikaClient(
     fun hentSammenslåttePerioder(request: InfotrygdPeriodeRequest): InfotrygdPeriodeResponse = postForEntity(sammenslåttePerioderUri, request)
 
     fun hentSaker(request: InfotrygdSøkRequest): InfotrygdSakResponse = postForEntity(finnSakerUri, request)
-
-    data class ÅpnesakerRapport(
-        val typeMedAntall: Map<String, Int>,
-    )
-
-    fun hentÅpneSaker(): ÅpnesakerRapport = getForEntity(åpnesakerUri)
 
     fun hentPersonerForMigrering(antall: Int): Set<String> {
         val response = getForEntity<Map<String, Any>>(migreringspersonerUri(antall))

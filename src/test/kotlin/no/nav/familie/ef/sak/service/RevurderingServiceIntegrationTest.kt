@@ -225,16 +225,16 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
                         listOf(
                             PeriodeMedBeløp(
                                 Månedsperiode(
-                                    YearMonth.of(2025, 9),
-                                    YearMonth.of(2025, 10),
+                                    YearMonth.of(2026, 9),
+                                    YearMonth.of(2026, 10),
                                 ),
                                 1000,
                             ),
                         ),
                         null,
                     ),
-                fom = YearMonth.of(2024, 6),
-                tom = YearMonth.of(2025, 12),
+                fom = YearMonth.of(2025, 6),
+                tom = YearMonth.of(2026, 12),
             )
         vedtakHelperService.ferdigstillVedtak(vedtak, behandling, fagsakBarnetilsyn)
 
@@ -246,7 +246,7 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
         assertThat(barnetilsynPerioder?.size).isEqualTo(3) // 3 perioder: Før, under og etter kontantstøtte-periode
         assertThat(barnetilsynPerioder?.first()?.utgifter).isEqualTo(8000)
         assertThat(barnetilsynPerioder?.first()?.barn?.size).isEqualTo(2)
-        assertThat(barnetilsynPerioder?.first()?.periode?.fom).isEqualTo(YearMonth.of(2025, 1))
+        assertThat(barnetilsynPerioder?.first()?.periode?.fom).isEqualTo(YearMonth.of(2026, 1))
     }
 
     /**

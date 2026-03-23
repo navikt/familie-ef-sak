@@ -1,6 +1,6 @@
 package no.nav.familie.ef.sak.vilkår.regler
 
-import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.jsonMapper
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
@@ -9,7 +9,7 @@ import java.io.File
 internal class VilkårsregelTest {
     @Test
     internal fun `sjekker at output fortsatt er det samme på json`() {
-        val objectWriter = objectMapper.writerWithDefaultPrettyPrinter()
+        val objectWriter = jsonMapper.writerWithDefaultPrettyPrinter()
         Vilkårsregler.ALLE_VILKÅRSREGLER.vilkårsregler.forEach {
             val json = objectWriter.writeValueAsString(it.value)
             // kommentere ut hvis regler har endret seg for å lagre de nye reglene
@@ -34,7 +34,7 @@ internal class VilkårsregelTest {
     @Test
     @Disabled
     internal fun `print alle vilkår`() {
-        val objectWriter = objectMapper.writerWithDefaultPrettyPrinter()
+        val objectWriter = jsonMapper.writerWithDefaultPrettyPrinter()
         println(objectWriter.writeValueAsString(Vilkårsregler.ALLE_VILKÅRSREGLER))
     }
 

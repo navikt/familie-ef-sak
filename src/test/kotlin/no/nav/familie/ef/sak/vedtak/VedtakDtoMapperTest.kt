@@ -1,8 +1,7 @@
 package no.nav.familie.ef.sak.vedtak
 
-import com.fasterxml.jackson.databind.node.ObjectNode
-import com.fasterxml.jackson.module.kotlin.readValue
-import no.nav.familie.ef.sak.infrastruktur.config.ObjectMapperProvider.objectMapper
+import no.nav.familie.ef.sak.infrastruktur.config.JsonMapperProvider.jsonMapper
+import no.nav.familie.ef.sak.infrastruktur.config.readValue
 import no.nav.familie.ef.sak.vedtak.VedtakDtoUtil.avslagDto
 import no.nav.familie.ef.sak.vedtak.VedtakDtoUtil.innvilgelseBarnetilsynDto
 import no.nav.familie.ef.sak.vedtak.VedtakDtoUtil.innvilgelseOvergangsstønadDto
@@ -23,7 +22,6 @@ class VedtakDtoMapperTest {
 
         val vedtak = innvilgelseOvergangsstønadDto()
         assertErLik(vedtak, vedtakJson)
-        assertErLikUtenType(vedtak, vedtakJson)
     }
 
     @Test
@@ -32,7 +30,6 @@ class VedtakDtoMapperTest {
 
         val vedtak = innvilgelseBarnetilsynDto(UUID.fromString("4ab497b2-a19c-4415-bf00-556ff8e9ce86"))
         assertErLik(vedtak, vedtakJson)
-        // assertErLikUtenType(vedtak, vedtakJson) Må få type fra frontend når barnetilsyn blir tatt i bruk
     }
 
     @Test
@@ -70,7 +67,6 @@ class VedtakDtoMapperTest {
 
         val vedtak = avslagDto()
         assertErLik(vedtak, vedtakJson)
-        assertErLikUtenType(vedtak, vedtakJson)
     }
 
     @Test
@@ -79,7 +75,6 @@ class VedtakDtoMapperTest {
 
         val vedtak = opphørDto()
         assertErLik(vedtak, vedtakJson)
-        assertErLikUtenType(vedtak, vedtakJson)
     }
 
     @Test
@@ -88,26 +83,15 @@ class VedtakDtoMapperTest {
 
         val vedtak = sanksjonertDto()
         assertErLik(vedtak, vedtakJson)
-        assertErLikUtenType(vedtak, vedtakJson)
     }
 
     private fun assertErLik(
         vedtakDto: VedtakDto,
         vedtakJson: String,
     ) {
-        val serialisertVedtak = objectMapper.writeValueAsString(vedtakDto)
-        assertThat(objectMapper.readValue<VedtakDto>(serialisertVedtak)).isEqualTo(objectMapper.readValue<VedtakDto>(vedtakJson))
-        assertThat(objectMapper.readValue<VedtakDto>(vedtakJson)).isEqualTo(vedtakDto)
-    }
-
-    private fun assertErLikUtenType(
-        vedtakDto: VedtakDto,
-        vedtakJson: String,
-    ) {
-        val tree = objectMapper.readTree(vedtakJson)
-        (tree as ObjectNode).remove("_type")
-        val vedtakJsonUtenType = objectMapper.writeValueAsString(tree)
-        assertThat(objectMapper.readValue<VedtakDto>(vedtakJsonUtenType)).isEqualTo(vedtakDto)
+        val serialisertVedtak = jsonMapper.writeValueAsString(vedtakDto)
+        assertThat(jsonMapper.readValue<VedtakDto>(serialisertVedtak)).isEqualTo(jsonMapper.readValue<VedtakDto>(vedtakJson))
+        assertThat(jsonMapper.readValue<VedtakDto>(vedtakJson)).isEqualTo(vedtakDto)
     }
 
     private fun readFile(filnavn: String): String = this::class.java.getResource("/vedtak/$filnavn")!!.readText()

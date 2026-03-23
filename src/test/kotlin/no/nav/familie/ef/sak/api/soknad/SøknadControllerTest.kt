@@ -15,11 +15,11 @@ import no.nav.familie.kontrakter.ef.søknad.SøknadMedVedlegg
 import no.nav.familie.kontrakter.ef.søknad.Testsøknad
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.ef.StønadType
-import org.assertj.core.api.Assertions
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.web.client.exchange
+import org.springframework.boot.resttestclient.exchange
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
@@ -50,9 +50,9 @@ internal class SøknadControllerTest : OppslagSpringRunnerTest() {
         val behandling = behandlingRepository.insert(behandling(fagsak))
         val respons = hentSøknadData(behandling.id)
 
-        Assertions.assertThat(respons.statusCode).isEqualTo(HttpStatus.FORBIDDEN)
-        Assertions.assertThat(respons.body?.status).isEqualTo(Ressurs.Status.IKKE_TILGANG)
-        Assertions.assertThat(respons.body?.data).isNull()
+        assertThat(respons.statusCode).isEqualTo(HttpStatus.FORBIDDEN)
+        assertThat(respons.body?.status).isEqualTo(Ressurs.Status.IKKE_TILGANG)
+        assertThat(respons.body?.data).isNull()
     }
 
     @Test
@@ -74,14 +74,14 @@ internal class SøknadControllerTest : OppslagSpringRunnerTest() {
         val søknadSkjema = søknadService.hentOvergangsstønad(behandling.id)!!
         val respons: ResponseEntity<Ressurs<SøknadDatoerDto>> = hentSøknadData(behandling.id)
 
-        Assertions.assertThat(respons.statusCode).isEqualTo(HttpStatus.OK)
-        Assertions.assertThat(respons.body?.status).isEqualTo(Ressurs.Status.SUKSESS)
-        Assertions.assertThat(respons.body?.data?.søkerStønadFra).isEqualTo(søknadSkjema.søkerFra)
-        Assertions.assertThat(respons.body?.data?.søknadsdato).isEqualTo(søknadSkjema.datoMottatt)
+        assertThat(respons.statusCode).isEqualTo(HttpStatus.OK)
+        assertThat(respons.body?.status).isEqualTo(Ressurs.Status.SUKSESS)
+        assertThat(respons.body?.data?.søkerStønadFra).isEqualTo(søknadSkjema.søkerFra)
+        assertThat(respons.body?.data?.søknadsdato).isEqualTo(søknadSkjema.datoMottatt)
     }
 
     private fun hentSøknadData(behandlingId: UUID): ResponseEntity<Ressurs<SøknadDatoerDto>> =
-        restTemplate.exchange(
+        testRestTemplate.exchange(
             localhost("/api/soknad/$behandlingId/datoer"),
             HttpMethod.GET,
             HttpEntity<Ressurs<SøknadDatoerDto>>(headers),

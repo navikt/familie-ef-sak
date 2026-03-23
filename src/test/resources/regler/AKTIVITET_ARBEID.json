@@ -1,5 +1,4 @@
 {
-  "vilkårType" : "AKTIVITET_ARBEID",
   "regler" : {
     "ER_I_ARBEID_ELLER_FORBIGÅENDE_SYKDOM" : {
       "regelId" : "ER_I_ARBEID_ELLER_FORBIGÅENDE_SYKDOM",
@@ -23,5 +22,6 @@
       },
       "versjon" : "GJELDENDE"
     }
-  }
+  },
+  "vilkårType" : "AKTIVITET_ARBEID"
 }

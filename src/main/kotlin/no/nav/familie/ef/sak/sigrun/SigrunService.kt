@@ -49,8 +49,6 @@ fun PensjonsgivendeInntektForSkatteordning.næringsinntekt() = (this.pensjonsgiv
 
 fun PensjonsgivendeInntektVisning.totalInntektOverNull() = (this.næring + this.person + (this.svalbard?.næring ?: 0) + (this.svalbard?.person ?: 0)) > 0
 
-fun List<PensjonsgivendeInntektVisning>.harNæringsinntekt() = this.any { it.totalNæringsinntekt() > 0 }
-
 data class PensjonsgivendeInntektVisning(
     val inntektsår: Int,
     var næring: Int,

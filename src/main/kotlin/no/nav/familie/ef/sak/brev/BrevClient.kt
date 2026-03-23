@@ -1,6 +1,5 @@
 package no.nav.familie.ef.sak.brev
 
-import com.fasterxml.jackson.databind.JsonNode
 import no.nav.familie.ef.sak.blankett.BlankettPdfRequest
 import no.nav.familie.ef.sak.brev.VedtaksbrevService.Companion.BESLUTTER_ENHET_PLACEHOLDER
 import no.nav.familie.ef.sak.brev.VedtaksbrevService.Companion.BESLUTTER_SIGNATUR_PLACEHOLDER
@@ -9,13 +8,13 @@ import no.nav.familie.ef.sak.brev.domain.FRITEKST
 import no.nav.familie.ef.sak.brev.dto.FritekstBrevMedSignaturRequest
 import no.nav.familie.ef.sak.felles.util.medContentTypeJsonUTF8
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
-import no.nav.familie.ef.sak.næringsinntektskontroll.NæringsinntektIngenEndringPdfRequest
-import no.nav.familie.http.client.AbstractPingableRestClient
+import no.nav.familie.restklient.client.AbstractPingableRestClient
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpHeaders
 import org.springframework.stereotype.Component
 import org.springframework.web.client.RestOperations
+import tools.jackson.databind.JsonNode
 import java.net.URI
 
 @Component
@@ -62,11 +61,6 @@ class BrevClient(
     fun genererBlankett(blankettPdfRequest: BlankettPdfRequest): ByteArray {
         val pdfUrl = URI.create("$familieBrevUri/blankett/pdf")
         return postForEntity(pdfUrl, blankettPdfRequest, HttpHeaders().medContentTypeJsonUTF8())
-    }
-
-    fun genererNæringsinntektUtenEndringNotat(næringsinntektIngenEndringPdfRequest: NæringsinntektIngenEndringPdfRequest): ByteArray {
-        val url = URI.create("$familieBrevUri/naeringsinntekt-kontroll/pdf")
-        return postForEntity(url, næringsinntektIngenEndringPdfRequest, HttpHeaders().medContentTypeJsonUTF8())
     }
 
     fun genererFritekstBrev(request: FritekstBrevMedSignaturRequest): ByteArray {

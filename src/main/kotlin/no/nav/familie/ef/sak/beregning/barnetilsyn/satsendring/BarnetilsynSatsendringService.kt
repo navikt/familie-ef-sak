@@ -54,7 +54,7 @@ class BarnetilsynSatsendringService(
 
         val kandidaterMedSkalRevurderesSatt =
             barnetilsynSatsendringKandidat.map {
-                val nåværendeAndelerForNesteÅr = it.andelerEtter(YearMonth.of(YearMonth.now().year, 6))
+                val nåværendeAndelerForNesteÅr = it.andelerEtter(YearMonth.of(YearMonth.now().year, 12))
                 val nyBeregningMånedsperioder = gjørNyBeregning(nåværendeAndelerForNesteÅr, brukIkkeVedtatteSatser)
                 val skalRevurderes: Boolean =
                     finnesStørreBeløpINyBeregning(nyBeregningMånedsperioder, nåværendeAndelerForNesteÅr)

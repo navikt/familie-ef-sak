@@ -14,7 +14,7 @@ interface BarnetilsynSatsendringRepository : RepositoryInterface<BarnetilsynSats
         FROM gjeldende_iverksatte_behandlinger gib
          JOIN tilkjent_ytelse ty ON ty.behandling_id = gib.id
          JOIN andel_tilkjent_ytelse aty ON ty.id = aty.tilkjent_ytelse
-        WHERE aty.stonad_tom >= '2024-01-01' AND gib.stonadstype = 'BARNETILSYN'
+        WHERE aty.stonad_tom >= '2026-01-01' AND gib.stonadstype = 'BARNETILSYN'
         """,
     )
     fun finnSatsendringskandidaterForBarnetilsyn(): List<UUID>

@@ -20,9 +20,9 @@ import no.nav.familie.ef.sak.database.DbContainerInitializer
 import no.nav.familie.ef.sak.fagsak.domain.FagsakDomain
 import no.nav.familie.ef.sak.fagsak.domain.FagsakPerson
 import no.nav.familie.ef.sak.felles.util.TokenUtil
+import no.nav.familie.ef.sak.infrastruktur.config.JsonMapperProvider.jsonMapper
 import no.nav.familie.ef.sak.infrastruktur.config.RolleConfig
 import no.nav.familie.ef.sak.iverksett.oppgaveterminbarn.TerminbarnOppgave
-import no.nav.familie.ef.sak.næringsinntektskontroll.NæringsinntektKontrollDomain
 import no.nav.familie.ef.sak.oppfølgingsoppgave.domain.OppgaverForOpprettelse
 import no.nav.familie.ef.sak.oppgave.Oppgave
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.Grunnlagsdata
@@ -46,16 +46,21 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
+import org.springframework.boot.restclient.RestTemplateBuilder
+import org.springframework.boot.resttestclient.TestRestTemplate
+import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureTestRestTemplate
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.boot.test.web.client.TestRestTemplate
 import org.springframework.boot.test.web.server.LocalServerPort
 import org.springframework.cache.CacheManager
 import org.springframework.context.ApplicationContext
 import org.springframework.data.jdbc.core.JdbcAggregateOperations
 import org.springframework.http.HttpHeaders
+import org.springframework.http.converter.json.JacksonJsonHttpMessageConverter
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.junit.jupiter.SpringExtension
+import org.springframework.web.client.RestOperations
+import org.springframework.web.client.RestTemplate
 
 @ExtendWith(SpringExtension::class)
 @ContextConfiguration(initializers = [DbContainerInitializer::class])
@@ -85,11 +90,22 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
     "mock-medl",
 )
 @EnableMockOAuth2Server
+@AutoConfigureTestRestTemplate
 abstract class OppslagSpringRunnerTest {
     protected final val listAppender = initLoggingEventListAppender()
     protected var loggingEvents: MutableList<ILoggingEvent> = listAppender.list
-    protected val restTemplate = TestRestTemplate()
     protected val headers = HttpHeaders()
+
+    protected val jacksonHttpMessageConverter = JacksonJsonHttpMessageConverter(jsonMapper)
+    protected val restOperations: RestOperations =
+        RestTemplateBuilder()
+            .additionalMessageConverters(listOf(jacksonHttpMessageConverter) + RestTemplate().messageConverters)
+            .build()
+
+    protected val restTemplate = RestTemplateBuilder().additionalMessageConverters(listOf(jacksonHttpMessageConverter) + RestTemplate().messageConverters).build()
+
+    @Autowired
+    protected lateinit var testRestTemplate: TestRestTemplate
 
     @Autowired
     private lateinit var jdbcAggregateOperations: JdbcAggregateOperations
@@ -172,7 +188,6 @@ abstract class OppslagSpringRunnerTest {
             Task::class,
             Migreringsstatus::class,
             OppgaverForOpprettelse::class,
-            NæringsinntektKontrollDomain::class,
         ).forEach { jdbcAggregateOperations.deleteAll(it.java) }
     }
 

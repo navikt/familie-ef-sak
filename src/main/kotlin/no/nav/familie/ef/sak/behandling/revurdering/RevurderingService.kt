@@ -23,13 +23,14 @@ import no.nav.familie.ef.sak.journalføring.dto.VilkårsbehandleNyeBarn
 import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.ef.sak.oppgave.TilordnetRessursService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.secureLogger
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
 import no.nav.familie.ef.sak.vedtak.KopierVedtakService
 import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.ef.sak.vilkår.VurderingService
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.felles.ef.StønadType
-import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.jsonMapper
 import no.nav.familie.leader.LeaderClient
 import no.nav.familie.prosessering.internal.TaskService
 import org.slf4j.LoggerFactory
@@ -98,6 +99,7 @@ class RevurderingService(
                 behandlingsårsak = revurderingDto.behandlingsårsak,
                 kravMottatt = revurderingDto.kravMottatt,
             )
+        secureLogger.info("Revurdering med behandlingId ${revurdering.id} opprettet")
         val forrigeBehandlingId =
             behandlingService.finnSisteIverksatteBehandlingMedEventuellAvslått(fagsak.id)?.id
                 ?: error("Revurdering må ha eksisterende iverksatt behandling")
@@ -125,7 +127,7 @@ class RevurderingService(
 
         val saksbehandler =
             finnSaksbehandlerForRevurdering(erAutomatiskRevurdering)
-
+        secureLogger.info("Skal lagre OpprettOppgaveForOpprettetBehandlingTask for behandling ${revurdering.id}")
         taskService.save(
             OpprettOppgaveForOpprettetBehandlingTask.opprettTask(
                 OpprettOppgaveForOpprettetBehandlingTask.OpprettOppgaveTaskData(
@@ -136,8 +138,10 @@ class RevurderingService(
                 ),
             ),
         )
+        secureLogger.info("Lagret OpprettOppgaveForOpprettetBehandlingTask for behandling ${revurdering.id}")
         if (!erAutomatiskRevurdering) {
             taskService.save(BehandlingsstatistikkTask.opprettPåbegyntTask(behandlingId = revurdering.id))
+            secureLogger.info("Lagret opprettPåbegyntTask for behandlingsstatistikk for behandling ${revurdering.id}")
         }
 
         if (erSatsendring(revurderingDto)) {
@@ -164,24 +168,6 @@ class RevurderingService(
             // HARDKODER midlertidig saksbehandler for automatisk inntektsendring
             false -> SikkerhetContext.hentSaksbehandlerEllerSystembruker()
         }
-
-    @Transactional
-    fun opprettAutomatiskInntektsendringTask(personIdenter: List<String>) {
-        if (LeaderClient.isLeader() != true) {
-            logger.info("Fant ingen leader ved oppretting av automatisk inntektsendring task")
-        }
-
-        personIdenter.take(10).forEach { personIdent ->
-
-            val payload = objectMapper.writeValueAsString(PayloadBehandleAutomatiskInntektsendringTask(personIdent = personIdent, årMåned = YearMonth.now()))
-            val finnesTask = taskService.finnTaskMedPayloadOgType(payload, BehandleAutomatiskInntektsendringTask.TYPE)
-
-            if (finnesTask == null) {
-                val task = BehandleAutomatiskInntektsendringTask.opprettTask(payload)
-                taskService.save(task)
-            }
-        }
-    }
 
     private fun vilkårsbehandleNyeBarn(
         revurdering: Behandling,
@@ -253,8 +239,4 @@ class RevurderingService(
     }
 
     private fun erSatsendring(revurderingDto: RevurderingDto) = revurderingDto.behandlingsårsak == BehandlingÅrsak.SATSENDRING
-
-    companion object {
-        const val GOSYS_MAPPE_ID_INNTEKTSKONTROLL = 63L
-    }
 }

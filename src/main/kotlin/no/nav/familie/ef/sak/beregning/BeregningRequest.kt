@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.beregning
 
+import com.fasterxml.jackson.annotation.JsonProperty
 import no.nav.familie.ef.sak.vedtak.dto.VedtaksperiodeDto
 import no.nav.familie.kontrakter.felles.Månedsperiode
 import java.math.BigDecimal
@@ -17,7 +18,20 @@ data class Inntekt(
     val samordningsfradrag: BigDecimal?,
     val dagsats: BigDecimal? = null,
     val månedsinntekt: BigDecimal? = null,
-)
+) {
+    private fun tilInntektsperiode(): Inntektsperiode =
+        Inntektsperiode(
+            periode = Månedsperiode(årMånedFra, årMånedFra),
+            dagsats = dagsats,
+            månedsinntekt = månedsinntekt,
+            inntekt = forventetInntekt ?: BigDecimal.ZERO,
+            samordningsfradrag = samordningsfradrag ?: BigDecimal.ZERO,
+        )
+
+    @get:JsonProperty
+    val totalinntekt: BigDecimal
+        get() = BeregningUtils.beregnTotalinntekt(tilInntektsperiode())
+}
 
 // TODO Dette er en domeneklasse og burde flyttes til Vedtak.kt.
 data class Inntektsperiode(

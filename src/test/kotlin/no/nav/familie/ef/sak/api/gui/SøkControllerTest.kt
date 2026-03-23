@@ -21,7 +21,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.web.client.exchange
+import org.springframework.boot.resttestclient.exchange
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
@@ -139,7 +139,7 @@ internal class SøkControllerTest : OppslagSpringRunnerTest() {
         }
 
         private fun søkPerson(eksternFagsakId: Long): ResponseEntity<Ressurs<Søkeresultat>> =
-            restTemplate.exchange(
+            testRestTemplate.exchange(
                 localhost("/api/sok/person/fagsak-ekstern/$eksternFagsakId"),
                 HttpMethod.GET,
                 HttpEntity<Any>(headers),
@@ -147,7 +147,7 @@ internal class SøkControllerTest : OppslagSpringRunnerTest() {
     }
 
     private fun søkPerson(personIdent: String): ResponseEntity<Ressurs<Søkeresultat>> =
-        restTemplate.exchange(
+        testRestTemplate.exchange(
             localhost("/api/sok"),
             HttpMethod.POST,
             HttpEntity(PersonIdentDto(personIdent = personIdent), headers),

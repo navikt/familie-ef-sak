@@ -1,6 +1,5 @@
 package no.nav.familie.ef.sak.behandlingsflyt.task
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
@@ -9,9 +8,10 @@ import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandlingsflyt.task.OpprettOppgaveForOpprettetBehandlingTask.OpprettOppgaveTaskData
+import no.nav.familie.ef.sak.infrastruktur.config.readValue
 import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.ef.sak.repository.behandling
-import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.jsonMapper
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.internal.TaskService
 import org.assertj.core.api.Assertions.assertThat
@@ -50,7 +50,7 @@ internal class OpprettOppgaveForOpprettetBehandlingTaskTest {
         )
 
         val opprettetTaskData =
-            objectMapper.readValue<BehandlingsstatistikkTaskPayload>(opprettTaskSlot.captured.payload)
+            jsonMapper.readValue<BehandlingsstatistikkTaskPayload>(opprettTaskSlot.captured.payload)
         assertThat(opprettetTaskData.oppgaveId).isEqualTo(oppgaveId)
 
         verify(exactly = 1) { oppgaveService.opprettOppgave(any(), any(), any(), any(), any()) }
@@ -70,7 +70,7 @@ internal class OpprettOppgaveForOpprettetBehandlingTaskTest {
         )
 
         val opprettetTaskData =
-            objectMapper.readValue<BehandlingsstatistikkTaskPayload>(opprettTaskSlot.captured.payload)
+            jsonMapper.readValue<BehandlingsstatistikkTaskPayload>(opprettTaskSlot.captured.payload)
         assertThat(opprettetTaskData.oppgaveId).isNull()
 
         verify(exactly = 0) { oppgaveService.opprettOppgave(any(), any(), any(), any(), any()) }

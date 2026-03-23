@@ -1,5 +1,4 @@
 {
-  "vilkårType" : "ALENEOMSORG",
   "regler" : {
     "SKRIFTLIG_AVTALE_OM_DELT_BOSTED" : {
       "regelId" : "SKRIFTLIG_AVTALE_OM_DELT_BOSTED",
@@ -63,5 +62,6 @@
       },
       "versjon" : "GJELDENDE"
     }
-  }
+  },
+  "vilkårType" : "ALENEOMSORG"
 }

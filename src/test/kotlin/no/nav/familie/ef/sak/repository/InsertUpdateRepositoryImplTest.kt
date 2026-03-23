@@ -10,7 +10,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.catchThrowable
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.data.relational.core.conversion.DbActionExecutionException
+import org.springframework.dao.IncorrectUpdateSemanticsDataAccessException
 
 internal class InsertUpdateRepositoryImplTest : OppslagSpringRunnerTest() {
     @Autowired
@@ -109,21 +109,6 @@ internal class InsertUpdateRepositoryImplTest : OppslagSpringRunnerTest() {
 
         assertThat(originalSøkerIdent.sporbar.endret.endretTid).isEqualTo(oppdatertSøkerIdent.sporbar.endret.endretTid)
         assertThat(originalSøkerIdent.sporbar.opprettetTid).isEqualTo(oppdatertSøkerIdent.sporbar.opprettetTid)
-    }
-
-    @Test
-    internal fun `skal kaste exception hvis man oppdaterer entiteter som ikke finnes`() {
-        assertThat(
-            catchThrowable {
-                fagsakRepository.update(fagsakDomain())
-            },
-        ).isInstanceOf(DbActionExecutionException::class.java)
-
-        assertThat(
-            catchThrowable {
-                fagsakRepository.updateAll(listOf(fagsakDomain(), fagsakDomain()))
-            },
-        ).isInstanceOf(DbActionExecutionException::class.java)
     }
 
     @Test

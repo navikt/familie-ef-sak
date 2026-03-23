@@ -208,7 +208,7 @@ data class Inntekt(
     val opptjeningsperiodeFom: LocalDate?,
     val opptjeningsperiodeTom: LocalDate?,
     val tilleggsinformasjon: Tilleggsinformasjon?,
-    val manuellVurdering: Boolean,
+    val manuellVurdering: Boolean = false,
     val antall: Int?,
     val skattemessigBosattLand: String?,
     val opptjeningsland: String?,
