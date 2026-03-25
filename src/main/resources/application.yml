@@ -376,6 +376,8 @@ prosessering:
       weeks: 16
 
 springdoc:
+  api-docs:
+    enabled: true
   swagger-ui:
     enabled: true
     oauth:
