@@ -25,6 +25,7 @@ import no.nav.familie.ef.sak.journalføring.dto.VilkårsbehandleNyeBarn
 import no.nav.familie.ef.sak.journalføring.dto.valider
 import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.secureLogger
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
 import no.nav.familie.ef.sak.vilkår.VurderingService
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
@@ -54,6 +55,8 @@ class JournalføringService(
     private val infotrygdPeriodeValideringService: InfotrygdPeriodeValideringService,
 ) {
     private val logger = LoggerFactory.getLogger(javaClass)
+    private val secureLogger = LoggerFactory.getLogger("secureLogger")
+
 
     @Transactional
     fun fullførJournalpostV2(
@@ -326,6 +329,7 @@ class JournalføringService(
         when (fagsak.stønadstype) {
             StønadType.OVERGANGSSTØNAD -> {
                 val søknad = journalpostService.hentSøknadFraJournalpostForOvergangsstønad(journalpost)
+                secureLogger.info("JournalføringService.kt -- Søknad ETTER hentSøknadFraJournalPostForOvergangsstønad: $søknad")
                 søknadService.lagreSøknadForOvergangsstønad(søknad, behandlingId, fagsak.id, journalpost.journalpostId)
             }
 

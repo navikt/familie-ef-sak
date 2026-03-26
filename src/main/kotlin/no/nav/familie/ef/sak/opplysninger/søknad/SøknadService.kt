@@ -28,6 +28,7 @@ class SøknadService(
     private val søknadBarnetilsynRepository: SøknadBarnetilsynRepository,
 ) {
     private val logger = LoggerFactory.getLogger(javaClass)
+    private val secureLogger = LoggerFactory.getLogger("secureLogger")
 
     fun hentSøknadsgrunnlag(behandlingId: UUID): Søknadsverdier? {
         val søknad = hentSøknad(behandlingId) ?: return null
@@ -84,7 +85,9 @@ class SøknadService(
         fagsakId: UUID,
         journalpostId: String,
     ) {
+        secureLogger.info("SøknadService.kt -- søknad FØR mapping er: $søknad")
         val søknadsskjema = SøknadsskjemaMapper.tilDomene(søknad)
+        secureLogger.info("SøknadService.kt -- søknadsskjema ETTER mapping er: $søknadsskjema")
         søknadOvergangsstønadRepository.insert(søknadsskjema)
         søknadRepository.insert(SøknadMapper.toDomain(journalpostId, søknadsskjema, behandlingId))
     }
