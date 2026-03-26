@@ -23,6 +23,7 @@ import no.nav.familie.kontrakter.felles.journalpost.Journalpost
 import no.nav.familie.kontrakter.felles.journalpost.JournalposterForBrukerRequest
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.log.NavHttpHeaders
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus.BAD_REQUEST
@@ -91,7 +92,7 @@ class JournalpostClient(
             UriComponentsBuilder
                 .fromUriString(
                     "$journalpostURI/hentdokument/" +
-                        "$journalpostId/$dokumentInfoId",
+                            "$journalpostId/$dokumentInfoId",
                 ).queryParam("variantFormat", dokumentVariantformat)
                 .build()
                 .toUri(),
@@ -103,7 +104,12 @@ class JournalpostClient(
         dokumentInfoId: String,
     ): SøknadOvergangsstønad {
         val data = getForEntity<Ressurs<ByteArray>>(jsonDokumentUri(journalpostId, dokumentInfoId)).getDataOrThrow()
-        return objectMapper.readValue(data)
+        secureLogger.info("ByteArray fra hentOvergangsstønadSøknad er: ${data.contentToString()} MED GIMMICK")
+        secureLogger.info("ByteArray fra hentOvergangsstønadSøknad er: ${data}")
+
+        val mappedVerdi = objectMapper.readValue<SøknadOvergangsstønad>(data)
+        secureLogger.info("ByteArray ETTER object mapper er: $mappedVerdi")
+        return mappedVerdi
     }
 
     fun hentBarnetilsynSøknad(
