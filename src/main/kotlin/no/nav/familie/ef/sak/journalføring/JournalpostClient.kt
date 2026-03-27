@@ -104,9 +104,7 @@ class JournalpostClient(
         dokumentInfoId: String,
     ): SøknadOvergangsstønad {
         val data = getForEntity<Ressurs<ByteArray>>(jsonDokumentUri(journalpostId, dokumentInfoId)).getDataOrThrow()
-        secureLogger.info("ByteArray fra hentOvergangsstønadSøknad er: ${data.contentToString()} MED GIMMICK")
-        secureLogger.info("ByteArray fra hentOvergangsstønadSøknad er: ${data}")
-
+        secureLogger.info("ByteArray fra hentOvergangsstønadSøknad er: ${data.decodeToString()}")
         val mappedVerdi = objectMapper.readValue<SøknadOvergangsstønad>(data)
         secureLogger.info("ByteArray ETTER object mapper er: $mappedVerdi")
         return mappedVerdi
