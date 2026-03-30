@@ -11,6 +11,7 @@ import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerService
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
 import no.nav.familie.ef.sak.vedtak.VedtakRepository
 import no.nav.familie.ef.sak.vedtak.domain.Vedtak
@@ -27,6 +28,7 @@ import no.nav.familie.kontrakter.felles.ef.StønadType.OVERGANGSSTØNAD
 import no.nav.familie.kontrakter.felles.ef.StønadType.SKOLEPENGER
 import no.nav.familie.kontrakter.felles.jsonMapper
 import no.nav.familie.kontrakter.felles.oppgave.Oppgave
+import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
@@ -50,6 +52,7 @@ class BehandlingsstatistikkTask(
     private val oppgaveService: OppgaveService,
     private val grunnlagsdataService: GrunnlagsdataService,
     private val årsakRevurderingService: ÅrsakRevurderingService,
+    private val personopplysningerService: PersonopplysningerService,
 ) : AsyncTaskStep {
     private val zoneIdOslo = ZoneId.of("Europe/Oslo")
 
@@ -64,7 +67,20 @@ class BehandlingsstatistikkTask(
         val vedtak = vedtakRepository.findByIdOrNull(behandlingId)
 
         val resultatBegrunnelse = finnResultatBegrunnelse(hendelse, vedtak, saksbehandling)
-        val søker = grunnlagsdataService.hentGrunnlagsdata(behandlingId).grunnlagsdata.søker
+
+        val erStrengtFortrolig: Boolean =
+            try {
+                val søker = grunnlagsdataService.hentGrunnlagsdata(behandlingId).grunnlagsdata.søker
+                søker.adressebeskyttelse?.erStrengtFortrolig() ?: false
+            } catch (e: IllegalStateException) {
+                if (saksbehandling.resultat == BehandlingResultat.HENLAGT && e.message?.contains("Finner ikke Grunnlagsdata ") == true) {
+                    val beskyttelse = personopplysningerService.hentStrengesteAdressebeskyttelseForPersonMedRelasjoner(saksbehandling.ident)
+                    beskyttelse.erStrengtFortrolig()
+                }else{
+                    throw e
+                }
+            }
+
         val henvendelseTidspunkt = finnHenvendelsestidspunkt(saksbehandling)
         val relatertEksternBehandlingId =
             saksbehandling.forrigeBehandlingId?.let { behandlingService.hentBehandling(it).eksternId }
@@ -95,7 +111,7 @@ class BehandlingsstatistikkTask(
                 resultatBegrunnelse = resultatBegrunnelse,
                 opprettetEnhet = sisteOppgaveForBehandling?.opprettetAvEnhetsnr ?: FELLES_ENHET,
                 ansvarligEnhet = sisteOppgaveForBehandling?.tildeltEnhetsnr ?: FELLES_ENHET,
-                strengtFortroligAdresse = søker.adressebeskyttelse?.erStrengtFortrolig() ?: false,
+                strengtFortroligAdresse = erStrengtFortrolig,
                 stønadstype = saksbehandling.stønadstype,
                 behandlingstype = BehandlingType.valueOf(saksbehandling.type.name),
                 henvendelseTidspunkt = henvendelseTidspunkt.atZone(zoneIdOslo),
@@ -300,6 +316,11 @@ class BehandlingsstatistikkTask(
         const val TYPE = "behandlingsstatistikkTask"
         const val FELLES_ENHET = "4489"
     }
+}
+
+private fun ADRESSEBESKYTTELSEGRADERING.erStrengtFortrolig(): Boolean {
+    return this == ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG ||
+        this == ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG_UTLAND
 }
 
 data class BehandlingsstatistikkTaskPayload(
