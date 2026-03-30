@@ -76,7 +76,7 @@ class BehandlingsstatistikkTask(
                 if (saksbehandling.resultat == BehandlingResultat.HENLAGT && e.message?.contains("Finner ikke Grunnlagsdata ") == true) {
                     val beskyttelse = personopplysningerService.hentStrengesteAdressebeskyttelseForPersonMedRelasjoner(saksbehandling.ident)
                     beskyttelse.erStrengtFortrolig()
-                }else{
+                } else {
                     throw e
                 }
             }
@@ -318,10 +318,9 @@ class BehandlingsstatistikkTask(
     }
 }
 
-private fun ADRESSEBESKYTTELSEGRADERING.erStrengtFortrolig(): Boolean {
-    return this == ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG ||
+private fun ADRESSEBESKYTTELSEGRADERING.erStrengtFortrolig(): Boolean =
+    this == ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG ||
         this == ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG_UTLAND
-}
 
 data class BehandlingsstatistikkTaskPayload(
     val behandlingId: UUID,
