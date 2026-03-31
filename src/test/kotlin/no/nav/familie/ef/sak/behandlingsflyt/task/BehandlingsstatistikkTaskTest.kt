@@ -13,6 +13,7 @@ import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.GrunnlagsdataMedMetadata
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
 import no.nav.familie.ef.sak.repository.behandling
@@ -36,6 +37,7 @@ import no.nav.familie.kontrakter.ef.iverksett.ÅrsakRevurderingDto
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.kontrakter.felles.jsonMapper
 import no.nav.familie.kontrakter.felles.oppgave.Oppgave
+import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING
 import no.nav.familie.prosessering.domene.Task
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
@@ -102,6 +104,7 @@ internal class BehandlingsstatistikkTaskTest {
     val vedtakRepository = mockk<VedtakRepository>()
     val oppgaveService = mockk<OppgaveService>()
     val årsakRevurderingService = mockk<ÅrsakRevurderingService>()
+    val personopplysningerService = mockk<PersonopplysningerService>()
 
     val behandlingsstatistikkTask =
         BehandlingsstatistikkTask(
@@ -112,6 +115,7 @@ internal class BehandlingsstatistikkTaskTest {
             oppgaveService = oppgaveService,
             grunnlagsdataService = grunnlagsdataService,
             årsakRevurderingService = årsakRevurderingService,
+            personopplysningerService = personopplysningerService,
         )
 
     @BeforeEach
@@ -134,6 +138,31 @@ internal class BehandlingsstatistikkTaskTest {
         every { oppgaveMock.opprettetAvEnhetsnr } returns opprettetEnhet
         every { grunnlagsdataMock.grunnlagsdata.søker.adressebeskyttelse } returns null
         every { årsakRevurderingService.hentÅrsakRevurdering(behandling.id) } returns årsakRevurdering()
+    }
+
+    @Test
+    internal fun `skal sende informasjon om strengt fortrolig også på henlagte saker uten grunnlagsdata - hentes fra pdl`() {
+        val behandlingsstatistikkSlot = slot<BehandlingsstatistikkDto>()
+
+        every { behandlingService.hentSaksbehandling(behandling.id) } returns saksbehandling.copy(resultat = BehandlingResultat.HENLAGT)
+        every { grunnlagsdataService.hentGrunnlagsdata(any()) } throws IllegalStateException("Finner ikke Grunnlagsdata med .... osv")
+
+        every { personopplysningerService.hentStrengesteAdressebeskyttelseForPersonMedRelasjoner(any()) } returns ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG
+        every { søknadService.finnDatoMottattForSøknad(any()) } returns null
+
+        every { iverksettClient.sendBehandlingsstatistikk(capture(behandlingsstatistikkSlot)) } just Runs
+
+        val task =
+            Task(
+                type = "behandlingsstatistikkTask",
+                payload = jsonMapper.writeValueAsString(payload),
+            )
+
+        behandlingsstatistikkTask.doTask(task)
+
+        val behandlingsstatistikk = behandlingsstatistikkSlot.captured
+
+        assertThat(behandlingsstatistikk.strengtFortroligAdresse).isEqualTo(true)
     }
 
     @Test
