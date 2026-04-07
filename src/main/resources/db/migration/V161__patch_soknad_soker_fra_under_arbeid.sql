@@ -1,0 +1,15 @@
+UPDATE soknadsskjema SET soker_fra = '2025-06-01' WHERE id = 'f147f1fa-febf-42e1-abf1-759dd7171de0' AND soker_fra = '2025-07-01';
+UPDATE soknadsskjema SET soker_fra = '2026-06-01' WHERE id = '3b63361d-c0a2-4c89-bb70-504f0cf0cd95' AND soker_fra = '2026-07-01';
+UPDATE soknadsskjema SET soker_fra = '2026-02-01' WHERE id = 'ef33ef92-bf69-4312-bdfe-02d5bc2275ac' AND soker_fra = '2026-03-01';
+UPDATE soknadsskjema SET soker_fra = '2025-08-01' WHERE id = '5f20c8ff-7691-4e74-b17d-f49a5aae0131' AND soker_fra = '2025-09-01';
+UPDATE soknadsskjema SET soker_fra = '2026-03-01' WHERE id = 'dc4dfeaa-6723-4917-96d2-fbe2e87ed49d' AND soker_fra = '2026-04-01';
+UPDATE soknadsskjema SET soker_fra = '2023-05-01' WHERE id = 'cbb43a08-f533-48b5-b25a-41418f6d0968' AND soker_fra = '2023-06-01';
+UPDATE soknadsskjema SET soker_fra = '2026-04-01' WHERE id = 'e5525e1a-d531-44f0-8f35-e65e2432d424' AND soker_fra = '2026-05-01';
+UPDATE soknadsskjema SET soker_fra = '2026-03-01' WHERE id = '6a5d5f47-7c7f-47a4-8434-d691e1bfdf36' AND soker_fra = '2026-04-01';
+UPDATE soknadsskjema SET soker_fra = '2026-04-01' WHERE id = 'f4f75d9b-d349-4519-be73-f92e26b7ade1' AND soker_fra = '2026-05-01';
+UPDATE soknadsskjema SET soker_fra = '2026-02-01' WHERE id = '43dff1f5-40f9-44a9-a0d2-956c6cd0f411' AND soker_fra = '2026-03-01';
+UPDATE soknadsskjema SET soker_fra = '2026-03-01' WHERE id = '0ffa4cc3-3aa9-429d-86ee-079744a73af7' AND soker_fra = '2026-04-01';
+UPDATE soknadsskjema SET soker_fra = '2026-04-01' WHERE id = 'f96d9b69-b944-4afa-b2c8-bd26987f19ed' AND soker_fra = '2026-05-01';
+UPDATE soknadsskjema SET soker_fra = '2026-03-01' WHERE id = '821fc137-82b9-4c01-b1ad-f56b126b62b9' AND soker_fra = '2026-04-01';
+UPDATE soknadsskjema SET soker_fra = '2026-01-01' WHERE id = 'd0bc6866-2b05-4ed3-9f2e-ece54757873f' AND soker_fra = '2026-02-01';
+UPDATE soknadsskjema SET soker_fra = '2026-03-01' WHERE id = '3b9f99c0-8d88-4a31-9358-36b8cb4168b3' AND soker_fra = '2026-04-01';
