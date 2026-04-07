@@ -91,6 +91,7 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
             DokumentTilStringConverter(),
             StringTilDokumentConverter(),
             StringTilYearMonthConverter(),
+            YearMonthTilStringConverter(),
             PropertiesWrapperTilStringConverter(),
             StringTilPropertiesWrapperConverter(),
             PGobjectTilDelvilkårConverter(),
@@ -135,6 +136,11 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
     @ReadingConverter
     class StringTilYearMonthConverter : Converter<String, YearMonth> {
         override fun convert(string: String): YearMonth = YearMonth.parse(string)
+    }
+
+    @WritingConverter
+    class YearMonthTilStringConverter : Converter<YearMonth, String> {
+        override fun convert(yearMonth: YearMonth): String = yearMonth.toString()
     }
 
     @WritingConverter
