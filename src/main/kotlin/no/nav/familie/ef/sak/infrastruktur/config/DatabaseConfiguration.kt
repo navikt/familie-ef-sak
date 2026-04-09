@@ -163,8 +163,6 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
         override fun convert(s: String): Dokumentasjon = jsonMapper.readValue(s, Dokumentasjon::class.java)
     }
 
-
-
     @ReadingConverter
     class PGobjectTilDelvilkårConverter : Converter<PGobject, DelvilkårsvurderingWrapper> {
         override fun convert(pGobject: PGobject): DelvilkårsvurderingWrapper = DelvilkårsvurderingWrapper(pGobject.value?.let { jsonMapper.readValue(it) } ?: emptyList())
