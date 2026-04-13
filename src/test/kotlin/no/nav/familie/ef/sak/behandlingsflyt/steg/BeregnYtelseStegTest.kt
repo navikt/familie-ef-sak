@@ -191,12 +191,6 @@ internal class BeregnYtelseStegTest {
         }
 
         @Test
-        internal fun `innvilget - skal kaste feil når man sender inn uten nye beløpsperioder`() {
-            every { beregningService.beregnYtelse(any(), any()) } returns emptyList()
-            assertThrows<ApiFeil> { utførSteg(BehandlingType.REVURDERING) }
-        }
-
-        @Test
         internal fun `førstegangsbehandling - happy case`() {
             every { beregningService.beregnYtelse(any(), any()) } returns
                 listOf(

@@ -386,7 +386,6 @@ class BeregnYtelseSteg(
 
         val andelerTilkjentYtelse: List<AndelTilkjentYtelse> =
             lagBeløpsperioderForInnvilgelseOvergangsstønad(vedtak, saksbehandling)
-        brukerfeilHvis(andelerTilkjentYtelse.isEmpty()) { "Innvilget vedtak må ha minimum en beløpsperiode" }
 
         val (nyeAndeler, startdato) =
             when (saksbehandling.type) {
