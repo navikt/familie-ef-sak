@@ -221,11 +221,6 @@ class BeregnYtelseSteg(
         data: VedtakDto,
     ) {
         if (data is InnvilgelseOvergangsstønad) {
-            val harOpphørsperioder = data.perioder.any { it.periodeType == VedtaksperiodeType.MIDLERTIDIG_OPPHØR }
-            val harInnvilgedePerioder = data.perioder.any { !it.erMidlertidigOpphørEllerSanksjon() }
-            brukerfeilHvis(harOpphørsperioder && !harInnvilgedePerioder) {
-                "Må ha innvilgelsesperioder i tillegg til opphørsperioder"
-            }
             brukerfeilHvis(
                 !saksbehandling.erMigrering &&
                     !saksbehandling.erOmregning &&

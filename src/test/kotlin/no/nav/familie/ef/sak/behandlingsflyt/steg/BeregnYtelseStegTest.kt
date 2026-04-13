@@ -1081,24 +1081,6 @@ internal class BeregnYtelseStegTest {
         }
 
         @Test
-        internal fun `kan ikke innvilge med opphør, uten opphørsperioder`() {
-            val opphørFom = YearMonth.of(2021, 1)
-            val andelFom = YearMonth.of(2021, 6).atDay(1)
-            val andelTom = YearMonth.of(2021, 6).atEndOfMonth()
-
-            every { tilkjentYtelseService.hentForBehandling(any()) } returns
-                lagTilkjentYtelse(listOf(lagAndelTilkjentYtelse(100, andelFom, andelTom)))
-
-            assertThatThrownBy {
-                utførSteg(
-                    BehandlingType.REVURDERING,
-                    innvilget(listOf(opphørsperiode(opphørFom, opphørFom)), listOf(inntekt(opphørFom))),
-                    forrigeBehandlingId = UUID.randomUUID(),
-                )
-            }.hasMessageContaining("Må ha innvilgelsesperioder i tillegg til opphørsperioder")
-        }
-
-        @Test
         internal fun `kan ikke innvilge med opphør før innvilget perioder når man ikke har tidligere behandling`() {
             val opphørFom = YearMonth.of(2021, 1)
             val innvilgetMåned = opphørFom.plusMonths(1)
