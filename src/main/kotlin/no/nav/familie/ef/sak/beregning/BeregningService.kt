@@ -34,6 +34,7 @@ class BeregningService(
     }
 
     private fun validerVedtaksperioder(vedtaksperioder: List<Månedsperiode>) {
+        if(vedtaksperioder.isEmpty()) return
         brukerfeilHvis(
             vedtaksperioder.harOverlappende(),
         ) { "Vedtaksperioder $vedtaksperioder overlapper" }
@@ -43,6 +44,7 @@ class BeregningService(
         inntektsperioder: List<Inntektsperiode>,
         vedtaksperioder: List<Månedsperiode>,
     ) {
+        if(vedtaksperioder.isEmpty()) return
         brukerfeilHvis(inntektsperioder.isEmpty()) {
             "Inntektsperioder kan ikke være tom liste"
         }
