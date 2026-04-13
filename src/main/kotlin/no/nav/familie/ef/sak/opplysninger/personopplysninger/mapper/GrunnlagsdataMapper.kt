@@ -33,7 +33,7 @@ object GrunnlagsdataMapper {
         pdlPersonForelderBarn: PdlPersonForelderBarn,
         personIdent: String,
     ) = BarnMedIdent(
-        fødsel = mapFødsel(pdlPersonForelderBarn.fødselsdato.first(), pdlPersonForelderBarn.fødested.first()),
+        fødsel = mapFødsel(pdlPersonForelderBarn.fødselsdato.firstOrNull(), pdlPersonForelderBarn.fødested.firstOrNull()),
         adressebeskyttelse = pdlPersonForelderBarn.adressebeskyttelse,
         navn = pdlPersonForelderBarn.navn.gjeldende(),
         bostedsadresse = pdlPersonForelderBarn.bostedsadresse,
