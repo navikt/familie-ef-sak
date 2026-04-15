@@ -108,6 +108,7 @@ internal class BeregnYtelseStegTest {
             fagsakService,
             validerOmregningService,
             oppfølgingsoppgaveService,
+            featureToggleService,
         )
 
     private val slot = slot<TilkjentYtelse>()
@@ -116,6 +117,7 @@ internal class BeregnYtelseStegTest {
     internal fun setUp() {
         every { featureToggleService.isEnabled(Toggle.SATSENDRING_BRUK_IKKE_VEDTATT_MAXSATS) } returns false
         every { featureToggleService.isEnabled(any()) } returns true
+        every { featureToggleService.isEnabled(Toggle.INNVILGE_KUN_OPPHØR_OG_SANKSJON) } returns false
         every { fagsakService.fagsakMedOppdatertPersonIdent(any()) } returns fagsak(fagsakpersoner(setOf("123")))
         every { simuleringService.hentOgLagreSimuleringsresultat(any()) }
             .returns(

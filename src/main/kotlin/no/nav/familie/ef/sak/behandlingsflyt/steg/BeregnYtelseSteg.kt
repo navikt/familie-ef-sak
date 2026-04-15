@@ -14,6 +14,8 @@ import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.felles.util.min
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.ef.sak.oppfølgingsoppgave.OppfølgingsoppgaveService
 import no.nav.familie.ef.sak.simulering.SimuleringService
 import no.nav.familie.ef.sak.tilbakekreving.TilbakekrevingService
@@ -64,6 +66,7 @@ class BeregnYtelseSteg(
     private val fagsakService: FagsakService,
     private val validerOmregningService: ValiderOmregningService,
     private val oppfølgingsoppgaveService: OppfølgingsoppgaveService,
+    private val featureToggleService: FeatureToggleService,
 ) : BehandlingSteg<VedtakDto> {
     private val logger = LoggerFactory.getLogger(javaClass)
     private val midlertidigOpphørFeilmelding = "Kan ikke starte vedtaket med opphørsperiode for en førstegangsbehandling"
@@ -223,8 +226,17 @@ class BeregnYtelseSteg(
         if (data is InnvilgelseOvergangsstønad) {
             val harOpphørsperioder = data.perioder.any { it.periodeType == VedtaksperiodeType.MIDLERTIDIG_OPPHØR }
             val harInnvilgedePerioder = data.perioder.any { !it.erMidlertidigOpphørEllerSanksjon() }
-            brukerfeilHvis(harOpphørsperioder && !harInnvilgedePerioder) {
-                "Må ha innvilgelsesperioder i tillegg til opphørsperioder"
+
+            if (featureToggleService.isEnabled(Toggle.INNVILGE_KUN_OPPHØR_OG_SANKSJON)) {
+                val harKunOpphørsperioderOgSanksjon = data.perioder.all { it.erMidlertidigOpphørEllerSanksjon() }
+                logger.warn("NB! Validerer ikke perioder for innvilgelse grunnet toggle innvilge kun opphør og sanksjon")
+                brukerfeilHvis(!harKunOpphørsperioderOgSanksjon) {
+                    "Må kun ha opphørsperioder og sanksjon"
+                }
+            } else {
+                brukerfeilHvis(harOpphørsperioder && !harInnvilgedePerioder) {
+                    "Må ha innvilgelsesperioder i tillegg til opphørsperioder"
+                }
             }
             brukerfeilHvis(
                 !saksbehandling.erMigrering &&
