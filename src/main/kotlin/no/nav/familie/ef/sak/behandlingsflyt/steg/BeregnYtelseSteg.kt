@@ -744,7 +744,11 @@ class BeregnYtelseSteg(
                 forrigeTilkjenteYtelse.andelerTilkjentYtelse,
                 listOf(vedtak.periode.tilPeriode()),
             )
-        brukerfeilHvis(andelerTilkjentYtelse.isEmpty()) { "Innvilget vedtak må ha minimum en beløpsperiode" }
+        if (featureToggleService.isEnabled(Toggle.INNVILGE_KUN_OPPHØR_OG_SANKSJON)) {
+            logger.warn("NB! Krever ikke beløpsperiode for sanksjonert revurdering grunnet toggle innvilge kun opphør og sanksjon")
+        } else {
+            brukerfeilHvis(andelerTilkjentYtelse.isEmpty()) { "Innvilget vedtak må ha minimum en beløpsperiode" }
+        }
         return andelerTilkjentYtelse
     }
 
