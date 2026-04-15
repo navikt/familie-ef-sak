@@ -403,8 +403,12 @@ class BeregnYtelseSteg(
 
         val andelerTilkjentYtelse: List<AndelTilkjentYtelse> =
             lagBeløpsperioderForInnvilgelseOvergangsstønad(vedtak, saksbehandling)
-        brukerfeilHvis(andelerTilkjentYtelse.isEmpty()) { "Innvilget vedtak må ha minimum en beløpsperiode" }
 
+        if (featureToggleService.isEnabled(Toggle.INNVILGE_KUN_OPPHØR_OG_SANKSJON)) {
+            logger.warn("NB! Krever ikke beløpsperiode for innvilgelse grunnet toggle innvilge kun opphør og sanksjon")
+        } else {
+            brukerfeilHvis(andelerTilkjentYtelse.isEmpty()) { "Innvilget vedtak må ha minimum en beløpsperiode" }
+        }
         val (nyeAndeler, startdato) =
             when (saksbehandling.type) {
                 FØRSTEGANGSBEHANDLING -> {
