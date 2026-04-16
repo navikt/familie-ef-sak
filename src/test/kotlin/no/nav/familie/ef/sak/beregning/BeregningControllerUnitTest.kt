@@ -3,6 +3,7 @@ package no.nav.familie.ef.sak.beregning
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.repository.vedtaksperiodeDto
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.ef.sak.vedtak.VedtakService
@@ -25,11 +26,12 @@ import java.util.UUID
 
 internal class BeregningControllerUnitTest {
     val tilkjentytelseService = mockk<TilkjentYtelseService>()
+    val featureToggleService = mockk<FeatureToggleService>(relaxed = true)
     val vedtakService = mockk<VedtakService>()
 
     val beregningController =
         BeregningController(
-            beregningService = BeregningService(tilkjentytelseService),
+            beregningService = BeregningService(tilkjentytelseService, featureToggleService),
             tilgangService = mockk(relaxed = true),
             vedtakService = vedtakService,
         )
