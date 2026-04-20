@@ -1,12 +1,15 @@
 package no.nav.familie.ef.sak.beregning
 
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.ef.sak.tilkjentytelse.tilBeløpsperiode
 import no.nav.familie.ef.sak.vedtak.domain.Vedtak
 import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.kontrakter.felles.erSammenhengende
 import no.nav.familie.kontrakter.felles.harOverlappende
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
 import java.math.RoundingMode
@@ -15,7 +18,10 @@ import java.util.UUID
 @Service
 class BeregningService(
     val tilkjentYtelseService: TilkjentYtelseService,
+    val featureToggleService: FeatureToggleService,
 ) {
+    private val secureLogger = LoggerFactory.getLogger("secureLogger")
+
     fun beregnYtelse(
         vedtaksperioder: List<Månedsperiode>,
         inntektsperioder: List<Inntektsperiode>,
@@ -34,6 +40,10 @@ class BeregningService(
     }
 
     private fun validerVedtaksperioder(vedtaksperioder: List<Månedsperiode>) {
+        if (featureToggleService.isEnabled(Toggle.INNVILGE_KUN_OPPHØR_OG_SANKSJON)) {
+            secureLogger.warn("Validerer ikke inntektsperioder/vedtaksperioder fordi toggle innvilge kun opphør og sanksjon er på for saksbehandler")
+            return
+        }
         brukerfeilHvis(
             vedtaksperioder.harOverlappende(),
         ) { "Vedtaksperioder $vedtaksperioder overlapper" }
@@ -43,6 +53,10 @@ class BeregningService(
         inntektsperioder: List<Inntektsperiode>,
         vedtaksperioder: List<Månedsperiode>,
     ) {
+        if (featureToggleService.isEnabled(Toggle.INNVILGE_KUN_OPPHØR_OG_SANKSJON)) {
+            secureLogger.warn("Validerer ikke inntektsperioder/vedtaksperioder fordi toggle innvilge kun opphør og sanksjon er på for saksbehandler")
+            return
+        }
         brukerfeilHvis(inntektsperioder.isEmpty()) {
             "Inntektsperioder kan ikke være tom liste"
         }
