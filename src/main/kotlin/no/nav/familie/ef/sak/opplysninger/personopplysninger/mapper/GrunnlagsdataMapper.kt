@@ -33,7 +33,7 @@ object GrunnlagsdataMapper {
         pdlPersonForelderBarn: PdlPersonForelderBarn,
         personIdent: String,
     ) = BarnMedIdent(
-        fødsel = mapFødsel(pdlPersonForelderBarn.fødselsdato.first(), pdlPersonForelderBarn.fødested.first()),
+        fødsel = mapFødsel(pdlPersonForelderBarn.fødselsdato.firstOrNull(), pdlPersonForelderBarn.fødested.firstOrNull()),
         adressebeskyttelse = pdlPersonForelderBarn.adressebeskyttelse,
         navn = pdlPersonForelderBarn.navn.gjeldende(),
         bostedsadresse = pdlPersonForelderBarn.bostedsadresse,
@@ -75,7 +75,7 @@ object GrunnlagsdataMapper {
         dødsfall = pdlSøker.dødsfall.gjeldende(),
         forelderBarnRelasjon = pdlSøker.forelderBarnRelasjon.mapForelderBarnRelasjon(),
         fullmakt = mapFullmakt(pdlSøker, andrePersoner),
-        fødsel = mapFødsel(pdlSøker.fødselsdato.first(), pdlSøker.fødested.first()),
+        fødsel = mapFødsel(pdlSøker.fødselsdato.firstOrNull(), pdlSøker.fødested.firstOrNull()),
         folkeregisterpersonstatus = pdlSøker.folkeregisterpersonstatus,
         innflyttingTilNorge = pdlSøker.innflyttingTilNorge,
         kjønn = pdlSøker.kjønn.firstOrNull()?.kjønn ?: KjønnType.UKJENT,
