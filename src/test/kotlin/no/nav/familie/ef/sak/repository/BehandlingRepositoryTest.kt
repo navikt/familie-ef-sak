@@ -51,6 +51,7 @@ import org.postgresql.util.PSQLException
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.dao.DuplicateKeyException
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.UUID
@@ -131,6 +132,39 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
         val resultat = behandlingRepository.finnFerdigstilteBehandlingerMedUtdatertGBelopSomMåBehandlesManuelt(Grunnbeløpsperioder.nyesteGrunnbeløp.periode.fomDato)
 
         assertThat(resultat.size).isEqualTo(1)
+    }
+
+    @Test
+    fun `skal ikke anse behandling som utdatert når grunnbeløpsmåned er lik gjeldende grunnbeløp-dato`() {
+        val fagsak = testoppsettService.lagreFagsak(fagsak())
+        val behandling =
+            behandlingRepository.insert(
+                behandling(
+                    fagsak,
+                    resultat = INNVILGET,
+                    status = FERDIGSTILT,
+                ),
+            )
+        val stønadFom = LocalDate.now().minusMonths(3)
+        val stønadTom = LocalDate.now().plusMonths(2)
+        val aty = lagAndelTilkjentYtelse(10000, stønadFom, stønadTom, kildeBehandlingId = behandling.id)
+        // grunnbeløpsmåned = nyesteGrunnbeløp.fom lagres som VARCHAR (f.eks. '2025-05').
+        // Med LocalDate-parameter (fomDato = '2025-05-01'): strengsammenligning '2025-05' < '2025-05-01' = TRUE (feil).
+        // Testen skal feile inntil parameteren er endret til YearMonth.
+        val ty =
+            lagTilkjentYtelse(
+                listOf(aty),
+                behandlingId = behandling.id,
+                grunnbeløpsmåned = Grunnbeløpsperioder.nyesteGrunnbeløp.periode.fom,
+            )
+        tilkjentYtelseRepository.insert(ty)
+
+        val resultat =
+            behandlingRepository.finnFerdigstilteBehandlingerMedUtdatertGBelopSomMåBehandlesManuelt(
+                Grunnbeløpsperioder.nyesteGrunnbeløp.periode.fomDato,
+            )
+
+        assertThat(resultat).isEmpty()
     }
 
     private fun lagrePersonMedVedtak(
