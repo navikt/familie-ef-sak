@@ -137,6 +137,32 @@ internal class FagsakRepositoryTest : OppslagSpringRunnerTest() {
         }
 
         @Test
+        fun `skal ikke anse fagsak som utdatert når grunnbeløpsmåned er lik gjeldende grunnbeløp-dato`() {
+            val fagsak = testoppsettService.lagreFagsak(fagsak())
+            val behandling =
+                behandlingRepository.insert(
+                    behandling(
+                        fagsak,
+                        status = BehandlingStatus.FERDIGSTILT,
+                        resultat = BehandlingResultat.INNVILGET,
+                    ),
+                )
+            // grunnbeløpsmåned = YearMonth.of(2022, 5) lagres som VARCHAR '2022-05' etter V162-migrasjon.
+            // Med LocalDate-parameter '2022-05-01': strengsammenligning '2022-05' < '2022-05-01' = TRUE (feil).
+            // Testen skal feile inntil parameteren er endret til YearMonth.
+            tilkjentYtelseRepository.insert(
+                tilkjentYtelse(
+                    behandling.id,
+                    fagsak.personIdenter.first().ident,
+                    2022,
+                    grunnbeløpsmåned = YearMonth.of(2022, 5),
+                ),
+            )
+
+            assertThat(fagsakRepository.finnFerdigstilteFagsakerMedUtdatertGBelop(LocalDate.of(2022, 5, 1))).isEmpty()
+        }
+
+        @Test
         fun `tar ikke med ferdigstilte fagsaker som har en åpen behandling`() {
             val fagsak = testoppsettService.lagreFagsak(fagsak())
             val fagsak2 = testoppsettService.lagreFagsak(fagsak(identer = setOf(PersonIdent("1"))))
