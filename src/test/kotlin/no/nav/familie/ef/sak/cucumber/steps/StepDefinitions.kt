@@ -57,6 +57,7 @@ import no.nav.familie.ef.sak.no.nav.familie.ef.sak.cucumber.domeneparser.Saksbeh
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.cucumber.domeneparser.sisteDagenIMånedenEllerDefault
 import no.nav.familie.ef.sak.oppfølgingsoppgave.OppfølgingsoppgaveService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
@@ -126,7 +127,8 @@ class StepDefinitions {
     private val simuleringService = mockk<SimuleringService>(relaxed = true)
     private val tilbakekrevingService = mockk<TilbakekrevingService>(relaxed = true)
     private val barnRepository = mockk<BarnRepository>()
-    private val barnService = spyk(BarnService(barnRepository, mockk(), behandlingService))
+    private val personService = mockk<PersonService>()
+    private val barnService = spyk(BarnService(barnRepository, mockk(), behandlingService, featureToggleService, personService))
     private val fagsakService = mockFagsakService()
     private val validerOmregningService = mockk<ValiderOmregningService>(relaxed = true)
     private val oppfølgingsoppgaveService = mockk<OppfølgingsoppgaveService>(relaxed = true)
