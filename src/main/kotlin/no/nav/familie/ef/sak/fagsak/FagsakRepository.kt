@@ -99,7 +99,7 @@ interface FagsakRepository :
         """SELECT DISTINCT b.fagsak_id 
               FROM gjeldende_iverksatte_behandlinger b   
               JOIN tilkjent_ytelse ty ON b.id = ty.behandling_id
-                AND ty.grunnbelopsdato < :gjeldendeGrunnbeløpFraOgMedDato
+                AND ty.grunnbelopsdato < TO_CHAR(:gjeldendeGrunnbeløpFraOgMedDato::date, 'YYYY-MM')
               JOIN andel_tilkjent_ytelse aty ON aty.tilkjent_ytelse = ty.id 
                 AND aty.samordningsfradrag = 0
                 AND aty.stonad_tom > :gjeldendeGrunnbeløpFraOgMedDato

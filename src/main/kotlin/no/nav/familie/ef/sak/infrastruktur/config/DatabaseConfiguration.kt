@@ -1,13 +1,11 @@
 package no.nav.familie.ef.sak.infrastruktur.config
 
-import jakarta.annotation.Nullable
 import no.nav.familie.ef.sak.amelding.InntektResponse
 import no.nav.familie.ef.sak.brev.domain.OrganisasjonerWrapper
 import no.nav.familie.ef.sak.brev.domain.PersonerWrapper
 import no.nav.familie.ef.sak.felles.domain.Endret
 import no.nav.familie.ef.sak.felles.domain.Fil
 import no.nav.familie.ef.sak.felles.domain.JsonWrapper
-import no.nav.familie.ef.sak.infrastruktur.config.readValue
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.GrunnlagsdataDomene
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.Arbeidssituasjon
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.Dokumentasjon
@@ -46,8 +44,6 @@ import org.springframework.jdbc.datasource.DataSourceTransactionManager
 import org.springframework.jdbc.support.SQLErrorCodeSQLExceptionTranslator
 import org.springframework.jdbc.support.SQLExceptionTranslator
 import org.springframework.transaction.PlatformTransactionManager
-import java.sql.Date
-import java.time.LocalDate
 import java.time.YearMonth
 import java.util.Optional
 import javax.sql.DataSource
@@ -94,8 +90,8 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
             StringTilUtbetalingsoppdragConverter(),
             DokumentTilStringConverter(),
             StringTilDokumentConverter(),
-            YearMonthTilLocalDateConverter(),
-            LocalDateTilYearMonthConverter(),
+            StringTilYearMonthConverter(),
+            YearMonthTilStringConverter(),
             PropertiesWrapperTilStringConverter(),
             StringTilPropertiesWrapperConverter(),
             PGobjectTilDelvilkårConverter(),
@@ -137,6 +133,16 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
             PGobjectTilGrunnlagsdataInntekt(),
         )
 
+    @ReadingConverter
+    class StringTilYearMonthConverter : Converter<String, YearMonth> {
+        override fun convert(string: String): YearMonth = YearMonth.parse(string)
+    }
+
+    @WritingConverter
+    class YearMonthTilStringConverter : Converter<YearMonth, String> {
+        override fun convert(yearMonth: YearMonth): String = yearMonth.toString()
+    }
+
     @WritingConverter
     class UtbetalingsoppdragTilStringConverter : Converter<Utbetalingsoppdrag, String> {
         override fun convert(utbetalingsoppdrag: Utbetalingsoppdrag): String = jsonMapper.writeValueAsString(utbetalingsoppdrag)
@@ -155,16 +161,6 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
     @ReadingConverter
     class StringTilDokumentConverter : Converter<String, Dokumentasjon> {
         override fun convert(s: String): Dokumentasjon = jsonMapper.readValue(s, Dokumentasjon::class.java)
-    }
-
-    @WritingConverter
-    class YearMonthTilLocalDateConverter : Converter<YearMonth, LocalDate> {
-        override fun convert(yearMonth: YearMonth): LocalDate = yearMonth.atDay(1)
-    }
-
-    @ReadingConverter
-    class LocalDateTilYearMonthConverter : Converter<Date, YearMonth> {
-        override fun convert(date: Date): YearMonth = YearMonth.from(date.toLocalDate())
     }
 
     @ReadingConverter
