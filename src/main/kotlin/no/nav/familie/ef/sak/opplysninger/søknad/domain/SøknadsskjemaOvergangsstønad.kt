@@ -41,6 +41,12 @@ data class SøknadsskjemaOvergangsstønad(
     val søkerFraBestemtMåned: Boolean,
     @Embedded(onEmpty = Embedded.OnEmpty.USE_NULL, prefix = "adresseopplysninger_")
     val adresseopplysninger: Adresseopplysninger?,
+    @Column("er_regelendring_2026")
+    val erRegelendring2026: Boolean = false,
+    @Column("hva_situasjon")
+    val hvaSituasjon: StringListeWrapper? = null,
+    @Column("har_inntekt")
+    val harInntekt: StringListeWrapper? = null,
 ) : ISøknadsskjema
 
 data class Situasjon(

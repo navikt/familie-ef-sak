@@ -81,6 +81,11 @@ class JournalpostService(
         return journalpostClient.hentOvergangsstønadSøknad(journalpost.journalpostId, dokumentinfo.dokumentInfoId)
     }
 
+    fun hentRåJsonSøknadFraJournalpostForOvergangsstønad(journalpost: Journalpost): ByteArray {
+        val dokumentinfo = JournalføringHelper.plukkUtOriginaldokument(journalpost, DokumentBrevkode.OVERGANGSSTØNAD)
+        return journalpostClient.hentDokument(journalpost.journalpostId, dokumentinfo.dokumentInfoId, DokumentVariantformat.ORIGINAL)
+    }
+
     fun hentSøknadFraJournalpostForBarnetilsyn(journalpost: Journalpost): SøknadBarnetilsyn {
         val dokumentinfo = JournalføringHelper.plukkUtOriginaldokument(journalpost, DokumentBrevkode.BARNETILSYN)
         return journalpostClient.hentBarnetilsynSøknad(journalpost.journalpostId, dokumentinfo.dokumentInfoId)
