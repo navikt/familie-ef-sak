@@ -852,8 +852,8 @@ internal class JournalføringServiceTest {
             medlemskapsdetaljer = gammelSøknad.medlemskapsdetaljer,
             bosituasjon = gammelSøknad.bosituasjon,
             barn = gammelSøknad.barn,
-            hvaSituasjon = Søknadsfelt("Hva er situasjonen din?", listOf("barnUnder14Måneder")),
-            harInntekt = Søknadsfelt("Har du inntekt?", listOf("arbeidstaker")),
+            hvaSituasjon = Søknadsfelt("Hva er situasjonen din?", listOf("Jeg har barn under 14 måneder"), svarId = listOf("barnUnder14Måneder")),
+            harInntekt = Søknadsfelt("Har du inntekt?", listOf("Arbeidstaker"), svarId = listOf("arbeidstaker")),
             firmaer =
                 Søknadsfelt(
                     "Firmaer",

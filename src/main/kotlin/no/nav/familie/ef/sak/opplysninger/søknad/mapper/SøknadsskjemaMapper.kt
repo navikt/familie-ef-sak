@@ -101,16 +101,16 @@ object SøknadsskjemaMapper {
             søkerFraBestemtMåned = kontraktsøknad.stønadsstart.verdi.søkerFraBestemtMåned.verdi,
             adresseopplysninger = tilDomene(kontraktsøknad.personalia, kontraktsøknad.adresseopplysninger),
             erRegelendring2026 = true,
-            hvaSituasjon = StringListeWrapper(kontraktsøknad.hvaSituasjon.verdi),
-            harInntekt = StringListeWrapper(kontraktsøknad.harInntekt.verdi),
+            hvaSituasjon = StringListeWrapper(kontraktsøknad.hvaSituasjon.svarId ?: emptyList()),
+            harInntekt = StringListeWrapper(kontraktsøknad.harInntekt.svarId ?: emptyList()),
             aktivitet =
                 Aktivitet(
-                    hvordanErArbeidssituasjonen = Arbeidssituasjon(kontraktsøknad.harInntekt.verdi),
+                    hvordanErArbeidssituasjonen = Arbeidssituasjon(kontraktsøknad.harInntekt.svarId ?: emptyList()),
                     firmaer = tilFirmaer(kontraktsøknad.firmaer?.verdi),
                 ),
             situasjon =
                 Situasjon(
-                    gjelderDetteDeg = GjelderDeg(kontraktsøknad.hvaSituasjon.verdi),
+                    gjelderDetteDeg = GjelderDeg(kontraktsøknad.hvaSituasjon.svarId ?: emptyList()),
                     sagtOppEllerRedusertStilling = kontraktsøknad.sagtOppEllerRedusertStilling?.verdi,
                     oppsigelseReduksjonÅrsak = kontraktsøknad.begrunnelseSagtOppEllerRedusertStilling?.verdi,
                     oppsigelseReduksjonTidspunkt = kontraktsøknad.datoSagtOppEllerRedusertStilling?.verdi,

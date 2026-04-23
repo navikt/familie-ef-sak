@@ -238,8 +238,8 @@ internal class SøknadsskjemaMapperTest {
                 medlemskapsdetaljer = gammelSøknad.medlemskapsdetaljer,
                 bosituasjon = gammelSøknad.bosituasjon,
                 barn = gammelSøknad.barn,
-                hvaSituasjon = Søknadsfelt("Hva er situasjonen din?", listOf("barnUnder14Måneder", "barnSærligTilsyn")),
-                harInntekt = Søknadsfelt("Har du inntekt?", listOf("arbeidstaker")),
+                hvaSituasjon = Søknadsfelt("Hva er situasjonen din?", listOf("Jeg har barn under 14 måneder", "Barnet trenger særlig tilsyn"), svarId = listOf("barnUnder14Måneder", "barnSærligTilsyn")),
+                harInntekt = Søknadsfelt("Har du inntekt?", listOf("Arbeidstaker"), svarId = listOf("arbeidstaker")),
                 sagtOppEllerRedusertStilling = Søknadsfelt("Sagt opp?", "sagtOpp"),
                 begrunnelseSagtOppEllerRedusertStilling = Søknadsfelt("Begrunnelse", "Reduksjon forklaring"),
                 firmaer =
