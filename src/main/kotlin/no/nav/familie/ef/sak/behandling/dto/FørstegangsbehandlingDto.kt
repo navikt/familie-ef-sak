@@ -9,5 +9,5 @@ data class FørstegangsbehandlingDto(
     val behandlingsårsak: BehandlingÅrsak,
     val kravMottatt: LocalDate,
     val barn: List<BarnSomSkalFødes> = emptyList(),
-    val fosterbarn: List<ForeldreansvarBarn> = emptyList(),
+    val foreldreansvarBarn: List<ForeldreansvarBarn> = emptyList(),
 )
