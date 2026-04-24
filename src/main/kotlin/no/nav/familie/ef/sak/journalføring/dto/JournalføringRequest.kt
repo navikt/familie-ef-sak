@@ -69,7 +69,7 @@ data class BarnSomSkalFødes(
         )
 }
 
-data class Foreldreansvarsbarn(
+data class ForeldreansvarBarn(
     val fødselsnummer: String,
 )
 
