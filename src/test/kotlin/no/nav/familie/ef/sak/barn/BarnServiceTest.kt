@@ -7,9 +7,12 @@ import io.mockk.slot
 import io.mockk.verify
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.ef.sak.journalføring.dto.BarnSomSkalFødes
 import no.nav.familie.ef.sak.journalføring.dto.UstrukturertDokumentasjonType
 import no.nav.familie.ef.sak.journalføring.dto.VilkårsbehandleNyeBarn
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.SøknadBarn
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.Søknadsverdier
@@ -37,7 +40,9 @@ internal class BarnServiceTest {
     val barnRepository = mockk<BarnRepository>()
     val søknadService = mockk<SøknadService>()
     val behandlingService = mockk<BehandlingService>()
-    val barnService = BarnService(barnRepository, søknadService, behandlingService)
+    val featureToggleService = mockk<FeatureToggleService>()
+    val personService = mockk<PersonService>()
+    val barnService = BarnService(barnRepository, søknadService, behandlingService, featureToggleService, personService)
     val søknadMock = mockk<Søknadsverdier>()
     val fagsakId: UUID = UUID.randomUUID()
     val behandlingId: UUID = UUID.randomUUID()
@@ -51,6 +56,7 @@ internal class BarnServiceTest {
         every { søknadService.hentSøknadsgrunnlag(behandlingId) } returns søknadMock
         every { søknadMock.barn } returns emptySet()
         every { barnRepository.insertAll(capture(barnSlot)) } answers { firstArg() }
+        every { featureToggleService.isEnabled(Toggle.MULIGHET_LEGG_TIL_FORELDREANSVARSBARN_BARNETILSYN) } returns false
     }
 
     @Test
