@@ -80,7 +80,7 @@ class FørstegangsbehandlingService(
             stønadstype = fagsak.stønadstype,
             ustrukturertDokumentasjonType = UstrukturertDokumentasjonType.PAPIRSØKNAD,
             barnSomSkalFødes = førstegangsBehandlingRequest.barn,
-            foreldreansvarBarn = førstegangsBehandlingRequest.foreldreansvarBarn,
+            foreldreansvarsbarn = førstegangsBehandlingRequest.foreldreansvarsbarn,
             grunnlagsdataBarn = grunnlagsdata.grunnlagsdata.barn,
             vilkårsbehandleNyeBarn = VilkårsbehandleNyeBarn.VILKÅRSBEHANDLE,
         )
