@@ -56,7 +56,7 @@ internal class BarnServiceTest {
         every { søknadService.hentSøknadsgrunnlag(behandlingId) } returns søknadMock
         every { søknadMock.barn } returns emptySet()
         every { barnRepository.insertAll(capture(barnSlot)) } answers { firstArg() }
-        every { featureToggleService.isEnabled(Toggle.MULIGHET_LEGG_TIL_FOSTERBARN_BARNETILSYN) } returns false
+        every { featureToggleService.isEnabled(Toggle.MULIGHET_LEGG_TIL_FORELDREANSVARSBARN_BARNETILSYN) } returns false
     }
 
     @Test
