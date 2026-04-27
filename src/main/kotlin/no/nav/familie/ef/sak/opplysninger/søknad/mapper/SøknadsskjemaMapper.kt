@@ -101,7 +101,6 @@ object SøknadsskjemaMapper {
             søkerFraBestemtMåned = kontraktsøknad.stønadsstart.verdi.søkerFraBestemtMåned.verdi,
             adresseopplysninger = tilDomene(kontraktsøknad.personalia, kontraktsøknad.adresseopplysninger),
             erRegelendring2026 = true,
-            hvaSituasjon = StringListeWrapper(kontraktsøknad.hvaSituasjon.svarId ?: emptyList()),
             inntekter = StringListeWrapper(kontraktsøknad.inntekter.svarId ?: emptyList()),
             aktivitet =
                 Aktivitet(

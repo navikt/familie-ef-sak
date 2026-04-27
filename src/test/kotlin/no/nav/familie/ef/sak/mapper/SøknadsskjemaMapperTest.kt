@@ -209,7 +209,6 @@ internal class SøknadsskjemaMapperTest {
             val result = SøknadsskjemaMapper.tilDomene(søknad)
 
             assertThat(result.erRegelendring2026).isTrue()
-            assertThat(result.hvaSituasjon?.verdier).containsExactlyInAnyOrder("barnUnder14Måneder", "barnSærligTilsyn")
             assertThat(result.inntekter?.verdier).containsExactly("arbeidstaker")
             assertThat(result.aktivitet.hvordanErArbeidssituasjonen?.verdier).containsExactly("arbeidstaker")
             assertThat(result.situasjon.gjelderDetteDeg.verdier).containsExactlyInAnyOrder("barnUnder14Måneder", "barnSærligTilsyn")
@@ -225,7 +224,6 @@ internal class SøknadsskjemaMapperTest {
             val result = SøknadsskjemaMapper.tilDomene(søknad)
 
             assertThat(result.erRegelendring2026).isFalse()
-            assertThat(result.hvaSituasjon).isNull()
             assertThat(result.inntekter).isNull()
         }
 
