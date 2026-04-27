@@ -210,7 +210,7 @@ internal class SøknadsskjemaMapperTest {
 
             assertThat(result.erRegelendring2026).isTrue()
             assertThat(result.hvaSituasjon?.verdier).containsExactlyInAnyOrder("barnUnder14Måneder", "barnSærligTilsyn")
-            assertThat(result.harInntekt?.verdier).containsExactly("arbeidstaker")
+            assertThat(result.inntekter?.verdier).containsExactly("arbeidstaker")
             assertThat(result.aktivitet.hvordanErArbeidssituasjonen?.verdier).containsExactly("arbeidstaker")
             assertThat(result.situasjon.gjelderDetteDeg.verdier).containsExactlyInAnyOrder("barnUnder14Måneder", "barnSærligTilsyn")
             assertThat(result.situasjon.sagtOppEllerRedusertStilling).isEqualTo("sagtOpp")
@@ -226,7 +226,7 @@ internal class SøknadsskjemaMapperTest {
 
             assertThat(result.erRegelendring2026).isFalse()
             assertThat(result.hvaSituasjon).isNull()
-            assertThat(result.harInntekt).isNull()
+            assertThat(result.inntekter).isNull()
         }
 
         private fun lagTestRegelendring2026Søknad(): SøknadOvergangsstønadRegelendring2026 {
@@ -239,7 +239,7 @@ internal class SøknadsskjemaMapperTest {
                 bosituasjon = gammelSøknad.bosituasjon,
                 barn = gammelSøknad.barn,
                 hvaSituasjon = Søknadsfelt("Hva er situasjonen din?", listOf("Jeg har barn under 14 måneder", "Barnet trenger særlig tilsyn"), svarId = listOf("barnUnder14Måneder", "barnSærligTilsyn")),
-                harInntekt = Søknadsfelt("Har du inntekt?", listOf("Arbeidstaker"), svarId = listOf("arbeidstaker")),
+                inntekter = Søknadsfelt("Har du inntekt?", listOf("Arbeidstaker"), svarId = listOf("arbeidstaker")),
                 sagtOppEllerRedusertStilling = Søknadsfelt("Sagt opp?", "sagtOpp"),
                 begrunnelseSagtOppEllerRedusertStilling = Søknadsfelt("Begrunnelse", "Reduksjon forklaring"),
                 firmaer =

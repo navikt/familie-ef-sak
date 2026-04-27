@@ -102,10 +102,10 @@ object SøknadsskjemaMapper {
             adresseopplysninger = tilDomene(kontraktsøknad.personalia, kontraktsøknad.adresseopplysninger),
             erRegelendring2026 = true,
             hvaSituasjon = StringListeWrapper(kontraktsøknad.hvaSituasjon.svarId ?: emptyList()),
-            harInntekt = StringListeWrapper(kontraktsøknad.harInntekt.svarId ?: emptyList()),
+            inntekter = StringListeWrapper(kontraktsøknad.inntekter.svarId ?: emptyList()),
             aktivitet =
                 Aktivitet(
-                    hvordanErArbeidssituasjonen = Arbeidssituasjon(kontraktsøknad.harInntekt.svarId ?: emptyList()),
+                    hvordanErArbeidssituasjonen = Arbeidssituasjon(kontraktsøknad.inntekter.svarId ?: emptyList()),
                     firmaer = tilFirmaer(kontraktsøknad.firmaer?.verdi),
                 ),
             situasjon =

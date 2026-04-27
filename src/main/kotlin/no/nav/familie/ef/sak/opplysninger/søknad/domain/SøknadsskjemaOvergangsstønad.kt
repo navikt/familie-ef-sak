@@ -45,8 +45,8 @@ data class SøknadsskjemaOvergangsstønad(
     val erRegelendring2026: Boolean = false,
     @Column("hva_situasjon")
     val hvaSituasjon: StringListeWrapper? = null,
-    @Column("har_inntekt")
-    val harInntekt: StringListeWrapper? = null,
+    @Column("inntekter")
+    val inntekter: StringListeWrapper? = null,
 ) : ISøknadsskjema
 
 data class Situasjon(
