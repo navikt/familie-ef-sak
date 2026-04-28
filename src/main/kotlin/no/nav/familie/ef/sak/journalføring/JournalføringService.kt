@@ -328,12 +328,14 @@ class JournalføringService(
     ) {
         when (fagsak.stønadstype) {
             StønadType.OVERGANGSSTØNAD -> {
-                val råJson = journalpostService.hentRåJsonSøknadFraJournalpostForOvergangsstønad(journalpost)
-                if (jsonMapper.readTree(råJson).path("erRegelendring2026").asBoolean(false)) {
-                    val søknad = jsonMapper.readValue(råJson, SøknadOvergangsstønadRegelendring2026::class.java)
-                    søknadService.lagreSøknadForOvergangsstønadRegelendring2026(søknad, behandlingId, fagsak.id, journalpost.journalpostId)
+                val jsonOs = journalpostService.hentOvergangssøknadJsonFraJournalpost(journalpost)
+                val erRegelendring2026 = jsonMapper.readTree(jsonOs).path("erRegelendring2026").asBoolean(false)
+
+                if (erRegelendring2026) {
+                    val søknad = jsonMapper.readValue(jsonOs, SøknadOvergangsstønadRegelendring2026::class.java)
+                    søknadService.lagreSøknadForOvergangsstønadRegelendring2026(søknad, behandlingId, journalpost.journalpostId)
                 } else {
-                    val søknad = jsonMapper.readValue(råJson, SøknadOvergangsstønad::class.java)
+                    val søknad = jsonMapper.readValue(jsonOs, SøknadOvergangsstønad::class.java)
                     søknadService.lagreSøknadForOvergangsstønad(søknad, behandlingId, fagsak.id, journalpost.journalpostId)
                 }
             }

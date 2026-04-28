@@ -76,12 +76,7 @@ class JournalpostService(
         dokumentVariantformat: DokumentVariantformat = DokumentVariantformat.ARKIV,
     ): ByteArray = journalpostClient.hentDokument(journalpostId, dokumentInfoId, dokumentVariantformat)
 
-    fun hentSøknadFraJournalpostForOvergangsstønad(journalpost: Journalpost): SøknadOvergangsstønad {
-        val dokumentinfo = JournalføringHelper.plukkUtOriginaldokument(journalpost, DokumentBrevkode.OVERGANGSSTØNAD)
-        return journalpostClient.hentOvergangsstønadSøknad(journalpost.journalpostId, dokumentinfo.dokumentInfoId)
-    }
-
-    fun hentRåJsonSøknadFraJournalpostForOvergangsstønad(journalpost: Journalpost): ByteArray {
+    fun hentOvergangssøknadJsonFraJournalpost(journalpost: Journalpost): ByteArray {
         val dokumentinfo = JournalføringHelper.plukkUtOriginaldokument(journalpost, DokumentBrevkode.OVERGANGSSTØNAD)
         return journalpostClient.hentDokument(journalpost.journalpostId, dokumentinfo.dokumentInfoId, DokumentVariantformat.ORIGINAL)
     }

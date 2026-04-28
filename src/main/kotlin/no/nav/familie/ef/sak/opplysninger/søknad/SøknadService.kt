@@ -94,7 +94,6 @@ class SøknadService(
     fun lagreSøknadForOvergangsstønadRegelendring2026(
         søknad: SøknadOvergangsstønadRegelendring2026,
         behandlingId: UUID,
-        fagsakId: UUID,
         journalpostId: String,
     ) {
         val søknadsskjema = SøknadsskjemaMapper.tilDomene(søknad)
