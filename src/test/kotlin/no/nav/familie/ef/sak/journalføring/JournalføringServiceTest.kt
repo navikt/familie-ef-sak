@@ -217,7 +217,7 @@ internal class JournalføringServiceTest {
         } just Runs
 
         every {
-            søknadService.lagreSøknadForOvergangsstønadRegelendring2026(any(), any(), any(), any())
+            søknadService.lagreSøknadForOvergangsstønadRegelendring2026(any(), any(), any())
         } just Runs
 
         every {
@@ -327,7 +327,7 @@ internal class JournalføringServiceTest {
             journalføringRequest = lagRequest(årsak = Journalføringsårsak.DIGITAL_SØKNAD, aksjon = Journalføringsaksjon.OPPRETT_BEHANDLING),
         )
 
-        verify { søknadService.lagreSøknadForOvergangsstønadRegelendring2026(any(), any(), any(), any()) }
+        verify { søknadService.lagreSøknadForOvergangsstønadRegelendring2026(any(), any(), any()) }
         verify(exactly = 0) { søknadService.lagreSøknadForOvergangsstønad(any(), any(), any(), any()) }
     }
 
@@ -705,7 +705,7 @@ internal class JournalføringServiceTest {
             verify { journalpostClient.hentDokument(journalpostId, dokumentInfoIdMedJsonVerdi, DokumentVariantformat.ORIGINAL) }
             verify(exactly = 0) { journalpostClient.hentOvergangsstønadSøknad(any(), any()) }
             verify { søknadService.lagreSøknadForOvergangsstønad(any(), any(), any(), any()) }
-            verify(exactly = 0) { søknadService.lagreSøknadForOvergangsstønadRegelendring2026(any(), any(), any(), any()) }
+            verify(exactly = 0) { søknadService.lagreSøknadForOvergangsstønadRegelendring2026(any(), any(), any()) }
             verify {
                 behandlingService.opprettBehandling(
                     behandlingType = FØRSTEGANGSBEHANDLING,
@@ -747,7 +747,7 @@ internal class JournalføringServiceTest {
                 OppgavePrioritet.NORM,
             )
 
-            verify { søknadService.lagreSøknadForOvergangsstønadRegelendring2026(any(), any(), any(), any()) }
+            verify { søknadService.lagreSøknadForOvergangsstønadRegelendring2026(any(), any(), any()) }
             verify(exactly = 0) { søknadService.lagreSøknadForOvergangsstønad(any(), any(), any(), any()) }
         }
     }
