@@ -28,6 +28,7 @@ class FeatureToggleController(
             Toggle.FRONTEND_VIS_BEREGNINGSSKJEMA,
             Toggle.VIS_ANDRE_YTELSER,
             Toggle.MIGRERING_BARNETILSYN,
+            Toggle.MULIGHET_LEGG_TIL_FORELDREANSVARSBARN_BARNETILSYN
         )
 
     @GetMapping
