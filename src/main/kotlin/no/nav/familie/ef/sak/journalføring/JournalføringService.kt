@@ -29,9 +29,12 @@ import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
 import no.nav.familie.ef.sak.vilkår.VurderingService
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.ef.journalføring.AutomatiskJournalføringResponse
+import no.nav.familie.kontrakter.ef.søknad.SøknadOvergangsstønad
+import no.nav.familie.kontrakter.ef.søknad.SøknadOvergangsstønadRegelendring2026
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.kontrakter.felles.journalpost.Journalpost
 import no.nav.familie.kontrakter.felles.journalpost.Journalstatus
+import no.nav.familie.kontrakter.felles.jsonMapper
 import no.nav.familie.kontrakter.felles.oppgave.OppgavePrioritet
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.internal.TaskService
@@ -325,8 +328,16 @@ class JournalføringService(
     ) {
         when (fagsak.stønadstype) {
             StønadType.OVERGANGSSTØNAD -> {
-                val søknad = journalpostService.hentSøknadFraJournalpostForOvergangsstønad(journalpost)
-                søknadService.lagreSøknadForOvergangsstønad(søknad, behandlingId, fagsak.id, journalpost.journalpostId)
+                val jsonOs = journalpostService.hentOvergangssøknadJsonFraJournalpost(journalpost)
+                val erRegelendring2026 = jsonMapper.readTree(jsonOs).path("erRegelendring2026").asBoolean(false)
+
+                if (erRegelendring2026) {
+                    val søknad = jsonMapper.readValue(jsonOs, SøknadOvergangsstønadRegelendring2026::class.java)
+                    søknadService.lagreSøknadForOvergangsstønadRegelendring2026(søknad, behandlingId, journalpost.journalpostId)
+                } else {
+                    val søknad = jsonMapper.readValue(jsonOs, SøknadOvergangsstønad::class.java)
+                    søknadService.lagreSøknadForOvergangsstønad(søknad, behandlingId, fagsak.id, journalpost.journalpostId)
+                }
             }
 
             StønadType.BARNETILSYN -> {
