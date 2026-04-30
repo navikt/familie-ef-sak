@@ -13,6 +13,7 @@ import no.nav.familie.ef.sak.opplysninger.søknad.mapper.SøknadsskjemaMapper
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.kontrakter.ef.søknad.SøknadBarnetilsyn
 import no.nav.familie.kontrakter.ef.søknad.SøknadOvergangsstønad
+import no.nav.familie.kontrakter.ef.søknad.SøknadOvergangsstønadRegelendring2026
 import no.nav.familie.kontrakter.ef.søknad.SøknadSkolepenger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -82,6 +83,17 @@ class SøknadService(
         søknad: SøknadOvergangsstønad,
         behandlingId: UUID,
         fagsakId: UUID,
+        journalpostId: String,
+    ) {
+        val søknadsskjema = SøknadsskjemaMapper.tilDomene(søknad)
+        søknadOvergangsstønadRepository.insert(søknadsskjema)
+        søknadRepository.insert(SøknadMapper.toDomain(journalpostId, søknadsskjema, behandlingId))
+    }
+
+    @Transactional
+    fun lagreSøknadForOvergangsstønadRegelendring2026(
+        søknad: SøknadOvergangsstønadRegelendring2026,
+        behandlingId: UUID,
         journalpostId: String,
     ) {
         val søknadsskjema = SøknadsskjemaMapper.tilDomene(søknad)

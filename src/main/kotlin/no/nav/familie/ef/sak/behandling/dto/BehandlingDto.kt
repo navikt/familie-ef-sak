@@ -28,6 +28,7 @@ data class BehandlingDto(
     val stønadstype: StønadType,
     val vedtaksdato: LocalDateTime? = null,
     val henlagtÅrsak: HenlagtÅrsak? = null,
+    val erRegelendring2026: Boolean = false,
 )
 
 fun Behandling.tilDto(stønadstype: StønadType): BehandlingDto =
@@ -49,7 +50,7 @@ fun Behandling.tilDto(stønadstype: StønadType): BehandlingDto =
         vedtaksdato = this.vedtakstidspunkt,
     )
 
-fun Saksbehandling.tilDto(): BehandlingDto =
+fun Saksbehandling.tilDto(erRegelendring2026: Boolean = false): BehandlingDto =
     BehandlingDto(
         id = this.id,
         forrigeBehandlingId = this.forrigeBehandlingId,
@@ -66,4 +67,5 @@ fun Saksbehandling.tilDto(): BehandlingDto =
         henlagtÅrsak = this.henlagtÅrsak,
         stønadstype = stønadstype,
         vedtaksdato = this.vedtakstidspunkt,
+        erRegelendring2026 = erRegelendring2026,
     )

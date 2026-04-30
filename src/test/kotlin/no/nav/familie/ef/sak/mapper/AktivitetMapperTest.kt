@@ -22,7 +22,7 @@ import java.util.UUID
 internal class AktivitetMapperTest {
     @Test
     internal fun `sjekker at mappet aktivitet har fått satt alle verdier`() {
-        val dto = AktivitetMapper.tilDto(aktivitet(), situasjon(), barn(), LocalDate.now())
+        val dto = AktivitetMapper.tilDto(aktivitet(), situasjon(), barn(), LocalDate.now(), inntekter = listOf("arbeidstaker"))
         sjekkAtAlleVerdierErSatt(dto)
     }
 

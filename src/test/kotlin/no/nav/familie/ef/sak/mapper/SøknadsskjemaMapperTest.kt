@@ -2,7 +2,9 @@ package no.nav.familie.ef.sak.mapper
 
 import no.nav.familie.ef.sak.opplysninger.søknad.mapper.SøknadsskjemaMapper
 import no.nav.familie.kontrakter.ef.søknad.Adresse
+import no.nav.familie.kontrakter.ef.søknad.Selvstendig
 import no.nav.familie.kontrakter.ef.søknad.Stønadsstart
+import no.nav.familie.kontrakter.ef.søknad.SøknadOvergangsstønadRegelendring2026
 import no.nav.familie.kontrakter.ef.søknad.Søknadsfelt
 import no.nav.familie.kontrakter.ef.søknad.Testsøknad
 import no.nav.familie.kontrakter.ef.søknad.TestsøknadBuilder
@@ -195,6 +197,69 @@ internal class SøknadsskjemaMapperTest {
                     .first()
                     .årsakUtenlandsopphold,
             ).isEqualTo("Ferie")
+        }
+    }
+
+    @Nested
+    inner class RegelendringMapping {
+        @Test
+        internal fun `skal mappe SøknadOvergangsstønadRegelendring2026 korrekt`() {
+            val søknad = lagTestRegelendring2026Søknad()
+
+            val result = SøknadsskjemaMapper.tilDomene(søknad)
+
+            assertThat(result.erRegelendring2026).isTrue()
+            assertThat(result.inntekter?.verdier).containsExactly("arbeidstaker")
+            assertThat(result.aktivitet.hvordanErArbeidssituasjonen?.verdier).containsExactly("arbeidstaker")
+            assertThat(result.situasjon.gjelderDetteDeg.verdier).containsExactlyInAnyOrder("barnUnder14Måneder", "barnSærligTilsyn")
+            assertThat(result.situasjon.sagtOppEllerRedusertStilling).isEqualTo("sagtOpp")
+            assertThat(result.situasjon.oppsigelseReduksjonÅrsak).isEqualTo("Reduksjon forklaring")
+            assertThat(result.aktivitet.firmaer).hasSize(2)
+        }
+
+        @Test
+        internal fun `skal sette erRegelendring2026 og ikke populere aktivitet og situasjon for gammel søknad`() {
+            val søknad = Testsøknad.søknadOvergangsstønad
+
+            val result = SøknadsskjemaMapper.tilDomene(søknad)
+
+            assertThat(result.erRegelendring2026).isFalse()
+            assertThat(result.inntekter).isNull()
+        }
+
+        private fun lagTestRegelendring2026Søknad(): SøknadOvergangsstønadRegelendring2026 {
+            val gammelSøknad = Testsøknad.søknadOvergangsstønad
+            return SøknadOvergangsstønadRegelendring2026(
+                innsendingsdetaljer = gammelSøknad.innsendingsdetaljer,
+                personalia = gammelSøknad.personalia,
+                sivilstandsdetaljer = gammelSøknad.sivilstandsdetaljer,
+                medlemskapsdetaljer = gammelSøknad.medlemskapsdetaljer,
+                bosituasjon = gammelSøknad.bosituasjon,
+                barn = gammelSøknad.barn,
+                hvaSituasjon = Søknadsfelt("Hva er situasjonen din?", listOf("Jeg har barn under 14 måneder", "Barnet trenger særlig tilsyn"), svarId = listOf("barnUnder14Måneder", "barnSærligTilsyn")),
+                inntekter = Søknadsfelt("Har du inntekt?", listOf("Arbeidstaker"), svarId = listOf("arbeidstaker")),
+                sagtOppEllerRedusertStilling = Søknadsfelt("Sagt opp?", "Dette er tekst", svarId = "sagtOpp"),
+                begrunnelseSagtOppEllerRedusertStilling = Søknadsfelt("Begrunnelse", "Reduksjon forklaring"),
+                firmaer =
+                    Søknadsfelt(
+                        "Firmaer",
+                        listOf(
+                            Selvstendig(
+                                firmanavn = Søknadsfelt("Firmanavn", "Firma AS"),
+                                organisasjonsnummer = Søknadsfelt("Orgnr", "123456789"),
+                                etableringsdato = Søknadsfelt("Etableringsdato", LocalDate.of(2020, 1, 1)),
+                                hvordanSerArbeidsukenUt = Søknadsfelt("Arbeidsuke", "8 timer daglig"),
+                            ),
+                            Selvstendig(
+                                firmanavn = Søknadsfelt("Firmanavn", "Bivirksomhet ENK"),
+                                organisasjonsnummer = Søknadsfelt("Orgnr", "987654321"),
+                                etableringsdato = Søknadsfelt("Etableringsdato", LocalDate.of(2022, 6, 1)),
+                                hvordanSerArbeidsukenUt = Søknadsfelt("Arbeidsuke", "4 timer daglig"),
+                            ),
+                        ),
+                    ),
+                stønadsstart = gammelSøknad.stønadsstart,
+            )
         }
     }
 }
