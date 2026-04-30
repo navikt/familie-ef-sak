@@ -10,7 +10,6 @@ import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
-import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
 import no.nav.familie.ef.sak.vilkår.gjenbruk.GjenbrukVilkårService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.ef.StønadType
@@ -32,7 +31,6 @@ class BehandlingController(
     private val tilgangService: TilgangService,
     private val gjenbrukVilkårService: GjenbrukVilkårService,
     private val featureToggleService: FeatureToggleService,
-    private val søknadService: SøknadService,
 ) {
     @GetMapping("{behandlingId}")
     fun hentBehandling(
@@ -40,8 +38,7 @@ class BehandlingController(
     ): Ressurs<BehandlingDto> {
         val saksbehandling: Saksbehandling = behandlingService.hentSaksbehandling(behandlingId)
         tilgangService.validerTilgangTilPersonMedBarn(saksbehandling.ident, AuditLoggerEvent.ACCESS)
-        val erRegelendring2026 = søknadService.hentOvergangsstønad(behandlingId)?.erRegelendring2026 ?: false
-        return Ressurs.success(saksbehandling.tilDto(erRegelendring2026 = erRegelendring2026))
+        return Ressurs.success(saksbehandling.tilDto())
     }
 
     @GetMapping("gamle-behandlinger")

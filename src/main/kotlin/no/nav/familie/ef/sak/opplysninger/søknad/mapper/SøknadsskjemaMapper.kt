@@ -21,7 +21,6 @@ import no.nav.familie.ef.sak.opplysninger.søknad.domain.Selvstendig
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.Situasjon
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.Sivilstand
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.Sivilstandsplaner
-import no.nav.familie.ef.sak.opplysninger.søknad.domain.StringListeWrapper
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.SøknadBarn
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.SøknadType
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.SøknadsskjemaBarnetilsyn
@@ -58,7 +57,6 @@ import no.nav.familie.kontrakter.ef.søknad.Situasjon as KontraktSituasjon
 import no.nav.familie.kontrakter.ef.søknad.Sivilstandsplaner as KontraktSivilstandsplaner
 import no.nav.familie.kontrakter.ef.søknad.SøknadBarnetilsyn as KontraktSøknadBarnetilsyn
 import no.nav.familie.kontrakter.ef.søknad.SøknadOvergangsstønad as KontraktSøknadOvergangsstønad
-import no.nav.familie.kontrakter.ef.søknad.SøknadOvergangsstønadRegelendring2026 as KontraktSøknadOvergangsstønadRegelendring2026
 import no.nav.familie.kontrakter.ef.søknad.SøknadSkolepenger as KontraktSøknadSkolepenger
 import no.nav.familie.kontrakter.ef.søknad.TidligereUtdanning as KontraktTidligereUtdanning
 import no.nav.familie.kontrakter.ef.søknad.UnderUtdanning as KontraktUnderUtdanning
@@ -83,37 +81,6 @@ object SøknadsskjemaMapper {
             søkerFra = tilDomene(kontraktsøknad.stønadsstart.verdi),
             søkerFraBestemtMåned = kontraktsøknad.stønadsstart.verdi.søkerFraBestemtMåned.verdi,
             adresseopplysninger = tilDomene(kontraktsøknad.personalia, kontraktsøknad.adresseopplysninger),
-        )
-
-    fun tilDomene(kontraktsøknad: KontraktSøknadOvergangsstønadRegelendring2026): SøknadsskjemaOvergangsstønad =
-        SøknadsskjemaOvergangsstønad(
-            fødselsnummer = kontraktsøknad.personalia.verdi.fødselsnummer.verdi.verdi,
-            navn = kontraktsøknad.personalia.verdi.navn.verdi,
-            type = SøknadType.OVERGANGSSTØNAD,
-            datoMottatt = kontraktsøknad.innsendingsdetaljer.verdi.datoMottatt.verdi,
-            datoPåbegyntSøknad = kontraktsøknad.innsendingsdetaljer.verdi.datoPåbegyntSøknad,
-            sivilstand = tilDomene(kontraktsøknad.sivilstandsdetaljer.verdi),
-            medlemskap = tilDomene(kontraktsøknad.medlemskapsdetaljer.verdi),
-            bosituasjon = tilDomene(kontraktsøknad.bosituasjon.verdi),
-            sivilstandsplaner = tilDomene(kontraktsøknad.sivilstandsplaner?.verdi),
-            barn = tilDomene(kontraktsøknad.barn.verdi),
-            søkerFra = tilDomene(kontraktsøknad.stønadsstart.verdi),
-            søkerFraBestemtMåned = kontraktsøknad.stønadsstart.verdi.søkerFraBestemtMåned.verdi,
-            adresseopplysninger = tilDomene(kontraktsøknad.personalia, kontraktsøknad.adresseopplysninger),
-            erRegelendring2026 = true,
-            inntekter = StringListeWrapper(kontraktsøknad.inntekter.svarId ?: emptyList()),
-            aktivitet =
-                Aktivitet(
-                    hvordanErArbeidssituasjonen = Arbeidssituasjon(kontraktsøknad.inntekter.svarId ?: emptyList()),
-                    firmaer = tilFirmaer(kontraktsøknad.firmaer?.verdi),
-                ),
-            situasjon =
-                Situasjon(
-                    gjelderDetteDeg = GjelderDeg(kontraktsøknad.hvaSituasjon.svarId ?: emptyList()),
-                    sagtOppEllerRedusertStilling = kontraktsøknad.sagtOppEllerRedusertStilling?.svarId,
-                    oppsigelseReduksjonÅrsak = kontraktsøknad.begrunnelseSagtOppEllerRedusertStilling?.verdi,
-                    oppsigelseReduksjonTidspunkt = kontraktsøknad.datoSagtOppEllerRedusertStilling?.verdi,
-                ),
         )
 
     fun tilDomene(kontraktsøknad: KontraktSøknadBarnetilsyn): SøknadsskjemaBarnetilsyn =

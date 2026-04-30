@@ -23,7 +23,6 @@ data class AktivitetDto(
     val særligeTilsynsbehov: List<SærligeTilsynsbehovDto>,
     val datoOppstartJobb: LocalDate?,
     val erIArbeid: String?,
-    val inntekter: List<String> = emptyList(),
 )
 
 data class SagtOppEllerRedusertStillingDto(
