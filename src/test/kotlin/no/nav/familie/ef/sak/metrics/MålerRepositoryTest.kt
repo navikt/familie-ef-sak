@@ -206,7 +206,6 @@ class MålerRepositoryTest : OppslagSpringRunnerTest() {
             status = BehandlingStatus.FERDIGSTILT,
             resultat = INNVILGET,
             opprettetTid = opprettetTid,
-            vedtakstidspunkt = opprettetTid,
         ),
     )
 

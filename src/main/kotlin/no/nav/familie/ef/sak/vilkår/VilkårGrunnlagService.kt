@@ -52,8 +52,7 @@ class VilkårGrunnlagService(
                     aktivitet = it.aktivitet,
                     situasjon = it.situasjon,
                     søknadBarn = it.barn,
-                    datoPåbegyntSøknad = it.datoPåbegyntSøknad,
-                    inntekter = it.inntekter,
+                    it.datoPåbegyntSøknad,
                 )
             }
         val søknadsbarn = søknad?.barn ?: emptyList()

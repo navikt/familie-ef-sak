@@ -26,7 +26,6 @@ object AktivitetMapper {
         situasjon: Situasjon?,
         søknadBarn: Set<SøknadBarn>,
         datoPåbegyntSøknad: LocalDate?,
-        inntekter: List<String> = emptyList(),
     ): AktivitetDto =
         AktivitetDto(
             arbeidssituasjon = aktivitet?.hvordanErArbeidssituasjonen?.verdier ?: emptyList(),
@@ -44,7 +43,6 @@ object AktivitetMapper {
             særligeTilsynsbehov = tilSærligeTilsynsbehovDto(søknadBarn),
             datoOppstartJobb = situasjon?.oppstartNyJobb,
             erIArbeid = aktivitet?.erIArbeid,
-            inntekter = inntekter,
         )
 
     private fun tilArbeidforholdDto(arbeidsgivere: Set<Arbeidsgiver>?): List<ArbeidsforholdSøknadDto> =

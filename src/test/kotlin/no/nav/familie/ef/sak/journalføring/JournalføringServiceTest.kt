@@ -24,7 +24,6 @@ import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.journalføring.dto.BarnSomSkalFødes
-import no.nav.familie.ef.sak.journalføring.dto.DokumentVariantformat
 import no.nav.familie.ef.sak.journalføring.dto.JournalføringRequestV2
 import no.nav.familie.ef.sak.journalføring.dto.JournalføringTilNyBehandlingRequest
 import no.nav.familie.ef.sak.journalføring.dto.Journalføringsaksjon
@@ -44,9 +43,6 @@ import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak.NYE_OPPLYSNINGER
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak.SØKNAD
 import no.nav.familie.kontrakter.ef.iverksett.BehandlingKategori
 import no.nav.familie.kontrakter.ef.sak.DokumentBrevkode
-import no.nav.familie.kontrakter.ef.søknad.Selvstendig
-import no.nav.familie.kontrakter.ef.søknad.SøknadOvergangsstønadRegelendring2026
-import no.nav.familie.kontrakter.ef.søknad.Søknadsfelt
 import no.nav.familie.kontrakter.ef.søknad.Testsøknad
 import no.nav.familie.kontrakter.felles.Fagsystem
 import no.nav.familie.kontrakter.felles.dokarkiv.BulkOppdaterLogiskVedleggRequest
@@ -62,7 +58,6 @@ import no.nav.familie.kontrakter.felles.journalpost.Journalposttype
 import no.nav.familie.kontrakter.felles.journalpost.Journalstatus
 import no.nav.familie.kontrakter.felles.journalpost.LogiskVedlegg
 import no.nav.familie.kontrakter.felles.journalpost.RelevantDato
-import no.nav.familie.kontrakter.felles.jsonMapper
 import no.nav.familie.kontrakter.felles.oppgave.OppgavePrioritet
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.internal.TaskService
@@ -75,7 +70,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.http.HttpStatus.BAD_REQUEST
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.util.UUID
 
 internal class JournalføringServiceTest {
@@ -216,14 +210,6 @@ internal class JournalføringServiceTest {
             søknadService.lagreSøknadForOvergangsstønad(any(), any(), any(), any())
         } just Runs
 
-        every {
-            søknadService.lagreSøknadForOvergangsstønadRegelendring2026(any(), any(), any())
-        } just Runs
-
-        every {
-            journalpostClient.hentDokument(journalpostId, dokumentInfoIdMedJsonVerdi, DokumentVariantformat.ORIGINAL)
-        } returns jsonMapper.writeValueAsBytes(Testsøknad.søknadOvergangsstønad)
-
         every { taskService.save(capture(slotOpprettedeTasks)) } answers { firstArg() }
 
         every { behandlingService.oppdaterStegPåBehandling(any(), any()) } returns behandling(id = behandlingId)
@@ -276,6 +262,9 @@ internal class JournalføringServiceTest {
                 stønadstype = StønadType.OVERGANGSSTØNAD,
             )
 
+        every {
+            journalpostClient.hentOvergangsstønadSøknad(any(), any())
+        } returns Testsøknad.søknadOvergangsstønad
         every { infotrygdPeriodeValideringService.validerKanOppretteBehandlingGittInfotrygdData(any()) } just Runs
         every { behandlingService.finnSisteIverksatteBehandlingMedEventuellAvslått(any()) } returns null
 
@@ -303,32 +292,6 @@ internal class JournalføringServiceTest {
             assertThat(oppdatertDokument?.tittel).isEqualTo(nyTittel)
         }
         assertThat(slotOpprettedeTasks.map { it.type }).doesNotContain(OpprettOppgaveForOpprettetBehandlingTask.TYPE)
-        verify { journalpostClient.hentDokument(journalpostId, dokumentInfoIdMedJsonVerdi, DokumentVariantformat.ORIGINAL) }
-        verify(exactly = 0) { journalpostClient.hentOvergangsstønadSøknad(any(), any()) }
-        verify { søknadService.lagreSøknadForOvergangsstønad(any(), any(), any(), any()) }
-    }
-
-    @Test
-    internal fun `skal bruke regelendring2026-søknad ved deteksjon av ny versjon`() {
-        every { fagsakService.hentFagsak(fagsakId) } returns
-            fagsak(
-                id = fagsakId,
-                eksternId = fagsakEksternId,
-                stønadstype = StønadType.OVERGANGSSTØNAD,
-            )
-        every {
-            journalpostClient.hentDokument(journalpostId, dokumentInfoIdMedJsonVerdi, DokumentVariantformat.ORIGINAL)
-        } returns jsonMapper.writeValueAsBytes(lagTestRegelendring2026Søknad())
-        every { infotrygdPeriodeValideringService.validerKanOppretteBehandlingGittInfotrygdData(any()) } just Runs
-        every { behandlingService.finnSisteIverksatteBehandlingMedEventuellAvslått(any()) } returns null
-
-        journalføringService.fullførJournalpostV2(
-            journalpost = journalpostDigitalSøknad,
-            journalføringRequest = lagRequest(årsak = Journalføringsårsak.DIGITAL_SØKNAD, aksjon = Journalføringsaksjon.OPPRETT_BEHANDLING),
-        )
-
-        verify { søknadService.lagreSøknadForOvergangsstønadRegelendring2026(any(), any(), any()) }
-        verify(exactly = 0) { søknadService.lagreSøknadForOvergangsstønad(any(), any(), any(), any()) }
     }
 
     @Test
@@ -363,6 +326,9 @@ internal class JournalføringServiceTest {
                 stønadstype = StønadType.OVERGANGSSTØNAD,
             )
         every { journalpostClient.hentJournalpost(journalpostId) } returns (journalpostDigitalSøknad.copy(journalstatus = Journalstatus.JOURNALFOERT))
+        every {
+            journalpostClient.hentOvergangsstønadSøknad(any(), any())
+        } returns Testsøknad.søknadOvergangsstønad
         every { infotrygdPeriodeValideringService.validerKanOppretteBehandlingGittInfotrygdData(any()) } just Runs
         every { behandlingService.finnSisteIverksatteBehandlingMedEventuellAvslått(any()) } returns null
 
@@ -404,6 +370,9 @@ internal class JournalføringServiceTest {
     @Test
     internal fun `opprettBehandlingMedSøknadsdataFraEnFerdigstiltJournalpost skal kaste feil hvis finnes i infotrygd`() {
         every { journalpostClient.hentJournalpost(journalpostId) } returns (journalpostDigitalSøknad.copy(journalstatus = Journalstatus.JOURNALFOERT))
+        every {
+            journalpostClient.hentOvergangsstønadSøknad(any(), any())
+        } returns Testsøknad.søknadOvergangsstønad
 
         mockFeilerValideringAvInfotrygdperioder()
 
@@ -688,6 +657,10 @@ internal class JournalføringServiceTest {
 
         @Test
         internal fun `skal automatisk journalføre en ny digital søknad`() {
+            every {
+                journalpostClient.hentOvergangsstønadSøknad(any(), any())
+            } returns Testsøknad.søknadOvergangsstønad
+
             every { behandlingService.finnSisteIverksatteBehandlingMedEventuellAvslått(any()) } returns null
             val journalførendeEnhet = "4489"
             val mappeId = 1234L
@@ -702,10 +675,7 @@ internal class JournalføringServiceTest {
                 )
             verify { journalpostClient.oppdaterJournalpost(any(), journalpostId, null) }
             verify { journalpostClient.ferdigstillJournalpost(journalpostId, journalførendeEnhet, null) }
-            verify { journalpostClient.hentDokument(journalpostId, dokumentInfoIdMedJsonVerdi, DokumentVariantformat.ORIGINAL) }
-            verify(exactly = 0) { journalpostClient.hentOvergangsstønadSøknad(any(), any()) }
             verify { søknadService.lagreSøknadForOvergangsstønad(any(), any(), any(), any()) }
-            verify(exactly = 0) { søknadService.lagreSøknadForOvergangsstønadRegelendring2026(any(), any(), any()) }
             verify {
                 behandlingService.opprettBehandling(
                     behandlingType = FØRSTEGANGSBEHANDLING,
@@ -729,26 +699,6 @@ internal class JournalføringServiceTest {
             assertThat(res.behandlingId).isEqualTo(behandlingId)
             assertThat(res.fagsakId).isEqualTo(fagsakId)
             assertThat(slotOpprettedeTasks.map { it.type }).containsExactly(OpprettOppgaveForOpprettetBehandlingTask.TYPE)
-        }
-
-        @Test
-        internal fun `skal bruke regelendring2026-søknad ved automatisk journalføring`() {
-            every {
-                journalpostClient.hentDokument(journalpostId, dokumentInfoIdMedJsonVerdi, DokumentVariantformat.ORIGINAL)
-            } returns jsonMapper.writeValueAsBytes(lagTestRegelendring2026Søknad())
-            every { behandlingService.finnSisteIverksatteBehandlingMedEventuellAvslått(any()) } returns null
-
-            journalføringService.automatiskJournalfør(
-                fagsak,
-                journalpostDigitalSøknad,
-                "4489",
-                null,
-                FØRSTEGANGSBEHANDLING,
-                OppgavePrioritet.NORM,
-            )
-
-            verify { søknadService.lagreSøknadForOvergangsstønadRegelendring2026(any(), any(), any()) }
-            verify(exactly = 0) { søknadService.lagreSøknadForOvergangsstønad(any(), any(), any(), any()) }
         }
     }
 
@@ -841,32 +791,5 @@ internal class JournalføringServiceTest {
 
     private fun mockSisteIverksatteBehandlinger(sisteBehandling: Behandling?) {
         every { behandlingService.finnSisteIverksatteBehandlingMedEventuellAvslått(any()) } returns sisteBehandling
-    }
-
-    private fun lagTestRegelendring2026Søknad(): SøknadOvergangsstønadRegelendring2026 {
-        val gammelSøknad = Testsøknad.søknadOvergangsstønad
-        return SøknadOvergangsstønadRegelendring2026(
-            innsendingsdetaljer = gammelSøknad.innsendingsdetaljer,
-            personalia = gammelSøknad.personalia,
-            sivilstandsdetaljer = gammelSøknad.sivilstandsdetaljer,
-            medlemskapsdetaljer = gammelSøknad.medlemskapsdetaljer,
-            bosituasjon = gammelSøknad.bosituasjon,
-            barn = gammelSøknad.barn,
-            hvaSituasjon = Søknadsfelt("Hva er situasjonen din?", listOf("Jeg har barn under 14 måneder"), svarId = listOf("barnUnder14Måneder")),
-            inntekter = Søknadsfelt("Har du inntekt?", listOf("Arbeidstaker"), svarId = listOf("arbeidstaker")),
-            firmaer =
-                Søknadsfelt(
-                    "Firmaer",
-                    listOf(
-                        Selvstendig(
-                            firmanavn = Søknadsfelt("Firmanavn", "Firma AS"),
-                            organisasjonsnummer = Søknadsfelt("Orgnr", "123456789"),
-                            etableringsdato = Søknadsfelt("Etableringsdato", LocalDate.of(2020, 1, 1)),
-                            hvordanSerArbeidsukenUt = Søknadsfelt("Arbeidsuke", "8 timer daglig"),
-                        ),
-                    ),
-                ),
-            stønadsstart = gammelSøknad.stønadsstart,
-        )
     }
 }
