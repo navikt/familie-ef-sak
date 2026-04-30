@@ -11,6 +11,7 @@ import no.nav.familie.ef.sak.opplysninger.søknad.domain.Søknadsverdier
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.tilSøknadsverdier
 import no.nav.familie.ef.sak.opplysninger.søknad.mapper.SøknadsskjemaMapper
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
+import org.springframework.data.repository.findByIdOrNull
 import no.nav.familie.kontrakter.ef.søknad.SøknadBarnetilsyn
 import no.nav.familie.kontrakter.ef.søknad.SøknadOvergangsstønad
 import no.nav.familie.kontrakter.ef.søknad.SøknadOvergangsstønadRegelendring2026
@@ -123,6 +124,15 @@ class SøknadService(
         val søknadsskjema = SøknadsskjemaMapper.tilDomene(søknad)
         søknadSkolepengerRepository.insert(søknadsskjema)
         søknadRepository.insert(SøknadMapper.toDomain(journalpostId, søknadsskjema, behandlingId))
+    }
+
+    fun erRegelendring2026(behandlingId: UUID): Boolean {
+        val søknad = hentSøknad(behandlingId) ?: return false
+        return when (søknad.type) {
+            SøknadType.OVERGANGSSTØNAD ->
+                søknadOvergangsstønadRepository.findByIdOrNull(søknad.soknadsskjemaId)?.erRegelendring2026 ?: false
+            else -> false
+        }
     }
 
     private fun hentSøknad(behandlingId: UUID): Søknad? = søknadRepository.findByBehandlingId(behandlingId)

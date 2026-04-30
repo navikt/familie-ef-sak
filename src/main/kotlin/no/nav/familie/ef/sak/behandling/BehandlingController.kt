@@ -40,11 +40,7 @@ class BehandlingController(
     ): Ressurs<BehandlingDto> {
         val saksbehandling: Saksbehandling = behandlingService.hentSaksbehandling(behandlingId)
         tilgangService.validerTilgangTilPersonMedBarn(saksbehandling.ident, AuditLoggerEvent.ACCESS)
-        val erRegelendring2026 =
-            when (saksbehandling.stønadstype) {
-                StønadType.OVERGANGSSTØNAD -> søknadService.hentOvergangsstønad(behandlingId)?.erRegelendring2026 ?: false
-                else -> false
-            }
+        val erRegelendring2026 = søknadService.erRegelendring2026(behandlingId)
 
         return Ressurs.success(saksbehandling.tilDto(erRegelendring2026 = erRegelendring2026))
     }
