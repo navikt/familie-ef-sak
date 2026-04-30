@@ -10,7 +10,6 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.Grunnlagsdat
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.Arbeidssituasjon
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.Dokumentasjon
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.GjelderDeg
-import no.nav.familie.ef.sak.opplysninger.søknad.domain.StringListeWrapper
 import no.nav.familie.ef.sak.samværsavtale.domain.SamværsukeWrapper
 import no.nav.familie.ef.sak.vedtak.domain.BarnetilsynWrapper
 import no.nav.familie.ef.sak.vedtak.domain.InntektWrapper
@@ -132,8 +131,6 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
             SamværsukerTilPGobjectConverter(),
             GrunnlagsdataInntektTilPGobjectConverter(),
             PGobjectTilGrunnlagsdataInntekt(),
-            StringListeWrapperTilStringConverter(),
-            StringTilStringListeWrapperConverter(),
         )
 
     @ReadingConverter
@@ -421,15 +418,5 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
                 type = "json"
                 value = jsonMapper.writeValueAsString(samværsuker.uker)
             }
-    }
-
-    @WritingConverter
-    class StringListeWrapperTilStringConverter : Converter<StringListeWrapper, String> {
-        override fun convert(wrapper: StringListeWrapper): String = wrapper.verdier.joinToString(";")
-    }
-
-    @ReadingConverter
-    class StringTilStringListeWrapperConverter : Converter<String, StringListeWrapper> {
-        override fun convert(verdi: String): StringListeWrapper = StringListeWrapper(verdi.split(";").filter { it.isNotEmpty() })
     }
 }
