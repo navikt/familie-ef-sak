@@ -11,12 +11,12 @@ import no.nav.familie.ef.sak.opplysninger.søknad.domain.Søknadsverdier
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.tilSøknadsverdier
 import no.nav.familie.ef.sak.opplysninger.søknad.mapper.SøknadsskjemaMapper
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
-import org.springframework.data.repository.findByIdOrNull
 import no.nav.familie.kontrakter.ef.søknad.SøknadBarnetilsyn
 import no.nav.familie.kontrakter.ef.søknad.SøknadOvergangsstønad
 import no.nav.familie.kontrakter.ef.søknad.SøknadOvergangsstønadRegelendring2026
 import no.nav.familie.kontrakter.ef.søknad.SøknadSkolepenger
 import org.slf4j.LoggerFactory
+import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDateTime
@@ -129,9 +129,13 @@ class SøknadService(
     fun erRegelendring2026(behandlingId: UUID): Boolean {
         val søknad = hentSøknad(behandlingId) ?: return false
         return when (søknad.type) {
-            SøknadType.OVERGANGSSTØNAD ->
+            SøknadType.OVERGANGSSTØNAD -> {
                 søknadOvergangsstønadRepository.findByIdOrNull(søknad.soknadsskjemaId)?.erRegelendring2026 ?: false
-            else -> false
+            }
+
+            else -> {
+                false
+            }
         }
     }
 
