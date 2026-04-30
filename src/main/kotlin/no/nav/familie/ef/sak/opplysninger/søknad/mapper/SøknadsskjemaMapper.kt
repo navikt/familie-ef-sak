@@ -110,7 +110,7 @@ object SøknadsskjemaMapper {
             situasjon =
                 Situasjon(
                     gjelderDetteDeg = GjelderDeg(kontraktsøknad.hvaSituasjon.svarId ?: emptyList()),
-                    sagtOppEllerRedusertStilling = kontraktsøknad.sagtOppEllerRedusertStilling?.verdi,
+                    sagtOppEllerRedusertStilling = kontraktsøknad.sagtOppEllerRedusertStilling?.svarId,
                     oppsigelseReduksjonÅrsak = kontraktsøknad.begrunnelseSagtOppEllerRedusertStilling?.verdi,
                     oppsigelseReduksjonTidspunkt = kontraktsøknad.datoSagtOppEllerRedusertStilling?.verdi,
                 ),
