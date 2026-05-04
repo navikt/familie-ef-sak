@@ -93,6 +93,7 @@ class BarnMedSamværMapper(
         return BarnMedSamværSøknadsgrunnlagDto(
             id = behandlingBarn.id,
             navn = behandlingBarn.navn,
+            fødselsnummer = behandlingBarn.personIdent,
             fødselTermindato = behandlingBarn.fødselTermindato,
             harSammeAdresse = søknadsbarn?.harSkalHaSammeAdresse,
             skalBoBorHosSøker = søknadsbarn?.skalBoHosSøker,

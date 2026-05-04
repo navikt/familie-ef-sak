@@ -4,12 +4,17 @@ import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvisIkke
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.ef.sak.journalføring.dto.BarnSomSkalFødes
+import no.nav.familie.ef.sak.journalføring.dto.ForeldreansvarBarn
 import no.nav.familie.ef.sak.journalføring.dto.UstrukturertDokumentasjonType
 import no.nav.familie.ef.sak.journalføring.dto.VilkårsbehandleNyeBarn
 import no.nav.familie.ef.sak.opplysninger.mapper.BarnMatcher
 import no.nav.familie.ef.sak.opplysninger.mapper.MatchetBehandlingBarn
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.BarnMedIdent
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.gjeldende
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.visningsnavn
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
 import no.nav.familie.ef.sak.repository.findAllByIdOrThrow
@@ -22,6 +27,8 @@ class BarnService(
     private val barnRepository: BarnRepository,
     private val søknadService: SøknadService,
     private val behandlingService: BehandlingService,
+    private val featureToggleService: FeatureToggleService,
+    private val personService: PersonService,
 ) {
     /**
      * Barn som blir lagrede er:
@@ -39,12 +46,13 @@ class BarnService(
         stønadstype: StønadType,
         ustrukturertDokumentasjonType: UstrukturertDokumentasjonType = UstrukturertDokumentasjonType.IKKE_VALGT,
         barnSomSkalFødes: List<BarnSomSkalFødes> = emptyList(),
+        foreldreansvarBarn: List<ForeldreansvarBarn> = emptyList(),
         vilkårsbehandleNyeBarn: VilkårsbehandleNyeBarn = VilkårsbehandleNyeBarn.IKKE_VALGT,
     ) {
         val barnPåBehandlingen: List<BehandlingBarn> =
             when (stønadstype) {
                 StønadType.BARNETILSYN -> {
-                    barnForBarnetilsyn(barnSomSkalFødes, behandlingId, grunnlagsdataBarn)
+                    barnForBarnetilsyn(foreldreansvarBarn, behandlingId, grunnlagsdataBarn)
                 }
 
                 StønadType.OVERGANGSSTØNAD, StønadType.SKOLEPENGER -> {
@@ -65,22 +73,40 @@ class BarnService(
      * Barnetilsyn bruker barn fra registeret, og kobler det til søknadsbarn hvis det finnes i søknaden
      */
     private fun barnForBarnetilsyn(
-        barnSomSkalFødes: List<BarnSomSkalFødes>,
+        foreldreansvarBarn: List<ForeldreansvarBarn>,
         behandlingId: UUID,
         grunnlagsdataBarn: List<BarnMedIdent>,
     ): List<BehandlingBarn> {
-        feilHvis(barnSomSkalFødes.isNotEmpty()) {
-            "Kan ikke håndtere barnSomSkalFødes i barnetilsyn"
-        }
         val barnFraSøknad = hentSøknadsbarnForBehandling(behandlingId).associate { it.fødselsnummer to it.id }
-        return grunnlagsdataBarn.map { barn ->
-            BehandlingBarn(
-                behandlingId = behandlingId,
-                søknadBarnId = barnFraSøknad[barn.personIdent],
-                personIdent = barn.personIdent,
-                navn = barn.navn.visningsnavn(),
-            )
+        val registerbarn =
+            grunnlagsdataBarn.map { barn ->
+                BehandlingBarn(
+                    behandlingId = behandlingId,
+                    søknadBarnId = barnFraSøknad[barn.personIdent],
+                    personIdent = barn.personIdent,
+                    navn = barn.navn.visningsnavn(),
+                )
+            }
+        if (!featureToggleService.isEnabled(Toggle.MULIGHET_LEGG_TIL_FORELDREANSVARSBARN_BARNETILSYN)) {
+            return registerbarn
         }
+        val foreldreansvarBarnPdlMap =
+            if (foreldreansvarBarn.isNotEmpty()) {
+                personService.hentPersonForelderBarnRelasjon(foreldreansvarBarn.map { it.fødselsnummer })
+            } else {
+                emptyMap()
+            }
+        val foreldreansvarBarnSomBehandlingBarn =
+            foreldreansvarBarn.map { barn ->
+                val pdlBarn = foreldreansvarBarnPdlMap[barn.fødselsnummer]
+                BehandlingBarn(
+                    behandlingId = behandlingId,
+                    personIdent = barn.fødselsnummer,
+                    navn = pdlBarn?.navn?.gjeldende()?.visningsnavn(),
+                    fødselTermindato = pdlBarn?.fødselsdato?.firstOrNull()?.fødselsdato,
+                )
+            }
+        return registerbarn + foreldreansvarBarnSomBehandlingBarn
     }
 
     private fun kobleBarnForOvergangsstønadOgSkolepenger(
