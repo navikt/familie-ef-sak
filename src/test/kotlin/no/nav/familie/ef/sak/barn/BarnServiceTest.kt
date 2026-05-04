@@ -10,6 +10,7 @@ import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.ef.sak.journalføring.dto.BarnSomSkalFødes
+import no.nav.familie.ef.sak.journalføring.dto.ForeldreansvarBarn
 import no.nav.familie.ef.sak.journalføring.dto.UstrukturertDokumentasjonType
 import no.nav.familie.ef.sak.journalføring.dto.VilkårsbehandleNyeBarn
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
@@ -307,6 +308,29 @@ internal class BarnServiceTest {
         assertThat(barnSlot.captured).hasSize(2)
         assertThat(barnSlot.captured[0].personIdent).isEqualTo(pdlTerminbarn.personIdent)
         assertThat(barnSlot.captured[1].personIdent).isEqualTo(barnOver18.personIdent)
+    }
+
+    @Test
+    internal fun `skal inkludere foreldreansvarsbarn når feature toggle er aktivert`() {
+        every { featureToggleService.isEnabled(Toggle.MULIGHET_LEGG_TIL_FORELDREANSVARSBARN_BARNETILSYN) } returns true
+        val fødselsDato = LocalDate.now().minusYears(2)
+
+        val forelderAnsvarBarn = barnMedIdent(FnrGenerator.generer(fødselsDato), "J B")
+
+        every { personService.hentPersonForelderBarnRelasjon(any()) } returns mapOf()
+
+        barnService.opprettBarnPåBehandlingMedSøknadsdata(
+            behandlingId,
+            fagsakId,
+            emptyList(),
+            BARNETILSYN,
+            UstrukturertDokumentasjonType.IKKE_VALGT,
+            vilkårsbehandleNyeBarn = VilkårsbehandleNyeBarn.IKKE_VALGT,
+            foreldreansvarBarn = listOf(ForeldreansvarBarn(forelderAnsvarBarn.personIdent)),
+        )
+
+        assertThat(barnSlot.captured).hasSize(1)
+        assertThat(barnSlot.captured[0].personIdent).isEqualTo(forelderAnsvarBarn.personIdent)
     }
 
     @Nested
