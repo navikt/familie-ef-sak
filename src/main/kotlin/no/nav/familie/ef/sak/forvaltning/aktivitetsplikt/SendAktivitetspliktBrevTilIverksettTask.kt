@@ -25,6 +25,7 @@ import no.nav.familie.prosessering.domene.Task
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import java.time.LocalDate
 import java.time.Year
 import java.util.Properties
 
@@ -53,7 +54,7 @@ class SendAktivitetspliktBrevTilIverksettTask(
         val ident = OppgaveUtil.finnPersonidentForOppgave(oppgave) ?: throw Feil("Fant ikke ident for oppgave=${oppgave.id}")
         val fagsaker = fagsakService.finnFagsaker(setOf(ident))
 
-        validerHarIkkeVergemål(ident, oppgave)
+        validerHarIkkeVergemålOgErOver18År(ident, oppgave)
         validerHarFagsakOgBehandling(fagsaker, oppgave)
 
         val visningsnavn = personopplysningerService.hentGjeldeneNavn(listOf(ident)).getValue(ident)
@@ -76,14 +77,17 @@ class SendAktivitetspliktBrevTilIverksettTask(
         )
     }
 
-    private fun validerHarIkkeVergemål(
+    private fun validerHarIkkeVergemålOgErOver18År(
         ident: String,
-        opggave: Oppgave,
+        oppgave: Oppgave,
     ) {
         val personopplysninger = personopplysningerService.hentPersonopplysningerFraRegister(ident)
         val harVerge = personopplysninger.vergemål.isNotEmpty()
+        feilHvis(personopplysninger.fødselsdato == null || LocalDate.now().isBefore(personopplysninger.fødselsdato.plusYears(18))) {
+            "Kan ikke automatisk sende brev for oppgaveId=${oppgave.id}. Bruker er under 18 år eller fødselsdato er ukjent. Saken må følges opp manuelt."
+        }
         feilHvis(harVerge) {
-            "Kan ikke automatisk sende brev for oppgaveId=${opggave.id}. Brev om innhenting av aktivitetsplikt skal ikke sendes automatisk fordi bruker har vergemål. Saken må følges opp manuelt og tasken kan avvikshåndteres."
+            "Kan ikke automatisk sende brev for oppgaveId=${oppgave.id}. Brev om innhenting av aktivitetsplikt skal ikke sendes automatisk fordi bruker har vergemål. Saken må følges opp manuelt og tasken kan avvikshåndteres."
         }
     }
 
