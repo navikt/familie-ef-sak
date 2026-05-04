@@ -18,6 +18,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import java.time.LocalDate
 import java.time.Year
 
 internal class AktivitetspliktBrevTaskTest {
@@ -45,6 +46,7 @@ internal class AktivitetspliktBrevTaskTest {
         every { personopplysningerService.hentPersonopplysningerFraRegister(any<String>()) } returns
             mockk {
                 every { vergemål } returns emptyList()
+                every { fødselsdato } returns LocalDate.now().minusYears(30)
             }
     }
 
@@ -97,11 +99,34 @@ internal class AktivitetspliktBrevTaskTest {
         every { personopplysningerService.hentPersonopplysningerFraRegister(any<String>()) } returns
             mockk {
                 every { vergemål } returns listOf(mockk())
+                every { fødselsdato } returns LocalDate.now().minusYears(30)
             }
 
         val task = SendAktivitetspliktBrevTilIverksettTask.opprettTask(oppgaveId, Year.of(2023))
 
         val feil = assertThrows<Feil> { aktivitetspliktBrevTask.doTask(task) }
         assertThat(feil.frontendFeilmelding?.contains("Kan ikke automatisk sende brev for oppgaveId=$oppgaveId. Brev om innhenting av aktivitetsplikt skal ikke sendes automatisk fordi bruker har vergemål. Saken må følges opp manuelt og tasken kan avvikshåndteres."))
+    }
+
+    @Test
+    internal fun `task skal feile dersom bruker er under 18 år`() {
+        val oppgaveId: Long = 123
+
+        every { oppgaveService.hentOppgave(oppgaveId) } returns
+            Oppgave(
+                id = oppgaveId,
+                identer = listOf(OppgaveIdentV2("11111111", IdentGruppe.FOLKEREGISTERIDENT)),
+            )
+        every { fagsakService.finnFagsaker(any()) } returns listOf(fagsak())
+        every { personopplysningerService.hentPersonopplysningerFraRegister(any<String>()) } returns
+            mockk {
+                every { vergemål } returns emptyList()
+                every { fødselsdato } returns LocalDate.now().minusYears(17)
+            }
+
+        val task = SendAktivitetspliktBrevTilIverksettTask.opprettTask(oppgaveId, Year.of(2026))
+
+        val feil = assertThrows<Feil> { aktivitetspliktBrevTask.doTask(task) }
+        assertThat(feil.message).contains("under 18")
     }
 }
