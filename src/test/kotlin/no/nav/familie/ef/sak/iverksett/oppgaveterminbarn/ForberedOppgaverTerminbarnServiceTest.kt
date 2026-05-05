@@ -1,6 +1,5 @@
 package no.nav.familie.ef.sak.iverksett.oppgaveterminbarn
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
@@ -8,6 +7,7 @@ import io.mockk.slot
 import io.mockk.unmockkObject
 import io.mockk.verify
 import no.nav.familie.ef.sak.fagsak.FagsakService
+import no.nav.familie.ef.sak.infrastruktur.config.readValue
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.Fødsel
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper.GrunnlagsdataMapper
@@ -16,7 +16,7 @@ import no.nav.familie.ef.sak.testutil.PdlTestdataHelper.fødsel
 import no.nav.familie.ef.sak.testutil.PdlTestdataHelper.pdlBarn
 import no.nav.familie.kontrakter.ef.iverksett.OppgaveForBarn
 import no.nav.familie.kontrakter.felles.ef.StønadType
-import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.jsonMapper
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.internal.TaskService
 import org.assertj.core.api.Assertions.assertThat
@@ -71,7 +71,7 @@ internal class ForberedOppgaverTerminbarnServiceTest {
         every { taskService.save(capture(oppgaverForBarnSlot)) } returns mockk()
 
         forberedOppgaverTerminbarnService.forberedOppgaverForUfødteTerminbarn()
-        val capture = objectMapper.readValue<OppgaveForBarn>(oppgaverForBarnSlot.captured.payload)
+        val capture = jsonMapper.readValue<OppgaveForBarn>(oppgaverForBarnSlot.captured.payload)
         assertThat(capture.behandlingId).isEqualTo(terminbarn.first().behandlingId)
         assertThat(capture.eksternFagsakId).isEqualTo(terminbarn.first().eksternFagsakId)
         assertThat(capture.beskrivelse).isEqualTo(OppgaveBeskrivelse.beskrivelseUfødtTerminbarn())

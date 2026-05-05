@@ -123,7 +123,7 @@ spec:
           - id: "2931da41-8b8e-42cd-99c0-04a169ddae40" # 0000-GA-Strengt_Fortrolig_Adresse
           - id: "e98efc34-12d1-401f-b059-f17e62834065" # 0000-GA-Fortrolig_Adresse
           - id: "e750ceb5-b70b-4d94-b4fa-9d22467b786b" # 0000-GA-Egne_ansatte
-          - id: "3d718ae5-f25e-47a4-b4b3-084a97604c1d" # teamfamilie-forvaltning
+          - id: "f9882377-e69d-4af8-b41d-3ccdfc46ef8d" # teamfamilie-forvaltning
         extra:
           - "NAVident"
           - "azp_name"

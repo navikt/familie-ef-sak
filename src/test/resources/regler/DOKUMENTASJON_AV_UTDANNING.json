@@ -1,5 +1,4 @@
 {
-  "vilkårType" : "DOKUMENTASJON_AV_UTDANNING",
   "regler" : {
     "DOKUMENTASJON_AV_UTDANNING" : {
       "regelId" : "DOKUMENTASJON_AV_UTDANNING",
@@ -29,5 +28,6 @@
       },
       "versjon" : "GJELDENDE"
     }
-  }
+  },
+  "vilkårType" : "DOKUMENTASJON_AV_UTDANNING"
 }

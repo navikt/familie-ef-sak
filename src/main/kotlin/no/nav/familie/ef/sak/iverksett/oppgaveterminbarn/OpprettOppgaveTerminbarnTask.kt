@@ -1,9 +1,9 @@
 package no.nav.familie.ef.sak.iverksett.oppgaveterminbarn
 
-import com.fasterxml.jackson.module.kotlin.readValue
+import no.nav.familie.ef.sak.infrastruktur.config.readValue
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.kontrakter.ef.iverksett.OppgaveForBarn
-import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.jsonMapper
 import no.nav.familie.log.IdUtils
 import no.nav.familie.log.mdc.MDCConstants
 import no.nav.familie.prosessering.AsyncTaskStep
@@ -23,13 +23,13 @@ class OpprettOppgaveTerminbarnTask(
     val featureToggleService: FeatureToggleService,
 ) : AsyncTaskStep {
     override fun doTask(task: Task) {
-        val oppgaveForBarn = objectMapper.readValue<OppgaveForBarn>(task.payload)
+        val oppgaveForBarn = jsonMapper.readValue<OppgaveForBarn>(task.payload)
         opprettOppgaverForTerminbarnService.opprettOppgaveForTerminbarn(oppgaveForBarn)
     }
 
     companion object {
         fun opprettTask(opprettOppgavePayload: OppgaveForBarn): Task =
-            Task(TYPE, objectMapper.writeValueAsString(opprettOppgavePayload)).apply {
+            Task(TYPE, jsonMapper.writeValueAsString(opprettOppgavePayload)).apply {
                 this.metadata[MDCConstants.MDC_CALL_ID] = IdUtils.generateId()
             }
 

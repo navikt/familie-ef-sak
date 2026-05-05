@@ -1,5 +1,4 @@
 {
-  "vilkårType" : "SAMLIV",
   "regler" : {
     "LEVER_IKKE_MED_ANNEN_FORELDER" : {
       "regelId" : "LEVER_IKKE_MED_ANNEN_FORELDER",
@@ -29,5 +28,6 @@
       },
       "versjon" : "GJELDENDE"
     }
-  }
+  },
+  "vilkårType" : "SAMLIV"
 }

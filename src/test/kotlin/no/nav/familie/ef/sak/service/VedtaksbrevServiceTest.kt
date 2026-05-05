@@ -1,6 +1,5 @@
 package no.nav.familie.ef.sak.service
 
-import com.fasterxml.jackson.databind.node.TextNode
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
@@ -33,7 +32,7 @@ import no.nav.familie.ef.sak.repository.saksbehandling
 import no.nav.familie.ef.sak.repository.vedtak
 import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.ef.sak.vedtak.domain.VedtakErUtenBeslutter
-import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.jsonMapper
 import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG
 import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING.UGRADERT
 import org.assertj.core.api.Assertions.assertThat
@@ -42,6 +41,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.http.HttpStatus.BAD_REQUEST
+import tools.jackson.databind.node.StringNode
 
 internal class VedtaksbrevServiceTest {
     private val fagsak = fagsak(setOf(PersonIdent("12345678910")))
@@ -215,7 +215,7 @@ internal class VedtaksbrevServiceTest {
                                 BehandlingStatus.FERDIGSTILT,
                         ),
                     ),
-                    TextNode(""),
+                    jsonMapper.valueToTree(""),
                     "",
                 )
         }
@@ -253,7 +253,7 @@ internal class VedtaksbrevServiceTest {
     @Test
     internal fun `JsonNode toString fungerer som forventet`() {
         val json = """{"name":"John"}"""
-        assertThat(objectMapper.readTree(json).toString()).isEqualTo(json)
+        assertThat(jsonMapper.readTree(json).toString()).isEqualTo(json)
     }
 
     @Test
@@ -310,7 +310,7 @@ internal class VedtaksbrevServiceTest {
 
         vedtaksbrevService.lagSaksbehandlerSanitybrev(
             saksbehandling(fagsak, behandling),
-            objectMapper.createObjectNode(),
+            jsonMapper.createObjectNode(),
             "brevmal",
         )
 
@@ -331,7 +331,7 @@ internal class VedtaksbrevServiceTest {
         val now = SporbarUtils.now()
         vedtaksbrevService.lagSaksbehandlerSanitybrev(
             saksbehandling(fagsak, behandling),
-            objectMapper.createObjectNode(),
+            jsonMapper.createObjectNode(),
             "brevmal",
         )
         assertThat(vedtaksbrevSlot.captured.opprettetTid).isAfterOrEqualTo(now)

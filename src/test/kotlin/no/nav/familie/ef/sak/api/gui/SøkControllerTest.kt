@@ -9,7 +9,6 @@ import no.nav.familie.ef.sak.fagsak.dto.Søkeresultat
 import no.nav.familie.ef.sak.felles.dto.PersonIdentDto
 import no.nav.familie.ef.sak.infotrygd.InfotrygdReplikaClient
 import no.nav.familie.ef.sak.infrastruktur.config.InfotrygdReplikaMock
-import no.nav.familie.ef.sak.infrastruktur.config.ObjectMapperProvider
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdFinnesResponse
 import no.nav.familie.kontrakter.ef.infotrygd.Saktreff
@@ -21,15 +20,12 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.resttestclient.exchange
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
-import org.springframework.web.client.HttpClientErrorException
-import org.springframework.web.client.exchange
 
 internal class SøkControllerTest : OppslagSpringRunnerTest() {
     @Autowired

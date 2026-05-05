@@ -25,7 +25,6 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.oppgave
-import no.nav.familie.http.client.RessursException
 import no.nav.familie.kontrakter.felles.Behandlingstema
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.Tema
@@ -42,6 +41,7 @@ import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype.VurderHenvendelse
 import no.nav.familie.kontrakter.felles.oppgave.OpprettOppgaveRequest
 import no.nav.familie.kontrakter.felles.oppgave.StatusEnum.FEILREGISTRERT
 import no.nav.familie.kontrakter.felles.oppgave.StatusEnum.FERDIGSTILT
+import no.nav.familie.restklient.client.RessursException
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.BeforeEach

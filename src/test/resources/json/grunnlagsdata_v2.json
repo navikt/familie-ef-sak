@@ -1022,7 +1022,7 @@
               "omfangetErInnenPersonligOmraade" : {
                 "name" : "omfangetErInnenPersonligOmraade",
                 "type" : "Boolean",
-                "nullable" : false
+                "nullable" : true
               }
             },
             "nullable" : false

@@ -1,17 +1,17 @@
 package no.nav.familie.ef.sak.behandlingsflyt.task
 
-import com.fasterxml.jackson.module.kotlin.readValue
-import no.nav.familie.ef.sak.arbeidsfordeling.ArbeidsfordelingService.Companion.MASKINELL_JOURNALFOERENDE_ENHET
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType.FØRSTEGANGSBEHANDLING
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType.REVURDERING
 import no.nav.familie.ef.sak.behandling.revurdering.ÅrsakRevurderingService
+import no.nav.familie.ef.sak.infrastruktur.config.readValue
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerService
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
 import no.nav.familie.ef.sak.vedtak.VedtakRepository
 import no.nav.familie.ef.sak.vedtak.domain.Vedtak
@@ -26,8 +26,9 @@ import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.kontrakter.felles.ef.StønadType.BARNETILSYN
 import no.nav.familie.kontrakter.felles.ef.StønadType.OVERGANGSSTØNAD
 import no.nav.familie.kontrakter.felles.ef.StønadType.SKOLEPENGER
-import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.jsonMapper
 import no.nav.familie.kontrakter.felles.oppgave.Oppgave
+import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
@@ -51,12 +52,13 @@ class BehandlingsstatistikkTask(
     private val oppgaveService: OppgaveService,
     private val grunnlagsdataService: GrunnlagsdataService,
     private val årsakRevurderingService: ÅrsakRevurderingService,
+    private val personopplysningerService: PersonopplysningerService,
 ) : AsyncTaskStep {
     private val zoneIdOslo = ZoneId.of("Europe/Oslo")
 
     override fun doTask(task: Task) {
         val (behandlingId, hendelse, hendelseTidspunkt, gjeldendeSaksbehandler, oppgaveId, behandlingMetode) =
-            objectMapper.readValue<BehandlingsstatistikkTaskPayload>(task.payload)
+            jsonMapper.readValue<BehandlingsstatistikkTaskPayload>(task.payload)
 
         val saksbehandling = behandlingService.hentSaksbehandling(behandlingId)
         val årsakRevurdering = årsakRevurderingService.hentÅrsakRevurdering(behandlingId)
@@ -65,7 +67,20 @@ class BehandlingsstatistikkTask(
         val vedtak = vedtakRepository.findByIdOrNull(behandlingId)
 
         val resultatBegrunnelse = finnResultatBegrunnelse(hendelse, vedtak, saksbehandling)
-        val søker = grunnlagsdataService.hentGrunnlagsdata(behandlingId).grunnlagsdata.søker
+
+        val erStrengtFortrolig: Boolean =
+            try {
+                val søker = grunnlagsdataService.hentGrunnlagsdata(behandlingId).grunnlagsdata.søker
+                søker.adressebeskyttelse?.erStrengtFortrolig() ?: false
+            } catch (e: IllegalStateException) {
+                if (saksbehandling.resultat == BehandlingResultat.HENLAGT && e.message?.contains("Finner ikke Grunnlagsdata ") == true) {
+                    val beskyttelse = personopplysningerService.hentStrengesteAdressebeskyttelseForPersonMedRelasjoner(saksbehandling.ident)
+                    beskyttelse.erStrengtFortrolig()
+                } else {
+                    throw e
+                }
+            }
+
         val henvendelseTidspunkt = finnHenvendelsestidspunkt(saksbehandling)
         val relatertEksternBehandlingId =
             saksbehandling.forrigeBehandlingId?.let { behandlingService.hentBehandling(it).eksternId }
@@ -94,9 +109,9 @@ class BehandlingsstatistikkTask(
                 hendelse = hendelse,
                 behandlingResultat = saksbehandling.resultat.name,
                 resultatBegrunnelse = resultatBegrunnelse,
-                opprettetEnhet = sisteOppgaveForBehandling?.opprettetAvEnhetsnr ?: MASKINELL_JOURNALFOERENDE_ENHET,
-                ansvarligEnhet = sisteOppgaveForBehandling?.tildeltEnhetsnr ?: MASKINELL_JOURNALFOERENDE_ENHET,
-                strengtFortroligAdresse = søker.adressebeskyttelse?.erStrengtFortrolig() ?: false,
+                opprettetEnhet = sisteOppgaveForBehandling?.opprettetAvEnhetsnr ?: FELLES_ENHET,
+                ansvarligEnhet = sisteOppgaveForBehandling?.tildeltEnhetsnr ?: FELLES_ENHET,
+                strengtFortroligAdresse = erStrengtFortrolig,
                 stønadstype = saksbehandling.stønadstype,
                 behandlingstype = BehandlingType.valueOf(saksbehandling.type.name),
                 henvendelseTidspunkt = henvendelseTidspunkt.atZone(zoneIdOslo),
@@ -119,11 +134,11 @@ class BehandlingsstatistikkTask(
     private fun finnSisteOppgaveForBehandlingen(
         behandlingId: UUID,
         oppgaveId: Long?,
-    ): Oppgave? {
-        val gsakOppgaveId = oppgaveId ?: oppgaveService.finnSisteOppgaveForBehandling(behandlingId)?.gsakOppgaveId
-
-        return gsakOppgaveId?.let { oppgaveService.hentOppgave(it) }
-    }
+    ): Oppgave? =
+        when (oppgaveId) {
+            null -> oppgaveService.finnBehandlingsoppgaveSistEndretIEFSak(behandlingId)
+            else -> oppgaveService.hentOppgave(oppgaveId)
+        }
 
     private fun Hendelse.erBesluttetEllerFerdig() = this.name == Hendelse.BESLUTTET.name || this.name == Hendelse.FERDIG.name
 
@@ -278,7 +293,7 @@ class BehandlingsstatistikkTask(
             Task(
                 type = TYPE,
                 payload =
-                    objectMapper.writeValueAsString(
+                    jsonMapper.writeValueAsString(
                         BehandlingsstatistikkTaskPayload(
                             behandlingId,
                             hendelse,
@@ -299,8 +314,13 @@ class BehandlingsstatistikkTask(
             )
 
         const val TYPE = "behandlingsstatistikkTask"
+        const val FELLES_ENHET = "4489"
     }
 }
+
+private fun ADRESSEBESKYTTELSEGRADERING.erStrengtFortrolig(): Boolean =
+    this == ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG ||
+        this == ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG_UTLAND
 
 data class BehandlingsstatistikkTaskPayload(
     val behandlingId: UUID,

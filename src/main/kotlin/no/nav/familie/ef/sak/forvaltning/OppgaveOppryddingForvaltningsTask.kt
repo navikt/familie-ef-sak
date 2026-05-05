@@ -1,10 +1,10 @@
 package no.nav.familie.ef.sak.forvaltning
 
-import com.fasterxml.jackson.module.kotlin.readValue
+import no.nav.familie.ef.sak.infrastruktur.config.readValue
 import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.ef.sak.oppgave.OppgaveUtil
 import no.nav.familie.kontrakter.felles.Tema
-import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.jsonMapper
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveRequest
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.AsyncTaskStep
@@ -33,7 +33,7 @@ class OppgaveOppryddingForvaltningsTask(
     val mappeNavn = listOf(mappenavnDev, mappenavnProd)
 
     override fun doTask(task: Task) {
-        val runType = objectMapper.readValue<OppgaveOppryddingForvaltningsController.RunType>(task.payload)
+        val runType = jsonMapper.readValue<OppgaveOppryddingForvaltningsController.RunType>(task.payload)
         logger.info("Starter opprydding av oppgaver")
 
         val mappeId = hentFremleggMappeId()
@@ -76,7 +76,7 @@ class OppgaveOppryddingForvaltningsTask(
         fun opprettTask(runType: OppgaveOppryddingForvaltningsController.RunType): Task =
             Task(
                 TYPE,
-                objectMapper.writeValueAsString(runType),
+                jsonMapper.writeValueAsString(runType),
                 Properties(),
             )
     }

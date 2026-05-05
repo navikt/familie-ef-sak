@@ -3,6 +3,7 @@ package no.nav.familie.ef.sak.beregning
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.repository.inntektsperiode
 import no.nav.familie.ef.sak.repository.tilkjentYtelse
 import no.nav.familie.ef.sak.repository.vedtak
@@ -22,7 +23,8 @@ import java.util.UUID
 
 internal class BeregningServiceTest {
     private val tilkjentYtelseService = mockk<TilkjentYtelseService>()
-    private val beregningService = BeregningService(tilkjentYtelseService = tilkjentYtelseService)
+    private val featureToggleService = mockk<FeatureToggleService>(relaxed = true)
+    private val beregningService = BeregningService(tilkjentYtelseService = tilkjentYtelseService, featureToggleService = featureToggleService)
 
     @Test
     internal fun `skal beregne full ytelse når det ikke foreligger inntekt`() {

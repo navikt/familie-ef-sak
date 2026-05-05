@@ -11,7 +11,6 @@ import no.nav.familie.ef.sak.oppgave.OppgaveUtil.lagOpprettOppgavebeskrivelse
 import no.nav.familie.ef.sak.oppgave.dto.UtdanningOppgaveDto
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.secureLogger
-import no.nav.familie.http.client.RessursException
 import no.nav.familie.kontrakter.felles.Behandlingstema
 import no.nav.familie.kontrakter.felles.Tema
 import no.nav.familie.kontrakter.felles.ef.StønadType
@@ -31,6 +30,7 @@ import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype.InnhentDokumentasjon
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype.VurderHenvendelse
 import no.nav.familie.kontrakter.felles.oppgave.OpprettOppgaveRequest
 import no.nav.familie.kontrakter.felles.saksbehandler.Saksbehandler
+import no.nav.familie.restklient.client.RessursException
 import org.slf4j.LoggerFactory
 import org.springframework.cache.CacheManager
 import org.springframework.stereotype.Service
@@ -304,8 +304,6 @@ class OppgaveService(
             BehandleSak,
         )
 
-    fun finnSisteOppgaveForBehandling(behandlingId: UUID): EfOppgave? = oppgaveRepository.findTopByBehandlingIdOrderBySporbarOpprettetTidDesc(behandlingId)
-
     fun hentOppgaver(finnOppgaveRequest: FinnOppgaveRequest): FinnOppgaveResponseDto = oppgaveClient.hentOppgaver(finnOppgaveRequest)
 
     fun hentOppgaverForAutomatiskFerdigstilling(
@@ -518,7 +516,7 @@ class OppgaveService(
             else -> error("Håndterer ikke behandlesAvApplikasjon for $oppgavetype")
         }
 
-    private fun List<no.nav.familie.ef.sak.oppgave.Oppgave>?.oppgaveSistEndret(): no.nav.familie.ef.sak.oppgave.Oppgave? = this?.sortedBy { it.sistEndret() }?.last()
+    private fun List<no.nav.familie.ef.sak.oppgave.Oppgave>?.oppgaveSistEndret(): no.nav.familie.ef.sak.oppgave.Oppgave? = this?.sortedBy { it.sistEndret() }?.lastOrNull()
 
     private fun no.nav.familie.ef.sak.oppgave.Oppgave.sistEndret(): LocalDateTime = this.sporbar.endret.endretTid
 

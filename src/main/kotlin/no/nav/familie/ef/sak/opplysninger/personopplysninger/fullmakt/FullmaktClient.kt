@@ -1,7 +1,7 @@
 package no.nav.familie.ef.sak.opplysninger.personopplysninger.fullmakt
 
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.logger
-import no.nav.familie.http.client.AbstractPingableRestClient
+import no.nav.familie.restklient.client.AbstractPingableRestClient
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service

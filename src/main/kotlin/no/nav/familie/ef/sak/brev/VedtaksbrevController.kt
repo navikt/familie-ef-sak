@@ -1,6 +1,5 @@
 package no.nav.familie.ef.sak.brev
 
-import com.fasterxml.jackson.databind.JsonNode
 import no.nav.familie.ef.sak.AuditLoggerEvent
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
@@ -13,6 +12,7 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
+import tools.jackson.databind.JsonNode
 import java.util.UUID
 
 @RestController

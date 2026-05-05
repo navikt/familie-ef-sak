@@ -97,7 +97,7 @@ object VedtakDtoUtil {
         fom: YearMonth,
         tom: YearMonth,
         barn: List<UUID>,
-        utgifter: Int = 500,
+        utgifter: Int = 2000,
         periodetype: PeriodetypeBarnetilsyn = PeriodetypeBarnetilsyn.ORDINÆR,
         aktivitetType: AktivitetstypeBarnetilsyn? = if (periodetype == PeriodetypeBarnetilsyn.ORDINÆR) AktivitetstypeBarnetilsyn.I_ARBEID else null,
         sanksjonsårsak: Sanksjonsårsak? = null,
@@ -142,7 +142,7 @@ object VedtakDtoUtil {
                 listOf(
                     SkolepengerUtgiftDto(
                         id = UUID.fromString("c076a0b9-0eb9-4a1b-bdcb-d75ebc40570d"),
-                        årMånedFra = YearMonth.of(2021, 1),
+                        årMånedFra = YearMonth.of(2021, 8),
                         stønad = 500,
                     ),
                 ),
@@ -151,9 +151,9 @@ object VedtakDtoUtil {
     fun skolepengerDelårsperiode() =
         DelårsperiodeSkoleårDto(
             SkolepengerStudietype.HØGSKOLE_UNIVERSITET,
-            YearMonth.of(2021, 1),
-            YearMonth.of(2021, 12),
-            Månedsperiode(YearMonth.of(2021, 1), YearMonth.of(2021, 12)),
+            YearMonth.of(2021, 8),
+            YearMonth.of(2022, 6),
+            Månedsperiode(YearMonth.of(2021, 8), YearMonth.of(2022, 6)),
             50,
         )
 

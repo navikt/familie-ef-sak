@@ -7,6 +7,7 @@ import no.nav.familie.ef.sak.beregning.BeregningService
 import no.nav.familie.ef.sak.beregning.Grunnbeløpsperioder
 import no.nav.familie.ef.sak.beregning.ValiderOmregningService
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext.SYSTEM_FORKORTELSE
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
@@ -36,7 +37,8 @@ class ValiderOmregningServiceTest {
     val vedtakService = mockk<VedtakService>()
     val tilkjentYtelseRepository = mockk<TilkjentYtelseRepository>()
     val tilkjentYtelseService = mockk<TilkjentYtelseService>()
-    val beregningService = BeregningService(tilkjentYtelseService)
+    val featureToggleService = mockk<FeatureToggleService>(relaxed = true)
+    val beregningService = BeregningService(tilkjentYtelseService, featureToggleService)
     val vedtakHistorikkService = mockk<VedtakHistorikkService>()
     val validerOmregningService =
         ValiderOmregningService(

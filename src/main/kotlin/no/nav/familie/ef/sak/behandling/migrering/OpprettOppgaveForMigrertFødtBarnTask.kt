@@ -1,8 +1,8 @@
 package no.nav.familie.ef.sak.behandling.migrering
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
+import no.nav.familie.ef.sak.infrastruktur.config.readValue
 import no.nav.familie.ef.sak.iverksett.oppgaveforbarn.AktivitetspliktigAlder
 import no.nav.familie.ef.sak.iverksett.oppgaveforbarn.OpprettOppfølgingsoppgaveForBarnFyltÅrTask
 import no.nav.familie.ef.sak.iverksett.oppgaveforbarn.OpprettOppgavePayload
@@ -11,7 +11,7 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.Fødsel
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.BarnMinimumDto
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.kontrakter.felles.ef.StønadType
-import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.jsonMapper
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
@@ -40,7 +40,7 @@ class OpprettOppgaveForMigrertFødtBarnTask(
     private val logger: Logger = LoggerFactory.getLogger(javaClass)
 
     override fun doTask(task: Task) {
-        val data = objectMapper.readValue<OpprettOppgaveForMigrertFødtBarnTaskData>(task.payload)
+        val data = jsonMapper.readValue<OpprettOppgaveForMigrertFødtBarnTaskData>(task.payload)
         val fagsakId = data.fagsakId
         val behandlingId = sisteIverksatteBehandling(fagsakId)
         val sisteUtbetalingsdato = finnSisteUtbetalingsdato(behandlingId)
@@ -153,7 +153,7 @@ class OpprettOppgaveForMigrertFødtBarnTask(
         ): Task =
             Task(
                 TYPE,
-                objectMapper.writeValueAsString(
+                jsonMapper.writeValueAsString(
                     OpprettOppgaveForMigrertFødtBarnTaskData(
                         fagsakId = fagsak.id,
                         eksternFagsakId = fagsak.eksternId,

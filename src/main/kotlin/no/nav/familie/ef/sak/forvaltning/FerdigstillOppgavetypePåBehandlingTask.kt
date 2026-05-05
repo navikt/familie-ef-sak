@@ -2,7 +2,7 @@ package no.nav.familie.ef.sak.forvaltning
 
 import no.nav.familie.ef.sak.oppgave.OppgaveRepository
 import no.nav.familie.ef.sak.oppgave.OppgaveService
-import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.jsonMapper
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.kontrakter.felles.oppgave.StatusEnum
 import no.nav.familie.prosessering.AsyncTaskStep
@@ -26,7 +26,7 @@ class FerdigstillOppgavetypePåBehandlingTask(
     private val logger = LoggerFactory.getLogger(javaClass)
 
     override fun doTask(task: Task) {
-        val payload = objectMapper.readValue(task.payload, ForvaltningFerdigstillRequest::class.java)
+        val payload = jsonMapper.readValue(task.payload, ForvaltningFerdigstillRequest::class.java)
         val (behandlingId, _oppgavetype) = payload
         val oppgavetype = _oppgavetype.tilOppgavetype()
 
@@ -59,7 +59,7 @@ class FerdigstillOppgavetypePåBehandlingTask(
         ): Task =
             Task(
                 type = TYPE,
-                payload = objectMapper.writeValueAsString(request),
+                payload = jsonMapper.writeValueAsString(request),
                 properties = Properties(),
             )
     }

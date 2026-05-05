@@ -1,5 +1,4 @@
 {
-  "vilkårType" : "ER_UTDANNING_HENSIKTSMESSIG",
   "regler" : {
     "NAVKONTOR_VURDERING" : {
       "regelId" : "NAVKONTOR_VURDERING",
@@ -29,5 +28,6 @@
       },
       "versjon" : "GJELDENDE"
     }
-  }
+  },
+  "vilkårType" : "ER_UTDANNING_HENSIKTSMESSIG"
 }

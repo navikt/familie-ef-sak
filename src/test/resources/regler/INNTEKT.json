@@ -1,5 +1,4 @@
 {
-  "vilkårType" : "INNTEKT",
   "regler" : {
     "INNTEKT_LAVERE_ENN_INNTEKTSGRENSE" : {
       "regelId" : "INNTEKT_LAVERE_ENN_INNTEKTSGRENSE",
@@ -37,5 +36,6 @@
       },
       "versjon" : "GJELDENDE"
     }
-  }
+  },
+  "vilkårType" : "INNTEKT"
 }

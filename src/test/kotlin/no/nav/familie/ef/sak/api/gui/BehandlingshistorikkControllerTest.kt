@@ -16,7 +16,7 @@ import no.nav.familie.ef.sak.felles.domain.SporbarUtils
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.kontrakter.felles.Ressurs
-import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.jsonMapper
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -151,7 +151,7 @@ internal class BehandlingshistorikkControllerTest : OppslagSpringRunnerTest() {
         val behandling = behandlingRepository.insert(behandling(fagsak))
 
         val jsonMap = mapOf("key" to "value")
-        val metadata = JsonWrapper(objectMapper.writeValueAsString(jsonMap))
+        val metadata = JsonWrapper(jsonMapper.writeValueAsString(jsonMap))
         behandlingshistorikkRepository.insert(
             Behandlingshistorikk(
                 behandlingId = behandling.id,

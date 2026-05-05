@@ -1,6 +1,5 @@
 package no.nav.familie.ef.sak.vedtak
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
@@ -12,6 +11,7 @@ import no.nav.familie.ef.sak.behandlingshistorikk.domain.StegUtfall.ANGRE_SEND_T
 import no.nav.familie.ef.sak.behandlingshistorikk.domain.StegUtfall.BESLUTTE_VEDTAK_GODKJENT
 import no.nav.familie.ef.sak.behandlingshistorikk.domain.StegUtfall.BESLUTTE_VEDTAK_UNDERKJENT
 import no.nav.familie.ef.sak.beregning.ValiderOmregningService
+import no.nav.familie.ef.sak.infrastruktur.config.readValue
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
@@ -25,7 +25,7 @@ import no.nav.familie.ef.sak.vedtak.dto.TotrinnkontrollStatus.TOTRINNSKONTROLL_U
 import no.nav.familie.ef.sak.vedtak.dto.TotrinnkontrollStatus.UAKTUELT
 import no.nav.familie.ef.sak.vedtak.dto.TotrinnskontrollDto
 import no.nav.familie.ef.sak.vedtak.dto.TotrinnskontrollStatusDto
-import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.jsonMapper
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -148,7 +148,7 @@ class TotrinnskontrollService(
                         frontendFeilmelding = "Savner metadata, kontakt brukerstøtte id=$behandlingId",
                     )
                 }
-                val beslutt = objectMapper.readValue<BeslutteVedtakDto>(besluttetVedtakHendelse.metadata.json)
+                val beslutt = jsonMapper.readValue<BeslutteVedtakDto>(besluttetVedtakHendelse.metadata.json)
                 TotrinnskontrollStatusDto(
                     TOTRINNSKONTROLL_UNDERKJENT,
                     TotrinnskontrollDto(

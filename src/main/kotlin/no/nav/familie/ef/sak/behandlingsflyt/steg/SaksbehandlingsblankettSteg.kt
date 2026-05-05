@@ -9,7 +9,6 @@ import no.nav.familie.ef.sak.blankett.BlankettService
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.journalføring.JournalpostClient
 import no.nav.familie.ef.sak.vedtak.TotrinnskontrollService
-import no.nav.familie.http.client.RessursException
 import no.nav.familie.kontrakter.felles.BrukerIdType
 import no.nav.familie.kontrakter.felles.Tema
 import no.nav.familie.kontrakter.felles.dokarkiv.v2.ArkiverDokumentRequest
@@ -17,6 +16,7 @@ import no.nav.familie.kontrakter.felles.journalpost.Bruker
 import no.nav.familie.kontrakter.felles.journalpost.JournalposterForBrukerRequest
 import no.nav.familie.kontrakter.felles.journalpost.Journalposttype
 import no.nav.familie.prosessering.internal.TaskService
+import no.nav.familie.restklient.client.RessursException
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.web.client.HttpClientErrorException

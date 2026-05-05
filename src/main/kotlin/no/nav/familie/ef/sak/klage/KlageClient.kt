@@ -1,11 +1,11 @@
 package no.nav.familie.ef.sak.klage
 
-import no.nav.familie.http.client.AbstractRestClient
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.getDataOrThrow
 import no.nav.familie.kontrakter.felles.klage.Fagsystem
 import no.nav.familie.kontrakter.felles.klage.KlagebehandlingDto
 import no.nav.familie.kontrakter.felles.klage.OpprettKlagebehandlingRequest
+import no.nav.familie.restklient.client.AbstractRestClient
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component

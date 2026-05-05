@@ -13,7 +13,7 @@ import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerService
 import no.nav.familie.ef.sak.vedtak.domain.VedtakErUtenBeslutter
 import no.nav.familie.kontrakter.felles.ef.StønadType
-import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.jsonMapper
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -92,7 +92,7 @@ class HenleggService(
             brevClient
                 .genererHtml(
                     brevmal = "informasjonsbrevTrukketSoknad",
-                    saksbehandlerBrevrequest = objectMapper.valueToTree(henleggelsesbrev),
+                    saksbehandlerBrevrequest = jsonMapper.valueToTree(henleggelsesbrev),
                     saksbehandlersignatur = signatur.navn,
                     saksbehandlerEnhet = signatur.enhet,
                     skjulBeslutterSignatur = signatur.skjulBeslutter,

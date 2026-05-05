@@ -166,7 +166,7 @@ data class PdlAnnenForelder(
 ) : PdlPerson
 
 data class Metadata(
-    val historisk: Boolean,
+    val historisk: Boolean = false,
 )
 
 data class DeltBosted(
@@ -547,7 +547,7 @@ data class VergeEllerFullmektig(
     val motpartsPersonident: String?,
     val navn: Personnavn?,
     val omfang: String?,
-    val omfangetErInnenPersonligOmraade: Boolean,
+    val omfangetErInnenPersonligOmraade: Boolean?,
 )
 
 data class VergemaalEllerFremtidsfullmakt(

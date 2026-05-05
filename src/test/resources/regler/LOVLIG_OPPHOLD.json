@@ -1,5 +1,4 @@
 {
-  "vilkårType" : "LOVLIG_OPPHOLD",
   "regler" : {
     "BOR_OG_OPPHOLDER_SEG_I_NORGE" : {
       "regelId" : "BOR_OG_OPPHOLDER_SEG_I_NORGE",
@@ -37,5 +36,6 @@
       },
       "versjon" : "GJELDENDE"
     }
-  }
+  },
+  "vilkårType" : "LOVLIG_OPPHOLD"
 }

@@ -1,6 +1,5 @@
 package no.nav.familie.ef.sak.behandlingsflyt.steg
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import io.mockk.Runs
 import io.mockk.every
 import io.mockk.just
@@ -25,6 +24,7 @@ import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
 import no.nav.familie.ef.sak.felles.domain.Fil
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.clearBrukerContext
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.mockBrukerContext
+import no.nav.familie.ef.sak.infrastruktur.config.readValue
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.iverksett.IverksettingDtoMapper
@@ -47,7 +47,7 @@ import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.ef.iverksett.BehandlingKategori
 import no.nav.familie.kontrakter.ef.iverksett.Hendelse
 import no.nav.familie.kontrakter.felles.ef.StønadType
-import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.jsonMapper
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.internal.TaskService
@@ -158,7 +158,7 @@ internal class BeslutteVedtakStegTest {
         assertThat(taskSlot[2].type).isEqualTo(FerdigstillFremleggsoppgaverTask.TYPE)
         assertThat(taskSlot[3].type).isEqualTo(SendAutomatiskBrevTask.TYPE)
         assertThat(taskSlot[4].type).isEqualTo(BehandlingsstatistikkTask.TYPE)
-        assertThat(objectMapper.readValue<BehandlingsstatistikkTaskPayload>(taskSlot[4].payload).hendelse)
+        assertThat(jsonMapper.readValue<BehandlingsstatistikkTaskPayload>(taskSlot[4].payload).hendelse)
             .isEqualTo(Hendelse.BESLUTTET)
         verify(exactly = 1) {
             behandlingService.oppdaterResultatPåBehandling(
@@ -179,7 +179,7 @@ internal class BeslutteVedtakStegTest {
                 årsakerUnderkjent = listOf(ÅrsakUnderkjent.AKTIVITET),
             )
 
-        val deserializedPayload = objectMapper.readValue<OpprettOppgaveTask.OpprettOppgaveTaskData>(taskSlot[1].payload)
+        val deserializedPayload = jsonMapper.readValue<OpprettOppgaveTask.OpprettOppgaveTaskData>(taskSlot[1].payload)
 
         assertThat(nesteSteg).isEqualTo(StegType.SEND_TIL_BESLUTTER)
         assertThat(taskSlot[0].type).isEqualTo(FerdigstillOppgaveTask.TYPE)

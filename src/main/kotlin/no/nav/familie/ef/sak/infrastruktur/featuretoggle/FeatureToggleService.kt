@@ -20,6 +20,7 @@ enum class Toggle(
 
     // Operational
     G_BEREGNING("familie.ef.sak.g-beregning", "Operational"),
+    INNVILGE_KUN_OPPHØR_OG_SANKSJON("familie.ef.sak.innvilge-kun-opphor-og-sanskjon", "Operational"),
     G_BEREGNING_SCHEDULER("familie.ef.sak.g-beregning-scheduler", "Operational"),
     SATSENDRING_BRUK_IKKE_VEDTATT_MAXSATS("familie.ef.sak.bruk-nye-maxsatser", "Operational"),
     FRONTEND_VIS_IKKE_PUBLISERTE_BREVMALER(

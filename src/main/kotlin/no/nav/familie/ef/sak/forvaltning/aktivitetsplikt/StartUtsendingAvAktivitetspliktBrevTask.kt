@@ -1,7 +1,7 @@
 package no.nav.familie.ef.sak.forvaltning.aktivitetsplikt
 
-import com.fasterxml.jackson.module.kotlin.readValue
-import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.ef.sak.infrastruktur.config.readValue
+import no.nav.familie.kontrakter.felles.jsonMapper
 import no.nav.familie.log.IdUtils
 import no.nav.familie.log.mdc.MDCConstants
 import no.nav.familie.prosessering.AsyncTaskStep
@@ -28,7 +28,7 @@ class StartUtsendingAvAktivitetspliktBrevTask(
     val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
     override fun doTask(task: Task) {
-        val payload = objectMapper.readValue<PayLoad>(task.payload)
+        val payload = jsonMapper.readValue<PayLoad>(task.payload)
         automatiskBrevInnhentingAktivitetspliktService.opprettTasks(
             liveRun = payload.aktivitetspliktRequest.liveRun,
             taskLimit = payload.aktivitetspliktRequest.taskLimit,
@@ -37,7 +37,7 @@ class StartUtsendingAvAktivitetspliktBrevTask(
 
     companion object {
         fun opprettTask(aktivitetspliktRequest: AktivitetspliktRequest): Task {
-            val payload = objectMapper.writeValueAsString(PayLoad(aktivitetspliktRequest, LocalDateTime.now()))
+            val payload = jsonMapper.writeValueAsString(PayLoad(aktivitetspliktRequest, LocalDateTime.now()))
 
             val properties =
                 Properties().apply {

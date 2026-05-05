@@ -1,14 +1,12 @@
 package no.nav.familie.ef.sak.journalføring
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.familie.ef.sak.infrastruktur.config.IntegrasjonerConfig
+import no.nav.familie.ef.sak.infrastruktur.config.readValue
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.ef.sak.journalføring.dto.DokumentVariantformat
-import no.nav.familie.http.client.AbstractPingableRestClient
-import no.nav.familie.http.client.RessursException
 import no.nav.familie.kontrakter.ef.søknad.SøknadBarnetilsyn
 import no.nav.familie.kontrakter.ef.søknad.SøknadOvergangsstønad
 import no.nav.familie.kontrakter.ef.søknad.SøknadSkolepenger
@@ -21,8 +19,10 @@ import no.nav.familie.kontrakter.felles.dokarkiv.v2.ArkiverDokumentRequest
 import no.nav.familie.kontrakter.felles.getDataOrThrow
 import no.nav.familie.kontrakter.felles.journalpost.Journalpost
 import no.nav.familie.kontrakter.felles.journalpost.JournalposterForBrukerRequest
-import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.jsonMapper
 import no.nav.familie.log.NavHttpHeaders
+import no.nav.familie.restklient.client.AbstractPingableRestClient
+import no.nav.familie.restklient.client.RessursException
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus.BAD_REQUEST
@@ -103,7 +103,7 @@ class JournalpostClient(
         dokumentInfoId: String,
     ): SøknadOvergangsstønad {
         val data = getForEntity<Ressurs<ByteArray>>(jsonDokumentUri(journalpostId, dokumentInfoId)).getDataOrThrow()
-        return objectMapper.readValue(data)
+        return jsonMapper.readValue(data)
     }
 
     fun hentBarnetilsynSøknad(
@@ -111,7 +111,7 @@ class JournalpostClient(
         dokumentInfoId: String,
     ): SøknadBarnetilsyn {
         val data = getForEntity<Ressurs<ByteArray>>(jsonDokumentUri(journalpostId, dokumentInfoId)).getDataOrThrow()
-        return objectMapper.readValue(data)
+        return jsonMapper.readValue(data)
     }
 
     fun hentSkolepengerSøknad(
@@ -119,7 +119,7 @@ class JournalpostClient(
         dokumentInfoId: String,
     ): SøknadSkolepenger {
         val data = getForEntity<Ressurs<ByteArray>>(jsonDokumentUri(journalpostId, dokumentInfoId)).getDataOrThrow()
-        return objectMapper.readValue(data)
+        return jsonMapper.readValue(data)
     }
 
     private fun jsonDokumentUri(

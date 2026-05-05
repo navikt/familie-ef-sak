@@ -1,6 +1,6 @@
 package no.nav.familie.ef.sak.simulering
 
-import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.jsonMapper
 import no.nav.familie.kontrakter.felles.simulering.Simuleringsoppsummering
 import no.nav.familie.kontrakter.felles.simulering.Simuleringsperiode
 import org.assertj.core.api.Assertions
@@ -43,7 +43,7 @@ class SimuleringUtilTest {
 
     @Test
     internal fun `skal slå sammen perioder som har feilutbetalinger til sammenhengende perioder`() {
-        println(objectMapper.writeValueAsString(simuleringsoppsummering))
+        println(jsonMapper.writeValueAsString(simuleringsoppsummering))
 
         val sammenhengendePerioderMedFeilutbetaling = simuleringsoppsummering.hentSammenhengendePerioderMedFeilutbetaling()
         Assertions.assertThat(sammenhengendePerioderMedFeilutbetaling).hasSize(3)

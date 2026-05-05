@@ -1,9 +1,9 @@
 package no.nav.familie.ef.sak.behandlingsflyt.task
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.familie.ef.sak.avstemming.AvstemmingService
+import no.nav.familie.ef.sak.infrastruktur.config.readValue
 import no.nav.familie.kontrakter.felles.ef.StønadType
-import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.jsonMapper
 import no.nav.familie.log.IdUtils
 import no.nav.familie.log.mdc.MDCConstants
 import no.nav.familie.prosessering.AsyncTaskStep
@@ -25,7 +25,7 @@ class KonsistensavstemmingTask(
     private val avstemmingService: AvstemmingService,
 ) : AsyncTaskStep {
     override fun doTask(task: Task) {
-        val payload = objectMapper.readValue<KonsistensavstemmingPayload>(task.payload)
+        val payload = jsonMapper.readValue<KonsistensavstemmingPayload>(task.payload)
         avstemmingService.konsistensavstemOppdrag(payload.stønadstype, LocalDateTime.now())
     }
 
@@ -39,7 +39,7 @@ class KonsistensavstemmingTask(
             val task =
                 Task(
                     type = TYPE,
-                    payload = objectMapper.writeValueAsString(payload),
+                    payload = jsonMapper.writeValueAsString(payload),
                     triggerTid = triggerTid,
                 )
             val properties =

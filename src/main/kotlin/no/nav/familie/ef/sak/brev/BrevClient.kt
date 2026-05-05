@@ -1,6 +1,5 @@
 package no.nav.familie.ef.sak.brev
 
-import com.fasterxml.jackson.databind.JsonNode
 import no.nav.familie.ef.sak.blankett.BlankettPdfRequest
 import no.nav.familie.ef.sak.brev.VedtaksbrevService.Companion.BESLUTTER_ENHET_PLACEHOLDER
 import no.nav.familie.ef.sak.brev.VedtaksbrevService.Companion.BESLUTTER_SIGNATUR_PLACEHOLDER
@@ -9,12 +8,13 @@ import no.nav.familie.ef.sak.brev.domain.FRITEKST
 import no.nav.familie.ef.sak.brev.dto.FritekstBrevMedSignaturRequest
 import no.nav.familie.ef.sak.felles.util.medContentTypeJsonUTF8
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
-import no.nav.familie.http.client.AbstractPingableRestClient
+import no.nav.familie.restklient.client.AbstractPingableRestClient
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpHeaders
 import org.springframework.stereotype.Component
 import org.springframework.web.client.RestOperations
+import tools.jackson.databind.JsonNode
 import java.net.URI
 
 @Component

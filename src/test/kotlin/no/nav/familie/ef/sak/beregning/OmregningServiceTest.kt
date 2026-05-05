@@ -1,6 +1,5 @@
 package no.nav.familie.ef.sak.beregning
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
@@ -17,8 +16,9 @@ import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil
-import no.nav.familie.ef.sak.infrastruktur.config.ObjectMapperProvider
+import no.nav.familie.ef.sak.infrastruktur.config.JsonMapperProvider
 import no.nav.familie.ef.sak.infrastruktur.config.RolleConfig
+import no.nav.familie.ef.sak.infrastruktur.config.readValue
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.behandling.revurdering.GOmregningTestUtil
@@ -489,7 +489,7 @@ internal class OmregningServiceTest : OppslagSpringRunnerTest() {
             } ?: error("Finner ikke tidligere iverksatt behandling")
 
         val expectedIverksettDto: IverksettOvergangsstønadDto =
-            ObjectMapperProvider.objectMapper.readValue(readFile("expectedIverksettDto.json"))
+            JsonMapperProvider.jsonMapper.readValue(readFile("expectedIverksettDto.json"))
 
         val andelerTilkjentYtelse =
             expectedIverksettDto.vedtak.tilkjentYtelse?.andelerTilkjentYtelse?.map {

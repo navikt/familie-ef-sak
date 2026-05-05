@@ -227,7 +227,7 @@ interface BehandlingRepository :
         """SELECT DISTINCT b.id 
               FROM gjeldende_iverksatte_behandlinger b   
               JOIN tilkjent_ytelse ty ON b.id = ty.behandling_id
-                AND ty.grunnbelopsdato < :gjeldendeGrunnbeløpFraOgMedDato
+                AND ty.grunnbelopsdato < TO_CHAR(:gjeldendeGrunnbeløpFraOgMedDato::date, 'YYYY-MM')
               JOIN andel_tilkjent_ytelse aty ON aty.tilkjent_ytelse = ty.id 
                 AND aty.stonad_tom > :gjeldendeGrunnbeløpFraOgMedDato
               WHERE b.stonadstype = 'OVERGANGSSTØNAD'

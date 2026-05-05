@@ -1,14 +1,14 @@
 package no.nav.familie.ef.sak.no.nav.familie.ef.sak.opplysninger.personopplysninger.inntekt
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.amelding.InntektResponse
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
+import no.nav.familie.ef.sak.infrastruktur.config.readValue
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.inntekt.GrunnlagsdataInntekt
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.inntekt.GrunnlagsdataInntektRepository
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
-import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.jsonMapper
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -25,7 +25,7 @@ class GrunnlagsdataInntektRepositoryTest : OppslagSpringRunnerTest() {
         val fagsak = testoppsettService.lagreFagsak(fagsak())
         val behandling = behandlingRepository.insert(behandling(fagsak))
 
-        val inntektResponse = objectMapper.readValue<InntektResponse>(inntektResponseJson)
+        val inntektResponse = jsonMapper.readValue<InntektResponse>(inntektResponseJson)
 
         val grunnlagsdataInntekt = GrunnlagsdataInntekt(behandling.id, inntektResponse)
         grunnlagsdataInntektRepository.insert(grunnlagsdataInntekt)

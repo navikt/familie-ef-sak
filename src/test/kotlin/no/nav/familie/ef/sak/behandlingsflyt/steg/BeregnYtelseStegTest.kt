@@ -40,6 +40,7 @@ import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.ef.sak.vedtak.domain.AktivitetType
 import no.nav.familie.ef.sak.vedtak.domain.AktivitetstypeBarnetilsyn
 import no.nav.familie.ef.sak.vedtak.domain.PeriodetypeBarnetilsyn
+import no.nav.familie.ef.sak.vedtak.domain.Vedtaksperiode
 import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
 import no.nav.familie.ef.sak.vedtak.dto.Avslå
 import no.nav.familie.ef.sak.vedtak.dto.InnvilgelseBarnetilsyn
@@ -108,6 +109,7 @@ internal class BeregnYtelseStegTest {
             fagsakService,
             validerOmregningService,
             oppfølgingsoppgaveService,
+            featureToggleService,
         )
 
     private val slot = slot<TilkjentYtelse>()
@@ -116,6 +118,7 @@ internal class BeregnYtelseStegTest {
     internal fun setUp() {
         every { featureToggleService.isEnabled(Toggle.SATSENDRING_BRUK_IKKE_VEDTATT_MAXSATS) } returns false
         every { featureToggleService.isEnabled(any()) } returns true
+        every { featureToggleService.isEnabled(Toggle.INNVILGE_KUN_OPPHØR_OG_SANKSJON) } returns false
         every { fagsakService.fagsakMedOppdatertPersonIdent(any()) } returns fagsak(fagsakpersoner(setOf("123")))
         every { simuleringService.hentOgLagreSimuleringsresultat(any()) }
             .returns(
@@ -2003,6 +2006,64 @@ internal class BeregnYtelseStegTest {
         assertThat(feil.feil).contains("Periodene må være sammenhengende")
     }
 
+    @Test
+    internal fun `Skal bare innvilge med vedtak med opphør og sanksjon hvis feature toggle er INNVILGE_KUN_OPPHØR_OG_SANKSJON er på`() {
+        every { featureToggleService.isEnabled(Toggle.INNVILGE_KUN_OPPHØR_OG_SANKSJON) } returns true
+        every { beregningService.beregnYtelse(any(), any()) } returns emptyList()
+        val opphørFom = YearMonth.of(2021, 1)
+        val opphørTom = opphørFom.plusMonths(1)
+        val sanskjonsMåned = YearMonth.of(2021, 3)
+
+        utførSteg(
+            BehandlingType.REVURDERING,
+            sanksjon(sanskjonsMåned),
+            forrigeBehandlingId = UUID.randomUUID(),
+        )
+
+        mockHistorikk(andelhistorikkSanksjon(sanskjonsMåned))
+
+        utførSteg(
+            BehandlingType.REVURDERING,
+            innvilget(
+                listOf(
+                    opphørsperiode(opphørFom, opphørTom),
+                    sanksjonsperiode(sanskjonsMåned),
+                ),
+                listOf(inntekt(sanskjonsMåned)),
+            ),
+            forrigeBehandlingId = UUID.randomUUID(),
+        )
+
+        val tilkjentYtelse = slot.captured
+        assertThat(tilkjentYtelse.andelerTilkjentYtelse).isEmpty()
+
+        verify(exactly = 2) {
+            tilkjentYtelseService.opprettTilkjentYtelse(any())
+        }
+    }
+
+    @Test
+    internal fun `Skal feile ved innvilgelse med vanlig hovedperiode når feature toggle INNVILGE_KUN_OPPHØR_OG_SANKSJON er på`() {
+        every { featureToggleService.isEnabled(Toggle.INNVILGE_KUN_OPPHØR_OG_SANKSJON) } returns true
+        every { beregningService.beregnYtelse(any(), any()) } returns emptyList()
+        val periodeFom = YearMonth.of(2021, 1)
+        val periodeTom = YearMonth.of(2021, 6)
+
+        val feil =
+            assertThrows<ApiFeil> {
+                utførSteg(
+                    BehandlingType.REVURDERING,
+                    innvilget(
+                        listOf(innvilgetPeriode(periodeFom, periodeTom)),
+                        listOf(inntekt(periodeFom)),
+                    ),
+                    forrigeBehandlingId = UUID.randomUUID(),
+                )
+            }
+
+        assertThat(feil.feil).contains("Må kun ha opphørsperioder og sanksjon")
+    }
+
     private fun mockHistorikk(vararg andelHistorikkDto: AndelHistorikkDto) {
         every {
             andelsHistorikkService.hentHistorikk(any(), any())
@@ -2192,6 +2253,17 @@ internal class BeregnYtelseStegTest {
         periode = Månedsperiode(opphørFom, opphørTom),
         aktivitet = AktivitetType.IKKE_AKTIVITETSPLIKT,
         periodeType = VedtaksperiodeType.MIDLERTIDIG_OPPHØR,
+    )
+
+    private fun sanksjonsperiode(
+        sanksjonFom: YearMonth,
+    ) = VedtaksperiodeDto(
+        årMånedFra = sanksjonFom,
+        årMånedTil = sanksjonFom,
+        periode = Månedsperiode(sanksjonFom, sanksjonFom),
+        aktivitet = AktivitetType.IKKE_AKTIVITETSPLIKT,
+        periodeType = VedtaksperiodeType.SANKSJON,
+        sanksjonsårsak = Sanksjonsårsak.SAGT_OPP_STILLING,
     )
 
     private fun innvilgetPeriode(

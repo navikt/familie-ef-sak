@@ -1,5 +1,4 @@
 {
-  "vilkårType" : "FORUTGÅENDE_MEDLEMSKAP",
   "regler" : {
     "SØKER_MEDLEM_I_FOLKETRYGDEN" : {
       "regelId" : "SØKER_MEDLEM_I_FOLKETRYGDEN",
@@ -61,5 +60,6 @@
       },
       "versjon" : "GJELDENDE"
     }
-  }
+  },
+  "vilkårType" : "FORUTGÅENDE_MEDLEMSKAP"
 }
