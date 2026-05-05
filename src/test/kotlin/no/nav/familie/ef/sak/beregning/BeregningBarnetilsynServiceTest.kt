@@ -76,7 +76,7 @@ class BeregningBarnetilsynServiceTest {
         internal fun `Skal kaste feil når vi sender inn utgiftsperiode med null beløp som ikke er opphør eller sanksjon `() {
             val utgiftsperiodeMedNullBeløp = listeMedEnUtgiftsperiode(beløp = 0)
 
-            val negativUtgiftsfeil =
+            val nullBeløpUtgiftsfeil =
                 assertThrows<ApiFeil> {
                     service.beregnYtelseBarnetilsyn(
                         utgiftsperioder = utgiftsperiodeMedNullBeløp,
@@ -84,7 +84,7 @@ class BeregningBarnetilsynServiceTest {
                         tilleggsstønadsperioder = listOf(),
                     )
                 }
-            assertThat(negativUtgiftsfeil.message).isEqualTo("Kan ikke ha null utgifter på en periode som ikke er et midlertidig opphør eller sanksjon")
+            assertThat(nullBeløpUtgiftsfeil.message).isEqualTo("Kan ikke ha null utgifter på en periode som ikke er et midlertidig opphør eller sanksjon")
         }
 
         @Test
