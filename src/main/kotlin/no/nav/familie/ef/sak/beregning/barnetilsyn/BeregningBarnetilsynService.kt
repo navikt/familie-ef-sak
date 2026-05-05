@@ -106,6 +106,10 @@ class BeregningBarnetilsynService(
         brukerfeilHvis(!erMigrering && manglerAktivitetstype) {
             "Utgiftsperioder $utgiftsperioderDto mangler en eller flere aktivitetstyper"
         }
+
+        brukerfeilHvis(utgiftsperioderDto.any { !it.erMidlertidigOpphørEllerSanksjon && it.utgifter <= 0 }) {
+            "Kan ikke ha null utgifter på en periode som ikke er et midlertidig opphør eller sanksjon"
+        }
     }
 
     private fun harUrelevantReduksjonsPeriode(
