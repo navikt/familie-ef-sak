@@ -185,7 +185,7 @@ internal class JournalføringServiceTest {
         every { fagsakService.fagsakMedOppdatertPersonIdent(any()) } returns fagsak
 
         justRun {
-            barnService.opprettBarnPåBehandlingMedSøknadsdata(any(), any(), any(), any(), any(), any(), any())
+            barnService.opprettBarnPåBehandlingMedSøknadsdata(any(), any(), any(), any(), any(), any(), any(), any())
         }
 
         every { behandlingService.hentBehandlinger(any<UUID>()) } returns emptyList()
@@ -595,7 +595,7 @@ internal class JournalføringServiceTest {
                 journalpost = ustrukturertJournalpost,
             )
             verifyOrder {
-                barnService.opprettBarnPåBehandlingMedSøknadsdata(any(), any(), any(), any(), any(), any(), any())
+                barnService.opprettBarnPåBehandlingMedSøknadsdata(any(), any(), any(), any(), any(), any(), any(), any())
                 vurderingService.kopierVurderingerOgSamværsavtalerTilNyBehandling(behandlingId, forrigeBehandlingId, any(), any())
                 behandlingService.oppdaterStatusPåBehandling(behandlingId, BehandlingStatus.UTREDES)
                 behandlingService.oppdaterStegPåBehandling(behandlingId, StegType.BEREGNE_YTELSE)
