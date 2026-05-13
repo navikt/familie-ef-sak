@@ -276,6 +276,9 @@ internal class JournalføringServiceTest {
                 stønadstype = StønadType.OVERGANGSSTØNAD,
             )
 
+        every {
+            journalpostClient.hentOvergangsstønadSøknad(any(), any())
+        } returns Testsøknad.søknadOvergangsstønad
         every { infotrygdPeriodeValideringService.validerKanOppretteBehandlingGittInfotrygdData(any()) } just Runs
         every { behandlingService.finnSisteIverksatteBehandlingMedEventuellAvslått(any()) } returns null
 
@@ -363,6 +366,9 @@ internal class JournalføringServiceTest {
                 stønadstype = StønadType.OVERGANGSSTØNAD,
             )
         every { journalpostClient.hentJournalpost(journalpostId) } returns (journalpostDigitalSøknad.copy(journalstatus = Journalstatus.JOURNALFOERT))
+        every {
+            journalpostClient.hentOvergangsstønadSøknad(any(), any())
+        } returns Testsøknad.søknadOvergangsstønad
         every { infotrygdPeriodeValideringService.validerKanOppretteBehandlingGittInfotrygdData(any()) } just Runs
         every { behandlingService.finnSisteIverksatteBehandlingMedEventuellAvslått(any()) } returns null
 
@@ -404,6 +410,9 @@ internal class JournalføringServiceTest {
     @Test
     internal fun `opprettBehandlingMedSøknadsdataFraEnFerdigstiltJournalpost skal kaste feil hvis finnes i infotrygd`() {
         every { journalpostClient.hentJournalpost(journalpostId) } returns (journalpostDigitalSøknad.copy(journalstatus = Journalstatus.JOURNALFOERT))
+        every {
+            journalpostClient.hentOvergangsstønadSøknad(any(), any())
+        } returns Testsøknad.søknadOvergangsstønad
 
         mockFeilerValideringAvInfotrygdperioder()
 
@@ -688,6 +697,10 @@ internal class JournalføringServiceTest {
 
         @Test
         internal fun `skal automatisk journalføre en ny digital søknad`() {
+            every {
+                journalpostClient.hentOvergangsstønadSøknad(any(), any())
+            } returns Testsøknad.søknadOvergangsstønad
+
             every { behandlingService.finnSisteIverksatteBehandlingMedEventuellAvslått(any()) } returns null
             val journalførendeEnhet = "4489"
             val mappeId = 1234L
@@ -702,10 +715,7 @@ internal class JournalføringServiceTest {
                 )
             verify { journalpostClient.oppdaterJournalpost(any(), journalpostId, null) }
             verify { journalpostClient.ferdigstillJournalpost(journalpostId, journalførendeEnhet, null) }
-            verify { journalpostClient.hentDokument(journalpostId, dokumentInfoIdMedJsonVerdi, DokumentVariantformat.ORIGINAL) }
-            verify(exactly = 0) { journalpostClient.hentOvergangsstønadSøknad(any(), any()) }
             verify { søknadService.lagreSøknadForOvergangsstønad(any(), any(), any(), any()) }
-            verify(exactly = 0) { søknadService.lagreSøknadForOvergangsstønadRegelendring2026(any(), any(), any()) }
             verify {
                 behandlingService.opprettBehandling(
                     behandlingType = FØRSTEGANGSBEHANDLING,
