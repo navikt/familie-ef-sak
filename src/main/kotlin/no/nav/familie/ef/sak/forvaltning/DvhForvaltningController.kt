@@ -6,7 +6,6 @@ import no.nav.familie.ef.sak.behandlingsflyt.task.BehandlingsstatistikkTask
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.prosessering.internal.TaskService
-import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
@@ -16,7 +15,6 @@ import java.util.UUID
 
 @RestController
 @RequestMapping("/api/forvaltning/dvh")
-@ProtectedWithClaims(issuer = "azuread")
 class DvhForvaltningController(
     private val taskService: TaskService,
     private val behandlingService: BehandlingService,

@@ -7,7 +7,6 @@ import no.nav.familie.ef.sak.tilbakekreving.domain.tilDto
 import no.nav.familie.ef.sak.tilbakekreving.dto.TilbakekrevingDto
 import no.nav.familie.ef.sak.tilbakekreving.dto.VarseltekstDto
 import no.nav.familie.kontrakter.felles.Ressurs
-import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -20,7 +19,6 @@ import no.nav.familie.kontrakter.felles.tilbakekreving.Behandling as Tilbakekrev
 
 @RestController
 @RequestMapping(path = ["/api/tilbakekreving"], produces = [MediaType.APPLICATION_JSON_VALUE])
-@ProtectedWithClaims(issuer = "azuread")
 class TilbakekrevingController(
     private val tilgangService: TilgangService,
     private val behandlingService: BehandlingService,

@@ -11,7 +11,6 @@ import no.nav.familie.kontrakter.felles.PersonIdent
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.klage.KanOppretteRevurderingResponse
 import no.nav.familie.kontrakter.felles.klage.OpprettRevurderingResponse
-import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.GetMapping
@@ -28,7 +27,6 @@ private const val IKKE_AUTORISERT_KLIENT_MELDING = "Kallet utføres ikke av en a
     path = ["/api/ekstern/behandling"],
     produces = [MediaType.APPLICATION_JSON_VALUE],
 )
-@ProtectedWithClaims(issuer = "azuread")
 class EksternBehandlingController(
     private val tilgangService: TilgangService,
     private val eksternBehandlingService: EksternBehandlingService,
@@ -38,7 +36,6 @@ class EksternBehandlingController(
      * Dette er alltså ikke ett bolk-oppslag for flere ulike personer
      */
     @PostMapping("har-loepende-stoenad")
-    @ProtectedWithClaims(issuer = "azuread", claimMap = ["roles=access_as_application"])
     fun harAktivStønad(
         @RequestBody personidenter: Set<String>,
     ): Ressurs<Boolean> {
@@ -52,7 +49,6 @@ class EksternBehandlingController(
     }
 
     @PostMapping("har-loepende-barnetilsyn")
-    @ProtectedWithClaims(issuer = "azuread", claimMap = ["roles=access_as_application"])
     fun harLøpendeBarnetilsyn(
         @RequestBody personIdent: PersonIdent,
     ): Ressurs<Boolean> = Ressurs.success(eksternBehandlingService.harLøpendeBarnetilsyn(personIdent.ident))
@@ -82,7 +78,6 @@ class EksternBehandlingController(
     }
 
     @PostMapping("kan-sende-påminnelse-til-bruker")
-    @ProtectedWithClaims(issuer = "azuread", claimMap = ["roles=access_as_application"])
     fun kanSendeSmsPåminnelseTilSøker(
         @RequestBody kanSendePåminnelseRequest: KanSendePåminnelseRequest,
     ): Ressurs<Boolean> {
