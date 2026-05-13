@@ -18,7 +18,6 @@ import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveResponseDto
 import no.nav.familie.kontrakter.felles.oppgave.MappeDto
 import no.nav.familie.kontrakter.felles.oppgave.Oppgave
-import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
@@ -35,7 +34,6 @@ import java.util.UUID
 
 @RestController
 @RequestMapping("/api/oppgave")
-@ProtectedWithClaims(issuer = "azuread")
 @Validated
 class OppgaveController(
     private val oppgaveService: OppgaveService,

@@ -13,8 +13,6 @@ import no.nav.familie.restklient.interceptor.MdcValuesPropagatingClientIntercept
 import no.nav.security.token.support.client.core.http.OAuth2HttpClient
 import no.nav.security.token.support.client.core.oauth2.OAuth2AccessTokenResponse
 import no.nav.security.token.support.client.spring.oauth2.EnableOAuth2Client
-import no.nav.security.token.support.spring.SpringTokenValidationContextHolder
-import no.nav.security.token.support.spring.api.EnableJwtTokenValidation
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.SpringBootConfiguration
@@ -29,6 +27,8 @@ import org.springframework.http.client.ClientHttpRequestInterceptor
 import org.springframework.http.converter.FormHttpMessageConverter
 import org.springframework.http.converter.json.JacksonJsonHttpMessageConverter
 import org.springframework.scheduling.annotation.EnableScheduling
+import org.springframework.security.core.context.SecurityContextHolder
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken
 import org.springframework.web.client.RestClient
 import org.springframework.web.client.RestOperations
 import org.springframework.web.client.RestTemplate
@@ -44,7 +44,6 @@ import java.time.temporal.ChronoUnit
     "no.nav.familie.sikkerhet",
     "no.nav.familie.unleash",
 )
-@EnableJwtTokenValidation(ignore = ["org.springframework", "org.springdoc"])
 @Import(RestTemplateAzure::class)
 @EnableOAuth2Client(cacheEnabled = true)
 @EnableScheduling
@@ -97,15 +96,14 @@ class ApplicationConfig {
     fun prosesseringInfoProvider(
         @Value("\${prosessering.rolle}") prosesseringRolle: String,
     ) = object : ProsesseringInfoProvider {
-        override fun hentBrukernavn(): String =
-            try {
-                SpringTokenValidationContextHolder()
-                    .getTokenValidationContext()
-                    .getClaims("azuread")
-                    .getStringClaim("preferred_username")
-            } catch (e: Exception) {
-                throw e
+        override fun hentBrukernavn(): String {
+            val authentication = SecurityContextHolder.getContext().authentication
+            if (authentication is JwtAuthenticationToken) {
+                return authentication.token.getClaimAsString("preferred_username")
+                    ?: error("Finner ikke preferred_username i token")
             }
+            error("Finner ikke brukernavn i security context")
+        }
 
         override fun harTilgang(): Boolean = harRolle(prosesseringRolle)
     }

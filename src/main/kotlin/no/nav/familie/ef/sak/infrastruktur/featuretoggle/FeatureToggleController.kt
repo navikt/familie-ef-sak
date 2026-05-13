@@ -1,6 +1,5 @@
 package no.nav.familie.ef.sak.infrastruktur.featuretoggle
 
-import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -9,7 +8,6 @@ import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @RequestMapping(path = ["/api/featuretoggle"], produces = [MediaType.APPLICATION_JSON_VALUE])
-@ProtectedWithClaims(issuer = "azuread")
 class FeatureToggleController(
     private val featureToggleService: FeatureToggleService,
 ) {

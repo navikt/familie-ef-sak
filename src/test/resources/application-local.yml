@@ -11,15 +11,6 @@ spring:
     username: test
     password: test
 
-no.nav.security.jwt:
-  issuer:
-    tokenx:
-      discovery-url: http://localhost:${mock-oauth2-server.port}/tokenx/.well-known/openid-configuration
-      accepted-audience: aud-localhost
-    azuread:
-      discoveryurl: https://login.microsoftonline.com/navq.onmicrosoft.com/v2.0/.well-known/openid-configuration
-      accepted_audience: ${AZURE_APP_CLIENT_ID}
-
 AZUREAD_TOKEN_ENDPOINT_URL: https://login.microsoftonline.com/navq.onmicrosoft.com/oauth2/v2.0/token
 AUTHORIZATION_URL: https://login.microsoftonline.com/${AZURE_APP_TENANT_ID}/oauth2/v2.0/authorize
 API_SCOPE: api://${AZURE_APP_CLIENT_ID}/.default

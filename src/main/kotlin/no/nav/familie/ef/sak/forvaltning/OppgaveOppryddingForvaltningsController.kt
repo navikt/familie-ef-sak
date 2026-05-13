@@ -2,7 +2,6 @@ package no.nav.familie.ef.sak.forvaltning
 
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.prosessering.internal.TaskService
-import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.slf4j.LoggerFactory
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
@@ -11,7 +10,6 @@ import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @RequestMapping("/api/oppgave/forvaltning/opprydding")
-@ProtectedWithClaims(issuer = "azuread")
 class OppgaveOppryddingForvaltningsController(
     private val tilgangService: TilgangService,
     private val taskService: TaskService,

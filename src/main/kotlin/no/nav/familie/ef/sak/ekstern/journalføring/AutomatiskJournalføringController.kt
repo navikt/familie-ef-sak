@@ -8,7 +8,6 @@ import no.nav.familie.kontrakter.ef.journalføring.AutomatiskJournalføringRespo
 import no.nav.familie.kontrakter.felles.PersonIdent
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.ef.StønadType
-import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.PostMapping
@@ -31,7 +30,6 @@ class AutomatiskJournalføringController(
      * eller manuelt gjennomgås.
      */
     @PostMapping("kan-opprette-behandling")
-    @ProtectedWithClaims(issuer = "azuread", claimMap = ["roles=access_as_application"])
     fun kanOppretteBehandling(
         @RequestBody personIdent: PersonIdent,
         @RequestParam type: StønadType,
@@ -47,7 +45,6 @@ class AutomatiskJournalføringController(
      * Skal bare brukes av familie-ef-mottak for å automatisk journalføre
      */
     @PostMapping("journalfor")
-    @ProtectedWithClaims(issuer = "azuread", claimMap = ["roles=access_as_application"])
     fun automatiskJournalfør(
         @RequestBody request: AutomatiskJournalføringRequest,
     ): Ressurs<AutomatiskJournalføringResponse> {

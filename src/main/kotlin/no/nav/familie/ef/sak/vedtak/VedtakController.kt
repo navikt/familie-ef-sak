@@ -24,7 +24,6 @@ import no.nav.familie.ef.sak.vedtak.historikk.VedtakHistorikkService
 import no.nav.familie.ef.sak.vilkår.VurderingService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
-import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
@@ -44,7 +43,6 @@ import java.util.UUID
 
 @RestController
 @RequestMapping(path = ["/api/vedtak"], produces = [MediaType.APPLICATION_JSON_VALUE])
-@ProtectedWithClaims(issuer = "azuread")
 @Validated
 class VedtakController(
     private val beregnYtelseSteg: BeregnYtelseSteg,
@@ -198,7 +196,6 @@ class VedtakController(
     }
 
     @GetMapping("/eksternid/{eksternId}/inntekt")
-    @ProtectedWithClaims(issuer = "azuread", claimMap = ["roles=access_as_application"]) // Familie-ef-personhendelse bruker denne
     fun hentForventetInntektForEksternId(
         @PathVariable eksternId: Long,
         dato: LocalDate?,
@@ -210,7 +207,6 @@ class VedtakController(
     }
 
     @GetMapping("/eksternid/{eksternId}/harAktivtVedtak")
-    @ProtectedWithClaims(issuer = "azuread", claimMap = ["roles=access_as_application"]) // Familie-ef-personhendelse bruker denne
     fun hentHarAktivStonad(
         @PathVariable eksternId: Long,
         dato: LocalDate?,
@@ -222,7 +218,6 @@ class VedtakController(
     }
 
     @GetMapping("/personerMedAktivStonadIkkeManueltRevurdertSisteMaaneder")
-    @ProtectedWithClaims(issuer = "azuread", claimMap = ["roles=access_as_application"]) // Familie-ef-personhendelse bruker denne
     fun hentPersonerMedAktivStonadIkkeManueltRevurdertSisteMåneder(
         @RequestParam antallMaaneder: Int = 3,
     ): Ressurs<List<String>> =
@@ -233,7 +228,6 @@ class VedtakController(
         }
 
     @PostMapping("/gjeldendeIverksatteBehandlingerMedInntekt")
-    @ProtectedWithClaims(issuer = "azuread", claimMap = ["roles=access_as_application"]) // Familie-ef-personhendelse bruker denne
     fun hentPersonerMedAktivStonadOgForventetInntekt(
         @RequestBody
         personIdenter: List<String>,

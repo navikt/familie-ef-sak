@@ -4,9 +4,10 @@ import no.nav.familie.ef.sak.infrastruktur.exception.feilHvisIkke
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.sikkerhet.EksternBrukerUtils
-import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
+import org.springframework.security.core.context.SecurityContextHolder
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
@@ -16,7 +17,6 @@ import org.springframework.web.bind.annotation.RestController
     path = ["/api/ekstern/minside"],
     produces = [MediaType.APPLICATION_JSON_VALUE],
 )
-@ProtectedWithClaims(issuer = EksternBrukerUtils.ISSUER_TOKENX, claimMap = ["acr=Level4"])
 class EksternMinsideController(
     private val eksternMinsideService: EksternMinsideService,
 ) {
@@ -25,9 +25,20 @@ class EksternMinsideController(
      */
     @GetMapping("stonadsperioder")
     fun finnStønadsperioderForBruker(): Ressurs<MineStønaderDto> {
+        sjekkAcrLevel4()
         feilHvisIkke(SikkerhetContext.kallKommerFraFamilieEfSøknadApi(), HttpStatus.UNAUTHORIZED) {
             "Kallet utføres ikke av en autorisert klient"
         }
         return Ressurs.success(eksternMinsideService.hentStønadsperioderForBruker(EksternBrukerUtils.hentFnrFraToken()))
+    }
+
+    private fun sjekkAcrLevel4() {
+        val authentication =
+            SecurityContextHolder.getContext().authentication as? JwtAuthenticationToken
+                ?: error("Mangler autentisering")
+        val acr = authentication.token.getClaimAsString("acr")
+        feilHvisIkke(acr == "Level4", HttpStatus.UNAUTHORIZED) {
+            "Påloggingsnivå er ikke høyt nok. Krever Level4, fikk $acr"
+        }
     }
 }
