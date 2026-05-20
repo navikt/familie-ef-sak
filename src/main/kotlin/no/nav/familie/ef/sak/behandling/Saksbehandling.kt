@@ -38,6 +38,8 @@ data class Saksbehandling(
     val opprettetAv: String,
     val opprettetTid: LocalDateTime,
     val endretTid: LocalDateTime,
+    @Column("er_regelendring_2026")
+    val erRegelendring2026: Boolean = false,
 ) {
     val skalSendeBrev: Boolean = !skalIkkeSendeBrev
     val skalIkkeSendeBrev get() = erIverksettingKAVedtak || erKorrigeringUtenBrev || erOmregning || erSatsendring || erMigrering

@@ -222,6 +222,8 @@ class BehandlingService(
         kravMottatt: LocalDate?,
     ): Behandling = behandlingRepository.update(hentBehandling(behandlingId).copy(kravMottatt = kravMottatt))
 
+    fun oppdaterErRegelendring2026(behandlingId: UUID): Behandling = behandlingRepository.update(hentBehandling(behandlingId).copy(erRegelendring2026 = true))
+
     fun finnesBehandlingForFagsak(fagsakId: UUID) = behandlingRepository.existsByFagsakId(fagsakId)
 
     fun hentBehandlinger(fagsakId: UUID): List<Behandling> = behandlingRepository.findByFagsakId(fagsakId).sortertEtterVedtakstidspunkt()

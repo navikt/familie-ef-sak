@@ -38,6 +38,7 @@ class BehandlingController(
     ): Ressurs<BehandlingDto> {
         val saksbehandling: Saksbehandling = behandlingService.hentSaksbehandling(behandlingId)
         tilgangService.validerTilgangTilPersonMedBarn(saksbehandling.ident, AuditLoggerEvent.ACCESS)
+
         return Ressurs.success(saksbehandling.tilDto())
     }
 
