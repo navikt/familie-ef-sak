@@ -1,11 +1,10 @@
 package no.nav.familie.ef.sak.ekstern.soknad
 
-import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.infotrygd.InfotrygdService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.identer
-import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
+import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseRepository
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -13,8 +12,7 @@ import org.springframework.stereotype.Service
 @Service
 class EksternSøknadService(
     private val fagsakService: FagsakService,
-    private val behandlingService: BehandlingService,
-    private val tilkjentYtelseService: TilkjentYtelseService,
+    private val tilkjentYtelseRepository: TilkjentYtelseRepository,
     private val personService: PersonService,
     private val infotrygdService: InfotrygdService,
 ) {
@@ -28,10 +26,8 @@ class EksternSøknadService(
                 StønadType.values().any { stønadstype ->
                     fagsakService
                         .finnFagsak(personIdenter, stønadstype)
-                        ?.let { behandlingService.finnSisteIverksatteBehandling(it.id) }
-                        ?.let { tilkjentYtelseService.hentForBehandling(it.id) }
-                        ?.andelerTilkjentYtelse
-                        ?.isNotEmpty() == true
+                        ?.let { tilkjentYtelseRepository.finnAlleIverksatteForFagsak(it.id) }
+                        ?.any { it.andelerTilkjentYtelse.isNotEmpty() } == true
                 }
 
             val harInnvilgetIInfotrygd = infotrygdService.eksisterer(personIdent)
