@@ -22,6 +22,7 @@ class WebConfig(
             "/v3/api-docs",
             "/api/ekstern/perioder/full-overgangsstonad", // håndteres i controllern
             "/api/ekstern/minside/stonadsperioder", // urelevant å sjekke roller for tokenx/kall fra min-side
+            "/api/ekstern/soknad/har-tidligere-innvilget-vedtak",
         )
 
     override fun addInterceptors(registry: InterceptorRegistry) {
