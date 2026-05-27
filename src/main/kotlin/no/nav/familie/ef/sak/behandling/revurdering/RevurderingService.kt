@@ -100,18 +100,22 @@ class RevurderingService(
                 kravMottatt = revurderingDto.kravMottatt,
             )
         secureLogger.info("Revurdering med behandlingId ${revurdering.id} opprettet")
-        val forrigeBehandlingId =
-            behandlingService.finnSisteIverksatteBehandlingMedEventuellAvslått(fagsak.id)?.id
+        val forrigeBehandling =
+            behandlingService.finnSisteIverksatteBehandlingMedEventuellAvslått(fagsak.id)
                 ?: error("Revurdering må ha eksisterende iverksatt behandling")
 
-        søknadService.kopierSøknad(forrigeBehandlingId, revurdering.id)
+        if (forrigeBehandling.erRegelendring2026) {
+            behandlingService.oppdaterErRegelendring2026(revurdering.id)
+        }
+
+        søknadService.kopierSøknad(forrigeBehandling.id, revurdering.id)
         val grunnlagsdata = grunnlagsdataService.opprettGrunnlagsdata(revurdering.id)
 
         val terminbarn = revurderingDto.barnSomSkalFødes.map { it.tilBehandlingBarn(revurdering.id) }
         val nyeBarnFraRegister = vilkårsbehandleNyeBarn(revurdering, revurderingDto.vilkårsbehandleNyeBarn)
         barnService.opprettBarnForRevurdering(
             behandlingId = revurdering.id,
-            forrigeBehandlingId = forrigeBehandlingId,
+            forrigeBehandlingId = forrigeBehandling.id,
             nyeBarnPåRevurdering = nyeBarnFraRegister + terminbarn,
             grunnlagsdataBarn = grunnlagsdata.grunnlagsdata.barn,
             stønadstype = fagsak.stønadstype,
@@ -119,7 +123,7 @@ class RevurderingService(
         val (_, metadata) = vurderingService.hentGrunnlagOgMetadata(revurdering.id)
         vurderingService.kopierVurderingerOgSamværsavtalerTilNyBehandling(
             behandlingSomSkalOppdateresId = revurdering.id,
-            behandlingForGjenbrukId = forrigeBehandlingId,
+            behandlingForGjenbrukId = forrigeBehandling.id,
             metadata = metadata,
             stønadType = fagsak.stønadstype,
         )
@@ -148,7 +152,7 @@ class RevurderingService(
             val vedtakDto =
                 kopierVedtakService.lagVedtakDtoBasertPåTidligereVedtaksperioder(
                     fagsakId = fagsak.id,
-                    forrigeBehandlingId = forrigeBehandlingId,
+                    forrigeBehandlingId = forrigeBehandling.id,
                     revurderingId = revurdering.id,
                 )
             vedtakService.lagreVedtak(
