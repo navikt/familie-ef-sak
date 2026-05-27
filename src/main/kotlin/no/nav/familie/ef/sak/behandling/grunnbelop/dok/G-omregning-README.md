@@ -81,6 +81,7 @@ Når G-omregningen er ferdigkjørt er det viktig å gå igjennom denne listen fo
     * De i denne listen som har samordning skal overleveres til coachene.
     * Hvis G-omregning skjer etter 1. juni: Rekjør denne tasken når G-omregningen er ferdigkjørt
     * Kan bruke `finnFerdigstilteFagsakerMedUtdatertGBelop` og sjekke `samordningsfradrag > 0` samt `beløp > 0` for å finne liste for oversendelse til coacher
+    * Søk på `x_tags: G-omregning - Manuell` for å finne saker med fremtidig samordningsfradrag, som ikke kommer med i SQL over. (Samme som sanksjon).
 
 * **Sanksjon**
     * For de tilfellene med sanksjonsperioder vil G-omregningstaskene logge `Fagsak med id ... har sanksjon og må manuelt behandles` med `x_tags: G-omregning - Manuell`. Disse må sendes over til coachene.
