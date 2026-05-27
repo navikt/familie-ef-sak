@@ -12,7 +12,7 @@ valg vi har tatt og hva vi jobber med å endre før neste g-omregning.
 2. Legg inn ny G i no.nav.familie.ef.sak.beregning.Grunnbeløpsperioder
 3. Nye behandlinger vil nå bruke ny G
 4. Kjør gjerne en test med 1 fagsak (se ManuellGOmregningController under) før man setter på scheduler?
-5. Skalér opp til 4 podder for familie-ef-sak, familie-ef-iverksett og familie-ks-sak før selve g-omregningen kjøres
+5. Skalér opp til 4 podder for familie-ef-sak, familie-ef-iverksett og familie-ks-sak før selve g-omregningen kjøres. Si ifra til BAKS-teamet før oppskalering av ks-sak.
 6. Se ["etterarbeid under"](#etterarbeid)
 
 G-omregning starter vanligvis med at en scheduler finner kandidater for g-omregning (sql) 
