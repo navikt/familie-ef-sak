@@ -2,7 +2,9 @@ package no.nav.familie.ef.sak.infrastruktur.sikkerhet
 
 import no.nav.familie.ef.sak.behandlingsflyt.steg.BehandlerRolle
 import no.nav.familie.ef.sak.infrastruktur.config.RolleConfig
+import no.nav.familie.ef.sak.infrastruktur.exception.feilHvisIkke
 import org.slf4j.LoggerFactory
+import org.springframework.http.HttpStatus
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken
 
@@ -108,4 +110,11 @@ object SikkerhetContext {
     }
 
     fun harRolle(rolleId: String): Boolean = hentGrupperFraToken().contains(rolleId)
+
+    fun sjekkAcrLevel4() {
+        val acr = getJwtToken()?.token?.getClaimAsString("acr")
+        feilHvisIkke(acr == "Level4", HttpStatus.UNAUTHORIZED) {
+            "Påloggingsnivå er ikke høyt nok. Krever Level4, fikk $acr"
+        }
+    }
 }

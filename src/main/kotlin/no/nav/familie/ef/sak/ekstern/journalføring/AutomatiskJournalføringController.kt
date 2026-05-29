@@ -10,6 +10,7 @@ import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
+import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
@@ -30,6 +31,7 @@ class AutomatiskJournalføringController(
      * eller manuelt gjennomgås.
      */
     @PostMapping("kan-opprette-behandling")
+    @PreAuthorize("hasRole('APPLICATION')")
     fun kanOppretteBehandling(
         @RequestBody personIdent: PersonIdent,
         @RequestParam type: StønadType,
@@ -45,6 +47,7 @@ class AutomatiskJournalføringController(
      * Skal bare brukes av familie-ef-mottak for å automatisk journalføre
      */
     @PostMapping("journalfor")
+    @PreAuthorize("hasRole('APPLICATION')")
     fun automatiskJournalfør(
         @RequestBody request: AutomatiskJournalføringRequest,
     ): Ressurs<AutomatiskJournalføringResponse> {

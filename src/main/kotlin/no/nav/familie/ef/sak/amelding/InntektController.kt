@@ -4,6 +4,7 @@ import no.nav.familie.ef.sak.AuditLoggerEvent
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.Ressurs.Companion.success
+import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -22,6 +23,7 @@ class InntektController(
     private val inntektService: InntektService,
 ) {
     @PostMapping("inntektv2/{fagsakid}")
+    @PreAuthorize("hasRole('APPLICATION')")
     fun hentInntekt(
         @PathVariable("fagsakid") fagsakId: UUID,
         @RequestBody inntektRequestBody: InntektRequestBody,

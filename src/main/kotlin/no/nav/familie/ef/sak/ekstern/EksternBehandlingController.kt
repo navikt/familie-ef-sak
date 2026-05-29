@@ -13,6 +13,7 @@ import no.nav.familie.kontrakter.felles.klage.KanOppretteRevurderingResponse
 import no.nav.familie.kontrakter.felles.klage.OpprettRevurderingResponse
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
+import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
@@ -36,6 +37,7 @@ class EksternBehandlingController(
      * Dette er alltså ikke ett bolk-oppslag for flere ulike personer
      */
     @PostMapping("har-loepende-stoenad")
+    @PreAuthorize("hasRole('APPLICATION')")
     fun harAktivStønad(
         @RequestBody personidenter: Set<String>,
     ): Ressurs<Boolean> {
@@ -49,6 +51,7 @@ class EksternBehandlingController(
     }
 
     @PostMapping("har-loepende-barnetilsyn")
+    @PreAuthorize("hasRole('APPLICATION')")
     fun harLøpendeBarnetilsyn(
         @RequestBody personIdent: PersonIdent,
     ): Ressurs<Boolean> = Ressurs.success(eksternBehandlingService.harLøpendeBarnetilsyn(personIdent.ident))
@@ -78,6 +81,7 @@ class EksternBehandlingController(
     }
 
     @PostMapping("kan-sende-påminnelse-til-bruker")
+    @PreAuthorize("hasRole('APPLICATION')")
     fun kanSendeSmsPåminnelseTilSøker(
         @RequestBody kanSendePåminnelseRequest: KanSendePåminnelseRequest,
     ): Ressurs<Boolean> {
