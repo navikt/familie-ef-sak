@@ -334,7 +334,7 @@ class JournalføringService(
                 if (erRegelendring2026) {
                     val søknad = jsonMapper.readValue(jsonOs, SøknadOvergangsstønadRegelendring2026::class.java)
                     søknadService.lagreSøknadForOvergangsstønadRegelendring2026(søknad, behandlingId, journalpost.journalpostId)
-                    behandlingService.oppdaterErRegelendring2026(behandlingId)
+                    behandlingService.oppdaterErRegelendring2026(behandlingId, true)
                 } else {
                     val søknad = jsonMapper.readValue(jsonOs, SøknadOvergangsstønad::class.java)
                     søknadService.lagreSøknadForOvergangsstønad(søknad, behandlingId, fagsak.id, journalpost.journalpostId)
