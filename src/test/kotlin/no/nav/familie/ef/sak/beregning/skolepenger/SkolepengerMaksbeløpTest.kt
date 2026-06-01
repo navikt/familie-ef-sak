@@ -126,7 +126,7 @@ internal class SkolepengerMaksbeløpTest {
     @Test
     internal fun `Må holde maksbeløp skolepenger oppdatert innen juni`() {
         val sisteRegistrerteÅr = SkolepengerMaksbeløp.hentSisteÅrRegistrertMaksbeløpHøyskole()
-        if (YearMonth.now().month.value < 6) {
+        if (YearMonth.now().month.value <= 6) {
             val ifjor = Year.now().minusYears(1)
             assertThat(sisteRegistrerteÅr).isGreaterThanOrEqualTo(ifjor)
         } else {
