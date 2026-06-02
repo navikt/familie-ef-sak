@@ -69,6 +69,10 @@ data class BarnSomSkalFødes(
         )
 }
 
+data class ForeldreansvarBarn(
+    val fødselsnummer: String,
+)
+
 /**
  * [IKKE_VALGT] er indirekte det samme som digital søknad, der man ikke velger ustrukturert dokumentasjonstype
  */

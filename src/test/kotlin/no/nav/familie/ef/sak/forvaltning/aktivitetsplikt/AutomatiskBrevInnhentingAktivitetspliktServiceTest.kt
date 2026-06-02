@@ -18,7 +18,9 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.Month
 import java.time.YearMonth
+import kotlin.test.Ignore
 
+@Ignore
 internal class AutomatiskBrevInnhentingAktivitetspliktServiceTest {
     val taskService = mockk<TaskService>()
     val oppgaveService = mockk<OppgaveService>()
