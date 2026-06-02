@@ -6,8 +6,11 @@ import no.nav.familie.ef.sak.opplysninger.søknad.SøknadOvergangsstønadReposit
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadSkolepengerRepository
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.Adresseopplysninger
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.Sivilstandsplaner
+import no.nav.familie.ef.sak.opplysninger.søknad.domain.StringListeWrapper
 import no.nav.familie.ef.sak.opplysninger.søknad.mapper.SøknadsskjemaMapper
 import no.nav.familie.kontrakter.ef.søknad.Barnepass
+import no.nav.familie.kontrakter.ef.søknad.Selvstendig
+import no.nav.familie.kontrakter.ef.søknad.SøknadOvergangsstønadRegelendring2026
 import no.nav.familie.kontrakter.ef.søknad.Søknadsfelt
 import no.nav.familie.kontrakter.ef.søknad.Testsøknad
 import no.nav.familie.kontrakter.ef.søknad.TestsøknadBuilder
@@ -154,5 +157,44 @@ internal class SøknadsskjemaOvergangsstønadRepositoryTest : OppslagSpringRunne
 
         assertThat(søknadFraDatabase.barn).isEqualTo(søknadTilLagring.barn)
         assertThat(søknadFraDatabase.barn.single().barnepassordninger).hasSize(1)
+    }
+
+    @Test
+    internal fun `regelendring 2026 søknad lagres og leses korrekt fra database`() {
+        val kontraktsøknad = lagRegelendring2026Søknad(inntektSvarIder = listOf("arbeidstaker", "selvstendig"))
+        val søknadTilLagring = SøknadsskjemaMapper.tilDomene(kontraktsøknad)
+
+        søknadOvergangsstønadRepository.insert(søknadTilLagring)
+        val søknadFraDatabase = søknadOvergangsstønadRepository.findByIdOrThrow(søknadTilLagring.id)
+
+        assertThat(søknadFraDatabase).isEqualTo(søknadTilLagring)
+        assertThat(søknadFraDatabase.erRegelendring2026).isTrue()
+        assertThat(søknadFraDatabase.inntekter?.verdier).containsExactly("arbeidstaker", "selvstendig")
+    }
+
+    @Test
+    internal fun `gammel søknad har null-verdier for regelendring-felt etter lagring`() {
+        val søknadTilLagring = SøknadsskjemaMapper.tilDomene(Testsøknad.søknadOvergangsstønad)
+
+        søknadOvergangsstønadRepository.insert(søknadTilLagring)
+        val søknadFraDatabase = søknadOvergangsstønadRepository.findByIdOrThrow(søknadTilLagring.id)
+
+        assertThat(søknadFraDatabase.erRegelendring2026).isFalse()
+        assertThat(søknadFraDatabase.inntekter).isNull()
+    }
+
+    private fun lagRegelendring2026Søknad(inntektSvarIder: List<String>): SøknadOvergangsstønadRegelendring2026 {
+        val gammelSøknad = Testsøknad.søknadOvergangsstønad
+        return SøknadOvergangsstønadRegelendring2026(
+            innsendingsdetaljer = gammelSøknad.innsendingsdetaljer,
+            personalia = gammelSøknad.personalia,
+            sivilstandsdetaljer = gammelSøknad.sivilstandsdetaljer,
+            medlemskapsdetaljer = gammelSøknad.medlemskapsdetaljer,
+            bosituasjon = gammelSøknad.bosituasjon,
+            barn = gammelSøknad.barn,
+            hvaSituasjon = Søknadsfelt("Hva er situasjonen din?", listOf("Situasjon"), svarId = listOf("situasjon")),
+            inntekter = Søknadsfelt("Har du inntekt?", listOf("Arbeidstaker"), svarId = inntektSvarIder),
+            stønadsstart = gammelSøknad.stønadsstart,
+        )
     }
 }

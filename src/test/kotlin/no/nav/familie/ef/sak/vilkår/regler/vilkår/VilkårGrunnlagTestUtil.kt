@@ -109,6 +109,7 @@ fun tomtSøknadsgrunnlag() =
         UUID.randomUUID(),
         fødselTermindato = null,
         navn = null,
+        fødselsnummer = null,
         harSammeAdresse = null,
         skalBoBorHosSøker = null,
         forelder = null,
