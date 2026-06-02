@@ -27,7 +27,7 @@ jobs:
           mvn -B --no-transfer-progress antrun:run@ktlint --settings .m2/maven-settings.xml
   build:
     name: Build and sonar
-    runs-on: ubuntu-latest-8-cores
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # ratchet:actions/checkout@v4
         with:
