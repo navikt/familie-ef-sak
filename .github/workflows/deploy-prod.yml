@@ -25,33 +25,12 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '21'
-      - uses: actions/cache@v4
-        with:
-          path: ~/.m2/repository
-          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
-          restore-keys: |
-            ${{ runner.os }}-maven-
-      - name: Cache testcontainer images
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/testcontainers-images
-          key: docker-testcontainers-${{ runner.os }}-${{ hashFiles('**/DbContainerInitializer.kt') }}
-      - name: Load cached testcontainer images
-        run: |
-          if [ -f ~/.cache/testcontainers-images/images.tar ]; then
-            docker load -i ~/.cache/testcontainers-images/images.tar
-          fi
+          cache: 'maven'
       - name: Bygg med Maven
         env:
           GITHUB_USERNAME: x-access-token
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: mvn -B --no-transfer-progress package --settings .m2/maven-settings.xml --file pom.xml -Dsurefire.forkCount=2
-      - name: Save testcontainer images to cache
-        if: always()
-        run: |
-          mkdir -p ~/.cache/testcontainers-images
-          docker save testcontainers/ryuk:0.14.0 postgres:17.6 \
-            -o ~/.cache/testcontainers-images/images.tar 2>/dev/null || true
+        run: mvn -B --no-transfer-progress package --settings .m2/maven-settings.xml --file pom.xml
       - uses: nais/docker-build-push@cd5ec5663feb0e05c3fa374d1fb442605b046c6b # ratchet:nais/docker-build-push@v0
         id: docker-push
         with:
