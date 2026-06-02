@@ -28,6 +28,7 @@
         <revision>1.0</revision>
         <sha1/>
         <changelist>-SNAPSHOT</changelist>
+        <surefire.forkCount>1</surefire.forkCount>
         <java.version>21</java.version>
         <kotlin.version>2.3.21</kotlin.version>
         <springdoc.version>3.0.3</springdoc.version>
@@ -41,7 +42,6 @@
         <mikrofrontend.builder.version>20230704114948-74aa2e9</mikrofrontend.builder.version>
         <eksterne.kontrakter.bisys.version>2.0_20260323170751_4c02e3c</eksterne.kontrakter.bisys.version>
         <cucumber.version>7.34.3</cucumber.version>
-
 
         <!--suppress UnresolvedMavenProperty  Ligger som secret i github-->
         <sonar.projectKey>${SONAR_PROJECTKEY}</sonar.projectKey>
@@ -338,6 +338,10 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>3.5.5</version>
+                <configuration>
+                    <forkCount>${surefire.forkCount}</forkCount>
+                    <reuseForks>true</reuseForks>
+                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
