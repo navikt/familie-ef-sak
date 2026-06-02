@@ -33,8 +33,8 @@
         <kotlin.version>2.3.21</kotlin.version>
         <springdoc.version>3.0.3</springdoc.version>
         <mockk.version>1.14.9</mockk.version>
-        <felles.version>4.20260420125050_76c5fea</felles.version>
-        <prosessering.version>2.20260420122910_8bfca04</prosessering.version>
+        <felles.version>4.20260315040337_2316c82</felles.version>
+        <prosessering.version>2.20260511102627_928cb38</prosessering.version>
         <token-validation-spring.version>6.0.6</token-validation-spring.version>
 
         <start-class>no.nav.familie.ef.sak.ApplicationKt</start-class>
@@ -47,7 +47,7 @@
         <sonar.projectKey>${SONAR_PROJECTKEY}</sonar.projectKey>
         <sonar.organization>navit</sonar.organization>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
-        <nav.security.version>6.0.6</nav.security.version> <!-- Denne burde være samme versjon som i felles -->
+        <nav.security.version>6.0.7</nav.security.version> <!-- Denne burde være samme versjon som i felles -->
         <brukervarsel-builder.version>2.2.0</brukervarsel-builder.version>
         <!--suppress UnresolvedMavenProperty -->
         <sonar.login>${SONAR_LOGIN}</sonar.login>
@@ -189,6 +189,11 @@
         <dependency>
             <groupId>no.nav.familie</groupId>
             <artifactId>prosessering-core</artifactId>
+            <version>${prosessering.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>no.nav.familie</groupId>
+            <artifactId>prosessering-web-spring-security</artifactId>
             <version>${prosessering.version}</version>
         </dependency>
         <dependency>
