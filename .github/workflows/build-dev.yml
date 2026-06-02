@@ -18,7 +18,12 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '21'
-          cache: 'maven'
+      - uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
       - name: Kjør ktlint
         env:
           GITHUB_USERNAME: x-access-token
@@ -38,7 +43,12 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '21'
-          cache: 'maven'
+      - uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
       - name: Bygg (dependabot)
         if: github.actor == 'dependabot[bot]'
         env:
