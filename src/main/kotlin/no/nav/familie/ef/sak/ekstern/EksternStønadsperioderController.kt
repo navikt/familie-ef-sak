@@ -98,6 +98,7 @@ class EksternStønadsperioderController(
      * Brukes av tilleggstønader, for å vurdere barnetilsyn-ytelse. Trenger noen ganger å filtrere vekk barnetilsyn.
      */
     @PostMapping("perioder-for-ytelser")
+    @PreAuthorize("hasRole('APPLICATION')")
     fun hentPerioderForYtelser(
         @RequestBody request: EksternePerioderForStønadstyperRequest,
     ): Ressurs<EksternePerioderMedStønadstypeResponse> =
