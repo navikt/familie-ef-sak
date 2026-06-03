@@ -13,13 +13,14 @@ data class Søknadsverdier(
     val sivilstandsplaner: Sivilstandsplaner?,
     val bosituasjon: Bosituasjon,
     val sivilstand: Sivilstand,
-    val aktivitet: Aktivitet? = null, // Gjelder: OS og BT
-    val situasjon: Situasjon? = null, // Gjelder: OS
+    val aktivitet: Aktivitet? = null,
+    val situasjon: Situasjon? = null,
     val datoMottatt: LocalDateTime,
     val datoPåbegyntSøknad: LocalDate? = null,
     val søkerFra: YearMonth? = null,
     val adresseopplysninger: Adresseopplysninger?,
     val dokumentasjon: DokumentasjonFraSøknadDto,
+    val inntekter: List<String> = emptyList(),
 )
 
 data class DokumentasjonFraSøknadDto(
@@ -102,4 +103,5 @@ fun SøknadsskjemaOvergangsstønad.tilSøknadsverdier() =
         adresseopplysninger = this.adresseopplysninger,
         datoPåbegyntSøknad = this.datoPåbegyntSøknad,
         dokumentasjon = DokumentasjonMapper.tilDokumentasjonDto(this),
+        inntekter = this.inntekter?.verdier ?: emptyList(),
     )

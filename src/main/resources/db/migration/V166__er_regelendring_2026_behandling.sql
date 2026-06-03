@@ -1,0 +1,2 @@
+ALTER TABLE behandling
+    ADD COLUMN er_regelendring_2026 BOOLEAN NOT NULL DEFAULT FALSE;

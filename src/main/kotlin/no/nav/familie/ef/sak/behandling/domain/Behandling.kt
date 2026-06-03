@@ -36,6 +36,8 @@ data class Behandling(
     @Column("henlagt_arsak")
     val henlagtÅrsak: HenlagtÅrsak? = null,
     val vedtakstidspunkt: LocalDateTime? = null,
+    @Column("er_regelendring_2026")
+    val erRegelendring2026: Boolean = false,
 ) {
     fun kanHenlegges(): Boolean = !status.behandlingErLåstForVidereRedigering()
 
