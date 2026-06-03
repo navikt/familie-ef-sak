@@ -1,38 +1,61 @@
 package no.nav.familie.ef.sak.ekstern.soknad
 
+import no.nav.familie.ef.sak.behandling.BehandlingRepository
+import no.nav.familie.ef.sak.infotrygd.InfotrygdService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.TidligereVedtaksperioderService
-import no.nav.familie.ef.sak.vilkår.dto.TidligereVedtaksperioderDto
-import no.nav.familie.ef.sak.vilkår.dto.tilDto
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.gjeldende
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pensjon.HistoriskPensjonService
+import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import java.time.LocalDate
 
 @Service
 class EksternSøknadService(
     private val personService: PersonService,
-    private val tidligereVedtaksperioderService: TidligereVedtaksperioderService,
+    private val behandlingRepository: BehandlingRepository,
+    private val infotrygdService: InfotrygdService,
+    private val historiskPensjonService: HistoriskPensjonService,
 ) {
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    fun harTidligereInnvilgetVedtak(personIdent: String): TidligereVedtakStatus =
-        try {
+    fun harTidligereInnvilgetVedtak(personIdent: String): TidligereVedtakStatus {
+        return try {
             val folkeregisteridentifikatorer = personService.hentSøker(personIdent).folkeregisteridentifikator
-            val tidligereVedtaksperioder = tidligereVedtaksperioderService.hentTidligereVedtaksperioder(folkeregisteridentifikatorer)
+            if (folkeregisteridentifikatorer.isEmpty() || folkeregisteridentifikatorer.none { !it.metadata.historisk }) {
+                return TidligereVedtakStatus.NEI
+            }
 
-            tidligereVedtaksperioder.tilDto().tilTidligereVedtakStatus()
+            val aktivIdent = folkeregisteridentifikatorer.gjeldende().ident
+            val identer = folkeregisteridentifikatorer.map { it.ident }.toSet()
+
+            when {
+                harGjeldendePeriodePåGammeltRegelverkIEf(identer) -> TidligereVedtakStatus.JA
+                harTidligereOvergangsstønadIInfotrygd(identer) -> TidligereVedtakStatus.JA
+                else -> historiskPensjonStatus(aktivIdent, identer)
+            }
         } catch (e: Exception) {
             logger.warn("Feil ved sjekk av tidligere innvilget vedtak", e)
             TidligereVedtakStatus.VET_IKKE
         }
-}
+    }
 
-private fun TidligereVedtaksperioderDto.tilTidligereVedtakStatus(): TidligereVedtakStatus {
-    val harFraInfotrygd = infotrygd?.harTidligereInnvilgetVedtak() ?: false
-    val harFraSak = sak?.harTidligereInnvilgetVedtak() ?: false
+    private fun harGjeldendePeriodePåGammeltRegelverkIEf(identer: Set<String>): Boolean =
+        behandlingRepository.harGjeldendePeriodePåGammeltRegelverk(
+            identer = identer,
+            stønadstype = StønadType.OVERGANGSSTØNAD,
+            iDag = LocalDate.now(),
+        )
 
-    if (harFraInfotrygd || harFraSak) return TidligereVedtakStatus.JA
-    if (historiskPensjon == null) return TidligereVedtakStatus.VET_IKKE
-    if (historiskPensjon) return TidligereVedtakStatus.JA
+    private fun harTidligereOvergangsstønadIInfotrygd(identer: Set<String>): Boolean = infotrygdService.hentPerioderFraReplika(identer).overgangsstønad.isNotEmpty()
 
-    return TidligereVedtakStatus.NEI
+    private fun historiskPensjonStatus(
+        aktivIdent: String,
+        identer: Set<String>,
+    ): TidligereVedtakStatus =
+        when (historiskPensjonService.hentHistoriskPensjon(aktivIdent, identer).harPensjonsdata()) {
+            null -> TidligereVedtakStatus.VET_IKKE
+            true -> TidligereVedtakStatus.JA
+            false -> TidligereVedtakStatus.NEI
+        }
 }
