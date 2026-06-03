@@ -32,8 +32,8 @@
         <kotlin.version>2.3.21</kotlin.version>
         <springdoc.version>3.0.3</springdoc.version>
         <mockk.version>1.14.9</mockk.version>
-        <felles.version>4.20260428092133_557f62f</felles.version>
-        <prosessering.version>2.20260420122910_8bfca04</prosessering.version>
+        <felles.version>4.20260217152944_7094de0</felles.version>
+        <prosessering.version>2.20251110093725_10552cd</prosessering.version>
         <token-validation-spring.version>6.0.6</token-validation-spring.version>
 
         <start-class>no.nav.familie.ef.sak.ApplicationKt</start-class>
@@ -47,7 +47,6 @@
         <sonar.projectKey>${SONAR_PROJECTKEY}</sonar.projectKey>
         <sonar.organization>navit</sonar.organization>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
-        <nav.security.version>6.0.6</nav.security.version> <!-- Denne burde være samme versjon som i felles -->
         <okhttp3.version>4.9.1</okhttp3.version> <!-- overskrever spring sin versjon, blir brukt av mock-oauth2-server -->
         <brukervarsel-builder.version>2.2.0</brukervarsel-builder.version>
         <!--suppress UnresolvedMavenProperty -->
@@ -66,12 +65,6 @@
     </dependencyManagement>
 
     <dependencies>
-        <!-- Http Client - nyeste versjon fra spring skaper problemer. Issue: HTTPCLIENT-2405 -->
-        <dependency>
-            <groupId>org.apache.httpcomponents.client5</groupId>
-            <artifactId>httpclient5</artifactId>
-            <version>5.6.1</version>
-        </dependency>
         <dependency>
             <groupId>org.jetbrains.kotlin</groupId>
             <artifactId>kotlin-stdlib</artifactId>
@@ -274,7 +267,7 @@
         <dependency>
             <groupId>no.nav.security</groupId>
             <artifactId>token-validation-spring-test</artifactId>
-            <version>${nav.security.version}</version>
+            <version>${token-validation-spring.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
