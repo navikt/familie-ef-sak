@@ -14,6 +14,7 @@ import com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo
 import com.github.tomakehurst.wiremock.client.WireMock.urlPathMatching
 import no.nav.familie.ef.sak.arbeidsfordeling.Arbeidsfordelingsenhet
 import no.nav.familie.ef.sak.felles.integration.dto.Tilgang
+import no.nav.familie.ef.sak.infrastruktur.config.WireMockServerInitializer
 import no.nav.familie.ef.sak.journalføring.JournalføringTestUtil.avsenderMottaker
 import no.nav.familie.kontrakter.ef.sak.DokumentBrevkode
 import no.nav.familie.kontrakter.ef.søknad.Testsøknad
@@ -141,14 +142,12 @@ class FamilieIntegrasjonerMock(
 
     @Bean("mock-integrasjoner")
     @Profile("mock-integrasjoner")
-    fun integrationMockServer(
-        @Value("\${FAMILIE_INTEGRASJONER_URL}") uri: URI,
-    ): WireMockServer {
-        val mockServer = WireMockServer(uri.port)
+    fun integrationMockServer(): WireMockServer {
+        val mockServer = WireMockServerInitializer.wireMockServer
         responses.forEach {
             mockServer.stubFor(it)
         }
-        mockServer.start()
+
         return mockServer
     }
 
