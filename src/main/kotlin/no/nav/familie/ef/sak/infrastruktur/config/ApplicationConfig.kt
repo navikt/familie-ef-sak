@@ -38,9 +38,10 @@ import java.time.temporal.ChronoUnit
     "no.nav.familie.sikkerhet",
     "no.nav.familie.unleash",
 )
-@Import(RestTemplateAzure::class,
+@Import(
+    RestTemplateAzure::class,
     FamilieFellesSpringSecurityKonfigurasjon::class,
-    )
+)
 @EnableOAuth2Client(cacheEnabled = true)
 @EnableScheduling
 class ApplicationConfig {
