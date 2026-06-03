@@ -22,8 +22,8 @@ import no.nav.familie.ef.sak.fagsak.domain.FagsakPerson
 import no.nav.familie.ef.sak.felles.util.TokenUtil
 import no.nav.familie.ef.sak.infrastruktur.config.JsonMapperProvider.jsonMapper
 import no.nav.familie.ef.sak.infrastruktur.config.RolleConfig
-import no.nav.familie.ef.sak.iverksett.oppgaveterminbarn.TerminbarnOppgave
 import no.nav.familie.ef.sak.infrastruktur.config.WireMockServerInitializer
+import no.nav.familie.ef.sak.iverksett.oppgaveterminbarn.TerminbarnOppgave
 import no.nav.familie.ef.sak.oppfølgingsoppgave.domain.OppgaverForOpprettelse
 import no.nav.familie.ef.sak.oppgave.Oppgave
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.Grunnlagsdata

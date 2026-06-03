@@ -14,8 +14,8 @@ import com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo
 import com.github.tomakehurst.wiremock.client.WireMock.urlPathMatching
 import no.nav.familie.ef.sak.arbeidsfordeling.Arbeidsfordelingsenhet
 import no.nav.familie.ef.sak.felles.integration.dto.Tilgang
-import no.nav.familie.ef.sak.journalføring.JournalføringTestUtil.avsenderMottaker
 import no.nav.familie.ef.sak.infrastruktur.config.WireMockServerInitializer
+import no.nav.familie.ef.sak.journalføring.JournalføringTestUtil.avsenderMottaker
 import no.nav.familie.kontrakter.ef.sak.DokumentBrevkode
 import no.nav.familie.kontrakter.ef.søknad.Testsøknad
 import no.nav.familie.kontrakter.felles.BrukerIdType
