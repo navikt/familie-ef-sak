@@ -4,14 +4,11 @@ import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext.harRolle
 import no.nav.familie.log.NavSystemtype
 import no.nav.familie.log.filter.LogFilter
 import no.nav.familie.log.filter.RequestTimeFilter
+import no.nav.familie.log.interceptor.ConsumerIdClientInterceptor
+import no.nav.familie.log.interceptor.MdcValuesPropagatingClientInterceptor
 import no.nav.familie.prosessering.config.ProsesseringInfoProvider
-import no.nav.familie.restklient.client.RetryOAuth2HttpClient
 import no.nav.familie.restklient.config.RestTemplateAzure
-import no.nav.familie.restklient.interceptor.BearerTokenClientInterceptor
-import no.nav.familie.restklient.interceptor.ConsumerIdClientInterceptor
-import no.nav.familie.restklient.interceptor.MdcValuesPropagatingClientInterceptor
-import no.nav.security.token.support.client.core.http.OAuth2HttpClient
-import no.nav.security.token.support.client.core.oauth2.OAuth2AccessTokenResponse
+import no.nav.familie.sikkerhet.context.FamilieFellesSpringSecurityKonfigurasjon
 import no.nav.security.token.support.client.spring.oauth2.EnableOAuth2Client
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
@@ -23,13 +20,10 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.ComponentScan
 import org.springframework.context.annotation.Import
 import org.springframework.context.annotation.Primary
-import org.springframework.http.client.ClientHttpRequestInterceptor
-import org.springframework.http.converter.FormHttpMessageConverter
 import org.springframework.http.converter.json.JacksonJsonHttpMessageConverter
 import org.springframework.scheduling.annotation.EnableScheduling
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken
-import org.springframework.web.client.RestClient
 import org.springframework.web.client.RestOperations
 import org.springframework.web.client.RestTemplate
 import tools.jackson.databind.json.JsonMapper
@@ -44,7 +38,9 @@ import java.time.temporal.ChronoUnit
     "no.nav.familie.sikkerhet",
     "no.nav.familie.unleash",
 )
-@Import(RestTemplateAzure::class)
+@Import(RestTemplateAzure::class,
+    FamilieFellesSpringSecurityKonfigurasjon::class,
+    )
 @EnableOAuth2Client(cacheEnabled = true)
 @EnableScheduling
 class ApplicationConfig {
