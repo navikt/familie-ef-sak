@@ -6,7 +6,6 @@ import no.nav.familie.ef.sak.samværsavtale.dto.JournalførBeregnetSamværReques
 import no.nav.familie.ef.sak.samværsavtale.dto.SamværsavtaleDto
 import no.nav.familie.ef.sak.samværsavtale.dto.tilDto
 import no.nav.familie.kontrakter.felles.Ressurs
-import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -18,7 +17,6 @@ import java.util.UUID
 
 @RestController
 @RequestMapping(path = ["/api/samvaersavtale"])
-@ProtectedWithClaims(issuer = "azuread")
 class SamværsavtaleController(
     private val samværsavtaleService: SamværsavtaleService,
     private val tilgangService: TilgangService,

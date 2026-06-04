@@ -4,7 +4,6 @@ import no.nav.familie.ef.sak.AuditLoggerEvent
 import no.nav.familie.ef.sak.brev.dto.FrittståendeSanitybrevDto
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
-import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
@@ -15,7 +14,6 @@ import java.util.UUID
 
 @RestController
 @RequestMapping(path = ["/api/frittstaende-brev"])
-@ProtectedWithClaims(issuer = "azuread")
 class FrittståendeBrevController(
     private val frittståendeBrevService: FrittståendeBrevService,
     private val tilgangService: TilgangService,

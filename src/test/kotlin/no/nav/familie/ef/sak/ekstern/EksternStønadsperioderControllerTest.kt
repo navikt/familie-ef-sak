@@ -67,8 +67,7 @@ internal class EksternStønadsperioderControllerTest : OppslagSpringRunnerTest()
     @Test
     internal fun `full overgangsstønad - skal ikke kunne kalle endepunkt uten token`() {
         utførKallOgVerifiser<EksternePerioderResponse>("/api/ekstern/perioder/full-overgangsstonad", PersonIdent("1")) { response ->
-            assertThat(response.statusCode).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR)
-            assertThat(response.body?.status).isEqualTo(Ressurs.Status.FEILET)
+            assertThat(response.statusCode).isEqualTo(HttpStatus.UNAUTHORIZED)
         }
     }
 
