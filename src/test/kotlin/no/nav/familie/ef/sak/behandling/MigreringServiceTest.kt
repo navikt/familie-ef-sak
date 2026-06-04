@@ -37,7 +37,7 @@ import no.nav.familie.ef.sak.infrastruktur.config.PdlClientConfig
 import no.nav.familie.ef.sak.infrastruktur.config.RolleConfig
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.iverksett.IverksettClient
-import no.nav.familie.ef.sak.iverksett.oppgaveforbarn.GjeldendeBarnRepository
+import no.nav.familie.ef.sak.iverksett.oppgaveforbarn.OppfølgingOppgaveBarnFyllerÅrRepository
 import no.nav.familie.ef.sak.journalføring.dto.VilkårsbehandleNyeBarn
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.infotrygd.InfotrygdPeriodeTestUtil
 import no.nav.familie.ef.sak.oppgave.Oppgave
@@ -86,7 +86,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.repository.findByIdOrNull
 import java.math.BigDecimal
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.LinkedList
 import java.util.Queue
@@ -161,7 +160,7 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
     private lateinit var infotrygdReplikaClient: InfotrygdReplikaClient
 
     @Autowired
-    private lateinit var gjeldendeBarnRepository: GjeldendeBarnRepository
+    private lateinit var oppfølgingOppgaveBarnFyllerÅrRepository: OppfølgingOppgaveBarnFyllerÅrRepository
 
     @Autowired
     private lateinit var barnRepository: BarnRepository
@@ -630,13 +629,13 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
         internal fun `skal finne barn på uttrekk til oppgaver etter migrering`() {
             opprettOgIverksettMigrering()
             assertThat(
-                gjeldendeBarnRepository.finnBarnTilMigrerteBehandlinger(
+                oppfølgingOppgaveBarnFyllerÅrRepository.finnBarnIMigrerteBehandlingerMedGammeltRegelverkForOppfølgingsoppgave(
                     OVERGANGSSTØNAD,
                     DatoUtil.dagensDato(),
                 ),
             ).hasSize(2)
             assertThat(
-                gjeldendeBarnRepository.finnBarnAvGjeldendeIverksatteBehandlinger(
+                oppfølgingOppgaveBarnFyllerÅrRepository.finnBarnIBehandlingerMedGammeltRegelverkForOppfølgingsoppgave(
                     OVERGANGSSTØNAD,
                     DatoUtil.dagensDato(),
                 ),
@@ -648,12 +647,12 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
             val migrering = opprettOgIverksettMigrering()
             val revurdering = opprettRevurderingOgIverksett(migrering)
             assertThat(
-                gjeldendeBarnRepository.finnBarnAvGjeldendeIverksatteBehandlinger(
+                oppfølgingOppgaveBarnFyllerÅrRepository.finnBarnIBehandlingerMedGammeltRegelverkForOppfølgingsoppgave(
                     OVERGANGSSTØNAD,
                     DatoUtil.dagensDato(),
                 ),
             ).isEmpty()
-            val migrerteBarn = gjeldendeBarnRepository.finnBarnTilMigrerteBehandlinger(OVERGANGSSTØNAD, DatoUtil.dagensDato())
+            val migrerteBarn = oppfølgingOppgaveBarnFyllerÅrRepository.finnBarnIMigrerteBehandlingerMedGammeltRegelverkForOppfølgingsoppgave(OVERGANGSSTØNAD, DatoUtil.dagensDato())
             assertThat(migrerteBarn).hasSize(2)
             assertThat(migrerteBarn.map { it.behandlingId }.toSet()).containsExactly(revurdering.id)
         }
