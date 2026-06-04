@@ -2,6 +2,7 @@ package no.nav.familie.ef.sak.forvaltning.uttrekk
 
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.ef.sak.vedtak.historikk.VedtakHistorikkService
+import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.slf4j.LoggerFactory
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
@@ -13,6 +14,7 @@ import java.time.YearMonth
 import java.util.UUID
 
 @Controller
+@ProtectedWithClaims(issuer = "azuread")
 @RequestMapping(
     path = ["/api/uttrekk/andelshistorikk"],
     produces = [MediaType.APPLICATION_JSON_VALUE],

@@ -3,6 +3,7 @@ package no.nav.familie.ef.sak.oppfølgingsoppgave
 import no.nav.familie.ef.sak.behandling.oppgaveforopprettelse.OppgaverForOpprettelseDto
 import no.nav.familie.ef.sak.brev.Brevmal
 import no.nav.familie.kontrakter.felles.Ressurs
+import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
@@ -18,6 +19,7 @@ data class OppfølgingsoppgaveDto(
 
 @RestController
 @RequestMapping("/api/oppfolgingsoppgave")
+@ProtectedWithClaims(issuer = "azuread")
 class OppfølgingsoppgaveController(
     private val oppfølgingsoppgaveService: OppfølgingsoppgaveService,
 ) {

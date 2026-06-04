@@ -2,7 +2,7 @@ package no.nav.familie.ef.sak.ekstern.bisys
 
 import no.nav.familie.eksterne.kontrakter.bisys.BarnetilsynBisysRequest
 import no.nav.familie.eksterne.kontrakter.bisys.BarnetilsynBisysResponse
-import org.springframework.security.access.prepost.PreAuthorize
+import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
@@ -14,7 +14,7 @@ class BisysBarnetilsynController(
     val bisysBarnetilsynService: BisysBarnetilsynService,
 ) {
     @PostMapping("/perioder-barnetilsyn")
-    @PreAuthorize("hasRole('APPLICATION')")
+    @ProtectedWithClaims(issuer = "azuread", claimMap = ["roles=access_as_application"])
     fun hentPerioderBarnetilsyn(
         @RequestBody barnetilsynBisysRequest: BarnetilsynBisysRequest,
     ): BarnetilsynBisysResponse =

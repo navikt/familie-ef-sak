@@ -5,6 +5,7 @@ import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvisIkke
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
+import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
@@ -17,6 +18,7 @@ import java.util.UUID
 
 @RestController
 @RequestMapping("/api/utestengelse")
+@ProtectedWithClaims(issuer = "azuread")
 @Validated
 class UtestengelseController(
     private val tilgangService: TilgangService,

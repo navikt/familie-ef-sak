@@ -13,6 +13,7 @@ import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.ef.sak.vilkår.gjenbruk.GjenbrukVilkårService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.ef.StønadType
+import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
@@ -23,6 +24,7 @@ import java.util.UUID
 
 @RestController
 @RequestMapping(path = ["/api/behandling"])
+@ProtectedWithClaims(issuer = "azuread")
 class BehandlingController(
     private val behandlingService: BehandlingService,
     private val behandlingPåVentService: BehandlingPåVentService,
