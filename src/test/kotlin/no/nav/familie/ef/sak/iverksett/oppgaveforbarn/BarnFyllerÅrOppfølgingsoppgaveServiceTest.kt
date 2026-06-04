@@ -50,7 +50,7 @@ internal class BarnFyllerÅrOppfølgingsoppgaveServiceTest {
     private val grunnlagsdataService = mockk<GrunnlagsdataService>()
 
     private val opprettOppgaveForBarnService =
-        OppfølgingOppgaveBarnFyllerÅrOppfølgingsoppgaveService(
+        OppfølgingOppgaveBarnFyllerÅrService(
             oppfølgingOppgaveBarnFyllerÅrRepository,
             oppgaveRepository,
             taskService,

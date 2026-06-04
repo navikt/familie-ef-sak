@@ -19,7 +19,7 @@ import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
 
 @Service
-class OppfølgingOppgaveBarnFyllerÅrOppfølgingsoppgaveService(
+class OppfølgingOppgaveBarnFyllerÅrService(
     private val oppfølgingOppgaveBarnFyllerÅrRepository: OppfølgingOppgaveBarnFyllerÅrRepository,
     private val oppgaveRepository: OppgaveRepository,
     private val taskService: TaskService,

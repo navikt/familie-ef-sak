@@ -9,7 +9,7 @@ import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.infrastruktur.config.readValue
 import no.nav.familie.ef.sak.iverksett.oppgaveforbarn.AktivitetspliktigAlder
-import no.nav.familie.ef.sak.iverksett.oppgaveforbarn.OppfølgingOppgaveBarnFyllerÅrOppfølgingsoppgaveService
+import no.nav.familie.ef.sak.iverksett.oppgaveforbarn.OppfølgingOppgaveBarnFyllerÅrService
 import no.nav.familie.ef.sak.iverksett.oppgaveforbarn.OpprettOppgavePayload
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
 import no.nav.familie.ef.sak.repository.behandling
@@ -32,7 +32,7 @@ import org.springframework.dao.DuplicateKeyException
 import java.time.LocalDate
 
 class BarnFyllerÅrIntegrationTest : OppslagSpringRunnerTest() {
-    @Autowired private lateinit var barnFyllerÅrOppfølgingsoppgaveService: OppfølgingOppgaveBarnFyllerÅrOppfølgingsoppgaveService
+    @Autowired private lateinit var barnFyllerÅrOppfølgingsoppgaveService: OppfølgingOppgaveBarnFyllerÅrService
 
     @Autowired private lateinit var behandlingRepository: BehandlingRepository
 

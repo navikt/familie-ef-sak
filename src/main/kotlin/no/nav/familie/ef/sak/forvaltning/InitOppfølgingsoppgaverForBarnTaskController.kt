@@ -1,7 +1,7 @@
 package no.nav.familie.ef.sak.forvaltning
 
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
-import no.nav.familie.ef.sak.iverksett.oppgaveforbarn.OppfølgingOppgaveBarnFyllerÅrOppfølgingsoppgaveService
+import no.nav.familie.ef.sak.iverksett.oppgaveforbarn.OppfølgingOppgaveBarnFyllerÅrService
 import no.nav.familie.ef.sak.iverksett.oppgaveforbarn.OpprettTasksForBarnFyltÅrTask
 import no.nav.familie.prosessering.internal.TaskService
 import org.springframework.http.MediaType
@@ -17,7 +17,7 @@ import java.time.LocalDate
 )
 class InitOppfølgingsoppgaverForBarnTaskController(
     private val taskService: TaskService,
-    private val barnFyllerÅrOppfølgingsoppgaveService: OppfølgingOppgaveBarnFyllerÅrOppfølgingsoppgaveService,
+    private val barnFyllerÅrOppfølgingsoppgaveService: OppfølgingOppgaveBarnFyllerÅrService,
     private val tilgangService: TilgangService,
 ) {
     @PostMapping("/initialiser")
