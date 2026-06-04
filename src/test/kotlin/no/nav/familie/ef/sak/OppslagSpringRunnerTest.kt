@@ -21,8 +21,10 @@ import no.nav.familie.ef.sak.fagsak.domain.FagsakDomain
 import no.nav.familie.ef.sak.fagsak.domain.FagsakPerson
 import no.nav.familie.ef.sak.felles.util.TokenUtil
 import no.nav.familie.ef.sak.infrastruktur.config.JsonMapperProvider.jsonMapper
+import no.nav.familie.ef.sak.infrastruktur.config.MockOAuth2ServerConfig
 import no.nav.familie.ef.sak.infrastruktur.config.RolleConfig
 import no.nav.familie.ef.sak.infrastruktur.config.WireMockServerInitializer
+import no.nav.familie.ef.sak.infrastruktur.util.MockOAuth2ServerInitializer
 import no.nav.familie.ef.sak.iverksett.oppgaveterminbarn.TerminbarnOppgave
 import no.nav.familie.ef.sak.oppfølgingsoppgave.domain.OppgaverForOpprettelse
 import no.nav.familie.ef.sak.oppgave.Oppgave
@@ -42,7 +44,6 @@ import no.nav.familie.ef.sak.vilkår.Vilkårsvurdering
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.domene.TaskLogg
 import no.nav.security.mock.oauth2.MockOAuth2Server
-import no.nav.security.token.support.spring.test.EnableMockOAuth2Server
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
@@ -64,8 +65,8 @@ import org.springframework.web.client.RestOperations
 import org.springframework.web.client.RestTemplate
 
 @ExtendWith(SpringExtension::class)
-@ContextConfiguration(initializers = [DbContainerInitializer::class, WireMockServerInitializer::class])
-@SpringBootTest(classes = [ApplicationLocalSetup::class], webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@ContextConfiguration(initializers = [DbContainerInitializer::class, MockOAuth2ServerInitializer::class, WireMockServerInitializer::class])
+@SpringBootTest(classes = [ApplicationLocalSetup::class, MockOAuth2ServerConfig::class], webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles(
     "integrasjonstest",
     "mock-arbeidssøker",
@@ -90,7 +91,6 @@ import org.springframework.web.client.RestTemplate
     "mock-arbeid-og-inntekt",
     "mock-medl",
 )
-@EnableMockOAuth2Server
 @AutoConfigureTestRestTemplate
 abstract class OppslagSpringRunnerTest {
     protected final val listAppender = initLoggingEventListAppender()
