@@ -5,6 +5,7 @@ import no.nav.familie.ef.sak.AuditLoggerEvent
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.internal.TaskService
+import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
@@ -32,6 +33,7 @@ data class ForvaltningFerdigstillRequest(
 
 @RestController
 @RequestMapping("/api/oppgave/forvaltning/")
+@ProtectedWithClaims(issuer = "azuread")
 class OppgaveforvaltningsController(
     private val taskService: TaskService,
     private val tilgangService: TilgangService,

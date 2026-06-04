@@ -48,6 +48,7 @@ import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.internal.TaskService
+import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.context.annotation.Profile
 import org.springframework.http.MediaType
 import org.springframework.transaction.annotation.Transactional
@@ -62,6 +63,7 @@ import java.util.UUID
 
 @RestController
 @RequestMapping("/api/test")
+@ProtectedWithClaims(issuer = "azuread")
 @Profile("!prod")
 class TestSaksbehandlingController(
     private val fagsakService: FagsakService,

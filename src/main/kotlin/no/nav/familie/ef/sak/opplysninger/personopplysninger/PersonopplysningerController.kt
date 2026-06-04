@@ -9,6 +9,7 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.endringer.Endringer
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.endringer.EndringerIPersonopplysningerDto
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.navkontor.NavKontorEnhet
+import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.GetMapping
@@ -21,6 +22,7 @@ import java.util.UUID
 
 @RestController
 @RequestMapping(path = ["/api/personopplysninger"], produces = [APPLICATION_JSON_VALUE])
+@ProtectedWithClaims(issuer = "azuread")
 @Validated
 class PersonopplysningerController(
     private val personopplysningerService: PersonopplysningerService,

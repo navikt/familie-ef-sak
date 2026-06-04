@@ -9,6 +9,7 @@ import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.ef.sak.journalføring.dto.VilkårsbehandleNyeBarn
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.felles.Ressurs
+import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -20,6 +21,7 @@ import java.util.UUID
 
 @RestController
 @RequestMapping(path = ["/api/revurdering"])
+@ProtectedWithClaims(issuer = "azuread")
 class RevurderingController(
     private val revurderingService: RevurderingService,
     private val tilgangService: TilgangService,
