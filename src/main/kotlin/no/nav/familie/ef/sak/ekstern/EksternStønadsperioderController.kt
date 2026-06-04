@@ -13,9 +13,9 @@ import no.nav.familie.kontrakter.felles.ef.EksternePerioderMedBeløpResponse
 import no.nav.familie.kontrakter.felles.ef.EksternePerioderMedStønadstypeResponse
 import no.nav.familie.kontrakter.felles.ef.EksternePerioderRequest
 import no.nav.familie.kontrakter.felles.ef.EksternePerioderResponse
+import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.slf4j.LoggerFactory
 import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
-import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
@@ -29,6 +29,7 @@ import org.springframework.web.bind.annotation.RestController
     produces = [APPLICATION_JSON_VALUE],
 )
 @Validated
+@ProtectedWithClaims(issuer = "azuread")
 class EksternStønadsperioderController(
     private val eksternStønadsperioderService: EksternStønadsperioderService,
     private val perioderForBarnetrygdService: PerioderForBarnetrygdService,
@@ -40,7 +41,7 @@ class EksternStønadsperioderController(
      * Brukes av Arena
      */
     @PostMapping("alle-stonader", "")
-    @PreAuthorize("hasRole('APPLICATION')")
+    @ProtectedWithClaims(issuer = "azuread", claimMap = ["roles=access_as_application"])
     fun hentPerioderForAlleStønader(
         @RequestBody request: EksternePerioderRequest,
     ): Ressurs<EksternePerioderResponse> =
@@ -55,7 +56,7 @@ class EksternStønadsperioderController(
      * Brukes av Tiltakspenger-overgangsstønad
      */
     @PostMapping("overgangsstonad")
-    @PreAuthorize("hasRole('APPLICATION')")
+    @ProtectedWithClaims(issuer = "azuread", claimMap = ["roles=access_as_application"])
     fun hentPerioderForOvergangsstønad(
         @RequestBody request: EksternePerioderRequest,
     ): Ressurs<EksternePerioderResponse> =
@@ -70,7 +71,7 @@ class EksternStønadsperioderController(
      * Brukes av Bidrag
      */
     @PostMapping("overgangsstonad/med-belop")
-    @PreAuthorize("hasRole('APPLICATION')")
+    @ProtectedWithClaims(issuer = "azuread", claimMap = ["roles=access_as_application"])
     fun hentPerioderForOvergangsstønadMedBeløp(
         @RequestBody request: EksternePerioderRequest,
     ): Ressurs<EksternePerioderMedBeløpResponse> =
@@ -98,7 +99,6 @@ class EksternStønadsperioderController(
      * Brukes av tilleggstønader, for å vurdere barnetilsyn-ytelse. Trenger noen ganger å filtrere vekk barnetilsyn.
      */
     @PostMapping("perioder-for-ytelser")
-    @PreAuthorize("hasRole('APPLICATION')")
     fun hentPerioderForYtelser(
         @RequestBody request: EksternePerioderForStønadstyperRequest,
     ): Ressurs<EksternePerioderMedStønadstypeResponse> =

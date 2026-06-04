@@ -7,6 +7,7 @@ import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.prosessering.internal.TaskService
+import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.slf4j.LoggerFactory
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
@@ -17,6 +18,7 @@ import java.time.LocalDate
 
 @RestController
 @RequestMapping("/api/forvaltning/konsistensavstemming")
+@ProtectedWithClaims(issuer = "azuread")
 class KonsistensavstemmingForvaltningController(
     private val taskService: TaskService,
     private val tilgangService: TilgangService,

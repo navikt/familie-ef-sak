@@ -1,17 +1,19 @@
 package no.nav.familie.ef.sak.felles.util
 
+import com.nimbusds.jwt.JWTClaimsSet
+import io.mockk.every
+import io.mockk.mockk
 import jakarta.servlet.http.HttpServletRequest
+import no.nav.security.token.support.core.context.TokenValidationContext
+import no.nav.security.token.support.core.jwt.JwtTokenClaims
+import no.nav.security.token.support.spring.SpringTokenValidationContextHolder
 import org.springframework.mock.web.MockHttpServletRequest
-import org.springframework.security.core.context.SecurityContextHolder
-import org.springframework.security.oauth2.jwt.Jwt
-import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken
+import org.springframework.web.context.request.RequestAttributes
 import org.springframework.web.context.request.RequestContextHolder
 import org.springframework.web.context.request.ServletRequestAttributes
-import java.time.Instant
 
 object BrukerContextUtil {
     fun clearBrukerContext() {
-        SecurityContextHolder.clearContext()
         RequestContextHolder.resetRequestAttributes()
     }
 
@@ -21,26 +23,27 @@ object BrukerContextUtil {
         servletRequest: HttpServletRequest = MockHttpServletRequest(),
         azp_name: String? = null,
     ) {
-        val claims =
-            mutableMapOf<String, Any>(
-                "preferred_username" to preferredUsername,
-                "NAVident" to preferredUsername,
-                "name" to preferredUsername,
-                "groups" to groups,
+        val tokenValidationContext = mockk<TokenValidationContext>()
+        val jwtTokenClaims =
+            JwtTokenClaims(
+                JWTClaimsSet
+                    .Builder()
+                    .claim("preferred_username", preferredUsername)
+                    .claim("NAVident", preferredUsername)
+                    .claim("name", preferredUsername)
+                    .claim("groups", groups)
+                    .claim("azp_name", azp_name)
+                    .build(),
             )
-        if (azp_name != null) claims["azp_name"] = azp_name
+        val requestAttributes = ServletRequestAttributes(servletRequest)
 
-        val jwt =
-            Jwt
-                .withTokenValue("mock-token")
-                .header("alg", "RS256")
-                .issuedAt(Instant.now())
-                .expiresAt(Instant.now().plusSeconds(3600))
-                .claims { it.putAll(claims) }
-                .build()
-
-        SecurityContextHolder.getContext().authentication = JwtAuthenticationToken(jwt)
-        RequestContextHolder.setRequestAttributes(ServletRequestAttributes(servletRequest))
+        RequestContextHolder.setRequestAttributes(requestAttributes)
+        requestAttributes.setAttribute(
+            SpringTokenValidationContextHolder::class.java.name,
+            tokenValidationContext,
+            RequestAttributes.SCOPE_REQUEST,
+        )
+        every { tokenValidationContext.getClaims("azuread") } returns jwtTokenClaims
     }
 
     fun <T> testWithBrukerContext(

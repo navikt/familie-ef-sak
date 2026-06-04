@@ -7,6 +7,7 @@ import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
+import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -16,6 +17,7 @@ import java.util.UUID
 
 @RestController
 @RequestMapping(path = ["/api/andre-ytelser"])
+@ProtectedWithClaims(issuer = "azuread")
 class AndreYtelserController(
     private val andreYtelserService: AndreYtelserService,
     private val fagsakPersonService: FagsakPersonService,

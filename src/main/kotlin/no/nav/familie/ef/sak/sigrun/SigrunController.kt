@@ -3,6 +3,7 @@ package no.nav.familie.ef.sak.sigrun
 import no.nav.familie.ef.sak.AuditLoggerEvent
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
+import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
@@ -11,6 +12,7 @@ import java.util.UUID
 
 @RestController
 @RequestMapping("/api/naeringsinntekt")
+@ProtectedWithClaims(issuer = "azuread")
 class SigrunController(
     private val tilgangService: TilgangService,
     private val sigrunService: SigrunService,
