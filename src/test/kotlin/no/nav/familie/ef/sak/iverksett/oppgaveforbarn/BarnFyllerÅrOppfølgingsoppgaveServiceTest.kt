@@ -39,7 +39,7 @@ import java.time.LocalDate
 import java.util.UUID
 
 internal class BarnFyllerÅrOppfølgingsoppgaveServiceTest {
-    private val gjeldendeBarnRepository = mockk<GjeldendeBarnRepository>()
+    private val oppfølgingOppgaveBarnFyllerÅrRepository = mockk<OppfølgingOppgaveBarnFyllerÅrRepository>()
     private val behandlingRepository = mockk<BehandlingRepository>()
     private val oppgaveClient = mockk<OppgaveClient>()
     private val personService = mockk<PersonService>()
@@ -50,8 +50,8 @@ internal class BarnFyllerÅrOppfølgingsoppgaveServiceTest {
     private val grunnlagsdataService = mockk<GrunnlagsdataService>()
 
     private val opprettOppgaveForBarnService =
-        BarnFyllerÅrOppfølgingsoppgaveService(
-            gjeldendeBarnRepository,
+        OppfølgingOppgaveBarnFyllerÅrOppfølgingsoppgaveService(
+            oppfølgingOppgaveBarnFyllerÅrRepository,
             oppgaveRepository,
             taskService,
             personService,
@@ -71,7 +71,7 @@ internal class BarnFyllerÅrOppfølgingsoppgaveServiceTest {
         oppgaveSlot.clear()
         eksterneIderSlot.clear()
         mockkObject(OppgaveBeskrivelse)
-        every { gjeldendeBarnRepository.finnBarnTilMigrerteBehandlinger(any(), any()) } returns emptyList()
+        every { oppfølgingOppgaveBarnFyllerÅrRepository.finnBarnIMigrerteBehandlingerMedGammeltRegelverkForOppfølgingsoppgave(any(), any()) } returns emptyList()
         every { behandlingRepository.finnEksterneIder(capture(eksterneIderSlot)) } answers {
             firstArg<Set<UUID>>()
                 .mapIndexed { index, behandlingId -> EksternId(behandlingId, index.toLong(), index.toLong()) }
@@ -106,7 +106,7 @@ internal class BarnFyllerÅrOppfølgingsoppgaveServiceTest {
         val barnTilUtplukkForOppgave = opprettBarn(fødselsnummer = fødselsnummer)
         every { grunnlagsdataDomene.barn } returns listOf(barnMedIdent(fødselsnummer, "Fornavn etternavn", fødsel(fødselsdato)))
         every {
-            gjeldendeBarnRepository.finnBarnAvGjeldendeIverksatteBehandlinger(StønadType.OVERGANGSSTØNAD, any())
+            oppfølgingOppgaveBarnFyllerÅrRepository.finnBarnIBehandlingerMedGammeltRegelverkForOppfølgingsoppgave(StønadType.OVERGANGSSTØNAD, any())
         } returns listOf(barnTilUtplukkForOppgave)
         opprettOppgaveForBarnService.opprettTasksForAlleBarnSomHarFyltÅr()
         verify { taskService.save(any()) }
@@ -119,7 +119,7 @@ internal class BarnFyllerÅrOppfølgingsoppgaveServiceTest {
         val barnTilUtplukkForOppgave = opprettBarn(fødselsnummer = fødselsnummer)
         every { grunnlagsdataDomene.barn } returns listOf(barnMedIdent(fødselsnummer, "Fornavn etternavn", fødsel(fødselsdato)))
         every {
-            gjeldendeBarnRepository.finnBarnAvGjeldendeIverksatteBehandlinger(StønadType.OVERGANGSSTØNAD, any())
+            oppfølgingOppgaveBarnFyllerÅrRepository.finnBarnIBehandlingerMedGammeltRegelverkForOppfølgingsoppgave(StønadType.OVERGANGSSTØNAD, any())
         } returns listOf(barnTilUtplukkForOppgave)
 
         opprettOppgaveForBarnService.opprettTasksForAlleBarnSomHarFyltÅr()
@@ -133,7 +133,7 @@ internal class BarnFyllerÅrOppfølgingsoppgaveServiceTest {
         val barnTilUtplukkForOppgave = opprettBarn(fødselsnummer = fødselsnummer)
         every { grunnlagsdataDomene.barn } returns listOf(barnMedIdent(fødselsnummer, "Fornavn etternavn", fødsel(fødselsdato)))
         every {
-            gjeldendeBarnRepository.finnBarnAvGjeldendeIverksatteBehandlinger(StønadType.OVERGANGSSTØNAD, any())
+            oppfølgingOppgaveBarnFyllerÅrRepository.finnBarnIBehandlingerMedGammeltRegelverkForOppfølgingsoppgave(StønadType.OVERGANGSSTØNAD, any())
         } returns listOf(barnTilUtplukkForOppgave)
 
         opprettOppgaveForBarnService.opprettTasksForAlleBarnSomHarFyltÅr()
@@ -146,7 +146,7 @@ internal class BarnFyllerÅrOppfølgingsoppgaveServiceTest {
         val opprettBarnForFødselsdatoer = fødselsdatoer.map { opprettBarn(fødselsnummer = FnrGenerator.generer(it)) }
         every { grunnlagsdataDomene.barn } returns opprettBarnForFødselsdatoer.mapIndexed { i, it -> barnMedIdent(it.fødselsnummerBarn.toString(), "fornavn etternavn", fødsel(fødselsdatoer[i])) }
         every {
-            gjeldendeBarnRepository.finnBarnAvGjeldendeIverksatteBehandlinger(StønadType.OVERGANGSSTØNAD, any())
+            oppfølgingOppgaveBarnFyllerÅrRepository.finnBarnIBehandlingerMedGammeltRegelverkForOppfølgingsoppgave(StønadType.OVERGANGSSTØNAD, any())
         } returns opprettBarnForFødselsdatoer
 
         val opprettBarnTilOppgave =
@@ -164,7 +164,7 @@ internal class BarnFyllerÅrOppfølgingsoppgaveServiceTest {
         every { grunnlagsdataDomene.barn } returns listOf(barnMedIdent(fødselsnummerBarn, "Fornavn etternavn", fødsel(termindato)))
 
         every {
-            gjeldendeBarnRepository.finnBarnAvGjeldendeIverksatteBehandlinger(StønadType.OVERGANGSSTØNAD, any())
+            oppfølgingOppgaveBarnFyllerÅrRepository.finnBarnIBehandlingerMedGammeltRegelverkForOppfølgingsoppgave(StønadType.OVERGANGSSTØNAD, any())
         } returns
             listOf(
                 opprettBarn(
@@ -216,7 +216,7 @@ internal class BarnFyllerÅrOppfølgingsoppgaveServiceTest {
         every { grunnlagsdataDomene.barn } returns listOf(barnMedIdent(fødselsnummerBarn, "Fornavn etternavn", fødsel(termindato)))
 
         every {
-            gjeldendeBarnRepository.finnBarnAvGjeldendeIverksatteBehandlinger(StønadType.OVERGANGSSTØNAD, any())
+            oppfølgingOppgaveBarnFyllerÅrRepository.finnBarnIBehandlingerMedGammeltRegelverkForOppfølgingsoppgave(StønadType.OVERGANGSSTØNAD, any())
         } returns
             listOf(
                 opprettBarn(
@@ -262,7 +262,7 @@ internal class BarnFyllerÅrOppfølgingsoppgaveServiceTest {
             )
 
         every {
-            gjeldendeBarnRepository.finnBarnAvGjeldendeIverksatteBehandlinger(StønadType.OVERGANGSSTØNAD, any())
+            oppfølgingOppgaveBarnFyllerÅrRepository.finnBarnIBehandlingerMedGammeltRegelverkForOppfølgingsoppgave(StønadType.OVERGANGSSTØNAD, any())
         } returns
             listOf(
                 opprettBarn(
@@ -325,7 +325,7 @@ internal class BarnFyllerÅrOppfølgingsoppgaveServiceTest {
             )
 
         every {
-            gjeldendeBarnRepository.finnBarnAvGjeldendeIverksatteBehandlinger(StønadType.OVERGANGSSTØNAD, any())
+            oppfølgingOppgaveBarnFyllerÅrRepository.finnBarnIBehandlingerMedGammeltRegelverkForOppfølgingsoppgave(StønadType.OVERGANGSSTØNAD, any())
         } returns
             listOf(
                 opprettBarn(
@@ -367,7 +367,7 @@ internal class BarnFyllerÅrOppfølgingsoppgaveServiceTest {
         val fødselsnummerBarn = FnrGenerator.generer()
 
         every {
-            gjeldendeBarnRepository.finnBarnAvGjeldendeIverksatteBehandlinger(StønadType.OVERGANGSSTØNAD, any())
+            oppfølgingOppgaveBarnFyllerÅrRepository.finnBarnIBehandlingerMedGammeltRegelverkForOppfølgingsoppgave(StønadType.OVERGANGSSTØNAD, any())
         } returns
             listOf(
                 opprettBarn(
@@ -431,7 +431,7 @@ internal class BarnFyllerÅrOppfølgingsoppgaveServiceTest {
                 opprettBarn(behandlingId = UUID.randomUUID(), fødselsnummer = fødselsnummere[1]),
             )
         every {
-            gjeldendeBarnRepository.finnBarnAvGjeldendeIverksatteBehandlinger(StønadType.OVERGANGSSTØNAD, any())
+            oppfølgingOppgaveBarnFyllerÅrRepository.finnBarnIBehandlingerMedGammeltRegelverkForOppfølgingsoppgave(StønadType.OVERGANGSSTØNAD, any())
         } returns opprettBarnForFødselsdatoer
         every { grunnlagsdataDomene.barn } returns fødselsnummere.mapIndexed { i, it -> barnMedIdent(it, "fornavn etternavn", fødsel(fødselsdato)) }
 
@@ -454,7 +454,7 @@ internal class BarnFyllerÅrOppfølgingsoppgaveServiceTest {
                 barnMedIdent(fødselsnummerBarnMigrert, "Fornavn etternavn", fødsel(LocalDate.now().minusYears(1))),
             )
         every {
-            gjeldendeBarnRepository.finnBarnAvGjeldendeIverksatteBehandlinger(StønadType.OVERGANGSSTØNAD, any())
+            oppfølgingOppgaveBarnFyllerÅrRepository.finnBarnIBehandlingerMedGammeltRegelverkForOppfølgingsoppgave(StønadType.OVERGANGSSTØNAD, any())
         } returns
             listOf(
                 opprettBarn(
@@ -465,7 +465,7 @@ internal class BarnFyllerÅrOppfølgingsoppgaveServiceTest {
             )
 
         every {
-            gjeldendeBarnRepository.finnBarnTilMigrerteBehandlinger(StønadType.OVERGANGSSTØNAD, any())
+            oppfølgingOppgaveBarnFyllerÅrRepository.finnBarnIMigrerteBehandlingerMedGammeltRegelverkForOppfølgingsoppgave(StønadType.OVERGANGSSTØNAD, any())
         } returns
             listOf(
                 opprettBarn(

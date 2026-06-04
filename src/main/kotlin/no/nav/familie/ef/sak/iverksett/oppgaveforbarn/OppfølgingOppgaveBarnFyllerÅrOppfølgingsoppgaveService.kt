@@ -19,8 +19,8 @@ import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
 
 @Service
-class BarnFyllerÅrOppfølgingsoppgaveService(
-    private val gjeldendeBarnRepository: GjeldendeBarnRepository,
+class OppfølgingOppgaveBarnFyllerÅrOppfølgingsoppgaveService(
+    private val oppfølgingOppgaveBarnFyllerÅrRepository: OppfølgingOppgaveBarnFyllerÅrRepository,
     private val oppgaveRepository: OppgaveRepository,
     private val taskService: TaskService,
     private val personService: PersonService,
@@ -32,13 +32,13 @@ class BarnFyllerÅrOppfølgingsoppgaveService(
     @Transactional
     fun opprettTasksForAlleBarnSomHarFyltÅr(dryRun: Boolean = false) {
         val dagensDato = LocalDate.now()
-        val alleBarnIGjeldendeBehandlinger =
-            gjeldendeBarnRepository.finnBarnAvGjeldendeIverksatteBehandlinger(StønadType.OVERGANGSSTØNAD, dagensDato) +
-                gjeldendeBarnRepository.finnBarnTilMigrerteBehandlinger(StønadType.OVERGANGSSTØNAD, dagensDato)
+        val alleBarnIGjeldendeBehandlingerMedGammeltRegelverk =
+            oppfølgingOppgaveBarnFyllerÅrRepository.finnBarnIBehandlingerMedGammeltRegelverkForOppfølgingsoppgave(StønadType.OVERGANGSSTØNAD, dagensDato) +
+                oppfølgingOppgaveBarnFyllerÅrRepository.finnBarnIMigrerteBehandlingerMedGammeltRegelverkForOppfølgingsoppgave(StønadType.OVERGANGSSTØNAD, dagensDato)
 
-        logger.info("Antall barn i gjeldende behandlinger: ${alleBarnIGjeldendeBehandlinger.size}")
+        logger.info("Antall barn i gjeldende behandlinger: ${alleBarnIGjeldendeBehandlingerMedGammeltRegelverk.size}")
 
-        val behandlingMedBarnIAktivitetspliktigAlder = finnBarnIAktuellAlderUtenOppgave(alleBarnIGjeldendeBehandlinger)
+        val behandlingMedBarnIAktivitetspliktigAlder = finnBarnIAktuellAlderUtenOppgave(alleBarnIGjeldendeBehandlingerMedGammeltRegelverk)
         logger.info("Oppretter oppgave for ${behandlingMedBarnIAktivitetspliktigAlder.size} barn. (dry-run: $dryRun)")
 
         if (!dryRun) {

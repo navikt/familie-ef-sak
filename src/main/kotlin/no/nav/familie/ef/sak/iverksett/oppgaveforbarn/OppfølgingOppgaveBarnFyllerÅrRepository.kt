@@ -9,7 +9,7 @@ import java.time.LocalDate
 import java.util.UUID
 
 @Repository
-interface GjeldendeBarnRepository :
+interface OppfølgingOppgaveBarnFyllerÅrRepository :
     RepositoryInterface<BarnTilUtplukkForOppgave, UUID>,
     InsertUpdateRepository<BarnTilUtplukkForOppgave> {
     // language=PostgreSQL
@@ -27,7 +27,7 @@ interface GjeldendeBarnRepository :
           AND aty.stonad_tom >= :dato)
         """,
     )
-    fun finnBarnAvGjeldendeIverksatteBehandlinger(
+    fun finnBarnIBehandlingerMedGammeltRegelverkForOppfølgingsoppgave(
         stønadstype: StønadType,
         dato: LocalDate,
     ): List<BarnTilUtplukkForOppgave>
@@ -50,7 +50,7 @@ interface GjeldendeBarnRepository :
          AND b.migrert = TRUE
     """,
     )
-    fun finnBarnTilMigrerteBehandlinger(
+    fun finnBarnIMigrerteBehandlingerMedGammeltRegelverkForOppfølgingsoppgave(
         stønadstype: StønadType,
         dato: LocalDate,
     ): List<BarnTilUtplukkForOppgave>

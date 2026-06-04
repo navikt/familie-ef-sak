@@ -1,7 +1,7 @@
 package no.nav.familie.ef.sak.forvaltning
 
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
-import no.nav.familie.ef.sak.iverksett.oppgaveforbarn.BarnFyllerÅrOppfølgingsoppgaveService
+import no.nav.familie.ef.sak.iverksett.oppgaveforbarn.OppfølgingOppgaveBarnFyllerÅrOppfølgingsoppgaveService
 import no.nav.familie.ef.sak.iverksett.oppgaveforbarn.OpprettTasksForBarnFyltÅrTask
 import no.nav.familie.prosessering.internal.TaskService
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -19,7 +19,7 @@ import java.time.LocalDate
 @ProtectedWithClaims(issuer = "azuread")
 class InitOppfølgingsoppgaverForBarnTaskController(
     private val taskService: TaskService,
-    private val barnFyllerÅrOppfølgingsoppgaveService: BarnFyllerÅrOppfølgingsoppgaveService,
+    private val barnFyllerÅrOppfølgingsoppgaveService: OppfølgingOppgaveBarnFyllerÅrOppfølgingsoppgaveService,
     private val tilgangService: TilgangService,
 ) {
     @PostMapping("/initialiser")

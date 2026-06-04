@@ -17,7 +17,7 @@ import java.time.format.DateTimeFormatter
 )
 class OpprettTasksForBarnFyltÅrTask(
     val taskService: TaskService,
-    val barnFyllerÅrOppfølgingsoppgaveService: BarnFyllerÅrOppfølgingsoppgaveService,
+    val barnFyllerÅrOppfølgingsoppgaveService: OppfølgingOppgaveBarnFyllerÅrOppfølgingsoppgaveService,
 ) : AsyncTaskStep {
     override fun doTask(task: Task) {
         barnFyllerÅrOppfølgingsoppgaveService.opprettTasksForAlleBarnSomHarFyltÅr()

@@ -31,9 +31,9 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 
-class GjeldendeBarnRepositoryTest : OppslagSpringRunnerTest() {
+class OppfølgingOppgaveBarnFyllerÅrRepositoryTest : OppslagSpringRunnerTest() {
     @Autowired
-    private lateinit var gjeldendeBarnRepository: GjeldendeBarnRepository
+    private lateinit var oppfølgingOppgaveBarnFyllerÅrRepository: OppfølgingOppgaveBarnFyllerÅrRepository
 
     @Autowired
     private lateinit var behandlingRepository: BehandlingRepository
@@ -48,7 +48,7 @@ class GjeldendeBarnRepositoryTest : OppslagSpringRunnerTest() {
     private lateinit var grunnlagsdataRepository: GrunnlagsdataRepository
 
     @Test
-    internal fun `finnBarnAvGjeldendeIverksatteBehandlinger med fremtidig andel, forvent barn fra behandling med fremtidig andel `() {
+    internal fun `finnBarnForOppfølgingsoppgave med fremtidig andel, forvent barn fra behandling med fremtidig andel `() {
         val fagsak = testoppsettService.lagreFagsak(fagsak(fagsakpersoner(setOf("12345678910"))))
         val behandlingMedTidligereAndel = lagreInnvilgetBehandling(fagsak)
 
@@ -65,14 +65,14 @@ class GjeldendeBarnRepositoryTest : OppslagSpringRunnerTest() {
             ),
         )
 
-        val barnForUtplukk = finnBarnAvGjeldendeIverksatteBehandlinger()
+        val barnForUtplukk = finnBarnForOppfølgingsoppgave()
         assertThat(barnForUtplukk.size).isEqualTo(1)
         assertThat(barnForUtplukk.all { !it.fraMigrering }).isTrue
         barnForUtplukk.forEach { assertThat(it.behandlingId).isEqualTo(behandlingMedFremtidigAndel.id) }
     }
 
     @Test
-    internal fun `finnBarnAvGjeldendeIverksatteBehandlinger med fremtidig andel med null i inntekt, forvent treff `() {
+    internal fun `finnBarnForOppfølgingsoppgave med fremtidig andel med null i inntekt, forvent treff `() {
         val fagsak = testoppsettService.lagreFagsak(fagsak(fagsakpersoner(setOf("12345678910"))))
 
         val behandlingMedFremtidigAndel = lagreInnvilgetBehandling(fagsak)
@@ -81,12 +81,12 @@ class GjeldendeBarnRepositoryTest : OppslagSpringRunnerTest() {
 
         barnRepository.insertAll(listOf(barn(behandlingId = behandlingMedFremtidigAndel.id)))
 
-        val barnForUtplukk = finnBarnAvGjeldendeIverksatteBehandlinger()
+        val barnForUtplukk = finnBarnForOppfølgingsoppgave()
         assertThat(barnForUtplukk.size).isEqualTo(1)
     }
 
     @Test
-    internal fun `finnBarnAvGjeldendeIverksatteBehandlinger med to personidenter av samme fagsak, forvent siste opprettede personident i resultat `() {
+    internal fun `finnBarnForOppfølgingsoppgave med to personidenter av samme fagsak, forvent siste opprettede personident i resultat `() {
         val nyesteFnrSøker = "12345678910"
         val eldsteFnrSøker = "12345678911"
         val fagsak =
@@ -113,14 +113,14 @@ class GjeldendeBarnRepositoryTest : OppslagSpringRunnerTest() {
 
         barnRepository.insertAll(listOf(barn(behandlingId = behandlingMedFremtidigAndel.id)))
 
-        val barnForUtplukk = finnBarnAvGjeldendeIverksatteBehandlinger()
+        val barnForUtplukk = finnBarnForOppfølgingsoppgave()
         assertThat(barnForUtplukk.size).isEqualTo(1)
         assertThat(barnForUtplukk.first().fødselsnummerSøker).isEqualTo(nyesteFnrSøker)
         barnForUtplukk.forEach { assertThat(it.behandlingId).isEqualTo(behandlingMedFremtidigAndel.id) }
     }
 
     @Test
-    internal fun `finnBarnAvGjeldendeIverksatteBehandlinger med fremtidig andel fra to forskjellige fagsaker, forvent barn fra behandling med fremtidig andel`() {
+    internal fun `finnBarnForOppfølgingsoppgave med fremtidig andel fra to forskjellige fagsaker, forvent barn fra behandling med fremtidig andel`() {
         val fagsakForTidligereAndel = testoppsettService.lagreFagsak(fagsak(fagsakpersoner(setOf("12345678910"))))
         val fagsakForFremtidigAndel = testoppsettService.lagreFagsak(fagsak(fagsakpersoner(setOf("12345678911"))))
 
@@ -169,7 +169,7 @@ class GjeldendeBarnRepositoryTest : OppslagSpringRunnerTest() {
             )
 
         barnRepository.insertAll(barnListe)
-        val barnForUtplukk = finnBarnAvGjeldendeIverksatteBehandlinger()
+        val barnForUtplukk = finnBarnForOppfølgingsoppgave()
         assertThat(barnForUtplukk.size).isEqualTo(2)
         barnForUtplukk.map {
             assertThat(it).hasNoNullFieldsOrProperties()
@@ -178,7 +178,7 @@ class GjeldendeBarnRepositoryTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    internal fun `finnBarnAvGjeldendeIverksatteBehandlinger med erRegelendring2026, forvent ingen treff`() {
+    internal fun `finnBarnForOppfølgingsoppgave med erRegelendring2026, forvent ingen treff`() {
         val fagsak = testoppsettService.lagreFagsak(fagsak(fagsakpersoner(setOf("12345678910"))))
         val behandling =
             behandlingRepository.insert(
@@ -192,7 +192,7 @@ class GjeldendeBarnRepositoryTest : OppslagSpringRunnerTest() {
         lagreFremtidligAndel(behandling, beløp = 1)
         barnRepository.insertAll(listOf(barn(behandlingId = behandling.id)))
 
-        val barnForUtplukk = finnBarnAvGjeldendeIverksatteBehandlinger()
+        val barnForUtplukk = finnBarnForOppfølgingsoppgave()
         assertThat(barnForUtplukk).isEmpty()
     }
 
@@ -208,8 +208,8 @@ class GjeldendeBarnRepositoryTest : OppslagSpringRunnerTest() {
             grunnlagsdataRepository.insert(Grunnlagsdata(behandling.id, grunnlagsdataDomene))
             lagreFremtidligAndel(behandling, beløp = 1)
 
-            assertThat(finnBarnAvGjeldendeIverksatteBehandlinger()).isEmpty()
-            val resultat = finnBarnTilMigrerteBehandlinger()
+            assertThat(finnBarnForOppfølgingsoppgave()).isEmpty()
+            val resultat = finnBarnIMigrerteBehandlingerMedGammeltRegelverkForOppfølgingsoppgave()
             assertThat(resultat).hasSize(1)
             assertThat(resultat[0].behandlingId).isEqualTo(behandling.id)
             assertThat(resultat[0].fødselsnummerSøker).isEqualTo(fnrSøker)
@@ -228,8 +228,8 @@ class GjeldendeBarnRepositoryTest : OppslagSpringRunnerTest() {
 
             barnRepository.insert(barn(behandlingId = behandling.id, personIdent = "1"))
 
-            assertThat(finnBarnAvGjeldendeIverksatteBehandlinger()).hasSize(1)
-            assertThat(finnBarnTilMigrerteBehandlinger()).isEmpty()
+            assertThat(finnBarnForOppfølgingsoppgave()).hasSize(1)
+            assertThat(finnBarnIMigrerteBehandlingerMedGammeltRegelverkForOppfølgingsoppgave()).isEmpty()
         }
 
         @Test
@@ -242,12 +242,12 @@ class GjeldendeBarnRepositoryTest : OppslagSpringRunnerTest() {
             grunnlagsdataRepository.insert(Grunnlagsdata(behandling.id, grunnlagsdataDomene))
             lagreFremtidligAndel(behandling, beløp = 1)
 
-            assertThat(finnBarnAvGjeldendeIverksatteBehandlinger()).isEmpty()
-            assertThat(finnBarnTilMigrerteBehandlinger()).isEmpty()
+            assertThat(finnBarnForOppfølgingsoppgave()).isEmpty()
+            assertThat(finnBarnIMigrerteBehandlingerMedGammeltRegelverkForOppfølgingsoppgave()).isEmpty()
         }
 
         @Test
-        internal fun `finnBarnTilMigrerteBehandlinger med erRegelendring2026, forvent ingen treff`() {
+        internal fun `finnMigrerteBehandlingerBarnForOppfølgingsoppgave med erRegelendring2026, forvent ingen treff`() {
             val fnrSøker = "12345678910"
             val fnrBarn = "1"
             val fagsak = testoppsettService.lagreFagsak(fagsak(fagsakpersoner(setOf(fnrSøker)), migrert = true))
@@ -264,13 +264,13 @@ class GjeldendeBarnRepositoryTest : OppslagSpringRunnerTest() {
             grunnlagsdataRepository.insert(Grunnlagsdata(behandling.id, grunnlagsdataDomene))
             lagreFremtidligAndel(behandling, beløp = 1)
 
-            assertThat(finnBarnTilMigrerteBehandlinger()).isEmpty()
+            assertThat(finnBarnIMigrerteBehandlingerMedGammeltRegelverkForOppfølgingsoppgave()).isEmpty()
         }
     }
 
-    private fun finnBarnTilMigrerteBehandlinger() = gjeldendeBarnRepository.finnBarnTilMigrerteBehandlinger(StønadType.OVERGANGSSTØNAD, LocalDate.now())
+    private fun finnBarnIMigrerteBehandlingerMedGammeltRegelverkForOppfølgingsoppgave() = oppfølgingOppgaveBarnFyllerÅrRepository.finnBarnIMigrerteBehandlingerMedGammeltRegelverkForOppfølgingsoppgave(StønadType.OVERGANGSSTØNAD, LocalDate.now())
 
-    private fun finnBarnAvGjeldendeIverksatteBehandlinger() = gjeldendeBarnRepository.finnBarnAvGjeldendeIverksatteBehandlinger(StønadType.OVERGANGSSTØNAD, LocalDate.now())
+    private fun finnBarnForOppfølgingsoppgave() = oppfølgingOppgaveBarnFyllerÅrRepository.finnBarnIBehandlingerMedGammeltRegelverkForOppfølgingsoppgave(StønadType.OVERGANGSSTØNAD, LocalDate.now())
 
     private fun lagreInnvilgetBehandling(
         fagsak: Fagsak,
