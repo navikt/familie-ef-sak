@@ -8,7 +8,6 @@ import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.ef.sak.tilkjentytelse.tilDto
 import no.nav.familie.ef.sak.vedtak.historikk.AndelHistorikkDto
 import no.nav.familie.kontrakter.felles.Ressurs
-import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -19,7 +18,6 @@ import java.util.UUID
 
 @RestController
 @RequestMapping("/api/perioder")
-@ProtectedWithClaims(issuer = "azuread")
 @Validated
 class PeriodeController(
     private val tilgangService: TilgangService,

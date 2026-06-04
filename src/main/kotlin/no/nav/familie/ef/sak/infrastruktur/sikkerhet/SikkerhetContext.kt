@@ -2,9 +2,11 @@ package no.nav.familie.ef.sak.infrastruktur.sikkerhet
 
 import no.nav.familie.ef.sak.behandlingsflyt.steg.BehandlerRolle
 import no.nav.familie.ef.sak.infrastruktur.config.RolleConfig
-import no.nav.familie.sikkerhet.EksternBrukerUtils
-import no.nav.security.token.support.spring.SpringTokenValidationContextHolder
+import no.nav.familie.ef.sak.infrastruktur.exception.feilHvisIkke
 import org.slf4j.LoggerFactory
+import org.springframework.http.HttpStatus
+import org.springframework.security.core.context.SecurityContextHolder
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken
 
 object SikkerhetContext {
     private const val SYSTEM_NAVN = "System"
@@ -14,11 +16,14 @@ object SikkerhetContext {
 
     private val secureLogger = LoggerFactory.getLogger("secureLogger")
 
+    private fun getJwtToken(): JwtAuthenticationToken? = SecurityContextHolder.getContext().authentication as? JwtAuthenticationToken
+
     fun erMaskinTilMaskinToken(): Boolean {
-        val claims = SpringTokenValidationContextHolder().getTokenValidationContext().getClaims("azuread")
-        return claims.get("oid") != null &&
-            claims.get("oid") == claims.get("sub") &&
-            claims.getAsList("roles").contains("access_as_application")
+        val jwt = getJwtToken()?.token ?: return false
+        val oid = jwt.getClaimAsString("oid")
+        val sub = jwt.subject
+        val roles = jwt.getClaimAsStringList("roles") ?: emptyList()
+        return oid != null && oid == sub && roles.contains("access_as_application")
     }
 
     fun kallKommerFraFamilieEfMottak(): Boolean = kallKommerFra("teamfamilie:familie-ef-mottak")
@@ -26,19 +31,19 @@ object SikkerhetContext {
     fun kallKommerFraKlage(): Boolean = kallKommerFra("teamfamilie:familie-klage")
 
     fun kallKommerFraFamilieEfSøknadApi(): Boolean {
-        val claims = SpringTokenValidationContextHolder().getTokenValidationContext().getClaims(EksternBrukerUtils.ISSUER_TOKENX)
-        val applikasjonsnavn = claims.get("client_id")?.toString() ?: "" // e.g. dev-gcp:some-team:application-name
+        val jwt = getJwtToken()?.token ?: return false
+        val applikasjonsnavn = jwt.getClaimAsString("client_id") ?: ""
         return applikasjonsnavn.endsWith("teamfamilie:familie-ef-soknad-api")
     }
 
     private fun kallKommerFra(forventetApplikasjonsSuffix: String): Boolean {
-        val claims = SpringTokenValidationContextHolder().getTokenValidationContext().getClaims("azuread")
-        val applikasjonsnavn = claims.get("azp_name")?.toString() ?: "" // e.g. dev-gcp:some-team:application-name
+        val jwt = getJwtToken()?.token ?: return false
+        val applikasjonsnavn = jwt.getClaimAsString("azp_name") ?: ""
         secureLogger.info("Applikasjonsnavn: $applikasjonsnavn")
         return applikasjonsnavn.endsWith(forventetApplikasjonsSuffix)
     }
 
-    fun erSystembruker(): Boolean = hentSaksbehandlerEllerSystembruker() == SYSTEM_FORKORTELSE
+    fun erSystembruker(): Boolean = erMaskinTilMaskinToken()
 
     fun hentSaksbehandler(): String {
         val result = hentSaksbehandlerEllerSystembruker()
@@ -49,38 +54,17 @@ object SikkerhetContext {
         return result
     }
 
-    fun hentSaksbehandlerEllerSystembruker() =
-        Result
-            .runCatching { SpringTokenValidationContextHolder().getTokenValidationContext() }
-            .fold(
-                onSuccess = {
-                    it.getClaims("azuread")?.get("NAVident")?.toString() ?: SYSTEM_FORKORTELSE
-                },
-                onFailure = { SYSTEM_FORKORTELSE },
-            )
+    fun hentSaksbehandlerEllerSystembruker() = getJwtToken()?.token?.getClaimAsString("NAVident") ?: SYSTEM_FORKORTELSE
 
-    fun hentSaksbehandlerNavn(strict: Boolean = false): String =
-        Result
-            .runCatching { SpringTokenValidationContextHolder().getTokenValidationContext() }
-            .fold(
-                onSuccess = {
-                    it.getClaims("azuread")?.get("name")?.toString()
-                        ?: if (strict) error("Finner ikke navn i azuread token") else SYSTEM_NAVN
-                },
-                onFailure = { if (strict) error("Finner ikke navn på innlogget bruker") else SYSTEM_NAVN },
-            )
+    fun hentSaksbehandlerNavn(strict: Boolean = false): String {
+        val name = getJwtToken()?.token?.getClaimAsString("name")
+        return name ?: if (strict) error("Finner ikke navn på innlogget bruker") else SYSTEM_NAVN
+    }
 
-    fun hentGrupperFraToken(): Set<String> =
-        Result
-            .runCatching { SpringTokenValidationContextHolder().getTokenValidationContext() }
-            .fold(
-                onSuccess = {
-                    @Suppress("UNCHECKED_CAST")
-                    val groups = it.getClaims("azuread")?.get("groups") as List<String>?
-                    groups?.toSet() ?: emptySet()
-                },
-                onFailure = { emptySet() },
-            )
+    fun hentGrupperFraToken(): Set<String> {
+        val jwt = getJwtToken()?.token ?: return emptySet()
+        return jwt.getClaimAsStringList("groups")?.toSet() ?: emptySet()
+    }
 
     fun harTilgangTilGittRolle(
         rolleConfig: RolleConfig,
@@ -126,4 +110,11 @@ object SikkerhetContext {
     }
 
     fun harRolle(rolleId: String): Boolean = hentGrupperFraToken().contains(rolleId)
+
+    fun sjekkAcrLevel4() {
+        val acr = getJwtToken()?.token?.getClaimAsString("acr")
+        feilHvisIkke(acr == "Level4", HttpStatus.UNAUTHORIZED) {
+            "Påloggingsnivå er ikke høyt nok. Krever Level4, fikk $acr"
+        }
+    }
 }
