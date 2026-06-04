@@ -20,7 +20,7 @@ interface GjeldendeBarnRepository :
         FROM gjeldende_iverksatte_behandlinger b
          JOIN (SELECT DISTINCT ON(pi.fagsak_person_id) * FROM person_ident pi ORDER BY pi.fagsak_person_id, pi.opprettet_tid DESC) pi ON pi.fagsak_person_id = b.fagsak_person_id
          JOIN behandling_barn bb ON bb.behandling_id = b.id
-        WHERE b.stonadstype=:stønadstype AND EXISTS(SELECT 1 FROM andel_tilkjent_ytelse aty
+        WHERE b.stonadstype=:stønadstype AND b.er_regelendring_2026 = FALSE AND EXISTS(SELECT 1 FROM andel_tilkjent_ytelse aty
             JOIN tilkjent_ytelse ty ON aty.tilkjent_ytelse = ty.id
             WHERE ty.id = aty.tilkjent_ytelse 
             AND ty.behandling_id = b.id
@@ -40,6 +40,7 @@ interface GjeldendeBarnRepository :
          JOIN (SELECT DISTINCT ON(pi.fagsak_person_id) * FROM person_ident pi ORDER BY pi.fagsak_person_id, pi.opprettet_tid DESC) pi ON pi.fagsak_person_id = b.fagsak_person_id
          JOIN grunnlagsdata g ON g.behandling_id = b.id
         WHERE NOT EXISTS(SELECT FROM behandling_barn WHERE behandling_id = b.id)
+         AND b.er_regelendring_2026 = FALSE
          AND EXISTS(SELECT 
                     FROM andel_tilkjent_ytelse aty
                      JOIN tilkjent_ytelse ty ON aty.tilkjent_ytelse = ty.id

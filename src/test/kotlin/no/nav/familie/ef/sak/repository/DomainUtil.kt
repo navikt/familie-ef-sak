@@ -118,6 +118,7 @@ fun behandling(
     eksternId: Long = 0L,
     vedtakstidspunkt: LocalDateTime? = null,
     kravMottatt: LocalDate? = null,
+    erRegelendring2026: Boolean = false,
 ): Behandling =
     Behandling(
         fagsakId = fagsak.id,
@@ -136,6 +137,7 @@ fun behandling(
             vedtakstidspunkt
                 ?: if (resultat != BehandlingResultat.IKKE_SATT) SporbarUtils.now() else null,
         kravMottatt = kravMottatt,
+        erRegelendring2026 = erRegelendring2026,
     )
 
 fun saksbehandling(

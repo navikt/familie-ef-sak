@@ -77,6 +77,25 @@ class BarnFyllerÅrIntegrationTest : OppslagSpringRunnerTest() {
     }
 
     @Test
+    fun `barn har blitt mer enn 6 mnd men behandling er regelendring 2026, skal ikke opprette oppgave`() {
+        val fagsak = testoppsettService.lagreFagsak(fagsak())
+        val behandling =
+            behandlingRepository.insert(
+                behandling(fagsak, BehandlingStatus.FERDIGSTILT, resultat = BehandlingResultat.INNVILGET, erRegelendring2026 = true),
+            )
+        val barnPersonIdent = "01012067050" // Se PdlClientConfig
+        barnRepository.insert(BehandlingBarn(personIdent = barnPersonIdent, behandlingId = behandling.id))
+        grunnlagsdataService.opprettGrunnlagsdata(behandling.id)
+        oppdaterGrunnlagsdata(behandling, LocalDate.now().minusMonths(6).minusDays(1))
+        vedtakRepository.insert(vedtak(behandling.id))
+        lagreFremtidligAndel(behandling, 4000)
+
+        barnFyllerÅrOppfølgingsoppgaveService.opprettTasksForAlleBarnSomHarFyltÅr()
+
+        assertThat(taskService.findAll().toList()).isEmpty()
+    }
+
+    @Test
     fun `barn har blitt mer enn 6 mnd, skal ikke opprette og lagre oppgave fordi behandling er ikke iverksatt`() {
         val fagsak = testoppsettService.lagreFagsak(fagsak())
         val behandling = behandlingRepository.insert(behandling(fagsak, BehandlingStatus.OPPRETTET, resultat = BehandlingResultat.INNVILGET))

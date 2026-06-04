@@ -177,6 +177,25 @@ class GjeldendeBarnRepositoryTest : OppslagSpringRunnerTest() {
         barnForUtplukk.forEach { assertThat(it.behandlingId).isEqualTo(behandlingMedFremtidigAndel.id) }
     }
 
+    @Test
+    internal fun `finnBarnAvGjeldendeIverksatteBehandlinger med erRegelendring2026, forvent ingen treff`() {
+        val fagsak = testoppsettService.lagreFagsak(fagsak(fagsakpersoner(setOf("12345678910"))))
+        val behandling =
+            behandlingRepository.insert(
+                behandling(
+                    fagsak,
+                    status = BehandlingStatus.FERDIGSTILT,
+                    resultat = BehandlingResultat.INNVILGET,
+                    erRegelendring2026 = true,
+                ),
+            )
+        lagreFremtidligAndel(behandling, beløp = 1)
+        barnRepository.insertAll(listOf(barn(behandlingId = behandling.id)))
+
+        val barnForUtplukk = finnBarnAvGjeldendeIverksatteBehandlinger()
+        assertThat(barnForUtplukk).isEmpty()
+    }
+
     @Nested
     inner class FinnBarnTilMigrerteBehandlinger {
         @Test
@@ -224,6 +243,27 @@ class GjeldendeBarnRepositoryTest : OppslagSpringRunnerTest() {
             lagreFremtidligAndel(behandling, beløp = 1)
 
             assertThat(finnBarnAvGjeldendeIverksatteBehandlinger()).isEmpty()
+            assertThat(finnBarnTilMigrerteBehandlinger()).isEmpty()
+        }
+
+        @Test
+        internal fun `finnBarnTilMigrerteBehandlinger med erRegelendring2026, forvent ingen treff`() {
+            val fnrSøker = "12345678910"
+            val fnrBarn = "1"
+            val fagsak = testoppsettService.lagreFagsak(fagsak(fagsakpersoner(setOf(fnrSøker)), migrert = true))
+            val behandling =
+                behandlingRepository.insert(
+                    behandling(
+                        fagsak,
+                        status = BehandlingStatus.FERDIGSTILT,
+                        resultat = BehandlingResultat.INNVILGET,
+                        erRegelendring2026 = true,
+                    ),
+                )
+            val grunnlagsdataDomene = opprettGrunnlagsdata().copy(barn = listOf(opprettBarnMedIdent(fnrBarn)))
+            grunnlagsdataRepository.insert(Grunnlagsdata(behandling.id, grunnlagsdataDomene))
+            lagreFremtidligAndel(behandling, beløp = 1)
+
             assertThat(finnBarnTilMigrerteBehandlinger()).isEmpty()
         }
     }
