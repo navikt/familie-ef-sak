@@ -36,7 +36,7 @@ class OppfølgingOppgaveBarnFyllerÅrService(
             oppfølgingOppgaveBarnFyllerÅrRepository.finnBarnIBehandlingerMedGammeltRegelverkForOppfølgingsoppgave(StønadType.OVERGANGSSTØNAD, dagensDato) +
                 oppfølgingOppgaveBarnFyllerÅrRepository.finnBarnIMigrerteBehandlingerMedGammeltRegelverkForOppfølgingsoppgave(StønadType.OVERGANGSSTØNAD, dagensDato)
 
-        logger.info("Antall barn i gjeldende behandlinger: ${alleBarnIGjeldendeBehandlingerMedGammeltRegelverk.size}")
+        logger.info("Antall barn i gjeldende behandlinger med gammelt regelverk: ${alleBarnIGjeldendeBehandlingerMedGammeltRegelverk.size}")
 
         val behandlingMedBarnIAktivitetspliktigAlder = finnBarnIAktuellAlderUtenOppgave(alleBarnIGjeldendeBehandlingerMedGammeltRegelverk)
         logger.info("Oppretter oppgave for ${behandlingMedBarnIAktivitetspliktigAlder.size} barn. (dry-run: $dryRun)")
