@@ -228,7 +228,7 @@ internal class JournalføringServiceTest {
 
         every { behandlingService.oppdaterStegPåBehandling(any(), any()) } returns behandling(id = behandlingId)
         every { behandlingService.oppdaterStatusPåBehandling(any(), any()) } returns behandling(id = behandlingId)
-        every { behandlingService.oppdaterErRegelendring2026(any(), true) } returns behandling(id = behandlingId)
+        every { behandlingService.oppdaterErRegelendring2026(any(), erRegelendring2026 = true) } returns behandling(id = behandlingId)
 
         slotJournalpost.clear()
         every {
