@@ -1415,7 +1415,7 @@
                   "periodeType" : {
                     "name" : "periodeType",
                     "type" : "Enum",
-                    "values" : [ "FORLENGELSE", "HOVEDPERIODE", "MIDLERTIDIG_OPPHØR", "MIGRERING", "PERIODE_FØR_FØDSEL", "SANKSJON", "UTVIDELSE", "NY_PERIODE_FOR_NYTT_BARN" ],
+                    "values" : [ "FORLENGELSE", "HOVEDPERIODE", "MIDLERTIDIG_OPPHØR", "MIGRERING", "PERIODE_FØR_FØDSEL", "SANKSJON", "UTVIDELSE", "NY_PERIODE_FOR_NYTT_BARN", "BARN_UNDER_14_MÅNEDER", "SÆRLIG_TILSYNSKREVENDE_BARN", "FORBIGÅENDE_SYKDOM_HOS_BARNET" ],
                     "nullable" : false
                   },
                   "fom" : {
@@ -1498,7 +1498,7 @@
                   "periodeType" : {
                     "name" : "periodeType",
                     "type" : "Enum",
-                    "values" : [ "FORLENGELSE", "HOVEDPERIODE", "MIDLERTIDIG_OPPHØR", "MIGRERING", "PERIODE_FØR_FØDSEL", "SANKSJON", "UTVIDELSE", "NY_PERIODE_FOR_NYTT_BARN" ],
+                    "values" : [ "FORLENGELSE", "HOVEDPERIODE", "MIDLERTIDIG_OPPHØR", "MIGRERING", "PERIODE_FØR_FØDSEL", "SANKSJON", "UTVIDELSE", "NY_PERIODE_FOR_NYTT_BARN", "BARN_UNDER_14_MÅNEDER", "SÆRLIG_TILSYNSKREVENDE_BARN", "FORBIGÅENDE_SYKDOM_HOS_BARNET" ],
                     "nullable" : false
                   },
                   "fom" : {
@@ -2217,7 +2217,7 @@
               "periodeType" : {
                 "name" : "periodeType",
                 "type" : "Enum",
-                "values" : [ "FORLENGELSE", "HOVEDPERIODE", "MIDLERTIDIG_OPPHØR", "MIGRERING", "PERIODE_FØR_FØDSEL", "SANKSJON", "UTVIDELSE", "NY_PERIODE_FOR_NYTT_BARN" ],
+                "values" : [ "FORLENGELSE", "HOVEDPERIODE", "MIDLERTIDIG_OPPHØR", "MIGRERING", "PERIODE_FØR_FØDSEL", "SANKSJON", "UTVIDELSE", "NY_PERIODE_FOR_NYTT_BARN", "BARN_UNDER_14_MÅNEDER", "SÆRLIG_TILSYNSKREVENDE_BARN", "FORBIGÅENDE_SYKDOM_HOS_BARNET" ],
                 "nullable" : false
               },
               "fom" : {
@@ -2300,7 +2300,7 @@
               "periodeType" : {
                 "name" : "periodeType",
                 "type" : "Enum",
-                "values" : [ "FORLENGELSE", "HOVEDPERIODE", "MIDLERTIDIG_OPPHØR", "MIGRERING", "PERIODE_FØR_FØDSEL", "SANKSJON", "UTVIDELSE", "NY_PERIODE_FOR_NYTT_BARN" ],
+                "values" : [ "FORLENGELSE", "HOVEDPERIODE", "MIDLERTIDIG_OPPHØR", "MIGRERING", "PERIODE_FØR_FØDSEL", "SANKSJON", "UTVIDELSE", "NY_PERIODE_FOR_NYTT_BARN", "BARN_UNDER_14_MÅNEDER", "SÆRLIG_TILSYNSKREVENDE_BARN", "FORBIGÅENDE_SYKDOM_HOS_BARNET" ],
                 "nullable" : false
               },
               "fom" : {

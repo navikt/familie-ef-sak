@@ -245,6 +245,9 @@ enum class VedtaksperiodeType {
     SANKSJON,
     UTVIDELSE,
     NY_PERIODE_FOR_NYTT_BARN,
+    BARN_UNDER_14_MÅNEDER,
+    SÆRLIG_TILSYNSKREVENDE_BARN,
+    FORBIGÅENDE_SYKDOM_HOS_BARNET,
     ;
 
     fun midlertidigOpphørEllerSanksjon() = this == MIDLERTIDIG_OPPHØR || this == SANKSJON
