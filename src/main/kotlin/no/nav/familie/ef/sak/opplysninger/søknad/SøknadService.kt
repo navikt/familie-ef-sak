@@ -126,18 +126,5 @@ class SøknadService(
         søknadRepository.insert(SøknadMapper.toDomain(journalpostId, søknadsskjema, behandlingId))
     }
 
-    fun erRegelendring2026(behandlingId: UUID): Boolean {
-        val søknad = hentSøknad(behandlingId) ?: return false
-        return when (søknad.type) {
-            SøknadType.OVERGANGSSTØNAD -> {
-                søknadOvergangsstønadRepository.findByIdOrNull(søknad.soknadsskjemaId)?.erRegelendring2026 ?: false
-            }
-
-            else -> {
-                false
-            }
-        }
-    }
-
     private fun hentSøknad(behandlingId: UUID): Søknad? = søknadRepository.findByBehandlingId(behandlingId)
 }
