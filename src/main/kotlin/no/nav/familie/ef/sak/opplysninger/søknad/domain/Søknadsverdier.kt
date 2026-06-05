@@ -13,8 +13,8 @@ data class Søknadsverdier(
     val sivilstandsplaner: Sivilstandsplaner?,
     val bosituasjon: Bosituasjon,
     val sivilstand: Sivilstand,
-    val aktivitet: Aktivitet? = null,
-    val situasjon: Situasjon? = null,
+    val aktivitet: Aktivitet? = null, // Gjelder: OS og BT
+    val situasjon: Situasjon? = null, // Gjelder: OS
     val datoMottatt: LocalDateTime,
     val datoPåbegyntSøknad: LocalDate? = null,
     val søkerFra: YearMonth? = null,

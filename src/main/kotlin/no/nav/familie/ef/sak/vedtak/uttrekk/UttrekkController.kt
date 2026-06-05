@@ -2,7 +2,6 @@ package no.nav.familie.ef.sak.vedtak.uttrekk
 
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.Ressurs.Companion.success
-import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -14,7 +13,6 @@ import java.util.UUID
 
 @RestController
 @RequestMapping(path = ["/api/uttrekk"])
-@ProtectedWithClaims(issuer = "azuread")
 @Validated
 class UttrekkController(
     private val uttrekkVedtakService: UttrekkArbeidssøkerService,
