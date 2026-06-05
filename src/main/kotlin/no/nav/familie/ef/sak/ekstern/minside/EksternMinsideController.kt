@@ -4,7 +4,6 @@ import no.nav.familie.ef.sak.infrastruktur.exception.feilHvisIkke
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.sikkerhet.EksternBrukerUtils
-import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.GetMapping
@@ -16,7 +15,6 @@ import org.springframework.web.bind.annotation.RestController
     path = ["/api/ekstern/minside"],
     produces = [MediaType.APPLICATION_JSON_VALUE],
 )
-@ProtectedWithClaims(issuer = EksternBrukerUtils.ISSUER_TOKENX, claimMap = ["acr=Level4"])
 class EksternMinsideController(
     private val eksternMinsideService: EksternMinsideService,
 ) {
@@ -25,6 +23,7 @@ class EksternMinsideController(
      */
     @GetMapping("stonadsperioder")
     fun finnStønadsperioderForBruker(): Ressurs<MineStønaderDto> {
+        SikkerhetContext.sjekkAcrLevel4()
         feilHvisIkke(SikkerhetContext.kallKommerFraFamilieEfSøknadApi(), HttpStatus.UNAUTHORIZED) {
             "Kallet utføres ikke av en autorisert klient"
         }

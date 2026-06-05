@@ -9,7 +9,6 @@ import no.nav.familie.ef.sak.tilkjentytelse.tilBeløpsperiodeBarnetilsyn
 import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.ef.sak.vedtak.dto.InnvilgelseBarnetilsyn
 import no.nav.familie.kontrakter.felles.Ressurs
-import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
@@ -20,7 +19,6 @@ import java.util.UUID
 
 @RestController
 @RequestMapping(path = ["/api/beregning/barnetilsyn"])
-@ProtectedWithClaims(issuer = "azuread")
 class BeregningBarnetilsynController(
     private val beregningBarnetilsynService: BeregningBarnetilsynService,
     private val tilgangService: TilgangService,

@@ -1,15 +1,14 @@
 package no.nav.familie.ef.sak
 
 import no.nav.familie.ef.sak.database.DbContainerInitializer
-import no.nav.security.token.support.spring.test.EnableMockOAuth2Server
+import no.nav.familie.ef.sak.infrastruktur.util.MockOAuth2ServerInitializer
 import org.springframework.boot.builder.SpringApplicationBuilder
 
-@EnableMockOAuth2Server
 class ApplicationLocal : ApplicationLocalSetup()
 
 fun main(args: Array<String>) {
     SpringApplicationBuilder(ApplicationLocal::class.java)
-        .initializers(DbContainerInitializer())
+        .initializers(DbContainerInitializer(), MockOAuth2ServerInitializer())
         .profiles(
             "local",
             "mock-arbeidssøker",
