@@ -30,6 +30,7 @@ class EksternSøknadService(
             val identer = folkeregisteridentifikatorer.map { it.ident }.toSet()
 
             when {
+                sisteFerdigstilteBehandlingErPåNyttRegelverk(identer) -> TidligereVedtakStatus.NEI
                 harGjeldendePeriodePåGammeltRegelverkIEf(identer) -> TidligereVedtakStatus.JA
                 harTidligereOvergangsstønadIInfotrygd(identer) -> TidligereVedtakStatus.JA
                 else -> historiskPensjonStatus(aktivIdent, identer)
@@ -39,6 +40,12 @@ class EksternSøknadService(
             TidligereVedtakStatus.VET_IKKE
         }
     }
+
+    private fun sisteFerdigstilteBehandlingErPåNyttRegelverk(identer: Set<String>): Boolean =
+        behandlingRepository.erSisteFerdigstilteBehandlingPåNyttRegelverk(
+            identer = identer,
+            stønadstype = StønadType.OVERGANGSSTØNAD,
+        ) == true
 
     private fun harGjeldendePeriodePåGammeltRegelverkIEf(identer: Set<String>): Boolean =
         behandlingRepository.harGjeldendePeriodePåGammeltRegelverk(

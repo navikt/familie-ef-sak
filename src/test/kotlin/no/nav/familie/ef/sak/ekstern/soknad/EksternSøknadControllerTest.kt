@@ -96,6 +96,90 @@ class EksternSøknadControllerTest : OppslagSpringRunnerTest() {
     }
 
     @Test
+    fun `skal returnere NEI når siste ferdigstilte behandling er på nytt regelverk selv om bruker finnes i Infotrygd`() {
+        every { infotrygdReplikaClient.hentPerioder(any()) } returns
+            InfotrygdPeriodeResponse(
+                overgangsstønad = listOf(lagInfotrygdPeriode(personident)),
+                barnetilsyn = emptyList(),
+                skolepenger = emptyList(),
+            )
+        testoppsettService.lagreFagsak(fagsakOvergangsstønad)
+        behandlingRepository.insert(
+            behandling(fagsakOvergangsstønad).innvilgetOgFerdigstilt().copy(erRegelendring2026 = true),
+        )
+
+        val response = hentHarTidligereInnvilgetVedtak()
+
+        assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
+        assertThat(response.body?.data).isEqualTo(TidligereVedtakStatus.NEI)
+    }
+
+    @Test
+    fun `skal returnere NEI når siste ferdigstilte behandling er på nytt regelverk selv om historisk pensjon har historikk`() {
+        every { historiskPensjonClient.hentHistoriskPensjonStatusForIdent(any(), any()) } returns
+            HistoriskPensjonDto(HistoriskPensjonStatus.HAR_HISTORIKK, "")
+        testoppsettService.lagreFagsak(fagsakOvergangsstønad)
+        behandlingRepository.insert(
+            behandling(fagsakOvergangsstønad).innvilgetOgFerdigstilt().copy(erRegelendring2026 = true),
+        )
+
+        val response = hentHarTidligereInnvilgetVedtak()
+
+        assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
+        assertThat(response.body?.data).isEqualTo(TidligereVedtakStatus.NEI)
+    }
+
+    @Test
+    fun `skal bruke siste behandling slik at nyere gammelt vedtak gir JA selv om eldre behandling var på nytt regelverk`() {
+        testoppsettService.lagreFagsak(fagsakOvergangsstønad)
+        behandlingRepository.insert(
+            behandling(fagsakOvergangsstønad)
+                .innvilgetOgFerdigstilt()
+                .copy(erRegelendring2026 = true, vedtakstidspunkt = SporbarUtils.now().minusDays(10)),
+        )
+        val nyesteBehandling =
+            behandlingRepository.insert(
+                behandling(fagsakOvergangsstønad)
+                    .innvilgetOgFerdigstilt()
+                    .copy(vedtakstidspunkt = SporbarUtils.now()),
+            )
+        lagreAndel(nyesteBehandling, beløp = 5000, tilOgMed = iDagPlusEttÅr())
+
+        val response = hentHarTidligereInnvilgetVedtak()
+
+        assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
+        assertThat(response.body?.data).isEqualTo(TidligereVedtakStatus.JA)
+    }
+
+    @Test
+    fun `skal ignorere henlagt behandling og bruke siste reelle behandling på nytt regelverk`() {
+        every { infotrygdReplikaClient.hentPerioder(any()) } returns
+            InfotrygdPeriodeResponse(
+                overgangsstønad = listOf(lagInfotrygdPeriode(personident)),
+                barnetilsyn = emptyList(),
+                skolepenger = emptyList(),
+            )
+        testoppsettService.lagreFagsak(fagsakOvergangsstønad)
+        behandlingRepository.insert(
+            behandling(fagsakOvergangsstønad)
+                .innvilgetOgFerdigstilt()
+                .copy(erRegelendring2026 = true, vedtakstidspunkt = SporbarUtils.now().minusDays(5)),
+        )
+        behandlingRepository.insert(
+            behandling(
+                fagsak = fagsakOvergangsstønad,
+                resultat = BehandlingResultat.HENLAGT,
+                status = BehandlingStatus.FERDIGSTILT,
+            ).copy(vedtakstidspunkt = SporbarUtils.now()),
+        )
+
+        val response = hentHarTidligereInnvilgetVedtak()
+
+        assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
+        assertThat(response.body?.data).isEqualTo(TidligereVedtakStatus.NEI)
+    }
+
+    @Test
     fun `skal returnere NEI for innvilget vedtak med kun historiske perioder`() {
         testoppsettService.lagreFagsak(fagsakOvergangsstønad)
         val behandling = behandlingRepository.insert(behandling(fagsakOvergangsstønad).innvilgetOgFerdigstilt())
