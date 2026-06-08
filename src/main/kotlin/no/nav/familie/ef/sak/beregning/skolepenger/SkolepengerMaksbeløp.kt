@@ -15,6 +15,7 @@ import java.time.Year
 object SkolepengerMaksbeløp {
     private val høgskoleUniversitet =
         mapOf<Year, Int>(
+            Year.of(2026) to 81_102,
             Year.of(2025) to 79_432,
             Year.of(2024) to 77_192,
             Year.of(2023) to 74_366,
@@ -26,6 +27,7 @@ object SkolepengerMaksbeløp {
 
     private val videregående =
         mapOf<Year, Int>(
+            Year.of(2026) to 33_841,
             Year.of(2025) to 33_145,
             Year.of(2024) to 32_211,
             Year.of(2023) to 31_033,
