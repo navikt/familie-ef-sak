@@ -2,6 +2,7 @@ package no.nav.familie.ef.sak.behandling
 
 import no.nav.familie.ef.sak.AuditLoggerEvent
 import no.nav.familie.ef.sak.behandling.dto.BehandlingDto
+import no.nav.familie.ef.sak.behandling.dto.OppdaterErRegelendring2026Dto
 import no.nav.familie.ef.sak.behandling.dto.OppdaterStatusDto
 import no.nav.familie.ef.sak.behandling.dto.SettPåVentRequest
 import no.nav.familie.ef.sak.behandling.dto.TaAvVentStatusDto
@@ -110,6 +111,17 @@ class BehandlingController(
             "Manuell oppdatering av behandlingstatus er ikke mulig fordi toggle ikke er enablet for bruker"
         }
         behandlingService.oppdaterStatusPåBehandling(behandlingId, oppdaterStatusDto.status)
+        return Ressurs.success(behandlingId)
+    }
+
+    @PostMapping("{behandlingId}/regelendring-2026")
+    fun oppdaterErRegelendring2026(
+        @PathVariable behandlingId: UUID,
+        @RequestBody dto: OppdaterErRegelendring2026Dto,
+    ): Ressurs<UUID> {
+        tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.UPDATE)
+        tilgangService.validerHarSaksbehandlerrolle()
+        behandlingService.oppdaterErRegelendring2026(behandlingId, dto.erRegelendring2026)
         return Ressurs.success(behandlingId)
     }
 }

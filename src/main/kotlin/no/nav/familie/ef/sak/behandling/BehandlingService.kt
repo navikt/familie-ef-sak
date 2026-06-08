@@ -222,7 +222,10 @@ class BehandlingService(
         kravMottatt: LocalDate?,
     ): Behandling = behandlingRepository.update(hentBehandling(behandlingId).copy(kravMottatt = kravMottatt))
 
-    fun oppdaterErRegelendring2026(behandlingId: UUID): Behandling = behandlingRepository.update(hentBehandling(behandlingId).copy(erRegelendring2026 = true))
+    fun oppdaterErRegelendring2026(
+        behandlingId: UUID,
+        erRegelendring2026: Boolean,
+    ): Behandling = behandlingRepository.update(hentBehandling(behandlingId).copy(erRegelendring2026 = erRegelendring2026))
 
     fun finnesBehandlingForFagsak(fagsakId: UUID) = behandlingRepository.existsByFagsakId(fagsakId)
 

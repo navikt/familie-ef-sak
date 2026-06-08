@@ -105,7 +105,7 @@ class RevurderingService(
                 ?: error("Revurdering må ha eksisterende iverksatt behandling")
 
         if (forrigeBehandling.erRegelendring2026) {
-            behandlingService.oppdaterErRegelendring2026(revurdering.id)
+            behandlingService.oppdaterErRegelendring2026(revurdering.id, erRegelendring2026 = true)
         }
 
         søknadService.kopierSøknad(forrigeBehandling.id, revurdering.id)
