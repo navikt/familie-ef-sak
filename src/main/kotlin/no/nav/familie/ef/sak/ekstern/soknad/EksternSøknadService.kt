@@ -22,7 +22,7 @@ class EksternSøknadService(
     fun harTidligereInnvilgetVedtak(personIdent: String): TidligereVedtakStatus {
         return try {
             val folkeregisteridentifikatorer = personService.hentSøker(personIdent).folkeregisteridentifikator
-            if (folkeregisteridentifikatorer.isEmpty() || folkeregisteridentifikatorer.none { !it.metadata.historisk }) {
+            if (folkeregisteridentifikatorer.none { !it.metadata.historisk }) {
                 return TidligereVedtakStatus.NEI
             }
 
