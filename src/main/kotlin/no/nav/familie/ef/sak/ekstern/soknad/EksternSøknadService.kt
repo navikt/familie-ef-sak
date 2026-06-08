@@ -23,7 +23,7 @@ class EksternSøknadService(
         return try {
             val folkeregisteridentifikatorer = personService.hentSøker(personIdent).folkeregisteridentifikator
             if (folkeregisteridentifikatorer.none { !it.metadata.historisk }) {
-                return TidligereVedtakStatus.NEI
+                return TidligereVedtakStatus.VET_IKKE
             }
 
             val aktivIdent = folkeregisteridentifikatorer.gjeldende().ident

@@ -11,6 +11,10 @@ import no.nav.familie.ef.sak.infotrygd.InfotrygdReplikaClient
 import no.nav.familie.ef.sak.infrastruktur.config.InfotrygdReplikaMock
 import no.nav.familie.ef.sak.infrastruktur.config.PdlClientConfig
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.infotrygd.InfotrygdPeriodeTestUtil.lagInfotrygdPeriode
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlClient
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Folkeregisteridentifikator
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.FolkeregisteridentifikatorStatus
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Metadata
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pensjon.HistoriskPensjonClient
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pensjon.HistoriskPensjonDto
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pensjon.HistoriskPensjonStatus
@@ -54,6 +58,9 @@ class EksternSøknadControllerTest : OppslagSpringRunnerTest() {
     private lateinit var historiskPensjonClient: HistoriskPensjonClient
 
     @Autowired
+    private lateinit var pdlClient: PdlClient
+
+    @Autowired
     @Qualifier("longCache")
     private lateinit var longCache: CacheManager
 
@@ -65,6 +72,7 @@ class EksternSøknadControllerTest : OppslagSpringRunnerTest() {
             InfotrygdPeriodeResponse(overgangsstønad = emptyList(), barnetilsyn = emptyList(), skolepenger = emptyList())
         every { historiskPensjonClient.hentHistoriskPensjonStatusForIdent(any(), any()) } returns
             HistoriskPensjonDto(HistoriskPensjonStatus.HAR_IKKE_HISTORIKK, "")
+        every { pdlClient.hentSøker(any()) } returns PdlClientConfig.opprettPdlSøker()
         longCache.cacheNames.mapNotNull { longCache.getCache(it) }.forEach { it.clear() }
     }
 
@@ -254,6 +262,23 @@ class EksternSøknadControllerTest : OppslagSpringRunnerTest() {
     fun `skal returnere VET_IKKE når historisk pensjon er ukjent og ingen treff ellers`() {
         every { historiskPensjonClient.hentHistoriskPensjonStatusForIdent(any(), any()) } returns
             HistoriskPensjonDto(HistoriskPensjonStatus.UKJENT, "")
+
+        val response = hentHarTidligereInnvilgetVedtak()
+
+        assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
+        assertThat(response.body?.data).isEqualTo(TidligereVedtakStatus.VET_IKKE)
+    }
+
+    @Test
+    fun `skal returnere VET_IKKE når søker ikke har en aktiv folkeregisteridentifikator`() {
+        val historiskIdent =
+            Folkeregisteridentifikator(
+                ident = personident,
+                status = FolkeregisteridentifikatorStatus.I_BRUK,
+                metadata = Metadata(historisk = true),
+            )
+        every { pdlClient.hentSøker(any()) } returns
+            PdlClientConfig.opprettPdlSøker().copy(folkeregisteridentifikator = listOf(historiskIdent))
 
         val response = hentHarTidligereInnvilgetVedtak()
 
