@@ -2,6 +2,7 @@ package no.nav.familie.ef.sak.behandling
 
 import no.nav.familie.ef.sak.AuditLoggerEvent
 import no.nav.familie.ef.sak.behandling.dto.BehandlingDto
+import no.nav.familie.ef.sak.behandling.dto.OppdaterErRegelendring2026Dto
 import no.nav.familie.ef.sak.behandling.dto.OppdaterStatusDto
 import no.nav.familie.ef.sak.behandling.dto.SettPåVentRequest
 import no.nav.familie.ef.sak.behandling.dto.TaAvVentStatusDto
@@ -13,7 +14,6 @@ import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.ef.sak.vilkår.gjenbruk.GjenbrukVilkårService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.ef.StønadType
-import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
@@ -24,7 +24,6 @@ import java.util.UUID
 
 @RestController
 @RequestMapping(path = ["/api/behandling"])
-@ProtectedWithClaims(issuer = "azuread")
 class BehandlingController(
     private val behandlingService: BehandlingService,
     private val behandlingPåVentService: BehandlingPåVentService,
@@ -112,6 +111,17 @@ class BehandlingController(
             "Manuell oppdatering av behandlingstatus er ikke mulig fordi toggle ikke er enablet for bruker"
         }
         behandlingService.oppdaterStatusPåBehandling(behandlingId, oppdaterStatusDto.status)
+        return Ressurs.success(behandlingId)
+    }
+
+    @PostMapping("{behandlingId}/regelendring-2026")
+    fun oppdaterErRegelendring2026(
+        @PathVariable behandlingId: UUID,
+        @RequestBody dto: OppdaterErRegelendring2026Dto,
+    ): Ressurs<UUID> {
+        tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.UPDATE)
+        tilgangService.validerHarSaksbehandlerrolle()
+        behandlingService.oppdaterErRegelendring2026(behandlingId, dto.erRegelendring2026)
         return Ressurs.success(behandlingId)
     }
 }

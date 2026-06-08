@@ -9,7 +9,7 @@ import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.infrastruktur.config.readValue
 import no.nav.familie.ef.sak.iverksett.oppgaveforbarn.AktivitetspliktigAlder
-import no.nav.familie.ef.sak.iverksett.oppgaveforbarn.BarnFyllerÅrOppfølgingsoppgaveService
+import no.nav.familie.ef.sak.iverksett.oppgaveforbarn.OppfølgingOppgaveBarnFyllerÅrService
 import no.nav.familie.ef.sak.iverksett.oppgaveforbarn.OpprettOppgavePayload
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
 import no.nav.familie.ef.sak.repository.behandling
@@ -29,11 +29,10 @@ import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.dao.DuplicateKeyException
-import org.springframework.transaction.UnexpectedRollbackException
 import java.time.LocalDate
 
 class BarnFyllerÅrIntegrationTest : OppslagSpringRunnerTest() {
-    @Autowired private lateinit var barnFyllerÅrOppfølgingsoppgaveService: BarnFyllerÅrOppfølgingsoppgaveService
+    @Autowired private lateinit var barnFyllerÅrOppfølgingsoppgaveService: OppfølgingOppgaveBarnFyllerÅrService
 
     @Autowired private lateinit var behandlingRepository: BehandlingRepository
 
@@ -74,6 +73,25 @@ class BarnFyllerÅrIntegrationTest : OppslagSpringRunnerTest() {
 
         val tasksEtterAndreKjøring = taskService.findAll().toList()
         assertThat(tasksEtterAndreKjøring.size).isEqualTo(1)
+    }
+
+    @Test
+    fun `barn har blitt mer enn 6 mnd men behandling er regelendring 2026, skal ikke opprette oppgave`() {
+        val fagsak = testoppsettService.lagreFagsak(fagsak())
+        val behandling =
+            behandlingRepository.insert(
+                behandling(fagsak, BehandlingStatus.FERDIGSTILT, resultat = BehandlingResultat.INNVILGET, erRegelendring2026 = true),
+            )
+        val barnPersonIdent = "01012067050" // Se PdlClientConfig
+        barnRepository.insert(BehandlingBarn(personIdent = barnPersonIdent, behandlingId = behandling.id))
+        grunnlagsdataService.opprettGrunnlagsdata(behandling.id)
+        oppdaterGrunnlagsdata(behandling, LocalDate.now().minusMonths(6).minusDays(1))
+        vedtakRepository.insert(vedtak(behandling.id))
+        lagreFremtidligAndel(behandling, 4000)
+
+        barnFyllerÅrOppfølgingsoppgaveService.opprettTasksForAlleBarnSomHarFyltÅr()
+
+        assertThat(taskService.findAll().toList()).isEmpty()
     }
 
     @Test

@@ -3,7 +3,6 @@ package no.nav.familie.ef.sak.forvaltning
 import io.swagger.v3.oas.annotations.Operation
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.restklient.client.AbstractRestClient
-import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
@@ -16,7 +15,6 @@ import java.net.URI
 
 @RestController
 @RequestMapping("/api/forvaltning/iverksett/task/")
-@ProtectedWithClaims(issuer = "azuread")
 class IverksettProxyTaskForvaltningController(
     private val tilgangService: TilgangService,
     @Value("\${FAMILIE_EF_IVERKSETT_URL}")

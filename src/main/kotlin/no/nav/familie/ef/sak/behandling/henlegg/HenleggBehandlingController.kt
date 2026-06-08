@@ -17,7 +17,6 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerS
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.internal.TaskService
-import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
@@ -29,7 +28,6 @@ import java.util.UUID
 
 @RestController
 @RequestMapping(path = ["/api/behandling"])
-@ProtectedWithClaims(issuer = "azuread")
 class HenleggBehandlingController(
     private val behandlingService: BehandlingService,
     private val fagsakService: FagsakService,

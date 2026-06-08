@@ -1,10 +1,9 @@
 package no.nav.familie.ef.sak
 
-import no.nav.security.token.support.spring.test.EnableMockOAuth2Server
+import no.nav.familie.ef.sak.infrastruktur.util.MockOAuth2ServerInitializer
 import org.springframework.boot.builder.SpringApplicationBuilder
 import java.util.Properties
 
-@EnableMockOAuth2Server
 class ApplicationLocalPostgres : ApplicationLocalSetup()
 
 fun main(args: Array<String>) {
@@ -15,6 +14,7 @@ fun main(args: Array<String>) {
     properties["DATASOURCE_DRIVER"] = "org.postgresql.Driver"
 
     SpringApplicationBuilder(ApplicationLocalPostgres::class.java)
+        .initializers(MockOAuth2ServerInitializer())
         .profiles(
             "local",
             "mock-arbeidssøker",
