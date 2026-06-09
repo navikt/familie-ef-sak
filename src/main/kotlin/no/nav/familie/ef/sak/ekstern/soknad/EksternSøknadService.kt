@@ -3,7 +3,7 @@ package no.nav.familie.ef.sak.ekstern.soknad
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
 import no.nav.familie.ef.sak.infotrygd.InfotrygdService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.gjeldende
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.gjeldendeEllerNull
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pensjon.HistoriskPensjonService
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.slf4j.LoggerFactory
@@ -18,52 +18,44 @@ class EksternSøknadService(
 ) {
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    fun harTidligereInnvilgetVedtak(personIdent: String): TidligereVedtakStatus {
-        return try {
+    fun harTidligereInnvilgetVedtak(personIdent: String): TidligereVedtakStatus =
+        try {
             val folkeregisteridentifikatorer = personService.hentSøker(personIdent).folkeregisteridentifikator
-            if (folkeregisteridentifikatorer.none { !it.metadata.historisk }) {
-                return TidligereVedtakStatus.VET_IKKE
-            }
+            val aktivIdent = folkeregisteridentifikatorer.gjeldendeEllerNull()?.ident
 
-            val aktivIdent = folkeregisteridentifikatorer.gjeldende().ident
-            val identer = folkeregisteridentifikatorer.map { it.ident }.toSet()
+            if (aktivIdent == null) {
+                TidligereVedtakStatus.VET_IKKE
+            } else {
+                val identer = folkeregisteridentifikatorer.map { it.ident }.toSet()
 
-            when (sisteFerdigstilteBehandlingErPåNyttRegelverk(identer)) {
-                true -> TidligereVedtakStatus.NEI
-                false -> TidligereVedtakStatus.JA
-                null -> statusFraEksternHistorikk(aktivIdent = aktivIdent, identer = identer)
+                statusFraSisteBehandling(identer)
+                    ?: statusFraInfotrygd(identer)
+                    ?: statusFraHistoriskPensjon(aktivIdent = aktivIdent, identer = identer)
             }
         } catch (e: Exception) {
             logger.warn("Feil ved sjekk av tidligere innvilget vedtak", e)
             TidligereVedtakStatus.VET_IKKE
         }
-    }
 
-    private fun sisteFerdigstilteBehandlingErPåNyttRegelverk(identer: Set<String>): Boolean? =
-        behandlingRepository.erSisteFerdigstilteBehandlingPåNyttRegelverk(
-            identer = identer,
-            stønadstyper = STØNADSTYPER_SOM_GIR_GAMMEL_ORDNING,
-        )
-
-    private fun statusFraEksternHistorikk(
-        aktivIdent: String,
-        identer: Set<String>,
-    ): TidligereVedtakStatus =
-        when {
-            harTidligereOvergangsstønadIInfotrygd(identer) -> TidligereVedtakStatus.JA
-            else -> historiskPensjonStatus(aktivIdent = aktivIdent, identer = identer)
+    private fun statusFraSisteBehandling(identer: Set<String>): TidligereVedtakStatus? =
+        when (behandlingRepository.erSisteFerdigstilteBehandlingPåNyttRegelverk(identer, STØNADSTYPER_SOM_GIR_GAMMEL_ORDNING)) {
+            true -> TidligereVedtakStatus.NEI
+            false -> TidligereVedtakStatus.JA
+            null -> null
         }
 
-    private fun harTidligereOvergangsstønadIInfotrygd(identer: Set<String>): Boolean = infotrygdService.hentPerioderFraReplika(identer).overgangsstønad.isNotEmpty()
+    private fun statusFraInfotrygd(identer: Set<String>): TidligereVedtakStatus? =
+        TidligereVedtakStatus.JA
+            .takeIf { infotrygdService.hentPerioderFraReplika(identer).overgangsstønad.isNotEmpty() }
 
-    private fun historiskPensjonStatus(
+    private fun statusFraHistoriskPensjon(
         aktivIdent: String,
         identer: Set<String>,
     ): TidligereVedtakStatus =
         when (historiskPensjonService.hentHistoriskPensjon(aktivIdent, identer).harPensjonsdata()) {
-            null -> TidligereVedtakStatus.VET_IKKE
             true -> TidligereVedtakStatus.JA
             false -> TidligereVedtakStatus.NEI
+            null -> TidligereVedtakStatus.VET_IKKE
         }
 
     companion object {

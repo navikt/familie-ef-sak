@@ -44,6 +44,10 @@ class EksternSøknadControllerTest : OppslagSpringRunnerTest() {
     private val personident = PdlClientConfig.SØKER_FNR
     private val fagsakOvergangsstønad =
         fagsak(stønadstype = StønadType.OVERGANGSSTØNAD, identer = fagsakpersoner(setOf(personident)))
+    private val fagsakBarnetilsyn =
+        fagsak(stønadstype = StønadType.BARNETILSYN, identer = fagsakpersoner(setOf(personident)))
+    private val fagsakSkolepenger =
+        fagsak(stønadstype = StønadType.SKOLEPENGER, identer = fagsakpersoner(setOf(personident)))
 
     @Autowired
     private lateinit var tilkjentYtelseRepository: TilkjentYtelseRepository
@@ -230,6 +234,49 @@ class EksternSøknadControllerTest : OppslagSpringRunnerTest() {
 
         assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
         assertThat(response.body?.data).isEqualTo(TidligereVedtakStatus.JA)
+    }
+
+    @Test
+    fun `skal returnere JA når siste behandling er en gammel barnetilsyn`() {
+        testoppsettService.lagreFagsak(fagsakBarnetilsyn)
+        behandlingRepository.insert(behandling(fagsakBarnetilsyn).innvilgetOgFerdigstilt())
+
+        val response = hentHarTidligereInnvilgetVedtak()
+
+        assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
+        assertThat(response.body?.data).isEqualTo(TidligereVedtakStatus.JA)
+    }
+
+    @Test
+    fun `skal returnere JA når siste behandling er en gammel skolepenger`() {
+        testoppsettService.lagreFagsak(fagsakSkolepenger)
+        behandlingRepository.insert(behandling(fagsakSkolepenger).innvilgetOgFerdigstilt())
+
+        val response = hentHarTidligereInnvilgetVedtak()
+
+        assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
+        assertThat(response.body?.data).isEqualTo(TidligereVedtakStatus.JA)
+    }
+
+    @Test
+    fun `skal bruke siste behandling på tvers av stønadsordninger slik at ny overgangsstønad gir NEI selv om eldre barnetilsyn var på gammelt regelverk`() {
+        testoppsettService.lagreFagsak(fagsakBarnetilsyn)
+        behandlingRepository.insert(
+            behandling(fagsakBarnetilsyn)
+                .innvilgetOgFerdigstilt()
+                .copy(vedtakstidspunkt = SporbarUtils.now().minusDays(10)),
+        )
+        testoppsettService.lagreFagsak(fagsakOvergangsstønad)
+        behandlingRepository.insert(
+            behandling(fagsakOvergangsstønad)
+                .innvilgetOgFerdigstilt()
+                .copy(erRegelendring2026 = true, vedtakstidspunkt = SporbarUtils.now()),
+        )
+
+        val response = hentHarTidligereInnvilgetVedtak()
+
+        assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
+        assertThat(response.body?.data).isEqualTo(TidligereVedtakStatus.NEI)
     }
 
     @Test
