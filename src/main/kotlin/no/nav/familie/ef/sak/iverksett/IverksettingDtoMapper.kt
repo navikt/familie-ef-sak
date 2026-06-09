@@ -287,6 +287,7 @@ class IverksettingDtoMapper(
             kravMottatt = saksbehandling.kravMottatt,
             årsakRevurdering = mapÅrsakRevurdering(saksbehandling),
             kategori = saksbehandling.kategori,
+            erRegelendring2026 = saksbehandling.erRegelendring2026,
         )
     }
 
