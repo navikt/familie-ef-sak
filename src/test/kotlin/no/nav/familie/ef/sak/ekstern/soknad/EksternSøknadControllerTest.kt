@@ -188,7 +188,7 @@ class EksternSøknadControllerTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    fun `skal returnere NEI for innvilget vedtak med kun historiske perioder`() {
+    fun `skal returnere JA når siste behandling er på gammelt regelverk selv om perioden er utløpt`() {
         testoppsettService.lagreFagsak(fagsakOvergangsstønad)
         val behandling = behandlingRepository.insert(behandling(fagsakOvergangsstønad).innvilgetOgFerdigstilt())
         lagreAndel(behandling, beløp = 5000, tilOgMed = LocalDate.now().minusYears(1))
@@ -196,11 +196,11 @@ class EksternSøknadControllerTest : OppslagSpringRunnerTest() {
         val response = hentHarTidligereInnvilgetVedtak()
 
         assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
-        assertThat(response.body?.data).isEqualTo(TidligereVedtakStatus.NEI)
+        assertThat(response.body?.data).isEqualTo(TidligereVedtakStatus.JA)
     }
 
     @Test
-    fun `skal returnere NEI for innvilget vedtak med beløp 0`() {
+    fun `skal returnere JA når siste behandling er på gammelt regelverk selv om beløpet er 0`() {
         testoppsettService.lagreFagsak(fagsakOvergangsstønad)
         val behandling = behandlingRepository.insert(behandling(fagsakOvergangsstønad).innvilgetOgFerdigstilt())
         lagreAndel(behandling, beløp = 0, tilOgMed = iDagPlusEttÅr())
@@ -208,11 +208,11 @@ class EksternSøknadControllerTest : OppslagSpringRunnerTest() {
         val response = hentHarTidligereInnvilgetVedtak()
 
         assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
-        assertThat(response.body?.data).isEqualTo(TidligereVedtakStatus.NEI)
+        assertThat(response.body?.data).isEqualTo(TidligereVedtakStatus.JA)
     }
 
     @Test
-    fun `skal returnere NEI for opphørt sak`() {
+    fun `skal returnere JA når siste behandling er en opphørt sak på gammelt regelverk`() {
         testoppsettService.lagreFagsak(fagsakOvergangsstønad)
 
         val førsteBehandling = behandlingRepository.insert(behandling(fagsakOvergangsstønad).innvilgetOgFerdigstilt())
@@ -229,7 +229,7 @@ class EksternSøknadControllerTest : OppslagSpringRunnerTest() {
         val response = hentHarTidligereInnvilgetVedtak()
 
         assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
-        assertThat(response.body?.data).isEqualTo(TidligereVedtakStatus.NEI)
+        assertThat(response.body?.data).isEqualTo(TidligereVedtakStatus.JA)
     }
 
     @Test

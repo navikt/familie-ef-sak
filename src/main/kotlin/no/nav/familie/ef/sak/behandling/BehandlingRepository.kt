@@ -209,40 +209,12 @@ interface BehandlingRepository :
     // language=PostgreSQL
     @Query(
         """
-        SELECT EXISTS (
-            SELECT 1
-            FROM gjeldende_iverksatte_behandlinger gib
-            JOIN behandling b ON b.id = gib.id
-            JOIN person_ident pi ON gib.fagsak_person_id = pi.fagsak_person_id
-            WHERE pi.ident IN (:identer)
-              AND gib.stonadstype = :stønadstype
-              AND gib.resultat = 'INNVILGET'
-              AND b.er_regelendring_2026 = false
-              AND EXISTS (
-                  SELECT 1 FROM andel_tilkjent_ytelse aty
-                  JOIN tilkjent_ytelse ty ON aty.tilkjent_ytelse = ty.id
-                  WHERE ty.behandling_id = gib.id
-                    AND aty.belop > 0
-                    AND aty.stonad_tom >= :iDag
-              )
-        )
-        """,
-    )
-    fun harGjeldendePeriodePåGammeltRegelverk(
-        identer: Set<String>,
-        stønadstype: StønadType,
-        iDag: LocalDate,
-    ): Boolean
-
-    // language=PostgreSQL
-    @Query(
-        """
         SELECT b.er_regelendring_2026
         FROM behandling b
         JOIN fagsak f ON f.id = b.fagsak_id
         JOIN person_ident pi ON f.fagsak_person_id = pi.fagsak_person_id
         WHERE pi.ident IN (:identer)
-          AND f.stonadstype = :stønadstype
+          AND f.stonadstype IN (:stønadstyper)
           AND b.status = 'FERDIGSTILT'
           AND b.resultat <> 'HENLAGT'
         ORDER BY b.vedtakstidspunkt DESC
@@ -251,7 +223,7 @@ interface BehandlingRepository :
     )
     fun erSisteFerdigstilteBehandlingPåNyttRegelverk(
         identer: Set<String>,
-        stønadstype: StønadType,
+        stønadstyper: Set<StønadType>,
     ): Boolean?
 
     // language=PostgreSQL

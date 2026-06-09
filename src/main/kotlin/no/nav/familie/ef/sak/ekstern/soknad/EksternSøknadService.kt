@@ -8,7 +8,6 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.pensjon.HistoriskPe
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
-import java.time.LocalDate
 
 @Service
 class EksternSøknadService(
@@ -29,11 +28,10 @@ class EksternSøknadService(
             val aktivIdent = folkeregisteridentifikatorer.gjeldende().ident
             val identer = folkeregisteridentifikatorer.map { it.ident }.toSet()
 
-            when {
-                sisteFerdigstilteBehandlingErPåNyttRegelverk(identer) -> TidligereVedtakStatus.NEI
-                harGjeldendePeriodePåGammeltRegelverkIEf(identer) -> TidligereVedtakStatus.JA
-                harTidligereOvergangsstønadIInfotrygd(identer) -> TidligereVedtakStatus.JA
-                else -> historiskPensjonStatus(aktivIdent, identer)
+            when (sisteFerdigstilteBehandlingErPåNyttRegelverk(identer)) {
+                true -> TidligereVedtakStatus.NEI
+                false -> TidligereVedtakStatus.JA
+                null -> statusFraEksternHistorikk(aktivIdent = aktivIdent, identer = identer)
             }
         } catch (e: Exception) {
             logger.warn("Feil ved sjekk av tidligere innvilget vedtak", e)
@@ -41,18 +39,20 @@ class EksternSøknadService(
         }
     }
 
-    private fun sisteFerdigstilteBehandlingErPåNyttRegelverk(identer: Set<String>): Boolean =
+    private fun sisteFerdigstilteBehandlingErPåNyttRegelverk(identer: Set<String>): Boolean? =
         behandlingRepository.erSisteFerdigstilteBehandlingPåNyttRegelverk(
             identer = identer,
-            stønadstype = StønadType.OVERGANGSSTØNAD,
-        ) == true
-
-    private fun harGjeldendePeriodePåGammeltRegelverkIEf(identer: Set<String>): Boolean =
-        behandlingRepository.harGjeldendePeriodePåGammeltRegelverk(
-            identer = identer,
-            stønadstype = StønadType.OVERGANGSSTØNAD,
-            iDag = LocalDate.now(),
+            stønadstyper = STØNADSTYPER_SOM_GIR_GAMMEL_ORDNING,
         )
+
+    private fun statusFraEksternHistorikk(
+        aktivIdent: String,
+        identer: Set<String>,
+    ): TidligereVedtakStatus =
+        when {
+            harTidligereOvergangsstønadIInfotrygd(identer) -> TidligereVedtakStatus.JA
+            else -> historiskPensjonStatus(aktivIdent = aktivIdent, identer = identer)
+        }
 
     private fun harTidligereOvergangsstønadIInfotrygd(identer: Set<String>): Boolean = infotrygdService.hentPerioderFraReplika(identer).overgangsstønad.isNotEmpty()
 
@@ -65,4 +65,9 @@ class EksternSøknadService(
             true -> TidligereVedtakStatus.JA
             false -> TidligereVedtakStatus.NEI
         }
+
+    companion object {
+        private val STØNADSTYPER_SOM_GIR_GAMMEL_ORDNING =
+            setOf(StønadType.OVERGANGSSTØNAD, StønadType.BARNETILSYN, StønadType.SKOLEPENGER)
+    }
 }
