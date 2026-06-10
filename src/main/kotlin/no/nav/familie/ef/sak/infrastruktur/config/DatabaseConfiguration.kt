@@ -168,7 +168,7 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
 
     @ReadingConverter
     class PGobjectTilDelvilkårConverter : Converter<PGobject, DelvilkårsvurderingWrapper> {
-        override fun convert(pGobject: PGobject): DelvilkårsvurderingWrapper = DelvilkårsvurderingWrapper(pGobject.value?.let { jsonMapper.readValue(it) } ?: emptyList())
+        override fun convert(pGobject: PGobject): DelvilkårsvurderingWrapper = DelvilkårsvurderingWrapper(pGobject.verdi()?.let { jsonMapper.readValue(it) } ?: emptyList())
     }
 
     @WritingConverter
@@ -203,7 +203,7 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
     @ReadingConverter
     class PGobjectTilJsonWrapperConverter : Converter<PGobject, JsonWrapper> {
         override fun convert(pGobject: PGobject): JsonWrapper =
-            pGobject.value?.let { JsonWrapper(it) }
+            pGobject.verdi()?.let { JsonWrapper(it) }
                 ?: throw IllegalArgumentException("PGobject.value kan ikke være null")
     }
 
@@ -256,7 +256,7 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
 
     @ReadingConverter
     class PGobjectTilVedtaksperioder : Converter<PGobject, PeriodeWrapper> {
-        override fun convert(pGobject: PGobject): PeriodeWrapper = PeriodeWrapper(pGobject.value?.let { jsonMapper.readValue(it) } ?: emptyList())
+        override fun convert(pGobject: PGobject): PeriodeWrapper = PeriodeWrapper(pGobject.verdi()?.let { jsonMapper.readValue(it) } ?: emptyList())
     }
 
     @WritingConverter
@@ -270,7 +270,7 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
 
     @ReadingConverter
     class PGobjectTilInntektsperiode : Converter<PGobject, InntektWrapper> {
-        override fun convert(pGobject: PGobject): InntektWrapper = InntektWrapper(pGobject.value?.let { jsonMapper.readValue(it) } ?: emptyList())
+        override fun convert(pGobject: PGobject): InntektWrapper = InntektWrapper(pGobject.verdi()?.let { jsonMapper.readValue(it) } ?: emptyList())
     }
 
     @WritingConverter
@@ -285,7 +285,7 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
     @ReadingConverter
     class PGobjectTilBarnetilsynConverter : Converter<PGobject, BarnetilsynWrapper> {
         override fun convert(pGobject: PGobject): BarnetilsynWrapper {
-            val barnetilsynVerdi: BarnetilsynWrapper? = pGobject.value?.let { jsonMapper.readValue(it) }
+            val barnetilsynVerdi: BarnetilsynWrapper? = pGobject.verdi()?.let { jsonMapper.readValue(it) }
             return barnetilsynVerdi ?: BarnetilsynWrapper(perioder = emptyList(), begrunnelse = null)
         }
     }
@@ -302,7 +302,7 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
     @ReadingConverter
     class PGobjectTilSkolepengerConverter : Converter<PGobject, SkolepengerWrapper> {
         override fun convert(pGobject: PGobject): SkolepengerWrapper {
-            val eksisterendeVerdi: SkolepengerWrapper? = pGobject.value?.let { jsonMapper.readValue(it) }
+            val eksisterendeVerdi: SkolepengerWrapper? = pGobject.verdi()?.let { jsonMapper.readValue(it) }
             return eksisterendeVerdi ?: SkolepengerWrapper(skoleårsperioder = emptyList(), begrunnelse = null)
         }
     }
@@ -319,7 +319,7 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
     @ReadingConverter
     class PGobjectTilKontantstøtteConverter : Converter<PGobject, KontantstøtteWrapper> {
         override fun convert(pGobject: PGobject): KontantstøtteWrapper {
-            val kontantstøtteVerdi: KontantstøtteWrapper? = pGobject.value?.let { jsonMapper.readValue(it) }
+            val kontantstøtteVerdi: KontantstøtteWrapper? = pGobject.verdi()?.let { jsonMapper.readValue(it) }
             return kontantstøtteVerdi ?: KontantstøtteWrapper(perioder = emptyList(), begrunnelse = null)
         }
     }
@@ -336,7 +336,7 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
     @ReadingConverter
     class PGobjectTilTilleggsstønadConverter : Converter<PGobject, TilleggsstønadWrapper> {
         override fun convert(pGobject: PGobject): TilleggsstønadWrapper {
-            val tilleggstønadVerdi: TilleggsstønadWrapper? = pGobject.value?.let { jsonMapper.readValue(it) }
+            val tilleggstønadVerdi: TilleggsstønadWrapper? = pGobject.verdi()?.let { jsonMapper.readValue(it) }
             return tilleggstønadVerdi ?: TilleggsstønadWrapper(
                 perioder = emptyList(),
                 begrunnelse = null,
@@ -355,7 +355,7 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
 
     @ReadingConverter
     class PGobjectTilDetaljertSimuleringResultat : Converter<PGobject, DetaljertSimuleringResultat> {
-        override fun convert(pGobject: PGobject): DetaljertSimuleringResultat = DetaljertSimuleringResultat(pGobject.value?.let { jsonMapper.readValue(it) } ?: emptyList())
+        override fun convert(pGobject: PGobject): DetaljertSimuleringResultat = DetaljertSimuleringResultat(pGobject.verdi()?.let { jsonMapper.readValue(it) } ?: emptyList())
     }
 
     @WritingConverter
@@ -369,7 +369,7 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
 
     @ReadingConverter
     class PGobjectTilBeriketSimuleringsresultat : Converter<PGobject, BeriketSimuleringsresultat> {
-        override fun convert(pGobject: PGobject): BeriketSimuleringsresultat = pGobject.value?.let { jsonMapper.readValue(it) } ?: throw IllegalArgumentException("Beriket simuleringsresultat er null: ${pGobject.value}")
+        override fun convert(pGobject: PGobject): BeriketSimuleringsresultat = pGobject.verdi()?.let { jsonMapper.readValue(it) } ?: throw IllegalArgumentException("Beriket simuleringsresultat er null: ${pGobject.value}")
     }
 
     @WritingConverter
@@ -383,7 +383,7 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
 
     @ReadingConverter
     class PGobjectTilBrevmottakerPersoner : Converter<PGobject, PersonerWrapper> {
-        override fun convert(pGobject: PGobject): PersonerWrapper = pGobject.value?.let { jsonMapper.readValue(it) } ?: throw IllegalArgumentException("PersonerWrapper er null: ${pGobject.value}")
+        override fun convert(pGobject: PGobject): PersonerWrapper = pGobject.verdi()?.let { jsonMapper.readValue(it) } ?: throw IllegalArgumentException("PersonerWrapper er null: ${pGobject.value}")
     }
 
     @WritingConverter
@@ -397,7 +397,7 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
 
     @ReadingConverter
     class PGobjectTilBrevmottakerOrganisasjoner : Converter<PGobject, OrganisasjonerWrapper> {
-        override fun convert(pGobject: PGobject): OrganisasjonerWrapper = pGobject.value?.let { jsonMapper.readValue(it) } ?: throw IllegalArgumentException("OrganisasjonerWrapper er null: ${pGobject.value}")
+        override fun convert(pGobject: PGobject): OrganisasjonerWrapper = pGobject.verdi()?.let { jsonMapper.readValue(it) } ?: throw IllegalArgumentException("OrganisasjonerWrapper er null: ${pGobject.value}")
     }
 
     @WritingConverter
@@ -411,7 +411,7 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
 
     @ReadingConverter
     class PGobjectTilSamværsuker : Converter<PGobject, SamværsukeWrapper> {
-        override fun convert(pGobject: PGobject): SamværsukeWrapper = SamværsukeWrapper(pGobject.value?.let { jsonMapper.readValue(it) } ?: emptyList())
+        override fun convert(pGobject: PGobject): SamværsukeWrapper = SamværsukeWrapper(pGobject.verdi()?.let { jsonMapper.readValue(it) } ?: emptyList())
     }
 
     @WritingConverter
@@ -433,3 +433,5 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
         override fun convert(verdi: String): StringListeWrapper = StringListeWrapper(verdi.split(";").filter { it.isNotEmpty() })
     }
 }
+
+private fun PGobject.verdi(): String? = this.value
