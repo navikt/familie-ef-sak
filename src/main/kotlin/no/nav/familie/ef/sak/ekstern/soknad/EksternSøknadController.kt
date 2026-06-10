@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RestController
 class EksternSøknadController(
     private val eksternSøknadService: EksternSøknadService,
 ) {
-    @GetMapping("har-tidligere-innvilget-vedtak")
+    @GetMapping("har-vedtak-pa-gammelt-regelverk")
     fun harTidligereInnvilgetVedtak(): Ressurs<TidligereVedtakStatus> {
         SikkerhetContext.sjekkAcrLevel4()
         feilHvisIkke(SikkerhetContext.kallKommerFraFamilieEfSøknadApi(), HttpStatus.UNAUTHORIZED) {
