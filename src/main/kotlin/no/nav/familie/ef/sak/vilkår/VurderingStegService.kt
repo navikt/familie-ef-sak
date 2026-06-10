@@ -75,28 +75,6 @@ class VurderingStegService(
         return oppdatertVilkår
     }
 
-    @Transactional
-    fun nullstillAktivitetOgSagtOppVilkår(behandlingId: UUID) {
-        val vilkårTyperSomSkalNullstilles =
-            setOf(VilkårType.AKTIVITET, VilkårType.SAGT_OPP_ELLER_REDUSERT)
-        val metadata = hentHovedregelMetadata(behandlingId)
-
-        vilkårsvurderingRepository
-            .findByBehandlingId(behandlingId)
-            .filter { it.type in vilkårTyperSomSkalNullstilles }
-            .forEach { vilkårsvurdering ->
-                val nyeDelvilkår = hentVilkårsregel(vilkårsvurdering.type).initiereDelvilkårsvurdering(metadata)
-                vilkårsvurderingRepository.update(
-                    vilkårsvurdering.copy(
-                        resultat = Vilkårsresultat.IKKE_TATT_STILLING_TIL,
-                        delvilkårsvurdering = DelvilkårsvurderingWrapper(nyeDelvilkår),
-                        opphavsvilkår = null,
-                    ),
-                )
-            }
-        behandlingStegOppdaterer.oppdaterStegOgKategoriPåBehandling(behandlingId)
-    }
-
     private fun nullstillVilkårMedNyeHovedregler(
         behandlingId: UUID,
         vilkårsvurdering: Vilkårsvurdering,
