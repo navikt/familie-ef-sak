@@ -209,6 +209,26 @@ interface BehandlingRepository :
     // language=PostgreSQL
     @Query(
         """
+        SELECT b.er_regelendring_2026
+        FROM behandling b
+        JOIN fagsak f ON f.id = b.fagsak_id
+        JOIN person_ident pi ON f.fagsak_person_id = pi.fagsak_person_id
+        WHERE pi.ident IN (:identer)
+          AND f.stonadstype IN (:stønadstyper)
+          AND b.status = 'FERDIGSTILT'
+          AND b.resultat <> 'HENLAGT'
+        ORDER BY b.vedtakstidspunkt DESC
+        LIMIT 1
+        """,
+    )
+    fun erSisteFerdigstilteBehandlingPåNyttRegelverk(
+        identer: Set<String>,
+        stønadstyper: Set<StønadType>,
+    ): Boolean?
+
+    // language=PostgreSQL
+    @Query(
+        """
         SELECT b.*, f.stonadstype
         FROM behandling b
         JOIN fagsak f ON f.id = b.fagsak_id
