@@ -13,6 +13,12 @@ import org.junit.jupiter.api.Test
 import java.time.Year
 import java.time.YearMonth
 
+/*
+    - Legge til nye makssatser i SkolepengerMaksbeløp.kt
+    - Legge til nye makssatser i i skoleår.ts i ef-sak-frontend
+    - Oppdatere MaksBeløpForUniversitet og MaksBeløpForVideregående
+ */
+
 internal class SkolepengerMaksbeløpTest {
     @Nested
     inner class MaksBeløpForUniversitet {
@@ -49,6 +55,11 @@ internal class SkolepengerMaksbeløpTest {
         @Test
         internal fun `skal returnere maksbeløp for universitet - 2025`() {
             assertThat(maksbeløpForÅr(HØGSKOLE_UNIVERSITET, Year.of(2025))).isEqualTo(79_432)
+        }
+
+        @Test
+        internal fun `skal returnere maksbeløp for universitet - 2026`() {
+            assertThat(maksbeløpForÅr(HØGSKOLE_UNIVERSITET, Year.of(2026))).isEqualTo(81_102)
         }
     }
 
@@ -88,6 +99,11 @@ internal class SkolepengerMaksbeløpTest {
         internal fun `skal returnere maksbeløp for videregående - 2025`() {
             assertThat(maksbeløpForÅr(VIDEREGÅENDE, Year.of(2025))).isEqualTo(33_145)
         }
+
+        @Test
+        internal fun `skal returnere maksbeløp for videregående - 2026`() {
+            assertThat(maksbeløpForÅr(VIDEREGÅENDE, Year.of(2026))).isEqualTo(33_841)
+        }
     }
 
     @Test
@@ -126,7 +142,7 @@ internal class SkolepengerMaksbeløpTest {
     @Test
     internal fun `Må holde maksbeløp skolepenger oppdatert innen juni`() {
         val sisteRegistrerteÅr = SkolepengerMaksbeløp.hentSisteÅrRegistrertMaksbeløpHøyskole()
-        if (YearMonth.now().month.value <= 6) {
+        if (YearMonth.now().month.value < 6) {
             val ifjor = Year.now().minusYears(1)
             assertThat(sisteRegistrerteÅr).isGreaterThanOrEqualTo(ifjor)
         } else {
@@ -134,11 +150,6 @@ internal class SkolepengerMaksbeløpTest {
         }
     }
 
-    /**
-     * Disse testene må oppdateres med år når man legger inn nytt maksbeløp for neste år
-     * * [årOm2År] må oppdateres
-     * * Beløp må oppdateres
-     */
     @Nested
     inner class MaksBeløpEtÅrFremITiden {
         private val årOm2År = Year.now().plusYears(2)
