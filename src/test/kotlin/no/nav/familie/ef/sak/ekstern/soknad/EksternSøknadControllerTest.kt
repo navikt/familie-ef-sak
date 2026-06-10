@@ -355,7 +355,7 @@ class EksternSøknadControllerTest : OppslagSpringRunnerTest() {
 
     private fun hentHarTidligereInnvilgetVedtak() =
         testRestTemplate.exchange<Ressurs<TidligereVedtakStatus>>(
-            localhost("/api/ekstern/soknad/har-tidligere-innvilget-vedtak"),
+            localhost("/api/ekstern/soknad/har-vedtak-pa-gammelt-regelverk"),
             HttpMethod.GET,
             HttpEntity<Ressurs<TidligereVedtakStatus>>(headers),
         )
