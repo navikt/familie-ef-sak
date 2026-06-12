@@ -126,6 +126,7 @@ class BehandlingsstatistikkTask(
                     },
                 avslagÅrsak = vedtak?.avslåÅrsak,
                 kategori = saksbehandling.kategori,
+                erRegelEndring2026 = saksbehandling.erRegelendring2026,
             )
 
         iverksettClient.sendBehandlingsstatistikk(behandlingsstatistikkDto)
