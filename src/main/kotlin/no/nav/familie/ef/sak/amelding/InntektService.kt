@@ -47,31 +47,31 @@ class InntektService(
     fun genererAInntektUrl(fagsakPersonId: UUID): String {
         val personIdent = fagsakPersonService.hentAktivIdent(fagsakPersonId)
         val url = arbeidOgInntektClient.genererAInntektUrl(personIdent)
-        loggGenerertAInntektUrl(kilde = "fagsakPersonId=$fagsakPersonId", personIdent = personIdent, url = url)
+        loggGenerertAInntektUrl(fagsakId = "fagsakPersonId=$fagsakPersonId", personIdent = personIdent, url = url)
         return url
     }
 
     fun genererAInntektArbeidsforholdUrl(fagsakId: UUID): String {
         val personIdent = fagsakService.hentAktivIdent(fagsakId)
         val url = arbeidOgInntektClient.genererAInntektArbeidsforholdUrl(personIdent)
-        loggGenerertAInntektUrl(kilde = "fagsakId=$fagsakId (arbeidsforhold)", personIdent = personIdent, url = url)
+        loggGenerertAInntektUrl(fagsakId = "fagsakId=$fagsakId (arbeidsforhold)", personIdent = personIdent, url = url)
         return url
     }
 
     fun genererAInntektUrlFagsak(fagsakId: UUID): String {
         val personIdent = fagsakService.hentAktivIdent(fagsakId)
         val url = arbeidOgInntektClient.genererAInntektUrl(personIdent)
-        loggGenerertAInntektUrl(kilde = "fagsakId=$fagsakId", personIdent = personIdent, url = url)
+        loggGenerertAInntektUrl(fagsakId = "fagsakId=$fagsakId", personIdent = personIdent, url = url)
         return url
     }
 
     private fun loggGenerertAInntektUrl(
-        kilde: String,
+        fagsakId: String,
         personIdent: String,
         url: String,
     ) {
         val saksbehandler = SikkerhetContext.hentSaksbehandlerEllerSystembruker()
-        logger.info("Genererer a-inntekt-url for $kilde (saksbehandler=$saksbehandler)")
-        secureLogger.info("Genererer a-inntekt-url for $kilde (saksbehandler=$saksbehandler) personIdent=$personIdent url=$url")
+        logger.info("Genererer a-inntekt-url for $fagsakId (saksbehandler=$saksbehandler)")
+        secureLogger.info("Genererer a-inntekt-url for $fagsakId (saksbehandler=$saksbehandler) personIdent=$personIdent url=$url")
     }
 }
