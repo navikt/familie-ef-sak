@@ -13,6 +13,7 @@ import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.HarRolleForvalter
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.HarRolleSaksbehandlerEllerApplikasjon
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
+import no.nav.familie.ef.sak.vedtak.NullstillVedtakService
 import no.nav.familie.ef.sak.vilkår.gjenbruk.GjenbrukVilkårService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.ef.StønadType
@@ -32,6 +33,7 @@ class BehandlingController(
     private val tilgangService: TilgangService,
     private val gjenbrukVilkårService: GjenbrukVilkårService,
     private val featureToggleService: FeatureToggleService,
+    private val nullstillVedtakService: NullstillVedtakService,
 ) {
     @GetMapping("{behandlingId}")
     fun hentBehandling(
@@ -124,6 +126,7 @@ class BehandlingController(
     ): Ressurs<UUID> {
         tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.UPDATE)
         behandlingService.oppdaterErRegelendring2026(behandlingId, dto.erRegelendring2026)
+        nullstillVedtakService.nullstillVedtak(behandlingId)
         return Ressurs.success(behandlingId)
     }
 }

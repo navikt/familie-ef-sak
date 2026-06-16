@@ -19,6 +19,7 @@ import no.nav.familie.ef.sak.brev.domain.Vedtaksbrev
 import no.nav.familie.ef.sak.database.DbContainerInitializer
 import no.nav.familie.ef.sak.fagsak.domain.FagsakDomain
 import no.nav.familie.ef.sak.fagsak.domain.FagsakPerson
+import no.nav.familie.ef.sak.felles.util.BrukerContextUtil
 import no.nav.familie.ef.sak.felles.util.TokenUtil
 import no.nav.familie.ef.sak.infrastruktur.config.JsonMapperProvider.jsonMapper
 import no.nav.familie.ef.sak.infrastruktur.config.MockOAuth2ServerConfig
@@ -136,6 +137,7 @@ abstract class OppslagSpringRunnerTest {
 
     @AfterEach
     fun reset() {
+        BrukerContextUtil.clearBrukerContext()
         headers.clear()
         loggingEvents.clear()
         resetDatabase()
