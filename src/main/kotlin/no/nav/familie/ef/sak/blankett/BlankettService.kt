@@ -56,6 +56,7 @@ class BlankettService(
                     harKontantstøttePerioder = grunnlagsdata.harKontantstøttePerioder,
                     kontantstøttePerioderFraKs = grunnlagsdata.kontantstøttePerioder,
                     registeropplysningerOpprettetDato = vilkårVurderinger.grunnlag.registeropplysningerOpprettetTid.toLocalDate(),
+                    erRegelendring2026 = behandling.erRegelendring2026,
                 ),
                 lagPersonopplysningerDto(behandling),
                 vilkårVurderinger,
