@@ -1,6 +1,8 @@
 package no.nav.familie.ef.sak.opplysninger.personopplysninger.pensjon
 
+import no.nav.familie.ef.sak.AuditLoggerEvent
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
+import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -13,14 +15,21 @@ import java.util.UUID
 class HistoriskPensjonController(
     val historiskPensjonService: HistoriskPensjonService,
     val featureToggleService: FeatureToggleService,
+    val tilgangService: TilgangService,
 ) {
     @GetMapping("{fagsakPersonId}")
     fun hentHistoriskPensjon(
         @PathVariable fagsakPersonId: UUID,
-    ): Ressurs<HistoriskPensjonDto> = Ressurs.success(historiskPensjonService.hentHistoriskPensjon(fagsakPersonId))
+    ): Ressurs<HistoriskPensjonDto> {
+        tilgangService.validerTilgangTilFagsakPerson(fagsakPersonId, AuditLoggerEvent.ACCESS)
+        return Ressurs.success(historiskPensjonService.hentHistoriskPensjon(fagsakPersonId))
+    }
 
     @GetMapping("fagsak/{fagsakId}")
     fun hentHistoriskPensjonForFagsak(
         @PathVariable fagsakId: UUID,
-    ): Ressurs<HistoriskPensjonDto> = Ressurs.success(historiskPensjonService.hentHistoriskPensjonForFagsak(fagsakId))
+    ): Ressurs<HistoriskPensjonDto> {
+        tilgangService.validerTilgangTilFagsak(fagsakId, AuditLoggerEvent.ACCESS)
+        return Ressurs.success(historiskPensjonService.hentHistoriskPensjonForFagsak(fagsakId))
+    }
 }
