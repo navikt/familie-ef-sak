@@ -23,8 +23,6 @@ class FinnBehandlingerMedGammelGTask(
 ) : AsyncTaskStep {
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    private val uaktuelleBehandlinger = listOf("4d4de67b-f87b-4b6b-8524-aa92b3ebb870")
-
     override fun doTask(task: Task) {
         logger.info("Starter jobb som finner behandlinger som ikke har blitt g-omregnet")
         val gjeldendeGrunnbeløpFraOgMedDato = Grunnbeløpsperioder.nyesteGrunnbeløp.periode.fomDato
@@ -37,7 +35,6 @@ class FinnBehandlingerMedGammelGTask(
                 val erIkkeRelevantForOmregning = utledOmBehandlingIkkeErRelevantForOmregning(behandlingId, gjeldendeGrunnbeløpFraOgMedDato)
                 when {
                     erIkkeRelevantForOmregning -> false
-                    uaktuelleBehandlinger.contains(behandlingId.toString()) -> false
                     else -> true
                 }
             }
