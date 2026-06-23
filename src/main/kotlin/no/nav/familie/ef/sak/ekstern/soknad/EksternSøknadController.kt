@@ -26,4 +26,13 @@ class EksternSøknadController(
         }
         return Ressurs.success(eksternSøknadService.harTidligereInnvilgetVedtak(EksternBrukerUtils.hentFnrFraToken()))
     }
+
+    @GetMapping("har-gyldig-barnetilsyn-ved-regelendring")
+    fun harGyldigBarnetilsynVedRegelendring(): Ressurs<Boolean> {
+        SikkerhetContext.sjekkAcrLevel4()
+        feilHvisIkke(SikkerhetContext.kallKommerFraFamilieEfSøknadApi(), HttpStatus.UNAUTHORIZED) {
+            "Kallet utføres ikke av en autorisert klient"
+        }
+        return Ressurs.success(eksternSøknadService.harGyldigBarnetilsynVedRegelendring(EksternBrukerUtils.hentFnrFraToken()))
+    }
 }
