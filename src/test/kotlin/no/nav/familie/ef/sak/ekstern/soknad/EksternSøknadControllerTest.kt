@@ -237,25 +237,25 @@ class EksternSøknadControllerTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    fun `skal returnere JA når siste behandling er en gammel barnetilsyn`() {
+    fun `skal returnere NEI når siste behandling er en gammel barnetilsyn`() {
         testoppsettService.lagreFagsak(fagsakBarnetilsyn)
         behandlingRepository.insert(behandling(fagsakBarnetilsyn).innvilgetOgFerdigstilt())
 
         val response = hentHarTidligereInnvilgetVedtak()
 
         assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
-        assertThat(response.body?.data).isEqualTo(TidligereVedtakStatus.JA)
+        assertThat(response.body?.data).isEqualTo(TidligereVedtakStatus.NEI)
     }
 
     @Test
-    fun `skal returnere JA når siste behandling er en gammel skolepenger`() {
+    fun `skal returnere Nei når siste behandling er en gammel skolepenger`() {
         testoppsettService.lagreFagsak(fagsakSkolepenger)
         behandlingRepository.insert(behandling(fagsakSkolepenger).innvilgetOgFerdigstilt())
 
         val response = hentHarTidligereInnvilgetVedtak()
 
         assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
-        assertThat(response.body?.data).isEqualTo(TidligereVedtakStatus.JA)
+        assertThat(response.body?.data).isEqualTo(TidligereVedtakStatus.NEI)
     }
 
     @Test
@@ -355,7 +355,7 @@ class EksternSøknadControllerTest : OppslagSpringRunnerTest() {
 
     private fun hentHarTidligereInnvilgetVedtak() =
         testRestTemplate.exchange<Ressurs<TidligereVedtakStatus>>(
-            localhost("/api/ekstern/soknad/har-vedtak-pa-gammelt-regelverk"),
+            localhost("/api/ekstern/soknad/har-overgangsstønad-pa-gammelt-regelverk"),
             HttpMethod.GET,
             HttpEntity<Ressurs<TidligereVedtakStatus>>(headers),
         )

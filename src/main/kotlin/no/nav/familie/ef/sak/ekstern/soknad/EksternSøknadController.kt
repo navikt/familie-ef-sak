@@ -18,13 +18,13 @@ import org.springframework.web.bind.annotation.RestController
 class EksternSøknadController(
     private val eksternSøknadService: EksternSøknadService,
 ) {
-    @GetMapping("har-vedtak-pa-gammelt-regelverk")
-    fun harTidligereInnvilgetVedtak(): Ressurs<TidligereVedtakStatus> {
+    @GetMapping("har-overgangsstønad-pa-gammelt-regelverk")
+    fun harTidligereInnvilgetOvergangsstønadVedtak(): Ressurs<TidligereVedtakStatus> {
         SikkerhetContext.sjekkAcrLevel4()
         feilHvisIkke(SikkerhetContext.kallKommerFraFamilieEfSøknadApi(), HttpStatus.UNAUTHORIZED) {
             "Kallet utføres ikke av en autorisert klient"
         }
-        return Ressurs.success(eksternSøknadService.harTidligereInnvilgetVedtak(EksternBrukerUtils.hentFnrFraToken()))
+        return Ressurs.success(eksternSøknadService.harTidligereInnvilgetOvergangsstønadVedtak(EksternBrukerUtils.hentFnrFraToken()))
     }
 
     @GetMapping("har-gyldig-barnetilsyn-ved-regelendring")

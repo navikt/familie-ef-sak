@@ -21,7 +21,7 @@ class EksternSøknadService(
 ) {
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    fun harTidligereInnvilgetVedtak(personIdent: String): TidligereVedtakStatus =
+    fun harTidligereInnvilgetOvergangsstønadVedtak(personIdent: String): TidligereVedtakStatus =
         try {
             val folkeregisteridentifikatorer = personService.hentSøker(personIdent).folkeregisteridentifikator
             val aktivIdent = folkeregisteridentifikatorer.gjeldendeEllerNull()?.ident
