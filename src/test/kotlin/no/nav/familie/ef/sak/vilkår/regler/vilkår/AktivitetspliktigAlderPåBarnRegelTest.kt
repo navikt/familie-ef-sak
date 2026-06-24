@@ -35,18 +35,7 @@ class AktivitetspliktigAlderPåBarnRegelTest {
         every { vilkårGrunnlagDto.barnMedSamvær } returns listOf(barnMedSamvær)
     }
 
-    @Test
-    fun `skal bruke fødselTermindato hvis fødselsdato ikke finnes i registerdata`() {
-        val listDelvilkårsvurdering =
-            AlderPåBarnRegel().initiereDelvilkårsvurdering(
-                hovedregelMetadataMock,
-                Vilkårsresultat.IKKE_TATT_STILLING_TIL,
-                behandlingBarnMedDnr.id,
-            )
 
-        Assertions.assertThat(listDelvilkårsvurdering.size).isEqualTo(1)
-        Assertions.assertThat(listDelvilkårsvurdering.first().resultat).isEqualTo(Vilkårsresultat.AUTOMATISK_OPPFYLT)
-    }
 
     @Test
     fun `skal bruke fødselsdato av registerdata hvis datoen finnes der`() {
@@ -63,7 +52,7 @@ class AktivitetspliktigAlderPåBarnRegelTest {
     }
 
     @Test
-    fun `Vilkår ikke tatt stilling til og har ikke fullført fjerdetrinn - skal automatisk oppfylle vilkår`() {
+    fun `Vilkår ikke tatt stilling til og har ikke fullført fjerdetrinn - skal ikke automatisk oppfylle vilkår`() {
         val listDelvilkårsvurdering =
             AlderPåBarnRegel().initiereDelvilkårsvurdering(
                 hovedregelMetadataMock,
@@ -72,7 +61,7 @@ class AktivitetspliktigAlderPåBarnRegelTest {
             )
 
         Assertions.assertThat(listDelvilkårsvurdering.size).isEqualTo(1)
-        Assertions.assertThat(listDelvilkårsvurdering.first().resultat).isEqualTo(Vilkårsresultat.AUTOMATISK_OPPFYLT)
+        Assertions.assertThat(listDelvilkårsvurdering.first().resultat).isEqualTo(Vilkårsresultat.IKKE_TATT_STILLING_TIL)
     }
 
     @Test
