@@ -33,6 +33,27 @@ interface TilkjentYtelseRepository :
     // language=PostgreSQL
     @Query(
         """
+        SELECT EXISTS (
+            SELECT 1
+            FROM andel_tilkjent_ytelse aty
+            JOIN tilkjent_ytelse ty ON ty.id = aty.tilkjent_ytelse
+            JOIN gjeldende_iverksatte_behandlinger gib ON gib.id = ty.behandling_id
+            JOIN person_ident pi ON pi.fagsak_person_id = gib.fagsak_person_id
+            WHERE pi.ident IN (:identer)
+              AND gib.stonadstype = 'BARNETILSYN'
+              AND aty.stonad_fom <= :dato
+              AND aty.stonad_tom >= :dato
+        )
+        """,
+    )
+    fun harBarnetilsynAndelForDato(
+        identer: Set<String>,
+        dato: LocalDate,
+    ): Boolean
+
+    // language=PostgreSQL
+    @Query(
+        """
         SELECT ty.*
         FROM tilkjent_ytelse ty 
         WHERE ty.behandling_id IN (SELECT id FROM gjeldende_iverksatte_behandlinger WHERE stonadstype=:stønadstype) 
