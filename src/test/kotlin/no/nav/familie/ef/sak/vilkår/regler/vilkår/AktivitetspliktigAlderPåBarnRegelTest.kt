@@ -35,8 +35,6 @@ class AktivitetspliktigAlderPåBarnRegelTest {
         every { vilkårGrunnlagDto.barnMedSamvær } returns listOf(barnMedSamvær)
     }
 
-
-
     @Test
     fun `skal bruke fødselsdato av registerdata hvis datoen finnes der`() {
         every { barnMedSamværRegistergrunnlagDto.fødselsdato } returns LocalDate.now().minusYears(50)
