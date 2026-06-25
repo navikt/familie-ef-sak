@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RestController
 class EksternSøknadController(
     private val eksternSøknadService: EksternSøknadService,
 ) {
-    @GetMapping("har-overgangsstønad-pa-gammelt-regelverk")
+    @GetMapping("har-overgangsstonad-pa-gammelt-regelverk")
     fun harTidligereInnvilgetOvergangsstønadVedtak(): Ressurs<TidligereVedtakStatus> {
         SikkerhetContext.sjekkAcrLevel4()
         feilHvisIkke(SikkerhetContext.kallKommerFraFamilieEfSøknadApi(), HttpStatus.UNAUTHORIZED) {
