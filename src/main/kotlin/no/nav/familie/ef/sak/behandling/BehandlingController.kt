@@ -4,6 +4,7 @@ import no.nav.familie.ef.sak.AuditLoggerEvent
 import no.nav.familie.ef.sak.behandling.dto.BehandlingDto
 import no.nav.familie.ef.sak.behandling.dto.OppdaterErRegelendring2026Dto
 import no.nav.familie.ef.sak.behandling.dto.OppdaterStatusDto
+import no.nav.familie.ef.sak.behandling.dto.Regelendring2026Dto
 import no.nav.familie.ef.sak.behandling.dto.SettPåVentRequest
 import no.nav.familie.ef.sak.behandling.dto.TaAvVentStatusDto
 import no.nav.familie.ef.sak.behandling.dto.tilDto
@@ -32,6 +33,7 @@ class BehandlingController(
     private val gjenbrukVilkårService: GjenbrukVilkårService,
     private val featureToggleService: FeatureToggleService,
     private val nullstillVedtakService: NullstillVedtakService,
+    private val regelendring2026Service: Regelendring2026Service,
 ) {
     @GetMapping("{behandlingId}")
     fun hentBehandling(
@@ -123,8 +125,39 @@ class BehandlingController(
     ): Ressurs<UUID> {
         tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.UPDATE)
         tilgangService.validerHarSaksbehandlerrolle()
+
         behandlingService.oppdaterErRegelendring2026(behandlingId, dto.erRegelendring2026)
+        regelendring2026Service.oppdaterRegelendring(behandlingId, dto.erRegelendring2026)
+
         nullstillVedtakService.nullstillVedtak(behandlingId)
+        return Ressurs.success(behandlingId)
+    }
+
+    @GetMapping("{behandlingId}/regelendring-2026/begrunnelse")
+    fun hentRegelendring2026(
+        @PathVariable behandlingId: UUID,
+    ): Ressurs<Regelendring2026Dto?> {
+        tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.ACCESS)
+        val regelendring = regelendring2026Service.hent(behandlingId)
+        return Ressurs.success(
+            regelendring?.let {
+                Regelendring2026Dto(
+                    erRegelendring2026 = it.erRegelendring2026,
+                    begrunnelse = it.begrunnelse,
+                )
+            },
+        )
+    }
+
+    @PostMapping("{behandlingId}/regelendring-2026/begrunnelse")
+    fun lagreRegelendring2026(
+        @PathVariable behandlingId: UUID,
+        @RequestBody dto: Regelendring2026Dto,
+    ): Ressurs<UUID> {
+        tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.UPDATE)
+        tilgangService.validerHarSaksbehandlerrolle()
+        feilHvis(dto.begrunnelse.isBlank()) { "Begrunnelse kan ikke være tom" }
+        regelendring2026Service.oppdaterBegrunnelse(behandlingId, dto.begrunnelse)
         return Ressurs.success(behandlingId)
     }
 }
