@@ -19,13 +19,21 @@ class Regelendring2026Service(
             regelendring2026Repository.update(
                 eksisterende.copy(erRegelendring2026 = erRegelendring2026),
             )
-        } else {
+            return
+        }
+
+        try {
             regelendring2026Repository.insert(
                 Regelendring2026(
                     behandlingId = behandlingId,
                     erRegelendring2026 = erRegelendring2026,
                     begrunnelse = "",
                 ),
+            )
+        } catch (e: org.springframework.dao.DuplicateKeyException) {
+            val oppdatertEksisterende = hent(behandlingId) ?: throw e
+            regelendring2026Repository.update(
+                oppdatertEksisterende.copy(erRegelendring2026 = erRegelendring2026),
             )
         }
     }
