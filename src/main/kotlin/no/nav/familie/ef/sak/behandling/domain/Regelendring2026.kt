@@ -10,7 +10,5 @@ data class Regelendring2026(
     @Id
     @Column("behandling_id")
     val behandlingId: UUID,
-    @Column("er_regelendring_2026")
-    val erRegelendring2026: Boolean,
     val begrunnelse: String,
 )

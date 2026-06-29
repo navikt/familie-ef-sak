@@ -10,34 +10,6 @@ class Regelendring2026Service(
 ) {
     fun hent(behandlingId: UUID): Regelendring2026? = regelendring2026Repository.findByBehandlingId(behandlingId)
 
-    fun oppdaterRegelendring(
-        behandlingId: UUID,
-        erRegelendring2026: Boolean,
-    ) {
-        val eksisterende = hent(behandlingId)
-        if (eksisterende != null) {
-            regelendring2026Repository.update(
-                eksisterende.copy(erRegelendring2026 = erRegelendring2026),
-            )
-            return
-        }
-
-        try {
-            regelendring2026Repository.insert(
-                Regelendring2026(
-                    behandlingId = behandlingId,
-                    erRegelendring2026 = erRegelendring2026,
-                    begrunnelse = "",
-                ),
-            )
-        } catch (e: org.springframework.dao.DuplicateKeyException) {
-            val oppdatertEksisterende = hent(behandlingId) ?: throw e
-            regelendring2026Repository.update(
-                oppdatertEksisterende.copy(erRegelendring2026 = erRegelendring2026),
-            )
-        }
-    }
-
     fun oppdaterBegrunnelse(
         behandlingId: UUID,
         begrunnelse: String,
@@ -51,7 +23,6 @@ class Regelendring2026Service(
             regelendring2026Repository.insert(
                 Regelendring2026(
                     behandlingId = behandlingId,
-                    erRegelendring2026 = false,
                     begrunnelse = begrunnelse,
                 ),
             )
