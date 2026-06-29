@@ -158,6 +158,8 @@ class BehandlingController(
         tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.UPDATE)
         tilgangService.validerHarSaksbehandlerrolle()
         feilHvis(dto.begrunnelse.isBlank()) { "Begrunnelse kan ikke være tom" }
+        val saksbehandling: Saksbehandling = behandlingService.hentSaksbehandling(behandlingId)
+        regelendring2026Service.oppdaterRegelendring(behandlingId, saksbehandling.erRegelendring2026)
         regelendring2026Service.oppdaterBegrunnelse(behandlingId, dto.begrunnelse)
         return Ressurs.success(behandlingId)
     }
