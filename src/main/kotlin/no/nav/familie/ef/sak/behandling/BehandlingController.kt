@@ -3,6 +3,7 @@ package no.nav.familie.ef.sak.behandling
 import no.nav.familie.ef.sak.AuditLoggerEvent
 import no.nav.familie.ef.sak.behandling.dto.BehandlingDto
 import no.nav.familie.ef.sak.behandling.dto.OppdaterErRegelendring2026Dto
+import no.nav.familie.ef.sak.behandling.dto.OppdaterRegelendring2026BegrunnelseDto
 import no.nav.familie.ef.sak.behandling.dto.OppdaterStatusDto
 import no.nav.familie.ef.sak.behandling.dto.Regelendring2026Dto
 import no.nav.familie.ef.sak.behandling.dto.SettPåVentRequest
@@ -152,7 +153,7 @@ class BehandlingController(
     @PostMapping("{behandlingId}/regelendring-2026/begrunnelse")
     fun lagreRegelendring2026(
         @PathVariable behandlingId: UUID,
-        @RequestBody dto: Regelendring2026Dto,
+        @RequestBody dto: OppdaterRegelendring2026BegrunnelseDto,
     ): Ressurs<UUID> {
         tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.UPDATE)
         tilgangService.validerHarSaksbehandlerrolle()
