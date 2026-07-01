@@ -22,6 +22,8 @@ class FeatureToggleMock {
         every { mockk.isEnabled(Toggle.UTVIKLER_MED_VEILEDERRROLLE) } returns false
         every { mockk.isEnabled(Toggle.INNVILGE_KUN_OPPHØR_OG_SANKSJON) } returns false
         every { mockk.isEnabled(Toggle.MULIGHET_LEGG_TIL_FORELDREANSVARSBARN_BARNETILSYN) } returns false
+        every { mockk.isEnabled(Toggle.REGELENDRINGER_2026) } returns false
+
         return mockk
     }
 }
