@@ -76,7 +76,7 @@ class TestSaksbehandlingController(
     private val migreringService: MigreringService,
     private val vurderingService: VurderingService,
     private val vurderingStegService: VurderingStegService,
-    private val regelendring2026Service: Regelendring2026Service
+    private val regelendring2026Service: Regelendring2026Service,
 ) {
     @PostMapping("{behandlingId}/utfyll-vilkar")
     fun utfyllVilkår(
