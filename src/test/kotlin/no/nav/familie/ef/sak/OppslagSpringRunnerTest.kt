@@ -7,6 +7,7 @@ import no.nav.familie.ef.sak.avstemming.KonsistensavstemmingJobb
 import no.nav.familie.ef.sak.barn.BehandlingBarn
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.Behandlingsjournalpost
+import no.nav.familie.ef.sak.behandling.domain.Regelendring2026
 import no.nav.familie.ef.sak.behandling.domain.ÅrsakRevurdering
 import no.nav.familie.ef.sak.behandling.migrering.Migreringsstatus
 import no.nav.familie.ef.sak.behandlingshistorikk.domain.Behandlingshistorikk
@@ -183,6 +184,7 @@ abstract class OppslagSpringRunnerTest {
             GrunnlagsdataInntekt::class,
             Tilbakekreving::class,
             ÅrsakRevurdering::class,
+            Regelendring2026::class,
             Behandling::class,
             TerminbarnOppgave::class,
             FagsakDomain::class,
