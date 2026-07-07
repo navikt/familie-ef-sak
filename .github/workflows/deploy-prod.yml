@@ -52,7 +52,7 @@ jobs:
           mkdir -p ~/.cache/testcontainers-images
           docker save testcontainers/ryuk:0.14.0 postgres:17.6 \
             -o ~/.cache/testcontainers-images/images.tar 2>/dev/null || true
-      - uses: nais/docker-build-push@f8bc7437f7549c2b08197152d781b98f8727a08a # ratchet:nais/docker-build-push@v0
+      - uses: nais/docker-build-push@31c3a7321909bcb20799fdf46153fec721fd9512 # ratchet:nais/docker-build-push@v0
         id: docker-push
         with:
           team: teamfamilie
