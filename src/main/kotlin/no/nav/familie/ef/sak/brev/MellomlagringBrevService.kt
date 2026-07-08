@@ -1,6 +1,5 @@
 package no.nav.familie.ef.sak.brev
 
-import no.nav.familie.ef.sak.brev.domain.MellomlagretBrev
 import no.nav.familie.ef.sak.brev.domain.MellomlagretFrittståendeSanitybrev
 import no.nav.familie.ef.sak.brev.dto.MellomlagretBrevResponse
 import no.nav.familie.ef.sak.brev.dto.MellomlagretBrevSanity
@@ -21,16 +20,15 @@ class MellomlagringBrevService(
         brevmal: String,
         sanityVersjon: String,
     ): UUID {
-        slettMellomlagringHvisFinnes(behandlingId)
-        val mellomlagretBrev =
-            MellomlagretBrev(
-                behandlingId,
-                brevverdier,
-                brevmal,
-                sanityVersjon,
-                LocalDate.now(),
-            )
-        return mellomlagerBrevRepository.insert(mellomlagretBrev).behandlingId
+        // Bruker upsert fremfor delete+insert for å unngå duplicate key ved samtidige mellomlagringer
+        mellomlagerBrevRepository.upsert(
+            behandlingId,
+            brevverdier,
+            brevmal,
+            sanityVersjon,
+            LocalDate.now(),
+        )
+        return behandlingId
     }
 
     fun mellomLagreFrittståendeSanitybrev(
