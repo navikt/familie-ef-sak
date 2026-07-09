@@ -1,12 +1,12 @@
 package no.nav.familie.ef.sak.brev
 
-import no.nav.familie.ef.sak.brev.domain.MellomlagretFrittståendeSanitybrev
 import no.nav.familie.ef.sak.brev.dto.MellomlagretBrevResponse
 import no.nav.familie.ef.sak.brev.dto.MellomlagretBrevSanity
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.UUID
 
 @Service
@@ -36,14 +36,16 @@ class MellomlagringBrevService(
         brevverdier: String,
         brevmal: String,
     ): UUID {
-        slettMellomlagretFrittståendeBrev(fagsakId, SikkerhetContext.hentSaksbehandler())
-        val mellomlagretBrev =
-            MellomlagretFrittståendeSanitybrev(
-                fagsakId = fagsakId,
-                brevverdier = brevverdier,
-                brevmal = brevmal,
-            )
-        return mellomlagerFrittståendeSanitybrevRepository.insert(mellomlagretBrev).fagsakId
+        // Bruker upsert fremfor delete+insert for å unngå duplicate key ved samtidige mellomlagringer
+        mellomlagerFrittståendeSanitybrevRepository.upsert(
+            UUID.randomUUID(),
+            fagsakId,
+            brevverdier,
+            brevmal,
+            SikkerhetContext.hentSaksbehandler(),
+            LocalDateTime.now(),
+        )
+        return fagsakId
     }
 
     fun hentMellomlagretFrittståendeSanitybrev(fagsakId: UUID): MellomlagretBrevResponse? =
