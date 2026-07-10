@@ -98,7 +98,7 @@ class SkyggeInfotrygdTask(
                     "ulik responsen fra familie-ef-infotrygd (on-prem). Se secureLogger for detaljer.",
             )
             throw TaskExceptionUtenStackTrace(
-                "Skyggekjøring av ${payload.operasjon} feilet - avvik mellom on-prem og GCP-replika for infotrygd",
+                "Skyggekjøring av ${payload.operasjon} feilet - avvik mellom on-prem og GCP-replika for infotrygd. Se securelogger for detaljer.",
             )
         }
     }
