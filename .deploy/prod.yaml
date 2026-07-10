@@ -86,6 +86,7 @@ spec:
         - application: familie-ef-iverksett
         - application: familie-dokument
         - application: familie-ks-sak
+        - application: familie-ef-infotrygd-replika
         - application: historisk-pensjon
           namespace: historisk
         - application: familie-ef-proxy
