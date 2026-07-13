@@ -35,6 +35,7 @@ import no.nav.familie.ef.sak.vedtak.dto.ResultatType.INNVILGE
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType.INNVILGE_UTEN_UTBETALING
 import no.nav.familie.ef.sak.vedtak.dto.SendTilBeslutterDto
 import no.nav.familie.ef.sak.vilkår.VurderingService
+import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.internal.TaskService
@@ -78,6 +79,7 @@ class SendTilBeslutterSteg(
 
     private fun validerBegrunnelseForRegelveksvalgErSatt(saksbehandling: Saksbehandling) {
         if (!featureToggleService.isEnabled(Toggle.REGELENDRINGER_2026)) return
+        if (saksbehandling.årsak == BehandlingÅrsak.G_OMREGNING) return
         val begrunnelse: String? = regelendring2026Repository.findByBehandlingId(saksbehandling.id)?.begrunnelse
         when (saksbehandling.stønadstype) {
             StønadType.OVERGANGSSTØNAD, StønadType.BARNETILSYN -> brukerfeilHvis(begrunnelse.isNullOrBlank()) { "Begrunnelse for valg av regelverk er påkrevd. Behandling: ${saksbehandling.id}" }

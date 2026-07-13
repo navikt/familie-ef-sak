@@ -213,6 +213,17 @@ internal class SendTilBeslutterStegTest {
     }
 
     @Test
+    internal fun `Skal ikke kaste feil hvis begrunnelse for regelverk ikke er satt og behandlingsårsak er G_OMREGNING`() {
+        val innvilgetBehandling = behandling.copy(resultat = INNVILGET, årsak = BehandlingÅrsak.G_OMREGNING)
+        every { vedtakService.hentVedtaksresultat(any()) } returns ResultatType.INNVILGE
+        every { featureToggleService.isEnabled(Toggle.REGELENDRINGER_2026) } returns true
+
+        beslutteVedtakSteg.validerSteg(innvilgetBehandling)
+
+        verify(exactly = 0) { regelendring2026Repository.findByBehandlingId(any()) }
+    }
+
+    @Test
     internal fun `Skal ikke kaste feil hvis SKOLEPENGER`() {
         val innvilgetBehandling = behandling.copy(resultat = INNVILGET, stønadstype = StønadType.SKOLEPENGER)
         every { vedtakService.hentVedtaksresultat(any()) } returns ResultatType.INNVILGE
