@@ -5,6 +5,8 @@ Noen av kommentarene i dette dokumentet går litt ut over implementering av kode
 Viktig med forklaring på hvordan og hvorfor koden har blitt som den har blitt, hvilke 
 valg vi har tatt og hva vi jobber med å endre før neste g-omregning.   
 
+NB! 2027 - sjekk om lovvalg blir riktig ved manuelle g-omregninger etter endring i 2026
+
 ## Årlig arbeid
 
 **Når G er vedtatt (mai/juni):** 
