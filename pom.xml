@@ -40,7 +40,7 @@
         <start-class>no.nav.familie.ef.sak.ApplicationKt</start-class>
         <kontrakter.version>4.0_20260702124405_ce34af2</kontrakter.version>
         <mikrofrontend.builder.version>20230704114948-74aa2e9</mikrofrontend.builder.version>
-        <eksterne.kontrakter.bisys.version>2.0_20260623154817_f726581</eksterne.kontrakter.bisys.version>
+        <eksterne.kontrakter.bisys.version>2.0_20260706100416_64fc922</eksterne.kontrakter.bisys.version>
         <cucumber.version>7.34.4</cucumber.version>
 
 
@@ -277,7 +277,7 @@
         <dependency>
             <groupId>no.nav.security</groupId>
             <artifactId>mock-oauth2-server</artifactId>
-            <version>5.0.1</version>
+            <version>5.0.2</version>
             <scope>test</scope>
         </dependency>
         <dependency>
