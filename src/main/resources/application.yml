@@ -37,6 +37,15 @@ no.nav.security.jwt:
           client-id: ${AZURE_APP_CLIENT_ID}
           client-secret: ${AZURE_APP_CLIENT_SECRET}
           client-auth-method: client_secret_basic
+      infotrygd-replika-gcp:
+        resource-url: ${INFOTRYGD_REPLIKA_GCP_API_URL}
+        token-endpoint-url: ${AZUREAD_TOKEN_ENDPOINT_URL}
+        grant-type: client_credentials
+        scope: ${INFOTRYGD_REPLIKA_GCP_SCOPE}
+        authentication:
+          client-id: ${AZURE_APP_CLIENT_ID}
+          client-secret: ${AZURE_APP_CLIENT_SECRET}
+          client-auth-method: client_secret_basic
       familie-ef-iverksett-clientcredentials:
         resource-url: ${FAMILIE_EF_IVERKSETT_URL}
         token-endpoint-url: ${AZUREAD_TOKEN_ENDPOINT_URL}
@@ -243,6 +252,7 @@ FAMILIE_TILBAKE_SCOPE: api://${DEPLOY_ENV}-gcp.tilbake.tilbakekreving-backend/.d
 FAMILIE_KLAGE_SCOPE: api://${DEPLOY_ENV}-gcp.teamfamilie.familie-klage/.default
 FAMILIE_EF_PROXY_SCOPE: api://${DEPLOY_ENV}-fss.teamfamilie.familie-ef-proxy/.default
 INFOTRYGD_REPLIKA_SCOPE: api://${DEPLOY_ENV}-fss.teamfamilie.familie-ef-infotrygd/.default
+INFOTRYGD_REPLIKA_GCP_SCOPE: api://${DEPLOY_ENV}-gcp.teamfamilie.familie-ef-infotrygd-replika/.default
 ARBEIDSSOKER_SCOPE: api://${DEPLOY_ENV}-gcp.paw.paw-arbeidssoekerregisteret-api-oppslag-v2/.default
 FAMILIE_INTEGRASJONER_SCOPE: api://${DEPLOY_ENV}-fss.teamfamilie.familie-integrasjoner/.default
 HISTORISK_PENSJON_SCOPE: api://${DEPLOY_ENV}-gcp.historisk.historisk-pensjon/.default
@@ -321,6 +331,7 @@ FAMILIE_KLAGE_URL: http://familie-klage
 
 FAMILIE_INTEGRASJONER_URL: https://familie-integrasjoner.${ON_PREM_URL_ENV}-fss-pub.nais.io
 INFOTRYGD_REPLIKA_API_URL: https://familie-ef-infotrygd.${ON_PREM_URL_ENV}-fss-pub.nais.io
+INFOTRYGD_REPLIKA_GCP_API_URL: http://familie-ef-infotrygd-replika
 PDL_URL: https://pdl-api.${ON_PREM_URL_ENV}-fss-pub.nais.io
 REPR_API_URL: http://repr-api.repr
 FAMILIE_EF_PROXY_URL: https://familie-ef-proxy.${ON_PREM_URL_ENV}-fss-pub.nais.io
