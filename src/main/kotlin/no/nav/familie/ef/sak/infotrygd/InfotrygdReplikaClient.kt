@@ -1,11 +1,17 @@
 package no.nav.familie.ef.sak.infotrygd
 
+import no.nav.familie.ef.sak.infotrygd.skygge.SkyggeInfotrygdOperasjon
+import no.nav.familie.ef.sak.infotrygd.skygge.SkyggekjørInfotrygdTask
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdFinnesResponse
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPeriodeRequest
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPeriodeResponse
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdSakResponse
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdSøkRequest
+import no.nav.familie.prosessering.internal.TaskService
 import no.nav.familie.restklient.client.AbstractPingableRestClient
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
@@ -19,7 +25,10 @@ class InfotrygdReplikaClient(
     private val infotrygdReplikaUri: URI,
     @Qualifier("azure")
     restOperations: RestOperations,
+    private val taskService: TaskService,
+    private val featureToggleService: FeatureToggleService,
 ) : AbstractPingableRestClient(restOperations, "infotrygd.replika") {
+    private val logger = LoggerFactory.getLogger(javaClass)
     private val perioderUri: URI =
         UriComponentsBuilder
             .fromUri(infotrygdReplikaUri)
@@ -56,11 +65,23 @@ class InfotrygdReplikaClient(
             .build()
             .toUri()
 
-    fun hentPerioder(request: InfotrygdPeriodeRequest): InfotrygdPeriodeResponse = postForEntity(perioderUri, request)
+    fun hentPerioder(request: InfotrygdPeriodeRequest): InfotrygdPeriodeResponse {
+        val response = postForEntity<InfotrygdPeriodeResponse>(perioderUri, request)
+        skyggekjør(SkyggeInfotrygdOperasjon.HENT_PERIODER, request, response, request.personIdenter)
+        return response
+    }
 
-    fun hentSammenslåttePerioder(request: InfotrygdPeriodeRequest): InfotrygdPeriodeResponse = postForEntity(sammenslåttePerioderUri, request)
+    fun hentSammenslåttePerioder(request: InfotrygdPeriodeRequest): InfotrygdPeriodeResponse {
+        val response = postForEntity<InfotrygdPeriodeResponse>(sammenslåttePerioderUri, request)
+        skyggekjør(SkyggeInfotrygdOperasjon.HENT_SAMMENSLÅTTE_PERIODER, request, response, request.personIdenter)
+        return response
+    }
 
-    fun hentSaker(request: InfotrygdSøkRequest): InfotrygdSakResponse = postForEntity(finnSakerUri, request)
+    fun hentSaker(request: InfotrygdSøkRequest): InfotrygdSakResponse {
+        val response = postForEntity<InfotrygdSakResponse>(finnSakerUri, request)
+        skyggekjør(SkyggeInfotrygdOperasjon.HENT_SAKER, request, response, request.personIdenter)
+        return response
+    }
 
     fun hentPersonerForMigrering(antall: Int): Set<String> {
         val response = getForEntity<Map<String, Any>>(migreringspersonerUri(antall))
@@ -73,7 +94,9 @@ class InfotrygdReplikaClient(
      */
     fun hentInslagHosInfotrygd(request: InfotrygdSøkRequest): InfotrygdFinnesResponse {
         require(request.personIdenter.isNotEmpty()) { "Identer har ingen verdier" }
-        return postForEntity(eksistererUri, request)
+        val response = postForEntity<InfotrygdFinnesResponse>(eksistererUri, request)
+        skyggekjør(SkyggeInfotrygdOperasjon.HENT_INNSLAG_HOS_INFOTRYGD, request, response, request.personIdenter)
+        return response
     }
 
     override val pingUri: URI
@@ -83,4 +106,26 @@ class InfotrygdReplikaClient(
                 .pathSegment("api/ping")
                 .build()
                 .toUri()
+
+    /**
+     * Oppretter en asynkron task som gjør det samme kallet mot familie-ef-infotrygd-replika (GCP) og sammenligner
+     * responsen med [forventetRespons] (svaret vi nettopp fikk fra familie-ef-infotrygd on-prem). Brukes til å
+     * verifisere at migreringen til GCP-replikaen gir identiske svar, se [SkyggekjørInfotrygdTask].
+     *
+     * Skal aldri kunne påvirke det ordinære kallet mot on-prem, så eventuelle feil ved oppretting av skyggetasken logges her
+     */
+    private fun skyggekjør(
+        operasjon: SkyggeInfotrygdOperasjon,
+        request: Any,
+        forventetRespons: Any,
+        personIdenter: Set<String>,
+    ) {
+        if (featureToggleService.isEnabled(Toggle.SKYGGEKJØR_INFOTRYGD)) {
+            try {
+                taskService.save(SkyggekjørInfotrygdTask.opprettTask(operasjon, request, forventetRespons, personIdenter))
+            } catch (e: Exception) {
+                logger.error("Klarte ikke å opprette skyggetask for $operasjon mot familie-ef-infotrygd-replika", e)
+            }
+        }
+    }
 }
