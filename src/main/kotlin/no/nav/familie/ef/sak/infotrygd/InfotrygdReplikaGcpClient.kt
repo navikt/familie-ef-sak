@@ -18,7 +18,7 @@ import java.net.URI
  *
  * Brukes utelukkende til å skyggekjøre kall som allerede har blitt gjort mot [InfotrygdReplikaClient] (familie-ef-infotrygd on-prem),
  * for å verifisere at migreringen til GCP-replikaen gir samme svar. Skal ikke brukes i den ordinære saksbehandlingsflyten
- * før migreringen er ferdig verifisert, se [no.nav.familie.ef.sak.infotrygd.skygge.SkyggeInfotrygdTask].
+ * før migreringen er ferdig verifisert, se [no.nav.familie.ef.sak.infotrygd.skygge.SkyggekjørInfotrygdTask].
  */
 @Service
 class InfotrygdReplikaGcpClient(
