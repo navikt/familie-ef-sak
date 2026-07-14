@@ -1,7 +1,7 @@
 package no.nav.familie.ef.sak.infotrygd
 
 import no.nav.familie.ef.sak.infotrygd.skygge.SkyggeInfotrygdOperasjon
-import no.nav.familie.ef.sak.infotrygd.skygge.SkyggeInfotrygdTask
+import no.nav.familie.ef.sak.infotrygd.skygge.SkyggekjørInfotrygdTask
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdFinnesResponse
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPeriodeRequest
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPeriodeResponse
@@ -107,7 +107,7 @@ class InfotrygdReplikaClient(
     /**
      * Oppretter en asynkron task som gjør det samme kallet mot familie-ef-infotrygd-replika (GCP) og sammenligner
      * responsen med [forventetRespons] (svaret vi nettopp fikk fra familie-ef-infotrygd on-prem). Brukes til å
-     * verifisere at migreringen til GCP-replikaen gir identiske svar, se [SkyggeInfotrygdTask].
+     * verifisere at migreringen til GCP-replikaen gir identiske svar, se [SkyggekjørInfotrygdTask].
      *
      * Skal aldri kunne påvirke det ordinære kallet mot on-prem, så eventuelle feil ved oppretting av skyggetasken logges her
      */
@@ -118,7 +118,7 @@ class InfotrygdReplikaClient(
         personIdenter: Set<String>,
     ) {
         try {
-            taskService.save(SkyggeInfotrygdTask.opprettTask(operasjon, request, forventetRespons, personIdenter))
+            taskService.save(SkyggekjørInfotrygdTask.opprettTask(operasjon, request, forventetRespons, personIdenter))
         } catch (e: Exception) {
             logger.error("Klarte ikke å opprette skyggetask for $operasjon mot familie-ef-infotrygd-replika", e)
         }

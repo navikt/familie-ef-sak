@@ -15,6 +15,7 @@ import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.error.TaskExceptionUtenStackTrace
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import java.time.LocalDateTime
 import java.util.Properties
 
 /**
@@ -28,13 +29,13 @@ import java.util.Properties
  */
 @Service
 @TaskStepBeskrivelse(
-    taskStepType = SkyggeInfotrygdTask.TYPE,
+    taskStepType = SkyggekjørInfotrygdTask.TYPE,
     maxAntallFeil = 3,
     settTilManuellOppfølgning = true,
     triggerTidVedFeilISekunder = 60L,
     beskrivelse = "Skyggekjører kall mot familie-ef-infotrygd-replika (GCP) og sammenligner med fasitsvar fra familie-ef-infotrygd (on-prem)",
 )
-class SkyggeInfotrygdTask(
+class SkyggekjørInfotrygdTask(
     private val infotrygdReplikaGcpClient: InfotrygdReplikaGcpClient,
 ) : AsyncTaskStep {
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -135,6 +136,7 @@ data class SkyggeInfotrygdPayload(
     val operasjon: SkyggeInfotrygdOperasjon,
     val request: String,
     val forventetRespons: String,
+    val timestamp: LocalDateTime = LocalDateTime.now(),
 )
 
 enum class SkyggeInfotrygdOperasjon {
