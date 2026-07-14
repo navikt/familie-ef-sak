@@ -2,6 +2,8 @@ package no.nav.familie.ef.sak.infotrygd
 
 import no.nav.familie.ef.sak.infotrygd.skygge.SkyggeInfotrygdOperasjon
 import no.nav.familie.ef.sak.infotrygd.skygge.SkyggekjørInfotrygdTask
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdFinnesResponse
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPeriodeRequest
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPeriodeResponse
@@ -24,6 +26,7 @@ class InfotrygdReplikaClient(
     @Qualifier("azure")
     restOperations: RestOperations,
     private val taskService: TaskService,
+    private val featureToggleService: FeatureToggleService,
 ) : AbstractPingableRestClient(restOperations, "infotrygd.replika") {
     private val logger = LoggerFactory.getLogger(javaClass)
     private val perioderUri: URI =
@@ -117,10 +120,12 @@ class InfotrygdReplikaClient(
         forventetRespons: Any,
         personIdenter: Set<String>,
     ) {
-        try {
-            taskService.save(SkyggekjørInfotrygdTask.opprettTask(operasjon, request, forventetRespons, personIdenter))
-        } catch (e: Exception) {
-            logger.error("Klarte ikke å opprette skyggetask for $operasjon mot familie-ef-infotrygd-replika", e)
+        if (featureToggleService.isEnabled(Toggle.SKYGGEKJØR_INFOTRYGD)) {
+            try {
+                taskService.save(SkyggekjørInfotrygdTask.opprettTask(operasjon, request, forventetRespons, personIdenter))
+            } catch (e: Exception) {
+                logger.error("Klarte ikke å opprette skyggetask for $operasjon mot familie-ef-infotrygd-replika", e)
+            }
         }
     }
 }
