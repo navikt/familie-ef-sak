@@ -26,18 +26,6 @@ class Regelendring2026Service(
             "Behandlingen eies av en annen saksbehandler"
         }
 
-        val eksisterende = hent(behandlingId)
-        if (eksisterende != null) {
-            regelendring2026Repository.update(
-                eksisterende.copy(begrunnelse = begrunnelse),
-            )
-        } else {
-            regelendring2026Repository.insert(
-                Regelendring2026(
-                    behandlingId = behandlingId,
-                    begrunnelse = begrunnelse,
-                ),
-            )
-        }
+        regelendring2026Repository.upsert(behandlingId, begrunnelse)
     }
 }
