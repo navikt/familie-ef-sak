@@ -1,7 +1,9 @@
 package no.nav.familie.ef.sak.infotrygd
 
+import efterlatte.prosessering.spring.TaskService
+import no.nav.familie.ef.sak.infotrygd.skygge.SKYGGEKJØR_INFOTRYGD_TASK_TYPE
 import no.nav.familie.ef.sak.infotrygd.skygge.SkyggeInfotrygdOperasjon
-import no.nav.familie.ef.sak.infotrygd.skygge.SkyggekjørInfotrygdTask
+import no.nav.familie.ef.sak.infotrygd.skygge.SkyggeInfotrygdPayload
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdFinnesResponse
@@ -9,7 +11,7 @@ import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPeriodeRequest
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPeriodeResponse
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdSakResponse
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdSøkRequest
-import no.nav.familie.prosessering.internal.TaskService
+import no.nav.familie.kontrakter.felles.jsonMapper
 import no.nav.familie.restklient.client.AbstractPingableRestClient
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
@@ -110,9 +112,12 @@ class InfotrygdReplikaClient(
     /**
      * Oppretter en asynkron task som gjør det samme kallet mot familie-ef-infotrygd-replika (GCP) og sammenligner
      * responsen med [forventetRespons] (svaret vi nettopp fikk fra familie-ef-infotrygd on-prem). Brukes til å
-     * verifisere at migreringen til GCP-replikaen gir identiske svar, se [SkyggekjørInfotrygdTask].
+     * verifisere at migreringen til GCP-replikaen gir identiske svar, se
+     * [no.nav.familie.ef.sak.infotrygd.skygge.SkyggekjørInfotrygdTask].
      *
-     * Skal aldri kunne påvirke det ordinære kallet mot on-prem, så eventuelle feil ved oppretting av skyggetasken logges her
+     * Tasken opprettes med [TaskService.opprettIEgenTransaksjon] - det finnes ingen forretningstransaksjon her å henge
+     * outbox-garantien på (kallet skjer utenfor enhver transaksjon), og det skal det heller ikke gjøre: skyggekjøringen
+     * skal aldri kunne påvirke det ordinære kallet mot on-prem, så eventuelle feil ved oppretting av skyggetasken logges her.
      */
     private fun skyggekjør(
         operasjon: SkyggeInfotrygdOperasjon,
@@ -122,7 +127,16 @@ class InfotrygdReplikaClient(
     ) {
         if (featureToggleService.isEnabled(Toggle.SKYGGEKJØR_INFOTRYGD)) {
             try {
-                taskService.save(SkyggekjørInfotrygdTask.opprettTask(operasjon, request, forventetRespons, personIdenter))
+                taskService.opprettIEgenTransaksjon(
+                    type = SKYGGEKJØR_INFOTRYGD_TASK_TYPE,
+                    payload =
+                        SkyggeInfotrygdPayload(
+                            operasjon = operasjon,
+                            request = jsonMapper.writeValueAsString(request),
+                            forventetRespons = jsonMapper.writeValueAsString(forventetRespons),
+                            personIdenter = personIdenter,
+                        ),
+                )
             } catch (e: Exception) {
                 logger.error("Klarte ikke å opprette skyggetask for $operasjon mot familie-ef-infotrygd-replika", e)
             }

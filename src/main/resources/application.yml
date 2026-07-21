@@ -379,6 +379,11 @@ prosessering:
     after:
       weeks: 16
 
+# Pilot: efterlatte-prosessering (se .github/prosessering/ i navikt/efterlatte-prosessering).
+# Kjører side om side med no.nav.familie.prosessering over - foreløpig kun SkyggekjørInfotrygdTask.
+efterlatte-prosessering:
+  node: ${HOSTNAME:ukjent-node}
+
 springdoc:
   api-docs:
     enabled: true

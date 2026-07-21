@@ -35,6 +35,7 @@
         <mockk.version>1.14.11</mockk.version>
         <felles.version>4.20260702124222_2415d74</felles.version>
         <prosessering.version>2.20260622101837_623782e</prosessering.version>
+        <efterlatte-prosessering.version>1.20260721140553_01ed75f</efterlatte-prosessering.version>
         <token-validation-spring.version>6.0.11</token-validation-spring.version>
 
         <start-class>no.nav.familie.ef.sak.ApplicationKt</start-class>
@@ -215,6 +216,17 @@
             <groupId>no.nav.familie</groupId>
             <artifactId>prosessering-core</artifactId>
             <version>${prosessering.version}</version>
+        </dependency>
+        <!--
+            Pilot: efterlatte-prosessering, en framework-agnostisk transaksjonell-outbox
+            jobbkø fra navikt/efterlatte-prosessering. Kjøres side om side med den gamle
+            no.nav.familie:prosessering-* over - foreløpig kun tatt i bruk av
+            SkyggekjørInfotrygdTask, se .github/prosessering/05-poc-veikart.md i det repoet.
+        -->
+        <dependency>
+            <groupId>no.nav.efterlatte</groupId>
+            <artifactId>prosessering-spring-boot-starter</artifactId>
+            <version>${efterlatte-prosessering.version}</version>
         </dependency>
         <dependency>
             <groupId>no.nav.familie.kontrakter</groupId>
