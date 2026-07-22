@@ -1,14 +1,12 @@
 package no.nav.familie.ef.sak.infotrygd.skygge
 
-import no.nav.familie.prosessering.domene.Task
-import no.nav.familie.prosessering.internal.TaskService
+import efterlatte.prosessering.spring.TaskService
 import org.slf4j.LoggerFactory
-import org.springframework.dao.DuplicateKeyException
-import org.springframework.data.relational.core.conversion.DbActionExecutionException
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
+import java.sql.SQLException
 
 /**
  * Sjekk-og-lagre kjøres i [Propagation.REQUIRES_NEW]: [no.nav.familie.ef.sak.infotrygd.InfotrygdReplikaClient] kan
@@ -22,6 +20,11 @@ import org.springframework.transaction.annotation.Transactional
  * advisory-lås ([forsøkLåsForPayloadOgType]) nøkkelet på (type, payload). Den er transaksjonsscopet og frigis
  * automatisk ved commit/rollback, og serialiserer kun samtidige kall for *nøyaktig* samme skyggetask - andre
  * skyggekjøringer blokkeres ikke.
+ *
+ * [efterlatte.prosessering.spring.TaskService.opprett] går rett på JDBC (se [efterlatte.prosessering.postgres.PostgresTaskRepository]),
+ * uten Springs vanlige exception-oversettelse - et brudd på den unike indeksen (idx_prosessering_task_type_payload,
+ * se V170__efterlatte_prosessering_task.sql) dukker derfor opp som en rå [SQLException] med SQLSTATE 23505, ikke
+ * Springs [org.springframework.dao.DuplicateKeyException] slik det gamle no.nav.familie.prosessering-biblioteket ga.
  */
 @Component
 class SkyggekjøringTaskLagrer(
@@ -31,24 +34,20 @@ class SkyggekjøringTaskLagrer(
     private val logger = LoggerFactory.getLogger(javaClass)
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    fun lagreHvisIkkeFinnesFraFør(task: Task) {
-        if (!forsøkLåsForPayloadOgType(task.payload, task.type)) {
-            logger.info("Skyggetask av type ${task.type} håndteres allerede av et samtidig kall - hopper over")
+    fun lagreHvisIkkeFinnesFraFør(payload: SkyggeInfotrygdPayload) {
+        val type = SkyggekjørInfotrygdTask.TYPE
+        val serialisertPayload = type.serialiser(payload)
+
+        if (!forsøkLåsForPayloadOgType(serialisertPayload, type.navn)) {
+            logger.info("Skyggetask av type ${type.navn} håndteres allerede av et samtidig kall - hopper over")
             return
         }
 
-        val eksisterende = taskService.finnTaskMedPayloadOgType(task.payload, task.type)
-        if (eksisterende != null) {
-            logger.info("Skyggetask av type ${task.type} med lik payload finnes allerede (id=${eksisterende.id}) - hopper over")
-            return
-        }
         try {
-            taskService.save(task)
-        } catch (e: DuplicateKeyException) {
-            logger.info("Skyggetask av type ${task.type} ble opprettet samtidig av et annet kall - hopper over")
-        } catch (e: DbActionExecutionException) {
-            if (e.cause is DuplicateKeyException) {
-                logger.info("Skyggetask av type ${task.type} ble opprettet samtidig av et annet kall - hopper over")
+            taskService.opprett(type = type, payload = payload)
+        } catch (e: SQLException) {
+            if (e.sqlState == UNIK_INDEKS_SQLSTATE) {
+                logger.info("Skyggetask av type ${type.navn} med lik payload finnes allerede - hopper over")
             } else {
                 throw e
             }
@@ -61,5 +60,9 @@ class SkyggekjøringTaskLagrer(
     ): Boolean {
         val låsnøkkel = "$type|$payload".hashCode()
         return jdbcTemplate.queryForObject("SELECT pg_try_advisory_xact_lock($låsnøkkel)", Boolean::class.java) ?: false
+    }
+
+    companion object {
+        private const val UNIK_INDEKS_SQLSTATE = "23505"
     }
 }

@@ -1,17 +1,16 @@
 package no.nav.familie.ef.sak.infotrygd.skygge
 
+import efterlatte.prosessering.TaskId
+import efterlatte.prosessering.spring.TaskService
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import io.mockk.verifyOrder
-import no.nav.familie.prosessering.domene.Task
-import no.nav.familie.prosessering.internal.TaskService
 import org.assertj.core.api.Assertions.assertThatCode
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.springframework.dao.DuplicateKeyException
-import org.springframework.data.relational.core.conversion.DbAction
-import org.springframework.data.relational.core.conversion.DbActionExecutionException
+import org.postgresql.util.PSQLException
+import org.postgresql.util.PSQLState
 import org.springframework.jdbc.core.JdbcTemplate
 
 class SkyggekjøringTaskLagrerTest {
@@ -19,83 +18,63 @@ class SkyggekjøringTaskLagrerTest {
     private val jdbcTemplate = mockk<JdbcTemplate>()
     private val skyggekjøringTaskLagrer = SkyggekjøringTaskLagrer(taskService, jdbcTemplate)
 
-    private val task = Task(type = "skyggekjørInfotrygd", payload = "{\"foo\":\"bar\"}", properties = java.util.Properties())
-    private val forventetLåsnøkkel = "${task.type}|${task.payload}".hashCode()
+    private val payload =
+        SkyggeInfotrygdPayload(
+            operasjon = SkyggeInfotrygdOperasjon.HENT_PERIODER,
+            request = "{\"foo\":\"bar\"}",
+            forventetRespons = "{}",
+        )
+    private val type = SkyggekjørInfotrygdTask.TYPE
+    private val serialisertPayload = type.serialiser(payload)
+    private val forventetLåsnøkkel = "${type.navn}|$serialisertPayload".hashCode()
     private val forventetLåsSql = "SELECT pg_try_advisory_xact_lock($forventetLåsnøkkel)"
 
     @BeforeEach
     fun setup() {
         // Låsen tas som hovedregel - egne tester overstyrer dette for å simulere at et annet samtidig kall alt holder den.
         every { jdbcTemplate.queryForObject(forventetLåsSql, Boolean::class.java) } returns true
+        every { taskService.opprett(type, payload) } returns TaskId(1L)
     }
 
     @Test
     fun `lagrer ikke ny task dersom advisory-låsen for type og payload allerede holdes av et samtidig kall`() {
         every { jdbcTemplate.queryForObject(forventetLåsSql, Boolean::class.java) } returns false
 
-        skyggekjøringTaskLagrer.lagreHvisIkkeFinnesFraFør(task)
+        skyggekjøringTaskLagrer.lagreHvisIkkeFinnesFraFør(payload)
 
-        verify(exactly = 0) { taskService.finnTaskMedPayloadOgType(any(), any()) }
-        verify(exactly = 0) { taskService.save(any()) }
+        verify(exactly = 0) { taskService.opprett(any(), any<SkyggeInfotrygdPayload>()) }
     }
 
     @Test
-    fun `lagrer ikke ny task dersom en identisk task allerede finnes`() {
-        every { taskService.finnTaskMedPayloadOgType(task.payload, task.type) } returns mockk<Task>(relaxed = true)
-
-        skyggekjøringTaskLagrer.lagreHvisIkkeFinnesFraFør(task)
-
-        verify(exactly = 0) { taskService.save(any()) }
-    }
-
-    @Test
-    fun `forsøker advisory-lås nøkkelet på type og payload før sjekk mot databasen`() {
-        every { taskService.finnTaskMedPayloadOgType(task.payload, task.type) } returns null
-        every { taskService.save(task) } returns task
-
-        skyggekjøringTaskLagrer.lagreHvisIkkeFinnesFraFør(task)
+    fun `forsøker advisory-lås nøkkelet på type og payload før tasken opprettes`() {
+        skyggekjøringTaskLagrer.lagreHvisIkkeFinnesFraFør(payload)
 
         verifyOrder {
             jdbcTemplate.queryForObject(forventetLåsSql, Boolean::class.java)
-            taskService.finnTaskMedPayloadOgType(task.payload, task.type)
-            taskService.save(task)
+            taskService.opprett(type, payload)
         }
     }
 
     @Test
     fun `lagrer ny task dersom ingen identisk task finnes fra før`() {
-        every { taskService.finnTaskMedPayloadOgType(task.payload, task.type) } returns null
-        every { taskService.save(task) } returns task
+        skyggekjøringTaskLagrer.lagreHvisIkkeFinnesFraFør(payload)
 
-        skyggekjøringTaskLagrer.lagreHvisIkkeFinnesFraFør(task)
-
-        verify(exactly = 1) { taskService.save(task) }
+        verify(exactly = 1) { taskService.opprett(type, payload) }
     }
 
     @Test
-    fun `svelger DuplicateKeyException dersom en annen tråd rekker å lagre samme task først`() {
-        every { taskService.finnTaskMedPayloadOgType(task.payload, task.type) } returns null
-        every { taskService.save(task) } throws DuplicateKeyException("task_payload_type_idx")
+    fun `svelger SQLException for unik-indeks-brudd dersom en annen tråd rekker å lagre samme task først`() {
+        every { taskService.opprett(type, payload) } throws PSQLException("duplikat", PSQLState.UNIQUE_VIOLATION)
 
-        assertThatCode { skyggekjøringTaskLagrer.lagreHvisIkkeFinnesFraFør(task) }.doesNotThrowAnyException()
+        assertThatCode { skyggekjøringTaskLagrer.lagreHvisIkkeFinnesFraFør(payload) }.doesNotThrowAnyException()
     }
 
     @Test
-    fun `svelger DbActionExecutionException som skyldes DuplicateKeyException`() {
-        every { taskService.finnTaskMedPayloadOgType(task.payload, task.type) } returns null
-        every { taskService.save(task) } throws
-            DbActionExecutionException(mockk<DbAction<*>>(relaxed = true), DuplicateKeyException("task_payload_type_idx"))
+    fun `kaster videre SQLException som ikke skyldes unik-indeks-brudd`() {
+        val exception = PSQLException("noe annet gikk galt", PSQLState.CONNECTION_FAILURE)
+        every { taskService.opprett(type, payload) } throws exception
 
-        assertThatCode { skyggekjøringTaskLagrer.lagreHvisIkkeFinnesFraFør(task) }.doesNotThrowAnyException()
-    }
-
-    @Test
-    fun `kaster videre DbActionExecutionException som ikke skyldes DuplicateKeyException`() {
-        every { taskService.finnTaskMedPayloadOgType(task.payload, task.type) } returns null
-        val exception = DbActionExecutionException(mockk<DbAction<*>>(relaxed = true), RuntimeException("noe annet gikk galt"))
-        every { taskService.save(task) } throws exception
-
-        assertThatCode { skyggekjøringTaskLagrer.lagreHvisIkkeFinnesFraFør(task) }
-            .isInstanceOf(DbActionExecutionException::class.java)
+        assertThatCode { skyggekjøringTaskLagrer.lagreHvisIkkeFinnesFraFør(payload) }
+            .isInstanceOf(java.sql.SQLException::class.java)
     }
 }

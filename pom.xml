@@ -22,6 +22,10 @@
             <id>github</id>
             <url>https://maven.pkg.github.com/navikt/familie-felles</url>
         </repository>
+        <repository>
+            <id>github-efterlatte-prosessering</id>
+            <url>https://maven.pkg.github.com/navikt/efterlatte-prosessering</url>
+        </repository>
     </repositories>
 
     <properties>
@@ -35,6 +39,7 @@
         <mockk.version>1.14.11</mockk.version>
         <felles.version>4.20260702124222_2415d74</felles.version>
         <prosessering.version>2.20260622101837_623782e</prosessering.version>
+        <efterlatte-prosessering.version>1.20260721140553_01ed75f</efterlatte-prosessering.version>
         <token-validation-spring.version>6.0.11</token-validation-spring.version>
 
         <start-class>no.nav.familie.ef.sak.ApplicationKt</start-class>
@@ -215,6 +220,16 @@
             <groupId>no.nav.familie</groupId>
             <artifactId>prosessering-core</artifactId>
             <version>${prosessering.version}</version>
+        </dependency>
+        <!--
+            Pilot: no.nav.familie.prosessering brukes fortsatt av alle andre tasks. Denne avhengigheten
+            brukes kun av skyggekjøringInfotrygd-task (se no.nav.familie.ef.sak.infotrygd.skygge) som en
+            pilot for det nye, transaksjonelle outbox-baserte task-rammeverket fra efterlatte-teamet.
+        -->
+        <dependency>
+            <groupId>no.nav.efterlatte</groupId>
+            <artifactId>prosessering-spring-boot-starter</artifactId>
+            <version>${efterlatte-prosessering.version}</version>
         </dependency>
         <dependency>
             <groupId>no.nav.familie.kontrakter</groupId>

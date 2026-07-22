@@ -379,6 +379,10 @@ prosessering:
     after:
       weeks: 16
 
+# Pilot: no.nav.efterlatte:prosessering-spring-boot-starter, kun brukt av skyggekjøringInfotrygd-task inntil videre.
+efterlatte-prosessering:
+  node: ${HOSTNAME:ukjent-node}
+
 springdoc:
   api-docs:
     enabled: true
