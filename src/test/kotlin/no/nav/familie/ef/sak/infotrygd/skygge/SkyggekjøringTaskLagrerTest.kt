@@ -7,6 +7,7 @@ import io.mockk.verifyOrder
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.internal.TaskService
 import org.assertj.core.api.Assertions.assertThatCode
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.dao.DuplicateKeyException
 import org.springframework.data.relational.core.conversion.DbAction
@@ -15,10 +16,28 @@ import org.springframework.jdbc.core.JdbcTemplate
 
 class SkyggekjøringTaskLagrerTest {
     private val taskService = mockk<TaskService>()
-    private val jdbcTemplate = mockk<JdbcTemplate>(relaxed = true)
+    private val jdbcTemplate = mockk<JdbcTemplate>()
     private val skyggekjøringTaskLagrer = SkyggekjøringTaskLagrer(taskService, jdbcTemplate)
 
     private val task = Task(type = "skyggekjørInfotrygd", payload = "{\"foo\":\"bar\"}", properties = java.util.Properties())
+    private val forventetLåsnøkkel = "${task.type}|${task.payload}".hashCode()
+    private val forventetLåsSql = "SELECT pg_try_advisory_xact_lock($forventetLåsnøkkel)"
+
+    @BeforeEach
+    fun setup() {
+        // Låsen tas som hovedregel - egne tester overstyrer dette for å simulere at et annet samtidig kall alt holder den.
+        every { jdbcTemplate.queryForObject(forventetLåsSql, Boolean::class.java) } returns true
+    }
+
+    @Test
+    fun `lagrer ikke ny task dersom advisory-låsen for type og payload allerede holdes av et samtidig kall`() {
+        every { jdbcTemplate.queryForObject(forventetLåsSql, Boolean::class.java) } returns false
+
+        skyggekjøringTaskLagrer.lagreHvisIkkeFinnesFraFør(task)
+
+        verify(exactly = 0) { taskService.finnTaskMedPayloadOgType(any(), any()) }
+        verify(exactly = 0) { taskService.save(any()) }
+    }
 
     @Test
     fun `lagrer ikke ny task dersom en identisk task allerede finnes`() {
@@ -30,15 +49,14 @@ class SkyggekjøringTaskLagrerTest {
     }
 
     @Test
-    fun `tar advisory-lås nøkkelet på type og payload før sjekk mot databasen`() {
+    fun `forsøker advisory-lås nøkkelet på type og payload før sjekk mot databasen`() {
         every { taskService.finnTaskMedPayloadOgType(task.payload, task.type) } returns null
         every { taskService.save(task) } returns task
 
         skyggekjøringTaskLagrer.lagreHvisIkkeFinnesFraFør(task)
 
-        val forventetNøkkel = "${task.type}|${task.payload}".hashCode()
         verifyOrder {
-            jdbcTemplate.execute("SELECT pg_advisory_xact_lock($forventetNøkkel)")
+            jdbcTemplate.queryForObject(forventetLåsSql, Boolean::class.java)
             taskService.finnTaskMedPayloadOgType(task.payload, task.type)
             taskService.save(task)
         }

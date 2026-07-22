@@ -18,11 +18,10 @@ import org.springframework.transaction.annotation.Transactional
  * kallsted, uten at vi må stole på at skyggekjøring bare kalles fra transaksjonsløse ("trygge") deler av koden.
  *
  * For å unngå at to podder som skyggekjører nøyaktig samme kall samtidig faktisk *forsøker* å lagre samme task
- * (og dermed må håndtere en exception fra den unike indeksen, se catch under), tas det først en Postgres
- * advisory-lås ([låsForPayloadOgType]) nøkkelet på (type, payload). Den er transaksjonsscopet og frigis
+ * (og dermed må håndtere en exception fra den unike indeksen, se catch under), forsøkes det først en Postgres
+ * advisory-lås ([forsøkLåsForPayloadOgType]) nøkkelet på (type, payload). Den er transaksjonsscopet og frigis
  * automatisk ved commit/rollback, og serialiserer kun samtidige kall for *nøyaktig* samme skyggetask - andre
- * skyggekjøringer blokkeres ikke. Den første som får låsen gjør sjekk+lagre+commit; de påfølgende ser deretter
- * allerede den lagrede tasken i sjekken og hopper over lagring i stedet for å forsøke et duplikat-insert.
+ * skyggekjøringer blokkeres ikke.
  */
 @Component
 class SkyggekjøringTaskLagrer(
@@ -33,7 +32,10 @@ class SkyggekjøringTaskLagrer(
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     fun lagreHvisIkkeFinnesFraFør(task: Task) {
-        låsForPayloadOgType(task.payload, task.type)
+        if (!forsøkLåsForPayloadOgType(task.payload, task.type)) {
+            logger.info("Skyggetask av type ${task.type} håndteres allerede av et samtidig kall - hopper over")
+            return
+        }
 
         val eksisterende = taskService.finnTaskMedPayloadOgType(task.payload, task.type)
         if (eksisterende != null) {
@@ -53,18 +55,11 @@ class SkyggekjøringTaskLagrer(
         }
     }
 
-    /**
-     * Tar en transaksjonsscopet Postgres advisory-lås (`pg_advisory_xact_lock`) nøkkelet på (type, payload), slik
-     * at samtidige kall for nøyaktig samme skyggetask - fra denne eller andre podder - blir serialisert i stedet
-     * for å forsøke duplikate inserts. Nøkkelen er en 32-bits hash av (type, payload); en eventuell hash-kollisjon
-     * med en helt annen skyggetask fører i verste fall til at de kortvarig serialiseres unødvendig, ikke til noen
-     * korrekthetsfeil. Låsen frigis automatisk når [Propagation.REQUIRES_NEW]-transaksjonen commit'er/ruller tilbake.
-     */
-    private fun låsForPayloadOgType(
+    private fun forsøkLåsForPayloadOgType(
         payload: String,
         type: String,
-    ) {
+    ): Boolean {
         val låsnøkkel = "$type|$payload".hashCode()
-        jdbcTemplate.execute("SELECT pg_advisory_xact_lock($låsnøkkel)")
+        return jdbcTemplate.queryForObject("SELECT pg_try_advisory_xact_lock($låsnøkkel)", Boolean::class.java) ?: false
     }
 }
