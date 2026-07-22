@@ -19,7 +19,7 @@ import org.springframework.transaction.annotation.Transactional
  *
  * For å unngå at to podder som skyggekjører nøyaktig samme kall samtidig faktisk *forsøker* å lagre samme task
  * (og dermed må håndtere en exception fra den unike indeksen, se catch under), tas det først en Postgres
- * advisory-lås ([laasForPayloadOgType]) nøkkelet på (type, payload). Den er transaksjonsscopet og frigis
+ * advisory-lås ([låsForPayloadOgType]) nøkkelet på (type, payload). Den er transaksjonsscopet og frigis
  * automatisk ved commit/rollback, og serialiserer kun samtidige kall for *nøyaktig* samme skyggetask - andre
  * skyggekjøringer blokkeres ikke. Den første som får låsen gjør sjekk+lagre+commit; de påfølgende ser deretter
  * allerede den lagrede tasken i sjekken og hopper over lagring i stedet for å forsøke et duplikat-insert.
@@ -33,7 +33,7 @@ class SkyggekjøringTaskLagrer(
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     fun lagreHvisIkkeFinnesFraFør(task: Task) {
-        laasForPayloadOgType(task.payload, task.type)
+        låsForPayloadOgType(task.payload, task.type)
 
         val eksisterende = taskService.finnTaskMedPayloadOgType(task.payload, task.type)
         if (eksisterende != null) {
@@ -60,7 +60,7 @@ class SkyggekjøringTaskLagrer(
      * med en helt annen skyggetask fører i verste fall til at de kortvarig serialiseres unødvendig, ikke til noen
      * korrekthetsfeil. Låsen frigis automatisk når [Propagation.REQUIRES_NEW]-transaksjonen commit'er/ruller tilbake.
      */
-    private fun laasForPayloadOgType(
+    private fun låsForPayloadOgType(
         payload: String,
         type: String,
     ) {
