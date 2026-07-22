@@ -15,7 +15,6 @@ import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.error.TaskExceptionUtenStackTrace
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
-import java.time.LocalDateTime
 import java.util.Properties
 
 /**
@@ -136,7 +135,6 @@ data class SkyggeInfotrygdPayload(
     val operasjon: SkyggeInfotrygdOperasjon,
     val request: String,
     val forventetRespons: String,
-    val timestamp: LocalDateTime = LocalDateTime.now(),
 )
 
 enum class SkyggeInfotrygdOperasjon {
