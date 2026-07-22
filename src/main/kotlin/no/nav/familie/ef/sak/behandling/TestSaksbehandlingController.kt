@@ -86,6 +86,7 @@ class TestSaksbehandlingController(
         val saksbehandling = behandlingService.hentSaksbehandling(behandlingId)
         val regler = vilkårsreglerForStønad(saksbehandling.stønadstype).associateBy { it.vilkårType }
 
+        behandlingService.oppdaterErRegelendring2026(behandlingId, true)
         regelendring2026Service.oppdaterBegrunnelse(behandlingId, "begrunnelse")
         vurderinger.forEach { vurdering ->
             val delvilkår = lagDelvilkår(regler, vurdering)
