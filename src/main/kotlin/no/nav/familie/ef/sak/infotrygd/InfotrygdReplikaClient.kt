@@ -2,6 +2,7 @@ package no.nav.familie.ef.sak.infotrygd
 
 import no.nav.familie.ef.sak.infotrygd.skygge.SkyggeInfotrygdOperasjon
 import no.nav.familie.ef.sak.infotrygd.skygge.SkyggekjørInfotrygdTask
+import no.nav.familie.ef.sak.infotrygd.skygge.SkyggekjøringTaskLagrer
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdFinnesResponse
@@ -9,7 +10,6 @@ import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPeriodeRequest
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPeriodeResponse
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdSakResponse
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdSøkRequest
-import no.nav.familie.prosessering.internal.TaskService
 import no.nav.familie.restklient.client.AbstractPingableRestClient
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
@@ -25,7 +25,7 @@ class InfotrygdReplikaClient(
     private val infotrygdReplikaUri: URI,
     @Qualifier("azure")
     restOperations: RestOperations,
-    private val taskService: TaskService,
+    private val skyggekjøringTaskLagrer: SkyggekjøringTaskLagrer,
     private val featureToggleService: FeatureToggleService,
 ) : AbstractPingableRestClient(restOperations, "infotrygd.replika") {
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -112,6 +112,9 @@ class InfotrygdReplikaClient(
      * responsen med [forventetRespons] (svaret vi nettopp fikk fra familie-ef-infotrygd on-prem). Brukes til å
      * verifisere at migreringen til GCP-replikaen gir identiske svar, se [SkyggekjørInfotrygdTask].
      *
+     * [SkyggekjøringTaskLagrer] oppretter kun tasken dersom en identisk (samme payload/type) ikke allerede finnes -
+     * se den for hvorfor dette er trygt og effektivt på tvers av transaksjonskontekster.
+     *
      * Skal aldri kunne påvirke det ordinære kallet mot on-prem, så eventuelle feil ved oppretting av skyggetasken logges her
      */
     private fun skyggekjør(
@@ -122,7 +125,9 @@ class InfotrygdReplikaClient(
     ) {
         if (featureToggleService.isEnabled(Toggle.SKYGGEKJØR_INFOTRYGD)) {
             try {
-                taskService.save(SkyggekjørInfotrygdTask.opprettTask(operasjon, request, forventetRespons, personIdenter))
+                skyggekjøringTaskLagrer.lagreHvisIkkeFinnesFraFør(
+                    SkyggekjørInfotrygdTask.opprettTask(operasjon, request, forventetRespons, personIdenter),
+                )
             } catch (e: Exception) {
                 logger.error("Klarte ikke å opprette skyggetask for $operasjon mot familie-ef-infotrygd-replika", e)
             }
