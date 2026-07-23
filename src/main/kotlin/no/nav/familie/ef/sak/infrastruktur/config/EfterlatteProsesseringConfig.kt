@@ -1,38 +1,39 @@
 package no.nav.familie.ef.sak.infrastruktur.config
 
+import efterlatte.prosessering.StandardTaskProdusent
 import efterlatte.prosessering.TaskProdusent
 import efterlatte.prosessering.TaskRepository
 import efterlatte.prosessering.postgres.PostgresTaskRepository
 import efterlatte.prosessering.spring.ProsesseringProperties
 import efterlatte.prosessering.spring.TaskService
+import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import javax.sql.DataSource
 
 /**
- * no.nav.efterlatte:prosessering-spring-boot-starter (pilotert av skyggekjøringInfotrygd-task, se
- * no.nav.familie.ef.sak.infotrygd.skygge) sin autokonfigurasjon (efterlatte.prosessering.spring.ProsesseringAutoConfiguration)
- * definerer beans under de samme standardnavnene («taskRepository», «taskService») som allerede er i bruk av
- * det etablerte no.nav.familie.prosessering-biblioteket (Spring Data JDBC-repositoryet
- * no.nav.familie.prosessering.domene.TaskRepository fra @EnableJdbcRepositories("no.nav.familie") i
- * [DatabaseConfiguration], og no.nav.familie.prosessering.internal.TaskService fra
- * @ComponentScan("no.nav.familie.prosessering") i [ApplicationConfig]).
+ * efterlatte-prosessering sin autokonfigurasjon (ProsesseringAutoConfiguration) definerer beans under de
+ * samme standardnavnene («taskRepository», «taskService») som det etablerte no.nav.familie.prosessering-
+ * biblioteket allerede bruker. Med `allow-bean-definition-overriding` på ville det stille brutt en av dem.
+ * Vi definerer derfor [TaskRepository], [TaskProdusent] og [TaskService] selv under egne navn, slik at
+ * autokonfigurasjonens @ConditionalOnMissingBean slår av dens egne (konfliktende) beans.
  *
- * Uten disse to beanene ville appen fått to helt urelaterte bean-typer registrert under samme navn. Siden
- * `spring.main.allow-bean-definition-overriding` er skrudd på, ville det siste vunnet uten feilmelding ved
- * oppstart - og stille brutt alt som er avhengig av den andre typen.
- *
- * Ved å definere disse selv med egne, eksplisitte navn blir @ConditionalOnMissingBean (som matcher på
- * returtype) i autokonfigurasjonen falsk, slik at den ikke lager sine egne konfliktende beans. De to
- * task-bibliotekene kan dermed leve side om side under migreringen.
+ * [TaskProdusent] og [ProsesseringProperties] lages/aktiveres eksplisitt her fordi autokonfigurasjonens
+ * `@ConditionalOnBean(DataSource::class)` mangler `@AutoConfigureAfter(DataSourceAutoConfiguration::class)`
+ * og derfor kan bli evaluert før DataSource-bønnen finnes - da hopper hele autokonfigurasjonen over, og gir
+ * `NoSuchBeanDefinitionException` ved oppstart.
  */
 @Configuration
+@EnableConfigurationProperties(ProsesseringProperties::class)
 class EfterlatteProsesseringConfig {
     @Bean("efterlatteProsesseringTaskRepository")
     fun efterlatteProsesseringTaskRepository(
         dataSource: DataSource,
         properties: ProsesseringProperties,
     ): TaskRepository = PostgresTaskRepository(dataSource = dataSource, skjema = properties.skjema)
+
+    @Bean("efterlatteProsesseringTaskProdusent")
+    fun efterlatteProsesseringTaskProdusent(taskRepository: TaskRepository): TaskProdusent = StandardTaskProdusent(repo = taskRepository)
 
     @Bean("efterlatteProsesseringTaskService")
     fun efterlatteProsesseringTaskService(
