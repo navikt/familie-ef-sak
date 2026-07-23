@@ -17,11 +17,12 @@ import org.springframework.transaction.annotation.Transactional
  * en helt urelatert del av en større transaksjon ruller tilbake. Egen transaksjon gir oss dette uavhengig av
  * kallsted, uten at vi må stole på at skyggekjøring bare kalles fra transaksjonsløse ("trygge") deler av koden.
  *
- * For å unngå at to podder som skyggekjører nøyaktig samme kall samtidig faktisk *forsøker* å lagre samme task
- * (og dermed må håndtere en exception fra den unike indeksen, se catch under), forsøkes det først en Postgres
- * advisory-lås ([forsøkLåsForPayloadOgType]) nøkkelet på (type, payload). Den er transaksjonsscopet og frigis
- * automatisk ved commit/rollback, og serialiserer kun samtidige kall for *nøyaktig* samme skyggetask - andre
- * skyggekjøringer blokkeres ikke.
+ * Payload inneholder kun operasjon+personIdenter (bevisst, for å holde den unike indeksen liten), så det er dette
+ * som regnes som "samme skyggetask" - ikke eksakt request/respons. For å unngå at to podder som skyggekjører
+ * samme operasjon+person samtidig faktisk *forsøker* å lagre samme task (og dermed må håndtere en exception fra
+ * den unike indeksen, se catch under), forsøkes det først en Postgres advisory-lås ([forsøkLåsForPayloadOgType])
+ * nøkkelet på (type, payload). Den er transaksjonsscopet og frigis automatisk ved commit/rollback, og serialiserer
+ * kun samtidige kall for samme operasjon+person - andre skyggekjøringer blokkeres ikke.
  */
 @Component
 class SkyggekjøringTaskLagrer(
