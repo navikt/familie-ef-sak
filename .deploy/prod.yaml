@@ -28,10 +28,10 @@ spec:
     enabled: true
   resources:
     limits:
-      memory: 4096Mi
+      memory: 2048Mi
     requests:
-      memory: 1024Mi
-      cpu: 100m
+      memory: 2048Mi
+      cpu: 600m
   gcp:
     sqlInstances:
       - type: POSTGRES_14 # IF This is changed, all data will be lost. Read on nais.io how to upgrade

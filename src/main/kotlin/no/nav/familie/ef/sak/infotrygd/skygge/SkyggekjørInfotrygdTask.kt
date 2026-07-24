@@ -1,8 +1,5 @@
 package no.nav.familie.ef.sak.infotrygd.skygge
 
-import efterlatte.prosessering.TaskKontekst
-import efterlatte.prosessering.TaskStep
-import efterlatte.prosessering.TaskType
 import no.nav.familie.ef.sak.infotrygd.InfotrygdReplikaGcpClient
 import no.nav.familie.ef.sak.infrastruktur.config.readValue
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.secureLogger
@@ -12,8 +9,14 @@ import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPeriodeResponse
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdSakResponse
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdSøkRequest
 import no.nav.familie.kontrakter.felles.jsonMapper
+import no.nav.familie.prosessering.AsyncTaskStep
+import no.nav.familie.prosessering.TaskStepBeskrivelse
+import no.nav.familie.prosessering.domene.Task
+import no.nav.familie.prosessering.error.TaskExceptionUtenStackTrace
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import java.util.Base64
+import java.util.Properties
 
 /**
  * Skyggekjører kall som allerede er gjort mot familie-ef-infotrygd (on-prem) på nytt mot familie-ef-infotrygd-replika (GCP),
@@ -23,35 +26,42 @@ import org.springframework.stereotype.Service
  * i [no.nav.familie.ef.sak.infotrygd.InfotrygdReplikaClient], gjør det samme kallet mot GCP-replikaen, og sammenligner
  * responsene. Ved avvik logges det en error (med detaljer i secureLogger siden responsene kan inneholde personopplysninger)
  * og tasken feiler slik at avviket blir synlig og kan følges opp manuelt.
- *
- * Pilot for det nye, transaksjonelle outbox-baserte task-rammeverket no.nav.efterlatte:prosessering-* (se
- * [SkyggekjøringTaskLagrer] for hvordan tasken opprettes, og [no.nav.familie.ef.sak.infrastruktur.config.EfterlatteProsesseringConfig]
- * for oppsettet). Andre tasks i familie-ef-sak kjører fortsatt på det etablerte no.nav.familie.prosessering.
  */
 @Service
+@TaskStepBeskrivelse(
+    taskStepType = SkyggekjørInfotrygdTask.TYPE,
+    maxAntallFeil = 3,
+    settTilManuellOppfølgning = true,
+    triggerTidVedFeilISekunder = 60L,
+    beskrivelse = "Skyggekjører kall mot familie-ef-infotrygd-replika (GCP) og sammenligner med fasitsvar fra familie-ef-infotrygd (on-prem)",
+)
 class SkyggekjørInfotrygdTask(
     private val infotrygdReplikaGcpClient: InfotrygdReplikaGcpClient,
-) : TaskStep<SkyggeInfotrygdPayload> {
+) : AsyncTaskStep {
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    override val type: TaskType<SkyggeInfotrygdPayload> = TYPE
-
-    override fun utfor(kontekst: TaskKontekst<SkyggeInfotrygdPayload>) {
-        val payload = kontekst.payload
+    override fun doTask(task: Task) {
+        val payload = jsonMapper.readValue<SkyggeInfotrygdPayload>(task.payload)
+        val request = task.metadata.hentDekodetProperty(METADATA_REQUEST)
+        val forventetRespons = task.metadata.hentDekodetProperty(METADATA_FORVENTET_RESPONS)
         when (payload.operasjon) {
             SkyggeInfotrygdOperasjon.HENT_PERIODER -> {
                 sammenlign(
-                    payload = payload,
-                    faktiskRespons = { infotrygdReplikaGcpClient.hentPerioder(jsonMapper.readValue<InfotrygdPeriodeRequest>(payload.request)) },
+                    operasjon = payload.operasjon,
+                    request = request,
+                    forventetRespons = forventetRespons,
+                    faktiskRespons = { infotrygdReplikaGcpClient.hentPerioder(jsonMapper.readValue<InfotrygdPeriodeRequest>(request)) },
                     normaliser = InfotrygdPeriodeResponse::normalisert,
                 )
             }
 
             SkyggeInfotrygdOperasjon.HENT_SAMMENSLÅTTE_PERIODER -> {
                 sammenlign(
-                    payload = payload,
+                    operasjon = payload.operasjon,
+                    request = request,
+                    forventetRespons = forventetRespons,
                     faktiskRespons = {
-                        infotrygdReplikaGcpClient.hentSammenslåttePerioder(jsonMapper.readValue<InfotrygdPeriodeRequest>(payload.request))
+                        infotrygdReplikaGcpClient.hentSammenslåttePerioder(jsonMapper.readValue<InfotrygdPeriodeRequest>(request))
                     },
                     normaliser = InfotrygdPeriodeResponse::normalisert,
                 )
@@ -59,17 +69,21 @@ class SkyggekjørInfotrygdTask(
 
             SkyggeInfotrygdOperasjon.HENT_SAKER -> {
                 sammenlign(
-                    payload = payload,
-                    faktiskRespons = { infotrygdReplikaGcpClient.hentSaker(jsonMapper.readValue<InfotrygdSøkRequest>(payload.request)) },
+                    operasjon = payload.operasjon,
+                    request = request,
+                    forventetRespons = forventetRespons,
+                    faktiskRespons = { infotrygdReplikaGcpClient.hentSaker(jsonMapper.readValue<InfotrygdSøkRequest>(request)) },
                     normaliser = InfotrygdSakResponse::normalisert,
                 )
             }
 
             SkyggeInfotrygdOperasjon.HENT_INNSLAG_HOS_INFOTRYGD -> {
                 sammenlign(
-                    payload = payload,
+                    operasjon = payload.operasjon,
+                    request = request,
+                    forventetRespons = forventetRespons,
                     faktiskRespons = {
-                        infotrygdReplikaGcpClient.hentInslagHosInfotrygd(jsonMapper.readValue<InfotrygdSøkRequest>(payload.request))
+                        infotrygdReplikaGcpClient.hentInslagHosInfotrygd(jsonMapper.readValue<InfotrygdSøkRequest>(request))
                     },
                     normaliser = InfotrygdFinnesResponse::normalisert,
                 )
@@ -78,65 +92,69 @@ class SkyggekjørInfotrygdTask(
     }
 
     private inline fun <reified T> sammenlign(
-        payload: SkyggeInfotrygdPayload,
+        operasjon: SkyggeInfotrygdOperasjon,
+        request: String,
+        forventetRespons: String,
         faktiskRespons: () -> T,
         normaliser: (T) -> T,
     ) {
-        val forventet = normaliser(jsonMapper.readValue<T>(payload.forventetRespons))
+        val forventet = normaliser(jsonMapper.readValue<T>(forventetRespons))
         val faktisk = normaliser(faktiskRespons())
 
         if (forventet != faktisk) {
             secureLogger.error(
-                "Skyggekjøring av ${payload.operasjon} feilet - avvik mellom familie-ef-infotrygd (on-prem) og " +
-                    "familie-ef-infotrygd-replika (GCP).\nrequest=${payload.request}\nonPrem=$forventet\ngcp=$faktisk",
+                "Skyggekjøring av $operasjon feilet - avvik mellom familie-ef-infotrygd (on-prem) og " +
+                    "familie-ef-infotrygd-replika (GCP).\nrequest=$request\nonPrem=$forventet\ngcp=$faktisk",
             )
             logger.error(
-                "Skyggekjøring av ${payload.operasjon} feilet - responsen fra familie-ef-infotrygd-replika (GCP) er " +
+                "Skyggekjøring av $operasjon feilet - responsen fra familie-ef-infotrygd-replika (GCP) er " +
                     "ulik responsen fra familie-ef-infotrygd (on-prem). Se secureLogger for detaljer.",
             )
-            throw SkyggekjøringAvvikException(
-                "Skyggekjøring av ${payload.operasjon} feilet - avvik mellom on-prem og GCP-replika for infotrygd. Se securelogger for detaljer.",
+            throw TaskExceptionUtenStackTrace(
+                "Skyggekjøring av $operasjon feilet - avvik mellom on-prem og GCP-replika for infotrygd. Se securelogger for detaljer.",
             )
         }
     }
 
     companion object {
-        const val TYPE_NAVN = "skyggekjørInfotrygd"
+        const val TYPE = "skyggekjørInfotrygd"
+        private const val METADATA_REQUEST = "request"
+        private const val METADATA_FORVENTET_RESPONS = "forventetRespons"
 
-        val TYPE: TaskType<SkyggeInfotrygdPayload> =
-            TaskType(
-                navn = TYPE_NAVN,
-                serialiser = { jsonMapper.writeValueAsString(it) },
-                deserialiser = { jsonMapper.readValue<SkyggeInfotrygdPayload>(it) },
-            )
-
-        fun opprettPayload(
+        fun opprettTask(
             operasjon: SkyggeInfotrygdOperasjon,
             request: Any,
             forventetRespons: Any,
-        ): SkyggeInfotrygdPayload =
-            SkyggeInfotrygdPayload(
-                operasjon = operasjon,
-                request = jsonMapper.writeValueAsString(request),
-                forventetRespons = jsonMapper.writeValueAsString(forventetRespons),
+            personIdenter: Set<String>,
+        ): Task {
+            val sortertePersonIdenter = personIdenter.sorted()
+            val payload =
+                SkyggeInfotrygdPayload(
+                    operasjon = operasjon,
+                    personIdenter = sortertePersonIdenter,
+                )
+            return Task(
+                type = TYPE,
+                payload = jsonMapper.writeValueAsString(payload),
+                properties =
+                    Properties().apply {
+                        this["operasjon"] = operasjon.name
+                        this["personIdenter"] = sortertePersonIdenter.joinToString(",")
+                        this[METADATA_REQUEST] = jsonMapper.writeValueAsString(request).kodeBase64()
+                        this[METADATA_FORVENTET_RESPONS] = jsonMapper.writeValueAsString(forventetRespons).kodeBase64()
+                    },
             )
-    }
-}
+        }
 
-/**
- * Feil ved avvik mellom on-prem og GCP-replika er et forventet forretningsutfall (ikke en programmeringsfeil),
- * så stacktracen fylles bevisst ikke ut - detaljene ligger allerede i secureLogger/logger over.
- */
-private class SkyggekjøringAvvikException(
-    message: String,
-) : RuntimeException(message) {
-    override fun fillInStackTrace(): Throwable = this
+        private fun String.kodeBase64(): String = Base64.getEncoder().encodeToString(this.toByteArray(Charsets.UTF_8))
+
+        private fun Properties.hentDekodetProperty(navn: String): String = String(Base64.getDecoder().decode(this.getProperty(navn)), Charsets.UTF_8)
+    }
 }
 
 data class SkyggeInfotrygdPayload(
     val operasjon: SkyggeInfotrygdOperasjon,
-    val request: String,
-    val forventetRespons: String,
+    val personIdenter: List<String>,
 )
 
 enum class SkyggeInfotrygdOperasjon {
