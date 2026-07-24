@@ -15,6 +15,7 @@ import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.error.TaskExceptionUtenStackTrace
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import java.util.Base64
 import java.util.Properties
 
 /**
@@ -41,20 +42,26 @@ class SkyggekjørInfotrygdTask(
 
     override fun doTask(task: Task) {
         val payload = jsonMapper.readValue<SkyggeInfotrygdPayload>(task.payload)
+        val request = task.metadata.hentDekodetProperty(METADATA_REQUEST)
+        val forventetRespons = task.metadata.hentDekodetProperty(METADATA_FORVENTET_RESPONS)
         when (payload.operasjon) {
             SkyggeInfotrygdOperasjon.HENT_PERIODER -> {
                 sammenlign(
-                    payload = payload,
-                    faktiskRespons = { infotrygdReplikaGcpClient.hentPerioder(jsonMapper.readValue<InfotrygdPeriodeRequest>(payload.request)) },
+                    operasjon = payload.operasjon,
+                    request = request,
+                    forventetRespons = forventetRespons,
+                    faktiskRespons = { infotrygdReplikaGcpClient.hentPerioder(jsonMapper.readValue<InfotrygdPeriodeRequest>(request)) },
                     normaliser = InfotrygdPeriodeResponse::normalisert,
                 )
             }
 
             SkyggeInfotrygdOperasjon.HENT_SAMMENSLÅTTE_PERIODER -> {
                 sammenlign(
-                    payload = payload,
+                    operasjon = payload.operasjon,
+                    request = request,
+                    forventetRespons = forventetRespons,
                     faktiskRespons = {
-                        infotrygdReplikaGcpClient.hentSammenslåttePerioder(jsonMapper.readValue<InfotrygdPeriodeRequest>(payload.request))
+                        infotrygdReplikaGcpClient.hentSammenslåttePerioder(jsonMapper.readValue<InfotrygdPeriodeRequest>(request))
                     },
                     normaliser = InfotrygdPeriodeResponse::normalisert,
                 )
@@ -62,17 +69,21 @@ class SkyggekjørInfotrygdTask(
 
             SkyggeInfotrygdOperasjon.HENT_SAKER -> {
                 sammenlign(
-                    payload = payload,
-                    faktiskRespons = { infotrygdReplikaGcpClient.hentSaker(jsonMapper.readValue<InfotrygdSøkRequest>(payload.request)) },
+                    operasjon = payload.operasjon,
+                    request = request,
+                    forventetRespons = forventetRespons,
+                    faktiskRespons = { infotrygdReplikaGcpClient.hentSaker(jsonMapper.readValue<InfotrygdSøkRequest>(request)) },
                     normaliser = InfotrygdSakResponse::normalisert,
                 )
             }
 
             SkyggeInfotrygdOperasjon.HENT_INNSLAG_HOS_INFOTRYGD -> {
                 sammenlign(
-                    payload = payload,
+                    operasjon = payload.operasjon,
+                    request = request,
+                    forventetRespons = forventetRespons,
                     faktiskRespons = {
-                        infotrygdReplikaGcpClient.hentInslagHosInfotrygd(jsonMapper.readValue<InfotrygdSøkRequest>(payload.request))
+                        infotrygdReplikaGcpClient.hentInslagHosInfotrygd(jsonMapper.readValue<InfotrygdSøkRequest>(request))
                     },
                     normaliser = InfotrygdFinnesResponse::normalisert,
                 )
@@ -81,30 +92,34 @@ class SkyggekjørInfotrygdTask(
     }
 
     private inline fun <reified T> sammenlign(
-        payload: SkyggeInfotrygdPayload,
+        operasjon: SkyggeInfotrygdOperasjon,
+        request: String,
+        forventetRespons: String,
         faktiskRespons: () -> T,
         normaliser: (T) -> T,
     ) {
-        val forventet = normaliser(jsonMapper.readValue<T>(payload.forventetRespons))
+        val forventet = normaliser(jsonMapper.readValue<T>(forventetRespons))
         val faktisk = normaliser(faktiskRespons())
 
         if (forventet != faktisk) {
             secureLogger.error(
-                "Skyggekjøring av ${payload.operasjon} feilet - avvik mellom familie-ef-infotrygd (on-prem) og " +
-                    "familie-ef-infotrygd-replika (GCP).\nrequest=${payload.request}\nonPrem=$forventet\ngcp=$faktisk",
+                "Skyggekjøring av $operasjon feilet - avvik mellom familie-ef-infotrygd (on-prem) og " +
+                    "familie-ef-infotrygd-replika (GCP).\nrequest=$request\nonPrem=$forventet\ngcp=$faktisk",
             )
             logger.error(
-                "Skyggekjøring av ${payload.operasjon} feilet - responsen fra familie-ef-infotrygd-replika (GCP) er " +
+                "Skyggekjøring av $operasjon feilet - responsen fra familie-ef-infotrygd-replika (GCP) er " +
                     "ulik responsen fra familie-ef-infotrygd (on-prem). Se secureLogger for detaljer.",
             )
             throw TaskExceptionUtenStackTrace(
-                "Skyggekjøring av ${payload.operasjon} feilet - avvik mellom on-prem og GCP-replika for infotrygd. Se securelogger for detaljer.",
+                "Skyggekjøring av $operasjon feilet - avvik mellom on-prem og GCP-replika for infotrygd. Se securelogger for detaljer.",
             )
         }
     }
 
     companion object {
         const val TYPE = "skyggekjørInfotrygd"
+        private const val METADATA_REQUEST = "request"
+        private const val METADATA_FORVENTET_RESPONS = "forventetRespons"
 
         fun opprettTask(
             operasjon: SkyggeInfotrygdOperasjon,
@@ -112,11 +127,11 @@ class SkyggekjørInfotrygdTask(
             forventetRespons: Any,
             personIdenter: Set<String>,
         ): Task {
+            val sortertePersonIdenter = personIdenter.sorted()
             val payload =
                 SkyggeInfotrygdPayload(
                     operasjon = operasjon,
-                    request = jsonMapper.writeValueAsString(request),
-                    forventetRespons = jsonMapper.writeValueAsString(forventetRespons),
+                    personIdenter = sortertePersonIdenter,
                 )
             return Task(
                 type = TYPE,
@@ -124,17 +139,22 @@ class SkyggekjørInfotrygdTask(
                 properties =
                     Properties().apply {
                         this["operasjon"] = operasjon.name
-                        this["personIdenter"] = personIdenter.joinToString(",")
+                        this["personIdenter"] = sortertePersonIdenter.joinToString(",")
+                        this[METADATA_REQUEST] = jsonMapper.writeValueAsString(request).kodeBase64()
+                        this[METADATA_FORVENTET_RESPONS] = jsonMapper.writeValueAsString(forventetRespons).kodeBase64()
                     },
             )
         }
+
+        private fun String.kodeBase64(): String = Base64.getEncoder().encodeToString(this.toByteArray(Charsets.UTF_8))
+
+        private fun Properties.hentDekodetProperty(navn: String): String = String(Base64.getDecoder().decode(this.getProperty(navn)), Charsets.UTF_8)
     }
 }
 
 data class SkyggeInfotrygdPayload(
     val operasjon: SkyggeInfotrygdOperasjon,
-    val request: String,
-    val forventetRespons: String,
+    val personIdenter: List<String>,
 )
 
 enum class SkyggeInfotrygdOperasjon {
