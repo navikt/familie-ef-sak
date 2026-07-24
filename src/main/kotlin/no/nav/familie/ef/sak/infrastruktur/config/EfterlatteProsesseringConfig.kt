@@ -1,9 +1,13 @@
 package no.nav.familie.ef.sak.infrastruktur.config
 
+import efterlatte.prosessering.ProcessingEngine
+import efterlatte.prosessering.Reaper
 import efterlatte.prosessering.StandardTaskProdusent
 import efterlatte.prosessering.TaskProdusent
 import efterlatte.prosessering.TaskRepository
+import efterlatte.prosessering.TaskStep
 import efterlatte.prosessering.postgres.PostgresTaskRepository
+import efterlatte.prosessering.spring.ProsesseringLivssyklus
 import efterlatte.prosessering.spring.ProsesseringProperties
 import efterlatte.prosessering.spring.TaskService
 import org.springframework.boot.context.properties.EnableConfigurationProperties
@@ -15,13 +19,14 @@ import javax.sql.DataSource
  * efterlatte-prosessering sin autokonfigurasjon (ProsesseringAutoConfiguration) definerer beans under de
  * samme standardnavnene («taskRepository», «taskService») som det etablerte no.nav.familie.prosessering-
  * biblioteket allerede bruker. Med `allow-bean-definition-overriding` på ville det stille brutt en av dem.
- * Vi definerer derfor [TaskRepository], [TaskProdusent] og [TaskService] selv under egne navn, slik at
- * autokonfigurasjonens @ConditionalOnMissingBean slår av dens egne (konfliktende) beans.
+ * I tillegg mangler autokonfigurasjonens `@ConditionalOnBean(DataSource::class)` en
+ * `@AutoConfigureAfter(DataSourceAutoConfiguration::class)`, så den kan bli evaluert før DataSource-bønnen
+ * finnes - da hopper *hele* autokonfigurasjonen over, inkludert [ProsesseringLivssyklus] (selve motoren som
+ * plukker og kjører KLAR-tasks). Tasks ble da lagret fint via vår egen [TaskService], men aldri plukket opp.
  *
- * [TaskProdusent] og [ProsesseringProperties] lages/aktiveres eksplisitt her fordi autokonfigurasjonens
- * `@ConditionalOnBean(DataSource::class)` mangler `@AutoConfigureAfter(DataSourceAutoConfiguration::class)`
- * og derfor kan bli evaluert før DataSource-bønnen finnes - da hopper hele autokonfigurasjonen over, og gir
- * `NoSuchBeanDefinitionException` ved oppstart.
+ * Vi ekskluderer derfor `ProsesseringAutoConfiguration` helt (se `spring.autoconfigure.exclude` i
+ * application.yml) og tar full manuell kontroll over [TaskRepository], [TaskProdusent], [TaskService] og
+ * [ProsesseringLivssyklus] selv, uavhengig av bean-oppdagelsesrekkefølge.
  */
 @Configuration
 @EnableConfigurationProperties(ProsesseringProperties::class)
@@ -40,4 +45,25 @@ class EfterlatteProsesseringConfig {
         dataSource: DataSource,
         taskProdusent: TaskProdusent,
     ): TaskService = TaskService(dataSource = dataSource, produsent = taskProdusent)
+
+    @Bean("efterlatteProsesseringLivssyklus")
+    fun efterlatteProsesseringLivssyklus(
+        taskRepository: TaskRepository,
+        taskProdusent: TaskProdusent,
+        steg: List<TaskStep<*>>,
+        properties: ProsesseringProperties,
+    ): ProsesseringLivssyklus {
+        val engine =
+            ProcessingEngine(
+                repo = taskRepository,
+                produsent = taskProdusent,
+                steg = steg,
+                node = properties.node,
+                batchStorrelse = properties.batchStorrelse,
+                maxSamtidighet = properties.maxSamtidighet,
+                maxAntallFeil = properties.maxAntallFeil,
+            )
+        val reaper = if (properties.reaperPaa) Reaper(repo = taskRepository) else null
+        return ProsesseringLivssyklus(engine = engine, reaper = reaper, node = properties.node)
+    }
 }
