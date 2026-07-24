@@ -1,11 +1,10 @@
 package no.nav.familie.ef.sak.opplysninger.personopplysninger.fullmakt
 
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.logger
-import no.nav.familie.restklient.client.AbstractPingableRestClient
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
-import org.springframework.web.client.RestOperations
+import org.springframework.web.client.RestClient
+import org.springframework.web.client.body
 import java.net.URI
 import java.time.LocalDate
 
@@ -13,15 +12,17 @@ import java.time.LocalDate
 class FullmaktClient(
     @Value("\${REPR_API_URL}")
     private val fullmaktUrl: String,
-    @Qualifier("azure")
-    private val restOperations: RestOperations,
-) : AbstractPingableRestClient(restOperations, "repr.fullmakt") {
-    override val pingUri: URI = URI.create(fullmaktUrl)
-
+    @Qualifier("reprApiRestClient")
+    private val restClient: RestClient,
+) {
     fun hentFullmakt(ident: String): List<FullmaktResponse> {
         val url = URI.create("$fullmaktUrl/api/internbruker/fullmakt/fullmaktsgiver")
-        val fullmaktResponse = postForEntity<List<FullmaktResponse>>(url, FullmaktRequest(ident))
-        return fullmaktResponse
+        return restClient
+            .post()
+            .uri(url)
+            .body(FullmaktRequest(ident))
+            .retrieve()
+            .body<List<FullmaktResponse>>()!!
     }
 }
 

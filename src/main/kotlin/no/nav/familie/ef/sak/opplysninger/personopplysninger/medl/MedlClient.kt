@@ -1,10 +1,10 @@
 package no.nav.familie.ef.sak.opplysninger.personopplysninger.medl
 
-import no.nav.familie.restklient.client.AbstractRestClient
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
-import org.springframework.web.client.RestOperations
+import org.springframework.web.client.RestClient
+import org.springframework.web.client.body
 import org.springframework.web.util.UriComponentsBuilder
 import java.net.URI
 import java.time.LocalDate
@@ -12,8 +12,8 @@ import java.time.LocalDate
 @Component
 class MedlClient(
     @Value("\${MEDL_URL}") private val uri: URI,
-    @Qualifier("azure") restOperations: RestOperations,
-) : AbstractRestClient(restOperations, "familie.medl") {
+    @Qualifier("medlRestClient") private val restClient: RestClient,
+) {
     val soekUri =
         UriComponentsBuilder
             .fromUri(uri)
@@ -39,7 +39,12 @@ class MedlClient(
                 tilOgMed = tilOgMed,
             )
 
-        return postForEntity<List<Medlemskapsunntak>>(soekUri, requestBody)
+        return restClient
+            .post()
+            .uri(soekUri)
+            .body(requestBody)
+            .retrieve()
+            .body<List<Medlemskapsunntak>>()!!
     }
 }
 

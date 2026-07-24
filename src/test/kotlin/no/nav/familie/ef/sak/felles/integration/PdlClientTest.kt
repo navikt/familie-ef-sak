@@ -20,19 +20,19 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
-import org.springframework.boot.restclient.RestTemplateBuilder
 import org.springframework.http.converter.json.JacksonJsonHttpMessageConverter
-import org.springframework.web.client.RestOperations
+import org.springframework.web.client.RestClient
 import java.net.URI
 import java.time.LocalDate
 
 class PdlClientTest {
     companion object {
-        private val restOperations: RestOperations =
-            RestTemplateBuilder()
-                .additionalMessageConverters(
-                    JacksonJsonHttpMessageConverter(jsonMapper),
-                ).build()
+        private val restClient: RestClient =
+            RestClient
+                .builder()
+                .messageConverters { converters ->
+                    converters.add(0, JacksonJsonHttpMessageConverter(jsonMapper))
+                }.build()
         lateinit var pdlClient: PdlClient
         lateinit var wiremockServerItem: WireMockServer
 
@@ -41,7 +41,7 @@ class PdlClientTest {
         fun initClass() {
             wiremockServerItem = WireMockServer(wireMockConfig().dynamicPort())
             wiremockServerItem.start()
-            pdlClient = PdlClient(PdlConfig(URI.create(wiremockServerItem.baseUrl())), restOperations)
+            pdlClient = PdlClient(PdlConfig(URI.create(wiremockServerItem.baseUrl())), restClient)
         }
 
         @AfterAll

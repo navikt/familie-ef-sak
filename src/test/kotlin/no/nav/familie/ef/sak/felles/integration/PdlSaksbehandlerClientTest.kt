@@ -14,13 +14,12 @@ import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
-import org.springframework.boot.restclient.RestTemplateBuilder
-import org.springframework.web.client.RestOperations
+import org.springframework.web.client.RestClient
 import java.net.URI
 
 internal class PdlSaksbehandlerClientTest {
     companion object {
-        private val restOperations: RestOperations = RestTemplateBuilder().build()
+        private val restClient: RestClient = RestClient.builder().build()
         lateinit var pdlClient: PdlSaksbehandlerClient
         lateinit var wiremockServerItem: WireMockServer
 
@@ -32,7 +31,7 @@ internal class PdlSaksbehandlerClientTest {
             pdlClient =
                 PdlSaksbehandlerClient(
                     PdlConfig(URI.create(wiremockServerItem.baseUrl())),
-                    restOperations,
+                    restClient,
                 )
         }
 

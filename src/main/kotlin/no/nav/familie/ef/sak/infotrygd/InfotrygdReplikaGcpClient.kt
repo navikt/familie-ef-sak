@@ -5,11 +5,11 @@ import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPeriodeRequest
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPeriodeResponse
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdSakResponse
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdSøkRequest
-import no.nav.familie.restklient.client.AbstractRestClient
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
-import org.springframework.web.client.RestOperations
+import org.springframework.web.client.RestClient
+import org.springframework.web.client.body
 import org.springframework.web.util.UriComponentsBuilder
 import java.net.URI
 
@@ -24,9 +24,9 @@ import java.net.URI
 class InfotrygdReplikaGcpClient(
     @Value("\${INFOTRYGD_REPLIKA_GCP_API_URL}")
     private val infotrygdReplikaGcpUri: URI,
-    @Qualifier("azure")
-    restOperations: RestOperations,
-) : AbstractRestClient(restOperations, "infotrygd.replika.gcp") {
+    @Qualifier("infotrygdReplikaGcpRestClient")
+    private val restClient: RestClient,
+) {
     private val perioderUri: URI =
         UriComponentsBuilder
             .fromUri(infotrygdReplikaGcpUri)
@@ -55,14 +55,37 @@ class InfotrygdReplikaGcpClient(
             .build()
             .toUri()
 
-    fun hentPerioder(request: InfotrygdPeriodeRequest): InfotrygdPeriodeResponse = postForEntity(perioderUri, request)
+    fun hentPerioder(request: InfotrygdPeriodeRequest): InfotrygdPeriodeResponse =
+        restClient
+            .post()
+            .uri(perioderUri)
+            .body(request)
+            .retrieve()
+            .body<InfotrygdPeriodeResponse>()!!
 
-    fun hentSammenslåttePerioder(request: InfotrygdPeriodeRequest): InfotrygdPeriodeResponse = postForEntity(sammenslåttePerioderUri, request)
+    fun hentSammenslåttePerioder(request: InfotrygdPeriodeRequest): InfotrygdPeriodeResponse =
+        restClient
+            .post()
+            .uri(sammenslåttePerioderUri)
+            .body(request)
+            .retrieve()
+            .body<InfotrygdPeriodeResponse>()!!
 
-    fun hentSaker(request: InfotrygdSøkRequest): InfotrygdSakResponse = postForEntity(finnSakerUri, request)
+    fun hentSaker(request: InfotrygdSøkRequest): InfotrygdSakResponse =
+        restClient
+            .post()
+            .uri(finnSakerUri)
+            .body(request)
+            .retrieve()
+            .body<InfotrygdSakResponse>()!!
 
     fun hentInslagHosInfotrygd(request: InfotrygdSøkRequest): InfotrygdFinnesResponse {
         require(request.personIdenter.isNotEmpty()) { "Identer har ingen verdier" }
-        return postForEntity(eksistererUri, request)
+        return restClient
+            .post()
+            .uri(eksistererUri)
+            .body(request)
+            .retrieve()
+            .body<InfotrygdFinnesResponse>()!!
     }
 }

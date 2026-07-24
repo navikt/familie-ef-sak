@@ -1,10 +1,10 @@
 package no.nav.familie.ef.sak.kontantstøtte
 
-import no.nav.familie.restklient.client.AbstractRestClient
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
-import org.springframework.web.client.RestOperations
+import org.springframework.web.client.RestClient
+import org.springframework.web.client.body
 import org.springframework.web.util.UriComponentsBuilder
 import java.net.URI
 import java.time.LocalDate
@@ -13,8 +13,8 @@ import java.time.YearMonth
 @Component
 class KontantstøtteClient(
     @Value("\${FAMILIE_KS_SAK_URL}") private val kontantstøtteUrl: URI,
-    @Qualifier("azure") restOperations: RestOperations,
-) : AbstractRestClient(restOperations, "kontantstøtte") {
+    @Qualifier("ksSakRestClient") private val restClient: RestClient,
+) {
     private fun lagHentUtbetalingsinfoUri() =
         UriComponentsBuilder
             .fromUri(kontantstøtteUrl)
@@ -23,10 +23,12 @@ class KontantstøtteClient(
             .toUri()
 
     fun hentUtbetalingsinfo(forelderIdenter: List<String>): HentUtbetalingsinfoKontantstøtte =
-        postForEntity(
-            lagHentUtbetalingsinfoUri(),
-            HentUtbetalingsinfoKontantstøtteRequest(LocalDate.MIN.toString(), forelderIdenter),
-        )
+        restClient
+            .post()
+            .uri(lagHentUtbetalingsinfoUri())
+            .body(HentUtbetalingsinfoKontantstøtteRequest(LocalDate.MIN.toString(), forelderIdenter))
+            .retrieve()
+            .body<HentUtbetalingsinfoKontantstøtte>()!!
 }
 
 data class HentUtbetalingsinfoKontantstøtteRequest(
