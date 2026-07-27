@@ -61,7 +61,7 @@ class InfotrygdReplikaGcpClient(
 
     fun hentSaker(request: InfotrygdSøkRequest): InfotrygdSakResponse = postForEntity(finnSakerUri, request)
 
-    fun hentInslagHosInfotrygd(request: InfotrygdSøkRequest): InfotrygdFinnesResponse {
+    fun hentInfotrygdFinnes(request: InfotrygdSøkRequest): InfotrygdFinnesResponse {
         require(request.personIdenter.isNotEmpty()) { "Identer har ingen verdier" }
         return postForEntity(eksistererUri, request)
     }

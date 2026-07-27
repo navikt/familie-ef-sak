@@ -76,7 +76,7 @@ class SkyggekjørInfotrygdTask(
                     request = request,
                     forventetRespons = forventetRespons,
                     faktiskRespons = {
-                        infotrygdReplikaGcpClient.hentInslagHosInfotrygd(jsonMapper.readValue<InfotrygdSøkRequest>(request))
+                        infotrygdReplikaGcpClient.hentInfotrygdFinnes(jsonMapper.readValue<InfotrygdSøkRequest>(request))
                     },
                     normaliser = InfotrygdFinnesResponse::normalisert,
                 )
