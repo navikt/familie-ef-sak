@@ -14,8 +14,7 @@ CREATE TABLE IF NOT EXISTS prosessering.task
     plukket_tid   TIMESTAMPTZ,
     antall_feil   INT         NOT NULL DEFAULT 0,
     stoppaarsak   TEXT,
-    versjon       BIGINT      NOT NULL DEFAULT 0,
-    metadata      JSONB
+    versjon       BIGINT      NOT NULL DEFAULT 0
 );
 
 CREATE INDEX IF NOT EXISTS idx_prosessering_task_plukk
