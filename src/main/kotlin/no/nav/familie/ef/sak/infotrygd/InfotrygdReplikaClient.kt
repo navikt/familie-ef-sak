@@ -67,19 +67,19 @@ class InfotrygdReplikaClient(
 
     fun hentPerioder(request: InfotrygdPeriodeRequest): InfotrygdPeriodeResponse {
         val response = postForEntity<InfotrygdPeriodeResponse>(perioderUri, request)
-        skyggekjør(SkyggeInfotrygdOperasjon.HENT_PERIODER, request, response)
+        skyggekjør(SkyggeInfotrygdOperasjon.HENT_PERIODER, request.personIdenter, request, response)
         return response
     }
 
     fun hentSammenslåttePerioder(request: InfotrygdPeriodeRequest): InfotrygdPeriodeResponse {
         val response = postForEntity<InfotrygdPeriodeResponse>(sammenslåttePerioderUri, request)
-        skyggekjør(SkyggeInfotrygdOperasjon.HENT_SAMMENSLÅTTE_PERIODER, request, response)
+        skyggekjør(SkyggeInfotrygdOperasjon.HENT_SAMMENSLÅTTE_PERIODER, request.personIdenter, request, response)
         return response
     }
 
     fun hentSaker(request: InfotrygdSøkRequest): InfotrygdSakResponse {
         val response = postForEntity<InfotrygdSakResponse>(finnSakerUri, request)
-        skyggekjør(SkyggeInfotrygdOperasjon.HENT_SAKER, request, response)
+        skyggekjør(SkyggeInfotrygdOperasjon.HENT_SAKER, request.personIdenter, request, response)
         return response
     }
 
@@ -95,7 +95,7 @@ class InfotrygdReplikaClient(
     fun hentInslagHosInfotrygd(request: InfotrygdSøkRequest): InfotrygdFinnesResponse {
         require(request.personIdenter.isNotEmpty()) { "Identer har ingen verdier" }
         val response = postForEntity<InfotrygdFinnesResponse>(eksistererUri, request)
-        skyggekjør(SkyggeInfotrygdOperasjon.HENT_INNSLAG_HOS_INFOTRYGD, request, response)
+        skyggekjør(SkyggeInfotrygdOperasjon.HENT_INNSLAG_HOS_INFOTRYGD, request.personIdenter, request, response)
         return response
     }
 
@@ -119,13 +119,16 @@ class InfotrygdReplikaClient(
      */
     private fun skyggekjør(
         operasjon: SkyggeInfotrygdOperasjon,
+        personIdenter: Set<String>,
         request: Any,
         forventetRespons: Any,
     ) {
         if (featureToggleService.isEnabled(Toggle.SKYGGEKJØR_INFOTRYGD)) {
             try {
                 skyggekjøringTaskLagrer.lagreHvisIkkeFinnesFraFør(
-                    SkyggekjørInfotrygdTask.opprettPayload(operasjon, request, forventetRespons),
+                    type = SkyggekjørInfotrygdTask.TYPE,
+                    payload = SkyggekjørInfotrygdTask.opprettPayload(operasjon, personIdenter),
+                    metadata = SkyggekjørInfotrygdTask.opprettMetadata(request, forventetRespons),
                 )
             } catch (e: Exception) {
                 logger.error("Klarte ikke å opprette skyggetask for $operasjon mot familie-ef-infotrygd-replika", e)
