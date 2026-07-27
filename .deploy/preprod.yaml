@@ -30,8 +30,8 @@ spec:
     limits:
       memory: 1024Mi
     requests:
-      memory: 512Mi
-      cpu: 50m
+      memory: 1024Mi
+      cpu: 300m
   gcp:
     sqlInstances:
       - name: familie-ef-sak-17
