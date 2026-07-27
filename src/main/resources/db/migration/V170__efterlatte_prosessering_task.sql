@@ -1,1 +1,1 @@
-DROP SCHEMA prosessering;
+DROP SCHEMA IF EXISTS prosessering;
