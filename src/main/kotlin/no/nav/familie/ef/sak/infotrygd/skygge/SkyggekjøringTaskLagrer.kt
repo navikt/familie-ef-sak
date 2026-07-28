@@ -60,7 +60,7 @@ class SkyggekjøringTaskLagrer(
     ): Boolean {
         val antall =
             jdbcTemplate.queryForObject(
-                "SELECT COUNT(*) FROM prosessering.task WHERE type = ? AND payload = ?",
+                "SELECT COUNT(*) FROM prosessering_task WHERE type = ? AND payload = ?",
                 Int::class.java,
                 type,
                 payload,

@@ -29,7 +29,7 @@ class SkyggekjøringTaskLagrerTest {
     private val serialisertPayload = type.serialiser(payload)
     private val forventetLåsnøkkel = "${type.navn}|$serialisertPayload".hashCode()
     private val forventetLåsSql = "SELECT pg_try_advisory_xact_lock($forventetLåsnøkkel)"
-    private val forventetFinnesFraFørSql = "SELECT COUNT(*) FROM prosessering.task WHERE type = ? AND payload = ?"
+    private val forventetFinnesFraFørSql = "SELECT COUNT(*) FROM prosessering_task WHERE type = ? AND payload = ?"
 
     @BeforeEach
     fun setup() {
