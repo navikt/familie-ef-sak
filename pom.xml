@@ -221,11 +221,6 @@
             <artifactId>prosessering-core</artifactId>
             <version>${prosessering.version}</version>
         </dependency>
-        <!--
-            Pilot: no.nav.familie.prosessering brukes fortsatt av alle andre tasks. Denne avhengigheten
-            brukes kun av skyggekjøringInfotrygd-task (se no.nav.familie.ef.sak.infotrygd.skygge) som en
-            pilot for det nye, transaksjonelle outbox-baserte task-rammeverket fra efterlatte-teamet.
-        -->
         <dependency>
             <groupId>no.nav.efterlatte</groupId>
             <artifactId>prosessering-spring-boot-starter</artifactId>
