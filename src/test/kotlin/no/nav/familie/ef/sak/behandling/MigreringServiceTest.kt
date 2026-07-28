@@ -165,6 +165,9 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
     @Autowired
     private lateinit var barnRepository: BarnRepository
 
+    @Autowired
+    private lateinit var regelendring2026Repository: Regelendring2026Repository
+
     private val periodeFraMåned = YearMonth.of(2022, 7)
     private val opphørsmåned = YearMonth.of(2023, 5)
     private val migrerFraDato = YearMonth.of(2023, 5)
@@ -880,6 +883,7 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
             )
         val brevrequest = jsonMapper.readTree("123")
         opprettOppgave(saksbehandling.id)
+        regelendring2026Repository.upsert(saksbehandling.id, "Begrunnelse for regelverksvalg")
         testWithBrukerContext(preferredUsername = "Z999999", groups = listOf(rolleConfig.saksbehandlerRolle)) {
             stegService.håndterSteg(saksbehandling, årsakRevurderingSteg, revurderingsinformasjon())
             stegService.håndterSteg(saksbehandling, beregnYtelseSteg, innvilget)

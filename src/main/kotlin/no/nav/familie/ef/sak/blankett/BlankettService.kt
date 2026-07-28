@@ -7,8 +7,6 @@ import no.nav.familie.ef.sak.behandling.dto.tilDto
 import no.nav.familie.ef.sak.behandling.revurdering.ÅrsakRevurderingService
 import no.nav.familie.ef.sak.brev.BrevClient
 import no.nav.familie.ef.sak.felles.domain.Fil
-import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
-import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerService
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadDatoerDto
@@ -35,7 +33,6 @@ class BlankettService(
     private val årsakRevurderingService: ÅrsakRevurderingService,
     private val grunnlagsdataService: GrunnlagsdataService,
     private val samværsavtaleService: SamværsavtaleService,
-    private val featureToggleService: FeatureToggleService,
     private val regelendring2026Service: Regelendring2026Service,
 ) {
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -62,7 +59,6 @@ class BlankettService(
                     kontantstøttePerioderFraKs = grunnlagsdata.kontantstøttePerioder,
                     registeropplysningerOpprettetDato = vilkårVurderinger.grunnlag.registeropplysningerOpprettetTid.toLocalDate(),
                     erRegelendring2026 = behandling.erRegelendring2026,
-                    featureToggleRegelendringer2026 = featureToggleService.isEnabled(Toggle.REGELENDRINGER_2026),
                     regelendring2026Begrunnelse = regelendring2026Service.hent(behandlingId)?.begrunnelse?.takeIf { it.isNotBlank() },
                 ),
                 lagPersonopplysningerDto(behandling),
