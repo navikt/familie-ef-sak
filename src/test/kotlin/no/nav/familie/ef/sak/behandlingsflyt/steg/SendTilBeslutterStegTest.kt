@@ -179,6 +179,7 @@ internal class SendTilBeslutterStegTest {
             Behandlingshistorikk(behandlingId = UUID.randomUUID(), steg = StegType.SEND_TIL_BESLUTTER)
         mockBrukerContext(saksbehandlerNavn)
         every { tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandler(any()) } returns true
+        every { regelendring2026Repository.findByBehandlingId(any()) } returns Regelendring2026(behandling.id, "Begrunnelse")
     }
 
     @AfterEach
@@ -199,6 +200,7 @@ internal class SendTilBeslutterStegTest {
     internal fun `Skal kaste feil hvis begrunnelse for regelverk ikke er satt`() {
         val innvilgetBehandling = behandling.copy(resultat = INNVILGET)
         every { vedtakService.hentVedtaksresultat(any()) } returns ResultatType.INNVILGE
+        every { regelendring2026Repository.findByBehandlingId(any()) } returns null
 
         val frontendFeilmelding =
             assertThrows<ApiFeil> { beslutteVedtakSteg.validerSteg(innvilgetBehandling) }.feil
