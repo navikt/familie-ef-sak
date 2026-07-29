@@ -5,9 +5,13 @@ import no.nav.familie.felles.tokenklient.entraid.EntraIDRestClientFactory
 import no.nav.familie.log.interceptor.ConsumerIdClientInterceptor
 import no.nav.familie.log.interceptor.MdcValuesPropagatingClientInterceptor
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.boot.http.client.ClientHttpRequestFactoryBuilder
+import org.springframework.boot.http.client.HttpClientSettings
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.http.client.ClientHttpRequestFactory
 import org.springframework.web.client.RestClient
+import java.time.Duration
 
 @Configuration
 class RestClientConfig(
@@ -15,7 +19,19 @@ class RestClientConfig(
     private val consumerIdClientInterceptor: ConsumerIdClientInterceptor,
     private val mdcValuesPropagatingClientInterceptor: MdcValuesPropagatingClientInterceptor,
 ) {
-    private fun hybrid(scope: String): RestClient = entraIDRestClientFactory.lagHybridRestKlient(scope) { SikkerhetContext.hentJwt()?.tokenValue }
+    private val requestFactory: ClientHttpRequestFactory =
+        ClientHttpRequestFactoryBuilder
+            .detect()
+            .build(
+                HttpClientSettings
+                    .defaults()
+                    .withConnectTimeout(Duration.ofSeconds(2))
+                    .withReadTimeout(Duration.ofSeconds(30)),
+            )
+
+    private fun RestClient.medTimeout(): RestClient = this.mutate().requestFactory(requestFactory).build()
+
+    private fun hybrid(scope: String): RestClient = entraIDRestClientFactory.lagHybridRestKlient(scope) { SikkerhetContext.hentJwt()?.tokenValue }.medTimeout()
 
     /** familie-integrasjoner (PersonopplysningerIntegrasjonerClient, JournalpostClient, OppgaveClient, KodeverkClient) */
     @Bean("integrasjonerRestClient")
@@ -27,16 +43,17 @@ class RestClientConfig(
     @Bean("pdlRestClient")
     fun pdlRestClient(
         @Value("\${PDL_SCOPE}") scope: String,
-    ): RestClient = entraIDRestClientFactory.lagMaskinTilMaskinRestKlient(scope)
+    ): RestClient = entraIDRestClientFactory.lagMaskinTilMaskinRestKlient(scope).medTimeout()
 
     /** PDL – på vegne av saksbehandler (PdlSaksbehandlerClient) */
     @Bean("pdlSaksbehandlerRestClient")
     fun pdlSaksbehandlerRestClient(
         @Value("\${PDL_SCOPE}") scope: String,
     ): RestClient =
-        entraIDRestClientFactory.lagOboRestKlient(scope) {
-            SikkerhetContext.hentJwt()?.tokenValue ?: error("OBO-kall mot PDL uten innlogget bruker")
-        }
+        entraIDRestClientFactory
+            .lagOboRestKlient(scope) {
+                SikkerhetContext.hentJwt()?.tokenValue ?: error("OBO-kall mot PDL uten innlogget bruker")
+            }.medTimeout()
 
     /** repr-api / fullmakt (FullmaktClient) */
     @Bean("reprApiRestClient")
@@ -135,5 +152,6 @@ class RestClientConfig(
             .builder()
             .requestInterceptor(consumerIdClientInterceptor)
             .requestInterceptor(mdcValuesPropagatingClientInterceptor)
+            .requestFactory(requestFactory)
             .build()
 }
