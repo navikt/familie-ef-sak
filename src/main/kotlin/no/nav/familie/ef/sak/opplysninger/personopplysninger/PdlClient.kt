@@ -22,24 +22,19 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlResponse
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlSøker
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlSøkerData
 import no.nav.familie.kontrakter.felles.Tema
-import no.nav.familie.restklient.client.AbstractPingableRestClient
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.http.HttpHeaders
 import org.springframework.stereotype.Service
-import org.springframework.web.client.RestOperations
-import java.net.URI
+import org.springframework.web.client.RestClient
+import org.springframework.web.client.body
 
 @Service
 class PdlClient(
     val pdlConfig: PdlConfig,
-    @Qualifier("azureClientCredential") restTemplate: RestOperations,
-) : AbstractPingableRestClient(restTemplate, "pdl.personinfo") {
-    override val pingUri: URI
-        get() = pdlConfig.pdlUri
-
-    override fun ping() {
-        operations.optionsForAllow(pingUri)
-    }
+    @Qualifier("pdlRestClient") private val restClient: RestClient,
+) {
+    private val secureLogger = LoggerFactory.getLogger("secureLogger")
 
     fun hentSøker(personIdent: String): PdlSøker {
         val pdlPersonRequest =
@@ -48,11 +43,13 @@ class PdlClient(
                 query = PdlConfig.søkerQuery,
             )
         val pdlResponse: PdlResponse<PdlSøkerData> =
-            postForEntity(
-                pdlConfig.pdlUri,
-                pdlPersonRequest,
-                httpHeaders(),
-            )
+            restClient
+                .post()
+                .uri(pdlConfig.pdlUri)
+                .headers { it.addAll(httpHeaders()) }
+                .body(pdlPersonRequest)
+                .retrieve()
+                .body<PdlResponse<PdlSøkerData>>()!!
         return feilsjekkOgReturnerData(personIdent, pdlResponse) { it.person }
     }
 
@@ -64,11 +61,13 @@ class PdlClient(
                 query = PdlConfig.forelderBarnQuery,
             )
         val pdlResponse: PdlBolkResponse<PdlPersonForelderBarn> =
-            postForEntity(
-                pdlConfig.pdlUri,
-                pdlPersonRequest,
-                httpHeaders(),
-            )
+            restClient
+                .post()
+                .uri(pdlConfig.pdlUri)
+                .headers { it.addAll(httpHeaders()) }
+                .body(pdlPersonRequest)
+                .retrieve()
+                .body<PdlBolkResponse<PdlPersonForelderBarn>>()!!
         return feilsjekkOgReturnerData(pdlResponse)
     }
 
@@ -80,11 +79,13 @@ class PdlClient(
                 query = PdlConfig.annenForelderQuery,
             )
         val pdlResponse: PdlBolkResponse<PdlAnnenForelder> =
-            postForEntity(
-                pdlConfig.pdlUri,
-                pdlPersonRequest,
-                httpHeaders(),
-            )
+            restClient
+                .post()
+                .uri(pdlConfig.pdlUri)
+                .headers { it.addAll(httpHeaders()) }
+                .body(pdlPersonRequest)
+                .retrieve()
+                .body<PdlBolkResponse<PdlAnnenForelder>>()!!
         return feilsjekkOgReturnerData(pdlResponse)
     }
 
@@ -96,11 +97,13 @@ class PdlClient(
                 query = PdlConfig.personBolkKortQuery,
             )
         val pdlResponse: PdlBolkResponse<PdlPersonKort> =
-            postForEntity(
-                pdlConfig.pdlUri,
-                pdlPersonRequest,
-                httpHeaders(),
-            )
+            restClient
+                .post()
+                .uri(pdlConfig.pdlUri)
+                .headers { it.addAll(httpHeaders()) }
+                .body(pdlPersonRequest)
+                .retrieve()
+                .body<PdlBolkResponse<PdlPersonKort>>()!!
         return feilsjekkOgReturnerData(pdlResponse)
     }
 
@@ -115,11 +118,13 @@ class PdlClient(
                 query = PdlConfig.hentIdentQuery,
             )
         val pdlResponse: PdlResponse<PdlHentIdenter> =
-            postForEntity(
-                pdlConfig.pdlUri,
-                pdlPersonRequest,
-                httpHeaders(),
-            )
+            restClient
+                .post()
+                .uri(pdlConfig.pdlUri)
+                .headers { it.addAll(httpHeaders()) }
+                .body(pdlPersonRequest)
+                .retrieve()
+                .body<PdlResponse<PdlHentIdenter>>()!!
         return feilsjekkOgReturnerData(ident, pdlResponse) { it.hentIdenter }
     }
 
@@ -134,11 +139,13 @@ class PdlClient(
                 query = PdlConfig.hentIdentQuery,
             )
         val pdlResponse: PdlResponse<PdlHentIdenter> =
-            postForEntity(
-                pdlConfig.pdlUri,
-                pdlIdentRequest,
-                httpHeaders(),
-            )
+            restClient
+                .post()
+                .uri(pdlConfig.pdlUri)
+                .headers { it.addAll(httpHeaders()) }
+                .body(pdlIdentRequest)
+                .retrieve()
+                .body<PdlResponse<PdlHentIdenter>>()!!
         val pdlIdenter = feilsjekkOgReturnerData(ident, pdlResponse) { it.hentIdenter }
 
         if (pdlIdenter.identer.isEmpty()) {
@@ -162,11 +169,13 @@ class PdlClient(
                 query = PdlConfig.hentIdenterBolkQuery,
             )
         val pdlResponse: PdlIdentBolkResponse =
-            postForEntity(
-                pdlConfig.pdlUri,
-                pdlIdentBolkRequest,
-                httpHeaders(),
-            )
+            restClient
+                .post()
+                .uri(pdlConfig.pdlUri)
+                .headers { it.addAll(httpHeaders()) }
+                .body(pdlIdentBolkRequest)
+                .retrieve()
+                .body<PdlIdentBolkResponse>()!!
 
         return feilmeldOgReturnerData(pdlResponse)
     }

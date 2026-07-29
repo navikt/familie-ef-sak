@@ -8,12 +8,12 @@ import no.nav.familie.ef.sak.brev.domain.FRITEKST
 import no.nav.familie.ef.sak.brev.dto.FritekstBrevMedSignaturRequest
 import no.nav.familie.ef.sak.felles.util.medContentTypeJsonUTF8
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
-import no.nav.familie.restklient.client.AbstractPingableRestClient
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpHeaders
 import org.springframework.stereotype.Component
-import org.springframework.web.client.RestOperations
+import org.springframework.web.client.RestClient
+import org.springframework.web.client.body
 import tools.jackson.databind.JsonNode
 import java.net.URI
 
@@ -21,15 +21,9 @@ import java.net.URI
 class BrevClient(
     @Value("\${FAMILIE_BREV_API_URL}")
     private val familieBrevUri: String,
-    @Qualifier("utenAuth")
-    private val restOperations: RestOperations,
-) : AbstractPingableRestClient(restOperations, "familie.brev") {
-    override val pingUri: URI = URI.create("$familieBrevUri/api/status")
-
-    override fun ping() {
-        operations.optionsForAllow(pingUri)
-    }
-
+    @Qualifier("utenAuthRestClient")
+    private val restClient: RestClient,
+) {
     fun genererHtml(
         brevmal: String,
         saksbehandlerBrevrequest: JsonNode,
@@ -43,29 +37,44 @@ class BrevClient(
 
         val url = URI.create("$familieBrevUri/api/ef-brev/avansert-dokument/bokmaal/$brevmal/html")
 
-        return postForEntity(
-            url,
-            BrevRequestMedSignaturer(
-                brevFraSaksbehandler = saksbehandlerBrevrequest,
-                saksbehandlersignatur = saksbehandlersignatur,
-                saksbehandlerEnhet = saksbehandlerEnhet,
-                besluttersignatur = BESLUTTER_SIGNATUR_PLACEHOLDER,
-                beslutterEnhet = BESLUTTER_ENHET_PLACEHOLDER,
-                skjulBeslutterSignatur = skjulBeslutterSignatur,
-                datoPlaceholder = BESLUTTER_VEDTAKSDATO_PLACEHOLDER,
-            ),
-            HttpHeaders().medContentTypeJsonUTF8(),
-        )
+        return restClient
+            .post()
+            .uri(url)
+            .headers { it.addAll(HttpHeaders().medContentTypeJsonUTF8()) }
+            .body(
+                BrevRequestMedSignaturer(
+                    brevFraSaksbehandler = saksbehandlerBrevrequest,
+                    saksbehandlersignatur = saksbehandlersignatur,
+                    saksbehandlerEnhet = saksbehandlerEnhet,
+                    besluttersignatur = BESLUTTER_SIGNATUR_PLACEHOLDER,
+                    beslutterEnhet = BESLUTTER_ENHET_PLACEHOLDER,
+                    skjulBeslutterSignatur = skjulBeslutterSignatur,
+                    datoPlaceholder = BESLUTTER_VEDTAKSDATO_PLACEHOLDER,
+                ),
+            ).retrieve()
+            .body<String>()!!
     }
 
     fun genererBlankett(blankettPdfRequest: BlankettPdfRequest): ByteArray {
         val pdfUrl = URI.create("$familieBrevUri/blankett/pdf")
-        return postForEntity(pdfUrl, blankettPdfRequest, HttpHeaders().medContentTypeJsonUTF8())
+        return restClient
+            .post()
+            .uri(pdfUrl)
+            .headers { it.addAll(HttpHeaders().medContentTypeJsonUTF8()) }
+            .body(blankettPdfRequest)
+            .retrieve()
+            .body<ByteArray>()!!
     }
 
     fun genererFritekstBrev(request: FritekstBrevMedSignaturRequest): ByteArray {
         val url = URI.create("$familieBrevUri/api/fritekst-brev")
-        return postForEntity(url, request, HttpHeaders().medContentTypeJsonUTF8())
+        return restClient
+            .post()
+            .uri(url)
+            .headers { it.addAll(HttpHeaders().medContentTypeJsonUTF8()) }
+            .body(request)
+            .retrieve()
+            .body<ByteArray>()!!
     }
 
     companion object {

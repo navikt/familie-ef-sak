@@ -1,11 +1,11 @@
 package no.nav.familie.ef.sak.opplysninger.personopplysninger.pensjon
 
-import no.nav.familie.restklient.client.AbstractRestClient
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
-import org.springframework.web.client.RestOperations
+import org.springframework.web.client.RestClient
+import org.springframework.web.client.body
 import org.springframework.web.util.UriComponentsBuilder
 import java.net.URI
 
@@ -13,9 +13,10 @@ import java.net.URI
 class HistoriskPensjonClient(
     @Value("\${HISTORISK_PENSJON_URL}")
     private val historiskPensjonUri: URI,
-    @Qualifier("azure") restOperations: RestOperations,
-) : AbstractRestClient(restOperations, "pensjon") {
+    @Qualifier("historiskPensjonRestClient") private val restClient: RestClient,
+) {
     private val logger = LoggerFactory.getLogger(javaClass)
+    private val secureLogger = LoggerFactory.getLogger("secureLogger")
 
     private fun lagHarPensjonUri() =
         UriComponentsBuilder
@@ -33,10 +34,13 @@ class HistoriskPensjonClient(
         val antallForsøk = 2
         repeat(antallForsøk) { teller ->
             try {
-                return postForEntity<HistoriskPensjonResponse>(
-                    lagHarPensjonUri(),
-                    EnsligForsoergerRequest(aktivIdent, alleRelaterteFoedselsnummer),
-                ).tilDto()
+                return restClient
+                    .post()
+                    .uri(lagHarPensjonUri())
+                    .body(EnsligForsoergerRequest(aktivIdent, alleRelaterteFoedselsnummer))
+                    .retrieve()
+                    .body<HistoriskPensjonResponse>()!!
+                    .tilDto()
             } catch (e: Exception) {
                 val skalLoggeSisteForsøk = teller == (antallForsøk - 1)
                 if (skalLoggeSisteForsøk) {

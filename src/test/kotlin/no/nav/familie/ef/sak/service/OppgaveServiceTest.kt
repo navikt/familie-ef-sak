@@ -26,7 +26,6 @@ import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.oppgave
 import no.nav.familie.kontrakter.felles.Behandlingstema
-import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.Tema
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveRequest
@@ -41,7 +40,6 @@ import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype.VurderHenvendelse
 import no.nav.familie.kontrakter.felles.oppgave.OpprettOppgaveRequest
 import no.nav.familie.kontrakter.felles.oppgave.StatusEnum.FEILREGISTRERT
 import no.nav.familie.kontrakter.felles.oppgave.StatusEnum.FERDIGSTILT
-import no.nav.familie.restklient.client.RessursException
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.BeforeEach
@@ -49,8 +47,9 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.cache.concurrent.ConcurrentMapCacheManager
+import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
-import org.springframework.web.client.HttpServerErrorException
+import org.springframework.web.client.HttpClientErrorException
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
@@ -422,15 +421,21 @@ internal class OppgaveServiceTest {
     @Nested
     inner class FeilregistertOppgave {
         private val feilregistrertException =
-            RessursException(
-                Ressurs.failure("Oppgave har status feilregistrert"),
-                HttpServerErrorException(HttpStatus.BAD_REQUEST),
+            HttpClientErrorException.create(
+                HttpStatus.BAD_REQUEST,
+                "Bad Request",
+                HttpHeaders(),
+                "Oppgave har status feilregistrert".toByteArray(),
+                null,
             )
 
         private val annenException =
-            RessursException(
-                Ressurs.failure("Oppgave har status ferdigstilt"),
-                HttpServerErrorException(HttpStatus.BAD_REQUEST),
+            HttpClientErrorException.create(
+                HttpStatus.BAD_REQUEST,
+                "Bad Request",
+                HttpHeaders(),
+                "Oppgave har status ferdigstilt".toByteArray(),
+                null,
             )
 
         @BeforeEach
@@ -455,7 +460,7 @@ internal class OppgaveServiceTest {
 
             assertThatThrownBy {
                 oppgaveService.ferdigstillOppgaveForBehandlingIdOgOppgavetype(UUID.randomUUID(), BehandleSak, false)
-            }.isInstanceOf(RessursException::class.java)
+            }.isInstanceOf(HttpClientErrorException::class.java)
 
             verify(exactly = 0) { oppgaveRepository.update(any()) }
         }
@@ -466,7 +471,7 @@ internal class OppgaveServiceTest {
 
             assertThatThrownBy {
                 oppgaveService.ferdigstillOppgaveForBehandlingIdOgOppgavetype(UUID.randomUUID(), BehandleSak, true)
-            }.isInstanceOf(RessursException::class.java)
+            }.isInstanceOf(HttpClientErrorException::class.java)
 
             verify(exactly = 0) { oppgaveRepository.update(any()) }
         }

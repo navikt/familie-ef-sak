@@ -16,7 +16,6 @@ import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.fagsakpersoner
 import no.nav.familie.ef.sak.repository.saksbehandling
 import no.nav.familie.ef.sak.vedtak.TotrinnskontrollService
-import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.dokarkiv.ArkiverDokumentResponse
 import no.nav.familie.kontrakter.felles.dokarkiv.Dokumenttype
 import no.nav.familie.kontrakter.felles.dokarkiv.v2.ArkiverDokumentRequest
@@ -25,7 +24,6 @@ import no.nav.familie.kontrakter.felles.journalpost.Journalpost
 import no.nav.familie.kontrakter.felles.journalpost.Journalposttype
 import no.nav.familie.kontrakter.felles.journalpost.Journalstatus
 import no.nav.familie.prosessering.internal.TaskService
-import no.nav.familie.restklient.client.RessursException
 import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
@@ -127,11 +125,7 @@ internal class SaksbehandlingsblankettStegTest {
                 any(),
             )
         } throws
-            RessursException(
-                Ressurs.failure(),
-                HttpClientErrorException.create(HttpStatus.CONFLICT, "status=${HttpStatus.CONFLICT}", HttpHeaders(), null, null),
-                HttpStatus.CONFLICT,
-            )
+            HttpClientErrorException.create(HttpStatus.CONFLICT, "status=${HttpStatus.CONFLICT}", HttpHeaders(), null, null)
 
         val behandling = saksbehandling(type = BehandlingType.REVURDERING).copy(stønadstype = StønadType.BARNETILSYN)
         every {
@@ -173,15 +167,11 @@ internal class SaksbehandlingsblankettStegTest {
                 any(),
             )
         } throws
-            RessursException(
-                Ressurs.failure(),
-                HttpClientErrorException.create(HttpStatus.BAD_REQUEST, "status=${HttpStatus.BAD_REQUEST}", HttpHeaders(), null, null),
-                HttpStatus.BAD_REQUEST,
-            )
+            HttpClientErrorException.create(HttpStatus.BAD_REQUEST, "status=${HttpStatus.BAD_REQUEST}", HttpHeaders(), null, null)
 
         val behandling = saksbehandling(type = BehandlingType.REVURDERING).copy(stønadstype = StønadType.BARNETILSYN)
 
-        val feil = assertThrows<RessursException> { saksbehandlingsblankettSteg.utførSteg(behandling, null) }
-        assertThat(feil.httpStatus).isEqualTo(HttpStatus.BAD_REQUEST)
+        val feil = assertThrows<HttpClientErrorException> { saksbehandlingsblankettSteg.utførSteg(behandling, null) }
+        assertThat(feil.statusCode).isEqualTo(HttpStatus.BAD_REQUEST)
     }
 }
