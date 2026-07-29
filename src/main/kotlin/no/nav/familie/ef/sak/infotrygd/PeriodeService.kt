@@ -111,7 +111,7 @@ class PeriodeService(
             ?.let { behandlingService.finnSisteIverksatteBehandling(it.id) }
             ?.let { behandling ->
                 val tilkjentYtelse = tilkjentYtelseService.hentForBehandling(behandling.id)
-                val internperioder = tilInternPeriode(tilkjentYtelse)
+                val internperioder = tilInternPeriode(tilkjentYtelse, behandling.erRegelendring2026)
                 val startdato = tilkjentYtelse.startdato
                 EfInternPerioder(startdato, internperioder)
             }
@@ -127,12 +127,14 @@ class PeriodeService(
                 tilArbeidsoppfølgingsPeriode(andelerTilkjentYtelse)
             } ?: emptyList()
 
-    private fun tilInternPeriode(tilkjentYtelse: TilkjentYtelse) =
-        tilkjentYtelse.andelerTilkjentYtelse
-            .map(AndelTilkjentYtelse::tilInternPeriode)
-            // trenger å sortere de revers pga filtrerOgSorterPerioderFraInfotrygd gjør det,
-            // då vi ønsker de sortert på siste hendelsen først
-            .sortedWith(compareBy<InternPeriode> { it.stønadFom }.reversed())
+    private fun tilInternPeriode(
+        tilkjentYtelse: TilkjentYtelse,
+        erRegelendring2026: Boolean,
+    ) = tilkjentYtelse.andelerTilkjentYtelse
+        .map { it.tilInternPeriode(erRegelendring2026) }
+        // trenger å sortere de revers pga filtrerOgSorterPerioderFraInfotrygd gjør det,
+        // då vi ønsker de sortert på siste hendelsen først
+        .sortedWith(compareBy<InternPeriode> { it.stønadFom }.reversed())
 
     private fun tilArbeidsoppfølgingsPeriode(andelerTilkjentYtelse: List<AndelTilkjentYtelse>): List<PeriodeMedAktivitetOgBarn> =
         andelerTilkjentYtelse
@@ -221,7 +223,7 @@ fun AndelTilkjentYtelse.harPeriodeSomLøperNåEllerIFramtid(): Boolean {
 
 private fun Vedtaksperiode.månedsPeriode() = Månedsperiode(datoFra, datoTil)
 
-private fun AndelTilkjentYtelse.tilInternPeriode(): InternPeriode =
+private fun AndelTilkjentYtelse.tilInternPeriode(erRegelendring2026: Boolean): InternPeriode =
     InternPeriode(
         personIdent = this.personIdent,
         inntektsreduksjon = this.inntektsreduksjon,
@@ -233,6 +235,7 @@ private fun AndelTilkjentYtelse.tilInternPeriode(): InternPeriode =
         stønadTom = this.stønadTom,
         opphørsdato = null,
         datakilde = Datakilde.EF,
+        erRegelendring2026 = erRegelendring2026,
     )
 
 fun InfotrygdPeriode.tilInternPeriode(): InternPeriode =
