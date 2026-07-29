@@ -33,8 +33,6 @@ import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.mockBrukerContext
 import no.nav.familie.ef.sak.infrastruktur.config.readValue
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
-import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
-import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.ef.sak.oppfølgingsoppgave.OppfølgingsoppgaveService
 import no.nav.familie.ef.sak.oppgave.Oppgave
 import no.nav.familie.ef.sak.oppgave.TilordnetRessursService
@@ -81,7 +79,6 @@ internal class SendTilBeslutterStegTest {
     private val behandlingshistorikkService = mockk<BehandlingshistorikkService>()
     private val tilordnetRessursService = mockk<TilordnetRessursService>()
     private val oppfølgingsoppgaveService = mockk<OppfølgingsoppgaveService>(relaxed = true)
-    private val featureToggleService = mockk<FeatureToggleService>(relaxed = true)
     private val regelendring2026Repository = mockk<Regelendring2026Repository>(relaxed = true)
     private val simuleringsoppsummering =
         Simuleringsoppsummering(
@@ -111,7 +108,6 @@ internal class SendTilBeslutterStegTest {
             behandlingshistorikkService,
             tilordnetRessursService,
             oppfølgingsoppgaveService,
-            featureToggleService,
             regelendring2026Repository,
         )
     private val fagsak =
@@ -183,6 +179,7 @@ internal class SendTilBeslutterStegTest {
             Behandlingshistorikk(behandlingId = UUID.randomUUID(), steg = StegType.SEND_TIL_BESLUTTER)
         mockBrukerContext(saksbehandlerNavn)
         every { tilordnetRessursService.tilordnetRessursErInnloggetSaksbehandler(any()) } returns true
+        every { regelendring2026Repository.findByBehandlingId(any()) } returns Regelendring2026(behandling.id, "Begrunnelse")
     }
 
     @AfterEach
@@ -203,7 +200,7 @@ internal class SendTilBeslutterStegTest {
     internal fun `Skal kaste feil hvis begrunnelse for regelverk ikke er satt`() {
         val innvilgetBehandling = behandling.copy(resultat = INNVILGET)
         every { vedtakService.hentVedtaksresultat(any()) } returns ResultatType.INNVILGE
-        every { featureToggleService.isEnabled(Toggle.REGELENDRINGER_2026) } returns true
+        every { regelendring2026Repository.findByBehandlingId(any()) } returns null
 
         val frontendFeilmelding =
             assertThrows<ApiFeil> { beslutteVedtakSteg.validerSteg(innvilgetBehandling) }.feil
@@ -216,7 +213,6 @@ internal class SendTilBeslutterStegTest {
     internal fun `Skal ikke kaste feil hvis begrunnelse for regelverk ikke er satt og behandlingsårsak er G_OMREGNING`() {
         val innvilgetBehandling = behandling.copy(resultat = INNVILGET, årsak = BehandlingÅrsak.G_OMREGNING)
         every { vedtakService.hentVedtaksresultat(any()) } returns ResultatType.INNVILGE
-        every { featureToggleService.isEnabled(Toggle.REGELENDRINGER_2026) } returns true
 
         beslutteVedtakSteg.validerSteg(innvilgetBehandling)
 
@@ -227,7 +223,6 @@ internal class SendTilBeslutterStegTest {
     internal fun `Skal ikke kaste feil hvis SKOLEPENGER`() {
         val innvilgetBehandling = behandling.copy(resultat = INNVILGET, stønadstype = StønadType.SKOLEPENGER)
         every { vedtakService.hentVedtaksresultat(any()) } returns ResultatType.INNVILGE
-        every { featureToggleService.isEnabled(Toggle.REGELENDRINGER_2026) } returns true
 
         beslutteVedtakSteg.validerSteg(innvilgetBehandling)
     }
@@ -236,7 +231,6 @@ internal class SendTilBeslutterStegTest {
     internal fun `Skal ikke kaste feil hvis begrunnelse for regelverk er satt`() {
         val innvilgetBehandling = behandling.copy(resultat = INNVILGET)
         every { vedtakService.hentVedtaksresultat(any()) } returns ResultatType.INNVILGE
-        every { featureToggleService.isEnabled(Toggle.REGELENDRINGER_2026) } returns true
         every { regelendring2026Repository.findByBehandlingId(innvilgetBehandling.id) } returns Regelendring2026(innvilgetBehandling.id, "Fordi")
         beslutteVedtakSteg.validerSteg(innvilgetBehandling)
         verify(exactly = 1) { regelendring2026Repository.findByBehandlingId(innvilgetBehandling.id) }

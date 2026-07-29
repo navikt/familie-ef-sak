@@ -6,6 +6,7 @@ import no.nav.familie.ef.sak.api.gui.VedtakControllerTest.Saksbehandler.BESLUTTE
 import no.nav.familie.ef.sak.api.gui.VedtakControllerTest.Saksbehandler.SAKSBEHANDLER
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
 import no.nav.familie.ef.sak.behandling.BehandlingService
+import no.nav.familie.ef.sak.behandling.Regelendring2026Repository
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.behandlingsflyt.task.FerdigstillOppgaveTask
@@ -113,6 +114,9 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
 
     @Autowired
     private lateinit var oppfølgingsoppgaveService: OppfølgingsoppgaveService
+
+    @Autowired
+    private lateinit var regelendring2026Repository: Regelendring2026Repository
 
     private val fagsak = fagsak()
     private val behandling = behandling(fagsak)
@@ -515,6 +519,7 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
                     steg = steg,
                 ),
             )
+        regelendring2026Repository.upsert(lagretBehandling.id, "Begrunnelse for regelverksvalg")
 
         vedtakRepository.insert(
             vedtak(lagretBehandling.id, vedtakResultatType).copy(

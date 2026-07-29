@@ -31,7 +31,6 @@ data class BlankettPdfBehandling(
     val kontantstøttePerioderFraKs: List<KontantstøttePeriode>,
     val registeropplysningerOpprettetDato: LocalDate,
     val erRegelendring2026: Boolean = false,
-    val featureToggleRegelendringer2026: Boolean = false,
     val regelendring2026Begrunnelse: String? = null,
 )
 

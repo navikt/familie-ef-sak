@@ -20,8 +20,6 @@ import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvisIkke
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
-import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
-import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext.NAVIDENT_REGEX
 import no.nav.familie.ef.sak.oppfølgingsoppgave.OppfølgingsoppgaveService
@@ -61,7 +59,6 @@ class SendTilBeslutterSteg(
     private val behandlingshistorikkService: BehandlingshistorikkService,
     private val tilordnetRessursService: TilordnetRessursService,
     private val oppfølgingsoppgaveService: OppfølgingsoppgaveService,
-    private val featureToggleService: FeatureToggleService,
     private val regelendring2026Repository: Regelendring2026Repository,
 ) : BehandlingSteg<SendTilBeslutterDto?> {
     override fun validerSteg(saksbehandling: Saksbehandling) {
@@ -78,7 +75,6 @@ class SendTilBeslutterSteg(
     }
 
     private fun validerBegrunnelseForRegelveksvalgErSatt(saksbehandling: Saksbehandling) {
-        if (!featureToggleService.isEnabled(Toggle.REGELENDRINGER_2026)) return
         if (saksbehandling.årsak == BehandlingÅrsak.G_OMREGNING) return
         val begrunnelse: String? = regelendring2026Repository.findByBehandlingId(saksbehandling.id)?.begrunnelse
         when (saksbehandling.stønadstype) {
